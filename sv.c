@@ -8813,7 +8813,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		intsize = 'q';
 #endif
 		break;
-/* [perl #20339] - we should accept and ignore %hf, %lf rather than die */
+/* [perl #20339] - we should accept and ignore %lf rather than die */
 	    case 'l':
 		/* FALL THROUGH */
 	    default:
