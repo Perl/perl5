@@ -132,25 +132,18 @@ sub constant {
   # Arguments: what, sub
   while (@_) {
     if (@_ == 1) {
-        if (warnings::enabled) {
-            require Carp;
-            Carp::carp ("Odd number of arguments for overload::constant");
-        }
+        warnings::warnif ("Odd number of arguments for overload::constant");
         last;
     }
     elsif (!exists $constants {$_ [0]}) {
-        if (warnings::enabled) {
-            require Carp;
-            Carp::carp ("`$_[0]' is not an overloadable type");
-        }
+        warnings::warnif ("`$_[0]' is not an overloadable type");
     }
     elsif (!ref $_ [1] || "$_[1]" !~ /CODE\(0x[\da-f]+\)$/) {
         # Can't use C<ref $_[1] eq "CODE"> above as code references can be
         # blessed, and C<ref> would return the package the ref is blessed into.
         if (warnings::enabled) {
-            require Carp;
             $_ [1] = "undef" unless defined $_ [1];
-            Carp::carp ("`$_[1]' is not a code reference");
+            warnings::warn ("`$_[1]' is not a code reference");
         }
     }
     else {

@@ -935,5 +935,39 @@ unless ($aaa) {
   main::test $x, '0pq1';		# 209
 };
 
+# Test module-specific warning
+{
+    # check the Odd number of arguments for overload::constant warning
+    my $a = "" ;
+    $SIG{__WARN__} = sub {$a = @_[0]} ;
+    $x = eval ' overload::constant "integer" ; ' ;
+    test($a eq "") ; # 210
+    use warnings 'overload' ;
+    $x = eval ' overload::constant "integer" ; ' ;
+    test($a =~ /^Odd number of arguments for overload::constant at/) ; # 211
+}
+
+{
+    # check the `$_[0]' is not an overloadable type warning
+    my $a = "" ;
+    $SIG{__WARN__} = sub {$a = @_[0]} ;
+    $x = eval ' overload::constant "fred" => sub {} ; ' ;
+    test($a eq "") ; # 212
+    use warnings 'overload' ;
+    $x = eval ' overload::constant "fred" => sub {} ; ' ;
+    test($a =~ /^`fred' is not an overloadable type at/); # 213
+}
+
+{
+    # check the `$_[1]' is not a code reference warning
+    my $a = "" ;
+    $SIG{__WARN__} = sub {$a = @_[0]} ;
+    $x = eval ' overload::constant "integer" => 1; ' ;
+    test($a eq "") ; # 214
+    use warnings 'overload' ;
+    $x = eval ' overload::constant "integer" => 1; ' ;
+    test($a =~ /^`1' is not a code reference at/); # 215
+}
+
 # Last test is:
-sub last {209}
+sub last {215}
