@@ -2777,7 +2777,6 @@ XS(w32_FsType)
     dXSARGS;
     char fsname[256];
     DWORD flags, filecomplen;
-    EXTEND(SP,1);
     if (GetVolumeInformation(NULL, NULL, 0, NULL, &filecomplen,
 			 &flags, fsname, sizeof(fsname))) {
 	if (GIMME_V == G_ARRAY) {
