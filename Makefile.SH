@@ -261,7 +261,7 @@ lintflags = -hbvxac
 .c$(OBJ_EXT):
 	$(CCCMD) $(PLDLFLAGS) $*.c
 
-all: $(FIRSTMAKEFILE) miniperl $(private) $(public) $(dynamic_ext) $(nonxs_ext)
+all: $(FIRSTMAKEFILE) miniperl extra.pods $(private) $(public) $(dynamic_ext) $(nonxs_ext)
 	@echo " ";
 	@echo "	Everything is up to date. 'make test' to run test suite."
 
@@ -505,7 +505,7 @@ lib/re.pm: ext/re/re.pm
 $(plextract):	miniperl lib/Config.pm lib/re.pm
 	$(LDLIBPTH) ./miniperl -Ilib $@.PL
 
-extra.pods: perl
+extra.pods: miniperl
 	-@test -f extra.pods && rm -f `cat extra.pods`
 	-@rm -f extra.pods
 	-@for x in `grep -l '^=[a-z]' README.*` ; do \
@@ -516,7 +516,7 @@ extra.pods: perl
 
 install: all install.perl install.man
 
-install.perl:	all extra.pods installperl
+install.perl:	all installperl
 	if [ -n "$(COMPILE)" ]; \
 	then \
 		cd utils; $(MAKE) compile; \
@@ -526,7 +526,7 @@ install.perl:	all extra.pods installperl
 	fi
 	$(LDLIBPTH) ./perl installperl
 
-install.man:	all extra.pods installman
+install.man:	all installman
 	$(LDLIBPTH) ./perl installman
 
 # XXX Experimental. Hardwired values, but useful for testing.
