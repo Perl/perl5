@@ -686,6 +686,9 @@ if ($define{'PERL_GLOBAL_STRUCT'}) {
 
 my @syms = ($global_sym, $globvar_sym); # $pp_sym is not part of the API
 
+# Symbols that are the public face of the PerlIO layers implementation
+# These are in _addition to_ the public face of the abstraction
+# and need to be exported to allow XS modules to implement layers
 my @layer_syms = qw(
 			 PerlIOBase_clearerr
 			 PerlIOBase_close
@@ -696,7 +699,7 @@ my @layer_syms = qw(
 			 PerlIOBase_pushed
 			 PerlIOBase_read
 			 PerlIOBase_setlinebuf
-		         PerlIOBase_unread
+			 PerlIOBase_unread
 			 PerlIOBuf_bufsiz
 			 PerlIOBuf_fill
 			 PerlIOBuf_flush
@@ -710,7 +713,10 @@ my @layer_syms = qw(
 			 PerlIOBuf_tell
 			 PerlIOBuf_unread
 			 PerlIOBuf_write
+			 PerlIO_debug
 			 PerlIO_allocate
+			 PerlIO_apply_layera
+			 PerlIO_apply_layers
 			 PerlIO_arg_fetch
 			 PerlIO_define_layer
 			 PerlIO_modestr
@@ -726,11 +732,20 @@ my @layer_syms = qw(
 			 PL_perlio
 );
 
+
 if ($define{'USE_PERLIO'}) {
+    # Export the symols that make up the PerlIO abstraction, regardless
+    # of its implementation - read from a file
     push @syms, $perlio_sym;
+
+    # This part is then dependent on how the abstraction is implemented
     if ($define{'USE_SFIO'}) {
+	# Old legacy non-stdio "PerlIO"
 	skip_symbols \@layer_syms;
 	# SFIO defines most of the PerlIO routines as macros
+	# So undo most of what $perlio_sym has just done - d'oh !
+	# Perhaps it would be better to list the ones which do exist
+	# And emit them
 	skip_symbols [qw(
 			 PerlIO_canset_cnt
 			 PerlIO_clearerr
@@ -798,9 +813,19 @@ if ($define{'USE_PERLIO'}) {
 			 Perl_PerlIO_write
 			 )];
     }
+    else {
+	# PerlIO with layers - export implementation
+	emit_symbols \@layer_syms;
+    }
 } else {
-	# Skip the PerlIO New Generation symbols.
+	# -Uuseperlio
+	# Skip the PerlIO layer symbols - although
+	# nothing should have exported them any way
 	skip_symbols \@layer_syms;
+	# Also do NOT add abstraction symbols from $perlio_sym
+	# abstraction is done as #define to stdio
+	# Remaining remnants that _may_ be functions
+	# are handled in <DATA>
 }
 
 for my $syms (@syms) {
@@ -1253,44 +1278,11 @@ perl_destruct
 perl_free
 perl_parse
 perl_run
-PerlIOBase_clearerr
-PerlIOBase_close
-PerlIOBase_dup
-PerlIOBase_eof
-PerlIOBase_error
-PerlIOBase_fileno
-PerlIOBase_pushed
-PerlIOBase_read
-PerlIOBase_setlinebuf
-PerlIOBase_unread
-PerlIOBuf_bufsiz
-PerlIOBuf_fill
-PerlIOBuf_flush
-PerlIOBuf_get_cnt
-PerlIOBuf_get_ptr
-PerlIOBuf_open
-PerlIOBuf_pushed
-PerlIOBuf_read
-PerlIOBuf_seek
-PerlIOBuf_set_ptrcnt
-PerlIOBuf_tell
-PerlIOBuf_unread
-PerlIOBuf_write
-PerlIO_allocate
-PerlIO_apply_layera
-PerlIO_apply_layers
-PerlIO_arg_fetch
+# Oddities
 PerlIO_binmode
-PerlIO_debug
-PerlIO_define_layer
-PerlIO_define_layer
 PerlIO_getpos
 PerlIO_init
-PerlIO_layer_fetch
-PerlIO_modestr
-PerlIO_pending
 PerlIO_perlio
-PerlIO_push
 PerlIO_setpos
 PerlIO_sprintf
 PerlIO_sv_dup
