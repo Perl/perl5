@@ -112,6 +112,12 @@ start_sockets(void)
 }
 
 void
+end_sockets(void)
+{
+    EndSockets();
+}
+
+void
 set_socktype(void)
 {
 #ifdef USE_SOCKETS_AS_HANDLES

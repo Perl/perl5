@@ -3,11 +3,12 @@
 BEGIN {
    chdir 't' if -d 't';
    unshift @INC, '../lib';
-   print "1..9\n";
+   print "1..13\n";
 }
 
+use vars '*FOO';
 use strict;
-use Fatal qw(open);
+use Fatal qw(open close);
 
 my $i = 1;
 eval { open FOO, '<lkjqweriuapofukndajsdlfjnvcvn' };
@@ -20,8 +21,9 @@ for ('$foo', "'$foo'", "*$foo", "\\*$foo") {
     print "not " if $@;
     print "ok $i\n"; ++$i;
 
-    print "not " unless scalar(<FOO>) =~ m|^#!./perl|;
+    print "not " if $@ or scalar(<FOO>) !~ m|^#!./perl|;
+    print "ok $i\n"; ++$i;
+    eval qq{ close FOO };
     print "not " if $@;
     print "ok $i\n"; ++$i;
-    close FOO;
 }

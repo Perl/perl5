@@ -244,7 +244,7 @@
  *	uname() routine to derive the host name.  See also HAS_GETHOSTNAME
  *	and PHOSTNAME.
  */
-/*#define HAS_UNAME		/**/
+#define HAS_UNAME		/**/
 
 /* HAS_GETLOGIN:
  *	This symbol, if defined, indicates that the getlogin routine is

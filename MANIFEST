@@ -502,6 +502,7 @@ lib/File/DosGlob.pm	Win32 DOS-globbing module
 lib/File/Find.pm	Routines to do a find
 lib/File/Path.pm	Do things like `mkdir -p' and `rm -r'
 lib/File/Spec.pm	portable operations on file names
+lib/File/Spec/Functions.pm	Function interface to File::Spec object methods
 lib/File/Spec/Mac.pm	portable operations on Mac file names
 lib/File/Spec/OS2.pm	portable operations on OS2 file names
 lib/File/Spec/Unix.pm	portable operations on Unix file names
@@ -710,6 +711,7 @@ plan9/plan9ish.h	Plan9 port: Plan9-specific C header file
 plan9/setup.rc		Plan9 port: script for easy build+install
 plan9/versnum		Plan9 port: script to print version number
 pod/Makefile		Make pods into something else
+pod/Win32.pod		Documentation for Win32 extras
 pod/buildtoc		generate perltoc.pod
 pod/checkpods.PL	Tool to check for common errors in pods
 pod/perl.pod		Top level perl man page

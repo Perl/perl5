@@ -415,6 +415,7 @@
 #define ninstr			Perl_ninstr
 #define no_aelem		Perl_no_aelem
 #define no_dir_func		Perl_no_dir_func
+#define no_bareword_allowed	Perl_no_bareword_allowed
 #define no_fh_allowed		Perl_no_fh_allowed
 #define no_func			Perl_no_func
 #define no_helem		Perl_no_helem

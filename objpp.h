@@ -861,6 +861,8 @@
 #define ninstr            CPerlObj::Perl_ninstr
 #undef  not_a_number
 #define not_a_number      CPerlObj::not_a_number
+#undef  no_bareword_allowed
+#define no_bareword_allowed     CPerlObj::Perl_no_bareword_allowed
 #undef  no_fh_allowed
 #define no_fh_allowed     CPerlObj::Perl_no_fh_allowed
 #undef  no_op

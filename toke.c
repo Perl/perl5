@@ -1498,7 +1498,7 @@ yylex(void)
 	*/
 	if (PL_in_my) {
 	    if (strchr(PL_tokenbuf,':'))
-		croak(no_myglob,PL_tokenbuf);
+		yyerror(form(no_myglob,PL_tokenbuf));
 
 	    yylval.opval = newOP(OP_PADANY, 0);
 	    yylval.opval->op_targ = pad_allocmy(PL_tokenbuf);
@@ -1942,8 +1942,24 @@ yylex(void)
 		 * Look for options.
 		 */
 		d = instr(s,"perl -");
-		if (!d)
+		if (!d) {
 		    d = instr(s,"perl");
+#if defined(DOSISH)
+		    /* avoid getting into infinite loops when shebang
+		     * line contains "Perl" rather than "perl" */
+		    if (!d) {
+			for (d = ipathend-4; d >= ipath; --d) {
+			    if ((*d == 'p' || *d == 'P')
+				&& !ibcmp(d, "perl", 4))
+			    {
+				break;
+			    }
+			}
+			if (d < ipath)
+			    d = Nullch;
+		    }
+#endif
+		}
 #ifdef ALTERNATE_SHEBANG
 		/*
 		 * If the ALTERNATE_SHEBANG on this system starts with a
@@ -2997,11 +3013,9 @@ yylex(void)
 		    PL_oldoldbufptr < PL_bufptr &&
 		    (PL_oldoldbufptr == PL_last_lop || PL_oldoldbufptr == PL_last_uni) &&
 		    /* NO SKIPSPACE BEFORE HERE! */
-		    (PL_expect == XREF 
-		     || ((opargs[PL_last_lop_op] >> OASHIFT)& 7) == OA_FILEREF
-		     || (PL_last_lop_op == OP_ENTERSUB 
-			 && PL_last_proto 
-			 && PL_last_proto[PL_last_proto[0] == ';' ? 1 : 0] == '*')) )
+		    (PL_expect == XREF ||
+		     ((opargs[PL_last_lop_op] >> OASHIFT)& 7) == OA_FILEREF))
+
 		{
 		    bool immediate_paren = *s == '(';
 
@@ -3017,8 +3031,10 @@ yylex(void)
 		    /* (But it's an indir obj regardless for sort.) */
 
 		    if ((PL_last_lop_op == OP_SORT ||
-                         (!immediate_paren && (!gv || !GvCVu(gv))) ) &&
-                        (PL_last_lop_op != OP_MAPSTART && PL_last_lop_op != OP_GREPSTART)){
+                         (!immediate_paren && (!gv || !GvCVu(gv)))) &&
+                        (PL_last_lop_op != OP_MAPSTART &&
+			 PL_last_lop_op != OP_GREPSTART))
+		    {
 			PL_expect = (PL_last_lop == PL_oldoldbufptr) ? XTERM : XOPERATOR;
 			goto bareword;
 		    }
@@ -3031,11 +3047,8 @@ yylex(void)
 		if (*s == '(') {
 		    CLINE;
 		    if (gv && GvCVu(gv)) {
-			CV *cv;
-			if ((cv = GvCV(gv)) && SvPOK(cv))
-			    PL_last_proto = SvPV((SV*)cv, n_a);
 			for (d = s + 1; *d == ' ' || *d == '\t'; d++) ;
-			if (*d == ')' && (sv = cv_const_sv(cv))) {
+			if (*d == ')' && (sv = cv_const_sv(GvCV(gv)))) {
 			    s = d + 1;
 			    goto its_constant;
 			}
@@ -3044,7 +3057,6 @@ yylex(void)
 		    PL_expect = XOPERATOR;
 		    force_next(WORD);
 		    yylval.ival = 0;
-		    PL_last_lop_op = OP_ENTERSUB;
 		    TOKEN('&');
 		}
 
@@ -3068,8 +3080,6 @@ yylex(void)
 		    if (lastchar == '-')
 			warn("Ambiguous use of -%s resolved as -&%s()",
 				PL_tokenbuf, PL_tokenbuf);
-		    PL_last_lop = PL_oldbufptr;
-		    PL_last_lop_op = OP_ENTERSUB;
 		    /* Check for a constant sub */
 		    cv = GvCV(gv);
 		    if ((sv = cv_const_sv(cv))) {
@@ -3083,52 +3093,40 @@ yylex(void)
 		    /* Resolve to GV now. */
 		    op_free(yylval.opval);
 		    yylval.opval = newCVREF(0, newGVOP(OP_GV, 0, gv));
+		    yylval.opval->op_private |= OPpENTERSUB_NOPAREN;
+		    PL_last_lop = PL_oldbufptr;
 		    PL_last_lop_op = OP_ENTERSUB;
 		    /* Is there a prototype? */
 		    if (SvPOK(cv)) {
 			STRLEN len;
-			PL_last_proto = SvPV((SV*)cv, len);
+			char *proto = SvPV((SV*)cv, len);
 			if (!len)
 			    TERM(FUNC0SUB);
-			if (strEQ(PL_last_proto, "$"))
+			if (strEQ(proto, "$"))
 			    OPERATOR(UNIOPSUB);
-			if (*PL_last_proto == '&' && *s == '{') {
+			if (*proto == '&' && *s == '{') {
 			    sv_setpv(PL_subname,"__ANON__");
 			    PREBLOCK(LSTOPSUB);
 			}
-		    } else
-			PL_last_proto = NULL;
+		    }
 		    PL_nextval[PL_nexttoke].opval = yylval.opval;
 		    PL_expect = XTERM;
 		    force_next(WORD);
 		    TOKEN(NOAMP);
 		}
 
-		if (PL_hints & HINT_STRICT_SUBS &&
-		    lastchar != '-' &&
-		    strnNE(s,"->",2) &&
-		    PL_last_lop_op != OP_TRUNCATE &&  /* S/F prototype in opcode.pl */
-		    PL_last_lop_op != OP_ACCEPT &&
-		    PL_last_lop_op != OP_PIPE_OP &&
-		    PL_last_lop_op != OP_SOCKPAIR &&
-		    !(PL_last_lop_op == OP_ENTERSUB 
-			 && PL_last_proto 
-			 && PL_last_proto[PL_last_proto[0] == ';' ? 1 : 0] == '*'))
-		{
-		    warn(
-		     "Bareword \"%s\" not allowed while \"strict subs\" in use",
-			PL_tokenbuf);
-		    ++PL_error_count;
-		}
-
 		/* Call it a bare word */
 
-	    bareword:
-		if (PL_dowarn) {
-		    if (lastchar != '-') {
-			for (d = PL_tokenbuf; *d && isLOWER(*d); d++) ;
-			if (!*d)
-			    warn(warn_reserved, PL_tokenbuf);
+		if (PL_hints & HINT_STRICT_SUBS)
+		    yylval.opval->op_private |= OPpCONST_STRICT;
+		else {
+		bareword:
+		    if (PL_dowarn) {
+			if (lastchar != '-') {
+			    for (d = PL_tokenbuf; *d && isLOWER(*d); d++) ;
+			    if (!*d)
+				warn(warn_reserved, PL_tokenbuf);
+			}
 		    }
 		}
 

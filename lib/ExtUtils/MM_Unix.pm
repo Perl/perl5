@@ -1695,8 +1695,7 @@ usually solves this kind of problem.
 
     my($install_variable,$search_prefix,$replace_prefix);
 
-    # The rule, taken from Configure, is that if prefix contains perl,
-    # we shape the tree
+    # If the prefix contains perl, Configure shapes the tree as follows:
     #    perlprefix/lib/                INSTALLPRIVLIB
     #    perlprefix/lib/pod/
     #    perlprefix/lib/site_perl/	INSTALLSITELIB
@@ -1708,6 +1707,11 @@ usually solves this kind of problem.
     #    prefix/lib/perl5/site_perl/	INSTALLSITELIB
     #    prefix/bin/			INSTALLBIN
     #    prefix/lib/perl5/man/		INSTALLMAN1DIR
+    #
+    # The above results in various kinds of breakage on various
+    # platforms, so we cope with it as follows: if prefix/lib/perl5
+    # or prefix/lib/perl5/man exist, we'll replace those instead
+    # of /prefix/{lib,man}
 
     $replace_prefix = qq[\$\(PREFIX\)];
     for $install_variable (qw/
@@ -1716,36 +1720,45 @@ usually solves this kind of problem.
 			   /) {
 	$self->prefixify($install_variable,$configure_prefix,$replace_prefix);
     }
-    $search_prefix = $configure_prefix =~ /perl/ ?
-	$self->catdir($configure_prefix,"lib") :
-	$self->catdir($configure_prefix,"lib","perl5");
+    my $funkylibdir = $self->catdir($configure_prefix,"lib","perl5");
+    $funkylibdir = '' unless -d $funkylibdir;
+    $search_prefix = $funkylibdir || $self->catdir($configure_prefix,"lib");
     if ($self->{LIB}) {
 	$self->{INSTALLPRIVLIB} = $self->{INSTALLSITELIB} = $self->{LIB};
 	$self->{INSTALLARCHLIB} = $self->{INSTALLSITEARCH} = 
 	    $self->catdir($self->{LIB},$Config{'archname'});
-    } else {
-	$replace_prefix = $self->{PREFIX} =~ /perl/ ? 
-	    $self->catdir(qq[\$\(PREFIX\)],"lib") :
-		$self->catdir(qq[\$\(PREFIX\)],"lib","perl5");
+    }
+    else {
+	if (-d $self->catdir($self->{PREFIX},"lib","perl5")) {
+	    $replace_prefix = $self->catdir(qq[\$\(PREFIX\)],"lib", "perl5");
+	}
+	else {
+	    $replace_prefix = $self->catdir(qq[\$\(PREFIX\)],"lib");
+	}
 	for $install_variable (qw/
 			       INSTALLPRIVLIB
 			       INSTALLARCHLIB
 			       INSTALLSITELIB
 			       INSTALLSITEARCH
-			       /) {
+			       /)
+	{
 	    $self->prefixify($install_variable,$search_prefix,$replace_prefix);
 	}
     }
-    $search_prefix = $configure_prefix =~ /perl/ ?
-	$self->catdir($configure_prefix,"man") :
-	    $self->catdir($configure_prefix,"lib","perl5","man");
-    $replace_prefix = $self->{PREFIX} =~ /perl/ ? 
-	$self->catdir(qq[\$\(PREFIX\)],"man") :
-	    $self->catdir(qq[\$\(PREFIX\)],"lib","perl5","man");
+    my $funkymandir = $self->catdir($configure_prefix,"lib","perl5","man");
+    $funkymandir = '' unless -d $funkymandir;
+    $search_prefix = $funkymandir || $self->catdir($configure_prefix,"man");
+    if (-d $self->catdir($self->{PREFIX},"lib","perl5", "man")) {
+	$replace_prefix = $self->catdir(qq[\$\(PREFIX\)],"lib", "perl5", "man");
+    }
+    else {
+	$replace_prefix = $self->catdir(qq[\$\(PREFIX\)],"man");
+    }
     for $install_variable (qw/
 			   INSTALLMAN1DIR
 			   INSTALLMAN3DIR
-			   /) {
+			   /)
+    {
 	$self->prefixify($install_variable,$search_prefix,$replace_prefix);
     }
 
@@ -1846,7 +1859,7 @@ usually solves this kind of problem.
 	push @defpath, $component if defined $component;
     }
     $self->{PERL} ||=
-        $self->find_perl(5.0, [ $^X, 'miniperl','perl','perl5',"perl$]" ],
+        $self->find_perl(5.0, [ $self->canonpath($^X), 'miniperl','perl','perl5',"perl$]" ],
 	    \@defpath, $Verbose );
     # don't check if perl is executable, maybe they have decided to
     # supply switches with perl

@@ -242,11 +242,13 @@ sub warn {
 }
 
 # The mod_perl package Apache::Registry loads CGI programs by calling
-# eval.  These evals don't count when looking at the stack backtrace.
+# eval, as does PerlEx.  These evals don't count when looking at the 
+# stack backtrace.
 sub _longmess {
     my $message = Carp::longmess();
     my $mod_perl = exists $ENV{MOD_PERL};
-    $message =~ s,eval[^\n]+Apache/Registry\.pm.*,,s if $mod_perl;
+    my $PerlEx = exists($ENV{'GATEWAY_INTERFACE'}) && $ENV{'GATEWAY_INTERFACE'} =~ /^CGI-PerlEx/;
+    $message =~ s,eval[^\n]+(Apache/Registry\.pm|\s*PerlEx::Precompiler).*,,s if $mod_perl || $PerlEx;
     return( $message );    
 }
 
@@ -307,8 +309,10 @@ and the time and date of the error.
 END
     ;
     my $mod_perl = exists $ENV{MOD_PERL};
+    my $PerlEx = exists($ENV{'GATEWAY_INTERFACE'}) && $ENV{'GATEWAY_INTERFACE'} =~ /^CGI-PerlEx/;
+
     print STDOUT "Content-type: text/html\n\n" 
-	unless $mod_perl;
+	unless $mod_perl || $PerlEx;
 
     if ($CUSTOM_MSG) {
 	if (ref($CUSTOM_MSG) eq 'CODE') {

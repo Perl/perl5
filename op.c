@@ -43,6 +43,7 @@ static I32 list_assignment _((OP *o));
 static void bad_type _((I32 n, char *t, char *name, OP *kid));
 static OP *modkids _((OP *o, I32 type));
 static OP *no_fh_allowed _((OP *o));
+static void no_bareword_allowed _((OP *o));
 static OP *scalarboolean _((OP *o));
 static OP *too_few_arguments _((OP *o, char* name));
 static OP *too_many_arguments _((OP *o, char* name));
@@ -91,6 +92,15 @@ bad_type(I32 n, char *t, char *name, OP *kid)
 		 (int)n, name, t, op_desc[kid->op_type]));
 }
 
+STATIC void
+no_bareword_allowed(OP *o)
+{
+    STRLEN n_a;
+    warn("Bareword \"%s\" not allowed while \"strict subs\" in use",
+	  SvPV(cSVOPo->op_sv, n_a));
+    ++PL_error_count;
+}
+
 void
 assertref(OP *o)
 {
@@ -127,7 +137,7 @@ pad_allocmy(char *name)
 	    name[2] = toCTRL(name[1]);
 	    name[1] = '^';
 	}
-	croak("Can't use global %s in \"my\"",name);
+	yyerror(form("Can't use global %s in \"my\"",name));
     }
     if (PL_dowarn && AvFILLp(PL_comppad_name) >= 0) {
 	SV **svp = AvARRAY(PL_comppad_name);
@@ -149,7 +159,8 @@ pad_allocmy(char *name)
     sv_setpv(sv, name);
     if (PL_in_my_stash) {
 	if (*name != '$')
-	    croak("Can't declare class for non-scalar %s in \"my\"",name);
+	    yyerror(form("Can't declare class for non-scalar %s in \"my\"",
+			 name));
 	SvOBJECT_on(sv);
 	(void)SvUPGRADE(sv, SVt_PVMG);
 	SvSTASH(sv) = (HV*)SvREFCNT_inc(PL_in_my_stash);
@@ -929,7 +940,9 @@ scalarvoid(OP *o)
 
     case OP_CONST:
 	sv = cSVOPo->op_sv;
-	if (PL_dowarn) {
+	if (cSVOPo->op_private & OPpCONST_STRICT)
+	    no_bareword_allowed(o);
+	else if (PL_dowarn) {
 	    useless = "a constant";
 	    if (SvNIOK(sv) && (SvNV(sv) == 0.0 || SvNV(sv) == 1.0))
 		useless = 0;
@@ -1722,13 +1735,23 @@ fold_constants(register OP *o)
     if (opargs[type] & OA_TARGET)
 	o->op_targ = pad_alloc(type, SVs_PADTMP);
 
-    if ((opargs[type] & OA_OTHERINT) && (PL_hints & HINT_INTEGER))
+    /* integerize op, unless it happens to be C<-foo>.
+     * XXX should pp_i_negate() do magic string negation instead? */
+    if ((opargs[type] & OA_OTHERINT) && (PL_hints & HINT_INTEGER)
+	&& !(type == OP_NEGATE && cUNOPo->op_first->op_type == OP_CONST
+	     && (cUNOPo->op_first->op_private & OPpCONST_BARE)))
+    {
 	o->op_ppaddr = ppaddr[type = ++(o->op_type)];
+    }
 
     if (!(opargs[type] & OA_FOLDCONST))
 	goto nope;
 
     switch (type) {
+    case OP_NEGATE:
+	/* XXX might want a ck_negate() for this */
+	cUNOPo->op_first->op_private &= ~OPpCONST_STRICT;
+	break;
     case OP_SPRINTF:
     case OP_UCFIRST:
     case OP_LCFIRST:
@@ -1748,11 +1771,13 @@ fold_constants(register OP *o)
 	goto nope;		/* Don't try to run w/ errors */
 
     for (curop = LINKLIST(o); curop != o; curop = LINKLIST(curop)) {
-	if (curop->op_type != OP_CONST &&
-		curop->op_type != OP_LIST &&
-		curop->op_type != OP_SCALAR &&
-		curop->op_type != OP_NULL &&
-		curop->op_type != OP_PUSHMARK) {
+	if ((curop->op_type != OP_CONST ||
+	     (curop->op_private & OPpCONST_BARE)) &&
+	    curop->op_type != OP_LIST &&
+	    curop->op_type != OP_SCALAR &&
+	    curop->op_type != OP_NULL &&
+	    curop->op_type != OP_PUSHMARK)
+	{
 	    goto nope;
 	}
     }
@@ -4936,6 +4961,15 @@ ck_subr(OP *o)
 	    }
 	}
     }
+    else if (cvop->op_type == OP_METHOD) {
+	if (o2->op_type == OP_CONST)
+	    o2->op_private &= ~OPpCONST_STRICT;
+	else if (o2->op_type == OP_LIST) {
+	    OP *o = ((UNOP*)o2)->op_first->op_sibling;
+	    if (o && o->op_type == OP_CONST)
+		o->op_private &= ~OPpCONST_STRICT;
+	}
+    }
     o->op_private |= (PL_hints & HINT_STRICT_REFS);
     if (PERLDB_SUB && PL_curstash != PL_debstash)
 	o->op_private |= OPpENTERSUB_DB;
@@ -4970,6 +5004,35 @@ ck_subr(OP *o)
 		arg++;
 		if (o2->op_type == OP_RV2GV)
 		    goto wrapref;	/* autoconvert GLOB -> GLOBref */
+		else if (o2->op_type == OP_CONST)
+		    o2->op_private &= ~OPpCONST_STRICT;
+		else if (o2->op_type == OP_ENTERSUB) {
+		    /* accidental subroutine, revert to bareword */
+		    OP *gvop = ((UNOP*)o2)->op_first;
+		    if (gvop && gvop->op_type == OP_NULL) {
+			gvop = ((UNOP*)gvop)->op_first;
+			if (gvop) {
+			    for (; gvop->op_sibling; gvop = gvop->op_sibling)
+				;
+			    if (gvop &&
+				(gvop->op_private & OPpENTERSUB_NOPAREN) &&
+				(gvop = ((UNOP*)gvop)->op_first) &&
+				gvop->op_type == OP_GV)
+			    {
+				GV *gv = (GV*)((SVOP*)gvop)->op_sv;
+				OP *sibling = o2->op_sibling;
+				SV *n = newSVpvn("",0);
+				op_free(o2);
+				gv_fullname3(n, gv, "");
+				if (SvCUR(n)>6 && strnEQ(SvPVX(n),"main::",6))
+				    sv_chop(n, SvPVX(n)+6);
+				o2 = newSVOP(OP_CONST, 0, n);
+				prev->op_sibling = o2;
+				o2->op_sibling = sibling;
+			    }
+			}
+		    }
+		}
 		scalar(o2);
 		break;
 	    case '\\':
@@ -5048,9 +5111,12 @@ ck_trunc(OP *o)
 
 	if (kid->op_type == OP_NULL)
 	    kid = (SVOP*)kid->op_sibling;
-	if (kid &&
-	  kid->op_type == OP_CONST && (kid->op_private & OPpCONST_BARE))
+	if (kid && kid->op_type == OP_CONST &&
+	    (kid->op_private & OPpCONST_BARE))
+	{
 	    o->op_flags |= OPf_SPECIAL;
+	    kid->op_private &= ~OPpCONST_STRICT;
+	}
     }
     return ck_fun(o);
 }
@@ -5081,8 +5147,11 @@ peep(register OP *o)
 	    o->op_seq = PL_op_seqmax++;
 	    break;
 
-	case OP_CONCAT:
 	case OP_CONST:
+	    if (cSVOPo->op_private & OPpCONST_STRICT)
+		no_bareword_allowed(o);
+	    /* FALL THROUGH */
+	case OP_CONCAT:
 	case OP_JOIN:
 	case OP_UC:
 	case OP_UCFIRST:

@@ -524,6 +524,7 @@ readvars %globvar, '..\perlvars.h','G';
 open(HDRFILE, ">$hdrfile") or die "$0: Can't open $hdrfile: $!\n";
 print HDRFILE <<ENDCODE;
 EXTERN_C void SetCPerlObj(void* pP);
+EXTERN_C void boot_CAPI_handler(CV *cv, void (*subaddr)(CV *c), void *pP);
 EXTERN_C CV* Perl_newXS(char* name, void (*subaddr)(CV* cv), char* filename);
 
 ENDCODE
@@ -593,6 +594,14 @@ U32 *	_Perl_opargs(void)
     return pPerl->Perl_get_opargs();
 }
 
+void boot_CAPI_handler(CV *cv, void (*subaddr)(CV *c), void *pP)
+{
+#ifndef NO_XSLOCKS
+    XSLock localLock((CPerlObj*)pP);
+#endif
+    subaddr(cv);
+}
+
 void xs_handler(CV* cv, CPerlObj* p)
 {
 #ifndef NO_XSLOCKS
@@ -616,7 +625,7 @@ void xs_handler(CV* cv, CPerlObj* p)
     }
 }
 
-EXTERN_C CV* Perl_newXS(char* name, void (*subaddr)(CV* cv), char* filename)
+CV* Perl_newXS(char* name, void (*subaddr)(CV* cv), char* filename)
 {
     CV* cv = pPerl->Perl_newXS(name, xs_handler, filename);
     pPerl->Perl_sv_magic((SV*)cv, pPerl->Perl_sv_2mortal(pPerl->Perl_newSViv((IV)subaddr)), '~', "CAPI", 4);
@@ -982,9 +991,19 @@ int          _win32_ioctl(int i, unsigned int u, char *data)
     return pPerl->PL_piLIO->IOCtl(i, u, data, ErrorNo());
 }
 
+int          _win32_unlink(const char *f)
+{
+    return pPerl->PL_piLIO->Unlink(f, ErrorNo());
+}
+
 int          _win32_utime(const char *f, struct utimbuf *t)
 {
     return pPerl->PL_piLIO->Utime((char*)f, t, ErrorNo());
+}
+
+int          _win32_uname(struct utsname *name)
+{
+    return pPerl->PL_piENV->Uname(name, ErrorNo());
 }
 
 char*   _win32_getenv(const char *name)

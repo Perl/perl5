@@ -1703,14 +1703,19 @@ EXTCONST char no_myglob[]
 #ifdef DOINIT
 EXT char *sig_name[] = { SIG_NAME };
 EXT int   sig_num[]  = { SIG_NUM };
+#  ifndef PERL_OBJECT
 EXT SV	* psig_ptr[sizeof(sig_num)/sizeof(*sig_num)];
 EXT SV  * psig_name[sizeof(sig_num)/sizeof(*sig_num)];
+#  endif
 #else
 EXT char *sig_name[];
 EXT int   sig_num[];
+#  ifndef PERL_OBJECT
 EXT SV  * psig_ptr[];
 EXT SV  * psig_name[];
+#  endif
 #endif
+
 
 /* fast case folding tables */
 
@@ -2039,6 +2044,10 @@ typedef int (CPerlObj::*runops_proc_t) _((void));
 #undef INIT
 #define INIT(x)
 
+const int perl_object_sig_num[]  = { SIG_NUM };
+const int PSIG_SIZE = (sizeof(perl_object_sig_num)/sizeof(*perl_object_sig_num));
+
+
 class CPerlObj {
 public:
 	CPerlObj(IPerlMem*, IPerlEnv*, IPerlStdIO*, IPerlLIO*, IPerlDir*, IPerlSock*, IPerlProc*);
@@ -2186,6 +2195,13 @@ PERLVAR(bitcount,		char*)
 PERLVAR(filter_debug,	int)
 PERLVAR(super_bufptr,	char*)	/* PL_bufptr that was */
 PERLVAR(super_bufend,	char*)	/* PL_bufend that was */
+
+#undef	psig_ptr
+#undef	psig_name
+#define psig_ptr		PL_psig_ptr
+#define psig_name		PL_psig_name
+PERLVAR(psig_ptr[PSIG_SIZE], SV*);
+PERLVAR(psig_name[PSIG_SIZE], SV*);
 
 /*
  * The following is a buffer where new variables must

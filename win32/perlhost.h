@@ -98,6 +98,10 @@ public:
     {
 	return g_win32_get_sitelib(pl);
     };
+    virtual int Uname(struct utsname *name, int &err)
+    {
+	return win32_uname(name);
+    };
 };
 
 class CPerlSock : public IPerlSock
@@ -422,8 +426,7 @@ public:
     };
     virtual int Unlink(const char *filename, int &err)
     {
-	chmod(filename, S_IREAD | S_IWRITE);
-	CALLFUNCRET(unlink(filename))
+	CALLFUNCRET(win32_unlink(filename))
     };
     virtual int Utime(char *filename, struct utimbuf *times, int &err)
     {
@@ -573,12 +576,14 @@ public:
 			  |FORMAT_MESSAGE_IGNORE_INSERTS
 			  |FORMAT_MESSAGE_FROM_SYSTEM, NULL,
 			   dwErr, 0, (char *)&sMsg, 1, NULL);
+	/* strip trailing whitespace and period */
 	if (0 < dwLen) {
-	    while (0 < dwLen  &&  isspace(sMsg[--dwLen]))
-		;
+	    do {
+		--dwLen;	/* dwLen doesn't include trailing null */
+	    } while (0 < dwLen && isSPACE(sMsg[dwLen]));
 	    if ('.' != sMsg[dwLen])
 		dwLen++;
-	    sMsg[dwLen]= '\0';
+	    sMsg[dwLen] = '\0';
 	}
 	if (0 == dwLen) {
 	    sMsg = (char*)LocalAlloc(0, 64/**sizeof(TCHAR)*/);
@@ -859,6 +864,8 @@ public:
 			       &perlDir, &perlSock, &perlProc);
 	    if(pPerl != NULL)
 	    {
+		perl_init_i18nl10n(1);
+
 		try
 		{
 		    pPerl->perl_construct();

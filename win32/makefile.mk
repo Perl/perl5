@@ -36,6 +36,17 @@ INST_TOP	*= $(INST_DRV)\perl
 INST_VER	*= \5.00503
 
 #
+# Comment this out if you DON'T want your perl installation to have
+# architecture specific components.  This means that architecture-
+# specific files will be installed along with the architecture-neutral
+# files.  Leaving it enabled is safer and more flexible, in case you
+# want to build multiple flavors of perl and install them together in
+# the same location.  Commenting it out gives you a simpler
+# installation that is easier to understand for beginners.
+#
+INST_ARCH	*= \$(ARCHNAME)
+
+#
 # uncomment to enable threads-capabilities
 #
 #USE_THREADS	*= define
@@ -191,6 +202,19 @@ ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)
 ARCHDIR		= ..\lib\$(ARCHNAME)
 COREDIR		= ..\lib\CORE
 AUTODIR		= ..\lib\auto
+LIBDIR		= ..\lib
+EXTDIR		= ..\ext
+PODDIR		= ..\pod
+EXTUTILSDIR	= $(LIBDIR)\extutils
+
+#
+INST_SCRIPT	= $(INST_TOP)$(INST_VER)\bin
+INST_BIN	= $(INST_SCRIPT)$(INST_ARCH)
+INST_LIB	= $(INST_TOP)$(INST_VER)\lib
+INST_ARCHLIB	= $(INST_LIB)$(INST_ARCH)
+INST_COREDIR	= $(INST_ARCHLIB)\CORE
+INST_POD	= $(INST_LIB)\pod
+INST_HTML	= $(INST_POD)\html
 
 #
 # Programs to compile, build .lib files and link
@@ -229,7 +253,7 @@ LINK_DBG	=
 
 CFLAGS		= -w -g0 -tWM -tWD $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 		$(PCHFLAGS) $(OPTIMIZE)
-LINK_FLAGS	= $(LINK_DBG) -L"$(CCLIBDIR)"
+LINK_FLAGS	= $(LINK_DBG) -L"$(INST_COREDIR)" -L"$(CCLIBDIR)"
 OBJOUT_FLAG	= -o
 EXEOUT_FLAG	= -e
 LIBOUT_FLAG	= 
@@ -267,7 +291,7 @@ LINK_DBG	=
 .ENDIF
 
 CFLAGS		= $(INCLUDES) $(DEFINES) $(LOCDEFS) $(OPTIMIZE)
-LINK_FLAGS	= $(LINK_DBG) -L"$(CCLIBDIR)"
+LINK_FLAGS	= $(LINK_DBG) -L"$(INST_COREDIR)" -L"$(CCLIBDIR)"
 OBJOUT_FLAG	= -o
 EXEOUT_FLAG	= -o
 LIBOUT_FLAG	= 
@@ -336,7 +360,9 @@ LIBFILES	= $(LIBBASEFILES) $(LIBC)
 
 CFLAGS		= -nologo -Gf -W3 $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 		$(PCHFLAGS) $(OPTIMIZE)
-LINK_FLAGS	= -nologo -nodefaultlib $(LINK_DBG) -machine:$(PROCESSOR_ARCHITECTURE)
+LINK_FLAGS	= -nologo -nodefaultlib $(LINK_DBG) \
+		-libpath:"$(INST_COREDIR)" \
+		-machine:$(PROCESSOR_ARCHITECTURE)
 OBJOUT_FLAG	= -Fo
 EXEOUT_FLAG	= -Fe
 LIBOUT_FLAG	= /out:
@@ -381,17 +407,6 @@ $(o).dll:
 	$(LINK32) -dll -subsystem:windows -implib:$(*B).lib -def:$(*B).def \
 	    -out:$@ $(LINK_FLAGS) $(LIBFILES) $< $(LIBPERL)  
 .ENDIF
-
-#
-INST_BIN	= $(INST_TOP)$(INST_VER)\bin\$(ARCHNAME)
-INST_SCRIPT	= $(INST_TOP)$(INST_VER)\bin
-INST_LIB	= $(INST_TOP)$(INST_VER)\lib
-INST_POD	= $(INST_LIB)\pod
-INST_HTML	= $(INST_POD)\html
-LIBDIR		= ..\lib
-EXTDIR		= ..\ext
-PODDIR		= ..\pod
-EXTUTILSDIR	= $(LIBDIR)\extutils
 
 #
 # various targets
@@ -686,6 +701,7 @@ CFG_VARS	=					\
 		"INST_DRV=$(INST_DRV)"			\
 		"INST_TOP=$(INST_TOP)"			\
 		"INST_VER=$(INST_VER)"			\
+		"INST_ARCH=$(INST_ARCH)"		\
 		"archname=$(ARCHNAME)"			\
 		"cc=$(CC)"				\
 		"ccflags=$(OPTIMIZE:s/"/\"/) $(DEFINES) $(OBJECT)"	\

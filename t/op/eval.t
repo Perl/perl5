@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..36\n";
+print "1..37\n";
 
 eval 'print "ok 1\n";';
 
@@ -171,3 +171,9 @@ sub terminal { eval 'print $r' }
 }
 $x++;
 
+# does scalar eval"" pop stack correctly?
+{
+    my $c = eval "(1,2)x10";
+    print $c eq '2222222222' ? "ok $x\n" : "# $c\nnot ok $x\n";
+    $x++;
+}

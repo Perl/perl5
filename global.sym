@@ -502,6 +502,7 @@ newXS
 newXSUB
 nextargv
 ninstr
+no_bareword_allowed
 no_fh_allowed
 no_op
 oopsAV

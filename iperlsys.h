@@ -450,10 +450,12 @@ public:
     virtual int		Putenv(const char *envstring, int &err) = 0;
     virtual char *	LibPath(char *patchlevel) =0;
     virtual char *	SiteLibPath(char *patchlevel) =0;
+    virtual int		Uname(struct utsname *name, int &err) =0;
 };
 
 #define PerlEnv_putenv(str)		PL_piENV->Putenv((str), ErrorNo())
 #define PerlEnv_getenv(str)		PL_piENV->Getenv((str), ErrorNo())
+#define PerlEnv_uname(name)		PL_piENV->Uname((name), ErrorNo())
 #ifdef WIN32
 #define PerlEnv_lib_path(str)		PL_piENV->LibPath((str))
 #define PerlEnv_sitelib_path(str)	PL_piENV->SiteLibPath((str))
@@ -463,6 +465,7 @@ public:
 
 #define PerlEnv_putenv(str)		putenv((str))
 #define PerlEnv_getenv(str)		getenv((str))
+#define PerlEnv_uname(name)		uname((name))
 
 #endif	/* PERL_OBJECT */
 

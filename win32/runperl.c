@@ -28,9 +28,6 @@ xs_init(CPERLarg)
 
 CPerlObj *pPerl;
 
-#undef PERL_SYS_INIT
-#define PERL_SYS_INIT(a, c)
-
 int
 main(int argc, char **argv, char **env)
 {
@@ -41,10 +38,14 @@ main(int argc, char **argv, char **env)
      * want to free() argv after main() returns.  As luck would have it,
      * Borland's CRT does the right thing to argv[0] already. */
     char szModuleName[MAX_PATH];
+    char *ptr;
 
     GetModuleFileName(NULL, szModuleName, sizeof(szModuleName));
+    (void)win32_longpath(szModuleName);
     argv[0] = szModuleName;
 #endif
+
+    PERL_SYS_INIT(&argc,&argv);
 
     if (!host.PerlCreate())
 	exit(exitstatus);
@@ -87,7 +88,10 @@ main(int argc, char **argv, char **env)
      * want to free() argv after main() returns.  As luck would have it,
      * Borland's CRT does the right thing to argv[0] already. */
     char szModuleName[MAX_PATH];
+    char *ptr;
+
     GetModuleFileName(NULL, szModuleName, sizeof(szModuleName));
+    (void)win32_longpath(szModuleName);
     argv[0] = szModuleName;
 #endif
     return RunPerl(argc, argv, env, (void*)0);

@@ -2352,6 +2352,7 @@ PP(pp_entersub)
 	    if (AvREAL(av)) {
 		av_clear(av);
 		AvREAL_off(av);
+		AvREIFY_on(av);
 	    }
 #ifndef USE_THREADS
 	    cx->blk_sub.savearray = GvAV(PL_defgv);

@@ -474,6 +474,8 @@ refto(SV *sv)
 	    vivify_defelem(sv);
 	if (!(sv = LvTARG(sv)))
 	    sv = &PL_sv_undef;
+	else
+	    (void)SvREFCNT_inc(sv);
     }
     else if (SvPADTMP(sv))
 	sv = newSVsv(sv);
@@ -4365,6 +4367,7 @@ PP(pp_split)
 	else {
 	    if (!AvREAL(ary)) {
 		AvREAL_on(ary);
+		AvREIFY_off(ary);
 		for (i = AvFILLp(ary); i >= 0; i--)
 		    AvARRAY(ary)[i] = &PL_sv_undef;	/* don't free mere refs */
 	    }

@@ -134,6 +134,7 @@ Perl_my_ntohl
 Perl_my_swap
 Perl_my_chsize
 Perl_newXSUB
+Perl_no_bareword_allowed
 Perl_no_fh_allowed
 Perl_no_op
 Perl_nointrp
@@ -540,7 +541,9 @@ win32_alarm
 win32_open_osfhandle
 win32_get_osfhandle
 win32_ioctl
+win32_unlink
 win32_utime
+win32_uname
 win32_wait
 win32_waitpid
 win32_kill
@@ -551,6 +554,7 @@ win32_telldir
 win32_seekdir
 win32_rewinddir
 win32_closedir
+win32_longpath
 Perl_win32_init
 Perl_init_os_extras
 Perl_getTHR

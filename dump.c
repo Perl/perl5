@@ -219,6 +219,8 @@ dump_op(OP *o)
 	else if (o->op_type == OP_CONST) {
 	    if (o->op_private & OPpCONST_BARE)
 		sv_catpv(tmpsv, ",BARE");
+	    if (o->op_private & OPpCONST_STRICT)
+		sv_catpv(tmpsv, ",STRICT");
 	}
 	else if (o->op_type == OP_FLIP) {
 	    if (o->op_private & OPpFLIP_LINENUM)

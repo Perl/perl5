@@ -123,7 +123,7 @@ $IIS++ if defined($ENV{'SERVER_SOFTWARE'}) && $ENV{'SERVER_SOFTWARE'}=~/IIS/;
 # Turn on special checking for Doug MacEachern's modperl
 if (exists $ENV{'GATEWAY_INTERFACE'} 
     && 
-    ($MOD_PERL = $ENV{'GATEWAY_INTERFACE'} =~ /^CGI-Perl/))
+    ($MOD_PERL = $ENV{'GATEWAY_INTERFACE'} =~ /^CGI-Perl\//))
 {
     $| = 1;
     require Apache;
