@@ -3447,7 +3447,8 @@ Perl_report_evil_fh(pTHX_ GV *gv, IO *io, I32 op)
     if (gv && isGV(gv)) {
 	SV *sv = sv_newmortal();
 	gv_efullname4(sv, gv, Nullch, FALSE);
-	name = SvPVX(sv);
+        if (SvOK(sv))
+            name = SvPVX(sv);
     }
 
     if (op == OP_phoney_OUTPUT_ONLY || op == OP_phoney_INPUT_ONLY) {
