@@ -1743,6 +1743,7 @@ sub cmd_h {
 }
 
 sub cmd_l {
+	my $current_line = $line;
 	my $line = shift;
 	$line =~ s/^-\s*$/-/;
 	if ($line =~ /^(\$.*)/s) {
@@ -1806,7 +1807,7 @@ sub cmd_l {
 				my ($stop,$action);
 				($stop,$action) = split(/\0/, $dbline{$i}) if
 						$dbline{$i};
-							$arrow = ($i==$line 
+						$arrow = ($i==$current_line
 						and $filename eq $filename_ini) 
 					?  '==>' 
 						: ($dbline[$i]+0 ? ':' : ' ') ;
