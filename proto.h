@@ -659,6 +659,7 @@ PERL_CALLCONV I32	Perl_setenv_getix(pTHX_ char* nam);
 PERL_CALLCONV void	Perl_setdefout(pTHX_ GV* gv);
 PERL_CALLCONV HEK*	Perl_share_hek(pTHX_ const char* sv, I32 len, U32 hash);
 PERL_CALLCONV Signal_t	Perl_sighandler(int sig);
+PERL_CALLCONV Signal_t	Perl_csighandler(int sig);
 PERL_CALLCONV SV**	Perl_stack_grow(pTHX_ SV** sp, SV**p, int n);
 PERL_CALLCONV I32	Perl_start_subparse(pTHX_ I32 is_format, U32 flags);
 PERL_CALLCONV void	Perl_sub_crush_depth(pTHX_ CV* cv);

@@ -958,6 +958,9 @@
 #ifdef PERL_CORE
 #define sighandler		Perl_sighandler
 #endif
+#ifdef PERL_CORE
+#define csighandler		Perl_csighandler
+#endif
 #define stack_grow		Perl_stack_grow
 #define start_subparse		Perl_start_subparse
 #ifdef PERL_CORE
@@ -3444,6 +3447,9 @@
 #endif
 #ifdef PERL_CORE
 #define sighandler		Perl_sighandler
+#endif
+#ifdef PERL_CORE
+#define csighandler		Perl_csighandler
 #endif
 #define stack_grow(a,b,c)	Perl_stack_grow(aTHX_ a,b,c)
 #define start_subparse(a,b)	Perl_start_subparse(aTHX_ a,b)

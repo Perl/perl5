@@ -1641,9 +1641,9 @@ object, it defaults to the empty set.  The third parameter contains the
 C<sa_flags>, it defaults to 0.
 
 	$sigset = POSIX::SigSet->new(SIGINT, SIGQUIT);
-	$sigaction = POSIX::SigAction->new( 'main::handler', $sigset, &POSIX::SA_NOCLDSTOP );
+	$sigaction = POSIX::SigAction->new( \&main::handler, $sigset, &POSIX::SA_NOCLDSTOP );
 
-This C<POSIX::SigAction> object should be used with the C<POSIX::sigaction()>
+This C<POSIX::SigAction> object is intended for use with the C<POSIX::sigaction()>
 function.
 
 =back
@@ -1660,6 +1660,23 @@ accessor functions to get/set the values of a SigAction object.
 
 	$sigset = $sigaction->mask;
 	$sigaction->flags(&POSIX::SA_RESTART);
+
+=item safe
+
+accessor function for the "safe signals" flag of a SigAction object; see
+L<perlipc> for general information on safe (a.k.a. "deferred") signals.  If
+you wish to handle a signal safely, use this accessor to set the "safe" flag
+in the C<POSIX::SigAction> object:
+
+	$sigaction->safe(1);
+
+You may also examine the "safe" flag on the output action object which is
+filled in when given as the third parameter to C<POSIX::sigaction()>:
+
+	sigaction(SIGINT, $new_action, $old_action);
+	if ($old_action->safe) {
+	    # previous SIGINT handler used safe signals
+	}
 
 =back
 
