@@ -467,8 +467,8 @@ The SV will hang around without any way to access it until Perl itself
 terminates.  This is a memory leak.
 
 The correct procedure, then, is to use C<newRV_noinc> instead of
-C<newRV_inc>.  Then, if and when the last reference is destroyed, the
-reference count of the SV will go to zero and it will be destroyed,
+C<newRV_inc>.  Then, if and when the last reference is destroyed,
+the reference count of the SV will go to zero and it will be destroyed,
 stopping any memory leak.
 
 There are some convenience functions available that can help with the
@@ -498,8 +498,8 @@ The first call creates a mortal SV, the second converts an existing
 SV to a mortal SV (and thus defers a call to C<SvREFCNT_dec>), and the
 third creates a mortal copy of an existing SV.
 
-The mortal routines are not just for SV's -- AV's and HV's can be made
-mortal by passing their addresses (type-casted to C<SV*>) to the
+The mortal routines are not just for SV's -- AV's and HV's can be
+made mortal by passing their address (type-casted to C<SV*>) to the
 C<sv_2mortal> or C<sv_mortalcopy> routines.
 
 =head2 Stashes and Globs
@@ -1186,6 +1186,39 @@ Indicates that no arguments are being sent to a callback.  See L<perlcall>.
 =item G_SCALAR
 
 Used to indicate scalar context.  See C<GIMME> and L<perlcall>.
+
+=item gv_fetchmeth
+
+Returns the glob with the given C<name> and a defined subroutine or
+C<NULL>. The glob lives in the given C<stash>, or in the stashes accessable
+via @ISA and @<UNIVERSAL>.
+
+As a side-effect creates a glob with the given C<name> in the given C<stash>
+which in the case of success contains an alias for the subroutine, and
+sets up caching info for this glob.  Similarly for all the searched
+stashes.
+
+        GV*     gv_fetchmeth _((HV* stash, char* name, STRLEN len, I32 level));
+
+=item gv_fetchmethod
+
+Returns the glob which contains the subroutine to call to invoke the
+method on the C<stash>. In fact in the presense of autoloading this may
+be the glob for "AUTOLOAD".  In this case the corresponing variable
+$AUTOLOAD is already setup.
+
+Note that if you want to keep this glob for a long time, you need to
+check for it being "AUTOLOAD", since at the later time the the call
+may load a different subroutine due to $AUTOLOAD changing its value.
+Use the glob created via a side effect to do this.
+
+This function grants C<"SUPER"> token as prefix of name or postfix of
+the stash name.
+
+Has the same side-effects and as C<gv_fetchmeth()>.  C<name> should be
+writable if contains C<':'> or C<'\''>.
+
+        GV*     gv_fetchmethod _((HV* stash, char* name));
 
 =item gv_stashpv
 
@@ -2557,4 +2590,4 @@ API Listing by Dean Roehrich <roehrich@cray.com>.
 
 =head1 DATE
 
-Version 26.1: 1996/12/20
+Version 27: 1996/12/24
