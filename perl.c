@@ -220,12 +220,6 @@ perl_construct(pTHXx)
     PL_fdpid = newAV();			/* for remembering popen pids by fd */
     PL_modglobal = newHV();		/* pointers to per-interpreter module globals */
 
-#ifdef MACOS_TRADITIONAL
-    /* In MacOS time() already returns values in excess of 2**31-1,
-     * therefore we patch the integerness away. */
-    PL_opargs[OP_TIME] &= ~OA_RETINTEGER;
-#endif
-
     ENTER;
 }
 
@@ -2012,6 +2006,12 @@ S_init_interp(pTHX)
 #    undef PERLVARI
 #    undef PERLVARIC
 #  endif
+#endif
+
+#ifdef MACOS_TRADITIONAL
+  /* In MacOS time() already returns values in excess of 2**31-1,
+   * therefore we patch the integerness away. */
+  PL_opargs[OP_TIME] &= ~OA_RETINTEGER;
 #endif
 
 }
