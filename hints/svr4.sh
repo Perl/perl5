@@ -32,6 +32,15 @@ usevfork='false'
 # other SVR4 derivatives.
 d_lstat=define
 
+# UnixWare has a broken csh.  The undocumented -X argument to uname is probably
+# a reasonable way of detecting UnixWare
+uw_ver=`uname -v`
+uw_isuw=`uname -X 2>&1 | grep Release`
+if [ "$uw_isuw" = "Release = 4.2MP" -a \
+     \( "$uw_ver" = "2.1" -o "$uw_ver" = "2.1.1" \) ]; then
+   d_csh='undef'
+fi
+
 cat <<'EOM' >&4
 
 If you wish to use dynamic linking, you must use 
