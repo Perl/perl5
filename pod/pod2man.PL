@@ -310,6 +310,7 @@ Tom Christiansen such that Larry probably doesn't recognize it anymore.
 
 $/ = "";
 $cutting = 1;
+@Indices = ();
 
 # We try first to get the version number from a local binary, in case we're
 # running an installed version of Perl to produce documentation from an
@@ -555,13 +556,14 @@ END
 
 print <<"END";
 .TH $name $section "$RP" "$date" "$center"
-.IX Title "$name $section"
 .UC
 END
 
+push(@Indices, qq{.IX Title "$name $section"});
+
 while (($name, $desc) = each %namedesc) {
     for ($name, $desc) { s/^\s+//; s/\s+$//; }
-    print qq(.IX Name "$name - $desc"\n);
+    push(@Indices, qq(.IX Name "$name - $desc"\n));
 }
 
 print <<'END';
@@ -883,11 +885,11 @@ while (<>) {
 	    s/\s+$//;
 	    delete $wanna_see{$_} if exists $wanna_see{$_};
 	    print qq{.SH "$_"\n};
-	    print qq{.IX Header "$_"\n};
+      push(@Indices, qq{.IX Header "$_"\n});
 	}
 	elsif ($Cmd eq 'head2') {
 	    print qq{.Sh "$_"\n};
-	    print qq{.IX Subsection "$_"\n};
+      push(@Indices, qq{.IX Subsection "$_"\n});
 	}
 	elsif ($Cmd eq 'over') {
 	    push(@indent,$indent);
@@ -906,7 +908,7 @@ while (<>) {
 	    s/[^"]""([^"]+?)""[^"]/'$1'/g;
 	    # here do something about the $" in perlvar?
 	    print STDOUT qq{.Ip "$_" $indent\n};
-	    print qq{.IX Item "$_"\n};
+      push(@Indices, qq{.IX Item "$_"\n});
 	}
 	elsif ($Cmd eq 'pod') {
 	    # this is just a comment
@@ -938,6 +940,8 @@ if (%wanna_see && !$lax) {
 	.  ": @missing\n";
     $oops++;
 }
+
+foreach (@Indices) { print "$_\n"; }
 
 exit;
 #exit ($oops != 0);
@@ -1042,7 +1046,7 @@ sub makespace {
 sub mkindex {
     my ($entry) = @_;
     my @entries = split m:\s*/\s*:, $entry;
-    print ".IX Xref ";
+    push @Indices, ".IX Xref " . join ' ', map {qq("$_")} @entries;
     for $entry (@entries) {
 	print qq("$entry" );
     }
