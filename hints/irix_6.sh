@@ -126,7 +126,10 @@ malloc_cflags='ccflags="-DSTRICT_ALIGNMENT $ccflags"'
 	# and returning small structures.  This affects inet_*() and semctl().
 	# See http://reality.sgi.com/ariel/freeware/gcc-2.8.1-notes.html
 	# for more information.  Reported by Lionel Cons <lionel.cons@cern.ch>.
-	IRIX64) ccflags="$ccflags -mabi=64" ;;
+	IRIX64)	ccflags="$ccflags -mabi=64"
+		ldflags="$ldflags -mabi=64 -L/usr/lib64"
+		lddlflags="$lddlflags -mabi=64"
+		;;
 	esac
 	;;
 *)
