@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Jun  2 17:25:04 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Mon Jun  4 06:11:38 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -545,6 +545,7 @@ socketlib=''
 d_socklen_t=''
 d_socks5_init=''
 d_sqrtl=''
+d_sresgproto=''
 d_sresuproto=''
 d_statblks=''
 d_statfs_f_flags=''
@@ -11882,6 +11883,11 @@ eval $inlibc
 set socks5_init d_socks5_init
 eval $inlibc
 
+: see if prototype for setresgid is available
+echo " "
+set d_sresgproto setresgid $i_unistd unistd.h
+eval $hasproto
+
 : see if prototype for setresuid is available
 echo " "
 set d_sresuproto setresuid $i_unistd unistd.h
@@ -16458,6 +16464,7 @@ d_socklen_t='$d_socklen_t'
 d_sockpair='$d_sockpair'
 d_socks5_init='$d_socks5_init'
 d_sqrtl='$d_sqrtl'
+d_sresgproto='$d_sresgproto'
 d_sresuproto='$d_sresuproto'
 d_statblks='$d_statblks'
 d_statfs_f_flags='$d_statfs_f_flags'

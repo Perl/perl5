@@ -2474,7 +2474,7 @@ I32 unlnk (char*);
 #ifndef HAS_SETRESUID_PROTO /* some versions of glibc */
 int setresuid(uid_t ruid, uid_t euid, uid_t suid);
 #endif
-#ifndef HAS_SETRESUID_PROTO /* some versions of glibc */
+#ifndef HAS_SETRESGID_PROTO /* some versions of glibc */
 int setresgid(gid_t rgid, gid_t egid, gid_t sgid);
 #endif
 

@@ -3351,6 +3351,14 @@
  */
 /*#define HAS_SOCKATMARK		/ **/
 
+/* HAS_SETRESGID_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the setresgid() function.  Otherwise, it is up
+ *	to the program to supply one.  Good guesses are
+ *		extern int setresgid(uid_t ruid, uid_t euid, uid_t suid);
+ */
+/*#define	HAS_SETRESGID_PROTO	/ **/
+
 /* HAS_SETRESUID_PROTO:
  *	This symbol, if defined, indicates that the system provides
  *	a prototype for the setresuid() function.  Otherwise, it is up
