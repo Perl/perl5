@@ -189,9 +189,11 @@ if ($Is_VMS || $Is_Dos) {
 }
 else {
 	$PATH = $ENV{PATH};
+	$PDL = $ENV{PERL_DESTRUCT_LEVEL} || 0;
 	$ENV{foo} = "bar";
 	%ENV = ();
 	$ENV{PATH} = $PATH;
+	$ENV{PERL_DESTRUCT_LEVEL} = $PDL || 0;
 	ok 29, ($Is_MSWin32 ? (`cmd /x /c set foo 2>NUL` eq "")
 				: (`echo \$foo` eq "\n") );
 
