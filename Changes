@@ -28,6 +28,122 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7481] By: jhi                                   on 2000/10/29  17:02:37
+        Log: UTF-8 decoder tweak.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[  7478] By: jhi                                   on 2000/10/29  02:04:01
+        Log: Add also emailless people.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[  7477] By: jhi                                   on 2000/10/29  01:36:00
+        Log: The #7476 needs a MANIFEST change, too.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[  7476] By: jhi                                   on 2000/10/29  01:35:21
+        Log: Have only one master list of AUTHORS, drop unmaintained MAINTAIN.
+     Branch: perl
+	   - MAINTAIN
+	   ! AUTHORS Changes
+____________________________________________________________________________
+[  7475] By: jhi                                   on 2000/10/28  23:57:25
+        Log: De-quoted-unreadable to ISO Latin 1.
+             (There's one ISO-2022-JP name in Changes5.004.)
+     Branch: perl
+	   ! Changes Changes5.6
+____________________________________________________________________________
+[  7474] By: jhi                                   on 2000/10/28  19:13:06
+        Log: Subject: [ID 20001027.007] uniq array in perlfaq
+             From: Hans Ginzel <hans@kolej.mff.cuni.cz>     
+             Date: Fri, 27 Oct 2000 19:28:30 +0200
+             Message-Id: <20001027192830.A1564@kolej.mff.cuni.cz> 
+     Branch: perl
+	   ! pod/perlfaq4.pod
+____________________________________________________________________________
+[  7473] By: jhi                                   on 2000/10/28  18:02:05
+        Log: Locking null mutexes is not recommendable.
+             
+             Subject: Re: [ID 20001027.008] Not OK: perl v5.7.0 +DEVEL7462 on i386-freebsd-thread-64all 4.1-stable (UNINSTALLED) 
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Sat, 28 Oct 2000 18:41:12 +0100
+             Message-Id: <200010281741.SAA31327@crypt.compulink.co.uk>
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[  7472] By: jhi                                   on 2000/10/28  17:52:58
+        Log: Better create a true mailing list for the repository keepers.
+     Branch: perl
+	   ! Porting/repository.pod
+____________________________________________________________________________
+[  7471] By: jhi                                   on 2000/10/28  17:28:24
+        Log: Add the repository doc by Malcolm, Sarathy, and by Simon,
+             name as suggested by Michael Bletzinger <mbletzin@ncsa.uiuc.edu>.
+     Branch: perl
+	   + Porting/repository.pod
+	   ! MANIFEST
+____________________________________________________________________________
+[  7470] By: jhi                                   on 2000/10/28  17:20:54
+        Log: Subject: DOC PATCH 5.6.0
+             From: mjd@plover.com
+             Date: 27 Oct 2000 17:32:44 -0000
+             Message-ID: <20001027173244.23754.qmail@plover.com>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  7469] By: jhi                                   on 2000/10/28  17:16:45
+        Log: Subject: [ID 20001027.010] [PATCH] Add info on building CPAN modules to README.dos
+             From: "Peter J. Farley III" <pjfarley@banet.net>
+             Date: Fri, 27 Oct 2000 20:32:56 -0400
+             Message-Id: <4.3.1.0.20001027202303.00ad8900@pop5.banet.net>
+     Branch: perl
+	   ! README.dos
+____________________________________________________________________________
+[  7468] By: jhi                                   on 2000/10/28  17:07:18
+        Log: Make target reordering to avoid pointless re-makes.
+             
+             Subject: Re: Total re-make of 'make okfile' after 7451 ?
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sat, 28 Oct 2000 00:31:02 +0100
+             Message-ID: <20001028003101.A54517@plum.flirble.org>
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  7467] By: jhi                                   on 2000/10/28  17:05:31
+        Log: Subject: [ID 20001027.005] Nit in perlos2.pod - space needs deleted on line 118
+             From: lvirden@cas.org
+             Date: Fri, 27 Oct 2000 13:14:41 -0400 (EDT)
+             Message-Id: <200010271714.NAA22015@lwv26awu.cas.org>
+     Branch: perl
+	   ! README.os2
+____________________________________________________________________________
+[  7466] By: jhi                                   on 2000/10/28  16:09:16
+        Log: Upgrade to CPAN 1.58_55.
+             
+             Subject: CPAN.pm status
+             From: andreas.koenig@anima.de (Andreas J. Koenig) 
+             Date: 28 Oct 2000 08:18:00 +0200 
+             Message-ID: <m3n1fpa3qf.fsf@ak-71.mind.de>
+     Branch: perl
+	   ! lib/CPAN.pm lib/CPAN/FirstTime.pm
+____________________________________________________________________________
+[  7465] By: jhi                                   on 2000/10/28  16:02:47
+        Log: The reëntrant version shouldn't be needed unless USE_PURE_BISON.
+     Branch: perl
+	   ! embed.h embed.pl perl.h proto.h toke.c
+____________________________________________________________________________
+[  7464] By: nick                                  on 2000/10/28  10:43:44
+        Log: Fix for sv_2iv() on "shared" value from keys %hash.
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  7463] By: jhi                                   on 2000/10/27  16:18:29
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  7461] By: jhi                                   on 2000/10/27  15:37:38
         Log: Retract #7459, the script needs more work.
      Branch: perl
