@@ -3576,7 +3576,7 @@ int
 my_flush(FILE *fp)
 {
     int res;
-    if ((res = fflush(fp)) == 0) {
+    if ((res = fflush(fp)) == 0 && fp) {
 #ifdef VMS_DO_SOCKETS
 	Stat_t s;
 	if (Fstat(fileno(fp), &s) == 0 && !S_ISSOCK(s.st_mode))
