@@ -183,10 +183,10 @@ sub WRITE {
 sub CLOSE {
     my $pkg = ref $_[0];
     croak "$pkg doesn't define a CLOSE method";
-} 
+}
 
 package Tie::StdHandle; 
-our @ISA = 'Tie::Handle';       
+our @ISA = 'Tie::Handle';
 use Carp;
 
 sub TIEHANDLE 
@@ -196,7 +196,7 @@ sub TIEHANDLE
  bless $fh,$class;
  $fh->OPEN(@_) if (@_);
  return $fh;
-}         
+}
 
 sub EOF     { eof($_[0]) }
 sub TELL    { tell($_[0]) }
@@ -206,9 +206,9 @@ sub CLOSE   { close($_[0]) }
 sub BINMODE { binmode($_[0]) }
 
 sub OPEN
-{         
+{
  $_[0]->CLOSE if defined($_[0]->FILENO);
- open($_[0],$_[1]);
+ @_ == 2 ? open($_[0], $_[1]) : open($_[0], $_[1], $_[2]);
 }
 
 sub READ     { read($_[0],$_[1],$_[2]) }
@@ -216,7 +216,7 @@ sub READLINE { my $fh = $_[0]; <$fh> }
 sub GETC     { getc($_[0]) }
 
 sub WRITE
-{        
+{
  my $fh = $_[0];
  print $fh substr($_[1],0,$_[2])
 }
