@@ -527,17 +527,17 @@ Set the length of the string which is in the SV.  See C<SvCUR>.
 						  SVp_IOK|SVp_NOK|SVf_IVisUV))
 
 #ifdef __GNUC__
-#define assert_not_ROK(sv)	({assert(!SvROK(sv) || !SvRV(sv))})
+#define assert_not_ROK(sv)	({assert(!SvROK(sv) || !SvRV(sv))}),
 #else
-#define assert_not_ROK(sv)	0
+#define assert_not_ROK(sv)	
 #endif
 
 #define SvOK(sv)		(SvFLAGS(sv) & SVf_OK)
-#define SvOK_off(sv)		(assert_not_ROK(sv),			\
+#define SvOK_off(sv)		(assert_not_ROK(sv)			\
 				 SvFLAGS(sv) &=	~(SVf_OK|SVf_AMAGIC|	\
 						  SVf_IVisUV|SVf_UTF8),	\
 							SvOOK_off(sv))
-#define SvOK_off_exc_UV(sv)	(assert_not_ROK(sv),			\
+#define SvOK_off_exc_UV(sv)	(assert_not_ROK(sv)			\
 				 SvFLAGS(sv) &=	~(SVf_OK|SVf_AMAGIC|	\
 						  SVf_UTF8),		\
 							SvOOK_off(sv))
@@ -549,7 +549,7 @@ Set the length of the string which is in the SV.  See C<SvCUR>.
 #define SvNOKp(sv)		(SvFLAGS(sv) & SVp_NOK)
 #define SvNOKp_on(sv)		(SvFLAGS(sv) |= SVp_NOK)
 #define SvPOKp(sv)		(SvFLAGS(sv) & SVp_POK)
-#define SvPOKp_on(sv)		(assert_not_ROK(sv),			\
+#define SvPOKp_on(sv)		(assert_not_ROK(sv)			\
 				 SvFLAGS(sv) |= SVp_POK)
 
 #define SvIOK(sv)		(SvFLAGS(sv) & SVf_IOK)
@@ -600,14 +600,14 @@ and leaves the UTF8 status as it was.
 #define SvUTF8_off(sv)		(SvFLAGS(sv) &= ~(SVf_UTF8))
 
 #define SvPOK(sv)		(SvFLAGS(sv) & SVf_POK)
-#define SvPOK_on(sv)		(assert_not_ROK(sv),			\
+#define SvPOK_on(sv)		(assert_not_ROK(sv)			\
 				 SvFLAGS(sv) |= (SVf_POK|SVp_POK))
 #define SvPOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_POK|SVp_POK))
-#define SvPOK_only(sv)		(assert_not_ROK(sv),			\
+#define SvPOK_only(sv)		(assert_not_ROK(sv)			\
 				 SvFLAGS(sv) &= ~(SVf_OK|SVf_AMAGIC|	\
 						  SVf_IVisUV|SVf_UTF8),	\
 				    SvFLAGS(sv) |= (SVf_POK|SVp_POK))
-#define SvPOK_only_UTF8(sv)	(assert_not_ROK(sv),			\
+#define SvPOK_only_UTF8(sv)	(assert_not_ROK(sv)			\
 				 SvFLAGS(sv) &= ~(SVf_OK|SVf_AMAGIC|	\
 						  SVf_IVisUV),		\
 				    SvFLAGS(sv) |= (SVf_POK|SVp_POK))
