@@ -342,4 +342,3 @@ if ( $symlink_exists ) {
 
 } 
 
-print "# of cases: $case\n";
