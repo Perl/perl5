@@ -3344,7 +3344,7 @@
 /*#define	USE_5005THREADS		/ **/
 /*#define	USE_ITHREADS		/ **/
 #if defined(USE_5005THREADS) && !defined(USE_ITHREADS)
-#define		USE_5005THREADS		/* until src is revised*/
+#define		USE_THREADS		/* until src is revised*/
 #endif
 /*#define	OLD_PTHREADS_API		/ **/
 /*#define	USE_REENTRANT_API	/ **/
