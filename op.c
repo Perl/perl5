@@ -4304,7 +4304,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	}
     }
     if (const_sv) {
-	SvREFCNT_inc(const_sv);
+	(void)SvREFCNT_inc(const_sv);
 	if (cv) {
 	    assert(!CvROOT(cv) && !CvCONST(cv));
 	    sv_setpvn((SV*)cv, "", 0);  /* prototype is "" */
@@ -5541,7 +5541,7 @@ Perl_ck_glob(pTHX_ OP *o)
 	gv = gv_fetchpv("CORE::GLOBAL::glob", FALSE, SVt_PVCV);
 	glob_gv = gv_fetchpv("File::Glob::csh_glob", FALSE, SVt_PVCV);
 	GvCV(gv) = GvCV(glob_gv);
-	SvREFCNT_inc((SV*)GvCV(gv));
+	(void)SvREFCNT_inc((SV*)GvCV(gv));
 	GvIMPORTED_CV_on(gv);
 	LEAVE;
     }

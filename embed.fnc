@@ -1299,8 +1299,8 @@ s	|I32	|sublex_done
 s	|I32	|sublex_push
 s	|I32	|sublex_start
 s	|char *	|filter_gets	|SV *sv|PerlIO *fp|STRLEN append
-s	|HV *	|find_in_my_stash|char *pkgname|I32 len
-s	|SV*	|new_constant	|char *s|STRLEN len|const char *key|SV *sv \
+s	|HV *	|find_in_my_stash|const char *pkgname|I32 len
+s	|SV*	|new_constant	|const char *s|STRLEN len|const char *key|SV *sv \
 				|SV *pv|const char *type
 #  if defined(DEBUGGING)
 s	|void	|tokereport	|char *thing|char *s|I32 rv

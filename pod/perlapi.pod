@@ -1920,7 +1920,7 @@ invalid character will also trigger a warning.
 On return I<*len> is set to the length of the scanned string,
 and I<*flags> gives output flags.
 
-If the value is <= UV_MAX it is returned as a UV, the output flags are clear,
+If the value is <= C<UV_MAX> it is returned as a UV, the output flags are clear,
 and nothing is written to I<*result>. If the value is > UV_MAX C<grok_bin>
 returns UV_MAX, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
 and writes the value to I<*result> (or the value is discarded if I<result>

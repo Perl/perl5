@@ -235,8 +235,8 @@ because a valid ASCII string is a valid UTF-8 string.
 bool
 Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len)
 {
-    U8* x = s;
-    U8* send;
+    const U8* x = s;
+    const U8* send;
     STRLEN c;
 
     if (!len && s)
@@ -251,7 +251,7 @@ Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len)
 	      return FALSE;
 	 else {
 	      /* ... and call is_utf8_char() only if really needed. */
-	      c = is_utf8_char(x);
+	      c = is_utf8_char((U8*)x);
 	      if (!c)
 		   return FALSE;
 	 }
@@ -275,8 +275,8 @@ the last argument.
 bool
 Perl_is_utf8_string_loc(pTHX_ U8 *s, STRLEN len, U8 **p)
 {
-    U8* x = s;
-    U8* send;
+    const U8* x = s;
+    const U8* send;
     STRLEN c;
 
     if (!len && s)
@@ -289,15 +289,15 @@ Perl_is_utf8_string_loc(pTHX_ U8 *s, STRLEN len, U8 **p)
 	      c = 1;
 	 else if (!UTF8_IS_START(*x)) {
 	      if (p)
-		  *p = x;
+		  *p = (U8 *)x;
 	      return FALSE;
 	 }
 	 else {
 	      /* ... and call is_utf8_char() only if really needed. */
-	      c = is_utf8_char(x);
+	      c = is_utf8_char((U8 *)x);
 	      if (!c) {
 		   if (p)
-		      *p = x;
+		      *p = (U8 *)x;
 		   return FALSE;
 	      }
 	 }
@@ -305,7 +305,7 @@ Perl_is_utf8_string_loc(pTHX_ U8 *s, STRLEN len, U8 **p)
     }
     if (x != send) {
        if (p)
-	   *p = x;
+	   *p = (U8 *)x;
 	return FALSE;
     }
 
@@ -339,11 +339,11 @@ Most code should use utf8_to_uvchr() rather than call this directly.
 UV
 Perl_utf8n_to_uvuni(pTHX_ U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 {
-    U8 *s0 = s;
+    const U8 *s0 = s;
     UV uv = *s, ouv = 0;
     STRLEN len = 1;
-    bool dowarn = ckWARN_d(WARN_UTF8);
-    UV startbyte = *s;
+    const bool dowarn = ckWARN_d(WARN_UTF8);
+    const UV startbyte = *s;
     STRLEN expectlen = 0;
     U32 warning = 0;
 
@@ -1399,11 +1399,11 @@ The "normal" is a string like "ToLower" which means the swash
 UV
 Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *normal, char *special)
 {
-    UV uv0, uv1;
+    UV uv1;
     U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
     STRLEN len = 0;
 
-    uv0 = utf8_to_uvchr(p, 0);
+    const UV uv0 = utf8_to_uvchr(p, 0);
     /* The NATIVE_TO_UNI() and UNI_TO_NATIVE() mappings
      * are necessary in EBCDIC, they are redundant no-ops
      * in ASCII-ish platforms, and hopefully optimized away. */
@@ -1573,8 +1573,8 @@ Perl_swash_init(pTHX_ char* pkg, char* name, SV *listsv, I32 minbits, I32 none)
     SV* retval;
     SV* tokenbufsv = sv_newmortal();
     dSP;
-    size_t pkg_len = strlen(pkg);
-    size_t name_len = strlen(name);
+    const size_t pkg_len = strlen(pkg);
+    const size_t name_len = strlen(name);
     HV *stash = gv_stashpvn(pkg, pkg_len, FALSE);
     SV* errsv_save;
 

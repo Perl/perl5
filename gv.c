@@ -1899,7 +1899,7 @@ Perl_is_gv_magical(pTHX_ char *name, STRLEN len, U32 flags)
 	case '8':
 	case '9':
 	{
-	    char *end = name + len;
+	    const char *end = name + len;
 	    while (--end > name) {
 		if (!isDIGIT(*end))
 		    return FALSE;
