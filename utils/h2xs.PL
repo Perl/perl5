@@ -1248,7 +1248,7 @@ END
       foreach my $letter (keys %leading) {
 	  if ($letter eq '') {
 	      $null = 1;
-	      break;
+	      last;
 	  }
       }
 
@@ -1834,7 +1834,10 @@ COPYRIGHT AND LICENCE
 
 Put the correct copyright and licence information here.
 
-Copyright (C) $thisyear $author blah blah blah
+Copyright (C) $thisyear $author
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself. 
 
 _RMEND_
 close(RM) || die "Can't close $ext$modpname/README: $!\n";
