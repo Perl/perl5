@@ -1,0 +1,86 @@
+
+use strict ;
+
+my $verbose = 0 ;
+
+# find all version of Perl that are available
+my @PerlBinaries = qw( 
+	perl5.004        
+	perl5.00401      
+	perl5.00402      
+	perl5.00403      
+	perl5.00404      
+	perl5.00405      
+	perl5.005                         
+	perl5.00501                       
+	perl5.00502      
+	perl5.00503                     
+	perl5.6.0        
+	perl5.6.1 
+	perl5.7.0
+	perl5.7.1
+	perl5.7.2      
+	);
+
+my $maxlen = 0 ;
+foreach (@PerlBinaries)
+  { $maxlen = length $_ if length $_ > $maxlen }
+$maxlen += 3 ;
+
+# run each through the test harness
+
+my $bad = 0 ;
+my $good = 0 ;
+my $total = 0 ;
+
+foreach my $perl (@PerlBinaries)
+{
+   print "Testing $perl " . ('.' x ($maxlen - length $perl)) ;
+   my $ok = runit("$perl Makefile.PL") &&
+            runit("make sweep")	&&
+            runit("make test")	;
+
+    ++ $total;
+    if ($ok) {
+        ++ $good ;
+        print "ok\n";
+    }
+    else {
+        ++ $bad ;
+        print "not ok\n" ;
+    }
+
+}
+
+print "\n\nPassed with $good of $total versions of Perl.\n";
+exit $bad ;
+
+
+sub runit
+{
+    my $cmd = shift ;
+    print "Running [$cmd]\n" if $verbose ;
+    my $file = "/tmp/abc.$$" ;
+    unlink $file ;
+    system "$cmd >$file 2>&1" ;
+    if ($?)
+    {
+        return 0 unless $verbose ;
+        my $output = docat_del($file) ;
+        warn "$cmd failed: $?\n$output\n" ;
+        exit ;
+    }
+    unlink $file ;
+    return 1 ;
+}                   
+
+sub docat_del
+{
+    my $file = shift;
+    local $/ = undef;
+    open(CAT, "<$file") || die "Cannot open $file: $!";
+    my $result = <CAT>;
+    close(CAT);
+    unlink $file ;
+    return $result;
+}          

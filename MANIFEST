@@ -139,6 +139,17 @@ ext/Devel/Peek/Makefile.PL	Data debugging tool, makefile writer
 ext/Devel/Peek/Peek.pm		Data debugging tool, module and pod
 ext/Devel/Peek/Peek.t		See if Devel::Peek works
 ext/Devel/Peek/Peek.xs		Data debugging tool, externals
+ext/Devel/PPPort/Makefile.PL	Devel::PPPort makefile writer
+ext/Devel/PPPort/PPPort.pm	Devel::PPPort
+ext/Devel/PPPort/README		Devel::PPPort Readme
+ext/Devel/PPPort/TODO		Devel::PPPort Todo
+ext/Devel/PPPort/harness/Harness.pm	Devel::PPPort test harness
+ext/Devel/PPPort/harness/Harness.xs	Devel::PPPort test harness
+ext/Devel/PPPort/harness/Makefile.PL	Devel::PPPort::harness makefile writer
+ext/Devel/PPPort/harness/module2.c	Devel::PPPort test file
+ext/Devel/PPPort/harness/module3.c	Devel::PPPort test file
+ext/Devel/PPPort/harness/t/test.t	See if Devel::PPPort works
+ext/Devel/PPPort/soak			Test Harness to run Devel::PPPort other Perls
 ext/Digest/MD5/Changes		Digest::MD5 extension changes
 ext/Digest/MD5/hints/irix_6.pl	Hints for named architecture
 ext/Digest/MD5/Makefile.PL	Digest::MD5 extension makefile writer
