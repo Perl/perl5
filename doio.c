@@ -1126,7 +1126,7 @@ register SV **sp;
     SV **oldmark = mark;
 
 #define APPLY_TAINT_PROPER() \
-    if (!(tainting && tainted)) {} else { goto taint_proper_label; }
+    if (!tainted) {} else { TAINT_PROPER(what); }
 
     /* This is a first heuristic; it doesn't catch tainting magic. */
     if (tainting) {
@@ -1305,10 +1305,6 @@ register SV **sp;
 #endif
     }
     return tot;
-
-  taint_proper_label:
-    TAINT_PROPER(what);
-    return 0;	/* this should never happen */
 
 #undef APPLY_TAINT_PROPER
 }
