@@ -1,6 +1,7 @@
 #!./perl -w
 
-# Tests for the command-line switches
+# Tests for the command-line switches -0, -c, -l, -s, -m, -M, -V
+# Some switches have their own tests, see MANIFEST.
 
 BEGIN {
     chdir 't' if -d 't';
