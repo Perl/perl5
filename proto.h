@@ -264,6 +264,7 @@ VIRTUAL int	magic_settaint	_((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_setuvar	_((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_setvec	_((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_set_all_env _((SV* sv, MAGIC* mg));
+VIRTUAL U32	magic_sizepack	_((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_wipepack	_((SV* sv, MAGIC* mg));
 VIRTUAL void	magicname _((char* sym, char* name, I32 namlen));
 int	main _((int argc, char** argv, char** env));
@@ -280,6 +281,7 @@ VIRTUAL int	mg_get _((SV* sv));
 VIRTUAL U32	mg_len _((SV* sv));
 VIRTUAL void	mg_magical _((SV* sv));
 VIRTUAL int	mg_set _((SV* sv));
+VIRTUAL I32	mg_size _((SV* sv));
 VIRTUAL OP*	mod _((OP* o, I32 type));
 VIRTUAL char*	moreswitches _((char* s));
 VIRTUAL OP*	my _((OP* o));
@@ -342,7 +344,9 @@ VIRTUAL OP*	newLISTOP _((I32 type, I32 flags, OP* first, OP* last));
 VIRTUAL OP*	newPMOP _((I32 type, I32 flags));
 VIRTUAL OP*	newPVOP _((I32 type, I32 flags, char* pv));
 VIRTUAL SV*	newRV _((SV* ref));
+#if !defined(__GNUC__) && (defined(CRIPPLED_CC) || defined(USE_THREADS))
 VIRTUAL SV*	newRV_noinc _((SV *));
+#endif
 #ifdef LEAKTEST
 VIRTUAL SV*	newSV _((I32 x, STRLEN len));
 #else

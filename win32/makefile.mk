@@ -27,6 +27,10 @@ CCTYPE		*= BORLAND
 #CCTYPE		*= GCC
 
 #
+# uncomment next line if you want to use the perl object
+#OBJECT		*= -DPERL_OBJECT
+
+#
 # uncomment next line if you want debug version of perl (big,slow)
 #CFG		*= Debug
 
@@ -104,7 +108,7 @@ IMPLIB = implib -c
 RUNTIME  = -D_RTLDLL
 INCLUDES = -I.\include -I. -I.. -I$(CCINCDIR)
 #PCHFLAGS = -H -H$(INTDIR)\bcmoduls.pch 
-DEFINES  = -DWIN32 $(BUILDOPT) $(CRYPT_FLAG)
+DEFINES  = -DWIN32 $(BUILDOPT) $(CRYPT_FLAG) $(OBJECT)
 LOCDEFS  = -DPERLDLL -DPERL_CORE
 SUBSYS   = console
 LIBC = cw32mti.lib
@@ -120,7 +124,11 @@ OPTIMIZE = -5 -O2 $(RUNTIME)
 LINK_DBG = 
 .ENDIF
 
+.IF "$(OBJECT)" == "-DPERL_OBJECT"
+CFLAGS   = -w -d -tWM -tWD -P $(INCLUDES) $(DEFINES) $(LOCDEFS) $(PCHFLAGS) $(OPTIMIZE)
+.ELSE
 CFLAGS   = -w -d -tWM -tWD $(INCLUDES) $(DEFINES) $(LOCDEFS) $(PCHFLAGS) $(OPTIMIZE)
+.ENDIF
 LINK_FLAGS  = $(LINK_DBG) -L$(CCLIBDIR)
 OBJOUT_FLAG = -o
 EXEOUT_FLAG = -e
@@ -139,7 +147,7 @@ o = .o
 #
 RUNTIME  =
 INCLUDES = -I.\include -I. -I..
-DEFINES  = -DWIN32 $(BUILDOPT) $(CRYPT_FLAG)
+DEFINES  = -DWIN32 $(BUILDOPT) $(CRYPT_FLAG) $(OBJECT)
 LOCDEFS  = -DPERLDLL -DPERL_CORE
 SUBSYS   = console
 LIBC	 = -lcrtdll
@@ -156,7 +164,11 @@ OPTIMIZE = -g -O2 $(RUNTIME)
 LINK_DBG = 
 .ENDIF
 
+.IF "$(OBJECT)" == "-DPERL_OBJECT"
 CFLAGS   = $(INCLUDES) $(DEFINES) $(LOCDEFS) $(OPTIMIZE)
+.ELSE
+CFLAGS   = $(INCLUDES) $(DEFINES) $(LOCDEFS) $(OPTIMIZE)
+.ENDIF
 LINK_FLAGS  = $(LINK_DBG) -L$(CCLIBDIR)
 OBJOUT_FLAG = -o
 EXEOUT_FLAG = -o
@@ -174,7 +186,7 @@ RUNTIME  = -MD
 .ENDIF
 INCLUDES = -I.\include -I. -I..
 #PCHFLAGS = -Fp$(INTDIR)\vcmoduls.pch -YX 
-DEFINES  = -DWIN32 -D_CONSOLE $(BUILDOPT) $(CRYPT_FLAG)
+DEFINES  = -DWIN32 -D_CONSOLE $(BUILDOPT) $(CRYPT_FLAG) $(OBJECT)
 LOCDEFS  = -DPERLDLL -DPERL_CORE
 SUBSYS   = console
 
@@ -208,7 +220,11 @@ LIBFILES = $(CRYPT_LIB) oldnames.lib kernel32.lib user32.lib gdi32.lib \
 	oleaut32.lib netapi32.lib uuid.lib wsock32.lib mpr.lib winmm.lib \
 	version.lib odbc32.lib odbccp32.lib
 
+.IF "$(OBJECT)" == "-DPERL_OBJECT"
+CFLAGS   = -nologo -Gf -W3 -TP $(INCLUDES) $(DEFINES) $(LOCDEFS) $(PCHFLAGS) $(OPTIMIZE)
+.ELSE
 CFLAGS   = -nologo -Gf -W3 $(INCLUDES) $(DEFINES) $(LOCDEFS) $(PCHFLAGS) $(OPTIMIZE)
+.ENDIF
 LINK_FLAGS  = -nologo $(LINK_DBG) -machine:$(PROCESSOR_ARCHITECTURE)
 OBJOUT_FLAG = -Fo
 EXEOUT_FLAG = -Fe

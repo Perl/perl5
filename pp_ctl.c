@@ -644,14 +644,6 @@ static int SortCv(const void *a, const void *b)
 {
     return pSortPerl->sortcv(a, b);
 }
-static int SortCmp(const void *a, const void *b)
-{
-    return pSortPerl->sortcmp(a, b);
-}
-static int SortCmpLocale(const void *a, const void *b)
-{
-    return pSortPerl->sortcmp_locale(a, b);
-}
 #endif
 
 PP(pp_sort)
@@ -779,6 +771,8 @@ PP(pp_sort)
 	if (max > 1) {
 	    MEXTEND(SP, 20);	/* Can't afford stack realloc on signal. */
 #ifdef PERL_OBJECT
+	    /* XXX sort_mutex is probably not needed since qsort is now
+	     * internal GSAR */
 	    MUTEX_LOCK(&sort_mutex);
 	    pSortPerl = this;
 	    qsortsv(ORIGMARK+1, max,
