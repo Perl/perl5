@@ -498,7 +498,7 @@ register SV *sv;
 		    goto nope;
 		len -= rslen - 1;
 		s -= rslen - 1;
-		if (bcmp(s, rsptr, rslen))
+		if (memcmp(s, rsptr, rslen))
 		    goto nope;
 		count += rslen;
 	    }
@@ -531,6 +531,8 @@ SV *right;
     register char *rc = SvPV(right, rightlen);
     register I32 len;
     I32 lensave;
+    char *lsave = lc;
+    char *rsave = rc;
 
     dc = SvPV_force(sv,na);
     len = leftlen < rightlen ? leftlen : rightlen;
@@ -588,9 +590,6 @@ SV *right;
     }
 #endif
     {
-	char *lsave = lc;
-	char *rsave = rc;
-	
 	switch (optype) {
 	case OP_BIT_AND:
 	    while (len--)
