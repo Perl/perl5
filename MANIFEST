@@ -85,10 +85,10 @@ ext/B/B/Xref.pm		Compiler Xref backend
 ext/B/C/C.xs		Compiler C backend external subroutines
 ext/B/C/Makefile.PL	Compiler C backend makefile writer
 ext/B/defsubs_h.PL	Generator for constant subroutines
+ext/B/hints/darwin.pl	Hints for named architecture
 ext/B/Makefile.PL	Compiler backend makefile writer
 ext/B/NOTES		Compiler backend notes
 ext/B/O.pm		Compiler front-end module (-MO=...)
-ext/B/t/o.t		See if O works
 ext/B/ramblings/cc.notes	Compiler ramblings: notes on CC backend
 ext/B/ramblings/curcop.runtime	Compiler ramblings: notes on curcop use
 ext/B/ramblings/flip-flop	Compiler ramblings: notes on flip-flop
@@ -104,6 +104,7 @@ ext/B/t/concise.t	See whether B::Concise works
 ext/B/t/debug.t		See if B::Debug works
 ext/B/t/deparse.t	See if B::Deparse works
 ext/B/t/lint.t		See if B::Lint works
+ext/B/t/o.t		See if O works
 ext/B/t/showlex.t	See if B::ShowLex works
 ext/B/t/stash.t		See if B::Stash works
 ext/B/t/terse.t		See if B::Terse works
@@ -660,8 +661,8 @@ ext/threads/Makefile.PL		ithreads
 ext/threads/README		ithreads
 ext/threads/shared/Makefile.PL	thread shared variables
 ext/threads/shared/queue.pm	Threadsafe queue.
-ext/threads/shared/semaphore.pm	Threadsafe semaphore
 ext/threads/shared/README	thread shared variables
+ext/threads/shared/semaphore.pm	Threadsafe semaphore
 ext/threads/shared/shared.pm	thread shared variables
 ext/threads/shared/shared.xs	thread shared variables
 ext/threads/shared/t/0nothread.t	Tests for basic shared array functionality.
@@ -2748,8 +2749,8 @@ wince/bin/pl2bat.pl			WinCE port
 wince/bin/runperl.pl			WinCE port
 wince/bin/search.pl			WinCE port
 wince/cecopy-lib.pl			WinCE port
-wince/compile.bat			WinCE port
 wince/comp.pl				WinCE port
+wince/compile.bat			WinCE port
 wince/config.ce				WinCE port
 wince/config_H.ce			WinCE port
 wince/config_h.PL			WinCE port
@@ -2770,10 +2771,10 @@ wince/registry.bat			WinCE port
 wince/runperl.c				WinCE port
 wince/splittree.pl			WinCE port
 wince/win32.h				WinCE port
+wince/win32io.c				WinCE port
 wince/win32iop.h			WinCE port
 wince/win32thread.c			WinCE port
 wince/win32thread.h			WinCE port
-wince/win32io.c				WinCE port
 wince/wince.c				WinCE port
 wince/wince.h				WinCE port
 wince/wincesck.c			WinCE port
