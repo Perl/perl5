@@ -2234,8 +2234,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	not from sig_num (which is unused).
  */
 /* SIG_SIZE:
- *	This variable contains the number of elements of the sig_name
- *	and sig_num arrays, excluding the final NULL entry.
+ *	This variable contains the number of elements of the SIG_NAME
+ *	and SIG_NUM arrays, excluding the final NULL entry.
  */
 #define SIG_NAME $sig_name_init		/**/
 #define SIG_NUM  $sig_num_init		/**/
