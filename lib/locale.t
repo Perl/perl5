@@ -771,7 +771,7 @@ foreach (&last_without_setlocale()+1..$last) {
     if ($Problem{$_} || !defined $Okay{$_} || !@{$Okay{$_}}) {
 	if ($_ == 102) {
 	    print "# The failure of test 102 is not necessarily fatal.\n";
-	    print "# It usually indicates a problem in the enviroment,\n";
+	    print "# It usually indicates a problem in the environment,\n";
 	    print "# not in Perl itself.\n";
 	}
 	print "not ";
