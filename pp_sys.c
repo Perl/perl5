@@ -29,7 +29,7 @@
  * --jhi */
 #   ifdef __hpux__
 /* There is a MAXINT coming from <shadow.h> <- <hpsecurity.h> <- <values.h>
- * and another MAXINT from "perl.h" <- <sys/param.h>. */ 
+ * and another MAXINT from "perl.h" <- <sys/param.h>. */
 #       undef MAXINT
 #   endif
 #   include <shadow.h>
@@ -40,8 +40,8 @@
 # include <unistd.h>
 #endif
 
-#ifdef HAS_SYSCALL   
-#ifdef __cplusplus              
+#ifdef HAS_SYSCALL
+#ifdef __cplusplus
 extern "C" int syscall(unsigned long,...);
 #endif
 #endif
@@ -58,7 +58,7 @@ extern "C" int syscall(unsigned long,...);
 # include <sys/socket.h>
 # if defined(USE_SOCKS) && defined(I_SOCKS)
 #   include <socks.h>
-# endif 
+# endif
 # ifdef I_NETDB
 #  include <netdb.h>
 # endif
@@ -703,7 +703,7 @@ PP(pp_binmode)
     if (MAXARG > 1)
 	discp = POPs;
 
-    gv = (GV*)POPs; 
+    gv = (GV*)POPs;
 
     if (gv && (mg = SvTIED_mg((SV*)gv, 'q'))) {
 	PUSHMARK(SP);
@@ -722,7 +722,7 @@ PP(pp_binmode)
     if (!(io = GvIO(gv)) || !(fp = IoIFP(io)))
 	RETPUSHUNDEF;
 
-    if (do_binmode(fp,IoTYPE(io),mode_from_discipline(discp))) 
+    if (do_binmode(fp,IoTYPE(io),mode_from_discipline(discp)))
 	RETPUSHYES;
     else
 	RETPUSHUNDEF;
@@ -769,7 +769,7 @@ PP(pp_tie)
 	    PUSHs(*MARK++);
 	PUTBACK;
 	call_method(methname, G_SCALAR);
-    } 
+    }
     else {
 	/* Not clear why we don't call call_method here too.
 	 * perhaps to get different error message ?
@@ -777,7 +777,7 @@ PP(pp_tie)
 	stash = gv_stashsv(*MARK, FALSE);
 	if (!stash || !(gv = gv_fetchmethod(stash, methname))) {
 	    DIE(aTHX_ "Can't locate object method \"%s\" via package \"%s\"",
-		 methname, SvPV(*MARK,n_a));                   
+		 methname, SvPV(*MARK,n_a));
 	}
 	ENTER;
 	PUSHSTACKi(PERLSI_MAGIC);
@@ -813,21 +813,22 @@ PP(pp_untie)
 	SV *obj = SvRV(mg->mg_obj);
 	GV *gv;
 	CV *cv = NULL;
-        if (ckWARN(WARN_UNTIE)) {
-	    if (mg && SvREFCNT(obj) > 1)
-		Perl_warner(aTHX_ WARN_UNTIE,
-		    "untie attempted while %"UVuf" inner references still exist",
-		    (UV)SvREFCNT(obj) - 1 ) ;
-        }
 	if ((gv = gv_fetchmethod_autoload(SvSTASH(obj), "UNTIE", FALSE)) &&
             isGV(gv) && (cv = GvCV(gv))) {
 	    PUSHMARK(SP);
 	    XPUSHs(SvTIED_obj((SV*)gv, mg));
+	    XPUSHs(sv_2mortal(newSViv(SvREFCNT(obj)-1)));
 	    PUTBACK;
 	    ENTER;
 	    call_sv((SV *)cv, G_VOID);
 	    LEAVE;
 	    SPAGAIN;
+        }
+        else if (ckWARN(WARN_UNTIE)) {
+	    if (mg && SvREFCNT(obj) > 1)
+		Perl_warner(aTHX_ WARN_UNTIE,
+		    "untie attempted while %"UVuf" inner references still exist",
+		    (UV)SvREFCNT(obj) - 1 ) ;
         }
     }
     sv_unmagic(sv, how);
@@ -901,7 +902,7 @@ PP(pp_dbmopen)
     }
 
     if (sv_isobject(TOPs)) {
-	sv_unmagic((SV *) hv, 'P');            
+	sv_unmagic((SV *) hv, 'P');
 	sv_magic((SV*)hv, TOPs, 'P', Nullch, 0);
     }
     LEAVE;
@@ -1788,7 +1789,7 @@ PP(pp_eof)
 PP(pp_tell)
 {
     djSP; dTARGET;
-    GV *gv;     
+    GV *gv;
     MAGIC *mg;
 
     if (MAXARG == 0)
@@ -1890,7 +1891,7 @@ PP(pp_truncate)
     len = (Off_t)POPi;
 #endif
     /* Checking for length < 0 is problematic as the type might or
-     * might not be signed: if it is not, clever compilers will moan. */ 
+     * might not be signed: if it is not, clever compilers will moan. */
     /* XXX Configure probe for the signedness of the length type of *truncate() needed? XXX */
     SETERRNO(0,0);
 #if defined(HAS_TRUNCATE) || defined(HAS_CHSIZE) || defined(F_FREESP)
@@ -1904,7 +1905,7 @@ PP(pp_truncate)
 	    PerlIO_flush(IoIFP(GvIOp(tmpgv)));
 #ifdef HAS_TRUNCATE
 	    if (ftruncate(PerlIO_fileno(IoIFP(GvIOn(tmpgv))), len) < 0)
-#else 
+#else
 	    if (my_chsize(PerlIO_fileno(IoIFP(GvIOn(tmpgv))), len) < 0)
 #endif
 		result = 0;
@@ -2005,7 +2006,7 @@ PP(pp_ioctl)
 	retval = fcntl(PerlIO_fileno(IoIFP(io)), func, (int)s);
 #else
 	retval = fcntl(PerlIO_fileno(IoIFP(io)), func, s);
-#endif 
+#endif
 #else
 	DIE(aTHX_ "fcntl is not implemented");
 #endif
@@ -2492,7 +2493,7 @@ PP(pp_getpeername)
 	    if (((struct sockaddr *)SvPVX(sv))->sa_family == AF_INET &&
 		!memcmp((char *)SvPVX(sv) + sizeof(u_short), nowhere,
 			sizeof(u_short) + sizeof(struct in_addr))) {
-		goto nuts2;	    
+		goto nuts2;	
 	    }
 	}
 #endif
@@ -2604,7 +2605,7 @@ PP(pp_stat)
 	PUSHs(sv_2mortal(newSVuv(PL_statcache.st_uid)));
 #   endif
 #endif
-#if Gid_t_size > IVSIZE 
+#if Gid_t_size > IVSIZE
 	PUSHs(sv_2mortal(newSVnv(PL_statcache.st_gid)));
 #else
 #   if Gid_t_sign <= 0
@@ -3156,7 +3157,7 @@ PP(pp_fttext)
 	    break;
 	}
 #ifdef EBCDIC
-        else if (!(isPRINT(*s) || isSPACE(*s))) 
+        else if (!(isPRINT(*s) || isSPACE(*s)))
             odd++;
 #else
 	else if (*s & 128) {
@@ -3744,7 +3745,7 @@ PP(pp_fork)
 
 PP(pp_wait)
 {
-#if (!defined(DOSISH) || defined(OS2) || defined(WIN32)) && !defined(MACOS_TRADITIONAL) 
+#if (!defined(DOSISH) || defined(OS2) || defined(WIN32)) && !defined(MACOS_TRADITIONAL)
     djSP; dTARGET;
     Pid_t childpid;
     int argflags;
@@ -3765,7 +3766,7 @@ PP(pp_wait)
 
 PP(pp_waitpid)
 {
-#if (!defined(DOSISH) || defined(OS2) || defined(WIN32)) && !defined(MACOS_TRADITIONAL) 
+#if (!defined(DOSISH) || defined(OS2) || defined(WIN32)) && !defined(MACOS_TRADITIONAL)
     djSP; dTARGET;
     Pid_t childpid;
     int optype;
@@ -4559,7 +4560,7 @@ PP(pp_gprotoent)
 #if defined(HAS_GETPROTOBYNAME) || defined(HAS_GETPROTOBYNUMBER) || defined(HAS_GETPROTOENT)
     I32 which = PL_op->op_type;
     register char **elem;
-    register SV *sv;  
+    register SV *sv;
 #ifndef HAS_GETPROTO_PROTOS /* XXX Do we need individual probes? */
     struct protoent *PerlSock_getprotobyname(Netdb_name_t);
     struct protoent *PerlSock_getprotobynumber(int);
@@ -4844,7 +4845,7 @@ PP(pp_gpwent)
     register SV *sv;
     STRLEN n_a;
     struct passwd *pwent  = NULL;
-    /* 
+    /*
      * We currently support only the SysV getsp* shadow password interface.
      * The interface is declared in <shadow.h> and often one needs to link
      * with -lsecurity or some such.
@@ -4885,7 +4886,7 @@ PP(pp_gpwent)
      *
      * Note that <sys/security.h> is already probed for, but currently
      * it is only included in special cases.
-     * 
+     *
      * In Digital UNIX/Tru64 if using the getespw*() (which seems to be
      * be preferred interface, even though also the getprpw*() interface
      * is available) one needs to link with -lsecurity -ldb -laud -lm.
@@ -5216,7 +5217,7 @@ PP(pp_syscall)
 	    a[i++] = SvIV(*MARK);
 	else if (*MARK == &PL_sv_undef)
 	    a[i++] = 0;
-	else 
+	else
 	    a[i++] = (unsigned long)SvPV_force(*MARK, n_a);
 	if (i > 15)
 	    break;
@@ -5284,7 +5285,7 @@ PP(pp_syscall)
 }
 
 #ifdef FCNTL_EMULATE_FLOCK
- 
+
 /*  XXX Emulate flock() with fcntl().
     What's really needed is a good file locking module.
 */
@@ -5293,7 +5294,7 @@ static int
 fcntl_emulate_flock(int fd, int operation)
 {
     struct flock flock;
- 
+
     switch (operation & ~LOCK_NB) {
     case LOCK_SH:
 	flock.l_type = F_RDLCK;
@@ -5310,7 +5311,7 @@ fcntl_emulate_flock(int fd, int operation)
     }
     flock.l_whence = SEEK_SET;
     flock.l_start = flock.l_len = (Off_t)0;
- 
+
     return fcntl(fd, (operation & LOCK_NB) ? F_SETLK : F_SETLKW, &flock);
 }
 
