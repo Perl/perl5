@@ -3809,6 +3809,8 @@ extern void moncontrol(int);
    HAS_STRUCT_MSGHDR
    HAS_STRUCT_CMSGHDR
 
+   USE_REENTRANT_API
+
    so that Configure picks them up. */
 
 #endif /* Include guard */

@@ -3243,12 +3243,18 @@
  *	This symbol, if defined, indicates that Perl should
  *	be built to use the old draft POSIX threads API.
  */
+/* USE_REENTRANT_API:
+ *	This symbol, if defined, indicates that Perl should
+ *	try to use the various _r versions of library functions.
+ *	This is extremely experimental.
+ */
 /*#define	USE_5005THREADS		/ **/
 /*#define	USE_ITHREADS		/ **/
 #if defined(USE_5005THREADS) && !defined(USE_ITHREADS)
 #define		USE_THREADS		/* until src is revised*/
 #endif
 /*#define	OLD_PTHREADS_API		/ **/
+/*#define	USE_REENTRANT_API	/ **/
 
 /* PERL_VENDORARCH:
  *	If defined, this symbol contains the name of a private library.

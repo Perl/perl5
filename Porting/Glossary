@@ -3756,6 +3756,13 @@ useposix (Extensions.U):
 	for hints files to indicate that POSIX will not compile
 	on a particular system.
 
+usereentrant (usethreads.U):
+	This variable conditionally defines the USE_REENTRANT_API symbol,
+	which indicates that the thread code may try to use the various
+	_r versions of library functions.  This is only potentially
+	meaningful if usethreads is set and is very experimental, it is
+	not even prompted for.
+
 usesfio (d_sfio.U):
 	This variable is set to true when the user agrees to use sfio.
 	It is set to false when sfio is not available or when the user
