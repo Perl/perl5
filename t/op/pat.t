@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..738\n";
+print "1..744\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2205,4 +2205,28 @@ print "# some Unicode properties\n";
     print "not " unless "A" =~ /\P{Ll}/;
     print "ok 738\n";
 
+}
+
+{
+    print "not " if     "a" =~ /\p{Common}/;
+    print "ok 739\n";
+
+    print "not " unless "1" =~ /\p{Common}/;
+    print "ok 740\n";
+}
+
+{
+    print "not " if     "a"       =~ /\p{Inherited}/;
+    print "ok 741\n";
+
+    print "not " unless "\x{300}" =~ /\p{Inherited}/;
+    print "ok 742\n";
+}
+
+{
+    print "not " unless "a" =~ /\p{L&}/;
+    print "ok 743\n";
+
+    print "not " if     "1" =~ /\p{L&}/;
+    print "ok 744\n";
 }

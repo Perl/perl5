@@ -23,7 +23,7 @@ sub SWASHNEW {
 
 	defined %utf8::In || do "unicore/In.pl";
 
-	$type =~ s/^In(?:[-_]|\s+)?//i;
+	$type =~ s/^In(?:[-_]|\s+)?(?!herited$)//i;
 	$type =~ s/\s+$//;
 
 	my $inprefix = substr(lc($type), 0, 3);
@@ -43,7 +43,7 @@ sub SWASHNEW {
 
 	unless (defined $file) {
 	    # This is separate from 'To' in preparation of Is.pl (a la In.pl).
-	    if ($type =~ /^Is([A-Z][A-Za-z]*|L&)$/) {
+	    if ($type =~ /^Is([A-Z][A-Za-z]*|L&)$/ || $type =~ /^(L&)$/ ) {
 		my $cat = $1 eq 'L&' ? 'L' : $1;
 		$file = "unicore/Is/$cat";
 	    } elsif ((not defined $file) && $type =~ /^To([A-Z][A-Za-z]*)$/) {

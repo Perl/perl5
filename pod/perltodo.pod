@@ -73,9 +73,9 @@ C<\p{IsPs}>.
 
 =item *
 
-Allow for the metaproperties C<Any> and C<Assigned>, and C<Common>;
+Allow for the metaproperties C<Any> and C<Assigned>;
 C<Alphabetic>, C<Ideographic>, C<Lowercase>, C<Uppercase> (note that
-are large classes than the general categories C<Lu> and C<Ll>),
+these are larger classes than the general categories C<Lu> and C<Ll>),
 C<White Space>, C<Bidi Control>, C<Join Control>, C<ASCII Hex Digit>,
 C<Hex Digit>, <Noncharacter Code Point>, C<ID Start>, C<ID Continue>,
 C<XID Start>, C<XID Continue>, C<NF*_NO>, C<NF*_MAYBE>.
