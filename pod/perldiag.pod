@@ -1188,7 +1188,7 @@ If you need to represent those character sequences inside a regular
 expression character class, just quote the square brackets with the
 backslash: "\[=" and "=\]".
 
-=item chmod: mode argument is missing initial 0
+=item chmod() mode argument is missing initial 0
 
 (W) A novice will sometimes say
 

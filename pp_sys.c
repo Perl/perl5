@@ -3376,12 +3376,19 @@ S_dooneliner(pTHX_ char *cmd, char *filename)
 PP(pp_mkdir)
 {
     djSP; dTARGET;
-    int mode = POPi;
+    int mode;
 #ifndef HAS_MKDIR
     int oldumask;
 #endif
     STRLEN n_a;
-    char *tmps = SvPV(TOPs, n_a);
+    char *tmps;
+
+    if (MAXARG > 1)
+	mode = POPi;
+    else
+	mode = 0777;
+
+    tmps = SvPV(TOPs, n_a);
 
     TAINT_PROPER("mkdir");
 #ifdef HAS_MKDIR

@@ -2417,9 +2417,12 @@ the original list for which the BLOCK or EXPR evaluates to true.
 
 =item mkdir FILENAME,MASK
 
+=item mkdir FILENAME
+
 Creates the directory specified by FILENAME, with permissions
 specified by MASK (as modified by C<umask>).  If it succeeds it
 returns true, otherwise it returns false and sets C<$!> (errno).
+If omitted, MASK defaults to 0777.
 
 In general, it is better to create directories with permissive MASK,
 and let the user modify that with their C<umask>, than it is to supply

@@ -709,7 +709,7 @@ rename		rename			ck_fun		isT@	S S
 link		link			ck_fun		isT@	S S
 symlink		symlink			ck_fun		isT@	S S
 readlink	readlink		ck_fun		stu%	S?
-mkdir		mkdir			ck_fun		isT@	S S
+mkdir		mkdir			ck_fun		isT@	S S?
 rmdir		rmdir			ck_fun		isTu%	S?
 
 # Directory calls.

@@ -1725,7 +1725,7 @@ EXT U32 PL_opargs[] = {
 	0x0002291c,	/* link */
 	0x0002291c,	/* symlink */
 	0x0001368c,	/* readlink */
-	0x0002291c,	/* mkdir */
+	0x0012291c,	/* mkdir */
 	0x0001379c,	/* rmdir */
 	0x0002c814,	/* open_dir */
 	0x0000d600,	/* readdir */

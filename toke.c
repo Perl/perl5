@@ -3955,7 +3955,7 @@ Perl_yylex(pTHX)
 		for (d = s; d < PL_bufend && (isSPACE(*d) || *d == '('); d++) ;
 		if (*d != '0' && isDIGIT(*d))
 		    Perl_warner(aTHX_ WARN_OCTAL,
-		    		"chmod: mode argument is missing initial 0");
+		    		"chmod() mode argument is missing initial 0");
 	    }
 	    LOP(OP_CHMOD,XTERM);
 
