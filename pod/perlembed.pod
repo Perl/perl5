@@ -37,7 +37,7 @@ Read on...
 
 L<Compiling your C program>
 
-There's one example in each of the eight sections:
+There's one example in each of the nine sections:
 
 L<Adding a Perl interpreter to your C program>
 
@@ -55,8 +55,7 @@ L<Maintaining multiple interpreter instances>
 
 L<Using Perl modules, which themselves use C libraries, from your C program>
 
-This documentation is Unix specific; if you have information about how
-to embed Perl on other platforms, please send e-mail to <F<orwant@tpj.com>>.
+L<Embedding Perl under Win32>
 
 =head2 Compiling your C program
 
@@ -944,6 +943,41 @@ B<ExtUtils::Embed> can also automate writing the I<xs_init> glue code.
 
 Consult L<perlxs> and L<perlguts> for more details.
 
+=head1 Embedding Perl under Win32
+
+At the time of this writing, there are two versions of Perl which run
+under Win32.  Interfacing to Activeware's Perl library is quite
+different from the examples in this documentation, as significant
+changes were made to the internal Perl API.  However, it is possible
+to embed Activeware's Perl runtime, see the Perl for Win32 FAQ:
+http://www.perl.com/perl/faq/win32/Perl_for_Win32_FAQ.html
+
+With the "official" Perl version 5.004 or higher, all the examples
+within this documentation will compile and run untouched, although,
+the build process is slightly different between Unix and Win32.  
+
+For starters, backticks don't work under the Win32 native command shell!
+The ExtUtils::Embed kit on CPAN ships with a script called
+B<genmake>, which generates a simple makefile to build a program from
+a single C source file.  It can be used like so:
+
+ C:\ExtUtils-Embed\eg> perl genmake interp.c
+ C:\ExtUtils-Embed\eg> nmake
+ C:\ExtUtils-Embed\eg> interp -e "print qq{I'm embedded in Win32!\n}"
+
+You may wish to use a more robust environment such as the MS Developer
+stdio.  In this case, to generate perlxsi.c run:
+
+ perl -MExtUtils::Embed -e xsinit
+
+Create a new project, Insert -> Files into Project: perlxsi.c, perl.lib,
+and your own source files, e.g. interp.c.  Typically you'll find
+perl.lib in B<C:\perl\lib\CORE>, if not, you should see the B<CORE>
+directory relative to C<perl -V:archlib>.
+The studio will also need this path so it knows where to find Perl
+include files.  This path can be added via the Tools -> Options ->
+Directories menu.  Finnally, select Build -> Build interp.exe and
+you're ready to go!
 
 =head1 MORAL
 
