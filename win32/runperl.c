@@ -589,10 +589,8 @@ public:
     };
     virtual PerlIO* Popen(const char *command, const char *mode)
     {
-#ifdef __BORLANDC__
 	win32_fflush(stdout);
 	win32_fflush(stderr);
-#endif
 	return (PerlIO*)win32_popen(command, mode);
     };
     virtual int Pclose(PerlIO *stream)
@@ -922,11 +920,10 @@ public:
     };
     inline int PerlParse(int argc, char** argv, char** env)
     {
-	char* environ = NULL;
 	int retVal;
 	try
 	{
-	    retVal = pPerl->perl_parse(xs_init, argc, argv, (env == NULL || *env == NULL ? &environ : env));
+	    retVal = pPerl->perl_parse(xs_init, argc, argv, env);
 	}
 	catch(int x)
 	{
@@ -995,7 +992,7 @@ main(int argc, char **argv, char **env)
 	exit(exitstatus);
 
 
-    exitstatus = host.PerlParse(argc, argv, env);
+    exitstatus = host.PerlParse(argc, argv, NULL);
 
     if (!exitstatus)
     {
@@ -1024,7 +1021,6 @@ xs_init(CPERLarg)
 
 #else  /* PERL_OBJECT */
 
-/* Say NO to CPP! Hallelujah! */
 #ifdef __GNUC__
 /*
  * GNU C does not do __declspec()

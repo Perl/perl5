@@ -10,14 +10,12 @@
 #define  _INC_WIN32_PERL5
 
 #ifdef PERL_OBJECT
-#define ENV_HV_NAME "ENV_HV_NAME"
-#define DYNAMIC_ENV_FETCH
-#define prime_env_iter()
-#ifdef PERL_GLOBAL_STRUCT
-#error PERL_GLOBAL_STRUCT cannot be defined with PERL_OBJECT
-#endif
-#define win32_get_stdlib PerlEnv_lib_path
-#define win32_get_sitelib PerlEnv_sitelib_path
+#  define WIN32IO_IS_STDIO		/* don't pull in custom stdio layer */
+#  ifdef PERL_GLOBAL_STRUCT
+#    error PERL_GLOBAL_STRUCT cannot be defined with PERL_OBJECT
+#  endif
+#  define win32_get_stdlib PerlEnv_lib_path
+#  define win32_get_sitelib PerlEnv_sitelib_path
 #endif
 
 #ifdef __GNUC__

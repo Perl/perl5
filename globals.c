@@ -1444,13 +1444,9 @@ CPerlObj::ErrorNo(void)
 void
 CPerlObj::Init(void)
 {
-#ifdef WIN32
-    New(2904, environ, 1, char*);
-    *environ = NULL;
-#endif
 }
 
-#ifdef WIN32
+#ifdef WIN32		/* XXX why are these needed? */
 bool
 do_exec(char *cmd)
 {

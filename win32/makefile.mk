@@ -705,14 +705,14 @@ perlmain.c : runperl.c
 	copy runperl.c perlmain.c
 
 perlmain$(o) : perlmain.c
-	$(CC) $(CFLAGS_O) -UPERLDLL $(EXEOUT_FLAG)$@ -c perlmain.c
+	$(CC) $(CFLAGS_O) -UPERLDLL $(OBJOUT_FLAG)$@ -c perlmain.c
 
 $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ)
 .IF "$(CCTYPE)" == "BORLAND"
 	$(LINK32) -Tpe -ap $(LINK_FLAGS) \
-	    @$(mktmp c0x32$(o) $(PERLEXE_OBJ)\n \
-	    $@,\n \
-	    $(PERLIMPLIB) $(LIBFILES)\n)
+	    @$(mktmp c0x32$(o) $(PERLEXE_OBJ:s,\,\\)\n \
+	    $(@:s,\,\\),\n \
+	    $(LIBFILES) $(PERLIMPLIB)\n)
 .ELIF "$(CCTYPE)" == "GCC"
 	$(LINK32) -o $@ $(LINK_FLAGS)  \
 	    $(PERLEXE_OBJ) $(PERLIMPLIB) $(LIBFILES)
