@@ -2548,7 +2548,7 @@ sub tr_decode_byte {
 	}
 	@from = @newfrom;
     }
-    unless ($flags & OPpTRANS_DELETE) {
+    unless ($flags & OPpTRANS_DELETE || !@to) {
 	pop @to while $#to and $to[$#to] == $to[$#to -1];
     }
     my($from, $to);
