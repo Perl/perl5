@@ -3323,10 +3323,14 @@ trylocal: {
 	SETERRNO(0, SS$_NORMAL);
 
     /* Assume success here to prevent recursive requirement. */
-    (void)hv_store(GvHVn(PL_incgv), name, strlen(name),
-		   (hook_sv ? SvREFCNT_inc(hook_sv)
-			    : newSVpv(CopFILE(&PL_compiling), 0)),
-		   0 );
+    len = strlen(name);
+    /* Check whether a hook in @INC has already filled %INC */
+    if (!hook_sv || !(svp = hv_fetch(GvHVn(PL_incgv), name, len, 0))) {
+	(void)hv_store(GvHVn(PL_incgv), name, len,
+		       (hook_sv ? SvREFCNT_inc(hook_sv)
+				: newSVpv(CopFILE(&PL_compiling), 0)),
+		       0 );
+    }
 
     ENTER;
     SAVETMPS;
