@@ -1227,6 +1227,8 @@ die_where(char *message)
 	    return pop_return();
 	}
     }
+    if (!message)
+	message = SvPVx(ERRSV, PL_na);
     PerlIO_printf(PerlIO_stderr(), "%s",message);
     PerlIO_flush(PerlIO_stderr());
     my_failure_exit();
