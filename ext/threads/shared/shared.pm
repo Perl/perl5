@@ -80,8 +80,9 @@ C<share>, C<lock>, C<cond_wait>, C<cond_signal>, C<cond_broadcast>
 
 =item share VARIABLE
 
-C<share> takes a value and marks it as shared. You can share a scalar, array,
-hash, scalar ref, array ref or hash ref. C<share> will return the shared value.
+C<share> takes a value and marks it as shared. You can share a scalar,
+array, hash, scalar ref, array ref or hash ref.  C<share> will return
+the shared rvalue.
 
 C<share> will traverse up references exactly I<one> level.
 C<share(\$a)> is equivalent to C<share($a)>, while C<share(\\$a)> is not.
@@ -89,8 +90,9 @@ C<share(\$a)> is equivalent to C<share($a)>, while C<share(\\$a)> is not.
 A variable can also be marked as shared at compile time by using the
 C<shared> attribute: C<my $var : shared>.
 
-If you want to share a newly created reference, unfourtunetly you need to use
-C<&share([])> and C<&share({})> syntax due to problems with perls prototyping.
+If you want to share a newly created reference unfortunately you
+need to use C<&share([])> and C<&share({})> syntax due to problems
+with Perl's prototyping.
 
 =item lock VARIABLE
 
