@@ -160,8 +160,8 @@ the podlators bundle, Pod::LaTeX, Pod::Parser, Term::ANSIColor, Test.
 
 Bug fixes and minor enhancements have been applied to B::Deparse,
 Data::Dumper, IO::Poll, IO::Socket::INET, Math::BigFloat,
-Math::Complex, Math::Trig, re, SelfLoader, Sys::SysLog, Test::Harness,
-Text::Wrap, UNIVERSAL.
+Math::Complex, Math::Trig, Net::protoent, re, SelfLoader, Sys::SysLog,
+Test::Harness, Text::Wrap, UNIVERSAL.
 
 =item *
 
@@ -767,7 +767,17 @@ platform-dependent.
 
 =head2 ftmp-posix subtest 6 fails in VMS
 
-The test exposed a flushing bug in VMS, this failure can be ignored.
+The test exposes a flushing bug in the VMS port of Perl, this failure
+as such can be ignored.
+
+=head2 ftmp-security tests warn 'system possibly insecure'
+
+Don't panic.  Read INSTALL 'make test' section instead. 
+
+=head2 Long Doubles Still Don't Work In Solaris
+
+The experimental long double support is still very much so in Solaris.
+(Other platforms like Linux and Tru64 are beginning to solidify in this area.)
 
 =head2 Storable tests fail in some platforms
 
