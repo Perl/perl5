@@ -123,8 +123,7 @@ sub SWASHGET {
 #		print "$min $max $val\n";
 		if ($none) {
 		    if ($min < $start) {
-			$val += $start - $min;
-			$val = $none if $val > $none;
+			$val += $start - $min if $val < $none;
 			$min = $start;
 		    }
 		    for ($key = $min; $key <= $max; $key++) {
