@@ -471,12 +471,13 @@ avhv_keys(AV *av)
 
     keysp = av_fetch(av, 0, FALSE);
     if (keysp) {
-	if (SvGMAGICAL(*keysp))
-	    mg_get(*keysp);
-	if (SvROK(*keysp)) {
-	    SV *hash = SvRV(*keysp);
-	    if (SvTYPE(hash) == SVt_PVHV)
-		keys = (HV*)hash;
+	SV *sv = *keysp;
+	if (SvGMAGICAL(sv))
+	    mg_get(sv);
+	if (SvROK(sv)) {
+	    sv = SvRV(sv);
+	    if (SvTYPE(sv) == SVt_PVHV)
+		keys = (HV*)sv;
 	}
     }
     if (!keys)
