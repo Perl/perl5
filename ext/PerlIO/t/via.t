@@ -14,7 +14,7 @@ BEGIN {
 
 my $tmp = "via$$";
 
-use Test::More tests => 13;
+use Test::More tests => 15;
 
 my $fh;
 my $a = join("", map { chr } 0..255) x 10;
@@ -64,6 +64,14 @@ is($a, $b, 'compare original data with filtered version');
     ok( ! open($fh,">Via(Unknown::Module)", $tmp), 'open Via Unknown::Module will fail');
     is( $warnings, "",  "don't warn about unknown package" );
 }
+
+my $obj = '';
+sub Foo::PUSHED			{ $obj = shift; -1; }
+sub PerlIO::Via::Bar::PUSHED	{ $obj = shift; -1; }
+open $fh, '<:Via(Foo)', "foo";
+is( $obj, 'Foo', 'search for package Foo' );
+open $fh, '<:Via(Bar)', "bar";
+is( $obj, 'PerlIO::Via::Bar', 'search for package PerlIO::Via::Bar' );
 
 END {
     1 while unlink $tmp;

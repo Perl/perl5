@@ -142,6 +142,12 @@ PerlIOVia_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
      char *pkg = SvPV(arg,pkglen);
      s->obj = SvREFCNT_inc(arg);
      s->stash  = gv_stashpvn(pkg, pkglen, FALSE);
+     if (!s->stash)
+      {
+       s->obj = newSVpvn(Perl_form(aTHX_ "PerlIO::Via::%s",pkg), pkglen + 13);
+       SvREFCNT_dec(arg);
+       s->stash = gv_stashpvn(SvPVX(s->obj), pkglen + 13, FALSE);
+      }
      if (s->stash)
       {
        SV *modesv = (mode) ? sv_2mortal(newSVpvn(mode,strlen(mode))) : Nullsv;
