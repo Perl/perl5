@@ -4299,7 +4299,11 @@ Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
  * to the my_socketpair in global.sym. */
 int
 Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
+#ifdef HAS_SOCKETPAIR
     return socketpair(family, type, protocol, fd);
+#else
+    return -1;
+#endif
 }
 #endif
 
