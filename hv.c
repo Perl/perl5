@@ -985,19 +985,21 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	    continue;
 	if ((HeKFLAGS(entry) ^ masked_flags) & HVhek_UTF8)
 	    continue;
-        if (k_flags & HVhek_FREEKEY)
-            Safefree(key);
 
 	/* if placeholder is here, it's already been deleted.... */
 	if (HeVAL(entry) == &PL_sv_placeholder)
 	{
-           return Nullsv;
+	  if (k_flags & HVhek_FREEKEY)
+            Safefree(key);
+	  return Nullsv;
 	}
 	else if (SvREADONLY(hv) && HeVAL(entry) && SvREADONLY(HeVAL(entry))) {
 	    S_hv_notallowed(aTHX_ k_flags, key, klen,
 			    "delete readonly key '%"SVf"' from"
 			    );
 	}
+        if (k_flags & HVhek_FREEKEY)
+            Safefree(key);
 
 	if (d_flags & G_DISCARD)
 	    sv = Nullsv;
