@@ -2170,7 +2170,6 @@ lib/vmsish.t			Tests for vmsish.pm
 lib/warnings.pm			For "use warnings"
 lib/warnings/register.pm	For "use warnings::register"
 lib/warnings.t			See if warning controls work
-lib/Win32.pod			Documentation for Win32 extras
 locale.c			locale-specific utility functions
 makeaperl.SH			perl script that produces a new perl binary
 makedef.pl			Create symbol export lists for linking
@@ -3051,6 +3050,9 @@ win32/config.vc			Win32 base line config.sh (Visual C++ build)
 win32/config.vc64		Win64 base line config.sh (Visual C++ build)
 win32/distclean.bat		Remove _ALL_ files not listed here in MANIFEST
 win32/dl_win32.xs		Win32 port
+win32/ext/Win32/Makefile.PL	Win32 extension makefile writer
+win32/ext/Win32/Win32.pm	Win32 extension Perl module
+win32/ext/Win32/Win32.xs	Win32 extension external subroutines
 win32/fcrypt.c			crypt() implementation
 win32/FindExt.pm		Scan for extensions
 win32/genmk95.pl		Perl code to generate command.com-usable makefile.95

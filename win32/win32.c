@@ -1182,6 +1182,10 @@ win32_stat(const char *path, Stat_t *sbuf)
 	/* FindFirstFile() and stat() are buggy with a trailing
 	 * backslash, so change it to a forward slash :-( */
 	case '\\':
+	    if (l >= sizeof(buffer)) {
+		errno = ENAMETOOLONG;
+		return -1;
+	    }
 	    strncpy(buffer, path, l-1);
 	    buffer[l - 1] = '/';
 	    buffer[l] = '\0';

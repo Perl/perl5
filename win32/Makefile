@@ -372,10 +372,6 @@ LIBC	= msvcrt.lib
 LIBC	= PerlCRT.lib
 !ENDIF
 
-PERLEXE_ICO	= perlexe.ico
-PERLEXE_RES	= perlexe.res
-PERLDLL_RES	=
-
 !IF  "$(CFG)" == "Debug"
 !  IF "$(CCTYPE)" == "MSVC20"
 OPTIMIZE	= -Od -MD -Z7 -DDEBUGGING
@@ -470,6 +466,10 @@ GLOBEXE		= ..\perlglob.exe
 CONFIGPM	= ..\lib\Config.pm
 MINIMOD		= ..\lib\ExtUtils\Miniperl.pm
 X2P		= ..\x2p\a2p.exe
+
+PERLEXE_ICO	= .\perlexe.ico
+PERLEXE_RES	= .\perlexe.res
+PERLDLL_RES	=
 
 # Nominate a target which causes extensions to be re-built
 # This used to be $(PERLEXE), but at worst it is the .dll that they depend
@@ -702,6 +702,7 @@ PERLIOVIA		= $(EXTDIR)\PerlIO\via\via
 XSAPITEST		= $(EXTDIR)\XS\APItest\APItest
 XSTYPEMAP		= $(EXTDIR)\XS\Typemap\Typemap
 UNICODENORMALIZE	= $(EXTDIR)\Unicode\Normalize\Normalize
+WIN32_DIR		= ext\Win32
 
 SOCKET_DLL		= $(AUTODIR)\Socket\Socket.dll
 FCNTL_DLL		= $(AUTODIR)\Fcntl\Fcntl.dll
@@ -732,6 +733,7 @@ PERLIOVIA_DLL		= $(AUTODIR)\PerlIO\via\via.dll
 XSAPITEST_DLL		= $(AUTODIR)\XS\APItest\APItest.dll
 XSTYPEMAP_DLL		= $(AUTODIR)\XS\Typemap\Typemap.dll
 UNICODENORMALIZE_DLL	= $(AUTODIR)\Unicode\Normalize\Normalize.dll
+WIN32_DLL		= $(AUTODIR)\Win32\Win32.dll
 
 EXTENSION_C	= 		\
 		$(SOCKET).c	\
@@ -762,7 +764,8 @@ EXTENSION_C	= 		\
 		$(PERLIOVIA).c	\
 		$(XSAPITEST).c	\
 		$(XSTYPEMAP).c	\
-		$(UNICODENORMALIZE).c
+		$(UNICODENORMALIZE).c	\
+		$(WIN32_DIR).c
 
 EXTENSION_DLL	= 		\
 		$(SOCKET_DLL)	\
@@ -793,7 +796,8 @@ EXTENSION_DLL	= 		\
 		$(PERLIOVIA_DLL)	\
 		$(XSAPITEST_DLL)	\
 		$(XSTYPEMAP_DLL)	\
-		$(UNICODENORMALIZE_DLL)
+		$(UNICODENORMALIZE_DLL)	\
+		$(WIN32_DLL)
 
 POD2HTML	= $(PODDIR)\pod2html
 POD2MAN		= $(PODDIR)\pod2man
@@ -987,9 +991,20 @@ $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 #----------------------------------------------------------------------------------
 Extensions: buildext.pl $(PERLDEP) $(CONFIGPM)
 	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR)
+	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext
+
+# Note: The next two targets explicitly remove a "blibdirs.exists" file that
+# currerntly gets left behind, until CPAN RT Ticket #5616 is resolved.
 
 Extensions_clean: 
 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) clean
+	-if exist $(MINIPERL) $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext clean
+	-if exist $(EXTDIR)\SDBM_File\sdbm\blibdirs.exists del /f $(EXTDIR)\SDBM_File\sdbm\blibdirs.exists
+
+Extensions_realclean: 
+	-if exist $(MINIPERL) $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) realclean
+	-if exist $(MINIPERL) $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext realclean
+	-if exist $(EXTDIR)\SDBM_File\sdbm\blibdirs.exists del /f $(EXTDIR)\SDBM_File\sdbm\blibdirs.exists
 
 #----------------------------------------------------------------------------------
 
@@ -1054,41 +1069,46 @@ utils: $(PERLEXE) $(X2P)
 
 # the doubled rmdir calls are needed because older cmd shells
 # don't understand /q
-distclean: clean
+distclean: realclean
 	-del /f $(MINIPERL) $(PERLEXE) $(PERLDLL) $(GLOBEXE) \
 		$(PERLIMPLIB) ..\miniperl.lib $(MINIMOD)
 	-del /f *.def *.map
 	-del /f $(EXTENSION_DLL)
 	-del /f $(EXTENSION_C) $(DYNALOADER).c $(ERRNO).pm
 	-del /f $(EXTDIR)\DynaLoader\dl_win32.xs
+	-del /f $(EXTDIR)\DynaLoader\DynaLoader.pm
+	-del /f $(EXTDIR)\DynaLoader\XSLoader.pm
+	-del /f $(LIBDIR)\Encode.pm $(LIBDIR)\encoding.pm $(LIBDIR)\Errno.pm
+	-del /f $(LIBDIR)\Config.pod $(LIBDIR)\POSIX.pod $(LIBDIR)\threads.pm
 	-del /f $(LIBDIR)\.exists $(LIBDIR)\attrs.pm $(LIBDIR)\DynaLoader.pm
-	-del /f $(LIBDIR)\XSLoader.pm
+	-del /f $(LIBDIR)\XSLoader.pm $(LIBDIR)\lib.pm
 	-del /f $(LIBDIR)\Fcntl.pm $(LIBDIR)\IO.pm $(LIBDIR)\Opcode.pm
 	-del /f $(LIBDIR)\ops.pm $(LIBDIR)\Safe.pm
 	-del /f $(LIBDIR)\SDBM_File.pm $(LIBDIR)\Socket.pm $(LIBDIR)\POSIX.pm
 	-del /f $(LIBDIR)\B.pm $(LIBDIR)\O.pm $(LIBDIR)\re.pm
-	-del /f $(LIBDIR)\Data\Dumper.pm $(LIBDIR)\ByteLoader.pm
+	-del /f $(LIBDIR)\ByteLoader.pm
 	-del /f $(LIBDIR)\Devel\Peek.pm $(LIBDIR)\Devel\DProf.pm
+	-del /f $(LIBDIR)\Devel\PPPort.pm
 	-del /f $(LIBDIR)\File\Glob.pm
 	-del /f $(LIBDIR)\Storable.pm
-	-del /f $(LIBDIR)\Filter\Util\Call.pm
 	-del /f $(LIBDIR)\Digest\MD5.pm
+	-del /f $(LIBDIR)\PerlIO\encoding.pm
 	-del /f $(LIBDIR)\PerlIO\scalar.pm
 	-del /f $(LIBDIR)\PerlIO\via.pm
-	-del /f $(LIBDIR)\MIME\Base64.pm
-	-del /f $(LIBDIR)\MIME\QuotedPrint.pm
-	-del /f $(LIBDIR)\List\Util.pm
-	-del /f $(LIBDIR)\Scalar\Util.pm
+	-del /f $(LIBDIR)\Sys\Hostname.pm
+	-del /f $(LIBDIR)\Thread\Signal.pm $(LIBDIR)\Thread\Specific.pm
+	-del /f $(LIBDIR)\threads\shared.pm
 	-del /f $(LIBDIR)\Time\HiRes.pm
-	-del /f $(LIBDIR)\XS\APItest.pm
-	-del /f $(LIBDIR)\XS\Typemap.pm
 	-del /f $(LIBDIR)\Unicode\Normalize.pm
+	-del /f $(LIBDIR)\Win32.pm
 	-if exist $(LIBDIR)\IO rmdir /s /q $(LIBDIR)\IO
 	-if exist $(LIBDIR)\IO rmdir /s $(LIBDIR)\IO
 	-if exist $(LIBDIR)\B rmdir /s /q $(LIBDIR)\B
 	-if exist $(LIBDIR)\B rmdir /s $(LIBDIR)\B
 	-if exist $(LIBDIR)\Data rmdir /s /q $(LIBDIR)\Data
 	-if exist $(LIBDIR)\Data rmdir /s $(LIBDIR)\Data
+	-if exist $(LIBDIR)\Encode rmdir /s /q $(LIBDIR)\Encode
+	-if exist $(LIBDIR)\Encode rmdir /s $(LIBDIR)\Encode
 	-if exist $(LIBDIR)\Filter\Util rmdir /s /q $(LIBDIR)\Filter\Util
 	-if exist $(LIBDIR)\Filter\Util rmdir /s $(LIBDIR)\Filter\Util
 	-if exist $(LIBDIR)\MIME rmdir /s /q $(LIBDIR)\MIME
@@ -1099,8 +1119,7 @@ distclean: clean
 	-if exist $(LIBDIR)\Scalar rmdir /s $(LIBDIR)\Scalar
 	-if exist $(LIBDIR)\XS rmdir /s /q $(LIBDIR)\XS
 	-if exist $(LIBDIR)\XS rmdir /s $(LIBDIR)\XS
-	cd $(PODDIR)
-	-del /f *.html *.bat checkpods \
+	-cd $(PODDIR) && del /f *.html *.bat checkpods \
 	    perlaix.pod perlamiga.pod perlapollo.pod perlbeos.pod \
 	    perlbs2000.pod perlce.pod perlcn.pod perlcygwin.pod \
 	    perldelta.pod perldgux.pod perldos.pod perlepoc.pod \
@@ -1109,28 +1128,19 @@ distclean: clean
 	    perlmacosx.pod perlmint.pod perlmpeix.pod perlnetware.pod \
 	    perlos2.pod perlos390.pod perlos400.pod perlplan9.pod \
 	    perlqnx.pod perlsolaris.pod perltru64.pod perltw.pod \
-	    perluts.pod perlvmesa.pod perlvms.pod perlvms.pod perlvos.pod \
-	    perlwin32.pod \
+	    perluts.pod perlvmesa.pod perlvms.pod perlvos.pod perlwin32.pod \
 	    pod2html pod2latex pod2man pod2text pod2usage \
 	    podchecker podselect
-	cd ..\utils
-	-del /f h2ph splain perlbug pl2pm c2ph pstruct h2xs perldoc perlivp \
-	    dprofpp perlcc libnetcfg enc2xs piconv cpan xsubpp instmodsh prove
-	-del /f *.bat
-	cd ..\win32
-	cd ..\x2p
-	-del /f find2perl s2p psed
-	-del /f *.bat
-	cd ..\win32
+	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph pstruct h2xs \
+	    perldoc perlivp dprofpp perlcc libnetcfg enc2xs piconv cpan *.bat \
+	    xsubpp instmodsh prove
+	-cd ..\x2p && del /f find2perl s2p psed *.bat
 	-del /f ..\config.sh ..\splittree.pl perlmain.c dlutils.c config.h.new
 	-del /f $(CONFIGPM)
 	-del /f bin\*.bat
-	cd ..
-	-del /s *.lib *.map *.pdb *.ilk *.bs *$(o) .exists pm_to_blib
-	cd win32
-	cd $(EXTDIR)
-	-del /s *.def Makefile Makefile.old
-	cd ..\win32
+	-del /f $(PERLEXE_ICO)
+	-cd .. && del /s *.lib *.map *.pdb *.ilk *.bs *$(o) .exists pm_to_blib
+	-cd $(EXTDIR) && del /s *.def Makefile Makefile.old
 	-if exist $(AUTODIR) rmdir /s /q $(AUTODIR)
 	-if exist $(AUTODIR) rmdir /s $(AUTODIR)
 	-if exist $(COREDIR) rmdir /s /q $(COREDIR)
@@ -1153,13 +1163,13 @@ inst_lib : $(CONFIGPM)
 	$(RCOPY) ..\lib $(INST_LIB)\*.*
 
 minitest : $(MINIPERL) $(GLOBEXE) $(CONFIGPM) utils
-	$(XCOPY) $(MINIPERL) ..\t\perl.exe
+	$(XCOPY) $(MINIPERL) ..\t\$(NULL)
+	if exist ..\t\perl.exe del /f ..\t\perl.exe
+	rename ..\t\miniperl.exe perl.exe
 	$(XCOPY) $(GLOBEXE) ..\t\$(NULL)
 	attrib -r ..\t\*.*
-	copy test ..\t
-	cd ..\t
-	$(MINIPERL) -I..\lib test base/*.t comp/*.t cmd/*.t io/*.t op/*.t pragma/*.t
-	cd ..\win32
+	cd ..\t && \
+	$(MINIPERL) -I..\lib harness base/*.t comp/*.t cmd/*.t io/*.t op/*.t pragma/*.t
 
 test-prep : all utils
 	$(XCOPY) $(PERLEXE) ..\t\$(NULL)
@@ -1185,7 +1195,7 @@ _test :
        $(PERLEXE) -I..\lib harness
        cd ..\win32
 
-clean : Extensions_clean
+_clean :
 	-@$(DEL) miniperlmain$(o)
 	-@$(DEL) $(MINIPERL)
 	-@$(DEL) perlglob$(o)
@@ -1207,6 +1217,10 @@ clean : Extensions_clean
 	-@$(DEL) ..\x2p\*.exe ..\x2p\*.bat
 	-@$(DEL) *.ilk
 	-@$(DEL) *.pdb
+
+clean : Extensions_clean _clean
+
+realclean : Extensions_realclean _clean
 
 # Handy way to run perlbug -ok without having to install and run the
 # installed perlbug. We don't re-run the tests here - we trust the user.

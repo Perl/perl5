@@ -3665,7 +3665,8 @@ static char *mp_do_tounixspec(pTHX_ char *spec, char *buf, int ts)
 {
   static char __tounixspec_retbuf[NAM$C_MAXRSS+1];
   char *dirend, *rslt, *cp1, *cp2, *cp3, tmp[NAM$C_MAXRSS+1];
-  int devlen, dirlen, retlen = NAM$C_MAXRSS+1, expand = 0;
+  int devlen, dirlen, retlen = NAM$C_MAXRSS+1;
+  int expand = 1; /* guarantee room for leading and trailing slashes */
   unsigned short int trnlnm_iter_count;
 
   if (spec == NULL) return NULL;
