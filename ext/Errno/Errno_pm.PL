@@ -4,7 +4,7 @@ use strict;
 
 use vars qw($VERSION);
 
-$VERSION = "1.09";
+$VERSION = "1.111";
 
 my %err = ();
 
@@ -31,7 +31,9 @@ sub process_file {
 	}     
     } else {
 	unless(open(FH,"< $file")) {
-            warn "Cannot open '$file'";
+	    # This file could be a temporay file created by cppstdin
+	    # so only warn under -w, and return
+            warn "Cannot open '$file'" if $^W;
             return;
 	}
     }
@@ -65,9 +67,14 @@ sub get_files {
 	close(CPPI);
 
 	# invoke CPP and read the output
-
-	open(CPPO,"$Config{cpprun} $Config{cppflags} errno.c |") or
-	    die "Cannot exec $Config{cpprun}";
+	if ($^O eq 'MSWin32') {
+	    open(CPPO,"$Config{cpprun} $Config{cppflags} errno.c |") or
+		die "Cannot run '$Config{cpprun} $Config{cppflags} errno.c'";
+	} else {
+	    my $cpp = "$Config{cppstdin} $Config{cppflags} $Config{cppminus}";
+	    open(CPPO,"$cpp < errno.c |") or
+		die "Cannot exec $cpp";
+	}
 
 	my $pat;
 	if ($^O eq 'MSWin32' and $Config{cc} =~ /^bcc/i) {
@@ -107,14 +114,13 @@ sub write_errno_pm {
 	$cpp =~ s/sys\$input//i;
 	open(CPPO,"$cpp  errno.c |") or
           die "Cannot exec $Config{cppstdin}";
-    } elsif(!$Config{'cpprun'} or $^O eq 'next') {
-	# NeXT will do syntax checking unless it is reading from stdin
+    } elsif ($^O eq 'MSWin32') {
+	open(CPPO,"$Config{cpprun} $Config{cppflags} errno.c |") or
+	    die "Cannot run '$Config{cpprun} $Config{cppflags} errno.c'";
+    } else {
 	my $cpp = "$Config{cppstdin} $Config{cppflags} $Config{cppminus}";
 	open(CPPO,"$cpp < errno.c |")
 	    or die "Cannot exec $cpp";
-    } else {
-	open(CPPO,"$Config{cpprun} $Config{cppflags} errno.c |") or
-	    die "Cannot exec $Config{cpprun}";
     }
 
     %err = ();
