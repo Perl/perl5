@@ -1,9 +1,22 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.32 2002/04/09 20:06:15 dankogai Exp dankogai $
+# $Id: Changes,v 1.33 2002/04/10 22:28:40 dankogai Exp dankogai $
 #
 
-1.32 $Date: 2002/04/09 20:06:15 $
+1.33 $Date: 2002/04/10 22:28:40 $
+! AUTHORS
+  Philip's mail address corrected.
+! AUTHORS
+! t/Encoder.t
+! lib/Encode/Encoder.pm
+  s/= shift;/= @_/g # trivial but a common idiomatic typo :)
+  This adds Miyagawa-kun to AUTHORS. 
+  * encoding() no longer exported by default but on demand
+  * t/Encoder.t updated to test all these
+  Message-Id: <86hemjpdn4.wl@mail.edge.co.jp>
+  http://www.dan.co.jp/~dankogai/Storable.diff.gz
+
+1.32 2002/04/09 20:06:15
 + bin/ucmlint
 + t/bogus.ucm
 - ucm/macDevanaga.ucm   Unicode Character Map
@@ -233,7 +246,7 @@
   Typo fixes and improvements by jhi
   Message-Id: <200204010201.FAA03564@alpha.hut.fi>, et al.
 
-1.11  $Date: 2002/04/09 20:06:15 $
+1.11  $Date: 2002/04/10 22:28:40 $
 + t/encoding.t
 + t/jperl.t
 ! MANIFEST

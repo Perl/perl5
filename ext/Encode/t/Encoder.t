@@ -1,5 +1,5 @@
 #
-# $Id: Encoder.t,v 1.1 2002/04/08 18:07:31 dankogai Exp $
+# $Id: Encoder.t,v 1.2 2002/04/10 22:28:40 dankogai Exp dankogai $
 #
 
 BEGIN {
@@ -23,8 +23,8 @@ BEGIN {
 
 use strict;
 #use Test::More 'no_plan';
-use Test::More tests => 512;
-use Encode::Encoder;
+use Test::More tests => 516;
+use Encode::Encoder qw(encoder);
 use MIME::Base64;
 package Encode::Base64;
 use base 'Encode::Encoding';
@@ -40,6 +40,12 @@ sub decode{
 }
 
 package main;
+
+my $e = encoder("foo", "ascii");
+ok ($e->data("bar"));
+is ($e->data, "bar");
+ok ($e->encoding("latin1"));
+is ($e->encoding, "iso-8859-1");
 
 my $data = '';
 for my $i (0..255){
