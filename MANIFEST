@@ -1051,6 +1051,7 @@ lib/CPAN/Nox.pm			Runs CPAN while avoiding compiled extensions
 lib/CPAN/t/loadme.t		See if CPAN the module works
 lib/CPAN/t/mirroredby.t		See if CPAN::Mirrored::By works
 lib/CPAN/t/Nox.t		See if CPAN::Nox works
+lib/CPAN/t/signature.t		See if CPAN signatures work
 lib/CPAN/t/vcmp.t		See if CPAN the module works
 lib/ctime.pl			A ctime workalike
 lib/Cwd.pm			Various cwd routines (getcwd, fastcwd, chdir)
