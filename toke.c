@@ -1,4 +1,4 @@
-/* $RCSfile: toke.c,v $$Revision: 4.0.1.3 $$Date: 91/06/10 01:32:26 $
+/* $RCSfile: toke.c,v $$Revision: 4.0.1.4 $$Date: 91/11/05 19:02:48 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,14 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	toke.c,v $
+ * Revision 4.0.1.4  91/11/05  19:02:48  lwall
+ * patch11: \x and \c were subject to double interpretation in regexps
+ * patch11: prepared for ctype implementations that don't define isascii()
+ * patch11: nested list operators could miscount parens
+ * patch11: once-thru blocks didn't display right in the debugger
+ * patch11: sort eval "whatever" didn't work
+ * patch11: underscore is now allowed within literal octal and hex numbers
+ * 
  * Revision 4.0.1.3  91/06/10  01:32:26  lwall
  * patch10: m'$foo' now treats string as single quoted
  * patch10: certain pattern optimizations were botched
@@ -41,7 +49,7 @@
 
 /* which backslash sequences to keep in m// or s// */
 
-static char *patleave = "\\.^$@dDwWsSbB+*?|()-nrtf0123456789[{]}";
+static char *patleave = "\\.^$@dDwWsSbB+*?|()-nrtfeaxc0123456789[{]}";
 
 char *reparse;		/* if non-null, scanident found ${foo[$bar]} */
 
@@ -92,7 +100,7 @@ void checkcomma();
  * paren came before the listop rather than after.
  */
 #define LOP(f) return(CLINE, *s == '(' || (s = skipspace(s), *s == '(') ? \
-	(*s = META('('), bufptr = oldbufptr, '(') : \
+	(*s = (char) META('('), bufptr = oldbufptr, '(') : \
 	(yylval.ival=f,expectterm = TRUE,bufptr = s,(int)LISTOP))
 /* grandfather return to old style */
 #define OLDLOP(f) return(yylval.ival=f,expectterm = TRUE,bufptr = s,(int)LISTOP)
@@ -101,7 +109,7 @@ char *
 skipspace(s)
 register char *s;
 {
-    while (s < bufend && isascii(*s) && isspace(*s))
+    while (s < bufend && isSPACE(*s))
 	s++;
     return s;
 }
@@ -175,8 +183,10 @@ yylex()
 #endif
 #ifdef BADSWITCH
     if (*s & 128) {
-	if ((*s & 127) == '(')
+	if ((*s & 127) == '(') {
 	    *s++ = '(';
+	    oldbufptr = s;
+	}
 	else
 	    warn("Unrecognized character \\%03o ignored", *s++ & 255);
 	goto retry;
@@ -184,8 +194,10 @@ yylex()
 #endif
     switch (*s) {
     default:
-	if ((*s & 127) == '(')
+	if ((*s & 127) == '(') {
 	    *s++ = '(';
+	    oldbufptr = s;
+	}
 	else
 	    warn("Unrecognized character \\%03o ignored", *s++ & 255);
 	goto retry;
@@ -238,7 +250,7 @@ yylex()
 		if (rsfp) {
 		    if (preprocess)
 			(void)mypclose(rsfp);
-		    else if (rsfp == stdin)
+		    else if ((FILE*)rsfp == stdin)
 			clearerr(stdin);
 		    else
 			(void)fclose(rsfp);
@@ -283,15 +295,15 @@ yylex()
 		    if (*s == ' ')
 			s++;
 		    cmd = s;
-		    while (s < bufend && !isspace(*s))
+		    while (s < bufend && !isSPACE(*s))
 			s++;
 		    *s++ = '\0';
-		    while (s < bufend && isspace(*s))
+		    while (s < bufend && isSPACE(*s))
 			s++;
 		    if (s < bufend) {
 			Newz(899,newargv,origargc+3,char*);
 			newargv[1] = s;
-			while (s < bufend && !isspace(*s))
+			while (s < bufend && !isSPACE(*s))
 			    s++;
 			*s = '\0';
 			Copy(origargv+1, newargv+2, origargc+1, char*);
@@ -304,7 +316,7 @@ yylex()
 		}
 	    }
 	    else {
-		while (s < bufend && isspace(*s))
+		while (s < bufend && isSPACE(*s))
 		    s++;
 		if (*s == ':')	/* for csh's that have to exec sh scripts */
 		    s++;
@@ -316,11 +328,14 @@ yylex()
 	goto retry;
     case '#':
 	if (preprocess && s == str_get(linestr) &&
-	       s[1] == ' ' && isdigit(s[2])) {
-	    curcmd->c_line = atoi(s+2)-1;
-	    for (s += 2; isdigit(*s); s++) ;
+	       s[1] == ' ' && (isDIGIT(s[2]) || strnEQ(s+2,"line ",5)) ) {
+	    while (*s && !isDIGIT(*s))
+		s++;
+	    curcmd->c_line = atoi(s)-1;
+	    while (isDIGIT(*s))
+		s++;
 	    d = bufend;
-	    while (s < d && isspace(*s)) s++;
+	    while (s < d && isSPACE(*s)) s++;
 	    s[strlen(s)-1] = '\0';	/* wipe out newline */
 	    if (*s == '"') {
 		s++;
@@ -355,7 +370,7 @@ yylex()
 	}
 	goto retry;
     case '-':
-	if (s[1] && isalpha(s[1]) && !isalpha(s[2])) {
+	if (s[1] && isALPHA(s[1]) && !isALPHA(s[2])) {
 	    s++;
 	    switch (*s++) {
 	    case 'r': FTST(O_FTEREAD);
@@ -441,7 +456,8 @@ yylex()
 	OPERATOR(tmp);
     case '{':
 	tmp = *s++;
-	if (isspace(*s) || *s == '#')
+	yylval.ival = curcmd->c_line;
+	if (isSPACE(*s) || *s == '#')
 	    cmdline = NOLINE;   /* invalidate current command line number */
 	OPERATOR(tmp);
     case ';':
@@ -464,9 +480,9 @@ yylex()
 	s--;
 	if (expectterm) {
 	    d = bufend;
-	    while (s < d && isspace(*s))
+	    while (s < d && isSPACE(*s))
 		s++;
-	    if (isalpha(*s) || *s == '_' || *s == '\'')
+	    if (isALPHA(*s) || *s == '_' || *s == '\'')
 		*(--s) = '\\';	/* force next ident to WORD */
 	    OPERATOR(AMPER);
 	}
@@ -526,8 +542,7 @@ yylex()
 
 #define SNARFWORD \
 	d = tokenbuf; \
-	while (isascii(*s) && \
-	  (isalpha(*s) || isdigit(*s) || *s == '_' || *s == '\'')) \
+	while (isALNUM(*s) || *s == '\'') \
 	    *d++ = *s++; \
 	while (d[-1] == '\'') \
 	    d--,s--; \
@@ -535,7 +550,7 @@ yylex()
 	d = tokenbuf;
 
     case '$':
-	if (s[1] == '#' && (isalpha(s[2]) || s[2] == '_')) {
+	if (s[1] == '#' && (isALPHA(s[2]) || s[2] == '_')) {
 	    s++;
 	    s = scanident(s,bufend,tokenbuf);
 	    yylval.stabval = aadd(stabent(tokenbuf,TRUE));
@@ -574,7 +589,7 @@ yylex()
 	OPERATOR(tmp);
 
     case '.':
-	if (!expectterm || !isdigit(s[1])) {
+	if (!expectterm || !isDIGIT(s[1])) {
 	    tmp = *s++;
 	    if (*s == tmp) {
 		s++;
@@ -613,6 +628,7 @@ yylex()
 		STAB *stab;
 		int fd;
 
+		/*SUPPRESS 560*/
 		if (stab = stabent("DATA",FALSE)) {
 		    stab->str_pok |= SP_MULTI;
 		    stab_io(stab) = stio_new();
@@ -623,7 +639,7 @@ yylex()
 #endif
 		    if (preprocess)
 			stab_io(stab)->type = '|';
-		    else if (rsfp == stdin)
+		    else if ((FILE*)rsfp == stdin)
 			stab_io(stab)->type = '-';
 		    else
 			stab_io(stab)->type = '<';
@@ -670,7 +686,10 @@ yylex()
 	    UNI(O_CALLER);
 	if (strEQ(d,"crypt")) {
 #ifdef FCRYPT
-	    init_des();
+	    static int cryptseen = 0;
+
+	    if (!cryptseen++)
+		init_des();
 #endif
 	    FUN2(O_CRYPT);
 	}
@@ -689,9 +708,9 @@ yylex()
 	SNARFWORD;
 	if (strEQ(d,"do")) {
 	    d = bufend;
-	    while (s < d && isspace(*s))
+	    while (s < d && isSPACE(*s))
 		s++;
-	    if (isalpha(*s) || *s == '_')
+	    if (isALPHA(*s) || *s == '_')
 		*(--s) = '\\';	/* force next ident to WORD */
 	    OPERATOR(DO);
 	}
@@ -755,9 +774,9 @@ yylex()
 	}
 	if (strEQ(d,"format")) {
 	    d = bufend;
-	    while (s < d && isspace(*s))
+	    while (s < d && isSPACE(*s))
 		s++;
-	    if (isalpha(*s) || *s == '_')
+	    if (isALPHA(*s) || *s == '_')
 		*(--s) = '\\';	/* force next ident to WORD */
 	    in_format = TRUE;
 	    allstabs = TRUE;		/* must initialize everything since */
@@ -1125,11 +1144,12 @@ yylex()
 	    if (strEQ(d,"sort")) {
 		checkcomma(s,"subroutine name");
 		d = bufend;
-		while (s < d && isascii(*s) && isspace(*s)) s++;
+		while (s < d && isSPACE(*s)) s++;
 		if (*s == ';' || *s == ')')		/* probably a close */
 		    fatal("sort is now a reserved word");
-		if (isascii(*s) && (isalpha(*s) || *s == '_')) {
-		    for (d = s; isalpha(*d) || isdigit(*d) || *d == '_'; d++) ;
+		if (isALPHA(*s) || *s == '_') {
+		    /*SUPPRESS 530*/
+		    for (d = s; isALNUM(*d); d++) ;
 		    strncpy(tokenbuf,s,d-s);
 		    if (strNE(tokenbuf,"keys") &&
 			strNE(tokenbuf,"values") &&
@@ -1138,7 +1158,8 @@ yylex()
 			strNE(tokenbuf,"readdir") &&
 			strNE(tokenbuf,"unpack") &&
 			strNE(tokenbuf,"do") &&
-			(d >= bufend || isspace(*d)) )
+			strNE(tokenbuf,"eval") &&
+			(d >= bufend || isSPACE(*d)) )
 			*(--s) = '\\';	/* force next ident to WORD */
 		}
 		LOP(O_SORT);
@@ -1176,17 +1197,23 @@ yylex()
 	    if (strEQ(d,"substr"))
 		FUN2x(O_SUBSTR);
 	    if (strEQ(d,"sub")) {
+		yylval.ival = savestack->ary_fill; /* restore stuff on reduce */
+		if (perldb) {
+		    savelong(&subline);
+		    saveitem(subname);
+		}
+
 		subline = curcmd->c_line;
 		d = bufend;
-		while (s < d && isspace(*s))
+		while (s < d && isSPACE(*s))
 		    s++;
-		if (isalpha(*s) || *s == '_' || *s == '\'') {
+		if (isALPHA(*s) || *s == '_' || *s == '\'') {
 		    if (perldb) {
 			str_sset(subname,curstname);
 			str_ncat(subname,"'",1);
-			for (d = s+1;
-			  isalpha(*d) || isdigit(*d) || *d == '_' || *d == '\'';
-			  d++);
+			for (d = s+1; isALNUM(*d) || *d == '\''; d++)
+			    /*SUPPRESS 530*/
+			    ;
 			if (d[-1] == '\'')
 			    d--;
 			str_ncat(subname,s,d-s);
@@ -1322,7 +1349,7 @@ yylex()
     yylval.cval = savestr(d);
     expectterm = FALSE;
     if (oldoldbufptr && oldoldbufptr < bufptr) {
-	while (isspace(*oldoldbufptr))
+	while (isSPACE(*oldoldbufptr))
 	    oldoldbufptr++;
 	if (*oldoldbufptr == 'p' && strnEQ(oldoldbufptr,"print",5))
 	    expectterm = TRUE;
@@ -1341,13 +1368,13 @@ char *what;
 
     if (*s == '(')
 	s++;
-    while (s < bufend && isascii(*s) && isspace(*s))
+    while (s < bufend && isSPACE(*s))
 	s++;
-    if (isascii(*s) && (isalpha(*s) || *s == '_')) {
+    if (isALPHA(*s) || *s == '_') {
 	someword = s++;
-	while (isalpha(*s) || isdigit(*s) || *s == '_')
+	while (isALNUM(*s))
 	    s++;
-	while (s < bufend && isspace(*s))
+	while (s < bufend && isSPACE(*s))
 	    s++;
 	if (*s == ',') {
 	    *s = '\0';
@@ -1375,12 +1402,12 @@ char *dest;
     reparse = Nullch;
     s++;
     d = dest;
-    if (isdigit(*s)) {
-	while (isdigit(*s))
+    if (isDIGIT(*s)) {
+	while (isDIGIT(*s))
 	    *d++ = *s++;
     }
     else {
-	while (isalpha(*s) || isdigit(*s) || *s == '_' || *s == '\'')
+	while (isALNUM(*s) || *s == '\'')
 	    *d++ = *s++;
     }
     while (d > dest+1 && d[-1] == '\'')
@@ -1393,8 +1420,7 @@ char *dest;
 	    d = dest;
 	    brackets++;
 	    while (s < send && brackets) {
-		if (!reparse && (d == dest || (*s && isascii(*s) &&
-		  (isalpha(*s) || isdigit(*s) || *s == '_') ))) {
+		if (!reparse && (d == dest || (*s && isALNUM(*s) ))) {
 		    *d++ = *s++;
 		    continue;
 		}
@@ -1418,18 +1444,23 @@ char *dest;
 	else
 	    d[1] = '\0';
     }
-    if (*d == '^' && (isupper(*s) || index("[\\]^_?",*s)))
+    if (*d == '^' && (isUPPER(*s) || index("[\\]^_?", *s))) {
+#ifdef DEBUGGING
+	if (*s == 'D')
+	    debug |= 32768;
+#endif
 	*d = *s++ ^ 64;
+    }
     return s;
 }
 
-STR *
+void
 scanconst(spat,string,len)
 SPAT *spat;
 char *string;
 int len;
 {
-    register STR *retstr;
+    register STR *tmpstr;
     register char *t;
     register char *d;
     register char *e;
@@ -1437,27 +1468,28 @@ int len;
     static char *vert = "|";
 
     if (ninstr(string, string+len, vert, vert+1))
-	return Nullstr;
+	return;
     if (*string == '^')
 	string++, len--;
-    retstr = Str_new(86,len);
-    str_nset(retstr,string,len);
-    t = str_get(retstr);
+    tmpstr = Str_new(86,len);
+    str_nset(tmpstr,string,len);
+    t = str_get(tmpstr);
     e = t + len;
-    retstr->str_u.str_useful = 100;
+    tmpstr->str_u.str_useful = 100;
     for (d=t; d < e; ) {
 	switch (*d) {
 	case '{':
-	    if (isdigit(d[1]))
+	    if (isDIGIT(d[1]))
 		e = d;
 	    else
 		goto defchar;
 	    break;
 	case '.': case '[': case '$': case '(': case ')': case '|': case '+':
+	case '^':
 	    e = d;
 	    break;
 	case '\\':
-	    if (d[1] && index("wWbB0123456789sSdDlLuUE",d[1])) {
+	    if (d[1] && index("wWbB0123456789sSdDlLuUExc",d[1])) {
 		e = d;
 		break;
 	    }
@@ -1494,18 +1526,17 @@ int len;
 	}
     }
     if (d == t) {
-	str_free(retstr);
-	return Nullstr;
+	str_free(tmpstr);
+	return;
     }
     *d = '\0';
-    retstr->str_cur = d - t;
+    tmpstr->str_cur = d - t;
     if (d == t+len)
 	spat->spat_flags |= SPAT_ALL;
     if (*origstring != '^')
 	spat->spat_flags |= SPAT_SCANFIRST;
-    spat->spat_short = retstr;
+    spat->spat_short = tmpstr;
     spat->spat_slen = d - t;
-    return retstr;
 }
 
 char *
@@ -1663,15 +1694,15 @@ register char *s;
 	    arg->arg_type = O_ITEM;
 	    arg[1].arg_type = A_DOUBLE;
 	    arg[1].arg_ptr.arg_str = str_smake(str);
-	    d = scanident(d,bufend,buf);
+	    d = scanident(d,e,buf);
 	    (void)stabent(buf,TRUE);		/* make sure it's created */
 	    for (; *d; d++) {
 		if (*d == '$' && d[1] && d[-1] != '\\' && d[1] != '|') {
-		    d = scanident(d,bufend,buf);
+		    d = scanident(d,e,buf);
 		    (void)stabent(buf,TRUE);
 		}
 		else if (*d == '@' && d[-1] != '\\') {
-		    d = scanident(d,bufend,buf);
+		    d = scanident(d,e,buf);
 		    if (strEQ(buf,"ARGV") || strEQ(buf,"ENV") ||
 		      strEQ(buf,"SIG") || strEQ(buf,"INC"))
 			(void)stabent(buf,TRUE);
@@ -1701,7 +1732,7 @@ get_repl:
 	e = tmpstr->str_ptr + tmpstr->str_cur;
 	for (t = tmpstr->str_ptr; t < e; t++) {
 	    if (*t == '$' && t[1] && (index("`'&+0123456789",t[1]) ||
-	      (t[1] == '{' /*}*/ && isdigit(t[2])) ))
+	      (t[1] == '{' /*}*/ && isDIGIT(t[2])) ))
 		spat->spat_flags &= ~SPAT_CONST;
 	}
     }
@@ -1710,7 +1741,9 @@ get_repl:
 	    s++;
 	    if ((spat->spat_repl[1].arg_type & A_MASK) == A_DOUBLE)
 		spat->spat_repl[1].arg_type = A_SINGLE;
-	    spat->spat_repl = make_op(O_EVAL,2,
+	    spat->spat_repl = make_op(
+		(spat->spat_repl[1].arg_type == A_SINGLE ? O_EVALONCE : O_EVAL),
+		2,
 		spat->spat_repl,
 		Nullarg,
 		Nullarg);
@@ -1950,6 +1983,9 @@ register char *s;
 		switch (*s) {
 		default:
 		    goto out;
+		case '_':
+		    s++;
+		    break;
 		case '8': case '9':
 		    if (shift != 4)
 			yyerror("Illegal octal digit");
@@ -1984,7 +2020,7 @@ register char *s;
       decimal:
 	arg[1].arg_type = A_SINGLE;
 	d = tokenbuf;
-	while (isdigit(*s) || *s == '_') {
+	while (isDIGIT(*s) || *s == '_') {
 	    if (*s == '_')
 		s++;
 	    else
@@ -1992,7 +2028,7 @@ register char *s;
 	}
 	if (*s == '.' && s[1] && index("0123456789eE ;",s[1])) {
 	    *d++ = *s++;
-	    while (isdigit(*s) || *s == '_') {
+	    while (isDIGIT(*s) || *s == '_') {
 		if (*s == '_')
 		    s++;
 		else
@@ -2003,7 +2039,7 @@ register char *s;
 	    *d++ = *s++;
 	    if (*s == '+' || *s == '-')
 		*d++ = *s++;
-	    while (isdigit(*s))
+	    while (isDIGIT(*s))
 		*d++ = *s++;
 	}
 	*d = '\0';
@@ -2034,7 +2070,7 @@ register char *s;
 		    s++, term = '\'';
 		else
 		    term = '"';
-		while (isascii(*s) && (isalpha(*s) || isdigit(*s) || *s == '_'))
+		while (isALNUM(*s))
 		    *d++ = *s++;
 	    }				/* assuming tokenbuf won't clobber */
 	    *d++ = '\n';
@@ -2057,8 +2093,7 @@ register char *s;
 	if (s < bufend)
 	    s++;
 	if (*d == '$') d++;
-	while (*d &&
-	  (isalpha(*d) || isdigit(*d) || *d == '_' || *d == '\''))
+	while (*d && (isALNUM(*d) || *d == '\''))
 	    d++;
 	if (d - tokenbuf != len) {
 	    d = tokenbuf;
@@ -2209,7 +2244,7 @@ register char *s;
 	    s = tmpstr->str_ptr;
 	    send = s + tmpstr->str_cur;
 	    while (s < send) {		/* see if we can make SINGLE */
-		if (*s == '\\' && s[1] && isdigit(s[1]) && !isdigit(s[2]) &&
+		if (*s == '\\' && s[1] && isDIGIT(s[1]) && !isDIGIT(s[2]) &&
 		  !alwaysdollar && s[1] != '0')
 		    *s = '$';		/* grandfather \digit in subst */
 		if ((*s == '$' || *s == '@') && s+1 < send &&
@@ -2228,6 +2263,8 @@ register char *s;
 		if ((*s == '$' && s+1 < send &&
 		    (alwaysdollar || /*(*/ (s[1] != ')' && s[1] != '|')) ) ||
 		    (*s == '@' && s+1 < send) ) {
+		    if (s[1] == '#' && (isALPHA(s[2]) || s[2] == '_'))
+			*d++ = *s++;
 		    len = scanident(s,send,tokenbuf) - s;
 		    if (*s == '$' || strEQ(tokenbuf,"ARGV")
 		      || strEQ(tokenbuf,"ENV")
@@ -2258,7 +2295,7 @@ register char *s;
 		    case 'c':
 			s++;
 			*d = *s++;
-			if (islower(*d))
+			if (isLOWER(*d))
 			    *d = toupper(*d);
 			*d++ ^= 64;
 			continue;
@@ -2337,6 +2374,7 @@ load_format()
 	    astore(stab_xarray(curcmd->c_filestab), (int)curcmd->c_line,tmpstr);
 	}
 	if (*s == '.') {
+	    /*SUPPRESS 530*/
 	    for (t = s+1; *t == ' ' || *t == '\t'; t++) ;
 	    if (*t == '\n') {
 		bufptr = s;
@@ -2479,7 +2517,7 @@ load_format()
 	    }
 	    else {
 		eol[-1] = '\n';
-		while (s < eol && isspace(*s))
+		while (s < eol && isSPACE(*s))
 		    s++;
 		t = s;
 		while (s < eol) {
@@ -2487,7 +2525,7 @@ load_format()
 		    case ' ': case '\t': case '\n': case ';':
 			str_ncat(str, t, s - t);
 			str_ncat(str, "," ,1);
-			while (s < eol && (isspace(*s) || *s == ';'))
+			while (s < eol && (isSPACE(*s) || *s == ';'))
 			    s++;
 			t = s;
 			break;

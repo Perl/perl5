@@ -6,6 +6,9 @@ Note that there is a bug in some versions of NFS on the DECStation that
 may cause utime() to work incorrectly.  If so, regression test io/fs
 may fail if run under NFS.  Ignore the failure.
 EOF
+    case "$tmp" in
+    *4.2*) d_volatile=undef;;
+    esac
 ;;
 esac
 case "$tmp" in

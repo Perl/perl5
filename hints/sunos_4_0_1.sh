@@ -1,1 +1,1 @@
-$ccflags="$ccflags -DFPUTS_BOTCH"
+ccflags="$ccflags -DFPUTS_BOTCH"

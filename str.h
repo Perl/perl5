@@ -1,4 +1,4 @@
-/* $RCSfile: str.h,v $$Revision: 4.0.1.2 $$Date: 91/06/07 11:58:33 $
+/* $RCSfile: str.h,v $$Revision: 4.0.1.3 $$Date: 91/11/05 18:41:47 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	str.h,v $
+ * Revision 4.0.1.3  91/11/05  18:41:47  lwall
+ * patch11: random cleanup
+ * patch11: solitary subroutine references no longer trigger typo warnings
+ * 
  * Revision 4.0.1.2  91/06/07  11:58:33  lwall
  * patch4: new copyright notice
  * 
@@ -32,8 +36,8 @@ struct string {
     STRLEN	str_cur;	/* length of str_ptr as a C string */
     STR		*str_magic;	/* while free, link to next free str */
 				/* while in use, ptr to "key" for magic items */
-    char	str_pok;	/* state of str_ptr */
-    char	str_nok;	/* state of str_nval */
+    unsigned char str_pok;	/* state of str_ptr */
+    unsigned char str_nok;	/* state of str_nval */
     unsigned char str_rare;	/* used by search strings */
     unsigned char str_state;	/* one of SS_* below */
 				/* also used by search strings for backoff */
@@ -57,8 +61,8 @@ struct stab {	/* should be identical, except for str_ptr */
     STRLEN	str_cur;	/* length of str_ptr as a C string */
     STR		*str_magic;	/* while free, link to next free str */
 				/* while in use, ptr to "key" for magic items */
-    char	str_pok;	/* state of str_ptr */
-    char	str_nok;	/* state of str_nval */
+    unsigned char str_pok;	/* state of str_ptr */
+    unsigned char str_nok;	/* state of str_nval */
     unsigned char str_rare;	/* used by search strings */
     unsigned char str_state;	/* one of SS_* below */
 				/* also used by search strings for backoff */
@@ -136,3 +140,5 @@ int str_eq();
 void str_magic();
 void str_insert();
 STRLEN str_len();
+
+#define MULTI	(3)

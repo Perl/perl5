@@ -1,4 +1,4 @@
-/* $RCSfile: util.c,v $$Revision: 4.0.1.2 $$Date: 91/06/07 12:10:42 $
+/* $RCSfile: util.c,v $$Revision: 4.0.1.3 $$Date: 91/11/05 19:18:26 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,12 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	util.c,v $
+ * Revision 4.0.1.3  91/11/05  19:18:26  lwall
+ * patch11: safe malloc code now integrated into Perl's malloc when possible
+ * patch11: index("little", "longer string") could visit faraway places
+ * patch11: warn '-' x 10000 dumped core
+ * patch11: forked exec on non-existent program now issues a warning
+ * 
  * Revision 4.0.1.2  91/06/07  12:10:42  lwall
  * patch4: new copyright notice
  * patch4: made some allowances for "semi-standard" C
@@ -20,6 +26,7 @@
  * 4.0 baseline.
  * 
  */
+/*SUPPRESS 112*/
 
 #include "EXTERN.h"
 #include "perl.h"
@@ -44,6 +51,8 @@
 #endif
 
 #define FLUSH
+
+#ifndef safemalloc
 
 static char nomem[] = "Out of memory!\n";
 
@@ -173,9 +182,12 @@ char *where;
 #  endif
 #endif
     if (where) {
+	/*SUPPRESS 701*/
 	free(where);
     }
 }
+
+#endif /* !safemalloc */
 
 #ifdef LEAKTEST
 
@@ -222,7 +234,7 @@ xstat()
     register int i;
 
     for (i = 0; i < MAXXCOUNT; i++) {
-	if (xcount[i] != lastxcount[i]) {
+	if (xcount[i] > lastxcount[i]) {
 	    fprintf(stderr,"%2d %2d\t%ld\n", i / 100, i % 100, xcount[i]);
 	    lastxcount[i] = xcount[i];
 	}
@@ -307,6 +319,8 @@ char *lend;
 
     if (!first && little > littleend)
 	return big;
+    if (bigend - big < littleend - little)
+	return Nullch;
     bigend -= littleend - little++;
     while (big <= bigend) {
 	if (*big++ != first)
@@ -433,8 +447,8 @@ int iflag;
 {
     register unsigned char *s;
     register unsigned char *table;
-    register int i;
-    register int len = str->str_cur;
+    register unsigned int i;
+    register unsigned int len = str->str_cur;
     int rarest = 0;
     unsigned int frequency = 256;
 
@@ -564,6 +578,7 @@ STR *littlestr;
     if (littlestr->str_pok & SP_CASEFOLD) {	/* case insensitive? */
 	if (s < bigend) {
 	  top1:
+	    /*SUPPRESS 560*/
 	    if (tmp = table[*s]) {
 #ifdef POINTERRIGOR
 		if (bigend - s > tmp) {
@@ -597,6 +612,7 @@ STR *littlestr;
     else {
 	if (s < bigend) {
 	  top2:
+	    /*SUPPRESS 560*/
 	    if (tmp = table[*s]) {
 #ifdef POINTERRIGOR
 		if (bigend - s > tmp) {
@@ -660,17 +676,82 @@ STR *littlestr;
     big = Null(unsigned char*);
 #endif
     bigend = big + bigstr->str_cur;
-    big -= previous;
     while (pos < previous) {
 #ifndef lint
 	if (!(pos += screamnext[pos]))
 #endif
 	    return Nullch;
     }
+#ifdef POINTERRIGOR
     if (littlestr->str_pok & SP_CASEFOLD) {	/* case insignificant? */
 	do {
-	    if (big[pos] != first && big[pos] != fold[first])
-		continue;
+#ifndef lint
+	    while (big[pos-previous] != first && big[pos-previous] != fold[first]
+	      && (pos += screamnext[pos]) )
+		/*SUPPRESS 530*/
+		;
+#endif
+	    for (x=big+pos+1-previous,s=little; s < littleend; /**/ ) {
+		if (x >= bigend)
+		    return Nullch;
+		if (*s++ != *x++ && fold[*(s-1)] != *(x-1)) {
+		    s--;
+		    break;
+		}
+	    }
+	    if (s == littleend)
+#ifndef lint
+		return (char *)(big+pos-previous);
+#else
+		return Nullch;
+#endif
+	} while (
+#ifndef lint
+		pos += screamnext[pos]	/* does this goof up anywhere? */
+#else
+		pos += screamnext[0]
+#endif
+	    );
+    }
+    else {
+	do {
+#ifndef lint
+	    while (big[pos-previous] != first && (pos += screamnext[pos]))
+		/*SUPPRESS 530*/
+		;
+#endif
+	    for (x=big+pos+1-previous,s=little; s < littleend; /**/ ) {
+		if (x >= bigend)
+		    return Nullch;
+		if (*s++ != *x++) {
+		    s--;
+		    break;
+		}
+	    }
+	    if (s == littleend)
+#ifndef lint
+		return (char *)(big+pos-previous);
+#else
+		return Nullch;
+#endif
+	} while (
+#ifndef lint
+		pos += screamnext[pos]
+#else
+		pos += screamnext[0]
+#endif
+	    );
+    }
+#else /* !POINTERRIGOR */
+    big -= previous;
+    if (littlestr->str_pok & SP_CASEFOLD) {	/* case insignificant? */
+	do {
+#ifndef lint
+	    while (big[pos] != first && big[pos] != fold[first]
+	      && (pos += screamnext[pos]) )
+		/*SUPPRESS 530*/
+		;
+#endif
 	    for (x=big+pos+1,s=little; s < littleend; /**/ ) {
 		if (x >= bigend)
 		    return Nullch;
@@ -695,8 +776,11 @@ STR *littlestr;
     }
     else {
 	do {
-	    if (big[pos] != first)
-		continue;
+#ifndef lint
+	    while (big[pos] != first && (pos += screamnext[pos]))
+		/*SUPPRESS 530*/
+		;
+#endif
 	    for (x=big+pos+1,s=little; s < littleend; /**/ ) {
 		if (x >= bigend)
 		    return Nullch;
@@ -719,6 +803,7 @@ STR *littlestr;
 #endif
 	    );
     }
+#endif /* POINTERRIGOR */
     return Nullch;
 }
 
@@ -774,10 +859,20 @@ char *pat;
 long a1, a2, a3, a4;
 {
     char *s;
+    int usermess = strEQ(pat,"%s");
+    STR *tmpstr;
 
     s = buf;
-    (void)sprintf(s,pat,a1,a2,a3,a4);
-    s += strlen(s);
+    if (usermess) {
+	tmpstr = str_mortal(&str_undef);
+	str_set(tmpstr, (char*)a1);
+	*s++ = tmpstr->str_ptr[tmpstr->str_cur-1];
+    }
+    else {
+	(void)sprintf(s,pat,a1,a2,a3,a4);
+	s += strlen(s);
+    }
+
     if (s[-1] != '\n') {
 	if (curcmd->c_line) {
 	    (void)sprintf(s," at %s line %ld",
@@ -793,7 +888,13 @@ long a1, a2, a3, a4;
 	    s += strlen(s);
 	}
 	(void)strcpy(s,".\n");
+	if (usermess)
+	    str_cat(tmpstr,buf+1);
     }
+    if (usermess)
+	return tmpstr->str_ptr;
+    else
+	return buf;
 }
 
 /*VARARGS1*/
@@ -804,10 +905,11 @@ long a1, a2, a3, a4;
     extern FILE *e_fp;
     extern char *e_tmpname;
     char *tmps;
+    char *message;
 
-    mess(pat,a1,a2,a3,a4);
+    message = mess(pat,a1,a2,a3,a4);
     if (in_eval) {
-	str_set(stab_val(stabent("@",TRUE)),buf);
+	str_set(stab_val(stabent("@",TRUE)),message);
 	tmps = "_EVAL_";
 	while (loop_ptr >= 0 && (!loop_stack[loop_ptr].loop_label ||
 	  strNE(tmps,loop_stack[loop_ptr].loop_label) )) {
@@ -831,7 +933,7 @@ long a1, a2, a3, a4;
 	}
 	longjmp(loop_stack[loop_ptr].loop_env, 1);
     }
-    fputs(buf,stderr);
+    fputs(message,stderr);
     (void)fflush(stderr);
     if (e_fp)
 	(void)UNLINK(e_tmpname);
@@ -844,8 +946,10 @@ warn(pat,a1,a2,a3,a4)
 char *pat;
 long a1, a2, a3, a4;
 {
-    mess(pat,a1,a2,a3,a4);
-    fputs(buf,stderr);
+    char *message;
+
+    message = mess(pat,a1,a2,a3,a4);
+    fputs(message,stderr);
 #ifdef LEAKTEST
 #ifdef DEBUGGING
     if (debug & 4096)
@@ -856,11 +960,14 @@ long a1, a2, a3, a4;
 }
 #else
 /*VARARGS0*/
+char *
 mess(args)
 va_list args;
 {
     char *pat;
     char *s;
+    STR *tmpstr;
+    int usermess;
 #ifndef HAS_VPRINTF
 #ifdef CHARVSPRINTF
     char *vsprintf();
@@ -869,15 +976,23 @@ va_list args;
 #endif
 #endif
 
-    s = buf;
 #ifdef lint
     pat = Nullch;
 #else
     pat = va_arg(args, char *);
 #endif
-    (void) vsprintf(s,pat,args);
+    s = buf;
+    usermess = strEQ(pat, "%s");
+    if (usermess) {
+	tmpstr = str_mortal(&str_undef);
+	str_set(tmpstr, va_arg(args, char *));
+	*s++ = tmpstr->str_ptr[tmpstr->str_cur-1];
+    }
+    else {
+	(void) vsprintf(s,pat,args);
+	s += strlen(s);
+    }
 
-    s += strlen(s);
     if (s[-1] != '\n') {
 	if (curcmd->c_line) {
 	    (void)sprintf(s," at %s line %ld",
@@ -893,7 +1008,14 @@ va_list args;
 	    s += strlen(s);
 	}
 	(void)strcpy(s,".\n");
+	if (usermess)
+	    str_cat(tmpstr,buf+1);
     }
+
+    if (usermess)
+	return tmpstr->str_ptr;
+    else
+	return buf;
 }
 
 /*VARARGS0*/
@@ -904,16 +1026,17 @@ va_dcl
     extern FILE *e_fp;
     extern char *e_tmpname;
     char *tmps;
+    char *message;
 
 #ifndef lint
     va_start(args);
 #else
     args = 0;
 #endif
-    mess(args);
+    message = mess(args);
     va_end(args);
     if (in_eval) {
-	str_set(stab_val(stabent("@",TRUE)),buf);
+	str_set(stab_val(stabent("@",TRUE)),message);
 	tmps = "_EVAL_";
 	while (loop_ptr >= 0 && (!loop_stack[loop_ptr].loop_label ||
 	  strNE(tmps,loop_stack[loop_ptr].loop_label) )) {
@@ -937,7 +1060,7 @@ va_dcl
 	}
 	longjmp(loop_stack[loop_ptr].loop_env, 1);
     }
-    fputs(buf,stderr);
+    fputs(message,stderr);
     (void)fflush(stderr);
     if (e_fp)
 	(void)UNLINK(e_tmpname);
@@ -950,16 +1073,17 @@ warn(va_alist)
 va_dcl
 {
     va_list args;
+    char *message;
 
 #ifndef lint
     va_start(args);
 #else
     args = 0;
 #endif
-    mess(args);
+    message = mess(args);
     va_end(args);
 
-    fputs(buf,stderr);
+    fputs(message,stderr);
 #ifdef LEAKTEST
 #ifdef DEBUGGING
     if (debug & 4096)
@@ -981,6 +1105,7 @@ char *nam, *val;
 	int max;
 	char **tmpenv;
 
+	/*SUPPRESS 530*/
 	for (max = i; environ[max]; max++) ;
 	New(901,tmpenv, max+2, char*);
 	for (j=0; j<max; j++)		/* copy environment */
@@ -1242,8 +1367,10 @@ char	*mode;
 		close(fd);
 #endif
 	    do_exec(cmd);	/* may or may not use the shell */
+	    warn("Can't exec \"%s\": %s", cmd, strerror(errno));
 	    _exit(1);
 	}
+	/*SUPPRESS 560*/
 	if (tmpstab = stabent("$",allstabs))
 	    str_numset(STAB_STR(tmpstab),(double)getpid());
 	forkprocess = 0;
@@ -1321,9 +1448,9 @@ FILE *ptr;
     int pid;
 
     str = afetch(fdpid,fileno(ptr),TRUE);
+    pid = (int)str->str_u.str_useful;
     astore(fdpid,fileno(ptr),Nullstr);
     fclose(ptr);
-    pid = (int)str->str_u.str_useful;
     hstat = signal(SIGHUP, SIG_IGN);
     istat = signal(SIGINT, SIG_IGN);
     qstat = signal(SIGQUIT, SIG_IGN);
@@ -1340,9 +1467,11 @@ int pid;
 int *statusp;
 int flags;
 {
+#if !defined(HAS_WAIT4) && !defined(HAS_WAITPID)
     int result;
     STR *str;
     char spid[16];
+#endif
 
     if (!pid)
 	return -1;
@@ -1387,6 +1516,7 @@ int flags;
 #endif
 }
 
+/*SUPPRESS 590*/
 pidgone(pid,status)
 int pid;
 int status;

@@ -1,4 +1,4 @@
-/* $RCSfile: util.h,v $$Revision: 4.0.1.1 $$Date: 91/06/07 12:11:00 $
+/* $RCSfile: util.h,v $$Revision: 4.0.1.2 $$Date: 91/11/05 19:18:40 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	util.h,v $
+ * Revision 4.0.1.2  91/11/05  19:18:40  lwall
+ * patch11: safe malloc code now integrated into Perl's malloc when possible
+ * 
  * Revision 4.0.1.1  91/06/07  12:11:00  lwall
  * patch4: new copyright notice
  * 
@@ -17,8 +20,10 @@
 EXT int *screamfirst INIT(Null(int*));
 EXT int *screamnext INIT(Null(int*));
 
+#ifndef safemalloc
 char	*safemalloc();
 char	*saferealloc();
+#endif
 char	*cpytill();
 char	*instr();
 char	*fbminstr();

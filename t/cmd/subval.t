@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: subval.t,v 4.0 91/03/20 01:49:40 lwall Locked $
+# $RCSfile: subval.t,v $$Revision: 4.0.1.1 $$Date: 91/11/05 18:42:31 $
 
 sub foo1 {
     'true1';
@@ -102,7 +102,7 @@ print $x eq '1:2:3' ? "ok 26\n" : "not ok 26 $x\n";
 sub somesub {
     local($num,$P,$F,$L) = @_;
     ($p,$f,$l) = caller;
-    print "$p:$f:$l" eq "$P:$F:$L" ? "ok $num\n" : "not ok $num\n";
+    print "$p:$f:$l" eq "$P:$F:$L" ? "ok $num\n" : "not ok $num $p:$f:$l ne $P:$F:$L\n";
 }
 
 &somesub(27, 'main', __FILE__, __LINE__);
