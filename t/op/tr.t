@@ -160,7 +160,7 @@ is($_, '...d.f...j.l...p');
 
 # 20000705 MJD
 eval "tr/m-d/ /";
-like($@, qr/^Invalid \[\] range "m-d" in transliteration operator/,
+like($@, qr/^Invalid range "m-d" in transliteration operator/,
               'reversed range check');
 
 eval '$1 =~ tr/x/y/';
