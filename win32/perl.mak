@@ -84,7 +84,6 @@ LINK32_FLAGS=kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib\
 LINK32_OBJS= \
 	"$(INTDIR)/perlmain.obj" \
 	"$(INTDIR)/win32io.obj" \
-	"$(INTDIR)/perl.res" \
 	"..\perl.lib"
 
 "$(OUTDIR)\_perl.exe" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
@@ -144,7 +143,6 @@ LINK32_FLAGS=kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib\
 LINK32_OBJS= \
 	"$(INTDIR)/perlmain.obj" \
 	"$(INTDIR)/win32io.obj" \
-	"$(INTDIR)/perl.res" \
 	"..\perl.lib"
 
 "$(OUTDIR)\_perl.exe" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
@@ -232,19 +230,6 @@ DEP_CPP_WIN32=\
 	
 
 "$(INTDIR)\win32io.obj" : $(SOURCE) $(DEP_CPP_WIN32) "$(INTDIR)"
-
-
-# End Source File
-################################################################################
-# Begin Source File
-
-SOURCE=.\perl.rc
-DEP_RSC_PERL_=\
-	".\camel.ico"\
-	
-
-"$(INTDIR)\perl.res" : $(SOURCE) $(DEP_RSC_PERL_) "$(INTDIR)"
-   $(RSC) $(RSC_PROJ) $(SOURCE)
 
 
 # End Source File
