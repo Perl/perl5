@@ -203,7 +203,7 @@ sub write_protos {
 	    my $prefix = $flags =~ /n/ ? '' : 'pTHX_';
 	    my $args = scalar @args;
 	    $ret .= "\n#ifdef CHECK_FORMAT\n";
-	    $ret .= sprintf " __attribute__((format(printf,%s%d,%s%d)))",
+	    $ret .= sprintf " __attribute__((format(__printf__,%s%d,%s%d)))",
 				    $prefix, $args - 1, $prefix, $args;
 	    $ret .= "\n#endif\n";
 	}

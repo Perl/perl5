@@ -418,7 +418,7 @@ S_next_symbol(pTHX_ register tempsym_t* symptr )
         if (strchr(natstr, code))
  	  code |= TYPE_IS_SHRIEKING;
         else
-   	  Perl_croak(aTHX_ "'!' allowed only after types %s in pack/unpack",
+   	  Perl_croak(aTHX_ "'!' allowed only after types %s in %s",
                      natstr, symptr->flags & FLAG_PACK ? "pack" : "unpack" );
       }
 
