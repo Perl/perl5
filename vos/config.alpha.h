@@ -220,6 +220,13 @@
  */
 #define HAS_GETLOGIN		/**/
 
+/* HAS_GETPAGESIZE:
+ *	This symbol, if defined, indicates that the getpagesize system call
+ *	is available to get system page size, which is the granularity of
+ *	many memory management calls.
+ */
+/*#define HAS_GETPAGESIZE		/**/
+
 /* HAS_GETPGID:
  *	This symbol, if defined, indicates to the C program that 
  *	the getpgid(pid) function is available to get the

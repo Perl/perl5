@@ -1507,6 +1507,13 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_getnetprotos	HAS_GETNET_PROTOS	/**/
 
+/* HAS_GETPAGESIZE:
+ *	This symbol, if defined, indicates that the getpagesize system call
+ *	is available to get system page size, which is the granularity of
+ *	many memory management calls.
+ */
+#$d_getpagsz HAS_GETPAGESIZE		/**/
+
 /* HAS_GETPROTOENT:
  *	This symbol, if defined, indicates that the getprotoent() routine is
  *	available to look up protocols in some data base or another.

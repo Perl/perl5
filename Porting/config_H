@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : /m/fs/work/work/permanent/perl/pp4/perl
- * Configuration time: Sat Nov  4 02:04:31 EET 2000
+ * Configuration time: Sat Nov 11 18:52:36 EET 2000
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -1487,6 +1487,13 @@
  */
 #define	HAS_GETNET_PROTOS	/**/
 
+/* HAS_GETPAGESIZE:
+ *	This symbol, if defined, indicates that the getpagesize system call
+ *	is available to get system page size, which is the granularity of
+ *	many memory management calls.
+ */
+#define HAS_GETPAGESIZE		/**/
+
 /* HAS_GETPROTOENT:
  *	This symbol, if defined, indicates that the getprotoent() routine is
  *	available to look up protocols in some data base or another.
@@ -2044,7 +2051,7 @@
 #define FILE_cnt(fp)	((fp)->_cnt)
 #define STDIO_CNT_LVALUE 		/**/
 /*#define STDIO_PTR_LVAL_SETS_CNT	/ **/
-/*#define STDIO_PTR_LVAL_NOCHANGE_CNT	/ **/
+#define STDIO_PTR_LVAL_NOCHANGE_CNT	/**/
 #endif
 
 /* USE_STDIO_BASE:

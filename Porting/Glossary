@@ -715,6 +715,10 @@ d_getnetprotos (d_getnetprotos.U):
 	prototypes for the various getnet*() functions.  
 	See also netdbtype.U for probing for various netdb types.
 
+d_getpagsz (d_getpagsz.U):
+	This variable conditionally defines HAS_GETPAGESIZE if getpagesize()
+	is available to get the system page size.
+
 d_getpbyname (d_getprotby.U):
 	This variable conditionally defines the HAS_GETPROTOBYNAME 
 	symbol, which indicates to the C program that the 

@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Nov  9 15:20:17 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Sat Nov 11 18:45:10 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -386,6 +386,7 @@ d_getnbyaddr=''
 d_getnbyname=''
 d_getnent=''
 d_getnetprotos=''
+d_getpagsz=''
 d_getpent=''
 d_getpgid=''
 d_getpgrp2=''
@@ -9434,6 +9435,10 @@ echo " "
 set d_getnetprotos getnetent $i_netdb netdb.h
 eval $hasproto
 
+: see if getpagesize exists
+set getpagesize d_getpagsz
+eval $inlibc
+
 
 : see if getprotobyname exists
 set getprotobyname d_getpbyname
@@ -15590,6 +15595,7 @@ d_getnbyaddr='$d_getnbyaddr'
 d_getnbyname='$d_getnbyname'
 d_getnent='$d_getnent'
 d_getnetprotos='$d_getnetprotos'
+d_getpagsz='$d_getpagsz'
 d_getpbyname='$d_getpbyname'
 d_getpbynumber='$d_getpbynumber'
 d_getpent='$d_getpent'
