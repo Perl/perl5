@@ -6642,6 +6642,17 @@ Perl_peep(pTHX_ register OP *o)
 		    || (o2->op_flags & OPf_WANT) != OPf_WANT_VOID)
 		break;
 
+	    /* check that the sort is the first arg on RHS of assign */
+
+	    o2 = cUNOPx(o2)->op_first;
+	    if (!o2 || o2->op_type != OP_NULL)
+		break;
+	    o2 = cUNOPx(o2)->op_first;
+	    if (!o2 || o2->op_type != OP_PUSHMARK)
+		break;
+	    if (o2->op_sibling != o)
+		break;
+
 	    /* check the array is the same on both sides */
 	    if (oleft->op_type == OP_RV2AV) {
 		if (oright->op_type != OP_RV2AV
