@@ -16,7 +16,7 @@ BEGIN {
 
 use strict;
 
-print "1..80\n";
+print "1..82\n";
 
 my $i = 1;
 
@@ -402,4 +402,14 @@ print "ok ", $i++, "\n";
 sub foo2 ($\%);
 eval q{ foo2 "s" };
 print "not " unless $@ =~ /^Not enough/;
+print "ok ", $i++, "\n";
+
+sub X::foo3;
+*X::foo3 = sub {'ok'};
+print "# $@not " unless eval {X->foo3} eq 'ok';
+print "ok ", $i++, "\n";
+
+sub X::foo4 ($);
+*X::foo4 = sub ($) {'ok'};
+print "not " unless X->foo4 eq 'ok';
 print "ok ", $i++, "\n";

@@ -7,7 +7,7 @@
 #endif
 
 #define dXSARGS				\
-	dSP; dMARK;		\
+	dSP; dMARK;			\
 	I32 ax = mark - stack_base + 1;	\
 	I32 items = sp - mark
 

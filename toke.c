@@ -189,7 +189,7 @@ missingterm(char *s)
     char q;
     if (s) {
 	char *nl = strrchr(s,'\n');
-	if (nl) 
+	if (nl)
 	    *nl = '\0';
     }
     else if (multi_close < 32 || multi_close == 127) {
@@ -411,8 +411,6 @@ skipspace(register char *s)
 		PerlIO_clearerr(rsfp);
 	    else
 		(void)PerlIO_close(rsfp);
-	    if (e_fp == rsfp)
-		e_fp = Nullfp;
 	    rsfp = Nullfp;
 	    return s;
 	}
@@ -1076,7 +1074,7 @@ intuit_more(register char *s)
     else {
 	int weight = 2;		/* let's weigh the evidence */
 	char seen[256];
-	unsigned char un_char = 0, last_un_char;
+	unsigned char un_char = 255, last_un_char;
 	char *send = strchr(s,']');
 	char tmpbuf[sizeof tokenbuf * 4];
 
@@ -1142,6 +1140,8 @@ intuit_more(register char *s)
 		    weight += 30;
 		if (strchr("zZ79~",s[1]))
 		    weight += 30;
+		if (last_un_char == 255 && (isDIGIT(s[1]) || s[1] == '$'))
+		    weight -= 5;	/* cope with negative subscript */
 		break;
 	    default:
 		if (!isALNUM(last_un_char) && !strchr("$@&",last_un_char) &&
@@ -1791,8 +1791,6 @@ yylex(void)
 			PerlIO_clearerr(rsfp);
 		    else
 			(void)PerlIO_close(rsfp);
-		    if (e_fp == rsfp)
-			e_fp = Nullfp;
 		    rsfp = Nullfp;
 		}
 		if (!in_eval && (minus_n || minus_p)) {
@@ -5088,7 +5086,7 @@ scan_heredoc(register char *s)
 	}
 	sv_setpvn(tmpstr,d+1,s-d);
 	s += len - 1;
-	curcop->cop_line++;     /* the preceding stmt passes a newline */
+	curcop->cop_line++;	/* the preceding stmt passes a newline */
 
 	sv_catpvn(herewas,s,bufend-s);
 	sv_setsv(linestr,herewas);

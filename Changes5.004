@@ -68,6 +68,1329 @@ Version 5.004_05        Maintenance release 5 for 5.004
     TBA
 
 
+Change 996 on 1998/05/15 by TimBunce@ig.co.uk
+
+	 Title:  "Negative array subscript unrecognized in regex"
+	  From:  Mark-Jason Dominus <mjd@plover.com>,
+	         h.sanden@elsevier.nl (Hugo van der Sanden)
+	Msg-ID:  <19980425040819.13828.qmail@plover.com>,
+	         <199805151514.RAA04121@dorlas.elsevier.nl>
+	 Files:  t/base/lex.t toke.c
+	
+	 Title:  "Remove e_fp from toke.c after change 955"
+	  From:  Tim Bunce
+	 Files:  toke.c
+
+Change 995 on 1998/05/15 by TimBunce@ig.co.uk
+
+	 Title:  "Fix -e security hole (no longer uses temp file)"
+	  From:  Tim Bunce
+	 Files:  embed.h perl.h perl.c
+
+Change 992 on 1998/05/15 by TimBunce@ig.co.uk
+
+	 Title:  "install non-backwards compatible .pm files into archlib"
+	  From:  Tim Bunce
+	 Files:  installperl
+	
+	 Title:  "revert "Can't locate" message to original for maintenance"
+	  From:  Tim Bunce
+	Msg-ID:  <199804240047.SAA24155@den-mdev1.co.csgsystems.com>
+	 Files:  pod/perldiag.pod pp_ctl.c
+
+Change 990 on 1998/05/15 by TimBunce@ig.co.uk
+
+	 Title:  "Add tests for die $ref"
+	  From:  Graham Barr <gbarr@ti.com>
+	Msg-ID:  <355C6297.121B576B@ti.com>
+	 Files:  MANIFEST t/op/die.t
+
+Change 989 on 1998/05/15 by TimBunce@ig.co.uk
+
+	 Title:  "Fix t/op/ipcmsg.t for Digital UNIX"
+	  From:  Jarkko Hietaniemi <jhi@iki.fi>
+	Msg-ID:  <199805151337.QAA01174@alpha.hut.fi>
+	 Files:  t/op/ipcmsg.t
+
+Change 986 on 1998/05/15 by TimBunce@ig.co.uk
+
+	 Title:  "Patches for BeOS port of Perl, courtesy of Tom Spindler"
+	  From:  Jarkko Hietaniemi <jhi@iki.fi>, Tom Spindler
+	Msg-ID:  <199805042312.CAA09025@alpha.hut.fi>
+	 Files:  MANIFEST Configure config_h.SH hints/beos.sh pod/perlfunc.pod
+	         Porting/Glossary README.beos beos/nm.c lib/Term/ReadLine.pm
+	         plan9/config.plan9 pp_sys.c t/io/pipe.t vms/config.vms
+	         win32/config.bc win32/config.vc win32/config_H.bc
+	         win32/config_H.vc
+
+Change 985 on 1998/05/15 by TimBunce@ig.co.uk
+
+	 Title:  "allow die $ref"
+	  From:  Graham Barr <gbarr@ti.com>, Tim.Bunce@ig.co.uk (Tim Bunce)
+	Msg-ID:  <199805151351.OAA01985@toad.ig.co.uk>, <355C3E67.AF25B9F7@ti.com>
+	 Files:  pp_ctl.c pp_sys.c util.c
+	
+	 Title:  "ExtUtils::Manifest could truncate files during "make dist""
+	  From:  "James E Jurach Jr." <muaddib@arrakis.int.ein.cz>,
+	         koenig@kulturbox.de (Andreas J. Koenig)
+	Msg-ID:  <199805111048.MAA02573@arrakis.int.ein.cz>,
+	         <sfc90o8bgie.fsf@dubravka.in-berlin.de>
+	 Files:  lib/ExtUtils/Manifest.pm
+	
+	 Title:  "Autosplit doesn't like upper case letters in sub names on VMS"
+	  From:  Dan Sugalski <sugalskd@osshe.edu>
+	Msg-ID:  <3.0.5.32.19980330152332.009cb130@osshe.edu>
+	 Files:  lib/AutoSplit.pm
+	
+	 Title:  "AutoSplit/AutoLoaded subs: give useful line numbers in warnings etc"
+	  From:  "Jesse N. Glick" <jglick@sig.bsh.com>, koenig@anna.mind.de (Andreas
+	         J. Koenig), larry@wall.org (Larry Wall)
+	Msg-ID:  <199709292015.NAA09627@wall.org>, <342FCDDF.23534195@sig.bsh.com>,
+	         <sfc202c9jsb.fsf@anna.in-berlin.de>,
+	         <sfc3efg5rhg.fsf@dubravka.in-berlin.de>
+	 Files:  lib/AutoSplit.pm
+
+Change 984 on 1998/05/15 by TimBunce@ig.co.uk
+
+	 ------  CORE LANGUAGE  ------
+	
+	 Title:  "Fix close pipe returning status from wrong child"
+	  From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>, kstar@chapin.edu@ig.co.uk ()
+	Msg-ID:  <199805142313.TAA02684@chapin.edu>,
+	         <E0yZ8ah-0005d8-00@taurus.cus.cam.ac.uk>
+	 Files:  t/io/pipe.t util.c
+	
+	 Title:  "Avoid English.pm triggering load of Errno.pm"
+	  From:  Tim Bunce
+	 Files:  gv.c lib/English.pm
+	
+	 ------  DOCUMENTATION  ------
+	
+	 Title:  "Document child exit cause a parent sleep to end early"
+	  From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+	Msg-ID:  <E0yZwMK-0000D9-00@taurus.cus.cam.ac.uk>
+	 Files:  pod/perlfunc.pod
+	
+	 ------  EXTENSIONS  ------
+	
+	 Title:  "BSD Platforms need STRUCT_TM_HASZONE for POSIX"
+	  From:  Andy Dougherty <doughera@lafcol.lafayette.edu>
+	Msg-ID:  <Pine.SUN.3.96.980512095524.8158C-100000@newton.phys>
+	 Files:  MANIFEST ext/POSIX/hints/bsdos.pl ext/POSIX/hints/freebsd.pl
+	         ext/POSIX/hints/netbsd.pl ext/POSIX/hints/openbsd.pl
+	
+	 Title:  "MM_VMS.pm fixes for building external library"
+	  From:  Dan Sugalski <sugalskd@ous.edu>
+	Msg-ID:  <3.0.5.32.19980511160542.009dd480@ous.edu>
+	 Files:  lib/ExtUtils/MM_VMS.pm
+	
+	 Title:  "Appease picky DEC compiler in POSIX.xs"
+	  From:  Dan Sugalski <sugalskd@ous.edu>
+	Msg-ID:  <3.0.5.32.19980511161434.009f8bb0@ous.edu>
+	 Files:  ext/POSIX/POSIX.xs
+	
+	 ------  TESTS  ------
+	
+	 Title:  "Fix constant detection in t/op/ipcsem.t for Digit UNIX"
+	  From:  Jarkko Hietaniemi <jhi@iki.fi>
+	Msg-ID:  <199805121212.PAA15351@alpha.hut.fi>
+	 Files:  t/op/ipcsem.t
+	
+	 Title:  "Fix doc bug for system() return value"
+	  From:  Daniel Grisinger <dgris@perrin.dimensional.com>
+	Msg-ID:  <Pine.LNX.3.96.980514165608.4062A-100000@perrin.dimensional.com>
+	 Files:  pod/perlfunc.pod t/op/exec.t
+	
+	 ------  UTILITIES  ------
+	
+	 Title:  "Avoid possible constant autoload loop"
+	  From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>, Graham Barr <gbarr@ti.com>, Ilya
+	         Zakharevich <ilya@math.ohio-state.edu>
+	Msg-ID:  <199805141910.PAA26994@monk.mps.ohio-state.edu>,
+	         <355B475A.C5AD4B90@ti.com>,
+	         <E0ya11X-0000hm-00@taurus.cus.cam.ac.uk>
+	 Files:  utils/h2xs.PL
+	
+	 Title:  "Further improvements to h2ph.PL"
+	  From:  kstar@chapin.edu
+	Msg-ID:  <199805130241.WAA25459@chapin.edu>
+	 Files:  utils/h2ph.PL
+
+Change 982 on 1998/05/15 by TimBunce@ig.co.uk
+
+	 Title:  "comment init_postdump_symbols issues"
+	  From:  Tim Bunce
+	 Files:  perl.c
+	
+	 Title:  "Improve sort docs re SUBNAME"
+	  From:  circle@azstarnet.com
+	Msg-ID:  <199804281828.LAA22737@andromeda.azstarnet.com>
+	 Files:  pod/perlfunc.pod
+
+Change 981 on 1998/05/15 by TimBunce@ig.co.uk
+
+	 Title:  "Add hook to tie %! to external Errno.pm module (not included)"
+	  From:  Graham Barr <gbarr@ti.com>
+	Msg-ID:  <355080CD.1111BC81@ti.com>
+	 Files:  gv.c
+
+Change 971 on 1998/05/14 by TimBunce@ig.co.uk
+	
+	 Title:  "fix C<print "foo ${\()}"> (pp_refgen fumbles when G_SCALAR, no args)"
+	  From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+	Msg-ID:  <199805070402.AAA02858@aatma.engin.umich.edu>
+	 Files:  pp.c
+
+Change 970 on 1998/05/14 by TimBunce@ig.co.uk
+	
+	 Title:  "perlbug reformatted"
+	  From:  Dominic Dunlop <domo@vo.lu>, Hugo van der Sanden
+	         <hv@crypt0.demon.co.uk>
+	Msg-ID:  <199805110954.LAA20367@dorlas.elsevier.nl>,
+	         <l03130300b17cebcb6d33@[194.222.64.89]>,
+	         <v03110702b17ccbab6824@[195.95.102.67]>
+	 Files:  utils/perlbug.PL
+
+Change 965 on 1998/05/14 by TimBunce@ig.co.uk
+	
+	 Title:  "Sub declaration cost reduced from ~500 to ~100 bytes"
+	  From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+	Msg-ID:  <199805050607.CAA02050@monk.mps.ohio-state.edu>
+	 Files:  gv.h gv.c op.c
+
+Change 949 on 1998/05/14 by TimBunce@ig.co.uk
+	
+	 Title:  "while($x=<>) no longer warns (implicit defined added)"
+	  From:  Nick Ing-Simmons <nik@tiuk.ti.com>
+	Msg-ID:  <199805051035.LAA27365@pluto.tiuk.ti.com>
+	 Files:  MANIFEST op.c t/op/defins.t
+
+Change 946 on 1998/05/14 by TimBunce@ig.co.uk
+	
+	 Title:  "Fix PERL_DESTRUCT_LEVEL core dumps"
+	  From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+	Msg-ID:  <199805062301.TAA24599@aatma.engin.umich.edu>
+	 Files:  perl.c sv.c t/op/misc.t
+
+Change 944 on 1998/05/14 by TimBunce@ig.co.uk
+
+	 Title:  "5.004_04-m2 Cleanup of test failures"
+	  From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+	Msg-ID:  <199805070416.AAA03082@aatma.engin.umich.edu>
+	 Files:  t/op/die_exit.t t/op/ipcmsg.t t/op/ipcsem.t t/op/taint.t
+	         win32/config.bc win32/config.vc
+
+Change 922 on 1998/05/11 by TimBunce@ig.co.uk
+
+	Assorted patches:
+	
+	 ------  CORE LANGUAGE  ------
+	
+	 Title:  "incorrect return value for hv_iterinit"
+	  From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+	Msg-ID:  <199805031848.OAA20618@aatma.engin.umich.edu>
+	 Files:  pod/perlguts.pod hv.c
+	
+	 ------  DOCUMENTATION  ------
+	
+	 Title:  "perlvar.pod buglet E<EVMSERR>"
+	  From:  Achim Bohnet <ach@mpe.mpg.de>
+	Msg-ID:  <9805041415.AA22185@o09.xray.mpe.mpg.de>
+	 Files:  pod/perlvar.pod
+	
+	 Title:  "Improve docs for warning about code after an exec()"
+	  From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>, Chaim Frenkel
+	         <chaimf@concentric.net>
+	Msg-ID:  <E0yYUit-0003yb-00@taurus.cus.cam.ac.uk>,
+	         <m3ra22qn1z.fsf@chany-p100.emwp.com>
+	 Files:  pod/perlfunc.pod
+	
+	 Title:  "Remove dead code from pod2man"
+	  From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+	Msg-ID:  <E0yXmuT-0006Ll-00@ursa.cus.cam.ac.uk>
+	 Files:  pod/pod2man.PL
+	
+	 Title:  "tweak doc for C<do FILENAME>"
+	  From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+	Msg-ID:  <199805090017.UAA06888@aatma.engin.umich.edu>
+	 Files:  pod/perlfunc.pod
+	
+	 Title:  "Document integer pragma effect on % operator"
+	  From:  Gisle Aas <gisle@aas.no>
+	Msg-ID:  <m3yawjmzhx.fsf@furu.g.aas.no>
+	 Files:  pod/perlop.pod
+	
+	 Title:  "Reduce rm command line length in pod/Makefile"
+	  From:  Hugo van der Sanden <h.sanden@elsevier.nl>
+	Msg-ID:  <199805041423.QAA13199@dorlas.elsevier.nl>
+	 Files:  pod/Makefile
+	
+	 ------  EXTENSIONS  ------
+	
+	 Title:  "Clarify Termios usage in POSIX.pod"
+	  From:  Rocco Caputo <troc@netrus.net>
+	Msg-ID:  <199805101952.PAA12738@ns.netrus.net>
+	 Files:  ext/POSIX/POSIX.pod
+	
+	 ------  LIBRARY  ------
+	
+	 Title:  "Fix File::Find::finddepth typo in trial 2 release"
+	  From:  koenig@kulturbox.de (Andreas J. Koenig)
+	Msg-ID:  <sfcbttflsjz.fsf@dubravka.in-berlin.de>
+	 Files:  lib/File/Find.pm t/lib/filefind.t
+	
+	 ------  PORTABILITY - GENERAL  ------
+	
+	 Title:  "Add Porting/patching.pod document"
+	  From:  Daniel Grisinger <dgris@tdrenterprises.com>
+	Msg-ID:  <199805030305.XAA16147@relay.pair.com>
+	 Files:  MANIFEST Porting/patching.pod
+	
+	 Title:  "hints/machten.sh: disable semctl(), align with devel version"
+	  From:  Dominic Dunlop <domo@vo.lu>
+	Msg-ID:  <v03110701b175fc029eb1@[195.95.102.115]>
+	 Files:  hints/machten.sh
+	
+	 Title:  "Add VMS specifics to Porting/makerel"
+	  From:  Charles Bailey <BAILEY@newman.upenn.edu>
+	Msg-ID:  <01IWDK1LONRQ0026P0@cor.newman.upenn.edu>,
+	         <199804271732.SAA13762@toad.ig.co.uk>,
+	         <9804250212.AA27695@forte.com>
+	 Files:  Porting/makerel
+
+Change 913 on 1998/05/01 by TimBunce@ig.co.uk
+
+	Update MANIFEST for trial 2.
+	(Porting/Contract lib/Tie/Handle.pm t/op/tiehandle.t)
+
+Change 912 on 1998/05/01 by TimBunce@ig.co.uk
+
+	Add t/op/tiehandle.t as xtext to repository (see change 911)
+
+Change 911 on 1998/05/01 by TimBunce@ig.co.uk
+	
+	 Title:  "Add ERRSV, ERRHV, DEFSV and SAVE_DEFSV for XS 5.005 compatibility"
+	  From:  timbo@ig.co.uk (Tim Bunce)
+	Msg-ID:  <199804200854.JAA01482@toad.ig.co.uk>
+	 Files:  perl.h
+	
+	 Title:  "Add WRITE & CLOSE to TIEHANDLE"
+	  From:  Graham Barr <gbarr@pobox.com>
+	Msg-ID:  <34F63DC8.CA95670F@pobox.com>
+	 Files:  pod/perltie.pod lib/Tie/Handle.pm pp_sys.c t/op/tiehandle.t
+
+Change 910 on 1998/05/01 by TimBunce@ig.co.uk
+	
+	 Title:  "Add warning for Illegal hex digit"
+	  From:  Stephen P Potter <spp@spp.users.ds.net>, Stephen Potter
+	         <spp@psasolar.colltech.com>, Tim.Bunce@ig.co.uk (Tim Bunce)
+	Msg-ID:  <199804232219.SAA02267@spp.users.ds.net>,
+	         <199804271409.PAA12819@toad.ig.co.uk>,
+	         <199804280307.WAA12332@psasolar.psa.pencom.com>
+	 Files:  pod/perldiag.pod util.c
+	
+	 Title:  "perl_call_method() bug fix (corrupt op pointer)"
+	  From:  "Alterman, Eugene" <Eugene.Alterman@bremer-inc.com>
+	Msg-ID:  <510415F72ECFD111A31700A0C9B3CCDE3098@efx98digmasa.bremer-inc.com>
+	 Files:  perl.c
+	
+	 Title:  "Fix printf segmentation fault"
+	  From:  Hugo van der Sanden <hv@crypt0.demon.co.uk>
+	Msg-ID:  <l03130300b16bebdbc314@[194.222.64.89]>
+	 Files:  pp_hot.c
+	
+	 Title:  "Document changed local($a[$i],$b{$j}) behaviour re delete/splice"
+	  From:  Charles Bailey <BAILEY@newman.upenn.edu>
+	Msg-ID:  <01IVMVIHNZ36001NKH@cor.newman.upenn.edu>
+	 Files:  pod/perlsub.pod
+
+Change 909 on 1998/05/01 by TimBunce@ig.co.uk
+	
+	 Title:  "Change Ilya's do_binmode to K&R prototype and move to doio.c"
+	 Files:  doio.c util.c
+
+Change 907 on 1998/05/01 by TimBunce@ig.co.uk
+	
+	 Title:  "Runtime Carp verbosity without aliasing"
+	  From:  Joshua.Pritikin@NewYork2.dmg.deuba.com, Tim Bunce
+	Msg-ID:  <H00000e50003936c@MHS>
+	 Files:  lib/Carp.pm
+	
+	 Title:  "Fix File::Basename to not untaint results (using new //t flag)"
+	  From:  Eric Hammond <erich@finity.citysearch.com>, Tom Phoenix
+	         <rootbeer@teleport.com>
+	Msg-ID:  <199710070515.WAA00682@finity.citysearch.com>,
+	         <Pine.GSO.3.96.971007074114.14211J-100000@usertest.teleport.com>
+	 Files:  lib/File/Basename.pm
+
+Change 906 on 1998/04/28 by TimBunce@ig.co.uk
+	
+	 ------  CORE LANGUAGE  ------
+	
+	 Title:  "5.004_04m5t1: Fix dangling references in LVs", "Fix dangling
+	         references in LVs"
+	  From:  Spider Boardman <spider@orb.nashua.nh.us>
+	Msg-ID:  <199804010541.AAA32615@Orb.Nashua.NH.US>,
+	         <19980422164037.D29222@perl.org>
+	 Files:  embed.h keywords.h opcode.h perl.h proto.h doop.c global.sym mg.c
+	         pp.c sv.c
+	
+	 Title:  "Fix SvGMAGIC typo in change 904"
+	 Files:  doop.c
+
+Change 905 on 1998/04/28 by TimBunce@ig.co.uk
+
+	Regexp patches
+	
+	 Title:  "New regex flag //t to leave $1 etc. tainted"
+	  From:  Chip Salzenberg <chip@pobox.com>, Tim Bunce <Tim.Bunce@ig.co.uk>
+	Msg-ID:  <19980310192640.37826@cyprus>
+	 Files:  pod/perlop.pod pod/perlre.pod op.h dump.c mg.c pp_hot.c sv.c
+	         t/op/taint.t toke.c
+	
+	 Title:  "Don't accidentally untaint target of s///"
+	  From:  Chip Salzenberg <chip@pobox.com>
+	Msg-ID:  <19980310151756.24767@cyprus>
+	 Files:  pp_ctl.c pp_hot.c t/op/taint.t
+	
+	 Title:  "Allow but ignore embedded /...(?o).../ in regexp"
+	  From:  h.sanden@elsevier.nl (Hugo van der Sanden)
+	Msg-ID:  <199804201243.OAA08244@dorlas.elsevier.nl>
+	 Files:  regcomp.c
+
+Change 904 on 1998/04/27 by TimBunce@ig.co.uk
+
+	Assorted patches:
+	
+	 ------  CORE LANGUAGE  ------
+	
+	 Title:  "Protect join() against double reads on undef and SvGMAGICALs"
+	  From:  Chip Salzenberg <chip@perlsupport.com>, Tim Bunce
+	         <Tim.Bunce@ig.co.uk>
+	Msg-ID:  <19980424080630.D13985@perl.org>
+	 Files:  doop.c
+	
+	 Title:  "Better error message for require failure"
+	  From:  epeschko@den-mdev1 (Ed Peschko)
+	Msg-ID:  <199804240047.SAA24155@den-mdev1.co.csgsystems.com>
+	 Files:  pod/perldiag.pod pp_ctl.c
+	
+	 Title:  "fixes for various noises under PERL_DESTRUCT_LEVEL"
+	  From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+	Msg-ID:  <199804231926.PAA23969@aatma.engin.umich.edu>
+	 Files:  perl.c
+	
+	 Title:  "Fix nice_chunk memory leak"
+	  From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+	Msg-ID:  <199804052347.TAA15699@aatma.engin.umich.edu>
+	 Files:  sv.c
+	
+	 Title:  "-2.0 vs. -2 (was Number representations)"
+	  From:  Chip Salzenberg <chip@pobox.com>
+	Msg-ID:  <19980309185652.11231@cyprus>
+	 Files:  op.c
+	
+	 Title:  "perl.c fixes for -DUNEXEC"
+	  From:  Matt Wette <mwette@mr-ed.jpl.nasa.gov>, Matthew R Wette
+	         <mwette@mr-ed.jpl.nasa.gov>
+	Msg-ID:  <199710152146.OAA07283@mr-ed.jpl.nasa.gov>
+	 Files:  perl.c
+	
+	 ------  DOCUMENTATION  ------
+	
+	 Title:  "perlcall is Perl from C, not C from Perl"
+	  From:  Steve A Fink <sfink@cs.berkeley.edu>
+	 Files:  pod/perlembed.pod
+	
+	 Title:  "Clarify require "Foo::Bar" non-bareword issue"
+	  From:  Dominique Dumont <domi@ss7serv.grenoble.hp.com>
+	Msg-ID:  <199804231527.AA153445256@ss7serv.grenoble.hp.com>
+	 Files:  pod/perlfunc.pod
+	
+	 Title:  "(repost) new text for perlsec", "new text for perlsec"
+	  From:  Tom Phoenix <rootbeer@teleport.com>
+	Msg-ID:  <Pine.GSO.3.96.980423161605.5518N-100000@user2.teleport.com>
+	 Files:  pod/perlsec.pod
+	
+	 ------  EXTENSIONS  ------
+	
+	 Title:  "IO::Socket->socketpair broken (typo)"
+	  From:  Olaf Titz <olaf@bigred.inka.de>
+	Msg-ID:  <19980425224535.2807.qmail@bigred.inka.de>
+	 Files:  ext/IO/lib/IO/Socket.pm
+	
+	 Title:  "NDBM_File man page needs Fcntl"
+	  From:  "Danny R. Faught" <faught@mailhost.rsn.hp.com>
+	Msg-ID:  <199707011500.IAA00601@palrel3.hp.com>
+	 Files:  ext/NDBM_File/NDBM_File.pm
+	
+	 ------  LIBRARY  ------
+	
+	 Title:  "Documentation discrepancy: pragmatic modules"
+	  From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>, h.sanden@elsevier.nl (Hugo van der Sanden)
+	Msg-ID:  <199804221525.RAA12695@dorlas.elsevier.nl>,
+	         <E0ySPhk-00034f-00@taurus.cus.cam.ac.uk>
+	 Files:  lib/strict.pm lib/subs.pm lib/vars.pm
+	
+	 ------  PORTABILITY - GENERAL  ------
+	
+	 Title:  "Updated hints file for svr4"
+	  From:  Andy Dougherty <doughera@lafcol.lafayette.edu>
+	Msg-ID:  <Pine.SUN.3.96.980423110522.26621A-100000@newton.phys>
+	 Files:  hints/svr4.sh
+	
+	 Title:  "Pumpkin update -- shared libperl.so location"
+	  From:  Andy Dougherty <doughera@lafcol.lafayette.edu>
+	Msg-ID:  <Pine.SUN.3.96.980424115837.6222A-100000@newton.phys>
+	 Files:  Porting/pumpkin.pod
+	
+	 Title:  "perl compile fix for AIX 4.3"
+	  From:  Jens-Uwe Mager <jum@helios.de>
+	Msg-ID:  <199804261611.SAA34728@ans.helios.de>
+	 Files:  ext/DynaLoader/dl_aix.xs
+	
+	 Title:  "Dynaloader build on VMS",
+	  From:  pvhp@forte.com (Peter Prymmer), timbo@ig.co.uk (Tim Bunce)
+	Msg-ID:  <199804271732.SAA13762@toad.ig.co.uk>, <9804250212.AA27695@forte.com>
+	 Files:  vms/descrip.mms
+	
+	 ------  UTILITIES  ------
+	
+	 Title:  "Major update to h2ph.PL"
+	  From:  Billy <wdconsta@cs.adelaide.edu.au>
+	Msg-ID:  <Pine.SV4.3.93.980424031837.20782A-200000@ermintrude.teaching.cs.adelaide.edu.au>
+	 Files:  utils/h2ph.PL
+
+Change 897 on 1998/04/23 by TimBunce@ig.co.uk
+
+	Assorted patches:
+	
+	 ------  CORE LANGUAGE  ------
+	
+	 Title:  "fix for "Unbalanced string table refcount""
+	  From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+	Msg-ID:  <199804042251.RAA25527@aatma.engin.umich.edu>
+	 Files:  sv.c
+	
+	 Title:  "Allow more lenient switch processing"
+	  From:  "John L. Allen" <allen@grumman.com>
+	Msg-ID:  <199803251638.LAA22664@gateway.grumman.com>
+	 Files:  perl.c
+	
+	 Title:  "Add fourth arg to substr: substr EXPR,OFFSET,LEN,REPLACEMENT"
+	  From:  Gisle Aas <gisle@aas.no>
+	Msg-ID:  <m3g1jglqtm.fsf@furu.g.aas.no>
+	 Files:  pod/perlfunc.pod Todo opcode.pl pp.c t/op/substr.t
+	
+	 Title:  "Odd number of elements in hash list."
+	  From:  Tom Phoenix <rootbeer@teleport.com>
+	Msg-ID:  <Pine.GSO.3.96.980328151929.29336D-100000@user2.teleport.com>
+	 Files:  MANIFEST pod/perldiag.pod pp.c pp_hot.c t/op/hashwarn.t
+	
+	 Title:  "another destruct_level fix"
+	  From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+	Msg-ID:  <199804030105.UAA04400@aatma.engin.umich.edu>
+	 Files:  hv.c
+	
+	 Title:  "bidirectional pipe warning blues"
+	  From:  pmarquess@bfsec.bt.co.uk (Paul Marquess)
+	Msg-ID:  <9804082151.AA20399@claudius.bfsec.bt.co.uk>
+	 Files:  doio.c
+	
+	 Title:  "stale pointers after realloc (MEXTEND in pp_print and pp_prtf)"
+	  From:  Malcolm Beattie <mbeattie@sable.ox.ac.uk>
+	Msg-ID:  <199801191107.LAA17979@sable.ox.ac.uk>
+	 Files:  pp_hot.c pp_sys.c
+	
+	 Title:  "unimplemented umask() should return undef not die"
+	  From:  kstar@chapin.edu (Kurt D. Starsinic)
+	Msg-ID:  <199803120515.VAA08660@chapin.edu>
+	 Files:  pod/perlfunc.pod pp_sys.c
+	
+	 Title:  "warning for: bless $foo, """
+	  From:  Joshua.Pritikin@NewYork2.dmg.deuba.com
+	Msg-ID:  <H00000e5000378a0@MHS>
+	 Files:  pod/perldiag.pod pp.c
+	
+	 ------  DOCUMENTATION  ------
+	
+	 Title:  "Mention SWIG in perlxs.pod"
+	  From:  Steve A Fink <sfink@cs.berkeley.edu>
+	Msg-ID:  <Pine.HPP.3.96.980408154956.20990K-100000@brooksie.CS.Berkeley.EDU>
+	 Files:  pod/perlxs.pod
+	
+	 Title:  "fix-up of previous perlre.pod patch"
+	  From:  Ted Ashton <ashted@southern.edu>
+	Msg-ID:  <199803031540.KAA09388@ns.southern.edu>
+	 Files:  pod/perlre.pod
+	
+	 Title:  "long list of man page nitpicks"
+	  From:  Greg Bacon <gbacon@mickey.cs.uah.edu>, Tom Christiansen
+	         <tchrist@jhereg.perl.com>
+	Msg-ID:  <199804221844.NAA08338@pluto.cs.uah.edu>,
+	         <199804222204.QAA20805@jhereg.perl.com>
+	 Files:  pod/perlapio.pod pod/perlcall.pod pod/perldebug.pod pod/perldelta.pod
+	         pod/perldiag.pod pod/perlembed.pod pod/perlfaq2.pod
+	         pod/perlfaq3.pod pod/perlfaq4.pod pod/perlfaq5.pod
+	         pod/perlfaq7.pod pod/perlfaq8.pod pod/perlform.pod
+	         pod/perlfunc.pod pod/perlguts.pod pod/perlipc.pod
+	         pod/perllocale.pod pod/perlmodlib.pod pod/perlop.pod
+	         pod/perlre.pod pod/perlref.pod pod/perlrun.pod
+	         pod/perlstyle.pod pod/perlsub.pod pod/perlsyn.pod
+	         pod/perltoot.pod pod/perlvar.pod pod/perlxs.pod
+	         pod/pod2man.PL
+	
+	 Title:  "document that system() does not set $! when it fails"
+	  From:  "Mark R. Levinson" <mrl@isc.upenn.edu>
+	Msg-ID:  <199803011946.OAA31942@anaximander.dccs.upenn.edu>
+	 Files:  pod/perlfunc.pod
+	
+	 Title:  "Fix pod/roffitall execute permission"
+	  From:  lvirden@cas.org
+	Msg-ID:  <1997Nov17.132031.2589892@cor.newman>
+	 Files:  pod/roffitall
+	
+	 Title:  "document when split ignores trailing empty fields"
+	  From:  Hugo van der Sanden <hv@crypt0.demon.co.uk>
+	Msg-ID:  <l03130300b14fac832b77@[194.222.64.89]>
+	 Files:  pod/perlfunc.pod
+	
+	 ------  EXTENSIONS  ------
+	
+	 Title:  "Buglet in Opcode.pm documentation"
+	  From:  Horst von Brand <vonbrand@sleipnir.valparaiso.cl>
+	Msg-ID:  <199804170349.XAA32445@sleipnir.valparaiso.cl>
+	 Files:  ext/Opcode/Opcode.pm
+	
+	 Title:  "Failure to append to perllocal.pod should not be fatal"
+	  From:  koenig@kulturbox.de (Andreas J. Koenig)
+	Msg-ID:  <sfciuogy67x.fsf@dubravka.in-berlin.de>
+	 Files:  lib/ExtUtils/MM_Unix.pm
+	
+	 Title:  "Document that IO.pm does not load IO::Select etc"
+	  From:  Graham Barr <gbarr@ti.com>
+	Msg-ID:  <353B48F1.64E35A63@ti.com>
+	 Files:  ext/IO/IO.pm
+	
+	 Title:  "Install extensions with bootstrap (again) in $archlib"
+	  From:  Achim Bohnet <ach@mpe.mpg.de>, koenig@kulturbox.de (Andreas J.
+	         Koenig)
+	Msg-ID:  <9804061909.AA12675@o09.xray.mpe.mpg.de>,
+	         <sfc90oxc0uj.fsf@dubravka.in-berlin.de>
+	 Files:  lib/ExtUtils/Install.pm
+	
+	 Title:  "glibc2.0.6 missing MSG_* <sys/socket.h> defines."
+	  From:  Andy Dougherty <doughera@lafcol.lafayette.edu>
+	Msg-ID:  <Pine.SUN.3.96.980406113950.3166L-100000@newton.phys>
+	 Files:  ext/Socket/Socket.xs
+	
+	 ------  LIBRARY  ------
+	
+	 Title:  "Benchmark.pm: add run-for-some-time mode"
+	  From:  Jarkko Hietaniemi <jhi@iki.fi>
+	Msg-ID:  <199804080647.JAA15136@alpha.hut.fi>
+	 Files:  lib/Benchmark.pm
+	
+	 Title:  "Comments added to Carp.pm"
+	  From:  Andy Wardley <abw@cre.canon.co.uk>, Chip Salzenberg
+	         <chip@perlsupport.com>, Tom Christiansen
+	         <tchrist@jhereg.perl.com>
+	Msg-ID:  <19980422164242.E29222@perl.org>,
+	         <199804222033.OAA17959@jhereg.perl.com>,
+	         <980409182357.ZM21638@bandanna>
+	 Files:  lib/Carp.pm
+	
+	 Title:  "chat2.pl fix"
+	  From:  Charles Bailey <BAILEY@newman.upenn.edu>
+	Msg-ID:  <01IVMVF507PO001NKH@cor.newman.upenn.edu>
+	 Files:  lib/chat2.pl
+	
+	 Title:  "lib/Pod/Html.pm"
+	  From:  d-lewart@uiuc.edu (Daniel S. Lewart)
+	Msg-ID:  <199710170718.DAA25472@staff1.cso.uiuc.edu>,
+	         <199710180417.AAA19778@staff2.cso.uiuc.edu>
+	 Files:  lib/Pod/Html.pm
+	
+	 Title:  "ormaments method in Term/ReadLine.pm causes warning with string
+	         arg."
+	  From:  hiroo.hayashi@computer.org
+	Msg-ID:  <199804061519.AAA21907@mail.fb3.so-net.ne.jp>
+	 Files:  lib/Term/ReadLine.pm
+	
+	 ------  OTHER CHANGES  ------
+	
+	 Title:  "ptags broken"
+	  From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+	Msg-ID:  <199804120208.WAA29264@monk.mps.ohio-state.edu>
+	 Files:  emacs/ptags
+	
+	 ------  PORTABILITY - WIN32  ------
+	
+	 Title:  "win32 tweaks (signals and crypt support)"
+	  From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+	Msg-ID:  <199804170505.BAA06413@aatma.engin.umich.edu>
+	 Files:  perl.h win32/config.bc win32/config.vc win32/config_H.bc
+	         win32/config_H.vc win32/win32.c
+	
+	 ------  PORTABILITY - GENERAL  ------
+	
+	 Title:  "Add Social Contract (2nd Draft) as Porting/Contract"
+	  From:  Russ Allbery <rra@stanford.edu>
+	Msg-ID:  <m3btw66n8i.fsf@windlord.Stanford.EDU>
+	 Files:  Porting/Contract
+	
+	 Title:  "Config: Irix 5 hints"
+	  From:  kstar@O2.chapin.edu
+	Msg-ID:  <199804061712.NAA22823@O2.chapin.edu>
+	 Files:  hints/irix_5.sh
+	
+	 Title:  "VMS patches to 5.004_03"
+	  From:  Charles Bailey <BAILEY@newman.upenn.edu>
+	Msg-ID:  <01IVYJS0L8D200209B@cor.newman.upenn.edu>
+	 Files:  vms/vms.c
+	
+	 Title:  "hints/netbsd.sh - enable vfork"
+	  From:  Andy Dougherty <doughera@lafcol.lafayette.edu>
+	Msg-ID:  <Pine.SUN.3.96.980417110749.19327B-100000@newton.phys>
+	 Files:  hints/netbsd.sh
+	
+	 ------  UTILITIES  ------
+	
+	 Title:  "support find2perl -follow"
+	  From:  Billy <wdconsta@cs.adelaide.edu.au>
+	Msg-ID:  <Pine.SV4.3.93.980408005903.24081A-100000@ermintrude.teaching.cs.adelaide.edu.au>
+	 Files:  x2p/find2perl.PL
+
+Change 896 on 1998/04/22 by TimBunce@ig.co.uk
+
+	 Assorted patches:
+	
+	 ------  CORE LANGUAGE  ------
+	
+	 Title:  "Additional regex-cache patch"
+	  From:  Chip Salzenberg <chip@atlantic.net>
+	Msg-ID:  <19980305104831.38100@cyprus>
+	 Files:  pp_ctl.c
+	
+	 Title:  "Conservative C<*x = undef> patch"
+	  From:  Chip Salzenberg <chip@atlantic.net>
+	Msg-ID:  <19980310163310.48509@cyprus>
+	 Files:  pod/perldiag.pod pod/perlfunc.pod pp.c sv.c t/op/gv.t
+	
+	 Title:  "Consider @ARGV to be plain files if inplace (-i)"
+	  From:  Chip Salzenberg <salzench@nielsenmedia.com>
+	Msg-ID:  <199802042106.QAA04082@nielsenmedia.com>
+	 Files:  doio.c
+	
+	 Title:  "Fix semctl for Linux, Sun and SVR4"
+	  From:  Graham Barr <gbarr@ti.com>, lvirden@cas.org (Larry W. Virden, x2487)
+	Msg-ID:  <3484247D.BB036D39@ti.com>, <9712021313.AA11495@cas.org>
+	 Files:  doio.c
+	
+	 Title:  "C<dSP> entails using C<SP>, not C<sp>"
+	  From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+	Msg-ID:  <199803070149.UAA12217@aatma.engin.umich.edu>
+	 Files:  pod/perlcall.pod pod/perlembed.pod pod/perlguts.pod pod/perlxs.pod
+	         doio.c doop.c ext/DB_File/DB_File.xs
+	         ext/DynaLoader/dl_dld.xs ext/Opcode/Opcode.xs
+	         ext/POSIX/POSIX.xs ext/Socket/Socket.xs gv.c
+	         lib/ExtUtils/typemap mg.c os2/OS2/REXX/REXX.xs
+	         win32/win32.c
+	
+	 Title:  "Make autouse -w-safe"
+	  From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+	Msg-ID:  <199803030236.VAA13244@monk.mps.ohio-state.edu>
+	 Files:  lib/autouse.pm op.c sv.c
+	
+	 Title:  "Misleading error on close of unopened handle"
+	  From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+	Msg-ID:  <E0y4R07-0003PH-00@ursa.cus.cam.ac.uk>
+	 Files:  doio.c
+	
+	 Title:  "Confusing error from perl -e "x'""
+	  From:  Hans Mulder <hansmu@xs4all.nl>
+	Msg-ID:  <1998Mar25.174320.2866352@cor.newman.upenn.edu>
+	 Files:  toke.c
+	
+	 Title:  "Add HAS_GNULIBC define"
+	  From:  Andy Dougherty <doughera@lafcol.lafayette.edu>
+	Msg-ID:  <Pine.SUN.3.96.980305115202.9180K-100000@newton.phys>
+	 Files:  config_H config_h.SH
+	
+	 Title:  "h_errno might not be an int"
+	  From:  Andy Dougherty <doughera@lafcol.lafayette.edu>
+	Msg-ID:  <Pine.SUN.3.96.980325165059.22255D-100000@newton.phys>
+	 Files:  pp_sys.c
+	
+	 Title:  "Revised taint hole closer", "Revised taint hole closer"
+	  From:  Chip Salzenberg <chip@atlantic.net>, Ilya Zakharevich
+	         <ilya@math.ohio-state.edu>
+	Msg-ID:  <19980310222127.09350@cyprus>,
+	         <199803110554.AAA29157@monk.mps.ohio-state.edu>
+	 Files:  doio.c
+	
+	 Title:  "SEGV compiling localised lexical in perl5.004_05t1"
+	  From:  Gurusamy Sarathy <gsar@engin.umich.edu>, h.sanden@elsevier.nl (Hugo
+	         van der Sanden)
+	Msg-ID:  <199803171530.QAA24053@dorlas.elsevier.nl>,
+	         <199803171727.MAA05234@aatma.engin.umich.edu>
+	 Files:  op.c t/op/misc.t
+	
+	 Title:  "Stale SP in pp_substr"
+	  From:  Stephen McCamant <alias@mcs.com>
+	Msg-ID:  <m0yFsTS-000EZpC@alias-2.pr.mcs.net>
+	 Files:  pp.c
+	
+	 Title:  "Statement unlikely to be reached warning"
+	  From:  Hans Mulder <hansm@icgned.nl>
+	Msg-ID:  <1997Dec24.171511.2683516@cor.newman>
+	 Files:  op.c
+	
+	 Title:  "Tainting propagates from nowhere"
+	  From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+	Msg-ID:  <199803140411.XAA09343@aatma.engin.umich.edu>
+	 Files:  pp.c
+	
+	 Title:  "two trivial tweaks to 5.004m5t1"
+	  From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+	Msg-ID:  <199803060553.AAA28461@aatma.engin.umich.edu>
+	 Files:  proto.h win32/Makefile
+	
+	 Title:  "unpacking negatives on Alpha"
+	  From:  Achim Bohnet <ach@mpe.mpg.de>
+	Msg-ID:  <9710201503.AA24797@o09.xray.mpe.mpg.de>
+	 Files:  pp.c t/op/pack.t
+	
+	 ------  LIBRARY AND EXTENSIONS  ------
+	
+	 Title:  "Cwd.pm: abs_path() and fast_abs_path() plus code merge"
+	  From:  Graham Barr <gbarr@ti.com>
+	Msg-ID:  <3482F365.4A0486BA@ti.com>
+	 Files:  lib/Cwd.pm
+	
+	 Title:  "Math/BigInt.pm, fixed use of undefined value."
+	  From:  abigail@fnx.com
+	Msg-ID:  <19980313052452.27365.qmail@betelgeuse.wayne.fnx.com>
+	 Files:  lib/Math/BigInt.pm
+	
+	 Title:  "File::Find rewrite"
+	  From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+	Msg-ID:  <199803052344.SAA01008@monk.mps.ohio-state.edu>
+	 Files:  lib/File/Find.pm
+	
+	 Title:  "efficient version of strict.pm"
+	  From:  koenig@anna.mind.de (Andreas J. Koenig)
+	Msg-ID:  <sfcpvonhdnc.fsf@anna.in-berlin.de>
+	 Files:  lib/strict.pm
+	
+	 Title:  "Socket occasional SEGV in pack_sockaddr_un"
+	  From:  Trevor Blackwell <tlb@viaweb.com>
+	Msg-ID:  <199710281804.NAA09632@wagg.viaweb.com>
+	 Files:  ext/Socket/Socket.xs
+	
+	 Title:  "Warning on mis-use of 'use lib'"
+	  From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>, Tom Phoenix
+	         <rootbeer@teleport.com>, chip@atlantic.net
+	Msg-ID:  <199801270435.XAA14147@cyprus.atlantic.net>,
+	         <E0xx9x4-0006jc-00@ursa.cus.cam.ac.uk>,
+	         <Pine.GSO.3.96.980126192445.22284N-100000@user2.teleport.com>
+	 Files:  lib/lib.pm
+	
+	 Title:  "bug in Class::Struct"
+	  From:  Tom Christiansen <tchrist@toy.perl.com>
+	Msg-ID:  <199803290814.KAA05699@toy.perl.com>
+	 Files:  lib/Class/Struct.pm
+	
+	 Title:  "Allow POSIX to export nice()"
+	  From:  bkeelerx@iwa.dp.intel.com (Bruce J. Keeler)
+	Msg-ID:  <eclg1kf5yf0.fsf@ws010.dp.intel.com>
+	 Files:  ext/POSIX/POSIX.pm
+	
+	 Title:  "'use Env' on WinNT/95 fails"
+	  From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+	Msg-ID:  <199803280511.AAA15933@aatma.engin.umich.edu>
+	 Files:  lib/Env.pm
+	
+	 ------  OTHER CHANGES  ------
+	
+	 Title:  "mv-if-diff"
+	  From:  Robin Barker <rmb1@cise.npl.co.uk>
+	Msg-ID:  <14572.9803271806@tempest.cise.npl.co.uk>
+	 Files:  mv-if-diff
+	
+	 ------  PORTABILITY - WIN32  ------
+	
+	 Title:  "fix various problems with backticks on win32"
+	  From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+	Msg-ID:  <199803070705.CAA15945@aatma.engin.umich.edu>
+	 Files:  win32/config_h.PL win32/win32.c
+	
+	 ------  TESTS  ------
+	
+	 Title:  "Fix bug in locale.t"
+	  From:  Jarkko Hietaniemi <jhi@iki.fi>
+	Msg-ID:  <199801042148.XAA08599@alpha.hut.fi>
+	 Files:  t/pragma/locale.t
+
+Change 887 on 1998/04/10 by TimBunce@ig.co.uk
+
+	 Assorted patches:
+	
+	 ------  CORE LANGUAGE  ------
+	
+	 Title:  "Re: die exits with 0"
+	  From:  Robin Barker <rmb1@cise.npl.co.uk>
+	 Files:  perl.c t/op/die_exit.t
+	
+	 Title:  "More toke.c commentary; fix oddity"
+	  From:  h.sanden@elsevier.nl (Hugo van der Sanden)
+	Msg-ID:  <199803251022.LAA01308@dorlas.elsevier.nl>
+	 Files:  toke.c
+	
+	 Title:  "for semctl on solaris"
+	  From:  Graham Barr <gbarr@ti.com>
+	Msg-ID:  <34624B80.C014E841@ti.com>
+	 Files:  doio.c t/op/ipcmsg.t t/op/ipcsem.t
+	
+	 ------  DOCUMENTATION  ------
+	
+	 Title:  "Add more 'see also's to perlre.pod.", "Perl regexp /g modifier bug"
+	  From:  Ilya Zakharevich <ilya@math.ohio-state.edu>, epeschko@den-mdev1 (Ed
+	         Peschko), pjr@watcher.telstra.com.au (Peter Richardson)
+	Msg-ID:  <199803050000.LAA11476@watcher.telecom.com.au>,
+	         <199803050231.VAA19128@monk.mps.ohio-state.edu>,
+	         <199803050605.XAA09785@den-mdev1.co.csgsystems.com>
+	 Files:  pod/perlre.pod
+	
+	 ------  LIBRARY AND EXTENSIONS  ------
+	
+	 Title:  "BigFloat - small neagtive numbers cause panic"
+	  From:  Hugo van der Sanden <hv@crypt.compulink.co.uk>
+	Msg-ID:  <199711201325.NAA09732@crypt.compulink.co.uk>
+	 Files:  lib/Math/BigFloat.pm
+	
+	 Title:  "Update Getopt::Long to 2.16"
+	  From:  JVromans@Squirrel.nl (Johan Vromans), Johan Vromans
+	         <jvromans@squirrel.nl>
+	Msg-ID:  <13571.48089.726787.147769@plume.nl.compuware.com>,
+	         <13572.6847.863219.973795@phoenix.squirrel.nl>
+	 Files:  lib/Getopt/Long.pm
+	
+	 Title:  "New Text::ParseWords"
+	  From:  pomeranz@netcom.com (Hal Pomeranz)
+	Msg-ID:  <199710162118.OAA06275@netcom7.netcom.com>
+	 Files:  lib/Text/ParseWords.pm t/lib/parsewords.t
+	
+	 Title:  "Fixed Text/Wrap.pm bugs (2)"
+	  From:  Jacqui Caren <Jacqui.Caren@ig.co.uk>
+	Msg-ID:  <199709291548.QAA08645@toad.ig.co.uk>
+	 Files:  lib/Text/Wrap.pm
+	
+	 Title:  "Very *evil* File::CheckTree behavior! (now uses warn/die not
+	         print/exit)"
+	  From:  Eryq <eryq@zeegee.com>, Randal Schwartz <merlyn@stonehenge.com>
+	Msg-ID:  <34B542FD.190A@zeegee.com>, <8cen2i9k6f.fsf@gadget.cscaper.com>
+	 Files:  lib/File/CheckTree.pm
+	
+	 ------  OTHER CHANGES  ------
+	
+	 Title:  "Add ./emacs/ptags"
+	  From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+	Msg-ID:  <199803150847.DAA08196@monk.mps.ohio-state.edu>
+	 Files:  emacs/ptags
+	
+	 ------  TESTS  ------
+	
+	 Title:  "Avoid stat test failure from build in /tmp (tmpfs)", "Build in /tmp"
+	  From:  Andy Dougherty <doughera@newton.phys.lafayette.edu>, Greg Bacon
+	         <gbacon@adtran.com>, pudge@pobox.com (Chris Nandor)
+	Msg-ID:  <199710171616.LAA13435@crp-201.adtran.com>,
+	         <Pine.SUN.3.96.971017171023.2349A-100000@newton.phys>,
+	         <v02130515b06be80f1486@[205.228.240.16]>
+	 Files:  t/op/stat.t
+	
+	 Title:  "for failure with lib/timelocal"
+	  From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>, jan.dubois@ibm.net (Jan Dubois)
+	Msg-ID:  <34c78f61.2529827@smtp1.ibm.net>,
+	         <E0xvdfI-00057d-00@ursa.cus.cam.ac.uk>
+	 Files:  t/lib/timelocal.t
+	
+	 Title:  "Make "localhost" related failures more clear"
+	  From:  Paul Hoffman <phoffman@proper.com>
+	Msg-ID:  <199801201859.KAA05686@mail.proper.com>
+	 Files:  t/lib/io_sock.t t/lib/io_udp.t
+	
+	 ------  UTILITIES  ------
+	
+	 Title:  "Let h2xs read multiple header files"
+	  From:  Andy Dougherty <doughera@lafcol.lafayette.edu>, Benjamin Sugars
+	         <bsugars@canoe.ca>
+	Msg-ID:  <Pine.SOL.3.95.980310091946.25236A-100000@interact>,
+	         <Pine.SUN.3.96.980310145455.638A-100000@newton.phys>
+	 Files:  utils/h2xs.PL
+
+Change 886 on 1998/04/10 by TimBunce@ig.co.uk
+
+	Changes relating primarily to portability.
+	
+	 ------  CORE LANGUAGE  ------
+	
+	 Title:  "5.004_55: Another round of OS/2 patches"
+	  From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+	Msg-ID:  <199803050945.EAA20153@monk.mps.ohio-state.edu>
+	 Files:  hints/os2.sh pod/perlguts.pod cop.h perl.h proto.h README.os2
+	         global.sym lib/ExtUtils/MM_OS2.pm lib/File/Path.pm op.c
+	         os2/Changes os2/Makefile.SHs os2/os2.c os2/perl2cmd.pl
+	         perl.c pod/pod2man.PL pp_ctl.c pp_hot.c pp_sys.c
+	         t/lib/filecopy.t util.c utils/perldoc.PL
+	
+	 Title:  "VMS: chdir() with empty arg list"
+	  From:  lane@duphy4.drexel.edu (Charles Lane)
+	Msg-ID:  <980317125556.222041c7@DUPHY4.Physics.Drexel.Edu>
+	 Files:  pp_sys.c
+	
+	 ------  LIBRARY AND EXTENSIONS  ------
+	
+	 Title:  "ExtUtils/MM_Unix.pm changed to use ld -rpath on IRIX"
+	  From:  "W. Phillip Moore" <wpm@ms.com>
+	Msg-ID:  <199712011738.MAA21139@zappa.morgan.com>
+	 Files:  lib/ExtUtils/MM_Unix.pm
+	
+	 Title:  "[Linux] POSIX::_[PS]C_.+ bug (add HINT_SC_EXIST)"
+	  From:  Yutaka OIWA <oiwa@is.s.u-tokyo.ac.jp>
+	Msg-ID:  <199712251923.EAA08260@tjms1f.is.s.u-tokyo.ac.jp>
+	 Files:  ext/POSIX/hints/linux.pl ext/POSIX/POSIX.xs
+	
+	 Title:  "5.004_04-m1] Use HAS_GNULIBC in POSIX.xs"
+	  From:  Andy Dougherty <doughera@lafcol.lafayette.edu>
+	Msg-ID:  <Pine.SUN.3.96.980305115517.9180L-100000@newton.phys>
+	 Files:  ext/POSIX/POSIX.xs
+	
+	 Title:  ""ODBM_File.c", line 275: NULL undefined"
+	  From:  pmarquess@bfsec.bt.co.uk (Paul Marquess)
+	Msg-ID:  <9803091310.AA23264@claudius.bfsec.bt.co.uk>
+	 Files:  ext/ODBM_File/ODBM_File.xs
+	
+	 ------  PORTABILITY - GENERAL  ------
+	
+	 Title:  "5.004_04 QNX getcwd"
+	  From:  Norton Allen <allen@huarp.harvard.edu>
+	Msg-ID:  <199802121838.NAA20452@dolores.harvard.edu>,
+	         <199803061511.KAA22346@bottesini.harvard.edu>
+	 Files:  hints/qnx.sh lib/Cwd.pm t/op/magic.t
+	
+	 Title:  "hints/netbsd.sh d_setrgid d_setruid"
+	  From:  Jarkko Hietaniemi <jhi@iki.fi>
+	Msg-ID:  <199802281435.QAA10866@alpha.hut.fi>
+	 Files:  hints/netbsd.sh
+	
+	 Title:  "osname=unixware, osvers=2.03, archname=i386-unixware
+	         d_casti32=undef"
+	  From:  Tom Hughes <tom@compton.demon.co.uk>
+	Msg-ID:  <465398da47%tom@compton.demon.co.uk>
+	 Files:  hints/svr4.sh
+	
+	 Title:  "hints/bsdos.sh patch for BSDI 3.1"
+	  From:  Jan-Pieter Cornet <johnpc@xs4all.nl>
+	Msg-ID:  <6fbip6$3cp$1@xs1.xs4all.nl>
+	 Files:  hints/bsdos.sh
+	
+	 Title:  "Remove BIND_NOSTART from DynaLoader for HP"
+	  From:  Keong Lim <Keong.Lim@sr.com.au>
+	Msg-ID:  <01BD1D03.53B65E90@sieplan2.sr.com.au>
+	 Files:  ext/DynaLoader/dl_hpux.xs
+	
+	 Title:  "Building Perl on AIX 4+ with shared libraries and dynamic loading"
+	  From:  Juan Gallego <Little.Boss@physics.mcgill.ca>
+	Msg-ID:  <Pine.SGI.3.91.971022084517.17052F-100000@nazgul.physics.mcgill.ca>
+	 Files:  hints/aix.sh
+	
+	 Title:  "alpha-dec_osf 5.0"
+	  From:  Spider Boardman <spider@Orb.Nashua.NH.US>
+	Msg-ID:  <199712232305.SAA08359@Orb.Nashua.NH.US>
+	 Files:  hints/dec_osf.sh
+	
+	 Title:  "Off-by-one error with OS2::PrfDB"
+	  From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+	Msg-ID:  <199710170920.FAA00390@monk.mps.ohio-state.edu>
+	 Files:  os2/OS2/PrfDB/PrfDB.xs
+	
+	 Title:  "5.004_04-m1] Allow overrides in hints/openbsd.sh"
+	  From:  Andy Dougherty <doughera@lafcol.lafayette.edu>
+	Msg-ID:  <Pine.SUN.3.96.980305115956.9180N-100000@newton.phys>
+	 Files:  hints/openbsd.sh
+	
+	 Title:  "5.004_04-m1] Linux shouldn't use -lnet"
+	  From:  Andy Dougherty <doughera@lafcol.lafayette.edu>
+	Msg-ID:  <Pine.SUN.3.96.980305115843.9180M-100000@newton.phys>
+	 Files:  hints/linux.sh
+	
+	 Title:  "5.004_(04|63)] Close VMS security hole"
+	  From:  Charles Bailey <BAILEY@newman.upenn.edu>
+	Msg-ID:  <01IV6LRJCSSC0009C4@cor.newman.upenn.edu>
+	 Files:  vms/vms.c
+	
+	 Title:  "Re: Perl online documentation on OpenVMS"
+	  From:  pvhp@forte.com (Peter Prymmer)
+	Msg-ID:  <9803192143.AA28120@forte.com>
+	 Files:  README.vms
+	
+	 Title:  "Perl5.004_04m4t4 *almost* makes it for VMS", "Updated
+	         vms/perly_c.vms and vms/perly_h.vms"
+	  From:  Andy Dougherty <doughera@newton.phys.lafayette.edu>, Dan Sugalski
+	         <sugalskd@osshe.edu>, larry@wall.org (Larry Wall)
+	Msg-ID:  <199710151650.JAA29185@wall.org>,
+	         <3.0.3.32.19971014150404.02fdef78@osshe.edu>,
+	         <Pine.SUN.3.96.971015121704.28456F-100000@newton.phys>
+	 Files:  vms/perly_c.vms
+	
+	 Title:  "Updated, non-wordwrapped, patch to README.VMS"
+	  From:  Dan Sugalski <sugalskd@osshe.edu>
+	Msg-ID:  <3.0.5.32.19980213133828.0092c870@osshe.edu>
+	 Files:  README.vms
+	
+	 Title:  "VMS patches to 5.004_03 (excluding installperl and timelocal.t)"
+	  From:  Charles Bailey <BAILEY@newman.upenn.edu>
+	Msg-ID:  <01INZT9G2LZS0006YW@cor.newman.upenn.edu>
+	 Files:  lib/File/Basename.pm lib/File/Path.pm vms/config.vms vms/descrip.mms
+	         vms/genconfig.pl vms/test.com vms/vms.c vms/ext/Filespec.pm
+	         vms/ext/filespec.t
+	
+	 Title:  "Re: VMSperl crashes on -Mblib argument"
+	  From:  bailey@newman.upenn.edu (Charles Bailey)
+	Msg-ID:  <1997Dec10.004439.2635060@cor.newman>
+	 Files:  lib/blib.pm vms/vms.c
+	
+	 Title:  "hints/linux.sh (MkLinux / PPC)"
+	  From:  pudge@pobox.com (Chris Nandor)
+	Msg-ID:  <v0213050cb06c19682a25@[205.228.240.28]>
+	 Files:  hints/linux.sh
+	
+	 Title:  "hpux.sh hints file clarification suggestion"
+	  From:  root@qad.com
+	Msg-ID:  <199802192351.QAA09096@jhereg.perl.com>
+	 Files:  hints/hpux.sh
+	
+	 Title:  "new hints/solaris_2.sh"
+	  From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+	Msg-ID:  <E0xw80h-0005SV-00@ursa.cus.cam.ac.uk>
+	 Files:  hints/solaris_2.sh
+
+Change 873 on 1998/04/03 by TimBunce@ig.co.uk
+
+	 Title:  "FileHandle Documentation patch"
+	  From:  "Darren/Torin/Who Ever..." <torin@daft.com>
+	Msg-ID:  <87emzqo49g.fsf@perv.daft.com>
+	 Files:  lib/FileHandle.pm
+
+Change 872 on 1998/04/03 by TimBunce@ig.co.uk
+
+	Documentation and documentation related patches:
+	
+	 ------  BUILD PROCESS  ------
+	
+	 Title:  "Docs re /usr/bin/perl quasi-standard location"
+	  From:  Tom Phoenix <rootbeer@teleport.com>
+	Msg-ID:  <Pine.GSO.3.96.971117080737.12318C-100000@usertest.teleport.com>
+	 Files:  INSTALL pod/perlrun.pod
+	
+	 ------  DOCUMENTATION  ------
+	
+	 Title:  "/RFC|RFC-1305/ non-greedy"
+	  From:  Jan-Pieter Cornet <johnpc@xs4all.nl>
+	Msg-ID:  <6epo02$c4r$1@xs1.xs4all.nl>
+	 Files:  pod/perlre.pod
+	
+	 Title:  "5.004_04: perlhist.pod, buildtoc, perltoc.pod"
+	  From:  Jarkko Hietaniemi <jhi@iki.fi>
+	Msg-ID:  <199802191543.RAA29231@alpha.hut.fi>
+	 Files:  pod/perl.pod pod/perlhist.pod pod/perltoc.pod pod/buildtoc
+	
+	 Title:  "5.004_04: pod/perlfunc.pod: i18n example for localtime()"
+	  From:  Jarkko Hietaniemi <jhi@iki.fi>
+	Msg-ID:  <199711141555.RAA18875@alpha.hut.fi>
+	 Files:  pod/perlfunc.pod
+	
+	 Title:  "typo-fix and suggestion for perlguts.pod"
+	  From:  h.sanden@elsevier.nl (Hugo van der Sanden)
+	Msg-ID:  <199803051543.QAA03097@dorlas.elsevier.nl>
+	 Files:  pod/perlguts.pod
+	
+	 Title:  "perlfunc/syscall curiosity"
+	  From:  Roderick Schertler <roderick@argon.org>, Tkil
+	         <tkil@reptile.scrye.com>
+	Msg-ID:  <199711302259.PAA02134@reptile.scrye.com>,
+	         <pziut8snva.fsf@eeyore.ibcinc.com>
+	 Files:  pod/perlfunc.pod
+	
+	 Title:  "Document sprintf %#x behaviour for zero value"
+	  From:  ilya@math.ohio-state.edu (Ilya Zakharevich)
+	Msg-ID:  <1997Nov5.185959.2539604@cor.newman>
+	 Files:  pod/perlfunc.pod
+	
+	 Title:  "NUL termination (was Re: STOP THE PRESSES)"
+	  From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+	Msg-ID:  <E0xsn5M-0002gw-00@ursa.cus.cam.ac.uk>
+	 Files:  pod/perlguts.pod
+	
+	 Title:  "Typo fix."
+	  From:  abigail@fnx.com
+	Msg-ID:  <19971101120114.1030.qmail@betelgeuse.wayne.fnx.com>
+	 Files:  pod/perlop.pod pod/perlvar.pod
+	
+	 Title:  "5.004_63 perlrun.pod: _DEBUG_MSTATS"
+	  From:  Achim Bohnet <ach@mpe.mpg.de>
+	Msg-ID:  <9803181940.AA22587@o09.xray.mpe.mpg.de>
+	 Files:  pod/perlrun.pod
+	
+	 Title:  "Re: Conservative C<*x = undef> patch"
+	  From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+	Msg-ID:  <E0yCjHT-0005Dt-00@ursa.cus.cam.ac.uk>
+	 Files:  pod/perltrap.pod
+	
+	 Title:  "perlfunc.pod for flock()"
+	  From:  "Jeremy D. Zawodny" <jzawodn@wcnet.org>
+	Msg-ID:  <3.0.5.32.19971118203119.00a723e0@woody.wcnet.org>
+	 Files:  pod/perlfunc.pod
+	
+	 Title:  "buglet: 'perltoc' not mentioned in perl.pod"
+	  From:  Tkil <tkil@scrye.com>
+	Msg-ID:  <19971127035036.17668.qmail@scrye.com>
+	 Files:  pod/perl.pod
+	
+	 Title:  "for() and map() peculiarity"
+	  From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+	Msg-ID:  <E0y4YAa-0003Qu-00@ursa.cus.cam.ac.uk>
+	 Files:  pod/perlsyn.pod
+	
+	 Title:  "Re: new text for perlsec"
+	  From:  Tom Phoenix <rootbeer@teleport.com>
+	Msg-ID:  <Pine.GSO.3.96.980328100418.22321T-100000@user2.teleport.com>
+	 Files:  pod/perlsec.pod
+	
+	 Title:  "perldsc's debugger x command"
+	  From:  Roderick Schertler <roderick@argon.org>
+	Msg-ID:  <10669.878352893@eeyore.ibcinc.com>
+	 Files:  pod/perldsc.pod
+	
+	 Title:  "perlre.pod"
+	  From:  Ted Ashton <ashted@southern.edu>
+	Msg-ID:  <199802271501.KAA09279@ns.southern.edu>
+	 Files:  pod/perlre.pod
+	
+	 Title:  "Re: printf and $\", "printf and $\"
+	  From:  Roderick Schertler <roderick@argon.org>, Tom Phoenix
+	         <rootbeer@teleport.com>, nag <nick@flirble.org>
+	Msg-ID:  <199711141918.TAA08096@flirble.org>,
+	         <Pine.GSO.3.96.971117085421.12318J-100000@usertest.teleport
+	         .com>, <pzyb2ncr42.fsf@eeyore.ibcinc.com>
+	 Files:  pod/perlfunc.pod
+	
+	 Title:  "recv() typo"
+	  From:  Roderick Schertler <roderick@argon.org>
+	Msg-ID:  <12064.877012073@eeyore.ibcinc.com>
+	 Files:  pod/perlfunc.pod
+	
+	 Title:  "truncate return value"
+	  From:  Roderick Schertler <roderick@argon.org>
+	Msg-ID:  <5490.878337883@eeyore.ibcinc.com>
+	 Files:  pod/perlfunc.pod
+	
+	 Title:  "update to perlbook.pod"
+	  From:  "Nathan V. Patwardhan" <nvp@mediaone.net>, Randal Schwartz
+	         <merlyn@stonehenge.com>, Stephen Potter
+	         <spp@psasolar.colltech.com>, Tom Phoenix
+	         <rootbeer@teleport.com>
+	Msg-ID:  <199803241354.HAA23938@psasolar.psa.pencom.com>,
+	         <199803241441.OAA01261@mediaone.net>,
+	         <8clnu0i05k.fsf@gadget.cscaper.com>,
+	         <Pine.GSO.3.96.980324111957.15753C-100000@user1.teleport.com>
+	 Files:  pod/perlbook.pod
+	
+	 Title:  "utime documentation"
+	  From:  "Brandon S. Allbery KF8NH" <bsa@kf8nh.apk.net>, "M.J.T. Guy"
+	         <mjtg@cus.cam.ac.uk>
+	Msg-ID:  <199802180256.VAA11369@speaker.kf8nh.apk.net>,
+	         <E0y4qd6-0000P6-00@ursa.cus.cam.ac.uk>
+	 Files:  pod/perlfunc.pod
+	
+	 Title:  "(well, doc patch) use of // requires successful match"
+	  From:  Roderick Schertler <roderick@argon.org>
+	Msg-ID:  <pz7mb4bips.fsf@eeyore.ibcinc.com>
+	 Files:  pod/perlop.pod
+	
+	 ------  LIBRARY AND EXTENSIONS  ------
+	
+	 Title:  "MakeMaker PM doc patch and a DIR buglet"
+	  From:  Achim Bohnet <ach@mpe.mpg.de>
+	Msg-ID:  <9711101050.AA13868@o09.xray.mpe.mpg.de>
+	 Files:  lib/ExtUtils/MakeMaker.pm
+	
+	 Title:  "bareword clarification for constant.pm"
+	  From:  Roderick Schertler <roderick@argon.org>
+	Msg-ID:  <6460.878143077@eeyore.ibcinc.com>
+	 Files:  lib/constant.pm
+	
+	 Title:  "integer rand - bug or feature?"
+	  From:  Roderick Schertler <roderick@argon.org>
+	Msg-ID:  <pzhg8lvgta.fsf@eeyore.ibcinc.com>
+	 Files:  lib/integer.pm
+	
+	 ------  OTHER CHANGES  ------
+	
+	 Title:  "FileHandle Documentation patch"
+	  From:  "Darren/Torin/Who Ever..." <torin@daft.com>
+	Msg-ID:  <87emzqo49g.fsf@perv.daft.com>
+	
+	 Title:  "perl5.004_61 myconfig updates"
+	  From:  Andy Dougherty <doughera@lafcol.lafayette.edu>
+	Msg-ID:  <Pine.SUN.3.96.980305150629.11530G-100000@newton.phys>
+	 Files:  myconfig
+	
+	 Title:  "small fixups in pod2latex.PL"
+	  From:  "Darren/Torin/Who Ever..." <torin@daft.com>
+	Msg-ID:  <873eg6o3v2.fsf@perv.daft.com>
+	
+	 ------  PORTABILITY - GENERAL  ------
+	
+	 Title:  "Misc doc fixes for README.VMS"
+	  From:  Dan Sugalski <sugalskd@osshe.edu>
+	Msg-ID:  <3.0.5.32.19980121113134.00924a20@osshe.edu>
+	 Files:  README.vms
+	
+	 Title:  "moved DynaLib"
+	  From:  John Tobey <jtobey@channel1.com>
+	Msg-ID:  <199710182332.XAA21630@remote212>
+	 Files:  ext/DynaLoader/DynaLoader.pm.PL
+	
+	 ------  UTILITIES  ------
+	
+	 Title:  "Searching for FAQs (patch to perldoc)"
+	  From:  Piers Cawley <pdcawley@bofh.org.uk>, Russ Allbery <rra@stanford.edu>
+	Msg-ID:  <m3d8gsb8uk.fsf@windlord.Stanford.EDU>,
+	         <m3iuqkfmiq.fsf@tower.bofh.org.uk>
+	 Files:  utils/perldoc.PL
+	
+	 Title:  "perldoc"
+	  From:  Ted Ashton <ashted@southern.edu>
+	Msg-ID:  <199802271510.KAA10506@ns.southern.edu>
+	 Files:  utils/perldoc.PL
+	
+	 Title:  "perldoc -f not using pod2man"
+	  From:  Russ Allbery <rra@stanford.edu>
+	Msg-ID:  <m3hg4f9vyy.fsf@windlord.Stanford.EDU>
+	 Files:  utils/perldoc.PL
+	
+	 Title:  "perldoc -m should not require pod"
+	  From:  Robin Houston <robin@nml.guardian.co.uk>
+	Msg-ID:  <199803241319.NAA24777@stringfellow.guardian.co.uk>
+	 Files:  utils/perldoc.PL
+	
+	 Title:  "small fix for perldoc in perl 5.004_04"
+	  From:  Julian Yip <julian@imoney.com>
+	Msg-ID:  <Roam.SIMC.2.0.6.884805579.5280.julian@imoney.com>
+	 Files:  utils/perldoc.PL
+
 Change 764 on 1998/03/05 by TimBunce@ig.co.uk
 
     APPLLIB_EXP now has arch and version dirs added to @INC
@@ -859,12 +2182,6 @@ Change 626 on 1998/03/02 by TimBunce@ig.co.uk
       From:  Inaba Hiroto <inaba@st.rim.or.jp>
     Msg-ID:  <19980110155333D.inaba@st.rim.or.jp>
      Files:  doop.c
-
-Change 625 on 1998/03/02 by TimBunce@ig.co.uk
-
-
-Change 624 on 1998/03/02 by TimBunce@ig.co.uk *pending*
-
 
 Change 623 on 1998/03/02 by TimBunce@ig.co.uk
 

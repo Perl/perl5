@@ -2998,9 +2998,10 @@ function, or use this relation:
 =item sleep
 
 Causes the script to sleep for EXPR seconds, or forever if no EXPR.
-May be interrupted by sending the process a SIGALRM.  Returns the
-number of seconds actually slept.  You probably cannot mix alarm() and
-sleep() calls, because sleep() is often implemented using alarm().
+May be interrupted if the process receives a signal such as SIGALRM.
+Returns the number of seconds actually slept.  You probably cannot
+mix alarm() and sleep() calls, because sleep() is often implemented
+using alarm().
 
 On some older systems, it may sleep up to a full second less than what
 you requested, depending on how it counts seconds.  Most modern systems
@@ -3038,9 +3039,10 @@ specified, it gives the name of a subroutine that returns an integer
 less than, equal to, or greater than 0, depending on how the elements
 of the array are to be ordered.  (The C<E<lt>=E<gt>> and C<cmp>
 operators are extremely useful in such routines.)  SUBNAME may be a
-scalar variable name, in which case the value provides the name of the
-subroutine to use.  In place of a SUBNAME, you can provide a BLOCK as
-an anonymous, in-line sort subroutine.
+scalar variable name (unsubscripted), in which case the value provides
+the name of (or a reference to) the actual subroutine to use.  In place
+of a SUBNAME, you can provide a BLOCK as an anonymous, in-line sort
+subroutine.
 
 In the interests of efficiency the normal calling code for subroutines is
 bypassed, with the following effects: the subroutine may not be a
@@ -3676,7 +3678,7 @@ signals and core dumps.
 	# forked, so the errno value is not visible in the parent.
 	printf "command failed: %s\n", ($! || "Unknown system() error");
     }
-    elsif ($rc > 0x80) {
+    elsif (($rc & 0xff) == 0) {
 	$rc >>= 8;
 	print "ran with non-zero exit status $rc\n";
     }

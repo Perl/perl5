@@ -1695,13 +1695,13 @@ PP(pp_subst)
 	sv_free(dstr);
 
 	TAINT_IF(rxtainted & 1);
+	SPAGAIN;
 	PUSHs(sv_2mortal(newSViv((I32)iters)));
 
 	(void)SvPOK_only(TARG);
 	TAINT_IF(rxtainted);
 	SvSETMAGIC(TARG);
 	SvTAINT(TARG);
-	SPAGAIN;
 	LEAVE_SCOPE(oldsave);
 	RETURN;
     }

@@ -108,6 +108,15 @@
 #  ifdef _MSC_VER
 #    define mode_t short
 #  endif
+#  ifdef __MINGW32__
+#    define mode_t short
+#    ifndef tzset
+#      define tzset()		not_here("tzset")
+#    endif
+#    ifndef _POSIX_OPEN_MAX
+#      define _POSIX_OPEN_MAX	FOPEN_MAX	/* XXX bogus ? */
+#    endif
+#  endif
 #  define sigaction(a,b,c)	not_here("sigaction")
 #  define sigpending(a)		not_here("sigpending")
 #  define sigprocmask(a,b,c)	not_here("sigprocmask")
@@ -255,12 +264,12 @@ unsigned long strtoul _((const char *, char **, int));
 #define localeconv() not_here("localeconv")
 #endif
 
-#ifndef WIN32
 #ifdef HAS_TZNAME
+#  ifndef WIN32
 extern char *tzname[];
+#  endif
 #else
 char *tzname[] = { "" , "" };
-#endif
 #endif
 
 /* XXX struct tm on some systems (SunOS4/BSD) contains extra (non POSIX)

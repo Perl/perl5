@@ -532,6 +532,11 @@ find_threadsv(char *name)
 	    sawampersand = TRUE;
 	    SvREADONLY_on(sv);
 	    /* FALL THROUGH */
+
+	/* XXX %! tied to Errno.pm needs to be added here.
+	 * See gv_fetchpv(). */
+	/* case '!': */
+
 	default:
 	    sv_magic(sv, 0, 0, name, 1); 
 	}
@@ -3369,7 +3374,7 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 	else
 	    sv_setiv((SV*)gv, -1);
 	SvREFCNT_dec(compcv);
-	compcv = NULL;
+	cv = compcv = NULL;
 	sub_generation++;
 	goto noblock;
     }
