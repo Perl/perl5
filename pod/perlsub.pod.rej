@@ -1,0 +1,17 @@
+***************
+*** 371,377 ****
+  via C<require> or C<use>, then this is probably just fine.  If it's
+  all in the main program, you'll need to arrange for the my() 
+  to be executed early, either by putting the whole block above
+! your pain program, or more likely, placing merely a BEGIN 
+  sub around it to make sure it gets executed before your program
+  starts to run:
+  
+--- 371,377 ----
+  via C<require> or C<use>, then this is probably just fine.  If it's
+  all in the main program, you'll need to arrange for the my() 
+  to be executed early, either by putting the whole block above
+! your main program, or more likely, placing merely a BEGIN 
+  sub around it to make sure it gets executed before your program
+  starts to run:
+  
