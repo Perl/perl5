@@ -1834,9 +1834,10 @@ PP(pp_entersub)
 #ifdef USE_THREADS
     /*
      * First we need to check if the sub or method requires locking.
-     * If so, we gain a lock on the CV or the first argument, as
-     * appropriate. This has to be inline because for FAKE_THREADS,
-     * COND_WAIT inlines code to reschedule by returning a new op.
+     * If so, we gain a lock on the CV, the first argument or the
+     * stash (for static methods), as appropriate. This has to be
+     * inline because for FAKE_THREADS, COND_WAIT inlines code to
+     * reschedule by returning a new op.
      */
     MUTEX_LOCK(CvMUTEXP(cv));
     if (CvFLAGS(cv) & CVf_LOCKED) {
@@ -1850,6 +1851,11 @@ PP(pp_entersub)
 	    }
 	    if (SvROK(sv))
 		sv = SvRV(sv);
+	    else {		
+		STRLEN len;
+		char *stashname = SvPV(sv, len);
+		sv = (SV*)gv_stashpvn(stashname, len, TRUE);
+	    }
 	}
 	else {
 	    sv = (SV*)cv;

@@ -958,7 +958,6 @@ pp_snetent
 pp_socket
 pp_sockpair
 pp_sort
-pp_specific
 pp_splice
 pp_split
 pp_sprintf
@@ -987,6 +986,7 @@ pp_system
 pp_syswrite
 pp_tell
 pp_telldir
+pp_threadsv
 pp_tie
 pp_tied
 pp_time

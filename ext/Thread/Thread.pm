@@ -15,6 +15,10 @@ sub async (&) {
     return new Thread $_[0];
 }
 
+sub eval {
+    return eval { shift->join; };
+}
+
 bootstrap Thread;
 
 1;

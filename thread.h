@@ -243,10 +243,10 @@ typedef struct thread *Thread;
 #define THRf_ZOMBIE	3
 #define THRf_DEAD	4
 
-#define THRf_DIE_FATAL	8
+#define THRf_DID_DIE	8
 
 /* ThrSTATE(t) and ThrSETSTATE(t) must only be called while holding t->mutex */
-#define ThrSTATE(t) ((t)->flags)
+#define ThrSTATE(t) ((t)->flags & THRf_STATE_MASK)
 #define ThrSETSTATE(t, s) STMT_START {		\
 	(t)->flags &= ~THRf_STATE_MASK;		\
 	(t)->flags |= (s);			\
