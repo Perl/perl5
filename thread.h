@@ -17,7 +17,7 @@ struct perl_thread *getTHR _((void));
 #    ifdef DJGPP
 #      define pthread_addr_t any_t
 #      define NEED_PTHREAD_INIT
-#      define PTHREAD_CREATE_JOINABLE (&err)
+#      define PTHREAD_CREATE_JOINABLE (1)
 #    endif
 #    ifdef __OPEN_VM
 #      define pthread_addr_t void *
@@ -25,6 +25,7 @@ struct perl_thread *getTHR _((void));
 #    ifdef VMS
 #      define pthread_attr_init(a) pthread_attr_create(a)
 #      define PTHREAD_ATTR_SETDETACHSTATE(a,s) pthread_setdetach_np(a,s)
+#      define PTHREAD_CREATE(t,a,s,d) pthread_create(t,a,s,d)
 #      define pthread_key_create(k,d) pthread_keycreate(k,(pthread_destructor_t)(d))
 #      define pthread_mutexattr_init(a) pthread_mutexattr_create(a)
 #      define pthread_mutexattr_settype(a,t) pthread_mutexattr_setkind_np(a,t)
@@ -32,9 +33,6 @@ struct perl_thread *getTHR _((void));
 #    if defined(DJGPP) || defined(__OPEN_VM)
 #      define PTHREAD_ATTR_SETDETACHSTATE(a,s) pthread_attr_setdetachstate(a,&(s))
 #      define YIELD pthread_yield(NULL)
-#    endif
-#    if defined(DJGPP) || defined(VMS)
-#      define PTHREAD_CREATE(t,a,s,d) pthread_create(t,a,s,d)
 #    endif
 #  endif
 #  ifndef VMS
