@@ -23,8 +23,8 @@ INST_TOP	*= $(INST_DRV)\perl5004.5x
 # uncomment one
 #CCTYPE		*= MSVC20
 #CCTYPE		*= MSVC
-CCTYPE		*= BORLAND
-#CCTYPE		*= GCC
+#CCTYPE		*= BORLAND
+CCTYPE		*= GCC
 
 #
 # uncomment next line if you want debug version of perl (big,slow)
@@ -43,8 +43,8 @@ CCTYPE		*= BORLAND
 #
 # set the install locations of the compiler include/libraries
 #CCHOME		*= f:\msdev\vc
-CCHOME		*= C:\bc5
-#CCHOME		*= C:\mingw32
+#CCHOME		*= C:\bc5
+CCHOME		*= D:\packages\mingw32
 CCINCDIR	*= $(CCHOME)\include
 CCLIBDIR	*= $(CCHOME)\lib
 
@@ -227,7 +227,7 @@ o *= .obj
 .SUFFIXES : .c $(o) .dll .lib .exe .a
 
 .c$(o):
-	$(CC) -c -I$(<:d) $(CFLAGS) $(OBJOUT_FLAG)$@ $<
+	$(CC) -c $(null,$(<:d) $(NULL) -I$(<:d)) $(CFLAGS) $(OBJOUT_FLAG)$@ $<
 
 .y.c:
 	$(NOOP)
@@ -552,7 +552,7 @@ $(PERLDLL): perldll.def $(CORE_OBJ) $(WIN32_OBJ) $(DLL_OBJ)
 		perldll.def\n)
 	$(IMPLIB) $*.lib $@
 .ELIF "$(CCTYPE)" == "GCC"
-	$(LINK32) -dll -o $@ -Wl,--base-file -Wl,perl.base $(LINK_FLAGS) \
+	$(LINK32) -mdll -o $@ -Wl,--base-file -Wl,perl.base $(LINK_FLAGS) \
 	    $(mktmp $(LKPRE) $(CORE_OBJ:s,\,\\) $(WIN32_OBJ:s,\,\\) \
 	        $(DLL_OBJ:s,\,\\) $(LIBFILES) $(LKPOST))
 	dlltool --output-lib $(PERLIMPLIB) \
@@ -560,7 +560,7 @@ $(PERLDLL): perldll.def $(CORE_OBJ) $(WIN32_OBJ) $(DLL_OBJ)
                 --def perldll.def \
                 --base-file perl.base \
                 --output-exp perl.exp
-	$(LINK32) -dll -o $@ $(LINK_FLAGS) \
+	$(LINK32) -mdll -o $@ $(LINK_FLAGS) \
 	    $(mktmp $(LKPRE) $(CORE_OBJ:s,\,\\) $(WIN32_OBJ:s,\,\\) \
 	        $(DLL_OBJ:s,\,\\) $(LIBFILES) perl.exp $(LKPOST))
 .ELSE
