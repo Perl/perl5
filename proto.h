@@ -361,7 +361,7 @@ VIRTUAL OP*	newNULLLIST _((void));
 VIRTUAL OP*	newOP _((I32 optype, I32 flags));
 VIRTUAL void	newPROG _((OP* o));
 VIRTUAL OP*	newRANGE _((I32 flags, OP* left, OP* right));
-VIRTUAL OP*	newSLICEOP _((I32 flags, OP* subscript, OP* list));
+VIRTUAL OP*	newSLICEOP _((I32 flags, OP* subscript, OP* listop));
 VIRTUAL OP*	newSTATEOP _((I32 flags, char* label, OP* o));
 VIRTUAL CV*	newSUB _((I32 floor, OP* o, OP* proto, OP* block));
 VIRTUAL CV*	newXS _((char* name, void (*subaddr)(CV* cv _CPERLproto), char* filename));
