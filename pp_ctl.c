@@ -2189,7 +2189,7 @@ PP(pp_goto)
 		    PL_stack_sp--;		/* There is no cv arg. */
 		    /* Push a mark for the start of arglist */
 		    PUSHMARK(mark); 
-		    (void)(*CvXSUB(cv))(aTHX_ cv);
+		    (void)(*CvXSUB(cv))(aTHXo_ cv);
 		    /* Pop the current context like a decent sub should */
 		    POPBLOCK(cx, PL_curpm);
 		    /* Do _not_ use PUTBACK, keep the XSUB's return stack! */

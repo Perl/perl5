@@ -1408,8 +1408,8 @@ Perl_mess(pTHX_ const char *pat, va_list *args)
     return sv;
 }
 
-static OP *
-do_die(pTHX_ const char* pat, va_list *args)
+STATIC OP *
+S_do_die(pTHX_ const char* pat, va_list *args)
 {
     dTHR;
     char *message;
@@ -3299,6 +3299,12 @@ U32 *
 Perl_get_opargs(pTHX)
 {
  return PL_opargs;
+}
+
+PPADDR_t*
+Perl_get_ppaddr(pTHX)
+{
+ return &PL_ppaddr;
 }
 
 #ifndef HAS_GETENV_LEN

@@ -79,6 +79,298 @@ Version 5.005_58        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  3549] By: gsar                                  on 1999/06/24  22:41:17
+        Log: avoid race condition in the CAPI extension bootstrap handler
+     Branch: perl
+           ! lib/ExtUtils/xsubpp win32/GenCAPI.pl
+____________________________________________________________________________
+[  3548] By: gsar                                  on 1999/06/24  22:39:53
+        Log: sanity check to cover the case when perl is installed into the
+             X:\ (drive root)
+     Branch: perl
+           ! win32/win32.c
+____________________________________________________________________________
+[  3547] By: gsar                                  on 1999/06/22  19:30:32
+        Log: tweak RefHash to make intent clearer (suggested by John Dlugosz)
+     Branch: perl
+           ! lib/Tie/RefHash.pm
+____________________________________________________________________________
+[  3544] By: jhi                                   on 1999/06/18  19:24:28
+        Log: Tidy up #3542 and #3543. 
+     Branch: cfgperl
+           ! t/pragma/locale.t util.c
+____________________________________________________________________________
+[  3543] By: jhi                                   on 1999/06/18  10:28:45
+        Log: Spice up locale.t.
+     Branch: cfgperl
+           ! t/pragma/locale.t
+____________________________________________________________________________
+[  3542] By: jhi                                   on 1999/06/17  22:42:03
+        Log: Fixed two long-standing locale bugs.
+             
+             Both problems were related to numeric locale which
+             controls the radix character aka the decimal separator.
+             (1) printf (and sprintf) were resetting the numeric locale to C.
+             (2) Using locale-numerically formatted floating point
+             numbers (e.g. "1,23") together with -w caused warnings about
+             "isn't numeric".  The operations were working fine, though,
+             because atof() was using the local locale.
+             Both problems reported by Stefan Vogtner.
+             
+             Introduced a wrapper for atof() that attempts to convert
+             the string both ways.  This helps Perl to understand
+             numbers like this "4.56" even when using a local locale
+             makes atof() understand only numbers like this "7,89".
+             
+             Remaining related problems, both of which existed before
+             this patch and continue to exist after this patch:
+             (a) The behaviour of print() is _not_ as documented by perllocale.
+             Instead of always using the C locale, print() does use the
+             local locale, just like the *printf() do.  This may be fixable
+             now that switching to-and-fro between locales has been made
+             more consistent, but fixing print() would change existing
+             behaviour.  perllocale is not changed by this patch.
+             (b) If a number has been stringified (say, via "$number") under
+             a local locale, the cached string value persists even under
+             "no locale".  This may or may not be a problem: operations
+             work fine because the original number is still there, but
+             that the string form keeps its locale-ish outlook may be
+             somewhat confusing.
+     Branch: cfgperl
+	   ! dump.c embed.h embed.pl embedvar.h global.sym intrpvar.h mg.c
+	   ! objXSUB.h op.c perl.c perl.h perlvars.h pp.c pp_ctl.c
+	   ! pp_proto.h pp_sys.c proto.h sv.c t/pragma/locale.t toke.c
+           ! util.c
+____________________________________________________________________________
+[  3541] By: jhi                                   on 1999/06/17  20:00:16
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+          !> ext/Data/Dumper/Dumper.pm op.c
+____________________________________________________________________________
+[  3540] By: gsar                                  on 1999/06/16  16:49:55
+        Log: dump C<0> as such, not C<'0'>
+     Branch: perl
+           ! ext/Data/Dumper/Dumper.pm
+____________________________________________________________________________
+[  3539] By: gsar                                  on 1999/06/13  04:04:40
+        Log: fix coredumper in change#3498
+     Branch: perl
+           ! op.c
+____________________________________________________________________________
+[  3538] By: jhi                                   on 1999/06/12  22:01:26
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+          +> lib/caller.pm
+          !> (integrate 36 files)
+____________________________________________________________________________
+[  3537] By: gsar                                  on 1999/06/12  06:43:03
+        Log: EXTERN_C declarations for global arrays in various
+             headers, so perl can be built even in C++ mode; win32
+             build fixups; regen headers
+     Branch: perl
+	   ! XSUB.h embedvar.h ext/B/B.xs objXSUB.h opcode.h opcode.pl
+           ! perl.h regcomp.h regexec.c utf8.h win32/win32.c win32/win32.h
+____________________________________________________________________________
+[  3536] By: gsar                                  on 1999/06/12  06:38:21
+        Log: caller.pm typos
+     Branch: perl
+           ! lib/caller.pm
+____________________________________________________________________________
+[  3535] By: gsar                                  on 1999/06/11  23:13:54
+        Log: various little tweaks; most globals are now in intrpvar.h, ninterps
+             is temporarily gone
+     Branch: perl
+	   ! embed.pl intrpvar.h os2/os2.c perl.c perlvars.h
+           ! pod/perldelta.pod proto.h win32/perllib.c
+____________________________________________________________________________
+[  3534] By: gsar                                  on 1999/06/11  20:41:51
+        Log: implement C<use caller 'encoding'>
+     Branch: perl
+           + lib/caller.pm
+           ! MANIFEST perl.h pod/perldelta.pod pod/perlfunc.pod pp_ctl.c
+____________________________________________________________________________
+[  3533] By: gsar                                  on 1999/06/11  16:51:04
+        Log: truncate() has a peculiar exemption from strict barewords, even
+             though it has a non-filehandle prototype
+     Branch: perl
+           ! op.c t/io/fs.t
+____________________________________________________________________________
+[  3532] By: gsar                                  on 1999/06/11  09:09:16
+        Log: GDBM tweak
+     Branch: perl
+           ! ext/GDBM_File/GDBM_File.xs ext/GDBM_File/typemap
+____________________________________________________________________________
+[  3531] By: gsar                                  on 1999/06/10  23:34:19
+        Log: part of the platform changes for IMPLICIT_CONTEXT
+     Branch: perl
+	   ! djgpp/djgpp.c jpl/JNI/JNI.xs jpl/JNI/typemap
+	   ! jpl/PerlInterpreter/PerlInterpreter.c
+	   ! jpl/PerlInterpreter/PerlInterpreter.h
+	   ! os2/OS2/ExtAttr/ExtAttr.xs os2/OS2/PrfDB/PrfDB.xs
+           ! os2/OS2/Process/Process.xs os2/OS2/REXX/REXX.xs perl.h
+____________________________________________________________________________
+[  3530] By: jhi                                   on 1999/06/10  20:55:56
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+          !> ext/DB_File/DB_File.xs ext/DB_File/typemap
+____________________________________________________________________________
+[  3529] By: gsar                                  on 1999/06/10  20:40:01
+        Log: DB_File tweaks for IMPLICIT CONTEXT
+     Branch: perl
+           ! ext/DB_File/DB_File.xs ext/DB_File/typemap
+____________________________________________________________________________
+[  3528] By: jhi                                   on 1999/06/10  10:18:15
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+          !> (integrate 105 files)
+____________________________________________________________________________
+[  3527] By: gsar                                  on 1999/06/10  09:30:35
+        Log: most globals are now interpreter local; locale initialization
+             was too early, defer it until interpreter is allocated and
+             initialized; multiple interpreters should now be
+             concurrency-safe (untested)
+     Branch: perl
+	   ! embedvar.h intrpvar.h malloc.c miniperlmain.c perl.c perl.h
+           ! perlvars.h
+____________________________________________________________________________
+[  3526] By: gsar                                  on 1999/06/10  08:38:00
+        Log: fix small nits
+     Branch: perl
+           ! cc_runtime.h ext/B/B/CC.pm run.c
+____________________________________________________________________________
+[  3525] By: gsar                                  on 1999/06/10  04:41:38
+        Log: win32 build fixes
+     Branch: perl
+	   ! bytecode.pl dosish.h embed.h embed.pl ext/B/B.xs
+	   ! ext/ByteLoader/ByteLoader.xs ext/ByteLoader/bytecode.h
+	   ! ext/ByteLoader/byterun.h ext/SDBM_File/sdbm/sdbm.c globals.c
+	   ! mg.c objXSUB.h op.h perl.c perl.h pp_sys.c proto.h sv.c util.c
+	   ! win32/Makefile win32/config_H.bc win32/config_H.gc
+	   ! win32/config_H.vc win32/config_h.PL win32/dl_win32.xs
+	   ! win32/makedef.pl win32/makefile.mk win32/perllib.c
+	   ! win32/win32.c win32/win32.h win32/win32sck.c
+           ! win32/win32thread.c win32/win32thread.h
+____________________________________________________________________________
+[  3524] By: gsar                                  on 1999/06/09  18:03:01
+        Log: more complete support for implicit thread/interpreter pointer,
+             enabled via -DPERL_IMPLICIT_CONTEXT (all changes are noops
+             without that enabled):
+             - USE_THREADS now enables PERL_IMPLICIT_CONTEXT, so dTHR
+             is a noop; tests pass on Solaris; should be faster now!
+             - MULTIPLICITY has been tested with and without
+             PERL_IMPLICIT_CONTEXT on Solaris
+             - improved function database now merged with embed.pl
+             - everything except the varargs functions have foo(a,b,c) macros
+             to provide compatibility
+             - varargs functions default to compatibility variants that
+             get the context pointer using dTHX
+             - there should be almost no source compatibility issues as a
+             result of all this
+             - dl_foo.xs changes other than dl_dlopen.xs untested
+             - still needs documentation, fixups for win32 etc
+             Next step: migrate most non-mutex variables from perlvars.h
+             to intrpvar.h
+     Branch: perl
+           - proto.pl
+	   ! MANIFEST XSUB.h av.c bytecode.pl cv.h doio.c doop.c dump.c
+	   ! ebcdic.c embed.h embed.pl embedvar.h ext/B/B.xs ext/B/typemap
+	   ! ext/ByteLoader/ByteLoader.xs ext/ByteLoader/bytecode.h
+	   ! ext/ByteLoader/byterun.c ext/ByteLoader/byterun.h
+	   ! ext/Data/Dumper/Dumper.xs ext/Devel/Peek/Peek.xs
+	   ! ext/DynaLoader/dl_aix.xs ext/DynaLoader/dl_beos.xs
+	   ! ext/DynaLoader/dl_cygwin32.xs ext/DynaLoader/dl_dld.xs
+	   ! ext/DynaLoader/dl_dlopen.xs ext/DynaLoader/dl_hpux.xs
+	   ! ext/DynaLoader/dl_mpeix.xs ext/DynaLoader/dl_next.xs
+	   ! ext/DynaLoader/dl_none.xs ext/DynaLoader/dl_rhapsody.xs
+	   ! ext/DynaLoader/dl_vmesa.xs ext/DynaLoader/dl_vms.xs
+	   ! ext/DynaLoader/dlutils.c ext/Opcode/Opcode.xs
+	   ! ext/POSIX/POSIX.xs ext/Thread/Thread.xs ext/re/re.xs
+	   ! global.sym globals.c gv.c hv.c lib/ExtUtils/typemap
+	   ! lib/ExtUtils/xsubpp malloc.c mg.c mg.h miniperlmain.c
+	   ! objXSUB.h op.c opcode.h opcode.pl perl.c perl.h perlio.c
+	   ! perlsfio.h perly.c pp.c pp.h pp_ctl.c pp_hot.c pp_sys.c
+	   ! proto.h regcomp.c regcomp.h regexec.c run.c scope.c scope.h
+	   ! sv.c taint.c thrdvar.h thread.h toke.c universal.c utf8.c
+           ! util.c win32/Makefile win32/makefile.mk writemain.SH
+____________________________________________________________________________
+[  3523] By: gsar                                  on 1999/06/07  05:24:13
+        Log: missed a file
+     Branch: perl
+           + proto.pl
+           ! MANIFEST
+____________________________________________________________________________
+[  3522] By: gsar                                  on 1999/06/07  05:18:34
+        Log: initial stub implementation of implicit thread/this
+             pointer	argument; builds/tests on Solaris, win32
+             hasn't been fixed up yet; proto.h, global.sym and
+             static function decls are now generated from a common
+             database in proto.pl; some inconsistently named
+             perl_foo() things are now Perl_foo(), compatibility
+             #defines provided; perl_foo() (lowercase 'p') reserved
+             for functions that take an explicit context argument;
+             next step: generate #define foo(a,b) Perl_foo(aTHX_ a,b)
+     Branch: perl
+	   ! XSUB.h av.c cop.h deb.c doio.c doop.c dump.c ebcdic.c embed.h
+	   ! embed.pl ext/POSIX/POSIX.xs global.sym globals.c gv.c gv.h
+	   ! hv.c malloc.c mg.c miniperlmain.c objXSUB.h op.c opcode.h
+	   ! opcode.pl perl.c perl.h perl_exp.SH perlio.c perly.c perly.y
+	   ! pp.c pp.sym pp_ctl.c pp_hot.c pp_proto.h pp_sys.c proto.h
+	   ! regcomp.c regexec.c run.c scope.c scope.h sv.c taint.c toke.c
+           ! universal.c utf8.c util.c
+____________________________________________________________________________
+[  3521] By: gsar                                  on 1999/06/04  23:00:22
+        Log: clean up some stray "global" symbols
+     Branch: perl
+	   ! embed.h embed.pl global.sym objXSUB.h opcode.pl pp.sym
+           ! pp_proto.h proto.h
+____________________________________________________________________________
+[  3520] By: jhi                                   on 1999/06/02  21:33:28
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+          !> (integrate 94 files)
+____________________________________________________________________________
+[  3519] By: gsar                                  on 1999/06/02  07:16:10
+        Log: avoid dereferencing null pointer from getpwent() et al
+     Branch: perl
+           ! pp_sys.c
+____________________________________________________________________________
+[  3518] By: gsar                                  on 1999/06/02  04:47:10
+        Log: remove _() non-ansism
+     Branch: perl
+	   ! Porting/config_H XSUB.h config_h.SH cv.h doio.c doop.c
+	   ! ext/B/B/C.pm ext/B/B/CC.pm ext/B/byteperl.c
+	   ! ext/ByteLoader/ByteLoader.xs ext/Data/Dumper/Dumper.xs
+	   ! ext/DynaLoader/dl_beos.xs ext/DynaLoader/dl_dlopen.xs
+	   ! ext/DynaLoader/dl_vmesa.xs ext/IO/poll.h ext/IPC/SysV/SysV.xs
+	   ! ext/Opcode/Opcode.xs ext/POSIX/POSIX.xs ext/Thread/Thread.xs
+	   ! ext/re/re.xs handy.h hv.c iperlsys.h
+	   ! jpl/PerlInterpreter/PerlInterpreter.c lib/ExtUtils/Embed.pm
+	   ! malloc.c mg.c mg.h minimod.pl miniperlmain.c op.c op.h
+	   ! opcode.h opcode.pl os2/POSIX.mkfifo perl.c perl.h
+	   ! plan9/config.plan9 pod/perlembed.pod pod/perlguts.pod pp.c
+	   ! pp_ctl.c pp_hot.c pp_sys.c proto.h regcomp.c regexec.c run.c
+	   ! scope.h sv.c sv.h thread.h toke.c util.c vms/sockadapt.h
+	   ! vms/vmsish.h vms/writemain.pl vos/config.h
+	   ! vos/config_h.SH_orig win32/GenCAPI.pl win32/config_H.bc
+	   ! win32/config_H.gc win32/config_H.vc win32/makemain.pl
+	   ! win32/perllib.c win32/runperl.c win32/win32.h
+	   ! win32/win32thread.h writemain.SH x2p/a2p.c x2p/a2p.h x2p/a2p.y
+           ! x2p/hash.h x2p/str.h x2p/util.h x2p/walk.c
+____________________________________________________________________________
+[  3517] By: gsar                                  on 1999/06/02  02:17:51
+        Log: missed a few files
+     Branch: perl
+           ! ext/POSIX/POSIX.xs jpl/JNI/JNI.xs
+____________________________________________________________________________
+[  3516] By: gsar                                  on 1999/06/02  01:37:33
+        Log: integrate cfgperl contents into mainline
+     Branch: perl
+	  +> ext/ByteLoader/bytecode.h ext/ByteLoader/byterun.c
+          +> ext/ByteLoader/byterun.h
+           - bytecode.h byterun.c byterun.h
+           ! Changes
+          !> (integrate 58 files)
+____________________________________________________________________________
 [  3515] By: gsar                                  on 1999/06/02  00:48:50
         Log: remove stray K&R-isms
      Branch: perl
@@ -1640,7 +1932,7 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [  3307] By: gsar                                  on 1999/05/06  01:56:06
         Log: fix bogus OPf_REF context in C<sort BLOCK @foo> (extension of
-             change#3810)
+             change#3180)
      Branch: perl
            ! op.c
 ____________________________________________________________________________

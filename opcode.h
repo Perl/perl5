@@ -1072,19 +1072,6 @@ EXT char *PL_op_desc[] = {
 
 END_EXTERN_C
 
-#ifndef PERL_OBJECT
-START_EXTERN_C
-
-#undef PERL_CKDEF
-#undef PERL_PPDEF
-#define PERL_CKDEF(s) OP *s (pTHX_ OP *o);
-#define PERL_PPDEF(s) OP *s (pTHX);
-
-#include "pp_proto.h"
-
-
-END_EXTERN_C
-#endif	/* PERL_OBJECT */
 
 START_EXTERN_C
 

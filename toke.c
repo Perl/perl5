@@ -1512,7 +1512,7 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
     /* Call function. The function is expected to 	*/
     /* call "FILTER_READ(idx+1, buf_sv)" first.		*/
     /* Return: <0:error, =0:eof, >0:not eof 		*/
-    return (*funcp)(aTHX_ idx, buf_sv, maxlen);
+    return (*funcp)(aTHXo_ idx, buf_sv, maxlen);
 }
 
 STATIC char *

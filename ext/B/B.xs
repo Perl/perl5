@@ -15,9 +15,9 @@
 #undef PL_op_name
 #undef PL_opargs 
 #undef PL_op_desc
-#define PL_op_name (pPerl->Perl_get_op_names())
-#define PL_opargs (pPerl->Perl_get_opargs())
-#define PL_op_desc (pPerl->Perl_get_op_descs())
+#define PL_op_name (get_op_names())
+#define PL_opargs (get_opargs())
+#define PL_op_desc (get_op_descs())
 #endif
 
 #ifdef PerlIO

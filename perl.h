@@ -22,6 +22,14 @@
 #define USE_STDIO
 #endif /* PERL_FOR_X2P */
 
+#define VOIDUSED 1
+#include "config.h"
+
+/* XXXXXX testing threads via implicit pointer */
+#ifdef USE_THREADS
+#define PERL_IMPLICIT_CONTEXT
+#endif
+
 #ifdef PERL_OBJECT
 
 /* PERL_OBJECT explained  - DickH and DougL @ ActiveState.com
@@ -101,22 +109,29 @@ class CPerlObj;
 
 #define STATIC
 #define CPERLscope(x) CPerlObj::x
-#define CPERLproto CPerlObj *
-#define _CPERLproto ,CPERLproto
-#define CPERLarg CPerlObj *pPerl
-#define CPERLarg_ CPERLarg,
-#define _CPERLarg ,CPERLarg
-#define PERL_OBJECT_THIS this
-#define _PERL_OBJECT_THIS ,this
-#define PERL_OBJECT_THIS_ this,
 #define CALL_FPTR(fptr) (this->*fptr)
+
+#define pTHXo		CPerlObj *pPerl
+#define pTHXo_		pTHXo,
+#define _pTHXo		,pTHXo
+#define aTHXo		this
+#define aTHXo_		this,
+#define _aTHXo		,this
+#define PERL_OBJECT_THIS	aTHXo
+#define PERL_OBJECT_THIS_	aTHXo_
+#define _PERL_OBJECT_THIS	_aTHXo
+
+#define pTHXx		void
+#define pTHXx_
+#define _pTHXx
+#define aTHXx
+#define aTHXx_
+#define _aTHXx
 
 #else /* !PERL_OBJECT */
 
 #define STATIC static
 #define CPERLscope(x) x
-#define CPERLproto
-#define _CPERLproto
 #define CPERLarg void
 #define CPERLarg_
 #define _CPERLarg
@@ -132,12 +147,57 @@ class CPerlObj;
 #define CALLREGEXEC CALL_FPTR(PL_regexecp)
 #define CALLPROTECT CALL_FPTR(PL_protect)
 
-#define VOIDUSED 1
-#include "config.h"
+#define NOOP (void)0
+#define dNOOP extern int Perl___notused
 
-/* XXXXXX testing threads via implicit pointer */
-#ifdef USE_THREADS
-#define PERL_IMPLICIT_CONTEXT
+#ifdef PERL_IMPLICIT_CONTEXT
+#  ifdef USE_THREADS
+struct perl_thread;
+#    define pTHX	register struct perl_thread *thr
+#    define aTHX	thr
+#    define dTHXa(a)	pTHX = (struct perl_thread *)a
+#    define dTHX	dTHXa(SvPVX(PL_thrsv))
+#    define dTHR	dNOOP
+#  else
+#    define MULTIPLICITY
+#    define pTHX	register PerlInterpreter *my_perl
+#    define aTHX	my_perl
+#    define dTHXa(a)	pTHX = (PerlInterpreter *)a
+#    define dTHX	dTHXa(PL_curinterp)
+#  endif
+#  define pTHX_		pTHX,
+#  define _pTHX		,pTHX
+#  define aTHX_		aTHX,
+#  define _aTHX		,aTHX
+#endif
+
+#ifndef pTHX
+#  define pTHX		void
+#  define pTHX_
+#  define _pTHX
+#  define aTHX
+#  define aTHX_
+#  define _aTHX
+#  define dTHXa(a)	dNOOP
+#  define dTHX		dNOOP
+#endif
+
+#ifndef pTHXo
+#  define pTHXo		pTHX
+#  define pTHXo_	pTHX_
+#  define _pTHXo	_pTHX
+#  define aTHXo		aTHX
+#  define aTHXo_	aTHX_
+#  define _aTHXo	_aTHX
+#endif
+
+#ifndef pTHXx
+#  define pTHXx		register PerlInterpreter *my_perl
+#  define pTHXx_	pTHXx,
+#  define _pTHXx	,pTHXx
+#  define aTHXx		my_perl
+#  define aTHXx_	aTHXx,
+#  define _aTHXx	,aTHXx
 #endif
 
 #undef START_EXTERN_C
@@ -184,8 +244,7 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 # endif
 #endif
 
-#define NOOP (void)0
-#define dNOOP extern int Perl___notused
+#define WITH_THX(s) STMT_START { dTHX; s; } STMT_END
 #define WITH_THR(s) STMT_START { dTHR; s; } STMT_END
 
 /*
@@ -380,7 +439,7 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #   include <stdlib.h>
 #endif
 
-#if !defined(PERL_FOR_X2P)
+#if !defined(PERL_FOR_X2P) && !defined(PERL_OBJECT)
 #  include "embed.h"
 #endif
 
@@ -1499,44 +1558,6 @@ typedef pthread_key_t	perl_key;
             (PerlLIO_setmode(PerlIO_fileno(fp), O_BINARY) != -1 ? TRUE : NULL)
 #endif
 
-#ifdef PERL_IMPLICIT_CONTEXT
-#  ifdef USE_THREADS
-struct perl_thread;
-#    define pTHX	register struct perl_thread *thr
-#    define aTHX	thr
-#    define dTHXa(a)	pTHX = (struct perl_thread *)a
-#    define dTHX	dTHXa(SvPVX(PL_thrsv))
-#    define dTHR	dNOOP
-#  else
-#    define MULTIPLICITY
-#    define pTHX	register PerlInterpreter *my_perl
-#    define aTHX	my_perl
-#    define dTHXa(a)	pTHX = (PerlInterpreter *)a
-#    define dTHX	dTHXa(PL_curinterp)
-#  endif
-#  define pTHX_		pTHX,
-#  define _pTHX		,pTHX
-#  define aTHX_		aTHX,
-#  define _aTHX		,aTHX
-#endif
-
-#ifndef pTHX
-#  define pTHX		void
-#  define pTHX_
-#  define _pTHX
-#  define aTHX
-#  define aTHX_
-#  define _aTHX
-#  define dTHXa(a)	dNOOP
-#  define dTHX		dNOOP
-#endif
-
-#define WITH_THX(s) STMT_START { dTHX; s; } STMT_END
-
-#ifndef STATIC
-#  define STATIC static
-#endif
-
 #ifdef UNION_ANY_DEFINITION
 UNION_ANY_DEFINITION;
 #else
@@ -1555,11 +1576,7 @@ union any {
 #define ARGSproto
 #endif /* USE_THREADS */
 
-#ifdef PERL_OBJECT
-typedef I32 (*filter_t) (CPerlObj*, int, SV *, int);
-#else
-typedef I32 (*filter_t) (pTHX_ int, SV *, int);
-#endif
+typedef I32 (*filter_t) (pTHXo_ int, SV *, int);
 
 #define FILTER_READ(idx, sv, len)  filter_read(idx, sv, len)
 #define FILTER_DATA(idx)	   (AvARRAY(PL_rsfp_filters)[idx])
@@ -1576,9 +1593,6 @@ typedef I32 (*filter_t) (pTHX_ int, SV *, int);
 #include "form.h"
 #include "gv.h"
 #include "cv.h"
-#ifndef PERL_OBJECT
-#include "opcode.h"
-#endif
 #include "op.h"
 #include "cop.h"
 #include "av.h"
@@ -1932,11 +1946,8 @@ typedef Sighandler_t Sigsave_t;
 #endif
 
 
-#ifdef PERL_OBJECT
-typedef int (CPerlObj::*runops_proc_t) (void);
-#else
-typedef int (*runops_proc_t) (pTHX);
-#endif
+typedef int (CPERLscope(*runops_proc_t)) (pTHX);
+typedef OP* (CPERLscope(*PPADDR_t)[]) (pTHX);
 
 /* _ (for $_) must be first in the following list (DEFSV requires it) */
 #define THREADSV_NAMES "_123456789&`'+/.,\\\";^-%=|~:\001\005!@"
@@ -2315,19 +2326,11 @@ enum {		/* pass one of these to get_vtbl */
 #define RsRECORD(sv)  (SvROK(sv) && (SvIV(SvRV(sv)) > 0))
 
 /* Enable variables which are pointers to functions */
-#ifdef PERL_OBJECT
-typedef regexp*(CPerlObj::*regcomp_t) (char* exp, char* xend, PMOP* pm);
-typedef I32 (CPerlObj::*regexec_t) (regexp* prog, char* stringarg,
-				    char* strend, char* strbeg,
-				    I32 minend, SV* screamer, void* data,
-				    U32 flags);
-#else
-typedef regexp*(*regcomp_t) (pTHX_ char* exp, char* xend, PMOP* pm);
-typedef I32 (*regexec_t) (pTHX_ regexp* prog, char* stringarg, char* strend, char*
-			  strbeg, I32 minend, SV* screamer, void* data, 
-			  U32 flags);
+typedef regexp*(CPERLscope(*regcomp_t)) (pTHX_ char* exp, char* xend, PMOP* pm);
+typedef I32 (CPERLscope(*regexec_t)) (pTHX_ regexp* prog, char* stringarg,
+				      char* strend, char* strbeg, I32 minend,
+				      SV* screamer, void* data, U32 flags);
 
-#endif
 
 /* Set up PERLVAR macros for populating structs */
 #define PERLVAR(var,type) type var;
@@ -2336,16 +2339,14 @@ typedef I32 (*regexec_t) (pTHX_ regexp* prog, char* stringarg, char* strend, cha
 
 /* Interpreter exitlist entry */
 typedef struct exitlistentry {
-#ifdef PERL_OBJECT
-    void (*fn) (CPerlObj*, void*);
-#else
-    void (*fn) (pTHX_ void*);
-#endif
+    void (*fn) (pTHXo_ void*);
     void *ptr;
 } PerlExitListEntry;
 
 #ifdef PERL_OBJECT
-extern "C" CPerlObj* perl_alloc (IPerlMem*, IPerlEnv*, IPerlStdIO*, IPerlLIO*, IPerlDir*, IPerlSock*, IPerlProc*);
+#undef perl_alloc
+#define perl_alloc Perl_alloc
+CPerlObj* Perl_alloc (IPerlMem*, IPerlEnv*, IPerlStdIO*, IPerlLIO*, IPerlDir*, IPerlSock*, IPerlProc*);
 
 #undef EXT
 #define EXT
@@ -2428,7 +2429,7 @@ typedef void *Thread;
 #  define VIRTUAL virtual PERL_CALLCONV
 #else
 #  define VIRTUAL PERL_CALLCONV
-START_EXTERN_C
+/*START_EXTERN_C*/
 #endif
 
 #ifndef NEXT30_NO_ATTRIBUTE
@@ -2444,19 +2445,41 @@ START_EXTERN_C
 int Perl_yylex(pTHX_ YYSTYPE *lvalp, int *lcharp);
 #endif
 
-typedef void (*DESTRUCTORFUNC_t) (pTHX_ void*);
-typedef void (*SVFUNC_t) (pTHX_ SV*);
-typedef I32 (*SVCOMPARE_t) (pTHX_ SV*, SV*);
-typedef void (*XSINIT_t) (pTHX);
-typedef void (*ATEXIT_t) (pTHX_ void*);
-typedef void (*XSUBADDR_t) (pTHX_ CV *);
+typedef void (CPERLscope(*DESTRUCTORFUNC_t)) (pTHX_ void*);
+typedef void (CPERLscope(*SVFUNC_t)) (pTHX_ SV*);
+typedef I32 (CPERLscope(*SVCOMPARE_t)) (pTHX_ SV*, SV*);
+typedef void (*XSINIT_t) (pTHXo);
+typedef void (*ATEXIT_t) (pTHXo_ void*);
+typedef void (*XSUBADDR_t) (pTHXo_ CV *);
+
+#ifdef PERL_OBJECT
+#define PERL_DECL_PROT
+#define perl_alloc Perl_alloc
+#endif
 
 #include "proto.h"
 
+#undef PERL_CKDEF
+#undef PERL_PPDEF
+#define PERL_CKDEF(s)	OP *s (pTHX_ OP *o);
+#define PERL_PPDEF(s)	OP *s (pTHX);
+#ifdef PERL_OBJECT
+public:
+#endif
+
 #include "pp_proto.h"
 
+#ifdef PERL_OBJECT
+VIRTUAL int CPerlObj::fprintf (PerlIO *pf, const char *pat, ...);
+VIRTUAL int CPerlObj::do_aspawn (void *vreally, void **vmark, void **vsp);
+#undef PERL_DECL_PROT
+#else
+/*END_EXTERN_C*/
+#endif
+
 #ifndef PERL_OBJECT
-END_EXTERN_C
+/* this has structure inits, so it cannot be included before here */
+#  include "opcode.h"
 #endif
 
 /* The following must follow proto.h as #defines mess up syntax */
@@ -2475,9 +2498,15 @@ END_EXTERN_C
 #define PERLVARIC(var,type,init) EXTCONST type PL_##var INIT(init);
 
 #ifndef PERL_GLOBAL_STRUCT
+#  ifndef PERL_OBJECT
 START_EXTERN_C
-#include "perlvars.h"
+#  endif
+
+#  include "perlvars.h"
+
+#  ifndef PERL_OBJECT
 END_EXTERN_C
+#  endif
 #endif
 
 #ifndef MULTIPLICITY

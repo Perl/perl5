@@ -525,15 +525,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	    sv_setnv(sv, (double)dwErr);
 	    if (dwErr)
 	    {
-#ifdef PERL_OBJECT
-		char *sMsg;
-		DWORD dwLen;
-		PerlProc_GetSysMsg(sMsg, dwLen, dwErr);
-		sv_setpvn(sv, sMsg, dwLen);
-		PerlProc_FreeBuf(sMsg);
-#else
-		win32_str_os_error(aTHX_ sv, dwErr);
-#endif
+		PerlProc_GetOSError(sv, dwErr);
 	    }
 	    else
 		sv_setpv(sv, "");

@@ -7,17 +7,13 @@ static void
 freadpv(U32 len, void *data, XPV *pv)
 {
     New(666, pv->xpv_pv, len, char);
-    fread(pv->xpv_pv, 1, len, (FILE*)data);
+    PerlIO_read((PerlIO*)data, (void*)pv->xpv_pv, len);
     pv->xpv_len = len;
     pv->xpv_cur = len - 1;
 }
 
 static I32
-#ifdef PERL_OBJECT
-byteloader_filter(CPerlObj *pPerl, int idx, SV *buf_sv, int maxlen)
-#else
-byteloader_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
-#endif
+byteloader_filter(pTHXo_ int idx, SV *buf_sv, int maxlen)
 {
     dTHR;
     OP *saveroot = PL_main_root;
@@ -29,7 +25,7 @@ byteloader_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
     bs.pfread = (int(*) (char*,size_t,size_t,void*))fread;
     bs.pfreadpv = freadpv;
 
-    byterun(bs);
+    byterun(aTHXo_ bs);
 
     if (PL_in_eval) {
         OP *o;

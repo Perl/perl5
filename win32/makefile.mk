@@ -36,6 +36,17 @@ INST_TOP	*= $(INST_DRV)\perl
 INST_VER	*= \5.00557
 
 #
+# Comment this out if you DON'T want your perl installation to have
+# architecture specific components.  This means that architecture-
+# specific files will be installed along with the architecture-neutral
+# files.  Leaving it enabled is safer and more flexible, in case you
+# want to build multiple flavors of perl and install them together in
+# the same location.  Commenting it out gives you a simpler
+# installation that is easier to understand for beginners.
+#
+INST_ARCH	*= \$(ARCHNAME)
+
+#
 # uncomment to enable threads-capabilities
 #
 #USE_THREADS	*= define
@@ -139,6 +150,7 @@ CCLIBDIR	*= $(CCHOME)\lib
 # instead of clinging to shortcuts like this one.
 #
 #BUILDOPT	*= -DPERL_POLLUTE
+#BUILDOPT	*= -DPERL_IMPLICIT_CONTEXT
 
 #
 # specify semicolon-separated list of extra directories that modules will
@@ -206,7 +218,6 @@ DELAYLOAD	*= -DELAYLOAD:wsock32.dll delayimp.lib
 CFG		*= Optimize
 .ENDIF
 
-ARCHDIR		= ..\lib\$(ARCHNAME)
 COREDIR		= ..\lib\CORE
 AUTODIR		= ..\lib\auto
 
@@ -402,7 +413,7 @@ $(o).dll:
 .ENDIF
 
 #
-INST_BIN	= $(INST_TOP)$(INST_VER)\bin\$(ARCHNAME)
+INST_BIN	= $(INST_TOP)$(INST_VER)\bin$(INST_ARCH)
 INST_SCRIPT	= $(INST_TOP)$(INST_VER)\bin
 INST_LIB	= $(INST_TOP)$(INST_VER)\lib
 INST_POD	= $(INST_LIB)\pod
@@ -715,6 +726,7 @@ CFG_VARS	=					\
 		"INST_DRV=$(INST_DRV)"			\
 		"INST_TOP=$(INST_TOP)"			\
 		"INST_VER=$(INST_VER)"			\
+		"INST_ARCH=$(INST_ARCH)"		\
 		"archname=$(ARCHNAME)"			\
 		"cc=$(CC)"				\
 		"ccflags=$(OPTIMIZE:s/"/\"/) $(DEFINES) $(OBJECT)"	\

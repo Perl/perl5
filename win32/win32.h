@@ -188,7 +188,10 @@ typedef long		gid_t;
 typedef unsigned short	mode_t;
 #pragma  warning(disable: 4018 4035 4101 4102 4244 4245 4761)
 
-#ifndef PERL_OBJECT
+#ifdef PERL_OBJECT
+extern CPerlObj* GetPerlInter(void);
+#define dPERLOBJ CPerlObj* pPerl = GetPerlInter()
+#else /* PERL_OBJECT */
 
 /* Visual C thinks that a pointer to a member variable is 16 bytes in size. */
 #define STRUCT_MGVTBL_DEFINITION					\
@@ -235,6 +238,8 @@ struct mgvtbl {								\
     char	handle_VC_problem[16];			\
 }
 
+
+#define dPERLOBJ
 #endif /* PERL_OBJECT */
 
 #endif /* _MSC_VER */
@@ -345,6 +350,12 @@ typedef struct {
     DWORD	pids[MAXIMUM_WAIT_OBJECTS];
 } child_tab;
 
+struct host_link {
+    char *	nameId;
+    void *	host_data;
+    struct host_link *	next;
+};
+
 struct interp_intern {
     char *	perlshell_tokens;
     char **	perlshell_vec;
@@ -352,6 +363,7 @@ struct interp_intern {
     struct av *	fdpid;
     child_tab *	children;
     HANDLE	child_handles[MAXIMUM_WAIT_OBJECTS];
+    struct host_link *	hostlist;
 };
 
 
@@ -363,6 +375,7 @@ struct interp_intern {
 #define w32_num_children	(w32_children->num)
 #define w32_child_pids		(w32_children->pids)
 #define w32_child_handles	(PL_sys_intern.child_handles)
+#define w32_host_link		(PL_sys_intern.hostlist)
 
 /* 
  * Now Win32 specific per-thread data stuff 
@@ -395,15 +408,13 @@ struct thread_intern {
 /* Use CP_ACP when mode is ANSI */
 /* Use CP_UTF8 when mode is UTF8 */
 
-#define A2WHELPER(lpa, lpw, nChars, acp)\
-    lpw[0] = 0, MultiByteToWideChar(acp, 0, lpa, -1, lpw, nChars)
+#define A2WHELPER(lpa, lpw, nChars)\
+    lpw[0] = 0, MultiByteToWideChar((IN_UTF8) ? CP_UTF8 : CP_ACP, 0, lpa, -1, lpw, nChars)
 
-#define W2AHELPER(lpw, lpa, nChars, acp)\
-    lpa[0] = '\0', WideCharToMultiByte(acp, 0, lpw, -1, lpa, nChars, NULL, NULL)
+#define W2AHELPER(lpw, lpa, nChars)\
+    lpa[0] = '\0', WideCharToMultiByte((IN_UTF8) ? CP_UTF8 : CP_ACP, 0, lpw, -1, (LPSTR)lpa, nChars, NULL, NULL)
 
-/* place holders for now */
-#define USING_WIDE()	(IsWinNT())
-#define GETINTERPMODE() (IN_UTF8)
+#define USING_WIDE()	(PerlEnv_os_id() == VER_PLATFORM_WIN32_NT)
 
 /*
  * This provides a layer of functions and macros to ensure extensions will

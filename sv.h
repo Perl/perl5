@@ -271,7 +271,7 @@ struct xpvfm {
     HV *	xcv_stash;
     OP *	xcv_start;
     OP *	xcv_root;
-    void      (*xcv_xsub)(CV* _CPERLproto);
+    void      (*xcv_xsub)(pTHXo_ CV*);
     ANY		xcv_xsubany;
     GV *	xcv_gv;
     GV *	xcv_filegv;

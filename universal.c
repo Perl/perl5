@@ -103,6 +103,20 @@ Perl_sv_derived_from(pTHX_ SV *sv, const char *name)
  
 }
 
+void XS_UNIVERSAL_isa(pTHXo_ CV *cv);
+void XS_UNIVERSAL_can(pTHXo_ CV *cv);
+void XS_UNIVERSAL_VERSION(pTHXo_ CV *cv);
+
+void
+Perl_boot_core_UNIVERSAL(pTHX)
+{
+    char *file = __FILE__;
+
+    newXS("UNIVERSAL::isa",             XS_UNIVERSAL_isa,         file);
+    newXS("UNIVERSAL::can",             XS_UNIVERSAL_can,         file);
+    newXS("UNIVERSAL::VERSION", 	XS_UNIVERSAL_VERSION, 	  file);
+}
+
 #ifdef PERL_OBJECT
 #define NO_XSLOCKS
 #endif  /* PERL_OBJECT */
@@ -205,18 +219,3 @@ XS(XS_UNIVERSAL_VERSION)
     XSRETURN(1);
 }
 
-#ifdef PERL_OBJECT
-#undef  boot_core_UNIVERSAL
-#define boot_core_UNIVERSAL CPerlObj::Perl_boot_core_UNIVERSAL
-#define pPerl this
-#endif
-
-void
-Perl_boot_core_UNIVERSAL(pTHX)
-{
-    char *file = __FILE__;
-
-    newXS("UNIVERSAL::isa",             XS_UNIVERSAL_isa,         file);
-    newXS("UNIVERSAL::can",             XS_UNIVERSAL_can,         file);
-    newXS("UNIVERSAL::VERSION", 	XS_UNIVERSAL_VERSION, 	  file);
-}

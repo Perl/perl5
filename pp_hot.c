@@ -2366,7 +2366,7 @@ try_autoload:
 		PL_curcopdb = NULL;
 	    }
 	    /* Do we need to open block here? XXXX */
-	    (void)(*CvXSUB(cv))(aTHX_ cv);
+	    (void)(*CvXSUB(cv))(aTHXo_ cv);
 
 	    /* Enforce some sanity in scalar context. */
 	    if (gimme == G_SCALAR && ++markix != PL_stack_sp - PL_stack_base ) {

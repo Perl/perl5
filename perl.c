@@ -24,6 +24,8 @@
 char *getenv (char *); /* Usually in <stdlib.h> */
 #endif
 
+static I32 read_e_script(pTHXo_ int idx, SV *buf_sv, int maxlen);
+
 #ifdef I_FCNTL
 #include <fcntl.h>
 #endif
@@ -68,7 +70,7 @@ perl_alloc(void)
 #endif /* PERL_OBJECT */
 
 void
-perl_construct(register PerlInterpreter *my_perl)
+perl_construct(pTHXx)
 {
 #ifdef USE_THREADS
     int i;
@@ -206,7 +208,7 @@ perl_construct(register PerlInterpreter *my_perl)
 }
 
 void
-perl_destruct(register PerlInterpreter *my_perl)
+perl_destruct(pTHXx)
 {
     dTHR;
     int destruct_level;  /* 0=none, 1=full, 2=full with checks */
@@ -340,7 +342,7 @@ perl_destruct(register PerlInterpreter *my_perl)
 
     /* call exit list functions */
     while (PL_exitlistlen-- > 0)
-	PL_exitlist[PL_exitlistlen].fn(aTHX_ PL_exitlist[PL_exitlistlen].ptr);
+	PL_exitlist[PL_exitlistlen].fn(aTHXo_ PL_exitlist[PL_exitlistlen].ptr);
 
     Safefree(PL_exitlist);
 
@@ -561,7 +563,7 @@ perl_destruct(register PerlInterpreter *my_perl)
 }
 
 void
-perl_free(PerlInterpreter *my_perl)
+perl_free(pTHXx)
 {
 #ifdef PERL_OBJECT
 	Safefree(this);
@@ -584,7 +586,7 @@ Perl_call_atexit(pTHX_ ATEXIT_t fn, void *ptr)
 }
 
 int
-perl_parse(PerlInterpreter *my_perl, XSINIT_t xsinit, int argc, char **argv, char **env)
+perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
 {
     dTHR;
     I32 oldscope;
@@ -737,7 +739,7 @@ S_parse_body(pTHX_ va_list args)
 		Perl_croak(aTHX_ "No -e allowed in setuid scripts");
 	    if (!PL_e_script) {
 		PL_e_script = newSVpvn("",0);
-		filter_add(S_read_e_script, NULL);
+		filter_add(read_e_script, NULL);
 	    }
 	    if (*++s)
 		sv_catpv(PL_e_script, s);
@@ -941,7 +943,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     boot_core_UNIVERSAL();
 
     if (xsinit)
-	(*xsinit)(aTHX);	/* in case linked C routines want magical variables */
+	(*xsinit)(aTHXo);	/* in case linked C routines want magical variables */
 #if defined(VMS) || defined(WIN32) || defined(DJGPP)
     init_os_extras(aTHX);
 #endif
@@ -999,7 +1001,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 }
 
 int
-perl_run(PerlInterpreter *my_perl)
+perl_run(pTHXx)
 {
     dTHR;
     I32 oldscope;
@@ -3100,15 +3102,15 @@ S_my_exit_jump(pTHX)
 
 #include "XSUB.h"
 
-STATIC I32
-S_read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen)
+static I32
+read_e_script(pTHXo_ int idx, SV *buf_sv, int maxlen)
 {
     char *p, *nl;
     p  = SvPVX(PL_e_script);
     nl = strchr(p, '\n');
     nl = (nl) ? nl+1 : SvEND(PL_e_script);
     if (nl-p == 0) {
-	filter_del(S_read_e_script);
+	filter_del(read_e_script);
 	return 0;
     }
     sv_catpvn(buf_sv, p, nl-p);

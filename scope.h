@@ -82,7 +82,7 @@
 #define SAVEDELETE(h,k,l) \
 	  save_delete(SOFT_CAST(HV*)(h), SOFT_CAST(char*)(k), (I32)(l))
 #ifdef PERL_OBJECT
-#define CALLDESTRUCTOR this->*SSPOPDPTR
+#define CALLDESTRUCTOR (this->*SSPOPDPTR)
 #else
 #define CALLDESTRUCTOR (*SSPOPDPTR)
 #endif
