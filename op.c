@@ -395,7 +395,8 @@ U32 tmptype;
     }
     SvFLAGS(sv) |= tmptype;
     curpad = AvARRAY(comppad);
-    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad alloc %ld for %s\n", (long) retval, op_name[optype]));
+    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad %p alloc %ld for %s\n",
+				curpad, (long) retval, op_name[optype]));
     return (PADOFFSET)retval;
 }
 
@@ -409,7 +410,8 @@ pad_sv(PADOFFSET po)
 {
     if (!po)
 	croak("panic: pad_sv po");
-    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad sv %lu\n", (unsigned long)po));
+    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad %p sv %lu\n",
+				curpad, (unsigned long)po));
     return curpad[po];		/* eventually we'll turn this into a macro */
 }
 
@@ -427,7 +429,8 @@ pad_free(PADOFFSET po)
 	croak("panic: pad_free curpad");
     if (!po)
 	croak("panic: pad_free po");
-    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad free %lu\n", (unsigned long)po));
+    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad %p free %lu\n",
+				curpad, (unsigned long)po));
     if (curpad[po] && !SvIMMORTAL(curpad[po]))
 	SvPADTMP_off(curpad[po]);
     if ((I32)po < padix)
@@ -446,7 +449,8 @@ pad_swipe(PADOFFSET po)
 	croak("panic: pad_swipe curpad");
     if (!po)
 	croak("panic: pad_swipe po");
-    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad swipe %lu\n", (unsigned long)po));
+    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad %p swipe %lu\n",
+				curpad, (unsigned long)po));
     SvPADTMP_off(curpad[po]);
     curpad[po] = NEWSV(1107,0);
     SvPADTMP_on(curpad[po]);
@@ -468,7 +472,7 @@ pad_reset()
 
     if (AvARRAY(comppad) != curpad)
 	croak("panic: pad_reset curpad");
-    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad reset\n"));
+    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad %p reset\n", curpad));
     if (!tainting) {	/* Can't mix tainted and non-tainted temporaries. */
 	for (po = AvMAX(comppad); po > padix_floor; po--) {
 	    if (curpad[po] && !SvIMMORTAL(curpad[po]))

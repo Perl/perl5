@@ -43,8 +43,23 @@
 #define FREE_TMPS() FREETMPS
 #endif
 
+#ifdef DEBUGGING
+#define ENTER							\
+    STMT_START {						\
+	push_scope();						\
+	DEBUG_l(deb("ENTER scope %ld at %s:%d\n",		\
+		    scopestack_ix, __FILE__, __LINE__));	\
+    } STMT_END
+#define LEAVE							\
+    STMT_START {						\
+	DEBUG_l(deb("LEAVE scope %ld at %s:%d\n",		\
+		    scopestack_ix, __FILE__, __LINE__));	\
+	pop_scope();						\
+    } STMT_END
+#else
 #define ENTER push_scope()
 #define LEAVE pop_scope()
+#endif
 #define LEAVE_SCOPE(old) if (savestack_ix > old) leave_scope(old)
 
 /*

@@ -674,7 +674,7 @@ sublex_start()
 static I32
 sublex_push()
 {
-    push_scope();
+    ENTER;
 
     lex_state = sublex_info.super_state;
     SAVEI32(lex_dojoin);
@@ -760,7 +760,7 @@ sublex_done()
 	return ',';
     }
     else {
-	pop_scope();
+	LEAVE;
 	bufend = SvPVX(linestr);
 	bufend += SvCUR(linestr);
 	expect = XOPERATOR;

@@ -2528,6 +2528,7 @@ PP(pp_leaveeval)
     assert(CvDEPTH(compcv) == 1);
 #endif
     CvDEPTH(compcv) = 0;
+    lex_end();
 
     if (optype == OP_REQUIRE &&
 	!(gimme == G_SCALAR ? SvTRUE(*sp) : sp > newsp))
@@ -2536,13 +2537,13 @@ PP(pp_leaveeval)
 	char *name = cx->blk_eval.old_name;
 	(void)hv_delete(GvHVn(incgv), name, strlen(name), G_DISCARD);
 	retop = die("%s did not return a true value", name);
+	/* die_where() did LEAVE, or we won't be here */
     }
-
-    lex_end();
-    LEAVE;
-
-    if (!(save_flags & OPf_SPECIAL))
-	sv_setpv(GvSV(errgv),"");
+    else {
+	LEAVE;
+	if (!(save_flags & OPf_SPECIAL))
+	    sv_setpv(GvSV(errgv),"");
+    }
 
     RETURNOP(retop);
 }
