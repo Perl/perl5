@@ -76,10 +76,10 @@ sub canonpath {
     ($volume,$directories,$file) = File::Spec->splitpath( $path );
     ($volume,$directories,$file) = File::Spec->splitpath( $path, $no_file );
 
-Splits a path in to volume, directory, and filename portions. Assumes that 
+Splits a path into volume, directory, and filename portions. Assumes that 
 the last file is a path unless the path ends in '/', '/.', '/..'
 or $no_file is true.  On Win32 this means that $no_file true makes this return 
-( $volume, $path, undef ).
+( $volume, $path, '' ).
 
 Separators accepted are \ and /.
 

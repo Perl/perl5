@@ -235,8 +235,8 @@ sub join {
     ($volume,$directories,$file) = File::Spec->splitpath( $path );
     ($volume,$directories,$file) = File::Spec->splitpath( $path, $no_file );
 
-Splits a path in to volume, directory, and filename portions. On systems
-with no concept of volume, returns undef for volume. 
+Splits a path into volume, directory, and filename portions. On systems
+with no concept of volume, returns '' for volume. 
 
 For systems with no syntax differentiating filenames from directories, 
 assumes that the last file is a path unless $no_file is true or a 
