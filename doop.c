@@ -149,10 +149,7 @@ register SV **sarg;
     register char *s;
     register char *t;
     register char *f;
-    bool dolong;
-#ifdef HAS_QUAD
-    bool doquad;
-#endif /* HAS_QUAD */
+    char dotype;
     char ch;
     register char *send;
     register SV *arg;
@@ -181,10 +178,7 @@ register SV **sarg;
 	f = t;
 	*buf = '\0';
 	xs = buf;
-#ifdef HAS_QUAD
-	doquad =
-#endif /* HAS_QUAD */
-	dolong = FALSE;
+	dotype = '\0';
 	pre = post = 0;
 	for (t++; t < send; t++) {
 	    switch (*t) {
@@ -204,12 +198,14 @@ register SV **sarg;
 		continue;
 	    case 'l':
 #ifdef HAS_QUAD
-		if (dolong) {
-		    dolong = FALSE;
-		    doquad = TRUE;
-		} else
+		if (dotype == 'l')
+		    dotype = 'q';
+		else
 #endif
-		dolong = TRUE;
+		    dotype = 'l';
+		continue;
+	    case 'h':
+		dotype = 's';
 		continue;
 	    case 'c':
 		ch = *(++t);
@@ -226,38 +222,54 @@ register SV **sarg;
 		}
 		break;
 	    case 'D':
-		dolong = TRUE;
+		dotype = 'l';
 		/* FALL THROUGH */
 	    case 'd':
+	    case 'i':
 		ch = *(++t);
 		*t = '\0';
+		switch (dotype) {
 #ifdef HAS_QUAD
-		if (doquad)
-		    (void)sprintf(buf,s,(Quad_t)SvNV(arg));
-		else
+		case 'q':
+		    /* perl.h says that if quad is available, IV is quad */
+		    (void)sprintf(xs,f,(Quad_t)SvIV(arg));
+		    break;
 #endif
-		if (dolong)
-		    (void)sprintf(xs,f,(long)SvNV(arg));
-		else
-		    (void)sprintf(xs,f,SvIV(arg));
+		case 'l':
+		    (void)sprintf(xs,f,(long)SvIV(arg));
+		    break;
+		default:
+		    (void)sprintf(xs,f,(int)SvIV(arg));
+		    break;
+		case 's':
+		    (void)sprintf(xs,f,(short)SvIV(arg));
+		    break;
+		}
 		xlen = strlen(xs);
 		break;
 	    case 'X': case 'O':
-		dolong = TRUE;
+		dotype = 'l';
 		/* FALL THROUGH */
 	    case 'x': case 'o': case 'u':
 		ch = *(++t);
 		*t = '\0';
-		value = SvNV(arg);
+		switch (dotype) {
 #ifdef HAS_QUAD
-		if (doquad)
-		    (void)sprintf(buf,s,(unsigned Quad_t)value);
-		else
+		case 'q':
+		    /* perl.h says that if quad is available, UV is quad */
+		    (void)sprintf(xs,f,(unsigned Quad_t)SvUV(arg));
+		    break;
 #endif
-		if (dolong)
-		    (void)sprintf(xs,f,U_L(value));
-		else
-		    (void)sprintf(xs,f,U_I(value));
+		case 'l':
+		    (void)sprintf(xs,f,(unsigned long)SvUV(arg));
+		    break;
+		default:
+		    (void)sprintf(xs,f,(unsigned int)SvUV(arg));
+		    break;
+		case 's':
+		    (void)sprintf(xs,f,(unsigned short)SvUV(arg));
+		    break;
+		}
 		xlen = strlen(xs);
 		break;
 	    case 'E': case 'e': case 'f': case 'G': case 'g':

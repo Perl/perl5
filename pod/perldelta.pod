@@ -103,6 +103,12 @@ This now works.  (e.g. C<delete @ENV{'PATH', 'MANPATH'}>)
 is now supported on more platforms, and prefers fcntl
 to lockf when emulating.
 
+=item printf and sprintf
+
+now support "%i" as a synonym for "%d", and the "h" modifier.
+So "%hi" means "short integer in decimal", and "%ho" means
+"unsigned short integer as octal".
+
 =item keys as an lvalue
 
 As an lvalue, C<keys> allows you to increase the number of hash buckets
