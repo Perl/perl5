@@ -169,8 +169,7 @@ PP(pp_concat)
 	    s = (U8*)SvPV(right,len);
             if (TARG == right) {
 		/* Take a copy since we're about to overwrite TARG */
-	        olds = s;
-		s = (U8*)savepvn((char*)s, len);
+	        olds = s = (U8*)savepvn((char*)s, len);
 	    }
 	    if (!SvOK(left) && SvTYPE(left) <= SVt_PVMG)
 		sv_setpv(left, "");	/* Suppress warning. */
