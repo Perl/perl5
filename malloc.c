@@ -1630,8 +1630,6 @@ malloced_size(void *p)
     return BUCKET_SIZE_REAL(bucket);
 }
 
-#ifdef DEBUGGING_MSTATS
-
 #  ifdef BUCKETS_ROOT2
 #    define MIN_EVEN_REPORT 6
 #  else
@@ -1647,6 +1645,7 @@ malloced_size(void *p)
 void
 dump_mstats(char *s)
 {
+#ifdef DEBUGGING_MSTATS
   	register int i, j;
   	register union overhead *p;
   	int topbucket=0, topbucket_ev=0, topbucket_odd=0, totfree=0, total=0;
@@ -1715,15 +1714,9 @@ dump_mstats(char *s)
 	PerlIO_printf(PerlIO_stderr(), "\nTotal sbrk(): %d/%d:%d. Odd ends: pad+heads+chain+tail: %d+%d+%d+%d.\n",
 		      goodsbrk + sbrk_slack, sbrks, sbrk_good, sbrk_slack,
 		      start_slack, total_chain, sbrked_remains);
+#endif /* DEBUGGING_MSTATS */
 }
-#else
-void
-dump_mstats(char *s)
-{
-}
-#endif
 #endif /* lint */
-
 
 #ifdef USE_PERL_SBRK
 
