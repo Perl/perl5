@@ -79,6 +79,194 @@ Version 5.005_63        Development release working toward 5.6
 ----------------
 
 ____________________________________________________________________________
+[  4651] By: gsar                                  on 1999/12/05  09:01:19
+        Log: on dosish platforms, avoid infinite recursion in File::Path::mkpath()
+             when given non-existent drive names
+     Branch: perl
+	   ! lib/File/Path.pm
+____________________________________________________________________________
+[  4650] By: gsar                                  on 1999/12/05  08:47:11
+        Log: windows build tweaks for change#4649
+     Branch: perl
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  4649] By: gsar                                  on 1999/12/05  07:49:28
+        Log: make File::Glob::glob() the default for CORE::glob()
+             (old csh glob can still be had with -DPERL_EXTERNAL_GLOB)
+     Branch: perl
+	   ! Makefile.SH op.c pod/perldelta.pod win32/Makefile
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[  4648] By: gsar                                  on 1999/12/05  00:33:34
+        Log: fix bug in processing L<> tags (from j.vavruska@post.cz)
+     Branch: perl
+	   ! lib/Pod/Html.pm
+____________________________________________________________________________
+[  4647] By: gsar                                  on 1999/12/05  00:14:01
+        Log: remove outdated entry
+     Branch: perl
+	   ! pod/perltrap.pod
+____________________________________________________________________________
+[  4646] By: gsar                                  on 1999/12/04  22:48:51
+        Log: s/block/loop block/ in diagnostics about next, last, redo
+     Branch: perl
+	   ! pod/perldiag.pod pp_ctl.c t/op/runlevel.t t/pragma/warn/pp_ctl
+____________________________________________________________________________
+[  4645] By: gsar                                  on 1999/12/04  22:25:32
+        Log: readability tweak suggested by GRommel@sears.com
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[  4644] By: gsar                                  on 1999/12/04  22:05:00
+        Log: Configure tweak from Peter Prymmer
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[  4643] By: gsar                                  on 1999/12/04  21:55:27
+        Log: make weak keyword check look for defined(&lock), not
+             merely defined(*lock)
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  4642] By: gsar                                  on 1999/12/04  21:11:51
+        Log: make eof() open ARGV if it isn't open already; also fixes bug
+             where eof() would operate on any last-read filehandle, not
+             just ARGV
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[  4641] By: gsar                                  on 1999/12/04  04:42:25
+        Log: make uninitialized value warnings report opcode
+     Branch: perl
+	   ! doio.c embed.h embed.pl global.sym objXSUB.h opcode.h
+	   ! opcode.pl perl.h perlapi.c pp.c pp_hot.c proto.h sv.c
+	   ! t/op/misc.t t/pragma/warn/1global t/pragma/warn/2use
+	   ! t/pragma/warn/3both t/pragma/warn/4lint t/pragma/warn/7fatal
+	   ! t/pragma/warn/doio t/pragma/warn/pp t/pragma/warn/pp_hot
+	   ! t/pragma/warn/sv
+____________________________________________________________________________
+[  4640] By: gsar                                  on 1999/12/04  02:40:44
+        Log: provide explicit functions timegm_nocheck() and timelocal_nocheck()
+             that don't do range checking
+     Branch: perl
+	   ! lib/Time/Local.pm
+____________________________________________________________________________
+[  4639] By: gsar                                  on 1999/12/04  01:00:49
+        Log: better implementation of change#3326; open(local $foo,...) now
+             allowed in addition to any uninitialized variable, for consistency
+             with how autovivification works elsewhere; add code to use the
+             variable name as the name of the handle for simple variables, so
+             that diagnostics report the handle: "... at - line 1, <$foo> line 10."
+     Branch: perl
+	   ! op.c pod/perldelta.pod pp.c t/io/open.t
+____________________________________________________________________________
+[  4638] By: gsar                                  on 1999/12/03  21:20:00
+        Log: pod nits
+     Branch: perl
+	   ! pod/perlfunc.pod pod/perlrun.pod
+____________________________________________________________________________
+[  4637] By: gsar                                  on 1999/12/03  08:59:04
+        Log: change#4431 was flawed
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  4636] By: gsar                                  on 1999/12/03  07:59:52
+        Log: pod embellishments from Nathan Torkington
+     Branch: perl
+	   ! pod/perlfaq2.pod pod/perlhack.pod
+____________________________________________________________________________
+[  4635] By: gsar                                  on 1999/12/03  07:56:04
+        Log: perlfaq4 typo (from Jeff Pinyan <jeffp@crusoe.net>)
+     Branch: perl
+	   ! pod/perlfaq4.pod
+____________________________________________________________________________
+[  4634] By: gsar                                  on 1999/12/03  07:47:47
+        Log: test tweak for VMS (from Craig A. Berry)
+     Branch: perl
+	   ! t/io/nargv.t
+____________________________________________________________________________
+[  4633] By: gsar                                  on 1999/12/03  07:44:52
+        Log: patchls tweak from Andreas Koenig
+     Branch: perl
+	   ! Porting/patchls
+____________________________________________________________________________
+[  4632] By: gsar                                  on 1999/12/03  07:42:23
+        Log: don't mess with the umask()
+     Branch: perl
+	   ! installhtml installman installperl lib/ExtUtils/Install.pm
+	   ! lib/ExtUtils/Manifest.pm
+____________________________________________________________________________
+[  4631] By: gsar                                  on 1999/12/03  06:52:50
+        Log: support -a switch to append bytecode to an existing file and make
+             perlcc use it (from Tom Hughes <tom@compton.nu>)
+     Branch: perl
+	   ! ext/B/B/Bytecode.pm utils/perlcc.PL
+____________________________________________________________________________
+[  4630] By: gsar                                  on 1999/12/03  06:46:16
+        Log: document incompatible perl4 vec() vs bitwise ops interaction trap
+             (from Tom Phoenix)
+     Branch: perl
+	   ! pod/perltrap.pod
+____________________________________________________________________________
+[  4629] By: gsar                                  on 1999/12/03  06:40:15
+        Log: use PerlIO abstraction rather than straight stdio (from
+             Chip Salzenberg)
+     Branch: perl
+	   ! ext/ByteLoader/ByteLoader.xs
+____________________________________________________________________________
+[  4628] By: gsar                                  on 1999/12/03  06:15:54
+        Log: avoid warning in IO::Select::exists() if socket doesn't exist
+     Branch: perl
+	   ! ext/IO/lib/IO/Select.pm
+____________________________________________________________________________
+[  4627] By: gsar                                  on 1999/12/03  06:05:19
+        Log: two small patches from Peter Prymmer <pvhp@forte.com>
+     Branch: perl
+	   ! makedepend.SH win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  4626] By: gsar                                  on 1999/12/03  05:36:38
+        Log: From: Peter Prymmer <pvhp@forte.com>
+             Date: Thu, 25 Nov 1999 21:06:19 -0800 (PST)
+             Message-Id: <199911260506.VAA17230@brio.forte.com>
+             Subject: [PATCH: 5.005_62] implement /[:ascii:]/ on ebcdic machines
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[  4625] By: gsar                                  on 1999/12/03  05:20:21
+        Log: Windows build tweaks due to change#4623
+     Branch: perl
+	   ! win32/Makefile win32/makefile.mk win32/perlhost.h
+____________________________________________________________________________
+[  4624] By: gsar                                  on 1999/12/03  04:58:30
+        Log: add missing file
+     Branch: perl
+	   + ext/DynaLoader/XSLoader_pm.PL
+____________________________________________________________________________
+[  4623] By: gsar                                  on 1999/12/03  04:47:03
+        Log: applied suggested patch; removed $VERSION = $VERSION hack
+             (change#4043 fixed the need for that)
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 16 Nov 1999 01:50:31 EST
+             Message-Id: <199911160650.BAA18874@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.005_62] XSLoader.pm
+     Branch: perl
+	   ! MANIFEST ext/B/B.pm ext/ByteLoader/ByteLoader.pm
+	   ! ext/DB_File/DB_File.pm ext/Data/Dumper/Dumper.pm
+	   ! ext/Devel/DProf/DProf.pm ext/Devel/Peek/Peek.pm
+	   ! ext/DynaLoader/DynaLoader_pm.PL ext/DynaLoader/Makefile.PL
+	   ! ext/DynaLoader/dlutils.c ext/Fcntl/Fcntl.pm
+	   ! ext/File/Glob/Glob.pm ext/GDBM_File/GDBM_File.pm ext/IO/IO.pm
+	   ! ext/NDBM_File/NDBM_File.pm ext/ODBM_File/ODBM_File.pm
+	   ! ext/Opcode/Opcode.pm ext/POSIX/POSIX.pm
+	   ! ext/SDBM_File/SDBM_File.pm ext/Socket/Socket.pm
+	   ! ext/Thread/Thread.pm ext/attrs/attrs.pm ext/re/re.pm
+	   ! lib/AutoLoader.pm lib/FindBin.pm lib/Getopt/Std.pm
+____________________________________________________________________________
+[  4622] By: gsar                                  on 1999/12/03  04:02:39
+        Log: revert change#4618 (breaks C<$_ = 'A:B'; s/^[a-z]:/x/>)
+     Branch: perl
+	   ! Changes embed.h embed.pl perl.h proto.h regcomp.c regcomp.h
+____________________________________________________________________________
 [  4621] By: gsar                                  on 1999/12/02  22:24:53
         Log: caveat about thread-safety of extensions
      Branch: perl
