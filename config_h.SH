@@ -2478,7 +2478,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 /* USE_LARGE_FILES:
  *	This symbol, if defined, indicates that large file support
  *	should be used when available.  The USE_64_BITS symbol will
- *	also be turned on.
+ *	also be turned on if necessary.
  */
 #$uselfs	USE_LARGE_FILES		/**/
 

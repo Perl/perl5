@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Sep 20 12:12:09 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Mon Sep 20 12:40:23 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -3027,12 +3027,36 @@ case "$usemorebits" in
 	;;
 esac
 
+
+cat <<EOM
+
+Perl can be built to understand large files (files larger than 2 gigabytes)
+on some systems.  To do so, Configure must be run with -Duselfs.
+
+If this doesn't make any sense to you, just accept the default.
+EOM
+case "$uselfs" in
+"$define"|true|[yY]*) dflt='y' ;;
+*)	dflt='n' ;;
+esac
+rp='Try to understand large files?'
+. ./myread
+case "$ans" in
+y|Y) 	val="$define" ;;
+*)   	val="$undef"  ;;
+esac
+set uselfs
+eval $setvar
+case "$uselfs" in
+"$define") use64bits="$define" ;;
+esac
+
 cat <<EOM
 
 Perl can be built to take advantage of explicit 64-bit interfaces,
 on some systems.  To do so, Configure must be run with -Duse64bits.
 
-If this doesn't make any sense to you, just accept the default 'n'.
+If this doesn't make any sense to you, just accept the default.
 EOM
 case "$use64bits" in
 $define|true|[yY]*)	dflt='y';;
@@ -6515,16 +6539,6 @@ if $test X"$prefix" != X"$installprefix"; then
 else
 	installsitearch="$sitearchexp"
 fi
-
-
-case "$uselfs" in
-"$define"|true|[yY]*)
-	uselfs="$define"
-	use64bits="$define"
-	;;
-*)	uselfs="$undef"
-	;;
-esac
 
 cat <<EOM
 

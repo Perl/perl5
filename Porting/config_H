@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Fri Sep 17 12:08:19 EET DST 1999
+ * Configuration time: Mon Sep 20 12:44:36 EET DST 1999
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -2460,6 +2460,13 @@
  *	will be used (be they 32 or 64 bits).
  */
 #define	USE_64_BITS		/**/
+
+/* USE_LARGE_FILES:
+ *	This symbol, if defined, indicates that large file support
+ *	should be used when available.  The USE_64_BITS symbol will
+ *	also be turned on if necessary.
+ */
+#define	USE_LARGE_FILES		/**/
 
 /* USE_LONG_DOUBLE:
  *	This symbol, if defined, indicates that long doubles should
