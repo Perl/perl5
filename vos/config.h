@@ -1,7 +1,7 @@
 /* This is config.h for Stratus VOS.  It was created by hand
    from the distribution copy of config_h.SH.  */
 
-/* Configuration time: September 4, 1998
+/* Configuration time: February 3, 1999
  * Configured by: Paul Green
  * Target system: Stratus VOS
  */
@@ -209,6 +209,54 @@
  */
 #define HAS_FSETPOS	/**/
 
+/* I_SYS_MOUNT:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sys/mount.h>.
+ */
+/*#define I_SYS_MOUNT		/**/
+
+/* HAS_FSTATFS:
+ *	This symbol, if defined, indicates that the fstatfs routine is
+ *	available to stat the filesystem of a file descriptor.
+ */
+/*#define HAS_FSTATFS	/**/
+
+/* HAS_STRUCT_STATFS_FLAGS:
+ *	This symbol, if defined, indicates that the struct statfs has
+ *	the f_flags member for mount flags.
+ */
+/*#define HAS_STRUCT_STATFS_FLAGS	/**/
+
+/* I_SYS_STATVFS:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sys/statvfs.h>.
+ */
+/*#define I_SYS_STATVFS		/**/
+
+/* HAS_FSTATVFS:
+ *	This symbol, if defined, indicates that the fstatvfs routine is
+ *	available to stat the filesystem of a file descriptor.
+ */
+/*#define HAS_FSTATVFS	/**/
+
+/* I_MNTENT:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <mntent.h>.
+ */
+/*#define I_MNTENT		/**/
+
+/* HAS_GETMNTENT:
+ *	This symbol, if defined, indicates that the getmntent routine is
+ *	available to lookup mount entries in some data base or other.
+ */
+/*#define HAS_GETMNTENT	/**/
+
+/* HAS_HASMNTOPT:
+ *	This symbol, if defined, indicates that the hasmntopt routine is
+ *	available to query mount entries returned by getmntent.
+ */
+/*#define HAS_HASMNTOPT	/**/
+
 /* HAS_GETTIMEOFDAY:
  *	This symbol, if defined, indicates that the gettimeofday() system
  *	call is available for a sub-second accuracy clock. Usually, the file
@@ -255,7 +303,7 @@
  *	This symbol, if defined, indicates that getpgrp needs one
  *	arguments whereas USG one needs none.
  */
-/*#define HAS_GETPGRP		/**/
+#define HAS_GETPGRP		/**/
 /*#define USE_BSD_GETPGRP	/ **/
 
 /* HAS_GETPGRP2:
@@ -433,7 +481,7 @@
  *	This symbol, if defined, indicates that the pause routine is
  *	available to suspend a process until a signal is received.
  */
-/*#define HAS_PAUSE		/**/
+#define HAS_PAUSE		/**/
 
 /* HAS_PIPE:
  *	This symbol, if defined, indicates that the pipe routine is
@@ -745,7 +793,7 @@
  *	This symbol, if defined, indicates that the tzname[] array is
  *	available to access timezone names.
  */
-/*#define HAS_TZNAME		/**/
+#define HAS_TZNAME		/**/
 
 /* HAS_UMASK:
  *	This symbol, if defined, indicates that the umask routine is
@@ -918,7 +966,7 @@
  *	This symbol, if defined, indicates to the C program that it should
  *	include <netinet/in.h>. Otherwise, you may try <sys/in.h>.
  */
-/*#define I_NETINET_IN	/**/ /* PG: just "in.h" on VOS */
+#define I_NETINET_IN	/**/
 
 /* I_SFIO:
  *	This symbol, if defined, indicates to the C program that it should
@@ -960,7 +1008,7 @@
  *	This symbol, if defined, indicates that <sys/ioctl.h> exists and should
  *	be included. Otherwise, include <sgtty.h> or <termio.h>.
  */
-#define	I_SYS_IOCTL		/**/      /* PG: just ioctl.h */
+#define	I_SYS_IOCTL		/**/
 
 /* I_SYS_NDIR:
  *	This symbol, if defined, indicates to the C program that it should
@@ -984,7 +1032,7 @@
  *	This symbol, if defined, indicates to the C program that it should
  *	include <sys/select.h> in order to get definition of struct timeval.
  */
-/*#define I_SYS_SELECT	/**/
+#define I_SYS_SELECT	/**/
 
 /* I_SYS_STAT:
  *	This symbol, if defined, indicates to the C program that it should
@@ -1033,7 +1081,7 @@
  *	the ioctl() calls that depend on the value of this symbol.
  */
 /*#define I_TERMIO		/ **/
-/*#define I_TERMIOS		/**/      /* PG: PREFERED, NOT THERE YET */
+#define I_TERMIOS		/**/
 /*#define I_SGTTY		/ **/
 
 /* I_UNISTD:
@@ -1131,7 +1179,7 @@
  *	This might matter for NeXT 3.0.
  */
 #ifndef NeXT
-#define BYTEORDER 0x1234	/* large digits for MSB */
+#define BYTEORDER 0x4321	/* large digits for MSB */
 #else  /* NeXT */
 #ifdef __LITTLE_ENDIAN__
 #define BYTEORDER 0x1234
@@ -1462,25 +1510,25 @@
  *	This symbol, if defined, indicates that the endhostent() routine is
  *	available to close whatever was being used for host queries.
  */
-/*#define HAS_ENDHOSTENT		/**/
+#define HAS_ENDHOSTENT		/**/
 
 /* HAS_ENDNETENT:
  *	This symbol, if defined, indicates that the endnetent() routine is
  *	available to close whatever was being used for network queries.
  */
-/*#define HAS_ENDNETENT		/**/
+#define HAS_ENDNETENT		/**/
 
 /* HAS_ENDPROTOENT:
  *	This symbol, if defined, indicates that the endprotoent() routine is
  *	available to close whatever was being used for protocol queries.
  */
-/*#define HAS_ENDPROTOENT		/**/
+#define HAS_ENDPROTOENT		/**/
 
 /* HAS_ENDSERVENT:
  *	This symbol, if defined, indicates that the endservent() routine is
  *	available to close whatever was being used for service queries.
  */
-/*#define HAS_ENDSERVENT		/**/
+#define HAS_ENDSERVENT		/**/
 
 /* HAS_GETHOSTBYADDR:
  *	This symbol, if defined, indicates that the gethostbyaddr() routine is
@@ -1826,8 +1874,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-/*#define ARCHLIB "/opt/perl/lib/i86pc-solaris/5.00305"		/**/
-/*#define ARCHLIB_EXP "/opt/perl/lib/i86pc-solaris/5.00305"		/**/
+/*#define ARCHLIB "/system/ported/perl/lib/5.005.{68k,860,7100,8000}"		/* See build macro */
+/*#define ARCHLIB_EXP "/system/ported/perl/lib/5.005.{68k,860,7100,8000}"		/* See build macro */
 
 /* DLSYM_NEEDS_UNDERSCORE:
  *	This symbol, if defined, indicates that we need to prepend an
@@ -1872,8 +1920,17 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "/system/ported/perl"		/**/
-#define PRIVLIB_EXP "/system/ported/perl"		/**/
+#define PRIVLIB "/system/ported/perl/lib/5.005"		/**/
+#define PRIVLIB_EXP "/system/ported/perl/lib/5.005"		/**/
+
+/* SELECT_MIN_BITS:
+ *	This symbol holds the minimum number of bits operated by select.
+ *	That is, if you do select(n, ...), how many bits at least will be
+ *	cleared in the masks if some activity is detected.  Usually this
+ *	is either n or 32*ceil(n/32), especially many little-endians do
+ *	the latter.  This is only useful if you have select(), naturally.
+ */
+#define SELECT_MIN_BITS 	1	/**/
 
 /* SITEARCH:
  *	This symbol contains the name of the private library for this package.
@@ -1888,8 +1945,8 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH "/system/ported/site_command_library"		/**/
-#define SITEARCH_EXP "/system/ported/site_command_library"		/**/
+/*#define SITEARCH "/system/ported/perl/lib/site/5.005.{68k,860,7100,8000}"		/* See build macro */
+/*#define SITEARCH_EXP "/system/ported/perl/lib/site/5.005.{68k,860,7100,8000}"		/* See build macro */
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -1904,8 +1961,8 @@
  *	This symbol contains the ~name expanded version of SITELIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITELIB "/system/ported/site_command_library"		/**/
-#define SITELIB_EXP "/system/ported/site_command_library"		/**/
+#define SITELIB "/system/ported/perl/lib/site/5.005"		/**/
+#define SITELIB_EXP "/system/ported/perl/lib/site/5.005"		/**/
 
 /* STARTPERL:
  *	This variable contains the string to put in front of a perl
@@ -2092,7 +2149,7 @@
  *	standard headers (e.g., sys/types.h).
  */
 #ifndef _POSIX_C_SOURCE
-#define _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE 199309L
 #endif
 
 #endif

@@ -1,6 +1,6 @@
 /*  +++begin copyright+++ *******************************************  */
 /*                                                                     */
-/*  COPYRIGHT (c) 1997, 1998, 1999 Stratus Computer, Inc.              */
+/*  COPYRIGHT (c) 1999 Stratus Computer, Inc.                          */
 /*                                                                     */
 /*  This program is free software; you can redistribute it and/or      */
 /*  modify it under the terms of either:                               */
@@ -31,64 +31,21 @@
 
 #define _POSIX_C_SOURCE 199309L
 
-#include <stdio.h>
-#include <string.h>
-#include <sys/types.h>
+/* Beginning of modification history */
+/* Written 99-02-03 by Paul Green. */
+/* End of modification history */
 
-extern void s$stop_program (char_varying (256) *command_line, 
-                            short int          *error_code);
-extern void s$write_code (char_varying     *record_buffer, 
-                          short int        *error_code);
-extern int vos_call_debug ();
+/* This short program soaks up the call to "accept" and
+   transfers it to "_accept".  This is necessary because the VOS
+   C compilers treat "accept" as a keyword unless the -Xc
+   (strict ANSI option) has been specified.  This program must
+   be compiled with -Xc.  Because "accept" is a keyword, the VOS
+   OS TCP/IP product has renamed the usual TCP/IP "accept"
+   function to "_accept".  */
 
-#pragma page
-static void bomb (char *p_name)
+extern int _accept (int a, struct sockaddr *b, int *c);
+
+extern int accept (int a, struct sockaddr *b, int *c)
 {
-char_varying(256)   msgvs;
-
-     strcpy_vstr_nstr (&msgvs, "FATAL ERROR: Call to unimplemented function '");
-     strcat_vstr_nstr (&msgvs, p_name);
-     strcat_vstr_nstr (&msgvs, "'. Entering debugger.");
-     s$write_code (&msgvs, &0);
-
-     strcpy_vstr_nstr (&msgvs, "Please capture the output of the 'trace' request and mail it to Paul_Green@stratus.com.");
-     s$write_code (&msgvs, &0);
-
-     vos_call_debug ();
-
-     strcpy_vstr_nstr (&msgvs, "Return from debugger. Stopping program. Sorry but this error is unrecoverable.");
-     s$write_code (&msgvs, &0);
-     s$stop_program (&"", &1);
+     return _accept (a, b, c);
 }
-
-extern int dup (int _fildes)
-{
-     bomb ("dup");
-}
-
-extern int do_aspawn ()
-{
-     bomb ("do_aspawn");
-}
-
-extern int do_spawn ()
-{
-     bomb ("do_spawn");
-}
-
-extern pid_t fork (void)
-{
-     bomb ("fork");
-}
-
-extern void Perl_dump_mstats (char *s)
-{
-     bomb ("Perl_dump_mstats");
-}
-
-extern pid_t waitpid (pid_t pid, int *stat_loc, int options)
-{
-
-     bomb ("waitpid");
-}
-

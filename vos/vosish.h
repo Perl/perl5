@@ -54,7 +54,7 @@
  *	This symbol is defined if this system has a stat structure declaring
  *	st_rdev
  */
-#define USE_STAT_RDEV 	/ **/
+#undef USE_STAT_RDEV 	/**/
 
 /* ACME_MESS:
  *	This symbol, if defined, indicates that error messages should be 
@@ -89,7 +89,7 @@
  */
 /* #define ALTERNATE_SHEBANG "#!" / **/
 
-#if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX)
+#if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX)  || defined(__NetBSD__)
 # include <signal.h>
 #endif
 

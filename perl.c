@@ -1747,7 +1747,7 @@ moreswitches(char *s)
 	printf("MVS (OS390) port by Mortice Kern Systems, 1997-1998\n");
 #endif
 #ifdef __VOS__
-	printf("Stratus VOS port by Paul_Green@stratus.com, 1997-1998\n");
+	printf("Stratus VOS port by Paul_Green@stratus.com, 1997-1999\n");
 #endif
 #ifdef __MINT__
 	printf("MiNT port by Guido Flohr, 1997\n");
