@@ -20,24 +20,23 @@ version="${perl_revision}.${perl_version}.${perl_subversion}"
 
 # BSD paths
 case "$prefix" in
-  ''|'/usr')
-	case "$prefix" in
-	'')	# Default install; use non-system directories
-		prefix='/usr/local';
-		siteprefix='/usr/local';
-		;;
-	'/usr')	# We are building/replacing the built-in perl
-		prefix=/;
-		siteprefix='/usr/local';
-		# The DSTROOT is used by the Apple build system.
-		installprefix="${DSTROOT}/";
-		bin='/usr/bin';
-		sitebin='/usr/bin';
-		installusrbinperl='define'; # You knew what you were doing.
-		privlib="/System/Library/Perl/${version}";
-		sitelib="/Library/Perl/${version}";
-		;;
-	esac
+'')	# Default install; use non-system directories
+	prefix='/usr/local';
+	siteprefix='/usr/local';
+	;;
+'/usr')	# We are building/replacing the built-in perl
+	prefix='/';
+	# The DSTROOT is used by the Apple build system.
+	installprefix="${DSTROOT}/";
+	bin='/usr/bin';
+	sitebin='/usr/bin';
+	installusrbinperl='define'; # You knew what you were doing.
+	privlib="/System/Library/Perl/${version}";
+	sitelib="/Library/Perl/${version}";
+	vendorprefix='/';
+	usevendorprefix='define';
+	vendorbin='/usr/bin';
+	vendorscript='/usr/bin';
 	vendorlib="/Network/Library/Perl/${version}";
 	# 4BSD uses ${prefix}/share/man, not ${prefix}/man.
 	man1dir='/usr/share/man/man1';
