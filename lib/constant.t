@@ -10,7 +10,7 @@ use vars qw{ @warnings };
 BEGIN {				# ...and save 'em for later
     $SIG{'__WARN__'} = sub { push @warnings, @_ }
 }
-END { print @warnings }
+END { print STDERR @warnings }
 
 ######################### We start with some black magic to print on failure.
 

@@ -1587,11 +1587,10 @@ Perl_hab_GET()			/* Needed if perl.h cannot be included */
 HMQ
 Perl_Register_MQ(int serve)
 {
+  if (Perl_hmq_refcnt <= 0) {
     PPIB pib;
     PTIB tib;
 
-    if (Perl_hmq_refcnt > 0)
-	return Perl_hmq;
     Perl_hmq_refcnt = 0;		/* Be extra safe */
     DosGetInfoBlocks(&tib, &pib);
     Perl_os2_initial_mode = pib->pib_ultype;
@@ -1609,6 +1608,7 @@ Perl_Register_MQ(int serve)
 	    _exit(188);			/* Panic can try to create a window. */
 	Perl_croak_nocontext("Cannot create a message queue, or morph to a PM application");
     }
+  }
     if (serve) {
 	if ( Perl_hmq_servers <= 0	/* Safe to inform us on shutdown, */
 	     && Perl_hmq_refcnt > 0 )	/* this was switched off before... */
@@ -2795,18 +2795,30 @@ my_tmpfile ()
 
 #undef rmdir
 
+/* EMX flavors do not tolerate trailing slashes.  t/op/mkdir.t has many
+   trailing slashes, so we need to support this as well. */
+
 int
 my_rmdir (__const__ char *s)
 {
-    char buf[MAXPATHLEN];
+    char b[MAXPATHLEN];
+    char *buf = b;
     STRLEN l = strlen(s);
+    int rc;
 
-    if (s[l-1] == '/' || s[l-1] == '\\') {	/* EMX rmdir fails... */
+    if (s[l-1] == '/' || s[l-1] == '\\') {	/* EMX mkdir fails... */
+	if (l >= sizeof b)
+	    New(1305, buf, l + 1, char);
 	strcpy(buf,s);
-	buf[l - 1] = 0;
+	while (l > 1 && (s[l-1] == '/' || s[l-1] == '\\'))
+	    l--;
+	buf[l] = 0;
 	s = buf;
     }
-    return rmdir(s);
+    rc = rmdir(s);
+    if (b != buf)
+	Safefree(buf);
+    return rc;
 }
 
 #undef mkdir
@@ -2814,15 +2826,24 @@ my_rmdir (__const__ char *s)
 int
 my_mkdir (__const__ char *s, long perm)
 {
-    char buf[MAXPATHLEN];
+    char b[MAXPATHLEN];
+    char *buf = b;
     STRLEN l = strlen(s);
+    int rc;
 
     if (s[l-1] == '/' || s[l-1] == '\\') {	/* EMX mkdir fails... */
+	if (l >= sizeof b)
+	    New(1305, buf, l + 1, char);
 	strcpy(buf,s);
-	buf[l - 1] = 0;
+	while (l > 1 && (s[l-1] == '/' || s[l-1] == '\\'))
+	    l--;
+	buf[l] = 0;
 	s = buf;
     }
-    return mkdir(s, perm);
+    rc = mkdir(s, perm);
+    if (b != buf)
+	Safefree(buf);
+    return rc;
 }
 
 #undef flock

@@ -2739,6 +2739,7 @@ B<W> I<*>             Delete all watch-expressions.
 B<V> [I<pkg> [I<vars>]]	List some (default all) variables in package (default current).
 		Use B<~>I<pattern> and B<!>I<pattern> for positive and negative regexps.
 B<X> [I<vars>]	Same as \"B<V> I<currentpackage> [I<vars>]\".
+B<y> [I<n> [I<Vars>]]   List lexicals in higher scope <n>.  Vars same as B<V>.
 B<x> I<expr>		Evals expression in list context, dumps the result.
 B<m> I<expr>		Evals expression in list context, prints methods callable
 		on the first element of the result.

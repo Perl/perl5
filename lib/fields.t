@@ -10,7 +10,7 @@ BEGIN {
            $w++;
            return;
        }
-       print $_[0];
+       print STDERR $_[0];
    };
 }
 

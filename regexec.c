@@ -2110,6 +2110,7 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
     PL_reglastparen = &prog->lastparen;
     PL_reglastcloseparen = &prog->lastcloseparen;
     prog->lastparen = 0;
+    prog->lastcloseparen = 0;
     PL_regsize = 0;
     DEBUG_r(PL_reg_starttry = startpos);
     if (PL_reg_start_tmpl <= prog->nparens) {

@@ -2221,6 +2221,7 @@ union any {
     I32		any_i32;
     IV		any_iv;
     long	any_long;
+    bool	any_bool;
     void	(*any_dptr) (void*);
     void	(*any_dxptr) (pTHX_ void*);
 };

@@ -3445,7 +3445,7 @@
  *	should be used when available.
  */
 #ifndef USE_LARGE_FILES
-/*#define	USE_LARGE_FILES		/**/
+#define	USE_LARGE_FILES		/**/
 #endif
 
 /* USE_LONG_DOUBLE:

@@ -379,6 +379,7 @@ Perl_save_aelem
 Perl_save_alloc
 Perl_save_aptr
 Perl_save_ary
+Perl_save_bool
 Perl_save_clearsv
 Perl_save_delete
 Perl_save_destructor

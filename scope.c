@@ -391,6 +391,15 @@ Perl_save_long(pTHX_ long int *longp)
 }
 
 void
+Perl_save_bool(pTHX_ bool *boolp)
+{
+    SSCHECK(3);
+    SSPUSHBOOL(*boolp);
+    SSPUSHPTR(boolp);
+    SSPUSHINT(SAVEt_BOOL);
+}
+
+void
 Perl_save_I32(pTHX_ I32 *intp)
 {
     SSCHECK(3);
@@ -794,6 +803,10 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_LONG:			/* long reference */
 	    ptr = SSPOPPTR;
 	    *(long*)ptr = (long)SSPOPLONG;
+	    break;
+	case SAVEt_BOOL:			/* bool reference */
+	    ptr = SSPOPPTR;
+	    *(bool*)ptr = (bool)SSPOPBOOL;
 	    break;
 	case SAVEt_I32:				/* I32 reference */
 	    ptr = SSPOPPTR;

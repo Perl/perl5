@@ -77,6 +77,7 @@ DllExport  PerlIO*	win32_popenlist(const char *mode, IV narg, SV **args);
 DllExport  int		win32_pclose( PerlIO *pf);
 DllExport  int		win32_rename( const char *oname, const char *newname);
 DllExport  int		win32_setmode( int fd, int mode);
+DllExport  int		win32_chsize(int fd, Off_t size);
 DllExport  Off_t	win32_lseek( int fd, Off_t offset, int origin);
 DllExport  Off_t	win32_tell( int fd);
 DllExport  int		win32_dup( int fd);
@@ -236,6 +237,7 @@ END_EXTERN_C
 #define longpath(pth)   	win32_longpath(pth)
 #define rename(old,new)		win32_rename(old,new)
 #define setmode(fd,mode)	win32_setmode(fd,mode)
+#define chsize(fd,sz)		win32_chsize(fd,sz)
 #define lseek(fd,offset,orig)	win32_lseek(fd,offset,orig)
 #define tell(fd)		win32_tell(fd)
 #define dup(fd)			win32_dup(fd)
