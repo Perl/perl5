@@ -636,7 +636,7 @@ else {
 unless ($define{'NO_PERL_MALLOC_WRAP'}) {
     emit_symbols [qw(
 		    PL_memory_wrap
-		    );]
+		    )];
 }
 
 unless ($define{'USE_ITHREADS'}) {
