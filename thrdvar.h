@@ -81,7 +81,7 @@ PERLVAR(Ttimesbuf,	struct tms)
 /* Fields used by magic variables such as $@, $/ and so on */
 PERLVAR(Ttainted,	bool)		/* using variables controlled by $< */
 PERLVAR(Tcurpm,		PMOP *)		/* what to do \ interps in REs from */
-PERLVAR(Tnrs,		SV *)
+PERLVAR(Tunused_1,	SV *)		/* placeholder: was Tnrs */
 
 /*
 =for apidoc mn|SV*|PL_rs

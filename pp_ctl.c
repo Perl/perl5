@@ -2894,8 +2894,6 @@ S_doeval(pTHX_ int gimme, OP** startop)
     PL_error_count = 0;
     PL_curcop = &PL_compiling;
     PL_curcop->cop_arybase = 0;
-    SvREFCNT_dec(PL_rs);
-    PL_rs = newSVpvn("\n", 1);
     if (saveop && saveop->op_flags & OPf_SPECIAL)
 	PL_in_eval |= EVAL_KEEPERR;
     else
@@ -2933,8 +2931,6 @@ S_doeval(pTHX_ int gimme, OP** startop)
 	    Perl_croak(aTHX_ "%sCompilation failed in regexp",
 		       (*msg ? msg : "Unknown error\n"));
 	}
-	SvREFCNT_dec(PL_rs);
-	PL_rs = SvREFCNT_inc(PL_nrs);
 #ifdef USE_5005THREADS
 	MUTEX_LOCK(&PL_eval_mutex);
 	PL_eval_owner = 0;
@@ -2943,8 +2939,6 @@ S_doeval(pTHX_ int gimme, OP** startop)
 #endif /* USE_5005THREADS */
 	RETPUSHUNDEF;
     }
-    SvREFCNT_dec(PL_rs);
-    PL_rs = SvREFCNT_inc(PL_nrs);
     CopLINE_set(&PL_compiling, 0);
     if (startop) {
 	*startop = PL_eval_root;

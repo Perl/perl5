@@ -5507,13 +5507,19 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
     register STDCHAR *bp;
     register I32 cnt;
     I32 i = 0;
+    I32 rspara = 0;
 
     SV_CHECK_THINKFIRST(sv);
     (void)SvUPGRADE(sv, SVt_PV);
 
     SvSCREAM_off(sv);
 
-    if (RsSNARF(PL_rs)) {
+    if (PL_curcop == &PL_compiling) {
+	/* we always read code in line mode */
+	rsptr = "\n";
+	rslen = 1;
+    }
+    else if (RsSNARF(PL_rs)) {
 	rsptr = NULL;
 	rslen = 0;
     }
@@ -5545,6 +5551,7 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
     else if (RsPARA(PL_rs)) {
 	rsptr = "\n\n";
 	rslen = 2;
+	rspara = 1;
     }
     else {
 	/* Get $/ i.e. PL_rs into same encoding as stream wants */
@@ -5563,7 +5570,7 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
 
     rslast = rslen ? rsptr[rslen - 1] : '\0';
 
-    if (RsPARA(PL_rs)) {		/* have to do this both before and after */
+    if (rspara) {		/* have to do this both before and after */
 	do {			/* to make sure file boundaries work right */
 	    if (PerlIO_eof(fp))
 		return 0;
@@ -5769,7 +5776,7 @@ screamer2:
 	}
     }
 
-    if (RsPARA(PL_rs)) {		/* have to do this both before and after */
+    if (rspara) {		/* have to do this both before and after */
         while (i != EOF) {	/* to make sure file boundaries work right */
 	    i = PerlIO_getc(fp);
 	    if (i != '\n') {
@@ -10175,7 +10182,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_tainted		= proto_perl->Ttainted;
     PL_curpm		= proto_perl->Tcurpm;	/* XXX No PMOP ref count */
-    PL_nrs		= sv_dup_inc(proto_perl->Tnrs, param);
     PL_rs		= sv_dup_inc(proto_perl->Trs, param);
     PL_last_in_gv	= gv_dup(proto_perl->Tlast_in_gv, param);
     PL_ofs_sv		= sv_dup_inc(proto_perl->Tofs_sv, param);

@@ -445,8 +445,6 @@ Perl_lex_start(pTHX_ SV *line)
     PL_oldoldbufptr = PL_oldbufptr = PL_bufptr = PL_linestart = SvPVX(PL_linestr);
     PL_bufend = PL_bufptr + SvCUR(PL_linestr);
     PL_last_lop = PL_last_uni = Nullch;
-    SvREFCNT_dec(PL_rs);
-    PL_rs = newSVpvn("\n", 1);
     PL_rsfp = 0;
 }
 

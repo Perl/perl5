@@ -4957,8 +4957,6 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    ENTER;
 	    SAVECOPFILE(&PL_compiling);
 	    SAVECOPLINE(&PL_compiling);
-	    save_svref(&PL_rs);
-	    sv_setsv(PL_rs, PL_nrs);
 
 	    if (!PL_beginav)
 		PL_beginav = newAV();

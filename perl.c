@@ -212,8 +212,7 @@ perl_construct(pTHXx)
 #endif
     }
 
-    PL_nrs = newSVpvn("\n", 1);
-    PL_rs = SvREFCNT_inc(PL_nrs);
+    PL_rs = newSVpvn("\n", 1);
 
     init_stacks();
 
@@ -539,9 +538,6 @@ perl_destruct(pTHXx)
 
     SvREFCNT_dec(PL_rs);	/* $/ */
     PL_rs = Nullsv;
-
-    SvREFCNT_dec(PL_nrs);	/* $/ helper */
-    PL_nrs = Nullsv;
 
     PL_multiline = 0;		/* $* */
     Safefree(PL_osname);	/* $^O */
@@ -1431,10 +1427,12 @@ print \"  \\@INC:\\n    @INC\\n\";");
 	PL_e_script = Nullsv;
     }
 
-    /* now that script is parsed, we can modify record separator */
-    SvREFCNT_dec(PL_rs);
-    PL_rs = SvREFCNT_inc(PL_nrs);
+/*
+   Not sure that this is still the right place to do this now that we
+   no longer use PL_nrs. HVDS 2001/09/09
+*/
     sv_setsv(get_sv("/", TRUE), PL_rs);
+
     if (PL_do_undump)
 	my_unexec();
 
@@ -2151,14 +2149,14 @@ Perl_moreswitches(pTHX_ char *s)
         I32 flags = 0;
 	numlen = 4;
 	rschar = (U32)grok_oct(s, &numlen, &flags, NULL);
-	SvREFCNT_dec(PL_nrs);
+	SvREFCNT_dec(PL_rs);
 	if (rschar & ~((U8)~0))
-	    PL_nrs = &PL_sv_undef;
+	    PL_rs = &PL_sv_undef;
 	else if (!rschar && numlen >= 2)
-	    PL_nrs = newSVpvn("", 0);
+	    PL_rs = newSVpvn("", 0);
 	else {
 	    char ch = rschar;
-	    PL_nrs = newSVpvn(&ch, 1);
+	    PL_rs = newSVpvn(&ch, 1);
 	}
 	return s + numlen;
     }
@@ -2288,11 +2286,11 @@ Perl_moreswitches(pTHX_ char *s)
 	    s += numlen;
 	}
 	else {
-	    if (RsPARA(PL_nrs)) {
+	    if (RsPARA(PL_rs)) {
 		PL_ors_sv = newSVpvn("\n\n",2);
 	    }
 	    else {
-		PL_ors_sv = newSVsv(PL_nrs);
+		PL_ors_sv = newSVsv(PL_rs);
 	    }
 	}
 	return s;
