@@ -156,7 +156,7 @@ sub scan_func {
   my($line) = @_;
 
   print "\tchecking for global routine\n" if $debug > 1;
-  if ( /(\w+)\s+\(/ ) {
+  if ( $line =~ /(\w+)\s+\(/ ) {
     print "\troutine name is \\$1\\\n" if $debug > 1;
     if ($1 eq 'main' || $1 eq 'perl_init_ext') {
       print "\tskipped\n" if $debug > 1;
@@ -177,8 +177,8 @@ LINE: while (<CPP>) {
   while (/^#.*vmsish\.h/i .. /^#.*perl\.h/i) {
     while (/__VMS_PROTOTYPES__/i .. /__VMS_SEPYTOTORP__/i) {
       print "vms_proto>> $_" if $debug > 2;
-      &scan_func($_);
-      if (/^EXT/) { &scan_var($_); }
+      if (/^EXT/) { &scan_var($_);  }
+      else        { &scan_func($_); }
       last LINE unless $_ = <CPP>;
     }
     print "vmsish.h>> $_" if $debug > 2;
@@ -199,8 +199,8 @@ LINE: while (<CPP>) {
   }
   while (/^#.*proto\.h/i .. /^#.*perl\.h/i) {
     print "proto.h>> $_" if $debug > 2;
-    &scan_func($_);
-    if (/^EXT/) { &scan_var($_); }
+    if (/^EXT/) { &scan_var($_);  }
+    else        { &scan_func($_); }
     last LINE unless $_ = <CPP>;
   }
   print $_ if $debug > 3;
@@ -219,11 +219,19 @@ LINE: while (<CPP>) {
   }
 }
 close CPP;
+
+
+# Kluge to determine whether we need to add EMBED prefix to
+# symbols read from local list.  init_os_extras() is a VMS-
+# specific function whose Perl_ prefix is added in vmsish.h
+# if EMBED is #defined.
+$embed = exists($fcns{'Perl_init_os_extras'}) ? 'Perl_' : '';
 while (<DATA>) {
   next if /^#/;
   s/\s+#.*\n//;
   next if /^\s*$/;
   ($key,$array) = split('=',$_);
+  $key = "$embed$key";
   print "Adding $key to \%$array list\n" if $debug > 1;
   ${$array}{$key}++;
 }
@@ -344,7 +352,6 @@ exec "\$ \@$drvrname" if $isvax;
 __END__
 
 # Oddball cases, so we can keep the perl.h scan above simple
-error=vars      # declared in perl.h only when DOINIT defined by INTERN.h
 rcsid=vars      # declared in perl.c
 regarglen=vars  # declared in regcomp.h
 regdummy=vars   # declared in regcomp.h
