@@ -740,6 +740,7 @@ char *perllib_mangle(char *, unsigned int);
 
 #define fork	fork_with_resources
 
+#ifdef EINTR				/* x2p do not include perl.h!!! */
 static __inline__ int
 my_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout)
 {
@@ -753,6 +754,7 @@ my_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct
 }
 
 #define select		my_select
+#endif
 
 
 typedef int (*Perl_PFN)();
