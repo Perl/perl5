@@ -2519,7 +2519,7 @@ EXT int   PL_sig_num[];
 #ifdef DOINIT
 #ifdef EBCDIC
 #if '^' == 106  /* if defined(_OSD_POSIX) POSIX-BC */
-EXT unsigned char PL_e2a[] = { /* ASCII (ISO8859-1) to EBCDIC (POSIX-BC) */
+EXT unsigned char PL_a2e[] = { /* ASCII (ISO8859-1) to EBCDIC (POSIX-BC) */
       0,      1,      2,      3,     55,     45,     46,     47,
      22,      5,     21,     11,     12,     13,     14,     15,
      16,     17,     18,     19,     60,     61,     50,     38,
@@ -2553,7 +2553,7 @@ EXT unsigned char PL_e2a[] = { /* ASCII (ISO8859-1) to EBCDIC (POSIX-BC) */
     140,     73,    205,    206,    203,    207,    204,    225,
     112,    192,    222,    219,    220,    141,    142,    223
 };
-EXT unsigned char PL_a2e[] = { /* EBCDIC (POSIX-BC) to ASCII (ISO8859-1) */
+EXT unsigned char PL_e2a[] = { /* EBCDIC (POSIX-BC) to ASCII (ISO8859-1) */
       0,      1,      2,      3,    156,      9,    134,    127,
     151,    141,    142,     11,     12,     13,     14,     15,
      16,     17,     18,     19,    157,     10,      8,    135,
@@ -2589,7 +2589,7 @@ EXT unsigned char PL_a2e[] = { /* EBCDIC (POSIX-BC) to ASCII (ISO8859-1) */
 };
 #endif          /* POSIX-BC */
 #if '^' == 176  /* if defined(??) (OS/400?) 037 */
-EXT unsigned char PL_e2a[] = { /* ASCII (ISO8859-1) to EBCDIC (IBM-037) */
+EXT unsigned char PL_a2e[] = { /* ASCII (ISO8859-1) to EBCDIC (IBM-037) */
       0,      1,      2,      3,     55,     45,     46,     47,
      22,      5,     37,     11,     12,     13,     14,     15,
      16,     17,     18,     19,     60,     61,     50,     38,
@@ -2623,7 +2623,7 @@ EXT unsigned char PL_e2a[] = { /* ASCII (ISO8859-1) to EBCDIC (IBM-037) */
     140,     73,    205,    206,    203,    207,    204,    225,
     112,    221,    222,    219,    220,    141,    142,    223
 };
-EXT unsigned char PL_a2e[] = { /* EBCDIC (IBM-037) to ASCII (ISO8859-1) */
+EXT unsigned char PL_e2a[] = { /* EBCDIC (IBM-037) to ASCII (ISO8859-1) */
       0,      1,      2,      3,    156,      9,    134,    127,
     151,    141,    142,     11,     12,     13,     14,     15,
      16,     17,     18,     19,    157,    133,      8,    135,
@@ -2659,7 +2659,7 @@ EXT unsigned char PL_a2e[] = { /* EBCDIC (IBM-037) to ASCII (ISO8859-1) */
 };
 #endif          /* 037 */
 #if '^' == 95   /* if defined(__MVS__) || defined(??) (VM/ESA?) 1047 */
-EXT unsigned char PL_e2a[] = { /* ASCII (ISO8859-1) to EBCDIC (IBM-1047) */
+EXT unsigned char PL_a2e[] = { /* ASCII (ISO8859-1) to EBCDIC (IBM-1047) */
     0,      1,      2,      3,      55,     45,     46,     47,
     22,     5,      21,     11,     12,     13,     14,     15,
     16,     17,     18,     19,     60,     61,     50,     38,
@@ -2693,7 +2693,7 @@ EXT unsigned char PL_e2a[] = { /* ASCII (ISO8859-1) to EBCDIC (IBM-1047) */
     140,    73,     205,    206,    203,    207,    204,    225,
     112,    221,    222,    219,    220,    141,    142,    223
 };
-EXT unsigned char PL_a2e[] = { /* EBCDIC (IBM-1047) to ASCII (ISO8859-1) */
+EXT unsigned char PL_e2a[] = { /* EBCDIC (IBM-1047) to ASCII (ISO8859-1) */
     0,      1,      2,      3,      156,    9,      134,    127,
     151,    141,    142,    11,     12,     13,     14,     15,
     16,     17,     18,     19,     157,    10,     8,      135,

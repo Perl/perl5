@@ -1271,11 +1271,11 @@ S_scan_const(pTHX_ char *start)
 		    if (isLOWER(min)) {
 			for (i = min; i <= max; i++)
 			    if (isLOWER(i))
-				*d++ = i;
+				*d++ = NATIVE_TO_NEED(has_utf8,i);
 		    } else {
 			for (i = min; i <= max; i++)
 			    if (isUPPER(i))
-				*d++ = i;
+				*d++ = NATIVE_TO_NEED(has_utf8,i);
 		    }
 		}
 		else
@@ -1314,7 +1314,7 @@ S_scan_const(pTHX_ char *start)
 	else if (*s == '(' && PL_lex_inpat && s[1] == '?') {
 	    if (s[2] == '#') {
 		while (s < send && *s != ')')
-		    *d++ = *s++;
+		    *d++ = NATIVE_TO_NEED(has_utf8,*s++);
 	    }
 	    else if (s[2] == '{' /* This should match regcomp.c */
 		     || ((s[2] == 'p' || s[2] == '?') && s[3] == '{'))
@@ -1337,7 +1337,7 @@ S_scan_const(pTHX_ char *start)
 		    yyerror("Sequence (?{...}) not terminated or not {}-balanced");
 		}
 		while (s < regparse)
-		    *d++ = *s++;
+		    *d++ = NATIVE_TO_NEED(has_utf8,*s++);
 	    }
 	}
 
@@ -1345,7 +1345,7 @@ S_scan_const(pTHX_ char *start)
 	else if (*s == '#' && PL_lex_inpat &&
 	  ((PMOP*)PL_lex_inpat)->op_pmflags & PMf_EXTENDED) {
 	    while (s+1 < send && *s != '\n')
-		*d++ = *s++;
+		*d++ = NATIVE_TO_NEED(has_utf8,*s++);
 	}
 
 	/* check for embedded arrays
@@ -1371,8 +1371,8 @@ S_scan_const(pTHX_ char *start)
 
 	    /* some backslashes we leave behind */
 	    if (*leaveit && *s && strchr(leaveit, *s)) {
-		*d++ = '\\';
-		*d++ = *s++;
+		*d++ = NATIVE_TO_NEED(has_utf8,'\\');
+		*d++ = NATIVE_TO_NEED(has_utf8,*s++);
 		continue;
 	    }
 
@@ -1448,13 +1448,13 @@ S_scan_const(pTHX_ char *start)
 	      NUM_ESCAPE_INSERT:
 		/* Insert oct or hex escaped character.
 		 * There will always enough room in sv since such
-		 * escapes will be longer than any UT-F8 sequence
+		 * escapes will be longer than any UTF-8 sequence
 		 * they can end up as. */
 		
 		/* We need to map to chars to ASCII before doing the tests
 		   to cover EBCDIC
 		*/
-		if (NATIVE_TO_ASCII(uv) > 127) {
+		if (NATIVE_TO_UNI(uv) > 127) {
 		    if (!has_utf8 && uv > 255) {
 		        /* Might need to recode whatever we have
 			 * accumulated so far if it contains any
@@ -1465,28 +1465,23 @@ S_scan_const(pTHX_ char *start)
 			 */
 			int hicount = 0;
 			char *c;
-
 			for (c = SvPVX(sv); c < d; c++) {
-			    if (UTF8_IS_CONTINUED(NATIVE_TO_ASCII(*c)))
+			    if (UTF8_IS_CONTINUED(NATIVE_TO_ASCII(*c))) {
 			        hicount++;
+			    }
 			}
-			if (hicount) {
-			    char *old_pvx = SvPVX(sv);
-			    char *src, *dst;
-			
-			    d = SvGROW(sv,
-				       SvLEN(sv) + hicount + 1) +
-				         (d - old_pvx);
-
-			    src = d - 1;
-			    d += hicount;
-			    dst = d - 1;
-
-			    while (src < dst) {
+			if (hicount || NATIVE_TO_ASCII('A') != 'A') {
+			    STRLEN offset = d - SvPVX(sv);
+			    U8 *src, *dst;
+			    d = SvGROW(sv, SvLEN(sv) + hicount + 1) + offset;
+			    src = (U8 *)d - 1;
+			    dst = src+hicount;
+			    d  += hicount;
+			    while (src >= (U8 *)SvPVX(sv)) {
 				U8 ch = NATIVE_TO_ASCII(*src);
 			        if (UTF8_IS_CONTINUED(ch)) {
- 				    *dst-- = UTF8_EIGHT_BIT_LO(ch);
- 				    *dst-- = UTF8_EIGHT_BIT_HI(ch);
+				    *dst-- = UTF8_EIGHT_BIT_LO(ch);
+				    *dst-- = UTF8_EIGHT_BIT_HI(ch);
 			        }
 			        else {
 				    *dst-- = ch;
@@ -1512,7 +1507,7 @@ S_scan_const(pTHX_ char *start)
 		    }
 		}
 		else {
-		    *d++ = (char)uv;
+		    *d++ = NATIVE_TO_NEED(has_utf8,uv);
 		}
 		continue;
 
@@ -1572,31 +1567,31 @@ S_scan_const(pTHX_ char *start)
 		    if (isLOWER(c))
 			c = toUPPER(c);
 #endif
-		    *d++ = toCTRL(c);
+		    *d++ = NATIVE_TO_NEED(has_utf8,toCTRL(c));
 		}
 		continue;
 
 	    /* printf-style backslashes, formfeeds, newlines, etc */
 	    case 'b':
-		*d++ = '\b';
+		*d++ = NATIVE_TO_NEED(has_utf8,'\b');
 		break;
 	    case 'n':
-		*d++ = '\n';
+		*d++ = NATIVE_TO_NEED(has_utf8,'\n');
 		break;
 	    case 'r':
-		*d++ = '\r';
+		*d++ = NATIVE_TO_NEED(has_utf8,'\r');
 		break;
 	    case 'f':
-		*d++ = '\f';
+		*d++ = NATIVE_TO_NEED(has_utf8,'\f');
 		break;
 	    case 't':
-		*d++ = '\t';
+		*d++ = NATIVE_TO_NEED(has_utf8,'\t');
 		break;
 	    case 'e':
-		*d++ = ASCII_TO_NATIVE('\033');
+		*d++ = ASCII_TO_NEED(has_utf8,'\033');
 		break;
 	    case 'a':
-		*d++ = ASCII_TO_NATIVE('\007');
+		*d++ = ASCII_TO_NEED(has_utf8,'\007');
 		break;
 	    } /* end switch */
 
@@ -1605,6 +1600,8 @@ S_scan_const(pTHX_ char *start)
 	} /* end if (backslash) */
 
     default_action:
+#ifndef EBCDIC
+       /* The 'has_utf8' here is very dubious */
        if (UTF8_IS_CONTINUED(NATIVE_TO_ASCII(*s)) && (this_utf8 || has_utf8)) {
            STRLEN len = (STRLEN) -1;
            UV uv;
@@ -1630,8 +1627,8 @@ S_scan_const(pTHX_ char *start)
 	   }
            continue;
        }
-
-       *d++ = *s++;
+#endif
+       *d++ = NATIVE_TO_NEED(has_utf8,*s++);
     } /* while loop to process each character */
 
     /* terminate the string and set up the sv */
