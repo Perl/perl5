@@ -1,16 +1,13 @@
 #----------------------------------------------------------------
 # QNX hints
 #
-# These hints were written for QNX4, but are in the process
-# of being extended to encompass Neutrino as well.
+# Most of the hints in this file are for QNX4, which needed
+# more help. The QNX6 hints are located toward the bottom.
 #
-# As of perl5.004_04, all tests pass under:
-#  QNX 4.23A
+# perl-5.7.2 passes all tests under QNX4.24G
 #  Watcom 10.6 with Beta/970211.wcc.update.tar.F
 #  socket3r.lib Nov21 1996.
-# perl-5.6.1 runs well on QNX4 with a few known test failures
-# perl-5.6.0 ships with QNX RTP (Neutrino) but the build is
-# not yet straightforward.
+# perl-5.7.2 fails 4 known tests under QNX6.1.0
 #
 # As with many unix ports, this one depends on a few "standard"
 # unix utilities which are not necessarily standard for QNX4.
@@ -61,6 +58,15 @@
 #      Resolved in 970211 Beta
 #   lib/io_udp.t test hangs because of a bug in getsockname().
 #      Fixed in latest BETA socket3r.lib
+#----------------------------------------------------------------
+# Outstanding Issues for QNX6:
+#  The following tests are still failing as of 5.7.1:
+#
+#   op/sprintf.........................FAILED at test 91
+#   lib/1_compile......................FAILED at test 33
+#   ext/IO/lib/IO/t/io_sock............FAILED at test 12
+#   ext/IO/lib/IO/t/io_udp.............FAILED at test 4
+#
 #----------------------------------------------------------------
 # These hints were submitted by:
 #   Norton T. Allen
@@ -208,4 +214,21 @@ if [ "$osname" = "qnx" ]; then
 	  /usr/local/bin or some other suitable location.
 	EOF
   fi
+else
+  # $^O eq nto
+
+  ccflags='-DDLOPEN_WONT_DO_RELATIVE_PATHS'
+
+  # Options required to get dynamic linking to work
+  lddlflags='-shared'
+  ccdlflags='-Wl,-E'
+
+  # Somewhere in the build, something tries to throw a gcc
+  # option to $cc if it knows it invokes gcc. Our cc doesn't
+  # recognize that option, so we're better off setting cc=gcc.
+  cc='gcc'
+
+  # If we use perl's malloc, it dies with an invalid sbrk.
+  # This is probably worth tracking down someday.
+  usemymalloc='false'
 fi

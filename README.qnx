@@ -8,7 +8,7 @@ README.qnx - Perl version 5 on QNX
 
 =head1 DESCRIPTION
 
-As of perl5.8.0 all tests pass under:
+As of perl5.7.2 all tests pass under:
 
   QNX 4.24G
   Watcom 10.6 with Beta/970211.wcc.update.tar.F
@@ -17,25 +17,20 @@ As of perl5.8.0 all tests pass under:
 Some tests may complain under known circumstances. See
 below and hints/qnx.sh for more information.
 
-[ Perl 5.6.0 is shipping with QNX RTP (aka QNX6, Neutrino), but
-the build does not appear to be straightforward. If anyone has
-more data in this regard, please let me know.
+Under QNX 6.1.0 there are still a few tests which fail.
+See below and hints/qnx.sh for more information.
 
-These notes were originally written for QNX4 and do not
-necessarily apply to Neutrino, but see hints/qnx.sh for
-more information. ] 
-
-=head2 Required Software for Compiling Perl on QNX
+=head2 Required Software for Compiling Perl on QNX4
 
 As with many unix ports, this one depends on a few "standard"
-unix utilities which are not necessarily standard for QNX.
+unix utilities which are not necessarily standard for QNX4.
 
 =over 4
 
 =item /bin/sh
 
 This is used heavily by Configure and then by
-perl itself. QNX's version is fine, but Configure
+perl itself. QNX4's version is fine, but Configure
 will choke on the 16-bit version, so if you are
 running QNX 4.22, link /bin/sh to /bin32/ksh
 
@@ -70,11 +65,11 @@ from quics for earlier versions.
 
 =back
 
-=head2 Outstanding Issues with Perl on QNX
+=head2 Outstanding Issues with Perl on QNX4
 
 There is no support for dynamically linked libraries in QNX4.
 
-The following tests may report errors:
+The following tests may report errors under QNX4:
 
 ext/Cwd/Cwd.t will complain if `pwd` and cwd don't give
 the same results. cwd calls `fullpath -t`, so if you
@@ -113,6 +108,15 @@ A script that provides C preprocessing functionality.  Configure can
 generate a similar cover, but it doesn't handle all the command-line
 options that perl throws at it. This might be reasonably placed in
 /usr/local/bin.
+
+=head2 Outstanding issues with perl under QNX6
+
+The following tests are still failing for Perl 5.7.1 under QNX 6.1.0:
+
+  op/sprintf.........................FAILED at test 91
+  lib/1_compile......................FAILED at test 33
+  ext/IO/lib/IO/t/io_sock............FAILED at test 12
+  ext/IO/lib/IO/t/io_udp.............FAILED at test 4
 
 =back
 
