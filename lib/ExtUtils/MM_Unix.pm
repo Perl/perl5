@@ -11,7 +11,7 @@ use strict;
 our ($Is_Mac,$Is_OS2,$Is_VMS,$Is_Win32,$Is_Dos,
 	    $Verbose,%pm,%static,$Xsubpp_Version);
 
-our $VERSION = '1.12605';
+our $VERSION = '1.12606';
 
 require ExtUtils::MakeMaker;
 ExtUtils::MakeMaker->import(qw($Verbose &neatvalue));
@@ -2796,7 +2796,8 @@ sub nicetext {
 
 parse a file and return what you think is $VERSION in this file set to.
 It will return the string "undef" if it can't figure out what $VERSION
-is.
+is. $VERSION should be for all to see, so our $VERSION or plain $VERSION
+are okay, but my $VERSION is not.
 
 =cut
 
