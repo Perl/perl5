@@ -25,7 +25,7 @@ INST_TOP	= $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-INST_VER	= \5.00470
+INST_VER	= \5.00471
 
 #
 # uncomment to enable threads-capabilities
@@ -448,7 +448,8 @@ PERLEXE_OBJ	= $(PERLEXE_OBJ) $(WIN32_OBJ) $(DLL_OBJ)
 PERL95_OBJ	= $(PERL95_OBJ) DynaLoadmt$(o)
 !ENDIF
 
-DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re
+DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
+		Data/Dumper
 STATIC_EXT	= DynaLoader
 NONXS_EXT	= Errno
 
@@ -462,7 +463,8 @@ POSIX		= $(EXTDIR)\POSIX\POSIX
 ATTRS		= $(EXTDIR)\attrs\attrs
 THREAD		= $(EXTDIR)\Thread\Thread
 B		= $(EXTDIR)\B\B
-RE		= $(EXTDIR)\RE\RE
+RE		= $(EXTDIR)\re\re
+DUMPER		= $(EXTDIR)\Data\Dumper\Dumper
 ERRNO		= $(EXTDIR)\Errno\Errno
 
 SOCKET_DLL	= $(AUTODIR)\Socket\Socket.dll
@@ -474,6 +476,7 @@ POSIX_DLL	= $(AUTODIR)\POSIX\POSIX.dll
 ATTRS_DLL	= $(AUTODIR)\attrs\attrs.dll
 THREAD_DLL	= $(AUTODIR)\Thread\Thread.dll
 B_DLL		= $(AUTODIR)\B\B.dll
+DUMPER_DLL	= $(AUTODIR)\Data\Dumper\Dumper.dll
 RE_DLL		= $(AUTODIR)\re\re.dll
 
 ERRNO_PM	= $(LIBDIR)\Errno.pm
@@ -488,6 +491,7 @@ EXTENSION_C	= 		\
 		$(ATTRS).c	\
 		$(THREAD).c	\
 		$(RE).c		\
+		$(DUMPER).c	\
 		$(B).c
 
 EXTENSION_DLL	= 		\
@@ -498,6 +502,7 @@ EXTENSION_DLL	= 		\
 		$(IO_DLL)	\
 		$(POSIX_DLL)	\
 		$(ATTRS_DLL)	\
+		$(DUMPER_DLL)	\
 		$(B_DLL)
 
 EXTENSION_PM	=		\
@@ -714,6 +719,12 @@ $(CAPILIB) : PerlCAPI.cpp PerlCAPI$(o)
 $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 	copy dl_win32.xs $(EXTDIR)\DynaLoader\dl_win32.xs
 
+$(DUMPER_DLL): $(PERLEXE) $(DUMPER).xs
+	cd $(EXTDIR)\Data\$(*B)
+	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(MAKE)
+	cd ..\..\..\win32
+
 $(RE_DLL): $(PERLEXE) $(RE).xs
 	cd $(EXTDIR)\$(*B)
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
@@ -806,9 +817,11 @@ distclean: clean
 	-del /f $(LIBDIR)\ops.pm $(LIBDIR)\Safe.pm $(LIBDIR)\Thread.pm
 	-del /f $(LIBDIR)\SDBM_File.pm $(LIBDIR)\Socket.pm $(LIBDIR)\POSIX.pm
 	-del /f $(LIBDIR)\B.pm $(LIBDIR)\O.pm $(LIBDIR)\re.pm
+	-del /f $(LIBDIR)\Data\Dumper.pm
 	-rmdir /s /q $(LIBDIR)\IO || rmdir /s $(LIBDIR)\IO
 	-rmdir /s /q $(LIBDIR)\Thread || rmdir /s $(LIBDIR)\Thread
 	-rmdir /s /q $(LIBDIR)\B || rmdir /s $(LIBDIR)\B
+	-rmdir /s /q $(LIBDIR)\Data || rmdir /s $(LIBDIR)\Data
 	-del /f $(PODDIR)\*.html
 	-del /f $(PODDIR)\*.bat
 	cd ..\utils

@@ -180,6 +180,11 @@ ext/DB_File/DB_File_BS		Berkeley DB extension mkbootstrap fodder
 ext/DB_File/Makefile.PL		Berkeley DB extension makefile writer
 ext/DB_File/dbinfo		Berkeley DB database version checker
 ext/DB_File/typemap		Berkeley DB extension interface types
+ext/Data/Dumper/Changes		Data pretty printer, changelog
+ext/Data/Dumper/Dumper.pm	Data pretty printer, module
+ext/Data/Dumper/Dumper.xs	Data pretty printer, externals
+ext/Data/Dumper/Makefile.PL	Data pretty printer, makefile writer
+ext/Data/Dumper/Todo		Data pretty printer, futures
 ext/DynaLoader/DynaLoader_pm.PL	Dynamic Loader perl module
 ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
@@ -802,6 +807,8 @@ t/lib/cgi-html.t	See if CGI.pm works
 t/lib/cgi-request.t	See if CGI.pm works
 t/lib/checktree.t	See if File::CheckTree works
 t/lib/complex.t		See if Math::Complex works
+t/lib/dumper.t		See if Data::Dumper works
+t/lib/dumper-ovl.t	See if Data::Dumper works for overloaded data
 t/lib/db-btree.t	See if DB_File works
 t/lib/db-hash.t		See if DB_File works
 t/lib/db-recno.t	See if DB_File works
