@@ -79,6 +79,119 @@ Version 5.005_57        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  3455] By: gsar                                  on 1999/05/24  05:05:19
+        Log: return 0 rather than "" when scalar grep has nothing to iterate
+             on (brings behavior in line with documentation)
+     Branch: perl
+           ! pp_ctl.c
+____________________________________________________________________________
+[  3454] By: gsar                                  on 1999/05/24  04:52:52
+        Log: From: Tim Jenness <t.jenness@jach.hawaii.edu>
+             Date: Thu, 20 May 1999 13:27:02 -1000
+             Message-Id: <E10kcDN-0007TA-00@lapaki>
+             Subject: Problem with MM_Unix in 5.005_03
+     Branch: perl
+           ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[  3453] By: gsar                                  on 1999/05/24  04:39:49
+        Log: avoid removing duplicates in user-generated warnings
+             From: byron@omix.com (Byron Brummer)
+             Date: Thu, 20 May 1999 04:01:17 -0700 (PDT)
+             Message-Id: <199905201101.EAA91175@thrush.omix.com>
+             Subject: [PATCH] Re: warn buffers/loses output in ?? - 5.005_03
+     Branch: perl
+           ! lib/diagnostics.pm
+____________________________________________________________________________
+[  3452] By: gsar                                  on 1999/05/24  04:23:10
+        Log: straighten some code to avoid NeXT compiler bugs (from
+             Geoff Kuenning <geoff@cs.hmc.edu>)
+     Branch: perl
+           ! pp_ctl.c
+____________________________________________________________________________
+[  3451] By: gsar                                  on 1999/05/24  03:03:05
+        Log: minor logic tweak for reserved word warning
+     Branch: perl
+           ! lib/Test/Harness.pm toke.c
+____________________________________________________________________________
+[  3450] By: gsar                                  on 1999/05/24  02:34:20
+        Log: oops, some files missing in change#3449
+     Branch: perl
+           ! op.c op.h toke.c
+____________________________________________________________________________
+[  3449] By: gsar                                  on 1999/05/24  02:33:12
+        Log: allow '*' prototype to autoquote even barewords that happen to be
+             function names; parens or ampersand continue to force the other
+             interpretation; makes C<sub Foo {'bar'} CORE::GLOBAL::require Foo;>
+             do the right thing, for example
+     Branch: perl
+           ! t/comp/proto.t
+____________________________________________________________________________
+[  3448] By: gsar                                  on 1999/05/24  01:51:24
+        Log: remove vestiges of PL_last_proto
+     Branch: perl
+           ! embedvar.h intrpvar.h objXSUB.h
+____________________________________________________________________________
+[  3447] By: gsar                                  on 1999/05/24  01:49:20
+        Log: redo change#2061 and parts of change#1169 with code in the
+             parser; PL_last_proto hackery gone, strict 'subs' in now
+             implemented in the optimizer where specifying the exceptional
+             cases is much more robust; '*' (bareword) prototype now works
+             reliably when used in second and subsequent arguments
+     Branch: perl
+           ! dump.c embed.h embed.pl objXSUB.h op.c op.h proto.h toke.c
+____________________________________________________________________________
+[  3446] By: gsar                                  on 1999/05/23  05:00:55
+        Log: remove redundant part of change#1169 superceded by change#2061;
+             avoid "future reserved word" warning on prototypical bearwords
+     Branch: perl
+           ! t/lib/fatal.t toke.c
+____________________________________________________________________________
+[  3445] By: gsar                                  on 1999/05/21  23:36:49
+        Log: s/isspace/isSPACE/g and make sure the CRT version is always
+             passed an unsigned char (fixes random occurrence of spaces in
+             arguments containing high-bit chars passed to spawned children,
+             on win32)
+     Branch: perl
+           ! ext/SDBM_File/sdbm/dbe.c win32/perlhost.h win32/win32.c
+____________________________________________________________________________
+[  3444] By: gsar                                  on 1999/05/21  23:08:55
+        Log: integrate Configure changes from cfgperl
+     Branch: perl
+	  !> Configure Porting/Glossary Porting/config.sh Porting/config_H
+          !> config_h.SH
+____________________________________________________________________________
+[  3443] By: jhi                                   on 1999/05/21  22:00:56
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+	  !> Changes doop.c ext/SDBM_File/sdbm/dba.c
+	  !> ext/SDBM_File/sdbm/dbd.c ext/SDBM_File/sdbm/dbe.c os2/os2.c
+	  !> perl.h pod/perldiag.pod pod/perlport.pod pp.c t/comp/proto.t
+          !> win32/perlhost.h win32/win32.c x2p/walk.c
+____________________________________________________________________________
+[  3442] By: jhi                                   on 1999/05/21  21:59:46
+        Log: fflush.
+     Branch: cfgperl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+           ! config_h.SH
+____________________________________________________________________________
+[  3441] By: gsar                                  on 1999/05/21  17:48:55
+        Log: integrate cfgperl changes
+     Branch: perl
+	  !> Configure Porting/Glossary Porting/config.sh Porting/config_H
+          !> config_h.SH hints/sunos_4_1.sh installperl
+____________________________________________________________________________
+[  3440] By: gsar                                  on 1999/05/21  17:42:49
+        Log: test tweak
+     Branch: perl
+           ! t/comp/proto.t
+____________________________________________________________________________
+[  3439] By: gsar                                  on 1999/05/21  17:31:26
+        Log: fix breakage when neither FFLUSH_ALL nor FFLUSH_NULL are #defined.
+             (Configure fflush(NULL) detection seems broken on Solaris, which
+             is why I hit the problem)
+     Branch: perl
+           ! Changes perl.h
+____________________________________________________________________________
 [  3438] By: gsar                                  on 1999/05/20  16:41:01
         Log: perlport 1.41 update from Chris Nandor <pudge@pobox.com>
      Branch: perl
