@@ -3416,7 +3416,10 @@ PP(pp_unpack)
 		while (len-- > 0 && s < strend) {
 		    auint = utf8_to_uv((U8*)s, &along);
 		    s += along;
-		    culong += auint;
+		    if (checksum > 32)
+			cdouble += (double)auint;
+		    else
+			culong += auint;
 		}
 	    }
 	    else {
@@ -3852,7 +3855,7 @@ PP(pp_unpack)
 	if (checksum) {
 	    sv = NEWSV(42, 0);
 	    if (strchr("fFdD", datumtype) ||
-	      (checksum > 32 && strchr("iIlLN", datumtype)) ) {
+	      (checksum > 32 && strchr("iIlLNU", datumtype)) ) {
 		double trouble;
 
 		adouble = 1.0;
