@@ -13,7 +13,6 @@
 #include "INTERN.h"
 #include "bytecode.h"
 #include "byterun.h"
-#include "ccop.h"
 
 static char *svclassnames[] = {
     "B::NULL",
@@ -33,6 +32,142 @@ static char *svclassnames[] = {
     "B::FM",
     "B::IO",
 };
+
+typedef enum {
+    OPc_NULL,	/* 0 */
+    OPc_BASEOP,	/* 1 */
+    OPc_UNOP,	/* 2 */
+    OPc_BINOP,	/* 3 */
+    OPc_LOGOP,	/* 4 */
+    OPc_CONDOP,	/* 5 */
+    OPc_LISTOP,	/* 6 */
+    OPc_PMOP,	/* 7 */
+    OPc_SVOP,	/* 8 */
+    OPc_GVOP,	/* 9 */
+    OPc_PVOP,	/* 10 */
+    OPc_CVOP,	/* 11 */
+    OPc_LOOP,	/* 12 */
+    OPc_COP	/* 13 */
+} opclass;
+
+static char *opclassnames[] = {
+    "B::NULL",
+    "B::OP",
+    "B::UNOP",
+    "B::BINOP",
+    "B::LOGOP",
+    "B::CONDOP",
+    "B::LISTOP",
+    "B::PMOP",
+    "B::SVOP",
+    "B::GVOP",
+    "B::PVOP",
+    "B::CVOP",
+    "B::LOOP",
+    "B::COP"	
+};
+
+static opclass
+cc_opclass(o)
+OP *	o;
+{
+    if (!o)
+	return OPc_NULL;
+
+    if (o->op_type == 0)
+	return (o->op_flags & OPf_KIDS) ? OPc_UNOP : OPc_BASEOP;
+
+    if (o->op_type == OP_SASSIGN)
+	return ((o->op_private & OPpASSIGN_BACKWARDS) ? OPc_UNOP : OPc_BINOP);
+
+    switch (opargs[o->op_type] & OA_CLASS_MASK) {
+    case OA_BASEOP:
+	return OPc_BASEOP;
+
+    case OA_UNOP:
+	return OPc_UNOP;
+
+    case OA_BINOP:
+	return OPc_BINOP;
+
+    case OA_LOGOP:
+	return OPc_LOGOP;
+
+    case OA_CONDOP:
+	return OPc_CONDOP;
+
+    case OA_LISTOP:
+	return OPc_LISTOP;
+
+    case OA_PMOP:
+	return OPc_PMOP;
+
+    case OA_SVOP:
+	return OPc_SVOP;
+
+    case OA_GVOP:
+	return OPc_GVOP;
+
+    case OA_PVOP:
+	return OPc_PVOP;
+
+    case OA_LOOP:
+	return OPc_LOOP;
+
+    case OA_COP:
+	return OPc_COP;
+
+    case OA_BASEOP_OR_UNOP:
+	/*
+	 * UNI(OP_foo) in toke.c returns token UNI or FUNC1 depending on
+	 * whether bare parens were seen. perly.y uses OPf_SPECIAL to
+	 * signal whether an OP or an UNOP was chosen.
+	 * Frederic.Chauveau@pasteur.fr says we need to check for OPf_KIDS too.
+	 */
+	return ((o->op_flags & OPf_SPECIAL) ? OPc_BASEOP :
+		(o->op_flags & OPf_KIDS) ? OPc_UNOP : OPc_BASEOP);
+
+    case OA_FILESTATOP:
+	/*
+	 * The file stat OPs are created via UNI(OP_foo) in toke.c but use
+	 * the OPf_REF flag to distinguish between OP types instead of the
+	 * usual OPf_SPECIAL flag. As usual, if OPf_KIDS is set, then we
+	 * return OPc_UNOP so that walkoptree can find our children. If
+	 * OPf_KIDS is not set then we check OPf_REF. Without OPf_REF set
+	 * (no argument to the operator) it's an OP; with OPf_REF set it's
+	 * a GVOP (and op_gv is the GV for the filehandle argument).
+	 */
+	return ((o->op_flags & OPf_KIDS) ? OPc_UNOP :
+		(o->op_flags & OPf_REF) ? OPc_GVOP : OPc_BASEOP);
+
+    case OA_LOOPEXOP:
+	/*
+	 * next, last, redo, dump and goto use OPf_SPECIAL to indicate that a
+	 * label was omitted (in which case it's a BASEOP) or else a term was
+	 * seen. In this last case, all except goto are definitely PVOP but
+	 * goto is either a PVOP (with an ordinary constant label), an UNOP
+	 * with OPf_STACKED (with a non-constant non-sub) or an UNOP for
+	 * OP_REFGEN (with goto &sub) in which case OPf_STACKED also seems to
+	 * get set.
+	 */
+	if (o->op_flags & OPf_STACKED)
+	    return OPc_UNOP;
+	else if (o->op_flags & OPf_SPECIAL)
+	    return OPc_BASEOP;
+	else
+	    return OPc_PVOP;
+    }
+    warn("can't determine class of operator %s, assuming BASEOP\n",
+	 op_name[o->op_type]);
+    return OPc_BASEOP;
+}
+
+static char *
+cc_opclassname(o)
+OP *	o;
+{
+    return opclassnames[cc_opclass(o)];
+}
 
 static SV *
 make_sv_object(arg, sv)
@@ -260,7 +395,6 @@ walkoptree(opsv, method)
 SV *opsv;
 char *method;
 {
-    dTHR;
     dSP;
     OP *o;
     
@@ -386,8 +520,10 @@ ppname(opnum)
 	int	opnum
     CODE:
 	ST(0) = sv_newmortal();
-	if (opnum >= 0 && opnum < sizeof(ppnames)/sizeof(char*))
-	    sv_setpv(ST(0), ppnames[opnum]);
+	if (opnum >= 0 && opnum < maxo) {
+	    sv_setpvn(ST(0), "pp_", 3);
+	    sv_catpv(ST(0), op_name[opnum]);
+	}
 
 void
 hash(sv)
@@ -421,9 +557,19 @@ SV *
 cchar(sv)
 	SV *	sv
 
+void
+threadsv_names()
+    PPCODE:
+	int i;
+	STRLEN len = strlen(threadsv_names);
+
+	EXTEND(sp, len);
+	for (i = 0; i < len; i++)
+	    PUSHs(sv_2mortal(newSVpv(&threadsv_names[i], 1)));
+
+
 #define OP_next(o)	o->op_next
 #define OP_sibling(o)	o->op_sibling
-#define OP_ppaddr(o)	ppnames[o->op_type]
 #define OP_desc(o)	op_desc[o->op_type]
 #define OP_targ(o)	o->op_targ
 #define OP_type(o)	o->op_type
@@ -444,6 +590,10 @@ OP_sibling(o)
 char *
 OP_ppaddr(o)
 	B::OP		o
+    CODE:
+	ST(0) = sv_newmortal();
+	sv_setpvn(ST(0), "pp_", 3);
+	sv_catpv(ST(0), op_name[o->op_type]);
 
 char *
 OP_desc(o)
@@ -518,10 +668,8 @@ LISTOP_children(o)
 #define PMOP_pmreplstart(o)	o->op_pmreplstart
 #define PMOP_pmnext(o)		o->op_pmnext
 #define PMOP_pmregexp(o)	o->op_pmregexp
-#define PMOP_pmshort(o)		o->op_pmshort
 #define PMOP_pmflags(o)		o->op_pmflags
 #define PMOP_pmpermflags(o)	o->op_pmpermflags
-#define PMOP_pmslen(o)		o->op_pmslen
 
 MODULE = B	PACKAGE = B::PMOP		PREFIX = PMOP_
 
@@ -550,20 +698,12 @@ B::PMOP
 PMOP_pmnext(o)
 	B::PMOP		o
 
-B::SV
-PMOP_pmshort(o)
-	B::PMOP		o
-
 U16
 PMOP_pmflags(o)
 	B::PMOP		o
 
 U16
 PMOP_pmpermflags(o)
-	B::PMOP		o
-
-U8
-PMOP_pmslen(o)
 	B::PMOP		o
 
 void

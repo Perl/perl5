@@ -130,27 +130,25 @@ enum {
     INSN_OP_PMREPLSTART,			/* 98 */
     INSN_OP_PMNEXT,			/* 99 */
     INSN_PREGCOMP,			/* 100 */
-    INSN_OP_PMSHORT,			/* 101 */
-    INSN_OP_PMFLAGS,			/* 102 */
-    INSN_OP_PMPERMFLAGS,			/* 103 */
-    INSN_OP_PMSLEN,			/* 104 */
-    INSN_OP_SV,			/* 105 */
-    INSN_OP_GV,			/* 106 */
-    INSN_OP_PV,			/* 107 */
-    INSN_OP_PV_TR,			/* 108 */
-    INSN_OP_REDOOP,			/* 109 */
-    INSN_OP_NEXTOP,			/* 110 */
-    INSN_OP_LASTOP,			/* 111 */
-    INSN_COP_LABEL,			/* 112 */
-    INSN_COP_STASH,			/* 113 */
-    INSN_COP_FILEGV,			/* 114 */
-    INSN_COP_SEQ,			/* 115 */
-    INSN_COP_ARYBASE,			/* 116 */
-    INSN_COP_LINE,			/* 117 */
-    INSN_MAIN_START,			/* 118 */
-    INSN_MAIN_ROOT,			/* 119 */
-    INSN_CURPAD,			/* 120 */
-    MAX_INSN = 120
+    INSN_OP_PMFLAGS,			/* 101 */
+    INSN_OP_PMPERMFLAGS,			/* 102 */
+    INSN_OP_SV,			/* 103 */
+    INSN_OP_GV,			/* 104 */
+    INSN_OP_PV,			/* 105 */
+    INSN_OP_PV_TR,			/* 106 */
+    INSN_OP_REDOOP,			/* 107 */
+    INSN_OP_NEXTOP,			/* 108 */
+    INSN_OP_LASTOP,			/* 109 */
+    INSN_COP_LABEL,			/* 110 */
+    INSN_COP_STASH,			/* 111 */
+    INSN_COP_FILEGV,			/* 112 */
+    INSN_COP_SEQ,			/* 113 */
+    INSN_COP_ARYBASE,			/* 114 */
+    INSN_COP_LINE,			/* 115 */
+    INSN_MAIN_START,			/* 116 */
+    INSN_MAIN_ROOT,			/* 117 */
+    INSN_CURPAD,			/* 118 */
+    MAX_INSN = 118
 };
 
 enum {

@@ -3,7 +3,12 @@ cwd=`pwd`
 if [ -f bperl ]; then
     perl=./bperl
 else
-    perl="perl -Iblib/arch"
+    perl="perl -Mblib"
+fi
+if [ "X$PERL_SRC" != "X" ]; then
+    testdir=$PERL_SRC/t
+else
+    testdir=t
 fi
 for pl in ${1+"$@"}
 do
@@ -11,5 +16,5 @@ do
     $perl -MO=CC,-obtest.tc $pl			\
 	&& mv btest.tc btest.c			\
 	&& $perl cc_harness -O2 -o btest btest.c\
-	&& (cd t; $cwd/btest)
+	&& (cd $testdir; $cwd/btest)
 done

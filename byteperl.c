@@ -1,20 +1,9 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "EXTERN.h"
 #include "perl.h"
 #ifndef PATCHLEVEL
 #include "patchlevel.h"
 #endif
 #include "byterun.h"
-
-#ifdef __cplusplus
-}
-#  define EXTERN_C extern "C"
-#else
-#  define EXTERN_C extern
-#endif
 
 static void xs_init _((void));
 static PerlInterpreter *my_perl;

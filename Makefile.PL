@@ -3,11 +3,10 @@ use Config;
 
 WriteMakefile(
     NAME	=> "B",
-    VERSION	=> "a4",
-    OBJECT	=> "B.o ccop.o byterun.o",
+    VERSION	=> "a5",
+    OBJECT	=> "B.o byterun.o",
     depend	=> {
-	"B.o"		=> "B.c ccop.h bytecode.h byterun.h",
-	"ccop.o"	=> "ccop.c ccop.h"
+	"B.o"		=> "B.c bytecode.h byterun.h",
     },
     clean	=> {
 	FILES		=> "perl byteperl btest btest.c *.o B.c *~"
@@ -37,7 +36,7 @@ regen_headers:
 # at the moment because a standlone Perl program needs to set up curpad
 # which is overwritten on exit from an XSUB.
 #
-byteperl: byteperl.o B.o ccop.o byterun.o
-	$(CC) -o byteperl byteperl.o B.o ccop.o byterun.o $(LDFLAGS) -L$(PERL_ARCHLIB)/CORE -lperl $(LIBS)
+byteperl: byteperl.o B.o byterun.o
+	$(CC) -o byteperl byteperl.o B.o byterun.o $(LDFLAGS) -L$(PERL_ARCHLIB)/CORE -lperl $(LIBS)
 EOT
 }

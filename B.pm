@@ -10,7 +10,7 @@ require DynaLoader;
 require Exporter;
 @ISA = qw(Exporter DynaLoader);
 @EXPORT_OK = qw(byteload_fh byteload_string minus_c ppname
-		class peekop cast_I32 cstring cchar hash
+		class peekop cast_I32 cstring cchar hash threadsv_names
 		main_root main_start main_cv svref_2object
 		walkoptree walkoptree_slow walkoptree_exec walksymtable
 		parents comppadlist sv_undef compile_stats timing_info);

@@ -1,6 +1,6 @@
 use Config;
 
-$libdir = "$Config{installarchlib}/CORE";
+$libdir = $ENV{PERL_SRC} || "$Config{installarchlib}/CORE";
 
 if (!grep(/^-[cS]$/, @ARGV)) {
     $linkargs = sprintf("%s -L$libdir -lperl %s", @Config{qw(ldflags libs)});

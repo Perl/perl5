@@ -40,14 +40,14 @@ if (-f "byterun.c") {
 if (-f "byterun.h") {
     rename("byterun.h", "byterun.h.old");
 }
-if (-f "Asmdata.pm") {
-    rename("Asmdata.pm", "Asmdata.pm.old");
+if (-f "B/Asmdata.pm") {
+    rename("B/Asmdata.pm", "B/Asmdata.pm.old");
 }
 
 #
 # Start with boilerplate for Asmdata.pm
 #
-open(ASMDATA_PM, ">Asmdata.pm") or die "Asmdata.pm: $!";
+open(ASMDATA_PM, ">B/Asmdata.pm") or die "Asmdata.pm: $!";
 print ASMDATA_PM $perl_header, <<'EOT';
 package B::Asmdata;
 use Exporter;
@@ -356,10 +356,8 @@ op_pmreplrootgv	*(SV**)&cPMOP->op_pmreplroot	svindex
 op_pmreplstart	cPMOP->op_pmreplstart	opindex
 op_pmnext	*(OP**)&cPMOP->op_pmnext	opindex
 pregcomp	op			pvcontents	x
-op_pmshort	cPMOP->op_pmshort	svindex
 op_pmflags	cPMOP->op_pmflags	U16
 op_pmpermflags	cPMOP->op_pmpermflags	U16
-op_pmslen	cPMOP->op_pmslen	char
 op_sv		cSVOP->op_sv		svindex
 op_gv		*(SV**)&cGVOP->op_gv	svindex
 op_pv		cPVOP->op_pv		pvcontents

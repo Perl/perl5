@@ -723,140 +723,126 @@ FILE *fp;
 		BSET_pregcomp(op, arg);
 		break;
 	    }
-	  case INSN_OP_PMSHORT:		/* 101 */
-	    {
-		svindex arg;
-		BGET_objindex(arg);
-		cPMOP->op_pmshort = arg;
-		break;
-	    }
-	  case INSN_OP_PMFLAGS:		/* 102 */
+	  case INSN_OP_PMFLAGS:		/* 101 */
 	    {
 		U16 arg;
 		BGET_U16(arg);
 		cPMOP->op_pmflags = arg;
 		break;
 	    }
-	  case INSN_OP_PMPERMFLAGS:		/* 103 */
+	  case INSN_OP_PMPERMFLAGS:		/* 102 */
 	    {
 		U16 arg;
 		BGET_U16(arg);
 		cPMOP->op_pmpermflags = arg;
 		break;
 	    }
-	  case INSN_OP_PMSLEN:		/* 104 */
-	    {
-		char arg;
-		BGET_U8(arg);
-		cPMOP->op_pmslen = arg;
-		break;
-	    }
-	  case INSN_OP_SV:		/* 105 */
+	  case INSN_OP_SV:		/* 103 */
 	    {
 		svindex arg;
 		BGET_objindex(arg);
 		cSVOP->op_sv = arg;
 		break;
 	    }
-	  case INSN_OP_GV:		/* 106 */
+	  case INSN_OP_GV:		/* 104 */
 	    {
 		svindex arg;
 		BGET_objindex(arg);
 		*(SV**)&cGVOP->op_gv = arg;
 		break;
 	    }
-	  case INSN_OP_PV:		/* 107 */
+	  case INSN_OP_PV:		/* 105 */
 	    {
 		pvcontents arg;
 		BGET_pvcontents(arg);
 		cPVOP->op_pv = arg;
 		break;
 	    }
-	  case INSN_OP_PV_TR:		/* 108 */
+	  case INSN_OP_PV_TR:		/* 106 */
 	    {
 		op_tr_array arg;
 		BGET_op_tr_array(arg);
 		cPVOP->op_pv = arg;
 		break;
 	    }
-	  case INSN_OP_REDOOP:		/* 109 */
+	  case INSN_OP_REDOOP:		/* 107 */
 	    {
 		opindex arg;
 		BGET_objindex(arg);
 		cLOOP->op_redoop = arg;
 		break;
 	    }
-	  case INSN_OP_NEXTOP:		/* 110 */
+	  case INSN_OP_NEXTOP:		/* 108 */
 	    {
 		opindex arg;
 		BGET_objindex(arg);
 		cLOOP->op_nextop = arg;
 		break;
 	    }
-	  case INSN_OP_LASTOP:		/* 111 */
+	  case INSN_OP_LASTOP:		/* 109 */
 	    {
 		opindex arg;
 		BGET_objindex(arg);
 		cLOOP->op_lastop = arg;
 		break;
 	    }
-	  case INSN_COP_LABEL:		/* 112 */
+	  case INSN_COP_LABEL:		/* 110 */
 	    {
 		pvcontents arg;
 		BGET_pvcontents(arg);
 		cCOP->cop_label = arg;
 		break;
 	    }
-	  case INSN_COP_STASH:		/* 113 */
+	  case INSN_COP_STASH:		/* 111 */
 	    {
 		svindex arg;
 		BGET_objindex(arg);
 		*(SV**)&cCOP->cop_stash = arg;
 		break;
 	    }
-	  case INSN_COP_FILEGV:		/* 114 */
+	  case INSN_COP_FILEGV:		/* 112 */
 	    {
 		svindex arg;
 		BGET_objindex(arg);
 		*(SV**)&cCOP->cop_filegv = arg;
 		break;
 	    }
-	  case INSN_COP_SEQ:		/* 115 */
+	  case INSN_COP_SEQ:		/* 113 */
 	    {
 		U32 arg;
 		BGET_U32(arg);
 		cCOP->cop_seq = arg;
 		break;
 	    }
-	  case INSN_COP_ARYBASE:		/* 116 */
+	  case INSN_COP_ARYBASE:		/* 114 */
 	    {
 		I32 arg;
 		BGET_I32(arg);
 		cCOP->cop_arybase = arg;
 		break;
 	    }
-	  case INSN_COP_LINE:		/* 117 */
+	  case INSN_COP_LINE:		/* 115 */
 	    {
 		line_t arg;
 		BGET_U16(arg);
 		cCOP->cop_line = arg;
 		break;
 	    }
-	  case INSN_MAIN_START:		/* 118 */
+	  case INSN_MAIN_START:		/* 116 */
 	    {
 		opindex arg;
 		BGET_objindex(arg);
 		main_start = arg;
 		break;
 	    }
-	  case INSN_MAIN_ROOT:		/* 119 */
+	  case INSN_MAIN_ROOT:		/* 117 */
 	    {
 		opindex arg;
 		BGET_objindex(arg);
 		main_root = arg;
 		break;
 	    }
-	  case INSN_CURPAD:		/* 120 */
+	  case INSN_CURPAD:		/* 118 */
 	    {
 		svindex arg;
 		BGET_objindex(arg);

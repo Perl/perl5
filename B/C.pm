@@ -12,7 +12,8 @@ use Exporter ();
 		init_sections set_callback save_unused_subs objsym);
 
 use B qw(minus_c sv_undef walkoptree walksymtable main_root main_start peekop
-	 class cstring cchar svref_2object compile_stats comppadlist hash);
+	 class cstring cchar svref_2object compile_stats comppadlist hashi
+	 threadsv_names);
 use B::Asmdata qw(@specialsv_name);
 
 use FileHandle;
@@ -32,6 +33,11 @@ my @unused_sub_packages;
 my $nullop_count;
 my $pv_copy_on_grow;
 my ($debug_cops, $debug_av, $debug_cv, $debug_mg);
+
+my @threadsv_names;
+BEGIN {
+    @threadsv_names = threadsv_names();
+}
 
 # Code sections
 my ($init, $decl, $symsect, $binopsect, $condopsect, $copsect, $cvopsect,
@@ -61,6 +67,10 @@ sub walk_and_save_optree {
 my $op_seq = 65535;
 
 sub AVf_REAL () { 1 }
+
+# XXX This shouldn't really be hardcoded here but it saves
+# looking up the name of every BASEOP in B::OP
+sub OP_THREADSV () { 345 }
 
 sub savesym {
     my ($obj, $value) = @_;
@@ -107,6 +117,11 @@ sub B::OP::save {
     my ($op, $level) = @_;
     my $type = $op->type;
     $nullop_count++ unless $type;
+    if ($type == OP_THREADSV) {
+	# saves looking up ppaddr but it's a bit naughty to hard code this
+	$init->add(sprintf("(void)find_threadsv(%s);",
+			   cstring($threadsv_names[$op->targ]));
+    }
     $opsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x",
 			 ${$op->next}, ${$op->sibling}, $op->ppaddr, $op->targ,
 			 $type, $op_seq, $op->flags, $op->private));
@@ -244,7 +259,6 @@ sub B::COP::save {
 
 sub B::PMOP::save {
     my ($op, $level) = @_;
-    my $shortsym = $op->pmshort->save;
     my $replroot = $op->pmreplroot;
     my $replstart = $op->pmreplstart;
     my $replrootfield = sprintf("s\\_%x", $$replroot);
@@ -266,12 +280,12 @@ sub B::PMOP::save {
     # pmnext handling is broken in perl itself, I think. Bad op_pmnext
     # fields aren't noticed in perl's runtime (unless you try reset) but we
     # segfault when trying to dereference it to find op->op_pmnext->op_type
-    $pmopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x, %u, %s, %s, 0, 0, %s, 0x%x, 0x%x, %u",
+    $pmopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x, %u, %s, %s, 0, 0, 0x%x, 0x%x",
 			   ${$op->next}, ${$op->sibling}, $ppaddr, $op->targ,
 			   $op->type, $op_seq, $op->flags, $op->private,
 			   ${$op->first}, ${$op->last}, $op->children,
-			   $replrootfield, $replstartfield, $shortsym,
-			   $op->pmflags, $op->pmpermflags, $op->pmslen));
+			   $replrootfield, $replstartfield,
+			   $op->pmflags, $op->pmpermflags,));
     my $pm = sprintf("pmop_list[%d]", $pmopsect->index);
     my $re = $op->precomp;
     if (defined($re)) {
@@ -857,7 +871,11 @@ sub output_all {
 	}
     }
 
-    print "static int $init_name()\n{\n";
+    print <<"EOT";
+static int $init_name()
+{
+	dTHR;
+EOT
     $init->output(\*STDOUT, "\t%s\n");
     print "\treturn 0;\n}\n";
     if ($verbose) {
@@ -898,6 +916,10 @@ typedef struct {
     long	xcv_depth;		/* >= 2 indicates recursive call */
     AV *	xcv_padlist;
     CV *	xcv_outside;
+#ifdef USE_THREADS
+    perl_mutex *xcv_mutexp;
+    struct perl_thread *xcv_owner;	/* current owner thread */
+#endif /* USE_THREADS */
     U8		xcv_flags;
 } XPVCV_or_similar;
 #define ANYINIT(i) i
@@ -918,30 +940,15 @@ EOT
 
 sub output_boilerplate {
     print <<'EOT';
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "EXTERN.h"
 #include "perl.h"
 #ifndef PATCHLEVEL
 #include "patchlevel.h"
 #endif
 
-#ifdef __cplusplus
-}
-#  define EXTERN_C extern "C"
-#else
-#  define EXTERN_C extern
-#endif
-
 /* Workaround for mapstart: the only op which needs a different ppaddr */
 #undef pp_mapstart
 #define pp_mapstart pp_grepstart
-
-#if PATCHLEVEL < 4
-#define vivify_ref(sv, to_what) provide_ref(op, sv)
-#endif
 
 static void xs_init _((void));
 static PerlInterpreter *my_perl;
@@ -966,11 +973,7 @@ main(int argc, char **argv, char **env)
 
     PERL_SYS_INIT(&argc,&argv);
  
-#if PATCHLEVEL > 3 || (PATCHLEVEL == 3 && SUBVERSION >= 1)
     perl_init_i18nl10n(1);
-#else
-    perl_init_i18nl14n(1);
-#endif
 
     if (!do_undump) {
 	my_perl = perl_alloc();

@@ -162,7 +162,7 @@ sub init_pp {
     $ppname = shift;
     $runtime_list_ref = [];
     $declare_ref = {};
-    runtime("dSP;");
+    runtime("djSP;");
     declare("I32", "oldsave");
     declare("SV", "**svp");
     map { declare("SV", "*$_") } qw(sv src dst left right);
@@ -544,7 +544,6 @@ sub pp_padsv {
 	if ($private & OPpLVAL_INTRO) {
 	    runtime("SAVECLEARSV(curpad[$ix]);");
 	} elsif ($private & OPpDEREF) {
-	    loadop($op) if $patchlevel < 4;
 	    runtime(sprintf("vivify_ref(curpad[%d], %d);",
 			    $ix, $private & OPpDEREF));
 	    $pad[$ix]->invalidate;
@@ -947,7 +946,7 @@ sub pp_entersub {
     write_back_lexicals(REGISTER|TEMPORARY);
     write_back_stack();
     my $sym = doop($op);
-    runtime("if (op != ($sym)->op_next) op = (*op->op_ppaddr)();");
+    runtime("if (op != ($sym)->op_next) op = (*op->op_ppaddr)(ARGS);");
     runtime("SPAGAIN;");
     $know_op = 0;
     invalidate_lexicals(REGISTER|TEMPORARY);
@@ -966,7 +965,7 @@ sub pp_leavewrite {
     my $sym = doop($op);
     # XXX Is this the right way to distinguish between it returning
     # CvSTART(cv) (via doform) and pop_return()?
-    runtime("if (op) op = (*op->op_ppaddr)();");
+    runtime("if (op) op = (*op->op_ppaddr)(ARGS);");
     runtime("SPAGAIN;");
     $know_op = 0;
     invalidate_lexicals(REGISTER|TEMPORARY);
