@@ -2436,13 +2436,14 @@ S_docatch(pTHX_ OP *o)
     dTHR;
     int ret;
     OP *oldop = PL_op;
+    dJMPENV;
 
 #ifdef DEBUGGING
     assert(CATCH_GET == TRUE);
 #endif
     PL_op = o;
  redo_body:
-    CALLPROTECT(aTHX_ &ret, MEMBER_TO_FPTR(S_docatch_body));
+    CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_docatch_body));
     switch (ret) {
     case 0:
 	break;

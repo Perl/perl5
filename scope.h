@@ -148,6 +148,7 @@ struct jmpenv {
     int			je_ret;		/* last exception thrown */
     bool		je_mustcatch;	/* need to call longjmp()? */
     void		(*je_throw)(int v); /* last for bincompat */
+    bool		je_noset;	/* no need for setjmp() */
 };
 
 typedef struct jmpenv JMPENV;
@@ -157,7 +158,8 @@ typedef struct jmpenv JMPENV;
  *  body of protected processing.
  */
 typedef void *(CPERLscope(*protect_body_t)) (pTHX_ va_list);
-typedef void *(CPERLscope(*protect_proc_t)) (pTHX_ int *, protect_body_t, ...);
+typedef void *(CPERLscope(*protect_proc_t)) (pTHX_ volatile JMPENV *pcur_env,
+					     int *, protect_body_t, ...);
 
 /*
  * How to build the first jmpenv.
@@ -175,6 +177,7 @@ typedef void *(CPERLscope(*protect_proc_t)) (pTHX_ int *, protect_body_t, ...);
 	PL_start_env.je_throw = NULL;		\
 	PL_start_env.je_ret = -1;		\
 	PL_start_env.je_mustcatch = TRUE;	\
+	PL_start_env.je_noset = 0;		\
 	PL_top_env = &PL_start_env;		\
     } STMT_END
 
@@ -216,43 +219,49 @@ typedef void *(CPERLscope(*protect_proc_t)) (pTHX_ int *, protect_body_t, ...);
  *    JMPENV_POP;  // don't forget this!
  */
 
-#define dJMPENV		JMPENV cur_env
+#define dJMPENV	JMPENV cur_env;	\
+		volatile JMPENV *pcur_env = ((cur_env.je_noset = 0),&cur_env)
 
-#define JMPENV_PUSH_INIT_ENV(cur_env,THROWFUNC) \
+#define JMPENV_PUSH_INIT_ENV(ce,THROWFUNC) \
     STMT_START {					\
-	cur_env.je_throw = (THROWFUNC);			\
-	cur_env.je_ret = -1;				\
-	cur_env.je_mustcatch = FALSE;			\
-	cur_env.je_prev = PL_top_env;			\
-	PL_top_env = &cur_env;				\
+	(ce).je_throw = (THROWFUNC);			\
+	(ce).je_ret = -1;				\
+	(ce).je_mustcatch = FALSE;			\
+	(ce).je_prev = PL_top_env;			\
+	PL_top_env = &(ce);				\
 	OP_REG_TO_MEM;					\
     } STMT_END
 
-#define JMPENV_PUSH_INIT(THROWFUNC) JMPENV_PUSH_INIT_ENV(cur_env,THROWFUNC) 
+#define JMPENV_PUSH_INIT(THROWFUNC) JMPENV_PUSH_INIT_ENV(*(JMPENV*)pcur_env,THROWFUNC) 
 
-#define JMPENV_POST_CATCH_ENV(cur_env) \
+#define JMPENV_POST_CATCH_ENV(ce) \
     STMT_START {					\
 	OP_MEM_TO_REG;					\
-	PL_top_env = &cur_env;				\
+	PL_top_env = &(ce);				\
     } STMT_END
 
-#define JMPENV_POST_CATCH JMPENV_POST_CATCH_ENV(cur_env)
+#define JMPENV_POST_CATCH JMPENV_POST_CATCH_ENV(*(JMPENV*)pcur_env)
 
 
-#define JMPENV_PUSH_ENV(cur_env,v) \
-    STMT_START {					\
-	JMPENV_PUSH_INIT_ENV(cur_env,NULL);				\
-	EXCEPT_SET_ENV(cur_env,PerlProc_setjmp(cur_env.je_buf, 1));	\
-	JMPENV_POST_CATCH_ENV(cur_env);				\
-	(v) = EXCEPT_GET_ENV(cur_env);				\
+#define JMPENV_PUSH_ENV(ce,v) \
+    STMT_START {						\
+	if (!(ce).je_noset) {					\
+	    JMPENV_PUSH_INIT_ENV(ce,NULL);			\
+	    EXCEPT_SET_ENV(ce,PerlProc_setjmp((ce).je_buf, 1));\
+	    (ce).je_noset = 1;					\
+	}							\
+	else							\
+	    EXCEPT_SET_ENV(ce,0);				\
+	JMPENV_POST_CATCH_ENV(ce);				\
+	(v) = EXCEPT_GET_ENV(ce);				\
     } STMT_END
 
-#define JMPENV_PUSH(v) JMPENV_PUSH_ENV(cur_env,v) 
+#define JMPENV_PUSH(v) JMPENV_PUSH_ENV(*(JMPENV*)pcur_env,v) 
 
-#define JMPENV_POP_ENV(cur_env) \
-    STMT_START { PL_top_env = cur_env.je_prev; } STMT_END
+#define JMPENV_POP_ENV(ce) \
+    STMT_START { PL_top_env = (ce).je_prev; } STMT_END
 
-#define JMPENV_POP  JMPENV_POP_ENV(cur_env) 
+#define JMPENV_POP  JMPENV_POP_ENV(*(JMPENV*)pcur_env) 
 
 #define JMPENV_JUMP(v) \
     STMT_START {						\
@@ -269,11 +278,10 @@ typedef void *(CPERLscope(*protect_proc_t)) (pTHX_ int *, protect_body_t, ...);
 	PerlProc_exit(1);					\
     } STMT_END
 
-#define EXCEPT_GET_ENV(cur_env)	(cur_env.je_ret)
-#define EXCEPT_GET EXCEPT_GET_ENV(cur_env)
-#define EXCEPT_SET_ENV(cur_env,v)	(cur_env.je_ret = (v))
-#define EXCEPT_SET(v) EXCEPT_SET_ENV(cur_env,v)
+#define EXCEPT_GET_ENV(ce)	((ce).je_ret)
+#define EXCEPT_GET		EXCEPT_GET_ENV(*(JMPENV*)pcur_env)
+#define EXCEPT_SET_ENV(ce,v)	((ce).je_ret = (v))
+#define EXCEPT_SET(v)		EXCEPT_SET_ENV(*(JMPENV*)pcur_env,v)
 
-#define CATCH_GET	(PL_top_env->je_mustcatch)
-#define CATCH_SET(v)	(PL_top_env->je_mustcatch = (v))
-   
+#define CATCH_GET		(PL_top_env->je_mustcatch)
+#define CATCH_SET(v)		(PL_top_env->je_mustcatch = (v))

@@ -1756,8 +1756,10 @@ p	|void	|do_pmop_dump	|I32 level|PerlIO *file|PMOP *pm
 p	|void	|do_sv_dump	|I32 level|PerlIO *file|SV *sv|I32 nest \
 				|I32 maxnest|bool dumpops|STRLEN pvlim
 p	|void	|magic_dump	|MAGIC *mg
-p	|void*	|default_protect|int *excpt|protect_body_t body|...
-p	|void*	|vdefault_protect|int *excpt|protect_body_t body|va_list *args
+p	|void*	|default_protect|volatile JMPENV *je|int *excpt \
+				|protect_body_t body|...
+p	|void*	|vdefault_protect|volatile JMPENV *je|int *excpt \
+				|protect_body_t body|va_list *args
 p	|void	|reginitcolors
 p	|char*	|sv_2pv_nolen	|SV* sv
 p	|char*	|sv_pv		|SV *sv

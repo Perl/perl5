@@ -590,6 +590,7 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
     dTHR;
     I32 oldscope;
     int ret;
+    dJMPENV;
 #ifdef USE_THREADS
     dTHX;
 #endif
@@ -638,7 +639,8 @@ setuid perl scripts securely.\n");
     oldscope = PL_scopestack_ix;
     PL_dowarn = G_WARN_OFF;
 
-    CALLPROTECT(aTHX_ &ret, MEMBER_TO_FPTR(S_parse_body), env, xsinit);
+    CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_parse_body),
+		env, xsinit);
     switch (ret) {
     case 0:
 	return 0;
@@ -1005,6 +1007,7 @@ perl_run(pTHXx)
     dTHR;
     I32 oldscope;
     int ret;
+    dJMPENV;
 #ifdef USE_THREADS
     dTHX;
 #endif
@@ -1012,7 +1015,7 @@ perl_run(pTHXx)
     oldscope = PL_scopestack_ix;
 
  redo_body:
-    CALLPROTECT(aTHX_ &ret, MEMBER_TO_FPTR(S_run_body), oldscope);
+    CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_run_body), oldscope);
     switch (ret) {
     case 1:
 	cxstack_ix = -1;		/* start context stack again */
@@ -1206,6 +1209,7 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
     bool oldcatch = CATCH_GET;
     int ret;
     OP* oldop = PL_op;
+    dJMPENV;
 
     if (flags & G_DISCARD) {
 	ENTER;
@@ -1273,7 +1277,8 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	PL_markstack_ptr++;
 
   redo_body:
-	CALLPROTECT(aTHX_ &ret, MEMBER_TO_FPTR(S_call_body), (OP*)&myop, FALSE);
+	CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_call_body),
+		    (OP*)&myop, FALSE);
 	switch (ret) {
 	case 0:
 	    retval = PL_stack_sp - (PL_stack_base + oldmark);
@@ -1371,6 +1376,7 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
     I32 oldscope;
     int ret;
     OP* oldop = PL_op;
+    dJMPENV;
 
     if (flags & G_DISCARD) {
 	ENTER;
@@ -1395,7 +1401,8 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 	myop.op_flags |= OPf_SPECIAL;
 
  redo_body:
-    CALLPROTECT(aTHX_ &ret, MEMBER_TO_FPTR(S_call_body), (OP*)&myop, TRUE);
+    CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_call_body),
+		(OP*)&myop, TRUE);
     switch (ret) {
     case 0:
 	retval = PL_stack_sp - (PL_stack_base + oldmark);
@@ -2990,11 +2997,12 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
     CV *cv;
     STRLEN len;
     int ret;
+    dJMPENV;
 
     while (AvFILL(paramList) >= 0) {
 	cv = (CV*)av_shift(paramList);
 	SAVEFREESV(cv);
-	CALLPROTECT(aTHX_ &ret, MEMBER_TO_FPTR(S_call_list_body), cv);
+	CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_call_list_body), cv);
 	switch (ret) {
 	case 0:
 	    (void)SvPV(atsv, len);

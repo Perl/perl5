@@ -1012,7 +1012,7 @@ change#4052
 =item Data::Dumper
 
 A C<Maxdepth> setting can be specified to avoid venturing
-too deeply into depp data structures.  See L<Data::Dumper>.
+too deeply into deep data structures.  See L<Data::Dumper>.
 
 Dumping C<qr//> objects works correctly.
 
