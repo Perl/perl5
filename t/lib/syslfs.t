@@ -101,7 +101,7 @@ unless($syswrite && $close) {
     } elsif ($! =~ /quota/i) {
 	print "1..0\n# filesystem quota limits?\n";
     }
-lain();
+    explain();
     bye();
 }
 

@@ -105,7 +105,7 @@ unless ($print && $close) {
     } elsif ($! =~ /quota/i) {
 	print "1..0\n# filesystem quota limits?\n";
     }
- ain();
+    explain();
     bye();
 }
 
