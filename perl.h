@@ -42,12 +42,6 @@
 #  define EXTERN_C
 #endif
 
-#if defined(USE_THREADS) /* && !defined(PERL_CORE) && !defined(PERLDLL) */
-#ifndef CRIPPLED_CC
-#define CRIPPLED_CC
-#endif
-#endif
-
 #ifdef OP_IN_REGISTER
 #  ifdef __GNUC__
 #    define stringify_immed(s) #s
