@@ -19,6 +19,69 @@ exists(hash, key_sv)
         OUTPUT:
         RETVAL
 
+SV *
+delete(hash, key_sv)
+	PREINIT:
+	STRLEN len;
+	const char *key;
+	INPUT:
+	HV *hash
+	SV *key_sv
+	CODE:
+	key = SvPV(key_sv, len);
+	/* It's already mortal, so need to increase reference count.  */
+	RETVAL = SvREFCNT_inc(hv_delete(hash, key,
+					SvUTF8(key_sv) ? -len : len, 0));
+        OUTPUT:
+        RETVAL
+
+SV *
+store(hash, key_sv, value)
+	PREINIT:
+	STRLEN len;
+	const char *key;
+	SV *copy;
+	SV **result;
+	INPUT:
+	HV *hash
+	SV *key_sv
+	SV *value
+	CODE:
+	key = SvPV(key_sv, len);
+	copy = newSV(0);
+	result = hv_store(hash, key, SvUTF8(key_sv) ? -len : len, copy, 0);
+	SvSetMagicSV(*result, value);
+	if (!result) {
+	    SvREFCNT_dec(copy);
+	    XSRETURN_EMPTY;
+	}
+	/* It's about to become mortal, so need to increase reference count.
+	 */
+	RETVAL = SvREFCNT_inc(*result);
+        OUTPUT:
+        RETVAL
+
+
+SV *
+fetch(hash, key_sv)
+	PREINIT:
+	STRLEN len;
+	const char *key;
+	SV **result;
+	INPUT:
+	HV *hash
+	SV *key_sv
+	CODE:
+	key = SvPV(key_sv, len);
+	result = hv_fetch(hash, key, SvUTF8(key_sv) ? -len : len, 0);
+	if (!result) {
+	    XSRETURN_EMPTY;
+	}
+	/* Force mg_get  */
+	RETVAL = newSVsv(*result);
+        OUTPUT:
+        RETVAL
+
 =pod
 
 sub TIEHASH  { bless {}, $_[0] }

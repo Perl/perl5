@@ -226,15 +226,19 @@ S_hv_fetch_flags(pTHX_ HV *hv, const char *key, I32 klen, I32 lval, int flags)
 	return 0;
 
     if (SvRMAGICAL(hv)) {
-        /* All this clause seems to be utf8 unaware.
-           By moving the utf8 stuff out to hv_fetch_flags I need to ensure
-           key doesn't leak. I've not tried solving the utf8-ness.
-           NWC.
-        */
 	if (mg_find((SV*)hv, PERL_MAGIC_tied) || SvGMAGICAL((SV*)hv)) {
 	    sv = sv_newmortal();
 	    sv_upgrade(sv, SVt_PVLV);
-	    mg_copy((SV*)hv, sv, key, klen);
+	    if (flags & HVhek_UTF8) {
+		/* This hack based on the code in hv_exists_ent seems to be
+		   the easiest way to pass the utf8 flag through and fix
+		   the bug in hv_exists for tied hashes with utf8 keys.  */
+		SV *keysv = sv_2mortal(newSVpvn(key, klen));
+		SvUTF8_on(keysv);
+		mg_copy((SV*)hv, sv, (char *)keysv, HEf_SVKEY);
+	    } else {
+		mg_copy((SV*)hv, sv, key, klen);
+	    }
             if (flags & HVhek_FREEKEY)
                 Safefree(key);
 	    LvTYPE(sv) = 't';
@@ -627,7 +631,16 @@ Perl_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val,
 	bool needs_store;
 	hv_magic_check (hv, &needs_copy, &needs_store);
 	if (needs_copy) {
-	    mg_copy((SV*)hv, val, key, klen);
+	    if (flags & HVhek_UTF8) {
+		/* This hack based on the code in hv_exists_ent seems to be
+		   the easiest way to pass the utf8 flag through and fix
+		   the bug in hv_exists for tied hashes with utf8 keys.  */
+		SV *keysv = sv_2mortal(newSVpvn(key, klen));
+		SvUTF8_on(keysv);
+		mg_copy((SV*)hv, val, (char *)keysv, HEf_SVKEY);
+	    } else {
+		mg_copy((SV*)hv, val, key, klen);
+	    }
 	    if (!xhv->xhv_array /* !HvARRAY */ && !needs_store) {
                 if (flags & HVhek_FREEKEY)
                     Safefree(key);
@@ -957,7 +970,9 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
 	bool needs_store;
 	hv_magic_check (hv, &needs_copy, &needs_store);
 
-	if (needs_copy && (svp = hv_fetch(hv, key, klen, TRUE))) {
+// XXX PerlIO_printf(PerlIO_stderr(), "%d %d\n", is_utf8, klen);
+	if (needs_copy
+	    && (svp = hv_fetch(hv, key, is_utf8 ? -klen : klen, TRUE))) {
 	    sv = *svp;
 	    if (SvMAGICAL(sv)) {
 	        mg_clear(sv);
