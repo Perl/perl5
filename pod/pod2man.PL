@@ -389,7 +389,7 @@ $wanna_see{SYNOPSIS}++ if $section =~ /^3/;
 $name = @ARGV ? $ARGV[0] : "<STDIN>";
 $Filename = $name;
 $name = uc($name) if $section =~ /^1/;
-$name =~ s/\..*//;
+$name =~ s/\.[^.]*$//;
 
 if ($name ne 'something') {
     FCHECK: {
@@ -519,7 +519,7 @@ print <<'END';
 ..
 .\" @(#)ms.acc 1.5 88/02/08 SMI; from UCB 4.2
 .	\" AM - accent mark definitions
-.bd S B 3
+.bd B 3
 .	\" fudge factors for nroff and troff
 .if n \{\
 .	ds #H 0
