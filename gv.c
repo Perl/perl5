@@ -750,9 +750,9 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	    HV *hv;
 	    I32 i;
 	    if (!PL_psig_ptr) {
-		New(73, PL_psig_ptr,  SIG_SIZE, SV*);
-		New(73, PL_psig_name, SIG_SIZE, SV*);
-		New(73, PL_psig_pend, SIG_SIZE, int);
+		Newz(73, PL_psig_ptr,  SIG_SIZE, SV*);
+		Newz(73, PL_psig_name, SIG_SIZE, SV*);
+		Newz(73, PL_psig_pend, SIG_SIZE, int);
 	    }
 	    GvMULTI_on(gv);
 	    hv = GvHVn(gv);
@@ -764,6 +764,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 		    sv_setsv(*init, &PL_sv_undef);
 	    	PL_psig_ptr[i] = 0;
 	    	PL_psig_name[i] = 0;
+	    	PL_psig_pend[i] = 0;
 	    }
 	}
 	break;

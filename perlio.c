@@ -1279,6 +1279,7 @@ PerlIOUnix_read(PerlIO *f, void *vbuf, Size_t count)
       PerlIOBase(f)->flags |= PERLIO_F_EOF;
      return len;
     }
+   PERL_ASYNC_CHECK();
   }
 }
 
@@ -1296,6 +1297,7 @@ PerlIOUnix_write(PerlIO *f, const void *vbuf, Size_t count)
       PerlIOBase(f)->flags |= PERLIO_F_ERROR;
      return len;
     }
+   PERL_ASYNC_CHECK();
   }
 }
 
@@ -1329,6 +1331,7 @@ PerlIOUnix_close(PerlIO *f)
      code = -1;
      break;
     }
+   PERL_ASYNC_CHECK();
   }
  if (code == 0)
   {

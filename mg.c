@@ -996,6 +996,40 @@ Perl_magic_clearsig(pTHX_ SV *sv, MAGIC *mg)
     return 0;
 }
 
+void
+Perl_raise_signal(pTHX_ int sig)
+{
+    /* Set a flag to say this signal is pending */
+    PL_psig_pend[sig]++;
+    /* And one to say _a_ signal is pending */
+    PL_sig_pending = 1;
+}
+
+Signal_t
+Perl_csighandler(int sig)
+{
+#ifdef PERL_OLD_SIGNALS
+    /* Call the perl level handler now with risk we may be in malloc() etc. */
+    (*PL_sighandlerp)(sig);
+#else
+    dTHX;
+    Perl_raise_signal(aTHX_ sig);
+#endif
+}
+
+void
+Perl_despatch_signals(pTHX)
+{
+    int sig;
+    PL_sig_pending = 0;
+    for (sig = 1; sig < SIG_SIZE; sig++) {
+	if (PL_psig_pend[sig]) {
+	    PL_psig_pend[sig] = 0;
+	    (*PL_sighandlerp)(sig);
+	}
+    }
+}
+
 int
 Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 {
@@ -1034,7 +1068,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
     }
     if (SvTYPE(sv) == SVt_PVGV || SvROK(sv)) {
 	if (i)
-	    (void)rsignal(i, PL_sighandlerp);
+	    (void)rsignal(i, &Perl_csighandler);
 	else
 	    *svp = SvREFCNT_inc(sv);
 	return 0;
@@ -1061,7 +1095,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 	if (!strchr(s,':') && !strchr(s,'\''))
 	    sv_insert(sv, 0, 0, "main::", 6);
 	if (i)
-	    (void)rsignal(i, PL_sighandlerp);
+	    (void)rsignal(i, &Perl_csighandler);
 	else
 	    *svp = SvREFCNT_inc(sv);
     }
@@ -2145,15 +2179,6 @@ Perl_whichsig(pTHX_ char *sig)
     return 0;
 }
 
-void
-Perl_despatch_signals(pTHX)
-{
-#ifndef PERL_OLD_SIGNALS
- /* This is just a dummy for now */
-#endif
- PL_sig_pending = 0;
-}
-
 static SV* sig_sv;
 
 Signal_t
@@ -2251,7 +2276,7 @@ Perl_sighandler(int sig)
 #else
 	/* Not clear if this will work */
 	(void)rsignal(sig, SIG_IGN);
-	(void)rsignal(sig, PL_sighandlerp);
+	(void)rsignal(sig, &Perl_csighandler);
 #endif
 	Perl_die(aTHX_ Nullch);
     }
