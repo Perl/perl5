@@ -616,6 +616,12 @@ vmssetenv(char *lnm, char *eqv, struct dsc$descriptor_s **tabvec)
         }
         else {
           if (!*eqv) eqvdsc.dsc$w_length = 1;
+	  if (eqvdsc.dsc$w_length > LNM$C_NAMLENGTH) {
+	    eqvdsc.dsc$w_length = LNM$C_NAMLENGTH;
+	    if (ckWARN(WARN_MISC)) {
+	      Perl_warner(aTHX_ WARN_MISC,"Value of logical \"%s\" too long. Truncating to %i bytes",lnm, LNM$C_NAMLENGTH);
+	    }
+	  }
           retsts = lib$set_logical(&lnmdsc,&eqvdsc,tabvec[0],0,0);
         }
       }
