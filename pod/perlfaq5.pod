@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq5 - Files and Formats ($Revision: 1.18 $, $Date: 2002/05/30 07:04:25 $)
+perlfaq5 - Files and Formats ($Revision: 1.26 $, $Date: 2002/09/21 21:04:17 $)
 
 =head1 DESCRIPTION
 
@@ -313,11 +313,19 @@ See L<perlform/"Accessing Formatting Internals"> for an swrite() function.
 
 =head2 How can I output my numbers with commas added?
 
-This one from Benjamin Goldberg will do it for you:
+This subroutine will add commas to your number:
+
+	sub commify {
+	   local $_  = shift;
+	   1 while s/^([-+]?\d+)(\d{3})/$1,$2/;
+	   return $_;
+	   }
+
+This regex from Benjamin Goldberg will add commas to numbers:
 
    s/(^[-+]?\d+?(?=(?>(?:\d{3})+)(?!\d))|\G\d{3}(?=\d))/$1,/g;
 
-or written verbosely:
+It is easier to see with comments:
 
    s/(
        ^[-+]?            # beginning of number.
@@ -469,8 +477,8 @@ It may be a lot clearer to use sysopen(), though:
 
 =head2 How can I reliably rename a file?
 
-If your operating system supports a proper mv(1) utility or its functional
-equivalent, this works:
+If your operating system supports a proper mv(1) utility or its
+functional equivalent, this works:
 
     rename($old, $new) or system("mv", $old, $new);
 
@@ -678,30 +686,22 @@ utime() on those platforms.
 
 =head2 How do I print to more than one file at once?
 
-If you only have to do this once, you can do this:
+To connect one filehandle to several output filehandles,
+you can use the IO::Tee or Tie::FileHandle::Multiplex modules.
+
+If you only have to do this once, you can print individually
+to each filehandle.
 
     for $fh (FH1, FH2, FH3) { print $fh "whatever\n" }
 
-To connect up to one filehandle to several output filehandles, it's
-easiest to use the tee(1) program if you have it, and let it take care
-of the multiplexing:
-
-    open (FH, "| tee file1 file2 file3");
-
-Or even:
-
-    # make STDOUT go to three files, plus original STDOUT
-    open (STDOUT, "| tee file1 file2 file3") or die "Teeing off: $!\n";
-    print "whatever\n"                       or die "Writing: $!\n";
-    close(STDOUT)                            or die "Closing: $!\n";
-
-Otherwise you'll have to write your own multiplexing print
-function--or your own tee program--or use Tom Christiansen's,
-at http://www.cpan.org/authors/id/TOMC/scripts/tct.gz , which is
-written in Perl and offers much greater functionality
-than the stock version.
-
 =head2 How can I read in an entire file all at once?
+
+You can use the File::Slurp module to do it in one step.
+
+	use File::Slurp;
+	
+	$all_of_it = read_file($filename); # entire file in scalar
+    @all_lines = read_file($filename); # one line perl element
 
 The customary Perl approach for processing all the lines in a file is to
 do so one line at a time:
@@ -983,7 +983,7 @@ documentation for details.
 
 This is elaborately and painstakingly described in the
 F<file-dir-perms> article in the "Far More Than You Ever Wanted To
-Know" collection in http://www.cpan.org/olddoc/FMTEYEWTK.tgz .
+Know" collection in http://www.cpan.org/misc/olddoc/FMTEYEWTK.tgz .
 
 The executive summary: learn how your filesystem works.  The
 permissions on a file say what can happen to the data in that file.
@@ -1000,9 +1000,18 @@ Here's an algorithm from the Camel Book:
     srand;
     rand($.) < 1 && ($line = $_) while <>;
 
-This has a significant advantage in space over reading the whole
-file in.  A simple proof by induction is available upon 
-request if you doubt the algorithm's correctness.
+This has a significant advantage in space over reading the whole file
+in.  You can find a proof of this method in I<The Art of Computer
+Programming>, Volume 2, Section 3.4.2, by Donald E. Knuth.
+
+You can use the File::Random module which provides a function
+for that algorithm:
+
+	use File::Random qw/random_line/;
+	my $line = random_line($filename);
+
+Another way is to use the Tie::File module, which treats the entire
+file as an array.  Simply access a random array element.
 
 =head2 Why do I get weird spaces when I print an array of lines?
 

@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq3 - Programming Tools ($Revision: 1.22 $, $Date: 2002/05/06 13:11:13 $)
+perlfaq3 - Programming Tools ($Revision: 1.29 $, $Date: 2002/11/13 06:23:50 $)
 
 =head1 DESCRIPTION
 
@@ -59,6 +59,50 @@ which aren't part of the Perl language as shell commands.  perlsh
 from the source distribution is simplistic and uninteresting, but
 may still be what you want.
 
+=head2 How do I find which modules are installed on my system?
+
+You can use the ExtUtils::Installed module to show all
+installed distributions, although it can take awhile to do
+its magic.  The standard library which comes with Perl just
+shows up as "Perl" (although you can get those with
+Mod::CoreList).
+
+	use ExtUtils::Installed;
+	
+	my $inst    = ExtUtils::Installed->new();
+	my @modules = $inst->modules();
+
+If you want a list of all of the Perl module filenames, you
+can use File::Find::Rule.
+
+	use File::Find::Rule;
+	
+	my @files = File::Find::Rule->file()->name( '*.pm' )->in( @INC );
+
+If you do not have that module, you can do the same thing
+with File::Find which is part of the standard library.  
+
+    use File::Find;
+    my @files;
+
+    find sub { push @files, $File::Find::name if -f _ && /\.pm$/ },
+         @INC;
+
+	print join "\n", @files;
+	
+If you simply need to quickly check to see if a module is
+available, you can check for its documentation.  If you can
+read the documentation the module is most likely installed. 
+If you cannot read the documentation, the module might not
+have any (in rare cases).
+
+	prompt% perldoc Module::Name
+
+You can also try to include the module in a one-liner to see if
+perl finds it.
+
+	perl -MModule::Name -e1
+	
 =head2 How do I debug my Perl programs?
 
 Have you tried C<use warnings> or used C<-w>?  They enable warnings 
@@ -154,7 +198,7 @@ for indenting, ^D is for undenting, and ^O is for blockdenting--
 as it were.  A more complete example, with comments, can be found at
 http://www.cpan.org/authors/id/TOMC/scripts/toms.exrc.gz
 
-The a2ps http://www-inf.enst.fr/%7Edemaille/a2ps/black+white.ps does
+The a2ps http://www-inf.enst.fr/%7Edemaille/a2ps/black+white.ps.gz does
 lots of things related to generating nicely printed output of
 documents, as does enscript at http://people.ssh.fi/mtr/genscript/ .
 
@@ -219,19 +263,6 @@ environment, including debugger and syntax highlighting editor.
 
 =back
 
-For Windows there's also the
-
-=over 4
-
-=item CodeMagicCD
-
-( http://www.codemagiccd.com/ ) Collection of various programming
-tools for Windows: Perl (5.005_03), TclTk, Python, GNU programming
-tools, REBOL, wxWindows toolkit, the MinGW GNU C/C++ compiler, DJGPP
-GNU C/C++ compiler, Cint C interpreter, YaBasic.
-
-=back
-
 For editors: if you're on Unix you probably have vi or a vi clone already,
 and possibly an emacs too, so you may not need to download anything.
 In any emacs the cperl-mode (M-x cperl-mode) gives you perhaps the
@@ -247,10 +278,10 @@ specifically for programming, such as Textpad
 ( http://www.textpad.com/ ) and UltraEdit
 ( http://www.ultraedit.com/ ), among others.
 
-If you are using Mac OS, the same concerns apply.  MacPerl
+If you are using MacOS, the same concerns apply.  MacPerl
 (for Classic environments) comes with a simple editor.
 Popular external editors are BBEdit ( http://www.bbedit.com/ )
-or Alpha ( http://www.kelehers.org/alpha/ ). Mac OS X users can
+or Alpha ( http://www.kelehers.org/alpha/ ). MacOS X users can
 use Unix editors as well.
 
 =over 4
@@ -261,11 +292,15 @@ http://www.gnu.org/software/emacs/windows/ntemacs.html
 
 =item MicroEMACS
 
-http://members.nbci.com/uemacs/
+http://www.microemacs.de/
 
 =item XEmacs
 
 http://www.xemacs.org/Download/index.html
+
+=item Jed
+
+http://space.mit.edu/~davis/jed/
 
 =back
 
@@ -279,13 +314,11 @@ ftp://ftp.cs.pdx.edu/pub/elvis/ http://www.fh-wedel.de/elvis/
 
 =item Vile
 
-http://vile.cx/
+http://dickey.his.com/vile/vile.html
 
 =item Vim
 
 http://www.vim.org/
-
-win32: http://www.cs.vu.nl/%7Etmgil/vi.html
 
 =back
 
@@ -323,7 +356,7 @@ There is also a toyedit Text widget based editor written in Perl
 that is distributed with the Tk module on CPAN.  The ptkdb
 ( http://world.std.com/~aep/ptkdb/ ) is a Perl/tk based debugger that
 acts as a development environment of sorts.  Perl Composer
-( http://perlcomposer.sourceforge.net/vperl.html ) is an IDE for Perl/Tk
+( http://perlcomposer.sourceforge.net/ ) is an IDE for Perl/Tk
 GUI creation.
 
 In addition to an editor/IDE you might be interested in a more
@@ -411,7 +444,7 @@ shouldn't be an issue.
 
 The Curses module from CPAN provides a dynamically loadable object
 module interface to a curses library.  A small demo can be found at the
-directory http://www.cpan.org/authors/Tom_Christiansen/scripts/rep ;
+directory http://www.cpan.org/authors/Tom_Christiansen/scripts/rep.gz ;
 this program repeats a command and updates the screen as needed, rendering
 B<rep ps axu> similar to B<top>.
 
@@ -598,9 +631,10 @@ causing your hard disk to thrash due to massive swapping.
 
 =back
 
-=head2 Is it unsafe to return a pointer to local data?
+=head2 Is it safe to return a reference to local or lexical data?
 
-No, Perl's garbage collection system takes care of this.
+Yes. Perl's garbage collection system takes care of this so
+everything works out right.
 
     sub makeone {
 	my @a = ( 1 .. 10 );
@@ -704,6 +738,12 @@ You can try using the native-code compiler described below, but
 crackers might be able to disassemble it.  These pose varying degrees
 of difficulty to people wanting to get at your code, but none can
 definitively conceal it (true of every language, not just Perl).
+
+It is very easy to recover the source of Perl programs.  You simply
+feed the program to the perl interpreter and use the modules in
+the B:: hierarchy.  The B::Deparse module should be able to
+defeat most attempts to hide source.  Again, this is not
+unique to Perl.
 
 If you're concerned about people profiting from your code, then the
 bottom line is that nothing but a restrictive license will give you
