@@ -304,7 +304,6 @@ do_test(17,
     GPFLAGS = 0x0
     LINE = \\d+
     FILE = ".*\\b(?i:peek\\.t)"
-    FLAGS = $ADDR
     EGV = $ADDR\\t"a"');
 
 END {
