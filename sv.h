@@ -492,8 +492,6 @@ struct xpvio {
 
 #define SvTAINT(sv)	  STMT_START{ if(tainted){SvTAINTED_on(sv);} }STMT_END
 
-#ifdef CRIPPLED_CC
-
 #define SvPV_force(sv, lp) sv_pvn_force(sv, &lp)
 #define SvPV(sv, lp) sv_pvn(sv, &lp)
 #define SvIVx(sv) sv_iv(sv)
@@ -508,7 +506,8 @@ struct xpvio {
 #define SvUV(sv) SvIVx(sv)
 #define SvTRUE(sv) SvTRUEx(sv)
 
-#else /* !CRIPPLED_CC */
+#ifndef CRIPPLED_CC
+/* redefine some things to more efficient inlined versions */
 
 #undef SvIV
 #define SvIV(sv) (SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv))
@@ -528,8 +527,51 @@ struct xpvio {
     ((SvFLAGS(sv) & (SVf_POK|SVf_THINKFIRST)) == SVf_POK \
      ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_pvn_force(sv, &lp))
 
-#undef SvTRUE
-#define SvTRUE(sv) (						\
+#ifdef __GNUC__
+#  undef SvIVx
+#  undef SvUVx
+#  undef SvNVx
+#  undef SvPVx
+#  undef SvTRUE
+#  undef SvTRUEx
+#  define SvIVx(sv) ({SV *nsv = (SV*)(sv); SvIV(nsv); })
+#  define SvUVx(sv) ({SV *nsv = (SV*)(sv); SvUV(nsv); })
+#  define SvNVx(sv) ({SV *nsv = (SV*)(sv); SvNV(nsv); })
+#  define SvPVx(sv, lp) ({SV *nsv = (sv); SvPV(nsv, lp); })
+#  define SvTRUE(sv) (						\
+    !sv								\
+    ? 0								\
+    :    SvPOK(sv)						\
+	?   (({XPV *nxpv = (XPV*)SvANY(sv);			\
+	     nxpv &&						\
+	     (*nxpv->xpv_pv > '0' ||				\
+	      nxpv->xpv_cur > 1 ||				\
+	      (nxpv->xpv_cur && *nxpv->xpv_pv != '0')); })	\
+	     ? 1						\
+	     : 0)						\
+	:							\
+	    SvIOK(sv)						\
+	    ? SvIVX(sv) != 0					\
+	    :   SvNOK(sv)					\
+		? SvNVX(sv) != 0.0				\
+		: sv_2bool(sv) )
+#  define SvTRUEx(sv) ({SV *nsv = (sv); SvTRUE(nsv); })
+#else /* __GNUC__ */
+#ifndef USE_THREADS
+/* These inlined macros use globals, which will require a thread
+ * declaration in user code, so we avoid them under threads */
+
+#  undef SvIVx
+#  undef SvUVx
+#  undef SvNVx
+#  undef SvPVx
+#  undef SvTRUE
+#  undef SvTRUEx
+#  define SvIVx(sv) ((Sv = (sv)), SvIV(Sv))
+#  define SvUVx(sv) ((Sv = (sv)), SvUV(Sv))
+#  define SvNVx(sv) ((Sv = (sv)), SvNV(Sv))
+#  define SvPVx(sv, lp) ((Sv = (sv)), SvPV(Sv, lp))
+#  define SvTRUE(sv) (						\
     !sv								\
     ? 0								\
     :    SvPOK(sv)						\
@@ -545,22 +587,10 @@ struct xpvio {
 	    :   SvNOK(sv)					\
 		? SvNVX(sv) != 0.0				\
 		: sv_2bool(sv) )
-
-#ifdef __GNUC__
-#  define SvIVx(sv) ({SV *nsv = (SV*)(sv); SvIV(nsv); })
-#  define SvUVx(sv) ({SV *nsv = (SV*)(sv); SvUV(nsv); })
-#  define SvNVx(sv) ({SV *nsv = (SV*)(sv); SvNV(nsv); })
-#  define SvPVx(sv, lp) ({SV *nsv = (sv); SvPV(nsv, lp); })
-#else
-#  define SvIVx(sv) ((Sv = (sv)), SvIV(Sv))
-#  define SvUVx(sv) ((Sv = (sv)), SvUV(Sv))
-#  define SvNVx(sv) ((Sv = (sv)), SvNV(Sv))
-#  define SvPVx(sv, lp) ((Sv = (sv)), SvPV(Sv, lp))
-#endif /* __GNUC__ */
-
-#define SvTRUEx(sv) ((Sv = (sv)), SvTRUE(Sv))
-
-#endif /* CRIPPLED_CC */
+#  define SvTRUEx(sv) ((Sv = (sv)), SvTRUE(Sv))
+#endif /* !USE_THREADS */
+#endif /* !__GNU__ */
+#endif /* !CRIPPLED_CC */
 
 #define newRV_inc(sv)	newRV(sv)
 #ifdef __GNUC__

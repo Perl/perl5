@@ -234,7 +234,8 @@ CORE_C=	..\av.c		\
 	..\taint.c	\
 	..\toke.c	\
 	..\universal.c	\
-	..\util.c
+	..\util.c	\
+	..\malloc.c
 
 CORE_OBJ= ..\av.obj	\
 	..\deb.obj	\
@@ -261,7 +262,8 @@ CORE_OBJ= ..\av.obj	\
 	..\taint.obj	\
 	..\toke.obj	\
 	..\universal.obj\
-	..\util.obj
+	..\util.obj     \
+	..\malloc.obj
 
 WIN32_C = perllib.c \
 	win32.c \

@@ -1686,6 +1686,9 @@ GNU General Public License, which may be found in the Perl 5.0 source kit.\n\n")
 	break;
     case '-':
     case 0:
+#ifdef WIN32
+    case '\r':
+#endif
     case '\n':
     case '\t':
 	break;
@@ -1987,7 +1990,7 @@ SV *sv;
     if (strEQ(origfilename,"-"))
 	scriptname = "";
     if (fdscript >= 0) {
-	rsfp = PerlIO_fdopen(fdscript,"r");
+	rsfp = PerlIO_fdopen(fdscript,PERL_SCRIPT_MODE);
 #if defined(HAS_FCNTL) && defined(F_SETFD)
 	if (rsfp)
 	    fcntl(PerlIO_fileno(rsfp),F_SETFD,1);  /* ensure close-on-exec */
@@ -2071,7 +2074,7 @@ sed %s -e \"/^[^#]/b\" \
 	rsfp = PerlIO_stdin();
     }
     else {
-	rsfp = PerlIO_open(scriptname,"r");
+	rsfp = PerlIO_open(scriptname,PERL_SCRIPT_MODE);
 #if defined(HAS_FCNTL) && defined(F_SETFD)
 	if (rsfp)
 	    fcntl(PerlIO_fileno(rsfp),F_SETFD,1);  /* ensure close-on-exec */

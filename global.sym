@@ -463,7 +463,6 @@ gv_stashpv
 gv_stashpvn
 gv_stashsv
 he_root
-hoistmust
 hv_clear
 hv_delayfree_ent
 hv_delete

@@ -144,9 +144,9 @@ typedef OP OP_4tree;			/* Will be redefined later. */
  */
 
 #ifndef DOINIT
-EXT const U8 regkind[];
+EXTCONST U8 regkind[];
 #else
-EXT const U8 regkind[] = {
+EXTCONST U8 regkind[] = {
 	END,
 	BOL,
 	BOL,

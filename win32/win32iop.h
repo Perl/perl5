@@ -219,10 +219,17 @@ END_EXTERN_C
 #define puts			win32_puts
 #define getchar			win32_getchar
 #define putchar			win32_putchar
+
+#if !defined(MYMALLOC) || !defined(PERLDLL)
+#undef malloc
+#undef calloc
+#undef realloc
+#undef free
 #define malloc			win32_malloc
 #define calloc			win32_calloc
 #define realloc			win32_realloc
 #define free			win32_free
+#endif
 
 #define pipe(fd)		win32_pipe((fd), 512, O_BINARY)
 #define pause()			win32_sleep((32767L << 16) + 32767)

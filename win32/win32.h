@@ -111,6 +111,7 @@ extern  gid_t	getegid(void);
 extern  int	setuid(uid_t uid);
 extern  int	setgid(gid_t gid);
 extern  int	kill(int pid, int sig);
+extern  void	*sbrk(int need);
 
 #undef	 Stat
 #define  Stat		win32_stat
@@ -128,8 +129,7 @@ extern int		my_fclose(FILE *);
 extern int		do_aspawn(void* really, void ** mark, void ** arglast);
 extern int		do_spawn(char *cmd);
 extern char		do_exec(char *cmd);
-extern char *		win32PerlLibPath(void);
-extern char *		win32SiteLibPath(void);
+extern char *		win32PerlLibPath(char *sfx,...);
 extern int		IsWin95(void);
 extern int		IsWinNT(void);
 
@@ -144,5 +144,23 @@ typedef  char *		caddr_t;	/* In malloc.c (core address). */
  */
 #include <sys/socket.h>
 #include <netdb.h>
+
+#ifdef MYMALLOC
+#define EMBEDMYMALLOC	/**/
+/* #define USE_PERL_SBRK	/**/
+/* #define PERL_SBRK_VIA_MALLOC	/**/
+#endif
+
+#ifdef PERLDLL
+#define PERL_CORE
+#endif
+
+#ifdef USE_BINMODE_SCRIPTS
+#define PERL_SCRIPT_MODE "rb"
+EXT void win32_strip_return(struct sv *sv);
+#else
+#define PERL_SCRIPT_MODE "r"
+#define win32_strip_return(sv) NOOP
+#endif
 
 #endif /* _INC_WIN32_PERL5 */
