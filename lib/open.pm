@@ -213,7 +213,7 @@ filehandles (STDIN, STDOUT, STDERR) to comply with encoding selected
 for input/output handles.  For example, if both input and out are
 chosen to be C<:utf8>, a C<:std> will mean that STDIN, STDOUT, and
 STDERR are also in C<:utf8>.  On the other hand, if only output is
-chosen to be in C<:encoding(koi8r)', a C<:std> will cause only the
+chosen to be in C<< :encoding(koi8r) >>, a C<:std> will cause only the
 STDOUT and STDERR to be in C<koi8r>.  The C<:locale> subpragma
 implicitly turns on C<:std>.
 

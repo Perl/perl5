@@ -612,6 +612,8 @@ MAN3PODS = ',$self->wraplist(sort keys %{$self->{MAN3PODS}}),'
     }
 
 push @m,"
+makemakerdflt : all
+
 .SUFFIXES :
 .SUFFIXES : \$(OBJ_EXT) .c .cpp .cxx .xs
 
