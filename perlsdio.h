@@ -18,14 +18,16 @@
 #define PerlIO_vprintf(f,fmt,a)		vfprintf(f,fmt,a)          
 #define PerlIO_read(f,buf,count)	fread(buf,1,count,f)
 #define PerlIO_write(f,buf,count)	fwrite1(buf,1,count,f)
-#define PerlIO_open(path,mode)		fopen(path,mode)
-#define PerlIO_fdopen(fd,mode)		fdopen(fd,mode)
+#define PerlIO_open			fopen
+#define PerlIO_fdopen			fdopen
+#define PerlIO_reopen		freopen
 #define PerlIO_close(f)			fclose(f)
 #define PerlIO_puts(f,s)		fputs(s,f)
 #define PerlIO_putc(f,c)		fputc(c,f)
 #define PerlIO_ungetc(f,c)		ungetc(c,f)
 #define PerlIO_getc(f)			getc(f)
 #define PerlIO_eof(f)			feof(f)
+#define PerlIO_getname(f,b)		fgetname(f,b)
 #define PerlIO_error(f)			ferror(f)
 #define PerlIO_fileno(f)		fileno(f)
 #define PerlIO_clearerr(f)		clearerr(f)
@@ -60,9 +62,9 @@
 #define PerlIO_get_ptr(f)		FILE_ptr(f)          
 #define PerlIO_get_cnt(f)		FILE_cnt(f)          
 
-#ifdef FILE_CNT_LVALUE
+#ifdef STDIO_CNT_LVALUE
 #define PerlIO_canset_cnt(f)		1      
-#ifdef FILE_PTR_LVALUE
+#ifdef STDIO_PTR_LVALUE
 #define PerlIO_fast_gets(f)		1        
 #endif
 #define PerlIO_set_cnt(f,c)		(FILE_cnt(f) = (c))          
@@ -71,7 +73,7 @@
 #define PerlIO_set_cnt(f,c)		abort()
 #endif
 
-#ifdef FILE_PTR_LVALUE
+#ifdef STDIO_PTR_LVALUE
 #define PerlIO_set_ptrcnt(f,p,c)	(FILE_ptr(f) = (p), PerlIO_set_cnt(f,c))          
 #else
 #define PerlIO_set_ptrcnt(f,p,c)	abort()
@@ -80,6 +82,7 @@
 #else  /* USE_STDIO_PTR */
 
 #define PerlIO_has_cntptr(f)		0
+#define PerlIO_canset_cnt(f)		0
 #define PerlIO_get_cnt(f)		(abort(),0)
 #define PerlIO_get_ptr(f)		(abort(),0)
 #define PerlIO_set_cnt(f,c)		abort()
