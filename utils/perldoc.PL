@@ -313,7 +313,9 @@ sub printout {
     my $err;
 
     if ($opt_t) {
-	Pod::Text->new()->parse_from_file($file,$tmp);
+	open(OUT,">>$tmp") or warn("Can't open $tmp: $!"), return;
+	Pod::Text->new()->parse_from_file($file,\*OUT);
+	close OUT;
     }
     elsif (not $opt_u) {
 	my $cmd = "pod2man --lax $file | nroff -man";
