@@ -17,9 +17,9 @@
 /*
  * Package name      : perl5
  * Source directory  : /m/fs/work/work/permanent/perl/pp4/maint-5.6/perl
- * Configuration time: Tue Jan 30 07:23:37 EET 2001
+ * Configuration time: Sat Mar  3 01:13:55 EET 2001
  * Configured by     : jhi
- * Target system     : osf1 kosh.hut.fi v4.0 1229 alpha 
+ * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
 
 #ifndef _config_h_
@@ -961,12 +961,6 @@
  */
 #define SH_PATH "/bin/sh"  /**/
 
-/* STDCHAR:
- *	This symbol is defined to be the type of char used in stdio.h.
- *	It has the values "unsigned char" or "char".
- */
-#define STDCHAR unsigned char	/**/
-
 /* CROSSCOMPILE:
  *	This symbol, if defined, signifies that we our
  *	build process is a cross-compilation.
@@ -1800,7 +1794,7 @@
  *	probably use memmove() or memcpy(). If neither is defined, roll your
  *	own version.
  */
-#define HAS_SAFE_MEMCPY	/**/
+/*#define HAS_SAFE_MEMCPY	/ **/
 
 /* HAS_SANE_MEMCMP:
  *	This symbol, if defined, indicates that the memcmp routine is available
@@ -3190,6 +3184,12 @@
  */
 #define HAS_SETPGRP		/**/
 #define USE_BSD_SETPGRP	/**/
+
+/* STDCHAR:
+ *	This symbol is defined to be the type of char used in stdio.h.
+ *	It has the values "unsigned char" or "char".
+ */
+#define STDCHAR unsigned char	/**/
 
 /* HAS__FWALK:
  *	This symbol, if defined, indicates that the _fwalk system call is

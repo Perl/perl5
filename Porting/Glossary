@@ -1449,6 +1449,11 @@ d_sigaction (d_sigaction.U):
 	This variable conditionally defines the HAS_SIGACTION symbol, which
 	indicates that the Vr4 sigaction() routine is available.
 
+d_sigprocmask (d_sigprocmask.U):
+	This variable conditionally defines HAS_SIGPROCMASK
+	if sigprocmask() is available to examine or change the signal mask
+	of the calling process.
+
 d_sigsetjmp (d_sigsetjmp.U):
 	This variable conditionally defines the HAS_SIGSETJMP symbol,
 	which indicates that the sigsetjmp() routine is available to
@@ -1563,6 +1568,10 @@ d_strtold (d_strtold.U):
 d_strtoll (d_strtoll.U):
 	This variable conditionally defines the HAS_STRTOLL symbol, which
 	indicates to the C program that the strtoll() routine is available.
+
+d_strtoq (d_strtoq.U):
+	This variable conditionally defines the HAS_STRTOQ symbol, which
+	indicates to the C program that the strtoq() routine is available.
 
 d_strtoul (d_strtoul.U):
 	This variable conditionally defines the HAS_STRTOUL symbol, which
@@ -2439,6 +2448,11 @@ intsize (intsize.U):
 	This variable contains the value of the INTSIZE symbol, which
 	indicates to the C program how many bytes there are in an int.
 
+issymlink (issymlink.U):
+	This variable holds the test command to test for a symbolic link
+	(if they are supported).  Typical values include 'test -h' and
+	'test -L'.
+
 ivdformat (perlxvf.U):
 	This variable contains the format string used for printing
 	a Perl IV as a signed decimal integer. 
@@ -2739,6 +2753,15 @@ n (n.U):
 	This variable contains the '-n' flag if that is what causes the echo
 	command to suppress newline.  Otherwise it is null.  Correct usage is
 	$echo $n "prompt for a question: $c".
+
+need_va_copy (need_va_copy.U):
+	This symbol, if defined, indicates that the system stores
+	the variable argument list datatype, va_list, in a format
+	that cannot be copied by simple assignment, so that some
+	other means must be used when copying is required.
+	As such systems vary in their provision (or non-provision)
+	of copying mechanisms, handy.h defines a platform-
+	independent macro, Perl_va_copy(src, dst), to do the job.
 
 netdb_hlen_type (netdbtype.U):
 	This variable holds the type used for the 2nd argument to
@@ -3164,6 +3187,10 @@ sig_num_init (sig_name.U):
 	separated by commas, suitable for use in the SIG_NUM definition 
 	below.  A "ZERO" is prepended to the list, and the list is 
 	terminated with a plain 0.
+
+sig_size (sig_name.U):
+	This variable contains the number of elements of the sig_name
+	and sig_num arrays, excluding the final NULL entry.
 
 signal_t (d_voidsig.U):
 	This variable holds the type of the signal handler (void or int).
