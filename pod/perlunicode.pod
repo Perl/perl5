@@ -166,6 +166,10 @@ bytes and match against the character properties specified in the
 Unicode properties database.  C<\w> can be used to match a Japanese
 ideograph, for instance.
 
+(However, and as a limitation of the current implementation, using
+C<\w> or C<\W> I<inside> a C<[...]> character class will still match
+with byte semantics.)
+
 =item *
 
 Named Unicode properties, scripts, and block ranges may be used like
