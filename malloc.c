@@ -51,9 +51,16 @@
     # Use table lookup to decide in which bucket a given allocation will go.
     SMALL_BUCKET_VIA_TABLE	!NO_FANCY_MALLOC
 
-    # Use system-malloc() to emulate sbrk(). Normally only used with broken
-    # sbrk()s.
+    # Use a perl-defined sbrk() instead of the (presumably broken or
+    # missing) system-supplied sbrk().
+    USE_PERL_SBRK		undef
+
+    # Use system malloc() (or calloc() etc.) to emulate sbrk(). Normally
+    # only used with broken sbrk()s.
     PERL_SBRK_VIA_MALLOC	undef
+
+    # Which allocator to use if PERL_SBRK_VIA_MALLOC
+    SYSTEM_ALLOC(a) 		malloc(a)
 
     # Disable memory overwrite checking with DEBUGGING.  Memory and speed
     # optimization, error reporting pessimization.
@@ -93,9 +100,6 @@
 
     # This many continuous sbrk()s compensate for one discontinuous one.
     SBRK_FAILURE_PRICE		50
-
-    # Which allocator to use if PERL_SBRK_VIA_MALLOC
-    SYSTEM_ALLOC(a) 		malloc(a)
 
   This implementation assumes that calling PerlIO_printf() does not
   result in any memory allocation calls (used during a panic).
@@ -1546,9 +1550,27 @@ dump_mstats(char *s)
 #      define PERL_SBRK_VIA_MALLOC
 #   endif
 
+#   ifdef __MACHTEN_PPC__
+#      define PERL_SBRK_VIA_MALLOC
+/*
+ * MachTen's malloc() returns a buffer aligned on a two-byte boundary.
+ * While this is adequate, it may slow down access to longer data
+ * types by forcing multiple memory accesses.  It also causes
+ * complaints when RCHECK is in force.  So we allocate six bytes
+ * more than we need to, and return an address rounded up to an
+ * eight-byte boundary.
+ *
+ * 980701 Dominic Dunlop <domo@computer.org>
+ */
+#      define SYSTEM_ALLOC(a) ((void *)(((unsigned)malloc((a)+6)+6)&~7))
+#   endif
+
 #   ifdef PERL_SBRK_VIA_MALLOC
 #      if defined(HIDEMYMALLOC) || defined(EMBEDMYMALLOC)
-#         undef malloc
+#         undef malloc		/* Expose names that  */
+#         undef calloc		/* HIDEMYMALLOC hides */
+#         undef realloc
+#         undef free
 #      else
 #         include "Error: -DPERL_SBRK_VIA_MALLOC needs -D(HIDE|EMBED)MYMALLOC"
 #      endif
@@ -1558,7 +1580,9 @@ dump_mstats(char *s)
 /* frequent core dumps within nxzonefreenolock. This sbrk routine put an */
 /* end to the cores */
 
-#      define SYSTEM_ALLOC(a) malloc(a)
+#      ifndef SYSTEM_ALLOC
+#         define SYSTEM_ALLOC(a) malloc(a)
+#      endif
 
 #   endif  /* PERL_SBRK_VIA_MALLOC */
 
