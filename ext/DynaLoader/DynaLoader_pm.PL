@@ -100,17 +100,35 @@ if ($Is_MacOS) {
     push(@dl_library_path, split(/,/, $ENV{LD_LIBRARY_PATH}))
    	if exists $ENV{LD_LIBRARY_PATH};
 } else {
-    push(@dl_library_path, split(/:/, $ENV{$Config::Config{ldlibpthname}}))
-    	if exists      $Config::Config{ldlibpthname}        &&
-                       $Config::Config{ldlibpthname}  ne '' &&
-                exists $ENV{$Config::Config{ldlibpthname}}       ;;
-    push(@dl_library_path, split(/:/, $ENV{$Config::Config{ldlibpthname}}))
-    	if exists      $Config::Config{ldlibpthname}        &&
-                       $Config::Config{ldlibpthname}  ne '' &&
-                exists $ENV{$Config::Config{ldlibpthname}}       ;;
+#     push(@dl_library_path, split(/:/, $ENV{$Config::Config{ldlibpthname}}))
+#     	if exists      $Config::Config{ldlibpthname}        &&
+#                        $Config::Config{ldlibpthname}  ne '' &&
+#                 exists $ENV{$Config::Config{ldlibpthname}}       ;;
+#     push(@dl_library_path, split(/:/, $ENV{$Config::Config{ldlibpthname}}))
+#     	if exists      $Config::Config{ldlibpthname}        &&
+#                        $Config::Config{ldlibpthname}  ne '' &&
+#                 exists $ENV{$Config::Config{ldlibpthname}}       ;;
 # E.g. HP-UX supports both its native SHLIB_PATH *and* LD_LIBRARY_PATH.
-push(@dl_library_path, split(/:/, $ENV{LD_LIBRARY_PATH}))
-    if exists $ENV{LD_LIBRARY_PATH};
+# push(@dl_library_path, split(/:/, $ENV{LD_LIBRARY_PATH}))
+#     if exists $ENV{LD_LIBRARY_PATH};
+EOT
+
+# Make a list of paths to print.
+# HP-UX supports both its native SHLIB_PATH *and* LD_LIBRARY_PATH,
+# but for other OSes no point pushing 'LD_LIBRARY_PATH' twice.
+my @ldlibpthname = 'LD_LIBRARY_PATH';
+if (exists $Config::Config{ldlibpthname}
+    and length $Config::Config{ldlibpthname}
+    and $Config::Config{ldlibpthname} ne 'LD_LIBRARY_PATH') {
+    unshift @ldlibpthname, $Config::Config{ldlibpthname};
+}
+
+foreach (@ldlibpthname) {
+    print OUT "    push(\@dl_library_path, split(/:/, \$ENV{", to_string($_),
+		  "}))\n\tif exists \$ENV{", to_string($_), "};\n";
+}
+
+print OUT <<'EOT';
 }
 
 # No prizes for guessing why we don't say 'bootstrap DynaLoader;' here.
