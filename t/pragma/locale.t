@@ -80,9 +80,9 @@ check_taint       7, "\L$a";
 check_taint       8, lcfirst($a);
 check_taint       9, "\l$a";
 
-check_taint_not  10, sprintf('%e', 123.456);
-check_taint_not  11, sprintf('%f', 123.456);
-check_taint_not  12, sprintf('%g', 123.456);
+check_taint      10, sprintf('%e', 123.456);
+check_taint      11, sprintf('%f', 123.456);
+check_taint      12, sprintf('%g', 123.456);
 check_taint_not  13, sprintf('%d', 123.456);
 check_taint_not  14, sprintf('%x', 123.456);
 
