@@ -339,7 +339,6 @@ xcv_stash	*(SV**)&CvSTASH(bytecode_sv)		svindex
 xcv_start	CvSTART(bytecode_sv)			opindex
 xcv_root	CvROOT(bytecode_sv)			opindex
 xcv_gv		*(SV**)&CvGV(bytecode_sv)		svindex
-xcv_filegv	*(SV**)&CvFILEGV(bytecode_sv)		svindex
 xcv_depth	CvDEPTH(bytecode_sv)			long
 xcv_padlist	*(SV**)&CvPADLIST(bytecode_sv)		svindex
 xcv_outside	*(SV**)&CvOUTSIDE(bytecode_sv)		svindex
@@ -366,7 +365,7 @@ gp_refcnt_add	GvREFCNT(bytecode_sv)			I32		x
 gp_av		*(SV**)&GvAV(bytecode_sv)		svindex
 gp_hv		*(SV**)&GvHV(bytecode_sv)		svindex
 gp_cv		*(SV**)&GvCV(bytecode_sv)		svindex
-gp_filegv	*(SV**)&GvFILEGV(bytecode_sv)		svindex
+gp_file		GvFILE(bytecode_sv)			pvcontents
 gp_io		*(SV**)&GvIOp(bytecode_sv)		svindex
 gp_form		*(SV**)&GvFORM(bytecode_sv)		svindex
 gp_cvgen	GvCVGEN(bytecode_sv)			U32

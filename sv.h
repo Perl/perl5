@@ -276,8 +276,10 @@ struct xpvfm {
     void      (*xcv_xsub)(pTHXo_ CV*);
     ANY		xcv_xsubany;
     GV *	xcv_gv;
-    GV *	xcv_filegv;
-    long	xcv_depth;		/* >= 2 indicates recursive call */
+#if defined(PERL_BINCOMPAT_5005)
+    GV *	xcv_filegv;	/* XXX unused (and deprecated) */
+#endif
+    long	xcv_depth;	/* >= 2 indicates recursive call */
     AV *	xcv_padlist;
     CV *	xcv_outside;
 #ifdef USE_THREADS

@@ -1028,6 +1028,10 @@ U16
 GvLINE(gv)
 	B::GV	gv
 
+char *
+GvFILE(gv)
+	B::GV	gv
+
 B::GV
 GvFILEGV(gv)
 	B::GV	gv
@@ -1147,10 +1151,6 @@ CvROOT(cv)
 
 B::GV
 CvGV(cv)
-	B::CV	cv
-
-B::GV
-CvFILEGV(cv)
 	B::CV	cv
 
 long

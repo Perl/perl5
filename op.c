@@ -3941,7 +3941,6 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
     MUTEX_INIT(CvMUTEXP(cv));
     CvOWNER(cv)		= 0;
 #endif /* USE_THREADS */
-    CvFILEGV(cv)	= CvFILEGV(proto);
     CvGV(cv)		= (GV*)SvREFCNT_inc(CvGV(proto));
     CvSTASH(cv)		= CvSTASH(proto);
     CvROOT(cv)		= CvROOT(proto);
@@ -4267,7 +4266,6 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	}
     }
     CvGV(cv) = (GV*)SvREFCNT_inc(gv);
-    CvFILEGV(cv) = PL_curcop->cop_filegv;
     CvSTASH(cv) = PL_curstash;
 #ifdef USE_THREADS
     CvOWNER(cv) = 0;
@@ -4502,7 +4500,7 @@ Perl_newXS(pTHX_ char *name, XSUBADDR_t subaddr, char *filename)
     MUTEX_INIT(CvMUTEXP(cv));
     CvOWNER(cv) = 0;
 #endif /* USE_THREADS */
-    CvFILEGV(cv) = gv_fetchfile(filename);
+    (void)gv_fetchfile(filename);
     CvXSUB(cv) = subaddr;
 
     if (name) {
@@ -4566,7 +4564,6 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
     cv = PL_compcv;
     GvFORM(gv) = cv;
     CvGV(cv) = (GV*)SvREFCNT_inc(gv);
-    CvFILEGV(cv) = PL_curcop->cop_filegv;
 
     for (ix = AvFILLp(PL_comppad); ix > 0; ix--) {
 	if (!SvPADMY(PL_curpad[ix]) && !SvIMMORTAL(PL_curpad[ix]))

@@ -364,7 +364,6 @@ Looks like this:
 	  XSUB = 0x0
 	  XSUBANY = 0
 	  GVGV::GV = 0x1d44e8   "MY" :: "top_targets"
-	  FILEGV = 0x1fab74     "_<(eval 5)"
 	  DEPTH = 0
 	  PADLIST = 0x1c9338
 

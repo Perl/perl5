@@ -610,7 +610,7 @@ sub B::CV::save {
 	my $stashname = $egv->STASH->NAME;
          if ($cvname eq "bootstrap")
           {                                   
-           my $file = $cv->FILEGV->SV->PV;    
+           my $file = $gv->FILE;    
            $decl->add("/* bootstrap $file */"); 
            warn "Bootstrap $stashname $file\n";
            $xsub{$stashname}='Dynamic'; 
@@ -700,13 +700,6 @@ sub B::CV::save {
 	warn sprintf("done saving GV 0x%x for CV 0x%x\n",
 		     $$gv, $$cv) if $debug_cv;
     }
-    my $filegv = $cv->FILEGV;
-    if ($$filegv) {
-	$filegv->save;
-	$init->add(sprintf("CvFILEGV(s\\_%x) = s\\_%x;", $$cv, $$filegv));
-	warn sprintf("done saving FILEGV 0x%x for CV 0x%x\n",
-		     $$filegv, $$cv) if $debug_cv;
-    }
     my $stash = $cv->STASH;
     if ($$stash) {
 	$stash->save;
@@ -793,12 +786,8 @@ sub B::GV::save {
 #              warn "GV::save &$name\n"; # debug
 	    } 
         }     
-	my $gvfilegv = $gv->FILEGV;
-	if ($$gvfilegv) {
-	    $gvfilegv->save;
-	    $init->add(sprintf("GvFILEGV($sym) = (GV*)s\\_%x;",$$gvfilegv));
-#	    warn "GV::save GvFILEGV(*$name)\n"; # debug
-	}
+	$init->add(sprintf("GvFILE($sym) = %s;", cstring($gv->FILE)));
+#	warn "GV::save GvFILE(*$name)\n"; # debug
 	my $gvform = $gv->FORM;
 	if ($$gvform) {
 	    $gvform->save;
@@ -1022,8 +1011,10 @@ typedef struct {
     void      (*xcv_xsub) (CV*);
     void *	xcv_xsubany;
     GV *	xcv_gv;
-    GV *	xcv_filegv;
-    long	xcv_depth;		/* >= 2 indicates recursive call */
+#if defined(PERL_BINCOMPAT_5005)
+    GV *	xcv_filegv;	/* XXX unused (and deprecated) */
+#endif
+    long	xcv_depth;	/* >= 2 indicates recursive call */
     AV *	xcv_padlist;
     CV *	xcv_outside;
 #ifdef USE_THREADS

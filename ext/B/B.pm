@@ -442,6 +442,8 @@ C<REFCNT> (corresponding to the C function C<SvREFCNT>).
 
 =item LINE
 
+=item FILE
+
 =item FILEGV
 
 =item GvREFCNT
@@ -509,8 +511,6 @@ C<REFCNT> (corresponding to the C function C<SvREFCNT>).
 =item ROOT
 
 =item GV
-
-=item FILEGV
 
 =item DEPTH
 

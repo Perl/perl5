@@ -470,10 +470,11 @@ sub B::GV::bytecode {
     my $egv = $gv->EGV;
     my $egvix = $egv->objix;
     ldsv($ix);
-    printf <<"EOT", $gv->FLAGS, $gv->GvFLAGS, $gv->LINE;
+    printf <<"EOT", $gv->FLAGS, $gv->GvFLAGS, $gv->LINE, cstring($gv->FILE);
 sv_flags 0x%x
 xgv_flags 0x%x
 gp_line %d
+gp_file %s
 EOT
     my $refcnt = $gv->REFCNT;
     printf("sv_refcnt_add %d\n", $refcnt - 1) if $refcnt > 1;
@@ -484,7 +485,7 @@ EOT
     } else {
 	if ($gvname !~ /^([^A-Za-z]|STDIN|STDOUT|STDERR|ARGV|SIG|ENV)$/) {
 	    my $i;
-	    my @subfield_names = qw(SV AV HV CV FILEGV FORM IO);
+	    my @subfield_names = qw(SV AV HV CV FORM IO);
 	    my @subfields = map($gv->$_(), @subfield_names);
 	    my @ixes = map($_->objix, @subfields);
 	    # Reset sv register for $gv
@@ -567,7 +568,7 @@ sub B::CV::bytecode {
     my $ix = $cv->objix;
     $cv->B::PVMG::bytecode;
     my $i;
-    my @subfield_names = qw(ROOT START STASH GV FILEGV PADLIST OUTSIDE);
+    my @subfield_names = qw(ROOT START STASH GV PADLIST OUTSIDE);
     my @subfields = map($cv->$_(), @subfield_names);
     my @ixes = map($_->objix, @subfields);
     # Save OP tree from CvROOT (first element of @subfields)
