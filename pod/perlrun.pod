@@ -270,7 +270,7 @@ An alternate delimiter may be specified using B<-F>.
 The C<-C> flag controls some Unicode of the Perl Unicode features.
 
 As of 5.8.1, the C<-C> can be followed either by a number or a list
-of option letters.  The letters, their numeric values, and affects
+of option letters.  The letters, their numeric values, and effects
 are as follows; listing the letters is equal to summing the numbers.
 
     I     1    STDIN is assumed to be in UTF-8
