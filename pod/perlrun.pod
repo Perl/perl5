@@ -876,7 +876,7 @@ variable are summarised below. For more details see L<PerlIO>.
 =item :bytes
 
 Turns I<off> the C<:utf8> flag for the layer below.
-Unlikey to be useful in global PERLIO environment variable.
+Unlikely to be useful in global PERLIO environment variable.
 
 =item :crlf
 
@@ -963,7 +963,7 @@ implementation.
 
 On Win32 the default in this release is "unix crlf". Win32's "stdio"
 has a number of bugs/mis-features for perl IO which are somewhat
-C compiler verndor/version dependant. Using our own C<crlf> layer as
+C compiler vendor/version dependent. Using our own C<crlf> layer as
 the buffer avoids those issues and makes things more uniform.
 The C<crlf> layer provides CRLF to/from "\n" conversion as well as
 buffering.
