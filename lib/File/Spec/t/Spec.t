@@ -7,6 +7,7 @@ use File::Spec @File::Spec::EXPORT_OK ;
 
 require File::Spec::Unix ;
 require File::Spec::Win32 ;
+require Cwd;
 
 eval {
    require VMS::Filespec ;
@@ -226,14 +227,14 @@ if ($^O eq 'MacOS') {
 [ "Win32->canonpath('/..\\')",          '\\'                  ],
 [ "Win32->can('_cwd')",                 '/CODE/'              ],
 
-# FakeWin32 subclass (see below) just sets CWD to C:\one\two
+# FakeWin32 subclass (see below) just sets CWD to C:\one\two and getdcwd('D') to D:\alpha\beta
 
 [ "FakeWin32->abs2rel('/t1/t2/t3','/t1/t2/t3')",     ''                       ],
 [ "FakeWin32->abs2rel('/t1/t2/t4','/t1/t2/t3')",     '..\\t4'                 ],
 [ "FakeWin32->abs2rel('/t1/t2','/t1/t2/t3')",        '..'                     ],
 [ "FakeWin32->abs2rel('/t1/t2/t3/t4','/t1/t2/t3')",  't4'                     ],
 [ "FakeWin32->abs2rel('/t4/t5/t6','/t1/t2/t3')",     '..\\..\\..\\t4\\t5\\t6' ],
-[ "FakeWin32->abs2rel('../t4','/t1/t2/t3')",         '..\\..\\..\\one\\t4'    ],
+[ "FakeWin32->abs2rel('../t4','/t1/t2/t3')",         '..\\..\\..\\one\\t4'    ],  # Uses _cwd()
 [ "FakeWin32->abs2rel('/','/t1/t2/t3')",             '..\\..\\..'             ],
 [ "FakeWin32->abs2rel('///','/t1/t2/t3')",           '..\\..\\..'             ],
 [ "FakeWin32->abs2rel('/.','/t1/t2/t3')",            '..\\..\\..'             ],
@@ -558,11 +559,37 @@ if ($^O eq 'MacOS') {
 
 ) ;
 
+if ($^O eq 'MSWin32') {
+  push @tests, [ "FakeWin32->rel2abs('D:foo.txt')", 'D:\\alpha\\beta\\foo.txt' ];
+}
+
+
 plan tests => scalar @tests;
 
 {
-    @File::Spec::FakeWin32::ISA = qw(File::Spec::Win32);
-    sub File::Spec::FakeWin32::_cwd { 'C:\\one\\two' }
+    package File::Spec::FakeWin32;
+    use vars qw(@ISA);
+    @ISA = qw(File::Spec::Win32);
+
+    sub _cwd { 'C:\\one\\two' }
+
+    # Some funky stuff to override Cwd::getdcwd() for testing purposes,
+    # in the limited scope of the rel2abs() method.
+    if ($Cwd::VERSION gt '2.17') {
+	local $^W;
+	*rel2abs = sub {
+	    my $self = shift;
+	    local $^W;
+	    local *Cwd::getdcwd = sub {
+	      return 'D:\alpha\beta' if $_[0] eq 'D:';
+	      return 'C:\one\two'    if $_[0] eq 'C:';
+	      return;
+	    };
+	    *Cwd::getdcwd = *Cwd::getdcwd; # Avoid a 'used only once' warning
+	    return $self->SUPER::rel2abs(@_);
+	};
+	*rel2abs = *rel2abs; # Avoid a 'used only once' warning
+    }
 }
 
 

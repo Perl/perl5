@@ -257,6 +257,49 @@ ok ($class->new(-1)->is_one('-'),1);
 
 ok ($class->new(1)->fdiv('0.5')->bsstr(),'2e+0');
 
+###############################################################################
+# [perl #30609] bug with $x -= $x not beeing 0, but 2*$x
+
+$x = $class->new(3);  $x -= $x; ok ($x, 0);
+$x = $class->new(-3); $x -= $x; ok ($x, 0);
+$x = $class->new(3);  $x += $x; ok ($x, 6);
+$x = $class->new(-3); $x += $x; ok ($x, -6);
+
+$x = $class->new('NaN'); $x -= $x; ok ($x->is_nan(), 1);
+$x = $class->new('inf'); $x -= $x; ok ($x->is_nan(), 1);
+$x = $class->new('-inf'); $x -= $x; ok ($x->is_nan(), 1);
+
+$x = $class->new('NaN'); $x += $x; ok ($x->is_nan(), 1);
+$x = $class->new('inf'); $x += $x; ok ($x->is_inf(), 1);
+$x = $class->new('-inf'); $x += $x; ok ($x->is_inf('-'), 1);
+
+$x = $class->new('3.14');  $x -= $x; ok ($x, 0);
+$x = $class->new('-3.14'); $x -= $x; ok ($x, 0);
+$x = $class->new('3.14');  $x += $x; ok ($x, '6.28');
+$x = $class->new('-3.14'); $x += $x; ok ($x, '-6.28');
+
+$x = $class->new('3.14');  $x *= $x; ok ($x, '9.8596');
+$x = $class->new('-3.14'); $x *= $x; ok ($x, '9.8596');
+$x = $class->new('3.14');  $x /= $x; ok ($x, '1');
+$x = $class->new('-3.14'); $x /= $x; ok ($x, '1');
+$x = $class->new('3.14');  $x %= $x; ok ($x, '0');
+$x = $class->new('-3.14'); $x %= $x; ok ($x, '0');
+
+###############################################################################
+# the following two were reported by "kenny" via hotmail.com:
+
+#perl -MMath::BigFloat -wle 'print Math::BigFloat->new(0)->bpow(".1")'
+#Use of uninitialized value in numeric le (<=) at BigFloat.pm line 1851.
+
+$x = $class->new(0); $y = $class->new('0.1');
+ok ($x ** $y, 0, 'no warnings and zero result');
+
+#perl -MMath::BigFloat -lwe 'print Math::BigFloat->new(".222222222222222222222222222222222222222222")->bceil()'
+#Use of uninitialized value in numeric le (<=) at BigFloat.pm line 1851.
+
+$x = $class->new(".222222222222222222222222222222222222222222"); 
+ok ($x->bceil(), 1, 'no warnings and one as result');
+
 1; # all done
 
 ###############################################################################
