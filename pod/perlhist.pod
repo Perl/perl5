@@ -316,6 +316,7 @@ the strings?).
           5.005_53      1998-Oct-31
           5.005_54      1998-Nov-30
           5.005_55      1999-Feb-16
+          5.005_56      1999-Mar-01
 
 =head2 SELECTED RELEASE SIZES
 
