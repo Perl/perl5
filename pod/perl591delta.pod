@@ -250,6 +250,9 @@ On some configurations on AIX 5, one test in F<lib/Time/Local.t> fails.
 When configured with long doubles, perl may fail tests 224-236 in
 F<t/op/pow.t> on the same platform.
 
+For threaded builds, F<ext/threads/shared/t/wait.t> has been reported to
+fail some tests on HP-UX 10.20.
+
 =head1 To-do for perl 5.10.0
 
 This is a non-exhaustive, non-ordered, non-contractual and non-definitive
@@ -288,7 +291,7 @@ C<make test.taintwarn>).
 
 Make threads more robust.
 
-Make C<no 6> and C<no v6> work.
+Make C<no 6> and C<no v6> work (opposite of C<use 5.005>, etc.).
 
 A test suite for the B module would be nice.
 
