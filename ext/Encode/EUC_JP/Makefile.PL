@@ -2,10 +2,13 @@ use 5.7.2;
 use strict;
 use ExtUtils::MakeMaker;
 
-my %tables = (EUC_JP  => ['euc-jp.ucm',
-              # 'euc-kr.ucm', 'euc-cn.ucm'
-              ],
-	      );
+my %tables = (EUC_JP  => [
+                'euc-jp.ucm',
+#               'jis0201.enc',
+#               'jis0212.enc',
+#               'jis0208.enc',
+#               'shiftjis.enc',
+              ]);
 
 
 WriteMakefile(
@@ -39,7 +42,7 @@ sub post_initialize
     my %xs;
     foreach my $table (keys %tables) {
 	$xs{"$table.xs"} = "$table.c";
-	foreach my $ext (qw($(OBJ_EXT) .xs .c .h .def .fnm)) {
+	foreach my $ext (qw($(OBJ_EXT) .xs .c .h _def.h .fnm)) {
 	    push (@files,$table.$ext);
 	}
     }
@@ -52,7 +55,7 @@ sub postamble
 {
     my $self = shift;
     my $dir  = $self->catdir($self->updir,'Encode');
-    my $str  = "# Encode\$(OBJ_EXT) depends on .h and .def files not .c files - but all written by compile\n";
+    my $str  = "# Encode\$(OBJ_EXT) depends on .h and _def.h files not .c files - but all written by compile\n";
     $str  .= 'Encode$(OBJ_EXT) :';
     foreach my $table (keys %tables)
     {
