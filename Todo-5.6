@@ -48,6 +48,7 @@ Configure
     POSIX 1003.1 1996 Edition support--realtime stuff:
 	POSIX semaphores, message queues, shared memory, realtime clocks,
 	timers, signals (the metaconfig units mostly already exist for these)
+    better shadow password support: see pp_sys.c:pp_gpwent()
     UNIX98 support: reader-writer locks, realtime/asynchronous IO
     IPv6 support: see RFC2292, RFC2553
 
@@ -67,15 +68,16 @@ Locales
     figure out how to support Unicode locales
 	suggestion: integrate the IBM Classes for Unicode (ICU)
 	http://oss.software.ibm.com/developerworks/opensource/icu/project/
-	and check out also the Locale Converter:
+		ICU is "portable, open-source Unicode library with:
+		charset-independent locales (with multiple locales
+		simultaneously supported in same thread; character
+		conversions; formatting/parsing for numbers, currencies,
+		date/time and messages; message catalogs (resources);
+		transliteration, collation, normalization, and text
+		boundaries (grapheme, word, line-break))".
+	Check out also the Locale Converter:
 	http://alphaworks.ibm.com/tech/localeconverter
-    ICU is "portable, open-source Unicode library with:
-    charset-independent locales (with multiple locales simultaneously
-    supported in same thread; character conversions; formatting/parsing
-    for numbers, currencies, date/time and messages; message catalogs
-    (resources) ; transliteration, collation, normalization, and text
-    boundaries (grapheme, word, line-break))".
-    There is also 'iconv', either from XPG4 or GNU (glibc).
+    There is also the iconv interface, either from XPG4 or GNU (glibc).
     iconv is about character set conversions.
     Either ICU or iconv would be valuable to get integrated
     into Perl, Configure already probes for libiconv and <iconv.h>. 
@@ -101,6 +103,9 @@ Regexen
 	this is also a part of the Unicode 3.0:
 	http://www.unicode.org/unicode/uni2book/u2.html
 	executive summary: there are several different levels of 'equivalence'
+   trie optimization: factor out common suffixes (and prefixes?)
+	from |-alternating groups (both for exact strings and character
+	classes, use lookaheads?)
    approximate matching
 
 Security
