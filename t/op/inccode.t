@@ -10,7 +10,7 @@ BEGIN {
 use File::Spec;
 
 require "test.pl";
-plan(tests => 43);
+plan(tests => 44);
 
 my @tempfiles = ();
 
@@ -172,3 +172,11 @@ ok( ! ref $INC{'Toto.pm'},         q/  val Toto.pm isn't a ref in %INC/ );
 is( $INC{'Toto.pm'}, 'xyz',	   '  val Toto.pm is correct in %INC' );
 
 pop @INC;
+
+my $filename = $^O eq 'MacOS' ? ':Foo:Foo.pm' : './Foo.pm';
+{
+    local @INC;
+    @INC = sub { $filename = 'seen'; return undef; };
+    eval { require $filename; };
+    is( $filename, 'seen', 'the coderef sees fully-qualified pathnames' );
+}
