@@ -26,7 +26,7 @@ sub POP
  if ($newsize >= 0) 
   {
    $val = $obj->FETCH($newsize);
-   $obj->SETSIZE($newsize);
+   $obj->STORESIZE($newsize);
   }
  $val;
 }          
