@@ -2155,7 +2155,11 @@ sv_compile_2op(SV *sv, OP** startop, char *code, AV** avp)
     safestr = savepv(tmpbuf);
     SAVEDELETE(defstash, safestr, strlen(safestr));
     SAVEI32(hints);
+#ifdef OP_IN_REGISTER
+    opsave = op;
+#else
     SAVEPPTR(op);
+#endif
     hints = 0;
 
     op = &dummy;
@@ -2172,6 +2176,9 @@ sv_compile_2op(SV *sv, OP** startop, char *code, AV** avp)
     lex_end();
     *avp = (AV*)SvREFCNT_inc(comppad);
     LEAVE;
+#ifdef OP_IN_REGISTER
+    op = opsave;
+#endif
     return rop;
 }
 

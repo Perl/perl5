@@ -46,7 +46,11 @@
 #  ifdef __GNUC__
 #    define stringify_immed(s) #s
 #    define stringify(s) stringify_immed(s)
+#ifdef EMBED
+register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
+#else
 register struct op *op asm(stringify(OP_IN_REGISTER));
+#endif
 #  endif
 #endif
 
