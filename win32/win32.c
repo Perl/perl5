@@ -91,7 +91,7 @@ static DWORD		os_id(void);
 static void		get_shell(void);
 static long		tokenize(char *str, char **dest, char ***destv);
 	int		do_spawn2(char *cmd, int exectype);
-static BOOL		has_redirection(char *ptr);
+static BOOL		has_shell_metachars(char *ptr);
 static long		filetime_to_clock(PFILETIME ft);
 static BOOL		filetime_from_time(PFILETIME ft, time_t t);
 static char *		get_emd_part(char *leading, char *trailing, ...);
@@ -289,17 +289,20 @@ win32_get_sitelib(char *pl)
 
 
 static BOOL
-has_redirection(char *ptr)
+has_shell_metachars(char *ptr)
 {
     int inquote = 0;
     char quote = '\0';
 
     /*
      * Scan string looking for redirection (< or >) or pipe
-     * characters (|) that are not in a quoted string
+     * characters (|) that are not in a quoted string.
+     * Shell variable interpolation (%VAR%) can also happen inside strings.
      */
     while (*ptr) {
 	switch(*ptr) {
+	case '%':
+	    return TRUE;
 	case '\'':
 	case '\"':
 	    if (inquote) {
@@ -521,7 +524,7 @@ do_spawn2(char *cmd, int exectype)
 
     /* Save an extra exec if possible. See if there are shell
      * metacharacters in it */
-    if (!has_redirection(cmd)) {
+    if (!has_shell_metachars(cmd)) {
 	New(1301,argv, strlen(cmd) / 2 + 2, char*);
 	New(1302,cmd2, strlen(cmd) + 1, char);
 	strcpy(cmd2, cmd);
