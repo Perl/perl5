@@ -42,7 +42,7 @@ update is 2.0.
 
 The original version of PA-RISC, HP no longer sells any system with this chip.
 
-The following systems contain PA-RISC 1.0 chips:
+The following systems contained PA-RISC 1.0 chips:
 
     600, 635, 645, 808, 815, 822, 825, 832, 834, 835, 840, 842, 845, 850, 852,
     855, 860, 865, 870, 890
@@ -94,18 +94,39 @@ Perl to to also run on a PA-RISC 1.1, the compiler flags +DAportable and
 +DS32 should be used.
 
 It is no longer possible to compile PA-RISC 1.0 executables on either
-the PA-RISC 1.1 or 2.0 platforms.
+the PA-RISC 1.1 or 2.0 platforms.  The command-line flags are accepted,
+but the resulting executable will not run when transferred to a PA-RISC
+1.0 system.
+
+=head2 Itanium Processor Family
+
+HP-UX also runs on the new Itanium processor.  This requires the use
+of a different version of HP-UX (currently 11.20), and with the exception
+of a few differences detailed below and in later sections, Perl should
+compile with no problems.
+
+Although PA-RISC binaries can run on Itanium systems, you should not
+attempt to use a PA-RISC version of Perl on an Itanium system.  This is
+because shared libraries created on an Itanium system cannot be loaded
+while running a PA-RISC executable.
 
 =head2 Building Dynamic Extensions on HP-UX
 
 HP-UX supports dynamically loadable libraries (shared libraries).
-Shared libraries end with the suffix .sl.
+Shared libraries end with the suffix .sl.  On Itanium systems,
+they end with the suffix .so.
 
 Shared libraries created on a platform using a particular PA-RISC
 version are not usable on platforms using an earlier PA-RISC version by
 default.  However, this backwards compatibility may be enabled using the
 same +DAportable compiler flag (with the same PA-RISC 1.0 caveat
 mentioned above).
+
+Shared libraries created on an Itanium platform cannot be loaded on
+a PA-RISC platform.  Shared libraries created on a PA-RISC platform
+can only be loaded on an Itanium platform if it is a PA-RISC executable
+that is attempting to load the PA-RISC library.  A PA-RISC shared
+library cannot be loaded into an Itanium executable nor vice-versa.
 
 To create a shared library, the following steps must be performed:
 
@@ -177,7 +198,13 @@ the DB_File module, which requires SleepyCat's libdb.sl:
     # make test
     # make install
 
-It is no longer possible to link PA-RISC 1.0 shared libraries.
+It is no longer possible to link PA-RISC 1.0 shared libraries (even
+though the command-line flags are still present).
+
+PA-RISC and Itanium object files are not interchangeable.  Although
+you may be able to use ar to create an archive library of PA-RISC
+object files on an Itanium system, you cannot link against it using
+an Itanium link editor.
 
 =head2 The HP ANSI C Compiler
 
@@ -304,6 +331,23 @@ like for example C<"!">:
 
     s!foo!!;
 
+=head2 Kernel parameters (maxdsiz)
+
+By default, HP-UX comes configured with a maximum data segment size of
+64MB.  This is too small to correctly compile Perl with the maximum
+optimization levels.  You can increase the size of the maxdsiz kernel
+parameter through the use of SAM.
+
+When using the GUI version of SAM, click on the Kernel Configuration
+icon, then the Configurable Parameters icon.  Scroll down and select
+the maxdsiz line.  From the Actions menu, select the Modify Configurable
+Parameter item.  Insert the new formula into the Formula/Value box.
+Then follow the instructions to rebuild your kernel and reboot your
+system.
+
+In general, a value of 256MB (or "256*1024*1024") is sufficient for
+Perl to compile at maximum optimization.
+
 =head1 AUTHOR
 
 Jeff Okamoto <okamoto@corp.hp.com>
@@ -312,6 +356,6 @@ With much assistance regarding shared libraries from Marc Sabatella.
 
 =head1 DATE
 
-Version 0.6.2: 2001-02-02
+Version 0.6.3: 2001-05-16
 
 =cut
