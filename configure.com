@@ -880,7 +880,7 @@ $   config_symbols0 ="|archlib|archlibexp|bin|binexp|builddir|cf_email|config_sh
 $   config_symbols1 ="|installprivlib|installscript|installsitearch|installsitelib|most|oldarchlib|oldarchlibexp|osname|pager|perl_symbol|perl_verb|"
 $   config_symbols2 ="|prefix|privlib|privlibexp|scriptdir|sitearch|sitearchexp|sitebin|sitelib|sitelib_stem|sitelibexp|try_cxx|use64bitall|use64bitint|"
 $   config_symbols3 ="|usecasesensitive|usedefaulttypes|usedevel|useieee|useithreads|usemultiplicity|usemymalloc|usedebugging_perl|useperlio|usesecurelog|"
-$   config_symbols4 ="|usethreads|usevmsdebug|usefaststdio|"
+$   config_symbols4 ="|usethreads|usevmsdebug|usefaststdio|usemallocwrap|"
 $!  
 $   open/read CONFIG 'config_sh'
 $   rd_conf_loop:
@@ -2506,6 +2506,23 @@ $ GOSUB myread
 $ d_alwdeftype = ans
 $ usedefaulttypes = "undef"
 $ if (d_alwdeftype) then usedefaulttypes = "define"
+$!
+$! determine whether to use malloc wrapping
+$ echo ""
+$ IF .NOT. usedevel .AND. usedevel .NES. "define"
+$ THEN bool_dflt = "n"
+$ ELSE bool_dflt = "y"
+$ ENDIF
+$ IF F$TYPE(usemallocwrap) .nes. ""
+$ then
+$   if usemallocwrap .or. usemallocwrap .eqs. "define" then bool_dflt = "y"
+$ endif
+$ rp = "Do you wish to wrap malloc calls to protect against potential overflows? [''bool_dflt'] "
+$ GOSUB myread
+$ IF ans
+$ THEN usemallocwrap = "define"
+$ ELSE usemallocwrap = "undef"
+$ ENDIF
 $!
 $! Ask if they want to use perl's memory allocator
 $ echo ""
@@ -5766,6 +5783,7 @@ $ WC "lseektype='int'"
 $ WC "mab='" + "'"
 $ WC "make='" + make + "'"
 $ WC "malloctype='void *'"
+$ WC "usemallocwrap='" + usemallocwrap + "'"
 $ WC "man1ext='rno'"
 $ WC "man3ext='rno'"
 $ WC "mmaptype='void *'"
