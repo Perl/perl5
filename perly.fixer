@@ -19,7 +19,7 @@
 #  
 
 gnupatch=patch
-. config.sh
+. ./config.sh
 
 input=$1
 output=$2
@@ -52,6 +52,7 @@ if grep 'yaccpar 1.8 (Berkeley)' $input >/dev/null 2>&1; then
 	    -e 's/^yynewerror:$//' \
 	    -e 's/^    goto yynewerror;//' \
 	    -e 's|^static char yysccsid\(.*\)|/* static char yysccsid\1 */|' \
+	    -e 's|deprecate(|deprecate_old(|' \
 	    < $output > $tmp && mv -f $tmp $output || exit 1
 	rm -rf $input
 	echo "If you need to debug perly.c, you need to fix up the #line"
@@ -72,6 +73,7 @@ elif grep 'yaccpar	1.9 (Berkeley)' $input >/dev/null 2>&1; then
 	    -e 's/^yynewerror:$//' \
 	    -e 's/^    goto yynewerror;//' \
 	    -e 's|^static char yysccsid\(.*\)|/* static char yysccsid\1 */|' \
+	    -e 's|deprecate(|deprecate_old(|' \
 	    < $output > $tmp && mv -f $tmp $output || exit 1
 	rm -rf $input
 	echo "If you need to debug perly.c, you need to fix up the #line"
