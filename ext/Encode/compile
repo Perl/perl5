@@ -6,6 +6,7 @@ BEGIN {
 use strict;
 use Getopt::Std;
 my @orig_ARGV = @ARGV;
+my $perforce  = '$Id$';
 
 # These may get re-ordered.
 # RAW is a do_now as inserted by &enter
@@ -120,12 +121,13 @@ eval "\@ARGV = map(glob(\$_),\@ARGV)" if ($^O eq 'MSWin32');
 my %opt;
 # I think these are:
 # -Q to disable the duplicate codepoint test
+# -S make mapping errors fatal
 # -q to remove comments written to output files
 # -O to enable the (brute force) substring optimiser
 # -o <output> to specify the output file name (else it's the first arg)
 # -f <inlist> to give a file with a list of input files (else use the args)
 # -n <name> to name the encoding (else use the basename of the input file.
-getopts('QqOo:f:n:',\%opt);
+getopts('SQqOo:f:n:',\%opt);
 
 # This really should go first, else the die here causes empty (non-erroneous)
 # output files to be written.
@@ -416,6 +418,8 @@ sub compile_ucm
  $encoding{$name} = [$e2u,$u2e,$erep,$min_el,$max_el];
 }
 
+
+
 sub compile_enc
 {
  my ($fh,$name) = @_;
@@ -441,6 +445,7 @@ sub compile_enc
   my $v = hex($def);
   $rep = &$type_func($v & 0xFF, ($v >> 8) & 0xffe);
  }
+ my $errors;
  my $seen;
  # use -Q to silence the seen test. Makefile.PL uses this by default.
  $seen = {} unless $opt{Q};
@@ -455,8 +460,9 @@ sub compile_enc
     {
      # So why is it 1% faster to leave the my here?
      my $line = <$fh>;
-     die "Line should be exactly 65 characters long including newline"
-       unless length ($line) == 65;
+     $line =~ s/\r\n$/\n/;
+     die "$.:${line}Line should be exactly 65 characters long including
+     newline (".length($line).")" unless length ($line) == 65;
      # Split line into groups of 4 hex digits, convert groups to ints
      # This takes 65.35		
      # map {hex $_} $line =~ /(....)/g
@@ -483,6 +489,7 @@ sub compile_enc
              {
                warn sprintf("U%04X is %02X%02X and %04X\n",
                             $val,$page,$ch,$seen->{$uch});
+               $errors++;
              }
            else
              {
@@ -505,6 +512,7 @@ sub compile_enc
   } while --$pages;
  die "\$min_el=$min_el, \$max_el=$max_el - seems we read no lines"
    if $min_el > $max_el;
+ die "$errors mapping conflicts\n" if ($errors && $opt{'S'});
  $encoding{$name} = [$e2u,$u2e,$rep,$min_el,$max_el];
 }
 
