@@ -85,7 +85,7 @@ modify_SV_attributes(pTHXo_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 		    }
 		    break;
 		case 's':
-		    if (strEQ(name, "shared")) {
+      if (strEQ(name, "unique")) {
 			if (negated)
 			    GvSHARED_off(CvGV((CV*)sv));
 			else
@@ -102,7 +102,7 @@ modify_SV_attributes(pTHXo_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
               case 6:
 		switch (*name) {
                   case 's':
-		    if (strEQ(name, "shared")) {
+      if (strEQ(name, "unique")) {
                         /* toke.c has already marked as GvSHARED */
                         continue;
                     }
@@ -190,7 +190,7 @@ usage:
 	if (cvflags & CVf_METHOD)
 	    XPUSHs(sv_2mortal(newSVpvn("method", 6)));
         if (GvSHARED(CvGV((CV*)sv)))
-	    XPUSHs(sv_2mortal(newSVpvn("shared", 6)));
+     XPUSHs(sv_2mortal(newSVpvn("unique", 6)));
 	break;
     default:
 	break;

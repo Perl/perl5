@@ -3091,7 +3091,7 @@ Perl_yylex(pTHX)
 		    else if (!PL_in_my && len == 6 && strnEQ(s, "method", len))
 			CvMETHOD_on(PL_compcv);
 #ifdef USE_ITHREADS
-		    else if (PL_in_my == KEY_our && len == 6 && strnEQ(s, "shared", len))
+      else if (PL_in_my == KEY_our && len == 6 && strnEQ(s, "unique", len))
 			GvSHARED_on(cGVOPx_gv(yylval.opval));
 #endif
 		    /* After we've set the flags, it could be argued that
