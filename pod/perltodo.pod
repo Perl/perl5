@@ -189,11 +189,6 @@ Have a way to introduce user-defined opcodes without the subroutine call
 overhead of an XSUB; the user should be able to create PP code. Simon
 Cozens has some ideas on this.
 
-=head2 spawnvp() on Win32
-
-Win32 has problems spawning processes, particularly when the arguments
-to the child process contain spaces, quotes or tab characters.
-
 =head2 DLL Versioning
 
 Windows needs a way to know what version of a XS or C<libperl> DLL it's
