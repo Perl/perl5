@@ -199,6 +199,8 @@ no_op(char *what, char *s)
 		t - PL_oldoldbufptr, PL_oldoldbufptr);
 
     }
+    else if (s <= oldbp)
+	warn("\t(Missing operator before end of line?)\n");
     else
 	warn("\t(Missing operator before %.*s?)\n", s - oldbp, oldbp);
     PL_bufptr = oldbp;
