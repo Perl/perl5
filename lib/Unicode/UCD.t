@@ -1,14 +1,14 @@
-use Unicode::UCD;
-
-use strict;
-
 BEGIN {
     if (ord("A") == 193) {
 	print "1..0 # Skip: EBCDIC\n";
 	exit 0;
     }
+    chdir 't' if -d 't';
+    @INC = '../lib';
 }
 
+use strict;
+use Unicode::UCD;
 use Test;
 
 BEGIN { plan tests => 162 };
