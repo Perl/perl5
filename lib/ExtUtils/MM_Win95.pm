@@ -40,3 +40,5 @@ sub xs_o {
 	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.c
 	';
 }
+
+1;
