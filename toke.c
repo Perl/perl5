@@ -406,8 +406,6 @@ register char *s;
 		PerlIO_clearerr(rsfp);
 	    else
 		(void)PerlIO_close(rsfp);
-	    if (e_fp == rsfp)
-		e_fp = Nullfp;
 	    rsfp = Nullfp;
 	    return s;
 	}
@@ -1069,7 +1067,7 @@ register char *s;
     else {
 	int weight = 2;		/* let's weigh the evidence */
 	char seen[256];
-	unsigned char un_char = 0, last_un_char;
+	unsigned char un_char = 255, last_un_char;
 	char *send = strchr(s,']');
 	char tmpbuf[sizeof tokenbuf * 4];
 
@@ -1135,6 +1133,8 @@ register char *s;
 		    weight += 30;
 		if (strchr("zZ79~",s[1]))
 		    weight += 30;
+		if (last_un_char == 255 && (isDIGIT(s[1]) || s[1] == '$'))
+		    weight -= 5;	/* cope with negative subscript */
 		break;
 	    default:
 		if (!isALNUM(last_un_char) && !strchr("$@&",last_un_char) &&
@@ -1764,8 +1764,6 @@ yylex()
 			PerlIO_clearerr(rsfp);
 		    else
 			(void)PerlIO_close(rsfp);
-		    if (e_fp == rsfp)
-			e_fp = Nullfp;
 		    rsfp = Nullfp;
 		}
 		if (!in_eval && (minus_n || minus_p)) {
