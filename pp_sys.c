@@ -5183,7 +5183,7 @@ PP(pp_gpwent)
      * char *(getespw*(...).ufld.fd_encrypt)
      * Mention HAS_GETESPWNAM here so that Configure probes for it.
      *
-     * <userpw.h> /* AIX */
+     * <userpw.h> (AIX)
      * struct userpw *getuserpw();
      * The password is in
      * char *(getuserpw(...)).spw_upw_passwd
