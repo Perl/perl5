@@ -206,21 +206,22 @@ D_CRYPT		= define
 CRYPT_FLAG	= -DHAVE_DES_FCRYPT
 !ENDIF
 
+!IF "$(USE_IMP_SYS)" == "define"
+PERL_MALLOC	= undef
+DEBUG_MSTATS	= undef
+!ENDIF
+
 !IF "$(PERL_MALLOC)" == ""
 PERL_MALLOC	= undef
-DEBUG_MSTATS   = undef
+DEBUG_MSTATS	= undef
 !ENDIF
 
 !IF "$(DEBUG_MSTATS)" == ""
-DEBUG_MSTATS   = undef
+DEBUG_MSTATS	= undef
 !ENDIF
 
 !IF "$(DEBUG_MSTATS)" == "define"
-BUILDOPT       = $(BUILDOPT) -DPERL_DEBUGGING_MSTATS
-!ENDIF
-
-!IF "$(USE_IMP_SYS)" == "define"
-PERL_MALLOC	= undef
+BUILDOPT	= $(BUILDOPT) -DPERL_DEBUGGING_MSTATS
 !ENDIF
 
 !IF "$(USE_MULTI)" == ""

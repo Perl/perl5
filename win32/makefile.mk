@@ -162,7 +162,7 @@ CRYPT_SRC	*= fcrypt.c
 # This must be enabled to use the Devel::Peek::mstat() function.  This cannot
 # be enabled without PERL_MALLOC as well.
 #
-#DEBUG_MSTATS  *= define
+#DEBUG_MSTATS	*= define
 
 #
 # set the install locations of the compiler include/libraries
@@ -238,6 +238,7 @@ CRYPT_FLAG	= -DHAVE_DES_FCRYPT
 .ENDIF
 
 PERL_MALLOC	*= undef
+DEBUG_MSTATS	*= undef
 
 USE_MULTI	*= undef
 USE_ITHREADS	*= undef
@@ -246,21 +247,16 @@ USE_PERLIO	*= undef
 USE_LARGE_FILES	*= undef
 USE_PERLCRT	*= undef
 
-.IF "$(PERL_MALLOC)" == "undef"
+.IF "$(USE_IMP_SYS)" == "define"
 PERL_MALLOC	= undef
-DEBUG_MSTATS   = undef
 .ENDIF
 
-.IF "$(DEBUG_MSTATS)" == "undef"
-DEBUG_MSTATS   = undef
+.IF "$(PERL_MALLOC)" == "undef"
+DEBUG_MSTATS	= undef
 .ENDIF
 
 .IF "$(DEBUG_MSTATS)" == "define"
-BUILDOPT       += -DPERL_DEBUGGING_MSTATS
-.ENDIF
-
-.IF "$(USE_IMP_SYS)" == "define"
-PERL_MALLOC	= undef
+BUILDOPT	+= -DPERL_DEBUGGING_MSTATS
 .ENDIF
 
 .IF "$(USE_IMP_SYS)$(USE_MULTI)" == "defineundef"
