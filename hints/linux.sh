@@ -6,11 +6,11 @@
 # Additional info from Nigel Head <nhead@ESOC.bitnet>
 # and Kenneth Albanowski <kjahds@kjahds.com>
 #
-# Consolidated by Andy Dougherty <doughera@lafcol.lafayette.edu>
+# Consolidated by Andy Dougherty <doughera@lafayette.edu>
 #
 # Updated Thu Feb  8 11:56:10 EST 1996
 
-# Updated Thu May 30 10:50:22 EDT 1996 by <doughera@lafcol.lafayette.edu>
+# Updated Thu May 30 10:50:22 EDT 1996 by <doughera@lafayette.edu>
 
 # Updated Fri Jun 21 11:07:54 EDT 1996
 # NDBM support for ELF renabled by <kjahds@kjahds.com>
@@ -38,14 +38,6 @@ d_suidsafe='undef'
 # appropriate version of libgdbm, if one is available; Linux, however, doesn't
 # do the implicit mapping.
 ignore_versioned_solibs='y'
-
-# perl goes into the /usr tree.  See the Filesystem Standard
-# available via anonymous FTP at tsx-11.mit.edu in
-# /pub/linux/docs/linux-standards/fsstnd.
-# Allow a command line override, e.g. Configure -Dprefix=/foo/bar
-case "$prefix" in
-'') prefix='/usr' ;;
-esac
 
 # gcc-2.6.3 defines _G_HAVE_BOOL to 1, but doesn't actually supply bool.
 ccflags="-Dbool=char -DHAS_BOOL $ccflags"
@@ -225,6 +217,16 @@ fi
 #case "`uname -r | sed 's/^[0-9.-]*//'``arch`" in
 #'osfmach3ppc') ccdlflags='-Wl,-E' ;;
 #esac
+
+# On the SPARC architecture, -fpic is not enough; -fPIC is needed.
+case "`uname -m`" in
+sparc*)
+	case "$cccdlflags" in
+	*-fpic*) cccdlflags="`echo $cccdlflags|sed 's/-fpic/-fPIC/'`" ;;
+	*)	 cccdlflags="$cccdlflags -fPIC" ;;
+	esac
+	;;
+esac
 
 # This script UU/usethreads.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use threads.
