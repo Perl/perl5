@@ -2394,7 +2394,9 @@ See L<perlipc/"Safe Pipe Opens"> for more examples of this.
 
 NOTE: On any operation that may do a fork, any unflushed buffers remain
 unflushed in both processes, which means you may need to set C<$|> to
-avoid duplicate output.
+avoid duplicate output.  On systems that support a close-on-exec flag on
+files, the flag will be set for the newly opened file descriptor as
+determined by the value of $^F.  See L<perlvar/$^F>.
 
 Closing any piped filehandle causes the parent process to wait for the
 child to finish, and returns the status value in C<$?>.
@@ -2613,6 +2615,10 @@ after each command, depending on the application.
 
 See L<IPC::Open2>, L<IPC::Open3>, and L<perlipc/"Bidirectional Communication">
 for examples of such things.
+
+On systems that support a close-on-exec flag on files, the flag will be set
+for the newly opened file descriptors as determined by the value of $^F.
+See L<perlvar/$^F>.
 
 =item pop ARRAY
 

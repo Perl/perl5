@@ -572,7 +572,10 @@ PP(pp_pipe_op)
 	else PerlLIO_close(fd[1]);
 	goto badexit;
     }
-
+#if defined(HAS_FCNTL) && defined(F_SETFD)
+    fcntl(fd[0],F_SETFD,fd[0] > PL_maxsysfd);	/* ensure close-on-exec */
+    fcntl(fd[1],F_SETFD,fd[1] > PL_maxsysfd);	/* ensure close-on-exec */
+#endif
     RETPUSHYES;
 
 badexit:
