@@ -10378,7 +10378,7 @@ The PV of the sv is returned.
 char *
 Perl_sv_recode_to_utf8(pTHX_ SV *sv, SV *encoding)
 {
-     if (SvPOK(sv) && !SvUTF8(sv) && SvROK(encoding)) {
+     if (SvPOK(sv) && !DO_UTF8(sv) && SvROK(encoding)) {
 	  SV *uni;
 	  STRLEN len;
 	  char *s;

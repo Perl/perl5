@@ -1,4 +1,4 @@
-print "1..5\n";
+print "1..9\n";
 
 use encoding "latin1"; # ignored (overwritten by the next line)
 use encoding "greek";  # iso 8859-7 (no "latin" alias, surprise...)
@@ -29,3 +29,17 @@ print "ok 4\n";
 print "not " unless ord(substr($c, 1, 1)) == 0x100;
 print "ok 5\n";
 
+print "not " unless ord(chr(0xdf)) == 0x3af; # spooky
+print "ok 6\n";
+
+print "not " unless ord(pack("C", 0xdf)) == 0x3af;
+print "ok 7\n";
+
+# we didn't break pack/unpack, I hope
+
+print "not " unless unpack("C", pack("C", 0xdf)) == 0xdf;
+print "ok 8\n";
+
+# the first octet of UTF-8 encoded 0x3af 
+print "not " unless unpack("C", chr(0xdf)) == 0xce;
+print "ok 9\n";

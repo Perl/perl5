@@ -291,7 +291,7 @@ X<-S>X<-b>X<-c>X<-t>X<-u>X<-g>X<-k>X<-T>X<-B>X<-M>X<-A>X<-C>
     -g	File has setgid bit set.
     -k	File has sticky bit set.
 
-    -T	File is an ASCII text file.
+    -T	File is an ASCII text file (heuristic guess).
     -B	File is a "binary" file (opposite of -T).
 
     -M	Age of file in days when script started.
@@ -682,12 +682,12 @@ On POSIX systems, you can detect this condition this way:
 
 Returns the character represented by that NUMBER in the character set.
 For example, C<chr(65)> is C<"A"> in either ASCII or Unicode, and
-chr(0x263a) is a Unicode smiley face.  Note that characters from
-127 to 255 (inclusive) are not encoded in Unicode for backward
-compatibility reasons.
+chr(0x263a) is a Unicode smiley face.  Note that characters from 127
+to 255 (inclusive) are by default not encoded in Unicode for backward
+compatibility reasons (but see L<encoding>).
 
 For the reverse, use L</ord>.
-See L<utf8> for more about Unicode.
+See L<perlunicode> and L<encoding> for more about Unicode.
 
 If NUMBER is omitted, uses C<$_>.
 
@@ -2970,9 +2970,12 @@ DIRHANDLEs have their own namespace separate from FILEHANDLEs.
 
 =item ord
 
-Returns the numeric (ASCII or Unicode) value of the first character of EXPR.  If
-EXPR is omitted, uses C<$_>.  For the reverse, see L</chr>.
-See L<utf8> for more about Unicode.
+Returns the numeric (the native 8-bit encoding, like ASCII or EBCDIC,
+or Unicode) value of the first character of EXPR.  If EXPR is omitted,
+uses C<$_>.
+
+For the reverse, see L</chr>.
+See L<perlunicode> and L<encoding> for more about Unicode.
 
 =item our EXPR
 
@@ -3051,8 +3054,8 @@ sequence of characters that give the order and type of values, as
 follows:
 
     a	A string with arbitrary binary data, will be null padded.
-    A	An ASCII string, will be space padded.
-    Z	A null terminated (asciz) string, will be null padded.
+    A	A text (ASCII) string, will be space padded.
+    Z	A null terminated (ASCIZ) string, will be null padded.
 
     b	A bit string (ascending bit order inside each byte, like vec()).
     B	A bit string (descending bit order inside each byte).
