@@ -745,9 +745,10 @@ PP(pp_schop)
 
 PP(pp_chop)
 {
-    dSP; dMARK; dTARGET;
-    while (SP > MARK)
-	do_chop(TARG, POPs);
+    dSP; dMARK; dTARGET; dORIGMARK;
+    while (MARK < SP)
+	do_chop(TARG, *++MARK);
+    SP = ORIGMARK;
     PUSHTARG;
     RETURN;
 }
