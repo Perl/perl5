@@ -1854,6 +1854,104 @@ string
 
 =item DESCRIPTION
 
+=item What Is A Thread Anyway?
+
+=item Threaded Program Models
+
+=over 4
+
+=item Boss/Worker
+
+=item Work Crew
+
+=item Pipeline
+
+=back
+
+=item Native threads
+
+=item What kind of threads are perl threads?
+
+=item Threadsafe Modules
+
+=item Thread Basics
+
+=over 4
+
+=item Basic Thread Support
+
+=item Creating Threads
+
+=item Giving up control
+
+=item Waiting For A Thread To Exit
+
+=item Ignoring A Thread
+
+=back
+
+=item Threads And Data
+
+=over 4
+
+=item Shared And Unshared Data
+
+=item Thread Pitfalls: Races
+
+=item Controlling access: lock()
+
+=item Thread Pitfall: Deadlocks
+
+=item Queues: Passing Data Around
+
+=back
+
+=item Threads And Code
+
+=over 4
+
+=item Semaphores: Synchronizing Data Access
+
+Basic semaphores, Advanced Semaphores
+
+=back
+
+=item General Thread Utility Routines
+
+=over 4
+
+=item What Thread Am I In?
+
+=item Thread IDs
+
+=item Are These Threads The Same?
+
+=item What Threads Are Running?
+
+=back
+
+=item A Complete Example
+
+=item Conclusion
+
+=item Bibliography
+
+=over 4
+
+=item Introductory Texts
+
+=item OS-Related References
+
+=item Other References
+
+=back
+
+=item Acknowledgements
+
+=item AUTHOR
+
+=item Copyrights
+
 =back
 
 =head2 perlothrtut - old tutorial on threads in Perl
@@ -2836,8 +2934,8 @@ References, Tutorials, Task-Oriented, Special Topics
 
 =back
 
-=head2 perlfaq3 - Programming Tools ($Revision: 1.21 $, $Date: 2002/04/28
-15:51:10 $)
+=head2 perlfaq3 - Programming Tools ($Revision: 1.22 $, $Date: 2002/05/06
+13:11:13 $)
 
 =over 4
 
@@ -2921,8 +3019,8 @@ my C program; what am I doing wrong?
 
 =back
 
-=head2 perlfaq4 - Data Manipulation ($Revision: 1.20 $, $Date: 2002/04/07
-18:46:13 $)
+=head2 perlfaq4 - Data Manipulation ($Revision: 1.21 $, $Date: 2002/05/06
+13:08:46 $)
 
 =over 4
 
@@ -2942,7 +3040,7 @@ Trig functions?
 
 =item How do I convert between numeric representations?
 
-B<How do I convert Hexadecimal into decimal:>, B<How do I convert from
+B<How do I convert hexadecimal into decimal:>, B<How do I convert from
 decimal to hexadecimal:>, B<How do I convert from octal to decimal:>, B<How
 do I convert from decimal to octal:>, B<How do I convert from binary to
 decimal:>, B<How do I convert from decimal to binary:>
@@ -3800,7 +3898,7 @@ C<!!!>, C<!!>, C<!>
 
 =item EXAMPLE 8 (Coming Soon)
 
-=item EXAMPLE 9 (Coming Soon)
+=item EXAMPLE 9 Passing open files to XSes
 
 =item Troubleshooting these Examples
 
@@ -4360,8 +4458,8 @@ HEf_SVKEY, Nullch, Nullsv
 get_hv, HeHASH, HeKEY, HeKLEN, HePV, HeSVKEY, HeSVKEY_force, HeSVKEY_set,
 HeVAL, HvNAME, hv_clear, hv_delete, hv_delete_ent, hv_exists,
 hv_exists_ent, hv_fetch, hv_fetch_ent, hv_iterinit, hv_iterkey,
-hv_iterkeysv, hv_iternext, hv_iternextsv, hv_iterval, hv_magic, hv_store,
-hv_store_ent, hv_undef, newHV, Nullhv
+hv_iterkeysv, hv_iternext, hv_iternextsv, hv_iternext_flags, hv_iterval,
+hv_magic, hv_store, hv_store_ent, hv_undef, newHV, Nullhv
 
 =item Magical Functions
 
@@ -4428,13 +4526,13 @@ sv_nounlocking, sv_nv, sv_pos_b2u, sv_pos_u2b, sv_pv, sv_pvbyte,
 sv_pvbyten, sv_pvbyten_force, sv_pvn, sv_pvn_force, sv_pvn_force_flags,
 sv_pvutf8, sv_pvutf8n, sv_pvutf8n_force, sv_reftype, sv_replace,
 sv_report_used, sv_reset, sv_rvweaken, sv_setiv, sv_setiv_mg, sv_setnv,
-sv_setnv_mg, sv_setpv, sv_setpvf, sv_setpvf_mg, sv_setpviv, sv_setpviv_mg,
-sv_setpvn, sv_setpvn_mg, sv_setpv_mg, sv_setref_iv, sv_setref_nv,
-sv_setref_pv, sv_setref_pvn, sv_setref_uv, sv_setsv, sv_setsv_flags,
-sv_setsv_mg, sv_setuv, sv_setuv_mg, sv_taint, sv_tainted, sv_true,
-sv_unmagic, sv_unref, sv_unref_flags, sv_untaint, sv_upgrade, sv_usepvn,
-sv_usepvn_mg, sv_utf8_decode, sv_utf8_downgrade, sv_utf8_encode,
-sv_utf8_upgrade, sv_utf8_upgrade_flags, sv_uv, sv_vcatpvfn, sv_vsetpvfn
+sv_setnv_mg, sv_setpv, sv_setpvf, sv_setpvf_mg, sv_setpvn, sv_setpvn_mg,
+sv_setpv_mg, sv_setref_iv, sv_setref_nv, sv_setref_pv, sv_setref_pvn,
+sv_setref_uv, sv_setsv, sv_setsv_flags, sv_setsv_mg, sv_setuv, sv_setuv_mg,
+sv_taint, sv_tainted, sv_true, sv_unmagic, sv_unref, sv_unref_flags,
+sv_untaint, sv_upgrade, sv_usepvn, sv_usepvn_mg, sv_utf8_decode,
+sv_utf8_downgrade, sv_utf8_encode, sv_utf8_upgrade, sv_utf8_upgrade_flags,
+sv_uv, sv_vcatpvfn, sv_vsetpvfn
 
 =item Unicode Support
 
@@ -4539,7 +4637,7 @@ Setlinebuf, Get_base, Get_bufsiz, Get_ptr, Get_cnt, Set_ptrcnt
 
 =item Extension Layers
 
-":encoding", ":Scalar", ":Object" or ":Perl"
+":encoding", ":Scalar", ":Via"
 
 =back
 
@@ -4572,7 +4670,7 @@ B<PerlIO_rewind(f)>, B<PerlIO_tmpfile()>, B<PerlIO_setlinebuf(f)>
 =item Co-existence with stdio
 
 B<PerlIO_importFILE(f,flags)>, B<PerlIO_exportFILE(f,flags)>,
-B<PerlIO_findFILE(f)>, B<PerlIO_releaseFILE(p,f)>
+B<PerlIO_releaseFILE(p,f)>, B<PerlIO_findFILE(f)>
 
 =item "Fast gets" Functions
 
@@ -5030,6 +5128,11 @@ finish, 'enter', print
 F<t/base/>, F<t/cmd/>, F<t/comp/>, F<t/io/>, F<t/lib/>, F<t/op/>,
 F<t/pod/>, F<t/run/>, t/base t/comp, t/cmd t/run t/io t/op, t/lib ext lib
 
+=item Special Make Test Targets
+
+coretest, test.deparse, minitest, test.third check.third utest.third
+ucheck.third, test.torture torturetest, utest ucheck test.utf8 check.utf8
+
 =back
 
 =item EXTERNAL TOOLS FOR DEBUGGING PERL
@@ -5209,11 +5312,13 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item FreeBSD Failing locale Test 117 For ISO8859-15 Locales
 
+=item Modifying $_ Inside for(..)
+
 =item mod_perl 1.26 Doesn't Build With Threaded Perl
 
 =item lib/ftmp-security tests warn 'system possibly insecure'
 
-=item  HP-UX lib/posix Subtest 9 Fails When LP64-Configured
+=item HP-UX lib/posix Subtest 9 Fails When LP64-Configured
 
 =item Linux With Sfio Fails op/misc Test 48
 
@@ -5236,8 +5341,6 @@ I<The Road goes ever on and on, down from the door where it began.>
 =item Win32
 
 =item XML::Parser not working
-
-=item Localising a Tied Variable Leaks Memory
 
 =item z/OS (OS/390)
 
@@ -7991,6 +8094,37 @@ method, locked
 
 =back
 
+=head2 threadshared::queue, threads::shared::queue - thread-safe queues
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item FUNCTIONS AND METHODS
+
+new, enqueue LIST, dequeue, dequeue_nb, pending
+
+=item SEE ALSO
+
+=back
+
+=head2 threadshared::semaphore, threads::shared::semaphore - thread-safe
+semaphores
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item FUNCTIONS AND METHODS
+
+new, new NUMBER, down, down NUMBER, up, up NUMBER
+
+=back
+
 =head2 threadshared::shared, threads::shared - Perl extension for sharing
 data structures between threads
 
@@ -8027,7 +8161,8 @@ from perl
 =item DESCRIPTION
 
 $thread = threads->create(function, LIST), $thread->join, $thread->detach,
-threads->self, $thread->tid, threads->yield();, threads->list();
+threads->self, $thread->tid, threads->yield();, threads->list();, async
+BLOCK;
 
 =item WARNINGS
 
@@ -8693,7 +8828,8 @@ from perl
 =item DESCRIPTION
 
 $thread = threads->create(function, LIST), $thread->join, $thread->detach,
-threads->self, $thread->tid, threads->yield();, threads->list();
+threads->self, $thread->tid, threads->yield();, threads->list();, async
+BLOCK;
 
 =item WARNINGS
 
@@ -8733,6 +8869,37 @@ cond_signal VARIABLE, cond_broadcast VARIABLE
 =item AUTHOR
 
 =item SEE ALSO
+
+=back
+
+=head2 threadshared::queue, threads::shared::queue - thread-safe queues
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item FUNCTIONS AND METHODS
+
+new, enqueue LIST, dequeue, dequeue_nb, pending
+
+=item SEE ALSO
+
+=back
+
+=head2 threadshared::semaphore, threads::shared::semaphore - thread-safe
+semaphores
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item FUNCTIONS AND METHODS
+
+new, new NUMBER, down, down NUMBER, up, up NUMBER
 
 =back
 
@@ -10167,8 +10334,7 @@ C<asctime_r_proto>, C<awk>
 
 =item b
 
-C<baserev>, C<bash>, C<bin>, C<binexp>, C<bison>,
-C<byacc>, C<byteorder>
+C<baserev>, C<bash>, C<bin>, C<binexp>, C<bison>, C<byacc>, C<byteorder>
 
 =item c
 
@@ -10184,78 +10350,77 @@ C<csh>, C<ctermid_r_proto>, C<ctime_r_proto>
 
 C<d__fwalk>, C<d_access>, C<d_accessx>, C<d_alarm>, C<d_archlib>,
 C<d_asctime_r>, C<d_atolf>, C<d_atoll>, C<d_attribut>, C<d_bcmp>,
-C<d_bcopy>, C<d_bsd>, C<d_bsdgetpgrp>, C<d_bsdsetpgrp>,
-C<d_bzero>, C<d_casti32>, C<d_castneg>, C<d_charvspr>, C<d_chown>,
-C<d_chroot>, C<d_chsize>, C<d_class>, C<d_closedir>, C<d_cmsghdr_s>,
-C<d_const>, C<d_crypt>, C<d_crypt_r>, C<d_csh>, C<d_ctermid_r>,
-C<d_ctime_r>, C<d_cuserid>, C<d_dbl_dig>, C<d_dbminitproto>, C<d_difftime>,
-C<d_dirfd>, C<d_dirnamlen>, C<d_dlerror>, C<d_dlopen>, C<d_dlsymun>,
-C<d_dosuid>, C<d_drand48_r>, C<d_drand48proto>, C<d_dup2>, C<d_eaccess>,
-C<d_endgrent>, C<d_endgrent_r>, C<d_endhent>, C<d_endhostent_r>,
-C<d_endnent>, C<d_endnetent_r>, C<d_endpent>, C<d_endprotoent_r>,
-C<d_endpwent>, C<d_endpwent_r>, C<d_endsent>, C<d_endservent_r>,
-C<d_eofnblk>, C<d_eunice>, C<d_fchdir>, C<d_fchmod>, C<d_fchown>,
-C<d_fcntl>, C<d_fcntl_can_lock>, C<d_fd_macros>, C<d_fd_set>,
-C<d_fds_bits>, C<d_fgetpos>, C<d_finite>, C<d_finitel>, C<d_flexfnam>,
-C<d_flock>, C<d_flockproto>, C<d_fork>, C<d_fp_class>, C<d_fpathconf>,
-C<d_fpclass>, C<d_fpclassify>, C<d_fpclassl>, C<d_fpos64_t>, C<d_frexpl>,
-C<d_fs_data_s>, C<d_fseeko>, C<d_fsetpos>, C<d_fstatfs>, C<d_fstatvfs>,
-C<d_fsync>, C<d_ftello>, C<d_ftime>, C<d_Gconvert>, C<d_getcwd>,
-C<d_getespwnam>, C<d_getfsstat>, C<d_getgrent>, C<d_getgrent_r>,
-C<d_getgrgid_r>, C<d_getgrnam_r>, C<d_getgrps>, C<d_gethbyaddr>,
-C<d_gethbyname>, C<d_gethent>, C<d_gethname>, C<d_gethostbyaddr_r>,
-C<d_gethostbyname_r>, C<d_gethostent_r>, C<d_gethostprotos>,
-C<d_getitimer>, C<d_getlogin>, C<d_getlogin_r>, C<d_getmnt>,
-C<d_getmntent>, C<d_getnbyaddr>, C<d_getnbyname>, C<d_getnent>,
-C<d_getnetbyaddr_r>, C<d_getnetbyname_r>, C<d_getnetent_r>,
-C<d_getnetprotos>, C<d_getpagsz>, C<d_getpbyname>, C<d_getpbynumber>,
-C<d_getpent>, C<d_getpgid>, C<d_getpgrp2>, C<d_getpgrp>, C<d_getppid>,
-C<d_getprior>, C<d_getprotobyname_r>, C<d_getprotobynumber_r>,
-C<d_getprotoent_r>, C<d_getprotoprotos>, C<d_getprpwnam>, C<d_getpwent>,
-C<d_getpwent_r>, C<d_getpwnam_r>, C<d_getpwuid_r>, C<d_getsbyname>,
-C<d_getsbyport>, C<d_getsent>, C<d_getservbyname_r>, C<d_getservbyport_r>,
-C<d_getservent_r>, C<d_getservprotos>, C<d_getspnam>, C<d_getspnam_r>,
-C<d_gettimeod>, C<d_gmtime_r>, C<d_gnulibc>, C<d_grpasswd>, C<d_hasmntopt>,
-C<d_htonl>, C<d_index>, C<d_inetaton>, C<d_int64_t>, C<d_isascii>,
-C<d_isfinite>, C<d_isinf>, C<d_isnan>, C<d_isnanl>, C<d_killpg>,
-C<d_lchown>, C<d_ldbl_dig>, C<d_link>, C<d_localtime_r>, C<d_locconv>,
-C<d_lockf>, C<d_longdbl>, C<d_longlong>, C<d_lseekproto>, C<d_lstat>,
-C<d_madvise>, C<d_mblen>, C<d_mbstowcs>, C<d_mbtowc>, C<d_memchr>,
-C<d_memcmp>, C<d_memcpy>, C<d_memmove>, C<d_memset>, C<d_mkdir>,
-C<d_mkdtemp>, C<d_mkfifo>, C<d_mkstemp>, C<d_mkstemps>, C<d_mktime>,
-C<d_mmap>, C<d_modfl>, C<d_modfl_pow32_bug>, C<d_mprotect>, C<d_msg>,
-C<d_msg_ctrunc>, C<d_msg_dontroute>, C<d_msg_oob>, C<d_msg_peek>,
-C<d_msg_proxy>, C<d_msgctl>, C<d_msgget>, C<d_msghdr_s>, C<d_msgrcv>,
-C<d_msgsnd>, C<d_msync>, C<d_munmap>, C<d_mymalloc>, C<d_nice>,
-C<d_nl_langinfo>, C<d_nv_preserves_uv>, C<d_off64_t>,
-C<d_old_pthread_create_joinable>, C<d_oldpthreads>, C<d_oldsock>,
-C<d_open3>, C<d_pathconf>, C<d_pause>, C<d_perl_otherlibdirs>,
-C<d_phostname>, C<d_pipe>, C<d_poll>, C<d_portable>, C<d_PRId64>,
-C<d_PRIeldbl>, C<d_PRIEUldbl>, C<d_PRIfldbl>, C<d_PRIFUldbl>,
-C<d_PRIgldbl>, C<d_PRIGUldbl>, C<d_PRIi64>, C<d_PRIo64>, C<d_PRIu64>,
-C<d_PRIx64>, C<d_PRIXU64>, C<d_procselfexe>, C<d_pthread_atfork>,
-C<d_pthread_yield>, C<d_pwage>, C<d_pwchange>, C<d_pwclass>,
-C<d_pwcomment>, C<d_pwexpire>, C<d_pwgecos>, C<d_pwpasswd>, C<d_pwquota>,
-C<d_qgcvt>, C<d_quad>, C<d_random_r>, C<d_readdir64_r>, C<d_readdir>,
-C<d_readdir_r>, C<d_readlink>, C<d_readv>, C<d_recvmsg>, C<d_rename>,
-C<d_rewinddir>, C<d_rmdir>, C<d_safebcpy>, C<d_safemcpy>, C<d_sanemcmp>,
-C<d_sbrkproto>, C<d_sched_yield>, C<d_scm_rights>, C<d_SCNfldbl>,
-C<d_seekdir>, C<d_select>, C<d_sem>, C<d_semctl>, C<d_semctl_semid_ds>,
-C<d_semctl_semun>, C<d_semget>, C<d_semop>, C<d_sendmsg>, C<d_setegid>,
-C<d_seteuid>, C<d_setgrent>, C<d_setgrent_r>, C<d_setgrps>, C<d_sethent>,
-C<d_sethostent_r>, C<d_setitimer>, C<d_setlinebuf>, C<d_setlocale>,
-C<d_setlocale_r>, C<d_setnent>, C<d_setnetent_r>, C<d_setpent>,
-C<d_setpgid>, C<d_setpgrp2>, C<d_setpgrp>, C<d_setprior>,
-C<d_setproctitle>, C<d_setprotoent_r>, C<d_setpwent>, C<d_setpwent_r>,
-C<d_setregid>, C<d_setresgid>, C<d_setresuid>, C<d_setreuid>, C<d_setrgid>,
-C<d_setruid>, C<d_setsent>, C<d_setservent_r>, C<d_setsid>, C<d_setvbuf>,
-C<d_sfio>, C<d_shm>, C<d_shmat>, C<d_shmatprototype>, C<d_shmctl>,
-C<d_shmdt>, C<d_shmget>, C<d_sigaction>, C<d_sigprocmask>, C<d_sigsetjmp>,
-C<d_sockatmark>, C<d_sockatmarkproto>, C<d_socket>, C<d_socklen_t>,
-C<d_sockpair>, C<d_socks5_init>, C<d_sqrtl>, C<d_srand48_r>,
-C<d_srandom_r>, C<d_sresgproto>, C<d_sresuproto>, C<d_statblks>,
-C<d_statfs_f_flags>, C<d_statfs_s>, C<d_statvfs>, C<d_stdio_cnt_lval>,
-C<d_stdio_ptr_lval>, C<d_stdio_ptr_lval_nochange_cnt>,
+C<d_bcopy>, C<d_bsd>, C<d_bsdgetpgrp>, C<d_bsdsetpgrp>, C<d_bzero>,
+C<d_casti32>, C<d_castneg>, C<d_charvspr>, C<d_chown>, C<d_chroot>,
+C<d_chsize>, C<d_class>, C<d_closedir>, C<d_cmsghdr_s>, C<d_const>,
+C<d_crypt>, C<d_crypt_r>, C<d_csh>, C<d_ctermid_r>, C<d_ctime_r>,
+C<d_cuserid>, C<d_dbl_dig>, C<d_dbminitproto>, C<d_difftime>, C<d_dirfd>,
+C<d_dirnamlen>, C<d_dlerror>, C<d_dlopen>, C<d_dlsymun>, C<d_dosuid>,
+C<d_drand48_r>, C<d_drand48proto>, C<d_dup2>, C<d_eaccess>, C<d_endgrent>,
+C<d_endgrent_r>, C<d_endhent>, C<d_endhostent_r>, C<d_endnent>,
+C<d_endnetent_r>, C<d_endpent>, C<d_endprotoent_r>, C<d_endpwent>,
+C<d_endpwent_r>, C<d_endsent>, C<d_endservent_r>, C<d_eofnblk>,
+C<d_eunice>, C<d_fchdir>, C<d_fchmod>, C<d_fchown>, C<d_fcntl>,
+C<d_fcntl_can_lock>, C<d_fd_macros>, C<d_fd_set>, C<d_fds_bits>,
+C<d_fgetpos>, C<d_finite>, C<d_finitel>, C<d_flexfnam>, C<d_flock>,
+C<d_flockproto>, C<d_fork>, C<d_fp_class>, C<d_fpathconf>, C<d_fpclass>,
+C<d_fpclassify>, C<d_fpclassl>, C<d_fpos64_t>, C<d_frexpl>, C<d_fs_data_s>,
+C<d_fseeko>, C<d_fsetpos>, C<d_fstatfs>, C<d_fstatvfs>, C<d_fsync>,
+C<d_ftello>, C<d_ftime>, C<d_Gconvert>, C<d_getcwd>, C<d_getespwnam>,
+C<d_getfsstat>, C<d_getgrent>, C<d_getgrent_r>, C<d_getgrgid_r>,
+C<d_getgrnam_r>, C<d_getgrps>, C<d_gethbyaddr>, C<d_gethbyname>,
+C<d_gethent>, C<d_gethname>, C<d_gethostbyaddr_r>, C<d_gethostbyname_r>,
+C<d_gethostent_r>, C<d_gethostprotos>, C<d_getitimer>, C<d_getlogin>,
+C<d_getlogin_r>, C<d_getmnt>, C<d_getmntent>, C<d_getnbyaddr>,
+C<d_getnbyname>, C<d_getnent>, C<d_getnetbyaddr_r>, C<d_getnetbyname_r>,
+C<d_getnetent_r>, C<d_getnetprotos>, C<d_getpagsz>, C<d_getpbyname>,
+C<d_getpbynumber>, C<d_getpent>, C<d_getpgid>, C<d_getpgrp2>, C<d_getpgrp>,
+C<d_getppid>, C<d_getprior>, C<d_getprotobyname_r>,
+C<d_getprotobynumber_r>, C<d_getprotoent_r>, C<d_getprotoprotos>,
+C<d_getprpwnam>, C<d_getpwent>, C<d_getpwent_r>, C<d_getpwnam_r>,
+C<d_getpwuid_r>, C<d_getsbyname>, C<d_getsbyport>, C<d_getsent>,
+C<d_getservbyname_r>, C<d_getservbyport_r>, C<d_getservent_r>,
+C<d_getservprotos>, C<d_getspnam>, C<d_getspnam_r>, C<d_gettimeod>,
+C<d_gmtime_r>, C<d_gnulibc>, C<d_grpasswd>, C<d_hasmntopt>, C<d_htonl>,
+C<d_index>, C<d_inetaton>, C<d_int64_t>, C<d_isascii>, C<d_isfinite>,
+C<d_isinf>, C<d_isnan>, C<d_isnanl>, C<d_killpg>, C<d_lchown>,
+C<d_ldbl_dig>, C<d_link>, C<d_localtime_r>, C<d_locconv>, C<d_lockf>,
+C<d_longdbl>, C<d_longlong>, C<d_lseekproto>, C<d_lstat>, C<d_madvise>,
+C<d_mblen>, C<d_mbstowcs>, C<d_mbtowc>, C<d_memchr>, C<d_memcmp>,
+C<d_memcpy>, C<d_memmove>, C<d_memset>, C<d_mkdir>, C<d_mkdtemp>,
+C<d_mkfifo>, C<d_mkstemp>, C<d_mkstemps>, C<d_mktime>, C<d_mmap>,
+C<d_modfl>, C<d_modfl_pow32_bug>, C<d_mprotect>, C<d_msg>, C<d_msg_ctrunc>,
+C<d_msg_dontroute>, C<d_msg_oob>, C<d_msg_peek>, C<d_msg_proxy>,
+C<d_msgctl>, C<d_msgget>, C<d_msghdr_s>, C<d_msgrcv>, C<d_msgsnd>,
+C<d_msync>, C<d_munmap>, C<d_mymalloc>, C<d_nice>, C<d_nl_langinfo>,
+C<d_nv_preserves_uv>, C<d_off64_t>, C<d_old_pthread_create_joinable>,
+C<d_oldpthreads>, C<d_oldsock>, C<d_open3>, C<d_pathconf>, C<d_pause>,
+C<d_perl_otherlibdirs>, C<d_phostname>, C<d_pipe>, C<d_poll>,
+C<d_portable>, C<d_PRId64>, C<d_PRIeldbl>, C<d_PRIEUldbl>, C<d_PRIfldbl>,
+C<d_PRIFUldbl>, C<d_PRIgldbl>, C<d_PRIGUldbl>, C<d_PRIi64>, C<d_PRIo64>,
+C<d_PRIu64>, C<d_PRIx64>, C<d_PRIXU64>, C<d_procselfexe>,
+C<d_pthread_atfork>, C<d_pthread_yield>, C<d_pwage>, C<d_pwchange>,
+C<d_pwclass>, C<d_pwcomment>, C<d_pwexpire>, C<d_pwgecos>, C<d_pwpasswd>,
+C<d_pwquota>, C<d_qgcvt>, C<d_quad>, C<d_random_r>, C<d_readdir64_r>,
+C<d_readdir>, C<d_readdir_r>, C<d_readlink>, C<d_readv>, C<d_recvmsg>,
+C<d_rename>, C<d_rewinddir>, C<d_rmdir>, C<d_safebcpy>, C<d_safemcpy>,
+C<d_sanemcmp>, C<d_sbrkproto>, C<d_sched_yield>, C<d_scm_rights>,
+C<d_SCNfldbl>, C<d_seekdir>, C<d_select>, C<d_sem>, C<d_semctl>,
+C<d_semctl_semid_ds>, C<d_semctl_semun>, C<d_semget>, C<d_semop>,
+C<d_sendmsg>, C<d_setegid>, C<d_seteuid>, C<d_setgrent>, C<d_setgrent_r>,
+C<d_setgrps>, C<d_sethent>, C<d_sethostent_r>, C<d_setitimer>,
+C<d_setlinebuf>, C<d_setlocale>, C<d_setlocale_r>, C<d_setnent>,
+C<d_setnetent_r>, C<d_setpent>, C<d_setpgid>, C<d_setpgrp2>, C<d_setpgrp>,
+C<d_setprior>, C<d_setproctitle>, C<d_setprotoent_r>, C<d_setpwent>,
+C<d_setpwent_r>, C<d_setregid>, C<d_setresgid>, C<d_setresuid>,
+C<d_setreuid>, C<d_setrgid>, C<d_setruid>, C<d_setsent>, C<d_setservent_r>,
+C<d_setsid>, C<d_setvbuf>, C<d_sfio>, C<d_shm>, C<d_shmat>,
+C<d_shmatprototype>, C<d_shmctl>, C<d_shmdt>, C<d_shmget>, C<d_sigaction>,
+C<d_sigprocmask>, C<d_sigsetjmp>, C<d_sockatmark>, C<d_sockatmarkproto>,
+C<d_socket>, C<d_socklen_t>, C<d_sockpair>, C<d_socks5_init>, C<d_sqrtl>,
+C<d_srand48_r>, C<d_srandom_r>, C<d_sresgproto>, C<d_sresuproto>,
+C<d_statblks>, C<d_statfs_f_flags>, C<d_statfs_s>, C<d_statvfs>,
+C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>, C<d_stdio_ptr_lval_nochange_cnt>,
 C<d_stdio_ptr_lval_sets_cnt>, C<d_stdio_stream_array>, C<d_stdiobase>,
 C<d_stdstdio>, C<d_strchr>, C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>,
 C<d_strerror>, C<d_strerror_r>, C<d_strftime>, C<d_strtod>, C<d_strtol>,
@@ -11126,6 +11291,8 @@ guess_encoding($data, [, I<list of suspects>])
 
 =item CAVEATS
 
+=item TO DO
+
 =item SEE ALSO
 
 =back
@@ -11234,11 +11401,12 @@ the Cyrillic world, gsm0338 - Hentai Latin 1
 =item CJK: Chinese, Japanese, Korean (Multibyte)
 
 Encode::CN -- Continental China, Encode::JP -- Japan, Encode::KR -- Korea,
-Encode::TW -- Taiwan, Encode::HanExtra -- More Chinese via CPAN
+Encode::TW -- Taiwan, Encode::HanExtra -- More Chinese via CPAN,
+Encode::JIS2K -- JIS X 0213 encodings via CPAN
 
 =item Miscellaneous encodings
 
-Encode::EBCDIC, Encode::Symbols
+Encode::EBCDIC, Encode::Symbols, Encode::MIME::Header, Encode::Guess
 
 =back
 
@@ -11432,6 +11600,8 @@ guess_encoding($data, [, I<list of suspects>])
 
 =item CAVEATS
 
+=item TO DO
+
 =item SEE ALSO
 
 =back
@@ -11514,11 +11684,12 @@ the Cyrillic world, gsm0338 - Hentai Latin 1
 =item CJK: Chinese, Japanese, Korean (Multibyte)
 
 Encode::CN -- Continental China, Encode::JP -- Japan, Encode::KR -- Korea,
-Encode::TW -- Taiwan, Encode::HanExtra -- More Chinese via CPAN
+Encode::TW -- Taiwan, Encode::HanExtra -- More Chinese via CPAN,
+Encode::JIS2K -- JIS X 0213 encodings via CPAN
 
 =item Miscellaneous encodings
 
-Encode::EBCDIC, Encode::Symbols
+Encode::EBCDIC, Encode::Symbols, Encode::MIME::Header, Encode::Guess
 
 =back
 
@@ -12095,6 +12266,49 @@ B<replace_manpage_separator>
 
 =back
 
+=head2 ExtUtils::MM_MacOS - methods to override UN*X behaviour in
+ExtUtils::MakeMaker
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+maybe_command
+
+guess_name
+
+macify
+
+patternify
+
+init_main
+
+init_others
+
+init_dirscan
+
+libscan (o)
+
+constants (o)
+
+static (o)
+
+dlsyms (o)
+
+dynamic (o)
+
+clean (o)
+
+realclean (o)
+
+rulez (o)
+
+processPL (o)
+
 =head2 ExtUtils::MM_NW5 - methods to override UN*X behaviour in
 ExtUtils::MakeMaker
 
@@ -12107,6 +12321,8 @@ ExtUtils::MakeMaker
 =back
 
 constants (o)
+
+static_lib (o)
 
 dynamic_lib (o)
 
@@ -12494,6 +12710,16 @@ dist_ci (o)
 dist_core (o)
 
 pasthru (o)
+
+=head2 ExtUtils::MM_Win95 - method to customize MakeMaker for Win9X
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
 
 =head2 ExtUtils::MY - ExtUtils::MakeMaker subclass for customization
 
@@ -17507,7 +17733,7 @@ SOCKADDR_UN, pack_sockaddr_un PATH, unpack_sockaddr_un SOCKADDR_UN
 
 =back
 
-=head2 Storable - persistency for perl data structures
+=head2 Storable - persistence for Perl data structures
 
 =over 4
 
@@ -17522,6 +17748,10 @@ SOCKADDR_UN, pack_sockaddr_un PATH, unpack_sockaddr_un SOCKADDR_UN
 =item SPEED
 
 =item CANONICAL REPRESENTATION
+
+=item FORWARD COMPATIBILITY
+
+utf8 data, restricted hashes, files from future versions of Storable
 
 =item ERROR REPORTING
 
@@ -17554,8 +17784,6 @@ C<Storable::is_retrieving>
 =item BUGS
 
 =item CREDITS
-
-=item TRANSLATIONS
 
 =item AUTHOR
 
@@ -18802,7 +19030,7 @@ $obj->isa( TYPE ), CLASS->isa( TYPE ), isa( VAL, TYPE ), $obj->can( METHOD
 
 =back
 
-=head2 Unicode::Collate - use UCA (Unicode Collation Algorithm)
+=head2 Unicode::Collate - Unicode Collation Algorithm
 
 =over 4
 
@@ -18818,16 +19046,21 @@ alternate, backwards, entry, ignoreName, ignoreChar, level, normalization,
 overrideCJK, overrideHangul, preprocess, rearrange, table, undefName,
 undefChar, katakana_before_hiragana, upper_before_lower
 
-=item Other methods
+=item Methods for Collation
 
 C<@sorted = $Collator-E<gt>sort(@not_sorted)>, C<$result =
 $Collator-E<gt>cmp($a, $b)>, C<$result = $Collator-E<gt>eq($a, $b)>,
 C<$result = $Collator-E<gt>ne($a, $b)>, C<$result = $Collator-E<gt>lt($a,
 $b)>, C<$result = $Collator-E<gt>le($a, $b)>, C<$result =
 $Collator-E<gt>gt($a, $b)>, C<$result = $Collator-E<gt>ge($a, $b)>,
-C<$sortKey = $Collator-E<gt>getSortKey($string)>, C<$position =
+C<$sortKey = $Collator-E<gt>getSortKey($string)>, C<$sortKeyForm =
+$Collator-E<gt>viewSortKey($string)>, C<$position =
 $Collator-E<gt>index($string, $substring)>, C<($position, $length) =
 $Collator-E<gt>index($string, $substring)>
+
+=item Other Methods
+
+UCA_Version, Base_Unicode_Version
 
 =item EXPORT
 
@@ -18835,13 +19068,18 @@ $Collator-E<gt>index($string, $substring)>
 
 =item CAVEAT
 
+=item BUGS
+
 =back
 
 =item AUTHOR
 
 =item SEE ALSO
 
-Unicode Collation Algorithm - Unicode TR #10, L<Unicode::Normalize>
+http://www.unicode.org/unicode/reports/tr10/,
+http://www.unicode.org/unicode/reports/tr10/allkeys.txt,
+http://www.unicode.org/unicode/reports/tr15/,
+http://www.unicode.org/unicode/reports/tr18, L<Unicode::Normalize>
 
 =back
 
