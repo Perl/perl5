@@ -467,7 +467,8 @@ EOT
 			 perlmain.c tmon.out mon.out core core.*perl.*.?
 			 *perl.core so_locations pm_to_blib
 			 *$(OBJ_EXT) *$(LIB_EXT) perl.exe
-			 $(BOOTSTRAP) $(BASEEXT).bso $(BASEEXT).def
+			 $(BOOTSTRAP) $(BASEEXT).bso
+			 $(BASEEXT).def lib$(BASEEXT).def
 			 $(BASEEXT).exp
 			]);
     push @m, "\t-$self->{RM_RF} @otherfiles\n";
