@@ -74,6 +74,7 @@ extern char * sys_errlist[];
 MP_EXT char	gMacPerl_AlwaysExtract		MP_INIT(false);
 MP_EXT char	gMacPerl_SyntaxError;
 MP_EXT char	gMacPerl_MustPrime;
+MP_EXT char *	gMacPerl_Perl5DB;
 MP_EXT char	gMacPerl_InModalDialog		MP_INIT(false);
 MP_EXT short	gMacPerl_OSErr;
 MP_EXT char 	gMacPerl_PseudoFileName[256];

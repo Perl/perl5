@@ -313,10 +313,13 @@ prime_env_iter(void)
   /* Perform a dummy fetch as an lval to insure that the hash table is
    * set up.  Otherwise, the hv_store() will turn into a nullop */
   (void) hv_fetch(envhv,"DEFAULT",7,TRUE);
-  (void) hv_delete(envhv,"DEFAULT",7, G_DISCARD);
+  (void) hv_delete(envhv,"DEFAULT",7,G_DISCARD);
   for (env = environ; *env; ++env) {
+    SV *sv;
     len = strchr(*env, '=') - *env;
-    hv_store(envhv,*env,len,newSVpv(*env+len+1, 0),0);
+    sv = newSVpv(*env+len+1, 0);
+    SvTAINTED_on(sv);
+    hv_store(envhv,*env,len,sv,0);
   }
 }  /* end of prime_env_iter */
 
@@ -476,8 +479,10 @@ char * (getenv)(const char * env)
 {
 	int 	l = strlen(env);
 	char ** 	e;
-	Boolean	found;
-	
+
+	if (strEQ(env, "PERL5DB") && gMacPerl_Perl5DB)
+		return gMacPerl_Perl5DB;
+
 	for (e = environ; *e; ++e)
 		if (EqualEnv(env, *e))
 			return *e+l+1;
@@ -811,7 +816,9 @@ void MacPerl_init()
 }
 
 void
-Perl_my_setenv(pTHX_ char *nam, char *val)
+Perl_my_setenv(pTHX_ char *env, char *val)
 {
+	/* A hack just to get this darn thing working */
+	if (strEQ(env, "PERL5DB"))
+		gMacPerl_Perl5DB = val;
 }
-
