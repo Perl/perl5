@@ -29,6 +29,7 @@ while (<GR>) {
     @s = split /:/;
     if (@s == 4) {
 	my ($name_s,$passwd_s,$gid_s,$members_s) = @s;
+	$members_s =~ s/ /,/g;
 	@n = getgrgid($gid_s);
 	# 'nogroup' et al.
 	next unless @n;

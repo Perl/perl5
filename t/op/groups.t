@@ -27,7 +27,11 @@ for (split(' ', $()) {
     }
 } 
 
-$gr1 = join(' ', sort @gr);
+if ($^O eq "uwin") {
+	$gr1 = join(' ', grep(!$did{$_}++, sort split(' ', join(' ', @gr))));
+} else {
+	$gr1 = join(' ', sort @gr);
+}
 
 $gr2 = join(' ', grep(!$basegroup{$_}++, sort split(' ',`$groups`)));
 
