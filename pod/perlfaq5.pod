@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq5 - Files and Formats ($Revision: 1.1 $, $Date: 2001/09/20 03:03:00 $)
+perlfaq5 - Files and Formats ($Revision: 1.2 $, $Date: 2001/09/26 10:44:41 $)
 
 =head1 DESCRIPTION
 
@@ -428,9 +428,9 @@ See L<perlform/"Accessing Formatting Internals"> for an swrite() function.
 This one will do it for you:
 
     sub commify {
-	local $_  = shift;
-	1 while s/^([-+]?\d+)(\d{3})/$1,$2/;
-	return $_;
+        my $number = shift;
+	1 while ($number =~ s/^([-+]?\d+)(\d{3})/$1,$2/);
+	return $number;
     }
 
     $n = 23659019423.2331;

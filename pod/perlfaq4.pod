@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 1.1 $, $Date: 2001/09/20 03:03:00 $)
+perlfaq4 - Data Manipulation ($Revision: 1.2 $, $Date: 2001/09/26 15:42:12 $)
 
 =head1 DESCRIPTION
 
@@ -583,7 +583,7 @@ To make the first letter of each word upper case:
 
 This has the strange effect of turning "C<don't do it>" into "C<Don'T
 Do It>".  Sometimes you might want this.  Other times you might need a
-more thorough solution (Suggested by brian d.  foy):
+more thorough solution (Suggested by brian d foy):
 
     $string =~ s/ (
                  (^\w)    #at the beginning of the line
