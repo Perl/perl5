@@ -146,8 +146,14 @@
      # Fatal error reporting function
      croak(format, arg)			warn(idem) + exit(1)
   
+     # Fatal error reporting function
+     croak2(format, arg1, arg2)		warn2(idem) + exit(1)
+  
      # Error reporting function
      warn(format, arg)			fprintf(stderr, idem)
+
+     # Error reporting function
+     warn2(format, arg1, arg2)		fprintf(stderr, idem)
 
      # Locking/unlocking for MT operation
      MALLOC_LOCK			MUTEX_LOCK(&PL_malloc_mutex)
@@ -234,7 +240,12 @@
 #  include "perl.h"
 #  if defined(PERL_IMPLICIT_CONTEXT)
 #    define croak	Perl_croak_nocontext
+#    define croak2	Perl_croak_nocontext
 #    define warn	Perl_warn_nocontext
+#    define warn2	Perl_warn_nocontext
+#  else
+#    define croak2	croak
+#    define warn2	warn
 #  endif
 #else
 #  ifdef PERL_FOR_X2P
@@ -274,8 +285,14 @@
 #  ifndef croak				/* make depend */
 #    define croak(mess, arg) (warn((mess), (arg)), exit(1))
 #  endif 
+#  ifndef croak2			/* make depend */
+#    define croak2(mess, arg1, arg2) (warn2((mess), (arg1), (arg2)), exit(1))
+#  endif 
 #  ifndef warn
 #    define warn(mess, arg) fprintf(stderr, (mess), (arg))
+#  endif 
+#  ifndef warn
+#    define warn2(mess, arg1) fprintf(stderr, (mess), (arg1), (arg2))
 #  endif 
 #  ifdef DEBUG_m
 #    undef DEBUG_m
@@ -851,18 +868,64 @@ static int	getpages_adjacent(MEM_SIZE require);
 #  define MUTEX_UNLOCK(m) STMT_START { if (*m) mutex_unlock(*m); } STMT_END
 #endif
 
+#ifndef BITS_IN_PTR
+#  define BITS_IN_PTR (8*PTRSIZE)
+#endif
+
+/*
+ * nextf[i] is the pointer to the next free block of size 2^i.  The
+ * smallest allocatable block is 8 bytes.  The overhead information
+ * precedes the data area returned to the user.
+ */
+#define	NBUCKETS (BITS_IN_PTR*BUCKETS_PER_POW2 + 1)
+static	union overhead *nextf[NBUCKETS];
+
+#if defined(PURIFY) && !defined(USE_PERL_SBRK)
+#  define USE_PERL_SBRK
+#endif
+
+#ifdef USE_PERL_SBRK
+#define sbrk(a) Perl_sbrk(a)
+Malloc_t Perl_sbrk (int size);
+#else 
+#ifdef DONT_DECLARE_STD
+#ifdef I_UNISTD
+#include <unistd.h>
+#endif
+#else
+extern	Malloc_t sbrk(int);
+#endif
+#endif
+
+#ifdef DEBUGGING_MSTATS
+/*
+ * nmalloc[i] is the difference between the number of mallocs and frees
+ * for a given block size.
+ */
+static	u_int nmalloc[NBUCKETS];
+static  u_int sbrk_slack;
+static  u_int start_slack;
+#else	/* !( defined DEBUGGING_MSTATS ) */
+#  define sbrk_slack	0
+#endif
+
+static	u_int goodsbrk;
+
 static char *emergency_buffer;
 static MEM_SIZE emergency_buffer_size;
+static int no_mem;	/* 0 if the last request for more memory succeeded.
+			   Otherwise the size of the failing request. */
 
 static Malloc_t
 emergency_sbrk(MEM_SIZE size)
 {
     MEM_SIZE rsize = (((size - 1)>>LOG_OF_MIN_ARENA) + 1)<<LOG_OF_MIN_ARENA;
 
-    if (size >= BIG_SIZE) {
-	/* Give the possibility to recover: */
+    if (size >= BIG_SIZE && (!no_mem || (size < no_mem))) {
+	/* Give the possibility to recover, but avoid an infinite cycle. */
 	MALLOC_UNLOCK;
-	croak("Out of memory during \"large\" request for %i bytes", size);
+	no_mem = size;
+	croak2("Out of memory during \"large\" request for %"UVuf" bytes, total sbrk() is %"UVuf" bytes", (UV)size, (UV)(goodsbrk + sbrk_slack));
     }
 
     if (emergency_buffer_size >= rsize) {
@@ -910,7 +973,7 @@ emergency_sbrk(MEM_SIZE size)
     }
   do_croak:
     MALLOC_UNLOCK;
-    croak("Out of memory during request for %i bytes", size);
+    croak("Out of memory during request for %"UVuf" bytes, total sbrk() is %"UVuf" bytes", (UV)size, (UV)(goodsbrk + sbrk_slack));
     /* NOTREACHED */
     return Nullch;
 }
@@ -918,47 +981,6 @@ emergency_sbrk(MEM_SIZE size)
 #else /* !(defined(PERL_EMERGENCY_SBRK) && defined(PERL_CORE)) */
 #  define emergency_sbrk(size)	-1
 #endif /* !(defined(PERL_EMERGENCY_SBRK) && defined(PERL_CORE)) */
-
-#ifndef BITS_IN_PTR
-#  define BITS_IN_PTR (8*PTRSIZE)
-#endif
-
-/*
- * nextf[i] is the pointer to the next free block of size 2^i.  The
- * smallest allocatable block is 8 bytes.  The overhead information
- * precedes the data area returned to the user.
- */
-#define	NBUCKETS (BITS_IN_PTR*BUCKETS_PER_POW2 + 1)
-static	union overhead *nextf[NBUCKETS];
-
-#if defined(PURIFY) && !defined(USE_PERL_SBRK)
-#  define USE_PERL_SBRK
-#endif
-
-#ifdef USE_PERL_SBRK
-#define sbrk(a) Perl_sbrk(a)
-Malloc_t Perl_sbrk (int size);
-#else 
-#ifdef DONT_DECLARE_STD
-#ifdef I_UNISTD
-#include <unistd.h>
-#endif
-#else
-extern	Malloc_t sbrk(int);
-#endif
-#endif
-
-#ifdef DEBUGGING_MSTATS
-/*
- * nmalloc[i] is the difference between the number of mallocs and frees
- * for a given block size.
- */
-static	u_int nmalloc[NBUCKETS];
-static  u_int sbrk_slack;
-static  u_int start_slack;
-#endif
-
-static	u_int goodsbrk;
 
 #ifdef DEBUGGING
 #undef ASSERT
@@ -1035,7 +1057,28 @@ Perl_malloc(register size_t nbytes)
 		{
 		    dTHX;
 		    if (!PL_nomemok) {
-			PerlIO_puts(PerlIO_stderr(),"Out of memory!\n");
+			char buff[80];
+			char *eb = buff + sizeof(buff) - 1;
+			char *s = eb;
+			size_t n = nbytes;
+
+			PerlIO_puts(PerlIO_stderr(),"Out of memory during request for ");
+#if defined(DEBUGGING) || defined(RCHECK)
+			n = size;
+#endif
+			*s = 0;			
+			do {
+			    *--s = '0' + (n % 10);
+			} while (n /= 10);
+			PerlIO_puts(PerlIO_stderr(),s);
+			PerlIO_puts(PerlIO_stderr()," bytes, total sbrk() is ");
+			s = eb;
+			n = goodsbrk + sbrk_slack;
+			do {
+			    *--s = '0' + (n % 10);
+			} while (n /= 10);
+			PerlIO_puts(PerlIO_stderr(),s);
+			PerlIO_puts(PerlIO_stderr()," bytes!\n");
 			my_exit(1);
 		    }
 		}
@@ -1343,6 +1386,7 @@ getpages(MEM_SIZE needed, int *nblksp, int bucket)
 	sbrked_remains = require - needed;
 	last_op = cp;
     }
+    no_mem = 0;
     last_sbrk_top = cp + require;
 #ifdef DEBUGGING_MSTATS
     goodsbrk += require;

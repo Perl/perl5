@@ -2329,7 +2329,8 @@ The request was judged to be small, so the possibility to trap it
 depends on the way perl was compiled.  By default it is not trappable.
 However, if compiled for this, Perl may use the contents of C<$^M> as an
 emergency pool after die()ing with this message.  In this case the error
-is trappable I<once>.
+is trappable I<once>, and the error message will include the line and file
+where the failed request happened.
 
 =item Out of memory during ridiculously large request
 
