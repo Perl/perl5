@@ -247,7 +247,7 @@ PP(pp_rv2gv)
 			STRLEN len;
 			SV *namesv = PL_curpad[cUNOP->op_targ];
 			name = SvPV(namesv, len);
-			gv = (GV*)NEWSV(0,len);
+			gv = (GV*)NEWSV(0,0);
 			gv_init(gv, CopSTASH(PL_curcop), name, len, 0);
 		    }
 		    else {
