@@ -32,14 +32,16 @@ print "ok 3\n";
 print "not " unless langinfo(MON_1)     eq "January";
 print "ok 4\n";
 
-unless (langinfo(RADIXCHAR) eq ".") {
+unless (eval { langinfo(RADIXCHAR) } eq ".") {
     print "not ok 5 - RADIXCHAR undefined\n";
-    if ($Config{d_gnulibc} || $Config{cppsymbols} =~ /GLIBC/) {
+    if ($Config{d_gnulibc} || $Config{cppsymbols} =~ /__GNU_LIBRARY_/) {
 	print <<EOM;
 #
 # You are probably using GNU libc. The RADIXCHAR not getting defined
 # by I18N::Langinfo is a known problem in some older versions of the
-# GNU libc.
+# GNU libc (caused by the combination of using only enums, not cpp
+# definitions, and of hiding the definitions behind rather obscure
+# feature tests).  Upgrading your libc is strongly suggested. 
 #
 EOM
     }

@@ -141,281 +141,281 @@
 );
 %utf8::InPat = (
 'alp' => {
-	'Alphabetic[- _]?Presentation[- _]?Forms' => 'Alphabetic Presentation Forms',
+	'Alphabetic(?:[-_]|\s+)?Presentation(?:[-_]|\s+)?Forms' => 'Alphabetic Presentation Forms',
 },
 'ara' => {
 	'ARABIC' => 'ARABIC',
-	'Arabic[- _]?Block' => 'Arabic Block',
-	'Arabic[- _]?Presentation[- _]?Forms[- _]?A' => 'Arabic Presentation Forms-A',
-	'Arabic[- _]?Presentation[- _]?Forms[- _]?B' => 'Arabic Presentation Forms-B',
+	'Arabic(?:[-_]|\s+)?Block' => 'Arabic Block',
+	'Arabic(?:[-_]|\s+)?Presentation(?:[-_]|\s+)?Forms(?:[-_]|\s+)?A' => 'Arabic Presentation Forms-A',
+	'Arabic(?:[-_]|\s+)?Presentation(?:[-_]|\s+)?Forms(?:[-_]|\s+)?B' => 'Arabic Presentation Forms-B',
 },
 'arm' => {
 	'ARMENIAN' => 'ARMENIAN',
-	'Armenian[- _]?Block' => 'Armenian Block',
+	'Armenian(?:[-_]|\s+)?Block' => 'Armenian Block',
 },
 'arr' => {
 	'Arrows' => 'Arrows',
 },
 'bas' => {
-	'Basic[- _]?Latin' => 'Basic Latin',
+	'Basic(?:[-_]|\s+)?Latin' => 'Basic Latin',
 },
 'ben' => {
 	'BENGALI' => 'BENGALI',
-	'Bengali[- _]?Block' => 'Bengali Block',
+	'Bengali(?:[-_]|\s+)?Block' => 'Bengali Block',
 },
 'blo' => {
-	'Block[- _]?Elements' => 'Block Elements',
+	'Block(?:[-_]|\s+)?Elements' => 'Block Elements',
 },
 'bop' => {
 	'BOPOMOFO' => 'BOPOMOFO',
-	'Bopomofo[- _]?Block' => 'Bopomofo Block',
-	'Bopomofo[- _]?Extended' => 'Bopomofo Extended',
+	'Bopomofo(?:[-_]|\s+)?Block' => 'Bopomofo Block',
+	'Bopomofo(?:[-_]|\s+)?Extended' => 'Bopomofo Extended',
 },
 'box' => {
-	'Box[- _]?Drawing' => 'Box Drawing',
+	'Box(?:[-_]|\s+)?Drawing' => 'Box Drawing',
 },
 'bra' => {
-	'Braille[- _]?Patterns' => 'Braille Patterns',
+	'Braille(?:[-_]|\s+)?Patterns' => 'Braille Patterns',
 },
 'byz' => {
-	'Byzantine[- _]?Musical[- _]?Symbols' => 'Byzantine Musical Symbols',
+	'Byzantine(?:[-_]|\s+)?Musical(?:[-_]|\s+)?Symbols' => 'Byzantine Musical Symbols',
 },
 'can' => {
-	'CANADIAN[- _]?ABORIGINAL' => 'CANADIAN-ABORIGINAL',
+	'CANADIAN(?:[-_]|\s+)?ABORIGINAL' => 'CANADIAN-ABORIGINAL',
 },
 'che' => {
 	'CHEROKEE' => 'CHEROKEE',
-	'Cherokee[- _]?Block' => 'Cherokee Block',
+	'Cherokee(?:[-_]|\s+)?Block' => 'Cherokee Block',
 },
 'cjk' => {
-	'CJK[- _]?Radicals[- _]?Supplement' => 'CJK Radicals Supplement',
-	'CJK[- _]?Symbols[- _]?and[- _]?Punctuation' => 'CJK Symbols and Punctuation',
-	'CJK[- _]?Compatibility' => 'CJK Compatibility',
-	'CJK[- _]?Unified[- _]?Ideographs[- _]?Extension[- _]?A' => 'CJK Unified Ideographs Extension A',
-	'CJK[- _]?Unified[- _]?Ideographs' => 'CJK Unified Ideographs',
-	'CJK[- _]?Compatibility[- _]?Ideographs' => 'CJK Compatibility Ideographs',
-	'CJK[- _]?Compatibility[- _]?Forms' => 'CJK Compatibility Forms',
-	'CJK[- _]?Unified[- _]?Ideographs[- _]?Extension[- _]?B' => 'CJK Unified Ideographs Extension B',
-	'CJK[- _]?Compatibility[- _]?Ideographs[- _]?Supplement' => 'CJK Compatibility Ideographs Supplement',
+	'CJK(?:[-_]|\s+)?Radicals(?:[-_]|\s+)?Supplement' => 'CJK Radicals Supplement',
+	'CJK(?:[-_]|\s+)?Symbols(?:[-_]|\s+)?and(?:[-_]|\s+)?Punctuation' => 'CJK Symbols and Punctuation',
+	'CJK(?:[-_]|\s+)?Compatibility' => 'CJK Compatibility',
+	'CJK(?:[-_]|\s+)?Unified(?:[-_]|\s+)?Ideographs(?:[-_]|\s+)?Extension(?:[-_]|\s+)?A' => 'CJK Unified Ideographs Extension A',
+	'CJK(?:[-_]|\s+)?Unified(?:[-_]|\s+)?Ideographs' => 'CJK Unified Ideographs',
+	'CJK(?:[-_]|\s+)?Compatibility(?:[-_]|\s+)?Ideographs' => 'CJK Compatibility Ideographs',
+	'CJK(?:[-_]|\s+)?Compatibility(?:[-_]|\s+)?Forms' => 'CJK Compatibility Forms',
+	'CJK(?:[-_]|\s+)?Unified(?:[-_]|\s+)?Ideographs(?:[-_]|\s+)?Extension(?:[-_]|\s+)?B' => 'CJK Unified Ideographs Extension B',
+	'CJK(?:[-_]|\s+)?Compatibility(?:[-_]|\s+)?Ideographs(?:[-_]|\s+)?Supplement' => 'CJK Compatibility Ideographs Supplement',
 },
 'com' => {
-	'Combining[- _]?Diacritical[- _]?Marks' => 'Combining Diacritical Marks',
-	'Combining[- _]?Marks[- _]?for[- _]?Symbols' => 'Combining Marks for Symbols',
-	'Combining[- _]?Half[- _]?Marks' => 'Combining Half Marks',
+	'Combining(?:[-_]|\s+)?Diacritical(?:[-_]|\s+)?Marks' => 'Combining Diacritical Marks',
+	'Combining(?:[-_]|\s+)?Marks(?:[-_]|\s+)?for(?:[-_]|\s+)?Symbols' => 'Combining Marks for Symbols',
+	'Combining(?:[-_]|\s+)?Half(?:[-_]|\s+)?Marks' => 'Combining Half Marks',
 },
 'con' => {
-	'Control[- _]?Pictures' => 'Control Pictures',
+	'Control(?:[-_]|\s+)?Pictures' => 'Control Pictures',
 },
 'cur' => {
-	'Currency[- _]?Symbols' => 'Currency Symbols',
+	'Currency(?:[-_]|\s+)?Symbols' => 'Currency Symbols',
 },
 'cyr' => {
 	'CYRILLIC' => 'CYRILLIC',
-	'Cyrillic[- _]?Block' => 'Cyrillic Block',
+	'Cyrillic(?:[-_]|\s+)?Block' => 'Cyrillic Block',
 },
 'des' => {
 	'DESERET' => 'DESERET',
-	'Deseret[- _]?Block' => 'Deseret Block',
+	'Deseret(?:[-_]|\s+)?Block' => 'Deseret Block',
 },
 'dev' => {
 	'DEVANAGARI' => 'DEVANAGARI',
-	'Devanagari[- _]?Block' => 'Devanagari Block',
+	'Devanagari(?:[-_]|\s+)?Block' => 'Devanagari Block',
 },
 'din' => {
 	'Dingbats' => 'Dingbats',
 },
 'enc' => {
-	'Enclosed[- _]?Alphanumerics' => 'Enclosed Alphanumerics',
-	'Enclosed[- _]?CJK[- _]?Letters[- _]?and[- _]?Months' => 'Enclosed CJK Letters and Months',
+	'Enclosed(?:[-_]|\s+)?Alphanumerics' => 'Enclosed Alphanumerics',
+	'Enclosed(?:[-_]|\s+)?CJK(?:[-_]|\s+)?Letters(?:[-_]|\s+)?and(?:[-_]|\s+)?Months' => 'Enclosed CJK Letters and Months',
 },
 'eth' => {
 	'ETHIOPIC' => 'ETHIOPIC',
-	'Ethiopic[- _]?Block' => 'Ethiopic Block',
+	'Ethiopic(?:[-_]|\s+)?Block' => 'Ethiopic Block',
 },
 'gen' => {
-	'General[- _]?Punctuation' => 'General Punctuation',
+	'General(?:[-_]|\s+)?Punctuation' => 'General Punctuation',
 },
 'geo' => {
 	'GEORGIAN' => 'GEORGIAN',
-	'Georgian[- _]?Block' => 'Georgian Block',
-	'Geometric[- _]?Shapes' => 'Geometric Shapes',
+	'Georgian(?:[-_]|\s+)?Block' => 'Georgian Block',
+	'Geometric(?:[-_]|\s+)?Shapes' => 'Geometric Shapes',
 },
 'got' => {
 	'GOTHIC' => 'GOTHIC',
-	'Gothic[- _]?Block' => 'Gothic Block',
+	'Gothic(?:[-_]|\s+)?Block' => 'Gothic Block',
 },
 'gre' => {
 	'GREEK' => 'GREEK',
-	'Greek[- _]?Block' => 'Greek Block',
-	'Greek[- _]?Extended' => 'Greek Extended',
+	'Greek(?:[-_]|\s+)?Block' => 'Greek Block',
+	'Greek(?:[-_]|\s+)?Extended' => 'Greek Extended',
 },
 'guj' => {
 	'GUJARATI' => 'GUJARATI',
-	'Gujarati[- _]?Block' => 'Gujarati Block',
+	'Gujarati(?:[-_]|\s+)?Block' => 'Gujarati Block',
 },
 'gur' => {
 	'GURMUKHI' => 'GURMUKHI',
-	'Gurmukhi[- _]?Block' => 'Gurmukhi Block',
+	'Gurmukhi(?:[-_]|\s+)?Block' => 'Gurmukhi Block',
 },
 'hal' => {
-	'Halfwidth[- _]?and[- _]?Fullwidth[- _]?Forms' => 'Halfwidth and Fullwidth Forms',
+	'Halfwidth(?:[-_]|\s+)?and(?:[-_]|\s+)?Fullwidth(?:[-_]|\s+)?Forms' => 'Halfwidth and Fullwidth Forms',
 },
 'han' => {
 	'HANGUL' => 'HANGUL',
 	'HAN' => 'HAN',
-	'Hangul[- _]?Jamo' => 'Hangul Jamo',
-	'Hangul[- _]?Compatibility[- _]?Jamo' => 'Hangul Compatibility Jamo',
-	'Hangul[- _]?Syllables' => 'Hangul Syllables',
+	'Hangul(?:[-_]|\s+)?Jamo' => 'Hangul Jamo',
+	'Hangul(?:[-_]|\s+)?Compatibility(?:[-_]|\s+)?Jamo' => 'Hangul Compatibility Jamo',
+	'Hangul(?:[-_]|\s+)?Syllables' => 'Hangul Syllables',
 },
 'heb' => {
 	'HEBREW' => 'HEBREW',
-	'Hebrew[- _]?Block' => 'Hebrew Block',
+	'Hebrew(?:[-_]|\s+)?Block' => 'Hebrew Block',
 },
 'hig' => {
-	'High[- _]?Surrogates' => 'High Surrogates',
-	'High[- _]?Private[- _]?Use[- _]?Surrogates' => 'High Private Use Surrogates',
+	'High(?:[-_]|\s+)?Surrogates' => 'High Surrogates',
+	'High(?:[-_]|\s+)?Private(?:[-_]|\s+)?Use(?:[-_]|\s+)?Surrogates' => 'High Private Use Surrogates',
 },
 'hir' => {
 	'HIRAGANA' => 'HIRAGANA',
-	'Hiragana[- _]?Block' => 'Hiragana Block',
+	'Hiragana(?:[-_]|\s+)?Block' => 'Hiragana Block',
 },
 'ide' => {
-	'Ideographic[- _]?Description[- _]?Characters' => 'Ideographic Description Characters',
+	'Ideographic(?:[-_]|\s+)?Description(?:[-_]|\s+)?Characters' => 'Ideographic Description Characters',
 },
 'inh' => {
 	'INHERITED' => 'INHERITED',
 },
 'ipa' => {
-	'IPA[- _]?Extensions' => 'IPA Extensions',
+	'IPA(?:[-_]|\s+)?Extensions' => 'IPA Extensions',
 },
 'kan' => {
 	'KANNADA' => 'KANNADA',
-	'Kannada[- _]?Block' => 'Kannada Block',
-	'Kangxi[- _]?Radicals' => 'Kangxi Radicals',
+	'Kannada(?:[-_]|\s+)?Block' => 'Kannada Block',
+	'Kangxi(?:[-_]|\s+)?Radicals' => 'Kangxi Radicals',
 	'Kanbun' => 'Kanbun',
 },
 'kat' => {
 	'KATAKANA' => 'KATAKANA',
-	'Katakana[- _]?Block' => 'Katakana Block',
+	'Katakana(?:[-_]|\s+)?Block' => 'Katakana Block',
 },
 'khm' => {
 	'KHMER' => 'KHMER',
-	'Khmer[- _]?Block' => 'Khmer Block',
+	'Khmer(?:[-_]|\s+)?Block' => 'Khmer Block',
 },
 'lao' => {
 	'LAO' => 'LAO',
-	'Lao[- _]?Block' => 'Lao Block',
+	'Lao(?:[-_]|\s+)?Block' => 'Lao Block',
 },
 'lat' => {
 	'LATIN' => 'LATIN',
-	'Latin[- _]?1[- _]?Supplement' => 'Latin-1 Supplement',
-	'Latin[- _]?Extended[- _]?A' => 'Latin Extended-A',
-	'Latin[- _]?Extended[- _]?B' => 'Latin Extended-B',
-	'Latin[- _]?Extended[- _]?Additional' => 'Latin Extended Additional',
+	'Latin(?:[-_]|\s+)?1(?:[-_]|\s+)?Supplement' => 'Latin-1 Supplement',
+	'Latin(?:[-_]|\s+)?Extended(?:[-_]|\s+)?A' => 'Latin Extended-A',
+	'Latin(?:[-_]|\s+)?Extended(?:[-_]|\s+)?B' => 'Latin Extended-B',
+	'Latin(?:[-_]|\s+)?Extended(?:[-_]|\s+)?Additional' => 'Latin Extended Additional',
 },
 'let' => {
-	'Letterlike[- _]?Symbols' => 'Letterlike Symbols',
+	'Letterlike(?:[-_]|\s+)?Symbols' => 'Letterlike Symbols',
 },
 'low' => {
-	'Low[- _]?Surrogates' => 'Low Surrogates',
+	'Low(?:[-_]|\s+)?Surrogates' => 'Low Surrogates',
 },
 'mal' => {
 	'MALAYALAM' => 'MALAYALAM',
-	'Malayalam[- _]?Block' => 'Malayalam Block',
+	'Malayalam(?:[-_]|\s+)?Block' => 'Malayalam Block',
 },
 'mat' => {
-	'Mathematical[- _]?Operators' => 'Mathematical Operators',
-	'Mathematical[- _]?Alphanumeric[- _]?Symbols' => 'Mathematical Alphanumeric Symbols',
+	'Mathematical(?:[-_]|\s+)?Operators' => 'Mathematical Operators',
+	'Mathematical(?:[-_]|\s+)?Alphanumeric(?:[-_]|\s+)?Symbols' => 'Mathematical Alphanumeric Symbols',
 },
 'mis' => {
-	'Miscellaneous[- _]?Technical' => 'Miscellaneous Technical',
-	'Miscellaneous[- _]?Symbols' => 'Miscellaneous Symbols',
+	'Miscellaneous(?:[-_]|\s+)?Technical' => 'Miscellaneous Technical',
+	'Miscellaneous(?:[-_]|\s+)?Symbols' => 'Miscellaneous Symbols',
 },
 'mon' => {
 	'MONGOLIAN' => 'MONGOLIAN',
-	'Mongolian[- _]?Block' => 'Mongolian Block',
+	'Mongolian(?:[-_]|\s+)?Block' => 'Mongolian Block',
 },
 'mus' => {
-	'Musical[- _]?Symbols' => 'Musical Symbols',
+	'Musical(?:[-_]|\s+)?Symbols' => 'Musical Symbols',
 },
 'mya' => {
 	'MYANMAR' => 'MYANMAR',
-	'Myanmar[- _]?Block' => 'Myanmar Block',
+	'Myanmar(?:[-_]|\s+)?Block' => 'Myanmar Block',
 },
 'num' => {
-	'Number[- _]?Forms' => 'Number Forms',
+	'Number(?:[-_]|\s+)?Forms' => 'Number Forms',
 },
 'ogh' => {
 	'OGHAM' => 'OGHAM',
-	'Ogham[- _]?Block' => 'Ogham Block',
+	'Ogham(?:[-_]|\s+)?Block' => 'Ogham Block',
 },
 'old' => {
-	'OLD[- _]?ITALIC' => 'OLD-ITALIC',
-	'Old[- _]?Italic' => 'Old Italic',
+	'OLD(?:[-_]|\s+)?ITALIC' => 'OLD-ITALIC',
+	'Old(?:[-_]|\s+)?Italic' => 'Old Italic',
 },
 'opt' => {
-	'Optical[- _]?Character[- _]?Recognition' => 'Optical Character Recognition',
+	'Optical(?:[-_]|\s+)?Character(?:[-_]|\s+)?Recognition' => 'Optical Character Recognition',
 },
 'ori' => {
 	'ORIYA' => 'ORIYA',
-	'Oriya[- _]?Block' => 'Oriya Block',
+	'Oriya(?:[-_]|\s+)?Block' => 'Oriya Block',
 },
 'pri' => {
-	'Private[- _]?Use' => 'Private Use',
+	'Private(?:[-_]|\s+)?Use' => 'Private Use',
 },
 'run' => {
 	'RUNIC' => 'RUNIC',
-	'Runic[- _]?Block' => 'Runic Block',
+	'Runic(?:[-_]|\s+)?Block' => 'Runic Block',
 },
 'sin' => {
 	'SINHALA' => 'SINHALA',
-	'Sinhala[- _]?Block' => 'Sinhala Block',
+	'Sinhala(?:[-_]|\s+)?Block' => 'Sinhala Block',
 },
 'sma' => {
-	'Small[- _]?Form[- _]?Variants' => 'Small Form Variants',
+	'Small(?:[-_]|\s+)?Form(?:[-_]|\s+)?Variants' => 'Small Form Variants',
 },
 'spa' => {
-	'Spacing[- _]?Modifier[- _]?Letters' => 'Spacing Modifier Letters',
+	'Spacing(?:[-_]|\s+)?Modifier(?:[-_]|\s+)?Letters' => 'Spacing Modifier Letters',
 },
 'spe' => {
 	'Specials' => 'Specials',
 },
 'sup' => {
-	'Superscripts[- _]?and[- _]?Subscripts' => 'Superscripts and Subscripts',
+	'Superscripts(?:[-_]|\s+)?and(?:[-_]|\s+)?Subscripts' => 'Superscripts and Subscripts',
 },
 'syr' => {
 	'SYRIAC' => 'SYRIAC',
-	'Syriac[- _]?Block' => 'Syriac Block',
+	'Syriac(?:[-_]|\s+)?Block' => 'Syriac Block',
 },
 'tag' => {
 	'Tags' => 'Tags',
 },
 'tam' => {
 	'TAMIL' => 'TAMIL',
-	'Tamil[- _]?Block' => 'Tamil Block',
+	'Tamil(?:[-_]|\s+)?Block' => 'Tamil Block',
 },
 'tel' => {
 	'TELUGU' => 'TELUGU',
-	'Telugu[- _]?Block' => 'Telugu Block',
+	'Telugu(?:[-_]|\s+)?Block' => 'Telugu Block',
 },
 'tha' => {
 	'THAANA' => 'THAANA',
 	'THAI' => 'THAI',
-	'Thaana[- _]?Block' => 'Thaana Block',
-	'Thai[- _]?Block' => 'Thai Block',
+	'Thaana(?:[-_]|\s+)?Block' => 'Thaana Block',
+	'Thai(?:[-_]|\s+)?Block' => 'Thai Block',
 },
 'tib' => {
 	'TIBETAN' => 'TIBETAN',
-	'Tibetan[- _]?Block' => 'Tibetan Block',
+	'Tibetan(?:[-_]|\s+)?Block' => 'Tibetan Block',
 },
 'uni' => {
-	'Unified[- _]?Canadian[- _]?Aboriginal[- _]?Syllabics' => 'Unified Canadian Aboriginal Syllabics',
+	'Unified(?:[-_]|\s+)?Canadian(?:[-_]|\s+)?Aboriginal(?:[-_]|\s+)?Syllabics' => 'Unified Canadian Aboriginal Syllabics',
 },
 'yi' => {
 	'YI' => 'YI',
 },
 'yi ' => {
-	'Yi[- _]?Syllables' => 'Yi Syllables',
-	'Yi[- _]?Radicals' => 'Yi Radicals',
+	'Yi(?:[-_]|\s+)?Syllables' => 'Yi Syllables',
+	'Yi(?:[-_]|\s+)?Radicals' => 'Yi Radicals',
 },
 );

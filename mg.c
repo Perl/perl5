@@ -1894,6 +1894,8 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
     case '|':
 	{
 	    IO *io = GvIOp(PL_defoutgv);
+	    if(!io)
+	      break;
 	    if ((SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv)) == 0)
 		IoFLAGS(io) &= ~IOf_FLUSH;
 	    else {

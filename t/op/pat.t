@@ -2138,8 +2138,9 @@ print "# some Unicode properties\n";
     print "not " unless "\x80" =~ /\P{  ^  In Latin 1 Supplement  }/;
     print "ok 717\n";
 
-    # No ^In, dashes, case.
-    print "not " unless "\x80" =~ /\p{latin-1-supplement}/;
+    # No ^In, dashes, case, dash, any intervening (word-break) whitespace.
+    # (well, newlines don't work...)
+    print "not " unless "\x80" =~ /\p{latin-1   supplement}/;
     print "ok 718\n";
 }
 
