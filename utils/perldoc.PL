@@ -232,7 +232,7 @@ sub minus_f_nocase {
      }
      return "";
 }
- 
+
 
 sub check_file {
     my($dir,$file) = @_;
@@ -273,7 +273,7 @@ sub searchfor {
 	) {
 	    return $ret;
 	}
-	
+
 	if ($recurse) {
 	    opendir(D,$dir);
 	    my @newdirs = map "$dir/$_", grep {
@@ -289,6 +289,15 @@ sub searchfor {
 	}
     }
     return ();
+}
+
+sub filter_nroff {
+  my @data = split /\n{2,}/, shift;
+  shift @data while @data and $data[0] !~ /\S/; # Go to header
+  shift @data if @data and $data[0] =~ /Contributed\s+Perl/; # Skip header
+  pop @data if @data and $data[-1] =~ /^\w/; # Skip footer, like
+				# 28/Jan/99 perl 5.005, patch 53 1
+  join "\n\n", @data;
 }
 
 my @found;
@@ -331,9 +340,9 @@ foreach (@pages) {
 		print STDERR "Found as @files\n" if $opt_v;
 	} else {
 		# no match, try recursive search
-		
+
 		@searchdirs = grep(!/^\.$/,@INC);
-		
+
 		@files= searchfor(1,$_,@searchdirs) if $opt_r;
 		if( @files ) {
 			print STDERR "Loosely found as @files\n" if $opt_v;
@@ -389,7 +398,7 @@ if ($Is_MSWin32) {
 	  $tmp = POSIX::tmpnam();
 	  unshift @pagers, 'less', 'cmd /c more <';
 	} else {
-	  $tmp = "/tmp/perldoc1.$$";	  
+	  $tmp = "/tmp/perldoc1.$$";
 	}
 	push @pagers, qw( more less pg view cat );
 	unshift @pagers, $ENV{PAGER}  if $ENV{PAGER};
@@ -402,8 +411,9 @@ if ($opt_m) {
 	}
 	if ($Is_VMS) { eval 'use vmsish qw(status exit); exit $?' }
 	exit 1;
-} 
+}
 
+my @pod;
 if ($opt_f) {
    my $perlfunc = shift @found;
    open(PFUNC, $perlfunc) or die "Can't open $perlfunc: $!";
@@ -418,7 +428,6 @@ if ($opt_f) {
 
    # Look for our function
    my $found = 0;
-   my @pod;
    while (<PFUNC>) {
        if (/^=item\s+\Q$search_string\E\b/o)  {
 	   $found = 1;
@@ -429,27 +438,9 @@ if ($opt_f) {
        push @pod, $_;
        ++$found if /^\w/;	# found descriptive text
    }
-   if (@pod) {
-       if ($opt_t) {
-	   open(FORMATTER, "| pod2text") || die "Can't start filter";
-	   print FORMATTER "=over 8\n\n";
-	   print FORMATTER @pod;
-	   print FORMATTER "=back\n";
-	   close(FORMATTER);
-       } elsif (@pod < $lines-2) {
-	   print @pod;
-       } else {
-	   foreach my $pager (@pagers) {
-		open (PAGER, "| $pager") or next;
-		print PAGER @pod ;
-		close(PAGER) or next;
-		last;
-	   }
-       }
-   } else {
+   if (!@pod) {
        die "No documentation for perl function `$opt_f' found\n";
    }
-   exit;
 }
 
 if ($opt_q) {
@@ -468,28 +459,24 @@ if ($opt_q) {
       next unless $found;
       push @pod, $_;
    }
-   
-   if (@pod) {
-      if ($opt_t) {
-	 open(FORMATTER, "| pod2text") || die "Can't start filter";
-	 print FORMATTER "=over 8\n\n";
-	 print FORMATTER @pod;
-	 print FORMATTER "=back\n";
-	 close(FORMATTER);
-      } elsif (@pod < $lines-2) {
-	 print @pod;
-      } else {
-	 foreach my $pager (@pagers) {
-	    open (PAGER, "| $pager") or next;
-	    print PAGER @pod ;
-	    close(PAGER) or next;
-	    last;
-	 }
-      }
-   } else {
+
+   if (!@pod) {
       die "No documentation for perl FAQ keyword `$opt_q' found\n";
    }
-   exit;
+}
+
+my $tmp1;
+my $filter;
+
+if (@pod) {
+  $tmp1 = $tmp . "_";
+  open(TMP,">$tmp1") or die "open '$tmp1': $!";
+  print TMP "=over 8\n\n";
+  print TMP @pod;
+  print TMP "=back\n";
+  close(TMP) or die "close '$tmp1': $!";
+  @found = $tmp1;
+  $filter = 1;
 }
 
 foreach (@found) {
@@ -503,13 +490,14 @@ foreach (@found) {
 		my $cmd = "pod2man --lax $_ | nroff -man";
 		$cmd .= " | col -x" if $^O =~ /hpux/;
 		my $rslt = `$cmd`;
+		$rslt = filter_nroff $rslt if $filter;
 		unless(($err = $?)) {
 			open(TMP,">>$tmp");
 			print TMP $rslt;
 			close TMP;
 		}
 	}
-	                                                
+
 	if( $opt_u or $err or -z $tmp) {
 		open(OUT,">>$tmp");
 		open(IN,"<$_");
@@ -535,6 +523,9 @@ if( $no_tty ) {
 }
 
 1 while unlink($tmp); #Possibly pointless VMSism
+if (defined $tmp1) {
+  1 while unlink($tmp1); #Possibly pointless VMSism
+}
 
 exit 0;
 
@@ -638,6 +629,8 @@ C<perldoc> itself, are available.)  C<perldoc> will use, in order of
 preference, the pager defined in C<PERLDOC_PAGER>, C<MANPAGER>, or
 C<PAGER> before trying to find a pager on its own.  (C<MANPAGER> is not
 used if C<perldoc> was told to display plain text or unformatted pod.)
+
+One useful value for C<PERLDOC_PAGER> is C<less -+C -E>.
 
 =head1 AUTHOR
 
