@@ -92,6 +92,7 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
     PerlIO *fp;
     int fd;
     int result;
+    bool was_fdopen = FALSE;
 
     forkprocess = 1;		/* assume true if no fork */
 
@@ -221,6 +222,8 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
 		    }
 		    if (dodup)
 			fd = PerlLIO_dup(fd);
+		    else
+			was_fdopen = TRUE;
 		    if (!(fp = PerlIO_fdopen(fd,mode))) {
 			if (dodup)
 			    PerlLIO_close(fd);
@@ -330,7 +333,8 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
 	    sv = *av_fetch(fdpid,fd,TRUE);
 	    (void)SvUPGRADE(sv, SVt_IV);
 	    SvIVX(sv) = pid;
-	    PerlIO_close(fp);
+	    if (!was_fdopen)
+		PerlIO_close(fp);
 
 	}
 	fp = saveifp;
