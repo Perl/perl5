@@ -2,7 +2,7 @@ package base;
 
 use strict 'vars';
 use vars qw($VERSION);
-$VERSION = '2.04';
+$VERSION = '2.05';
 
 # constant.pm is slow
 sub SUCCESS () { 1 }

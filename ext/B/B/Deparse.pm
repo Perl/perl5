@@ -19,7 +19,9 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          CVf_METHOD CVf_LOCKED CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE PMf_SKIPWHITE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
-$VERSION = 0.64;
+# Not sure if I really should have this as maint's version, given that Deparse
+# differs from blead. (latter has // support)
+$VERSION = 0.66;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();

@@ -2,7 +2,7 @@ package utf8;
 
 $utf8::hint_bits = 0x00800000;
 
-our $VERSION = '1.02';
+our $VERSION = '1.03';
 
 sub import {
     $^H |= $utf8::hint_bits;

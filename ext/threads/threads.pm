@@ -50,7 +50,13 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
 async	
 );
+>>>> ORIGINAL threads.pm#37
+our $VERSION = '1.02';
+==== THEIRS threads.pm#38
+our $VERSION = '1.03';
+==== YOURS threads.pm
 our $VERSION = '1.01';
+<<<<
 
 
 # || 0 to ensure compatibility with previous versions

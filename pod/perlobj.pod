@@ -535,15 +535,15 @@ two-phased garbage collection:
     warn "time to die...";
     exit;
 
-When run as F</tmp/test>, the following output is produced:
+When run as F</foo/test>, the following output is produced:
 
-    starting program at /tmp/test line 18.
-    CREATING SCALAR(0x8e5b8) at /tmp/test line 7.
-    CREATING SCALAR(0x8e57c) at /tmp/test line 7.
-    leaving block at /tmp/test line 23.
-    DESTROYING Subtle=SCALAR(0x8e5b8) at /tmp/test line 13.
-    just exited block at /tmp/test line 26.
-    time to die... at /tmp/test line 27.
+    starting program at /foo/test line 18.
+    CREATING SCALAR(0x8e5b8) at /foo/test line 7.
+    CREATING SCALAR(0x8e57c) at /foo/test line 7.
+    leaving block at /foo/test line 23.
+    DESTROYING Subtle=SCALAR(0x8e5b8) at /foo/test line 13.
+    just exited block at /foo/test line 26.
+    time to die... at /foo/test line 27.
     DESTROYING Subtle=SCALAR(0x8e57c) during global destruction.
 
 Notice that "global destruction" bit there?  That's the thread

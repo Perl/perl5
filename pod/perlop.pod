@@ -1162,10 +1162,10 @@ but leave its STDOUT to come out the old STDERR:
     $output = `cmd 3>&1 1>&2 2>&3 3>&-`;
 
 To read both a command's STDOUT and its STDERR separately, it's easiest
-and safest to redirect them separately to files, and then read from those
-files when the program is done:
+to redirect them separately to files, and then read from those files
+when the program is done:
 
-    system("program args 1>/tmp/program.stdout 2>/tmp/program.stderr");
+    system("program args 1>program.stdout 2>program.stderr");
 
 Using single-quote as a delimiter protects the command from Perl's
 double-quote interpolation, passing it on to the shell instead:

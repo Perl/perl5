@@ -6,7 +6,7 @@ use File::Spec::Functions;
 
 our($capture_stderr, $VERSION, $AUTOLOAD);
 
-$VERSION = '0.5.1';
+$VERSION = '0.5.2';
 
 sub new { bless \my $foo, shift }
 sub DESTROY { }
@@ -147,7 +147,7 @@ Here's one that'll whack your mind a little out.
     sub ps;
     print ps -ww;
 
-    cp("/etc/passwd", "/tmp/passwd");
+    cp("/etc/passwd", "/etc/passwd.orig");
 
 That's maybe too gonzo.  It actually exports an AUTOLOAD to the current
 package (and uncovered a bug in Beta 3, by the way).  Maybe the usual

@@ -23,7 +23,9 @@ use Config;
 use File::Basename;
 
 use vars qw(@ISA $VERSION);
-$VERSION = '2.06';
+# Has same version as blead, but differs. Must resync when next CPAN release
+# of MM is merged from blead to maint
+$VERSION = '2.07_02';
 
 require ExtUtils::MM_Win32;
 @ISA = qw(ExtUtils::MM_Win32);

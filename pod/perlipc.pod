@@ -1030,7 +1030,7 @@ Here's a sample Unix-domain client:
     use strict;
     my ($rendezvous, $line);
 
-    $rendezvous = shift || '/tmp/catsock';
+    $rendezvous = shift || 'catsock';
     socket(SOCK, PF_UNIX, SOCK_STREAM, 0)	|| die "socket: $!";
     connect(SOCK, sockaddr_un($rendezvous))	|| die "connect: $!";
     while (defined($line = <SOCK>)) {
@@ -1051,7 +1051,7 @@ to be on the localhost, and thus everything works right.
     sub spawn;  # forward declaration
     sub logmsg { print "$0 $$: @_ at ", scalar localtime, "\n" }
 
-    my $NAME = '/tmp/catsock';
+    my $NAME = 'catsock';
     my $uaddr = sockaddr_un($NAME);
     my $proto = getprotobyname('tcp');
 
