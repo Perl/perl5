@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 93;
+plan tests => 133;
 
 $_ = 'abc';
 $c = do foo();
@@ -189,7 +189,7 @@ foreach my $start (@chars) {
     local $/ = $end;
     my $message = "start=" . ord ($start) . " end=" . ord $end;
     my $string = $start . $end;
-    chomp $string;
+    is (chomp ($string), 1, "$message [returns 1]");
     is ($string, $start, $message);
 
     my $end_utf8 = $end;
@@ -199,13 +199,13 @@ foreach my $start (@chars) {
     # $end ne $end_utf8, so these should not chomp.
     $string = $start . $end_utf8;
     my $chomped = $string;
-    chomp $chomped;
+    is (chomp ($chomped), 0, "$message (end as bytes) [returns 0]");
     is ($chomped, $string, "$message (end as bytes)");
 
     $/ = $end_utf8;
     $string = $start . $end;
     $chomped = $string;
-    chomp $chomped;
+    is (chomp ($chomped), 0, "$message (\$/ as bytes) [returns 0]");
     is ($chomped, $string, "$message (\$/ as bytes)");
   }
 }
