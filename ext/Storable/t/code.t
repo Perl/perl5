@@ -118,7 +118,7 @@ ok($thawed->(), "JAPH");
 ######################################################################
 
 eval { $freezed = freeze $obj[4] };
-ok($@ =~ /The result of B::Deparse::coderef2text was empty/);
+ok($@, qr/The result of B::Deparse::coderef2text was empty/);
 
 ######################################################################
 # Test dclone
@@ -162,7 +162,7 @@ ok(prototype($thawed->[4]), prototype($obj[0]->[4]));
 	$freezed = freeze $obj[$i];
 	$@ = "";
 	eval { $thawed  = thaw $freezed };
-	ok($@ =~ /Can\'t eval/);
+	ok($@, qr/Can\'t eval/);
     }
 }
 
@@ -172,7 +172,7 @@ ok(prototype($thawed->[4]), prototype($obj[0]->[4]));
     for my $i (0 .. 1) {
 	$@ = "";
 	eval { $freezed = freeze $obj[$i] };
-	ok($@ =~ /Can\'t store CODE items/);
+	ok($@, qr/Can\'t store CODE items/);
     }
 }
 
@@ -184,7 +184,7 @@ ok(prototype($thawed->[4]), prototype($obj[0]->[4]));
 	$@ = "";
 	eval { $thawed  = thaw $freezed };
 	ok($@, "");
-	ok($$thawed =~ /^sub/);
+	ok($$thawed, qr/^sub/);
     }
 }
 
@@ -218,7 +218,8 @@ ok(prototype($thawed->[4]), prototype($obj[0]->[4]));
 
     $freezed = freeze $obj[0]->[6];
     eval { $thawed = thaw $freezed };
-    ok($@ =~ /trapped/);
+    # The "Code sub ..." error message only appears if Log::Agent is installed
+    ok($@, qr/(trapped|Code sub)/);
 
     if (0) {
 	# Disable or fix this test if the internal representation of Storable
@@ -234,7 +235,7 @@ ok(prototype($thawed->[4]), prototype($obj[0]->[4]));
 	substr($freezed, -1, 0, $bad_code);
 	$@ = "";
 	eval { $thawed = thaw $freezed };
-	ok($@ =~ /trapped/);
+	ok($@, qr/(trapped|Code sub)/);
     }
 }
 
