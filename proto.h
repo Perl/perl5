@@ -1288,9 +1288,6 @@ STATIC SV*	S_mess_alloc(pTHX);
 #  if defined(LEAKTEST)
 STATIC void	S_xstat(pTHX_ int);
 #  endif
-#  if defined(EBCDIC)
-PERL_CALLCONV int	Perl_ebcdic_control(pTHX_ int ch);
-#  endif
 #endif
 
 #if defined(PERL_OBJECT)
