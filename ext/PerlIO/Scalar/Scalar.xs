@@ -44,6 +44,8 @@ PerlIOScalar_pushed(PerlIO *f, const char *mode, SV *arg)
    s->posn = SvCUR(SvRV(arg));
  else
    s->posn = 0;
+ if ((PerlIOBase(f)->flags) & PERLIO_F_TRUNCATE)
+   SvCUR(SvRV(arg)) = 0;
  return code;
 }
 

@@ -10,7 +10,7 @@ BEGIN {
 }
 
 $| = 1;
-print "1..11\n";
+print "1..19\n";
 
 my $fh;
 my $var = "ok 2\n";
@@ -32,17 +32,57 @@ print "not " if eof($fh);
 print "ok 8\n";
 print "not " unless <$fh> eq "foo\n";
 print "ok 9\n";
-# Test multiple consecutive writes to $var
-$var = "";
-seek($fh, 0, 0);
-print $fh "Fred and Wilma ";
-print $fh "Flintstone";
-print "not " unless $var eq "Fred and Wilma Flintstone";
+my $rv = close $fh;
+if (!$rv) {
+    print "# Close on scalar failed: $!\n";
+    print "not ";
+}
 print "ok 10\n";
-# Test appending
-close $fh;
-$var = "Fred and Wilma ";
-open $fh, ">>", \$var;
-print $fh "Flintstone";
-print "not " unless $var eq "Fred and Wilma Flintstone";
+
+# Test that semantics are similar to normal file-based I/O
+# Check that ">" clobbers the scalar
+$var = "Something";
+open $fh, ">", \$var;
+print "# Got [$var], expect []\n";
+print "not " unless $var eq "";
 print "ok 11\n";
+#  Check that file offset set to beginning of scalar
+my $off = tell($fh);
+print "# Got $off, expect 0\n";
+print "not " unless $off == 0;
+print "ok 12\n";
+# Check that writes go where they should and update the offset
+$var = "Something";
+print $fh "Brea";
+$off = tell($fh);
+print "# Got $off, expect 4\n";
+print "not " unless $off == 4;
+print "ok 13\n";
+print "# Got [$var], expect [Breathing]\n";
+print "not " unless $var eq "Breathing";
+print "ok 14\n";
+close $fh;
+
+# Check that ">>" appends to the scalar
+$var = "Something ";
+open $fh, ">>", \$var;
+$off = tell($fh);
+print "# Got $off, expect 10\n";
+print "not " unless $off == 10;
+print "ok 15\n";
+print "# Got [$var], expect [Something ]\n";
+print "not " unless $var eq "Something ";
+print "ok 16\n";
+#  Check that further writes go to the very end of the scalar
+$var .= "else ";
+print "# Got [$var], expect [Something else ]\n";
+print "not " unless $var eq "Something else ";
+print "ok 17\n";
+$off = tell($fh);
+print "# Got $off, expect 10\n";
+print "not " unless $off == 10;
+print "ok 18\n";
+print $fh "is here";
+print "# Got [$var], expect [Something else is here]\n";
+print "not " unless $var eq "Something else is here";
+print "ok 19\n";
