@@ -463,10 +463,10 @@ PerlIO_debug(const char *fmt, ...)
     }
     if (dbg > 0) {
 	dTHX;
+	const char *s;
 #ifdef USE_ITHREADS
 	/* Use fixed buffer as sv_catpvf etc. needs SVs */
 	char buffer[1024];
-	char *s;
 	STRLEN len;
 	s = CopFILE(PL_curcop);
 	if (!s)
@@ -477,7 +477,6 @@ PerlIO_debug(const char *fmt, ...)
 	PerlLIO_write(dbg, buffer, strlen(buffer));
 #else
 	SV *sv = newSVpvn("", 0);
-	char *s;
 	STRLEN len;
 	s = CopFILE(PL_curcop);
 	if (!s)

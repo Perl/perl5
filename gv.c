@@ -106,7 +106,7 @@ void
 Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 {
     register GP *gp;
-    bool doproto = SvTYPE(gv) > SVt_NULL;
+    const bool doproto = SvTYPE(gv) > SVt_NULL;
     char *proto = (doproto && SvPOK(gv)) ? SvPVX(gv) : NULL;
 
     sv_upgrade((SV*)gv, SVt_PVGV);
@@ -494,7 +494,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
     HV* varstash;
     GV* vargv;
     SV* varsv;
-    char *packname = "";
+    const char *packname = "";
 
     if (len == autolen && strnEQ(name, autoload, autolen))
 	return Nullgv;
@@ -881,7 +881,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 		    if ((add & GV_ADDMULTI) && strEQ(nambeg,"AnyDBM_File::ISA")
 			&& AvFILLp(av) == -1)
 			{
-			    char *pname;
+			    const char *pname;
 			    av_push(av, newSVpvn(pname = "NDBM_File",9));
 			    gv_stashpvn(pname, 9, TRUE);
 			    av_push(av, newSVpvn(pname = "DB_File",7));
@@ -1169,7 +1169,7 @@ Perl_gv_fullname(pTHX_ SV *sv, GV *gv)
 void
 Perl_gv_efullname(pTHX_ SV *sv, GV *gv)
 {
-    gv_efullname3(sv, gv, sv == (SV*)gv ? "*" : "");
+    gv_efullname3(sv, gv, sv == (const SV*)gv ? "*" : "");
 }
 
 IO *
@@ -1196,7 +1196,6 @@ Perl_newIO(pTHX)
 void
 Perl_gv_check(pTHX_ HV *stash)
 {
-    register HE *entry;
     register I32 i;
     register GV *gv;
     HV *hv;
@@ -1204,6 +1203,7 @@ Perl_gv_check(pTHX_ HV *stash)
     if (!HvARRAY(stash))
 	return;
     for (i = 0; i <= (I32) HvMAX(stash); i++) {
+        const HE *entry;
 	for (entry = HvARRAY(stash)[i]; entry; entry = HeNEXT(entry)) {
 	    if (HeKEY(entry)[HeKLEN(entry)-1] == ':' &&
 		(gv = (GV*)HeVAL(entry)) && isGV(gv) && (hv = GvHV(gv)))
@@ -1212,7 +1212,7 @@ Perl_gv_check(pTHX_ HV *stash)
 		     gv_check(hv);              /* nested package */
 	    }
 	    else if (isALPHA(*HeKEY(entry))) {
-		char *file;
+                const char *file;
 		gv = (GV*)HeVAL(entry);
 		if (SvTYPE(gv) != SVt_PVGV || GvMULTI(gv))
 		    continue;
@@ -1378,10 +1378,10 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
     for (i = 1; i < lim; i++)
 	amt.table[i] = Nullcv;
     for (; i < NofAMmeth; i++) {
-	char *cooky = (char*)PL_AMG_names[i];
+	const char *cooky = PL_AMG_names[i];
 	/* Human-readable form, for debugging: */
-	char *cp = (i >= DESTROY_amg ? cooky : AMG_id2name(i));
-	STRLEN l = strlen(cooky);
+	const char *cp = (i >= DESTROY_amg ? cooky : AMG_id2name(i));
+	const STRLEN l = strlen(cooky);
 
 	DEBUG_o( Perl_deb(aTHX_ "Checking overloading of `%s' in package `%.256s'\n",
 		     cp, HvNAME(stash)) );
@@ -1479,7 +1479,7 @@ Perl_gv_handler(pTHX_ HV *stash, I32 id)
 	       "Inherited AUTOLOAD for a non-method deprecated", since
 	       our caller is going through a function call, not a method call.
 	       So return the CV for AUTOLOAD, setting $AUTOLOAD. */
-	    GV *gv = gv_fetchmethod(stash, (char*)PL_AMG_names[id]);
+	    GV *gv = gv_fetchmethod(stash, PL_AMG_names[id]);
 
 	    if (gv && GvCV(gv))
 		return GvCV(gv);

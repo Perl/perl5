@@ -478,8 +478,8 @@ static void clear_re(pTHX_ void *r);
 STATIC void
 S_scan_commit(pTHX_ RExC_state_t *pRExC_state, scan_data_t *data)
 {
-    STRLEN l = CHR_SVLEN(data->last_found);
-    STRLEN old_l = CHR_SVLEN(*data->longest);
+    const STRLEN l = CHR_SVLEN(data->last_found);
+    const STRLEN old_l = CHR_SVLEN(*data->longest);
 
     if ((l >= old_l) && ((l > old_l) || (data->flags & SF_BEFORE_EOL))) {
 	SvSetMagicSV(*data->longest, data->last_found);
@@ -2508,8 +2508,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
     }
 
     {
-	const char *p;
-	static const char parens[] = "=!<,>";
+        const char *p;
+        static const char parens[] = "=!<,>";
 
 	if (paren && (p = strchr(parens, paren))) {
 	    U8 node = ((p - parens) % 2) ? UNLESSM : IFMATCH;
@@ -4749,7 +4749,7 @@ Perl_regdump(pTHX_ regexp *r)
     PerlIO_printf(Perl_debug_log, "\n");
     if (r->offsets) {
       U32 i;
-      U32 len = r->offsets[0];
+      const U32 len = r->offsets[0];
       PerlIO_printf(Perl_debug_log, "Offsets: [%"UVuf"]\n\t", (UV)r->offsets[0]);
       for (i = 1; i <= len; i++)
         PerlIO_printf(Perl_debug_log, "%"UVuf"[%"UVuf"] ", 
@@ -4803,7 +4803,7 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 	  pv_uni_display(dsv, (U8*)STRING(o), STR_LEN(o), 60,
 			 UNI_DISPLAY_REGEX) :
 	  STRING(o);
-	int len = do_utf8 ?
+	const int len = do_utf8 ?
 	  strlen(s) :
 	  STR_LEN(o);
 	Perl_sv_catpvf(aTHX_ sv, " <%s%.*s%s>",
@@ -4993,13 +4993,10 @@ Perl_pregfree(pTHX_ struct regexp *r)
     if (!r || (--r->refcnt > 0))
 	return;
     DEBUG_r({
-	 int len;
-         char *s;
-
-	 s = (r->reganch & ROPT_UTF8) ? pv_uni_display(dsv, (U8*)r->precomp,
-		r->prelen, 60, UNI_DISPLAY_REGEX)
+        const char *s = (r->reganch & ROPT_UTF8)
+            ? pv_uni_display(dsv, (U8*)r->precomp, r->prelen, 60, UNI_DISPLAY_REGEX)
             : pv_display(dsv, r->precomp, r->prelen, 0, 60);
-	 len = SvCUR(dsv);
+        const int len = SvCUR(dsv);
 	 if (!PL_colorset)
 	      reginitcolors();
 	 PerlIO_printf(Perl_debug_log,

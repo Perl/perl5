@@ -316,7 +316,7 @@ PP(pp_backtick)
     STRLEN n_a;
     char *tmps = POPpx;
     I32 gimme = GIMME_V;
-    char *mode = "r";
+    const char *mode = "r";
 
     TAINT_PROPER("``");
     if (PL_op->op_private & OPpOPEN_IN_RAW)
@@ -325,7 +325,7 @@ PP(pp_backtick)
 	mode = "rt";
     fp = PerlProc_popen(tmps, mode);
     if (fp) {
-	char *type = NULL;
+        const char *type = NULL;
 	if (PL_curcop->cop_io) {
 	    type = SvPV_nolen(PL_curcop->cop_io);
 	}
@@ -427,7 +427,7 @@ PP(pp_warn)
 {
     dSP; dMARK;
     SV *tmpsv;
-    char *tmps;
+    const char *tmps;
     STRLEN len;
     if (SP - MARK != 1) {
 	dTARGET;
@@ -457,7 +457,7 @@ PP(pp_warn)
 PP(pp_die)
 {
     dSP; dMARK;
-    char *tmps;
+    const char *tmps;
     SV *tmpsv;
     STRLEN len;
     bool multiarg = 0;
@@ -784,7 +784,7 @@ PP(pp_tie)
     GV *gv;
     SV *sv;
     I32 markoff = MARK - PL_stack_base;
-    char *methname;
+    const char *methname;
     int how = PERL_MAGIC_tied;
     U32 items;
 
@@ -2190,7 +2190,7 @@ PP(pp_ioctl)
     dSP; dTARGET;
     SV *argsv = POPs;
     unsigned int func = POPu;
-    int optype = PL_op->op_type;
+    const int optype = PL_op->op_type;
     char *s;
     IV retval;
     GV *gv = (GV*)POPs;

@@ -1020,8 +1020,8 @@ s	|void	|hv_notallowed	|int flags|const char *key|I32 klen|const char *msg
 
 #if defined(PERL_IN_MG_C) || defined(PERL_DECL_PROT)
 s	|void	|save_magic	|I32 mgs_ix|SV *sv
-s	|int	|magic_methpack	|SV *sv|MAGIC *mg|char *meth
-s	|int	|magic_methcall	|SV *sv|MAGIC *mg|char *meth|I32 f \
+s	|int	|magic_methpack	|SV *sv|const MAGIC *mg|const char *meth
+s	|int	|magic_methcall	|SV *sv|const MAGIC *mg|const char *meth|I32 f \
 				|int n|SV *val
 #endif
 
@@ -1053,8 +1053,8 @@ Ap	|void	|Slab_Free	|void *op
 
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
 s	|void	|find_beginning
-s	|void	|forbid_setid	|char *
-s	|void	|incpush	|char *|int|int|int
+s	|void	|forbid_setid	|const char *
+s	|void	|incpush	|const char *|int|int|int
 s	|void	|init_interp
 s	|void	|init_ids
 s	|void	|init_lexer
@@ -1065,14 +1065,14 @@ s	|void	|init_predump_symbols
 rs	|void	|my_exit_jump
 s	|void	|nuke_stacks
 s	|void	|open_script	|char *|bool|SV *
-s	|void	|usage		|char *
-s	|void	|validate_suid	|char *|char*
+s	|void	|usage		|const char *
+s	|void	|validate_suid	|const char *validarg|const char *scriptname
 #  if defined(IAMSUID)
 s	|int	|fd_on_nosuid_fs|int fd
 #  endif
 s	|void*	|parse_body	|char **env|XSINIT_t xsinit
 s	|void*	|run_body	|I32 oldscope
-s	|void	|call_body	|OP *myop|int is_eval
+s	|void	|call_body	|const OP *myop|int is_eval
 s	|void*	|call_list_body	|CV *cv
 #if defined(PERL_FLEXIBLE_EXCEPTIONS)
 s	|void*	|vparse_body	|va_list args
@@ -1197,7 +1197,7 @@ Es	|void	|to_byte_substr	|regexp * prog
 
 #if defined(PERL_IN_DUMP_C) || defined(PERL_DECL_PROT)
 s	|CV*	|deb_curcv	|I32 ix
-s	|void	|debprof	|OP *o
+s	|void	|debprof	|const OP *o
 #endif
 
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
@@ -1398,9 +1398,9 @@ pd	|void	|pad_fixup_inner_anons|PADLIST *padlist|CV *old_cv|CV *new_cv
 pd	|void	|pad_push	|PADLIST *padlist|int depth|int has_args
 
 #if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
-sd	|PADOFFSET|pad_findlex	|char* name|PADOFFSET newoff|CV* innercv
+sd	|PADOFFSET|pad_findlex	|const char* name|PADOFFSET newoff|const CV* innercv
 #  if defined(DEBUGGING)
-sd	|void	|cv_dump	|CV *cv|char *title
+sd	|void	|cv_dump	|const CV *cv|const char *title
 #  endif
 s	|CV*	|cv_clone2	|CV *proto|CV *outside
 #endif

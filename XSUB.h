@@ -214,7 +214,7 @@ C<xsubpp>.  See L<perlxs/"The VERSIONCHECK: Keyword">.
 #  define XS_VERSION_BOOTCHECK \
     STMT_START {							\
 	SV *_sv; STRLEN n_a;						\
-	char *vn = Nullch, *module = SvPV(ST(0),n_a);			\
+	const char *vn = Nullch, *module = SvPV(ST(0),n_a);		\
 	if (items >= 2)	 /* version supplied as bootstrap arg */	\
 	    _sv = ST(1);						\
 	else {								\

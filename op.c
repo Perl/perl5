@@ -691,7 +691,7 @@ OP *
 Perl_scalarvoid(pTHX_ OP *o)
 {
     OP *kid;
-    char* useless = 0;
+    const char* useless = 0;
     SV* sv;
     U8 want;
 
@@ -1809,7 +1809,7 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
        left->op_type == OP_RV2HV ||
        left->op_type == OP_PADAV ||
        left->op_type == OP_PADHV)) {
-      char *desc = PL_op_desc[(right->op_type == OP_SUBST ||
+      const char *desc = PL_op_desc[(right->op_type == OP_SUBST ||
                             right->op_type == OP_TRANS)
                            ? right->op_type : OP_MATCH];
       const char *sample = ((left->op_type == OP_RV2AV ||
@@ -2391,13 +2391,13 @@ Perl_newBINOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
 static int
 uvcompare(const void *a, const void *b)
 {
-    if (*((UV *)a) < (*(UV *)b))
+    if (*((const UV *)a) < (*(const UV *)b))
 	return -1;
-    if (*((UV *)a) > (*(UV *)b))
+    if (*((const UV *)a) > (*(const UV *)b))
 	return 1;
-    if (*((UV *)a+1) < (*(UV *)b+1))
+    if (*((const UV *)a+1) < (*(const UV *)b+1))
 	return -1;
-    if (*((UV *)a+1) > (*(UV *)b+1))
+    if (*((const UV *)a+1) > (*(const UV *)b+1))
 	return 1;
     return 0;
 }
@@ -3433,7 +3433,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 OP *
 Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 {
-    U32 seq = intro_my();
+    const U32 seq = intro_my();
     register COP *cop;
 
     NewOp(1101, cop, 1, COP);
@@ -3787,8 +3787,8 @@ Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop, I32 whileline, OP *
 	expr = newUNOP(OP_DEFINED, 0,
 	    newASSIGNOP(0, newDEFSVOP(), 0, expr) );
     } else if (expr && (expr->op_flags & OPf_KIDS)) {
-	OP *k1 = ((UNOP*)expr)->op_first;
-	OP *k2 = (k1) ? k1->op_sibling : NULL;
+	const OP *k1 = ((UNOP*)expr)->op_first;
+	const OP *k2 = (k1) ? k1->op_sibling : NULL;
 	switch (expr->op_type) {
 	  case OP_NULL:
 	    if (k2 && k2->op_type == OP_READLINE
@@ -4074,7 +4074,7 @@ Perl_cv_ckproto(pTHX_ CV *cv, GV *gv, char *p)
 	if (name)
 	    Perl_sv_catpvf(aTHX_ msg, " sub %"SVf, name);
 	if (SvPOK(cv))
-	    Perl_sv_catpvf(aTHX_ msg, " (%"SVf")", (SV *)cv);
+	    Perl_sv_catpvf(aTHX_ msg, " (%"SVf")", (const SV *)cv);
 	else
 	    Perl_sv_catpv(aTHX_ msg, ": none");
 	sv_catpv(msg, " vs ");
@@ -4402,7 +4402,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    char *s = strrchr(name, ':');
 	    s = s ? s+1 : name;
 	    if (strEQ(s, "BEGIN")) {
-		char *not_safe =
+		const char not_safe[] =
 		    "BEGIN not safe after errors--compilation aborted";
 		if (PL_in_eval & EVAL_KEEPERR)
 		    Perl_croak(aTHX_ not_safe);
@@ -4639,7 +4639,7 @@ Perl_newXS(pTHX_ char *name, XSUBADDR_t subaddr, char *filename)
     CvXSUB(cv) = subaddr;
 
     if (name) {
-	char *s = strrchr(name,':');
+	const char *s = strrchr(name,':');
 	if (s)
 	    s++;
 	else
@@ -5132,7 +5132,7 @@ Perl_ck_rvconst(pTHX_ register OP *o)
 	if (SvROK(kidsv) && SvREADONLY(kidsv)) {
 	    SV *rsv = SvRV(kidsv);
 	    int svtype = SvTYPE(rsv);
-	    char *badtype = Nullch;
+            const char *badtype = Nullch;
 
 	    switch (o->op_type) {
 	    case OP_RV2SV:
@@ -5167,7 +5167,7 @@ Perl_ck_rvconst(pTHX_ register OP *o)
 	}
 	name = SvPV(kidsv, n_a);
 	if ((PL_hints & HINT_STRICT_REFS) && (kid->op_private & OPpCONST_BARE)) {
-	    char *badthing = Nullch;
+            const char *badthing = Nullch;
 	    switch (o->op_type) {
 	    case OP_RV2SV:
 		badthing = "a SCALAR";
@@ -5392,7 +5392,7 @@ Perl_ck_fun(pTHX_ OP *o)
 
 			/* is this op a FH constructor? */
 			if (is_handle_constructor(o,numargs)) {
-			    char *name = Nullch;
+                            const char *name = Nullch;
 			    STRLEN len = 0;
 
 			    flags = 0;
@@ -5429,7 +5429,7 @@ Perl_ck_fun(pTHX_ OP *o)
 				 name = 0;
 				 if ((op = ((BINOP*)kid)->op_first)) {
 				      SV *tmpstr = Nullsv;
-				      char *a =
+				      const char *a =
 					   kid->op_type == OP_AELEM ?
 					   "[]" : "{}";
 				      if (((op->op_type == OP_RV2AV) ||
@@ -6172,7 +6172,7 @@ Perl_ck_join(pTHX_ OP *o)
     if (ckWARN(WARN_SYNTAX)) {
 	OP *kid = cLISTOPo->op_first->op_sibling;
 	if (kid && kid->op_type == OP_MATCH) {
-	    char *pmstr = "STRING";
+	    const char *pmstr = "STRING";
 	    if (PM_GETRE(kPMOP))
 		pmstr = PM_GETRE(kPMOP)->precomp;
 	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
@@ -7030,7 +7030,7 @@ Perl_peep(pTHX_ register OP *o)
 
 char* Perl_custom_op_name(pTHX_ OP* o)
 {
-    IV  index = PTR2IV(o->op_ppaddr);
+    const IV index = PTR2IV(o->op_ppaddr);
     SV* keysv;
     HE* he;
 
@@ -7048,7 +7048,7 @@ char* Perl_custom_op_name(pTHX_ OP* o)
 
 char* Perl_custom_op_desc(pTHX_ OP* o)
 {
-    IV  index = PTR2IV(o->op_ppaddr);
+    const IV index = PTR2IV(o->op_ppaddr);
     SV* keysv;
     HE* he;
 

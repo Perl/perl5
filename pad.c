@@ -124,7 +124,7 @@ can be OR'ed together:
 PADLIST *
 Perl_pad_new(pTHX_ int flags)
 {
-    AV *padlist, *padname, *pad, *a0;
+    AV *padlist, *padname, *pad;
 
     ASSERT_CURPAD_LEGAL("pad_new");
 
@@ -164,7 +164,7 @@ Perl_pad_new(pTHX_ int flags)
 	 * dispensed with eventually ???
 	 */
 
-	a0 = newAV();			/* will be @_ */
+        AV * const a0 = newAV();			/* will be @_ */
 	av_extend(a0, 0);
 	av_store(pad, 0, (SV*)a0);
 	AvFLAGS(a0) = AVf_REIFY;
@@ -226,7 +226,7 @@ void
 Perl_pad_undef(pTHX_ CV* cv)
 {
     I32 ix;
-    PADLIST *padlist = CvPADLIST(cv);
+    const PADLIST *padlist = CvPADLIST(cv);
 
     if (!padlist)
 	return;
@@ -245,7 +245,7 @@ Perl_pad_undef(pTHX_ CV* cv)
 
     if (!PL_dirty) { /* don't bother during global destruction */
 	CV *outercv = CvOUTSIDE(cv);
-	U32 seq = CvOUTSIDE_SEQ(cv);
+        const U32 seq = CvOUTSIDE_SEQ(cv);
 	AV *comppad_name = (AV*)AvARRAY(padlist)[0];
 	SV **namepad = AvARRAY(comppad_name);
 	AV *comppad = (AV*)AvARRAY(padlist)[1];
@@ -414,7 +414,7 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
     }
     else {
 	SV **names = AvARRAY(PL_comppad_name);
-	SSize_t names_fill = AvFILLp(PL_comppad_name);
+        const SSize_t names_fill = AvFILLp(PL_comppad_name);
 	for (;;) {
 	    /*
 	     * "foreach" index vars temporarily become aliases to non-"my"
@@ -638,7 +638,7 @@ ref to it at newoff in the current pad.
 */
 
 STATIC PADOFFSET
-S_pad_findlex(pTHX_ char *name, PADOFFSET newoff, CV* innercv)
+S_pad_findlex(pTHX_ const char *name, PADOFFSET newoff, const CV* innercv)
 {
     CV *cv;
     I32 off = 0;
@@ -956,13 +956,13 @@ Perl_pad_leavemy(pTHX)
 {
     I32 off;
     SV **svp = AvARRAY(PL_comppad_name);
-    SV *sv;
 
     PL_pad_reset_pending = FALSE;
 
     ASSERT_CURPAD_ACTIVE("pad_leavemy");
     if (PL_min_intro_pending && PL_comppad_name_fill < PL_min_intro_pending) {
 	for (off = PL_max_intro_pending; off >= PL_min_intro_pending; off--) {
+            const SV *sv;
 	    if ((sv = svp[off]) && sv != &PL_sv_undef
 		    && !SvFAKE(sv) && ckWARN_d(WARN_INTERNAL))
 		Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
@@ -971,6 +971,7 @@ Perl_pad_leavemy(pTHX)
     }
     /* "Deintroduce" my variables that are leaving with this scope. */
     for (off = AvFILLp(PL_comppad_name); off > PL_comppad_name_fill; off--) {
+        const SV *sv;
 	if ((sv = svp[off]) && sv != &PL_sv_undef
 		&& !SvFAKE(sv) && SvIVX(sv) == PAD_MAX)
 	{
@@ -1042,8 +1043,6 @@ void
 Perl_pad_reset(pTHX)
 {
 #ifdef USE_BROKEN_PAD_RESET
-    register I32 po;
-
     if (AvARRAY(PL_comppad) != PL_curpad)
 	Perl_croak(aTHX_ "panic: pad_reset curpad");
 
@@ -1055,6 +1054,7 @@ Perl_pad_reset(pTHX)
     );
 
     if (!PL_tainting) {	/* Can't mix tainted and non-tainted temporaries. */
+        register I32 po;
 	for (po = AvMAX(PL_comppad); po > PL_padix_floor; po--) {
 	    if (PL_curpad[po] && !SvIMMORTAL(PL_curpad[po]))
 		SvPADTMP_off(PL_curpad[po]);
@@ -1193,11 +1193,10 @@ Dump the contents of a padlist
 void
 Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full)
 {
-    AV *pad_name;
-    AV *pad;
+    const AV *pad_name;
+    const AV *pad;
     SV **pname;
     SV **ppad;
-    SV *namesv;
     I32 ix;
 
     if (!padlist) {
@@ -1213,7 +1212,7 @@ Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full)
     );
 
     for (ix = 1; ix <= AvFILLp(pad_name); ix++) {
-	namesv = pname[ix];
+        const SV *namesv = pname[ix];
 	if (namesv && namesv == &PL_sv_undef) {
 	    namesv = Nullsv;
 	}
@@ -1260,9 +1259,9 @@ dump the contents of a CV
 
 #ifdef DEBUGGING
 STATIC void
-S_cv_dump(pTHX_ CV *cv, char *title)
+S_cv_dump(pTHX_ const CV *cv, const char *title)
 {
-    CV *outside = CvOUTSIDE(cv);
+    const CV *outside = CvOUTSIDE(cv);
     AV* padlist = CvPADLIST(cv);
 
     PerlIO_printf(Perl_debug_log,
@@ -1321,12 +1320,12 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
 {
     I32 ix;
     AV* protopadlist = CvPADLIST(proto);
-    AV* protopad_name = (AV*)*av_fetch(protopadlist, 0, FALSE);
-    AV* protopad = (AV*)*av_fetch(protopadlist, 1, FALSE);
+    const AV* protopad_name = (AV*)*av_fetch(protopadlist, 0, FALSE);
+    const AV* protopad = (AV*)*av_fetch(protopadlist, 1, FALSE);
     SV** pname = AvARRAY(protopad_name);
     SV** ppad = AvARRAY(protopad);
-    I32 fname = AvFILLp(protopad_name);
-    I32 fpad = AvFILLp(protopad);
+    const I32 fname = AvFILLp(protopad_name);
+    const I32 fpad = AvFILLp(protopad);
     AV* comppadlist;
     CV* cv;
 
@@ -1472,7 +1471,7 @@ Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv, CV *new_cv)
     SV **namepad = AvARRAY(comppad_name);
     SV **curpad = AvARRAY(comppad);
     for (ix = AvFILLp(comppad_name); ix > 0; ix--) {
-	SV *namesv = namepad[ix];
+        const SV *namesv = namepad[ix];
 	if (namesv && namesv != &PL_sv_undef
 	    && *SvPVX(namesv) == '&')
 	{

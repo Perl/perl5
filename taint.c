@@ -24,7 +24,7 @@
 void
 Perl_taint_proper(pTHX_ const char *f, const char *s)
 {
-    char *ug;
+    const char *ug;
 
 #if defined(HAS_SETEUID) && defined(DEBUGGING)
 #   if Uid_t_size == 1
@@ -74,8 +74,8 @@ Perl_taint_env(pTHX)
 {
     SV** svp;
     MAGIC* mg;
-    char** e;
-    static char* misc_env[] = {
+    const char** e;
+    static const char* misc_env[] = {
 	"IFS",		/* most shells' inter-field separators */
 	"CDPATH",	/* ksh dain bramage #1 */
 	"ENV",		/* ksh dain bramage #2 */
@@ -90,7 +90,7 @@ Perl_taint_env(pTHX)
      * it probably doesn't reflect the actual environment */
     if (!GvHV(PL_envgv) || !(SvRMAGICAL(GvHV(PL_envgv))
 	    && mg_find((SV*)GvHV(PL_envgv), PERL_MAGIC_env))) {
-	bool was_tainted = PL_tainted;
+	const bool was_tainted = PL_tainted;
 	char *name = GvENAME(PL_envgv);
 	PL_tainted = TRUE;
 	if (strEQ(name,"ENV"))

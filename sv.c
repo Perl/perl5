@@ -1646,7 +1646,7 @@ Perl_sv_grow(pTHX_ register SV *sv, register STRLEN newlen)
 	    }
 	}
 	SvPV_set(sv, s);
-	SvLEN_set(sv, newlen);
+        SvLEN_set(sv, newlen);
     }
     return s;
 }
@@ -2996,6 +2996,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
 	    SV* tmpstr;
+            register const char *typestr;
             if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,string)) &&
                 (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
                 char *pv = SvPV(tmpstr, *lp);
@@ -3008,7 +3009,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	    origsv = sv;
 	    sv = (SV*)SvRV(sv);
 	    if (!sv)
-		s = "NULLREF";
+		typestr = "NULLREF";
 	    else {
 		MAGIC *mg;
 		
@@ -3018,10 +3019,10 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 			   (SVs_OBJECT|SVf_OK|SVs_GMG|SVs_SMG|SVs_RMG))
 			  == (SVs_OBJECT|SVs_SMG))
 			 && (mg = mg_find(sv, PERL_MAGIC_qr))) {
-			regexp *re = (regexp *)mg->mg_obj;
+                        const regexp *re = (regexp *)mg->mg_obj;
 
 			if (!mg->mg_ptr) {
-			    char *fptr = "msix";
+                            const char *fptr = "msix";
 			    char reflags[6];
 			    char ch;
 			    int left = 0;
@@ -3061,10 +3062,10 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
                              */
                             if (PMf_EXTENDED & re->reganch)
                             {
-                                char *endptr = re->precomp + re->prelen;
+                                const char *endptr = re->precomp + re->prelen;
                                 while (endptr >= re->precomp)
                                 {
-                                    char c = *(endptr--);
+                                    const char c = *(endptr--);
                                     if (c == '\n')
                                         break; /* don't need another */
                                     if (c == '#') {
@@ -3104,35 +3105,32 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		case SVt_PV:
 		case SVt_PVIV:
 		case SVt_PVNV:
-		case SVt_PVBM:	if (SvROK(sv))
-				    s = "REF";
-				else
-				    s = "SCALAR";		break;
-		case SVt_PVLV:	s = SvROK(sv) ? "REF"
+		case SVt_PVBM:	typestr = SvROK(sv) ? "REF" : "SCALAR"; break;
+		case SVt_PVLV:	typestr = SvROK(sv) ? "REF"
 				/* tied lvalues should appear to be
 				 * scalars for backwards compatitbility */
 				: (LvTYPE(sv) == 't' || LvTYPE(sv) == 'T')
 				    ? "SCALAR" : "LVALUE";	break;
-		case SVt_PVAV:	s = "ARRAY";			break;
-		case SVt_PVHV:	s = "HASH";			break;
-		case SVt_PVCV:	s = "CODE";			break;
-		case SVt_PVGV:	s = "GLOB";			break;
-		case SVt_PVFM:	s = "FORMAT";			break;
-		case SVt_PVIO:	s = "IO";			break;
-		default:	s = "UNKNOWN";			break;
+		case SVt_PVAV:	typestr = "ARRAY";	break;
+		case SVt_PVHV:	typestr = "HASH";	break;
+		case SVt_PVCV:	typestr = "CODE";	break;
+		case SVt_PVGV:	typestr = "GLOB";	break;
+		case SVt_PVFM:	typestr = "FORMAT";	break;
+		case SVt_PVIO:	typestr = "IO";		break;
+		default:	typestr = "UNKNOWN";	break;
 		}
 		tsv = NEWSV(0,0);
 		if (SvOBJECT(sv)) {
 		    const char *name = HvNAME(SvSTASH(sv));
 		    Perl_sv_setpvf(aTHX_ tsv, "%s=%s(0x%"UVxf")",
-				   name ? name : "__ANON__" , s, PTR2UV(sv));
+				   name ? name : "__ANON__" , typestr, PTR2UV(sv));
 		}
 		else
-		    Perl_sv_setpvf(aTHX_ tsv, "%s(0x%"UVxf")", s, PTR2UV(sv));
+		    Perl_sv_setpvf(aTHX_ tsv, "%s(0x%"UVxf")", typestr, PTR2UV(sv));
 		goto tokensaveref;
 	    }
-	    *lp = strlen(s);
-	    return s;
+	    *lp = strlen(typestr);
+	    return typestr;
 	}
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    if (ckWARN(WARN_UNINITIALIZED))
@@ -3144,8 +3142,8 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
     if (SvIOK(sv) || ((SvIOKp(sv) && !SvNOKp(sv)))) {
 	/* I'm assuming that if both IV and NV are equally valid then
 	   converting the IV is going to be more efficient */
-	U32 isIOK = SvIOK(sv);
-	U32 isUIOK = SvIsUV(sv);
+	const U32 isIOK = SvIOK(sv);
+	const U32 isUIOK = SvIsUV(sv);
 	char buf[TYPE_CHARS(UV)];
 	char *ebuf, *ptr;
 
@@ -4658,8 +4656,8 @@ to add more than one instance of the same 'how'.
 void
 Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 namlen)
 {
+    const MGVTBL *vtable = 0;
     MAGIC* mg;
-    MGVTBL *vtable = 0;
 
     if (SvREADONLY(sv)) {
 	if (IN_PERL_RUNTIME
@@ -4834,7 +4832,7 @@ Perl_sv_unmagic(pTHX_ SV *sv, int type)
     mgp = &SvMAGIC(sv);
     for (mg = *mgp; mg; mg = *mgp) {
 	if (mg->mg_type == type) {
-	    MGVTBL* vtbl = mg->mg_virtual;
+            const MGVTBL* const vtbl = mg->mg_virtual;
 	    *mgp = mg->mg_moremagic;
 	    if (vtbl && vtbl->svt_free)
 		CALL_FPTR(vtbl->svt_free)(aTHX_ sv, mg);
@@ -5830,9 +5828,9 @@ coerce its args to strings if necessary.
 I32
 Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
 {
-    char *pv1;
+    const char *pv1;
     STRLEN cur1;
-    char *pv2;
+    const char *pv2;
     STRLEN cur2;
     I32  eq     = 0;
     char *tpv   = Nullch;
@@ -5878,7 +5876,7 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
 	      if (SvUTF8(sv1)) {
 		   /* sv1 is the UTF-8 one,
 		    * if is equal it must be downgrade-able */
-		   char *pv = (char*)bytes_from_utf8((U8*)pv1,
+		   char *pv = (char*)bytes_from_utf8((const U8*)pv1,
 						     &cur1, &is_utf8);
 		   if (pv != pv1)
 			pv1 = tpv = pv;
@@ -5886,7 +5884,7 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
 	      else {
 		   /* sv2 is the UTF-8 one,
 		    * if is equal it must be downgrade-able */
-		   char *pv = (char *)bytes_from_utf8((U8*)pv2,
+		   char *pv = (char *)bytes_from_utf8((const U8*)pv2,
 						      &cur2, &is_utf8);
 		   if (pv != pv2)
 			pv2 = tpv = pv;
@@ -5925,7 +5923,8 @@ I32
 Perl_sv_cmp(pTHX_ register SV *sv1, register SV *sv2)
 {
     STRLEN cur1, cur2;
-    char *pv1, *pv2, *tpv = Nullch;
+    const char *pv1, *pv2;
+    char *tpv = Nullch;
     I32  cmp;
     SV *svrecode = Nullsv;
 
@@ -5953,7 +5952,7 @@ Perl_sv_cmp(pTHX_ register SV *sv1, register SV *sv2)
 		 pv2 = SvPV(svrecode, cur2);
 	    }
 	    else {
-		 pv2 = tpv = (char*)bytes_to_utf8((U8*)pv2, &cur2);
+		 pv2 = tpv = (char*)bytes_to_utf8((const U8*)pv2, &cur2);
 	    }
 	}
 	else {
@@ -5963,7 +5962,7 @@ Perl_sv_cmp(pTHX_ register SV *sv1, register SV *sv2)
 		 pv1 = SvPV(svrecode, cur1);
 	    }
 	    else {
-		 pv1 = tpv = (char*)bytes_to_utf8((U8*)pv1, &cur1);
+		 pv1 = tpv = (char*)bytes_to_utf8((const U8*)pv1, &cur1);
 	    }
 	}
     }
@@ -5973,7 +5972,7 @@ Perl_sv_cmp(pTHX_ register SV *sv1, register SV *sv2)
     } else if (!cur2) {
 	cmp = 1;
     } else {
-	I32 retval = memcmp((void*)pv1, (void*)pv2, cur1 < cur2 ? cur1 : cur2);
+        const I32 retval = memcmp((const void*)pv1, (const void*)pv2, cur1 < cur2 ? cur1 : cur2);
 
 	if (retval) {
 	    cmp = retval < 0 ? -1 : 1;
@@ -6125,7 +6124,7 @@ appending to the currently-stored string.
 char *
 Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
 {
-    char *rsptr;
+    const char *rsptr;
     STRLEN rslen;
     register STDCHAR rslast;
     register STDCHAR *bp;
@@ -6886,7 +6885,7 @@ Perl_newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
 	STRLEN tmplen = -len;
         is_utf8 = TRUE;
 	/* See the note in hv.c:hv_fetch() --jhi */
-	src = (char*)bytes_from_utf8((U8*)src, &tmplen, &is_utf8);
+	src = (char*)bytes_from_utf8((const U8*)src, &tmplen, &is_utf8);
 	len = tmplen;
     }
     if (!hash)
@@ -7306,7 +7305,7 @@ Perl_sv_true(pTHX_ register SV *sv)
     if (!sv)
 	return 0;
     if (SvPOK(sv)) {
-	register XPV* tXpv;
+	const register XPV* tXpv;
 	if ((tXpv = (XPV*)SvANY(sv)) &&
 		(tXpv->xpv_cur > 1 ||
 		(tXpv->xpv_cur && *tXpv->xpv_pv != '0')))
@@ -8505,7 +8504,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	STRLEN have;
 	STRLEN need;
 	STRLEN gap;
-	char *dotstr = ".";
+        const char *dotstr = ".";
 	STRLEN dotstrlen = 1;
 	I32 efix = 0; /* explicit format parameter index */
 	I32 ewix = 0; /* explicit width index */
@@ -9449,7 +9448,7 @@ Perl_re_dup(pTHX_ REGEXP *r, CLONE_PARAMS *param)
     ret->regstclass = NULL;
     if (r->data) {
 	struct reg_data *d;
-	int count = r->data->count;
+        const int count = r->data->count;
 
 	Newc(0, d, sizeof(struct reg_data) + count*sizeof(void *),
 		char, struct reg_data);

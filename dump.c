@@ -54,14 +54,14 @@ void
 Perl_dump_packsubs(pTHX_ HV *stash)
 {
     I32	i;
-    HE	*entry;
 
     if (!HvARRAY(stash))
 	return;
     for (i = 0; i <= (I32) HvMAX(stash); i++) {
+        const HE *entry;
 	for (entry = HvARRAY(stash)[i]; entry; entry = HeNEXT(entry)) {
-	    GV *gv = (GV*)HeVAL(entry);
-	    HV *hv;
+            const GV *gv = (GV*)HeVAL(entry);
+            const HV *hv;
 	    if (SvTYPE(gv) != SVt_PVGV || !GvGP(gv))
 		continue;
 	    if (GvCVu(gv))
@@ -114,13 +114,13 @@ Perl_dump_eval(pTHX)
 char *
 Perl_pv_display(pTHX_ SV *dsv, char *pv, STRLEN cur, STRLEN len, STRLEN pvlim)
 {
-    int truncated = 0;
-    int nul_terminated = len > cur && pv[cur] == '\0';
+    const bool nul_terminated = len > cur && pv[cur] == '\0';
+    bool truncated = 0;
 
     sv_setpvn(dsv, "\"", 1);
     for (; cur--; pv++) {
 	if (pvlim && SvCUR(dsv) >= pvlim) {
-            truncated++;
+            truncated = 1;
 	    break;
         }
 	switch (*pv) {
@@ -866,7 +866,7 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, MAGIC *mg, I32 nest, I32 maxne
 
 	{
 	    int n;
-	    char *name = 0;
+	    const char *name = 0;
 	    for (n=0; magic_names[n].name; n++) {
 		if (mg->mg_type == magic_names[n].type) {
 		    name = magic_names[n].name;
@@ -978,7 +978,7 @@ void
 Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bool dumpops, STRLEN pvlim)
 {
     SV *d;
-    char *s;
+    const char *s;
     U32 flags;
     U32 type;
 
@@ -1307,7 +1307,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    while ((he = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS))
                    && count--) {
 		SV *elt, *keysv;
-		char *keypv;
+                const char *keypv;
 		STRLEN len;
 		U32 hash = HeHASH(he);
 
@@ -1354,7 +1354,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    do_dump_pad(level+1, file, CvPADLIST(sv), 0);
 	}
 	{
-	    CV *outside = CvOUTSIDE(sv);
+            const CV *outside = CvOUTSIDE(sv);
 	    Perl_dump_indent(aTHX_ level, file, "  OUTSIDE = 0x%"UVxf" (%s)\n",
 			PTR2UV(outside),
 			(!outside ? "null"
@@ -1509,7 +1509,7 @@ Perl_debop(pTHX_ OP *o)
 STATIC CV*
 S_deb_curcv(pTHX_ I32 ix)
 {
-    PERL_CONTEXT *cx = &cxstack[ix];
+    const PERL_CONTEXT *cx = &cxstack[ix];
     if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT)
         return cx->blk_sub.cv;
     else if (CxTYPE(cx) == CXt_EVAL && !CxTRYBLOCK(cx))
@@ -1532,7 +1532,7 @@ Perl_watch(pTHX_ char **addr)
 }
 
 STATIC void
-S_debprof(pTHX_ OP *o)
+S_debprof(pTHX_ const OP *o)
 {
     if (CopSTASH_eq(PL_curcop, PL_debstash) && !DEBUG_J_TEST_)
 	return;

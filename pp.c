@@ -170,7 +170,7 @@ PP(pp_rv2gv)
 		if (SvREADONLY(sv))
 		    Perl_croak(aTHX_ PL_no_modify);
 		if (PL_op->op_private & OPpDEREF) {
-		    char *name;
+		    const char *name;
 		    GV *gv;
 		    if (cUNOP->op_targ) {
 			STRLEN len;
@@ -516,7 +516,7 @@ PP(pp_ref)
 {
     dSP; dTARGET;
     SV *sv;
-    char *pv;
+    const char *pv;
 
     sv = POPs;
 
@@ -542,7 +542,7 @@ PP(pp_bless)
     else {
 	SV *ssv = POPs;
 	STRLEN len;
-	char *ptr;
+	const char *ptr;
 
 	if (ssv && !SvGMAGICAL(ssv) && !SvAMAGIC(ssv) && SvROK(ssv))
 	    Perl_croak(aTHX_ "Attempt to bless into a reference");
@@ -562,7 +562,7 @@ PP(pp_gelem)
     GV *gv;
     SV *sv;
     SV *tmpRef;
-    char *elem;
+    const char *elem;
     dSP;
     STRLEN n_a;
 
@@ -611,7 +611,7 @@ PP(pp_gelem)
 	    break;
 	case 'P':
 	    if (strEQ(elem2, "ACKAGE")) {
-		char *name = HvNAME(GvSTASH(gv));
+		const char *name = HvNAME(GvSTASH(gv));
 		sv = newSVpv(name ? name : "__ANON__", 0);
 	    }
 	    break;
@@ -2999,11 +2999,11 @@ PP(pp_substr)
     I32 pos;
     I32 rem;
     I32 fail;
-    I32 lvalue = PL_op->op_flags & OPf_MOD || LVRET;
-    char *tmps;
-    I32 arybase = PL_curcop->cop_arybase;
+    const I32 lvalue = PL_op->op_flags & OPf_MOD || LVRET;
+    const char *tmps;
+    const I32 arybase = PL_curcop->cop_arybase;
     SV *repl_sv = NULL;
-    char *repl = 0;
+    const char *repl = 0;
     STRLEN repl_len;
     int num_args = PL_op->op_private & 7;
     bool repl_need_utf8_upgrade = FALSE;

@@ -976,8 +976,8 @@ STATIC void	S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen, const ch
 
 #if defined(PERL_IN_MG_C) || defined(PERL_DECL_PROT)
 STATIC void	S_save_magic(pTHX_ I32 mgs_ix, SV *sv);
-STATIC int	S_magic_methpack(pTHX_ SV *sv, MAGIC *mg, char *meth);
-STATIC int	S_magic_methcall(pTHX_ SV *sv, MAGIC *mg, char *meth, I32 f, int n, SV *val);
+STATIC int	S_magic_methpack(pTHX_ SV *sv, const MAGIC *mg, const char *meth);
+STATIC int	S_magic_methcall(pTHX_ SV *sv, const MAGIC *mg, const char *meth, I32 f, int n, SV *val);
 #endif
 
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
@@ -1008,8 +1008,8 @@ PERL_CALLCONV void	Perl_Slab_Free(pTHX_ void *op);
 
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
 STATIC void	S_find_beginning(pTHX);
-STATIC void	S_forbid_setid(pTHX_ char *);
-STATIC void	S_incpush(pTHX_ char *, int, int, int);
+STATIC void	S_forbid_setid(pTHX_ const char *);
+STATIC void	S_incpush(pTHX_ const char *, int, int, int);
 STATIC void	S_init_interp(pTHX);
 STATIC void	S_init_ids(pTHX);
 STATIC void	S_init_lexer(pTHX);
@@ -1020,14 +1020,14 @@ STATIC void	S_init_predump_symbols(pTHX);
 STATIC void	S_my_exit_jump(pTHX) __attribute__((noreturn));
 STATIC void	S_nuke_stacks(pTHX);
 STATIC void	S_open_script(pTHX_ char *, bool, SV *);
-STATIC void	S_usage(pTHX_ char *);
-STATIC void	S_validate_suid(pTHX_ char *, char*);
+STATIC void	S_usage(pTHX_ const char *);
+STATIC void	S_validate_suid(pTHX_ const char *validarg, const char *scriptname);
 #  if defined(IAMSUID)
 STATIC int	S_fd_on_nosuid_fs(pTHX_ int fd);
 #  endif
 STATIC void*	S_parse_body(pTHX_ char **env, XSINIT_t xsinit);
 STATIC void*	S_run_body(pTHX_ I32 oldscope);
-STATIC void	S_call_body(pTHX_ OP *myop, int is_eval);
+STATIC void	S_call_body(pTHX_ const OP *myop, int is_eval);
 STATIC void*	S_call_list_body(pTHX_ CV *cv);
 #if defined(PERL_FLEXIBLE_EXCEPTIONS)
 STATIC void*	S_vparse_body(pTHX_ va_list args);
@@ -1146,7 +1146,7 @@ STATIC void	S_to_byte_substr(pTHX_ regexp * prog);
 
 #if defined(PERL_IN_DUMP_C) || defined(PERL_DECL_PROT)
 STATIC CV*	S_deb_curcv(pTHX_ I32 ix);
-STATIC void	S_debprof(pTHX_ OP *o);
+STATIC void	S_debprof(pTHX_ const OP *o);
 #endif
 
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
@@ -1339,9 +1339,9 @@ PERL_CALLCONV void	Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv
 PERL_CALLCONV void	Perl_pad_push(pTHX_ PADLIST *padlist, int depth, int has_args);
 
 #if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
-STATIC PADOFFSET	S_pad_findlex(pTHX_ char* name, PADOFFSET newoff, CV* innercv);
+STATIC PADOFFSET	S_pad_findlex(pTHX_ const char* name, PADOFFSET newoff, const CV* innercv);
 #  if defined(DEBUGGING)
-STATIC void	S_cv_dump(pTHX_ CV *cv, char *title);
+STATIC void	S_cv_dump(pTHX_ const CV *cv, const char *title);
 #  endif
 STATIC CV*	S_cv_clone2(pTHX_ CV *proto, CV *outside);
 #endif

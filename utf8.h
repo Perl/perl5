@@ -42,7 +42,7 @@ EXTCONST unsigned char PL_utf8skip[];
 #endif
 
 END_EXTERN_C
-#define UTF8SKIP(s) PL_utf8skip[*(U8*)s]
+#define UTF8SKIP(s) PL_utf8skip[*(const U8*)s]
 
 /* Native character to iso-8859-1 */
 #define NATIVE_TO_ASCII(ch)      (ch)
@@ -147,12 +147,12 @@ encoded character.
  * (that is, the two high bits are set).  Otherwise we risk loading in the
  * heavy-duty SWASHINIT and SWASHGET routines unnecessarily.
  */
-#define isIDFIRST_lazy_if(p,c) ((IN_BYTES || (!c || (*((U8*)p) < 0xc0))) \
+#define isIDFIRST_lazy_if(p,c) ((IN_BYTES || (!c || (*((const U8*)p) < 0xc0))) \
 				? isIDFIRST(*(p)) \
-				: isIDFIRST_utf8((U8*)p))
-#define isALNUM_lazy_if(p,c)   ((IN_BYTES || (!c || (*((U8*)p) < 0xc0))) \
+				: isIDFIRST_utf8((const U8*)p))
+#define isALNUM_lazy_if(p,c)   ((IN_BYTES || (!c || (*((const U8*)p) < 0xc0))) \
 				? isALNUM(*(p)) \
-				: isALNUM_utf8((U8*)p))
+				: isALNUM_utf8((const U8*)p))
 
 
 #endif /* EBCDIC vs ASCII */

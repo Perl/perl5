@@ -504,7 +504,7 @@ perl_destruct(pTHXx)
     {
 	char *s;
 	if ((s = PerlEnv_getenv("PERL_DESTRUCT_LEVEL"))) {
-	    int i = atoi(s);
+            const int i = atoi(s);
 	    if (destruct_level < i)
 		destruct_level = i;
 	}
@@ -1194,7 +1194,7 @@ setuid perl scripts securely.\n");
 	 * the area we are able to modify is limited to the size of
 	 * the original argv[0].  (See below for 'contiguous', though.)
 	 * --jhi */
-	 char *s = NULL;
+	 const char *s = NULL;
 	 int i;
 	 UV mask =
 	   ~(UV)(PTRSIZE == 4 ? 3 : PTRSIZE == 8 ? 7 : PTRSIZE == 16 ? 15 : 0);
@@ -1348,13 +1348,13 @@ STATIC void *
 S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 {
     int argc = PL_origargc;
-    char **argv = PL_origargv;
-    char *scriptname = NULL;
+    const char **argv = PL_origargv;
+    const char *scriptname = NULL;
     VOL bool dosearch = FALSE;
-    char *validarg = "";
+    const char *validarg = "";
     register SV *sv;
     register char *s;
-    char *cddir = Nullch;
+    const char *cddir = Nullch;
     bool minus_f = FALSE;
 
     PL_fdscript = -1;
@@ -1628,7 +1628,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 #endif
 	(s = PerlEnv_getenv("PERL5OPT")))
     {
-    	char *popt = s;
+    	const char *popt = s;
 	while (isSPACE(*s))
 	    s++;
 	if (*s == '-' && *(s+1) == 'T') {
@@ -2352,7 +2352,7 @@ S_vcall_body(pTHX_ va_list args)
 #endif
 
 STATIC void
-S_call_body(pTHX_ OP *myop, int is_eval)
+S_call_body(pTHX_ const OP *myop, int is_eval)
 {
     if (PL_op == myop) {
 	if (is_eval)
@@ -2538,7 +2538,7 @@ Perl_magicname(pTHX_ char *sym, char *name, I32 namlen)
 }
 
 STATIC void
-S_usage(pTHX_ char *name)		/* XXX move this out into a module ? */
+S_usage(pTHX_ const char *name)		/* XXX move this out into a module ? */
 {
     /* This message really ought to be max 23 lines.
      * Removed -h because the user already knows that option. Others? */
@@ -2577,7 +2577,7 @@ S_usage(pTHX_ char *name)		/* XXX move this out into a module ? */
 "\n",
 NULL
 };
-    char **p = usage_msg;
+    const char **p = usage_msg;
 
     PerlIO_printf(PerlIO_stdout(),
 		  "\nUsage: %s [switches] [--] [programfile] [arguments]",
@@ -2632,7 +2632,7 @@ Perl_get_debug_opts_flags(pTHX_ char **s, int flags)
 	static const char debopts[] = "psltocPmfrxu HXDSTRJvC";
 
 	for (; isALNUM(**s); (*s)++) {
-	    char *d = strchr(debopts,**s);
+	    const char *d = strchr(debopts,**s);
 	    if (d)
 		i |= 1 << (d - debopts);
 	    else if (ckWARN_d(WARN_DEBUGGING))
@@ -2646,7 +2646,7 @@ Perl_get_debug_opts_flags(pTHX_ char **s, int flags)
     }
     else if (flags & 1) {
       /* Give help.  */
-      char **p = usage_msgd;
+      const char **p = usage_msgd;
       while (*p) PerlIO_printf(PerlIO_stdout(), "%s\n", *p++);
     }
 #  ifdef EBCDIC
@@ -2853,7 +2853,7 @@ Perl_moreswitches(pTHX_ char *s)
 	if (*++s) {
 	    char *start;
 	    SV *sv;
-	    char *use = "use ";
+	    const char *use = "use ";
 	    /* -M-foo == 'no foo'	*/
 	    if (*s == '-') { use = "no "; ++s; }
 	    sv = newSVpv(use,0);
@@ -3179,10 +3179,10 @@ STATIC void
 S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv)
 {
 #ifndef IAMSUID
-    char *quote;
-    char *code;
-    char *cpp_discard_flag;
-    char *perl;
+    const char *quote;
+    const char *code;
+    const char *cpp_discard_flag;
+    const char *perl;
 #endif
 
     PL_fdscript = -1;
@@ -3196,7 +3196,7 @@ S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv)
 	PL_origfilename = scriptname = find_script(scriptname, dosearch, NULL, 1);
 
 	if (strnEQ(scriptname, "/dev/fd/", 8) && isDIGIT(scriptname[8]) ) {
-	    char *s = scriptname + 8;
+            const char *s = scriptname + 8;
 	    PL_fdscript = atoi(s);
 	    while (isDIGIT(*s))
 		s++;
@@ -3478,7 +3478,7 @@ S_fd_on_nosuid_fs(pTHX_ int fd)
 #endif /* IAMSUID */
 
 STATIC void
-S_validate_suid(pTHX_ char *validarg, char *scriptname)
+S_validate_suid(pTHX_ const char *validarg, const char *scriptname)
 {
 #ifdef IAMSUID
     /* int which; */
@@ -4005,7 +4005,7 @@ Perl_doing_taint(int argc, char *argv[], char *envp[])
 }
 
 STATIC void
-S_forbid_setid(pTHX_ char *s)
+S_forbid_setid(pTHX_ const char *s)
 {
 #ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
     if (PL_euid != PL_uid)
@@ -4512,7 +4512,7 @@ S_incpush_if_exists(pTHX_ SV *dir)
 }
 
 STATIC void
-S_incpush(pTHX_ char *p, int addsubdirs, int addoldvers, int usesep)
+S_incpush(pTHX_ const char *p, int addsubdirs, int addoldvers, int usesep)
 {
     SV *subdir = Nullsv;
 
@@ -4526,7 +4526,7 @@ S_incpush(pTHX_ char *p, int addsubdirs, int addoldvers, int usesep)
     /* Break at all separators */
     while (p && *p) {
 	SV *libdir = NEWSV(55,0);
-	char *s;
+        const char *s;
 
 	/* skip any consecutive separators */
 	if (usesep) {
@@ -4719,7 +4719,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
     int ret;
     dJMPENV;
 
-    while (AvFILL(paramList) >= 0) {
+    while (av_len(paramList) >= 0) {
 	cv = (CV*)av_shift(paramList);
 	if (PL_savebegin) {
 	    if (paramList == PL_beginav) {

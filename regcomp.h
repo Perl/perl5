@@ -310,7 +310,7 @@ struct regnode_charclass_class {	/* has [[:blah:]] classes */
  */
 #ifndef lint
 #ifndef CHARMASK
-#define	UCHARAT(p)	((int)*(U8*)(p))
+#define	UCHARAT(p)	((int)*(const U8*)(p))
 #else
 #define	UCHARAT(p)	((int)*(p)&CHARMASK)
 #endif
