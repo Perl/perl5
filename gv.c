@@ -814,20 +814,17 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	break;
 
     case '&':
-	if (len > 1)
-	    break;
-	PL_sawampersand = TRUE;
-	goto ro_magicalize;
-
     case '`':
-	if (len > 1)
-	    break;
-	PL_sawampersand = TRUE;
-	goto ro_magicalize;
-
     case '\'':
-	if (len > 1)
-	    break;
+       if (
+           len > 1 ||
+           sv_type == SVt_PVAV ||
+           sv_type == SVt_PVHV ||
+           sv_type == SVt_PVCV ||
+           sv_type == SVt_PVGV ||
+           sv_type == SVt_PVFM ||
+           sv_type == SVt_PVIO
+       ) { break; }
 	PL_sawampersand = TRUE;
 	goto ro_magicalize;
 
