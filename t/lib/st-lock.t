@@ -13,13 +13,6 @@
 #
 #
 
-use Config;
-
-if ($Config{'osname'} eq 'dos') {
-	print "1..0 # Skip: fcntl/flock emulation broken on this platform\n";
-	exit 0;
-}
-
 sub BEGIN {
     chdir('t') if -d 't';
     @INC = '.'; 
@@ -32,6 +25,10 @@ sub BEGIN {
     if (!$Config{'d_flock'} && !$Config{'d_fcntl'} && !$Config{'d_lockf'}) {
         print "1..0 # Skip: no flock or flock emulation on this platform\n";
         exit 0;
+    }
+    if ($^O eq 'dos') {
+	print "1..0 # Skip: fcntl/flock emulation broken on this platform\n";
+	exit 0;
     }
     require 'lib/st-dump.pl';
 }
