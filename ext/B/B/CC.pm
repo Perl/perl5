@@ -662,11 +662,15 @@ sub numeric_binop {
 	    }
 	} else {
 	    if ($force_int) {
+	        my $rightruntime = new B::Pseudoreg ("IV", "riv");
+	    	runtime(sprintf("$$rightruntime = %s;",$right));
 		runtime(sprintf("sv_setiv(TOPs, %s);",
-				&$operator("TOPi", $right)));
+				&$operator("TOPi", $$rightruntime)));
 	    } else {
+	    	my $rightruntime = new B::Pseudoreg ("double", "rnv");
+	    	runtime(sprintf("$$rightruntime = %s;",$right));
 		runtime(sprintf("sv_setnv(TOPs, %s);",
-				&$operator("TOPn", $right)));
+				&$operator("TOPn",$$rightruntime)));
 	    }
 	}
     } else {
@@ -1405,6 +1409,7 @@ sub cc_main {
 		     );
                  
     }
+    seek(STDOUT,0,0); #prevent print statements from BEGIN{} into the output
     output_boilerplate();
     print "\n";
     output_all("perl_init");

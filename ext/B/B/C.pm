@@ -1274,6 +1274,7 @@ sub descend_marked_unused {
 sub save_main {
     warn "Starting compile\n";
     warn "Walking tree\n";
+    seek(STDOUT,0,0); #exclude print statements in BEGIN{} into output
     walkoptree(main_root, "save");
     warn "done main optree, walking symtable for extras\n" if $debug_cv;
     save_unused_subs();
