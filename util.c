@@ -1227,7 +1227,7 @@ mess(const char *pat, va_list *args)
 		      GvSV(PL_curcop->cop_filegv), (long)PL_curcop->cop_line);
 	if (GvIO(PL_last_in_gv) && IoLINES(GvIOp(PL_last_in_gv))) {
 	    bool line_mode = (RsSIMPLE(PL_rs) &&
-			      SvLEN(PL_rs) == 1 && *SvPVX(PL_rs) == '\n');
+			      SvCUR(PL_rs) == 1 && *SvPVX(PL_rs) == '\n');
 	    sv_catpvf(sv, ", <%s> %s %ld",
 		      PL_last_in_gv == PL_argvgv ? "" : GvNAME(PL_last_in_gv),
 		      line_mode ? "line" : "chunk", 
