@@ -1038,11 +1038,6 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 STATIC void
 S_hsplit(pTHX_ HV *hv)
 {
-    /* Can't make this clear any placeholders first for non-restricted hashes,
-       as Storable rebuilds restricted hashes by putting in all the
-       placeholders (first) before turning on the readonly flag.  Hence midway
-       through restoring the hash there are placeholders which need to remain
-       even though the hash isn't (currently) flagged as restricted. */
     register XPVHV* xhv = (XPVHV*)SvANY(hv);
     I32 oldsize = (I32) xhv->xhv_max+1; /* HvMAX(hv)+1 (sick) */
     register I32 newsize = oldsize * 2;
@@ -1055,6 +1050,17 @@ S_hsplit(pTHX_ HV *hv)
     int longest_chain = 0;
     int was_shared;
 
+    /*PerlIO_printf(PerlIO_stderr(), "hsplit called for %p which had %d\n",
+      hv, (int) oldsize);*/
+
+    if (HvPLACEHOLDERS(hv) && !SvREADONLY(hv)) {
+      /* Can make this clear any placeholders first for non-restricted hashes,
+	 even though Storable rebuilds restricted hashes by putting in all the
+	 placeholders (first) before turning on the readonly flag, because
+	 Storable always pre-splits the hash.  */
+      hv_clear_placeholders(hv);
+    }
+	       
     PL_nomemok = TRUE;
 #if defined(STRANGE_MALLOC) || defined(MYMALLOC)
     Renew(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize), char);

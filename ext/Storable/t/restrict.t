@@ -38,7 +38,7 @@ sub BEGIN {
 use Storable qw(dclone);
 use Hash::Util qw(lock_hash unlock_value);
 
-print "1..16\n";
+print "1..50\n";
 
 my %hash = (question => '?', answer => 42, extra => 'junk', undef => undef);
 lock_hash %hash;
@@ -100,4 +100,23 @@ for $Storable::canonical (0, 1) {
   testit (\%hash);
   my $object = \%hash;
   # bless {}, "Restrict_Test";
+
+  my %hash2;
+  $hash2{"k$_"} = "v$_" for 0..16;
+  lock_hash %hash2;
+  for (0..16) {
+    unlock_value %hash2, "k$_";
+    delete $hash2{"k$_"};
+  }
+  my $copy = dclone \%hash2;
+
+  for (0..16) {
+    my $k = "k$_";
+    eval { $copy->{$k} = undef } ;
+    unless (ok ++$test, !$@, "Can assign to reserved key '$k'?") {
+      my $diag = $@;
+      $diag =~ s/\n.*\z//s;
+      print "# \$\@: $diag\n";
+    }
+  }
 }
