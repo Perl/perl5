@@ -794,7 +794,10 @@ PP(pp_tie)
     POPSTACK;
     if (sv_isobject(sv)) {
 	sv_unmagic(varsv, how);
-	sv_magic(varsv, (SvRV(sv) == varsv ? Nullsv : sv), how, Nullch, 0);
+	/* Croak if a self-tie is attempted */
+	if (varsv == SvRV(sv))
+	    Perl_croak(aTHX_ "Self-ties are not supported");
+	sv_magic(varsv, sv, how, Nullch, 0);
     }
     LEAVE;
     SP = PL_stack_base + markoff;

@@ -2899,6 +2899,10 @@ filehandle that was either never opened or has since been closed.
 
 (F) This machine doesn't implement the select() system call.
 
+=item Self-ties are not supported
+
+(F) Self-ties are not supported in the current implementation.
+
 =item Semicolon seems to be missing
 
 (W semicolon) A nearby syntax error was probably caused by a missing
