@@ -1,5 +1,5 @@
 # -*- Mode: cperl; cperl-indent-level: 4 -*-
-# $Id: Harness.pm,v 1.47 2003/04/24 19:33:05 andy Exp $
+# $Id: Harness.pm,v 1.52 2003/07/17 19:02:48 andy Exp $
 
 package Test::Harness;
 
@@ -22,7 +22,7 @@ use vars qw($VERSION $Verbose $Switches $Have_Devel_Corestack $Curtest
 
 $Have_Devel_Corestack = 0;
 
-$VERSION = '2.28';
+$VERSION = '2.29';
 
 $ENV{HARNESS_ACTIVE} = 1;
 
@@ -898,7 +898,7 @@ sub _create_fmts {
     }
 }
 
-sub canonfailed ($@) {
+sub canonfailed ($$@) {
     my($max,$skipped,@failed) = @_;
     my %seen;
     @failed = sort {$a <=> $b} grep !$seen{$_}++, @failed;

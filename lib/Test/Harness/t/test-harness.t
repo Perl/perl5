@@ -472,8 +472,8 @@ my %samples = (
 
 plan tests => (keys(%samples) * 8) + 1;
 
-use Test::Harness;
 use_ok('Test::Harness');
+use Test::Harness; # So that we don't get "used only once" warnings on the next line
 $Test::Harness::Switches = '"-Mstrict"';
 
 tie *NULL, 'My::Dev::Null' or die $!;
