@@ -418,8 +418,8 @@ Perl_lex_start(pTHX_ SV *line)
     SAVEPPTR(PL_last_uni);
     SAVEPPTR(PL_linestart);
     SAVESPTR(PL_linestr);
-    SAVEPPTR(PL_lex_brackstack);
-    SAVEPPTR(PL_lex_casestack);
+    SAVEGENERICPV(PL_lex_brackstack);
+    SAVEGENERICPV(PL_lex_casestack);
     SAVEDESTRUCTOR_X(restore_rsfp, PL_rsfp);
     SAVESPTR(PL_lex_stuff);
     SAVEI32(PL_lex_defer);
@@ -434,8 +434,6 @@ Perl_lex_start(pTHX_ SV *line)
     PL_lex_brackets = 0;
     New(899, PL_lex_brackstack, 120, char);
     New(899, PL_lex_casestack, 12, char);
-    SAVEFREEPV(PL_lex_brackstack);
-    SAVEFREEPV(PL_lex_casestack);
     PL_lex_casemods = 0;
     *PL_lex_casestack = '\0';
     PL_lex_dojoin = 0;
@@ -1043,8 +1041,8 @@ S_sublex_push(pTHX)
     SAVEPPTR(PL_last_uni);
     SAVEPPTR(PL_linestart);
     SAVESPTR(PL_linestr);
-    SAVEPPTR(PL_lex_brackstack);
-    SAVEPPTR(PL_lex_casestack);
+    SAVEGENERICPV(PL_lex_brackstack);
+    SAVEGENERICPV(PL_lex_casestack);
 
     PL_linestr = PL_lex_stuff;
     PL_lex_stuff = Nullsv;
@@ -1059,8 +1057,6 @@ S_sublex_push(pTHX)
     PL_lex_brackets = 0;
     New(899, PL_lex_brackstack, 120, char);
     New(899, PL_lex_casestack, 12, char);
-    SAVEFREEPV(PL_lex_brackstack);
-    SAVEFREEPV(PL_lex_casestack);
     PL_lex_casemods = 0;
     *PL_lex_casestack = '\0';
     PL_lex_starts = 0;
@@ -2199,6 +2195,7 @@ Perl_yylex(pTHX)
     GV *gv = Nullgv;
     GV **gvp = 0;
     bool bof = FALSE;
+    I32 orig_keyword = 0;
 
     /* check if there's an identifier for us to look at */
     if (PL_pending_ident)
@@ -2269,11 +2266,7 @@ Perl_yylex(pTHX)
 		return ')';
 	    }
 	    if (PL_lex_casemods > 10) {
-		char* newlb = Renew(PL_lex_casestack, PL_lex_casemods + 2, char);
-		if (newlb != PL_lex_casestack) {
-		    SAVEFREEPV(newlb);
-		    PL_lex_casestack = newlb;
-		}
+		Renew(PL_lex_casestack, PL_lex_casemods + 2, char);
 	    }
 	    PL_lex_casestack[PL_lex_casemods++] = *s;
 	    PL_lex_casestack[PL_lex_casemods] = '\0';
@@ -3112,11 +3105,7 @@ Perl_yylex(pTHX)
       leftbracket:
 	s++;
 	if (PL_lex_brackets > 100) {
-	    char* newlb = Renew(PL_lex_brackstack, PL_lex_brackets + 1, char);
-	    if (newlb != PL_lex_brackstack) {
-		SAVEFREEPV(newlb);
-		PL_lex_brackstack = newlb;
-	    }
+	    Renew(PL_lex_brackstack, PL_lex_brackets + 10, char);
 	}
 	switch (PL_expect) {
 	case XTERM:
@@ -3773,7 +3762,7 @@ Perl_yylex(pTHX)
     case 'z': case 'Z':
 
       keylookup: {
-	I32 orig_keyword = 0;
+	orig_keyword = 0;
 	gv = Nullgv;
 	gvp = 0;
 

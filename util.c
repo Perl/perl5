@@ -3674,6 +3674,20 @@ Perl_my_strftime(pTHX_ char *fmt, int sec, int min, int hour, int mday, int mon,
   mytm.tm_yday = yday;
   mytm.tm_isdst = isdst;
   mini_mktime(&mytm);
+  /* use libc to get the values for tm_gmtoff and tm_zone [perl #18238] */
+#if defined(HAS_MKTIME) && (defined(HAS_TM_TM_GMTOFF) || defined(HAS_TM_TM_ZONE))
+  STMT_START {
+    struct tm mytm2;
+    mytm2 = mytm;
+    mktime(&mytm2);
+#ifdef HAS_TM_TM_GMTOFF
+    mytm.tm_gmtoff = mytm2.tm_gmtoff;
+#endif
+#ifdef HAS_TM_TM_ZONE
+    mytm.tm_zone = mytm2.tm_zone;
+#endif
+  } STMT_END;
+#endif
   buflen = 64;
   New(0, buf, buflen, char);
   len = strftime(buf, buflen, fmt, &mytm);

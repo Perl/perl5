@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..11\n";
+print "1..12\n";
 
 for ($i = 0; $i <= 10; $i++) {
     $x[$i] = $i;
@@ -66,3 +66,8 @@ foreach $b (bar()) {
 }
 print $a == 7 ? "ok" : "not ok", " 11\n";
 
+$loop_count = 0;
+for ("-3" .. "0") {
+    $loop_count++;
+}
+print $loop_count == 4 ? "ok" : "not ok", " 12\n";

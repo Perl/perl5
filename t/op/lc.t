@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 51;
+plan tests => 55;
 
 $a = "HELLO.* world";
 $b = "hello.* WORLD";
@@ -123,3 +123,18 @@ is(ucfirst("\x{3C3}") , "\x{3A3}", "U+03C3 ucfirst is U+03A3, too");
 is(uc("\x{1C5}") , "\x{1C4}",      "U+01C5 uc is U+01C4");
 is(uc("\x{1C6}") , "\x{1C4}",      "U+01C6 uc is U+01C4, too");
 
+# #18107: A host of bugs involving [ul]c{,first}. AMS 20021106
+$a = "\x{3c3}foo.bar"; # \x{3c3} == GREEK SMALL LETTER SIGMA.
+$b = "\x{3a3}FOO.BAR"; # \x{3a3} == GREEK CAPITAL LETTER SIGMA.
+
+($c = $b) =~ s/(\w+)/lc($1)/ge;
+ok($c eq $a, "Using s///e to change case.");
+
+($c = $a) =~ s/(\w+)/uc($1)/ge;
+ok($c eq $b, "Using s///e to change case.");
+
+($c = $b) =~ s/(\w+)/lcfirst($1)/ge;
+ok($c eq "\x{3c3}FOO.bAR", "Using s///e to change case.");
+
+($c = $a) =~ s/(\w+)/ucfirst($1)/ge;
+ok($c eq "\x{3a3}foo.Bar", "Using s///e to change case.");

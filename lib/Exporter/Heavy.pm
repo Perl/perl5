@@ -6,7 +6,6 @@ no strict 'refs';
 # On one line so MakeMaker will see it.
 require Exporter;  our $VERSION = $Exporter::VERSION;
 $Carp::Internal{"Exporter::Heavy"} = 1;
-our $Verbose;
 
 =head1 NAME
 
@@ -103,7 +102,7 @@ sub heavy_export {
 		}
 
 		warn "Import ".($remove ? "del":"add").": @names "
-		    if $Verbose;
+		    if $Exporter::Verbose;
 
 		if ($remove) {
 		   foreach $sym (@names) { delete $imports{$sym} } 
@@ -169,7 +168,7 @@ sub heavy_export {
 	    # barewords twice... both with and without a leading &.
 	    # (Technique could be applied to $export_cache at cost of memory)
 	    my @expanded = map { /^\w/ ? ($_, '&'.$_) : $_ } @$fail;
-	    warn "${pkg}::EXPORT_FAIL cached: @expanded" if $Verbose;
+	    warn "${pkg}::EXPORT_FAIL cached: @expanded" if $Exporter::Verbose;
 	    @{$fail_cache}{@expanded} = (1) x @expanded;
 	}
 	my @failed;
@@ -189,7 +188,7 @@ sub heavy_export {
     }
 
     warn "Importing into $callpkg from $pkg: ",
-		join(", ",sort @imports) if $Verbose;
+		join(", ",sort @imports) if $Exporter::Verbose;
 
     foreach $sym (@imports) {
 	# shortcut for the common case of no type character
