@@ -141,6 +141,7 @@ $   perl_uselargefiles = "undef"
 $   perl_uselongdouble = "undef"
 $   perl_usemorebits = "undef"
 $ ENDIF
+$ use_64bitall = use_64bitint ! until configure.com question is reworded?
 $ IF use_64bitall .eqs. "Y"
 $ THEN
 $   perl_use64bitall = "define"
@@ -3349,7 +3350,12 @@ $ perl_d_gethostprotos="define"
 $ perl_d_getnetprotos="define"
 $ perl_d_getprotoprotos="define"
 $ perl_d_getservprotos="define"
-$ perl_sock_size_type="int *"
+$ IF ("''Using_Dec_C'".EQS."Yes")
+$ THEN
+$ perl_socksizetype="unsigned int"
+$ ELSE
+$ perl_socksizetype="int *"
+$ ENDIF
 $ ELSE
 $ perl_d_vms_do_sockets="undef"
 $ perl_d_htonl="undef"
@@ -3371,7 +3377,7 @@ $ perl_d_gethostprotos="undef"
 $ perl_d_getnetprotos="undef"
 $ perl_d_getprotoprotos="undef"
 $ perl_d_getservprotos="undef"
-$ perl_sock_size_type="undef"
+$ perl_socksizetype="undef"
 $ ENDIF
 $! Threads
 $ if ("''use_threads'".eqs."T")
@@ -3919,7 +3925,7 @@ $ WC "netdb_host_type='" + perl_netdb_host_type + "'"
 $ WC "netdb_hlen_type='" + perl_netdb_hlen_type + "'"
 $ WC "netdb_name_type='" + perl_netdb_name_type + "'"
 $ WC "netdb_net_type='" + perl_netdb_net_type + "'"
-$ WC "sock_size_type='" + perl_sock_size_type + "'"
+$ WC "socksizetype='" + perl_socksizetype + "'"
 $ WC "baserev='" + perl_baserev + "'"
 $ WC "doublesize='" + perl_doublesize + "'"
 $ WC "ptrsize='" + perl_ptrsize + "'"

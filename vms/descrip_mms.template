@@ -375,7 +375,7 @@ pod8 = [.lib.pod]perltoot.pod [.lib.pod]perltootc.pod [.lib.pod]perltrap.pod [.l
 pod9 = [.lib.pod]perlfaq.pod [.lib.pod]perlfaq1.pod [.lib.pod]perlfaq2.pod [.lib.pod]perlfaq3.pod [.lib.pod]perlfaq4.pod [.lib.pod]perlfaq5.pod
 pod10 = [.lib.pod]perlfaq6.pod [.lib.pod]perlfaq7.pod [.lib.pod]perlfaq8.pod [.lib.pod]perlfaq9.pod
 
-perlpods : $(pod1) $(pod2) $(pod3) $(pod4) $(pod5) $(pod6) $(pod7) $(pod8) $(pod9) $(pod10) [.lib.pod]perlvms.pod [.lib.pod]README_vms.pod
+perlpods : $(pod1) $(pod2) $(pod3) $(pod4) $(pod5) $(pod6) $(pod7) $(pod8) $(pod9) $(pod10) [.lib.pod]perlvms.pod
 	@ $(NOOP)
 
 archcorefiles : $(ac) $(acth) $(ARCHAUTO)time.stamp
@@ -850,13 +850,10 @@ preplibrary : $(MINIPERL_EXE) $(LIBPREREQ) $(SOCKPM)
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	@ Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 
-[.lib.pod]README_vms.pod : README.vms
-	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
-	@ Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
-
-[.lib.pod]perlwin32.pod : README.win32
-	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
-	@ Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+install.html : []perl_setup.com installhtml. install $(perlpods)
+	@ @perl_setup
+	@ If F$Search("[.lib]html.dir").eqs."" Then Create/Directory [.lib.html]
+	$(MINIPERL) installhtml. "--podroot=/perl_root --recurse --htmldir=lib/html --htmlroot=lib/html --splithead=pod/perlipc --splititem=pod/perlfunc --libpods=perlfunc:perlguts:perlvar:perlrun:perlop --verbose"
 
 printconfig :
         @ @[.vms]make_command $(MMS) $(MMSQUALIFIERS) $(MMSTARGETS)

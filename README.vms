@@ -327,13 +327,35 @@ rebuild attempt.  They might not, too, so it is best to be sure and do it.
 There are several steps you need to take to get Perl installed and
 running.
 
-1) Create a directory somewhere and define the concealed logical PERL_ROOT
-to point to it. For example, 
+=over 4
+
+=item 1
+
+Check your default file protections with
+
+     SHOW PROTECTION /DEFAULT
+
+and adjust if necessary with SET PROTECTION=(code)/DEFAULT.
+
+=item 2
+
+Create a directory somewhere and either run @perl_setup or 
+define the concealed logical PERL_ROOT to point to it by hand. 
+For example, 
+
+    CREATE/DIRECTORY dka200:[perl]
+    @PERL_SETUP
+    SHOW LOGICAL PERL_ROOT
+
+or,
 
     CREATE/DIRECTORY dka200:[perl]
     DEFINE/TRANS=(CONC,TERM) PERL_ROOT dka200:[perl.]
 
-2) Run the install script via:
+
+=item 3
+
+Run the install script via:
 
     MMS install
 
@@ -344,53 +366,34 @@ or
 If for some reason it complains about target INSTALL being up to date,
 throw a /FORCE switch on the MMS or MMK command.
 
-The DCL script [.VMS]PERL_SETUP.COM that is written by CONFIGURE.COM 
-will take care of most of the following:
+=back
 
-3) Either create the global foreign symbol PERL somewhere, such as
-SYS$MANAGER:SYLOGIN.COM, to be
+The DCL script PERL_SETUP.COM that is written by CONFIGURE.COM
+will help you with the definition of PERL_ROOT, PERLSHR and the PERL
+Foreign symbol.  Take a look at PERL_SETUP.COM and modify it if you want 
+to.  Then copy PERL_SETUP.COM to a place accessible to your perl users.  
+For example:
 
-    $ PERL :== "$PERL_ROOT:[000000]PERL.EXE"
+    COPY PERL_SETUP.COM SYS$LIBRARY: 
 
-or install Perl into DCLTABLES.EXE (Check out the section "Installing Perl
-into DCLTABLES (optional)" for more information), or put the image in a 
+If you want to have everyone on the system have access to perl
+then add a line that reads
+
+    $ @sys$library:perl_setup
+
+to SYS$MANAGER:SYLOGIN.COM.
+
+Two alternatives to the foreign symbol would be to install PERL into 
+DCLTABLES.EXE (Check out the section "Installing Perl into DCLTABLES 
+(optional)" for more information), or put the image in a 
 directory that's in your DCL$PATH (if you're using VMS V6.2 or higher).
 
-4) Either define the logical name PERLSHR somewhere 
-(such as in PERL_SETUP.COM) like so
-
-    $ DEFINE/NOLOG PERLSHR PERL_ROOT:[000000]PERLSHR.EXE
-
-or copy the file into the system shareable library directory with
+An alternative to having PERL_SETUP.COM define the PERLSHR logical name
+is to simply copy it into the system shareable library directory with:
 
     copy perl_root:[000000]perlshr.exe sys$share:
 
-5) Optionally define the command PERLDOC as 
-
-    $ PERLDOC == "$PERL_ROOT:[000000]PERL PERL_ROOT:[LIB.POD]PERLDOC.COM -t"
-
-(See above for where to find the B<most> pager for use with perldoc).
-
-6) Optionally define the command PERLBUG (the Perl bug report generator) as
-
-    $ PERLBUG == "$PERL_ROOT:[000000]PERL PERL_ROOT:[LIB]PERLBUG.COM"
-
-7) Optionally define the command POD2MAN (Converts POD files to nroff
-source suitable for converting to man pages. Also quiets complaints during
-module builds) as
-
-    $ DEFINE/NOLOG POD2MAN PERL_ROOT:[LIB.POD]POD2MAN.COM
-    $ POD2MAN == "$PERL_ROOT:[000000]PERL POD2MAN"
-
-8) Optionally define the command POD2TEXT (Converts POD files to text,
-which is required for B<perldoc -f> to work properly) as
-
-    $ DEFINE/NOLOG POD2TEXT PERL_ROOT:[LIB.POD]POD2TEXT.COM
-    $ POD2TEXT == "$PERL_ROOT:[000000]PERL POD2TEXT"
-
-In all these cases, if you've got PERL defined as a foreign command symbol, 
-you can replace $PERL_ROOT:[000000]PERL with ''perl'.  If you have installed 
-perl into DCLTABLES, replace it with just perl.
+See also the "INSTALLing images (optional)" section.
 
 =head2 Installing Perl into DCLTABLES (optional)
 
@@ -567,7 +570,7 @@ of extending vmsperl with CPAN modules after Perl has been installed.
 
 =head1 AUTHORS
 
-Last revised 13-February-2000 by Peter Prymmer pvhp@best.com.  
+Last revised 25-February-2000 by Peter Prymmer pvhp@best.com.  
 Revised 27-October-1999 by Craig Berry craig.berry@metamorgs.com.  
 Revised 01-March-1999 by Dan Sugalski dan@sidhe.org.  
 Originally by Charles Bailey bailey@newman.upenn.edu.
@@ -601,6 +604,8 @@ missed someone.  That said, special thanks are due to the following:
   the Stanford Synchrotron Radiation Laboratory and the
      Laboratory of Nuclear Studies at Cornell University for
      the opportunity to test and develop for the AXP,
+  John Hasstedt John.Hasstedt@sunysb.edu
+     for VAX VMS V7.2 support
 
 and to the entire VMSperl group for useful advice and suggestions.  In
 addition the perl5-porters deserve credit for their creativity and
