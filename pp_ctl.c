@@ -1,6 +1,7 @@
 /*    pp_ctl.c
  *
- *    Copyright (c) 1991-2003, Larry Wall
+ *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
+ *    2000, 2001, 2002, 2003, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -2884,7 +2885,13 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	*startop = PL_eval_root;
     } else
 	SAVEFREEOP(PL_eval_root);
-    if (gimme & G_VOID)
+    if (gimme & G_VOID && ! PL_in_eval & EVAL_INREQUIRE)
+	/*
+	 * EVAL_INREQUIRE (the code is being required) is special-cased :
+	 * in this case we want scalar context to be forced, instead
+	 * of void context, so a proper return value is returned from
+	 * C<require> via this leaveeval op.
+	 */
 	scalarvoid(PL_eval_root);
     else if (gimme & G_ARRAY)
 	list(PL_eval_root);

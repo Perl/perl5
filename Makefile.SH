@@ -96,26 +96,33 @@ true)
 	    ldlibpth=`echo $ldlibpth | sed 's/:*$//'`
 	    ;;
         esac
+
+	case "$ldlibpth" in
+	# Protect any spaces
+	*" "*) ldlibpth=`echo $ldlibpth|sed 's/ /\\\\ /g'` ;;
+	esac
+
+	case "$osname" in
+	linux)
+		rm -f preload
+		cat <<-'EOT' > preload
+		#! /bin/sh
+		lib=$1
+		shift
+		test -r $lib && export LD_PRELOAD="$lib $LD_PRELOAD"
+		exec "$@"
+		EOT
+		chmod 755 preload
+		ldlibpth="$ldlibpth `pwd`/preload `pwd`/$libperl"
+		;;
+	os390)	test -f /bin/env && ldlibpth="/bin/env $ldlibpth"
+		;;
+	esac
+
 	;;
+
 *)	pldlflags=''
 	static_target='static'
-	;;
-esac
-
-case "$ldlibpth" in
-# Protect any spaces
-*" "*) ldlibpth=`echo $ldlibpth|sed 's/ /\\\\ /g'` ;;
-esac
-
-case "$osname" in
-linux)
-	case "$useshrplib" in
-	true)
-	    ldlibpth="LD_PRELOAD=\"\$\$LD_PRELOAD `pwd`/$libperl\" $ldlibpth"
-	    ;;
-	esac
-	;;
-os390)	test -f /bin/env && ldlibpth="/bin/env $ldlibpth"
 	;;
 esac
 
@@ -457,7 +464,7 @@ PERLEXPORT		= perl.exp
 	esac
 	$spitshell >>Makefile <<'!NO!SUBS!'
 perl.exp: $(MINIPERLEXP) makedef.pl config.sh $(SYM) $(SYMH)
-	./$(MINIPERLEXP) makedef.pl PLATFORM=aix | sort -u | sort -f > perl.exp.tmp
+	./$(MINIPERLEXP) makedef.pl PLATFORM=aix CC_FLAGS="$(OPTIMIZE)" | sort -u | sort -f > perl.exp.tmp
 	sh mv-if-diff perl.exp.tmp perl.exp
 
 !NO!SUBS!
@@ -467,7 +474,7 @@ os2)
 MINIPERLEXP		= miniperl
 
 perl5.def: $(MINIPERLEXP) makedef.pl config.sh $(SYM) $(SYMH) miniperl.map
-	./$(MINIPERLEXP) makedef.pl PLATFORM=os2 -DPERL_DLL=$(PERL_DLL) > perl.exp.tmp
+	./$(MINIPERLEXP) makedef.pl PLATFORM=os2 -DPERL_DLL=$(PERL_DLL) CC_FLAGS="$(OPTIMIZE)" > perl.exp.tmp
 	sh mv-if-diff perl.exp.tmp perl5.def
 
 !NO!SUBS!
@@ -944,6 +951,7 @@ _cleaner2:
 	rm -f lib/.exists lib/*/.exists lib/*/*/.exists
 	rm -f h2ph.man pstruct
 	rm -rf .config
+	rm -f preload
 	rm -f testcompile compilelog
 	-rmdir lib/B lib/Data lib/Digest
 	rm -rf lib/Encode
@@ -996,7 +1004,7 @@ makedepend: makedepend.SH config.sh
 	test_tty test-tty _test_tty test_notty test-notty _test_notty \
 	utest ucheck test.utf8 check.utf8 test.torture torturetest \
 	test.third check.third utest.third ucheck.third test_notty.third \
-	test.deparse test_notty.deparse \
+	test.deparse test_notty.deparse test_harness \
 	minitest coretest
 
 # Cannot delegate rebuilding of t/perl to make

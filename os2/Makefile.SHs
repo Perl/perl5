@@ -27,7 +27,6 @@ $spitshell >>Makefile <<!GROK!THIS!
 
 PERL_FULLVERSION = $perl_fullversion
 
-OPTIMIZE	= $optimize
 AOUT_OPTIMIZE	= \$(OPTIMIZE)
 AOUT_CCCMD	= \$(CC) -DPERL_CORE $aout_ccflags \$(AOUT_OPTIMIZE)
 AOUT_AR		= $aout_ar

@@ -1,6 +1,7 @@
 /*    sv.h
  *
- *    Copyright (c) 1991-2003, Larry Wall
+ *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
+ *    2000, 2001, 2002, 2003, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -306,7 +307,7 @@ struct xpvbm {
     U8		xbm_rare;	/* rarest character in string */
 };
 
-/* This structure much match XPVCV in cv.h */
+/* This structure must match XPVCV in cv.h */
 
 typedef U16 cv_flags_t;
 

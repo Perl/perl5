@@ -1,6 +1,7 @@
 /*    pp.c
  *
- *    Copyright (c) 1991-2003, Larry Wall
+ *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
+ *    2000, 2001, 2002, 2003, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -2890,24 +2891,14 @@ PP(pp_int)
 		  SETu(U_V(value));
 	      } else {
 #if defined(SPARC64_MODF_WORKAROUND)
-		(void)sparc64_workaround_modf(value, &value);
-#else
-#   if defined(HAS_MODFL) || defined(LONG_DOUBLE_EQUALS_DOUBLE)
-#       ifdef HAS_MODFL_POW32_BUG
+                  (void)sparc64_workaround_modf(value, &value);
+#elif defined(HAS_MODFL_POW32_BUG)
 /* some versions of glibc split (i + d) into (i-1, d+1) for 2^32 <= i < 2^64 */
-                {
-                    NV offset = Perl_modf(value, &value);
-                    (void)Perl_modf(offset, &offset);
-                    value += offset;
-                }
-#       else
-		  (void)Perl_modf(value, &value);
-#       endif
-#   else
-		  double tmp = (double)value;
-		  (void)Perl_modf(tmp, &tmp);
-		  value = (NV)tmp;
-#   endif
+                  NV offset = Perl_modf(value, &value);
+                  (void)Perl_modf(offset, &offset);
+                  value += offset;
+#else
+                  (void)Perl_modf(value, &value);
 #endif
 		  SETn(value);
 	      }
@@ -2916,24 +2907,17 @@ PP(pp_int)
 	      if (value > (NV)IV_MIN - 0.5) {
 		  SETi(I_V(value));
 	      } else {
-#if defined(HAS_MODFL) || defined(LONG_DOUBLE_EQUALS_DOUBLE)
-#   ifdef HAS_MODFL_POW32_BUG
+#if defined(SPARC64_MODF_WORKAROUND)
+                  (void)sparc64_workaround_modf(-value, &value);
+#elif defined(HAS_MODFL_POW32_BUG)
 /* some versions of glibc split (i + d) into (i-1, d+1) for 2^32 <= i < 2^64 */
-                 {
-                     NV offset = Perl_modf(-value, &value);
-                     (void)Perl_modf(offset, &offset);
-                     value += offset;
-                 }
-#   else
-		  (void)Perl_modf(-value, &value);
-#   endif
-		  value = -value;
+                  NV offset = Perl_modf(-value, &value);
+                  (void)Perl_modf(offset, &offset);
+                  value += offset;
 #else
-		  double tmp = (double)value;
-		  (void)Perl_modf(-tmp, &tmp);
-		  value = -(NV)tmp;
+		  (void)Perl_modf(-value, &value);
 #endif
-		  SETn(value);
+		  SETn(-value);
 	      }
 	  }
       }
@@ -3387,7 +3371,8 @@ PP(pp_chr)
 	tmps = SvPVX(TARG);
 	if (SvCUR(TARG) == 0 || !is_utf8_string((U8*)tmps, SvCUR(TARG)) ||
 	    memEQ(tmps, "\xef\xbf\xbd\0", 4)) {
-	    SvGROW(TARG,3);
+	    SvGROW(TARG, 3);
+	    tmps = SvPVX(TARG);
 	    SvCUR_set(TARG, 2);
 	    *tmps++ = (U8)UTF8_EIGHT_BIT_HI(value);
 	    *tmps++ = (U8)UTF8_EIGHT_BIT_LO(value);
@@ -3418,6 +3403,24 @@ PP(pp_crypt)
 	 sv_utf8_downgrade(tsv, FALSE);
 	 tmps = SvPVX(tsv);
     }
+#   ifdef USE_ITHREADS
+#     ifdef HAS_CRYPT_R
+    if (!PL_reentrant_buffer->_crypt_struct_buffer) {
+      /* This should be threadsafe because in ithreads there is only
+       * one thread per interpreter.  If this would not be true,
+       * we would need a mutex to protect this malloc. */
+        PL_reentrant_buffer->_crypt_struct_buffer =
+	  (struct crypt_data *)safemalloc(sizeof(struct crypt_data));
+#if defined(__GLIBC__) || defined(__EMX__)
+	if (PL_reentrant_buffer->_crypt_struct_buffer) {
+	    PL_reentrant_buffer->_crypt_struct_buffer->initialized = 0;
+	    /* work around glibc-2.2.5 bug */
+	    PL_reentrant_buffer->_crypt_struct_buffer->current_saltbits = 0;
+	}
+#endif
+    }
+#     endif /* HAS_CRYPT_R */
+#   endif /* USE_ITHREADS */
 #   ifdef FCRYPT
     sv_setpv(TARG, fcrypt(tmps, SvPV(right, n_a)));
 #   else
@@ -4760,12 +4763,10 @@ PP(pp_split)
 	if (gimme == G_ARRAY)
 	    RETURN;
     }
-    if (iters || !pm->op_pmreplroot) {
-	GETTARGET;
-	PUSHi(iters);
-	RETURN;
-    }
-    RETPUSHUNDEF;
+
+    GETTARGET;
+    PUSHi(iters);
+    RETURN;
 }
 
 PP(pp_lock)

@@ -4,7 +4,7 @@
 
 BEGIN {
     if( $ENV{PERL_CORE} ) {
-        @INC = ('../lib', 'lib');
+        @INC = ('../../lib', '../lib', 'lib');
     }
     else {
         unshift @INC, 't/lib';

@@ -1,6 +1,7 @@
 /*    perl.h
  *
- *    Copyright (c) 1987-2003, Larry Wall
+ *    Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999,
+ *    2000, 2001, 2002, 2003, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -1253,12 +1254,18 @@ typedef NVTYPE NV;
 long double modfl(long double, long double *);
 #	endif
 #   else
-#       define Perl_modf(x,y) ((long double)modf((double)(x),(double*)(y)))
+#       if defined(HAS_AINTL) && defined(HAS_COPYSIGNL)
+        extern long double Perl_my_modfl(long double x, long double *ip);
+#           define Perl_modf(x,y) Perl_my_modfl(x,y)
+#       endif
 #   endif
 #   ifdef HAS_FREXPL
 #       define Perl_frexp(x,y) frexpl(x,y)
 #   else
-#       define Perl_frexp(x,y) ((long double)frexp((double)(x),y))
+#       if defined(HAS_ILOGBL) && defined(HAS_SCALBNL)
+        extern long double Perl_my_frexpl(long double x, int *e);
+#           define Perl_frexp(x,y) Perl_my_frexpl(x,y)
+#       endif
 #   endif
 #   ifndef Perl_isnan
 #       ifdef HAS_ISNANL
@@ -3182,6 +3189,7 @@ typedef enum {
     XATTRTERM,
     XTERMBLOCK,
     XTERMORDORDOR /* evil hack */
+    /* update exp_name[] in toke.c if adding to this enum */
 } expectation;
 
 enum {		/* pass one of these to get_vtbl */
@@ -4157,6 +4165,7 @@ int flock(int fd, int op);
 /* Input flags: */
 #define PERL_SCAN_ALLOW_UNDERSCORES   0x01 /* grok_??? accept _ in numbers */
 #define PERL_SCAN_DISALLOW_PREFIX     0x02 /* grok_??? reject 0x in hex etc */
+#define PERL_SCAN_SILENT_ILLDIGIT     0x04 /* grok_??? not warn about illegal digits */
 /* Output flags: */
 #define PERL_SCAN_GREATER_THAN_UV_MAX 0x02 /* should this merge with above? */
 

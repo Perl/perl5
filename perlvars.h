@@ -1,6 +1,6 @@
 /*    perlvars.h
  *
- *    Copyright (c) 1997-2002, Larry Wall
+ *    Copyright (C) 1999, 2000, 2001, 2002, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -66,3 +66,6 @@ PERLVARI(Gppid,		IV,		0)
 #ifdef USE_ITHREADS
 PERLVAR(Gdollarzero_mutex, perl_mutex)	/* Modifying $0 */
 #endif
+
+/* This is constant on most architectures, a global on OS/2 */
+PERLVARI(Gsh_path,	char *,	SH_PATH)/* full path of shell */

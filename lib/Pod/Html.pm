@@ -2,10 +2,11 @@ package Pod::Html;
 use strict;
 require Exporter;
 
-use vars qw($VERSION @ISA @EXPORT);
-$VERSION = 1.04;
+use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
+$VERSION = 1.05;
 @ISA = qw(Exporter);
 @EXPORT = qw(pod2html htmlify);
+@EXPORT_OK = qw(anchorify);
 
 use Carp;
 use Config;
@@ -1965,12 +1966,12 @@ sub htmlify {
 }
 
 #
-# similar to htmlify, but turns spaces into underscores
+# similar to htmlify, but turns non-alphanumerics into underscores
 #
 sub anchorify {
     my ($anchor) = @_;
     $anchor = htmlify($anchor);
-    $anchor =~ s/\s/_/g; # fixup spaces left by htmlify
+    $anchor =~ s/\W/_/g;
     return $anchor;
 }
 

@@ -1,6 +1,7 @@
 /*    perl.c
  *
- *    Copyright (c) 1987-2003 Larry Wall
+ *    Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999,
+ *    2000, 2001, 2002, 2003, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -272,6 +273,8 @@ perl_construct(pTHXx)
 #endif
 	 PL_clocktick = HZ;
 
+    PL_stashcache = newHV();
+
     ENTER;
 }
 
@@ -456,6 +459,9 @@ perl_destruct(pTHXx)
     PL_regex_padav = Nullav;
     PL_regex_pad = NULL;
 #endif
+
+    SvREFCNT_dec((SV*) PL_stashcache);
+    PL_stashcache = NULL;
 
     /* loosen bonds of global variables */
 
@@ -2166,19 +2172,42 @@ Perl_moreswitches(pTHX_ char *s)
     switch (*s) {
     case '0':
     {
-        I32 flags = 0;
-	numlen = 4;
-	rschar = (U32)grok_oct(s, &numlen, &flags, NULL);
-	SvREFCNT_dec(PL_rs);
-	if (rschar & ~((U8)~0))
-	    PL_rs = &PL_sv_undef;
-	else if (!rschar && numlen >= 2)
-	    PL_rs = newSVpvn("", 0);
-	else {
-	    char ch = (char)rschar;
-	    PL_rs = newSVpvn(&ch, 1);
-	}
-	return s + numlen;
+	 I32 flags = 0;
+
+	 SvREFCNT_dec(PL_rs);
+	 if (s[1] == 'x' && s[2]) {
+	      char *e;
+	      U8 *tmps;
+
+	      for (s += 2, e = s; *e; e++);
+	      numlen = e - s;
+	      flags = PERL_SCAN_SILENT_ILLDIGIT;
+	      rschar = (U32)grok_hex(s, &numlen, &flags, NULL);
+	      if (s + numlen < e) {
+		   rschar = 0; /* Grandfather -0xFOO as -0 -xFOO. */
+		   numlen = 0;
+		   s--;
+	      }
+	      PL_rs = newSVpvn("", 0);
+	      SvGROW(PL_rs, UNISKIP(rschar) + 1);
+	      tmps = (U8*)SvPVX(PL_rs);
+	      uvchr_to_utf8(tmps, rschar);
+	      SvCUR_set(PL_rs, UNISKIP(rschar));
+	      SvUTF8_on(PL_rs);
+	 }
+	 else {
+	      numlen = 4;
+	      rschar = (U32)grok_oct(s, &numlen, &flags, NULL);
+	      if (rschar & ~((U8)~0))
+		   PL_rs = &PL_sv_undef;
+	      else if (!rschar && numlen >= 2)
+		   PL_rs = newSVpvn("", 0);
+	      else {
+		   char ch = (char)rschar;
+		   PL_rs = newSVpvn(&ch, 1);
+	      }
+	 }
+	 return s + numlen;
     }
     case 'C':
         s++;

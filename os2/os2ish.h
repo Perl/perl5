@@ -99,6 +99,111 @@
 # undef I_SYS_UN
 #endif 
 
+#ifdef USE_ITHREADS
+
+#define do_spawn(a)      os2_do_spawn(aTHX_ (a))
+#define do_aspawn(a,b,c) os2_do_aspawn(aTHX_ (a),(b),(c))
+
+#define OS2_ERROR_ALREADY_POSTED 299	/* Avoid os2.h */
+
+extern int rc;
+
+#define MUTEX_INIT(m) \
+    STMT_START {						\
+	int rc;							\
+	if ((rc = _rmutex_create(m,0)))				\
+	    Perl_croak_nocontext("panic: MUTEX_INIT: rc=%i", rc);	\
+    } STMT_END
+#define MUTEX_LOCK(m) \
+    STMT_START {						\
+	int rc;							\
+	if ((rc = _rmutex_request(m,_FMR_IGNINT)))		\
+	    Perl_croak_nocontext("panic: MUTEX_LOCK: rc=%i", rc);	\
+    } STMT_END
+#define MUTEX_UNLOCK(m) \
+    STMT_START {						\
+	int rc;							\
+	if ((rc = _rmutex_release(m)))				\
+	    Perl_croak_nocontext("panic: MUTEX_UNLOCK: rc=%i", rc);	\
+    } STMT_END
+#define MUTEX_DESTROY(m) \
+    STMT_START {						\
+	int rc;							\
+	if ((rc = _rmutex_close(m)))				\
+	    Perl_croak_nocontext("panic: MUTEX_DESTROY: rc=%i", rc);	\
+    } STMT_END
+
+#define COND_INIT(c) \
+    STMT_START {						\
+	int rc;							\
+	if ((rc = DosCreateEventSem(NULL,c,0,0)))		\
+	    Perl_croak_nocontext("panic: COND_INIT: rc=%i", rc);	\
+    } STMT_END
+#define COND_SIGNAL(c) \
+    STMT_START {						\
+	int rc;							\
+	if ((rc = DosPostEventSem(*(c))) && rc != OS2_ERROR_ALREADY_POSTED)\
+	    Perl_croak_nocontext("panic: COND_SIGNAL, rc=%ld", rc);	\
+    } STMT_END
+#define COND_BROADCAST(c) \
+    STMT_START {						\
+	int rc;							\
+	if ((rc = DosPostEventSem(*(c))) && rc != OS2_ERROR_ALREADY_POSTED)\
+	    Perl_croak_nocontext("panic: COND_BROADCAST, rc=%i", rc);	\
+    } STMT_END
+/* #define COND_WAIT(c, m) \
+    STMT_START {						\
+	if (WaitForSingleObject(*(c),INFINITE) == WAIT_FAILED)	\
+	    Perl_croak_nocontext("panic: COND_WAIT");		\
+    } STMT_END
+*/
+#define COND_WAIT(c, m) os2_cond_wait(c,m)
+
+#define COND_WAIT_win32(c, m) \
+    STMT_START {						\
+	int rc;							\
+	if ((rc = SignalObjectAndWait(*(m),*(c),INFINITE,FALSE)))	\
+	    Perl_croak_nocontext("panic: COND_WAIT");			\
+	else							\
+	    MUTEX_LOCK(m);					\
+    } STMT_END
+#define COND_DESTROY(c) \
+    STMT_START {						\
+	int rc;							\
+	if ((rc = DosCloseEventSem(*(c))))			\
+	    Perl_croak_nocontext("panic: COND_DESTROY, rc=%i", rc);	\
+    } STMT_END
+/*#define THR ((struct thread *) TlsGetValue(PL_thr_key))
+*/
+
+#ifdef USE_SLOW_THREAD_SPECIFIC
+#  define pthread_getspecific(k)	(*_threadstore())
+#  define pthread_setspecific(k,v)	(*_threadstore()=v,0)
+#  define pthread_key_create(keyp,flag)	(*keyp=_gettid(),0)
+#else /* USE_SLOW_THREAD_SPECIFIC */
+#  define pthread_getspecific(k)	(*(k))
+#  define pthread_setspecific(k,v)	(*(k)=(v),0)
+#  define pthread_key_create(keyp,flag)			\
+	( DosAllocThreadLocalMemory(1,(unsigned long**)keyp)	\
+	  ? Perl_croak_nocontext("LocalMemory"),1	\
+	  : 0						\
+	)
+#endif /* USE_SLOW_THREAD_SPECIFIC */
+#define pthread_key_delete(keyp)
+#define pthread_self()			_gettid()
+#define YIELD				DosSleep(0)
+
+#ifdef PTHREADS_INCLUDED		/* For ./x2p stuff. */
+int pthread_join(pthread_t tid, void **status);
+int pthread_detach(pthread_t tid);
+int pthread_create(pthread_t *tid, const pthread_attr_t *attr,
+		   void *(*start_routine)(void*), void *arg);
+#endif /* PTHREAD_INCLUDED */
+
+#define THREADS_ELSEWHERE
+
+#else /* USE_ITHREADS */
+
 #define do_spawn(a)      os2_do_spawn(a)
 #define do_aspawn(a,b,c) os2_do_aspawn((a),(b),(c))
  
@@ -294,14 +399,18 @@ char *ctermid(char *s);
 #if OS2_STAT_HACK
 
 #define Stat(fname,bufptr) os2_stat((fname),(bufptr))
-#define Fstat(fd,bufptr)   fstat((fd),(bufptr))
+#define Fstat(fd,bufptr)   os2_fstat((fd),(bufptr))
 #define Fflush(fp)         fflush(fp)
 #define Mkdir(path,mode)   mkdir((path),(mode))
+#define chmod(path,mode)   os2_chmod((path),(mode))
 
 #undef S_IFBLK
 #undef S_ISBLK
-#define S_IFBLK		0120000
+#define S_IFBLK		0120000		/* Hacks to make things compile... */
 #define S_ISBLK(mode)	(((mode) & S_IFMT) == S_IFBLK)
+
+int os2_chmod(const char *name, int pmode);
+int os2_fstat(int handle, struct stat *st);
 
 #else
 
@@ -563,11 +672,14 @@ void CroakWinError(int die, char *name);
 #define PERLLIB_MANGLE(s, n) perllib_mangle((s), (n))
 char *perllib_mangle(char *, unsigned int);
 
+#define fork	fork_with_resources
+
 typedef int (*Perl_PFN)();
 Perl_PFN loadByOrdinal(enum entries_ordinals ord, int fail);
 extern const Perl_PFN * const pExtFCN;
 char *os2error(int rc);
 int os2_stat(const char *name, struct stat *st);
+int fork_with_resources();
 int setpriority(int which, int pid, int val);
 int getpriority(int which /* ignored */, int pid);
 

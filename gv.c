@@ -1,6 +1,7 @@
 /*    gv.c
  *
- *    Copyright (c) 1991-2003, Larry Wall
+ *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
+ *    2000, 2001, 2002, 2003, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -764,8 +765,10 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 		  : sv_type == SVt_PVAV ? "@"
 		  : sv_type == SVt_PVHV ? "%"
 		  : ""), name));
+	    stash = GvHV(gv_fetchpv("<none>::", GV_ADDMULTI, SVt_PVHV));
 	}
-	return Nullgv;
+	else
+	    return Nullgv;
     }
 
     if (!SvREFCNT(stash))	/* symbol table under destruction */
@@ -1121,6 +1124,9 @@ Perl_newIO(pTHX)
     sv_upgrade((SV *)io,SVt_PVIO);
     SvREFCNT(io) = 1;
     SvOBJECT_on(io);
+    /* Clear the stashcache because a new IO could overrule a 
+       package name */
+    hv_clear(PL_stashcache);
     iogv = gv_fetchpv("FileHandle::", FALSE, SVt_PVHV);
     /* unless exists($main::{FileHandle}) and defined(%main::FileHandle::) */
     if (!(iogv && GvHV(iogv) && HvARRAY(GvHV(iogv))))
@@ -1235,6 +1241,8 @@ Perl_gp_free(pTHX_ GV *gv)
 
     SvREFCNT_dec(gp->gp_sv);
     SvREFCNT_dec(gp->gp_av);
+    if(gp->gp_hv && HvNAME(gp->gp_hv) && PL_stashcache)
+        hv_delete(PL_stashcache, HvNAME(gp->gp_hv), strlen(HvNAME(gp->gp_hv)), G_DISCARD);
     SvREFCNT_dec(gp->gp_hv);
     SvREFCNT_dec(gp->gp_io);
     SvREFCNT_dec(gp->gp_cv);

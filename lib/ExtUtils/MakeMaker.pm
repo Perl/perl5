@@ -2,21 +2,20 @@ package ExtUtils::MakeMaker;
 
 BEGIN {require 5.005_03;}
 
-$VERSION = "6.03";
-$Version_OK = "5.49";   # Makefiles older than $Version_OK will die
-                        # (Will be checked from MakeMaker version 4.13 onwards)
-($Revision = substr(q$Revision: 1.63 $, 10)) =~ s/\s+$//;
+$VERSION = '6.10_03';
+($Revision = substr(q$Revision: 1.109 $, 10)) =~ s/\s+$//;
 
 require Exporter;
 use Config;
 use Carp ();
+use File::Path;
 
 use vars qw(
             @ISA @EXPORT @EXPORT_OK
-            $ISA_TTY $Revision $VERSION $Verbose $Version_OK %Config 
-            %Keep_after_flush %MM_Sections @Prepend_parent
+            $Revision $VERSION $Verbose %Config 
+            @Prepend_parent @Parent
             %Recognized_Att_Keys @Get_from_Config @MM_Sections @Overridable 
-            @Parent $PACKNAME
+            $Filename
            );
 use strict;
 
@@ -28,6 +27,10 @@ use strict;
 # purged.
 my $Is_VMS     = $^O eq 'VMS';
 my $Is_Win32   = $^O eq 'MSWin32';
+
+# Our filename for diagnostic and debugging purposes.  More reliable
+# than %INC (think caseless filesystems)
+$Filename = __FILE__;
 
 full_setup();
 
@@ -200,6 +203,7 @@ sub full_setup {
     EXCLUDE_EXT EXE_FILES FIRST_MAKEFILE
     FULLPERL FULLPERLRUN FULLPERLRUNINST
     FUNCLIST H IMPORTS
+
     INST_ARCHLIB INST_SCRIPT INST_BIN INST_LIB INST_MAN1DIR INST_MAN3DIR
     INSTALLDIRS
     DESTDIR PREFIX
@@ -213,18 +217,18 @@ sub full_setup {
     INSTALLSCRIPT 
     PERL_LIB        PERL_ARCHLIB 
     SITELIBEXP      SITEARCHEXP 
+
     INC INCLUDE_EXT LDFROM LIB LIBPERL_A LIBS
-    LINKTYPE MAKEAPERL MAKEFILE_OLD MAN1PODS MAN3PODS MAP_TARGET 
-    MYEXTLIB
-    PERL_MALLOC_OK
-    NAME NEEDS_LINKING NOECHO NORECURS NO_VC OBJECT OPTIMIZE PERL PERLMAINCC
-    PERLRUN PERLRUNINST PERL_CORE
+    LINKTYPE MAKEAPERL MAKEFILE_OLD MAN1PODS MAN3PODS MAP_TARGET MYEXTLIB
+    NAME NEEDS_LINKING NOECHO NO_META NORECURS NO_VC OBJECT OPTIMIZE 
+    PERL_MALLOC_OK PERL PERLMAINCC PERLRUN PERLRUNINST PERL_CORE
     PERL_SRC PERM_RW PERM_RWX
     PL_FILES PM PM_FILTER PMLIBDIRS POLLUTE PPM_INSTALL_EXEC
     PPM_INSTALL_SCRIPT PREREQ_FATAL PREREQ_PM PREREQ_PRINT PRINT_PREREQ
     SKIP TYPEMAPS VERSION VERSION_FROM XS XSOPT XSPROTOARG
     XS_VERSION clean depend dist dynamic_lib linkext macro realclean
     tool_autosplit
+
     MACPERL_SRC MACPERL_LIB MACLIBS_68K MACLIBS_PPC MACLIBS_SC MACLIBS_MRC
     MACLIBS_ALL_68K MACLIBS_ALL_PPC MACLIBS_SHARED
         /;
@@ -604,12 +608,12 @@ sub WriteEmptyMakefile {
     my %att = @_;
     my $self = MM->new(\%att);
     if (-f $self->{MAKEFILE_OLD}) {
-      chmod 0666, $self->{MAKEFILE_OLD};
-      unlink $self->{MAKEFILE_OLD} or warn "unlink $self->{MAKEFILE_OLD}: $!";
+      _unlink($self->{MAKEFILE_OLD}) or 
+        warn "unlink $self->{MAKEFILE_OLD}: $!";
     }
     if ( -f $self->{MAKEFILE} ) {
-        _rename($self->{MAKEFILE}, $self->{MAKEFILE_OLD})
-          or warn "rename $self->{MAKEFILE} => $self->{MAKEFILE_OLD}: $!"
+        _rename($self->{MAKEFILE}, $self->{MAKEFILE_OLD}) or
+          warn "rename $self->{MAKEFILE} => $self->{MAKEFILE_OLD}: $!"
     }
     open MF, '>'.$self->{MAKEFILE} or die "open $self->{MAKEFILE} for write: $!";
     print MF <<'EOP';
@@ -883,6 +887,13 @@ sub _rename {
     chmod 0666, $dest;
     unlink $dest;
     return rename $src, $dest;
+}
+
+# This is an unlink for OS's where the target must be writable first.
+sub _unlink {
+    my @files = @_;
+    chmod 0666, @files;
+    return unlink @files;
 }
 
 
@@ -2006,7 +2017,7 @@ MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
     *VERSION = \'1.01';
-    ( $VERSION ) = '$Revision: 1.63 $ ' =~ /\$Revision:\s+([^\s]+)/;
+    ( $VERSION ) = '$Revision: 1.109 $ ' =~ /\$Revision:\s+([^\s]+)/;
     $FOO::VERSION = '1.10';
     *FOO::VERSION = \'1.11';
     our $VERSION = 1.2.3;       # new for perl5.6.0 

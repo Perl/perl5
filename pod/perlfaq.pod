@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq - frequently asked questions about Perl ($Date: 2003/01/26 17:45:46 $)
+perlfaq - frequently asked questions about Perl ($Date: 2003/01/31 17:37:17 $)
 
 =head1 DESCRIPTION
 
@@ -70,9 +70,33 @@ in respect of this information or its use.
 
 =head1 Table of Contents
 
-=head2 perlfaq: Structural overview of the FAQ.
+=over 4
 
-This document.
+=item perlfaq  - this document
+
+=item perlfaq1 - General Questions About Perl
+
+=item perlfaq2 - Obtaining and Learning about Perl
+
+=item perlfaq3 - Programming Tools
+
+=item perlfaq4 - Data Manipulation
+
+=item perlfaq5 - Files and Formats
+
+=item perlfaq6 - Regular Expressions
+
+=item perlfaq7 - General Perl Language Issues
+
+=item perlfaq8 - System Interaction
+
+=item perlfaq9 - Networking
+
+
+=back
+
+
+=head1 The Questions
 
 =head2 L<perlfaq1>: General Questions About Perl
 
@@ -412,7 +436,7 @@ How do I get a random number between X and Y?
 
 =item *
 
-How do I find the week-of-the-year/day-of-the-year?
+How do I find the day or week of the year?
 
 =item *
 
@@ -1049,6 +1073,10 @@ How do I clear a package?
 =item *
 
 How can I use a variable as a variable name?
+
+=item *
+
+What does "bad interpreter" mean?
 
 =back
 

@@ -25,8 +25,18 @@ require ExtUtils::MM_Unix;
 
 use vars qw(@ISA $VERSION);
 @ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
-$VERSION = 1.03;
+$VERSION = 1.04;
 
+
+=item os_flavor (o)
+
+BeOS is BeOS.
+
+=cut
+
+sub os_flavor {
+    return('BeOS');
+}
 
 =item init_linker
 

@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq7 - General Perl Language Issues ($Revision: 1.13 $, $Date: 2003/01/26 17:45:46 $)
+perlfaq7 - General Perl Language Issues ($Revision: 1.14 $, $Date: 2003/01/31 17:38:14 $)
 
 =head1 DESCRIPTION
 
@@ -878,6 +878,31 @@ manipulate the symbol table.  This doesn't matter for formats, handles, and
 subroutines, because they are always global--you can't use my() on them.
 For scalars, arrays, and hashes, though--and usually for subroutines--
 you probably only want to use hard references.
+
+=head2 What does "bad interpreter" mean?
+
+The "bad interpreter" message comes from the shell, not perl.  The
+actual message may vary depending on your platform, shell, and locale
+settings.
+
+If you see "bad interpreter - no such file or directory", the first
+line in your perl script (the "shebang" line) does not contain the
+right path to perl (or any other program capable of running scripts). 
+Sometimes this happens when you move the script from one machine to
+another and each machine has a different path to perl---/usr/bin/perl
+versus /usr/local/bin/perl for instance.
+
+If you see "bad interpreter: Permission denied", you need to make your
+script executable.
+
+In either case, you should still be able to run the scripts with perl
+explicitly:
+
+	% perl script.pl
+
+If you get a message like "perl: command not found", perl is not in
+your PATH, which might also mean that the location of perl is not
+where you expect it so you need to adjust your shebang line.
 
 =head1 AUTHOR AND COPYRIGHT
 

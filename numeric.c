@@ -1,6 +1,7 @@
 /*    numeric.c
  *
- *    Copyright (c) 2001-2002, Larry Wall
+ *    Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999,
+ *    2000, 2001, 2002, 2003, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -197,7 +198,7 @@ Perl_grok_bin(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result) {
 		++s;
                 goto redo;
 	    }
-        if (ckWARN(WARN_DIGIT))
+        if (!(*flags & PERL_SCAN_SILENT_ILLDIGIT) && ckWARN(WARN_DIGIT))
             Perl_warner(aTHX_ packWARN(WARN_DIGIT),
                         "Illegal binary digit '%c' ignored", *s);
         break;
@@ -312,7 +313,7 @@ Perl_grok_hex(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result) {
 		++s;
                 goto redo;
 	    }
-        if (ckWARN(WARN_DIGIT))
+        if (!(*flags & PERL_SCAN_SILENT_ILLDIGIT) && ckWARN(WARN_DIGIT))
             Perl_warner(aTHX_ packWARN(WARN_DIGIT),
                         "Illegal hexadecimal digit '%c' ignored", *s);
         break;
@@ -398,7 +399,7 @@ Perl_grok_oct(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result) {
          * as soon as non-octal characters are seen, complain only iff
          * someone seems to want to use the digits eight and nine). */
         if (digit == 8 || digit == 9) {
-            if (ckWARN(WARN_DIGIT))
+            if (!(*flags & PERL_SCAN_SILENT_ILLDIGIT) && ckWARN(WARN_DIGIT))
                 Perl_warner(aTHX_ packWARN(WARN_DIGIT),
                             "Illegal octal digit '%c' ignored", *s);
         }
@@ -972,3 +973,19 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
     return s;
 }
 
+#if ! defined(HAS_MODFL) && defined(HAS_AINTL) && defined(HAS_COPYSIGNL)
+long double
+Perl_my_modfl(long double x, long double *ip)
+{
+	*ip = aintl(x);
+	return (x == *ip ? copysignl(0.0L, x) : x - *ip);
+}
+#endif
+
+#if ! defined(HAS_FREXPL) && defined(HAS_ILOGBL) && defined(HAS_SCALBNL)
+long double
+Perl_my_frexpl(long double x, int *e) {
+	*e = x == 0.0L ? 0 : ilogbl(x) + 1;
+	return (scalbnl(x, -*e));
+}
+#endif

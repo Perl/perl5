@@ -18,11 +18,30 @@ BEGIN {
 sub do_not_edit ($)
 {
     my $file = shift;
+    
+    my $years;
+
+    if ($file eq 'embed.h') {
+        $years = '1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003';
+    } elsif ($file eq 'embedvar.h') {
+        $years = '1999, 2000, 2001, 2002, 2003';
+    } elsif ($file eq 'global.sym') {
+        $years = '1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003';
+    } elsif ($file eq 'perlapi.c') {
+        $years = '1999, 2000, 2001';
+    } elsif ($file eq 'perlapi.h') {
+        $years = '1999, 2000, 2001, 2002, 2003';
+    } elsif ($file eq 'proto.h') {
+        $years = '1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003';
+    }
+
+    $years =~ s/1999,/1999,\n  / if length $years > 40;
+
     my $warning = <<EOW;
 
    $file
 
-   Copyright (c) 1997-2003, Larry Wall
+   Copyright (C) $years, by Larry Wall and others
 
    You may distribute under the terms of either the GNU General Public
    License or the Artistic License, as specified in the README file.

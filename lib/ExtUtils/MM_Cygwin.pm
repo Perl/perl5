@@ -10,7 +10,7 @@ require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
 @ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
 
-$VERSION = 1.05;
+$VERSION = 1.06;
 
 
 =head1 NAME
@@ -26,6 +26,16 @@ ExtUtils::MM_Cygwin - methods to override UN*X behaviour in ExtUtils::MakeMaker
 See ExtUtils::MM_Unix for a documentation of the methods provided there.
 
 =over 4
+
+=item os_flavor (o)
+
+We're Unix and Cygwin.
+
+=cut
+
+sub os_flavor {
+    return('Unix', 'Cygwin');
+}
 
 =item cflags (o)
 

@@ -1,5 +1,5 @@
 # -*- Mode: cperl; cperl-indent-level: 4 -*-
-# $Id: Harness.pm,v 1.43 2003/03/24 20:09:50 andy Exp $
+# $Id: Harness.pm,v 1.45 2003/04/13 03:34:09 andy Exp $
 
 package Test::Harness;
 
@@ -22,7 +22,7 @@ use vars qw($VERSION $Verbose $Switches $Have_Devel_Corestack $Curtest
 
 $Have_Devel_Corestack = 0;
 
-$VERSION = '2.27_02';
+$VERSION = '2.27_04';
 
 $ENV{HARNESS_ACTIVE} = 1;
 
@@ -328,6 +328,7 @@ It returns true if everything was ok.  Otherwise it will die() with
 one of the messages in the DIAGNOSTICS section.
 
 =for _private
+
 This is just _run_all_tests() plus _show_results()
 
 =cut

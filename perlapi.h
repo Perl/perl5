@@ -1,7 +1,7 @@
 /*
  *    perlapi.h
  *
- *    Copyright (c) 1997-2003, Larry Wall
+ *    Copyright (C) 1999, 2000, 2001, 2002, 2003, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -490,8 +490,8 @@ END_EXTERN_C
 #define PL_savebegin		(*Perl_Isavebegin_ptr(aTHX))
 #undef  PL_sawampersand
 #define PL_sawampersand		(*Perl_Isawampersand_ptr(aTHX))
-#undef  PL_sh_path
-#define PL_sh_path		(*Perl_Ish_path_ptr(aTHX))
+#undef  PL_sh_path_compat
+#define PL_sh_path_compat	(*Perl_Ish_path_compat_ptr(aTHX))
 #undef  PL_sig_pending
 #define PL_sig_pending		(*Perl_Isig_pending_ptr(aTHX))
 #undef  PL_sighandlerp
@@ -504,6 +504,8 @@ END_EXTERN_C
 #define PL_splitstr		(*Perl_Isplitstr_ptr(aTHX))
 #undef  PL_srand_called
 #define PL_srand_called		(*Perl_Isrand_called_ptr(aTHX))
+#undef  PL_stashcache
+#define PL_stashcache		(*Perl_Istashcache_ptr(aTHX))
 #undef  PL_statusvalue
 #define PL_statusvalue		(*Perl_Istatusvalue_ptr(aTHX))
 #undef  PL_statusvalue_vms
@@ -928,6 +930,8 @@ END_EXTERN_C
 #define PL_runops_dbg		(*Perl_Grunops_dbg_ptr(NULL))
 #undef  PL_runops_std
 #define PL_runops_std		(*Perl_Grunops_std_ptr(NULL))
+#undef  PL_sh_path
+#define PL_sh_path		(*Perl_Gsh_path_ptr(NULL))
 #undef  PL_sharehook
 #define PL_sharehook		(*Perl_Gsharehook_ptr(NULL))
 #undef  PL_thr_key

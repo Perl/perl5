@@ -552,7 +552,7 @@ you could do it like so:
 which is presumably easier to read than the old way:
 
     C<open(X, "E<gt>E<gt>thing.dat") || die $!>
-    C<$foo-E<gt>bar(); >>
+    C<$foo-E<gt>bar();>
 
 This is currently supported by pod2text (Pod::Text), pod2man (Pod::Man),
 and any other pod2xxx or Pod::Xxxx translators that use

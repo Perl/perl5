@@ -43,6 +43,7 @@ The values are the original list elements.
 sub abbrev {
     my ($word, $hashref, $glob, %table, $returnvoid);
 
+    @_ or return;   # So we don't autovivify onto @_ and trigger warning
     if (ref($_[0])) {           # hash reference preferably
       $hashref = shift;
       $returnvoid = 1;

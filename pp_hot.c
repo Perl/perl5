@@ -1,6 +1,7 @@
 /*    pp_hot.c
  *
- *    Copyright (c) 1991-2003, Larry Wall
+ *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
+ *    2000, 2001, 2002, 2003, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -2926,8 +2927,18 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 
 	/* this isn't a reference */
 	packname = Nullch;
+
+        if(SvOK(sv) && (packname = SvPV(sv, packlen))) {
+          HE* he;
+	  he = hv_fetch_ent(PL_stashcache, sv, 0, 0);
+          if (he) { 
+            stash = (HV*)SvIV(HeVAL(he));
+            goto fetch;
+          }
+        }
+
 	if (!SvOK(sv) ||
-	    !(packname = SvPV(sv, packlen)) ||
+	    !(packname) ||
 	    !(iogv = gv_fetchpv(packname, FALSE, SVt_PVIO)) ||
 	    !(ob=(SV*)GvIO(iogv)))
 	{
@@ -2946,6 +2957,10 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	    stash = gv_stashpvn(packname, packlen, FALSE);
 	    if (!stash)
 		packsv = sv;
+            else {
+	        SV* ref = newSViv((IV)stash);
+	        hv_store(PL_stashcache, packname, packlen, ref, 0);
+	    }
 	    goto fetch;
 	}
 	/* it _is_ a filehandle name -- replace with a reference */

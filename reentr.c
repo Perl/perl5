@@ -1,7 +1,7 @@
 /*
  *    reentr.c
  *
- *    Copyright (c) 1997-2003, Larry Wall
+ *    Copyright (C) 2002, 2003, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -146,10 +146,8 @@ Perl_reentrant_init(pTHX) {
 	New(31338, PL_reentrant_buffer->_asctime_buffer, PL_reentrant_buffer->_asctime_size, char);
 #endif /* HAS_ASCTIME_R */
 #ifdef HAS_CRYPT_R
-#ifdef __GLIBC__
-	PL_reentrant_buffer->_crypt_struct.initialized = 0;
-	/* work around glibc-2.2.5 bug */
-	PL_reentrant_buffer->_crypt_struct.current_saltbits = 0;
+#if CRYPT_R_PROTO != REENTRANT_PROTO_B_CCD
+	PL_reentrant_buffer->_crypt_struct_buffer = 0;
 #endif
 #endif /* HAS_CRYPT_R */
 #ifdef HAS_CTIME_R
@@ -230,6 +228,9 @@ Perl_reentrant_free(pTHX) {
 	Safefree(PL_reentrant_buffer->_asctime_buffer);
 #endif /* HAS_ASCTIME_R */
 #ifdef HAS_CRYPT_R
+#if CRYPT_R_PROTO != REENTRANT_PROTO_B_CCD
+	Safefree(PL_reentrant_buffer->_crypt_struct_buffer);
+#endif
 #endif /* HAS_CRYPT_R */
 #ifdef HAS_CTIME_R
 	Safefree(PL_reentrant_buffer->_ctime_buffer);

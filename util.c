@@ -1,6 +1,7 @@
 /*    util.c
  *
- *    Copyright (c) 1991-2003, Larry Wall
+ *    Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999,
+ *    2000, 2001, 2002, 2003, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -4324,7 +4325,7 @@ Perl_parse_unicode_opts(pTHX_ char **popt)
        if (isDIGIT(*p)) {
 	    opt = (U32) atoi(p);
 	    while (isDIGIT(*p)) p++;
-	    if (*p)
+	    if (*p && *p != '\n' && *p != '\r')
 		 Perl_croak(aTHX_ "Unknown Unicode option letter '%c'", *p);
        }
        else {
@@ -4349,8 +4350,9 @@ Perl_parse_unicode_opts(pTHX_ char **popt)
 		 case PERL_UNICODE_ARGV:
 		      opt |= PERL_UNICODE_ARGV_FLAG;	break;
 		 default:
-		      Perl_croak(aTHX_
-				 "Unknown Unicode option letter '%c'", *p);
+		      if (*p != '\n' && *p != '\r')
+			  Perl_croak(aTHX_
+				     "Unknown Unicode option letter '%c'", *p);
 		 }
 	    }
        }

@@ -1,6 +1,7 @@
 /*    op.c
  *
- *    Copyright (c) 1991-2003, Larry Wall
+ *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
+ *    2000, 2001, 2002, 2003, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -2789,13 +2790,13 @@ Perl_package(pTHX_ OP *o)
 }
 
 void
-Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
+Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 {
     OP *pack;
     OP *imop;
     OP *veop;
 
-    if (id->op_type != OP_CONST)
+    if (idop->op_type != OP_CONST)
 	Perl_croak(aTHX_ "Module name must be constant");
 
     veop = Nullop;
@@ -2813,8 +2814,8 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
 	    if (version->op_type != OP_CONST || !SvNIOKp(vesv))
 		Perl_croak(aTHX_ "Version number must be constant number");
 
-	    /* Make copy of id so we don't free it twice */
-	    pack = newSVOP(OP_CONST, 0, newSVsv(((SVOP*)id)->op_sv));
+	    /* Make copy of idop so we don't free it twice */
+	    pack = newSVOP(OP_CONST, 0, newSVsv(((SVOP*)idop)->op_sv));
 
 	    /* Fake up a method call to VERSION */
 	    meth = newSVpvn("VERSION",7);
@@ -2831,14 +2832,14 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
     /* Fake up an import/unimport */
     if (arg && arg->op_type == OP_STUB)
 	imop = arg;		/* no import on explicit () */
-    else if (SvNIOKp(((SVOP*)id)->op_sv)) {
+    else if (SvNIOKp(((SVOP*)idop)->op_sv)) {
 	imop = Nullop;		/* use 5.0; */
     }
     else {
 	SV *meth;
 
-	/* Make copy of id so we don't free it twice */
-	pack = newSVOP(OP_CONST, 0, newSVsv(((SVOP*)id)->op_sv));
+	/* Make copy of idop so we don't free it twice */
+	pack = newSVOP(OP_CONST, 0, newSVsv(((SVOP*)idop)->op_sv));
 
 	/* Fake up a method call to import/unimport */
 	meth = aver ? newSVpvn("import",6) : newSVpvn("unimport", 8);
@@ -2858,7 +2859,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
 	Nullop,
 	append_elem(OP_LINESEQ,
 	    append_elem(OP_LINESEQ,
-	        newSTATEOP(0, Nullch, newUNOP(OP_REQUIRE, 0, id)),
+	        newSTATEOP(0, Nullch, newUNOP(OP_REQUIRE, 0, idop)),
 	        newSTATEOP(0, Nullch, veop)),
 	    newSTATEOP(0, Nullch, imop) ));
 
@@ -4191,7 +4192,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	if (*s != 'B' && *s != 'E' && *s != 'C' && *s != 'I')
 	    goto done;
 
-	if (strEQ(s, "BEGIN")) {
+	if (strEQ(s, "BEGIN") && !PL_error_count) {
 	    I32 oldscope = PL_scopestack_ix;
 	    ENTER;
 	    SAVECOPFILE(&PL_compiling);
@@ -4273,7 +4274,7 @@ Perl_newCONSTSUB(pTHX_ HV *stash, char *name, SV *sv)
 	CopSTASH_set(PL_curcop,stash);
     }
 
-    cv = newXS(name, const_sv_xsub, __FILE__);
+    cv = newXS(name, const_sv_xsub, savepv(CopFILE(PL_curcop)));
     CvXSUBANY(cv).any_ptr = sv;
     CvCONST_on(cv);
     sv_setpv((SV*)cv, "");  /* prototype is "" */
@@ -5108,9 +5109,51 @@ Perl_ck_fun(pTHX_ OP *o)
 			    else if (kid->op_type == OP_AELEM
 				     || kid->op_type == OP_HELEM)
 			    {
-				name = "__ANONIO__";
-				len = 10;
-				mod(kid,type);
+				 OP *op;
+
+				 name = 0;
+				 if ((op = ((BINOP*)kid)->op_first)) {
+				      SV *tmpstr = Nullsv;
+				      char *a =
+					   kid->op_type == OP_AELEM ?
+					   "[]" : "{}";
+				      if (((op->op_type == OP_RV2AV) ||
+					   (op->op_type == OP_RV2HV)) &&
+					  (op = ((UNOP*)op)->op_first) &&
+					  (op->op_type == OP_GV)) {
+					   /* packagevar $a[] or $h{} */
+					   GV *gv = cGVOPx_gv(op);
+					   if (gv)
+						tmpstr =
+						     Perl_newSVpvf(aTHX_
+								   "%s%c...%c",
+								   GvNAME(gv),
+								   a[0], a[1]);
+				      }
+				      else if (op->op_type == OP_PADAV
+					       || op->op_type == OP_PADHV) {
+					   /* lexicalvar $a[] or $h{} */
+					   char *padname =
+						PAD_COMPNAME_PV(op->op_targ);
+					   if (padname)
+						tmpstr =
+						     Perl_newSVpvf(aTHX_
+								   "%s%c...%c",
+								   padname + 1,
+								   a[0], a[1]);
+					   
+				      }
+				      if (tmpstr) {
+					   name = savepv(SvPVX(tmpstr));
+					   len = strlen(name);
+					   sv_2mortal(tmpstr);
+				      }
+				 }
+				 if (!name) {
+				      name = "__ANONIO__";
+				      len = 10;
+				 }
+				 mod(kid, type);
 			    }
 			    if (name) {
 				SV *namesv;
@@ -5457,6 +5500,25 @@ Perl_ck_open(pTHX_ OP *o)
     }
     if (o->op_type == OP_BACKTICK)
 	return o;
+    {
+	 /* In case of three-arg dup open remove strictness
+	  * from the last arg if it is a bareword. */
+	 OP *first = cLISTOPx(o)->op_first; /* The pushmark. */
+	 OP *last  = cLISTOPx(o)->op_last;  /* The bareword. */
+	 OP *oa;
+	 char *mode;
+
+	 if ((last->op_type == OP_CONST) &&		/* The bareword. */
+	     (last->op_private & OPpCONST_BARE) &&
+	     (last->op_private & OPpCONST_STRICT) &&
+	     (oa = first->op_sibling) &&		/* The fh. */
+	     (oa = oa->op_sibling) &&			/* The mode. */
+	     SvPOK(((SVOP*)oa)->op_sv) &&
+	     (mode = SvPVX(((SVOP*)oa)->op_sv)) &&
+	     mode[0] == '>' && mode[1] == '&' &&	/* A dup open. */
+	     (last == oa->op_sibling))			/* The bareword. */
+	      last->op_private &= ~OPpCONST_STRICT;
+    }
     return ck_fun(o);
 }
 

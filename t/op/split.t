@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 52;
+plan tests => 54;
 
 $FS = ':';
 
@@ -279,6 +279,13 @@ ok(@ary == 3 &&
 {
     $p="a,b";
     utf8::upgrade $p;
-    @a=split(/[, ]+/,$p);
+    eval { @a=split(/[, ]+/,$p) };
     is ("$@-@a-", '-a b-', '#20912 - split() to array with /[]+/ and utf8');
+}
+
+{
+    is (\@a, \@{"a"}, '@a must be global for following test');
+    $p="";
+    $n = @a = split /,/,$p;
+    is ($n, 0, '#21765 - pmreplroot hack used to return undef for 0 iters');
 }

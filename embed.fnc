@@ -809,7 +809,7 @@ Ap	|I32	|unlnk		|char* f
 Apd	|I32	|unpack_str	|char *pat|char *patend|char *s|char *strbeg|char *strend|char **new_s|I32 ocnt|U32 flags
 Ap	|void	|unsharepvn	|const char* sv|I32 len|U32 hash
 p	|void	|unshare_hek	|HEK* hek
-p	|void	|utilize	|int aver|I32 floor|OP* version|OP* id|OP* arg
+p	|void	|utilize	|int aver|I32 floor|OP* version|OP* idop|OP* arg
 Ap	|U8*	|utf16_to_utf8	|U8* p|U8 *d|I32 bytelen|I32 *newlen
 Ap	|U8*	|utf16_to_utf8_reversed|U8* p|U8 *d|I32 bytelen|I32 *newlen
 Adp	|STRLEN	|utf8_length	|U8* s|U8 *e

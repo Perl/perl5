@@ -1,6 +1,7 @@
 /*    perlio.h
  *
- *    Copyright (c) 1997-2003, Larry Wall
+ *    Copyright (C) 1996, 1997, 1999, 2000, 2001, 2002, 2003,
+ *    by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -107,6 +108,7 @@ extern PerlIO_funcs *PerlIO_find_layer(pTHX_ const char *name, STRLEN len,
 extern PerlIO *PerlIO_push(pTHX_ PerlIO *f, PerlIO_funcs *tab,
 			   const char *mode, SV *arg);
 extern void PerlIO_pop(pTHX_ PerlIO *f);
+extern AV* PerlIO_get_layers(pTHX_ PerlIO *f);
 extern void PerlIO_clone(pTHX_ PerlInterpreter *proto, CLONE_PARAMS *param);
 
 #endif				/* PerlIO */

@@ -1,6 +1,7 @@
 /*    sv.c
  *
- *    Copyright (c) 1991-2003, Larry Wall
+ *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
+ *    2000, 2001, 2002, 2003, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -11027,7 +11028,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_origalen		= proto_perl->Iorigalen;
     PL_pidstatus	= newHV();			/* XXX flag for cloning? */
     PL_osname		= SAVEPV(proto_perl->Iosname);
-    PL_sh_path		= proto_perl->Ish_path; /* XXX never deallocated */
+    PL_sh_path_compat	= proto_perl->Ish_path_compat; /* XXX never deallocated */
     PL_sighandlerp	= proto_perl->Isighandlerp;
 
 
@@ -11396,6 +11397,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     /* Pluggable optimizer */
     PL_peepp		= proto_perl->Tpeepp;
+
+    PL_stashcache       = newHV();
 
     if (!(flags & CLONEf_KEEP_PTR_TABLE)) {
         ptr_table_free(PL_ptr_table);

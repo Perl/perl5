@@ -5,13 +5,17 @@ BEGIN {
         chdir 't' if -d 't';
         @INC = '../lib';
     }
+    use Config;
+    unless ($Config{usedl}) {
+	print "1..0 # no usedl, skipping\n";
+	exit 0;
+    }
 }
 
 # use warnings;
 use strict;
 use ExtUtils::MakeMaker;
 use ExtUtils::Constant qw (constant_types C_constant XS_constant autoload);
-use Config;
 use File::Spec;
 use Cwd;
 

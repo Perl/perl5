@@ -1,7 +1,7 @@
 /*
  *    embedvar.h
  *
- *    Copyright (c) 1997-2003, Larry Wall
+ *    Copyright (C) 1999, 2000, 2001, 2002, 2003, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -366,13 +366,14 @@
 #define PL_runops		(vTHX->Irunops)
 #define PL_savebegin		(vTHX->Isavebegin)
 #define PL_sawampersand		(vTHX->Isawampersand)
-#define PL_sh_path		(vTHX->Ish_path)
+#define PL_sh_path_compat	(vTHX->Ish_path_compat)
 #define PL_sig_pending		(vTHX->Isig_pending)
 #define PL_sighandlerp		(vTHX->Isighandlerp)
 #define PL_signals		(vTHX->Isignals)
 #define PL_sort_RealCmp		(vTHX->Isort_RealCmp)
 #define PL_splitstr		(vTHX->Isplitstr)
 #define PL_srand_called		(vTHX->Isrand_called)
+#define PL_stashcache		(vTHX->Istashcache)
 #define PL_statusvalue		(vTHX->Istatusvalue)
 #define PL_statusvalue_vms	(vTHX->Istatusvalue_vms)
 #define PL_stderrgv		(vTHX->Istderrgv)
@@ -658,13 +659,14 @@
 #define PL_Irunops		PL_runops
 #define PL_Isavebegin		PL_savebegin
 #define PL_Isawampersand	PL_sawampersand
-#define PL_Ish_path		PL_sh_path
+#define PL_Ish_path_compat	PL_sh_path_compat
 #define PL_Isig_pending		PL_sig_pending
 #define PL_Isighandlerp		PL_sighandlerp
 #define PL_Isignals		PL_signals
 #define PL_Isort_RealCmp	PL_sort_RealCmp
 #define PL_Isplitstr		PL_splitstr
 #define PL_Isrand_called	PL_srand_called
+#define PL_Istashcache		PL_stashcache
 #define PL_Istatusvalue		PL_statusvalue
 #define PL_Istatusvalue_vms	PL_statusvalue_vms
 #define PL_Istderrgv		PL_stderrgv
@@ -883,6 +885,7 @@
 #define PL_ppid			(PL_Vars.Gppid)
 #define PL_runops_dbg		(PL_Vars.Grunops_dbg)
 #define PL_runops_std		(PL_Vars.Grunops_std)
+#define PL_sh_path		(PL_Vars.Gsh_path)
 #define PL_sharehook		(PL_Vars.Gsharehook)
 #define PL_thr_key		(PL_Vars.Gthr_key)
 #define PL_threadhook		(PL_Vars.Gthreadhook)
@@ -903,6 +906,7 @@
 #define PL_Gppid		PL_ppid
 #define PL_Grunops_dbg		PL_runops_dbg
 #define PL_Grunops_std		PL_runops_std
+#define PL_Gsh_path		PL_sh_path
 #define PL_Gsharehook		PL_sharehook
 #define PL_Gthr_key		PL_thr_key
 #define PL_Gthreadhook		PL_threadhook

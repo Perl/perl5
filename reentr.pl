@@ -41,7 +41,7 @@ print <<EOF;
 /*
  *    reentr.h
  *
- *    Copyright (c) 1997-2003, Larry Wall
+ *    Copyright (C) 2002, 2003, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -453,14 +453,17 @@ EOF
 #if CRYPT_R_PROTO == REENTRANT_PROTO_B_CCD
 	$seend{$func} _${func}_data;
 #else
-	$seent{$func} _${func}_struct;
+	$seent{$func} *_${func}_struct_buffer;
 #endif
 EOF
     	    push @init, <<EOF;
-#ifdef __GLIBC__
-	PL_reentrant_buffer->_${func}_struct.initialized = 0;
-	/* work around glibc-2.2.5 bug */
-	PL_reentrant_buffer->_${func}_struct.current_saltbits = 0;
+#if CRYPT_R_PROTO != REENTRANT_PROTO_B_CCD
+	PL_reentrant_buffer->_${func}_struct_buffer = 0;
+#endif
+EOF
+    	    push @free, <<EOF;
+#if CRYPT_R_PROTO != REENTRANT_PROTO_B_CCD
+	Safefree(PL_reentrant_buffer->_${func}_struct_buffer);
 #endif
 EOF
 	    pushssif $endif;
@@ -661,9 +664,11 @@ EOF
 			     $_ eq 'D' ?
 				 "&PL_reentrant_buffer->_${genfunc}_data" :
 			     $_ eq 'S' ?
-				 ($func =~ /^readdir/ ?
+				 ($func =~ /^readdir\d*$/ ?
 				  "PL_reentrant_buffer->_${genfunc}_struct" :
-				  "&PL_reentrant_buffer->_${genfunc}_struct" ) :
+				  $func =~ /^crypt$/ ?
+				  "PL_reentrant_buffer->_${genfunc}_struct_buffer" :
+				  "&PL_reentrant_buffer->_${genfunc}_struct") :
 			     $_ eq 'T' && $func eq 'drand48' ?
 				 "&PL_reentrant_buffer->_${genfunc}_double" :
 			     $_ =~ /^[ilt]$/ && $func eq 'random' ?
@@ -733,7 +738,7 @@ print <<EOF;
 /*
  *    reentr.c
  *
- *    Copyright (c) 1997-2003, Larry Wall
+ *    Copyright (C) 2002, 2003, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.

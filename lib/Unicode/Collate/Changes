@@ -1,5 +1,8 @@
 Revision history for Perl extension Unicode::Collate.
 
+0.24  Thu Apr 02 23:12:54 2003
+    - internal tweak for (?un)pack 'U'.
+
 0.23  Wed Sep 04 19:25:20 2002
     - fix: scalar match() no longer returns an lvalue substr ref.
     - fix: "Ignorable after variable" should be made level 3 ignorable

@@ -132,15 +132,18 @@ If you use Sun's C compiler, make sure the correct directory
 
 =head3 GCC
 
-If you use gcc, make sure your installation is recent and
-complete.  As a point of reference, perl-5.6.0 built fine with
-gcc-2.8.1 on both Solaris 2.6 and Solaris 8.  You should
-Configure perl with
+If you use gcc, make sure your installation is recent and complete.
+Perl versions since 5.6.0 build fine with gcc > 2.8.1 on Solaris >=
+2.6.
+
+You must Configure perl with
 
 	sh Configure -Dcc=gcc
 
+If you don't, you may experience strange build errors.
+
 If you have updated your Solaris version, you may also have to update
-your GCC.  For example, if you are running Solaris 2.6 and your gcc is
+your gcc.  For example, if you are running Solaris 2.6 and your gcc is
 installed under /usr/local, check in /usr/local/lib/gcc-lib and make
 sure you have the appropriate directory, sparc-sun-solaris2.6/ or
 i386-pc-solaris2.6/.  If gcc's directory is for a different version of

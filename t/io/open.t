@@ -12,7 +12,7 @@ use Config;
 $Is_VMS = $^O eq 'VMS';
 $Is_MacOS = $^O eq 'MacOS';
 
-plan tests => 95;
+plan tests => 100;
 
 my $Perl = which_perl();
 
@@ -228,6 +228,11 @@ like( $@, qr/Bad filehandle:\s+afile/,          '       right error' );
     ok( open(my $stdout, ">&", \*STDOUT),       'dup \*STDOUT into lexical fh');
     ok( open(STDOUT,     ">&", $stdout),        'restore dupped STDOUT from lexical fh');
 
+    {
+	use strict; # the below should not warn
+	ok( open(my $stdout, ">&", STDOUT),         'dup STDOUT into lexical fh');
+    }
+
     # used to try to open a file [perl #17830]
     ok( open(my $stdin,  "<&", fileno STDIN),   'dup fileno(STDIN) into lexical fh');
 }
@@ -244,3 +249,33 @@ SKIP: {
     ok( !eval { open F, "BAR", "QUUX" },       'Unknown open() mode' );
     like( $@, qr/\QUnknown open() mode 'BAR'/, '       right error' );
 }
+
+{
+    local $SIG{__WARN__} = sub { $@ = shift };
+
+    sub gimme {
+        my $tmphandle = shift;
+	my $line = scalar <$tmphandle>;
+	warn "gimme";
+	return $line;
+    }
+
+    open($fh0[0], "TEST");
+    gimme($fh0[0]);
+    like($@, qr/<\$fh0\[...\]> line 1\./, "autoviv fh package aelem");
+
+    open($fh1{k}, "TEST");
+    gimme($fh1{k});
+    like($@, qr/<\$fh1{...}> line 1\./, "autoviv fh package helem");
+
+    my @fh2;
+    open($fh2[0], "TEST");
+    gimme($fh2[0]);
+    like($@, qr/<\$fh2\[...\]> line 1\./, "autoviv fh lexical aelem");
+
+    my %fh3;
+    open($fh3{k}, "TEST");
+    gimme($fh3{k});
+    like($@, qr/<\$fh3{...}> line 1\./, "autoviv fh lexical helem");
+}
+    

@@ -30,20 +30,29 @@ Unify VMS->find_perl
 
 Consider if VMS->find_perl needs to have pieces put into maybe_command()
 
-Consider if shell escaping all macro data is a good idea.
-
-Move Win32->init_others() ExtUtils::Command overrides into MM_Any.
+Add a MM_Any->init_others() using ExtUtils::Command.
 
 Figure out and document the 4th arg to ExtUtils::Install::install()
 
 Consider if adding a nativize() routine to replace macify() and
 fixpath() is useful.
 
-Eliminate the above from inside FS::VMS->catfile and catdir.  Make into 
-MM_VMS wrappers.
+Eliminate eliminate_macros() from inside FS::VMS->catfile and catdir.
+Make into MM_VMS wrappers.
 
 Add "NO_META" to stop autogeneration (and auto overwrite) of META.yml.
 
 Test ExtUtils::Command::MM
 
 Finish ExtUtils::MakeMaker::Tutorial
+
+Add 'how to install additional files' to ExtUtils::MakeMaker::FAQ.
+
+Fix NORECUSE bug continuing to set DIR
+
+Give typemap location its own macro.
+
+Merge MM_VMS->tool_xsubpp
+
+Initialize PERL_SRC to '' instead of leaving undef when outside the source 
+tree

@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 1.40 $, $Date: 2003/01/26 17:43:21 $)
+perlfaq4 - Data Manipulation ($Revision: 1.43 $, $Date: 2003/02/23 20:25:09 $)
 
 =head1 DESCRIPTION
 
@@ -316,7 +316,7 @@ Get the http://www.cpan.org/modules/by-module/Roman module.
 If you're using a version of Perl before 5.004, you must call C<srand>
 once at the start of your program to seed the random number generator.
 
-	 BEGIN { srand() if $[ < 5.004 }
+	 BEGIN { srand() if $] < 5.004 }
 
 5.004 and later automatically call C<srand> at the beginning.  Don't
 call C<srand> more than once---you make your numbers less random, rather
@@ -353,13 +353,34 @@ C<random_int_in(50,120)>
 
 =head1 Data: Dates
 
-=head2 How do I find the week-of-the-year/day-of-the-year?
+=head2 How do I find the day or week of the year?
 
-The day of the year is in the array returned by localtime() (see
-L<perlfunc/"localtime">):
+The localtime function returns the day of the week.  Without an
+argument localtime uses the current time.
 
-    $day_of_year = (localtime(time()))[7];
+    $day_of_year = (localtime)[7];
+    
+The POSIX module can also format a date as the day of the year or
+week of the year.
 
+	use POSIX qw/strftime/;
+	my $day_of_year  = strftime "%j", localtime;
+	my $week_of_year = strftime "%W", localtime;
+
+To get the day of year for any date, use the Time::Local module to get
+a time in epoch seconds for the argument to localtime.
+	
+	use POSIX qw/strftime/;
+	use Time::Local;
+	my $week_of_year = strftime "%W", 
+		localtime( timelocal( 0, 0, 0, 18, 11, 1987 ) );
+
+The Date::Calc module provides two functions for to calculate these.
+
+	use Date::Calc;
+	my $day_of_year  = Day_of_Year(  1987, 12, 18 );
+	my $week_of_year = Week_of_Year( 1987, 12, 18 );
+	
 =head2 How do I find the current century or millennium?
 
 Use the following simple functions:

@@ -1,6 +1,6 @@
 /*    utf8.c
  *
- *    Copyright (c) 1998-2003, Larry Wall
+ *    Copyright (C) 2000, 2001, 2002, 2003, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -1235,7 +1235,7 @@ Perl_is_utf8_upper(pTHX_ U8 *p)
     if (!is_utf8_char(p))
 	return FALSE;
     if (!PL_utf8_upper)
-	PL_utf8_upper = swash_init("utf8", "IsUpper", &PL_sv_undef, 0, 0);
+	PL_utf8_upper = swash_init("utf8", "IsUppercase", &PL_sv_undef, 0, 0);
     return swash_fetch(PL_utf8_upper, p, TRUE) != 0;
 }
 
@@ -1245,7 +1245,7 @@ Perl_is_utf8_lower(pTHX_ U8 *p)
     if (!is_utf8_char(p))
 	return FALSE;
     if (!PL_utf8_lower)
-	PL_utf8_lower = swash_init("utf8", "IsLower", &PL_sv_undef, 0, 0);
+	PL_utf8_lower = swash_init("utf8", "IsLowercase", &PL_sv_undef, 0, 0);
     return swash_fetch(PL_utf8_lower, p, TRUE) != 0;
 }
 

@@ -1114,6 +1114,7 @@ lib/ExtUtils/t/INST_PREFIX.t	See if MakeMaker can apply PREFIXs
 lib/ExtUtils/t/Liblist.t	See if ExtUtils::Liblist works
 lib/ExtUtils/t/Manifest.t	See if ExtUtils::Manifest works
 lib/ExtUtils/t/Mkbootstrap.t	See if ExtUtils::Mkbootstrap works
+lib/ExtUtils/t/MM_Any.t		See if ExtUtils::MM_Any works
 lib/ExtUtils/t/MM_BeOS.t	See if ExtUtils::MM_BeOS works
 lib/ExtUtils/t/MM_Cygwin.t	See if ExtUtils::MM_Cygwin works
 lib/ExtUtils/t/MM_NW5.t		See if ExtUtils::MM_NW5 works
@@ -1257,8 +1258,11 @@ lib/Locale/Maketext.pm		Locale::Maketext
 lib/Locale/Maketext.pod		Locale::Maketext documentation
 lib/Locale/Maketext/ChangeLog	Locale::Maketext
 lib/Locale/Maketext/README	Locale::Maketext
-lib/Locale/Maketext/test.pl	See if Locale::Maketext works
 lib/Locale/Maketext/TPJ13.pod	Locale::Maketext documentation article
+lib/Locale/Maketext/t/00about.t	See if Locale::Maketext works
+lib/Locale/Maketext/t/01make.t	See if Locale::Maketext works
+lib/Locale/Maketext/t/02get.t	See if Locale::Maketext works
+lib/Locale/Maketext/t/03http.t	See if Locale::Maketext works
 lib/Locale/Script.pm		Locale::Codes
 lib/Locale/Script.pod		Locale::Codes documentation
 lib/look.pl			A "look" equivalent
@@ -1367,7 +1371,6 @@ lib/Net/Netrc.pm		libnet
 lib/Net/NNTP.pm			libnet
 lib/Net/Ping.pm			Hello, anybody home?
 lib/Net/Ping/Changes		Net::Ping
-lib/Net/Ping/README		Net::Ping
 lib/Net/Ping/t/100_load.t	Ping Net::Ping
 lib/Net/Ping/t/110_icmp_inst.t	Ping Net::Ping
 lib/Net/Ping/t/120_udp_inst.t	Ping Net::Ping
@@ -1382,6 +1385,7 @@ lib/Net/Ping/t/400_ping_syn.t	Ping Net::Ping
 lib/Net/Ping/t/410_syn_host.t	Ping Net::Ping
 lib/Net/Ping/t/450_service.t	Ping Net::Ping
 lib/Net/Ping/t/500_ping_icmp.t	Ping Net::Ping
+lib/Net/Ping/t/510_ping_udp.t	Ping Net::Ping
 lib/Net/POP3.pm			libnet
 lib/Net/protoent.pm		By-name interface to Perl's builtin getproto*
 lib/Net/protoent.t		See if Net::protoent works
@@ -1459,10 +1463,10 @@ lib/Pod/t/htmlescp.t		pod2html escape test
 lib/Pod/t/htmlview.pod		pod2html render test input data
 lib/Pod/t/htmlview.t		pod2html render test
 lib/Pod/t/InputObjects.t	See if Pod::InputObjects works
-lib/Pod/t/latex.t		See if Pod::LaTeX works
 lib/Pod/t/man.t			podlators test
 lib/Pod/t/parselink.t		podlators test
 lib/Pod/t/pod2html-lib.pl	pod2html testing library
+lib/Pod/t/pod2latex.t		See if Pod::LaTeX works
 lib/Pod/t/Select.t		See if Pod::Select works
 lib/Pod/t/text-errors.t		podlators test
 lib/Pod/t/text-options.t		podlators test
@@ -1527,6 +1531,7 @@ lib/Test/Harness/t/base.t	Test::Harness test
 lib/Test/Harness/t/callback.t	Test::Harness test
 lib/Test/Harness/t/nonumbers.t	Test::Harness test
 lib/Test/Harness/t/ok.t		Test::Harness test
+lib/Test/Harness/t/pod.t	Test::Harness test
 lib/Test/Harness/t/strap-analyze.t	Test::Harness::Straps test
 lib/Test/Harness/t/strap.t		Test::Harness::Straps test
 lib/Test/Harness/t/test-harness.t	Test::Harness test
@@ -2436,6 +2441,7 @@ t/io/fflush.t			See if auto-flush on fork/exec/system/qx works
 t/io/fs.t			See if directory manipulations work
 t/io/inplace.t			See if inplace editing works
 t/io/iprefix.t			See if inplace editing works with prefixes
+t/io/layers.t			See if PerlIO layers work
 t/io/nargv.t			See if nested ARGV stuff works
 t/io/open.t			See if open works
 t/io/openpid.t			See if open works for subprocesses
@@ -2497,6 +2503,7 @@ t/lib/sample-tests/skip			Test data for Test::Harness
 t/lib/sample-tests/skip_nomsg		Test data for Test::Harness
 t/lib/sample-tests/skipall		Test data for Test::Harness
 t/lib/sample-tests/skipall_nomsg	Test data for Test::Harness
+t/lib/sample-tests/switches		Test data for Test::Harness
 t/lib/sample-tests/taint		Test data for Test::Harness
 t/lib/sample-tests/todo			Test data for Test::Harness
 t/lib/sample-tests/todo_inline		Test data for Test::Harness
@@ -2723,7 +2730,7 @@ t/run/noswitch.t		Test aliasing ARGV for other switch tests
 t/run/runenv.t			Test if perl honors its environment variables.
 t/run/switcha.t			Test the -a switch
 t/run/switchC.t			Test the -C switch
-t/run/switches.t		Tests for the other switches
+t/run/switches.t		Tests for the other switches (-0, -l, -c, -s, -M, -m, -V)
 t/run/switchF.t			Test the -F switch
 t/run/switchI.t			Test the -I switch
 t/run/switchn.t			Test the -n switch

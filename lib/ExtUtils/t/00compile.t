@@ -19,35 +19,24 @@ BEGIN {
     $Has_Test_Pod = eval 'use Test::Pod 0.95; 1';
 }
 
-my(@modules);
+chdir File::Spec->updir;
+my $manifest = File::Spec->catfile('MANIFEST');
+open(MANIFEST, $manifest) or die "Can't open $manifest: $!";
+my @modules = map { m{^lib/(\S+)}; $1 } 
+              grep { m{^lib/ExtUtils/\S*\.pm}  } <MANIFEST>;
+chomp @modules;
+close MANIFEST;
 
-chdir File::Spec->catdir(File::Spec->updir, 'lib');
-find( sub {
-        return if /~$/;
-        if( $File::Find::dir =~ /^blib|t$/ ) {
-            $File::Find::prune = 1;
-            return;
-        }
-        push @modules, $File::Find::name if /\.pm$/;
-    }, 'ExtUtils'
-);
-
+chdir 'lib';
 plan tests => scalar @modules * 2;
 foreach my $file (@modules) {
-    local @INC = @INC;
-    unshift @INC, File::Spec->curdir;
-
-    # This piece of insanity brought to you by non-case preserving
-    # file systems!  We have extutils/command.pm, %INC has 
-    # ExtUtils/Command.pm
-    # Furthermore, 5.8.0 has a bug about require alone in an eval.  Thus
-    # the extra statement.
-    eval q{ require($file); 1 } unless grep { lc $file =~ lc $_ } keys %INC;
+    # 5.8.0 has a bug about require alone in an eval.  Thus the extra
+    # statement.
+    eval q{ require($file); 1 };
     is( $@, '', "require $file" );
 
     SKIP: {
         skip "Test::Pod not installed", 1 unless $Has_Test_Pod;
         pod_file_ok($file);
     }
-    
 }

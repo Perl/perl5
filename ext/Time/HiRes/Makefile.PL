@@ -14,8 +14,8 @@ my $DEFINE;
 my $LIBS;
 my $XSOPT;
 
-unless($ENV{PERL_CORE}) { # This trick from Encode/Makefile.PL.
-    $ENV{PERL_CORE} = 1 if ($^X =~ m{\bminiperl[^/\\\]>:]*$}o);
+unless($ENV{PERL_CORE}) {
+    $ENV{PERL_CORE} = 1 if grep { $_ eq 'PERL_CORE=1' } @ARGV;
 }
 
 # Perls 5.002 and 5.003 did not have File::Spec, fake what we need.
@@ -407,6 +407,10 @@ sub doMakefile {
         clean => { FILES => "xdefine" },
         realclean => {FILES=> 'const-c.inc const-xs.inc'},
     );
+
+    if ($ENV{PERL_CORE}) {
+	push @makefileopts, MAN3PODS => {};
+    }
 
     WriteMakefile(@makefileopts);
 }

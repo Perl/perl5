@@ -6,7 +6,7 @@ rem
 
 set ARG-1=PV=
 set ARG-2=INST_VER=
-set ARG-3=INSTALL_ROOT=\Storage Card\perl-tests\perl@19041
+set ARG-3=INSTALL_ROOT=\Storage Card\perl-tests\perl@19053
 set ARG-4=WCEROOT=%SDKROOT%
 set ARG-5=CEPATH=%WCEROOT%
 set ARG-6=CELIBDLLDIR=d:\personal\pocketPC\celib-palm-3.0

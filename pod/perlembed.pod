@@ -183,6 +183,7 @@ version of I<miniperlmain.c> containing the essentials of embedding:
 
     int main(int argc, char **argv, char **env)
     {
+	PERL_SYS_INIT3(&argc,&argv,&env);
         my_perl = perl_alloc();
         perl_construct(my_perl);
 	PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
@@ -190,11 +191,16 @@ version of I<miniperlmain.c> containing the essentials of embedding:
         perl_run(my_perl);
         perl_destruct(my_perl);
         perl_free(my_perl);
+	PERL_SYS_TERM();
     }
 
 Notice that we don't use the C<env> pointer.  Normally handed to
 C<perl_parse> as its final argument, C<env> here is replaced by
-C<NULL>, which means that the current environment will be used.
+C<NULL>, which means that the current environment will be used.  The macros
+PERL_SYS_INIT3() and PERL_SYS_TERM() provide system-specific tune up 
+of the C runtime environment necessary to run Perl interpreters; since
+PERL_SYS_INIT3() may change C<env>, it may be more appropriate to provide
+C<env> as an argument to perl_parse().
 
 Now compile this program (I'll call it I<interp.c>) into an executable:
 
@@ -235,6 +241,7 @@ That's shown below, in a program I'll call I<showtime.c>.
     int main(int argc, char **argv, char **env)
     {
         char *args[] = { NULL };
+	PERL_SYS_INIT3(&argc,&argv,&env);
         my_perl = perl_alloc();
         perl_construct(my_perl);
 
@@ -247,6 +254,7 @@ That's shown below, in a program I'll call I<showtime.c>.
 
         perl_destruct(my_perl);
         perl_free(my_perl);
+	PERL_SYS_TERM();
     }
 
 where I<showtime> is a Perl subroutine that takes no arguments (that's the
@@ -308,6 +316,7 @@ the first, a C<float> from the second, and a C<char *> from the third.
        STRLEN n_a;
        char *embedding[] = { "", "-e", "0" };
 
+       PERL_SYS_INIT3(&argc,&argv,&env);
        my_perl = perl_alloc();
        perl_construct( my_perl );
 
@@ -329,6 +338,7 @@ the first, a C<float> from the second, and a C<char *> from the third.
 
        perl_destruct(my_perl);
        perl_free(my_perl);
+       PERL_SYS_TERM();
    }
 
 All of those strange functions with I<sv> in their names help convert Perl scalars to C types.  They're described in L<perlguts> and L<perlapi>.
@@ -489,6 +499,7 @@ been wrapped here):
      SV *text;
      STRLEN n_a;
 
+     PERL_SYS_INIT3(&argc,&argv,&env);
      my_perl = perl_alloc();
      perl_construct(my_perl);
      perl_parse(my_perl, NULL, 3, embedding, NULL);
@@ -532,6 +543,7 @@ been wrapped here):
      PL_perl_destruct_level = 1;
      perl_destruct(my_perl);
      perl_free(my_perl);
+     PERL_SYS_TERM();
  }
 
 which produces the output (again, long lines have been wrapped here)
@@ -614,6 +626,7 @@ deep breath...
     {
       char *my_argv[] = { "", "power.pl" };
 
+      PERL_SYS_INIT3(&argc,&argv,&env);
       my_perl = perl_alloc();
       perl_construct( my_perl );
 
@@ -625,6 +638,7 @@ deep breath...
 
       perl_destruct(my_perl);
       perl_free(my_perl);
+      PERL_SYS_TERM();
     }
 
 
@@ -763,6 +777,7 @@ with L<perlfunc/my> whenever possible.
      int exitstatus = 0;
      STRLEN n_a;
 
+     PERL_SYS_INIT3(&argc,&argv,&env);
      if((my_perl = perl_alloc()) == NULL) {
         fprintf(stderr, "no memory!");
         exit(1);
@@ -792,6 +807,7 @@ with L<perlfunc/my> whenever possible.
      PL_perl_destruct_level = 0;
      perl_destruct(my_perl);
      perl_free(my_perl);
+     PERL_SYS_TERM();
      exit(exitstatus);
  }
 
@@ -884,11 +900,13 @@ Let's give it a try:
 
  int main(int argc, char **argv, char **env)
  {
-     PerlInterpreter
-         *one_perl = perl_alloc(),
-         *two_perl = perl_alloc();
+     PerlInterpreter *one_perl, *two_perl;
      char *one_args[] = { "one_perl", SAY_HELLO };
      char *two_args[] = { "two_perl", SAY_HELLO };
+
+     PERL_SYS_INIT3(&argc,&argv,&env);
+     one_perl = perl_alloc();
+     two_perl = perl_alloc();
 
      PERL_SET_CONTEXT(one_perl);
      perl_construct(one_perl);
@@ -914,6 +932,7 @@ Let's give it a try:
      perl_free(one_perl);
      PERL_SET_CONTEXT(two_perl);
      perl_free(two_perl);
+     PERL_SYS_TERM();
  }
 
 Note the calls to PERL_SET_CONTEXT().  These are necessary to initialize

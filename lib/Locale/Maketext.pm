@@ -1,5 +1,5 @@
 
-# Time-stamp: "2001-06-21 23:09:33 MDT"
+# Time-stamp: "2003-04-02 11:04:55 AHST"
 
 require 5;
 package Locale::Maketext;
@@ -14,7 +14,7 @@ use I18N::LangTags 0.21 ();
 BEGIN { unless(defined &DEBUG) { *DEBUG = sub () {0} } }
  # define the constant 'DEBUG' at compile-time
 
-$VERSION = "1.03";
+$VERSION = "1.04";
 @ISA = ();
 
 $MATCH_SUPERS = 1;
@@ -252,11 +252,8 @@ sub get_handle {  # This is a constructor and, yes, it CAN FAIL.
 
   unless(@languages) {  # Calling with no args is magical!  wooo, magic!
     if(length( $ENV{'REQUEST_METHOD'} || '' )) { # I'm a CGI
-      my $in = $ENV{'HTTP_ACCEPT_LANGUAGE'} || '';
-        # supposedly that works under mod_perl, too.
-      $in =~ s<\([\)]*\)><>g; # Kill parens'd things -- just a hack.
-      @languages = &I18N::LangTags::extract_language_tags($in) if length $in;
-        # ...which untaints, incidentally.
+      @languages = $base_class->_http_accept_langs;
+         # it's off in its own routine because it's complicated
       
     } else { # Not running as a CGI: try to puzzle out from the environment
       if(length( $ENV{'LANG'} || '' )) {
@@ -329,6 +326,62 @@ sub get_handle {  # This is a constructor and, yes, it CAN FAIL.
 #
 # This is where most people should stop reading.
 #
+###########################################################################
+
+sub _http_accept_langs {
+  # Deal with HTTP "Accept-Language:" stuff.  Hassle.
+  # This code is more lenient than RFC 3282, which you must read.
+  # Hm.  Should I just move this into I18N::LangTags at some point?
+  no integer;
+
+  my $in = (@_ > 1) ? $_[1] : $ENV{'HTTP_ACCEPT_LANGUAGE'};
+  # (always ends up untainting)
+
+  return() unless defined $in and length $in;
+
+  $in =~ s/\([^\)]*\)//g; # nix just about any comment
+  
+  if( $in =~ m/^\s*([a-zA-Z][-a-zA-Z]+)\s*$/s ) {
+    # Very common case: just one language tag
+    return lc $1;
+  } elsif( $in =~ m/^\s*[a-zA-Z][-a-zA-Z]+(?:\s*,\s*[a-zA-Z][-a-zA-Z]+)*\s*$/s ) {
+    # Common case these days: just "foo, bar, baz"
+    return map lc($_), $in =~ m/([a-zA-Z][-a-zA-Z]+)/g;
+  }
+
+  # Else it's complicated...
+
+  $in =~ s/\s+//g;  # Yes, we can just do without the WS!
+  my @in = $in =~ m/([^,]+)/g;
+  my %pref;
+  
+  my $q;
+  foreach my $tag (@in) {
+    next unless $tag =~
+     m/^([a-zA-Z][-a-zA-Z]+)
+        (?:
+         ;q=
+         (
+          \d*   # a bit too broad of a RE, but so what.
+          (?:
+            \.\d+
+          )?
+         )
+        )?
+       $
+      /sx
+    ;
+    $q = (defined $2 and length $2) ? $2 : 1;
+    #print "$1 with q=$q\n";
+    push @{ $pref{$q} }, lc $1;
+  }
+
+  return # Read off %pref, in descending key order...
+    map @{$pref{$_}},
+    sort {$b <=> $a}
+    keys %pref;
+}
+
 ###########################################################################
 
 sub _compile {
@@ -673,3 +726,37 @@ sub clear_isa_scan { %isa_scan = (); return; } # end on a note of simplicity!
 ###########################################################################
 1;
 
+__END__
+
+HEY YOU!  You need some FOOD!
+
+
+  ~~ Tangy Moroccan Carrot Salad ~~
+
+* 6 to 8 medium carrots, peeled and then sliced in 1/4-inch rounds
+* 1/4 teaspoon chile powder (cayenne, chipotle, ancho, or the like)
+* 1 tablespoon ground cumin
+* 1 tablespoon honey
+* The juice of about a half a big lemon, or of a whole smaller one
+* 1/3 cup olive oil
+* 1 tablespoon of fresh dill, washed and chopped fine
+* Pinch of salt, maybe a pinch of pepper
+
+Cook the carrots in a pot of boiling water until just tender -- roughly
+six minutes.  (Just don't let them get mushy!)  Drain the carrots.
+
+In a largish bowl, combine the lemon juice, the cumin, the chile
+powder, and the honey.  Mix well.
+Add the olive oil and whisk it together well.  Add the dill and stir.
+
+Add the warm carrots to the bowl and toss it all to coat the carrots
+well.  Season with salt and pepper, to taste.
+
+Serve warm or at room temperature.
+
+The measurements here are very approximate, and you should feel free to
+improvise and experiment.  It's a very forgiving recipe.  For example,
+you could easily halve or double the amount of cumin, or use chopped mint
+leaves instead of dill, or lime juice instead of lemon, et cetera.
+
+[end]

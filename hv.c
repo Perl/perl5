@@ -1,6 +1,7 @@
 /*    hv.c
  *
- *    Copyright (c) 1991-2003, Larry Wall
+ *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
+ *    2000, 2001, 2002, 2003, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -1739,6 +1740,8 @@ Perl_hv_undef(pTHX_ HV *hv)
     hfreeentries(hv);
     Safefree(xhv->xhv_array /* HvARRAY(hv) */);
     if (HvNAME(hv)) {
+        if(PL_stashcache)
+	    hv_delete(PL_stashcache, HvNAME(hv), strlen(HvNAME(hv)), G_DISCARD);
 	Safefree(HvNAME(hv));
 	HvNAME(hv) = 0;
     }

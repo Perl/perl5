@@ -30,7 +30,7 @@ import Time::HiRes 'ualarm'		if $have_ualarm;
 
 use Config;
 
-my $xdefine; 
+my $xdefine = ''; 
 
 if (open(XDEFINE, "xdefine")) {
     chomp($xdefine = <XDEFINE>);

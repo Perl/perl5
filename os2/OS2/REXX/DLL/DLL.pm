@@ -3,9 +3,7 @@ package OS2::DLL;
 our $VERSION = '1.00';
 
 use Carp;
-use DynaLoader;
-
-@ISA = qw(DynaLoader);
+use XSLoader;
 
 sub AUTOLOAD {
     $AUTOLOAD =~ /^OS2::DLL::.+::(.+)$/
@@ -86,7 +84,7 @@ EOE
 	return 1;
 }
 
-bootstrap OS2::DLL;
+XSLoader::load 'OS2::DLL';
 
 1;
 __END__

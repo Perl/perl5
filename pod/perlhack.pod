@@ -480,63 +480,23 @@ for reference.
 =back
 
 
-=head2 Perlbug remote interface
+=head2 Perlbug administration
 
-There are three (3) remote administrative interfaces for modifying bug
-status, category, etc.  In all cases an admin must be first registered
-with the Perlbug database by sending an email request to
-richard@perl.org or bugmongers@perl.org.
+There is a single remote administrative interface for modifying bug status, 
+category, open issues etc. using the B<RT> I<bugtracker> system, maintained
+by I<Robert Spier>.  Become an administrator, and close any bugs you can get 
+your sticky mitts on:
 
-The main requirement is the willingness to classify, (with the
-emphasis on closing where possible :), outstanding bugs.  Further
-explanation can be garnered from the web at http://bugs.perl.org/ , or
-by asking on the admin mailing list at: bugmongers@perl.org
+	http://rt.perl.org
 
-For more info on the web see
+The bugtracker mechanism for B<perl5> bugs in particular is at:
 
-	http://bugs.perl.org/perlbug.cgi?req=spec
+	http://bugs6.perl.org/perlbug
 
-=over 4
+To email the bug system administrators:
 
-=item 1 http://bugs.perl.org
+	"perlbug-admin" <perlbug-admin@perl.org>
 
-Login via the web, (remove B<admin/> if only browsing), where interested
-Cc's, tests, patches and change-ids, etc. may be assigned.
-
-	http://bugs.perl.org/admin/index.html
-
-
-=item 2 bugdb@perl.org
-
-Where the subject line is used for commands:
-
-	To: bugdb@perl.org
-	Subject: -a close bugid1 bugid2 aix install
-
-	To: bugdb@perl.org
-	Subject: -h
-
-
-=item 3 commands_and_bugdids@bugs.perl.org
-
-Where the address itself is the source for the commands:
-
-	To: close_bugid1_bugid2_aix@bugs.perl.org
-
-	To: help@bugs.perl.org
-
-
-=item notes, patches, tests
-
-For patches and tests, the message body is assigned to the appropriate
-bugs and forwarded to p5p for their attention.
-
-	To: test_<bugid1>_aix_close@bugs.perl.org
-	Subject: this is a test for the (now closed) aix bug
-
-	Test is the body of the mail
-
-=back
 
 =head2 Submitting patches
 
@@ -1759,6 +1719,18 @@ modules hanging around in here that need to be moved out into F<lib/>.
 Testing features of how perl actually runs, including exit codes and
 handling of PERL* environment variables.
 
+=item F<t/uni/>
+
+Tests for the core support of Unicode.
+
+=item F<t/win32/>
+
+Windows-specific tests.
+
+=item F<t/x2p>
+
+A test suite for the s2p converter.
+
 =back
 
 The core uses the same testing style as the rest of Perl, a simple
@@ -1835,7 +1807,7 @@ F<perl3.log.testname>.
 =item test.torture torturetest
 
 Run all the usual tests and some extra tests.  As of Perl 5.8.0 the
-only extra tests are Abigail's JAPHs, t/japh/abigail.t.
+only extra tests are Abigail's JAPHs, F<t/japh/abigail.t>.
 
 You can also run the torture test with F<t/harness> by giving
 C<-torture> argument to F<t/harness>.
@@ -1843,6 +1815,59 @@ C<-torture> argument to F<t/harness>.
 =item utest ucheck test.utf8 check.utf8
 
 Run all the tests with -Mutf8.  Not all tests will succeed.
+
+=item test_harness
+
+Run the test suite with the F<t/harness> controlling program, instead of
+F<t/TEST>. F<t/harness> is more sophisticated, and uses the
+L<Test::Harness> module, thus using this test target supposes that perl
+mostly works. The main advantage for our purposes is that it prints a
+detailed summary of failed tests at the end. Also, unlike F<t/TEST>, it
+doesn't redirect stderr to stdout.
+
+=back
+
+=head2 Running tests by hand
+
+You can run part of the test suite by hand by using one the following
+commands from the F<t/> directory :
+
+    ./perl -I../lib TEST list-of-.t-files
+
+or
+
+    ./perl -I../lib harness list-of-.t-files
+
+(if you don't specify test scripts, the whole test suite will be run.)
+
+You can run an individual test by a command similar to
+
+    ./perl -I../lib patho/to/foo.t
+
+except that the harnesses set up some environment variables that may
+affect the execution of the test :
+
+=over 4 
+
+=item PERL_CORE=1
+
+indicates that we're running this test part of the perl core test suite.
+This is useful for modules that have a dual life on CPAN.
+
+=item PERL_DESTRUCT_LEVEL=2
+
+is set to 2 if it isn't set already (see L</PERL_DESTRUCT_LEVEL>)
+
+=item PERL
+
+(used only by F<t/TEST>) if set, overrides the path to the perl executable
+that should be used to run the tests (the default being F<./perl>).
+
+=item PERL_SKIP_TTY_TEST
+
+if set, tells to skip the tests that need a terminal. It's actually set
+automatically by the Makefile, but can also be forced artificially by
+running 'make test_notty'.
 
 =back
 

@@ -1,6 +1,7 @@
 /*    toke.c
  *
- *    Copyright (c) 1991-2003, Larry Wall
+ *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
+ *    2000, 2001, 2002, 2003, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -2141,7 +2142,7 @@ S_find_in_my_stash(pTHX_ char *pkgname, I32 len)
 #ifdef DEBUGGING
     static char* exp_name[] =
 	{ "OPERATOR", "TERM", "REF", "STATE", "BLOCK", "ATTRBLOCK",
-	  "ATTRTERM", "TERMBLOCK"
+	  "ATTRTERM", "TERMBLOCK", "TERMORDORDOR"
 	};
 #endif
 
@@ -6688,8 +6689,12 @@ retval:
 	Renew(SvPVX(tmpstr), SvLEN(tmpstr), char);
     }
     SvREFCNT_dec(herewas);
-    if (UTF && !IN_BYTES && is_utf8_string((U8*)SvPVX(tmpstr), SvCUR(tmpstr)))
-	SvUTF8_on(tmpstr);
+    if (!IN_BYTES) {
+	if (UTF && is_utf8_string((U8*)SvPVX(tmpstr), SvCUR(tmpstr)))
+	    SvUTF8_on(tmpstr);
+	else if (PL_encoding)
+	    sv_recode_to_utf8(tmpstr, PL_encoding);
+    }
     PL_lex_stuff = tmpstr;
     yylval.ival = op_type;
     return s;

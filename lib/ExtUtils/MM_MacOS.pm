@@ -12,7 +12,7 @@ require ExtUtils::MM_Unix;
 @ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
 
 use vars qw($VERSION);
-$VERSION = '1.04';
+$VERSION = '1.05';
 
 use Config;
 use Cwd 'cwd';
@@ -265,7 +265,7 @@ sub macify {
 	}
 	push(@mac, $_);
     }
-    
+
     return "@mac";
 }
 
@@ -278,7 +278,8 @@ Translate Unix filepaths and shell globs to Mac style.
 sub patternify {
     my($unix) = @_;
     my(@mac);
-    
+    use bytes; # Non-UTF-8 high bytes below.
+
     foreach (split(/[ \t\n]+/, $unix)) {
 	if (m|/|) {
 	    $_ = ":$_";
@@ -288,7 +289,7 @@ sub patternify {
 	    push(@mac, $_);
 	}
     }
-    
+
     return "@mac";
 }
 
@@ -930,6 +931,16 @@ sub _include {  # for Unix-style includes, with -I instead of -i
 	} else {
 		return '-i ' . macify($inc);
 	}
+}
+
+=item os_flavor
+
+MacOS Classic is MacOS and MacOS Classic.
+
+=cut
+
+sub os_flavor {
+    return('MacOS', 'MacOS Classic');
 }
 
 =back

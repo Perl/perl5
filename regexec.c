@@ -67,7 +67,8 @@
  *
  ****    Alterations to Henry's code are...
  ****
- ****    Copyright (c) 1991-2003, Larry Wall
+ ****    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
+ ****    2000, 2001, 2002, 2003, by Larry Wall and others
  ****
  ****    You may distribute under the terms of either the GNU General Public
  ****    License or the Artistic License, as specified in the README file.
@@ -544,7 +545,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	    goto fail_finish;
 	/* we may be pointing at the wrong string */
 	if (s && RX_MATCH_COPIED(prog))
-	    s = prog->subbeg + (s - SvPVX(sv));
+	    s = strbeg + (s - SvPVX(sv));
 	if (data)
 	    *data->scream_olds = s;
     }
@@ -1862,7 +1863,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 				  PL_multiline ? FBMrf_MULTILINE : 0))) ) {
 	    /* we may be pointing at the wrong string */
 	    if ((flags & REXEC_SCREAM) && RX_MATCH_COPIED(prog))
-		s = prog->subbeg + (s - SvPVX(sv));
+		s = strbeg + (s - SvPVX(sv));
 	    DEBUG_r( did_match = 1 );
 	    if (HOPc(s, -back_max) > last1) {
 		last1 = HOPc(s, -back_min);
@@ -1951,7 +1952,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 		    last = scream_olds; /* Only one occurrence. */
 		/* we may be pointing at the wrong string */
 		else if (RX_MATCH_COPIED(prog))
-		    s = prog->subbeg + (s - SvPVX(sv));
+		    s = strbeg + (s - SvPVX(sv));
 	    }
 	    else {
 		STRLEN len;

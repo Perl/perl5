@@ -11,7 +11,7 @@ require Exporter;
 use vars qw(@ISA @EXPORT $VERSION);
 @ISA     = qw(Exporter);
 @EXPORT  = qw(cp rm_f rm_rf mv cat eqtime mkpath touch test_f);
-$VERSION = '1.04';
+$VERSION = '1.05';
 
 my $Is_VMS = $^O eq 'VMS';
 

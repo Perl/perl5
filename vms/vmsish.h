@@ -307,6 +307,7 @@ struct interp_intern {
 
 /* Flags for vmstrnenv() */
 #define PERL__TRNENV_SECURE 0x01
+#define PERL__TRNENV_JOIN_SEARCHLIST 0x02
 
 /* Handy way to vet calls to VMS system services and RTL routines. */
 #define _ckvmssts(call) STMT_START { register unsigned long int __ckvms_sts; \
