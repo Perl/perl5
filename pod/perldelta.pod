@@ -500,7 +500,7 @@ prototype(\[$@%&]) is now available to implicitly create references
 =item *
 
 A new command-line option, C<-t> is available.  It is the
-little brother of C<-T>: instead of dieing on taint violations,
+little brother of C<-T>: instead of dying on taint violations,
 lexical warnings are given.  B<This is only meant as a temporary
 debugging aid while securing the code of old legacy applications.
 This is not a substitute for -T.>
