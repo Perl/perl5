@@ -1,6 +1,6 @@
 #!./perl -w
 
-print "1..611\n";
+print "1..613\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -660,4 +660,14 @@ foreach (
     my $p = pack($t, $u, $v);
     my @u = unpack($t, $p);
     ok(@u == 2 && $u[0] eq $u && $u[1] eq $v);
+}
+
+{
+    # 612
+
+    ok((unpack("w/a*", "\x02abc"))[0] eq "ab");
+
+    # 613: "w/a*" should be seen as one unit
+
+    ok(scalar unpack("w/a*", "\x02abc") eq "ab");
 }
