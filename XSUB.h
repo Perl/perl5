@@ -193,7 +193,8 @@ C<xsubpp>.  See L<perlxs/"The VERSIONCHECK: Keyword">.
 
 #define XSRETURN(off)					\
     STMT_START {					\
-	PL_stack_sp = PL_stack_base + ax + ((off) - 1);	\
+	IV tmpXSoff = (off);				\
+	PL_stack_sp = PL_stack_base + ax + (tmpXSoff - 1);	\
 	return;						\
     } STMT_END
 
