@@ -13,6 +13,9 @@ Project	:	Perl5				-
 File	:	config.h			-	Mac configuration
 
 $Log: config.h,v $
+Revision 1.12  2002/10/30 07:12:31  neeri
+Yet another approach to signal handling
+
 Revision 1.11  2002/01/03 21:53:51  neeri
 Disable sigaction (MacPerl Bug #470321)
 
@@ -2241,7 +2244,7 @@ First build released to public
  *	This symbol, if defined, indicates that Vr4's sigaction() routine
  *	is available.
  */
-#undef HAS_SIGACTION /**/
+#define HAS_SIGACTION /**/
 
 /* HAS_SIGSETJMP:
  *	This variable indicates to the C program that the sigsetjmp()
