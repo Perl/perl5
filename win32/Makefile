@@ -24,6 +24,11 @@ INST_TOP=$(INST_DRV)\perl
 # uncomment next line if you want debug version of perl (big,slow)
 #CFG=Debug
 
+#
+# set this to your email address (perl will guess a value from
+# from your loginname and your hostname, which may not be right)
+#EMAIL = 
+
 ##################### CHANGE THESE ONLY IF YOU MUST #####################
 
 #
@@ -264,7 +269,7 @@ perlglob.obj  : perlglob.c
 
 ..\config.sh : config.w32 $(MINIPERL) config_sh.PL
 	$(MINIPERL) -I..\lib config_sh.PL "INST_DRV=$(INST_DRV)" "INST_TOP=$(INST_TOP)"\
-	"cc=$(CC)" "ccflags=$(RUNTIME) -DWIN32" config.w32 > ..\config.sh
+	"cc=$(CC)" "ccflags=$(RUNTIME) -DWIN32" "cf_email=$(EMAIL)" config.w32 > ..\config.sh
 
 $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 	cd .. && miniperl configpm
