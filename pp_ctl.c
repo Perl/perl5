@@ -87,13 +87,6 @@ PP(pp_regcomp)
     STRLEN len;
     MAGIC *mg = Null(MAGIC*);
 
-#if defined(USE_ITHREADS) || defined(USE_THREADS)
-    if ((pm->op_pmflags & PMf_KEEP) && !(pm->op_private & OPpRUNTIME)) {
-	/* no point compiling again */
-	RETURN;
-    }
-#endif
-
     tmpstr = POPs;
     if (SvROK(tmpstr)) {
 	SV *sv = SvRV(tmpstr);
