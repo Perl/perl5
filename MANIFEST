@@ -878,11 +878,49 @@ lib/Memoize/t/tie_storable.t	Memoize
 lib/Memoize/t/tiefeatures.t	Memoize
 lib/Memoize/t/unmemoize.t	Memoize
 lib/NEXT.pm		Pseudo-class NEXT for method redispatch
+lib/Net/ChangeLog.libnet	libnet
+lib/Net/Cmd.pm	libnet
+lib/Net/Config.eg	libnet
+lib/Net/Config.pm	libnet
+lib/Net/Domain.pm	libnet
+lib/Net/DummyInetd.pm	libnet
+lib/Net/FTP.pm	libnet
+lib/Net/FTP/A.pm	libnet
+lib/Net/FTP/E.pm	libnet
+lib/Net/FTP/I.pm	libnet
+lib/Net/FTP/L.pm	libnet
+lib/Net/FTP/dataconn.pm	libnet
+lib/Net/Hostname.eg	libnet
+lib/Net/NNTP.pm	libnet
+lib/Net/Netrc.pm	libnet
+lib/Net/PH.pm	libnet
+lib/Net/POP3.pm	libnet
 lib/Net/Ping.pm		Hello, anybody home?
+lib/Net/README.config 	libnet
+lib/Net/README.libnet	libnet
+lib/Net/SMTP.pm	libnet
+lib/Net/SNPP.pm	libnet
+lib/Net/Time.pm	libnet
+lib/Net/demos/ftp	libnet
+lib/Net/demos/inetd	libnet
+lib/Net/demos/nntp	libnet
+lib/Net/demos/nntp.mirror	libnet
+lib/Net/demos/pop3	libnet
+lib/Net/demos/smtp.self	libnet
+lib/Net/demos/snpp	libnet
+lib/Net/demos/time	libnet
 lib/Net/hostent.pm	By-name interface to Perl's builtin gethost*
+lib/Net/libnet.ppd	libnet
+lib/Net/libnetFAQ.pod	libnet
 lib/Net/netent.pm	By-name interface to Perl's builtin getnet*
 lib/Net/protoent.pm	By-name interface to Perl's builtin getproto*
 lib/Net/servent.pm	By-name interface to Perl's builtin getserv*
+lib/Net/t/ftp.t	libnet
+lib/Net/t/hostname.t	libnet
+lib/Net/t/nntp.t	libnet
+lib/Net/t/ph.t	libnet
+lib/Net/t/require.t	libnet
+lib/Net/t/smtp.t	libnet
 lib/PerlIO.pm		PerlIO support module
 lib/Pod/Checker.pm	Pod-Parser - check POD documents for syntax errors
 lib/Pod/Find.pm		used by pod/splitpod
@@ -1998,6 +2036,7 @@ utils/c2ph.PL		program to translate dbx stabs to perl
 utils/dprofpp.PL	Perl code profile post-processor
 utils/h2ph.PL		A thing to turn C .h files into perl .ph files
 utils/h2xs.PL		Program to make .xs files from C header files
+utils/libnetcfg.PL	libnet
 utils/perlbug.PL	A simple tool to submit a bug report
 utils/perlcc.PL		Front-end for compiler
 utils/perldoc.PL	A simple tool to find & display perl's documentation
