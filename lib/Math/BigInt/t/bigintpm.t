@@ -417,8 +417,13 @@ ok ($args[4],7); ok (ref($args[4]),'');
 
 $z = 1050000000000000;          # may be int on systems with 64bit?
 $x = Math::BigInt->new($z); ok ($x->bsstr(),'105e+13');	# not 1.03e+15?
-$z = 1e+129;			# definitely a float
-$x = Math::BigInt->new($z); ok ($x->bsstr(),$z);
+if ($^O eq 'os390' || $^O eq 's390') { # non-IEEE
+    $z = 1e+75;			# definitely a float
+    $x = Math::BigInt->new($z); ok ($x->bsstr(),$z);
+} else {
+    $z = 1e+129;			# definitely a float
+    $x = Math::BigInt->new($z); ok ($x->bsstr(),$z);
+}
 
 ###############################################################################
 # prime number tests, also test for **= and length()
