@@ -31,6 +31,42 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 11833] By: jhi                                   on 2001/09/02  12:59:05
+        Log: Slight tweaks.
+     Branch: perl
+	   ! t/run/kill_perl.t
+____________________________________________________________________________
+[ 11832] By: jhi                                   on 2001/09/02  12:41:12
+        Log: Special casing had become a little bit more complex in Unicode 3.1.1.
+     Branch: perl
+	   ! lib/Unicode/UCD.pm lib/Unicode/UCD.t
+____________________________________________________________________________
+[ 11831] By: sky                                   on 2001/09/02  12:10:42
+        Log: Change #11828 wasn't complete, this updates to intest path
+     Branch: perl
+	   ! t/run/kill_perl.t
+____________________________________________________________________________
+[ 11830] By: jhi                                   on 2001/09/02  11:56:18
+        Log: 's's's.
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
+[ 11829] By: jhi                                   on 2001/09/02  11:54:22
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
+[ 11828] By: sky                                   on 2001/09/02  11:53:56
+        Log: Subject: [PATCH] rm t/run/segfault.t; mv t/op/misc.t t/run/kill_perl.t
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sat, 1 Sep 2001 20:18:58 -0400
+             Message-ID: <20010901201858.X606@blackrider>
+             +MANIFEST Fix
+     Branch: perl
+	   + t/run/kill_perl.t
+	   - t/op/misc.t t/run/segfault.t
+	   ! MANIFEST
+____________________________________________________________________________
 [ 11827] By: jhi                                   on 2001/09/02  11:46:47
         Log: Subject: [PATCH] lib/Time/Local.pm
              From: "Daniel S. Lewart" <d-lewart@uiuc.edu>
