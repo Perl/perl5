@@ -27,7 +27,7 @@
 #include <db.h>
 
 void
-__getBerkeleyDBInfo()
+__getBerkeleyDBInfo(void)
 {
 #ifdef dTHX	
     dTHX;

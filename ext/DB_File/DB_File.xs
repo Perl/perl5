@@ -128,6 +128,8 @@
 #    include <db.h>
 #endif
 
+extern void __getBerkeleyDBInfo(void);
+
 #ifndef pTHX
 #    define pTHX
 #    define pTHX_
