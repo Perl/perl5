@@ -22,6 +22,7 @@ so='dll'
 # - eliminate -lc, implied by gcc
 libswanted=`echo " $libswanted " | sed -e 's/ c / /g'`
 libswanted="$libswanted cygipc cygwin kernel32"
+test -z "$optimize" && optimize='-O2'
 # - otherwise i686-cygwin
 archname='cygwin'
 
@@ -36,8 +37,6 @@ bincompat5005='undef'
 
 # stubs (ENOSYS, not implemented)
 d_chroot='undef'
-d_seteuid='undef'
-d_setegid='undef'
 
 # Win9x problem with non-blocking read from a closed pipe
 d_eofnblk='define'
