@@ -1353,7 +1353,9 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
 #endif
     CvGV(cv)		= CvGV(proto);
     CvSTASH(cv)		= CvSTASH(proto);
+    OP_REFCNT_LOCK;
     CvROOT(cv)		= OpREFCNT_inc(CvROOT(proto));
+    OP_REFCNT_UNLOCK;
     CvSTART(cv)		= CvSTART(proto);
     if (outside) {
 	CvOUTSIDE(cv)	= (CV*)SvREFCNT_inc(outside);

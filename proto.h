@@ -1366,4 +1366,7 @@ PERL_CALLCONV SV*	Perl_magic_scalarpack(pTHX_ HV* hv, MAGIC*	mg);
 #if defined(DEBUGGING)
 PERL_CALLCONV int	Perl_get_debug_opts_flags(pTHX_ char **s, int flags);
 #endif
+
+PERL_CALLCONV void	Perl_op_refcnt_lock(pTHX);
+PERL_CALLCONV void	Perl_op_refcnt_unlock(pTHX);
 END_EXTERN_C

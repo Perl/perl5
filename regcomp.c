@@ -4959,6 +4959,7 @@ Perl_pregfree(pTHX_ struct regexp *r)
 	int n = r->data->count;
 	PAD* new_comppad = NULL;
 	PAD* old_comppad;
+	PADOFFSET refcnt;
 
 	while (--n >= 0) {
           /* If you add a ->what type here, update the comment in regcomp.h */
@@ -4980,9 +4981,11 @@ Perl_pregfree(pTHX_ struct regexp *r)
 		    (SvTYPE(new_comppad) == SVt_PVAV) ?
 		    		new_comppad : Null(PAD *)
 		);
-		if (!OpREFCNT_dec((OP_4tree*)r->data->data[n])) {
+		OP_REFCNT_LOCK;
+		refcnt = OpREFCNT_dec((OP_4tree*)r->data->data[n]);
+		OP_REFCNT_UNLOCK;
+		if (!refcnt)
                     op_free((OP_4tree*)r->data->data[n]);
-		}
 
 		PAD_RESTORE_LOCAL(old_comppad);
 		SvREFCNT_dec((SV*)new_comppad);

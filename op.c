@@ -338,6 +338,7 @@ Perl_op_free(pTHX_ OP *o)
 {
     register OP *kid, *nextkid;
     OPCODE type;
+    PADOFFSET refcnt;
 
     if (!o || o->op_seq == (U16)-1)
 	return;
@@ -351,11 +352,10 @@ Perl_op_free(pTHX_ OP *o)
 	case OP_SCOPE:
 	case OP_LEAVEWRITE:
 	    OP_REFCNT_LOCK;
-	    if (OpREFCNT_dec(o)) {
-		OP_REFCNT_UNLOCK;
-		return;
-	    }
+	    refcnt = OpREFCNT_dec(o);
 	    OP_REFCNT_UNLOCK;
+	    if (refcnt)
+		return;
 	    break;
 	default:
 	    break;
@@ -548,6 +548,18 @@ Perl_op_null(pTHX_ OP *o)
     o->op_targ = o->op_type;
     o->op_type = OP_NULL;
     o->op_ppaddr = PL_ppaddr[OP_NULL];
+}
+
+void
+Perl_op_refcnt_lock(pTHX)
+{
+    OP_REFCNT_LOCK;
+}
+
+void
+Perl_op_refcnt_unlock(pTHX)
+{
+    OP_REFCNT_UNLOCK;
 }
 
 /* Contextualizers */

@@ -667,3 +667,5 @@ Perl_PerlIO_stdout
 Perl_PerlIO_stderr
 Perl_hv_clear_placeholders
 Perl_hv_scalar
+Perl_op_refcnt_lock
+Perl_op_refcnt_unlock

@@ -374,7 +374,7 @@ p	|I32	|keyword	|char* d|I32 len
 Ap	|void	|leave_scope	|I32 base
 p	|void	|lex_end
 p	|void	|lex_start	|SV* line
-Ap |void   |op_null    |OP* o
+Ap	|void	|op_null	|OP* o
 p	|void	|op_clear	|OP* o
 p	|OP*	|linklist	|OP* o
 p	|OP*	|list		|OP* o
@@ -1425,4 +1425,7 @@ p	|SV*	|magic_scalarpack|HV* hv|MAGIC*	mg
 #if defined(DEBUGGING)
 p	|int	|get_debug_opts_flags	|char **s|int flags
 #endif
+
+Ap	|void	|op_refcnt_lock
+Ap	|void	|op_refcnt_unlock
 END_EXTERN_C
