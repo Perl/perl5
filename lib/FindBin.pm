@@ -55,7 +55,10 @@ Workaround is to invoke perl as
 
 =head1 AUTHORS
 
-Graham Barr E<lt>F<bodg@tiuk.ti.com>E<gt>
+FindBin is supported as part of the core perl distribution. Please send bug
+reports to E<lt>F<perlbug@perl.org>E<gt> using the perlbug program included with perl.
+
+Graham Barr E<lt>F<gbarr@pobox.com>E<gt>
 Nick Ing-Simmons E<lt>F<nik@tiuk.ti.com>E<gt>
 
 =head1 COPYRIGHT
@@ -64,26 +67,22 @@ Copyright (c) 1995 Graham Barr & Nick Ing-Simmons. All rights reserved.
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
 
-=head1 REVISION
-
-$Revision: 1.4 $
-
 =cut
 
 package FindBin;
 use Carp;
 require 5.000;
 require Exporter;
-use File::Spec;
 use Cwd qw(getcwd abs_path);
 use Config;
 use File::Basename;
+use File::Spec;
 
 @EXPORT_OK = qw($Bin $Script $RealBin $RealScript $Dir $RealDir);
 %EXPORT_TAGS = (ALL => [qw($Bin $Script $RealBin $RealScript $Dir $RealDir)]);
 @ISA = qw(Exporter);
 
-$VERSION = $VERSION = sprintf("%d.%02d", q$Revision: 1.42 $ =~ /(\d+)\.(\d+)/);
+$VERSION = $VERSION = "1.42";
 
 BEGIN
 {
@@ -113,13 +112,12 @@ BEGIN
             && -f $script)
       {
        my $dir;
-       my $pathvar = 'PATH';
-
-       foreach $dir (split(/$Config{'path_sep'}/,$ENV{$pathvar}))
+       foreach $dir (File::Spec->path)
 	{
-	if(-r "$dir/$script" && (!$IsWin32 || -x _))
+        my $scr = File::Spec->catfile($dir, $script);
+	if(-r $scr && (!$IsWin32 || -x _))
          {
-          $script = "$dir/$script";
+          $script = $scr;
 
 	  if (-f $0)
            {
@@ -142,7 +140,8 @@ BEGIN
 
      # Ensure $script contains the complete path incase we C<chdir>
 
-     $script = getcwd() . "/" . $script unless File::Spec->file_name_is_absolute($script);
+     $script = File::Spec->catfile(getcwd(), $script)
+       unless File::Spec->file_name_is_absolute($script);
 
      ($Script,$Bin) = fileparse($script);
 
@@ -156,7 +155,7 @@ BEGIN
 
        $script = (File::Spec->file_name_is_absolute($linktext))
                   ? $linktext
-                  : $RealBin . "/" . $linktext;
+                  : File::Spec->catfile($RealBin, $linktext);
       }
 
      # Get absolute paths to directories
