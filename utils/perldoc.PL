@@ -25,6 +25,8 @@ print "Extracting $file (with variable substitutions)\n";
 # In this section, perl variables will be expanded during extraction.
 # You can use $Config{...} to use Configure variables.
 
+my $versiononly = $Config{versiononly} ? $Config{version} : '';
+
 print OUT <<"!GROK!THIS!";
 $Config{startperl}
     eval 'exec $Config{perlpath} -S \$0 \${1+"\$@"}'
@@ -43,7 +45,11 @@ my \@pagers = ();
 push \@pagers, \$pager if -x \$pager;
 
 (my \$bindir = <<'/../') =~ s/\\s*\\z//;
-$Config{scriptdir}
+$Config{installscript}
+/../
+
+(my \$pod2man = <<'/../') =~ s/\\s*\\z//;
+pod2man$versiononly
 /../
 
 !GROK!THIS!
@@ -597,7 +603,7 @@ foreach (@found) {
 	Pod::Text->new()->parse_from_file($file, $tmpfd);
     }
     elsif (not $opt_u) {
-	my $cmd = catfile($bindir, 'pod2man') . " --lax $file | $opt_n -man";
+	my $cmd = catfile($bindir, $pod2man) . " --lax $file | $opt_n -man";
 	$cmd .= " | col -x" if $^O =~ /hpux/;
 	my $rslt = `$cmd`;
 	$rslt = filter_nroff($rslt) if $filter;
