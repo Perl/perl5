@@ -14,11 +14,12 @@ sub _get_locale_encoding {
 	unless ($@) {
 	    $locale_encoding = langinfo(CODESET);
 	}
+	my $country_language;
         if (not $locale_encoding && in_locale()) {
-	    if ($ENV{LC_ALL} =~ /^[^.]+\.([^.]+)$/) {
-		$locale_encoding = $1;
-	    } elsif ($ENV{LANG} =~ /^[^.]+\.([^.]+)$/) {
-		$locale_encoding = $1;
+	    if ($ENV{LC_ALL} =~ /^([^.]+)\.([^.]+)$/) {
+		($country_language, $locale_encoding) = ($1, $2);
+	    } elsif ($ENV{LANG} =~ /^([^.]+)\.([^.]+)$/) {
+		($country_language, $locale_encoding) = ($1, $2);
 	    }
 	} else {
 	    # Could do heuristics based on the country and language
@@ -27,6 +28,19 @@ sub _get_locale_encoding {
 	    # TODO: get a database of Language -> Encoding mappings
 	    # (the Estonian database would be excellent!)
 	    # --jhi
+	}
+	if (defined $locale_encoding &&
+	    $locale_encoding eq 'euc' &&
+	    defined $country_language) {
+	    if ($country_language =~ /^ja_JP|japan(?:ese)$/i) {
+		$locale_encoding = 'eucjp';
+	    } elsif ($country_language =~ /^ko_KR|korea(?:n)$/i) {
+		$locale_encoding = 'euckr';
+	    } elsif ($country_language =~ /^zh_TW|taiwan(?:ese)$/i) {
+		$locale_encoding = 'euctw';
+	    }
+	    croak "Locale encoding 'euc' too ambiguous"
+		if $locale_encoding eq 'euc';
 	}
     }
 }
@@ -50,7 +64,11 @@ sub import {
 		    unless defined $locale_encoding;
 		croak "Cannot figure out an encoding to use"
 		    unless defined $locale_encoding;
-		$layer = "encoding($locale_encoding)";
+		if ($locale_encoding =~ /^utf-?8$/i) {
+		    $layer = "utf8";
+		} else {
+		    $layer = "encoding($locale_encoding)";
+		}
 	    }
 	    unless(PerlIO::Layer::->find($layer)) {
 		carp("Unknown discipline layer '$layer'");
