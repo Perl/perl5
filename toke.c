@@ -3867,7 +3867,7 @@ Perl_yylex(pTHX)
 	    CLINE;
 	    yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpv(PL_tokenbuf,0));
 	    yylval.opval->op_private = OPpCONST_BARE;
-	    if (UTF && !IN_BYTE && is_utf8_string((U8*)PL_tokenbuf, len))
+	    if (UTF && !IN_BYTES && is_utf8_string((U8*)PL_tokenbuf, len))
 	      SvUTF8_on(((SVOP*)yylval.opval)->op_sv);
 	    TERM(WORD);
 	}
@@ -4028,7 +4028,7 @@ Perl_yylex(pTHX)
 		if (*s == '=' && s[1] == '>') {
 		    CLINE;
 		    sv_setpv(((SVOP*)yylval.opval)->op_sv, PL_tokenbuf);
-		    if (UTF && !IN_BYTE && is_utf8_string((U8*)PL_tokenbuf, len))
+		    if (UTF && !IN_BYTES && is_utf8_string((U8*)PL_tokenbuf, len))
 		      SvUTF8_on(((SVOP*)yylval.opval)->op_sv);
 		    TERM(WORD);
 		}
@@ -4204,7 +4204,7 @@ Perl_yylex(pTHX)
 		}
 #endif
 #ifdef PERLIO_LAYERS
-		if (UTF && !IN_BYTE)
+		if (UTF && !IN_BYTES)
 		    PerlIO_apply_layers(aTHX_ PL_rsfp, NULL, ":utf8");
 #endif
 		PL_rsfp = Nullfp;
@@ -6532,7 +6532,7 @@ retval:
 	Renew(SvPVX(tmpstr), SvLEN(tmpstr), char);
     }
     SvREFCNT_dec(herewas);
-    if (UTF && !IN_BYTE && is_utf8_string((U8*)SvPVX(tmpstr), SvCUR(tmpstr)))
+    if (UTF && !IN_BYTES && is_utf8_string((U8*)SvPVX(tmpstr), SvCUR(tmpstr)))
 	SvUTF8_on(tmpstr);
     PL_lex_stuff = tmpstr;
     yylval.ival = op_type;

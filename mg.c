@@ -375,9 +375,11 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
 		
 		if (i > 0 && DO_UTF8(PL_reg_sv)) {
 		    char *b = rx->subbeg;
-		    i = Perl_utf8_length(aTHX_ (U8*)b, (U8*)(b+i));
+		    if (b)
+		        i = Perl_utf8_length(aTHX_ (U8*)b, (U8*)(b+i));
 		}
-		sv_setiv(sv,i);
+
+		sv_setiv(sv, i);
 	    }
     }
     return 0;

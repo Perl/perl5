@@ -323,7 +323,7 @@ PP(pp_formline)
     NV value;
     bool gotsome = FALSE;
     STRLEN len;
-    STRLEN fudge = SvCUR(tmpForm) * (IN_BYTE ? 1 : 3) + 1;
+    STRLEN fudge = SvCUR(tmpForm) * (IN_BYTES ? 1 : 3) + 1;
     bool item_is_utf = FALSE;
 
     if (!SvMAGICAL(tmpForm) || !SvCOMPILED(tmpForm)) {

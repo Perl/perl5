@@ -3001,7 +3001,7 @@ PP(pp_chr)
 
     (void)SvUPGRADE(TARG,SVt_PV);
 
-    if (value > 255 && !IN_BYTE) {
+    if (value > 255 && !IN_BYTES) {
 	SvGROW(TARG, UNISKIP(value)+1);
 	tmps = (char*)uvchr_to_utf8((U8*)SvPVX(TARG), value);
 	SvCUR_set(TARG, tmps - SvPVX(TARG));

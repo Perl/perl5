@@ -507,7 +507,7 @@ Perl_utf8_length(pTHX_ U8 *s, U8 *e)
 	U8 t = UTF8SKIP(s);
 
 	if (e - s < t)
-	    Perl_croak(aTHX_ "panic: utf8_length: s=%p (%02X) e=%p l=%d - unaligned end",s,*s,e,t);
+	    Perl_croak(aTHX_ "panic: utf8_length: unaligned end");
 	s += t;
 	len++;
     }

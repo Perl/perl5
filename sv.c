@@ -3067,7 +3067,7 @@ Perl_sv_utf8_downgrade(pTHX_ register SV* sv, bool fail_ok)
 	        if (fail_ok)
 		    return FALSE;
 #ifdef USE_BYTES_DOWNGRADES
-		else if (IN_BYTE) {
+		else if (IN_BYTES) {
 		    U8 *d = s;
 		    U8 *e = (U8 *) SvEND(sv);
 		    int first = 1;
@@ -4893,7 +4893,7 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
 	pv2 = SvPV(sv2, cur2);
 
     /* do not utf8ize the comparands as a side-effect */
-    if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTE) {
+    if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTES) {
 	bool is_utf8 = TRUE;
         /* UTF-8ness differs */
 	if (PL_hints & HINT_UTF8_DISTINCT)
@@ -4960,7 +4960,7 @@ Perl_sv_cmp(pTHX_ register SV *sv1, register SV *sv2)
 	pv2 = SvPV(sv2, cur2);
 
     /* do not utf8ize the comparands as a side-effect */
-    if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTE) {
+    if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTES) {
 	if (PL_hints & HINT_UTF8_DISTINCT)
 	    return SvUTF8(sv1) ? 1 : -1;
 
@@ -7265,7 +7265,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    uv = args ? va_arg(*args, int) : SvIVx(argsv);
 	    if ((uv > 255 ||
 		 (!UNI_IS_INVARIANT(uv) && SvUTF8(sv)))
-		&& !IN_BYTE) {
+		&& !IN_BYTES) {
 		eptr = (char*)utf8buf;
 		elen = uvchr_to_utf8((U8*)eptr, uv) - utf8buf;
 		is_utf = TRUE;
