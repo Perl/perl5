@@ -12,16 +12,17 @@ use lib '.';
     if ( ! -d 'DBM_Filter')
     {
         mkdir 'DBM_Filter', 0777 
-            || die "Cannot create directory 'DBM_Filter': $!\n" ;
+	    or die "Cannot create directory 'DBM_Filter': $!\n" ;
     }
 }
 
+END { rmdir 'DBM_Filter' }
 
 sub writeFile
 {
     my $filename = shift ;
     my $content = shift;
-    open F, ">DBM_Filter/$filename.pm" || croak "Cannot open $filename: $!" ;
+    open F, ">DBM_Filter/$filename.pm" or croak "Cannot open $filename: $!" ;
     print F $content ;
     close F;
     $files{"DBM_Filter/$filename.pm"} ++;
