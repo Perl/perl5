@@ -21,13 +21,7 @@ my $out = runperl(
 
 #print "out:$out\n";
 
-my $src = q{
-    our ($beg, $chk, $init, $end) = "'foo'";
-    BEGIN { $beg++ }
-    CHECK { $chk++ }
-    INIT  { $init++ }
-    END   { $end++ }
-};
+my $src = q[our ($beg, $chk, $init, $end) = qq{'foo'}; BEGIN { $beg++ } CHECK { $chk++ } INIT { $init++ } END { $end++ }];
 
 
 
