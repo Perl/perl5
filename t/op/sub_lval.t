@@ -251,7 +251,7 @@ eval <<'EOE' or $_ = $@;
 EOE
 
 print "# '$_'.\nnot "
-  unless /Empty array returned from lvalue subroutine in scalar context/;
+  unless /Can't return undef from lvalue subroutine/;
 print "ok 31\n";
 
 sub lv10 : lvalue {}
@@ -274,7 +274,7 @@ eval <<'EOE' or $_ = $@;
 EOE
 
 print "# '$_'.\nnot "
-  unless /Can\'t return a readonly value from lvalue subroutine/;
+  unless /Can't return undef from lvalue subroutine/;
 print "ok 33\n";
 
 $_ = undef;
