@@ -800,7 +800,7 @@ Precedence
 
 Regular Expression, Regular Expression, Regular Expression, Regular
 Expression, Regular Expression, Regular Expression, Regular Expression,
-Regular Expression
+Regular Expression, Regular Expression
 
 =item Subroutine, Signal, Sorting Traps
 
@@ -860,10 +860,11 @@ B<-X>, B<-x> I<directory>
 =item ENVIRONMENT
 
 HOME, LOGDIR, PATH, PERL5LIB, PERL5OPT, PERLIO, :bytes, :crlf, :mmap,
-:perlio, :raw, :stdio, :unix, :utf8, :win32, PERLIO_DEBUG, PERLLIB,
+:perlio, :pop, :raw, :stdio, :unix, :utf8, :win32, PERLIO_DEBUG, PERLLIB,
 PERL5DB, PERL5SHELL (specific to the Win32 port), PERL_DEBUG_MSTATS,
-PERL_DESTRUCT_LEVEL, PERL_ENCODING, PERL_ROOT (specific to the VMS port),
-PERL_SIGNALS, PERL_UNICODE, SYS$LOGIN (specific to the VMS port)
+PERL_DESTRUCT_LEVEL, PERL_ENCODING, PERL_HASH_SEED, PERL_HASH_SEED_DEBUG,
+PERL_ROOT (specific to the VMS port), PERL_SIGNALS, PERL_UNICODE, SYS$LOGIN
+(specific to the VMS port)
 
 =back
 
@@ -2138,6 +2139,8 @@ portable
 
 =item Command names versus file pathnames
 
+=item Networking
+
 =item Interprocess Communication (IPC)
 
 =item External Subroutines (XS)
@@ -2420,10 +2423,6 @@ enable UTF-8/UTF-EBCDIC in scripts
 
 =item When Unicode Does Not Happen
 
-chmod, chmod, chown, chroot, exec, link, mkdir, rename, rmdir, stat,
-symlink, truncate, unlink, utime, %ENV, glob (aka the <*>), open, opendir,
-sysopen, qx (aka the backtick operator), system, readdir, readlink
-
 =item Forcing Unicode in Perl (Or Unforcing Unicode in Perl)
 
 =item Using Unicode in XS
@@ -2595,6 +2594,8 @@ chcp, dataset access, OS/390, z/OS iconv, locales
 =item Protecting Your Programs
 
 =item Unicode
+
+=item Algorithmic Complexity Attacks
 
 =back
 
@@ -5255,12 +5256,16 @@ Argument stack, Mark stack, Save stack
 
 =item Millions of Macros
 
+=item The .i Targets
+
 =item Poking at Perl
 
 =item Using a source-level debugger
 
 run [args], break function_name, break source.c:xxx, step, next, continue,
 finish, 'enter', print
+
+=item gdb macro support
 
 =item Dumping Perl Data Structures
 
@@ -5394,15 +5399,27 @@ B<-V>
 
 =item Incompatible Changes
 
+=over 4
+
+=item Hash Randomisation
+
+=item Closures, eval and lexicals
+
+=back
+
 =item Core Enhancements
 
 =over 4
 
-=item UTF-8 no more default under UTF-8 locales
+=item UTF-8 no longer default under UTF-8 locales
 
 =item Unsafe signals again available
 
 =item Tied Arrays with Negative Array Indices
+
+=item local ${$x}
+
+=item Unicode Character Database
 
 =item Warnings
 
@@ -5424,13 +5441,42 @@ B<-V>
 
 =item New Documentation
 
-=item Performance Enhancements
-
 =item Installation and Configuration Improvements
 
 =item Selected Bug Fixes
 
 =item New or Changed Diagnostics
+
+=over 4
+
+=item Changed "A thread exited while %d threads were running"
+
+=item Removed "Attempt to clear a restricted hash"
+
+=item New "Illegal declaration of anonymous subroutine"
+
+=item Changed "Invalid range "%s" in transliteration operator"
+
+=item New "Missing control char name in \c"
+
+=item New "Newline in left-justified string for %s"
+
+=item New "Possible precedence problem on bitwise %c operator"
+
+=item New "Pseudo-hashes are deprecated"
+
+=item New "read() on %s filehandle %s"
+
+=item New "5.005 threads are deprecated"
+
+=item New "Tied variable freed while still in use"
+
+=item New "To%s: illegal mapping '%s'"
+
+=item New "Use of freed value in iteration (perhaps you modified the
+iterated array within the loop?)"
+
+=back
 
 =item Changed Internals
 
@@ -5439,6 +5485,12 @@ B<-V>
 =item Known Problems
 
 =item Platform Specific Problems
+
+=over 4
+
+=item Win32 sysread, syswrite
+
+=back
 
 =item Reporting Bugs
 
@@ -7207,22 +7259,12 @@ long, Process terminated by SIG%s
 
 =item Definitions
 
-"Package" refers to the collection of files distributed by the Copyright
-Holder, and derivatives of that collection of files created through textual
-modification, "Standard Version" refers to such a Package if it has not
-been modified, or has been modified in accordance with the wishes of the
-Copyright Holder as specified below, "Copyright Holder" is whoever is named
-in the copyright or copyrights for the package, "You" is you, if you're
-thinking about copying or distributing this Package, "Reasonable copying
-fee" is whatever you can justify on the basis of media cost, duplication
-charges, time of people involved, and so on. (You will not be required to
-justify it to the Copyright Holder, but only to the computing community at
-large as a market that must bear the fee.), "Freely Available" means that
-no fee is charged for the item itself, though there may be fees involved in
-handling the item. It also means that recipients of the item may
-redistribute it under the same conditions they received it
+"Package", "Standard Version", "Copyright Holder", "You", "Reasonable
+copying fee", "Freely Available"
 
 =item Conditions
+
+a), b), c), d), a), b), c), d)
 
 =back
 
@@ -7479,11 +7521,11 @@ I<dlsym()>, Win9x and C<d_eofnblk>, Compiler/Preprocessor defines
 
 =item NDBM_File and ODBM_File do not work on FAT filesystems
 
-=item fork() failures in io_* tests
+=item C<fork()> failures in io_* tests
 
 =item Script Portability on Cygwin
 
-Pathnames, Text/Binary, F<.exe>, chown(), Miscellaneous
+Pathnames, Text/Binary, PerlIO, F<.exe>, C<chown()>, Miscellaneous
 
 =back
 
@@ -9257,6 +9299,8 @@ B<untrapped>, B<any>, I<signal>, I<number>
 
 C<strict refs>, C<strict vars>, C<strict subs>
 
+=item HISTORY
+
 =back
 
 =head2 subs - Perl pragma to predeclare sub names
@@ -9340,7 +9384,7 @@ code
 
 $num_octets = utf8::upgrade($string);, utf8::downgrade($string[, FAIL_OK]),
 utf8::encode($string), $flag = utf8::decode($string), $flag =
-utf8::valid(STRING)
+utf8::is_utf8(STRING), $flag = utf8::valid(STRING)
 
 =back
 
@@ -9531,9 +9575,8 @@ $keep, $check, $modtime
 =item Functions Returning C<B::SV>, C<B::AV>, C<B::HV>, and C<B::CV>
 objects
 
-sv_undef, sv_yes, sv_no, svref_2object(SVREF), amagic_generation,
-C<init_av>, check_av, begin_av, end_av, comppadlist, regex_padav,
-C<main_cv>
+sv_undef, sv_yes, sv_no, svref_2object(SVREF), amagic_generation, init_av,
+check_av, begin_av, end_av, comppadlist, regex_padav, main_cv
 
 =item Functions for Examining the Symbol Table
 
@@ -9640,7 +9683,7 @@ children
 =item B::PMOP Methods
 
 pmreplroot, pmreplstart, pmnext, pmregexp, pmflags, pmdynflags,
-pmpermflags, precomp, pmoffet
+pmpermflags, precomp, pmoffset
 
 =item B::SVOP METHOD
 
@@ -10265,7 +10308,8 @@ B<Parameters:>
 
 =item CREATING A CLICKABLE IMAGE BUTTON
 
-B<Parameters:>
+B<Parameters:>, 3. The third option (-align, optional) is an alignment
+type, and may be TOP, BOTTOM or MIDDLE
 
 =item CREATING A JAVASCRIPT ACTION BUTTON
 
@@ -10977,8 +11021,9 @@ C<man3direxp>, C<man3ext>
 
 =item M
 
-C<Mcc>, C<mips_type>, C<mkdir>, C<mmaptype>, C<modetype>, C<more>,
-C<multiarch>, C<mv>, C<myarchname>, C<mydomain>, C<myhostname>, C<myuname>
+C<Mcc>, C<mips_type>, C<mistrustnm>, C<mkdir>, C<mmaptype>, C<modetype>,
+C<more>, C<multiarch>, C<mv>, C<myarchname>, C<mydomain>, C<myhostname>,
+C<myuname>
 
 =item n
 
@@ -10996,7 +11041,7 @@ C<orderlib>, C<osname>, C<osvers>, C<otherlibdirs>
 =item p
 
 C<package>, C<pager>, C<passcat>, C<patchlevel>, C<path_sep>, C<perl5>,
-C<perl5>, C<perl>, C<perl_patchlevel>
+C<perl>, C<perl_patchlevel>
 
 =item P
 
@@ -11072,7 +11117,7 @@ C<xlibpth>, C<xs_apiversion>
 
 =item y
 
-C<yaccflags>
+C<yacc>, C<yaccflags>
 
 =item z
 
@@ -11318,6 +11363,12 @@ Dumper
 =item EXAMPLES
 
 =item BUGS
+
+=over 4
+
+=item NOTE
+
+=back
 
 =item AUTHOR
 
@@ -13428,13 +13479,13 @@ INSTALLVENDORBIN, INSTALLVENDORLIB, INSTALLVENDORMAN1DIR,
 INSTALLVENDORMAN3DIR, INST_ARCHLIB, INST_BIN, INST_LIB, INST_MAN1DIR,
 INST_MAN3DIR, INST_SCRIPT, LD, LDDLFLAGS, LDFROM, LIB, LIBPERL_A, LIBS,
 LINKTYPE, MAKEAPERL, MAKEFILE_OLD, MAN1PODS, MAN3PODS, MAP_TARGET,
-MYEXTLIB, NAME, NEEDS_LINKING, NOECHO, NORECURS, NO_VC, OBJECT, OPTIMIZE,
-PERL, PERL_CORE, PERLMAINCC, PERL_ARCHLIB, PERL_LIB, PERL_MALLOC_OK,
-PERLPREFIX, PERLRUN, PERLRUNINST, PERL_SRC, PERM_RW, PERM_RWX, PL_FILES,
-PM, PMLIBDIRS, PM_FILTER, POLLUTE, PPM_INSTALL_EXEC, PPM_INSTALL_SCRIPT,
-PREFIX, PREREQ_FATAL, PREREQ_PM, PREREQ_PRINT, PRINT_PREREQ, SITEPREFIX,
-SKIP, TYPEMAPS, VENDORPREFIX, VERBINST, VERSION, VERSION_FROM, VERSION_SYM,
-XS, XSOPT, XSPROTOARG, XS_VERSION
+MYEXTLIB, NAME, NEEDS_LINKING, NOECHO, NORECURS, NO_META, NO_VC, OBJECT,
+OPTIMIZE, PERL, PERL_CORE, PERLMAINCC, PERL_ARCHLIB, PERL_LIB,
+PERL_MALLOC_OK, PERLPREFIX, PERLRUN, PERLRUNINST, PERL_SRC, PERM_RW,
+PERM_RWX, PL_FILES, PM, PMLIBDIRS, PM_FILTER, POLLUTE, PPM_INSTALL_EXEC,
+PPM_INSTALL_SCRIPT, PREFIX, PREREQ_FATAL, PREREQ_PM, PREREQ_PRINT,
+PRINT_PREREQ, SITEPREFIX, SKIP, TYPEMAPS, VENDORPREFIX, VERBINST, VERSION,
+VERSION_FROM, VERSION_SYM, XS, XSOPT, XSPROTOARG, XS_VERSION
 
 =item Additional lowercase attributes
 
@@ -13454,6 +13505,8 @@ C<<MAN3PODS => ' '>>
    make distcheck,    make skipcheck,	 make distclean,    make manifest, 
   make distdir,   make disttest,    make tardist,    make dist,    make
 uutardist,    make shdist,    make zipdist,    make ci
+
+=item Module Meta-Data
 
 =item Disabling an extension
 
@@ -13492,13 +13545,7 @@ shell commands, easier to customize, cleaner internals, less cruft
 
 =item Module Writing
 
-How do I keep my $VERSION up to date without resetting it manually?
-
 =item XS
-
-How to I prevent "object version X.XX does not match bootstrap parameter
-Y.YY" errors?, How do I make two or more XS files coexist in the same
-directory?
 
 =back
 
@@ -14286,6 +14333,8 @@ cacheout EXPR, cacheout MODE, EXPR
 
 =item BUGS
 
+=item NOTES
+
 =back
 
 =head2 FileHandle - supply object methods for filehandles
@@ -14842,7 +14891,7 @@ new ( FILENAME [,MODE [,PERMS]] ), new_tmpfile
 
 =item METHODS
 
-open( FILENAME [,MODE [,PERMS]] )
+open( FILENAME [,MODE [,PERMS]] ), open( FILENAME, IOLAYERS )
 
 =item SEE ALSO
 
@@ -15080,7 +15129,7 @@ new ( FILENAME [,MODE [,PERMS]] ), new_tmpfile
 
 =item METHODS
 
-open( FILENAME [,MODE [,PERMS]] )
+open( FILENAME [,MODE [,PERMS]] ), open( FILENAME, IOLAYERS )
 
 =item SEE ALSO
 
@@ -16441,7 +16490,7 @@ dataend ()
 
 debug_print ( DIR, TEXT ), debug_text ( TEXT ), command ( CMD [, ARGS, ...
 ]), unsupported (), response (), parse_response ( TEXT ), getline (),
-ungetline ( TEXT ), read_until_dot (), tied_fh ()
+ungetline ( TEXT ), rawdatasend ( DATA ), read_until_dot (), tied_fh ()
 
 =item EXPORTS
 
@@ -16508,15 +16557,16 @@ login ([LOGIN [,PASSWORD [, ACCOUNT] ] ]), authorize ( [AUTH [, RESP]]),
 site (ARGS), type (TYPE [, ARGS]), ascii ([ARGS]) binary([ARGS])
 ebcdic([ARGS]) byte([ARGS]), rename ( OLDNAME, NEWNAME ), delete ( FILENAME
 ), cwd ( [ DIR ] ), cdup (), pwd (), restart ( WHERE ), rmdir ( DIR ),
-mkdir ( DIR [, RECURSE ]), ls ( [ DIR ] ), dir ( [ DIR ] ), get (
-REMOTE_FILE [, LOCAL_FILE [, WHERE]] ), put ( LOCAL_FILE [, REMOTE_FILE ]
-), put_unique ( LOCAL_FILE [, REMOTE_FILE ] ), append ( LOCAL_FILE [,
-REMOTE_FILE ] ), unique_name (), mdtm ( FILE ), size ( FILE ), supported (
-CMD ), hash ( [FILEHANDLE_GLOB_REF],[ BYTES_PER_HASH_MARK] ), nlst ( [ DIR
-] ), list ( [ DIR ] ), retr ( FILE ), stor ( FILE ), stou ( FILE ), appe (
-FILE ), port ( [ PORT ] ), pasv (), pasv_xfer ( SRC_FILE, DEST_SERVER [,
-DEST_FILE ] ), pasv_xfer_unique ( SRC_FILE, DEST_SERVER [, DEST_FILE ] ),
-pasv_wait ( NON_PASV_SERVER ), abort (), quit ()
+mkdir ( DIR [, RECURSE ]), ls ( [ DIR ] ), alloc ( SIZE [, RECORD_SIZE] ),
+dir ( [ DIR ] ), get ( REMOTE_FILE [, LOCAL_FILE [, WHERE]] ), put (
+LOCAL_FILE [, REMOTE_FILE ] ), put_unique ( LOCAL_FILE [, REMOTE_FILE ] ),
+append ( LOCAL_FILE [, REMOTE_FILE ] ), unique_name (), mdtm ( FILE ), size
+( FILE ), supported ( CMD ), hash ( [FILEHANDLE_GLOB_REF],[
+BYTES_PER_HASH_MARK] ), nlst ( [ DIR ] ), list ( [ DIR ] ), retr ( FILE ),
+stor ( FILE ), stou ( FILE ), appe ( FILE ), port ( [ PORT ] ), pasv (),
+pasv_xfer ( SRC_FILE, DEST_SERVER [, DEST_FILE ] ), pasv_xfer_unique (
+SRC_FILE, DEST_SERVER [, DEST_FILE ] ), pasv_wait ( NON_PASV_SERVER ),
+abort (), quit ()
 
 =over 4
 
@@ -16533,7 +16583,7 @@ bytes_read (), abort (), close ()
 
 =item UNIMPLEMENTED
 
-B<ALLO>, B<SMNT>, B<HELP>, B<MODE>, B<SYST>, B<STAT>, B<STRU>, B<REIN>
+B<SMNT>, B<HELP>, B<MODE>, B<SYST>, B<STAT>, B<STRU>, B<REIN>
 
 =item REPORTING BUGS
 
@@ -16606,8 +16656,6 @@ MESSAGE-SPEC, PATTERN, Examples, C<[^]-]>, C<*bdc>, C<[0-9a-zA-Z]>, C<a??d>
 =item SYNOPSIS
 
 =item DESCRIPTION
-
-=item EXAMPLES
 
 =item CONSTRUCTOR
 
@@ -20000,6 +20048,10 @@ getitimer ( $which )
 
 =item BUGS
 
+=item SUPPORT
+
+=item AUTHOR
+
 =back
 
 =head2 Time::gmtime - by-name interface to Perl's built-in gmtime()
@@ -20102,8 +20154,6 @@ C<%old_tailoring = $Collator-E<gt>change(%new_tailoring)>, UCA_Version,
 Base_Unicode_Version
 
 =item EXPORT
-
-=item TODO
 
 =item CAVEAT
 
