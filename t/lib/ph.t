@@ -9,8 +9,6 @@ BEGIN {
     @INC = '../lib';
 }
 
-use Config;
-
 # All the constants which Socket.pm tries to make available:
 my @possibly_defined = qw(
     INADDR_ANY INADDR_LOOPBACK INADDR_NONE AF_802 AF_APPLETALK AF_CCITT

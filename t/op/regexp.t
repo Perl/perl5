@@ -24,7 +24,7 @@ $ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3;
 # Column 5 contains the expected result of double-quote
 # interpolating that string after the match, or start of error message.
 #
-# \n in the tests are interpolated.
+# \n in the tests are interpolated, as are variables of the form ${\w+}.
 #
 # If you want to add a regular expression test that can't be expressed
 # in this format, don't add it here: put it in op/pat.t instead.
@@ -46,6 +46,8 @@ $numtests = $.;
 seek(TESTS,0,0);
 $. = 0;
 
+$bang = sprintf "\\%03o", ord "!"; # \41 would not be portable.
+
 $| = 1;
 print "1..$numtests\n# $iters iterations\n";
 TEST:
@@ -58,6 +60,7 @@ while (<TESTS>) {
     infty_subst(\$expect);
     $pat = "'$pat'" unless $pat =~ /^[:']/;
     $pat =~ s/\\n/\n/g;
+    $pat =~ s/(\$\{\w+\})/$1/eeg;
     $subject =~ s/\\n/\n/g;
     $expect =~ s/\\n/\n/g;
     $expect = $repl = '-' if $skip_amp and $input =~ /\$[&\`\']/;

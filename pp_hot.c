@@ -21,6 +21,12 @@
 #ifdef I_UNISTD
 #include <unistd.h>
 #endif
+#ifdef I_FCNTL
+#include <fcntl.h>
+#endif
+#ifdef I_SYS_FILE
+#include <sys/file.h>
+#endif
 
 /* Hot code. */
 
@@ -1063,7 +1069,7 @@ do_readline(void)
 		    IoFLAGS(io) &= ~IOf_START;
 		    IoLINES(io) = 0;
 		    if (av_len(GvAVn(PL_last_in_gv)) < 0) {
-			do_open(PL_last_in_gv,"-",1,FALSE,0,0,Nullfp);
+			do_open(PL_last_in_gv,"-",1,FALSE,O_RDONLY,0,Nullfp);
 			sv_setpvn(GvSV(PL_last_in_gv), "-", 1);
 			SvSETMAGIC(GvSV(PL_last_in_gv));
 			fp = IoIFP(io);
@@ -1197,7 +1203,7 @@ do_readline(void)
 #endif /* !CSH */
 #endif /* !DOSISH */
 		(void)do_open(PL_last_in_gv, SvPVX(tmpcmd), SvCUR(tmpcmd),
-			      FALSE, 0, 0, Nullfp);
+			      FALSE, O_RDONLY, 0, Nullfp);
 		fp = IoIFP(io);
 #endif /* !VMS */
 		LEAVE;

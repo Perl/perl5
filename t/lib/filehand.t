@@ -31,7 +31,7 @@ $buffer = <$fh>;
 print $buffer eq "#!./perl\n" ? "ok 3\n" : "not ok 3\n";
 
 
-ungetc $fh 65;
+ungetc $fh ord 'A';
 CORE::read($fh, $buf,1);
 print $buf eq 'A' ? "ok 4\n" : "not ok 4\n";
 

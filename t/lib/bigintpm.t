@@ -5,7 +5,6 @@ BEGIN {
     @INC = '../lib';
 }
 
-use Config;
 use Math::BigInt;
 
 $test = 0;

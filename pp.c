@@ -2908,6 +2908,20 @@ mul128(SV *sv, U8 m)
 
 /* Explosives and implosives. */
 
+static const char uuemap[] =
+    "`!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_";
+static char uudmap[256];        /* Initialised on first use */
+#if 'I' == 73 && 'J' == 74
+/* On an ASCII/ISO kind of system */
+#define ISUUCHAR(ch)    ((ch) > ' ' && (ch) < 'a')
+#else
+/*
+  Some other sort of character set - use memchr() so we don't match
+  the null byte.
+ */
+#define ISUUCHAR(ch)    (memchr(uuemap, (ch), sizeof(uuemap)-1))
+#endif
+
 PP(pp_unpack)
 {
     djSP;
@@ -3534,31 +3548,48 @@ PP(pp_unpack)
 	    }
 	    break;
 	case 'u':
+	    /* MKS:
+	     * Initialise the decode mapping.  By using a table driven
+             * algorithm, the code will be character-set independent
+             * (and just as fast as doing character arithmetic)
+             */
+            if (uudmap['M'] == 0) {
+                int i;
+ 
+                for (i = 0; i < sizeof(uuemap); i += 1)
+                    uudmap[uuemap[i]] = i;
+                /*
+                 * Because ' ' and '`' map to the same value,
+                 * we need to decode them both the same.
+                 */
+                uudmap[' '] = 0;
+            }
+
 	    along = (strend - s) * 3 / 4;
 	    sv = NEWSV(42, along);
 	    if (along)
 		SvPOK_on(sv);
-	    while (s < strend && *s > ' ' && *s < 'a') {
+	    while (s < strend && *s > ' ' && ISUUCHAR(*s)) {
 		I32 a, b, c, d;
 		char hunk[4];
 
 		hunk[3] = '\0';
 		len = (*s++ - ' ') & 077;
 		while (len > 0) {
-		    if (s < strend && *s >= ' ')
-			a = (*s++ - ' ') & 077;
-		    else
-			a = 0;
-		    if (s < strend && *s >= ' ')
-			b = (*s++ - ' ') & 077;
-		    else
-			b = 0;
-		    if (s < strend && *s >= ' ')
-			c = (*s++ - ' ') & 077;
-		    else
-			c = 0;
-		    if (s < strend && *s >= ' ')
-			d = (*s++ - ' ') & 077;
+		    if (s < strend && ISUUCHAR(*s))
+			a = uudmap[*s++] & 077;
+ 		    else
+ 			a = 0;
+		    if (s < strend && ISUUCHAR(*s))
+			b = uudmap[*s++] & 077;
+ 		    else
+ 			b = 0;
+		    if (s < strend && ISUUCHAR(*s))
+			c = uudmap[*s++] & 077;
+ 		    else
+ 			c = 0;
+		    if (s < strend && ISUUCHAR(*s))
+			d = uudmap[*s++] & 077;
 		    else
 			d = 0;
 		    hunk[0] = (a << 2) | (b >> 4);
@@ -3619,21 +3650,17 @@ doencodes(register SV *sv, register char *s, register I32 len)
 {
     char hunk[5];
 
-    *hunk = len + ' ';
+    *hunk = uuemap[len];
     sv_catpvn(sv, hunk, 1);
     hunk[4] = '\0';
     while (len > 0) {
-	hunk[0] = ' ' + (077 & (*s >> 2));
-	hunk[1] = ' ' + (077 & (((*s << 4) & 060) | ((s[1] >> 4) & 017)));
-	hunk[2] = ' ' + (077 & (((s[1] << 2) & 074) | ((s[2] >> 6) & 03)));
-	hunk[3] = ' ' + (077 & (s[2] & 077));
+	hunk[0] = uuemap[(077 & (*s >> 2))];
+	hunk[1] = uuemap[(077 & ((*s << 4) & 060 | (s[1] >> 4) & 017))];
+	hunk[2] = uuemap[(077 & ((s[1] << 2) & 074 | (s[2] >> 6) & 03))];
+	hunk[3] = uuemap[(077 & (s[2] & 077))];
 	sv_catpvn(sv, hunk, 4);
 	s += 3;
 	len -= 3;
-    }
-    for (s = SvPVX(sv); *s; s++) {
-	if (*s == ' ')
-	    *s = '`';
     }
     sv_catpvn(sv, "\n", 1);
 }

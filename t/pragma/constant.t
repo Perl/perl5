@@ -81,7 +81,7 @@ test 18, (COUNTLIST)[1] == 4;
 use constant ABC	=> 'ABC';
 test 19, "abc${\( ABC )}abc" eq "abcABCabc";
 
-use constant DEF	=> 'D', "\x45", chr 70;
+use constant DEF	=> 'D', 'E', chr ord 'F';
 test 20, "d e f @{[ DEF ]} d e f" eq "d e f D E F d e f";
 
 use constant SINGLE	=> "'";

@@ -502,25 +502,19 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 	    bool global = FALSE;
 
 	    if (isUPPER(*name)) {
-		if (*name > 'I') {
-		    if (*name == 'S' && (
-		      strEQ(name, "SIG") ||
-		      strEQ(name, "STDIN") ||
-		      strEQ(name, "STDOUT") ||
-		      strEQ(name, "STDERR") ))
-			global = TRUE;
-		}
-		else if (*name > 'E') {
-		    if (*name == 'I' && strEQ(name, "INC"))
-			global = TRUE;
-		}
-		else if (*name > 'A') {
-		    if (*name == 'E' && strEQ(name, "ENV"))
-			global = TRUE;
-		}
+		if (*name == 'S' && (
+		    strEQ(name, "SIG") ||
+		    strEQ(name, "STDIN") ||
+		    strEQ(name, "STDOUT") ||
+		    strEQ(name, "STDERR")))
+		    global = TRUE;
+		else if (*name == 'I' && strEQ(name, "INC"))
+		    global = TRUE;
+		else if (*name == 'E' && strEQ(name, "ENV"))
+		    global = TRUE;
 		else if (*name == 'A' && (
 		  strEQ(name, "ARGV") ||
-		  strEQ(name, "ARGVOUT") ))
+		  strEQ(name, "ARGVOUT")))
 		    global = TRUE;
 	    }
 	    else if (*name == '_' && !name[1])
@@ -759,8 +753,8 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
     case '\005':
     case '\006':
     case '\010':
+    case '\011':	/* NOT \t in EBCDIC */
     case '\017':
-    case '\t':
     case '\020':
     case '\024':
     case '\027':

@@ -1738,6 +1738,9 @@ moreswitches(char *s)
 #ifdef MPE
 	printf("MPE/iX port Copyright by Mark Klein and Mark Bixby, 1996-1998\n");
 #endif
+#ifdef OEMVS
+	printf("MVS (OS390) port by Mortice Kern Systems, 1997-1998\n");
+#endif
 #ifdef BINARY_BUILD_NOTICE
 	BINARY_BUILD_NOTICE;
 #endif

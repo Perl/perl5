@@ -25,7 +25,7 @@ print "ok ",$i++,"\n";
 
 # compile-time failure in require
 do_require "1)\n";
-print "# $@\nnot " unless $@ =~ /syntax error/;
+print "# $@\nnot " unless $@ =~ /syntax error/i;
 print "ok ",$i++,"\n";
 
 # successful require

@@ -135,6 +135,12 @@ __END__
 :endofperl
 EOT
     }
+    if ($^O eq 'os390') {  # no shebang
+	$headmaybe = <<EOH ;
+    eval 'exec ./perl -S \$0 \${1+"\$\@"}'
+        if 0;
+EOH
+    }
     $s1 = $s2 = "\$^X is $perl, \$0 is $script\n";
     ok 19, open(SCRIPT, ">$script"), $!;
     ok 20, print(SCRIPT $headmaybe . <<EOB . <<'EOF' . $tailmaybe), $!;

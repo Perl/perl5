@@ -34,6 +34,7 @@ README.cygwin32		Notes about Cygwin32 port
 README.dos		Notes about dos/djgpp port
 README.mpeix		Notes about MPE/iX port
 README.os2		Notes about OS/2 port
+README.os390		Notes about OS/390 (nee MVS) port
 README.plan9		Notes about Plan9 port
 README.qnx		Notes about QNX port
 README.threads		Notes about multithreading
@@ -73,6 +74,7 @@ doio.c			I/O operations
 doop.c			Support code for various operations
 dosish.h		Some defines for MS/DOSish machines
 dump.c			Debugging output
+ebcdic.c		EBCDIC support routines
 eg/ADB			An adb wrapper to put in your crash dir
 eg/README		Intro to example perl scripts
 eg/cgi/RunMeFirst		Setup script for CGI examples

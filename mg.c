@@ -422,7 +422,7 @@ magic_get(SV *sv, MAGIC *mg)
     case '\010':		/* ^H */
 	sv_setiv(sv, (IV)PL_hints);
 	break;
-    case '\t':			/* ^I */
+    case '\011':		/* ^I */ /* NOT \t in EBCDIC */
 	if (PL_inplace)
 	    sv_setpv(sv, PL_inplace);
 	else
@@ -1520,7 +1520,7 @@ magic_set(SV *sv, MAGIC *mg)
     case '\010':	/* ^H */
 	PL_hints = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
 	break;
-    case '\t':	/* ^I */
+    case '\011':	/* ^I */ /* NOT \t in EBCDIC */
 	if (PL_inplace)
 	    Safefree(PL_inplace);
 	if (SvOK(sv))

@@ -5,8 +5,6 @@ BEGIN {
     @INC = '../lib';
 }
 
-use Config;
-
 package Oscalar;
 use overload ( 
 				# Anonymous subroutines:

@@ -12026,7 +12026,7 @@ esac
 case "$ebcdic" in
 $define)
     xxx=''
-    echo "This is an EBCDIC system, checking if any parser files may need regenerating." >&4
+    echo "This is an EBCDIC system, checking if any parser files need regenerating." >&4
     rm -f y.tab.c y.tab.h
     yacc -d perly.y >/dev/null 2>&1
     if cmp -s y.tab.c perly.c; then
@@ -12048,8 +12048,8 @@ $define)
     fi
     echo "x2p/a2p.y" >&4
     cd x2p
-    rm -f y.tab.c y.tab.h
-    yacc -d a2p.y >/dev/null 2>&1
+    rm -f y.tab.c
+    yacc a2p.y >/dev/null 2>&1
     if cmp -s y.tab.c a2p.c
     then
         rm -f y.tab.c
@@ -12060,14 +12060,6 @@ $define)
         sed -e 's/fprintf *( *stderr *,/PerlIO_printf(Perl_debug_log,/g' \
             -e 's/y\.tab/a2p/g' a2p.c >a2p.tmp && mv a2p.tmp a2p.c
         xxx="$xxx a2p.c"
-    fi
-    if cmp -s y.tab.h a2p.h
-    then
-        rm -f y.tab.h
-    else
-        echo "a2p.h -> a2p.h" >&4
-        mv -f y.tab.h a2p.h
-        xxx="$xxx a2p.h"
     fi
     cd ..
     case "$xxx" in

@@ -2,7 +2,7 @@
 
 # $RCSfile: pack.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:11 $
 
-print "1..56\n";
+print "1..58\n";
 
 $format = "c2 x5 C C x s d i l a6";
 # Need the expression in here to force ary[5] to be numeric.  This avoids
@@ -30,7 +30,10 @@ print +($x = unpack("%32b69", "\001\002\004\010\020\040\100\200\017")) == 12
 print +($x = unpack("%32B69", "\001\002\004\010\020\040\100\200\017")) == 9
 	? "ok 6\n" : "not ok 6 $x\n";
 
-print +($x = unpack("%32B*", "Now is the time for all good blurfl")) == 129
+my $sum = 129; # ASCII
+$sum = 103 if ($^O eq 'os390'); # An EBCDIC variant.
+
+print +($x = unpack("%32B*", "Now is the time for all good blurfl")) == $sum
 	? "ok 7\n" : "not ok 7 $x\n";
 
 open(BIN, "./perl") || open(BIN, "./perl.exe") 
@@ -154,3 +157,22 @@ foreach my $t (@templates) {
       unless @t == 2 and (($t[0] == 12 and $t[1] == 34) or ($t =~ /[nv]/i));
     print "ok ", $test++, "\n";
 }
+
+# 57..58: uuencode/decode
+
+$in = join "", map { chr } 0..255;
+$uu = <<'EOUU';
+M``$"`P0%!@<("0H+#`T.#Q`1$A,4%187&!D:&QP='A\@(2(C)"4F)R@I*BLL
+M+2XO,#$R,S0U-C<X.3H[/#T^/T!!0D-$149'2$E*2TQ-3D]045)35%565UA9
+M6EM<75Y?8&%B8V1E9F=H:6IK;&UN;W!Q<G-T=79W>'EZ>WQ]?G^`@8*#A(6&
+MAXB)BHN,C8Z/D)&2DY25EI>8F9J;G)V>GZ"AHJ.DI::GJ*FJJZRMKJ^PL;*S
+MM+6VM[BYNKN\O;Z_P,'"P\3%QL?(R<K+S,W.S]#1TM/4U=;7V-G:V]S=WM_@
+?X>+CY.7FY^CIZNOL[>[O\/'R\_3U]O?X^?K[_/W^_P``
+EOUU
+
+print "not " unless pack('u', $in) eq $uu;
+print "ok ", $test++, "\n";
+
+print "not " unless unpack('u', $uu) eq $in;
+print "ok ", $test++, "\n";
+

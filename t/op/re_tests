@@ -151,8 +151,8 @@ a[bcd]+dcdcde	adcdcde	n	-	-
 (bc+d$|ef*g.|h?i(j|k))	reffgz	y	$&-$1-$2	effgz-effgz-
 ((((((((((a))))))))))	a	y	$10	a
 ((((((((((a))))))))))\10	aa	y	$&	aa
-((((((((((a))))))))))\41	aa	n	-	-
-((((((((((a))))))))))\41	a!	y	$&	a!
+((((((((((a))))))))))${bang}	aa	n	-	-
+((((((((((a))))))))))${bang}	a!	y	$&	a!
 (((((((((a)))))))))	a	y	$&	a
 multiple words of text	uh-uh	n	-	-
 multiple words	multiple words, yeah	y	$&	multiple words
@@ -291,8 +291,8 @@ a[-]?c	ac	y	$&	ac
 '(bc+d$|ef*g.|h?i(j|k))'i	REFFGZ	y	$&-$1-$2	EFFGZ-EFFGZ-
 '((((((((((a))))))))))'i	A	y	$10	A
 '((((((((((a))))))))))\10'i	AA	y	$&	AA
-'((((((((((a))))))))))\41'i	AA	n	-	-
-'((((((((((a))))))))))\41'i	A!	y	$&	A!
+'((((((((((a))))))))))${bang}'i	AA	n	-	-
+'((((((((((a))))))))))${bang}'i	A!	y	$&	A!
 '(((((((((a)))))))))'i	A	y	$&	A
 '(?:(?:(?:(?:(?:(?:(?:(?:(?:(a))))))))))'i	A	y	$1	A
 '(?:(?:(?:(?:(?:(?:(?:(?:(?:(a|b|c))))))))))'i	C	y	$1	C

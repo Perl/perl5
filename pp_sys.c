@@ -382,7 +382,7 @@ PP(pp_open)
     if (GvIOp(gv))
 	IoFLAGS(GvIOp(gv)) &= ~IOf_UNTAINT;
     tmps = SvPV(sv, len);
-    if (do_open(gv, tmps, len, FALSE, 0, 0, Nullfp))
+    if (do_open(gv, tmps, len, FALSE, O_RDONLY, 0, Nullfp))
 	PUSHi( (I32)PL_forkprocess );
     else if (PL_forkprocess == 0)		/* we are a new child */
 	PUSHi(0);
@@ -2608,12 +2608,17 @@ PP(pp_fttext)
 	    odd += len;
 	    break;
 	}
+#ifdef EBCDIC
+        else if (!(isPRINT(*s) || isSPACE(*s))) 
+            odd++;
+#else
 	else if (*s & 128)
 	    odd++;
 	else if (*s < 32 &&
 	  *s != '\n' && *s != '\r' && *s != '\b' &&
 	  *s != '\t' && *s != '\f' && *s != 27)
 	    odd++;
+#endif
     }
 
     if ((odd * 3 > len) == (PL_op->op_type == OP_FTTEXT)) /* allow 1/3 odd */

@@ -1,0 +1,83 @@
+This is a fully ported perl for OS/390 Release 3.  It may work on
+other versions, but that's the one we've tested it on.
+
+If you've downloaded the binary distribution, it needs to be
+installed below /usr/local.  Source code distributions have an
+automated `make install` step that means you do not need to extract
+the source code below /usr/local (though that is where it will be
+installed by default).  You may need to worry about the networking
+configuration files discussed in the last bullet below.
+
+Gunzip/gzip for OS/390 is discussed at:
+
+   http://www.s390.ibm.com/products/oe/bpxqp1.html
+
+to extract an ASCII tar archive on OS/390, try this:
+
+   pax -o to=IBM-1047,from=ISO8859-1 -r < latest.tar
+
+GNU make for OS/390, which may be required for the build of perl, 
+is available from:
+
+  http://www.mks.com/s390/gnu/index.htm
+
+Once you've unpacked the distribution, run Configure (see INSTALL for
+full discussion of the Configure options), and then run make, then
+"make test" then "make install" (this last step may require UID=0
+privileges)
+
+There is a "hints" file for os390 that specifies the correct values
+for most things.  Some things to watch out for are
+
+	- this port doesn't support dynamic loading.  Although
+	  OS/390 has support for DLLs, there are some differences
+	  that cause problems for perl.
+
+        - You may see a "WHOA THERE!!!" message for $d_shmatprototype
+          it is OK to keep the recommended "define".
+
+	- Don't turn on the compiler optimization flag "-O".  There's
+	  a bug in either the optimizer or perl that causes perl to
+	  not work correctly when the optimizer is on.
+
+	- Some of the configuration files in /etc used by the
+	  networking APIs are either missing or have the wrong
+	  names.  In particular, make sure that there's either
+	  an /etc/resolv.conf or and /etc/hosts, so that
+	  gethostbyname() works, and make sure that the file
+	  /etc/proto has been renamed to /etc/protocol (NOT
+	  /etc/protocols, as used by other Unix systems).
+
+When using perl on OS/390 please keep in mind that the EBCDIC and ASCII
+character sets are different.  Perl builtin functions that may behave
+differently under EBCDIC are mentioned in the perlport.pod document.
+
+OpenEdition (UNIX System Services) does not (yet) support the #! means 
+of script invokation.
+See:
+
+    head `whence perldoc`
+
+for an example of how to use the "eval exec" trick to ask the shell to
+have perl run your scripts for you.
+
+perl-mvs mailing list: The Perl Institute (http://www.perl.org/)
+maintains a mailing list of interest to all folks building and/or
+using perl on EBCDIC platforms.  To subscibe, send a message of:
+
+    subscribe perl-mvs
+
+to majordomo@perl.org.
+
+Regression tests: as the 5.005 kit was was being assembled
+the following "failures" were known to appear on some machines
+during `make test` (mostly due to ASCII vs. EBCDIC conflicts),
+your results may differ:
+
+comp/cpp..........FAILED at test 0
+op/pack...........FAILED at test 58
+op/stat...........Out of memory!
+op/taint..........FAILED at test 73
+lib/errno.........FAILED at test 1
+lib/posix.........FAILED at test 19
+lib/searchdict....FAILED at test 1

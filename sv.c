@@ -3540,10 +3540,24 @@ sv_inc(register SV *sv)
 	    *(d--) = '0';
 	}
 	else {
+#ifdef EBCDIC
+	    /* MKS: The original code here died if letters weren't consecutive.
+	     * at least it didn't have to worry about non-C locales.  The
+	     * new code assumes that ('z'-'a')==('Z'-'A'), letters are
+	     * arranged in order (although not consecutively) and that only 
+	     * [A-Za-z] are accepted by isALPHA in the C locale.
+	     */
+	    if (*d != 'z' && *d != 'Z') {
+		do { ++*d; } while (!isALPHA(*d));
+		return;
+	    }
+	    *(d--) -= 'z' - 'a';
+#else
 	    ++*d;
 	    if (isALPHA(*d))
 		return;
 	    *(d--) -= 'z' - 'a' + 1;
+#endif
 	}
     }
     /* oh,oh, the number grew */

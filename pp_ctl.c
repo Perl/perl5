@@ -436,15 +436,13 @@ PP(pp_formline)
 	    arg = itemsize;
 	    s = item;
 	    while (arg--) {
-#if 'z' - 'a' != 25
+#ifdef EBCDIC
 		int ch = *t++ = *s++;
-		if (!iscntrl(ch))
-		    t[-1] = ' ';
+		if (iscntrl(ch))
 #else
 		if ( !((*t++ = *s++) & ~31) )
-		    t[-1] = ' ';
 #endif
-
+		    t[-1] = ' ';
 	    }
 	    break;
 
