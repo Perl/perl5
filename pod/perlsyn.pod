@@ -13,11 +13,11 @@ you like.  Whitespace mostly serves to separate tokens, unlike
 languages like Python where it is an important part of the syntax.
 
 Many of Perl's syntactic elements are B<optional>.  Rather than
-requiring you to put parenthesis around every function call and
+requiring you to put parentheses around every function call and
 declare every variable, you can often leave such explicit elements off
 and Perl will figure out what you meant.  This is known as B<Do What I
 Mean>, abbreviated B<DWIM>.  It allows programmers to be B<lazy> and to
-code in a style which they are comfortable.
+code in a style with which they are comfortable.
 
 Perl B<borrows syntax> and concepts from many languages: awk, sed, C,
 Bourne Shell, Smalltalk, Lisp and even English.  Other
