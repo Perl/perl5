@@ -1,54 +1,70 @@
 #!./perl
 
+BEGIN: {
+    chdir 't' if -d 't';
+    @INC = ('../lib');
+}
+
+# supress VMS whinging about bad execs.
+use vmsish qw(hushed);
+
 $| = 1;				# flush stdout
 
 $ENV{LC_ALL}   = 'C';		# Forge English error messages.
 $ENV{LANGUAGE} = 'C';		# Ditto in GNU.
 
-if ($^O eq 'MSWin32' || $^O eq 'NetWare') {
-    # XXX the system tests could be written to use ./perl and so work on Win32
-    print "1..0 # Skip: shh, win32\n";
-    exit(0);
+require './test.pl';
+plan(tests => 12);
+
+my $exit;
+SKIP: {
+    skip("bug/feature of pdksh", 2) if $^O eq 'os2';
+
+    $exit = system qq{$^X -le "print q{ok 1 - interpreted system(EXPR)"}};
+    next_test();
+    is( $exit, 0, '  exited 0' );
 }
 
-if ($^O eq 'MacOS') {
-    # XXX the system tests could be written to use ./perl and so work on Win32
-    print "1..0 # Mostly useless tests for Mac OS\n";
-    exit(0);
-}
+$exit = system qq{$^X -le "print q{ok 3 - split & direct call system(EXPR)"}};
+next_test();
+is( $exit, 0, '  exited 0' );
 
-print "1..8\n";
+# On VMS you need the quotes around the program or it won't work.
+# On Unix its the opposite.
+my $quote = $^O eq 'VMS' ? '"' : '';
+$exit = system $^X, '-le', 
+               "${quote}print q{ok 5 - system(PROG, LIST)}${quote}";
+next_test();
+is( $exit, 0, '  exited 0' );
 
-if ($^O ne 'os2') {
-  print "not ok 1\n" if system "echo ok \\1";	# shell interpreted
-} 
-else {
-  print "ok 1 # skipped: bug/feature of pdksh\n"; # shell interpreted
-}
-print "not ok 2\n" if system "echo ok 2";	# split and directly called
-print "not ok 3\n" if system "echo", "ok", "3"; # directly called
 
-# these should probably be rewritten to match the examples in perlfunc.pod
-if (system "true") {print "not ok 4\n";} else {print "ok 4\n";}
+is( system(qq{$^X -e "exit 0"}), 0,     'Explicit exit of 0' );
 
-if ($^O eq 'mpeix') {
-    print "ok 5 # skipped: status broken on MPE/iX\n";
-} else {
-    if ((system "/bin/sh -c 'exit 1'") != 256) { print "not "; }
-    print "ok 5\n";
-}
+my $exit_one = $^O eq 'VMS' ? 4 << 8 : 1 << 8;
+is( system(qq{$^X "-I../lib" -e "use vmsish qw(hushed); exit 1"}), $exit_one,
+    'Explicit exit of 1' );
+
 
 $rc = system "lskdfj";
-if ($rc == 255 << 8 or $rc == -1 and
-     (
-      $! == 2 or
-      $! =~ /\bno\b.*\bfile/i or
-      $! == 13 or
-      $! =~ /permission denied/i
-     )
-   )
- {print "ok 6\n";} else {print "not ok 6\n";}
+unless( ok($rc == 255 << 8 or $rc == -1 or $rc == 256) ) {
+    print "# \$rc == $rc\n";
+}
 
-unless (exec "lskdjfalksdjfdjfkls") {print "ok 7\n";} else {print "not ok 7\n";}
+unless ( ok( $! == 2  or  $! =~ /\bno\b.*\bfile/i or  
+             $! == 13 or  $! =~ /permission denied/i or
+             $! == 22 or  $! =~ /invalid argument/           ) ) {
+    printf "# \$! eq %d, '%s'\n", $!, $!;
+}
 
-exec "echo","ok","8";
+TODO: {
+    if( $^O =~ /Win32/ ) {
+        print "not ok 11 - exec failure doesn't terminate process # TODO Win32 exec failure waits for user input\n";
+        last TODO;
+    }
+
+    ok( !exec("lskdjfalksdjfdjfkls"), 
+        "exec failure doesn't terminate process");
+}
+
+exec $^X, '-le', qq{${quote}print 'ok 12 - exec PROG, LIST'${quote}};
+fail("This should never be reached if the exec() worked");
