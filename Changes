@@ -95,6 +95,22 @@ Version v5.6.0
 --------------
 
 ____________________________________________________________________________
+[  5631] By: gsar                                  on 2000/03/09  18:49:12
+        Log: track more of the child state on Windows
+     Branch: perl
+	   ! win32/win32.c win32/win32.h
+____________________________________________________________________________
+[  5630] By: gsar                                  on 2000/03/09  18:48:05
+        Log: UNIVERSAL::isa() and UNIVERSAL::can() fail for magic values
+     Branch: perl
+	   ! universal.c
+____________________________________________________________________________
+[  5629] By: gsar                                  on 2000/03/09  18:37:35
+        Log: tweak Unicode notes, other cleanups
+     Branch: perl
+	   ! Changes lib/bytes.pm lib/utf8.pm pod/perldelta.pod
+	   ! pod/perlhist.pod pod/perlunicode.pod
+____________________________________________________________________________
 [  5628] By: gsar                                  on 2000/03/09  17:39:58
         Log: support binmode(F,":crlf") and use open IN => ":raw", OUT => ":crlf"
              semantics; the pragma sets defaults for both open() and qx//
