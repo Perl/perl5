@@ -1,3 +1,3 @@
 use ExtUtils::MakeMaker;
 
-WriteMakefile( 'VERSION' => '1.0' );
+WriteMakefile( 'VERSION_FROM' => 'Stdio.pm' );
