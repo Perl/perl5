@@ -377,12 +377,21 @@ case "$use64bitall" in
 		lddlflags="$lddlflags -G -mv9"
 		;;
 	    *)
-		ccflags="$ccflags `getconf XBS5_LP64_OFF64_CFLAGS`"
-		ldflags="$ccflags `getconf XBS5_LP64_OFF64_LDFLAGS`"
-		lddlflags="$lddlflags -G `getconf XBS5_LP64_OFF64_LDFLAGS`"
+		ccflags="$ccflags `getconf XBS5_LP64_OFF64_CFLAGS 2>/dev/null`"
+		ldflags="$ccflags `getconf XBS5_LP64_OFF64_LDFLAGS 2>/dev/null`"
+		lddlflags="$lddlflags -G `getconf XBS5_LP64_OFF64_LDFLAGS 2>/dev/null`"
 		;;
 	    esac	
 	    libc='/usr/lib/sparcv9/libc.so'
+	    if test ! -f $libc; then
+		cat <<EOM
+
+I do not see the 64-bit libc, $libc.
+Cannot continue, aborting.
+
+EOM
+		exit 1
+	    fi 
 	    loclibpth="$loclibpth /usr/lib/sparcv9"
 	    libscheck='case "`/usr/bin/file $xxx`" in
 *64-bit*|*SPARCV9*) ;;
@@ -396,7 +405,7 @@ EOCBU
 # because we need to fix up the library paths right now.
 case "$use64bitall" in
 "$define"|true|[yY]*)
-	. ./use64bitall.cbu
+	. ./UU/use64bitall.cbu
 	;;
 esac
 
