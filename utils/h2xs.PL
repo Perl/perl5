@@ -191,6 +191,18 @@ hand-editing. Such may be objects which cannot be converted from/to a
 pointer (like C<long long>), pointers to functions, or arrays.  See
 also the section on L<LIMITATIONS of B<-x>>.
 
+=item B<-b> I<version>
+
+Generates a .pm file which is backwards compatible with the specified
+perl version.
+
+For versions < 5.6.0, the changes are.
+    - no use of 'our' (uses 'use vars' instead)
+    - no 'use warnings'
+
+Specifying a compatibility version higher than the version of perl you
+are using to run h2xs will have no effect.
+
 =back
 
 =head1 EXAMPLES
@@ -332,6 +344,7 @@ use strict;
 my( $H2XS_VERSION ) = ' $Revision: 1.20 $ ' =~ /\$Revision:\s+([^\s]+)/;
 my $TEMPLATE_VERSION = '0.01';
 my @ARGS = @ARGV;
+my $compat_version = $];
 
 use Getopt::Std;
 
@@ -359,6 +372,7 @@ version: $H2XS_VERSION
     -s   Create subroutines for specified macros.
     -v   Specify a version number for this extension.
     -x   Autogenerate XSUBs using C::Scan.
+    -b   Specify a perl version to be backwards compatibile with
 extra_libraries
          are any libraries that might be needed for loading the
          extension, e.g. -lm would try to link in the math library.
@@ -366,11 +380,21 @@ extra_libraries
 }
 
 
-getopts("ACF:M:OPXacdfhkmn:o:p:s:v:x") || usage;
+getopts("ACF:M:OPXacdfhkmn:o:p:s:v:xb:") || usage;
 use vars qw($opt_A $opt_C $opt_F $opt_M $opt_O $opt_P $opt_X $opt_a $opt_c $opt_d
-	    $opt_f $opt_h $opt_k $opt_m $opt_n $opt_o $opt_p $opt_s $opt_v $opt_x);
+	    $opt_f $opt_h $opt_k $opt_m $opt_n $opt_o $opt_p $opt_s $opt_v $opt_x 
+	    $opt_b);
 
 usage if $opt_h;
+
+if( $opt_b ){
+    usage "You cannot use -b and -m at the same time.\n" if ($opt_b && $opt_m);
+    $opt_b =~ /^\d+\.\d+\.\d+/ ||
+	usage "You must provide the backwards compatibility version in X.Y.Z form. " .
+	    "(i.e. 5.5.0)\n";
+    my ($maj,$min,$sub) = split(/\./,$opt_b,3);
+    $compat_version = sprintf("%d.%03d%02d",$maj,$min,$sub);
+} 
 
 if( $opt_v ){
 	$TEMPLATE_VERSION = $opt_v;
@@ -685,6 +709,15 @@ open(PM, ">$modfname.pm") || die "Can't create $ext$modpname/$modfname.pm: $!\n"
 $" = "\n\t";
 warn "Writing $ext$modpname/$modfname.pm\n";
 
+if ( $compat_version < 5.006 ) {
+print PM <<"END";
+package $module;
+
+use $compat_version;
+use strict;
+END
+} 
+else {
 print PM <<"END";
 package $module;
 
@@ -692,6 +725,7 @@ use 5.006;
 use strict;
 use warnings;
 END
+}
 
 unless( $opt_X || $opt_c || $opt_A ){
 	# we'll have an AUTOLOAD(), and it will have $AUTOLOAD and
@@ -721,15 +755,25 @@ unless ($opt_A) { # no autoloader whatsoever.
 	}
 }
 
+if ( $compat_version < 5.006 ) {
+    if ( $opt_X || $opt_c || $opt_A ) {
+	print PM 'use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);';
+    } else {
+	print PM 'use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $AUTOLOAD);';
+    }
+}
+
 # Determine @ISA.
 my $myISA = 'our @ISA = qw(Exporter';	# We seem to always want this.
 $myISA .= ' DynaLoader' 	unless $opt_X;  # no XS
 $myISA .= ');';
+$myISA =~ s/^our // if $compat_version < 5.006;
+
 print PM "\n$myISA\n\n";
 
 my @exported_names = (@const_names, @fnames_no_prefix, map '$'.$_, @vdecls);
 
-print PM<<"END";
+my $tmp=<<"END";
 # Items to export into callers namespace by default. Note: do not export
 # names by default without a very good reason. Use EXPORT_OK instead.
 # Do not simply export all your public functions/methods/constants.
@@ -750,10 +794,15 @@ our \$VERSION = '$TEMPLATE_VERSION';
 
 END
 
+$tmp =~ s/^our //mg if $compat_version < 5.006;
+print PM $tmp;
+
 if (@vdecls) {
     printf PM "our(@{[ join ', ', map '$'.$_, @vdecls ]});\n\n";
 }
 
+
+$tmp = ( $compat_version < 5.006 ?  "" : "our \$AUTOLOAD;" );
 print PM <<"END" unless $opt_c or $opt_X;
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
@@ -761,7 +810,7 @@ sub AUTOLOAD {
     # to the AUTOLOAD in AutoLoader.
 
     my \$constname;
-    our \$AUTOLOAD;
+    $tmp
     (\$constname = \$AUTOLOAD) =~ s/.*:://;
     croak "&$module::constant not defined" if \$constname eq 'constant';
     my \$val = constant(\$constname, \@_ ? \$_[0] : 0);
