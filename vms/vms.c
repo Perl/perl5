@@ -14,6 +14,7 @@
 #include <clidef.h>
 #include <climsgdef.h>
 #include <descrip.h>
+#include <devdef.h>
 #include <dvidef.h>
 #include <fibdef.h>
 #include <float.h>
@@ -971,19 +972,35 @@ my_tmpfile(void)
 static void
 create_mbx(unsigned short int *chan, struct dsc$descriptor_s *namdsc)
 {
-  static unsigned long int mbxbufsiz;
-  long int syiitm = SYI$_MAXBUF, dviitm = DVI$_DEVNAM;
+  unsigned long int mbxbufsiz;
+  static unsigned long int syssize = 0;
+  unsigned long int dviitm = DVI$_DEVNAM;
   dTHX;
+  char csize[LNM$C_NAMLENGTH+1];
   
-  if (!mbxbufsiz) {
+  if (!syssize) {
+    unsigned long syiitm = SYI$_MAXBUF;
     /*
      * Get the SYSGEN parameter MAXBUF, and the smaller of it and the
-     * preprocessor consant BUFSIZ from stdio.h as the size of the
+     * preprocessor consant BUFSIZ from stdio.h defaults as the size of the
      * 'pipe' mailbox.
+     *
+     * If the logical 'PERL_MBX_SIZE' is defined
+     * use the value of the logical instead of BUFSIZ, but again
+     * keep the size between 128 and MAXBUF.
+     *
      */
-    _ckvmssts(lib$getsyi(&syiitm, &mbxbufsiz, 0, 0, 0, 0));
-    if (mbxbufsiz > BUFSIZ) mbxbufsiz = BUFSIZ; 
+    _ckvmssts(lib$getsyi(&syiitm, &syssize, 0, 0, 0, 0));
   }
+
+  if (vmstrnenv("PERL_MBX_SIZE", csize, 0, fildev, 0)) {
+      mbxbufsiz = atoi(csize);
+  } else {
+      mbxbufsiz = BUFSIZ;
+  }
+  if (mbxbufsiz < 128) mbxbufsiz = 128;
+  if (mbxbufsiz > syssize) mbxbufsiz = syssize;
+
   _ckvmssts(sys$crembx(0,chan,mbxbufsiz,mbxbufsiz,0,0,0));
 
   _ckvmssts(lib$getdvi(&dviitm, chan, NULL, NULL, namdsc, &namdsc->dsc$w_length));
@@ -991,15 +1008,78 @@ create_mbx(unsigned short int *chan, struct dsc$descriptor_s *namdsc)
 
 }  /* end of create_mbx() */
 
+
 /*{{{  my_popen and my_pclose*/
+
+typedef struct _iosb           IOSB;
+typedef struct _iosb*         pIOSB;
+typedef struct _pipe           Pipe;
+typedef struct _pipe*         pPipe;
+typedef struct pipe_details    Info;
+typedef struct pipe_details*  pInfo;
+typedef struct _srqp            RQE;
+typedef struct _srqp*          pRQE;
+typedef struct _tochildbuf      CBuf;
+typedef struct _tochildbuf*    pCBuf;
+
+struct _iosb {
+    unsigned short status;
+    unsigned short count;
+    unsigned long  dvispec;
+};
+
+#pragma member_alignment save
+#pragma nomember_alignment quadword
+struct _srqp {          /* VMS self-relative queue entry */
+    unsigned long qptr[2];
+};
+#pragma member_alignment restore
+static RQE  RQE_ZERO = {0,0};
+
+struct _tochildbuf {
+    RQE             q;
+    int             eof;
+    unsigned short  size;
+    char            *buf;
+};
+
+struct _pipe {
+    RQE            free;
+    RQE            wait;
+    int            fd_out;
+    unsigned short chan_in;
+    unsigned short chan_out;
+    char          *buf;
+    unsigned int   bufsize;
+    IOSB           iosb;
+    IOSB           iosb2;
+    int           *pipe_done;
+    int            retry;
+    int            type;
+    int            shut_on_empty;
+    int            need_wake;
+    pPipe         *home;
+    pInfo          info;
+    pCBuf          curr;
+    pCBuf          curr2;
+};
+
+
 struct pipe_details
 {
-    struct pipe_details *next;
+    pInfo           next;
     PerlIO *fp;  /* stdio file pointer to pipe mailbox */
     int pid;   /* PID of subprocess */
     int mode;  /* == 'r' if pipe open for reading */
     int done;  /* subprocess has completed */
-    unsigned long int completion;  /* termination status of subprocess */
+    int             closing;        /* my_pclose is closing this pipe */
+    unsigned long   completion;     /* termination status of subprocess */
+    pPipe           in;             /* pipe in to sub */
+    pPipe           out;            /* pipe out of sub */
+    pPipe           err;            /* pipe of sub's sys$error */
+    int             in_done;        /* true when in pipe finished */
+    int             out_done;
+    int             err_done;
 };
 
 struct exit_control_block
@@ -1011,45 +1091,23 @@ struct exit_control_block
     unsigned long int exit_status;
 }; 
 
-static struct pipe_details *open_pipes = NULL;
+#define RETRY_DELAY     "0 ::0.20"
+#define MAX_RETRY              50
+
+static int pipe_ef = 0;          /* first call to safe_popen inits these*/
+static unsigned long mypid;
+static unsigned long delaytime[2];
+
+static pInfo open_pipes = NULL;
 static $DESCRIPTOR(nl_desc, "NL:");
-static int waitpid_asleep = 0;
 
-/* Send an EOF to a mbx.  N.B.  We don't check that fp actually points
- * to a mbx; that's the caller's responsibility.
- */
-static unsigned long int
-pipe_eof(FILE *fp, int immediate)
-{
-  char devnam[NAM$C_MAXRSS+1], *cp;
-  unsigned long int chan, iosb[2], retsts, retsts2;
-  struct dsc$descriptor devdsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, devnam};
-  dTHX;
-
-  if (fgetname(fp,devnam,1)) {
-    /* It oughta be a mailbox, so fgetname should give just the device
-     * name, but just in case . . . */
-    if ((cp = strrchr(devnam,':')) != NULL) *(cp+1) = '\0';
-    devdsc.dsc$w_length = strlen(devnam);
-    _ckvmssts(sys$assign(&devdsc,&chan,0,0));
-    retsts = sys$qiow(0,chan,IO$_WRITEOF|(immediate?IO$M_NOW|IO$M_NORSWAIT:0),
-             iosb,0,0,0,0,0,0,0,0);
-    if (retsts & 1) retsts = iosb[0];
-    retsts2 = sys$dassgn(chan);  /* Be sure to deassign the channel */
-    if (retsts & 1) retsts = retsts2;
-    _ckvmssts(retsts);
-    return retsts;
-  }
-  else _ckvmssts(vaxc$errno);  /* Should never happen */
-  return (unsigned long int) vaxc$errno;
-}
 
 static unsigned long int
 pipe_exit_routine()
 {
-    struct pipe_details *info;
+    pInfo info;
     unsigned long int retsts = SS$_NORMAL, abort = SS$_TIMEOUT;
-    int sts, did_stuff;
+    int sts, did_stuff, need_eof;
     dTHX;
 
     /* 
@@ -1062,11 +1120,12 @@ pipe_exit_routine()
     while (info) {
       int need_eof;
       _ckvmssts(sys$setast(0));
-      need_eof = info->mode != 'r' && !info->done;
-      _ckvmssts(sys$setast(1));
-      if (need_eof) {
-        if (pipe_eof(info->fp, 1) & 1) did_stuff = 1;
+      if (info->in && !info->in->shut_on_empty) {
+        _ckvmssts(sys$qio(0,info->in->chan_in,IO$_WRITEOF,0,0,0,
+                          0, 0, 0, 0, 0, 0));
+        did_stuff = 1;
       }
+      _ckvmssts(sys$setast(1));
       info = info->next;
     }
     if (did_stuff) sleep(1);   /* wait for EOF to have an effect */
@@ -1091,7 +1150,6 @@ pipe_exit_routine()
       if (!info->done) {  /* We tried to be nice . . . */
         sts = sys$delprc(&info->pid,0);
         if (!(sts&1) && sts != SS$_NONEXPR) _ckvmssts(sts); 
-        info->done = 1; /* so my_pclose doesn't try to write EOF */
       }
       _ckvmssts(sys$setast(1));
       info = info->next;
@@ -1108,72 +1166,914 @@ static struct exit_control_block pipe_exitblock =
        {(struct exit_control_block *) 0,
         pipe_exit_routine, 0, &pipe_exitblock.exit_status, 0};
 
+static void pipe_mbxtofd_ast(pPipe p);
+static void pipe_tochild1_ast(pPipe p);
+static void pipe_tochild2_ast(pPipe p);
 
 static void
-popen_completion_ast(struct pipe_details *thispipe)
+popen_completion_ast(pInfo info)
 {
-  thispipe->done = TRUE;
-  if (waitpid_asleep) {
-    waitpid_asleep = 0;
-    sys$wake(0,0);
+  dTHX;
+  pInfo i = open_pipes;
+  int iss;
+
+  while (i) {
+    if (i == info) break;
+    i = i->next;
   }
+  if (!i) return;       /* unlinked, probably freed too */
+
+  info->completion &= 0x0FFFFFFF; /* strip off "control" field */
+  info->done = TRUE;
+
+/*
+    Writing to subprocess ...
+            if my_pclose'd: EOF already sent, should shutdown chan_in part of pipe
+
+            chan_out may be waiting for "done" flag, or hung waiting
+            for i/o completion to child...cancel the i/o.  This will
+            put it into "snarf mode" (done but no EOF yet) that discards
+            input.
+
+    Output from subprocess (stdout, stderr) needs to be flushed and
+    shut down.   We try sending an EOF, but if the mbx is full the pipe
+    routine should still catch the "shut_on_empty" flag, telling it to
+    use immediate-style reads so that "mbx empty" -> EOF.
+
+
+*/
+  if (info->in && !info->in_done) {               /* only for mode=w */
+        if (info->in->shut_on_empty && info->in->need_wake) {
+            info->in->need_wake = FALSE;
+            _ckvmssts(sys$dclast(pipe_tochild2_ast,info->in,0));
+        } else {
+            _ckvmssts(sys$cancel(info->in->chan_out));
+        }
+  }
+
+  if (info->out && !info->out_done) {             /* were we also piping output? */
+      info->out->shut_on_empty = TRUE;
+      iss = sys$qio(0,info->out->chan_in,IO$_WRITEOF|IO$M_NORSWAIT, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+      if (iss == SS$_MBFULL) iss = SS$_NORMAL;
+      _ckvmssts(iss);
+  }
+
+  if (info->err && !info->err_done) {        /* we were piping stderr */
+        info->err->shut_on_empty = TRUE;
+        iss = sys$qio(0,info->err->chan_in,IO$_WRITEOF|IO$M_NORSWAIT, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        if (iss == SS$_MBFULL) iss = SS$_NORMAL;
+        _ckvmssts(iss);
+  }
+  _ckvmssts(sys$setef(pipe_ef));
+
 }
 
 static unsigned long int setup_cmddsc(char *cmd, int check_img);
 static void vms_execfree(pTHX);
 
+/*
+    we actually differ from vmstrnenv since we use this to
+    get the RMS IFI to check if SYS$OUTPUT and SYS$ERROR *really*
+    are pointing to the same thing
+*/
+
+static unsigned short
+popen_translate(char *logical, char *result)
+{
+    int iss;
+    $DESCRIPTOR(d_table,"LNM$PROCESS_TABLE");
+    $DESCRIPTOR(d_log,"");
+    struct _il3 {
+        unsigned short length;
+        unsigned short code;
+        char *         buffer_addr;
+        unsigned short *retlenaddr;
+    } itmlst[2];
+    unsigned short l, ifi;
+
+    d_log.dsc$a_pointer = logical;
+    d_log.dsc$w_length  = strlen(logical);
+
+    itmlst[0].code = LNM$_STRING;
+    itmlst[0].length = 255;
+    itmlst[0].buffer_addr = result;
+    itmlst[0].retlenaddr = &l;
+
+    itmlst[1].code = 0;
+    itmlst[1].length = 0;
+    itmlst[1].buffer_addr = 0;
+    itmlst[1].retlenaddr = 0;
+
+    iss = sys$trnlnm(0, &d_table, &d_log, 0, itmlst);
+    if (iss == SS$_NOLOGNAM) {
+        iss = SS$_NORMAL;
+        l = 0;
+    }
+    if (!(iss&1)) lib$signal(iss);
+    result[l] = '\0';
+/*
+    logicals for PPFs have a 4 byte prefix  ESC+NUL+(RMS IFI)
+    strip it off and return the ifi, if any
+*/
+    ifi  = 0;
+    if (result[0] == 0x1b && result[1] == 0x00) {
+        memcpy(&ifi,result+2,2);
+        strcpy(result,result+4);
+    }
+    return ifi;     /* this is the RMS internal file id */
+}
+
+#define MAX_DCL_SYMBOL        255
+static void pipe_infromchild_ast(pPipe p);
+
+/*
+    I'm using LIB$(GET|FREE)_VM here so that we can allocate and deallocate
+    inside an AST routine without worrying about reentrancy and which Perl
+    memory allocator is being used.
+
+    We read data and queue up the buffers, then spit them out one at a
+    time to the output mailbox when the output mailbox is ready for one.
+
+*/
+#define INITIAL_TOCHILDQUEUE  2
+
+static pPipe
+pipe_tochild_setup(char *rmbx, char *wmbx)
+{
+    dTHX;
+    pPipe p;
+    pCBuf b;
+    char mbx1[64], mbx2[64];
+    struct dsc$descriptor_s d_mbx1 = {sizeof mbx1, DSC$K_DTYPE_T,
+                                      DSC$K_CLASS_S, mbx1},
+                            d_mbx2 = {sizeof mbx2, DSC$K_DTYPE_T,
+                                      DSC$K_CLASS_S, mbx2};
+    unsigned int dviitm = DVI$_DEVBUFSIZ;
+    int j, n;
+
+    New(1368, p, 1, Pipe);
+
+    create_mbx(&p->chan_in , &d_mbx1);
+    create_mbx(&p->chan_out, &d_mbx2);
+    _ckvmssts(lib$getdvi(&dviitm, &p->chan_in, 0, &p->bufsize));
+
+    p->buf           = 0;
+    p->shut_on_empty = FALSE;
+    p->need_wake     = FALSE;
+    p->type          = 0;
+    p->retry         = 0;
+    p->iosb.status   = SS$_NORMAL;
+    p->iosb2.status  = SS$_NORMAL;
+    p->free          = RQE_ZERO;
+    p->wait          = RQE_ZERO;
+    p->curr          = 0;
+    p->curr2         = 0;
+    p->info          = 0;
+
+    n = sizeof(CBuf) + p->bufsize;
+
+    for (j = 0; j < INITIAL_TOCHILDQUEUE; j++) {
+        _ckvmssts(lib$get_vm(&n, &b));
+        b->buf = (char *) b + sizeof(CBuf);
+        _ckvmssts(lib$insqhi(b, &p->free));
+    }
+
+    pipe_tochild2_ast(p);
+    pipe_tochild1_ast(p);
+    strcpy(wmbx, mbx1);
+    strcpy(rmbx, mbx2);
+    return p;
+}
+
+/*  reads the MBX Perl is writing, and queues */
+
+static void
+pipe_tochild1_ast(pPipe p)
+{
+    dTHX;
+    pCBuf b = p->curr;
+    int iss = p->iosb.status;
+    int eof = (iss == SS$_ENDOFFILE);
+
+    if (p->retry) {
+        if (eof) {
+            p->shut_on_empty = TRUE;
+            b->eof     = TRUE;
+            _ckvmssts(sys$dassgn(p->chan_in));
+        } else  {
+            _ckvmssts(iss);
+        }
+
+        b->eof  = eof;
+        b->size = p->iosb.count;
+        _ckvmssts(lib$insqhi(b, &p->wait));
+        if (p->need_wake) {
+            p->need_wake = FALSE;
+            _ckvmssts(sys$dclast(pipe_tochild2_ast,p,0));
+        }
+    } else {
+        p->retry = 1;   /* initial call */
+    }
+
+    if (eof) {                  /* flush the free queue, return when done */
+        int n = sizeof(CBuf) + p->bufsize;
+        while (1) {
+            iss = lib$remqti(&p->free, &b);
+            if (iss == LIB$_QUEWASEMP) return;
+            _ckvmssts(iss);
+            _ckvmssts(lib$free_vm(&n, &b));
+        }
+    }
+
+    iss = lib$remqti(&p->free, &b);
+    if (iss == LIB$_QUEWASEMP) {
+        int n = sizeof(CBuf) + p->bufsize;
+        _ckvmssts(lib$get_vm(&n, &b));
+        b->buf = (char *) b + sizeof(CBuf);
+    } else {
+       _ckvmssts(iss);
+    }
+
+    p->curr = b;
+    iss = sys$qio(0,p->chan_in,
+             IO$_READVBLK|(p->shut_on_empty ? IO$M_NOWAIT : 0),
+             &p->iosb,
+             pipe_tochild1_ast, p, b->buf, p->bufsize, 0, 0, 0, 0);
+    if (iss == SS$_ENDOFFILE && p->shut_on_empty) iss = SS$_NORMAL;
+    _ckvmssts(iss);
+}
+
+
+/* writes queued buffers to output, waits for each to complete before
+   doing the next */
+
+static void
+pipe_tochild2_ast(pPipe p)
+{
+    dTHX;
+    pCBuf b = p->curr2;
+    int iss = p->iosb2.status;
+    int n = sizeof(CBuf) + p->bufsize;
+    int done = (p->info && p->info->done) ||
+              iss == SS$_CANCEL || iss == SS$_ABORT;
+
+    do {
+        if (p->type) {         /* type=1 has old buffer, dispose */
+            if (p->shut_on_empty) {
+                _ckvmssts(lib$free_vm(&n, &b));
+            } else {
+                _ckvmssts(lib$insqhi(b, &p->free));
+            }
+            p->type = 0;
+        }
+
+        iss = lib$remqti(&p->wait, &b);
+        if (iss == LIB$_QUEWASEMP) {
+            if (p->shut_on_empty) {
+                if (done) {
+                    _ckvmssts(sys$dassgn(p->chan_out));
+                    *p->pipe_done = TRUE;
+                    _ckvmssts(sys$setef(pipe_ef));
+                } else {
+                    _ckvmssts(sys$qio(0,p->chan_out,IO$_WRITEOF,
+                        &p->iosb2, pipe_tochild2_ast, p, 0, 0, 0, 0, 0, 0));
+                }
+                return;
+            }
+            p->need_wake = TRUE;
+            return;
+        }
+        _ckvmssts(iss);
+        p->type = 1;
+    } while (done);
+
+
+    p->curr2 = b;
+    if (b->eof) {
+        _ckvmssts(sys$qio(0,p->chan_out,IO$_WRITEOF,
+            &p->iosb2, pipe_tochild2_ast, p, 0, 0, 0, 0, 0, 0));
+    } else {
+        _ckvmssts(sys$qio(0,p->chan_out,IO$_WRITEVBLK,
+            &p->iosb2, pipe_tochild2_ast, p, b->buf, b->size, 0, 0, 0, 0));
+    }
+
+    return;
+
+}
+
+
+static pPipe
+pipe_infromchild_setup(char *rmbx, char *wmbx)
+{
+    dTHX;
+    pPipe p;
+    char mbx1[64], mbx2[64];
+    struct dsc$descriptor_s d_mbx1 = {sizeof mbx1, DSC$K_DTYPE_T,
+                                      DSC$K_CLASS_S, mbx1},
+                            d_mbx2 = {sizeof mbx2, DSC$K_DTYPE_T,
+                                      DSC$K_CLASS_S, mbx2};
+    unsigned int dviitm = DVI$_DEVBUFSIZ;
+
+    New(1367, p, 1, Pipe);
+    create_mbx(&p->chan_in , &d_mbx1);
+    create_mbx(&p->chan_out, &d_mbx2);
+
+    _ckvmssts(lib$getdvi(&dviitm, &p->chan_in, 0, &p->bufsize));
+    New(1367, p->buf, p->bufsize, char);
+    p->shut_on_empty = FALSE;
+    p->info   = 0;
+    p->type   = 0;
+    p->iosb.status = SS$_NORMAL;
+    pipe_infromchild_ast(p);
+
+    strcpy(wmbx, mbx1);
+    strcpy(rmbx, mbx2);
+    return p;
+}
+
+static void
+pipe_infromchild_ast(pPipe p)
+{
+    dTHX;
+    int iss = p->iosb.status;
+    int eof = (iss == SS$_ENDOFFILE);
+    int myeof = (eof && (p->iosb.dvispec == mypid || p->iosb.dvispec == 0));
+    int kideof = (eof && (p->iosb.dvispec == p->info->pid));
+
+    if (p->info && p->info->closing && p->chan_out)  {           /* output shutdown */
+        _ckvmssts(sys$dassgn(p->chan_out));
+        p->chan_out = 0;
+    }
+
+    /* read completed:
+            input shutdown if EOF from self (done or shut_on_empty)
+            output shutdown if closing flag set (my_pclose)
+            send data/eof from child or eof from self
+            otherwise, re-read (snarf of data from child)
+    */
+
+    if (p->type == 1) {
+        p->type = 0;
+        if (myeof && p->chan_in) {                  /* input shutdown */
+            _ckvmssts(sys$dassgn(p->chan_in));
+            p->chan_in = 0;
+        }
+
+        if (p->chan_out) {
+            if (myeof || kideof) {      /* pass EOF to parent */
+                _ckvmssts(sys$qio(0,p->chan_out,IO$_WRITEOF, &p->iosb,
+                              pipe_infromchild_ast, p,
+                              0, 0, 0, 0, 0, 0));
+                return;
+            } else if (eof) {       /* eat EOF --- fall through to read*/
+
+            } else {                /* transmit data */
+                _ckvmssts(sys$qio(0,p->chan_out,IO$_WRITEVBLK,&p->iosb,
+                              pipe_infromchild_ast,p,
+                              p->buf, p->iosb.count, 0, 0, 0, 0));
+                return;
+            }
+        }
+    }
+
+    /*  everything shut? flag as done */
+
+    if (!p->chan_in && !p->chan_out) {
+        *p->pipe_done = TRUE;
+        _ckvmssts(sys$setef(pipe_ef));
+        return;
+    }
+
+    /* write completed (or read, if snarfing from child)
+            if still have input active,
+               queue read...immediate mode if shut_on_empty so we get EOF if empty
+            otherwise,
+               check if Perl reading, generate EOFs as needed
+    */
+
+    if (p->type == 0) {
+        p->type = 1;
+        if (p->chan_in) {
+            iss = sys$qio(0,p->chan_in,IO$_READVBLK|(p->shut_on_empty ? IO$M_NOW : 0),&p->iosb,
+                          pipe_infromchild_ast,p,
+                          p->buf, p->bufsize, 0, 0, 0, 0);
+            if (p->shut_on_empty && iss == SS$_ENDOFFILE) iss = SS$_NORMAL;
+            _ckvmssts(iss);
+        } else {           /* send EOFs for extra reads */
+            p->iosb.status = SS$_ENDOFFILE;
+            p->iosb.dvispec = 0;
+            _ckvmssts(sys$qio(0,p->chan_out,IO$_SETMODE|IO$M_READATTN,
+                      0, 0, 0,
+                      pipe_infromchild_ast, p, 0, 0, 0, 0));
+        }
+    }
+}
+
+static pPipe
+pipe_mbxtofd_setup(int fd, char *out)
+{
+    dTHX;
+    pPipe p;
+    char mbx[64];
+    unsigned long dviitm = DVI$_DEVBUFSIZ;
+    struct stat s;
+    struct dsc$descriptor_s d_mbx = {sizeof mbx, DSC$K_DTYPE_T,
+                                      DSC$K_CLASS_S, mbx};
+
+    /* things like terminals and mbx's don't need this filter */
+    if (fd && fstat(fd,&s) == 0) {
+        unsigned long dviitm = DVI$_DEVCHAR, devchar;
+        struct dsc$descriptor_s d_dev = {strlen(s.st_dev), DSC$K_DTYPE_T,
+                                         DSC$K_CLASS_S, s.st_dev};
+
+        _ckvmssts(lib$getdvi(&dviitm,0,&d_dev,&devchar,0,0));
+        if (!(devchar & DEV$M_DIR)) {  /* non directory structured...*/
+            strcpy(out, s.st_dev);
+            return 0;
+        }
+    }
+
+    New(1366, p, 1, Pipe);
+    p->fd_out = dup(fd);
+    create_mbx(&p->chan_in, &d_mbx);
+    _ckvmssts(lib$getdvi(&dviitm, &p->chan_in, 0, &p->bufsize));
+    New(1366, p->buf, p->bufsize+1, char);
+    p->shut_on_empty = FALSE;
+    p->retry = 0;
+    p->info  = 0;
+    strcpy(out, mbx);
+
+    _ckvmssts(sys$qio(0, p->chan_in, IO$_READVBLK, &p->iosb,
+                  pipe_mbxtofd_ast, p,
+                  p->buf, p->bufsize, 0, 0, 0, 0));
+
+    return p;
+}
+
+static void
+pipe_mbxtofd_ast(pPipe p)
+{
+    dTHX;
+    int iss = p->iosb.status;
+    int done = p->info->done;
+    int iss2;
+    int eof = (iss == SS$_ENDOFFILE);
+    int myeof = eof && ((p->iosb.dvispec == mypid)||(p->iosb.dvispec == 0));
+    int err = !(iss&1) && !eof;
+
+
+    if (done && myeof) {               /* end piping */
+        close(p->fd_out);
+        sys$dassgn(p->chan_in);
+        *p->pipe_done = TRUE;
+        _ckvmssts(sys$setef(pipe_ef));
+        return;
+    }
+
+    if (!err && !eof) {             /* good data to send to file */
+        p->buf[p->iosb.count] = '\n';
+        iss2 = write(p->fd_out, p->buf, p->iosb.count+1);
+        if (iss2 < 0) {
+            p->retry++;
+            if (p->retry < MAX_RETRY) {
+                _ckvmssts(sys$setimr(0,delaytime,pipe_mbxtofd_ast,p));
+                return;
+            }
+        }
+        p->retry = 0;
+    } else if (err) {
+        _ckvmssts(iss);
+    }
+
+
+    iss = sys$qio(0, p->chan_in, IO$_READVBLK|(p->shut_on_empty ? IO$M_NOW : 0), &p->iosb,
+          pipe_mbxtofd_ast, p,
+          p->buf, p->bufsize, 0, 0, 0, 0);
+    if (p->shut_on_empty && (iss == SS$_ENDOFFILE)) iss = SS$_NORMAL;
+    _ckvmssts(iss);
+}
+
+
+typedef struct _pipeloc     PLOC;
+typedef struct _pipeloc*   pPLOC;
+
+struct _pipeloc {
+    pPLOC   next;
+    char    dir[NAM$C_MAXRSS+1];
+};
+static pPLOC  head_PLOC = 0;
+
+
+static void
+store_pipelocs()
+{
+    int    i;
+    pPLOC  p;
+    AV    *av = GvAVn(PL_incgv);
+    SV    *dirsv;
+    GV    *gv;
+    char  *dir, *x;
+    char  *unixdir;
+    char  temp[NAM$C_MAXRSS+1];
+    STRLEN n_a;
+
+/*  the . directory from @INC comes last */
+
+    New(1370,p,1,PLOC);
+    p->next = head_PLOC;
+    head_PLOC = p;
+    strcpy(p->dir,"./");
+
+/*  get the directory from $^X */
+
+    if (PL_origargv && PL_origargv[0]) {    /* maybe nul if embedded Perl */
+        strcpy(temp, PL_origargv[0]);
+        x = strrchr(temp,']');
+        if (x) x[1] = '\0';
+
+        if ((unixdir = tounixpath(temp, Nullch)) != Nullch) {
+            New(1370,p,1,PLOC);
+            p->next = head_PLOC;
+            head_PLOC = p;
+            strncpy(p->dir,unixdir,sizeof(p->dir)-1);
+            p->dir[NAM$C_MAXRSS] = '\0';
+        }
+    }
+
+/*  reverse order of @INC entries, skip "." since entered above */
+
+    for (i = 0; i <= AvFILL(av); i++) {
+        dirsv = *av_fetch(av,i,TRUE);
+
+        if (SvROK(dirsv)) continue;
+        dir = SvPVx(dirsv,n_a);
+        if (strcmp(dir,".") == 0) continue;
+        if ((unixdir = tounixpath(dir, Nullch)) == Nullch)
+            continue;
+
+        New(1370,p,1,PLOC);
+        p->next = head_PLOC;
+        head_PLOC = p;
+        strncpy(p->dir,unixdir,sizeof(p->dir)-1);
+        p->dir[NAM$C_MAXRSS] = '\0';
+    }
+
+/* most likely spot (ARCHLIB) put first in the list */
+
+#ifdef ARCHLIB_EXP
+    if ((unixdir = tounixpath(ARCHLIB_EXP, Nullch)) != Nullch) {
+        New(1370,p,1,PLOC);
+        p->next = head_PLOC;
+        head_PLOC = p;
+        strncpy(p->dir,unixdir,sizeof(p->dir)-1);
+        p->dir[NAM$C_MAXRSS] = '\0';
+    }
+#endif
+
+}
+
+
+static char *
+find_vmspipe(void)
+{
+    static int   vmspipe_file_status = 0;
+    static char  vmspipe_file[NAM$C_MAXRSS+1];
+
+    /* already found? Check and use ... need read+execute permission */
+
+    if (vmspipe_file_status == 1) {
+        if (cando_by_name(S_IRUSR, 0, vmspipe_file)
+         && cando_by_name(S_IXUSR, 0, vmspipe_file)) {
+            return vmspipe_file;
+        }
+        vmspipe_file_status = 0;
+    }
+
+    /* scan through stored @INC, $^X */
+
+    if (vmspipe_file_status == 0) {
+        char file[NAM$C_MAXRSS+1];
+        pPLOC  p = head_PLOC;
+
+        while (p) {
+            strcpy(file, p->dir);
+            strncat(file, "vmspipe.com",NAM$C_MAXRSS);
+            file[NAM$C_MAXRSS] = '\0';
+            p = p->next;
+
+            if (!do_tovmsspec(file,vmspipe_file,0)) continue;
+
+            if (cando_by_name(S_IRUSR, 0, vmspipe_file)
+             && cando_by_name(S_IXUSR, 0, vmspipe_file)) {
+                vmspipe_file_status = 1;
+                return vmspipe_file;
+            }
+        }
+        vmspipe_file_status = -1;   /* failed, use tempfiles */
+    }
+
+    return 0;
+}
+
+static FILE *
+vmspipe_tempfile(void)
+{
+    char file[NAM$C_MAXRSS+1];
+    FILE *fp;
+    static int index = 0;
+    stat_t s0, s1;
+
+    /* create a tempfile */
+
+    /* we can't go from   W, shr=get to  R, shr=get without
+       an intermediate vulnerable state, so don't bother trying...
+
+       and lib$spawn doesn't shr=put, so have to close the write
+
+       So... match up the creation date/time and the FID to
+       make sure we're dealing with the same file
+
+    */
+
+    index++;
+    sprintf(file,"sys$scratch:perlpipe_%08.8x_%d.com",mypid,index);
+    fp = fopen(file,"w");
+    if (!fp) {
+        sprintf(file,"sys$login:perlpipe_%08.8x_%d.com",mypid,index);
+        fp = fopen(file,"w");
+        if (!fp) {
+            sprintf(file,"sys$disk:[]perlpipe_%08.8x_%d.com",mypid,index);
+            fp = fopen(file,"w");
+        }
+    }
+    if (!fp) return 0;  /* we're hosed */
+
+    fprintf(fp,"$! 'f$verify(0)\n");
+    fprintf(fp,"$!  ---  protect against nonstandard definitions ---\n");
+    fprintf(fp,"$ perl_cfile  = f$environment(\"procedure\")\n");
+    fprintf(fp,"$ perl_define = \"define/nolog\"\n");
+    fprintf(fp,"$ perl_on     = \"set noon\"\n");
+    fprintf(fp,"$ perl_exit   = \"exit\"\n");
+    fprintf(fp,"$ perl_del    = \"delete\"\n");
+    fprintf(fp,"$ pif         = \"if\"\n");
+    fprintf(fp,"$!  --- define i/o redirection (sys$output set by lib$spawn)\n");
+    fprintf(fp,"$ pif perl_popen_in  .nes. \"\" then perl_define sys$input  'perl_popen_in'\n");
+    fprintf(fp,"$ pif perl_popen_err .nes. \"\" then perl_define sys$error  'perl_popen_err'\n");
+    fprintf(fp,"$ cmd = perl_popen_cmd\n");
+    fprintf(fp,"$!  --- get rid of global symbols\n");
+    fprintf(fp,"$ perl_del/symbol/global perl_popen_in\n");
+    fprintf(fp,"$ perl_del/symbol/global perl_popen_err\n");
+    fprintf(fp,"$ perl_del/symbol/global perl_popen_cmd\n");
+    fprintf(fp,"$ perl_on\n");
+    fprintf(fp,"$ 'cmd\n");
+    fprintf(fp,"$ perl_status = $STATUS\n");
+    fprintf(fp,"$ perl_del 'perl_cfile'\n");
+    fprintf(fp,"$ perl_exit 'perl_status'\n");
+    fsync(fileno(fp));
+
+    fgetname(fp, file, 1);
+    fstat(fileno(fp), &s0);
+    fclose(fp);
+
+    fp = fopen(file,"r","shr=get");
+    if (!fp) return 0;
+    fstat(fileno(fp), &s1);
+
+    if (s0.st_ino[0] != s1.st_ino[0] ||
+        s0.st_ino[1] != s1.st_ino[1] ||
+        s0.st_ino[2] != s1.st_ino[2] ||
+        s0.st_ctime  != s1.st_ctime  )  {
+        fclose(fp);
+        return 0;
+    }
+
+    return fp;
+}
+
+
+
 static PerlIO *
 safe_popen(char *cmd, char *mode)
 {
-    static int handler_set_up = FALSE;
-    char mbxname[64];
-    unsigned short int chan;
-    unsigned long int sts, flags=1;  /* nowait - gnu c doesn't allow &1 */
     dTHX;
-    struct pipe_details *info;
-    struct dsc$descriptor_s namdsc = {sizeof mbxname, DSC$K_DTYPE_T,
-                                      DSC$K_CLASS_S, mbxname},
-                            cmddsc = {0, DSC$K_DTYPE_T,
+    static int handler_set_up = FALSE;
+    unsigned long int sts, flags=1;  /* nowait - gnu c doesn't allow &1 */
+    unsigned int table = LIB$K_CLI_GLOBAL_SYM;
+    char *p, symbol[MAX_DCL_SYMBOL+1], *vmspipe;
+    char in[512], out[512], err[512], mbx[512];
+    FILE *tpipe = 0;
+    char tfilebuf[NAM$C_MAXRSS+1];
+    pInfo info;
+    struct dsc$descriptor_s d_symbol= {0, DSC$K_DTYPE_T,
+                                      DSC$K_CLASS_S, symbol};
+    struct dsc$descriptor_s d_out = {0, DSC$K_DTYPE_T,
+                                      DSC$K_CLASS_S, out};
+    struct dsc$descriptor_s vmspipedsc = {0, DSC$K_DTYPE_T,
                                       DSC$K_CLASS_S, 0};
+    $DESCRIPTOR(d_sym_cmd,"PERL_POPEN_CMD");
+    $DESCRIPTOR(d_sym_in ,"PERL_POPEN_IN");
+    $DESCRIPTOR(d_sym_err,"PERL_POPEN_ERR");
                             
+    /* once-per-program initialization...
+       note that the SETAST calls and the dual test of pipe_ef
+       makes sure that only the FIRST thread through here does
+       the initialization...all other threads wait until it's
+       done.
+
+       Yeah, uglier than a pthread call, it's got all the stuff inline
+       rather than in a separate routine.
+    */
+
+    if (!pipe_ef) {
+        _ckvmssts(sys$setast(0));
+        if (!pipe_ef) {
+            unsigned long int pidcode = JPI$_PID;
+            $DESCRIPTOR(d_delay, RETRY_DELAY);
+            _ckvmssts(lib$get_ef(&pipe_ef));
+            _ckvmssts(lib$getjpi(&pidcode,0,0,&mypid,0,0));
+            _ckvmssts(sys$bintim(&d_delay, delaytime));
+        }
+        if (!handler_set_up) {
+          _ckvmssts(sys$dclexh(&pipe_exitblock));
+          handler_set_up = TRUE;
+        }
+        _ckvmssts(sys$setast(1));
+    }
+
+    /* see if we can find a VMSPIPE.COM */
+
+    tfilebuf[0] = '@';
+    vmspipe = find_vmspipe();
+    if (vmspipe) {
+        strcpy(tfilebuf+1,vmspipe);
+    } else {        /* uh, oh...we're in tempfile hell */
+        tpipe = vmspipe_tempfile();
+        if (!tpipe) {       /* a fish popular in Boston */
+            if (ckWARN(WARN_PIPE)) {
+                Perl_warner(aTHX_ WARN_PIPE,"unable to find VMSPIPE.COM for i/o piping");
+            }
+        return Nullfp;
+        }
+        fgetname(tpipe,tfilebuf+1,1);
+    }
+    vmspipedsc.dsc$a_pointer = tfilebuf;
+    vmspipedsc.dsc$w_length  = strlen(tfilebuf);
 
     if (!(setup_cmddsc(cmd,0) & 1)) { set_errno(EINVAL); return Nullfp; }
-    New(1301,info,1,struct pipe_details);
-
-    /* create mailbox */
-    create_mbx(&chan,&namdsc);
-
-    /* open a FILE* onto it */
-    info->fp = PerlIO_open(mbxname, mode);
-
-    /* give up other channel onto it */
-    _ckvmssts(sys$dassgn(chan));
-
-    if (!info->fp)
-        return Nullfp;
+    New(1301,info,1,Info);
         
     info->mode = *mode;
     info->done = FALSE;
-    info->completion=0;
+    info->completion = 0;
+    info->closing    = FALSE;
+    info->in         = 0;
+    info->out        = 0;
+    info->err        = 0;
+    info->in_done    = TRUE;
+    info->out_done   = TRUE;
+    info->err_done   = TRUE;
+
+    if (*mode == 'r') {             /* piping from subroutine */
+        in[0] = '\0';
+
+        info->out = pipe_infromchild_setup(mbx,out);
+        if (info->out) {
+            info->out->pipe_done = &info->out_done;
+            info->out_done = FALSE;
+            info->out->info = info;
+        }
+        info->fp  = PerlIO_open(mbx, mode);
+        if (!info->fp && info->out) {
+            sys$cancel(info->out->chan_out);
         
-    if (*mode == 'r') {
-      _ckvmssts(lib$spawn(&VMScmd, &nl_desc, &namdsc, &flags,
-                     0  /* name */, &info->pid, &info->completion,
-                     0, popen_completion_ast,info,0,0,0));
-    }
-    else {
-      _ckvmssts(lib$spawn(&VMScmd, &namdsc, 0 /* sys$output */, &flags,
-                     0  /* name */, &info->pid, &info->completion,
-                     0, popen_completion_ast,info,0,0,0));
+            while (!info->out_done) {
+                int done;
+                _ckvmssts(sys$setast(0));
+                done = info->out_done;
+                if (!done) _ckvmssts(sys$clref(pipe_ef));
+                _ckvmssts(sys$setast(1));
+                if (!done) _ckvmssts(sys$waitfr(pipe_ef));
     }
 
-    vms_execfree(aTHX);
-    if (!handler_set_up) {
-      _ckvmssts(sys$dclexh(&pipe_exitblock));
-      handler_set_up = TRUE;
+            if (info->out->buf) Safefree(info->out->buf);
+            Safefree(info->out);
+            Safefree(info);
+            return Nullfp;
     }
+
+        info->err = pipe_mbxtofd_setup(fileno(stderr), err);
+        if (info->err) {
+            info->err->pipe_done = &info->err_done;
+            info->err_done = FALSE;
+            info->err->info = info;
+        }
+
+    } else {                        /* piping to subroutine , mode=w*/
+        int melded;
+
+        info->in = pipe_tochild_setup(in,mbx);
+        info->fp  = PerlIO_open(mbx, mode);
+        if (info->in) {
+            info->in->pipe_done = &info->in_done;
+            info->in_done = FALSE;
+            info->in->info = info;
+        }
+
+        /* error cleanup */
+        if (!info->fp && info->in) {
+            info->done = TRUE;
+            _ckvmssts(sys$qiow(0,info->in->chan_in, IO$_WRITEOF, 0,
+                              0, 0, 0, 0, 0, 0, 0, 0));
+
+            while (!info->in_done) {
+                int done;
+                _ckvmssts(sys$setast(0));
+                done = info->in_done;
+                if (!done) _ckvmssts(sys$clref(pipe_ef));
+                _ckvmssts(sys$setast(1));
+                if (!done) _ckvmssts(sys$waitfr(pipe_ef));
+            }
+
+            if (info->in->buf) Safefree(info->in->buf);
+            Safefree(info->in);
+            Safefree(info);
+        return Nullfp;
+        }
+        
+        /* if SYS$ERROR == SYS$OUTPUT, use only one mbx */
+        
+        melded = FALSE;
+        fgetname(stderr, err);
+        if (strncmp(err,"SYS$ERROR:",10) == 0) {
+            fgetname(stdout, out);
+            if (strncmp(out,"SYS$OUTPUT:",11) == 0) {
+                if (popen_translate("SYS$OUTPUT",out) == popen_translate("SYS$ERROR",err)) {
+                    melded = TRUE;
+                }
+    }
+    }
+
+        info->out = pipe_mbxtofd_setup(fileno(stdout), out);
+        if (info->out) {
+            info->out->pipe_done = &info->out_done;
+            info->out_done = FALSE;
+            info->out->info = info;
+        }
+        if (!melded) {
+            info->err = pipe_mbxtofd_setup(fileno(stderr), err);
+            if (info->err) {
+                info->err->pipe_done = &info->err_done;
+                info->err_done = FALSE;
+                info->err->info = info;
+    }
+        } else {
+            err[0] = '\0';
+    }
+    }
+    d_out.dsc$w_length = strlen(out);   /* lib$spawn sets SYS$OUTPUT so can meld*/
+
+    symbol[MAX_DCL_SYMBOL] = '\0';
+
+    strncpy(symbol, in, MAX_DCL_SYMBOL);
+    d_symbol.dsc$w_length = strlen(symbol);
+    _ckvmssts(lib$set_symbol(&d_sym_in, &d_symbol, &table));
+
+    strncpy(symbol, err, MAX_DCL_SYMBOL);
+    d_symbol.dsc$w_length = strlen(symbol);
+    _ckvmssts(lib$set_symbol(&d_sym_err, &d_symbol, &table));
+
+
+    p = VMScmd.dsc$a_pointer;
+    while (*p && *p != '\n') p++;
+    *p = '\0';                                  /* truncate on \n */
+    p = VMScmd.dsc$a_pointer;
+    while (*p == ' ' || *p == '\t') p++;        /* remove leading whitespace */
+    if (*p == '$') p++;                         /* remove leading $ */
+    while (*p == ' ' || *p == '\t') p++;
+    strncpy(symbol, p, MAX_DCL_SYMBOL);
+    d_symbol.dsc$w_length = strlen(symbol);
+    _ckvmssts(lib$set_symbol(&d_sym_cmd, &d_symbol, &table));
+
+    _ckvmssts(sys$setast(0));
     info->next=open_pipes;  /* prepend to list */
     open_pipes=info;
+    _ckvmssts(sys$setast(1));
+    _ckvmssts(lib$spawn(&vmspipedsc, &nl_desc, &d_out, &flags,
+                      0, &info->pid, &info->completion,
+                      0, popen_completion_ast,info,0,0,0));
+
+    /* if we were using a tempfile, close it now */
+
+    if (tpipe) fclose(tpipe);
+
+    /* once the subprocess is spawned, its copied the symbols and
+       we can get rid of ours */
+
+    _ckvmssts(lib$delete_symbol(&d_sym_cmd, &table));
+    _ckvmssts(lib$delete_symbol(&d_sym_in,  &table));
+    _ckvmssts(lib$delete_symbol(&d_sym_err, &table));
+
+    vms_execfree(aTHX);
         
     PL_forkprocess = info->pid;
     return info->fp;
@@ -1195,9 +2095,10 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 /*{{{  I32 my_pclose(FILE *fp)*/
 I32 Perl_my_pclose(pTHX_ FILE *fp)
 {
-    struct pipe_details *info, *last = NULL;
+    dTHX;
+    pInfo info, last = NULL;
     unsigned long int retsts;
-    int need_eof;
+    int done, iss;
     
     for (info = open_pipes; info != NULL; last = info, info = info->next)
         if (info->fp == fp) break;
@@ -1210,21 +2111,67 @@ I32 Perl_my_pclose(pTHX_ FILE *fp)
 
     /* If we were writing to a subprocess, insure that someone reading from
      * the mailbox gets an EOF.  It looks like a simple fclose() doesn't
-     * produce an EOF record in the mailbox.  */
+     * produce an EOF record in the mailbox.
+     *
+     *  well, at least sometimes it *does*, so we have to watch out for
+     *  the first EOF closing the pipe (and DASSGN'ing the channel)...
+     */
+
+     fsync(fileno(info->fp));   /* first, flush data */
+
     _ckvmssts(sys$setast(0));
-    need_eof = info->mode != 'r' && !info->done;
+     info->closing = TRUE;
+     done = info->done && info->in_done && info->out_done && info->err_done;
+     /* hanging on write to Perl's input? cancel it */
+     if (info->mode == 'r' && info->out && !info->out_done) {
+        if (info->out->chan_out) {
+            _ckvmssts(sys$cancel(info->out->chan_out));
+            if (!info->out->chan_in) {   /* EOF generation, need AST */
+                _ckvmssts(sys$dclast(pipe_infromchild_ast,info->out,0));
+            }
+        }
+     }
+     if (info->in && !info->in_done && !info->in->shut_on_empty)  /* EOF if hasn't had one yet */
+         _ckvmssts(sys$qio(0,info->in->chan_in,IO$_WRITEOF,0,0,0,
+                           0, 0, 0, 0, 0, 0));
     _ckvmssts(sys$setast(1));
-    if (need_eof) pipe_eof(info->fp,0);
     PerlIO_close(info->fp);
 
-    if (info->done) retsts = info->completion;
-    else waitpid(info->pid,(int *) &retsts,0);
+     /*
+        we have to wait until subprocess completes, but ALSO wait until all
+        the i/o completes...otherwise we'll be freeing the "info" structure
+        that the i/o ASTs could still be using...
+     */
+
+     while (!done) {
+         _ckvmssts(sys$setast(0));
+         done = info->done && info->in_done && info->out_done && info->err_done;
+         if (!done) _ckvmssts(sys$clref(pipe_ef));
+         _ckvmssts(sys$setast(1));
+         if (!done) _ckvmssts(sys$waitfr(pipe_ef));
+     }
+     retsts = info->completion;
 
     /* remove from list of open pipes */
     _ckvmssts(sys$setast(0));
     if (last) last->next = info->next;
     else open_pipes = info->next;
     _ckvmssts(sys$setast(1));
+
+    /* free buffers and structures */
+
+    if (info->in) {
+        if (info->in->buf) Safefree(info->in->buf);
+        Safefree(info->in);
+    }
+    if (info->out) {
+        if (info->out->buf) Safefree(info->out->buf);
+        Safefree(info->out);
+    }
+    if (info->err) {
+        if (info->err->buf) Safefree(info->err->buf);
+        Safefree(info->err);
+    }
     Safefree(info);
 
     return retsts;
@@ -1236,7 +2183,8 @@ I32 Perl_my_pclose(pTHX_ FILE *fp)
 Pid_t
 my_waitpid(Pid_t pid, int *statusp, int flags)
 {
-    struct pipe_details *info;
+    pInfo info;
+    int done;
     dTHX;
     
     for (info = open_pipes; info != NULL; info = info->next)
@@ -1244,8 +2192,11 @@ my_waitpid(Pid_t pid, int *statusp, int flags)
 
     if (info != NULL) {  /* we know about this child */
       while (!info->done) {
-        waitpid_asleep = 1;
-        sys$hiber();
+          _ckvmssts(sys$setast(0));
+          done = info->done;
+          if (!done) _ckvmssts(sys$clref(pipe_ef));
+          _ckvmssts(sys$setast(1));
+          if (!done) _ckvmssts(sys$waitfr(pipe_ef));
       }
 
       *statusp = info->completion;
@@ -1268,6 +2219,7 @@ my_waitpid(Pid_t pid, int *statusp, int flags)
         _ckvmssts(sys$schdwk(0,0,interval,0));
         _ckvmssts(sys$hiber());
       }
+      if (sts == SS$_NONEXPR) sts = SS$_NORMAL;
       _ckvmssts(sts);
 
       /* There's no easy way to find the termination status a child we're
@@ -5337,6 +6289,8 @@ init_os_extras()
   newXSproto("VMS::Filespec::candelete",candelete_fromperl,file,"$");
   newXSproto("DynaLoader::mod2fname", mod2fname, file, "$");
   newXS("File::Copy::rmscopy",rmscopy_fromperl,file);
+
+  store_pipelocs();
 
   return;
 }
