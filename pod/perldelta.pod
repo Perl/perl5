@@ -851,6 +851,8 @@ instead of
    $c = $d unless defined $c;
 
 The operator will have the same precedence and associativity as C<||>.
+A source code patch against the Perl 5.8.1 sources will be available
+in CPAN as F<authors/id/H/HM/HMBRAND/dor-5.8.1.diff>.
 
 =item *
 
