@@ -896,8 +896,8 @@ do_sv_dump(I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bool dumpops,
 	    if (SvOOK(sv))
 		PerlIO_printf(file, "( %s . ) ", pv_display(d, SvPVX(sv)-SvIVX(sv), SvIVX(sv), 0, pvlim));
 	    PerlIO_printf(file, "%s\n", pv_display(d, SvPVX(sv), SvCUR(sv), SvLEN(sv), pvlim));
-	    dump_indent(level, file, "  CUR = 0\n", (long)SvCUR(sv));
-	    dump_indent(level, file, "  LEN = 0\n", (long)SvLEN(sv));
+	    dump_indent(level, file, "  CUR = %ld\n", (long)SvCUR(sv));
+	    dump_indent(level, file, "  LEN = %ld\n", (long)SvLEN(sv));
 	}
 	else
 	    dump_indent(level, file, "  PV = 0\n");
