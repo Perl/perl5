@@ -2035,9 +2035,15 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
 	right->op_type == OP_SUBST ||
 	right->op_type == OP_TRANS)) {
 	right->op_flags |= OPf_STACKED;
-	if (right->op_type != OP_MATCH &&
-            ! (right->op_type == OP_TRANS &&
-               right->op_private & OPpTRANS_IDENTICAL))
+	if ((right->op_type != OP_MATCH &&
+	     ! (right->op_type == OP_TRANS &&
+		right->op_private & OPpTRANS_IDENTICAL)) ||
+	    /* if SV has magic, then match on original SV, not on its copy.
+	       see note in pp_helem() */
+	    (right->op_type == OP_MATCH &&	
+	     (left->op_type == OP_AELEM ||
+	      left->op_type == OP_HELEM ||
+	      left->op_type == OP_AELEMFAST)))
 	    left = mod(left, right->op_type);
 	if (right->op_type == OP_TRANS)
 	    o = newBINOP(OP_NULL, OPf_STACKED, scalar(left), right);

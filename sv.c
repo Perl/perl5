@@ -4415,9 +4415,9 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
     mg->mg_moremagic = SvMAGIC(sv);
     SvMAGIC(sv) = mg;
 
-    /* Some magic sontains a reference loop, where the sv and object refer to
-       each other.  To prevent a avoid a reference loop that would prevent such
-       objects being freed, we look for such loops and if we find one we avoid
+    /* Some magic contains a reference loop, where the sv and object refer to
+       each other.  To avoid a reference loop that would prevent such objects
+       being freed, we look for such loops and if we find one we avoid
        incrementing the object refcount. */
     if (!obj || obj == sv ||
 	how == PERL_MAGIC_arylen ||
