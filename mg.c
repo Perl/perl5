@@ -600,7 +600,7 @@ magic_setenv(SV *sv, MAGIC *mg)
     }
 #endif
 
-#if !defined(OS2) && !defined(AMIGAOS) && !defined(WIN32)
+#if !defined(OS2) && !defined(AMIGAOS) && !defined(WIN32) && !defined(MSDOS)
 			    /* And you'll never guess what the dog had */
 			    /*   in its mouth... */
     if (tainting) {
@@ -649,7 +649,7 @@ magic_setenv(SV *sv, MAGIC *mg)
 	    }
 	}
     }
-#endif /* neither OS2 nor AMIGAOS nor WIN32 */
+#endif /* neither OS2 nor AMIGAOS nor WIN32 nor MSDOS */
 
     return 0;
 }

@@ -3526,7 +3526,7 @@ is_an_int(char *s, STRLEN l)
 }
 
 static int
-div128(SV *pnum, char *done)
+div128(SV *pnum, bool *done)
                           		    /* must be '\0' terminated */
                           
 {
@@ -4315,8 +4315,8 @@ PP(pp_threadsv)
 	PUSHs(*save_threadsv(op->op_targ));
     else
 	PUSHs(*av_fetch(thr->threadsv, op->op_targ, FALSE));
+    RETURN;
 #else
     DIE("tried to access per-thread data in non-threaded perl");
 #endif /* USE_THREADS */
-    RETURN;
 }

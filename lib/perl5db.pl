@@ -290,7 +290,7 @@ if ($notty) {
 
   if (-e "/dev/tty") {
     $console = "/dev/tty";
-  } elsif (-e "con" or $^O eq 'MSWin32') {
+  } elsif ($^O eq 'dos' or -e "con" or $^O eq 'MSWin32') {
     $console = "con";
   } else {
     $console = "sys\$command";

@@ -74,7 +74,7 @@ OBJVAL = $(MMS$TARGET_NAME)$(O)
 .endif
 
 # Updated by fndvers.com -- do not edit by hand
-PERL_VERSION = 5_004  #
+PERL_VERSION = 5_00454#
 
 .ifdef DECC_SOCKETS
 SOCKET=1
@@ -130,7 +130,7 @@ POSIX =
 .else
 XTRAOBJS = 
 LIBS1 = $(XTRAOBJS)
-DBGSPECFLAGS = /Show=(Source,Include,Expansion)
+DBGSPECFLAGS = /Show=All
 .ifdef decc
 # Some versions of DECCRTL on AXP have a bug in chdir() which causes the change
 # to persist after the image exits, even when this was not requested, iff
@@ -370,10 +370,9 @@ archcorefiles :  $(ac1) $(ac2) $(ac3) $(ac4) $(ac5) $(ac6) $(ac7) $(ac8) $(ac9) 
 
 miniperl : $(DBG)miniperl$(E)
 	@ Continue
-miniperl_objs = miniperlmain$(O), $(obj)
 $(MINIPERL_EXE) :  miniperlmain$(O), $(DBG)libperl$(OLB) $(CRTL)
 	Link $(LINKFLAGS)/NoDebug/NoMap/NoFull/NoCross/Exe=$(MMS$TARGET) miniperlmain$(O), $(DBG)libperl$(OLB)/Library/Include=globals $(CRTLOPTS)
-$(DBG)miniperl$(E) :  $(miniperl_objs), $(DBG)libperl$(OLB) $(CRTL)
+$(DBG)miniperl$(E) :  miniperlmain$(O), $(DBG)libperl$(OLB) $(CRTL)
 	Link $(LINKFLAGS)/Exe=$(MMS$TARGET) miniperlmain$(O),$(DBG)libperl$(OLB)/Library/Include=globals  $(CRTLOPTS)
 
 $(DBG)libperl$(OLB) : $(obj)

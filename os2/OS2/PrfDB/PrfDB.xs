@@ -22,7 +22,7 @@ Prf_Get(HINI hini, PSZ app, PSZ key) {
 
     if (CheckWinError(PrfQueryProfileSize(hini, app, key, &len))) return &sv_undef;
     sv = newSVpv("", 0);
-    SvGROW(sv, len);
+    SvGROW(sv, len + 1);
     if (CheckWinError(PrfQueryProfileData(hini, app, key, SvPVX(sv), &len))
 	|| (len == 0 && (app == NULL || key == NULL))) { /* Somewhy needed. */
 	SvREFCNT_dec(sv);

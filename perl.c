@@ -897,7 +897,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     boot_core_UNIVERSAL();
     if (xsinit)
 	(*xsinit)();	/* in case linked C routines want magical variables */
-#if defined(VMS) || defined(WIN32)
+#if defined(VMS) || defined(WIN32) || defined(DJGPP)
     init_os_extras();
 #endif
 
@@ -913,6 +913,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 
     /* now parse the script */
 
+    SETERRNO(0,SS$_NORMAL);
     error_count = 0;
     if (yyparse() || error_count) {
 	if (minus_c)
@@ -1661,6 +1662,7 @@ moreswitches(char *s)
 #endif
 #ifdef DJGPP
 	printf("djgpp v2 port (jpl5003c) by Hirofumi Watanabe, 1996\n");
+	printf("djgpp v2 port (perl5004) by Laszlo Molnar, 1997\n");
 #endif
 #ifdef OS2
 	printf("\n\nOS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"
@@ -1822,7 +1824,7 @@ SV *sv;
      *
      * Assuming SEARCH_EXTS is C<".foo",".bar",NULL>, PATH search
      * proceeds as follows:
-     *   If DOSISH:
+     *   If DOSISH or VMSISH:
      *     + look for ./scriptname{,.foo,.bar}
      *     + search the PATH for scriptname{,.foo,.bar}
      *
@@ -1832,11 +1834,20 @@ SV *sv;
      */
 
 #ifdef VMS
+#  ifdef ALWAYS_DEFTYPES
+    len = strlen(scriptname);
+    if (!(len == 1 && *scriptname == '-') && scriptname[len-1] != ':') {
+	int hasdir, idx = 0, deftypes = 1;
+	bool seen_dot = 1;
+
+	hasdir = !dosearch || (strpbrk(scriptname,":[</") != Nullch) ;
+#  else
     if (dosearch) {
 	int hasdir, idx = 0, deftypes = 1;
 	bool seen_dot = 1;
 
 	hasdir = (strpbrk(scriptname,":[</") != Nullch) ;
+#  endif
 	/* The first time through, just add SEARCH_EXTS to whatever we
 	 * already have, so we can check for default file types. */
 	while (deftypes ||
@@ -2599,7 +2610,7 @@ init_postdump_symbols(register int argc, register char **argv, register char **e
 	    if (!(s = strchr(*env,'=')))
 		continue;
 	    *s++ = '\0';
-#ifdef WIN32
+#if defined(WIN32) || defined(MSDOS)
 	    (void)strupr(*env);
 #endif
 	    sv = newSVpv(s--,0);

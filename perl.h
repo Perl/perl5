@@ -75,7 +75,7 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 
 #define NOOP (void)0
 
-#define WITH_THR(s) do { dTHR; s; } while (0)
+#define WITH_THR(s) STMT_START { dTHR; s; } STMT_END
 
 /*
  * SOFT_CAST can be used for args to prototyped functions to retain some
@@ -113,7 +113,7 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 # define STANDARD_C 1
 #endif
 
-#if defined(__cplusplus) || defined(WIN32) || defined(__sgi)
+#if defined(__cplusplus) || defined(WIN32) || defined(__sgi) || defined(OS2)
 # define DONT_DECLARE_STD 1
 #endif
 
@@ -965,8 +965,8 @@ typedef I32 (*filter_t) _((int, SV *, int));
 #endif         
 
 /* 
- * USE_THREADS needs to be after unixish.h as <pthread.h> includes <sys/signal.h>
- * which defines NSIG - which will stop inclusion of <signal.h>
+ * USE_THREADS needs to be after unixish.h as <pthread.h> includes
+ * <sys/signal.h> which defines NSIG - which will stop inclusion of <signal.h>
  * this results in many functions being undeclared which bothers C++
  * May make sense to have threads after "*ish.h" anyway
  */
@@ -978,11 +978,15 @@ typedef I32 (*filter_t) _((int, SV *, int));
 #    ifdef WIN32
 #      include <win32thread.h>
 #    else
-#      include <pthread.h>
+#      ifdef OS2
+#        include "os2thread.h"
+#      else
+#        include <pthread.h>
 typedef pthread_t perl_os_thread;
 typedef pthread_mutex_t perl_mutex;
 typedef pthread_cond_t perl_cond;
 typedef pthread_key_t perl_key;
+#      endif /* OS2 */
 #    endif /* WIN32 */
 #  endif /* FAKE_THREADS */
 #endif /* USE_THREADS */

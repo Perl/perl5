@@ -111,7 +111,7 @@ $| = 1;
 
 @ARGV = grep($_,@ARGV);  # remove empty elements due to "''p1'" syntax
 
-if ($ARGV[0] eq '-v') {
+if (lc($ARGV[0]) eq '-v') {
     $verbose = 1;
     shift;
 }

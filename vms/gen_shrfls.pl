@@ -39,7 +39,7 @@ require 5.000;
 
 $debug = $ENV{'GEN_SHRFLS_DEBUG'};
 
-print "gen_shrfls.pl Rev. 14-Dec-1996\n" if $debug;
+print "gen_shrfls.pl Rev. 03-Nov-1997\n" if $debug;
 
 if ($ARGV[0] eq '-f') {
   open(INP,$ARGV[1]) or die "Can't read input file $ARGV[1]: $!\n";
@@ -150,7 +150,7 @@ sub scan_var {
   $line =~ s/\[.*//;
   $line =~ s/=.*//;
   $line =~ s/\W*;?\s*$//;
-  $line =~ s/\(void//;
+  $line =~ s/\W*\)\s*\(.*$//; # closing paren for args stripped in previous stmt
   print "\tfiltered to \\$line\\\n" if $debug > 1;
   if ($line =~ /(\w+)$/) {
     print "\tvar name is \\$1\\" . ($const ? ' (const)' : '') . "\n" if $debug > 1;
@@ -214,6 +214,12 @@ LINE: while (<CPP>) {
   while (/^typedef enum/ .. /^\}/) {
     print "global enum>> $_" if $debug > 2;
     &scan_enum($_);
+    last LINE unless $_ = <CPP>;
+  }
+  while (/^#.*thread\.h/i .. /^#.*perl\.h/i) {
+    print "thread.h>> $_" if $debug > 2;
+    if (/\s*^EXT/) { &scan_var($_);  }
+    else        { &scan_func($_); }
     last LINE unless $_ = <CPP>;
   }
   while (/^#.*proto\.h/i .. /^#.*perl\.h/i) {
@@ -373,7 +379,7 @@ if ($ENV{PERLSHR_USE_GSMATCH}) {
   my $minor = int(($] * 1000 - $major) * 100 + 0.5) & 0xFF;  # range 0..255
   print OPTBLD "GSMATCH=LEQUAL,$major,$minor\n";
   foreach (@symfiles) {
-    print OPTBLD "CLUSTER=\$\$TRANSFER_VECTOR,,,$_.$objsuffix\n";
+    print OPTBLD "CLUSTER=\$\$TRANSFER_VECTOR,,,$_$objsuffix\n";
   }
 }
 elsif (@symfiles) { $incstr .= ',' . join(',',@symfiles); }

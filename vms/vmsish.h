@@ -77,6 +77,12 @@
 #endif
 #define waitpid my_waitpid
 
+/* Don't redeclare standard RTL routines in Perl's header files;
+ * VMS history or extensions makes some of the formal protoypes
+ * differ from the common Unix forms.
+ */
+#define DONT_DECLARE_STD 1
+
 /* Our own contribution to PerlShr's global symbols . . . */
 #ifdef EMBED
 #  define my_trnlnm		Perl_my_trnlnm
@@ -111,7 +117,6 @@
 #  define seekdir		Perl_seekdir
 #  define closedir		Perl_closedir
 #  define vmsreaddirversions	Perl_vmsreaddirversions
-#if __VMS_VER < 70000000 || __DECC_VER < 50200000
 #  define my_gmtime		Perl_my_gmtime
 #  define my_localtime		Perl_my_localtime
 #  define my_time		Perl_my_time
@@ -121,7 +126,6 @@
 #  define my_sigdelset          Perl_my_sigdelset
 #  define my_sigismember        Perl_my_sigismember
 #  define my_sigprocmask        Perl_my_sigprocmask
-#endif
 #  define cando_by_name		Perl_cando_by_name
 #  define flex_fstat		Perl_flex_fstat
 #  define flex_stat		Perl_flex_stat
@@ -284,6 +288,30 @@
  */
 #define USEMYBINMODE
 
+/* Stat_t:
+ *	This symbol holds the type used to declare buffers for information
+ *	returned by stat().  It's usually just struct stat.  It may be necessary
+ *	to include <sys/stat.h> and <sys/types.h> to get any typedef'ed
+ *	information.
+ */
+/* VMS:
+ * We need this typedef to point to the new type even if DONT_MASK_RTL_CALLS
+ * is in effect, since Perl's thread.h embeds one of these structs in its
+ * thread data struct, and our struct mystat is a different size from the
+ * regular struct stat (cf. note above about having to pad struct to work
+ * around bug in compiler.)
+ * It's OK to pass one of these to the RTL's stat(), though, since the
+ * fields it fills are the same in each struct.
+ */
+#define Stat_t struct mystat
+
+/* USE_STAT_RDEV:
+*	This symbol is defined if this system has a stat structure declaring
+*	st_rdev
+*	VMS: Field exists in POSIXish version of struct stat(), but is not used.
+*/
+#undef USE_STAT_RDEV		/**/
+
 /*
  * fwrite1() should be a routine with the same calling sequence as fwrite(),
  * but which outputs all of the bytes requested as a single stream (unlike
@@ -332,39 +360,44 @@ struct utimbuf {
 #  define tbuffer_t struct tms
 #endif
 
-/* Prior to VMS 7.0, the CRTL gmtime() routine was a stub which always
- * returned NULL.  Substitute our own routine, which uses the logical
- * SYS$TIMEZONE_DIFFERENTIAL, whcih the native UTC support routines
- * in VMS 6.0 or later use.  We also add shims for time() and localtime()
- * so we can run on UTC by default.
+/* Substitute our own routines for gmtime(), localtime(), and time(),
+ * which allow us to implement the vmsish 'time' pragma, and work
+ * around absence of system-level UTC support on old versions of VMS.
  */
-#if __VMS_VER < 70000000 || __DECC_VER < 50200000
 #define gmtime(t) my_gmtime(t)
 #define localtime(t) my_localtime(t)
 #define time(t) my_time(t)
-#define sigemptyset(t) my_sigemptyset(t)
-#define sigfillset(t) my_sigfillset(t)
-#define sigaddset(t, u) my_sigaddset(t, u)
-#define sigdelset(t, u) my_sigdelset(t, u)
-#define sigismember(t, u) my_sigismember(t, u)
-#define sigprocmask(t, u, v) my_sigprocmask(t, u, v)
-typedef int sigset_t;
-/* The tools for sigprocmask() are there, just not the routine itself */
-#    ifndef SIG_UNBLOCK
-#      define SIG_UNBLOCK 1
-#    endif
-#    ifndef SIG_BLOCK
-#      define SIG_BLOCK 2
-#    endif
-#    ifndef SIG_SETMASK
-#      define SIG_SETMASK 3
-#    endif
-#    define sigaction sigvec
-#    define sa_flags sv_onstack
-#    define sa_handler sv_handler
-#    define sa_mask sv_mask
-#    define sigsuspend(set) sigpause(*set)
-#    define sigpending(a) (not_here("sigpending"),0)
+
+/* If we're using an older version of VMS whose Unix signal emulation
+ * isn't very POSIXish, then roll our own.
+ */
+#if __VMS_VER < 70000000 || __DECC_VER < 50200000
+#  define HOMEGROWN_POSIX_SIGNALS
+#endif
+#ifdef HOMEGROWN_POSIX_SIGNALS
+#  define sigemptyset(t) my_sigemptyset(t)
+#  define sigfillset(t) my_sigfillset(t)
+#  define sigaddset(t, u) my_sigaddset(t, u)
+#  define sigdelset(t, u) my_sigdelset(t, u)
+#  define sigismember(t, u) my_sigismember(t, u)
+#  define sigprocmask(t, u, v) my_sigprocmask(t, u, v)
+   typedef int sigset_t;
+   /* The tools for sigprocmask() are there, just not the routine itself */
+#  ifndef SIG_UNBLOCK
+#    define SIG_UNBLOCK 1
+#  endif
+#  ifndef SIG_BLOCK
+#    define SIG_BLOCK 2
+#  endif
+#  ifndef SIG_SETMASK
+#    define SIG_SETMASK 3
+#  endif
+#  define sigaction sigvec
+#  define sa_flags sv_onstack
+#  define sa_handler sv_handler
+#  define sa_mask sv_mask
+#  define sigsuspend(set) sigpause(*set)
+#  define sigpending(a) (not_here("sigpending"),0)
 #endif
 
 /* VMS doesn't use a real sys_nerr, but we need this when scanning for error
@@ -480,6 +513,13 @@ struct mystat
         char	st_fab_rat;	/* record attributes */
         char	st_fab_fsz;	/* fixed header size */
         unsigned st_dev;	/* encoded device name */
+        /* Pad struct out to integral number of longwords, since DECC 5.6/VAX
+         * has a bug in dealing with offsets in structs in which are embedded
+         * other structs whose size is an odd number of bytes.  (An even
+         * number of bytes is enough to make it happy, but we go for natural
+         * alignment anyhow.)
+         */
+        char	st_fill1[sizeof(void *) - (3*sizeof(unsigned short) + 3*sizeof(char))%sizeof(void *)];
 };
 typedef unsigned mydev_t;
 typedef unsigned myino_t;
@@ -565,14 +605,10 @@ long	telldir _((DIR *));
 void	seekdir _((DIR *, long));
 void	closedir _((DIR *));
 void	vmsreaddirversions _((DIR *, int));
-#ifdef my_gmtime
 struct tm *	my_gmtime _((const time_t *));
 struct tm *	my_localtime _((const time_t *));
 time_t	my_time _((time_t *));
-#endif /* We're assuming these three come as a package */
-/* We're just gonna assume that if we've got an antique here that we */
-/* need the signal functions */
-#if __VMS_VER < 70000000 || __DECC_VER < 50200000
+#ifdef HOMEGROWN_POSIX_SIGNALS
 int     my_sigemptyset _((sigset_t *));
 int     my_sigfillset  _((sigset_t *));
 int     my_sigaddset   _((sigset_t *, int));
@@ -581,13 +617,13 @@ int     my_sigismember _((sigset_t *, int));
 int     my_sigprocmask _((int, sigset_t *, sigset_t *));
 #endif
 I32	cando_by_name _((I32, I32, char *));
-int	flex_fstat _((int, struct mystat *));
-int	flex_stat _((char *, struct mystat *));
+int	flex_fstat _((int, Stat_t *));
+int	flex_stat _((char *, Stat_t *));
 int	trim_unixpath _((char *, char*, int));
 int	my_vfork _(());
 bool	vms_do_aexec _((SV *, SV **, SV **));
 bool	vms_do_exec _((char *));
-unsigned long int	do_aspawn _((SV *, SV **, SV **));
+unsigned long int	do_aspawn _((void *, void **, void **));
 unsigned long int	do_spawn _((char *));
 int	my_fwrite _((void *, size_t, size_t, FILE *));
 int	my_flush _((FILE *));

@@ -37,6 +37,12 @@ umask 022;
 @pods = (<pod/*.pod>);
 
 %archpms = (Config => 1, FileHandle => 1, overload => 1);
+
+if ($^O eq 'dos') {
+    push(@scripts,'djgpp/fixpmain');
+    $archpms{config} = $archpms{filehand} = 1;
+}
+
 find(sub {
 	if ("$File::Find::dir/$_" =~ m{^ext/[^/]+/(.*)\.pm$}) {
 	    (my $pm = $1) =~ s{^lib/}{};
@@ -97,9 +103,14 @@ chmod(0755, "$installbin/perl.$dlext");
 
 # First we install the version-numbered executables.
 
-safe_unlink("$installbin/perl$ver$exe_ext");
-copy("perl$exe_ext", "$installbin/perl$ver$exe_ext");
-chmod(0755, "$installbin/perl$ver$exe_ext");
+if ($^O ne 'dos') {
+    safe_unlink("$installbin/perl$ver$exe_ext");
+    copy("perl$exe_ext", "$installbin/perl$ver$exe_ext");
+    chmod(0755, "$installbin/perl$ver$exe_ext");
+} else {
+    safe_unlink("$installbin/perl.exe");
+    copy("perl.exe", "$installbin/perl.exe");
+}
 
 safe_unlink("$installbin/sperl$ver$exe_ext");
 if ($d_dosuid) {
@@ -182,7 +193,7 @@ if (!$versiononly && !$nonono && -t STDIN && -t STDERR
 
 # Make links to ordinary names if installbin directory isn't current directory.
 
-if (! $versiononly && ! samepath($installbin, '.')) {
+if (! $versiononly && ! samepath($installbin, '.') && ($^O ne 'dos')) {
     safe_unlink("$installbin/perl$exe_ext", "$installbin/suidperl$exe_ext");
     link("$installbin/perl$ver$exe_ext", "$installbin/perl$exe_ext");
     link("$installbin/sperl$ver$exe_ext", "$installbin/suidperl$exe_ext") 
@@ -221,7 +232,11 @@ if (! $versiononly) {
 
 if (! $versiononly) {
     safe_unlink("$installscript/pstruct");
-    link("$installscript/c2ph","$installscript/pstruct");
+    if ($^O eq 'dos') {
+        copy("$installscript/c2ph","$installscript/pstruct"); 
+    } else {
+        link("$installscript/c2ph","$installscript/pstruct");
+    }
 }
 
 # Install pod pages.  Where? I guess in $installprivlib/pod.
@@ -255,7 +270,7 @@ if (! $versiononly || !($installprivlib =~ m/\Q$]/)) {
     if (compare($from, $to) || $nonono) {
 	mkpath("${installarchlib}/pod", 1, 0777);
 	unlink($to);
-	link($from, $to);
+	link($from, $to) if ($^O ne 'dos');
     }
 }
 
@@ -377,6 +392,7 @@ sub link {
 sub chmod {
     local($mode,$name) = @_;
 
+    return if ($^O eq 'dos');
     printf STDERR "  chmod %o %s\n", $mode, $name;
     CORE::chmod($mode,$name)
 	|| warn sprintf("Couldn't chmod %o %s: $!\n", $mode, $name)
