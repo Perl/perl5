@@ -249,7 +249,6 @@ struct regnode_charclass_class {
 
 #define ANYOF_CLASS_ZERO(ret)	Zero(((struct regnode_charclass_class*)(ret))->classflags, ANYOF_CLASSBITMAP_SIZE, char)
 #define ANYOF_BITMAP_ZERO(ret)	Zero(((struct regnode_charclass*)(ret))->bitmap, ANYOF_BITMAP_SIZE, char)
-#define ANYOF_BITMAP_SETALL(p)  (memset(ANYOF_BITMAP(p), 0xff, ANYOF_BITMAP_SIZE))
 
 #define ANYOF_BITMAP(p)		(((struct regnode_charclass*)(p))->bitmap)
 #define ANYOF_BITMAP_BYTE(p, c)	(ANYOF_BITMAP(p)[((c) >> 3) & 31])
