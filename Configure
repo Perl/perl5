@@ -4691,7 +4691,7 @@ if "$useshrplib"; then
 		xxx="-R $shrpdir"
 		;;
 	freebsd)
-		xxx="-Wl,-R,$shrpdir"
+		xxx="-Wl,-R$shrpdir"
 		;;
 	linux|irix*)
 		xxx="-Wl,-rpath,$shrpdir"
