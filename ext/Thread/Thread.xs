@@ -31,6 +31,7 @@ remove_thread(pTHX_ struct perl_thread *t)
     PL_nthreads--;
     t->prev->next = t->next;
     t->next->prev = t->prev;
+    SvREFCNT_dec(t->oursv);
     COND_BROADCAST(&PL_nthreads_cond);
     MUTEX_UNLOCK(&PL_threads_mutex);
 #endif
@@ -136,7 +137,8 @@ threadstart(void *arg)
 	av_store(av, 1, newSVsv(thr->errsv));
 	DEBUG_S(PerlIO_printf(Perl_debug_log, "%p died: %s\n",
 			      thr, SvPV(thr->errsv, PL_na)));
-    } else {
+    }
+    else {
 	DEBUG_S(STMT_START {
 	    for (i = 1; i <= retval; i++) {
 		PerlIO_printf(Perl_debug_log, "%p return[%d] = %s\n",
@@ -298,7 +300,6 @@ newthread (pTHX_ SV *startsv, AV *initargs, char *classname)
 	/* Thread creation failed--clean up */
 	SvREFCNT_dec(thr->cvcache);
 	remove_thread(aTHX_ thr);
-	MUTEX_DESTROY(&thr->mutex);
 	for (i = 0; i <= AvFILL(initargs); i++)
 	    SvREFCNT_dec(*av_fetch(initargs, i, FALSE));
 	SvREFCNT_dec(startsv);
@@ -385,11 +386,14 @@ join(t)
 	}
 	JOIN(t, &av);
 
+	sv_2mortal((SV*)av);
+
 	if (SvTRUE(*av_fetch(av, 0, FALSE))) {
 	    /* Could easily speed up the following if necessary */
 	    for (i = 1; i <= AvFILL(av); i++)
-		XPUSHs(sv_2mortal(*av_fetch(av, i, FALSE)));
-	} else {
+		XPUSHs(*av_fetch(av, i, FALSE));
+	}
+	else {
 	    STRLEN n_a;
 	    char *mess = SvPV(*av_fetch(av, 1, FALSE), n_a);
 	    DEBUG_S(PerlIO_printf(Perl_debug_log,

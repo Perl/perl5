@@ -77,8 +77,8 @@ of that container are not locked. For example, if a thread does a C<lock
 
 You may also C<lock> a sub, using C<lock &sub>. Any calls to that sub from
 another thread will block until the lock is released. This behaviour is not
-equvalent to C<use attrs qw(locked)> in the sub. C<use attrs qw(locked)>
-serializes access to a subroutine, but allows different threads
+equivalent to declaring the sub with the C<locked> attribute.  The C<locked>
+attribute serializes access to a subroutine, but allows different threads
 non-simultaneous access. C<lock &sub>, on the other hand, will not allow
 I<any> other thread access for the duration of the lock.
 
@@ -185,7 +185,7 @@ duplicate tids. This limitation may be lifted in a future version of Perl.
 
 =head1 SEE ALSO
 
-L<attrs>, L<Thread::Queue>, L<Thread::Semaphore>, L<Thread::Specific>.
+L<attributes>, L<Thread::Queue>, L<Thread::Semaphore>, L<Thread::Specific>.
 
 =cut
 
