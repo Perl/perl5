@@ -57,6 +57,8 @@ print $i == 2 ? "ok 7\n" : "not ok 7\n";
 
 # Create a file called "0"
 print open(F, ">0") ? "ok 8\n" : "not ok 8 # $!\n";
+close F;
+
 my $ok = "not ok 9\n";
 $ok = "ok 9\n" while my $var = glob("0");
 print $ok;
