@@ -34,6 +34,103 @@ Version v5.6.2
 --------------
 
 ____________________________________________________________________________
+[ 21459] By: rgs                                   on 2003/10/15  19:52:18
+        Log: Upgrade to File::Temp 0.14
+     Branch: maint-5.6
+	   + perl-5.6.2/lib/File/Temp/t/mktemp.t
+	   + perl-5.6.2/lib/File/Temp/t/object.t
+	   + perl-5.6.2/lib/File/Temp/t/posix.t
+	   + perl-5.6.2/lib/File/Temp/t/security.t
+	   + perl-5.6.2/lib/File/Temp/t/tempfile.t
+	   - perl-5.6.2/t/lib/ftmp-mktemp.t perl-5.6.2/t/lib/ftmp-posix.t
+	   - perl-5.6.2/t/lib/ftmp-security.t
+	   - perl-5.6.2/t/lib/ftmp-tempfile.t
+	   ! perl-5.6.2/MANIFEST perl-5.6.2/lib/File/Temp.pm
+____________________________________________________________________________
+[ 21458] By: rgs                                   on 2003/10/15  19:39:02
+        Log: Update perlhist.pod from bleadperl.
+     Branch: maint-5.6
+	   ! perl-5.6.2/pod/perlhist.pod
+____________________________________________________________________________
+[ 21457] By: rgs                                   on 2003/10/15  19:26:41
+        Log: Grab the newest perlfaq.
+             It's assumed that the perlfaqs must not be version-dependent.
+     Branch: maint-5.6
+	   ! perl-5.6.2/pod/perlfaq.pod perl-5.6.2/pod/perlfaq1.pod
+	   ! perl-5.6.2/pod/perlfaq2.pod perl-5.6.2/pod/perlfaq3.pod
+	   ! perl-5.6.2/pod/perlfaq4.pod perl-5.6.2/pod/perlfaq5.pod
+	   ! perl-5.6.2/pod/perlfaq6.pod perl-5.6.2/pod/perlfaq7.pod
+	   ! perl-5.6.2/pod/perlfaq8.pod perl-5.6.2/pod/perlfaq9.pod
+____________________________________________________________________________
+[ 21455] By: rgs                                   on 2003/10/15  19:12:14
+        Log: Sync the configure hints files with bleadperl.
+     Branch: maint-5.6
+	   ! perl-5.6.2/hints/aix.sh perl-5.6.2/hints/darwin.sh
+	   ! perl-5.6.2/hints/freebsd.sh perl-5.6.2/hints/linux.sh
+	   ! perl-5.6.2/hints/powerux.sh perl-5.6.2/hints/solaris_2.sh
+	   ! perl-5.6.2/hints/svr4.sh
+____________________________________________________________________________
+[ 21444] By: rgs                                   on 2003/10/13  20:28:05
+        Log: Integrate changes 11565 and part of 19384, also
+             from Abe.
+             
+             Subject: Re: [ID 20010731.105] MinGW can't compile win32.c on Windows 20$00
+             From: John Kristian <jmk2001@engineer.com>
+             Date: Fri, 03 Aug 2001 00:59:08 -0700
+             Message-id: <03a101c11bf2$2c9b5ee0$0100a8c0@JOHNKRISTIAN>
+             
+             Subject: [PATCH win32/win32.c] silence compiler warnings
+             From: Abe Timmerman <abe@ztreet.demon.nl>
+             Date: Fri, 2 May 2003 00:51:42 +0200
+             Message-Id: <200305020051.43166.abe@ztreet.demon.nl>
+     Branch: maint-5.6
+	   ! perl-5.6.2/win32/win32.c
+____________________________________________________________________________
+[ 21443] By: rgs                                   on 2003/10/13  20:20:11
+        Log: Integrate change 18046, as suggested by Abe Timmerman :
+             
+             Subject: Re: Smoke 18027 FAIL(F) MSWin32 5.0 Win2000Pro (MSWin32-x86)
+             From: Alain Barbet <alian@alianwebserver.com>
+             Date: Fri, 18 Oct 2002 15:29:29 +0200
+             Message-ID: <3DB00CB9.70708@alianwebserver.com>
+     Branch: maint-5.6
+	   ! perl-5.6.2/win32/makefile.mk
+	  !> perl-5.6.2/README.win32 perl-5.6.2/win32/win32.c
+____________________________________________________________________________
+[ 21434] By: rgs                                   on 2003/10/10  06:20:20
+        Log: Integrate changes 17322, 8309 and part of 10534,
+             as suggested by Stas Bakman, to suppress compilation
+             warnings in XS and in mod_perl.
+     Branch: maint-5.6
+	   ! perl-5.6.2/lib/ExtUtils/xsubpp perl-5.6.2/perl.h
+____________________________________________________________________________
+[ 21347] By: rgs                                   on 2003/09/23  21:34:15
+        Log: In Configure, integrate a more modern way to guess whether
+             a C symbol is defined. (See change #21267.)
+     Branch: maint-5.6
+	   ! perl-5.6.2/Configure
+____________________________________________________________________________
+[ 21281] By: rgs                                   on 2003/09/18  20:48:50
+        Log: perlunicode.pod refers to a future which is now the past.
+             Get perlhack from bleadperl (but note that the description of the
+             test suite is not in line with what's in perl 5.6.2).
+     Branch: maint-5.6
+	   ! perl-5.6.2/pod/perlhack.pod perl-5.6.2/pod/perlunicode.pod
+____________________________________________________________________________
+[ 21280] By: rgs                                   on 2003/09/18  20:06:11
+        Log: Increment the version number to 5.6.2.
+             Update the user-visible copyright date (in "perl -v").
+     Branch: maint-5.6
+	   ! perl-5.6.2/patchlevel.h perl-5.6.2/perl.c
+	   ! perl-5.6.2/win32/Makefile perl-5.6.2/win32/config_H.bc
+	   ! perl-5.6.2/win32/config_H.gc perl-5.6.2/win32/config_H.vc
+	   ! perl-5.6.2/win32/makefile.mk
+____________________________________________________________________________
+[ 21256] By: rgs                                   on 2003/09/16  20:34:56
+        Log: Update Changes.
+     Branch: maint-5.6
+	   ! perl-5.6.2/Changes perl-5.6.2/patchlevel.h
+____________________________________________________________________________
 [ 21255] By: rgs                                   on 2003/09/16  20:16:03
         Log: Hints updates from bleadperl
      Branch: maint-5.6
