@@ -119,9 +119,20 @@ EOT
 		    $ok = 1;
 		}
 		else {
-		    $next = $1, $ok = 0, last if /^not ok ([0-9]*)/;
-		    if (/^ok (\d+)(\s*#.*)?/ && $1 == $next) {
-			$next = $next + 1;
+		    if (/^(not )?ok (\d+)(\s*#.*)?/ &&
+			$2 == $next) 
+		    {
+			my($not, $num, $extra) = ($1, $2, $3);
+			my($istodo) = $extra =~ /^\s*#\s*TODO/ if $extra;
+
+			if( $not && !$istodo ) {
+			    $ok = 0;
+			    $next = $num;
+			    last;
+			}
+			else {
+			    $next = $next + 1;
+			}
                     }
                     elsif (/^Bail out!\s*(.*)/i) { # magic words
                         die "FAILED--Further testing stopped" . ($1 ? ": $1\n" : ".\n");
