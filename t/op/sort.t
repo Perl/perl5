@@ -5,7 +5,7 @@ BEGIN {
     unshift @INC, '../lib';
 }
 use warnings;
-print "1..55\n";
+print "1..57\n";
 
 # XXX known to leak scalars
 {
@@ -303,3 +303,21 @@ sub cxt_five { sort { test_if_scalar($a,$b); } 1,2 }
 @x = cxt_five();
 sub cxt_six { sort test_if_scalar 1,2 }
 @x = cxt_six();
+
+# test against a reentrancy bug
+{
+    package Bar;
+    sub compare { $a cmp $b }
+    sub reenter { my @force = sort compare qw/a b/ }
+}
+{
+    my($def, $init) = (0, 0);
+    @b = sort {
+	$def = 1 if defined $Bar::a;
+	Bar::reenter() unless $init++;
+	$a <=> $b
+    } qw/4 3 1 2/;
+    print ("@b" eq '1 2 3 4' ? "ok 56\n" : "not ok 56\n");
+    print "# x = '@b'\n";
+    print !$def ? "ok 57\n" : "not ok 57\n";
+}
