@@ -719,6 +719,7 @@ os390)
 vmesa)
     # Do nothing in VM/ESA.
     ;;
+esac
     case "$xxx" in
     '') echo "No parser files were regenerated.  That's okay." >&2 ;;
     esac
