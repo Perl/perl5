@@ -79,6 +79,230 @@ Version 5.005_58        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  3781] By: gsar                                  on 1999/07/26  17:54:47
+        Log: a more correct fix for change#2744
+             From: Stephen McCamant <smccam@uclink4.berkeley.edu>
+             Date: Sun, 25 Jul 1999 14:02:25 -0500 (CDT)
+             Message-ID: <14235.24385.671437.246345@alias-2.pr.mcs.net>
+             Subject: [PATCH _57] Re: toke.c questions 
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  3780] By: gsar                                  on 1999/07/26  17:37:04
+        Log: utime() doc typo from Greg Bacon <gbacon@itsc.uah.edu>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  3779] By: jhi                                   on 1999/07/26  16:37:23
+        Log: Dusting off.
+     Branch: cfgperl
+	   ! README.threads
+____________________________________________________________________________
+[  3778] By: gsar                                  on 1999/07/26  13:28:46
+        Log: avoid DIVZERO
+     Branch: perl
+	   ! utils/dprofpp.PL
+____________________________________________________________________________
+[  3777] By: gsar                                  on 1999/07/26  13:18:53
+        Log: warnings identified by Borland compiler
+     Branch: perl
+	   ! makedef.pl pp_ctl.c
+____________________________________________________________________________
+[  3776] By: jhi                                   on 1999/07/26  13:07:36
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> lib/Carp/Heavy.pm pp_ctl.c pp_hot.c
+____________________________________________________________________________
+[  3775] By: gsar                                  on 1999/07/26  12:55:43
+        Log: avoid infinite recursion when Thread.pm croaks during
+             bootstrap
+     Branch: perl
+	   ! lib/Carp/Heavy.pm
+____________________________________________________________________________
+[  3774] By: gsar                                  on 1999/07/26  12:43:02
+        Log: integrate cfgperl contents into mainline
+     Branch: perl
+	  +> lib/Carp/Heavy.pm
+	  !> MANIFEST Makefile.SH cflags.SH configpm ext/util/make_ext
+	  !> lib/AutoSplit.pm lib/Carp.pm makedepend.SH pod/pod2html.PL
+	  !> pod/pod2latex.PL pod/pod2man.PL pod/pod2text.PL
+	  !> pod/pod2usage.PL pod/podchecker.PL pod/podselect.PL
+	  !> writemain.SH x2p/Makefile.SH x2p/cflags.SH
+____________________________________________________________________________
+[  3773] By: jhi                                   on 1999/07/26  12:40:29
+        Log: Use long doubles only if they are useful.
+     Branch: cfgperl
+	   ! ext/POSIX/POSIX.xs
+____________________________________________________________________________
+[  3772] By: gsar                                  on 1999/07/26  12:33:11
+        Log: typo in change#3768
+     Branch: perl
+	   ! pp_hot.c
+____________________________________________________________________________
+[  3771] By: gsar                                  on 1999/07/26  12:08:27
+        Log: alpha-stage support for user-hooks in @INC
+             From: Ken Fox <kfox@ford.com>
+             Date: Mon, 19 Jul 1999 22:12:29 -0400 (EDT)
+             Message-Id: <199907200213.WAA02816@mailfw2.ford.com>
+             Subject: Re: loading remote modules
+     Branch: perl
+	   ! pp_ctl.c
+____________________________________________________________________________
+[  3770] By: jhi                                   on 1999/07/26  11:38:36
+        Log: Back out #3735.  Needs more work.
+     Branch: cfgperl
+	   ! Makefile.SH cflags.SH configpm ext/util/make_ext
+	   ! lib/AutoSplit.pm makedepend.SH pod/pod2html.PL
+	   ! pod/pod2latex.PL pod/pod2man.PL pod/pod2text.PL
+	   ! pod/pod2usage.PL pod/podchecker.PL pod/podselect.PL
+	   ! writemain.SH x2p/Makefile.SH x2p/cflags.SH
+____________________________________________________________________________
+[  3769] By: jhi                                   on 1999/07/26  11:24:45
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> (integrate 35 files)
+____________________________________________________________________________
+[  3768] By: gsar                                  on 1999/07/26  11:03:07
+        Log: optimize method name lookup
+             From: Chip Salzenberg <chip@perlsupport.com>
+             Date: Thu, 22 Jul 1999 13:43:36 -0400
+             Message-ID: <19990722134336.Q391@perlsupport.com>
+             Subject: [PATCH] OP_METHOD_NAMED
+     Branch: perl
+	   ! dump.c embed.h embed.pl ext/Opcode/Opcode.pm objXSUB.h op.c
+	   ! opcode.h opcode.pl perlapi.c pp.sym pp_hot.c pp_proto.h
+	   ! proto.h
+____________________________________________________________________________
+[  3767] By: gsar                                  on 1999/07/26  10:44:11
+        Log: allow arrow omission in $foo[10]->('foo') etc. (but not in
+             foo()->()); rework grammar to remove conflicts
+             From: Stephen McCamant <smccam@uclink4.berkeley.edu>
+             Date: Fri, 23 Jul 1999 15:55:22 -0500 (CDT)
+             Message-ID: <14232.54970.771570.548676@alias-2.pr.mcs.net>
+             Subject: [PATCH _57, long] Re: optional arrow asymmetry
+     Branch: perl
+	   ! Makefile.SH embed.h embed.pl global.sym objXSUB.h op.c
+	   ! perlapi.c perly.c perly.h perly.y perly_c.diff proto.h
+	   ! vms/perly_c.vms vms/perly_h.vms
+____________________________________________________________________________
+[  3766] By: jhi                                   on 1999/07/26  10:18:56
+        Log: Use $< instead of $*.c in *perlmain.o rules.
+     Branch: cfgperl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  3765] By: gsar                                  on 1999/07/26  09:28:48
+        Log: From: Ian Phillipps <ian@dial.pipex.com>
+             Date: Fri, 23 Jul 1999 23:35:56 +0100
+             Message-ID: <19990723233556.B2435@homer.diplex.co.uk>
+             Subject: (Version 2) Extending unpack to deal with counted strings
+     Branch: perl
+	   ! pod/perldiag.pod pod/perlfunc.pod pp.c t/op/pack.t
+____________________________________________________________________________
+[  3764] By: jhi                                   on 1999/07/26  09:17:26
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             To: perl5-porters@perl.org (Mailing list Perl5)
+             Subject: [PATCH 5.005_57] Lean Carp.pm with Carp/Heavy.pm
+             Date: Mon, 26 Jul 1999 04:05:27 -0400 (EDT)
+             Message-Id: <199907260805.EAA26888@monk.mps.ohio-state.edu>
+             
+             The patch was based on 5_57 so had to re-apply lib/Carp.pm
+             parts of changes #3498, #3696, and #3702 for the new
+             lib/Carp/Heavy.pm.
+     Branch: cfgperl
+	   + lib/Carp/Heavy.pm
+	   ! MANIFEST lib/Carp.pm
+____________________________________________________________________________
+[  3763] By: gsar                                  on 1999/07/26  09:03:17
+        Log: ~ isn't valid in VMS filenames
+     Branch: perl
+	   ! lib/Pod/Html.pm
+____________________________________________________________________________
+[  3762] By: gsar                                  on 1999/07/26  08:59:47
+        Log: setstate stop-gap from Vishal Bhatia
+     Branch: perl
+	   ! ext/B/B/CC.pm
+____________________________________________________________________________
+[  3761] By: gsar                                  on 1999/07/26  08:06:39
+        Log: patch for pp_foo -> Perl_pp_foo changes from Vishal Bhatia;
+             add B::OP::name() method that returns just the op_name;
+             convert Deparse et all to use that instead of B::OP::ppaddr();
+             add support for OP_SETSTATE in Deparse
+     Branch: perl
+	   ! ext/B/B.pm ext/B/B.xs ext/B/B/Bblock.pm ext/B/B/Bytecode.pm
+	   ! ext/B/B/C.pm ext/B/B/CC.pm ext/B/B/Deparse.pm ext/B/B/Lint.pm
+	   ! ext/B/B/Xref.pm opcode.h opcode.pl
+____________________________________________________________________________
+[  3760] By: jhi                                   on 1999/07/26  07:14:43
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> (integrate 43 files)
+____________________________________________________________________________
+[  3759] By: gsar                                  on 1999/07/26  05:12:24
+        Log: add disclaimer about perl 4 libraries (modified version of
+             patch suggested by Clinton Pierce <cpierce1@ford.com>)
+     Branch: perl
+	   ! lib/abbrev.pl lib/bigfloat.pl lib/bigint.pl lib/bigrat.pl
+	   ! lib/cacheout.pl lib/chat2.pl lib/complete.pl lib/ctime.pl
+	   ! lib/dotsh.pl lib/exceptions.pl lib/fastcwd.pl lib/flush.pl
+	   ! lib/ftp.pl lib/getcwd.pl lib/getopt.pl lib/getopts.pl
+	   ! lib/hostname.pl lib/look.pl lib/pwd.pl lib/termcap.pl
+____________________________________________________________________________
+[  3758] By: gsar                                  on 1999/07/26  04:48:35
+        Log: make reset() behave with high-bit characters
+             From: Ian Phillipps <ian@dial.pipex.com>
+             Date: Thu, 22 Jul 1999 22:48:59 +0100
+             Message-ID: <19990722224859.A27987@homer.diplex.co.uk>
+             Subject: [PATCH 5.005_57] sv_reset can cause stack corruption
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  3757] By: gsar                                  on 1999/07/26  04:40:32
+        Log: update to perlport-1.44 from Chris Nandor <pudge@pobox.com>
+     Branch: perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[  3756] By: gsar                                  on 1999/07/26  04:20:37
+        Log: dprofpp pod additions from Nathan Torkington <gnat@frii.com>
+     Branch: perl
+	   ! utils/dprofpp.PL
+____________________________________________________________________________
+[  3755] By: gsar                                  on 1999/07/26  04:18:00
+        Log: disable VPATH for now (breaks x2p build)
+     Branch: perl
+	   ! x2p/Makefile.SH
+____________________________________________________________________________
+[  3754] By: gsar                                  on 1999/07/26  03:15:33
+        Log: INSTALL =~ s/5.006/5.6/; delay loading Errno until needed
+             (%! has the necessary magic); misc typos
+     Branch: perl
+	   ! INSTALL ext/DB_File/DB_File.pm ext/Fcntl/Fcntl.pm
+	   ! ext/GDBM_File/GDBM_File.pm gv.c jpl/JNI/JNI.pm
+	   ! lib/AutoLoader.pm lib/CPAN.pm perl.c pod/perllocale.pod
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[  3753] By: gsar                                  on 1999/07/26  02:38:28
+        Log: integrate cfgperl contents into mainline
+     Branch: perl
+	  +> t/pragma/locale/latin1 t/pragma/locale/utf8
+	  !> (integrate 53 files)
+____________________________________________________________________________
+[  3752] By: gsar                                  on 1999/07/26  02:11:31
+        Log: ensure implicitly closed handles don't set $? or $!
+     Branch: perl
+	   ! doio.c embed.h embed.pl perlapi.c proto.h sv.c t/io/pipe.t
+____________________________________________________________________________
+[  3751] By: gsar                                  on 1999/07/26  01:28:34
+        Log: change#3534 didn't preserve undef return values from caller()
+     Branch: perl
+	   ! Changes pp_ctl.c
+____________________________________________________________________________
+[  3750] By: jhi                                   on 1999/07/25  20:59:29
+        Log: Back up a tiny bit from #3735.
+             This may break builds outside the source directory
+             but then again, they do not work that ell yet anyway.
+     Branch: cfgperl
+	   ! Makefile.SH
+____________________________________________________________________________
 [  3750] By: jhi                                   on 1999/07/25  20:59:29
         Log: Back up a tiny bit from #3735.
              This may break builds outside the source directory
