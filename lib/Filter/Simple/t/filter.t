@@ -1,3 +1,8 @@
+BEGIN {
+    chdir('t') if -d 't';    
+    @INC = 'lib';
+}
+
 use FilterTest qr/not ok/ => "ok", fail => "ok";
 print "1..6\n";
 
