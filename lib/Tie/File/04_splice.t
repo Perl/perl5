@@ -10,11 +10,10 @@
 # Then, it checks the actual contents of the file against the expected
 # contents.
 
-use lib '/home/mjd/src/perl/Tie-File2/lib';
 my $file = "tf$$.txt";
 my $data = "rec0$/rec1$/rec2$/";
 
-print "1..88\n";
+print "1..97\n";
 
 my $N = 1;
 use Tie::File;
@@ -136,6 +135,34 @@ check_contents("rec0$/rec1$/");
 # (87-88) what if we remove too many records?
 splice(@a, 0, 17);
 check_contents("");
+
+# (89-92) In the past, splicing past the end was not correctly detected
+# (1.14)
+splice(@a, 89, 3);
+check_contents("");
+splice(@a, @a, 3);
+check_contents("");
+
+# (93-96) Also we did not emulate splice's freaky behavior when inserting
+# past the end of the array (1.14)
+splice(@a, 89, 0, "I", "like", "pie");
+check_contents("I$/like$/pie$/");
+splice(@a, 89, 0, "pie pie pie");
+check_contents("I$/like$/pie$/pie pie pie$/");
+
+# (97) Splicing with too large a negative number should be fatal
+# This test ignored because it causes 5.6.1 and 5.7.2 to dump core
+# NOT MY FAULT
+if ($] < 5.006 || $] > 5.007002) {
+  eval { splice(@a, -7, 0) };
+  print $@ =~ /^Modification of non-creatable array value attempted, subscript -7/
+      ? "ok $N\n" : "not ok $N \# \$\@ was '$@'\n";
+} else { 
+  print "ok $N \# skipped (5.6.0 through 5.7.2 dump core here.)\n";
+}
+$N++;
+       
+    
 
 sub init_file {
   my $data = shift;
