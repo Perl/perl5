@@ -171,6 +171,13 @@ construction, but the command was missing or blank.
 
 Todo.
 
+=head1 Configuration Changes
+
+You can use "Configure -Uinstallusrbinperl" which causes installperl
+to skip installing perl also as /usr/bin/perl.  This is useful if you
+prefer not to modify /usr/bin for some reason or another but harmful
+because many scripts assume to find Perl in /usr/bin/perl.
+
 =head1 BUGS
 
 If you find what you think is a bug, you might check the headers of
