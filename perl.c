@@ -2287,9 +2287,22 @@ Perl_moreswitches(pTHX_ char *s)
 	s++;
 	return s;
     case 'v':
+#if !defined(DGUX)
 	PerlIO_printf(PerlIO_stdout(),
 		      Perl_form(aTHX_ "\nThis is perl, v%"VDf" built for %s",
 				PL_patchlevel, ARCHNAME));
+#else /* DGUX */
+/* Adjust verbose output as in the perl that ships with the DG/UX OS from EMC */
+	PerlIO_printf(PerlIO_stdout(),
+			Perl_form(aTHX_ "\nThis is perl, version %vd\n", PL_patchlevel));
+	PerlIO_printf(PerlIO_stdout(),
+			Perl_form(aTHX_ "        built under %s at %s %s\n",
+					OSNAME, __DATE__, __TIME__));
+	PerlIO_printf(PerlIO_stdout(),
+			Perl_form(aTHX_ "        OS Specific Release: %s\n",
+					OSVERSION));
+#endif /* !DGUX */
+
 #if defined(LOCAL_PATCH_COUNT)
 	if (LOCAL_PATCH_COUNT > 0)
 	    PerlIO_printf(PerlIO_stdout(),

@@ -280,6 +280,10 @@ newthread (pTHX_ SV *startsv, AV *initargs, char *classname)
 	attr_inited = 1;
 	err = pthread_attr_init(&attr);
 #  ifdef PTHREAD_ATTR_SETDETACHSTATE
+#ifdef DGUX
+	if (err == 0)
+	    err = pthread_attr_setstacksize(&attr, (1024*16));
+#endif
 	if (err == 0)
 	    err = PTHREAD_ATTR_SETDETACHSTATE(&attr, attr_joinable);
 
