@@ -71,6 +71,8 @@ my $a;
 my $Is_VMS = $^O eq 'VMS';
 $a = `$^X "-I../lib" "-MO=Deparse" -anle 1 2>&1`;
 $a =~ s/-e syntax OK\n//g;
+$a =~ s{\\340\\242}{\\s} if (ord("\\") == 224); # EBCDIC, cp 1047 or 037
+$a =~ s{\\274\\242}{\\s} if (ord("\\") == 188); # $^O eq 'posix-bc'
 $b = <<'EOF';
 
 LINE: while (defined($_ = <ARGV>)) {
@@ -140,7 +142,12 @@ if ($is_thread) {
     print "# use5005threads: test $test skipped\n";
 } else {
     $a = `$^X "-I../lib" "-MO=Showlex" -e "my %one" 2>&1`;
-    print "# [$a]\nnot " unless $a =~ /sv_undef.*PVNV.*%one.*sv_undef.*HV/s;
+    if (ord('A') != 193) { # ASCIIish
+        print "# [$a]\nnot " unless $a =~ /sv_undef.*PVNV.*%one.*sv_undef.*HV/s;
+    } 
+    else { # EBCDICish C<1: PVNV (0x1a7ede34) "%\226\225\205">
+        print "# [$a]\nnot " unless $a =~ /sv_undef.*PVNV.*%\\[0-9].*sv_undef.*HV/s;
+    }
 }
 ok;
 
