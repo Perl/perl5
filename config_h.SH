@@ -2597,6 +2597,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$i_machcthr   I_MACH_CTHREADS	/**/
 
+/* I_PTHREAD:
+ *     This symbol, if defined, indicates to the C program that it should
+ *     include <pthread.h>.
+ */
+#$i_pthread   I_PTHREAD	/**/
+
 /* USE_THREADS:
  *	This symbol, if defined, indicates that Perl should
  *	be built to use threads.
