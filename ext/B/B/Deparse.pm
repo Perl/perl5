@@ -146,6 +146,10 @@ use strict;
 # keys are addresses of GVs for subs and formats we've already
 # deparsed (or at least put into subs_todo)
 #
+# subs_declared
+# keys are names of subs for which we've printed declarations.
+# That means we can omit parentheses from the arguments.
+#
 # parens: -p
 # linenums: -l
 # unquote: -q
@@ -231,6 +235,7 @@ sub next_todo {
 	return "format $name =\n"
 	    . $self->deparse_format($ent->[1]->FORM). "\n";
     } else {
+	$self->{'subs_declared'}{$name} = 1;
 	return "sub $name " . $self->deparse_sub($ent->[1]->CV);
     }
 }
@@ -903,7 +908,7 @@ sub pp_nextstate {
     @text = $op->label . ": " if $op->label;
     my $seq = $op->cop_seq;
     while (scalar(@{$self->{'subs_todo'}})
-	   and $seq > $self->{'subs_todo'}[0][0]) {
+	   and $seq >= $self->{'subs_todo'}[0][0]) {
 	push @text, $self->next_todo;
     }
     my $stash = $op->stashpv;
@@ -2414,8 +2419,13 @@ sub pp_entersub {
 	my $arrow = is_subscriptable($kid->first) ? "" : "->";
 	$kid = $self->deparse($kid, 24) . $arrow;
     }
+
+    # Doesn't matter how many prototypes there are, if
+    # they haven't happened yet!
+    my $declared = exists $self->{'subs_declared'}{$kid};
+
     my $args;
-    if (defined $proto and not $amper) {
+    if ($declared and defined $proto and not $amper) {
 	($amper, $args) = $self->check_proto($proto, @exprs);
 	if ($amper eq "&") {
 	    $args = join(", ", map($self->deparse($_, 6), @exprs));
@@ -2430,7 +2440,9 @@ sub pp_entersub {
 	    return $prefix . $amper. $kid;
 	}
     } else {
-	if (defined $proto and $proto eq "") {
+        if (!$declared) {
+	    return "$kid(" . $args . ")";
+	} elsif (defined $proto and $proto eq "") {
 	    return $kid;
 	} elsif (defined $proto and $proto eq "\$") {
 	    return $self->maybe_parens_func($kid, $args, $cx, 16);
