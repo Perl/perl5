@@ -11,7 +11,7 @@ BEGIN {
     }
 }
 
-BEGIN { $| = 1; print "1..5\n"; }
+BEGIN { $| = 1; print "1..7\n"; }
 
 END {print "not ok 1\n" unless $loaded;}
 
