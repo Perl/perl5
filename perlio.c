@@ -635,7 +635,7 @@ PerlIO_layer_fetch(pTHX_ AV *av,IV n,PerlIO_funcs *def)
    return INT2PTR(PerlIO_funcs *, SvIV(layer));
   }
  if (!def)
-  Perl_croak(aTHX_ "panic:PerlIO layer array corrupt");
+  Perl_croak(aTHX_ "panic: PerlIO layer array corrupt");
  return def;
 }
 
