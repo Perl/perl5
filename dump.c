@@ -942,6 +942,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 		   (int)(PL_dumpindent*level), "", (IV)SvREFCNT(sv),
 		   (int)(PL_dumpindent*level), "");
 
+    if (flags & SVs_PADSTALE)	sv_catpv(d, "PADSTALE,");
     if (flags & SVs_PADTMP)	sv_catpv(d, "PADTMP,");
     if (flags & SVs_PADMY)	sv_catpv(d, "PADMY,");
     if (flags & SVs_TEMP)	sv_catpv(d, "TEMP,");
