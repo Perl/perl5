@@ -310,3 +310,49 @@ print "done\n" ;
 EXPECT
 Useless use of time in void context at - line 4.
 Useless use of length in void context at - line 8.
+########
+
+use warnings FATAL => 'all';
+{
+    no warnings;
+    my $b ; chop $b;
+    {
+        use warnings ;
+        my $b ; chop $b;
+    }
+}
+my $b ; chop $b;
+print STDERR "The End.\n" ;
+EXPECT
+Use of uninitialized value in scalar chop at - line 8.
+Use of uninitialized value in scalar chop at - line 11.
+########
+
+use warnings FATAL => 'all';
+{
+    no warnings FATAL => 'all';
+    my $b ; chop $b;
+    {
+        use warnings ;
+        my $b ; chop $b;
+    }
+}
+my $b ; chop $b;
+print STDERR "The End.\n" ;
+EXPECT
+Use of uninitialized value in scalar chop at - line 8.
+Use of uninitialized value in scalar chop at - line 11.
+########
+
+use warnings FATAL => 'all';
+{
+    no warnings 'syntax';
+    {
+        use warnings ;
+        my $b ; chop $b;
+    }
+}
+my $b ; chop $b;
+print STDERR "The End.\n" ;
+EXPECT
+Use of uninitialized value in scalar chop at - line 7.

@@ -314,7 +314,7 @@ sub unimport {
         $mask |= $Bits{'all'} ;
         $mask |= $DeadBits{'all'} if vec($mask, $Offsets{'all'}+1, 1);
     }
-    ${^WARNING_BITS} = $mask & ~ (bits(@_ ? @_ : 'all') | $All) ;
+    ${^WARNING_BITS} = $mask & ~ (bits('FATAL' => (@_ ? @_ : 'all')) | $All) ;
 }
 
 sub __chk
