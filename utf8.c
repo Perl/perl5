@@ -1668,7 +1668,7 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, bool u1, register I32 len1, const char *s2
 {
      register U8 *a  = (U8*)s1;
      register U8 *b  = (U8*)s2;
-     register U8 *ae = b + len1;
+     register U8 *ae = a + len1;
      register U8 *be = b + len2;
      STRLEN la, lb;
      UV ca, cb;
@@ -1703,7 +1703,8 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, bool u1, register I32 len1, const char *s2
 	       else
 		    ulen2 = 1;
 	       if (ulen1 != ulen2
-		   || (ulen1 == 1 && PL_fold[ca] != PL_fold[cb])
+		   || (ca < 256 && cb < 256 &&
+		       PL_fold[ca] != PL_fold[cb])
 		   || memNE((char *)tmpbuf1, (char *)tmpbuf2, ulen1))
 		    return 1; /* mismatch */
 	  }

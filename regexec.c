@@ -979,8 +979,8 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 		    while (s <= e) {
 			if ( utf8_to_uvchr((U8*)s, &len) == c1
 			     && (ln == len ||
-				 ibcmp_utf8(s, do_utf8, (I32)(strend - s),
-					    m, UTF, (I32)ln))
+				 !ibcmp_utf8(s, do_utf8, (I32)(strend - s),
+					     m, UTF, (I32)ln))
 			     && (norun || regtry(prog, s)) )
 			    goto got_it;
 			s += len;
@@ -1002,8 +1002,9 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 			    c == (UV)UNICODE_GREEK_SMALL_LETTER_FINAL_SIGMA)
 			    c = (UV)UNICODE_GREEK_SMALL_LETTER_SIGMA;
 			if ( (c == c1 || c == c2 || f == c1 || f == c2)
-			     && ibcmp_utf8(s, do_utf8, (I32)(strend - s),
-					   m, UTF, (I32)ln)
+			     && (ln == len ||
+				 !ibcmp_utf8(s, do_utf8, (I32)(strend - s),
+					     m, UTF, (I32)ln))
 			     && (norun || regtry(prog, s)) )
 			    goto got_it;
 			s += len;
