@@ -279,9 +279,12 @@ Perl_sv_peek(pTHX_ SV *sv)
 	}
     }
     else if (SvNOKp(sv)) {
- 	RESTORE_NUMERIC_STANDARD();
+ 	bool was_local = PL_numeric_local;
+	if (!was_local)
+	    SET_NUMERIC_STANDARD();
 	Perl_sv_catpvf(aTHX_ t, "(%g)",SvNVX(sv));
- 	RESTORE_NUMERIC_LOCAL();
+	if (was_local)
+	    SET_NUMERIC_LOCAL();
     }
     else if (SvIOKp(sv)) {
 	if (SvIsUV(sv))
@@ -929,14 +932,17 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	PerlIO_putc(file, '\n');
     }
     if (type >= SVt_PVNV || type == SVt_NV) {
-	RESTORE_NUMERIC_STANDARD();
+	bool was_local = PL_numeric_local;
+	if (!was_local)
+	    SET_NUMERIC_STANDARD();
 	/* %Vg doesn't work? --jhi */
 #ifdef USE_LONG_DOUBLE
 	Perl_dump_indent(aTHX_ level, file, "  NV = %.*" PERL_PRIgldbl "\n", LDBL_DIG, SvNVX(sv));
 #else
 	Perl_dump_indent(aTHX_ level, file, "  NV = %.*g\n", DBL_DIG, SvNVX(sv));
 #endif
-	RESTORE_NUMERIC_LOCAL();
+	if (was_local)
+	    SET_NUMERIC_LOCAL();
     }
     if (SvROK(sv)) {
 	Perl_dump_indent(aTHX_ level, file, "  RV = 0x%"UVxf"\n", PTR2UV(SvRV(sv)));

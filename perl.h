@@ -3096,8 +3096,20 @@ typedef struct am_table_short AMTS;
 	((PL_hints & HINT_LOCALE) && \
 	  PL_numeric_radix && (c) == PL_numeric_radix)
 
-#define RESTORE_NUMERIC_LOCAL()		if ((PL_hints & HINT_LOCALE) && PL_numeric_standard) SET_NUMERIC_LOCAL()
-#define RESTORE_NUMERIC_STANDARD()	if ((PL_hints & HINT_LOCALE) && PL_numeric_local) SET_NUMERIC_STANDARD()
+#define STORE_NUMERIC_LOCAL_SET_STANDARD() \
+	bool was_local = (PL_hints & HINT_LOCALE) && PL_numeric_local; \
+	if (!was_local) SET_NUMERIC_STANDARD();
+
+#define STORE_NUMERIC_STANDARD_SET_LOCAL() \
+	bool was_standard = !(PL_hints & HINT_LOCALE) || PL_numeric_standard; \
+	if (!was_standard) SET_NUMERIC_LOCAL();
+
+#define RESTORE_NUMERIC_LOCAL() \
+	if (was_local) SET_NUMERIC_LOCAL();
+
+#define RESTORE_NUMERIC_STANDARD() \
+	if (was_standard) SET_NUMERIC_STANDARD();
+
 #define Atof				my_atof
 
 #else /* !USE_LOCALE_NUMERIC */
@@ -3105,6 +3117,8 @@ typedef struct am_table_short AMTS;
 #define SET_NUMERIC_STANDARD()  	/**/
 #define SET_NUMERIC_LOCAL()     	/**/
 #define IS_NUMERIC_RADIX(c)		(0)
+#define STORE_NUMERIC_LOCAL_SET_STANDARD()	/**/
+#define STORE_NUMERIC_STANDARD_SET_LOCAL()	/**/
 #define RESTORE_NUMERIC_LOCAL()		/**/
 #define RESTORE_NUMERIC_STANDARD()	/**/
 #define Atof				Perl_atof
