@@ -316,10 +316,17 @@ In 5.8.0 this
 didn't work correctly but instead corrupted the data.  This has now
 been fixed.
 
-In VMS IO::Poll now works.
-
 FETCH etc may now safely access tied values (ie resulting in a recursive
 call to FETCH etc).
+
+Linenumbers in Perl scripts may now be greater than 65536, or 2**16.
+(Perl scripts have always been able to be larger than that, it's just
+that reported errors and warnings have wrapped around.)  While scripts
+that large usually indicate a need to rethink your code a bit, such
+Perl scripts do exist, for example as results from generated code.
+Now linenumbers can go all the way to 4294967296, or 2**32.
+
+In VMS IO::Poll now works.
 
 =head1 New or Changed Diagnostics
 
@@ -430,7 +437,10 @@ Perl_save_bool() has been added.
 utf8::is_utf8() has been added as a quick way to test whether
 a scalar is encoded internally in UTF-8 (Unicode).
 
--DL removed; verbose modifier v added for -DXv and -Dsv, see L<perlrun>.
+C<-DL> removed (the leaktest had been broken and unsupported for years,
+use alternative debugging mallocs or tools like valgrind and Purify).
+
+Verbose modifier C<v> added for C<-DXv> and C<-Dsv>, see L<perlrun>.
 
 =head1 New Tests
 
@@ -442,7 +452,16 @@ system platform.
 =head1 Known Problems
 
 The hash randomisation mentioned in L</Incompatible Changes> is definitely
-problematic: it will wake dormant bugs.
+problematic: it will wake dormant bugs and shake out bad assumptions.
+
+Many of the rarer platforms that worked 100% or pretty close to it
+with perl 5.8.0 have been left a little bit untended since their
+maintainers have been otherwise busy lately, and therefore there will
+be more failures on those platforms.  Such platforms include Mac OS
+Classic, HP MPE/iX, IBM z/OS (and other EBCDIC platforms), and NetWare.
+The most common Perl platforms (Unix and Unix-like, Microsoft platforms,
+and VMS) have large enough testing and expert population that they are
+doing well.
 
 =head1 Platform Specific Problems
 
@@ -463,6 +482,11 @@ considerable effort to implement cleanly, and secondly because one can
 argue that the old behaviour of sysread/syswrite on Win32 was simply
 anomalous (that is, wrong), since it makes Win32 behave differently
 from any other platform.
+
+=head2 EBCDIC Platforms
+
+IBM z/OS and other EBCDIC platforms continue to be problematic
+regarding Unicode support.
 
 =head1 Reporting Bugs
 
