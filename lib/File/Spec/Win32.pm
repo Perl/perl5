@@ -66,6 +66,10 @@ sub catfile {
     return $dir.$file;
 }
 
+sub devnull {
+    return "nul";
+}
+
 sub path {
     local $^W = 1;
     my($self) = @_;

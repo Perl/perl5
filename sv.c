@@ -4413,10 +4413,6 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 	char *eptr = Nullch;
 	STRLEN elen = 0;
 	char ebuf[TYPE_DIGITS(int) * 2 + 16]; /* large enough for "%#.#f" */
-
-	static char *efloatbuf = Nullch;
-	static STRLEN efloatsize = 0;
-
 	char c;
 	int i;
 	unsigned base;
@@ -4758,10 +4754,10 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 		need = width;
 
 	    need += 20; /* fudge factor */
-	    if (efloatsize < need) {
-		Safefree(efloatbuf);
-		efloatsize = need + 20; /* more fudge */
-		New(906, efloatbuf, efloatsize, char);
+	    if (PL_efloatsize < need) {
+		Safefree(PL_efloatbuf);
+		PL_efloatsize = need + 20; /* more fudge */
+		New(906, PL_efloatbuf, PL_efloatsize, char);
 	    }
 
 	    eptr = ebuf + sizeof ebuf;
@@ -4786,10 +4782,10 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 		*--eptr = '#';
 	    *--eptr = '%';
 
-	    (void)sprintf(efloatbuf, eptr, nv);
+	    (void)sprintf(PL_efloatbuf, eptr, nv);
 
-	    eptr = efloatbuf;
-	    elen = strlen(efloatbuf);
+	    eptr = PL_efloatbuf;
+	    elen = strlen(PL_efloatbuf);
 
 #ifdef LC_NUMERIC
 	    /*

@@ -1806,7 +1806,7 @@ char *getlogin _((void));
 #define UNLINK unlnk
 I32 unlnk _((char*));
 #else
-#define UNLINK unlink
+#define UNLINK PerlLIO_unlink
 #endif
 
 #ifndef HAS_SETREUID
@@ -1935,6 +1935,10 @@ EXTCONST char PL_no_func[]
   INIT("The %s function is unimplemented");
 EXTCONST char PL_no_myglob[]
   INIT("\"my\" variable %s can't be in a package");
+
+EXTCONST char PL_uuemap[]
+  INIT("`!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_");
+
 
 #ifdef DOINIT
 EXT char *PL_sig_name[] = { SIG_NAME };

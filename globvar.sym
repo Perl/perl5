@@ -37,6 +37,7 @@ psig_ptr
 regkind
 simple
 utf8skip
+uuemap
 varies
 vtbl_sv
 vtbl_env

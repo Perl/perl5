@@ -191,9 +191,9 @@ get_emd_part(char *prev_path, char *trailing_path, ...)
 
     sprintf(base, "%5.3f", (double) 5 + ((double) PATCHLEVEL / (double) 1000));
 
-    GetModuleFileName((w32_perldll_handle == INVALID_HANDLE_VALUE)
-		      ? GetModuleHandle(NULL)
-		      : w32_perldll_handle, mod_name, sizeof(mod_name));
+    GetModuleFileName((HMODULE)((w32_perldll_handle == INVALID_HANDLE_VALUE)
+				? GetModuleHandle(NULL) : w32_perldll_handle),
+		      mod_name, sizeof(mod_name));
     ptr = strrchr(mod_name, '\\');
     while (ptr && strip) {
         /* look for directories to skip back */
@@ -201,8 +201,11 @@ get_emd_part(char *prev_path, char *trailing_path, ...)
 	*ptr = '\0';
 	ptr = strrchr(mod_name, '\\');
 	if (!ptr || stricmp(ptr+1, strip) != 0) {
-	    *optr = '\\';
-	    ptr = optr;
+	    if(!(*strip == '5' && *(ptr+1) == '5' && strncmp(strip, base, 5) == 0
+		    && strncmp(ptr+1, base, 5) == 0)) {
+		*optr = '\\';
+		ptr = optr;
+	    }
 	}
 	strip = va_arg(ap, char *);
     }
@@ -494,7 +497,7 @@ do_aspawn(void *vreally, void **vmark, void **vsp)
 			   (const char*)(really ? SvPV(really,n_a) : argv[0]),
 			   (const char* const*)argv);
 
-    if (status < 0 && errno == ENOEXEC) {
+    if (status < 0 && (errno == ENOEXEC || errno == ENOENT)) {
 	/* possible shell-builtin, invoke with shell */
 	int sh_items;
 	sh_items = w32_perlshell_items;
@@ -1773,51 +1776,102 @@ win32_pclose(FILE *pf)
 DllExport int
 win32_rename(const char *oname, const char *newname)
 {
-    char szNewWorkName[MAX_PATH+1];
-    WIN32_FIND_DATA fdOldFile, fdNewFile;
-    HANDLE handle;
-    char *ptr;
-
-    if ((strchr(oname, '\\') || strchr(oname, '/'))
-	&& strchr(newname, '\\') == NULL
-	&& strchr(newname, '/') == NULL)
-    {
-	strcpy(szNewWorkName, oname);
-	if ((ptr = strrchr(szNewWorkName, '\\')) == NULL)
-	    ptr = strrchr(szNewWorkName, '/');
-	strcpy(++ptr, newname);
+    /* XXX despite what the documentation says about MoveFileEx(),
+     * it doesn't work under Windows95!
+     */
+    if (IsWinNT()) {
+	if (!MoveFileEx(oname,newname,
+			MOVEFILE_COPY_ALLOWED|MOVEFILE_REPLACE_EXISTING)) {
+	    DWORD err = GetLastError();
+	    switch (err) {
+	    case ERROR_BAD_NET_NAME:
+	    case ERROR_BAD_NETPATH:
+	    case ERROR_BAD_PATHNAME:
+	    case ERROR_FILE_NOT_FOUND:
+	    case ERROR_FILENAME_EXCED_RANGE:
+	    case ERROR_INVALID_DRIVE:
+	    case ERROR_NO_MORE_FILES:
+	    case ERROR_PATH_NOT_FOUND:
+		errno = ENOENT;
+		break;
+	    default:
+		errno = EACCES;
+		break;
+	    }
+	    return -1;
+	}
+	return 0;
     }
-    else
-	strcpy(szNewWorkName, newname);
+    else {
+	int retval = 0;
+	char tmpname[MAX_PATH+1];
+	char dname[MAX_PATH+1];
+	char *endname = Nullch;
+	STRLEN tmplen = 0;
+	DWORD from_attr, to_attr;
 
-    if (stricmp(oname, szNewWorkName) != 0) {
-	// check that we're not being fooled by relative paths
-	// and only delete the new file
-	//  1) if it exists
-	//  2) it is not the same file as the old file
-	//  3) old file exist
-	// GetFullPathName does not return the long file name on some systems
-	handle = FindFirstFile(oname, &fdOldFile);
-	if (handle != INVALID_HANDLE_VALUE) {
-	    FindClose(handle);
-    
-	    handle = FindFirstFile(szNewWorkName, &fdNewFile);
-    
-	    if (handle != INVALID_HANDLE_VALUE)
-		FindClose(handle);
+	/* if oname doesn't exist, do nothing */
+	from_attr = GetFileAttributes(oname);
+	if (from_attr == 0xFFFFFFFF) {
+	    errno = ENOENT;
+	    return -1;
+	}
+
+	/* if newname exists, rename it to a temporary name so that we
+	 * don't delete it in case oname happens to be the same file
+	 * (but perhaps accessed via a different path)
+	 */
+	to_attr = GetFileAttributes(newname);
+	if (to_attr != 0xFFFFFFFF) {
+	    /* if newname is a directory, we fail
+	     * XXX could overcome this with yet more convoluted logic */
+	    if (to_attr & FILE_ATTRIBUTE_DIRECTORY) {
+		errno = EACCES;
+		return -1;
+	    }
+	    tmplen = strlen(newname);
+	    strcpy(tmpname,newname);
+	    endname = tmpname+tmplen;
+	    for (; endname > tmpname ; --endname) {
+		if (*endname == '/' || *endname == '\\') {
+		    *endname = '\0';
+		    break;
+		}
+	    }
+	    if (endname > tmpname)
+		endname = strcpy(dname,tmpname);
 	    else
-		fdNewFile.cFileName[0] = '\0';
+		endname = ".";
 
-	    if (strcmp(fdOldFile.cAlternateFileName,
-		       fdNewFile.cAlternateFileName) != 0
-		&& strcmp(fdOldFile.cFileName, fdNewFile.cFileName) != 0)
-	    {
-		// file exists and not same file
-		DeleteFile(szNewWorkName);
+	    /* get a temporary filename in same directory
+	     * XXX is this really the best we can do? */
+	    if (!GetTempFileName((LPCTSTR)endname, "plr", 0, tmpname)) {
+		errno = ENOENT;
+		return -1;
+	    }
+	    DeleteFile(tmpname);
+
+	    retval = rename(newname, tmpname);
+	    if (retval != 0) {
+		errno = EACCES;
+		return retval;
 	    }
 	}
+
+	/* rename oname to newname */
+	retval = rename(oname, newname);
+
+	/* if we created a temporary file before ... */
+	if (endname != Nullch) {
+	    /* ...and rename succeeded, delete temporary file/directory */
+	    if (retval == 0)
+		DeleteFile(tmpname);
+	    /* else restore it to what it was */
+	    else
+		(void)rename(tmpname, newname);
+	}
+	return retval;
     }
-    return rename(oname, newname);
 }
 
 DllExport int
@@ -2346,7 +2400,7 @@ XS(w32_Spawn)
     if (items != 3)
 	croak("usage: Win32::Spawn($cmdName, $args, $PID)");
 
-    cmd = SvPV(ST(0), n_a);
+    cmd = SvPV(ST(0),n_a);
     args = SvPV(ST(1), n_a);
 
     memset(&stStartInfo, 0, sizeof(stStartInfo));   /* Clear the block */

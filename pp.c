@@ -107,8 +107,6 @@ static SV* refto _((SV* sv));
 static U32 seed _((void));
 #endif
 
-static bool srand_called = FALSE;
-
 /* variations on pp_null */
 
 #ifdef I_UNISTD
@@ -1596,9 +1594,9 @@ PP(pp_rand)
 	value = POPn;
     if (value == 0.0)
 	value = 1.0;
-    if (!srand_called) {
+    if (!PL_srand_called) {
 	(void)seedDrand01((Rand_seed_t)seed());
-	srand_called = TRUE;
+	PL_srand_called = TRUE;
     }
     value *= Drand01();
     XPUSHn(value);
@@ -1614,7 +1612,7 @@ PP(pp_srand)
     else
 	anum = POPu;
     (void)seedDrand01((Rand_seed_t)anum);
-    srand_called = TRUE;
+    PL_srand_called = TRUE;
     EXTEND(SP, 1);
     RETPUSHYES;
 }
@@ -3171,9 +3169,6 @@ mul128(SV *sv, U8 m)
 
 /* Explosives and implosives. */
 
-static const char uuemap[] =
-    "`!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_";
-static char uudmap[256];        /* Initialised on first use */
 #if 'I' == 73 && 'J' == 74
 /* On an ASCII/ISO kind of system */
 #define ISUUCHAR(ch)    ((ch) >= ' ' && (ch) < 'a')
@@ -3182,7 +3177,7 @@ static char uudmap[256];        /* Initialised on first use */
   Some other sort of character set - use memchr() so we don't match
   the null byte.
  */
-#define ISUUCHAR(ch)    (memchr(uuemap, (ch), sizeof(uuemap)-1) || (ch) == ' ')
+#define ISUUCHAR(ch)    (memchr(PL_uuemap, (ch), sizeof(PL_uuemap)-1) || (ch) == ' ')
 #endif
 
 PP(pp_unpack)
@@ -3222,7 +3217,6 @@ PP(pp_unpack)
     I32 checksum = 0;
     register U32 culong;
     double cdouble;
-    static char* bitcount = 0;
     int commas = 0;
 
     if (gimme != G_ARRAY) {		/* arrange to do first one only */
@@ -3310,21 +3304,21 @@ PP(pp_unpack)
 	    if (pat[-1] == '*' || len > (strend - s) * 8)
 		len = (strend - s) * 8;
 	    if (checksum) {
-		if (!bitcount) {
-		    Newz(601, bitcount, 256, char);
+		if (!PL_bitcount) {
+		    Newz(601, PL_bitcount, 256, char);
 		    for (bits = 1; bits < 256; bits++) {
-			if (bits & 1)	bitcount[bits]++;
-			if (bits & 2)	bitcount[bits]++;
-			if (bits & 4)	bitcount[bits]++;
-			if (bits & 8)	bitcount[bits]++;
-			if (bits & 16)	bitcount[bits]++;
-			if (bits & 32)	bitcount[bits]++;
-			if (bits & 64)	bitcount[bits]++;
-			if (bits & 128)	bitcount[bits]++;
+			if (bits & 1)	PL_bitcount[bits]++;
+			if (bits & 2)	PL_bitcount[bits]++;
+			if (bits & 4)	PL_bitcount[bits]++;
+			if (bits & 8)	PL_bitcount[bits]++;
+			if (bits & 16)	PL_bitcount[bits]++;
+			if (bits & 32)	PL_bitcount[bits]++;
+			if (bits & 64)	PL_bitcount[bits]++;
+			if (bits & 128)	PL_bitcount[bits]++;
 		    }
 		}
 		while (len >= 8) {
-		    culong += bitcount[*(unsigned char*)s++];
+		    culong += PL_bitcount[*(unsigned char*)s++];
 		    len -= 8;
 		}
 		if (len) {
@@ -3853,16 +3847,16 @@ PP(pp_unpack)
              * algorithm, the code will be character-set independent
              * (and just as fast as doing character arithmetic)
              */
-            if (uudmap['M'] == 0) {
+            if (PL_uudmap['M'] == 0) {
                 int i;
  
-                for (i = 0; i < sizeof(uuemap); i += 1)
-                    uudmap[uuemap[i]] = i;
+                for (i = 0; i < sizeof(PL_uuemap); i += 1)
+                    PL_uudmap[PL_uuemap[i]] = i;
                 /*
                  * Because ' ' and '`' map to the same value,
                  * we need to decode them both the same.
                  */
-                uudmap[' '] = 0;
+                PL_uudmap[' '] = 0;
             }
 
 	    along = (strend - s) * 3 / 4;
@@ -3874,22 +3868,22 @@ PP(pp_unpack)
 		char hunk[4];
 
 		hunk[3] = '\0';
-		len = uudmap[*s++] & 077;
+		len = PL_uudmap[*s++] & 077;
 		while (len > 0) {
 		    if (s < strend && ISUUCHAR(*s))
-			a = uudmap[*s++] & 077;
+			a = PL_uudmap[*s++] & 077;
  		    else
  			a = 0;
 		    if (s < strend && ISUUCHAR(*s))
-			b = uudmap[*s++] & 077;
+			b = PL_uudmap[*s++] & 077;
  		    else
  			b = 0;
 		    if (s < strend && ISUUCHAR(*s))
-			c = uudmap[*s++] & 077;
+			c = PL_uudmap[*s++] & 077;
  		    else
  			c = 0;
 		    if (s < strend && ISUUCHAR(*s))
-			d = uudmap[*s++] & 077;
+			d = PL_uudmap[*s++] & 077;
 		    else
 			d = 0;
 		    hunk[0] = (a << 2) | (b >> 4);
@@ -3950,24 +3944,24 @@ doencodes(register SV *sv, register char *s, register I32 len)
 {
     char hunk[5];
 
-    *hunk = uuemap[len];
+    *hunk = PL_uuemap[len];
     sv_catpvn(sv, hunk, 1);
     hunk[4] = '\0';
     while (len > 2) {
-	hunk[0] = uuemap[(077 & (*s >> 2))];
-	hunk[1] = uuemap[(077 & (((*s << 4) & 060) | ((s[1] >> 4) & 017)))];
-	hunk[2] = uuemap[(077 & (((s[1] << 2) & 074) | ((s[2] >> 6) & 03)))];
-	hunk[3] = uuemap[(077 & (s[2] & 077))];
+	hunk[0] = PL_uuemap[(077 & (*s >> 2))];
+	hunk[1] = PL_uuemap[(077 & (((*s << 4) & 060) | ((s[1] >> 4) & 017)))];
+	hunk[2] = PL_uuemap[(077 & (((s[1] << 2) & 074) | ((s[2] >> 6) & 03)))];
+	hunk[3] = PL_uuemap[(077 & (s[2] & 077))];
 	sv_catpvn(sv, hunk, 4);
 	s += 3;
 	len -= 3;
     }
     if (len > 0) {
 	char r = (len > 1 ? s[1] : '\0');
-	hunk[0] = uuemap[(077 & (*s >> 2))];
-	hunk[1] = uuemap[(077 & (((*s << 4) & 060) | ((r >> 4) & 017)))];
-	hunk[2] = uuemap[(077 & ((r << 2) & 074))];
-	hunk[3] = uuemap[0];
+	hunk[0] = PL_uuemap[(077 & (*s >> 2))];
+	hunk[1] = PL_uuemap[(077 & (((*s << 4) & 060) | ((r >> 4) & 017)))];
+	hunk[2] = PL_uuemap[(077 & ((r << 2) & 074))];
+	hunk[3] = PL_uuemap[0];
 	sv_catpvn(sv, hunk, 4);
     }
     sv_catpvn(sv, "\n", 1);

@@ -111,12 +111,8 @@ INST_VER	= \5.00554
 # set the install locations of the compiler include/libraries
 # Running VCVARS32.BAT is *required* when using Visual C.
 # Some versions of Visual C don't define MSVCDIR in the environment,
-# so you may have to set CCHOME explicitly.
-#
-# If the path contains spaces, you can try putting it in double
-# quotes, but support for this is not well-tested, and various
-# other things may break, so you're kinda on your own if you are
-# into specious paths. :-)
+# so you may have to set CCHOME explicitly (spaces in the path name should
+# not be quoted)
 #
 #CCHOME		= f:\msvc20
 CCHOME		= $(MSVCDIR)
@@ -135,7 +131,8 @@ CCLIBDIR	= $(CCHOME)\lib
 #BUILDOPT	= -DPERL_POLLUTE
 
 #
-# specify space-separated list of extra directories to look for libraries
+# specify semicolon-separated list of extra directories that modules will
+# look for libraries (spaces in path names need not be quoted)
 #
 EXTRALIBDIRS	=
 
@@ -590,14 +587,14 @@ CFG_VARS	=					\
 		"INST_VER=$(INST_VER)"			\
 		"archname=$(ARCHNAME)"			\
 		"cc=$(CC)"				\
-		"ccflags=$(OPTIMIZE) $(DEFINES) $(OBJECT)"	\
+		"ccflags=$(OPTIMIZE:"=\") $(DEFINES) $(OBJECT)"	\
 		"cf_email=$(EMAIL)"			\
 		"d_crypt=$(D_CRYPT)"			\
 		"d_mymalloc=$(PERL_MALLOC)"		\
 		"libs=$(LIBFILES)"			\
-		"incpath=$(CCINCDIR)"			\
-		"libperl=$(PERLIMPLIB:..\=)"			\
-		"libpth=$(CCLIBDIR) $(EXTRALIBDIRS)"	\
+		"incpath=$(CCINCDIR:"=\")"		\
+		"libperl=$(PERLIMPLIB:..\=)"		\
+		"libpth=$(CCLIBDIR:"=\");$(EXTRALIBDIRS:"=\")"	\
 		"libc=$(LIBC)"				\
 		"make=nmake"				\
 		"static_ext=$(STATIC_EXT)"		\
@@ -605,8 +602,8 @@ CFG_VARS	=					\
 		"nonxs_ext=$(NONXS_EXT)"		\
 		"usethreads=$(USE_THREADS)"		\
 		"usemultiplicity=$(USE_MULTI)"		\
-		"LINK_FLAGS=$(LINK_FLAGS)"		\
-		"optimize=$(OPTIMIZE)"
+		"LINK_FLAGS=$(LINK_FLAGS:"=\")"		\
+		"optimize=$(OPTIMIZE:"=\")"
 
 #
 # Top targets
@@ -645,7 +642,7 @@ regen_config_h:
 	perl configpm
 	cd win32
 	-del /f $(CFGH_TMPL)
-	-mkdir ..\lib\CORE
+	-mkdir $(COREDIR)
 	-perl -I..\lib config_h.PL "INST_VER=$(INST_VER)"
 	rename config.h $(CFGH_TMPL)
 
@@ -657,7 +654,7 @@ $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 	$(XCOPY) ..\ext\re\re.pm $(LIBDIR)\*.*
 	$(RCOPY) include $(COREDIR)\*.*
 	$(MINIPERL) -I..\lib config_h.PL "INST_VER=$(INST_VER)" \
-	    || $(MAKE) $(MAKEFLAGS) $(CONFIGPM)
+	    || $(MAKE) /$(MAKEFLAGS) $(CONFIGPM)
 
 $(MINIPERL) : $(MINIDIR) $(MINI_OBJ)
 	$(LINK32) -subsystem:console -out:$@ @<<

@@ -52,6 +52,8 @@
 #define PL_basetime		pPerl->PL_basetime
 #undef  PL_beginav
 #define PL_beginav		pPerl->PL_beginav
+#undef  PL_bitcount
+#define PL_bitcount		pPerl->PL_bitcount
 #undef  PL_bodytarget
 #define PL_bodytarget		pPerl->PL_bodytarget
 #undef  PL_bostr
@@ -170,6 +172,10 @@
 #define PL_dumpindent		pPerl->PL_dumpindent
 #undef  PL_e_script
 #define PL_e_script		pPerl->PL_e_script
+#undef  PL_efloatbuf
+#define PL_efloatbuf		pPerl->PL_efloatbuf
+#undef  PL_efloatsize
+#define PL_efloatsize		pPerl->PL_efloatsize
 #undef  PL_egid
 #define PL_egid			pPerl->PL_egid
 #undef  PL_endav
@@ -206,6 +212,8 @@
 #define PL_fdpid		pPerl->PL_fdpid
 #undef  PL_filemode
 #define PL_filemode		pPerl->PL_filemode
+#undef  PL_filter_debug
+#define PL_filter_debug		pPerl->PL_filter_debug
 #undef  PL_firstgv
 #define PL_firstgv		pPerl->PL_firstgv
 #undef  PL_forkprocess
@@ -220,6 +228,8 @@
 #define PL_gensym		pPerl->PL_gensym
 #undef  PL_gid
 #define PL_gid			pPerl->PL_gid
+#undef  PL_glob_index
+#define PL_glob_index		pPerl->PL_glob_index
 #undef  PL_globalstash
 #define PL_globalstash		pPerl->PL_globalstash
 #undef  PL_he_root
@@ -638,6 +648,8 @@
 #define PL_specialsv_list	pPerl->PL_specialsv_list
 #undef  PL_splitstr
 #define PL_splitstr		pPerl->PL_splitstr
+#undef  PL_srand_called
+#define PL_srand_called		pPerl->PL_srand_called
 #undef  PL_stack_base
 #define PL_stack_base		pPerl->PL_stack_base
 #undef  PL_stack_max
@@ -752,6 +764,8 @@
 #define PL_utf8_toupper		pPerl->PL_utf8_toupper
 #undef  PL_utf8_upper
 #define PL_utf8_upper		pPerl->PL_utf8_upper
+#undef  PL_uudmap
+#define PL_uudmap		pPerl->PL_uudmap
 #undef  PL_warnhook
 #define PL_warnhook		pPerl->PL_warnhook
 #undef  PL_watchaddr

@@ -31,6 +31,10 @@ sub path {
     @path;
 }
 
+sub devnull {
+    return "/dev/nul";
+}
+
 1;
 __END__
 

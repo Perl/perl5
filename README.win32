@@ -107,7 +107,7 @@ make for building extensions using MakeMaker.
 
 =item Mingw32 with EGCS or GCC
 
-ECGS-1.0.2 binaries can be downloaded from:
+ECGS binaries can be downloaded from:
 
     ftp://ftp.xraylith.wisc.edu/pub/khan/gnu-win32/mingw32/
 
@@ -123,6 +123,8 @@ come with more up-to-date Mingw32 libraries.
 Make sure you install the binaries as indicated in the web sites
 above.  You will need to set up a few environment variables (usually
 run from a batch file).
+
+You also need dmake.  See L</"Borland C++"> above on how to get it.
 
 =back
 
@@ -149,7 +151,12 @@ a perl interpreter that supports the Perl Object abstraction (courtesy
 ActiveState Tool Corp.)  PERL_OBJECT uses C++, and the binaries are
 therefore incompatible with the regular C build.  However, the
 PERL_OBJECT build does provide something called the C-API, for linking
-it with extensions that won't compile under PERL_OBJECT.  PERL_OBJECT
+it with extensions that won't compile under PERL_OBJECT. Using the C_API
+is typically requested through:
+
+    perl Makefile.PL CAPI=TRUE
+
+PERL_OBJECT requires VC++ 5.0 (Service Pack 3 recommended) or later. It
 is not yet supported under GCC or EGCS.  WARNING:  Binaries built with
 PERL_OBJECT enabled are B<not> compatible with binaries built without.
 Perl installs PERL_OBJECT binaries under a distinct architecture name,
@@ -185,14 +192,11 @@ Perl will also build without des_fcrypt(), but the crypt() builtin will
 fail at run time.
 
 You will also have to make sure CCHOME points to wherever you installed
-your compiler.  Make sure this path has no spaces in it.  If you
-insist on spaces in your path names, there is no telling what else
-will fail, but you can try putting the path in double quotes.  Some
-parts of perl try to accomodate that, but not all pieces do.
+your compiler.
 
 The default value for CCHOME in the makefiles for Visual C++
-may not be correct if you have a version later than 5.2.  Make
-sure the default exists and is valid.
+may not be correct for some versions.  Make sure the default exists
+and is valid.
 
 Other options are explained in the makefiles.  Be sure to read the
 instructions carefully.
@@ -259,7 +263,7 @@ you will need to add two components to your PATH environment variable,
 C<$INST_TOP\$VERSION\bin>, and C<$INST_TOP\$VERSION\bin\$ARCHNAME>.
 For example:
 
-    set PATH c:\perl\5.005\bin;c:\perl\5.005\bin\MSWin32-x6;%PATH%
+    set PATH c:\perl\5.005\bin;c:\perl\5.005\bin\MSWin32-x86;%PATH%
 
 
 =head2 Usage Hints
@@ -401,9 +405,34 @@ be built, tested and installed with the standard mantra:
     $MAKE test
     $MAKE install
 
-where $MAKE stands for NMAKE or DMAKE.  Some extensions may not
-provide a testsuite (so "$MAKE test" may not do anything, or fail),
-but most serious ones do.
+where $MAKE is whatever 'make' program you have configured perl to
+use.  Use "perl -V:make" to find out what this is.  Some extensions
+may not provide a testsuite (so "$MAKE test" may not do anything, or
+fail), but most serious ones do.
+
+It is important that you use a supported 'make' program, and
+ensure Config.pm knows about it.  If you don't have nmake, you can
+either get dmake from the location mentioned earlier, or get an
+old version of nmake reportedly available from:
+
+    ftp://ftp.microsoft.com/Softlib/MSLFILES/nmake15.exe
+
+Another option is to use the make written in Perl, available from
+CPAN:
+
+    http://www.perl.com/CPAN/authors/id/NI-S/Make-0.03.tar.gz
+
+Note that MakeMaker actually emits makefiles with different syntax
+depending on what 'make' it thinks you are using.  Therefore, it is
+important that one of the following values appears in Config.pm:
+
+    make='nmake'	# MakeMaker emits nmake syntax
+    make='dmake'	# MakeMaker emits dmake syntax
+    any other value	# MakeMaker emits generic make syntax
+    			    (e.g GNU make, or Perl make)
+
+If the value doesn't match the 'make' program you want to use,
+edit Config.pm to fix it.
 
 If a module implements XSUBs, you will need one of the supported
 C compilers.  You must make sure you have set up the environment for
@@ -718,7 +747,9 @@ Borland support was added in 5.004_01 (Gurusamy Sarathy).
 
 GCC/mingw32 support was added in 5.005 (Nick Ing-Simmons).
 
-Last updated: 29 November 1998
+Support for PERL_OBJECT was added in 5.005 (ActiveState Tool Corp).
+
+Last updated: 18 January 1999
 
 =cut
 
