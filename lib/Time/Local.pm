@@ -149,7 +149,7 @@ values, the following conventions are followed:
 
 Years greater than 999 are interpreted as being the actual year,
 rather than the offset from 1900.  Thus, 1963 would indicate the year
-of Martin Luther King's assassination, not the year 2863.
+Martin Luther King won the Nobel prize, not the year 2863.
 
 =item *
 
@@ -170,6 +170,7 @@ two digit dates.  Whenever possible, use an absolute four digit year instead.
 
 The scheme above allows interpretation of a wide range of dates, particularly
 if 4-digit years are used.  
+
 Please note, however, that the range of dates that can be actually be handled
 depends on the size of an integer (time_t) on a given platform.  
 Currently, this is 32 bits for most systems, yielding an approximate range 
