@@ -219,6 +219,12 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix, I32 s
 		    SvNVX(namesv) = (double)PL_curcop->cop_seq;
 		    SvIVX(namesv) = PAD_MAX;	/* A ref, intro immediately */
 		    SvFAKE_on(namesv);		/* A ref, not a real var */
+		    if (SvOBJECT(svp[off])) {	/* A typed var */
+			SvOBJECT_on(namesv);
+			(void)SvUPGRADE(namesv, SVt_PVMG);
+			SvSTASH(namesv) = (HV*)SvREFCNT_inc((SV*)SvSTASH(svp[off]));
+			PL_sv_objcount++;
+		    }
 		    if (CvANON(PL_compcv) || SvTYPE(PL_compcv) == SVt_PVFM) {
 			/* "It's closures all the way down." */
 			CvCLONE_on(PL_compcv);
