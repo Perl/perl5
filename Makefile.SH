@@ -26,6 +26,7 @@ esac
 linklibperl='$(LIBPERL)'
 shrpldflags='$(LDDLFLAGS)'
 ldlibpth=''
+DPERL_EXTERNAL_GLOB='-DPERL_EXTERNAL_GLOB'
 case "$useshrplib" in
 true)
 	# Prefix all runs of 'miniperl' and 'perl' with 
@@ -76,6 +77,10 @@ true)
 	hpux*)
 		linklibperl="-L `pwd | sed 's/\/UU$//'` -Wl,+s -Wl,+b$archlibexp/CORE -lperl"
 		;;
+	os390*)
+	    linklibperl='libperl.x'
+	    DPERL_EXTERNAL_GLOB=''
+	    ;;
 	esac
 	case "$ldlibpthname" in
 	'') ;;
@@ -300,17 +305,21 @@ utilities:	miniperl lib/Config.pm $(plextract) lib/lib.pm FORCE
 # Apparently some makes require an action for the FORCE target.
 FORCE:
 	@sh -c true
+!NO!SUBS!
+$spitshell >>Makefile <<!GROK!THIS!
 
 # We do a copy of the op.c instead of a symlink because gcc gets huffy
 # if we have a symlink forest to another disk (it complains about too many
 # levels of symbolic links, even if we have only two)
 
-opmini$(OBJ_EXT): op.c config.h
-	$(RMS) opmini.c
-	$(CPS) op.c opmini.c
-	$(CCCMD) $(PLDLFLAGS) -DPERL_EXTERNAL_GLOB opmini.c
-	$(RMS) opmini.c
+opmini\$(OBJ_EXT): op.c config.h
+	\$(RMS) opmini.c
+	\$(CPS) op.c opmini.c
+	\$(CCCMD) \$(PLDLFLAGS) $DPERL_EXTERNAL_GLOB opmini.c
+	\$(RMS) opmini.c
 
+!GROK!THIS!
+$spitshell >>Makefile <<'!NO!SUBS!'
 miniperlmain$(OBJ_EXT): miniperlmain.c patchlevel.h
 	$(CCCMD) $(PLDLFLAGS) $*.c
 
