@@ -26,6 +26,7 @@ main(int argc, char **argv, char **env)
     struct bytestream bs;
 #endif /* INDIRECT_BGET_MACROS */
 
+    INIT_SPECIALSV_LIST;
     PERL_SYS_INIT(&argc,&argv);
  
 #if PATCHLEVEL > 3 || (PATCHLEVEL == 3 && SUBVERSION >= 1)
@@ -41,13 +42,19 @@ main(int argc, char **argv, char **env)
 	perl_construct( my_perl );
     }
 
+#ifdef CSH
     if (!cshlen) 
       cshlen = strlen(cshname);
+#endif
 
     if (argc < 2)
 	fp = stdin;
     else {
+#ifdef WIN32
+	fp = fopen(argv[1], "rb");
+#else
 	fp = fopen(argv[1], "r");
+#endif
 	if (!fp) {
 	    perror(argv[1]);
 	    exit(1);

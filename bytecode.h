@@ -156,7 +156,9 @@ EXT I32 obj_list_fill INIT(-1);
  */
 #define BSET_op_type(o, arg)	do {	\
 	o->op_type = arg;		\
-	o->op_ppaddr = (arg != OP_MAPSTART) ? ppaddr[arg] : pp_grepstart; \
+	if (arg == OP_MAPSTART)		\
+	    arg = OP_GREPSTART;		\
+	o->op_ppaddr = ppaddr[arg];	\
     } while (0)
 #define BSET_op_ppaddr(o, arg) croak("op_ppaddr not yet implemented")
 #define BSET_curpad(pad, arg) pad = AvARRAY(arg)

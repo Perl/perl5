@@ -675,6 +675,7 @@ sub bytecompile_main {
 sub prepare_assemble {
     my $newfh = IO::File->new_tmpfile;
     select($newfh);
+    binmode $newfh;
     return $newfh;
 }
 
@@ -688,6 +689,7 @@ sub compile {
     my @options = @_;
     my ($option, $opt, $arg);
     open(OUT, ">&STDOUT");
+    binmode OUT;
     select(OUT);
   OPTION:
     while ($option = shift @options) {
@@ -704,6 +706,7 @@ sub compile {
 	} elsif ($opt eq "o") {
 	    $arg ||= shift @options;
 	    open(OUT, ">$arg") or return "$arg: $!\n";
+	    binmode OUT;
 	} elsif ($opt eq "D") {
 	    $arg ||= shift @options;
 	    foreach $arg (split(//, $arg)) {

@@ -982,8 +982,10 @@ main(int argc, char **argv, char **env)
 	perl_construct( my_perl );
     }
 
+#ifdef CSH
     if (!cshlen) 
       cshlen = strlen(cshname);
+#endif
 
 #ifdef ALLOW_PERL_OPTIONS
 #define EXTRA_OPTIONS 2

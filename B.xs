@@ -433,6 +433,9 @@ MODULE = B	PACKAGE = B	PREFIX = B_
 
 PROTOTYPES: DISABLE
 
+BOOT:
+    INIT_SPECIALSV_LIST;
+
 #define B_main_cv()	main_cv
 #define B_main_root()	main_root
 #define B_main_start()	main_start
@@ -553,12 +556,14 @@ cchar(sv)
 void
 threadsv_names()
     PPCODE:
+#ifdef USE_THREADS
 	int i;
 	STRLEN len = strlen(threadsv_names);
 
 	EXTEND(sp, len);
 	for (i = 0; i < len; i++)
 	    PUSHs(sv_2mortal(newSVpv(&threadsv_names[i], 1)));
+#endif
 
 
 #define OP_next(o)	o->op_next

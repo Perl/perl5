@@ -220,13 +220,14 @@ print BYTERUN_H <<'EOT';
 EOT
 
 printf BYTERUN_H <<'EOT', scalar(@specialsv);
-EXT SV * specialsv_list[%d]
-#ifdef DOINIT
+EXT SV * specialsv_list[%d];
+#define INIT_SPECIALSV_LIST STMT_START { \
 EOT
-print BYTERUN_H "= { ", join(", ", @specialsv), " }\n";
+for ($i = 0; $i < @specialsv; $i++) {
+    print BYTERUN_H "specialsv_list[$i] = $specialsv[$i]; \\\n";
+}
 print BYTERUN_H <<'EOT';
-#endif /* DOINIT */
-;
+} STMT_END
 EOT
 
 #
