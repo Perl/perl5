@@ -1,5 +1,3 @@
-#
-
 package IO::Handle;
 
 =head1 NAME
@@ -193,11 +191,6 @@ use SelectSaver;
 require Exporter;
 @ISA = qw(Exporter);
 
-##
-## TEMPORARY workaround as perl expects handles to be <FileHandle> objects
-##
-@FileHandle::ISA = qw(IO::Handle);
-
 $VERSION = "1.12";
 $RCS = sprintf("%s", q$Revision: 1.15 $ =~ /([\d\.]+)/);
 
@@ -269,28 +262,22 @@ sub new_from_fd {
     my $class = ref($_[0]) || $_[0] || "IO::Handle";
     @_ == 3 or croak "usage: new_from_fd $class FD, MODE";
     my $fh = gensym;
+    shift;
     IO::Handle::fdopen($fh, @_)
 	or return undef;
     bless $fh, $class;
 }
 
+#
+# That an IO::Handle is being destroyed does not necessarily mean
+# that the associated filehandle should be closed.  This is because
+# *FOO{FILEHANDLE} may by a synonym for *BAR{FILEHANDLE}.
+#
+# If this IO::Handle really does have the final reference to the
+# given FILEHANDLE, then Perl will close it for us automatically.
+#
+
 sub DESTROY {
-    my ($fh) = @_;
-
-    # During global object destruction, this function may be called
-    # on FILEHANDLEs as well as on the GLOBs that contains them.
-    # Thus the following trickery.  If only the CORE file operators
-    # could deal with FILEHANDLEs, it wouldn't be necessary...
-
-    if ($fh =~ /=FILEHANDLE\(/) {
-	local *TMP = $fh;
-	close(TMP)
-	    if defined fileno(TMP);
-    }
-    else {
-	close($fh)
-	    if defined fileno($fh);
-    }
 }
 
 ################################################
