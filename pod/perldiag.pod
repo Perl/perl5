@@ -1538,7 +1538,7 @@ backwards.
 
 =item Modification of non-creatable hash value attempted, subscript "%s"
 
-(F) You tried to make a hash value spring into existence, and it couldn't
+(P) You tried to make a hash value spring into existence, and it couldn't
 be created for some peculiar reason.
 
 =item Module name must be constant
