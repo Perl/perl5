@@ -48,6 +48,19 @@ use Locale::Country;
  ['code2country("zw") eq "Zimbabwe"', 0],         # last in DATA segment
  ['code2country("gb") eq "United Kingdom"', 0],   # United Kingdom is "gb", not "uk"
 
+ #-- tests added after changes in the standard 2002-05-20 ------
+ ['code2country("kz") eq "Kazakhstan"', 0],
+ ['country2code("kazakhstan")               eq "kz"', 0],
+ ['country2code("kazakstan")                eq "kz"', 0],
+
+ ['code2country("mo") eq "Macao"', 0],
+ ['country2code("macao")                    eq "mo"', 0],
+ ['country2code("macau")                    eq "mo"', 0],
+
+ ['code2country("tl", LOCALE_CODE_ALPHA_2) eq "East Timor"', 0],
+ ['code2country("tls", LOCALE_CODE_ALPHA_3) eq "East Timor"', 0],
+ ['code2country("626", LOCALE_CODE_NUMERIC) eq "East Timor"', 0],
+
 	#================================================
 	# TESTS FOR country2code
 	#================================================
