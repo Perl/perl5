@@ -144,6 +144,7 @@ embed.pl
 embedvar.h	
 ext/*/hints*			cfg
 ext/B/*				nik
+ext/B/B/Deparse.pm		smccam
 ext/DB_File*			pmarquess
 ext/DB_File/hints/dynixptx.pl	dynix/ptx
 ext/Data/Dumper/*		gsar
