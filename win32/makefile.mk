@@ -593,6 +593,7 @@ UTILS		=			\
 		..\utils\piconv		\
 		..\utils\cpan		\
 		..\utils\xsubpp		\
+		..\utils\prove		\
 		..\utils\instmodsh	\
 		..\pod\checkpods	\
 		..\pod\pod2html		\
@@ -1201,7 +1202,7 @@ distclean: clean
 	    podchecker podselect
 	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph pstruct h2xs \
 	    perldoc perlivp dprofpp perlcc libnetcfg enc2xs piconv cpan *.bat \
-	    xsubpp instmodsh
+	    xsubpp instmodsh prove
 	-cd ..\x2p && del /f find2perl s2p psed *.bat
 	-del /f ..\config.sh ..\splittree.pl perlmain.c dlutils.c config.h.new
 	-del /f $(CONFIGPM)
