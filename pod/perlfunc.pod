@@ -1076,6 +1076,8 @@ in case 6.
 
 =item exec LIST
 
+=item exec PROGRAM LIST
+
 The exec() function executes a system command I<AND NEVER RETURNS> -
 use system() instead of exec() if you want it to return. It fails and
 returns FALSE only if the command does not exist I<and> it is executed
@@ -3564,6 +3566,8 @@ the new position.
 
 =item system LIST
 
+=item system PROGRAM LIST
+
 Does exactly the same thing as "exec LIST" except that a fork is done
 first, and the parent process waits for the child process to complete.
 Note that argument processing varies depending on the number of
@@ -3572,6 +3576,9 @@ returned by the wait() call.  To get the actual exit value divide by
 256.  See also L</exec>.  This is I<NOT> what you want to use to capture
 the output from a command, for that you should use merely backticks or
 qx//, as described in L<perlop/"`STRING`">.
+
+Like exec(), system() allows you to lie to a program about its name if
+you use the "system PROGRAM LIST" syntax.  Again, see L</exec>.
 
 Because system() and backticks block SIGINT and SIGQUIT, killing the
 program they're running doesn't actually interrupt your program.
