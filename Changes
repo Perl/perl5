@@ -74,9 +74,105 @@ indicator:
 
 
 ----------------
-Version 5.005_02        Second maintenance release of 5.005 (trial2)
+Version 5.005_02        Second maintenance release of 5.005
 ----------------
 
+____________________________________________________________________________
+[  1757] By: gsar                                  on 1998/08/08  03:33:33
+        Log: prevent lexical leaks from Benchmark into target code (inspired by
+             an attempt by John Allen)
+     Branch: maint-5.005/perl
+           ! lib/Benchmark.pm
+____________________________________________________________________________
+[  1755] By: gsar                                  on 1998/08/07  23:58:33
+        Log: temporary opcode.pl workaround for ebcdic (suggested by
+             David J. Fiander <davidf@mks.com> and M.J.T. Guy)
+     Branch: maint-5.005/perl
+           ! opcode.pl
+____________________________________________________________________________
+[  1754] By: gsar                                  on 1998/08/07  22:21:10
+        Log: From: pmarquess@bfsec.bt.co.uk (Paul Marquess)
+             Date: Fri, 7 Aug 1998 09:56:01 +0100 (BST)
+             Message-Id: <9808070856.AA28065@claudius.bfsec.bt.co.uk>
+             Subject: [PATCH 5.005_50 & 5.005_02] Fix for command line use of source filters
+     Branch: maint-5.005/perl
+           ! perl.c
+____________________________________________________________________________
+[  1753] By: gsar                                  on 1998/08/07  22:19:42
+        Log: perlport.pod notes from Jarkko Hietaniemi; utime() note for Win32
+     Branch: maint-5.005/perl
+           ! pod/perlport.pod
+____________________________________________________________________________
+[  1752] By: gsar                                  on 1998/08/07  22:08:29
+        Log: perlport.pod v1.33 from Chris Nandor <pudge@pobox.com>
+     Branch: maint-5.005/perl
+           ! pod/perlport.pod
+____________________________________________________________________________
+[  1751] By: gsar                                  on 1998/08/07  22:01:04
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Thu, 6 Aug 1998 19:44:16 -0400 (EDT)
+             Message-Id: <199808062344.TAA09505@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.005_*] Minor cleanup of RE tests and docs
+     Branch: maint-5.005/perl
+           ! pod/perlre.pod t/op/regexp.t
+____________________________________________________________________________
+[  1750] By: gsar                                  on 1998/08/07  21:51:52
+        Log: allow more compatible interpretation of spaces File::DosGlob::glob()
+             patterns
+     Branch: maint-5.005/perl
+           ! lib/File/DosGlob.pm
+____________________________________________________________________________
+[  1749] By: gsar                                  on 1998/08/07  21:36:04
+        Log: don't use © in Test.pm (suggested by M.J.T. Guy)
+     Branch: maint-5.005/perl
+           ! lib/Test.pm
+____________________________________________________________________________
+[  1748] By: gsar                                  on 1998/08/07  21:31:46
+        Log: From: Dominic Dunlop <domo@computer.org>
+             Date: Thu, 6 Aug 1998 12:38:07 +0000
+             Message-Id: <v03110702b1ef5274635a@[195.95.102.104]>
+             Subject: [Patch perl5.005_02-TRIAL2] Update hints, Configure for MachTen 4.1.1
+     Branch: maint-5.005/perl
+           ! Configure hints/machten.sh
+____________________________________________________________________________
+[  1746] By: gsar                                  on 1998/08/05  22:55:59
+        Log: MM_Win32.pm and Liblist.pm tweaks
+     Branch: maint-5.005/perl
+           ! lib/ExtUtils/Liblist.pm lib/ExtUtils/MM_Win32.pm
+____________________________________________________________________________
+[  1745] By: gsar                                  on 1998/08/05  21:57:00
+        Log: pod/perlfaq* update from Tom Christiansen <tchrist@perl.com>
+     Branch: maint-5.005/perl
+	   ! pod/perlfaq.pod pod/perlfaq1.pod pod/perlfaq2.pod
+           ! pod/perlfaq3.pod pod/perlfaq4.pod pod/perlfaq8.pod
+____________________________________________________________________________
+[  1744] By: gsar                                  on 1998/08/05  21:53:30
+        Log: From: Chris Nandor <pudge@pobox.com>
+             Date: Wed, 5 Aug 1998 15:38:48 -0400
+             Message-Id: <v04011701b1ee58b86c63@[192.168.0.3]>
+             Subject: [PATCH] perlport 1.32
+     Branch: maint-5.005/perl
+           ! pod/perlport.pod
+____________________________________________________________________________
+[  1743] By: gsar                                  on 1998/08/05  21:52:05
+        Log: README.os2 update
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Wed, 5 Aug 1998 05:44:46 -0400 (EDT)
+             Message-Id: <199808050944.FAA09053@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.005_*] Additional OS/2 tweaks: docs, tests
+     Branch: maint-5.005/perl
+           ! README.os2 t/lib/posix.t t/op/exec.t
+____________________________________________________________________________
+[  1742] By: gsar                                  on 1998/08/05  21:50:07
+        Log: additional INSTALL notes from Jarkko Hietaniemi <jhi@cc.hut.fi>
+             on semget failure in t/lib/ipc_sysv.t
+     Branch: maint-5.005/perl
+           ! INSTALL
+____________________________________________________________________________
+[  1741] By: gsar                                  on 1998/08/05  21:46:13
+        Log: correct URL for perlcrt.dll
+     Branch: maint-5.005/perl
+           ! Changes win32/Makefile win32/makefile.mk
 ____________________________________________________________________________
 [  1740] By: gsar                                  on 1998/08/05  10:05:46
         Log: update Changes, patchlevel, tweak Liblist.pm

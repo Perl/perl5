@@ -40,7 +40,6 @@
  */
 static	char	*local_patches[] = {
 	NULL
-	,"TRIAL2 - nearly 5.005_02, **for testing purposes only**"
 	,NULL
 };
 

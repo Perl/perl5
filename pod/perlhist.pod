@@ -297,7 +297,8 @@ the strings?).
 
  Sarathy  5.005_01      1998-Jul-27     The 5.005 maintenance track.
           5.005_02-T1   1998-Aug-02
-          5.005_02      1998-Aug-
+          5.005_02-T2   1998-Aug-05
+          5.005_02      1998-Aug-08
  Graham   5.005_03      1998-           
 
  Sarathy  5.005_50      1998-Jul-26     The 5.006 development track.

@@ -374,7 +374,7 @@ assume that the alphabetic characters are encoded contiguously (in
 numerical sense).  Do no assume anything about the ordering of the
 characters.  The lowercase letters may come before or after the
 uppercase letters, the lowercase and uppercase may be interlaced so
-that both 'a' and 'A* come before the 'b', the accented and other
+that both 'a' and 'A' come before the 'b', the accented and other
 international characters may be interlaced so that E<auml> comes
 before the 'b'.
 
