@@ -127,11 +127,36 @@ sub mycan {				# Real can would leave stubs.
 	 dereferencing	  => '${} @{} %{} &{} *{}',
 	 special	  => 'nomethod fallback =');
 
+use warnings::register;
 sub constant {
   # Arguments: what, sub
   while (@_) {
-    $^H{$_[0]} = $_[1];
-    $^H |= $constants{$_[0]} | $overload::hint_bits;
+    if (@_ == 1) {
+        if (warnings::enabled) {
+            require Carp;
+            Carp::carp ("Odd number of arguments for overload::constant");
+        }
+        last;
+    }
+    elsif (!exists $constants {$_ [0]}) {
+        if (warnings::enabled) {
+            require Carp;
+            Carp::carp ("`$_[0]' is not an overloadable type");
+        }
+    }
+    elsif (!ref $_ [1] || "$_[1]" !~ /CODE\(0x[\da-f]+\)$/) {
+        # Can't use C<ref $_[1] eq "CODE"> above as code references can be
+        # blessed, and C<ref> would return the package the ref is blessed into.
+        if (warnings::enabled) {
+            require Carp;
+            $_ [1] = "undef" unless defined $_ [1];
+            Carp::carp ("`$_[1]' is not a code reference");
+        }
+    }
+    else {
+        $^H{$_[0]} = $_[1];
+        $^H |= $constants{$_[0]} | $overload::hint_bits;
+    }
     shift, shift;
   }
 }
@@ -1335,6 +1360,27 @@ is shown by debugger. The method C<()> corresponds to the C<fallback>
 key (in fact a presence of this method shows that this package has
 overloading enabled, and it is what is used by the C<Overloaded>
 function of module C<overload>).
+
+The module might issues the following warnings:
+
+=over 4
+
+=item Odd number of arguments for overload::constant
+
+(W) The call to overload::constant contained an odd number of arguments.
+The arguments should come in pairs.
+
+=item `%s' is not an overloadable type
+
+(W) You tried to overload a constant type the overload package is unaware of.
+
+=item `%s' is not a code reference
+
+(W) The second (fourth, sixth, ...) argument of overload::constant needs
+to be a code reference. Either an anonymous subroutine, or a reference
+to a subroutine.
+
+=back
 
 =head1 BUGS
 
