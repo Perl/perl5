@@ -2847,8 +2847,8 @@ PerlIOStdio_fill(pTHX_ PerlIO *f)
      * buffer, so we stuff it in the buffer ourselves.
      * Should never get called as should hit code above
      */
-    *(--((*fp)->_ptr)) = (unsigned char) c;
-    (*fp)->_cnt++;
+    *(--((*stdio)->_ptr)) = (unsigned char) c;
+    (*stdio)->_cnt++;
 #else
     /* If buffer snoop scheme above fails fall back to
        using ungetc (but why did "fill" get called?).
