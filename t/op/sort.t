@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 use warnings;
-print "1..127\n";
+print "1..129\n";
 
 # these shouldn't hang
 {
@@ -22,7 +22,7 @@ sub Backwards_stacked($$) { my($a,$b) = @_; $a lt $b ? 1 : $a gt $b ? -1 : 0 }
 my $upperfirst = 'A' lt 'a';
 
 # Beware: in future this may become hairier because of possible
-# collation complications: qw(A a B c) can be sorted at least as
+# collation complications: qw(A a B b) can be sorted at least as
 # any of the following
 #
 #	A a B b
@@ -576,6 +576,15 @@ ok "@output", "G H I D E F A B C", 'stable $b <=> $a sort';
 @input = &generate1;
 @input = sort {$b <=> $a} @input;
 ok "@input", "G H I D E F A B C", 'stable $b <=> $a in place sort';
+
+# test that optimized {$b cmp $a} and {$b <=> $a} remain stable
+# (new in 5.9) without overloading
+{ no warnings;
+@b = sort { $b <=> $a } @input = qw/5first 6first 5second 6second/;
+ok "@b" , "6first 6second 5first 5second", "optimized {$b <=> $a} without overloading" ;
+@input = sort {$b <=> $a} @input;
+ok "@input" , "6first 6second 5first 5second","inline optimized {$b <=> $a} without overloading" ;
+};
 
 # These two are actually doing string cmp on 0 1 and 2
 @input = &generate1;
