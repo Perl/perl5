@@ -473,7 +473,6 @@ Perl_sv_reset
 Perl_sv_setpvf
 Perl_sv_vsetpvf
 Perl_sv_setiv
-Perl_sv_setpviv
 Perl_sv_setuv
 Perl_sv_setnv
 Perl_sv_setref_iv
@@ -552,7 +551,6 @@ Perl_sv_catsv_mg
 Perl_sv_setpvf_mg
 Perl_sv_vsetpvf_mg
 Perl_sv_setiv_mg
-Perl_sv_setpviv_mg
 Perl_sv_setuv_mg
 Perl_sv_setnv_mg
 Perl_sv_setpv_mg
