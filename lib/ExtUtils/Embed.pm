@@ -43,10 +43,15 @@ sub my_return {
     }
 }
 
+sub is_perl_object {
+    $Config{ccflags} =~ /-DPERL_OBJECT/;  
+}
+
 sub xsinit { 
     my($file, $std, $mods) = @_;
     my($fh,@mods,%seen);
     $file ||= "perlxsi.c";
+    my $xsinit_proto = is_perl_object() ? "CPERLarg" : "void";
 
     if (@_) {
        @mods = @$mods if $mods;
@@ -70,10 +75,10 @@ sub xsinit {
     @mods = grep(!$seen{$_}++, @mods);
 
     print $fh &xsi_header();
-    print $fh "EXTERN_C void xs_init _((void));\n\n";     
+    print $fh "EXTERN_C void xs_init _(($xsinit_proto));\n\n";     
     print $fh &xsi_protos(@mods);
 
-    print $fh "\nEXTERN_C void\nxs_init()\n{\n";
+    print $fh "\nEXTERN_C void\nxs_init($xsinit_proto)\n{\n";
     print $fh &xsi_body(@mods);
     print $fh "}\n";
 
@@ -81,14 +86,24 @@ sub xsinit {
 
 sub xsi_header {
     return <<EOF;
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(PERL_OBJECT)
+#define is_cplusplus
+#endif
+
+#ifdef is_cplusplus
 extern "C" {
 #endif
 
 #include <EXTERN.h>
 #include <perl.h>
-
-#ifdef __cplusplus
+#ifdef PERL_OBJECT
+#define NO_XSLOCKS
+#include <XSUB.h>
+#include "win32iop.h"
+#include <fcntl.h>
+#include <perlhost.h>
+#endif
+#ifdef is_cplusplus
 }
 #  ifndef EXTERN_C
 #    define EXTERN_C extern "C"
@@ -105,13 +120,14 @@ EOF
 sub xsi_protos {
     my(@exts) = @_;
     my(@retval,%seen);
-
+    my $boot_proto = is_perl_object() ? 
+	"CV* cv _CPERLarg" : "CV* cv";
     foreach $_ (@exts){
         my($pname) = canon('/', $_);
         my($mname, $cname);
         ($mname = $pname) =~ s!/!::!g;
         ($cname = $pname) =~ s!/!__!g;
-	my($ccode) = "EXTERN_C void boot_${cname} _((CV* cv));\n";
+	my($ccode) = "EXTERN_C void boot_${cname} _(($boot_proto));\n";
 	next if $seen{$ccode}++;
         push(@retval, $ccode);
     }
