@@ -31,6 +31,18 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 14752] By: jhi                                   on 2002/02/18  17:54:44
+        Log: What do you know; these tests unearthed nasty problems.
+             Will resolve those first.
+     Branch: perl
+	   - t/uni/case.pl t/uni/lower.t t/uni/title.t t/uni/upper.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 14751] By: jhi                                   on 2002/02/18  17:52:23
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 14750] By: ams                                   on 2002/02/18  17:36:05
         Log: Subject: Re: IO::Poll: Removing Handles
              From: Matthew Sachs <matthewg@zevils.com>
