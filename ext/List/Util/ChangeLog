@@ -1,3 +1,11 @@
+Change 759 on 2002/12/12 by <gbarr@pobox.com> (Graham Barr)
+
+	Release 1.09
+
+Change 758 on 2002/12/12 by <gbarr@pobox.com> (Graham Barr)
+
+	Use UV to return refaddr
+
 Change 757 on 2002/11/03 by <gbarr@pobox.com> (Graham Barr)
 
 	Add XS_VERSION
