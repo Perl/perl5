@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq5 - Files and Formats ($Revision: 1.12 $, $Date: 2002/03/11 22:25:25 $)
+perlfaq5 - Files and Formats ($Revision: 1.13 $, $Date: 2002/03/16 15:37:26 $)
 
 =head1 DESCRIPTION
 
@@ -496,6 +496,7 @@ literals
 
 	open FILE, "<", "  file  ";  # filename is "   file   "
 	open FILE, ">", ">file";     # filename is ">file"
+	
 
 It may be a lot clearer to use sysopen(), though:
 
@@ -763,21 +764,7 @@ more fun to use the standard DB_File module's $DB_RECNO bindings,
 which allow you to tie an array to a file so that accessing an element
 the array actually accesses the corresponding line in the file.
 
-On very rare occasion, you may have an algorithm that demands that
-the entire file be in memory at once as one scalar.  The simplest solution
-to that is
-
-    $var = `cat $file`;
-
-Being in scalar context, you get the whole thing.  In list context,
-you'd get a list of all the lines:
-
-    @lines = `cat $file`;
-
-This tiny but expedient solution is neat, clean, and portable to
-all systems on which decent tools have been installed.  For those
-who prefer not to use the toolbox, you can of course read the file
-manually, although this makes for more complicated code.
+You can read the entire filehandle contents into a scalar.
 
     {
 	local(*INPUT, $/);
@@ -789,6 +776,13 @@ That temporarily undefs your record separator, and will automatically
 close the file at block exit.  If the file is already open, just use this:
 
     $var = do { local $/; <INPUT> };
+
+For ordinary files you can also use the read function.
+
+	read( INPUT, $var, -s INPUT );
+
+The third argument tests the byte size of the data on the INPUT filehandle
+and reads that many bytes into the buffer $var.
 
 =head2 How can I read in a file by paragraphs?
 
