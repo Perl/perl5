@@ -106,8 +106,8 @@ Perl_ithread_destruct (pTHX_ ithread* thread, const char *why)
 	    threads = NULL;
         }
 	else {
-	    thread->next->prev = thread->prev->next;
-	    thread->prev->next = thread->next->prev;
+	    thread->next->prev = thread->prev;
+	    thread->prev->next = thread->next;
 	    if (threads == thread) {
 		threads = thread->next;
 	    }
@@ -350,6 +350,7 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 	Zero(thread,1,ithread);
 	thread->next = threads;
 	thread->prev = threads->prev;
+	threads->prev = thread;
 	thread->prev->next = thread;
 	/* Set count to 1 immediately in case thread exits before
 	 * we return to caller !
