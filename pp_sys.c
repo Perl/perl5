@@ -4556,7 +4556,7 @@ PP(pp_gpwent)
     struct passwd *pwent;
     STRLEN n_a;
 #ifdef HAS_GETSPENT
-    struct spwd *spwent;
+    struct spwd *spwent = NULL;
 #endif
 
     if (which == OP_GPWNAM)
@@ -4567,14 +4567,18 @@ PP(pp_gpwent)
 	pwent = (struct passwd *)getpwent();
 
 #ifdef HAS_GETSPNAM
-   if (which == OP_GPWNAM)
-      spwent = getspnam(pwent->pw_name);
+    if (which == OP_GPWNAM) {
+	if (pwent)
+	    spwent = getspnam(pwent->pw_name);
+    }
 #  ifdef HAS_GETSPUID /* AFAIK there isn't any anywhere. --jhi */ 
-   else if (which == OP_GPWUID)
-      spwent = getspnam(pwent->pw_name);
+    else if (which == OP_GPWUID) {
+	if (pwent)
+	    spwent = getspnam(pwent->pw_name);
+    }
 #  endif
-   else
-      spwent = (struct spwd *)getspent();
+    else
+	spwent = (struct spwd *)getspent();
 #endif
 
     EXTEND(SP, 10);
