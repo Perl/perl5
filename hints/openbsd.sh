@@ -104,6 +104,14 @@ $define|true|[yY]*)
 	# any openbsd version dependencies with pthreads?
 	ccflags="-pthread $ccflags"
 	ldflags="-pthread $ldflags"
+	case "$osvers" in
+	[0-2].*|3.[0-2])
+		# Change from -lc to -lc_r
+		set `echo "X $libswanted " | sed 's/ c / c_r /'`
+		shift
+		libswanted="$*"
+	;;
+	esac
 esac
 EOCBU
 
