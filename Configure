@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Jan  5 00:20:59 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Fri Jan  5 20:11:52 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1434,6 +1434,7 @@ case "$src" in
     */*) src=`echo $0 | sed -e 's%/[^/][^/]*$%%'`
          case "$src" in
 	 /*)	;;
+	 .)	;;
          *)	src=`cd ../$src && pwd` ;;
 	 esac
          ;;
