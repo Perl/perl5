@@ -4890,8 +4890,9 @@ Example, assuming array lengths are passed before arrays:
 
 =item split
 
-Splits a string into a list of strings and returns that list.  By default,
-empty leading fields are preserved, and empty trailing ones are deleted.
+Splits the string EXPR into a list of strings and returns that list.  By
+default, empty leading fields are preserved, and empty trailing ones are
+deleted.
 
 In scalar context, returns the number of fields found and splits into
 the C<@_> array.  Use of split in scalar context is deprecated, however,
