@@ -457,38 +457,53 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	fd = PerlIO_fileno(saveifp);
 	if (saveofp) {
 	    PerlIO_flush(saveofp);		/* emulate PerlIO_close() */
-	    if (saveofp != saveifp) {	/* was a socket? */
+	    if (saveofp != saveifp) {		/* was a socket? */
 		PerlIO_close(saveofp);
-		if (fd > 2)
-		    Safefree(saveofp);
 	    }
 	}
 	if (fd != PerlIO_fileno(fp)) {
-	    Pid_t pid;
-	    SV *sv;
-
 	    PerlLIO_dup2(PerlIO_fileno(fp), fd);
 #ifdef VMS
 	    if (fd != PerlIO_fileno(PerlIO_stdin())) {
-	      char newname[FILENAME_MAX+1];
-	      if (fgetname(fp, newname)) {
-	        if (fd == PerlIO_fileno(PerlIO_stdout())) Perl_vmssetuserlnm("SYS$OUTPUT", newname);
-	        if (fd == PerlIO_fileno(PerlIO_stderr())) Perl_vmssetuserlnm("SYS$ERROR",  newname);
-	      }
+		char newname[FILENAME_MAX+1];
+		if (fgetname(fp, newname)) {
+		    if (fd == PerlIO_fileno(PerlIO_stdout()))
+			Perl_vmssetuserlnm("SYS$OUTPUT", newname);
+		    if (fd == PerlIO_fileno(PerlIO_stderr()))
+			Perl_vmssetuserlnm("SYS$ERROR",  newname);
+		}
 	    }
 #endif
-	    LOCK_FDPID_MUTEX;
-	    sv = *av_fetch(PL_fdpid,PerlIO_fileno(fp),TRUE);
-	    (void)SvUPGRADE(sv, SVt_IV);
-	    pid = SvIVX(sv);
-	    SvIVX(sv) = 0;
-	    sv = *av_fetch(PL_fdpid,fd,TRUE);
-	    UNLOCK_FDPID_MUTEX;
-	    (void)SvUPGRADE(sv, SVt_IV);
-	    SvIVX(sv) = pid;
-	    if (!was_fdopen)
-		PerlIO_close(fp);
 
+#if !defined(WIN32)
+	    /* PL_fdpid isn't used on Windows, so avoid this useless work.
+	     * XXX Probably the same for a lot of other places. */
+	    {
+		Pid_t pid;
+		SV *sv;
+
+		LOCK_FDPID_MUTEX;
+		sv = *av_fetch(PL_fdpid,PerlIO_fileno(fp),TRUE);
+		(void)SvUPGRADE(sv, SVt_IV);
+		pid = SvIVX(sv);
+		SvIVX(sv) = 0;
+		sv = *av_fetch(PL_fdpid,fd,TRUE);
+		(void)SvUPGRADE(sv, SVt_IV);
+		SvIVX(sv) = pid;
+		UNLOCK_FDPID_MUTEX;
+	    }
+#endif
+
+	    if (was_fdopen) {
+		/* need to close fp without closing underlying fd */
+		int ofd = PerlIO_fileno(fp);
+		int dupfd = PerlLIO_dup(ofd);
+		PerlIO_close(fp);
+		PerlLIO_dup2(dupfd,ofd);
+		PerlLIO_close(dupfd);
+	    }
+	    else
+		PerlIO_close(fp);
 	}
 	fp = saveifp;
 	PerlIO_clearerr(fp);

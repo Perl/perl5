@@ -8,11 +8,12 @@ BEGIN {
 # $RCSfile$    
 $|  = 1;
 use warnings;
+use File::Spec;
 $Is_MacOS = $^O eq 'MacOS';
 $Is_VMS   = $^O eq 'VMS';
 $Is_Dos   = $^O eq 'dos';
 
-print "1..66\n";
+print "1..69\n";
 
 my $test = 1;
 
@@ -271,7 +272,7 @@ ok;
     local *F;
     for (1..2) {
         if ($Is_Dos) {
-        open(F, "echo \\#foo|") or print "not ";
+	    open(F, "echo \\#foo|") or print "not ";
         } else {
             open(F, "echo #foo|") or print "not ";
         }
@@ -281,12 +282,51 @@ ok;
     ok;
     for (1..2) {
         if ($Is_Dos) {
-	open(F, "-|", "echo \\#foo") or print "not ";
+	    open(F, "-|", "echo \\#foo") or print "not ";
         } else {
             open(F, "-|", "echo #foo") or print "not ";
         }
 	print <F>;
 	close F;
+    }
+    ok;
+}
+
+
+# this used to leak FILE* pointers on all platforms (and also died on
+# Windows after running a few hundred times)
+
+my $devnull = File::Spec->devnull;
+{
+    my $loopcount;
+
+    $loopcount = 0;
+    while ($loopcount++ < 555) {
+	open NEWOUT, ">$devnull" or die;
+	open SAVEOUT, ">&STDOUT" or die;
+	open STDOUT, ">&=" . fileno(NEWOUT) or die;
+	open STDOUT, ">&SAVEOUT" or die;
+	close NEWOUT;
+    }
+    ok;
+
+    $loopcount = 0;
+    while ($loopcount++ < 555) {
+	open NEWOUT, ">$devnull" or die;
+	open SAVEOUT, ">&STDOUT" or die;
+	open STDOUT, ">&=NEWOUT" or die;
+	open STDOUT, ">&SAVEOUT" or die;
+	close NEWOUT;
+    }
+    ok;
+
+    $loopcount = 0;
+    while ($loopcount++ < 555) {
+	open NEWOUT, ">$devnull" or die;
+	open SAVEOUT, ">&STDOUT" or die;
+	open STDOUT, ">&NEWOUT" or die;
+	open STDOUT, ">&SAVEOUT" or die;
+	close NEWOUT;
     }
     ok;
 }
