@@ -195,16 +195,28 @@ get_emd_part(char *prev_path, char *trailing_path, ...)
     GetModuleFileName((HMODULE)((w32_perldll_handle == INVALID_HANDLE_VALUE)
 				? GetModuleHandle(NULL) : w32_perldll_handle),
 		      mod_name, sizeof(mod_name));
-    ptr = strrchr(mod_name, '\\');
+    /* try to get full path to binary (which may be mangled when perl is
+     * run from a 16-bit app */
+    (void)GetFullPathName(mod_name, sizeof(mod_name), mod_name, &ptr);
+    ptr = mod_name;
+    /* normalize to forward slashes */
+    while (*ptr) {
+	if (*ptr == '\\')
+	    *ptr = '/';
+	++ptr;
+    }
+    ptr = strrchr(mod_name, '/');
     while (ptr && strip) {
         /* look for directories to skip back */
 	optr = ptr;
 	*ptr = '\0';
-	ptr = strrchr(mod_name, '\\');
+	ptr = strrchr(mod_name, '/');
 	if (!ptr || stricmp(ptr+1, strip) != 0) {
-	    if(!(*strip == '5' && *(ptr+1) == '5' && strncmp(strip, base, 5) == 0
-		    && strncmp(ptr+1, base, 5) == 0)) {
-		*optr = '\\';
+	    if(!(*strip == '5' && *(ptr+1) == '5'
+		 && strncmp(strip, base, 5) == 0
+		 && strncmp(ptr+1, base, 5) == 0))
+	    {
+		*optr = '/';
 		ptr = optr;
 	    }
 	}
@@ -213,7 +225,7 @@ get_emd_part(char *prev_path, char *trailing_path, ...)
     if (!ptr) {
 	ptr = mod_name;
 	*ptr++ = '.';
-	*ptr = '\\';
+	*ptr = '/';
     }
     va_end(ap);
     strcpy(++ptr, trailing_path);
@@ -273,7 +285,7 @@ win32_get_sitelib(char *pl)
 
     /* $sitelib .=
      * ";$EMD/" . ((-d $EMD/../../../$]) ? "../../.." : "../.."). "/site/$]/lib";  */
-    sprintf(pathstr, "site\\%s\\lib", pl);
+    sprintf(pathstr, "site/%s/lib", pl);
     path1 = get_emd_part(path1, pathstr, ARCHNAME, "bin", pl, Nullch);
 
     /* $HKCU{'sitelib'} || $HKLM{'sitelib'} . ---; */
@@ -281,7 +293,7 @@ win32_get_sitelib(char *pl)
 
     /* $sitelib .=
      * ";$EMD/" . ((-d $EMD/../../../$]) ? "../../.." : "../.."). "/site/lib";  */
-    path2 = get_emd_part(path2, "site\\lib", ARCHNAME, "bin", pl, Nullch);
+    path2 = get_emd_part(path2, "site/lib", ARCHNAME, "bin", pl, Nullch);
 
     if (!path1)
 	return path2;
