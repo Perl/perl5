@@ -4,7 +4,7 @@ use Test::Harness 1.1601 ();
 use Carp;
 use vars (qw($VERSION @ISA @EXPORT @EXPORT_OK $ntest $TestLevel), #public-ish
 	  qw($TESTOUT $ONFAIL %todo %history $planned @FAILDETAIL)); #private-ish
-$VERSION = '1.121';
+$VERSION = '1.13';
 require Exporter;
 @ISA=('Exporter');
 @EXPORT=qw(&plan &ok &skip);
@@ -63,7 +63,11 @@ sub ok ($;$$) {
     } else {
 	$expected = to_value(shift);
 	my ($regex,$ignore);
-	if ((ref($expected)||'') eq 'Regexp') {
+	if (!defined $expected) {
+	    $ok = !defined $result;
+	} elsif (!defined $result) {
+	    $ok = 0;
+	} elsif ((ref($expected)||'') eq 'Regexp') {
 	    $ok = $result =~ /$expected/;
 	} elsif (($regex) = ($expected =~ m,^ / (.+) / $,sx) or
 	    ($ignore, $regex) = ($expected =~ m,^ m([^\w\s]) (.+) \1 $,sx)) {
@@ -94,7 +98,8 @@ sub ok ($;$$) {
 		}
 	    } else {
 		my $prefix = "Test $ntest";
-		print $TESTOUT "# $prefix got: '$result' ($context)\n";
+		print $TESTOUT "# $prefix got: ".
+		    (defined $result? "'$result'":'<UNDEF>')." ($context)\n";
 		$prefix = ' ' x (length($prefix) - 5);
 		if ((ref($expected)||'') eq 'Regexp') {
 		    $expected = 'qr/'.$expected.'/'
@@ -162,7 +167,7 @@ __END__
 
   ok(sub { 1+1 }, 2);  # success: '2' eq '2'
   ok(sub { 1+1 }, 3);  # failure: '2' ne '3'
-  ok(0, int(rand(2));  # (just kidding! :-)
+  ok(0, int(rand(2));  # (just kidding :-)
 
   my @list = (0,0);
   ok @list, 3, "\@list=".join(',',@list);      #extra diagnostics
@@ -239,7 +244,7 @@ L<Test::Harness> and, perhaps, test coverage analysis tools.
 
 =head1 AUTHOR
 
-Copyright (C) 1998 Joshua Nathaniel Pritikin.  All rights reserved.
+Copyright (c) 1998-1999 Joshua Nathaniel Pritikin.  All rights reserved.
 
 This package is free software and is provided "as is" without express
 or implied warranty.  It may be used, redistributed and/or modified
