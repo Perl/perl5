@@ -1845,7 +1845,6 @@ scope.c				Scope entry and exit code
 scope.h				Scope entry and exit header
 sv.c				Scalar value code
 sv.h				Scalar value header
-t/base/commonsense.t		See if configuration meets basic needs
 t/base/cond.t			See if conditionals work
 t/base/if.t			See if if works
 t/base/lex.t			See if lexical items work
@@ -1888,6 +1887,7 @@ t/io/read.t			See if read works
 t/io/tell.t			See if file seeking works
 t/io/utf8.t			See if file seeking works
 t/lib/1_compile.t		See if the various libraries and extensions compile
+t/lib/commonsense.t		See if configuration meets basic needs
 t/lib/compmod.pl		Helper for 1_compile.t
 t/lib/dprof/test1_t		Perl code profiler tests
 t/lib/dprof/test1_v		Perl code profiler tests
