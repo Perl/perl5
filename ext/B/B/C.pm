@@ -152,6 +152,8 @@ sub savepv {
 
 sub B::OP::save {
     my ($op, $level) = @_;
+    my $sym = objsym($op);
+    return $sym if defined $sym;
     my $type = $op->type;
     $nullop_count++ unless $type;
     if ($type == $OP_THREADSV) {
@@ -188,6 +190,8 @@ sub B::FAKEOP::private { $_[0]->{private} || 0 }
 
 sub B::UNOP::save {
     my ($op, $level) = @_;
+    my $sym = objsym($op);
+    return $sym if defined $sym;
     $unopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, s\\_%x",
 			   ${$op->next}, ${$op->sibling}, $op->ppaddr,
 			   $op->targ, $op->type, $op_seq, $op->flags,
@@ -197,6 +201,8 @@ sub B::UNOP::save {
 
 sub B::BINOP::save {
     my ($op, $level) = @_;
+    my $sym = objsym($op);
+    return $sym if defined $sym;
     $binopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x",
 			    ${$op->next}, ${$op->sibling}, $op->ppaddr,
 			    $op->targ, $op->type, $op_seq, $op->flags,
@@ -206,6 +212,8 @@ sub B::BINOP::save {
 
 sub B::LISTOP::save {
     my ($op, $level) = @_;
+    my $sym = objsym($op);
+    return $sym if defined $sym;
     $listopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x, %u",
 			     ${$op->next}, ${$op->sibling}, $op->ppaddr,
 			     $op->targ, $op->type, $op_seq, $op->flags,
@@ -216,6 +224,8 @@ sub B::LISTOP::save {
 
 sub B::LOGOP::save {
     my ($op, $level) = @_;
+    my $sym = objsym($op);
+    return $sym if defined $sym;
     $logopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x",
 			    ${$op->next}, ${$op->sibling}, $op->ppaddr,
 			    $op->targ, $op->type, $op_seq, $op->flags,
@@ -225,6 +235,8 @@ sub B::LOGOP::save {
 
 sub B::CONDOP::save {
     my ($op, $level) = @_;
+    my $sym = objsym($op);
+    return $sym if defined $sym;
     $condopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x, s\\_%x",
 			     ${$op->next}, ${$op->sibling}, $op->ppaddr,
 			     $op->targ, $op->type, $op_seq, $op->flags,
@@ -235,6 +247,8 @@ sub B::CONDOP::save {
 
 sub B::LOOP::save {
     my ($op, $level) = @_;
+    my $sym = objsym($op);
+    return $sym if defined $sym;
     #warn sprintf("LOOP: redoop %s, nextop %s, lastop %s\n",
     #		 peekop($op->redoop), peekop($op->nextop),
     #		 peekop($op->lastop)); # debug
@@ -249,6 +263,8 @@ sub B::LOOP::save {
 
 sub B::PVOP::save {
     my ($op, $level) = @_;
+    my $sym = objsym($op);
+    return $sym if defined $sym;
     $pvopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, %s",
 			   ${$op->next}, ${$op->sibling}, $op->ppaddr,
 			   $op->targ, $op->type, $op_seq, $op->flags,
@@ -258,6 +274,8 @@ sub B::PVOP::save {
 
 sub B::SVOP::save {
     my ($op, $level) = @_;
+    my $sym = objsym($op);
+    return $sym if defined $sym;
     my $svsym = $op->sv->save;
     $svopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, %s",
 			   ${$op->next}, ${$op->sibling}, $op->ppaddr,
@@ -268,6 +286,8 @@ sub B::SVOP::save {
 
 sub B::GVOP::save {
     my ($op, $level) = @_;
+    my $sym = objsym($op);
+    return $sym if defined $sym;
     my $gvsym = $op->gv->save;
     $gvopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, Nullgv",
 			   ${$op->next}, ${$op->sibling}, $op->ppaddr,
@@ -279,6 +299,8 @@ sub B::GVOP::save {
 
 sub B::COP::save {
     my ($op, $level) = @_;
+    my $sym = objsym($op);
+    return $sym if defined $sym;
     my $gvsym = $op->filegv->save;
     my $stashsym = $op->stash->save;
     warn sprintf("COP: line %d file %s\n", $op->line, $op->filegv->SV->PV)
@@ -296,6 +318,8 @@ sub B::COP::save {
 
 sub B::PMOP::save {
     my ($op, $level) = @_;
+    my $sym = objsym($op);
+    return $sym if defined $sym;
     my $replroot = $op->pmreplroot;
     my $replstart = $op->pmreplstart;
     my $replrootfield = sprintf("s\\_%x", $$replroot);
