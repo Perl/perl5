@@ -364,11 +364,11 @@ Perl_mg_free(pTHX_ SV *sv)
 	    if (mg->mg_type == PERL_MAGIC_tiedscalar && SvROK(obj) &&
 		(SvRV(obj) == sv || GvIO(SvRV(obj)) == (IO *) sv)) {
 		/* We are already free'ing the self-tied thing
-		   so SvREFCNT_dec must not.
+		   so must not SvREFCNT_dec.
 		 */
 		SvROK_off(obj);
-	    }
-	    SvREFCNT_dec(obj);
+	    } else
+		SvREFCNT_dec(obj);
 	}
 	Safefree(mg);
     }
