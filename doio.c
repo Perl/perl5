@@ -1165,7 +1165,7 @@ fail_discipline:
 		if (!end)
 		    end = s+len;
 #ifndef PERLIO_LAYERS
-		Perl_croak(aTHX_ "Unknown discipline '%.*s'", end-s, s);
+		Perl_croak(aTHX_ "IO layers (like '%.*s') unavailable", end-s, s);
 #else
 		s = end;
 #endif

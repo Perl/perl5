@@ -1914,6 +1914,12 @@ strange for a machine that supports C.
 (W unopened) You tried ioctl() on a filehandle that was never opened.
 Check you control flow and number of arguments.
 
+=item IO layers (like "%s") unavailable
+
+(F) Your Perl has not been configured to have PerlIO, and therefore
+you cannot use IO layers.  To have PerlIO Perl must be configured
+with 'useperlio'.
+
 =item IO::Socket::atmark not implemented on this architecture
 
 (F) Your machine doesn't implement the sockatmark() functionality,
