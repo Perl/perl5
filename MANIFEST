@@ -436,7 +436,6 @@ hv.h			Hash value header
 installhtml		Perl script to install html files for pods
 installman		Perl script to install man pages for pods
 installperl		Perl script to do "make install" dirty work
-interp.sym		Interpreter specific symbols to hide in a struct
 intrpvar.h		Variables held in each interpreter instance
 iperlsys.h		Perl's interface to the system
 keywords.h		The keyword numbers

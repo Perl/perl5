@@ -450,6 +450,7 @@ perly.h: perly.y
 	-@sh -c true
 
 # No compat3.sym here since and including the 5.004_50.
+# No interp.sym since 5.005_03.
 SYM  = global.sym interp.sym perlio.sym thread.sym
 
 SYMH = perlvars.h thrdvar.h

@@ -37,7 +37,6 @@ sub readsyms (\%$) {
 }
 
 readsyms %global, 'global.sym';
-readsyms %interp, 'interp.sym';
 
 sub readvars(\%$$) {
     my ($syms, $file,$pre) = @_;
@@ -78,12 +77,6 @@ foreach my $sym (sort keys %globvar)
     delete $global{$sym};
     warn "$sym in global.sym as well as perlvars.h\n";
    }
- }
-
-foreach my $sym (keys %interp)
- {
-  warn "extra $sym in interp.sym\n" 
-   unless exists $intrp{$sym} || exists $thread{$sym};
  }
 
 foreach my $sym (sort keys %thread)
