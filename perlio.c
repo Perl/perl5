@@ -2125,7 +2125,6 @@ PerlIOCrlf_get_cnt(PerlIO *f)
           {
            int code;
            dTHX;
-           Perl_warn(aTHX_ __FUNCTION__ " f=%p CR @ end of buffer",f);
            b->ptr++;               /* say we have read it as far as flush() is concerned */
            b->buf++;               /* Leave space an front of buffer */
            b->bufsiz--;            /* Buffer is thus smaller */
