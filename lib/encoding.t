@@ -5,7 +5,7 @@ BEGIN {
     }
 }
 
-print "1..23\n";
+print "1..29\n";
 
 use encoding "latin1"; # ignored (overwritten by the next line)
 use encoding "greek";  # iso 8859-7 (no "latin" alias, surprise...)
@@ -91,19 +91,91 @@ print "ok 19\n";
 
 # eq, cmp
 
+my ($byte,$bytes,$U,$Ub,$g1,$g2,$l) = ( 
+    pack("C*", 0xDF ),       # byte
+    pack("C*", 0xDF, 0x20),  # ($bytes2 cmp $U) > 0
+    pack("U*", 0x3AF),       # $U eq $byte
+    pack("U*", 0xDF ),       # $Ub would eq $bytev w/o use encoding
+    pack("U*", 0x3B1),       # ($g1 cmp $byte) > 0; === chr(0xe1)
+    pack("U*", 0x3AF, 0x20), # ($g2 cmp $byte) > 0;
+    pack("U*", 0x3AB),       # ($l  cmp $byte) < 0; === chr(0xdb)
+);
+
+# all the tests in this section that compare a byte encoded string 
+# ato UTF-8 encoded are run in all possible vairants 
+# all of the eq, ne, cmp operations tested,
+# $v z $u tested as well as $u z $v
+
+sub alleq($$){
+    my ($a,$b)    =    (shift, shift);
+     $a  eq  $b        &&     $b  eq  $a         && 
+  !( $a  ne  $b )      &&  !( $b  ne  $a )       &&
+   ( $a  cmp $b ) == 0 &&   ( $b  cmp $a ) == 0;
+}
+   
+sub anyeq($$){
+    my ($a,$b)    =    (shift, shift);
+     $a  eq  $b        ||     $b  eq  $a         ||
+  !( $a  ne  $b )      ||  !( $b  ne  $a )       ||
+   ( $a  cmp $b ) == 0 ||   ( $b  cmp $a ) == 0;
+}
+
+sub allgt($$){
+    my ($a,$b)    =    (shift, shift);
+    ( $a cmp $b ) == 1 && ( $b cmp $a ) == -1;
+}
+#match the correct UTF-8 string
+print "not " unless  alleq($byte, $U);
+print "ok 20\n";
+
+#do not match a wrong UTF-8 string
+print "not " if anyeq($byte, $Ub);
+print "ok 21\n";
+
+#string ordering
+print "not " unless allgt ( $g1,    $byte  )  &&
+                    allgt ( $g2,    $byte  )  &&
+                    allgt ( $byte,  $l     )  &&
+                    allgt ( $bytes, $U     );
+print "ok 22\n";
+
+# upgrade, downgrade
+
+my ($u,$v,$v2);
+$u = $v = $v2 = pack("C*", 0xDF);
+utf8::upgrade($v);                   #explicit upgrade
+$v2 = substr( $v2."\x{410}", 0, -1); #implicit upgrade
+
+# implicit upgrade === explicit upgrade
+print "not "  if do{{use bytes; $v ne $v2}} || $v ne $v2;
+print "ok 23\n";
+
+# utf8::upgrade is transparent and does not break equality
+print "not " unless alleq( $u, $v );
+print "ok 24\n";
+
+$u = $v = pack("C*", 0xDF);
+utf8::upgrade($v);
+#test for a roundtrip, we should get back from where we left
+eval {utf8::downgrade( $v )};
+print "not " if $@ !~ /^Wide / || do{{use bytes; $u eq $v}} || $u ne $v;
+print "ok 25\n";
+
+# some more eq, cmp
+
 my $byte=pack("C*", 0xDF);
 
 print "not " unless pack("U*", 0x3AF) eq $byte;
-print "ok 20\n";
+print "ok 26\n";
 
 print "not " if chr(0xDF) cmp $byte;
-print "ok 21\n";
+print "ok 27\n";
 
 print "not " unless ((pack("U*", 0x3B0)       cmp $byte) ==  1) &&
                     ((pack("U*", 0x3AE)       cmp $byte) == -1) &&
                     ((pack("U*", 0x3AF, 0x20) cmp $byte) ==  1) &&
 	            ((pack("U*", 0x3AF) cmp pack("C*",0xDF,0x20))==-1);
-print "ok 22\n";
+print "ok 28\n";
 
 # Used to core dump in 5.7.3
-print ord undef == 0 ? "ok 23\n" : "not ok 23\n";
+print ord undef == 0 ? "ok 29\n" : "not ok 29\n";
