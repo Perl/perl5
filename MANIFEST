@@ -1535,6 +1535,7 @@ t/lib/h2ph.h		Test header file for h2ph
 t/lib/h2ph.pht		Generated output from h2ph.h by h2ph, for comparison
 t/lib/h2ph.t		See if h2ph works like it should
 t/lib/hostname.t	See if Sys::Hostname works
+t/lib/i18n-collate.t	See if I18N::Collate works
 t/lib/io_const.t	See if constants from IO work
 t/lib/io_dir.t		See if directory-related methods from IO work
 t/lib/io_dup.t		See if dup()-related methods from IO work

@@ -158,6 +158,7 @@ FindBin
 GDBM_File
 Getopt::Long
 Getopt::Std
+I18N:Collate
 IO::Dir
 IO::File
 IO::Handle
