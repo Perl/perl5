@@ -209,10 +209,8 @@ S_no_op(pTHX_ char *what, char *s)
 
     if (!s)
 	s = oldbp;
-    else {
-	assert(s >= oldbp);
+    else
 	PL_bufptr = s;
-    }
     yywarn(Perl_form(aTHX_ "%s found where operator expected", what));
     if (is_first)
 	Perl_warn(aTHX_ "\t(Missing semicolon on previous line?)\n");
@@ -223,8 +221,10 @@ S_no_op(pTHX_ char *what, char *s)
 	    Perl_warn(aTHX_ "\t(Do you need to predeclare %.*s?)\n",
 		t - PL_oldoldbufptr, PL_oldoldbufptr);
     }
-    else
+    else {
+	assert(s >= oldbp);
 	Perl_warn(aTHX_ "\t(Missing operator before %.*s?)\n", s - oldbp, oldbp);
+    }
     PL_bufptr = oldbp;
 }
 
