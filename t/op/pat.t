@@ -3032,8 +3032,8 @@ print "\x{072F}" =~ /\P{Syriac1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
     ok($a =~ /^\C\Cy/,     'match two \C');
     ok($a =~ /^\C{2}y/,    'match \C{2}');
 
-    ok($a !~ /^\C\C\Cy/,    'not match three \Cy');
-    ok($a !~ /^\C{2}\Cy/,   'not match \C{3}y');
+    ok($a !~ /^\C\C\Cy/,    q{don't match three \Cy});
+    ok($a !~ /^\C{2}\Cy/,   q{don't match \C{3}y});
 
     $a = "\x{1000}y"; # 3 bytes before "y"
 
@@ -3050,8 +3050,8 @@ print "\x{072F}" =~ /\P{Syriac1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
     ok($a =~ /^\C\C\Cy/,    'match three \Cy');
     ok($a =~ /^\C{3}y/,     'match \C{3}y');
 
-    ok($a !~ /^\C\C\C\C\y/, 'not match four \Cy');
-    ok($a !~ /^\C{4}y/,     'not match \C{4}y');
+    ok($a !~ /^\C\C\C\C\y/, q{don't match four \Cy});
+    ok($a !~ /^\C{4}y/,     q{don't match \C{4}y});
 }
 
 # last test 968
