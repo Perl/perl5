@@ -904,12 +904,6 @@ Ap	|void	|do_pmop_dump	|I32 level|PerlIO *file|PMOP *pm
 Ap	|void	|do_sv_dump	|I32 level|PerlIO *file|SV *sv|I32 nest \
 				|I32 maxnest|bool dumpops|STRLEN pvlim
 Ap	|void	|magic_dump	|MAGIC *mg
-#if defined(PERL_FLEXIBLE_EXCEPTIONS)
-Ap	|void*	|default_protect|volatile JMPENV *je|int *excpt \
-				|protect_body_t body|...
-Ap	|void*	|vdefault_protect|volatile JMPENV *je|int *excpt \
-				|protect_body_t body|va_list *args
-#endif
 Ap	|void	|reginitcolors
 Apd	|char*	|sv_2pv_nolen	|SV* sv
 Apd	|char*	|sv_2pvutf8_nolen|SV* sv
@@ -1056,12 +1050,6 @@ s	|void*	|parse_body	|char **env|XSINIT_t xsinit
 s	|void*	|run_body	|I32 oldscope
 s	|void	|call_body	|OP *myop|int is_eval
 s	|void*	|call_list_body	|CV *cv
-#if defined(PERL_FLEXIBLE_EXCEPTIONS)
-s	|void*	|vparse_body	|va_list args
-s	|void*	|vrun_body	|va_list args
-s	|void*	|vcall_body	|va_list args
-s	|void*	|vcall_list_body|va_list args
-#endif
 #endif
 
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
@@ -1084,9 +1072,6 @@ s	|int	|div128		|SV *pnum|bool *done
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
 s	|OP*	|docatch	|OP *o
 s	|void*	|docatch_body
-#if defined(PERL_FLEXIBLE_EXCEPTIONS)
-s	|void*	|vdocatch_body	|va_list args
-#endif
 s	|OP*	|dofindlabel	|OP *o|char *label|OP **opstack|OP **oplimit
 s	|OP*	|doparseform	|SV *sv
 sn	|bool	|num_overflow	|NV value|I32 fldsize|I32 frcsize

@@ -24,37 +24,6 @@
 #define PERL_IN_SCOPE_C
 #include "perl.h"
 
-#if defined(PERL_FLEXIBLE_EXCEPTIONS)
-void *
-Perl_default_protect(pTHX_ volatile JMPENV *pcur_env, int *excpt,
-		     protect_body_t body, ...)
-{
-    void *ret;
-    va_list args;
-    va_start(args, body);
-    ret = vdefault_protect(pcur_env, excpt, body, &args);
-    va_end(args);
-    return ret;
-}
-
-void *
-Perl_vdefault_protect(pTHX_ volatile JMPENV *pcur_env, int *excpt,
-		      protect_body_t body, va_list *args)
-{
-    int ex;
-    void *ret;
-
-    JMPENV_PUSH(ex);
-    if (ex)
-	ret = NULL;
-    else
-	ret = CALL_FPTR(body)(aTHX_ *args);
-    *excpt = ex;
-    JMPENV_POP;
-    return ret;
-}
-#endif
-
 SV**
 Perl_stack_grow(pTHX_ SV **sp, SV **p, int n)
 {

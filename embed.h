@@ -1183,10 +1183,6 @@
 #define do_pmop_dump		Perl_do_pmop_dump
 #define do_sv_dump		Perl_do_sv_dump
 #define magic_dump		Perl_magic_dump
-#if defined(PERL_FLEXIBLE_EXCEPTIONS)
-#define default_protect		Perl_default_protect
-#define vdefault_protect	Perl_vdefault_protect
-#endif
 #define reginitcolors		Perl_reginitcolors
 #define sv_2pv_nolen		Perl_sv_2pv_nolen
 #define sv_2pvutf8_nolen	Perl_sv_2pvutf8_nolen
@@ -1444,20 +1440,6 @@
 #ifdef PERL_CORE
 #define call_list_body		S_call_list_body
 #endif
-#if defined(PERL_FLEXIBLE_EXCEPTIONS)
-#ifdef PERL_CORE
-#define vparse_body		S_vparse_body
-#endif
-#ifdef PERL_CORE
-#define vrun_body		S_vrun_body
-#endif
-#ifdef PERL_CORE
-#define vcall_body		S_vcall_body
-#endif
-#ifdef PERL_CORE
-#define vcall_list_body		S_vcall_list_body
-#endif
-#endif
 #endif
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
@@ -1502,11 +1484,6 @@
 #endif
 #ifdef PERL_CORE
 #define docatch_body		S_docatch_body
-#endif
-#if defined(PERL_FLEXIBLE_EXCEPTIONS)
-#ifdef PERL_CORE
-#define vdocatch_body		S_vdocatch_body
-#endif
 #endif
 #ifdef PERL_CORE
 #define dofindlabel		S_dofindlabel
@@ -3806,9 +3783,6 @@
 #define do_pmop_dump(a,b,c)	Perl_do_pmop_dump(aTHX_ a,b,c)
 #define do_sv_dump(a,b,c,d,e,f,g)	Perl_do_sv_dump(aTHX_ a,b,c,d,e,f,g)
 #define magic_dump(a)		Perl_magic_dump(aTHX_ a)
-#if defined(PERL_FLEXIBLE_EXCEPTIONS)
-#define vdefault_protect(a,b,c,d)	Perl_vdefault_protect(aTHX_ a,b,c,d)
-#endif
 #define reginitcolors()		Perl_reginitcolors(aTHX)
 #define sv_2pv_nolen(a)		Perl_sv_2pv_nolen(aTHX_ a)
 #define sv_2pvutf8_nolen(a)	Perl_sv_2pvutf8_nolen(aTHX_ a)
@@ -4066,20 +4040,6 @@
 #ifdef PERL_CORE
 #define call_list_body(a)	S_call_list_body(aTHX_ a)
 #endif
-#if defined(PERL_FLEXIBLE_EXCEPTIONS)
-#ifdef PERL_CORE
-#define vparse_body(a)		S_vparse_body(aTHX_ a)
-#endif
-#ifdef PERL_CORE
-#define vrun_body(a)		S_vrun_body(aTHX_ a)
-#endif
-#ifdef PERL_CORE
-#define vcall_body(a)		S_vcall_body(aTHX_ a)
-#endif
-#ifdef PERL_CORE
-#define vcall_list_body(a)	S_vcall_list_body(aTHX_ a)
-#endif
-#endif
 #endif
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
@@ -4124,11 +4084,6 @@
 #endif
 #ifdef PERL_CORE
 #define docatch_body()		S_docatch_body(aTHX)
-#endif
-#if defined(PERL_FLEXIBLE_EXCEPTIONS)
-#ifdef PERL_CORE
-#define vdocatch_body(a)	S_vdocatch_body(aTHX_ a)
-#endif
 #endif
 #ifdef PERL_CORE
 #define dofindlabel(a,b,c,d)	S_dofindlabel(aTHX_ a,b,c,d)

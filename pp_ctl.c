@@ -2674,14 +2674,6 @@ S_save_lines(pTHX_ AV *array, SV *sv)
     }
 }
 
-#ifdef PERL_FLEXIBLE_EXCEPTIONS
-STATIC void *
-S_docatch_body(pTHX_ va_list args)
-{
-    return docatch_body();
-}
-#endif
-
 STATIC void *
 S_docatch_body(pTHX)
 {
@@ -2713,18 +2705,11 @@ S_docatch(pTHX_ OP *o)
     retop = cxstack[cxstack_ix].blk_eval.retop;
     cxstack[cxstack_ix].blk_eval.retop = Nullop;
 
-#ifdef PERL_FLEXIBLE_EXCEPTIONS
- redo_body:
-    CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_docatch_body));
-#else
     JMPENV_PUSH(ret);
-#endif
     switch (ret) {
     case 0:
-#ifndef PERL_FLEXIBLE_EXCEPTIONS
  redo_body:
 	docatch_body();
-#endif
 	break;
     case 3:
 	/* die caught by an inner eval - continue inner loop */

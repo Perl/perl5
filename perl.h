@@ -123,10 +123,6 @@
 #define CALLREG_INTUIT_STRING CALL_FPTR(PL_regint_string)
 #define CALLREGFREE CALL_FPTR(PL_regfree)
 
-#ifdef PERL_FLEXIBLE_EXCEPTIONS
-#  define CALLPROTECT CALL_FPTR(PL_protect)
-#endif
-
 #ifdef HASATTRIBUTE
 #  if (defined(__GNUC__) && defined(__cplusplus)) || defined(__INTEL_COMPILER)
 #    define PERL_UNUSED_DECL

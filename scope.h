@@ -234,10 +234,6 @@ struct jmpenv {
     Sigjmp_buf		je_buf;		/* only for use if !je_throw */
     int			je_ret;		/* last exception thrown */
     bool		je_mustcatch;	/* need to call longjmp()? */
-#ifdef PERL_FLEXIBLE_EXCEPTIONS
-    void		(*je_throw)(int v); /* last for bincompat */
-    bool		je_noset;	/* no need for setjmp() */
-#endif
 };
 
 typedef struct jmpenv JMPENV;
@@ -268,115 +264,37 @@ typedef struct jmpenv JMPENV;
 	PL_top_env = &PL_start_env;		\
     } STMT_END
 
-#ifdef PERL_FLEXIBLE_EXCEPTIONS
-
 /*
- * These exception-handling macros are split up to
- * ease integration with C++ exceptions.
+ *   PERL_FLEXIBLE_EXCEPTIONS
+ * 
+ * All the flexible exceptions code has been removed.
+ * See the following threads for details:
  *
- * To use C++ try+catch to catch Perl exceptions, an extension author
- * needs to first write an extern "C" function to throw an appropriate
- * exception object; typically it will be or contain an integer,
- * because Perl's internals use integers to track exception types:
- *    extern "C" { static void thrower(int i) { throw i; } }
+ *   http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2004-07/msg00378.html
+ * 
+ * Joshua's original patches (which weren't applied) and discussion:
+ * 
+ *   http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/1998-02/msg01396.html
+ *   http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/1998-02/msg01489.html
+ *   http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/1998-02/msg01491.html
+ *   http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/1998-02/msg01608.html
+ *   http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/1998-02/msg02144.html
+ *   http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/1998-02/msg02998.html
+ * 
+ * Chip's reworked patch and discussion:
+ * 
+ *   http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/1999-03/msg00520.html
+ * 
+ * The flaw in these patches (which went unnoticed at the time) was
+ * that they moved some code that could potentially die() out of the
+ * region protected by the setjmp()s.  This caused exceptions within
+ * END blocks and such to not be handled by the correct setjmp().
+ * 
+ * The original patches that introduces flexible exceptions were:
  *
- * Then (as shown below) the author needs to use, not the simple
- * JMPENV_PUSH, but several of its constitutent macros, to arrange for
- * the Perl internals to call thrower() rather than longjmp() to
- * report exceptions:
- *
- *    dJMPENV;
- *    JMPENV_PUSH_INIT(thrower);
- *    try {
- *        ... stuff that may throw exceptions ...
- *    }
- *    catch (int why) {  // or whatever matches thrower()
- *        JMPENV_POST_CATCH;
- *        EXCEPT_SET(why);
- *        switch (why) {
- *          ... // handle various Perl exception codes
- *        }
- *    }
- *    JMPENV_POP;  // don't forget this!
+ *   http://public.activestate.com/cgi-bin/perlbrowse?patch=3386
+ *   http://public.activestate.com/cgi-bin/perlbrowse?patch=5162
  */
-
-/*
- * Function that catches/throws, and its callback for the
- *  body of protected processing.
- */
-typedef void *(CPERLscope(*protect_body_t)) (pTHX_ va_list);
-typedef void *(CPERLscope(*protect_proc_t)) (pTHX_ volatile JMPENV *pcur_env,
-					     int *, protect_body_t, ...);
-
-#define dJMPENV	JMPENV cur_env;	\
-		volatile JMPENV *pcur_env = ((cur_env.je_noset = 0),&cur_env)
-
-#define JMPENV_PUSH_INIT_ENV(ce,THROWFUNC) \
-    STMT_START {					\
-	(ce).je_throw = (THROWFUNC);			\
-	(ce).je_ret = -1;				\
-	(ce).je_mustcatch = FALSE;			\
-	(ce).je_prev = PL_top_env;			\
-	PL_top_env = &(ce);				\
-	OP_REG_TO_MEM;					\
-    } STMT_END
-
-#define JMPENV_PUSH_INIT(THROWFUNC) JMPENV_PUSH_INIT_ENV(*(JMPENV*)pcur_env,THROWFUNC)
-
-#define JMPENV_POST_CATCH_ENV(ce) \
-    STMT_START {					\
-	OP_MEM_TO_REG;					\
-	PL_top_env = &(ce);				\
-    } STMT_END
-
-#define JMPENV_POST_CATCH JMPENV_POST_CATCH_ENV(*(JMPENV*)pcur_env)
-
-#define JMPENV_PUSH_ENV(ce,v) \
-    STMT_START {						\
-	if (!(ce).je_noset) {					\
-	    DEBUG_l(Perl_deb(aTHX_ "Setting up jumplevel %p, was %p\n",	\
-			     ce, PL_top_env));			\
-	    JMPENV_PUSH_INIT_ENV(ce,NULL);			\
-	    EXCEPT_SET_ENV(ce,PerlProc_setjmp((ce).je_buf, SCOPE_SAVES_SIGNAL_MASK));\
-	    (ce).je_noset = 1;					\
-	}							\
-	else							\
-	    EXCEPT_SET_ENV(ce,0);				\
-	JMPENV_POST_CATCH_ENV(ce);				\
-	(v) = EXCEPT_GET_ENV(ce);				\
-    } STMT_END
-
-#define JMPENV_PUSH(v) JMPENV_PUSH_ENV(*(JMPENV*)pcur_env,v)
-
-#define JMPENV_POP_ENV(ce) \
-    STMT_START {						\
-	if (PL_top_env == &(ce))				\
-	    PL_top_env = (ce).je_prev;				\
-    } STMT_END
-
-#define JMPENV_POP  JMPENV_POP_ENV(*(JMPENV*)pcur_env)
-
-#define JMPENV_JUMP(v) \
-    STMT_START {						\
-	OP_REG_TO_MEM;						\
-	if (PL_top_env->je_prev) {				\
-	    if (PL_top_env->je_throw)				\
-		PL_top_env->je_throw(v);			\
-	    else						\
-		PerlProc_longjmp(PL_top_env->je_buf, (v));	\
-	}							\
-	if ((v) == 2)						\
-	    PerlProc_exit(STATUS_NATIVE_EXPORT);		\
-	PerlIO_printf(Perl_error_log, "panic: top_env\n");	\
-	PerlProc_exit(1);					\
-    } STMT_END
-
-#define EXCEPT_GET_ENV(ce)	((ce).je_ret)
-#define EXCEPT_GET		EXCEPT_GET_ENV(*(JMPENV*)pcur_env)
-#define EXCEPT_SET_ENV(ce,v)	((ce).je_ret = (v))
-#define EXCEPT_SET(v)		EXCEPT_SET_ENV(*(JMPENV*)pcur_env,v)
-
-#else /* !PERL_FLEXIBLE_EXCEPTIONS */
 
 #define dJMPENV		JMPENV cur_env
 
@@ -410,8 +328,6 @@ typedef void *(CPERLscope(*protect_proc_t)) (pTHX_ volatile JMPENV *pcur_env,
 	PerlIO_printf(PerlIO_stderr(), "panic: top_env\n");	\
 	PerlProc_exit(1);					\
     } STMT_END
-
-#endif /* PERL_FLEXIBLE_EXCEPTIONS */
 
 #define CATCH_GET		(PL_top_env->je_mustcatch)
 #define CATCH_SET(v)		(PL_top_env->je_mustcatch = (v))

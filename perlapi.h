@@ -766,8 +766,6 @@ END_EXTERN_C
 #define PL_opsave		(*Perl_Topsave_ptr(aTHX))
 #undef  PL_peepp
 #define PL_peepp		(*Perl_Tpeepp_ptr(aTHX))
-#undef  PL_protect
-#define PL_protect		(*Perl_Tprotect_ptr(aTHX))
 #undef  PL_reg_call_cc
 #define PL_reg_call_cc		(*Perl_Treg_call_cc_ptr(aTHX))
 #undef  PL_reg_curpm

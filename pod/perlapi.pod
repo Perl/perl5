@@ -1699,6 +1699,16 @@ which is shared between threads.
 =for hackers
 Found in file util.c
 
+=item savesvpv
+
+A version of C<savepv()>/C<savepvn() which gets the string to duplicate from
+the passed in SV using C<SvPV()>
+
+	char*	savesvpv(SV* sv)
+
+=for hackers
+Found in file util.c
+
 =item StructCopy
 
 This is an architecture-independent macro to copy one structure to another.

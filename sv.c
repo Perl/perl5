@@ -12178,9 +12178,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_dirty		= proto_perl->Tdirty;
     PL_localizing	= proto_perl->Tlocalizing;
 
-#ifdef PERL_FLEXIBLE_EXCEPTIONS
-    PL_protect		= proto_perl->Tprotect;
-#endif
     PL_errors		= sv_dup_inc(proto_perl->Terrors, param);
     PL_hv_fetch_ent_mh	= Nullhe;
     PL_modcount		= proto_perl->Tmodcount;

@@ -130,9 +130,6 @@ PERLVAR(Tmainstack,	AV *)		/* the stack when nothing funny is happening */
 
 PERLVAR(Ttop_env,	JMPENV *)	/* ptr. to current sigjmp() environment */
 PERLVAR(Tstart_env,	JMPENV)		/* empty startup sigjmp() environment */
-#ifdef PERL_FLEXIBLE_EXCEPTIONS
-PERLVARI(Tprotect,	protect_proc_t,	MEMBER_TO_FPTR(Perl_default_protect))
-#endif
 PERLVARI(Terrors,	SV *, Nullsv)	/* outstanding queued errors */
 
 /* statics "owned" by various functions */

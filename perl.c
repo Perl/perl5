@@ -213,10 +213,6 @@ perl_construct(pTHXx)
 #endif
    /* Init the real globals (and main thread)? */
     if (!PL_linestr) {
-#ifdef PERL_FLEXIBLE_EXCEPTIONS
-	PL_protect = MEMBER_TO_FPTR(Perl_default_protect); /* for exceptions */
-#endif
-
 	PL_curcop = &PL_compiling;	/* needed by ckWARN, right away */
 
 	PL_linestr = NEWSV(65,79);
@@ -1176,16 +1172,10 @@ setuid perl scripts securely.\n");
     oldscope = PL_scopestack_ix;
     PL_dowarn = G_WARN_OFF;
 
-#ifdef PERL_FLEXIBLE_EXCEPTIONS
-    CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_vparse_body), env, xsinit);
-#else
     JMPENV_PUSH(ret);
-#endif
     switch (ret) {
     case 0:
-#ifndef PERL_FLEXIBLE_EXCEPTIONS
 	parse_body(env,xsinit);
-#endif
 	if (PL_checkav)
 	    call_list(oldscope, PL_checkav);
 	ret = 0;
@@ -1211,17 +1201,6 @@ setuid perl scripts securely.\n");
     JMPENV_POP;
     return ret;
 }
-
-#ifdef PERL_FLEXIBLE_EXCEPTIONS
-STATIC void *
-S_vparse_body(pTHX_ va_list args)
-{
-    char **env = va_arg(args, char**);
-    XSINIT_t xsinit = va_arg(args, XSINIT_t);
-
-    return parse_body(env, xsinit);
-}
-#endif
 
 STATIC void *
 S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
@@ -1748,21 +1727,14 @@ perl_run(pTHXx)
     VMSISH_HUSHED = 0;
 #endif
 
-#ifdef PERL_FLEXIBLE_EXCEPTIONS
- redo_body:
-    CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_vrun_body), oldscope);
-#else
     JMPENV_PUSH(ret);
-#endif
     switch (ret) {
     case 1:
 	cxstack_ix = -1;		/* start context stack again */
 	goto redo_body;
     case 0:				/* normal completion */
-#ifndef PERL_FLEXIBLE_EXCEPTIONS
  redo_body:
 	run_body(oldscope);
-#endif
 	/* FALL THROUGH */
     case 2:				/* my_exit() */
 	while (PL_scopestack_ix > oldscope)
@@ -1792,16 +1764,6 @@ perl_run(pTHXx)
     JMPENV_POP;
     return ret;
 }
-
-#ifdef PERL_FLEXIBLE_EXCEPTIONS
-STATIC void *
-S_vrun_body(pTHX_ va_list args)
-{
-    I32 oldscope = va_arg(args, I32);
-
-    return run_body(oldscope);
-}
-#endif
 
 
 STATIC void *
@@ -2113,19 +2075,11 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	}
 	PL_markstack_ptr++;
 
-#ifdef PERL_FLEXIBLE_EXCEPTIONS
- redo_body:
-	CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_vcall_body),
-		    (OP*)&myop, FALSE);
-#else
 	JMPENV_PUSH(ret);
-#endif
 	switch (ret) {
 	case 0:
-#ifndef PERL_FLEXIBLE_EXCEPTIONS
  redo_body:
 	    call_body((OP*)&myop, FALSE);
-#endif
 	    retval = PL_stack_sp - (PL_stack_base + oldmark);
 	    if (!(flags & G_KEEPERR))
 		sv_setpv(ERRSV,"");
@@ -2182,18 +2136,6 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
     PL_op = oldop;
     return retval;
 }
-
-#ifdef PERL_FLEXIBLE_EXCEPTIONS
-STATIC void *
-S_vcall_body(pTHX_ va_list args)
-{
-    OP *myop = va_arg(args, OP*);
-    int is_eval = va_arg(args, int);
-
-    call_body(myop, is_eval);
-    return NULL;
-}
-#endif
 
 STATIC void
 S_call_body(pTHX_ OP *myop, int is_eval)
@@ -2254,23 +2196,15 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
     if (flags & G_KEEPERR)
 	myop.op_flags |= OPf_SPECIAL;
 
-#ifdef PERL_FLEXIBLE_EXCEPTIONS
- redo_body:
-    CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_vcall_body),
-		(OP*)&myop, TRUE);
-#else
     /* fail now; otherwise we could fail after the JMPENV_PUSH but
      * before a PUSHEVAL, which corrupts the stack after a croak */
     TAINT_PROPER("eval_sv()");
 
     JMPENV_PUSH(ret);
-#endif
     switch (ret) {
     case 0:
-#ifndef PERL_FLEXIBLE_EXCEPTIONS
  redo_body:
 	call_body((OP*)&myop,TRUE);
-#endif
 	retval = PL_stack_sp - (PL_stack_base + oldmark);
 	if (!(flags & G_KEEPERR))
 	    sv_setpv(ERRSV,"");
@@ -4632,16 +4566,10 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 	} else {
 	    SAVEFREESV(cv);
 	}
-#ifdef PERL_FLEXIBLE_EXCEPTIONS
-	CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_vcall_list_body), cv);
-#else
 	JMPENV_PUSH(ret);
-#endif
 	switch (ret) {
 	case 0:
-#ifndef PERL_FLEXIBLE_EXCEPTIONS
 	    call_list_body(cv);
-#endif
 	    atsv = ERRSV;
 	    (void)SvPV(atsv, len);
 	    if (len) {
@@ -4697,15 +4625,6 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 	JMPENV_POP;
     }
 }
-
-#ifdef PERL_FLEXIBLE_EXCEPTIONS
-STATIC void *
-S_vcall_list_body(pTHX_ va_list args)
-{
-    CV *cv = va_arg(args, CV*);
-    return call_list_body(cv);
-}
-#endif
 
 STATIC void *
 S_call_list_body(pTHX_ CV *cv)

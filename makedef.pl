@@ -596,14 +596,6 @@ unless ($define{'PERL_COPY_ON_WRITE'}) {
 		  )];
 }
 
-unless ($define{'PERL_FLEXIBLE_EXCEPTIONS'}) {
-    skip_symbols [qw(
-		    PL_protect
-		    Perl_default_protect
-		    Perl_vdefault_protect
-		    )];
-}
-
 unless ($define{'USE_REENTRANT_API'}) {
     skip_symbols [qw(
 		    PL_reentrant_buffer
