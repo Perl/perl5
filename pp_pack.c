@@ -1425,20 +1425,17 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		len = along;
 	    if (checksum) {
 		while (len-- > 0) {
-#if LONGSIZE > SIZE32 && INTSIZE == SIZE32
-		    I32 along;
-#endif
-		    COPY32(s, &along);
-		    DO_BO_UNPACK(along, 32);
-#if LONGSIZE > SIZE32
-		    if (along > 2147483647)
-		        along -= 4294967296;
+		    COPY32(s, &ai32);
+		    DO_BO_UNPACK(ai32, 32);
+#if U32SIZE > SIZE32
+		    if (ai32 > 2147483647)
+		        ai32 -= 4294967296;
 #endif
 		    s += SIZE32;
 		    if (checksum > bits_in_uv)
-			cdouble += (NV)along;
+			cdouble += (NV)ai32;
 		    else
-			cuv += along;
+			cuv += ai32;
 		}
 	    }
 	    else {
@@ -1447,18 +1444,15 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
 		while (len-- > 0) {
-#if LONGSIZE > SIZE32 && INTSIZE == SIZE32
-		    I32 along;
-#endif
-		    COPY32(s, &along);
-		    DO_BO_UNPACK(along, 32);
-#if LONGSIZE > SIZE32
-		    if (along > 2147483647)
-		        along -= 4294967296;
+		    COPY32(s, &ai32);
+		    DO_BO_UNPACK(ai32, 32);
+#if U32SIZE > SIZE32
+		    if (ai32 > 2147483647)
+		        ai32 -= 4294967296;
 #endif
 		    s += SIZE32;
 		    sv = NEWSV(42, 0);
-		    sv_setiv(sv, (IV)along);
+		    sv_setiv(sv, (IV)ai32);
 		    PUSHs(sv_2mortal(sv));
 		}
 	    }
