@@ -29,8 +29,11 @@
 typedef int IBW;
 typedef unsigned UBW;
 
-static SV* refto _((SV* sv));
 static void doencodes _((SV* sv, char* s, I32 len));
+static SV* refto _((SV* sv));
+static U32 seed _((void));
+
+static bool srand_called = FALSE;
 
 /* variations on pp_null */
 
@@ -1296,6 +1299,10 @@ PP(pp_rand)
 	value = POPn;
     if (value == 0.0)
 	value = 1.0;
+    if (!srand_called) {
+	(void)srand((unsigned)seed());
+	srand_called = TRUE;
+    }
 #if RANDBITS == 31
     value = rand() * value / 2147483648.0;
 #else
@@ -1316,38 +1323,44 @@ PP(pp_rand)
 PP(pp_srand)
 {
     dSP;
-    I32 anum;
-
-    if (MAXARG < 1) {
-#ifdef VMS
-#  include <starlet.h>
-	unsigned int when[2];
-	_ckvmssts(sys$gettim(when));
-	anum = when[0] ^ when[1];
-#else
-#  ifdef HAS_GETTIMEOFDAY
-	struct timeval when;
-	gettimeofday(&when,(struct timezone *) 0);
-	anum = when.tv_sec ^ when.tv_usec;
-#  else
-	Time_t when;
-	(void)time(&when);
-	anum = when;
-#  endif
-#endif
-#if !defined(PLAN9) /* XXX Plan9 assembler chokes on this; fix coming soon  */
-                    /*     17-Jul-1996  bailey@genetics.upenn.edu           */
-	/* What is a good hashing algorithm here? */
-	anum ^= (  (  269 * (U32)getpid())
-	         ^ (26107 * (U32)&when)
-	         ^ (73819 * (U32)stack_sp));
-#endif
-    }
+    UV anum;
+    if (MAXARG < 1)
+	anum = seed();
     else
-	anum = POPi;
-    (void)srand(anum);
+	anum = POPu;
+    (void)srand((unsigned)anum);
+    srand_called = TRUE;
     EXTEND(SP, 1);
     RETPUSHYES;
+}
+
+static U32
+seed()
+{
+    U32 u;
+#ifdef VMS
+#  include <starlet.h>
+    unsigned int when[2];
+    _ckvmssts(sys$gettim(when));
+    u = when[0] ^ when[1];
+#else
+#  ifdef HAS_GETTIMEOFDAY
+    struct timeval when;
+    gettimeofday(&when,(struct timezone *) 0);
+    u = when.tv_sec ^ when.tv_usec;
+#  else
+    Time_t when;
+    (void)time(&when);
+    u = when;
+#  endif
+#endif
+#ifndef PLAN9		/* XXX Plan9 assembler chokes on this; fix needed  */
+    /* What is a good hashing algorithm here? */
+    u ^= (   (  269 * (U32)getpid())
+	   ^ (26107 * (U32)&when)
+	   ^ (73819 * (U32)stack_sp));
+#endif
+    return u;
 }
 
 PP(pp_exp)

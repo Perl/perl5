@@ -2275,8 +2275,8 @@ If EXPR is omitted, uses $_.
 
 Returns a random fractional number between 0 and the value of EXPR.
 (EXPR should be positive.)  If EXPR is omitted, returns a value between 
-0 and 1.  This function produces repeatable sequences unless srand() 
-is invoked.  See also srand().
+0 and 1.  Automatically calls srand() unless srand() has already been
+called.  See also srand().
 
 (Note: if your rand function consistently returns numbers that are too
 large or too small, then your version of Perl was probably compiled
@@ -3036,17 +3036,23 @@ root of $_.
 
 =item srand EXPR
 
-Sets the random number seed for the C<rand> operator.  If EXPR is omitted,
-uses a semi-random value based on the current time and process ID, among
-other things.  In versions of Perl prior to 5.004 the default seed was
-just the current time().  This isn't a particularly good seed, so many
-old programs supply their own seed value (often C<time ^ $$> or C<time ^
-($$ + ($$ << 15))>), but that isn't necessary any more.
+=item srand
 
-You need something much more random than the default seed for
-cryptographic purposes, though.  Checksumming the compressed output of
-one or more rapidly changing operating system status programs is the
-usual method. For example:
+Sets the random number seed for the C<rand> operator.  If EXPR is
+omitted, uses a semi-random value based on the current time and process
+ID, among other things.  In versions of Perl prior to 5.004 the default
+seed was just the current time().  This isn't a particularly good seed,
+so many old programs supply their own seed value (often C<time ^ $$> or
+C<time ^ ($$ + ($$ << 15))>), but that isn't necessary any more.
+
+In fact, it's usually not necessary to call srand() at all, because if
+it is not called explicitly, it is called implicitly at the first use of
+the C<rand> operator.
+
+However, you need something much more random than the default seed for
+cryptographic purposes.  Checksumming the compressed output of one or
+more rapidly changing operating system status programs is the usual
+method. For example:
 
     srand (time ^ $$ ^ unpack "%L*", `ps axww | gzip`);
 
