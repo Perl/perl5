@@ -508,9 +508,15 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 			SvREFCNT_inc(sv);
 			av_push(keys, sv);
 		    }
+#ifdef USE_LOCALE_NUMERIC
 		    sortsv(AvARRAY(keys), 
 			   av_len(keys)+1, 
 			   IN_LOCALE ? Perl_sv_cmp_locale : Perl_sv_cmp);
+#else
+		    sortsv(AvARRAY(keys), 
+			   av_len(keys)+1, 
+			   Perl_sv_cmp);
+#endif
 		}
 		else {
 		    dSP; ENTER; SAVETMPS; PUSHMARK(sp);

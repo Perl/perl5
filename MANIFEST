@@ -3,6 +3,8 @@ Artistic		The "Artistic License"
 AUTHORS			Contact info for contributors
 av.c			Array value code
 av.h			Array value header
+beos/beosish.h		BeOS port
+beos/beos.c		BeOS port
 beos/nm.c		BeOS port
 bytecode.pl		Produces ext/ByteLoader/byterun.h, ext/ByteLoader/byterun.c and ext/B/Asmdata.pm
 cc_runtime.h		Macros need by runtime of compiler-generated code
@@ -489,6 +491,7 @@ ext/POSIX/POSIX.pod		POSIX extension documentation
 ext/POSIX/POSIX.xs		POSIX extension external subroutines
 ext/POSIX/t/posix.t		See if POSIX works
 ext/POSIX/t/sigaction.t		See if POSIX::sigaction works
+ext/POSIX/t/waitpid.t		See if waitpid works
 ext/POSIX/typemap		POSIX extension interface types
 ext/re/hints/mpeix.pl		Hints for re for named architecture
 ext/re/Makefile.PL		re extension makefile writer
@@ -788,24 +791,6 @@ lib/abbrev.pl			An abbreviation table builder
 lib/AnyDBM_File.pm		Perl module to emulate dbmopen
 lib/AnyDBM_File.t		See if AnyDBM_File works
 lib/assert.pl			assertion and panic with stack trace
-lib/Attribute/Handlers.pm		Attribute::Handlers
-lib/Attribute/Handlers/Changes	Attribute::Handlers
-lib/Attribute/Handlers/demo/demo.pl	Attribute::Handlers demo
-lib/Attribute/Handlers/demo/Demo.pm	Attribute::Handlers demo
-lib/Attribute/Handlers/demo/demo2.pl	Attribute::Handlers demo
-lib/Attribute/Handlers/demo/demo3.pl	Attribute::Handlers demo
-lib/Attribute/Handlers/demo/demo4.pl	Attribute::Handlers demo
-lib/Attribute/Handlers/demo/demo_call.pl	Attribute::Handlers demo
-lib/Attribute/Handlers/demo/demo_chain.pl	Attribute::Handlers demo
-lib/Attribute/Handlers/demo/demo_cycle.pl	Attribute::Handlers demo
-lib/Attribute/Handlers/demo/demo_hashdir.pl	Attribute::Handlers demo
-lib/Attribute/Handlers/demo/demo_phases.pl	Attribute::Handlers demo
-lib/Attribute/Handlers/demo/demo_range.pl	Attribute::Handlers demo
-lib/Attribute/Handlers/demo/demo_rawdata.pl	Attribute::Handlers demo
-lib/Attribute/Handlers/demo/Descriptions.pm	Attribute::Handlers demo
-lib/Attribute/Handlers/demo/MyClass.pm	Attribute::Handlers demo
-lib/Attribute/Handlers/README		Attribute::Handlers
-lib/Attribute/Handlers/t/multi.t	See if Attribute::Handlers works
 lib/attributes.pm		For "sub foo : attrlist"
 lib/AutoLoader.pm		Autoloader base class
 lib/AutoLoader.t		See if AutoLoader works
@@ -1078,7 +1063,6 @@ lib/Memoize/ExpireFile.pm	Memoize
 lib/Memoize/ExpireTest.pm	Memoize
 lib/Memoize/NDBM_File.pm	Memoize
 lib/Memoize/README		Memoize
-lib/Memoize/Saves.pm		Memoize
 lib/Memoize/SDBM_File.pm	Memoize
 lib/Memoize/Storable.pm		Memoize
 lib/Memoize/t/array.t		Memoize
@@ -1227,6 +1211,7 @@ lib/Term/Cap.t			See if Term::Cap works
 lib/Term/Complete.pm		A command completion subroutine
 lib/Term/Complete.t		See if Term::Complete works
 lib/Term/ReadLine.pm		Stub readline library
+lib/Term/ReadLine.t		See if Term::ReadLine works
 lib/termcap.pl			Perl library supporting termcap usage
 lib/Test.pm			A simple framework for writing test scripts
 lib/Test/Builder.pm             For writing new test libraries
@@ -2206,6 +2191,7 @@ t/op/grent.t			See if getgr*() functions work
 t/op/grep.t			See if grep() and map() work
 t/op/groups.t			See if $( works
 t/op/gv.t			See if typeglobs work
+t/op/hashassign.t		See if hash assignments work
 t/op/hashwarn.t			See if warnings for bad hash assignments work
 t/op/inc.t			See if inc/dec of integers near 32 bit limit work
 t/op/inccode.t			See if coderefs work in @INC

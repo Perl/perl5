@@ -36,10 +36,10 @@ my $tmpfile_link = $tmpfile.'2';
 
 
 unlink $tmpfile;
-open(FOO, ">$tmpfile") || BAILOUT("Can't open temp test file: $!");
+open(FOO, ">$tmpfile") || DIE("Can't open temp test file: $!");
 close FOO;
 
-open(FOO, ">$tmpfile") || BAILOUT("Can't open temp test file: $!");
+open(FOO, ">$tmpfile") || DIE("Can't open temp test file: $!");
 
 my($nlink, $mtime, $ctime) = (stat(FOO))[$NLINK, $MTIME, $CTIME];
 SKIP: {
@@ -80,6 +80,9 @@ SKIP: {
 
     SKIP: {
         skip "No link count", 1 if $Config{dont_use_nlink};
+        skip "Cygwin9X fakes hard links by copying", 1
+          if $Config{myuname} =~ /^cygwin_(?:9\d|me)\b/i;
+
         is($nlink, 2,     'Link count on hard linked file' );
     }
 
@@ -106,13 +109,13 @@ DIAG
 }
 
 # truncate and touch $tmpfile.
-open(F, ">$tmpfile") || BAILOUT("Can't open temp test file: $!");
+open(F, ">$tmpfile") || DIE("Can't open temp test file: $!");
 close F;
 
 ok(-z $tmpfile,     '-z on empty file');
 ok(! -s $tmpfile,   '   and -s');
 
-open(F, ">$tmpfile") || BAILOUT("Can't open temp test file: $!");
+open(F, ">$tmpfile") || DIE("Can't open temp test file: $!");
 print F "hi\n";
 close F;
 
@@ -209,11 +212,17 @@ SKIP: {
     # /dev/stdout might be either character special or a named pipe,
     # depending on which OS and how are you running the test, so let's
     # censor that one away.
-    $DEV =~ s{^[cp].+?\bstdout$}{}m;
-    @DEV = grep { ! m{\bstdout$} } @DEV;
+    $DEV =~ s{^[cp].+?\sstdout$}{}m;
+    @DEV =  grep { $_ ne 'stdout' } @DEV;
+
+    # If running as root, we will see .files in the ls result,
+    # and readdir() will see them always.  Potential for conflict,
+    # so let's weed them out.
+    $DEV =~ s{^.+?\s\..+?$}{}m;
+    @DEV =  grep { ! m{^\..+$} } @DEV;
 
     my $try = sub {
-	my @c1 = eval qq[\$DEV =~ /^$_[0]/mg];
+	my @c1 = eval qq[\$DEV =~ /^$_[0].*/mg];
 	my @c2 = eval qq[grep { $_[1] "/dev/\$_" } \@DEV];
 	my $c1 = scalar @c1;
 	my $c2 = scalar @c2;
@@ -230,8 +239,6 @@ ok(! -c $Curdir,    '!-c cwd');
 ok(! -S $Curdir,    '!-S cwd');
 
 SKIP: {
-    skip "No setuid", 3 if $Is_MPE or $Is_Amiga or $Is_Dosish or $Is_Cygwin;
-
     my($cnt, $uid);
     $cnt = $uid = 0;
 
@@ -251,17 +258,11 @@ SKIP: {
     }
     closedir BIN;
 
-    if( !isnt($cnt, 0,    'found some programs') ||
-        !isnt($uid, 0,    'found some setuid programs') ||
-        !ok($uid < $cnt,  "  they're not all setuid") )
-    {
-        print <<DIAG;
-# The above two tests assume that at least one of these directories
-# are readable, executable and contain at least one setuid file
-# (but aren't all setuid).
-#   @bin
-DIAG
-    }
+    skip "No setuid programs", 3 if $uid == 0;
+
+    isnt($cnt, 0,    'found some programs');
+    isnt($uid, 0,    '  found some setuid programs');
+    ok($uid < $cnt,  "    they're not all setuid");
 }
 
 
@@ -295,7 +296,7 @@ my $Null = File::Spec->devnull;
 SKIP: {
     skip "No null device to test with", 1 unless -e $Null;
 
-    open(NULL, $Null) or BAIL_OUT("Can't open $Null: $!");
+    open(NULL, $Null) or DIE("Can't open $Null: $!");
     ok(! -t NULL,   'null device is not a TTY');
     close(NULL);
 }

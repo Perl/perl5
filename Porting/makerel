@@ -122,6 +122,9 @@ my @writables = qw(
     ext/ByteLoader/byterun.h
     ext/ByteLoader/byterun.c
     ext/B/B/Asmdata.pm
+    ext/Devel/PPPort/PPPort.xs
+    ext/Devel/PPPort/module2.c
+    ext/Devel/PPPort/module3.c
     regnodes.h
     warnings.h
     lib/warnings.pm

@@ -85,10 +85,14 @@ BEGIN {
 
 	my ($now) = time;
 	utime ($now, $now, $ARGV[0]);
+    sleep 2;
 
 	# Just checking modify time stamp, access time stamp is set
-	# to the beginning of the day in Win95
-	is( (stat($ARGV[0]))[9], $now, 'checking modify time stamp' );
+	# to the beginning of the day in Win95.
+    # There's a small chance of a 1 second flutter here.
+    my $stamp = (stat($ARGV[0]))[9];
+	ok( abs($now - $stamp) <= 1, 'checking modify time stamp' ) ||
+      print "# mtime == $stamp, should be $now\n";
 
 	# change a file to read-only
 	@ARGV = ( 0600, 'ecmdfile' );

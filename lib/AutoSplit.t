@@ -307,7 +307,7 @@ AutoSplitting *INC**PATHSEP**MOD*.pm (*DIR**PATHSEP**MOD*)
 is (&*MOD*::obsolete, 0);
 is (&*MOD*::obsolete, 1);
 ## Sleep
-2
+4
 ## SameAgain
 True, so don't scrub this directory.
 IIRC DOS FAT filesystems have only 2 second granularity.
@@ -338,7 +338,7 @@ AutoSplitting *INC**PATHSEP**MOD*.pm (*DIR**PATHSEP**MOD*)
 is (&*MOD*::skeleton, "bones", "skeleton");
 eval {&*MOD*::gonner}; ok ($@ =~ m!^Can't locate auto/*MOD*/gonner.al in \@INC!, "Check &*MOD*::gonner is now a gonner") or print "# \$\@='$@'\n";
 ## Sleep
-2
+4
 ## SameAgain
 True, so don't scrub this directory.
 ################################################################
@@ -368,7 +368,7 @@ AutoSplitting *INC**PATHSEP**MOD*.pm (*DIR**PATHSEP**MOD*)
 is (&*MOD*::ghost, "bump");
 is (&*MOD*::zombie, "You didn't use fire.", "Are our zombies undead?");
 ## Sleep
-2
+4
 ## SameAgain
 True, so don't scrub this directory.
 ################################################################
@@ -390,7 +390,7 @@ Without the timestamp check make sure that nothing happens
 is (&*MOD*::ghoul, "wail", "still haunted");
 is (&*MOD*::zombie, "You didn't use fire.", "Are our zombies still undead?");
 ## Sleep
-2
+4
 ## SameAgain
 True, so don't scrub this directory.
 ################################################################

@@ -65,6 +65,15 @@ change will probably break backward compatibility with compiled
 modules.  The change was made to make Perl more compliant with other
 applications like modperl which are using the AIX native interface.
 
+=head2 Attributes for C<my> variables now handled at run-time.
+
+The C<my EXPR : ATTRS> syntax now applies variable attributes at
+run-time.  (Subroutine and C<our> variables still get attributes applied
+at compile-time.)  See L<attributes> for additional details.  In particular,
+however, this allows variable attributes to be useful for C<tie> interfaces,
+which was a deficiency of earlier releases.  Note that the new semantics
+doesn't work with the Attribute::Handlers module (as of version 0.76).
+
 =head2 Socket Extension Dynamic in VMS
 
 The Socket extension is now dynamically loaded instead of being
@@ -291,11 +300,19 @@ the child process.
 
 =back
 
-=head2 Signals Are Now Safe
+=head2 Safe Signals
 
 Perl used to be fragile in that signals arriving at inopportune moments
 could corrupt Perl's internal state.  Now Perl postpones handling of
-signals until it's safe.
+signals until it's safe (between opcodes).
+
+This change may have surprising side effects because signals no more
+interrupt Perl instantly.  Perl will now first finish whatever it was
+doing, like finishing an internal operation (like sort()) or an
+external operation (like an I/O operation), and only then look at any
+arrived signals (and before starting the next operation).  No more corrupt
+internal state since the current operation is always finished first,
+but the signal may take more time to get heard.
 
 =head2 Unicode Overhaul
 
@@ -445,22 +462,6 @@ simply B<between digits>.
 =head2 New Modules and Pragmata
 
 =over 4
-
-=item *
-
-C<Attribute::Handlers> allows a class to define attribute handlers.
-
-    package MyPack;
-    use Attribute::Handlers;
-    sub Wolf :ATTR(SCALAR) { print "howl!\n" }
-
-    # later, in some package using or inheriting from MyPack...
-
-    my MyPack $Fluffy : Wolf; # the attribute handler Wolf will be called
-
-Both variables and routines can have attribute handlers.  Handlers can
-be specific to type (SCALAR, ARRAY, HASH, or CODE), or specific to the
-exact compilation phase (BEGIN, CHECK, INIT, or END).
 
 =item *
 
@@ -681,7 +682,7 @@ to Quoted-Printable.  See L<PerlIO::Via>.
 =item *
 
 C<Pod::ParseLink>, by Russ Allbery, has been added,
-to parse L&lt;&gt; links in pods as described in the new
+to parse LZ<><> links in pods as described in the new
 perlpodspec.
 
 =item *
@@ -2221,7 +2222,8 @@ Made possible to propagate customised exceptions via croak()ing.
 
 =item *
 
-Now xsubs can have attributes just like subs.
+Now xsubs can have attributes just like subs.  (Well, at least the
+built-in attributes.)
 
 =item *
 
@@ -2509,15 +2511,6 @@ hard-to-fix ways.  As a stop-gap measure to avoid people from getting
 frustrated at the mysterious results (core dumps, most often) it is
 for now forbidden (you will get a fatal error even from an attempt).
 
-=head2 Variable Attributes are not Currently Usable for Tieing
-
-This limitation will hopefully be fixed in future.  (Subroutine
-attributes work fine for tieing, see L<Attribute::Handlers>).
-
-One way to run into this limitation is to have a loop variable with
-attributes within a loop: the tie is called only once, not for each
-iteration of the loop.
-
 =head2 Building Extensions Can Fail Because Of Largefiles
 
 Some extensions like mod_perl are known to have issues with
@@ -2546,7 +2539,7 @@ pP are testing for Unicode code points, not knowing about EBCDIC.
 The compiler suite is slowly getting better but it continues to be
 highly experimental.  Use in production environments is discouraged.
 
-=head2 The Long Double Support is Still Experimental
+=head2 The Long Double Support Is Still Experimental
 
 The ability to configure Perl's numbers to use "long doubles",
 floating point numbers of hopefully better accuracy, is still
@@ -2557,6 +2550,29 @@ and moving target.  The gain of more precision may also be offset
 by slowdown in computations (more bits to move around, and the
 operations are more likely to be executed by less optimised
 libraries).
+
+=head2 Seen In Perl 5.7 But Gone Now
+
+Some modules were seen in the Perl 5.7 development releases
+but are not present in 5.8.0.
+
+=over 4
+
+=item *
+
+C<Attribute::Handlers> was removed because the implementation of C<my>
+variable attributes changed so much that the Attribute::Handlers will
+require a major rewrite.  (This means that you can't use
+Attribute::Handler 0.76 with Perl 5.8.0.)
+
+=item *
+
+C<Time::Piece> (previously known as C<Time::Object>) was removed
+because it was felt that it didn't have enough value in it to be a
+core module.  It is still a useful module, though, and is available
+from the CPAN.
+
+=back
 
 =head1 Reporting Bugs
 

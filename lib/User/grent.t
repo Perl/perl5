@@ -5,40 +5,35 @@ BEGIN {
     @INC = '../lib';
 }
 
+use Test::More tests => 5;
+
 BEGIN {
     our $hasgr;
     eval { my @n = getgrgid 0 };
     $hasgr = 1 unless $@ && $@ =~ /unimplemented/;
-    unless ($hasgr) { print "1..0 # Skip: no getgrgid\n"; exit 0 }
+    unless ($hasgr) { plan skip_all => "no getgrgid"; }
     use Config;
     $hasgr = 0 unless $Config{'i_grp'} eq 'define';
-    unless ($hasgr) { print "1..0 # Skip: no grp.h\n"; exit 0 }
+    unless ($hasgr) { plan skip_all => "no grp.h"; }
 }
 
 BEGIN {
     our @grent = getgrgid 0; # This is the function getgrgid.
-    unless (@grent) { print "1..0 # Skip: no gid 0\n"; exit 0 }
+    unless (@grent) { plan skip_all => "no gid 0"; }
 }
 
-print "1..5\n";
 
-use User::grent;
+BEGIN { use_ok('User::grent'); }
+can_ok(__PACKAGE__, 'getgrgid');
 
-print "ok 1\n";
+my $grent = getgrgid 0;
 
-my $grent = getgrgid 0; # This is the OO getgrgid.
+is( $grent->name, $grent[0],    'name matches core getgrgid' );
 
-print "not " unless $grent->gid    == 0;
-print "ok 2\n";
+is( $grent->passwd, $grent[1],  '   passwd' );
 
-print "not " unless $grent->name   == $grent[0];
-print "ok 3\n";
+is( $grent->gid, $grent[2],     '   gid' );
 
-print "not " unless $grent->passwd eq $grent[1];
-print "ok 4\n";
-
-print "not " unless $grent->gid    == $grent[2];
-print "ok 5\n";
 
 # Testing pretty much anything else is unportable.
 

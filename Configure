@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun Nov 25 08:58:37 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Wed Dec 12 17:09:05 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -3262,8 +3262,9 @@ experimental.  This arrangement exists to help developers work out
 which one is better.
 
 If you're a casual user, you probably don't want interpreter-threads
-at this time.  There doesn't yet exist a way to create threads from
-within Perl in this model, i.e., "use Thread;" will NOT work.
+at this time.  But if you do, the 'threads' module allows their use,
+and the 'Thread' module offers an interface to both 5005threads and
+ithreads (whichever has been configured).
 EOM
 	: Default to ithreads unless overridden on command line or with
 	: old config.sh
@@ -7172,7 +7173,7 @@ EOM
 	esac
 	for thisflag in $ldflags; do
 		case "$thisflag" in
-		-L*|-R*)
+		-L*|-R*|-Wl,-R*)
 			case " $dflt " in
 			*" $thisflag "*) ;;
 			*) dflt="$dflt $thisflag" ;;
@@ -7381,10 +7382,10 @@ if "$useshrplib"; then
 	aix)
 		# We'll set it in Makefile.SH...
 		;;
-	solaris|netbsd)
+	solaris)
 		xxx="-R $shrpdir"
 		;;
-	freebsd)
+	freebsd|netbsd)
 		xxx="-Wl,-R$shrpdir"
 		;;
 	linux|irix*|dec_osf)
@@ -7667,7 +7668,7 @@ case "$man3dir" in
 esac
 
 : see if we have to deal with yellow pages, now NIS.
-if $test -d /usr/etc/yp || $test -d /etc/yp; then
+if $test -d /usr/etc/yp || $test -d /etc/yp || $test -d /usr/lib/yp; then
 	if $test -f /usr/etc/nibindd; then
 		echo " "
 		echo "I'm fairly confident you're on a NeXT."
@@ -8036,7 +8037,10 @@ echo "I'll use $startperl to start perl scripts."
 : figure best path for perl in scripts
 case "$perlpath" in
 '')
-	perlpath="$binexp/perl"
+	case "$versiononly" in
+	"$define")	perlpath="$binexp/perl$version";;
+	*)		perlpath="$binexp/perl";;
+	esac
 	case "$startperl" in
 	*!*) ;;
 	*)
@@ -15928,8 +15932,11 @@ set fp_class.h i_fp_class
 eval $inhdr
 
 : see if this is a ieeefp.h system
-set ieeefp.h i_ieeefp
-eval $inhdr
+case "$i_ieeefp" in
+'' ) set ieeefp.h i_ieeefp
+     eval $inhdr
+     ;;
+esac
 
 : see if this is a libutil.h system
 set libutil.h i_libutil
@@ -16516,7 +16523,12 @@ for xxx in $known_extensions ; do
 		;;
 	Socket|socket)
 		case "$d_socket" in 
-		true|$define|y) avail_ext="$avail_ext $xxx" ;;
+		true|$define|y)
+		    case "$osname" in
+		    beos) ;; # not unless BONE
+		    *) avail_ext="$avail_ext $xxx" ;;
+		    esac
+		    ;;
 		esac
 		;;
 	Sys/Syslog|sys/syslog)

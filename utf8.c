@@ -400,6 +400,7 @@ malformed:
 	case UTF8_WARN_SHORT:
 	    Perl_sv_catpvf(aTHX_ sv, "(%d byte%s, need %d)",
                            curlen, curlen == 1 ? "" : "s", expectlen);
+	    expectlen = curlen;		/* distance for caller to skip */
 	    break;
 	case UTF8_WARN_OVERFLOW:
 	    Perl_sv_catpvf(aTHX_ sv, "(overflow at 0x%"UVxf", byte 0x%02x)",
@@ -902,7 +903,7 @@ Perl_is_uni_punct(pTHX_ UV c)
 bool
 Perl_is_uni_xdigit(pTHX_ UV c)
 {
-    U8 tmpbuf[UTF8_MAXLEN*2+1];
+    U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
     uvchr_to_utf8(tmpbuf, (UV)c);
     return is_utf8_xdigit(tmpbuf);
 }
@@ -910,7 +911,7 @@ Perl_is_uni_xdigit(pTHX_ UV c)
 UV
 Perl_to_uni_upper(pTHX_ UV c, U8* p, STRLEN *lenp)
 {
-    U8 tmpbuf[UTF8_MAXLEN*2+1];
+    U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
     uvchr_to_utf8(tmpbuf, (UV)c);
     return to_utf8_upper(tmpbuf, p, lenp);
 }
@@ -918,7 +919,7 @@ Perl_to_uni_upper(pTHX_ UV c, U8* p, STRLEN *lenp)
 UV
 Perl_to_uni_title(pTHX_ UV c, U8* p, STRLEN *lenp)
 {
-    U8 tmpbuf[UTF8_MAXLEN*2+1];
+    U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
     uvchr_to_utf8(tmpbuf, (UV)c);
     return to_utf8_title(tmpbuf, p, lenp);
 }
@@ -926,7 +927,7 @@ Perl_to_uni_title(pTHX_ UV c, U8* p, STRLEN *lenp)
 UV
 Perl_to_uni_lower(pTHX_ UV c, U8* p, STRLEN *lenp)
 {
-    U8 tmpbuf[UTF8_MAXLEN+1];
+    U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
     uvchr_to_utf8(tmpbuf, (UV)c);
     return to_utf8_lower(tmpbuf, p, lenp);
 }
@@ -934,7 +935,7 @@ Perl_to_uni_lower(pTHX_ UV c, U8* p, STRLEN *lenp)
 UV
 Perl_to_uni_fold(pTHX_ UV c, U8* p, STRLEN *lenp)
 {
-    U8 tmpbuf[UTF8_MAXLEN+1];
+    U8 tmpbuf[UTF8_MAXLEN_FOLD+1];
     uvchr_to_utf8(tmpbuf, (UV)c);
     return to_utf8_fold(tmpbuf, p, lenp);
 }
@@ -1246,7 +1247,8 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp,char *normal
 	      return 0;
 	 }
     }
-    *lenp = UNISKIP(uv);
+    if (lenp)
+       *lenp = UNISKIP(uv);
     uvuni_to_utf8(ustrp, uv);
     return uv;
 }
@@ -1523,6 +1525,16 @@ Perl_utf8n_to_uvchr(pTHX_ U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
     return UNI_TO_NATIVE(uv);
 }
 
+/*
+=for apidoc A|char *|pv_uni_display|SV *dsv|U8 *spv|STRLEN len|STRLEN pvlim|UV flags
+
+Build to the scalar dsv a displayable version of the string spv,
+length len, the displayable version being at most pvlim bytes long
+(if longer, the rest is truncated and "..." will be appended).
+The flags argument is currently unused but available for future extensions.
+The pointer to the PV of the dsv is returned.
+
+=cut */
 char *
 Perl_pv_uni_display(pTHX_ SV *dsv, U8 *spv, STRLEN len, STRLEN pvlim, UV flags)
 {
@@ -1545,6 +1557,16 @@ Perl_pv_uni_display(pTHX_ SV *dsv, U8 *spv, STRLEN len, STRLEN pvlim, UV flags)
     return SvPVX(dsv);
 }
 
+/*
+=for apidoc A|char *|sv_uni_display|SV *dsv|SV *ssv|STRLEN pvlim|UV flags
+
+Build to the scalar dsv a displayable version of the scalar sv,
+he displayable version being at most pvlim bytes long
+(if longer, the rest is truncated and "..." will be appended).
+The flags argument is currently unused but available for future extensions.
+The pointer to the PV of the dsv is returned.
+
+=cut */
 char *
 Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, STRLEN pvlim, UV flags)
 {
@@ -1552,27 +1574,46 @@ Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, STRLEN pvlim, UV flags)
 				pvlim, flags);
 }
 
+/*
+=for apidoc A|I32|ibcmp_utf8|const char *s1|bool u1|const char *s2|bool u2|register I32 len
+
+Return true if the strings s1 and s2 differ case-insensitively, false
+if not (if they are equal case-insensitively).  If u1 is true, the
+string s1 is assumed to be in UTF-8-encoded Unicode.  If u2 is true,
+the string s2 is assumed to be in UTF-8-encoded Unicode.
+
+For case-insensitiveness, the "casefolding" of Unicode is used
+instead of upper/lowercasing both the characters, see
+http://www.unicode.org/unicode/reports/tr21/ (Case Mappings).
+
+=cut */
 I32
-Perl_ibcmp_utf8(pTHX_ const char *s1, bool u1, const char *s2, bool u2, register I32 len)
+Perl_ibcmp_utf8(pTHX_ const char *s1, bool u1, register I32 len1, const char *s2, bool u2, register I32 len2)
 {
-     register U8 *a = (U8*)s1;
-     register U8 *b = (U8*)s2;
+     register U8 *a  = (U8*)s1;
+     register U8 *b  = (U8*)s2;
+     register U8 *ae = b + len1;
+     register U8 *be = b + len2;
      STRLEN la, lb;
      UV ca, cb;
      STRLEN ulen1, ulen2;
-     U8 tmpbuf1[UTF8_MAXLEN*3+1];
-     U8 tmpbuf2[UTF8_MAXLEN*3+1];
-
-     while (len) {
-	  if (u1)
+     U8 tmpbuf1[UTF8_MAXLEN_FOLD+1];
+     U8 tmpbuf2[UTF8_MAXLEN_FOLD+1];
+     
+     while (a < ae && b < be) {
+	  if (u1) {
+	       if (a + UTF8SKIP(a) > ae)
+		    break;
 	       ca = utf8_to_uvchr((U8*)a, &la);
-	  else {
+	  } else {
 	       ca = *a;
 	       la = 1;
 	  }
-	  if (u2)
+	  if (u2) {
+	       if (b + UTF8SKIP(b) > be)
+		    break;
 	       cb = utf8_to_uvchr((U8*)b, &lb);
-	  else {
+	  } else {
 	       cb = *b;
 	       lb = 1;
 	  }
@@ -1588,11 +1629,11 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, bool u1, const char *s2, bool u2, register
 	       if (ulen1 != ulen2
 		   || (ulen1 == 1 && PL_fold[ca] != PL_fold[cb])
 		   || memNE((char *)tmpbuf1, (char *)tmpbuf2, ulen1))
-		    return 1;
+		    return 1; /* mismatch */
 	  }
 	  a += la;
 	  b += lb;
-    }
-    return 0;
+     }
+     return a == ae && b == be ? 0 : 1; /* 0 match, 1 mismatch */
 }
 

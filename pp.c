@@ -2648,6 +2648,28 @@ PP(pp_sqrt)
     }
 }
 
+/*
+ * There are strange code-generation bugs caused on sparc64 by gcc-2.95.2.
+ * These need to be revisited when a newer toolchain becomes available.
+ */
+#if defined(__sparc64__) && defined(__GNUC__)
+#   if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 96)
+#       undef  SPARC64_MODF_WORKAROUND
+#       define SPARC64_MODF_WORKAROUND 1
+#   endif
+#endif
+
+#if defined(SPARC64_MODF_WORKAROUND)
+static NV
+sparc64_workaround_modf(NV theVal, NV *theIntRes)
+{
+    NV res, ret;
+    ret = Perl_modf(theVal, &res);
+    *theIntRes = res;
+    return ret;
+}
+#endif
+
 PP(pp_int)
 {
     dSP; dTARGET; tryAMAGICun(int);
@@ -2671,21 +2693,25 @@ PP(pp_int)
 	      if (value < (NV)UV_MAX + 0.5) {
 		  SETu(U_V(value));
 	      } else {
-#if defined(HAS_MODFL) || defined(LONG_DOUBLE_EQUALS_DOUBLE)
-#   ifdef HAS_MODFL_POW32_BUG
+#if defined(SPARC64_MODF_WORKAROUND)
+		(void)sparc64_workaround_modf(value, &value);
+#else
+#   if defined(HAS_MODFL) || defined(LONG_DOUBLE_EQUALS_DOUBLE)
+#       ifdef HAS_MODFL_POW32_BUG
 /* some versions of glibc split (i + d) into (i-1, d+1) for 2^32 <= i < 2^64 */
                 { 
                     NV offset = Perl_modf(value, &value);
                     (void)Perl_modf(offset, &offset);
                     value += offset;
                 }
-#   else
+#       else
 		  (void)Perl_modf(value, &value);
-#   endif
-#else
+#       endif
+#   else
 		  double tmp = (double)value;
 		  (void)Perl_modf(tmp, &tmp);
 		  value = (NV)tmp;
+#   endif
 #endif
 		  SETn(value);
 	      }
@@ -3184,7 +3210,7 @@ PP(pp_ucfirst)
     STRLEN slen;
 
     if (DO_UTF8(sv)) {
-	U8 tmpbuf[UTF8_MAXLEN*2+1];
+	U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
 	STRLEN ulen;
 	STRLEN tculen;
 
@@ -3239,7 +3265,7 @@ PP(pp_lcfirst)
 
     if (DO_UTF8(sv) && (s = (U8*)SvPV(sv, slen)) && slen && UTF8_IS_START(*s)) {
 	STRLEN ulen;
-	U8 tmpbuf[UTF8_MAXLEN*2+1];
+	U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
 	U8 *tend;
 	UV uv;
 
@@ -3296,7 +3322,7 @@ PP(pp_uc)
 	STRLEN ulen;
 	register U8 *d;
 	U8 *send;
-	U8 tmpbuf[UTF8_MAXLEN*2+1];
+	U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
 
 	s = (U8*)SvPV(sv,len);
 	if (!len) {
@@ -3363,7 +3389,7 @@ PP(pp_lc)
 	STRLEN ulen;
 	register U8 *d;
 	U8 *send;
-	U8 tmpbuf[UTF8_MAXLEN*2+1];
+	U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
 
 	s = (U8*)SvPV(sv,len);
 	if (!len) {

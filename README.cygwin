@@ -31,7 +31,7 @@ about this project can be found at:
 
 A recent net or commercial release of Cygwin is required.
 
-At the time this document was last updated, Cygwin 1.3.5 was current.
+At the time this document was last updated, Cygwin 1.3.6 was current.
 
 
 =head2 Cygwin Configuration
@@ -124,14 +124,14 @@ Alternatively, the crypt libraries in GNU libc have been ported to Cygwin.
 
 The DES based Ultra Fast Crypt port was done by Alexey Truhan:
 
-  ftp://ftp.franken.de/pub/win32/develop/gnuwin32/cygwin/porters/Okhapkin_Sergey/cw32crypt-dist-0.tgz
+  ftp://ftp.uni-erlangen.de/pub/pc/gnuwin32/cygwin/porters/Okhapkin_Sergey/cw32crypt-dist-0.tgz
 
 NOTE: There are various export restrictions on DES implementations,
 see the glibc README for more details.
 
 The MD5 port was done by Andy Piper:
 
-  ftp://ftp.franken.de/pub/win32/develop/gnuwin32/cygwin/porters/Okhapkin_Sergey/libcrypt.tgz
+  ftp://ftp.uni-erlangen.de/pub/pc/gnuwin32/cygwin/porters/Okhapkin_Sergey/libcrypt.tgz
 
 =item * C<-lgdbm> (C<use GDBM_File>)
 
@@ -191,9 +191,9 @@ more than one interpreter instance.  This works with the Cygwin port.
 
 =item * C<-Duse64bitint>
 
-I<gcc> supports 64-bit integers.  However, several additional long long
-functions are necessary to use them within Perl (I<{strtol,strtoul}l>).
-These are B<not> yet available with Cygwin.
+By default Perl uses 32 bit integers.  If you want to use larger 64
+bit integers, define this symbol.  If there is trouble, check that
+your Cygwin installation is up to date.
 
 =item * C<-Duselongdouble>
 
@@ -329,70 +329,6 @@ these options, these tests will fail:
   lib/odbm.t            2
   lib/sdbm.t            2
   op/stat.t             9, 20 (.tmp not an executable extension)
-
-=head2 Hard Links on Cygwin
-
-FAT partitions do not support hard links (whereas NTFS does), in which
-case Cygwin implements link() by copying the file.  On remote (network)
-drives Cygwin's stat() always sets C<st_nlink> to 1, so the link count
-for remote directories and files is not available.  In either case,
-these tests will fail:
-
-  Failed Test           List of failed
-  ------------------------------------
-  io/fs.t               4
-  op/stat.t             3
-
-=head2 Filetime Granularity on Cygwin
-
-On FAT partitions the filetime granularity is 2 seconds.  The following
-test will fail:
-
-  Failed Test           List of failed
-  ------------------------------------
-  io/fs.t               18
-
-=head2 Tainting Checks on Cygwin
-
-When Perl is running in taint mode, C<$ENV{PATH}> is considered tainted
-and not used, so DLLs not in the default system directories will not
-be found.  While the tests are running you will see warnings popup from
-the system with messages like:
-
-  Win9x
-    Error Starting Program
-    A required .DLL file, CYGWIN1.DLL, was not found
-
-  WinNT
-    perl.exe - Unable to Locate DLL
-    The dynamic link library cygwin1.dll could not be found in the
-      specified path ...
-
-Just click OK and ignore them.  When running `C<make test>', 2 popups
-occur.  During `C<./perl harness>', 4 popups occur.  Also, these tests
-will fail:
-
-  Failed Test           List of failed
-  ------------------------------------
-  op/taint.t            1, 3, 31, 37
-
-Alternatively, you can copy F<cygwin1.dll> into the directory where the
-tests run:
-
-  cp /bin/cygwin1.dll t
-
-or one of the Windows system directories (although, this is B<not>
-recommended).
-
-=head2 /etc/group on Cygwin
-
-Cygwin does not require F</etc/group>, in which case the F<op/grent.t>
-test will be skipped.  The check performed by F<op/grent.t> expects to
-see entries that use the members field, otherwise this test will fail:
-
-  Failed Test           List of failed
-  ------------------------------------
-  op/grent.t            1
 
 =head2 Script Portability on Cygwin
 

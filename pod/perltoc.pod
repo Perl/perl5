@@ -2205,6 +2205,8 @@ LC_NUMERIC, LC_TIME, LANG
 
 =item Unicode I/O
 
+=item Displaying Unicode As Text
+
 =item Special Cases
 
 =item Advanced Topics
@@ -2274,6 +2276,8 @@ UTF-32, UTF-32BE, UTF32-LE, UCS-2, UCS-4, UTF-7
 =item Security Implications of Malformed UTF-8
 
 =item Unicode in Perl on EBCDIC
+
+=item Using Unicode in XS
 
 =back
 
@@ -2492,39 +2496,38 @@ module (sometimes unnecessary), B<INSTALL> the module
 
 attributes, attrs, autouse, base, blib, bytes, charnames, constant,
 diagnostics, encoding, fields, filetest, integer, less, locale, open, ops,
-overload, re, sigtrap, sort, strict, subs, threads, utf8, vars, vmsish,
-warnings, warnings::register
+overload, re, sigtrap, sort, strict, subs, utf8, vars, vmsish, warnings,
+warnings::register
 
 =item Standard Modules
 
-AnyDBM_File, Attribute::Handlers, AutoLoader, AutoSplit, B, B::Asmdata,
-B::Assembler, B::Bblock, B::Bytecode, B::C, B::CC, B::Concise, B::Debug,
-B::Deparse, B::Disassembler, B::Lint, B::Showlex, B::Stackobj, B::Stash,
-B::Terse, B::Xref, Benchmark, ByteLoader, CGI, CGI::Apache, CGI::Carp,
-CGI::Cookie, CGI::Fast, CGI::Pretty, CGI::Push, CGI::Switch, CGI::Util,
-CPAN, CPAN::FirstTime, CPAN::Nox, Carp, Carp::Heavy, Class::ISA,
-Class::Struct, Cwd, DB, DB_File, Devel::SelfStubber, Digest, DirHandle,
-Dumpvalue, Encode, Encode::EncodeFormat, Encode::Tcl, English, Env,
-Exporter, Exporter::Heavy, ExtUtils::Command, ExtUtils::Constant,
-ExtUtils::Embed, ExtUtils::Install, ExtUtils::Installed, ExtUtils::Liblist,
-ExtUtils::MM_Cygwin, ExtUtils::MM_NW5, ExtUtils::MM_OS2, ExtUtils::MM_Unix,
-ExtUtils::MM_VMS, ExtUtils::MM_Win32, ExtUtils::MakeMaker,
-ExtUtils::Manifest, ExtUtils::Mkbootstrap, ExtUtils::Mksymlists,
-ExtUtils::Packlist, ExtUtils::testlib, Fatal, Fcntl, File::Basename,
-File::CheckTree, File::Compare, File::Copy, File::DosGlob, File::Find,
-File::Path, File::Spec, File::Spec::Epoc, File::Spec::Functions,
-File::Spec::Mac, File::Spec::OS2, File::Spec::Unix, File::Spec::VMS,
-File::Spec::Win32, File::Temp, File::stat, FileCache, FileHandle,
-Filter::Simple, FindBin, Getopt::Long, Getopt::Std, I18N::Collate,
-I18N::LangTags, I18N::LangTags::List, IO, IPC::Open2, IPC::Open3,
-Locale::Constants, Locale::Country, Locale::Currency, Locale::Language,
-Locale::Maketext, Locale::Maketext::TPJ13, Math::BigFloat, Math::BigInt,
-Math::BigInt::Calc, Math::Complex, Math::Trig, Memoize,
-Memoize::AnyDBM_File, Memoize::Expire, Memoize::ExpireFile,
-Memoize::ExpireTest, Memoize::NDBM_File, Memoize::SDBM_File,
-Memoize::Saves, Memoize::Storable, NDBM_File, NEXT, Net::Cmd, Net::Config,
-Net::Domain, Net::FTP, Net::NNTP, Net::Netrc, Net::POP3, Net::Ping,
-Net::SMTP, Net::Time, Net::hostent, Net::libnetFAQ, Net::netent,
+AnyDBM_File, AutoLoader, AutoSplit, B, B::Asmdata, B::Assembler, B::Bblock,
+B::Bytecode, B::C, B::CC, B::Concise, B::Debug, B::Deparse,
+B::Disassembler, B::Lint, B::Showlex, B::Stackobj, B::Stash, B::Terse,
+B::Xref, Benchmark, ByteLoader, CGI, CGI::Apache, CGI::Carp, CGI::Cookie,
+CGI::Fast, CGI::Pretty, CGI::Push, CGI::Switch, CGI::Util, CPAN,
+CPAN::FirstTime, CPAN::Nox, Carp, Carp::Heavy, Class::ISA, Class::Struct,
+Cwd, DB, DB_File, Devel::SelfStubber, Digest, DirHandle, Dumpvalue, Encode,
+Encode::EncodeFormat, Encode::Tcl, English, Env, Exporter, Exporter::Heavy,
+ExtUtils::Command, ExtUtils::Constant, ExtUtils::Embed, ExtUtils::Install,
+ExtUtils::Installed, ExtUtils::Liblist, ExtUtils::MM_Cygwin,
+ExtUtils::MM_NW5, ExtUtils::MM_OS2, ExtUtils::MM_Unix, ExtUtils::MM_VMS,
+ExtUtils::MM_Win32, ExtUtils::MakeMaker, ExtUtils::Manifest,
+ExtUtils::Mkbootstrap, ExtUtils::Mksymlists, ExtUtils::Packlist,
+ExtUtils::testlib, Fatal, Fcntl, File::Basename, File::CheckTree,
+File::Compare, File::Copy, File::DosGlob, File::Find, File::Path,
+File::Spec, File::Spec::Epoc, File::Spec::Functions, File::Spec::Mac,
+File::Spec::OS2, File::Spec::Unix, File::Spec::VMS, File::Spec::Win32,
+File::Temp, File::stat, FileCache, FileHandle, Filter::Simple, FindBin,
+Getopt::Long, Getopt::Std, I18N::Collate, I18N::LangTags,
+I18N::LangTags::List, IO, IPC::Open2, IPC::Open3, Locale::Constants,
+Locale::Country, Locale::Currency, Locale::Language, Locale::Maketext,
+Locale::Maketext::TPJ13, Math::BigFloat, Math::BigInt, Math::BigInt::Calc,
+Math::Complex, Math::Trig, Memoize, Memoize::AnyDBM_File, Memoize::Expire,
+Memoize::ExpireFile, Memoize::ExpireTest, Memoize::NDBM_File,
+Memoize::SDBM_File, Memoize::Storable, NDBM_File, NEXT, Net::Cmd,
+Net::Config, Net::Domain, Net::FTP, Net::NNTP, Net::Netrc, Net::POP3,
+Net::Ping, Net::SMTP, Net::Time, Net::hostent, Net::libnetFAQ, Net::netent,
 Net::protoent, Net::servent, O, ODBM_File, Opcode, POSIX, PerlIO,
 Pod::Checker, Pod::Find, Pod::Html, Pod::InputObjects, Pod::LaTeX,
 Pod::Man, Pod::ParseLink, Pod::ParseUtils, Pod::Parser, Pod::Plainer,
@@ -2904,8 +2907,8 @@ mean?
 
 =back
 
-=head2 perlfaq4 - Data Manipulation ($Revision: 1.8 $, $Date: 2001/11/09
-08:06:04 $)
+=head2 perlfaq4 - Data Manipulation ($Revision: 1.9 $, $Date: 2001/12/07
+21:17:58 $)
 
 =over 4
 
@@ -3212,7 +3215,7 @@ protected files?  Isn't this a bug in Perl?
 
 =back
 
-=head2 perlfaq6 - Regexes ($Revision: 1.4 $, $Date: 2001/11/09 08:06:04 $)
+=head2 perlfaq6 - Regexes ($Revision: 1.5 $, $Date: 2001/12/02 01:55:12 $)
 
 =over 4
 
@@ -4291,35 +4294,36 @@ G_EVAL, G_NOARGS, G_SCALAR, G_VOID, HEf_SVKEY, HeHASH, HeKEY, HeKLEN, HePV,
 HeSVKEY, HeSVKEY_force, HeSVKEY_set, HeVAL, HvNAME, hv_clear, hv_delete,
 hv_delete_ent, hv_exists, hv_exists_ent, hv_fetch, hv_fetch_ent,
 hv_iterinit, hv_iterkey, hv_iterkeysv, hv_iternext, hv_iternextsv,
-hv_iterval, hv_magic, hv_store, hv_store_ent, hv_undef, isALNUM, isALPHA,
-isDIGIT, isLOWER, isSPACE, isUPPER, is_utf8_char, is_utf8_string, items,
-ix, LEAVE, load_module, looks_like_number, MARK, mg_clear, mg_copy,
-mg_find, mg_free, mg_get, mg_length, mg_magical, mg_set, Move, New, newAV,
-Newc, newCONSTSUB, newHV, newRV_inc, newRV_noinc, NEWSV, newSV, newSViv,
-newSVnv, newSVpv, newSVpvf, newSVpvn, newSVpvn_share, newSVrv, newSVsv,
-newSVuv, newXS, newXSproto, Newz, new_vstring, Nullav, Nullch, Nullcv,
-Nullhv, Nullsv, ORIGMARK, perl_alloc, perl_clone, perl_construct,
-perl_destruct, perl_free, perl_parse, perl_run, PL_modglobal, PL_na,
-PL_sv_no, PL_sv_undef, PL_sv_yes, POPi, POPl, POPn, POPp, POPpbytex, POPpx,
-POPs, PUSHi, PUSHMARK, PUSHn, PUSHp, PUSHs, PUSHu, PUTBACK, Renew, Renewc,
-require_pv, RETVAL, Safefree, savepv, savepvn, SAVETMPS, scan_bin,
-scan_hex, scan_oct, sharedsv_find, sharedsv_init, sharedsv_lock,
-sharedsv_new, sharedsv_thrcnt_dec, sharedsv_thrcnt_inc, sharedsv_unlock,
-sortsv, SP, SPAGAIN, ST, strEQ, strGE, strGT, strLE, strLT, strNE, strnEQ,
-strnNE, StructCopy, SvCUR, SvCUR_set, SvEND, SvGETMAGIC, SvGROW, SvIOK,
-SvIOKp, SvIOK_notUV, SvIOK_off, SvIOK_on, SvIOK_only, SvIOK_only_UV,
-SvIOK_UV, SvIV, SvIVX, SvIVx, SvLEN, SvNIOK, SvNIOKp, SvNIOK_off, SvNOK,
-SvNOKp, SvNOK_off, SvNOK_on, SvNOK_only, SvNV, SvNVx, SvNVX, SvOK, SvOOK,
-SvPOK, SvPOKp, SvPOK_off, SvPOK_on, SvPOK_only, SvPOK_only_UTF8, SvPV,
-SvPVbyte, SvPVbytex, SvPVbytex_force, SvPVbyte_force, SvPVbyte_nolen,
-SvPVutf8, SvPVutf8x, SvPVutf8x_force, SvPVutf8_force, SvPVutf8_nolen,
-SvPVX, SvPVx, SvPV_force, SvPV_force_nomg, SvPV_nolen, SvREFCNT,
-SvREFCNT_dec, SvREFCNT_inc, SvROK, SvROK_off, SvROK_on, SvRV, SvSETMAGIC,
-SvSetMagicSV, SvSetMagicSV_nosteal, SvSetSV, SvSetSV_nosteal, SvSTASH,
-SvTAINT, SvTAINTED, SvTAINTED_off, SvTAINTED_on, SvTRUE, svtype, SvTYPE,
-SVt_IV, SVt_NV, SVt_PV, SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG, SvUOK,
-SvUPGRADE, SvUTF8, SvUTF8_off, SvUTF8_on, SvUV, SvUVx, SvUVX, sv_2bool,
-sv_2cv, sv_2io, sv_2iv, sv_2mortal, sv_2nv, sv_2pvbyte, sv_2pvbyte_nolen,
+hv_iterval, hv_magic, hv_store, hv_store_ent, hv_undef, ibcmp_utf8,
+isALNUM, isALPHA, isDIGIT, isLOWER, isSPACE, isUPPER, is_utf8_char,
+is_utf8_string, items, ix, LEAVE, load_module, looks_like_number, MARK,
+mg_clear, mg_copy, mg_find, mg_free, mg_get, mg_length, mg_magical, mg_set,
+Move, New, newAV, Newc, newCONSTSUB, newHV, newRV_inc, newRV_noinc, newSV,
+NEWSV, newSViv, newSVnv, newSVpv, newSVpvf, newSVpvn, newSVpvn_share,
+newSVrv, newSVsv, newSVuv, newXS, newXSproto, Newz, new_vstring, Nullav,
+Nullch, Nullcv, Nullhv, Nullsv, ORIGMARK, perl_alloc, perl_clone,
+perl_construct, perl_destruct, perl_free, perl_parse, perl_run,
+PL_modglobal, PL_na, PL_sv_no, PL_sv_undef, PL_sv_yes, POPi, POPl, POPn,
+POPp, POPpbytex, POPpx, POPs, PUSHi, PUSHMARK, PUSHn, PUSHp, PUSHs, PUSHu,
+PUTBACK, pv_uni_display, Renew, Renewc, require_pv, RETVAL, Safefree,
+savepv, savepvn, SAVETMPS, scan_bin, scan_hex, scan_oct, sharedsv_find,
+sharedsv_init, sharedsv_lock, sharedsv_new, sharedsv_thrcnt_dec,
+sharedsv_thrcnt_inc, sharedsv_unlock, sortsv, SP, SPAGAIN, ST, strEQ,
+strGE, strGT, strLE, strLT, strNE, strnEQ, strnNE, StructCopy, SvCUR,
+SvCUR_set, SvEND, SvGETMAGIC, SvGROW, SvIOK, SvIOKp, SvIOK_notUV,
+SvIOK_off, SvIOK_on, SvIOK_only, SvIOK_only_UV, SvIOK_UV, SvIV, SvIVx,
+SvIVX, SvLEN, SvNIOK, SvNIOKp, SvNIOK_off, SvNOK, SvNOKp, SvNOK_off,
+SvNOK_on, SvNOK_only, SvNV, SvNVx, SvNVX, SvOK, SvOOK, SvPOK, SvPOKp,
+SvPOK_off, SvPOK_on, SvPOK_only, SvPOK_only_UTF8, SvPV, SvPVbyte,
+SvPVbytex, SvPVbytex_force, SvPVbyte_force, SvPVbyte_nolen, SvPVutf8,
+SvPVutf8x, SvPVutf8x_force, SvPVutf8_force, SvPVutf8_nolen, SvPVX, SvPVx,
+SvPV_force, SvPV_force_nomg, SvPV_nolen, SvREFCNT, SvREFCNT_dec,
+SvREFCNT_inc, SvROK, SvROK_off, SvROK_on, SvRV, SvSETMAGIC, SvSetMagicSV,
+SvSetMagicSV_nosteal, SvSetSV, SvSetSV_nosteal, SvSTASH, SvTAINT,
+SvTAINTED, SvTAINTED_off, SvTAINTED_on, SvTRUE, svtype, SvTYPE, SVt_IV,
+SVt_NV, SVt_PV, SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG, SvUOK, SvUPGRADE,
+SvUTF8, SvUTF8_off, SvUTF8_on, SvUV, SvUVx, SvUVX, sv_2bool, sv_2cv,
+sv_2io, sv_2iv, sv_2mortal, sv_2nv, sv_2pvbyte, sv_2pvbyte_nolen,
 sv_2pvutf8, sv_2pvutf8_nolen, sv_2pv_flags, sv_2pv_nolen, sv_2uv,
 sv_backoff, sv_bless, sv_catpv, sv_catpvf, sv_catpvf_mg, sv_catpvn,
 sv_catpvn_flags, sv_catpvn_mg, sv_catpv_mg, sv_catsv, sv_catsv_flags,
@@ -4335,16 +4339,16 @@ sv_setnv_mg, sv_setpv, sv_setpvf, sv_setpvf_mg, sv_setpviv, sv_setpviv_mg,
 sv_setpvn, sv_setpvn_mg, sv_setpv_mg, sv_setref_iv, sv_setref_nv,
 sv_setref_pv, sv_setref_pvn, sv_setref_uv, sv_setsv, sv_setsv_flags,
 sv_setsv_mg, sv_setuv, sv_setuv_mg, sv_taint, sv_tainted, sv_true,
-sv_unmagic, sv_unref, sv_unref_flags, sv_untaint, sv_upgrade, sv_usepvn,
-sv_usepvn_mg, sv_utf8_decode, sv_utf8_downgrade, sv_utf8_encode,
-sv_utf8_upgrade, sv_utf8_upgrade_flags, sv_uv, sv_vcatpvfn, sv_vsetpvfn,
-THIS, toLOWER, toUPPER, to_utf8_case, utf8n_to_uvchr, utf8n_to_uvuni,
-utf8_distance, utf8_hop, utf8_length, utf8_to_bytes, utf8_to_uvchr,
-utf8_to_uvuni, uvchr_to_utf8, uvuni_to_utf8, warn, XPUSHi, XPUSHn, XPUSHp,
-XPUSHs, XPUSHu, XS, XSRETURN, XSRETURN_EMPTY, XSRETURN_IV, XSRETURN_NO,
-XSRETURN_NV, XSRETURN_PV, XSRETURN_UNDEF, XSRETURN_YES, XST_mIV, XST_mNO,
-XST_mNV, XST_mPV, XST_mUNDEF, XST_mYES, XS_VERSION, XS_VERSION_BOOTCHECK,
-Zero
+sv_uni_display, sv_unmagic, sv_unref, sv_unref_flags, sv_untaint,
+sv_upgrade, sv_usepvn, sv_usepvn_mg, sv_utf8_decode, sv_utf8_downgrade,
+sv_utf8_encode, sv_utf8_upgrade, sv_utf8_upgrade_flags, sv_uv, sv_vcatpvfn,
+sv_vsetpvfn, THIS, toLOWER, toUPPER, to_utf8_case, utf8n_to_uvchr,
+utf8n_to_uvuni, utf8_distance, utf8_hop, utf8_length, utf8_to_bytes,
+utf8_to_uvchr, utf8_to_uvuni, uvchr_to_utf8, uvuni_to_utf8, warn, XPUSHi,
+XPUSHn, XPUSHp, XPUSHs, XPUSHu, XS, XSRETURN, XSRETURN_EMPTY, XSRETURN_IV,
+XSRETURN_NO, XSRETURN_NV, XSRETURN_PV, XSRETURN_UNDEF, XSRETURN_YES,
+XST_mIV, XST_mNO, XST_mNV, XST_mPV, XST_mUNDEF, XST_mYES, XS_VERSION,
+XS_VERSION_BOOTCHECK, Zero
 
 =item AUTHORS
 
@@ -4818,6 +4822,8 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 
 =item Create debugging macros
 
+=item truncate to the people
+
 =back
 
 =back
@@ -4979,7 +4985,7 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item DESCRIPTION
 
-=item Highlights
+=item Highlights In 5.8.0
 
 =item Incompatible Changes
 
@@ -4988,6 +4994,8 @@ I<The Road goes ever on and on, down from the door where it began.>
 =item 64-bit platforms and malloc
 
 =item AIX Dynaloading
+
+=item Attributes for C<my> variables now handled at run-time.
 
 =item Socket Extension Dynamic in VMS
 
@@ -5009,7 +5017,7 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item PerlIO is Now The Default
 
-=item Signals Are Now Safe
+=item Safe Signals
 
 =item Unicode Overhaul
 
@@ -5099,15 +5107,15 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item Self-tying of Arrays and Hashes Is Forbidden
 
-=item Variable Attributes are not Currently Usable for Tieing
-
 =item Building Extensions Can Fail Because Of Largefiles
 
 =item Unicode Support on EBCDIC Still Spotty
 
 =item The Compiler Suite Is Still Experimental
 
-=item The Long Double Support is Still Experimental
+=item The Long Double Support Is Still Experimental
+
+=item Seen In Perl 5.7 But Gone Now
 
 =back
 
@@ -6879,14 +6887,6 @@ I<dlsym()>, Win9x and C<d_eofnblk>, Compiler/Preprocessor defines
 
 =item File Permissions on Cygwin
 
-=item Hard Links on Cygwin
-
-=item Filetime Granularity on Cygwin
-
-=item Tainting Checks on Cygwin
-
-=item /etc/group on Cygwin
-
 =item Script Portability on Cygwin
 
 Pathnames, Text/Binary, F<.exe>, chown(), Miscellaneous
@@ -6931,6 +6931,50 @@ Source, Compiled Module Source, Perl Modules/Scripts
 =item Testing Perl on DG/UX
 
 =item Installing the built perl on DG/UX
+
+=back
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 perldos - Perl under DOS, W31, W95.
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Prerequisites for Compiling Perl on DOS
+
+DJGPP, Pthreads
+
+=item Shortcomings of Perl under DOS
+
+=item Building Perl on DOS
+
+=item Testing Perl on DOS
+
+=item Installation of Perl on DOS
+
+=back
+
+=item BUILDING AND INSTALLING MODULES ON DOS
+
+=over 4
+
+=item Building Prerequisites for Perl on DOS
+
+=item Unpacking CPAN Modules on DOS
+
+=item Building Non-XS Modules on DOS
+
+=item Building XS Modules on DOS
 
 =back
 
@@ -7823,6 +7867,48 @@ LIST, waitpid PID,FLAGS
 
 =back
 
+=head2 perlwin32 - Perl under Win32
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Setting Up Perl on Win32
+
+Make, Command Shell, Borland C++, Microsoft Visual C++, Mingw32 with GCC
+
+=item Building
+
+=item Testing Perl on Win32
+
+=item Installation of Perl on Win32
+
+=item Usage Hints for Perl on Win32
+
+Environment Variables, File Globbing, Using perl from the command line,
+Building Extensions, Command-line Wildcard Expansion, Win32 Specific
+Extensions, Running Perl Scripts, Miscellaneous Things
+
+=back
+
+=item BUGS AND CAVEATS
+
+=item AUTHORS
+
+Gary Ng E<lt>71564.1743@CompuServe.COME<gt>, Gurusamy Sarathy
+E<lt>gsar@activestate.comE<gt>, Nick Ing-Simmons
+E<lt>nick@ing-simmons.netE<gt>
+
+=item SEE ALSO
+
+=item HISTORY
+
+=back
+
 =head1 PRAGMA DOCUMENTATION
 
 =head2 attrs - set/get attributes of a subroutine (deprecated)
@@ -8388,58 +8474,6 @@ C<strict refs>, C<strict vars>, C<strict subs>
 
 =back
 
-=head2 threads - Perl extension allowing use of interpreter based threads
-from perl
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-$thread = new(function, LIST), $thread->join, $thread->detach,
-threads->self, $thread->tid
-
-=item TODO
-
-Fix so the return value is returned when you join, Add join_all, Fix memory
-leaks!
-
-=item AUTHOR and COPYRIGHT
-
-=item BUGS
-
-creating a thread from within a thread is unsafe under win32,
-PERL_OLD_SIGNALS are not threadsafe, will not be
-
-=item SEE ALSO
-
-=back
-
-=head2 threadshared, threads::shared - Perl extension for sharing data
-structures between threads
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item EXPORT
-
-=item FUNCTIONS
-
-share VARIABLE, lock VARIABLE, unlock VARIABLE, cond_wait VARIABLE,
-cond_signal VARIABLE, cond_broadcast VARIABLE
-
-=item BUGS
-
-=item AUTHOR
-
-=item SEE ALSO
-
-=back
-
 =head2 utf8 - Perl pragma to enable/disable UTF-8 (or UTF-EBCDIC) in source
 code
 
@@ -8529,49 +8563,6 @@ warnings::warnif($object, $message)
 =back
 
 =item SEE ALSO
-
-=back
-
-=head2 Attribute::Handlers - Simpler definition of attribute handlers
-
-=over 4
-
-=item VERSION
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-[0], [1], [2], [3], [4], [5]
-
-=over 4
-
-=item Typed lexicals
-
-=item Type-specific attribute handlers
-
-=item Non-interpretive attribute handlers
-
-=item Phase-specific attribute handlers
-
-=item Attributes as C<tie> interfaces
-
-=back
-
-=item EXAMPLES
-
-=item DIAGNOSTICS
-
-C<Bad attribute type: ATTR(%s)>, C<Attribute handler %s doesn't handle %s
-attributes>, C<Declaration of %s attribute in package %s may clash with
-future reserved word>, C<Can't have two ATTR specifiers on one subroutine>,
-C<Can't autotie a %s>, C<Internal error: %s symbol went missing>
-
-=item AUTHOR
-
-=item BUGS
-
-=item COPYRIGHT
 
 =back
 
@@ -13698,7 +13689,7 @@ Remarks
 
 =item EXAMPLES
 
-  use Math::BigInt qw(bstr);
+  use Math::BigInt;
 
 =item Autocreating constants
 
@@ -13951,23 +13942,6 @@ Storable use
 =over 4
 
 =item DESCRIPTION
-
-=back
-
-=head2 Memoize::Saves - Plug-in module to specify which return values
-should be memoized
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item CAVEATS
-
-=item AUTHOR
-
-=item SEE ALSO
 
 =back
 

@@ -24,11 +24,11 @@ my $files = join '',
 	( $ENV{HOME} . '/.termcap', # we assume pretty UNIXy system anyway
 	  '/etc/termcap', 
 	  '/usr/share/misc/termcap' );
-unless( $files ) {
+unless( $files || $^O eq 'VMS') {
     plan skip_all => 'no termcap available to test';
 }
 else {
-    plan tests => 43;
+    plan tests => 44;
 }
 
 use_ok( 'Term::Cap' );
@@ -98,10 +98,15 @@ local $SIG{__WARN__} = sub {
 # test the first few features by forcing Tgetent() to croak (line 156)
 undef $ENV{TERM};
 my $vals = {};
-eval { $t = Term::Cap->Tgetent($vals) };
+eval { local $^W = 1; $t = Term::Cap->Tgetent($vals) };
 like( $@, qr/TERM not set/, 'Tgetent() should croaks without TERM' );
 like( $warn, qr/OSPEED was not set/, 'Tgetent() should set default OSPEED' );
+
 is( $vals->{PADDING}, 10000/9600, 'Default OSPEED implies default PADDING' );
+
+$warn = 'xxxx';
+eval { local $^W = 0; $t = Term::Cap->Tgetent($vals) };
+is($warn,'xxxx',"Tgetent() doesn't carp() without warnings on");
 
 # check values for very slow speeds
 $vals->{OSPEED} = 1;
@@ -110,12 +115,17 @@ eval { $t = Term::Cap->Tgetent($vals) };
 is( $warn, '', 'Tgetent() should not work if OSPEED is provided' );
 is( $vals->{PADDING}, 200, 'Tgetent() should set slow PADDING when needed' );
 
-# now see if lines 177 or 180 will fail
-$ENV{TERM} = 'foo';
-$ENV{TERMPATH} = '!';
-$ENV{TERMCAP} = '';
-eval { $t = Term::Cap->Tgetent($vals) };
-isn't( $@, '', 'Tgetent() should catch bad termcap file' );
+
+SKIP: {
+        skip('Tgetent() bad termcap test, since using a fixed termcap',1)
+              if $^O eq 'VMS';
+        # now see if lines 177 or 180 will fail
+        $ENV{TERM} = 'foo';
+        $ENV{TERMPATH} = '!';
+        $ENV{TERMCAP} = '';
+        eval { $t = Term::Cap->Tgetent($vals) };
+        isn't( $@, '', 'Tgetent() should catch bad termcap file' );
+}
 
 SKIP: {
 	skip( "Can't write 'tcout' file for tests", 9 ) unless $writable;
@@ -159,7 +169,7 @@ like( $t->Tgoto('test', '', 0), qr/\x61\x01\x08/,
 	'Tgoto() should handle %. and magic' );
 
 $t->{_test} = 'a%+';
-like( $t->Tgoto('test', '', 1), qr/a\x01/, 'Tgoto() shoudl handle %+' );
+like( $t->Tgoto('test', '', 1), qr/a\x01/, 'Tgoto() should handle %+' );
 $t->{_test} = 'a%+a';
 is( $t->Tgoto('test', '', 1), 'ab', 'Tgoto() should handle %+char' );
 $t->{_test} .= 'a' x 99;

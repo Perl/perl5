@@ -658,6 +658,17 @@ S_cl_or(pTHX_ RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, str
     }
 }
 
+/*
+ * There are strange code-generation bugs caused on sparc64 by gcc-2.95.2.
+ * These need to be revisited when a newer toolchain becomes available.
+ */
+#if defined(__sparc64__) && defined(__GNUC__)
+#   if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 96)
+#       undef  SPARC64_GCC_WORKAROUND
+#       define SPARC64_GCC_WORKAROUND 1
+#   endif
+#endif
+
 /* REx optimizer.  Converts nodes into quickier variants "in place".
    Finds fixed substrings.  */
 
@@ -1203,11 +1214,28 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		    int counted = mincount != 0;
 
 		    if (data->last_end > 0 && mincount != 0) { /* Ends with a string. */
+#if defined(SPARC64_GCC_WORKAROUND)
+			I32 b = 0;
+			STRLEN l = 0;
+			char *s = NULL;
+			I32 old = 0;
+
+			if (pos_before >= data->last_start_min)
+			    b = pos_before;
+			else
+			    b = data->last_start_min;
+
+			l = 0;
+			s = SvPV(data->last_found, l);
+			old = b - data->last_start_min;
+
+#else
 			I32 b = pos_before >= data->last_start_min
 			    ? pos_before : data->last_start_min;
 			STRLEN l;
 			char *s = SvPV(data->last_found, l);
 			I32 old = b - data->last_start_min;
+#endif
 
 			if (UTF)
 			    old = utf8_hop((U8*)s, old) - (U8*)s;
@@ -2960,7 +2988,7 @@ tryagain:
 	    char *oldp, *s;
 	    STRLEN numlen;
 	    STRLEN ulen;
-	    U8 tmpbuf[UTF8_MAXLEN*2+1];
+	    U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
 
             parse_start = RExC_parse - 1;
 
@@ -3159,7 +3187,7 @@ tryagain:
 	 STRLEN newlen = SvCUR(sv);
 	 if (!SIZE_ONLY) {
 	      DEBUG_r(PerlIO_printf(Perl_debug_log, "recode %*s to %*s\n",
-				    oldlen, STRING(ret), newlen, s));
+				    (int)oldlen, STRING(ret), (int)newlen, s));
 	      Copy(s, STRING(ret), newlen, char);
 	      STR_LEN(ret) += newlen - oldlen;
 	      RExC_emit += STR_SZ(newlen) - STR_SZ(oldlen);

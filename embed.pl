@@ -1123,7 +1123,7 @@ Ap	|CV*	|gv_handler	|HV* stash|I32 id
 p	|OP*	|append_elem	|I32 optype|OP* head|OP* tail
 p	|OP*	|append_list	|I32 optype|LISTOP* first|LISTOP* last
 p	|I32	|apply		|I32 type|SV** mark|SV** sp
-Ap	|void	|apply_attrs_string|char *stashpv|CV *cv|char *attrstr|STRLEN len
+ApM	|void	|apply_attrs_string|char *stashpv|CV *cv|char *attrstr|STRLEN len
 Ap	|SV*	|avhv_delete_ent|AV *ar|SV* keysv|I32 flags|U32 hash
 Ap	|bool	|avhv_exists_ent|AV *ar|SV* keysv|U32 hash
 Ap	|SV**	|avhv_fetch_ent	|AV *ar|SV* keysv|I32 lval|U32 hash
@@ -1333,7 +1333,7 @@ Apd	|HE*	|hv_store_ent	|HV* tb|SV* key|SV* val|U32 hash
 Apd	|void	|hv_undef	|HV* tb
 Ap	|I32	|ibcmp		|const char* a|const char* b|I32 len
 Ap	|I32	|ibcmp_locale	|const char* a|const char* b|I32 len
-Ap	|I32	|ibcmp_utf8	|const char* a|bool ua|const char* b|bool ub|I32 len
+Apd	|I32	|ibcmp_utf8	|const char* a|bool ua|I32 len1|const char* b|bool ub|I32 len2
 p	|bool	|ingroup	|Gid_t testgid|Uid_t effective
 p	|void	|init_argv_symbols|int|char **
 p	|void	|init_debugger
@@ -1851,9 +1851,9 @@ Adp	|UV	|utf8n_to_uvchr	|U8 *s|STRLEN curlen|STRLEN* retlen|U32 flags
 Adp	|UV	|utf8n_to_uvuni	|U8 *s|STRLEN curlen|STRLEN* retlen|U32 flags
 Apd	|U8*	|uvchr_to_utf8	|U8 *d|UV uv
 Apd	|U8*	|uvuni_to_utf8	|U8 *d|UV uv
-Ap	|char*	|pv_uni_display	|SV *dsv|U8 *spv|STRLEN len \
+Apd	|char*	|pv_uni_display	|SV *dsv|U8 *spv|STRLEN len \
 				|STRLEN pvlim|UV flags
-Ap	|char*	|sv_uni_display	|SV *dsv|SV *ssv|STRLEN pvlim|UV flags
+Apd	|char*	|sv_uni_display	|SV *dsv|SV *ssv|STRLEN pvlim|UV flags
 p	|void	|vivify_defelem	|SV* sv
 p	|void	|vivify_ref	|SV* sv|U32 to_what
 p	|I32	|wait4pid	|Pid_t pid|int* statusp|int flags
@@ -2045,9 +2045,10 @@ s	|void	|cv_dump	|CV *cv
 #  endif
 s	|CV*	|cv_clone2	|CV *proto|CV *outside
 s	|bool	|scalar_mod_type|OP *o|I32 type
-s	|OP *	|my_kid		|OP *o|OP *attrs
+s	|OP *	|my_kid		|OP *o|OP *attrs|OP **imopsp
 s	|OP *	|dup_attrlist	|OP *o
-s	|void	|apply_attrs	|HV *stash|SV *target|OP *attrs
+s	|void	|apply_attrs	|HV *stash|SV *target|OP *attrs|bool for_my
+s	|void	|apply_attrs_my	|HV *stash|OP *target|OP *attrs|OP **imopsp
 #  if defined(PL_OP_SLAB_ALLOC)
 s	|void*	|Slab_Alloc	|int m|size_t sz
 #  endif

@@ -19,6 +19,7 @@ print "1..".NTESTS."\n";
 $SIG{__WARN__} = sub { die @_ };
 
 sub mytest {
+    my $bad = '';
     if (!$@ ne !$_[0] || $_[0] && $@ !~ $_[0]) {
 	if ($@) {
 	    my $x = $@;
@@ -35,15 +36,15 @@ sub mytest {
 	    print "# Expected success\n";
 	}
 	$failed = 1;
-	print "not ";
+	$bad = 'not ';
     }
     elsif (@_ == 3 && $_[1] ne $_[2]) {
 	print "# Got: $_[1]\n";
 	print "# Expected: $_[2]\n";
 	$failed = 1;
-	print "not ";
+	$bad = 'not ';
     }
-    print "ok ",++$test,"\n";
+    print $bad."ok ".++$test."\n";
 }
 
 eval 'sub t1 ($) : locked { $_[0]++ }';
@@ -173,6 +174,31 @@ BEGIN {++$ntests}
 mytest '', "@attrs", "locked method Z";
 BEGIN {++$ntests}
 
+# Begin testing attributes that tie
+
+{
+    package Ttie;
+    sub DESTROY {}
+    sub TIESCALAR { my $x = $_[1]; bless \$x, $_[0]; }
+    sub FETCH { ${$_[0]} }
+    sub STORE {
+	#print "# In Ttie::STORE\n";
+	::mytest '';
+	${$_[0]} = $_[1]*2;
+    }
+    package Tloop;
+    sub MODIFY_SCALAR_ATTRIBUTES { tie ${$_[1]}, 'Ttie', -1; (); }
+}
+
+eval '
+    package Tloop;
+    for my $i (0..2) {
+	my $x : TieLoop = $i;
+	$x != $i*2 and ::mytest "", $x, $i*2;
+    }
+';
+mytest;
+BEGIN {$ntests += 4}
 
 # Other tests should be added above this line
 

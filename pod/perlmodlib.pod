@@ -141,10 +141,6 @@ Restrict unsafe constructs
 
 Predeclare sub names
 
-=item threads
-
-Perl extension allowing use of interpreter based threads from perl
-
 =item utf8
 
 Enable/disable UTF-8 (or UTF-EBCDIC) in source code
@@ -178,10 +174,6 @@ Exporter module.  See their own documentation for details.
 =item AnyDBM_File
 
 Provide framework for multiple DBMs
-
-=item Attribute::Handlers
-
-Simpler definition of attribute handlers
 
 =item AutoLoader
 
@@ -654,10 +646,6 @@ Glue to provide EXISTS for NDBM_File for Storable use
 =item Memoize::SDBM_File
 
 Glue to provide EXISTS for SDBM_File for Storable use
-
-=item Memoize::Saves
-
-Plug-in module to specify which return values should be memoized
 
 =item Memoize::Storable
 

@@ -68,12 +68,20 @@ sub _unix_os2_ext {
     foreach $thislib (split ' ', $potential_libs){
 
 	# Handle possible linker path arguments.
-	if ($thislib =~ s/^(-[LR])//){	# save path flag type
+	if ($thislib =~ s/^(-[LR]|-Wl,-R)//){	# save path flag type
 	    my($ptype) = $1;
 	    unless (-d $thislib){
 		warn "$ptype$thislib ignored, directory does not exist\n"
 			if $verbose;
 		next;
+	    }
+	    my($rtype) = $ptype;
+	    if (($ptype eq '-R') or ($ptype eq '-Wl,-R')) {
+		if ($Config{'lddlflags'} =~ /-Wl,-R/) {
+		    $rtype = '-Wl,-R';
+		} elsif ($Config{'lddlflags'} =~ /-R/) {
+		    $rtype = '-R';
+		}
 	    }
 	    unless ($self->file_name_is_absolute($thislib)) {
 	      warn "Warning: $ptype$thislib changed to $ptype$pwd/$thislib\n";
@@ -81,7 +89,7 @@ sub _unix_os2_ext {
 	    }
 	    push(@searchpath, $thislib);
 	    push(@extralibs,  "$ptype$thislib");
-	    push(@ldloadlibs, "$ptype$thislib");
+	    push(@ldloadlibs, "$rtype$thislib");
 	    next;
 	}
 

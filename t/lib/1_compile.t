@@ -21,6 +21,7 @@ sub add_by_name {
 }
 
 while (<MANIFEST>) {
+    s/_pm\.PL/.pm/; # Don't forget the extracted modules
     if (m!^(lib)/(\S+?)\.pm\s!) {
 	# Collecting modules names from under ext/ would be
 	# rather painful since the mapping from filenames

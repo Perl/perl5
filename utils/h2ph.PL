@@ -338,7 +338,7 @@ sub expr {
 	# Eliminate typedefs
 	/\(([\w\s]+)[\*\s]*\)\s*[\w\(]/ && do {
 	    foreach (split /\s+/, $1) {  # Make sure all the words are types,
-		last unless ($isatype{$_} or $_ eq 'struct');
+		last unless ($isatype{$_} or $_ eq 'struct' or $_ eq 'union');
 	    }
 	    s/\([\w\s]+[\*\s]*\)// && next;      # then eliminate them.
 	};
@@ -361,7 +361,7 @@ sub expr {
 	};
 	s/^([_a-zA-Z]\w*)//	&& do {
 	    my $id = $1;
-	    if ($id eq 'struct') {
+	    if ($id eq 'struct' || $id eq 'union') {
 		s/^\s+(\w+)//;
 		$id .= ' ' . $1;
 		$isatype{$id} = 1;

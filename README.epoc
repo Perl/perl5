@@ -16,10 +16,9 @@ EPOC is an OS for palmtops and mobile phones. For more informations look at:
 http://www.symbian.com/
 
 This is a port of perl to EPOC. It runs on ER5 machines: Psion 5mx,
-5mx Pro, Psion Revo and on the Ericson M128. I have no report about
-the Psion Netbook or the S7. It runs on ER3 Hardware (Series 5
-classic), too. For more information about this hardware please refer
-to http://www.psion.com.
+5mx Pro, Psion Revo, Psion Netbook and on the Ericson M128. It runs on
+ER3 Hardware (Series 5 classic), too. For more information about this
+hardware please refer to http://www.psion.com.
 
 Vendors which like to have support for their devices are free to send
 me a sample. 
@@ -50,13 +49,7 @@ start perl with a double click on the camel icon. Be sure to configure
 the perl installation drive first. You can even provide a script with
 a special commandline, if needed.
 
-Alternatively you can get ESHELL from symbian: 
-http://developer.epocworld.com/downloads/progs/Eshell.zip
-
-Running ESHELL you can enter: perl -de 0 in order to run the perl
-debugger. If you are leaving perl, you get into the system screen. You
-have to switch back manually to ESHELL. When perl is running, you will
-see a task with the name STDOUT in the task list. 
+Alternatively you can use the epocemx shell
 
 If you have an ER3 machine (i.e. a PSION 5), you may have to supply the
 full path to the perl executable C:\system\programs\perl.exe.
@@ -67,9 +60,8 @@ command line switch '-x'. See L<perlrun> for details.
 =head1 STOPPING PERL ON EPOC
 
 You can stop a running perl process in the task list by closing the
-application `STDOUT'. You cannot stop a running perl process if it has
-not written anything to stdout or stderr! Be very cautious with I/O
-redirection. You will have to reboot the PDA!
+application `STDOUT'. You can use the kill command in the epocemx
+shell to kill perl.
 
 =head1 USING PERL ON EPOC
 
@@ -110,7 +102,7 @@ perl.exe C:/test.pl >C:/output.txt
 =head2 Editors on Epoc
 
 A suitable text editor can be downloaded from symbian
- http://developer.epocworld.com/downloads/progs/Editor.zip
+http://www.symbian.com/developer/downloads/files/editor.zip
 
 =head2 Features of Perl on Epoc
 
@@ -169,17 +161,8 @@ Sorry, this is far too short.
 
 =item *
 
-You will need the C++ SDK from http://developer.epocworld.com/. 
-
-=item *
-
-You will need to set up the cross SDK from 
-http://www.science-computing.de/o.flebbe/sdk
-
-=item *
-
-You may have to adjust config.sh (cc, cppflags) to reflect your epoc 
-and SDK location.
+You will need the epocemx SDK from Eberhard Mattes. Watch out for an
+announcement.
 
 =item *
 
@@ -201,16 +184,9 @@ Start again from scratch
       make 
       cp miniperl.native miniperl
       make
-      make ext/Errno/pm_to_blib 
-      perl link.pl perlmain.o lib/auto/DynaLoader/DynaLoader.a \
-         lib/auto/Data/Dumper/Dumper.a \
-         lib/auto/File/Glob/Glob.a lib/auto/IO/IO.a \
-         lib/auto/Socket/Socket.a \
-         lib/auto/Fcntl/Fcntl.a lib/auto/Sys/Hostname/Hostname.a \
-	perl.a `cat ext.libs`
       perl createpkg.pl 
 
-      wine G:/bin/makesis perl.pkg perl.sis
+      emxsis perl.pkg perl.sis
 
 =back
 
@@ -226,6 +202,6 @@ http://www.science-computing.de/o.flebbe/perl/
 
 =head1 LAST UPDATE
 
-2001-02-26
+2001-12-12
 
 =cut

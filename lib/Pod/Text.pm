@@ -1,15 +1,16 @@
 # Pod::Text -- Convert POD data to formatted ASCII text.
-# $Id: Text.pm,v 2.15 2001/11/23 06:14:10 eagle Exp $
+# $Id: Text.pm,v 2.16 2001/11/28 01:15:50 eagle Exp $
 #
 # Copyright 1999, 2000, 2001 by Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
 #
-# This module replaces the old Pod::Text that came with versions of Perl prior
-# to 5.6.0, and attempts to match its output except for some specific
-# circumstances where other decisions seemed to produce better output.  It
-# uses Pod::Parser and is designed to be very easy to subclass.
+# This module converts POD to formatted text.  It replaces the old Pod::Text
+# module that came with versions of Perl prior to 5.6.0 and attempts to match
+# its output except for some specific circumstances where other decisions
+# seemed to produce better output.  It uses Pod::Parser and is designed to be
+# very easy to subclass.
 #
 # Perl core hackers, please note that this module is also separately
 # maintained outside of the Perl core as part of the podlators.  Please send
@@ -42,7 +43,7 @@ use vars qw(@ISA @EXPORT %ESCAPES $VERSION);
 # Don't use the CVS revision as the version, since this module is also in Perl
 # core and too many things could munge CVS magic revision strings.  This
 # number should ideally be the same as the CVS revision in podlators, however.
-$VERSION = 2.15;
+$VERSION = 2.16;
 
 
 ##############################################################################
@@ -263,18 +264,18 @@ sub textblock {
     }
 }
 
-# Called for an interior sequence.  Gets the command, argument, and a
+# Called for a formatting code.  Gets the command, argument, and a
 # Pod::InteriorSequence object and is expected to return the resulting text.
-# Calls code, bold, italic, file, and link to handle those types of sequences,
-# and handles S<>, E<>, X<>, and Z<> directly.
+# Calls methods for code, bold, italic, file, and link to handle those types
+# of codes, and handles S<>, E<>, X<>, and Z<> directly.
 sub interior_sequence {
     local $_;
     my ($self, $command, $seq);
     ($self, $command, $_, $seq) = @_;
 
     # We have to defer processing of the inside of an L<> formatting code.  If
-    # this sequence is nested inside an L<> sequence, return the literal raw
-    # text of it.
+    # this code is nested inside an L<> code, return the literal raw text of
+    # it.
     my $parent = $seq->nested;
     while (defined $parent) {
         return $seq->raw_text if ($parent->cmd_name eq 'L');
@@ -297,7 +298,7 @@ sub interior_sequence {
         }
     }
 
-    # For all the other sequences, empty content produces no output.
+    # For all the other formatting codes, empty content produces no output.
     return if $_ eq '';
 
     # For S<>, compress all internal whitespace and then map spaces to \01.
@@ -317,7 +318,7 @@ sub interior_sequence {
     else {
         my $seq = shift;
         my ($file, $line) = $seq->file_line;
-        warn "$file:$line: Unknown sequence $command<$_>\n";
+        warn "$file:$line: Unknown formatting code $command<$_>\n";
     }
 }
 
@@ -429,11 +430,11 @@ sub cmd_for {
 
 
 ##############################################################################
-# Interior sequences
+# Formatting codes
 ##############################################################################
 
-# The simple formatting ones.  These are here mostly so that subclasses can
-# override them and do more complicated things.
+# The simple ones.  These are here mostly so that subclasses can override them
+# and do more complicated things.
 sub seq_b { return $_[0]{alt} ? "``$_[1]''" : $_[1] }
 sub seq_f { return $_[0]{alt} ? "\"$_[1]\"" : $_[1] }
 sub seq_i { return '*' . $_[1] . '*' }
@@ -780,9 +781,9 @@ the form C<=command args>) that Pod::Man didn't know about.  It was ignored.
 (W) The POD source contained an C<EE<lt>E<gt>> escape that Pod::Text didn't
 know about.
 
-=item %s:%d: Unknown sequence: %s
+=item %s:%d: Unknown formatting code: %s
 
-(W) The POD source contained a non-standard internal sequence (something of
+(W) The POD source contained a non-standard formatting code (something of
 the form C<XE<lt>E<gt>>) that Pod::Text didn't know about.
 
 =item %s:%d: Unmatched =back

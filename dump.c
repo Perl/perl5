@@ -503,6 +503,8 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
 		    sv_catpv(tmpsv, ",NOPAREN");
 		if (o->op_private & OPpENTERSUB_INARGS)
 		    sv_catpv(tmpsv, ",INARGS");
+		if (o->op_private & OPpENTERSUB_NOMOD)
+		    sv_catpv(tmpsv, ",NOMOD");
 	    }
 	    else {
 		switch (o->op_private & OPpDEREF) {
@@ -549,7 +551,8 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
 	else if (o->op_type == OP_FLOP) {
 	    if (o->op_private & OPpFLIP_LINENUM)
 		sv_catpv(tmpsv, ",LINENUM");
-	} else if (o->op_type == OP_RV2CV) {
+	}
+	else if (o->op_type == OP_RV2CV) {
 	    if (o->op_private & OPpLVAL_INTRO)
 		sv_catpv(tmpsv, ",INTRO");
 	}
@@ -1381,7 +1384,7 @@ Perl_runops_debug(pTHX)
 			      "WARNING: %"UVxf" changed from %"UVxf" to %"UVxf"\n",
 			      PTR2UV(PL_watchaddr), PTR2UV(PL_watchok),
 			      PTR2UV(*PL_watchaddr));
-	    if (DEBUG_p_TEST_) debstack();
+	    if (DEBUG_s_TEST_) debstack();
 	    if (DEBUG_t_TEST_) debop(PL_op);
 	    if (DEBUG_P_TEST_) debprof(PL_op);
 	}

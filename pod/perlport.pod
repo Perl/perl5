@@ -1848,7 +1848,7 @@ is finally closed. (AmigaOS)
 
 =item utime LIST
 
-Only the modification time is updated. (S<Mac OS>, VMS, S<RISC OS>)
+Only the modification time is updated. (S<BeOS>, S<Mac OS>, VMS, S<RISC OS>)
 
 May not behave as expected.  Behavior depends on the C runtime
 library's implementation of utime(), and the filesystem being

@@ -1096,8 +1096,25 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)/.exists 
     push(@m,'	$(RM_F) $@
 ');
 
-    push(@m,'	LD_RUN_PATH="$(LD_RUN_PATH)" $(LD) '.$ldrun.' $(LDDLFLAGS) '.$ldfrom.
-		' $(OTHERLDFLAGS) -o $@ $(MYEXTLIB) $(PERL_ARCHIVE) $(LDLOADLIBS) $(PERL_ARCHIVE_AFTER) $(EXPORT_LIST)');
+    my $libs = $self->{LDLOADLIBS};
+
+    if ($^O eq 'netbsd') {
+	# Use nothing on static perl platforms, and to the flags needed
+	# to link against the shared libperl library on shared perl
+	# platforms.  We peek at lddlflags to see if we need -Wl,-R
+	# or -R to add paths to the run-time library search path.
+	if ($Config{'useshrplib'}) {
+	    if ($Config{'lddlflags'} =~ /-Wl,-R/) {
+		$libs = '-L$(PERL_INC) -Wl,-R$(INSTALLARCHLIB)/CORE -lperl';
+	    } elsif ($Config{'lddlflags'} =~ /-R/) {
+		$libs = '-L$(PERL_INC) -R$(INSTALLARCHLIB)/CORE -lperl';
+	    }
+	}
+    }
+
+    push(@m,
+'	LD_RUN_PATH="$(LD_RUN_PATH)" $(LD) '.$ldrun.' $(LDDLFLAGS) '.$ldfrom.
+' $(OTHERLDFLAGS) -o $@ $(MYEXTLIB) $(PERL_ARCHIVE) '.$libs.' $(PERL_ARCHIVE_AFTER) $(EXPORT_LIST)');
     push @m, '
 	$(CHMOD) $(PERM_RWX) $@
 ';
@@ -3207,6 +3224,9 @@ Defines the realclean target.
 sub realclean {
     my($self, %attribs) = @_;
     my(@m);
+
+    push(@m,'LLIBPERL = '.$llibperl."\n");
+
     push(@m,'
 # Delete temporary files (via clean) and also delete installed files
 realclean purge ::  clean

@@ -135,7 +135,12 @@ END_EXTERN_C
 #define isIDFIRST_lazy(p)	isIDFIRST_lazy_if(p,1)
 #define isALNUM_lazy(p)		isALNUM_lazy_if(p,1)
 
-#define UTF8_MAXLEN 13 /* how wide can a single UTF8 encoded character become */
+/* how wide can a single UTF8 encoded character become */
+#define UTF8_MAXLEN 13
+/* how wide a character can become when upper/lowercased */
+#define UTF8_MAXLEN_UCLC (UTF8_MAXLEN*2)
+/* how wide a character can become when casefolded */
+#define UTF8_MAXLEN_FOLD (UTF8_MAXLEN*3)
 
 #define IN_BYTES (PL_curcop->op_private & HINT_BYTES)
 #define DO_UTF8(sv) (SvUTF8(sv) && !IN_BYTES)

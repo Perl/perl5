@@ -97,7 +97,7 @@ sub get_files {
 	$file{'../../vmesa/errno.h'} = 1;
     } elsif ($Config{archname} eq 'epoc') {
 	# Watch out for cross compiling for EPOC (usually done on linux)
-	$file{'/usr/local/epoc/include/libc/sys/errno.h'} = 1;
+	$file{'/usr/local/epocemx/epocsdk/include/libc/sys/errno.h'} = 1;
     } elsif ($^O eq 'linux' &&
 	     $Config{gccversion} ne '' # might be using, say, Intel's icc
 	     ) {
@@ -108,6 +108,10 @@ sub get_files {
 	# note that we are only getting the GUSI errno's here ...
 	# we might miss out on compiler-specific ones
 	$file{"$ENV{GUSI}include:sys:errno.h"} = 1;
+
+    } elsif ($^O eq 'beos') {
+	# hidden in a special place
+	$file{'/boot/develop/headers/posix/errno.h'} = 1;
 
     } else {
 	open(CPPI,"> errno.c") or
@@ -202,9 +206,44 @@ sub write_errno_pm {
 	    my($name,$expr);
 	    next unless ($name, $expr) = /"(.*?)"\s*\[\s*\[\s*(.*?)\s*\]\s*\]/;
 	    next if $name eq $expr;
+	    $expr =~ s/(\d+)[LU]+\b/$1/g; # 2147483647L et alia
 	    $err{$name} = eval $expr;
 	}
 	close(CPPO);
+    }
+
+    # Many of the E constants (including ENOENT, which is being
+    # used in the Perl test suite a lot), are available only as
+    # enums in BeOS, so compiling and executing some code is about
+    # only way to find out what the numeric Evalues are.
+
+    if ($^O eq 'beos') {
+	if (open(C, ">errno.c")) {
+	    my @zero = grep { !$err{$_} } keys %err;
+	    print C <<EOF;
+#include <errno.h>
+#include <stdio.h>
+int main() {
+EOF
+            for (@zero) {
+		print C qq[printf("$_ %d\n", $_);]
+	    }
+            print C "}\n";
+            close C;
+            system("cc -o errno errno.c");
+            unlink("errno.c");
+            if (open(C, "./errno|")) {
+		while (<C>) {
+		    if (/^(\w+) (-?\d+)$/) { $err{$1} = $2 }
+		}
+		close(C);
+	    } else {
+		die "failed to execute ./errno: $!\n";
+	    }
+            unlink("errno");
+        } else {
+	    die "failed to create errno.c: $!\n";
+	}
     }
 
     # Write Errno.pm

@@ -134,13 +134,15 @@ is($?,0,"outer lex scope of vmsish [POSIX status]");
             $utclocal[2] * 3600     + $utclocal[1] * 60 + $utclocal[0];
   $vmsval = $vmslocal[5] * 31536000 + $vmslocal[7] * 86400 +
             $vmslocal[2] * 3600     + $vmslocal[1] * 60 + $vmslocal[0];
-  ok($vmsval - $utcval + $offset <= 10, "(localtime)\n# UTC: @utclocal\n# VMS: @vmslocal");
+  ok($vmsval - $utcval + $offset <= 10, "(localtime)");
+  print "# UTC: @utclocal\n# VMS: @vmslocal\n";
 
   $utcval = $utcgmtime[5] * 31536000 + $utcgmtime[7] * 86400 +
             $utcgmtime[2] * 3600     + $utcgmtime[1] * 60 + $utcgmtime[0];
   $vmsval = $vmsgmtime[5] * 31536000 + $vmsgmtime[7] * 86400 +
             $vmsgmtime[2] * 3600     + $vmsgmtime[1] * 60 + $vmsgmtime[0];
-  ok($vmsval - $utcval + $offset <= 10, "(gmtime)\n# UTC: @utcgmtime\n# VMS: @vmsgmtime");
+  ok($vmsval - $utcval + $offset <= 10, "(gmtime)");
+  print "# UTC: @utcgmtime\n# VMS: @vmsgmtime\n";
 
   ok($vmsmtime - $utcmtime + $offset <= 10,"(stat) UTC: $utcmtime  VMS: $vmsmtime");
 }

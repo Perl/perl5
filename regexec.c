@@ -932,8 +932,8 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	    ln = STR_LEN(c);
 	    if (UTF) {
 	        STRLEN ulen1, ulen2;
-		U8 tmpbuf1[UTF8_MAXLEN*2+1];
-		U8 tmpbuf2[UTF8_MAXLEN*2+1];
+		U8 tmpbuf1[UTF8_MAXLEN_UCLC+1];
+		U8 tmpbuf2[UTF8_MAXLEN_UCLC+1];
 
 		to_utf8_lower((U8*)m, tmpbuf1, &ulen1);
 		to_utf8_upper((U8*)m, tmpbuf2, &ulen2);
@@ -971,7 +971,8 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 		    while (s <= e) {
 			if ( utf8_to_uvchr((U8*)s, &len) == c1
 			     && (ln == 1 ||
-				 ibcmp_utf8(s, do_utf8, m, UTF, ln)) )
+				 ibcmp_utf8(s, do_utf8,  strend - s,
+					    m, UTF, ln)) )
 			    goto got_it;
 			s += len;
 		    }
@@ -980,7 +981,8 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 			UV c = utf8_to_uvchr((U8*)s, &len);
 			if ( (c == c1 || c == c2)
 			     && (ln == 1 ||
-				 ibcmp_utf8(s, do_utf8, m, UTF, ln)) )
+				 ibcmp_utf8(s, do_utf8, strend - s,
+					    m, UTF, ln)) )
 			    goto got_it;
 			s += len;
 		    }
@@ -2283,7 +2285,7 @@ S_regmatch(pTHX_ regnode *prog)
 		char *l = locinput;
 		char *e;
 		STRLEN ulen;
-		U8 tmpbuf[UTF8_MAXLEN*2+1];
+		U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
 		e = s + ln;
 		while (s < e) {
 		    if (l >= PL_regeol)
@@ -2556,8 +2558,8 @@ S_regmatch(pTHX_ regnode *prog)
 		 */
 		if (OP(scan) == REFF) {
 		    STRLEN ulen1, ulen2;
-		    U8 tmpbuf1[UTF8_MAXLEN*2+1];
-		    U8 tmpbuf2[UTF8_MAXLEN*2+1];
+		    U8 tmpbuf1[UTF8_MAXLEN_UCLC+1];
+		    U8 tmpbuf2[UTF8_MAXLEN_UCLC+1];
 		    while (s < e) {
 			if (l >= PL_regeol)
 			    sayNO;
@@ -3362,8 +3364,8 @@ S_regmatch(pTHX_ regnode *prog)
 		    else { /* UTF */
 			if (OP(text_node) == EXACTF || OP(text_node) == REFF) {
 			     STRLEN ulen1, ulen2;
-			     U8 tmpbuf1[UTF8_MAXLEN*2+1];
-			     U8 tmpbuf2[UTF8_MAXLEN*2+1];
+			     U8 tmpbuf1[UTF8_MAXLEN_UCLC+1];
+			     U8 tmpbuf2[UTF8_MAXLEN_UCLC+1];
 
 			     to_utf8_lower((U8*)s, tmpbuf1, &ulen1);
 			     to_utf8_upper((U8*)s, tmpbuf2, &ulen2);
@@ -4108,7 +4110,7 @@ S_reginclass(pTHX_ register regnode *n, register U8* p, register bool do_utf8)
 		    match = TRUE;
 		else if (flags & ANYOF_FOLD) {
 		    STRLEN ulen;
-		    U8 tmpbuf[UTF8_MAXLEN*2+1];
+		    U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
 
 		    toLOWER_utf8(p, tmpbuf, &ulen);
 		    if (swash_fetch(sw, tmpbuf, do_utf8))

@@ -8,6 +8,10 @@ BEGIN {
 	print "1..0 # Skip: Sys::Syslog was not built\n";
 	exit 0;
     }
+    if ($Config{'extensions'} !~ /\bSocket\b/) {
+	print "1..0 # Skip: Socket was not built\n";
+	exit 0;
+    }
 
     require Socket;
 

@@ -48,69 +48,19 @@ $!  Pick up a copy of vmspipe.com to use for the tests
 $   If F$Search("VMSPIPE.COM").nes."" then Delete/Log/Noconfirm VMSPIPE.COM;*
 $   Copy/Log/NoConfirm [-]VMSPIPE.COM []
 $!
-$!  Make the environment look a little friendlier to tests which assume Unix
-$   cat == "Type"
-$   Macro/NoDebug/NoList/Object=Echo.Obj Sys$Input
-		.title echo
-		.psect data,wrt,noexe
-	dsc:
-		.word 0
-		.byte 14 ; DSC$K_DTYPE_T
-		.byte 2  ; DSC$K_CLASS_D
-		.long 0
-		.psect code,nowrt,exe
-		.entry	echo,^m<r2,r3>
-		movab	dsc,r2
-		pushab	(r2)
-		calls	#1,G^LIB$GET_FOREIGN
-		movl	4(r2),r3
-		movzwl	(r2),r0
-		addl2	4(r2),r0
-		cmpl	r3,r0
-		bgtru	sym.3
-		nop	
-	sym.1:
-		movb	(r3),r0
-		cmpb	r0,#65
-		blss	sym.2
-		cmpb	r0,#90
-		bgtr	sym.2
-		cvtbl	r0,r0
-		addl2	#32,r0
-		cvtlb	r0,(r3)
-	sym.2:
-		incl	r3
-		movzwl	(r2),r0
-		addl2	4(r2),r0
-		cmpl	r3,r0
-		blequ	sym.1
-	sym.3:
-		pushab	(r2)
-		calls	#1,G^LIB$PUT_OUTPUT
-		movl	#1,r0
-		ret	
-		.end echo
-$   If F$Search("Echo.Exe").nes."" Then Delete/Log/NoConfirm Echo.Exe;*
-$   Link/NoMap/NoTrace/Exe=Echo.Exe Echo.Obj;
-$   Delete/Log/NoConfirm Echo.Obj;*
-$   echo == "$" + F$Parse("Echo.Exe")
-$!
 $!  And do it
 $   Show Process/Accounting
 $   testdir = "Directory/NoHead/NoTrail/Column=1"
 $   PerlShr_filespec = f$parse("Sys$Disk:[-]''dbg'PerlShr''exe'")
 $   Define 'dbg'Perlshr 'PerlShr_filespec'
+$   if f$mode() .nes. "INTERACTIVE" then Define PERL_SKIP_TTY_TEST 1
 $   MCR Sys$Disk:[]Perl. "-I[-.lib]" - "''p3'" "''p4'" "''p5'" "''p6'"
 $   Deck/Dollar=$$END-OF-TEST$$
-# $RCSfile: test.com,v $$Revision: 1.1 $$Date: 2001/12/05 06:53:37 $
-# Modified for VMS 30-Sep-1994  Charles Bailey  bailey@newman.upenn.edu
 #
-# This is written in a peculiar style, since we're trying to avoid
-# most of the constructs we'll be testing for.
+# The bulk of the below code is scheduled for deletion.  test.com
+# will shortly use t/TEST.
+#
 
-# skip those tests we know will fail entirely or cause perl to hang bacause
-# of Unixisms in the tests.  (The Perl operators being tested may work fine,
-# but the tests may use other operators which don't.)
 use Config;
 use File::Spec;
 

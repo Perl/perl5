@@ -931,11 +931,15 @@ int sockatmark(int);
 #   define S_IRWXO (S_IROTH|S_IWOTH|S_IXOTH)
 #endif
 
-#ifndef S_IREAD
+/* BeOS 5.0 seems to define S_IREAD and S_IWRITE in <posix/fcntl.h>
+ * which would get included through <sys/file.h >, but that is 3000
+ * lines in the future.  --jhi */
+
+#if !defined(S_IREAD) && !defined(__BEOS__)
 #   define S_IREAD S_IRUSR
 #endif
 
-#ifndef S_IWRITE
+#if !defined(S_IWRITE) && !defined(__BEOS__)
 #   define S_IWRITE S_IWUSR
 #endif
 
@@ -1749,56 +1753,65 @@ typedef struct clone_params CLONE_PARAMS;
 #endif
 
 #if defined(__OPEN_VM)
-# include "vmesa/vmesaish.h"
+#   include "vmesa/vmesaish.h"
+#   define ISHISH "vmesa"
 #endif
 
 #ifdef DOSISH
-# if defined(OS2)
-#   include "os2ish.h"
-# else
-#   include "dosish.h"
-# endif
-#else
-# if defined(VMS)
+#   if defined(OS2)
+#       include "os2ish.h"
+#   else
+#       include "dosish.h"
+#   endif
+#   define ISHISH "dos"
+#endif
+
+#if defined(VMS)
 #   include "vmsish.h"
 #   include "embed.h"
-# else
-#   if defined(PLAN9)
-#     include "./plan9/plan9ish.h"
-#   else
-#     if defined(MPE)
-#       include "mpeix/mpeixish.h"
-#     else
-#       if defined(__VOS__)
-#         include "vosish.h"
-#       else
-#         if defined(EPOC)
-#           include "epocish.h"
-#         else
-#           if defined(MACOS_TRADITIONAL)
-#             include "macos/macish.h"
-#	      ifndef NO_ENVIRON_ARRAY
-#               define NO_ENVIRON_ARRAY
-#             endif
-#           else
-#             include "unixish.h"
-#           endif
-#         endif
-#       endif
-#     endif
+#   define ISHISH "vms"
+#endif
+
+#if defined(PLAN9)
+#   include "./plan9/plan9ish.h"
+#   define ISHISH "plan9"
+#endif
+
+#if defined(MPE)
+#  include "mpeix/mpeixish.h"
+#  define ISHISH "mpeix"
+#endif
+
+#if defined(__VOS__)
+#   include "vosish.h"
+#   define ISHISH "vos"
+#endif
+
+#if defined(EPOC)
+#   include "epocish.h"
+#   define ISHISH "epoc"
+#endif
+
+#if defined(MACOS_TRADITIONAL)
+#   include "macos/macish.h"
+#   ifndef NO_ENVIRON_ARRAY
+#       define NO_ENVIRON_ARRAY
 #   endif
-# endif
+#   define ISHISH "macos classic"
+#endif
+
+#if defined(__BEOS__)
+#   include "beos/beosish.h"
+#   define ISHISH "beos"
+#endif
+
+#ifndef ISHISH
+#   include "unixish.h"
+#   define ISHISH "unix"
 #endif
 
 #ifndef NO_ENVIRON_ARRAY
 #  define USE_ENVIRON_ARRAY
-#endif
-
-#ifdef JPL
-    /* E.g. JPL needs to operate on a copy of the real environment.
-     * JDK 1.2 and 1.3 seem to get upset if the original environment
-     * is diddled with. */
-#   define NEED_ENVIRON_DUP_FOR_MODIFY
 #endif
 
 /*
@@ -3919,6 +3932,18 @@ int flock(int fd, int op);
 
 #ifndef O_TEXT
 #  define O_TEXT 0
+#endif
+
+#if O_TEXT != O_BINARY
+    /* If you have different O_TEXT and O_BINARY and you are a CLRF shop,
+     * that is, you are somehow DOSish. */
+#   if !defined(__BEOS__)
+#      define PERLIO_USING_CRLF 1
+#   else
+    /* If you have O_TEXT different from your O_BINARY but you still are
+     * not a CRLF shop. */
+#       undef PERLIO_USING_CRLF
+#   endif
 #endif
 
 #ifdef IAMSUID
