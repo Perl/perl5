@@ -146,9 +146,17 @@ PP(pp_concat)
     dPOPTOPssrl;
     STRLEN len;
     U8 *s;
-    bool left_utf = DO_UTF8(left);
-    bool right_utf = DO_UTF8(right);
+    bool left_utf;
+    bool right_utf;
 
+    if (TARG == right && SvGMAGICAL(right))
+        mg_get(right);
+    if (SvGMAGICAL(left))
+        mg_get(left);
+
+    left_utf  = DO_UTF8(left);
+    right_utf = DO_UTF8(right);
+ 
     if (left_utf != right_utf) {
         if (TARG == right && !right_utf) {
             sv_utf8_upgrade(TARG); /* Now straight binary copy */
@@ -163,9 +171,7 @@ PP(pp_concat)
 		/* Take a copy since we're about to overwrite TARG */
 		olds = s = (U8*)savepvn((char*)s, len);
 	    }
-	    if (SvGMAGICAL(left))
-		mg_get(left);
-	    else if (!SvOK(left) && SvTYPE(left) <= SVt_PVMG)
+	    if (!SvOK(left) && SvTYPE(left) <= SVt_PVMG)
 		sv_setpv(left, "");	/* Suppress warning. */
             l = (U8*)SvPV(left, targlen);
             if (TARG != left)
@@ -207,8 +213,6 @@ PP(pp_concat)
 	}
 	sv_setpvn(TARG, (char *)s, len);
     }
-    else if (SvGMAGICAL(TARG))
-	mg_get(TARG);
     else if (!SvOK(TARG) && SvTYPE(TARG) <= SVt_PVMG)
 	sv_setpv(TARG, "");	/* Suppress warning. */
     s = (U8*)SvPV(right,len);
