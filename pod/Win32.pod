@@ -121,7 +121,7 @@ convert 8.3 components in the supplied FILENAME to longnames or
 vice-versa.  Compare with Win32::GetShortPathName and
 Win32::GetLongPathName.  
 
-This function has been added for Perl 5.006.
+This function has been added for Perl 5.6.
 
 =item Win32::GetLastError()
 
@@ -137,7 +137,7 @@ than PATHNAME.  No attempt is made to convert PATHNAME to the
 absolute path.  Compare with Win32::GetShortPathName and
 Win32::GetFullPathName.
 
-This function has been added for Perl 5.006.
+This function has been added for Perl 5.6.
 
 =item Win32::GetNextAvailDrive()
 
@@ -259,7 +259,7 @@ such a feature is not available under Windows 95.
 
 [CORE] Sets the value of the last error encountered to ERROR. This is
 that value that will be returned by the Win32::GetLastError()
-function. This functions has been added for Perl 5.006.
+function. This functions has been added for Perl 5.6.
 
 =item Win32::Sleep(TIME)
 

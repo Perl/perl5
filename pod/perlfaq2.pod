@@ -17,7 +17,7 @@ in standard Internet format (a gzipped archive in POSIX tar format).
 
 Perl builds and runs on a bewildering number of platforms.  Virtually
 all known and current Unix derivatives are supported (Perl's native
-platform), as are proprietary systems like VMS, DOS, OS/2, Windows,
+platform), as are other systems like VMS, DOS, OS/2, Windows,
 QNX, BeOS, and the Amiga.  There are also the beginnings of support
 for MPE/iX.
 
@@ -45,11 +45,12 @@ Some URLs that might help you are:
     http://www.perl.com/latest/
     http://www.perl.com/CPAN/ports/
 
-Someone looking for a Perl for Win16 might look to LMOLNAR's djgpp
+Someone looking for a Perl for Win16 might look to Laszlo Molnar's djgpp
 port in http://www.perl.com/CPAN/ports/msdos/ , which comes with clear
 installation instructions.  A simple installation guide for MS-DOS using
-IlyaZ's OS/2 port is available at http://www.cs.ruu.nl/~piet/perl5dos.html
-and similarly for Windows 3.1 at http://www.cs.ruu.nl/~piet/perlwin3.html .
+Ilya Zakharevich's OS/2 port is available at
+http://www.cs.ruu.nl/%7Epiet/perl5dos.html
+and similarly for Windows 3.1 at http://www.cs.ruu.nl/%7Epiet/perlwin3.html .
 
 =head2 I don't have a C compiler on my system.  How can I compile perl?
 
@@ -74,7 +75,7 @@ the hard-coded @INC which perl is looking for.
 
 If this command lists any paths which don't exist on your system, then you
 may need to move the appropriate libraries to these locations, or create
-symlinks, aliases, or shortcuts appropriately.  @INC is also printed as
+symbolic links, aliases, or shortcuts appropriately.  @INC is also printed as
 part of the output of
 
     % perl -V
@@ -111,7 +112,7 @@ ftp://ftp.funet.fi/pub/languages/perl/CPAN/misc/japh .
 
 Considering that there are hundreds of existing modules in the
 archive, one probably exists to do nearly anything you can think of.
-Current categories under CPAN/modules/by-category/ include perl core
+Current categories under CPAN/modules/by-category/ include Perl core
 modules; development support; operating system interfaces; networking,
 devices, and interprocess communication; data type utilities; database
 interfaces; user interfaces; interfaces to other languages; filenames,
@@ -127,13 +128,13 @@ Certainly not.  Larry expects that he'll be certified before Perl is.
 
 =head2 Where can I get information on Perl?
 
-The complete Perl documentation is available with the perl distribution.
-If you have perl installed locally, you probably have the documentation
+The complete Perl documentation is available with the Perl distribution.
+If you have Perl installed locally, you probably have the documentation
 installed as well: type C<man perl> if you're on a system resembling Unix.
 This will lead you to other important man pages, including how to set your
 $MANPATH.  If you're not on a Unix system, access to the documentation
 will be different; for example, it might be only in HTML format.  But all
-proper perl installations have fully-accessible documentation.
+proper Perl installations have fully-accessible documentation.
 
 You might also try C<perldoc perl> in case your system doesn't
 have a proper man command, or it's been misinstalled.  If that doesn't
@@ -157,7 +158,7 @@ assistance:
     http://language.perl.com/info/documentation.html
     http://reference.perl.com/query.cgi?tutorials
 
-=head2 What are the Perl newsgroups on USENET?  Where do I post questions?
+=head2 What are the Perl newsgroups on Usenet?  Where do I post questions?
 
 The now defunct comp.lang.perl newsgroup has been superseded by the
 following groups:
@@ -170,7 +171,7 @@ following groups:
 
     comp.infosystems.www.authoring.cgi 	Writing CGI scripts for the Web.
 
-There is also USENET gateway to the mailing list used by the crack
+There is also Usenet gateway to the mailing list used by the crack
 Perl development team (perl5-porters) at
 news://news.perl.com/perl.porters-gw/ .
 
@@ -182,14 +183,15 @@ to alt.sources, please make sure it follows their posting standards,
 including setting the Followup-To header line to NOT include alt.sources;
 see their FAQ (http://www.faqs.org/faqs/alt-sources-intro/) for details.
 
-If you're just looking for software, first use Alta Vista, Deja News, and
+If you're just looking for software, first use AltaVista
+(http://www.altavista.com), Deja (http://www.deja.com), and
 search CPAN.  This is faster and more productive than just posting
 a request.
 
 =head2 Perl Books
 
 A number of books on Perl and/or CGI programming are available.  A few of
-these are good, some are ok, but many aren't worth your money.  Tom
+these are good, some are OK, but many aren't worth your money.  Tom
 Christiansen maintains a list of these books, some with extensive
 reviews, at http://www.perl.com/perl/critiques/index.html.
 
@@ -254,7 +256,10 @@ a star may be ordered from O'Reilly.
 	by Larry Wall, Tom Christiansen, and Randal L. Schwartz
 
     *Perl 5 Desktop Reference
-        By Johan Vromans
+        by Johan Vromans
+
+    *Perl in a Nutshell
+        by Ellen Siever, Stephan Spainhour, and Nathan Patwardhan
 
 =item Tutorials
 		
@@ -298,6 +303,9 @@ a star may be ordered from O'Reilly.
     How to Set up and Maintain a World Wide Web Site [2nd edition]
 	by Lincoln Stein
 
+    *Learning Perl/Tk
+        by Nancy Walsh
+
 =back
 
 =head2 Perl in Magazines
@@ -322,7 +330,7 @@ http://www.stonehenge.com/merlyn/WebTechniques/.
 
 To get the best (and possibly cheapest) performance, pick a site from
 the list below and use it to grab the complete list of mirror sites.
->From there you can find the quickest site for you.  Remember, the
+From there you can find the quickest site for you.  Remember, the
 following list is I<not> the complete list of CPAN mirrors.
 
   http://www.perl.com/CPAN-local
@@ -332,9 +340,9 @@ following list is I<not> the complete list of CPAN mirrors.
   http://www.cs.ruu.nl/pub/PERL/CPAN/
   ftp://ftp.cs.colorado.edu/pub/perl/CPAN/
 
-=head2 What mailing lists are there for perl?
+=head2 What mailing lists are there for Perl?
 
-Most of the major modules (tk, CGI, libwww-perl) have their own
+Most of the major modules (Tk, CGI, libwww-perl) have their own
 mailing lists.  Consult the documentation that came with the module for
 subscription information.  The Perl Institute attempts to maintain a
 list of mailing lists at:
@@ -343,10 +351,10 @@ list of mailing lists at:
 
 =head2 Archives of comp.lang.perl.misc
 
-Have you tried Deja News or Alta Vista?  Those are the 
+Have you tried Deja or AltaVista?  Those are the 
 best archives.  Just look up "*perl*" as a newsgroup.
 
-    http://www.dejanews.com/dnquery.xp?QRY=&DBS=2&ST=PS&defaultOp=AND&LNG=ALL&format=terse&showsort=date&maxhits=25&subjects=&groups=*perl*&authors=&fromdate=&todate=
+    http://www.deja.com/dnquery.xp?QRY=&DBS=2&ST=PS&defaultOp=AND&LNG=ALL&format=terse&showsort=date&maxhits=25&subjects=&groups=*perl*&authors=&fromdate=&todate=
 
 You'll probably want to trim that down a bit, though.
 
@@ -379,8 +387,8 @@ better for everyone.
 However, these answers may not suffice for managers who require a
 purchase order from a company whom they can sue should anything go awry.
 Or maybe they need very serious hand-holding and contractual obligations.
-Shrink-wrapped CDs with perl on them are available from several sources if
-that will help.  For example, many perl books carry a perl distribution
+Shrink-wrapped CDs with Perl on them are available from several sources if
+that will help.  For example, many Perl books carry a Perl distribution
 on them, as do the O'Reilly Perl Resource Kits (in both the Unix flavor
 and in the proprietary Microsoft flavor); the free Unix distributions
 also all come with Perl.
@@ -417,7 +425,7 @@ See also www.perl.com for updates on tutorials, training, and support.
 =head2 Where do I send bug reports?
 
 If you are reporting a bug in the perl interpreter or the modules
-shipped with perl, use the I<perlbug> program in the perl distribution or
+shipped with Perl, use the I<perlbug> program in the Perl distribution or
 mail your report to perlbug@perl.com .
 
 If you are posting a bug with a non-standard port (see the answer to
@@ -434,7 +442,7 @@ The perl.com domain is owned by Tom Christiansen, who created it as a
 public service long before perl.org came about.  Despite the name, it's a
 pretty non-commercial site meant to be a clearinghouse for information
 about all things Perlian, accepting no paid advertisements, bouncy
-happy gifs, or silly java applets on its pages.  The Perl Home Page at
+happy GIFs, or silly Java applets on its pages.  The Perl Home Page at
 http://www.perl.com/ is currently hosted on a T3 line courtesy of Songline
 Systems, a software-oriented subsidiary of O'Reilly and Associates.
 Other starting points include 
@@ -453,7 +461,7 @@ of Perl or of its documentation (printed or otherwise), this works is
 covered under Perl's Artistic License.  For separate distributions of
 all or part of this FAQ outside of that, see L<perlfaq>.
 
-Irrespective of its distribution, all code examples here are public
+Irrespective of its distribution, all code examples here are in the public
 domain.  You are permitted and encouraged to use this code and any
 derivatives thereof in your own programs for fun or for profit as you
 see fit.  A simple comment in the code giving credit to the FAQ would

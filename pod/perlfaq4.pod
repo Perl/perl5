@@ -31,7 +31,7 @@ representation is converted back to decimal.  These decimal numbers
 are displayed in either the format you specify with printf(), or the
 current output format for numbers (see L<perlvar/"$#"> if you use
 print.  C<$#> has a different default value in Perl5 than it did in
-Perl4.  Changing C<$#> yourself is deprecated.
+Perl4.  Changing C<$#> yourself is deprecated.)
 
 This affects B<all> computer languages that represent decimal
 floating-point numbers in binary, not just Perl.  Perl provides
@@ -67,7 +67,7 @@ route.
 
     printf("%.3f", 3.1415926535);	# prints 3.142
 
-The POSIX module (part of the standard perl distribution) implements
+The POSIX module (part of the standard Perl distribution) implements
 ceil(), floor(), and a number of other mathematical and trigonometric
 functions.
 
@@ -76,7 +76,7 @@ functions.
     $floor  = floor(3.5);			# 3
 
 In 5.000 to 5.003 Perls, trigonometry was done in the Math::Complex
-module.  With 5.004, the Math::Trig module (part of the standard perl
+module.  With 5.004, the Math::Trig module (part of the standard Perl
 distribution) implements the trigonometric functions. Internally it
 uses the Math::Complex module and some functions can break out from
 the real axis into the complex plane, for example the inverse sine of
@@ -105,12 +105,12 @@ are not guaranteed.
 
 To turn a string of 1s and 0s like C<10110110> into a scalar containing
 its binary value, use the pack() and unpack() functions (documented in
-L<perlfunc/"pack" L<perlfunc/"unpack">):
+L<perlfunc/"pack"> and L<perlfunc/"unpack">):
 
     $decimal = unpack('c', pack('B8', '10110110'));
 
 This packs the string C<10110110> into an eight bit binary structure.
-This is then unpack as a character, which returns its ordinal value.
+This is then unpacked as a character, which returns its ordinal value.
 
 This does the same thing:
 
@@ -182,6 +182,15 @@ ranges.  Instead use:
     for ($i=5; $i < 500_005; $i++) {
         push(@results, some_func($i));
     }
+
+This situation has been fixed in Perl5.005. Use of C<..> in a C<for>
+loop will iterate over the range, without creating the entire range.
+
+    for my $i (5 .. 500_005) {
+        push(@results, some_func($i));
+    }
+
+will not create a list of 500,000 integers.
 
 =head2 How can I output Roman numerals?
 
@@ -333,7 +342,7 @@ A solution to this issue is offered by Russ Allbery.
     #
     # The explicit settings of $ndst and $tdst are necessary because localtime
     # only says it returns the system tm struct, and the system tm struct at
-    # least on Solaris doesn't guarantee any particuliar positive value (like,
+    # least on Solaris doesn't guarantee any particular positive value (like,
     # say, 1) for isdst, just a positive value.  And that value can
     # potentially be negative, if DST information isn't available (this sub
     # just treats those cases like no DST).
@@ -350,7 +359,7 @@ A solution to this issue is offered by Russ Allbery.
     # Copyright relinquished 1999 by Russ Allbery <rra@stanford.edu>
     # This code is in the public domain
 
-=head2 Does Perl have a year 2000 problem?  Is Perl Y2K compliant?
+=head2 Does Perl have a Year 2000 problem?  Is Perl Y2K compliant?
 
 Short answer: No, Perl does not have a Year 2000 problem.  Yes, Perl is
 Y2K compliant (whatever that means).  The programmers you've hired to
@@ -361,7 +370,7 @@ Perl is just as Y2K compliant as your pencil--no more, and no less.
 Can you use your pencil to write a non-Y2K-compliant memo?  Of course
 you can.  Is that the pencil's fault?  Of course it isn't.
 
-The date and time functions supplied with perl (gmtime and localtime)
+The date and time functions supplied with Perl (gmtime and localtime)
 supply adequate information to determine the year well beyond 2000
 (2038 is when trouble strikes for 32-bit machines).  The year returned
 by these functions when used in an array context is the year minus 1900.
@@ -441,7 +450,7 @@ If you are serious about writing a parser, there are a number of
 modules or oddities that will make your life a lot easier.  There is
 the CPAN module Parse::RecDescent, the standard module Text::Balanced,
 the byacc program, the CPAN module Parse::Yapp, and Mark-Jason
-Dominus's excellent I<py> tool at http://www.plover.com/~mjd/perl/py/
+Dominus's excellent I<py> tool at http://www.plover.com/%7Emjd/perl/py/
 .
 
 One simple destructive, inside-out approach that you might try is to
@@ -479,7 +488,7 @@ You can do it yourself:
 
     1 while $string =~ s/\t+/' ' x (length($&) * 8 - length($`) % 8)/e;
 
-Or you can just use the Text::Tabs module (part of the standard perl
+Or you can just use the Text::Tabs module (part of the standard Perl
 distribution).
 
     use Text::Tabs;
@@ -487,7 +496,7 @@ distribution).
 
 =head2 How do I reformat a paragraph?
 
-Use Text::Wrap (part of the standard perl distribution):
+Use Text::Wrap (part of the standard Perl distribution):
 
     use Text::Wrap;
     print wrap("\t", '  ', @paragraphs);
@@ -570,8 +579,8 @@ To make the first letter of each word upper case:
         $line =~ s/\b(\w)/\U$1/g;
 
 This has the strange effect of turning "C<don't do it>" into "C<Don'T
-Do It>".  Sometimes you might want this, instead (Suggested by Brian
-Foy):
+Do It>".  Sometimes you might want this, instead (Suggested by brian d. 
+foy):
 
     $string =~ s/ (
                  (^\w)    #at the beginning of the line
@@ -627,7 +636,7 @@ quotation-mark-delimited field, escape them with backslashes (eg,
 C<"like \"this\"">.  Unescaping them is a task addressed earlier in
 this section.
 
-Alternatively, the Text::ParseWords module (part of the standard perl
+Alternatively, the Text::ParseWords module (part of the standard Perl
 distribution) lets you say:
 
     use Text::ParseWords;
@@ -735,7 +744,7 @@ you can use this kind of thing:
 
 =head2 How do I find the soundex value of a string?
 
-Use the standard Text::Soundex module distributed with perl.
+Use the standard Text::Soundex module distributed with Perl.
 But before you do so, you may want to determine whether `soundex' is in
 fact what you think it is.  Knuth's soundex algorithm compresses words
 into a small space, and so it does not necessarily distinguish between
@@ -952,7 +961,7 @@ ordered and whether you wish to preserve the ordering.
 This is nice in that it doesn't use much extra memory, simulating
 uniq(1)'s behavior of removing only adjacent duplicates.  It's less
 nice in that it won't work with false values like undef, 0, or "";
-"0 but true" is ok, though.
+"0 but true" is OK, though.
 
 =item b) If you don't know whether @in is sorted:
 
@@ -973,7 +982,7 @@ nice in that it won't work with false values like undef, 0, or "";
 
     undef @ary;
     @ary[@in] = @in;
-    @out = @ary;
+    @out = grep {defined} @ary;
 
 =back
 
@@ -1121,7 +1130,7 @@ Now C<$found_index> has what you want.
 In general, you usually don't need a linked list in Perl, since with
 regular arrays, you can push and pop or shift and unshift at either end,
 or you can use splice to add and/or remove arbitrary number of elements at
-arbitrary points.  Both pop and shift are both O(1) operations on perl's
+arbitrary points.  Both pop and shift are both O(1) operations on Perl's
 dynamic arrays.  In the absence of shifts and pops, push in general
 needs to reallocate on the order every log(N) times, and unshift will
 need to copy pointers each time.
@@ -1427,10 +1436,10 @@ sorting the keys as shown in an earlier question.
 Don't do that. :-)
 
 [lwall] In Perl 4, you were not allowed to modify a hash at all while
-interating over it.  In Perl 5 you can delete from it, but you still
+iterating over it.  In Perl 5 you can delete from it, but you still
 can't add to it, because that might cause a doubling of the hash table,
 in which half the entries get copied up to the new top half of the
-table, at which point you've totally bamboozled the interator code.
+table, at which point you've totally bamboozled the iterator code.
 Even if the table doesn't double, there's no telling whether your new
 entry will be inserted before or after the current iterator position.
 
@@ -1527,7 +1536,7 @@ And these conditions hold
 	$ary{'d'}                       is false
 	defined $ary{'d'}               is true
 	defined $ary{'a'}               is true
-	exists $ary{'a'}                is true (perl5 only)
+	exists $ary{'a'}                is true (Perl5 only)
 	grep ($_ eq 'a', keys %ary)     is true
 
 If you now say
@@ -1551,7 +1560,7 @@ and these conditions now hold; changes in caps:
 	$ary{'d'}                       is false
 	defined $ary{'d'}               is true
 	defined $ary{'a'}               is FALSE
-	exists $ary{'a'}                is true (perl5 only)
+	exists $ary{'a'}                is true (Perl5 only)
 	grep ($_ eq 'a', keys %ary)     is true
 
 Notice the last two: you have an undef value, but a defined key!
@@ -1575,7 +1584,7 @@ and these conditions now hold; changes in caps:
 	$ary{'d'}                       is false
 	defined $ary{'d'}               is true
 	defined $ary{'a'}               is false
-	exists $ary{'a'}                is FALSE (perl5 only)
+	exists $ary{'a'}                is FALSE (Perl5 only)
 	grep ($_ eq 'a', keys %ary)     is FALSE
 
 See, the whole entry is gone!
@@ -1651,7 +1660,7 @@ whether you store something there or not.  That's because functions
 get scalars passed in by reference.  If somefunc() modifies C<$_[0]>,
 it has to be ready to write it back into the caller's version.
 
-This has been fixed as of perl5.004.
+This has been fixed as of Perl5.004.
 
 Normally, merely accessing a key's value for a nonexistent key does
 I<not> cause that key to be forever there.  This is different than
@@ -1678,7 +1687,7 @@ in L<perltoot>.
 =head2 How can I use a reference as a hash key?
 
 You can't do this directly, but you could use the standard Tie::Refhash
-module distributed with perl.
+module distributed with Perl.
 
 =head1 Data: Misc
 

@@ -1435,7 +1435,7 @@ defined C<END> routines first, but these C<END> routines may not
 themselves abort the exit.  Likewise any object destructors that need to
 be called are called before the real exit.  If this is a problem, you
 can call C<POSIX:_exit($status)> to avoid END and destructor processing.
-See L<perlsub> for details.
+See L<perlmod> for details.
 
 =item exp EXPR
 
@@ -4200,28 +4200,37 @@ a NAME, it's an anonymous function declaration, and does actually return a
 value: the CODE ref of the closure you just created.  See L<perlsub> and
 L<perlref> for details.
 
-=item substr EXPR,OFFSET,LEN,REPLACEMENT
+=item substr EXPR,OFFSET,LENGTH,REPLACEMENT
 
-=item substr EXPR,OFFSET,LEN
+=item substr EXPR,OFFSET,LENGTH
 
 =item substr EXPR,OFFSET
 
 Extracts a substring out of EXPR and returns it.  First character is at
 offset C<0>, or whatever you've set C<$[> to (but don't do that).
 If OFFSET is negative (or more precisely, less than C<$[>), starts
-that far from the end of the string.  If LEN is omitted, returns
-everything to the end of the string.  If LEN is negative, leaves that
+that far from the end of the string.  If LENGTH is omitted, returns
+everything to the end of the string.  If LENGTH is negative, leaves that
 many characters off the end of the string.
 
-If you specify a substring that is partly outside the string, the part
-within the string is returned.    If the substring is totally outside
-the string a warning is produced.
-
 You can use the substr() function as an lvalue, in which case EXPR
-must itself be an lvalue.  If you assign something shorter than LEN,
-the string will shrink, and if you assign something longer than LEN,
+must itself be an lvalue.  If you assign something shorter than LENGTH,
+the string will shrink, and if you assign something longer than LENGTH,
 the string will grow to accommodate it.  To keep the string the same
 length you may need to pad or chop your value using C<sprintf>.
+
+If OFFSET and LENGTH specify a substring that is partly outside the
+string, only the part within the string is returned.  If the substring
+is beyond either end of the string, substr() returns the undefined
+value and produces a warning.  When used as an lvalue, specifying a
+substring that is entirely outside the string is a fatal error.
+Here's an example showing the behavior for boundary cases:
+
+    my $name = 'fred';
+    substr($name, 4) = 'dy';		# $name is now 'freddy'
+    my $null = substr $name, 6, 2;	# returns '' (no warning)
+    my $oops = substr $name, 7;		# returns undef, with warning
+    substr($name, 7) = 'gap';		# fatal error
 
 An alternative to using substr() as an lvalue is to specify the
 replacement string as the 4th argument.  This allows you to replace

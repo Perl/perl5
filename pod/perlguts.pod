@@ -366,9 +366,9 @@ The hash algorithm is defined in the C<PERL_HASH(hash, key, klen)> macro:
     hash = 0;
     while (klen--)
 	hash = (hash * 33) + *key++;
-    hash = hash + (hash >> 5);			/* after 5.006 */
+    hash = hash + (hash >> 5);			/* after 5.6 */
 
-The last step was added in version 5.006 to improve distribution of
+The last step was added in version 5.6 to improve distribution of
 lower bits in the resulting hash value.
 
 See L<Understanding the Magic of Tied Hashes and Arrays> for more

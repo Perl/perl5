@@ -45,9 +45,7 @@ you try to assign to this variable, either directly or indirectly through
 a reference, you'll raise a run-time exception.
 
 The following list is ordered by scalar variables first, then the
-arrays, then the hashes (except $^M was added in the wrong place).
-This is somewhat obscured because %ENV and %SIG are listed as
-$ENV{expr} and $SIG{expr}.
+arrays, then the hashes.
 
 =over 8
 
@@ -868,7 +866,7 @@ The hash %INC contains entries for each filename included via the
 C<do>, C<require>, or C<use> operators.  The key is the filename
 you specified (with module names converted to pathnames), and the
 value is the location of the file found.  The C<require>
-operator uses this array to determine whether a particular file has
+operator uses this hash to determine whether a particular file has
 already been included.
 
 =item %ENV
@@ -1047,7 +1045,7 @@ C<W>) is the scalar variable whose name is the single character
 control-C<W>.  This is better than typing a literal control-C<W>
 into your program.
 
-Finally, new in Perl 5.006, Perl variable names may be alphanumeric
+Finally, new in Perl 5.6, Perl variable names may be alphanumeric
 strings that begin with control characters (or better yet, a caret).
 These variables must be written in the form C<${^Foo}>; the braces
 are not optional.  C<${^Foo}> denotes the scalar variable whose

@@ -714,7 +714,7 @@ criticized for being of questionable value.
 =head2 Making my() work on "package" variables
 
 Being able to say my($Foo::Bar), something that sounds ludicrous and
-the 5.006 pumpking has mocked.
+the 5.6 pumpking has mocked.
 
 =head2 "or" testing defined not truth
 

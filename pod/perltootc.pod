@@ -111,12 +111,12 @@ hard-coded in so many places.
 
 Both these problems can be easily fixed.  Just add the C<use strict>
 pragma, then pre-declare your package variables.  (The C<our> operator
-will be new in 5.006, and will work for package globals just like C<my>
+will be new in 5.6, and will work for package globals just like C<my>
 works for scoped lexicals.)
 
     package Some_Class;
     use strict;
-    our($CData1, $CData2);   	# our() is new to perl5.006
+    our($CData1, $CData2);   	# our() is new to perl5.6
     sub CData1 {
 	shift;	# XXX: ignore calling class/object
 	$CData1 = shift if @_;
@@ -148,7 +148,7 @@ Here's what to do.  First, make just one hash to hold all class attributes.
 
     package Some_Class;
     use strict;
-    our %ClassData = (   	# our() is new to perl5.006
+    our %ClassData = (   	# our() is new to perl5.6
 	CData1 => "",
 	CData2 => "",
     );
@@ -287,7 +287,7 @@ used to implement the class.
     use strict;
 
     # create class meta-object using that most perfect of names
-    our %Some_Class = (   	# our() is new to perl5.006
+    our %Some_Class = (   	# our() is new to perl5.6
 	CData1 => "",
 	CData2 => "",
     );
@@ -339,7 +339,7 @@ class the object belongs to.
     package Some_Class;
     use strict;
 
-    our %Some_Class = (   	# our() is new to perl5.006
+    our %Some_Class = (   	# our() is new to perl5.6
 	CData1 => "",
 	CData2 => "",
     );
@@ -373,7 +373,7 @@ L<perlbot>, but there may be variations in the example below that you
 haven't thought of before.
 
     package Some_Class;
-    our($CData1, $CData2);      	# our() is new to perl5.006
+    our($CData1, $CData2);      	# our() is new to perl5.6
 
     sub new {
 	my $obclass = shift;
@@ -424,7 +424,7 @@ proper package's data.
 	package Some_Class;
 	use strict;
 
-	our %Some_Class = (   	# our() is new to perl5.006
+	our %Some_Class = (   	# our() is new to perl5.6
 	    CData1 => "",
 	    CData2 => "",
 	);
@@ -738,7 +738,7 @@ these attributes similar to the way process attributes like environment
 variables, user and group IDs, or the current working directory are
 treated across a fork().  You can change only yourself, but you will see
 those changes reflected in your unspawned children.  Changes to one object
-will propagate enither up to the parent nor down to any existing child objects.
+will propagate neither up to the parent nor down to any existing child objects.
 Those objects made later, however, will see the changes.
 
 If you have an object with an actual attribute value, and you want to
@@ -757,7 +757,7 @@ Here's a complete implementation of Vermin as described above.
     # so the latter can be used for both initialization 
     # and translucency.
 
-    our %Vermin = (   		# our() is new to perl5.006
+    our %Vermin = (   		# our() is new to perl5.6
 	PopCount => 0,		# capital for class attributes
 	color    => "beige",    # small for instance attributes		
     );
@@ -1125,7 +1125,7 @@ Here's one way:
 No one--absolutely no one--is allowed to read or write the class
 attributes without the mediation of the managing accessor method, since
 only that method has access to the lexical variable it's managing.
-This use of mediated access to class attributes is a form privacy far
+This use of mediated access to class attributes is a form of privacy far
 stronger than most OO languages provide.
 
 The repetition of code used to create per-datum accessor methods chafes
@@ -1157,8 +1157,8 @@ the &UNIVERSAL::can method and SUPER as shown previously.
 
 =head2 Translucency Revisited
 
-The Vermin class used to demonstrate translucency used an eponymously
-named package variable, %Vermin, as its meta-object.  If you prefer to
+The Vermin class demonstrates translucency using a package variable,
+eponymously named %Vermin, as its meta-object.  If you prefer to
 use absolutely no package variables beyond those necessary to appease
 inheritance or possibly the Exporter, this strategy is closed to you.
 That's too bad, because translucent attributes are an appealing
@@ -1287,7 +1287,7 @@ better approach.
 
 We use the hypothetical our() syntax for package variables.  It works
 like C<use vars>, but looks like my().  It should be in this summer's
-major release (5.006) of perl--we hope.
+major release (5.6) of perl--we hope.
 
 You can't use file-scoped lexicals in conjunction with the SelfLoader
 or the AutoLoader, because they alter the lexical scope in which the
