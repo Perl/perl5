@@ -348,7 +348,7 @@ handle_thread_signal(int sig)
      * with -DL.
      */
     DEBUG_S(PerlIO_printf(Perl_debug_log,
-	    "handle_thread_signal: got signal %d\n", sig););
+	    "handle_thread_signal: got signal %d\n", sig));
     write(sig_pipe[1], &c, 1);
 }
 
@@ -373,7 +373,7 @@ join(t)
 	if (t == thr)
 	    croak("Attempt to join self");
 	DEBUG_S(PerlIO_printf(Perl_debug_log, "%p: joining %p (state %u)\n",
-			      thr, t, ThrSTATE(t)););
+			      thr, t, ThrSTATE(t)));
     	MUTEX_LOCK(&t->mutex);
 	switch (ThrSTATE(t)) {
 	case THRf_R_JOINABLE:
@@ -416,7 +416,7 @@ detach(t)
     CODE:
 #ifdef USE_THREADS
 	DEBUG_S(PerlIO_printf(Perl_debug_log, "%p: detaching %p (state %u)\n",
-			      thr, t, ThrSTATE(t)););
+			      thr, t, ThrSTATE(t)));
     	MUTEX_LOCK(&t->mutex);
 	switch (ThrSTATE(t)) {
 	case THRf_R_JOINABLE:
@@ -664,7 +664,7 @@ await_signal()
 	if (ret)
 	    sv_setsv(ST(0), c ? PL_psig_ptr[c] : &PL_sv_no);
 	DEBUG_S(PerlIO_printf(Perl_debug_log,
-			      "await_signal returning %s\n", SvPEEK(ST(0))););
+			      "await_signal returning %s\n", SvPEEK(ST(0))));
 
 MODULE = Thread		PACKAGE = Thread::Specific
 
