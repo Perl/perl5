@@ -670,6 +670,20 @@ keywords.h		The keyword numbers
 keywords.pl		Program to write keywords.h
 lib/AnyDBM_File.pm	Perl module to emulate dbmopen
 lib/Attribute/Handlers.pm	Attribute::Handlers
+lib/Attribute/Handlers/demo/Demo.pm	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/Descriptions.pm	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/MyClass.pm	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo2.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo3.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo4.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo_call.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo_chain.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo_cycle.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo_hashdir.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo_phases.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo_range.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo_rawdata.pl	Attribute::Handlers demo
 lib/AutoLoader.pm	Autoloader base class
 lib/AutoSplit.pm	Split up autoload functions
 lib/Benchmark.pm	Measure execution time
