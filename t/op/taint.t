@@ -904,5 +904,5 @@ ok( ${^TAINT},  '$^TAINT is on' );
 eval { ${^TAINT} = 0 };
 ok( ${^TAINT},  '$^TAINT is not assignable' );
 ok( $@ =~ /^Modification of a read-only value attempted/,
-                                'Assigning to taint pukes properly' );
+                                'Assigning to ${^TAINT} fails' );
 

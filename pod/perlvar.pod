@@ -1041,7 +1041,7 @@ and B<-C> filetests are based on this value.
 
 =item ${^TAINT}
 
-Reflects if taint mode is on or off (ie. if the program was run with
+Reflects if taint mode is on or off (i.e. if the program was run with
 B<-T> or not).  True for on, false for off.
 
 =item $PERL_VERSION
