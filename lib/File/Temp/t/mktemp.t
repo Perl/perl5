@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -wT
 
 # Test for mktemp family of commands in File::Temp
 # Use STANDARD safe level for these tests
