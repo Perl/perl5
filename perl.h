@@ -2090,26 +2090,6 @@ enum {
 	UNLOCK_SV_MUTEX;				\
     } while (0)
 
-#ifdef HAS_SEM
-#   include <sys/ipc.h>
-#   include <sys/sem.h>
-#   ifndef HAS_UNION_SEMUN	/* Provide the union semun. */
-    union semun {
-	int val;
-	struct semid_ds *buf;
-	unsigned short *array;
-    };
-#   endif
-#   ifdef USE_SEMCTL_SEMUN
-#       define Semctl(id, num, cmd, semun) semctl(id, num, cmd, semun)
-#   else
-#       ifdef USE_SEMCTL_SEMID_DS
-#           define Semctl(id, num, cmd, semun) semctl(id, num, cmd, semun.buf)
-#       endif
-#   endif
-#   ifndef Semctl	/* Place our bets on the semun horse. */
-#       define Semctl(id, num, cmd, semun) semctl(id, num, cmd, semun)
-#   endif
-#endif
 
 #endif /* Include guard */
+

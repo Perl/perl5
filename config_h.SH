@@ -536,30 +536,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_sem HAS_SEM		/**/
 
-/* HAS_UNION_SEMUN:
- *	This symbol, if defined, indicates that the union semun
- *	is defined in <sys/sem.h>.  If not, the user code probably
- *      needs to define it as:
- * union semun {
- *    int val;
- *    struct semid_ds *buf;
- *    unsigned short *array;
- * }
- */
-#$d_union_semun HAS_UNION_SEMUN		/**/
-
-/* USE_SEMCTL_SEMUN:
- *	This symbol, if defined, indicates that union semun is
- *	used for semctl IPC_STAT.
- */
-#$d_semctl_semun USE_SEMCTL_SEMUN	/**/
-
-/* USE_SEMCTL_SEMID_DS:
- *	This symbol, if defined, indicates that struct semid_ds * is
- *	used for semctl IPC_STAT.
- */
-#$d_semctl_semid_ds USE_SEMCTL_SEMID_DS	/**/
-
 /* HAS_SETEGID:
  *	This symbol, if defined, indicates that the setegid routine is available
  *	to change the effective gid of the current program.

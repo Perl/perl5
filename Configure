@@ -408,9 +408,6 @@ d_sem=''
 d_semctl=''
 d_semget=''
 d_semop=''
-d_union_semun=''
-d_semctl_semun=''
-d_semctl_semid_ds=''
 d_setegid=''
 d_seteuid=''
 d_setgrps=''
@@ -7948,162 +7945,6 @@ fi
 set d_sem
 eval $setvar
 
-: see how to do semctl IPC_STAT
-case "$h_sem$d_sem$d_semctl" in
-true$define$define)
-    : see whether sys/sem.h defines union semun
-    $cat > try.c <<'END'
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/sem.h>
-int main () { union semun semun; semun.buf = 0; }
-END
-    if $cc $ccflags -o try try.c > /dev/null 2>&1; then
-	echo "You have union semun in <sys/sem.h>." >&4
-	val="$define"
-    else
-	 echo "You do not have union semun in <sys/sem.h>." >&4
-	 val="$undef"
-    fi
-    $rm -f try try.c
-    set d_union_semun
-    eval $setvar
-
-    : see whether semctl IPC_STAT can use union semun
-    $cat > try.c <<END
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/sem.h>
-#include <sys/stat.h>
-#include <stdio.h>
-#include <errno.h>
-#ifndef errno
-extern int errno;
-#endif
-#$d_union_semun HAS_UNION_SEMUN
-int main() {
-  union semun
-#ifndef HAS_UNION_SEMUN
-  {
-    int val;
-    struct semid_ds *buf;
-    unsigned short *array;
-  }
-#endif
-    arg;
-  int sem, st;
-
-#if defined(IPC_PRIVATE) && defined(S_IRWXU) && defined(S_IRWXG) && \
-    defined(S_IRWXO) && defined(IPC_CREAT)
-  sem = semget(IPC_PRIVATE, 1, S_IRWXU|S_IRWXG|S_IRWXO|IPC_CREAT);
-  if (sem > -1) {
-    struct semid_ds argbuf;
-    arg.buf = &argbuf;
-#   ifdef IPC_STAT
-    st = semctl(sem, 0, IPC_STAT, arg);
-    if (st == 0)
-      printf("semun\n");
-    else
-#   endif /* IPC_STAT */
-      printf("semctl IPC_STAT failed: errno = %d\n", errno);
-#   ifdef IPC_RMID
-    if (semctl(sem, 0, IPC_RMID, arg) != 0)
-#   endif /* IPC_RMID */
-      printf("semctl IPC_RMID failed: errno = %d\n", errno);
-  } else
-#endif /* IPC_PRIVATE && ... */
-    printf("semget failed: errno = %d\n", errno);
-
-  return 0;
-}
-END
-    val="$undef"
-    if $cc $ccflags -o try try.c > /dev/null 2>&1; then
-        d_semctl_semun=`./try`
-        case "$d_semctl_semun" in
-        semun) val="$define" ;;
-        esac
-    fi
-    $rm -f try try.c
-    set d_semctl_semun
-    eval $setvar
-    case "$d_semctl_semun" in
-    $define|true)
-        echo "You can use union semun for semctl IPC_STAT." >&4
-        ;;
-    *)  echo "You cannot use union semun for semctl IPC_STAT." >&4
-        ;;
-    esac
-
-    : see whether semctl IPC_STAT can use struct semid_ds pointer
-
-    $cat > try.c <<'END'
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/sem.h>
-#include <sys/stat.h>
-#include <stdio.h>
-#include <errno.h>
-#ifndef errno
-extern int errno;
-#endif
-int main() {
-  struct semid_ds arg;
-  int sem, st;
-
-#if defined(IPC_PRIVATE) && defined(S_IRWXU) && defined(S_IRWXG) && \
-    defined(S_IRWXO) && defined(IPC_CREAT)
-  sem = semget(IPC_PRIVATE, 1, S_IRWXU|S_IRWXG|S_IRWXO|IPC_CREAT);
-  if (sem > -1) {
-#   ifdef IPC_STAT
-    st = semctl(sem, 0, IPC_STAT, &arg);
-    if (st == 0)
-      printf("semid_ds\n");
-    else
-#   endif /* IPC_STAT */
-      printf("semctl IPC_STAT failed: errno = %d\n", errno);
-#   ifdef IPC_RMID
-    if (semctl(sem, 0, IPC_RMID, &arg) != 0)
-#   endif /* IPC_RMID */
-      printf("semctl IPC_RMID failed: errno = %d\n", errno);
-  } else
-#endif /* IPC_PRIVATE && ... */
-      printf("semget failed: errno = %d\n", errno);
-
-  return 0;
-}
-END
-    val="$undef"
-    if $cc $ccflags -o try try.c > /dev/null 2>&1; then
-        d_semctl_semid_ds=`./try`
-        case "$d_semctl_semid_ds" in
-        semid_ds) val="$define" ;;
-        esac
-    fi
-    $rm -f try try.c
-    set d_semctl_semid_ds
-    eval $setvar
-    case "$d_semctl_semid_ds" in
-    $define|true)
-        echo "You can use struct semid_ds * for semctl IPC_STAT." >&4
-        ;;
-    *)  echo "You cannot use struct semid_ds * for semctl IPC_STAT." >&4
-        ;;
-    esac
-    ;;
-*)  val="$undef"
-
-    set d_union_semun
-    eval $setvar
-
-    set d_semctl_semun
-    eval $setvar
-
-    set d_semctl_semid_ds
-    eval $setvar
-    ;;
-esac
-
 : see if setegid exists
 set setegid d_setegid
 eval $inlibc
@@ -11293,9 +11134,6 @@ d_sem='$d_sem'
 d_semctl='$d_semctl'
 d_semget='$d_semget'
 d_semop='$d_semop'
-d_union_semun='$d_union_semun'
-d_semctl_semun='$d_semctl_semun'
-d_semctl_semid_ds='$d_semctl_semid_ds'
 d_setegid='$d_setegid'
 d_seteuid='$d_seteuid'
 d_setgrps='$d_setgrps'
