@@ -1,3 +1,18 @@
+2004-01-14   Gisle Aas <gisle@ActiveState.com>
+
+   Release 3.00
+
+   Drop the pure Perl implementations of the encoders and
+   decoders.  They are bloat that hides real problems in
+   the XS implementations.  I will re-release them separately
+   in the new MIME-Base64-Perl distribution.
+
+   The 'gcc -Wall' fix in 2.22 broke support for perl5.005,
+   as the isXDIGIT() macro is not available in that perl.
+   This problem has now been fixed.
+
+
+
 2004-01-08   Gisle Aas <gisle@ActiveState.com>
 
    Release 2.23
