@@ -2013,7 +2013,7 @@ rsignal_restore(int signo, Sigsave_t *save)
     /* VMS' my_pclose() is in VMS.c; same with OS/2 */
 #if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS)
 I32
-my_pclose(FILE *ptr)
+my_pclose(PerlIO *ptr)
 {
     Sigsave_t hstat, istat, qstat;
     int status;

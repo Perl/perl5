@@ -1195,7 +1195,7 @@ filter_read(int idx, SV *buf_sv, int maxlen)
 
 
 static char *
-filter_gets(register SV *sv, register FILE *fp, STRLEN append)
+filter_gets(register SV *sv, register PerlIO *fp, STRLEN append)
 {
 #ifdef WIN32FILTER
     if (!rsfp_filters) {

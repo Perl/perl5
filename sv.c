@@ -2983,7 +2983,7 @@ sv_collxfrm(SV *sv, STRLEN *nxp)
 #endif /* USE_LOCALE_COLLATE */
 
 char *
-sv_gets(register SV *sv, register FILE *fp, I32 append)
+sv_gets(register SV *sv, register PerlIO *fp, I32 append)
 {
     dTHR;
     char *rsptr;
