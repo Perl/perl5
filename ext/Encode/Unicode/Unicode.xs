@@ -1,5 +1,5 @@
 /*
- $Id: Unicode.xs,v 1.7 2003/02/20 14:42:34 dankogai Exp $
+ $Id: Unicode.xs,v 1.7 2003/02/20 14:42:34 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -84,6 +84,9 @@ MODULE = Encode::Unicode PACKAGE = Encode::Unicode
 
 PROTOTYPES: DISABLE
 
+#define attr(k, l)  (hv_exists((HV *)SvRV(obj),k,l) ? \
+    *hv_fetch((HV *)SvRV(obj),k,l,0) : &PL_sv_undef)
+
 void
 decode_xs(obj, str, check = 0)
 SV *	obj
@@ -91,10 +94,11 @@ SV *	str
 IV	check
 CODE:
 {
-    int size    = SvIV(*hv_fetch((HV *)SvRV(obj),"size",4,0));
-    U8 endian   = *((U8 *)SvPV_nolen(*hv_fetch((HV *)SvRV(obj),"endian",6,0)));
-    int ucs2    = SvTRUE(*hv_fetch((HV *)SvRV(obj),"ucs2",4,0));
-    SV *result = newSVpvn("",0);
+    U8 endian   = *((U8 *)SvPV_nolen(attr("endian", 6)));
+    int size    =   SvIV(attr("size",   4));
+    int ucs2    = SvTRUE(attr("ucs2",   4));
+    int clone   = SvTRUE(attr("clone",  5));
+    SV *result  = newSVpvn("",0);
     STRLEN ulen;
     U8 *s = (U8 *)SvPVbyte(str,ulen);
     U8 *e = (U8 *)SvEND(str);
@@ -118,9 +122,11 @@ CODE:
 		      bom);
 	    }
 	}
-#if 0
-	/* Update endian for this sequence */
-	hv_store((HV *)SvRV(obj),"endian",6,newSVpv((char *)&endian,1),0);
+#if 1
+	/* Update endian for next sequence */
+	if (clone) {
+	    hv_store((HV *)SvRV(obj),"endian",6,newSVpv((char *)&endian,1),0);
+	}
 #endif
     }
     while (s < e && s+size <= e) {
@@ -188,10 +194,11 @@ SV *	utf8
 IV	check
 CODE:
 {
-    int size   = SvIV(*hv_fetch((HV *)SvRV(obj),"size",4,0));
-    U8 endian = *((U8 *)SvPV_nolen(*hv_fetch((HV *)SvRV(obj),"endian",6,0)));
-    int ucs2   = SvTRUE(*hv_fetch((HV *)SvRV(obj),"ucs2",4,0));
-    SV *result = newSVpvn("",0);
+    U8 endian   = *((U8 *)SvPV_nolen(attr("endian", 6)));
+    int size    =   SvIV(attr("size",   4));
+    int ucs2    = SvTRUE(attr("ucs2",   4));
+    int clone   = SvTRUE(attr("clone",  5));
+    SV *result  = newSVpvn("",0);
     STRLEN ulen;
     U8 *s = (U8 *)SvPVutf8(utf8,ulen);
     U8 *e = (U8 *)SvEND(utf8);
@@ -199,9 +206,11 @@ CODE:
     if (!endian) {
 	endian = (size == 4) ? 'N' : 'n';
 	enc_pack(aTHX_ result,size,endian,BOM_BE);
-#if 0
-	/* Update endian for this sequence */
-	hv_store((HV *)SvRV(obj),"endian",6,newSVpv((char *)&endian,1),0);
+#if 1
+	/* Update endian for next sequence */
+	if (clone){
+	    hv_store((HV *)SvRV(obj),"endian",6,newSVpv((char *)&endian,1),0);
+	}
 #endif
     }
     while (s < e && s+UTF8SKIP(s) <= e) {

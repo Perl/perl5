@@ -15,7 +15,7 @@ use base qw/Exporter/;
 
 our @EXPORT = qw(
   decode  decode_utf8  encode  encode_utf8
-  encodings  find_encoding
+  encodings  find_encoding clone_encoding
 );
 
 our @FB_FLAGS  = qw(DIE_ON_ERR WARN_ON_ERR RETURN_ON_ERR LEAVE_SRC
@@ -95,7 +95,7 @@ sub getEncoding
 {
     my ($class, $name, $skip_external) = @_;
 
-    ref($name) && $name->can('new_sequence') and return $name;
+    ref($name) && $name->can('renew') and return $name;
     exists $Encoding{$name} and return $Encoding{$name};
     my $lc = lc $name;
     exists $Encoding{$lc} and return $Encoding{$lc};
@@ -116,16 +116,24 @@ sub getEncoding
     return;
 }
 
-sub find_encoding
+sub find_encoding($;$)
 {
     my ($name, $skip_external) = @_;
     return __PACKAGE__->getEncoding($name,$skip_external);
 }
 
-sub resolve_alias {
+sub resolve_alias($){
     my $obj = find_encoding(shift);
     defined $obj and return $obj->name;
     return;
+}
+
+sub clone_encoding($){
+    my $obj = find_encoding(shift);
+    ref $obj or return;
+    eval { require Storable };
+    $@ and return;
+    return Storable::dclone($obj);
 }
 
 sub encode($$;$)

@@ -113,12 +113,13 @@ PerlIOEncode_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg, PerlIO_funcs *
 	code = -1;
     }
     else {
-#ifdef USE_NEW_SEQUENCE
+
+       /* $enc->renew */
 	PUSHMARK(sp);
 	XPUSHs(result);
 	PUTBACK;
-	if (call_method("new_sequence",G_SCALAR|G_EVAL) != 1 || SvTRUE(ERRSV)) {
-	    Perl_warner(aTHX_ packWARN(WARN_IO), "\"%" SVf "\" does not support new_sequence",
+	if (call_method("renew",G_SCALAR|G_EVAL) != 1 || SvTRUE(ERRSV)) {
+	    Perl_warner(aTHX_ packWARN(WARN_IO), "\"%" SVf "\" does not support renew method",
 			arg);
 	}
 	else {
@@ -126,7 +127,6 @@ PerlIOEncode_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg, PerlIO_funcs *
 	    result = POPs;
 	    PUTBACK;
 	}
-#endif
 	e->enc = newSVsv(result);
 	PUSHMARK(sp);
 	XPUSHs(e->enc);
