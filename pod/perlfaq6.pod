@@ -279,7 +279,7 @@ consider an underscore a letter).
 
 The Perl parser will expand $variable and @variable references in
 regular expressions unless the delimiter is a single quote.  Remember,
-too, that the right-hand side of an C<s///> substitution is considered
+too, that the right-hand side of a C<s///> substitution is considered
 a double-quoted string (see L<perlop> for more details).  Remember
 also that any regex special characters will be acted on unless you
 precede the substitution with \Q.  Here's an example:
