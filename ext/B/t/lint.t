@@ -40,7 +40,8 @@ RESULT
 SKIP : {
 
     use Config;
-    skip("Doesn't work with threaded perls",9) if $Config{useithreads};
+    skip("Doesn't work with threaded perls",9)
+       if $Config{useithreads} || $Config{use5005threads};
 
     runlint 'implicit-read', '1 for @ARGV', <<'RESULT', 'implicit-read in foreach';
 Implicit use of $_ in foreach at -e line 1
