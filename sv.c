@@ -2448,8 +2448,13 @@ Perl_sv_utf8_downgrade(pTHX_ register SV* sv, bool fail_ok)
         if (!utf8_to_bytes((U8*)c, &len)) {
 	    if (fail_ok)
 		return FALSE;
-	    else
-		Perl_croak(aTHX_ "big byte");
+	    else {
+		if (PL_op)
+		    Perl_croak(aTHX_ "Wide character in %s",
+			       PL_op_desc[PL_op->op_type]);
+		else
+		    Perl_croak(aTHX_ "Wide character");
+	    }
 	}
 	SvCUR(sv) = len - 1;
 	SvUTF8_off(sv);

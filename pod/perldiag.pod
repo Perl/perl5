@@ -3822,6 +3822,10 @@ but in actual fact, you got
 
 So put in parentheses to say what you really mean.
 
+=item Wide character in %s
+
+(F) Perl met a wide character (>255) when it wasn't expecting one.
+
 =item write() on closed filehandle %s
 
 (W closed) The filehandle you're writing to got itself closed sometime
