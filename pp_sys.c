@@ -389,15 +389,6 @@ PP(pp_glob)
     return result;
 }
 
-#if 0		/* XXX never used! */
-PP(pp_indread)
-{
-    STRLEN n_a;
-    PL_last_in_gv = gv_fetchpv(SvPVx(GvSV((GV*)(*PL_stack_sp--)), n_a), TRUE,SVt_PVIO);
-    return do_readline();
-}
-#endif
-
 PP(pp_rcatline)
 {
     PL_last_in_gv = cGVOP_gv;
