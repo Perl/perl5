@@ -65,9 +65,9 @@ my $Test_Dir     = "$Top_Test_Dir/_path_/_to_/_a_/_dir_";
 my $want = "t/$Test_Dir";
 if( $IsVMS ) {
     # translate the unixy path to VMSish
-    $want = uc $want;
     $want =~ s|/|\.|g;
     $want .= '\]';
+    $want = '((?i)' . $want . ')';  # might be ODS-2 or ODS-5
 }
 
 mkpath(["$Test_Dir"], 0, 0777);
@@ -94,7 +94,7 @@ print "#$ENV{PWD}\n";
 rmtree([$Top_Test_Dir], 0, 0);
 
 if ($IsVMS) {
-    like($ENV{PWD}, qr|\bT\]$|);
+    like($ENV{PWD}, qr|\b((?i)t)\]$|);
 }
 else {
     like($ENV{PWD}, qr|\bt$|);
