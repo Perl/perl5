@@ -1783,7 +1783,7 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 }
 
 #ifndef VMS  /* VMS' my_setenv() is in VMS.c */
-#if !defined(WIN32) && !defined(CYGWIN32)
+#if !defined(WIN32) && !defined(CYGWIN)
 void
 Perl_my_setenv(pTHX_ char *nam, char *val)
 {
@@ -1848,8 +1848,8 @@ Perl_my_setenv(pTHX_ char *nam, char *val)
 #endif  /* PERL_USE_SAFE_PUTENV */
 }
 
-#else /* WIN32 || CYGWIN32 */
-#if defined(CYGWIN32)
+#else /* WIN32 || CYGWIN */
+#if defined(CYGWIN)
 /*
  * Save environ of perl.exe, currently Cygwin links in separate environ's
  * for each exe/dll.  Probably should be a member of impure_ptr.
@@ -2547,7 +2547,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 }
 #endif /* !DOSISH */
 
-#if  !defined(DOSISH) || defined(OS2) || defined(WIN32) || defined(CYGWIN32)
+#if  !defined(DOSISH) || defined(OS2) || defined(WIN32) || defined(CYGWIN)
 I32
 Perl_wait4pid(pTHX_ int pid, int *statusp, int flags)
 {

@@ -499,7 +499,7 @@ sub categorize_files {
 	$c{UTIL} += 10,next  if m:^(utils|x2p|h2pl)/:;
 	$c{PORT1}+= 15,next  if m:^win32:;
 	$c{PORT2} += 15,next
-	    if m:^(cygwin32|os2|plan9|qnx|vms)/:
+	    if m:^(cygwin|os2|plan9|qnx|vms)/:
 	    or m:^(hints|Porting|ext/DynaLoader)/:
 	    or m:^README\.:;
 	$c{EXT}  += 10,next

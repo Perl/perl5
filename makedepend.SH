@@ -105,7 +105,7 @@ for file in `$cat .clist`; do
 		if [ "$osname" = os2 ]; then
 			uwinfix="-e s,\\\\\\\\,/,g"
 		else
-			if [ "$archname" = cygwin32 ]; then
+			if [ "$archname" = cygwin ]; then
 				uwinfix="-e s,\\\\\\\\,/,g"
 			else
 				uwinfix=

@@ -226,7 +226,7 @@ http://www.perl.com/CPAN/src/index.html
         1) in DOS mode either the DOS or OS/2 ports can be used
         2) formerly known as MVS
         3) formerly known as Digital UNIX and before that DEC OSF/1     
-        4) compilers: Borland, Cygwin32, Mingw32 EGCS/GCC, VC++
+        4) compilers: Borland, Cygwin, Mingw32 EGCS/GCC, VC++
                                         
 The following platforms have been known to build Perl from source,
 but we haven't been able to verify their status for the current release,

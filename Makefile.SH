@@ -303,7 +303,7 @@ ext.libs: $(static_ext)
 # Load up custom Makefile.SH fragment for shared loading and executables:
 case "$osname" in
 cygwin*)
-	Makefile_s="cygwin32/Makefile.SHs"
+	Makefile_s="cygwin/Makefile.SHs"
 	;;
 *)
 	Makefile_s="$osname/Makefile.SHs"

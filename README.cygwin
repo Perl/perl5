@@ -4,13 +4,13 @@ specially designed to be readable as is.
 
 =head1 NAME
 
-README.cygwin32 - notes about porting Perl to Cygwin32
+README.cygwin - notes about porting Perl to Cygwin
 
 =head1 SYNOPSIS
 
 =over
 
-=item Cygwin32
+=item Cygwin
 
 The Cygwin tools are ports of the popular GNU development tools for
 Windows NT, 95, and 98.  They run thanks to the Cygwin library which
@@ -20,7 +20,7 @@ http://sourceware.cygnus.com/cygwin/
 
 =item libperl.dll
 
-These instructions and the default cygwin32 hints build a shared
+These instructions and the default cygwin hints build a shared
 libperl.dll Perl library and enables dynamically loaded extensions.
 
 =back
@@ -209,7 +209,7 @@ kill 'CONT', $$ if($^O =~ /cygwin/); # XXX: Cygwin bug INT signal gets stuck
 
 =head2 Configure
 
-Check hints/cygwin32.sh for any system specific settings.  In
+Check hints/cygwin.sh for any system specific settings.  In
 particular change libpth to point to the correct location of
 ...../i586-cygwin32/lib.
 
@@ -228,7 +228,7 @@ When confronted with this prompt:
 
 =end text
 
-select "cygwin32".
+select "cygwin".
 
 Do not use the malloc that comes with perl--using the perl malloc
 collides with some cygwin startup routines. 

@@ -1644,7 +1644,7 @@ typedef pthread_key_t	perl_key;
 #   endif
 #endif
 
-#if defined(CYGWIN32)
+#if defined(CYGWIN)
 /* USEMYBINMODE
  *   This symbol, if defined, indicates that the program should
  *   use the routine my_binmode(FILE *fp, char iotype) to insure
@@ -1673,18 +1673,6 @@ union any {
 #else
 #define ARGSproto
 #endif /* USE_THREADS */
-
-#if defined(CYGWIN32)
-/* USEMYBINMODE
- *   This symbol, if defined, indicates that the program should
- *   use the routine my_binmode(FILE *fp, char iotype) to insure
- *   that a file is in "binary" mode -- that is, that no translation
- *   of bytes occurs on read or write operations.
- */
-#define USEMYBINMODE / **/
-#define my_binmode(fp, iotype) \
-        (PerlLIO_setmode(PerlIO_fileno(fp), O_BINARY) != -1 ? TRUE : FALSE)
-#endif
 
 typedef I32 (*filter_t) (pTHXo_ int, SV *, int);
 
@@ -2497,7 +2485,7 @@ struct perl_vars {
 EXT struct perl_vars PL_Vars;
 EXT struct perl_vars *PL_VarsPtr INIT(&PL_Vars);
 #else /* PERL_CORE */
-#if !defined(__GNUC__) || !(defined(WIN32) || defined(CYGWIN32))
+#if !defined(__GNUC__) || !(defined(WIN32) || defined(CYGWIN))
 EXT
 #endif /* WIN32 */
 struct perl_vars *PL_VarsPtr;

@@ -663,8 +663,8 @@ C<ftp://hobbes.nmsu.edu/pub/os2/dev/emx>
 
 =item The ActiveState Pages, C<http://www.activestate.com/>
 
-=item The Cygwin32 environment for Win32; L<README.cygwin32>,
-C<http://www.cygnus.com/misc/gnu-win32/>
+=item The Cygwin environment for Win32; L<README.cygwin>,
+C<http://sourceware.cygnus.com/cygwin/>
 
 =item The U/WIN environment for Win32,
 C<http://www.research.att.com/sw/tools/uwin/>

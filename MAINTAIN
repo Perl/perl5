@@ -51,7 +51,7 @@ Porting/pumpkin.pod
 README	
 README.amiga			amiga
 README.beos			beos
-README.cygwin32			cygwin32
+README.cygwin			cygwin
 README.dos			dos
 README.hpux			hpux
 README.lexwarn			lexwarn
@@ -85,7 +85,7 @@ configure.com			vms
 configure.gnu	
 cop.h	
 cv.h	
-cygwin32/*			cygwin32
+cygwin/*			cygwin
 deb.c	
 djgpp/*				dos
 doio.c	
@@ -154,7 +154,7 @@ ext/DynaLoader/DynaLoader_pm.PL
 ext/DynaLoader/Makefile.PL	
 ext/DynaLoader/README	
 ext/DynaLoader/dl_aix.xs	aix
-ext/DynaLoader/dl_cygwin32.xs	cygwin32
+ext/DynaLoader/dl_cygwin.xs	cygwin
 ext/DynaLoader/dl_dld.xs	rsanders
 ext/DynaLoader/dl_dlopen.xs	timb
 ext/DynaLoader/dl_hpux.xs	hpux
@@ -310,7 +310,7 @@ hints/broken-db.msg
 hints/bsdos.sh			bsdos
 hints/convexos.sh	
 hints/cxux.sh			cxux
-hints/cygwin32.sh		cygwin32x
+hints/cygwin.sh			cygwinx
 hints/dcosx.sh	
 hints/dec_osf.sh		dec_osf
 hints/dgux.sh			dgux

@@ -8,7 +8,7 @@
  */
 
 #include "config.h"
-#ifdef CYGWIN32
+#ifdef CYGWIN
 # define EXT extern
 # define EXTCONST extern const
 #else

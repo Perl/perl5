@@ -1,4 +1,4 @@
-/* dl_cygwin32.xs
+/* dl_cygwin.xs
  * 
  * Platform:	Win32 (Windows NT/Windows 95)
  * Author:	Wei-Yuen Tan (wyt@hip.com)
@@ -8,7 +8,7 @@
  *    August 23rd 1995 - rewritten after losing everything when I
  *                       wiped off my NT partition (eek!)
  */
-/* Modified from the original dl_win32.xs to work with cygwin32
+/* Modified from the original dl_win32.xs to work with cygwin
    -John Cerney 3/26/97
 */
 /* Porting notes:
@@ -21,7 +21,7 @@ calls.
 
 #define WIN32_LEAN_AND_MEAN
 // Defines from windows needed for this function only. Can't include full
-//  Cygwin32 windows headers because of problems with CONTEXT redefinition
+//  Cygwin windows headers because of problems with CONTEXT redefinition
 //  Removed logic to tell not dynamically load static modules. It is assumed that all
 //   modules are dynamically built. This should be similar to the behavoir on sunOS.
 //   Leaving in the logic would have required changes to the standard perlmain.c code
