@@ -557,6 +557,7 @@ setuid perl scripts securely.\n");
 	s = argv[0]+1;
       reswitch:
 	switch (*s) {
+	case ' ':
 	case '0':
 	case 'F':
 	case 'a':
@@ -1419,8 +1420,11 @@ char *s;
 	inplace = savepv(s+1);
 	/*SUPPRESS 530*/
 	for (s = inplace; *s && !isSPACE(*s); s++) ;
-	if (*s)
+	if (*s) {
 	    *s++ = '\0';
+	    if (*s == '-')	/* Additional switches on #! line. */
+	        s++;
+	}
 	return s;
     case 'I':	/* -I handled both here and in parse_perl() */
 	forbid_setid("-I");
