@@ -234,7 +234,7 @@ the arrow notation:
     my $fred = Critter->find("Fred");
     $fred->display("Height", "Weight");
 
-You should already be familiar with the C<< -> >> operator from using
+You should already be familiar with the use of the C<< -> >> operator with
 references.  In fact, since C<$fred> above is a reference to an object,
 you could think of the method call as just another form of
 dereferencing.
@@ -249,12 +249,11 @@ So the above code is mostly equivalent to:
 How does Perl know which package the subroutine is in?  By looking at
 the left side of the arrow, which must be either a package name or a
 reference to an object, i.e. something that has been blessed to a
-package.  Either way, that's the package Perl starts looking in.  If
+package.  Either way, that's the package where Perl starts looking.  If
 that package has no subroutine with that name, Perl starts looking for
 it in any base classes of that package, and so on.
 
-If you want, you I<can> force Perl to start looking in some other
-package:
+If you need to, you I<can> force Perl to start looking in some other package:
 
     my $barney = MyCritter->Critter::find("Barney");
     $barney->Critter::display("Height", "Weight");
@@ -265,8 +264,8 @@ those methods do, but that doesn't matter above since we've forced Perl
 to start looking for the subroutines in C<Critter>.
 
 As a special case of the above, you may use the C<SUPER> pseudo-class to
-tell Perl to start looking for the method in the current class's C<@ISA>
-list.  
+tell Perl to start looking for the method in the packages named in the
+current class's C<@ISA> list.  
 
     package MyCritter;
     use base 'Critter';    # sets @MyCritter::ISA = ('Critter');
@@ -282,15 +281,15 @@ So the following statement is valid:
 
     Critter->find("Fred")->display("Height", "Weight");
 
-and so is even the following:
+and so is the following:
 
     my $fred = (reverse "rettirC")->find(reverse "derF");
 
 =head2 Indirect Object Syntax
 
-The other way to invoke a method is by using the so-called indirect
-object notation.  Already in Perl 4, long before objects were
-introduced, this syntax was used with filehandles like this:
+The other way to invoke a method is by using the so-called "indirect
+object" notation.  This syntax was available in Perl 4 long before
+objects were introduced, and is still used with filehandles like this:
 
    print STDERR "help!!!\n";
 
@@ -304,19 +303,18 @@ parameters.  This is how Perl can tell you want an indirect method call
 instead of an ordinary subroutine call.
 
 But what if there are no arguments?  In that case, Perl must guess what
-you want.  Even worse, it must make the guess I<at compile time>.
-Usually Perl gets it right, but when it doesn't it, you get a function
-call compiled as a method, or vice versa. This can introduce subtle bugs
-that are hard to unravel.
+you want.  Even worse, it must make that guess I<at compile time>.
+Usually Perl gets it right, but when it doesn't you get a function
+call compiled as a method, or vice versa.  This can introduce subtle bugs
+that are hard to detect.
 
-For example, calling a method C<new> in indirect notation -- as C++
-programmers are so wont to do -- can be miscompiled into a subroutine
+For example, a call to a method C<new> in indirect notation -- as C++
+programmers are wont to make -- can be miscompiled into a subroutine
 call if there's already a C<new> function in scope.  You'd end up
 calling the current package's C<new> as a subroutine, rather than the
 desired class's method.  The compiler tries to cheat by remembering
-bareword C<require>s, but the grief if it messes up just isn't worth the
-years of debugging it would likely take you to track such subtle bugs
-down.
+bareword C<require>s, but the grief when it messes up just isn't worth the
+years of debugging it will take you to track down such subtle bugs.
 
 There is another problem with this syntax: the indirect object is
 limited to a name, a scalar variable, or a block, because it would have
