@@ -3867,7 +3867,7 @@ usesocks (usesocks.U):
 	and indicates that Perl should be built to use SOCKS.
 
 usethreads (usethreads.U):
-	This variable conditionally defines the USE_5005THREADS symbol,
+	This variable conditionally defines the USE_THREADS symbol,
 	and indicates that Perl should be built to use threads.
 
 usevendorprefix (vendorprefix.U):

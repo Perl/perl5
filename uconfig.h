@@ -922,15 +922,6 @@
 #define	_(args) ()
 #endif
 
-/* SH_PATH:
- *	This symbol contains the full pathname to the shell used on this
- *	on this system to execute Bourne shell scripts.  Usually, this will be
- *	/bin/sh, though it's possible that some systems will have /bin/ksh,
- *	/bin/pdksh, /bin/ash, /bin/bash, or even something such as
- *	D:/bin/sh.exe.
- */
-#define SH_PATH ""  /**/
-
 /* INTSIZE:
  *	This symbol contains the value of sizeof(int) so that the C
  *	preprocessor can make decisions based on it.
@@ -1386,24 +1377,6 @@
  *
  */
 /*#define HAS_FPCLASSIFY		/ **/
-
-/* HAS_FPCLASSL:
- *	This symbol, if defined, indicates that the fpclassl routine is
- *	available to classify long doubles.  Available for example in IRIX.
- *	The returned values are defined in <ieeefp.h> and are:
- *
- *	FP_SNAN		signaling NaN
- *	FP_QNAN		quiet NaN
- *	FP_NINF		negative infinity
- *	FP_PINF		positive infinity
- *	FP_NDENORM	negative denormalized non-zero
- *	FP_PDENORM	positive denormalized non-zero
- *	FP_NZERO	negative zero
- *	FP_PZERO	positive zero
- *	FP_NNORM	negative normalized non-zero
- *	FP_PNORM	positive normalized non-zero
- */
-/*#define HAS_FPCLASSL		/ **/
 
 /* HAS_FPOS64_T:
  *	This symbol will be defined if the C compiler supports fpos64_t.
@@ -3470,6 +3443,15 @@
 #define I_STDARG		/**/
 /*#define I_VARARGS	/ **/
 
+/* SH_PATH:
+ *	This symbol contains the full pathname to the shell used on this
+ *	on this system to execute Bourne shell scripts.  Usually, this will be
+ *	/bin/sh, though it's possible that some systems will have /bin/ksh,
+ *	/bin/pdksh, /bin/ash, /bin/bash, or even something such as
+ *	D:/bin/sh.exe.
+ */
+#define SH_PATH ""  /**/
+
 /* USE_CROSS_COMPILE:
  *	This symbol, if defined, indicates that Perl is being cross-compiled.
  */
@@ -3497,6 +3479,24 @@
  *		extern int flock(int, int);
  */
 /*#define	HAS_FLOCK_PROTO	/ **/
+
+/* HAS_FPCLASSL:
+ *	This symbol, if defined, indicates that the fpclassl routine is
+ *	available to classify long doubles.  Available for example in IRIX.
+ *	The returned values are defined in <ieeefp.h> and are:
+ *
+ *	FP_SNAN		signaling NaN
+ *	FP_QNAN		quiet NaN
+ *	FP_NINF		negative infinity
+ *	FP_PINF		positive infinity
+ *	FP_NDENORM	negative denormalized non-zero
+ *	FP_PDENORM	positive denormalized non-zero
+ *	FP_NZERO	negative zero
+ *	FP_PZERO	positive zero
+ *	FP_NNORM	negative normalized non-zero
+ *	FP_PNORM	positive normalized non-zero
+ */
+/*#define HAS_FPCLASSL		/ **/
 
 /* HAS_NL_LANGINFO:
  *	This symbol, if defined, indicates that the nl_langinfo routine is
