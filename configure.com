@@ -5109,7 +5109,7 @@ $   WS "    iss =  ((iss&1)==1 && code == 0x1234);"
 $   WS "    printf(""%d\n"",iss);"
 $   WS "}"
 $   CS
-$   IF (archname .EQS. "VMS_AXP")
+$   IF (F$EXTRACT(0,7,archname) .EQS. "VMS_AXP")
 $   THEN
 $     GOSUB compile
 $   ELSE
@@ -6400,8 +6400,8 @@ $   echo ""
 $   echo4 "The perl.cld file is now being written..."
 $   OPEN/WRITE CONFIG 'file_2_find'
 $   ext = ".exe"
-$   IF (sharedperl .AND. archname .EQS. "VMS_AXP") THEN ext := .AXE
-$   IF (sharedperl .AND. archname .EQS. "VMS_IA64") THEN ext := .IXE
+$   IF (sharedperl .AND. F$EXTRACT(0,7,archname) .EQS. "VMS_AXP") THEN ext := .AXE
+$   IF (sharedperl .AND. F$EXTRACT(0,8,archname) .EQS. "VMS_IA64") THEN ext := .IXE
 $   IF (use_vmsdebug_perl)
 $   THEN
 $     WRITE CONFIG "define verb dbgperl"
