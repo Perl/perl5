@@ -1765,6 +1765,7 @@ t/op/nothr5005.t	local @_ test which does not work under use5005threads
 t/op/numconvert.t	See if accessing fields does not change numeric values
 t/op/oct.t		See if oct and hex work
 t/op/ord.t		See if ord works
+t/op/override.t		See if operator overriding works
 t/op/pack.t		See if pack and unpack work
 t/op/pat.t		See if esoteric patterns work
 t/op/pos.t		See if pos works
