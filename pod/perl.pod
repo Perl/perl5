@@ -306,7 +306,7 @@ F<http://www.perl.com/CPAN/ports/index.html>.
 
 				Perl release
 
-	Acorn RISCOS		5.001
+	Acorn RISCOS		5.005_02
 	AOS			5.002
 	LynxOS			5.004_02
 	Netware			5.003_07
