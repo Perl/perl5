@@ -1716,6 +1716,18 @@ struct _pipeloc {
 };
 static pPLOC  head_PLOC = 0;
 
+void
+free_pipelocs(void *head)
+{
+    pPLOC p, pnext;
+
+    p = (pPLOC) head;
+    while (p) {
+        pnext = p->next;
+        Safefree(p);
+        p = pnext;
+    }
+}
 
 static void
 store_pipelocs()
@@ -1782,7 +1794,7 @@ store_pipelocs()
         p->dir[NAM$C_MAXRSS] = '\0';
     }
 #endif
-
+    Perl_call_atexit(&free_pipelocs, head_PLOC);
 }
 
 
