@@ -10,7 +10,7 @@
 package Pod::Usage;
 
 use vars qw($VERSION);
-$VERSION = 1.16;  ## Current version of this package
+$VERSION = 1.16_01;  ## Current version of this package
 require  5.005;    ## requires this Perl version or later
 
 =head1 NAME
@@ -467,7 +467,8 @@ sub pod2usage {
         $opts{"-exitval"} = ($opts{"-verbose"} > 0) ? 1 : 2;
     }
     elsif (! defined $opts{"-verbose"}) {
-        $opts{"-verbose"} = ($opts{"-exitval"} < 2);
+        $opts{"-verbose"} = (lc($opts{"-exitval"}) eq "noexit" ||
+                             $opts{"-exitval"} < 2);
     }
 
     ## Default the output file
