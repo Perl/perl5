@@ -8742,8 +8742,10 @@ int main()
 		int ret;
 		close(pd[1]);	/* Parent reads from pd[0] */
 		close(pu[0]);	/* Parent writes (blocking) to pu[1] */
+#ifdef F_SETFL
 		if (-1 == fcntl(pd[0], F_SETFL, MY_O_NONBLOCK))
 			exit(1);
+#endif
 		signal(SIGALRM, blech);
 		alarm(5);
 		if ((ret = read(pd[0], buf, 1)) > 0)	/* Nothing to read! */
