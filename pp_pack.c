@@ -2052,14 +2052,42 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 	case 'f':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
+#ifdef __VOS__
+/* VOS does not automatically map a floating-point overflow
+   during conversion from double to float into infinity, so we
+   do it by hand.  This code should either be generalized for
+   any OS that needs it, or removed if and when VOS implements
+   posix-976 (suggestion to support mapping to infinity).
+   Paul.Green@stratus.com 02-04-02.  */
+		if (SvNV(fromstr) > FLT_MAX)
+		     afloat = _float_constants[0];   /* single prec. inf. */
+		else if (SvNV(fromstr) < -FLT_MAX)
+		     afloat = _float_constants[0];   /* single prec. inf. */
+		else afloat = (float)SvNV(fromstr);
+#else
 		afloat = (float)SvNV(fromstr);
+#endif
 		sv_catpvn(cat, (char *)&afloat, sizeof (float));
 	    }
 	    break;
 	case 'd':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
+#ifdef __VOS__
+/* VOS does not automatically map a floating-point overflow
+   during conversion from long double to double into infinity,
+   so we do it by hand.  This code should either be generalized
+   for any OS that needs it, or removed if and when VOS
+   implements posix-976 (suggestion to support mapping to
+   infinity).  Paul.Green@stratus.com 02-04-02.  */
+		if (SvNV(fromstr) > DBL_MAX)
+		     adouble = _double_constants[0];   /* double prec. inf. */
+		else if (SvNV(fromstr) < -DBL_MAX)
+		     adouble = _double_constants[0];   /* double prec. inf. */
+		else adouble = (double)SvNV(fromstr);
+#else
 		adouble = (double)SvNV(fromstr);
+#endif
 		sv_catpvn(cat, (char *)&adouble, sizeof (double));
 	    }
 	    break;
