@@ -2809,9 +2809,9 @@ C<"P"> is C<undef>.
 
 =item *
 
-The C<"#"> character allows packing and unpacking of strings where the
+The C<"/"> character allows packing and unpacking of strings where the
 packed structure contains a byte count followed by the string itself.
-You write I<length-item>C<#>I<string-item>.
+You write I<length-item>C</>I<string-item>.
 
 The I<length-item> can be any C<pack> template letter,
 and describes how the length value is packed.
@@ -2823,9 +2823,9 @@ The I<string-item> must, at present, be C<"A*">, C<"a*"> or C<"Z*">.
 For C<unpack> the length of the string is obtained from the I<length-item>,
 but if you put in the '*' it will be ignored.
 
-    unpack 'C#a', "\04Gurusamy";        gives 'Guru'
-    unpack 'a3#A* A*', '007 Bond  J ';  gives (' Bond','J')
-    pack 'n#a* w#a*','hello,','world';  gives "\000\006hello,\005world"
+    unpack 'C/a', "\04Gurusamy";        gives 'Guru'
+    unpack 'a3/A* A*', '007 Bond  J ';  gives (' Bond','J')
+    pack 'n/a* w/a*','hello,','world';  gives "\000\006hello,\005world"
 
 The I<length-item> is not returned explicitly from C<unpack>.
 
@@ -2930,6 +2930,10 @@ enough C<'x'>es while packing.  There is no way to pack() and unpack()
 could know where the bytes are going to or coming from.  Therefore
 C<pack> (and C<unpack>) handle their output and input as flat
 sequences of bytes.
+
+=item *
+
+A comment in a TEMPLATE starts with C<#> and goes to the end of line.
 
 =back
 

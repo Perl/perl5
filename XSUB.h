@@ -1,3 +1,6 @@
+#ifndef _INC_PERL_XSUB_H
+#define _INC_PERL_XSUB_H 1
+
 #define ST(off) PL_stack_base[ax + (off)]
 
 #if defined(CYGWIN) && defined(USE_DYNAMIC_LOADING)
@@ -279,3 +282,5 @@
 #    define socketpair		PerlSock_socketpair
 #  endif  /* NO_XSLOCKS */
 #endif  /* PERL_CAPI */
+
+#endif _INC_PERL_XSUB_H		/* include guard */

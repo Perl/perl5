@@ -3288,6 +3288,11 @@ PP(pp_unpack)
 #endif
 	if (isSPACE(datumtype))
 	    continue;
+	if (datumtype == '#') {
+	    while (pat < patend && *pat != '\n')
+		pat++;
+	    continue;
+	}
 	if (*pat == '!') {
 	    char *natstr = "sSiIlL";
 
@@ -3347,16 +3352,16 @@ PP(pp_unpack)
 		DIE(aTHX_ "x outside of string");
 	    s += len;
 	    break;
-	case '#':
+	case '/':
 	    if (oldsp >= SP)
-		DIE(aTHX_ "# must follow a numeric type");
+		DIE(aTHX_ "/ must follow a numeric type");
 	    if (*pat != 'a' && *pat != 'A' && *pat != 'Z')
-		DIE(aTHX_ "# must be followed by a, A or Z");
+		DIE(aTHX_ "/ must be followed by a, A or Z");
 	    datumtype = *pat++;
 	    if (*pat == '*')
 		pat++;		/* ignore '*' for compatibility with pack */
 	    if (isDIGIT(*pat))
-		DIE(aTHX_ "# cannot take a count" );
+		DIE(aTHX_ "/ cannot take a count" );
 	    len = POPi;
 	    /* drop through */
 	case 'A':
@@ -4345,6 +4350,11 @@ PP(pp_pack)
 #endif
 	if (isSPACE(datumtype))
 	    continue;
+	if (datumtype == '#') {
+	    while (pat < patend && *pat != '\n')
+		pat++;
+	    continue;
+	}
         if (*pat == '!') {
 	    char *natstr = "sSiIlL";
 
@@ -4371,10 +4381,10 @@ PP(pp_pack)
 	}
 	else
 	    len = 1;
-	if (*pat == '#') {
+	if (*pat == '/') {
 	    ++pat;
 	    if (*pat != 'a' && *pat != 'A' && *pat != 'Z' || pat[1] != '*')
-		DIE(aTHX_ "# must be followed by a*, A* or Z*");
+		DIE(aTHX_ "/ must be followed by a*, A* or Z*");
 	    lengthcode = sv_2mortal(newSViv(sv_len(items > 0
 						   ? *MARK : &PL_sv_no)));
 	}
