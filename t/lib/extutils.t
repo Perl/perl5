@@ -1,6 +1,6 @@
 #!./perl -w
 
-print "1..12\n";
+print "1..18\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -16,9 +16,14 @@ use File::Spec::Functions;
 use File::Spec;
 # Because were are going to be changing directory before running Makefile.PL
 my $perl = File::Spec->rel2abs( $^X );
+# ExtUtils::Constant::C_constant uses $^X inside a comment, and we want to
+# compare output to ensure that it is the same. We were probably run as ./perl
+# whereas we will run the child with the full path in $perl. So make $^X for
+# us the same as our child will see.
+$^X = $perl;
 
 print "# perl=$perl\n";
-my $runperl = "$perl \"-I../../lib\"";
+my $runperl = "$perl -x \"-I../../lib\"";
 
 $| = 1;
 
@@ -35,15 +40,25 @@ END {
     rmtree($dir);
 }
 
+my $package = "ExtTest";
+
 my @names = ("FIVE", {name=>"OK6", type=>"PV",},
              {name=>"OK7", type=>"PVN",
               value=>['"not ok 7\\n\\0ok 7\\n"', 15]},
              {name => "FARTHING", type=>"NV"},
-             {name => "NOT_ZERO", type=>"UV", value=>"~(UV)0"});
+             {name => "NOT_ZERO", type=>"UV", value=>"~(UV)0"},
+             {name => "CLOSE", type=>"PV", value=>'"*/"',
+              macro=>["#if 1\n", "#endif\n"]},
+             {name => "ANSWER", default=>["UV", 42]}, "NOTDEF");
 
 my @names_only = map {(ref $_) ? $_->{name} : $_} @names;
 
-my $package = "ExtTest";
+my $types = {};
+my $constant_types = constant_types(); # macro defs
+my $C_constant = join "\n",
+  C_constant ($package, undef, "IV", $types, undef, undef, @names);
+my $XS_constant = XS_constant ($package, $types); # XS for ExtTest::constant
+
 ################ Header
 my $header = catfile($dir, "test.h");
 push @files, "test.h";
@@ -54,6 +69,7 @@ print FH <<'EOT';
 #define OK7 1
 #define FARTHING 0.25
 #define NOT_ZERO 1
+#undef NOTDEF
 EOT
 close FH or die "close $header: $!\n";
 
@@ -69,14 +85,11 @@ print FH <<'EOT';
 EOT
 
 print FH "#include \"test.h\"\n\n";
-print FH constant_types(); # macro defs
-my $types = {};
-foreach (C_constant (undef, "IV", $types, undef, undef, @names) ) {
-  print FH $_, "\n"; # C constant subs
-}
+print FH $constant_types;
+print FH $C_constant, "\n";
 print FH "MODULE = $package		PACKAGE = $package\n";
 print FH "PROTOTYPES: ENABLE\n";
-print FH XS_constant ($package, $types); # XS for ExtTest::constant
+print FH $XS_constant;
 close FH or die "close $xs: $!\n";
 
 ################ PM
@@ -94,7 +107,6 @@ use Carp;
 
 require Exporter;
 require DynaLoader;
-use AutoLoader;
 use vars qw ($VERSION @ISA @EXPORT_OK);
 
 $VERSION = '0.01';
@@ -113,9 +125,11 @@ my $testpl = catfile($dir, "test.pl");
 push @files, "test.pl";
 open FH, ">$testpl" or die "open >$testpl: $!\n";
 
+print FH "use strict;\n";
 print FH "use $package qw(@names_only);\n";
 print FH <<'EOT';
 
+# IV
 my $five = FIVE;
 if ($five == 5) {
   print "ok 5\n";
@@ -123,12 +137,15 @@ if ($five == 5) {
   print "not ok 5 # $five\n";
 }
 
+# PV
 print OK6;
 
+# PVN containing embedded \0s
 $_ = OK7;
 s/.*\0//s;
 print;
 
+# NV
 my $farthing = FARTHING;
 if ($farthing == 0.25) {
   print "ok 8\n";
@@ -136,6 +153,7 @@ if ($farthing == 0.25) {
   print "not ok 8 # $farthing\n";
 }
 
+# UV
 my $not_zero = NOT_ZERO;
 if ($not_zero > 0 && $not_zero == ~0) {
   print "ok 9\n";
@@ -143,17 +161,56 @@ if ($not_zero > 0 && $not_zero == ~0) {
   print "not ok 9 # \$not_zero=$not_zero ~0=" . (~0) . "\n";
 }
 
+# Value includes a "*/" in an attempt to bust out of a C comment.
+# Also tests custom cpp #if clauses
+my $close = CLOSE;
+if ($close eq '*/') {
+  print "ok 10\n";
+} else {
+  print "not ok 10 # \$close='$close'\n";
+}
+
+# Default values if macro not defined.
+my $answer = ANSWER;
+if ($answer == 42) {
+  print "ok 11\n";
+} else {
+  print "not ok 11 # What do you get if you multiply six by nine? '$answer'\n";
+}
+
+# not defined macro
+my $notdef = eval { NOTDEF; };
+if (defined $notdef) {
+  print "not ok 12 # \$notdef='$notdef'\n";
+} elsif ($@ !~ /Your vendor has not defined ExtTest macro NOTDEF/) {
+  print "not ok 12 # \$@='$@'\n";
+} else {
+  print "ok 12\n";
+}
+
+# not a macro
+my $notthere = eval { &ExtTest::NOTTHERE; };
+if (defined $notthere) {
+  print "not ok 13 # \$notthere='$notthere'\n";
+} elsif ($@ !~ /NOTTHERE is not a valid ExtTest macro/) {
+  chomp $@;
+  print "not ok 13 # \$@='$@'\n";
+} else {
+  print "ok 13\n";
+}
 
 EOT
 
 close FH or die "close $testpl: $!\n";
 
 ################ Makefile.PL
-# Keep the dependancy in the Makefile happy
+# We really need a Makefile.PL because make test for a no dynamic linking perl
+# will run Makefile.PL again as part of the "make perl" target.
 my $makefilePL = catfile($dir, "Makefile.PL");
 push @files, "Makefile.PL";
 open FH, ">$makefilePL" or die "open >$makefilePL: $!\n";
 print FH <<"EOT";
+#!$perl -w
 use ExtUtils::MakeMaker;
 WriteMakefile(
               'NAME'		=> "$package",
@@ -219,14 +276,16 @@ if ($Config{usedl}) {
   }
 }
 
+my $test = 14;
 my $maketest = "$make test";
 print "# make = '$maketest'\n";
 $makeout = `$maketest`;
 if ($?) {
-  print "not ok 10 # $maketest failed: $?\n";
+  print "not ok $test # $maketest failed: $?\n";
 } else {
-  # Perl babblings
+  # echo of running the test script
   $makeout =~ s/^\s*PERL_DL_NONLAZY=.+?\n//m;
+  $makeout =~ s/^MCR.+test.pl\n//mig if $^O eq 'VMS';
 
   # GNU make babblings
   $makeout =~ s/^\w*?make.+?(?:entering|leaving) directory.+?\n//mig;
@@ -237,21 +296,40 @@ if ($?) {
   # make[1]: `perl' is up to date.
   $makeout =~ s/^\w*?make.+perl.+?is up to date.*?\n//mig;
 
-  # echo of running the test script
-  $makeout =~ s/^MCR.+test.pl\n//mig if $^O eq 'VMS';
-
   print $makeout;
-  print "ok 10\n";
+  print "ok $test\n";
 }
+$test++;
+
+my $regen = `$runperl $package.xs`;
+if ($?) {
+  print "not ok $test # $runperl $package.xs failed: $?\n";
+} else {
+  print "ok $test\n";
+}
+$test++;
+
+my $expect = $constant_types . $C_constant .
+  "\n#### XS Section:\n" . $XS_constant;
+
+if ($expect eq $regen) {
+  print "ok $test\n";
+} else {
+  print "not ok $test\n";
+  # open FOO, ">expect"; print FOO $expect;
+  # open FOO, ">regen"; print FOO $regen; close FOO;
+}
+$test++;
 
 my $makeclean = "$make clean";
 print "# make = '$makeclean'\n";
 $makeout = `$makeclean`;
 if ($?) {
-  print "not ok 11 # $make failed: $?\n";
+  print "not ok $test # $make failed: $?\n";
 } else {
-  print "ok 11\n";
+  print "ok $test\n";
 }
+$test++;
 
 foreach (@files) {
   unlink $_ or warn "unlink $_: $!";
@@ -266,7 +344,7 @@ while (defined (my $entry = readdir DIR)) {
 }
 closedir DIR or warn "closedir '.': $!";
 if ($fail) {
-  print "not ok 12\n";
+  print "not ok $test\n";
 } else {
-  print "ok 12\n";
+  print "ok $test\n";
 }
