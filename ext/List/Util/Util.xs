@@ -206,7 +206,7 @@ reduce(block,...)
 PROTOTYPE: &@
 CODE:
 {
-    SV *ret;
+    SV *ret = sv_newmortal();
     int index;
     GV *agv,*bgv,*gv;
     HV *stash;
@@ -225,6 +225,7 @@ CODE:
     bgv = gv_fetchpv("b", TRUE, SVt_PV);
     SAVESPTR(GvSV(agv));
     SAVESPTR(GvSV(bgv));
+    GvSV(agv) = ret;
     cv = sv_2cv(block, &stash, &gv, 0);
     reducecop = CvSTART(cv);
     SAVESPTR(CvROOT(cv)->op_ppaddr);
@@ -237,20 +238,19 @@ CODE:
 #endif
     SAVETMPS;
     SAVESPTR(PL_op);
-    ret = ST(1);
+    SvSetSV(ret, ST(1));
     CATCH_SET(TRUE);
     PUSHBLOCK(cx, CXt_SUB, SP);
     PUSHSUB(cx);
     if (!CvDEPTH(cv))
         (void)SvREFCNT_inc(cv);
     for(index = 2 ; index < items ; index++) {
-	GvSV(agv) = ret;
 	GvSV(bgv) = ST(index);
 	PL_op = reducecop;
 	CALLRUNOPS(aTHX);
-	ret = *PL_stack_sp;
+	SvSetSV(ret, *PL_stack_sp);
     }
-    ST(0) = sv_mortalcopy(ret);
+    ST(0) = ret;
     POPBLOCK(cx,PL_curpm);
     CATCH_SET(oldcatch);
     XSRETURN(1);

@@ -6,7 +6,7 @@ package Test::Harness::Straps;
 use strict;
 use vars qw($VERSION);
 use Config;
-$VERSION = '0.14';
+$VERSION = '0.141';
 
 use Test::Harness::Assert;
 use Test::Harness::Iterator;

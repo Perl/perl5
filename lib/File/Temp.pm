@@ -167,7 +167,7 @@ Exporter::export_tags('POSIX','mktemp');
 
 # Version number
 
-$VERSION = '0.13';
+$VERSION = '0.131';
 
 # This is a list of characters that can be used in random filenames
 

@@ -507,6 +507,10 @@ warnings - Perl pragma to control optional warnings
 
 =head1 DESCRIPTION
 
+The C<warnings> pragma is a replacement for the command line flag C<-w>,
+but the pragma is limited to the enclosing block, while the flag is global.
+See L<perllexwarn> for more information.
+
 If no import list is supplied, all possible warnings are either enabled
 or disabled.
 
