@@ -221,6 +221,22 @@ typedef struct re_cc_state
 
 #define regcpblow(cp) LEAVE_SCOPE(cp)
 
+#define TRYPAREN(paren, n, input) {				\
+    if (paren) {						\
+	if (n) {						\
+	    PL_regstartp[paren] = HOPc(input, -1) - PL_bostr;	\
+	    PL_regendp[paren] = input - PL_bostr;		\
+	}							\
+	else							\
+	    PL_regendp[paren] = -1;				\
+    }								\
+    if (regmatch(next))						\
+	sayYES;							\
+    if (paren && n)						\
+	PL_regendp[paren] = -1;					\
+}
+
+
 /*
  * pregexec and friends
  */
@@ -3001,8 +3017,6 @@ S_regmatch(pTHX_ regnode *prog)
 	    else
 		c1 = c2 = -1000;
 	    PL_reginput = locinput;
-	    if (paren)
-		PL_regendp[paren] = -1;
 	    if (minmod) {
 		CHECKPOINT lastcp;
 		minmod = 0;
@@ -3037,16 +3051,7 @@ S_regmatch(pTHX_ regnode *prog)
 				sayNO;
 			}
 			/* PL_reginput == locinput now */
-			if (paren) {
-			    if (ln) {
-				PL_regstartp[paren] = HOPc(locinput, -1) - PL_bostr;
-				PL_regendp[paren] = locinput - PL_bostr;
-			    }
-			    else
-				PL_regendp[paren] = -1;
-			}
-			if (regmatch(next))
-			    sayYES;
+			TRYPAREN(paren, ln, locinput);
 			PL_reginput = locinput;	/* Could be reset... */
 			REGCP_UNWIND;
 			/* Couldn't or didn't -- move forward. */
@@ -3060,16 +3065,7 @@ S_regmatch(pTHX_ regnode *prog)
 			UCHARAT(PL_reginput) == c1 ||
 			UCHARAT(PL_reginput) == c2)
 		    {
-			if (paren) {
-			    if (n) {
-				PL_regstartp[paren] = HOPc(PL_reginput, -1) - PL_bostr;
-				PL_regendp[paren] = PL_reginput - PL_bostr;
-			    }
-			    else
-				PL_regendp[paren] = -1;
-			}
-			if (regmatch(next))
-			    sayYES;
+			TRYPAREN(paren, n, PL_reginput);
 			REGCP_UNWIND;
 		    }
 		    /* Couldn't or didn't -- move forward. */
@@ -3103,16 +3099,7 @@ S_regmatch(pTHX_ regnode *prog)
 			    UCHARAT(PL_reginput) == c1 ||
 			    UCHARAT(PL_reginput) == c2)
 			    {
-				if (paren && n) {
-				    if (n) {
-					PL_regstartp[paren] = HOPc(PL_reginput, -1) - PL_bostr;
-					PL_regendp[paren] = PL_reginput - PL_bostr;
-				    }
-				    else
-					PL_regendp[paren] = -1;
-				}
-				if (regmatch(next))
-				    sayYES;
+				TRYPAREN(paren, n, PL_reginput);
 				REGCP_UNWIND;
 			    }
 			/* Couldn't or didn't -- back up. */
@@ -3127,8 +3114,7 @@ S_regmatch(pTHX_ regnode *prog)
 			    UCHARAT(PL_reginput) == c1 ||
 			    UCHARAT(PL_reginput) == c2)
 			    {
-				if (regmatch(next))
-				    sayYES;
+				TRYPAREN(paren, n, PL_reginput);
 				REGCP_UNWIND;
 			    }
 			/* Couldn't or didn't -- back up. */
