@@ -943,3 +943,5 @@ a(b)??	abc	y	<$1>	<>	# undef [perl #16773]
 .*a(?!(b|cd)*e).*f	......abef	n	-	-	# [perl #23030]
 x(?#	x	c	-	Sequence (?#... not terminated
 :x(?#:	x	c	-	Sequence (?#... not terminated
+^(a*?)(?!(aa|aaaa)*$)	aaaaaaaaaaaaaaaaaaaa	y	$1	a	# [perl #34195]
+^(a*?)(?!(aa|aaaa)*$)(?=a\z)	aaaaaaaa	y	$1	aaaaaaa
