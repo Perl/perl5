@@ -5,16 +5,24 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..2\n";
-
 use File::Path;
+use strict;
 
-mkpath("foo/bar");
+my $count = 0;
+$^W = 1;
 
-print "not " unless -d "foo" && -d "foo/bar";
-print "ok 1\n";
+print "1..4\n";
 
-rmtree("foo");
+# first check for stupid permissions second for full, so we clean up
+# behind ourselves
+for my $perm (0111,0777) {
+    mkpath("foo/bar");
+    chmod $perm, "foo", "foo/bar";
 
-print "not " if -e "foo";
-print "ok 2\n";
+    print "not " unless -d "foo" && -d "foo/bar";
+    print "ok ", ++$count, "\n";
+
+    rmtree("foo");
+    print "not " if -e "foo";
+    print "ok ", ++$count, "\n";
+}
