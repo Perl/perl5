@@ -3968,7 +3968,7 @@ Perl_new_vstring(pTHX_ char *s, SV *sv)
 	    }
 #ifdef EBCDIC
 	    if (rev > 0x7FFFFFFF)
-		 Perl_croak(aTHX "In EBCDIC the v-string components cannot exceed 2147483647");
+		 Perl_croak(aTHX_ "In EBCDIC the v-string components cannot exceed 2147483647");
 #endif
 	    /* Append native character for the rev point */
 	    tmpend = uvchr_to_utf8(tmpbuf, rev);

@@ -3,7 +3,7 @@ use ExtUtils::MakeMaker;
 
 # Just for sure :)
 unless($ENV{PERL_CORE}) {
-    $ENV{PERL_CORE} = 1 if grep { $_ eq 'PERL_CORE=1' } @ARGV;
+    $ENV{PERL_CORE} = 1 if ($^X =~ m{\bminiperl[^/\\\]>:]*$}o);
 }
 
 my %tables = 

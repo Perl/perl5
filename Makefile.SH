@@ -1223,6 +1223,11 @@ os390|posix-bc)
             -e 's/y\.tab/perly/g' perly.c >perly.tmp && mv perly.tmp perly.c
         xxx="$xxx perly.c"
     fi
+    case "$osname:$usethreads" in
+    os390:define)
+	sed -e 's@^extern int yychar, yyerrflag;@/* extern int yychar, yyerrflag; */@' perly.c > perly.tmp && mv perly.tmp perly.c
+	;;
+    esac
     if cmp -s y.tab.h perly.h; then
         rm -f y.tab.h
     else
