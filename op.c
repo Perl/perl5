@@ -813,10 +813,10 @@ Perl_op_clear(pTHX_ OP *o)
 	goto clear_pmop;
     case OP_PUSHRE:
 #ifdef USE_ITHREADS
-	if ((PADOFFSET)cPMOPo->op_pmreplroot) {
+        if (INT2PTR(PADOFFSET, cPMOPo->op_pmreplroot)) {
 	    if (PL_curpad) {
-		GV *gv = (GV*)PL_curpad[(PADOFFSET)cPMOPo->op_pmreplroot];
-		pad_swipe((PADOFFSET)cPMOPo->op_pmreplroot);
+		GV *gv = (GV*)PL_curpad[INT2PTR(PADOFFSET, cPMOPo->op_pmreplroot)];
+		pad_swipe(INT2PTR(PADOFFSET, cPMOPo->op_pmreplroot));
 		/* No GvIN_PAD_off(gv) here, because other references may still
 		 * exist on the pad */
 		SvREFCNT_dec(gv);
@@ -3553,7 +3553,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 		    else if (curop->op_type == OP_PUSHRE) {
 			if (((PMOP*)curop)->op_pmreplroot) {
 #ifdef USE_ITHREADS
-			    GV *gv = (GV*)PL_curpad[(PADOFFSET)((PMOP*)curop)->op_pmreplroot];
+			    GV *gv = (GV*)PL_curpad[INT2PTR(PADOFFSET,((PMOP*)curop)->op_pmreplroot)];
 #else
 			    GV *gv = (GV*)((PMOP*)curop)->op_pmreplroot;
 #endif
@@ -3583,7 +3583,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 		    tmpop = ((UNOP*)left)->op_first;
 		    if (tmpop->op_type == OP_GV && !pm->op_pmreplroot) {
 #ifdef USE_ITHREADS
-			pm->op_pmreplroot = (OP*)cPADOPx(tmpop)->op_padix;
+			pm->op_pmreplroot = INT2PTR(OP*, cPADOPx(tmpop)->op_padix);
 			cPADOPx(tmpop)->op_padix = 0;	/* steal it */
 #else
 			pm->op_pmreplroot = (OP*)cSVOPx(tmpop)->op_sv;

@@ -470,7 +470,7 @@ perl_destruct(pTHXx)
 
         while (i) {
             SV *resv = ary[--i];
-            REGEXP *re = (REGEXP *)SvIVX(resv);
+            REGEXP *re = INT2PTR(REGEXP *,SvIVX(resv));
 
             if (SvFLAGS(resv) & SVf_BREAK) {
                 /* this is PL_reg_curpm, already freed
