@@ -217,9 +217,9 @@ sub ok {
 
     # ditto with refs and shared()
 
-    my $counter2;
+    my $counter2 = 0;
     share($counter2);
-    my $r  = \$counter2;
+    my $r = \$counter2;
 
     sub waiter2 {
 	lock($r);
