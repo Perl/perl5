@@ -621,7 +621,9 @@ This is partially implemented now.
 
 A class implementing a tied filehandle should define the following
 methods: TIEHANDLE, at least one of PRINT, PRINTF, WRITE, READLINE, GETC,
-READ, and possibly CLOSE and DESTROY.
+READ, and possibly CLOSE and DESTROY.  The class can also provide: BINMODE, 
+OPEN, EOF, FILENO, SEEK, TELL - if the corresponding perl operators are
+used on the handle.
 
 It is especially useful when perl is embedded in some other program,
 where output to STDOUT and STDERR may have to be redirected in some
@@ -680,9 +682,12 @@ This method will be called when the handle is read from via the C<read>
 or C<sysread> functions.
 
     sub READ {
-	$r = shift;
-	my($buf,$len,$offset) = @_;
-	print "READ called, \$buf=$buf, \$len=$len, \$offset=$offset";
+	my $self = shift;
+	my $$bufref = \$_[0];
+	my(undef,$len,$offset) = @_;
+	print "READ called, \$buf=$bufref, \$len=$len, \$offset=$offset";
+	# add to $$bufref, set $len to number of characters read
+	$len;
     }
 
 =item READLINE this
@@ -690,7 +695,7 @@ or C<sysread> functions.
 This method will be called when the handle is read from via <HANDLE>.
 The method should return undef when there is no more data.
 
-    sub READLINE { $r = shift; "PRINT called $$r times\n"; }
+    sub READLINE { $r = shift; "READLINE called $$r times\n"; }
 
 =item GETC this
 
@@ -829,7 +834,7 @@ destructor (DESTROY) is called, which is normal for objects that have
 no more valid references; and thus the file is closed.
 
 In the second example, however, we have stored another reference to
-the tied object in C<$x>.  That means that when untie() gets called
+the tied object in $x.  That means that when untie() gets called
 there will still be a valid reference to the object in existence, so
 the destructor is not called at that time, and thus the file is not
 closed.  The reason there is no output is because the file buffers

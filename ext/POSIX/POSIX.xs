@@ -1,17 +1,18 @@
 #ifdef WIN32
 #define _POSIX_
 #endif
+
+#define PERL_NO_GET_CONTEXT
+
 #include "EXTERN.h"
 #define PERLIO_NOT_STDIO 1
 #include "perl.h"
 #include "XSUB.h"
-#ifdef PERL_OBJECT	/* XXX _very_ temporary hacks */
+#if defined(PERL_OBJECT) || defined(PERL_CAPI)
 #  undef signal
 #  undef open
 #  undef setmode
 #  define open PerlLIO_open3
-#  undef TAINT_PROPER
-#  define TAINT_PROPER(a)
 #endif
 #include <ctype.h>
 #ifdef I_DIRENT    /* XXX maybe better to just rely on perl.h? */
@@ -80,6 +81,7 @@
    /* The non-POSIX CRTL times() has void return type, so we just get the
       current time directly */
    clock_t vms_times(struct tms *PL_bufptr) {
+	dTHX;
 	clock_t retval;
 	/* Get wall time and convert to 10 ms intervals to
 	 * produce the return value that the POSIX standard expects */
@@ -104,6 +106,10 @@
    }
 #  define times(t) vms_times(t)
 #else
+#if defined (CYGWIN)
+#    define tzname _tzname
+#    undef MB_CUR_MAX          /* XXX: bug in b20.1 */
+#endif
 #if defined (WIN32)
 #  undef mkfifo
 #  define mkfifo(a,b) not_here("mkfifo")
@@ -137,8 +143,12 @@
 #else
 
 #  ifndef HAS_MKFIFO
-#    ifndef mkfifo
-#      define mkfifo(path, mode) (mknod((path), (mode) | S_IFIFO, 0))
+#    ifdef OS2
+#      define mkfifo(a,b) not_here("mkfifo")
+#    else	/* !( defined OS2 ) */ 
+#      ifndef mkfifo
+#        define mkfifo(path, mode) (mknod((path), (mode) | S_IFIFO, 0))
+#      endif
 #    endif
 #  endif /* !HAS_MKFIFO */
 
@@ -179,10 +189,10 @@ typedef struct termios* POSIX__Termios;
 #endif
 
 /* Possibly needed prototypes */
-char *cuserid _((char *));
-double strtod _((const char *, char **));
-long strtol _((const char *, char **, int));
-unsigned long strtoul _((const char *, char **, int));
+char *cuserid (char *);
+double strtod (const char *, char **);
+long strtol (const char *, char **, int);
+unsigned long strtoul (const char *, char **, int);
 
 #ifndef HAS_CUSERID
 #define cuserid(a) (char *) not_here("cuserid")
@@ -305,14 +315,13 @@ char *tzname[] = { "" , "" };
  */
 #ifdef HAS_GNULIBC
 # ifndef STRUCT_TM_HASZONE
-#    define STRUCT_TM_HAS_ZONE
+#    define STRUCT_TM_HASZONE
 # endif
 #endif
 
 #ifdef STRUCT_TM_HASZONE
 static void
-init_tm(ptm)		/* see mktime, strftime and asctime	*/
-    struct tm *ptm;
+init_tm(struct tm *ptm)		/* see mktime, strftime and asctime	*/
 {
     Time_t now;
     (void)time(&now);
@@ -350,7 +359,7 @@ not_here(char *s)
 }
 
 static
-#ifdef HAS_LONG_DOUBLE
+#if defined(HAS_LONG_DOUBLE) && (LONG_DOUBLESIZE > DOUBLESIZE)
 long double
 #else
 double
@@ -822,6 +831,8 @@ constant(char *name, int arg)
 #else
 		goto not_there;
 #endif
+	    break;
+	case 'L':
 	    if (strEQ(name, "ELOOP"))
 #ifdef ELOOP
 		return ELOOP;
@@ -1519,9 +1530,10 @@ constant(char *name, int arg)
 #else
 		goto not_there;
 #endif
-	    if (strEQ(name, "L_tmpname"))
-#ifdef L_tmpname
-		return L_tmpname;
+	    /* L_tmpnam[e] was a typo--retained for compatibility */
+	    if (strEQ(name, "L_tmpname") || strEQ(name, "L_tmpnam"))
+#ifdef L_tmpnam
+		return L_tmpnam;
 #else
 		goto not_there;
 #endif
@@ -2567,7 +2579,7 @@ new(packname = "POSIX::SigSet", ...)
     CODE:
 	{
 	    int i;
-	    RETVAL = (sigset_t*)safemalloc(sizeof(sigset_t));
+	    New(0, RETVAL, 1, sigset_t);
 	    sigemptyset(RETVAL);
 	    for (i = 1; i < items; i++)
 		sigaddset(RETVAL, SvIV(ST(i)));
@@ -2579,7 +2591,7 @@ void
 DESTROY(sigset)
 	POSIX::SigSet	sigset
     CODE:
-	safefree((char *)sigset);
+	Safefree(sigset);
 
 SysRet
 sigaddset(sigset, sig)
@@ -2613,7 +2625,7 @@ new(packname = "POSIX::Termios", ...)
     CODE:
 	{
 #ifdef I_TERMIOS
-	    RETVAL = (struct termios*)safemalloc(sizeof(struct termios));
+	    New(0, RETVAL, 1, struct termios);
 #else
 	    not_here("termios");
         RETVAL = 0;
@@ -2627,7 +2639,7 @@ DESTROY(termios_ref)
 	POSIX::Termios	termios_ref
     CODE:
 #ifdef I_TERMIOS
-	safefree((char *)termios_ref);
+	Safefree(termios_ref);
 #else
 	    not_here("termios");
 #endif
@@ -2954,7 +2966,6 @@ localeconv()
 #ifdef HAS_LOCALECONV
 	struct lconv *lcbuf;
 	RETVAL = newHV();
-	SET_NUMERIC_LOCAL();
 	if (lcbuf = localeconv()) {
 	    /* the strings */
 	    if (lcbuf->decimal_point && *lcbuf->decimal_point)
@@ -3046,7 +3057,7 @@ setlocale(category, locale = 0)
 		else
 #endif
 		    newctype = RETVAL;
-		perl_new_ctype(newctype);
+		new_ctype(newctype);
 	    }
 #endif /* USE_LOCALE_CTYPE */
 #ifdef USE_LOCALE_COLLATE
@@ -3063,7 +3074,7 @@ setlocale(category, locale = 0)
 		else
 #endif
 		    newcoll = RETVAL;
-		perl_new_collate(newcoll);
+		new_collate(newcoll);
 	    }
 #endif /* USE_LOCALE_COLLATE */
 #ifdef USE_LOCALE_NUMERIC
@@ -3080,7 +3091,7 @@ setlocale(category, locale = 0)
 		else
 #endif
 		    newnum = RETVAL;
-		perl_new_numeric(newnum);
+		new_numeric(newnum);
 	    }
 #endif /* USE_LOCALE_NUMERIC */
 	}
@@ -3177,13 +3188,14 @@ sigaction(sig, action, oldaction = 0)
 	    POSIX__SigSet sigset;
 	    SV** svp;
 	    SV** sigsvp = hv_fetch(GvHVn(PL_siggv),
-				 sig_name[sig],
-				 strlen(sig_name[sig]),
+				 PL_sig_name[sig],
+				 strlen(PL_sig_name[sig]),
 				 TRUE);
+	    STRLEN n_a;
 
 	    /* Remember old handler name if desired. */
 	    if (oldaction) {
-		char *hand = SvPVx(*sigsvp, PL_na);
+		char *hand = SvPVx(*sigsvp, n_a);
 		svp = hv_fetch(oldaction, "HANDLER", 7, TRUE);
 		sv_setpv(*svp, *hand ? hand : "DEFAULT");
 	    }
@@ -3194,9 +3206,9 @@ sigaction(sig, action, oldaction = 0)
 		svp = hv_fetch(action, "HANDLER", 7, FALSE);
 		if (!svp)
 		    croak("Can't supply an action without a HANDLER");
-		sv_setpv(*sigsvp, SvPV(*svp, PL_na));
+		sv_setpv(*sigsvp, SvPV(*svp, n_a));
 		mg_set(*sigsvp);	/* handles DEFAULT and IGNORE */
-		act.sa_handler = sighandler;
+		act.sa_handler = PL_sighandlerp;
 
 		/* Set up any desired mask. */
 		svp = hv_fetch(action, "MASK", 4, FALSE);
@@ -3233,8 +3245,8 @@ sigaction(sig, action, oldaction = 0)
 		    sigset = (sigset_t*) tmp;
 		}
 		else {
-		    sigset = (sigset_t*)safemalloc(sizeof(sigset_t));
-		    sv_setptrobj(*svp, sigset, "POSIX::SigSet");
+		    New(0, sigset, 1, sigset_t);
+		    sv_setptrobj(*svp, PTR_CAST sigset, "POSIX::SigSet");
 		}
 		*sigset = oact.sa_mask;
 
@@ -3255,7 +3267,20 @@ SysRet
 sigprocmask(how, sigset, oldsigset = 0)
 	int			how
 	POSIX::SigSet		sigset
-	POSIX::SigSet		oldsigset
+	POSIX::SigSet		oldsigset = NO_INIT
+INIT:
+	if ( items < 3 ) {
+	    oldsigset = 0;
+	}
+	else if (sv_derived_from(ST(2), "POSIX::SigSet")) {
+	    IV tmp = SvIV((SV*)SvRV(ST(2)));
+	    oldsigset = (POSIX__SigSet)PTR_CAST tmp;
+	}
+	else {
+	    New(0, oldsigset, 1, sigset_t);
+	    sigemptyset(oldsigset);
+	    sv_setref_pv(ST(2), "POSIX::SigSet", (void*)oldsigset);
+	}
 
 SysRet
 sigsuspend(signal_mask)
@@ -3354,9 +3379,18 @@ write(fd, buffer, nbytes)
 	char *		buffer
 	size_t		nbytes
 
-char *
-tmpnam(s = 0)
-	char *		s = 0;
+SV *
+tmpnam()
+    PREINIT:
+	STRLEN i;
+	int len;
+    CODE:
+	RETVAL = newSVpvn("", 0);
+	SvGROW(RETVAL, L_tmpnam);
+	len = strlen(tmpnam(SvPV(RETVAL, i)));
+	SvCUR_set(RETVAL, len);
+    OUTPUT:
+	RETVAL
 
 void
 abort()
@@ -3421,10 +3455,12 @@ strtol(str, base = 0)
 	char *unparsed;
     PPCODE:
 	num = strtol(str, &unparsed, base);
-	if (num >= IV_MIN && num <= IV_MAX)
-	    PUSHs(sv_2mortal(newSViv((IV)num)));
-	else
+#if IVSIZE <= LONGSIZE
+	if (num < IV_MIN || num > IV_MAX)
 	    PUSHs(sv_2mortal(newSVnv((double)num)));
+	else
+#endif
+	    PUSHs(sv_2mortal(newSViv((IV)num)));
 	if (GIMME == G_ARRAY) {
 	    EXTEND(SP, 1);
 	    if (unparsed)
@@ -3590,7 +3626,7 @@ mktime(sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = 0)
 	RETVAL
 
 char *
-strftime(fmt, sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = 0)
+strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
 	char *		fmt
 	int		sec
 	int		min
@@ -3616,8 +3652,45 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = 0)
 	    mytm.tm_wday = wday;
 	    mytm.tm_yday = yday;
 	    mytm.tm_isdst = isdst;
+	    (void) mktime(&mytm);
 	    len = strftime(tmpbuf, sizeof tmpbuf, fmt, &mytm);
-	    ST(0) = sv_2mortal(newSVpv(tmpbuf, len));
+	    /*
+	    ** The following is needed to handle to the situation where 
+	    ** tmpbuf overflows.  Basically we want to allocate a buffer
+	    ** and try repeatedly.  The reason why it is so complicated
+	    ** is that getting a return value of 0 from strftime can indicate
+	    ** one of the following:
+	    ** 1. buffer overflowed,
+	    ** 2. illegal conversion specifier, or
+	    ** 3. the format string specifies nothing to be returned(not
+	    **	  an error).  This could be because format is an empty string
+	    **    or it specifies %p that yields an empty string in some locale.
+	    ** If there is a better way to make it portable, go ahead by
+	    ** all means.
+	    */
+	    if ( ( len > 0 && len < sizeof(tmpbuf) )
+	    		|| ( len == 0 && strlen(fmt) == 0 ) ) {
+		ST(0) = sv_2mortal(newSVpv(tmpbuf, len));
+	    } else {
+		/* Possibly buf overflowed - try again with a bigger buf */
+		int	bufsize = strlen(fmt) + sizeof(tmpbuf);
+		char* 	buf;
+		int	buflen;
+
+		New(0, buf, bufsize, char);
+		while( buf ) {
+		    buflen = strftime(buf, bufsize, fmt, &mytm);
+		    if ( buflen > 0 && buflen < bufsize ) break;
+		    bufsize *= 2;
+		    Renew(buf, bufsize, char);
+		}
+		if ( buf ) {
+		    ST(0) = sv_2mortal(newSVpvn(buf, buflen));
+		    Safefree(buf);
+		} else {
+		    ST(0) = sv_2mortal(newSVpvn(tmpbuf, len));
+		}
+	    }
 	}
 
 void
@@ -3627,8 +3700,8 @@ void
 tzname()
     PPCODE:
 	EXTEND(SP,2);
-	PUSHs(sv_2mortal(newSVpv(tzname[0],strlen(tzname[0]))));
-	PUSHs(sv_2mortal(newSVpv(tzname[1],strlen(tzname[1]))));
+	PUSHs(sv_2mortal(newSVpvn(tzname[0],strlen(tzname[0]))));
+	PUSHs(sv_2mortal(newSVpvn(tzname[1],strlen(tzname[1]))));
 
 SysRet
 access(filename, mode)

@@ -117,23 +117,25 @@ pclose (FILE *pp)
 #define EXECF_EXEC 1
 
 static int
-convretcode (int rc,char *prog,int fl)
+convretcode (pTHX_ int rc,char *prog,int fl)
 {
-    if (rc < 0 && PL_dowarn)
-        warn ("Can't %s \"%s\": %s",fl ? "exec" : "spawn",prog,Strerror (errno));
+    if (rc < 0 && ckWARN(WARN_EXEC))
+        Perl_warner(aTHX_ WARN_EXEC,"Can't %s \"%s\": %s",
+		    fl ? "exec" : "spawn",prog,Strerror (errno));
     if (rc > 0)
-        return rc <<= 8;
+        return rc << 8;
     if (rc < 0)
         return 255 << 8;
     return 0;
 }
 
 int
-do_aspawn (SV *really,SV **mark,SV **sp)
+do_aspawn (pTHX_ SV *really,SV **mark,SV **sp)
 {
     dTHR;
     int  rc;
     char **a,*tmps,**argv; 
+    STRLEN n_a;
 
     if (sp<=mark)
         return -1;
@@ -141,7 +143,7 @@ do_aspawn (SV *really,SV **mark,SV **sp)
 
     while (++mark <= sp)
         if (*mark)
-            *a++ = SvPVx(*mark, PL_na);
+            *a++ = SvPVx(*mark, n_a);
         else
             *a++ = "";
     *a = Nullch;
@@ -152,7 +154,7 @@ do_aspawn (SV *really,SV **mark,SV **sp)
      ) /* will swawnvp use PATH? */
          TAINT_ENV();	/* testing IFS here is overkill, probably */
 
-    if (really && *(tmps = SvPV(really, PL_na)))
+    if (really && *(tmps = SvPV(really, n_a)))
         rc=spawnvp (P_WAIT,tmps,argv);
     else
         rc=spawnvp (P_WAIT,argv[0],argv);
@@ -163,7 +165,7 @@ do_aspawn (SV *really,SV **mark,SV **sp)
 #define EXTRA "\x00\x00\x00\x00\x00\x00"
 
 int
-do_spawn2 (char *cmd,int execf)
+do_spawn2 (pTHX_ char *cmd,int execf)
 {
     char **a,*s,*shell,*metachars;
     int  rc,unixysh;
@@ -231,15 +233,15 @@ doshell:
 }
 
 int
-do_spawn (char *cmd)
+do_spawn (pTHX_ char *cmd)
 {
-    return do_spawn2 (cmd,EXECF_SPAWN);
+    return do_spawn2 (aTHX_ cmd,EXECF_SPAWN);
 }
 
 bool
-do_exec (char *cmd)
+Perl_do_exec (pTHX_ char *cmd)
 {
-    do_spawn2 (cmd,EXECF_EXEC);
+    do_spawn2 (aTHX_ cmd,EXECF_EXEC);
     return FALSE;
 }
 
@@ -250,6 +252,7 @@ struct globinfo
     int    fd;
     char   *matches;
     size_t size;
+    fpos_t pos;
 };
 
 #define MAXOPENGLOBS 10
@@ -284,6 +287,7 @@ glob_handler (__FSEXT_Fnumber n,int *rv,va_list args)
             if ((gi=searchfd (-1)) == NULL)
                 break;
 
+            gi->pos=0;
             pattern=alloca (strlen (name+=13)+1);
             strcpy (pattern,name);
             if (!_USE_LFN)
@@ -330,11 +334,10 @@ glob_handler (__FSEXT_Fnumber n,int *rv,va_list args)
             if ((gi=searchfd (fd))==NULL)
                 break;
 
-            ic=tell (fd);
-            if (siz+ic>=gi->size)
-                siz=gi->size-ic;
-            memcpy (buf,ic+gi->matches,siz);
-            lseek (fd,siz,1);
+            if (siz+gi->pos > gi->size)
+                siz = gi->size - gi->pos;
+            memcpy (buf,gi->pos+gi->matches,siz);
+            gi->pos += siz;
             *rv=siz;
             return 1;
         }
@@ -360,7 +363,7 @@ XS(dos_GetCwd)
     dXSARGS;
 
     if (items)
-        croak ("Usage: Dos::GetCwd()");
+        Perl_croak (aTHX_ "Usage: Dos::GetCwd()");
     {
         char tmp[PATH_MAX+2];
         ST(0)=sv_newmortal ();
@@ -378,7 +381,7 @@ XS(dos_UseLFN)
 }
 
 void
-init_os_extras()
+Perl_init_os_extras(pTHX)
 {
     char *file = __FILE__;
 

@@ -6,10 +6,8 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    unshift @INC, '../lib';
 }
-
-use Config;
 
 # All the constants which Socket.pm tries to make available:
 my @possibly_defined = qw(

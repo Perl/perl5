@@ -1,6 +1,6 @@
 /*    deb.c
  *
- *    Copyright (c) 1991-1997, Larry Wall
+ *    Copyright (c) 1991-1999, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -13,14 +13,39 @@
  */
 
 #include "EXTERN.h"
+#define PERL_IN_DEB_C
 #include "perl.h"
 
+#if defined(PERL_IMPLICIT_CONTEXT)
 void
-deb(const char *pat, ...)
+Perl_deb_nocontext(const char *pat, ...)
+{
+#ifdef DEBUGGING
+    dTHX;
+    va_list args;
+    va_start(args, pat);
+    vdeb(pat, &args);
+    va_end(args);
+#endif /* DEBUGGING */
+}
+#endif
+
+void
+Perl_deb(pTHX_ const char *pat, ...)
+{
+#ifdef DEBUGGING
+    va_list args;
+    va_start(args, pat);
+    vdeb(pat, &args);
+    va_end(args);
+#endif /* DEBUGGING */
+}
+
+void
+Perl_vdeb(pTHX_ const char *pat, va_list *args)
 {
 #ifdef DEBUGGING
     dTHR;
-    va_list args;
     register I32 i;
     GV* gv = PL_curcop->cop_filegv;
 
@@ -36,15 +61,12 @@ deb(const char *pat, ...)
 #endif /* USE_THREADS */
     for (i=0; i<PL_dlevel; i++)
 	PerlIO_printf(Perl_debug_log, "%c%c ",PL_debname[i],PL_debdelim[i]);
-
-    va_start(args, pat);
-    (void) PerlIO_vprintf(Perl_debug_log,pat,args);
-    va_end( args );
+    (void) PerlIO_vprintf(Perl_debug_log, pat, *args);
 #endif /* DEBUGGING */
 }
 
 void
-deb_growlevel(void)
+Perl_deb_growlevel(pTHX)
 {
 #ifdef DEBUGGING
     PL_dlmax += 128;
@@ -54,7 +76,7 @@ deb_growlevel(void)
 }
 
 I32
-debstackptrs(void)
+Perl_debstackptrs(pTHX)
 {
 #ifdef DEBUGGING
     dTHR;
@@ -70,7 +92,7 @@ debstackptrs(void)
 }
 
 I32
-debstack(void)
+Perl_debstack(pTHX)
 {
 #ifdef DEBUGGING
     dTHR;

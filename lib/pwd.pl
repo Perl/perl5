@@ -1,5 +1,14 @@
 ;# pwd.pl - keeps track of current working directory in PWD environment var
 ;#
+#
+# This library is no longer being maintained, and is included for backward
+# compatibility with Perl 4 programs which may require it.
+#
+# In particular, this should not be used as an example of modern Perl
+# programming techniques.
+#
+# Suggested alternative: Cwd
+#
 ;# $RCSfile: pwd.pl,v $$Revision: 4.1 $$Date: 92/08/07 18:24:11 $
 ;#
 ;# $Log:	pwd.pl,v $

@@ -3,7 +3,7 @@
 BEGIN {
     $^O = '';
     chdir 't' if -d 't';
-    @INC = '../lib';
+    unshift @INC, '../lib';
 }
 
 print "1..4\n";

@@ -6,7 +6,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    unshift @INC, '../lib';
     $SIG{__WARN__} = sub { $warns++; warn $_[0] };
     print "1..14\n";
 }
@@ -61,6 +61,7 @@ while ($where{$seen} = <FILE>)
  }
 print "not " unless $seen;
 print "ok 5\n";
+close FILE;
 
 opendir(DIR,'.');
 $seen = 0;

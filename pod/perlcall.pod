@@ -72,7 +72,7 @@ Each of the functions will now be discussed in turn.
 
 =over 5
 
-=item B<perl_call_sv>
+=item perl_call_sv
 
 I<perl_call_sv> takes two parameters, the first, C<sv>, is an SV*.
 This allows you to specify the Perl subroutine to be called either as a
@@ -80,7 +80,7 @@ C string (which has first been converted to an SV) or a reference to a
 subroutine. The section, I<Using perl_call_sv>, shows how you can make
 use of I<perl_call_sv>.
 
-=item B<perl_call_pv>
+=item perl_call_pv
 
 The function, I<perl_call_pv>, is similar to I<perl_call_sv> except it
 expects its first parameter to be a C char* which identifies the Perl
@@ -88,7 +88,7 @@ subroutine you want to call, e.g., C<perl_call_pv("fred", 0)>.  If the
 subroutine you want to call is in another package, just include the
 package name in the string, e.g., C<"pkg::fred">.
 
-=item B<perl_call_method>
+=item perl_call_method
 
 The function I<perl_call_method> is used to call a method from a Perl
 class.  The parameter C<methname> corresponds to the name of the method
@@ -99,7 +99,7 @@ object (for a virtual method).  See L<perlobj> for more information on
 static and virtual methods and L<Using perl_call_method> for an example
 of using I<perl_call_method>.
 
-=item B<perl_call_argv>
+=item perl_call_argv
 
 I<perl_call_argv> calls the Perl subroutine specified by the C string
 stored in the C<subname> parameter. It also takes the usual C<flags>
@@ -116,7 +116,7 @@ subroutine are stored on the Perl stack.
 As a general rule you should I<always> check the return value from
 these functions.  Even if you are expecting only a particular number of
 values to be returned from the Perl subroutine, there is nothing to
-stop someone from doing something unexpected - don't say you haven't
+stop someone from doing something unexpected--don't say you haven't
 been warned.
 
 =head1 FLAG VALUES
@@ -279,8 +279,8 @@ belongs to C<joe>.
 
 It is possible for the Perl subroutine you are calling to terminate
 abnormally, e.g., by calling I<die> explicitly or by not actually
-existing.  By default, when either of these of events occurs, the
-process will terminate immediately.  If though, you want to trap this
+existing.  By default, when either of these events occurs, the
+process will terminate immediately.  If you want to trap this
 type of event, specify the G_EVAL flag.  It will put an I<eval { }>
 around the subroutine call.
 
@@ -505,9 +505,9 @@ returned from I<perl_call_pv>. It will always be 0.
 =head2 Passing Parameters
 
 Now let's make a slightly more complex example. This time we want to
-call a Perl subroutine, C<LeftString>, which will take 2 parameters - a
-string (C<$s>) and an integer (C<$n>).  The subroutine will simply
-print the first C<$n> characters of the string.
+call a Perl subroutine, C<LeftString>, which will take 2 parameters--a
+string ($s) and an integer ($n).  The subroutine will simply
+print the first $n characters of the string.
 
 So the Perl subroutine would look like this
 
@@ -555,7 +555,7 @@ as C<SP>.
 =item 2.
 
 If you are going to put something onto the Perl stack, you need to know
-where to put it. This is the purpose of the macro C<dSP> - it declares
+where to put it. This is the purpose of the macro C<dSP>--it declares
 and initializes a I<local> copy of the Perl stack pointer.
 
 All the other macros which will be used in this example require you to
@@ -563,7 +563,7 @@ have used this macro.
 
 The exception to this rule is if you are calling a Perl subroutine
 directly from an XSUB function. In this case it is not necessary to
-use the C<dSP> macro explicitly - it will be declared for you
+use the C<dSP> macro explicitly--it will be declared for you
 automatically.
 
 =item 3.
@@ -578,12 +578,12 @@ The C<PUSHMARK> macro tells Perl to make a mental note of the current
 stack pointer. Even if you aren't passing any parameters (like the
 example shown in the section I<No Parameters, Nothing returned>) you
 must still call the C<PUSHMARK> macro before you can call any of the
-I<perl_call_*> functions - Perl still needs to know that there are no
+I<perl_call_*> functions--Perl still needs to know that there are no
 parameters.
 
 The C<PUTBACK> macro sets the global copy of the stack pointer to be
 the same as our local copy. If we didn't do this I<perl_call_pv>
-wouldn't know where the two parameters we pushed were - remember that
+wouldn't know where the two parameters we pushed were--remember that
 up to now all the stack pointer manipulation we have done is with our
 local copy, I<not> the global copy.
 
@@ -922,7 +922,7 @@ and here is a C function to call it.
 
 To be able to access the two parameters that were pushed onto the stack
 after they return from I<perl_call_pv> it is necessary to make a note
-of their addresses - thus the two variables C<sva> and C<svb>.
+of their addresses--thus the two variables C<sva> and C<svb>.
 
 The reason this is necessary is that the area of the Perl stack which
 held them will very likely have been overwritten by something else by
@@ -971,7 +971,8 @@ and some C to call it
         /* Check the eval first */
         if (SvTRUE(ERRSV))
         {
-            printf ("Uh oh - %s\n", SvPV(ERRSV, PL_na)) ;
+	    STRLEN n_a;
+            printf ("Uh oh - %s\n", SvPV(ERRSV, n_a)) ;
             POPs ;
         }
         else
@@ -1013,7 +1014,8 @@ The code
 
     if (SvTRUE(ERRSV))
     {
-        printf ("Uh oh - %s\n", SvPV(ERRSV, PL_na)) ;
+	STRLEN n_a;
+        printf ("Uh oh - %s\n", SvPV(ERRSV, n_a)) ;
         POPs ;
     }
 
@@ -1173,11 +1175,11 @@ the version of Perl you are using)
     Not a CODE reference at ...
     Undefined subroutine &main::47 called ...
 
-The variable C<$ref> may have referred to the subroutine C<fred>
+The variable $ref may have referred to the subroutine C<fred>
 whenever the call to C<SaveSub1> was made but by the time
 C<CallSavedSub1> gets called it now holds the number C<47>. Because we
 saved only a pointer to the original SV in C<SaveSub1>, any changes to
-C<$ref> will be tracked by the pointer C<rememberSub>. This means that
+$ref will be tracked by the pointer C<rememberSub>. This means that
 whenever C<CallSavedSub1> gets called, it will attempt to execute the
 code which is referenced by the SV* C<rememberSub>.  In this case
 though, it now refers to the integer C<47>, so expect Perl to complain
@@ -1349,7 +1351,7 @@ So the methods C<PrintID> and C<Display> can be invoked like this
     call_PrintID('Mine', 'PrintID') ;
 
 The only thing to note is that in both the static and virtual methods,
-the method name is not passed via the stack - it is used as the first
+the method name is not passed via the stack--it is used as the first
 parameter to I<perl_call_method>.
 
 =head2 Using GIMME_V
@@ -1483,9 +1485,9 @@ enclosing scope at some stage.  In the event driven scenario that may
 never happen.  This means that as time goes on, your program will
 create more and more temporaries, none of which will ever be freed. As
 each of these temporaries consumes some memory your program will
-eventually consume all the available memory in your system - kapow!
+eventually consume all the available memory in your system--kapow!
 
-So here is the bottom line - if you are sure that control will revert
+So here is the bottom line--if you are sure that control will revert
 back to the enclosing Perl scope fairly quickly after the end of your
 callback, then it isn't absolutely necessary to dispose explicitly of
 any temporaries you may have created. Mind you, if you are at all
@@ -1577,7 +1579,7 @@ require is a means of storing the mapping between the opened file and
 the Perl subroutine we want to be called for that file.
 
 Say the i/o library has a function C<asynch_read> which associates a C
-function C<ProcessRead> with a file handle C<fh> - this assumes that it
+function C<ProcessRead> with a file handle C<fh>--this assumes that it
 has also provided some routine to open the file and so obtain the file
 handle.
 
@@ -1923,8 +1925,8 @@ refers to the last.
 =head2 Creating and calling an anonymous subroutine in C
 
 As we've already shown, C<perl_call_sv> can be used to invoke an
-anonymous subroutine.  However, our example showed how Perl script
-invoking an XSUB to preform this operation.  Let's see how it can be
+anonymous subroutine.  However, our example showed a Perl script
+invoking an XSUB to perform this operation.  Let's see how it can be
 done inside our C code:
 
  ...

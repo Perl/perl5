@@ -1,6 +1,6 @@
 /*    cv.h
  *
- *    Copyright (c) 1991-1997, Larry Wall
+ *    Copyright (c) 1991-1999, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -14,14 +14,14 @@ struct xpvcv {
     STRLEN	xpv_cur;	/* length of xp_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     IV		xof_off;	/* integer value */
-    double	xnv_nv;		/* numeric value, if any */
+    NV		xnv_nv;		/* numeric value, if any */
     MAGIC*	xmg_magic;	/* magic for scalar array */
     HV*		xmg_stash;	/* class package */
 
     HV *	xcv_stash;
     OP *	xcv_start;
     OP *	xcv_root;
-    void      (*xcv_xsub) _((CV* _CPERLproto));
+    void	(*xcv_xsub) (pTHXo_ CV*);
     ANY		xcv_xsubany;
     GV *	xcv_gv;
     GV *	xcv_filegv;
@@ -62,6 +62,7 @@ struct xpvcv {
 				   (esp. useful for special XSUBs) */
 #define CVf_METHOD	0x0040	/* CV is explicitly marked as a method */
 #define CVf_LOCKED	0x0080	/* CV locks itself or first arg on entry */
+#define CVf_LVALUE	0x0100  /* CV return value can be used as lvalue */
 
 #define CvCLONE(cv)		(CvFLAGS(cv) & CVf_CLONE)
 #define CvCLONE_on(cv)		(CvFLAGS(cv) |= CVf_CLONE)
@@ -75,9 +76,11 @@ struct xpvcv {
 #define CvANON_on(cv)		(CvFLAGS(cv) |= CVf_ANON)
 #define CvANON_off(cv)		(CvFLAGS(cv) &= ~CVf_ANON)
 
+#ifdef PERL_XSUB_OLDSTYLE
 #define CvOLDSTYLE(cv)		(CvFLAGS(cv) & CVf_OLDSTYLE)
 #define CvOLDSTYLE_on(cv)	(CvFLAGS(cv) |= CVf_OLDSTYLE)
 #define CvOLDSTYLE_off(cv)	(CvFLAGS(cv) &= ~CVf_OLDSTYLE)
+#endif
 
 #define CvUNIQUE(cv)		(CvFLAGS(cv) & CVf_UNIQUE)
 #define CvUNIQUE_on(cv)		(CvFLAGS(cv) |= CVf_UNIQUE)
@@ -94,3 +97,16 @@ struct xpvcv {
 #define CvLOCKED(cv)		(CvFLAGS(cv) & CVf_LOCKED)
 #define CvLOCKED_on(cv)		(CvFLAGS(cv) |= CVf_LOCKED)
 #define CvLOCKED_off(cv)	(CvFLAGS(cv) &= ~CVf_LOCKED)
+
+#define CvLVALUE(cv)		(CvFLAGS(cv) & CVf_LVALUE)
+#define CvLVALUE_on(cv)		(CvFLAGS(cv) |= CVf_LVALUE)
+#define CvLVALUE_off(cv)	(CvFLAGS(cv) &= ~CVf_LVALUE)
+
+#define CvEVAL(cv)		(CvUNIQUE(cv) && !SvFAKE(cv))
+#define CvEVAL_on(cv)		(CvUNIQUE_on(cv),SvFAKE_off(cv))
+#define CvEVAL_off(cv)		CvUNIQUE_off(cv)
+
+/* BEGIN|INIT|END */
+#define CvSPECIAL(cv)		(CvUNIQUE(cv) && SvFAKE(cv))
+#define CvSPECIAL_on(cv)	(CvUNIQUE_on(cv),SvFAKE_on(cv))
+#define CvSPECIAL_off(cv)	(CvUNIQUE_off(cv),SvFAKE_off(cv))

@@ -9,11 +9,22 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib' if -d '../lib';
+    unshift @INC, '../lib' if -d '../lib';
 }
 
 use strict;
 use Config;
+
+# We do not want the whole taint.t to fail
+# just because Errno possibly failing.
+eval { require Errno; import Errno };
+
+BEGIN {
+  if ($^O eq 'VMS' && !defined($Config{d_setenv})) {
+      $ENV{PATH} = $ENV{PATH};
+      $ENV{TERM} = $ENV{TERM} ne ''? $ENV{TERM} : 'dummy';
+  }
+}
 
 my $Is_VMS = $^O eq 'VMS';
 my $Is_MSWin32 = $^O eq 'MSWin32';
@@ -29,9 +40,9 @@ if ($Is_VMS) {
     }
     eval <<EndOfCleanup;
 	END {
-	    \$ENV{PATH} = '';
+	    \$ENV{PATH} = '' if $Config{d_setenv};
 	    warn "# Note: logical name 'PATH' may have been deleted\n";
-	    @ENV{keys %old} = values %old;
+	    \@ENV{keys %old} = values %old;
 	}
 EndOfCleanup
 }
@@ -360,7 +371,12 @@ else {
 
     test 71, eval { open FOO, $foo } eq '', 'open for read';
     test 72, $@ eq '', $@;		# NB: This should be allowed
-    test 73, $! == 2 || ($Is_Dos && $! == 22); # File not found
+
+    # Try first new style but allow also old style.
+    test 73, $!{ENOENT} ||
+	$! == 2 || # File not found
+	($Is_Dos && $! == 22) ||
+	($^O eq 'mint' && $! == 33);
 
     test 74, eval { open FOO, "> $foo" } eq '', 'open for write';
     test 75, $@ =~ /^Insecure dependency/, $@;
@@ -374,10 +390,10 @@ else {
 	for (76..79) { print "ok $_ # Skipped: open('|') is not available\n" }
     }
     else {
-	test 76, eval { open FOO, "| $foo" } eq '', 'popen to';
+	test 76, eval { open FOO, "| x$foo" } eq '', 'popen to';
 	test 77, $@ =~ /^Insecure dependency/, $@;
 
-	test 78, eval { open FOO, "$foo |" } eq '', 'popen from';
+	test 78, eval { open FOO, "x$foo |" } eq '', 'popen from';
 	test 79, $@ =~ /^Insecure dependency/, $@;
     }
 

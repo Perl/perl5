@@ -1,0 +1,39 @@
+name:     perl;
+
+/* entry:    main; */
+
+variables:
+          s$c_options init (4);    /* Use VOS-style pathnames. */
+
+modules:  miniperlmain,
+          av,
+          deb,
+          doio,
+          doop,
+          dump,
+          globals,
+          gv,
+          hv,
+          mg,
+          op,
+          perl,
+          perlio,
+          perly,
+          pp,
+          pp_ctl,
+          pp_hot,
+          pp_sys,
+          regcomp,
+          regexec,
+          run,
+          scope,
+          sv,
+          taint,
+          toke,
+          universal,
+          util,
+          vos_dummies,
+          tcp_runtime,
+          tcp_gethost;
+
+end;

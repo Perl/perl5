@@ -5,4 +5,5 @@ WriteMakefile(
 	      VERSION => '0.21',
 	      MAN3PODS 	=> ' ', 	# Pods will be built by installman.
 	      XSPROTOARG => '-noprototypes',
+	      PERL_MALLOC_OK => 1,
 );

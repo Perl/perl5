@@ -9,11 +9,11 @@
 
 package Data::Dumper;
 
-$VERSION = $VERSION = '2.09';
+$VERSION = $VERSION = '2.101';
 
 #$| = 1;
 
-require 5.004;
+require 5.004_02;
 require Exporter;
 require DynaLoader;
 require overload;
@@ -39,7 +39,7 @@ $Deepcopy = 0 unless defined $Deepcopy;
 $Quotekeys = 1 unless defined $Quotekeys;
 $Bless = "bless" unless defined $Bless;
 #$Expdepth = 0 unless defined $Expdepth;
-#$Maxdepth = 0 unless defined $Maxdepth;
+$Maxdepth = 0 unless defined $Maxdepth;
 
 #
 # expects an arrayref of values to be dumped.
@@ -74,7 +74,7 @@ sub new {
              quotekeys	=> $Quotekeys,  # quote hash keys
              'bless'	=> $Bless,	# keyword to use for "bless"
 #	     expdepth   => $Expdepth,   # cutoff depth for explicit dumping
-#	     maxdepth	=> $Maxdepth,   # depth beyond which we give up
+	     maxdepth	=> $Maxdepth,   # depth beyond which we give up
 	   };
 
   if ($Indent > 0) {
@@ -208,78 +208,94 @@ sub _dump {
   my($sname);
   my($out, $realpack, $realtype, $type, $ipad, $id, $blesspad);
 
-  return "undef" unless defined $val;
-
   $type = ref $val;
   $out = "";
 
   if ($type) {
 
     # prep it, if it looks like an object
-    if ($type =~ /[a-z_:]/) {
-      my $freezer = $s->{freezer};
-      # UNIVERSAL::can should be used here, when we can require 5.004
-      if ($freezer) {
-	eval { $val->$freezer() };
-	carp "WARNING(Freezer method call failed): $@" if $@;
-      }
+    if (my $freezer = $s->{freezer}) {
+      $val->$freezer() if UNIVERSAL::can($val, $freezer);
     }
 
     ($realpack, $realtype, $id) =
       (overload::StrVal($val) =~ /^(?:(.*)\=)?([^=]*)\(([^\(]*)\)$/);
-    
-    # keep a tab on it so that we dont fall into recursive pit
-    if (exists $s->{seen}{$id}) {
-#     if ($s->{expdepth} < $s->{level}) {
-      if ($s->{purity} and $s->{level} > 0) {
-	$out = ($realtype eq 'HASH')  ? '{}' :
-	       ($realtype eq 'ARRAY') ? '[]' :
-					"''" ;
-	  push @post, $name . " = " . $s->{seen}{$id}[0];
-      }
-      else {
-	$out = $s->{seen}{$id}[0];
-	if ($name =~ /^([\@\%])/) {
-	  my $start = $1;
-	  if ($out =~ /^\\$start/) {
-	    $out = substr($out, 1);
+
+    # if it has a name, we need to either look it up, or keep a tab
+    # on it so we know when we hit it later
+    if (defined($name) and length($name)) {
+      # keep a tab on it so that we dont fall into recursive pit
+      if (exists $s->{seen}{$id}) {
+#	if ($s->{expdepth} < $s->{level}) {
+	  if ($s->{purity} and $s->{level} > 0) {
+	    $out = ($realtype eq 'HASH')  ? '{}' :
+	      ($realtype eq 'ARRAY') ? '[]' :
+		"''" ;
+	    push @post, $name . " = " . $s->{seen}{$id}[0];
 	  }
 	  else {
-	    $out = $start . '{' . $out . '}';
-	  }
-	}
+	    $out = $s->{seen}{$id}[0];
+	    if ($name =~ /^([\@\%])/) {
+	      my $start = $1;
+	      if ($out =~ /^\\$start/) {
+		$out = substr($out, 1);
+	      }
+	      else {
+		$out = $start . '{' . $out . '}';
+	      }
+	    }
+          }
+	  return $out;
+#        }
       }
-      return $out;
-#     }
+      else {
+        # store our name
+        $s->{seen}{$id} = [ (($name =~ /^[@%]/)     ? ('\\' . $name ) :
+			     ($realtype eq 'CODE' and
+			      $name =~ /^[*](.*)$/) ? ('\\&' . $1 )   :
+			     $name          ),
+			    $val ];
+      }
     }
-    else {
-      # store our name
-      $s->{seen}{$id} = [ (($name =~ /^[@%]/)     ? ('\\' . $name ) :
-			   ($realtype eq 'CODE' and
-			    $name =~ /^[*](.*)$/) ? ('\\&' . $1 )   :
-						     $name          ),
-			  $val ];
+
+    if ($realpack and $realpack eq 'Regexp') {
+	$out = "$val";
+	$out =~ s,/,\\/,g;
+	return "qr/$out/";
+    }
+
+    # If purity is not set and maxdepth is set, then check depth: 
+    # if we have reached maximum depth, return the string
+    # representation of the thing we are currently examining
+    # at this depth (i.e., 'Foo=ARRAY(0xdeadbeef)'). 
+    if (!$s->{purity}
+	and $s->{maxdepth} > 0
+	and $s->{level} >= $s->{maxdepth})
+    {
+      return qq['$val'];
+    }
+
+    # we have a blessed ref
+    if ($realpack) {
+      $out = $s->{'bless'} . '( ';
+      $blesspad = $s->{apad};
+      $s->{apad} .= '       ' if ($s->{indent} >= 2);
     }
 
     $s->{level}++;
     $ipad = $s->{xpad} x $s->{level};
 
-    if ($realpack) {          # we have a blessed ref
-      $out = $s->{'bless'} . '( ';
-      $blesspad = $s->{apad};
-      $s->{apad} .= '       ' if ($s->{indent} >= 2);
-    }
     
     if ($realtype eq 'SCALAR') {
       if ($realpack) {
-	$out .= 'do{\\(my $o = ' . $s->_dump($$val, "") . ')}';
+	$out .= 'do{\\(my $o = ' . $s->_dump($$val, "\${$name}") . ')}';
       }
       else {
-	$out .= '\\' . $s->_dump($$val, "");
+	$out .= '\\' . $s->_dump($$val, "\${$name}");
       }
     }
     elsif ($realtype eq 'GLOB') {
-	$out .= '\\' . $s->_dump($$val, "");
+	$out .= '\\' . $s->_dump($$val, "*{$name}");
     }
     elsif ($realtype eq 'ARRAY') {
       my($v, $pad, $mname);
@@ -287,7 +303,9 @@ sub _dump {
       $out .= ($name =~ /^\@/) ? '(' : '[';
       $pad = $s->{sep} . $s->{pad} . $s->{apad};
       ($name =~ /^\@(.*)$/) ? ($mname = "\$" . $1) : 
-	($name =~ /[]}]$/) ? ($mname = $name) : ($mname = $name . '->');
+	# omit -> if $foo->[0]->{bar}, but not ${$foo->[0]}->{bar}
+	($name =~ /^\\?[\%\@\*\$][^{].*[]}]$/) ? ($mname = $name) :
+	  ($mname = $name . '->');
       $mname .= '->' if $mname =~ /^\*.+\{[A-Z]+\}$/;
       for $v (@$val) {
 	$sname = $mname . '[' . $i . ']';
@@ -303,8 +321,10 @@ sub _dump {
       $out .= ($name =~ /^\%/) ? '(' : '{';
       $pad = $s->{sep} . $s->{pad} . $s->{apad};
       $lpad = $s->{apad};
-      ($name =~ /^\%(.*)$/) ? ($mname = "\$" . $1) : 
-	($name =~ /[]}]$/) ? ($mname = $name) : ($mname = $name . '->');
+      ($name =~ /^\%(.*)$/) ? ($mname = "\$" . $1) :
+	# omit -> if $foo->[0]->{bar}, but not ${$foo->[0]}->{bar}
+	($name =~ /^\\?[\%\@\*\$][^{].*[]}]$/) ? ($mname = $name) :
+	  ($mname = $name . '->');
       $mname .= '->' if $mname =~ /^\*.+\{[A-Z]+\}$/;
       while (($k, $v) = each %$val) {
 	my $nk = $s->_dump($k, "");
@@ -324,8 +344,7 @@ sub _dump {
       $out .= ($name =~ /^\%/) ? ')' : '}';
     }
     elsif ($realtype eq 'CODE') {
-      $out .= '"DUMMY"';
-      $out = 'sub { ' . $out . ' }';
+      $out .= 'sub { "DUMMY" }';
       carp "Encountered CODE ref, using dummy placeholder" if $s->{purity};
     }
     else {
@@ -347,11 +366,15 @@ sub _dump {
     if ($name ne '') {
       ($id) = ("$ref" =~ /\(([^\(]*)\)$/);
       if (exists $s->{seen}{$id}) {
-	$out = $s->{seen}{$id}[0];
-	return $out;
+        if ($s->{seen}{$id}[2]) {
+	  $out = $s->{seen}{$id}[0];
+	  #warn "[<$out]\n";
+	  return "\${$out}";
+	}
       }
       else {
-	$s->{seen}{$id} = ["\\$name", $val];
+	#warn "[>\\$name]\n";
+	$s->{seen}{$id} = ["\\$name", $ref];
       }
     }
     if (ref($ref) eq 'GLOB' or "$ref" =~ /=GLOB\([^()]+\)$/) {  # glob
@@ -368,21 +391,28 @@ sub _dump {
 	my $k;
 	local ($s->{level}) = 0;
 	for $k (qw(SCALAR ARRAY HASH)) {
+	  my $gval = *$val{$k};
+	  next unless defined $gval;
+	  next if $k eq "SCALAR" && ! defined $$gval;  # always there
+
 	  # _dump can push into @post, so we hold our place using $postlen
 	  my $postlen = scalar @post;
 	  $post[$postlen] = "\*$sname = ";
 	  local ($s->{apad}) = " " x length($post[$postlen]) if $s->{indent} >= 2;
-	  $post[$postlen] .= $s->_dump(*{$name}{$k}, "\*$sname\{$k\}");
+	  $post[$postlen] .= $s->_dump($gval, "\*$sname\{$k\}");
 	}
       }
       $out .= '*' . $sname;
     }
-    elsif ($val =~ /^-?[1-9]\d{0,8}$/) { # safe decimal number
+    elsif (!defined($val)) {
+      $out .= "undef";
+    }
+    elsif ($val =~ /^(?:0|-?[1-9]\d{0,8})$/) { # safe decimal number
       $out .= $val;
     }
     else {				 # string
       if ($s->{useqq}) {
-	$out .= qquote($val);
+	$out .= qquote($val, $s->{useqq});
       }
       else {
 	$val =~ s/([\\\'])/\\$1/g;
@@ -390,10 +420,16 @@ sub _dump {
       }
     }
   }
-
-  # if we made it this far, $id was added to seen list at current
-  # level, so remove it to get deep copies
-  delete($s->{seen}{$id}) if $id and $s->{deepcopy};
+  if ($id) {
+    # if we made it this far, $id was added to seen list at current
+    # level, so remove it to get deep copies
+    if ($s->{deepcopy}) {
+      delete($s->{seen}{$id});
+    }
+    elsif ($name) {
+      $s->{seen}{$id}[2] = 1;
+    }
+  }
   return $out;
 }
   
@@ -493,22 +529,47 @@ sub Bless {
   defined($v) ? (($s->{'bless'} = $v), return $s) : $s->{'bless'};
 }
 
+sub Maxdepth {
+  my($s, $v) = @_;
+  defined($v) ? (($s->{'maxdepth'} = $v), return $s) : $s->{'maxdepth'};
+}
+
+
+# used by qquote below
+my %esc = (  
+    "\a" => "\\a",
+    "\b" => "\\b",
+    "\t" => "\\t",
+    "\n" => "\\n",
+    "\f" => "\\f",
+    "\r" => "\\r",
+    "\e" => "\\e",
+);
+
 # put a string value in double quotes
 sub qquote {
   local($_) = shift;
-  s/([\\\"\@\$\%])/\\$1/g;    
-  s/\a/\\a/g;
-  s/[\b]/\\b/g;
-  s/\t/\\t/g;
-  s/\n/\\n/g;
-  s/\f/\\f/g;
-  s/\r/\\r/g;
-  s/\e/\\e/g;
+  s/([\\\"\@\$])/\\$1/g;
+  return qq("$_") unless /[^\040-\176]/;  # fast exit
 
-# this won't work!
-#  s/([^\a\b\t\n\f\r\e\038-\176])/'\\'.sprintf('%03o',ord($1))/eg;
-  s/([\000-\006\013\016-\032\034-\037\177\200-\377])/'\\'.sprintf('%03o',ord($1))/eg;
-  return "\"$_\"";
+  my $high = shift || "";
+  s/([\a\b\t\n\f\r\e])/$esc{$1}/g;
+
+  # no need for 3 digits in escape for these
+  s/([\0-\037])(?!\d)/'\\'.sprintf('%o',ord($1))/eg;
+
+  s/([\0-\037\177])/'\\'.sprintf('%03o',ord($1))/eg;
+  if ($high eq "iso8859") {
+    s/([\200-\240])/'\\'.sprintf('%o',ord($1))/eg;
+  } elsif ($high eq "utf8") {
+#   use utf8;
+#   $str =~ s/([^\040-\176])/sprintf "\\x{%04x}", ord($1)/ge;
+  } elsif ($high eq "8bit") {
+      # leave it as it is
+  } else {
+    s/([\0-\037\177-\377])/'\\'.sprintf('%03o',ord($1))/eg;
+  }
+  return qq("$_");
 }
 
 1;
@@ -777,6 +838,14 @@ builtin operator used to create objects.  A function with the specified
 name should exist, and should accept the same arguments as the builtin.
 Default is C<bless>.
 
+=item $Data::Dumper::Maxdepth  I<or>  $I<OBJ>->Maxdepth(I<[NEWVAL]>)
+
+Can be set to a positive integer that specifies the depth beyond which
+which we don't venture into a structure.  Has no effect when
+C<Data::Dumper::Purity> is set.  (Useful in debugger when we often don't
+want to see more than enough).  Default is 0, which means there is 
+no maximum depth. 
+
 =back
 
 =head2 Exports
@@ -859,6 +928,21 @@ distribution for more examples.)
     $Data::Dumper::Purity = 0;         # avoid cross-refs
     print Data::Dumper->Dump([$b, $a], [qw(*b a)]);
     
+    ########
+    # deep structures
+    ########
+    
+    $a = "pearl";
+    $b = [ $a ];
+    $c = { 'b' => $b };
+    $d = [ $c ];
+    $e = { 'd' => $d };
+    $f = { 'e' => $e };
+    print Data::Dumper->Dump([$f], [qw(f)]);
+
+    $Data::Dumper::Maxdepth = 3;       # no deeper than 3 refs down
+    print Data::Dumper->Dump([$f], [qw(f)]);
+
     
     ########
     # object-oriented usage
@@ -954,7 +1038,7 @@ modify it under the same terms as Perl itself.
 
 =head1 VERSION
 
-Version 2.09    (9 July 1998)
+Version 2.11   (unreleased)
 
 =head1 SEE ALSO
 

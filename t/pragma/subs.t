@@ -2,7 +2,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    unshift @INC, '../lib';
     $ENV{PERL5LIB} = '../lib';
 }
 
@@ -49,12 +49,15 @@ for (@prgs){
                   `MCR $^X $switch $tmpfile` :
 		  $Is_MSWin32 ?
                   `.\\perl -I../lib $switch $tmpfile 2>&1` :
-                  `sh -c './perl $switch $tmpfile' 2>&1`;
+                  `./perl $switch $tmpfile 2>&1`;
     my $status = $?;
     $results =~ s/\n+$//;
     # allow expected output to be written as if $prog is on STDIN
     $results =~ s/tmp\d+/-/g;
     $results =~ s/\n%[A-Z]+-[SIWEF]-.*$// if $Is_VMS;  # clip off DCL status msg
+# bison says 'parse error' instead of 'syntax error',
+# various yaccs may or may not capitalize 'syntax'.
+    $results =~ s/^(syntax|parse) error/syntax error/mig;
     $expected =~ s/\n+$//;
     my $prefix = ($results =~ s/^PREFIX\n//) ;
     if ( $results =~ s/^SKIPPED\n//) {

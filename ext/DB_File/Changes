@@ -203,3 +203,72 @@
 
 1.60
    Changed the test to check for full tied array support
+
+1.61 19th November 1998
+
+   Added a note to README about how to build Berkeley DB 2.x when
+   using HP-UX.
+   Minor modifications to get the module to build with DB 2.5.x
+   Fixed a typo in the definition of O_RDONLY, courtesy of Mark Kettenis.
+
+1.62 30th November 1998
+
+   Added hints/dynixptx.pl.
+   Fixed typemap -- 1.61 used PL_na instead of na
+
+1.63 19th December 1998
+
+   * Fix to allow DB 2.6.x to build with DB_File
+   * Documentation updated to use push,pop etc in the RECNO example &
+     to include the find_dup & del_dup methods.
+
+1.64 21st February 1999
+
+   * Tidied the 1.x to 2.x flag mapping code.
+   * Added a patch from Mark Kettenis <kettenis@wins.uva.nl> to fix a flag
+     mapping problem with O_RDONLY on the Hurd
+   * Updated the message that db-recno.t prints when tests 51, 53 or 55 fail.
+
+1.65 6th March 1999
+
+   * Fixed a bug in the recno PUSH logic.
+   * The BOOT version check now needs 2.3.4 when using Berkeley DB version 2
+
+1.66 15th March 1999
+
+   * Added DBM Filter code
+
+1.67 6th June 1999
+
+   * Added DBM Filter documentation to DB_File.pm
+
+   * Fixed DBM Filter code to work with 5.004
+
+   * A few instances of newSVpvn were used in 1.66. This isn't available in
+     Perl 5.004_04 or earlier. Replaced with newSVpv.
+
+1.68 22nd July 1999
+
+   * Merged changes from 5.005_58 
+
+   * Fixed a bug in R_IBEFORE & R_IAFTER procesing in Berkeley DB
+     2 databases.
+
+   * Added some of the examples in the POD into the test harness.
+
+1.69 3rd August 1999
+
+   * fixed a bug in push -- DB_APPEND wasn't working properly.
+
+   * Fixed the R_SETCURSOR bug introduced in 1.68
+
+   * Added a new Perl variable $DB_File::db_ver
+   
+1.70 4th August 1999
+
+   * Initialise $DB_File::db_ver and $DB_File::db_version with
+     GV_ADD|GV_ADDMULT -- bug spotted by Nick Ing-Simmons.
+
+   * Added a BOOT check to test for equivalent versions of db.h &
+     libdb.a/so.
+

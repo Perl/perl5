@@ -9,16 +9,23 @@
 #ifndef  _INC_WIN32_PERL5
 #define  _INC_WIN32_PERL5
 
-#ifdef PERL_OBJECT
+#if defined(PERL_OBJECT) || defined(PERL_CAPI)
 #  define DYNAMIC_ENV_FETCH
 #  define ENV_HV_NAME "___ENV_HV_NAME___"
+#  define HAS_GETENV_LEN
 #  define prime_env_iter()
 #  define WIN32IO_IS_STDIO		/* don't pull in custom stdio layer */
+#  define WIN32SCK_IS_STDSCK		/* don't pull in custom wsock layer */
 #  ifdef PERL_GLOBAL_STRUCT
 #    error PERL_GLOBAL_STRUCT cannot be defined with PERL_OBJECT
 #  endif
 #  define win32_get_privlib PerlEnv_lib_path
 #  define win32_get_sitelib PerlEnv_sitelib_path
+#endif
+
+#if defined(PERL_IMPLICIT_CONTEXT)
+#  define PERL_GET_INTERP	((PerlInterpreter*)GetPerlInterpreter())
+#  define PERL_SET_INTERP(i)	(SetPerlInterpreter(i))
 #endif
 
 #ifdef __GNUC__
@@ -27,10 +34,14 @@ typedef long long __int64;
 /* GCC does not do __declspec() - render it a nop 
  * and turn on options to avoid importing data 
  */
+#ifndef __declspec
 #  define __declspec(x)
+#endif
 #  ifndef PERL_OBJECT
 #    define PERL_GLOBAL_STRUCT
-#    define MULTIPLICITY
+#    ifndef MULTIPLICITY
+#      define MULTIPLICITY
+#    endif
 #  endif
 #endif
 
@@ -79,6 +90,18 @@ struct tms {
 	long	tms_cstime;
 };
 
+#ifndef SYS_NMLN
+#define SYS_NMLN	257
+#endif
+
+struct utsname {
+    char sysname[SYS_NMLN];
+    char nodename[SYS_NMLN];
+    char release[SYS_NMLN];
+    char version[SYS_NMLN];
+    char machine[SYS_NMLN];
+};
+
 #ifndef START_EXTERN_C
 #undef EXTERN_C
 #ifdef __cplusplus
@@ -100,6 +123,11 @@ struct tms {
  * real filehandles. XXX Should always be defined (the other version is untested) */
 #define USE_SOCKETS_AS_HANDLES
 
+/* read() and write() aren't transparent for socket handles */
+#define PERL_SOCK_SYSREAD_IS_RECV
+#define PERL_SOCK_SYSWRITE_IS_SEND
+
+
 /* if USE_WIN32_RTL_ENV is not defined, Perl uses direct Win32 calls
  * to read the environment, bypassing the runtime's (usually broken)
  * facilities for accessing the same.  See note in util.c/my_setenv(). */
@@ -119,6 +147,14 @@ struct tms {
 
 #ifndef FILE_SHARE_DELETE		/* VC-4.0 headers don't have this */
 #define FILE_SHARE_DELETE		0x00000004
+#endif
+
+/* access() mode bits */
+#ifndef R_OK
+#  define	R_OK	4
+#  define	W_OK	2
+#  define	X_OK	1
+#  define	F_OK	0
 #endif
 
 /* Compiler-specific stuff. */
@@ -142,12 +178,11 @@ struct tms {
 #pragma warn -use	/* "'foo' is declared but never used" */
 #pragma warn -csu	/* "comparing signed and unsigned values" */
 #pragma warn -pro	/* "call to function with no prototype" */
-
-#define USE_RTL_WAIT	/* Borland has a working wait() */
+#pragma warn -stu	/* "undefined structure 'foo'" */
 
 /* Borland is picky about a bare member function name used as its ptr */
 #ifdef PERL_OBJECT
-#define FUNC_NAME_TO_PTR(name)	&(name)
+#  define MEMBER_TO_FPTR(name)	&(name)
 #endif
 
 #endif
@@ -156,6 +191,7 @@ struct tms {
 
 typedef long		uid_t;
 typedef long		gid_t;
+typedef unsigned short	mode_t;
 #pragma  warning(disable: 4018 4035 4101 4102 4244 4245 4761)
 
 #ifndef PERL_OBJECT
@@ -164,23 +200,23 @@ typedef long		gid_t;
 #define STRUCT_MGVTBL_DEFINITION					\
 struct mgvtbl {								\
     union {								\
-	int	    (CPERLscope(*svt_get))	_((SV *sv, MAGIC* mg));	\
+	int	    (CPERLscope(*svt_get))(pTHX_ SV *sv, MAGIC* mg);	\
 	char	    handle_VC_problem1[16];				\
     };									\
     union {								\
-	int	    (CPERLscope(*svt_set))	_((SV *sv, MAGIC* mg));	\
+	int	    (CPERLscope(*svt_set))(pTHX_ SV *sv, MAGIC* mg);	\
 	char	    handle_VC_problem2[16];				\
     };									\
     union {								\
-	U32	    (CPERLscope(*svt_len))	_((SV *sv, MAGIC* mg));	\
+	U32	    (CPERLscope(*svt_len))(pTHX_ SV *sv, MAGIC* mg);	\
 	char	    handle_VC_problem3[16];				\
     };									\
     union {								\
-	int	    (CPERLscope(*svt_clear))	_((SV *sv, MAGIC* mg));	\
+	int	    (CPERLscope(*svt_clear))(pTHX_ SV *sv, MAGIC* mg);	\
 	char	    handle_VC_problem4[16];				\
     };									\
     union {								\
-	int	    (CPERLscope(*svt_free))	_((SV *sv, MAGIC* mg));	\
+	int	    (CPERLscope(*svt_free))(pTHX_ SV *sv, MAGIC* mg);	\
 	char	    handle_VC_problem5[16];				\
     };									\
 }
@@ -188,22 +224,13 @@ struct mgvtbl {								\
 #define BASEOP_DEFINITION		\
     OP*		op_next;		\
     OP*		op_sibling;		\
-    OP*		(CPERLscope(*op_ppaddr))_((ARGSproto));		\
+    OP*		(CPERLscope(*op_ppaddr))(pTHX);		\
     char	handle_VC_problem[12];	\
     PADOFFSET	op_targ;		\
     OPCODE	op_type;		\
     U16		op_seq;			\
     U8		op_flags;		\
     U8		op_private;
-
-#define UNION_ANY_DEFINITION union any {		\
-    void*	any_ptr;				\
-    I32		any_i32;				\
-    IV		any_iv;					\
-    long	any_long;				\
-    void	(CPERLscope(*any_dptr)) _((void*));	\
-    char	handle_VC_problem[16];			\
-}
 
 #endif /* PERL_OBJECT */
 
@@ -213,12 +240,14 @@ struct mgvtbl {								\
 
 typedef long		uid_t;
 typedef long		gid_t;
+#ifndef _environ
 #define _environ	environ
+#endif
 #define flushall	_flushall
 #define fcloseall	_fcloseall
 
 #ifdef PERL_OBJECT
-#define FUNC_NAME_TO_PTR(name)	&(name)
+#  define MEMBER_TO_FPTR(name)	&(name)
 #endif
 
 #ifndef _O_NOINHERIT
@@ -262,8 +291,11 @@ extern	int	chown(const char *p, uid_t o, gid_t g);
 #define  init_os_extras Perl_init_os_extras
 
 DllExport void		Perl_win32_init(int *argcp, char ***argvp);
-DllExport void		Perl_init_os_extras(void);
+DllExport void		Perl_init_os_extras();
 DllExport void		win32_str_os_error(void *sv, DWORD err);
+DllExport int		RunPerl(int argc, char **argv, char **env);
+DllExport bool		SetPerlInterpreter(void* interp);
+DllExport void*		GetPerlInterpreter(void);
 
 #ifndef USE_SOCKETS_AS_HANDLES
 extern FILE *		my_fdopen(int, char *);
@@ -272,7 +304,6 @@ extern int		my_fclose(FILE *);
 extern int		do_aspawn(void *really, void **mark, void **sp);
 extern int		do_spawn(char *cmd);
 extern int		do_spawn_nowait(char *cmd);
-extern char		do_exec(char *cmd);
 extern char *		win32_get_privlib(char *pl);
 extern char *		win32_get_sitelib(char *pl);
 extern int		IsWin95(void);
@@ -309,26 +340,37 @@ EXT void win32_strip_return(struct sv *sv);
 #endif
 
 #define HAVE_INTERP_INTERN
-struct interp_intern {
-    char *	w32_perlshell_tokens;
-    char **	w32_perlshell_vec;
-    long	w32_perlshell_items;
-    struct av *	w32_fdpid;
-#ifndef USE_RTL_WAIT
-    long	w32_num_children;
-    HANDLE	w32_child_pids[MAXIMUM_WAIT_OBJECTS];
-#endif
+typedef struct {
+    long	num;
+    DWORD	pids[MAXIMUM_WAIT_OBJECTS];
+} child_tab;
+
+struct host_link {
+    char *	nameId;
+    void *	host_data;
+    struct host_link *	next;
 };
 
-#define w32_perlshell_tokens	(PL_sys_intern.w32_perlshell_tokens)
-#define w32_perlshell_vec	(PL_sys_intern.w32_perlshell_vec)
-#define w32_perlshell_items	(PL_sys_intern.w32_perlshell_items)
-#define w32_fdpid		(PL_sys_intern.w32_fdpid)
+struct interp_intern {
+    char *	perlshell_tokens;
+    char **	perlshell_vec;
+    long	perlshell_items;
+    struct av *	fdpid;
+    child_tab *	children;
+    HANDLE	child_handles[MAXIMUM_WAIT_OBJECTS];
+    struct host_link *	hostlist;
+};
 
-#ifndef USE_RTL_WAIT
-#  define w32_num_children	(PL_sys_intern.w32_num_children)
-#  define w32_child_pids	(PL_sys_intern.w32_child_pids)
-#endif
+
+#define w32_perlshell_tokens	(PL_sys_intern.perlshell_tokens)
+#define w32_perlshell_vec	(PL_sys_intern.perlshell_vec)
+#define w32_perlshell_items	(PL_sys_intern.perlshell_items)
+#define w32_fdpid		(PL_sys_intern.fdpid)
+#define w32_children		(PL_sys_intern.children)
+#define w32_num_children	(w32_children->num)
+#define w32_child_pids		(w32_children->pids)
+#define w32_child_handles	(PL_sys_intern.child_handles)
+#define w32_host_link		(PL_sys_intern.hostlist)
 
 /* 
  * Now Win32 specific per-thread data stuff 
@@ -357,4 +399,23 @@ struct thread_intern {
 #  endif /* !USE_DECLSPEC_THREAD */
 #endif /* USE_THREADS */
 
+/* UNICODE<>ANSI translation helpers */
+/* Use CP_ACP when mode is ANSI */
+/* Use CP_UTF8 when mode is UTF8 */
+
+#define A2WHELPER(lpa, lpw, nBytes)\
+    lpw[0] = 0, MultiByteToWideChar((IN_UTF8) ? CP_UTF8 : CP_ACP, 0, lpa, -1, lpw, (nBytes/sizeof(WCHAR)))
+
+#define W2AHELPER(lpw, lpa, nChars)\
+    lpa[0] = '\0', WideCharToMultiByte((IN_UTF8) ? CP_UTF8 : CP_ACP, 0, lpw, -1, (LPSTR)lpa, nChars, NULL, NULL)
+
+#define USING_WIDE()	(PerlEnv_os_id() == VER_PLATFORM_WIN32_NT)
+
+/*
+ * This provides a layer of functions and macros to ensure extensions will
+ * get to use the same RTL functions as the core.
+ */
+#include "win32iop.h"
+
 #endif /* _INC_WIN32_PERL5 */
+

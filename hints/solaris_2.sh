@@ -1,6 +1,6 @@
 # hints/solaris_2.sh
-# Last modified:  Wed May 27 13:04:45 EDT 1998
-# Andy Dougherty  <doughera@lafcol.lafayette.edu>
+# Last modified:  Tue Apr 13 13:12:49 EDT 1999
+# Andy Dougherty  <doughera@lafayette.edu>
 # Based on input from lots of folks, especially
 # Dean Roehrich <roehrich@ironwood-fddi.cray.com>
 
@@ -9,7 +9,10 @@
 # way to do that is to invoke Configure with
 # 
 #     sh Configure -Dcc='gcc -B/usr/ccs/bin/'
-# 
+#
+#  (Note that the trailing slash is *required*.)
+#  gcc will occasionally emit warnings about "unused prefix", but
+#  these ought to be harmless.  See below for more details.
  
 # See man vfork.
 usevfork=false
@@ -140,6 +143,19 @@ cat > UU/cc.cbu <<'EOSH'
 #
 # Watch out in case they have not set $cc.
 
+# Perl compiled with some combinations of GNU as and ld may not 
+# be able to perform dynamic loading of extensions.  If you have a
+# problem with dynamic loading, be sure that you are using the Solaris
+# /usr/ccs/bin/as and /usr/ccs/bin/ld.  You can do that with
+#  		sh Configure -Dcc='gcc -B/usr/ccs/bin/'
+# (note the trailing slash is required). 
+# Combinations that are known to work with the following hints:
+#
+#  gcc-2.7.2, GNU as 2.7, GNU ld 2.7
+#  egcs-1.0.3, GNU as 2.9.1 and GNU ld 2.9.1
+#	--Andy Dougherty  <doughera@lafayette.edu>  
+#	Tue Apr 13 17:19:43 EDT 1999
+
 # Get gcc to share its secrets.
 echo 'main() { return 0; }' > try.c
 	# Indent to avoid propagation to config.sh
@@ -149,7 +165,6 @@ if echo "$verbose" | grep '^Reading specs from' >/dev/null 2>&1; then
 	#
 	# Using gcc.
 	#
-	#echo Using gcc
 
 	tmp=`echo "$verbose" | grep '^Reading' |
 		awk '{print $NF}'  | sed 's/specs$/include/'`
@@ -157,48 +172,76 @@ if echo "$verbose" | grep '^Reading specs from' >/dev/null 2>&1; then
 	# Determine if the fixed-includes look like they'll work.
 	# Doesn't work anymore for gcc-2.7.2.
 
-	# See if as(1) is GNU as(1).  GNU as(1) won't work for this job.
+	# See if as(1) is GNU as(1).  GNU as(1) might not work for this job.
 	if echo "$verbose" | grep ' /usr/ccs/bin/as ' >/dev/null 2>&1; then
 	    :
 	else
 	    cat <<END >&2
 
-NOTE: You are using GNU as(1).  GNU as(1) will not build Perl.
-I'm arranging to use /usr/ccs/bin/as by including -B/usr/ccs/bin/
+NOTE: You are using GNU as(1).  GNU as(1) might not build Perl.  If you
+have trouble, you can use /usr/ccs/bin/as by including -B/usr/ccs/bin/
 in your ${cc:-cc} command.  (Note that the trailing "/" is required.)
 
 END
-	    cc="${cc:-cc} -B/usr/ccs/bin/"
+	    # Apparently not needed, at least for as 2.7 and later.
+	    # cc="${cc:-cc} -B/usr/ccs/bin/"
 	fi
 
-	# See if ld(1) is GNU ld(1).  GNU ld(1) won't work for this job.
+	# See if ld(1) is GNU ld(1).  GNU ld(1) might not work for this job.
 	# Recompute $verbose since we may have just changed $cc.
-	verbose=`${cc:-cc} -v -o try try.c 2>&1`
+	verbose=`${cc:-cc} -v -o try try.c 2>&1 | grep ld 2>&1`
+
 	if echo "$verbose" | grep ' /usr/ccs/bin/ld ' >/dev/null 2>&1; then
+	    # Ok, gcc directly calls the Solaris /usr/ccs/bin/ld.
+	    :
+	elif echo "$verbose" | grep "ld: Software Generation Utilities" >/dev/null 2>&1; then
+	    # Hmm.  gcc doesn't call /usr/ccs/bin/ld directly, but it
+	    # does appear to be using it eventually.  egcs-1.0.3's ld
+	    # wrapper does this.
+	    # All Solaris versions of ld I've seen contain the magic
+	    # string used in the grep.
 	    :
 	else
-	    cat <<END >&2
+	    # No evidence yet of /usr/ccs/bin/ld.  Some versions
+	    # of egcs's ld wrapper call /usr/ccs/bin/ld in turn but
+	    # apparently don't reveal that unless you pass in -V.
+	    # (This may all depend on local configurations too.)
 
-NOTE: You are using GNU ld(1).  GNU ld(1) will not build Perl.
-I'm arranging to use /usr/ccs/bin/ld by including -B/usr/ccs/bin/
+	    myld=`echo $verbose| grep ld | awk '/\/ld/ {print $1}'`
+	    # This assumes that gcc's output will not change, and that
+	    # /full/path/to/ld will be the first word of the output.
+	    # Thus myld is something like opt/gnu/sparc-sun-solaris2.5/bin/ld
+
+	    if $myld -V 2>&1 | grep "ld: Software Generation Utilities" >/dev/null 2>&1; then
+		# Ok, /usr/ccs/bin/ld eventually does get called.
+		:
+	    else
+		cat <<END >&2
+
+NOTE: You are using GNU ld(1).  GNU ld(1) might not build Perl.  If you
+have trouble, you can use /usr/ccs/bin/ld by including -B/usr/ccs/bin/
 in your ${cc:-cc} command.  (Note that the trailing "/" is required.)
 
+I will try to use GNU ld by passing in the -Wl,-E flag, but if that
+doesn't work, you should use -B/usr/ccs/bin/ instead.
+
 END
-	    cc="${cc:-cc} -B/usr/ccs/bin/"
+		ccdlflags="$ccdlflags -Wl,-E"
+		lddlflags="$lddlflags -W,l-E -G"
+	    fi
 	fi
 
 else
 	#
 	# Not using gcc.
 	#
-	#echo Not using gcc
 
-	# See if as(1) is GNU as(1).  GNU as(1) won't work for this job.
+	# See if as(1) is GNU as(1).  GNU might not work for this job.
 	case `as --version < /dev/null 2>&1` in
 	*GNU*)
 		cat <<END >&2
 
-NOTE: You are using GNU as(1).  GNU as(1) will not build Perl.
+NOTE: You are using GNU as(1).  GNU as(1) might not build Perl.
 You must arrange to use /usr/ccs/bin/as, perhaps by adding /usr/ccs/bin
 to the beginning of your PATH.
 
@@ -206,7 +249,7 @@ END
 		;;
 	esac
 
-	# See if ld(1) is GNU ld(1).  GNU ld(1) won't work for this job.
+	# See if ld(1) is GNU ld(1).  GNU ld(1) might not work for this job.
 	# ld --version doesn't properly report itself as a GNU tool,
 	# as of ld version 2.6, so we need to be more strict. TWP 9/5/96
 	gnu_ld=false
@@ -226,8 +269,8 @@ END
 	if $gnu_ld ; then
 		cat <<END >&2
 
-NOTE: You are apparently using GNU ld(1).  GNU ld(1) will not build Perl.
-You must arrange to use /usr/ccs/bin/ld, perhaps by adding /usr/ccs/bin
+NOTE: You are apparently using GNU ld(1).  GNU ld(1) might not build Perl.
+You should arrange to use /usr/ccs/bin/ld, perhaps by adding /usr/ccs/bin
 to the beginning of your PATH.
 
 END
@@ -242,25 +285,26 @@ rm -f core
 # XXX
 EOSH
 
-if [ "X$usethreads" = "X$define" ]; then
-    ccflags="-D_REENTRANT $ccflags"
-    # -lpthread needs to come before -lc but after other libraries such
-    # as -lgdbm and such like. We assume here that -lc is present in
-    # libswanted. If that fails to be true in future, then this can be
-    # changed to add pthread to the very end of libswanted.
-    # sched_yield is in -lposix4
-    set `echo X "$libswanted "| sed -e 's/ c / posix4 pthread c /'`
-    shift
-    libswanted="$*"
+# This script UU/usethreads.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use threads.
+cat > UU/usethreads.cbu <<'EOCBU'
+case "$usethreads" in
+$define|true|[yY]*)
+        ccflags="-D_REENTRANT $ccflags"
 
-    # On Solaris 2.6 x86 there is a bug with sigsetjmp() and siglongjmp()
-    # when linked with the threads library, such that whatever positive value
-    # you pass to siglongjmp(), sigsetjmp() returns 1.
-    # Thanks to Simon Parsons <S.Parsons@ftel.co.uk> for this report.
-    # Sun BugID is 4117946, "sigsetjmp always returns 1 when called by
-    # siglongjmp in a MT program". As of 19980622, there is no patch
-    # available.
-    cat >try.c <<'EOM'
+        # sched_yield is in -lposix4
+        set `echo X "$libswanted "| sed -e 's/ c / posix4 pthread c /'`
+        shift
+        libswanted="$*"
+
+        # On Solaris 2.6 x86 there is a bug with sigsetjmp() and siglongjmp()
+        # when linked with the threads library, such that whatever positive
+        # value you pass to siglongjmp(), sigsetjmp() returns 1.
+        # Thanks to Simon Parsons <S.Parsons@ftel.co.uk> for this report.
+        # Sun BugID is 4117946, "sigsetjmp always returns 1 when called by
+        # siglongjmp in a MT program". As of 19980622, there is no patch
+        # available.
+        cat >try.c <<'EOM'
 	/* Test for sig(set|long)jmp bug. */
 	#include <setjmp.h>
 	 
@@ -274,18 +318,44 @@ if [ "X$usethreads" = "X$define" ]; then
 	    siglongjmp(env, 2);
 	}
 EOM
-    if test "`arch`" = i86pc -a "$osvers" = 2.6 \
-    && ${cc:-cc} try.c -lpthread >/dev/null 2>&1 && ./a.out; then
-	d_sigsetjmp=$undef
-	cat << 'EOM' >&2
+        if test "`arch`" = i86pc -a "$osvers" = 2.6 && \
+           ${cc:-cc} try.c -lpthread >/dev/null 2>&1 && ./a.out; then
+ 	    d_sigsetjmp=$undef
+	    cat << 'EOM' >&2
 
 You will see a *** WHOA THERE!!! ***  message from Configure for
 d_sigsetjmp.  Keep the recommended value.  See hints/solaris_2.sh
 for more information.
 
 EOM
-    fi
-fi
+        fi
+	;;
+esac
+EOCBU
+
+# This script UU/use64bits.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use 64 bits.
+cat > UU/use64bits.cbu <<'EOCBU'
+case "$use64bits" in
+$define|true|[yY]*)
+	    case "`uname -r`" in
+	    2.[1-5])
+		cat >&4 <<EOM
+Solaris `uname -r` does not support 64-bit interfaces.
+You should upgrade to at least Solaris 2.6.
+EOM
+		exit 1
+		;;
+	    esac
+	    ccflags="$ccflags `getconf LFS_CFLAGS`"
+	    ldflags="$ldflags `getconf LFS_LDFLAGS`"
+	    libswanted="$libswanted `getconf LFS_LIBS`"
+	    ccflags="$ccflags -DUSE_LONG_LONG"
+	    # When a 64-bit cc becomes available $archname64
+	    # may need setting so that $archname gets it attached.
+	    ;;
+esac
+EOCBU
 
 # This is just a trick to include some useful notes.
 cat > /dev/null <<'End_of_Solaris_Notes'

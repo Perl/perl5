@@ -77,19 +77,18 @@ typedef struct Module {
  * We keep a list of all loaded modules to be able to call the fini
  * handlers at atexit() time.
  */
-static ModulePtr modList;
+static ModulePtr modList;		/* XXX threaded */
 
 /*
  * The last error from one of the dl* routines is kept in static
  * variables here. Each error is returned only once to the caller.
  */
-static char errbuf[BUFSIZ];
-static int errvalid;
+static char errbuf[BUFSIZ];		/* XXX threaded */
+static int errvalid;			/* XXX threaded */
 
 static void caterr(char *);
 static int readExports(ModulePtr);
 static void terminate(void);
-static void *findMain(void);
 
 static char *strerror_failed   = "(strerror failed)";
 static char *strerror_r_failed = "(strerror_r failed)";
@@ -104,7 +103,7 @@ char *strerrorcat(char *str, int err) {
 
     if (buf == 0)
       return 0;
-    if (strerror_r(err, buf, sizeof(buf)) == 0)
+    if (strerror_r(err, buf, BUFSIZ) == 0)
       msg = buf;
     else
       msg = strerror_r_failed;
@@ -132,7 +131,7 @@ char *strerrorcpy(char *str, int err) {
 
     if (buf == 0)
       return 0;
-    if (strerror_r(err, buf, sizeof(buf)) == 0)
+    if (strerror_r(err, buf, BUFSIZ) == 0)
       msg = buf;
     else
       msg = strerror_r_failed;
@@ -154,17 +153,16 @@ char *strerrorcpy(char *str, int err) {
 /* ARGSUSED */
 void *dlopen(char *path, int mode)
 {
+	dTHX;
 	register ModulePtr mp;
-	static void *mainModule;
+	static int inited;			/* XXX threaded */
 
 	/*
 	 * Upon the first call register a terminate handler that will
-	 * close all libraries. Also get a reference to the main module
-	 * for use with loadbind.
+	 * close all libraries.
 	 */
-	if (!mainModule) {
-		if ((mainModule = findMain()) == NULL)
-			return NULL;
+	if (!inited) {
+		inited++;
 		atexit(terminate);
 	}
 	/*
@@ -190,11 +188,19 @@ void *dlopen(char *path, int mode)
 		safefree(mp);
 		return NULL;
 	}
+
 	/*
 	 * load should be declared load(const char *...). Thus we
 	 * cast the path to a normal char *. Ugly.
 	 */
-	if ((mp->entry = (void *)load((char *)path, L_NOAUTODEFER, NULL)) == NULL) {
+	if ((mp->entry = (void *)load((char *)path,
+#ifdef L_LIBPATH_EXEC
+				      L_LIBPATH_EXEC |
+#endif
+				      L_NOAUTODEFER,
+				      NULL)) == NULL) {
+	        int saverrno = errno;
+		
 		safefree(mp->name);
 		safefree(mp);
 		errvalid++;
@@ -206,27 +212,34 @@ void *dlopen(char *path, int mode)
 		 * can be further described by querying the loader about
 		 * the last error.
 		 */
-		if (errno == ENOEXEC) {
-			char *tmp[BUFSIZ/sizeof(char *)];
-			if (loadquery(L_GETMESSAGES, tmp, sizeof(tmp)) == -1)
-				strerrorcpy(errbuf, errno);
+		if (saverrno == ENOEXEC) {
+			char *moreinfo[BUFSIZ/sizeof(char *)];
+			if (loadquery(L_GETMESSAGES, moreinfo, sizeof(moreinfo)) == -1)
+				strerrorcpy(errbuf, saverrno);
 			else {
 				char **p;
-				for (p = tmp; *p; p++)
+				for (p = moreinfo; *p; p++)
 					caterr(*p);
 			}
 		} else
-			strerrorcat(errbuf, errno);
+			strerrorcat(errbuf, saverrno);
 		return NULL;
 	}
 	mp->refCnt = 1;
 	mp->next = modList;
 	modList = mp;
-	if (loadbind(0, mainModule, mp->entry) == -1) {
+	/*
+	 * Assume anonymous exports come from the module this dlopen
+	 * is linked into, that holds true as long as dlopen and all
+	 * of the perl core are in the same shared object.
+	 */
+	if (loadbind(0, (void *)dlopen, mp->entry) == -1) {
+	        int saverrno = errno;
+
 		dlclose(mp);
 		errvalid++;
 		strcpy(errbuf, "loadbind: ");
-		strerrorcat(errbuf, errno);
+		strerrorcat(errbuf, saverrno);
 		return NULL;
 	}
 	if (readExports(mp) == -1) {
@@ -364,6 +377,7 @@ void *calloc(size_t ne, size_t sz)
  */
 static int readExports(ModulePtr mp)
 {
+	dTHX;
 	LDFILE *ldp = NULL;
 	SCNHDR sh;
 	LDHDR *lhp;
@@ -526,52 +540,6 @@ static int readExports(ModulePtr mp)
 	return 0;
 }
 
-/*
- * Find the main modules entry point. This is used as export pointer
- * for loadbind() to be able to resolve references to the main part.
- */
-static void * findMain(void)
-{
-	struct ld_info *lp;
-	char *buf;
-	int size = 4*1024;
-	int i;
-	void *ret;
-
-	if ((buf = safemalloc(size)) == NULL) {
-		errvalid++;
-		strcpy(errbuf, "findMain: ");
-		strerrorcat(errbuf, errno);
-		return NULL;
-	}
-	while ((i = loadquery(L_GETINFO, buf, size)) == -1 && errno == ENOMEM) {
-		safefree(buf);
-		size += 4*1024;
-		if ((buf = safemalloc(size)) == NULL) {
-			errvalid++;
-			strcpy(errbuf, "findMain: ");
-			strerrorcat(errbuf, errno);
-			return NULL;
-		}
-	}
-	if (i == -1) {
-		errvalid++;
-		strcpy(errbuf, "findMain: ");
-		strerrorcat(errbuf, errno);
-		safefree(buf);
-		return NULL;
-	}
-	/*
-	 * The first entry is the main module. The entry point
-	 * returned by load() does actually point to the data
-	 * segment origin.
-	 */
-	lp = (struct ld_info *)buf;
-	ret = lp->ldinfo_dataorg;
-	safefree(buf);
-	return ret;
-}
-
 /* dl_dlopen.xs
  * 
  * Platform:	SunOS/Solaris, possibly others which use dlopen.
@@ -597,15 +565,15 @@ static void * findMain(void)
 
 
 static void
-dl_private_init()
+dl_private_init(pTHX)
 {
-    (void)dl_generic_private_init();
+    (void)dl_generic_private_init(aTHX);
 }
  
 MODULE = DynaLoader     PACKAGE = DynaLoader
 
 BOOT:
-    (void)dl_private_init();
+    (void)dl_private_init(aTHX);
 
 
 void *
@@ -615,12 +583,12 @@ dl_load_file(filename, flags=0)
 	CODE:
 	DLDEBUG(1,PerlIO_printf(PerlIO_stderr(), "dl_load_file(%s,%x):\n", filename,flags));
 	if (flags & 0x01)
-	    warn("Can't make loaded symbols global on this platform while loading %s",filename);
+	    Perl_warn(aTHX_ "Can't make loaded symbols global on this platform while loading %s",filename);
 	RETVAL = dlopen(filename, 1) ;
 	DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), " libref=%x\n", RETVAL));
 	ST(0) = sv_newmortal() ;
 	if (RETVAL == NULL)
-	    SaveError("%s",dlerror()) ;
+	    SaveError(aTHX_ "%s",dlerror()) ;
 	else
 	    sv_setiv( ST(0), (IV)RETVAL);
 
@@ -636,7 +604,7 @@ dl_find_symbol(libhandle, symbolname)
 	DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), "  symbolref = %x\n", RETVAL));
 	ST(0) = sv_newmortal() ;
 	if (RETVAL == NULL)
-	    SaveError("%s",dlerror()) ;
+	    SaveError(aTHX_ "%s",dlerror()) ;
 	else
 	    sv_setiv( ST(0), (IV)RETVAL);
 
@@ -657,7 +625,9 @@ dl_install_xsub(perl_name, symref, filename="$Package")
     CODE:
     DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), "dl_install_xsub(name=%s, symref=%x)\n",
 	perl_name, symref));
-    ST(0)=sv_2mortal(newRV((SV*)newXS(perl_name, (void(*)())symref, filename)));
+    ST(0) = sv_2mortal(newRV((SV*)newXS(perl_name,
+					(void(*)(pTHX_ CV *))symref,
+					filename)));
 
 
 char *

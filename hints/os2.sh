@@ -113,10 +113,11 @@ aout_lib_ext='.a'
 aout_ar='ar'
 aout_plibext='.a'
 aout_lddlflags="-Zdll $ld_dll_optimize"
+# Cannot have 32000K stack: get SYS0170  ?!
 if [ $emxcrtrev -ge 50 ]; then 
-    aout_ldflags='-Zexe -Zsmall-conv -Zstack 32000'
+    aout_ldflags='-Zexe -Zsmall-conv -Zstack 16000'
 else
-    aout_ldflags='-Zexe -Zstack 32000'
+    aout_ldflags='-Zexe -Zstack 16000'
 fi
 
 # To get into config.sh:
@@ -249,15 +250,6 @@ nm_opt='-p'
 d_getprior='define'
 d_setprior='define'
 
-if [ "X$usethreads" = "X$define" ]; then
-    ccflags="-Zmt $ccflags"
-    cppflags="-Zmt $cppflags"  # Do we really need to set this?
-    aout_ccflags="-DUSE_THREADS $aout_ccflags"
-    aout_cppflags="-DUSE_THREADS $aout_cppflags"
-    aout_lddlflags="-Zmt $aout_lddlflags"
-    aout_ldflags="-Zmt $aout_ldflags"
-fi
-
 # The next two are commented. pdksh handles #!, extproc gives no path part.
 # sharpbang='extproc '
 # shsharp='false'
@@ -265,9 +257,71 @@ fi
 # Commented:
 #startsh='extproc ksh\\n#! sh'
 
+# Find patch:
+gnupatch='patch'
+if (gnupatch -v || gnupatch --version)   2>&1 >/dev/null; then
+    gnupatch=gnupatch
+else
+    if (gpatch -v || gpatch --version)   2>&1 >/dev/null; then
+	gnupatch=gpatch
+    else
+	# They may have a special PATH during configuring
+	if (patch -v || patch --version) 2>&1 >/dev/null; then
+	    gnupatch="`./UU/loc patch.exe undef $pth`"
+	fi
+    fi
+fi
+
+# Apply patches if needed
+case "$0$running_c_cmd" in
+  *[/\\]Configure|*[/\\]Configure.|Configure|Configure.) # Skip Configure.cmd
+    if grep "^libnames" ./Configure > /dev/null; then
+	# Not patched!
+	if test -f ./Configure.cmd ; then
+	    echo "!!!" >&2
+	    echo "!!! ./Configure not patched, but ./Configure.cmd exits" >&2
+	    echo "!!! Do not know what to do!" >&2
+	    echo "!!!" >&2
+	    exit 2
+	fi
+	echo "!!!" >&2
+	echo "!!! You did not patch ./Configure!" >&2
+	echo "!!! I create Configure.cmd and patch it from ./os2/diff.configure." >&2
+	echo "!!!" >&2
+	echo "$gnupatch -b -p1 --output=Configure.cmd <./os2/diff.configure 2>&1 | tee 00_auto_patch" >&2
+	($gnupatch -b -p1 --output=Configure.cmd <./os2/diff.configure 2>&1 | tee 00_auto_patch) >&2
+	echo "!!!" >&2
+	echo "!!! The report of patching is copied to 00_auto_patch." >&2
+	echo "!!! Now you need to restart Configure.cmd with all the options" >&2
+	echo "!!!" >&2
+	echo "extproc sh" > Configure.ctm
+	cat Configure.cmd >> Configure.ctm && mv -f Configure.ctm Configure.cmd
+	exit 0
+    else
+	echo "!!! Apparently we are running a patched Configure." >&2
+    fi 
+    ;;
+  *) echo "!!! Apparently we are running a renamed Configure: '$0'." >&2
+esac
+
 # Copy pod:
 
-cp ./README.os2 ./pod/perlos2.pod
+cp -uf ./README.os2 ./pod/perlos2.pod
+
+# This script UU/usethreads.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use threads.
+cat > UU/usethreads.cbu <<'EOCBU'
+case "$usethreads" in
+$define|true|[yY]*)
+	ccflags="-Zmt $ccflags"
+        cppflags="-Zmt $cppflags"  # Do we really need to set this?
+        aout_ccflags="-DUSE_THREADS $aout_ccflags"
+        aout_cppflags="-DUSE_THREADS $aout_cppflags"
+        aout_lddlflags="-Zmt $aout_lddlflags"
+        aout_ldflags="-Zmt $aout_ldflags"
+	;;
+esac
+EOCBU
 
 # Now install the external modules. We are in the ./hints directory.
 
@@ -297,6 +351,9 @@ for xxx in * ; do
 	fi
 done
 
+case "$ldlibpthname" in
+'') ldlibpthname=none ;;
+esac
 
 # Now go back
 cd ../..

@@ -4,10 +4,8 @@ use overload
 '+'	=>	sub {new Math::BigInt &badd},
 '-'	=>	sub {new Math::BigInt
 		       $_[2]? bsub($_[1],${$_[0]}) : bsub(${$_[0]},$_[1])},
-'<=>'	=>	sub {new Math::BigInt
-		       $_[2]? bcmp($_[1],${$_[0]}) : bcmp(${$_[0]},$_[1])},
-'cmp'	=>	sub {new Math::BigInt
-		       $_[2]? ($_[1] cmp ${$_[0]}) : (${$_[0]} cmp $_[1])},
+'<=>'	=>	sub {$_[2]? bcmp($_[1],${$_[0]}) : bcmp(${$_[0]},$_[1])},
+'cmp'	=>	sub {$_[2]? ($_[1] cmp ${$_[0]}) : (${$_[0]} cmp $_[1])},
 '*'	=>	sub {new Math::BigInt &bmul},
 '/'	=>	sub {new Math::BigInt 
 		       $_[2]? scalar bdiv($_[1],${$_[0]}) :
@@ -18,6 +16,14 @@ use overload
 		       $_[2]? bpow($_[1],${$_[0]}) : bpow(${$_[0]},$_[1])},
 'neg'	=>	sub {new Math::BigInt &bneg},
 'abs'	=>	sub {new Math::BigInt &babs},
+'<<'	=>	sub {new Math::BigInt
+		       $_[2]? blsft($_[1],${$_[0]}) : blsft(${$_[0]},$_[1])},
+'>>'	=>	sub {new Math::BigInt
+		       $_[2]? brsft($_[1],${$_[0]}) : brsft(${$_[0]},$_[1])},
+'&'	=>	sub {new Math::BigInt &band},
+'|'	=>	sub {new Math::BigInt &bior},
+'^'	=>	sub {new Math::BigInt &bxor},
+'~'	=>	sub {new Math::BigInt &bnot},
 
 qw(
 ""	stringify
@@ -82,8 +88,8 @@ sub external { #(int_num_array) return num_str
 # Negate input value.
 sub bneg { #(num_str) return num_str
     local($_) = &bnorm(@_);
-    vec($_,0,8) ^= ord('+') ^ ord('-') unless $_ eq '+0';
-    s/^H/N/;
+    return $_ if $_ eq '+0' or $_ eq 'NaN';
+    vec($_,0,8) ^= ord('+') ^ ord('-');
     $_;
 }
 
@@ -106,7 +112,7 @@ sub bcmp { #(num_str, num_str) return cond_code
     } elsif ($y eq 'NaN') {
 	undef;
     } else {
-	&cmp($x,$y);
+	&cmp($x,$y) <=> 0;
     }
 }
 
@@ -259,8 +265,10 @@ sub bdiv { #(dividend: num_str, divisor: num_str) return num_str
 	push(@x, 0);
     }
     @q = (); ($v2,$v1) = @y[-2,-1];
+    $v2 = 0 unless $v2;
     while ($#x > $#y) {
 	($u2,$u1,$u0) = @x[-3..-1];
+	$u2 = 0 unless $u2;
 	$q = (($u0 == $v1) ? 99999 : int(($u0*1e5+$u1)/$v1));
 	--$q while ($v2*$q > ($u0*1e5+$u1-$q*$v1)*1e5+$u2);
 	if ($q) {
@@ -328,6 +336,69 @@ sub bpow { #(num_str, num_str) return num_str
     }
 }
 
+# compute x << y, y >= 0
+sub blsft { #(num_str, num_str) return num_str
+    &bmul($_[$[], &bpow(2, $_[$[+1]));
+}
+
+# compute x >> y, y >= 0
+sub brsft { #(num_str, num_str) return num_str
+    &bdiv($_[$[], &bpow(2, $_[$[+1]));
+}
+
+# compute x & y
+sub band { #(num_str, num_str) return num_str
+    local($x,$y,$r,$m,$xr,$yr) = (&bnorm($_[$[]),&bnorm($_[$[+1]),0,1);
+    if ($x eq 'NaN' || $y eq 'NaN') {
+	'NaN';
+    } else {
+	while ($x ne '+0' && $y ne '+0') {
+	    ($x, $xr) = &bdiv($x, 0x10000);
+	    ($y, $yr) = &bdiv($y, 0x10000);
+	    $r = &badd(&bmul(int $xr & $yr, $m), $r);
+	    $m = &bmul($m, 0x10000);
+	}
+	$r;
+    }
+}
+
+# compute x | y
+sub bior { #(num_str, num_str) return num_str
+    local($x,$y,$r,$m,$xr,$yr) = (&bnorm($_[$[]),&bnorm($_[$[+1]),0,1);
+    if ($x eq 'NaN' || $y eq 'NaN') {
+	'NaN';
+    } else {
+	while ($x ne '+0' || $y ne '+0') {
+	    ($x, $xr) = &bdiv($x, 0x10000);
+	    ($y, $yr) = &bdiv($y, 0x10000);
+	    $r = &badd(&bmul(int $xr | $yr, $m), $r);
+	    $m = &bmul($m, 0x10000);
+	}
+	$r;
+    }
+}
+
+# compute x ^ y
+sub bxor { #(num_str, num_str) return num_str
+    local($x,$y,$r,$m,$xr,$yr) = (&bnorm($_[$[]),&bnorm($_[$[+1]),0,1);
+    if ($x eq 'NaN' || $y eq 'NaN') {
+	'NaN';
+    } else {
+	while ($x ne '+0' || $y ne '+0') {
+	    ($x, $xr) = &bdiv($x, 0x10000);
+	    ($y, $yr) = &bdiv($y, 0x10000);
+	    $r = &badd(&bmul(int $xr ^ $yr, $m), $r);
+	    $m = &bmul($m, 0x10000);
+	}
+	$r;
+    }
+}
+
+# represent ~x as twos-complement number
+sub bnot { #(num_str) return num_str
+    &bsub(-1,$_[$[]);
+}
+
 1;
 __END__
 
@@ -350,6 +421,12 @@ Math::BigInt - Arbitrary size integer math package
   $i->bmod(BINT) return BINT         modulus
   $i->bgcd(BINT) return BINT         greatest common divisor
   $i->bnorm return BINT              normalization
+  $i->blsft(BINT) return BINT        left shift
+  $i->brsft(BINT) return (BINT,BINT) right shift (quo,rem) just quo if scalar
+  $i->band(BINT) return BINT         bit-wise and
+  $i->bior(BINT) return BINT         bit-wise inclusive or
+  $i->bxor(BINT) return BINT         bit-wise exclusive or
+  $i->bnot return BINT               bit-wise not
 
 =head1 DESCRIPTION
 
@@ -393,15 +470,15 @@ are not numbers, as well as the result of dividing by zero.
 =head1 Autocreating constants
 
 After C<use Math::BigInt ':constant'> all the integer decimal constants
-in the given scope are converted to C<Math::BigInt>.  This convertion
+in the given scope are converted to C<Math::BigInt>.  This conversion
 happens at compile time.
 
 In particular
 
   perl -MMath::BigInt=:constant -e 'print 2**100'
 
-print the integer value of C<2**100>.  Note that without convertion of 
-constants the expression 2**100 will be calculatted as floating point number.
+print the integer value of C<2**100>.  Note that without conversion of 
+constants the expression 2**100 will be calculated as floating point number.
 
 =head1 BUGS
 

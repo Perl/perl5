@@ -26,14 +26,14 @@ char *limit;
 STR *subs;
 STR *curargs = Nullstr;
 
-static void addsemi _(( STR *str ));
-static void emit_split _(( STR *str, int level ));
-static void fixtab _(( STR *str, int lvl ));
-static void numericize _(( int node ));
-static void tab _(( STR *str, int lvl ));
+static void addsemi ( STR *str );
+static void emit_split ( STR *str, int level );
+static void fixtab ( STR *str, int lvl );
+static void numericize ( int node );
+static void tab ( STR *str, int lvl );
 
-int prewalk _(( int numit, int level, int node, int *numericptr ));
-STR * walk _(( int useval, int level, int node, int *numericptr, int minprec ));
+int prewalk ( int numit, int level, int node, int *numericptr );
+STR * walk ( int useval, int level, int node, int *numericptr, int minprec );
 
 
 STR *
@@ -133,7 +133,7 @@ walk(int useval, int level, register int node, int *numericptr, int minprec)
 	    if (saw_FS && !const_FS)
 		do_chop = TRUE;
 	    if (do_chop) {
-		str_cat(str,"chop;\t# strip record separator\n");
+		str_cat(str,"chomp;\t# strip record separator\n");
 		tab(str,level);
 	    }
 	    if (do_split)
@@ -190,7 +190,7 @@ walk(int useval, int level, register int node, int *numericptr, int minprec)
 		    i = 0;
 		    if (do_chop) {
 			i++;
-			str_cat(str,"chop;\t# strip record separator\n");
+			str_cat(str,"chomp;\t# strip record separator\n");
 			tab(str,level);
 		    }
 		    if (do_split && !(len & 1)) {
@@ -1292,7 +1292,7 @@ sub Pick {\n\
 	if (len > 0)
 	    tmpstr = walk(1,level,ops[node+1].ival,&numarg,P_MIN);
 	else
-	    tmpstr = str_new(0);;
+	    tmpstr = str_new(0);
 	if (!tmpstr->str_ptr || !*tmpstr->str_ptr) {
 	    if (lval_field) {
 		t = saw_OFS ? "$," : "' '";
@@ -1417,7 +1417,7 @@ sub Pick {\n\
 	str_scat(str,fstr=walk(1,level,ops[node+1].ival,&numarg,P_MIN));
 	str_free(fstr);
 	if (str->str_ptr[str->str_cur - 1] == '\n')
-	    --str->str_cur;;
+	    --str->str_cur;
 	str_cat(str," while (");
 	str_scat(str,fstr=walk(0,level,ops[node+2].ival,&numarg,P_MIN));
 	str_free(fstr);

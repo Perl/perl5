@@ -7,17 +7,13 @@ package CGI::Cookie;
 # documentation in manual or html file format (these utilities are part of the
 # Perl 5 distribution).
 
-# Copyright 1995,1996, Lincoln D. Stein.  All rights reserved.
+# Copyright 1995-1999, Lincoln D. Stein.  All rights reserved.
 # It may be used and modified freely, but I do request that this copyright
 # notice remain attached to the file.  You may modify this module as you 
 # wish, but if you redistribute a modified version, please attach a note
 # listing the modifications you have made.
 
-# The most recent version and complete docs are available at:
-#   http://www.genome.wi.mit.edu/ftp/pub/software/WWW/cgi_docs.html
-#   ftp://ftp-genome.wi.mit.edu/pub/software/WWW/
-
-$CGI::Cookie::VERSION='1.06';
+$CGI::Cookie::VERSION='1.10';
 
 use CGI;
 use overload '""' => \&as_string,
@@ -69,7 +65,9 @@ sub parse {
 	my($key,$value) = split("=");
 	my(@values) = map CGI::unescape($_),split('&',$value);
 	$key = CGI::unescape($key);
-	$results{$key} = $self->new(-name=>$key,-value=>\@values);
+	# A bug in Netscape can cause several cookies with same name to
+	# appear.  The FIRST one in HTTP_COOKIE is the most recent version.
+	$results{$key} ||= $self->new(-name=>$key,-value=>\@values);
     }
     return \%results unless wantarray;
     return %results;
@@ -98,8 +96,9 @@ sub new {
 	'value'=>[@values],
 	},$class;
 
-    # IE requires the path to be present for some reason.
-    ($path = $ENV{'SCRIPT_NAME'})=~s![^/]+$!! unless $path;
+    # IE requires the path and domain to be present for some reason.
+    $path   ||= CGI::url(-absolute=>1);
+    $domain ||= CGI::virtual_host();
 
     $self->path($path) if defined $path;
     $self->domain($domain) if defined $domain;
@@ -249,10 +248,10 @@ cookie originated from.
 If you provide a cookie path attribute, the browser will check it
 against your script's URL before returning the cookie.  For example,
 if you specify the path "/cgi-bin", then the cookie will be returned
-to each of the scripts "/cgi-bin/tally.pl", "/cgi-bin/order.pl",
-and "/cgi-bin/customer_service/complain.pl", but not to the script
-"/cgi-private/site_admin.pl".  By default, path is set to "/", which
-causes the cookie to be sent to any CGI script on your site.
+to each of the scripts "/cgi-bin/tally.pl", "/cgi-bin/order.pl", and
+"/cgi-bin/customer_service/complain.pl", but not to the script
+"/cgi-private/site_admin.pl".  By default, the path is set to the
+directory that contains your script.
 
 =item B<4. secure flag>
 
@@ -399,13 +398,12 @@ Get or set the cookie's expiration time.
 
 =head1 AUTHOR INFORMATION
 
-be used and modified freely, but I do request that this copyright
-notice remain attached to the file.  You may modify this module as you
-wish, but if you redistribute a modified version, please attach a note
-listing the modifications you have made.
+Copyright 1997-1998, Lincoln D. Stein.  All rights reserved.  
 
-Address bug reports and comments to:
-lstein@genome.wi.mit.edu
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+Address bug reports and comments to: lstein@cshl.org
 
 =head1 BUGS
 

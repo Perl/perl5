@@ -5,7 +5,7 @@ diff -cr ..\perl5os2.patch\perl5.001m.andy/ext/POSIX/POSIX.xs ./ext/POSIX/POSIX.
 *** 81,86 ****
 --- 81,90 ----
   /* Possibly needed prototypes */
-  char *cuserid _((char *));
+  char *cuserid (char *);
   
 + #ifndef HAS_MKFIFO
 + #define mkfifo(a,b) not_here("mkfifo")

@@ -1,7 +1,7 @@
 
 			   Perl Kit, Version 5.0
 
-		       Copyright 1989-1997, Larry Wall
+		       Copyright 1989-1999, Larry Wall
 			    All rights reserved.
 
     This program is free software; you can redistribute it and/or modify
@@ -22,8 +22,8 @@
     Kit, in the file named "Artistic".  If not, I'll be glad to provide one.
 
     You should also have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+    along with this program; if not, write to the Free Software Foundation,
+    Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
     For those of you that choose to use the GNU General Public License,
     my interpretation of the GNU General Public License is that no Perl
@@ -64,14 +64,27 @@ Installation
 
 1) Detailed instructions are in the file INSTALL which you should read.
 In brief, the following should work on most systems:
-	rm -f config.sh
+
+	rm -f config.sh Policy.sh
+	sh Configure -de
+	make
+	make test
+	make install
+
+For most systems, it should be safe to accept all the Configure defaults.
+It is recommended that you accept the defaults the first time you build
+or if you have any problems building.
+
+The above commands will install Perl to /usr/local or /opt, depending
+on the platform.  If that's not okay with you, use
+
+	rm -f config.sh Policy.sh
 	sh Configure
 	make
 	make test
 	make install
-For most systems, it should be safe to accept all the Configure defaults.
-(It is recommended that you accept the defaults the first time you build
-or if you have any problems building.)
+
+Full configuration instructions can be found in the INSTALL file.
 
 2) Read the manual entries before running perl.
 

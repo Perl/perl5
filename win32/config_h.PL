@@ -60,7 +60,6 @@ while (<SH>)
    }
   print H;
  }
-print H "#include <win32.h>\n";
 close(H);
 close(SH);
 

@@ -1,5 +1,5 @@
 #! /bin/sh
-case $CONFIG in
+case $CONFIGDOTSH in
 '')
 	if test -f config.sh; then TOP=.;
 	elif test -f ../config.sh; then TOP=..;
@@ -37,7 +37,7 @@ esac
 
 export PATH || (echo "OOPS, this isn't sh.  Desperation time.  I will feed myself to sh."; sh \$0; kill \$\$)
 
-case $CONFIG in
+case $CONFIGDOTSH in
 '')
 	if test -f config.sh; then TOP=.;
 	elif test -f ../config.sh; then TOP=..;
@@ -67,6 +67,7 @@ if test -f Makefile; then
     # to be out of date.  I don't know if OS/2 has touch, so do this:
     case "$osname" in
     os2) ;;
+    netbsd) ;;
     *) $touch $firstmakefile ;;
     esac
 fi
@@ -98,6 +99,19 @@ $MAKE clist || ($echo "Searching for .c files..."; \
 	$echo *.c | $tr ' ' $trnl | $egrep -v '\*' >.clist)
 for file in `$cat .clist`; do
 # for file in `cat /dev/null`; do
+	if [ "$osname" = uwin ]; then
+		uwinfix="-e s,\\\\\\\\,/,g -e s,\\([a-zA-Z]\\):/,/\\1/,g"
+	else
+		if [ "$osname" = os2 ]; then
+			uwinfix="-e s,\\\\\\\\,/,g"
+		else
+			if [ "$archname" = cygwin ]; then
+				uwinfix="-e s,\\\\\\\\,/,g"
+			else
+				uwinfix=
+			fi
+		fi
+	fi
     case "$file" in
     *.c) filebase=`basename $file .c` ;;
     *.y) filebase=`basename $file .y` ;;
@@ -126,7 +140,7 @@ for file in `$cat .clist`; do
 	-e 's/^.*"\(.*\)".*$/'$filebase'\$(OBJ_EXT): \1/' \
 	-e 's/^# *[0-9][0-9]* \(.*\)$/'$filebase'\$(OBJ_EXT): \1/' \
 	-e 's|: \./|: |' \
-	-e 's|\.c\.c|.c|' | \
+	-e 's|\.c\.c|.c|' $uwinfix | \
     $uniq | $sort | $uniq >> .deptmp
 done
 

@@ -53,12 +53,12 @@ larger than 255.  Presuming you use a Unicode editor to edit your
 program, these will typically occur directly within the literal strings
 as UTF-8 characters, but you can also specify a particular character
 with an extension of the C<\x> notation.  UTF-8 characters are
-specified by putting the hexidecimal code within curlies after the
+specified by putting the hexadecimal code within curlies after the
 C<\x>.  For instance, a Unicode smiley face is C<\x{263A}>.  A
 character in the Latin-1 range (128..255) should be written C<\x{ab}>
 rather than C<\xab>, since the former will turn into a two-byte UTF-8
 code, while the latter will continue to be interpreted as generating a
-8-bit byte rather than a character.  In fact, if -w is turned on, it will
+8-bit byte rather than a character.  In fact, if C<-w> is turned on, it will
 produce a warning that you might be generating invalid UTF-8.
 
 =item *
@@ -98,7 +98,7 @@ The special pattern C<\X> match matches any extended Unicode sequence
 (a "combining character sequence" in Standardese), where the first
 character is a base character and subsequent characters are mark
 characters that apply to the base character.  It is equivalent to
-C<(?:\pM\PM*)>.
+C<(?:\PM\pM*)>.
 
 =item *
 

@@ -1,6 +1,6 @@
 /*    handy.h
  *
- *    Copyright (c) 1991-1997, Larry Wall
+ *    Copyright (c) 1991-1999, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -54,7 +54,7 @@
 /* The NeXT dynamic loader headers will not build with the bool macro
    So declare them now to clear confusion.
 */
-#ifdef NeXT
+#if defined(NeXT) || defined(__NeXT__)
 # undef FALSE
 # undef TRUE
   typedef enum bool { FALSE = 0, TRUE = 1 } bool;
@@ -62,7 +62,7 @@
 # ifndef HAS_BOOL
 #  define HAS_BOOL 1
 # endif /* !HAS_BOOL */
-#endif /* NeXT */
+#endif /* NeXT || __NeXT__ */
 
 #ifndef HAS_BOOL
 # if defined(UTS) || defined(VMS)
@@ -105,6 +105,31 @@
    Andy Dougherty	April 1998
 */
 
+#if defined(UINT8_MAX) && defined(INT16_MAX) && defined(INT32_MAX)
+
+typedef int8_t		I8;
+typedef uint8_t		U8;
+/* I8_MAX and I8_MIN constants are not defined, as I8 is an ambiguous type.
+   Please search CHAR_MAX in perl.h for further details. */
+#define U8_MAX UINT8_MAX
+#define U8_MIN UINT8_MIN
+
+typedef int16_t         I16;
+typedef uint16_t        U16;
+#define I16_MAX INT16_MAX
+#define I16_MIN INT16_MIN
+#define U16_MAX UINT16_MAX
+#define U16_MIN UINT16_MIN
+
+typedef int32_t         I32;
+typedef uint32_t        U32;
+#define I32_MAX INT32_MAX
+#define I32_MIN INT32_MIN
+#define U32_MAX UINT32_MAX
+#define U32_MIN UINT32_MIN
+
+#else
+
 typedef char		I8;
 typedef unsigned char	U8;
 /* I8_MAX and I8_MIN constants are not defined, as I8 is an ambiguous type.
@@ -112,6 +137,7 @@ typedef unsigned char	U8;
 #define U8_MAX PERL_UCHAR_MAX
 #define U8_MIN PERL_UCHAR_MIN
 
+/* Beware.  SHORTSIZE > 2 in Cray C90ties. */
 typedef short		I16;
 typedef unsigned short	U16;
 #define I16_MAX PERL_SHORT_MAX
@@ -133,6 +159,8 @@ typedef unsigned short	U16;
 # define I32_MIN PERL_LONG_MIN
 # define U32_MAX PERL_ULONG_MAX
 # define U32_MIN PERL_ULONG_MIN
+#endif
+
 #endif
 
 #define BIT_DIGITS(N)   (((N)*146)/485 + 1)  /* log2(10) =~ 146/485 */
@@ -183,17 +211,37 @@ typedef unsigned short	U16;
 #define isSPACE(c) \
 	((c) == ' ' || (c) == '\t' || (c) == '\n' || (c) =='\r' || (c) == '\f')
 #define isDIGIT(c)	((c) >= '0' && (c) <= '9')
-#define isUPPER(c)	((c) >= 'A' && (c) <= 'Z')
-#define isLOWER(c)	((c) >= 'a' && (c) <= 'z')
-#define isPRINT(c)	(((c) > 32 && (c) < 127) || isSPACE(c))
-#define toUPPER(c)	(isLOWER(c) ? (c) - ('a' - 'A') : (c))
-#define toLOWER(c)	(isUPPER(c) ? (c) + ('a' - 'A') : (c))
+#ifdef EBCDIC
+    /* In EBCDIC we do not do locales: therefore() isupper() is fine. */
+#   define isUPPER(c)	isupper(c)
+#   define isLOWER(c)	islower(c)
+#   define isALNUMC(c)	isalnum(c)
+#   define isASCII(c)	isascii(c)
+#   define isCNTRL(c)	iscntrl(c)
+#   define isGRAPH(c)	isgraph(c)
+#   define isPRINT(c)	isprint(c)
+#   define isPUNCT(c)	ispunct(c)
+#   define isXDIGIT(c)	isxdigit(c)
+#   define toUPPER(c)	toupper(c)
+#   define toLOWER(c)	tolower(c)
+#else
+#   define isUPPER(c)	((c) >= 'A' && (c) <= 'Z')
+#   define isLOWER(c)	((c) >= 'a' && (c) <= 'z')
+#   define isALNUMC(c)	(isALPHA(c) || isDIGIT(c))
+#   define isASCII(c)	((c) <= 127)
+#   define isCNTRL(c)	((c) < ' ')
+#   define isGRAPH(c)	(isALNUM(c) || isPUNCT(c))
+#   define isPRINT(c)	(((c) > 32 && (c) < 127) || isSPACE(c))
+#   define isPUNCT(c)	(((c) >= 33 && (c) <= 47) || ((c) >= 58 && (c) <= 64)  || ((c) >= 91 && (c) <= 96) || ((c) >= 123 && (c) <= 126))
+#   define isXDIGIT(c)  (isdigit(c) || ((c) >= 'a' && (c) <= 'f') || ((c) >= 'A' && (c) <= 'F'))
+#   define toUPPER(c)	(isLOWER(c) ? (c) - ('a' - 'A') : (c))
+#   define toLOWER(c)	(isUPPER(c) ? (c) + ('a' - 'A') : (c))
+#endif
 
 #ifdef USE_NEXT_CTYPE
 
 #  define isALNUM_LC(c) \
-	(NXIsAlpha((unsigned int)(c)) || NXIsDigit((unsigned int)(c)) || \
-	 (char)(c) == '_')
+	(NXIsAlNum((unsigned int)(c)) || (char)(c) == '_')
 #  define isIDFIRST_LC(c) \
 	(NXIsAlpha((unsigned int)(c)) || (char)(c) == '_')
 #  define isALPHA_LC(c)		NXIsAlpha((unsigned int)(c))
@@ -201,37 +249,47 @@ typedef unsigned short	U16;
 #  define isDIGIT_LC(c)		NXIsDigit((unsigned int)(c))
 #  define isUPPER_LC(c)		NXIsUpper((unsigned int)(c))
 #  define isLOWER_LC(c)		NXIsLower((unsigned int)(c))
+#  define isALNUMC_LC(c)	NXIsAlNum((unsigned int)(c))
+#  define isCNTRL_LC(c)		NXIsCntrl((unsigned int)(c))
+#  define isGRAPH_LC(c)		NXIsGraph((unsigned int)(c))
 #  define isPRINT_LC(c)		NXIsPrint((unsigned int)(c))
+#  define isPUNCT_LC(c)		NXIsPunct((unsigned int)(c))
 #  define toUPPER_LC(c)		NXToUpper((unsigned int)(c))
 #  define toLOWER_LC(c)		NXToLower((unsigned int)(c))
 
 #else /* !USE_NEXT_CTYPE */
+
 #  if defined(CTYPE256) || (!defined(isascii) && !defined(HAS_ISASCII))
 
-#    define isALNUM_LC(c) \
-	(isalpha((unsigned char)(c)) || \
-	 isdigit((unsigned char)(c)) || (char)(c) == '_')
+#    define isALNUM_LC(c)   (isalnum((unsigned char)(c)) || (char)(c) == '_')
 #    define isIDFIRST_LC(c) (isalpha((unsigned char)(c)) || (char)(c) == '_')
 #    define isALPHA_LC(c)	isalpha((unsigned char)(c))
 #    define isSPACE_LC(c)	isspace((unsigned char)(c))
 #    define isDIGIT_LC(c)	isdigit((unsigned char)(c))
 #    define isUPPER_LC(c)	isupper((unsigned char)(c))
 #    define isLOWER_LC(c)	islower((unsigned char)(c))
+#    define isALNUMC_LC(c)	isalnum((unsigned char)(c))
+#    define isCNTRL_LC(c)	iscntrl((unsigned char)(c))
+#    define isGRAPH_LC(c)	isgraph((unsigned char)(c))
 #    define isPRINT_LC(c)	isprint((unsigned char)(c))
+#    define isPUNCT_LC(c)	ispunct((unsigned char)(c))
 #    define toUPPER_LC(c)	toupper((unsigned char)(c))
 #    define toLOWER_LC(c)	tolower((unsigned char)(c))
 
 #  else
 
-#    define isALNUM_LC(c) \
-	(isascii(c) && (isalpha(c) || isdigit(c) || (c) == '_'))
+#    define isALNUM_LC(c) 	(isascii(c) && (isalnum(c) || (c) == '_'))
 #    define isIDFIRST_LC(c)	(isascii(c) && (isalpha(c) || (c) == '_'))
 #    define isALPHA_LC(c)	(isascii(c) && isalpha(c))
 #    define isSPACE_LC(c)	(isascii(c) && isspace(c))
 #    define isDIGIT_LC(c)	(isascii(c) && isdigit(c))
 #    define isUPPER_LC(c)	(isascii(c) && isupper(c))
 #    define isLOWER_LC(c)	(isascii(c) && islower(c))
+#    define isALNUMC_LC(c)	(isascii(c) && isalnum(c))
+#    define isCNTRL_LC(c)	(isascii(c) && iscntrl(c))
+#    define isGRAPH_LC(c)	(isascii(c) && isgraph(c))
 #    define isPRINT_LC(c)	(isascii(c) && isprint(c))
+#    define isPUNCT_LC(c)	(isascii(c) && ispunct(c))
 #    define toUPPER_LC(c)	toupper(c)
 #    define toLOWER_LC(c)	tolower(c)
 
@@ -245,7 +303,13 @@ typedef unsigned short	U16;
 #define isDIGIT_uni(c)		is_uni_digit(c)
 #define isUPPER_uni(c)		is_uni_upper(c)
 #define isLOWER_uni(c)		is_uni_lower(c)
+#define isALNUMC_uni(c)		is_uni_alnumc(c)
+#define isASCII_uni(c)		is_uni_ascii(c)
+#define isCNTRL_uni(c)		is_uni_cntrl(c)
+#define isGRAPH_uni(c)		is_uni_graph(c)
 #define isPRINT_uni(c)		is_uni_print(c)
+#define isPUNCT_uni(c)		is_uni_punct(c)
+#define isXDIGIT_uni(c)		is_uni_xdigit(c)
 #define toUPPER_uni(c)		to_uni_upper(c)
 #define toTITLE_uni(c)		to_uni_title(c)
 #define toLOWER_uni(c)		to_uni_lower(c)
@@ -257,7 +321,11 @@ typedef unsigned short	U16;
 #define isDIGIT_LC_uni(c)	(c < 256 ? isDIGIT_LC(c) : is_uni_digit_lc(c))
 #define isUPPER_LC_uni(c)	(c < 256 ? isUPPER_LC(c) : is_uni_upper_lc(c))
 #define isLOWER_LC_uni(c)	(c < 256 ? isLOWER_LC(c) : is_uni_lower_lc(c))
+#define isALNUMC_LC_uni(c)	(c < 256 ? isALNUMC_LC(c) : is_uni_alnumc_lc(c))
+#define isCNTRL_LC_uni(c)	(c < 256 ? isCNTRL_LC(c) : is_uni_cntrl_lc(c))
+#define isGRAPH_LC_uni(c)	(c < 256 ? isGRAPH_LC(c) : is_uni_graph_lc(c))
 #define isPRINT_LC_uni(c)	(c < 256 ? isPRINT_LC(c) : is_uni_print_lc(c))
+#define isPUNCT_LC_uni(c)	(c < 256 ? isPUNCT_LC(c) : is_uni_punct_lc(c))
 #define toUPPER_LC_uni(c)	(c < 256 ? toUPPER_LC(c) : to_uni_upper_lc(c))
 #define toTITLE_LC_uni(c)	(c < 256 ? toUPPER_LC(c) : to_uni_title_lc(c))
 #define toLOWER_LC_uni(c)	(c < 256 ? toLOWER_LC(c) : to_uni_lower_lc(c))
@@ -269,7 +337,13 @@ typedef unsigned short	U16;
 #define isDIGIT_utf8(p)		is_utf8_digit(p)
 #define isUPPER_utf8(p)		is_utf8_upper(p)
 #define isLOWER_utf8(p)		is_utf8_lower(p)
+#define isALNUMC_utf8(p)	is_utf8_alnumc(p)
+#define isASCII_utf8(p)		is_utf8_ascii(p)
+#define isCNTRL_utf8(p)		is_utf8_cntrl(p)
+#define isGRAPH_utf8(p)		is_utf8_graph(p)
 #define isPRINT_utf8(p)		is_utf8_print(p)
+#define isPUNCT_utf8(p)		is_utf8_punct(p)
+#define isXDIGIT_utf8(p)	is_utf8_xdigit(p)
 #define toUPPER_utf8(p)		to_utf8_upper(p)
 #define toTITLE_utf8(p)		to_utf8_title(p)
 #define toLOWER_utf8(p)		to_utf8_lower(p)
@@ -281,13 +355,22 @@ typedef unsigned short	U16;
 #define isDIGIT_LC_utf8(p)	isDIGIT_LC_uni(utf8_to_uv(p, 0))
 #define isUPPER_LC_utf8(p)	isUPPER_LC_uni(utf8_to_uv(p, 0))
 #define isLOWER_LC_utf8(p)	isLOWER_LC_uni(utf8_to_uv(p, 0))
+#define isALNUMC_LC_utf8(p)	isALNUMC_LC_uni(utf8_to_uv(p, 0))
+#define isCNTRL_LC_utf8(p)	isCNTRL_LC_uni(utf8_to_uv(p, 0))
+#define isGRAPH_LC_utf8(p)	isGRAPH_LC_uni(utf8_to_uv(p, 0))
 #define isPRINT_LC_utf8(p)	isPRINT_LC_uni(utf8_to_uv(p, 0))
+#define isPUNCT_LC_utf8(p)	isPUNCT_LC_uni(utf8_to_uv(p, 0))
 #define toUPPER_LC_utf8(p)	toUPPER_LC_uni(utf8_to_uv(p, 0))
 #define toTITLE_LC_utf8(p)	toTITLE_LC_uni(utf8_to_uv(p, 0))
 #define toLOWER_LC_utf8(p)	toLOWER_LC_uni(utf8_to_uv(p, 0))
 
-/* This conversion works both ways, strangely enough. */
-#define toCTRL(c)    (toUPPER(c) ^ 64)
+#ifdef EBCDIC
+EXT int ebcdic_control (int);
+#  define toCTRL(c)	ebcdic_control(c)
+#else
+  /* This conversion works both ways, strangely enough. */
+#  define toCTRL(c)    (toUPPER(c) ^ 64)
+#endif
 
 /* Line numbers are unsigned, 16 bits. */
 typedef U16 line_t;

@@ -2,7 +2,7 @@ package DB;
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 
-$VERSION = 1.03;
+$VERSION = 1.0403;
 $header = "perl5db.pl version $VERSION";
 
 # Enhanced by ilya@math.ohio-state.edu (Ilya Zakharevich)
@@ -179,7 +179,7 @@ $inhibit_exit = $option{PrintRet} = 1;
 		  TTY noTTY ReadLine NonStop LineInfo maxTraceLen
 		  recallCommand ShellBang pager tkRunning ornaments
 		  signalLevel warnLevel dieLevel inhibit_exit
-		  ImmediateStop);
+		  ImmediateStop bareStringify);
 
 %optionVars    = (
 		 hashDepth	=> \$dumpvar::hashDepth,
@@ -191,6 +191,7 @@ $inhibit_exit = $option{PrintRet} = 1;
 		 undefPrint	=> \$dumpvar::printUndef,
 		 globPrint	=> \$dumpvar::globPrint,
 		 UsageOnly	=> \$dumpvar::usageOnly,     
+		 bareStringify	=> \$dumpvar::bareStringify,
 		 frame          => \$frame,
 		 AutoTrace      => \$trace,
 		 inhibit_exit   => \$inhibit_exit,
@@ -234,7 +235,11 @@ $pretype = [] unless defined $pretype;
 warnLevel($warnLevel);
 dieLevel($dieLevel);
 signalLevel($signalLevel);
-&pager(defined($ENV{PAGER}) ? $ENV{PAGER} : "|more") unless defined $pager;
+&pager((defined($ENV{PAGER}) 
+	? $ENV{PAGER}
+	: ($^O eq 'os2' 
+	   ? 'cmd /c more' 
+	   : 'more'))) unless defined $pager;
 &recallCommand("!") unless defined $prc;
 &shellBang("!") unless defined $psh;
 $maxtrace = 400 unless defined $maxtrace;
@@ -291,7 +296,10 @@ if ($notty) {
 
   #require Term::ReadLine;
 
-  if (-e "/dev/tty") {
+  if ($^O =~ /cygwin/) {
+    # /dev/tty is binary. use stdin for textmode
+    undef $console;
+  } elsif (-e "/dev/tty") {
     $console = "/dev/tty";
   } elsif ($^O eq 'dos' or -e "con" or $^O eq 'MSWin32') {
     $console = "con";
@@ -305,6 +313,10 @@ if ($notty) {
 
   # Around a bug:
   if (defined $ENV{OS2_SHELL} and ($emacs or $ENV{WINDOWID})) { # In OS/2
+    $console = undef;
+  }
+
+  if ($^O eq 'epoc') {
     $console = undef;
   }
 
@@ -360,7 +372,7 @@ sub DB {
     # _After_ the perl program is compiled, $single is set to 1:
     if ($single and not $second_time++) {
       if ($runnonstop) {	# Disable until signal
-	for ($i=0; $i <= $#stack; ) {
+	for ($i=0; $i <= $stack_depth; ) {
 	    $stack[$i++] &= ~1;
 	}
 	$single = 0;
@@ -390,6 +402,7 @@ sub DB {
     if ($trace & 2) {
       for (my $n = 0; $n <= $#to_watch; $n++) {
 	$evalarg = $to_watch[$n];
+	local $onetimeDump;	# Do not output results
 	my ($val) = &eval;	# Fix context (&eval is doing array)?
 	$val = ( (defined $val) ? "'$val'" : 'undef' );
 	if ($val ne $old_watch[$n]) {
@@ -410,11 +423,11 @@ EOP
     $was_signal = $signal;
     $signal = 0;
     if ($single || ($trace & 1) || $was_signal) {
-	$term || &setterm;
 	if ($emacs) {
 	    $position = "\032\032$filename:$line:0\n";
 	    print $LINEINFO $position;
 	} elsif ($package eq 'DB::fake') {
+	  $term || &setterm;
 	  print_help(<<EOP);
 Debugged program terminated.  Use B<q> to quit or B<R> to restart,
   use B<O> I<inhibit_exit> to avoid stopping after program termination,
@@ -437,7 +450,7 @@ EOP
 		$position = "$prefix$line$infix$dbline[$line]$after";
 	    }
 	    if ($frame) {
-		print $LINEINFO ' ' x $#stack, "$line:\t$dbline[$line]$after";
+		print $LINEINFO ' ' x $stack_depth, "$line:\t$dbline[$line]$after";
 	    } else {
 		print $LINEINFO $position;
 	    }
@@ -448,7 +461,7 @@ EOP
 		$incr_pos = "$prefix$i$infix$dbline[$i]$after";
 		$position .= $incr_pos;
 		if ($frame) {
-		    print $LINEINFO ' ' x $#stack, "$i:\t$dbline[$i]$after";
+		    print $LINEINFO ' ' x $stack_depth, "$i:\t$dbline[$i]$after";
 		} else {
 		    print $LINEINFO $incr_pos;
 		}
@@ -461,11 +474,11 @@ EOP
 	foreach $evalarg (@$pre) {
 	  &eval;
 	}
-	print $OUT $#stack . " levels deep in subroutine calls!\n"
+	print $OUT $stack_depth . " levels deep in subroutine calls!\n"
 	  if $single & 4;
 	$start = $line;
 	$incr = -1;		# for backward motion.
-	@typeahead = @$pretype, @typeahead;
+	@typeahead = (@$pretype, @typeahead);
       CMD:
 	while (($term || &setterm),
 	       ($term_pid == $$ or &resetterm),
@@ -638,8 +651,9 @@ EOP
 				$arrow .= 'b' if $stop;
 				$arrow .= 'a' if $action;
 				print $OUT "$i$arrow\t", $dbline[$i];
-				last if $signal;
+				$i++, last if $signal;
 			    }
+			    print $OUT "\n" unless $dbline[$i-1] =~ /\n$/;
 			}
 			$start = $i; # remember in case they want more
 			$start = $max if $start > $max;
@@ -877,14 +891,14 @@ EOP
 			    }
 			    $dbline{$i} =~ s/($|\0)/;9$1/; # add one-time-only b.p.
 			}
-			for ($i=0; $i <= $#stack; ) {
+			for ($i=0; $i <= $stack_depth; ) {
 			    $stack[$i++] &= ~1;
 			}
 			last CMD; };
 		    $cmd =~ /^r$/ && do {
 		        end_report(), next CMD if $finished and $level <= 1;
-			$stack[$#stack] |= 1;
-			$doret = $option{PrintRet} ? $#stack - 1 : -2;
+			$stack[$stack_depth] |= 1;
+			$doret = $option{PrintRet} ? $stack_depth - 1 : -2;
 			last CMD; };
 		    $cmd =~ /^R$/ && do {
 		        print $OUT "Warning: some settings and command-line options may be lost!\n";
@@ -1044,7 +1058,7 @@ EOP
 			pop(@hist) if length($cmd) > 1;
 			$i = $1 ? ($#hist-($2?$2:1)) : ($2?$2:$#hist);
 			$cmd = $hist[$i];
-			print $OUT $cmd;
+			print $OUT $cmd, "\n";
 			redo CMD; };
 		    $cmd =~ /^$sh$sh\s*([\x00-\xff]*)/ && do {
 			&system($1);
@@ -1060,7 +1074,7 @@ EOP
 			    next CMD;
 			}
 			$cmd = $hist[$i];
-			print $OUT $cmd;
+			print $OUT $cmd, "\n";
 			redo CMD; };
 		    $cmd =~ /^$sh$/ && do {
 			&system($ENV{SHELL}||"/bin/sh");
@@ -1167,24 +1181,26 @@ sub sub {
     if (length($sub) > 10 && substr($sub, -10, 10) eq '::AUTOLOAD') {
 	$al = " for $$sub";
     }
-    push(@stack, $single);
+    local $stack_depth = $stack_depth + 1; # Protect from non-local exits
+    $#stack = $stack_depth;
+    $stack[-1] = $single;
     $single &= 1;
-    $single |= 4 if $#stack == $deep;
+    $single |= 4 if $stack_depth == $deep;
     ($frame & 4 
-     ? ( (print $LINEINFO ' ' x ($#stack - 1), "in  "), 
+     ? ( (print $LINEINFO ' ' x ($stack_depth - 1), "in  "), 
 	 # Why -1? But it works! :-(
 	 print_trace($LINEINFO, -1, 1, 1, "$sub$al") )
-     : print $LINEINFO ' ' x ($#stack - 1), "entering $sub$al\n") if $frame;
+     : print $LINEINFO ' ' x ($stack_depth - 1), "entering $sub$al\n") if $frame;
     if (wantarray) {
 	@ret = &$sub;
-	$single |= pop(@stack);
+	$single |= $stack[$stack_depth--];
 	($frame & 4 
-	 ? ( (print $LINEINFO ' ' x $#stack, "out "), 
+	 ? ( (print $LINEINFO ' ' x $stack_depth, "out "), 
 	     print_trace($LINEINFO, -1, 1, 1, "$sub$al") )
-	 : print $LINEINFO ' ' x $#stack, "exited $sub$al\n") if $frame & 2;
-	if ($doret eq $#stack or $frame & 16) {
-            my $fh = ($doret eq $#stack ? $OUT : $LINEINFO);
-	    print $fh ' ' x $#stack if $frame & 16;
+	 : print $LINEINFO ' ' x $stack_depth, "exited $sub$al\n") if $frame & 2;
+	if ($doret eq $stack_depth or $frame & 16) {
+            my $fh = ($doret eq $stack_depth ? $OUT : $LINEINFO);
+	    print $fh ' ' x $stack_depth if $frame & 16;
 	    print $fh "list context return from $sub:\n"; 
 	    dumpit($fh, \@ret );
 	    $doret = -2;
@@ -1196,14 +1212,14 @@ sub sub {
         } else {
             &$sub; undef $ret;
         };
-	$single |= pop(@stack);
+	$single |= $stack[$stack_depth--];
 	($frame & 4 
-	 ? ( (print $LINEINFO ' ' x $#stack, "out "), 
+	 ? ( (print $LINEINFO ' ' x $stack_depth, "out "), 
 	      print_trace($LINEINFO, -1, 1, 1, "$sub$al") )
-	 : print $LINEINFO ' ' x $#stack, "exited $sub$al\n") if $frame & 2;
-	if ($doret eq $#stack or $frame & 16 and defined wantarray) {
-            my $fh = ($doret eq $#stack ? $OUT : $LINEINFO);
-	    print $fh (' ' x $#stack) if $frame & 16;
+	 : print $LINEINFO ' ' x $stack_depth, "exited $sub$al\n") if $frame & 2;
+	if ($doret eq $stack_depth or $frame & 16 and defined wantarray) {
+            my $fh = ($doret eq $stack_depth ? $OUT : $LINEINFO);
+	    print $fh (' ' x $stack_depth) if $frame & 16;
 	    print $fh (defined wantarray 
 			 ? "scalar context return from $sub: " 
 			 : "void context return from $sub\n");
@@ -1224,7 +1240,6 @@ sub save {
 sub eval {
     my @res;
     {
-	local (@stack) = @stack; # guard against recursive debugging
 	my $otrace = $trace;
 	my $osingle = $single;
 	my $od = $^D;
@@ -1282,7 +1297,7 @@ sub postponed {
   $filename =~ s/^_<//;
   $signal = 1, print $OUT "'$filename' loaded...\n"
     if $break_on_load{$filename};
-  print $LINEINFO ' ' x $#stack, "Package $filename.\n" if $frame;
+  print $LINEINFO ' ' x $stack_depth, "Package $filename.\n" if $frame;
   return unless $postponed_file{$filename};
   $had_breakpoints{$filename}++;
   #%dbline = %{$postponed_file{$filename}}; # Cannot be done: unsufficient magic
@@ -1430,7 +1445,6 @@ sub system {
 sub setterm {
     local $frame = 0;
     local $doret = -2;
-    local @stack = @stack;		# Prevent growth by failing `use'.
     eval { require Term::ReadLine } or die $@;
     if ($notty) {
 	if ($tty) {
@@ -1745,13 +1759,7 @@ sub list_versions {
     } 
     $version{$file} .= $INC{$file};
   }
-  do 'dumpvar.pl' unless defined &main::dumpValue;
-  if (defined &main::dumpValue) {
-    local $frame = 0;
-    &main::dumpValue(\%version);
-  } else {
-    print $OUT "dumpvar.pl not available.\n";
-  }
+  dumpit($OUT,\%version);
 }
 
 sub sethelp {
@@ -1823,6 +1831,7 @@ B<O> [I<opt>[B<=>I<val>]] [I<opt>B<\">I<val>B<\">] [I<opt>B<?>]...
     I<DumpPackages>:		dump symbol tables of packages;
     I<DumpReused>:		dump contents of \"reused\" addresses;
     I<quote>, I<HighBit>, I<undefPrint>:	change style of string dump;
+    I<bareStringify>:		Do not print the overload-stringified value;
   Option I<PrintRet> affects printing of return value after B<r> command,
          I<frame>    affects printing messages on entry and exit from subroutines.
          I<AutoTrace> affects printing messages on every possible breaking point.
@@ -2070,6 +2079,7 @@ BEGIN {			# This does not compile, alas.
   # @stack and $doret are needed in sub sub, which is called for DB::postponed.
   # Triggers bug (?) in perl is we postpone this until runtime:
   @postponed = @stack = (0);
+  $stack_depth = 0;		# Localized $#stack
   $doret = -2;
   $frame = 0;
 }

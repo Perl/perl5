@@ -5,7 +5,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib' if -d '../lib';
+    unshift @INC, '../lib' if -d '../lib';
 }
 
 use Data::Dumper;
@@ -20,6 +20,8 @@ sub TEST {
   my $string = shift;
   my $t = eval $string;
   ++$TNUM;
+  $t =~ s/([A-Z]+)\(0x[0-9a-f]+\)/$1(0xdeadbeef)/g
+      if ($WANT =~ /deadbeef/);
   print( ($t eq $WANT and not $@) ? "ok $TNUM\n"
 	: "not ok $TNUM\n--Expected--\n$WANT\n--Got--\n$@$t\n");
 
@@ -29,17 +31,19 @@ sub TEST {
 
   $t = eval $string;
   ++$TNUM;
+  $t =~ s/([A-Z]+)\(0x[0-9a-f]+\)/$1(0xdeadbeef)/g
+      if ($WANT =~ /deadbeef/);
   print( ($t eq $WANT and not $@) ? "ok $TNUM\n"
 	: "not ok $TNUM\n--Expected--\n$WANT\n--Got--\n$@$t\n");
 }
 
 if (defined &Data::Dumper::Dumpxs) {
   print "### XS extension loaded, will run XS tests\n";
-  $TMAX = 138; $XS = 1;
+  $TMAX = 174; $XS = 1;
 }
 else {
   print "### XS extensions not loaded, will NOT run XS tests\n";
-  $TMAX = 69; $XS = 0;
+  $TMAX = 87; $XS = 0;
 }
 
 print "1..$TMAX\n";
@@ -236,11 +240,11 @@ EOT
 ##
 $WANT = <<'EOT';
 #$VAR1 = {
-#  "abc\000\efg" => "mno\000"
+#  "abc\0'\efg" => "mno\0"
 #};
 EOT
 
-$foo = { "abc\000\efg" => "mno\000" };
+$foo = { "abc\000\'\efg" => "mno\000" };
 {
   local $Data::Dumper::Useqq = 1;
   TEST q(Dumper($foo));
@@ -248,7 +252,7 @@ $foo = { "abc\000\efg" => "mno\000" };
 
   $WANT = <<"EOT";
 #\$VAR1 = {
-#  'abc\000\efg' => 'mno\000'
+#  'abc\0\\'\efg' => 'mno\0'
 #};
 EOT
 
@@ -450,8 +454,8 @@ EOT
 #  Second => \'Wags'
 #);
 #@dogs = (
-#  $kennels{First},
-#  $kennels{Second},
+#  ${$kennels{First}},
+#  ${$kennels{Second}},
 #  \%kennels
 #);
 #%mutts = %kennels;
@@ -489,8 +493,8 @@ EOT
 #  Second => \'Wags'
 #);
 #@dogs = (
-#  $kennels{First},
-#  $kennels{Second},
+#  ${$kennels{First}},
+#  ${$kennels{Second}},
 #  \%kennels
 #);
 #%mutts = %kennels;
@@ -566,8 +570,8 @@ EOT
 
 {
 
-sub a { print "foo\n" }
-$c = [ \&a ];
+sub z { print "foo\n" }
+$c = [ \&z ];
 
 ############# 121
 ##
@@ -578,8 +582,8 @@ $c = [ \&a ];
 #];
 EOT
 
-TEST q(Data::Dumper->new([\&a,$c],['a','c'])->Seen({'b' => \&a})->Dump;);
-TEST q(Data::Dumper->new([\&a,$c],['a','c'])->Seen({'b' => \&a})->Dumpxs;)
+TEST q(Data::Dumper->new([\&z,$c],['a','c'])->Seen({'b' => \&z})->Dump;);
+TEST q(Data::Dumper->new([\&z,$c],['a','c'])->Seen({'b' => \&z})->Dumpxs;)
 	if $XS;
 
 ############# 127
@@ -591,8 +595,8 @@ TEST q(Data::Dumper->new([\&a,$c],['a','c'])->Seen({'b' => \&a})->Dumpxs;)
 #];
 EOT
 
-TEST q(Data::Dumper->new([\&a,$c],['a','c'])->Seen({'*b' => \&a})->Dump;);
-TEST q(Data::Dumper->new([\&a,$c],['a','c'])->Seen({'*b' => \&a})->Dumpxs;)
+TEST q(Data::Dumper->new([\&z,$c],['a','c'])->Seen({'*b' => \&z})->Dump;);
+TEST q(Data::Dumper->new([\&z,$c],['a','c'])->Seen({'*b' => \&z})->Dumpxs;)
 	if $XS;
 
 ############# 133
@@ -604,8 +608,146 @@ TEST q(Data::Dumper->new([\&a,$c],['a','c'])->Seen({'*b' => \&a})->Dumpxs;)
 #);
 EOT
 
-TEST q(Data::Dumper->new([\&a,$c],['*a','*c'])->Seen({'*b' => \&a})->Dump;);
-TEST q(Data::Dumper->new([\&a,$c],['*a','*c'])->Seen({'*b' => \&a})->Dumpxs;)
+TEST q(Data::Dumper->new([\&z,$c],['*a','*c'])->Seen({'*b' => \&z})->Dump;);
+TEST q(Data::Dumper->new([\&z,$c],['*a','*c'])->Seen({'*b' => \&z})->Dumpxs;)
 	if $XS;
 
+}
+
+{
+  $a = [];
+  $a->[1] = \$a->[0];
+
+############# 139
+##
+  $WANT = <<'EOT';
+#@a = (
+#  undef,
+#  ''
+#);
+#$a[1] = \$a[0];
+EOT
+
+TEST q(Data::Dumper->new([$a],['*a'])->Purity(1)->Dump;);
+TEST q(Data::Dumper->new([$a],['*a'])->Purity(1)->Dumpxs;)
+	if $XS;
+}
+
+{
+  $a = \\\\\'foo';
+  $b = $$$a;
+
+############# 145
+##
+  $WANT = <<'EOT';
+#$a = \\\\\'foo';
+#$b = ${${$a}};
+EOT
+
+TEST q(Data::Dumper->new([$a,$b],['a','b'])->Purity(1)->Dump;);
+TEST q(Data::Dumper->new([$a,$b],['a','b'])->Purity(1)->Dumpxs;)
+	if $XS;
+}
+
+{
+  $a = [{ a => \$b }, { b => undef }];
+  $b = [{ c => \$b }, { d => \$a }];
+
+############# 151
+##
+  $WANT = <<'EOT';
+#$a = [
+#  {
+#    a => \[
+#        {
+#          c => ''
+#        },
+#        {
+#          d => \[]
+#        }
+#      ]
+#  },
+#  {
+#    b => undef
+#  }
+#];
+#${$a->[0]{a}}->[0]->{c} = $a->[0]{a};
+#${${$a->[0]{a}}->[1]->{d}} = $a;
+#$b = ${$a->[0]{a}};
+EOT
+
+TEST q(Data::Dumper->new([$a,$b],['a','b'])->Purity(1)->Dump;);
+TEST q(Data::Dumper->new([$a,$b],['a','b'])->Purity(1)->Dumpxs;)
+	if $XS;
+}
+
+{
+  $a = [[[[\\\\\'foo']]]];
+  $b = $a->[0][0];
+  $c = $${$b->[0][0]};
+
+############# 157
+##
+  $WANT = <<'EOT';
+#$a = [
+#  [
+#    [
+#      [
+#        \\\\\'foo'
+#      ]
+#    ]
+#  ]
+#];
+#$b = $a->[0][0];
+#$c = ${${$a->[0][0][0][0]}};
+EOT
+
+TEST q(Data::Dumper->new([$a,$b,$c],['a','b','c'])->Purity(1)->Dump;);
+TEST q(Data::Dumper->new([$a,$b,$c],['a','b','c'])->Purity(1)->Dumpxs;)
+	if $XS;
+}
+
+{
+    $f = "pearl";
+    $e = [        $f ];
+    $d = { 'e' => $e };
+    $c = [        $d ];
+    $b = { 'c' => $c };
+    $a = { 'b' => $b };
+
+############# 163
+##
+  $WANT = <<'EOT';
+#$a = {
+#  b => {
+#    c => [
+#      {
+#        e => 'ARRAY(0xdeadbeef)'
+#      }
+#    ]
+#  }
+#};
+#$b = $a->{b};
+#$c = $a->{b}{c};
+EOT
+
+TEST q(Data::Dumper->new([$a,$b,$c],['a','b','c'])->Maxdepth(4)->Dump;);
+TEST q(Data::Dumper->new([$a,$b,$c],['a','b','c'])->Maxdepth(4)->Dumpxs;)
+	if $XS;
+
+############# 169
+##
+  $WANT = <<'EOT';
+#$a = {
+#  b => 'HASH(0xdeadbeef)'
+#};
+#$b = $a->{b};
+#$c = [
+#  'HASH(0xdeadbeef)'
+#];
+EOT
+
+TEST q(Data::Dumper->new([$a,$b,$c],['a','b','c'])->Maxdepth(1)->Dump;);
+TEST q(Data::Dumper->new([$a,$b,$c],['a','b','c'])->Maxdepth(1)->Dumpxs;)
+	if $XS;
 }

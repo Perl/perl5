@@ -18,14 +18,23 @@ desperation):
 Optional warnings are enabled by using the B<-w> switch.  Warnings may
 be captured by setting C<$SIG{__WARN__}> to a reference to a routine that
 will be called on each warning instead of printing it.  See L<perlvar>.
+
 Trappable errors may be trapped using the eval operator.  See
-L<perlfunc/eval>.
+L<perlfunc/eval>.  In almost all cases, warnings may be selectively
+disabled or promoted to fatal errors using the C<warnings> pragma.
+See L<warnings>.
 
 Some of these messages are generic.  Spots that vary are denoted with a %s,
 just as in a printf format.  Note that some messages start with a %s!
-The symbols C<"%(-?@> sort before the letters, while C<[> and C<\> sort after.
+Since the messages are listed in alphabetical order, the symbols
+C<"%(-?@> sort before the letters, while C<[> and C<\> sort after.
 
 =over 4
+
+=item "my sub" not yet implemented
+
+(F) Lexically scoped subroutines are not yet implemented.  Don't try that
+yet.
 
 =item "my" variable %s can't be in a package
 
@@ -33,11 +42,11 @@ The symbols C<"%(-?@> sort before the letters, while C<[> and C<\> sort after.
 to try to declare one with a package qualifier on the front.  Use local()
 if you want to localize a package variable.
 
-=item "my" variable %s masks earlier declaration in same scope
+=item "my" variable %s masks earlier declaration in same %s
 
-(W) A lexical variable has been redeclared in the same scope, effectively
-eliminating all access to the previous instance.  This is almost always
-a typographical error.  Note that the earlier variable will still exist
+(W) A lexical variable has been redeclared in the current scope or statement,
+effectively eliminating all access to the previous instance.  This is almost
+always a typographical error.  Note that the earlier variable will still exist
 until the end of the scope or until all closure referents to it are
 destroyed.
 
@@ -51,17 +60,80 @@ no useful value.  See L<perlmod>.
 (F) The "use" keyword is recognized and executed at compile time, and returns
 no useful value.  See L<perlmod>.
 
+=item '!' allowed only after types %s
+
+(F) The '!' is allowed in pack() and unpack() only after certain types.
+See L<perlfunc/pack>.
+
+=item # cannot take a count
+
+(F) You had an unpack template indicating a counted-length string,
+but you have also specified an explicit size for the string.
+See L<perlfunc/pack>.
+
+=item # must be followed by a, A or Z
+
+(F) You had an unpack template indicating a counted-length string,
+which must be followed by one of the letters a, A or Z
+to indicate what sort of string is to be unpacked.
+See L<perlfunc/pack>.
+
+=item # must be followed by a*, A* or Z*
+
+(F) You had an pack template indicating a counted-length string,
+Currently the only things that can have their length counted are a*, A* or Z*.
+See L<perlfunc/pack>.
+
+=item # must follow a numeric type
+
+(F) You had an unpack template that contained a '#',
+but this did not follow some numeric unpack specification.
+See L<perlfunc/pack>.
+
 =item % may only be used in unpack
 
 (F) You can't pack a string by supplying a checksum, because the
 checksumming process loses information, and you can't go the other
 way.  See L<perlfunc/unpack>.
 
+=item Repeat count in pack overflows
+
+(F) You can't specify a repeat count so large that it overflows
+your signed integers.  See L<perlfunc/pack>.
+
+=item Repeat count in unpack overflows
+
+(F) You can't specify a repeat count so large that it overflows
+your signed integers.  See L<perlfunc/unpack>.
+
+=item /%s/: Unrecognized escape \\%c passed through
+
+(W) You used a backslash-character combination which is not recognized
+by Perl.  This combination appears in an interpolated variable or a 
+C<'>-delimited regular expression.
+
+=item /%s/ should probably be written as "%s"
+
+(W) You have used a pattern where Perl expected to find a string,
+like in the first argument to C<join>.  Perl will treat the true
+or false result of matching the pattern against $_ as the string,
+which is probably not what you had in mind.
+
 =item %s (...) interpreted as function
 
 (W) You've run afoul of the rule that says that any list operator followed
 by parentheses turns into a function, with all the list operators arguments
 found inside the parentheses.  See L<perlop/Terms and List Operators (Leftward)>.
+
+=item %s() called too early to check prototype
+
+(W) You've called a function that has a prototype before the parser saw a
+definition or declaration for it, and Perl could not check that the call
+conforms to the prototype.  You need to either add an early prototype
+declaration for the subroutine in question, or move the subroutine
+definition ahead of the call to get proper prototype checking.  Alternatively,
+if you are certain that you're calling the function correctly, you may put
+an ampersand before the name to avoid the warning.  See L<perlsub>.
 
 =item %s argument is not a HASH element
 
@@ -115,6 +187,13 @@ regular expression engine didn't specifically check for that.  See L<perlre>.
 (S) The symbol in question was declared but somehow went out of scope
 before it could possibly have been used.
 
+=item %s package attribute may clash with future reserved word: %s
+
+(W) A lowercase attribute name was used that had a package-specific handler.
+That name might have a meaning to Perl itself some day, even though it
+doesn't yet.  Perhaps you should use a mixed-case attribute name, instead.
+See L<attributes>.
+
 =item %s syntax OK
 
 (F) The final summary message when a C<perl -c> succeeds.
@@ -142,6 +221,18 @@ Perl yourself.
 (A) You've accidentally run your script through the Bourne shell
 instead of Perl.  Check the #! line, or manually feed your script
 into Perl yourself.
+
+=item         (in cleanup) %s
+
+(W) This prefix usually indicates that a DESTROY() method raised
+the indicated exception.  Since destructors are usually called by
+the system at arbitrary points during execution, and often a vast
+number of times, the warning is issued only once for any number
+of failures that would otherwise result in the same message being
+repeated.
+
+Failure of user callbacks dispatched using the C<G_KEEPERR> flag
+could also result in this warning.  See L<perlcall/G_KEEPERR>.
 
 =item         (Missing semicolon on previous line?)
 
@@ -178,6 +269,11 @@ if you meant it literally.   See L<perlre>.
 
 (F) You had a pack template that specified an absolute position outside
 the string being unpacked.  See L<perlfunc/pack>.
+
+=item <> should be quotes
+
+(F) You wrote C<require E<lt>fileE<gt>> when you should have written
+C<require 'file'>.
 
 =item accept() on closed fd
 
@@ -221,7 +317,8 @@ imported with the C<use subs> pragma).
 
 To silently interpret it as the Perl operator, use the C<CORE::> prefix
 on the operator (e.g. C<CORE::log($x)>) or by declaring the subroutine
-to be an object method (see L<attrs>).
+to be an object method (see L<perlsub/"Subroutine Attributes">
+or L<attributes>).
 
 =item Args must match #! line
 
@@ -288,6 +385,12 @@ and should have been freed, and in fact, probably was freed.  This
 could indicate that SvREFCNT_dec() was called too many times, or that
 SvREFCNT_inc() was called too few times, or that the SV was mortalized
 when it shouldn't have been, or that memory has been corrupted.
+
+=item Attempt to join self
+
+(F) You tried to join a thread from within itself, which is an
+impossible task.  You may be joining the wrong thread, or you may
+need to move the join() to some other thread.
 
 =item Attempt to pack pointer to temporary value
 
@@ -376,7 +479,7 @@ Perl yourself.
 =item Bareword "%s" not allowed while "strict subs" in use
 
 (F) With "strict subs" in use, a bareword is only allowed as a
-subroutine identifier, in curly braces or to the left of the "=>" symbol.
+subroutine identifier, in curly brackets or to the left of the "=>" symbol.
 Perhaps you need to predeclare a subroutine?
 
 =item Bareword "%s" refers to nonexistent package
@@ -398,14 +501,30 @@ already occurred.  Since the intended environment for the C<BEGIN {}>
 could not be guaranteed (due to the errors), and since subsequent code
 likely depends on its correct operation, Perl just gave up.
 
+=item Binary number > 0b11111111111111111111111111111111 non-portable
+
+(W) The binary number you specified is larger than 2**32-1
+(4294967295) and therefore non-portable between systems.  See
+L<perlport> for more on portability concerns.
+
 =item bind() on closed fd
 
 (W) You tried to do a bind on a closed socket.  Did you forget to check
 the return value of your socket() call?  See L<perlfunc/bind>.
 
+=item Bit vector size > 32 non-portable
+
+(W) Using bit vector sizes larger than 32 is non-portable.
+
 =item Bizarre copy of %s in %s
 
 (P) Perl detected an attempt to copy an internal value that is not copiable.
+
+=item Buffer overflow in prime_env_iter: %s
+
+(W) A warning peculiar to VMS.  While Perl was preparing to iterate over
+%ENV, it encountered a logical name or symbol definition which was too long,
+so it was truncated to the string shown.
 
 =item Callback called exit
 
@@ -440,6 +559,13 @@ there isn't a current block.  Note that an "if" or "else" block doesn't
 count as a "loopish" block, as doesn't a block given to sort().  You can
 usually double the curlies to get the same effect though, because the inner
 curlies will be considered a block that loops once.  See L<perlfunc/next>.
+
+=item Can't read CRTL environ
+
+(S) A warning peculiar to VMS.  Perl tried to read an element of %ENV
+from the CRTL's internal environment array and discovered the array was
+missing.  You need to figure out where your CRTL misplaced its environ
+or define F<PERL_ENV_TABLES> (see L<perlvms>) so that environ is not searched.
 
 =item Can't "redo" outside a block
 
@@ -499,6 +625,10 @@ Something like this will reproduce the error:
 (F) You called C<perl -x/foo/bar>, but C</foo/bar> is not a directory
 that you can chdir to, possibly because it doesn't exist.
 
+=item Can't check filesystem of script "%s"
+
+(P) For some reason you can't check the filesystem of the script for nosuid.
+
 =item Can't coerce %s to integer in %s
 
 (F) Certain types of SVs, in particular real symbol table entries
@@ -550,9 +680,11 @@ They must have ordinary identifiers as names.
 from a deleted (but still opened) file.  You have to say C<-i.bak>, or some
 such.
 
-=item Can't do inplace edit: %s E<gt> 14 characters
+=item Can't do inplace edit: %s would not be unique
 
-(S) There isn't enough room in the filename to make a backup name for the file.
+(S) Your filesystem does not support filenames longer than 14
+characters and Perl was unable to create a unique filename during
+inplace editing with the B<-i> switch.  The file was ignored.
 
 =item Can't do inplace edit: %s is not a regular file
 
@@ -711,13 +843,15 @@ but there is no function to autoload.  Most probable causes are a misprint
 in a function/method name or a failure to C<AutoSplit> the file, say, by
 doing C<make install>.
 
-=item Can't locate %s in @INC
+=item Can't locate %s
 
-(F) You said to do (or require, or use) a file that couldn't be found
-in any of the libraries mentioned in @INC.  Perhaps you need to set the
-PERL5LIB or PERL5OPT environment variable to say where the extra library
-is, or maybe the script needs to add the library name to @INC.  Or maybe
-you just misspelled the name of the file.  See L<perlfunc/require>.
+(F) You said to C<do> (or C<require>, or C<use>) a file that couldn't be
+found. Perl looks for the file in all the locations mentioned in @INC,
+unless the file name included the full path to the file.  Perhaps you need
+to set the PERL5LIB or PERL5OPT environment variable to say where the extra
+library is, or maybe the script needs to add the library name to @INC.  Or
+maybe you just misspelled the name of the file.  See L<perlfunc/require>
+and L<lib>.
 
 =item Can't locate object method "%s" via package "%s"
 
@@ -738,6 +872,11 @@ to exist.
 
 (F) You aren't allowed to assign to the item indicated, or otherwise try to
 change it, such as with an auto-increment.
+
+=item Can't modify non-lvalue subroutine call
+
+(F) Subroutines used in lvalue context should be marked as such, see
+L<perlsub/"Lvalue subroutines">.
 
 =item Can't modify nonexistent substring
 
@@ -797,10 +936,16 @@ pointers into them.  You tried to redefine one such sort subroutine when it
 was currently active, which is not allowed.  If you really want to do
 this, you should write C<sort { &func } @x> instead of C<sort func @x>.
 
+=item Can't remove %s: %s, skipping file 
+
+(S) You requested an inplace edit without creating a backup file.  Perl
+was unable to remove the original file to replace it with the modified
+file.  The file was left unmodified.
+
 =item Can't rename %s to %s: %s, skipping file
 
-(S) The rename done by the B<-i> switch failed for some reason, probably because
-you don't have write permission to the directory.
+(S) The rename done by the B<-i> switch failed for some reason,
+probably because you don't have write permission to the directory.
 
 =item Can't reopen input pipe (name: %s) in binary mode
 
@@ -816,6 +961,12 @@ of suidperl.
 
 (F) The return statement was executed in mainline code, that is, where
 there was no subroutine call to return out of.  See L<perlsub>.
+
+=item Can't return %s from lvalue subroutine
+
+(F) Perl detected an attempt to return illegal lvalues (such
+as temporary or readonly values) from a subroutine used as an lvalue.
+This is not allowed.
 
 =item Can't stat script "%s"
 
@@ -878,6 +1029,12 @@ and the variable had earlier been declared as a lexical variable.
 Either qualify the sort variable with the package name, or rename the
 lexical variable.
 
+=item Bad evalled substitution pattern
+
+(F) You've used the /e switch to evaluate the replacement for a
+substitution, but perl found a syntax error in the code to evaluate,
+most likely an unexpected right brace '}'.
+
 =item Can't use %s for loop variable
 
 (F) Only a simple scalar variable may be used as a loop variable on a foreach.
@@ -925,22 +1082,38 @@ weren't.
 subscript.  But to the left of the brackets was an expression that
 didn't look like an array reference, or anything else subscriptable.
 
+=item Can't weaken a nonreference
+
+(F) You attempted to weaken something that was not a reference.  Only
+references can be weakened.
+
 =item Can't x= to read-only value
 
 (F) You tried to repeat a constant value (often the undefined value) with
 an assignment operator, which implies modifying the value itself.
 Perhaps you need to copy the value to a temporary, and repeat that.
 
-=item Cannot find an opnumber for "%s"
+=item Can't find an opnumber for "%s"
 
 (F) A string of a form C<CORE::word> was given to prototype(), but
 there is no builtin with the name C<word>.
 
-=item Cannot resolve method `%s' overloading `%s' in package `%s'
+=item Can't resolve method `%s' overloading `%s' in package `%s'
 
 (F|P) Error resolving overloading specified by a method name (as
 opposed to a subroutine reference): no such method callable via the
 package. If method name is C<???>, this is an internal error.
+
+=item Character class [:%s:] unknown
+
+(F) The class in the character class [: :] syntax is unknown.
+
+=item Character class syntax [%s] belongs inside character classes
+
+(W) The character class constructs [: :], [= =], and [. .]  go
+I<inside> character classes, the [] are part of the construct,
+for example: /[012[:alpha:]345]/.  Note that the last two constructs
+are not currently implemented, they are placeholders for future extensions.
 
 =item Character class syntax [. .] is reserved for future extensions
 
@@ -949,14 +1122,6 @@ with "[." and ending with ".]" is reserved for future extensions.
 If you need to represent those character sequences inside a regular
 expression character class, just quote the square brackets with the
 backslash: "\[." and ".\]".
-
-=item Character class syntax [: :] is reserved for future extensions
-
-(W) Within regular expression character classes ([]) the syntax beginning
-with "[:" and ending with ":]" is reserved for future extensions.
-If you need to represent those character sequences inside a regular
-expression character class, just quote the square brackets with the
-backslash: "\[:" and ":\]".
 
 =item Character class syntax [= =] is reserved for future extensions
 
@@ -1002,6 +1167,14 @@ for information on I<Mastering Regular Expressions>.)
 (W) You tried to do a connect on a closed socket.  Did you forget to check
 the return value of your socket() call?  See L<perlfunc/connect>.
 
+=item Constant is not %s reference
+
+(F) A constant value (perhaps declared using the C<use constant> pragma)
+is being dereferenced, but it amounts to the wrong type of reference.  The
+message indicates the type of reference that was expected. This usually
+indicates a syntax error in dereferencing the constant value.
+See L<perlsub/"Constant Functions"> and L<constant>.
+
 =item Constant subroutine %s redefined
 
 (S) You redefined a subroutine which had previously been eligible for
@@ -1013,6 +1186,16 @@ workarounds.
 (S) You undefined a subroutine which had previously been eligible for
 inlining.  See L<perlsub/"Constant Functions"> for commentary and
 workarounds.
+
+=item constant(%s): %%^H is not localized
+
+(F) When setting compile-time-lexicalized hash %^H one should set the 
+corresponding bit of $^H as well.
+
+=item constant(%s): %s
+
+(F) Compile-time-substitutions (such as overloaded constants and
+character names) were not correctly set up.
 
 =item Copy method did not return a reference
 
@@ -1038,6 +1221,18 @@ a valid magic number.
 times more than it has returned.  This probably indicates an infinite
 recursion, unless you're writing strange benchmark programs, in which
 case it indicates something else.
+
+=item defined(@array) is deprecated
+
+(D) defined() is not usually useful on arrays because it checks for an
+undefined I<scalar> value.  If you want to see if the array is empty,
+just use C<if (@array) { # not empty }> for example.  
+
+=item defined(%hash) is deprecated
+
+(D) defined() is not usually useful on hashes because it checks for an
+undefined I<scalar> value.  If you want to see if the hash is empty,
+just use C<if (%hash) { # not empty }> for example.  
 
 =item Delimiter for here document is too long
 
@@ -1095,6 +1290,11 @@ unlikely to be what you want.
 
 (F) An untrapped exception was raised while executing an END subroutine.
 The interpreter is immediately exited.
+
+=item entering effective %s failed
+
+(F) While under the C<use filetest> pragma, switching the real and
+effective uids or gids failed.
 
 =item Error converting file specification %s
 
@@ -1162,7 +1362,7 @@ a return, a goto, or a loop control statement.
 (W) You are blessing a reference to a zero length string.  This has
 the effect of blessing the reference into the package main.  This is
 usually not what you want.  Consider providing a default target
-package, e.g. bless($ref, $p or 'MyPackage');
+package, e.g. bless($ref, $p || 'MyPackage');
 
 =item Fatal VMS error at %s, line %d
 
@@ -1182,7 +1382,7 @@ PDP-11 or something?
 You need to do an open() or a socket() call, or call a constructor from
 the FileHandle package.
 
-=item Filehandle %s opened for only input
+=item Filehandle %s opened only for input
 
 (W) You tried to write on a read-only filehandle.  If you
 intended it to be a read-write filehandle, you needed to open it with
@@ -1190,12 +1390,12 @@ intended it to be a read-write filehandle, you needed to open it with
 you intended only to write the file, use "E<gt>" or "E<gt>E<gt>".  See
 L<perlfunc/open>.
 
-=item Filehandle opened for only input
+=item Filehandle %s opened only for output
 
-(W) You tried to write on a read-only filehandle.  If you
+(W) You tried to read from a filehandle opened only for writing.  If you
 intended it to be a read-write filehandle, you needed to open it with
 "+E<lt>" or "+E<gt>" or "+E<gt>E<gt>" instead of with "E<lt>" or nothing.  If
-you intended only to write the file, use "E<gt>" or "E<gt>E<gt>".  See
+you intended only to read from the file, use "E<lt>".  See
 L<perlfunc/open>.
 
 =item Final $ should be \$ or $name
@@ -1217,7 +1417,7 @@ the name.
 (W) You redefined a format.  To suppress this warning, say
 
     {
-	local $^W = 0;
+	no warnings;
 	eval "format NAME =...";
     }
 
@@ -1258,7 +1458,6 @@ Did you forget to check the return value of your socket() call?
 (S) A warning peculiar to VMS.  The call to C<sys$getuai> underlying the
 C<getpwnam> operator returned an invalid UIC.
 
-
 =item Glob not terminated
 
 (F) The lexer saw a left angle bracket in a place where it was expecting
@@ -1288,6 +1487,12 @@ an emergency basis to prevent a core dump.
 (D) Really old Perl let you omit the % on hash names in some spots.  This
 is now heavily deprecated.
 
+=item Hexadecimal number > 0xffffffff non-portable
+
+(W) The hexadecimal number you specified is larger than 2**32-1
+(4294967295) and therefore non-portable between systems.  See
+L<perlport> for more on portability concerns.
+
 =item Identifier too long
 
 (F) Perl limits identifiers (names for variables, functions, etc.) to
@@ -1295,14 +1500,18 @@ about 250 characters for simple names, and somewhat more for compound
 names (like C<$A::B>).  You've exceeded Perl's limits.  Future
 versions of Perl are likely to eliminate these arbitrary limitations.
 
-=item Ill-formed logical name |%s| in prime_env_iter
+=item Ill-formed CRTL environ value "%s"
 
-(W) A warning peculiar to VMS.  A logical name was encountered when preparing
-to iterate over %ENV which violates the syntactic rules governing logical
-names.  Because it cannot be translated normally, it is skipped, and will not
-appear in %ENV.  This may be a benign occurrence, as some software packages
-might directly modify logical name tables and introduce nonstandard names,
-or it may indicate that a logical name table has been corrupted.
+(W) A warning peculiar to VMS.  Perl tried to read the CRTL's internal
+environ array, and encountered an element without the C<=> delimiter
+used to spearate keys from values.  The element is ignored.
+
+=item Ill-formed message in prime_env_iter: |%s|
+
+(W) A warning peculiar to VMS.  Perl tried to read a logical name
+or CLI symbol definition when preparing to iterate over %ENV, and
+didn't see the expected delimiter between key and value, so the
+line was ignored.
 
 =item Illegal character %s (carriage return)
 
@@ -1333,20 +1542,34 @@ logic, or you need to put a conditional in to guard against meaningless input.
 (F) You tried to divide a number by 0 to get the remainder.  Most numbers
 don't take to this kindly.
 
-=item Illegal octal digit
+=item Illegal binary digit %s
+
+(F) You used a digit other than 0 and 1 in a binary number.
+
+=item Illegal octal digit %s
 
 (F) You used an 8 or 9 in a octal number.
 
-=item Illegal octal digit ignored
+=item Illegal binary digit %s ignored
+
+(W) You may have tried to use a digit other than 0 or 1 in a binary number.
+Interpretation of the binary number stopped before the offending digit.
+
+=item Illegal octal digit %s ignored
 
 (W) You may have tried to use an 8 or 9 in a octal number.  Interpretation
 of the octal number stopped before the 8 or 9.
 
-=item Illegal hex digit ignored
+=item Illegal hexadecimal digit %s ignored
 
-(W) You may have tried to use a character other than 0 - 9 or A - F in a
-hexadecimal number.  Interpretation of the hexadecimal number stopped
+(W) You may have tried to use a character other than 0 - 9 or A - F, a - f
+in a hexadecimal number.  Interpretation of the hexadecimal number stopped
 before the illegal character.
+
+=item Illegal number of bits in vec
+
+(F) The number of bits in vec() (the third argument) must be a power of
+two from 1 to 32 (or 64, if your platform supports that).
 
 =item Illegal switch in PERL5OPT: %s
 
@@ -1387,24 +1610,24 @@ C<$ENV{ENV}> or C<$ENV{BASH_ENV}> are derived from data supplied (or
 potentially supplied) by the user.  The script must set the path to a
 known value, using trustworthy data.  See L<perlsec>.
 
-=item Integer overflow in hex number
+=item Integer overflow in %s number
 
-(S) The literal hex number you have specified is too big for your
-architecture. On a 32-bit architecture the largest hex literal is
-0xFFFFFFFF.
-
-=item Integer overflow in octal number
-
-(S) The literal octal number you have specified is too big for your
-architecture. On a 32-bit architecture the largest octal literal is
-037777777777.
+(W) The hexadecimal, octal or binary number you have specified either
+as a literal in your code or as a scalar is too big for your
+architecture, and has been converted to a floating point number.  On a
+32-bit architecture the largest hexadecimal, octal or binary number
+representable without overflow is 0xFFFFFFFF, 037777777777, or
+0b11111111111111111111111111111111 respectively.  Note that Perl
+transparently promotes all numbers to a floating point representation
+internally--subject to loss of precision errors in subsequent
+operations.
 
 =item Internal inconsistency in tracking vforks
 
 (S) A warning peculiar to VMS.  Perl keeps track of the number
 of times you've called C<fork> and C<exec>, to determine
 whether the current call to C<exec> should affect the current
-script or a subprocess (see L<perlvms/exec>).  Somehow, this count
+script or a subprocess (see L<perlvms/"exec LIST">).  Somehow, this count
 has become scrambled, so Perl is making a guess and treating
 this C<exec> as a request to terminate the Perl script
 and execute the specified command.
@@ -1413,30 +1636,51 @@ and execute the specified command.
 
 (P) Something went badly wrong in the regular expression parser.
 
-=item internal error: glob failed
+=item glob failed (%s)
 
-(P) Something went wrong with the external program(s) used for C<glob>
-and C<E<lt>*.cE<gt>>.  This may mean that your csh (C shell) is
-broken.  If so, you should change all of the csh-related variables in
-config.sh:  If you have tcsh, make the variables refer to it as if it
-were csh (e.g. C<full_csh='/usr/bin/tcsh'>); otherwise, make them all
-empty (except that C<d_csh> should be C<'undef'>) so that Perl will
-think csh is missing.  In either case, after editing config.sh, run
-C<./Configure -S> and rebuild Perl.
+(W) Something went wrong with the external program(s) used for C<glob>
+and C<E<lt>*.cE<gt>>.  Usually, this means that you supplied a C<glob>
+pattern that caused the external program to fail and exit with a nonzero
+status.  If the message indicates that the abnormal exit resulted in a
+coredump, this may also mean that your csh (C shell) is broken.  If so,
+you should change all of the csh-related variables in config.sh:  If you
+have tcsh, make the variables refer to it as if it were csh (e.g.
+C<full_csh='/usr/bin/tcsh'>); otherwise, make them all empty (except that
+C<d_csh> should be C<'undef'>) so that Perl will think csh is missing.
+In either case, after editing config.sh, run C<./Configure -S> and
+rebuild Perl.
 
 =item internal urp in regexp at /%s/
 
 (P) Something went badly awry in the regular expression parser.
 
+=item Invalid %s attribute: %s
+
+The indicated attribute for a subroutine or variable was not recognized
+by Perl or by a user-supplied handler.  See L<attributes>.
+
+=item Invalid %s attributes: %s
+
+The indicated attributes for a subroutine or variable were not recognized
+by Perl or by a user-supplied handler.  See L<attributes>.
+
 =item invalid [] range in regexp
 
 (F) The range specified in a character class had a minimum character
-greater than the maximum character.  See L<perlre>.
+greater than the maximum character, or the range didn't start/end with
+a literal character.  See L<perlre>.
 
 =item Invalid conversion in %s: "%s"
 
 (W) Perl does not understand the given format conversion.
 See L<perlfunc/sprintf>.
+
+=item Invalid separator character %s in attribute list
+
+(F) Something other than a comma or whitespace was seen between the
+elements of an attribute list.  If the previous attribute
+had a parenthesised parameter list, perhaps that list was terminated
+too soon.  See L<attributes>.
 
 =item Invalid type in pack: '%s'
 
@@ -1477,10 +1721,21 @@ L<perlfunc/last>.
 that name, not even if you count where you were called from.  See
 L<perlfunc/last>.
 
+=item leaving effective %s failed
+
+(F) While under the C<use filetest> pragma, switching the real and
+effective uids or gids failed.
+
 =item listen() on closed fd
 
 (W) You tried to do a listen on a closed socket.  Did you forget to check
 the return value of your socket() call?  See L<perlfunc/listen>.
+
+=item Lvalue subs returning %s not implemented yet
+
+(F) Due to limitations in the current implementation, array and hash
+values cannot be returned in subroutines used in lvalue context.
+See L<perlsub/"Lvalue subroutines">.
 
 =item Method for operation %s not found in package %s during blessing
 
@@ -1503,21 +1758,31 @@ ended earlier on the current line.
 mentioned with the $ in Perl, unlike in the shells, where it can vary from
 one line to the next.
 
+=item Missing %sbrace%s on \N{}
+
+(F) Wrong syntax of character name literal C<\N{charname}> within
+double-quotish context.
+
 =item Missing comma after first argument to %s function
 
 (F) While certain functions allow you to specify a filehandle or an
 "indirect object" before the argument list, this ain't one of them.
+
+=item Missing command in piped open
+
+(W) You used the C<open(FH, "| command")> or C<open(FH, "command |")>
+construction, but the command was missing or blank.
 
 =item Missing operator before %s?
 
 (S) This is an educated guess made in conjunction with the message "%s
 found where operator expected".  Often the missing operator is a comma.
 
-=item Missing right bracket
+=item Missing right curly or square bracket
 
-(F) The lexer counted more opening curly brackets (braces) than closing ones.
-As a general rule, you'll find it's missing near the place you were last
-editing.
+(F) The lexer counted more opening curly or square brackets than
+closing ones.  As a general rule, you'll find it's missing near the place
+you were last editing.
 
 =item Modification of a read-only value attempted
 
@@ -1538,7 +1803,7 @@ backwards.
 
 =item Modification of non-creatable hash value attempted, subscript "%s"
 
-(F) You tried to make a hash value spring into existence, and it couldn't
+(P) You tried to make a hash value spring into existence, and it couldn't
 be created for some peculiar reason.
 
 =item Module name must be constant
@@ -1553,6 +1818,11 @@ be created for some peculiar reason.
 
 (W) Multidimensional arrays aren't written like C<$foo[1,2,3]>.  They're written
 like C<$foo[1][2][3]>, as in C.
+
+=item Missing name in "my sub"
+
+(F) The reserved syntax for lexically scoped subroutines requires that they
+have a name with which they can be found.
 
 =item Name "%s::%s" used only once: possible typo
 
@@ -1703,6 +1973,14 @@ an attempt to close an unopened filehandle.
 (W) You specified a signal name as a subscript to %SIG that was not recognized.
 Say C<kill -l> in your shell to see the valid signal names on your system.
 
+=item no UTC offset information; assuming local time is UTC
+
+(S) A warning peculiar to VMS.  Perl was unable to find the local
+timezone offset, so it's assuming that local system time is equivalent
+to UTC.  If it's not, define the logical name F<SYS$TIMEZONE_DIFFERENTIAL>
+to translate to the number of seconds which need to be added to UTC to
+get local time.
+
 =item Not a CODE reference
 
 (F) Perl was trying to evaluate a reference to a code value (that is, a
@@ -1801,6 +2079,14 @@ about 250 characters.  You've exceeded that length.  Future versions of
 Perl are likely to eliminate this arbitrary limitation.  In the meantime,
 try using scientific notation (e.g. "1e6" instead of "1_000_000").
 
+=item Octal number > 037777777777 non-portable
+
+(W) The octal number you specified is larger than 2**32-1 (4294967295)
+and therefore non-portable between systems.  See L<perlport> for more
+on portability concerns.
+
+See also L<perlport> for writing portable code.
+
 =item Odd number of elements in hash assignment
 
 (S) You specified an odd number of elements to initialize a hash, which
@@ -1884,6 +2170,11 @@ See L<perlform>.
 (P) The savestack was requested to restore more localized values than there
 are in the savestack.
 
+=item panic: del_backref
+
+(P) Failed an internal consistency check while trying to reset a weak
+reference.
+
 =item panic: die %s
 
 (P) We popped the context stack to an eval context, and then discovered
@@ -1922,6 +2213,10 @@ and then discovered it wasn't a context we know how to do a goto in.
 
 (P) The lexer got into a bad state parsing a string with brackets.
 
+=item panic: kid popen errno read
+
+(F) forked child returned an incomprehensible message about its errno.
+
 =item panic: last
 
 (P) We popped the context stack to a block context, and then discovered
@@ -1939,6 +2234,11 @@ invalid enum on the top of it.
 =item panic: malloc
 
 (P) Something requested a negative number of bytes of malloc.
+
+=item panic: magic_killbackrefs
+
+(P) Failed an internal consistency check while trying to reset all weak
+references to an object.
 
 =item panic: mapstart
 
@@ -2037,7 +2337,7 @@ anyway?  See L<perlfunc/require>.
 
 (F) The setuid emulator in suidperl decided you were up to no good.
 
-=item pid %d not a child
+=item pid %x not a child
 
 (W) A warning peculiar to VMS.  Waitpid() was asked to wait for a process which
 isn't a subprocess of the current process.  While this is fine from VMS'
@@ -2145,7 +2445,7 @@ are outside the range which can be represented by integers internally.
 One possible workaround is to force Perl to use magical string
 increment by prepending "0" to your numbers.
 
-=item Read on closed filehandle E<lt>%sE<gt>
+=item Read on closed filehandle %s
 
 (W) The filehandle you're reading from got itself closed sometime before now.
 Check your logic flow.
@@ -2182,6 +2482,11 @@ to use parens. In any case, a hash requires key/value B<pairs>.
     %hash = ( one => 1, two => 2, );	# right
     %hash = qw( one 1 two 2 );			# also fine
 
+=item Reference is already weak
+
+(W) You have attempted to weaken a reference that is already weak.
+Doing so has no effect.
+
 =item Reference miscount in sv_replace()
 
 (W) The internal sv_replace() function was handed a new SV with a
@@ -2200,14 +2505,6 @@ expression compiler gave it.
 =item regexp out of space
 
 (P) A "can't happen" error, because safemalloc() should have caught it earlier.
-
-=item regexp too big
-
-(F) The current implementation of regular expressions uses shorts as
-address offsets within a string.  Unfortunately this means that if
-the regular expression compiles to longer than 32767, it'll blow up.
-Usually when you want a regular expression this big, there is a better
-way to do it with multiple statements.  See L<perlre>.
 
 =item Reversed %s= operator
 
@@ -2322,11 +2619,13 @@ from the user it isn't running under, and isn't in a location where the CGI
 server can't find it, basically, more or less.  Please see the following
 for more information:
 
-	http://www.perl.com/perl/faq/idiots-guide.html
-	http://www.perl.com/perl/faq/perl-cgi-faq.html
+	http://www.perl.com/CPAN/doc/FAQs/cgi/idiots-guide.html
+	http://www.perl.com/CPAN/doc/FAQs/cgi/perl-cgi-faq.html
 	ftp://rtfm.mit.edu/pub/usenet/news.answers/www/cgi-faq
 	http://hoohoo.ncsa.uiuc.edu/cgi/interface.html
 	http://www-genome.wi.mit.edu/WWW/faqs/www-security-faq.html
+
+You should also look at L<perlfaq9>.
 
 =item setegid() not implemented
 
@@ -2405,6 +2704,14 @@ there was a failure.  You probably wanted to use system() instead,
 which does return.  To suppress this warning, put the exec() in a block
 by itself.
 
+=item Strange *+?{} on zero-length expression
+
+(W) You applied a regular expression quantifier in a place where it
+makes no sense, such as on a zero-width assertion.
+Try putting the quantifier inside the assertion instead.  For example,
+the way to match "abc" provided that it is followed by three
+repetitions of "xyz" is C</abc(?=(?:xyz){3})/>, not C</abc(?=xyz){3}/>.
+
 =item Stub found while resolving method `%s' overloading `%s' in package `%s'
 
 (P) Overloading resolution over @ISA tree may be broken by importation stubs.
@@ -2416,7 +2723,7 @@ may break this.
 (W) You redefined a subroutine.  To suppress this warning, say
 
     {
-	local $^W = 0;
+	no warnings;
 	eval "sub name { ... }";
     }
 
@@ -2452,6 +2759,11 @@ of an assignment or as a subroutine argument for example).
 (F) Your Perl was compiled with B<-D>SETUID_SCRIPTS_ARE_SECURE_NOW, but a
 version of the setuid emulator somehow got run anyway.
 
+=item switching effective %s is not implemented
+
+(F) While under the C<use filetest> pragma, we cannot switch the
+real and effective uids or gids.
+
 =item syntax error
 
 (F) Probably means you had a syntax error.  Common reasons include:
@@ -2479,10 +2791,12 @@ if the error went away.  Sort of the cybernetic version of S<20 questions>.
 instead of Perl.  Check the #! line, or manually feed your script
 into Perl yourself.
 
-=item System V IPC is not implemented on this machine
+=item System V %s is not implemented on this machine
 
-(F) You tried to do something with a function beginning with "sem", "shm",
-or "msg".  See L<perlfunc/semctl>, for example.
+(F) You tried to do something with a function beginning with "sem",
+"shm", or "msg" but that System V IPC is not implemented in your
+machine.  In some machines the functionality can exist but be
+unconfigured.  Consult your system support.
 
 =item Syswrite on closed filehandle
 
@@ -2537,6 +2851,17 @@ will deny it.
 (F) It makes no sense to test the current stat buffer for symbolic linkhood
 if the last stat that wrote to the stat buffer already went past
 the symlink to get to the real file.  Use an actual filename instead.
+
+=item This Perl can't reset CRTL eviron elements (%s)
+
+=item This Perl can't set CRTL environ elements (%s=%s)
+
+(W) Warnings peculiar to VMS.  You tried to change or delete an element
+of the CRTL's internal environ array, but your copy of Perl wasn't
+built with a CRTL that contained the setenv() function.  You'll need to
+rebuild Perl with a CRTL that does, or redefine F<PERL_ENV_TABLES> (see
+L<perlvms>) so that the environ array isn't the target of the change to
+%ENV which produced the warning.
 
 =item times not implemented
 
@@ -2692,18 +3017,31 @@ representative, who probably put it there in the first place.
 
 (F) There are no byte-swapping functions for a machine with this byte order.
 
+=item Unknown open() mode '%s'
+
+(F) The second argument of 3-arguments open is not one from the list
+of C<L<lt>>, C<L<gt>>, C<E<gt>E<gt>>, C<+L<lt>>, C<+L<gt>>,
+C<+E<gt>E<gt>>, C<-|>, C<|-> of possible open() modes.
+
+=item Unknown process %x sent message to prime_env_iter: %s
+
+(P) An error peculiar to VMS.  Perl was reading values for %ENV before
+iterating over it, and someone else stuck a message in the stream of
+data Perl expected.  Someone's very confused, or perhaps trying to
+subvert Perl's population of %ENV for nefarious purposes.
+
 =item unmatched () in regexp
 
 (F) Unbackslashed parentheses must always be balanced in regular
 expressions.  If you're a vi user, the % key is valuable for finding
 the matching parenthesis.  See L<perlre>.
 
-=item Unmatched right bracket
+=item Unmatched right %s bracket
 
-(F) The lexer counted more closing curly brackets (braces) than opening
-ones, so you're probably missing an opening bracket.  As a general
-rule, you'll find the missing one (so to speak) near the place you were
-last editing.
+(F) The lexer counted more closing curly or square brackets than
+opening ones, so you're probably missing a matching opening bracket.
+As a general rule, you'll find the missing one (so to speak) near the
+place you were last editing.
 
 =item unmatched [] in regexp
 
@@ -2722,6 +3060,11 @@ an underbar into it.  You might also declare it as a subroutine.
 (F) The Perl parser has no idea what to do with the specified character
 in your Perl script (or eval).  Perhaps you tried to run a compressed
 script, a binary program, or a directory as a Perl program.
+
+=item Unrecognized escape \\%c passed through
+
+(W) You used a backslash-character combination which is not recognized
+by Perl.
 
 =item Unrecognized signal name "%s"
 
@@ -2769,17 +3112,19 @@ a term, so it's looking for the corresponding right angle bracket, and not
 finding it.  Chances are you left some needed parentheses out earlier in
 the line, and you really meant a "less than".
 
-=item Use of "$$<digit>" to mean "${$}<digit>" is deprecated
+=item Unterminated attribute parameter in attribute list
 
-(D) Perl versions before 5.004 misinterpreted any type marker followed
-by "$" and a digit.  For example, "$$0" was incorrectly taken to mean
-"${$}0" instead of "${$0}".  This bug is (mostly) fixed in Perl 5.004.
+(F) The lexer saw an opening (left) parenthesis character while parsing an
+attribute list, but the matching closing (right) parenthesis
+character was not found.  You may need to add (or remove) a backslash
+character to get your parentheses to balance.  See L<attributes>.
 
-However, the developers of Perl 5.004 could not fix this bug completely,
-because at least two widely-used modules depend on the old meaning of
-"$$0" in a string.  So Perl 5.004 still interprets "$$<digit>" in the
-old (broken) way inside strings; but it generates this message as a
-warning.  And in Perl 5.005, this special treatment will cease.
+=item Unterminated attribute list
+
+(F) The lexer found something other than a simple identifier at the start
+of an attribute, and it wasn't a semicolon or the start of a
+block.  Perhaps you terminated the parameter list of the previous attribute
+too soon.  See L<attributes>.
 
 =item Use of $# is deprecated
 
@@ -2850,7 +3195,7 @@ bad side effects.
 
 (W) An undefined value was used as if it were already defined.  It was
 interpreted as a "" or a 0, but maybe it was a mistake.  To suppress this
-warning assign an initial value to your variables.
+warning assign a defined value to your variables.
 
 =item Useless use of "re" pragma
 
@@ -2899,6 +3244,13 @@ or C<readdir()> as a boolean value.  Each of these constructs can return a
 value of "0"; that would make the conditional expression false, which is
 probably not what you intended.  When using these constructs in conditional
 expressions, test their values with the C<defined> operator.
+
+=item Value of CLI symbol "%s" too long
+
+(W) A warning peculiar to VMS.  Perl tried to read the value of an %ENV
+element from a CLI symbol table, and found a resultant string longer
+than 1024 characters.  The return value has been truncated to 1024
+characters.
 
 =item Variable "%s" is not imported%s
 
@@ -3008,7 +3360,7 @@ but in actual fact, you got
 
 So put in parentheses to say what you really mean.
 
-=item Write on closed filehandle
+=item Write on closed filehandle %s
 
 (W) The filehandle you're writing to got itself closed sometime before now.
 Check your logic flow.

@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..10\n";
+print "1..13\n";
 
 print join(':',1..5) eq '1:2:3:4:5' ? "ok 1\n" : "not ok 1\n";
 
@@ -46,3 +46,21 @@ foreach ('09'..'08') {
 print "not " unless join(",", @y) eq join(",", @x);
 print "ok 10\n";
 
+# check bounds
+@a = 0x7ffffffe..0x7fffffff;
+print "not " unless "@a" eq "2147483646 2147483647";
+print "ok 11\n";
+
+@a = -0x7fffffff..-0x7ffffffe;
+print "not " unless "@a" eq "-2147483647 -2147483646";
+print "ok 12\n";
+
+# check magic
+{
+    my $bad = 0;
+    local $SIG{'__WARN__'} = sub { $bad = 1 };
+    my $x = 'a-e';
+    $x =~ s/(\w)-(\w)/join ':', $1 .. $2/e;
+    $bad = 1 unless $x eq 'a:b:c:d:e';
+    print $bad ? "not ok 13\n" : "ok 13\n";
+}

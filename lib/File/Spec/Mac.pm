@@ -1,18 +1,9 @@
 package File::Spec::Mac;
 
-use Exporter ();
-use Config;
 use strict;
-use File::Spec;
-use vars qw(@ISA $VERSION $Is_Mac);
-
-$VERSION = '1.0';
-
+use vars qw(@ISA);
+require File::Spec::Unix;
 @ISA = qw(File::Spec::Unix);
-$Is_Mac = $^O eq 'MacOS';
-
-Exporter::import('File::Spec', '$Verbose');
-
 
 =head1 NAME
 
@@ -20,7 +11,7 @@ File::Spec::Mac - File::Spec for MacOS
 
 =head1 SYNOPSIS
 
-C<require File::Spec::Mac;>
+ require File::Spec::Mac; # Done internally by File::Spec if needed
 
 =head1 DESCRIPTION
 
@@ -37,8 +28,8 @@ On MacOS, there's nothing to be done.  Returns what it's given.
 =cut
 
 sub canonpath {
-    my($self,$path) = @_;
-    $path;
+    my ($self,$path) = @_;
+    return $path;
 }
 
 =item catdir
@@ -52,7 +43,7 @@ The fundamental requirement of this routine is that
 	  File::Spec->catdir(split(":",$path)) eq $path
 
 But because of the nature of Macintosh paths, some additional 
-possibilities are allowed to make using this routine give resonable results 
+possibilities are allowed to make using this routine give reasonable results 
 for some common situations.  Here are the rules that are used.  Each 
 argument has its trailing ":" removed.  Each argument, except the first,
 has its leading ":" removed.  They are then joined together by a ":".
@@ -78,26 +69,23 @@ Under MacPerl, there is an additional ambiguity.  Does the user intend that
 	  File::Spec->catfile("LWP","Protocol","http.pm")
 
 be relative or absolute?  There's no way of telling except by checking for the
-existance of LWP: or :LWP, and even there he may mean a dismounted volume or
+existence of LWP: or :LWP, and even there he may mean a dismounted volume or
 a relative path in a different directory (like in @INC).   So those checks
 aren't done here. This routine will treat this as absolute.
 
 =cut
 
-# ';
-
 sub catdir {
     shift;
     my @args = @_;
-	$args[0] =~ s/:$//;
-	my $result = shift @args;
-	for (@args) {
-		s/:$//;
-		s/^://;
-		$result .= ":$_";
+    my $result = shift @args;
+    $result =~ s/:$//;
+    foreach (@args) {
+	s/:$//;
+	s/^://;
+	$result .= ":$_";
     }
-    $result .= ":";
-	$result;
+    return "$result:";
 }
 
 =item catfile
@@ -118,50 +106,69 @@ give the same answer, as one might expect.
 =cut
 
 sub catfile {
-    my $self = shift @_;
+    my $self = shift;
     my $file = pop @_;
     return $file unless @_;
     my $dir = $self->catdir(@_);
-	$file =~ s/^://;
+    $file =~ s/^://;
     return $dir.$file;
 }
 
 =item curdir
 
-Returns a string representing of the current directory.
+Returns a string representing the current directory.
 
 =cut
 
 sub curdir {
-    return ":" ;
+    return ":";
+}
+
+=item devnull
+
+Returns a string representing the null device.
+
+=cut
+
+sub devnull {
+    return "Dev:Null";
 }
 
 =item rootdir
 
 Returns a string representing the root directory.  Under MacPerl,
 returns the name of the startup volume, since that's the closest in
-concept, although other volumes aren't rooted there.  On any other
-platform returns '', since there's no common way to indicate "root
-directory" across all Macs.
+concept, although other volumes aren't rooted there.
 
 =cut
 
 sub rootdir {
 #
-#  There's no real root directory on MacOS.  If you're using MacPerl,
-#  the name of the startup volume is returned, since that's the closest in
-#  concept.  On other platforms, simply return '', because nothing better
-#  can be done.
+#  There's no real root directory on MacOS.  The name of the startup
+#  volume is returned, since that's the closest in concept.
 #
-	if($Is_Mac) {
-        require Mac::Files;
-		my $system =  Mac::Files::FindFolder(&Mac::Files::kOnSystemDisk,
-		        &Mac::Files::kSystemFolderType);
-		$system =~ s/:.*$/:/;
-		return $system;
-	} else {
-		return '';
-    }
+    require Mac::Files;
+    my $system =  Mac::Files::FindFolder(&Mac::Files::kOnSystemDisk,
+					 &Mac::Files::kSystemFolderType);
+    $system =~ s/:.*$/:/;
+    return $system;
+}
+
+=item tmpdir
+
+Returns a string representation of the first existing directory
+from the following list or '' if none exist:
+
+    $ENV{TMPDIR}
+
+=cut
+
+my $tmpdir;
+sub tmpdir {
+    return $tmpdir if defined $tmpdir;
+    $tmpdir = $ENV{TMPDIR} if -d $ENV{TMPDIR};
+    $tmpdir = '' unless defined $tmpdir;
+    return $tmpdir;
 }
 
 =item updir
@@ -185,11 +192,11 @@ distinguish unambiguously.
 =cut
 
 sub file_name_is_absolute {
-    my($self,$file) = @_;
-	if ($file =~ /:/) {
-		return ($file !~ m/^:/);
-	} else {
-		return (! -e ":$file");
+    my ($self,$file) = @_;
+    if ($file =~ /:/) {
+	return ($file !~ m/^:/);
+    } else {
+	return (! -e ":$file");
     }
 }
 
@@ -207,14 +214,8 @@ sub path {
 #  The concept is meaningless under the MacPerl application.
 #  Under MPW, it has a meaning.
 #
-    my($self) = @_;
-	my @path;
-	if(exists $ENV{Commands}) {
-		@path = split /,/,$ENV{Commands};
-	} else {
-	    @path = ();
-	}
-    @path;
+    return unless exists $ENV{Commands};
+    return split(/,/, $ENV{Commands});
 }
 
 =back
@@ -226,5 +227,3 @@ L<File::Spec>
 =cut
 
 1;
-__END__
-

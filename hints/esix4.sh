@@ -30,12 +30,3 @@ EOM
 	rm -f /tmp/esix$$
 fi
 
-cat <<'EOM' >&4
-
-If you wish to use dynamic linking, you must use 
-	LD_LIBRARY_PATH=`pwd`; export LD_LIBRARY_PATH
-or
-	setenv LD_LIBRARY_PATH `pwd`
-before running make.
-
-EOM

@@ -2,7 +2,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    unshift @INC, '../lib';
     require Config; import Config;
     if ($^O ne 'VMS' and $Config{'extensions'} !~ /\bPOSIX\b/) {
 	print "1..0\n";
@@ -96,5 +96,6 @@ print &POSIX::acos(1.0) == 0.0 ? "ok 17\n" : "not ok 17\n";
 print POSIX::strftime("ok 18 # %H:%M, on %D\n", localtime());
 
 $| = 0;
-print '@#!*$@(!@#$';
+# The following line assumes buffered output, which may be not true with EMX:
+print '@#!*$@(!@#$' unless ($^O eq 'os2' || $^O eq 'uwin' || $^O eq 'os390');
 _exit(0);

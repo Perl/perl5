@@ -6,7 +6,7 @@ xsubpp - compiler to convert Perl XS code into C code
 
 =head1 SYNOPSIS
 
-B<xsubpp> [B<-v>] [B<-C++>] [B<-except>] [B<-s pattern>] [B<-prototypes>] [B<-noversioncheck>] [B<-nolinenumbers>] [B<-typemap typemap>] [B<-object_capi>]... file.xs
+B<xsubpp> [B<-v>] [B<-C++>] [B<-except>] [B<-s pattern>] [B<-prototypes>] [B<-noversioncheck>] [B<-nolinenumbers>] [B<-typemap typemap>] ... file.xs
 
 =head1 DESCRIPTION
 
@@ -59,11 +59,7 @@ number.
 
 Prevents the inclusion of `#line' directives in the output.
 
-=item B<-object_capi>
-
-Compile code as C in a PERL_OBJECT environment.
-
-back
+=back
 
 =head1 ENVIRONMENT
 
@@ -127,6 +123,7 @@ SWITCH: while (@ARGV and $ARGV[0] =~ /^-./) {
     $WantPrototypes = 1, next SWITCH	if $flag eq 'prototypes';
     $WantVersionChk = 0, next SWITCH	if $flag eq 'noversioncheck';
     $WantVersionChk = 1, next SWITCH	if $flag eq 'versioncheck';
+    # XXX left this in for compat
     $WantCAPI = 1, next SWITCH    if $flag eq 'object_capi';
     $except = " TRY",	next SWITCH	if $flag eq 'except';
     push(@tm,shift),	next SWITCH	if $flag eq 'typemap';
@@ -776,7 +773,7 @@ while (<$FH>) {
 	/^MODULE\s*=\s*([\w:]+)(?:\s+PACKAGE\s*=\s*([\w:]+))?(?:\s+PREFIX\s*=\s*(\S+))?\s*$/;
 
     if ($OBJ) {
-        s/#if(?:def|\s+defined)\s+(\(__cplusplus\)|__cplusplus)/#if defined(__cplusplus) && !defined(PERL_OBJECT)/;
+        s/#if(?:def\s|\s+defined)\s*(\(__cplusplus\)|__cplusplus)/#if defined(__cplusplus) && !defined(PERL_OBJECT)/;
     }
     print $_;
 }
@@ -1024,12 +1021,12 @@ EOF
     if ($ALIAS) 
       { print Q<<"EOF" if $cond }
 #    if ($cond)
-#       croak("Usage: %s($orig_args)", GvNAME(CvGV(cv)));
+#       Perl_croak(aTHX_ "Usage: %s($orig_args)", GvNAME(CvGV(cv)));
 EOF
     else 
       { print Q<<"EOF" if $cond }
 #    if ($cond)
-#	croak("Usage: $pname($orig_args)");
+#	Perl_croak(aTHX_ "Usage: $pname($orig_args)");
 EOF
 
     print Q<<"EOF" if $PPCODE;
@@ -1080,7 +1077,7 @@ EOF
 
 	# do code
 	if (/^\s*NOT_IMPLEMENTED_YET/) {
-		print "\n\tcroak(\"$pname: not implemented yet\");\n";
+		print "\n\tPerl_croak(aTHX_ \"$pname: not implemented yet\");\n";
 		$_ = '' ;
 	} else {
 		if ($ret_type ne "void") {
@@ -1176,7 +1173,7 @@ EOF
 
     print Q<<EOF if $except;
 #    if (errbuf[0])
-#	croak(errbuf);
+#	Perl_croak(aTHX_ errbuf);
 EOF
 
     if ($ret_type ne "void" or $EXPLICIT_RETURN) {
@@ -1254,30 +1251,23 @@ EOF
 }
 
 # print initialization routine
-if ($WantCAPI) {
+
 print Q<<"EOF";
-#
 ##ifdef __cplusplus
 #extern "C"
 ##endif
-#XS(boot__CAPI_entry)
-#[[
-#    dXSARGS;
-#    char* file = __FILE__;
-#
 EOF
-} else {
+
 print Q<<"EOF";
-##ifdef __cplusplus
-#extern "C"
-##endif
 #XS(boot_$Module_cname)
+EOF
+
+print Q<<"EOF";
 #[[
 #    dXSARGS;
 #    char* file = __FILE__;
 #
 EOF
-}
 
 print Q<<"EOF" if $WantVersionChk ;
 #    XS_VERSION_BOOTCHECK ;
@@ -1309,23 +1299,6 @@ print Q<<"EOF";;
 #]]
 #
 EOF
-
-if ($WantCAPI) { 
-print Q<<"EOF";
-#
-##define XSCAPI(name) void name(CV* cv, void* pPerl)
-#
-##ifdef __cplusplus
-#extern "C"
-##endif
-#XSCAPI(boot_$Module_cname)
-#[[
-#    SetCPerlObj(pPerl);
-#    boot__CAPI_entry(cv);
-#]]
-#
-EOF
-}
 
 warn("Please specify prototyping behavior for $filename (see perlxs manual)\n") 
     unless $ProtoUsed ;

@@ -17,9 +17,9 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Tue Jul 21 10:03:27 EDT 1998
- * Configured by     : doughera
- * Target system     : linux fractal 2.0.34 #1 tue jun 23 10:09:17 edt 1998 i686 unknown 
+ * Configuration time: Mon Aug 16 22:37:31 EET DST 1999
+ * Configured by     : jhi
+ * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
 
 #ifndef _config_h_
@@ -28,33 +28,7 @@
 /* LOC_SED:
  *	This symbol holds the complete pathname to the sed program.
  */
-#define LOC_SED 	"/bin/sed"	/**/
-
-/* BIN:
- *	This symbol holds the path of the bin directory where the package will
- *	be installed. Program must be prepared to deal with ~name substitution.
- */
-/* BIN_EXP:
- *	This symbol is the filename expanded version of the BIN symbol, for
- *	programs that do not want to deal with that at run-time.
- */
-#define BIN "/opt/perl/bin"	/**/
-#define BIN_EXP "/opt/perl/bin"	/**/
-
-/* CPPSTDIN:
- *	This symbol contains the first part of the string which will invoke
- *	the C preprocessor on the standard input and produce to standard
- *	output.	 Typical value of "cc -E" or "/lib/cpp", but it can also
- *	call a wrapper. See CPPRUN.
- */
-/* CPPMINUS:
- *	This symbol contains the second part of the string which will invoke
- *	the C preprocessor on the standard input and produce to standard
- *	output.  This symbol will have the value "-" if CPPSTDIN needs a minus
- *	to specify standard input, otherwise the value is "".
- */
-#define CPPSTDIN "cc -E"
-#define CPPMINUS "-"
+#define LOC_SED 	"/usr/bin/sed"	/**/
 
 /* HAS_ALARM:
  *	This symbol, if defined, indicates that the alarm routine is
@@ -66,7 +40,7 @@
  *	This symbol indicates the C compiler can check for function attributes,
  *	such as printf formats. This is normally only supported by GNU cc.
  */
-#define HASATTRIBUTE 	/**/
+/*#define HASATTRIBUTE 	/ **/
 #ifndef HASATTRIBUTE
 #define __attribute__(_arg_)
 #endif
@@ -243,13 +217,6 @@
  */
 #define HAS_GETGROUPS		/**/
 
-/* HAS_UNAME:
- *	This symbol, if defined, indicates that the C program may use the
- *	uname() routine to derive the host name.  See also HAS_GETHOSTNAME
- *	and PHOSTNAME.
- */
-#define HAS_UNAME		/**/
-
 /* HAS_GETLOGIN:
  *	This symbol, if defined, indicates that the getlogin routine is
  *	available to get the login name.
@@ -291,31 +258,6 @@
  *	available to get a process's priority.
  */
 #define HAS_GETPRIORITY		/**/
-
-/* HAS_HTONL:
- *	This symbol, if defined, indicates that the htonl() routine (and
- *	friends htons() ntohl() ntohs()) are available to do network
- *	order byte swapping.
- */
-/* HAS_HTONS:
- *	This symbol, if defined, indicates that the htons() routine (and
- *	friends htonl() ntohl() ntohs()) are available to do network
- *	order byte swapping.
- */
-/* HAS_NTOHL:
- *	This symbol, if defined, indicates that the ntohl() routine (and
- *	friends htonl() htons() ntohs()) are available to do network
- *	order byte swapping.
- */
-/* HAS_NTOHS:
- *	This symbol, if defined, indicates that the ntohs() routine (and
- *	friends htonl() htons() ntohl()) are available to do network
- *	order byte swapping.
- */
-#define HAS_HTONL		/**/
-#define HAS_HTONS		/**/
-#define HAS_NTOHL		/**/
-#define HAS_NTOHS		/**/
 
 /* HAS_INET_ATON:
  *	This symbol, if defined, indicates to the C program that the
@@ -420,11 +362,17 @@
  */
 #define HAS_MKTIME		/**/
 
-/* HAS_MSG:
- *	This symbol, if defined, indicates that the entire msg*(2) library is
- *	supported (IPC mechanism based on message queues).
+/* HAS_MSYNC:
+ *	This symbol, if defined, indicates that the msync system call is
+ *	available to synchronize a mapped file.
  */
-#define HAS_MSG		/**/
+#define HAS_MSYNC		/**/
+
+/* HAS_MUNMAP:
+ *	This symbol, if defined, indicates that the munmap system call is
+ *	available to unmap a region, usually mapped by mmap().
+ */
+#define HAS_MUNMAP		/**/
 
 /* HAS_NICE:
  *	This symbol, if defined, indicates that the nice routine is
@@ -516,12 +464,6 @@
  */
 #define HAS_SELECT	/**/
 
-/* HAS_SEM:
- *	This symbol, if defined, indicates that the entire sem*(2) library is
- *	supported.
- */
-#define HAS_SEM		/**/
-
 /* HAS_SETEGID:
  *	This symbol, if defined, indicates that the setegid routine is available
  *	to change the effective gid of the current program.
@@ -563,7 +505,7 @@
  *	for a POSIX interface.
  */
 #define HAS_SETPGRP		/**/
-/*#define USE_BSD_SETPGRP	/ **/
+#define USE_BSD_SETPGRP	/**/
 
 /* HAS_SETPGRP2:
  *	This symbol, if defined, indicates that the setpgrp2() (as in DG/UX)
@@ -607,25 +549,19 @@
  *	This symbol, if defined, indicates that the setrgid routine is available
  *	to change the real gid of the current program.
  */
-/*#define HAS_SETRGID		/ **/
+#define HAS_SETRGID		/**/
 
 /* HAS_SETRUID:
  *	This symbol, if defined, indicates that the setruid routine is available
  *	to change the real uid of the current program.
  */
-/*#define HAS_SETRUID		/ **/
+#define HAS_SETRUID		/**/
 
 /* HAS_SETSID:
  *	This symbol, if defined, indicates that the setsid routine is
  *	available to set the process group ID.
  */
 #define HAS_SETSID	/**/
-
-/* HAS_SHM:
- *	This symbol, if defined, indicates that the entire shm*(2) library is
- *	supported.
- */
-#define HAS_SHM		/**/
 
 /* Shmat_t:
  *	This symbol holds the return type of the shmat() system call.
@@ -640,12 +576,6 @@
  */
 #define Shmat_t void *	/**/
 #define HAS_SHMAT_PROTOTYPE	/**/
-
-/* USE_STAT_BLOCKS:
- *	This symbol is defined if this system has a stat structure declaring
- *	st_blksize and st_blocks.
- */
-/*#define USE_STAT_BLOCKS 	/ **/
 
 /* HAS_STRCHR:
  *	This symbol is defined to indicate that the strchr()/strrchr()
@@ -671,25 +601,6 @@
  *	routine of some sort instead.
  */
 #define	USE_STRUCT_COPY	/**/
-
-/* HAS_STRERROR:
- *	This symbol, if defined, indicates that the strerror routine is
- *	available to translate error numbers to strings. See the writeup
- *	of Strerror() in this file before you try to define your own.
- */
-/* HAS_SYS_ERRLIST:
- *	This symbol, if defined, indicates that the sys_errlist array is
- *	available to translate error numbers to strings. The extern int
- *	sys_nerr gives the size of that table.
- */
-/* Strerror:
- *	This preprocessor symbol is defined as a macro if strerror() is
- *	not available to translate error numbers to strings but sys_errlist[]
- *	array is there.
- */
-#define HAS_STRERROR		/**/
-#define HAS_SYS_ERRLIST	/**/
-#define Strerror(e) strerror(e)
 
 /* HAS_STRTOD:
  *	This symbol, if defined, indicates that the strtod routine is
@@ -769,11 +680,6 @@
  */
 #define HAS_UMASK		/**/
 
-/* HAS_VFORK:
- *	This symbol, if defined, indicates that vfork() exists.
- */
-/*#define HAS_VFORK	/ **/
-
 /* HASVOLATILE:
  *	This symbol, if defined, indicates that this C compiler knows about
  *	the volatile declaration.
@@ -806,17 +712,11 @@
  */
 #define HAS_WCTOMB		/**/
 
-/* EBCDIC:
- *	This symbol, if defined, indicates that this system uses
- *	EBCDIC encoding.
- */
-/*#define	EBCDIC 		/ **/
-
 /* I_ARPA_INET:
- *	This symbol, if defined, indicates that <arpa/inet.h> exists and should
- *	be included.
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <arpa/inet.h> to get inet_addr and friends declarations.
  */
-#define I_ARPA_INET	/**/
+#define	I_ARPA_INET		/**/
 
 /* I_DBM:
  *	This symbol, if defined, indicates that <dbm.h> exists and should
@@ -846,7 +746,7 @@
  *	portably declare your directory entries.
  */
 #define I_DIRENT		/**/
-/*#define DIRNAMLEN	/ **/
+#define DIRNAMLEN	/**/
 #define Direntry_t struct dirent
 
 /* I_DLFCN:
@@ -866,32 +766,6 @@
  *	DBL_MIN, i.e. machine dependent floating point values.
  */
 #define I_FLOAT		/**/
-
-/* I_GRP:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <grp.h>.
- */
-/* GRPASSWD:
- *	This symbol, if defined, indicates to the C program that struct group
- *	contains gr_passwd.
- */
-/* HAS_SETGRENT:
- *	This symbol, if defined, indicates that the getgrent routine is
- *	available for initializing sequential access of the group database.
- */
-/* HAS_GETGRENT:
- *	This symbol, if defined, indicates that the getgrent routine is
- *	available for sequential access of the group database.
- */
-/* HAS_ENDGRENT:
- *	This symbol, if defined, indicates that the getgrent routine is
- *	available for finalizing sequential access of the group database.
- */
-#define I_GRP		/**/
-#define GRPASSWD	/**/
-#define HAS_SETGRENT	/**/
-#define HAS_GETGRENT	/**/
-#define HAS_ENDGRENT	/**/
 
 /* I_LIMITS:
  *	This symbol, if defined, indicates to the C program that it should
@@ -1120,22 +994,80 @@
  *	This symbol is defined to be the type of char used in stdio.h.
  *	It has the values "unsigned char" or "char".
  */
-#define STDCHAR char	/**/
+#define STDCHAR unsigned char	/**/
+
+/* HAS_ACCESSX:
+ *	This symbol, if defined, indicates that the accessx routine is
+ *	available to do extended access checks.
+ */
+/*#define HAS_ACCESSX		/ **/
+
+/* HAS_EACCESS:
+ *	This symbol, if defined, indicates that the eaccess routine is
+ *	available to do extended access checks.
+ */
+/*#define HAS_EACCESS		/ **/
+
+/* I_SYS_ACCESS:
+ *     This symbol, if defined, indicates to the C program that it should
+ *     include <sys/access.h>.
+ */
+#define   I_SYS_ACCESS                /**/
+
+/* I_SYS_SECURITY:
+ *     This symbol, if defined, indicates to the C program that it should
+ *     include <sys/security.h>.
+ */
+#define   I_SYS_SECURITY	/**/
+
+/* CROSSCOMPILE:
+ *	This symbol, if defined, signifies that we our
+ *	build process is a cross-compilation.
+ */
+/*#define CROSSCOMPILE		/ **/
+
+/* INTSIZE:
+ *	This symbol contains the value of sizeof(int) so that the C
+ *	preprocessor can make decisions based on it.
+ */
+/* LONGSIZE:
+ *	This symbol contains the value of sizeof(long) so that the C
+ *	preprocessor can make decisions based on it.
+ */
+/* SHORTSIZE:
+ *	This symbol contains the value of sizeof(short) so that the C
+ *	preprocessor can make decisions based on it.
+ */
+#define INTSIZE 4		/**/
+#define LONGSIZE 8		/**/
+#define SHORTSIZE 2		/**/
+
+/* MULTIARCH:
+ *	This symbol, if defined, signifies that the build
+ *	process will produce some binary files that are going to be
+ *	used in a cross-platform environment.  This is the case for
+ *	example with the NeXT "fat" binaries that contain executables
+ *	for several CPUs.
+ */
+/*#define MULTIARCH		/ **/
 
 /* MEM_ALIGNBYTES:
- *	 This symbol contains the number of bytes required to align a
- *	 double. Usual values are 2, 4 and 8.
- *	 On NeXT starting with 3.2, you can build "Fat" Multiple Architecture
- *	 Binaries (MAB) for targets with varying alignment.  This only matters
- *	 for perl, where the config.h can be generated and installed on one
- *	 system, and used by a different architecture to build an extension.
- *	 The default is eight, for safety.
+ *	This symbol contains the number of bytes required to align a
+ *	double. Usual values are 2, 4 and 8. The default is eight,
+ *	for safety.
  */
-#define MEM_ALIGNBYTES 4	/**/
+#if defined(CROSSCOMPILE) || defined(MULTIARCH)
+#  define MEM_ALIGNBYTES 8
+#else
+#define MEM_ALIGNBYTES 8
+#endif
 
 /* BYTEORDER:
  *	This symbol holds the hexadecimal constant defined in byteorder,
  *	i.e. 0x1234 or 0x4321, etc...
+ *	If the compiler supports cross-compiling or multiple-architecture
+ *	binaries (eg. on NeXT systems), use compiler-defined macros to
+ *	determine the byte order.
  *	On NeXT 3.2 (and greater), you can build "Fat" Multiple Architecture
  *	Binaries (MAB) on either big endian or little endian machines.
  *	The endian-ness is available at compile-time.  This only matters
@@ -1146,14 +1078,31 @@
  *	so the default case (for NeXT) is big endian to catch them. 
  *	This might matter for NeXT 3.0.
  */
-#ifndef NeXT
-#define BYTEORDER 0x1234	/* large digits for MSB */
-#else  /* NeXT */
-#ifdef __LITTLE_ENDIAN__
-#define BYTEORDER 0x1234
-#else /* __BIG_ENDIAN__ */
-#define BYTEORDER 0x4321
-#endif /* ENDIAN CHECK */
+#if defined(CROSSCOMPILE) || defined(MULTIARCH)
+#  ifdef __LITTLE_ENDIAN__
+#    if LONGSIZE == 4
+#      define BYTEORDER 0x1234
+#    else
+#      if LONGSIZE == 8
+#        define BYTEORDER 0x12345678
+#      endif
+#    endif
+#  else
+#    ifdef __BIG_ENDIAN__
+#      if LONGSIZE == 4
+#        define BYTEORDER 0x4321
+#      else
+#        if LONGSIZE == 8
+#          define BYTEORDER 0x87654321
+#        endif
+#      endif
+#    endif
+#  endif
+#  if !defined(BYTEORDER) && (defined(NeXT) || defined(__NeXT__))
+#    define BYTEORDER 0x4321
+#  endif
+#else
+#define BYTEORDER 0x12345678	/* large digits for MSB */
 #endif /* NeXT */
 
 /* CASTI32:
@@ -1183,6 +1132,12 @@
  */
 /*#define VOID_CLOSEDIR		/ **/
 
+/* HAS_FD_SET:
+ *	This symbol, when defined, indicates presence of the fd_set typedef
+ *	in <sys/types.h>
+ */
+#define HAS_FD_SET	/**/
+
 /* Gconvert:
  *	This preprocessor macro is defined to convert a floating point
  *	number to a string without a trailing decimal point.  This
@@ -1204,7 +1159,7 @@
  *	This symbol, if defined, indicates to the C program that 
  *	the GNU C library is being used.
  */
-#define HAS_GNULIBC  	/**/
+/*#define HAS_GNULIBC  	/ **/
 /* HAS_ISASCII:
  *	This manifest constant lets the C program know that isascii 
  *	is available.
@@ -1216,7 +1171,7 @@
  *	available to operate on a symbolic link (instead of following the
  *	link).
  */
-/*#define HAS_LCHOWN		/ **/
+#define HAS_LCHOWN		/**/
 
 /* HAS_OPEN3:
  *	This manifest constant lets the C program know that the three
@@ -1253,6 +1208,13 @@
  */
 #define HAS_SIGACTION	/**/
 
+/* HAS_SIGSETJMP:
+ *	This variable indicates to the C program that the sigsetjmp()
+ *	routine is available to save the calling process's registers
+ *	and stack environment for later use by siglongjmp(), and
+ *	to optionally save the process's signal mask.  See
+ *	Sigjmp_buf, Sigsetjmp, and Siglongjmp.
+ */
 /* Sigjmp_buf:
  *	This is the buffer type to be used with Sigsetjmp and Siglongjmp.
  */
@@ -1304,10 +1266,10 @@
  */
 #define USE_STDIO_PTR 	/**/
 #ifdef USE_STDIO_PTR
-#define FILE_ptr(fp)	((fp)->_IO_read_ptr)
+#define FILE_ptr(fp)	((fp)->_ptr)
 #define STDIO_PTR_LVALUE 		/**/
-#define FILE_cnt(fp)	((fp)->_IO_read_end - (fp)->_IO_read_ptr)
-/*#define STDIO_CNT_LVALUE 		/ **/
+#define FILE_cnt(fp)	((fp)->_cnt)
+#define STDIO_CNT_LVALUE 		/**/
 #endif
 
 /* USE_STDIO_BASE:
@@ -1332,8 +1294,8 @@
  */
 #define USE_STDIO_BASE 	/**/
 #ifdef USE_STDIO_BASE
-#define FILE_base(fp)	((fp)->_IO_read_base)
-#define FILE_bufsiz(fp)	((fp)->_IO_read_end - (fp)->_IO_read_base)
+#define FILE_base(fp)	((fp)->_base)
+#define FILE_bufsiz(fp)	((fp)->_cnt + (fp)->_ptr - (fp)->_base)
 #endif
 
 /* HAS_VPRINTF:
@@ -1372,22 +1334,6 @@
 #define I_SYS_TIME		/**/
 /*#define I_SYS_TIME_KERNEL		/ **/
 
-/* INTSIZE:
- *	This symbol contains the value of sizeof(int) so that the C
- *	preprocessor can make decisions based on it.
- */
-/* LONGSIZE:
- *	This symbol contains the value of sizeof(long) so that the C
- *	preprocessor can make decisions based on it.
- */
-/* SHORTSIZE:
- *	This symbol contains the value of sizeof(short) so that the C
- *	preprocessor can make decisions based on it.
- */
-#define INTSIZE 4		/**/
-#define LONGSIZE 4		/**/
-#define SHORTSIZE 2		/**/
-
 /* VAL_O_NONBLOCK:
  *	This symbol is to be used during open() or fcntl(F_SETFL) to turn on
  *	non-blocking I/O for the file descriptor. Note that there is no way
@@ -1421,13 +1367,32 @@
  *	the compiler supports (void *); otherwise it will be
  *	sizeof(char *).
  */
-#define PTRSIZE 4		/**/
+#define PTRSIZE 8		/**/
 
-/* RANDBITS:
- *	This symbol contains the number of bits of random number the rand()
- *	function produces.  Usual values are 15, 16, and 31.
+/* Drand01:
+ *	This macro is to be used to generate uniformly distributed
+ *	random numbers over the range [0., 1.[.  You may have to supply
+ *	an 'extern double drand48();' in your program since SunOS 4.1.3
+ *	doesn't provide you with anything relevant in it's headers.
+ *	See HAS_DRAND48_PROTO.
  */
-#define RANDBITS 31		/**/
+/* Rand_seed_t:
+ *	This symbol defines the type of the argument of the
+ *	random seed function.
+ */
+/* seedDrand01:
+ *	This symbol defines the macro to be used in seeding the
+ *	random number generator (see Drand01).
+ */
+/* RANDBITS:
+ *	This symbol indicates how many bits are produced by the
+ *	function used to generate normalized random numbers.
+ *	Values include 15, 16, 31, and 48.
+ */
+#define Drand01()		drand48()		/**/
+#define Rand_seed_t		long		/**/
+#define seedDrand01(x)	srand48((Rand_seed_t)x)	/**/
+#define RANDBITS		48		/**/
 
 /* SSize_t:
  *	This symbol holds the type used by functions that return
@@ -1439,12 +1404,102 @@
  */
 #define SSize_t ssize_t	 /* signed count of bytes */
 
+/* EBCDIC:
+ *     This symbol, if defined, indicates that this system uses
+ *	EBCDIC encoding.
+ */
+/*#define	EBCDIC 		/ **/
+
+/* ARCHLIB:
+ *	This variable, if defined, holds the name of the directory in
+ *	which the user wants to put architecture-dependent public
+ *	library files for perl5.  It is most often a local directory
+ *	such as /usr/local/lib.  Programs using this variable must be
+ *	prepared to deal with filename expansion.  If ARCHLIB is the
+ *	same as PRIVLIB, it is not defined, since presumably the
+ *	program already searches PRIVLIB.
+ */
+/* ARCHLIB_EXP:
+ *	This symbol contains the ~name expanded version of ARCHLIB, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+#define ARCHLIB "/opt/perl/lib/5.00560/alpha-dec_osf-thread"		/**/
+#define ARCHLIB_EXP "/opt/perl/lib/5.00560/alpha-dec_osf-thread"		/**/
+
+/* BIN:
+ *	This symbol holds the path of the bin directory where the package will
+ *	be installed. Program must be prepared to deal with ~name substitution.
+ */
+/* BIN_EXP:
+ *	This symbol is the filename expanded version of the BIN symbol, for
+ *	programs that do not want to deal with that at run-time.
+ */
+#define BIN "/opt/perl/bin"	/**/
+#define BIN_EXP "/opt/perl/bin"	/**/
+
+/* INSTALL_USR_BIN_PERL:
+ *	This symbol, if defined, indicates that Perl is to be installed
+ * 	also as /usr/bin/perl.
+ */
+#define INSTALL_USR_BIN_PERL	/**/
+
+/* PRIVLIB:
+ *	This symbol contains the name of the private library for this package.
+ *	The library is private in the sense that it needn't be in anyone's
+ *	execution path, but it should be accessible by the world.  The program
+ *	should be prepared to do ~ expansion.
+ */
+/* PRIVLIB_EXP:
+ *	This symbol contains the ~name expanded version of PRIVLIB, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+#define PRIVLIB "/opt/perl/lib/5.00560"		/**/
+#define PRIVLIB_EXP "/opt/perl/lib/5.00560"		/**/
+
+/* SITEARCH:
+ *	This symbol contains the name of the private library for this package.
+ *	The library is private in the sense that it needn't be in anyone's
+ *	execution path, but it should be accessible by the world.  The program
+ *	should be prepared to do ~ expansion.
+ *	The standard distribution will put nothing in this directory.
+ *	Individual sites may place their own extensions and modules in
+ *	this directory.
+ */
+/* SITEARCH_EXP:
+ *	This symbol contains the ~name expanded version of SITEARCH, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+#define SITEARCH "/opt/perl/lib/site_perl/5.00560/alpha-dec_osf-thread"		/**/
+#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.00560/alpha-dec_osf-thread"		/**/
+
+/* SITELIB:
+ *	This symbol contains the name of the private library for this package.
+ *	The library is private in the sense that it needn't be in anyone's
+ *	execution path, but it should be accessible by the world.  The program
+ *	should be prepared to do ~ expansion.
+ *	The standard distribution will put nothing in this directory.
+ *	Individual sites may place their own extensions and modules in
+ *	this directory.
+ */
+/* SITELIB_EXP:
+ *	This symbol contains the ~name expanded version of SITELIB, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+#define SITELIB "/opt/perl/lib/site_perl"		/**/
+#define SITELIB_EXP "/opt/perl/lib/site_perl"		/**/
+
+/* PERL_VENDORLIB_EXP:
+ *	This symbol contains the ~name expanded version of VENDORLIB, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+/*#define PERL_VENDORLIB_EXP ""		/ **/
+
 /* OSNAME:
  *	This symbol contains the name of the operating system, as determined
  *	by Configure.  You shouldn't rely on it too much; the specific
  *	feature tests from Configure are generally more reliable.
  */
-#define OSNAME "linux"		/**/
+#define OSNAME "dec_osf"		/**/
 
 /* CAT2:
  *	This macro catenates 2 tokens together.
@@ -1466,13 +1521,54 @@
 #include "Bletch: How does this C preprocessor catenate tokens?"
 #endif
 
+/* CPPSTDIN:
+ *	This symbol contains the first part of the string which will invoke
+ *	the C preprocessor on the standard input and produce to standard
+ *	output.	 Typical value of "cc -E" or "/lib/cpp", but it can also
+ *	call a wrapper. See CPPRUN.
+ */
+/* CPPMINUS:
+ *	This symbol contains the second part of the string which will invoke
+ *	the C preprocessor on the standard input and produce to standard
+ *	output.  This symbol will have the value "-" if CPPSTDIN needs a minus
+ *	to specify standard input, otherwise the value is "".
+ */
+/* CPPRUN:
+ *	This symbol contains the string which will invoke a C preprocessor on
+ *	the standard input and produce to standard output. It needs to end
+ *	with CPPLAST, after all other preprocessor flags have been specified.
+ *	The main difference with CPPSTDIN is that this program will never be a
+ *	pointer to a shell wrapper, i.e. it will be empty if no preprocessor is
+ *	available directly to the user. Note that it may well be different from
+ *	the preprocessor used to compile the C program.
+ */
+#define CPPSTDIN "cppstdin"
+#define CPPMINUS ""
+#define CPPRUN "/usr/bin/cpp"
+
+/* HAS_ACCESS:
+ *	This manifest constant lets the C program know that the access()
+ *	system call is available to check for accessibility using real UID/GID.
+ *	(always present on UNIX.)
+ */
+#define HAS_ACCESS		/**/
+
+/* HAS_CSH:
+ *	This symbol, if defined, indicates that the C-shell exists.
+ */
 /* CSH:
  *	This symbol, if defined, contains the full pathname of csh.
  */
 #define HAS_CSH		/**/
 #ifdef HAS_CSH
-#define CSH "/bin/csh"	/**/
+#define CSH "/usr/bin/csh"	/**/
 #endif
+
+/* HAS_ENDGRENT:
+ *	This symbol, if defined, indicates that the getgrent routine is
+ *	available for finalizing sequential access of the group database.
+ */
+#define HAS_ENDGRENT		/**/
 
 /* HAS_ENDHOSTENT:
  *	This symbol, if defined, indicates that the endhostent() routine is
@@ -1492,11 +1588,23 @@
  */
 #define HAS_ENDPROTOENT		/**/
 
+/* HAS_ENDPWENT:
+ *	This symbol, if defined, indicates that the getgrent routine is
+ *	available for finalizing sequential access of the passwd database.
+ */
+#define HAS_ENDPWENT		/**/
+
 /* HAS_ENDSERVENT:
  *	This symbol, if defined, indicates that the endservent() routine is
  *	available to close whatever was being used for service queries.
  */
 #define HAS_ENDSERVENT		/**/
+
+/* HAS_GETGRENT:
+ *	This symbol, if defined, indicates that the getgrent routine is
+ *	available for sequential access of the group database.
+ */
+#define HAS_GETGRENT		/**/
 
 /* HAS_GETHOSTBYADDR:
  *	This symbol, if defined, indicates that the gethostbyaddr() routine is
@@ -1515,6 +1623,30 @@
  *	available to look up host names in some data base or another.
  */
 #define HAS_GETHOSTENT		/**/
+
+/* HAS_GETHOSTNAME:
+ *	This symbol, if defined, indicates that the C program may use the
+ *	gethostname() routine to derive the host name.  See also HAS_UNAME
+ *	and PHOSTNAME.
+ */
+/* HAS_UNAME:
+ *	This symbol, if defined, indicates that the C program may use the
+ *	uname() routine to derive the host name.  See also HAS_GETHOSTNAME
+ *	and PHOSTNAME.
+ */
+/* PHOSTNAME:
+ *	This symbol, if defined, indicates the command to feed to the
+ *	popen() routine to derive the host name.  See also HAS_GETHOSTNAME
+ *	and HAS_UNAME.	Note that the command uses a fully qualified path,
+ *	so that it is safe even if used by a process with super-user
+ *	privileges.
+ */
+#define HAS_GETHOSTNAME	/**/
+#define HAS_UNAME		/**/
+#undef HAS_PHOSTNAME
+#ifdef HAS_PHOSTNAME
+#define PHOSTNAME ""	/* How to get the host name */
+#endif
 
 /* HAS_GETNETBYADDR:
  *	This symbol, if defined, indicates that the getnetbyaddr() routine is
@@ -1551,6 +1683,13 @@
 #define HAS_GETPROTOBYNAME		/**/
 #define HAS_GETPROTOBYNUMBER		/**/
 
+/* HAS_GETPWENT:
+ *	This symbol, if defined, indicates that the getpwent routine is
+ *	available for sequential access of the passwd database.
+ *	If this is not available, the older getpw() function may be available.
+ */
+#define HAS_GETPWENT		/**/
+
 /* HAS_GETSERVENT:
  *	This symbol, if defined, indicates that the getservent() routine is
  *	available to look up network services in some data base or another.
@@ -1568,6 +1707,31 @@
 #define HAS_GETSERVBYNAME		/**/
 #define HAS_GETSERVBYPORT		/**/
 
+/* HAS_HTONL:
+ *	This symbol, if defined, indicates that the htonl() routine (and
+ *	friends htons() ntohl() ntohs()) are available to do network
+ *	order byte swapping.
+ */
+/* HAS_HTONS:
+ *	This symbol, if defined, indicates that the htons() routine (and
+ *	friends htonl() ntohl() ntohs()) are available to do network
+ *	order byte swapping.
+ */
+/* HAS_NTOHL:
+ *	This symbol, if defined, indicates that the ntohl() routine (and
+ *	friends htonl() htons() ntohs()) are available to do network
+ *	order byte swapping.
+ */
+/* HAS_NTOHS:
+ *	This symbol, if defined, indicates that the ntohs() routine (and
+ *	friends htonl() htons() ntohl()) are available to do network
+ *	order byte swapping.
+ */
+#define HAS_HTONL		/**/
+#define HAS_HTONS		/**/
+#define HAS_NTOHL		/**/
+#define HAS_NTOHS		/**/
+
 /* HAS_LONG_DOUBLE:
  *	This symbol will be defined if the C compiler supports long
  *	doubles.
@@ -1579,12 +1743,11 @@
  */
 #define HAS_LONG_DOUBLE		/**/
 #ifdef HAS_LONG_DOUBLE
-#define LONG_DOUBLESIZE 12		/**/
+#define LONG_DOUBLESIZE 8		/**/
 #endif
 
 /* HAS_LONG_LONG:
- *	This symbol will be defined if the C compiler supports
- *	long long.
+ *	This symbol will be defined if the C compiler supports long long.
  */
 /* LONGLONGSIZE:
  *	This symbol contains the size of a long long, so that the 
@@ -1595,6 +1758,42 @@
 #ifdef HAS_LONG_LONG
 #define LONGLONGSIZE 8		/**/
 #endif
+
+/* HAS_MEMCHR:
+ *	This symbol, if defined, indicates that the memchr routine is available
+ *	to locate characters within a C string.
+ */
+#define HAS_MEMCHR	/**/
+
+/* HAS_MMAP:
+ *	This symbol, if defined, indicates that the mmap system call is
+ *	available to map a file into memory.
+ */
+/* Mmap_t:
+ *	This symbol holds the return type of the mmap() system call
+ *	(and simultaneously the type of the first argument).
+ *	Usually set to 'void *' or 'cadd_t'.
+ */
+#define HAS_MMAP		/**/
+#define Mmap_t void *	/**/
+
+/* HAS_MSG:
+ *	This symbol, if defined, indicates that the entire msg*(2) library is
+ *	supported (IPC mechanism based on message queues).
+ */
+#define HAS_MSG		/**/
+
+/* HAS_SEM:
+ *	This symbol, if defined, indicates that the entire sem*(2) library is
+ *	supported.
+ */
+#define HAS_SEM		/**/
+
+/* HAS_SETGRENT:
+ *	This symbol, if defined, indicates that the setgrent routine is
+ *	available for initializing sequential access of the group database.
+ */
+#define HAS_SETGRENT		/**/
 
 /* HAS_SETGROUPS:
  *	This symbol, if defined, indicates that the setgroups() routine is
@@ -1621,6 +1820,12 @@
  */
 #define HAS_SETPROTOENT		/**/
 
+/* HAS_SETPWENT:
+ *	This symbol, if defined, indicates that the setpwent routine is
+ *	available for initializing sequential access of the passwd database.
+ */
+#define HAS_SETPWENT		/**/
+
 /* HAS_SETSERVENT:
  *	This symbol, if defined, indicates that the setservent() routine is
  *	available.
@@ -1634,6 +1839,12 @@
  */
 #define HAS_SETVBUF		/**/
 
+/* HAS_SHM:
+ *	This symbol, if defined, indicates that the entire shm*(2) library is
+ *	supported.
+ */
+#define HAS_SHM		/**/
+
 /* HAS_SOCKET:
  *	This symbol, if defined, indicates that the BSD socket interface is
  *	supported.
@@ -1642,8 +1853,93 @@
  *	This symbol, if defined, indicates that the BSD socketpair() call is
  *	supported.
  */
-#define HAS_SOCKET		/**/
-#define HAS_SOCKETPAIR	/**/
+/* HAS_MSG_CTRUNC:
+ *	This symbol, if defined, indicates that the MSG_CTRUNC is supported.
+ *	Checking just with #ifdef might not be enough because this symbol
+ *	has been known to be an enum.
+ */
+/* HAS_MSG_DONTROUTE:
+ *	This symbol, if defined, indicates that the MSG_DONTROUTE is supported.
+ *	Checking just with #ifdef might not be enough because this symbol
+ *	has been known to be an enum.
+ */
+/* HAS_MSG_OOB:
+ *	This symbol, if defined, indicates that the MSG_OOB is supported.
+ *	Checking just with #ifdef might not be enough because this symbol
+ *	has been known to be an enum.
+ */
+/* HAS_MSG_PEEK:
+ *	This symbol, if defined, indicates that the MSG_PEEK is supported.
+ *	Checking just with #ifdef might not be enough because this symbol
+ *	has been known to be an enum.
+ */
+/* HAS_MSG_PROXY:
+ *	This symbol, if defined, indicates that the MSG_PROXY is supported.
+ *	Checking just with #ifdef might not be enough because this symbol
+ *	has been known to be an enum.
+ */
+/* HAS_SCM_RIGHTS:
+ *	This symbol, if defined, indicates that the SCM_RIGHTS is supported.
+ *	Checking just with #ifdef might not be enough because this symbol
+ *	has been known to be an enum.
+ */
+/* HAS_SENDMSG:
+ *	This symbol, if defined, indicates that the sendmsg is supported
+ *	to send messages between sockets.  You will also need struct
+ *	iovec from <sys/uio.h>, HAS_STRUCT_IOVEC and I_SYSUIO.
+ */
+/* HAS_RECVMSG:
+ *	This symbol, if defined, indicates that the recvmsg is supported
+ *	to send messages between sockets.  You will also need struct
+ *	iovec from <sys/uio.h>, HAS_STRUCT_IOVEC and I_SYSUIO.
+ */
+/* HAS_STRUCT_MSGHDR:
+ *	This symbol, if defined, indicates that the struct msghdr
+ *	(BSD 4.3 or 4.4) is supported.  You will also need struct
+ *	iovec from <sys/uio.h>, HAS_STRUCT_IOVEC and I_SYSUIO.
+ */
+/* HAS_STRUCT_CMSGHDR:
+ *	This symbol, if defined, indicates that the struct cmsghdr
+ *	(BSD 4.4) is supported.  You will also need struct
+ *	iovec from <sys/uio.h>, HAS_STRUCT_IOVEC and I_SYSUIO.
+ */
+#define	HAS_SOCKET		/**/
+#define	HAS_SOCKETPAIR	/**/
+#define	HAS_MSG_CTRUNC	/**/
+#define	HAS_MSG_DONTROUTE	/**/
+#define	HAS_MSG_OOB	/**/
+#define	HAS_MSG_PEEK	/**/
+/*#define	HAS_MSG_PROXY	/ **/
+#define	HAS_SCM_RIGHTS	/**/
+#define	HAS_SENDMSG	/**/
+#define	HAS_RECVMSG	/**/
+#define	HAS_STRUCT_MSGHDR	/**/
+#define	HAS_STRUCT_CMSGHDR	/**/
+
+/* USE_STAT_BLOCKS:
+ *	This symbol is defined if this system has a stat structure declaring
+ *	st_blksize and st_blocks.
+ */
+#define USE_STAT_BLOCKS 	/**/
+
+/* HAS_STRERROR:
+ *	This symbol, if defined, indicates that the strerror routine is
+ *	available to translate error numbers to strings. See the writeup
+ *	of Strerror() in this file before you try to define your own.
+ */
+/* HAS_SYS_ERRLIST:
+ *	This symbol, if defined, indicates that the sys_errlist array is
+ *	available to translate error numbers to strings. The extern int
+ *	sys_nerr gives the size of that table.
+ */
+/* Strerror:
+ *	This preprocessor symbol is defined as a macro if strerror() is
+ *	not available to translate error numbers to strings but sys_errlist[]
+ *	array is there.
+ */
+#define HAS_STRERROR		/**/
+#define HAS_SYS_ERRLIST	/**/
+#define Strerror(e) strerror(e)
 
 /* HAS_UNION_SEMUN:
  *	This symbol, if defined, indicates that the union semun is
@@ -1663,9 +1959,14 @@
  *	This symbol, if defined, indicates that struct semid_ds * is
  *	used for semctl IPC_STAT.
  */
-#define HAS_UNION_SEMUN	/**/
+/*#define HAS_UNION_SEMUN	/ **/
 #define USE_SEMCTL_SEMUN	/**/
 #define USE_SEMCTL_SEMID_DS	/**/
+
+/* HAS_VFORK:
+ *	This symbol, if defined, indicates that vfork() exists.
+ */
+/*#define HAS_VFORK	/ **/
 
 /* Signal_t:
  *	This symbol's value is either "void" or "int", corresponding to the
@@ -1687,6 +1988,17 @@
 #if defined(HAS_GETGROUPS) || defined(HAS_SETGROUPS)
 #define Groups_t gid_t	/* Type for 2nd arg to [sg]etgroups() */
 #endif
+
+/* I_GRP:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <grp.h>.
+ */
+/* GRPASSWD:
+ *	This symbol, if defined, indicates to the C program that struct group
+ *	in <grp.h> contains gr_passwd.
+ */
+#define I_GRP		/**/
+#define GRPASSWD	/**/
 
 /* I_NETDB:
  *	This symbol, if defined, indicates that <netdb.h> exists and
@@ -1730,30 +2042,21 @@
  *	This symbol, if defined, indicates to the C program that struct passwd
  *	contains pw_passwd.
  */
-/* HAS_SETPWENT:
- *	This symbol, if defined, indicates that the getpwrent routine is
- *	available for initializing sequential access of the passwd database.
- */
-/* HAS_GETPWENT:
- *	This symbol, if defined, indicates that the getpwent routine is
- *	available for sequential access of the password database.
- */
-/* HAS_ENDPWENT:
- *	This symbol, if defined, indicates that the getpwent routine is
- *	available for finalizing sequential access of the passwd database.
- */
 #define I_PWD		/**/
-/*#define PWQUOTA	/ **/
+#define PWQUOTA	/**/
 /*#define PWAGE	/ **/
 /*#define PWCHANGE	/ **/
 /*#define PWCLASS	/ **/
 /*#define PWEXPIRE	/ **/
-/*#define PWCOMMENT	/ **/
+#define PWCOMMENT	/**/
 #define PWGECOS	/**/
 #define PWPASSWD	/**/
-#define HAS_SETPWENT	/**/
-#define HAS_GETPWENT	/**/
-#define HAS_ENDPWENT	/**/
+
+/* I_SYSUIO:
+ *	This symbol, if defined, indicates that <sys/uio.h> exists and
+ *	should be included.
+ */
+#define	I_SYSUIO		/**/
 
 /* Free_t:
  *	This variable contains the return type of free().  It is usually
@@ -1798,8 +2101,8 @@
  *	The last element is 0, corresponding to the 0 at the end of
  *	the sig_name list.
  */
-#define SIG_NAME "ZERO", "HUP", "INT", "QUIT", "ILL", "TRAP", "ABRT", "BUS", "FPE", "KILL", "USR1", "SEGV", "USR2", "PIPE", "ALRM", "TERM", "STKFLT", "CHLD", "CONT", "STOP", "TSTP", "TTIN", "TTOU", "URG", "XCPU", "XFSZ", "VTALRM", "PROF", "WINCH", "IO", "PWR", "UNUSED", "IOT", "CLD", "POLL", 0		/**/
-#define SIG_NUM  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 6, 17, 29, 0			/**/
+#define SIG_NAME "ZERO", "HUP", "INT", "QUIT", "ILL", "TRAP", "ABRT", "EMT", "FPE", "KILL", "BUS", "SEGV", "SYS", "PIPE", "ALRM", "TERM", "IOINT", "STOP", "TSTP", "CONT", "CHLD", "TTIN", "TTOU", "AIO", "XCPU", "XFSZ", "VTALRM", "PROF", "WINCH", "INFO", "USR1", "USR2", "RESV", "RTMIN", "NUM34", "NUM35", "NUM36", "NUM37", "NUM38", "NUM39", "NUM40", "NUM41", "NUM42", "NUM43", "NUM44", "NUM45", "NUM46", "NUM47", "MAX", "IOT", "LOST", "URG", "CLD", "IO", "POLL", "PTY", "PWR", "RTMAX", 0		/**/
+#define SIG_NUM  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 6, 6, 16, 20, 23, 23, 23, 29, 48, 0		/**/
 
 /* VOIDFLAGS:
  *	This symbol indicates how much support of the void type is given by this
@@ -1826,21 +2129,25 @@
 #define M_VOID			/* Xenix strikes again */
 #endif
 
-/* ARCHLIB:
- *	This variable, if defined, holds the name of the directory in
- *	which the user wants to put architecture-dependent public
- *	library files for perl5.  It is most often a local directory
- *	such as /usr/local/lib.  Programs using this variable must be
- *	prepared to deal with filename expansion.  If ARCHLIB is the
- *	same as PRIVLIB, it is not defined, since presumably the
- *	program already searches PRIVLIB.
+/* HAS_ATOLF:
+ *	This symbol, if defined, indicates that the atolf routine is
+ *	available to convert strings into long doubles.
  */
-/* ARCHLIB_EXP:
- *	This symbol contains the ~name expanded version of ARCHLIB, to be used
- *	in programs that are not prepared to deal with ~ expansion at run-time.
+/*#define HAS_ATOLF		/ **/
+
+/* HAS_ATOLL:
+ *	This symbol, if defined, indicates that the atoll routine is
+ *	available to convert strings into long longs.
  */
-#define ARCHLIB "/opt/perl/lib/5.005/i686-linux-thread"		/**/
-#define ARCHLIB_EXP "/opt/perl/lib/5.005/i686-linux-thread"		/**/
+/*#define HAS_ATOLL		/ **/
+
+/* PERL_BINCOMPAT_5005:
+ *	This symbol, if defined, indicates that Perl 5.006 should be
+ *	binary-compatible with Perl 5.005.  This is impossible for builds
+ *	that use features like threads and multiplicity it is always 
+ *	for those versions.
+ */
+/*#define PERL_BINCOMPAT_5005			/ **/
 
 /* DLSYM_NEEDS_UNDERSCORE:
  *	This symbol, if defined, indicates that we need to prepend an
@@ -1850,17 +2157,140 @@
  */
 /*#define 	DLSYM_NEEDS_UNDERSCORE 	/ **/
 
+/* HAS_ENDSPENT:
+ *	This symbol, if defined, indicates that the endspent system call is
+ *	available to finalize the scan of SysV shadow password entries.
+ */
+/*#define HAS_ENDSPENT		/ **/
+
+/* HAS_FSEEKO:
+ *	This symbol, if defined, indicates that the fseeko routine is
+ *	available to fseek beyond 32 bits (useful for ILP32 hosts).
+ */
+/*#define HAS_FSEEKO		/ **/
+
+/* HAS_FTELLO:
+ *	This symbol, if defined, indicates that the ftello routine is
+ *	available to ftell beyond 32 bits (useful for ILP32 hosts).
+ */
+/*#define HAS_FTELLO		/ **/
+
+/* HAS_GETMNTENT:
+ *	This symbol, if defined, indicates that the getmntent routine is
+ *	available to iterate through mounted file systems.
+ */
+/*#define HAS_GETMNTENT		/ **/
+
+/* HAS_GETSPENT:
+ *	This symbol, if defined, indicates that the getspent system call is
+ *	available to retrieve SysV shadow password entries sequentially.
+ */
+/*#define HAS_GETSPENT		/ **/
+
+/* HAS_GETSPNAM:
+ *	This symbol, if defined, indicates that the getspnam system call is
+ *	available to retrieve SysV shadow password entries by name.
+ */
+/*#define HAS_GETSPNAM		/ **/
+
+/* HAS_HASMNTOPT:
+ *	This symbol, if defined, indicates that the hasmntopt routine is
+ *	available to query the mount options of file systems.
+ */
+/*#define HAS_HASMNTOPT		/ **/
+
+/* HAS_LDBL_DIG:
+ *	This symbol, if defined, indicates that this system's <float.h>
+ *	or <limits.h> defines the symbol LDBL_DIG, which is the number
+ *	of significant digits in a long double precision number. Unlike
+ *	for DBL_DIG, there's no good guess for LDBL_DIG if it is undefined.
+ */
+#define HAS_LDBL_DIG 	/* */
+
+/* HAS_MADVISE:
+ *	This symbol, if defined, indicates that the madvise system call is
+ *	available to map a file into memory.
+ */
+#define HAS_MADVISE		/**/
+
+/* HAS_MPROTECT:
+ *	This symbol, if defined, indicates that the mprotect system call is
+ *	available to modify the access protection of a memory mapped file.
+ */
+#define HAS_MPROTECT		/**/
+
+/* HAS_READV:
+ *	This symbol, if defined, indicates that the readv routine is
+ *	available to do gather reads.  You will also need <sys/uio.h>
+ *	and there I_SYSUIO.
+ */
+#define HAS_READV		/**/
+
+/* HAS_SETSPENT:
+ *	This symbol, if defined, indicates that the setspent system call is
+ *	available to initialize the scan of SysV shadow password entries.
+ */
+/*#define HAS_SETSPENT		/ **/
+
 /* USE_SFIO:
  *	This symbol, if defined, indicates that sfio should
  *	be used.
  */
 /*#define	USE_SFIO		/ **/
 
+/* HAS_FSTATFS:
+ *	This symbol, if defined, indicates that the fstatfs routine is
+ *	available to stat filesystems of file descriptors.
+ */
+/* HAS_STRUCT_STATFS_FLAGS:
+ *	This symbol, if defined, indicates that the struct statfs
+ *	does have the f_flags member containing the mount flags of
+ *	the filesystem holding the file.
+ *	This kind of struct statfs is coming from sys/mount.h (BSD),
+ *	not from sys/statfs.h (SYSV).
+ */
+#define HAS_FSTATFS		/**/
+#define HAS_STRUCT_STATFS_FLAGS		/**/
+
+/* HAS_FSTATVFS:
+ *	This symbol, if defined, indicates that the fstatvfs routine is
+ *	available to stat filesystems of file descriptors.
+ */
+#define HAS_FSTATVFS		/**/
+
+/* HAS_TELLDIR_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the telldir() function.  Otherwise, it is up
+ *	to the program to supply one.  A good guess is
+ *		extern long telldir _((DIR*));
+ */
+#define	HAS_TELLDIR_PROTO	/**/
+
+/* HAS_WRITEV:
+ *	This symbol, if defined, indicates that the writev routine is
+ *	available to do scatter writes.
+ */
+#define HAS_WRITEV		/**/
+
 /* USE_DYNAMIC_LOADING:
  *	This symbol, if defined, indicates that dynamic loading of
  *	some sort is available.
  */
 #define USE_DYNAMIC_LOADING		/**/
+
+/* FFLUSH_NULL:
+ *	This symbol, if defined, tells that fflush(NULL) does flush
+ *	all pending stdio output.
+ */
+/* FFLUSH_ALL:
+ *	This symbol, if defined, tells that to flush
+ *	all pending stdio output one must loop through all
+ *	the stdio file handles stored in an array and fflush them.
+ *	Note that if fflushNULL is defined, fflushall will not
+ *	even be probed for and will be left undefined.
+ */
+#define	FFLUSH_NULL 		/**/
+/*#define	FFLUSH_ALL 		/ **/
 
 /* DB_Prefix_t:
  *	This symbol contains the type of the prefix structure element
@@ -1875,50 +2305,115 @@
 #define DB_Hash_t	u_int32_t		/**/
 #define DB_Prefix_t	size_t  	/**/
 
-/* PRIVLIB:
- *	This symbol contains the name of the private library for this package.
- *	The library is private in the sense that it needn't be in anyone's
- *	execution path, but it should be accessible by the world.  The program
- *	should be prepared to do ~ expansion.
+/* I_INTTYPES:
+ *     This symbol, if defined, indicates to the C program that it should
+ *     include <inttypes.h>.
  */
-/* PRIVLIB_EXP:
- *	This symbol contains the ~name expanded version of PRIVLIB, to be used
- *	in programs that are not prepared to deal with ~ expansion at run-time.
+/* HAS_INT64_T:
+ *     This symbol will defined if the C compiler supports int64_t.
+ *     Usually the <inttypes.h> needs to be included, but sometimes
+ *	<sys/types.h> is enough.
  */
-#define PRIVLIB "/opt/perl/lib/5.005"		/**/
-#define PRIVLIB_EXP "/opt/perl/lib/5.005"		/**/
+/*#define   I_INTTYPES                / **/
+/*#define     HAS_INT64_T               / **/
 
-/* SITEARCH:
- *	This symbol contains the name of the private library for this package.
- *	The library is private in the sense that it needn't be in anyone's
- *	execution path, but it should be accessible by the world.  The program
- *	should be prepared to do ~ expansion.
- *	The standard distribution will put nothing in this directory.
- *	Individual sites may place their own extensions and modules in
- *	this directory.
+/* I_MNTENT:
+ *	This symbol, if defined, indicates that <mntent.h> exists and
+ *	should be included.
  */
-/* SITEARCH_EXP:
- *	This symbol contains the ~name expanded version of SITEARCH, to be used
- *	in programs that are not prepared to deal with ~ expansion at run-time.
- */
-#define SITEARCH "/opt/perl/lib/site_perl/5.005/i686-linux-thread"		/**/
-#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.005/i686-linux-thread"		/**/
+/*#define	I_MNTENT		/ **/
 
-/* SITELIB:
- *	This symbol contains the name of the private library for this package.
- *	The library is private in the sense that it needn't be in anyone's
- *	execution path, but it should be accessible by the world.  The program
- *	should be prepared to do ~ expansion.
- *	The standard distribution will put nothing in this directory.
- *	Individual sites may place their own extensions and modules in
- *	this directory.
+/* I_NETINET_TCP:
+ *     This symbol, if defined, indicates to the C program that it should
+ *     include <netinet/tcp.h>.
  */
-/* SITELIB_EXP:
- *	This symbol contains the ~name expanded version of SITELIB, to be used
- *	in programs that are not prepared to deal with ~ expansion at run-time.
+#define   I_NETINET_TCP                /**/
+
+/* I_POLL:
+ *	This symbol, if defined, indicates that <poll.h> exists and
+ *	should be included.
  */
-#define SITELIB "/opt/perl/lib/site_perl/5.005"		/**/
-#define SITELIB_EXP "/opt/perl/lib/site_perl/5.005"		/**/
+#define	I_POLL		/**/
+
+/* I_SHADOW:
+ *	This symbol, if defined, indicates that <shadow.h> exists and
+ *	should be included.
+ */
+/*#define	I_SHADOW		/ **/
+
+/* I_SOCKS:
+ *	This symbol, if defined, indicates that <socks.h> exists and
+ *	should be included.
+ */
+/*#define	I_SOCKS		/ **/
+
+/* I_SYS_MMAN:
+ *	This symbol, if defined, indicates that <sys/mman.h> exists and
+ *	should be included.
+ */
+#define	I_SYS_MMAN		/**/
+
+/* I_SYS_MOUNT:
+ *	This symbol, if defined, indicates that <sys/mount.h> exists and
+ *	should be included.
+ */
+#define	I_SYS_MOUNT		/**/
+
+/* I_SYS_STATVFS:
+ *	This symbol, if defined, indicates that <sys/statvfs.h> exists and
+ *	should be included.
+ */
+#define	I_SYS_STATVFS		/**/
+
+/* HAS_OFF64_T:
+ *	This symbol will be defined if the C compiler supports off64_t.
+ */
+/* HAS_FPOS64_T:
+ *	This symbol will be defined if the C compiler supports fpos64_t.
+ */
+/*#define	HAS_OFF64_T    		/ **/
+/*#define	HAS_FPOS64_T    	/ **/
+
+/* PERL_PRIfldbl:
+ *	This symbol, if defined, contains the string used by stdio to
+ *	format long doubles (format 'f') for output.
+ */
+/* PERL_PRIgldbl:
+ *	This symbol, if defined, contains the string used by stdio to
+ *	format long doubles (format 'g') for output.
+ */
+#define PERL_PRIfldbl	"f"	/**/
+#define PERL_PRIgldbl	"g"	/**/
+
+/* PERL_PRId64:
+ *	This symbol, if defined, contains the string used by stdio to
+ *	format 64-bit decimal numbers (format 'd') for output.
+ */
+/* PERL_PRIu64:
+ *	This symbol, if defined, contains the string used by stdio to
+ *	format 64-bit unsigned decimal numbers (format 'u') for output.
+ */
+/* PERL_PRIo64:
+ *	This symbol, if defined, contains the string used by stdio to
+ *	format 64-bit octal numbers (format 'o') for output.
+ */
+/* PERL_PRIx64:
+ *	This symbol, if defined, contains the string used by stdio to
+ *	format 64-bit hexadecimal numbers (format 'x') for output.
+ */
+#define PERL_PRId64	"ld"	/**/
+#define PERL_PRIu64	"lu"	/**/
+#define PERL_PRIo64	"lo"	/**/
+#define PERL_PRIx64	"lx"	/**/
+
+/* SELECT_MIN_BITS:
+ *	This symbol holds the minimum number of bits operated by select.
+ *	That is, if you do select(n, ...), how many bits at least will be
+ *	cleared in the masks if some activity is detected.  Usually this
+ *	is either n or 32*ceil(n/32), especially many little-endians do
+ *	the latter.  This is only useful if you have select(), naturally.
+ */
+#define SELECT_MIN_BITS 	32	/**/
 
 /* STARTPERL:
  *	This variable contains the string to put in front of a perl
@@ -1927,12 +2422,62 @@
  */
 #define STARTPERL "#!/opt/perl/bin/perl"		/**/
 
+/* HAS_STDIO_STREAM_ARRAY:
+ *	This symbol, if defined, tells that there is an array
+ *	holding the stdio streams.
+ */
+/* STDIO_STREAM_ARRAY:
+ *	This symbol tells the name of the array holding the stdio streams.
+ *	Usual values include _iob, __iob, and __sF.
+ */
+#define	HAS_STDIO_STREAM_ARRAY	/**/
+#define STDIO_STREAM_ARRAY	_iob
+
+/* HAS_STRTOULL:
+ *	This symbol, if defined, indicates that the strtoull routine is
+ *	available to convert strings into unsigned long longs.
+ */
+/*#define HAS_STRTOULL		/ **/
+
+/* USE_64_BITS:
+ *	This symbol, if defined, indicates that 64-bit interfaces should
+ *	be used when available.  If not defined, the native default interfaces
+ *	will be used (be they 32 or 64 bits).
+ */
+#define	USE_64_BITS		/**/
+
+/* USE_LONG_DOUBLE:
+ *	This symbol, if defined, indicates that long doubles should
+ *	be used when available.
+ */
+/*#define	USE_LONG_DOUBLE		/ **/
+
+/* MULTIPLICITY:
+ *	This symbol, if defined, indicates that Perl should
+ *	be built to use multiplicity.
+ */
+/*#define	MULTIPLICITY		/ **/
+
 /* USE_PERLIO:
  *	This symbol, if defined, indicates that the PerlIO abstraction should
  *	be used throughout.  If not defined, stdio should be
  *	used in a fully backward compatible manner.
  */
 /*#define	USE_PERLIO		/ **/
+
+/* USE_SOCKS:
+ *	This symbol, if defined, indicates that Perl should
+ *	be built to use socks.
+ */
+/*#define	USE_SOCKS		/ **/
+
+/* HAS_DRAND48_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the drand48() function.  Otherwise, it is up
+ *	to the program to supply one.  A good guess is
+ *		extern double drand48 _((void));
+ */
+#define	HAS_DRAND48_PROTO	/**/
 
 /* HAS_GETHOST_PROTOS:
  *	This symbol, if defined, indicates that <netdb.h> includes
@@ -1985,7 +2530,7 @@
 #define Netdb_host_t		const char * /**/
 #define Netdb_hlen_t		int /**/
 #define Netdb_name_t		const char * /**/
-#define Netdb_net_t		unsigned long /**/
+#define Netdb_net_t		int /**/
 
 /* Select_fd_set_t:
  *	This symbol holds the type used for the 2nd, 3rd, and 4th
@@ -2001,26 +2546,42 @@
  *	where library files may be held under a private library, for
  *	instance.
  */
-#define ARCHNAME "i686-linux-thread"		/**/
+#define ARCHNAME "alpha-dec_osf-thread"		/**/
+
+/* OLD_PTHREAD_CREATE_JOINABLE:
+ *	This symbol, if defined, indicates how to create pthread
+ *	in joinable (aka undetached) state.  NOTE: not defined
+ *	if pthread.h already has defined PTHREAD_CREATE_JOINABLE
+ *	(the new version of the constant).
+ *	If defined, known values are PTHREAD_CREATE_UNDETACHED
+ *	and __UNDETACHED.
+ */
+/*#define OLD_PTHREAD_CREATE_JOINABLE  / **/
 
 /* HAS_PTHREAD_YIELD:
  *	This symbol, if defined, indicates that the pthread_yield 
  *	routine is available to yield the execution of the current
- *	thread.
+ *	thread.	 sched_yield is preferable to pthread_yield.
+ */
+/* SCHED_YIELD:
+ *	This symbol defines the way to yield the execution of
+ *	the current thread.  Known ways are sched_yield,
+ *	pthread_yield, and pthread_yield with NULL.
  */
 /* HAS_SCHED_YIELD:
  *	This symbol, if defined, indicates that the sched_yield
  *	routine is available to yield the execution of the current
- *	thread.
+ *	thread.	 sched_yield is preferable to pthread_yield.
  */
 /*#define HAS_PTHREAD_YIELD	/ **/
+#define SCHED_YIELD	sched_yield()	/**/
 #define HAS_SCHED_YIELD	/**/
 
-/* PTHREADS_CREATED_JOINABLE:
- *	This symbol, if defined, indicates that pthreads are created
- *	in the joinable (aka undetached) state.
+/* I_MACH_CTHREADS:
+ *     This symbol, if defined, indicates to the C program that it should
+ *     include <mach/cthreads.h>.
  */
-#define PTHREADS_CREATED_JOINABLE /**/
+/*#define   I_MACH_CTHREADS	/ **/
 
 /* USE_THREADS:
  *	This symbol, if defined, indicates that Perl should
@@ -2068,7 +2629,11 @@
  *	It can be int, long, off_t, etc... It may be necessary to include
  *	<sys/types.h> to get any typedef'ed information.
  */
+/* LSEEKSIZE:
+ *	This symbol holds the number of bytes used by the Off_t.
+ */
 #define Off_t off_t		/* <offset> type */
+#define LSEEKSIZE 8		/* <offset> size */
 
 /* Mode_t:
  *	This symbol holds the type used to declare file modes 

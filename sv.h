@@ -1,6 +1,6 @@
 /*    sv.h
  *
- *    Copyright (c) 1991-1997, Larry Wall
+ *    Copyright (c) 1991-1999, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -137,7 +137,7 @@ struct io {
 #define SVf_BREAK	0x00400000	/* refcnt is artificially low */
 #define SVf_READONLY	0x00800000	/* may not be modified */
 
-#define SVf_THINKFIRST	(SVf_READONLY|SVf_ROK)
+#define SVf_THINKFIRST	(SVf_READONLY|SVf_ROK|SVf_FAKE)
 
 #define SVp_IOK		0x01000000	/* has valid non-public integer value */
 #define SVp_NOK		0x02000000	/* has valid non-public numeric value */
@@ -147,23 +147,25 @@ struct io {
 #define SVf_OK		(SVf_IOK|SVf_NOK|SVf_POK|SVf_ROK| \
 			 SVp_IOK|SVp_NOK|SVp_POK)
 
-#ifdef OVERLOAD
-#define SVf_AMAGIC    0x10000000      /* has magical overloaded methods */
-#else
-#define SVf_AMAGIC    0               /* can be or-ed without effect */
-#endif /* OVERLOAD */
+#define SVf_AMAGIC	0x10000000      /* has magical overloaded methods */
 
 #define PRIVSHIFT 8
 
 /* Some private flags. */
 
-#define SVpfm_COMPILED	0x80000000
+#define SVf_IVisUV	0x80000000	/* use XPVUV instead of XPVIV */
+
+#define SVpfm_COMPILED	0x80000000	/* FORMLINE is compiled */
 
 #define SVpbm_VALID	0x80000000
 #define SVpbm_TAIL	0x40000000
 
+#define SVrepl_EVAL	0x40000000	/* Replacement part of s///e */
+
 #define SVphv_SHAREKEYS 0x20000000	/* keys live on shared string table */
 #define SVphv_LAZYDEL	0x40000000	/* entry in xhv_eiter must be deleted */
+
+#define SVprv_WEAKREF   0x80000000      /* Weak reference */
 
 struct xrv {
     SV *	xrv_rv;		/* pointer to another SV */
@@ -194,7 +196,7 @@ struct xpvnv {
     STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     IV		xiv_iv;		/* integer value or pv offset */
-    double	xnv_nv;		/* numeric value, if any */
+    NV    	xnv_nv;		/* numeric value, if any */
 };
 
 /* These structure must match the beginning of struct xpvhv in hv.h. */
@@ -203,7 +205,7 @@ struct xpvmg {
     STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     IV		xiv_iv;		/* integer value or pv offset */
-    double	xnv_nv;		/* numeric value, if any */
+    NV    	xnv_nv;		/* numeric value, if any */
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
 };
@@ -213,7 +215,7 @@ struct xpvlv {
     STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     IV		xiv_iv;		/* integer value or pv offset */
-    double	xnv_nv;		/* numeric value, if any */
+    NV    	xnv_nv;		/* numeric value, if any */
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
 
@@ -228,7 +230,7 @@ struct xpvgv {
     STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     IV		xiv_iv;		/* integer value or pv offset */
-    double	xnv_nv;		/* numeric value, if any */
+    NV		xnv_nv;		/* numeric value, if any */
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
 
@@ -244,7 +246,7 @@ struct xpvbm {
     STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     IV		xiv_iv;		/* integer value or pv offset */
-    double	xnv_nv;		/* numeric value, if any */
+    NV		xnv_nv;		/* numeric value, if any */
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
 
@@ -262,14 +264,14 @@ struct xpvfm {
     STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     IV		xiv_iv;		/* integer value or pv offset */
-    double	xnv_nv;		/* numeric value, if any */
+    NV		xnv_nv;		/* numeric value, if any */
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
 
     HV *	xcv_stash;
     OP *	xcv_start;
     OP *	xcv_root;
-    void      (*xcv_xsub)_((CV* _CPERLproto));
+    void      (*xcv_xsub)(pTHXo_ CV*);
     ANY		xcv_xsubany;
     GV *	xcv_gv;
     GV *	xcv_filegv;
@@ -290,7 +292,7 @@ struct xpvio {
     STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     IV		xiv_iv;		/* integer value or pv offset */
-    double	xnv_nv;		/* numeric value, if any */
+    NV		xnv_nv;		/* numeric value, if any */
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
 
@@ -316,17 +318,21 @@ struct xpvio {
 #define IOf_START 2	/* check for null ARGV and substitute '-' */
 #define IOf_FLUSH 4	/* this fp wants a flush after write op */
 #define IOf_DIDTOP 8	/* just did top of form */
-#define IOf_UNTAINT 16  /* consider this fp (and it's data) "safe" */
+#define IOf_UNTAINT 16  /* consider this fp (and its data) "safe" */
+#define IOf_NOLINE  32	/* slurped a pseudo-line from empty file */
 
 /* The following macros define implementation-independent predicates on SVs. */
 
 #define SvNIOK(sv)		(SvFLAGS(sv) & (SVf_IOK|SVf_NOK))
 #define SvNIOKp(sv)		(SvFLAGS(sv) & (SVp_IOK|SVp_NOK))
 #define SvNIOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK| \
-						  SVp_IOK|SVp_NOK))
+						  SVp_IOK|SVp_NOK|SVf_IVisUV))
 
 #define SvOK(sv)		(SvFLAGS(sv) & SVf_OK)
-#define SvOK_off(sv)		(SvFLAGS(sv) &=	~(SVf_OK|SVf_AMAGIC),	\
+#define SvOK_off(sv)		(SvFLAGS(sv) &=	~(SVf_OK|SVf_AMAGIC|	\
+						  SVf_IVisUV),		\
+							SvOOK_off(sv))
+#define SvOK_off_exc_UV(sv)	(SvFLAGS(sv) &=	~(SVf_OK|SVf_AMAGIC),	\
 							SvOOK_off(sv))
 
 #define SvOKp(sv)		(SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK))
@@ -340,9 +346,20 @@ struct xpvio {
 #define SvIOK(sv)		(SvFLAGS(sv) & SVf_IOK)
 #define SvIOK_on(sv)		(SvOOK_off(sv), \
 				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
-#define SvIOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_IOK|SVp_IOK))
+#define SvIOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_IOK|SVp_IOK|SVf_IVisUV))
 #define SvIOK_only(sv)		(SvOK_off(sv), \
 				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
+#define SvIOK_only_UV(sv)	(SvOK_off_exc_UV(sv), \
+				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
+ 
+#define SvIOK_UV(sv)		((SvFLAGS(sv) & (SVf_IOK|SVf_IVisUV))	\
+				 == (SVf_IOK|SVf_IVisUV))
+#define SvIOK_notUV(sv)		((SvFLAGS(sv) & (SVf_IOK|SVf_IVisUV))	\
+				 == SVf_IOK)
+
+#define SvIsUV(sv)		(SvFLAGS(sv) & SVf_IVisUV)
+#define SvIsUV_on(sv)		(SvFLAGS(sv) |= SVf_IVisUV)
+#define SvIsUV_off(sv)		(SvFLAGS(sv) &= ~SVf_IVisUV)
 
 #define SvNOK(sv)		(SvFLAGS(sv) & SVf_NOK)
 #define SvNOK_on(sv)		(SvFLAGS(sv) |= (SVf_NOK|SVp_NOK))
@@ -353,7 +370,7 @@ struct xpvio {
 #define SvPOK(sv)		(SvFLAGS(sv) & SVf_POK)
 #define SvPOK_on(sv)		(SvFLAGS(sv) |= (SVf_POK|SVp_POK))
 #define SvPOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_POK|SVp_POK))
-#define SvPOK_only(sv)		(SvFLAGS(sv) &= ~(SVf_OK|SVf_AMAGIC),	\
+#define SvPOK_only(sv)		(SvFLAGS(sv) &= ~(SVf_OK|SVf_AMAGIC|SVf_IVisUV),	\
 				    SvFLAGS(sv) |= (SVf_POK|SVp_POK))
 
 #define SvOOK(sv)		(SvFLAGS(sv) & SVf_OOK)
@@ -384,10 +401,9 @@ struct xpvio {
 #define SvRMAGICAL_on(sv)	(SvFLAGS(sv) |= SVs_RMG)
 #define SvRMAGICAL_off(sv)	(SvFLAGS(sv) &= ~SVs_RMG)
 
-#ifdef OVERLOAD
-#define SvAMAGIC(sv)         (SvFLAGS(sv) & SVf_AMAGIC)
-#define SvAMAGIC_on(sv)      (SvFLAGS(sv) |= SVf_AMAGIC)
-#define SvAMAGIC_off(sv)     (SvFLAGS(sv) &= ~SVf_AMAGIC)
+#define SvAMAGIC(sv)		(SvFLAGS(sv) & SVf_AMAGIC)
+#define SvAMAGIC_on(sv)		(SvFLAGS(sv) |= SVf_AMAGIC)
+#define SvAMAGIC_off(sv)	(SvFLAGS(sv) &= ~SVf_AMAGIC)
 
 /*
 #define Gv_AMG(stash) \
@@ -395,7 +411,11 @@ struct xpvio {
          ((!HV_AMAGICbad(stash) && HV_AMAGIC(stash)) || Gv_AMupdate(stash)))
 */
 #define Gv_AMG(stash)           (PL_amagic_generation && Gv_AMupdate(stash))
-#endif /* OVERLOAD */
+
+#define SvWEAKREF(sv)		((SvFLAGS(sv) & (SVf_ROK|SVprv_WEAKREF)) \
+				  == (SVf_ROK|SVprv_WEAKREF))
+#define SvWEAKREF_on(sv)	(SvFLAGS(sv) |=  (SVf_ROK|SVprv_WEAKREF))
+#define SvWEAKREF_off(sv)	(SvFLAGS(sv) &= ~(SVf_ROK|SVprv_WEAKREF))
 
 #define SvTHINKFIRST(sv)	(SvFLAGS(sv) & SVf_THINKFIRST)
 
@@ -427,6 +447,10 @@ struct xpvio {
 #define SvCOMPILED(sv)		(SvFLAGS(sv) & SVpfm_COMPILED)
 #define SvCOMPILED_on(sv)	(SvFLAGS(sv) |= SVpfm_COMPILED)
 #define SvCOMPILED_off(sv)	(SvFLAGS(sv) &= ~SVpfm_COMPILED)
+
+#define SvEVALED(sv)		(SvFLAGS(sv) & SVrepl_EVAL)
+#define SvEVALED_on(sv)		(SvFLAGS(sv) |= SVrepl_EVAL)
+#define SvEVALED_off(sv)	(SvFLAGS(sv) &= ~SVrepl_EVAL)
 
 #define SvTAIL(sv)		(SvFLAGS(sv) & SVpbm_TAIL)
 #define SvTAIL_on(sv)		(SvFLAGS(sv) |= SVpbm_TAIL)
@@ -517,6 +541,7 @@ struct xpvio {
 
 #define SvPV_force(sv, lp) sv_pvn_force(sv, &lp)
 #define SvPV(sv, lp) sv_pvn(sv, &lp)
+#define SvPV_nolen(sv) sv_pv(sv)
 #define SvIVx(sv) sv_iv(sv)
 #define SvUVx(sv) sv_uv(sv)
 #define SvNVx(sv) sv_nv(sv)
@@ -526,12 +551,13 @@ struct xpvio {
 
 #define SvIV(sv) SvIVx(sv)
 #define SvNV(sv) SvNVx(sv)
-#define SvUV(sv) SvIVx(sv)
+#define SvUV(sv) SvUVx(sv)
 #define SvTRUE(sv) SvTRUEx(sv)
 
 #ifndef CRIPPLED_CC
 /* redefine some things to more efficient inlined versions */
 
+/* Let us hope that bitmaps for UV and IV are the same */
 #undef SvIV
 #define SvIV(sv) (SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv))
 
@@ -549,6 +575,10 @@ struct xpvio {
 #define SvPV_force(sv, lp) \
     ((SvFLAGS(sv) & (SVf_POK|SVf_THINKFIRST)) == SVf_POK \
      ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_pvn_force(sv, &lp))
+
+#undef SvPV_nolen
+#define SvPV_nolen(sv) \
+    (SvPOK(sv) ? SvPVX(sv) : sv_2pv_nolen(sv))
 
 #ifdef __GNUC__
 #  undef SvIVx
@@ -650,7 +680,11 @@ struct xpvio {
 #define SvSetMagicSV_nosteal(dst,src) \
 		SvSetSV_nosteal_and(dst,src,SvSETMAGIC(dst))
 
+#ifdef DEBUGGING
 #define SvPEEK(sv) sv_peek(sv)
+#else
+#define SvPEEK(sv) ""
+#endif
 
 #define SvIMMORTAL(sv) ((sv)==&PL_sv_undef || (sv)==&PL_sv_yes || (sv)==&PL_sv_no)
 
@@ -658,12 +692,5 @@ struct xpvio {
 
 #define isGV(sv) (SvTYPE(sv) == SVt_PVGV)
 
-#ifndef DOSISH
-#  define SvGROW(sv,len) (SvLEN(sv) < (len) ? sv_grow(sv,len) : SvPVX(sv))
-#  define Sv_Grow sv_grow
-#else
-    /* extra parentheses intentionally NOT placed around "len"! */
-#  define SvGROW(sv,len) ((SvLEN(sv) < (unsigned long)len) \
-		? sv_grow(sv,(unsigned long)len) : SvPVX(sv))
-#  define Sv_Grow(sv,len) sv_grow(sv,(unsigned long)(len))
-#endif /* DOSISH */
+#define SvGROW(sv,len) (SvLEN(sv) < (len) ? sv_grow(sv,len) : SvPVX(sv))
+#define Sv_Grow sv_grow

@@ -56,9 +56,9 @@ sub bits {
     my $bits = 0;
     my $sememe;
     foreach $sememe (@_) {
-	$bits |= 0x01000000, next if $sememe eq 'status' || $sememe eq '$?';
-	$bits |= 0x02000000, next if $sememe eq 'exit';
-	$bits |= 0x04000000, next if $sememe eq 'time';
+	$bits |= 0x20000000, next if $sememe eq 'status' || $sememe eq '$?';
+	$bits |= 0x40000000, next if $sememe eq 'exit';
+	$bits |= 0x80000000, next if $sememe eq 'time';
     }
     $bits;
 }

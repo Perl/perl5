@@ -1,11 +1,13 @@
 /*    utf8.h
  *
- *    Copyright (c) 1998, Larry Wall
+ *    Copyright (c) 1998-1999, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
  *
  */
+
+START_EXTERN_C
 
 #ifdef DOINIT
 EXTCONST unsigned char PL_utf8skip[] = {
@@ -22,6 +24,8 @@ EXTCONST unsigned char PL_utf8skip[] = {
 EXTCONST unsigned char PL_utf8skip[];
 #endif
 
-#define IN_UTF8 (curcop->op_private & HINT_UTF8)
+END_EXTERN_C
+
+#define IN_UTF8 (PL_curcop->op_private & HINT_UTF8)
 
 #define UTF8SKIP(s) PL_utf8skip[*(U8*)s]

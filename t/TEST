@@ -1,6 +1,6 @@
 #!./perl
 
-# Last change: Fri Jan 10 09:57:03 WET 1997
+# Last change: Fri May 28 03:16:57 BST 1999
 
 # This is written in a peculiar style, since we're trying to avoid
 # most of the constructs we'll be testing for.
@@ -43,11 +43,22 @@ TESTING COMPILER
 --------------------------------------------------------------------------------
 EOT
 
+    $ENV{PERLCC_TIMEOUT} = 120 
+          if ($type eq 'compile' && !$ENV{PERLCC_TIMEOUT});
+
     $bad = 0;
     $good = 0;
     $total = @tests;
     $files  = 0;
     $totmax = 0;
+    $maxlen = 0;
+    foreach (@tests) {
+	$len = length;
+	$maxlen = $len if $len > $maxlen;
+    }
+    # +3 : we want three dots between the test name and the "ok"
+    # -2 : the .t suffix
+    $dotdotdot = $maxlen + 3 - 2;
     while ($test = shift @tests) {
 
 	if ( $infinite{$test} && $type eq 'compile' ) {
@@ -59,7 +70,7 @@ EOT
 	}
 	$te = $test;
 	chop($te);
-	print "$te" . '.' x (18 - length($te));
+	print "$te" . '.' x ($dotdotdot - length($te));
 
 	open(SCRIPT,"<$test") or die "Can't run $test.\n";
 	$_ = <SCRIPT>;
@@ -142,12 +153,12 @@ EOT
 	}
     }
     else {
-	$pct = sprintf("%.2f", $good / $total * 100);
+	$pct = sprintf("%.2f", ($files - $bad) / $files * 100);
 	if ($bad == 1) {
-	    warn "Failed 1 test script out of $total, $pct% okay.\n";
+	    warn "Failed 1 test script out of $files, $pct% okay.\n";
 	}
 	else {
-	    warn "Failed $bad test scripts out of $total, $pct% okay.\n";
+	    warn "Failed $bad test scripts out of $files, $pct% okay.\n";
 	}
 	warn <<'SHRDLU';
    ### Since not all tests were successful, you may want to run some

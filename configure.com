@@ -1,23 +1,16 @@
 $ sav_ver = 'F$VERIFY(0)'
 $! SET VERIFY
 $!
-$! Installation and usage: COPY this file into you perl source tree - at or 
-$! below where the main MANIFEST. file is located.
-$!
 $! For example, if you unpacked perl into: [USER.PERL5_00n...] then you will 
-$! want to:
-$!
-$! $ COPY Configure.com [USER.PERL5_00n.VMS] 
-$!
-$! Now cd into the tree and execute Configure:
+$! want to cd into the tree and execute Configure:
 $!
 $! $ SET DEFAULT [USER.PERL5_00n]
-$! $ @[.vms]Configure 
+$! $ @Configure 
 $!
 $! or
 $!
 $! $ SET DEFAULT [USER.PERL5_00n]
-$! $ @[.vms]Configure "-des"
+$! $ @Configure "-des"
 $!
 $! That's it. If you get into a bind trying to build perl on VMS then 
 $! definitely read through the README.VMS file.
@@ -46,16 +39,19 @@ $ cat  = "type"
 $ gcc_symbol = "gcc"
 $ ans = ""
 $ macros = ""
+$ use_vmsdebug_perl = "N"
 $ use_debugging_perl = "Y"
+$ use_64bit = "N"
 $ C_Compiler_Replace = "CC="
 $ Thread_Live_Dangerously = "MT="
 $ use_two_pot_malloc = "N"
 $ use_pack_malloc = "N"
 $ use_debugmalloc = "N"
-$ preload_env = "N"
+$ d_secintgenv = "N"
+$ use_multiplicity = "N"
 $ vms_default_directory_name = F$ENVIRONMENT("DEFAULT")
-$! max_allowed_dir_depth = 3  ! e.g. [A.B.PERL5_00n] not [A.B.C.PERL5_00n]
-$ max_allowed_dir_depth = 2  ! e.g. [FOO.PERL5_00n] not [FOO.BAR.PERL5_00n]
+$ max_allowed_dir_depth = 3  ! e.g. [A.B.PERL5_00n] not [A.B.C.PERL5_00n]
+$! max_allowed_dir_depth = 2  ! e.g. [FOO.PERL5_00n] not [FOO.BAR.PERL5_00n]
 $!
 $ vms_filcnt = F$GETJPI ("","FILCNT")
 $!
@@ -388,6 +384,8 @@ $   ENDIF
 $ ELSE
 $! MANIFEST. has been found and we have set def'ed there - 
 $! time to bail out before it's too late.
+$ tmp = f$extract(1,3,f$edit(f$getsyi("VERSION"),"TRIM,COLLAPSE"))
+$ IF tmp .GES. "7.2" THEN GOTO Beyond_depth_check
 $   IF (F$ELEMENT(max_allowed_dir_depth,".",F$ENVIRONMENT("Default")).nes.".")
 $   THEN
 $     TYPE SYS$INPUT:
@@ -400,6 +398,7 @@ $     SET DEFAULT 'vms_default_directory_name' !be kind rewind
 $     STOP
 $     EXIT !2 !$STATUS = "%X00000002" (error)
 $   ENDIF
+$Beyond_depth_check:
 $!
 $! after finding MANIFEST let's create (but not yet enter) the UU subdirectory
 $!
@@ -874,7 +873,7 @@ $   ENDIF
 $ ENDIF
 $ IF (archname.EQS."VMS_AXP")
 $ THEN
-$   dflt = "N"
+$   dflt = "n"
 $   rp = "Are you sharing your PERL_ROOT with a VAX? [''dflt'] "
 $   GOSUB myread
 $   if ans.NES.""
@@ -972,16 +971,16 @@ $   got_sub   = "false"
 $   OPEN/READONLY CONFIG 'patchlevel_h' 
 $Patchlevel_h_loop:
 $   READ/END_Of_File=Close_patch CONFIG line
-$   IF ((F$LOCATE("#define PATCHLEVEL",line).NE.F$LENGTH(line)).AND.(.NOT.got_patch))
+$   IF ((F$LOCATE("#define PERL_VERSION",line).NE.F$LENGTH(line)).AND.(.NOT.got_patch))
 $   THEN
 $     line = F$EDIT(line,"COMPRESS, TRIM")
-$     patchlevel = F$EXTRACT(18,F$LENGTH(line)-18,line)
+$     patchlevel = F$ELEMENT(2," ",line)
 $     got_patch = "true"
 $   ENDIF
-$   IF ((F$LOCATE("SUBVERSION",line).NE.F$LENGTH(line)).AND.(.NOT.got_sub))
+$   IF ((F$LOCATE("#define PERL_SUBVERSION",line).NE.F$LENGTH(line)).AND.(.NOT.got_sub))
 $   THEN
 $     line = F$EDIT(line,"COMPRESS, TRIM")
-$     subversion = F$EXTRACT(18,F$LENGTH(line)-18,line)
+$     subversion = F$ELEMENT(2," ",line)
 $     got_sub = "true"
 $   ENDIF
 $   IF (.NOT.got_patch).OR.(.NOT.got_sub) THEN GOTO Patchlevel_h_loop
@@ -1565,7 +1564,7 @@ $ IF mydomain.NES.""  !no periods in DECnet names like "MYDECNODE::"
 $ THEN
 $   rp = "What is your domain name? [''mydomain'] "
 $   GOSUB myread
-$   IF ans THEN mydomain = ans
+$   IF ans .nes. "" THEN mydomain = ans
 $!: translate upper to lower if necessary
 $   mydomain = F$EDIT(mydomain,"COLLAPSE")
 $   mylowdomain = F$EDIT(mydomain," LOWERCASE")
@@ -1589,7 +1588,7 @@ $ ENDIF
 $ dflt = "''cf_by@''myhostname'"+"''mydomain'"
 $ rp = "What is your e-mail address? [''dflt'] "
 $ GOSUB myread
-$ IF ans
+$ IF ans .nes. ""
 $ THEN cf_email = ans
 $ ELSE cf_email = dflt
 $ ENDIF
@@ -1606,7 +1605,7 @@ $ ENDIF
 $ dflt = "''cf_email'"
 $ rp = "Perl administrator e-mail address [''dflt'] "
 $ GOSUB myread
-$ IF ans
+$ IF ans .nes. ""
 $ THEN perladmin = ans
 $ ELSE perladmin = dflt
 $ ENDIF
@@ -1657,7 +1656,7 @@ $   if "''has_dec_c_sockets'".eqs."T"
 $   THEN
 $     dflt = "DECC"
 $   else
-$     dlft = "SOCKETSHR"
+$     dflt = "SOCKETSHR"
 $   endif
 $   rp = "Choose socket stack (NONE"
 $   if "''has_socketshr'".eqs."T" THEN rp = rp + ",SOCKETSHR"
@@ -1673,6 +1672,63 @@ $   IF ans.eqs."socketshr" then has_socketshr = "T"
 $ endif
 $!
 $!
+$! Ask if they want to build with VMS_DEBUG perl
+$ echo "Perl can be built to run under the VMS debugger."
+$ echo "You should only select this option if you are debugging"
+$ echo "perl itself.  This can be a useful feature if you are "
+$ echo "embedding perl in a program."
+$ echo ""
+$ dflt = "N"
+$ rp = "Build a VMS-DEBUG version of Perl? [''dflt'] "
+$ GOSUB myread
+$   if ans.eqs."" then ans = dflt
+$ if (f$extract(0, 1, "''ans'").eqs."Y").or.(f$extract(0, 1, "''ans'").eqs."y")
+$ THEN
+$   use_vmsdebug_perl = "Y"
+$   macros = macros + """__DEBUG__=1"","
+$ ELSE
+$   use_vmsdebug_perl = "N"
+$ ENDIF
+$!
+$! Ask if they want to build with MULTIPLICITY
+$ echo "The perl interpreter engine can be built in a way that makes it
+$ echo "possible for a program that embeds perl into it (and yep, you can
+$ echo "do that--it's pretty keen) to have multiple perl interpreters active
+$ echo "at once. There is some performance overhead, however, so you
+$ echo "probably don't want to choose this unless you're going to be doing
+$ echo "funky perl embedding."
+$ echo ""
+$ dflt = "n"
+$ rp = "Build with MULTIPLICITY? [''dflt'] "
+$ GOSUB myread
+$   if ans.eqs."" then ans = dflt
+$ if (f$extract(0, 1, "''ans'").eqs."Y").or.(f$extract(0, 1, "''ans'").eqs."y")
+$ THEN
+$   use_multiplicity="Y"
+$ ELSE
+$   use_multiplicity="N"
+$ ENDIF
+$!
+$! Ask if they want to build with 64-bit support
+$ if (Archname.eqs."VMS_AXP").and.("''f$extract(1,3, f$getsyi(""version""))'".ges."7.1")
+$ THEN
+$   echo "This version of perl has experimental support for building wtih
+$   echo "64 bit integers and 128 bit floating point variables. This gives
+$   echo "a much larger range for perl's mathematical operations. (Note that
+$   echo "does *not* enable 64-bit fileops at the moment, as Dec C doesn't
+$   echo "do that yet)"
+$   echo ""
+$   dflt = use_64bit
+$   rp = "Build with 64 bits? [''dflt'] "
+$   GOSUB myread
+$     if ans.eqs."" then ans = dflt
+$   if (f$extract(0, 1, "''ans'").eqs."Y").or.(f$extract(0, 1, "''ans'").eqs."y")
+$   THEN
+$     use_64bit="Y"
+$   ELSE
+$     use_64bit="N"
+$   ENDIF
+$ ENDIF
 $! Ask about threads, if appropriate
 $ if (Using_Dec_C.eqs."Yes")
 $ THEN
@@ -1700,7 +1756,7 @@ $       echo "machine. Unfortunately this feature isn't safe on an
 $       echo "unpatched 7.1 system. (Several OS patches were required when
 $       echo "this procedure was written)
 $       echo ""
-$       dflt = "N"
+$       dflt = "n"
 $       rp = "Enable multiple kernel threads and upcalls? [''dflt'] "
 $       gosub myread
 $       if ans.eqs."" then ans="''dflt'"
@@ -1712,26 +1768,43 @@ $     ENDIF
 $   ENDIF
 $ ENDIF
 $!
-$! Pre-load %ENV?
+$! Ask whether they want to use secure logical translation when tainting
 $ echo ""
-$ echo "Because of the way perl fetches the list of logical names
-$ echo "for the %ENV hash (we spawn a subprocess that does a
-$ echo "SHOW LOGICALS *, which is expensive), we defer fetching it
-$ echo "until the first time a program iterates over the %ENV hash.
-$ echo "This means things like 'exists($ENV{'SYS$MANAGER'})' will
-$ echo "return false unless you've already accessed $ENV{SYS$MANAGER}
-$ echo "or done something like a keys %ENV."
+$ echo "As Perl starts up, it checks several logical names, such as"
+$ echo "PERL5LIB and PERL_ENV_TABLES, which allow you to modify aspects"
+$ echo "of its behavior.  For additional security, you may limit this"
+$ echo "process to executive- and kernel-mode translation when tainting"
+$ echo "is enabled.  In this case, logical names normally skipped when"
+$ echo "tainting is enabled (e.g. PERL5OPTS) are translated as well."
+$ echo "If you do not choose to do this, the usual order of access modes"
+$ echo "is used for logical name translation."
 $ echo ""
-$ echo "If you choose, perl can populate the %ENV hash at startup.
-$ echo "This will exact both a memory penalty (to store the keys) and
-$ echo "a time penalty (to spawn the subprocess) every time you invoke
-$ echo "perl. Depending on your system, this might not be a big deal.
+$ echo "This restriction does not apply to the %ENV hash or to implicit"
+$ echo "logical name translation during parsing of file specifications;"
+$ echo "these always use the normal sequence of access modes for logical"
+$ echo "name translation."
 $ echo ""
-$ dflt = "N"
-$ rp = "Populate %ENV at startup time? [''dflt'] "
+$ dflt = "n"
+$ rp = "Use secure logical name translation? [''dflt'] "
 $ GOSUB myread
 $ if ans.eqs."" then ans="''dflt'"
-$ preload_env = f$extract(0, 1, f$edit(ans,"TRIM,COMPRESS,UPCASE"))
+$ d_secintgenv = f$extract(0, 1, f$edit(ans,"TRIM,COMPRESS,UPCASE"))
+$!
+$! Ask whether they want to default filetypes
+$ echo ""
+$ echo "When you pass the name of a program to Perl on the command line,"
+$ echo "it generally doesn't supply any defaults unless the -S command"
+$ echo "line switch is specified.  In keeping with the VMS tradition of"
+$ echo "default file types, however, you can configure Perl to try default"
+$ echo "file types of nothing, .pl, and .com, in that order (e.g. typing"
+$ echo """$ perl foo"" would cause Perl to look for foo., then foo.pl, and"
+$ echo "finally foo.com)."
+$ echo ""
+$ dflt = "n"
+$ rp = "Always use default file types? [''dflt'] "
+$ GOSUB myread
+$ if ans.eqs."" then ans="''dflt'"
+$ d_alwdeftype = f$extract(0, 1, f$edit(ans,"TRIM,COMPRESS,UPCASE"))
 $!
 $! Ask if they want to use perl's memory allocator
 $ echo ""
@@ -1740,7 +1813,7 @@ $ echo "normal memory usage. It's oftentimes better than the standard
 $ echo "system memory allocator. It also has the advantage of providing
 $ echo "memory allocation statistics, if you choose to enable them.
 $ echo ""
-$ dflt = "N"
+$ dflt = "n"
 $ rp = "Build with perl's memory allocator? [''dflt'] "
 $ GOSUB myread
 $ if ans.eqs."" then ans="''dflt'"
@@ -1754,7 +1827,7 @@ $     echo "Perl can keep statistics on memory usage if you choose to use
 $     echo "them. This is useful for debugging, but does have some
 $     echo "performance overhead.
 $     echo ""
-$     dflt = "N"
+$     dflt = "n"
 $     rp = "Do you want the debugging memory allocator? [''dflt'] "
 $     gosub myread
 $     if ans.eqs."" then ans="''dflt'"
@@ -1786,7 +1859,8 @@ $ echo "you might, for example, want to build GDBM_File instead of
 $ echo "SDBM_File if you have the GDBM library built on your machine
 $ echo "
 $ echo "Which modules do you want to build into perl?"
-$ dflt = "Fcntl Errno IO Opcode Dumper attrs re Stdio DCLsym B SDBM_File"
+$! dflt = "Fcntl Errno IO Opcode Byteloader Devel::Peek Devel::DProf Data::Dumper attrs re VMS::Stdio VMS::DCLsym B SDBM_File"
+$ dflt = "Fcntl Errno IO Opcode Devel::Peek Devel::DProf Data::Dumper attrs re VMS::Stdio VMS::DCLsym B SDBM_File"
 $ if Using_Dec_C.eqs."Yes"
 $ THEN
 $   dflt = dflt + " POSIX"
@@ -1935,11 +2009,37 @@ $!
 $! Invoke the subconfig piece
 $!
 $ echo ""
-$ echo4 "Generating config.h"
+$ echo4 "Checking the C run-time library"
 $ dflt = F$ENVIRONMENT("DEFAULT")
 $ SET DEFAULT [-.vms]
 $ @subconfigure
 $ SET DEFAULT 'dflt
+$!
+$!  Warn of dangerous logical names
+$!
+$Bad_logical: SUBROUTINE
+$   IF f$trnlnm(p1) .nes. ""
+$   THEN
+$     IF f$search("config.msg") .nes. ""
+$     THEN
+$       OPEN/APPEND CONFIG config.msg
+$     ELSE
+$       OPEN/WRITE CONFIG config.msg
+$     ENDIF
+$     WRITE CONFIG "Logical name ''p1' found in environment as " + f$trnlnm(p1)
+$     WRITE CONFIG " deassign before building ''package'"
+$     CLOSE CONFIG
+$   ENDIF
+$ EXIT
+$ ENDSUBROUTINE ! Bad_logical
+$ echo ""
+$ echo4 "%Config-I-VMS, Checking for dangerous pre extant logical names."
+$ CALL Bad_logical "TMP"
+$ CALL Bad_logical "LIB"
+$ CALL Bad_logical "T"
+$ CALL Bad_logical "FOO"
+$ CALL Bad_logical "EXT"
+$ IF f$search("config.msg") .eqs. "" THEN echo "OK."
 $!
 $! %Config-I-VMS, write perl_setup.com here
 $!
@@ -1956,11 +2056,25 @@ $ ELSE
 $ WRITE CONFIG "$! This perl configured & administered by ''perladmin'"
 $ ENDIF
 $ WRITE CONFIG "$!"
+$ prefix = prefix - "000000."
 $ IF F$LOCATE(".]",prefix) .EQ. F$LENGTH(prefix) THEN -
     prefix = prefix - "]" + ".]" 
 $ WRITE CONFIG "$ define/translation=concealed Perl_Root ''prefix'"
-$ WRITE CONFIG "$ perl :== $Perl_Root:[000000]Perl"
-$ WRITE CONFIG "$ define PerlShr Perl_Root:[000000]PerlShr.Exe"
+$ write config "$ ext = "".exe"""
+$ if sharedperl .eqs. "Y"
+$ then
+$   write config "$ if f$getsyi(""ARCH_NAME"") .nes. ""VAX"" then ext = "".AXE"""
+$ endif
+$ IF use_vmsdebug_perl .eqs. "Y"
+$ then
+$   WRITE CONFIG "$ dbgperl :== $Perl_Root:[000000]dbgPerl'ext'"
+$   WRITE CONFIG "$ perl    :== $Perl_Root:[000000]ndbgPerl'ext'"
+$   WRITE CONFIG "$ define dbgPerlShr Perl_Root:[000000]dbgPerlShr'ext'"
+$ else
+$   WRITE CONFIG "$ perl :== $Perl_Root:[000000]Perl'ext'"
+$   WRITE CONFIG "$ define PerlShr Perl_Root:[000000]PerlShr'ext'"
+$ endif
+$!
 $ IF (tzneedset)
 $ THEN
 $ WRITE CONFIG "$ define SYS$TIMEZONE_DIFFERENTIAL ''tzd'"
@@ -2012,6 +2126,15 @@ $   echo4 ""
 $ ENDIF
 $ echo4 " ''make'''makefile'", macros
 $ echo4 ""
+$!
+$ IF ( F$SEARCH("config.msg").NES."" ) 
+$ THEN
+$   echo "Hmm.  I also noted the following information while running:"
+$   echo ""
+$   type config.msg
+$   SET PROTECTION=(SYSTEM:RWED,OWNER:RWED) config.msg
+$   DELETE/NOLOG/NOCONFIRM config.msg;
+$ ENDIF
 $!
 $Clean_up:
 $ IF (silent)

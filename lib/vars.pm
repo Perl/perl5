@@ -14,7 +14,7 @@ sub import {
     my ($pack, @imports, $sym, $ch) = @_;
     foreach $sym (@imports) {
         ($ch, $sym) = unpack('a1a*', $sym);
-	if ($sym =~ tr/A-Za-Z_0-9//c) {
+	if ($sym =~ tr/A-Za-z_0-9//c) {
 	    # time for a more-detailed check-up
 	    if ($sym =~ /::/) {
 		require Carp;

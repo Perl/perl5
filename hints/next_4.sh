@@ -1,24 +1,14 @@
-######################################################################
-#
-# IMPORTANT: before you run 'make', you need to enter one of these two
-# lines (depending on your shell):
-#	 DYLD_LIBRARY_PATH=`pwd`; export DYLD_LIBRARY_PATH
-# or
-#	setenv DYLD_LIBRARY_PATH `pwd`
-#
-######################################################################
-
 # Posix support has been removed from NextStep 
 #
 useposix='undef'
 
-libpth='/lib /usr/lib'
+libpth='/lib /usr/lib /usr/local/lib'
 libswanted=' '
 libc='/NextLibrary/Frameworks/System.framework/System'
 
 ldflags='-dynamic -prebind'
 lddlflags='-dynamic -bundle -undefined suppress'
-ccflags='-dynamic -fno-common -DUSE_NEXT_CTYPE -DUSE_PERL_SBRK -DHIDEMYMALLOC'
+ccflags='-dynamic -fno-common -DUSE_NEXT_CTYPE -DUSE_PERL_SBRK'
 cccdlflags='none'
 ld='cc'
 #optimize='-g -O'
@@ -35,7 +25,20 @@ ld='cc'
 #
 #	archs='m68k i386'
 #
-archs=`/bin/lipo -info /usr/lib/libm.a | sed -n 's/^[^:]*:[^:]*: //p'`
+
+# On m68k machines, toke.c cannot be compiled at all for i386 and it can
+# only be compiled for m68k itself without optimization (this is under
+# OPENSTEP 4.2).
+#
+if [ `hostinfo | grep 'NeXT Mach.*:'  | sed 's/.*RELEASE_//'` = M68K ]
+then
+	echo "Cross compilation is impossible on m68k hardware under OS 4"
+	echo "Forcing architecture to m68k only"
+	toke_cflags='optimize=""'
+	archs='m68k'
+else
+	archs=`/bin/lipo -info /usr/lib/libm.a | sed -n 's/^[^:]*:[^:]*: //p'`
+fi
 
 #
 # leave the following part alone
@@ -93,3 +96,7 @@ clocktype='int'
 # running ranlib.  The '5' is an empirical number that's "long enough."
 # (Thanks to Andreas Koenig <k@franz.ww.tu-berlin.de>)
 ranlib='sleep 5; /bin/ranlib' 
+
+case "$ldlibpthname" in
+'') ldlibpthname=DYLD_LIBRARY_PATH ;;
+esac

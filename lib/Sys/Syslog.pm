@@ -124,7 +124,8 @@ sub openlog {
     $lo_ndelay = $logopt =~ /\bndelay\b/;
     $lo_cons = $logopt =~ /\bcons\b/;
     $lo_nowait = $logopt =~ /\bnowait\b/;
-    &connect if $lo_ndelay;
+    return 1 unless $lo_ndelay;
+    &connect;
 } 
 
 sub closelog {

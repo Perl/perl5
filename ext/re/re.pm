@@ -74,6 +74,8 @@ See L<perlmodlib/Pragmatic Modules>.
 
 =cut
 
+# N.B. File::Basename contains a literal for 'taint' as a fallback.  If
+# taint is changed here, File::Basename must be updated as well.
 my %bitmask = (
 taint	=> 0x00100000,
 eval	=> 0x00200000,
@@ -84,16 +86,13 @@ sub setcolor {
   require Term::Cap;
 
   my $terminal = Tgetent Term::Cap ({OSPEED => 9600}); # Avoid warning.
-  my $props = $ENV{PERL_RE_TC} || 'md,me,so,se'; # can use us/ue later
+  my $props = $ENV{PERL_RE_TC} || 'md,me,so,se,us,ue';
   my @props = split /,/, $props;
+  my $colors = join "\t", map {$terminal->Tputs($_,1)} @props;
 
-
-  $ENV{TERMCAP_COLORS} = join "\t", map {$terminal->Tputs($_,1)} @props;
+  $colors =~ s/\0//g;
+  $ENV{PERL_RE_COLORS} = $colors;
  };
-
- not defined $ENV{TERMCAP_COLORS} or ($ENV{TERMCAP_COLORS} =~ tr/\t/\t/) >= 4
-    or not defined $ENV{PERL_RE_TC}
-    or die "Not enough fields in \$ENV{PERL_RE_TC}=`$ENV{PERL_RE_TC}'";
 }
 
 sub bits {

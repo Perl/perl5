@@ -1,6 +1,6 @@
 /*    hv.h
  *
- *    Copyright (c) 1991-1997, Larry Wall
+ *    Copyright (c) 1991-1999, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -28,7 +28,7 @@ struct xpvhv {
     STRLEN	xhv_fill;	/* how full xhv_array currently is */
     STRLEN	xhv_max;	/* subscript of last element of xhv_array */
     IV		xhv_keys;	/* how many elements in the array */
-    double	xnv_nv;		/* numeric value, if any */
+    NV		xnv_nv;		/* numeric value, if any */
     MAGIC*	xmg_magic;	/* magic for scalar array */
     HV*		xmg_stash;	/* class package */
 
@@ -40,12 +40,12 @@ struct xpvhv {
 
 #define PERL_HASH(hash,str,len) \
      STMT_START	{ \
-	register char *s_PeRlHaSh = str; \
+	register const char *s_PeRlHaSh = str; \
 	register I32 i_PeRlHaSh = len; \
 	register U32 hash_PeRlHaSh = 0; \
 	while (i_PeRlHaSh--) \
 	    hash_PeRlHaSh = hash_PeRlHaSh * 33 + *s_PeRlHaSh++; \
-	(hash) = hash_PeRlHaSh; \
+	(hash) = hash_PeRlHaSh + (hash_PeRlHaSh>>5); \
     } STMT_END
 
 
@@ -71,8 +71,6 @@ struct xpvhv {
 #define HvLAZYDEL_on(hv)	(SvFLAGS(hv) |= SVphv_LAZYDEL)
 #define HvLAZYDEL_off(hv)	(SvFLAGS(hv) &= ~SVphv_LAZYDEL)
 
-#ifdef OVERLOAD
-
 /* Maybe amagical: */
 /* #define HV_AMAGICmb(hv)      (SvFLAGS(hv) & (SVpgv_badAM | SVpgv_AM)) */
 
@@ -85,8 +83,6 @@ struct xpvhv {
 #define HV_badAMAGIC_on(hv)  (SvFLAGS(hv) |= SVpgv_badAM)
 #define HV_badAMAGIC_off(hv) (SvFLAGS(hv) &= ~SVpgv_badAM)
 */
-
-#endif /* OVERLOAD */
 
 #define Nullhe Null(HE*)
 #define HeNEXT(he)		(he)->hent_next
@@ -108,7 +104,7 @@ struct xpvhv {
 #define HeSVKEY_force(he)	(HeKEY(he) ?				\
 				 ((HeKLEN(he) == HEf_SVKEY) ?		\
 				  HeKEY_sv(he) :			\
-				  sv_2mortal(newSVpv(HeKEY(he),		\
+				  sv_2mortal(newSVpvn(HeKEY(he),	\
 						     HeKLEN(he)))) :	\
 				 &PL_sv_undef)
 #define HeSVKEY_set(he,sv)	((HeKLEN(he) = HEf_SVKEY), (HeKEY_sv(he) = sv))

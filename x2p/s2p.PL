@@ -339,11 +339,11 @@ if ($appendseen || $tseen || !$assumen) {
 :	    if ($atext) { chop $atext; print $atext; $atext = ''; }
 :	#endif
 EOT
+}
 
 print BODY &q(<<'EOT');
 :	}
 EOT
-}
 
 unless ($debug) {
 
@@ -552,6 +552,11 @@ EOT
 			substr($_,$i-1,1) = '$';
 		    }
 		}
+		elsif ($c eq '@') {
+		    substr($_, $i, 0) = '\\';
+		    $i++;
+		    $len++;
+		}
 		elsif ($c eq '&' && $repl) {
 		    substr($_, $i, 0) = '$';
 		    $i++;
@@ -671,7 +676,7 @@ EOT
 	}
 
 	if (/^H/) {
-	    $_ = '$hold .= "\n"; $hold .= $_;';
+	    $_ = '$hold .= "\n", $hold .= $_;';
 	    next;
 	}
 
@@ -681,7 +686,7 @@ EOT
 	}
 
 	if (/^G/) {
-	    $_ = '$_ .= "\n"; $_ .= $hold;';
+	    $_ = '$_ .= "\n", $_ .= $hold;';
 	    next;
 	}
 
@@ -797,6 +802,7 @@ sub fetchpat {
 	}
     }
     $addr =~ s/\t/\\t/g;
+    $addr =~ s/\@/\\@/g;
     &simplify($addr);
     $addr;
 }

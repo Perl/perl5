@@ -7,18 +7,18 @@
  *
  */
 
+#define PERL_NO_GET_CONTEXT
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-#include "INTERN.h"
 
 #ifdef PERL_OBJECT
-#undef op_name
-#undef opargs 
-#undef op_desc
-#define op_name (pPerl->Perl_get_op_names())
-#define opargs (pPerl->Perl_get_opargs())
-#define op_desc (pPerl->Perl_get_op_descs())
+#undef PL_op_name
+#undef PL_opargs 
+#undef PL_op_desc
+#define PL_op_name (get_op_names())
+#define PL_opargs (get_opargs())
+#define PL_op_desc (get_op_descs())
 #endif
 
 #ifdef PerlIO
@@ -53,15 +53,14 @@ typedef enum {
     OPc_UNOP,	/* 2 */
     OPc_BINOP,	/* 3 */
     OPc_LOGOP,	/* 4 */
-    OPc_CONDOP,	/* 5 */
-    OPc_LISTOP,	/* 6 */
-    OPc_PMOP,	/* 7 */
-    OPc_SVOP,	/* 8 */
-    OPc_GVOP,	/* 9 */
-    OPc_PVOP,	/* 10 */
-    OPc_CVOP,	/* 11 */
-    OPc_LOOP,	/* 12 */
-    OPc_COP	/* 13 */
+    OPc_LISTOP,	/* 5 */
+    OPc_PMOP,	/* 6 */
+    OPc_SVOP,	/* 7 */
+    OPc_GVOP,	/* 8 */
+    OPc_PVOP,	/* 9 */
+    OPc_CVOP,	/* 10 */
+    OPc_LOOP,	/* 11 */
+    OPc_COP	/* 12 */
 } opclass;
 
 static char *opclassnames[] = {
@@ -70,7 +69,6 @@ static char *opclassnames[] = {
     "B::UNOP",
     "B::BINOP",
     "B::LOGOP",
-    "B::CONDOP",
     "B::LISTOP",
     "B::PMOP",
     "B::SVOP",
@@ -83,8 +81,10 @@ static char *opclassnames[] = {
 
 static int walkoptree_debug = 0;	/* Flag for walkoptree debug hook */
 
+static SV *specialsv_list[4];
+
 static opclass
-cc_opclass(OP *o)
+cc_opclass(pTHX_ OP *o)
 {
     if (!o)
 	return OPc_NULL;
@@ -95,7 +95,7 @@ cc_opclass(OP *o)
     if (o->op_type == OP_SASSIGN)
 	return ((o->op_private & OPpASSIGN_BACKWARDS) ? OPc_UNOP : OPc_BINOP);
 
-    switch (opargs[o->op_type] & OA_CLASS_MASK) {
+    switch (PL_opargs[o->op_type] & OA_CLASS_MASK) {
     case OA_BASEOP:
 	return OPc_BASEOP;
 
@@ -107,9 +107,6 @@ cc_opclass(OP *o)
 
     case OA_LOGOP:
 	return OPc_LOGOP;
-
-    case OA_CONDOP:
-	return OPc_CONDOP;
 
     case OA_LISTOP:
 	return OPc_LISTOP;
@@ -123,8 +120,16 @@ cc_opclass(OP *o)
     case OA_GVOP:
 	return OPc_GVOP;
 
-    case OA_PVOP:
-	return OPc_PVOP;
+    case OA_PVOP_OR_SVOP:
+        /*
+         * Character translations (tr///) are usually a PVOP, keeping a 
+         * pointer to a table of shorts used to look up translations.
+         * Under utf8, however, a simple table isn't practical; instead,
+         * the OP is an SVOP, and the SV is a reference to a swash
+         * (i.e., an RV pointing to an HV).
+         */
+	return (o->op_private & (OPpTRANS_TO_UTF|OPpTRANS_FROM_UTF))
+		? OPc_SVOP : OPc_PVOP;
 
     case OA_LOOP:
 	return OPc_LOOP;
@@ -173,47 +178,47 @@ cc_opclass(OP *o)
 	    return OPc_PVOP;
     }
     warn("can't determine class of operator %s, assuming BASEOP\n",
-	 op_name[o->op_type]);
+	 PL_op_name[o->op_type]);
     return OPc_BASEOP;
 }
 
 static char *
-cc_opclassname(OP *o)
+cc_opclassname(pTHX_ OP *o)
 {
-    return opclassnames[cc_opclass(o)];
+    return opclassnames[cc_opclass(aTHX_ o)];
 }
 
 static SV *
-make_sv_object(SV *arg, SV *sv)
+make_sv_object(pTHX_ SV *arg, SV *sv)
 {
     char *type = 0;
     IV iv;
     
-    for (iv = 0; iv < sizeof(PL_specialsv_list)/sizeof(SV*); iv++) {
-	if (sv == PL_specialsv_list[iv]) {
+    for (iv = 0; iv < sizeof(specialsv_list)/sizeof(SV*); iv++) {
+	if (sv == specialsv_list[iv]) {
 	    type = "B::SPECIAL";
 	    break;
 	}
     }
     if (!type) {
 	type = svclassnames[SvTYPE(sv)];
-	iv = (IV)sv;
+	iv = (IV)PTR_CAST sv;
     }
     sv_setiv(newSVrv(arg, type), iv);
     return arg;
 }
 
 static SV *
-make_mg_object(SV *arg, MAGIC *mg)
+make_mg_object(pTHX_ SV *arg, MAGIC *mg)
 {
-    sv_setiv(newSVrv(arg, "B::MAGIC"), (IV)mg);
+    sv_setiv(newSVrv(arg, "B::MAGIC"), (IV)PTR_CAST mg);
     return arg;
 }
 
 static SV *
-cstring(SV *sv)
+cstring(pTHX_ SV *sv)
 {
-    SV *sstr = newSVpv("", 0);
+    SV *sstr = newSVpvn("", 0);
     STRLEN len;
     char *s;
 
@@ -264,10 +269,11 @@ cstring(SV *sv)
 }
 
 static SV *
-cchar(SV *sv)
+cchar(pTHX_ SV *sv)
 {
-    SV *sstr = newSVpv("'", 0);
-    char *s = SvPV(sv, PL_na);
+    SV *sstr = newSVpvn("'", 1);
+    STRLEN n_a;
+    char *s = SvPV(sv, n_a);
 
     if (*s == '\'')
 	sv_catpv(sstr, "\\'");
@@ -302,76 +308,8 @@ cchar(SV *sv)
     return sstr;
 }
 
-#ifdef INDIRECT_BGET_MACROS
-void freadpv(U32 len, void *data)
-{
-    New(666, pv.xpv_pv, len, char);
-    fread(pv.xpv_pv, 1, len, (FILE*)data);
-    pv.xpv_len = len;
-    pv.xpv_cur = len - 1;
-}
-
-void byteload_fh(InputStream fp)
-{
-    struct bytestream bs;
-    bs.data = fp;
-    bs.fgetc = (int(*) _((void*)))fgetc;
-    bs.fread = (int(*) _((char*,size_t,size_t,void*)))fread;
-    bs.freadpv = freadpv;
-    byterun(bs);
-}
-
-static int fgetc_fromstring(void *data)
-{
-    char **strp = (char **)data;
-    return *(*strp)++;
-}
-
-static int fread_fromstring(char *argp, size_t elemsize, size_t nelem,
-			    void *data)
-{
-    char **strp = (char **)data;
-    size_t len = elemsize * nelem;
-    
-    memcpy(argp, *strp, len);
-    *strp += len;
-    return (int)len;
-}
-
-static void freadpv_fromstring(U32 len, void *data)
-{
-    char **strp = (char **)data;
-    
-    New(666, pv.xpv_pv, len, char);
-    memcpy(pv.xpv_pv, *strp, len);
-    pv.xpv_len = len;
-    pv.xpv_cur = len - 1;
-    *strp += len;
-}    
-
-void byteload_string(char *str)
-{
-    struct bytestream bs;
-    bs.data = &str;
-    bs.fgetc = fgetc_fromstring;
-    bs.fread = fread_fromstring;
-    bs.freadpv = freadpv_fromstring;
-    byterun(bs);
-}
-#else
-void byteload_fh(InputStream fp)
-{
-    byterun(fp);
-}
-
-void byteload_string(char *str)
-{
-    croak("Must compile with -DINDIRECT_BGET_MACROS for byteload_string");
-}    
-#endif /* INDIRECT_BGET_MACROS */
-
 void
-walkoptree(SV *opsv, char *method)
+walkoptree(pTHX_ SV *opsv, char *method)
 {
     dSP;
     OP *o;
@@ -379,7 +317,7 @@ walkoptree(SV *opsv, char *method)
     if (!SvROK(opsv))
 	croak("opsv is not a reference");
     opsv = sv_mortalcopy(opsv);
-    o = (OP*)SvIV((SV*)SvRV(opsv));
+    o = (OP*)PTR_CAST SvIV((SV*)SvRV(opsv));
     if (walkoptree_debug) {
 	PUSHMARK(sp);
 	XPUSHs(opsv);
@@ -394,8 +332,8 @@ walkoptree(SV *opsv, char *method)
 	OP *kid;
 	for (kid = ((UNOP*)o)->op_first; kid; kid = kid->op_sibling) {
 	    /* Use the same opsv. Rely on methods not to mess it up. */
-	    sv_setiv(newSVrv(opsv, cc_opclassname(kid)), (IV)kid);
-	    walkoptree(opsv, method);
+	    sv_setiv(newSVrv(opsv, cc_opclassname(aTHX_ kid)), (IV)PTR_CAST kid);
+	    walkoptree(aTHX_ opsv, method);
 	}
     }
 }
@@ -404,7 +342,6 @@ typedef OP	*B__OP;
 typedef UNOP	*B__UNOP;
 typedef BINOP	*B__BINOP;
 typedef LOGOP	*B__LOGOP;
-typedef CONDOP	*B__CONDOP;
 typedef LISTOP	*B__LISTOP;
 typedef PMOP	*B__PMOP;
 typedef SVOP	*B__SVOP;
@@ -434,15 +371,28 @@ MODULE = B	PACKAGE = B	PREFIX = B_
 PROTOTYPES: DISABLE
 
 BOOT:
-    INIT_SPECIALSV_LIST;
+{
+    HV *stash = gv_stashpvn("B", 1, TRUE);
+    AV *export_ok = perl_get_av("B::EXPORT_OK",TRUE);
+    specialsv_list[0] = Nullsv;
+    specialsv_list[1] = &PL_sv_undef;
+    specialsv_list[2] = &PL_sv_yes;
+    specialsv_list[3] = &PL_sv_no;
+#include "defsubs.h"
+}
 
 #define B_main_cv()	PL_main_cv
+#define B_init_av()	PL_initav
 #define B_main_root()	PL_main_root
 #define B_main_start()	PL_main_start
+#define B_amagic_generation()	PL_amagic_generation
 #define B_comppadlist()	(PL_main_cv ? CvPADLIST(PL_main_cv) : CvPADLIST(PL_compcv))
 #define B_sv_undef()	&PL_sv_undef
 #define B_sv_yes()	&PL_sv_yes
 #define B_sv_no()	&PL_sv_no
+
+B::AV
+B_init_av()
 
 B::CV
 B_main_cv()
@@ -452,6 +402,9 @@ B_main_root()
 
 B::OP
 B_main_start()
+
+long 
+B_amagic_generation()
 
 B::AV
 B_comppadlist()
@@ -472,6 +425,8 @@ void
 walkoptree(opsv, method)
 	SV *	opsv
 	char *	method
+    CODE:
+	walkoptree(aTHX_ opsv, method);
 
 int
 walkoptree_debug(...)
@@ -482,20 +437,7 @@ walkoptree_debug(...)
     OUTPUT:
 	RETVAL
 
-int
-byteload_fh(fp)
-	InputStream    fp
-    CODE:
-	byteload_fh(fp);
-	RETVAL = 1;
-    OUTPUT:
-	RETVAL
-
-void
-byteload_string(str)
-	char *	str
-
-#define address(sv) (IV)sv
+#define address(sv) (IV)PTR_CAST sv
 
 IV
 address(sv)
@@ -509,7 +451,28 @@ svref_2object(sv)
 	    croak("argument is not a reference");
 	RETVAL = (SV*)SvRV(sv);
     OUTPUT:
-	RETVAL
+	RETVAL              
+
+void
+opnumber(name)
+char *	name
+CODE:
+{
+ int i; 
+ IV  result = -1;
+ ST(0) = sv_newmortal();
+ if (strncmp(name,"pp_",3) == 0)
+   name += 3;
+ for (i = 0; i < PL_maxo; i++)
+  {
+   if (strcmp(name, PL_op_name[i]) == 0)
+    {
+     result = i;
+     break;
+    }
+  }
+ sv_setiv(ST(0),result);
+}
 
 void
 ppname(opnum)
@@ -518,7 +481,7 @@ ppname(opnum)
 	ST(0) = sv_newmortal();
 	if (opnum >= 0 && opnum < PL_maxo) {
 	    sv_setpvn(ST(0), "pp_", 3);
-	    sv_catpv(ST(0), op_name[opnum]);
+	    sv_catpv(ST(0), PL_op_name[opnum]);
 	}
 
 void
@@ -528,10 +491,9 @@ hash(sv)
 	char *s;
 	STRLEN len;
 	U32 hash = 0;
-	char hexhash[11]; /* must fit "0xffffffff" plus trailing \0 */
+	char hexhash[19]; /* must fit "0xffffffff" plus trailing \0 */
 	s = SvPV(sv, len);
-	while (len--)
-	    hash = hash * 33 + *s++;
+	PERL_HASH(hash, s, len);
 	sprintf(hexhash, "0x%x", hash);
 	ST(0) = sv_2mortal(newSVpv(hexhash, 0));
 
@@ -548,10 +510,18 @@ minus_c()
 SV *
 cstring(sv)
 	SV *	sv
+    CODE:
+	RETVAL = cstring(aTHX_ sv);
+    OUTPUT:
+	RETVAL
 
 SV *
 cchar(sv)
 	SV *	sv
+    CODE:
+	RETVAL = cchar(aTHX_ sv);
+    OUTPUT:
+	RETVAL
 
 void
 threadsv_names()
@@ -562,13 +532,13 @@ threadsv_names()
 
 	EXTEND(sp, len);
 	for (i = 0; i < len; i++)
-	    PUSHs(sv_2mortal(newSVpv(&PL_threadsv_names[i], 1)));
+	    PUSHs(sv_2mortal(newSVpvn(&PL_threadsv_names[i], 1)));
 #endif
 
 
 #define OP_next(o)	o->op_next
 #define OP_sibling(o)	o->op_sibling
-#define OP_desc(o)	op_desc[o->op_type]
+#define OP_desc(o)	PL_op_desc[o->op_type]
 #define OP_targ(o)	o->op_targ
 #define OP_type(o)	o->op_type
 #define OP_seq(o)	o->op_seq
@@ -586,12 +556,20 @@ OP_sibling(o)
 	B::OP		o
 
 char *
+OP_name(o)
+	B::OP		o
+    CODE:
+	ST(0) = sv_newmortal();
+	sv_setpv(ST(0), PL_op_name[o->op_type]);
+
+
+char *
 OP_ppaddr(o)
 	B::OP		o
     CODE:
 	ST(0) = sv_newmortal();
-	sv_setpvn(ST(0), "pp_", 3);
-	sv_catpv(ST(0), op_name[o->op_type]);
+	sv_setpvn(ST(0), "Perl_pp_", 8);
+	sv_catpv(ST(0), PL_op_name[o->op_type]);
 
 char *
 OP_desc(o)
@@ -641,19 +619,6 @@ B::OP
 LOGOP_other(o)
 	B::LOGOP	o
 
-#define CONDOP_true(o)	o->op_true
-#define CONDOP_false(o)	o->op_false
-
-MODULE = B	PACKAGE = B::CONDOP		PREFIX = CONDOP_
-
-B::OP
-CONDOP_true(o)
-	B::CONDOP	o
-
-B::OP
-CONDOP_false(o)
-	B::CONDOP	o
-
 #define LISTOP_children(o)	o->op_children
 
 MODULE = B	PACKAGE = B::LISTOP		PREFIX = LISTOP_
@@ -682,10 +647,10 @@ PMOP_pmreplroot(o)
 	if (o->op_type == OP_PUSHRE) {
 	    sv_setiv(newSVrv(ST(0), root ?
 			     svclassnames[SvTYPE((SV*)root)] : "B::SV"),
-		     (IV)root);
+		     (IV)PTR_CAST root);
 	}
 	else {
-	    sv_setiv(newSVrv(ST(0), cc_opclassname(root)), (IV)root);
+	    sv_setiv(newSVrv(ST(0), cc_opclassname(aTHX_ root)), (IV)PTR_CAST root);
 	}
 
 B::OP
@@ -770,6 +735,7 @@ LOOP_lastop(o)
 #define COP_cop_seq(o)	o->cop_seq
 #define COP_arybase(o)	o->cop_arybase
 #define COP_line(o)	o->cop_line
+#define COP_warnings(o)	o->cop_warnings
 
 MODULE = B	PACKAGE = B::COP		PREFIX = COP_
 
@@ -797,6 +763,10 @@ U16
 COP_line(o)
 	B::COP	o
 
+B::SV
+COP_warnings(o)
+	B::COP	o
+
 MODULE = B	PACKAGE = B::SV		PREFIX = Sv
 
 U32
@@ -816,6 +786,11 @@ SvIV(sv)
 IV
 SvIVX(sv)
 	B::IV	sv
+
+UV 
+SvUVX(sv) 
+	B::IV   sv
+                      
 
 MODULE = B	PACKAGE = B::IV
 
@@ -839,12 +814,16 @@ packiv(sv)
 	     * reach this code anyway (unless sizeof(IV) > 8 but then
 	     * everything else breaks too so I'm not fussed at the moment).
 	     */
-	    wp[0] = htonl(((U32)iv) >> (sizeof(IV)*4));
+#ifdef UV_IS_QUAD
+	    wp[0] = htonl(((UV)iv) >> (sizeof(UV)*4));
+#else
+	    wp[0] = htonl(((U32)iv) >> (sizeof(UV)*4));
+#endif
 	    wp[1] = htonl(iv & 0xffffffff);
-	    ST(0) = sv_2mortal(newSVpv((char *)wp, 8));
+	    ST(0) = sv_2mortal(newSVpvn((char *)wp, 8));
 	} else {
 	    U32 w = htonl((U32)SvIVX(sv));
-	    ST(0) = sv_2mortal(newSVpv((char *)&w, 4));
+	    ST(0) = sv_2mortal(newSVpvn((char *)&w, 4));
 	}
 
 MODULE = B	PACKAGE = B::NV		PREFIX = Sv
@@ -872,6 +851,14 @@ SvPV(sv)
 	ST(0) = sv_newmortal();
 	sv_setpvn(ST(0), SvPVX(sv), SvCUR(sv));
 
+STRLEN
+SvLEN(sv)
+	B::PV	sv
+
+STRLEN
+SvCUR(sv)
+	B::PV	sv
+
 MODULE = B	PACKAGE = B::PVMG	PREFIX = Sv
 
 void
@@ -880,7 +867,7 @@ SvMAGIC(sv)
 	MAGIC *	mg = NO_INIT
     PPCODE:
 	for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic)
-	    XPUSHs(make_mg_object(sv_newmortal(), mg));
+	    XPUSHs(make_mg_object(aTHX_ sv_newmortal(), mg));
 
 MODULE = B	PACKAGE = B::PVMG
 
@@ -893,6 +880,7 @@ SvSTASH(sv)
 #define MgTYPE(mg) mg->mg_type
 #define MgFLAGS(mg) mg->mg_flags
 #define MgOBJ(mg) mg->mg_obj
+#define MgLENGTH(mg) mg->mg_len
 
 MODULE = B	PACKAGE = B::MAGIC	PREFIX = Mg	
 
@@ -916,13 +904,23 @@ B::SV
 MgOBJ(mg)
 	B::MAGIC	mg
 
+I32 
+MgLENGTH(mg)
+	B::MAGIC	mg
+ 
 void
 MgPTR(mg)
 	B::MAGIC	mg
     CODE:
 	ST(0) = sv_newmortal();
-	if (mg->mg_ptr)
-	    sv_setpvn(ST(0), mg->mg_ptr, mg->mg_len);
+ 	if (mg->mg_ptr){
+		if (mg->mg_len >= 0){
+	    		sv_setpvn(ST(0), mg->mg_ptr, mg->mg_len);
+		} else {
+			if (mg->mg_len == HEf_SVKEY)	
+				sv_setsv(ST(0),newRV((SV*)mg->mg_ptr));
+		}
+	}
 
 MODULE = B	PACKAGE = B::PVLV	PREFIX = Lv
 
@@ -964,7 +962,7 @@ BmTABLE(sv)
     CODE:
 	str = SvPV(sv, len);
 	/* Boyer-Moore table is just after string and its safety-margin \0 */
-	ST(0) = sv_2mortal(newSVpv(str + len + 1, 256));
+	ST(0) = sv_2mortal(newSVpvn(str + len + 1, 256));
 
 MODULE = B	PACKAGE = B::GV		PREFIX = Gv
 
@@ -972,7 +970,7 @@ void
 GvNAME(gv)
 	B::GV	gv
     CODE:
-	ST(0) = sv_2mortal(newSVpv(GvNAME(gv), GvNAMELEN(gv)));
+	ST(0) = sv_2mortal(newSVpvn(GvNAME(gv), GvNAMELEN(gv)));
 
 B::HV
 GvSTASH(gv)
@@ -1108,7 +1106,7 @@ AvARRAY(av)
 	    SV **svp = AvARRAY(av);
 	    I32 i;
 	    for (i = 0; i <= AvFILL(av); i++)
-		XPUSHs(make_sv_object(sv_newmortal(), svp[i]));
+		XPUSHs(make_sv_object(aTHX_ sv_newmortal(), svp[i]));
 	}
 
 MODULE = B	PACKAGE = B::AV
@@ -1155,7 +1153,7 @@ void
 CvXSUB(cv)
 	B::CV	cv
     CODE:
-	ST(0) = sv_2mortal(newSViv((IV)CvXSUB(cv)));
+	ST(0) = sv_2mortal(newSViv((IV)PTR_CAST CvXSUB(cv)));
 
 
 void
@@ -1163,6 +1161,13 @@ CvXSUBANY(cv)
 	B::CV	cv
     CODE:
 	ST(0) = sv_2mortal(newSViv(CvXSUBANY(cv).any_iv));
+
+MODULE = B    PACKAGE = B::CV
+
+U8
+CvFLAGS(cv)
+      B::CV   cv
+
 
 MODULE = B	PACKAGE = B::HV		PREFIX = Hv
 
@@ -1201,7 +1206,7 @@ HvARRAY(hv)
 	    (void)hv_iterinit(hv);
 	    EXTEND(sp, HvKEYS(hv) * 2);
 	    while (sv = hv_iternextsv(hv, &key, &len)) {
-		PUSHs(newSVpv(key, len));
-		PUSHs(make_sv_object(sv_newmortal(), sv));
+		PUSHs(newSVpvn(key, len));
+		PUSHs(make_sv_object(aTHX_ sv_newmortal(), sv));
 	    }
 	}

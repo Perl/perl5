@@ -1,0 +1,15 @@
+    This is a test to see if I can do not only `$self' and
+    `method()', but also `$self->method()' and `$self->{FIELDNAME}'
+    and `{FOO=>BAR}' without resorting to escape sequences.
+
+    Now for the grand finale of `$self->method()->{FIELDNAME} =
+    {FOO=>BAR}'.
+
+    Of course I should still be able to do all this *with* escape
+    sequences too: `$self->method()' and `$self->{FIELDNAME}' and
+    `{FOO=>BAR}'.
+
+    Dont forget `$self->method()->{FIELDNAME} = {FOO=>BAR}'.
+
+    And make sure that `0' works too!
+

@@ -8,6 +8,7 @@
 #  define BIT_BUCKET "nul"
 #  define OP_BINARY O_BINARY
 #  define PERL_SYS_INIT(c,v) Perl_DJGPP_init(c,v)
+#  define init_os_extras Perl_init_os_extras
 #  include <signal.h>
 #  define HAS_UTIME
 #  define HAS_KILL
@@ -16,20 +17,7 @@
 #    define NO_LOCALECONV_MON_THOUSANDS_SEP
 #  endif
 #  ifdef USE_THREADS
-#    define NEED_PTHREAD_INIT
 #    define OLD_PTHREADS_API
-#    define YIELD pthread_yield(NULL)
-#    define DETACH(t)				\
-       STMT_START {				\
-         if (pthread_detach(&(t)->self)) {	\
-             MUTEX_UNLOCK(&(t)->mutex);		\
-             croak("panic: DETACH");		\
-         }					\
-       } STMT_END
-#    define pthread_mutexattr_default NULL
-#    define pthread_condattr_default NULL
-#    define pthread_addr_t any_t
-#    define PTHREAD_CREATE_JOINABLE (&err)
 #  endif
 #else	/* DJGPP */
 #  ifdef WIN32
@@ -123,13 +111,4 @@
 #  define HAS_KILL
 #  define HAS_WAIT
 #  define HAS_CHOWN
-/*
- * This provides a layer of functions and macros to ensure extensions will
- * get to use the same RTL functions as the core.
- */
-#  ifndef HASATTRIBUTE
-#    ifndef PERL_OBJECT
-#      include <win32iop.h>
-#    endif
-#  endif
 #endif	/* WIN32 */

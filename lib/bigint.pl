@@ -1,5 +1,13 @@
 package bigint;
-
+#
+# This library is no longer being maintained, and is included for backward
+# compatibility with Perl 4 programs which may require it.
+#
+# In particular, this should not be used as an example of modern Perl
+# programming techniques.
+#
+# Suggested alternative:  Math::BigInt
+#
 # arbitrary size integer math package
 #
 # by Mark Biggar
@@ -74,7 +82,7 @@ sub external { #(int_num_array) return num_str
 sub main'bneg { #(num_str) return num_str
     local($_) = &'bnorm(@_);
     vec($_,0,8) ^= ord('+') ^ ord('-') unless $_ eq '+0';
-    s/^H/N/;
+    s/^./N/ unless /^[-+]/; # works both in ASCII and EBCDIC
     $_;
 }
 

@@ -1,7 +1,7 @@
 package Text::ParseWords;
 
 use vars qw($VERSION @ISA @EXPORT $PERL_SINGLE_QUOTE);
-$VERSION = "3.1";
+$VERSION = "3.2";
 
 require 5.000;
 
@@ -63,7 +63,7 @@ sub parse_line {
                         ([\000-\377]*)	       # and the rest
 		       |                       # --OR--
                        ^((?:\\.|[^\\"'])*?)    # an $unquoted text
-		      (\Z(?!\n)|$delimiter|(?!^)(?=["']))  
+		      (\Z(?!\n)|(?-x:$delimiter)|(?!^)(?=["']))  
                                                # plus EOL, delimiter, or quote
                       ([\000-\377]*)	       # the rest
 		      /x;		       # extended layout

@@ -39,13 +39,6 @@ sub B::LOGOP::debug {
     printf "\top_other\t0x%x\n", ${$op->other};
 }
 
-sub B::CONDOP::debug {
-    my ($op) = @_;
-    $op->B::UNOP::debug();
-    printf "\top_true\t0x%x\n", ${$op->true};
-    printf "\top_false\t0x%x\n", ${$op->false};
-}
-
 sub B::LISTOP::debug {
     my ($op) = @_;
     $op->B::BINOP::debug();
@@ -68,13 +61,14 @@ sub B::COP::debug {
     my ($op) = @_;
     $op->B::OP::debug();
     my ($filegv) = $op->filegv;
-    printf <<'EOT', $op->label, ${$op->stash}, $$filegv, $op->seq, $op->arybase, $op->line;
+    printf <<'EOT', $op->label, ${$op->stash}, $$filegv, $op->seq, $op->arybase, $op->line, ${$op->warnings};
 	cop_label	%s
 	cop_stash	0x%x
 	cop_filegv	0x%x
 	cop_seq		%d
 	cop_arybase	%d
 	cop_line	%d
+	cop_warnings	0x%x
 EOT
     $filegv->debug;
 }

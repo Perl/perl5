@@ -68,4 +68,3 @@ FE70; FEFF; Arabic Presentation Forms-B
 FF00; FFEF; Halfwidth and Fullwidth Forms
 FEFF; FEFF; Specials
 FFF0; FFFF; Specials
-	

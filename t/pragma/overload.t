@@ -2,10 +2,8 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    unshift @INC, '../lib';
 }
-
-use Config;
 
 package Oscalar;
 use overload ( 
@@ -436,6 +434,487 @@ test($b, "_<oups1
 >_");	# 134
 test($c, "bareword");	# 135
 
+{
+  package symbolic;		# Primitive symbolic calculator
+  use overload nomethod => \&wrap, '""' => \&str, '0+' => \&num,
+      '=' => \&cpy, '++' => \&inc, '--' => \&dec;
+
+  sub new { shift; bless ['n', @_] }
+  sub cpy {
+    my $self = shift;
+    bless [@$self], ref $self;
+  }
+  sub inc { $_[0] = bless ['++', $_[0], 1]; }
+  sub dec { $_[0] = bless ['--', $_[0], 1]; }
+  sub wrap {
+    my ($obj, $other, $inv, $meth) = @_;
+    if ($meth eq '++' or $meth eq '--') {
+      @$obj = ($meth, (bless [@$obj]), 1); # Avoid circular reference
+      return $obj;
+    }
+    ($obj, $other) = ($other, $obj) if $inv;
+    bless [$meth, $obj, $other];
+  }
+  sub str {
+    my ($meth, $a, $b) = @{+shift};
+    $a = 'u' unless defined $a;
+    if (defined $b) {
+      "[$meth $a $b]";
+    } else {
+      "[$meth $a]";
+    }
+  } 
+  my %subr = ( 'n' => sub {$_[0]} );
+  foreach my $op (split " ", $overload::ops{with_assign}) {
+    $subr{$op} = $subr{"$op="} = eval "sub {shift() $op shift()}";
+  }
+  my @bins = qw(binary 3way_comparison num_comparison str_comparison);
+  foreach my $op (split " ", "@overload::ops{ @bins }") {
+    $subr{$op} = eval "sub {shift() $op shift()}";
+  }
+  foreach my $op (split " ", "@overload::ops{qw(unary func)}") {
+    $subr{$op} = eval "sub {$op shift()}";
+  }
+  $subr{'++'} = $subr{'+'};
+  $subr{'--'} = $subr{'-'};
+  
+  sub num {
+    my ($meth, $a, $b) = @{+shift};
+    my $subr = $subr{$meth} 
+      or die "Do not know how to ($meth) in symbolic";
+    $a = $a->num if ref $a eq __PACKAGE__;
+    $b = $b->num if ref $b eq __PACKAGE__;
+    $subr->($a,$b);
+  }
+  sub TIESCALAR { my $pack = shift; $pack->new(@_) }
+  sub FETCH { shift }
+  sub nop {  }		# Around a bug
+  sub vars { my $p = shift; tie($_, $p), $_->nop foreach @_; }
+  sub STORE { 
+    my $obj = shift; 
+    $#$obj = 1; 
+    @$obj->[0,1] = ('=', shift);
+  }
+}
+
+{
+  my $foo = new symbolic 11;
+  my $baz = $foo++;
+  test( (sprintf "%d", $foo), '12');
+  test( (sprintf "%d", $baz), '11');
+  my $bar = $foo;
+  $baz = ++$foo;
+  test( (sprintf "%d", $foo), '13');
+  test( (sprintf "%d", $bar), '12');
+  test( (sprintf "%d", $baz), '13');
+  my $ban = $foo;
+  $baz = ($foo += 1);
+  test( (sprintf "%d", $foo), '14');
+  test( (sprintf "%d", $bar), '12');
+  test( (sprintf "%d", $baz), '14');
+  test( (sprintf "%d", $ban), '13');
+  $baz = 0;
+  $baz = $foo++;
+  test( (sprintf "%d", $foo), '15');
+  test( (sprintf "%d", $baz), '14');
+  test( "$foo", '[++ [+= [++ [++ [n 11] 1] 1] 1] 1]');
+}
+
+{
+  my $iter = new symbolic 2;
+  my $side = new symbolic 1;
+  my $cnt = $iter;
+  
+  while ($cnt) {
+    $cnt = $cnt - 1;		# The "simple" way
+    $side = (sqrt(1 + $side**2) - 1)/$side;
+  }
+  my $pi = $side*(2**($iter+2));
+  test "$side", '[/ [- [sqrt [+ 1 [** [/ [- [sqrt [+ 1 [** [n 1] 2]]] 1] [n 1]] 2]]] 1] [/ [- [sqrt [+ 1 [** [n 1] 2]]] 1] [n 1]]]';
+  test( (sprintf "%f", $pi), '3.182598');
+}
+
+{
+  my $iter = new symbolic 2;
+  my $side = new symbolic 1;
+  my $cnt = $iter;
+  
+  while ($cnt--) {
+    $side = (sqrt(1 + $side**2) - 1)/$side;
+  }
+  my $pi = $side*(2**($iter+2));
+  test "$side", '[/ [- [sqrt [+ 1 [** [/ [- [sqrt [+ 1 [** [n 1] 2]]] 1] [n 1]] 2]]] 1] [/ [- [sqrt [+ 1 [** [n 1] 2]]] 1] [n 1]]]';
+  test( (sprintf "%f", $pi), '3.182598');
+}
+
+{
+  my ($a, $b);
+  symbolic->vars($a, $b);
+  my $c = sqrt($a**2 + $b**2);
+  $a = 3; $b = 4;
+  test( (sprintf "%d", $c), '5');
+  $a = 12; $b = 5;
+  test( (sprintf "%d", $c), '13');
+}
+
+{
+  package symbolic1;		# Primitive symbolic calculator
+  # Mutator inc/dec
+  use overload nomethod => \&wrap, '""' => \&str, '0+' => \&num, '=' => \&cpy;
+
+  sub new { shift; bless ['n', @_] }
+  sub cpy {
+    my $self = shift;
+    bless [@$self], ref $self;
+  }
+  sub wrap {
+    my ($obj, $other, $inv, $meth) = @_;
+    if ($meth eq '++' or $meth eq '--') {
+      @$obj = ($meth, (bless [@$obj]), 1); # Avoid circular reference
+      return $obj;
+    }
+    ($obj, $other) = ($other, $obj) if $inv;
+    bless [$meth, $obj, $other];
+  }
+  sub str {
+    my ($meth, $a, $b) = @{+shift};
+    $a = 'u' unless defined $a;
+    if (defined $b) {
+      "[$meth $a $b]";
+    } else {
+      "[$meth $a]";
+    }
+  } 
+  my %subr = ( 'n' => sub {$_[0]} );
+  foreach my $op (split " ", $overload::ops{with_assign}) {
+    $subr{$op} = $subr{"$op="} = eval "sub {shift() $op shift()}";
+  }
+  my @bins = qw(binary 3way_comparison num_comparison str_comparison);
+  foreach my $op (split " ", "@overload::ops{ @bins }") {
+    $subr{$op} = eval "sub {shift() $op shift()}";
+  }
+  foreach my $op (split " ", "@overload::ops{qw(unary func)}") {
+    $subr{$op} = eval "sub {$op shift()}";
+  }
+  $subr{'++'} = $subr{'+'};
+  $subr{'--'} = $subr{'-'};
+  
+  sub num {
+    my ($meth, $a, $b) = @{+shift};
+    my $subr = $subr{$meth} 
+      or die "Do not know how to ($meth) in symbolic";
+    $a = $a->num if ref $a eq __PACKAGE__;
+    $b = $b->num if ref $b eq __PACKAGE__;
+    $subr->($a,$b);
+  }
+  sub TIESCALAR { my $pack = shift; $pack->new(@_) }
+  sub FETCH { shift }
+  sub nop {  }		# Around a bug
+  sub vars { my $p = shift; tie($_, $p), $_->nop foreach @_; }
+  sub STORE { 
+    my $obj = shift; 
+    $#$obj = 1; 
+    @$obj->[0,1] = ('=', shift);
+  }
+}
+
+{
+  my $foo = new symbolic1 11;
+  my $baz = $foo++;
+  test( (sprintf "%d", $foo), '12');
+  test( (sprintf "%d", $baz), '11');
+  my $bar = $foo;
+  $baz = ++$foo;
+  test( (sprintf "%d", $foo), '13');
+  test( (sprintf "%d", $bar), '12');
+  test( (sprintf "%d", $baz), '13');
+  my $ban = $foo;
+  $baz = ($foo += 1);
+  test( (sprintf "%d", $foo), '14');
+  test( (sprintf "%d", $bar), '12');
+  test( (sprintf "%d", $baz), '14');
+  test( (sprintf "%d", $ban), '13');
+  $baz = 0;
+  $baz = $foo++;
+  test( (sprintf "%d", $foo), '15');
+  test( (sprintf "%d", $baz), '14');
+  test( "$foo", '[++ [+= [++ [++ [n 11] 1] 1] 1] 1]');
+}
+
+{
+  my $iter = new symbolic1 2;
+  my $side = new symbolic1 1;
+  my $cnt = $iter;
+  
+  while ($cnt) {
+    $cnt = $cnt - 1;		# The "simple" way
+    $side = (sqrt(1 + $side**2) - 1)/$side;
+  }
+  my $pi = $side*(2**($iter+2));
+  test "$side", '[/ [- [sqrt [+ 1 [** [/ [- [sqrt [+ 1 [** [n 1] 2]]] 1] [n 1]] 2]]] 1] [/ [- [sqrt [+ 1 [** [n 1] 2]]] 1] [n 1]]]';
+  test( (sprintf "%f", $pi), '3.182598');
+}
+
+{
+  my $iter = new symbolic1 2;
+  my $side = new symbolic1 1;
+  my $cnt = $iter;
+  
+  while ($cnt--) {
+    $side = (sqrt(1 + $side**2) - 1)/$side;
+  }
+  my $pi = $side*(2**($iter+2));
+  test "$side", '[/ [- [sqrt [+ 1 [** [/ [- [sqrt [+ 1 [** [n 1] 2]]] 1] [n 1]] 2]]] 1] [/ [- [sqrt [+ 1 [** [n 1] 2]]] 1] [n 1]]]';
+  test( (sprintf "%f", $pi), '3.182598');
+}
+
+{
+  my ($a, $b);
+  symbolic1->vars($a, $b);
+  my $c = sqrt($a**2 + $b**2);
+  $a = 3; $b = 4;
+  test( (sprintf "%d", $c), '5');
+  $a = 12; $b = 5;
+  test( (sprintf "%d", $c), '13');
+}
+
+{
+  package two_face;		# Scalars with separate string and
+                                # numeric values.
+  sub new { my $p = shift; bless [@_], $p }
+  use overload '""' => \&str, '0+' => \&num, fallback => 1;
+  sub num {shift->[1]}
+  sub str {shift->[0]}
+}
+
+{
+  my $seven = new two_face ("vii", 7);
+  test( (sprintf "seven=$seven, seven=%d, eight=%d", $seven, $seven+1),
+	'seven=vii, seven=7, eight=8');
+  test( scalar ($seven =~ /i/), '1')
+}
+
+{
+  package sorting;
+  use overload 'cmp' => \&comp;
+  sub new { my ($p, $v) = @_; bless \$v, $p }
+  sub comp { my ($x,$y) = @_; ($$x * 3 % 10) <=> ($$y * 3 % 10) or $$x cmp $$y }
+}
+{
+  my @arr = map sorting->new($_), 0..12;
+  my @sorted1 = sort @arr;
+  my @sorted2 = map $$_, @sorted1;
+  test "@sorted2", '0 10 7 4 1 11 8 5 12 2 9 6 3';
+}
+{
+  package iterator;
+  use overload '<>' => \&iter;
+  sub new { my ($p, $v) = @_; bless \$v, $p }
+  sub iter { my ($x) = @_; return undef if $$x < 0; return $$x--; }
+}
+{
+  my $iter = iterator->new(5);
+  my $acc = '';
+  my $out;
+  $acc .= " $out" while $out = <${iter}>;
+  test $acc, ' 5 4 3 2 1 0';	# 175
+  $iter = iterator->new(5);
+  test scalar <${iter}>, '5';	# 176
+  $acc = '';
+  $acc .= " $out" while $out = <$iter>;
+  test $acc, ' 4 3 2 1 0';	# 177
+}
+{
+  package deref;
+  use overload '%{}' => \&hderef, '&{}' => \&cderef, 
+    '*{}' => \&gderef, '${}' => \&sderef, '@{}' => \&aderef;
+  sub new { my ($p, $v) = @_; bless \$v, $p }
+  sub deref {
+    my ($self, $key) = (shift, shift);
+    my $class = ref $self;
+    bless $self, 'deref::dummy'; # Disable overloading of %{} 
+    my $out = $self->{$key};
+    bless $self, $class;	# Restore overloading
+    $out;
+  }
+  sub hderef {shift->deref('h')}
+  sub aderef {shift->deref('a')}
+  sub cderef {shift->deref('c')}
+  sub gderef {shift->deref('g')}
+  sub sderef {shift->deref('s')}
+}
+{
+  my $deref = bless { h => { foo => 5 , fake => 23 },
+		      c => sub {return shift() + 34},
+		      's' => \123,
+		      a => [11..13],
+		      g => \*srt,
+		    }, 'deref';
+  # Hash:
+  my @cont = sort %$deref;
+  test "@cont", '23 5 fake foo';	# 178
+  my @keys = sort keys %$deref;
+  test "@keys", 'fake foo';	# 179
+  my @val = sort values %$deref;
+  test "@val", '23 5';		# 180
+  test $deref->{foo}, 5;	# 181
+  test defined $deref->{bar}, ''; # 182
+  my $key;
+  @keys = ();
+  push @keys, $key while $key = each %$deref;
+  @keys = sort @keys;
+  test "@keys", 'fake foo';	# 183  
+  test exists $deref->{bar}, ''; # 184
+  test exists $deref->{foo}, 1; # 185
+  # Code:
+  test $deref->(5), 39;		# 186
+  test &$deref(6), 40;		# 187
+  sub xxx_goto { goto &$deref }
+  test xxx_goto(7), 41;		# 188
+  my $srt = bless { c => sub {$b <=> $a}
+		  }, 'deref';
+  *srt = \&$srt;
+  my @sorted = sort srt 11, 2, 5, 1, 22;
+  test "@sorted", '22 11 5 2 1'; # 189
+  # Scalar
+  test $$deref, 123;		# 190
+  # Code
+  @sorted = sort $srt 11, 2, 5, 1, 22;
+  test "@sorted", '22 11 5 2 1'; # 191
+  # Array
+  test "@$deref", '11 12 13';	# 192
+  test $#$deref, '2';		# 193
+  my $l = @$deref;
+  test $l, 3;			# 194
+  test $deref->[2], '13';		# 195
+  $l = pop @$deref;
+  test $l, 13;			# 196
+  $l = 1;
+  test $deref->[$l], '12';	# 197
+  # Repeated dereference
+  my $double = bless { h => $deref,
+		     }, 'deref';
+  test $double->{foo}, 5;	# 198
+}
+
+{
+  package two_refs;
+  use overload '%{}' => \&gethash, '@{}' => sub { ${shift()} };
+  sub new { 
+    my $p = shift; 
+    bless \ [@_], $p;
+  }
+  sub gethash {
+    my %h;
+    my $self = shift;
+    tie %h, ref $self, $self;
+    \%h;
+  }
+
+  sub TIEHASH { my $p = shift; bless \ shift, $p }
+  my %fields;
+  my $i = 0;
+  $fields{$_} = $i++ foreach qw{zero one two three};
+  sub STORE { 
+    my $self = ${shift()};
+    my $key = $fields{shift()};
+    defined $key or die "Out of band access";
+    $$self->[$key] = shift;
+  }
+  sub FETCH { 
+    my $self = ${shift()};
+    my $key = $fields{shift()};
+    defined $key or die "Out of band access";
+    $$self->[$key];
+  }
+}
+
+my $bar = new two_refs 3,4,5,6;
+$bar->[2] = 11;
+test $bar->{two}, 11;		# 199
+$bar->{three} = 13;
+test $bar->[3], 13;		# 200
+
+{
+  package two_refs_o;
+  @ISA = ('two_refs');
+}
+
+$bar = new two_refs_o 3,4,5,6;
+$bar->[2] = 11;
+test $bar->{two}, 11;		# 201
+$bar->{three} = 13;
+test $bar->[3], 13;		# 202
+
+{
+  package two_refs1;
+  use overload '%{}' => sub { ${shift()}->[1] },
+               '@{}' => sub { ${shift()}->[0] };
+  sub new { 
+    my $p = shift; 
+    my $a = [@_];
+    my %h;
+    tie %h, $p, $a;
+    bless \ [$a, \%h], $p;
+  }
+  sub gethash {
+    my %h;
+    my $self = shift;
+    tie %h, ref $self, $self;
+    \%h;
+  }
+
+  sub TIEHASH { my $p = shift; bless \ shift, $p }
+  my %fields;
+  my $i = 0;
+  $fields{$_} = $i++ foreach qw{zero one two three};
+  sub STORE { 
+    my $a = ${shift()};
+    my $key = $fields{shift()};
+    defined $key or die "Out of band access";
+    $a->[$key] = shift;
+  }
+  sub FETCH { 
+    my $a = ${shift()};
+    my $key = $fields{shift()};
+    defined $key or die "Out of band access";
+    $a->[$key];
+  }
+}
+
+$bar = new two_refs_o 3,4,5,6;
+$bar->[2] = 11;
+test $bar->{two}, 11;		# 203
+$bar->{three} = 13;
+test $bar->[3], 13;		# 204
+
+{
+  package two_refs1_o;
+  @ISA = ('two_refs1');
+}
+
+$bar = new two_refs1_o 3,4,5,6;
+$bar->[2] = 11;
+test $bar->{two}, 11;		# 205
+$bar->{three} = 13;
+test $bar->[3], 13;		# 206
+
+{
+  package B;
+  use overload bool => sub { ${+shift} };
+}
+
+my $aaa;
+{ my $bbbb = 0; $aaa = bless \$bbbb, B }
+
+test !$aaa, 1;
+
+unless ($aaa) {
+  test 'ok', 'ok';
+} else {
+  test 'is not', 'ok';
+}
+
 
 # Last test is:
-sub last {135}
+sub last {208}

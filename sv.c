@@ -1,6 +1,6 @@
 /*    sv.c
  *
- *    Copyright (c) 1991-1997, Larry Wall
+ *    Copyright (c) 1991-1999, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -12,88 +12,40 @@
  */
 
 #include "EXTERN.h"
+#define PERL_IN_SV_C
 #include "perl.h"
 
-#ifdef OVR_DBL_DIG
-/* Use an overridden DBL_DIG */
-# ifdef DBL_DIG
-#  undef DBL_DIG
-# endif
-# define DBL_DIG OVR_DBL_DIG
-#else
-/* The following is all to get DBL_DIG, in order to pick a nice
-   default value for printing floating point numbers in Gconvert.
-   (see config.h)
-*/
-#ifdef I_LIMITS
-#include <limits.h>
-#endif
-#ifdef I_FLOAT
-#include <float.h>
-#endif
-#ifndef HAS_DBL_DIG
-#define DBL_DIG	15   /* A guess that works lots of places */
-#endif
-#endif
-
-#if defined(USE_STDIO_PTR) && defined(STDIO_PTR_LVALUE) && defined(STDIO_CNT_LVALUE) && !defined(__QNX__)
-#  define FAST_SV_GETS
-#endif
-
-#ifdef PERL_OBJECT
-#define FCALL this->*f
-#define VTBL this->*vtbl
-
-#else /* !PERL_OBJECT */
-
-static IV asIV _((SV* sv));
-static UV asUV _((SV* sv));
-static SV *more_sv _((void));
-static XPVIV *more_xiv _((void));
-static XPVNV *more_xnv _((void));
-static XPV *more_xpv _((void));
-static XRV *more_xrv _((void));
-static XPVIV *new_xiv _((void));
-static XPVNV *new_xnv _((void));
-static XPV *new_xpv _((void));
-static XRV *new_xrv _((void));
-static void del_xiv _((XPVIV* p));
-static void del_xnv _((XPVNV* p));
-static void del_xpv _((XPV* p));
-static void del_xrv _((XRV* p));
-static void sv_mortalgrow _((void));
-static void sv_unglob _((SV* sv));
-static void sv_check_thinkfirst _((SV *sv));
-
-#ifndef PURIFY
-static void *my_safemalloc(MEM_SIZE size);
-#endif
-
-typedef void (*SVFUNC) _((SV*));
-#define VTBL *vtbl
 #define FCALL *f
+#define SV_CHECK_THINKFIRST(sv) if (SvTHINKFIRST(sv)) sv_force_normal(sv)
 
-#endif /* PERL_OBJECT */
+static void do_report_used(pTHXo_ SV *sv);
+static void do_clean_objs(pTHXo_ SV *sv);
+#ifndef DISABLE_DESTRUCTOR_KLUDGE
+static void do_clean_named_objs(pTHXo_ SV *sv);
+#endif
+static void do_clean_all(pTHXo_ SV *sv);
 
-#define SV_CHECK_THINKFIRST(sv) if (SvTHINKFIRST(sv)) sv_check_thinkfirst(sv)
 
 #ifdef PURIFY
 
-#define new_SV(p)			\
-    do {				\
-	LOCK_SV_MUTEX;			\
-	(p) = (SV*)safemalloc(sizeof(SV)); \
-	reg_add(p);			\
-	UNLOCK_SV_MUTEX;		\
-    } while (0)
+#define new_SV(p) \
+    STMT_START {					\
+	LOCK_SV_MUTEX;					\
+	(p) = (SV*)safemalloc(sizeof(SV));		\
+	reg_add(p);					\
+	UNLOCK_SV_MUTEX;				\
+	SvANY(p) = 0;					\
+	SvREFCNT(p) = 1;				\
+	SvFLAGS(p) = 0;					\
+    } STMT_END
 
-#define del_SV(p)			\
-    do {				\
-	LOCK_SV_MUTEX;			\
-	reg_remove(p);			\
-        Safefree((char*)(p));		\
-	UNLOCK_SV_MUTEX;		\
-    } while (0)
+#define del_SV(p) \
+    STMT_START {					\
+	LOCK_SV_MUTEX;					\
+	reg_remove(p);					\
+        Safefree((char*)(p));				\
+	UNLOCK_SV_MUTEX;				\
+    } STMT_END
 
 static SV **registry;
 static I32 registry_size;
@@ -101,25 +53,24 @@ static I32 registry_size;
 #define REGHASH(sv,size)  ((((U32)(sv)) >> 2) % (size))
 
 #define REG_REPLACE(sv,a,b) \
-    do {				\
-	void* p = sv->sv_any;		\
-	I32 h = REGHASH(sv, registry_size);	\
-	I32 i = h;			\
-	while (registry[i] != (a)) {	\
-	    if (++i >= registry_size)	\
-		i = 0;			\
-	    if (i == h)			\
-		die("SV registry bug");	\
-	}				\
-	registry[i] = (b);		\
-    } while (0)
+    STMT_START {					\
+	void* p = sv->sv_any;				\
+	I32 h = REGHASH(sv, registry_size);		\
+	I32 i = h;					\
+	while (registry[i] != (a)) {			\
+	    if (++i >= registry_size)			\
+		i = 0;					\
+	    if (i == h)					\
+		Perl_die(aTHX_ "SV registry bug");			\
+	}						\
+	registry[i] = (b);				\
+    } STMT_END
 
 #define REG_ADD(sv)	REG_REPLACE(sv,Nullsv,sv)
 #define REG_REMOVE(sv)	REG_REPLACE(sv,sv,Nullsv)
 
-static void
-reg_add(sv)
-SV* sv;
+STATIC void
+S_reg_add(pTHX_ SV *sv)
 {
     if (PL_sv_count >= (registry_size >> 1))
     {
@@ -145,17 +96,15 @@ SV* sv;
     ++PL_sv_count;
 }
 
-static void
-reg_remove(sv)
-SV* sv;
+STATIC void
+S_reg_remove(pTHX_ SV *sv)
 {
     REG_REMOVE(sv);
     --PL_sv_count;
 }
 
-static void
-visit(f)
-SVFUNC f;
+STATIC void
+S_visit(pTHX_ SVFUNC_t f)
 {
     I32 i;
 
@@ -167,10 +116,7 @@ SVFUNC f;
 }
 
 void
-sv_add_arena(ptr, size, flags)
-char* ptr;
-U32 size;
-U32 flags;
+Perl_sv_add_arena(pTHX_ char *ptr, U32 size, U32 flags)
 {
     if (!(flags & SVf_FAKE))
 	Safefree(ptr);
@@ -182,44 +128,49 @@ U32 flags;
  * "A time to plant, and a time to uproot what was planted..."
  */
 
-#define plant_SV(p)			\
-    do {				\
-	SvANY(p) = (void *)PL_sv_root;	\
-	SvFLAGS(p) = SVTYPEMASK;	\
-	PL_sv_root = (p);			\
-	--PL_sv_count;			\
-    } while (0)
+#define plant_SV(p) \
+    STMT_START {					\
+	SvANY(p) = (void *)PL_sv_root;			\
+	SvFLAGS(p) = SVTYPEMASK;			\
+	PL_sv_root = (p);				\
+	--PL_sv_count;					\
+    } STMT_END
 
 /* sv_mutex must be held while calling uproot_SV() */
-#define uproot_SV(p)			\
-    do {				\
-	(p) = PL_sv_root;			\
-	PL_sv_root = (SV*)SvANY(p);	\
-	++PL_sv_count;			\
-    } while (0)
+#define uproot_SV(p) \
+    STMT_START {					\
+	(p) = PL_sv_root;				\
+	PL_sv_root = (SV*)SvANY(p);			\
+	++PL_sv_count;					\
+    } STMT_END
 
-#define new_SV(p)	do {	\
-	LOCK_SV_MUTEX;		\
-	if (PL_sv_root)		\
-	    uproot_SV(p);	\
-	else			\
-	    (p) = more_sv();	\
-	UNLOCK_SV_MUTEX;	\
-    } while (0)
+#define new_SV(p) \
+    STMT_START {					\
+	LOCK_SV_MUTEX;					\
+	if (PL_sv_root)					\
+	    uproot_SV(p);				\
+	else						\
+	    (p) = more_sv();				\
+	UNLOCK_SV_MUTEX;				\
+	SvANY(p) = 0;					\
+	SvREFCNT(p) = 1;				\
+	SvFLAGS(p) = 0;					\
+    } STMT_END
 
 #ifdef DEBUGGING
 
-#define del_SV(p)	do {	\
-	LOCK_SV_MUTEX;		\
-	if (PL_debug & 32768)	\
-	    del_sv(p);		\
-	else			\
-	    plant_SV(p);	\
-	UNLOCK_SV_MUTEX;	\
-    } while (0)
+#define del_SV(p) \
+    STMT_START {					\
+	LOCK_SV_MUTEX;					\
+	if (PL_debug & 32768)				\
+	    del_sv(p);					\
+	else						\
+	    plant_SV(p);				\
+	UNLOCK_SV_MUTEX;				\
+    } STMT_END
 
 STATIC void
-del_sv(SV *p)
+S_del_sv(pTHX_ SV *p)
 {
     if (PL_debug & 32768) {
 	SV* sva;
@@ -233,7 +184,9 @@ del_sv(SV *p)
 		ok = 1;
 	}
 	if (!ok) {
-	    warn("Attempt to free non-arena SV: 0x%lx", (unsigned long)p);
+	    if (ckWARN_d(WARN_INTERNAL))	
+	        Perl_warner(aTHX_ WARN_INTERNAL,
+		       "Attempt to free non-arena SV: 0x%lx", (unsigned long)p);
 	    return;
 	}
     }
@@ -247,7 +200,7 @@ del_sv(SV *p)
 #endif /* DEBUGGING */
 
 void
-sv_add_arena(char *ptr, U32 size, U32 flags)
+Perl_sv_add_arena(pTHX_ char *ptr, U32 size, U32 flags)
 {
     SV* sva = (SV*)ptr;
     register SV* sv;
@@ -275,7 +228,7 @@ sv_add_arena(char *ptr, U32 size, U32 flags)
 
 /* sv_mutex must be held while calling more_sv() */
 STATIC SV*
-more_sv(void)
+S_more_sv(pTHX)
 {
     register SV* sv;
 
@@ -293,7 +246,7 @@ more_sv(void)
 }
 
 STATIC void
-visit(SVFUNC f)
+S_visit(pTHX_ SVFUNC_t f)
 {
     SV* sva;
     SV* sv;
@@ -303,92 +256,41 @@ visit(SVFUNC f)
 	svend = &sva[SvREFCNT(sva)];
 	for (sv = sva + 1; sv < svend; ++sv) {
 	    if (SvTYPE(sv) != SVTYPEMASK)
-		(FCALL)(sv);
+		(FCALL)(aTHXo_ sv);
 	}
     }
 }
 
 #endif /* PURIFY */
 
-STATIC void
-do_report_used(SV *sv)
+void
+Perl_sv_report_used(pTHX)
 {
-    if (SvTYPE(sv) != SVTYPEMASK) {
-	/* XXX Perhaps this ought to go to Perl_debug_log, if DEBUGGING. */
-	PerlIO_printf(PerlIO_stderr(), "****\n");
-	sv_dump(sv);
-    }
+    visit(do_report_used);
 }
 
 void
-sv_report_used(void)
-{
-    visit(FUNC_NAME_TO_PTR(do_report_used));
-}
-
-STATIC void
-do_clean_objs(SV *sv)
-{
-    SV* rv;
-
-    if (SvROK(sv) && SvOBJECT(rv = SvRV(sv))) {
-	DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning object ref:\n "), sv_dump(sv));)
-	SvROK_off(sv);
-	SvRV(sv) = 0;
-	SvREFCNT_dec(rv);
-    }
-
-    /* XXX Might want to check arrays, etc. */
-}
-
-#ifndef DISABLE_DESTRUCTOR_KLUDGE
-STATIC void
-do_clean_named_objs(SV *sv)
-{
-    if (SvTYPE(sv) == SVt_PVGV) {
-	if ( SvOBJECT(GvSV(sv)) ||
-	     GvAV(sv) && SvOBJECT(GvAV(sv)) ||
-	     GvHV(sv) && SvOBJECT(GvHV(sv)) ||
-	     GvIO(sv) && SvOBJECT(GvIO(sv)) ||
-	     GvCV(sv) && SvOBJECT(GvCV(sv)) )
-	{
-	    DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning named glob object:\n "), sv_dump(sv));)
-	    SvREFCNT_dec(sv);
-	}
-    }
-}
-#endif
-
-void
-sv_clean_objs(void)
+Perl_sv_clean_objs(pTHX)
 {
     PL_in_clean_objs = TRUE;
-    visit(FUNC_NAME_TO_PTR(do_clean_objs));
+    visit(do_clean_objs);
 #ifndef DISABLE_DESTRUCTOR_KLUDGE
     /* some barnacles may yet remain, clinging to typeglobs */
-    visit(FUNC_NAME_TO_PTR(do_clean_named_objs));
+    visit(do_clean_named_objs);
 #endif
     PL_in_clean_objs = FALSE;
 }
 
-STATIC void
-do_clean_all(SV *sv)
-{
-    DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning loops: SV at 0x%lx\n", sv) );)
-    SvFLAGS(sv) |= SVf_BREAK;
-    SvREFCNT_dec(sv);
-}
-
 void
-sv_clean_all(void)
+Perl_sv_clean_all(pTHX)
 {
     PL_in_clean_all = TRUE;
-    visit(FUNC_NAME_TO_PTR(do_clean_all));
+    visit(do_clean_all);
     PL_in_clean_all = FALSE;
 }
 
 void
-sv_free_arenas(void)
+Perl_sv_free_arenas(pTHX)
 {
     SV* sva;
     SV* svanext;
@@ -414,30 +316,33 @@ sv_free_arenas(void)
 }
 
 STATIC XPVIV*
-new_xiv(void)
+S_new_xiv(pTHX)
 {
     IV* xiv;
-    if (PL_xiv_root) {
-	xiv = PL_xiv_root;
-	/*
-	 * See comment in more_xiv() -- RAM.
-	 */
-	PL_xiv_root = *(IV**)xiv;
-	return (XPVIV*)((char*)xiv - STRUCT_OFFSET(XPVIV, xiv_iv));
-    }
-    return more_xiv();
+    LOCK_SV_MUTEX;
+    if (!PL_xiv_root)
+	more_xiv();
+    xiv = PL_xiv_root;
+    /*
+     * See comment in more_xiv() -- RAM.
+     */
+    PL_xiv_root = *(IV**)xiv;
+    UNLOCK_SV_MUTEX;
+    return (XPVIV*)((char*)xiv - STRUCT_OFFSET(XPVIV, xiv_iv));
 }
 
 STATIC void
-del_xiv(XPVIV *p)
+S_del_xiv(pTHX_ XPVIV *p)
 {
     IV* xiv = (IV*)((char*)(p) + STRUCT_OFFSET(XPVIV, xiv_iv));
+    LOCK_SV_MUTEX;
     *(IV**)xiv = PL_xiv_root;
     PL_xiv_root = xiv;
+    UNLOCK_SV_MUTEX;
 }
 
-STATIC XPVIV*
-more_xiv(void)
+STATIC void
+S_more_xiv(pTHX)
 {
     register IV* xiv;
     register IV* xivend;
@@ -455,67 +360,71 @@ more_xiv(void)
 	xiv++;
     }
     *(IV**)xiv = 0;
-    return new_xiv();
 }
 
 STATIC XPVNV*
-new_xnv(void)
+S_new_xnv(pTHX)
 {
-    double* xnv;
-    if (PL_xnv_root) {
-	xnv = PL_xnv_root;
-	PL_xnv_root = *(double**)xnv;
-	return (XPVNV*)((char*)xnv - STRUCT_OFFSET(XPVNV, xnv_nv));
-    }
-    return more_xnv();
+    NV* xnv;
+    LOCK_SV_MUTEX;
+    if (!PL_xnv_root)
+	more_xnv();
+    xnv = PL_xnv_root;
+    PL_xnv_root = *(NV**)xnv;
+    UNLOCK_SV_MUTEX;
+    return (XPVNV*)((char*)xnv - STRUCT_OFFSET(XPVNV, xnv_nv));
 }
 
 STATIC void
-del_xnv(XPVNV *p)
+S_del_xnv(pTHX_ XPVNV *p)
 {
-    double* xnv = (double*)((char*)(p) + STRUCT_OFFSET(XPVNV, xnv_nv));
-    *(double**)xnv = PL_xnv_root;
+    NV* xnv = (NV*)((char*)(p) + STRUCT_OFFSET(XPVNV, xnv_nv));
+    LOCK_SV_MUTEX;
+    *(NV**)xnv = PL_xnv_root;
     PL_xnv_root = xnv;
+    UNLOCK_SV_MUTEX;
 }
 
-STATIC XPVNV*
-more_xnv(void)
+STATIC void
+S_more_xnv(pTHX)
 {
-    register double* xnv;
-    register double* xnvend;
-    New(711, xnv, 1008/sizeof(double), double);
-    xnvend = &xnv[1008 / sizeof(double) - 1];
-    xnv += (sizeof(XPVIV) - 1) / sizeof(double) + 1; /* fudge by sizeof XPVIV */
+    register NV* xnv;
+    register NV* xnvend;
+    New(711, xnv, 1008/sizeof(NV), NV);
+    xnvend = &xnv[1008 / sizeof(NV) - 1];
+    xnv += (sizeof(XPVIV) - 1) / sizeof(NV) + 1; /* fudge by sizeof XPVIV */
     PL_xnv_root = xnv;
     while (xnv < xnvend) {
-	*(double**)xnv = (double*)(xnv + 1);
+	*(NV**)xnv = (NV*)(xnv + 1);
 	xnv++;
     }
-    *(double**)xnv = 0;
-    return new_xnv();
+    *(NV**)xnv = 0;
 }
 
 STATIC XRV*
-new_xrv(void)
+S_new_xrv(pTHX)
 {
     XRV* xrv;
-    if (PL_xrv_root) {
-	xrv = PL_xrv_root;
-	PL_xrv_root = (XRV*)xrv->xrv_rv;
-	return xrv;
-    }
-    return more_xrv();
+    LOCK_SV_MUTEX;
+    if (!PL_xrv_root)
+	more_xrv();
+    xrv = PL_xrv_root;
+    PL_xrv_root = (XRV*)xrv->xrv_rv;
+    UNLOCK_SV_MUTEX;
+    return xrv;
 }
 
 STATIC void
-del_xrv(XRV *p)
+S_del_xrv(pTHX_ XRV *p)
 {
+    LOCK_SV_MUTEX;
     p->xrv_rv = (SV*)PL_xrv_root;
     PL_xrv_root = p;
+    UNLOCK_SV_MUTEX;
 }
 
-STATIC XRV*
-more_xrv(void)
+STATIC void
+S_more_xrv(pTHX)
 {
     register XRV* xrv;
     register XRV* xrvend;
@@ -527,30 +436,32 @@ more_xrv(void)
 	xrv++;
     }
     xrv->xrv_rv = 0;
-    return new_xrv();
 }
 
 STATIC XPV*
-new_xpv(void)
+S_new_xpv(pTHX)
 {
     XPV* xpv;
-    if (PL_xpv_root) {
-	xpv = PL_xpv_root;
-	PL_xpv_root = (XPV*)xpv->xpv_pv;
-	return xpv;
-    }
-    return more_xpv();
+    LOCK_SV_MUTEX;
+    if (!PL_xpv_root)
+	more_xpv();
+    xpv = PL_xpv_root;
+    PL_xpv_root = (XPV*)xpv->xpv_pv;
+    UNLOCK_SV_MUTEX;
+    return xpv;
 }
 
 STATIC void
-del_xpv(XPV *p)
+S_del_xpv(pTHX_ XPV *p)
 {
+    LOCK_SV_MUTEX;
     p->xpv_pv = (char*)PL_xpv_root;
     PL_xpv_root = p;
+    UNLOCK_SV_MUTEX;
 }
 
-STATIC XPV*
-more_xpv(void)
+STATIC void
+S_more_xpv(pTHX)
 {
     register XPV* xpv;
     register XPV* xpvend;
@@ -562,7 +473,6 @@ more_xpv(void)
 	xpv++;
     }
     xpv->xpv_pv = 0;
-    return new_xpv();
 }
 
 #ifdef PURIFY
@@ -599,10 +509,10 @@ more_xpv(void)
 
 #ifdef PURIFY
 #  define my_safemalloc(s) safemalloc(s)
-#  define my_safefree(s) free(s)
+#  define my_safefree(s) safefree(s)
 #else
 STATIC void* 
-my_safemalloc(MEM_SIZE size)
+S_my_safemalloc(MEM_SIZE size)
 {
     char *p;
     New(717, p, size, char);
@@ -645,13 +555,13 @@ my_safemalloc(MEM_SIZE size)
 #define del_XPVIO(p) my_safefree((char*)p)
 
 bool
-sv_upgrade(register SV *sv, U32 mt)
+Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 {
     char*	pv;
     U32		cur;
     U32		len;
     IV		iv;
-    double	nv;
+    NV		nv;
     MAGIC*	magic;
     HV*		stash;
 
@@ -676,7 +586,7 @@ sv_upgrade(register SV *sv, U32 mt)
 	cur	= 0;
 	len	= 0;
 	iv	= SvIVX(sv);
-	nv	= (double)SvIVX(sv);
+	nv	= (NV)SvIVX(sv);
 	del_XIV(SvANY(sv));
 	magic	= 0;
 	stash	= 0;
@@ -690,7 +600,7 @@ sv_upgrade(register SV *sv, U32 mt)
 	cur	= 0;
 	len	= 0;
 	nv	= SvNVX(sv);
-	iv	= I_32(nv);
+	iv	= I_V(nv);
 	magic	= 0;
 	stash	= 0;
 	del_XNV(SvANY(sv));
@@ -702,8 +612,8 @@ sv_upgrade(register SV *sv, U32 mt)
 	pv	= (char*)SvRV(sv);
 	cur	= 0;
 	len	= 0;
-	iv	= (IV)pv;
-	nv	= (double)(unsigned long)pv;
+	iv	= (IV)PTR_CAST pv;
+	nv	= (NV)(PTRV)pv;
 	del_XRV(SvANY(sv));
 	magic	= 0;
 	stash	= 0;
@@ -753,12 +663,12 @@ sv_upgrade(register SV *sv, U32 mt)
 	del_XPVMG(SvANY(sv));
 	break;
     default:
-	croak("Can't upgrade that kind of scalar");
+	Perl_croak(aTHX_ "Can't upgrade that kind of scalar");
     }
 
     switch (mt) {
     case SVt_NULL:
-	croak("Can't upgrade to undef");
+	Perl_croak(aTHX_ "Can't upgrade to undef");
     case SVt_IV:
 	SvANY(sv) = new_XIV();
 	SvIVX(sv)	= iv;
@@ -918,158 +828,8 @@ sv_upgrade(register SV *sv, U32 mt)
     return TRUE;
 }
 
-char *
-sv_peek(SV *sv)
-{
-#ifdef DEBUGGING
-    SV *t = sv_newmortal();
-    STRLEN prevlen;
-    int unref = 0;
-
-    sv_setpvn(t, "", 0);
-  retry:
-    if (!sv) {
-	sv_catpv(t, "VOID");
-	goto finish;
-    }
-    else if (sv == (SV*)0x55555555 || SvTYPE(sv) == 'U') {
-	sv_catpv(t, "WILD");
-	goto finish;
-    }
-    else if (sv == &PL_sv_undef || sv == &PL_sv_no || sv == &PL_sv_yes) {
-	if (sv == &PL_sv_undef) {
-	    sv_catpv(t, "SV_UNDEF");
-	    if (!(SvFLAGS(sv) & (SVf_OK|SVf_OOK|SVs_OBJECT|
-				 SVs_GMG|SVs_SMG|SVs_RMG)) &&
-		SvREADONLY(sv))
-		goto finish;
-	}
-	else if (sv == &PL_sv_no) {
-	    sv_catpv(t, "SV_NO");
-	    if (!(SvFLAGS(sv) & (SVf_ROK|SVf_OOK|SVs_OBJECT|
-				 SVs_GMG|SVs_SMG|SVs_RMG)) &&
-		!(~SvFLAGS(sv) & (SVf_POK|SVf_NOK|SVf_READONLY|
-				  SVp_POK|SVp_NOK)) &&
-		SvCUR(sv) == 0 &&
-		SvNVX(sv) == 0.0)
-		goto finish;
-	}
-	else {
-	    sv_catpv(t, "SV_YES");
-	    if (!(SvFLAGS(sv) & (SVf_ROK|SVf_OOK|SVs_OBJECT|
-				 SVs_GMG|SVs_SMG|SVs_RMG)) &&
-		!(~SvFLAGS(sv) & (SVf_POK|SVf_NOK|SVf_READONLY|
-				  SVp_POK|SVp_NOK)) &&
-		SvCUR(sv) == 1 &&
-		SvPVX(sv) && *SvPVX(sv) == '1' &&
-		SvNVX(sv) == 1.0)
-		goto finish;
-	}
-	sv_catpv(t, ":");
-    }
-    else if (SvREFCNT(sv) == 0) {
-	sv_catpv(t, "(");
-	unref++;
-    }
-    if (SvROK(sv)) {
-	sv_catpv(t, "\\");
-	if (SvCUR(t) + unref > 10) {
-	    SvCUR(t) = unref + 3;
-	    *SvEND(t) = '\0';
-	    sv_catpv(t, "...");
-	    goto finish;
-	}
-	sv = (SV*)SvRV(sv);
-	goto retry;
-    }
-    switch (SvTYPE(sv)) {
-    default:
-	sv_catpv(t, "FREED");
-	goto finish;
-
-    case SVt_NULL:
-	sv_catpv(t, "UNDEF");
-	goto finish;
-    case SVt_IV:
-	sv_catpv(t, "IV");
-	break;
-    case SVt_NV:
-	sv_catpv(t, "NV");
-	break;
-    case SVt_RV:
-	sv_catpv(t, "RV");
-	break;
-    case SVt_PV:
-	sv_catpv(t, "PV");
-	break;
-    case SVt_PVIV:
-	sv_catpv(t, "PVIV");
-	break;
-    case SVt_PVNV:
-	sv_catpv(t, "PVNV");
-	break;
-    case SVt_PVMG:
-	sv_catpv(t, "PVMG");
-	break;
-    case SVt_PVLV:
-	sv_catpv(t, "PVLV");
-	break;
-    case SVt_PVAV:
-	sv_catpv(t, "AV");
-	break;
-    case SVt_PVHV:
-	sv_catpv(t, "HV");
-	break;
-    case SVt_PVCV:
-	if (CvGV(sv))
-	    sv_catpvf(t, "CV(%s)", GvNAME(CvGV(sv)));
-	else
-	    sv_catpv(t, "CV()");
-	goto finish;
-    case SVt_PVGV:
-	sv_catpv(t, "GV");
-	break;
-    case SVt_PVBM:
-	sv_catpv(t, "BM");
-	break;
-    case SVt_PVFM:
-	sv_catpv(t, "FM");
-	break;
-    case SVt_PVIO:
-	sv_catpv(t, "IO");
-	break;
-    }
-
-    if (SvPOKp(sv)) {
-	if (!SvPVX(sv))
-	    sv_catpv(t, "(null)");
-	if (SvOOK(sv))
-	    sv_catpvf(t, "(%ld+\"%.127s\")",(long)SvIVX(sv),SvPVX(sv));
-	else
-	    sv_catpvf(t, "(\"%.127s\")",SvPVX(sv));
-    }
-    else if (SvNOKp(sv)) {
-	SET_NUMERIC_STANDARD();
-	sv_catpvf(t, "(%g)",SvNVX(sv));
-    }
-    else if (SvIOKp(sv))
-	sv_catpvf(t, "(%ld)",(long)SvIVX(sv));
-    else
-	sv_catpv(t, "()");
-    
-  finish:
-    if (unref) {
-	while (unref--)
-	    sv_catpv(t, ")");
-    }
-    return SvPV(t, PL_na);
-#else	/* DEBUGGING */
-    return "";
-#endif	/* DEBUGGING */
-}
-
 int
-sv_backoff(register SV *sv)
+Perl_sv_backoff(pTHX_ register SV *sv)
 {
     assert(SvOOK(sv));
     if (SvIVX(sv)) {
@@ -1084,11 +844,7 @@ sv_backoff(register SV *sv)
 }
 
 char *
-#ifndef DOSISH
-sv_grow(register SV *sv, register I32 newlen)
-#else
-sv_grow(SV* sv, unsigned long newlen)
-#endif
+Perl_sv_grow(pTHX_ register SV *sv, register STRLEN newlen)
 {
     register char *s;
 
@@ -1136,7 +892,7 @@ sv_grow(SV* sv, unsigned long newlen)
 }
 
 void
-sv_setiv(register SV *sv, IV i)
+Perl_sv_setiv(pTHX_ register SV *sv, IV i)
 {
     SV_CHECK_THINKFIRST(sv);
     switch (SvTYPE(sv)) {
@@ -1152,11 +908,6 @@ sv_setiv(register SV *sv, IV i)
 	break;
 
     case SVt_PVGV:
-	if (SvFAKE(sv)) {
-	    sv_unglob(sv);
-	    break;
-	}
-	/* FALL THROUGH */
     case SVt_PVAV:
     case SVt_PVHV:
     case SVt_PVCV:
@@ -1164,8 +915,8 @@ sv_setiv(register SV *sv, IV i)
     case SVt_PVIO:
 	{
 	    dTHR;
-	    croak("Can't coerce %s to integer in %s", sv_reftype(sv,0),
-		  op_desc[PL_op->op_type]);
+	    Perl_croak(aTHX_ "Can't coerce %s to integer in %s", sv_reftype(sv,0),
+		  PL_op_desc[PL_op->op_type]);
 	}
     }
     (void)SvIOK_only(sv);			/* validate number */
@@ -1174,30 +925,29 @@ sv_setiv(register SV *sv, IV i)
 }
 
 void
-sv_setiv_mg(register SV *sv, IV i)
+Perl_sv_setiv_mg(pTHX_ register SV *sv, IV i)
 {
     sv_setiv(sv,i);
     SvSETMAGIC(sv);
 }
 
 void
-sv_setuv(register SV *sv, UV u)
+Perl_sv_setuv(pTHX_ register SV *sv, UV u)
 {
-    if (u <= IV_MAX)
-	sv_setiv(sv, u);
-    else
-	sv_setnv(sv, (double)u);
+    sv_setiv(sv, 0);
+    SvIsUV_on(sv);
+    SvUVX(sv) = u;
 }
 
 void
-sv_setuv_mg(register SV *sv, UV u)
+Perl_sv_setuv_mg(pTHX_ register SV *sv, UV u)
 {
     sv_setuv(sv,u);
     SvSETMAGIC(sv);
 }
 
 void
-sv_setnv(register SV *sv, double num)
+Perl_sv_setnv(pTHX_ register SV *sv, NV num)
 {
     SV_CHECK_THINKFIRST(sv);
     switch (SvTYPE(sv)) {
@@ -1212,11 +962,6 @@ sv_setnv(register SV *sv, double num)
 	break;
 
     case SVt_PVGV:
-	if (SvFAKE(sv)) {
-	    sv_unglob(sv);
-	    break;
-	}
-	/* FALL THROUGH */
     case SVt_PVAV:
     case SVt_PVHV:
     case SVt_PVCV:
@@ -1224,8 +969,8 @@ sv_setnv(register SV *sv, double num)
     case SVt_PVIO:
 	{
 	    dTHR;
-	    croak("Can't coerce %s to number in %s", sv_reftype(sv,0),
-		  op_name[PL_op->op_type]);
+	    Perl_croak(aTHX_ "Can't coerce %s to number in %s", sv_reftype(sv,0),
+		  PL_op_name[PL_op->op_type]);
 	}
     }
     SvNVX(sv) = num;
@@ -1234,14 +979,14 @@ sv_setnv(register SV *sv, double num)
 }
 
 void
-sv_setnv_mg(register SV *sv, double num)
+Perl_sv_setnv_mg(pTHX_ register SV *sv, NV num)
 {
     sv_setnv(sv,num);
     SvSETMAGIC(sv);
 }
 
 STATIC void
-not_a_number(SV *sv)
+S_not_a_number(pTHX_ SV *sv)
 {
     dTHR;
     char tmpbuf[64];
@@ -1289,14 +1034,23 @@ not_a_number(SV *sv)
     *d = '\0';
 
     if (PL_op)
-	warn("Argument \"%s\" isn't numeric in %s", tmpbuf,
-		op_name[PL_op->op_type]);
+	Perl_warner(aTHX_ WARN_NUMERIC, "Argument \"%s\" isn't numeric in %s", tmpbuf,
+		PL_op_name[PL_op->op_type]);
     else
-	warn("Argument \"%s\" isn't numeric", tmpbuf);
+	Perl_warner(aTHX_ WARN_NUMERIC, "Argument \"%s\" isn't numeric", tmpbuf);
 }
 
+/* the number can be converted to integer with atol() or atoll() */
+#define IS_NUMBER_TO_INT_BY_ATOL 0x01
+#define IS_NUMBER_TO_INT_BY_ATOF 0x02 /* atol() may be != atof() */
+#define IS_NUMBER_NOT_IV	 0x04 /* (IV)atof() may be != atof() */
+#define IS_NUMBER_NEG		 0x08 /* not good to cache UV */
+
+/* Actually, ISO C leaves conversion of UV to IV undefined, but
+   until proven guilty, assume that things are not that bad... */
+
 IV
-sv_2iv(register SV *sv)
+Perl_sv_2iv(pTHX_ register SV *sv)
 {
     if (!sv)
 	return 0;
@@ -1305,80 +1059,144 @@ sv_2iv(register SV *sv)
 	if (SvIOKp(sv))
 	    return SvIVX(sv);
 	if (SvNOKp(sv)) {
-	    if (SvNVX(sv) < 0.0)
-		return I_V(SvNVX(sv));
-	    else
-		return (IV) U_V(SvNVX(sv));
+	    return I_V(SvNVX(sv));
 	}
 	if (SvPOKp(sv) && SvLEN(sv))
 	    return asIV(sv);
 	if (!SvROK(sv)) {
-	    if (PL_dowarn && !(SvFLAGS(sv) & SVs_PADTMP)) {
+	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 		dTHR;
-		if (!PL_localizing)
-		    warn(warn_uninit);
+		if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
+		    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
 	    }
 	    return 0;
 	}
     }
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
-#ifdef OVERLOAD
 	  SV* tmpstr;
 	  if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv, numer)))
-	    return SvIV(tmpstr);
-#endif /* OVERLOAD */
-	  return (IV)SvRV(sv);
+	      return SvIV(tmpstr);
+	  return (IV)PTR_CAST SvRV(sv);
 	}
-	if (SvREADONLY(sv)) {
-	    if (SvNOKp(sv)) {
-		if (SvNVX(sv) < 0.0)
-		    return I_V(SvNVX(sv));
-		else
-		    return (IV) U_V(SvNVX(sv));
-	    }
-	    if (SvPOKp(sv) && SvLEN(sv))
-		return asIV(sv);
-	    if (PL_dowarn)
-		warn(warn_uninit);
+	if (SvREADONLY(sv) && !SvOK(sv)) {
+	    dTHR;
+	    if (ckWARN(WARN_UNINITIALIZED))
+		Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
 	    return 0;
 	}
     }
-    switch (SvTYPE(sv)) {
-    case SVt_NULL:
-	sv_upgrade(sv, SVt_IV);
-	break;
-    case SVt_PV:
-	sv_upgrade(sv, SVt_PVIV);
-	break;
-    case SVt_NV:
-	sv_upgrade(sv, SVt_PVNV);
-	break;
+    if (SvIOKp(sv)) {
+	if (SvIsUV(sv)) {
+	    return (IV)(SvUVX(sv));
+	}
+	else {
+	    return SvIVX(sv);
+	}
     }
     if (SvNOKp(sv)) {
+	/* We can cache the IV/UV value even if it not good enough
+	 * to reconstruct NV, since the conversion to PV will prefer
+	 * NV over IV/UV.
+	 */
+
+	if (SvTYPE(sv) == SVt_NV)
+	    sv_upgrade(sv, SVt_PVNV);
+
 	(void)SvIOK_on(sv);
-	if (SvNVX(sv) < 0.0)
+	if (SvNVX(sv) < (NV)IV_MAX + 0.5)
 	    SvIVX(sv) = I_V(SvNVX(sv));
-	else
+	else {
 	    SvUVX(sv) = U_V(SvNVX(sv));
+	    SvIsUV_on(sv);
+	  ret_iv_max:
+#ifdef IV_IS_QUAD
+	    DEBUG_c(PerlIO_printf(Perl_debug_log, 
+				  "0x%" PERL_PRIx64 " 2iv(%" PERL_PRIu64 " => %" PERL_PRId64 ") (as unsigned)\n",
+				  (UV)PTR_CAST sv,
+				  (UV)SvUVX(sv), (IV)SvUVX(sv)));
+#else
+	    DEBUG_c(PerlIO_printf(Perl_debug_log, 
+				  "0x%lx 2iv(%lu => %ld) (as unsigned)\n",
+				  (unsigned long)sv,
+				  (unsigned long)SvUVX(sv), (long)(IV)SvUVX(sv)));
+#endif
+	    return (IV)SvUVX(sv);
+	}
     }
     else if (SvPOKp(sv) && SvLEN(sv)) {
-	(void)SvIOK_on(sv);
-	SvIVX(sv) = asIV(sv);
+	I32 numtype = looks_like_number(sv);
+
+	/* We want to avoid a possible problem when we cache an IV which
+	   may be later translated to an NV, and the resulting NV is not
+	   the translation of the initial data.
+	  
+	   This means that if we cache such an IV, we need to cache the
+	   NV as well.  Moreover, we trade speed for space, and do not
+	   cache the NV if not needed.
+	 */
+	if (numtype & IS_NUMBER_NOT_IV) {
+	    /* May be not an integer.  Need to cache NV if we cache IV
+	     * - otherwise future conversion to NV will be wrong.  */
+	    NV d;
+
+	    d = Atof(SvPVX(sv));
+
+	    if (SvTYPE(sv) < SVt_PVNV)
+		sv_upgrade(sv, SVt_PVNV);
+	    SvNVX(sv) = d;
+	    (void)SvNOK_on(sv);
+	    (void)SvIOK_on(sv);
+#if defined(USE_LONG_DOUBLE)
+	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%" PERL_PRIgldbl ")\n",
+				  (unsigned long)sv, SvNVX(sv)));
+#else
+	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%g)\n",
+				  (unsigned long)sv, SvNVX(sv)));
+#endif
+	    if (SvNVX(sv) < (NV)IV_MAX + 0.5)
+		SvIVX(sv) = I_V(SvNVX(sv));
+	    else {
+		SvUVX(sv) = U_V(SvNVX(sv));
+		SvIsUV_on(sv);
+		goto ret_iv_max;
+	    }
+	}
+	else if (numtype) {
+	    /* The NV may be reconstructed from IV - safe to cache IV,
+	       which may be calculated by atol(). */
+	    if (SvTYPE(sv) == SVt_PV)
+		sv_upgrade(sv, SVt_PVIV);
+	    (void)SvIOK_on(sv);
+	    SvIVX(sv) = Atol(SvPVX(sv));
+	}
+	else {				/* Not a number.  Cache 0. */
+	    dTHR;
+
+	    if (SvTYPE(sv) < SVt_PVIV)
+		sv_upgrade(sv, SVt_PVIV);
+	    SvIVX(sv) = 0;
+	    (void)SvIOK_on(sv);
+	    if (ckWARN(WARN_NUMERIC))
+		not_a_number(sv);
+	}
     }
     else  {
 	dTHR;
-	if (PL_dowarn && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
-	    warn(warn_uninit);
+	if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
+	    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
+	if (SvTYPE(sv) < SVt_IV)
+	    /* Typically the caller expects that sv_any is not NULL now.  */
+	    sv_upgrade(sv, SVt_IV);
 	return 0;
     }
     DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2iv(%ld)\n",
 	(unsigned long)sv,(long)SvIVX(sv)));
-    return SvIVX(sv);
+    return SvIsUV(sv) ? (IV)SvUVX(sv) : SvIVX(sv);
 }
 
 UV
-sv_2uv(register SV *sv)
+Perl_sv_2uv(pTHX_ register SV *sv)
 {
     if (!sv)
 	return 0;
@@ -1391,68 +1209,157 @@ sv_2uv(register SV *sv)
 	if (SvPOKp(sv) && SvLEN(sv))
 	    return asUV(sv);
 	if (!SvROK(sv)) {
-	    if (PL_dowarn && !(SvFLAGS(sv) & SVs_PADTMP)) {
+	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 		dTHR;
-		if (!PL_localizing)
-		    warn(warn_uninit);
+		if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
+		    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
 	    }
 	    return 0;
 	}
     }
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
-#ifdef OVERLOAD
 	  SV* tmpstr;
 	  if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv, numer)))
-	    return SvUV(tmpstr);
-#endif /* OVERLOAD */
-	  return (UV)SvRV(sv);
+	      return SvUV(tmpstr);
+	  return (UV)PTR_CAST SvRV(sv);
 	}
-	if (SvREADONLY(sv)) {
-	    if (SvNOKp(sv)) {
-		return U_V(SvNVX(sv));
-	    }
-	    if (SvPOKp(sv) && SvLEN(sv))
-		return asUV(sv);
-	    if (PL_dowarn)
-		warn(warn_uninit);
+	if (SvREADONLY(sv) && !SvOK(sv)) {
+	    dTHR;
+	    if (ckWARN(WARN_UNINITIALIZED))
+		Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
 	    return 0;
 	}
     }
-    switch (SvTYPE(sv)) {
-    case SVt_NULL:
-	sv_upgrade(sv, SVt_IV);
-	break;
-    case SVt_PV:
-	sv_upgrade(sv, SVt_PVIV);
-	break;
-    case SVt_NV:
-	sv_upgrade(sv, SVt_PVNV);
-	break;
+    if (SvIOKp(sv)) {
+	if (SvIsUV(sv)) {
+	    return SvUVX(sv);
+	}
+	else {
+	    return (UV)SvIVX(sv);
+	}
     }
     if (SvNOKp(sv)) {
+	/* We can cache the IV/UV value even if it not good enough
+	 * to reconstruct NV, since the conversion to PV will prefer
+	 * NV over IV/UV.
+	 */
+	if (SvTYPE(sv) == SVt_NV)
+	    sv_upgrade(sv, SVt_PVNV);
 	(void)SvIOK_on(sv);
-	SvUVX(sv) = U_V(SvNVX(sv));
+	if (SvNVX(sv) >= -0.5) {
+	    SvIsUV_on(sv);
+	    SvUVX(sv) = U_V(SvNVX(sv));
+	}
+	else {
+	    SvIVX(sv) = I_V(SvNVX(sv));
+	  ret_zero:
+#ifdef IV_IS_QUAD
+	    DEBUG_c(PerlIO_printf(Perl_debug_log, 
+				  "0x%" PERL_PRIx64 " 2uv(%" PERL_PRId64 " => %" PERL_PRIu64 ") (as signed)\n",
+				  (unsigned long)sv,(long)SvIVX(sv),
+				  (long)(UV)SvIVX(sv)));
+#else
+	    DEBUG_c(PerlIO_printf(Perl_debug_log, 
+				  "0x%lx 2uv(%ld => %lu) (as signed)\n",
+				  (unsigned long)sv,(long)SvIVX(sv),
+				  (long)(UV)SvIVX(sv)));
+#endif
+	    return (UV)SvIVX(sv);
+	}
     }
     else if (SvPOKp(sv) && SvLEN(sv)) {
-	(void)SvIOK_on(sv);
-	SvUVX(sv) = asUV(sv);
+	I32 numtype = looks_like_number(sv);
+
+	/* We want to avoid a possible problem when we cache a UV which
+	   may be later translated to an NV, and the resulting NV is not
+	   the translation of the initial data.
+	  
+	   This means that if we cache such a UV, we need to cache the
+	   NV as well.  Moreover, we trade speed for space, and do not
+	   cache the NV if not needed.
+	 */
+	if (numtype & IS_NUMBER_NOT_IV) {
+	    /* May be not an integer.  Need to cache NV if we cache IV
+	     * - otherwise future conversion to NV will be wrong.  */
+	    NV d;
+
+	    d = Atof(SvPVX(sv));
+
+	    if (SvTYPE(sv) < SVt_PVNV)
+		sv_upgrade(sv, SVt_PVNV);
+	    SvNVX(sv) = d;
+	    (void)SvNOK_on(sv);
+	    (void)SvIOK_on(sv);
+#if defined(USE_LONG_DOUBLE)
+	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%" PERL_PRIgldbl ")\n",
+				  (unsigned long)sv, SvNVX(sv)));
+#else
+	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%g)\n",
+				  (unsigned long)sv, SvNVX(sv)));
+#endif
+	    if (SvNVX(sv) < -0.5) {
+		SvIVX(sv) = I_V(SvNVX(sv));
+		goto ret_zero;
+	    } else {
+		SvUVX(sv) = U_V(SvNVX(sv));
+		SvIsUV_on(sv);
+	    }
+	}
+	else if (numtype & IS_NUMBER_NEG) {
+	    /* The NV may be reconstructed from IV - safe to cache IV,
+	       which may be calculated by atol(). */
+	    if (SvTYPE(sv) == SVt_PV)
+		sv_upgrade(sv, SVt_PVIV);
+	    (void)SvIOK_on(sv);
+	    SvIVX(sv) = (IV)Atol(SvPVX(sv));
+	}
+	else if (numtype) {		/* Non-negative */
+	    /* The NV may be reconstructed from UV - safe to cache UV,
+	       which may be calculated by strtoul()/atol. */
+	    if (SvTYPE(sv) == SVt_PV)
+		sv_upgrade(sv, SVt_PVIV);
+	    (void)SvIOK_on(sv);
+	    (void)SvIsUV_on(sv);
+#ifdef HAS_STRTOUL
+	    SvUVX(sv) = Strtoul(SvPVX(sv), Null(char**), 10);
+#else			/* no atou(), but we know the number fits into IV... */
+	    		/* The only problem may be if it is negative... */
+	    SvUVX(sv) = (UV)Atol(SvPVX(sv));
+#endif
+	}
+	else {				/* Not a number.  Cache 0. */
+	    dTHR;
+
+	    if (SvTYPE(sv) < SVt_PVIV)
+		sv_upgrade(sv, SVt_PVIV);
+	    SvUVX(sv) = 0;		/* We assume that 0s have the
+					   same bitmap in IV and UV. */
+	    (void)SvIOK_on(sv);
+	    (void)SvIsUV_on(sv);
+	    if (ckWARN(WARN_NUMERIC))
+		not_a_number(sv);
+	}
     }
     else  {
-	if (PL_dowarn && !(SvFLAGS(sv) & SVs_PADTMP)) {
+	if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 	    dTHR;
-	    if (!PL_localizing)
-		warn(warn_uninit);
+	    if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
+		Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
 	}
+	if (SvTYPE(sv) < SVt_IV)
+	    /* Typically the caller expects that sv_any is not NULL now.  */
+	    sv_upgrade(sv, SVt_IV);
 	return 0;
     }
+
     DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2uv(%lu)\n",
 	(unsigned long)sv,SvUVX(sv)));
-    return SvUVX(sv);
+    return SvIsUV(sv) ? SvUVX(sv) : (UV)SvIVX(sv);
 }
 
-double
-sv_2nv(register SV *sv)
+NV
+Perl_sv_2nv(pTHX_ register SV *sv)
 {
     if (!sv)
 	return 0.0;
@@ -1461,42 +1368,37 @@ sv_2nv(register SV *sv)
 	if (SvNOKp(sv))
 	    return SvNVX(sv);
 	if (SvPOKp(sv) && SvLEN(sv)) {
-	    if (PL_dowarn && !SvIOKp(sv) && !looks_like_number(sv))
+	    dTHR;
+	    if (ckWARN(WARN_NUMERIC) && !SvIOKp(sv) && !looks_like_number(sv))
 		not_a_number(sv);
-	    SET_NUMERIC_STANDARD();
-	    return atof(SvPVX(sv));
+	    return Atof(SvPVX(sv));
 	}
-	if (SvIOKp(sv))
-	    return (double)SvIVX(sv);
+	if (SvIOKp(sv)) {
+	    if (SvIsUV(sv)) 
+		return (NV)SvUVX(sv);
+	    else
+		return (NV)SvIVX(sv);
+	}	
         if (!SvROK(sv)) {
-	    if (PL_dowarn && !(SvFLAGS(sv) & SVs_PADTMP)) {
+	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 		dTHR;
-		if (!PL_localizing)
-		    warn(warn_uninit);
+		if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
+		    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
 	    }
             return 0;
         }
     }
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
-#ifdef OVERLOAD
 	  SV* tmpstr;
 	  if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,numer)))
-	    return SvNV(tmpstr);
-#endif /* OVERLOAD */
-	  return (double)(unsigned long)SvRV(sv);
+	      return SvNV(tmpstr);
+	  return (NV)(PTRV)SvRV(sv);
 	}
-	if (SvREADONLY(sv)) {
-	    if (SvPOKp(sv) && SvLEN(sv)) {
-		if (PL_dowarn && !SvIOKp(sv) && !looks_like_number(sv))
-		    not_a_number(sv);
-		SET_NUMERIC_STANDARD();
-		return atof(SvPVX(sv));
-	    }
-	    if (SvIOKp(sv))
-		return (double)SvIVX(sv);
-	    if (PL_dowarn)
-		warn(warn_uninit);
+	if (SvREADONLY(sv) && !SvOK(sv)) {
+	    dTHR;
+	    if (ckWARN(WARN_UNINITIALIZED))
+		Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
 	    return 0.0;
 	}
     }
@@ -1505,76 +1407,118 @@ sv_2nv(register SV *sv)
 	    sv_upgrade(sv, SVt_PVNV);
 	else
 	    sv_upgrade(sv, SVt_NV);
-	DEBUG_c(SET_NUMERIC_STANDARD());
-	DEBUG_c(PerlIO_printf(Perl_debug_log,
-			      "0x%lx num(%g)\n",(unsigned long)sv,SvNVX(sv)));
+#if defined(USE_LONG_DOUBLE)
+	DEBUG_c({
+	    RESTORE_NUMERIC_STANDARD();
+	    PerlIO_printf(Perl_debug_log, "0x%lx num(%" PERL_PRIgldbl ")\n",
+			  (unsigned long)sv, SvNVX(sv));
+	    RESTORE_NUMERIC_LOCAL();
+	});
+#else
+	DEBUG_c({
+	    RESTORE_NUMERIC_STANDARD();
+	    PerlIO_printf(Perl_debug_log, "0x%lx num(%g)\n",
+			  (unsigned long)sv, SvNVX(sv));
+	    RESTORE_NUMERIC_LOCAL();
+	});
+#endif
     }
     else if (SvTYPE(sv) < SVt_PVNV)
 	sv_upgrade(sv, SVt_PVNV);
     if (SvIOKp(sv) &&
 	    (!SvPOKp(sv) || !strchr(SvPVX(sv),'.') || !looks_like_number(sv)))
     {
-	SvNVX(sv) = (double)SvIVX(sv);
+	SvNVX(sv) = SvIsUV(sv) ? (NV)SvUVX(sv) : (NV)SvIVX(sv);
     }
     else if (SvPOKp(sv) && SvLEN(sv)) {
-	if (PL_dowarn && !SvIOKp(sv) && !looks_like_number(sv))
+	dTHR;
+	if (ckWARN(WARN_NUMERIC) && !SvIOKp(sv) && !looks_like_number(sv))
 	    not_a_number(sv);
-	SET_NUMERIC_STANDARD();
-	SvNVX(sv) = atof(SvPVX(sv));
+	SvNVX(sv) = Atof(SvPVX(sv));
     }
     else  {
 	dTHR;
-	if (PL_dowarn && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
-	    warn(warn_uninit);
+	if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
+	    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
+	if (SvTYPE(sv) < SVt_NV)
+	    /* Typically the caller expects that sv_any is not NULL now.  */
+	    sv_upgrade(sv, SVt_NV);
 	return 0.0;
     }
     SvNOK_on(sv);
-    DEBUG_c(SET_NUMERIC_STANDARD());
-    DEBUG_c(PerlIO_printf(Perl_debug_log,
-			  "0x%lx 2nv(%g)\n",(unsigned long)sv,SvNVX(sv)));
+#if defined(USE_LONG_DOUBLE)
+    DEBUG_c({
+	RESTORE_NUMERIC_STANDARD();
+	PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%" PERL_PRIgldbl ")\n",
+		      (unsigned long)sv, SvNVX(sv));
+	RESTORE_NUMERIC_LOCAL();
+    });
+#else
+    DEBUG_c({
+	RESTORE_NUMERIC_STANDARD();
+	PerlIO_printf(Perl_debug_log, "0x%lx 1nv(%g)\n",
+		      (unsigned long)sv, SvNVX(sv));
+	RESTORE_NUMERIC_LOCAL();
+    });
+#endif
     return SvNVX(sv);
 }
 
 STATIC IV
-asIV(SV *sv)
+S_asIV(pTHX_ SV *sv)
 {
     I32 numtype = looks_like_number(sv);
-    double d;
+    NV d;
 
-    if (numtype == 1)
-	return atol(SvPVX(sv));
-    if (!numtype && PL_dowarn)
-	not_a_number(sv);
-    SET_NUMERIC_STANDARD();
-    d = atof(SvPVX(sv));
-    if (d < 0.0)
-	return I_V(d);
-    else
-	return (IV) U_V(d);
+    if (numtype & IS_NUMBER_TO_INT_BY_ATOL)
+	return Atol(SvPVX(sv));
+    if (!numtype) {
+	dTHR;
+	if (ckWARN(WARN_NUMERIC))
+	    not_a_number(sv);
+    }
+    d = Atof(SvPVX(sv));
+    return I_V(d);
 }
 
 STATIC UV
-asUV(SV *sv)
+S_asUV(pTHX_ SV *sv)
 {
     I32 numtype = looks_like_number(sv);
 
 #ifdef HAS_STRTOUL
-    if (numtype == 1)
-	return strtoul(SvPVX(sv), Null(char**), 10);
+    if (numtype & IS_NUMBER_TO_INT_BY_ATOL)
+	return Strtoul(SvPVX(sv), Null(char**), 10);
 #endif
-    if (!numtype && PL_dowarn)
-	not_a_number(sv);
-    SET_NUMERIC_STANDARD();
-    return U_V(atof(SvPVX(sv)));
+    if (!numtype) {
+	dTHR;
+	if (ckWARN(WARN_NUMERIC))
+	    not_a_number(sv);
+    }
+    return U_V(Atof(SvPVX(sv)));
 }
 
+/*
+ * Returns a combination of (advisory only - can get false negatives)
+ * 	IS_NUMBER_TO_INT_BY_ATOL, IS_NUMBER_TO_INT_BY_ATOF, IS_NUMBER_NOT_IV,
+ *	IS_NUMBER_NEG
+ * 0 if does not look like number.
+ *
+ * In fact possible values are 0 and
+ * IS_NUMBER_TO_INT_BY_ATOL				123
+ * IS_NUMBER_TO_INT_BY_ATOL | IS_NUMBER_NOT_IV		123.1
+ * IS_NUMBER_TO_INT_BY_ATOF | IS_NUMBER_NOT_IV		123e0
+ * with a possible addition of IS_NUMBER_NEG.
+ */
+
 I32
-looks_like_number(SV *sv)
+Perl_looks_like_number(pTHX_ SV *sv)
 {
     register char *s;
     register char *send;
     register char *sbegin;
-    I32 numtype;
+    register char *nbegin;
+    I32 numtype = 0;
     STRLEN len;
 
     if (SvPOK(sv)) {
@@ -1590,23 +1534,50 @@ looks_like_number(SV *sv)
     s = sbegin;
     while (isSPACE(*s))
 	s++;
-    if (*s == '+' || *s == '-')
+    if (*s == '-') {
+	s++;
+	numtype = IS_NUMBER_NEG;
+    }
+    else if (*s == '+')
 	s++;
 
-    /* next must be digit or '.' */
+    nbegin = s;
+    /*
+     * we return IS_NUMBER_TO_INT_BY_ATOL if the number can be converted
+     * to _integer_ with atol() and IS_NUMBER_TO_INT_BY_ATOF if you need
+     * (int)atof().
+     */
+
+    /* next must be digit or the radix separator */
     if (isDIGIT(*s)) {
         do {
 	    s++;
         } while (isDIGIT(*s));
-        if (*s == '.') {
+
+	if (s - nbegin >= TYPE_DIGITS(IV))	/* Cannot cache ato[ul]() */
+	    numtype |= IS_NUMBER_TO_INT_BY_ATOF | IS_NUMBER_NOT_IV;
+	else
+	    numtype |= IS_NUMBER_TO_INT_BY_ATOL;
+
+        if (*s == '.'
+#ifdef USE_LOCALE_NUMERIC 
+	    || IS_NUMERIC_RADIX(*s)
+#endif
+	    ) {
 	    s++;
-            while (isDIGIT(*s))  /* optional digits after "." */
+	    numtype |= IS_NUMBER_NOT_IV;
+            while (isDIGIT(*s))  /* optional digits after the radix */
                 s++;
         }
     }
-    else if (*s == '.') {
+    else if (*s == '.'
+#ifdef USE_LOCALE_NUMERIC 
+	    || IS_NUMERIC_RADIX(*s)
+#endif
+	    ) {
         s++;
-        /* no digits before '.' means we need digits after it */
+	numtype |= IS_NUMBER_TO_INT_BY_ATOL | IS_NUMBER_NOT_IV;
+        /* no digits before the radix means we need digits after it */
         if (isDIGIT(*s)) {
 	    do {
 	        s++;
@@ -1618,15 +1589,10 @@ looks_like_number(SV *sv)
     else
         return 0;
 
-    /*
-     * we return 1 if the number can be converted to _integer_ with atol()
-     * and 2 if you need (int)atof().
-     */
-    numtype = 1;
-
     /* we can have an optional exponent part */
     if (*s == 'e' || *s == 'E') {
-	numtype = 2;
+	numtype &= ~IS_NUMBER_NEG;
+	numtype |= IS_NUMBER_TO_INT_BY_ATOF | IS_NUMBER_NOT_IV;
 	s++;
 	if (*s == '+' || *s == '-')
 	    s++;
@@ -1643,17 +1609,53 @@ looks_like_number(SV *sv)
     if (s >= send)
 	return numtype;
     if (len == 10 && memEQ(sbegin, "0 but true", 10))
-	return 1;
+	return IS_NUMBER_TO_INT_BY_ATOL;
     return 0;
 }
 
 char *
-sv_2pv(register SV *sv, STRLEN *lp)
+Perl_sv_2pv_nolen(pTHX_ register SV *sv)
+{
+    STRLEN n_a;
+    return sv_2pv(sv, &n_a);
+}
+
+/* We assume that buf is at least TYPE_CHARS(UV) long. */
+static char *
+uiv_2buf(char *buf, IV iv, UV uv, int is_uv, char **peob)
+{
+    STRLEN len;
+    char *ptr = buf + TYPE_CHARS(UV);
+    char *ebuf = ptr;
+    int sign;
+    char *p;
+
+    if (is_uv)
+	sign = 0;
+    else if (iv >= 0) {
+	uv = iv;
+	sign = 0;
+    } else {
+	uv = -iv;
+	sign = 1;
+    }
+    do {
+	*--ptr = '0' + (uv % 10);
+    } while (uv /= 10);
+    if (sign)
+	*--ptr = '-';
+    *peob = ebuf;
+    return ptr;
+}
+
+char *
+Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 {
     register char *s;
     int olderrno;
     SV *tsv;
-    char tmpbuf[64];	/* Must fit sprintf/Gconvert of longest IV/NV */
+    char tbuf[64];	/* Must fit sprintf/Gconvert of longest IV/NV */
+    char *tmpbuf = tbuf;
 
     if (!sv) {
 	*lp = 0;
@@ -1666,21 +1668,30 @@ sv_2pv(register SV *sv, STRLEN *lp)
 	    return SvPVX(sv);
 	}
 	if (SvIOKp(sv)) {
-	    (void)sprintf(tmpbuf,"%ld",(long)SvIVX(sv));
+#ifdef IV_IS_QUAD
+	    if (SvIsUV(sv)) 
+		(void)sprintf(tmpbuf,"%" PERL_PRIu64,(UV)SvUVX(sv));
+	    else
+		(void)sprintf(tmpbuf,"%" PERL_PRId64,(IV)SvIVX(sv));
+#else
+	    if (SvIsUV(sv)) 
+		(void)sprintf(tmpbuf,"%lu",(unsigned long)SvUVX(sv));
+	    else
+		(void)sprintf(tmpbuf,"%ld",(long)SvIVX(sv));
+#endif
 	    tsv = Nullsv;
 	    goto tokensave;
 	}
 	if (SvNOKp(sv)) {
-	    SET_NUMERIC_STANDARD();
-	    Gconvert(SvNVX(sv), DBL_DIG, 0, tmpbuf);
+	    Gconvert(SvNVX(sv), NV_DIG, 0, tmpbuf);
 	    tsv = Nullsv;
 	    goto tokensave;
 	}
         if (!SvROK(sv)) {
-	    if (PL_dowarn && !(SvFLAGS(sv) & SVs_PADTMP)) {
+	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 		dTHR;
-		if (!PL_localizing)
-		    warn(warn_uninit);
+		if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
+		    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
 	    }
             *lp = 0;
             return "";
@@ -1688,11 +1699,9 @@ sv_2pv(register SV *sv, STRLEN *lp)
     }
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
-#ifdef OVERLOAD
 	    SV* tmpstr;
 	    if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,string)))
-	      return SvPV(tmpstr,*lp);
-#endif /* OVERLOAD */
+		return SvPV(tmpstr,*lp);
 	    sv = (SV*)SvRV(sv);
 	    if (!sv)
 		s = "NULLREF";
@@ -1764,35 +1773,32 @@ sv_2pv(register SV *sv, STRLEN *lp)
 		}
 		tsv = NEWSV(0,0);
 		if (SvOBJECT(sv))
-		    sv_setpvf(tsv, "%s=%s", HvNAME(SvSTASH(sv)), s);
+		    Perl_sv_setpvf(aTHX_ tsv, "%s=%s", HvNAME(SvSTASH(sv)), s);
 		else
 		    sv_setpv(tsv, s);
-		sv_catpvf(tsv, "(0x%lx)", (unsigned long)sv);
+#ifdef IV_IS_QUAD
+		Perl_sv_catpvf(aTHX_ tsv, "(0x%" PERL_PRIx64")", (UV)PTR_CAST sv);
+#else
+		Perl_sv_catpvf(aTHX_ tsv, "(0x%lx)", (unsigned long)sv);
+#endif
 		goto tokensaveref;
 	    }
 	    *lp = strlen(s);
 	    return s;
 	}
-	if (SvREADONLY(sv)) {
-	    if (SvNOKp(sv)) {
-		SET_NUMERIC_STANDARD();
-		Gconvert(SvNVX(sv), DBL_DIG, 0, tmpbuf);
-		tsv = Nullsv;
-		goto tokensave;
-	    }
-	    if (SvIOKp(sv)) {
-		(void)sprintf(tmpbuf,"%ld",(long)SvIVX(sv));
-		tsv = Nullsv;
-		goto tokensave;
-	    }
-	    if (PL_dowarn)
-		warn(warn_uninit);
+	if (SvREADONLY(sv) && !SvOK(sv)) {
+	    dTHR;
+	    if (ckWARN(WARN_UNINITIALIZED))
+		Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
 	    *lp = 0;
 	    return "";
 	}
     }
-    (void)SvUPGRADE(sv, SVt_PV);
-    if (SvNOKp(sv)) {
+    if (SvNOKp(sv)) {			/* See note in sv_2uv() */
+	/* XXXX 64-bit?  IV may have better precision... */
+	/* I tried changing this for to be 64-bit-aware and
+	 * the t/op/numconvert.t became very, very, angry.
+	 * --jhi Sep 1999 */
 	if (SvTYPE(sv) < SVt_PVNV)
 	    sv_upgrade(sv, SVt_PVNV);
 	SvGROW(sv, 28);
@@ -1804,8 +1810,7 @@ sv_2pv(register SV *sv, STRLEN *lp)
 	else
 #endif /*apollo*/
 	{
-	    SET_NUMERIC_STANDARD();
-	    Gconvert(SvNVX(sv), DBL_DIG, 0, s);
+	    Gconvert(SvNVX(sv), NV_DIG, 0, s);
 	}
 	errno = olderrno;
 #ifdef FIXNEGATIVEZERO
@@ -1819,29 +1824,48 @@ sv_2pv(register SV *sv, STRLEN *lp)
 #endif
     }
     else if (SvIOKp(sv)) {
-	U32 oldIOK = SvIOK(sv);
+	U32 isIOK = SvIOK(sv);
+	U32 isUIOK = SvIsUV(sv);
+	char buf[TYPE_CHARS(UV)];
+	char *ebuf, *ptr;
+
 	if (SvTYPE(sv) < SVt_PVIV)
 	    sv_upgrade(sv, SVt_PVIV);
-	olderrno = errno;	/* some Xenix systems wipe out errno here */
-	sv_setpviv(sv, SvIVX(sv));
-	errno = olderrno;
+	if (isUIOK)
+	    ptr = uiv_2buf(buf, 0, SvUVX(sv), 1, &ebuf);
+	else
+	    ptr = uiv_2buf(buf, SvIVX(sv), 0, 0, &ebuf);
+	SvGROW(sv, ebuf - ptr + 1);	/* inlined from sv_setpvn */
+	Move(ptr,SvPVX(sv),ebuf - ptr,char);
+	SvCUR_set(sv, ebuf - ptr);
 	s = SvEND(sv);
-	if (oldIOK)
+	*s = '\0';
+	if (isIOK)
 	    SvIOK_on(sv);
 	else
 	    SvIOKp_on(sv);
+	if (isUIOK)
+	    SvIsUV_on(sv);
+	SvPOK_on(sv);
     }
     else {
 	dTHR;
-	if (PL_dowarn && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
-	    warn(warn_uninit);
+	if (ckWARN(WARN_UNINITIALIZED)
+	    && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
+	{
+	    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
+	}
 	*lp = 0;
+	if (SvTYPE(sv) < SVt_PV)
+	    /* Typically the caller expects that sv_any is not NULL now.  */
+	    sv_upgrade(sv, SVt_PV);
 	return "";
     }
     *lp = s - SvPVX(sv);
     SvCUR_set(sv, *lp);
     SvPOK_on(sv);
-    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2pv(%s)\n",(unsigned long)sv,SvPVX(sv)));
+    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2pv(%s)\n",
+			  (unsigned long)sv,SvPVX(sv)));
     return SvPVX(sv);
 
   tokensave:
@@ -1886,7 +1910,7 @@ sv_2pv(register SV *sv, STRLEN *lp)
 
 /* This function is only called on magical items */
 bool
-sv_2bool(register SV *sv)
+Perl_sv_2bool(pTHX_ register SV *sv)
 {
     if (SvGMAGICAL(sv))
 	mg_get(sv);
@@ -1894,14 +1918,10 @@ sv_2bool(register SV *sv)
     if (!SvOK(sv))
 	return 0;
     if (SvROK(sv)) {
-#ifdef OVERLOAD
-      {
 	dTHR;
 	SV* tmpsv;
 	if (SvAMAGIC(sv) && (tmpsv = AMG_CALLun(sv,bool_)))
-	  return SvTRUE(tmpsv);
-      }
-#endif /* OVERLOAD */
+	    return SvTRUE(tmpsv);
       return SvRV(sv) != 0;
     }
     if (SvPOKp(sv)) {
@@ -1932,7 +1952,7 @@ sv_2bool(register SV *sv)
  */
 
 void
-sv_setsv(SV *dstr, register SV *sstr)
+Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 {
     dTHR;
     register U32 sflags;
@@ -1947,16 +1967,8 @@ sv_setsv(SV *dstr, register SV *sstr)
     stype = SvTYPE(sstr);
     dtype = SvTYPE(dstr);
 
-    if (dtype == SVt_PVGV && (SvFLAGS(dstr) & SVf_FAKE)) {
-        sv_unglob(dstr);     /* so fake GLOB won't perpetuate */
-	sv_setpvn(dstr, "", 0);
-        (void)SvPOK_only(dstr);
-        dtype = SvTYPE(dstr);
-    }
-
-#ifdef OVERLOAD
     SvAMAGIC_off(dstr);
-#endif /* OVERLOAD */
+
     /* There's a lot of redundancy below but we're going for speed here */
 
     switch (stype) {
@@ -1983,6 +1995,8 @@ sv_setsv(SV *dstr, register SV *sstr)
 	    }
 	    (void)SvIOK_only(dstr);
 	    SvIVX(dstr) = SvIVX(sstr);
+	    if (SvIsUV(sstr))
+		SvIsUV_on(dstr);
 	    SvTAINT(dstr);
 	    return;
 	}
@@ -2041,10 +2055,10 @@ sv_setsv(SV *dstr, register SV *sstr)
     case SVt_PVCV:
     case SVt_PVIO:
 	if (PL_op)
-	    croak("Bizarre copy of %s in %s", sv_reftype(sstr, 0),
-		op_name[PL_op->op_type]);
+	    Perl_croak(aTHX_ "Bizarre copy of %s in %s", sv_reftype(sstr, 0),
+		PL_op_name[PL_op->op_type]);
 	else
-	    croak("Bizarre copy of %s", sv_reftype(sstr, 0));
+	    Perl_croak(aTHX_ "Bizarre copy of %s", sv_reftype(sstr, 0));
 	break;
 
     case SVt_PVGV:
@@ -2063,7 +2077,7 @@ sv_setsv(SV *dstr, register SV *sstr)
 	    /* ahem, death to those who redefine active sort subs */
 	    else if (PL_curstackinfo->si_type == PERLSI_SORT
 		     && GvCV(dstr) && PL_sortcop == CvSTART(GvCV(dstr)))
-		croak("Can't redefine active sort subroutine %s",
+		Perl_croak(aTHX_ "Can't redefine active sort subroutine %s",
 		      GvNAME(dstr));
 	    (void)SvOK_off(dstr);
 	    GvINTRO_off(dstr);		/* one-shot flag */
@@ -2087,9 +2101,9 @@ sv_setsv(SV *dstr, register SV *sstr)
 	    }
 	}
 	if (stype == SVt_PVLV)
-	    SvUPGRADE(dstr, SVt_PVNV);
+	    (void)SvUPGRADE(dstr, SVt_PVNV);
 	else
-	    SvUPGRADE(dstr, stype);
+	    (void)SvUPGRADE(dstr, stype);
     }
 
     sflags = SvFLAGS(sstr);
@@ -2097,7 +2111,6 @@ sv_setsv(SV *dstr, register SV *sstr)
     if (sflags & SVf_ROK) {
 	if (dtype >= SVt_PV) {
 	    if (dtype == SVt_PVGV) {
-		dTHR;
 		SV *sref = SvREFCNT_inc(SvRV(sstr));
 		SV *dref = 0;
 		int intro = GvINTRO(dstr);
@@ -2160,15 +2173,15 @@ sv_setsv(SV *dstr, register SV *sstr)
 				 * active sort subs */
 				if (PL_curstackinfo->si_type == PERLSI_SORT &&
 				      PL_sortcop == CvSTART(cv))
-				    croak(
+				    Perl_croak(aTHX_ 
 				    "Can't redefine active sort subroutine %s",
 					  GvENAME((GV*)dstr));
-				if (PL_dowarn || (const_changed && const_sv)) {
+				if (ckWARN(WARN_REDEFINE) || (const_changed && const_sv)) {
 				    if (!(CvGV(cv) && GvSTASH(CvGV(cv))
 					  && HvNAME(GvSTASH(CvGV(cv)))
 					  && strEQ(HvNAME(GvSTASH(CvGV(cv))),
 						   "autouse")))
-					warn(const_sv ? 
+					Perl_warner(aTHX_ WARN_REDEFINE, const_sv ? 
 					     "Constant subroutine %s redefined"
 					     : "Subroutine %s redefined", 
 					     GvENAME((GV*)dstr));
@@ -2211,7 +2224,8 @@ sv_setsv(SV *dstr, register SV *sstr)
 	    }
 	    if (SvPVX(dstr)) {
 		(void)SvOOK_off(dstr);		/* backoff */
-		Safefree(SvPVX(dstr));
+		if (SvLEN(dstr))
+		    Safefree(SvPVX(dstr));
 		SvLEN(dstr)=SvCUR(dstr)=0;
 	    }
 	}
@@ -2225,12 +2239,12 @@ sv_setsv(SV *dstr, register SV *sstr)
 	if (sflags & SVp_IOK) {
 	    (void)SvIOK_on(dstr);
 	    SvIVX(dstr) = SvIVX(sstr);
+	    if (SvIsUV(sstr))
+		SvIsUV_on(dstr);
 	}
-#ifdef OVERLOAD
 	if (SvAMAGIC(sstr)) {
 	    SvAMAGIC_on(dstr);
 	}
-#endif /* OVERLOAD */
     }
     else if (sflags & SVp_POK) {
 
@@ -2250,7 +2264,7 @@ sv_setsv(SV *dstr, register SV *sstr)
 		    SvFLAGS(dstr) &= ~SVf_OOK;
 		    Safefree(SvPVX(dstr) - SvIVX(dstr));
 		}
-		else
+		else if (SvLEN(dstr))
 		    Safefree(SvPVX(dstr));
 	    }
 	    (void)SvPOK_only(dstr);
@@ -2281,6 +2295,8 @@ sv_setsv(SV *dstr, register SV *sstr)
 	if (sflags & SVp_IOK) {
 	    (void)SvIOK_on(dstr);
 	    SvIVX(dstr) = SvIVX(sstr);
+	    if (SvIsUV(sstr))
+		SvIsUV_on(dstr);
 	}
     }
     else if (sflags & SVp_NOK) {
@@ -2289,16 +2305,21 @@ sv_setsv(SV *dstr, register SV *sstr)
 	if (SvIOK(sstr)) {
 	    (void)SvIOK_on(dstr);
 	    SvIVX(dstr) = SvIVX(sstr);
+	    /* XXXX Do we want to set IsUV for IV(ROK)?  Be extra safe... */
+	    if (SvIsUV(sstr))
+		SvIsUV_on(dstr);
 	}
     }
     else if (sflags & SVp_IOK) {
 	(void)SvIOK_only(dstr);
 	SvIVX(dstr) = SvIVX(sstr);
+	if (SvIsUV(sstr))
+	    SvIsUV_on(dstr);
     }
     else {
 	if (dtype == SVt_PVGV) {
-	    if (PL_dowarn)
-		warn("Undefined value assigned to typeglob");
+	    if (ckWARN(WARN_UNSAFE))
+		Perl_warner(aTHX_ WARN_UNSAFE, "Undefined value assigned to typeglob");
 	}
 	else
 	    (void)SvOK_off(dstr);
@@ -2307,14 +2328,14 @@ sv_setsv(SV *dstr, register SV *sstr)
 }
 
 void
-sv_setsv_mg(SV *dstr, register SV *sstr)
+Perl_sv_setsv_mg(pTHX_ SV *dstr, register SV *sstr)
 {
     sv_setsv(dstr,sstr);
     SvSETMAGIC(dstr);
 }
 
 void
-sv_setpvn(register SV *sv, register const char *ptr, register STRLEN len)
+Perl_sv_setpvn(pTHX_ register SV *sv, register const char *ptr, register STRLEN len)
 {
     register char *dptr;
     assert(len >= 0);  /* STRLEN is probably unsigned, so this may
@@ -2324,12 +2345,7 @@ sv_setpvn(register SV *sv, register const char *ptr, register STRLEN len)
 	(void)SvOK_off(sv);
 	return;
     }
-    if (SvTYPE(sv) >= SVt_PV) {
-	if (SvFAKE(sv) && SvTYPE(sv) == SVt_PVGV)
-	    sv_unglob(sv);
-    }
-    else
-	sv_upgrade(sv, SVt_PV);
+    (void)SvUPGRADE(sv, SVt_PV);
 
     SvGROW(sv, len + 1);
     dptr = SvPVX(sv);
@@ -2341,14 +2357,14 @@ sv_setpvn(register SV *sv, register const char *ptr, register STRLEN len)
 }
 
 void
-sv_setpvn_mg(register SV *sv, register const char *ptr, register STRLEN len)
+Perl_sv_setpvn_mg(pTHX_ register SV *sv, register const char *ptr, register STRLEN len)
 {
     sv_setpvn(sv,ptr,len);
     SvSETMAGIC(sv);
 }
 
 void
-sv_setpv(register SV *sv, register const char *ptr)
+Perl_sv_setpv(pTHX_ register SV *sv, register const char *ptr)
 {
     register STRLEN len;
 
@@ -2358,12 +2374,7 @@ sv_setpv(register SV *sv, register const char *ptr)
 	return;
     }
     len = strlen(ptr);
-    if (SvTYPE(sv) >= SVt_PV) {
-	if (SvFAKE(sv) && SvTYPE(sv) == SVt_PVGV)
-	    sv_unglob(sv);
-    }
-    else 
-	sv_upgrade(sv, SVt_PV);
+    (void)SvUPGRADE(sv, SVt_PV);
 
     SvGROW(sv, len + 1);
     Move(ptr,SvPVX(sv),len+1,char);
@@ -2373,14 +2384,14 @@ sv_setpv(register SV *sv, register const char *ptr)
 }
 
 void
-sv_setpv_mg(register SV *sv, register const char *ptr)
+Perl_sv_setpv_mg(pTHX_ register SV *sv, register const char *ptr)
 {
     sv_setpv(sv,ptr);
     SvSETMAGIC(sv);
 }
 
 void
-sv_usepvn(register SV *sv, register char *ptr, register STRLEN len)
+Perl_sv_usepvn(pTHX_ register SV *sv, register char *ptr, register STRLEN len)
 {
     SV_CHECK_THINKFIRST(sv);
     (void)SvUPGRADE(sv, SVt_PV);
@@ -2389,7 +2400,7 @@ sv_usepvn(register SV *sv, register char *ptr, register STRLEN len)
 	return;
     }
     (void)SvOOK_off(sv);
-    if (SvPVX(sv))
+    if (SvPVX(sv) && SvLEN(sv))
 	Safefree(SvPVX(sv));
     Renew(ptr, len+1, char);
     SvPVX(sv) = ptr;
@@ -2401,26 +2412,28 @@ sv_usepvn(register SV *sv, register char *ptr, register STRLEN len)
 }
 
 void
-sv_usepvn_mg(register SV *sv, register char *ptr, register STRLEN len)
+Perl_sv_usepvn_mg(pTHX_ register SV *sv, register char *ptr, register STRLEN len)
 {
     sv_usepvn(sv,ptr,len);
     SvSETMAGIC(sv);
 }
 
-STATIC void
-sv_check_thinkfirst(register SV *sv)
+void
+Perl_sv_force_normal(pTHX_ register SV *sv)
 {
     if (SvREADONLY(sv)) {
 	dTHR;
 	if (PL_curcop != &PL_compiling)
-	    croak(no_modify);
+	    Perl_croak(aTHX_ PL_no_modify);
     }
     if (SvROK(sv))
 	sv_unref(sv);
+    else if (SvFAKE(sv) && SvTYPE(sv) == SVt_PVGV)
+	sv_unglob(sv);
 }
     
 void
-sv_chop(register SV *sv, register char *ptr)	/* like set but assuming ptr is in sv */
+Perl_sv_chop(pTHX_ register SV *sv, register char *ptr)	/* like set but assuming ptr is in sv */
                 
                    
 {
@@ -2433,10 +2446,17 @@ sv_chop(register SV *sv, register char *ptr)	/* like set but assuming ptr is in 
 	sv_upgrade(sv,SVt_PVIV);
 
     if (!SvOOK(sv)) {
+	if (!SvLEN(sv)) { /* make copy of shared string */
+	    char *pvx = SvPVX(sv);
+	    STRLEN len = SvCUR(sv);
+	    SvGROW(sv, len + 1);
+	    Move(pvx,SvPVX(sv),len,char);
+	    *SvEND(sv) = '\0';
+	}
 	SvIVX(sv) = 0;
 	SvFLAGS(sv) |= SVf_OOK;
     }
-    SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVp_IOK|SVp_NOK);
+    SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVp_IOK|SVp_NOK|SVf_IVisUV);
     delta = ptr - SvPVX(sv);
     SvLEN(sv) -= delta;
     SvCUR(sv) -= delta;
@@ -2445,7 +2465,7 @@ sv_chop(register SV *sv, register char *ptr)	/* like set but assuming ptr is in 
 }
 
 void
-sv_catpvn(register SV *sv, register char *ptr, register STRLEN len)
+Perl_sv_catpvn(pTHX_ register SV *sv, register const char *ptr, register STRLEN len)
 {
     STRLEN tlen;
     char *junk;
@@ -2462,14 +2482,14 @@ sv_catpvn(register SV *sv, register char *ptr, register STRLEN len)
 }
 
 void
-sv_catpvn_mg(register SV *sv, register char *ptr, register STRLEN len)
+Perl_sv_catpvn_mg(pTHX_ register SV *sv, register const char *ptr, register STRLEN len)
 {
     sv_catpvn(sv,ptr,len);
     SvSETMAGIC(sv);
 }
 
 void
-sv_catsv(SV *dstr, register SV *sstr)
+Perl_sv_catsv(pTHX_ SV *dstr, register SV *sstr)
 {
     char *s;
     STRLEN len;
@@ -2480,14 +2500,14 @@ sv_catsv(SV *dstr, register SV *sstr)
 }
 
 void
-sv_catsv_mg(SV *dstr, register SV *sstr)
+Perl_sv_catsv_mg(pTHX_ SV *dstr, register SV *sstr)
 {
     sv_catsv(dstr,sstr);
     SvSETMAGIC(dstr);
 }
 
 void
-sv_catpv(register SV *sv, register char *ptr)
+Perl_sv_catpv(pTHX_ register SV *sv, register const char *ptr)
 {
     register STRLEN len;
     STRLEN tlen;
@@ -2507,21 +2527,18 @@ sv_catpv(register SV *sv, register char *ptr)
 }
 
 void
-sv_catpv_mg(register SV *sv, register char *ptr)
+Perl_sv_catpv_mg(pTHX_ register SV *sv, register const char *ptr)
 {
     sv_catpv(sv,ptr);
     SvSETMAGIC(sv);
 }
 
 SV *
-newSV(STRLEN len)
+Perl_newSV(pTHX_ STRLEN len)
 {
     register SV *sv;
     
     new_SV(sv);
-    SvANY(sv) = 0;
-    SvREFCNT(sv) = 1;
-    SvFLAGS(sv) = 0;
     if (len) {
 	sv_upgrade(sv, SVt_PV);
 	SvGROW(sv, len + 1);
@@ -2532,14 +2549,14 @@ newSV(STRLEN len)
 /* name is assumed to contain an SV* if (name && namelen == HEf_SVKEY) */
 
 void
-sv_magic(register SV *sv, SV *obj, int how, char *name, I32 namlen)
+Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 namlen)
 {
     MAGIC* mg;
     
     if (SvREADONLY(sv)) {
 	dTHR;
 	if (PL_curcop != &PL_compiling && !strchr("gBf", how))
-	    croak(no_modify);
+	    Perl_croak(aTHX_ PL_no_modify);
     }
     if (SvMAGICAL(sv) || (how == 't' && SvTYPE(sv) >= SVt_PVMG)) {
 	if (SvMAGIC(sv) && (mg = mg_find(sv, how))) {
@@ -2572,100 +2589,107 @@ sv_magic(register SV *sv, SV *obj, int how, char *name, I32 namlen)
     
     switch (how) {
     case 0:
-	mg->mg_virtual = &vtbl_sv;
+	mg->mg_virtual = &PL_vtbl_sv;
 	break;
-#ifdef OVERLOAD
     case 'A':
-        mg->mg_virtual = &vtbl_amagic;
+        mg->mg_virtual = &PL_vtbl_amagic;
         break;
     case 'a':
-        mg->mg_virtual = &vtbl_amagicelem;
+        mg->mg_virtual = &PL_vtbl_amagicelem;
         break;
     case 'c':
         mg->mg_virtual = 0;
         break;
-#endif /* OVERLOAD */
     case 'B':
-	mg->mg_virtual = &vtbl_bm;
+	mg->mg_virtual = &PL_vtbl_bm;
+	break;
+    case 'D':
+	mg->mg_virtual = &PL_vtbl_regdata;
+	break;
+    case 'd':
+	mg->mg_virtual = &PL_vtbl_regdatum;
 	break;
     case 'E':
-	mg->mg_virtual = &vtbl_env;
+	mg->mg_virtual = &PL_vtbl_env;
 	break;
     case 'f':
-	mg->mg_virtual = &vtbl_fm;
+	mg->mg_virtual = &PL_vtbl_fm;
 	break;
     case 'e':
-	mg->mg_virtual = &vtbl_envelem;
+	mg->mg_virtual = &PL_vtbl_envelem;
 	break;
     case 'g':
-	mg->mg_virtual = &vtbl_mglob;
+	mg->mg_virtual = &PL_vtbl_mglob;
 	break;
     case 'I':
-	mg->mg_virtual = &vtbl_isa;
+	mg->mg_virtual = &PL_vtbl_isa;
 	break;
     case 'i':
-	mg->mg_virtual = &vtbl_isaelem;
+	mg->mg_virtual = &PL_vtbl_isaelem;
 	break;
     case 'k':
-	mg->mg_virtual = &vtbl_nkeys;
+	mg->mg_virtual = &PL_vtbl_nkeys;
 	break;
     case 'L':
 	SvRMAGICAL_on(sv);
 	mg->mg_virtual = 0;
 	break;
     case 'l':
-	mg->mg_virtual = &vtbl_dbline;
+	mg->mg_virtual = &PL_vtbl_dbline;
 	break;
 #ifdef USE_THREADS
     case 'm':
-	mg->mg_virtual = &vtbl_mutex;
+	mg->mg_virtual = &PL_vtbl_mutex;
 	break;
 #endif /* USE_THREADS */
 #ifdef USE_LOCALE_COLLATE
     case 'o':
-        mg->mg_virtual = &vtbl_collxfrm;
+        mg->mg_virtual = &PL_vtbl_collxfrm;
         break;
 #endif /* USE_LOCALE_COLLATE */
     case 'P':
-	mg->mg_virtual = &vtbl_pack;
+	mg->mg_virtual = &PL_vtbl_pack;
 	break;
     case 'p':
     case 'q':
-	mg->mg_virtual = &vtbl_packelem;
+	mg->mg_virtual = &PL_vtbl_packelem;
 	break;
     case 'r':
-	mg->mg_virtual = &vtbl_regexp;
+	mg->mg_virtual = &PL_vtbl_regexp;
 	break;
     case 'S':
-	mg->mg_virtual = &vtbl_sig;
+	mg->mg_virtual = &PL_vtbl_sig;
 	break;
     case 's':
-	mg->mg_virtual = &vtbl_sigelem;
+	mg->mg_virtual = &PL_vtbl_sigelem;
 	break;
     case 't':
-	mg->mg_virtual = &vtbl_taint;
+	mg->mg_virtual = &PL_vtbl_taint;
 	mg->mg_len = 1;
 	break;
     case 'U':
-	mg->mg_virtual = &vtbl_uvar;
+	mg->mg_virtual = &PL_vtbl_uvar;
 	break;
     case 'v':
-	mg->mg_virtual = &vtbl_vec;
+	mg->mg_virtual = &PL_vtbl_vec;
 	break;
     case 'x':
-	mg->mg_virtual = &vtbl_substr;
+	mg->mg_virtual = &PL_vtbl_substr;
 	break;
     case 'y':
-	mg->mg_virtual = &vtbl_defelem;
+	mg->mg_virtual = &PL_vtbl_defelem;
 	break;
     case '*':
-	mg->mg_virtual = &vtbl_glob;
+	mg->mg_virtual = &PL_vtbl_glob;
 	break;
     case '#':
-	mg->mg_virtual = &vtbl_arylen;
+	mg->mg_virtual = &PL_vtbl_arylen;
 	break;
     case '.':
-	mg->mg_virtual = &vtbl_pos;
+	mg->mg_virtual = &PL_vtbl_pos;
+	break;
+    case '<':
+	mg->mg_virtual = &PL_vtbl_backref;
 	break;
     case '~':	/* Reserved for use by extensions not perl internals.	*/
 	/* Useful for attaching extension internal data to perl vars.	*/
@@ -2674,7 +2698,7 @@ sv_magic(register SV *sv, SV *obj, int how, char *name, I32 namlen)
 	SvRMAGICAL_on(sv);
 	break;
     default:
-	croak("Don't know how to handle magic of type '%c'", how);
+	Perl_croak(aTHX_ "Don't know how to handle magic of type '%c'", how);
     }
     mg_magical(sv);
     if (SvGMAGICAL(sv))
@@ -2682,7 +2706,7 @@ sv_magic(register SV *sv, SV *obj, int how, char *name, I32 namlen)
 }
 
 int
-sv_unmagic(SV *sv, int type)
+Perl_sv_unmagic(pTHX_ SV *sv, int type)
 {
     MAGIC* mg;
     MAGIC** mgp;
@@ -2694,7 +2718,7 @@ sv_unmagic(SV *sv, int type)
 	    MGVTBL* vtbl = mg->mg_virtual;
 	    *mgp = mg->mg_moremagic;
 	    if (vtbl && (vtbl->svt_free != NULL))
-		(VTBL->svt_free)(sv, mg);
+		CALL_FPTR(vtbl->svt_free)(aTHX_ sv, mg);
 	    if (mg->mg_ptr && mg->mg_type != 'g')
 		if (mg->mg_len >= 0)
 		    Safefree(mg->mg_ptr);
@@ -2715,8 +2739,65 @@ sv_unmagic(SV *sv, int type)
     return 0;
 }
 
+SV *
+Perl_sv_rvweaken(pTHX_ SV *sv)
+{
+    SV *tsv;
+    if (!SvOK(sv))  /* let undefs pass */
+	return sv;
+    if (!SvROK(sv))
+	Perl_croak(aTHX_ "Can't weaken a nonreference");
+    else if (SvWEAKREF(sv)) {
+	dTHR;
+	if (ckWARN(WARN_MISC))
+	    Perl_warner(aTHX_ WARN_MISC, "Reference is already weak");
+	return sv;
+    }
+    tsv = SvRV(sv);
+    sv_add_backref(tsv, sv);
+    SvWEAKREF_on(sv);
+    SvREFCNT_dec(tsv);              
+    return sv;
+}
+
+STATIC void
+S_sv_add_backref(pTHX_ SV *tsv, SV *sv)
+{
+    AV *av;
+    MAGIC *mg;
+    if (SvMAGICAL(tsv) && (mg = mg_find(tsv, '<')))
+	av = (AV*)mg->mg_obj;
+    else {
+	av = newAV();
+	sv_magic(tsv, (SV*)av, '<', NULL, 0);
+	SvREFCNT_dec(av);           /* for sv_magic */
+    }
+    av_push(av,sv);
+}
+
+STATIC void 
+S_sv_del_backref(pTHX_ SV *sv)
+{
+    AV *av;
+    SV **svp;
+    I32 i;
+    SV *tsv = SvRV(sv);
+    MAGIC *mg;
+    if (!SvMAGICAL(tsv) || !(mg = mg_find(tsv, '<')))
+	Perl_croak(aTHX_ "panic: del_backref");
+    av = (AV *)mg->mg_obj;
+    svp = AvARRAY(av);
+    i = AvFILLp(av);
+    while (i >= 0) {
+	if (svp[i] == sv) {
+	    svp[i] = &PL_sv_undef; /* XXX */
+	}
+	i--;
+    }
+}
+
 void
-sv_insert(SV *bigstr, STRLEN offset, STRLEN len, char *little, STRLEN littlelen)
+Perl_sv_insert(pTHX_ SV *bigstr, STRLEN offset, STRLEN len, char *little, STRLEN littlelen)
 {
     register char *big;
     register char *mid;
@@ -2727,7 +2808,7 @@ sv_insert(SV *bigstr, STRLEN offset, STRLEN len, char *little, STRLEN littlelen)
     
 
     if (!bigstr)
-	croak("Can't modify non-existent substring");
+	Perl_croak(aTHX_ "Can't modify non-existent substring");
     SvPV_force(bigstr, curlen);
     if (offset + len > curlen) {
 	SvGROW(bigstr, offset+len+1);
@@ -2761,7 +2842,7 @@ sv_insert(SV *bigstr, STRLEN offset, STRLEN len, char *little, STRLEN littlelen)
     bigend = big + SvCUR(bigstr);
 
     if (midend > bigend)
-	croak("panic: sv_insert");
+	Perl_croak(aTHX_ "panic: sv_insert");
 
     if (mid - big > bigend - midend) {	/* faster to shorten from end */
 	if (littlelen) {
@@ -2801,12 +2882,13 @@ sv_insert(SV *bigstr, STRLEN offset, STRLEN len, char *little, STRLEN littlelen)
 /* make sv point to what nstr did */
 
 void
-sv_replace(register SV *sv, register SV *nsv)
+Perl_sv_replace(pTHX_ register SV *sv, register SV *nsv)
 {
+    dTHR;
     U32 refcnt = SvREFCNT(sv);
     SV_CHECK_THINKFIRST(sv);
-    if (SvREFCNT(nsv) != 1)
-	warn("Reference miscount in sv_replace()");
+    if (SvREFCNT(nsv) != 1 && ckWARN_d(WARN_INTERNAL))
+	Perl_warner(aTHX_ WARN_INTERNAL, "Reference miscount in sv_replace()");
     if (SvMAGICAL(sv)) {
 	if (SvMAGICAL(nsv))
 	    mg_free(nsv);
@@ -2827,7 +2909,7 @@ sv_replace(register SV *sv, register SV *nsv)
 }
 
 void
-sv_clear(register SV *sv)
+Perl_sv_clear(pTHX_ register SV *sv)
 {
     HV* stash;
     assert(sv);
@@ -2857,15 +2939,24 @@ sv_clear(register SV *sv)
 		    PUSHMARK(SP);
 		    PUSHs(&tmpref);
 		    PUTBACK;
-		    perl_call_sv((SV*)GvCV(destructor),
-				 G_DISCARD|G_EVAL|G_KEEPERR);
+		    call_sv((SV*)GvCV(destructor),
+			    G_DISCARD|G_EVAL|G_KEEPERR);
 		    SvREFCNT(sv)--;
 		    POPSTACK;
+		    SPAGAIN;
 		    LEAVE;
 		}
 	    } while (SvOBJECT(sv) && SvSTASH(sv) != stash);
 
 	    del_XRV(SvANY(&tmpref));
+
+	    if (SvREFCNT(sv)) {
+		if (PL_in_clean_objs)
+		    Perl_croak(aTHX_ "DESTROY created new reference to dead object '%s'",
+			  HvNAME(stash));
+		/* DESTROY gave object new lease on life */
+		return;
+	    }
 	}
 
 	if (SvOBJECT(sv)) {
@@ -2874,22 +2965,23 @@ sv_clear(register SV *sv)
 	    if (SvTYPE(sv) != SVt_PVIO)
 		--PL_sv_objcount;	/* XXX Might want something more general */
 	}
-	if (SvREFCNT(sv)) {
-		if (PL_in_clean_objs)
-		    croak("DESTROY created new reference to dead object");
-		/* DESTROY gave object new lease on life */
-		return;
-	}
     }
     if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv))
 	mg_free(sv);
     stash = NULL;
     switch (SvTYPE(sv)) {
     case SVt_PVIO:
-	if (IoIFP(sv) != PerlIO_stdin() &&
+	if (IoIFP(sv) &&
+	    IoIFP(sv) != PerlIO_stdin() &&
 	    IoIFP(sv) != PerlIO_stdout() &&
 	    IoIFP(sv) != PerlIO_stderr())
-	  io_close((IO*)sv);
+	{
+	    io_close((IO*)sv, FALSE);
+	}
+	if (IoDIRP(sv)) {
+	    PerlDir_close(IoDIRP(sv));
+	    IoDIRP(sv) = 0;
+	}
 	Safefree(IoTOP_NAME(sv));
 	Safefree(IoFMT_NAME(sv));
 	Safefree(IoBOTTOM_NAME(sv));
@@ -2926,8 +3018,12 @@ sv_clear(register SV *sv)
 	/* FALL THROUGH */
     case SVt_PV:
     case SVt_RV:
-	if (SvROK(sv))
-	    SvREFCNT_dec(SvRV(sv));
+	if (SvROK(sv)) {
+	    if (SvWEAKREF(sv))
+	        sv_del_backref(sv);
+	    else
+	        SvREFCNT_dec(SvRV(sv));
+	}
 	else if (SvPVX(sv) && SvLEN(sv))
 	    Safefree(SvPVX(sv));
 	break;
@@ -2999,7 +3095,7 @@ sv_clear(register SV *sv)
 }
 
 SV *
-sv_newref(SV *sv)
+Perl_sv_newref(pTHX_ SV *sv)
 {
     if (sv)
 	ATOMIC_INC(SvREFCNT(sv));
@@ -3007,8 +3103,9 @@ sv_newref(SV *sv)
 }
 
 void
-sv_free(SV *sv)
+Perl_sv_free(pTHX_ SV *sv)
 {
+    dTHR;
     int refcount_is_zero;
 
     if (!sv)
@@ -3023,7 +3120,8 @@ sv_free(SV *sv)
 	    SvREFCNT(sv) = (~(U32)0)/2;
 	    return;
 	}
-	warn("Attempt to free unreferenced scalar");
+	if (ckWARN_d(WARN_INTERNAL))
+	    Perl_warner(aTHX_ WARN_INTERNAL, "Attempt to free unreferenced scalar");
 	return;
     }
     ATOMIC_DEC_AND_TEST(refcount_is_zero, SvREFCNT(sv));
@@ -3031,7 +3129,9 @@ sv_free(SV *sv)
 	return;
 #ifdef DEBUGGING
     if (SvTEMP(sv)) {
-	warn("Attempt to free temp prematurely: SV 0x%lx", (unsigned long)sv);
+	if (ckWARN_d(WARN_DEBUGGING))
+	    Perl_warner(aTHX_ WARN_DEBUGGING,
+			"Attempt to free temp prematurely: SV 0x%lx", (unsigned long)sv);
 	return;
     }
 #endif
@@ -3046,7 +3146,7 @@ sv_free(SV *sv)
 }
 
 STRLEN
-sv_len(register SV *sv)
+Perl_sv_len(pTHX_ register SV *sv)
 {
     char *junk;
     STRLEN len;
@@ -3062,10 +3162,10 @@ sv_len(register SV *sv)
 }
 
 STRLEN
-sv_len_utf8(register SV *sv)
+Perl_sv_len_utf8(pTHX_ register SV *sv)
 {
-    unsigned char *s;
-    unsigned char *send;
+    U8 *s;
+    U8 *send;
     STRLEN len;
 
     if (!sv)
@@ -3076,7 +3176,7 @@ sv_len_utf8(register SV *sv)
 	len = mg_length(sv);
     else
 #endif
-	s = SvPV(sv, len);
+	s = (U8*)SvPV(sv, len);
     send = s + len;
     len = 0;
     while (s < send) {
@@ -3087,45 +3187,49 @@ sv_len_utf8(register SV *sv)
 }
 
 void
-sv_pos_u2b(register SV *sv, I32* offsetp, I32* lenp)
+Perl_sv_pos_u2b(pTHX_ register SV *sv, I32* offsetp, I32* lenp)
 {
-    unsigned char *start;
-    unsigned char *s;
-    unsigned char *send;
+    U8 *start;
+    U8 *s;
+    U8 *send;
     I32 uoffset = *offsetp;
     STRLEN len;
 
     if (!sv)
 	return;
 
-    start = s = SvPV(sv, len);
+    start = s = (U8*)SvPV(sv, len);
     send = s + len;
     while (s < send && uoffset--)
 	s += UTF8SKIP(s);
+    if (s >= send)
+	s = send;
     *offsetp = s - start;
     if (lenp) {
 	I32 ulen = *lenp;
 	start = s;
 	while (s < send && ulen--)
 	    s += UTF8SKIP(s);
+	if (s >= send)
+	    s = send;
 	*lenp = s - start;
     }
     return;
 }
 
 void
-sv_pos_b2u(register SV *sv, I32* offsetp)
+Perl_sv_pos_b2u(pTHX_ register SV *sv, I32* offsetp)
 {
-    unsigned char *s;
-    unsigned char *send;
+    U8 *s;
+    U8 *send;
     STRLEN len;
 
     if (!sv)
 	return;
 
-    s = SvPV(sv, len);
+    s = (U8*)SvPV(sv, len);
     if (len < *offsetp)
-	croak("panic: bad byte offset");
+	Perl_croak(aTHX_ "panic: bad byte offset");
     send = s + *offsetp;
     len = 0;
     while (s < send) {
@@ -3133,7 +3237,9 @@ sv_pos_b2u(register SV *sv, I32* offsetp)
 	++len;
     }
     if (s != send) {
-	warn("Malformed UTF-8 character");
+        dTHR;
+	if (ckWARN_d(WARN_UTF8))    
+	    Perl_warner(aTHX_ WARN_UTF8, "Malformed UTF-8 character");
 	--len;
     }
     *offsetp = len;
@@ -3141,7 +3247,7 @@ sv_pos_b2u(register SV *sv, I32* offsetp)
 }
 
 I32
-sv_eq(register SV *str1, register SV *str2)
+Perl_sv_eq(pTHX_ register SV *str1, register SV *str2)
 {
     char *pv1;
     STRLEN cur1;
@@ -3167,7 +3273,7 @@ sv_eq(register SV *str1, register SV *str2)
 }
 
 I32
-sv_cmp(register SV *str1, register SV *str2)
+Perl_sv_cmp(pTHX_ register SV *str1, register SV *str2)
 {
     STRLEN cur1 = 0;
     char *pv1 = str1 ? SvPV(str1, cur1) : (char *) NULL;
@@ -3193,7 +3299,7 @@ sv_cmp(register SV *str1, register SV *str2)
 }
 
 I32
-sv_cmp_locale(register SV *sv1, register SV *sv2)
+Perl_sv_cmp_locale(pTHX_ register SV *sv1, register SV *sv2)
 {
 #ifdef USE_LOCALE_COLLATE
 
@@ -3248,7 +3354,7 @@ sv_cmp_locale(register SV *sv1, register SV *sv2)
  * according to the locale settings.
  */
 char *
-sv_collxfrm(SV *sv, STRLEN *nxp)
+Perl_sv_collxfrm(pTHX_ SV *sv, STRLEN *nxp)
 {
     MAGIC *mg;
 
@@ -3294,7 +3400,7 @@ sv_collxfrm(SV *sv, STRLEN *nxp)
 #endif /* USE_LOCALE_COLLATE */
 
 char *
-sv_gets(register SV *sv, register PerlIO *fp, I32 append)
+Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
 {
     dTHR;
     char *rsptr;
@@ -3306,6 +3412,7 @@ sv_gets(register SV *sv, register PerlIO *fp, I32 append)
 
     SV_CHECK_THINKFIRST(sv);
     (void)SvUPGRADE(sv, SVt_PV);
+
     SvSCREAM_off(sv);
 
     if (RsSNARF(PL_rs)) {
@@ -3492,8 +3599,16 @@ thats_really_all_folks:
     }
    else
     {
+#ifndef EPOC
        /*The big, slow, and stupid way */
 	STDCHAR buf[8192];
+#else
+	/* Need to work around EPOC SDK features          */
+	/* On WINS: MS VC5 generates calls to _chkstk,    */
+	/* if a `large' stack frame is allocated          */
+	/* gcc on MARM does not generate calls like these */
+	STDCHAR buf[1024];
+#endif
 
 screamer2:
 	if (rslen) {
@@ -3557,31 +3672,30 @@ screamer2:
 
 
 void
-sv_inc(register SV *sv)
+Perl_sv_inc(pTHX_ register SV *sv)
 {
     register char *d;
     int flags;
 
     if (!sv)
 	return;
+    if (SvGMAGICAL(sv))
+	mg_get(sv);
     if (SvTHINKFIRST(sv)) {
 	if (SvREADONLY(sv)) {
 	    dTHR;
 	    if (PL_curcop != &PL_compiling)
-		croak(no_modify);
+		Perl_croak(aTHX_ PL_no_modify);
 	}
 	if (SvROK(sv)) {
 	    IV i;
-#ifdef OVERLOAD
-	    if (SvAMAGIC(sv) && AMG_CALLun(sv,inc)) return;
-#endif /* OVERLOAD */
-	    i = (IV)SvRV(sv);
+	    if (SvAMAGIC(sv) && AMG_CALLun(sv,inc))
+		return;
+	    i = (IV)PTR_CAST SvRV(sv);
 	    sv_unref(sv);
 	    sv_setiv(sv, i);
 	}
     }
-    if (SvGMAGICAL(sv))
-	mg_get(sv);
     flags = SvFLAGS(sv);
     if (flags & SVp_NOK) {
 	(void)SvNOK_only(sv);
@@ -3589,11 +3703,19 @@ sv_inc(register SV *sv)
 	return;
     }
     if (flags & SVp_IOK) {
-	if (SvIVX(sv) == IV_MAX)
-	    sv_setnv(sv, (double)IV_MAX + 1.0);
-	else {
-	    (void)SvIOK_only(sv);
-	    ++SvIVX(sv);
+	if (SvIsUV(sv)) {
+	    if (SvUVX(sv) == UV_MAX)
+		sv_setnv(sv, (NV)UV_MAX + 1.0);
+	    else
+		(void)SvIOK_only_UV(sv);
+		++SvUVX(sv);
+	} else {
+	    if (SvIVX(sv) == IV_MAX)
+		sv_setnv(sv, (NV)IV_MAX + 1.0);
+	    else {
+		(void)SvIOK_only(sv);
+		++SvIVX(sv);
+	    }	    
 	}
 	return;
     }
@@ -3608,8 +3730,7 @@ sv_inc(register SV *sv)
     while (isALPHA(*d)) d++;
     while (isDIGIT(*d)) d++;
     if (*d) {
-	SET_NUMERIC_STANDARD();
-	sv_setnv(sv,atof(SvPVX(sv)) + 1.0);  /* punt */
+	sv_setnv(sv,Atof(SvPVX(sv)) + 1.0);  /* punt */
 	return;
     }
     d--;
@@ -3620,10 +3741,24 @@ sv_inc(register SV *sv)
 	    *(d--) = '0';
 	}
 	else {
+#ifdef EBCDIC
+	    /* MKS: The original code here died if letters weren't consecutive.
+	     * at least it didn't have to worry about non-C locales.  The
+	     * new code assumes that ('z'-'a')==('Z'-'A'), letters are
+	     * arranged in order (although not consecutively) and that only 
+	     * [A-Za-z] are accepted by isALPHA in the C locale.
+	     */
+	    if (*d != 'z' && *d != 'Z') {
+		do { ++*d; } while (!isALPHA(*d));
+		return;
+	    }
+	    *(d--) -= 'z' - 'a';
+#else
 	    ++*d;
 	    if (isALPHA(*d))
 		return;
 	    *(d--) -= 'z' - 'a' + 1;
+#endif
 	}
     }
     /* oh,oh, the number grew */
@@ -3638,30 +3773,29 @@ sv_inc(register SV *sv)
 }
 
 void
-sv_dec(register SV *sv)
+Perl_sv_dec(pTHX_ register SV *sv)
 {
     int flags;
 
     if (!sv)
 	return;
+    if (SvGMAGICAL(sv))
+	mg_get(sv);
     if (SvTHINKFIRST(sv)) {
 	if (SvREADONLY(sv)) {
 	    dTHR;
 	    if (PL_curcop != &PL_compiling)
-		croak(no_modify);
+		Perl_croak(aTHX_ PL_no_modify);
 	}
 	if (SvROK(sv)) {
 	    IV i;
-#ifdef OVERLOAD
-	    if (SvAMAGIC(sv) && AMG_CALLun(sv,dec)) return;
-#endif /* OVERLOAD */
-	    i = (IV)SvRV(sv);
+	    if (SvAMAGIC(sv) && AMG_CALLun(sv,dec))
+		return;
+	    i = (IV)PTR_CAST SvRV(sv);
 	    sv_unref(sv);
 	    sv_setiv(sv, i);
 	}
     }
-    if (SvGMAGICAL(sv))
-	mg_get(sv);
     flags = SvFLAGS(sv);
     if (flags & SVp_NOK) {
 	SvNVX(sv) -= 1.0;
@@ -3669,11 +3803,22 @@ sv_dec(register SV *sv)
 	return;
     }
     if (flags & SVp_IOK) {
-	if (SvIVX(sv) == IV_MIN)
-	    sv_setnv(sv, (double)IV_MIN - 1.0);
-	else {
-	    (void)SvIOK_only(sv);
-	    --SvIVX(sv);
+	if (SvIsUV(sv)) {
+	    if (SvUVX(sv) == 0) {
+		(void)SvIOK_only(sv);
+		SvIVX(sv) = -1;
+	    }
+	    else {
+		(void)SvIOK_only_UV(sv);
+		--SvUVX(sv);
+	    }	    
+	} else {
+	    if (SvIVX(sv) == IV_MIN)
+		sv_setnv(sv, (NV)IV_MIN - 1.0);
+	    else {
+		(void)SvIOK_only(sv);
+		--SvIVX(sv);
+	    }	    
 	}
 	return;
     }
@@ -3684,8 +3829,7 @@ sv_dec(register SV *sv)
 	(void)SvNOK_only(sv);
 	return;
     }
-    SET_NUMERIC_STANDARD();
-    sv_setnv(sv,atof(SvPVX(sv)) - 1.0);	/* punt */
+    sv_setnv(sv,Atof(SvPVX(sv)) - 1.0);	/* punt */
 }
 
 /* Make a string that will exist for the duration of the expression
@@ -3693,74 +3837,55 @@ sv_dec(register SV *sv)
  * hopefully we won't free it until it has been assigned to a
  * permanent location. */
 
-STATIC void
-sv_mortalgrow(void)
-{
-    dTHR;
-    PL_tmps_max += (PL_tmps_max < 512) ? 128 : 512;
-    Renew(PL_tmps_stack, PL_tmps_max, SV*);
-}
-
 SV *
-sv_mortalcopy(SV *oldstr)
+Perl_sv_mortalcopy(pTHX_ SV *oldstr)
 {
     dTHR;
     register SV *sv;
 
     new_SV(sv);
-    SvANY(sv) = 0;
-    SvREFCNT(sv) = 1;
-    SvFLAGS(sv) = 0;
     sv_setsv(sv,oldstr);
-    if (++PL_tmps_ix >= PL_tmps_max)
-	sv_mortalgrow();
-    PL_tmps_stack[PL_tmps_ix] = sv;
+    EXTEND_MORTAL(1);
+    PL_tmps_stack[++PL_tmps_ix] = sv;
     SvTEMP_on(sv);
     return sv;
 }
 
 SV *
-sv_newmortal(void)
+Perl_sv_newmortal(pTHX)
 {
     dTHR;
     register SV *sv;
 
     new_SV(sv);
-    SvANY(sv) = 0;
-    SvREFCNT(sv) = 1;
     SvFLAGS(sv) = SVs_TEMP;
-    if (++PL_tmps_ix >= PL_tmps_max)
-	sv_mortalgrow();
-    PL_tmps_stack[PL_tmps_ix] = sv;
+    EXTEND_MORTAL(1);
+    PL_tmps_stack[++PL_tmps_ix] = sv;
     return sv;
 }
 
 /* same thing without the copying */
 
 SV *
-sv_2mortal(register SV *sv)
+Perl_sv_2mortal(pTHX_ register SV *sv)
 {
     dTHR;
     if (!sv)
 	return sv;
     if (SvREADONLY(sv) && SvIMMORTAL(sv))
 	return sv;
-    if (++PL_tmps_ix >= PL_tmps_max)
-	sv_mortalgrow();
-    PL_tmps_stack[PL_tmps_ix] = sv;
+    EXTEND_MORTAL(1);
+    PL_tmps_stack[++PL_tmps_ix] = sv;
     SvTEMP_on(sv);
     return sv;
 }
 
 SV *
-newSVpv(char *s, STRLEN len)
+Perl_newSVpv(pTHX_ const char *s, STRLEN len)
 {
     register SV *sv;
 
     new_SV(sv);
-    SvANY(sv) = 0;
-    SvREFCNT(sv) = 1;
-    SvFLAGS(sv) = 0;
     if (!len)
 	len = strlen(s);
     sv_setpvn(sv,s,len);
@@ -3768,71 +3893,76 @@ newSVpv(char *s, STRLEN len)
 }
 
 SV *
-newSVpvn(char *s, STRLEN len)
+Perl_newSVpvn(pTHX_ const char *s, STRLEN len)
 {
     register SV *sv;
 
     new_SV(sv);
-    SvANY(sv) = 0;
-    SvREFCNT(sv) = 1;
-    SvFLAGS(sv) = 0;
     sv_setpvn(sv,s,len);
     return sv;
 }
 
+#if defined(PERL_IMPLICIT_CONTEXT)
 SV *
-newSVpvf(const char* pat, ...)
+Perl_newSVpvf_nocontext(const char* pat, ...)
+{
+    dTHX;
+    register SV *sv;
+    va_list args;
+    va_start(args, pat);
+    sv = vnewSVpvf(pat, &args);
+    va_end(args);
+    return sv;
+}
+#endif
+
+SV *
+Perl_newSVpvf(pTHX_ const char* pat, ...)
 {
     register SV *sv;
     va_list args;
-
-    new_SV(sv);
-    SvANY(sv) = 0;
-    SvREFCNT(sv) = 1;
-    SvFLAGS(sv) = 0;
     va_start(args, pat);
-    sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
+    sv = vnewSVpvf(pat, &args);
     va_end(args);
     return sv;
 }
 
+SV *
+Perl_vnewSVpvf(pTHX_ const char* pat, va_list* args)
+{
+    register SV *sv;
+    new_SV(sv);
+    sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
+    return sv;
+}
 
 SV *
-newSVnv(double n)
+Perl_newSVnv(pTHX_ NV n)
 {
     register SV *sv;
 
     new_SV(sv);
-    SvANY(sv) = 0;
-    SvREFCNT(sv) = 1;
-    SvFLAGS(sv) = 0;
     sv_setnv(sv,n);
     return sv;
 }
 
 SV *
-newSViv(IV i)
+Perl_newSViv(pTHX_ IV i)
 {
     register SV *sv;
 
     new_SV(sv);
-    SvANY(sv) = 0;
-    SvREFCNT(sv) = 1;
-    SvFLAGS(sv) = 0;
     sv_setiv(sv,i);
     return sv;
 }
 
 SV *
-newRV_noinc(SV *tmpRef)
+Perl_newRV_noinc(pTHX_ SV *tmpRef)
 {
     dTHR;
     register SV *sv;
 
     new_SV(sv);
-    SvANY(sv) = 0;
-    SvREFCNT(sv) = 1;
-    SvFLAGS(sv) = 0;
     sv_upgrade(sv, SVt_RV);
     SvTEMP_off(tmpRef);
     SvRV(sv) = tmpRef;
@@ -3841,7 +3971,7 @@ newRV_noinc(SV *tmpRef)
 }
 
 SV *
-newRV(SV *tmpRef)
+Perl_newRV(pTHX_ SV *tmpRef)
 {
     return newRV_noinc(SvREFCNT_inc(tmpRef));
 }
@@ -3849,20 +3979,19 @@ newRV(SV *tmpRef)
 /* make an exact duplicate of old */
 
 SV *
-newSVsv(register SV *old)
+Perl_newSVsv(pTHX_ register SV *old)
 {
+    dTHR;
     register SV *sv;
 
     if (!old)
 	return Nullsv;
     if (SvTYPE(old) == SVTYPEMASK) {
-	warn("semi-panic: attempt to dup freed string");
+        if (ckWARN_d(WARN_INTERNAL))
+	    Perl_warner(aTHX_ WARN_INTERNAL, "semi-panic: attempt to dup freed string");
 	return Nullsv;
     }
     new_SV(sv);
-    SvANY(sv) = 0;
-    SvREFCNT(sv) = 1;
-    SvFLAGS(sv) = 0;
     if (SvTEMP(old)) {
 	SvTEMP_off(old);
 	sv_setsv(sv,old);
@@ -3874,7 +4003,7 @@ newSVsv(register SV *old)
 }
 
 void
-sv_reset(register char *s, HV *stash)
+Perl_sv_reset(pTHX_ register char *s, HV *stash)
 {
     register HE *entry;
     register GV *gv;
@@ -3882,7 +4011,7 @@ sv_reset(register char *s, HV *stash)
     register I32 i;
     register PMOP *pm;
     register I32 max;
-    char todo[256];
+    char todo[PERL_UCHAR_MAX+1];
 
     if (!stash)
 	return;
@@ -3901,22 +4030,28 @@ sv_reset(register char *s, HV *stash)
 
     Zero(todo, 256, char);
     while (*s) {
-	i = *s;
+	i = (unsigned char)*s;
 	if (s[1] == '-') {
 	    s += 2;
 	}
-	max = *s++;
+	max = (unsigned char)*s++;
 	for ( ; i <= max; i++) {
 	    todo[i] = 1;
 	}
 	for (i = 0; i <= (I32) HvMAX(stash); i++) {
 	    for (entry = HvARRAY(stash)[i];
-	      entry;
-	      entry = HeNEXT(entry)) {
+		 entry;
+		 entry = HeNEXT(entry))
+	    {
 		if (!todo[(U8)*HeKEY(entry)])
 		    continue;
 		gv = (GV*)HeVAL(entry);
 		sv = GvSV(gv);
+		if (SvTHINKFIRST(sv)) {
+		    if (!SvREADONLY(sv) && SvROK(sv))
+			sv_unref(sv);
+		    continue;
+		}
 		(void)SvOK_off(sv);
 		if (SvTYPE(sv) >= SVt_PV) {
 		    SvCUR_set(sv, 0);
@@ -3940,10 +4075,11 @@ sv_reset(register char *s, HV *stash)
 }
 
 IO*
-sv_2io(SV *sv)
+Perl_sv_2io(pTHX_ SV *sv)
 {
     IO* io;
     GV* gv;
+    STRLEN n_a;
 
     switch (SvTYPE(sv)) {
     case SVt_PVIO:
@@ -3953,30 +4089,31 @@ sv_2io(SV *sv)
 	gv = (GV*)sv;
 	io = GvIO(gv);
 	if (!io)
-	    croak("Bad filehandle: %s", GvNAME(gv));
+	    Perl_croak(aTHX_ "Bad filehandle: %s", GvNAME(gv));
 	break;
     default:
 	if (!SvOK(sv))
-	    croak(no_usym, "filehandle");
+	    Perl_croak(aTHX_ PL_no_usym, "filehandle");
 	if (SvROK(sv))
 	    return sv_2io(SvRV(sv));
-	gv = gv_fetchpv(SvPV(sv,PL_na), FALSE, SVt_PVIO);
+	gv = gv_fetchpv(SvPV(sv,n_a), FALSE, SVt_PVIO);
 	if (gv)
 	    io = GvIO(gv);
 	else
 	    io = 0;
 	if (!io)
-	    croak("Bad filehandle: %s", SvPV(sv,PL_na));
+	    Perl_croak(aTHX_ "Bad filehandle: %s", SvPV(sv,n_a));
 	break;
     }
     return io;
 }
 
 CV *
-sv_2cv(SV *sv, HV **st, GV **gvp, I32 lref)
+Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
 {
     GV *gv;
     CV *cv;
+    STRLEN n_a;
 
     if (!sv)
 	return *gvp = Nullgv, Nullcv;
@@ -3999,17 +4136,26 @@ sv_2cv(SV *sv, HV **st, GV **gvp, I32 lref)
 	if (SvGMAGICAL(sv))
 	    mg_get(sv);
 	if (SvROK(sv)) {
-	    cv = (CV*)SvRV(sv);
-	    if (SvTYPE(cv) != SVt_PVCV)
-		croak("Not a subroutine reference");
-	    *gvp = Nullgv;
-	    *st = CvSTASH(cv);
-	    return cv;
+	    dTHR;
+	    SV **sp = &sv;		/* Used in tryAMAGICunDEREF macro. */
+	    tryAMAGICunDEREF(to_cv);
+
+	    sv = SvRV(sv);
+	    if (SvTYPE(sv) == SVt_PVCV) {
+		cv = (CV*)sv;
+		*gvp = Nullgv;
+		*st = CvSTASH(cv);
+		return cv;
+	    }
+	    else if(isGV(sv))
+		gv = (GV*)sv;
+	    else
+		Perl_croak(aTHX_ "Not a subroutine reference");
 	}
-	if (isGV(sv))
+	else if (isGV(sv))
 	    gv = (GV*)sv;
 	else
-	    gv = gv_fetchpv(SvPV(sv, PL_na), lref, SVt_PVCV);
+	    gv = gv_fetchpv(SvPV(sv, n_a), lref, SVt_PVCV);
 	*gvp = gv;
 	if (!gv)
 	    return Nullcv;
@@ -4020,20 +4166,23 @@ sv_2cv(SV *sv, HV **st, GV **gvp, I32 lref)
 	    ENTER;
 	    tmpsv = NEWSV(704,0);
 	    gv_efullname3(tmpsv, gv, Nullch);
+	    /* XXX this is probably not what they think they're getting.
+	     * It has the same effect as "sub name;", i.e. just a forward
+	     * declaration! */
 	    newSUB(start_subparse(FALSE, 0),
 		   newSVOP(OP_CONST, 0, tmpsv),
 		   Nullop,
 		   Nullop);
 	    LEAVE;
 	    if (!GvCVu(gv))
-		croak("Unable to create sub named \"%s\"", SvPV(sv,PL_na));
+		Perl_croak(aTHX_ "Unable to create sub named \"%s\"", SvPV(sv,n_a));
 	}
 	return GvCVu(gv);
     }
 }
 
 I32
-sv_true(register SV *sv)
+Perl_sv_true(pTHX_ register SV *sv)
 {
     dTHR;
     if (!sv)
@@ -4061,23 +4210,29 @@ sv_true(register SV *sv)
 }
 
 IV
-sv_iv(register SV *sv)
+Perl_sv_iv(pTHX_ register SV *sv)
 {
-    if (SvIOK(sv))
+    if (SvIOK(sv)) {
+	if (SvIsUV(sv))
+	    return (IV)SvUVX(sv);
 	return SvIVX(sv);
+    }
     return sv_2iv(sv);
 }
 
 UV
-sv_uv(register SV *sv)
+Perl_sv_uv(pTHX_ register SV *sv)
 {
-    if (SvIOK(sv))
-	return SvUVX(sv);
+    if (SvIOK(sv)) {
+	if (SvIsUV(sv))
+	    return SvUVX(sv);
+	return (UV)SvIVX(sv);
+    }
     return sv_2uv(sv);
 }
 
-double
-sv_nv(register SV *sv)
+NV
+Perl_sv_nv(pTHX_ register SV *sv)
 {
     if (SvNOK(sv))
 	return SvNVX(sv);
@@ -4085,7 +4240,18 @@ sv_nv(register SV *sv)
 }
 
 char *
-sv_pvn(SV *sv, STRLEN *lp)
+Perl_sv_pv(pTHX_ SV *sv)
+{
+    STRLEN n_a;
+
+    if (SvPOK(sv))
+	return SvPVX(sv);
+
+    return sv_2pv(sv, &n_a);
+}
+
+char *
+Perl_sv_pvn(pTHX_ SV *sv, STRLEN *lp)
 {
     if (SvPOK(sv)) {
 	*lp = SvCUR(sv);
@@ -4095,31 +4261,21 @@ sv_pvn(SV *sv, STRLEN *lp)
 }
 
 char *
-sv_pvn_force(SV *sv, STRLEN *lp)
+Perl_sv_pvn_force(pTHX_ SV *sv, STRLEN *lp)
 {
     char *s;
 
-    if (SvREADONLY(sv)) {
-	dTHR;
-	if (PL_curcop != &PL_compiling)
-	    croak(no_modify);
-    }
+    if (SvTHINKFIRST(sv) && !SvROK(sv))
+	sv_force_normal(sv);
     
     if (SvPOK(sv)) {
 	*lp = SvCUR(sv);
     }
     else {
 	if (SvTYPE(sv) > SVt_PVLV && SvTYPE(sv) != SVt_PVFM) {
-	    if (SvFAKE(sv) && SvTYPE(sv) == SVt_PVGV) {
-		sv_unglob(sv);
-		s = SvPVX(sv);
-		*lp = SvCUR(sv);
-	    }
-	    else {
-		dTHR;
-		croak("Can't coerce %s to string in %s", sv_reftype(sv,0),
-		    op_name[PL_op->op_type]);
-	    }
+	    dTHR;
+	    Perl_croak(aTHX_ "Can't coerce %s to string in %s", sv_reftype(sv,0),
+		PL_op_name[PL_op->op_type]);
 	}
 	else
 	    s = sv_2pv(sv, lp);
@@ -4145,7 +4301,7 @@ sv_pvn_force(SV *sv, STRLEN *lp)
 }
 
 char *
-sv_reftype(SV *sv, int ob)
+Perl_sv_reftype(pTHX_ SV *sv, int ob)
 {
     if (ob && SvOBJECT(sv))
 	return HvNAME(SvSTASH(sv));
@@ -4176,7 +4332,7 @@ sv_reftype(SV *sv, int ob)
 }
 
 int
-sv_isobject(SV *sv)
+Perl_sv_isobject(pTHX_ SV *sv)
 {
     if (!sv)
 	return 0;
@@ -4191,7 +4347,7 @@ sv_isobject(SV *sv)
 }
 
 int
-sv_isa(SV *sv, char *name)
+Perl_sv_isa(pTHX_ SV *sv, const char *name)
 {
     if (!sv)
 	return 0;
@@ -4207,26 +4363,21 @@ sv_isa(SV *sv, char *name)
 }
 
 SV*
-newSVrv(SV *rv, char *classname)
+Perl_newSVrv(pTHX_ SV *rv, const char *classname)
 {
     dTHR;
     SV *sv;
 
     new_SV(sv);
-    SvANY(sv) = 0;
-    SvREFCNT(sv) = 0;
-    SvFLAGS(sv) = 0;
 
     SV_CHECK_THINKFIRST(rv);
-#ifdef OVERLOAD
     SvAMAGIC_off(rv);
-#endif /* OVERLOAD */
 
     if (SvTYPE(rv) < SVt_RV)
       sv_upgrade(rv, SVt_RV);
 
     (void)SvOK_off(rv);
-    SvRV(rv) = SvREFCNT_inc(sv);
+    SvRV(rv) = sv;
     SvROK_on(rv);
 
     if (classname) {
@@ -4237,49 +4388,49 @@ newSVrv(SV *rv, char *classname)
 }
 
 SV*
-sv_setref_pv(SV *rv, char *classname, void *pv)
+Perl_sv_setref_pv(pTHX_ SV *rv, const char *classname, void *pv)
 {
     if (!pv) {
 	sv_setsv(rv, &PL_sv_undef);
 	SvSETMAGIC(rv);
     }
     else
-	sv_setiv(newSVrv(rv,classname), (IV)pv);
+	sv_setiv(newSVrv(rv,classname), (IV)PTR_CAST pv);
     return rv;
 }
 
 SV*
-sv_setref_iv(SV *rv, char *classname, IV iv)
+Perl_sv_setref_iv(pTHX_ SV *rv, const char *classname, IV iv)
 {
     sv_setiv(newSVrv(rv,classname), iv);
     return rv;
 }
 
 SV*
-sv_setref_nv(SV *rv, char *classname, double nv)
+Perl_sv_setref_nv(pTHX_ SV *rv, const char *classname, NV nv)
 {
     sv_setnv(newSVrv(rv,classname), nv);
     return rv;
 }
 
 SV*
-sv_setref_pvn(SV *rv, char *classname, char *pv, I32 n)
+Perl_sv_setref_pvn(pTHX_ SV *rv, const char *classname, char *pv, STRLEN n)
 {
     sv_setpvn(newSVrv(rv,classname), pv, n);
     return rv;
 }
 
 SV*
-sv_bless(SV *sv, HV *stash)
+Perl_sv_bless(pTHX_ SV *sv, HV *stash)
 {
     dTHR;
     SV *tmpRef;
     if (!SvROK(sv))
-        croak("Can't bless non-reference value");
+        Perl_croak(aTHX_ "Can't bless non-reference value");
     tmpRef = SvRV(sv);
     if (SvFLAGS(tmpRef) & (SVs_OBJECT|SVf_READONLY)) {
 	if (SvREADONLY(tmpRef))
-	    croak(no_modify);
+	    Perl_croak(aTHX_ PL_no_modify);
 	if (SvOBJECT(tmpRef)) {
 	    if (SvTYPE(tmpRef) != SVt_PVIO)
 		--PL_sv_objcount;
@@ -4292,18 +4443,16 @@ sv_bless(SV *sv, HV *stash)
     (void)SvUPGRADE(tmpRef, SVt_PVMG);
     SvSTASH(tmpRef) = (HV*)SvREFCNT_inc(stash);
 
-#ifdef OVERLOAD
     if (Gv_AMG(stash))
 	SvAMAGIC_on(sv);
     else
 	SvAMAGIC_off(sv);
-#endif /* OVERLOAD */
 
     return sv;
 }
 
 STATIC void
-sv_unglob(SV *sv)
+S_sv_unglob(pTHX_ SV *sv)
 {
     assert(SvTYPE(sv) == SVt_PVGV);
     SvFAKE_off(sv);
@@ -4321,10 +4470,16 @@ sv_unglob(SV *sv)
 }
 
 void
-sv_unref(SV *sv)
+Perl_sv_unref(pTHX_ SV *sv)
 {
     SV* rv = SvRV(sv);
-    
+
+    if (SvWEAKREF(sv)) {
+    	sv_del_backref(sv);
+	SvWEAKREF_off(sv);
+	SvRV(sv) = 0;
+	return;
+    }
     SvRV(sv) = 0;
     SvROK_off(sv);
     if (SvREFCNT(rv) != 1 || SvREADONLY(rv))
@@ -4334,13 +4489,13 @@ sv_unref(SV *sv)
 }
 
 void
-sv_taint(SV *sv)
+Perl_sv_taint(pTHX_ SV *sv)
 {
     sv_magic((sv), Nullsv, 't', Nullch, 0);
 }
 
 void
-sv_untaint(SV *sv)
+Perl_sv_untaint(pTHX_ SV *sv)
 {
     if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
 	MAGIC *mg = mg_find(sv, 't');
@@ -4350,7 +4505,7 @@ sv_untaint(SV *sv)
 }
 
 bool
-sv_tainted(SV *sv)
+Perl_sv_tainted(pTHX_ SV *sv)
 {
     if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
 	MAGIC *mg = mg_find(sv, 't');
@@ -4361,94 +4516,143 @@ sv_tainted(SV *sv)
 }
 
 void
-sv_setpviv(SV *sv, IV iv)
+Perl_sv_setpviv(pTHX_ SV *sv, IV iv)
 {
-    STRLEN len;
-    char buf[TYPE_DIGITS(UV)];
-    char *ptr = buf + sizeof(buf);
-    int sign;
-    UV uv;
-    char *p;
+    char buf[TYPE_CHARS(UV)];
+    char *ebuf;
+    char *ptr = uiv_2buf(buf, iv, 0, 0, &ebuf);
 
-    sv_setpvn(sv, "", 0);
-    if (iv >= 0) {
-	uv = iv;
-	sign = 0;
-    } else {
-	uv = -iv;
-	sign = 1;
-    }
-    do {
-	*--ptr = '0' + (uv % 10);
-    } while (uv /= 10);
-    len = (buf + sizeof(buf)) - ptr;
-    /* taking advantage of SvCUR(sv) == 0 */
-    SvGROW(sv, sign + len + 1);
-    p = SvPVX(sv);
-    if (sign)
-	*p++ = '-';
-    memcpy(p, ptr, len);
-    p += len;
-    *p = '\0';
-    SvCUR(sv) = p - SvPVX(sv);
+    sv_setpvn(sv, ptr, ebuf - ptr);
 }
 
 
 void
-sv_setpviv_mg(SV *sv, IV iv)
+Perl_sv_setpviv_mg(pTHX_ SV *sv, IV iv)
 {
-    sv_setpviv(sv,iv);
+    char buf[TYPE_CHARS(UV)];
+    char *ebuf;
+    char *ptr = uiv_2buf(buf, iv, 0, 0, &ebuf);
+
+    sv_setpvn(sv, ptr, ebuf - ptr);
+    SvSETMAGIC(sv);
+}
+
+#if defined(PERL_IMPLICIT_CONTEXT)
+void
+Perl_sv_setpvf_nocontext(SV *sv, const char* pat, ...)
+{
+    dTHX;
+    va_list args;
+    va_start(args, pat);
+    sv_vsetpvf(sv, pat, &args);
+    va_end(args);
+}
+
+
+void
+Perl_sv_setpvf_mg_nocontext(SV *sv, const char* pat, ...)
+{
+    dTHX;
+    va_list args;
+    va_start(args, pat);
+    sv_vsetpvf_mg(sv, pat, &args);
+    va_end(args);
+}
+#endif
+
+void
+Perl_sv_setpvf(pTHX_ SV *sv, const char* pat, ...)
+{
+    va_list args;
+    va_start(args, pat);
+    sv_vsetpvf(sv, pat, &args);
+    va_end(args);
+}
+
+void
+Perl_sv_vsetpvf(pTHX_ SV *sv, const char* pat, va_list* args)
+{
+    sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
+}
+
+void
+Perl_sv_setpvf_mg(pTHX_ SV *sv, const char* pat, ...)
+{
+    va_list args;
+    va_start(args, pat);
+    sv_vsetpvf_mg(sv, pat, &args);
+    va_end(args);
+}
+
+void
+Perl_sv_vsetpvf_mg(pTHX_ SV *sv, const char* pat, va_list* args)
+{
+    sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
+    SvSETMAGIC(sv);
+}
+
+#if defined(PERL_IMPLICIT_CONTEXT)
+void
+Perl_sv_catpvf_nocontext(SV *sv, const char* pat, ...)
+{
+    dTHX;
+    va_list args;
+    va_start(args, pat);
+    sv_vcatpvf(sv, pat, &args);
+    va_end(args);
+}
+
+void
+Perl_sv_catpvf_mg_nocontext(SV *sv, const char* pat, ...)
+{
+    dTHX;
+    va_list args;
+    va_start(args, pat);
+    sv_vcatpvf_mg(sv, pat, &args);
+    va_end(args);
+}
+#endif
+
+void
+Perl_sv_catpvf(pTHX_ SV *sv, const char* pat, ...)
+{
+    va_list args;
+    va_start(args, pat);
+    sv_vcatpvf(sv, pat, &args);
+    va_end(args);
+}
+
+void
+Perl_sv_vcatpvf(pTHX_ SV *sv, const char* pat, va_list* args)
+{
+    sv_vcatpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
+}
+
+void
+Perl_sv_catpvf_mg(pTHX_ SV *sv, const char* pat, ...)
+{
+    va_list args;
+    va_start(args, pat);
+    sv_vcatpvf_mg(sv, pat, &args);
+    va_end(args);
+}
+
+void
+Perl_sv_vcatpvf_mg(pTHX_ SV *sv, const char* pat, va_list* args)
+{
+    sv_vcatpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
     SvSETMAGIC(sv);
 }
 
 void
-sv_setpvf(SV *sv, const char* pat, ...)
-{
-    va_list args;
-    va_start(args, pat);
-    sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
-    va_end(args);
-}
-
-
-void
-sv_setpvf_mg(SV *sv, const char* pat, ...)
-{
-    va_list args;
-    va_start(args, pat);
-    sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
-    va_end(args);
-    SvSETMAGIC(sv);
-}
-
-void
-sv_catpvf(SV *sv, const char* pat, ...)
-{
-    va_list args;
-    va_start(args, pat);
-    sv_vcatpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
-    va_end(args);
-}
-
-void
-sv_catpvf_mg(SV *sv, const char* pat, ...)
-{
-    va_list args;
-    va_start(args, pat);
-    sv_vcatpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
-    va_end(args);
-    SvSETMAGIC(sv);
-}
-
-void
-sv_vsetpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, I32 svmax, bool *used_locale)
+Perl_sv_vsetpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, I32 svmax, bool *used_locale)
 {
     sv_setpvn(sv, "", 0);
     sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale);
 }
 
 void
-sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, I32 svmax, bool *used_locale)
+Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, I32 svmax, bool *used_locale)
 {
     dTHR;
     char *p;
@@ -4497,22 +4701,23 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 	STRLEN precis = 0;
 
 	char esignbuf[4];
-	char utf8buf[10];
+	U8 utf8buf[10];
 	STRLEN esignlen = 0;
 
 	char *eptr = Nullch;
 	STRLEN elen = 0;
-	char ebuf[TYPE_DIGITS(int) * 2 + 16]; /* large enough for "%#.#f" */
-
-	static char *efloatbuf = Nullch;
-	static STRLEN efloatsize = 0;
-
+	/* Times 4: a decimal digit takes more than 3 binary digits.
+	 * NV_DIG: mantissa takes than many decimal digits.
+	 * Plus 32: Playing safe. */
+	char ebuf[IV_DIG * 4 + NV_DIG + 32];
+        /* large enough for "%#.#f" --chip */
+	/* what about long double NVs? --jhi */
 	char c;
 	int i;
 	unsigned base;
 	IV iv;
 	UV uv;
-	double nv;
+	NV nv;
 	STRLEN have;
 	STRLEN need;
 	STRLEN gap;
@@ -4600,15 +4805,20 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 
 	switch (*q) {
 	case 'l':
-#if 0  /* when quads have better support within Perl */
-	    if (*(q + 1) == 'l') {
+#ifdef HAS_QUAD
+             if (*(q + 1) == 'l') {	/* lld */
 		intsize = 'q';
 		q += 2;
 		break;
-	    }
+	     }
+	case 'L':			/* Ld */
+	case 'q':			/* qd */
+	    intsize = 'q';
+	    q++;
+	    break;
 #endif
-	    /* FALL THROUGH */
 	case 'h':
+	    /* FALL THROUGH */
 	case 'V':
 	    intsize = *q++;
 	    break;
@@ -4632,8 +4842,8 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 		else
 		    uv = (svix < svmax) ? SvIVx(svargs[svix++]) : 0;
 
-		eptr = utf8buf;
-		elen = uv_to_utf8(eptr, uv) - utf8buf;
+		eptr = (char*)utf8buf;
+		elen = uv_to_utf8((U8*)eptr, uv) - utf8buf;
 		goto string;
 	    }
 	    if (args)
@@ -4688,14 +4898,18 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 
 	case 'p':
 	    if (args)
-		uv = (UV)va_arg(*args, void*);
+		uv = (UV)PTR_CAST va_arg(*args, void*);
 	    else
-		uv = (svix < svmax) ? (UV)svargs[svix++] : 0;
+		uv = (svix < svmax) ? (UV)PTR_CAST svargs[svix++] : 0;
 	    base = 16;
 	    goto integer;
 
 	case 'D':
+#ifdef IV_IS_QUAD
+	    intsize = 'q';
+#else
 	    intsize = 'l';
+#endif
 	    /* FALL THROUGH */
 	case 'd':
 	case 'i':
@@ -4705,6 +4919,9 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 		default:	iv = va_arg(*args, int); break;
 		case 'l':	iv = va_arg(*args, long); break;
 		case 'V':	iv = va_arg(*args, IV); break;
+#ifdef HAS_QUAD
+		case 'q':	iv = va_arg(*args, Quad_t); break;
+#endif
 		}
 	    }
 	    else {
@@ -4714,6 +4931,9 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 		default:	iv = (int)iv; break;
 		case 'l':	iv = (long)iv; break;
 		case 'V':	break;
+#ifdef HAS_QUAD
+		case 'q':	iv = (Quad_t)iv; break;
+#endif
 		}
 	    }
 	    if (iv >= 0) {
@@ -4729,14 +4949,26 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 	    goto integer;
 
 	case 'U':
+#ifdef IV_IS_QUAD
+	    intsize = 'q';
+#else
 	    intsize = 'l';
+#endif
 	    /* FALL THROUGH */
 	case 'u':
 	    base = 10;
 	    goto uns_integer;
 
+	case 'b':
+	    base = 2;
+	    goto uns_integer;
+
 	case 'O':
+#ifdef IV_IS_QUAD
+	    intsize = 'q';
+#else
 	    intsize = 'l';
+#endif
 	    /* FALL THROUGH */
 	case 'o':
 	    base = 8;
@@ -4753,6 +4985,9 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 		default:   uv = va_arg(*args, unsigned); break;
 		case 'l':  uv = va_arg(*args, unsigned long); break;
 		case 'V':  uv = va_arg(*args, UV); break;
+#ifdef HAS_QUAD
+		case 'q':  uv = va_arg(*args, Quad_t); break;
+#endif
 		}
 	    }
 	    else {
@@ -4762,6 +4997,9 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 		default:	uv = (unsigned)uv; break;
 		case 'l':	uv = (unsigned long)uv; break;
 		case 'V':	break;
+#ifdef HAS_QUAD
+		case 'q':	uv = (Quad_t)uv; break;
+#endif
 		}
 	    }
 
@@ -4787,6 +5025,14 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 		    dig = uv & 7;
 		    *--eptr = '0' + dig;
 		} while (uv >>= 3);
+		if (alt && *eptr != '0')
+		    *--eptr = '0';
+		break;
+	    case 2:
+		do {
+		    dig = uv & 1;
+		    *--eptr = '0' + dig;
+		} while (uv >>= 1);
 		if (alt && *eptr != '0')
 		    *--eptr = '0';
 		break;
@@ -4818,7 +5064,7 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 	    /* This is evil, but floating point is even more evil */
 
 	    if (args)
-		nv = va_arg(*args, double);
+		nv = va_arg(*args, NV);
 	    else
 		nv = (svix < svmax) ? SvNVx(svargs[svix++]) : 0.0;
 
@@ -4827,7 +5073,7 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 		i = PERL_INT_MIN;
 		(void)frexp(nv, &i);
 		if (i == PERL_INT_MIN)
-		    die("panic: frexp");
+		    Perl_die(aTHX_ "panic: frexp");
 		if (i > 0)
 		    need = BIT_DIGITS(i);
 	    }
@@ -4836,15 +5082,21 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 		need = width;
 
 	    need += 20; /* fudge factor */
-	    if (efloatsize < need) {
-		Safefree(efloatbuf);
-		efloatsize = need + 20; /* more fudge */
-		New(906, efloatbuf, efloatsize, char);
+	    if (PL_efloatsize < need) {
+		Safefree(PL_efloatbuf);
+		PL_efloatsize = need + 20; /* more fudge */
+		New(906, PL_efloatbuf, PL_efloatsize, char);
 	    }
 
 	    eptr = ebuf + sizeof ebuf;
 	    *--eptr = '\0';
 	    *--eptr = c;
+#ifdef USE_LONG_DOUBLE
+	    {
+		char* p = PERL_PRIfldbl + sizeof(PERL_PRIfldbl) - 3;
+		while (p >= PERL_PRIfldbl) { *--eptr = *p--; }
+	    }
+#endif
 	    if (has_precis) {
 		base = precis;
 		do { *--eptr = '0' + (base % 10); } while (base /= 10);
@@ -4864,10 +5116,14 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 		*--eptr = '#';
 	    *--eptr = '%';
 
-	    (void)sprintf(efloatbuf, eptr, nv);
+	    {
+		RESTORE_NUMERIC_STANDARD();
+		(void)sprintf(PL_efloatbuf, eptr, nv);
+		RESTORE_NUMERIC_LOCAL();
+	    }
 
-	    eptr = efloatbuf;
-	    elen = strlen(efloatbuf);
+	    eptr = PL_efloatbuf;
+	    elen = strlen(PL_efloatbuf);
 
 #ifdef LC_NUMERIC
 	    /*
@@ -4891,6 +5147,9 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 		default:	*(va_arg(*args, int*)) = i; break;
 		case 'l':	*(va_arg(*args, long*)) = i; break;
 		case 'V':	*(va_arg(*args, IV*)) = i; break;
+#ifdef HAS_QUAD
+		case 'q':	*(va_arg(*args, Quad_t*)) = i; break;
+#endif
 		}
 	    }
 	    else if (svix < svmax)
@@ -4901,17 +5160,28 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 
 	default:
       unknown:
-	    if (!args && PL_dowarn &&
+	    if (!args && ckWARN(WARN_PRINTF) &&
 		  (PL_op->op_type == OP_PRTF || PL_op->op_type == OP_SPRINTF)) {
 		SV *msg = sv_newmortal();
-		sv_setpvf(msg, "Invalid conversion in %s: ",
+		Perl_sv_setpvf(aTHX_ msg, "Invalid conversion in %s: ",
 			  (PL_op->op_type == OP_PRTF) ? "printf" : "sprintf");
-		if (c)
-		    sv_catpvf(msg, isPRINT(c) ? "\"%%%c\"" : "\"%%\\%03o\"",
-			      c & 0xFF);
-		else
+		if (c) {
+#ifdef UV_IS_QUAD
+		    if (isPRINT(c))
+			Perl_sv_catpvf(aTHX_ msg, 
+				       "\"%%%c\"", c & 0xFF);
+		    else
+			Perl_sv_catpvf(aTHX_ msg,
+				       "\"%%\\%03" PERL_PRIo64 "\"",
+				       (UV)c & 0xFF);
+#else
+		    Perl_sv_catpvf(aTHX_ msg, isPRINT(c) ?
+				   "\"%%%c\"" : "\"%%\\%03o\"",
+				   c & 0xFF);
+#endif
+		} else
 		    sv_catpv(msg, "end of string");
-		warn("%_", msg); /* yes, this is reentrant */
+		Perl_warner(aTHX_ WARN_PRINTF, "%_", msg); /* yes, this is reentrant */
 	    }
 
 	    /* output mangled stuff ... */
@@ -4965,272 +5235,60 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
     }
 }
 
-void
-sv_dump(SV *sv)
+
+#ifdef PERL_OBJECT
+#define NO_XSLOCKS
+#include "XSUB.h"
+#endif
+
+static void
+do_report_used(pTHXo_ SV *sv)
 {
-#ifdef DEBUGGING
-    SV *d = sv_newmortal();
-    char *s;
-    U32 flags;
-    U32 type;
-
-    if (!sv) {
-	PerlIO_printf(Perl_debug_log, "SV = 0\n");
-	return;
+    if (SvTYPE(sv) != SVTYPEMASK) {
+	/* XXX Perhaps this ought to go to Perl_debug_log, if DEBUGGING. */
+	PerlIO_printf(PerlIO_stderr(), "****\n");
+	sv_dump(sv);
     }
-    
-    flags = SvFLAGS(sv);
-    type = SvTYPE(sv);
-
-    sv_setpvf(d, "(0x%lx)\n  REFCNT = %ld\n  FLAGS = (",
-	      (unsigned long)SvANY(sv), (long)SvREFCNT(sv));
-    if (flags & SVs_PADBUSY)	sv_catpv(d, "PADBUSY,");
-    if (flags & SVs_PADTMP)	sv_catpv(d, "PADTMP,");
-    if (flags & SVs_PADMY)	sv_catpv(d, "PADMY,");
-    if (flags & SVs_TEMP)	sv_catpv(d, "TEMP,");
-    if (flags & SVs_OBJECT)	sv_catpv(d, "OBJECT,");
-    if (flags & SVs_GMG)	sv_catpv(d, "GMG,");
-    if (flags & SVs_SMG)	sv_catpv(d, "SMG,");
-    if (flags & SVs_RMG)	sv_catpv(d, "RMG,");
-
-    if (flags & SVf_IOK)	sv_catpv(d, "IOK,");
-    if (flags & SVf_NOK)	sv_catpv(d, "NOK,");
-    if (flags & SVf_POK)	sv_catpv(d, "POK,");
-    if (flags & SVf_ROK)	sv_catpv(d, "ROK,");
-    if (flags & SVf_OOK)	sv_catpv(d, "OOK,");
-    if (flags & SVf_FAKE)	sv_catpv(d, "FAKE,");
-    if (flags & SVf_READONLY)	sv_catpv(d, "READONLY,");
-
-#ifdef OVERLOAD
-    if (flags & SVf_AMAGIC)	sv_catpv(d, "OVERLOAD,");
-#endif /* OVERLOAD */
-    if (flags & SVp_IOK)	sv_catpv(d, "pIOK,");
-    if (flags & SVp_NOK)	sv_catpv(d, "pNOK,");
-    if (flags & SVp_POK)	sv_catpv(d, "pPOK,");
-    if (flags & SVp_SCREAM)	sv_catpv(d, "SCREAM,");
-
-    switch (type) {
-    case SVt_PVCV:
-    case SVt_PVFM:
-	if (CvANON(sv))		sv_catpv(d, "ANON,");
-	if (CvUNIQUE(sv))	sv_catpv(d, "UNIQUE,");
-	if (CvCLONE(sv))	sv_catpv(d, "CLONE,");
-	if (CvCLONED(sv))	sv_catpv(d, "CLONED,");
-	if (CvNODEBUG(sv))	sv_catpv(d, "NODEBUG,");
-	break;
-    case SVt_PVHV:
-	if (HvSHAREKEYS(sv))	sv_catpv(d, "SHAREKEYS,");
-	if (HvLAZYDEL(sv))	sv_catpv(d, "LAZYDEL,");
-	break;
-    case SVt_PVGV:
-	if (GvINTRO(sv))	sv_catpv(d, "INTRO,");
-	if (GvMULTI(sv))	sv_catpv(d, "MULTI,");
-	if (GvASSUMECV(sv))	sv_catpv(d, "ASSUMECV,");
-	if (GvIMPORTED(sv)) {
-	    sv_catpv(d, "IMPORT");
-	    if (GvIMPORTED(sv) == GVf_IMPORTED)
-		sv_catpv(d, "ALL,");
-	    else {
-		sv_catpv(d, "(");
-		if (GvIMPORTED_SV(sv))	sv_catpv(d, " SV");
-		if (GvIMPORTED_AV(sv))	sv_catpv(d, " AV");
-		if (GvIMPORTED_HV(sv))	sv_catpv(d, " HV");
-		if (GvIMPORTED_CV(sv))	sv_catpv(d, " CV");
-		sv_catpv(d, " ),");
-	    }
-	}
-    case SVt_PVBM:
-	if (SvTAIL(sv))	sv_catpv(d, "TAIL,");
-	if (SvCOMPILED(sv))	sv_catpv(d, "COMPILED,");
-	break;
-    }
-
-    if (*(SvEND(d) - 1) == ',')
-	SvPVX(d)[--SvCUR(d)] = '\0';
-    sv_catpv(d, ")");
-    s = SvPVX(d);
-
-    PerlIO_printf(Perl_debug_log, "SV = ");
-    switch (type) {
-    case SVt_NULL:
-	PerlIO_printf(Perl_debug_log, "NULL%s\n", s);
-	return;
-    case SVt_IV:
-	PerlIO_printf(Perl_debug_log, "IV%s\n", s);
-	break;
-    case SVt_NV:
-	PerlIO_printf(Perl_debug_log, "NV%s\n", s);
-	break;
-    case SVt_RV:
-	PerlIO_printf(Perl_debug_log, "RV%s\n", s);
-	break;
-    case SVt_PV:
-	PerlIO_printf(Perl_debug_log, "PV%s\n", s);
-	break;
-    case SVt_PVIV:
-	PerlIO_printf(Perl_debug_log, "PVIV%s\n", s);
-	break;
-    case SVt_PVNV:
-	PerlIO_printf(Perl_debug_log, "PVNV%s\n", s);
-	break;
-    case SVt_PVBM:
-	PerlIO_printf(Perl_debug_log, "PVBM%s\n", s);
-	break;
-    case SVt_PVMG:
-	PerlIO_printf(Perl_debug_log, "PVMG%s\n", s);
-	break;
-    case SVt_PVLV:
-	PerlIO_printf(Perl_debug_log, "PVLV%s\n", s);
-	break;
-    case SVt_PVAV:
-	PerlIO_printf(Perl_debug_log, "PVAV%s\n", s);
-	break;
-    case SVt_PVHV:
-	PerlIO_printf(Perl_debug_log, "PVHV%s\n", s);
-	break;
-    case SVt_PVCV:
-	PerlIO_printf(Perl_debug_log, "PVCV%s\n", s);
-	break;
-    case SVt_PVGV:
-	PerlIO_printf(Perl_debug_log, "PVGV%s\n", s);
-	break;
-    case SVt_PVFM:
-	PerlIO_printf(Perl_debug_log, "PVFM%s\n", s);
-	break;
-    case SVt_PVIO:
-	PerlIO_printf(Perl_debug_log, "PVIO%s\n", s);
-	break;
-    default:
-	PerlIO_printf(Perl_debug_log, "UNKNOWN%s\n", s);
-	return;
-    }
-    if (type >= SVt_PVIV || type == SVt_IV)
-	PerlIO_printf(Perl_debug_log, "  IV = %ld\n", (long)SvIVX(sv));
-    if (type >= SVt_PVNV || type == SVt_NV) {
-	SET_NUMERIC_STANDARD();
-	PerlIO_printf(Perl_debug_log, "  NV = %.*g\n", DBL_DIG, SvNVX(sv));
-    }
-    if (SvROK(sv)) {
-	PerlIO_printf(Perl_debug_log, "  RV = 0x%lx\n", (long)SvRV(sv));
-	sv_dump(SvRV(sv));
-	return;
-    }
-    if (type < SVt_PV)
-	return;
-    if (type <= SVt_PVLV) {
-	if (SvPVX(sv))
-	    PerlIO_printf(Perl_debug_log, "  PV = 0x%lx \"%s\"\n  CUR = %ld\n  LEN = %ld\n",
-		(long)SvPVX(sv), SvPVX(sv), (long)SvCUR(sv), (long)SvLEN(sv));
-	else
-	    PerlIO_printf(Perl_debug_log, "  PV = 0\n");
-    }
-    if (type >= SVt_PVMG) {
-	if (SvMAGIC(sv)) {
-	    PerlIO_printf(Perl_debug_log, "  MAGIC = 0x%lx\n", (long)SvMAGIC(sv));
-	}
-	if (SvSTASH(sv))
-	    PerlIO_printf(Perl_debug_log, "  STASH = \"%s\"\n", HvNAME(SvSTASH(sv)));
-    }
-    switch (type) {
-    case SVt_PVLV:
-	PerlIO_printf(Perl_debug_log, "  TYPE = %c\n", LvTYPE(sv));
-	PerlIO_printf(Perl_debug_log, "  TARGOFF = %ld\n", (long)LvTARGOFF(sv));
-	PerlIO_printf(Perl_debug_log, "  TARGLEN = %ld\n", (long)LvTARGLEN(sv));
-	PerlIO_printf(Perl_debug_log, "  TARG = 0x%lx\n", (long)LvTARG(sv));
-	sv_dump(LvTARG(sv));
-	break;
-    case SVt_PVAV:
-	PerlIO_printf(Perl_debug_log, "  ARRAY = 0x%lx\n", (long)AvARRAY(sv));
-	PerlIO_printf(Perl_debug_log, "  ALLOC = 0x%lx\n", (long)AvALLOC(sv));
-	PerlIO_printf(Perl_debug_log, "  FILL = %ld\n", (long)AvFILLp(sv));
-	PerlIO_printf(Perl_debug_log, "  MAX = %ld\n", (long)AvMAX(sv));
-	PerlIO_printf(Perl_debug_log, "  ARYLEN = 0x%lx\n", (long)AvARYLEN(sv));
-	flags = AvFLAGS(sv);
-	sv_setpv(d, "");
-	if (flags & AVf_REAL)	sv_catpv(d, ",REAL");
-	if (flags & AVf_REIFY)	sv_catpv(d, ",REIFY");
-	if (flags & AVf_REUSED)	sv_catpv(d, ",REUSED");
-	PerlIO_printf(Perl_debug_log, "  FLAGS = (%s)\n",
-		      SvCUR(d) ? SvPVX(d) + 1 : "");
-	break;
-    case SVt_PVHV:
-	PerlIO_printf(Perl_debug_log, "  ARRAY = 0x%lx\n",(long)HvARRAY(sv));
-	PerlIO_printf(Perl_debug_log, "  KEYS = %ld\n", (long)HvKEYS(sv));
-	PerlIO_printf(Perl_debug_log, "  FILL = %ld\n", (long)HvFILL(sv));
-	PerlIO_printf(Perl_debug_log, "  MAX = %ld\n", (long)HvMAX(sv));
-	PerlIO_printf(Perl_debug_log, "  RITER = %ld\n", (long)HvRITER(sv));
-	PerlIO_printf(Perl_debug_log, "  EITER = 0x%lx\n",(long) HvEITER(sv));
-	if (HvPMROOT(sv))
-	    PerlIO_printf(Perl_debug_log, "  PMROOT = 0x%lx\n",(long)HvPMROOT(sv));
-	if (HvNAME(sv))
-	    PerlIO_printf(Perl_debug_log, "  NAME = \"%s\"\n", HvNAME(sv));
-	break;
-    case SVt_PVCV:
-	if (SvPOK(sv))
-	    PerlIO_printf(Perl_debug_log, "  PROTOTYPE = \"%s\"\n", SvPV(sv,PL_na));
-	/* FALL THROUGH */
-    case SVt_PVFM:
-	PerlIO_printf(Perl_debug_log, "  STASH = 0x%lx\n", (long)CvSTASH(sv));
-	PerlIO_printf(Perl_debug_log, "  START = 0x%lx\n", (long)CvSTART(sv));
-	PerlIO_printf(Perl_debug_log, "  ROOT = 0x%lx\n", (long)CvROOT(sv));
-	PerlIO_printf(Perl_debug_log, "  XSUB = 0x%lx\n", (long)CvXSUB(sv));
-	PerlIO_printf(Perl_debug_log, "  XSUBANY = %ld\n", (long)CvXSUBANY(sv).any_i32);
-	PerlIO_printf(Perl_debug_log, "  GV = 0x%lx", (long)CvGV(sv));
-	if (CvGV(sv) && GvNAME(CvGV(sv))) {
-	    PerlIO_printf(Perl_debug_log, "  \"%s\"\n", GvNAME(CvGV(sv)));
-	} else {
-	    PerlIO_printf(Perl_debug_log, "\n");
-	}
-	PerlIO_printf(Perl_debug_log, "  FILEGV = 0x%lx\n", (long)CvFILEGV(sv));
-	PerlIO_printf(Perl_debug_log, "  DEPTH = %ld\n", (long)CvDEPTH(sv));
-	PerlIO_printf(Perl_debug_log, "  PADLIST = 0x%lx\n", (long)CvPADLIST(sv));
-	PerlIO_printf(Perl_debug_log, "  OUTSIDE = 0x%lx\n", (long)CvOUTSIDE(sv));
-#ifdef USE_THREADS
-	PerlIO_printf(Perl_debug_log, "  MUTEXP = 0x%lx\n", (long)CvMUTEXP(sv));
-	PerlIO_printf(Perl_debug_log, "  OWNER = 0x%lx\n", (long)CvOWNER(sv));
-#endif /* USE_THREADS */
-	PerlIO_printf(Perl_debug_log, "  FLAGS = 0x%lx\n",
-		      (unsigned long)CvFLAGS(sv));
-	if (type == SVt_PVFM)
-	    PerlIO_printf(Perl_debug_log, "  LINES = %ld\n", (long)FmLINES(sv));
-	break;
-    case SVt_PVGV:
-	PerlIO_printf(Perl_debug_log, "  NAME = \"%s\"\n", GvNAME(sv));
-	PerlIO_printf(Perl_debug_log, "  NAMELEN = %ld\n", (long)GvNAMELEN(sv));
-	PerlIO_printf(Perl_debug_log, "  STASH = \"%s\"\n",
-	    SvTYPE(GvSTASH(sv)) == SVt_PVHV ? HvNAME(GvSTASH(sv)) : "(deleted)");
-	PerlIO_printf(Perl_debug_log, "  GP = 0x%lx\n", (long)GvGP(sv));
-	PerlIO_printf(Perl_debug_log, "    SV = 0x%lx\n", (long)GvSV(sv));
-	PerlIO_printf(Perl_debug_log, "    REFCNT = %ld\n", (long)GvREFCNT(sv));
-	PerlIO_printf(Perl_debug_log, "    IO = 0x%lx\n", (long)GvIOp(sv));
-	PerlIO_printf(Perl_debug_log, "    FORM = 0x%lx\n", (long)GvFORM(sv));
-	PerlIO_printf(Perl_debug_log, "    AV = 0x%lx\n", (long)GvAV(sv));
-	PerlIO_printf(Perl_debug_log, "    HV = 0x%lx\n", (long)GvHV(sv));
-	PerlIO_printf(Perl_debug_log, "    CV = 0x%lx\n", (long)GvCV(sv));
-	PerlIO_printf(Perl_debug_log, "    CVGEN = 0x%lx\n", (long)GvCVGEN(sv));
-	PerlIO_printf(Perl_debug_log, "    LASTEXPR = %ld\n", (long)GvLASTEXPR(sv));
-	PerlIO_printf(Perl_debug_log, "    LINE = %ld\n", (long)GvLINE(sv));
-	PerlIO_printf(Perl_debug_log, "    FILEGV = 0x%lx\n", (long)GvFILEGV(sv));
-	PerlIO_printf(Perl_debug_log, "    EGV = 0x%lx\n", (long)GvEGV(sv));
-	break;
-    case SVt_PVIO:
-	PerlIO_printf(Perl_debug_log, "  IFP = 0x%lx\n", (long)IoIFP(sv));
-	PerlIO_printf(Perl_debug_log, "  OFP = 0x%lx\n", (long)IoOFP(sv));
-	PerlIO_printf(Perl_debug_log, "  DIRP = 0x%lx\n", (long)IoDIRP(sv));
-	PerlIO_printf(Perl_debug_log, "  LINES = %ld\n", (long)IoLINES(sv));
-	PerlIO_printf(Perl_debug_log, "  PAGE = %ld\n", (long)IoPAGE(sv));
-	PerlIO_printf(Perl_debug_log, "  PAGE_LEN = %ld\n", (long)IoPAGE_LEN(sv));
-	PerlIO_printf(Perl_debug_log, "  LINES_LEFT = %ld\n", (long)IoLINES_LEFT(sv));
-	PerlIO_printf(Perl_debug_log, "  TOP_NAME = \"%s\"\n", IoTOP_NAME(sv));
-	PerlIO_printf(Perl_debug_log, "  TOP_GV = 0x%lx\n", (long)IoTOP_GV(sv));
-	PerlIO_printf(Perl_debug_log, "  FMT_NAME = \"%s\"\n", IoFMT_NAME(sv));
-	PerlIO_printf(Perl_debug_log, "  FMT_GV = 0x%lx\n", (long)IoFMT_GV(sv));
-	PerlIO_printf(Perl_debug_log, "  BOTTOM_NAME = \"%s\"\n", IoBOTTOM_NAME(sv));
-	PerlIO_printf(Perl_debug_log, "  BOTTOM_GV = 0x%lx\n", (long)IoBOTTOM_GV(sv));
-	PerlIO_printf(Perl_debug_log, "  SUBPROCESS = %ld\n", (long)IoSUBPROCESS(sv));
-	PerlIO_printf(Perl_debug_log, "  TYPE = %c\n", IoTYPE(sv));
-	PerlIO_printf(Perl_debug_log, "  FLAGS = 0x%lx\n", (long)IoFLAGS(sv));
-	break;
-    }
-#endif	/* DEBUGGING */
 }
+
+static void
+do_clean_objs(pTHXo_ SV *sv)
+{
+    SV* rv;
+
+    if (SvROK(sv) && SvOBJECT(rv = SvRV(sv))) {
+	DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning object ref:\n "), sv_dump(sv));)
+	SvROK_off(sv);
+	SvRV(sv) = 0;
+	SvREFCNT_dec(rv);
+    }
+
+    /* XXX Might want to check arrays, etc. */
+}
+
+#ifndef DISABLE_DESTRUCTOR_KLUDGE
+static void
+do_clean_named_objs(pTHXo_ SV *sv)
+{
+    if (SvTYPE(sv) == SVt_PVGV) {
+	if ( SvOBJECT(GvSV(sv)) ||
+	     GvAV(sv) && SvOBJECT(GvAV(sv)) ||
+	     GvHV(sv) && SvOBJECT(GvHV(sv)) ||
+	     GvIO(sv) && SvOBJECT(GvIO(sv)) ||
+	     GvCV(sv) && SvOBJECT(GvCV(sv)) )
+	{
+	    DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning named glob object:\n "), sv_dump(sv));)
+	    SvREFCNT_dec(sv);
+	}
+    }
+}
+#endif
+
+static void
+do_clean_all(pTHXo_ SV *sv)
+{
+    DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning loops: SV at 0x%lx\n", sv) );)
+    SvFLAGS(sv) |= SVf_BREAK;
+    SvREFCNT_dec(sv);
+}
+

@@ -85,9 +85,7 @@ sub install {
 	    exists $hash{"blib/arch"} and
 	    directory_not_empty("blib/arch")) {
 	    $targetroot = $hash{"blib/arch"};
-            print "Files found in blib/arch --> Installing files in " 
-	        . "blib/lib into architecture dependend library tree!\n"
-		; #if $verbose>1;
+            print "Files found in blib/arch: installing files in blib/lib into architecture dependent library tree\n";
 	}
 	chdir($source) or next;
 	find(sub {
@@ -136,13 +134,13 @@ sub install {
 	}, ".");
 	chdir($cwd) or Carp::croak("Couldn't chdir to $cwd: $!");
     }
-    umask $umask unless $Is_VMS;
     if ($pack{'write'}) {
 	$dir = dirname($pack{'write'});
 	mkpath($dir,0,0755);
 	print "Writing $pack{'write'}\n";
 	$packlist->write($pack{'write'});
     }
+    umask $umask unless $Is_VMS;
 }
 
 sub directory_not_empty ($) {
@@ -354,7 +352,7 @@ The argument is the value of MakeMaker's C<FULLEXT> key, like F<Tk/Canvas>.
 This function calls install() with the same arguments as the defaults 
 the MakeMaker would use.
 
-The argumement-less form is convenient for install scripts like
+The argument-less form is convenient for install scripts like
 
   perl -MExtUtils::Install -e install_default Tk/Canvas
 

@@ -1,0 +1,75 @@
+  regcomp.c	AOK
+
+  Strange *+?{} on zero-length expression	[S_study_chunk]
+	/(?=a)?/
+
+  %.*s matches null string many times   	[S_regpiece]
+	$a = "ABC123" ; $a =~ /(?=a)*/'
+
+  /%.127s/: Unrecognized escape \\%c passed through"	[S_regatom] 
+  	/\m/
+
+  Character class syntax [. .] is reserved for future extensions [S_regpposixcc]
+
+  Character class syntax [= =] is reserved for future extensions [S_checkposixcc]
+
+  Character class syntax [%c %c] belongs inside character classes [S_checkposixcc] 
+  
+
+  
+
+__END__
+# regcomp.c [S_regpiece]
+use warnings 'unsafe' ;
+my $a = "ABC123" ; 
+$a =~ /(?=a)*/ ;
+no warnings 'unsafe' ;
+$a =~ /(?=a)*/ ;
+EXPECT
+(?=a)* matches null string many times at - line 4.
+########
+# regcomp.c [S_study_chunk]
+use warnings 'unsafe' ;
+$_ = "" ;
+/(?=a)?/;
+no warnings 'unsafe' ;
+/(?=a)?/;
+EXPECT
+Strange *+?{} on zero-length expression at - line 4.
+########
+# regcomp.c [S_regatom]
+use warnings 'unsafe' ;
+$a =~ /\m/ ;
+no warnings 'unsafe' ;
+EXPECT
+Unrecognized escape \m passed through at - line 3.
+########
+# regcomp.c [S_regpposixcc S_checkposixcc]
+use warnings 'unsafe' ;
+$_ = "" ;
+/[:alpha:]/;
+/[.bar.]/;
+/[=zog=]/;
+/[[:alpha:]]/;
+/[[.foo.]]/;
+/[[=bar=]]/;
+/[:zog:]/;
+no warnings 'unsafe' ;
+/[:alpha:]/;
+/[.foo.]/;
+/[=bar=]/;
+/[[:alpha:]]/;
+/[[.foo.]]/;
+/[[=bar=]]/;
+/[:zog:]/;
+/[[:zog:]]/;
+EXPECT
+Character class syntax [: :] belongs inside character classes at - line 4.
+Character class syntax [. .] belongs inside character classes at - line 5.
+Character class syntax [. .] is reserved for future extensions at - line 5.
+Character class syntax [= =] belongs inside character classes at - line 6.
+Character class syntax [= =] is reserved for future extensions at - line 6.
+Character class syntax [. .] is reserved for future extensions at - line 8.
+Character class syntax [= =] is reserved for future extensions at - line 9.
+Character class syntax [: :] belongs inside character classes at - line 10.
+Character class [:zog:] unknown at - line 19.

@@ -130,7 +130,7 @@ Your mileage will vary. If in any doubt B<do not use it>.
 =head1 Operator Names and Operator Lists
 
 The canonical list of operator names is the contents of the array
-op_name defined and initialised in file F<opcode.h> of the Perl
+PL_op_name defined and initialised in file F<opcode.h> of the Perl
 source distribution (and installed into the perl library).
 
 Each operator has both a terse name (its opname) and a more verbose or
@@ -332,11 +332,11 @@ invert_opset function.
 
     cond_expr flip flop andassign orassign and or xor
 
-    warn die lineseq nextstate unstack scope enter leave
+    warn die lineseq nextstate scope enter leave setstate
 
     rv2cv anoncode prototype
 
-    entersub leavesub return method -- XXX loops via recursion?
+    entersub leavesub leavesublv return method method_named -- XXX loops via recursion?
 
     leaveeval -- needed for Safe to operate, is safe without entereval
 
@@ -365,7 +365,7 @@ used to implement a resource attack (e.g., consume all available CPU time).
     grepstart grepwhile
     mapstart mapwhile
     enteriter iter
-    enterloop leaveloop
+    enterloop leaveloop unstack
     last next redo
     goto
 

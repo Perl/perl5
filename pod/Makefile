@@ -1,4 +1,5 @@
-CONVERTERS = pod2html pod2latex pod2man pod2text checkpods
+CONVERTERS = pod2html pod2latex pod2man pod2text checkpods \
+		pod2usage podchecker podselect
 
 HTMLROOT = /	# Change this to fix cross-references in HTML
 POD2HTML = pod2html \
@@ -16,12 +17,15 @@ REALPERL = ../perl
 POD = \
 	perl.pod	\
 	perldelta.pod	\
+	perl5004delta.pod	\
+	perl5005delta.pod	\
 	perldata.pod	\
 	perlsyn.pod	\
 	perlop.pod	\
 	perlre.pod	\
 	perlrun.pod	\
 	perlfunc.pod	\
+	perlopentut.pod	\
 	perlvar.pod	\
 	perlsub.pod	\
 	perlmod.pod	\
@@ -30,13 +34,17 @@ POD = \
 	perlform.pod	\
 	perllocale.pod	\
 	perlref.pod	\
+	perlreftut.pod	\
 	perldsc.pod	\
 	perllol.pod	\
 	perltoot.pod	\
+	perltootc.pod	\
 	perlobj.pod	\
 	perltie.pod	\
 	perlbot.pod	\
 	perlipc.pod	\
+	perlthrtut.pod	\
+	perldbmfilter.pod	\
 	perldebug.pod	\
 	perldiag.pod	\
 	perlsec.pod	\
@@ -51,6 +59,9 @@ POD = \
 	perlxstut.pod	\
 	perlguts.pod	\
 	perlcall.pod	\
+	perlcompile.pod	\
+	perltodo.pod	\
+	perlhist.pod	\
 	perlfaq.pod	\
 	perlfaq1.pod	\
 	perlfaq2.pod	\
@@ -66,12 +77,15 @@ POD = \
 MAN = \
 	perl.man	\
 	perldelta.man	\
+	perl5004delta.man	\
+	perl5005delta.man	\
 	perldata.man	\
 	perlsyn.man	\
 	perlop.man	\
 	perlre.man	\
 	perlrun.man	\
 	perlfunc.man	\
+	perlopentut.man	\
 	perlvar.man	\
 	perlsub.man	\
 	perlmod.man	\
@@ -80,13 +94,17 @@ MAN = \
 	perlform.man	\
 	perllocale.man	\
 	perlref.man	\
+	perlreftut.man	\
 	perldsc.man	\
 	perllol.man	\
 	perltoot.man	\
+	perltootc.man	\
 	perlobj.man	\
 	perltie.man	\
 	perlbot.man	\
 	perlipc.man	\
+	perlthrtut.man	\
+	perldbmfilter.man	\
 	perldebug.man	\
 	perldiag.man	\
 	perlsec.man	\
@@ -101,6 +119,9 @@ MAN = \
 	perlxstut.man	\
 	perlguts.man	\
 	perlcall.man	\
+	perlcompile.man	\
+	perltodo.man	\
+	perlhist.man	\
 	perlfaq.man	\
 	perlfaq1.man	\
 	perlfaq2.man	\
@@ -116,12 +137,15 @@ MAN = \
 HTML = \
 	perl.html	\
 	perldelta.html	\
+	perl5004delta.html	\
+	perl5005delta.html	\
 	perldata.html	\
 	perlsyn.html	\
 	perlop.html	\
 	perlre.html	\
 	perlrun.html	\
 	perlfunc.html	\
+	perlopentut.html	\
 	perlvar.html	\
 	perlsub.html	\
 	perlmod.html	\
@@ -130,13 +154,17 @@ HTML = \
 	perlform.html	\
 	perllocale.html	\
 	perlref.html	\
+	perlreftut.html	\
 	perldsc.html	\
 	perllol.html	\
 	perltoot.html	\
+	perltootc.html	\
 	perlobj.html	\
 	perltie.html	\
 	perlbot.html	\
 	perlipc.html	\
+	perlthrtut.html	\
+	perldbmfilter.html	\
 	perldebug.html	\
 	perldiag.html	\
 	perlsec.html	\
@@ -151,6 +179,9 @@ HTML = \
 	perlxstut.html	\
 	perlguts.html	\
 	perlcall.html	\
+	perlcompile.html	\
+	perltodo.html	\
+	perlhist.html	\
 	perlfaq.html	\
 	perlfaq1.html	\
 	perlfaq2.html	\
@@ -166,12 +197,15 @@ HTML = \
 TEX = \
 	perl.tex	\
 	perldelta.tex	\
+	perl5004delta.tex	\
+	perl5005delta.tex	\
 	perldata.tex	\
 	perlsyn.tex	\
 	perlop.tex	\
 	perlre.tex	\
 	perlrun.tex	\
 	perlfunc.tex	\
+	perlopentut.tex	\
 	perlvar.tex	\
 	perlsub.tex	\
 	perlmod.tex	\
@@ -180,13 +214,17 @@ TEX = \
 	perlform.tex	\
 	perllocale.tex	\
 	perlref.tex	\
+	perlreftut.tex	\
 	perldsc.tex	\
 	perllol.tex	\
 	perltoot.tex	\
+	perltootc.tex	\
 	perlobj.tex	\
 	perltie.tex	\
 	perlbot.tex	\
 	perlipc.tex	\
+	perlthrtut.tex	\
+	perldbmfilter.tex	\
 	perldebug.tex	\
 	perldiag.tex	\
 	perlsec.tex	\
@@ -201,6 +239,9 @@ TEX = \
 	perlxstut.tex	\
 	perlguts.tex	\
 	perlcall.tex	\
+	perlcompile.tex	\
+	perltodo.tex	\
+	perlhist.tex	\
 	perlfaq.tex	\
 	perlfaq1.tex	\
 	perlfaq2.tex	\
@@ -279,6 +320,15 @@ pod2text:	pod2text.PL ../lib/Config.pm
 
 checkpods:	checkpods.PL ../lib/Config.pm
 	$(PERL) -I ../lib checkpods.PL
+
+pod2usage:	pod2usage.PL ../lib/Config.pm
+	$(PERL) -I ../lib pod2usage.PL
+
+podchecker:	podchecker.PL ../lib/Config.pm
+	$(PERL) -I ../lib podchecker.PL
+
+podselect:	podselect.PL ../lib/Config.pm
+	$(PERL) -I ../lib podselect.PL
 
 compile: all
 	$(REALPERL) -I../lib ../utils/perlcc -regex 's/$$/.exe/' pod2latex pod2man pod2text checkpods -prog -verbose dcf -log ../compilelog;

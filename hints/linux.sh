@@ -18,13 +18,55 @@
 # No version of Linux supports setuid scripts.
 d_suidsafe='undef'
 
+# Debian and Red Hat, and perhaps other vendors, provide both runtime and
+# development packages for some libraries.  The runtime packages contain shared
+# libraries with version information in their names (e.g., libgdbm.so.1.7.3);
+# the development packages supplement this with versionless shared libraries
+# (e.g., libgdbm.so).
+#
+# If you want to link against such a library, you must install the development
+# version of the package.
+#
+# These packages use a -dev naming convention in both Debian and Red Hat:
+#   libgdbmg1  (non-development version of GNU libc 2-linked GDBM library)
+#   libgdbmg1-dev (development version of GNU libc 2-linked GDBM library)
+# So make sure that for any libraries you wish to link Perl with under
+# Debian or Red Hat you have the -dev packages installed.
+#
+# Some operating systems (e.g., Solaris 2.6) will link to a versioned shared
+# library implicitly.  For example, on Solaris, `ld foo.o -lgdbm' will find an
+# appropriate version of libgdbm, if one is available; Linux, however, doesn't
+# do the implicit mapping.
+ignore_versioned_solibs='y'
+
 # perl goes into the /usr tree.  See the Filesystem Standard
 # available via anonymous FTP at tsx-11.mit.edu in
 # /pub/linux/docs/linux-standards/fsstnd.
 # Allow a command line override, e.g. Configure -Dprefix=/foo/bar
-case "$prefix" in
-'') prefix='/usr' ;;
-esac
+#
+#  Addendum for 5.005_57 and beyond:
+#
+# However, most Linux users probably already have a /usr/bin/perl.
+# We can't know whether the current user is intending to *replace*
+# that /usr/bin/perl or whether the user is intending to install
+# a *different* installation.
+#
+# Here is what we used to do:
+# Allow a command line override, e.g. Configure -Dprefix=/foo/bar
+# case "$prefix" in
+# '') prefix='/usr' ;;
+# esac
+#
+# For now, let's assume that most Linux users get their /usr/bin/perl
+# from some packaging system, so that those compiling from source are
+# probably the more experimental folks and hence probably aren't
+# intending to replace /usr/bin/perl (at least just yet).
+# This change makes linux consistent with most other unix platforms
+# in having a default of prefix=/usr/local.
+# These notes can probably safely be removed in 5.006_50 and beyond.
+#
+#	9 April 1999  Andy Dougherty  <doughera@lafayette.edu>
+#
 
 # gcc-2.6.3 defines _G_HAVE_BOOL to 1, but doesn't actually supply bool.
 ccflags="-Dbool=char -DHAS_BOOL $ccflags"
@@ -34,6 +76,19 @@ ccflags="-Dbool=char -DHAS_BOOL $ccflags"
 set `echo X "$libswanted "| sed -e 's/ bsd / /' -e 's/ net / /'`
 shift
 libswanted="$*"
+
+# If you have glibc, then report the version for ./myconfig bug reporting.
+# (Configure doesn't need to know the specific version since it just uses
+# gcc to load the library for all tests.)
+# Is this sufficiently robust for libc5 systems as well as
+# glibc-2.1.x systems?
+# We don't use __GLIBC__ and  __GLIBC_MINOR__ because they 
+# are insufficiently precise to distinguish things like
+# libc-2.0.6 and libc-2.0.7.
+if test -L /lib/libc.so.6; then
+    libc=`ls -l /lib/libc.so.6 | awk '{print $NF}'`
+    libc=/lib/$libc
+fi
 
 # Configure may fail to find lstat() since it's a static/inline
 # function in <sys/stat.h>.
@@ -187,29 +242,31 @@ fi
 # Shimpei Yamashita <shimpei@socrates.patnet.caltech.edu>
 # Message-Id: <33EF1634.B36B6500@pobox.com>
 # 
-# MkLinux (osname=linux,archname=ppc-linux), which differs slightly from other
-# linuces, needs special flags passed in order for dynamic loading to work.
+# The DR2 of MkLinux (osname=linux,archname=ppc-linux) may need
+# special flags passed in order for dynamic loading to work.
 # instead of the recommended:
+#
 # ccdlflags='-rdynamic'
 # 
 # it should be:
 # ccdlflags='-Wl,-E'
+#
+# So if your DR2 (DR3 came out summer 1998, consider upgrading)
+# has problems with dynamic loading, uncomment the
+# following three lines, make distclean, and re-Configure:
+#case "`uname -r | sed 's/^[0-9.-]*//'``arch`" in
+#'osfmach3ppc') ccdlflags='-Wl,-E' ;;
+#esac
 
-# XXX EXPERIMENTAL  A.D.  2/27/1998
-# XXX This script UU/usethreads.cbu will get 'called-back' by Configure 
-# XXX after it has prompted the user for whether to use threads.
-cat > UU/usethreads.cbu <<'EOSH'
+# This script UU/usethreads.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use threads.
+cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in
 $define|true|[yY]*)
-    ccflags="-D_REENTRANT $ccflags"
-    # -lpthread needs to come before -lc but after other libraries such
-    # as -lgdbm and such like. We assume here that -lc is present in
-    # libswanted. If that fails to be true in future, then this can be
-    # changed to add pthread to the very end of libswanted.
-    set `echo X "$libswanted "| sed -e 's/ c / pthread c /'`
-    shift
-    libswanted="$*"
-    ;;
+        ccflags="-D_REENTRANT $ccflags"
+        set `echo X "$libswanted "| sed -e 's/ c / pthread c /'`
+        shift
+        libswanted="$*"
+	;;
 esac
-EOSH
-# XXX EXPERIMENTAL  --end of call-back
+EOCBU

@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq6 - Regexps ($Revision: 1.22 $, $Date: 1998/07/16 14:01:07 $)
+perlfaq6 - Regexes ($Revision: 1.27 $, $Date: 1999/05/23 16:08:30 $)
 
 =head1 DESCRIPTION
 
@@ -18,7 +18,7 @@ understandable.
 
 =over 4
 
-=item Comments Outside the Regexp
+=item Comments Outside the Regex
 
 Describe what you're doing and how you're doing it, using normal Perl
 comments.
@@ -27,9 +27,9 @@ comments.
     # number of characters on the rest of the line
     s/^(\w+)(.*)/ lc($1) . ":" . length($2) /meg;
 
-=item Comments Inside the Regexp
+=item Comments Inside the Regex
 
-The C</x> modifier causes whitespace to be ignored in a regexp pattern
+The C</x> modifier causes whitespace to be ignored in a regex pattern
 (except in a character class), and also allows you to use normal
 comments there, too.  As you can imagine, whitespace and comments help
 a lot.
@@ -128,7 +128,7 @@ L<perlop>):
 
 If you wanted text and not lines, you would use
 
-    perl -0777 -pe 'print "$1\n" while /START(.*?)END/gs' file1 file2 ...
+    perl -0777 -ne 'print "$1\n" while /START(.*?)END/gs' file1 file2 ...
 
 But if you want nested occurrences of C<START> through C<END>, you'll
 run up against the problem described in the question in this section
@@ -177,11 +177,46 @@ appear within a certain time.
 
 =head2 How do I substitute case insensitively on the LHS, but preserving case on the RHS?
 
-It depends on what you mean by "preserving case".  The following
-script makes the substitution have the same case, letter by letter, as
-the original.  If the substitution has more characters than the string
-being substituted, the case of the last character is used for the rest
-of the substitution.
+Here's a lovely Perlish solution by Larry Rosler.  It exploits
+properties of bitwise xor on ASCII strings.
+
+    $_= "this is a TEsT case";
+
+    $old = 'test';
+    $new = 'success';
+
+    s{(\Q$old\E}
+     { uc $new | (uc $1 ^ $1) .
+	(uc(substr $1, -1) ^ substr $1, -1) x
+	    (length($new) - length $1)
+     }egi;
+
+    print;
+
+And here it is as a subroutine, modelled after the above:
+
+    sub preserve_case($$) {
+	my ($old, $new) = @_;
+	my $mask = uc $old ^ $old;
+
+	uc $new | $mask .
+	    substr($mask, -1) x (length($new) - length($old))        
+    }
+
+    $a = "this is a TEsT case";
+    $a =~ s/(test)/preserve_case($1, "success")/egi;
+    print "$a\n";
+
+This prints:
+
+    this is a SUcCESS case
+
+Just to show that C programmers can write C in any programming language,
+if you prefer a more C-like solution, the following script makes the
+substitution have the same case, letter by letter, as the original.
+(It also happens to run about 240% slower than the Perlish solution runs.)
+If the substitution has more characters than the string being substituted,
+the case of the last character is used for the rest of the substitution.
 
     # Original by Nathan Torkington, massaged by Jeffrey Friedl
     #
@@ -214,14 +249,6 @@ of the substitution.
         return $new;
     }
 
-    $a = "this is a TEsT case";
-    $a =~ s/(test)/preserve_case($1, "success")/gie;
-    print "$a\n";
-
-This prints:
-
-    this is a SUcCESS case
-
 =head2 How can I make C<\w> match national character sets?
 
 See L<perllocale>.
@@ -232,41 +259,41 @@ One alphabetic character would be C</[^\W\d_]/>, no matter what locale
 you're in.  Non-alphabetics would be C</[\W\d_]/> (assuming you don't
 consider an underscore a letter).
 
-=head2 How can I quote a variable to use in a regexp?
+=head2 How can I quote a variable to use in a regex?
 
 The Perl parser will expand $variable and @variable references in
 regular expressions unless the delimiter is a single quote.  Remember,
 too, that the right-hand side of a C<s///> substitution is considered
 a double-quoted string (see L<perlop> for more details).  Remember
-also that any regexp special characters will be acted on unless you
+also that any regex special characters will be acted on unless you
 precede the substitution with \Q.  Here's an example:
 
     $string = "to die?";
     $lhs = "die?";
-    $rhs = "sleep no more";
+    $rhs = "sleep, no more";
 
     $string =~ s/\Q$lhs/$rhs/;
     # $string is now "to sleep no more"
 
-Without the \Q, the regexp would also spuriously match "di".
+Without the \Q, the regex would also spuriously match "di".
 
 =head2 What is C</o> really for?
 
 Using a variable in a regular expression match forces a re-evaluation
 (and perhaps recompilation) each time through.  The C</o> modifier
-locks in the regexp the first time it's used.  This always happens in a
+locks in the regex the first time it's used.  This always happens in a
 constant regular expression, and in fact, the pattern was compiled
 into the internal format at the same time your entire program was.
 
 Use of C</o> is irrelevant unless variable interpolation is used in
-the pattern, and if so, the regexp engine will neither know nor care
+the pattern, and if so, the regex engine will neither know nor care
 whether the variables change after the pattern is evaluated the I<very
 first> time.
 
 C</o> is often used to gain an extra measure of efficiency by not
 performing subsequent evaluations when you know it won't matter
 (because you know the variables won't change), or more rarely, when
-you don't want the regexp to notice if they do.
+you don't want the regex to notice if they do.
 
 For example, here's a "paragrep" program:
 
@@ -286,23 +313,66 @@ For example, this one-liner
 will work in many but not all cases.  You see, it's too simple-minded for
 certain kinds of C programs, in particular, those with what appear to be
 comments in quoted strings.  For that, you'd need something like this,
-created by Jeffrey Friedl:
+created by Jeffrey Friedl and later modified by Fred Curtis.
 
     $/ = undef;
     $_ = <>;
-    s#/\*[^*]*\*+([^/*][^*]*\*+)*/|("(\\.|[^"\\])*"|'(\\.|[^'\\])*'|\n+|.[^/"'\\]*)#$2#g;
+    s#/\*[^*]*\*+([^/*][^*]*\*+)*/|("(\\.|[^"\\])*"|'(\\.|[^'\\])*'|.[^/"'\\]*)#$2#gs
     print;
 
 This could, of course, be more legibly written with the C</x> modifier, adding
-whitespace and comments.
+whitespace and comments.  Here it is expanded, courtesy of Fred Curtis.
+
+    s{
+       /\*         ##  Start of /* ... */ comment
+       [^*]*\*+    ##  Non-* followed by 1-or-more *'s
+       (
+         [^/*][^*]*\*+
+       )*          ##  0-or-more things which don't start with /
+                   ##    but do end with '*'
+       /           ##  End of /* ... */ comment
+
+     |         ##     OR  various things which aren't comments:
+
+       (
+         "           ##  Start of " ... " string
+         (
+           \\.           ##  Escaped char
+         |               ##    OR
+           [^"\\]        ##  Non "\
+         )*
+         "           ##  End of " ... " string
+
+       |         ##     OR
+
+         '           ##  Start of ' ... ' string
+         (
+           \\.           ##  Escaped char
+         |               ##    OR
+           [^'\\]        ##  Non '\
+         )*
+         '           ##  End of ' ... ' string
+
+       |         ##     OR
+
+         .           ##  Anything other char
+         [^/"'\\]*   ##  Chars which doesn't start a comment, string or escape
+       )
+     }{$2}gxs;
+
+A slight modification also removes C++ comments:
+
+    s#/\*[^*]*\*+([^/*][^*]*\*+)*/|//[^\n]*|("(\\.|[^"\\])*"|'(\\.|[^'\\])*'|.[^/"'\\]*)#$2#gs;
 
 =head2 Can I use Perl regular expressions to match balanced text?
 
 Although Perl regular expressions are more powerful than "mathematical"
 regular expressions, because they feature conveniences like backreferences
-(C<\1> and its ilk), they still aren't powerful enough. You still need
-to use non-regexp techniques to parse balanced text, such as the text
-enclosed between matching parentheses or braces, for example.
+(C<\1> and its ilk), they still aren't powerful enough -- with
+the possible exception of bizarre and experimental features in the
+development-track releases of Perl.  You still need to use non-regex
+techniques to parse balanced text, such as the text enclosed between
+matching parentheses or braces, for example.
 
 An elaborate subroutine (for 7-bit ASCII only) to pull out balanced
 and possibly nested single chars, like C<`> and C<'>, C<{> and C<}>,
@@ -312,9 +382,9 @@ http://www.perl.com/CPAN/authors/id/TOMC/scripts/pull_quotes.gz .
 The C::Scan module from CPAN contains such subs for internal usage,
 but they are undocumented.
 
-=head2 What does it mean that regexps are greedy?  How can I get around it?
+=head2 What does it mean that regexes are greedy?  How can I get around it?
 
-Most people mean that greedy regexps match as much as they can.
+Most people mean that greedy regexes match as much as they can.
 Technically speaking, it's actually the quantifiers (C<?>, C<*>, C<+>,
 C<{}>) that are greedy rather than the whole pattern; Perl prefers local
 greed and immediate gratification to overall greed.  To get non-greedy
@@ -387,48 +457,31 @@ See the module String::Approx available from CPAN.
 
 =head2 How do I efficiently match many regular expressions at once?
 
-The following is super-inefficient:
+The following is extremely inefficient:
 
-    while (<FH>) {
-        foreach $pat (@patterns) {
-            if ( /$pat/ ) {
-                # do something
-            }
-        }
-    }
+    # slow but obvious way
+    @popstates = qw(CO ON MI WI MN);
+    while (defined($line = <>)) {
+	for $state (@popstates) {
+	    if ($line =~ /\b$state\b/i) {  
+		print $line;
+		last;
+	    }
+	}
+    }                                        
 
-Instead, you either need to use one of the experimental Regexp extension
-modules from CPAN (which might well be overkill for your purposes),
-or else put together something like this, inspired from a routine
-in Jeffrey Friedl's book:
+That's because Perl has to recompile all those patterns for each of
+the lines of the file.  As of the 5.005 release, there's a much better
+approach, one which makes use of the new C<qr//> operator:
 
-    sub _bm_build {
-        my $condition = shift;
-        my @regexp = @_;  # this MUST not be local(); need my()
-        my $expr = join $condition => map { "m/\$regexp[$_]/o" } (0..$#regexp);
-        my $match_func = eval "sub { $expr }";
-        die if $@;  # propagate $@; this shouldn't happen!
-        return $match_func;
-    }
-
-    sub bm_and { _bm_build('&&', @_) }
-    sub bm_or  { _bm_build('||', @_) }
-
-    $f1 = bm_and qw{
-            xterm
-            (?i)window
-    };
-
-    $f2 = bm_or qw{
-            \b[Ff]ree\b
-            \bBSD\B
-            (?i)sys(tem)?\s*[V5]\b
-    };
-
-    # feed me /etc/termcap, prolly
-    while ( <> ) {
-        print "1: $_" if &$f1;
-        print "2: $_" if &$f2;
+    # use spiffy new qr// operator, with /i flag even
+    use 5.005;
+    @popstates = qw(CO ON MI WI MN);
+    @poppats   = map { qr/\b$_\b/i } @popstates;
+    while (defined($line = <>)) {
+	for $patobj (@poppats) {
+	    print $line if $line =~ /$patobj/;
+	}
     }
 
 =head2 Why don't word-boundary searches with C<\b> work for me?
@@ -439,7 +492,7 @@ characters.  Neither is correct.  C<\b> is the place between a C<\w>
 character and a C<\W> character (that is, C<\b> is the edge of a
 "word").  It's a zero-width assertion, just like C<^>, C<$>, and all
 the other anchors, so it doesn't consume any characters.  L<perlre>
-describes the behaviour of all the regexp metacharacters.
+describes the behavior of all the regex metacharacters.
 
 Here are examples of the incorrect application of C<\b>, with fixes:
 
@@ -460,22 +513,24 @@ not "this" or "island".
 
 =head2 Why does using $&, $`, or $' slow my program down?
 
-Because once Perl sees that you need one of these variables anywhere
-in the program, it has to provide them on each and every pattern
-match.  The same mechanism that handles these provides for the use of
-$1, $2, etc., so you pay the same price for each regexp that contains
-capturing parentheses. But if you never use $&, etc., in your script,
-then regexps I<without> capturing parentheses won't be penalized. So
-avoid $&, $', and $` if you can, but if you can't (and some algorithms
-really appreciate them), once you've used them once, use them at will,
-because you've already paid the price.
+Because once Perl sees that you need one of these variables anywhere in
+the program, it has to provide them on each and every pattern match.
+The same mechanism that handles these provides for the use of $1, $2,
+etc., so you pay the same price for each regex that contains capturing
+parentheses. But if you never use $&, etc., in your script, then regexes
+I<without> capturing parentheses won't be penalized. So avoid $&, $',
+and $` if you can, but if you can't, once you've used them at all, use
+them at will because you've already paid the price.  Remember that some
+algorithms really appreciate them.  As of the 5.005 release.  the $&
+variable is no longer "expensive" the way the other two are.
 
 =head2 What good is C<\G> in a regular expression?
 
 The notation C<\G> is used in a match or substitution in conjunction the
 C</g> modifier (and ignored if there's no C</g>) to anchor the regular
 expression to the point just past where the last match occurred, i.e. the
-pos() point.
+pos() point.  A failed match resets the position of C<\G> unless the
+C</c> modifier is in effect.
 
 For example, suppose you had a line of text quoted in standard mail
 and Usenet notation, (that is, with leading C<E<gt>> characters), and
@@ -530,7 +585,7 @@ Of course, that could have been written as
 
 But then you lose the vertical alignment of the regular expressions.
 
-=head2 Are Perl regexps DFAs or NFAs?  Are they POSIX compliant?
+=head2 Are Perl regexes DFAs or NFAs?  Are they POSIX compliant?
 
 While it's true that Perl's regular expressions resemble the DFAs
 (deterministic finite automata) of the egrep(1) program, they are in
@@ -596,20 +651,41 @@ Or like this:
 
 Or like this:
 
-   die "sorry, Perl doesn't (yet) have Martian support )-:\n";
-
-In addition, a sample program which converts half-width to full-width
-katakana (in Shift-JIS or EUC encoding) is available from CPAN as
-
-=for Tom make it so
+    die "sorry, Perl doesn't (yet) have Martian support )-:\n";
 
 There are many double- (and multi-) byte encodings commonly used these
 days.  Some versions of these have 1-, 2-, 3-, and 4-byte characters,
 all mixed.
 
+=head2 How do I match a pattern that is supplied by the user?
+
+Well, if it's really a pattern, then just use
+
+    chomp($pattern = <STDIN>);
+    if ($line =~ /$pattern/) { }
+
+Or, since you have no guarantee that your user entered
+a valid regular expression, trap the exception this way:
+
+    if (eval { $line =~ /$pattern/ }) { }
+
+But if all you really want to search for a string, not a pattern,
+then you should either use the index() function, which is made for
+string searching, or if you can't be disabused of using a pattern
+match on a non-pattern, then be sure to use C<\Q>...C<\E>, documented
+in L<perlre>.
+
+    $pattern = <STDIN>;
+
+    open (FILE, $input) or die "Couldn't open input $input: $!; aborting";
+    while (<FILE>) {
+	print if /\Q$pattern\E/;
+    }
+    close FILE;
+
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997, 1998 Tom Christiansen and Nathan Torkington.
+Copyright (c) 1997-1999 Tom Christiansen and Nathan Torkington.
 All rights reserved.
 
 When included as part of the Standard Version of Perl, or as part of

@@ -58,15 +58,10 @@
 # and it is called GEM. Many of the options we are going to use depend
 # on the compiler style.
 
-# do NOT, I repeat, *NOT* take away those leading tabs
-	# reset
-	_DEC_uname_r=
-	_DEC_cc_style=
-	# set
-	_DEC_uname_r=`uname -r`
-	# _DEC_cc_style set soon below
+# do NOT, I repeat, *NOT* take away the leading tabs
 # Configure Black Magic (TM)
-
+	# reset
+	_DEC_cc_style=
 case "$cc" in
 *gcc*)	;; # pass
 *)	# compile something small: taint.c is fine for this.
@@ -147,13 +142,26 @@ lddlflags='-shared -expect_unresolved "*"'
 
 # Fancy compiler suites use optimising linker as well as compiler.
 # <spider@Orb.Nashua.NH.US>
-case "$_DEC_uname_r" in
+case "`uname -r`" in
 *[123].*)	# old loader
 		lddlflags="$lddlflags -O3"
 		;;
-*)		lddlflags="$lddlflags $optimize -msym"
-		# -msym: If using a sufficiently recent /sbin/loader,
-		# keep the module symbols with the modules.
+*)            if $test "X$optimize" = "X$undef"; then
+                      lddlflags="$lddlflags -msym"
+              else
+		  case "`sizer -v`" in
+		  *4.0D*)
+		      # QAR 56761: -O4 + .so may produce broken code,
+		      # fixed in 4.0E or better.
+		      ;;
+		  *)    
+                      lddlflags="$lddlflags $optimize"
+		      ;;
+		  esac
+		  # -msym: If using a sufficiently recent /sbin/loader,
+		  # keep the module symbols with the modules.
+                  lddlflags="$lddlflags -msym"
+              fi
 		;;
 esac
 # Yes, the above loses if gcc does not use the system linker.
@@ -165,7 +173,7 @@ esac
 # As noted above the -DDEBUGGING is added automagically by Configure if -g.
 case "$optimize" in
 	*-g*) ;; # left intentionally blank
-*)	case "$_DEC_uname_r" in
+*)	case "`uname -r`" in
 	*[123].*)
 		case "$useshrplib" in
 		false|undef|'')	lddlflags="$lddlflags -s"	;;
@@ -177,46 +185,65 @@ case "$optimize" in
     	;;
 esac
 
-if [ "X$usethreads" = "X$define" ]; then
-    # Threads interfaces changed with V4.0.
-    case "$_DEC_uname_r" in
-    *[123].*)	libswanted="$libswanted pthreads mach exc c_r"
-		ccflags="-threads $ccflags"
-		;;
-    *)		libswanted="$libswanted pthread exc"
-    		ccflags="-pthread $ccflags"
-		;;
-    esac
-    usemymalloc='n'
-fi
-
 #
 # Make embedding in things like INN and Apache more memory friendly.
 # Keep it overridable on the Configure command line, though, so that
 # "-Uuseshrplib" prevents this default.
 #
 
-# This or the glibpth change above breaks the build. Commented out
-# for this snapshot.
-#case "$_DEC_cc_style.$useshrplib" in
-#	new.)	useshrplib="$define"	;;
-#esac
+case "$_DEC_cc_style.$useshrplib" in
+	new.)	useshrplib="$define"	;;
+esac
+
+# The EFF_ONLY_OK from <sys/access.h> is present but dysfunctional for
+# [RWX]_OK as of Digital UNIX 4.0[A-D]?.  If and when this gets fixed,
+# please adjust this appropriately.  See also pp_sys.c just before the
+# emulate_eaccess().
+
+pp_sys_cflags='ccflags="$ccflags -DNO_EFF_ONLY_OK"'
+
+# This script UU/usethreads.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use threads.
+cat > UU/usethreads.cbu <<'EOCBU'
+case "$usethreads" in
+$define|true|[yY]*)
+        # Threads interfaces changed with V4.0.
+        case "`uname -r`" in
+        *[123].*)
+	    libswanted="$libswanted pthreads mach exc c_r"
+  	    ccflags="-threads $ccflags"
+	    ;;
+        *)
+	    libswanted="$libswanted pthread exc"
+    	    ccflags="-pthread $ccflags"
+	    ;;
+        esac
+
+        usemymalloc='n'
+	;;
+esac
+EOCBU
 
 #
 # Unset temporary variables no more needed.
 #
 
 unset _DEC_cc_style
-unset _DEC_uname_r
     
 #
 # History:
+#
+# perl5.005_51:
+#
+#	September-1998 Jarkko Hietaniemi <jhi@iki.fi>
+#
+#	* Added the -DNO_EFF_ONLY_OK flag ('use filetest;' support).
 #
 # perl5.004_57:
 #
 #	19-Dec-1997 Spider Boardman <spider@Orb.Nashua.NH.US>
 #
-#	* Newer Digial UNIX compilers enforce signaling for NaN without
+#	* Newer Digital UNIX compilers enforce signaling for NaN without
 #	  -ieee.  Added -fprm d at the same time since it's friendlier for
 #	  embedding.
 #
@@ -332,3 +359,5 @@ unset _DEC_uname_r
 #	* Set -Olimit to 3200 because perl_yylex.c got too big
 #	  for the optimizer.
 #
+
+

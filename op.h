@@ -1,6 +1,6 @@
 /*    op.h
  *
- *    Copyright (c) 1991-1997, Larry Wall
+ *    Copyright (c) 1991-1999, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -38,7 +38,7 @@ typedef U32 PADOFFSET;
 #define BASEOP				\
     OP*		op_next;		\
     OP*		op_sibling;		\
-    OP*		(CPERLscope(*op_ppaddr))_((ARGSproto));		\
+    OP*		(CPERLscope(*op_ppaddr))(pTHX);		\
     PADOFFSET	op_targ;		\
     OPCODE	op_type;		\
     U16		op_seq;			\
@@ -79,6 +79,7 @@ typedef U32 PADOFFSET;
 				/*  On OP_ENTERSUB || OP_NULL, saw a "do". */
 				/*  On OP_(ENTER|LEAVE)EVAL, don't clear $@ */
 				/*  On OP_ENTERITER, loop var is per-thread */
+                                /*  On pushre, re is /\s+/ imp. by split " " */
 
 /* old names; don't use in new code, but don't break them, either */
 #define OPf_LIST	OPf_WANT_LIST
@@ -91,7 +92,7 @@ typedef U32 PADOFFSET;
 	   : dowantarray())
 
 /* Private for lvalues */
-#define OPpLVAL_INTRO	128	/* Lvalue must be localized */
+#define OPpLVAL_INTRO	128	/* Lvalue must be localized or lvalue sub */
 
 /* Private for OP_AASSIGN */
 #define OPpASSIGN_COMMON	64	/* Left & right have syms in common. */
@@ -103,33 +104,47 @@ typedef U32 PADOFFSET;
 #define OPpRUNTIME		64	/* Pattern coming in on the stack */
 
 /* Private for OP_TRANS */
-#define OPpTRANS_GROWS		1
-#define OPpTRANS_FROM_UTF	2
-#define OPpTRANS_TO_UTF		4
-#define OPpTRANS_COUNTONLY	8
-#define OPpTRANS_SQUASH		16
-#define OPpTRANS_DELETE		32
-#define OPpTRANS_COMPLEMENT	64
+#define OPpTRANS_FROM_UTF	1
+#define OPpTRANS_TO_UTF		2
+#define OPpTRANS_IDENTICAL	4
+	/* When CU or UC, means straight latin-1 to utf-8 or vice versa */
+	/* Otherwise, IDENTICAL means the right side is the same as the left */
+#define OPpTRANS_SQUASH		8
+#define OPpTRANS_DELETE		16
+#define OPpTRANS_COMPLEMENT	32
+#define OPpTRANS_GROWS		64
 
 /* Private for OP_REPEAT */
 #define OPpREPEAT_DOLIST	64	/* List replication. */
 
-/* Private for OP_ENTERSUB, OP_RV2?V, OP_?ELEM */
+/* Private for OP_RV2?V, OP_?ELEM */
 #define OPpDEREF		(32|64)	/* Want ref to something: */
 #define OPpDEREF_AV		32	/*   Want ref to AV. */
 #define OPpDEREF_HV		64	/*   Want ref to HV. */
 #define OPpDEREF_SV		(32|64)	/*   Want ref to SV. */
   /* OP_ENTERSUB only */
 #define OPpENTERSUB_DB		16	/* Debug subroutine. */
+#define OPpENTERSUB_HASTARG	32	/* Called from OP tree. */
+  /* OP_RV2CV only */
 #define OPpENTERSUB_AMPER	8	/* Used & form to call. */
+#define OPpENTERSUB_NOPAREN	128	/* bare sub call (without parens) */
+#define OPpENTERSUB_INARGS	4	/* Lval used as arg to a sub. */
+  /* OP_GV only */
+#define OPpEARLY_CV		32	/* foo() called before sub foo was parsed */
   /* OP_?ELEM only */
 #define OPpLVAL_DEFER		16	/* Defer creation of array/hash elem */
   /* for OP_RV2?V, lower bits carry hints */
 
+/* Private for OPs with TARGLEX */
+  /* (lower bits may carry MAXARG) */
+#define OPpTARGET_MY		16	/* Target is PADMY. */
+
 /* Private for OP_CONST */
+#define	OPpCONST_STRICT		8	/* bearword subject to strict 'subs' */
 #define OPpCONST_ENTERED	16	/* Has been entered as symbol. */
 #define OPpCONST_ARYBASE	32	/* Was a $[ translated to constant. */
 #define OPpCONST_BARE		64	/* Was a bare word (filehandle?). */
+#define OPpCONST_WARNING	128	/* Was a $^W translated to constant. */
 
 /* Private for OP_FLIP/FLOP */
 #define OPpFLIP_LINENUM		64	/* Range arg potentially a line num. */
@@ -143,6 +158,10 @@ typedef U32 PADOFFSET;
 /* Private for OP_SORT, OP_PRTF, OP_SPRINTF, string cmp'n, and case changers */
 #define OPpLOCALE		64	/* Use locale */
 
+/* Private for OP_SORT */
+#define OPpSORT_NUMERIC		1	/* Optimized away { $a <=> $b } */
+#define OPpSORT_INTEGER		2	/* Ditto while under "use integer" */
+#define OPpSORT_REVERSE		4	/* Descending sort */
 /* Private for OP_THREADSV */
 #define OPpDONE_SVREF		64	/* Been through newSVREF once */
 
@@ -165,13 +184,6 @@ struct logop {
     BASEOP
     OP *	op_first;
     OP *	op_other;
-};
-
-struct condop {
-    BASEOP
-    OP *	op_first;
-    OP *	op_true;
-    OP *	op_false;
 };
 
 struct listop {
@@ -247,7 +259,6 @@ struct loop {
 #define cBINOP ((BINOP*)PL_op)
 #define cLISTOP ((LISTOP*)PL_op)
 #define cLOGOP ((LOGOP*)PL_op)
-#define cCONDOP ((CONDOP*)PL_op)
 #define cPMOP ((PMOP*)PL_op)
 #define cSVOP ((SVOP*)PL_op)
 #define cGVOP ((GVOP*)PL_op)
@@ -259,7 +270,6 @@ struct loop {
 #define cBINOPo ((BINOP*)o)
 #define cLISTOPo ((LISTOP*)o)
 #define cLOGOPo ((LOGOP*)o)
-#define cCONDOPo ((CONDOP*)o)
 #define cPMOPo ((PMOP*)o)
 #define cSVOPo ((SVOP*)o)
 #define cGVOPo ((GVOP*)o)
@@ -272,7 +282,6 @@ struct loop {
 #define kBINOP ((BINOP*)kid)
 #define kLISTOP ((LISTOP*)kid)
 #define kLOGOP ((LOGOP*)kid)
-#define kCONDOP ((CONDOP*)kid)
 #define kPMOP ((PMOP*)kid)
 #define kSVOP ((SVOP*)kid)
 #define kGVOP ((GVOP*)kid)
@@ -282,7 +291,7 @@ struct loop {
 
 #define Nullop Null(OP*)
 
-/* Lowest byte of opargs */
+/* Lowest byte of PL_opargs */
 #define OA_MARK 1
 #define OA_FOLDCONST 2
 #define OA_RETSCALAR 4
@@ -291,29 +300,31 @@ struct loop {
 #define OA_OTHERINT 32
 #define OA_DANGEROUS 64
 #define OA_DEFGV 128
+#define OA_TARGLEX 256
 
 /* The next 4 bits encode op class information */
-#define OA_CLASS_MASK (15 << 8)
+#define OCSHIFT 9
 
-#define OA_BASEOP (0 << 8)
-#define OA_UNOP (1 << 8)
-#define OA_BINOP (2 << 8)
-#define OA_LOGOP (3 << 8)
-#define OA_CONDOP (4 << 8)
-#define OA_LISTOP (5 << 8)
-#define OA_PMOP (6 << 8)
-#define OA_SVOP (7 << 8)
-#define OA_GVOP (8 << 8)
-#define OA_PVOP (9 << 8)
-#define OA_LOOP (10 << 8)
-#define OA_COP (11 << 8)
-#define OA_BASEOP_OR_UNOP (12 << 8)
-#define OA_FILESTATOP (13 << 8)
-#define OA_LOOPEXOP (14 << 8)
+#define OA_CLASS_MASK (15 << OCSHIFT)
 
-#define OASHIFT 12
+#define OA_BASEOP (0 << OCSHIFT)
+#define OA_UNOP (1 << OCSHIFT)
+#define OA_BINOP (2 << OCSHIFT)
+#define OA_LOGOP (3 << OCSHIFT)
+#define OA_LISTOP (4 << OCSHIFT)
+#define OA_PMOP (5 << OCSHIFT)
+#define OA_SVOP (6 << OCSHIFT)
+#define OA_GVOP (7 << OCSHIFT)
+#define OA_PVOP_OR_SVOP (8 << OCSHIFT)
+#define OA_LOOP (9 << OCSHIFT)
+#define OA_COP (10 << OCSHIFT)
+#define OA_BASEOP_OR_UNOP (11 << OCSHIFT)
+#define OA_FILESTATOP (12 << OCSHIFT)
+#define OA_LOOPEXOP (13 << OCSHIFT)
 
-/* Remaining nybbles of opargs */
+#define OASHIFT 13
+
+/* Remaining nybbles of PL_opargs */
 #define OA_SCALAR 1
 #define OA_LIST 2
 #define OA_AVREF 3

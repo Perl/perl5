@@ -30,6 +30,7 @@ $!  C_Compiler_Invoke is the command needed to invoke the C compiler
 $!
 $! Set Dec_C_Version to something
 $ WRITE_RESULT := "WRITE SYS$OUTPUT ""%CONFIG-I-RESULT "" + "
+$ echo = "Write Sys$Output "
 $ Dec_C_Version := "''Dec_C_Version'"
 $ Dec_C_Version = Dec_C_Version + 0
 $ Vms_Ver := "''f$extract(1,3, f$getsyi(""version""))'"
@@ -49,6 +50,12 @@ $ ELSE
 $   Checkcc := "''Mcc'"
 $ ENDIF
 $ cc_flags = ""
+$ if use_multiplicity .eqs. "Y"
+$ THEN
+$   perl_usemultiplicity = "define"
+$ ELSE
+$   perl_usemultiplicity = "undef"
+$ ENDIF
 $! Some constant defaults.
 $
 $ hwname = f$getsyi("HW_NAME")
@@ -56,16 +63,70 @@ $ myname = myhostname
 $ if "''myname'" .eqs. "" THEN myname = f$trnlnm("SYS$NODE")
 $!
 $! ##ADD NEW CONSTANTS HERE##
+$ perl_d_madvise="undef"
+$ perl_selectminbits=32
+$ perl_d_msync="undef"
+$ perl_d_mprotect="undef"
+$ perl_d_munmap="undef"
+$ perl_crosscompile="undef"
+$ perl_multiarch="undef"
+$ perl_d_mmap="undef"
+$ perl_i_sysmman="undef"
+$ perl_d_telldirproto="define"
+$ perl_i_sysmount="undef"
+$ perl_d_bincompat="undef"
+$ perl_d_endspent="undef
+$ perl_d_getspent="undef
+$ perl_d_getspnam="undef
+$ perl_d_setspent="undef
+$ perl_d_fstatfs="undef"
+$ perl_i_machcthreads="undef"
+$ perl_i_pthread="define"
+$ perl_d_fstatvfs="undef"
+$ perl_usesocks="undef"
+$ perl_d_vendorlib="undef"
+$ perl_vendorlibexp=""
+$ perl_d_statfsflags="undef"
+$ perl_i_sysstatvfs="undef"
+$ perl_i_mntent="undef"
+$ perl_d_getmntent="undef"
+$ perl_d_hasmntopt="undef"
 $ perl_package="''package'"
 $ perl_baserev = "''baserev'"
 $ cc_defines=""
+$ perl_installusrbinperl="undef"
 $ perl_CONFIG="true"
+$ perl_d_fseeko="undef"
+$ perl_d_ftello="undef"
+$ perl_d_readv="undef"
+$ perl_d_writev="undef"
+$ perl_i_machcthr="undef"
 $ perl_i_netdb="undef"
 $ perl_d_gnulibc="undef"
 $ perl_cf_by="unknown"
 $ perl_ccdlflags=""
 $ perl_cccdlflags=""
 $ perl_mab=""
+$ perl_drand01 = "drand48()"
+$ perl_randseedtype = "long int"
+$ perl_seedfunc = "srand48"
+$ perl_d_msg_ctrunc = "undef"
+$ perl_d_msg_dontroute = "undef"
+$ perl_d_msg_oob = "undef"
+$ perl_d_msg_peek = "undef"
+$ perl_d_msg_proxy = "undef"
+$ perl_d_scm_rights = "undef"
+$ perl_d_sendmsg = "undef"
+$ perl_d_recvmsg = "undef"
+$ perl_d_msghdr_s = "undef"
+$ perl_d_cmsghdr_s = "undef"
+$ IF use_64bit .eqs. "Y"
+$ THEN
+$   perl_use64bits = "define"
+$ ELSE
+$   perl_use64bits = "undef"
+$ ENDIF
+$ perl_d_drand48proto = "define"
 $ perl_libpth="/sys$share /sys$library"
 $ perl_ld="Link"
 $ perl_lddlflags="/Share"
@@ -82,6 +143,9 @@ $ perl_d_pwpasswd="define"
 $ perl_d_setpwent="define"
 $ perl_d_getpwent="define"
 $ perl_d_endpwent="define"
+$ perl_d_phostname="undef"
+$ perl_d_accessx="undef"
+$ perl_d_eaccess="undef"
 $ perl_ebcdic="undef"
 $ perl_hintfile=""
 $ perl_shrplib="define"
@@ -96,7 +160,7 @@ $ perl_prefix="perl_root"
 $ perl_binexp="''perl_prefix':[000000]"
 $ perl_builddir="''perl_prefix':[000000]"
 $ perl_installbin="''perl_prefix':[000000]"
-$ perl_installscript="''perl_prefix':[000000]"
+$ perl_installscript="''perl_prefix':[utils]"
 $ perl_installman1dir="''perl_prefix':[man.man1]"
 $ perl_installman3dir="''perl_prefix':[man.man3]"
 $ perl_installprivlib="''perl_prefix':[lib]"
@@ -130,14 +194,14 @@ $ perl_osname="VMS"
 $ perl_d_archlib="define"
 $ perl_d_bincompat3="undef"
 $ perl_cppstdin="''Perl_CC'/noobj/preprocess=sys$output sys$input"
-$ perl_cppminus=""
+$ perl_cppminus=" "
 $ perl_d_castneg="define"
 $ perl_castflags="0"
 $ perl_d_chsize="undef"
 $ perl_d_const="define"
 $ perl_d_crypt="define"
 $ perl_byteorder="1234"
-$ perl_full_csh=""
+$ perl_full_csh=" "
 $ perl_d_csh="undef"
 $ perl_d_dup2="define"
 $ perl_d_fchmod="undef"
@@ -256,6 +320,7 @@ $ perl_d_chown="define"
 $ perl_d_chroot="undef"
 $ perl_d_cuserid="define"
 $ perl_d_dbl_dig="define"
+$ perl_d_ldbl_dig="define"
 $ perl_d_difftime="define"
 $ perl_d_fork="undef"
 $ perl_d_getlogin="define"
@@ -291,9 +356,9 @@ $ENDIF
 $ perl_sh="MCR"
 $ perl_modetype="unsigned int"
 $ perl_ssizetype="int"
-$ perl_o_nonblock=""
-$ perl_eagain=""
-$ perl_rd_nodata=""
+$ perl_o_nonblock=" "
+$ perl_eagain=" "
+$ perl_rd_nodata=" "
 $ perl_d_eofnblk="undef"
 $ perl_d_oldarchlib="define"
 $ perl_privlibexp="''perl_prefix':[lib]"
@@ -326,8 +391,8 @@ $ perl_d_getpgrp2="undef"
 $ perl_d_sfio="undef"
 $ perl_usedl="define"
 $ perl_startperl="""$ perl 'f$env(\""procedure\"")' 'p1' 'p2' 'p3' 'p4' 'p5' 'p6' 'p7' 'p8'  !\n$ exit++ + ++$status != 0 and $exit = $status = undef;"""
-$ perl_db_hashtype=""
-$ perl_db_prefixtype=""
+$ perl_db_hashtype=" "
+$ perl_db_prefixtype=" "
 $ perl_useperlio="undef"
 $ perl_defvoidused="15"
 $ perl_voidflags="15"
@@ -337,17 +402,49 @@ $ IF ("''Use_Threads'".eqs."T").and.("''VMS_VER'".LES."6.2")
 $ THEN
 $ perl_libs="SYS$SHARE:CMA$LIB_SHR.EXE/SHARE SYS$SHARE:CMA$RTL.EXE/SHARE SYS$SHARE:CMA$OPEN_LIB_SHR.exe/SHARE SYS$SHARE:CMA$OPEN_RTL.exe/SHARE"
 $ ELSE
-$ perl_libs=""
+$ perl_libs=" "
 $ ENDIF
 $ IF ("''Using_Dec_C'".eqs."Yes")
 $ THEN
 $ perl_libc="(DECCRTL)"
 $ ELSE
-$ perl_libc=""
+$ perl_libc=" "
 $ ENDIF
 $ perl_PATCHLEVEL="''patchlevel'"
 $ perl_SUBVERSION="''subversion'"
 $ perl_pager="most"
+$!
+$! Are we 64 bit?
+$!
+$ if (use_64bit .eqs. "Y")
+$ THEN
+$   perl_d_PRIfldbl = "define"
+$   perl_d_PRIgldbl = "define"
+$   perl_d_PRId64 = "define"
+$   perl_d_PRIu64 = "define"
+$   perl_d_PRIo64 = "define"
+$   perl_d_PRIx64 = "define"
+$   perl_sPRIfldbl = """Lf"""
+$   perl_sPRIgldbl = """Lg"""
+$   perl_sPRId64 = """Ld"""
+$   perl_sPRIu64 = """Lu"""
+$   perl_sPRIo64 = """Lo"""
+$   perl_sPRIx64 = """Lx"""
+$ ELSE
+$   perl_d_PRIfldbl = "undef"
+$   perl_d_PRIgldbl = "undef"
+$   perl_d_PRId64 = "undef"
+$   perl_d_PRIu64 = "undef"
+$   perl_d_PRIo64 = "undef"
+$   perl_d_PRIx64 = "undef"
+$   perl_sPRIfldbl = ""
+$   perl_sPRIgldbl = ""
+$   perl_sPRId64 = ""
+$   perl_sPRIu64 = ""
+$   perl_sPRIo64 = ""
+$   perl_sPRIx64 = ""
+$ ENDIF
+$ perl_d_llsekk="undef"
 $!
 $!
 $! Now some that we build up
@@ -371,9 +468,19 @@ $ if ("''Use_Threads'".eqs."T")
 $ THEN
 $ perl_arch = "''perl_arch'-thread"
 $ perl_archname = "''perl_archname'-thread"
+$ perl_d_old_pthread_create_joinable = "undef"
+$ perl_old_pthread_create_joinable = " "
+$ ELSE
+$ perl_d_old_pthread_create_joinable = "undef"
+$ perl_old_pthread_create_joinable = " "
 $ ENDIF
 $ perl_osvers=f$edit(osvers, "TRIM")
+$ if (perl_subversion + 0).eq.0
+$ THEN
+$ LocalPerlVer = "5_" + Perl_PATCHLEVEL
+$ ELSE
 $ LocalPerlVer = "5_" + Perl_PATCHLEVEL + perl_subversion
+$ ENDIF
 $!
 $! Some that we need to invoke the compiler for
 $ OS := "open/write SOURCECHAN []temp.c"
@@ -809,6 +916,66 @@ $     perl_i_unistd = "define"
 $   ENDIF
 $ WRITE_RESULT "i_unistd is ''perl_i_unistd'"
 $!
+$! Check to see if we've got shadow.h (probably not, but...)
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <shadow.h>
+$ WS "int main()
+$ WS "{"
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp.c
+$   teststatus = f$extract(9,1,$status)
+$   DEASSIGN SYS$OUTPUT
+$   DEASSIGN SYS$ERROR
+$   if (teststatus.nes."1")
+$   THEN
+$!   Okay, failed. Must not have it
+$     perl_i_shadow = "undef"
+$   ELSE
+$     perl_i_shadow = "define"
+
+$   ENDIF
+$ WRITE_RESULT "i_shadow is ''perl_i_shadow'"
+$!
+$! Check to see if we've got socks.h (probably not, but...)
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <socks.h>
+$ WS "int main()
+$ WS "{"
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp.c
+$   teststatus = f$extract(9,1,$status)
+$   DEASSIGN SYS$OUTPUT
+$   DEASSIGN SYS$ERROR
+$   if (teststatus.nes."1")
+$   THEN
+$!   Okay, failed. Must not have it
+$     perl_i_socks = "undef"
+$   ELSE
+$     perl_i_socks = "define"
+
+$   ENDIF
+$ WRITE_RESULT "i_socks is ''perl_i_socks'"
+$!
 $! Check the prototype for select
 $!
 $ if ("''Has_Dec_C_Sockets'".eqs."T").or.("''Has_Socketshr'".eqs."T")
@@ -856,6 +1023,816 @@ $   ! No sockets, so stick in an int *
 $   perl_selecttype = "int *"
 $ ENDIF
 $ WRITE_RESULT "selectype is ''perl_selecttype'"
+$!
+$! Check to see if fd_set exists
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "#include <types.h>
+$ WS "#include <unistd.h>
+$ if ("''Has_Socketshr'".eqs."T")
+$ THEN
+$  WS "#include <socketshr.h>"
+$ ENDIF
+$ IF ("''Has_Dec_C_Sockets'".eqs."T")
+$ THEN
+$  WS "#include <time.h>
+$  WS "#include <socket.h>
+$ endif
+$ WS "int main()
+$ WS "{"
+$ WS "fd_set *foo;
+$ WS "int bar;
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$ DEFINE SYS$ERROR _NLA0:
+$ DEFINE SYS$OUTPUT _NLA0:
+$ on error then continue
+$ on warning then continue
+$ 'Checkcc' temp.c
+$ teststatus = f$extract(9,1,$status)
+$ DEASSIGN SYS$OUTPUT
+$ DEASSIGN SYS$ERROR
+$ if (teststatus.nes."1")
+$ THEN
+$!  Okay, fd_set failed. Must not exist
+$   perl_d_fd_set = "undef"
+$ ELSE
+$   perl_d_fd_set="define"
+$ ENDIF
+$ WRITE_RESULT "d_fd_set is ''perl_d_fd_set'"
+$!
+$! Check for inttypes.h
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "#include <unistd.h>
+$ WS "#include <inttypes.h>
+$ WS "int main()
+$ WS "{"
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp.c
+$   savedstatus = $status
+$   teststatus = f$extract(9,1,savedstatus)
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_i_inttypes="undef"
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$   ELSE
+$     If (Needs_Opt.eqs."Yes")
+$     THEN
+$       link temp.obj,temp.opt/opt
+$     else
+$       link temp.obj
+$     endif
+$     savedstatus = $status
+$     teststatus = f$extract(9,1,savedstatus)
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$     if (teststatus.nes."1")
+$     THEN
+$       perl_i_inttypes="undef"
+$     ELSE
+$       perl_i_inttypes="define"
+$     ENDIF
+$   ENDIF
+$ WRITE_RESULT "i_inttypes is ''perl_i_inttypes'"
+$!
+$! Check to see if int64_t exists
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "#include <types.h>
+$ WS "#''perl_i_inttypes IIH
+$ WS "#ifdef IIH
+$ WS "#include <inttypes.h>
+$ WS "#endif
+$ WS "#include <unistd.h>
+$ WS "int main()
+$ WS "{"
+$ WS "int64_t bar;
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$ DEFINE SYS$ERROR _NLA0:
+$ DEFINE SYS$OUTPUT _NLA0:
+$ on error then continue
+$ on warning then continue
+$ 'Checkcc' temp.c
+$ teststatus = f$extract(9,1,$status)
+$ DEASSIGN SYS$OUTPUT
+$ DEASSIGN SYS$ERROR
+$ if (teststatus.nes."1")
+$ THEN
+$!  Okay, int64_t failed. Must not exist
+$   perl_d_int64t = "undef"
+$ ELSE
+$   perl_d_int64t="define"
+$ ENDIF
+$ WRITE_RESULT "d_int64t is ''perl_d_int64t'"
+$!
+$! Check to see if off64_t exists
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "#include <types.h>
+$ WS "#''perl_i_inttypes IIH
+$ WS "#ifdef IIH
+$ WS "#include <inttypes.h>
+$ WS "#endif
+$ WS "#include <unistd.h>
+$ WS "int main()
+$ WS "{"
+$ WS "off64_t bar;
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$ DEFINE SYS$ERROR _NLA0:
+$ DEFINE SYS$OUTPUT _NLA0:
+$ on error then continue
+$ on warning then continue
+$ 'Checkcc' temp.c
+$ teststatus = f$extract(9,1,$status)
+$ DEASSIGN SYS$OUTPUT
+$ DEASSIGN SYS$ERROR
+$ if (teststatus.nes."1")
+$ THEN
+$!  Okay, off64_t failed. Must not exist
+$   perl_d_off64_t = "undef"
+$ ELSE
+$   perl_d_off64_t="define"
+$ ENDIF
+$ WRITE_RESULT "d_off64_t is ''perl_d_off64_t'"
+$!
+$! Check to see if fpos64_t exists
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "#include <types.h>
+$ WS "#''perl_i_inttypes IIH
+$ WS "#ifdef IIH
+$ WS "#include <inttypes.h>
+$ WS "#endif
+$ WS "#include <unistd.h>
+$ WS "int main()
+$ WS "{"
+$ WS "fpos64_t bar;
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$ DEFINE SYS$ERROR _NLA0:
+$ DEFINE SYS$OUTPUT _NLA0:
+$ on error then continue
+$ on warning then continue
+$ 'Checkcc' temp.c
+$ teststatus = f$extract(9,1,$status)
+$ DEASSIGN SYS$OUTPUT
+$ DEASSIGN SYS$ERROR
+$ if (teststatus.nes."1")
+$ THEN
+$!  Okay, fpos64_t failed. Must not exist
+$   perl_d_fpos64_t = "undef"
+$ ELSE
+$   perl_d_fpos64_t="define"
+$ ENDIF
+$ WRITE_RESULT "d_fpos64_t is ''perl_d_fpos64_t'"
+$!
+$! Check to see if gethostname exists
+$!
+$ if ("''Has_Dec_C_Sockets'".eqs."T").or.("''Has_Socketshr'".eqs."T")
+$ THEN
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "#include <types.h>
+$ WS "#include <unistd.h>
+$ if ("''Has_Socketshr'".eqs."T")
+$ THEN
+$  WS "#include <socketshr.h>"
+$ else
+$  WS "#include <time.h>
+$  WS "#include <socket.h>
+$ endif
+$ WS "int main()
+$ WS "{"
+$ WS "char name[100];
+$ WS "int bar, baz;
+$ WS "bar = 100;
+$ WS "baz = gethostname(name, bar);
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp.c
+$   teststatus = f$extract(9,1,$status)
+$   DEASSIGN SYS$OUTPUT
+$   DEASSIGN SYS$ERROR
+$   if (teststatus.nes."1")
+$   THEN
+$!   Okay, compile failed. Must not have it
+$     perl_dgethname = "undef"
+$   ELSE
+$     If (Needs_Opt.eqs."Yes")
+$     THEN
+$       link temp.obj,temp.opt/opt
+$     else
+$       link temp.obj
+$     endif
+$     savedstatus = $status
+$     teststatus = f$extract(9,1,savedstatus)
+$     if (teststatus.nes."1")
+$     THEN
+$       perl_d_gethname="undef"
+$     ELSE
+$       perl_d_gethname="define"
+$     ENDIF
+$   ENDIF
+$ ELSE
+$   ! No sockets, so no gethname
+$   perl_d_gethname = "undef"
+$ ENDIF
+$ WRITE_RESULT "d_gethname is ''perl_d_gethname'"
+$!
+$! Check for sys/file.h
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "#include <unistd.h>
+$ WS "#include <sys/file.h>
+$ WS "int main()
+$ WS "{"
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp.c
+$   savedstatus = $status
+$   teststatus = f$extract(9,1,savedstatus)
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_i_sysfile="undef"
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$   ELSE
+$     If (Needs_Opt.eqs."Yes")
+$     THEN
+$       link temp.obj,temp.opt/opt
+$     else
+$       link temp.obj
+$     endif
+$     savedstatus = $status
+$     teststatus = f$extract(9,1,savedstatus)
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$     if (teststatus.nes."1")
+$     THEN
+$       perl_i_sysfile="undef"
+$     ELSE
+$       perl_i_sysfile="define"
+$     ENDIF
+$   ENDIF
+$ WRITE_RESULT "i_sysfile is ''perl_i_sysfile'"
+$!
+$! Check for poll.h
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "#include <unistd.h>
+$ WS "#include <poll.h>
+$ WS "int main()
+$ WS "{"
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp.c
+$   savedstatus = $status
+$   teststatus = f$extract(9,1,savedstatus)
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_i_poll="undef"
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$   ELSE
+$     If (Needs_Opt.eqs."Yes")
+$     THEN
+$       link temp.obj,temp.opt/opt
+$     else
+$       link temp.obj
+$     endif
+$     savedstatus = $status
+$     teststatus = f$extract(9,1,savedstatus)
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$     if (teststatus.nes."1")
+$     THEN
+$       perl_i_poll="undef"
+$     ELSE
+$       perl_i_poll="define"
+$     ENDIF
+$   ENDIF
+$ WRITE_RESULT "i_poll is ''perl_i_poll'"
+$!
+$! Check for sys/uio.h
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "#include <unistd.h>
+$ WS "#include <sys/uio.h>
+$ WS "int main()
+$ WS "{"
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp.c
+$   savedstatus = $status
+$   teststatus = f$extract(9,1,savedstatus)
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_i_sysuio="undef"
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$   ELSE
+$     If (Needs_Opt.eqs."Yes")
+$     THEN
+$       link temp.obj,temp.opt/opt
+$     else
+$       link temp.obj
+$     endif
+$     savedstatus = $status
+$     teststatus = f$extract(9,1,savedstatus)
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$     if (teststatus.nes."1")
+$     THEN
+$       perl_i_sysuio="undef"
+$     ELSE
+$       perl_i_sysuio="define"
+$     ENDIF
+$   ENDIF
+$ WRITE_RESULT "i_sysuio is ''perl_i_sysuio'"
+$!
+$! Check for sys/access.h
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "#include <unistd.h>
+$ WS "#include <sys/access.h>
+$ WS "int main()
+$ WS "{"
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp.c
+$   savedstatus = $status
+$   teststatus = f$extract(9,1,savedstatus)
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_i_sysaccess="undef"
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$   ELSE
+$     If (Needs_Opt.eqs."Yes")
+$     THEN
+$       link temp.obj,temp.opt/opt
+$     else
+$       link temp.obj
+$     endif
+$     savedstatus = $status
+$     teststatus = f$extract(9,1,savedstatus)
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$     if (teststatus.nes."1")
+$     THEN
+$       perl_i_sysaccess="undef"
+$     ELSE
+$       perl_i_sysaccess="define"
+$     ENDIF
+$   ENDIF
+$ WRITE_RESULT "i_sysaccess is ''perl_i_sysaccess'"
+$!
+$! Check for sys/security.h
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "#include <unistd.h>
+$ WS "#include <sys/security.h>
+$ WS "int main()
+$ WS "{"
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp.c
+$   savedstatus = $status
+$   teststatus = f$extract(9,1,savedstatus)
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_i_syssecrt="undef"
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$   ELSE
+$     If (Needs_Opt.eqs."Yes")
+$     THEN
+$       link temp.obj,temp.opt/opt
+$     else
+$       link temp.obj
+$     endif
+$     savedstatus = $status
+$     teststatus = f$extract(9,1,savedstatus)
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$     if (teststatus.nes."1")
+$     THEN
+$       perl_i_syssecrt="undef"
+$     ELSE
+$       perl_i_syssecrt="define"
+$     ENDIF
+$   ENDIF
+$ WRITE_RESULT "i_syssecrt is ''perl_i_syssecrt'"
+$!
+$! Check for fcntl.h
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "#include <unistd.h>
+$ WS "#include <fcntl.h>
+$ WS "int main()
+$ WS "{"
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp.c
+$   savedstatus = $status
+$   teststatus = f$extract(9,1,savedstatus)
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_i_fcntl="undef"
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$   ELSE
+$     If (Needs_Opt.eqs."Yes")
+$     THEN
+$       link temp.obj,temp.opt/opt
+$     else
+$       link temp.obj
+$     endif
+$     savedstatus = $status
+$     teststatus = f$extract(9,1,savedstatus)
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$     if (teststatus.nes."1")
+$     THEN
+$       perl_i_fcntl="undef"
+$     ELSE
+$       perl_i_fcntl="define"
+$     ENDIF
+$   ENDIF
+$ WRITE_RESULT "i_fcntl is ''perl_i_fcntl'"
+$!
+$! Check for fcntl
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "#include <unistd.h>
+$ WS "#include <fcntl.h>
+$ WS "int main()
+$ WS "{"
+$ WS "fcntl(1,2,3);
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp.c
+$   savedstatus = $status
+$   teststatus = f$extract(9,1,savedstatus)
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_d_fcntl="undef"
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$   ELSE
+$     If (Needs_Opt.eqs."Yes")
+$     THEN
+$       link temp.obj,temp.opt/opt
+$     else
+$       link temp.obj
+$     endif
+$     savedstatus = $status
+$     teststatus = f$extract(9,1,savedstatus)
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$     if (teststatus.nes."1")
+$     THEN
+$       perl_d_fcntl="undef"
+$     ELSE
+$       perl_d_fcntl="define"
+$     ENDIF
+$   ENDIF
+$ WRITE_RESULT "d_fcntl is ''perl_d_fcntl'"
+$!
+$! Check for memchr
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <string.h>
+$ WS "int main()
+$ WS "{"
+$ WS "char * place;
+$ WS "place = memchr(""foo"", 47, 3)
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp.c
+$   savedstatus = $status
+$   teststatus = f$extract(9,1,savedstatus)
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_d_memchr="undef"
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$   ELSE
+$     If (Needs_Opt.eqs."Yes")
+$     THEN
+$       link temp.obj,temp.opt/opt
+$     else
+$       link temp.obj
+$     endif
+$     savedstatus = $status
+$     teststatus = f$extract(9,1,savedstatus)
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$     if (teststatus.nes."1")
+$     THEN
+$       perl_d_memchr="undef"
+$     ELSE
+$       perl_d_memchr="define"
+$     ENDIF
+$   ENDIF
+$ WRITE_RESULT "d_memchr is ''perl_d_memchr'"
+$!
+$! Check for strtoull
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <string.h>
+$ WS "int main()
+$ WS "{"
+$ WS "unsigned __int64 result;
+$ WS "result = strtoull(""123123"", NULL, 10);
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp.c
+$   savedstatus = $status
+$   teststatus = f$extract(9,1,savedstatus)
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_d_strtoull="undef"
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$   ELSE
+$     If (Needs_Opt.eqs."Yes")
+$     THEN
+$       link temp.obj,temp.opt/opt
+$     else
+$       link temp.obj
+$     endif
+$     savedstatus = $status
+$     teststatus = f$extract(9,1,savedstatus)
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$     if (teststatus.nes."1")
+$     THEN
+$       perl_d_strtoull="undef"
+$     ELSE
+$       perl_d_strtoull="define"
+$     ENDIF
+$   ENDIF
+$ WRITE_RESULT "d_strtoull is ''perl_d_strtoull'"
+$!
+$! Check for atoll
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <string.h>
+$ WS "int main()
+$ WS "{"
+$ WS " __int64 result;
+$ WS "result = atoll(""123123"");
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp.c
+$   savedstatus = $status
+$   teststatus = f$extract(9,1,savedstatus)
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_d_atoll="undef"
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$   ELSE
+$     If (Needs_Opt.eqs."Yes")
+$     THEN
+$       link temp.obj,temp.opt/opt
+$     else
+$       link temp.obj
+$     endif
+$     savedstatus = $status
+$     teststatus = f$extract(9,1,savedstatus)
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$     if (teststatus.nes."1")
+$     THEN
+$       perl_d_atoll="undef"
+$     ELSE
+$       perl_d_atoll="define"
+$     ENDIF
+$   ENDIF
+$ WRITE_RESULT "d_atoll is ''perl_d_atoll'"
+$!
+$! Check for atoll
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <string.h>
+$ WS "int main()
+$ WS "{"
+$ WS "long double
+$ WS "result = atolf(""123123"");
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp.c
+$   savedstatus = $status
+$   teststatus = f$extract(9,1,savedstatus)
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_d_atolf="undef"
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$   ELSE
+$     If (Needs_Opt.eqs."Yes")
+$     THEN
+$       link temp.obj,temp.opt/opt
+$     else
+$       link temp.obj
+$     endif
+$     savedstatus = $status
+$     teststatus = f$extract(9,1,savedstatus)
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$     if (teststatus.nes."1")
+$     THEN
+$       perl_d_atolf="undef"
+$     ELSE
+$       perl_d_atolf="define"
+$     ENDIF
+$   ENDIF
+$ WRITE_RESULT "d_atolf is ''perl_d_atolf'"
+$!
+$! Check for access
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "#include <unistd.h>
+$ WS "int main()
+$ WS "{"
+$ WS "access("foo", F_OK);
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp.c
+$   savedstatus = $status
+$   teststatus = f$extract(9,1,savedstatus)
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_d_access="undef"
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$   ELSE
+$     If (Needs_Opt.eqs."Yes")
+$     THEN
+$       link temp.obj,temp.opt/opt
+$     else
+$       link temp.obj
+$     endif
+$     savedstatus = $status
+$     teststatus = f$extract(9,1,savedstatus)
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$     if (teststatus.nes."1")
+$     THEN
+$       perl_d_access="undef"
+$     ELSE
+$       perl_d_access="define"
+$     ENDIF
+$   ENDIF
+$ WRITE_RESULT "d_access is ''perl_d_access'"
 $!
 $! Check for bzero
 $!
@@ -1025,6 +2002,41 @@ $     perl_d_setvbuf="define"
 $   ENDIF
 $ WRITE_RESULT "d_setvbuf is ''perl_d_setvbuf'"
 $!
+$! Check for setenv
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "int main()
+$ WS "{"
+$ WS "setenv(""FOO"", ""BAR"", 0);
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp
+$   If (Needs_Opt.eqs."Yes")
+$   THEN
+$     link temp,temp/opt
+$   else
+$     link temp
+$   endif
+$   teststatus = f$extract(9,1,$status)
+$   DEASSIGN SYS$OUTPUT
+$   DEASSIGN SYS$ERROR
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_d_setenv="undef"
+$   ELSE
+$     perl_d_setenv="define"
+$   ENDIF
+$ WRITE_RESULT "d_setenv is ''perl_d_setenv'"
+$!
 $! Check for <netinet/in.h>
 $!
 $ if ("''Has_Dec_C_Sockets'".eqs."T").or.("''Has_Socketshr'".eqs."T")
@@ -1070,6 +2082,52 @@ $ ELSE
 $   perl_i_niin="undef"
 $ ENDIF
 $ WRITE_RESULT "i_niin is ''perl_i_niin'"
+$!
+$! Check for <netinet/tcp.h>
+$!
+$ if ("''Has_Dec_C_Sockets'".eqs."T").or.("''Has_Socketshr'".eqs."T")
+$ THEN
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ if ("''Has_Socketshr'".eqs."T")
+$ THEN
+$  WS "#include <socketshr.h>"
+$ else
+$  WS "#include <netdb.h>
+$ endif
+$ WS "#include <netinet/tcp.h>"
+$ WS "int main()
+$ WS "{"
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp.c
+$   If (Needs_Opt.eqs."Yes")
+$   THEN
+$     link temp.obj,temp.opt/opt
+$   else
+$     link temp.obj
+$   endif
+$   teststatus = f$extract(9,1,$status)
+$   DEASSIGN SYS$OUTPUT
+$   DEASSIGN SYS$ERROR
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_i_netinettcp="undef"
+$   ELSE
+$     perl_i_netinettcp="define"
+$   ENDIF
+$ ELSE
+$   perl_i_netinettcp="undef"
+$ ENDIF
+$ WRITE_RESULT "i_netinettcp is ''perl_i_netinettcp'"
 $!
 $! Check for endhostent
 $!
@@ -1685,13 +2743,17 @@ $   DEASSIGN SYS$ERROR
 $   if (teststatus.nes."1")
 $   THEN
 $     perl_d_sched_yield="undef"
+$     perl_sched_yield = " "
 $   ELSE
 $     perl_d_sched_yield="define"
+$     perl_sched_yield = "sched_yield"
 $   ENDIF
 $ ELSE
 $   perl_d_sched_yield="undef"
+$   perl_sched_yield = " "
 $ ENDIF
 $ WRITE_RESULT "d_sched_yield is ''perl_d_sched_yield'"
+$ WRITE_RESULT "sched_yield is ''perl_sched_yield'"
 $!
 $! Check for generic pointer size
 $!
@@ -1737,6 +2799,77 @@ $
 $ perl_ptrsize=line
 $ WRITE_RESULT "ptrsize is ''perl_ptrsize'"
 $!
+$!
+$! Check rand48 and its ilk
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "int main()
+$ WS "{"
+$ WS "srand48(12L);"
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$! copy temp.c sys$output
+$!
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   ON ERROR THEN CONTINUE
+$   ON WARNING THEN CONTINUE
+$   'Checkcc' temp
+$   If (Needs_Opt.eqs."Yes")
+$   THEN
+$     link temp,temp.opt/opt
+$   else
+$     link temp
+$   endif
+$   teststatus = f$extract(9,1,$status)
+$   DEASSIGN SYS$OUTPUT
+$   DEASSIGN SYS$ERROR
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_drand01="random()"
+$     perl_randseedtype = "unsigned"
+$     perl_seedfunc = "srandom"
+$   ENDIF
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "int main()
+$ WS "{"
+$ WS "srandom(12);"
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$! copy temp.c sys$output
+$!
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   ON ERROR THEN CONTINUE
+$   ON WARNING THEN CONTINUE
+$   'Checkcc' temp
+$   If (Needs_Opt.eqs."Yes")
+$   THEN
+$     link temp,temp.opt/opt
+$   else
+$     link temp
+$   endif
+$   teststatus = f$extract(9,1,$status)
+$   DEASSIGN SYS$OUTPUT
+$   DEASSIGN SYS$ERROR
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_drand01="(((float)rand())/((float)RAND_MAX))"
+$     perl_randseedtype = "unsigned"
+$     perl_seedfunc = "srand"
+$   ENDIF
+$ WRITE_RESULT "drand01 is ''perl_drand01'"
+$!
 $ set nover
 $! Done with compiler checks. Clean up.
 $ if f$search("temp.c").nes."" then DELETE/NOLOG temp.c;*
@@ -1772,8 +2905,9 @@ $ psnwc1="""ZERO"",""HUP"",""INT"",""QUIT"",""ILL"",""TRAP"",""IOT"",""EMT"",""F
 $ psnwc2="""PIPE"",""ALRM"",""TERM"",""ABRT"",""USR1"",""USR2"",""SPARE18"",""SPARE19"",""CHLD"",""CONT"",""STOP"",""TSTP"","
 $ psnwc3="""TTIN"",""TTOU"",""DEBUG"",""SPARE27"",""SPARE28"",""SPARE29"",""SPARE30"",""SPARE31"",""SPARE32"",""RTMIN"",""RTMAX"",0"
 $perl_sig_name_with_commas = psnwc1 + psnwc2 + psnwc3
-$ perl_sig_num="0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,6,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,64,0"
-$ perl_sig_num_with_commas=perl_sig_num
+$ perl_sig_num="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 6 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 64"","0"
+$ perl_sig_num_init="0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,6,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,64,0"
+$ perl_sig_num_with_commas=perl_sig_num_init
 $ perl_uidtype="uid_t"
 $ perl_d_pathconf="define"
 $ perl_d_fpathconf="define"
@@ -1792,8 +2926,9 @@ $ perl_sig_name="ZERO HUP INT QUIT ILL TRAP IOT EMT FPE KILL BUS SEGV SYS PIPE A
 $ psnwc1="""ZERO"",""HUP"",""INT"",""QUIT"",""ILL"",""TRAP"",""IOT"",""EMT"",""FPE"",""KILL"",""BUS"",""SEGV"",""SYS"","
 $ psnwc2="""PIPE"",""ALRM"",""TERM"",""ABRT"",""USR1"",""USR2"",0"
 $ perl_sig_name_with_commas = psnwc1 + psnwc2
-$ perl_sig_num="0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,6,16,17,0"
-$ perl_sig_num_with_commas=perl_sig_num
+$ perl_sig_num="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 6 16 17"",0"
+$ perl_sig_num_init="0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,6,16,17,0"
+$ perl_sig_num_with_commas=perl_sig_num_init
 $ perl_uidtype="unsigned int"
 $ perl_d_pathconf="undef"
 $ perl_d_fpathconf="undef"
@@ -1932,6 +3067,14 @@ $   THEN
 $     perl_ccflags="/Include=[]/Obj=''perl_obj_ext'/NoList''cc_flags'"
 $   ENDIF
 $ ENDIF
+$ if use_vmsdebug_perl .eqs. "Y"
+$ then
+$     perl_optimize="/Debug/NoOpt"
+$     perl_dbgprefix = "DBG"
+$ else
+$     perl_optimize= ""
+$     perl_dbgprefix = ""
+$ endif
 $!
 $! Finally clean off any leading zeros from the patchlevel or subversion
 $ perl_patchlevel = perl_patchlevel + 0
@@ -1944,6 +3087,7 @@ $!
 $ WC "# This file generated by Configure.COM on a VMS system."
 $ WC "# Time: " + perl_cf_time
 $ WC ""
+$ WC "CONFIGDOTSH=true"
 $ WC "package='" + perl_package + "'"
 $ WC "CONFIG='" + perl_config + "'"
 $ WC "cf_time='" + perl_cf_time + "'"
@@ -1987,6 +3131,8 @@ $ WC "vms_cc_type='" + perl_vms_cc_type + "'"
 $ WC "d_attribut='" + perl_d_attribut + "'"
 $ WC "cc='" + perl_cc + "'"
 $ WC "ccflags='" + perl_ccflags + "'"
+$ WC "optimize='" + perl_optimize + "'"
+$ WC "dbgprefix='" + perl_dbgprefix + "'"
 $ WC "d_vms_do_sockets='" + perl_d_vms_do_sockets + "'"
 $ WC "d_socket='" + perl_d_socket + "'"
 $ WC "d_sockpair='" + perl_d_sockpair + "'"
@@ -1994,6 +3140,7 @@ $ WC "d_gethent='" + perl_d_gethent + "'"
 $ WC "d_getsent='" + perl_d_getsent + "'"
 $ WC "d_select='" + perl_d_select + "'"
 $ WC "i_niin='" + perl_i_niin + "'"
+$ WC "i_netinettcp='" + perl_i_netinettcp + "'"
 $ WC "i_neterrno='" + perl_i_neterrno + "'"
 $ WC "d_stdstdio='" + perl_d_stdstdio + "'"
 $ WC "d_stdio_ptr_lval='" + perl_d_stdio_ptr_lval + "'"
@@ -2165,6 +3312,7 @@ $ WC "d_chown='" + perl_d_chown + "'"
 $ WC "d_chroot='" + perl_d_chroot + "'"
 $ WC "d_cuserid='" + perl_d_cuserid + "'"
 $ WC "d_dbl_dig='" + perl_d_dbl_dig + "'"
+$ WC "d_ldbl_dig='" + perl_d_dbl_dig + "'"
 $ WC "d_difftime='" + perl_d_difftime + "'"
 $ WC "d_fork='" + perl_d_fork + "'"
 $ WC "d_getlogin='" + perl_d_getlogin + "'"
@@ -2193,6 +3341,7 @@ $ WC "intsize='" + perl_intsize + "'"
 $ WC "longsize='" + perl_longsize + "'"
 $ WC "shortsize='" + perl_shortsize + "'"
 $ WC "lseektype='" + perl_lseektype + "'"
+$ WC "lseeksize='4'"
 $ WC "i_values='" + perl_i_values + "'"
 $ WC "malloctype='" + perl_malloctype + "'"
 $ WC "freetype='" + perl_freetype + "'"
@@ -2255,6 +3404,10 @@ $ WC "voidflags='" + perl_voidflags + "'"
 $ WC "d_eunice='" + perl_d_eunice + "'"
 $ WC "libs='" + perl_libs + "'"
 $ WC "libc='" + perl_libc + "'"
+$ tempstring = "PERL_VERSION='" + "''perl_patchlevel'" + "'"
+$ WC tempstring
+$ tempstring = "PERL_SUBVERSION='" + "''perl_patchlevel'" + "'"
+$ WC tempstring
 $ tempstring = "PATCHLEVEL='" + "''perl_patchlevel'" + "'"
 $ WC tempstring
 $ tempstring = "SUBVERSION='" + "''perl_SUBVERSION'" + "'"
@@ -2291,6 +3444,7 @@ $ WC "d_longlong='" + perl_d_longlong + "'"
 $ WC "longlongsize='" + perl_longlongsize + "'"
 $ WC "d_mkstemp='" + perl_d_mkstemp + "'"
 $ WC "d_setvbuf='" + perl_d_setvbuf + "'"
+$ WC "d_setenv='" + perl_d_setenv + "'"
 $ WC "d_endhent='" + perl_d_endhent + "'"
 $ WC "d_endnent='" + perl_d_endsent + "'"
 $ WC "d_endpent='" + perl_d_endpent + "'"
@@ -2326,13 +3480,103 @@ $ WC "d_semctl_semid_ds='" + perl_d_semctl_semid_ds + "'"
 $ WC "extensions='" + perl_extensions + "'"
 $ WC "d_mknod='" + perl_d_mknod + "'"
 $ WC "devtype='" + perl_devtype + "'"
+$ WC "d_gethname='" + perl_d_gethname + "'"
+$ WC "d_phostname='" + perl_d_phostname + "'"
+$ WC "d_accessx='" + perl_d_accessx + "'"
+$ WC "d_eaccess='" + perl_d_eaccess + "'"
+$ WC "i_sysaccess='" + perl_i_sysaccess + "'"
+$ WC "i_syssecrt='" + perl_i_syssecrt + "'"
+$ WC "d_fd_set='" + perl_d_fd_set + "'"
+$ WC "d_access='" + perl_d_access + "'"
+$ WC "d_msg_ctrunc='" + perl_d_msg_ctrunc + "'"
+$ WC "d_msg_dontroute='" + perl_d_msg_dontroute + "'"
+$ WC "d_msg_oob='" + perl_d_msg_oob + "'"
+$ WC "d_msg_peek='" + perl_d_msg_peek + "'"
+$ WC "d_msg_proxy='" + perl_d_msg_proxy + "'"
+$ WC "d_scm_rights='" + perl_d_scm_rights + "'"
+$ WC "d_sendmsg='" + perl_d_sendmsg + "'"
+$ WC "d_recvmsg='" + perl_d_recvmsg + "'"
+$ WC "d_msghdr_s='" + perl_d_msghdr_s + "'"
+$ WC "d_cmsghdr_s='" + perl_d_cmsghdr_s + "'"
+$ WC "i_sysuio='" + perl_i_sysuio + "'"
+$ WC "d_fseeko='" + perl_d_fseeko + "'"
+$ WC "d_ftello='" + perl_d_ftello + "'"
+$ WC "d_readv='" + perl_d_readv + "'"
+$ WC "d_writev='" + perl_d_writev + "'"
+$ WC "i_machcthr='" + perl_i_machcthr + "'"
+$ WC "usemultiplicity='" + perl_usemultiplicity + "'"
+$ WC "i_poll='" + perl_i_poll + "'"
+$ WC "i_inttypes='" + perl_i_inttypes + "'"
+$ WC "d_int64t='" + perl_d_int64t + "'"
+$ WC "d_off64_t='" + perl_d_off64_t + "'"
+$ WC "d_fpos64_t='" + perl_d_fpos64_t + "'"
+$ WC "use64bits='" + perl_use64bits + "'"
+$ WC "d_drand48proto='" + perl_d_drand48proto + "'"
+$ WC "d_old_pthread_create_joinable='" + perl_d_old_pthread_create_joinable + "'"
+$ WC "old_pthread_create_joinable='" + perl_old_pthread_create_joinable + "'"
+$ WC "drand01='" + perl_drand01 + "'"
+$ WC "randseedtype='" + perl_randseedtype + "'"
+$ WC "seedfunc='" + perl_seedfunc + "'"
+$ WC "sig_num_init='" + perl_sig_num_with_commas + "'"
+$ WC "i_sysmount='" + perl_i_sysmount + "'"
+$ WC "d_fstatfs='" + perl_d_fstatfs + "'"
+$ WC "d_memchr='" + perl_d_memchr + "'"
+$ WC "d_statfsflags='" + perl_d_statfsflags + "'"
+$ WC "fflushNULL='define'"
+$ WC "fflushall='undef'"
+$ WC "d_stdio_stream_array='undef'"
+$ WC "i_sysstatvfs='" + perl_i_sysstatvfs + "'"
+$ WC "i_machcthreads='" + perl_i_machcthreads + "'"
+$ WC "i_pthread='" + perl_i_pthread + "'"
+$ WC "d_fstatvfs='" + perl_d_fstatvfs + "'"
+$ WC "i_mntent='" + perl_i_mntent + "'"
+$ WC "d_getmntent='" + perl_d_getmntent + "'"
+$ WC "d_hasmntopt='" + perl_d_hasmntopt + "'"
+$ WC "d_telldirproto='" + perl_d_telldirproto + "'"
+$ WC "d_madvise='" + perl_d_madvise + "'"
+$ WC "d_msync='" + perl_d_msync + "'"
+$ WC "d_mprotect='" + perl_d_mprotect + "'"
+$ WC "d_munmap='" + perl_d_munmap + "'"
+$ WC "d_mmap='" + perl_d_mmap + "'"
+$ WC "i_sysmman='" + perl_i_sysmman + "'"
+$ WC "installusrbinperl='" + perl_installusrbinperl + "'"
+$! WC "selectminbits='" + perl_selectminbits + "'"
+$ WC "crosscompile='" + perl_crosscompile + "'"
+$ WC "multiarch='" + perl_multiarch + "'"
+$ WC "sched_yield='" + perl_sched_yield + "'"
+$ WC "d_strtoull='" + perl_d_strtoull + "'"
+$ WC "usesocks='" + perl_usesocks + "'"
+$ WC "d_vendorlib='" + perl_d_vendorlib + "'"
+$ WC "vendorlibexp='" + perl_vendorlibexp + "'"
+$ WC "d_atolf='" + perl_d_atolf + "'"
+$ WC "d_atoll='" + perl_d_atoll + "'"
+$ WC "d_bincompat5005='" + perl_d_bincompat + "'"
+$ WC "d_endspent='" + perl_d_endspent + "'"
+$ WC "d_getspent='" + perl_d_getspent + "'"
+$ WC "d_getspnam='" + perl_d_getspnam + "'"
+$ WC "d_setspent='" + perl_d_setspent + "'"
+$ WC "i_shadow='" + perl_i_shadow + "'"
+$ WC "i_socks='" + perl_i_socks + "'"
+$ WC "d_PRIfldbl='" + perl_d_PRIfldbl + "'"
+$ WC "d_PRIgldbl='" + perl_d_PRIgldbl + "'"
+$ WC "d_PRId64='" + perl_d_PRId64 + "'"
+$ WC "d_PRIu64='" + perl_d_PRIu64 + "'"
+$ WC "d_PRIo64='" + perl_d_PRIo64 + "'"
+$ WC "d_PRIx64='" + perl_d_PRIx64 + "'"
+$ WC "sPRIfldbl='" + perl_sPRIfldbl + "'"
+$ WC "sPRIgldbl='" + perl_sPRIgldbl + "'"
+$ WC "sPRId64='" + perl_sPRId64 + "'"
+$ WC "sPRIu64='" + perl_sPRIu64 + "'"
+$ WC "sPRIo64='" + perl_sPRIo64 + "'"
+$ WC "sPRIx64='" + perl_sPRIx64 + "'"
+$ WC "d_llseek='" + perl_d_llseek + "'"
 $!
 $! ##WRITE NEW CONSTANTS HERE##
 $!
 $ Close CONFIGSH
 $
 $! Okay, we've gotten here. Build munchconfig and run it
-$ 'Perl_CC' munchconfig.c
+$ 'Perl_CC'/debug munchconfig.c
 $ If (Needs_Opt.eqs."Yes")
 $ THEN
 $   open/write OPTCHAN []munchconfig.opt
@@ -2347,7 +3591,8 @@ $   delete munchconfig.opt;*
 $ else
 $   link munchconfig.obj
 $ endif
-$ WRITE_RESULT "Writing config.h"
+$ echo ""
+$ echo "Writing config.h"
 $ !
 $ ! we need an fdl file
 $ CREATE [-]CONFIG.FDL
@@ -2360,10 +3605,6 @@ $ OPEN/APPEND CONFIG [-]config.local
 $ if use_debugging_perl.eqs."Y"
 $ THEN
 $   WRITE CONFIG "#define DEBUGGING"
-$ ENDIF
-$ if preload_env.eqs."Y"
-$ THEN
-$    WRITE CONFIG "#define PRIME_ENV_AT_STARTUP"
 $ ENDIF
 $ if use_two_pot_malloc.eqs."Y"
 $ THEN
@@ -2394,6 +3635,26 @@ $ if "''Has_Socketshr'".eqs."T"
 $ THEN
 $    WRITE CONFIG "#define VMS_DO_SOCKETS"
 $ ENDIF
+$! This is VMS-specific for now
+$ WRITE CONFIG "#''perl_d_setenv' HAS_SETENV"
+$ if d_alwdeftype.eqs."Y"
+$ THEN
+$    WRITE CONFIG "#define SECURE_INTERNAL_GETENV"
+$ ELSE
+$    WRITE CONFIG "#undef SECURE_INTERNAL_GETENV"
+$ ENDIF
+$ if d_secintgenv.eqs."Y"
+$ THEN
+$    WRITE CONFIG "#define ALWAYS_DEFTYPES"
+$ ELSE
+$    WRITE CONFIG "#undef ALWAYS_DEFTYPES"
+$ ENDIF
+$ if use_64bit.eqs."Y"
+$ THEN
+$    WRITE CONFIG "#define USE_LONG_LONG"
+$    WRITE CONFIG "#define USE_LONG_DOUBLE"
+$ ENDIF
+$ WRITE CONFIG "#define HAS_ENVGETENV"
 $ CLOSE CONFIG
 $!
 $! Now build the normal config.h
@@ -2424,7 +3685,7 @@ $   SOCKET_REPLACE = "SOCKET=DECC_SOCKETS=1"
 $ ELSE
 $   if "''Has_Socketshr'" .eqs."T"
 $   THEN
-$     SOCKET_REPLACE = "SOCKET=SOCKETSHRSOCKETS=1"
+$     SOCKET_REPLACE = "SOCKET=SOCKETSHR_SOCKETS=1"
 $   ELSE
 $     SOCKET_REPLACE = "SOCKET="
 $   ENDIF
@@ -2452,10 +3713,66 @@ $ ARCH_TYPE = "ARCH-TYPE=__AXP__"
 $ ELSE
 $ ARCH_TYPE = "ARCH-TYPE=__VAX__"
 $ ENDIF
-$ WRITE_RESULT "Writing DESCRIP.MMS"
+$ echo "Writing DESCRIP.MMS"
 $!set ver
 $ define/user sys$output [-]descrip.mms
-$ mcr []munchconfig [-]config.sh descrip_mms.template "''DECC_REPLACE'" "''ARCH_TYPE'" "''GNUC_REPLACE'" "''SOCKET_REPLACE'" "''THREAD_REPLACE'" "''C_Compiler_Replace'" "''MALLOC_REPLACE'" "''Thread_Live_Dangerously'"
+$ mcr []munchconfig [-]config.sh descrip_mms.template "''DECC_REPLACE'" "''ARCH_TYPE'" "''GNUC_REPLACE'" "''SOCKET_REPLACE'" "''THREAD_REPLACE'" "''C_Compiler_Replace'" "''MALLOC_REPLACE'" "''Thread_Live_Dangerously'" "PV=''LocalPerlVer'"
+$ echo "Extracting Build_Ext.Com"
+$ Create Sys$Disk:[-]Build_Ext.Com
+$ Deck/Dollar="$EndOfTpl$"
+$!++ Build_Ext.Com
+$!   NOTE: This files is extracted as part of the VMS configuration process.
+$!   Any changes made to it directly will be lost.  If you need to make any
+$!   changes, please edit the template in [.vms]SubConfigure.Com instead.
+$    def = F$Environment("Default")
+$    exts1 = F$Edit(p1,"Compress")
+$    p2 = F$Edit(p2,"Upcase,Compress,Trim")
+$    If F$Locate("MCR ",p2).eq.0 Then p2 = F$Extract(3,255,p2)
+$    miniperl = "$" + F$Search(F$Parse(p2,".Exe"))
+$    makeutil = p3
+$    if f$type('p3') .nes. "" then makeutil = 'p3'
+$    targ = F$Edit(p4,"Lowercase")
+$    i = 0
+$ next_ext:
+$    ext = F$Element(i," ",p1)
+$    If ext .eqs. " " Then Goto done
+$    Define/User Perl_Env_Tables CLISYM_LOCAL
+$    miniperl
+     ($extdir = $ENV{'ext'}) =~ s/::/./g;
+     if ($extdir =~ /^vms/i) { $extdir =~ s/vms/.vms.ext/i; }
+     else                    { $extdir = ".ext.$extdir";   }
+     ($ENV{'extdir'} = "[$extdir]");
+     ($ENV{'up'} = ('-') x ($extdir =~ tr/././));
+$    Set Default &extdir
+$    redesc = 0
+$    If F$Locate("clean",targ) .eqs. F$Length(targ)
+$    Then
+$      Write Sys$Output "Building ''ext' . . ."
+$      On Error Then Goto done
+$      If F$Search("Descrip.MMS") .eqs. ""
+$      Then
+$        redesc = 1
+$      Else
+$        If F$CvTime(F$File("Descrip.MMS","rdt")) .lts. -
+            F$CvTime(F$File("Makefile.PL","rdt")) Then redesc = 1
+$      EndIf
+$    Else
+$      Write Sys$Output "''targ'ing ''ext' . . ."
+$      On Error Then Continue
+$    EndIf
+$    If redesc Then -
+       miniperl "-I[''up'.lib]" Makefile.PL "INST_LIB=[''up'.lib]" "INST_ARCHLIB=[''up'.lib]"
+$    makeutil 'targ'
+$    i = i + 1
+$    Set Def &def
+$    Goto next_ext
+$ done:
+$    sts = $Status
+$    Set Def &def
+$    Exit sts
+$!-- Build_Ext.Com
+$EndOfTpl$
+$
 $! set nover
 $!
 $! Clean up after ourselves

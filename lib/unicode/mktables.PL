@@ -1,25 +1,34 @@
 #!../../miniperl
 
+$UnicodeData = "UnicodeData-Latest.txt";
+
 # Note: we try to keep filenames unique within first 8 chars.  Using
 # subdirectories for the following helps.
 mkdir "In", 0777;
 mkdir "Is", 0777;
 mkdir "To", 0777;
+mkdir "Eq", 0777;
 
 @todo = (
 # typical
 
-    ['IsAlnum', '$cat =~ /^L[ulo]|^Nd/ or $code eq "005F"',	''],
-    ['IsAlpha', '$cat =~ /^L[ulo]/',	''],
-    ['IsSpace', '$cat =~ /^Z/ or $code lt "0020" and chr(hex $code) =~ /^\s/',	''],
-    ['IsDigit', '$cat =~ /^Nd$/',	''],
-    ['IsUpper', '$cat =~ /^Lu$/',	''],
-    ['IsLower', '$cat =~ /^Ll$/',	''],
-    ['IsPrint', '$cat =~ /^[^C]/',	''],
-    ['ToUpper', '$up',			'$up'],
-    ['ToLower', '$down',		'$down'],
-    ['ToTitle', '$title',		'$title'],
-    ['ToDigit', '$dec ne ""',		'$dec'],
+    ['IsWord',  '$cat =~ /^L[ulo]|^Nd/ or $code eq "005F"',	''],
+    ['IsAlnum', '$cat =~ /^L[ulo]|^Nd/',	''],
+    ['IsAlpha',  '$cat =~ /^L[ulo]/',	''],
+    ['IsSpace',  '$cat =~ /^Z/ or $code lt "0020" and chr(hex $code) =~ /^\s/',	''],
+    ['IsDigit',  '$cat =~ /^Nd$/',	''],
+    ['IsUpper',  '$cat =~ /^Lu$/',	''],
+    ['IsLower',  '$cat =~ /^Ll$/',	''],
+    ['IsASCII',  'hex $code <= 127',	''],
+    ['IsCntrl',  '$cat =~ /^C/',	''],
+    ['IsGraph',  '$cat =~ /^[^C]/ and $code ne "0020"',	''],
+    ['IsPrint',  '$cat =~ /^[^C]/',	''],
+    ['IsPunct',  '$cat =~ /^P/',	''],
+    ['IsXDigit', '$code =~ /^00(3[0-9]|[46][1-6])$/',	''],
+    ['ToUpper',  '$up',			'$up'],
+    ['ToLower',  '$down',		'$down'],
+    ['ToTitle',  '$title',		'$title'],
+    ['ToDigit',  '$dec ne ""',		'$dec'],
 
 # Name
 
@@ -143,6 +152,21 @@ mkdir "To", 0777;
 # Jamo
 
     ['JamoShort',	'1',		'$short'],
+
+# Syllables
+
+    ['IsSylV',	'$syl eq "V"',		''],
+    ['IsSylU',	'$syl eq "U"',		''],
+    ['IsSylI',	'$syl eq "I"',		''],
+    ['IsSylA',	'$syl eq "A"',		''],
+    ['IsSylE',	'$syl eq "E"',		''],
+    ['IsSylC',	'$syl eq "C"',		''],
+    ['IsSylO',	'$syl eq "O"',		''],
+    ['IsSylWV',	'$syl eq "V"',		''],
+    ['IsSylWI',	'$syl eq "I"',		''],
+    ['IsSylWA',	'$syl eq "A"',		''],
+    ['IsSylWE',	'$syl eq "E"',		''],
+    ['IsSylWC',	'$syl eq "C"',		''],
 );
 
 # This is not written for speed...
@@ -214,8 +238,13 @@ sub proplist {
 
 	$split = '($code, $short, $name) = split(/; */); $code =~ s/^U\+//;';
     }
+    elsif ($table =~ /^IsSyl/) {
+	open(UD, "syllables.txt") or warn "Can't open $table: $!";
+
+	$split = '($code, $short, $syl) = split(/; */); $code =~ s/^U\+//;';
+    }
     else {
-	open(UD, "UnicodeData-Latest.txt") or warn "Can't open $table: $!";
+	open(UD, $UnicodeData) or warn "Can't open $UnicodeData: $!";
 
 	$split = '($code, $name, $cat, $comb, $bid, $decomp, $dec, $dig, $num, $mir, $uni1,
 		$comment, $up, $down, $title) = split(/;/);';
@@ -292,3 +321,56 @@ END
     }
     $out;
 }
+
+# Create the equivalence mappings.
+
+open(UNICODEDATA, $UnicodeData) || die "$0: $UnicodeData: $!\n";
+
+while (<UNICODEDATA>) {
+    ($code, $name, $category, $decomposition) = (split /;/)[0,1,2,5];
+    
+    $code{$name} = $code;
+    $name{$code} = $name;
+
+    next unless $category =~ /^L/ && $decomposition ne '';
+    $decomposition =~ s/^<\w+> //;
+    @decomposition = split(' ', $decomposition);
+
+    push @base, [ $code, $decomposition[0] ];
+}
+
+foreach my $b (@base) {
+    ($code, $basecode) = @$b;
+    $base = $name{$basecode};
+    next unless exists $code{$base};
+    push @{$unicode{$code{$base}}}, $code;
+#   print "$code: $name{$code} -> $base\n",
+}
+
+@unicode = sort keys %unicode;
+
+print "EqUnicode\n";
+if (open(EQ_UNICODE, ">Eq/Unicode")) {
+    foreach my $c (@unicode) {
+	print EQ_UNICODE "$c @{$unicode{$c}}\n";
+    }
+    close EQ_UNICODE;
+} else {
+    die "$0: failed to open Eq/Unicode for writing: $!\n";
+}
+
+print "EqLatin1\n";
+if (open(EQ_LATIN1, ">Eq/Latin1")) {
+    foreach my $c (@unicode) {
+	last if hex($c) > 255;
+	my @c = grep { hex($_) <= 255 } @{$unicode{$c}};
+	next unless @c;
+	print EQ_LATIN1 "$c @c\n";
+    }
+    close EQ_LATIN1;
+} else {
+    die "$0: failed to open Eq/Latin1 for writing: $!\n";
+}
+
+# eof
+  

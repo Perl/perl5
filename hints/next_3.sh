@@ -32,8 +32,8 @@
 # than no perl at all.
 #
 # So, this hintsfile is using perl's malloc. If you want to turn
-# perl's malloc off, you need to remove '-DUSE_PERL_SBRK' and
-# '-DHIDEMYMALLOC' from the ccflags and set usemymalloc to 'n'.
+# perl's malloc off, you need to remove '-DUSE_PERL_SBRK'
+# from the ccflags and set usemymalloc to 'n'.
 #
 # 1997:
 # From perl5.003_22 the malloc bug has no impact any more. We can run
@@ -42,7 +42,7 @@
 #
 # use the following two lines to enable USE_PERL_SBRK. Try this if you
 # encounter intermittent core dumps:
-#ccflags='-DUSE_NEXT_CTYPE -DUSE_PERL_SBRK -DHIDEMYMALLOC'
+#ccflags='-DUSE_NEXT_CTYPE -DUSE_PERL_SBRK'
 #usemymalloc='y'
 # use the following two lines if you have perl5.003_22 or better and
 # do not encounter intermittent core dumps.
@@ -129,3 +129,13 @@ ranlib='sleep 5; /bin/ranlib'
 # This is true whether we're on an HPPA machine or cross-compiling
 # for one.
 pp_cflags='optimize=""'
+
+# The SysV IPC is optional (ftp://ftp.nluug.nl/pub/comp/next/SysVIPC/)
+# Gerben_Wierda@RnA.nl
+if [ -f /usr/local/lib/libIPC.a ]; then
+  libswanted="$libswanted IPC"
+  # As of Sep 1998 d_msg wasn't supported in that library,
+  # only d_sem and d_shm, but Configure should be able to
+  # figure that out. --jhi
+  # Note also the next3 ext/IPC/SysV hints file.
+fi

@@ -139,7 +139,7 @@ None
 
 =head1 ENVIRONMENT
 
-The envrironment variable C<PERL_RL> governs which ReadLine clone is
+The environment variable C<PERL_RL> governs which ReadLine clone is
 loaded. If the value is false, a dummy interface is used. If the value
 is true, it should be tail of the name of the package to use, such as
 C<Perl> or C<Gnu>.  
@@ -193,7 +193,7 @@ sub findConsole {
 	$console = "sys\$command";
     }
 
-    if (($^O eq 'amigaos') || ($^O eq 'beos')) {
+    if (($^O eq 'amigaos') || ($^O eq 'beos') || ($^O eq 'epoc')) {
 	$console = undef;
     }
     elsif ($^O eq 'os2') {

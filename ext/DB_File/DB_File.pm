@@ -1,10 +1,10 @@
 # DB_File.pm -- Perl 5 interface to Berkeley DB 
 #
-# written by Paul Marquess (pmarquess@bfsec.bt.co.uk)
-# last modified 16th May 1998
-# version 1.60
+# written by Paul Marquess (Paul.Marquess@btinternet.com)
+# last modified 4th August 1999
+# version 1.70
 #
-#     Copyright (c) 1995-8 Paul Marquess. All rights reserved.
+#     Copyright (c) 1995-1999 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
 #     modify it under the same terms as Perl itself.
 
@@ -145,7 +145,7 @@ use vars qw($VERSION @ISA @EXPORT $AUTOLOAD $DB_BTREE $DB_HASH $DB_RECNO $db_ver
 use Carp;
 
 
-$VERSION = "1.60" ;
+$VERSION = "1.70" ;
 
 #typedef enum { DB_BTREE, DB_HASH, DB_RECNO } DBTYPE;
 $DB_BTREE = new DB_File::BTREEINFO ;
@@ -196,7 +196,7 @@ sub AUTOLOAD {
     ($constname = $AUTOLOAD) =~ s/.*:://;
     my $val = constant($constname, @_ ? $_[0] : 0);
     if ($! != 0) {
-	if ($! =~ /Invalid/) {
+	if ($! =~ /Invalid/ || $!{EINVAL}) {
 	    $AutoLoader::AUTOLOAD = $AUTOLOAD;
 	    goto &AutoLoader::AUTOLOAD;
 	}
@@ -300,6 +300,40 @@ sub STORESIZE
     }
 }
  
+sub find_dup
+{
+    croak "Usage: \$db->find_dup(key,value)\n"
+        unless @_ == 3 ;
+ 
+    my $db        = shift ;
+    my ($origkey, $value_wanted) = @_ ;
+    my ($key, $value) = ($origkey, 0);
+    my ($status) = 0 ;
+
+    for ($status = $db->seq($key, $value, R_CURSOR() ) ;
+         $status == 0 ;
+         $status = $db->seq($key, $value, R_NEXT() ) ) {
+
+        return 0 if $key eq $origkey and $value eq $value_wanted ;
+    }
+
+    return $status ;
+}
+
+sub del_dup
+{
+    croak "Usage: \$db->del_dup(key,value)\n"
+        unless @_ == 3 ;
+ 
+    my $db        = shift ;
+    my ($key, $value) = @_ ;
+    my ($status) = $db->find_dup($key, $value) ;
+    return $status if $status != 0 ;
+
+    $status = $db->del($key, R_CURSOR() ) ;
+    return $status ;
+}
+
 sub get_dup
 {
     croak "Usage: \$db->get_dup(key [,flag])\n"
@@ -364,6 +398,8 @@ DB_File - Perl5 access to Berkeley DB version 1.x
  $count = $X->get_dup($key) ;
  @list  = $X->get_dup($key) ;
  %list  = $X->get_dup($key, 1) ;
+ $status = $X->find_dup($key, $value) ;
+ $status = $X->del_dup($key, $value) ;
 
  # RECNO only
  $a = $X->length;
@@ -371,6 +407,12 @@ DB_File - Perl5 access to Berkeley DB version 1.x
  $X->push(list);
  $a = $X->shift;
  $X->unshift(list);
+
+ # DBM Filters
+ $old_filter = $db->filter_store_key  ( sub { ... } ) ;
+ $old_filter = $db->filter_store_value( sub { ... } ) ;
+ $old_filter = $db->filter_fetch_key  ( sub { ... } ) ;
+ $old_filter = $db->filter_fetch_value( sub { ... } ) ;
 
  untie %hash ;
  untie @array ;
@@ -443,11 +485,11 @@ is considered stable enough for real work.
 B<Note:> The database file format has changed in Berkeley DB version 2.
 If you cannot recreate your databases, you must dump any existing
 databases with the C<db_dump185> utility that comes with Berkeley DB.
-Once you have upgraded DB_File to use Berkeley DB version 2, your
+Once you have rebuilt DB_File to use Berkeley DB version 2, your
 databases can be recreated using C<db_load>. Refer to the Berkeley DB
 documentation for further details.
 
-Please read L<COPYRIGHT> before using version 2.x of Berkeley DB with
+Please read L<"COPYRIGHT"> before using version 2.x of Berkeley DB with
 DB_File.
 
 =head2 Interface to Berkeley DB
@@ -628,6 +670,7 @@ contents of the database.
     use DB_File ;
     use vars qw( %h $k $v ) ;
 
+    unlink "fruit" ;
     tie %h, "DB_File", "fruit", O_RDWR|O_CREAT, 0640, $DB_HASH 
         or die "Cannot open file 'fruit': $!\n";
 
@@ -687,6 +730,7 @@ insensitive compare function will be used.
     # specify the Perl sub that will do the comparison
     $DB_BTREE->{'compare'} = \&Compare ;
 
+    unlink "tree" ;
     tie %h, "DB_File", "tree", O_RDWR|O_CREAT, 0640, $DB_BTREE 
         or die "Cannot open file 'tree': $!\n" ;
 
@@ -763,7 +807,7 @@ code:
 
     # iterate through the associative array
     # and print each key/value pair.
-    foreach (keys %h)
+    foreach (sort keys %h)
       { print "$_  -> $h{$_}\n" }
 
     untie %h ;
@@ -837,9 +881,12 @@ that prints:
 This time we have got all the key/value pairs, including the multiple
 values associated with the key C<Wall>.
 
+To make life easier when dealing with duplicate keys, B<DB_File> comes with 
+a few utility methods.
+
 =head2 The get_dup() Method
 
-B<DB_File> comes with a utility method, called C<get_dup>, to assist in
+The C<get_dup> method assists in
 reading duplicate values from BTREE databases. The method can take the
 following forms:
 
@@ -862,6 +909,19 @@ particular value occurred in the BTREE.
 So assuming the database created above, we can use C<get_dup> like
 this:
 
+    use strict ;
+    use DB_File ;
+ 
+    use vars qw($filename $x %h ) ;
+
+    $filename = "tree" ;
+ 
+    # Enable duplicate records
+    $DB_BTREE->{'flags'} = R_DUP ;
+ 
+    $x = tie %h, "DB_File", $filename, O_RDWR|O_CREAT, 0640, $DB_BTREE 
+	or die "Cannot open $filename: $!\n";
+
     my $cnt  = $x->get_dup("Wall") ;
     print "Wall occurred $cnt times\n" ;
 
@@ -869,7 +929,7 @@ this:
     print "Larry is there\n" if $hash{'Larry'} ;
     print "There are $hash{'Brick'} Brick Walls\n" ;
 
-    my @list = $x->get_dup("Wall") ;
+    my @list = sort $x->get_dup("Wall") ;
     print "Wall =>	[@list]\n" ;
 
     @list = $x->get_dup("Smith") ;
@@ -887,6 +947,79 @@ and it will print:
     Wall =>	[Brick Brick Larry]
     Smith =>	[John]
     Dog =>	[]
+
+=head2 The find_dup() Method
+
+    $status = $X->find_dup($key, $value) ;
+
+This method checks for the existance of a specific key/value pair. If the
+pair exists, the cursor is left pointing to the pair and the method 
+returns 0. Otherwise the method returns a non-zero value.
+
+Assuming the database from the previous example:
+
+    use strict ;
+    use DB_File ;
+ 
+    use vars qw($filename $x %h $found) ;
+
+    my $filename = "tree" ;
+ 
+    # Enable duplicate records
+    $DB_BTREE->{'flags'} = R_DUP ;
+ 
+    $x = tie %h, "DB_File", $filename, O_RDWR|O_CREAT, 0640, $DB_BTREE 
+	or die "Cannot open $filename: $!\n";
+
+    $found = ( $x->find_dup("Wall", "Larry") == 0 ? "" : "not") ; 
+    print "Larry Wall is $found there\n" ;
+    
+    $found = ( $x->find_dup("Wall", "Harry") == 0 ? "" : "not") ; 
+    print "Harry Wall is $found there\n" ;
+    
+    undef $x ;
+    untie %h ;
+
+prints this
+
+    Larry Wall is  there
+    Harry Wall is not there
+
+
+=head2 The del_dup() Method
+
+    $status = $X->del_dup($key, $value) ;
+
+This method deletes a specific key/value pair. It returns
+0 if they exist and have been deleted successfully.
+Otherwise the method returns a non-zero value.
+
+Again assuming the existance of the C<tree> database
+
+    use strict ;
+    use DB_File ;
+ 
+    use vars qw($filename $x %h $found) ;
+
+    my $filename = "tree" ;
+ 
+    # Enable duplicate records
+    $DB_BTREE->{'flags'} = R_DUP ;
+ 
+    $x = tie %h, "DB_File", $filename, O_RDWR|O_CREAT, 0640, $DB_BTREE 
+	or die "Cannot open $filename: $!\n";
+
+    $x->del_dup("Wall", "Larry") ;
+
+    $found = ( $x->find_dup("Wall", "Larry") == 0 ? "" : "not") ; 
+    print "Larry Wall is $found there\n" ;
+    
+    undef $x ;
+    untie %h ;
+
+prints this
+
+    Larry Wall is not there
 
 =head2 Matching Partial Keys 
 
@@ -941,7 +1074,7 @@ and print the first matching key/value pair given a partial key.
 	 $st == 0 ;
          $st = $x->seq($key, $value, R_NEXT) )
 	
-      {  print "$key -> $value\n" }
+      {  print "$key	-> $value\n" }
  
     print "\nPARTIAL MATCH\n" ;
 
@@ -970,7 +1103,7 @@ Here is the output:
 DB_RECNO provides an interface to flat text files. Both variable and
 fixed length records are supported.
 
-In order to make RECNO more compatible with Perl the array offset for
+In order to make RECNO more compatible with Perl, the array offset for
 all RECNO arrays begins at 0 rather than 1 as in Berkeley DB.
 
 As with normal Perl arrays, a RECNO array can be accessed using
@@ -999,7 +1132,7 @@ error will be fixed in the next release of Berkeley DB.
 
 That clarifies the situation with regards Berkeley DB itself. What
 about B<DB_File>? Well, the behavior defined in the quote above is
-quite useful, so B<DB_File> conforms it.
+quite useful, so B<DB_File> conforms to it.
 
 That means that you can specify other options (e.g. cachesize) and
 still have bval default to C<"\n"> for variable length records, and
@@ -1007,19 +1140,36 @@ space for fixed length records.
 
 =head2 A Simple Example
 
-Here is a simple example that uses RECNO.
+Here is a simple example that uses RECNO (if you are using a version 
+of Perl earlier than 5.004_57 this example won't work -- see 
+L<Extra RECNO Methods> for a workaround).
 
     use strict ;
     use DB_File ;
 
+    my $filename = "text" ;
+    unlink $filename ;
+
     my @h ;
-    tie @h, "DB_File", "text", O_RDWR|O_CREAT, 0640, $DB_RECNO 
+    tie @h, "DB_File", $filename, O_RDWR|O_CREAT, 0640, $DB_RECNO 
         or die "Cannot open file 'text': $!\n" ;
 
     # Add a few key/value pairs to the file
     $h[0] = "orange" ;
     $h[1] = "blue" ;
     $h[2] = "yellow" ;
+
+    push @h, "green", "black" ;
+
+    my $elements = scalar @h ;
+    print "The array contains $elements entries\n" ;
+
+    my $last = pop @h ;
+    print "popped $last\n" ;
+
+    unshift @h, "white" ;
+    my $first = shift @h ;
+    print "shifted $first\n" ;
 
     # Check for existence of a key
     print "Element 1 Exists with value $h[1]\n" if $h[1] ;
@@ -1032,17 +1182,19 @@ Here is a simple example that uses RECNO.
 
 Here is the output from the script:
 
-
+    The array contains 5 entries
+    popped black
+    shifted white
     Element 1 Exists with value blue
-    The last element is yellow
-    The 2nd last element is blue
+    The last element is green
+    The 2nd last element is yellow
 
-=head2 Extra Methods
+=head2 Extra RECNO Methods
 
 If you are using a version of Perl earlier than 5.004_57, the tied
-array interface is quite limited. The example script above will work,
-but you won't be able to use C<push>, C<pop>, C<shift>, C<unshift>
-etc. with the tied array.
+array interface is quite limited. In the example script above
+C<push>, C<pop>, C<shift>, C<unshift>
+or determining the array length will not work with a tied array.
 
 To make the interface more useful for older versions of Perl, a number
 of methods are supplied with B<DB_File> to simulate the missing array
@@ -1360,6 +1512,141 @@ R_RECNOSYNC is the only valid flag at present.
 
 =back
 
+=head1 DBM FILTERS
+
+A DBM Filter is a piece of code that is be used when you I<always>
+want to make the same transformation to all keys and/or values in a
+DBM database.
+
+There are four methods associated with DBM Filters. All work identically,
+and each is used to install (or uninstall) a single DBM Filter. Each
+expects a single parameter, namely a reference to a sub. The only
+difference between them is the place that the filter is installed.
+
+To summarise:
+
+=over 5
+
+=item B<filter_store_key>
+
+If a filter has been installed with this method, it will be invoked
+every time you write a key to a DBM database.
+
+=item B<filter_store_value>
+
+If a filter has been installed with this method, it will be invoked
+every time you write a value to a DBM database.
+
+
+=item B<filter_fetch_key>
+
+If a filter has been installed with this method, it will be invoked
+every time you read a key from a DBM database.
+
+=item B<filter_fetch_value>
+
+If a filter has been installed with this method, it will be invoked
+every time you read a value from a DBM database.
+
+=back
+
+You can use any combination of the methods, from none, to all four.
+
+All filter methods return the existing filter, if present, or C<undef>
+in not.
+
+To delete a filter pass C<undef> to it.
+
+=head2 The Filter
+
+When each filter is called by Perl, a local copy of C<$_> will contain
+the key or value to be filtered. Filtering is achieved by modifying
+the contents of C<$_>. The return code from the filter is ignored.
+
+=head2 An Example -- the NULL termination problem.
+
+Consider the following scenario. You have a DBM database
+that you need to share with a third-party C application. The C application
+assumes that I<all> keys and values are NULL terminated. Unfortunately
+when Perl writes to DBM databases it doesn't use NULL termination, so
+your Perl application will have to manage NULL termination itself. When
+you write to the database you will have to use something like this:
+
+    $hash{"$key\0"} = "$value\0" ;
+
+Similarly the NULL needs to be taken into account when you are considering
+the length of existing keys/values.
+
+It would be much better if you could ignore the NULL terminations issue
+in the main application code and have a mechanism that automatically
+added the terminating NULL to all keys and values whenever you write to
+the database and have them removed when you read from the database. As I'm
+sure you have already guessed, this is a problem that DBM Filters can
+fix very easily.
+
+    use strict ;
+    use DB_File ;
+
+    my %hash ;
+    my $filename = "/tmp/filt" ;
+    unlink $filename ;
+
+    my $db = tie %hash, 'DB_File', $filename, O_CREAT|O_RDWR, 0666, $DB_HASH 
+      or die "Cannot open $filename: $!\n" ;
+
+    # Install DBM Filters
+    $db->filter_fetch_key  ( sub { s/\0$//    } ) ;
+    $db->filter_store_key  ( sub { $_ .= "\0" } ) ;
+    $db->filter_fetch_value( sub { s/\0$//    } ) ;
+    $db->filter_store_value( sub { $_ .= "\0" } ) ;
+
+    $hash{"abc"} = "def" ;
+    my $a = $hash{"ABC"} ;
+    # ...
+    undef $db ;
+    untie %hash ;
+
+Hopefully the contents of each of the filters should be
+self-explanatory. Both "fetch" filters remove the terminating NULL,
+and both "store" filters add a terminating NULL.
+
+
+=head2 Another Example -- Key is a C int.
+
+Here is another real-life example. By default, whenever Perl writes to
+a DBM database it always writes the key and value as strings. So when
+you use this:
+
+    $hash{12345} = "soemthing" ;
+
+the key 12345 will get stored in the DBM database as the 5 byte string
+"12345". If you actually want the key to be stored in the DBM database
+as a C int, you will have to use C<pack> when writing, and C<unpack>
+when reading.
+
+Here is a DBM Filter that does it:
+
+    use strict ;
+    use DB_File ;
+    my %hash ;
+    my $filename = "/tmp/filt" ;
+    unlink $filename ;
+
+
+    my $db = tie %hash, 'DB_File', $filename, O_CREAT|O_RDWR, 0666, $DB_HASH 
+      or die "Cannot open $filename: $!\n" ;
+
+    $db->filter_fetch_key  ( sub { $_ = unpack("i", $_) } ) ;
+    $db->filter_store_key  ( sub { $_ = pack ("i", $_) } ) ;
+    $hash{123} = "def" ;
+    # ...
+    undef $db ;
+    untie %hash ;
+
+This time only two filters have been used -- we only need to manipulate
+the contents of the key, so it wasn't necessary to install any value
+filters.
+
 =head1 HINTS AND TIPS 
 
 
@@ -1429,7 +1716,7 @@ shared by both a Perl and a C application.
 
 The vast majority of problems that are reported in this area boil down
 to the fact that C strings are NULL terminated, whilst Perl strings are
-not. 
+not. See L<DBM FILTERS> for a generic way to work around this problem.
 
 Here is a real example. Netscape 2.0 keeps a record of the locations you
 visit along with the time you last visited them in a DB_HASH database.
@@ -1618,6 +1905,19 @@ double quotes, like this:
 Although it might seem like a real pain, it is really worth the effort
 of having a C<use strict> in all your scripts.
 
+=head1 REFERENCES
+
+Articles that are either about B<DB_File> or make use of it.
+
+=over 5
+
+=item 1.
+
+I<Full-Text Searching in Perl>, Tim Kientzle (tkientzle@ddj.com),
+Dr. Dobb's Journal, Issue 295, January 1999, pp 34-41
+
+=back
+
 =head1 HISTORY
 
 Moved to the Changes file.
@@ -1643,10 +1943,8 @@ F<modules/by-module/DB_File>.
 This version of B<DB_File> will work with either version 1.x or 2.x of
 Berkeley DB, but is limited to the functionality provided by version 1.
 
-The official web site for Berkeley DB is
-F<http://www.sleepycat.com/db>. The ftp equivalent is
-F<ftp.sleepycat.com:/pub>. Both versions 1 and 2 of Berkeley DB are
-available there.
+The official web site for Berkeley DB is F<http://www.sleepycat.com>.
+Both versions 1 and 2 of Berkeley DB are available there.
 
 Alternatively, Berkeley DB version 1 is available at your nearest CPAN
 archive in F<src/misc/db.1.85.tar.gz>.
@@ -1657,7 +1955,7 @@ compile properly on IRIX 5.3.
 
 =head1 COPYRIGHT
 
-Copyright (c) 1995-8 Paul Marquess. All rights reserved. This program
+Copyright (c) 1995-1999 Paul Marquess. All rights reserved. This program
 is free software; you can redistribute it and/or modify it under the
 same terms as Perl itself.
 
@@ -1683,12 +1981,13 @@ Berkeley DB authors or the author of DB_File. See L<"AUTHOR"> for details.
 
 =head1 SEE ALSO
 
-L<perl(1)>, L<dbopen(3)>, L<hash(3)>, L<recno(3)>, L<btree(3)> 
+L<perl(1)>, L<dbopen(3)>, L<hash(3)>, L<recno(3)>, L<btree(3)>,
+L<dbmfilter>
 
 =head1 AUTHOR
 
 The DB_File interface was written by Paul Marquess
-E<lt>pmarquess@bfsec.bt.co.ukE<gt>.
+E<lt>Paul.Marquess@btinternet.comE<gt>.
 Questions about the DB system itself may be addressed to
 E<lt>db@sleepycat.com<gt>.
 

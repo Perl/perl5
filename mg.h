@@ -1,6 +1,6 @@
 /*    mg.h
  *
- *    Copyright (c) 1991-1997, Larry Wall
+ *    Copyright (c) 1991-1999, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -11,11 +11,11 @@
 STRUCT_MGVTBL_DEFINITION;
 #else
 struct mgvtbl {
-    int		(CPERLscope(*svt_get))	_((SV *sv, MAGIC* mg));
-    int		(CPERLscope(*svt_set))	_((SV *sv, MAGIC* mg));
-    U32		(CPERLscope(*svt_len))	_((SV *sv, MAGIC* mg));
-    int		(CPERLscope(*svt_clear))	_((SV *sv, MAGIC* mg));
-    int		(CPERLscope(*svt_free))	_((SV *sv, MAGIC* mg));
+    int		(CPERLscope(*svt_get))	(pTHX_ SV *sv, MAGIC* mg);
+    int		(CPERLscope(*svt_set))	(pTHX_ SV *sv, MAGIC* mg);
+    U32		(CPERLscope(*svt_len))	(pTHX_ SV *sv, MAGIC* mg);
+    int		(CPERLscope(*svt_clear))(pTHX_ SV *sv, MAGIC* mg);
+    int		(CPERLscope(*svt_free))	(pTHX_ SV *sv, MAGIC* mg);
 };
 #endif
 
@@ -43,3 +43,8 @@ struct magic {
 #define MgPV(mg,lp)		(((lp = (mg)->mg_len) == HEf_SVKEY) ?   \
 				 SvPV((SV*)((mg)->mg_ptr),lp) :		\
 				 (mg)->mg_ptr)
+
+#define SvTIED_mg(sv,how) \
+    (SvRMAGICAL(sv) ? mg_find((sv),(how)) : Null(MAGIC*))
+#define SvTIED_obj(sv,mg) \
+    ((mg)->mg_obj ? (mg)->mg_obj : sv_2mortal(newRV(sv)))

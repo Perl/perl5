@@ -26,11 +26,11 @@ static int dl_debug = 0;	/* value copied from $DynaLoader::dl_error */
 
 
 static void
-dl_generic_private_init(CPERLarg)	/* called by dl_*.xs dl_private_init() */
+dl_generic_private_init(pTHXo)	/* called by dl_*.xs dl_private_init() */
 {
     char *perl_dl_nonlazy;
 #ifdef DEBUGGING
-    dl_debug = SvIV( perl_get_sv("DynaLoader::dl_debug", 0x04) );
+    dl_debug = SvIV(get_sv("DynaLoader::dl_debug", 0x04) );
 #endif
     if ( (perl_dl_nonlazy = getenv("PERL_DL_NONLAZY")) != NULL )
 	dl_nonlazy = atoi(perl_dl_nonlazy);
@@ -45,19 +45,21 @@ dl_generic_private_init(CPERLarg)	/* called by dl_*.xs dl_private_init() */
 
 /* SaveError() takes printf style args and saves the result in LastError */
 static void
-SaveError(CPERLarg_ char* pat, ...)
+SaveError(pTHXo_ char* pat, ...)
 {
     va_list args;
+    SV *msv;
     char *message;
-    int len;
+    STRLEN len;
 
     /* This code is based on croak/warn, see mess() in util.c */
 
     va_start(args, pat);
-    message = mess(pat, &args);
+    msv = mess(pat, &args);
     va_end(args);
 
-    len = strlen(message) + 1 ;	/* include terminating null char */
+    message = SvPV(msv,len);
+    len++;		/* include terminating null char */
 
     /* Allocate some memory for the error message */
     if (LastError)

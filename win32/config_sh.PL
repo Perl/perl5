@@ -1,3 +1,15 @@
+# take a semicolon separated path list and turn it into a quoted
+# list of paths that Text::Parsewords will grok
+sub mungepath {
+    my $p = shift;
+    # remove leading/trailing semis/spaces
+    $p =~ s/^[ ;]+//;
+    $p =~ s/[ ;]+$//;
+    $p =~ s/'/"/g;
+    my @p = map { $_ = "\"$_\"" if /\s/ and !/^".*"$/; $_ } split /;/, $p;
+    return join(' ', @p);
+}
+
 my %opt;
 while (@ARGV && $ARGV[0] =~ /^([\w_]+)=(.*)$/)
  {
@@ -8,14 +20,17 @@ while (@ARGV && $ARGV[0] =~ /^([\w_]+)=(.*)$/)
 $opt{VERSION} = $];
 $opt{INST_VER} =~ s|~VERSION~|$]|g;
 if ($] =~ /\.(\d\d\d)?(\d\d)?$/) { # should always be true
-  $opt{PATCHLEVEL} = int($1 || 0);
-  $opt{SUBVERSION} = $2 || '00';
+  $opt{PERL_VERSION} = int($1 || 0);
+  $opt{PERL_SUBVERSION} = $2 || '00';
 }
 
 $opt{'cf_by'} = $ENV{USERNAME} unless $opt{'cf_by'};
 $opt{'cf_email'} = $opt{'cf_by'} . '@' . (gethostbyname('localhost'))[0]
 	unless $opt{'cf_email'};
 $opt{'usemymalloc'} = 'y' if $opt{'d_mymalloc'} eq 'define';
+
+$opt{libpth} = mungepath($opt{libpth}) if exists $opt{libpth};
+$opt{incpath} = mungepath($opt{incpath}) if exists $opt{incpath};
 
 while (<>)
  {

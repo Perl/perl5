@@ -1,6 +1,6 @@
 /*    cop.h
  *
- *    Copyright (c) 1991-1997, Larry Wall
+ *    Copyright (c) 1991-1999, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -15,6 +15,7 @@ struct cop {
     U32		cop_seq;	/* parse sequence number */
     I32		cop_arybase;	/* array base this line was compiled with */
     line_t      cop_line;       /* line # of this command */
+    SV *	cop_warnings;	/* lexical warnings bitmask */
 };
 
 #define Nullcop Null(COP*)
@@ -34,12 +35,15 @@ struct block_sub {
     AV *	argarray;
     U16		olddepth;
     U8		hasargs;
+    U8		lval;		/* XXX merge lval and hasargs? */
 };
 
 #define PUSHSUB(cx)							\
 	cx->blk_sub.cv = cv;						\
 	cx->blk_sub.olddepth = CvDEPTH(cv);				\
-	cx->blk_sub.hasargs = hasargs;
+	cx->blk_sub.hasargs = hasargs;					\
+	cx->blk_sub.lval = PL_op->op_private &                          \
+	                      (OPpLVAL_INTRO|OPpENTERSUB_INARGS);
 
 #define PUSHFORMAT(cx)							\
 	cx->blk_sub.cv = cv;						\
@@ -72,6 +76,7 @@ struct block_sub {
 	    /* destroy arg array */					\
 	    av_clear(cxsub.argarray);					\
 	    AvREAL_off(cxsub.argarray);					\
+	    AvREIFY_on(cxsub.argarray);					\
 	}								\
 	if (cxsub.cv) {							\
 	    if (!(CvDEPTH(cxsub.cv) = cxsub.olddepth))			\
@@ -142,7 +147,7 @@ struct block_loop {
 #define POPLOOP2()							\
 	SvREFCNT_dec(cxloop.iterlval);					\
 	if (cxloop.itervar) {						\
-	    SvREFCNT_dec(*cxloop.itervar);				\
+	    sv_2mortal(*cxloop.itervar);				\
 	    *cxloop.itervar = cxloop.itersave;				\
 	}								\
 	if (cxloop.iterary && cxloop.iterary != PL_curstack)		\
@@ -180,17 +185,17 @@ struct block {
 	cx->cx_type		= t,					\
 	cx->blk_oldsp		= sp - PL_stack_base,			\
 	cx->blk_oldcop		= PL_curcop,				\
-	cx->blk_oldmarksp	= PL_markstack_ptr - PL_markstack,		\
+	cx->blk_oldmarksp	= PL_markstack_ptr - PL_markstack,	\
 	cx->blk_oldscopesp	= PL_scopestack_ix,			\
-	cx->blk_oldretsp	= PL_retstack_ix,				\
+	cx->blk_oldretsp	= PL_retstack_ix,			\
 	cx->blk_oldpm		= PL_curpm,				\
 	cx->blk_gimme		= gimme;				\
 	DEBUG_l( PerlIO_printf(PerlIO_stderr(), "Entering block %ld, type %s\n",	\
-		    (long)cxstack_ix, block_type[t]); )
+		    (long)cxstack_ix, PL_block_type[CxTYPE(cx)]); )
 
 /* Exit a block (RETURN and LAST). */
 #define POPBLOCK(cx,pm) cx = &cxstack[cxstack_ix--],			\
-	newsp		 = PL_stack_base + cx->blk_oldsp,			\
+	newsp		 = PL_stack_base + cx->blk_oldsp,		\
 	PL_curcop	 = cx->blk_oldcop,				\
 	PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp,		\
 	PL_scopestack_ix = cx->blk_oldscopesp,				\
@@ -198,20 +203,21 @@ struct block {
 	pm		 = cx->blk_oldpm,				\
 	gimme		 = cx->blk_gimme;				\
 	DEBUG_l( PerlIO_printf(PerlIO_stderr(), "Leaving block %ld, type %s\n",		\
-		    (long)cxstack_ix+1,block_type[cx->cx_type]); )
+		    (long)cxstack_ix+1,PL_block_type[CxTYPE(cx)]); )
 
 /* Continue a block elsewhere (NEXT and REDO). */
 #define TOPBLOCK(cx) cx  = &cxstack[cxstack_ix],			\
-	PL_stack_sp	 = PL_stack_base + cx->blk_oldsp,			\
+	PL_stack_sp	 = PL_stack_base + cx->blk_oldsp,		\
 	PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp,		\
 	PL_scopestack_ix = cx->blk_oldscopesp,				\
-	PL_retstack_ix	 = cx->blk_oldretsp
+	PL_retstack_ix	 = cx->blk_oldretsp,				\
+	PL_curpm         = cx->blk_oldpm
 
 /* substitution context */
 struct subst {
     I32		sbu_iters;
     I32		sbu_maxiters;
-    I32		sbu_safebase;
+    I32		sbu_rflags;
     I32		sbu_oldsave;
     bool	sbu_once;
     bool	sbu_rxtainted;
@@ -226,7 +232,7 @@ struct subst {
 };
 #define sb_iters	cx_u.cx_subst.sbu_iters
 #define sb_maxiters	cx_u.cx_subst.sbu_maxiters
-#define sb_safebase	cx_u.cx_subst.sbu_safebase
+#define sb_rflags	cx_u.cx_subst.sbu_rflags
 #define sb_oldsave	cx_u.cx_subst.sbu_oldsave
 #define sb_once		cx_u.cx_subst.sbu_once
 #define sb_rxtainted	cx_u.cx_subst.sbu_rxtainted
@@ -242,7 +248,7 @@ struct subst {
 #define PUSHSUBST(cx) CXINC, cx = &cxstack[cxstack_ix],			\
 	cx->sb_iters		= iters,				\
 	cx->sb_maxiters		= maxiters,				\
-	cx->sb_safebase		= safebase,				\
+	cx->sb_rflags		= r_flags,				\
 	cx->sb_oldsave		= oldsave,				\
 	cx->sb_once		= once,					\
 	cx->sb_rxtainted	= rxtainted,				\
@@ -261,18 +267,26 @@ struct subst {
 	rxres_free(&cx->sb_rxres)
 
 struct context {
-    I32		cx_type;	/* what kind of context this is */
+    U32		cx_type;	/* what kind of context this is */
     union {
 	struct block	cx_blk;
 	struct subst	cx_subst;
     } cx_u;
 };
+
+#define CXTYPEMASK	0xff
 #define CXt_NULL	0
 #define CXt_SUB		1
 #define CXt_EVAL	2
 #define CXt_LOOP	3
 #define CXt_SUBST	4
 #define CXt_BLOCK	5
+
+/* private flags for CXt_EVAL */
+#define CXp_REAL	0x00000100	/* truly eval'', not a lookalike */
+
+#define CxTYPE(c)	((c)->cx_type & CXTYPEMASK)
+#define CxREALEVAL(c)	(((c)->cx_type & (CXt_EVAL|CXp_REAL)) == (CXt_EVAL|CXp_REAL))
 
 #define CXINC (cxstack_ix < cxstack_max ? ++cxstack_ix : (cxstack_ix = cxinc()))
 
@@ -281,12 +295,19 @@ struct context {
 #define G_ARRAY		1
 #define G_VOID		128	/* skip this bit when adding flags below */
 
-/* extra flags for perl_call_* routines */
+/* extra flags for Perl_call_* routines */
 #define G_DISCARD	2	/* Call FREETMPS. */
 #define G_EVAL		4	/* Assume eval {} around subroutine call. */
 #define G_NOARGS	8	/* Don't construct a @_ array. */
 #define G_KEEPERR      16	/* Append errors to $@, don't overwrite it */
 #define G_NODEBUG      32	/* Disable debugging at toplevel.  */
+#define G_NOCATCH      64       /* Don't do CATCH_SET() */
+
+/* flag bits for PL_in_eval */
+#define EVAL_NULL	0	/* not in an eval */
+#define EVAL_INEVAL	1	/* some enclosing scope is an eval */
+#define EVAL_WARNONLY	2	/* used by yywarn() when calling yyerror() */
+#define EVAL_KEEPERR	4	/* set by Perl_call_sv if G_KEEPERR */
 
 /* Support for switching (stack and block) contexts.
  * This ensures magic doesn't invalidate local stack and cx pointers.
@@ -347,8 +368,11 @@ typedef struct stackinfo PERL_SI;
 
 #define PUSHSTACK PUSHSTACKi(PERLSI_UNKNOWN)
 
+/* POPSTACK works with PL_stack_sp, so it may need to be bracketed by
+ * PUTBACK/SPAGAIN to flush/refresh any local SP that may be active */
 #define POPSTACK \
     STMT_START {							\
+	djSP;								\
 	PERL_SI *prev = PL_curstackinfo->si_prev;			\
 	if (!prev) {							\
 	    PerlIO_printf(PerlIO_stderr(), "panic: POPSTACK\n");	\

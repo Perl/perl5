@@ -329,7 +329,7 @@ do more than fetch or set one particular field.
     sub exclaim {
         my $self = shift;
         return sprintf "Hi, I'm %s, age %d, working with %s",
-            $self->{NAME}, $self->{AGE}, join(", ", $self->{PEERS});
+            $self->{NAME}, $self->{AGE}, join(", ", @{$self->{PEERS}});
     }
 
 Or maybe even one like this:

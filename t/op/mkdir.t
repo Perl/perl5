@@ -4,10 +4,18 @@
 
 print "1..7\n";
 
-$^O eq 'MSWin32' ? `del /s /q blurfl 2>&1` : `rm -rf blurfl`;
+if ($^O eq 'VMS') { # May as well test the library too
+  unshift @INC, '../lib';
+  require File::Path;
+  File::Path::rmtree('blurfl');
+}
+else {
+  $^O eq 'MSWin32' ? `del /s /q blurfl 2>&1` : `rm -rf blurfl`;
+}
 
 # tests 3 and 7 rather naughtily expect English error messages
 $ENV{'LC_ALL'} = 'C';
+$ENV{LANGUAGE} = 'C'; # GNU locale extension
 
 print (mkdir('blurfl',0777) ? "ok 1\n" : "not ok 1\n");
 print (mkdir('blurfl',0777) ? "not ok 2\n" : "ok 2\n");
@@ -15,4 +23,4 @@ print ($! =~ /exist|denied/ ? "ok 3\n" : "# $!\nnot ok 3\n");
 print (-d 'blurfl' ? "ok 4\n" : "not ok 4\n");
 print (rmdir('blurfl') ? "ok 5\n" : "not ok 5\n");
 print (rmdir('blurfl') ? "not ok 6\n" : "ok 6\n");
-print ($! =~ /such|exist/ ? "ok 7\n" : "not ok 7\n");
+print ($! =~ /such|exist|not found/i ? "ok 7\n" : "not ok 7\n");

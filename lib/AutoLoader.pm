@@ -1,20 +1,22 @@
 package AutoLoader;
 
-use vars qw(@EXPORT @EXPORT_OK);
+# use vars qw(@EXPORT @EXPORT_OK $VERSION);
 
 my $is_dosish;
 my $is_vms;
 
 BEGIN {
     require Exporter;
-    @EXPORT = ();
-    @EXPORT_OK = qw(AUTOLOAD);
+    @EXPORT = @EXPORT = ();
+    @EXPORT_OK = @EXPORT_OK = qw(AUTOLOAD);
     $is_dosish = $^O eq 'dos' || $^O eq 'os2' || $^O eq 'MSWin32';
     $is_vms = $^O eq 'VMS';
+    $VERSION = $VERSION = '5.57';
 }
 
 AUTOLOAD {
-    my $name;
+    my $sub = $AUTOLOAD;
+    my $filename;
     # Braces used to preserve $1 et al.
     {
 	# Try to find the autoloaded file from the package-qualified
@@ -30,10 +32,10 @@ AUTOLOAD {
 	# In this case, we simple prepend the 'auto/' and let the
 	# C<require> take care of the searching for us.
 
-	my ($pkg,$func) = $AUTOLOAD =~ /(.*)::([^:]+)$/;
+	my ($pkg,$func) = ($sub =~ /(.*)::([^:]+)$/);
 	$pkg =~ s#::#/#g;
-	if (defined($name=$INC{"$pkg.pm"})) {
-	    $name =~ s#^(.*)$pkg\.pm$#$1auto/$pkg/$func.al#;
+	if (defined($filename = $INC{"$pkg.pm"})) {
+	    $filename =~ s#^(.*)$pkg\.pm$#$1auto/$pkg/$func.al#;
 
 	    # if the file exists, then make sure that it is a
 	    # a fully anchored path (i.e either '/usr/lib/auto/foo/bar.al',
@@ -41,45 +43,45 @@ AUTOLOAD {
 	    # (and failing) to find the 'lib/auto/foo/bar.al' because it
 	    # looked for 'lib/lib/auto/foo/bar.al', given @INC = ('lib').
 
-	    if (-r $name) {
-	        unless ($name =~ m|^/|) {
+	    if (-r $filename) {
+		unless ($filename =~ m|^/|) {
 		    if ($is_dosish) {
-			unless ($name =~ m{^([a-z]:)?[\\/]}i) {
-			     $name = "./$name";
+			unless ($filename =~ m{^([a-z]:)?[\\/]}i) {
+			     $filename = "./$filename";
 			}
 		    }
 		    elsif ($is_vms) {
-		        # XXX todo by VMSmiths
-			$name = "./$name";
+			# XXX todo by VMSmiths
+			$filename = "./$filename";
 		    }
 		    else {
-			$name = "./$name";
+			$filename = "./$filename";
 		    }
 		}
 	    }
 	    else {
-		$name = undef;
+		$filename = undef;
 	    }
 	}
-	unless (defined $name) {
+	unless (defined $filename) {
 	    # let C<require> do the searching
-	    $name = "auto/$AUTOLOAD.al";
-	    $name =~ s#::#/#g;
+	    $filename = "auto/$sub.al";
+	    $filename =~ s#::#/#g;
 	}
     }
     my $save = $@;
-    eval { local $SIG{__DIE__}; require $name };
+    eval { local $SIG{__DIE__}; require $filename };
     if ($@) {
-	if (substr($AUTOLOAD,-9) eq '::DESTROY') {
-	    *$AUTOLOAD = sub {};
+	if (substr($sub,-9) eq '::DESTROY') {
+	    *$sub = sub {};
 	} else {
 	    # The load might just have failed because the filename was too
 	    # long for some old SVR3 systems which treat long names as errors.
 	    # If we can succesfully truncate a long name then it's worth a go.
 	    # There is a slight risk that we could pick up the wrong file here
 	    # but autosplit should have warned about that when splitting.
-	    if ($name =~ s/(\w{12,})\.al$/substr($1,0,11).".al"/e){
-		eval {local $SIG{__DIE__};require $name};
+	    if ($filename =~ s/(\w{12,})\.al$/substr($1,0,11).".al"/e){
+		eval { local $SIG{__DIE__}; require $filename };
 	    }
 	    if ($@){
 		$@ =~ s/ at .*\n//;
@@ -90,7 +92,7 @@ AUTOLOAD {
 	}
     }
     $@ = $save;
-    goto &$AUTOLOAD;
+    goto &$sub;
 }
 
 sub import {
@@ -101,7 +103,10 @@ sub import {
     # Export symbols, but not by accident of inheritance.
     #
 
-    Exporter::export $pkg, $callpkg, @_ if $pkg eq 'AutoLoader';
+    if ($pkg eq 'AutoLoader') {
+      local $Exporter::ExportLevel = 1;
+      Exporter::import $pkg, @_;
+    }
 
     #
     # Try to find the autosplit index file.  Eg., if the call package
@@ -178,7 +183,7 @@ such a file exists, AUTOLOAD will read and evaluate it,
 thus (presumably) defining the needed subroutine.  AUTOLOAD will then
 C<goto> the newly defined subroutine.
 
-Once this process completes for a given funtion, it is defined, so
+Once this process completes for a given function, it is defined, so
 future calls to the subroutine will bypass the AUTOLOAD mechanism.
 
 =head2 Subroutine Stubs
@@ -219,20 +224,20 @@ lines:
     use Carp;
 
     sub AUTOLOAD {
-        my $constname;
-        ($constname = $AUTOLOAD) =~ s/.*:://;
+        my $sub = $AUTOLOAD;
+        (my $constname = $sub) =~ s/.*:://;
         my $val = constant($constname, @_ ? $_[0] : 0);
         if ($! != 0) {
-            if ($! =~ /Invalid/) {
-                $AutoLoader::AUTOLOAD = $AUTOLOAD;
+            if ($! =~ /Invalid/ || $!{EINVAL}) {
+                $AutoLoader::AUTOLOAD = $sub;
                 goto &AutoLoader::AUTOLOAD;
             }
             else {
                 croak "Your vendor has not defined constant $constname";
             }
         }
-	*$AUTOLOAD = sub { $val }; # same as: eval "sub $AUTOLOAD { $val }";
-        goto &$AUTOLOAD;
+        *$sub = sub { $val }; # same as: eval "sub $sub { $val }";
+        goto &$sub;
     }
 
 If any module's own AUTOLOAD subroutine has no need to fallback to the
@@ -266,7 +271,7 @@ C<__DATA__>, after which routines are cached.  B<SelfLoader> can also
 handle multiple packages in a file.
 
 B<AutoLoader> only reads code as it is requested, and in many cases
-should be faster, but requires a machanism like B<AutoSplit> be used to
+should be faster, but requires a mechanism like B<AutoSplit> be used to
 create the individual files.  L<ExtUtils::MakeMaker> will invoke
 B<AutoSplit> automatically if B<AutoLoader> is used in a module source
 file.

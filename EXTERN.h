@@ -1,6 +1,6 @@
 /*    EXTERN.h
  *
- *    Copyright (c) 1991-1997, Larry Wall
+ *    Copyright (c) 1991-1999, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -40,10 +40,17 @@
 #      define dEXTCONST const
 #    endif
 #  else
-#    define EXT extern
-#    define dEXT
-#    define EXTCONST extern const
-#    define dEXTCONST const
+#    if defined(CYGWIN) && defined(USEIMPORTLIB)
+#      define EXT extern __declspec(dllimport)
+#      define dEXT 
+#      define EXTCONST extern __declspec(dllimport) const
+#      define dEXTCONST const
+#    else
+#      define EXT extern
+#      define dEXT
+#      define EXTCONST extern const
+#      define dEXTCONST const
+#    endif
 #  endif
 #endif
 

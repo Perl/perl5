@@ -1,6 +1,6 @@
 /*  sockadapt.h
  *
- *  Authors: Charles Bailey  bailey@genetics.upenn.edu
+ *  Authors: Charles Bailey  bailey@newman.upenn.edu
  *           David Denholm  denholm@conmat.phys.soton.ac.uk
  *  Last Revised:  4-Mar-1997
  *
@@ -182,7 +182,7 @@ int si_fileno(FILE *);
 #  undef getpeername
 #endif
 #define getpeername my_getpeername
-int my_getpeername _((int, struct sockaddr *, int *));
+int my_getpeername (int, struct sockaddr *, int *);
 
 #endif /* SOCKETSHR stuff */
 #endif /* include guard */

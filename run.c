@@ -1,6 +1,6 @@
 /*    run.c
  *
- *    Copyright (c) 1991-1997, Larry Wall
+ *    Copyright (c) 1991-1999, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -8,6 +8,7 @@
  */
 
 #include "EXTERN.h"
+#define PERL_IN_RUN_C
 #include "perl.h"
 
 /*
@@ -16,54 +17,38 @@
  * know.  Run now!  Hope is in speed!"  --Gandalf
  */
 
-#ifdef PERL_OBJECT
-#define CALLOP this->*PL_op
-#else
-#define CALLOP *PL_op
-#endif
-
 int
-runops_standard(void)
+Perl_runops_standard(pTHX)
 {
     dTHR;
 
-    while ( PL_op = (CALLOP->op_ppaddr)(ARGS) ) ;
+    while ( PL_op = CALL_FPTR(PL_op->op_ppaddr)(aTHX) ) ;
 
     TAINT_NOT;
     return 0;
 }
 
-#ifdef DEBUGGING
-
-dEXT char **watchaddr = 0;
-dEXT char *watchok;
-
-#ifndef PERL_OBJECT
-static void debprof _((OP*o));
-#endif
-
-#endif	/* DEBUGGING */
-
 int
-runops_debug(void)
+Perl_runops_debug(pTHX)
 {
 #ifdef DEBUGGING
     dTHR;
     if (!PL_op) {
-	warn("NULL OP IN RUN");
+	if (ckWARN_d(WARN_DEBUGGING))
+	    Perl_warner(aTHX_ WARN_DEBUGGING, "NULL OP IN RUN");
 	return 0;
     }
 
     do {
 	if (PL_debug) {
-	    if (watchaddr != 0 && *watchaddr != watchok)
+	    if (PL_watchaddr != 0 && *PL_watchaddr != PL_watchok)
 		PerlIO_printf(Perl_debug_log, "WARNING: %lx changed from %lx to %lx\n",
-		    (long)watchaddr, (long)watchok, (long)*watchaddr);
+		    (long)PL_watchaddr, (long)PL_watchok, (long)*PL_watchaddr);
 	    DEBUG_s(debstack());
 	    DEBUG_t(debop(PL_op));
 	    DEBUG_P(debprof(PL_op));
 	}
-    } while ( PL_op = (CALLOP->op_ppaddr)(ARGS) );
+    } while ( PL_op = CALL_FPTR(PL_op->op_ppaddr)(aTHX) );
 
     TAINT_NOT;
     return 0;
@@ -73,11 +58,12 @@ runops_debug(void)
 }
 
 I32
-debop(OP *o)
+Perl_debop(pTHX_ OP *o)
 {
 #ifdef DEBUGGING
     SV *sv;
-    deb("%s", op_name[o->op_type]);
+    STRLEN n_a;
+    Perl_deb(aTHX_ "%s", PL_op_name[o->op_type]);
     switch (o->op_type) {
     case OP_CONST:
 	PerlIO_printf(Perl_debug_log, "(%s)", SvPEEK(cSVOPo->op_sv));
@@ -87,7 +73,7 @@ debop(OP *o)
 	if (cGVOPo->op_gv) {
 	    sv = NEWSV(0,0);
 	    gv_fullname3(sv, cGVOPo->op_gv, Nullch);
-	    PerlIO_printf(Perl_debug_log, "(%s)", SvPV(sv, PL_na));
+	    PerlIO_printf(Perl_debug_log, "(%s)", SvPV(sv, n_a));
 	    SvREFCNT_dec(sv);
 	}
 	else
@@ -102,18 +88,19 @@ debop(OP *o)
 }
 
 void
-watch(char **addr)
+Perl_watch(pTHX_ char **addr)
 {
 #ifdef DEBUGGING
-    watchaddr = addr;
-    watchok = *addr;
+    dTHR;
+    PL_watchaddr = addr;
+    PL_watchok = *addr;
     PerlIO_printf(Perl_debug_log, "WATCHING, %lx is currently %lx\n",
-	(long)watchaddr, (long)watchok);
+	(long)PL_watchaddr, (long)PL_watchok);
 #endif	/* DEBUGGING */
 }
 
 STATIC void
-debprof(OP *o)
+S_debprof(pTHX_ OP *o)
 {
 #ifdef DEBUGGING
     if (!PL_profiledata)
@@ -123,7 +110,7 @@ debprof(OP *o)
 }
 
 void
-debprofdump(void)
+Perl_debprofdump(pTHX)
 {
 #ifdef DEBUGGING
     unsigned i;
@@ -133,7 +120,7 @@ debprofdump(void)
 	if (PL_profiledata[i])
 	    PerlIO_printf(Perl_debug_log,
 			  "%5lu %s\n", (unsigned long)PL_profiledata[i],
-                                       op_name[i]);
+                                       PL_op_name[i]);
     }
 #endif	/* DEBUGGING */
 }

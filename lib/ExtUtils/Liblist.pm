@@ -191,10 +191,14 @@ sub _win32_ext {
     # (caller should probably use the list in $Config{libs})
     return ("", "", "", "") unless $potential_libs;
 
-    my($so)   = $Config{'so'};
-    my($libs) = $Config{'libs'};
-    my($libpth) = $Config{'libpth'};
-    my($libext) = $Config{'lib_ext'} || ".lib";
+    my $cc		= $Config{cc};
+    my $VC		= 1 if $cc =~ /^cl/i;
+    my $BC		= 1 if $cc =~ /^bcc/i;
+    my $GC		= 1 if $cc =~ /^gcc/i;
+    my $so		= $Config{'so'};
+    my $libs		= $Config{'libs'};
+    my $libpth		= $Config{'libpth'};
+    my $libext		= $Config{'lib_ext'} || ".lib";
 
     if ($libs and $potential_libs !~ /:nodefault/i) { 
 	# If Config.pm defines a set of default libs, we always
@@ -212,61 +216,103 @@ sub _win32_ext {
 
     # compute $extralibs from $potential_libs
 
-    my(@searchpath); # from "-L/path" entries in $potential_libs
-    my(@libpath) = Text::ParseWords::quotewords('\s+', 0, $libpth);
-    my(@extralibs);
+    my @searchpath;		    # from "-L/path" in $potential_libs
+    my @libpath		= Text::ParseWords::quotewords('\s+', 0, $libpth);
+    my @extralibs;
+    my $pwd		= cwd();    # from Cwd.pm
+    my $lib		= '';
+    my $found		= 0;
+    my $search		= 1;
     my($fullname, $thislib, $thispth);
-    my($pwd) = cwd(); # from Cwd.pm
-    my($lib) = '';
-    my($found) = 0;
 
-    foreach $thislib (Text::ParseWords::quotewords('\s+', 0, $potential_libs)){
+    # add "$Config{installarchlib}/CORE" to default search path
+    push @libpath, "$Config{installarchlib}/CORE";
 
-	# Handle possible linker path arguments.
-	if ($thislib =~ s/^-L// and not -d $thislib) {
-	    warn "-L$thislib ignored, directory does not exist\n"
+    foreach (Text::ParseWords::quotewords('\s+', 0, $potential_libs)){
+
+	$thislib = $_;
+
+        # see if entry is a flag
+	if (/^:\w+$/) {
+	    $search	= 0 if lc eq ':nosearch';
+	    $search	= 1 if lc eq ':search';
+	    warn "Ignoring unknown flag '$thislib'\n"
+		if $verbose and !/^:(no)?(search|default)$/i;
+	    next;
+	}
+
+	# if searching is disabled, do compiler-specific translations
+	unless ($search) {
+	    s/^-l(.+)$/$1.lib/ unless $GC;
+	    s/^-L/-libpath:/ if $VC;
+	    push(@extralibs, $_);
+	    $found++;
+	    next;
+	}
+
+	# handle possible linker path arguments
+	if (s/^-L// and not -d) {
+	    warn "$thislib ignored, directory does not exist\n"
 		if $verbose;
 	    next;
 	}
-	elsif (-d $thislib) {
-	    unless ($self->file_name_is_absolute($thislib)) {
-	      warn "Warning: '-L$thislib' changed to '-L$pwd/$thislib'\n";
-	      $thislib = $self->catdir($pwd,$thislib);
+	elsif (-d) {
+	    unless ($self->file_name_is_absolute($_)) {
+	      warn "Warning: '$thislib' changed to '-L$pwd/$_'\n";
+	      $_ = $self->catdir($pwd,$_);
 	    }
-	    push(@searchpath, $thislib);
+	    push(@searchpath, $_);
 	    next;
 	}
 
-	# Handle possible library arguments.
-	if ($thislib =~ s/^-l// and $thislib !~ /^lib/i) {
-	    $thislib = "lib$thislib";
+	# handle possible library arguments
+	if (s/^-l// and $GC and !/^lib/i) {
+	    $_ = "lib$_";
 	}
-	$thislib .= $libext if $thislib !~ /\Q$libext\E$/i;
+	$_ .= $libext if !/\Q$libext\E$/i;
+
+	my $secondpass = 0;
+    LOOKAGAIN:
 
         # look for the file itself
-	if (-f $thislib) {
-	    warn "'$thislib' found\n" if $verbose;
+	if (-f) {
+	    warn "'$thislib' found as '$_'\n" if $verbose;
 	    $found++;
-	    push(@extralibs, $thislib);
+	    push(@extralibs, $_);
 	    next;
 	}
 
-	my($found_lib)=0;
+	my $found_lib = 0;
 	foreach $thispth (@searchpath, @libpath){
-	    unless (-f ($fullname="$thispth\\$thislib")) {
-		warn "$thislib not found in $thispth\n" if $verbose;
+	    unless (-f ($fullname="$thispth\\$_")) {
+		warn "'$thislib' not found as '$fullname'\n" if $verbose;
 		next;
 	    }
-	    warn "'$thislib' found at $fullname\n" if $verbose;
+	    warn "'$thislib' found as '$fullname'\n" if $verbose;
 	    $found++;
 	    $found_lib++;
 	    push(@extralibs, $fullname);
 	    last;
 	}
+
+	# do another pass with (or without) leading 'lib' if they used -l
+	if (!$found_lib and $thislib =~ /^-l/ and !$secondpass++) {
+	    if ($GC) {
+		goto LOOKAGAIN if s/^lib//i;
+	    }
+	    elsif (!/^lib/i) {
+		$_ = "lib$_";
+		goto LOOKAGAIN;
+	    }
+	}
+
+	# give up
 	warn "Note (probably harmless): "
 		     ."No library found for '$thislib'\n"
 	    unless $found_lib>0;
+
     }
+
     return ('','','','') unless $found;
 
     # make sure paths with spaces are properly quoted
@@ -316,7 +362,7 @@ sub _vms_ext {
     return ('', '', $crtlstr, '');
   }
 
-  my(@dirs,@libs,$dir,$lib,%sh,%olb,%obj,$ldlib);
+  my(@dirs,@libs,$dir,$lib,%found,@fndlibs,$ldlib);
   my $cwd = cwd();
   my($so,$lib_ext,$obj_ext) = @Config{'so','lib_ext','obj_ext'};
   # List of common Unix library names and there VMS equivalents
@@ -384,28 +430,28 @@ sub _vms_ext {
         warn "\tChecking $name\n" if $verbose > 2;
         if (-f ($test = VMS::Filespec::rmsexpand($name))) {
           # It's got its own suffix, so we'll have to figure out the type
-          if    ($test =~ /(?:$so|exe)$/i)      { $type = 'sh'; }
-          elsif ($test =~ /(?:$lib_ext|olb)$/i) { $type = 'olb'; }
+          if    ($test =~ /(?:$so|exe)$/i)      { $type = 'SHR'; }
+          elsif ($test =~ /(?:$lib_ext|olb)$/i) { $type = 'OLB'; }
           elsif ($test =~ /(?:$obj_ext|obj)$/i) {
             warn "Note (probably harmless): "
 			 ."Plain object file $test found in library list\n";
-            $type = 'obj';
+            $type = 'OBJ';
           }
           else {
             warn "Note (probably harmless): "
 			 ."Unknown library type for $test; assuming shared\n";
-            $type = 'sh';
+            $type = 'SHR';
           }
         }
         elsif (-f ($test = VMS::Filespec::rmsexpand($name,$so))      or
                -f ($test = VMS::Filespec::rmsexpand($name,'.exe')))     {
-          $type = 'sh';
+          $type = 'SHR';
           $name = $test unless $test =~ /exe;?\d*$/i;
         }
         elsif (not length($ctype) and  # If we've got a lib already, don't bother
                ( -f ($test = VMS::Filespec::rmsexpand($name,$lib_ext)) or
                  -f ($test = VMS::Filespec::rmsexpand($name,'.olb'))))  {
-          $type = 'olb';
+          $type = 'OLB';
           $name = $test unless $test =~ /olb;?\d*$/i;
         }
         elsif (not length($ctype) and  # If we've got a lib already, don't bother
@@ -413,17 +459,18 @@ sub _vms_ext {
                  -f ($test = VMS::Filespec::rmsexpand($name,'.obj'))))  {
           warn "Note (probably harmless): "
 		       ."Plain object file $test found in library list\n";
-          $type = 'obj';
+          $type = 'OBJ';
           $name = $test unless $test =~ /obj;?\d*$/i;
         }
         if (defined $type) {
           $ctype = $type; $cand = $name;
-          last if $ctype eq 'sh';
+          last if $ctype eq 'SHR';
         }
       }
       if ($ctype) { 
-        eval '$' . $ctype . "{'$cand'}++";
-        die "Error recording library: $@" if $@;
+        # This has to precede any other CRTLs, so just make it first
+        if ($cand eq 'VAXCCURSE') { unshift @{$found{$ctype}}, $cand; }  
+        else                      { push    @{$found{$ctype}}, $cand; }
         warn "\tFound as $cand (really $test), type $ctype\n" if $verbose > 1;
         next LIB;
       }
@@ -432,15 +479,10 @@ sub _vms_ext {
 		 ."No library found for $lib\n";
   }
 
-  @libs = sort keys %obj;
-  # This has to precede any other CRTLs, so just make it first
-  if ($olb{VAXCCURSE}) {
-    push(@libs,"$olb{VAXCCURSE}/Library");
-    delete $olb{VAXCCURSE};
-  }
-  push(@libs, map { "$_/Library" } sort keys %olb);
-  push(@libs, map { "$_/Share"   } sort keys %sh);
-  $lib = join(' ',@libs);
+  push @fndlibs, @{$found{OBJ}}                      if exists $found{OBJ};
+  push @fndlibs, map { "$_/Library" } @{$found{OLB}} if exists $found{OLB};
+  push @fndlibs, map { "$_/Share"   } @{$found{SHR}} if exists $found{SHR};
+  $lib = join(' ',@fndlibs);
 
   $ldlib = $crtlstr ? "$lib $crtlstr" : $lib;
   warn "Result:\n\tEXTRALIBS: $lib\n\tLDLOADLIBS: $ldlib\n" if $verbose;
@@ -532,7 +574,7 @@ Unix-OS/2 version in several respects:
 =item *
 
 Input library and path specifications are accepted with or without the
-C<-l> and C<-L> prefices used by Unix linkers.  If neither prefix is
+C<-l> and C<-L> prefixes used by Unix linkers.  If neither prefix is
 present, a token is considered a directory to search if it is in fact
 a directory, and a library to search for otherwise.  Authors who wish
 their extensions to be portable to Unix or OS/2 should use the Unix
@@ -543,7 +585,7 @@ prefixes, since the Unix-OS/2 version of ext() requires them.
 Wherever possible, shareable images are preferred to object libraries,
 and object libraries to plain object files.  In accordance with VMS
 naming conventions, ext() looks for files named I<lib>shr and I<lib>rtl;
-it also looks for I<lib>lib and libI<lib> to accomodate Unix conventions
+it also looks for I<lib>lib and libI<lib> to accommodate Unix conventions
 used in some ported software.
 
 =item *
@@ -579,16 +621,39 @@ Unix-OS/2 version in several respects:
 
 =item *
 
+If C<$potential_libs> is empty, the return value will be empty.
+Otherwise, the libraries specified by C<$Config{libs}> (see Config.pm)
+will be appended to the list of C<$potential_libs>.  The libraries
+will be searched for in the directories specified in C<$potential_libs>,
+C<$Config{libpth}>, and in C<$Config{installarchlib}/CORE>.
+For each library that is found,  a space-separated list of fully qualified
+library pathnames is generated.
+
+=item *
+
 Input library and path specifications are accepted with or without the
-C<-l> and C<-L> prefices used by Unix linkers.  C<-lfoo> specifies the
-library C<libfoo.lib> (unless C<foo> already starts with C<lib>), and
-C<-Ls:ome\dir> specifies a directory to look for the libraries that follow.
-If neither prefix is present, a token is considered a directory to search
-if it is in fact a directory, and a library to search for otherwise.  The
-C<$Config{lib_ext}> suffix will be appended to any entries that are not
-directories and don't already have the suffix.  Authors who wish their
-extensions to be portable to Unix or OS/2 should use the Unix prefixes,
-since the Unix-OS/2 version of ext() requires them.
+C<-l> and C<-L> prefixes used by Unix linkers.
+
+An entry of the form C<-La:\foo> specifies the C<a:\foo> directory to look
+for the libraries that follow.
+
+An entry of the form C<-lfoo> specifies the library C<foo>, which may be
+spelled differently depending on what kind of compiler you are using.  If
+you are using GCC, it gets translated to C<libfoo.a>, but for other win32
+compilers, it becomes C<foo.lib>.  If no files are found by those translated
+names, one more attempt is made to find them using either C<foo.a> or
+C<libfoo.lib>, depending on whether GCC or some other win32 compiler is
+being used, respectively.
+
+If neither the C<-L> or C<-l> prefix is present in an entry, the entry is
+considered a directory to search if it is in fact a directory, and a
+library to search for otherwise.  The C<$Config{lib_ext}> suffix will
+be appended to any entries that are not directories and don't already have
+the suffix.
+
+Note that the C<-L> and C<-l> prefixes are B<not required>, but authors
+who wish their extensions to be portable to Unix or OS/2 should use the
+prefixes, since the Unix-OS/2 version of ext() requires them.
 
 =item *
 
@@ -597,15 +662,21 @@ not handle object files in the place of libraries.
 
 =item *
 
-If C<$potential_libs> is empty, the return value will be empty.
-Otherwise, the libraries specified by C<$Config{libs}> (see Config.pm)
-will be appended to the list of C<$potential_libs>.  The libraries
-will be searched for in the directories specified in C<$potential_libs>
-as well as in C<$Config{libpth}>. For each library that is found,  a
-space-separated list of fully qualified library pathnames is generated.
-You may specify an entry that matches C</:nodefault/i> in
-C<$potential_libs> to disable the appending of default libraries
-found in C<$Config{libs}> (this should be only needed very rarely).
+Entries in C<$potential_libs> beginning with a colon and followed by
+alphanumeric characters are treated as flags.  Unknown flags will be ignored.
+
+An entry that matches C</:nodefault/i> disables the appending of default
+libraries found in C<$Config{libs}> (this should be only needed very rarely).
+
+An entry that matches C</:nosearch/i> disables all searching for
+the libraries specified after it.  Translation of C<-Lfoo> and
+C<-lfoo> still happens as appropriate (depending on compiler being used,
+as reflected by C<$Config{cc}>), but the entries are not verified to be
+valid files or directories.
+
+An entry that matches C</:search/i> reenables searching for
+the libraries specified after it.  You can put it at the end to
+enable searching for default libraries specified by C<$Config{libs}>.
 
 =item *
 
@@ -629,6 +700,44 @@ C<$potential_libs> could be (literally):
 
 Note how the first and last entries are protected by quotes in order
 to protect the spaces.
+
+=item *
+
+Since this module is most often used only indirectly from extension
+C<Makefile.PL> files, here is an example C<Makefile.PL> entry to add
+a library to the build process for an extension:
+
+        LIBS => ['-lgl']
+
+When using GCC, that entry specifies that MakeMaker should first look
+for C<libgl.a> (followed by C<gl.a>) in all the locations specified by
+C<$Config{libpth}>.
+
+When using a compiler other than GCC, the above entry will search for
+C<gl.lib> (followed by C<libgl.lib>).
+
+If the library happens to be in a location not in C<$Config{libpth}>,
+you need:
+
+        LIBS => ['-Lc:\gllibs -lgl']
+
+Here is a less often used example:
+
+        LIBS => ['-lgl', ':nosearch -Ld:\mesalibs -lmesa -luser32']
+
+This specifies a search for library C<gl> as before.  If that search
+fails to find the library, it looks at the next item in the list. The
+C<:nosearch> flag will prevent searching for the libraries that follow,
+so it simply returns the value as C<-Ld:\mesalibs -lmesa -luser32>,
+since GCC can use that value as is with its linker.
+
+When using the Visual C compiler, the second item is returned as
+C<-libpath:d:\mesalibs mesa.lib user32.lib>.
+
+When using the Borland compiler, the second item is returned as
+C<-Ld:\mesalibs mesa.lib user32.lib>, and MakeMaker takes care of
+moving the C<-Ld:\mesalibs> to the correct place in the linker
+command line.
 
 =back
 

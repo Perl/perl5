@@ -1,3 +1,4 @@
+#define PERL_NO_GET_CONTEXT
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
@@ -6,42 +7,54 @@
 # ifdef I_SYS_TYPES
 #  include <sys/types.h>
 # endif
-#include <sys/socket.h>
-#ifdef MPE
-# define PF_INET AF_INET
-# define PF_UNIX AF_UNIX
-# define SOCK_RAW 3
-#endif
-#ifdef I_SYS_UN
-#include <sys/un.h>
-#endif
+# include <sys/socket.h>
+# if defined(USE_SOCKS) && defined(I_SOCKS)
+#   include <socks.h>
+# endif 
+# ifdef MPE
+#  define PF_INET AF_INET
+#  define PF_UNIX AF_UNIX
+#  define SOCK_RAW 3
+# endif
+# ifdef I_SYS_UN
+#  include <sys/un.h>
+# endif
 # ifdef I_NETINET_IN
 #  include <netinet/in.h>
 # endif
-#include <netdb.h>
-#ifdef I_ARPA_INET
-# include <arpa/inet.h>
-#endif
+# ifdef I_NETDB
+#  include <netdb.h>
+# endif
+# ifdef I_ARPA_INET
+#  include <arpa/inet.h>
+# endif
+# ifdef I_NETINET_TCP
+#  include <netinet/tcp.h>
+# endif
 #else
-#include "sockadapt.h"
+# include "sockadapt.h"
+#endif
+
+#ifdef I_SYSUIO
+# include <sys/uio.h>
 #endif
 
 #ifndef AF_NBS
-#undef PF_NBS
+# undef PF_NBS
 #endif
 
 #ifndef AF_X25
-#undef PF_X25
+# undef PF_X25
 #endif
 
 #ifndef INADDR_NONE
-#define INADDR_NONE	0xffffffff
+# define INADDR_NONE	0xffffffff
 #endif /* INADDR_NONE */
 #ifndef INADDR_BROADCAST
-#define INADDR_BROADCAST	0xffffffff
+# define INADDR_BROADCAST	0xffffffff
 #endif /* INADDR_BROADCAST */
 #ifndef INADDR_LOOPBACK
-#define INADDR_LOOPBACK         0x7F000001
+# define INADDR_LOOPBACK         0x7F000001
 #endif /* INADDR_LOOPBACK */
 
 #ifndef HAS_INET_ATON
@@ -56,6 +69,7 @@
 static int
 my_inet_aton(register const char *cp, struct in_addr *addr)
 {
+	dTHX;
 	register U32 val;
 	register int base;
 	register char c;
@@ -322,6 +336,18 @@ constant(char *name, int arg)
     case 'H':
 	break;
     case 'I':
+	if (strEQ(name, "IOV_MAX"))
+#ifdef IOV_MAX
+	    return IOV_MAX;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "IPPROTO_TCP"))
+#ifdef IPPROTO_TCP
+	    return IPPROTO_TCP;
+#else
+	    goto not_there;
+#endif
 	break;
     case 'J':
 	break;
@@ -330,15 +356,63 @@ constant(char *name, int arg)
     case 'L':
 	break;
     case 'M':
+	if (strEQ(name, "MSG_BCAST"))
+#ifdef MSG_BCAST
+	    return MSG_BCAST;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "MSG_CTLFLAGS"))
+#ifdef MSG_CTLFLAGS
+	    return MSG_CTLFLAGS;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "MSG_CTLIGNORE"))
+#ifdef MSG_CTLIGNORE
+	    return MSG_CTLIGNORE;
+#else
+	    goto not_there;
+#endif
 	if (strEQ(name, "MSG_CTRUNC"))
-#if defined(MSG_CTRUNC) || defined(HAS_GNULIBC) /* XXX it's an enum */
+#if defined(MSG_TRUNC) || defined(HAS_MSG_CTRUNC) /* might be an enum */
 	    return MSG_CTRUNC;
 #else
 	    goto not_there;
 #endif
 	if (strEQ(name, "MSG_DONTROUTE"))
-#if defined(MSG_DONTROUTE) || defined(HAS_GNULIBC) /* XXX it's an enum */
+#if defined(MSG_DONTROUTE) || defined(HAS_MSG_DONTROUTE) /* might be an enum */
 	    return MSG_DONTROUTE;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "MSG_DONTWAIT"))
+#ifdef MSG_DONTWAIT
+	    return MSG_DONTWAIT;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "MSG_EOF"))
+#ifdef MSG_EOF
+	    return MSG_EOF;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "MSG_EOR"))
+#ifdef MSG_EOR
+	    return MSG_EOR;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "MSG_ERRQUEUE"))
+#ifdef MSG_ERRQUEUE
+	    return MSG_ERRQUEUE;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "MSG_FIN"))
+#ifdef MSG_FIN
+	    return MSG_FIN;
 #else
 	    goto not_there;
 #endif
@@ -348,21 +422,57 @@ constant(char *name, int arg)
 #else
 	    goto not_there;
 #endif
+	if (strEQ(name, "MSG_MCAST"))
+#ifdef MSG_MCAST
+	    return MSG_MCAST;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "MSG_NOSIGNAL"))
+#ifdef MSG_NOSIGNAL
+	    return MSG_NOSIGNAL;
+#else
+	    goto not_there;
+#endif
 	if (strEQ(name, "MSG_OOB"))
-#if defined(MSG_OOB) || defined(HAS_GNULIBC) /* XXX it's an enum */
+#if defined(MSG_OOB) || defined(HAS_MSG_OOB) /* might be an enum */
 	    return MSG_OOB;
 #else
 	    goto not_there;
 #endif
 	if (strEQ(name, "MSG_PEEK"))
-#if defined(MSG_PEEK) || defined(HAS_GNULIBC) /* XXX it's an enum */
+#if defined(MSG_PEEK) || defined(HAS_MSG_PEEK) /* might be an enum */
 	    return MSG_PEEK;
 #else
 	    goto not_there;
 #endif
 	if (strEQ(name, "MSG_PROXY"))
-#if defined(MSG_PROXY) || defined(HAS_GNULIBC) /* XXX it's an enum */
+#if defined(MSG_PROXY) || defined(HAS_MSG_PROXY) /* might be an enum */
 	    return MSG_PROXY;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "MSG_RST"))
+#ifdef MSG_RST
+	    return MSG_RST;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "MSG_SYN"))
+#ifdef MSG_SYN
+	    return MSG_SYN;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "MSG_TRUNC"))
+#ifdef MSG_TRUNC
+	    return MSG_TRUNC;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "MSG_WAITALL"))
+#ifdef MSG_WAITALL
+	    return MSG_WAITALL;
 #else
 	    goto not_there;
 #endif
@@ -522,6 +632,36 @@ constant(char *name, int arg)
     case 'R':
 	break;
     case 'S':
+	if (strEQ(name, "SCM_CONNECT"))
+#ifdef SCM_CONNECT
+	    return SCM_CONNECT;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "SCM_CREDENTIALS"))
+#ifdef SCM_CREDENTIALS
+	    return SCM_CREDENTIALS;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "SCM_CREDS"))
+#ifdef SCM_CREDS
+	    return SCM_CREDS;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "SCM_RIGHTS"))
+#if defined(SCM_RIGHTS) || defined(HAS_SCM_RIGHTS) /* might be an enum */
+	    return SCM_RIGHTS;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "SCM_TIMESTAMP"))
+#ifdef SCM_TIMESTAMP
+	    return SCM_TIMESTAMP;
+#else
+	    goto not_there;
+#endif
 	if (strEQ(name, "SOCK_DGRAM"))
 #ifdef SOCK_DGRAM
 	    return SOCK_DGRAM;
@@ -680,8 +820,44 @@ constant(char *name, int arg)
 #endif
 	break;
     case 'T':
+	if (strEQ(name, "TCP_KEEPALIVE"))
+#ifdef TCP_KEEPALIVE
+	    return TCP_KEEPALIVE;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "TCP_MAXRT"))
+#ifdef TCP_MAXRT
+	    return TCP_MAXRT;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "TCP_MAXSEG"))
+#ifdef TCP_MAXSEG
+	    return TCP_MAXSEG;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "TCP_NODELAY"))
+#ifdef TCP_NODELAY
+	    return TCP_NODELAY;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "TCP_STDURG"))
+#ifdef TCP_STDURG
+	    return TCP_STDURG;
+#else
+	    goto not_there;
+#endif
 	break;
     case 'U':
+	if (strEQ(name, "UIO_MAXIOV"))
+#ifdef UIO_MAXIOV
+	    return UIO_MAXIOV;
+#else
+	    goto not_there;
+#endif
 	break;
     case 'V':
 	break;
@@ -749,7 +925,7 @@ inet_ntoa(ip_address_sv)
 	Copy( ip_address, &addr, sizeof addr, char );
 	addr_str = inet_ntoa(addr);
 
-	ST(0) = sv_2mortal(newSVpv(addr_str, strlen(addr_str)));
+	ST(0) = sv_2mortal(newSVpvn(addr_str, strlen(addr_str)));
 	}
 
 void
@@ -760,13 +936,38 @@ pack_sockaddr_un(pathname)
 #ifdef I_SYS_UN
 	struct sockaddr_un sun_ad; /* fear using sun */
 	STRLEN len;
+
 	Zero( &sun_ad, sizeof sun_ad, char );
 	sun_ad.sun_family = AF_UNIX;
 	len = strlen(pathname);
 	if (len > sizeof(sun_ad.sun_path))
 	    len = sizeof(sun_ad.sun_path);
+#  ifdef OS2	/* Name should start with \socket\ and contain backslashes! */
+	{
+	    int off;
+	    char *s, *e;
+
+	    if (pathname[0] != '/' && pathname[0] != '\\')
+		croak("Relative UNIX domain socket name '%s' unsupported", pathname);
+	    else if (len < 8 
+		     || pathname[7] != '/' && pathname[7] != '\\'
+		     || !strnicmp(pathname + 1, "socket", 6))
+		off = 7;
+	    else
+		off = 0;		/* Preserve names starting with \socket\ */
+	    Copy( "\\socket", sun_ad.sun_path, off, char);
+	    Copy( pathname, sun_ad.sun_path + off, len, char );
+
+	    s = sun_ad.sun_path + off - 1;
+	    e = s + len + 1;
+	    while (++s < e)
+		if (*s = '/')
+		    *s = '\\';
+	}
+#  else	/* !( defined OS2 ) */ 
 	Copy( pathname, sun_ad.sun_path, len, char );
-	ST(0) = sv_2mortal(newSVpv((char *)&sun_ad, sizeof sun_ad));
+#  endif
+	ST(0) = sv_2mortal(newSVpvn((char *)&sun_ad, sizeof sun_ad));
 #else
 	ST(0) = (SV *) not_here("pack_sockaddr_un");
 #endif
@@ -801,7 +1002,7 @@ unpack_sockaddr_un(sun_sv)
 	e = addr.sun_path;
 	while (*e && e < addr.sun_path + sizeof addr.sun_path)
 	    ++e;
-	ST(0) = sv_2mortal(newSVpv(addr.sun_path, e - addr.sun_path));
+	ST(0) = sv_2mortal(newSVpvn(addr.sun_path, e - addr.sun_path));
 #else
 	ST(0) = (SV *) not_here("unpack_sockaddr_un");
 #endif
@@ -820,7 +1021,7 @@ pack_sockaddr_in(port,ip_address)
 	sin.sin_port = htons(port);
 	Copy( ip_address, &sin.sin_addr, sizeof sin.sin_addr, char );
 
-	ST(0) = sv_2mortal(newSVpv((char *)&sin, sizeof sin));
+	ST(0) = sv_2mortal(newSVpvn((char *)&sin, sizeof sin));
 	}
 
 void
@@ -850,7 +1051,7 @@ unpack_sockaddr_in(sin_sv)
 
 	EXTEND(SP, 2);
 	PUSHs(sv_2mortal(newSViv((IV) port)));
-	PUSHs(sv_2mortal(newSVpv((char *)&ip_address,sizeof ip_address)));
+	PUSHs(sv_2mortal(newSVpvn((char *)&ip_address,sizeof ip_address)));
 	}
 
 void
@@ -859,7 +1060,7 @@ INADDR_ANY()
 	{
 	struct in_addr	ip_address;
 	ip_address.s_addr = htonl(INADDR_ANY);
-	ST(0) = sv_2mortal(newSVpv((char *)&ip_address,sizeof ip_address ));
+	ST(0) = sv_2mortal(newSVpvn((char *)&ip_address,sizeof ip_address ));
 	}
 
 void
@@ -868,7 +1069,7 @@ INADDR_LOOPBACK()
 	{
 	struct in_addr	ip_address;
 	ip_address.s_addr = htonl(INADDR_LOOPBACK);
-	ST(0) = sv_2mortal(newSVpv((char *)&ip_address,sizeof ip_address));
+	ST(0) = sv_2mortal(newSVpvn((char *)&ip_address,sizeof ip_address));
 	}
 
 void
@@ -877,7 +1078,7 @@ INADDR_NONE()
 	{
 	struct in_addr	ip_address;
 	ip_address.s_addr = htonl(INADDR_NONE);
-	ST(0) = sv_2mortal(newSVpv((char *)&ip_address,sizeof ip_address));
+	ST(0) = sv_2mortal(newSVpvn((char *)&ip_address,sizeof ip_address));
 	}
 
 void
@@ -886,5 +1087,5 @@ INADDR_BROADCAST()
 	{
 	struct in_addr	ip_address;
 	ip_address.s_addr = htonl(INADDR_BROADCAST);
-	ST(0) = sv_2mortal(newSVpv((char *)&ip_address,sizeof ip_address));
+	ST(0) = sv_2mortal(newSVpvn((char *)&ip_address,sizeof ip_address));
 	}

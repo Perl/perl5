@@ -64,12 +64,3 @@ lddlflags="-G $ldflags"	# Probably needed for dynamic loading
 # We _do_ want the -L paths in ldflags, but we don't want the -non_shared.
 lddlflags=`echo $lddlflags | sed 's/-non_shared//'`
 
-cat <<'EOM' >&4
-
-If you wish to use dynamic linking, you must use 
-	LD_LIBRARY_PATH=`pwd`; export LD_LIBRARY_PATH
-or
-	setenv LD_LIBRARY_PATH `pwd`
-before running make.
-
-EOM

@@ -2,14 +2,17 @@ package Pod::Html;
 
 use Pod::Functions;
 use Getopt::Long;	# package for handling command-line parameters
+use File::Spec::Unix;
 require Exporter;
 use vars qw($VERSION);
-$VERSION = 1.01;
+$VERSION = 1.02;
 @ISA = Exporter;
 @EXPORT = qw(pod2html htmlify);
 use Cwd;
 
 use Carp;
+
+use locale;	# make \w work right in non-ASCII lands
 
 use strict;
 
@@ -41,6 +44,15 @@ Pod::Html takes the following arguments:
     --help
 
 Displays the usage message.
+
+=item htmldir
+
+    --htmldir=name
+
+Sets the directory in which the resulting HTML file is placed.  This
+is used to generate relative links to other files. Not passing this
+causes all links to be absolute, since this is the value that tells
+Pod::Html the root of the documentation tree.
 
 =item htmlroot
 
@@ -125,11 +137,23 @@ Do not recurse into subdirectories specified in podpath.
 
 Specify the title of the resulting HTML file.
 
+=item css
+
+    --css=stylesheet
+
+Specify the URL of a cascading style sheet.
+
 =item verbose
 
     --verbose
 
 Display progress messages.
+
+=item quiet
+
+    --quiet
+
+Don't display I<mostly harmless> warning messages.
 
 =back
 
@@ -143,6 +167,10 @@ Display progress messages.
 	     "--recurse",
 	     "--infile=foo.pod",
 	     "--outfile=/perl/nmanual/foo.html");
+
+=head1 ENVIRONMENT
+
+Uses $Config{pod2html} to setup default options.
 
 =head1 AUTHOR
 
@@ -162,20 +190,29 @@ This program is distributed under the Artistic License.
 
 =cut
 
-my $dircache = "pod2html-dircache";
-my $itemcache = "pod2html-itemcache";
+my $cache_ext = $^O eq 'VMS' ? ".tmp" : ".x~~";
+my $dircache = "pod2htmd$cache_ext";
+my $itemcache = "pod2htmi$cache_ext";
 
 my @begin_stack = ();		# begin/end stack
 
 my @libpods = ();	    	# files to search for links from C<> directives
 my $htmlroot = "/";	    	# http-server base directory from which all
 				#   relative paths in $podpath stem.
+my $htmldir = "";		# The directory to which the html pages
+				# will (eventually) be written.
 my $htmlfile = "";		# write to stdout by default
+my $htmlfileurl = "" ;		# The url that other files would use to
+				# refer to this file.  This is only used
+				# to make relative urls that point to
+				# other files.
 my $podfile = "";		# read from stdin by default
 my @podpath = ();		# list of directories containing library pods.
 my $podroot = ".";		# filesystem base directory from which all
 				#   relative paths in $podpath stem.
+my $css = '';                   # Cascading style sheet
 my $recurse = 1;		# recurse on subdirectories in $podpath.
+my $quiet = 0;			# not quiet by default
 my $verbose = 0;		# not verbose by default
 my $doindex = 1;   	    	# non-zero if we should generate an index
 my $listlevel = 0;		# current list depth
@@ -194,6 +231,7 @@ my %items_named = ();		# for the multiples of the same item in perlfunc
 my @items_seen = ();
 my $netscape = 0;		# whether or not to use netscape directives.
 my $title;			# title to give the pod(s)
+my $header = 0;			# produce block header/footer
 my $top = 1;			# true if we are at the top of the doc.  used
 				#   to prevent the first <HR> directive.
 my $paragraph;			# which paragraph we're processing (used
@@ -206,8 +244,8 @@ my %items = ();			# associative array used to find the location
 my $Is83;                       # is dos with short filenames (8.3)
 
 sub init_globals {
-$dircache = "pod2html-dircache";
-$itemcache = "pod2html-itemcache";
+$dircache = "pod2htmd$cache_ext";
+$itemcache = "pod2htmi$cache_ext";
 
 @begin_stack = ();		# begin/end stack
 
@@ -219,7 +257,9 @@ $podfile = "";		# read from stdin by default
 @podpath = ();		# list of directories containing library pods.
 $podroot = ".";		# filesystem base directory from which all
 				#   relative paths in $podpath stem.
+$css = '';                   # Cascading style sheet
 $recurse = 1;		# recurse on subdirectories in $podpath.
+$quiet = 0;		# not quiet by default
 $verbose = 0;		# not verbose by default
 $doindex = 1;   	    	# non-zero if we should generate an index
 $listlevel = 0;		# current list depth
@@ -237,6 +277,7 @@ $ignore = 1;			# whether or not to format text.  we don't
 @items_seen = ();
 %items_named = ();
 $netscape = 0;		# whether or not to use netscape directives.
+$header = 0;			# produce block header/footer
 $title = '';			# title to give the pod(s)
 $top = 1;			# true if we are at the top of the doc.  used
 				#   to prevent the first <HR> directive.
@@ -281,6 +322,19 @@ sub pod2html {
     } 
     $htmlfile = "-" unless $htmlfile;	# stdout
     $htmlroot = "" if $htmlroot eq "/";	# so we don't get a //
+    $htmldir =~ s#/$## ;                # so we don't get a //
+    if (  $htmlroot eq ''
+       && defined( $htmldir ) 
+       && $htmldir ne ''
+       && substr( $htmlfile, 0, length( $htmldir ) ) eq $htmldir 
+       ) 
+    {
+	# Set the 'base' url for this file, so that we can use it
+	# as the location from which to calculate relative links 
+	# to other files. If this is '', then absolute links will
+	# be used throughout.
+        $htmlfileurl= "$htmldir/" . substr( $htmlfile, length( $htmldir ) + 1);
+    }
 
     # read the pod a paragraph at a time
     warn "Scanning for sections in input file(s)\n" if $verbose;
@@ -292,26 +346,27 @@ sub pod2html {
     my $index = scan_headings(\%sections, @poddata);
 
     unless($index) {
-	warn "No pod in $podfile\n" if $verbose;
-	return;
+	warn "No headings in $podfile\n" if $verbose;
     }
 
     # open the output file
     open(HTML, ">$htmlfile")
 	    || die "$0: cannot open $htmlfile file for output: $!\n";
 
-    # put a title in the HTML file
-    $title = '';
-    TITLE_SEARCH: {
-	for (my $i = 0; $i < @poddata; $i++) { 
-	    if ($poddata[$i] =~ /^=head1\s*NAME\b/m) {
-		for my $para ( @poddata[$i, $i+1] ) { 
-		    last TITLE_SEARCH if ($title) = $para =~ /(\S+\s+-+.*\S)/s;
-		}
-	    } 
+    # put a title in the HTML file if one wasn't specified
+    if ($title eq '') {
+	TITLE_SEARCH: {
+	    for (my $i = 0; $i < @poddata; $i++) { 
+		if ($poddata[$i] =~ /^=head1\s*NAME\b/m) {
+		    for my $para ( @poddata[$i, $i+1] ) { 
+			last TITLE_SEARCH
+			    if ($title) = $para =~ /(\S+\s+-+.*\S)/s;
+		    }
+		} 
 
-	} 
-    } 
+	    } 
+	}
+    }
     if (!$title and $podfile =~ /\.pod$/) {
 	# probably a split pod so take first =head[12] as title
 	for (my $i = 0; $i < @poddata; $i++) { 
@@ -323,20 +378,32 @@ sub pod2html {
     if ($title) {
 	$title =~ s/\s*\(.*\)//;
     } else {
-	warn "$0: no title for $podfile";
+	warn "$0: no title for $podfile" unless $quiet;
 	$podfile =~ /^(.*)(\.[^.\/]+)?$/;
 	$title = ($podfile eq "-" ? 'No Title' : $1);
 	warn "using $title" if $verbose;
     }
+    my $csslink = $css ? qq(\n<LINK REL="stylesheet" HREF="$css" TYPE="text/css">) : '';
+    $csslink =~ s,\\,/,g;
+    $csslink =~ s,(/.):,$1|,;
+
+    my $block = $header ? <<END_OF_BLOCK : '';
+<TABLE BORDER=0 CELLPADDING=0 CELLSPACING=0 WIDTH=100%>
+<TR><TD CLASS=block VALIGN=MIDDLE WIDTH=100% BGCOLOR="#cccccc">
+<FONT SIZE=+1><STRONG><P CLASS=block>&nbsp;$title</P></STRONG></FONT>
+</TD></TR>
+</TABLE>
+END_OF_BLOCK
+
     print HTML <<END_OF_HEAD;
 <HTML>
 <HEAD>
-<TITLE>$title</TITLE>
+<TITLE>$title</TITLE>$csslink
 <LINK REV="made" HREF="mailto:$Config{perladmin}">
 </HEAD>
 
 <BODY>
-
+$block
 END_OF_HEAD
 
     # load/reload/validate/cache %pages and %items
@@ -354,7 +421,7 @@ END_OF_HEAD
     print HTML $index;
     print HTML "-->\n" unless $doindex;
     print HTML "<!-- INDEX END -->\n\n";
-    print HTML "<HR>\n" if $doindex;
+    print HTML "<HR>\n" if $doindex and $index;
 
     # now convert this file
     warn "Converting input file\n" if $verbose;
@@ -398,13 +465,14 @@ END_OF_HEAD
 	    next if @begin_stack && $begin_stack[-1] ne 'html';
 	    my $text = $_;
 	    process_text(\$text, 1);
-	    print HTML "<P>\n$text";
+	    print HTML "<P>\n$text</P>\n";
 	}
     }
 
     # finish off any pending directives
     finish_list();
     print HTML <<END_OF_TAIL;
+$block
 </BODY>
 
 </HTML>
@@ -456,15 +524,20 @@ Usage:  $0 --help --htmlroot=<name> --infile=<name> --outfile=<name>
   --recurse    - recurse on those subdirectories listed in podpath
                  (default behavior).
   --title      - title that will appear in resulting html file.
+  --header     - produce block header/footer
+  --css        - stylesheet URL
   --verbose    - self-explanatory
+  --quiet      - supress some benign warning messages
 
 END_OF_USAGE
 
 sub parse_command_line {
-    my ($opt_flush,$opt_help,$opt_htmlroot,$opt_index,$opt_infile,$opt_libpods,$opt_netscape,$opt_outfile,$opt_podpath,$opt_podroot,$opt_norecurse,$opt_recurse,$opt_title,$opt_verbose);
+    my ($opt_flush,$opt_help,$opt_htmldir,$opt_htmlroot,$opt_index,$opt_infile,$opt_libpods,$opt_netscape,$opt_outfile,$opt_podpath,$opt_podroot,$opt_norecurse,$opt_recurse,$opt_title,$opt_verbose,$opt_css,$opt_header,$opt_quiet);
+    unshift @ARGV, split ' ', $Config{pod2html} if $Config{pod2html};
     my $result = GetOptions(
 			    'flush'      => \$opt_flush,
 			    'help'       => \$opt_help,
+			    'htmldir=s'  => \$opt_htmldir,
 			    'htmlroot=s' => \$opt_htmlroot,
 			    'index!'     => \$opt_index,
 			    'infile=s'   => \$opt_infile,
@@ -476,7 +549,10 @@ sub parse_command_line {
 			    'norecurse'  => \$opt_norecurse,
 			    'recurse!'   => \$opt_recurse,
 			    'title=s'    => \$opt_title,
+			    'header'     => \$opt_header,
+			    'css=s'      => \$opt_css,
 			    'verbose'    => \$opt_verbose,
+			    'quiet'      => \$opt_quiet,
 			   );
     usage("-", "invalid parameters") if not $result;
 
@@ -485,6 +561,7 @@ sub parse_command_line {
 
     $podfile  = $opt_infile if defined $opt_infile;
     $htmlfile = $opt_outfile if defined $opt_outfile;
+    $htmldir  = $opt_htmldir if defined $opt_outfile;
 
     @podpath  = split(":", $opt_podpath) if defined $opt_podpath;
     @libpods  = split(":", $opt_libpods) if defined $opt_libpods;
@@ -499,7 +576,10 @@ sub parse_command_line {
     $doindex  = $opt_index if defined $opt_index;
     $recurse  = $opt_recurse if defined $opt_recurse;
     $title    = $opt_title if defined $opt_title;
+    $header   = defined $opt_header ? 1 : 0;
+    $css      = $opt_css if defined $opt_css;
     $verbose  = defined $opt_verbose ? 1 : 0;
+    $quiet    = defined $opt_quiet ? 1 : 0;
     $netscape = $opt_netscape if defined $opt_netscape;
 }
 
@@ -538,7 +618,7 @@ sub get_cache {
 sub cache_key {
     my($dircache, $itemcache, $podpath, $podroot, $recurse) = @_;
     return join('!', $dircache, $itemcache, $recurse,
-		@$podpath, $podroot, stat($dircache), stat($itemcache));
+	@$podpath, $podroot, stat($dircache), stat($itemcache));
 }
 
 #
@@ -644,7 +724,9 @@ sub scan_podpath {
 	next unless defined $pages{$libpod} && $pages{$libpod};
 
 	# if there is a directory then use the .pod and .pm files within it.
-	if ($pages{$libpod} =~ /([^:]*[^(\.pod|\.pm)]):/) {
+	# NOTE: Only finds the first so-named directory in the tree.
+#	if ($pages{$libpod} =~ /([^:]*[^(\.pod|\.pm)]):/) {
+	if ($pages{$libpod} =~ /([^:]*(?<!\.pod)(?<!\.pm)):/) {
 	    #  find all the .pod and .pm files within the directory
 	    $dirname = $1;
 	    opendir(DIR, $dirname) ||
@@ -789,7 +871,7 @@ sub scan_headings {
 
 	    $index .= "\n" . ("\t" x $listdepth) . "<LI>" .
 	              "<A HREF=\"#" . htmlify(0,$title) . "\">" .
-		      html_escape(process_text(\$title, 0)) . "</A>";
+		      html_escape(process_text(\$title, 0)) . "</A></LI>";
 	}
     }
 
@@ -1094,8 +1176,32 @@ sub process_text {
 			"$1$2";
 		    }
 		  }xeg;
-	$rest =~ s/(<A HREF=)([^>:]*:)?([^>:]*)\.pod:([^>:]*:)?/$1$3.html/g;
+#	$rest =~ s/(<A HREF=)([^>:]*:)?([^>:]*)\.pod:([^>:]*:)?/$1$3.html/g;
+	$rest =~ s{
+		    (<A\ HREF="?) ([^>:]*:)? ([^>:]*) \.pod: ([^>:]*:)?
+                  }{
+                    my $url ;
+                    if ( $htmlfileurl ne '' ) {
+			# Here, we take advantage of the knowledge 
+			# that $htmlfileurl ne '' implies $htmlroot eq ''.
+			# Since $htmlroot eq '', we need to prepend $htmldir
+			# on the fron of the link to get the absolute path
+			# of the link's target. We check for a leading '/'
+			# to avoid corrupting links that are #, file:, etc.
+			my $old_url = $3 ;
+			$old_url = "$htmldir$old_url"
+			    if ( $old_url =~ m{^\/} ) ;
+			$url = relativize_url( "$old_url.html", $htmlfileurl );
+# print( "  a: [$old_url.html,$htmlfileurl,$url]\n" ) ;
+		    }
+		    else {
+			$url = "$3.html" ;
+		    }
+		    "$1$url" ;
+		  }xeg;
 
+  # Look for embedded URLs and make them in to links.  We don't
+  # relativize them since they are best left as the author intended.
   my $urls = '(' . join ('|', qw{
                 http
                 telnet
@@ -1117,6 +1223,7 @@ sub process_text {
         \b                          # start at word boundary
         (                           # begin $1  {
           $urls     :               # need resource and a colon
+	  (?!:)                     # Ignore File::, among others.
           [$any] +?                 # followed by on or more
                                     #  of any valid character, but
                                     #  be conservative and take only
@@ -1237,7 +1344,7 @@ WARN
 
 sub html_escape {
     my $rest = $_[0];
-    $rest   =~ s/&/&amp;/g;
+    $rest   =~ s/&(?!\w+;|#)/&amp;/g;	# XXX not bulletproof
     $rest   =~ s/</&lt;/g;
     $rest   =~ s/>/&gt;/g;
     $rest   =~ s/"/&quot;/g;
@@ -1292,8 +1399,9 @@ sub process_puretext {
 	    $word = process_C($word, 1);
 	} elsif ($word =~ m,^\w+://\w,) {
 	    # looks like a URL
+            # Don't relativize it: leave it as the author intended
 	    $word = qq(<A HREF="$word">$word</A>);
-	} elsif ($word =~ /[\w.-]+\@\w+\.\w/) {
+	} elsif ($word =~ /[\w.-]+\@[\w-]+\.\w/) {
 	    # looks like an e-mail address
 	    my ($w1, $w2, $w3) = ("", $word, "");
 	    ($w1, $w2, $w3) = ("(", $1, ")$2") if $word =~ /^\((.*?)\)(,?)/;
@@ -1334,8 +1442,7 @@ sub process_puretext {
 #
 sub pre_escape {
     my($str) = @_;
-
-    $$str =~ s,&,&amp;,g;
+    $$str =~ s/&(?!\w+;|#)/&amp;/g;	# XXX not bulletproof
 }
 
 #
@@ -1343,6 +1450,7 @@ sub pre_escape {
 #
 sub dosify {
     my($str) = @_;
+    return lc($str) if $^O eq 'VMS';     # VMS just needs casing
     if ($Is83) {
         $str = lc $str;
         $str =~ s/(\.\w+)/substr ($1,0,4)/ge;
@@ -1371,9 +1479,6 @@ sub process_L {
 	# LREF: a la HREF L<show this text|man/section>
 	$linktext = $1 if s:^([^|]+)\|::;
 
-	# a :: acts like a /
-	s,::,/,;
-
 	# make sure sections start with a /
 	s,^",/",g;
 	s,^,/,g if (!m,/, && / /);
@@ -1390,6 +1495,9 @@ sub process_L {
 	    $section = $page;
 	    $page = "";
 	}
+
+	# remove trailing punctuation, like ()
+	$section =~ s/\W*$// ;
     }
 
     $page83=dosify($page);
@@ -1397,8 +1505,37 @@ sub process_L {
     if ($page eq "") {
 	$link = "#" . htmlify(0,$section);
 	$linktext = $section unless defined($linktext);
+    } elsif ( $page =~ /::/ ) {
+	$linktext  = ($section ? "$section" : "$page")
+	    unless defined($linktext);
+	$page =~ s,::,/,g;
+	# Search page cache for an entry keyed under the html page name,
+	# then look to see what directory that page might be in.  NOTE:
+	# this will only find one page. A better solution might be to produce
+	# an intermediate page that is an index to all such pages.
+	my $page_name = $page ;
+	$page_name =~ s,^.*/,, ;
+	if ( defined( $pages{ $page_name } ) && 
+	     $pages{ $page_name } =~ /([^:]*$page)\.(?:pod|pm):/ 
+	   ) {
+	    $page = $1 ;
+	}
+	else {
+	    # NOTE: This branch assumes that all A::B pages are located in
+	    # $htmlroot/A/B.html . This is often incorrect, since they are
+	    # often in $htmlroot/lib/A/B.html or such like. Perhaps we could
+	    # analyze the contents of %pages and figure out where any
+	    # cousins of A::B are, then assume that.  So, if A::B isn't found,
+	    # but A::C is found in lib/A/C.pm, then A::B is assumed to be in
+	    # lib/A/B.pm. This is also limited, but it's an improvement.
+	    # Maybe a hints file so that the links point to the correct places
+	    # non-theless?
+	    # Also, maybe put a warn "$0: cannot resolve..." here.
+	}
+	$link = "$htmlroot/$page.html";
+	$link .= "#" . htmlify(0,$section) if ($section);
     } elsif (!defined $pages{$page}) {
-	warn "$0: $podfile: cannot resolve L<$str> in paragraph $paragraph: no such page '$page'\n";
+	warn "$0: $podfile: cannot resolve L<$str> in paragraph $paragraph: no such page '$page'\n" unless $quiet;
 	$link = "";
 	$linktext = $page unless defined($linktext);
     } else {
@@ -1407,7 +1544,8 @@ sub process_L {
 
 	# if there is a directory by the name of the page, then assume that an
 	# appropriate section will exist in the subdirectory
-	if ($section ne "" && $pages{$page} =~ /([^:]*[^(\.pod|\.pm)]):/) {
+#	if ($section ne "" && $pages{$page} =~ /([^:]*[^(\.pod|\.pm)]):/) {
+	if ($section ne "" && $pages{$page} =~ /([^:]*(?<!\.pod)(?<!\.pm)):/) {
 	    $link = "$htmlroot/$1/$section.html";
 
 	# since there is no directory by the name of the page, the section will
@@ -1431,11 +1569,61 @@ sub process_L {
 
     process_text(\$linktext, 0);
     if ($link) {
-	$s1 = "<A HREF=\"$link\">$linktext</A>";
+	# Here, we take advantage of the knowledge that $htmlfileurl ne ''
+	# implies $htmlroot eq ''. This means that the link in question
+	# needs a prefix of $htmldir if it begins with '/'. The test for
+	# the initial '/' is done to avoid '#'-only links, and to allow
+	# for other kinds of links, like file:, ftp:, etc.
+        my $url ;
+        if (  $htmlfileurl ne '' ) {
+            $link = "$htmldir$link"
+		if ( $link =~ m{^/} ) ;
+            
+            $url = relativize_url( $link, $htmlfileurl ) ;
+# print( "  b: [$link,$htmlfileurl,$url]\n" ) ;
+	}
+	else {
+            $url = $link ;
+	}
+
+	$s1 = "<A HREF=\"$url\">$linktext</A>";
     } else {
 	$s1 = "<EM>$linktext</EM>";
     }
     return $s1;
+}
+
+#
+# relativize_url - convert an absolute URL to one relative to a base URL.
+# Assumes both end in a filename.
+#
+sub relativize_url {
+    my ($dest,$source) = @_ ;
+
+    my ($dest_volume,$dest_directory,$dest_file) = 
+        File::Spec::Unix->splitpath( $dest ) ;
+    $dest = File::Spec::Unix->catpath( $dest_volume, $dest_directory, '' ) ;
+
+    my ($source_volume,$source_directory,$source_file) = 
+        File::Spec::Unix->splitpath( $source ) ;
+    $source = File::Spec::Unix->catpath( $source_volume, $source_directory, '' ) ;
+
+    my $rel_path = '' ;
+    if ( $dest ne '' ) {
+       $rel_path = File::Spec::Unix->abs2rel( $dest, $source ) ;
+    }
+
+    if ( $rel_path ne ''                && 
+         substr( $rel_path, -1 ) ne '/' &&
+         substr( $dest_file, 0, 1 ) ne '#' 
+        ) {
+        $rel_path .= "/$dest_file" ;
+    }
+    else {
+        $rel_path .= "$dest_file" ;
+    }
+
+    return $rel_path ;
 }
 
 #
@@ -1470,9 +1658,23 @@ sub process_C {
     # if there was a pod file that we found earlier with an appropriate
     # =item directive, then create a link to that page.
     if ($doref && defined $items{$s1}) {
-	$s1 = ($items{$s1} ?
-	       "<A HREF=\"$htmlroot/$items{$s1}#item_" . htmlify(0,$s2) .  "\">$str</A>" :
-	       "<A HREF=\"#item_" . htmlify(0,$s2) .  "\">$str</A>");
+        if ( $items{$s1} ) {
+            my $link = "$htmlroot/$items{$s1}#item_" . htmlify(0,$s2) ;
+	    # Here, we take advantage of the knowledge that $htmlfileurl ne ''
+	    # implies $htmlroot eq ''.
+            my $url ;
+            if (  $htmlfileurl ne '' ) {
+                $link = "$htmldir$link" ;
+                $url = relativize_url( $link, $htmlfileurl ) ;
+	    }
+	    else {
+                $url = $link ;
+	    }
+	    $s1 = "<A HREF=\"$url\">$str</A>" ;
+        }
+        else {
+	    $s1 = "<A HREF=\"#item_" . htmlify(0,$s2) .  "\">$str</A>" ;
+        }
 	$s1 =~ s,(perl\w+/(\S+)\.html)#item_\2\b,$1,; 
 	confess "s1 has space: $s1" if $s1 =~ /HREF="[^"]*\s[^"]*"/;
     } else {
@@ -1527,6 +1729,18 @@ sub process_S {
 #
 sub process_X {
     return '';
+}
+
+
+#
+# Adapted from Nick Ing-Simmons' PodToHtml package.
+sub relative_url {
+    my $source_file = shift ;
+    my $destination_file = shift;
+
+    my $source = URI::file->new_abs($source_file);
+    my $uo = URI::file->new($destination_file,$source)->abs;
+    return $uo->rel->as_string;
 }
 
 

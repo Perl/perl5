@@ -88,11 +88,7 @@ in situations where security is an issue.
 =head1 AUTHORS
 
 Tim Bunce <F<Tim.Bunce@ig.co.uk>> and
-Charles Bailey <F<bailey@genetics.upenn.edu>>
-
-=head1 REVISION
-
-Current $VERSION is 1.0401.
+Charles Bailey <F<bailey@newman.upenn.edu>>
 
 =cut
 
@@ -103,7 +99,7 @@ use Exporter ();
 use strict;
 
 use vars qw( $VERSION @ISA @EXPORT );
-$VERSION = "1.0401";
+$VERSION = "1.0402";
 @ISA = qw( Exporter );
 @EXPORT = qw( mkpath rmtree );
 
@@ -135,8 +131,9 @@ sub mkpath {
 	}
 	print "mkdir $path\n" if $verbose;
 	unless (mkdir($path,$mode)) {
-	    # allow for another process to have created it meanwhile
-	    croak "mkdir $path: $!" unless -d $path;
+	  my $e = $!;
+	  # allow for another process to have created it meanwhile
+	  croak "mkdir $path: $e" unless -d $path;
 	}
 	push(@created, $path);
     }
@@ -147,9 +144,16 @@ sub rmtree {
     my($roots, $verbose, $safe) = @_;
     my(@files);
     my($count) = 0;
-    $roots = [$roots] unless ref $roots;
     $verbose ||= 0;
     $safe ||= 0;
+
+    if ( defined($roots) && length($roots) ) {
+      $roots = [$roots] unless ref $roots;
+    }
+    else {
+      carp "No root path(s) specified\n";
+      return 0;
+    }
 
     my($root);
     foreach $root (@{$roots}) {

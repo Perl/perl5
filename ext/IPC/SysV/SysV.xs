@@ -4,32 +4,52 @@
 
 #include <sys/types.h>
 #ifdef __linux__
-#include <asm/page.h>
+#   include <asm/page.h>
 #endif
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
-#include <sys/ipc.h>
-#ifdef HAS_MSG
-#include <sys/msg.h>
+#ifndef HAS_SEM
+#   include <sys/ipc.h>
 #endif
-#ifdef HAS_SEM
-#include <sys/sem.h>
+#   ifdef HAS_MSG
+#       include <sys/msg.h>
+#   endif
+#   ifdef HAS_SHM
+#       if defined(PERL_SCO) || defined(PERL_ISC)
+#           include <sys/sysmacros.h>	/* SHMLBA */
+#       endif
+#      include <sys/shm.h>
+#      ifndef HAS_SHMAT_PROTOTYPE
+           extern Shmat_t shmat (int, char *, int);
+#      endif
+#      if defined(__sparc__) && (defined(__NetBSD__) || defined(__OpenBSD__))
+#          undef  SHMLBA /* not static: determined at boot time */
+#          define SHMLBA getpagesize()
+#      endif
+#   endif
 #endif
-#ifdef HAS_SHM
-#ifdef PERL_SCO5
-#include <sys/sysmacros.h>
-#endif
-#include <sys/shm.h>
-# ifndef HAS_SHMAT_PROTOTYPE
-    extern Shmat_t shmat _((int, char *, int));
-# endif
-#endif
+
+/* Required to get 'struct pte' for SHMLBA on ULTRIX. */
+#if defined(__ultrix) || defined(__ultrix__) || defined(ultrix)
+#include <machine/pte.h>
 #endif
 
 /* Required in BSDI to get PAGE_SIZE definition for SHMLBA.
  * Ugly.  More beautiful solutions welcome.
  * Shouting at BSDI sounds quite beautiful. */
 #ifdef __bsdi__
-#   include <vm/vm_param.h>
+#   include <vm/vm_param.h>	/* move upwards under HAS_SHM? */
+#endif
+
+#ifndef S_IRWXU
+#   ifdef S_IRUSR
+#       define S_IRWXU (S_IRUSR|S_IWUSR|S_IWUSR)
+#       define S_IRWXG (S_IRGRP|S_IWGRP|S_IWGRP)
+#       define S_IRWXO (S_IROTH|S_IWOTH|S_IWOTH)
+#   else
+#       define S_IRWXU 0700
+#       define S_IRWXG 0070
+#       define S_IRWXO 0007
+#   endif
 #endif
 
 MODULE=IPC::SysV	PACKAGE=IPC::Msg::stat
@@ -41,6 +61,7 @@ pack(obj)
     SV	* obj
 PPCODE:
 {
+#ifdef HAS_MSG
     SV *sv;
     struct msqid_ds ds;
     AV *list = (AV*)SvRV(obj);
@@ -48,8 +69,11 @@ PPCODE:
     sv = *av_fetch(list,1,TRUE); ds.msg_perm.gid = SvIV(sv);
     sv = *av_fetch(list,4,TRUE); ds.msg_perm.mode = SvIV(sv);
     sv = *av_fetch(list,6,TRUE); ds.msg_qbytes = SvIV(sv);
-    ST(0) = sv_2mortal(newSVpv((char *)&ds,sizeof(ds)));
+    ST(0) = sv_2mortal(newSVpvn((char *)&ds,sizeof(ds)));
     XSRETURN(1);
+#else
+    croak("System V msgxxx is not implemented on this machine");
+#endif
 }
 
 void
@@ -58,6 +82,7 @@ unpack(obj,buf)
     SV * buf
 PPCODE:
 {
+#ifdef HAS_MSG
     STRLEN len;
     SV **sv_ptr;
     struct msqid_ds *ds = (struct msqid_ds *)SvPV(buf,len);
@@ -92,6 +117,9 @@ PPCODE:
     sv_ptr = av_fetch(list,11,TRUE);
     sv_setiv(*sv_ptr, ds->msg_ctime);
     XSRETURN(1);
+#else
+    croak("System V msgxxx is not implemented on this machine");
+#endif
 }
 
 MODULE=IPC::SysV	PACKAGE=IPC::Semaphore::stat
@@ -102,6 +130,7 @@ unpack(obj,ds)
     SV * ds
 PPCODE:
 {
+#ifdef HAS_SEM
     STRLEN len;
     AV *list = (AV*)SvRV(obj);
     struct semid_ds *data = (struct semid_ds *)SvPV(ds,len);
@@ -122,6 +151,9 @@ PPCODE:
     sv_setiv(*av_fetch(list,6,TRUE), data[0].sem_otime);
     sv_setiv(*av_fetch(list,7,TRUE), data[0].sem_nsems);
     XSRETURN(1);
+#else
+    croak("System V semxxx is not implemented on this machine");
+#endif
 }
 
 void
@@ -129,6 +161,7 @@ pack(obj)
     SV	* obj
 PPCODE:
 {
+#ifdef HAS_SEM
     SV **sv_ptr;
     SV *sv;
     struct semid_ds ds;
@@ -152,8 +185,11 @@ PPCODE:
 	ds.sem_otime = SvIV(*sv_ptr);
     if((sv_ptr = av_fetch(list,7,TRUE)) && (sv = *sv_ptr))
 	ds.sem_nsems = SvIV(*sv_ptr);
-    ST(0) = sv_2mortal(newSVpv((char *)&ds,sizeof(ds)));
+    ST(0) = sv_2mortal(newSVpvn((char *)&ds,sizeof(ds)));
     XSRETURN(1);
+#else
+    croak("System V semxxx is not implemented on this machine");
+#endif
 }
 
 MODULE=IPC::SysV	PACKAGE=IPC::SysV
@@ -167,7 +203,7 @@ ftok(path, id)
         key_t k = ftok(path, id);
         ST(0) = k == (key_t) -1 ? &PL_sv_undef : sv_2mortal(newSViv(k));
 #else
-        DIE(no_func, "ftok");
+        DIE(PL_no_func, "ftok");
 #endif
 
 int

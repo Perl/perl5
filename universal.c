@@ -1,4 +1,5 @@
 #include "EXTERN.h"
+#define PERL_IN_UNIVERSAL_C
 #include "perl.h"
 
 /*
@@ -7,7 +8,7 @@
  */
 
 STATIC SV *
-isa_lookup(HV *stash, char *name, int len, int level)
+S_isa_lookup(pTHX_ HV *stash, const char *name, int len, int level)
 {
     AV* av;
     GV* gv;
@@ -21,7 +22,7 @@ isa_lookup(HV *stash, char *name, int len, int level)
 	return &PL_sv_yes;
 
     if (level > 100)
-	croak("Recursive inheritance detected in package '%s'", HvNAME(stash));
+	Perl_croak(aTHX_ "Recursive inheritance detected in package '%s'", HvNAME(stash));
 
     gvp = (GV**)hv_fetch(stash, "::ISA::CACHE::", 14, FALSE);
 
@@ -53,8 +54,10 @@ isa_lookup(HV *stash, char *name, int len, int level)
 		SV* sv = *svp++;
 		HV* basestash = gv_stashsv(sv, FALSE);
 		if (!basestash) {
-		    if (PL_dowarn)
-			warn("Can't locate package %s for @%s::ISA",
+		    dTHR;
+		    if (ckWARN(WARN_MISC))
+			Perl_warner(aTHX_ WARN_SYNTAX,
+		             "Can't locate package %s for @%s::ISA",
 			    SvPVX(sv), HvNAME(stash));
 		    continue;
 		}
@@ -71,7 +74,7 @@ isa_lookup(HV *stash, char *name, int len, int level)
 }
 
 bool
-sv_derived_from(SV *sv, char *name)
+Perl_sv_derived_from(pTHX_ SV *sv, const char *name)
 {
     SV *rv;
     char *type;
@@ -100,30 +103,43 @@ sv_derived_from(SV *sv, char *name)
  
 }
 
+void XS_UNIVERSAL_isa(pTHXo_ CV *cv);
+void XS_UNIVERSAL_can(pTHXo_ CV *cv);
+void XS_UNIVERSAL_VERSION(pTHXo_ CV *cv);
+
+void
+Perl_boot_core_UNIVERSAL(pTHX)
+{
+    char *file = __FILE__;
+
+    newXS("UNIVERSAL::isa",             XS_UNIVERSAL_isa,         file);
+    newXS("UNIVERSAL::can",             XS_UNIVERSAL_can,         file);
+    newXS("UNIVERSAL::VERSION", 	XS_UNIVERSAL_VERSION, 	  file);
+}
+
 #ifdef PERL_OBJECT
 #define NO_XSLOCKS
 #endif  /* PERL_OBJECT */
 
 #include "XSUB.h"
 
-static
 XS(XS_UNIVERSAL_isa)
 {
     dXSARGS;
     SV *sv;
     char *name;
+    STRLEN n_a;
 
     if (items != 2)
-	croak("Usage: UNIVERSAL::isa(reference, kind)");
+	Perl_croak(aTHX_ "Usage: UNIVERSAL::isa(reference, kind)");
 
     sv = ST(0);
-    name = (char *)SvPV(ST(1),PL_na);
+    name = (char *)SvPV(ST(1),n_a);
 
     ST(0) = boolSV(sv_derived_from(sv, name));
     XSRETURN(1);
 }
 
-static
 XS(XS_UNIVERSAL_can)
 {
     dXSARGS;
@@ -131,12 +147,13 @@ XS(XS_UNIVERSAL_can)
     char *name;
     SV   *rv;
     HV   *pkg = NULL;
+    STRLEN n_a;
 
     if (items != 2)
-	croak("Usage: UNIVERSAL::can(object-ref, method)");
+	Perl_croak(aTHX_ "Usage: UNIVERSAL::can(object-ref, method)");
 
     sv = ST(0);
-    name = (char *)SvPV(ST(1),PL_na);
+    name = (char *)SvPV(ST(1),n_a);
     rv = &PL_sv_undef;
 
     if(SvROK(sv)) {
@@ -158,7 +175,6 @@ XS(XS_UNIVERSAL_can)
     XSRETURN(1);
 }
 
-static
 XS(XS_UNIVERSAL_VERSION)
 {
     dXSARGS;
@@ -167,12 +183,12 @@ XS(XS_UNIVERSAL_VERSION)
     GV *gv;
     SV *sv;
     char *undef;
-    double req;
+    NV req;
 
     if(SvROK(ST(0))) {
         sv = (SV*)SvRV(ST(0));
         if(!SvOBJECT(sv))
-            croak("Cannot find version of an unblessed reference");
+            Perl_croak(aTHX_ "Cannot find version of an unblessed reference");
         pkg = SvSTASH(sv);
     }
     else {
@@ -181,7 +197,7 @@ XS(XS_UNIVERSAL_VERSION)
 
     gvp = pkg ? (GV**)hv_fetch(pkg,"VERSION",7,FALSE) : Null(GV**);
 
-    if (gvp && (gv = *gvp) != (GV*)&PL_sv_undef && (sv = GvSV(gv))) {
+    if (gvp && isGV(gv = *gvp) && SvOK(sv = GvSV(gv))) {
         SV *nsv = sv_newmortal();
         sv_setsv(nsv, sv);
         sv = nsv;
@@ -192,27 +208,14 @@ XS(XS_UNIVERSAL_VERSION)
         undef = "(undef)";
     }
 
-    if (items > 1 && (undef || (req = SvNV(ST(1)), req > SvNV(sv))))
-	croak("%s version %s required--this is only version %s",
-	      HvNAME(pkg), SvPV(ST(1),PL_na), undef ? undef : SvPV(sv,PL_na));
+    if (items > 1 && (undef || (req = SvNV(ST(1)), req > SvNV(sv)))) {
+	STRLEN n_a;
+	Perl_croak(aTHX_ "%s version %s required--this is only version %s",
+	      HvNAME(pkg), SvPV(ST(1),n_a), undef ? undef : SvPV(sv,n_a));
+    }
 
     ST(0) = sv;
 
     XSRETURN(1);
 }
 
-#ifdef PERL_OBJECT
-#undef  boot_core_UNIVERSAL
-#define boot_core_UNIVERSAL CPerlObj::Perl_boot_core_UNIVERSAL
-#define pPerl this
-#endif
-
-void
-boot_core_UNIVERSAL(void)
-{
-    char *file = __FILE__;
-
-    newXS("UNIVERSAL::isa",             XS_UNIVERSAL_isa,         file);
-    newXS("UNIVERSAL::can",             XS_UNIVERSAL_can,         file);
-    newXS("UNIVERSAL::VERSION", 	XS_UNIVERSAL_VERSION, 	  file);
-}

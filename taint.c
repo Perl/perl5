@@ -5,18 +5,26 @@
  */
 
 #include "EXTERN.h"
+#define PERL_IN_TAINT_C
 #include "perl.h"
 
 void
-taint_proper(const char *f, char *s)
+Perl_taint_proper(pTHX_ const char *f, char *s)
 {
     dTHR;	/* just for taint */
     char *ug;
 
+#ifdef IV_IS_QUAD
     DEBUG_u(PerlIO_printf(Perl_debug_log,
-            "%s %d %d %d\n", s, PL_tainted, PL_uid, PL_euid));
+            "%s %d %" PERL_PRId64 " %" PERL_PRId64 "\n", s, PL_tainted, (IV)PL_uid, (IV)PL_euid));
+#else
+    DEBUG_u(PerlIO_printf(Perl_debug_log,
+            "%s %d %lu %lu\n", s, PL_tainted, (unsigned long)PL_uid, (unsigned long)PL_euid));
+#endif
 
     if (PL_tainted) {
+	if (!f)
+	    f = PL_no_security;
 	if (PL_euid != PL_uid)
 	    ug = " while running setuid";
 	else if (PL_egid != PL_gid)
@@ -24,14 +32,14 @@ taint_proper(const char *f, char *s)
 	else
 	    ug = " while running with -T switch";
 	if (!PL_unsafe)
-	    croak(f, s, ug);
-	else if (PL_dowarn)
-	    warn(f, s, ug);
+	    Perl_croak(aTHX_ f, s, ug);
+	else if (ckWARN(WARN_TAINT))
+	    Perl_warner(aTHX_ WARN_TAINT, f, s, ug);
     }
 }
 
 void
-taint_env(void)
+Perl_taint_env(pTHX)
 {
     SV** svp;
     MAGIC* mg;
@@ -44,7 +52,11 @@ taint_env(void)
 	NULL
     };
 
+    if (!PL_envgv)
+	return;
+
 #ifdef VMS
+    {
     int i = 0;
     char name[10 + TYPE_DIGITS(int)] = "DCL$PATH";
 
@@ -66,6 +78,7 @@ taint_env(void)
 	}
 	i++;
     }
+  }
 #endif /* VMS */
 
     svp = hv_fetch(GvHVn(PL_envgv),"PATH",4,FALSE);
@@ -87,9 +100,10 @@ taint_env(void)
     svp = hv_fetch(GvHVn(PL_envgv),"TERM",4,FALSE);
     if (svp && *svp && SvTAINTED(*svp)) {
     	dTHR;	/* just for taint */
+	STRLEN n_a;
 	bool was_tainted = PL_tainted;
-	char *t = SvPV(*svp, PL_na);
-	char *e = t + PL_na;
+	char *t = SvPV(*svp, n_a);
+	char *e = t + n_a;
 	PL_tainted = was_tainted;
 	if (t < e && isALNUM(*t))
 	    t++;

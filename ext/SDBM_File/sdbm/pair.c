@@ -7,12 +7,13 @@
  * page-level routines
  */
 
-#ifndef lint
-static char rcsid[] = "$Id: pair.c,v 1.10 90/12/13 13:00:35 oz Exp $";
-#endif
-
 #include "config.h"
-#include "EXTERN.h"
+#ifdef CYGWIN
+# define EXT extern
+# define EXTCONST extern const
+#else
+# include "EXTERN.h"
+#endif
 #include "sdbm.h"
 #include "tune.h"
 #include "pair.h"
@@ -104,6 +105,17 @@ getpair(char *pag, datum key)
 	val.dptr = pag + ino[i + 1];
 	val.dsize = ino[i] - ino[i + 1];
 	return val;
+}
+
+int
+exipair(char *pag, datum key)
+{
+	register short *ino = (short *) pag;
+
+	if (ino[0] == 0)
+		return 0;
+
+	return (seepair(pag, ino[0], key.dptr, key.dsize) != 0);
 }
 
 #ifdef SEEDUPS

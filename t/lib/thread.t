@@ -2,10 +2,10 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    unshift @INC, '../lib';
     require Config; import Config;
     if (! $Config{'usethreads'}) {
-	print "1..0\n";
+	print "1..0 # Skip: this perl is not threaded\n";
 	exit 0;
     }
 
@@ -13,7 +13,7 @@ BEGIN {
     $ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3;
 }
 $| = 1;
-print "1..14\n";
+print "1..18\n";
 use Thread;
 print "ok 1\n";
 
@@ -24,7 +24,7 @@ sub content
 }
 
 # create a thread passing args and immedaietly wait for it.
-my $t = new Thread \&content,("ok 2\n","ok 3\n");
+my $t = new Thread \&content,("ok 2\n","ok 3\n", 1..1000);
 print $t->join;
 
 # check that lock works ...
@@ -71,3 +71,17 @@ sub islocked
 $t = Thread->new(\&islocked, "ok 13\n", "ok 14\n");
 $t->join->join;
 
+{
+    package Loch::Ness;
+    sub new { bless [], shift }
+    sub monster {
+	use attrs qw(locked method);
+	my($s, $m) = @_;
+	print "ok $m\n";
+    }
+    sub gollum { &monster }
+}
+Loch::Ness->monster(15);
+Loch::Ness->new->monster(16);
+Loch::Ness->gollum(17);
+Loch::Ness->new->gollum(18);

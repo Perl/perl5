@@ -7,7 +7,7 @@
 ##
 
 chdir 't' if -d 't';
-@INC = "../lib";
+unshift @INC, "../lib";
 $Is_VMS = $^O eq 'VMS';
 $Is_MSWin32 = $^O eq 'MSWin32';
 $ENV{PERL5LIB} = "../lib" unless $Is_VMS;
@@ -35,7 +35,7 @@ for (@prgs){
 		  `MCR $^X "-I[-.lib]" $switch $tmpfile` :
 		      $Is_MSWin32 ?  
 			  `.\\perl -I../lib $switch $tmpfile 2>&1` :
-			      `sh -c './perl $switch $tmpfile' 2>&1`;
+			      `./perl $switch $tmpfile 2>&1`;
     my $status = $?;
     $results =~ s/\n+$//;
     # allow expected output to be written as if $prog is on STDIN
@@ -315,3 +315,23 @@ main|-|9|main::__ANON__
 In DIE
 main|-|10|(eval)
 main|-|10|main::foo
+########
+package TEST;
+ 
+sub TIEARRAY {
+  return bless [qw(foo fee fie foe)], $_[0];
+}
+sub FETCH {
+  my ($s,$i) = @_;
+  if ($i) {
+    goto bbb;
+  }
+bbb:
+  return $s->[$i];
+}
+ 
+package main;
+tie my @bar, 'TEST';
+print join('|', @bar[0..3]), "\n"; 
+EXPECT
+foo|fee|fie|foe

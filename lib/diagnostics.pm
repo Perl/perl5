@@ -27,7 +27,7 @@ Aa a program:
 =head2 The C<diagnostics> Pragma
 
 This module extends the terse diagnostics normally emitted by both the
-perl compiler and the perl interpeter, augmenting them with the more
+perl compiler and the perl interpreter, augmenting them with the more
 explicative and endearing descriptions found in L<perldiag>.  Like the
 other pragmata, it affects the compilation phase of your program rather
 than merely the execution phase.
@@ -50,6 +50,11 @@ disable() and enable() methods to turn them off and on respectively.
 The B<-verbose> flag first prints out the L<perldiag> introduction before
 any other diagnostics.  The $diagnostics::PRETTY variable can generate nicer
 escape sequences for pagers.
+
+Warnings dispatched from perl itself (or more accurately, those that match
+descriptions found in L<perldiag>) are only displayed once (no duplicate
+descriptions).  User code generated warnings ala warn() are unaffected,
+allowing duplicate user messages to be displayed.
 
 =head2 The I<splain> Program
 
@@ -274,7 +279,7 @@ if (eof(POD_DIAG)) {
 
 $transmo = <<EOFUNC;
 sub transmo {
-    local \$^W = 0;  # recursive warnings we do NOT need!
+    #local \$^W = 0;  # recursive warnings we do NOT need!
     study;
 EOFUNC
 
@@ -371,7 +376,7 @@ if ($standalone) {
 
 sub import {
     shift;
-    $old_w = $^W;
+    #$old_w = $^W;
     $^W = 1; # yup, clobbered the global variable; tough, if you
 	     # want diags, you want diags.
     return if $SIG{__WARN__} eq \&warn_trap;
@@ -407,7 +412,7 @@ sub enable { &import }
 
 sub disable {
     shift;
-    $^W = $old_w;
+    #$^W = $old_w;
     return unless $SIG{__WARN__} eq \&warn_trap;
     $SIG{__WARN__} = $oldwarn;
     $SIG{__DIE__} = $olddie;
@@ -458,13 +463,15 @@ sub splainthis {
     s/\.?\n+$//;
     my $orig = $_;
     # return unless defined;
-    if ($exact_duplicate{$_}++) {
-	return 1;
-    } 
     s/, <.*?> (?:line|chunk).*$//;
     $real = s/(.*?) at .*? (?:line|chunk) \d+.*/$1/;
     s/^\((.*)\)$/$1/;
-    return 0 unless &transmo;
+    if ($exact_duplicate{$orig}++) {
+	return &transmo;
+    }
+    else {
+	return 0 unless &transmo;
+    }
     $orig = shorten($orig);
     if ($old_diag{$_}) {
 	autodescribe();
@@ -526,7 +533,7 @@ sub shorten {
 } 
 
 
-# have to do this: RS isn't set until run time, but we're executing at compile time
+# have to do this: RS isn't set until run time, but we're executing at compiletime
 $RS = "\n";
 
 1 unless $standalone;  # or it'll complain about itself

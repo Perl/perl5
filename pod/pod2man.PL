@@ -318,8 +318,12 @@ $cutting = 1;
 # running an installed version of Perl to produce documentation from an
 # uninstalled newer version's pod files.
 if ($^O ne 'plan9' and $^O ne 'dos' and $^O ne 'os2' and $^O ne 'MSWin32') {
-  ($version,$patch) =
-    `\PATH=.:..:\$PATH; perl -v` =~ /version (\d\.\d{3})(?:_(\d{2}))?/;
+  my $perl = (-x './perl' && -f './perl' ) ?
+                 './perl' :
+                 ((-x '../perl' && -f '../perl') ?
+                      '../perl' :
+                      '');
+  ($version,$patch) = `$perl -e 'print $]'` =~ /^(\d\.\d{3})(\d{2})?/ if $perl;
 }
 # No luck; we'll just go with the running Perl's version
 ($version,$patch) = $] =~ /^(.{5})(\d{2})?/ unless $version;
@@ -331,6 +335,7 @@ sub makedate {
     my $secs = shift;
     my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($secs);
     my $mname = (qw{Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec})[$mon];
+    $year += 1900;
     return "$mday/$mname/$year";
 }
 
@@ -561,7 +566,7 @@ print <<'END';
 END
 
 print <<"END";
-.TH $name $section "$RP" "$date" "$center"
+.TH $name $section "$date" "$RP" "$center"
 .UC
 END
 
@@ -673,8 +678,24 @@ $indent = 0;
 
 $begun = "";
 
-# Unrolling [^A-Z>]|[A-Z](?!<) gives:    // MRE pp 165.
-my $nonest = '(?:[^A-Z>]*(?:[A-Z](?!<)[^A-Z>]*)*)';
+# Unrolling [^-=A-Z>]|[A-Z](?!<)|[-=](?![A-Z]<)[\x00-\xFF] gives: // MRE pp 165.
+my $nonest = q{(?x)             # Turn on /x mode.
+              (?:               # Group
+                [^-=A-Z>]*      # Anything that isn't a dash, equal sign or
+                                # closing hook isn't special. Eat as much as
+                                # we can.
+                (?:             # Group.
+                  (?:           # Group.
+                    [-=]        # We want to recognize -> and =>.
+                    (?![A-Z]<)  # So, as long as it isn't followed by markup
+                    [\x00-\xFF] # anything may follow - and =
+                    |
+                    [A-Z]       # Capitals are fine too,
+                    (?!<)       # But not if they start markup.
+                  )             # End of special sequences.
+                  [^-=A-Z>]*    # Followed by zero or more non-special chars. 
+                )*              # And we can repeat this as often as we can.
+              )};               # That's all folks.
 
 while (<>) {
     if ($cutting) {
@@ -764,7 +785,7 @@ while (<>) {
 	} {I<$1>\\|$2}gx;
 
 	# convert simple variable references
-	s/(\s+)([\$\@%][\w:]+)(?!\()/${1}C<$2>/g;
+	s/(\s+)([\$\@%&*][\w:]+)(?!\()/${1}C<$2>/g;
 
 	if (m{ (
 		    [\-\w]+

@@ -44,7 +44,7 @@ Perl_alloc_thread_key(void)
     static int key_allocated = 0;
     if (!key_allocated) {
 	if ((PL_thr_key = TlsAlloc()) == TLS_OUT_OF_INDEXES)
-	    croak("panic: TlsAlloc");
+	    Perl_croak_nocontext("panic: TlsAlloc");
 	key_allocated = 1;
     }
 #endif
@@ -92,8 +92,7 @@ Perl_thread_create(struct perl_thread *thr, thread_func_t *fn)
     DWORD junk;
     unsigned long th;
 
-    MUTEX_LOCK(&thr->mutex);
-    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+    DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 			  "%p: create OS thread\n", thr));
 #ifdef USE_RTL_THREAD_API
     /* See comment about USE_RTL_THREAD_API in win32thread.h */
@@ -124,9 +123,8 @@ Perl_thread_create(struct perl_thread *thr, thread_func_t *fn)
 #else	/* !USE_RTL_THREAD_API */
     thr->self = CreateThread(NULL, 0, fn, (void*)thr, 0, &junk);
 #endif	/* !USE_RTL_THREAD_API */
-    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+    DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 			  "%p: OS thread = %p, id=%ld\n", thr, thr->self, junk));
-    MUTEX_UNLOCK(&thr->mutex);
     return thr->self ? 0 : -1;
 }
 #endif

@@ -4,7 +4,7 @@
 # various typeglob tests
 #
 
-print "1..23\n";
+print "1..30\n";
 
 # type coersion on assignment
 $foo = 'foo';
@@ -62,7 +62,7 @@ if (defined $baa) {
 #        fact that %X::Y:: is stored in %X:: isn't documented.
 #        (I hope.)
 
-{ package Foo::Bar }
+{ package Foo::Bar; $test=1; }
 print exists $Foo::{'Bar::'} ? "ok 12\n" : "not ok 12\n";
 print $Foo::{'Bar::'} eq '*Foo::Bar::' ? "ok 13\n" : "not ok 13\n";
 
@@ -95,4 +95,39 @@ print *{*x{GLOB}} eq "*main::STDOUT" ? "ok 21\n" : "not ok 21\n";
 print {*x{IO}} "ok 22\n";
 print {*x{FILEHANDLE}} "ok 23\n";
 
+# test if defined() doesn't create any new symbols
 
+{
+    my $test = 23;
+
+    my $a = "SYM000";
+    print "not " if defined *{$a};
+    ++$test; print "ok $test\n";
+
+    print "not " if defined @{$a} or defined *{$a};
+    ++$test; print "ok $test\n";
+
+    print "not " if defined %{$a} or defined *{$a};
+    ++$test; print "ok $test\n";
+
+    print "not " if defined ${$a} or defined *{$a};
+    ++$test; print "ok $test\n";
+
+    print "not " if defined &{$a} or defined *{$a};
+    ++$test; print "ok $test\n";
+
+    *{$a} = sub { print "ok $test\n" };
+    print "not " unless defined &{$a} and defined *{$a};
+    ++$test; &{$a};
+}
+
+# does pp_readline() handle glob-ness correctly?
+
+{
+    my $g = *foo;
+    $g = <DATA>;
+    print $g;
+}
+
+__END__
+ok 30

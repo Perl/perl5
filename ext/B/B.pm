@@ -9,12 +9,12 @@ package B;
 require DynaLoader;
 require Exporter;
 @ISA = qw(Exporter DynaLoader);
-@EXPORT_OK = qw(byteload_fh byteload_string minus_c ppname
+@EXPORT_OK = qw(minus_c ppname
 		class peekop cast_I32 cstring cchar hash threadsv_names
-		main_root main_start main_cv svref_2object
+		main_root main_start main_cv svref_2object opnumber amagic_generation
 		walkoptree walkoptree_slow walkoptree_exec walksymtable
-		parents comppadlist sv_undef compile_stats timing_info);
-
+		parents comppadlist sv_undef compile_stats timing_info init_av);
+sub OPf_KIDS ();
 use strict;
 @B::SV::ISA = 'B::OBJECT';
 @B::NULL::ISA = 'B::SV';
@@ -38,7 +38,6 @@ use strict;
 @B::UNOP::ISA = 'B::OP';
 @B::BINOP::ISA = 'B::UNOP';
 @B::LOGOP::ISA = 'B::UNOP';
-@B::CONDOP::ISA = 'B::UNOP';
 @B::LISTOP::ISA = 'B::BINOP';
 @B::SVOP::ISA = 'B::OP';
 @B::GVOP::ISA = 'B::OP';
@@ -65,10 +64,6 @@ sub debug {
     walkoptree_debug($value);
 }
 
-# sub OPf_KIDS;
-# add to .xs for perl5.002
-sub OPf_KIDS () { 4 }
-
 sub class {
     my $obj = shift;
     my $name = ref $obj;
@@ -81,7 +76,7 @@ sub parents { \@parents }
 # For debugging
 sub peekop {
     my $op = shift;
-    return sprintf("%s (0x%x) %s", class($op), $$op, $op->ppaddr);
+    return sprintf("%s (0x%x) %s", class($op), $$op, $op->name);
 }
 
 sub walkoptree_slow {
@@ -135,37 +130,26 @@ sub walkoptree_exec {
 	}
 	savesym($op, sprintf("%s (0x%lx)", class($op), $$op));
 	$op->$method($level);
-	$ppname = $op->ppaddr;
-	if ($ppname =~ /^pp_(or|and|mapwhile|grepwhile|entertry)$/) {
+	$ppname = $op->name;
+	if ($ppname =~
+	    /^(or|and|mapwhile|grepwhile|entertry|range|cond_expr)$/)
+	{
 	    print $prefix, uc($1), " => {\n";
 	    walkoptree_exec($op->other, $method, $level + 1);
 	    print $prefix, "}\n";
-	} elsif ($ppname eq "pp_match" || $ppname eq "pp_subst") {
+	} elsif ($ppname eq "match" || $ppname eq "subst") {
 	    my $pmreplstart = $op->pmreplstart;
 	    if ($$pmreplstart) {
 		print $prefix, "PMREPLSTART => {\n";
 		walkoptree_exec($pmreplstart, $method, $level + 1);
 		print $prefix, "}\n";
 	    }
-	} elsif ($ppname eq "pp_substcont") {
+	} elsif ($ppname eq "substcont") {
 	    print $prefix, "SUBSTCONT => {\n";
 	    walkoptree_exec($op->other->pmreplstart, $method, $level + 1);
 	    print $prefix, "}\n";
 	    $op = $op->other;
-	} elsif ($ppname eq "pp_cond_expr") {
-	    # pp_cond_expr never returns op_next
-	    print $prefix, "TRUE => {\n";
-	    walkoptree_exec($op->true, $method, $level + 1);
-	    print $prefix, "}\n";
-	    $op = $op->false;
-	    redo;
-	} elsif ($ppname eq "pp_range") {
-	    print $prefix, "TRUE => {\n";
-	    walkoptree_exec($op->true, $method, $level + 1);
-	    print $prefix, "}\n", $prefix, "FALSE => {\n";
-	    walkoptree_exec($op->false, $method, $level + 1);
-	    print $prefix, "}\n";
-	} elsif ($ppname eq "pp_enterloop") {
+	} elsif ($ppname eq "enterloop") {
 	    print $prefix, "REDO => {\n";
 	    walkoptree_exec($op->redoop, $method, $level + 1);
 	    print $prefix, "}\n", $prefix, "NEXT => {\n";
@@ -173,7 +157,7 @@ sub walkoptree_exec {
 	    print $prefix, "}\n", $prefix, "LAST => {\n";
 	    walkoptree_exec($op->lastop,  $method, $level + 1);
 	    print $prefix, "}\n";
-	} elsif ($ppname eq "pp_subst") {
+	} elsif ($ppname eq "subst") {
 	    my $replstart = $op->pmreplstart;
 	    if ($$replstart) {
 		print $prefix, "SUBST => {\n";
@@ -187,9 +171,12 @@ sub walkoptree_exec {
 sub walksymtable {
     my ($symref, $method, $recurse, $prefix) = @_;
     my $sym;
+    my $ref;
     no strict 'vars';
     local(*glob);
-    while (($sym, *glob) = each %$symref) {
+    $prefix = '' unless defined $prefix;
+    while (($sym, $ref) = each %$symref) {
+	*glob = "*main::".$prefix.$sym;
 	if ($sym =~ /::$/) {
 	    $sym = $prefix . $sym;
 	    if ($sym ne "main::" && &$recurse($sym)) {
@@ -530,6 +517,8 @@ C<REFCNT> (corresponding to the C function C<SvREFCNT>).
 
 =item XSUBANY
 
+=item CvFLAGS
+
 =back
 
 =head2 B::HV METHODS
@@ -554,7 +543,7 @@ C<REFCNT> (corresponding to the C function C<SvREFCNT>).
 
 =head2 OP-RELATED CLASSES
 
-B::OP, B::UNOP, B::BINOP, B::LOGOP, B::CONDOP, B::LISTOP, B::PMOP,
+B::OP, B::UNOP, B::BINOP, B::LOGOP, B::LISTOP, B::PMOP,
 B::SVOP, B::GVOP, B::PVOP, B::CVOP, B::LOOP, B::COP.
 These classes correspond in
 the obvious way to the underlying C structures of similar names. The
@@ -570,13 +559,18 @@ leading "class indication" prefix removed (op_).
 
 =item sibling
 
+=item name
+
+This returns the op name as a string (e.g. "add", "rv2av").
+
 =item ppaddr
 
-This returns the function name as a string (e.g. pp_add, pp_rv2av).
+This returns the function name as a string (e.g. Perl_pp_add,
+Perl_pp_rv2av).
 
 =item desc
 
-This returns the op description from the global C op_desc array
+This returns the op description from the global C PL_op_desc array
 (e.g. "addition" "array deref").
 
 =item targ
@@ -612,16 +606,6 @@ This returns the op description from the global C op_desc array
 =over 4
 
 =item other
-
-=back
-
-=head2 B::CONDOP METHODS
-
-=over 4
-
-=item true
-
-=item false
 
 =back
 
@@ -720,6 +704,10 @@ get an initial "handle" on an internal object.
 Return the (faked) CV corresponding to the main part of the Perl
 program.
 
+=item init_av
+
+Returns the AV object (i.e. in class B::AV) representing INIT blocks.
+
 =item main_root
 
 Returns the root op (i.e. an object in the appropriate B::OP-derived
@@ -744,6 +732,10 @@ Returns the SV object corresponding to the C variable C<sv_yes>.
 =item sv_no
 
 Returns the SV object corresponding to the C variable C<sv_no>.
+
+=item amagic_generation
+
+Returns the SV object corresponding to the C variable C<amagic_generation>.
 
 =item walkoptree(OP, METHOD)
 
@@ -810,11 +802,6 @@ preceding the first "::". This is used to turn "B::UNOP" into
 
 In a perl compiled for threads, this returns a list of the special
 per-thread threadsv variables.
-
-=item byteload_fh(FILEHANDLE)
-
-Load the contents of FILEHANDLE as bytecode. See documentation for
-the B<Bytecode> module in F<B::Backend> for how to generate bytecode.
 
 =back
 

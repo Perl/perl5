@@ -1,75 +1,43 @@
-$Id: README.beos,v 1.2 1998/05/02 01:55:04 dogcow Exp dogcow $
-
 Notes on building perl under BeOS:
 
 GENERAL ISSUES
 --------------
-perl will almost compile straight out of the box with ./Configure -d, but
-there are a few gotchas:
+how to compile perl:
 
-Currently, you have to edit config.sh and remove SDBM_File from the
-dynamic_ext= and extensions= lines. SDBM_File does not build properly
-at this time. You need to run ./Configure -S after editing config.sh.
+To compile perl under BeOS R4 x86:
 
-In addition, with mwcc, after doing `make depend`, you need to edit
-makefile and x2p/makefile and remove the lines that mention 'Bletch:'.
-This is not necessary if you're using gnu cpp.
+`./Configure -d` and hit ^C when it asks you if you want to make changes
+to config.sh;
 
-in short:
-./Configure -d
-remove SDBM_File from config.sh
-./Configure -S
-make depend
-remove Bletch: from makefile and x2p/makefile
-make
+edit config.sh and do the following:
+change d_socket='define' to ='undef';
+remove SDBM, Errno, and Socket from dynamic_ext= and nonxs_ext=;
 
-Other than that, perl should build without problems. There are some
-technical comments in hints/beos.sh.
+add '#define bool short' to x2p/a2p.h;
+
+../Configure -S; make; make install
+
+cd ~/config/lib; ln -s 5.00502/BeOS-BePC/CORE/libperl.so .
+(substitute 5.00502 with the appropriate filename)
 
 OS RELEASE-SPECIFIC NOTES
 -------------------------
+R4 x86 - dynamic loading finally works! Yay! This means you can compile
+your own modules into perl. However, Sockets and Errno still don't work.
+(Hopefully, sockets will at least work by R5, if not sooner.)
 
-PR1/PPC:
-See R3/X86. Same bug, different form.
-
-PR2/PPC:
-Signals are somewhat unreliable, but they can work. Use caution.
-The POSIX module is still somewhat buggy.
-
-R3/X86:
-Under R3 x86, there are some serious problems with the math routines
-such that numbers are incorrectly printed. This causes problems with
-modules that encode their version numbers - in particular, IO.pm will
-probably not work properly. This should be fixed under R3.1.
-
-The problem has manifested itself if you see something similar to the
-following during the compile:
-
-cc -c  -I/usr/local/include -O    -DVERSION=\"1.1504\" -DXS_VERSION=\"1.1499999999\" -fpic -I../..  IO.c
-(lots of 9's are the indication of the problem.)
-
-In the meantime, you can use the following workaround:
-
-make perl
-cd ext/IO
-cc -c  -I/usr/local/include -O    -DVERSION=\"1.1504\" -DXS_VERSION=\"1.15\" -fpic -I../..  IO.c
-cd ..
-make
-
-(Substitute the correct numbers if IO has been updated.)
-
-R3/PPC-
-There's math problems, but of a different kind. In particular,
-perl -e 'print (240000 - (3e4<<3))' gives a non-zero answer.
-I'm looking into this. There is no workaround as yet. Hopefully,
-this will be fixed in R3.1.
+R4 PPC - I have not tested this. I rather severely doubt that dynamic
+loading will work. (My BeBox is in pieces right now, following a nasty
+disk crash.) You may have to disable dynamic loading to get the thing
+to compile at all. (use `./Configure` without -d, and say 'no' to
+'Build a shared libperl.so'.)
 
 CONTACT INFORMATION
 -------------------
 If you have comments, problem reports, or even patches or bugfixes (gasp!)
 please email me.
 
-1 May 1998
+28 Jan 1999
 Tom Spindler
-dogcow@merit.edu
+dogcow@isi.net
 

@@ -124,6 +124,11 @@ The COUNT can be zero or negative, see timethis().
 Returns the difference between two Benchmark times as a Benchmark
 object suitable for passing to timestr().
 
+=item timesum ( T1, T2 )
+
+Returns the sum of two Benchmark times as a Benchmark object suitable
+for passing to timestr().
+
 =item timestr ( TIMEDIFF, [ STYLE, [ FORMAT ] ] )
 
 Returns a string that formats the times in the TIMEDIFF object in
@@ -238,10 +243,17 @@ functionality.
 
 =cut
 
+# evaluate something in a clean lexical environment
+sub _doeval { eval shift }
+
+#
+# put any lexicals at file scope AFTER here
+#
+
 use Carp;
 use Exporter;
 @ISA=(Exporter);
-@EXPORT=qw(timeit timethis timethese timediff timestr);
+@EXPORT=qw(timeit timethis timethese timediff timesum timestr);
 @EXPORT_OK=qw(clearcache clearallcache disablecache enablecache);
 
 &init;
@@ -280,10 +292,19 @@ sub real  { my($r,$pu,$ps,$cu,$cs) = @{$_[0]}; $r              ; }
 sub timediff {
     my($a, $b) = @_;
     my @r;
-    for ($i=0; $i < @$a; ++$i) {
+    for (my $i=0; $i < @$a; ++$i) {
 	push(@r, $a->[$i] - $b->[$i]);
     }
     bless \@r;
+}
+
+sub timesum {
+     my($a, $b) = @_;
+     my @r;
+     for (my $i=0; $i < @$a; ++$i) {
+ 	push(@r, $a->[$i] + $b->[$i]);
+     }
+     bless \@r;
 }
 
 sub timestr {
@@ -329,10 +350,15 @@ sub runloop {
 	last if $pack ne $curpack;
     }
 
-    my $subcode = (ref $c eq 'CODE')
-	? "sub { package $pack; my(\$_i)=$n; while (\$_i--){&\$c;} }"
-	: "sub { package $pack; my(\$_i)=$n; while (\$_i--){$c;} }";
-    my $subref  = eval $subcode;
+    my ($subcode, $subref);
+    if (ref $c eq 'CODE') {
+	$subcode = "sub { for (1 .. $n) { local \$_; package $pack; &\$c; } }";
+        $subref  = eval $subcode;
+    }
+    else {
+	$subcode = "sub { for (1 .. $n) { local \$_; package $pack; $c;} }";
+        $subref  = _doeval($subcode);
+    }
     croak "runloop unable to compile '$c': $@\ncode: $subcode\n" if $@;
     print STDERR "runloop $n '$subcode'\n" if $debug;
 

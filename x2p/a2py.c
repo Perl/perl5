@@ -35,7 +35,7 @@ static void usage(void);
 static void
 usage()
 {
-    printf("\nThis is the AWK to PERL translator, version 5.0, patchlevel %d\n", PATCHLEVEL);
+    printf("\nThis is the AWK to PERL translator, revision %d.0, version %d\n", PERL_REVISION, PERL_VERSION);
     printf("\nUsage: %s [-D<number>] [-F<char>] [-n<fieldlist>] [-<number>] filename\n", myname);
     printf("\n  -D<number>      sets debugging flags."
            "\n  -F<character>   the awk script to translate is always invoked with"
@@ -66,7 +66,7 @@ main(register int argc, register char **argv, register char **env)
 #ifdef DEBUGGING
 	case 'D':
 	    debug = atoi(argv[0]+2);
-#ifdef YYDEBUG
+#if YYDEBUG
 	    yydebug = (debug & 1);
 #endif
 	    break;
@@ -211,7 +211,7 @@ yylex(void)
     register int tmp;
 
   retry:
-#ifdef YYDEBUG
+#if YYDEBUG
     if (yydebug)
 	if (strchr(s,'\n'))
 	    fprintf(stderr,"Tokener at %s",s);
@@ -273,7 +273,11 @@ yylex(void)
     case ':':
 	tmp = *s++;
 	XOP(tmp);
+#ifdef EBCDIC
+    case 7:
+#else
     case 127:
+#endif
 	s++;
 	XTERM('}');
     case '}':
@@ -701,8 +705,15 @@ yylex(void)
 	}
 	if (strEQ(d,"sub"))
 	    XTERM(SUB);
-	if (strEQ(d,"sprintf"))
-	    XTERM(SPRINTF);
+	if (strEQ(d,"sprintf")) {
+            /* In old awk, { print sprintf("str%sg"),"in" } prints
+             * "string"; in new awk, "in" is not considered an argument to
+             * sprintf, so the statement breaks.  To support both, the
+             * grammar treats arguments to SPRINTF_OLD like old awk,
+             * SPRINTF_NEW like new.  Here we return the appropriate one.
+             */
+	    XTERM(old_awk ? SPRINTF_OLD : SPRINTF_NEW);
+        }
 	if (strEQ(d,"sqrt")) {
 	    yylval = OSQRT;
 	    XTERM(FUN1);

@@ -64,6 +64,7 @@ sub copy {
 	&& !$to_a_handle
 	&& !($from_a_handle && $^O eq 'os2' )	# OS/2 cannot handle handles
 	&& !($from_a_handle && $^O eq 'mpeix')	# and neither can MPE/iX.
+	&& !($from_a_handle && $^O eq 'MSWin32')
        )	
     {
 	return syscopy($from, $to);
@@ -186,6 +187,11 @@ unless (defined &syscopy) {
 	    # preserve MPE file attributes.
 	    return system('/bin/cp', '-f', $_[0], $_[1]) == 0;
 	};
+    } elsif ($^O eq 'MSWin32') {
+	*syscopy = sub {
+	    return 0 unless @_ == 2;
+	    return Win32::CopyFile(@_, 1);
+	};
     } else {
 	*syscopy = \&copy;
     }
@@ -235,7 +241,7 @@ B<Note that passing in
 files as handles instead of names may lead to loss of information
 on some operating systems; it is recommended that you use file
 names whenever possible.>  Files are opened in binary mode where
-applicable.  To get a consistent behavour when copying from a
+applicable.  To get a consistent behaviour when copying from a
 filehandle to a file, use C<binmode> on the filehandle.
 
 An optional third parameter can be used to specify the buffer
@@ -272,9 +278,9 @@ second parameter, preserving OS-specific attributes and file
 structure.  For Unix systems, this is equivalent to the simple
 C<copy> routine.  For VMS systems, this calls the C<rmscopy>
 routine (see below).  For OS/2 systems, this calls the C<syscopy>
-XSUB directly.
+XSUB directly. For Win32 systems, this calls C<Win32::CopyFile>.
 
-=head2 Special behavior if C<syscopy> is defined (VMS and OS/2)
+=head2 Special behaviour if C<syscopy> is defined (OS/2, VMS and Win32)
 
 If both arguments to C<copy> are not file handles,
 then C<copy> will perform a "system copy" of
@@ -336,7 +342,7 @@ $! will be set if an error was encountered.
 =head1 AUTHOR
 
 File::Copy was written by Aaron Sherman I<E<lt>ajs@ajs.comE<gt>> in 1995,
-and updated by Charles Bailey I<E<lt>bailey@genetics.upenn.eduE<gt>> in 1996.
+and updated by Charles Bailey I<E<lt>bailey@newman.upenn.eduE<gt>> in 1996.
 
 =cut
 

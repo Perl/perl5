@@ -32,7 +32,7 @@ does so by updating the %FIELDS hash in the calling package.
 If a typed lexical variable holding a reference is used to access a
 hash element and the %FIELDS hash of the given type exists, then the
 operation is turned into an array access at compile time.  The %FIELDS
-hash map from hash element names to the array indices.  If the hash
+hash maps from hash element names to the array indices.  If the hash
 element is not present in the %FIELDS hash, then a compile-time error
 is signaled.
 
@@ -57,7 +57,7 @@ constructor like this does the job:
   {
       my $class = shift;
       no strict 'refs';
-      my $self = bless [\%{"$class\::FIELDS"], $class;
+      my $self = bless [\%{"$class\::FIELDS"}], $class;
       $self;
   }
 
@@ -111,7 +111,7 @@ sub inherit  # called by base.pm
 {
     my($derived, $base) = @_;
 
-    if (defined %{"$derived\::FIELDS"}) {
+    if (keys %{"$derived\::FIELDS"}) {
 	 require Carp;
          Carp::croak("Inherited %FIELDS can't override existing %FIELDS");
     } else {
@@ -132,7 +132,7 @@ sub _dump  # sometimes useful for debugging
 {
    for my $pkg (sort keys %attr) {
       print "\n$pkg";
-      if (defined @{"$pkg\::ISA"}) {
+      if (@{"$pkg\::ISA"}) {
          print " (", join(", ", @{"$pkg\::ISA"}), ")";
       }
       print "\n";

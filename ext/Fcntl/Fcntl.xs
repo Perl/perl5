@@ -1,3 +1,4 @@
+#define PERL_NO_GET_CONTEXT
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
@@ -12,6 +13,10 @@
 #if defined(__GNUC__) && defined(__cplusplus) && defined(WIN32)
 #undef _NO_OLDNAMES
 #endif 
+#endif
+
+#ifdef I_UNISTD
+#include <unistd.h>
 #endif
 
 /* This comment is a kludge to get metaconfig to see the symbols
@@ -42,6 +47,30 @@ constant(char *name, int arg)
     switch (*name) {
     case 'F':
 	if (strnEQ(name, "F_", 2)) {
+	    if (strEQ(name, "F_ALLOCSP"))
+#ifdef F_ALLOCSP
+	        return F_ALLOCSP;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "F_ALLOCSP64"))
+#ifdef F_ALLOCSP64
+	        return F_ALLOCSP64;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "F_COMPAT"))
+#ifdef F_COMPAT
+	        return F_COMPAT;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "F_DUP2FD"))
+#ifdef F_DUP2FD
+	        return F_DUP2FD;
+#else
+	        goto not_there;
+#endif
 	    if (strEQ(name, "F_DUPFD"))
 #ifdef F_DUPFD
 	        return F_DUPFD;
@@ -51,6 +80,30 @@ constant(char *name, int arg)
 	    if (strEQ(name, "F_EXLCK"))
 #ifdef F_EXLCK
 	        return F_EXLCK;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "F_FREESP"))
+#ifdef F_FREESP
+	        return F_FREESP;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "F_FREESP64"))
+#ifdef F_FREESP64
+	        return F_FREESP64;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "F_FSYNC"))
+#ifdef F_FSYNC
+	        return F_FSYNC;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "F_FSYNC64"))
+#ifdef F_FSYNC64
+	        return F_FSYNC64;
 #else
 	        goto not_there;
 #endif
@@ -72,9 +125,21 @@ constant(char *name, int arg)
 #else
 	        goto not_there;
 #endif
+	    if (strEQ(name, "F_GETLK64"))
+#ifdef F_GETLK64
+	        return F_GETLK64;
+#else
+	        goto not_there;
+#endif
 	    if (strEQ(name, "F_GETOWN"))
 #ifdef F_GETOWN
 	        return F_GETOWN;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "F_NODNY"))
+#ifdef F_NODNY
+	        return F_NODNY;
 #else
 	        goto not_there;
 #endif
@@ -84,9 +149,33 @@ constant(char *name, int arg)
 #else
 	        goto not_there;
 #endif
+	    if (strEQ(name, "F_RDACC"))
+#ifdef F_RDACC
+	        return F_RDACC;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "F_RDDNY"))
+#ifdef F_RDDNY
+	        return F_RDDNY;
+#else
+	        goto not_there;
+#endif
 	    if (strEQ(name, "F_RDLCK"))
 #ifdef F_RDLCK
 	        return F_RDLCK;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "F_RWACC"))
+#ifdef F_RWACC
+	        return F_RWACC;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "F_RWDNY"))
+#ifdef F_RWDNY
+	        return F_RWDNY;
 #else
 	        goto not_there;
 #endif
@@ -108,15 +197,33 @@ constant(char *name, int arg)
 #else
 	        goto not_there;
 #endif
+	    if (strEQ(name, "F_SETLK64"))
+#ifdef F_SETLK64
+	        return F_SETLK64;
+#else
+	        goto not_there;
+#endif
 	    if (strEQ(name, "F_SETLKW"))
 #ifdef F_SETLKW
 	        return F_SETLKW;
 #else
 	        goto not_there;
 #endif
+	    if (strEQ(name, "F_SETLKW64"))
+#ifdef F_SETLKW64
+	        return F_SETLKW64;
+#else
+	        goto not_there;
+#endif
 	    if (strEQ(name, "F_SETOWN"))
 #ifdef F_SETOWN
 	        return F_SETOWN;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "F_SHARE"))
+#ifdef F_SHARE
+	        return F_SHARE;
 #else
 	        goto not_there;
 #endif
@@ -129,6 +236,24 @@ constant(char *name, int arg)
 	    if (strEQ(name, "F_UNLCK"))
 #ifdef F_UNLCK
 	        return F_UNLCK;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "F_UNSHARE"))
+#ifdef F_UNSHARE
+	        return F_UNSHARE;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "F_WRACC"))
+#ifdef F_WRACC
+	        return F_WRACC;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "F_WRDNY"))
+#ifdef F_WRDNY
+	        return F_WRDNY;
 #else
 	        goto not_there;
 #endif
@@ -171,9 +296,21 @@ constant(char *name, int arg)
 #else
 	    goto not_there;
 #endif
+        if (strEQ(name, "FDSYNC"))
+#ifdef FDSYNC
+            return FDSYNC;
+#else
+            goto not_there;
+#endif
         if (strEQ(name, "FEXCL"))
 #ifdef FEXCL
             return FEXCL;
+#else
+            goto not_there;
+#endif
+        if (strEQ(name, "FLARGEFILE"))
+#ifdef FLARGEFILE
+            return FLARGEFILE;
 #else
             goto not_there;
 #endif
@@ -186,6 +323,12 @@ constant(char *name, int arg)
         if (strEQ(name, "FNONBLOCK"))
 #ifdef FNONBLOCK
             return FNONBLOCK;
+#else
+            goto not_there;
+#endif
+        if (strEQ(name, "FRSYNC"))
+#ifdef FRSYNC
+            return FRSYNC;
 #else
             goto not_there;
 #endif
@@ -289,6 +432,12 @@ constant(char *name, int arg)
 #else
 	        goto not_there;
 #endif
+	    if (strEQ(name, "O_LARGEFILE"))
+#ifdef O_LARGEFILE
+	        return O_LARGEFILE;
+#else
+	        goto not_there;
+#endif
 	    if (strEQ(name, "O_NDELAY"))
 #ifdef O_NDELAY
 	        return O_NDELAY;
@@ -358,6 +507,26 @@ constant(char *name, int arg)
 	} else
 	  goto not_there;
 	break;
+    case 'S':
+      if (strEQ(name, "SEEK_CUR"))
+#ifdef SEEK_CUR
+	return SEEK_CUR;
+#else
+        goto not_there;
+#endif
+      if (strEQ(name, "SEEK_END"))
+#ifdef SEEK_END
+	return SEEK_END;
+#else
+        goto not_there;
+#endif
+      if (strEQ(name, "SEEK_SET"))
+#ifdef SEEK_SET
+	return SEEK_SET;
+#else
+        goto not_there;
+#endif
+        break;
     }
     errno = EINVAL;
     return 0;
