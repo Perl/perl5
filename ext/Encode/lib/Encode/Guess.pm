@@ -2,7 +2,7 @@ package Encode::Guess;
 use strict;
 
 use Encode qw(:fallbacks find_encoding);
-our $VERSION = do { my @r = (q$Revision: 1.3 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.4 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 my $Canon = 'Guess';
 our $DEBUG = 0;
@@ -133,6 +133,7 @@ Encode::Guess -- Guesses encoding from data
 
   # if you are sure $data won't contain anything bogus
 
+  use Encode;
   use Encode::Guess qw/euc-jp shiftjis 7bit-jis/;
   my $utf8 = decode("Guess", $data);
   my $data = encode("Guess", $utf8);   # this doesn't work!
