@@ -1009,11 +1009,11 @@ Manipulate threads in Perl (for old code only)
 
 =item Thread::Queue
 
-Thread-safe queues (for old code only)
+Thread-safe queues
 
 =item Thread::Semaphore
 
-Thread-safe semaphores (for old code only)
+Thread-safe semaphores
 
 =item Tie::Array
 

@@ -116,7 +116,7 @@ C<lock(\$a)> is equivalent to C<lock($a)>, while C<lock(\\$a)> is not.
 
 Note that you cannot explicitly unlock a variable; you can only wait
 for the lock to go out of scope. If you need more fine-grained
-control, see L<threads::shared::semaphore>.
+control, see L<Thread::Semaphore>.
 
 =item cond_wait VARIABLE
 

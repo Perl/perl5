@@ -1,23 +1,29 @@
-package threads::shared::semaphore;
-
-use threads::shared;
-
-our $VERSION = '1.00';
+package Thread::Semaphore;
+use Thread qw(cond_wait cond_broadcast);
 
 =head1 NAME
 
-threads::shared::semaphore - thread-safe semaphores
+Thread::Semaphore - thread-safe semaphores (5.005-threads)
+
+=head1 CAVEAT
+
+This Perl installation is using the old unsupported "5.005 threads".
+Use of the old threads model is discouraged.
+
+For the whole story about the development of threads in Perl, and why
+you should B<not> be using "old threads" unless you know what you're
+doing, see the CAVEAT of the C<Thread> module.
 
 =head1 SYNOPSIS
 
-    use threads::shared::semaphore;
-    my $s = new threads::shared::semaphore;
+    use Thread::Semaphore;
+    my $s = new Thread::Semaphore;
     $s->up;	# Also known as the semaphore V -operation.
     # The guarded section is here
     $s->down;	# Also known as the semaphore P -operation.
 
     # The default semaphore value is 1.
-    my $s = new threads::shared::semaphore($initial_value);
+    my $s = new Thread::Semaphore($initial_value);
     $s->up($up_value);
     $s->down($up_value);
 
@@ -28,8 +34,8 @@ unlike locks, aren't tied to particular scalars, and so may be used to
 control access to anything you care to use them for.
 
 Semaphores don't limit their values to zero or one, so they can be used to
-control access to some resource that there may be more than one of. (For
-example, filehandles). Increment and decrement amounts aren't fixed at one
+control access to some resource that may have more than one of. (For
+example, filehandles) Increment and decrement amounts aren't fixed at one
 either, so threads can reserve or return multiple resources at once.
 
 =head1 FUNCTIONS AND METHODS
@@ -48,7 +54,7 @@ number. If no number is passed, the semaphore's count is set to one.
 =item down NUMBER
 
 The C<down> method decreases the semaphore's count by the specified number,
-or by one if no number has been specified. If the semaphore's count would drop
+or one if no number has been specified. If the semaphore's count would drop
 below zero, this method will block until such time that the semaphore's
 count is equal to or larger than the amount you're C<down>ing the
 semaphore's count by.
@@ -58,9 +64,9 @@ semaphore's count by.
 =item up NUMBER
 
 The C<up> method increases the semaphore's count by the number specified,
-or by one if no number has been specified. This will unblock any thread blocked
+or one if no number's been specified. This will unblock any thread blocked
 trying to C<down> the semaphore if the C<up> raises the semaphore count
-above the amount that the C<down>s are trying to decrement it by.
+above what the C<down>s are trying to decrement it by.
 
 =back
 
@@ -68,23 +74,21 @@ above the amount that the C<down>s are trying to decrement it by.
 
 sub new {
     my $class = shift;
-    my $val : shared = @_ ? shift : 1;
+    my $val = @_ ? shift : 1;
     bless \$val, $class;
 }
 
-sub down {
+sub down : locked : method {
     my $s = shift;
-    lock($$s);
     my $inc = @_ ? shift : 1;
-    cond_wait $$s until $$s >= $inc;
+    cond_wait $s until $$s >= $inc;
     $$s -= $inc;
 }
 
-sub up {
+sub up : locked : method {
     my $s = shift;
-    lock($$s);
     my $inc = @_ ? shift : 1;
-    ($$s += $inc) > 0 and cond_broadcast $$s;
+    ($$s += $inc) > 0 and cond_broadcast $s;
 }
 
 1;

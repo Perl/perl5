@@ -682,9 +682,9 @@ synchronization issues.  They're pretty straightforward, and look like
 this:
 
     use threads; 
-    use threads::shared::queue;
+    use Thread::Queue;
 
-    my $DataQueue = threads::shared::queue->new; 
+    my $DataQueue = Thread::Queue->new; 
     $thr = threads->new(sub { 
         while ($DataElement = $DataQueue->dequeue) { 
             print "Popped $DataElement off the queue\n";
@@ -698,7 +698,7 @@ this:
     $DataQueue->enqueue(undef);
     $thr->join;
 
-You create the queue with C<new threads::shared::queue>.  Then you can
+You create the queue with C<new Thread::Queue>.  Then you can
 add lists of scalars onto the end with enqueue(), and pop scalars off
 the front of it with dequeue().  A queue has no fixed size, and can grow
 as needed to hold everything pushed on to it.
@@ -723,9 +723,9 @@ semaphore's current count would decrement below zero.  This program
 gives a quick demonstration:
 
     use threads qw(yield); 
-    use threads::shared::semaphore; 
+    use Thread::Semaphore; 
 
-    my $semaphore = new threads::shared::semaphore; 
+    my $semaphore = new Thread::Semaphore; 
     my $GlobalVariable : shared = 0;
 
     $thr1 = new threads \&sample_sub, 1; 
@@ -768,8 +768,8 @@ one, and up() increments by one. However, we can override any or all
 of these defaults simply by passing in different values:
 
     use threads;
-    use threads::shared::semaphore;
-    my $semaphore = threads::shared::semaphore->new(5);
+    use Thread::Semaphore;
+    my $semaphore = Thread::Semaphore->new(5);
                     # Creates a semaphore with the counter set to five
 
     $thr1 = threads->new(\&sub1);
@@ -882,9 +882,9 @@ things we've covered.  This program finds prime numbers using threads.
     4  use strict;
     5
     6  use threads;
-    7  use threads::shared::queue;
+    7  use Thread::Queue;
     8
-    9  my $stream = new threads::shared::queue;
+    9  my $stream = new Thread::Queue;
     10 my $kid    = new threads(\&check_num, $stream, 2);
     11
     12 for my $i ( 3 .. 1000 ) {
@@ -897,7 +897,7 @@ things we've covered.  This program finds prime numbers using threads.
     19 sub check_num {
     20     my ($upstream, $cur_prime) = @_;
     21     my $kid;
-    22     my $downstream = new threads::shared::queue;
+    22     my $downstream = new Thread::Queue;
     23     while (my $num = $upstream->dequeue) {
     24         next unless $num % $cur_prime;
     25         if ($kid) {

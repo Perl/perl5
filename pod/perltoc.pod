@@ -2674,13 +2674,13 @@ Memoize::NDBM_File, Memoize::SDBM_File, Memoize::Storable, NDBM_File, NEXT,
 Net::Cmd, Net::Config, Net::Domain, Net::FTP, Net::NNTP, Net::Netrc,
 Net::POP3, Net::Ping, Net::SMTP, Net::Time, Net::hostent, Net::libnetFAQ,
 Net::netent, Net::protoent, Net::servent, O, ODBM_File, Opcode, POSIX,
-PerlIO, Pod::Checker, Pod::Find, Pod::Functions, Pod::Html,
-Pod::InputObjects, Pod::LaTeX, Pod::Man, Pod::ParseLink, Pod::ParseUtils,
-Pod::Parser, Pod::Plainer, Pod::Select, Pod::Text, Pod::Text::Color,
-Pod::Text::Overstrike, Pod::Text::Termcap, Pod::Usage, SDBM_File, Safe,
-Search::Dict, SelectSaver, SelfLoader, Shell, Socket, Storable, Switch,
-Symbol, Term::ANSIColor, Term::Cap, Term::Complete, Term::ReadLine, Test,
-Test::Builder, Test::Harness, Test::Harness::Assert,
+PerlIO, PerlIO::via::QuotedPrint, Pod::Checker, Pod::Find, Pod::Functions,
+Pod::Html, Pod::InputObjects, Pod::LaTeX, Pod::Man, Pod::ParseLink,
+Pod::ParseUtils, Pod::Parser, Pod::Plainer, Pod::Select, Pod::Text,
+Pod::Text::Color, Pod::Text::Overstrike, Pod::Text::Termcap, Pod::Usage,
+SDBM_File, Safe, Search::Dict, SelectSaver, SelfLoader, Shell, Socket,
+Storable, Switch, Symbol, Term::ANSIColor, Term::Cap, Term::Complete,
+Term::ReadLine, Test, Test::Builder, Test::Harness, Test::Harness::Assert,
 Test::Harness::Iterator, Test::Harness::Straps, Test::More, Test::Simple,
 Test::Tutorial, Text::Abbrev, Text::Balanced, Text::ParseWords,
 Text::Soundex, Text::Tabs, Text::Wrap, Thread, Thread::Queue,
@@ -8313,37 +8313,6 @@ method, locked
 
 =back
 
-=head2 threadshared::queue, threads::shared::queue - thread-safe queues
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item FUNCTIONS AND METHODS
-
-new, enqueue LIST, dequeue, dequeue_nb, pending
-
-=item SEE ALSO
-
-=back
-
-=head2 threadshared::semaphore, threads::shared::semaphore - thread-safe
-semaphores
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item FUNCTIONS AND METHODS
-
-new, new NUMBER, down, down NUMBER, up, up NUMBER
-
-=back
-
 =head2 threadshared::shared, threads::shared - Perl extension for sharing
 data structures between threads
 
@@ -9049,8 +9018,8 @@ from perl
 =item DESCRIPTION
 
 $thread = threads->create(function, LIST), $thread->join, $thread->detach,
-threads->self, $thread->tid, threads->yield();, threads->list();, async
-BLOCK;
+threads->self, $thread->tid, threads->object( tid ), threads->yield();,
+threads->list();, async BLOCK;
 
 =item WARNINGS
 
@@ -9090,37 +9059,6 @@ cond_broadcast VARIABLE
 =item AUTHOR
 
 =item SEE ALSO
-
-=back
-
-=head2 threadshared::queue, threads::shared::queue - thread-safe queues
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item FUNCTIONS AND METHODS
-
-new, enqueue LIST, dequeue, dequeue_nb, pending
-
-=item SEE ALSO
-
-=back
-
-=head2 threadshared::semaphore, threads::shared::semaphore - thread-safe
-semaphores
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item FUNCTIONS AND METHODS
-
-new, new NUMBER, down, down NUMBER, up, up NUMBER
 
 =back
 
@@ -18975,11 +18913,9 @@ join, eval, detach, equal, tid, flags, done
 
 =back
 
-=head2 Thread::Queue - thread-safe queues (for old code only)
+=head2 Thread::Queue - thread-safe queues
 
 =over 4
-
-=item CAVEAT
 
 =item SYNOPSIS
 
@@ -18993,11 +18929,9 @@ new, enqueue LIST, dequeue, dequeue_nb, pending
 
 =back
 
-=head2 Thread::Semaphore - thread-safe semaphores (for old code only)
+=head2 Thread::Semaphore - thread-safe semaphores
 
 =over 4
-
-=item CAVEAT
 
 =item SYNOPSIS
 

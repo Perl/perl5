@@ -5,16 +5,16 @@ BEGIN {
     push @INC ,'../lib';
     require Config; import Config;
     unless ($Config{'useithreads'}) {
-        print "1..0 # Skip: might still hang\n";
+        print "1..0 # Skip: no ithreads\n";
         exit 0;
     }
 }
 
 use strict;
 use threads;
-use threads::shared::queue;
+use Thread::Queue;
 
-my $q = new threads::shared::queue;
+my $q = new Thread::Queue;
 $|++;
 print "1..26\n";
 
