@@ -471,8 +471,6 @@ taken for something more important.)
 Consider using "real" multidimensional arrays as described
 in L<perllol>.
 
-=item $OFMT
-
 =item $#
 
 The output format for printed numbers.  This variable is a half-hearted
