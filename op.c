@@ -1416,6 +1416,8 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	    op_null(((LISTOP*)cUNOPo->op_first)->op_first);/* disable pushmark */
 	    break;
 	}
+	else if (o->op_private & OPpENTERSUB_NOMOD)
+	    return o;
 	else {				/* lvalue subroutine call */
 	    o->op_private |= OPpLVAL_INTRO;
 	    PL_modcount = RETURN_UNLIMITED_NUMBER;
@@ -1886,7 +1888,7 @@ S_dup_attrlist(pTHX_ OP *o)
 }
 
 STATIC void
-S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs)
+S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs, bool for_my)
 {
     SV *stashsv;
 
@@ -1899,18 +1901,98 @@ S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs)
 	stashsv = &PL_sv_no;
 
 #define ATTRSMODULE "attributes"
+#define ATTRSMODULE_PM "attributes.pm"
 
-    Perl_load_module(aTHX_ PERL_LOADMOD_IMPORT_OPS,
-		     newSVpvn(ATTRSMODULE, sizeof(ATTRSMODULE)-1),
-		     Nullsv,
-		     prepend_elem(OP_LIST,
-				  newSVOP(OP_CONST, 0, stashsv),
-				  prepend_elem(OP_LIST,
-					       newSVOP(OP_CONST, 0,
-						       newRV(target)),
-					       dup_attrlist(attrs))));
+    if (for_my) {
+	SV **svp;
+	/* Don't force the C<use> if we don't need it. */
+	svp = hv_fetch(GvHVn(PL_incgv), ATTRSMODULE_PM,
+		       sizeof(ATTRSMODULE_PM)-1, 0);
+	if (svp && *svp != &PL_sv_undef)
+	    ; 		/* already in %INC */
+	else
+	    Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT,
+			     newSVpvn(ATTRSMODULE, sizeof(ATTRSMODULE)-1),
+			     Nullsv);
+    }
+    else {
+	Perl_load_module(aTHX_ PERL_LOADMOD_IMPORT_OPS,
+			 newSVpvn(ATTRSMODULE, sizeof(ATTRSMODULE)-1),
+			 Nullsv,
+			 prepend_elem(OP_LIST,
+				      newSVOP(OP_CONST, 0, stashsv),
+				      prepend_elem(OP_LIST,
+						   newSVOP(OP_CONST, 0,
+							   newRV(target)),
+						   dup_attrlist(attrs))));
+    }
     LEAVE;
 }
+
+STATIC void
+S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
+{
+    OP *pack, *imop, *arg;
+    SV *meth, *stashsv;
+
+    if (!attrs)
+	return;
+
+    assert(target->op_type == OP_PADSV ||
+	   target->op_type == OP_PADHV ||
+	   target->op_type == OP_PADAV);
+
+    /* Ensure that attributes.pm is loaded. */
+    apply_attrs(stash, pad_sv(target->op_targ), attrs, TRUE);
+
+    /* Need package name for method call. */
+    pack = newSVOP(OP_CONST, 0, newSVpvn(ATTRSMODULE, sizeof(ATTRSMODULE)-1));
+
+    /* Build up the real arg-list. */
+    if (stash)
+	stashsv = newSVpv(HvNAME(stash), 0);
+    else
+	stashsv = &PL_sv_no;
+    arg = newOP(OP_PADSV, 0);
+    arg->op_targ = target->op_targ;
+    arg = prepend_elem(OP_LIST,
+		       newSVOP(OP_CONST, 0, stashsv),
+		       prepend_elem(OP_LIST,
+				    newUNOP(OP_REFGEN, 0,
+					    mod(arg, OP_REFGEN)),
+				    dup_attrlist(attrs)));
+
+    /* Fake up a method call to import */
+    meth = newSVpvn("import", 6);
+    (void)SvUPGRADE(meth, SVt_PVIV);
+    (void)SvIOK_on(meth);
+    PERL_HASH(SvUVX(meth), SvPVX(meth), SvCUR(meth));
+    imop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL|OPf_WANT_VOID,
+		   append_elem(OP_LIST,
+			       prepend_elem(OP_LIST, pack, list(arg)),
+			       newSVOP(OP_METHOD_NAMED, 0, meth)));
+    imop->op_private |= OPpENTERSUB_NOMOD;
+
+    /* Combine the ops. */
+    *imopsp = append_elem(OP_LIST, *imopsp, imop);
+}
+
+/*
+=notfor apidoc apply_attrs_string
+
+Attempts to apply a list of attributes specified by the C<attrstr> and
+C<len> arguments to the subroutine identified by the C<cv> argument which
+is expected to be associated with the package identified by the C<stashpv>
+argument (see L<attributes>).  It gets this wrong, though, in that it
+does not correctly identify the boundaries of the individual attribute
+specifications within C<attrstr>.  This is not really intended for the
+public API, but has to be listed here for systems such as AIX which
+need an explicit export list for symbols.  (It's called from XS code
+in support of the C<ATTRS:> keyword from F<xsubpp>.)  Patches to fix it
+to respect attribute syntax properly would be welcome.
+
+=cut
+*/
 
 void
 Perl_apply_attrs_string(pTHX_ char *stashpv, CV *cv,
@@ -1944,7 +2026,7 @@ Perl_apply_attrs_string(pTHX_ char *stashpv, CV *cv,
 }
 
 STATIC OP *
-S_my_kid(pTHX_ OP *o, OP *attrs)
+S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
 {
     OP *kid;
     I32 type;
@@ -1955,7 +2037,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs)
     type = o->op_type;
     if (type == OP_LIST) {
 	for (kid = cLISTOPo->op_first; kid; kid = kid->op_sibling)
-	    my_kid(kid, attrs);
+	    my_kid(kid, attrs, imopsp);
     } else if (type == OP_UNDEF) {
 	return o;
     } else if (type == OP_RV2SV ||	/* "our" declaration */
@@ -1969,11 +2051,12 @@ S_my_kid(pTHX_ OP *o, OP *attrs)
                         (type == OP_RV2SV ? GvSV(gv) :
                          type == OP_RV2AV ? (SV*)GvAV(gv) :
                          type == OP_RV2HV ? (SV*)GvHV(gv) : (SV*)gv),
-                        attrs);
+                        attrs, FALSE);
         }
 	o->op_private |= OPpOUR_INTRO;
 	return o;
-    } else if (type != OP_PADSV &&
+    }
+    else if (type != OP_PADSV &&
 	     type != OP_PADAV &&
 	     type != OP_PADHV &&
 	     type != OP_PUSHMARK)
@@ -1985,7 +2068,6 @@ S_my_kid(pTHX_ OP *o, OP *attrs)
     }
     else if (attrs && type != OP_PUSHMARK) {
 	HV *stash;
-	SV *padsv;
 	SV **namesvp;
 
 	PL_in_my = FALSE;
@@ -1997,8 +2079,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs)
 	    stash = SvSTASH(*namesvp);
 	else
 	    stash = PL_curstash;
-	padsv = PAD_SV(o->op_targ);
-	apply_attrs(stash, padsv, attrs);
+	apply_attrs_my(stash, o, attrs, imopsp);
     }
     o->op_flags |= OPf_MOD;
     o->op_private |= OPpLVAL_INTRO;
@@ -2008,11 +2089,24 @@ S_my_kid(pTHX_ OP *o, OP *attrs)
 OP *
 Perl_my_attrs(pTHX_ OP *o, OP *attrs)
 {
+    OP *rops = Nullop;
+    int maybe_scalar = 0;
+
     if (o->op_flags & OPf_PARENS)
 	list(o);
+    else
+	maybe_scalar = 1;
     if (attrs)
 	SAVEFREEOP(attrs);
-    o = my_kid(o, attrs);
+    o = my_kid(o, attrs, &rops);
+    if (rops) {
+	if (maybe_scalar && o->op_type == OP_PADSV) {
+	    o = scalar(append_list(OP_LIST, (LISTOP*)rops, (LISTOP*)o));
+	    o->op_private |= OPpLVAL_INTRO;
+	}
+	else
+	    o = append_list(OP_LIST, (LISTOP*)o, (LISTOP*)rops);
+    }
     PL_in_my = FALSE;
     PL_in_my_stash = Nullhv;
     return o;
@@ -2021,7 +2115,7 @@ Perl_my_attrs(pTHX_ OP *o, OP *attrs)
 OP *
 Perl_my(pTHX_ OP *o)
 {
-    return my_kid(o, Nullop);
+    return my_attrs(o, Nullop);
 }
 
 OP *
@@ -3474,6 +3568,11 @@ S_list_assignment(pTHX_ register OP *o)
 	return FALSE;
     }
 
+    if (o->op_type == OP_LIST &&
+	(o->op_flags & OPf_WANT) == OPf_WANT_SCALAR &&
+	o->op_private & OPpLVAL_INTRO)
+	return FALSE;
+
     if (o->op_type == OP_LIST || o->op_flags & OPf_PARENS ||
 	o->op_type == OP_RV2AV || o->op_type == OP_RV2HV ||
 	o->op_type == OP_ASLICE || o->op_type == OP_HSLICE)
@@ -4766,7 +4865,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    else
 		stash = PL_curstash;
 	}
-	apply_attrs(stash, rcv, attrs);
+	apply_attrs(stash, rcv, attrs, FALSE);
     }
     if (cv) {				/* must reuse cv if autoloaded */
 	if (!block) {

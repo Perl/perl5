@@ -84,8 +84,8 @@ modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 			continue;
 		    }
 		    break;
-		case 's':
-      if (strEQ(name, "unique")) {
+		case 'u':
+		    if (strEQ(name, "unique")) {
 			if (negated)
 			    GvUNIQUE_off(CvGV((CV*)sv));
 			else
@@ -99,11 +99,17 @@ modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 	    break;
 	default:
 	    switch ((int)len) {
-              case 6:
+	    case 6:
 		switch (*name) {
-                  case 's':
-      if (strEQ(name, "unique")) {
-                        /* toke.c has already marked as GVf_UNIQUE */
+		case 'u':
+		    if (strEQ(name, "unique")) {
+			if (SvTYPE(sv) == SVt_PVGV) {
+			    if (negated)
+				GvUNIQUE_off(sv);
+			    else
+				GvUNIQUE_on(sv);
+			}
+			/* Hope this came from toke.c if not a GV. */
                         continue;
                     }
                 }
@@ -190,7 +196,11 @@ usage:
 	if (cvflags & CVf_METHOD)
 	    XPUSHs(sv_2mortal(newSVpvn("method", 6)));
         if (GvUNIQUE(CvGV((CV*)sv)))
-     XPUSHs(sv_2mortal(newSVpvn("unique", 6)));
+	    XPUSHs(sv_2mortal(newSVpvn("unique", 6)));
+	break;
+    case SVt_PVGV:
+	if (GvUNIQUE(sv))
+	    XPUSHs(sv_2mortal(newSVpvn("unique", 6)));
 	break;
     default:
 	break;

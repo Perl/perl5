@@ -1033,9 +1033,10 @@ STATIC void	S_cv_dump(pTHX_ CV *cv);
 #  endif
 STATIC CV*	S_cv_clone2(pTHX_ CV *proto, CV *outside);
 STATIC bool	S_scalar_mod_type(pTHX_ OP *o, I32 type);
-STATIC OP *	S_my_kid(pTHX_ OP *o, OP *attrs);
+STATIC OP *	S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp);
 STATIC OP *	S_dup_attrlist(pTHX_ OP *o);
-STATIC void	S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs);
+STATIC void	S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs, bool for_my);
+STATIC void	S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp);
 #  if defined(PL_OP_SLAB_ALLOC)
 STATIC void*	S_Slab_Alloc(pTHX_ int m, size_t sz);
 #  endif

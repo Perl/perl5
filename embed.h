@@ -928,6 +928,7 @@
 #define my_kid			S_my_kid
 #define dup_attrlist		S_dup_attrlist
 #define apply_attrs		S_apply_attrs
+#define apply_attrs_my		S_apply_attrs_my
 #  if defined(PL_OP_SLAB_ALLOC)
 #define Slab_Alloc		S_Slab_Alloc
 #  endif
@@ -2434,9 +2435,10 @@
 #  endif
 #define cv_clone2(a,b)		S_cv_clone2(aTHX_ a,b)
 #define scalar_mod_type(a,b)	S_scalar_mod_type(aTHX_ a,b)
-#define my_kid(a,b)		S_my_kid(aTHX_ a,b)
+#define my_kid(a,b,c)		S_my_kid(aTHX_ a,b,c)
 #define dup_attrlist(a)		S_dup_attrlist(aTHX_ a)
-#define apply_attrs(a,b,c)	S_apply_attrs(aTHX_ a,b,c)
+#define apply_attrs(a,b,c,d)	S_apply_attrs(aTHX_ a,b,c,d)
+#define apply_attrs_my(a,b,c,d)	S_apply_attrs_my(aTHX_ a,b,c,d)
 #  if defined(PL_OP_SLAB_ALLOC)
 #define Slab_Alloc(a,b)		S_Slab_Alloc(aTHX_ a,b)
 #  endif

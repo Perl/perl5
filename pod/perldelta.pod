@@ -65,6 +65,14 @@ change will probably break backward compatibility with compiled
 modules.  The change was made to make Perl more compliant with other
 applications like modperl which are using the AIX native interface.
 
+=head2 Attributes for C<my> variables now handled at run-time.
+
+The C<my EXPR : ATTRS> syntax now applies variable attributes at
+run-time.  (Subroutine and C<our> variables still get attributes applied
+at compile-time.)  See L<attributes> for additional details.  In particular,
+however, this allows variable attributes to be useful for C<tie> interfaces,
+which was a deficiency of earlier releaes.
+
 =head2 Socket Extension Dynamic in VMS
 
 The Socket extension is now dynamically loaded instead of being
@@ -681,7 +689,7 @@ to Quoted-Printable.  See L<PerlIO::Via>.
 =item *
 
 C<Pod::ParseLink>, by Russ Allbery, has been added,
-to parse L&lt;&gt; links in pods as described in the new
+to parse LZ<><> links in pods as described in the new
 perlpodspec.
 
 =item *
@@ -2221,7 +2229,8 @@ Made possible to propagate customised exceptions via croak()ing.
 
 =item *
 
-Now xsubs can have attributes just like subs.
+Now xsubs can have attributes just like subs.  (Well, at least the
+built-in attributes.)
 
 =item *
 
@@ -2508,15 +2517,6 @@ Self-tying of arrays and hashes is broken in rather deep and
 hard-to-fix ways.  As a stop-gap measure to avoid people from getting
 frustrated at the mysterious results (core dumps, most often) it is
 for now forbidden (you will get a fatal error even from an attempt).
-
-=head2 Variable Attributes are not Currently Usable for Tieing
-
-This limitation will hopefully be fixed in future.  (Subroutine
-attributes work fine for tieing, see L<Attribute::Handlers>).
-
-One way to run into this limitation is to have a loop variable with
-attributes within a loop: the tie is called only once, not for each
-iteration of the loop.
 
 =head2 Building Extensions Can Fail Because Of Largefiles
 

@@ -1123,7 +1123,7 @@ Ap	|CV*	|gv_handler	|HV* stash|I32 id
 p	|OP*	|append_elem	|I32 optype|OP* head|OP* tail
 p	|OP*	|append_list	|I32 optype|LISTOP* first|LISTOP* last
 p	|I32	|apply		|I32 type|SV** mark|SV** sp
-Ap	|void	|apply_attrs_string|char *stashpv|CV *cv|char *attrstr|STRLEN len
+ApM	|void	|apply_attrs_string|char *stashpv|CV *cv|char *attrstr|STRLEN len
 Ap	|SV*	|avhv_delete_ent|AV *ar|SV* keysv|I32 flags|U32 hash
 Ap	|bool	|avhv_exists_ent|AV *ar|SV* keysv|U32 hash
 Ap	|SV**	|avhv_fetch_ent	|AV *ar|SV* keysv|I32 lval|U32 hash
@@ -2045,9 +2045,10 @@ s	|void	|cv_dump	|CV *cv
 #  endif
 s	|CV*	|cv_clone2	|CV *proto|CV *outside
 s	|bool	|scalar_mod_type|OP *o|I32 type
-s	|OP *	|my_kid		|OP *o|OP *attrs
+s	|OP *	|my_kid		|OP *o|OP *attrs|OP **imopsp
 s	|OP *	|dup_attrlist	|OP *o
-s	|void	|apply_attrs	|HV *stash|SV *target|OP *attrs
+s	|void	|apply_attrs	|HV *stash|SV *target|OP *attrs|bool for_my
+s	|void	|apply_attrs_my	|HV *stash|OP *target|OP *attrs|OP **imopsp
 #  if defined(PL_OP_SLAB_ALLOC)
 s	|void*	|Slab_Alloc	|int m|size_t sz
 #  endif
