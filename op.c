@@ -2044,7 +2044,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
 	       type == OP_RV2AV ||
 	       type == OP_RV2HV) { /* XXX does this let anything illegal in? */
       if (cUNOPo->op_first->op_type != OP_GV) { /* MJD 20011224 */
-           yyerror(form("Can't declare %s in my", OP_DESC(o)));
+           yyerror(Perl_form(aTHX_ "Can't declare %s in my", OP_DESC(o)));
         }
         if (attrs) {
             GV *gv = cGVOPx_gv(cUNOPo->op_first);
