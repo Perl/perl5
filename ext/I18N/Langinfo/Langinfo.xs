@@ -6,13 +6,13 @@
 #   include <langinfo.h>
 #endif
 
-#include "constants.c"
+#include "const-c.inc"
 
 MODULE = I18N::Langinfo	PACKAGE = I18N::Langinfo
 
 PROTOTYPES: ENABLE
 
-INCLUDE: constants.xs
+INCLUDE: const-xs.inc
 
 SV*
 langinfo(code)

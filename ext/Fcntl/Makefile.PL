@@ -1,11 +1,10 @@
 use ExtUtils::MakeMaker;
-use ExtUtils::Constant 0.07 'WriteConstants';
+use ExtUtils::Constant 0.11 'WriteConstants';
 WriteMakefile(
     NAME 	=> 'Fcntl',
     MAN3PODS 	=> {}, 	# Pods will be built by installman.
     XSPROTOARG => '-noprototypes', 		# XXX remove later?
     VERSION_FROM => 'Fcntl.pm',
-    realclean => {FILES=> 'constants.c constants.xs'},
 );
 
 my @names = (qw(FAPPEND FASYNC FCREAT FDEFER FDSYNC FD_CLOEXEC FEXCL FLARGEFILE

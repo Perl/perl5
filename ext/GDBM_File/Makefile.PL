@@ -1,12 +1,11 @@
 use ExtUtils::MakeMaker;
-use ExtUtils::Constant 0.07 'WriteConstants';
+use ExtUtils::Constant 0.11 'WriteConstants';
 WriteMakefile(
     NAME => 'GDBM_File',
     LIBS => ["-L/usr/local/lib -lgdbm", "-ldbm"],
     MAN3PODS 	=> {}, 	# Pods will be built by installman.
     XSPROTOARG => '-noprototypes', 		# XXX remove later?
     VERSION_FROM => 'GDBM_File.pm',
-    realclean => {FILES=> 'constants.c constants.xs'},
 );
 WriteConstants(
     NAME => 'GDBM_File',

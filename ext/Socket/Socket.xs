@@ -211,11 +211,11 @@ not_here(char *s)
 *
 * --jhi */
 
-#include "constants.c"
+#include "const-c.inc"
 
 MODULE = Socket		PACKAGE = Socket
 
-INCLUDE: constants.xs
+INCLUDE: const-xs.inc
 
 void
 inet_aton(host)

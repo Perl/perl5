@@ -33,8 +33,8 @@
    --AD  October 16, 1995
 */
 
-#include "constants.c"
+#include "const-c.inc"
 
 MODULE = Fcntl		PACKAGE = Fcntl
 
-INCLUDE: constants.xs
+INCLUDE: const-xs.inc

@@ -372,7 +372,7 @@ not_here(char *s)
     return -1;
 }
 
-#include "constants.c"
+#include "const-c.inc"
 
 /* These were implemented in the old "constant" subroutine. They are actually
    macros that take an integer argument and return an integer result.  */
@@ -792,7 +792,7 @@ setcc(termios_ref, ccix, cc)
 
 MODULE = POSIX		PACKAGE = POSIX
 
-INCLUDE: constants.xs
+INCLUDE: const-xs.inc
 
 void
 int_macro_int(sv, iv)
