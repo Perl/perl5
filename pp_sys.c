@@ -754,7 +754,8 @@ PP(pp_sselect)
     }
 
 #if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
-#if defined(__linux__) || defined(OS2)
+/* XXX Configure test needed. */
+#if defined(__linux__) || defined(OS2) || defined(NeXT) || defined(__osf__)
     growsize = sizeof(fd_set);
 #else
     growsize = maxlen;		/* little endians can use vecs directly */
