@@ -1550,6 +1550,19 @@ PP(pp_cos)
     }
 }
 
+/* Support Configure command-line overrides for rand() functions.
+   After 5.005, perhaps we should replace this by Configure support
+   for drand48(), random(), or rand().  For 5.005, though, maintain
+   compatibility by calling rand() but allow the user to override it.
+   See INSTALL for details.  --Andy Dougherty  15 July 1998
+*/
+#ifndef my_rand
+#  define my_rand	rand
+#endif
+#ifndef my_srand
+#  define my_srand	srand
+#endif
+
 PP(pp_rand)
 {
     djSP; dTARGET;
@@ -1561,19 +1574,19 @@ PP(pp_rand)
     if (value == 0.0)
 	value = 1.0;
     if (!srand_called) {
-	(void)srand((unsigned)seed());
+	(void)my_srand((unsigned)seed());
 	srand_called = TRUE;
     }
 #if RANDBITS == 31
-    value = rand() * value / 2147483648.0;
+    value = my_rand() * value / 2147483648.0;
 #else
 #if RANDBITS == 16
-    value = rand() * value / 65536.0;
+    value = my_rand() * value / 65536.0;
 #else
 #if RANDBITS == 15
-    value = rand() * value / 32768.0;
+    value = my_rand() * value / 32768.0;
 #else
-    value = rand() * value / (double)(((unsigned long)1) << RANDBITS);
+    value = my_rand() * value / (double)(((unsigned long)1) << RANDBITS);
 #endif
 #endif
 #endif
@@ -1589,7 +1602,7 @@ PP(pp_srand)
 	anum = seed();
     else
 	anum = POPu;
-    (void)srand((unsigned)anum);
+    (void)my_srand((unsigned)anum);
     srand_called = TRUE;
     EXTEND(SP, 1);
     RETPUSHYES;

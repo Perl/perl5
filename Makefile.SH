@@ -387,6 +387,7 @@ lib/ExtUtils/Miniperl.pm: miniperlmain.c miniperl minimod.pl lib/Config.pm
 	sh mv-if-diff tmp $@
 
 lib/re.pm: ext/re/re.pm
+	rm -f $@
 	cat ext/re/re.pm > $@
 
 $(plextract):	miniperl lib/Config.pm lib/re.pm
@@ -400,6 +401,7 @@ install.perl:	all installperl
 		cd utils; $(MAKE) compile; \
 		cd ../x2p; $(MAKE) compile; \
 		cd ../pod; $(MAKE) compile; \
+	else :; \
 	fi
 	$(LDLIBPTH) ./perl installperl
 

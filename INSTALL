@@ -773,14 +773,18 @@ config.sh.
 
 For example, you can replace the rand() and srand() functions in the
 perl source by any other random number generator by a trick such as the
-following:
+following (this should all be on one line):
 
-	sh Configure -Dccflags='-Drand=random -Dsrand=srandom'
+	sh Configure -Dccflags='-Dmy_rand=random -Dmy_srand=srandom' \
+		-Drandbits=31
 
-or by adding -Drand=random and -Dsrand=srandom to your ccflags
-at the appropriate Configure prompt.  (Note:  Although this worked for
-me, it might not work for you if your system's header files give
-different prototypes for rand() and random() or srand() and srandom().)
+or you can use the drand48 family of functions with
+
+	sh Configure -Dccflags='-Dmy_rand=lrand48 -Dmy_srand=srand48' \
+		-Drandbits=31
+
+or by adding the -D flags to your ccflags at the appropriate Configure
+prompt.  (Read pp.c to see how this works.)
 
 You should also run Configure interactively to verify that a hint file
 doesn't inadvertently override your ccflags setting.  (Hints files
@@ -1573,4 +1577,4 @@ the contact information to match your distribution.
 
 =head1 LAST MODIFIED
 
-$Id: INSTALL,v 1.40 1998/07/06 14:49:02 doughera Released $
+$Id: INSTALL,v 1.42 1998/07/15 18:04:44 doughera Released $

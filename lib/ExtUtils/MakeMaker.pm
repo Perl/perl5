@@ -1758,14 +1758,14 @@ or you can edit the default by saying something like:
 	    $inherited;
 	}
 
-If you running experiments with embedding perl as a library into other
-applications, you might find MakeMaker not sufficient. You'd better
-have a look at ExtUtils::embed which is a collection of utilities for
-embedding.
+If you are running experiments with embedding perl as a library into
+other applications, you might find MakeMaker is not sufficient. You'd
+better have a look at ExtUtils::Embed which is a collection of utilities
+for embedding.
 
 If you still need a different solution, try to develop another
-subroutine, that fits your needs and submit the diffs to
-F<perl5-porters@nicoh.com> or F<comp.lang.perl.misc> as appropriate.
+subroutine that fits your needs and submit the diffs to
+F<perl5-porters@perl.org> or F<comp.lang.perl.moderated> as appropriate.
 
 For a complete description of all MakeMaker methods see L<ExtUtils::MM_Unix>.
 
@@ -1919,7 +1919,7 @@ different means on the current architecture).
 =head1 SEE ALSO
 
 ExtUtils::MM_Unix, ExtUtils::Manifest, ExtUtils::testlib,
-ExtUtils::Install, ExtUtils::embed
+ExtUtils::Install, ExtUtils::Embed
 
 =head1 AUTHORS
 

@@ -33,7 +33,7 @@ man1dir="$prefix/man/man1"
 man3dir="$prefix/man/man3"
 perlpath="$prefix/PERL"
 scriptdir="$prefix"
-startperl="#!$perlpath"
+startperl="#!$prefix/perl"
 startsh='#!/bin/sh'
 #
 # Compiling.

@@ -2845,6 +2845,10 @@ bad side effects.
 interpreted as a "" or a 0, but maybe it was a mistake.  To suppress this
 warning assign an initial value to your variables.
 
+=item Useless use of "re" pragma
+
+(W) You did C<use re;> without any arguments.   That isn't very useful.
+
 =item Useless use of %s in void context
 
 (W) You did something without a side effect in a context that does nothing

@@ -124,9 +124,10 @@ sub _doit
 
         $obj =         ($options->{'o'})?    $options->{'o'} :
                                             _getExecutable($file, $module_ext);
-        $so = "$obj.so";
+        $so = "$obj.$Config{so}";
         $type = 'sharedlib';
         return() if (!$obj);
+        $objfile = ($options->{'C'}) ?     $options->{'C'} : "$file.c";
     }
     else
     {
@@ -175,7 +176,7 @@ sub _doit
         (_print( "ERROR: In generating code for $file!\n", -1), return()) 
                                                                 if ($errcode);
     
-        _print( "Compiling C($obj) for $file!\n", 36 ) if (!$options->{'gen'});
+        _print( "Compiling C($so) for $file!\n", 36 ) if (!$options->{'gen'});
 
         my $errorcode = 
             _compileCode($file, $objfile, $obj, $so ) if (!$options->{'gen'});
@@ -244,18 +245,19 @@ sub _compileCode
     if (@_ == 3)                            # just compiling a program 
     {
         $return[0] = 
-        _ccharness($sourceprog, "-o", $output_executable, $generated_cfile);  
+        _ccharness('static', $sourceprog, "-o", $output_executable, $generated_cfile);  
         $return[0];
     }
     else
     {
         my $object_file = $generated_cfile;
-        $object_file =~ s"\.c$"\.o";   
+        $object_file =~ s"\.c$"$Config{_o}";   
 
-        $return[0] = _ccharness($sourceprog, "-c", $generated_cfile);
+        $return[0] = _ccharness('compile', $sourceprog, "-c", $generated_cfile);
         $return[1] = _ccharness
                             (
-                                $sourceprog, "-shared","-o", 
+				'dynamic', 
+                                $sourceprog, "-o", 
                                 $shared_object, $object_file 
                             );
         return(1) if (grep ($_, @return));
@@ -278,6 +280,7 @@ sub _removeCode
 
 sub _ccharness
 {
+    my $type = shift;
     my (@args) = @_;
     local($") = " ";
 
@@ -291,24 +294,26 @@ sub _ccharness
     }
     else
     {
-        $libdir = "-L.."; 
-        $incdir = "-I..";
+        $libdir = "-L.. -L."; 
+        $incdir = "-I.. -I.";
     }
 
     $libdir .= " -L$options->{L}" if (defined($options->{L}));
     $incdir .= " -I$options->{L}" if (defined($options->{L}));
 
-    my $linkargs;
+    my $linkargs = '';
 
-    if (!grep(/^-[cS]$/, @ARGV))
+    if (!grep(/^-[cS]$/, @args))
     {
-        $linkargs = sprintf("%s $libdir -lperl %s",@Config{qw(ldflags libs)});
+	my $lperl = $^O eq 'os2' ? '-llibperl' : '-lperl';
+	my $flags = $type eq 'dynamic' ? $Config{lddlflags} : $Config{ldflags};
+        $linkargs = "$flags $libdir $lperl @Config{libs}";
     }
 
     my @sharedobjects = _getSharedObjects($sourceprog); 
 
     my $cccmd = 
-        "$Config{cc} $Config{ccflags} $incdir @sharedobjects @args $linkargs";
+        "$Config{cc} @Config{qw(ccflags optimize)} $incdir @sharedobjects @args $linkargs";
 
 
     _print ("$cccmd\n", 36);

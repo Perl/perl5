@@ -121,11 +121,8 @@ esac
 # no attempt to figure out the additional location(s) searched by
 # gcc, since not all versions of gcc are easily coerced into
 # revealing that information.
-#
-# This or the new useshrplib default below breaks the build.
-# Commented out for this snapshot.
-#glibpth="/usr/shlib /usr/ccs/lib /usr/lib/cmplrs/cc"
-#glibpth="$glibpth /usr/lib /usr/local/lib /var/shlib"
+glibpth="/usr/shlib /usr/ccs/lib /usr/lib/cmplrs/cc"
+glibpth="$glibpth /usr/lib /usr/local/lib /var/shlib"
 
 # dlopen() is in libc
 libswanted="`echo $libswanted | sed -e 's/ dl / /'`"

@@ -853,8 +853,6 @@ PP(pp_match)
 	    }
 	}
     }
-    if (!rx->nparens && !global)
-	gimme = G_SCALAR;			/* accidental array context? */
     safebase = (((gimme == G_ARRAY) || global || !rx->nparens)
 		&& !PL_sawampersand);
     safebase = safebase ? 0  : REXEC_COPY_STR ;
@@ -958,6 +956,8 @@ play_it_again:
 	    PUTBACK;			/* EVAL blocks may use stack */
 	    goto play_it_again;
 	}
+	else if (!iters)
+	    XPUSHs(&sv_yes);
 	LEAVE_SCOPE(oldsave);
 	RETURN;
     }
@@ -1590,7 +1590,9 @@ PP(pp_subst)
 	DIE("panic: do_subst");
 
     strend = s + len;
-    maxiters = (strend - s) + 10;
+    maxiters = 2*(strend - s) + 10;	/* We can match twice at each 
+					   position, once with zero-length,
+					   second time with non-zero. */
 
     if (!rx->prelen && PL_curpm) {
 	pm = PL_curpm;

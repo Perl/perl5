@@ -2,7 +2,7 @@ package DB;
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 
-$VERSION = 1.02;
+$VERSION = 1.03;
 $header = "perl5db.pl version $VERSION";
 
 # Enhanced by ilya@math.ohio-state.edu (Ilya Zakharevich)
@@ -1043,7 +1043,7 @@ EOP
 		    $cmd =~ /^$rc+\s*(-)?(\d+)?$/ && do {
 			pop(@hist) if length($cmd) > 1;
 			$i = $1 ? ($#hist-($2?$2:1)) : ($2?$2:$#hist);
-			$cmd = $hist[$i] . "\n";
+			$cmd = $hist[$i];
 			print $OUT $cmd;
 			redo CMD; };
 		    $cmd =~ /^$sh$sh\s*([\x00-\xff]*)/ && do {
@@ -1059,7 +1059,7 @@ EOP
 			    print $OUT "No such command!\n\n";
 			    next CMD;
 			}
-			$cmd = $hist[$i] . "\n";
+			$cmd = $hist[$i];
 			print $OUT $cmd;
 			redo CMD; };
 		    $cmd =~ /^$sh$/ && do {
@@ -1182,9 +1182,13 @@ sub sub {
 	 ? ( (print $LINEINFO ' ' x $#stack, "out "), 
 	     print_trace($LINEINFO, -1, 1, 1, "$sub$al") )
 	 : print $LINEINFO ' ' x $#stack, "exited $sub$al\n") if $frame & 2;
-	print ($OUT ($frame & 16 ? ' ' x $#stack : ""),
-		    "list context return from $sub:\n"), dumpit( \@ret ),
-	  $doret = -2 if $doret eq $#stack or $frame & 16;
+	if ($doret eq $#stack or $frame & 16) {
+            my $fh = ($doret eq $#stack ? $OUT : $LINEINFO);
+	    print $fh ' ' x $#stack if $frame & 16;
+	    print $fh "list context return from $sub:\n"; 
+	    dumpit($fh, \@ret );
+	    $doret = -2;
+	}
 	@ret;
     } else {
         if (defined wantarray) {
@@ -1197,9 +1201,15 @@ sub sub {
 	 ? ( (print $LINEINFO ' ' x $#stack, "out "), 
 	      print_trace($LINEINFO, -1, 1, 1, "$sub$al") )
 	 : print $LINEINFO ' ' x $#stack, "exited $sub$al\n") if $frame & 2;
-	print ($OUT ($frame & 16 ? ' ' x $#stack : ""),
-		    "scalar context return from $sub: "), dumpit( $ret ),
-	  $doret = -2 if $doret eq $#stack or $frame & 16;
+	if ($doret eq $#stack or $frame & 16 and defined wantarray) {
+            my $fh = ($doret eq $#stack ? $OUT : $LINEINFO);
+	    print $fh (' ' x $#stack) if $frame & 16;
+	    print $fh (defined wantarray 
+			 ? "scalar context return from $sub: " 
+			 : "void context return from $sub\n");
+	    dumpit( $fh, $ret ) if defined wantarray;
+	    $doret = -2;
+	}
 	$ret;
     }
 }
@@ -1229,7 +1239,7 @@ sub eval {
     if ($at) {
 	print $OUT $at;
     } elsif ($onetimeDump eq 'dump') {
-	dumpit(\@res);
+	dumpit($OUT, \@res);
     } elsif ($onetimeDump eq 'methods') {
 	methods($res[0]);
     }
@@ -1284,7 +1294,7 @@ sub postponed {
 }
 
 sub dumpit {
-    local ($savout) = select($OUT);
+    local ($savout) = select(shift);
     my $osingle = $single;
     my $otrace = $trace;
     $single = $trace = 0;
@@ -1365,7 +1375,7 @@ sub dump_trace {
 	push(@a, $_);
       }
     }
-    $context = $context ? '@' : "\$";
+    $context = $context ? '@' : (defined $context ? "\$" : '.');
     $args = $h ? [@a] : undef;
     $e =~ s/\n\s*\;\s*\Z// if $e;
     $e =~ s/([\\\'])/\\$1/g if $e;

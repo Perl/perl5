@@ -1,26 +1,26 @@
-
 Perl/iX for HP 3000 MPE
 
 http://www.cccd.edu/~markb/perlix.html
 Perl language for MPE
-Last updated July 8, 1998 @ 2030 UTC
+Last updated July 15, 1998 @ 2030 UTC
 
   ------------------------------------------------------------------------
 
 What's New
 
+   * July 15, 1998
+        o Changed startperl to #!/PERL/PUB/perl so that Perl will recognize
+          scripts more easily and efficiently.
    * July 8, 1998
         o Updated to version 5.004_70 (internal developer release) which is
           now MPE-ready.  The next public freeware release of Perl should
           compile "straight out of the box" on MPE.  Note that this version
           of Perl/iX was strictly internal to me and never publicly
-          released.
+          released.  Note that BIND/iX is now required (well, the include
+          files and libbind.a) if you wish to compile Perl/iX.
    * November 6, 1997
         o Updated to version 5.004_04.  No changes in MPE-specific
           functionality.
-   * October 16, 1997
-        o Added Demos section to the Perl/iX home page so you can see some
-          sample Perl applications running on my 3000.
 
   ------------------------------------------------------------------------
 
@@ -95,7 +95,7 @@ anonymous
 your@email.address
 bytestream
 cd /pub/mpe
-get perl5.004_70.tar.Z /tmp/perl.tar.Z
+get perl5.005.tar.Z /tmp/perl.tar.Z
 exit
 
 .....Or download using some other generic web or ftp client (the alternate
@@ -104,8 +104,8 @@ method)
 Download the following files (make sure that you use "binary mode" or
 whatever client feature that is 8-bit clean):
 
-   * Perl from http://www.cccd.edu/ftp/pub/mpe/perl5.004_70.tar.Z or
-     ftp://ftp.cccd.edu/pub/mpe/perl5.004_70.tar.Z
+   * Perl from http://www.cccd.edu/ftp/pub/mpe/perl5.005.tar.Z or
+     ftp://ftp.cccd.edu/pub/mpe/perl5.005.tar.Z
 
 Upload those files to your HP 3000 in an 8-bit clean bytestream manner to:
 
@@ -147,14 +147,14 @@ man/
      Perl man page documentation.
 public_html/feedback.cgi
      Sample feedback CGI form written in Perl.
-src/perl5.004_70
+src/perl5.005
      Source code.
 
   ------------------------------------------------------------------------
 
 How to Compile Perl/iX
 
-  1. cd src/perl5.004_70
+  1. cd src/perl5.005
   2. Read the INSTALL file for the official instructions
   3. ./Configure
   4. make
@@ -181,7 +181,7 @@ Failed 6/183 test scripts, 96.72% okay. 31/5899 subtests failed, 99.47% okay.
 
 Getting Started with Perl/iX
 
-Create your Perl script files with "#!/PERL/PUB/PERL" (or an equivalent
+Create your Perl script files with "#!/PERL/PUB/perl" (or an equivalent
 symbolic link) as the first line.  Use the chmod command to make sure that
 your script has execute permission. Run your script!
 
@@ -243,6 +243,9 @@ To-Do List
 
 Change History
 
+   * October 16, 1997
+        o Added Demos section to the Perl/iX home page so you can see some
+          sample Perl applications running on my 3000.
    * October 3, 1997
         o Added System Requirements section to the Perl/iX home page just
           so the prerequisites stand out more. Various other home page
@@ -255,4 +258,3 @@ Change History
   ------------------------------------------------------------------------
 
 Mark Bixby, markb@cccd.edu
-

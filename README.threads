@@ -2,6 +2,7 @@ Building
 
 If you want to build with multi-threading support and you are
 running one of the following:
+
   * Linux 2.x (with the LinuxThreads library installed: that's
     the linuxthreads and linuxthreads-devel RPMs for RedHat)
 
@@ -15,48 +16,52 @@ running one of the following:
     IRIX 6.3 and up should be OK. See lower down for patch details.
 
 then you should be able to use
-    ./Configure -Dusethreads -Doptimize=-g -ders
+
+    ./Configure -Dusethreads -des
     make
+
 and ignore the rest of this "Building" section. If it doesn't
 work or you are using another platform which you believe supports
-POSIX.1c threads then read on.
+POSIX.1c threads then read on.  Additional information may be in
+a platform-specific "hints" file in the hints/ subdirectory.
 
-Omit the -e from your ./Configure arguments. For example, use
-    ./Configure -drs
-When it offers to let you change config.sh, do so. If you already
-have a config.sh then you can edit it and do
-    ./Configure -S
-to propagate the required changes.
-In ccflags, insert -DUSE_THREADS (and probably -DDEBUGGING since
-that's what I've been building with). Also insert any other
-arguments in there that your compiler needs to use POSIX threads.
-Change optimize to -g to give you better debugging information.
-Include any necessary explicit libraries in libs and change
-ldflags if you need any linker flags instead or as well.
+Omit the -d from your ./Configure arguments. For example, use
 
-More explicitly, for Linux (when using the standard kernel-threads
-based LinuxThreads library):
-    Add -DUSE_THREADS -D_REENTRANT -DDEBUGGING to ccflags and cppflags
-    Add -lpthread to libs
-    Change optimize to -g
+    ./Configure -Dusethreads
+
+When Configure prompts you for ccflags, insert any other arguments in
+there that your compiler needs to use POSIX threads. When Configure
+prompts you for linking flags, include any flags required for
+threading (usually nothing special is required here).  Finally, when
+COnfigure prompts you for libraries, include any necessary libraries
+(e.g. -lpthread).  Pay attention to the order of libraries.  It is
+probably necessary to specify your threading library *before* your
+standard C library, e.g.  it might be necessary to have -lpthread -lc,
+instead of -lc -lpthread.
+
+Once you have specified all your compiler flags, you can have Configure
+accept all the defaults for the remainder of the session by typing  &-d
+at any Configure prompt.
+
+Some additional notes (some of these may be obsolete now, other items
+may be handled automatically):
+
 For Digital Unix 4.x:
-    Add -pthread -DUSE_THREADS -DDEBUGGING to ccflags
-    Add -DUSE_THREADS -DDEBUGGING to cppflags
+    Add -pthread to ccflags
     Add -pthread to ldflags
-    Change optimize to -g
     Add -lpthread -lc_r to lddlflags
+
     For some reason, the extra includes for pthreads make Digital UNIX
     complain fatally about the sbrk() delcaration in perl's malloc.c
-    so use the native malloc as follows:
-    Change usemymalloc to n
-    Zap mallocobj and mallocsrc (foo='')
-    Change d_mymalloc to undef
-For Solaris, do the same as for Linux above.
+    so use the native malloc, e.g.  sh Configure -Uusemymalloc, or
+    manually edit your config.sh as follows:
+	Change usemymalloc to n
+	Zap mallocobj and mallocsrc (foo='')
+	Change d_mymalloc to undef
+
 For IRIX:
-    Add -DUSE_THREADS -DDEBUGGING to ccflags
-    Add -DUSE_THREADS -DDEBUGGING to cppflags
+    (This should all be done automatically by the hint file).
     Add -lpthread to libs
-    Change optimize to -g
     For IRIX 6.2, you have to have the following patches installed:
 	1404 Irix 6.2 Posix 1003.1b man pages
 	1645 IRIX 6.2 & 6.3 POSIX header file updates
@@ -71,9 +76,9 @@ For IRIX:
     Thanks to Hannu Napari <Hannu.Napari@hut.fi> for the IRIX
     pthreads patches information.
 For AIX:
+    (This should all be done automatically by the hint file).
     Change cc to xlc_r or cc_r.
-    Add -DUSE_THREADS -DNEED_PTHREAD_INIT -DDEBUGGING to ccflags and cppflags
-    Change optimize to -g
+    Add -DNEED_PTHREAD_INIT to ccflags and cppflags
     Add -lc_r to libswanted
     Change -lc in lddflags to be -lpthread -lc_r -lc
 
@@ -83,9 +88,7 @@ Now you can do a
 
 O/S specific bugs
 
-Solaris qsort uses a hidden mutex for synchronisation. If you die()
-while doing a sort() then the resulting longjmp() leaves the mutex
-locked so you get a deadlock the next time you try to sort().
+Irix 6.2:  See the Irix warning above.
 
 LinuxThreads 0.5 has a bug which can cause file descriptor 0 to be
 closed after a fork() leading to many strange symptoms. Version 0.6
@@ -259,3 +262,6 @@ ZOMBIE ----------------------------> DEAD
 Malcolm Beattie
 mbeattie@sable.ox.ac.uk
 Last updated: 27 November 1997
+
+Configure-related info updated 16 July 1998 by
+Andy Dougherty <doughera@lafayette.edu>

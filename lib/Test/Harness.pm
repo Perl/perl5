@@ -11,7 +11,13 @@ use vars qw($VERSION $verbose $switches $have_devel_corestack $curtest
 	    @ISA @EXPORT @EXPORT_OK);
 $have_devel_corestack = 0;
 
-$VERSION = "1.1601";
+$VERSION = "1.1602";
+
+# Some experimental versions of OS/2 build have broken $?
+my $ignore_exitcode = $ENV{HARNESS_IGNORE_EXITCODE};
+
+my $tests_skipped = 0;
+my $subtests_skipped = 0;
 
 @ISA=('Exporter');
 @EXPORT= qw(&runtests);
@@ -123,7 +129,7 @@ sub runtests {
 	    }
 	}
 	$fh->close; # must close to reap child resource values
-	my $wstatus = $?;
+	my $wstatus = $ignore_exitcode ? 0 : $?;	# Can trust $? ?
 	my $estatus;
 	$estatus = ($^O eq 'VMS'
 		       ? eval 'use vmsish "status"; $estatus = $?'
@@ -172,6 +178,7 @@ sub runtests {
 		print "ok\n";
 	    } else {
 		print "skipping test on this platform\n";
+		$tests_skipped++;
 	    }
 	    $good++;
 	} elsif ($max) {
@@ -204,6 +211,7 @@ sub runtests {
 				    estat => '', wstat => '',
 				  };
 	}
+	$subtests_skipped += $skipped;
     }
     my $t_total = timediff(new Benchmark, $t_start);
     
@@ -218,6 +226,16 @@ sub runtests {
     $bonusmsg = (" ($totbonus subtest".($totbonus>1?'s':'').
 	       " UNEXPECTEDLY SUCCEEDED)")
 	if $totbonus;
+    if ($tests_skipped) {
+	$bonusmsg .= ", $tests_skipped test" . ($tests_skipped != 1 ? 's' : '') .
+			' skipped';
+    }
+    if ($subtests_skipped) {
+	$bonusmsg .= ($tests_skipped ? ', plus ' : ', '). 
+			"$subtests_skipped subtest"
+			. ($subtests_skipped != 1 ? 's' : '') .
+			" skipped";
+    }
     if ($bad == 0 && $totmax) {
 	print "All tests successful$bonusmsg.\n";
     } elsif ($total==0){
@@ -235,6 +253,8 @@ sub runtests {
 	  write;
 	}
 	if ($bad) {
+	    $bonusmsg =~ s/^,\s*//;
+	    print "$bonusmsg.\n" if $bonusmsg;
 	    die "Failed $bad/$total test scripts, $pct% okay.$subpct\n";
 	}
     }
@@ -398,6 +418,11 @@ If not all tests were successful, the script dies with one of the
 above messages.
 
 =back
+
+=head1 ENVIRONMENT
+
+Setting C<HARNESS_IGNORE_EXITCODE> makes it ignore the exit status
+of child processes.
 
 =head1 SEE ALSO
 

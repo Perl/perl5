@@ -185,10 +185,21 @@ esac
 #     These warnings are harmless and can be safely ignored.
 
 #
-# You should enable these if you use the unbundled ANSI C compiler
-# (*not* when using the bundled K&R compiler or gcc)
-# [XXX this should be enabled automatically]
+# cppstdin and cpprun need the -Aa option if you use the unbundled 
+# ANSI C compiler (*not* the bundled K&R compiler or gcc)
+# [XXX this should be enabled automatically by Configure, but isn't yet.]
+# [XXX This is reported not to work.  You may have to edit config.sh.
+#  After running Configure, set cpprun and cppstdin in config.sh,
+#  run "Configure -S" and then "make".]
 #
-#cpprun='/opt/ansic/bin/cc -E -Aa'
-#cppstdin="$cpprun"
-
+case "$cppstdin" in
+'')
+    case "$ccflags" in
+    *-Aa*)
+	cpprun="${cc:-cc} -E -Aa"
+	cppstdin="$cpprun"
+	cppminus='-'
+	;;
+    esac
+    ;;
+esac

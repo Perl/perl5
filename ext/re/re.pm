@@ -81,11 +81,9 @@ sub bits {
     }
     foreach my $s (@_){
       if ($s eq 'debug') {
-	  eval <<'EOE';
-	    use DynaLoader;
-	    @ISA = ('DynaLoader');
-	    bootstrap re;
-EOE
+	  require DynaLoader;
+	  @ISA = ('DynaLoader');
+	  bootstrap re;
 	  install() if $on;
 	  uninstall() unless $on;
 	  next;
