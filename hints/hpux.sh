@@ -240,7 +240,10 @@ libswanted="$*"
 # ccdlflags="-Wl,-E -Wl,-B,immediate,-B,nonfatal $ccdlflags"
 ccdlflags="-Wl,-E -Wl,-B,deferred $ccdlflags"
 
-usemymalloc='y'
+case "$usemymalloc" in
+'') usemymalloc='y' ;;
+esac
+
 alignbytes=8
 # For native nm, you need "-p" to produce BSD format output.
 nm_opt='-p'
