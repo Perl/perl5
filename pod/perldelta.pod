@@ -48,12 +48,6 @@ The following modules and pragmata have been updated since Perl 5.8.1:
 
 =item Digest::MD5
 
-=item ExtUtils::MakeMaker
-
-Now able to generate a SIGNATURE file if Module::Signature is installed,
-by passing (SIGN => 1) to WriteMakefile().  (Work completed as part of
-The Perl Foundation's grant to Autrijus Tang)
-
 =item I18N::LangTags
 
 =item libnet

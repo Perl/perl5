@@ -226,7 +226,7 @@ sub full_setup {
     PERL_SRC PERM_RW PERM_RWX
     PL_FILES PM PM_FILTER PMLIBDIRS POLLUTE PPM_INSTALL_EXEC
     PPM_INSTALL_SCRIPT PREREQ_FATAL PREREQ_PM PREREQ_PRINT PRINT_PREREQ
-    SIGN SKIP TYPEMAPS VERSION VERSION_FROM XS XSOPT XSPROTOARG
+    SKIP TYPEMAPS VERSION VERSION_FROM XS XSOPT XSPROTOARG
     XS_VERSION clean depend dist dynamic_lib linkext macro realclean
     tool_autosplit
 
@@ -265,7 +265,6 @@ sub full_setup {
  installbin subdirs
  clean_subdirs clean realclean_subdirs realclean 
  metafile metafile_addtomanifest
- signature signature_addtomanifest
  dist_basics dist_core distdir dist_test dist_ci
  install force perldepend makefile staticmake test ppd
 
@@ -1991,16 +1990,6 @@ an explicit siteprefix in the Config.  In those cases
 $Config{installprefix} will be used.
 
 Overridable by PREFIX
-
-=item SIGN
-
-When true, perform the generation and addition to the MANIFEST of
-the SIGNATURE file during 'make distdir', via 'cpansign -s'.
-
-Note that you need to install the Module::Signature module to
-perform this operation.
-
-Defaults to false.
 
 =item SKIP
 

@@ -953,7 +953,7 @@ sub distdir {
     my($self) = shift;
 
     return <<'MAKE_FRAG';
-distdir : metafile metafile_addtomanifest signature signature_addtomanifest
+distdir : metafile metafile_addtomanifest
 	$(RM_RF) $(DISTVNAME)
 	$(PERLRUN) "-MExtUtils::Manifest=manicopy,maniread" \
 		-e "manicopy(maniread(),'$(DISTVNAME)', '$(DIST_CP)');"

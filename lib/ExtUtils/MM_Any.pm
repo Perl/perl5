@@ -607,32 +607,6 @@ MAKE_FRAG
 }
 
 
-=item signature_target
-
-    my $target = $mm->signature_target;
-
-Generate the signature target.
-
-Writes the file SIGNATURE with "cpansign -s".
-
-=cut
-
-sub signature_target {
-    my $self = shift;
-
-    return <<'MAKE_FRAG' if !$self->{SIGN};
-signature:
-	$(NOECHO) $(NOOP)
-MAKE_FRAG
-
-    return <<'MAKE_FRAG';
-signature:
-	cpansign -s
-MAKE_FRAG
-
-}
-
-
 =item metafile_addtomanifest_target
 
   my $target = $mm->metafile_addtomanifest_target
@@ -656,35 +630,6 @@ CODE
 
     return sprintf <<'MAKE_FRAG', $add_meta;
 metafile_addtomanifest:
-	$(NOECHO) %s
-MAKE_FRAG
-
-}
-
-
-=item signature_addtomanifest_target
-
-  my $target = $mm->signature_addtomanifest_target
-
-Adds the META.yml file to the MANIFEST.
-
-=cut
-
-sub signature_addtomanifest_target {
-    my $self = shift;
-
-    return <<'MAKE_FRAG' if !$self->{SIGN};
-signature_addtomanifest:
-	$(NOECHO) $(NOOP)
-MAKE_FRAG
-
-    my $add_sign = $self->oneliner(<<'CODE', ['-MExtUtils::Manifest=maniadd']);
-eval { maniadd({q{SIGNATURE} => q{Public-key signature (added by MakeMaker)}}) } 
-    or print "Could not add SIGNATURE to MANIFEST: $${'@'}\n"
-CODE
-
-    return sprintf <<'MAKE_FRAG', $add_sign;
-signature_addtomanifest:
 	$(NOECHO) %s
 MAKE_FRAG
 
