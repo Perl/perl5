@@ -8,6 +8,8 @@
  * XSUB.h provides wrapper functions via perlapi.h that make this
  * irrelevant, but not all code may be expected to #include XSUB.h. */
 
+/* Don't forget to add your variable also to perl_clone()! */
+
 /* The 'I' prefix is only needed for vars that need appropriate #defines
  * generated when built with or without MULTIPLICITY.  It is also used
  * to generate the appropriate export list for win32.
@@ -499,6 +501,8 @@ PERLVARI(Iin_load_module, int, 0)	/* to prevent recursions in PerlIO_find_layer 
 PERLVAR(Iunicode, U32)	/* Unicode features: $ENV{PERL_UNICODE} or -C */
 
 PERLVAR(Isignals, U32)	/* Using which pre-5.8 signals */
+
+/* Don't forget to add your variable also to perl_clone()! */
 
 /* New variables must be added to the very end, before this comment,
  * for binary compatibility (the offsets of the old members must not change).
