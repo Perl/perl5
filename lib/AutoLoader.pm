@@ -92,23 +92,24 @@ AUTOLOAD {
     eval { local $SIG{__DIE__}; require $filename };
     if ($@) {
 	if (substr($sub,-9) eq '::DESTROY') {
-		no strict 'refs';
+	    no strict 'refs';
 	    *$sub = sub {};
-	} else {
+	    $@ = undef;
+	} elsif ($@ =~ /^Can't locate/) {
 	    # The load might just have failed because the filename was too
 	    # long for some old SVR3 systems which treat long names as errors.
-	    # If we can succesfully truncate a long name then it's worth a go.
+	    # If we can successfully truncate a long name then it's worth a go.
 	    # There is a slight risk that we could pick up the wrong file here
 	    # but autosplit should have warned about that when splitting.
 	    if ($filename =~ s/(\w{12,})\.al$/substr($1,0,11).".al"/e){
 		eval { local $SIG{__DIE__}; require $filename };
 	    }
-	    if ($@){
-		$@ =~ s/ at .*\n//;
-		my $error = $@;
-		require Carp;
-		Carp::croak($error);
-	    }
+	}
+	if ($@){
+	    $@ =~ s/ at .*\n//;
+	    my $error = $@;
+	    require Carp;
+	    Carp::croak($error);
 	}
     }
     $@ = $save;
@@ -124,9 +125,9 @@ sub import {
     #
 
     if ($pkg eq 'AutoLoader') {
-      no strict 'refs';
-      *{ $callpkg . '::AUTOLOAD' } = \&AUTOLOAD
-        if @_ and $_[0] =~ /^&?AUTOLOAD$/;
+	no strict 'refs';
+	*{ $callpkg . '::AUTOLOAD' } = \&AUTOLOAD
+	    if @_ and $_[0] =~ /^&?AUTOLOAD$/;
     }
 
     #
