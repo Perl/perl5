@@ -1156,7 +1156,6 @@ double num;
     case SVt_IV:
 	sv_upgrade(sv, SVt_NV);
 	break;
-    case SVt_NV:
     case SVt_RV:
     case SVt_PV:
     case SVt_PVIV:
