@@ -47,13 +47,21 @@ int _CRT_glob = 0;
 #define EXECF_SPAWN 2
 #define EXECF_SPAWN_NOWAIT 3
 
-static DWORD IdOS(void);
+static DWORD		os_id(void);
+static char *		get_shell(void);
+static int		do_spawn2(char *cmd, int exectype);
+static BOOL		has_redirection(char *ptr);
+static long		filetime_to_clock(PFILETIME ft);
 
-BOOL  ProbeEnv = FALSE;
-DWORD Win32System = (DWORD)-1;
-char  szShellPath[MAX_PATH+1];
-char  szPerlLibRoot[MAX_PATH+1];
-HANDLE PerlDllHandle = INVALID_HANDLE_VALUE;
+BOOL	w32_env_probed = FALSE;
+DWORD	w32_platform = (DWORD)-1;
+char	w32_shellpath[MAX_PATH+1];
+char	w32_perllib_root[MAX_PATH+1];
+HANDLE	w32_perldll_handle = INVALID_HANDLE_VALUE;
+#ifndef __BORLANDC__
+long	w32_num_children = 0;
+HANDLE	w32_child_pids[MAXIMUM_WAIT_OBJECTS];
+#endif
 
 #ifdef USE_THREADS
 #  ifdef USE_DECLSPEC_THREAD
@@ -75,30 +83,28 @@ char	crypt_buffer[30];
 #  endif
 #endif
 
-static int do_spawn2(char *cmd, int exectype);
-
 int 
 IsWin95(void) {
-    return (IdOS() == VER_PLATFORM_WIN32_WINDOWS);
+    return (os_id() == VER_PLATFORM_WIN32_WINDOWS);
 }
 
 int
 IsWinNT(void) {
-    return (IdOS() == VER_PLATFORM_WIN32_NT);
+    return (os_id() == VER_PLATFORM_WIN32_NT);
 }
 
 char *
-win32PerlLibPath(char *sfx,...)
+win32_perllib_path(char *sfx,...)
 {
     va_list ap;
     char *end;
     va_start(ap,sfx);
-    GetModuleFileName((PerlDllHandle == INVALID_HANDLE_VALUE) 
+    GetModuleFileName((w32_perldll_handle == INVALID_HANDLE_VALUE) 
 		      ? GetModuleHandle(NULL)
-		      : PerlDllHandle,
-		      szPerlLibRoot, 
-		      sizeof(szPerlLibRoot));
-    *(end = strrchr(szPerlLibRoot, '\\')) = '\0';
+		      : w32_perldll_handle,
+		      w32_perllib_root, 
+		      sizeof(w32_perllib_root));
+    *(end = strrchr(w32_perllib_root, '\\')) = '\0';
     if (stricmp(end-4,"\\bin") == 0)
      end -= 4;
     strcpy(end,"\\lib");
@@ -109,12 +115,12 @@ win32PerlLibPath(char *sfx,...)
       sfx = va_arg(ap,char *);
      }
     va_end(ap); 
-    return (szPerlLibRoot);
+    return (w32_perllib_root);
 }
 
 
-BOOL
-HasRedirection(char *ptr)
+static BOOL
+has_redirection(char *ptr)
 {
     int inquote = 0;
     char quote = '\0';
@@ -187,23 +193,24 @@ my_pclose(PerlIO *fp)
 }
 
 static DWORD
-IdOS(void)
+os_id(void)
 {
     static OSVERSIONINFO osver;
 
-    if (osver.dwPlatformId != Win32System) {
+    if (osver.dwPlatformId != w32_platform) {
 	memset(&osver, 0, sizeof(OSVERSIONINFO));
 	osver.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 	GetVersionEx(&osver);
-	Win32System = osver.dwPlatformId;
+	w32_platform = osver.dwPlatformId;
     }
-    return (Win32System);
+    return (w32_platform);
 }
 
+/* XXX PERL5SHELL must be tokenized to allow switches to be passed */
 static char *
-GetShell(void)
+get_shell(void)
 {
-    if (!ProbeEnv) {
+    if (!w32_env_probed) {
 	char* defaultshell = (IsWinNT() ? "cmd.exe" : "command.com");
 	/* we don't use COMSPEC here for two reasons:
 	 *  1. the same reason perl on UNIX doesn't use SHELL--rampant and
@@ -214,57 +221,74 @@ GetShell(void)
 	 */
 	char *usershell = getenv("PERL5SHELL");  
 
-	ProbeEnv = TRUE;
-	strcpy(szShellPath, usershell ? usershell : defaultshell);
+	w32_env_probed = TRUE;
+	strcpy(w32_shellpath, usershell ? usershell : defaultshell);
     }
-    return szShellPath;
+    return w32_shellpath;
 }
 
 int
-do_aspawn(void* really, void ** mark, void ** arglast)
+do_aspawn(void *vreally, void **vmark, void **vsp)
 {
+    SV *really = (SV*)vreally;
+    SV **mark = (SV**)vmark;
+    SV **sp = (SV**)vsp;
     char **argv;
-    char *strPtr;
-    char *cmd;
+    char *str;
     int status;
-    unsigned int length;
+    int flag = P_WAIT;
     int index = 0;
-    SV *sv = (SV*)really;
-    SV** pSv = (SV**)mark;
 
-    New(1310, argv, (arglast - mark) + 4, char*);
+    if (sp <= mark)
+	return -1;
 
-    if(sv != Nullsv) {
-	cmd = SvPV(sv, length);
-    }
-    else {
-	argv[index++] = cmd = GetShell();
-	if (IsWinNT())
-	    argv[index++] = "/x";   /* always enable command extensions */
-	argv[index++] = "/c";
+    New(1301, argv, (sp - mark) + 4, char*);
+
+    if (SvNIOKp(*(mark+1)) && !SvPOKp(*(mark+1))) {
+	++mark;
+	flag = SvIVx(*mark);
     }
 
-    while(++pSv <= (SV**)arglast) {
-	sv = *pSv;
-	strPtr = SvPV(sv, length);
-	if(strPtr != NULL && *strPtr != '\0')
-	    argv[index++] = strPtr;
+    while(++mark <= sp) {
+	if (*mark && (str = SvPV(*mark, na)))
+	    argv[index++] = str;
+	else
+	    argv[index++] = "";
     }
     argv[index++] = 0;
    
-    status = win32_spawnvp(P_WAIT, cmd, (const char* const*)argv);
+    status = win32_spawnvp(flag,
+			   (really ? SvPV(really,na) : argv[0]),
+			   (const char* const*)argv);
+
+    if (status < 0 && errno == ENOEXEC) {
+	/* possible shell-builtin, invoke with shell */
+	int sh_items = 2;
+	while (--index >= 0)
+	    argv[index+sh_items] = argv[index];
+	if (IsWinNT())
+	    argv[--sh_items] = "/x/c";   /* always enable command extensions */
+	else
+	    argv[--sh_items] = "/c";
+	argv[--sh_items] = get_shell();
+   
+	status = win32_spawnvp(flag,
+			       (really ? SvPV(really,na) : argv[0]),
+			       (const char* const*)argv);
+    }
 
     Safefree(argv);
-
     if (status < 0) {
 	if (dowarn)
-	    warn("Can't spawn \"%s\": %s", cmd, strerror(errno));
-	status = 255;
+	    warn("Can't spawn \"%s\": %s", argv[0], strerror(errno));
+	status = 255 * 256;
     }
-    return (statusvalue = status*256);
+    else if (flag != P_NOWAIT)
+	status *= 256;
+    return (statusvalue = status);
 }
 
-int
+static int
 do_spawn2(char *cmd, int exectype)
 {
     char **a;
@@ -272,13 +296,11 @@ do_spawn2(char *cmd, int exectype)
     char **argv;
     int status = -1;
     BOOL needToTry = TRUE;
-    char *shell, *cmd2;
+    char *cmd2;
 
-    /* save an extra exec if possible */
-    shell = GetShell();
-
-    /* see if there are shell metacharacters in it */
-    if(!HasRedirection(cmd)) {
+    /* Save an extra exec if possible. See if there are shell
+     * metacharacters in it */
+    if(!has_redirection(cmd)) {
 	New(1301,argv, strlen(cmd) / 2 + 2, char*);
 	New(1302,cmd2, strlen(cmd) + 1, char);
 	strcpy(cmd2, cmd);
@@ -308,19 +330,22 @@ do_spawn2(char *cmd, int exectype)
 		status = win32_execvp(argv[0], (const char* const*)argv);
 		break;
 	    }
-	    if(status != -1 || errno == 0)
+	    if (status != -1 || errno == 0)
 		needToTry = FALSE;
 	}
 	Safefree(argv);
 	Safefree(cmd2);
     }
-    if(needToTry) {
-	char *argv[5];
+    if (needToTry) {
+	char *argv[4];
 	int i = 0;
-	argv[i++] = shell;
+	argv[i++] = get_shell();
 	if (IsWinNT())
-	    argv[i++] = "/x";
-	argv[i++] = "/c"; argv[i++] = cmd; argv[i] = Nullch;
+	    argv[i++] = "/x/c";
+	else
+	    argv[i++] = "/c";
+	argv[i++] = cmd;
+	argv[i] = Nullch;
 	switch (exectype) {
 	case EXECF_SPAWN:
 	    status = win32_spawnvp(P_WAIT, argv[0],
@@ -339,17 +364,24 @@ do_spawn2(char *cmd, int exectype)
 	if (dowarn)
 	    warn("Can't %s \"%s\": %s",
 		 (exectype == EXECF_EXEC ? "exec" : "spawn"),
-		 needToTry ? shell : argv[0],
-		 strerror(errno));
-	status = 255;
+		 argv[0], strerror(errno));
+	status = 255 * 256;
     }
-    return (statusvalue = status*256);
+    else if (exectype != EXECF_SPAWN_NOWAIT)
+	status *= 256;
+    return (statusvalue = status);
 }
 
 int
 do_spawn(char *cmd)
 {
     return do_spawn2(cmd, EXECF_SPAWN);
+}
+
+int
+do_spawn_nowait(char *cmd)
+{
+    return do_spawn2(cmd, EXECF_SPAWN_NOWAIT);
 }
 
 bool
@@ -683,7 +715,7 @@ win32_getenv(const char *name)
 #endif
 
 static long
-FileTimeToClock(PFILETIME ft)
+filetime_to_clock(PFILETIME ft)
 {
  __int64 qw = ft->dwHighDateTime;
  qw <<= 32;
@@ -700,8 +732,8 @@ win32_times(struct tms *timebuf)
     FILETIME dummy;
     if (GetProcessTimes(GetCurrentProcess(), &dummy, &dummy, 
                         &kernel,&user)) {
-	timebuf->tms_utime = FileTimeToClock(&user);
-	timebuf->tms_stime = FileTimeToClock(&kernel);
+	timebuf->tms_utime = filetime_to_clock(&user);
+	timebuf->tms_stime = filetime_to_clock(&kernel);
 	timebuf->tms_cutime = 0;
 	timebuf->tms_cstime = 0;
         
@@ -716,8 +748,53 @@ win32_times(struct tms *timebuf)
     return 0;
 }
 
-static UINT timerid = 0;
+DllExport int
+win32_wait(int *status)
+{
+#ifdef __BORLANDC__
+    return wait(status);
+#else
+    /* XXX this wait emulation only knows about processes
+     * spawned via win32_spawnvp(P_NOWAIT, ...).
+     */
+    int i, retval;
+    DWORD exitcode, waitcode;
 
+    if (!w32_num_children) {
+	errno = ECHILD;
+	return -1;
+    }
+
+    /* if a child exists, wait for it to die */
+    waitcode = WaitForMultipleObjects(w32_num_children,
+				      w32_child_pids,
+				      FALSE,
+				      INFINITE);
+    if (waitcode != WAIT_FAILED) {
+	if (waitcode >= WAIT_ABANDONED_0
+	    && waitcode < WAIT_ABANDONED_0 + w32_num_children)
+	    i = waitcode - WAIT_ABANDONED_0;
+	else
+	    i = waitcode - WAIT_OBJECT_0;
+	if (GetExitCodeProcess(w32_child_pids[i], &exitcode) ) {
+	    CloseHandle(w32_child_pids[i]);
+	    *status = (int)((exitcode & 0xff) << 8);
+	    retval = (int)w32_child_pids[i];
+	    Copy(&w32_child_pids[i+1], &w32_child_pids[i],
+		 (w32_num_children-i-1), HANDLE);
+	    w32_num_children--;
+	    return retval;
+	}
+    }
+
+FAILED:
+    errno = GetLastError();
+    return -1;
+
+#endif
+}
+
+static UINT timerid = 0;
 
 static VOID CALLBACK TimerProc(HWND win, UINT msg, UINT id, DWORD time)
 {
@@ -1267,7 +1344,18 @@ win32_chdir(const char *dir)
 DllExport int
 win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
 {
-    return spawnvp(mode, cmdname, (char * const *) argv);
+    int status;
+
+    status = spawnvp(mode, cmdname, (char * const *) argv);
+#ifndef __BORLANDC__
+    /* XXX For the P_NOWAIT case, Borland RTL returns pinfo.dwProcessId
+     * while VC RTL returns pinfo.hProcess. For purposes of the custom
+     * implementation of win32_wait(), we assume the latter.
+     */
+    if (mode == P_NOWAIT && status >= 0)
+	w32_child_pids[w32_num_children++] = (HANDLE)status;
+#endif
+    return status;
 }
 
 DllExport int

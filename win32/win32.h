@@ -164,10 +164,11 @@ DllExport void		Perl_init_os_extras(void);
 extern FILE *		my_fdopen(int, char *);
 #endif
 extern int		my_fclose(FILE *);
-extern int		do_aspawn(void* really, void ** mark, void ** arglast);
+extern int		do_aspawn(void *really, void **mark, void **sp);
 extern int		do_spawn(char *cmd);
+extern int		do_spawn_nowait(char *cmd);
 extern char		do_exec(char *cmd);
-extern char *		win32PerlLibPath(char *sfx,...);
+extern char *		win32_perllib_path(char *sfx,...);
 extern int		IsWin95(void);
 extern int		IsWinNT(void);
 
@@ -216,6 +217,9 @@ struct thread_intern {
     char		Wgetlogin_buffer[128];
 #    ifdef HAVE_DES_FCRYPT
     char		Wcrypt_buffer[30];
+#    endif
+#    ifdef USE_RTL_THREAD_API
+    void *		retv;	/* slot for thread return value */
 #    endif
 };
 #  endif /* !USE_DECLSPEC_THREAD */

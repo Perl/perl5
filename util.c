@@ -2060,7 +2060,7 @@ my_pclose(FILE *ptr)
 }
 #endif /* !DOSISH */
 
-#if  !defined(DOSISH) || defined(OS2)
+#if  !defined(DOSISH) || defined(OS2) || defined(WIN32)
 I32
 wait4pid(int pid, int *statusp, int flags)
 {
@@ -2118,7 +2118,7 @@ wait4pid(int pid, int *statusp, int flags)
     }
 #endif
 }
-#endif /* !DOSISH */
+#endif /* !DOSISH || OS2 || WIN32 */
 
 void
 /*SUPPRESS 590*/

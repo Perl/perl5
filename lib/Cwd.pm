@@ -339,13 +339,13 @@ sub _os2_cwd {
 }
 
 sub _win32_cwd {
-    $ENV{'PWD'} = Win32::GetCurrentDirectory();
+    $ENV{'PWD'} = Win32::GetCwd();
     $ENV{'PWD'} =~ s:\\:/:g ;
     return $ENV{'PWD'};
 }
 
 *_NT_cwd = \&_win32_cwd if (!defined &_NT_cwd && 
-                            defined &Win32::GetCurrentDirectory);
+                            defined &Win32::GetCwd);
 
 *_NT_cwd = \&_os2_cwd unless defined &_NT_cwd;
 

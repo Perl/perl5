@@ -100,8 +100,39 @@ typedef HANDLE perl_mutex;
 
 #define THREAD_CREATE(t, f)	Perl_thread_create(t, f)
 #define THREAD_POST_CREATE(t)	NOOP
-#define THREAD_RET_TYPE		DWORD WINAPI
-#define THREAD_RET_CAST(p)	((DWORD)(p))
+
+/* XXX Docs mention that the RTL versions of thread creation routines
+ * should be used, but that advice only seems applicable when the RTL
+ * is not in a DLL.  RTL DLLs in both Borland and VC seem to do all of
+ * the init/deinit required upon DLL_THREAD_ATTACH/DETACH.  So we seem
+ * to be completely safe using straight Win32 API calls, rather than
+ * the much braindamaged RTL calls.
+ *
+ * _beginthread() in the RTLs call CloseHandle() just after the thread
+ * function returns, which means: 1) we have a race on our hands
+ * 2) it is impossible to implement join() semantics.
+ *
+ * IOW, do *NOT* turn on USE_RTL_THREAD_API!  It is here
+ * for experimental purposes only. GSAR 98-01-02
+ */
+#ifdef USE_RTL_THREAD_API
+#  include <process.h>
+#  if defined(__BORLANDC__)
+     /* Borland RTL doesn't allow a return value from thread function! */
+#    define THREAD_RET_TYPE	void _USERENTRY
+#    define THREAD_RET_CAST(p)	((void)(thr->i.retv = (void *)(p)))
+#  elif defined (_MSC_VER)
+#    define THREAD_RET_TYPE	unsigned __stdcall
+#    define THREAD_RET_CAST(p)	((unsigned)(p))
+#  else
+     /* CRTDLL.DLL doesn't allow a return value from thread function! */
+#    define THREAD_RET_TYPE	void __cdecl
+#    define THREAD_RET_CAST(p)	((void)(thr->i.retv = (void *)(p)))
+#  endif
+#else	/* !USE_RTL_THREAD_API */
+#  define THREAD_RET_TYPE	DWORD WINAPI
+#  define THREAD_RET_CAST(p)	((DWORD)(p))
+#endif	/* !USE_RTL_THREAD_API */
 
 typedef THREAD_RET_TYPE thread_func_t(void *);
 
@@ -131,12 +162,22 @@ END_EXTERN_C
 #define ALLOC_THREAD_KEY Perl_alloc_thread_key()
 #define SET_THREAD_SELF(thr) Perl_set_thread_self(thr)
 
+#if defined(USE_RTL_THREAD_API) && !defined(_MSC_VER)
+#define JOIN(t, avp)							\
+    STMT_START {							\
+	if ((WaitForSingleObject((t)->self,INFINITE) == WAIT_FAILED)	\
+	     || (GetExitCodeThread((t)->self,(LPDWORD)(avp)) == 0))	\
+	    croak("panic: JOIN");					\
+	*avp = (AV *)((t)->i.retv);					\
+    } STMT_END
+#else	/* !USE_RTL_THREAD_API || _MSC_VER */
 #define JOIN(t, avp)							\
     STMT_START {							\
 	if ((WaitForSingleObject((t)->self,INFINITE) == WAIT_FAILED)	\
 	     || (GetExitCodeThread((t)->self,(LPDWORD)(avp)) == 0))	\
 	    croak("panic: JOIN");					\
     } STMT_END
+#endif	/* !USE_RTL_THREAD_API || _MSC_VER */
 
 #define YIELD			Sleep(0)
 

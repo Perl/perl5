@@ -223,7 +223,7 @@ win32_getsockopt(SOCKET s, int level, int optname, char *optval, int *optlen)
     return r;
 }
 
-DllExport int
+int
 win32_ioctlsocket(SOCKET s, long cmd, u_long *argp)
 {
     int r;
