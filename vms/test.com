@@ -114,9 +114,7 @@ $   Deck/Dollar=$$END-OF-TEST$$
 use Config;
 use File::Spec;
 
-@compexcl=('cpp.t');
-@opexcl=('die_exit.t','exec.t','stat.t');
-@exclist=(@compexcl,@libexcl,@opexcl);
+@exclist=('exec.t','stat.t');
 foreach $file (@exclist) { $skip{$file}++; }
 
 $| = 1;

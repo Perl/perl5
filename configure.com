@@ -2904,9 +2904,9 @@ $   lib_ext=".olb"
 $ ENDIF
 $ dlobj="dl_vms''obj_ext'"
 $!
-$ cppstdin="''perl_cc'/noobj/preprocess=sys$output sys$input"
+$ cppstdin="''perl_cc'/noobj/comments=as_is/preprocess=sys$output sys$input"
 $ cppminus=" "
-$ cpprun="''perl_cc'/noobj/preprocess=sys$output sys$input"
+$ cpprun="''perl_cc'/noobj/comments=as_is/preprocess=sys$output sys$input"
 $ cpplast=" "
 $!
 $ timetype="time_t"

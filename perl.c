@@ -2645,6 +2645,11 @@ S_init_main_stash(pTHX)
 STATIC void
 S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv, int *fdscript)
 {
+    char *quote;
+    char *code;
+    char *cpp_discard_flag;
+    char *perl;
+
     *fdscript = -1;
 
     if (PL_e_script) {
@@ -2667,20 +2672,21 @@ S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv, int *fdscript)
 	}
     }
 
-#ifdef USE_ITHREADS
-    Safefree(CopFILE(PL_curcop));
-#else
-    SvREFCNT_dec(CopFILEGV(PL_curcop));
-#endif
+#   ifdef USE_ITHREADS
+        Safefree(CopFILE(PL_curcop));
+#   else
+        SvREFCNT_dec(CopFILEGV(PL_curcop));
+#   endif
     CopFILE_set(PL_curcop, PL_origfilename);
     if (strEQ(PL_origfilename,"-"))
 	scriptname = "";
     if (*fdscript >= 0) {
 	PL_rsfp = PerlIO_fdopen(*fdscript,PERL_SCRIPT_MODE);
-#if defined(HAS_FCNTL) && defined(F_SETFD)
-	if (PL_rsfp)
-	    fcntl(PerlIO_fileno(PL_rsfp),F_SETFD,1);  /* ensure close-on-exec */
-#endif
+#       if defined(HAS_FCNTL) && defined(F_SETFD)
+	    if (PL_rsfp)
+                /* ensure close-on-exec */
+	        fcntl(PerlIO_fileno(PL_rsfp),F_SETFD,1);
+#       endif
     }
     else if (PL_preprocess) {
 	char *cpp_cfg = CPPSTDIN;
@@ -2691,88 +2697,73 @@ S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv, int *fdscript)
 	    Perl_sv_catpvf(aTHX_ cpp, "%s/", BIN_EXP);
 	sv_catpv(cpp, cpp_cfg);
 
-	sv_catpvn(sv, "-I", 2);
-	sv_catpv(sv,PRIVLIB_EXP);
+#       ifndef VMS
+	    sv_catpvn(sv, "-I", 2);
+	    sv_catpv(sv,PRIVLIB_EXP);
+#       endif
 
 	DEBUG_P(PerlIO_printf(Perl_debug_log,
 			      "PL_preprocess: scriptname=\"%s\", cpp=\"%s\", sv=\"%s\", CPPMINUS=\"%s\"\n",
 			      scriptname, SvPVX (cpp), SvPVX (sv), CPPMINUS));
-#if defined(MSDOS) || defined(WIN32)
-	Perl_sv_setpvf(aTHX_ cmd, "\
-sed %s -e \"/^[^#]/b\" \
- -e \"/^#[ 	]*include[ 	]/b\" \
- -e \"/^#[ 	]*define[ 	]/b\" \
- -e \"/^#[ 	]*if[ 	]/b\" \
- -e \"/^#[ 	]*ifdef[ 	]/b\" \
- -e \"/^#[ 	]*ifndef[ 	]/b\" \
- -e \"/^#[ 	]*else/b\" \
- -e \"/^#[ 	]*elif[ 	]/b\" \
- -e \"/^#[ 	]*undef[ 	]/b\" \
- -e \"/^#[ 	]*endif/b\" \
- -e \"s/^#.*//\" \
- %s | %"SVf" -C %"SVf" %s",
-	  (PL_doextract ? "-e \"1,/^#/d\n\"" : ""),
-#else
-#  ifdef __OPEN_VM
-	Perl_sv_setpvf(aTHX_ cmd, "\
-%s %s -e '/^[^#]/b' \
- -e '/^#[ 	]*include[ 	]/b' \
- -e '/^#[ 	]*define[ 	]/b' \
- -e '/^#[ 	]*if[ 	]/b' \
- -e '/^#[ 	]*ifdef[ 	]/b' \
- -e '/^#[ 	]*ifndef[ 	]/b' \
- -e '/^#[ 	]*else/b' \
- -e '/^#[ 	]*elif[ 	]/b' \
- -e '/^#[ 	]*undef[ 	]/b' \
- -e '/^#[ 	]*endif/b' \
- -e 's/^[ 	]*#.*//' \
- %s | %"SVf" %"SVf" %s",
-#  else
-	Perl_sv_setpvf(aTHX_ cmd, "\
-%s %s -e '/^[^#]/b' \
- -e '/^#[ 	]*include[ 	]/b' \
- -e '/^#[ 	]*define[ 	]/b' \
- -e '/^#[ 	]*if[ 	]/b' \
- -e '/^#[ 	]*ifdef[ 	]/b' \
- -e '/^#[ 	]*ifndef[ 	]/b' \
- -e '/^#[ 	]*else/b' \
- -e '/^#[ 	]*elif[ 	]/b' \
- -e '/^#[ 	]*undef[ 	]/b' \
- -e '/^#[ 	]*endif/b' \
- -e 's/^[ 	]*#.*//' \
- %s | %"SVf" -C %"SVf" %s",
-#  endif
-#ifdef LOC_SED
-	  LOC_SED,
-#else
-	  "sed",
-#endif
-	  (PL_doextract ? "-e '1,/^#/d\n'" : ""),
-#endif
-	  scriptname, cpp, sv, CPPMINUS);
+
+#       if defined(MSDOS) || defined(WIN32) || defined(VMS)
+            quote = "\"";
+#       else
+            quote = "'";
+#       endif
+
+#       ifdef VMS
+            cpp_discard_flag = "";
+#       else
+            cpp_discard_flag = "-C";
+#       endif
+
+#       ifdef OS2
+            perl = os2_execname(aTHX);
+#       else
+            perl = PL_origargv[0];
+#       endif
+
+
+        /* This strips off Perl comments which might interfere with
+           the C pre-processor, including #!.  #line directives are 
+           deliberately stripped to avoid confusion with Perl's version 
+           of #line.  FWP played some golf with it so it will fit
+           into VMS's 255 character buffer.
+        */
+        if( PL_doextract )
+            code = "(1../^#!.*perl/i)|/^\\s*#(?!\\s*((ifn?|un)def|(el|end)?if|define|include|else|error|pragma)\\b)/||!($|=1)||print";
+        else
+            code = "/^\\s*#(?!\\s*((ifn?|un)def|(el|end)?if|define|include|else|error|pragma)\\b)/||!($|=1)||print";
+
+        Perl_sv_setpvf(aTHX_ cmd, "\
+%s -ne%s%s%s %s | %"SVf" %s %"SVf" %s",
+                       perl, quote, code, quote, scriptname, cpp, 
+                       cpp_discard_flag, sv, CPPMINUS);
+
 	PL_doextract = FALSE;
-#ifdef IAMSUID				/* actually, this is caught earlier */
-	if (PL_euid != PL_uid && !PL_euid) {	/* if running suidperl */
-#ifdef HAS_SETEUID
-	    (void)seteuid(PL_uid);		/* musn't stay setuid root */
-#else
-#ifdef HAS_SETREUID
-	    (void)setreuid((Uid_t)-1, PL_uid);
-#else
-#ifdef HAS_SETRESUID
-	    (void)setresuid((Uid_t)-1, PL_uid, (Uid_t)-1);
-#else
-	    PerlProc_setuid(PL_uid);
-#endif
-#endif
-#endif
+#       ifdef IAMSUID			/* actually, this is caught earlier */
+	    if (PL_euid != PL_uid && !PL_euid) {  /* if running suidperl */
+#               ifdef HAS_SETEUID
+	            (void)seteuid(PL_uid);	  /* musn't stay setuid root */
+#               else
+#               ifdef HAS_SETREUID
+	            (void)setreuid((Uid_t)-1, PL_uid);
+#               else
+#               ifdef HAS_SETRESUID
+	            (void)setresuid((Uid_t)-1, PL_uid, (Uid_t)-1);
+#               else
+	            PerlProc_setuid(PL_uid);
+#               endif
+#               endif
+#               endif
 	    if (PerlProc_geteuid() != PL_uid)
 		Perl_croak(aTHX_ "Can't do seteuid!\n");
 	}
-#endif /* IAMSUID */
+#       endif /* IAMSUID */
 
-        DEBUG_P(PerlIO_printf(Perl_debug_log,
-                              "PL_preprocess: cmd=\"%s\"\n",
+        DEBUG_P(PerlIO_printf(Perl_debug_log, 
+                              "PL_preprocess: cmd=\"%s\"\n", 
                               SvPVX(cmd)));
 
 	PL_rsfp = PerlProc_popen(SvPVX(cmd), "r");
@@ -2785,34 +2776,36 @@ sed %s -e \"/^[^#]/b\" \
     }
     else {
 	PL_rsfp = PerlIO_open(scriptname,PERL_SCRIPT_MODE);
-#if defined(HAS_FCNTL) && defined(F_SETFD)
-	if (PL_rsfp)
-	    fcntl(PerlIO_fileno(PL_rsfp),F_SETFD,1);  /* ensure close-on-exec */
-#endif
+#       if defined(HAS_FCNTL) && defined(F_SETFD)
+	    if (PL_rsfp)
+                /* ensure close-on-exec */
+	        fcntl(PerlIO_fileno(PL_rsfp),F_SETFD,1);
+#       endif
     }
     if (!PL_rsfp) {
-#ifdef DOSUID
-#ifndef IAMSUID		/* in case script is not readable before setuid */
-	if (PL_euid &&
-	    PerlLIO_stat(CopFILE(PL_curcop),&PL_statbuf) >= 0 &&
-	    PL_statbuf.st_mode & (S_ISUID|S_ISGID))
-	{
-	    /* try again */
-	    PerlProc_execv(Perl_form(aTHX_ "%s/sperl"PERL_FS_VER_FMT, BIN_EXP,
-				     (int)PERL_REVISION, (int)PERL_VERSION,
-				     (int)PERL_SUBVERSION), PL_origargv);
-	    Perl_croak(aTHX_ "Can't do setuid\n");
-	}
-#endif
-#endif
-#ifdef IAMSUID
-	errno = EPERM;
-	Perl_croak(aTHX_ "Can't open perl script: %s\n",
-		   Strerror(errno));
-#else
-	Perl_croak(aTHX_ "Can't open perl script \"%s\": %s\n",
-		   CopFILE(PL_curcop), Strerror(errno));
-#endif
+#       ifdef DOSUID
+#       ifndef IAMSUID	/* in case script is not readable before setuid */
+	    if (PL_euid &&
+                PerlLIO_stat(CopFILE(PL_curcop),&PL_statbuf) >= 0 &&
+                PL_statbuf.st_mode & (S_ISUID|S_ISGID))
+            {
+                /* try again */
+                PerlProc_execv(Perl_form(aTHX_ "%s/sperl"PERL_FS_VER_FMT, 
+                                         BIN_EXP, (int)PERL_REVISION, 
+                                         (int)PERL_VERSION,
+                                         (int)PERL_SUBVERSION), PL_origargv);
+                Perl_croak(aTHX_ "Can't do setuid\n");
+            }
+#       endif
+#       endif
+#       ifdef IAMSUID
+            errno = EPERM;
+            Perl_croak(aTHX_ "Can't open perl script: %s\n",
+                       Strerror(errno));
+#       else
+            Perl_croak(aTHX_ "Can't open perl script \"%s\": %s\n",
+                       CopFILE(PL_curcop), Strerror(errno));
+#       endif
     }
 }
 

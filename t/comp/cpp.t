@@ -15,4 +15,4 @@ if ( $^O eq 'MSWin32' or $^O eq 'MacOS' or
     exit; 		# Cannot test till after install, alas.
 }
 
-system "./perl -P comp/cpp.aux"
+system qq{$^X -"P" "comp/cpp.aux"};
