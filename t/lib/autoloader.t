@@ -3,7 +3,7 @@
 BEGIN {
     chdir 't' if -d 't';
     $dir = "auto-$$";
-    @INC = ("./$dir", "../lib");
+    unshift @INC, ("./$dir", "../lib");
 }
 
 print "1..9\n";

@@ -4,7 +4,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    unshift @INC, '../lib';
 }
 require AnyDBM_File;
 #If Fcntl is not available, try 0x202 or 0x102 for O_RDWR|O_CREAT

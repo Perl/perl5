@@ -4,7 +4,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    unshift @INC, '../lib';
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bNDBM_File\b/) {
 	print "1..0\n";

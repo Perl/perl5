@@ -5,7 +5,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    unshift @INC, '../lib';
     $ENV{PERL5LIB} = '../lib';	# so children will see it too
 }
 use lib '../lib';
