@@ -317,6 +317,21 @@ SHRDLU
    ###     ./perl harness
    ### in directory ./t.
 SHRDLU
+	use Config;
+	if ($Config{ldlibpthname}) {
+	    warn <<SHRDLU;
+   ### Since you seem to have a dynamic library search path,
+   ### $Config{ldlibpthname}, you probably should set that
+   ### to point to the build directory before running the harness.
+   ### Depending on your shell style:
+   ###     setenv $Config{ldlibpthname} `pwd`; cd t; ./perl harness
+   ### (for csh-style shells) or:
+   ###     $Config{ldlibpthname}=`pwd`; export $Config{ldlibpthname}; cd t; ./perl harness
+   ### (for traditional Bourne-style shells) or:
+   ###     export $Config{ldlibpthname}=`pwd`; cd t; ./perl harness
+   ### (for ksh-style shells, like zsh).
+SHRDLU
+	}
     }
     ($user,$sys,$cuser,$csys) = times;
     print sprintf("u=%g  s=%g  cu=%g  cs=%g  scripts=%d  tests=%d\n",
