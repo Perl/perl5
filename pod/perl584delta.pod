@@ -37,7 +37,7 @@ of memory.  Previously such assignments would suffer from integer wrap-around
 during size calculations causing a misallocation, which would crash perl, and
 could theoretically be used for "stack smashing" attacks.  The wrapping
 defaults to enabled on platforms where we know it works (AIX, BSDi, Darwin,
-DEC OSF, FreeBSD, HP/UX, GNU Linux, OpenBSD, Solaris, VMS and Win32) and
+DEC OSF/1, FreeBSD, HP/UX, GNU Linux, OpenBSD, Solaris, VMS and Win32) and
 defaults to disabled on other platforms.
 
 =head2 Unicode Character Database 4.0.1
@@ -56,7 +56,8 @@ to C<suidperl>.
 
 =head2 format
 
-In addition to bug fixes, C<format>'s features have been enhanced. See XXX
+In addition to bug fixes, C<format>'s features have been enhanced. See
+L<perlform>
 
 =head1 Modules and Pragmata
 
@@ -122,8 +123,6 @@ C<syslog()> can now use numeric constants for facility names and priorities,
 in addition to strings.
 
 =item Term::ANSIColor
-
-=item Term::Unicode
 
 =item Time::HiRes
 
