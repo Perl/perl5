@@ -232,6 +232,9 @@ binary, or else consider using modules like Data::Dumper (included in
 the standard distribution as of Perl 5.005) and Storable (included as
 of perl 5.8).  Keeping all data as text significantly simplifies matters.
 
+The v-strings are portable only up to v2147483647 (0x7FFFFFFF), that's
+how far EBCDIC, or more precisely UTF-EBCDIC will go.
+
 =head2 Files and Filesystems
 
 Most platforms these days structure files in a hierarchical fashion.
@@ -258,6 +261,9 @@ The filesystem may support neither access timestamp nor change
 timestamp (meaning that about the only portable timestamp is the
 modification timestamp), or one second granularity of any timestamps
 (e.g. the FAT filesystem limits the time granularity to two seconds).
+
+The "inode change timestamp" (the <-C> filetest) may really be the
+"creation timestamp" (which it is not in UNIX).
 
 VOS perl can emulate Unix filenames with C</> as path separator.  The
 native pathname characters greater-than, less-than, number-sign, and
@@ -318,30 +324,61 @@ the user to override the default location of the file.
 Don't assume a text file will end with a newline.  They should,
 but people forget.
 
-Do not have two files of the same name with different case, like
-F<test.pl> and F<Test.pl>, as many platforms have case-insensitive
-filenames.  Also, try not to have non-word characters (except for C<.>)
-in the names, and keep them to the 8.3 convention, for maximum
-portability, onerous a burden though this may appear.
+Do not have two files or directories of the same name with different
+case, like F<test.pl> and F<Test.pl>, as many platforms have
+case-insensitive (or at least case-forgiving) filenames.  Also, try
+not to have non-word characters (except for C<.>) in the names, and
+keep them to the 8.3 convention, for maximum portability, onerous a
+burden though this may appear.
 
 Likewise, when using the AutoSplit module, try to keep your functions to
 8.3 naming and case-insensitive conventions; or, at the least,
 make it so the resulting files have a unique (case-insensitively)
 first 8 characters.
 
-Whitespace in filenames is tolerated on most systems, but not all.
+Whitespace in filenames is tolerated on most systems, but not all,
+and even on systems where it might be tolerated, some utilities
+might become confused by such whitespace.
+
 Many systems (DOS, VMS) cannot have more than one C<.> in their filenames.
 
 Don't assume C<< > >> won't be the first character of a filename.
-Always use C<< < >> explicitly to open a file for reading,
-unless you want the user to be able to specify a pipe open.
+Always use C<< < >> explicitly to open a file for reading, or even
+better, use the three-arg version of open, unless you want the user to
+be able to specify a pipe open.
 
-    open(FILE, "< $existing_file") or die $!;
+    open(FILE, '<', $existing_file) or die $!;
 
 If filenames might use strange characters, it is safest to open it
 with C<sysopen> instead of C<open>.  C<open> is magic and can
 translate characters like C<< > >>, C<< < >>, and C<|>, which may
 be the wrong thing to do.  (Sometimes, though, it's the right thing.)
+Three-arg open can also help protect against this translation in cases
+where it is undesirable.
+
+Don't use C<:> as a part of a filename since many systems use that for
+their own semantics (MacOS Classic for separating pathname components,
+many networking schemes and utilities for separating the nodename and
+the pathname, and so on).  For the same reasons, avoid C<@>, C<;> and
+C<|>.
+
+Don't assume that in pathnames you can collapse two leading slashes
+C<//> into one: some networking and clustering filesystems have special
+semantics for that.  Let the operating system to sort it out.
+
+The I<portable filename characters> as defined by ANSI C are
+
+ a b c d e f g h i j k l m n o p q r t u v w x y z
+ A B C D E F G H I J K L M N O P Q R T U V W X Y Z
+ 0 1 2 3 4 5 6 7 8 9
+ . _ -
+
+and the "-" shouldn't be the first character.  If you want to be
+hypercorrect, stay case-insensitive and within the 8.3 naming
+convention (all the files and directories have to be unique within one
+directory if their names are lowercased and truncated to eight
+characters before the C<.>, if any, and to three characters after the
+C<.>, if any).  (And do not use C<.>s in directory names.)
 
 =head2 System Interaction
 
@@ -502,15 +539,20 @@ to get what should be the proper value on any system.
 
 =head2 Character sets and character encoding
 
-Assume little about character sets.  Assume nothing about
-numerical values (C<ord>, C<chr>) of characters.  Do not
-assume that the alphabetic characters are encoded contiguously (in
-the numeric sense).  Do not assume anything about the ordering of the
-characters.  The lowercase letters may come before or after the
-uppercase letters; the lowercase and uppercase may be interlaced so
-that both `a' and `A' come before `b'; the accented and other
-international characters may be interlaced so that E<auml> comes
-before `b'.
+Assume very little about character sets.
+
+Assume nothing about numerical values (C<ord>, C<chr>) of characters.
+Do not use explicit code point ranges (like \xHH-\xHH); use for
+example symbolic character classes like C<[:print:]>.
+
+Do not assume that the alphabetic characters are encoded contiguously
+(in the numeric sense).  There may be gaps.
+
+Do not assume anything about the ordering of the characters.
+The lowercase letters may come before or after the uppercase letters;
+the lowercase and uppercase may be interlaced so that both `a' and `A'
+come before `b'; the accented and other international characters may
+be interlaced so that E<auml> comes before `b'.
 
 =head2 Internationalisation
 
@@ -638,6 +680,7 @@ are a few of the more popular Unix flavors:
     --------------------------------------------
     AIX           aix        aix
     BSD/OS        bsdos      i386-bsdos
+    Darwin        darwin     darwin
     dgux          dgux       AViiON-dgux
     DYNIX/ptx     dynixptx   i386-dynixptx
     FreeBSD       freebsd    freebsd-i386    
@@ -1747,7 +1790,11 @@ as '', so numeric comparison or manipulation of these fields may cause
 'not numeric' warnings.
 
 mtime and atime are the same thing, and ctime is creation time instead of
-inode change time. (S<Mac OS>)
+inode change time. (S<Mac OS>).
+
+ctime not supported on UFS (S<Mac OS X>).
+
+ctime is creation time instead of inode change time  (Win32).
 
 device and inode are not meaningful.  (Win32)
 
@@ -1778,6 +1825,16 @@ numeric values on some systems.  The flags exported by C<Fcntl>
 OS>, OS/390, VM/ESA)
 
 =item system LIST
+
+In general, do not assume the UNIX/POSIX semantics that you can shift
+C<$?> right by eight to get the exit value, or that C<$? & 127>
+would give you the number of the signal that terminated the program,
+or that C<$? & 128> would test true if the program was terminated by a
+coredump.  Instead, use the POSIX W*() interfaces: for example, use
+WIFEXITED($?) an WEXITVALUE($?) to test for a normal exit and the exit
+value, and WIFSIGNALED($?) and WTERMSIG($?)  for a signal exit and the
+signal.  Core dumping is not a portable concept, so there's no portable
+way to test for that.
 
 Only implemented if ToolServer is installed. (S<Mac OS>)
 
