@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Jul 30 06:47:25 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Tue Jul 31 17:53:39 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -7409,8 +7409,9 @@ esac
 echo " "
 case "$sysman" in
 '') 
-	syspath='/usr/man/man1 /usr/man/mann /usr/man/manl /usr/man/local/man1'
-	syspath="$syspath /usr/man/u_man/man1 /usr/share/man/man1"
+	syspath='/usr/share/man/man1 /usr/man/man1'
+	syspath="$syspath /usr/man/mann /usr/man/manl /usr/man/local/man1"
+	syspath="$syspath /usr/man/u_man/man1"
 	syspath="$syspath /usr/catman/u_man/man1 /usr/man/l_man/man1"
 	syspath="$syspath /usr/local/man/u_man/man1 /usr/local/man/l_man/man1"
 	syspath="$syspath /usr/man/man.L /local/man/man1 /usr/local/man/man1"
@@ -7442,7 +7443,8 @@ case "$man1dir" in
 ' ') dflt=none
 	;;
 '')
-	lookpath="$prefixexp/man/man1 $prefixexp/man/l_man/man1"
+	lookpath="$prefixexp/share/man/man1"
+	lookpath="$lookpath $prefixexp/man/man1 $prefixexp/man/l_man/man1"
 	lookpath="$lookpath $prefixexp/man/p_man/man1"
 	lookpath="$lookpath $prefixexp/man/u_man/man1"
 	lookpath="$lookpath $prefixexp/man/man.1"
