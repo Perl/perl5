@@ -21,7 +21,7 @@ my $test = 1;
 sub ok { print "ok $test\n"; $test++ }
 
 
-my $a;
+my $got;
 my $Is_VMS = $^O eq 'VMS';
 my $Is_MacOS = $^O eq 'MacOS';
 
@@ -29,34 +29,54 @@ my $path = join " ", map { qq["-I$_"] } @INC;
 $path = '"-I../lib" "-Iperl_root:[lib]"' if $Is_VMS;   # gets too long otherwise
 my $redir = $Is_MacOS ? "" : "2>&1";
 
+chomp($got = `$^X $path "-MB::Stash" "-Mwarnings" -e1`);
 
-chomp($a = `$^X $path "-MB::Stash" "-Mwarnings" -e1`);
-$a = join ',', sort split /,/, $a;
-$a =~ s/-u(PerlIO|open)(?:::\w+)?,//g;
-$a =~ s/-uWin32,// if $^O eq 'MSWin32';
-$a =~ s/-uNetWare,// if $^O eq 'NetWare';
-$a =~ s/-u(Cwd|File|File::Copy|OS2),//g if $^O eq 'os2';
-$a =~ s/-uCwd,// if $^O eq 'cygwin';
-  $b = '-uCarp,-uCarp::Heavy,-uDB,-uExporter,-uExporter::Heavy,-uaccess,-uattributes,'
-     . '-umain,-uutf8,-uwarnings';
+$got =~ s/-u//g;
+
+print "# got = $got\n";
+
+my @got = map { s/^\S+ //; $_ }
+              sort { $a cmp $b }
+                   map { lc($_) . " " . $_ }
+                       split /,/, $got;
+
+print "# (after sorting)\n";
+print "# got = @got\n";
+
+@got = grep { ! /^(PerlIO|open)(?:::\w+)?$/ } @got;
+
+print "# (after perlio censorings)\n";
+print "# got = @got\n";
+
+@got = grep { ! /^Win32$/                     } @got  if $^O eq 'MSWin32';
+@got = grep { ! /^NetWare$/                   } @got  if $^O eq 'NetWare';
+@got = grep { ! /^(Cwd|File|File::Copy|OS2)$/ } @got  if $^O eq 'os2';
+@got = grep { ! /^Cwd$/                       } @got  if $^O eq 'cygwin';
+
 if ($Is_VMS) {
-    $a =~ s/-uFile,-uFile::Copy,//;
-    $a =~ s/-uVMS,-uVMS::Filespec,//;
-    $a =~ s/-uvmsish,//;
-    $a =~ s/-uSocket,//; # Socket is optional/compiler version dependent
+    @got = grep { ! /^File(?:::Copy)?$/    } @got;
+    @got = grep { ! /^VMS(?:::Filespec)?$/ } @got;
+    @got = grep { ! /^vmsish$/             } @got;
+     # Socket is optional/compiler version dependent
+    @got = grep { ! /^Socket$/             } @got;
 }
+
+print "# (after platform censorings)\n";
+print "# got = @got\n";
+
+$got = "@got";
+
+my $expected = "access attributes Carp Carp::Heavy DB Exporter Exporter::Heavy main utf8 warnings";
 
 {
     no strict 'vars';
     use vars '$OS2::is_aout';
 }
+
 if ((($Config{static_ext} eq ' ') || ($Config{static_ext} eq ''))
     && !($^O eq 'os2' and $OS2::is_aout)
 	) {
-    if (ord('A') == 193) { # EBCDIC sort order is qw(a A) not qw(A a)
-	$b = join ',', sort split /,/, $b;
-    }
-    print "# [$a]\n# vs.\n# [$b]\nnot " if $a ne $b;
+    print "# [$got]\n# vs.\n# [$expected]\nnot " if $got ne $expected;
     ok;
 } else {
     print "ok $test # skipped: one or more static extensions\n"; $test++;
