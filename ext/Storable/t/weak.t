@@ -25,7 +25,7 @@ sub BEGIN {
   }
 
   require Scalar::Util;
-  Scalar::Util->import qw(weaken isweak);
+  Scalar::Util->import(qw(weaken isweak));
   if (grep { /weaken/ } @Scalar::Util::EXPORT_FAIL) {
     print("1..0 # Skip: No support for weaken in Scalar::Util\n");
     exit 0;

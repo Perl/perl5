@@ -14,13 +14,10 @@
 #include <XSUB.h>
 
 #ifndef PATCHLEVEL
-#    include <patchlevel.h>		/* Perl's one, needed since 5.6 */
-#    if !(defined(PERL_VERSION) || (SUBVERSION > 0 && defined(PATCHLEVEL)))
-#        include <could_not_find_Perl_patchlevel.h>
-#    endif
+#include <patchlevel.h>		/* Perl's one, needed since 5.6 */
 #endif
 
-#if PERL_VERSION < 8
+#if !defined(PERL_VERSION) || PERL_VERSION < 8
 #include "ppport.h"             /* handle old perls */
 #endif
 
