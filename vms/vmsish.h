@@ -56,6 +56,8 @@
 #ifdef EMBED
 #  define my_trnlnm		Perl_my_trnlnm
 #  define my_getenv		Perl_my_getenv
+#  define prime_env_iter	Perl_prime_env_iter
+#  define my_setenv		Perl_my_setenv
 #  define my_crypt		Perl_my_crypt
 #  define waitpid		Perl_waitpid
 #  define my_gconvert		Perl_my_gconvert
@@ -397,6 +399,10 @@ typedef unsigned myino_t;
  * __VMS_PROTOTYPES__ and __VMS_SEPYTOTORP__ lines, and must be in the form
  *    <data type><TAB>name<WHITESPACE>_((<prototype args>));
  */
+
+void	prime_env_iter _((void));
+void	getredirection _((int *, char ***));
+void	init_os_extras _(());
 /* prototype section start marker; `typedef' passes through cpp */
 typedef char  __VMS_PROTOTYPES__;
 int	my_trnlnm _((char *, char *, unsigned long int));
@@ -426,7 +432,6 @@ long	telldir _((DIR *));
 void	seekdir _((DIR *, long));
 void	closedir _((DIR *));
 void	vmsreaddirversions _((DIR *, int));
-void	getredirection _((int *, char ***));
 struct tm *my_gmtime _((const time_t *));
 I32	cando_by_name _((I32, I32, char *));
 int	flex_fstat _((int, struct stat *));
@@ -445,7 +450,6 @@ struct passwd *	my_getpwent _(());
 void	my_endpwent _(());
 char *	my_getlogin _(());
 int	rmscopy _((char *, char *, int));
-void	init_os_extras _(());
 typedef char __VMS_SEPYTOTORP__;
 /* prototype section end marker; `typedef' passes through cpp */
 
