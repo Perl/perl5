@@ -336,7 +336,7 @@ AutoSplitting *INC**PATHSEP**MOD*.pm (*DIR**PATHSEP**MOD*)
 *DIR*/*MOD*/flying_pig.al
 ## Tests
 is (&*MOD*::skeleton, "bones", "skeleton");
-eval {&*MOD*::gonner}; ok ($@ =~ m!^Can't locate auto/*MOD*/gonner.al in \@INC!, "Check &*MOD*::gonner is now a gonner") or print "# \$\@='$@'\n";
+eval {&*MOD*::gonner}; ok ($@ =~ m!^Can't locate file auto/*MOD*/gonner.al in \@INC!, "Check &*MOD*::gonner is now a gonner") or print "# \$\@='$@'\n";
 ## Sleep
 4
 ## SameAgain
@@ -408,4 +408,4 @@ AutoSplitting *INC**PATHSEP**MOD*.pm (*DIR**PATHSEP**MOD*)
 *DIR*/*MOD*/wraith.al
 ## Tests
 is (&*MOD*::wraith, 9);
-eval {&*MOD*::flying_pig}; ok ($@ =~ m!^Can't locate auto/*MOD*/flying_pig.al in \@INC!, "There are no flying pigs") or print "# \$\@='$@'\n";
+eval {&*MOD*::flying_pig}; ok ($@ =~ m!^Can't locate file auto/*MOD*/flying_pig.al in \@INC!, "There are no flying pigs") or print "# \$\@='$@'\n";
