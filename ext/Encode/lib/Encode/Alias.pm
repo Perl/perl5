@@ -193,8 +193,7 @@ sub init_aliases
   
     # Standardize on the dashed versions.
     # define_alias( qr/\butf8$/i  => '"utf-8"' );
-    define_alias( qr/\bkoi8r$/i => '"koi8-r"' );
-    define_alias( qr/\bkoi8u$/i => '"koi8-u"' );
+    define_alias( qr/\bkoi8[\s-_]*([ru])$/i => '"koi8-$1"' );
 
     unless ($Encode::ON_EBCDIC){
         # for Encode::CN

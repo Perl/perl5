@@ -3,6 +3,15 @@
 # $Id: Changes,v 1.97 2003/07/08 21:52:14 dankogai Exp $
 #
 $Revision: 1.97 $ $Date: 2003/07/08 21:52:14 $
+! t/enc_eucjp.t t/enc_utf8.t AUTHORS
+  Encode test fixes for VMS by Peter Prymmer
+  Message-ID: <OFBD4A7559.D7CF9517-ON85256D6B.00534853-85256D6B.00538131@factset.com>
+! lib/Encode/Alias.pm t/Aliases.t
+  koi-8 aliases bug detected and patched by sadahiro.
+  Further fix and test suite by dankogai
+  Message-Id: <20030713102228.C76A.BQW10602@nifty.com>
+
+1.97 2003/07/08 21:52:14
 ! encoding.pm lib/Encode/Guess.pm lib/Encode/Alias.pm 
   lib/Encode/JP/JIS7.pm lib/Encode/Encoder.pm Encode.pm
   $DEBUG replaced with DEBUG() so perl optimizes better,

@@ -6,4 +6,4 @@ installdirs:  perl
 requires:
 
 distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.10_05
+generated_by: ExtUtils::MakeMaker version 6.12
