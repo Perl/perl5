@@ -1094,7 +1094,7 @@ Perl_sv_grow(pTHX_ register SV *sv, register STRLEN newlen)
 	s = SvPVX(sv);
     if (newlen > SvLEN(sv)) {		/* need more room? */
 	if (SvLEN(sv) && s) {
-#if defined(MYMALLOC) && !defined(PURIFY) && !defined(LEAKTEST)
+#if defined(MYMALLOC) && !defined(LEAKTEST)
 	    STRLEN l = malloced_size((void*)SvPVX(sv));
 	    if (newlen <= l) {
 		SvLEN_set(sv, l);
