@@ -1949,7 +1949,10 @@ magic_set(SV *sv, MAGIC *mg)
 		    || PL_origargv[i] == s + 2
 #endif 
 		   )
-		    s += strlen(++s);	/* this one is ok too */
+		{
+		    ++s;
+		    s += strlen(s);	/* this one is ok too */
+		}
 		else
 		    break;
 	    }
@@ -1962,8 +1965,10 @@ magic_set(SV *sv, MAGIC *mg)
 		my_setenv("NoNe  SuCh", Nullch);
 					    /* force copy of environment */
 		for (i = 0; PL_origenviron[i]; i++)
-		    if (PL_origenviron[i] == s + 1)
-			s += strlen(++s);
+		    if (PL_origenviron[i] == s + 1) {
+			++s;
+			s += strlen(s);
+		    }
 		    else
 			break;
 	    }
