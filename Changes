@@ -28,6 +28,579 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 19682] By: jhi                                   on 2003/06/04  05:22:46
+        Log: Integrate:
+             [ 19654]
+             Two Cygwin patches from Gerrit.
+             
+             Subject: [PATCH] perl.h, README.cygwin: Cygwin O_TEXT <> O_BINARY issue
+             From: "Gerrit P. Haase" <gp@familiehaase.de>
+             Date: Sat, 31 May 2003 14:12:07 +0200
+             Message-ID: <179860591535.20030531141207@familiehaase.de>
+             
+             Subject: [PATCH] t/io/layers.t, Cygwin != DOSISH
+             Date: Sat, 31 May 2003 13:57:49 +0200
+             Message-ID: <11859733881.20030531135749@familiehaase.de>
+             
+             [ 19655]
+             A pointless test, noticed by Craig Berry.
+             
+             [ 19656]
+             Since pulling in File::Temp for tempfiles would pull in
+             also Fcntl, miniperl could not open up tempfiles.  This broke
+             the use of miniperl in VMS, as noticed by Craig Berry.
+             Try to cure this by moving the creation of tempfile into its
+             own routine, my_tmpfp(), which gets compiled differently
+             for miniperl and perl.
+             
+             [ 19657]
+             Stick with the original (5.8.0) logic.
+             
+             [ 19658]
+             I thought I tried building threaded.  Never think.  Try.
+             
+             [ 19659]
+             Duplicate definition bad.
+             
+             [ 19660]
+             Beautification.
+             
+             [ 19661]
+             Sync with libnet 1.14
+             
+             [ 19662]
+             U/WIN: final (for now) touches from John P. Linderman;
+             now we get 97% success rate, the remaining failures are
+             quite obscure.
+             
+             [ 19663]
+             Whitespace tweaks.
+             
+             [ 19664]
+             Upgrade to the CGI.pm 2.93.
+             
+             (Lincoln keeps ripping out the BEGIN/PERL_CORE blocks.  Sigh.)
+             
+             [ 19665]
+             A little bit more of weird-code-proofing in B::Deparse.
+             Fixes a bug reported by Alexey Tourbin in
+             Message-ID: <20030602085348.GA24023@solemn.turbinal.org>
+             
+             [ 19666]
+             change#19628 broke many win32/system.t tests, so back it out
+             
+             [ 19667]
+             don't use File::Temp to implement PerlIO_tmpfile() on windows;
+             reuse the straightforward native implementation instead
+             
+             this fixes the warning from io_xs.t
+             
+             NOTE: File::Temp has a less-than-robust implementation on windows
+             that relies on END blocks being run (this may not happen always)
+             
+             [ 19668]
+             resurrect change#19628 and make it work by generalizing
+             a spot that had a hardcoded dependency on the cmd.exe
+             arguments being "/x/c" or "/c"
+             
+             [ 19669]
+             fix for 09_gen_rs.t#59 failure on windows
+             
+             [ 19670]
+             Retract #19667, #19660, #19659, #19658, #19657, #19656,
+             #19655, #19418; File::Temp no more used internally.
+             Some parts of these will be salvaged later.
+             
+             [ 19671]
+             Subject: Re: [PATCH] perl.h, README.cygwin: Cygwin O_TEXT <> O_BINARY issue
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Tue, 03 Jun 2003 01:55:06 -0700
+             Message-ID: <qJG3+gzkgajL092yn@efn.org>
+             
+             [ 19672]
+             Salvage parts of #19418 (the ext/PerlIO/t/open.t
+             still is there).
+             
+             [ 19673]
+             Salvage parts of #19667.
+             
+             [ 19678]
+             According to Arthur this should help
+             #22060 Perl 5.8.0 on FreeBSD 5.0 threads (threads->list) possible bug
+             
+             [ 19679]
+             Urk.  Joe's patches were for the maint branch,
+             not for the blead (which has assertions and stuff).
+             Retract #19677, #19676, #19674.
+             
+             [ 19681]
+             Subject: [MacOS X] consider useshrplib='false' by default
+             From: Dan Kogai <dankogai@dan.co.jp>
+             Date: Wed, 4 Jun 2003 01:29:42 +0900
+             Message-Id: <94213618-95E0-11D7-8A27-000393AE4244@dan.co.jp>
+     Branch: maint-5.8/perl
+	  +> lib/CGI/t/util-58.t
+	  !> (integrate 48 files)
+____________________________________________________________________________
+[ 19680] By: jhi                                   on 2003/06/03  15:53:57
+        Log: Restore the perl5db.pl of #19677 into the maint branch.
+     Branch: maint-5.8/perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[ 19653] By: jhi                                   on 2003/06/01  07:35:55
+        Log: Integrate:
+             [ 19638]
+             Comment tweakage.
+             
+             [ 19639]
+             Add the test case for the already fixed
+             [perl #22351] perl bug with 'e' substitution modifier
+             
+             [ 19640]
+             Fix for "#22375 'split'/'index' problem for utf8".
+             
+             [ 19641]
+             A bit of networking notworking negativity.
+             (Inspiration from Jos.)
+             
+             [ 19642]
+             test.pl-isation.
+             
+             [ 19643]
+             Upgrade to Tie::File 0.96.
+             
+             [ 19644]
+             Subject: [PATCH] ext/Encode/t/perlio.t filename tweak
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Fri, 30 May 2003 13:08:01 -0500
+             Message-ID: <3ED79E01.8050401@mac.com>
+             
+             [ 19645]
+             Subject: Re: [perl #22372] [PATCH] sv_chop() broken
+             From: Enache Adrian <enache@rdslink.ro>
+             Date: Fri, 30 May 2003 18:52:28 +0300
+             Message-ID: <20030530155228.GA872@ratsnest.hole>
+             
+             [ 19646]
+             Interesting patch(1) glitch.
+             
+             [ 19647]
+             Subject: Re: [perl #22372] [PATCH] sv_chop() broken
+             From: Enache Adrian <enache@rdslink.ro>
+             Date: Sat, 31 May 2003 14:18:11 +0300
+             Message-ID: <20030531111811.GA1240@ratsnest.hole>
+             
+             [ 19648]
+             Better patch from Inaba Hiroto for
+             [perl #22375] 'split'/'index' problem for utf8
+             
+             [ 19650]
+             Regenerate internals pods.
+             
+             [ 19651]
+             Don't install test.pl files.
+             
+             [ 19652]
+             Fix a case of segfault in gv_check(), by making
+             it ignore non-GV values in stashes.
+     Branch: maint-5.8/perl
+	  !> ext/Encode/t/perlio.t gv.c installperl intrpvar.h
+	  !> lib/Tie/File.pm lib/Tie/File/t/00_version.t
+	  !> lib/Tie/File/t/09_gen_rs.t pod/perlapi.pod pod/perlintern.pod
+	  !> pod/perlport.pod sv.c t/op/index.t t/op/stash.t t/op/subst.t
+	  !> t/op/write.t
+____________________________________________________________________________
+[ 19652] By: rgs                                   on 2003/05/31  19:54:31
+        Log: Fix a case of segfault in gv_check(), by making
+             it ignore non-GV values in stashes.
+     Branch: perl
+	   ! gv.c t/op/stash.t
+____________________________________________________________________________
+[ 19651] By: rgs                                   on 2003/05/31  18:48:59
+        Log: Don't install test.pl files.
+     Branch: perl
+	   ! installperl
+____________________________________________________________________________
+[ 19650] By: rgs                                   on 2003/05/31  18:47:50
+        Log: Regenerate internals pods.
+     Branch: perl
+	   ! pod/perlapi.pod pod/perlintern.pod
+____________________________________________________________________________
+[ 19649] By: rgs                                   on 2003/05/31  18:33:07
+        Log: Subject: [PATCH] jumbo closure patch broke formats
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Sat, 31 May 2003 19:54:48 +0100
+             Message-ID: <20030531185448.GA6055@fdgroup.com>
+             Plus restore the original test script for bug #22372
+     Branch: perl
+	   ! pad.c t/op/write.t
+____________________________________________________________________________
+[ 19648] By: jhi                                   on 2003/05/31  17:37:36
+        Log: Better patch from Inaba Hiroto for
+             [perl #22375] 'split'/'index' problem for utf8
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 19647] By: rgs                                   on 2003/05/31  11:46:52
+        Log: Subject: Re: [perl #22372] [PATCH] sv_chop() broken
+             From: Enache Adrian <enache@rdslink.ro>
+             Date: Sat, 31 May 2003 14:18:11 +0300
+             Message-ID: <20030531111811.GA1240@ratsnest.hole>
+     Branch: perl
+	   ! t/op/write.t
+____________________________________________________________________________
+[ 19646] By: jhi                                   on 2003/05/31  05:40:15
+        Log: Interesting patch(1) glitch.
+     Branch: perl
+	   ! lib/Tie/File.pm
+____________________________________________________________________________
+[ 19645] By: jhi                                   on 2003/05/31  05:37:10
+        Log: Subject: Re: [perl #22372] [PATCH] sv_chop() broken
+             From: Enache Adrian <enache@rdslink.ro>
+             Date: Fri, 30 May 2003 18:52:28 +0300
+             Message-ID: <20030530155228.GA872@ratsnest.hole>
+     Branch: perl
+	   ! sv.c t/op/write.t
+____________________________________________________________________________
+[ 19644] By: jhi                                   on 2003/05/31  05:31:11
+        Log: Subject: [PATCH] ext/Encode/t/perlio.t filename tweak
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Fri, 30 May 2003 13:08:01 -0500
+             Message-ID: <3ED79E01.8050401@mac.com>
+     Branch: perl
+	   ! ext/Encode/t/perlio.t
+____________________________________________________________________________
+[ 19643] By: jhi                                   on 2003/05/31  05:28:56
+        Log: Upgrade to Tie::File 0.96.
+     Branch: perl
+	   ! lib/Tie/File.pm lib/Tie/File/t/00_version.t
+	   ! lib/Tie/File/t/09_gen_rs.t
+____________________________________________________________________________
+[ 19642] By: jhi                                   on 2003/05/30  19:06:02
+        Log: test.pl-isation.
+     Branch: perl
+	   ! t/op/index.t
+____________________________________________________________________________
+[ 19641] By: jhi                                   on 2003/05/30  15:59:57
+        Log: A bit of networking notworking negativity.
+             (Inspiration from Jos.)
+     Branch: perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[ 19640] By: jhi                                   on 2003/05/30  05:47:15
+        Log: Fix for "#22375 'split'/'index' problem for utf8".
+     Branch: perl
+	   ! sv.c t/op/index.t
+____________________________________________________________________________
+[ 19639] By: jhi                                   on 2003/05/29  19:07:35
+        Log: Add the test case for the already fixed
+             [perl #22351] perl bug with 'e' substitution modifier
+     Branch: perl
+	   ! t/op/subst.t
+____________________________________________________________________________
+[ 19638] By: jhi                                   on 2003/05/29  18:56:46
+        Log: Comment tweakage.
+     Branch: perl
+	   ! intrpvar.h
+____________________________________________________________________________
+[ 19637] By: rgs                                   on 2003/05/29  18:47:40
+        Log: Subject: [PATCH] jumbo closure fix
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Wed, 26 Feb 2003 14:49:47 +0000
+             Message-ID: <20030226144947.A14444@fdgroup.com>
+     Branch: perl
+	   ! embed.fnc embed.h embedvar.h ext/Devel/Peek/Peek.t intrpvar.h
+	   ! op.c pad.c perlapi.h pod/perldiag.pod pod/perlintern.pod
+	   ! pod/perlref.pod proto.h regcomp.c t/lib/warnings/pad
+	   ! t/op/closure.t
+____________________________________________________________________________
+[ 19636] By: jhi                                   on 2003/05/29  14:19:35
+        Log: Integrate:
+             [ 19618]
+             Subject: [Encode] Minor bug in piconv induced by Getopt::Long
+             From: Dan Kogai <dankogai@dan.co.jp>
+             Date: 24 May 2003 19:50:48 -0000
+             Message-ID: <20030524195048.16052.qmail@dan-gm.gm.dan.co.jp>
+             
+             [ 19619]
+             Protect against race conditions: if the pid is not seen,
+             neither will be the $0 change be seen (and vice versa).
+             
+             [ 19620]
+             Subject: Re: [PATCH: perlio.h] maint snap @ 19613
+             From: "Marcus Holland-Moritz" <mhx-perl@gmx.net>
+             Date: Sun, 25 May 2003 21:17:42 +0200
+             Message-ID: <003701c322f2$517fb5e0$0c2f1fac@R2D2>
+             
+             [ 19621]
+             Run external commands only with localized sanitized $ENV{PATH}.
+             
+             [ 19622]
+             Regen modlib and toc.
+             
+             [ 19623]
+             Subject: [PATCH] for cygwin/perlld.in
+             From: "Gerrit P. Haase" <gp@familiehaase.de>
+             Date: Sat, 24 May 2003 16:51:29 +0200
+             Message-ID: <162265353578.20030524165129@familiehaase.de>
+             
+             [ 19625]
+             Subject: Re: [perl #22299] goto doesn't find label
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Sat, 24 May 2003 12:25:17 +0100
+             Message-ID: <20030524112517.GA11761@fdgroup.com>
+             
+             Subject: [PATCH] Re: [perl #22299] goto doesn't find label
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Mon, 26 May 2003 13:47:11 +0100
+             Message-ID: <20030526124710.GA17670@fdgroup.com>
+             
+             [ 19626]
+             For now reword the sysread/syswrite description to
+             stress the fact that by default everything is still bytes.
+             
+             [ 19627]
+             OpenZaurus cross-compilation patches from Redvers Davies.
+             
+             [ 19628]
+             Subject: [PATCH] Use "cmd.exe /x/d/c" as the default PERL5SHELL on Windows NT/2K/XP
+             From: Jan Dubois <jand@ActiveState.com>
+             Date: Mon, 26 May 2003 23:33:53 -0700
+             Message-ID: <dv06dv48900iqv5hqddmbc6vt0efvto8d6@4ax.com>
+             
+             [ 19629]
+             Subject: [PATCH] Re: a2p is linked against too many libraries
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Wed, 28 May 2003 09:20:06 -0400 (EDT)
+             Message-ID: <Pine.SOL.4.53.0305280913350.27138@maxwell.phys.lafayette.edu>
+             
+             [ 19630]
+             Subject: typo in pod/perlfunc.pod
+             From: Alexey Mahotkin <alexm@w-m.ru>
+             Date: Wed, 28 May 2003 15:18:04 +0400
+             Message-ID: <878ysrs4k3.fsf@dim.w-m.ru>
+             
+             [ 19631]
+             Document that setvbuf() is not probably any more available.
+             Many reports, most recently by mjd in
+             [perl #22339] IO::Handle::setvbuf not defined properly
+             
+             [ 19632]
+             Subject: [PATCH] $x = $empty_hash{$undef_val} doesn't give a warning
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Tue, 27 May 2003 19:31:10 +0100
+             Message-ID: <20030527183110.GA22715@fdgroup.com>
+             
+             [ 19633]
+             A *much* cut-down version of the patches in the thread
+             Subject: [perl #22224] 2 patches to perldiag.pod; for POSIX and Win32 errors
+             From: Jim Cromie (via RT) <perlbug-followup@perl.org>
+             Date: 16 May 2003 19:04:28 -0000
+             Message-Id: <rt-22224-57743.7.22990607358@bugs6.perl.org>
+             
+             [ 19634]
+             Subject: [patch] IO::File->open() with encoding
+             From: Pradeep Hodigere <phodigere@yahoo.com>
+             Date: Mon, 19 May 2003 16:05:47 -0700 (PDT)
+             Message-ID: <20030519230547.39731.qmail@web12302.mail.yahoo.com>
+             
+             [ 19635]
+             Subject: Credits patch
+             From: Ed Avis <ed@membled.com>
+             Date: Sun, 18 May 2003 18:08:55 +0100 (BST)
+             Message-ID: <Pine.LNX.4.20L2.0305181807080.10859-100000@budvar.future-i.net>
+             
+             (the cygwin/perlld.in and Cross/config.sh-arm-linux edited
+             to talk of 5.8.1 instead of 5.9.0)
+     Branch: maint-5.8/perl
+	  +> ext/IO/lib/IO/t/io_utf8.t
+	  !> Cross/Makefile Cross/Makefile.SH.patch Cross/README
+	  !> Cross/config.sh-arm-linux Cross/generate_config_sh
+	  !> Cross/installperl.patch MANIFEST cygwin/perlld.in
+	  !> ext/Encode/bin/piconv ext/IO/lib/IO/File.pm
+	  !> ext/IO/lib/IO/Handle.pm ext/Sys/Hostname/Hostname.pm
+	  !> ext/threads/t/join.t hv.c lib/Tie/RefHash.pm perlio.h
+	  !> pod/perldiag.pod pod/perlfunc.pod pod/perlmodlib.pod
+	  !> pod/perlrun.pod pod/perltoc.pod pp_ctl.c t/op/goto.t
+	  !> win32/win32.c x2p/Makefile.SH
+____________________________________________________________________________
+[ 19635] By: jhi                                   on 2003/05/29  09:13:06
+        Log: Subject: Credits patch
+             From: Ed Avis <ed@membled.com>
+             Date: Sun, 18 May 2003 18:08:55 +0100 (BST)
+             Message-ID: <Pine.LNX.4.20L2.0305181807080.10859-100000@budvar.future-i.net>
+     Branch: perl
+	   ! lib/Tie/RefHash.pm
+____________________________________________________________________________
+[ 19634] By: jhi                                   on 2003/05/29  09:11:30
+        Log: Subject: [patch] IO::File->open() with encoding
+             From: Pradeep Hodigere <phodigere@yahoo.com>
+             Date: Mon, 19 May 2003 16:05:47 -0700 (PDT)
+             Message-ID: <20030519230547.39731.qmail@web12302.mail.yahoo.com>
+     Branch: perl
+	   + ext/IO/lib/IO/t/io_utf8.t
+	   ! MANIFEST ext/IO/lib/IO/File.pm
+____________________________________________________________________________
+[ 19633] By: jhi                                   on 2003/05/29  08:18:09
+        Log: A *much* cut-down version of the patches in the thread
+             Subject: [perl #22224] 2 patches to perldiag.pod; for POSIX and Win32 errors
+             From: Jim Cromie (via RT) <perlbug-followup@perl.org>
+             Date: 16 May 2003 19:04:28 -0000
+             Message-Id: <rt-22224-57743.7.22990607358@bugs6.perl.org>
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[ 19632] By: jhi                                   on 2003/05/29  08:12:46
+        Log: Subject: [PATCH] $x = $empty_hash{$undef_val} doesn't give a warning
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Tue, 27 May 2003 19:31:10 +0100
+             Message-ID: <20030527183110.GA22715@fdgroup.com>
+     Branch: perl
+	   ! hv.c
+____________________________________________________________________________
+[ 19631] By: jhi                                   on 2003/05/29  08:11:42
+        Log: Document that setvbuf() is not probably any more available.
+             Many reports, most recently by mjd in
+             [perl #22339] IO::Handle::setvbuf not defined properly
+     Branch: perl
+	   ! ext/IO/lib/IO/Handle.pm
+____________________________________________________________________________
+[ 19630] By: jhi                                   on 2003/05/29  07:59:51
+        Log: Subject: typo in pod/perlfunc.pod
+             From: Alexey Mahotkin <alexm@w-m.ru>
+             Date: Wed, 28 May 2003 15:18:04 +0400
+             Message-ID: <878ysrs4k3.fsf@dim.w-m.ru>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 19629] By: merijn                                on 2003/05/28  12:24:42
+        Log: Subject: [PATCH] Re: a2p is linked against too many libraries
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Wed, 28 May 2003 09:20:06 -0400 (EDT)
+             Message-ID: <Pine.SOL.4.53.0305280913350.27138@maxwell.phys.lafayette.edu>
+     Branch: perl
+	   ! x2p/Makefile.SH
+____________________________________________________________________________
+[ 19628] By: jhi                                   on 2003/05/28  05:26:43
+        Log: Subject: [PATCH] Use "cmd.exe /x/d/c" as the default PERL5SHELL on Windows NT/2K/XP
+             From: Jan Dubois <jand@ActiveState.com>
+             Date: Mon, 26 May 2003 23:33:53 -0700
+             Message-ID: <dv06dv48900iqv5hqddmbc6vt0efvto8d6@4ax.com>
+     Branch: perl
+	   ! pod/perlrun.pod win32/win32.c
+____________________________________________________________________________
+[ 19627] By: jhi                                   on 2003/05/28  05:08:07
+        Log: OpenZaurus cross-compilation patches from Redvers Davies.
+     Branch: perl
+	   ! Cross/Makefile Cross/Makefile.SH.patch Cross/README
+	   ! Cross/config.sh-arm-linux Cross/generate_config_sh
+	   ! Cross/installperl.patch
+____________________________________________________________________________
+[ 19626] By: jhi                                   on 2003/05/27  06:30:54
+        Log: For now reword the sysread/syswrite description to
+             stress the fact that by default everything is still bytes.
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 19625] By: jhi                                   on 2003/05/26  20:31:56
+        Log: Subject: Re: [perl #22299] goto doesn't find label
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Sat, 24 May 2003 12:25:17 +0100
+             Message-ID: <20030524112517.GA11761@fdgroup.com>
+             
+             Subject: [PATCH] Re: [perl #22299] goto doesn't find label
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Mon, 26 May 2003 13:47:11 +0100
+             Message-ID: <20030526124710.GA17670@fdgroup.com>
+     Branch: perl
+	   ! pp_ctl.c t/op/goto.t
+____________________________________________________________________________
+[ 19624] By: nick                                  on 2003/05/26  15:51:53
+        Log: Integrate mainline
+     Branch: perlio
+	  !> cygwin/perlld.in ext/Encode/bin/piconv
+	  !> ext/Sys/Hostname/Hostname.pm ext/threads/t/join.t
+	  !> pod/perlmodlib.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 19623] By: merijn                                on 2003/05/26  11:19:38
+        Log: Subject: [PATCH] for cygwin/perlld.in
+             From: "Gerrit P. Haase" <gp@familiehaase.de>
+             Date: Sat, 24 May 2003 16:51:29 +0200
+             Message-ID: <162265353578.20030524165129@familiehaase.de>
+     Branch: perl
+	   ! cygwin/perlld.in
+____________________________________________________________________________
+[ 19622] By: jhi                                   on 2003/05/25  18:57:18
+        Log: Regen modlib and toc.
+     Branch: perl
+	   ! pod/perlmodlib.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 19621] By: jhi                                   on 2003/05/25  18:51:00
+        Log: Run external commands only with localized sanitized $ENV{PATH}.
+     Branch: perl
+	   ! ext/Sys/Hostname/Hostname.pm
+____________________________________________________________________________
+[ 19620] By: jhi                                   on 2003/05/25  18:39:04
+        Log: Subject: Re: [PATCH: perlio.h] maint snap @ 19613
+             From: "Marcus Holland-Moritz" <mhx-perl@gmx.net>
+             Date: Sun, 25 May 2003 21:17:42 +0200
+             Message-ID: <003701c322f2$517fb5e0$0c2f1fac@R2D2>
+     Branch: perl
+	   ! perlio.h
+____________________________________________________________________________
+[ 19619] By: jhi                                   on 2003/05/25  18:36:17
+        Log: Protect against race conditions: if the pid is not seen,
+             neither will be the $0 change be seen (and vice versa).
+     Branch: perl
+	   ! ext/threads/t/join.t
+____________________________________________________________________________
+[ 19618] By: jhi                                   on 2003/05/24  19:54:39
+        Log: Subject: [Encode] Minor bug in piconv induced by Getopt::Long
+             From: Dan Kogai <dankogai@dan.co.jp>
+             Date: 24 May 2003 19:50:48 -0000
+             Message-ID: <20030524195048.16052.qmail@dan-gm.gm.dan.co.jp>
+     Branch: perl
+	   ! ext/Encode/bin/piconv
+____________________________________________________________________________
+[ 19617] By: nick                                  on 2003/05/24  18:47:42
+        Log: More work-in-progress on sysread() abstraction.
+             - sysread() does not want to retry on EINTR but too many places have that logic.
+             now stdio and unix are both doing re-try on EINTR it makes sense to move
+             that logic up to PerlIO_read()/PerlIO_write() and leave layers as raw without 
+             retry (which should help them be re-used for sysread).
+             - also noted (old?) comment in pp_sys.c that says PerlIO_read() returns 0 on error 
+             but perlapio.pod says it returns -ve. Match the pod for :stdio.
+             - all tests pass (:perlio/:stdio) if pp_sys.c is re-hacked to turn off new-sysread 
+             logic so above re-factoring is not a disaster...
+     Branch: perlio
+	   ! perlio.c
+____________________________________________________________________________
+[ 19616] By: nick                                  on 2003/05/24  16:09:55
+        Log: Tweak Base_read - which needed indentation change
+             re-indent perlio.c using indent
+             add .indent.pro so indent-ing is reproducable.
+     Branch: perlio
+	   + .indent.pro
+	   ! perlio.c
+____________________________________________________________________________
+[ 19615] By: nick                                  on 2003/05/24  14:53:02
+        Log: re-instate warning with syslayer abstraction.
+     Branch: perlio
+	   ! perlio.c
+____________________________________________________________________________
+[ 19614] By: nick                                  on 2003/05/24  14:03:12
+        Log: Integrate mainline (but don't integrate back yet).
+     Branch: perlio
+	  +> lib/ExtUtils/META.yml lib/ExtUtils/MakeMaker/bytes.pm
+	  +> lib/ExtUtils/t/bytes.t lib/ExtUtils/t/vmsish.t
+	   - lib/CPAN/README lib/ftp.pl
+	  !> (integrate 121 files)
+____________________________________________________________________________
+[ 19613] By: jhi                                   on 2003/05/24  08:03:55
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 19612] By: jhi                                   on 2003/05/24  07:53:25
         Log: Regen the old-style VOS config files.
      Branch: maint-5.8/perl
