@@ -234,13 +234,11 @@ unless($Is_VMS) {
 	$tmp = "/tmp/perldoc1.$$";
 	push @pagers, qw( more less pg view cat );
 	unshift @pagers, $ENV{PAGER}  if $ENV{PAGER};
-	$goodresult = 0;
 } else {
 	$tmp = 'Sys$Scratch:perldoc.tmp1_'.$$;
 	push @pagers, qw( most more less type/page );
-	unshift @pagers, $ENV{PERLDOC_PAGER} if $ENV{PERLDOC_PAGER};
-	$goodresult = 1;
 }
+unshift @pagers, $ENV{PERLDOC_PAGER} if $ENV{PERLDOC_PAGER};
 
 if ($opt_m) {
     foreach $pager (@pagers) {
