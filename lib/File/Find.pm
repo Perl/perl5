@@ -1,5 +1,7 @@
 package File::Find;
+use strict;
 use 5.005_64;
+our $VERSION = '1.00';
 require Exporter;
 require Cwd;
 
@@ -187,8 +189,8 @@ in an unknown directory.
 
 =cut
 
-@ISA = qw(Exporter);
-@EXPORT = qw(find finddepth);
+our @ISA = qw(Exporter);
+our @EXPORT = qw(find finddepth);
 
 
 use strict;

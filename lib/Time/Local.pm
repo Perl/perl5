@@ -2,23 +2,25 @@ package Time::Local;
 require 5.000;
 require Exporter;
 use Carp;
+use strict;
 
-@ISA		= qw( Exporter );
-@EXPORT		= qw( timegm timelocal );
-@EXPORT_OK	= qw( timegm_nocheck timelocal_nocheck );
+our $VERSION    = '1.00';
+our @ISA	= qw( Exporter );
+our @EXPORT	= qw( timegm timelocal );
+our @EXPORT_OK	= qw( timegm_nocheck timelocal_nocheck );
 
 # Set up constants
-    $SEC  = 1;
-    $MIN  = 60 * $SEC;
-    $HR   = 60 * $MIN;
-    $DAY  = 24 * $HR;
+our $SEC  = 1;
+our $MIN  = 60 * $SEC;
+our $HR   = 60 * $MIN;
+our $DAY  = 24 * $HR;
 # Determine breakpoint for rolling century
-    my $thisYear = (localtime())[5];
-    $nextCentury = int($thisYear / 100) * 100;
-    $breakpoint = ($thisYear + 50) % 100;
-    $nextCentury += 100 if $breakpoint < 50;
+    my $ThisYear = (localtime())[5];
+    my $NextCentury = int($ThisYear / 100) * 100;
+    my $Breakpoint = ($ThisYear + 50) % 100;
+       $NextCentury += 100 if $Breakpoint < 50;
 
-my %options;
+our(%Options, %Cheat);
 
 sub timegm {
     my (@date) = @_;
@@ -26,11 +28,11 @@ sub timegm {
         $date[5] -= 1900;
     }
     elsif ($date[5] >= 0 && $date[5] < 100) {
-        $date[5] -= 100 if $date[5] > $breakpoint;
-        $date[5] += $nextCentury;
+        $date[5] -= 100 if $date[5] > $Breakpoint;
+        $date[5] += $NextCentury;
     }
-    $ym = pack(C2, @date[5,4]);
-    $cheat = $cheat{$ym} || &cheat(@date);
+    my $ym = pack('C2', @date[5,4]);
+    my $cheat = $Cheat{$ym} || &cheat($ym, @date);
     $cheat
     + $date[0] * $SEC
     + $date[1] * $MIN
@@ -39,7 +41,7 @@ sub timegm {
 }
 
 sub timegm_nocheck {
-    local $options{no_range_check} = 1;
+    local $Options{no_range_check} = 1;
     &timegm;
 }
 
@@ -71,59 +73,61 @@ sub timelocal {
 
     $tzsec += $HR if($lt[8]);
     
-    $time = $t + $tzsec;
-    @test = localtime($time + ($tt - $t));
+    my $time = $t + $tzsec;
+    my @test = localtime($time + ($tt - $t));
     $time -= $HR if $test[2] != $_[2];
     $time;
 }
 
 sub timelocal_nocheck {
-    local $options{no_range_check} = 1;
+    local $Options{no_range_check} = 1;
     &timelocal;
 }
 
 sub cheat {
-    $year = $_[5];
-    $month = $_[4];
-    unless ($options{no_range_check}) {
+    my($ym, @date) = @_;
+    my($sec, $min, $hour, $day, $month, $year) = @date;
+    unless ($Options{no_range_check}) {
 	croak "Month '$month' out of range 0..11" if $month > 11 || $month < 0;
-	croak "Day '$_[3]' out of range 1..31"	  if $_[3] > 31 || $_[3] < 1;
-	croak "Hour '$_[2]' out of range 0..23"	  if $_[2] > 23 || $_[2] < 0;
-	croak "Minute '$_[1]' out of range 0..59" if $_[1] > 59 || $_[1] < 0;
-	croak "Second '$_[0]' out of range 0..59" if $_[0] > 59 || $_[0] < 0;
+	croak "Day '$day' out of range 1..31"	  if $day > 31  || $day < 1;
+	croak "Hour '$hour' out of range 0..23"	  if $hour > 23 || $hour < 0;
+	croak "Minute '$min' out of range 0..59" if $min > 59   || $min < 0;
+	croak "Second '$sec' out of range 0..59" if $sec > 59   || $sec < 0;
     }
-    $guess = $^T;
-    @g = gmtime($guess);
-    $lastguess = "";
-    $counter = 0;
-    while ($diff = $year - $g[5]) {
-	croak "Can't handle date (".join(", ",@_).")" if ++$counter > 255;
+    my $guess = $^T;
+    my @g = gmtime($guess);
+    my $lastguess = "";
+    my $counter = 0;
+    while (my $diff = $year - $g[5]) {
+        my $thisguess;
+	croak "Can't handle date (".join(", ",@date).")" if ++$counter > 255;
 	$guess += $diff * (363 * $DAY);
 	@g = gmtime($guess);
 	if (($thisguess = "@g") eq $lastguess){
-	    croak "Can't handle date (".join(", ",@_).")";
+	    croak "Can't handle date (".join(", ",@date).")";
 	    #date beyond this machine's integer limit
 	}
 	$lastguess = $thisguess;
     }
-    while ($diff = $month - $g[4]) {
-	croak "Can't handle date (".join(", ",@_).")" if ++$counter > 255;
+    while (my $diff = $month - $g[4]) {
+        my $thisguess;
+	croak "Can't handle date (".join(", ",@date).")" if ++$counter > 255;
 	$guess += $diff * (27 * $DAY);
 	@g = gmtime($guess);
 	if (($thisguess = "@g") eq $lastguess){
-	    croak "Can't handle date (".join(", ",@_).")";
+	    croak "Can't handle date (".join(", ",@date).")";
 	    #date beyond this machine's integer limit
 	}
 	$lastguess = $thisguess;
     }
-    @gfake = gmtime($guess-1); #still being sceptic
+    my @gfake = gmtime($guess-1); #still being sceptic
     if ("@gfake" eq $lastguess){
-        croak "Can't handle date (".join(", ",@_).")";
+        croak "Can't handle date (".join(", ",@date).")";
         #date beyond this machine's integer limit
     }
     $g[3]--;
     $guess -= $g[0] * $SEC + $g[1] * $MIN + $g[2] * $HR + $g[3] * $DAY;
-    $cheat{$ym} = $guess;
+    $Cheat{$ym} = $guess;
 }
 
 1;

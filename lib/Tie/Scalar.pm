@@ -1,5 +1,7 @@
 package Tie::Scalar;
 
+our $VERSION = '1.00';
+
 =head1 NAME
 
 Tie::Scalar, Tie::StdScalar - base class definitions for tied scalars

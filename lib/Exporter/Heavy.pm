@@ -1,4 +1,12 @@
-package Exporter;
+package Exporter::Heavy;
+
+use strict;
+no strict 'refs';
+
+# On one line so MakeMaker will see it.
+require Exporter;  our $VERSION = $Exporter::VERSION;
+
+our $Verbose;
 
 =head1 NAME
 
@@ -41,16 +49,17 @@ sub heavy_export {
 
     my($pkg, $callpkg, @imports) = @_;
     my($type, $sym, $oops);
-    *exports = *{"${pkg}::EXPORT"};
+    my($exports, $export_cache) = (\@{"${pkg}::EXPORT"},
+                                   \%{"${pkg}::EXPORT"});
 
     if (@imports) {
-	if (!%exports) {
-	    grep(s/^&//, @exports);
-	    @exports{@exports} = (1) x @exports;
+	if (!%$export_cache) {
+	    s/^&// foreach @$exports;
+	    @{$export_cache}{@$exports} = (1) x @$exports;
 	    my $ok = \@{"${pkg}::EXPORT_OK"};
 	    if (@$ok) {
-		grep(s/^&//, @$ok);
-		@exports{@$ok} = (1) x @$ok;
+		s/^&// foreach @$ok;
+		@{$export_cache}{@$ok} = (1) x @$ok;
 	    }
 	}
 
@@ -66,7 +75,7 @@ sub heavy_export {
 
 		if ($spec =~ s/^://){
 		    if ($spec eq 'DEFAULT'){
-			@names = @exports;
+			@names = @$exports;
 		    }
 		    elsif ($tagdata = $tagsref->{$spec}) {
 			@names = @$tagdata;
@@ -79,7 +88,7 @@ sub heavy_export {
 		}
 		elsif ($spec =~ m:^/(.*)/$:){
 		    my $patn = $1;
-		    @allexports = keys %exports unless @allexports; # only do keys once
+		    @allexports = keys %$export_cache unless @allexports; # only do keys once
 		    @names = grep(/$patn/, @allexports); # not anchored by default
 		}
 		else {
@@ -100,13 +109,13 @@ sub heavy_export {
 	}
 
 	foreach $sym (@imports) {
-	    if (!$exports{$sym}) {
+	    if (!$export_cache->{$sym}) {
 		if ($sym =~ m/^\d/) {
 		    $pkg->require_version($sym);
 		    # If the version number was the only thing specified
 		    # then we should act as if nothing was specified:
 		    if (@imports == 1) {
-			@imports = @exports;
+			@imports = @$exports;
 			last;
 		    }
 		    # We need a way to emulate 'use Foo ()' but still
@@ -115,7 +124,7 @@ sub heavy_export {
 			@imports = ();
 			last;
 		    }
-		} elsif ($sym !~ s/^&// || !$exports{$sym}) {
+		} elsif ($sym !~ s/^&// || !$export_cache->{$sym}) {
                     require Carp;
 		    Carp::carp(qq["$sym" is not exported by the $pkg module]);
 		    $oops++;
@@ -128,21 +137,23 @@ sub heavy_export {
 	}
     }
     else {
-	@imports = @exports;
+	@imports = @$exports;
     }
 
-    *fail = *{"${pkg}::EXPORT_FAIL"};
-    if (@fail) {
-	if (!%fail) {
+    my($fail, $fail_cache) = (\@{"${pkg}::EXPORT_FAIL"},
+                              \%{"${pkg}::EXPORT_FAIL"});
+
+    if (@$fail) {
+	if (!%$fail_cache) {
 	    # Build cache of symbols. Optimise the lookup by adding
 	    # barewords twice... both with and without a leading &.
-	    # (Technique could be applied to %exports cache at cost of memory)
-	    my @expanded = map { /^\w/ ? ($_, '&'.$_) : $_ } @fail;
+	    # (Technique could be applied to $export_cache at cost of memory)
+	    my @expanded = map { /^\w/ ? ($_, '&'.$_) : $_ } @$fail;
 	    warn "${pkg}::EXPORT_FAIL cached: @expanded" if $Verbose;
-	    @fail{@expanded} = (1) x @expanded;
+	    @{$fail_cache}{@expanded} = (1) x @expanded;
 	}
 	my @failed;
-	foreach $sym (@imports) { push(@failed, $sym) if $fail{$sym} }
+	foreach $sym (@imports) { push(@failed, $sym) if $fail_cache->{$sym} }
 	if (@failed) {
 	    @failed = $pkg->export_fail(@failed);
 	    foreach $sym (@failed) {
@@ -188,24 +199,19 @@ sub heavy_export_to_level
 
 sub _push_tags {
     my($pkg, $var, $syms) = @_;
-    my $nontag;
-    *export_tags = \%{"${pkg}::EXPORT_TAGS"};
+    my @nontag = ();
+    my $export_tags = \%{"${pkg}::EXPORT_TAGS"};
     push(@{"${pkg}::$var"},
-	map { $export_tags{$_} ? @{$export_tags{$_}} : scalar(++$nontag,$_) }
-		(@$syms) ? @$syms : keys %export_tags);
-    if ($nontag and $^W) {
+	map { $export_tags->{$_} ? @{$export_tags->{$_}} 
+                                 : scalar(push(@nontag,$_),$_) }
+		(@$syms) ? @$syms : keys %$export_tags);
+    if (@nontag and $^W) {
 	# This may change to a die one day
 	require Carp;
-	Carp::carp("Some names are not tags");
+	Carp::carp(join(", ", @nontag)." are not tags of $pkg");
     }
 }
 
-# Default methods
-
-sub export_fail {
-    my $self = shift;
-    @_;
-}
 
 sub require_version {
     my($self, $wanted) = @_;

@@ -32,6 +32,320 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  8015] By: jhi                                   on 2000/12/06  16:41:03
+        Log: Test \x{...} with ord().
+     Branch: perl
+	   ! t/op/ord.t
+____________________________________________________________________________
+[  8014] By: jhi                                   on 2000/12/06  16:20:33
+        Log: Test tweak because of #8013.
+     Branch: perl
+	   ! t/lib/b.t
+____________________________________________________________________________
+[  8013] By: jhi                                   on 2000/12/06  16:09:09
+        Log: Subject: [PATCH] $VERSION crusade, strict, tests, etc... all over lib/
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 5 Dec 2000 21:23:28 -0500
+             Message-ID: <20001205212328.C6473@blackrider.aocn.com>
+             
+             Carp::Heavy parts not very applicable because of recent changes.
+     Branch: perl
+	   ! ext/Opcode/Opcode.pm lib/AnyDBM_File.pm lib/CGI/Apache.pm
+	   ! lib/CGI/Switch.pm lib/Carp.pm lib/Carp/Heavy.pm
+	   ! lib/DirHandle.pm lib/Dumpvalue.pm lib/English.pm lib/Env.pm
+	   ! lib/Exporter.pm lib/Exporter/Heavy.pm
+	   ! lib/ExtUtils/MM_Cygwin.pm lib/ExtUtils/MM_OS2.pm
+	   ! lib/ExtUtils/MM_Unix.pm lib/ExtUtils/MM_VMS.pm
+	   ! lib/ExtUtils/MM_Win32.pm lib/File/CheckTree.pm
+	   ! lib/File/DosGlob.pm lib/File/Find.pm lib/File/stat.pm
+	   ! lib/FileCache.pm lib/I18N/Collate.pm lib/Net/hostent.pm
+	   ! lib/Net/netent.pm lib/Net/protoent.pm lib/Net/servent.pm
+	   ! lib/Pod/Functions.pm lib/Pod/Html.pm lib/Search/Dict.pm
+	   ! lib/SelectSaver.pm lib/Term/Cap.pm lib/Term/Complete.pm
+	   ! lib/Term/ReadLine.pm lib/Text/Abbrev.pm lib/Tie/Hash.pm
+	   ! lib/Tie/RefHash.pm lib/Tie/Scalar.pm lib/Tie/SubstrHash.pm
+	   ! lib/Time/Local.pm lib/Time/tm.pm lib/UNIVERSAL.pm
+	   ! lib/User/grent.pm lib/User/pwent.pm lib/bytes.pm
+	   ! lib/charnames.pm lib/diagnostics.pm lib/filetest.pm
+	   ! lib/integer.pm lib/less.pm lib/locale.pm lib/open.pm
+	   ! lib/overload.pm lib/subs.pm lib/utf8.pm lib/vars.pm
+	   ! lib/warnings/register.pm t/lib/attrs.t t/lib/syslog.t
+	   ! warnings.pl
+____________________________________________________________________________
+[  8012] By: jhi                                   on 2000/12/06  15:22:38
+        Log: Subject: [PATCH] Re: New harness is failing things
+             From: Nick Ing-Simmons <nik@tiuk.ti.com>
+             Date: Wed, 6 Dec 2000 13:00:30 GMT
+             Message-Id: <200012061300.NAA10567@mikado.tiuk.ti.com>
+     Branch: perl
+	   ! lib/Test/Harness.pm
+____________________________________________________________________________
+[  8011] By: jhi                                   on 2000/12/06  15:12:08
+        Log: Subject: installhtml changes
+             From: Michael Stevens <michael@etla.org>
+             Date: Wed, 6 Dec 2000 13:15:53 +0000
+             Message-ID: <20001206131553.A27317@firedrake.org>
+     Branch: perl
+	   ! installhtml
+____________________________________________________________________________
+[  8010] By: jhi                                   on 2000/12/06  15:06:05
+        Log: Subject: the dTHR hits
+             From: Michael Stevens <michael@etla.org>
+             Date: Wed, 6 Dec 2000 12:06:03 +0000
+             Message-ID: <20001206120603.A24581@firedrake.org>
+             
+             More, errrm, less dTHRs.
+     Branch: perl
+	   ! bytecode.pl ext/B/B/C.pm
+____________________________________________________________________________
+[  8009] By: jhi                                   on 2000/12/06  15:04:25
+        Log: Subject: MakeMaker mailing list gone?
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 5 Dec 2000 19:29:59 -0500
+             Message-ID: <20001205192959.B6473@blackrider.aocn.com>
+             
+             The MakeMaker mailing list is dead, perlbug is the right
+             address to report bugs.
+     Branch: perl
+	   ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[  8008] By: jhi                                   on 2000/12/06  15:00:32
+        Log: Subject: [PATCH ExtUtils::Manifest 1.1] Default MANIFEST.SKIP]
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 5 Dec 2000 19:21:21 -0500
+             Message-ID: <20001205192121.A6473@blackrider.aocn.com>
+             
+             Add a default MANIFEST skip that ignores things like
+             version control files, editor temporary files, and the Makefile.
+     Branch: perl
+	   + lib/ExtUtils/MANIFEST.SKIP
+	   ! MANIFEST lib/ExtUtils/Manifest.pm
+____________________________________________________________________________
+[  8007] By: jhi                                   on 2000/12/06  14:57:20
+        Log: In Amiga more manual hackery of the scripts seems to be needed,
+             from Jan-Erik Karlsson.  Why Configure does not get this right
+             is unknown, may be shell-induced.
+     Branch: perl
+	   ! README.amiga
+____________________________________________________________________________
+[  8006] By: jhi                                   on 2000/12/05  23:53:12
+        Log: Add TOPm1s to peek at the second topmost stack item.
+     Branch: perl
+	   ! pp.h
+____________________________________________________________________________
+[  8005] By: jhi                                   on 2000/12/05  23:13:55
+        Log: Avaunt, you foul UTF-8 tests.
+     Branch: perl
+	   ! t/op/ver.t t/pragma/utf8.t
+____________________________________________________________________________
+[  8004] By: jhi                                   on 2000/12/05  23:09:54
+        Log: Continue utf8 dispersal. 
+     Branch: perl
+	   + t/op/concat.t
+	   ! MANIFEST t/pragma/utf8.t
+____________________________________________________________________________
+[  8003] By: nick                                  on 2000/12/05  23:02:39
+        Log: Integrate mainline.
+     Branch: perlio
+	  +> t/op/length.t t/op/utf8decode.t
+	  !> (integrate 69 files)
+____________________________________________________________________________
+[  8002] By: jhi                                   on 2000/12/05  22:59:28
+        Log: Integrate perlio.
+     Branch: perl
+	  !> iperlsys.h perl.c perlio.c win32/perllib.c
+____________________________________________________________________________
+[  8001] By: nick                                  on 2000/12/05  22:07:52
+        Log: Win32 PERL_IMPLICIT_SYS passes all tests with USE_PERLIO
+             - calloc/free suffer from damage on TerminateThread()
+             - use PerlMemShared (as originally planned) now fixed
+             - avoid doing anything important on DLL "detach".
+     Branch: perlio
+	   ! perl.c perlio.c win32/perllib.c
+____________________________________________________________________________
+[  8000] By: nick                                  on 2000/12/05  21:05:09
+        Log: Fix gross PerlMemShared issue.
+     Branch: perlio
+	   ! iperlsys.h
+____________________________________________________________________________
+[  7999] By: jhi                                   on 2000/12/05  20:46:58
+        Log: Test for Unicode (UTF-8) hash keys.
+     Branch: perl
+	   ! t/op/each.t
+____________________________________________________________________________
+[  7998] By: jhi                                   on 2000/12/05  20:30:35
+        Log: Remove an unnecessary 'use utf8' (unnecessary because \x{...}
+             is now always UTF-8), empty line cosmetics.
+     Branch: perl
+	   ! t/pragma/utf8.t
+____________________________________________________________________________
+[  7997] By: jhi                                   on 2000/12/05  20:15:40
+        Log: Subject: Re: STRLEN - what?
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Tue, 5 Dec 2000 11:58:46 -0500 (EST)
+             Message-ID: <Pine.SOL.4.10.10012051152100.3586-100000@maxwell.phys.lafayette.edu>
+             
+             Explain STRLEN.
+     Branch: perl
+	   ! pod/perlguts.pod
+____________________________________________________________________________
+[  7996] By: jhi                                   on 2000/12/05  20:13:34
+        Log: Split off the UTF-8 decoder tests, make them to check also
+             the error message.
+     Branch: perl
+	   + t/op/utf8decode.t
+	   ! MANIFEST t/pragma/utf8.t utf8.c
+____________________________________________________________________________
+[  7995] By: jhi                                   on 2000/12/05  16:39:47
+        Log: Start migrating bits of pragma/utf8 to elsewhere
+             (since the long term plan is to obsolete 'use utf8').
+     Branch: perl
+	   + t/op/length.t
+	   ! MANIFEST t/pragma/utf8.t
+____________________________________________________________________________
+[  7994] By: jhi                                   on 2000/12/05  16:30:21
+        Log: Fix a manual edit typo from #7993, fix the message formatting
+             for Unicode, add few our declarations.
+     Branch: perl
+	   ! lib/Carp/Heavy.pm
+____________________________________________________________________________
+[  7993] By: jhi                                   on 2000/12/05  16:09:15
+        Log: Subject: Need help with warnings :-(
+             From: "Ben Tilly" <ben_tilly@hotmail.com>
+             Date: Tue, 05 Dec 2000 01:35:54 -0500
+             Message-ID: <LAW2-F2380n7J95K7aI00001bb9@hotmail.com>
+             
+             Subject: UPDATE: Carp/Heavy now passes all tests
+             From: "Ben Tilly" <ben_tilly@hotmail.com>
+             Date: Tue, 05 Dec 2000 07:59:41 -0500
+             Message-ID: <LAW2-F58V1qdiixjnzi00005523@hotmail.com>
+             
+             The Brave New Carp.
+     Branch: perl
+	   ! lib/Carp.pm lib/Carp/Heavy.pm
+____________________________________________________________________________
+[  7992] By: jhi                                   on 2000/12/05  15:55:08
+        Log: Subject: [PATCH perl@7979] cygwin port
+             From: "Eric Fifer" <efifer@dircon.co.uk>
+             Date: Tue, 5 Dec 2000 14:04:09 -0000
+             Message-Id: <200012051402.OAA60286@mailhost2.dircon.co.uk>
+     Branch: perl
+	   ! t/lib/net-hostent.t
+____________________________________________________________________________
+[  7991] By: jhi                                   on 2000/12/05  15:52:34
+        Log: Subject: Re: [PATCH] The largest hoax of all times?
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 5 Dec 2000 00:40:25 -0500
+             Message-ID: <20001205004025.A4050@monk.mps.ohio-state.edu>
+             
+             Subject: Re: [PATCH] The largest hoax of all times?
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 4 Dec 2000 23:55:53 -0500
+             Message-ID: <20001204235553.A1140@monk.mps.ohio-state.edu>
+             
+             Subject: Re: [PATCH] The largest hoax of all times?
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 5 Dec 2000 01:28:45 -0500
+             Message-ID: <20001205012844.A4227@monk.mps.ohio-state.edu>
+             
+             Fix the unpredictable order of DESTROYs.
+     Branch: perl
+	   ! embed.h embed.pl objXSUB.h pod/perlapi.pod proto.h scope.c
+	   ! sv.c sv.h t/op/ref.t
+____________________________________________________________________________
+[  7990] By: jhi                                   on 2000/12/05  14:38:53
+        Log: Subject: [PATCH] shrink pp_hot fractionally
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Tue, 5 Dec 2000 12:44:31 +0000
+             Message-ID: <20001205124431.E74518@plum.flirble.org>
+             
+             Use report_evil_fh().
+     Branch: perl
+	   ! opcode.pl opnames.h pp_hot.c util.c
+____________________________________________________________________________
+[  7989] By: jhi                                   on 2000/12/05  14:21:27
+        Log: Subject: [PATCH] [ID 20001203.001] Not OK: perl v5.7.0 +DEVEL7965 on os2-64int-ld 2.30 (UNINSTALLED)
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Mon, 04 Dec 2000 22:21:59 -0800
+             Message-ID: <HmIL6gzkgepS092yn@efn.org>
+             
+             Harness shouldn't ignore responses like "ok 3\r\n\n".
+     Branch: perl
+	   ! lib/Test/Harness.pm
+____________________________________________________________________________
+[  7988] By: jhi                                   on 2000/12/05  13:51:28
+        Log: Integrate the "skip" messages to explain().
+     Branch: perl
+	   ! t/lib/syslfs.t t/op/lfs.t
+____________________________________________________________________________
+[  7987] By: jhi                                   on 2000/12/05  12:34:54
+        Log: The one that got away in #7984.
+             
+             Subject: Re: dTHR - what and why?
+             From: Michael Stevens <michael@etla.org> 
+             Date: Tue, 5 Dec 2000 11:15:52 +0000
+             Message-ID: <20001205111552.A4647@firedrake.org>
+     Branch: perl
+	   ! sv.h
+____________________________________________________________________________
+[  7986] By: gsar                                  on 2000/12/05  09:14:44
+        Log: fix open(FOO, ">&MYSOCK") failure under Windows 9x (problem is
+             due to the notorious GetFileType() bug in Windows 9x, which fstat()
+             tickles)
+     Branch: perl
+	   ! win32/perlhost.h win32/win32.c win32/win32.h win32/win32sck.c
+____________________________________________________________________________
+[  7985] By: jhi                                   on 2000/12/05  05:49:03
+        Log: Integrate perlio.
+     Branch: perl
+	  !> iperlsys.h perl.c perlio.c perlio.h perliol.h sv.c t/op/fork.t
+	  !> win32/perlhost.h win32/perllib.c
+____________________________________________________________________________
+[  7984] By: jhi                                   on 2000/12/05  05:48:16
+        Log: dTHR is a nop in 5.6.0 onwards.  Ergo, it can go.
+     Branch: perl
+	   ! av.c cygwin/cygwin.c deb.c djgpp/djgpp.c doio.c doop.c dump.c
+	   ! epoc/epoc.c ext/ByteLoader/ByteLoader.xs
+	   ! ext/ByteLoader/byterun.c ext/Devel/DProf/DProf.xs
+	   ! ext/Thread/Thread.xs ext/re/re.xs gv.c hv.c mg.c op.c
+	   ! os2/OS2/REXX/REXX.xs os2/os2.c os2/os2ish.h perl.c perl.h
+	   ! perlapi.c pp.c pp.h pp_ctl.c pp_hot.c pp_sys.c regcomp.c
+	   ! regexec.c run.c scope.c sv.c taint.c thread.h toke.c
+	   ! universal.c utf8.c util.c vmesa/vmesa.c vms/ext/Stdio/Stdio.xs
+	   ! win32/win32.c
+____________________________________________________________________________
+[  7983] By: nick                                  on 2000/12/04  23:27:43
+        Log: PERL_IMPLICIT_SYS (almost) works - something odd with "signal"
+     Branch: perlio
+	   ! iperlsys.h perl.c perlio.c perlio.h perliol.h sv.c t/op/fork.t
+	   ! win32/perlhost.h win32/perllib.c
+____________________________________________________________________________
+[  7982] By: jhi                                   on 2000/12/04  19:44:09
+        Log: Yet Another Copying-Without-Paying-Attention-To-SvUTF8(sv) Bug
+             uncovered by #7980.
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[  7981] By: jhi                                   on 2000/12/04  19:42:07
+        Log: Subject: [PATCH] Trivial dump.c feature
+             From: Simon Cozens <simon@cozens.net>
+             Date: Mon, 4 Dec 2000 18:08:38 +0000
+             Message-ID: <20001204180838.A5541@pembro33.pmb.ox.ac.uk>
+             
+             Show whether a constant is UTF-8.
+     Branch: perl
+	   ! dump.c
+____________________________________________________________________________
+[  7980] By: jhi                                   on 2000/12/04  19:36:51
+        Log: UTF-8 hash keys, patch from Inaba Hiroto.
+     Branch: perl
+	   ! embed.h embed.pl hv.c hv.h pod/perlapi.pod proto.h
+____________________________________________________________________________
+[  7979] By: jhi                                   on 2000/12/04  17:36:28
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  7978] By: jhi                                   on 2000/12/04  16:42:17
         Log: Retract #7977, still too volatile (the euphemism of the day
              for unfinished and buggy :-)

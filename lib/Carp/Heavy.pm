@@ -1,8 +1,12 @@
+# Carp::Heavy uses some variables in common with Carp.
 package Carp;
 
-our $MaxEvalLen;
-our $MaxLenArg;
-our $Verbose;
+# use strict; # not yet
+
+# On one line so MakeMaker will see it.
+use Carp;  our $VERSION = $Carp::VERSION;
+
+our ($CarpLevel, $MaxArgNums, $MaxEvalLen, $MaxLenArg, $Verbose);
 
 sub caller_info {
   my $i = shift(@_) + 1;

@@ -2,12 +2,16 @@ package Pod::Functions;
 
 #:vi:set ts=20
 
+our $VERSION = '1.00';
+
 require Exporter;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(%Kinds %Type %Flavor %Type_Description @Type_Order);
 
-%Type_Description = (
+our(%Kinds, %Type, %Flavor);
+
+our %Type_Description = (
     'ARRAY'	=> 'Functions for real @ARRAYs',
     'Binary'	=> 'Functions for fixed length data or records',
     'File'	=> 'Functions for filehandles, files, or directories',
@@ -30,7 +34,7 @@ require Exporter;
     'Namespace'	=> 'Keywords altering or affecting scoping of identifiers',
 );
 
-@Type_Order = qw{
+our @Type_Order = qw{
     String
     Regexp
     Math
@@ -57,20 +61,20 @@ while (<DATA>) {
     chomp;
     s/#.*//;
     next unless $_;
-    ($name, $type, $text) = split " ", $_, 3;
+    my($name, $type, $text) = split " ", $_, 3;
     $Type{$name} = $type;
     $Flavor{$name} = $text;
-    for $type ( split /[,\s]+/, $type ) {
-	push @{$Kinds{$type}}, $name;
+    for my $t ( split /[,\s]+/, $type ) {
+	push @{$Kinds{$t}}, $name;
     }
 } 
 
 close DATA;
 
 unless (caller) { 
-    foreach $type ( @Type_Order ) {
-	$list = join(", ", sort @{$Kinds{$type}});
-	$typedesc = $Type_Description{$type} . ":";
+    foreach my $type ( @Type_Order ) {
+	my $list = join(", ", sort @{$Kinds{$type}});
+	my $typedesc = $Type_Description{$type} . ":";
 	write;
     } 
 }

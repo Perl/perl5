@@ -1020,7 +1020,6 @@ sub output_all {
     print <<"EOT";
 static int $init_name()
 {
-	dTHR;
 	dTARG;
 	djSP;
 EOT

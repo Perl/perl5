@@ -1,5 +1,7 @@
 package Carp;
 
+our $VERSION = '1.00';
+
 =head1 NAME
 
 carp    - warn of errors (from perspective of caller)

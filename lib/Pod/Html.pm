@@ -12,7 +12,6 @@ use Config;
 use Cwd;
 use File::Spec::Unix;
 use Getopt::Long;
-use Pod::Functions;
 
 use locale;	# make \w work right in non-ASCII lands
 

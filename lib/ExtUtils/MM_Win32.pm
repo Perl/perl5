@@ -1,5 +1,7 @@
 package ExtUtils::MM_Win32;
 
+our $VERSION = '1.00';
+
 =head1 NAME
 
 ExtUtils::MM_Win32 - methods to override UN*X behaviour in ExtUtils::MakeMaker
@@ -23,8 +25,8 @@ use Config;
 use File::Basename;
 require Exporter;
 
-Exporter::import('ExtUtils::MakeMaker',
-       qw( $Verbose &neatvalue));
+require ExtUtils::MakeMaker;
+ExtUtils::MakeMaker->import(qw( $Verbose &neatvalue));
 
 $ENV{EMXSHELL} = 'sh'; # to run `commands`
 unshift @MM::ISA, 'ExtUtils::MM_Win32';

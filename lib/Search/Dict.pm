@@ -2,8 +2,11 @@ package Search::Dict;
 require 5.000;
 require Exporter;
 
-@ISA = qw(Exporter);
-@EXPORT = qw(look);
+use strict;
+
+our $VERSION = '1.00';
+our @ISA = qw(Exporter);
+our @EXPORT = qw(look);
 
 =head1 NAME
 
@@ -30,9 +33,9 @@ If I<$fold> is true, ignore case.
 =cut
 
 sub look {
-    local(*FH,$key,$dict,$fold) = @_;
+    my($fh,$key,$dict,$fold) = @_;
     local($_);
-    my(@stat) = stat(FH)
+    my(@stat) = stat($fh)
 	or return -1;
     my($size, $blksize) = @stat[7,11];
     $blksize ||= 8192;
@@ -41,10 +44,10 @@ sub look {
     my($min, $max, $mid) = (0, int($size / $blksize));
     while ($max - $min > 1) {
 	$mid = int(($max + $min) / 2);
-	seek(FH, $mid * $blksize, 0)
+	seek($fh, $mid * $blksize, 0)
 	    or return -1;
-	<FH> if $mid;			# probably a partial line
-	$_ = <FH>;
+	<$fh> if $mid;			# probably a partial line
+	$_ = <$fh>;
 	chop;
 	s/[^\w\s]//g if $dict;
 	$_ = lc $_ if $fold;
@@ -56,19 +59,19 @@ sub look {
 	}
     }
     $min *= $blksize;
-    seek(FH,$min,0)
+    seek($fh,$min,0)
 	or return -1;
-    <FH> if $min;
+    <$fh> if $min;
     for (;;) {
-	$min = tell(FH);
-	defined($_ = <FH>)
+	$min = tell($fh);
+	defined($_ = <$fh>)
 	    or last;
 	chop;
 	s/[^\w\s]//g if $dict;
 	$_ = lc $_ if $fold;
 	last if $_ ge $key;
     }
-    seek(FH,$min,0);
+    seek($fh,$min,0);
     $min;
 }
 

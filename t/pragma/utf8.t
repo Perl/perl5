@@ -10,7 +10,7 @@ BEGIN {
     }
 }
 
-print "1..103\n";
+print "1..90\n";
 
 my $test = 1;
 
@@ -354,62 +354,6 @@ sub nok_bytes {
 }
 
 {
-    # bug id 20000819.004 
-
-    $_ = $dx = "\x{10f2}";
-    s/($dx)/$dx$1/;
-    {
-	use bytes;
-	print "not " unless $_ eq "$dx$dx";
-	print "ok $test\n";
-	$test++;
-    }
-
-    $_ = $dx = "\x{10f2}";
-    s/($dx)/$1$dx/;
-    {
-	use bytes;
-	print "not " unless $_ eq "$dx$dx";
-	print "ok $test\n";
-	$test++;
-    }
-
-    $dx = "\x{10f2}";
-    $_  = "\x{10f2}\x{10f2}";
-    s/($dx)($dx)/$1$2/;
-    {
-	use bytes;
-	print "not " unless $_ eq "$dx$dx";
-	print "ok $test\n";
-	$test++;
-    }
-}
-
-{
-    # bug id 20000323.056
-
-    print "not " unless "\x{41}" eq +v65;
-    print "ok $test\n";
-    $test++;
-
-    print "not " unless "\x41" eq +v65;
-    print "ok $test\n";
-    $test++;
-
-    print "not " unless "\x{c8}" eq +v200;
-    print "ok $test\n";
-    $test++;
-
-    print "not " unless "\xc8" eq +v200;
-    print "ok $test\n";
-    $test++;
-
-    print "not " unless "\x{221b}" eq v8731;
-    print "ok $test\n";
-    $test++;
-}
-
-{
     # bug id 20000427.003 
 
     use utf8;
@@ -425,17 +369,6 @@ sub nok_bytes {
     }
 
     print "not " unless $r eq " U+B36C U+5A8C U+FF5B U+5079 U+505B";
-    print "ok $test\n";
-    $test++;
-}
-
-{
-    # bug id 20000901.092
-    # test that undef left and right of utf8 results in a valid string
-
-    my $a;
-    $a .= "\x{1ff}";
-    print "not " unless $a eq "\x{1ff}";
     print "ok $test\n";
     $test++;
 }
@@ -526,38 +459,4 @@ sub nok_bytes {
 	print "ok $test\n";
 	$test++;
     }
-}
-
-{
-    # ID 20001020.006
-
-    "x" =~ /(.)/; # unset $2
-
-    # Without the fix this will croak:
-    # Modification of a read-only value attempted at ...
-    "$2\x{1234}";
-
-    print "ok $test\n";
-    $test++;
-
-    # For symmetry with the above.
-    "\x{1234}$2";
-
-    print "ok $test\n";
-    $test++;
-
-    *pi = \undef;
-    # This bug existed earlier than the $2 bug, but is fixed with the same
-    # patch. Without the fix this will also croak:
-    # Modification of a read-only value attempted at ...
-    "$pi\x{1234}";
-
-    print "ok $test\n";
-    $test++;
-
-    # For symmetry with the above.
-    "\x{1234}$pi";
-
-    print "ok $test\n";
-    $test++;
 }

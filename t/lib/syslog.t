@@ -24,6 +24,10 @@ BEGIN {
 
 use Sys::Syslog qw(:DEFAULT setlogsock);
 
+# Test this to 1 if your syslog accepts udp connections.
+# Most don't (or at least shouldn't)
+my $Test_Syslog_INET = 0;
+
 print "1..6\n";
 
 if (Sys::Syslog::_PATH_LOG()) {
@@ -45,6 +49,15 @@ else {
     for (1..3) { print "ok $_ # skipping, _PATH_LOG unavailable\n" }
 }
 
-print defined(eval { setlogsock('inet') }) ? "ok 4\n" : "not ok 4\n";
-print defined(eval { openlog('perl', 'ndelay', 'local0') }) ? "ok 5\n" : "not ok 5\n";
-print defined(eval { syslog('info', 'test') }) ? "ok 6\n" : "not ok 6\n";
+if( $Test_Syslog_INET ) {
+    print defined(eval { setlogsock('inet') }) ? "ok 4\n" 
+                                               : "not ok 4\n";
+    print defined(eval { openlog('perl', 'ndelay', 'local0') }) ? "ok 5\n" 
+                                                                : "not ok 5\n";
+    print defined(eval { syslog('info', 'test') }) ? "ok 6\n" 
+                                                   : "not ok 6\n";
+}
+else {
+    print "ok $_ # skipped(assuming syslog doesn't accept inet connections)\n" 
+      foreach (4..6);
+}

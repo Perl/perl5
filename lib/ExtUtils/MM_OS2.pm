@@ -1,12 +1,16 @@
 package ExtUtils::MM_OS2;
 
+use strict;
+
+our $VERSION = '1.00';
+
 #use Config;
 #use Cwd;
 #use File::Basename;
 require Exporter;
 
-Exporter::import('ExtUtils::MakeMaker',
-       qw( $Verbose &neatvalue));
+require ExtUtils::MakeMaker;
+ExtUtils::MakeMaker->import(qw( $Verbose &neatvalue));
 
 unshift @MM::ISA, 'ExtUtils::MM_OS2';
 

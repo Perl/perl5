@@ -4,11 +4,12 @@ require Exporter;
 use Config;
 use File::Find;
 use File::Copy 'copy';
+use File::Spec::Functions qw(splitpath);
 use Carp;
 use strict;
 
 use vars qw($VERSION @ISA @EXPORT_OK
-	    $Is_VMS $Debug $Verbose $Quiet $MANIFEST $found);
+	    $Is_VMS $Debug $Verbose $Quiet $MANIFEST $found $DEFAULT_MSKIP);
 
 $VERSION = substr(q$Revision: 1.33 $, 10);
 @ISA=('Exporter');
@@ -18,10 +19,11 @@ $VERSION = substr(q$Revision: 1.33 $, 10);
 $Is_VMS = $^O eq 'VMS';
 if ($Is_VMS) { require File::Basename }
 
-$Debug = 0;
+$Debug = $ENV{PERL_MM_MANIFEST_DEBUG} || 0;
 $Verbose = 1;
 $Quiet = 0;
 $MANIFEST = 'MANIFEST';
+$DEFAULT_MSKIP = (splitpath($INC{"ExtUtils/Manifest.pm"}))[1]."$MANIFEST.SKIP";
 
 # Really cool fix from Ilya :)
 unless (defined $Config{d_link}) {
@@ -160,8 +162,7 @@ sub _maniskip {
     my @skip ;
     $mfile ||= "$MANIFEST.SKIP";
     local *M;
-    return $matches unless -f $mfile;
-    open M, $mfile or return $matches;
+    open M, $mfile or open M, $DEFAULT_MSKIP or return $matches;
     while (<M>){
 	chomp;
 	next if /^#/;
@@ -344,14 +345,26 @@ expressions should appear one on each line. Blank lines and lines
 which start with C<#> are skipped.  Use C<\#> if you need a regular
 expression to start with a sharp character. A typical example:
 
+    # Version control files and dirs.
     \bRCS\b
+    \bCVS\b
+    ,v$
+
+    # Makemaker generated files and dirs.
     ^MANIFEST\.
     ^Makefile$
-    ~$
-    \.html$
-    \.old$
     ^blib/
     ^MakeMaker-\d
+
+    # Temp, old and emacs backup files.
+    ~$
+    \.old$
+    ^#.*#$
+
+If no MANIFEST.SKIP file is found, a default set of skips will be
+used, similar to the example above.  If you want nothing skipped,
+simply make an empty MANIFEST.SKIP file.
+
 
 =head1 EXPORT_OK
 
@@ -368,6 +381,10 @@ and a developer version including RCS).
 
 C<$ExtUtils::Manifest::Quiet> defaults to 0. If set to a true value,
 all functions act silently.
+
+C<$ExtUtils::Manifest::Debug> defaults to 0.  If set to a true value,
+or if PERL_MM_MANIFEST_DEBUG is true, debugging output will be
+produced.
 
 =head1 DIAGNOSTICS
 
@@ -394,6 +411,16 @@ is reported if C<MANIFEST> could not be opened.
 
 is reported by mkmanifest() if $Verbose is set and a file is added
 to MANIFEST. $Verbose is set to 1 by default.
+
+=back
+
+=head1 ENVIRONMENT
+
+=over 4
+
+=item B<PERL_MM_MANIFEST_DEBUG>
+
+Turns on debugging
 
 =back
 
