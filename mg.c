@@ -72,7 +72,6 @@ void* p;
     }
 }
 
-
 void
 mg_magical(sv)
 SV* sv;
@@ -367,8 +366,20 @@ MAGIC *mg;
 	    sv_setpv(sv, os2error(Perl_rc));
 	}
 #else
+#ifdef WIN32
+	{
+	    DWORD dwErr = GetLastError();
+	    sv_setnv(sv, (double)dwErr);
+	    if (dwErr)
+		win32_str_os_error(sv, dwErr);
+	    else
+		sv_setpv(sv, "");
+	    SetLastError(dwErr);
+	}
+#else
 	sv_setnv(sv, (double)errno);
 	sv_setpv(sv, errno ? Strerror(errno) : "");
+#endif
 #endif
 #endif
 	SvNOK_on(sv);	/* what a wonderful hack! */
@@ -1363,8 +1374,12 @@ MAGIC* mg;
 #ifdef VMS
 	set_vaxc_errno(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 #else
+#ifdef WIN32
+	SetLastError( SvIV(sv) );
+#else
 	/* will anyone ever use this? */
 	SETERRNO(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv), 4);
+#endif
 #endif
 	break;
     case '\006':	/* ^F */

@@ -22,6 +22,7 @@ $printUndef = 1 unless defined $printUndef;
 $tick = "auto" unless defined $tick;
 $unctrl = 'quote' unless defined $unctrl;
 $subdump = 1;
+$dumpReused = 0 unless defined $dumpReused;
 
 sub main::dumpValue {
   local %address;
@@ -118,7 +119,7 @@ sub unwrap {
     # Check for reused addresses
     if (ref $v) { 
       ($address) = $v =~ /(0x[0-9a-f]+)\)$/ ; 
-      if (defined $address) { 
+      if (!$dumpReused && defined $address) { 
 	($type) = $v =~ /=(.*?)\([^=]+$/ ;
 	$address{$address}++ ;
 	if ( $address{$address} > 1 ) { 

@@ -341,6 +341,7 @@ win32_calloc
 win32_realloc
 win32_free
 win32stdio
+win32_str_os_error
 Perl_win32_init
 RunPerl
 SetIOSubSystem

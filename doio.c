@@ -503,7 +503,8 @@ register GV *gv;
 	    return IoIFP(GvIOp(gv));
 	}
 	else
-	    PerlIO_printf(PerlIO_stderr(), "Can't open %s: %s\n",SvPV(sv, na), Strerror(errno));
+	    PerlIO_printf(PerlIO_stderr(), "Can't open %s: %s\n",
+	      SvPV(sv, na), Strerror(errno));
     }
     if (inplace) {
 	(void)do_close(argvoutgv,FALSE);

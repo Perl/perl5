@@ -934,6 +934,33 @@ win32_strerror(int e)
     return pIOSubSystem->pfnstrerror(e);
 }
 
+DllExport void
+win32_str_os_error(SV *sv, unsigned long dwErr)
+{
+    DWORD dwLen;
+    char *sMsg;
+    dwLen = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER
+			  |FORMAT_MESSAGE_IGNORE_INSERTS
+			  |FORMAT_MESSAGE_FROM_SYSTEM, NULL,
+			   dwErr, 0, (char *)&sMsg, 1, NULL);
+    if (0 < dwLen) {
+	while (0 < dwLen  &&  isspace(sMsg[--dwLen]))
+	    ;
+	if ('.' != sMsg[dwLen])
+	    dwLen++;
+	sMsg[dwLen]= '\0';
+    }
+    if (0 == dwLen) {
+	sMsg = LocalAlloc(0, 64/**sizeof(TCHAR)*/);
+	dwLen = sprintf(sMsg,
+			"Unknown error #0x%lX (lookup 0x%lX)",
+			dwErr, GetLastError());
+    }
+    sv_setpvn(sv, sMsg, dwLen);
+    LocalFree(sMsg);
+}
+
+
 DllExport int
 win32_fprintf(FILE *fp, const char *format, ...)
 {

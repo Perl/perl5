@@ -80,6 +80,7 @@ EXT char *win32_getenv(const char *name);
 #endif
 
 EXT void Perl_win32_init(int *argcp, char ***argvp);
+EXT void win32_str_os_error(struct sv *s, DWORD err);
 
 #define USE_SOCKETS_AS_HANDLES
 #ifndef USE_SOCKETS_AS_HANDLES
