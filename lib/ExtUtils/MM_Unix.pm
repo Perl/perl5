@@ -2923,7 +2923,8 @@ realclean purge ::  clean
         push(@m, "	$self->{RM_F} \$(INST_DYNAMIC) \$(INST_BOOT)\n");
         push(@m, "	$self->{RM_F} \$(INST_STATIC)\n");
     }
-    push(@m, "	$self->{RM_F} " . join(" ", values %{$self->{PM}}) . "\n");
+    push(@m, "	$self->{RM_F} " . join(" ", values %{$self->{PM}}) . "\n")
+	if keys %{$self->{PM}};
     my(@otherfiles) = ($self->{MAKEFILE},
 		       "$self->{MAKEFILE}.old"); # Makefiles last
     push(@otherfiles, $attribs{FILES}) if $attribs{FILES};
