@@ -14,7 +14,7 @@ BEGIN {
 	print "1..0 # no POSIX sys_wait_h\n";
 	exit 0;
     }
-    eval { use Time::HiRes };
+    eval { use Time::HiRes qw(time) };
     if ($@) {
 	print "1..0 # no Time::HiRes\n";
 	exit 0;
@@ -24,9 +24,9 @@ BEGIN {
 use warnings;
 use strict;
 
-use Time::HiRes qw(time);
-
 $| = 1;
+
+print "1..1\n";
 
 sub NEG1_PROHIBITED () { 0x01 }
 sub NEG1_REQUIRED   () { 0x02 }
