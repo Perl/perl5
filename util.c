@@ -2790,7 +2790,7 @@ Perl_condpair_magic(pTHX_ SV *sv)
 {
     MAGIC *mg;
 
-    SvUPGRADE(sv, SVt_PVMG);
+    (void)SvUPGRADE(sv, SVt_PVMG);
     mg = mg_find(sv, PERL_MAGIC_mutex);
     if (!mg) {
 	condpair_t *cp;
