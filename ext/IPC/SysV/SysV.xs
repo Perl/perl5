@@ -30,7 +30,7 @@
 
 /* Required to get 'struct pte' for SHMLBA on ULTRIX. */
 #if defined(__ultrix) || defined(__ultrix__) || defined(ultrix)
-#include <machine/pte.h>
+#   include <machine/pte.h>
 #endif
 
 /* Required in BSDI to get PAGE_SIZE definition for SHMLBA.
