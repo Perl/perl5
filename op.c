@@ -4261,7 +4261,7 @@ ck_index(OP *o)
     if (o->op_flags & OPf_KIDS) {
 	OP *kid = cLISTOPo->op_first->op_sibling;	/* get past pushmark */
 	if (kid && kid->op_type == OP_CONST)
-	    fbm_compile(((SVOP*)kid)->op_sv);
+	    fbm_compile(((SVOP*)kid)->op_sv, 0);
     }
     return ck_fun(o);
 }

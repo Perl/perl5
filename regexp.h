@@ -23,6 +23,16 @@ struct reg_data {
     void* data[1];
 };
 
+struct reg_substr_datum {
+    I32 min_offset;
+    I32 max_offset;
+    SV *substr;
+};
+
+struct reg_substr_data {
+    struct reg_substr_datum data[3];	/* Actual array */
+};
+
 typedef struct regexp {
 	I32 refcnt;
 	char **startp;
@@ -39,6 +49,7 @@ typedef struct regexp {
 	U16 naughty;		/* how exponential is this pattern? */
 	U16 reganch;		/* Internal use only +
 				   Tainted information used by regexec? */
+#if 0
         SV *anchored_substr;	/* Substring at fixed position wrt start. */
 	I32 anchored_offset;	/* Position of it. */
         SV *float_substr;	/* Substring at variable position wrt start. */
@@ -47,9 +58,21 @@ typedef struct regexp {
         SV *check_substr;	/* Substring to check before matching. */
         I32 check_offset_min;	/* Offset of the above. */
         I32 check_offset_max;	/* Offset of the above. */
+#else
+        struct reg_substr_data *substrs;
+#endif
         struct reg_data *data;	/* Additional data. */
 	regnode program[1];	/* Unwarranted chumminess with compiler. */
 } regexp;
+
+#define anchored_substr substrs->data[0].substr
+#define anchored_offset substrs->data[0].min_offset
+#define float_substr substrs->data[1].substr
+#define float_min_offset substrs->data[1].min_offset
+#define float_max_offset substrs->data[1].max_offset
+#define check_substr substrs->data[2].substr
+#define check_offset_min substrs->data[2].min_offset
+#define check_offset_max substrs->data[2].max_offset
 
 #define ROPT_ANCH		(ROPT_ANCH_BOL|ROPT_ANCH_MBOL|ROPT_ANCH_GPOS)
 #define ROPT_ANCH_SINGLE	(ROPT_ANCH_BOL|ROPT_ANCH_GPOS)
