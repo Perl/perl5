@@ -663,7 +663,10 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     if (writing) {
 	if (IoTYPE(io) == IoTYPE_SOCKET
 	    || (IoTYPE(io) == IoTYPE_WRONLY && fd >= 0 && S_ISCHR(PL_statbuf.st_mode)) ) {
-	    mode[0] = 'w';
+	    char *s = mode;
+	    if (*s == 'I' || *s == '#')
+	     s++;
+	    *s = 'w';
 	    if (!(IoOFP(io) = PerlIO_openn(aTHX_ type,mode,fd,0,0,NULL,0,svp))) {
 		PerlIO_close(fp);
 		IoIFP(io) = Nullfp;

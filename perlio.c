@@ -2243,12 +2243,11 @@ PerlIOUnix_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 	    f = PerlIO_allocate(aTHX);
 	}
 	if (!PerlIOValid(f)) {
-	    s = PerlIOSelf(PerlIO_push(aTHX_ f, self, mode, PerlIOArg),
-			   PerlIOUnix);
+	    if (!(f = PerlIO_push(aTHX_ f, self, mode, PerlIOArg))) {
+		return NULL;
+	    }
 	}
-	else {
-	    s = PerlIOSelf(f, PerlIOUnix);
-	}
+	s = PerlIOSelf(f, PerlIOUnix);
 	s->fd = fd;
 	s->oflags = imode;
 	PerlIOBase(f)->flags |= PERLIO_F_OPEN;
@@ -2473,12 +2472,12 @@ PerlIO_importFILE(FILE *stdio, const char *mode)
 	       varies between stdio implementations.
 	     */
 	    int fd = PerlLIO_dup(fileno(stdio));
-	    FILE *f2 = fdopen(fd, (mode = "r+"));
+	    FILE *f2 = PerlSIO_fdopen(fd, (mode = "r+"));
 	    if (!f2) {
-		f2 = fdopen(fd, (mode = "w"));
+		f2 = PerlSIO_fdopen(fd, (mode = "w"));
 	    }
 	    if (!f2) {
-		f2 = fdopen(fd, (mode = "r"));
+		f2 = PerlSIO_fdopen(fd, (mode = "r"));
 	    }
 	    if (!f2) {
 		/* Don't seem to be able to open */
@@ -2487,10 +2486,10 @@ PerlIO_importFILE(FILE *stdio, const char *mode)
 	    }
 	    fclose(f2);
 	}
-	s = PerlIOSelf(PerlIO_push
-			   (aTHX_(f = PerlIO_allocate(aTHX)), &PerlIO_stdio,
-			    mode, Nullsv), PerlIOStdio);
-	s->stdio = stdio;
+	if ((f = PerlIO_push(aTHX_(f = PerlIO_allocate(aTHX)), &PerlIO_stdio, mode, Nullsv))) {
+	    s = PerlIOSelf(f, PerlIOStdio);
+	    s->stdio = stdio;
+	}
     }
     return f;
 }
@@ -2528,12 +2527,13 @@ PerlIOStdio_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 		    if (!f) {
 			f = PerlIO_allocate(aTHX);
 		    }
-		    s = PerlIOSelf(PerlIO_push(aTHX_ f, self,
+		    if ((f = PerlIO_push(aTHX_ f, self,
 				    (mode = PerlIOStdio_mode(mode, tmode)),
-				    PerlIOArg),
-				   PerlIOStdio);
-		    s->stdio = stdio;
-		    PerlIOUnix_refcnt_inc(fileno(s->stdio));
+				    PerlIOArg))) {
+			s = PerlIOSelf(f, PerlIOStdio);
+			s->stdio = stdio;
+			PerlIOUnix_refcnt_inc(fileno(s->stdio));
+		    }
 		}
 		return f;
 	    }
@@ -2567,9 +2567,11 @@ PerlIOStdio_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 		if (!f) {
 		    f = PerlIO_allocate(aTHX);
 		}
-		s = PerlIOSelf(PerlIO_push(aTHX_ f, self, mode, PerlIOArg), PerlIOStdio);
-		s->stdio = stdio;
-		PerlIOUnix_refcnt_inc(fileno(s->stdio));
+		if ((f = PerlIO_push(aTHX_ f, self, mode, PerlIOArg))) {
+		    s = PerlIOSelf(f, PerlIOStdio);
+		    s->stdio = stdio;
+		    PerlIOUnix_refcnt_inc(fileno(s->stdio));
+		}
 		return f;
 	    }
 	}
@@ -2589,7 +2591,7 @@ PerlIOStdio_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 	    int fd = PerlLIO_dup(fileno(stdio));
 	    if (fd >= 0) {
 		char mode[8];
-		stdio = fdopen(fd, PerlIO_modestr(o,mode));
+		stdio = PerlSIO_fdopen(fd, PerlIO_modestr(o,mode));
 	    }
 	    else {
 		/* FIXME: To avoid messy error recovery if dup fails
@@ -2975,12 +2977,12 @@ PerlIO_exportFILE(PerlIO *f, const char *mode)
     if (!mode || !*mode) {
 	mode = PerlIO_modestr(f,buf);
     }
-    stdio = fdopen(PerlIO_fileno(f), mode);
+    stdio = PerlSIO_fdopen(PerlIO_fileno(f), mode);
     if (stdio) {
-	PerlIOStdio *s =
-	    PerlIOSelf(PerlIO_push(aTHX_ f, &PerlIO_stdio, buf, Nullsv),
-		       PerlIOStdio);
-	s->stdio = stdio;
+	if ((f = PerlIO_push(aTHX_ f, &PerlIO_stdio, buf, Nullsv))) {
+	    PerlIOStdio *s = PerlIOSelf(f,PerlIOStdio);
+	    s->stdio = stdio;
+	}
     }
     return stdio;
 }
@@ -4440,11 +4442,10 @@ PerlIO_tmpfile(void)
     PerlIO *f = NULL;
     FILE *stdio = PerlSIO_tmpfile();
     if (stdio) {
-	PerlIOStdio *s =
-	    PerlIOSelf(PerlIO_push
-		       (aTHX_(f = PerlIO_allocate(aTHX)), &PerlIO_stdio,
-			"w+", Nullsv), PerlIOStdio);
-	s->stdio = stdio;
+	if ((f = PerlIO_push(aTHX_(PerlIO_allocate(aTHX)), &PerlIO_stdio, "w+", Nullsv))) {
+	    PerlIOStdio *s = PerlIOSelf(f, PerlIOStdio);
+	    s->stdio = stdio;
+	}
     }
     return f;
 #else
