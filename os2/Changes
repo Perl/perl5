@@ -459,7 +459,7 @@ pre 5.7.3:
 After @14577:
 	$Config{pager} better (but needs work in the binary installer!).
 
-	New API: OS2::dll_name([type], [\&sub])
+	New API: OS2::DLLname([type], [\&sub])
 
 	New OS2::Process APIs:
 
