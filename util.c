@@ -3094,9 +3094,19 @@ Perl_scan_hex(pTHX_ char *start, STRLEN len, STRLEN *retlen)
     register char *s = start;
     register NV rnv = 0.0;
     register UV ruv = 0;
-    register bool seenx = FALSE;
     register bool overflowed = FALSE;
     char *hexdigit;
+
+    if (len > 2) {
+	if (s[0] == 'x') {
+	    s++;
+	    len--;
+	}
+	else if (len > 3 && s[0] == '0' && s[1] == 'x') {
+	    s+=2;
+	    len-=2;
+	}
+    }
 
     for (; len-- && *s; s++) {
 	hexdigit = strchr((char *) PL_hexdigit, *s);
@@ -3106,11 +3116,6 @@ Perl_scan_hex(pTHX_ char *start, STRLEN len, STRLEN *retlen)
 	    {
 		--len;
 		++s;
-	    }
-	    else if (seenx == FALSE && *s == 'x' && ruv == 0) {
-		/* Disallow 0xxx0x0xxx... */
-		seenx = TRUE;
-		continue;
 	    }
 	    else {
 		dTHR;

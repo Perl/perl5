@@ -2237,21 +2237,21 @@ Perl_init_i18nl14n(pTHXo_ int printwarn)
 
 #undef  Perl_new_collate
 void
-Perl_new_collate(pTHXo_ const char* newcoll)
+Perl_new_collate(pTHXo_ char* newcoll)
 {
     ((CPerlObj*)pPerl)->Perl_new_collate(newcoll);
 }
 
 #undef  Perl_new_ctype
 void
-Perl_new_ctype(pTHXo_ const char* newctype)
+Perl_new_ctype(pTHXo_ char* newctype)
 {
     ((CPerlObj*)pPerl)->Perl_new_ctype(newctype);
 }
 
 #undef  Perl_new_numeric
 void
-Perl_new_numeric(pTHXo_ const char* newcoll)
+Perl_new_numeric(pTHXo_ char* newcoll)
 {
     ((CPerlObj*)pPerl)->Perl_new_numeric(newcoll);
 }
@@ -3348,6 +3348,13 @@ U8*
 Perl_utf16_to_utf8_reversed(pTHXo_ U8* p, U8 *d, I32 bytelen, I32 *newlen)
 {
     return ((CPerlObj*)pPerl)->Perl_utf16_to_utf8_reversed(p, d, bytelen, newlen);
+}
+
+#undef  Perl_utf8_length
+STRLEN
+Perl_utf8_length(pTHXo_ U8* s, U8 *e)
+{
+    return ((CPerlObj*)pPerl)->Perl_utf8_length(s, e);
 }
 
 #undef  Perl_utf8_distance

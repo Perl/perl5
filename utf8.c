@@ -353,6 +353,35 @@ Perl_utf8_to_uv_simple(pTHX_ U8* s, STRLEN* retlen)
     return Perl_utf8_to_uv(aTHX_ s, (STRLEN)-1, retlen, 0);
 }
 
+/*
+=for apidoc|utf8_length|U8 *s|U8 *e
+
+Return the length of the UTF-8 char encoded string C<s> in characters.
+Stops at string C<e>.  If C<e E<lt> s> or if the scan would end up 
+past C<e>, return -1.
+
+=cut
+*/
+
+STRLEN
+Perl_utf8_length(pTHX_ U8* s, U8* e)
+{
+    STRLEN len = 0;
+
+    if (e < s)
+	return -1;
+    while (s < e) {
+	STRLEN t = UTF8SKIP(s);
+
+	if (e - s < t)
+	    return -1;
+	s += t;
+	len++;
+    }
+
+    return len;
+}
+
 /* utf8_distance(a,b) returns the number of UTF8 characters between
    the pointers a and b							*/
 

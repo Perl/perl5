@@ -3994,26 +3994,20 @@ UTF8 bytes as a single character.
 STRLEN
 Perl_sv_len_utf8(pTHX_ register SV *sv)
 {
-    U8 *s;
-    U8 *send;
-    STRLEN len;
-
     if (!sv)
 	return 0;
 
 #ifdef NOTYET
     if (SvGMAGICAL(sv))
-	len = mg_length(sv);
+	return mg_length(sv);
     else
 #endif
-	s = (U8*)SvPV(sv, len);
-    send = s + len;
-    len = 0;
-    while (s < send) {
-	s += UTF8SKIP(s);
-	len++;
+    {
+	STRLEN len;
+	U8 *s = (U8*)SvPV(sv, len);
+
+	return Perl_utf8_length(s, s + len);
     }
-    return len;
 }
 
 void

@@ -1853,6 +1853,10 @@
 #define Perl_utf16_to_utf8_reversed	pPerl->Perl_utf16_to_utf8_reversed
 #undef  utf16_to_utf8_reversed
 #define utf16_to_utf8_reversed	Perl_utf16_to_utf8_reversed
+#undef  Perl_utf8_length
+#define Perl_utf8_length	pPerl->Perl_utf8_length
+#undef  utf8_length
+#define utf8_length		Perl_utf8_length
 #undef  Perl_utf8_distance
 #define Perl_utf8_distance	pPerl->Perl_utf8_distance
 #undef  utf8_distance
