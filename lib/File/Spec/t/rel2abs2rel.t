@@ -50,7 +50,7 @@ sub sayok{
     return $output;
 }
 
-print "Checking manipulations of \$^X=$^X\n";
+print "# Checking manipulations of \$^X=$^X\n";
 
 my $perl = safe_rel($^X);
 is( sayok($perl), "ok\n",   "`$perl rel2abs2rel$$.pl` works" );
