@@ -7143,8 +7143,9 @@ Perl_peep(pTHX_ register OP *o)
     LEAVE;
 }
 
-#ifdef PERL_CUSTOM_OPS
-char* custom_op_name(pTHX_ OP* o)
+
+
+char* Perl_custom_op_name(pTHX_ OP* o)
 {
     IV  index = PTR2IV(o->op_ppaddr);
     SV* keysv;
@@ -7162,7 +7163,7 @@ char* custom_op_name(pTHX_ OP* o)
     return SvPV_nolen(HeVAL(he));
 }
 
-char* custom_op_desc(pTHX_ OP* o)
+char* Perl_custom_op_desc(pTHX_ OP* o)
 {
     IV  index = PTR2IV(o->op_ppaddr);
     SV* keysv;
@@ -7179,7 +7180,7 @@ char* custom_op_desc(pTHX_ OP* o)
 
     return SvPV_nolen(HeVAL(he));
 }
-#endif
+
 
 #include "XSUB.h"
 

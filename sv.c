@@ -9894,6 +9894,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     else
 	PL_exitlist	= (PerlExitListEntry*)NULL;
     PL_modglobal	= hv_dup_inc(proto_perl->Imodglobal, param);
+    PL_custom_op_names  = hv_dup_inc(proto_perl->Icustom_op_names,param);
+    PL_custom_op_descs  = hv_dup_inc(proto_perl->Icustom_op_descs,param);
 
     PL_profiledata	= NULL;
     PL_rsfp		= fp_dup(proto_perl->Irsfp, '<');

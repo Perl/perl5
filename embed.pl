@@ -1967,10 +1967,10 @@ Ap	|void	|ptr_table_free|PTR_TBL_t *tbl
 Ap	|void	|sys_intern_clear
 Ap	|void	|sys_intern_init
 #endif
-#if defined(PERL_CUSTOM_OPS)
+
 Ap |char * |custom_op_name|OP* op
 Ap |char * |custom_op_desc|OP* op
-#endif
+
 
 END_EXTERN_C
 
