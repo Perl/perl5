@@ -1,13 +1,7 @@
 #!./perl
 
 BEGIN {
-    if (-d '../pod' && -d '../t') {
-	require File::Spec;
-	my ($v,$d,$f) = File::Spec->splitpath($^X);
-	$^X = File::Spec->catfile(File::Spec->curdir, $f)
-	    if $^X eq File::Spec->catfile(File::Spec->updir, $f);
-	chdir '..';
-    }
+    chdir '..' if -d '../pod' && -d '../t';
     @INC = 'lib';
 }
 

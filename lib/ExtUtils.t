@@ -14,8 +14,7 @@ use ExtUtils::Constant qw (constant_types C_constant XS_constant autoload);
 use Config;
 use File::Spec::Functions qw(catfile rel2abs);
 # Because were are going to be changing directory before running Makefile.PL
-my $perl = $^X;
-print "# perl=$perl\n";
+my $perl;
 $perl = rel2abs( $^X ) unless $] < 5.006; # Hack. Until 5.00503 has rel2abs
 # ExtUtils::Constant::C_constant uses $^X inside a comment, and we want to
 # compare output to ensure that it is the same. We were probably run as ./perl
@@ -25,7 +24,6 @@ $^X = $perl;
 
 print "# perl=$perl\n";
 my $runperl = "$perl -x \"-I../../lib\"";
-print "# runperl=$runperl\n";
 
 $| = 1;
 
@@ -463,10 +461,6 @@ $test++;
 
 my $expect = $constant_types . $C_constant .
   "\n#### XS Section:\n" . $XS_constant;
-
-# Depending on whether $^X resolves symbolic links
-# or not we may have ".../perl" or ".../t/perl".
-$regen =~ s/\#!.+perl -w$/#!$perl -w/m;
 
 if ($expect eq $regen) {
   print "ok $test\n";

@@ -3415,7 +3415,7 @@ Perl_init_argv_symbols(pTHX_ register int argc, register char **argv)
 
 #ifdef HAS_PROCSELFEXE
 /* This is a function so that we don't hold on to MAXPATHLEN
-   bytes of stack longer than necessary.
+   bytes of stack longer than necessary
  */
 STATIC void
 S_procself_val(pTHX_ SV *sv, char *arg0)
@@ -3430,47 +3430,6 @@ S_procself_val(pTHX_ SV *sv, char *arg0)
     }
 }
 #endif /* HAS_PROCSELFEXE */
-
-#if defined(sun) && defined(__svr4__) /* solaris */
-#include <sys/auxv.h>
-STATIC void
-S_procselfauxv(pTHX_ SV *sv, char *arg0) {
-    auxv_t auxv;
-    int fh;
-    int n;
-
-    fh = open("/proc/self/auxv", O_RDONLY);
-    if (fh < 0) {
-        sv_setpv(sv, arg0);
-        return;
-    }
-
-    while (1) {
-        n = read(fh, &auxv, sizeof(auxv));
-        if (n != sizeof(auxv))
-            break;
-        if (auxv.a_type == AT_SUN_EXECNAME) {
-            close(fh);
-            sv_setpv(sv, auxv.a_un.a_ptr);
-	    if (!strchr(SvPVX(sv), '/')) {
-		 /* If no slash at all, probably started as "./perl" 
-		  * Do not compare against "perl", though, since the
-		  * binary might be called something else. */
-		 STRLEN len;
-		 char *s = SvPV(sv, len);
-		 SvGROW(sv, len + 2);
-		 memmove(s + 2, s, len);
-		 SvPVX(sv)[0] = '.';
-		 SvPVX(sv)[1] = '/';
-		 SvCUR(sv) += 2;
-	    }
-	    return;
-        }
-    }
-    close(fh);
-    sv_setpv(sv, arg0);
-}
-#endif /* solaris */
 
 STATIC void
 S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register char **env)
@@ -3508,15 +3467,11 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 #ifdef HAS_PROCSELFEXE
 	S_procself_val(aTHX_ GvSV(tmpgv), PL_origargv[0]);
 #else
-#   ifdef OS2
+#ifdef OS2
 	sv_setpv(GvSV(tmpgv), os2_execname(aTHX));
-#   else
-#       if defined(sun) && defined(__svr4__) /* solaris */
-	S_procselfauxv(aTHX_ GvSV(tmpgv), PL_origargv[0]);
-#       else
-	sv_setpv(GvSV(tmpgv), PL_origargv[0]);
-#       endif
-#   endif
+#else
+	sv_setpv(GvSV(tmpgv),PL_origargv[0]);
+#endif
 #endif
     }
     if ((PL_envgv = gv_fetchpv("ENV",TRUE, SVt_PVHV))) {
