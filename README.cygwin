@@ -191,9 +191,9 @@ more than one interpreter instance.  This works with the Cygwin port.
 
 =item * C<-Duse64bitint>
 
-I<gcc> supports 64-bit integers.  However, several additional long long
-functions are necessary to use them within Perl (I<{strtol,strtoul}l>).
-These are B<not> yet available with Cygwin.
+By default Perl uses 32 bit integers.  If you want to use larger 64
+bit integers, define this symbol.  If there is trouble, check that
+your Cygwin installation is up to date.
 
 =item * C<-Duselongdouble>
 
