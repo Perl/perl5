@@ -35,6 +35,10 @@
 #define Perl_Gv_AMupdate	pPerl->Perl_Gv_AMupdate
 #undef  Gv_AMupdate
 #define Gv_AMupdate		Perl_Gv_AMupdate
+#undef  Perl_apply_attrs_string
+#define Perl_apply_attrs_string	pPerl->Perl_apply_attrs_string
+#undef  apply_attrs_string
+#define apply_attrs_string	Perl_apply_attrs_string
 #undef  Perl_avhv_delete_ent
 #define Perl_avhv_delete_ent	pPerl->Perl_avhv_delete_ent
 #undef  avhv_delete_ent

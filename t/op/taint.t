@@ -24,7 +24,8 @@ BEGIN {
       $ENV{PATH} = $ENV{PATH};
       $ENV{TERM} = $ENV{TERM} ne ''? $ENV{TERM} : 'dummy';
   }
-  if ($Config{d_shm} || $Config{d_msg}) {
+  if ($Config{'extensions'} =~ /\bIPC\/SysV\b/
+      && ($Config{d_shm} || $Config{d_msg})) {
      require IPC::SysV;
      IPC::SysV->import(qw(IPC_PRIVATE IPC_RMID IPC_CREAT S_IRWXU));
   }
@@ -612,7 +613,7 @@ else {
 
 # test shmread
 {
-    if ($Config{d_shm}) {
+    if ($Config{'extensions'} =~ /\bIPC\/SysV\b/ && $Config{d_shm}) {
 	no strict 'subs';
 	my $sent = "foobar";
 	my $rcvd;
@@ -646,7 +647,7 @@ else {
 
 # test msgrcv
 {
-    if ($Config{d_msg}) {
+    if ($Config{'extensions'} =~ /\bIPC\/SysV\b/ && $Config{d_msg}) {
 	no strict 'subs';
 	my $id = msgget(IPC_PRIVATE, IPC_CREAT | S_IRWXU);
 

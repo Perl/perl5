@@ -85,6 +85,13 @@ Perl_Gv_AMupdate(pTHXo_ HV* stash)
     return ((CPerlObj*)pPerl)->Perl_Gv_AMupdate(stash);
 }
 
+#undef  Perl_apply_attrs_string
+void
+Perl_apply_attrs_string(pTHXo_ char *stashpv, CV *cv, char *attrstr, STRLEN len)
+{
+    ((CPerlObj*)pPerl)->Perl_apply_attrs_string(stashpv, cv, attrstr, len);
+}
+
 #undef  Perl_avhv_delete_ent
 SV*
 Perl_avhv_delete_ent(pTHXo_ AV *ar, SV* keysv, I32 flags, U32 hash)
