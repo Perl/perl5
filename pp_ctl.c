@@ -2204,11 +2204,6 @@ PP(pp_goto)
 	PL_do_undump = FALSE;
     }
 
-    if (PL_top_env->je_prev) {
-        PL_restartop = retop;
-        JMPENV_JUMP(3);
-    }
-
     RETURNOP(retop);
 }
 
