@@ -8869,6 +8869,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	int sig_num[] = { SIG_NUM };
 	Newz(0, PL_psig_ptr, sizeof(sig_num)/sizeof(*sig_num), SV*);
 	Newz(0, PL_psig_name, sizeof(sig_num)/sizeof(*sig_num), SV*);
+	Newz(0, PL_psig_pend, sizeof(sig_num)/sizeof(*sig_num), int*);
 	for (i = 1; PL_sig_name[i]; i++) {
 	    PL_psig_ptr[i] = sv_dup_inc(proto_perl->Ipsig_ptr[i]);
 	    PL_psig_name[i] = sv_dup_inc(proto_perl->Ipsig_name[i]);
@@ -8877,6 +8878,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     else {
 	PL_psig_ptr	= (SV**)NULL;
 	PL_psig_name	= (SV**)NULL;
+	PL_psig_pend	= (int*)NULL;
     }
 
     /* thrdvar.h stuff */

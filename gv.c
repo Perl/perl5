@@ -753,6 +753,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 		int sig_num[] = { SIG_NUM };
 		New(73, PL_psig_ptr, sizeof(sig_num)/sizeof(*sig_num), SV*);
 		New(73, PL_psig_name, sizeof(sig_num)/sizeof(*sig_num), SV*);
+		New(73, PL_psig_pend, sizeof(sig_num)/sizeof(*sig_num), int);
 	    }
 	    GvMULTI_on(gv);
 	    hv = GvHVn(gv);

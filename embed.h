@@ -518,6 +518,7 @@
 #define call_method		Perl_call_method
 #define call_pv			Perl_call_pv
 #define call_sv			Perl_call_sv
+#define despatch_signals	Perl_despatch_signals
 #define eval_pv			Perl_eval_pv
 #define eval_sv			Perl_eval_sv
 #define get_sv			Perl_get_sv
@@ -1995,6 +1996,7 @@
 #define call_method(a,b)	Perl_call_method(aTHX_ a,b)
 #define call_pv(a,b)		Perl_call_pv(aTHX_ a,b)
 #define call_sv(a,b)		Perl_call_sv(aTHX_ a,b)
+#define despatch_signals()	Perl_despatch_signals(aTHX)
 #define eval_pv(a,b)		Perl_eval_pv(aTHX_ a,b)
 #define eval_sv(a,b)		Perl_eval_sv(aTHX_ a,b)
 #define get_sv(a,b)		Perl_get_sv(aTHX_ a,b)
@@ -3910,6 +3912,8 @@
 #define call_pv			Perl_call_pv
 #define Perl_call_sv		CPerlObj::Perl_call_sv
 #define call_sv			Perl_call_sv
+#define Perl_despatch_signals	CPerlObj::Perl_despatch_signals
+#define despatch_signals	Perl_despatch_signals
 #define Perl_eval_pv		CPerlObj::Perl_eval_pv
 #define eval_pv			Perl_eval_pv
 #define Perl_eval_sv		CPerlObj::Perl_eval_sv

@@ -464,6 +464,10 @@ PERLVAR(Ixpvlv_arenaroot,XPVLV*)	/* list of allocated xpvlv areas */
 PERLVAR(Ixpvbm_arenaroot,XPVBM*)	/* list of allocated xpvbm areas */
 PERLVAR(Ihe_arenaroot,	XPV*)		/* list of allocated he areas */
 
+PERLVAR(Ipsig_pend, int *)		/* per-signal "count" of pending */
+PERLVARI(Isig_pending, int,0)           /* Number if highest signal pending */
+
+
 /* New variables must be added to the very end for binary compatibility.
  * XSUB.h provides wrapper functions via perlapi.h that make this
  * irrelevant, but not all code may be expected to #include XSUB.h. */

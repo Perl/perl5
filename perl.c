@@ -724,6 +724,7 @@ perl_destruct(pTHXx)
     Safefree(PL_op_mask);
     Safefree(PL_psig_ptr);
     Safefree(PL_psig_name);
+    Safefree(PL_psig_pend);
     nuke_stacks();
     PL_hints = 0;		/* Reset hints. Should hints be per-interpreter ? */
 
@@ -789,12 +790,12 @@ perl_free(pTHXx)
 #  if defined(PERL_IMPLICIT_SYS)
     void *host = w32_internal_host;
     if (PerlProc_lasthost()) {
-	PerlIO_cleanup();     
+	PerlIO_cleanup();
     }
     PerlMem_free(aTHXx);
     win32_delete_internal_host(host);
 #else
-    PerlIO_cleanup();     
+    PerlIO_cleanup();
     PerlMem_free(aTHXx);
 #endif
 #  else
