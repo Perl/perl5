@@ -369,6 +369,7 @@ __DATA__
 #	define PL_curstash	curstash
 #	define PL_defgv		defgv
 #	define PL_dirty		dirty
+#	define PL_dowarn	dowarn
 #	define PL_hints		hints
 #	define PL_na		na
 #	define PL_perldb	perldb
