@@ -3782,6 +3782,7 @@ S_init_main_thread(pTHX)
     (void) find_threadsv("@");	/* Ensure $@ is initialised early */
 
     PL_maxscream = -1;
+    PL_peepp = MEMBER_TO_FPTR(Perl_peep);
     PL_regcompp = MEMBER_TO_FPTR(Perl_pregcomp);
     PL_regexecp = MEMBER_TO_FPTR(Perl_regexec_flags);
     PL_regint_start = MEMBER_TO_FPTR(Perl_re_intuit_start);

@@ -10268,6 +10268,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_reginterp_cnt	= 0;
     PL_reg_starttry	= 0;
 
+    /* Pluggable optimizer */
+    PL_peepp		= proto_perl->Tpeepp;
+
     if (!(flags & CLONEf_KEEP_PTR_TABLE)) {
         ptr_table_free(PL_ptr_table);
         PL_ptr_table = NULL;

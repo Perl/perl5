@@ -728,6 +728,8 @@ START_EXTERN_C
 #define PL_op			(*Perl_Top_ptr(aTHXo))
 #undef  PL_opsave
 #define PL_opsave		(*Perl_Topsave_ptr(aTHXo))
+#undef  PL_peepp
+#define PL_peepp		(*Perl_Tpeepp_ptr(aTHXo))
 #undef  PL_protect
 #define PL_protect		(*Perl_Tprotect_ptr(aTHXo))
 #undef  PL_reg_call_cc

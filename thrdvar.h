@@ -211,6 +211,8 @@ PERLVAR(Treg_leftiter,	I32)		/* wait until caching pos */
 PERLVARI(Treg_poscache, char *, Nullch)	/* cache of pos of WHILEM */
 PERLVAR(Treg_poscache_size, STRLEN)	/* size of pos cache of WHILEM */
 
+PERLVARI(Tpeepp,	peep_t, MEMBER_TO_FPTR(Perl_peep))
+					/* Pointer to peephole optimizer */
 PERLVARI(Tregcompp,	regcomp_t, MEMBER_TO_FPTR(Perl_pregcomp))
 					/* Pointer to REx compiler */
 PERLVARI(Tregexecp,	regexec_t, MEMBER_TO_FPTR(Perl_regexec_flags))

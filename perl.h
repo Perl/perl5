@@ -3019,6 +3019,7 @@ enum {		/* pass one of these to get_vtbl */
 #define RsRECORD(sv)  (SvROK(sv) && (SvIV(SvRV(sv)) > 0))
 
 /* Enable variables which are pointers to functions */
+typedef void (CPERLscope(*peep_t))(pTHX_ OP* o);
 typedef regexp*(CPERLscope(*regcomp_t)) (pTHX_ char* exp, char* xend, PMOP* pm);
 typedef I32 (CPERLscope(*regexec_t)) (pTHX_ regexp* prog, char* stringarg,
 				      char* strend, char* strbeg, I32 minend,

@@ -20,6 +20,8 @@
 #include "perl.h"
 #include "keywords.h"
 
+#define CALL_PEEP(o) CALL_FPTR(PL_peepp)(o)
+
 /* #define PL_OP_SLAB_ALLOC */
 
 #ifdef PL_OP_SLAB_ALLOC
@@ -2174,7 +2176,7 @@ Perl_newPROG(pTHX_ OP *o)
 	PL_eval_root->op_private |= OPpREFCOUNTED;
 	OpREFCNT_set(PL_eval_root, 1);
 	PL_eval_root->op_next = 0;
-	peep(PL_eval_start);
+	CALL_PEEP(PL_eval_start);
     }
     else {
 	if (!o)
@@ -2185,7 +2187,7 @@ Perl_newPROG(pTHX_ OP *o)
 	PL_main_root->op_private |= OPpREFCOUNTED;
 	OpREFCNT_set(PL_main_root, 1);
 	PL_main_root->op_next = 0;
-	peep(PL_main_start);
+	CALL_PEEP(PL_main_start);
 	PL_compcv = 0;
 
 	/* Register with debugger */
@@ -2369,7 +2371,7 @@ Perl_gen_constant_list(pTHX_ register OP *o)
 
     PL_op = curop = LINKLIST(o);
     o->op_next = 0;
-    peep(curop);
+    CALL_PEEP(curop);
     pp_pushmark();
     CALLRUNOPS(aTHX);
     PL_op = curop;
@@ -4829,7 +4831,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     OpREFCNT_set(CvROOT(cv), 1);
     CvSTART(cv) = LINKLIST(CvROOT(cv));
     CvROOT(cv)->op_next = 0;
-    peep(CvSTART(cv));
+    CALL_PEEP(CvSTART(cv));
 
     /* now that optimizer has done its work, adjust pad values */
     if (CvCLONE(cv)) {
@@ -5170,7 +5172,7 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
     OpREFCNT_set(CvROOT(cv), 1);
     CvSTART(cv) = LINKLIST(CvROOT(cv));
     CvROOT(cv)->op_next = 0;
-    peep(CvSTART(cv));
+    CALL_PEEP(CvSTART(cv));
     op_free(o);
     PL_copline = NOLINE;
     LEAVE_SCOPE(floor);
@@ -6343,7 +6345,7 @@ Perl_ck_sort(pTHX_ OP *o)
 		    kid->op_next = 0;		/* just disconnect the leave */
 		k = kLISTOP->op_first;
 	    }
-	    peep(k);
+	    CALL_PEEP(k);
 
 	    kid = firstkid;
 	    if (o->op_type == OP_SORT) {
@@ -6881,7 +6883,7 @@ Perl_peep(pTHX_ register OP *o)
 	    o->op_seq = PL_op_seqmax++;
 	    while (cLOGOP->op_other->op_type == OP_NULL)
 		cLOGOP->op_other = cLOGOP->op_other->op_next;
-	    peep(cLOGOP->op_other);
+	    peep(cLOGOP->op_other); /* Recursive calls are not replaced by fptr calls */
 	    break;
 
 	case OP_ENTERLOOP:

@@ -3037,6 +3037,8 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
     PL_reg_start_tmpl = 0;
     PL_reg_poscache = Nullch;
 
+    PL_peepp = MEMBER_TO_FPTR(Perl_peep);
+
     /* parent thread's data needs to be locked while we make copy */
     MUTEX_LOCK(&t->mutex);
 
