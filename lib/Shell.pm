@@ -4,7 +4,7 @@ use strict;
 use warnings;
 our($capture_stderr, $VERSION, $AUTOLOAD);
 
-$VERSION = '0.5';
+$VERSION = '0.5.1';
 
 sub new { bless \my $foo, shift }
 sub DESTROY { }
@@ -28,11 +28,14 @@ sub AUTOLOAD {
     shift if ref $_[0] && $_[0]->isa( 'Shell' );
     my $cmd = $AUTOLOAD;
     $cmd =~ s/^.*:://;
+    $Shell::capture_stderr ||= 0;
     eval <<"*END*";
 	sub $AUTOLOAD {
 	    shift if ref \$_[0] && \$_[0]->isa( 'Shell' );
 	    if (\@_ < 1) {
-		\$Shell::capture_stderr ? `$cmd 2>&1` : `$cmd`;
+		\$Shell::capture_stderr ==  1 ? `$cmd 2>&1` : 
+		\$Shell::capture_stderr == -1 ? `$cmd 2>/dev/null` : 
+		`$cmd`;
 	    } elsif ('$^O' eq 'os2') {
 		local(\*SAVEOUT, \*READ, \*WRITE);
 
@@ -84,7 +87,8 @@ sub AUTOLOAD {
 			\$_ = \$_;
 		    }
 		}
-		push \@arr, '2>&1' if \$Shell::capture_stderr;
+		push \@arr, '2>&1'        if \$Shell::capture_stderr ==  1;
+		push \@arr, '2>/dev/null' if \$Shell::capture_stderr == -1;
 		open(SUBPROC, join(' ', '$cmd', \@arr, '|'))
 		    or die "Can't exec $cmd: \$!\\n";
 		if (wantarray) {
@@ -153,6 +157,9 @@ Larry
 
 If you set $Shell::capture_stderr to 1, the module will attempt to
 capture the STDERR of the process as well.
+
+If you set $Shell::capture_stderr to -1, the module will discard the 
+STDERR of the process.
 
 The module now should work on Win32.
 
