@@ -417,6 +417,19 @@ consecutive runs of Perl will order hash keys differently, which may
 confuse some applications (like Data::Dumper: the outputs of two
 different runs are no more identical).
 
+B<Perl has never guaranteed any ordering of the hash keys>, and the
+ordering has already changed several times during the lifetime of
+Perl 5.  Also, the ordering of hash keys has always been, and
+continues to be, affected by the insertion order.
+
+Also note that while the order of the hash elements might be
+randomised, this "pseudoordering" should B<not> be used for
+applications like shuffling a list randomly (use List::Util::shuffle()
+for that, see L<List::Util>, a standard core module since Perl 5.8.0;
+or the CPAN module Algorithm::Numerical::Shuffle), or for generating
+permutations (use e.g. the CPAN modules Algorithm::Permute or
+Algorithm::FastPermute), or for any cryptographic applications.
+
 =item *
 
 Regular expressions - Perl's regular expression engine is so called
