@@ -341,6 +341,8 @@
 #define PL_multi_open		(PERL_GET_INTERP->Imulti_open)
 #define PL_multi_start		(PERL_GET_INTERP->Imulti_start)
 #define PL_multiline		(PERL_GET_INTERP->Imultiline)
+#define PL_new_hash_seed	(PERL_GET_INTERP->Inew_hash_seed)
+#define PL_new_hash_seed_set	(PERL_GET_INTERP->Inew_hash_seed_set)
 #define PL_nexttoke		(PERL_GET_INTERP->Inexttoke)
 #define PL_nexttype		(PERL_GET_INTERP->Inexttype)
 #define PL_nextval		(PERL_GET_INTERP->Inextval)
