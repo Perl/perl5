@@ -88,19 +88,10 @@ if (-d "pod") {
     perlopentut
     perlretut
 
-    perlref
     perlre
+    perlref
+
     perlform
-    perllocale
-    perlunicode
-
-    perlipc
-    perlfork
-    perlnumber
-    perlthrtut
-
-    perlport
-    perlsec
 
     perlboot
     perltoot
@@ -108,6 +99,18 @@ if (-d "pod") {
     perlobj
     perlbot
     perltie
+
+    perlipc
+    perlfork
+    perlnumber
+    perlthrtut
+
+    perlport
+    perllocale
+    perlunicode
+    perlebcdic
+
+    perlsec
 
     perlmod
     perlmodlib
