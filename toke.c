@@ -3383,14 +3383,18 @@ Perl_yylex(pTHX)
 	s++;
 	tmp = *s++;
 	if (tmp == '=') {
-            /* was this !=~ where !~ was meant? */
+            /* was this !=~ where !~ was meant?
+             * warn on m:!=~\s+([/?]|[msy]\W|tr\W): */
+
             if (*s == '~' && ckWARN(WARN_SYNTAX)) {
                 char *t = s+1;
 
                 while (t < PL_bufend && isSPACE(*t))
                     ++t;
 
-                if (*t == '/' || (*t == 'm' && !isALNUM(t[1])) || *t == '?')
+                if (*t == '/' || *t == '?' ||
+                    ((*t == 'm' || *t == 's' || *t == 'y') && !isALNUM(t[1])) ||
+                    (*t == 't' && t[1] == 'r' && !isALNUM(t[2])))
                     Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
                                 "!=~ should be !~");
             }

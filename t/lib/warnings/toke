@@ -824,14 +824,23 @@ $a !=~  /1/;
 $a !=~ m#1#;
 $a !=~/1/;
 $a !=~ ?/?;
+$a !=~ y/1//;
+$a !=~ tr/1//;
+$a !=~ s/1//;
 $a != ~/1/;
 no warnings "syntax";
 $a !=~  /1/;
 $a !=~ m#1#;
 $a !=~/1/;
 $a !=~ ?/?;
+$a !=~ y/1//;
+$a !=~ tr/1//;
+$a !=~ s/1//;
 EXPECT
 !=~ should be !~ at - line 4.
 !=~ should be !~ at - line 5.
 !=~ should be !~ at - line 6.
 !=~ should be !~ at - line 7.
+!=~ should be !~ at - line 8.
+!=~ should be !~ at - line 9.
+!=~ should be !~ at - line 10.
