@@ -3820,17 +3820,6 @@ typedef struct am_table_short AMTS;
 #   define Atoul(s)	Strtoul(s, (char **)NULL, 10)
 #endif
 
-#if !defined(PERLIO_IS_STDIO)
-/*
- * Remap printf
- */
-#undef printf
-#if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
-#define printf(fmt,args...) PerlIO_stdoutf(fmt,##args)
-#else
-#define printf PerlIO_stdoutf
-#endif
-#endif
 
 /* if these never got defined, they need defaults */
 #ifndef PERL_SET_CONTEXT
