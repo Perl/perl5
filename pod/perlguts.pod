@@ -836,7 +836,7 @@ The C<av_store> function, when given a tied array argument, merely
 copies the magic of the array onto the value to be "stored", using
 C<mg_copy>.  It may also return NULL, indicating that the value did not
 actually need to be stored in the array.  After a call to C<av_store> on
-a tied array, the caller will usually need to call C<mg_get(val)> to
+a tied array, the caller will usually need to call C<mg_set(val)> to
 actually invoke the perl level "STORE" method on the TIEARRAY object.  If
 C<av_store> did return NULL, a call to C<SvREFCNT_dec(val)> will also be
 usually necessary to avoid a memory leak.
