@@ -55,7 +55,7 @@ $PERL = ($Is_NetWare            ? 'perl'   :
 eval '$ENV{"FOO"} = "hi there";';	# check that ENV is inited inside eval
 # cmd.exe will echo 'variable=value' but 4nt will echo just the value
 # -- Nikola Knezevic
-if ($Is_MSWin32)  { ok `set FOO` =~ /^(FOO=)?hi there$/; }
+if ($Is_MSWin32)  { ok `set FOO` =~ /^(?:FOO=)?hi there$/; }
 elsif ($Is_MacOS) { ok "1 # skipped", 1; }
 elsif ($Is_VMS)   { ok `write sys\$output f\$trnlnm("FOO")` eq "hi there\n"; }
 else              { ok `echo \$FOO` eq "hi there\n"; }
@@ -246,7 +246,7 @@ else {
 	$0 = "bar";
 # cmd.exe will echo 'variable=value' but 4nt will echo just the value
 # -- Nikola Knezevic
-	ok ($Is_MSWin32 ? (`set __NoNeSuCh` =~ /^(__NoNeSuCh=)?foo$/)
+       ok ($Is_MSWin32 ? (`set __NoNeSuCh` =~ /^(?:__NoNeSuCh=)?foo$/)
 			    : (`echo \$__NoNeSuCh` eq "foo\n") );
 }
 
