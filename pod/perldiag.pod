@@ -790,7 +790,7 @@ L<perlfunc/last>.
 may either mean that you upgraded your version of perl to one that is
 incompatible with your old dynamic extensions (which is known to happen
 between major versions of perl), or (more likely) that your dynamic
-extension was build against an older version of the library that is
+extension was built against an older version of the library that is
 installed on your system. You may need to rebuild your old dynamic
 extensions.
 
