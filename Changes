@@ -28,6 +28,36 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.6		Maintenance release working toward v5.8.6
 --------------
 ____________________________________________________________________________
+[ 23552] By: nicholas                              on 2004/11/27  15:14:36
+        Log: Entry for PERL_USE_SAFE_PUTENV, reworded slightly from an original
+             by Stas Bekman
+     Branch: maint-5.8/perl
+	   ! pod/perl586delta.pod
+____________________________________________________________________________
+[ 23551] By: nicholas                              on 2004/11/27  15:07:10
+        Log: Integrate:
+             [ 23546]
+             Doc nit for B::Lint
+             Subject: [PATCH] B::Lint
+             From: Andy Lester <andy@petdance.com>
+             Date: Fri, 26 Nov 2004 00:30:48 -0600
+             Message-ID: <20041126063048.GA10161@petdance.com>
+             
+             [ 23549]
+             Document the interaction of PERL_USE_SAVE_PUTENV and
+             PL_use_safe_putenv, based on text by Stas Bekman
+             
+             [ 23550]
+             Clarify the return values of pos, particularly 0 and undef, as
+             suggested by Stas Bekman
+     Branch: maint-5.8/perl
+	  !> INSTALL ext/B/B/Lint.pm pod/perlfunc.pod
+____________________________________________________________________________
+[ 23540] By: nicholas                              on 2004/11/25  22:34:55
+        Log: Update Changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 23539] By: nicholas                              on 2004/11/25  22:21:23
         Log: Integrate:
              [ 23532]
