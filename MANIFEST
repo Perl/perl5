@@ -539,6 +539,7 @@ lib/CPAN.pm		Interface to Comprehensive Perl Archive Network
 lib/CPAN/FirstTime.pm	Utility for creating CPAN config files
 lib/CPAN/Nox.pm		Runs CPAN while avoiding compiled extensions
 lib/Carp.pm		Error message base class
+lib/Carp/Heavy.pm	Error message workhorse
 lib/Class/Struct.pm	Declare struct-like datatypes as Perl classes
 lib/Cwd.pm		Various cwd routines (getcwd, fastcwd, chdir)
 lib/DB.pm		Debugger API (draft)
