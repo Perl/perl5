@@ -79,6 +79,47 @@ Version 5.005_59        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  3876] By: gsar                                  on 1999/08/02  07:51:18
+        Log: fix coredump under usethreads+debug
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[  3875] By: jhi                                   on 1999/08/02  07:50:51
+        Log: d_bincompat5005 could be left empty.
+     Branch: cfgperl
+	   ! Configure config_h.SH
+     Branch: metaconfig/U/perl
+	   ! bincompat5005.U
+____________________________________________________________________________
+[  3874] By: jhi                                   on 1999/08/02  07:42:45
+        Log: Fix printf %d when IV is quad.
+     Branch: cfgperl
+	   ! sv.c
+____________________________________________________________________________
+[  3873] By: gsar                                  on 1999/08/02  07:41:03
+        Log: fix d_bincompat5005='' junking config.h
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[  3872] By: gsar                                  on 1999/08/02  07:38:48
+        Log: C needs parameter list, not merely type
+     Branch: perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[  3871] By: jhi                                   on 1999/08/02  07:20:51
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> Changes ext/B/B/C.pm ext/B/B/CC.pm regexec.c
+____________________________________________________________________________
+[  3870] By: gsar                                  on 1999/08/02  07:12:18
+        Log: integrate cfgperl changes into mainline
+     Branch: perl
+	   ! Changes
+	  !> Configure Makefile.SH Porting/Glossary Porting/config.sh
+	  !> Porting/config_H config_h.SH doio.c dump.c mg.c op.c perl.h
+	  !> pp_ctl.c pp_hot.c pp_sys.c scope.c sv.c t/pragma/warn/sv
+	  !> toke.c util.c
+____________________________________________________________________________
 [  3869] By: gsar                                  on 1999/08/02  06:59:09
         Log: From: "Vishal Bhatia" <vishalb@my-deja.com>
              Date: Sat, 31 Jul 1999 19:08:33 -0700
