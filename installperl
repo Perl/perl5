@@ -192,7 +192,7 @@ if ($Is_W32 or $Is_Cygwin) {
       };
     };
   } else {
-    $perldll = 'perl56.' . $dlext;
+    $perldll = 'perl57.' . $dlext;
   }
 
   if ($dlsrc ne "dl_none.xs") {
