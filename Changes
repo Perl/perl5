@@ -31,6 +31,69 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 15046] By: jhi                                   on 2002/03/05  14:56:19
+        Log: Double MANIFESTing.
+     Branch: perl
+	   ! ext/Encode/MANIFEST
+____________________________________________________________________________
+[ 15045] By: jhi                                   on 2002/03/05  14:29:41
+        Log: Remove HanZi and 7bit-kr, from SADAHIRO Tomoyuki.
+     Branch: perl
+	   - ext/Encode/Encode/7bit-kr.enc
+	   - ext/Encode/lib/Encode/Tcl/HanZi.pm
+	   ! MANIFEST ext/Encode/lib/Encode/Tcl.pm
+____________________________________________________________________________
+[ 15044] By: jhi                                   on 2002/03/05  13:40:31
+        Log: Subject: [PATCH] Re: [ID 20020227.024] unexpected warning getc() on unopened filehandle STDIN
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Tue, 5 Mar 2002 14:35:57 +0100
+             Message-ID: <20020305143557.C695@rafael>   
+     Branch: perl
+	   ! pp_sys.c t/lib/warnings/pp_sys
+____________________________________________________________________________
+[ 15043] By: jhi                                   on 2002/03/05  13:36:30
+        Log: Subject: [PATCH Devel::PPPort]
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Tue, 5 Mar 2002 13:37:59 GMT
+             Message-Id: <200203051337.NAA14686@tempest.npl.co.uk>
+     Branch: perl
+	   ! ext/Devel/PPPort/Makefile.PL
+____________________________________________________________________________
+[ 15042] By: jhi                                   on 2002/03/05  13:33:55
+        Log: Real patch from SADAHIRO Tomoyusi to remove the HZ tests.
+     Branch: perl
+	   ! ext/Encode/t/Tcl.t
+____________________________________________________________________________
+[ 15041] By: nick                                  on 2002/03/05  07:23:58
+        Log: Integrate mainline (5.7.3)
+     Branch: perlio
+	  +> ext/Encode/lib/Encode/CN/HZ.pm
+	   - ext/Encode/Encode/HZ.enc ext/Encode/Encode/gbk.enc
+	  !> (integrate 54 files)
+____________________________________________________________________________
+[ 15040] By: ams                                   on 2002/03/05  05:10:33
+        Log: Subject: DOC PATCH 5.7.3 (perldelta)
+             From: mjd@plover.com
+             Date: 5 Mar 2002 05:35:58 -0000
+             Message-Id: <20020305053558.31677.qmail@plover.com>
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 15039] By: jhi                                   on 2002/03/05  03:32:07
+        Log: This is 5.7.3.
+     Branch: perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 15038] By: jhi                                   on 2002/03/05  03:31:32
+        Log: Shoo.
+     Branch: perl
+	   ! ext/Encode/t/Tcl.t
+____________________________________________________________________________
+[ 15037] By: jhi                                   on 2002/03/05  03:15:17
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 15036] By: jhi                                   on 2002/03/05  03:11:17
         Log: Regen perlapi.
      Branch: perl
