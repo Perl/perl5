@@ -1,6 +1,11 @@
 # Testing of Pod::Find
 # Author: Marek Rouchal <marek@saftsack.fs.uni-bayreuth.de>
 
+BEGIN {
+        chdir 't' if -d 't';
+        @INC = '../lib';
+}
+
 $| = 1;
 
 use Test;

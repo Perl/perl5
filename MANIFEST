@@ -32,6 +32,7 @@ Porting/patching.pod	How to report changes made to Perl
 Porting/patchls		Flexible patch file listing utility
 Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
 Porting/repository.pod	How to use the Perl repository
+Porting/testall.atom	Cumulative profile of the test suite with Third Degree
 README			The Instructions
 README.Y2K		Notes about Year 2000 concerns
 README.aix		Notes about AIX port
