@@ -11,6 +11,10 @@ use subs qw(unlink chmod rename link);
 use vars qw($packlist @modpods);
 require Cwd;
 
+if ($Config{d_umask}) {
+    umask(022); # umasks like 077 aren't that useful for installations
+}
+
 $ENV{SHELL} = 'sh' if $^O eq 'os2';
 
 my $ver = $Config{version};     # Not used presently.
