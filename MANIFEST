@@ -965,7 +965,6 @@ lib/autouse.pm			Load and call a function only when it's used
 lib/autouse.t			See if autouse works
 lib/base.pm			Establish IS-A relationship at compile time
 lib/base/t/base.t		See if base works
-lib/base/t/fields-560.t		See if fields work
 lib/base/t/fields-base.t	See if fields work
 lib/base/t/fields.t		See if fields work
 lib/Benchmark.pm		Measure execution time
