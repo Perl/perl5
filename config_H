@@ -329,6 +329,12 @@
  */
 #define HAS_GETPRIORITY		/**/
 
+/* HAS_GNULIBC:
+ *	This symbol, if defined, indicates to the C program that 
+ *	the GNU C library is being used.
+ */
+/*#define HAS_GNULIBC  	/ **/
+
 /* HAS_HTONL:
  *	This symbol, if defined, indicates that the htonl() routine (and
  *	friends htons() ntohl() ntohs()) are available to do network
