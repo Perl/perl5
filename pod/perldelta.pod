@@ -437,7 +437,8 @@ to build a Perl for PASE is to use an AIX host as a cross-compilation
 environment.  See README.os400.
 
 Yet another cross-compilation option has been added: now Perl builds
-on OpenZaurus.  See the Cross subdirectory.
+on OpenZaurus, an Linux distribution based on Embedix for the Sharp
+Zaurus PDA.  See the Cross/README file.
 
 Tru64 when using gcc 3 drops the optimisation for F<toke.c> to C<-O2>
 because of gigantic memory use with the default <-O3>.
