@@ -163,7 +163,7 @@ sub fileparse {
     }
   }
   if ($fstype =~ /^MSDOS/i) {
-    ($dirpath,$basename) = ($fullname =~ /^(.*[:\\\/])?(.*)/);
+    ($dirpath,$basename) = ($fullname =~ /^((?:.*[:\\\/])?)(.*)/);
     $dirpath .= '.\\' unless $dirpath =~ /[\\\/]$/;
   }
   elsif ($fstype =~ /^MacOS/i) {

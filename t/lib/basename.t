@@ -51,6 +51,7 @@ print +(dirname('arma:[virumque]cano.trojae') eq 'arma:[virumque]' ?
 print +(dirname('arma:<virumque>cano.trojae') eq 'arma:<virumque>' ?
         '' : 'not '),"ok 12\n";
 print +(dirname('arma:virumque.cano') eq 'arma:' ? '' : 'not '),"ok 13\n";
+$ENV{DEFAULT} = '' unless exists $ENV{DEFAULT};
 print +(dirname('virumque.cano') eq $ENV{DEFAULT} ? '' : 'not '),"ok 14\n";
 print +(dirname('arma/') eq '.' ? '' : 'not '),"ok 15\n";
 
