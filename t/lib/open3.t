@@ -20,7 +20,7 @@ use IO::Handle;
 use IPC::Open3;
 #require 'open3.pl'; use subs 'open3';
 
-my $perl = './perl';
+my $perl = $^X;
 
 sub ok {
     my ($n, $result, $info) = @_;
