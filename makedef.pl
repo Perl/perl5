@@ -136,7 +136,7 @@ elsif ($PLATFORM eq 'os2') {
 	last if /^\s*EXPORTS\b/;
       }
       while (<$fh>) {
-	$ordinal{$1} = $2 if /^\s*"(\w+)"\s*\@(\d+)\s*$/;
+	$ordinal{$1} = $2 if /^\s*"(\w+)"\s*(?:=\s*"\w+"\s*)?\@(\d+)\s*$/;
 	# This allows skipping ordinals which were used in older versions
 	$sym_ord = $1 if /^\s*;\s*LAST_ORDINAL\s*=\s*(\d+)\s*$/;
       }
@@ -1350,10 +1350,10 @@ sub output_symbol {
     elsif ($PLATFORM eq 'os2') {
 	printf qq(    %-31s \@%s\n),
 	  qq("$symbol"), $ordinal{$symbol} || ++$sym_ord;
-	if (exists $exportperlmalloc{$symbol}) {
-	  printf qq(    %-31s \@%s\n),
-	    qq("$exportperlmalloc{$symbol}" = "$symbol"), ++$sym_ord;
-	}
+	printf qq(    %-31s \@%s\n),
+	  qq("$exportperlmalloc{$symbol}" = "$symbol"),
+	  $ordinal{$exportperlmalloc{$symbol}} || ++$sym_ord
+	  if $exportperlmalloc and exists $exportperlmalloc{$symbol};
     }
     elsif ($PLATFORM eq 'aix' || $PLATFORM eq 'MacOS') {
 	print "$symbol\n";
