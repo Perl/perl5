@@ -826,4 +826,16 @@ by SADAHIRO Tomoyuki have been included since 5.8.0.
     Collation?     http://www.unicode.org/unicode/reports/tr10/
     Normalization? http://www.unicode.org/unicode/reports/tr15/
 
+=head2 Create debugging macros
+
+Debugging macros (like printsv, dump) can make debugging perl inside a
+C debugger much easier.  A good set for gdb comes with mod_perl.
+Something similar should be distributed with perl.
+
+The proper way to do this is to use and extend Devel::DebugInit.
+Devel::DebugInit also needs to be extended to support threads.
+
+See p5p archives for late May/early June 2001 for a recent discussion
+on this topic.
+
 =cut
