@@ -855,7 +855,7 @@
 #define re_intuit_string	Perl_re_intuit_string
 #define regexec_flags		Perl_regexec_flags
 #define regnext			Perl_regnext
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regprop			Perl_regprop
 #endif
 #define repeatcpy		Perl_repeatcpy
@@ -1601,110 +1601,140 @@
 #  endif
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_DECL_PROT)
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define reg			S_reg
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define reganode		S_reganode
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regatom			S_regatom
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regbranch		S_regbranch
-#ifdef PERL_CORE
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define reguni			S_reguni
 #endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regclass		S_regclass
+#endif
 #ifdef PERL_CORE
 #define regcurly		S_regcurly
 #endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define reg_node		S_reg_node
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regpiece		S_regpiece
-#ifdef PERL_CORE
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define reginsert		S_reginsert
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regoptail		S_regoptail
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regtail			S_regtail
 #endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regwhite		S_regwhite
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define nextchar		S_nextchar
+#endif
 #  ifdef DEBUGGING
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define dumpuntil		S_dumpuntil
-#ifdef PERL_CORE
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define put_byte		S_put_byte
 #endif
 #  endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define scan_commit		S_scan_commit
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define cl_anything		S_cl_anything
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define cl_is_anything		S_cl_is_anything
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define cl_init			S_cl_init
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define cl_init_zero		S_cl_init_zero
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define cl_and			S_cl_and
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define cl_or			S_cl_or
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define study_chunk		S_study_chunk
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define add_data		S_add_data
 #endif
 #ifdef PERL_CORE
 #define re_croak2		S_re_croak2
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regpposixcc		S_regpposixcc
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define checkposixcc		S_checkposixcc
 #endif
 #endif
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_DECL_PROT)
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regmatch		S_regmatch
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regrepeat		S_regrepeat
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regrepeat_hard		S_regrepeat_hard
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regtry			S_regtry
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define reginclass		S_reginclass
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regcppush		S_regcppush
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regcppop		S_regcppop
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regcp_set_to		S_regcp_set_to
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define cache_re		S_cache_re
 #endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define reghop			S_reghop
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define reghop3			S_reghop3
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define reghopmaybe		S_reghopmaybe
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define reghopmaybe3		S_reghopmaybe3
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define find_byclass		S_find_byclass
-#ifdef PERL_CORE
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define to_utf8_substr		S_to_utf8_substr
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define to_byte_substr		S_to_byte_substr
 #endif
 #endif
@@ -3257,7 +3287,7 @@
 #define re_intuit_string(a)	Perl_re_intuit_string(aTHX_ a)
 #define regexec_flags(a,b,c,d,e,f,g,h)	Perl_regexec_flags(aTHX_ a,b,c,d,e,f,g,h)
 #define regnext(a)		Perl_regnext(aTHX_ a)
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regprop(a,b)		Perl_regprop(aTHX_ a,b)
 #endif
 #define repeatcpy(a,b,c,d)	Perl_repeatcpy(aTHX_ a,b,c,d)
@@ -3995,109 +4025,139 @@
 #  endif
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_DECL_PROT)
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define reg(a,b,c)		S_reg(aTHX_ a,b,c)
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define reganode(a,b,c)		S_reganode(aTHX_ a,b,c)
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regatom(a,b)		S_regatom(aTHX_ a,b)
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regbranch(a,b,c)	S_regbranch(aTHX_ a,b,c)
-#ifdef PERL_CORE
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define reguni(a,b,c,d)		S_reguni(aTHX_ a,b,c,d)
 #endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regclass(a)		S_regclass(aTHX_ a)
+#endif
 #ifdef PERL_CORE
 #define regcurly(a)		S_regcurly(aTHX_ a)
 #endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define reg_node(a,b)		S_reg_node(aTHX_ a,b)
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regpiece(a,b)		S_regpiece(aTHX_ a,b)
-#ifdef PERL_CORE
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define reginsert(a,b,c)	S_reginsert(aTHX_ a,b,c)
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regoptail(a,b,c)	S_regoptail(aTHX_ a,b,c)
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regtail(a,b,c)		S_regtail(aTHX_ a,b,c)
 #endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regwhite(a,b)		S_regwhite(aTHX_ a,b)
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define nextchar(a)		S_nextchar(aTHX_ a)
+#endif
 #  ifdef DEBUGGING
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define dumpuntil(a,b,c,d,e)	S_dumpuntil(aTHX_ a,b,c,d,e)
-#ifdef PERL_CORE
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define put_byte(a,b)		S_put_byte(aTHX_ a,b)
 #endif
 #  endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define scan_commit(a,b)	S_scan_commit(aTHX_ a,b)
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define cl_anything(a,b)	S_cl_anything(aTHX_ a,b)
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define cl_is_anything(a)	S_cl_is_anything(aTHX_ a)
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define cl_init(a,b)		S_cl_init(aTHX_ a,b)
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define cl_init_zero(a,b)	S_cl_init_zero(aTHX_ a,b)
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define cl_and(a,b)		S_cl_and(aTHX_ a,b)
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define cl_or(a,b,c)		S_cl_or(aTHX_ a,b,c)
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define study_chunk(a,b,c,d,e,f)	S_study_chunk(aTHX_ a,b,c,d,e,f)
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define add_data(a,b,c)		S_add_data(aTHX_ a,b,c)
 #endif
 #ifdef PERL_CORE
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regpposixcc(a,b)	S_regpposixcc(aTHX_ a,b)
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define checkposixcc(a)		S_checkposixcc(aTHX_ a)
 #endif
 #endif
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_DECL_PROT)
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regmatch(a)		S_regmatch(aTHX_ a)
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regrepeat(a,b)		S_regrepeat(aTHX_ a,b)
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regrepeat_hard(a,b,c)	S_regrepeat_hard(aTHX_ a,b,c)
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regtry(a,b)		S_regtry(aTHX_ a,b)
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define reginclass(a,b,c,d)	S_reginclass(aTHX_ a,b,c,d)
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regcppush(a)		S_regcppush(aTHX_ a)
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regcppop()		S_regcppop(aTHX)
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regcp_set_to(a)		S_regcp_set_to(aTHX_ a)
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define cache_re(a)		S_cache_re(aTHX_ a)
 #endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define reghop(a,b)		S_reghop(aTHX_ a,b)
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define reghop3(a,b,c)		S_reghop3(aTHX_ a,b,c)
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define reghopmaybe(a,b)	S_reghopmaybe(aTHX_ a,b)
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define reghopmaybe3(a,b,c)	S_reghopmaybe3(aTHX_ a,b,c)
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define find_byclass(a,b,c,d,e,f)	S_find_byclass(aTHX_ a,b,c,d,e,f)
-#ifdef PERL_CORE
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define to_utf8_substr(a)	S_to_utf8_substr(aTHX_ a)
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define to_byte_substr(a)	S_to_byte_substr(aTHX_ a)
 #endif
 #endif
