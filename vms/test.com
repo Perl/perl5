@@ -112,6 +112,7 @@ $   Deck/Dollar=$$END-OF-TEST$$
 # of Unixisms in the tests.  (The Perl operators being tested may work fine,
 # but the tests may use other operators which don't.)
 use Config;
+use File::Spec;
 
 @compexcl=('cpp.t');
 @ioexcl=('argv.t','dup.t','fs.t','pipe.t');
@@ -143,8 +144,9 @@ if (lc($ARGV[0]) eq '-v') {
 chdir 't' if -f 't/TEST';
 
 if ($ARGV[0] eq '') {
-    foreach (<[.*]*.t>) {
-      s/.*[\[.]t./[./;
+    foreach (<[-.ext...]*.t>, <[-.lib...]*.t>, <[.*]*.t>) {
+      $_ = File::Spec->abs2rel($_);
+      s/\[([a-z]+)/[.$1/;      # hmm, abs2rel doesn't do subdirs of the cwd
       ($fname = $_) =~ s/.*\]//;
       if ($skip{"\L$fname"}) { push(@skipped,$_); }
       else { push(@ARGV,$_); }
@@ -166,7 +168,7 @@ while ($test = shift) {
     }
     $te = $test;
     chop($te);
-    $te .= '.' x (24 - length($te));
+    $te .= '.' x (40 - length($te));
 	open(script,"$test") || die "Can't run $test.\n";
 	$_ = <script>;
 	close(script);
