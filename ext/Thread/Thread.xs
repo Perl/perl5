@@ -86,9 +86,14 @@ threadstart(void *arg)
     I32 oldscope = PL_scopestack_ix;
     I32 retval;
     SV *sv;
-    AV *av = newAV();
+    AV *av;
     int i, ret;
     dJMPENV;
+
+#if defined(MULTIPLICITY)
+    PERL_SET_INTERP(thr->interp);
+#endif
+
     DEBUG_S(PerlIO_printf(PerlIO_stderr(), "new thread %p waiting to start\n",
 			  thr));
 
@@ -114,6 +119,7 @@ threadstart(void *arg)
     DEBUG_S(PerlIO_printf(PerlIO_stderr(), "new thread %p starting at %s\n",
 			  thr, SvPEEK(TOPs)));
 
+    av = newAV();
     sv = POPs;
     PUTBACK;
     ENTER;
