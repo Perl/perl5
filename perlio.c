@@ -208,30 +208,10 @@ PerlIO_pop(PerlIO *f)
   }
 }
 
-#undef PerlIO_close
-int
-PerlIO_close(PerlIO *f)
-{
- int code = (*PerlIOBase(f)->tab->Close)(f);
- while (*f)
-  {
-   PerlIO_pop(f);
-  }
- return code;
-}
-
-
 /*--------------------------------------------------------------------------------------*/
-/* Given the abstraction above the public API functions */
+/* XS Interface for perl code */
 
-#undef PerlIO_fileno
-int
-PerlIO_fileno(PerlIO *f)
-{
- return (*PerlIOBase(f)->tab->Fileno)(f);
-}
-
-XS(XS_io_import)
+XS(XS_perlio_import)
 {
  dXSARGS;
  GV *gv = CvGV(cv);
@@ -241,7 +221,7 @@ XS(XS_io_import)
  XSRETURN_EMPTY;
 }
 
-XS(XS_io_unimport)
+XS(XS_perlio_unimport)
 {
  dXSARGS;
  GV *gv = CvGV(cv);
@@ -271,7 +251,7 @@ perlio_mg_set(pTHX_ SV *sv, MAGIC *mg)
 {
  if (SvROK(sv))
   {
-   IO *io = GvIOn(SvRV(sv));
+   IO *io = GvIOn((GV *)SvRV(sv));
    PerlIO *ifp = IoIFP(io);
    PerlIO *ofp = IoOFP(io);
    AV *av = (AV *) mg->mg_obj;
@@ -285,7 +265,7 @@ perlio_mg_get(pTHX_ SV *sv, MAGIC *mg)
 {
  if (SvROK(sv))
   {
-   IO *io = GvIOn(SvRV(sv));
+   IO *io = GvIOn((GV *)SvRV(sv));
    PerlIO *ifp = IoIFP(io);
    PerlIO *ofp = IoOFP(io);
    AV *av = (AV *) mg->mg_obj;
@@ -353,7 +333,7 @@ void
 PerlIO_define_layer(PerlIO_funcs *tab)
 {
  dTHX;
- HV *stash = gv_stashpv("io::Layer", TRUE);
+ HV *stash = gv_stashpv("perlio::Layer", TRUE);
  SV *sv = sv_bless(newRV_noinc(newSViv(PTR2IV(tab))),stash);
  hv_store(PerlIO_layer_hv,tab->name,strlen(tab->name),sv,0);
 }
@@ -369,11 +349,13 @@ PerlIO_default_layer(I32 n)
  if (!PerlIO_layer_hv)
   {
    char *s  = PerlEnv_getenv("PERLIO");
-   newXS("io::import",XS_io_import,__FILE__);
-   newXS("io::unimport",XS_io_unimport,__FILE__);
+   newXS("perlio::import",XS_perlio_import,__FILE__);
+   newXS("perlio::unimport",XS_perlio_unimport,__FILE__);
+#if 0
    newXS("io::MODIFY_SCALAR_ATTRIBUTES",XS_io_MODIFY_SCALAR_ATTRIBUTES,__FILE__);
-   PerlIO_layer_hv = get_hv("io::layers",GV_ADD|GV_ADDMULTI);
-   PerlIO_layer_av = get_av("io::layers",GV_ADD|GV_ADDMULTI);
+#endif
+   PerlIO_layer_hv = get_hv("open::layers",GV_ADD|GV_ADDMULTI);
+   PerlIO_layer_av = get_av("open::layers",GV_ADD|GV_ADDMULTI);
    PerlIO_define_layer(&PerlIO_unix);
    PerlIO_define_layer(&PerlIO_perlio);
    PerlIO_define_layer(&PerlIO_stdio);
@@ -464,6 +446,30 @@ PerlIO_push(PerlIO *f,PerlIO_funcs *tab,const char *mode)
   }
  return f;
 }
+
+/*--------------------------------------------------------------------------------------*/
+/* Given the abstraction above the public API functions */
+
+#undef PerlIO_close
+int
+PerlIO_close(PerlIO *f)
+{
+ int code = (*PerlIOBase(f)->tab->Close)(f);
+ while (*f)
+  {
+   PerlIO_pop(f);
+  }
+ return code;
+}
+
+#undef PerlIO_fileno
+int
+PerlIO_fileno(PerlIO *f)
+{
+ return (*PerlIOBase(f)->tab->Fileno)(f);
+}
+
+
 
 #undef PerlIO_fdopen
 PerlIO *
