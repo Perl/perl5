@@ -4329,12 +4329,13 @@ S_reginclass(pTHX_ register regnode *n, register U8* p, STRLEN* lenp, register b
     char flags = ANYOF_FLAGS(n);
     bool match = FALSE;
     UV c = *p;
-    STRLEN len = 0;
+    STRLEN len = 1;
     STRLEN plen;
 
-    if (do_utf8 && !UTF8_IS_INVARIANT(c))
-	 c = utf8n_to_uvchr(p, UTF8_MAXLEN, &len,
-			    ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
+    c = (do_utf8 && !UTF8_IS_INVARIANT(c)) ?
+	 utf8n_to_uvchr(p, UTF8_MAXLEN, &len,
+			ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY) :
+         NATIVE_TO_UTF(c);
 
     plen = lenp ? *lenp : UNISKIP(NATIVE_TO_UNI(c));
     if (do_utf8 || (flags & ANYOF_UNICODE)) {
