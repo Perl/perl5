@@ -33,7 +33,7 @@ sub import {
     @_ > 2 && ref $_[2] or do {
 	require Exporter;
 	goto &Exporter::import;
-    }
+    };
     my (undef,$home_stash,$svref,@attrs) = @_;
 
     my $svtype = uc reftype($svref);
