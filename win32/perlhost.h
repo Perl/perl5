@@ -1746,7 +1746,13 @@ PerlProcFork(struct IPerlProc* piPerl)
 #ifdef USE_ITHREADS
     DWORD id;
     HANDLE handle;
-    CPerlHost *h = new CPerlHost(*(CPerlHost*)w32_internal_host);
+    CPerlHost *h;
+
+    if (w32_num_pseudo_children >= MAXIMUM_WAIT_OBJECTS) {
+	errno = EAGAIN;
+	return -1;
+    }
+    h = new CPerlHost(*(CPerlHost*)w32_internal_host);
     PerlInterpreter *new_perl = perl_clone_using((PerlInterpreter*)aTHXo, 1,
 						 h->m_pHostperlMem,
 						 h->m_pHostperlMemShared,
