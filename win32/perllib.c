@@ -33,6 +33,17 @@ xs_init(pTHX)
 
 #include "perlhost.h"
 
+void
+win32_checkTLS(PerlInterpreter *host_perl)
+{
+    dTHX;
+    if (host_perl != my_perl) {
+	int *nowhere = NULL;
+        *nowhere = 0; 
+	abort();
+    }
+}
+
 EXTERN_C void
 perl_get_host_info(struct IPerlMemInfo* perlMemInfo,
 		   struct IPerlMemInfo* perlMemSharedInfo,
@@ -105,6 +116,7 @@ perl_alloc_override(struct IPerlMem** ppMem, struct IPerlMem** ppMemShared,
 				   pHost->m_pHostperlProc);
 	if (my_perl) {
 	    w32_internal_host = pHost;
+	    pHost->host_perl  = my_perl;
 	}
     }
     return my_perl;
@@ -127,6 +139,7 @@ perl_alloc(void)
 				   pHost->m_pHostperlProc);
 	if (my_perl) {
 	    w32_internal_host = pHost;
+            pHost->host_perl  = my_perl;
 	}
     }
     return my_perl;
@@ -287,6 +300,7 @@ perl_clone_host(PerlInterpreter* proto_perl, UV flags) {
                         h->m_pHostperlProc
     );
     proto_perl->Isys_intern.internal_host = h;
+    h->host_perl  = proto_perl;
     return proto_perl;
 	
 }

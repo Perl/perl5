@@ -21,7 +21,8 @@
 #ifndef ___VMEM_H_INC___
 #define ___VMEM_H_INC___
 
-// #define _USE_MSVCRT_MEM_ALLOC
+#define _USE_MSVCRT_MEM_ALLOC
+#define _USE_LINKED_LIST
 
 // #define _USE_BUDDY_BLOCKS
 
@@ -70,10 +71,12 @@ typedef void (*LPFREE)(void *block);
 typedef void* (*LPMALLOC)(size_t size);
 typedef void* (*LPREALLOC)(void *block, size_t size);
 #ifdef _USE_LINKED_LIST
+class VMem;
 typedef struct _MemoryBlockHeader* PMEMORY_BLOCK_HEADER;
 typedef struct _MemoryBlockHeader {
     PMEMORY_BLOCK_HEADER    pNext;
     PMEMORY_BLOCK_HEADER    pPrev;
+    VMem *owner;
 } MEMORY_BLOCK_HEADER, *PMEMORY_BLOCK_HEADER;
 #endif
 
@@ -104,6 +107,7 @@ protected:
 	m_Dummy.pNext = ptr;
 	ptr->pPrev = &m_Dummy;
 	ptr->pNext = next;
+        ptr->owner = this;
 	next->pPrev = ptr;
     }
     void UnlinkBlock(PMEMORY_BLOCK_HEADER ptr)
@@ -131,6 +135,7 @@ VMem::VMem()
     InitializeCriticalSection(&m_cs);
 #ifdef _USE_LINKED_LIST
     m_Dummy.pNext = m_Dummy.pPrev =  &m_Dummy;
+    m_Dummy.owner = this;
 #endif
     m_hLib = LoadLibrary("msvcrt.dll");
     if (m_hLib) {
@@ -155,8 +160,10 @@ VMem::~VMem(void)
 void* VMem::Malloc(size_t size)
 {
 #ifdef _USE_LINKED_LIST
+    GetLock();
     PMEMORY_BLOCK_HEADER ptr = (PMEMORY_BLOCK_HEADER)m_pmalloc(size+sizeof(MEMORY_BLOCK_HEADER));
     LinkBlock(ptr);
+    FreeLock();
     return (ptr+1);
 #else
     return m_pmalloc(size);
@@ -174,10 +181,12 @@ void* VMem::Realloc(void* pMem, size_t size)
 	return NULL;
     }
 
+    GetLock();
     PMEMORY_BLOCK_HEADER ptr = (PMEMORY_BLOCK_HEADER)(((char*)pMem)-sizeof(MEMORY_BLOCK_HEADER));
     UnlinkBlock(ptr);
     ptr = (PMEMORY_BLOCK_HEADER)m_prealloc(ptr, size+sizeof(MEMORY_BLOCK_HEADER));
     LinkBlock(ptr);
+    FreeLock();
 
     return (ptr+1);
 #else
@@ -190,8 +199,22 @@ void VMem::Free(void* pMem)
 #ifdef _USE_LINKED_LIST
     if (pMem) {
 	PMEMORY_BLOCK_HEADER ptr = (PMEMORY_BLOCK_HEADER)(((char*)pMem)-sizeof(MEMORY_BLOCK_HEADER));
+        if (ptr->owner != this) {
+#if 0
+	    int *nowhere = NULL;
+            *nowhere = 0;
+#else
+	    if (ptr->owner) {
+	        ptr->owner->Free(pMem);	
+	    }
+	    return;
+#endif
+        }
+	GetLock();
 	UnlinkBlock(ptr);
+	ptr->owner = NULL;
 	m_pfree(ptr);
+	FreeLock();
     }
 #else
     m_pfree(pMem);

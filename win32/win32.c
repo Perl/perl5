@@ -1722,7 +1722,7 @@ win32_async_check(pTHX)
     /* Passing PeekMessage -1 as HWND (2nd arg) only get PostThreadMessage() messages
      * and ignores window messages - should co-exist better with windows apps e.g. Tk
      */ 
-    while (PeekMessage(&msg, (HWND)-1, 0, 0, PM_REMOVE)) {
+    while (PeekMessage(&msg, (HWND)-1, 0, 0, PM_REMOVE|PM_NOYIELD)) {
 	switch(msg.message) {
 
 #if 0
@@ -1742,8 +1742,10 @@ win32_async_check(pTHX)
 	
 	case WM_TIMER: {
 	    /* alarm() is a one-shot but SetTimer() repeats so kill it */
-	    KillTimer(NULL,w32_timerid);
-	    w32_timerid=0;  
+	    if (w32_timerid) {
+	    	KillTimer(NULL,w32_timerid);
+	    	w32_timerid=0;  
+            }
 	    /* Now fake a call to signal handler */
 	    CALL_FPTR(PL_sighandlerp)(14);
 	    break;
@@ -4558,6 +4560,7 @@ Perl_sys_intern_init(pTHX)
     w32_num_pseudo_children	= 0;
 #  endif
     w32_init_socktype		= 0;
+    w32_timerid                 = 0;
     if (my_perl == PL_curinterp) {
         /* Force C runtime signal stuff to set its console handler */
 	signal(SIGINT,&win32_csighandler);
@@ -4574,6 +4577,10 @@ Perl_sys_intern_clear(pTHX)
     Safefree(w32_perlshell_vec);
     /* NOTE: w32_fdpid is freed by sv_clean_all() */
     Safefree(w32_children);
+    if (w32_timerid) {
+    	KillTimer(NULL,w32_timerid);
+    	w32_timerid=0;  
+    }
     if (my_perl == PL_curinterp) {
 	SetConsoleCtrlHandler(win32_ctrlhandler,FALSE);
     }
@@ -4595,6 +4602,7 @@ Perl_sys_intern_dup(pTHX_ struct interp_intern *src, struct interp_intern *dst)
     dst->pseudo_id		= 0;
     Newz(1313, dst->pseudo_children, 1, child_tab);
     dst->thr_intern.Winit_socktype = 0;
+    dst->timerid                 = 0;
 }
 #  endif /* USE_ITHREADS */
 #endif /* HAVE_INTERP_INTERN */
