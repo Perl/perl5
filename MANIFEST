@@ -66,8 +66,8 @@ cygwin32/ld2		Cygwin32 port
 cygwin32/perlgcc	Cygwin32 port
 cygwin32/perlld		Cygwin32 port
 deb.c			Debugging routines
-djgpp/config.over       DOS/DJGPP port
-djgpp/configure.bat     DOS/DJGPP port
+djgpp/config.over	DOS/DJGPP port
+djgpp/configure.bat	DOS/DJGPP port
 djgpp/djgpp.c		DOS/DJGPP port
 djgpp/djgppsed.sh	DOS/DJGPP port
 djgpp/fixpmain		DOS/DJGPP port
@@ -186,6 +186,7 @@ ext/DB_File/DB_File.xs		Berkeley DB extension external subroutines
 ext/DB_File/DB_File_BS		Berkeley DB extension mkbootstrap fodder
 ext/DB_File/Makefile.PL		Berkeley DB extension makefile writer
 ext/DB_File/dbinfo		Berkeley DB database version checker
+ext/DB_File/hints/dynixptx.pl	Hints for DB_File for named architecture
 ext/DB_File/typemap		Berkeley DB extension interface types
 ext/Data/Dumper/Changes		Data pretty printer, changelog
 ext/Data/Dumper/Dumper.pm	Data pretty printer, module
@@ -263,6 +264,7 @@ ext/POSIX/POSIX.pm		POSIX extension Perl module
 ext/POSIX/POSIX.pod		POSIX extension documentation
 ext/POSIX/POSIX.xs		POSIX extension external subroutines
 ext/POSIX/hints/bsdos.pl	Hint for POSIX for named architecture
+ext/POSIX/hints/dynixptx.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/freebsd.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/linux.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/netbsd.pl	Hint for POSIX for named architecture
@@ -430,6 +432,7 @@ hints/unicosmk.sh	Hints for named architecture
 hints/unisysdynix.sh	Hints for named architecture
 hints/utekv.sh		Hints for named architecture
 hints/uts.sh		Hints for named architecture
+hints/uwin.sh		Hints for named architecture
 hv.c			Hash value code
 hv.h			Hash value header
 installhtml		Perl script to install html files for pods
@@ -456,7 +459,7 @@ lib/CPAN/Nox.pm		Runs CPAN while avoiding compiled extensions
 lib/Carp.pm		Error message base class
 lib/Class/Struct.pm	Declare struct-like datatypes as Perl classes
 lib/Cwd.pm		Various cwd routines (getcwd, fastcwd, chdir)
-lib/Devel/SelfStubber.pm Generate stubs for SelfLoader.pm
+lib/Devel/SelfStubber.pm	Generate stubs for SelfLoader.pm
 lib/DirHandle.pm	like FileHandle only for directories
 lib/English.pm		Readable aliases for short variables
 lib/Env.pm		Map environment into ordinary variables
@@ -553,7 +556,7 @@ lib/bigint.pl		An arbitrary precision integer arithmetic package
 lib/bigrat.pl		An arbitrary precision rational arithmetic package
 lib/blib.pm		For "use blib"
 lib/cacheout.pl		Manages output filehandles when you need too many
-lib/chat2.pl            Obsolete ipc library (use Comm.pm etc instead)
+lib/chat2.pl		Obsolete ipc library (use Comm.pm etc instead)
 lib/complete.pl		A command completion subroutine
 lib/constant.pm		For "use constant"
 lib/ctime.pl		A ctime workalike
@@ -829,7 +832,7 @@ t/lib/dumper.t		See if Data::Dumper works
 t/lib/english.t		See if English works
 t/lib/env.t		See if Env works
 t/lib/errno.t		See if Errno works
-t/lib/fields.t          See if base/fields works
+t/lib/fields.t		See if base/fields works
 t/lib/filecache.t	See if FileCache works
 t/lib/filecopy.t	See if File::Copy works
 t/lib/filefind.t	See if File::Find works
@@ -903,6 +906,7 @@ t/op/fork.t		See if fork works
 t/op/glob.t		See if <*> works
 t/op/goto.t		See if goto works
 t/op/goto_xs.t		See if "goto &sub" works on XSUBs
+t/op/grent.t		See if getgr* works
 t/op/groups.t		See if $( works
 t/op/gv.t		See if typeglobs work
 t/op/hashwarn.t		See if warnings for bad hash assignments work
@@ -924,6 +928,7 @@ t/op/pack.t		See if pack and unpack work
 t/op/pat.t		See if esoteric patterns work
 t/op/pos.t		See if pos works
 t/op/push.t		See if push and pop work
+t/op/pwent.t		See if getpw* works
 t/op/quotemeta.t	See if quotemeta works
 t/op/rand.t		See if rand works
 t/op/range.t		See if .. works
@@ -938,7 +943,7 @@ t/op/repeat.t		See if x operator works
 t/op/runlevel.t		See if die() works from perl_call_*()
 t/op/sleep.t		See if sleep works
 t/op/sort.t		See if sort works
-t/op/splice.t           See if splice works
+t/op/splice.t		See if splice works
 t/op/split.t		See if split works
 t/op/sprintf.t		See if sprintf works
 t/op/stat.t		See if stat works
@@ -1014,12 +1019,20 @@ vms/perly_c.vms		perly.c with fixed declarations for global syms
 vms/perly_h.vms		perly.h with fixed declarations for global syms
 vms/sockadapt.c		glue for SockshShr socket support
 vms/sockadapt.h		glue for SockshShr socket support
-vms/subconfigure.com    performs compiler checks and writes config.sh, config.h, and descrip.mms
+vms/subconfigure.com	performs compiler checks and writes config.sh, config.h, and descrip.mms
 vms/test.com		DCL driver for regression tests
 vms/vms.c		VMS-specific C code for Perl core
 vms/vms_yfix.pl		convert Unix perly.[ch] to VMS perly_[ch].vms
 vms/vmsish.h		VMS-specific C header for Perl core
 vms/writemain.pl	Generate perlmain.c from miniperlmain.c+extensions
+vos/build.cm		VOS command macro to build Perl   
+vos/Changes		Changes made to port Perl to the VOS operating system
+vos/compile_perl.cm	VOS commnad macro to build multiple version of Perl
+vos/config.h		config.h for VOS
+vos/perl.bind		VOS bind control file
+vos/test_vos_dummies.c	Test program for "vos_dummies.c"
+vos/vos_dummies.c	Wrappers to soak up undefined functions
+vos/vosish.h		VOS-specific header file                
 win32/GenCAPI.pl	Win32 port for C API with PERL_OBJECT
 win32/Makefile		Win32 makefile for NMAKE (Visual C++ build)
 win32/TEST		Win32 port

@@ -20,7 +20,7 @@ current addresses (as of July 1998):
     Abigail             <abigail@fnx.com>
     Kenneth Albanowski  <kjahds@kjahds.com>
     Russ Allbery        <rra@stanford.edu>
-    Graham Barr         <gbarr@ti.com>
+    Graham Barr         <gbarr@pobox.com>
     Spider Boardman     <spider@orb.nashua.nh.us>
     Tom Christiansen    <tchrist@perl.com>
     Hallvard B Furuseth <h.b.furuseth@usit.uio.no>
@@ -72,6 +72,1116 @@ indicator:
     	    +>	    branched (from elsewhere)
     	    !>	    merged changes (from elsewhere)
 
+
+----------------
+Version 5.005_03        Third maintenance release of 5.005
+----------------
+
+____________________________________________________________________________
+[  2411] By: gbarr                                 on 1998/11/30  01:31:22
+        Log: integrated changes#2323,2353,2369
+             
+             From: maeda@src.ricoh.co.jp
+             Date: Tue, 24 Nov 1998 10:37:45 +0900
+             Message-Id: <199811240137.KAA05867@luna.src.ricoh.co.jp>
+             Subject: format "..." bug
+             
+             Locale collation, ctype, and numeric, were initialized wrong
+             (if LC_ALL or LANG were unset, so were the collation/ctype/numeric),
+             as reported by
+             
+             From: Ilya.Sandler@etak.com (Ilya Sandler)
+             Subject: a bug in locale handling: LC_COLLATE ignored sometimes
+             Date: 25 Nov 1998 04:53:52 +0200
+             Message-ID: <MLIST_199811250226.SAA12590@axi001.etak.sw>
+             
+             allow final period in a file (not followed by a newline) to
+             terminate format spec
+     Branch: maint-5.005/perl
+           ! pp_ctl.c toke.c util.c
+          !> t/op/write.t
+____________________________________________________________________________
+[  2408] By: gbarr                                 on 1998/11/30  01:29:19
+        Log: integrated ext/B/... changes from mainline
+     Branch: maint-5.005/perl
+	  !> ext/B/B.pm ext/B/B.xs ext/B/B/Assembler.pm ext/B/B/C.pm
+          !> ext/B/B/Disassembler.pm
+____________________________________________________________________________
+[  2404] By: gbarr                                 on 1998/11/30  00:26:36
+        Log: integrate some of change#2318 from mainline
+     Branch: maint-5.005/perl
+          +> t/op/grent.t t/op/pwent.t
+	  !> ext/DB_File/Changes ext/DB_File/DB_File.pm
+	  !> ext/DB_File/DB_File.xs ext/POSIX/hints/dynixptx.pl
+	  !> ext/Socket/Socket.pm ext/Socket/Socket.xs lib/Benchmark.pm
+          !> pod/perldata.pod t/op/sort.t
+____________________________________________________________________________
+[  2398] By: gbarr                                 on 1998/11/29  22:11:16
+        Log: integrate changes#2254,2259,2335,2345,2348,2361,2368,2380 from mainline
+             
+             win32_recvfrom() compatibility fix
+             
+             From: "Kurt D. Starsinic" <kstar@chapin.edu>
+             Subject: Re: [PATCH] Re: pod2man bug in date generated line
+             To: Albert Dvornik <bert@genscan.com>, "Larry W. Virden" <lvirden@cas.org>
+             Cc: perlbug@perl.com
+             Date: 20 Nov 1998 21:30:17 +0200
+             Message-ID: <MLIST_19981120131523.A464@O2.chapin.edu>
+             
+             make $1 et al readonly under threads; make C<undef $1> fail like
+             C<$1 = undef> does
+             
+             fix typo in pp_defined() causing C<defined %tied> to fail
+             
+             more conservative version of changes#2345,2346,2347; those break
+             C<defined(@{"foo::ISA"})> which seems to be extensively used in
+             the libs :-(
+             
+             fix uninitialized warnings
+             From: Brian Callaghan <callagh@itginc.com>
+             Date: Thu, 19 Nov 1998 17:49:10 -0800
+             Message-Id: <3654CA96.B64FCAEB@itginc.com>
+             Subject: Complete.pm patch (version 1.1)
+             
+             Liblist tweak suggested by Swen Thuemmler <Swen.Thuemmler@paderlinx.de>;
+             add C<$Config{installarchlib}/CORE> to the default locations searched
+             on win32
+             
+             prefer IO::Handle for IO if FileHandle:: is empty (as suggested by
+             Tim Bunce)
+     Branch: maint-5.005/perl
+           ! gv.c op.c pp.c
+	  !> lib/ExtUtils/Liblist.pm lib/Term/Complete.pm pod/perlfaq4.pod
+          !> pod/pod2man.PL t/op/undef.t win32/win32sck.c
+____________________________________________________________________________
+[  2315] By: gbarr                                 on 1998/11/27  05:16:50
+        Log: integrate change#2246 from mainline, while still allowing
+             C<sort $globref @foo>
+             
+             allow C<sort $coderef @foo>
+     Branch: maint-5.005/perl
+           ! op.c sv.c
+          !> t/op/sort.t
+____________________________________________________________________________
+[  2314] By: gbarr                                 on 1998/11/27  04:03:58
+        Log: integrate change#2159 from mainline
+             
+             Data::Dumper update
+     Branch: maint-5.005/perl
+	  !> ext/Data/Dumper/Changes ext/Data/Dumper/Dumper.pm
+          !> ext/Data/Dumper/Dumper.xs ext/Data/Dumper/Todo t/lib/dumper.t
+____________________________________________________________________________
+[  2313] By: gbarr                                 on 1998/11/27  03:04:21
+        Log: Fix typo in change#2312
+     Branch: maint-5.005/perl
+           ! ext/Thread/Thread.xs
+____________________________________________________________________________
+[  2312] By: gbarr                                 on 1998/11/27  03:03:03
+        Log: integrate change#1837,1967,1986,2060,2068,2146,2214,2224,2300,2301 from mainline
+             
+             (via private mail)
+             From: Charles Bailey <BAILEY@newman.upenn.edu>
+             Date: Sat, 05 Sep 1998 01:23:58 -0400 (EDT)
+             Message-id: <01J1FH7R43NS002F14@cor.newman.upenn.edu>
+             Subject: [Patch 5.005_02] Miscellaneous VMS cleanup
+             
+             correct bugs exposed in MM_Unix.pm by commenting out Selfloader
+             (MAN3PODS cannot be set to ' '; stray stricture violation)
+             
+             qualify names of builtins
+             
+             handle '::' in section names properly
+             From: Graham Barr <gbarr@pobox.com>
+             Date: Sat, 17 Oct 1998 12:57:54 -0500
+             Message-ID: <19981017125754.C510@pobox.com>
+             Subject: Re: pod2html
+             
+             From: Zachary Miller <zcmiller@simon.er.usgs.gov>
+             Date: Tue, 20 Oct 1998 20:52:20 -0500
+             Message-Id: <199810210152.UAA07792@simon.er.usgs.gov>
+             Subject: Exporter.pm's export_to_level() argument handling buggy
+             
+             hand-apply whitespace-mutiliated patch
+             From: "vishal bhatia" <vishalb@hotmail.com>
+             Date: Wed, 28 Oct 1998 23:45:32 PST
+             Message-ID: <19981029074534.2334.qmail@hotmail.com>
+             Subject: [PATCH 5.005_52]Compiling modules,more bugfixes for B
+             
+             typo in newHVhv()
+             
+             avoid endless loops in Text::Wrap (from a suggestion by Lupe
+             Christoph <lupe@alanya.m.isar.de>)
+             
+             properly free temporaries created by threads
+             
+             fix PL_defoutgv leak under threads
+     Branch: maint-5.005/perl
+          !> (integrate 31 files)
+____________________________________________________________________________
+[  2311] By: gbarr                                 on 1998/11/27  01:31:36
+        Log: integrate change#2210 from mainline
+             
+             fix AvREALISH bogusness
+     Branch: maint-5.005/perl
+           ! av.c
+          !> t/op/array.t
+____________________________________________________________________________
+[  2310] By: gbarr                                 on 1998/11/27  00:20:21
+        Log: integrate changes#2235,2299,2300 from mainline
+             
+             catch a neophyte trap: open(<FH>), close(<FH>) etc.
+             
+             fix C<if (...) { package Foo; ... }> misoptimization that fails
+             to set the package for the block properly
+             
+             properly free temporaries created by threads
+     Branch: maint-5.005/perl
+           ! ext/Thread/Thread.xs op.c perl.h util.c
+          !> t/comp/package.t
+____________________________________________________________________________
+[  2309] By: gbarr                                 on 1998/11/27  00:16:36
+        Log: integrate change#2298 from mainline
+     Branch: maint-5.005/perl
+          !> universal.c
+____________________________________________________________________________
+[  2308] By: gbarr                                 on 1998/11/27  00:11:44
+        Log: Updates for MPE/iX DynaLoader and installperl, via private mail
+             forwarded by Jarkko Hietaniemi from Mark Bixby
+     Branch: maint-5.005/perl
+           ! ext/DynaLoader/dl_mpeix.xs installperl
+____________________________________________________________________________
+[  2307] By: gbarr                                 on 1998/11/27  00:07:27
+        Log: Remove docs for feature not in _0*
+     Branch: maint-5.005/perl
+           ! pod/perlfunc.pod
+____________________________________________________________________________
+[  2306] By: gbarr                                 on 1998/11/26  23:44:47
+        Log: Allow PL_FILES to have multiple targets from one source by allowing
+             an array ref as the value in the hash
+     Branch: maint-5.005/perl
+	   ! lib/ExtUtils/MM_Unix.pm lib/ExtUtils/MM_VMS.pm
+           ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[  2305] By: gbarr                                 on 1998/11/26  23:38:06
+        Log: fix unsigned variables to use SvUV and sv_setuv
+     Branch: maint-5.005/perl
+           ! lib/ExtUtils/typemap
+____________________________________________________________________________
+[  2304] By: gbarr                                 on 1998/11/26  23:36:17
+        Log: Fix embeded \n in ABSTRACT and <> in AUTHOR
+     Branch: maint-5.005/perl
+           ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[  2302] By: gbarr                                 on 1998/11/26  15:27:03
+        Log: integrate changes#2177,2189,2228,2229 from cfgperl
+             
+             0**0 = 1, from
+             
+             From: d-lewart@uiuc.edu (Daniel S. Lewart)
+             Subject: Math::Complex 0**0 patches
+             Date: Sun, 1 Nov 1998 19:21:48 -0600 (CST)
+             Message-Id: <199811020121.TAA28310@staff2.cso.uiuc.edu>
+             
+             sysio.t failure: fix undefined order of evaluation, from
+             
+             From: Spider Boardman <spider@web.zk3.dec.com>
+             Subject: Not OK: perl 5.00553 on alpha-thread 5.0 [PATCH]
+             Date: 4 Nov 1998 01:22:30 +0200
+             Message-ID: <MLIST_199811032227.RAA143892@web.zk3.dec.com>
+             
+             From: "Martin J. Bligh" <mbligh@sequent.com>
+             Message-ID: <187803647.910720870@w-186d219.rhe.sequent.com>
+             Subject: Re: Making Perl work on DYNIX/ptx
+             Date: Tue, 10 Nov 1998 18:01:10 -0800
+             
+             From: "Martin J. Bligh" <mbligh@sequent.com>
+             Subject: Re: Making Perl work on DYNIX/ptx
+             Date: Tue, 10 Nov 1998 16:24:26 -0800
+             Message-ID: <181999655.910715066@w-186d219.rhe.sequent.com>
+     Branch: maint-5.005/perl
+          +> ext/DB_File/hints/dynixptx.pl ext/POSIX/hints/dynixptx.pl
+           ! pp_sys.c
+          !> hints/dynixptx.sh lib/Math/Complex.pm t/lib/complex.t
+____________________________________________________________________________
+[  2297] By: gbarr                                 on 1998/11/24  02:32:38
+        Log: integrate change#2266 from cfgperl
+             From: John Tobey <jtobey@channel1.com>
+             Subject: [PATCH] perlfaq typos
+             To: perl5-porters@perl.com
+             Date: 22 Nov 1998 04:25:15 +0200
+             Message-ID: <MLIST_m0zhPeF-000FOgC@feynman.localnet>
+     Branch: maint-5.005/perl
+	  !> pod/perlfaq3.pod pod/perlfaq4.pod pod/perlfaq5.pod
+          !> pod/perlfaq7.pod pod/perlfaq8.pod
+____________________________________________________________________________
+[  2296] By: gbarr                                 on 1998/11/24  01:39:18
+        Log: integrated changes#2011,2092,2106,2108,2143 from cfgperl
+             
+             More robust yacc/bison failure output handling.
+             
+             More robustness.
+             
+             Bison says 'parse error', not 'parser error'.
+             
+             The "parse error" must be converted to "syntax error",
+             just matching it aint' enough.
+             
+             There can be multiple yacc/bison errors.
+     Branch: maint-5.005/perl
+	  !> t/comp/require.t t/op/misc.t t/pragma/subs.t
+          !> t/pragma/warning.t
+____________________________________________________________________________
+[  2295] By: gbarr                                 on 1998/11/24  00:49:28
+        Log: integrate change#1823 from mainline
+             From: Joe Buehler <jhpb@hekimian.com>
+             Date: 29 Aug 1998 17:13:28 -0400
+             Message-ID: <yd37lzro5jb.fsf@pandora.hekimian.com>
+             Subject: patches for perl 5.005_51 under U/WIN
+     Branch: maint-5.005/perl
+          +> hints/uwin.sh
+           ! Configure
+          !> installman makedepend.SH t/lib/posix.t
+____________________________________________________________________________
+[  2258] By: gbarr                                 on 1998/11/21  20:48:02
+        Log: Another Configure patch from Jarkko
+     Branch: maint-5.005/perl
+           ! Configure
+____________________________________________________________________________
+[  2257] By: gbarr                                 on 1998/11/21  17:23:13
+        Log: Big Configure patch from Jarkko Hietaniemi <jhi@iki.fi> via
+             private mail
+     Branch: maint-5.005/perl
+	   ! Configure Makefile.SH config_h.SH hints/dec_osf.sh
+	   ! hints/freebsd.sh hints/irix_6.sh hints/linux.sh
+           ! hints/next_3.sh hints/os390.sh pp_sys.c
+____________________________________________________________________________
+[  2239] By: gbarr                                 on 1998/11/14  03:59:58
+        Log: more doc changes from mainline
+     Branch: maint-5.005/perl
+           ! pod/perldiag.pod pod/perlfunc.pod pod/perlre.pod
+          !> INSTALL README.vms vms/ext/Stdio/Stdio.pm
+____________________________________________________________________________
+[  2238] By: gbarr                                 on 1998/11/14  02:51:51
+        Log: integrate doc changes from mainline, including
+             changes#1796,1811,1830,1831,1844,1846,1876,1905,2149,2152
+     Branch: maint-5.005/perl
+	  !> README.os390 pod/perl.pod pod/perldelta.pod pod/perlfaq1.pod
+	  !> pod/perlform.pod pod/perlfunc.pod pod/perlguts.pod
+	  !> pod/perlipc.pod pod/perllocale.pod pod/perlport.pod
+	  !> pod/perlref.pod pod/perlrun.pod pod/perlvar.pod pod/perlxs.pod
+          !> pod/pod2man.PL
+____________________________________________________________________________
+[  2237] By: gbarr                                 on 1998/11/14  02:51:49
+        Log: integrate change#1847 from mainline
+             From: Roderick Schertler <roderick@argon.org>
+             Date: Wed, 09 Sep 1998 23:52:48 -0400
+             Message-ID: <20567.905399568@eeyore.ibcinc.com>
+             Subject: seed srand from /dev/urandom when possible
+     Branch: maint-5.005/perl
+           ! pp.c
+____________________________________________________________________________
+[  2232] By: gbarr                                 on 1998/11/13  03:12:37
+        Log: integrate change#2215 from mainline
+             set close-on-exec bit on pipe() FDs
+     Branch: maint-5.005/perl
+           ! pod/perlfunc.pod pod/perlvar.pod pp_sys.c
+____________________________________________________________________________
+[  2231] By: gbarr                                 on 1998/11/13  02:16:03
+        Log: integrate change#2188 from mainline
+             fix return value of win32_pclose()
+     Branch: maint-5.005/perl
+          !> win32/win32.c
+____________________________________________________________________________
+[  2218] By: gbarr                                 on 1998/11/08  16:48:44
+        Log: From: Graham Barr <gbarr@ti.com>
+             Date: Mon, 2 Nov 1998 07:38:52 -0600
+             Message-ID: <19981102073852.A12751@asic.sc.ti.com>
+             Subject: [PATCH 5.005_*] Re: IPC::Msg 1.03
+     Branch: maint-5.005/perl
+           ! ext/IPC/SysV/Msg.pm
+____________________________________________________________________________
+[  2217] By: gbarr                                 on 1998/11/08  05:22:39
+        Log: fix changes in 2213 not to break binary compat
+     Branch: maint-5.005/perl
+           ! pp_ctl.c proto.h
+____________________________________________________________________________
+[  2216] By: gbarr                                 on 1998/11/08  04:21:01
+        Log: integrate change#2192 from mainline
+             indeterminate order-of-evaluation fixes
+     Branch: maint-5.005/perl
+           ! mg.c
+____________________________________________________________________________
+[  2213] By: gbarr                                 on 1998/11/08  00:39:44
+        Log: integrate change#2051 from mainline
+             properly restore PL_rsfp_filters after require
+     Branch: maint-5.005/perl
+	   ! embed.h global.sym objXSUB.h objpp.h pp_ctl.c proto.h scope.c
+           ! scope.h
+____________________________________________________________________________
+[  2212] By: gbarr                                 on 1998/11/07  23:13:29
+        Log: integrate changes#1914,1925,1926,1945,1956,1987 from mainline
+             
+             normalize tm struct passed to strftime() with mktime()
+             From: Spider Boardman <spider@orb.nashua.nh.us>
+             Date: Wed, 30 Sep 1998 15:12:09 -0400
+             Message-Id: <199809301912.PAA26119@Orb.Nashua.NH.US>
+             Subject: [PATCH 5.005_52] Re: POSIX::strftime returns incorrect date 
+             
+             disable USE_THREADS when PERL_OBJECT is enabled
+             
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Sun, 04 Oct 1998 14:48:11 -0400
+             Message-ID: <19981004184811.16048.qmail@plover.com>
+             Subject: PATCH: perldoc -f does not locate -e, -r, -x, etc.
+             
+             defer "deep recursion" warnings until CXt_SUB context is properly
+             set up
+             
+             Mutexen should be initialized only once.
+             
+             perldoc pod update
+             From: Daniel Grisinger <dgris@perrin.dimensional.com>
+             Date: 06 Oct 1998 23:56:51 -0600
+             Message-ID: <m3g1d0kj8c.fsf@perrin.dimensional.com>
+             Subject: [PATCH _02 and _52] perldoc
+     Branch: maint-5.005/perl
+           ! gv.c op.c pp_hot.c
+	  !> ext/POSIX/POSIX.pod ext/POSIX/POSIX.xs utils/perldoc.PL
+          !> win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  2207] By: gbarr                                 on 1998/11/06  01:36:17
+        Log: integrate changes#1912,1948 from mainline
+             change warning about glob process failure
+     Branch: maint-5.005/perl
+           ! pod/perldiag.pod pp_hot.c
+____________________________________________________________________________
+[  2200] By: gbarr                                 on 1998/11/05  04:26:26
+        Log: integrate changes#1840,1855,1860,1882,1884,1891,1900,1907 from mainline
+             pl2bat tweak from Tye McQueen <tye@metronet.com>
+             
+             reset errno after C<require> search (as suggested by Larry)
+             
+             upgrade to CPAN-1.40
+             
+             missing file in last submit (1881)
+             
+             temporarily disable perl malloc for a2p until we clean up
+             conflicting malloc() declarations everywhere
+             
+             Fixed apostrophe problem from Mark Knutsen.
+             
+             use SETERRNO() to reset errno (suggested by Charles Bailey)
+             
+             applied patches, but retained old behavior for win32 (where compilers
+             can't read from stdin at all)
+             From: Graham Barr <gbarr@ti.com>
+             Date: Mon, 28 Sep 1998 09:41:49 -0500
+             Message-ID: <19980928094149.B26576@asic.sc.ti.com>
+             Subject: Re: 5.005_51 Errno invokes cpprun incorrectly
+             --
+             Date: Tue, 29 Sep 1998 12:35:43 -0500
+             Message-ID: <19980929123543.Z26576@asic.sc.ti.com>
+             Subject: Re: 5.005_51 Errno invokes cpprun incorrectly
+             
+             and ext/Errno/Errno_pm.PL from change#2050
+     Branch: maint-5.005/perl
+           ! perl.h pp_ctl.c proto.h sv.h
+	  !> ext/Errno/Errno_pm.PL lib/CPAN.pm lib/CPAN/FirstTime.pm
+          !> win32/bin/pl2bat.pl x2p/Makefile.SH
+____________________________________________________________________________
+[  2199] By: gbarr                                 on 1998/11/05  03:35:00
+        Log: integrate changes#1817,1856,1869,1909 from mainline
+             updated usethreads hints for hpux 10.X
+             From: Matthew T Harden <mthard@mthard1.monsanto.com>
+             Date: Fri, 28 Aug 1998 14:10:42 GMT
+             Message-Id: <199808281410.AA11058@mthard1.monsanto.com>
+             Subject: Re: OK: perl 5.00502 on PA-RISC1.1-thread 10.20 (UNINSTALLED)
+             
+             update hints for OPENSTEP 4.2 on i386
+             From: Gerben Wierda <Gerben_Wierda@RnA.nl>
+             Date: Sun, 20 Sep 1998 01:03:18 +0200
+             Message-Id: <9809192303.AA29190@Spike>
+             Subject: Perl 5.005_02 compilation problems
+             
+             use STRICT_ALIGNMENT on IRIX to allow usemymalloc=y again
+             From:    Scott Henry <scotth@sgi.com>
+             Date:    13 Aug 1998 09:52:15 PDT
+             Message-Id: <yd8pve46czk.fsf@hoshi.engr.sgi.com>
+             Subject: [PATCH] Irix USE_LONG_LONG/malloc.c incompatibility (was...)
+             
+             update SCO hints for dynamic loading
+             From: Andy Dougherty <doughera@lafcol.lafayette.edu>
+             Date: Mon, 28 Sep 1998 16:50:38 -0400 (EDT)
+             Message-Id: <Pine.SUN.3.96.980928164648.8130E-100000@newton.phys>
+             Subject: [PATCH 5.004_04-MAINT_TRIAL_5 and 5.005_xx] Re: Perl on SCO_SV
+             --
+             Date: Tue, 29 Sep 1998 16:48:55 -0400 (EDT)
+             Message-Id: <Pine.SUN.3.96.980929164612.8634A-100000@newton.phys>
+             Subject: Re: [PATCH 5.004_04-MAINT_TRIAL_5 and 5.005_xx] Re: Perl on SCO_SV
+     Branch: maint-5.005/perl
+          !> hints/hpux.sh hints/irix_6.sh hints/next_4.sh hints/sco.sh
+____________________________________________________________________________
+[  2198] By: gbarr                                 on 1998/11/05  03:00:51
+        Log: integrate OS2 changes from mainline, change#1836,1930,1996,2063
+             and os2/os2,c from #2145
+             
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sat, 5 Sep 1998 00:14:51 -0400 (EDT)
+             Message-Id: <199809050414.AAA19801@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.005_*] OS/2 spawning typos
+             
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Message-Id: <199810050637.CAA07781@monk.mps.ohio-state.edu>
+             Date: Mon, 5 Oct 1998 02:37:43 -0400 (EDT)
+             Subject: [PATCH 5.005_52] Cumulative OS/2-related patch
+             
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 13 Oct 1998 04:46:00 -0400 (EDT)
+             Message-Id: <199810130846.EAA00769@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.005_52] Memory overrun in os2.c
+             
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sun, 18 Oct 1998 23:20:57 -0400 (EDT)
+             Message-Id: <199810190320.XAA28249@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.005_*] Improve sbrk() on OS/2               
+             
+             remaining PL_foo stragglers
+     Branch: maint-5.005/perl
+           ! mg.c perl_exp.SH util.c
+          !> hints/os2.sh os2/Changes os2/Makefile.SHs os2/os2.c
+____________________________________________________________________________
+[  2197] By: gbarr                                 on 1998/11/05  02:15:53
+        Log: integrate changes#1826,1862 from mainline
+             
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Wed, 12 Aug 1998 22:41:37 +0300 (EET DST)
+             Message-Id: <199808121941.WAA06263@alpha.hut.fi>
+             Subject: [PATCH] 5.004_50 or 5.005_02: get rid of interp.sym because not even AIX needs it
+             
+             remove bogus warn()
+     Branch: maint-5.005/perl
+           - interp.sym
+           ! MANIFEST Makefile.SH embed.pl perl_exp.SH
+____________________________________________________________________________
+[  2194] By: gbarr                                 on 1998/11/05  01:26:46
+        Log: integarte malloc.c changes from mainline change#1807,2112,2133
+     Branch: maint-5.005/perl
+          !> malloc.c
+____________________________________________________________________________
+[  2193] By: gbarr                                 on 1998/11/05  01:25:31
+        Log: integrate changes#1763,1778,1801,1804 from mainline
+             
+             From: Stephen McCamant <alias@mcs.com>
+             Date: Sun,  2 Aug 1998 16:33:18 -0500 (CDT)
+             Message-ID: <13764.55116.921952.837027@alias-2.pr.mcs.net>
+             Subject: [PATCH] Eliminate superfluous RV2p[AH]Vs in oops[AH]V()
+             
+             Implicit require during compile reset line numbering
+             
+             silence redefined warning for XS(INIT) {}
+             
+             From: Laszlo Molnar <molnarl@cdata.tvnet.hu>
+             Date: Sun, 9 Aug 1998 22:38:23 +0200
+             Message-ID: <19980809223823.A215@cdata.tvnet.hu>
+             Subject: [PATCH 5.5002] dos-djgpp update
+     Branch: maint-5.005/perl
+           ! op.c pp_ctl.c
+          !> t/io/fs.t
+____________________________________________________________________________
+[  2176] By: gbarr                                 on 1998/11/02  04:51:48
+        Log: integrate change#2030 from mainline
+             
+             fix handling of mayhaps-extended @_ in goto &sub
+     Branch: maint-5.005/perl
+           ! av.c pp_ctl.c
+          !> t/op/goto.t
+____________________________________________________________________________
+[  2175] By: gbarr                                 on 1998/11/02  04:32:02
+        Log: integrate chnage#1934,1935 from mainline
+             fix USE_THREADS coredump due to uninitialized PL_hv_fetch_ent_mh
+             add test for previous fix
+     Branch: maint-5.005/perl
+           ! util.c
+          !> ext/Thread/create.t
+____________________________________________________________________________
+[  2174] By: gbarr                                 on 1998/11/02  04:22:20
+        Log: integrate change#1863,1881 from mainline
+             
+             provide locked access to string table for USE_THREADS
+             
+             serial access to PL_x[inpr]v_root for USE_THREADS
+     Branch: maint-5.005/perl
+           ! embedvar.h objXSUB.h perl.c proto.h sv.c
+          !> hv.c intrpvar.h thread.h
+____________________________________________________________________________
+[  2173] By: gbarr                                 on 1998/11/02  04:10:46
+        Log: integrate change#1990 from mainline
+             
+             provide option to enable optimization with VC (suggested by Jan
+             Dubois)
+     Branch: maint-5.005/perl
+          !> win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  2172] By: gbarr                                 on 1998/11/02  02:52:29
+        Log: integrate changes#1944,1948,1966 from mainline
+             
+             change#1614 merely disabled earlier fix (doh!); undo it and properly
+             fixup the cop_seq value that must be seen by lexical lookups that
+             emanate within eval''
+             
+             tweak to make fix in change#1944 behave correctly for closures
+             created within eval''
+     Branch: maint-5.005/perl
+           ! op.c pp_ctl.c pp_hot.c scope.c
+          !> cop.h t/op/eval.t
+____________________________________________________________________________
+[  2171] By: gbarr                                 on 1998/11/01  03:59:39
+        Log: integrate changes 1835,2003,2067 and File::Find change in 1938
+             warn on C<my($foo,$foo)>
+             
+             silence -w noises (suggested by Greg Bacon) Term::Complete
+             
+             From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Wed, 21 Oct 1998 00:55:51 +0200
+             Message-ID: <36380269.55370608@smtp1.ibm.net>
+             Subject: Make _really_ sure Dynaloader.xs code is initialized only once
+     Branch: maint-5.005/perl
+           ! op.c pod/perldiag.pod
+	  !> ext/DynaLoader/DynaLoader_pm.PL lib/File/Find.pm
+          !> lib/Term/Complete.pm
+____________________________________________________________________________
+[  2170] By: gbarr                                 on 1998/11/01  03:48:38
+        Log: integrate change 1992 from mainline
+             
+             applied suggested patch with small doc tweak
+             From: Gisle Aas <gisle@aas.no>
+             Date: 11 Oct 1998 12:53:13 +0200
+             Message-ID: <m3u31bfjza.fsf@furu.g.aas.no>
+             Subject: Re: [PATCH 5.005_52] Optional syswrite LENGTH argument
+     Branch: maint-5.005/perl
+           ! pod/perlfunc.pod pp_sys.c
+          !> opcode.h opcode.pl t/op/sysio.t t/op/tiehandle.t
+____________________________________________________________________________
+[  2168] By: gbarr                                 on 1998/11/01  01:58:58
+        Log: From: jan.dubois@ibm.net (Jan Dubois)   
+             Date: Fri, 09 Oct 1998 23:28:31 +0200
+             Message-ID: <36217b7f.3193091@smtp1.ibm.net>
+             Subject: [PATCH 5.005_02] Allow XS access to vtbl_*s when compiled with PERL_OBJECT
+     Branch: maint-5.005/perl
+           ! XSUB.h
+____________________________________________________________________________
+[  2167] By: gbarr                                 on 1998/11/01  01:22:41
+        Log: integrate change#2029 from mainline
+             restore sanity to "constant" references
+     Branch: maint-5.005/perl
+           ! op.c pod/perldiag.pod
+          !> lib/constant.pm t/pragma/constant.t
+____________________________________________________________________________
+[  2166] By: gbarr                                 on 1998/11/01  01:04:24
+        Log: integrate changes#1895,1896,2066,2147,2148 from mainline
+             fix win32_stat() to do the right thing for share names
+             
+             small tweak on last change
+             
+             recognize '%' as a shell metachar for win32
+             From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Tue, 20 Oct 1998 21:57:35 +0200
+             Message-ID: <3636ea31.49170453@smtp1.ibm.net>
+             Subject: [PATCH 5.005_02, Win32]  Re: %ENV% not expanded in backquotes?
+             
+             tweaked version of suggested patch
+             From: Anton Berezin <tobez@plab.ku.dk>
+             Date: 29 Oct 1998 14:48:54 +0100
+             Message-ID: <86yapzv5q1.fsf@lion.plab.ku.dk>
+             Subject: [PATCH 5.005_52] One more problem with win32_stat and MSVC
+             
+             From: Anton Berezin <tobez@plab.ku.dk>
+             Date: 29 Oct 1998 17:06:25 +0100
+             Message-ID: <86pvbbuzcu.fsf@lion.plab.ku.dk>
+             Subject: [PATCH 5.005_52] win32_opendir() fails on empty drives
+     Branch: maint-5.005/perl
+          !> win32/win32.c
+____________________________________________________________________________
+[  2165] By: gbarr                                 on 1998/11/01  00:10:15
+        Log: integrated changes#1941,1942,1943,1975,2061,2111,2151 from mainline
+             
+             don't longjmp() in pp_goto() (regressive bug from old single-stack
+             implementation)
+             
+             force copy of substrings when matching against temporaries
+             
+             ensure recursive attempts to findlex()icals know enough about where
+             the last eval'' context was encountered
+             
+             propagate typeness of lexicals while cloning them
+             
+             From: Graham Barr <gbarr@pobox.com>
+             Date: Sat, 17 Oct 1998 22:22:02 -0500
+             Message-ID: <19981017222202.J510@pobox.com>
+             Subject: Re: '*' prototype does not allow bareword with strict
+             
+             smarter C<$SIG{FOO} = BAREWORD;> warning
+             
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Fri, 30 Oct 1998 14:24:23 EST
+             Message-Id: <19981030192423.27276.qmail@plover.com>
+             Subject: PATCH: (5.005_02)  a2p should use `chomp' instead of `chop'
+     Branch: maint-5.005/perl
+           ! op.c pp_ctl.c pp_hot.c t/op/pat.t toke.c
+          !> t/op/eval.t t/op/runlevel.t x2p/walk.c
+____________________________________________________________________________
+[  2158] By: gbarr                                 on 1998/10/31  05:03:02
+        Log: integrate changes#1821 & 1857 from mainline
+             
+             s/runops/CALLRUNOPS/
+             
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 22 Sep 1998 17:30:16 -0400 (EDT)
+             Message-Id: <199809222130.RAA17034@monk.mps.ohio-state.edu>
+             Subject: More verbose Test::Harness [PATCH]
+     Branch: maint-5.005/perl
+          !> cc_runtime.h lib/Test/Harness.pm
+____________________________________________________________________________
+[  2157] By: gbarr                                 on 1998/10/31  02:35:07
+        Log: integrate change#1839 from mainline
+             From: Drago Goricanec <drago@raptor.otsd.ts.fujitsu.co.jp>
+             Date: Mon, 7 Sep 1998 17:36:09 +0900
+             Message-Id: <199809070836.RAA14631@raptor.otsd.ts.fujitsu.co.jp>
+             Subject: Thread::cond_wait bug in 5.005.51 causes deadlock
+     Branch: maint-5.005/perl
+           ! ext/Thread/Thread.xs
+____________________________________________________________________________
+[  2156] By: gbarr                                 on 1998/10/31  02:22:11
+        Log: integrate change#1829 from mainline
+             fix problematic typecast in filter_del()
+             From: Mark P Lutz <tecmpl1@triton.ca.boeing.com>
+             Date: Mon, 31 Aug 1998 21:13:11 GMT
+             Message-Id: <199808312113.VAA53356@triton.ca.boeing.com>
+             Subject: perl5.005_02 does not build on Cray T90
+     Branch: maint-5.005/perl
+           ! toke.c
+____________________________________________________________________________
+[  2155] By: gbarr                                 on 1998/10/31  01:59:08
+        Log: integrate chnages#1824,2118 from mainline
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sat, 29 Aug 1998 17:38:30 -0400 (EDT)
+             Message-Id: <199808292138.RAA18359@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.005_*] Protect debugger from nonlocal exits
+             
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Wed, 28 Oct 1998 01:23:27 -0500 (EST)
+             Message-Id: <199810280623.BAA06968@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.00552] Minor debugger tweaks
+     Branch: maint-5.005/perl
+          !> lib/perl5db.pl
+____________________________________________________________________________
+[  2154] By: gbarr                                 on 1998/10/31  01:06:35
+        Log: integrate all lib/ExtUtils/... changes from mainline
+     Branch: maint-5.005/perl
+	  !> lib/ExtUtils/MM_OS2.pm lib/ExtUtils/MM_Unix.pm
+	  !> lib/ExtUtils/MM_VMS.pm lib/ExtUtils/MM_Win32.pm
+	  !> lib/ExtUtils/MakeMaker.pm lib/ExtUtils/Mkbootstrap.pm
+          !> lib/ExtUtils/Mksymlists.pm lib/ExtUtils/xsubpp
+____________________________________________________________________________
+[  2139] By: gbarr                                 on 1998/10/30  04:17:53
+        Log: apply chnage#2071 from mainline
+             From: Graham Barr <gbarr@pobox.com>
+             Date: Sat, 17 Oct 1998 20:42:41 -0500
+             Message-ID: <19981017204241.G510@pobox.com>
+             Subject: Re: taint checking for: use lib "$ENV{'EVIL'}"
+     Branch: maint-5.005/perl
+           ! pp_ctl.c
+____________________________________________________________________________
+[  2138] By: gbarr                                 on 1998/10/30  04:14:35
+        Log: apply change#2077 from mainline
+             From: Graham Barr <gbarr@pobox.com>
+             Date: Sat, 24 Oct 1998 21:45:50 -0500
+             Message-ID: <19981024214550.C508@pobox.com>
+             Subject: Re: die with a reference  should use overload "" operator
+     Branch: maint-5.005/perl
+           ! pp_ctl.c
+____________________________________________________________________________
+[  2137] By: gbarr                                 on 1998/10/30  04:01:06
+        Log: integrate change#1937 from mainline
+             fix $/ init for USE_THREADS
+     Branch: maint-5.005/perl
+           ! perl.c
+____________________________________________________________________________
+[  2136] By: gbarr                                 on 1998/10/30  03:40:55
+        Log: apply change#2076 from mainline
+             From: Graham Barr <gbarr@pobox.com>
+             Date: Sat, 24 Oct 1998 12:45:21 -0500
+             Message-ID: <19981024124521.C512@pobox.com>
+             Subject: [PATCH 5.005_02] Re: Auto-incrementing tied scalar causes SEGV
+     Branch: maint-5.005/perl
+           ! sv.c
+____________________________________________________________________________
+[  2135] By: gbarr                                 on 1998/10/30  03:28:29
+        Log: integrate change#1873 from mainline
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 25 Aug 1998 04:29:49 -0400 (EDT)
+             Message-Id: <199808250829.EAA02470@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.005_*] Extraneous warning for (?()A|B)
+     Branch: maint-5.005/perl
+           ! regcomp.c
+____________________________________________________________________________
+[  2134] By: gbarr                                 on 1998/10/30  03:15:12
+        Log: integrate change#1816 from mainline
+             don't create empty directories in installperl
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Fri, 21 Aug 1998 11:29:24 +0100 (BST)
+             Message-Id: <199808211029.LAA00551@cyclone.cise.npl.co.uk>
+             Subject: [PATCH 5.005_02] install: empty dirs
+     Branch: maint-5.005/perl
+          !> installperl
+____________________________________________________________________________
+[  2132] By: gbarr                                 on 1998/10/30  01:39:00
+        Log: integrate changes#1815 & 1828 from mainline
+             make behavior of /(a{3})+/ like /(aaa)+/ w.r.t where it matches
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Fri, 21 Aug 1998 05:41:02 -0400 (EDT)
+             Message-Id: <199808210941.FAA16467@monk.mps.ohio-state.edu>
+             Subject: Re: your mail
+             
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 31 Aug 1998 14:52:10 -0400 (EDT)
+             Message-Id: <199808311852.OAA24676@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.005_5*] (?>) broken in RE
+     Branch: maint-5.005/perl
+           ! regexec.c
+          !> t/op/re_tests
+____________________________________________________________________________
+[  2131] By: gbarr                                 on 1998/10/30  01:09:19
+        Log: integrate change#1947 from mainline
+             let docatch() pass the buck when restartop turns out to be null,
+             making exceptions in BEGIN{} propagate as expected
+     Branch: maint-5.005/perl
+           ! pp_ctl.c
+          !> t/op/misc.t
+____________________________________________________________________________
+[  2129] By: gbarr                                 on 1998/10/29  14:53:11
+        Log: integrate change#1810 from mainline
+             fix bogus integerization of pop()'s return value
+             From: Gurusamy Sarathy <gsar@engin.umich.edu>
+             Date: Sat, 15 Aug 1998 23:27:54 -0400
+             Message-Id: <199808160327.XAA05186@aatma.engin.umich.edu>
+             Subject: Re: Complex expression does integer arithmetic 
+     Branch: maint-5.005/perl
+          !> opcode.h opcode.pl
+____________________________________________________________________________
+[  2128] By: gbarr                                 on 1998/10/29  14:28:13
+        Log: integrate change#1870 from mainline
+             From:    Dan Sugalski <sugalskd@osshe.edu>
+             Date:    Fri, 14 Aug 1998 09:20:16 PDT
+             Message-Id: <3.0.5.32.19980814092016.00b37dc0@ous.edu>
+             Subject: [PATCH 5.005_02] (and _5x I expect) VMS config procedure patch
+     Branch: maint-5.005/perl
+          !> configure.com
+____________________________________________________________________________
+[  2127] By: gbarr                                 on 1998/10/29  13:36:29
+        Log: Integrate change#1789 from mainline
+             delay freeing itervar so C<for $i (@a) { return($i) }> works
+     Branch: maint-5.005/perl
+          !> cop.h t/cmd/for.t
+____________________________________________________________________________
+[  2123] By: gbarr                                 on 1998/10/29  02:43:01
+        Log: Apply change#2075 from mainline
+             fix C<print $n += 5;> etc.
+     Branch: maint-5.005/perl
+           ! toke.c
+____________________________________________________________________________
+[  2122] By: gbarr                                 on 1998/10/29  02:40:31
+        Log: Apply change#2070 from mainline
+             avoid bogus line number in XSUB redefined warnings
+     Branch: maint-5.005/perl
+           ! op.c
+____________________________________________________________________________
+[  2121] By: gbarr                                 on 1998/10/29  02:38:59
+        Log: Apply change#2052 from mainline
+             avoid the circular refcnt logic in magic_mutexfree()
+     Branch: maint-5.005/perl
+           ! mg.c pp.c pp_hot.c
+____________________________________________________________________________
+[  2120] By: gbarr                                 on 1998/10/29  02:36:23
+        Log: Remove "5.005" hard-coded and expose vtbl_* from the perl DLL
+             From: "Douglas Lankshear" <dougl@ActiveState.com>
+             Date: Mon, 28 Sep 1998 08:49:13 -0700
+             Message-ID: <000001bdeaf7$8a189350$a32fa8c0@tau.Active>
+             Subject: PATCH [5.005_02] update
+     Branch: maint-5.005/perl
+	   ! embed.h global.sym objXSUB.h objpp.h perl.h proto.h util.c
+           ! win32/win32.c
+____________________________________________________________________________
+[  2084] By: gbarr                                 on 1998/10/25  19:09:11
+        Log: Integrate change#2069 from mainline
+             From: Martijn Koster <mak@excitecorp.com>
+             Date: Wed, 21 Oct 1998 13:12:03 +0100
+             Message-ID: <19981021131203.A15661@excitecorp.com>
+             Subject: File::Path::mkpath reports the wrong error
+     Branch: maint-5.005/perl
+          !> lib/File/Path.pm
+____________________________________________________________________________
+[  2083] By: gbarr                                 on 1998/10/25  18:48:39
+        Log: Integrate change#1965 from mainline
+             use better numbers for exitstatus test
+     Branch: maint-5.005/perl
+          !> t/op/die_exit.t
+____________________________________________________________________________
+[  2082] By: gbarr                                 on 1998/10/25  18:22:54
+        Log: Apply change 2054 from mainline
+             disallow 'x' in hex numbers (except leading '0x')
+             From: Gisle Aas <gisle@aas.no>
+             Date: 16 Oct 1998 16:33:12 +0200
+             Message-ID: <m3n26wtw47.fsf@furu.g.aas.no>
+             Subject: Re: [PATCH 5.005_52] 'x' is not a legal hex digit
+     Branch: maint-5.005/perl
+           ! perlvars.h util.c
+          !> t/op/oct.t
+____________________________________________________________________________
+[  2081] By: gbarr                                 on 1998/10/25  17:58:04
+        Log: Apply change #1998 from mainline
+             skip readonly vars and unref references when doing a reset()
+     Branch: maint-5.005/perl
+           ! sv.c
+____________________________________________________________________________
+[  2080] By: gbarr                                 on 1998/10/25  16:06:35
+        Log: Integrate changes #2072 & #1993 from mainline
+             fix bug in B::CC::pp_sassign()
+             From: "vishal bhatia" <vishalb@hotmail.com>
+             Date: Sun, 11 Oct 1998 18:41:38 PDT
+             Message-ID: <19981012014139.19614.qmail@hotmail.com>
+             Subject: B::CC problems with pp_sassign routine
+             implement C<goto &func> and other fixes (via private mail)
+             From:    "vishal bhatia" <vishalb@hotmail.com>
+             Date:    Wed, 21 Oct 1998 22:59:03 PDT
+             Message-Id: <19981022055904.20083.qmail@hotmail.com>
+             Subject: [PATCH 5.005_52] More fixes for B
+     Branch: maint-5.005/perl
+          !> ext/B/B.pm ext/B/B.xs ext/B/B/C.pm ext/B/B/CC.pm
+____________________________________________________________________________
+[  2079] By: gbarr                                 on 1998/10/25  14:08:00
+        Log: integrate from mainline more FSF address changes
+     Branch: maint-5.005/perl
+          !> Copying ext/B/README lib/Getopt/Long.pm
+____________________________________________________________________________
+[  2053] By: gbarr                                 on 1998/10/25  04:56:47
+        Log: From: Graham Barr <gbarr@pobox.com>
+             Date: Sat, 17 Oct 1998 23:05:18 -0500
+             Message-ID: <19981017230518.K510@pobox.com>
+             Subject: Re: redo LOOP not restoring $` $' $&
+     Branch: maint-5.005/perl
+           ! cop.h t/cmd/while.t
+____________________________________________________________________________
+[  2048] By: gbarr                                 on 1998/10/24  04:20:10
+        Log: Change Free Software Foundation address in README
+     Branch: maint-5.005/perl
+          !> README
+____________________________________________________________________________
+[  2047] By: gbarr                                 on 1998/10/24  04:02:20
+        Log: Remove #ifdef DEBUGGING around SvTEMP_off
+             From: Gurusamy Sarathy <gsar@engin.umich.edu>
+             Date: Mon, 28 Sep 1998 15:23:39 -0400
+             Message-Id: <199809281923.PAA10303@aatma.engin.umich.edu>
+             Subject: Re: [PATCH] Re: 5.005_52: the miniperl coredump: touch magic and you're toast 
+     Branch: maint-5.005/perl
+           ! scope.c
+____________________________________________________________________________
+[  2046] By: gbarr                                 on 1998/10/24  04:00:54
+        Log: use cpp symbols instead of hardwired constants
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk>
+             Date: Mon, 05 Oct 1998 09:23:33 +0100
+             Message-Id: <199810050823.JAA00891@crypt.compulink.co.uk>
+             Subject: [PATCH 5.005_52] By the numbers (resend)
+     Branch: maint-5.005/perl
+           ! op.c
+____________________________________________________________________________
+[  2045] By: gbarr                                 on 1998/10/24  03:50:25
+        Log: squelch undef warnings
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk>
+             Date: Fri, 02 Oct 1998 11:01:14 +0100
+             Message-Id: <199810021001.LAA19214@crypt.compulink.co.uk>
+             Subject: [PATCH] Re: Apparent bug in Math::BigInt 
+     Branch: maint-5.005/perl
+          !> lib/Math/BigInt.pm
+____________________________________________________________________________
+[  2044] By: gbarr                                 on 1998/10/24  03:47:24
+        Log: Add note to INSTALL about ANSI C
+     Branch: maint-5.005/perl
+           ! INSTALL
+____________________________________________________________________________
+[  2043] By: gbarr                                 on 1998/10/24  02:38:12
+        Log: make C<goto &sub> AUTOLOAD-aware (autouse now works for modules
+             that are autoloaded)
+             From: Gurusamy Sarathy <gsar@engin.umich.edu>
+             Date: Thu, 24 Sep 1998 03:01:01 -0400
+             Message-Id: <199809240701.DAA16223@aatma.engin.umich.edu>
+             Subject: Re: autouse and Getopt::Long don't work together anymore 
+     Branch: maint-5.005/perl
+           ! pp_ctl.c t/op/goto.t
+____________________________________________________________________________
+[  2042] By: gbarr                                 on 1998/10/24  02:16:26
+        Log: From: jarkko.hietaniemi@research.nokia.com (Jarkko Hietaniemi)
+             Date: Wed, 12 Aug 1998 15:42:35 +0300
+             Message-Id: <199808121242.PAA29761@comanche.spices>
+             Subject: [PATCH] 5.004_02 or 5.005_51: fix regexp and tr character ranges in non-ASCII lands
+     Branch: maint-5.005/perl
+           + t/op/tr.t
+	   ! MANIFEST perl.h pod/perllocale.pod pod/perlop.pod
+           ! pod/perlre.pod regcomp.c t/pragma/locale.t toke.c
+____________________________________________________________________________
+[  2021] By: gbarr                                 on 1998/10/20  01:25:23
+        Log: From: Chip Salzenberg <chip@perlsupport.com>
+             Date: Tue, 6 Oct 1998 13:33:05 -0400
+             Message-ID: <19981006133305.A2348@perlsupport.com>
+             Subject: [PATCH] 5.005_02: Eliminate leak on self-ties
+     Branch: maint-5.005/perl
+	   ! av.c doop.c hv.c mg.c mg.h pp.c pp_hot.c pp_sys.c scope.c
+           ! t/op/tie.t
+____________________________________________________________________________
+[  2015] By: gbarr                                 on 1998/10/17  21:49:56
+        Log: make h2xs generate ANSI prototypes
+     Branch: maint-5.005/perl
+          !> utils/h2xs.PL
+____________________________________________________________________________
+[  2014] By: gbarr                                 on 1998/10/17  20:31:42
+        Log: Fix POSIX::sigprocmask not to check type of $old parameter
+             as it is output only
+     Branch: maint-5.005/perl
+           ! ext/POSIX/POSIX.xs
+____________________________________________________________________________
+[  2013] By: gbarr                                 on 1998/10/17  17:51:16
+        Log: From: "Kurt D. Starsinic" <kstar@chapin.edu>
+             Date: Thu, 20 Aug 1998 20:59:03 -0400
+             Message-ID: <19980820205903.A12908@O2.chapin.edu>
+             Subject: [PATCH] h2ph misquotes #error directives
+             
+             fix h2ph handling of C<#error "foo">
+             From: SAKAI Kiyotaka <ksakai@netwk.ntt-at.co.jp>
+             Date: Thu, 10 Sep 1998 09:59:33 +0900
+             Message-Id: <19980910095933N.ksakai@netwk.ntt-at.co.jp>
+             Subject: [5.005_02] h2ph problem
+     Branch: maint-5.005/perl
+          !> t/lib/h2ph.pht utils/h2ph.PL
+____________________________________________________________________________
+[  1985] By: gbarr                                 on 1998/10/17  00:41:40
+        Log: s/last/first/ typo in append_list()
+     Branch: maint-5.005/perl
+           ! op.c
+____________________________________________________________________________
+[  1984] By: gbarr                                 on 1998/10/17  00:36:51
+        Log: From: "Green, Paul" <pgreen@seussnt.stratus.com>
+             Date: Thu, 10 Sep 1998 00:02:07 -0400
+             Message-ID: <646CD0392810D211B04A00A024BF26FB1022EB@terminator.sw.stratus.com>
+             Subject: RE: [PATCH] 5.005_02 and 5.005_51: Stratus VOS port
+     Branch: maint-5.005/perl
+	   + README.vos vos/Changes vos/build.cm vos/compile_perl.cm
+	   + vos/config.h vos/config_h.SH_orig vos/perl.bind
+           + vos/test_vos_dummies.c vos/vos_dummies.c vos/vosish.h
+           ! MANIFEST perl.c perl.h pod/perlport.pod
+____________________________________________________________________________
+[  1983] By: gbarr                                 on 1998/10/17  00:23:31
+        Log: define PUT_svindex(), PUT_opindex()
+     Branch: maint-5.005/perl
+          !> ext/B/B/Assembler.pm
+____________________________________________________________________________
+[  1982] By: gbarr                                 on 1998/10/17  00:20:57
+        Log: From: Jochen Wiedmann <joe@ispsoft.de>
+             Date: Thu, 17 Sep 1998 17:16:06 +0200
+             Message-ID: <360127B6.E44564A@ispsoft.de>
+             Subject: [PATCH] ExtUtils::MakeMaker::prompt cannot return 0
+     Branch: maint-5.005/perl
+           ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[  1981] By: gbarr                                 on 1998/10/16  02:58:10
+        Log: better CR-handling on shebang line and in formats (fixed variant of
+             patch suggested by Igor Sysoev <igor@nitek.ru>)
+     Branch: maint-5.005/perl
+           ! perl.c toke.c
+____________________________________________________________________________
+[  1980] By: gbarr                                 on 1998/10/16  02:21:57
+        Log: From: Roderick Schertler <roderick@argon.org>
+             Date: 11 Sep 1998 16:19:21 -0400
+             Message-ID: <pzyarqpfli.fsf@eeyore.ibcinc.com>
+             Subject: Re: Open2 and memory leaks
+     Branch: maint-5.005/perl
+          !> lib/IPC/Open3.pm
+____________________________________________________________________________
+[  1979] By: gbarr                                 on 1998/10/16  02:15:54
+        Log: integrate change #1908 from mainline
+     Branch: maint-5.005/perl
+          !> lib/File/Find.pm
+____________________________________________________________________________
+[  1977] By: gbarr                                 on 1998/10/16  01:52:46
+        Log: tests missing from change #1794
+     Branch: maint-5.005/perl
+           ! t/op/re_tests
+____________________________________________________________________________
+[  1794] By: gbarr                                 on 1998/09/20  15:59:20
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 11 Aug 1998 18:43:29 -0400 (EDT)
+             Message-Id: <199808112243.SAA14243@monk.mps.ohio-state.edu>
+             Subject: Re: Segmentation fault for /a*abc?xyz+pqr{3}ab{2,}xy{4,5}pq{0,6}AB{0,}zz/
+     Branch: maint-5.005/perl
+           ! regcomp.c t/op/re_tests
+____________________________________________________________________________
+[  1793] By: gbarr                                 on 1998/09/20  15:39:41
+        Log: From: Peter Prymmer <pvhp@forte.com>
+             Date: Mon, 10 Aug 98 16:58:22 PDT
+             Message-Id: <9808102358.AA10616@forte.com>
+             Subject: fix for unpack('u') failures on OS/390
+     Branch: maint-5.005/perl
+           ! pp.c
+____________________________________________________________________________
+[  1792] By: gbarr                                 on 1998/09/20  15:11:33
+        Log: From: "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+             Date: Sun, 9 Aug 1998 15:51:48 +0100
+             Message-Id: <E0z5Wp2-00071p-00@taurus.cus.cam.ac.uk>
+             Subject: Fix typo, change "an array" to "a hash"
+     Branch: maint-5.005/perl
+           ! pod/perlfunc.pod
+____________________________________________________________________________
+[  1791] By: gbarr                                 on 1998/09/20  14:49:26
+        Log: From: Gurusamy Sarathy <gsar@engin.umich.edu>
+             Date: Wed, 16 Sep 1998 22:13:17 -0400
+             Message-Id: <199809170213.WAA10546@aatma.engin.umich.edu>
+             Subject: fill gaps in sig_* entries in win32/config.?c
+             and resync win32/config.?c with Porting/config.sh to pick up apiversion
+     Branch: maint-5.005/perl
+           ! win32/config.bc win32/config.gc win32/config.vc
+____________________________________________________________________________
+[  1790] By: gbarr                                 on 1998/09/20  14:40:56
+        Log: From: Gurusamy Sarathy <gsar@engin.umich.edu>
+             Date: Sun, 06 Sep 1998 15:35:11 -0400
+             Message-Id: <199809061935.PAA21531@aatma.engin.umich.edu>
+             Subject: suppress bogus warning on C<sub x {} x()>
+     Branch: maint-5.005/perl
+           ! toke.c
+____________________________________________________________________________
+[  1784] By: nick                                  on 1998/09/12  09:53:36
+        Log: Two tweaks to allow quiet compile qith egcs-1.1
+     Branch: maint-5.005/perl
+           ! win32/win32.h
+____________________________________________________________________________
+[  1783] By: gbarr                                 on 1998/09/07  20:33:11
+        Log: Subject: index() applied BM optimization to wrong argument
+             From: larry@wall.org (Larry Wall)
+             Date:  Thu, 3 Sep 1998 12:49:13 -0700
+             Message-Id: <199809031949.MAA29566@wall.org>, <199809060004.RAA23792@wall.org>
+     Branch: maint-5.005/perl
+           ! op.c util.c
+____________________________________________________________________________
+[  1782] By: gbarr                                 on 1998/09/07  18:54:49
+        Log: From: Gurusamy Sarathy <gsar@engin.umich.edu>
+             Date: Fri, 28 Aug 1998 00:33:15 -0400
+             Mssage-Id: <199808280433.AAA06767@aatma.engin.umich.edu>
+             Subject: socket problems on NT 
+     Branch: maint-5.005/perl
+           ! objXSUB.h
+____________________________________________________________________________
+[  1759] By: gsar                                  on 1998/08/08  20:57:47
+        Log: pending submit of 5.005_02
+     Branch: maint-5.005/perl
+           ! Changes
 
 ----------------
 Version 5.005_02        Second maintenance release of 5.005
