@@ -194,6 +194,8 @@ $PREAMBLE = <<'----END OF PREAMBLE----';
     'lt'        =>    '<',      # left chevron, less-than
     'gt'        =>    '>',      # right chevron, greater-than
     'quot'      =>    '"',      # double quote
+    'sol'       =>    '/',      # solidus
+    'verbar'    =>    '|',      # vertical bar
 
     'Aacute'    =>    "A\\*'",  # capital A, acute accent
     'aacute'    =>    "a\\*'",  # small a, acute accent
