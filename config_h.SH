@@ -1332,6 +1332,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  */
 #$d_archlib ARCHLIB_EXP "$archlibexp"		/**/
 
+/* OSNAME:
+ *	This symbol contains the name of the operating system, as determined
+ *	by Configure.
+ */
+#define OSNAME "$osname"		/**/
+
 /* BYTEORDER:
  *	This symbol hold the hexadecimal constant defined in byteorder,
  *	i.e. 0x1234 or 0x4321, etc...
