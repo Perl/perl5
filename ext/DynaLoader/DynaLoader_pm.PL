@@ -179,7 +179,7 @@ sub bootstrap {
     # The .bs file can be used to configure @dl_resolve_using etc to
     # match the needs of the individual module on this architecture.
     my $bs = $file;
-    $bs =~ s/(\.\w+)?$/\.bs/; # look for .bs 'beside' the library
+    $bs =~ s/(\.\w+)?(;\d*)?$/\.bs/; # look for .bs 'beside' the library
     if (-s $bs) { # only read file if it's not empty
         print STDERR "BS: $bs ($^O, $dlsrc)\n" if $dl_debug;
         eval { do $bs; };
