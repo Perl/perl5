@@ -439,7 +439,10 @@ sub ExtUtils::MakeMaker::new {
 		unless $self->file_name_is_absolute($self->{$key})
 		|| ($^O eq 'VMS' and ($key =~ /PERL$/ && $self->{$key} =~ /^[\w\-\$]+$/));
 	}
-	$self->{PARENT}->{CHILDREN}->{$newclass} = $self if $self->{PARENT};
+	if ($self->{PARENT}) {
+	    $self->{PARENT}->{CHILDREN}->{$newclass} = $self;
+	    $self->{CAPI} = $self->{PARENT}->{CAPI};
+	}
     } else {
 	parse_args($self,split(' ', $ENV{PERL_MM_OPT} || ''),@ARGV);
     }
