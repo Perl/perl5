@@ -54,7 +54,7 @@ kept up to date if all packages which use chdir import it from Cwd.
 
 use Carp;
 
-$VERSION = '2.00';
+$VERSION = '2.01';
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -82,65 +82,8 @@ sub _backtick_pwd {
 
 sub getcwd
 {
-    my($dotdots, $cwd, @pst, @cst, $dir, @tst);
-
-    unless (@cst = stat('.'))
-    {
-	warn "stat(.): $!";
-	return '';
-    }
-    $cwd = '';
-    $dotdots = '';
-    do
-    {
-	$dotdots .= '/' if $dotdots;
-	$dotdots .= '..';
-	@pst = @cst;
-	unless (opendir(PARENT, $dotdots))
-	{
-	    warn "opendir($dotdots): $!";
-	    return '';
-	}
-	unless (@cst = stat($dotdots))
-	{
-	    warn "stat($dotdots): $!";
-	    closedir(PARENT);
-	    return '';
-	}
-	if ($pst[0] == $cst[0] && $pst[1] == $cst[1])
-	{
-	    $dir = undef;
-	}
-	else
-	{
-	    do
-	    {
-		unless (defined ($dir = readdir(PARENT)))
-	        {
-		    warn "readdir($dotdots): $!";
-		    closedir(PARENT);
-		    return '';
-		}
-		unless (@tst = lstat("$dotdots/$dir"))
-		{
-		    # warn "lstat($dotdots/$dir): $!";
-		    # Just because you can't lstat this directory
-		    # doesn't mean you'll never find the right one.
-		    # closedir(PARENT);
-		    # return '';
-		}
-	    }
-	    while ($dir eq '.' || $dir eq '..' || $tst[0] != $pst[0] ||
-		   $tst[1] != $pst[1]);
-	}
-	$cwd = (defined $dir ? "$dir" : "" ) . "/$cwd" ;
-	closedir(PARENT);
-    } while (defined $dir);
-    chop($cwd) unless $cwd eq '/'; # drop the trailing /
-    $cwd;
+    abs_path('.');
 }
-
-
 
 # By John Bazik
 #
@@ -249,7 +192,7 @@ sub chdir {
 
 sub abs_path
 {
-    my $start = shift || '.';
+    my $start = @_ ? shift : '.';
     my($dotdots, $cwd, @pst, @cst, $dir, @tst);
 
     unless (@cst = stat( $start ))
@@ -276,7 +219,7 @@ sub abs_path
 	}
 	if ($pst[0] == $cst[0] && $pst[1] == $cst[1])
 	{
-	    $dir = '';
+	    $dir = undef;
 	}
 	else
 	{
@@ -293,10 +236,10 @@ sub abs_path
 	    while ($dir eq '.' || $dir eq '..' || $tst[0] != $pst[0] ||
 		   $tst[1] != $pst[1]);
 	}
-	$cwd = "$dir/$cwd";
+	$cwd = (defined $dir ? "$dir" : "" ) . "/$cwd" ;
 	closedir(PARENT);
-    } while ($dir);
-    chop($cwd); # drop the trailing /
+    } while (defined $dir);
+    chop($cwd) unless $cwd eq '/'; # drop the trailing /
     $cwd;
 }
 
