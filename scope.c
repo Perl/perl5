@@ -435,6 +435,7 @@ save_delete(HV *hv, char *key, I32 klen)
 void
 save_aelem(AV *av, I32 idx, SV **sptr)
 {
+    dTHR;
     SSCHECK(4);
     SSPUSHPTR(av);
     SSPUSHINT(idx);
@@ -446,6 +447,7 @@ save_aelem(AV *av, I32 idx, SV **sptr)
 void
 save_helem(HV *hv, SV *key, SV **sptr)
 {
+    dTHR;
     SSCHECK(4);
     SSPUSHPTR(hv);
     SSPUSHPTR(key);
@@ -727,7 +729,7 @@ leave_scope(I32 base)
 	    goto restore_sv;
 	case SAVEt_HELEM:		/* hash element */
 	    value = (SV*)SSPOPPTR;
-	    sv = (SV*)SSPOPINT;
+	    sv = (SV*)SSPOPPTR;
 	    hv = (HV*)SSPOPPTR;
 	    ptr = hv_fetch_ent(hv, sv, 1, 0);
 	    ptr = &HeVAL((HE*)ptr);
