@@ -31,6 +31,144 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 13461] By: jhi                                   on 2001/12/04  14:49:45
+        Log: Must wipe out the memory of real Socket before starting
+             to use the old one.
+     Branch: perl
+	   ! lib/Net/t/config.t
+____________________________________________________________________________
+[ 13460] By: jhi                                   on 2001/12/04  14:40:28
+        Log: LC_ALL might trump LANG.
+     Branch: perl
+	   ! lib/open.t
+____________________________________________________________________________
+[ 13459] By: jhi                                   on 2001/12/04  14:39:38
+        Log: Make the eval runtime.
+     Branch: perl
+	   ! lib/open.pm
+____________________________________________________________________________
+[ 13458] By: jhi                                   on 2001/12/04  14:08:17
+        Log: Make the Langinfo test both more lenient (allow
+             for any symbol not to exists) and stricter (add
+             more symbols).
+     Branch: perl
+	   ! ext/I18N/Langinfo/Langinfo.t
+____________________________________________________________________________
+[ 13457] By: gsar                                  on 2001/12/04  14:07:01
+        Log: integrate change#13453 from maint-5.6
+             
+             tweak change#11399 to use an explicit flag rather than
+             ass_u_ming w32_pseudo_id will only be zero for the real
+             toplevel interpreter; avoids multiple hosts from diddling
+             the environment at the same time
+     Branch: perl
+	  !> win32/perlhost.h
+____________________________________________________________________________
+[ 13456] By: jhi                                   on 2001/12/04  13:35:58
+        Log: Subject: [PATCH] VMS update for perldelta.pod
+             From: "Craig A. Berry" <craigberry@mac.com> 
+             Date: Tue, 4 Dec 2001 00:23:12 -0600
+             Message-Id: <a05101002b83218be190d@[172.16.52.1]>
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 13455] By: jhi                                   on 2001/12/04  13:23:19
+        Log: NetWare tweak from Ananth Kesari.
+     Branch: perl
+	   ! NetWare/Makefile
+____________________________________________________________________________
+[ 13454] By: jhi                                   on 2001/12/04  13:17:38
+        Log: Upgrade to Net::Ping 2.07, from Rob Brown.
+             Not adding the test suite because of its many assumptions.
+     Branch: perl
+	   ! lib/Net/Ping.pm
+____________________________________________________________________________
+[ 13452] By: jhi                                   on 2001/12/04  04:28:29
+        Log: Add hints file for SUPER-UX: the UNIX of NEC SX series,
+             from Len Makin.
+     Branch: perl
+	   + hints/super-ux.sh
+	   ! MANIFEST
+____________________________________________________________________________
+[ 13451] By: jhi                                   on 2001/12/04  01:58:03
+        Log: Add Mac OS X known failures to perldelta.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 13450] By: jhi                                   on 2001/12/04  01:26:38
+        Log: I think it's time to call the utf8 code non-test.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 13449] By: jhi                                   on 2001/12/04  00:59:27
+        Log: Retract #13303, need rethink.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 13448] By: jhi                                   on 2001/12/03  22:40:22
+        Log: Subject: [PATCH perl@13440] VMS install fix-ups: add libnetcfg and xsubpp as utility commands
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Mon, 03 Dec 2001 16:28:06 -0600
+             Message-Id: <5.1.0.14.2.20011202223303.01c3ab98@exchi01>
+     Branch: perl
+	   ! configure.com lib/File/Basename.pm vms/descrip_mms.template
+____________________________________________________________________________
+[ 13447] By: jhi                                   on 2001/12/03  22:37:12
+        Log: Subject: [PATCH] Solaris/longdouble needs /opt/SUNWspro/lib
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Mon, 3 Dec 2001 15:48:26 -0500 (EST)
+             Message-ID: <Pine.SOL.4.10.10112031543520.5207-100000@maxwell.phys.lafayette.edu>
+     Branch: perl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[ 13446] By: jhi                                   on 2001/12/03  22:29:58
+        Log: This test is not very robust on 8.3-constrained systems:
+             all the "with truncated name" lines between "Autosplitting ..."
+             and "some names are not unique" lines are unexpected,
+             and the truncation message becomes:
+             testtest.al, testtest.al truncate to testtest 
+     Branch: perl
+	   ! lib/AutoSplit.t
+____________________________________________________________________________
+[ 13445] By: jhi                                   on 2001/12/03  22:13:07
+        Log: DOS/DJGPP has nl_langinfo() but nothing much in it.
+     Branch: perl
+	   ! ext/I18N/Langinfo/Langinfo.t
+____________________________________________________________________________
+[ 13444] By: jhi                                   on 2001/12/03  22:02:52
+        Log: Test::Morify UCD.t
+     Branch: perl
+	   ! lib/Unicode/UCD.t
+____________________________________________________________________________
+[ 13443] By: jhi                                   on 2001/12/03  21:50:13
+        Log: If Socket has not been built (e.g. DJGPP) the libnet
+             tests fall over with (too) much noise.
+     Branch: perl
+	   ! lib/Net/t/config.t lib/Net/t/ftp.t lib/Net/t/hostname.t
+	   ! lib/Net/t/netrc.t lib/Net/t/nntp.t lib/Net/t/require.t
+	   ! lib/Net/t/smtp.t lib/Net/t/time.t
+____________________________________________________________________________
+[ 13442] By: jhi                                   on 2001/12/03  17:22:08
+        Log: Subject: [PATCH] shared hash keys and ++/--
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Mon, 3 Dec 2001 16:37:16 +0000
+             Message-ID: <20011203163716.C21702@plum.flirble.org>
+     Branch: perl
+	   ! pp.c pp_hot.c sv.c t/op/inc.t
+____________________________________________________________________________
+[ 13441] By: jhi                                   on 2001/12/03  17:15:52
+        Log: Subject: [PATCH lib/Term/Cap.pm] was Re: [PATCH] Shared hash keys
+             From: Jonathan Stowe <jns@gellyfish.com>
+             Date: Mon, 3 Dec 2001 15:48:38 +0000 (GMT)
+             Message-ID: <Pine.LNX.4.33.0112031543290.386-100000@orpheus.gellyfish.com>
+     Branch: perl
+	   ! lib/Term/Cap.pm
+____________________________________________________________________________
+[ 13440] By: jhi                                   on 2001/12/03  14:26:58
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 13439] By: jhi                                   on 2001/12/03  14:22:05
         Log: perldelta tweaks.
      Branch: perl
