@@ -322,7 +322,7 @@ print "ok 26\n";
 	    $t++;
 	}
     }
-    # last test here 47
+    # last test here 49
 }
 
 # sysread() and syswrite() tested in lib/open.t since Fnctl is used
