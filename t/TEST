@@ -20,6 +20,21 @@ chdir 't' if -f 't/TEST';
 die "You need to run \"make test\" first to set things up.\n"
   unless -e 'perl' or -e 'perl.exe';
 
+if ($ENV{PERL_3LOG}) {
+    unless (-x 'perl.third') {
+	unless (-x '../perl.third') {
+	    die "You need to run \"make perl.third first.\n";
+	}
+	else {
+	    print "Symlinking ../perl.third as perl.third...\n";
+	    die "Failed to symlink: $!\n"
+		unless symlink("../perl.third", "perl.third");
+	    die "Symlinked but no executable perl.third: $!\n"
+		unless -x 'perl.third';
+	}
+    }
+}
+
 # check leakage for embedders
 $ENV{PERL_DESTRUCT_LEVEL} = 2 unless exists $ENV{PERL_DESTRUCT_LEVEL};
 
