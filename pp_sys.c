@@ -1243,7 +1243,11 @@ PP(pp_sysread)
 #ifdef HAS_SOCKET
     if (op->op_type == OP_RECV) {
 	char namebuf[MAXPATHLEN];
+#if defined(VMS_DO_SOCKETS) && defined(DECCRTL_SOCKETS)
+	bufsize = sizeof (struct sockaddr_in);
+#else
 	bufsize = sizeof namebuf;
+#endif
 	buffer = SvGROW(bufsv, length+1);
 	/* 'offset' means 'flags' here */
 	length = recvfrom(PerlIO_fileno(IoIFP(io)), buffer, length, offset,
@@ -1283,7 +1287,11 @@ PP(pp_sysread)
 #ifdef HAS_SOCKET__bad_code_maybe
     if (IoTYPE(io) == 's') {
 	char namebuf[MAXPATHLEN];
+#if defined(VMS_DO_SOCKETS) && defined(DECCRTL_SOCKETS)
+	bufsize = sizeof (struct sockaddr_in);
+#else
 	bufsize = sizeof namebuf;
+#endif
 	length = recvfrom(PerlIO_fileno(IoIFP(io)), buffer+offset, length, 0,
 			  (struct sockaddr *)namebuf, &bufsize);
     }
@@ -1368,6 +1376,7 @@ PP(pp_send)
     }
     else
 	length = send(PerlIO_fileno(IoIFP(io)), buffer, blen, length);
+
 #else
     else
 	DIE(no_sock_func, "send");
@@ -1986,6 +1995,17 @@ PP(pp_getpeername)
     case OP_GETPEERNAME:
 	if (getpeername(fd, (struct sockaddr *)SvPVX(sv), &len) < 0)
 	    goto nuts2;
+#if defined(VMS_DO_SOCKETS) && defined (DECCRTL_SOCKETS)
+	{
+	    static const char nowhere[] = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
+	    /* If the call succeeded, make sure we don't have a zeroed port/addr */
+	    if (((struct sockaddr *)SvPVX(sv))->sa_family == AF_INET &&
+		!memcmp((char *)SvPVX(sv) + sizeof(u_short), nowhere,
+			sizeof(u_short) + sizeof(struct in_addr))) {
+		goto nuts2;	    
+	    }
+	}
+#endif
 	break;
     }
 #ifdef BOGUS_GETNAME_RETURN
