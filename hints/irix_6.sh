@@ -53,11 +53,11 @@ case "$cc" in
 	case "`$cc -version 2>&1`" in
 	*7.0*)                        # Mongoose 7.0
 	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1042,1048,1110,1116,1184 -OPT:Olimit=0"
-	     optimize='none'	  
+	     optimize='none'
 	     ;;
 	*7.1*|*7.2|*7.20)             # Mongoose 7.1+
 	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1184 -OPT:Olimit=0"
-	     optimize='-O3'	  
+	     optimize='-O3'
 # This is a temporary fix for 5.005.
 # Leave pp_ctl_cflags  line at left margin for Configure.  See 
 # hints/README.hints, especially the section 
@@ -65,12 +65,12 @@ case "$cc" in
 pp_ctl_cflags='optimize=-O'
 	     ;;
 	*7.*)                         # Mongoose 7.2.1+
-	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1184 -OPT:Olimit=0:space=on"
-	     optimize='-O3'	  
+	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1184 -OPT:Olimit=0:space=ON"
+	     optimize='-O3'
 	     ;;
 	*6.2*)                        # Ragnarok 6.2
 	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1184"
-	     optimize='none'	  
+	     optimize='none'
 	     ;;
 	*)                            # Be safe and not optimize
 	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1184 -OPT:Olimit=0"
@@ -78,9 +78,10 @@ pp_ctl_cflags='optimize=-O'
 	     ;;
 	esac
 
-	ld=ld
+	ld=$cc
 	# perl's malloc can return improperly aligned buffer
-	usemymalloc='undef'
+	# usemymalloc='undef'
+malloc_cflags='ccflags="-DSTRICT_ALIGNMENT $ccflags"'
 	# NOTE: -L/usr/lib32 -L/lib32 are automatically selected by the linker
 	ldflags=' -L/usr/local/lib32 -L/usr/local/lib'
 	cccdlflags=' '
