@@ -187,7 +187,7 @@ not_here(char *s)
 #define PERL_constant_ISYES	11
 
 static int
-constant_6 (const char *name, IV *iv_return, SV **sv_return) {
+constant_6 (pTHX_ const char *name, IV *iv_return, SV **sv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
      AF_802 AF_DLI AF_LAT AF_MAX AF_NBS AF_NIT AF_OSI AF_PUP AF_SNA AF_X25
@@ -922,7 +922,7 @@ constant_9 (const char *name, IV *iv_return, SV **sv_return) {
 }
 
 static int
-constant_10 (const char *name, IV *iv_return, SV **sv_return) {
+constant_10 (pTHX_ const char *name, IV *iv_return, SV **sv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
      AF_DATAKIT AF_IMPLINK INADDR_ANY MSG_CTRUNC PF_DATAKIT PF_IMPLINK
@@ -1061,7 +1061,7 @@ struct in_addr ip_address; ip_address.s_addr = htonl(INADDR_ANY);
 }
 
 static int
-constant_11 (const char *name, IV *iv_return, SV **sv_return) {
+constant_11 (pTHX_ const char *name, IV *iv_return, SV **sv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
      INADDR_NONE IPPROTO_TCP MSG_WAITALL SCM_CONNECT SOCK_STREAM SO_RCVLOWAT
@@ -1412,7 +1412,7 @@ constant_13 (const char *name, IV *iv_return, SV **sv_return) {
 }
 
 static int
-constant (const char *name, STRLEN len, IV *iv_return, SV **sv_return) {
+constant (pTHX_ const char *name, STRLEN len, IV *iv_return, SV **sv_return) {
   /* Initially switch on the length of the name.  */
   /* When generated this function returned values for the list of names given
      in this section of perl code.  Rather than manually editing these functions
@@ -1500,7 +1500,7 @@ __END__
     }
     break;
   case 6:
-    return constant_6 (name, iv_return, sv_return);
+    return constant_6 (aTHX_ name, iv_return, sv_return);
     break;
   case 7:
     return constant_7 (name, iv_return, sv_return);
@@ -1512,10 +1512,10 @@ __END__
     return constant_9 (name, iv_return, sv_return);
     break;
   case 10:
-    return constant_10 (name, iv_return, sv_return);
+    return constant_10 (aTHX_ name, iv_return, sv_return);
     break;
   case 11:
-    return constant_11 (name, iv_return, sv_return);
+    return constant_11 (aTHX_ name, iv_return, sv_return);
     break;
   case 12:
     return constant_12 (name, iv_return, sv_return);
@@ -1619,7 +1619,7 @@ constant(sv)
     PPCODE:
         /* Change this to constant(s, len, &iv, &nv);
            if you need to return both NVs and IVs */
-	type = constant(s, len, &iv, &sv);
+	type = constant(aTHX_ s, len, &iv, &sv);
       /* Return 1 or 2 items. First is error message, or undef if no error.
            Second, if present, is found value */
         switch (type) {
