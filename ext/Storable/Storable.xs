@@ -4006,15 +4006,19 @@ static SV *retrieve_byte(stcxt_t *cxt, char *cname)
 {
 	SV *sv;
 	int siv;
+	signed char tmp; /* must use temp var to work around
+			    an AIX compiler bug --H.Merijn Brand */
 
 	TRACEME(("retrieve_byte (#%d)", cxt->tagnum));
 
 	GETMARK(siv);
 	TRACEME(("small integer read as %d", (unsigned char) siv));
-	sv = newSViv((unsigned char) siv - 128);
+	tmp = ((unsigned char)siv) - 128;
+	sv = newSViv (tmp);
+
 	SEEN(sv, cname);	/* Associate this new scalar with tag "tagnum" */
 
-	TRACEME(("byte %d", (unsigned char) siv - 128));
+	TRACEME(("byte %d", tmp));
 	TRACEME(("ok (retrieve_byte at 0x%"UVxf")", PTR2UV(sv)));
 
 	return sv;
