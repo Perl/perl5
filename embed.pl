@@ -1384,15 +1384,15 @@ pno	|Malloc_t|calloc	|MEM_SIZE elements|MEM_SIZE size
 pno	|Malloc_t|realloc	|Malloc_t where|MEM_SIZE nbytes
 pno	|Free_t	|mfree		|Malloc_t where
 #endif
-p	|Malloc_t|safesysmalloc	|MEM_SIZE nbytes
-p	|Malloc_t|safesyscalloc	|MEM_SIZE elements|MEM_SIZE size
-p	|Malloc_t|safesysrealloc|Malloc_t where|MEM_SIZE nbytes
-p	|Free_t	|safesysfree	|Malloc_t where
+pn	|Malloc_t|safesysmalloc	|MEM_SIZE nbytes
+pn	|Malloc_t|safesyscalloc	|MEM_SIZE elements|MEM_SIZE size
+pn	|Malloc_t|safesysrealloc|Malloc_t where|MEM_SIZE nbytes
+pn	|Free_t	|safesysfree	|Malloc_t where
 #if defined(LEAKTEST)
-p	|Malloc_t|safexmalloc	|I32 x|MEM_SIZE size
-p	|Malloc_t|safexcalloc	|I32 x|MEM_SIZE elements|MEM_SIZE size
-p	|Malloc_t|safexrealloc	|Malloc_t where|MEM_SIZE size
-p	|void	|safexfree	|Malloc_t where
+pn	|Malloc_t|safexmalloc	|I32 x|MEM_SIZE size
+pn	|Malloc_t|safexcalloc	|I32 x|MEM_SIZE elements|MEM_SIZE size
+pn	|Malloc_t|safexrealloc	|Malloc_t where|MEM_SIZE size
+pn	|void	|safexfree	|Malloc_t where
 #endif
 #if defined(PERL_GLOBAL_STRUCT)
 p	|struct perl_vars *|GetVars
@@ -1455,12 +1455,6 @@ s	|I32	|do_trans_UC_simple	|SV *sv
 s	|I32	|do_trans_CU_simple	|SV *sv
 s	|I32	|do_trans_UC_trivial	|SV *sv
 s	|I32	|do_trans_CU_trivial	|SV *sv
-#endif
-
-#if defined(PERL_IN_GLOBALS_C)
-#  if defined(WIN32)
-s	|int	|do_aspawn	|void *vreally|void **vmark|void **vsp
-#  endif
 #endif
 
 #if defined(PERL_IN_GV_C)
@@ -1668,7 +1662,7 @@ s	|void	|visit		|SVFUNC_t f
 s	|void	|reg_add	|SV *sv
 s	|void	|reg_remove	|SV *sv
 #  else
-s	|void*	|my_safemalloc	|MEM_SIZE size
+ns	|void*	|my_safemalloc	|MEM_SIZE size
 #  endif
 s	|void	|sv_add_backref	|SV *tsv|SV *sv
 s	|void	|sv_del_backref	|SV *sv

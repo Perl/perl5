@@ -327,8 +327,6 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #  endif
 #endif
 
-#include "iperlsys.h"
-
 #ifdef USE_NEXT_CTYPE
 
 #if NX_CURRENT_COMPILER_RELEASE >= 500
@@ -1568,6 +1566,11 @@ typedef I32 (*filter_t) (pTHX_ int, SV *, int);
 #define FILTER_DATA(idx)	   (AvARRAY(PL_rsfp_filters)[idx])
 #define FILTER_ISREADER(idx)	   (idx >= AvFILLp(PL_rsfp_filters))
 
+#ifdef WIN32
+#include "win32.h"
+#endif
+
+#include "iperlsys.h"
 #include "regexp.h"
 #include "sv.h"
 #include "util.h"
@@ -2519,18 +2522,6 @@ PERLVAR(object_compatibility[30],	char)
 #undef PERLVAR
 #undef PERLVARI
 #undef PERLVARIC
-
-#if defined(HASATTRIBUTE) && defined(WIN32) && !defined(CYGWIN32)
-/*
- * This provides a layer of functions and macros to ensure extensions will
- * get to use the same RTL functions as the core.
- * It has to go here or #define of printf messes up __attribute__
- * stuff in proto.h  
- */
-#ifndef PERL_OBJECT
-#  include <win32iop.h>
-#endif  /* PERL_OBJECT */
-#endif	/* WIN32 */
 
 #ifdef DOINIT
 

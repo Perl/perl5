@@ -123,13 +123,4 @@
 #  define HAS_KILL
 #  define HAS_WAIT
 #  define HAS_CHOWN
-/*
- * This provides a layer of functions and macros to ensure extensions will
- * get to use the same RTL functions as the core.
- */
-#  ifndef HASATTRIBUTE
-#    ifndef PERL_OBJECT
-#      include <win32iop.h>
-#    endif
-#  endif
 #endif	/* WIN32 */

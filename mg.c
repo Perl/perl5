@@ -532,7 +532,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 		sv_setpvn(sv, sMsg, dwLen);
 		PerlProc_FreeBuf(sMsg);
 #else
-		win32_str_os_error(sv, dwErr);
+		win32_str_os_error(aTHX_ sv, dwErr);
 #endif
 	    }
 	    else

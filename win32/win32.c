@@ -90,7 +90,7 @@ int _CRT_glob = 0;
 static DWORD		os_id(void);
 static void		get_shell(void);
 static long		tokenize(char *str, char **dest, char ***destv);
-	int		do_spawn2(char *cmd, int exectype);
+	int		do_spawn2(pTHX_ char *cmd, int exectype);
 static BOOL		has_shell_metachars(char *ptr);
 static long		filetime_to_clock(PFILETIME ft);
 static BOOL		filetime_from_time(PFILETIME ft, time_t t);
@@ -254,7 +254,7 @@ get_emd_part(char **prev_path, char *trailing_path, ...)
 }
 
 char *
-win32_get_privlib(char *pl)
+win32_get_privlib(pTHX_ char *pl)
 {
     char *stdlib = "lib";
     char buffer[MAX_PATH+1];
@@ -276,7 +276,7 @@ win32_get_privlib(char *pl)
 }
 
 char *
-win32_get_sitelib(char *pl)
+win32_get_sitelib(pTHX_ char *pl)
 {
     char *sitelib = "sitelib";
     char regstr[40];
@@ -375,7 +375,7 @@ has_shell_metachars(char *ptr)
  * the library functions will get the correct environment
  */
 PerlIO *
-my_popen(char *cmd, char *mode)
+Perl_my_popen(pTHX_ char *cmd, char *mode)
 {
 #ifdef FIXCMD
 #define fixcmd(x)	{					\
@@ -398,7 +398,7 @@ my_popen(char *cmd, char *mode)
 }
 
 long
-my_pclose(PerlIO *fp)
+Perl_my_pclose(pTHX_ PerlIO *fp)
 {
     return win32_pclose(fp);
 }
@@ -490,7 +490,7 @@ get_shell(void)
 }
 
 int
-do_aspawn(void *vreally, void **vmark, void **vsp)
+do_aspawn(pTHX_ void *vreally, void **vmark, void **vsp)
 {
     SV *really = (SV*)vreally;
     SV **mark = (SV**)vmark;
@@ -541,7 +541,7 @@ do_aspawn(void *vreally, void **vmark, void **vsp)
     if (flag != P_NOWAIT) {
 	if (status < 0) {
 	    if (PL_dowarn)
-		warn("Can't spawn \"%s\": %s", argv[0], strerror(errno));
+		Perl_warn(aTHX_ "Can't spawn \"%s\": %s", argv[0], strerror(errno));
 	    status = 255 * 256;
 	}
 	else
@@ -553,7 +553,7 @@ do_aspawn(void *vreally, void **vmark, void **vsp)
 }
 
 int
-do_spawn2(char *cmd, int exectype)
+do_spawn2(pTHX_ char *cmd, int exectype)
 {
     char **a;
     char *s;
@@ -628,7 +628,7 @@ do_spawn2(char *cmd, int exectype)
     if (exectype != EXECF_SPAWN_NOWAIT) {
 	if (status < 0) {
 	    if (PL_dowarn)
-		warn("Can't %s \"%s\": %s",
+		Perl_warn(aTHX_ "Can't %s \"%s\": %s",
 		     (exectype == EXECF_EXEC ? "exec" : "spawn"),
 		     cmd, strerror(errno));
 	    status = 255 * 256;
@@ -641,21 +641,21 @@ do_spawn2(char *cmd, int exectype)
 }
 
 int
-do_spawn(char *cmd)
+do_spawn(pTHX_ char *cmd)
 {
-    return do_spawn2(cmd, EXECF_SPAWN);
+    return do_spawn2(aTHX_ cmd, EXECF_SPAWN);
 }
 
 int
-do_spawn_nowait(char *cmd)
+do_spawn_nowait(pTHX_ char *cmd)
 {
-    return do_spawn2(cmd, EXECF_SPAWN_NOWAIT);
+    return do_spawn2(aTHX_ cmd, EXECF_SPAWN_NOWAIT);
 }
 
 bool
-do_exec(char *cmd)
+Perl_do_exec(pTHX_ char *cmd)
 {
-    do_spawn2(cmd, EXECF_EXEC);
+    do_spawn2(aTHX_ cmd, EXECF_EXEC);
     return FALSE;
 }
 
@@ -734,7 +734,7 @@ win32_opendir(char *filename)
     idx = strlen(ptr)+1;
     New(1304, p->start, idx, char);
     if (p->start == NULL)
-	croak("opendir: malloc failed!\n");
+	Perl_croak_nocontext("opendir: malloc failed!\n");
     strcpy(p->start, ptr);
     p->nfiles++;
 
@@ -756,7 +756,7 @@ win32_opendir(char *filename)
 	 */
 	Renew(p->start, idx+len+1, char);
 	if (p->start == NULL)
-	    croak("opendir: malloc failed!\n");
+	    Perl_croak_nocontext("opendir: malloc failed!\n");
 	strcpy(&p->start[idx], ptr);
 	p->nfiles++;
 	idx += len+1;
@@ -885,7 +885,7 @@ setgid(gid_t agid)
 char *
 getlogin(void)
 {
-    dTHR;
+    dTHX;
     char *buf = getlogin_buffer;
     DWORD size = sizeof(getlogin_buffer);
     if (GetUserName(buf,&size))
@@ -1540,7 +1540,7 @@ win32_alarm(unsigned int sec)
      {
       timerid = SetTimer(NULL,timerid,sec*1000,(TIMERPROC)TimerProc);
       if (!timerid)
-       croak("Cannot set timer");
+       Perl_croak_nocontext("Cannot set timer");
      } 
     else
      {
@@ -1685,7 +1685,7 @@ win32_flock(int fd, int oper)
     HANDLE fh;
 
     if (!IsWinNT()) {
-	croak("flock() unimplemented on this platform");
+	Perl_croak_nocontext("flock() unimplemented on this platform");
 	return -1;
     }
     fh = (HANDLE)_get_osfhandle(fd);
@@ -1783,7 +1783,7 @@ win32_strerror(int e)
     DWORD source = 0;
 
     if (e < 0 || e > sys_nerr) {
-        dTHR;
+        dTHX;
 	if (e < 0)
 	    e = GetLastError();
 
@@ -1797,7 +1797,7 @@ win32_strerror(int e)
 }
 
 DllExport void
-win32_str_os_error(void *sv, DWORD dwErr)
+win32_str_os_error(pTHX_ void *sv, DWORD dwErr)
 {
     DWORD dwLen;
     char *sMsg;
@@ -2078,17 +2078,20 @@ win32_popen(const char *command, const char *mode)
     win32_close(p[child]);
 
     /* start the child */
-    if ((childpid = do_spawn_nowait((char*)command)) == -1)
-        goto cleanup;
+    {
+	dTHX;
+	if ((childpid = do_spawn_nowait(aTHX_ (char*)command)) == -1)
+	    goto cleanup;
 
-    /* revert stdfd to whatever it was before */
-    if (win32_dup2(oldfd, stdfd) == -1)
-        goto cleanup;
+	/* revert stdfd to whatever it was before */
+	if (win32_dup2(oldfd, stdfd) == -1)
+	    goto cleanup;
 
-    /* close saved handle */
-    win32_close(oldfd);
+	/* close saved handle */
+	win32_close(oldfd);
 
-    sv_setiv(*av_fetch(w32_fdpid, p[parent], TRUE), childpid);
+	sv_setiv(*av_fetch(w32_fdpid, p[parent], TRUE), childpid);
+    }
 
     /* we have an fd, return a file stream */
     return (win32_fdopen(p[parent], (char *)mode));
@@ -2116,7 +2119,7 @@ win32_pclose(FILE *pf)
 #ifdef USE_RTL_POPEN
     return _pclose(pf);
 #else
-
+    dTHX;
     int childpid, status;
     SV *sv;
 
@@ -2802,7 +2805,7 @@ XS(w32_SetCwd)
 {
     dXSARGS;
     if (items != 1)
-	croak("usage: Win32::SetCurrentDirectory($cwd)");
+	Perl_croak(aTHX_ "usage: Win32::SetCurrentDirectory($cwd)");
     if (SetCurrentDirectory(SvPV_nolen(ST(0))))
 	XSRETURN_YES;
 
@@ -2840,7 +2843,7 @@ XS(w32_SetLastError)
 {
     dXSARGS;
     if (items != 1)
-	croak("usage: Win32::SetLastError($error)");
+	Perl_croak(aTHX_ "usage: Win32::SetLastError($error)");
     SetLastError(SvIV(ST(0)));
     XSRETURN_EMPTY;
 }
@@ -2984,7 +2987,7 @@ XS(w32_FormatMessage)
     char msgbuf[1024];
 
     if (items != 1)
-	croak("usage: Win32::FormatMessage($errno)");
+	Perl_croak(aTHX_ "usage: Win32::FormatMessage($errno)");
 
     if (FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,
 		      &source, SvIV(ST(0)), 0,
@@ -3004,7 +3007,7 @@ XS(w32_Spawn)
     BOOL bSuccess = FALSE;
 
     if (items != 3)
-	croak("usage: Win32::Spawn($cmdName, $args, $PID)");
+	Perl_croak(aTHX_ "usage: Win32::Spawn($cmdName, $args, $PID)");
 
     cmd = SvPV_nolen(ST(0));
     args = SvPV_nolen(ST(1));
@@ -3052,7 +3055,7 @@ XS(w32_GetShortPathName)
     DWORD len;
 
     if (items != 1)
-	croak("usage: Win32::GetShortPathName($longPathName)");
+	Perl_croak(aTHX_ "usage: Win32::GetShortPathName($longPathName)");
 
     shortpath = sv_mortalcopy(ST(0));
     SvUPGRADE(shortpath, SVt_PV);
@@ -3080,7 +3083,7 @@ XS(w32_GetFullPathName)
     DWORD len;
 
     if (items != 1)
-	croak("usage: Win32::GetFullPathName($filename)");
+	Perl_croak(aTHX_ "usage: Win32::GetFullPathName($filename)");
 
     filename = ST(0);
     fullpath = sv_mortalcopy(filename);
@@ -3115,7 +3118,7 @@ XS(w32_GetLongPathName)
     STRLEN len;
 
     if (items != 1)
-	croak("usage: Win32::GetLongPathName($pathname)");
+	Perl_croak(aTHX_ "usage: Win32::GetLongPathName($pathname)");
 
     path = ST(0);
     pathstr = SvPV(path,len);
@@ -3133,7 +3136,7 @@ XS(w32_Sleep)
 {
     dXSARGS;
     if (items != 1)
-	croak("usage: Win32::Sleep($milliseconds)");
+	Perl_croak(aTHX_ "usage: Win32::Sleep($milliseconds)");
     Sleep(SvIV(ST(0)));
     XSRETURN_YES;
 }
@@ -3143,14 +3146,14 @@ XS(w32_CopyFile)
 {
     dXSARGS;
     if (items != 3)
-	croak("usage: Win32::CopyFile($from, $to, $overwrite)");
+	Perl_croak(aTHX_ "usage: Win32::CopyFile($from, $to, $overwrite)");
     if (CopyFile(SvPV_nolen(ST(0)), SvPV_nolen(ST(1)), !SvTRUE(ST(2))))
 	XSRETURN_YES;
     XSRETURN_NO;
 }
 
 void
-Perl_init_os_extras()
+Perl_init_os_extras(pTHX)
 {
     char *file = __FILE__;
     dXSUB_SYS;

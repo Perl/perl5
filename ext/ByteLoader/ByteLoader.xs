@@ -25,9 +25,9 @@ byteloader_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
     struct bytestream bs;
 
     bs.data = PL_rsfp;
-    bs.fgetc = (int(*) (void*))fgetc;
-    bs.fread = (int(*) (char*,size_t,size_t,void*))fread;
-    bs.freadpv = freadpv;
+    bs.pfgetc = (int(*) (void*))fgetc;
+    bs.pfread = (int(*) (char*,size_t,size_t,void*))fread;
+    bs.pfreadpv = freadpv;
 
     byterun(bs);
 

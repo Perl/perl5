@@ -71,18 +71,18 @@ long lastxycount[MAXXCOUNT][MAXYCOUNT];
  */
 
 Malloc_t
-Perl_safesysmalloc(pTHX_ MEM_SIZE size)
+Perl_safesysmalloc(MEM_SIZE size)
 {
     Malloc_t ptr;
 #ifdef HAS_64K_LIMIT
 	if (size > 0xffff) {
 		PerlIO_printf(PerlIO_stderr(), "Allocation too large: %lx\n", size) FLUSH;
-		my_exit(1);
+		WITH_THX(my_exit(1));
 	}
 #endif /* HAS_64K_LIMIT */
 #ifdef DEBUGGING
     if ((long)size < 0)
-	Perl_croak(aTHX_ "panic: malloc");
+	Perl_croak_nocontext("panic: malloc");
 #endif
     ptr = PerlMem_malloc(size?size:1);	/* malloc(0) is NASTY on our system */
 #if !(defined(I286) || defined(atarist))
@@ -96,7 +96,7 @@ Perl_safesysmalloc(pTHX_ MEM_SIZE size)
 	return Nullch;
     else {
 	PerlIO_puts(PerlIO_stderr(),PL_no_mem) FLUSH;
-	my_exit(1);
+	WITH_THX(my_exit(1));
         return Nullch;
     }
     /*NOTREACHED*/
@@ -105,7 +105,7 @@ Perl_safesysmalloc(pTHX_ MEM_SIZE size)
 /* paranoid version of system's realloc() */
 
 Malloc_t
-Perl_safesysrealloc(pTHX_ Malloc_t where,MEM_SIZE size)
+Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 {
     Malloc_t ptr;
 #if !defined(STANDARD_C) && !defined(HAS_REALLOC_PROTOTYPE)
@@ -116,7 +116,7 @@ Perl_safesysrealloc(pTHX_ Malloc_t where,MEM_SIZE size)
     if (size > 0xffff) {
 	PerlIO_printf(PerlIO_stderr(),
 		      "Reallocation too large: %lx\n", size) FLUSH;
-	my_exit(1);
+	WITH_THX(my_exit(1));
     }
 #endif /* HAS_64K_LIMIT */
     if (!size) {
@@ -128,7 +128,7 @@ Perl_safesysrealloc(pTHX_ Malloc_t where,MEM_SIZE size)
 	return safesysmalloc(size);
 #ifdef DEBUGGING
     if ((long)size < 0)
-	Perl_croak(aTHX_ "panic: realloc");
+	Perl_croak_nocontext("panic: realloc");
 #endif
     ptr = PerlMem_realloc(where,size);
 
@@ -150,7 +150,7 @@ Perl_safesysrealloc(pTHX_ Malloc_t where,MEM_SIZE size)
 	return Nullch;
     else {
 	PerlIO_puts(PerlIO_stderr(),PL_no_mem) FLUSH;
-	my_exit(1);
+	WITH_THX(my_exit(1));
 	return Nullch;
     }
     /*NOTREACHED*/
@@ -159,7 +159,7 @@ Perl_safesysrealloc(pTHX_ Malloc_t where,MEM_SIZE size)
 /* safe version of system's free() */
 
 Free_t
-Perl_safesysfree(pTHX_ Malloc_t where)
+Perl_safesysfree(Malloc_t where)
 {
 #if !(defined(I286) || defined(atarist))
     DEBUG_m( PerlIO_printf(Perl_debug_log, "0x%x: (%05d) free\n",(char *) where,PL_an++));
@@ -175,7 +175,7 @@ Perl_safesysfree(pTHX_ Malloc_t where)
 /* safe version of system's calloc() */
 
 Malloc_t
-Perl_safesyscalloc(pTHX_ MEM_SIZE count, MEM_SIZE size)
+Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 {
     Malloc_t ptr;
 
@@ -183,12 +183,12 @@ Perl_safesyscalloc(pTHX_ MEM_SIZE count, MEM_SIZE size)
     if (size * count > 0xffff) {
 	PerlIO_printf(PerlIO_stderr(),
 		      "Allocation too large: %lx\n", size * count) FLUSH;
-	my_exit(1);
+	WITH_THX(my_exit(1));
     }
 #endif /* HAS_64K_LIMIT */
 #ifdef DEBUGGING
     if ((long)size < 0 || (long)count < 0)
-	Perl_croak(aTHX_ "panic: calloc");
+	Perl_croak_nocontext("panic: calloc");
 #endif
     size *= count;
     ptr = PerlMem_malloc(size?size:1);	/* malloc(0) is NASTY on our system */
@@ -205,7 +205,7 @@ Perl_safesyscalloc(pTHX_ MEM_SIZE count, MEM_SIZE size)
 	return Nullch;
     else {
 	PerlIO_puts(PerlIO_stderr(),PL_no_mem) FLUSH;
-	my_exit(1);
+	WITH_THX(my_exit(1));
 	return Nullch;
     }
     /*NOTREACHED*/
@@ -235,7 +235,7 @@ struct mem_test_strut {
 			      : ((size) - 1)/4))
 
 Malloc_t
-Perl_safexmalloc(pTHX_ I32 x, MEM_SIZE size)
+Perl_safexmalloc(I32 x, MEM_SIZE size)
 {
     register char* where = (char*)safemalloc(size + ALIGN);
 
@@ -247,7 +247,7 @@ Perl_safexmalloc(pTHX_ I32 x, MEM_SIZE size)
 }
 
 Malloc_t
-Perl_safexrealloc(pTHX_ Malloc_t wh, MEM_SIZE size)
+Perl_safexrealloc(Malloc_t wh, MEM_SIZE size)
 {
     char *where = (char*)wh;
 
@@ -268,7 +268,7 @@ Perl_safexrealloc(pTHX_ Malloc_t wh, MEM_SIZE size)
 }
 
 void
-Perl_safexfree(pTHX_ Malloc_t wh)
+Perl_safexfree(Malloc_t wh)
 {
     I32 x;
     char *where = (char*)wh;
@@ -285,7 +285,7 @@ Perl_safexfree(pTHX_ Malloc_t wh)
 }
 
 Malloc_t
-Perl_safexcalloc(pTHX_ I32 x,MEM_SIZE count, MEM_SIZE size)
+Perl_safexcalloc(I32 x,MEM_SIZE count, MEM_SIZE size)
 {
     register char * where = (char*)safexmalloc(x, size * count + ALIGN);
     xcount[x] += size;
@@ -3224,7 +3224,7 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
     MUTEX_UNLOCK(&t->mutex);
 
 #ifdef HAVE_THREAD_INTERN
-    init_thread_intern(thr);
+    Perl_init_thread_intern(thr);
 #endif /* HAVE_THREAD_INTERN */
     return thr;
 }

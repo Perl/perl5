@@ -9,6 +9,9 @@
 
 #include "INTERN.h"
 #include "config.h"
+#ifdef WIN32
+#include "io.h"
+#endif
 #include "sdbm.h"
 #include "tune.h"
 #include "pair.h"

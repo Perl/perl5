@@ -2066,10 +2066,6 @@
 #endif
 #if defined(PERL_IN_DOOP_C)
 #endif
-#if defined(PERL_IN_GLOBALS_C)
-#  if defined(WIN32)
-#  endif
-#endif
 #if defined(PERL_IN_GV_C)
 #endif
 #if defined(PERL_IN_HV_C)

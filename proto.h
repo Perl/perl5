@@ -630,15 +630,15 @@ Malloc_t	Perl_calloc(MEM_SIZE elements, MEM_SIZE size);
 Malloc_t	Perl_realloc(Malloc_t where, MEM_SIZE nbytes);
 Free_t	Perl_mfree(Malloc_t where);
 #endif
-Malloc_t	Perl_safesysmalloc(pTHX_ MEM_SIZE nbytes);
-Malloc_t	Perl_safesyscalloc(pTHX_ MEM_SIZE elements, MEM_SIZE size);
-Malloc_t	Perl_safesysrealloc(pTHX_ Malloc_t where, MEM_SIZE nbytes);
-Free_t	Perl_safesysfree(pTHX_ Malloc_t where);
+Malloc_t	Perl_safesysmalloc(MEM_SIZE nbytes);
+Malloc_t	Perl_safesyscalloc(MEM_SIZE elements, MEM_SIZE size);
+Malloc_t	Perl_safesysrealloc(Malloc_t where, MEM_SIZE nbytes);
+Free_t	Perl_safesysfree(Malloc_t where);
 #if defined(LEAKTEST)
-Malloc_t	Perl_safexmalloc(pTHX_ I32 x, MEM_SIZE size);
-Malloc_t	Perl_safexcalloc(pTHX_ I32 x, MEM_SIZE elements, MEM_SIZE size);
-Malloc_t	Perl_safexrealloc(pTHX_ Malloc_t where, MEM_SIZE size);
-void	Perl_safexfree(pTHX_ Malloc_t where);
+Malloc_t	Perl_safexmalloc(I32 x, MEM_SIZE size);
+Malloc_t	Perl_safexcalloc(I32 x, MEM_SIZE elements, MEM_SIZE size);
+Malloc_t	Perl_safexrealloc(Malloc_t where, MEM_SIZE size);
+void	Perl_safexfree(Malloc_t where);
 #endif
 #if defined(PERL_GLOBAL_STRUCT)
 struct perl_vars *	Perl_GetVars(pTHX);
@@ -695,11 +695,6 @@ STATIC I32	S_do_trans_UC_simple(pTHX_ SV *sv);
 STATIC I32	S_do_trans_CU_simple(pTHX_ SV *sv);
 STATIC I32	S_do_trans_UC_trivial(pTHX_ SV *sv);
 STATIC I32	S_do_trans_CU_trivial(pTHX_ SV *sv);
-#endif
-#if defined(PERL_IN_GLOBALS_C)
-#  if defined(WIN32)
-STATIC int	S_do_aspawn(pTHX_ void *vreally, void **vmark, void **vsp);
-#  endif
 #endif
 #if defined(PERL_IN_GV_C)
 STATIC void	S_gv_init_sv(pTHX_ GV *gv, I32 sv_type);
@@ -889,7 +884,7 @@ STATIC void	S_visit(pTHX_ SVFUNC_t f);
 STATIC void	S_reg_add(pTHX_ SV *sv);
 STATIC void	S_reg_remove(pTHX_ SV *sv);
 #  else
-STATIC void*	S_my_safemalloc(pTHX_ MEM_SIZE size);
+STATIC void*	S_my_safemalloc(MEM_SIZE size);
 #  endif
 STATIC void	S_sv_add_backref(pTHX_ SV *tsv, SV *sv);
 STATIC void	S_sv_del_backref(pTHX_ SV *sv);

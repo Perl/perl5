@@ -582,7 +582,7 @@ S_more_xpv(pTHX)
 #  define my_safefree(s) safefree(s)
 #else
 STATIC void* 
-S_my_safemalloc(pTHX_ MEM_SIZE size)
+S_my_safemalloc(MEM_SIZE size)
 {
     char *p;
     New(717, p, size, char);

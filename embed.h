@@ -693,11 +693,6 @@
 #define do_trans_UC_trivial	S_do_trans_UC_trivial
 #define do_trans_CU_trivial	S_do_trans_CU_trivial
 #endif
-#if defined(PERL_IN_GLOBALS_C)
-#  if defined(WIN32)
-#define do_aspawn		S_do_aspawn
-#  endif
-#endif
 #if defined(PERL_IN_GV_C)
 #define gv_init_sv		S_gv_init_sv
 #endif
@@ -1928,15 +1923,15 @@
 #if defined(MYMALLOC)
 #define dump_mstats(a)		Perl_dump_mstats(aTHX_ a)
 #endif
-#define safesysmalloc(a)	Perl_safesysmalloc(aTHX_ a)
-#define safesyscalloc(a,b)	Perl_safesyscalloc(aTHX_ a,b)
-#define safesysrealloc(a,b)	Perl_safesysrealloc(aTHX_ a,b)
-#define safesysfree(a)		Perl_safesysfree(aTHX_ a)
+#define safesysmalloc		Perl_safesysmalloc
+#define safesyscalloc		Perl_safesyscalloc
+#define safesysrealloc		Perl_safesysrealloc
+#define safesysfree		Perl_safesysfree
 #if defined(LEAKTEST)
-#define safexmalloc(a,b)	Perl_safexmalloc(aTHX_ a,b)
-#define safexcalloc(a,b,c)	Perl_safexcalloc(aTHX_ a,b,c)
-#define safexrealloc(a,b)	Perl_safexrealloc(aTHX_ a,b)
-#define safexfree(a)		Perl_safexfree(aTHX_ a)
+#define safexmalloc		Perl_safexmalloc
+#define safexcalloc		Perl_safexcalloc
+#define safexrealloc		Perl_safexrealloc
+#define safexfree		Perl_safexfree
 #endif
 #if defined(PERL_GLOBAL_STRUCT)
 #define GetVars()		Perl_GetVars(aTHX)
@@ -1989,11 +1984,6 @@
 #define do_trans_CU_simple(a)	S_do_trans_CU_simple(aTHX_ a)
 #define do_trans_UC_trivial(a)	S_do_trans_UC_trivial(aTHX_ a)
 #define do_trans_CU_trivial(a)	S_do_trans_CU_trivial(aTHX_ a)
-#endif
-#if defined(PERL_IN_GLOBALS_C)
-#  if defined(WIN32)
-#define do_aspawn(a,b,c)	S_do_aspawn(aTHX_ a,b,c)
-#  endif
 #endif
 #if defined(PERL_IN_GV_C)
 #define gv_init_sv(a,b)		S_gv_init_sv(aTHX_ a,b)
@@ -2182,7 +2172,7 @@
 #define reg_add(a)		S_reg_add(aTHX_ a)
 #define reg_remove(a)		S_reg_remove(aTHX_ a)
 #  else
-#define my_safemalloc(a)	S_my_safemalloc(aTHX_ a)
+#define my_safemalloc		S_my_safemalloc
 #  endif
 #define sv_add_backref(a,b)	S_sv_add_backref(aTHX_ a,b)
 #define sv_del_backref(a)	S_sv_del_backref(aTHX_ a)
@@ -3308,11 +3298,6 @@
 #define S_do_trans_CU_simple	CPerlObj::do_trans_CU_simple
 #define S_do_trans_UC_trivial	CPerlObj::do_trans_UC_trivial
 #define S_do_trans_CU_trivial	CPerlObj::do_trans_CU_trivial
-#endif
-#if defined(PERL_IN_GLOBALS_C)
-#  if defined(WIN32)
-#define S_do_aspawn		CPerlObj::do_aspawn
-#  endif
 #endif
 #if defined(PERL_IN_GV_C)
 #define S_gv_init_sv		CPerlObj::gv_init_sv

@@ -443,19 +443,6 @@ walkoptree_debug(...)
     OUTPUT:
 	RETVAL
 
-int
-byteload_fh(fp)
-	InputStream    fp
-    CODE:
-	byteload_fh(fp);
-	RETVAL = 1;
-    OUTPUT:
-	RETVAL
-
-void
-byteload_string(str)
-	char *	str
-
 #define address(sv) (IV)sv
 
 IV

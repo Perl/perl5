@@ -3602,12 +3602,12 @@ PP(pp_system)
 #else /* ! FORK or VMS or OS/2 */
     if (PL_op->op_flags & OPf_STACKED) {
 	SV *really = *++MARK;
-	value = (I32)do_aspawn(really, (void **)MARK, (void **)SP);
+	value = (I32)do_aspawn(aTHX_ really, (void **)MARK, (void **)SP);
     }
     else if (SP - MARK != 1)
-	value = (I32)do_aspawn(Nullsv, (void **)MARK, (void **)SP);
+	value = (I32)do_aspawn(aTHX_ Nullsv, (void **)MARK, (void **)SP);
     else {
-	value = (I32)do_spawn(SvPVx(sv_mortalcopy(*SP), n_a));
+	value = (I32)do_spawn(aTHX_ SvPVx(sv_mortalcopy(*SP), n_a));
     }
     STATUS_NATIVE_SET(value);
     do_execfree();
@@ -3634,7 +3634,7 @@ PP(pp_exec)
 #else
 #  ifdef __OPEN_VM
 	{
-	   (void ) do_aspawn(Nullsv, MARK, SP);
+	   (void ) do_aspawn(aTHX_ Nullsv, MARK, SP);
 	   value = 0;
 	}
 #  else
@@ -3651,7 +3651,7 @@ PP(pp_exec)
 	value = (I32)vms_do_exec(SvPVx(sv_mortalcopy(*SP), n_a));
 #else
 #  ifdef __OPEN_VM
-	(void) do_spawn(SvPVx(sv_mortalcopy(*SP), n_a));
+	(void) do_spawn(aTHX_ SvPVx(sv_mortalcopy(*SP), n_a));
 	value = 0;
 #  else
 	value = (I32)do_exec(SvPVx(sv_mortalcopy(*SP), n_a));

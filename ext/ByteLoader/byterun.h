@@ -10,9 +10,9 @@
  */
 struct bytestream {
     void *data;
-    int (*fgetc)(void *);
-    int (*fread)(char *, size_t, size_t, void *);
-    void (*freadpv)(U32, void *, XPV *);
+    int (*pfgetc)(void *);
+    int (*pfread)(char *, size_t, size_t, void *);
+    void (*pfreadpv)(U32, void *, XPV *);
 };
 
 enum {

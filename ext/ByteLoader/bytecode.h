@@ -8,8 +8,8 @@ typedef OP *opindex;
 typedef IV IV64;
 
 #define BGET_FREAD(argp, len, nelem)	\
-	 bs.fread((char*)(argp),(len),(nelem),bs.data)
-#define BGET_FGETC() bs.fgetc(bs.data)
+	 bs.pfread((char*)(argp),(len),(nelem),bs.data)
+#define BGET_FGETC() bs.pfgetc(bs.data)
 
 #define BGET_U32(arg)	\
 	BGET_FREAD(&arg, sizeof(U32), 1); arg = PerlSock_ntohl((U32)arg)
@@ -22,7 +22,7 @@ typedef IV IV64;
 #define BGET_PV(arg)	STMT_START {	\
 	BGET_U32(arg);			\
 	if (arg)			\
-	    bs.freadpv(arg, bs.data, &bytecode_pv);	\
+	    bs.pfreadpv(arg, bs.data, &bytecode_pv);	\
 	else {				\
 	    bytecode_pv.xpv_pv = 0;		\
 	    bytecode_pv.xpv_len = 0;		\

@@ -947,7 +947,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     if (xsinit)
 	(*xsinit)(aTHX);	/* in case linked C routines want magical variables */
 #if defined(VMS) || defined(WIN32) || defined(DJGPP)
-    init_os_extras();
+    init_os_extras(aTHX);
 #endif
 
     init_predump_symbols();
@@ -2916,7 +2916,7 @@ S_init_main_thread(pTHX)
     MUTEX_UNLOCK(&PL_threads_mutex);
 
 #ifdef HAVE_THREAD_INTERN
-    init_thread_intern(thr);
+    Perl_init_thread_intern(thr);
 #endif
 
 #ifdef SET_THREAD_SELF
