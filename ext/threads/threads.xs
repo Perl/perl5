@@ -111,6 +111,11 @@ SV* Perl_thread_create(char* class, SV* init_function, SV* params) {
 	init_function = NULL;
 	temp_store = NULL;
 
+	temp_store = Perl_get_sv(current_perl, "threads::origthread", TRUE | GV_ADDMULTI);
+	sv_setiv(temp_store,(IV)current_perl);
+	temp_store = NULL;	
+
+	
 #ifdef WIN32
 	thread->interp = perl_clone(current_perl, 4);
 #else
@@ -121,6 +126,8 @@ SV* Perl_thread_create(char* class, SV* init_function, SV* params) {
 						    "threads::calltempstore",FALSE));
 	thread->params = newSVsv(Perl_get_sv(thread->interp,
 					     "threads::paramtempstore",FALSE));
+
+
 
 	/*
 	 * And here we make sure we clean up the data we put in the

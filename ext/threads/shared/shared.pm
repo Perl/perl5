@@ -59,7 +59,7 @@ sub CLONE {
     return unless($_[0] eq "threads::shared");
 	foreach my $ptr (keys %shared) {
 	    if($ptr) {
-		thrcnt_inc($shared{$ptr});
+		thrcnt_inc($shared{$ptr},$threads::origthread);
 	    }
 	}
 }

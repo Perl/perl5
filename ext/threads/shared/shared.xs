@@ -171,16 +171,21 @@ _thrcnt(ref)
 
 
 void
-thrcnt_inc(ref)
+thrcnt_inc(ref,perl)
         SV* ref
+	SV* perl
         CODE:
 	shared_sv* shared;
+	PerlInterpreter* origperl = (PerlInterpreter*) SvIV(perl);
+	PerlInterpreter* oldperl = PERL_GET_CONTEXT;
         if(SvROK(ref)) 
             ref = SvRV(ref);
         shared = Perl_sharedsv_find(aTHX, ref);
         if(!shared)
            croak("thrcnt can only be used on shared values");
+	PERL_SET_CONTEXT(origperl);
 	Perl_sharedsv_thrcnt_inc(aTHX_ shared);
+	PERL_SET_CONTEXT(oldperl);	
 
 void
 _thrcnt_dec(ref)
