@@ -75,6 +75,7 @@ static I32 read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen);
 	    ALLOC_THREAD_KEY;			\
 	    PERL_SET_THX(my_perl);		\
 	    OP_REFCNT_INIT;			\
+	    MUTEX_INIT(&PL_dollarzero_mutex);	\
 	}					\
 	else {					\
 	    PERL_SET_THX(my_perl);		\
@@ -192,10 +193,6 @@ perl_construct(pTHXx)
 
 	thr = init_main_thread();
 #endif /* USE_5005THREADS */
-
-#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
-	MUTEX_INIT(&PL_dollarzero_mutex);       /* for $0 modifying */
-#endif
 
 #ifdef PERL_FLEXIBLE_EXCEPTIONS
 	PL_protect = MEMBER_TO_FPTR(Perl_default_protect); /* for exceptions */
