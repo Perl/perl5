@@ -251,21 +251,39 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		SvREFCNT_dec(seenentry);
 	    }
 	}
-	
-	(*levelp)++;
-	ipad = sv_x(aTHX_ Nullsv, SvPVX(xpad), SvCUR(xpad), *levelp);
 
-	if (realpack) {   /* we have a blessed ref */
-	    STRLEN blesslen;
-	    char *blessstr = SvPV(bless, blesslen);
-	    sv_catpvn(retval, blessstr, blesslen);
-	    sv_catpvn(retval, "( ", 2);
-	    if (indent >= 2) {
-		blesspad = apad;
-		apad = newSVsv(apad);
-		sv_x(aTHX_ apad, " ", 1, blesslen+2);
+	if (realpack) {
+	    if (*realpack == 'R' && strEQ(realpack, "Regexp")) {
+		STRLEN rlen;
+		char *rval = SvPV(val, rlen);
+		char *slash = strchr(rval, '/');
+		sv_catpvn(retval, "qr/", 3);
+		while (slash) {
+		    sv_catpvn(retval, rval, slash-rval);
+		    sv_catpvn(retval, "\\/", 2);
+		    rlen -= slash-rval+1;
+		    rval = slash+1;
+		    slash = strchr(rval, '/');
+		}
+		sv_catpvn(retval, rval, rlen);
+		sv_catpvn(retval, "/", 1);
+		return 1;
+	    }
+	    else {				/* we have a blessed ref */
+		STRLEN blesslen;
+		char *blessstr = SvPV(bless, blesslen);
+		sv_catpvn(retval, blessstr, blesslen);
+		sv_catpvn(retval, "( ", 2);
+		if (indent >= 2) {
+		    blesspad = apad;
+		    apad = newSVsv(apad);
+		    sv_x(aTHX_ apad, " ", 1, blesslen+2);
+		}
 	    }
 	}
+
+	(*levelp)++;
+	ipad = sv_x(aTHX_ Nullsv, SvPVX(xpad), SvCUR(xpad), *levelp);
 
 	if (realtype <= SVt_PVBM) {			     /* scalar ref */
 	    SV *namesv = newSVpvn("${", 2);

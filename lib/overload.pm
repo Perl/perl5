@@ -87,7 +87,7 @@ sub AddrRef {
 }
 
 sub StrVal {
-  (OverloadedStringify($_[0])) ?
+  (OverloadedStringify($_[0]) or ref($_[0]) eq 'Regexp') ?
     (AddrRef(shift)) :
     "$_[0]";
 }

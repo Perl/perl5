@@ -181,6 +181,13 @@ sub unwrap {
     }
   }
 
+  if (ref $v eq 'Regexp') {
+    my $re = "$v";
+    $re =~ s,/,\\/,g;
+    print "$sp-> qr/$re/\n";
+    return;
+  }
+
   if ( UNIVERSAL::isa($v, 'HASH') ) {
     my @sortKeys = sort keys(%$v) ;
     my $more;
