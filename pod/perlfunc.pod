@@ -2118,17 +2118,21 @@ as trying has no effect).
 
 See also C<each>, C<values> and C<sort>.
 
-=item kill LIST
+=item kill SIGNAL, LIST
 
-Sends a signal to a list of processes.  The first element of
-the list must be the signal to send.  Returns the number of
+Sends a signal to a list of processes.  Returns the number of
 processes successfully signaled (which is not necessarily the
 same as the number actually killed).
 
     $cnt = kill 1, $child1, $child2;
     kill 9, @goners;
 
-Unlike in the shell, in Perl if the I<SIGNAL> is negative, it kills
+If SIGNAL is zero, no signal is sent to the process.  This is a
+useful way to check that the process is alive and hasn't changed
+its UID.  See L<perlport> for notes on the portability of this
+construct.
+
+Unlike in the shell, if SIGNAL is negative, it kills
 process groups instead of processes.  (On System V, a negative I<PROCESS>
 number will also kill process groups, but that's not portable.)  That
 means you usually want to use positive not negative signals.  You may also
