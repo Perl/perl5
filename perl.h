@@ -1886,7 +1886,7 @@ typedef I32 CHECKPOINT;
 #           endif
 #       endif
 #   endif
-#else
+#endif
 
 /* Used with UV/IV arguments: */
 					/* XXXX: need to speed it up */

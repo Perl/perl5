@@ -1265,6 +1265,10 @@
 #define Perl_do_trans		pPerl->Perl_do_trans
 #undef  do_trans
 #define do_trans		Perl_do_trans
+#undef  Perl_do_vecget
+#define Perl_do_vecget		pPerl->Perl_do_vecget
+#undef  do_vecget
+#define do_vecget		Perl_do_vecget
 #undef  Perl_do_vecset
 #define Perl_do_vecset		pPerl->Perl_do_vecset
 #undef  do_vecset

@@ -2052,74 +2052,24 @@ PP(pp_vec)
     register I32 offset = POPi;
     register SV *src = POPs;
     I32 lvalue = PL_op->op_flags & OPf_MOD;
-    STRLEN srclen;
-    unsigned char *s = (unsigned char*)SvPV(src, srclen);
-    unsigned long retnum;
-    I32 len;
 
-    SvTAINTED_off(TARG);			/* decontaminate */
-    offset *= size;		/* turn into bit offset */
-    len = (offset + size + 7) / 8;
-    if (offset < 0 || size < 1)
-	retnum = 0;
-    else {
-	if (lvalue) {                      /* it's an lvalue! */
-	    if (SvTYPE(TARG) < SVt_PVLV) {
-		sv_upgrade(TARG, SVt_PVLV);
-		sv_magic(TARG, Nullsv, 'v', Nullch, 0);
-	    }
-
-	    LvTYPE(TARG) = 'v';
-	    if (LvTARG(TARG) != src) {
-		if (LvTARG(TARG))
-		    SvREFCNT_dec(LvTARG(TARG));
-		LvTARG(TARG) = SvREFCNT_inc(src);
-	    }
-	    LvTARGOFF(TARG) = offset;
-	    LvTARGLEN(TARG) = size;
+    SvTAINTED_off(TARG);		/* decontaminate */
+    if (lvalue) {			/* it's an lvalue! */
+	if (SvTYPE(TARG) < SVt_PVLV) {
+	    sv_upgrade(TARG, SVt_PVLV);
+	    sv_magic(TARG, Nullsv, 'v', Nullch, 0);
 	}
-	if (len > srclen) {
-	    if (size <= 8)
-		retnum = 0;
-	    else {
-		offset >>= 3;
-		if (size == 16) {
-		    if (offset >= srclen)
-			retnum = 0;
-		    else
-			retnum = (unsigned long) s[offset] << 8;
-		}
-		else if (size == 32) {
-		    if (offset >= srclen)
-			retnum = 0;
-		    else if (offset + 1 >= srclen)
-			retnum = (unsigned long) s[offset] << 24;
-		    else if (offset + 2 >= srclen)
-			retnum = ((unsigned long) s[offset] << 24) +
-			    ((unsigned long) s[offset + 1] << 16);
-		    else
-			retnum = ((unsigned long) s[offset] << 24) +
-			    ((unsigned long) s[offset + 1] << 16) +
-			    (s[offset + 2] << 8);
-		}
-	    }
+	LvTYPE(TARG) = 'v';
+	if (LvTARG(TARG) != src) {
+	    if (LvTARG(TARG))
+		SvREFCNT_dec(LvTARG(TARG));
+	    LvTARG(TARG) = SvREFCNT_inc(src);
 	}
-	else if (size < 8)
-	    retnum = (s[offset >> 3] >> (offset & 7)) & ((1 << size) - 1);
-	else {
-	    offset >>= 3;
-	    if (size == 8)
-		retnum = s[offset];
-	    else if (size == 16)
-		retnum = ((unsigned long) s[offset] << 8) + s[offset+1];
-	    else if (size == 32)
-		retnum = ((unsigned long) s[offset] << 24) +
-			((unsigned long) s[offset + 1] << 16) +
-			(s[offset + 2] << 8) + s[offset+3];
-	}
+	LvTARGOFF(TARG) = offset;
+	LvTARGLEN(TARG) = size;
     }
 
-    sv_setuv(TARG, (UV)retnum);
+    sv_setuv(TARG, do_vecget(src, offset, size));
     PUSHs(TARG);
     RETURN;
 }

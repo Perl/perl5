@@ -868,6 +868,13 @@ Perl_do_trans(pTHXo_ SV* sv)
     return ((CPerlObj*)pPerl)->Perl_do_trans(sv);
 }
 
+#undef  Perl_do_vecget
+UV
+Perl_do_vecget(pTHXo_ SV* sv, I32 offset, I32 size)
+{
+    return ((CPerlObj*)pPerl)->Perl_do_vecget(sv, offset, size);
+}
+
 #undef  Perl_do_vecset
 void
 Perl_do_vecset(pTHXo_ SV* sv)

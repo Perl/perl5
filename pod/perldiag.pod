@@ -1519,6 +1519,11 @@ of the octal number stopped before the 8 or 9.
 in a hexadecimal number.  Interpretation of the hexadecimal number stopped
 before the illegal character.
 
+=item Illegal number of bits in vec
+
+(F) The number of bits in vec() (the third argument) must be from 1 to 8
+(inclusive), or 16, or 32.
+ 
 =item Illegal switch in PERL5OPT: %s
 
 (X) The PERL5OPT environment variable may only be used to set the

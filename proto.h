@@ -125,6 +125,7 @@ VIRTUAL void	Perl_do_sprintf(pTHX_ SV* sv, I32 len, SV** sarg);
 VIRTUAL Off_t	Perl_do_sysseek(pTHX_ GV* gv, Off_t pos, int whence);
 VIRTUAL Off_t	Perl_do_tell(pTHX_ GV* gv);
 VIRTUAL I32	Perl_do_trans(pTHX_ SV* sv);
+VIRTUAL UV	Perl_do_vecget(pTHX_ SV* sv, I32 offset, I32 size);
 VIRTUAL void	Perl_do_vecset(pTHX_ SV* sv);
 VIRTUAL void	Perl_do_vop(pTHX_ I32 optype, SV* sv, SV* left, SV* right);
 VIRTUAL OP*	Perl_dofile(pTHX_ OP* term);

@@ -1361,65 +1361,13 @@ int
 Perl_magic_getvec(pTHX_ SV *sv, MAGIC *mg)
 {
     SV *lsv = LvTARG(sv);
-    unsigned char *s;
-    unsigned long retnum;
-    STRLEN lsvlen;
-    I32 len;
-    I32 offset;
-    I32 size;
 
     if (!lsv) {
 	SvOK_off(sv);
 	return 0;
     }
-    s = (unsigned char *) SvPV(lsv, lsvlen);
-    offset = LvTARGOFF(sv);
-    size = LvTARGLEN(sv);
-    len = (offset + size + 7) / 8;
 
-    /* Copied from pp_vec() */
-
-    if (len > lsvlen) {
-	if (size <= 8)
-	    retnum = 0;
-	else {
-	    offset >>= 3;
-	    if (size == 16) {
-		if (offset >= lsvlen)
-		    retnum = 0;
-		else
-		    retnum = (unsigned long) s[offset] << 8;
-	    }
-	    else if (size == 32) {
-		if (offset >= lsvlen)
-		    retnum = 0;
-		else if (offset + 1 >= lsvlen)
-		    retnum = (unsigned long) s[offset] << 24;
-		else if (offset + 2 >= lsvlen)
-		    retnum = ((unsigned long) s[offset] << 24) +
-			((unsigned long) s[offset + 1] << 16);
-		else
-		    retnum = ((unsigned long) s[offset] << 24) +
-			((unsigned long) s[offset + 1] << 16) +
-			(s[offset + 2] << 8);
-	    }
-	}
-    }
-    else if (size < 8)
-	retnum = (s[offset >> 3] >> (offset & 7)) & ((1 << size) - 1);
-    else {
-	offset >>= 3;
-	if (size == 8)
-	    retnum = s[offset];
-	else if (size == 16)
-	    retnum = ((unsigned long) s[offset] << 8) + s[offset+1];
-	else if (size == 32)
-	    retnum = ((unsigned long) s[offset] << 24) +
-		((unsigned long) s[offset + 1] << 16) +
-		(s[offset + 2] << 8) + s[offset+3];
-    }
-
-    sv_setuv(sv, (UV)retnum);
+    sv_setuv(sv, do_vecget(lsv, LvTARGOFF(sv), LvTARGLEN(sv)));
     return 0;
 }
 

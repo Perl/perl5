@@ -1143,6 +1143,7 @@ p	|void	|do_sprintf	|SV* sv|I32 len|SV** sarg
 p	|Off_t	|do_sysseek	|GV* gv|Off_t pos|int whence
 p	|Off_t	|do_tell	|GV* gv
 p	|I32	|do_trans	|SV* sv
+p	|UV	|do_vecget	|SV* sv|I32 offset|I32 size
 p	|void	|do_vecset	|SV* sv
 p	|void	|do_vop		|I32 optype|SV* sv|SV* left|SV* right
 p	|OP*	|dofile		|OP* term
