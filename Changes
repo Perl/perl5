@@ -79,6 +79,195 @@ Version 5.005_62        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  4141] By: jhi                                   on 1999/09/13  16:16:56
+        Log: Scan for <pthread.h> always.
+     Branch: cfgperl
+	   ! Configure config_h.SH perl.h
+     Branch: metaconfig
+	   ! U/threads/i_pthread.U
+____________________________________________________________________________
+[  4140] By: jhi                                   on 1999/09/13  16:00:08
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> (integrate 27 files)
+____________________________________________________________________________
+[  4139] By: jhi                                   on 1999/09/13  15:35:18
+        Log: Add -A option to Configure to diddle with variables
+             after the hints file has been applied.
+     Branch: cfgperl
+	   ! Configure config_h.SH
+     Branch: metaconfig
+	   ! U/modified/Oldconfig.U U/modified/Options.U
+____________________________________________________________________________
+[  4138] By: jhi                                   on 1999/09/13  13:42:56
+        Log: Change #4136 edited DynaLoader.xs which is kind of fruitless.
+     Branch: cfgperl
+	   ! ext/DynaLoader/dl_aix.xs ext/DynaLoader/dl_beos.xs
+	   ! ext/DynaLoader/dl_cygwin.xs ext/DynaLoader/dl_dld.xs
+	   ! ext/DynaLoader/dl_hpux.xs ext/DynaLoader/dl_mpeix.xs
+	   ! ext/DynaLoader/dl_next.xs ext/DynaLoader/dl_rhapsody.xs
+	   ! ext/DynaLoader/dl_vmesa.xs ext/DynaLoader/dl_vms.xs
+____________________________________________________________________________
+[  4137] By: jhi                                   on 1999/09/13  13:25:31
+        Log: Applying change #4136 manually introduced patch residue.
+     Branch: cfgperl
+	   ! perl.h
+____________________________________________________________________________
+[  4136] By: jhi                                   on 1999/09/13  13:23:04
+        Log: Replace change #4100 with
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             To: gsar@activestate.com
+             Cc: perl5-porters@perl.org
+             Subject: Re: [ID 19990907.004] [PATCH perl5.005_61] compiler warnings with -Duse64bits
+             Date: Mon, 13 Sep 1999 14:15:11 +0100 (BST)
+             Message-Id: <199909131315.OAA24012@tempest.npl.co.uk>
+     Branch: cfgperl
+	   ! doio.c dump.c ext/B/B.xs ext/B/typemap
+	   ! ext/ByteLoader/bytecode.h ext/Devel/DProf/DProf.xs
+	   ! ext/DynaLoader/dl_dlopen.xs ext/ODBM_File/ODBM_File.xs
+	   ! ext/POSIX/POSIX.xs lib/ExtUtils/typemap malloc.c perl.h pp.c
+	   ! pp_ctl.c pp_hot.c pp_sys.c sv.c
+____________________________________________________________________________
+[  4135] By: jhi                                   on 1999/09/13  10:22:31
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             To: perl5-porters@perl.org (Mailing list Perl5)
+             Subject: [PATCH 5.005_61] MakeMaker supports uninstalled Perls
+             Date: Sat, 11 Sep 1999 05:31:03 -0400 (EDT)
+             Message-Id: <199909110931.FAA11036@monk.mps.ohio-state.edu>
+             
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             To: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Cc: perl5-porters@perl.org (Mailing list Perl5)
+             Subject: Re: [PATCH 5.005_61] MakeMaker supports uninstalled Perls
+             Date: 11 Sep 1999 15:36:26 +0200
+             Message-ID: <sfc906dr2n9.fsf@hohenstaufen.in-berlin.de>
+     Branch: cfgperl
+	   ! lib/ExtUtils/MM_Unix.pm lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[  4134] By: jhi                                   on 1999/09/13  10:20:14
+        Log: From: Tom Phoenix <rootbeer@redcat.com>
+             To: Perl Porters Mailing List <perl5-porters@perl.org>
+             Subject: [DOCPATCH] Server errors and perldiag
+             Date: Fri, 10 Sep 1999 16:45:02 -0700 (PDT)
+             Message-ID: <Pine.GSO.4.10.9909101639490.16999-100000@user2.teleport.com>
+     Branch: cfgperl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[  4133] By: gsar                                  on 1999/09/13  03:25:43
+        Log: avoid assertion failure on C<@a'>
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  4132] By: gsar                                  on 1999/09/13  03:03:57
+        Log: add -DPERL_Y2KWARN build option that will generate additional
+             warnings on "19$yy" etc (reworked a patch suggested by
+             Ulrich Pfeifer <upf@de.uu.net>)
+     Branch: perl
+	   ! pod/perldelta.pod pod/perldiag.pod pod/perllexwarn.pod
+	   ! pp_hot.c sv.c t/pragma/warn/pp_hot t/pragma/warn/sv
+____________________________________________________________________________
+[  4131] By: gsar                                  on 1999/09/12  22:06:25
+        Log: fix DATA leaks; reword documentation about the DATA filehandle
+     Branch: perl
+	   ! ext/Opcode/Safe.pm lib/Pod/Functions.pm pod/perldata.pod
+____________________________________________________________________________
+[  4130] By: gsar                                  on 1999/09/12  20:08:56
+        Log: make sprintf("%g",...) threadsafe; only taint its result iff the
+             formatted result looks nonstandard
+     Branch: perl
+	   ! embed.pl embedvar.h intrpvar.h objXSUB.h perl.c perlapi.c
+	   ! pod/perlfunc.pod pod/perlguts.pod proto.h sv.c
+	   ! t/pragma/locale.t thrdvar.h
+____________________________________________________________________________
+[  4129] By: gsar                                  on 1999/09/12  17:04:11
+        Log: From: Doug MacEachern <dougm@cp.net>
+             Date: Sun, 25 Jul 1999 15:49:00 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.10.9907251538380.373-100000@mojo.eng.cp.net>
+             Subject: [PATCH 5.005_57] B::clearsym
+     Branch: perl
+	   ! ext/B/B.pm ext/B/B/Bblock.pm ext/B/B/Debug.pm ext/B/B/Terse.pm
+____________________________________________________________________________
+[  4128] By: gsar                                  on 1999/09/12  16:59:12
+        Log: better debugger help output (from Ilya Zakharevich)
+     Branch: perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[  4127] By: jhi                                   on 1999/09/11  20:50:37
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  +> pod/perlcompile.pod t/lib/gol-basic.t t/lib/gol-compat.t
+	  +> t/lib/gol-linkage.t
+	  !> (integrate 43 files)
+____________________________________________________________________________
+[  4126] By: nick                                  on 1999/09/10  20:44:22
+        Log: Get resolve -at mainline
+     Branch: utfperl
+	  +> (branch 297 files)
+	   - README.cygwin32 XSlock.h bytecode.h byterun.c byterun.h
+	   - cygwin32/cw32imp.h cygwin32/gcc2 cygwin32/ld2 cygwin32/perlgcc
+	   - cygwin32/perlld ext/B/byteperl.c ext/DynaLoader/dl_cygwin32.xs
+	   - hints/cygwin32.sh interp.sym myconfig objpp.h perl_exp.SH
+	   - t/pragma/warn-1global t/pragma/warning.t thread.sym
+	   - win32/GenCAPI.pl win32/TEST win32/autosplit.pl
+	   - win32/bin/network.pl win32/bin/webget.pl win32/bin/www.pl
+	   - win32/genxsdef.pl win32/makedef.pl win32/makemain.pl
+	   - win32/makeperldef.pl win32/perlhost.h
+	  !> (integrate 847 files)
+____________________________________________________________________________
+[  4125] By: gsar                                  on 1999/09/10  19:22:14
+        Log: s/dXS_TARGET/dXSTARG/ in change#4044 (to match dARGS vs dXSARGS
+             etc.)
+     Branch: perl
+	   ! XSUB.h pp.h
+____________________________________________________________________________
+[  4124] By: gsar                                  on 1999/09/10  19:14:35
+        Log: rewrote substantive parts of patch
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Fri, 27 Aug 1999 19:02:18 -0400
+             Message-ID: <19990827190218.A19561@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.005_58] REx documentation
+     Branch: perl
+	   ! pod/perlre.pod
+____________________________________________________________________________
+[  4123] By: gsar                                  on 1999/09/10  18:21:53
+        Log: note about AVf_*
+     Branch: perl
+	   ! av.h
+____________________________________________________________________________
+[  4122] By: gsar                                  on 1999/09/10  17:55:42
+        Log: allow 'text' in L<text|A::B/"C"> (from Martin Lichtin
+             <lichtin@bivio.com>)
+     Branch: perl
+	   ! lib/Pod/Html.pm
+____________________________________________________________________________
+[  4121] By: gsar                                  on 1999/09/10  17:49:35
+        Log: dos-djgpp update (from Laszlo Molnar <laszlo.molnar@eth.ericsson.se>)
+     Branch: perl
+	   ! AUTHORS Changes README.dos djgpp/config.over
+	   ! djgpp/configure.bat djgpp/djgpp.c djgpp/djgppsed.sh dosish.h
+	   ! lib/ExtUtils/MM_Unix.pm pod/pod2usage.PL pod/podchecker.PL
+	   ! pod/podselect.PL sv.h t/io/openpid.t util.c
+____________________________________________________________________________
+[  4120] By: gsar                                  on 1999/09/10  12:25:01
+        Log: add perlcompile.pod (edited content from Nathan Torkington
+             <gnat@frii.com> and others)
+     Branch: perl
+	   + pod/perlcompile.pod
+	   ! MANIFEST pod/Makefile pod/buildtoc pod/perl.pod pod/roffitall
+____________________________________________________________________________
+[  4119] By: gsar                                  on 1999/09/10  11:05:13
+        Log: avoid leaking static local_patches unless patchlevel.h is
+             explicitly included
+     Branch: perl
+	   ! patchlevel.h perl.c
+____________________________________________________________________________
+[  4118] By: gsar                                  on 1999/09/10  10:44:54
+        Log: upgrade to Getopt::Long v2.20 (from Johan Vromans
+             <jvromans@squirrel.nl>)
+     Branch: perl
+	   + t/lib/gol-basic.t t/lib/gol-compat.t t/lib/gol-linkage.t
+	   ! Changes MANIFEST lib/Getopt/Long.pm
+____________________________________________________________________________
 [  4117] By: jhi                                   on 1999/09/09  18:24:30
         Log: Remove ill-designed %B introduced by change #4111.
      Branch: cfgperl
