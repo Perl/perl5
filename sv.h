@@ -204,7 +204,7 @@ perform the upgrade if necessary.  See C<svtype>.
 
 #define SVf_UTF8        0x20000000      /* SvPVX is UTF-8 encoded */
 
-#define SVf_THINKFIRST	(SVf_READONLY|SVf_ROK|SVf_FAKE|SVf_UTF8)
+#define SVf_THINKFIRST	(SVf_READONLY|SVf_ROK|SVf_FAKE)
 
 #define SVf_OK		(SVf_IOK|SVf_NOK|SVf_POK|SVf_ROK| \
 			 SVp_IOK|SVp_NOK|SVp_POK)
