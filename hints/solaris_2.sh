@@ -366,7 +366,11 @@ $define|true|[yY]*)
 	    ccflags="$ccflags `getconf XBS5_LP64_OFF64_CFLAGS`"
 	    ldflags="$ccflags `getconf XBS5_LP64_OFF64_LDFLAGS`"
 	    lddlflags="$lddlflags -G `getconf XBS5_LP64_OFF64_LDFLAGS`"
-	    loclibpth=/usr/lib/sparcv9
+	    loclibpth="$loclibpth /usr/lib/sparcv9"
+	    libscheck='case "`file $xxx`" in
+*64-bit*|*SPARCV9*) ;;
+*) xxx=/no/64-bit$xxx ;;
+esac'
 	    ;;
 esac
  
