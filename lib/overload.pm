@@ -1,6 +1,6 @@
 package overload;
 
-our $VERSION = '1.03';
+our $VERSION = '1.02';
 
 $overload::hint_bits = 0x20000; # HINT_LOCALIZE_HH
 
@@ -94,7 +94,7 @@ sub AddrRef {
 }
 
 sub StrVal {
-  (ref $_[0] && Overloaded($_[0]) or ref($_[0]) eq 'Regexp') ?
+  (ref $_[0] && OverloadedStringify($_[0]) or ref($_[0]) eq 'Regexp') ?
     (AddrRef(shift)) :
     "$_[0]";
 }
