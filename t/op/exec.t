@@ -14,7 +14,9 @@ $| = 1;				# flush stdout
 $ENV{LC_ALL}   = 'C';		# Forge English error messages.
 $ENV{LANGUAGE} = 'C';		# Ditto in GNU.
 
-plan(tests => 14);
+my $Is_VMS = $^O eq 'VMS';
+
+plan(tests => 20);
 
 my $Perl = which_perl();
 
@@ -22,27 +24,59 @@ my $exit;
 SKIP: {
     skip("bug/feature of pdksh", 2) if $^O eq 'os2';
 
-    $exit = system qq{$Perl -le "print q{ok 1 - interpreted system(EXPR)"}};
+    my $tnum = curr_test();
+    $exit = system qq{$Perl -le "print q{ok $tnum - interp system(EXPR)"}};
     next_test();
     is( $exit, 0, '  exited 0' );
 }
 
-$exit = system qq{$Perl -le "print q{ok 3 - split & direct call system(EXPR)"}};
+my $tnum = curr_test();
+$exit = system qq{$Perl -le "print q{ok $tnum - split & direct system(EXPR)"}};
 next_test();
 is( $exit, 0, '  exited 0' );
 
 # On VMS you need the quotes around the program or it won't work.
 # On Unix its the opposite.
-my $quote = $^O eq 'VMS' ? '"' : '';
+my $quote = $Is_VMS ? '"' : '';
+$tnum = curr_test();
 $exit = system $Perl, '-le', 
-               "${quote}print q{ok 5 - system(PROG, LIST)}${quote}";
+               "${quote}print q{ok $tnum - system(PROG, LIST)}${quote}";
 next_test();
 is( $exit, 0, '  exited 0' );
 
 
+# Some basic piped commands.  Some OS's have trouble with "helpfully"
+# putting newlines on the end of piped output.  So we split this into
+# newline insensitive and newline sensitive tests.
+my $echo_out = `$Perl -e "print 'ok'" | $Perl -le "print <STDIN>"`;
+$echo_out =~ s/\n\n/\n/g;
+is( $echo_out, "ok\n", 'piped echo emulation');
+
+{
+    # here we check if extra newlines are going to be slapped on
+    # piped output.
+    local $TODO = 'VMS sticks newlines on everything' if $Is_VMS;
+
+    is( scalar `$Perl -e "print 'ok'"`,
+        "ok", 'no extra newlines on ``' );
+
+    is( scalar `$Perl -e "print 'ok'" | $Perl -e "print <STDIN>"`, 
+        "ok", 'no extra newlines on pipes');
+
+    is( scalar `$Perl -le "print 'ok'" | $Perl -le "print <STDIN>"`, 
+        "ok\n\n", 'doubled up newlines');
+
+    is( scalar `$Perl -e "print 'ok'" | $Perl -le "print <STDIN>"`, 
+        "ok\n", 'extra newlines on inside pipes');
+
+    is( scalar `$Perl -le "print 'ok'" | $Perl -e "print <STDIN>"`, 
+        "ok\n", 'extra newlines on outgoing pipes');
+}
+
+
 is( system(qq{$Perl -e "exit 0"}), 0,     'Explicit exit of 0' );
 
-my $exit_one = $^O eq 'VMS' ? 4 << 8 : 1 << 8;
+my $exit_one = $Is_VMS ? 4 << 8 : 1 << 8;
 is( system(qq{$Perl "-I../lib" -e "use vmsish qw(hushed); exit 1"}), $exit_one,
     'Explicit exit of 1' );
 
@@ -66,8 +100,10 @@ END
 
 
 TODO: {
+    my $tnum = curr_test();
     if( $^O =~ /Win32/ ) {
-        print "not ok 11 - exec failure doesn't terminate process # TODO Win32 exec failure waits for user input\n";
+        print "not ok $tnum - exec failure doesn't terminate process # TODO Win32 exec failure waits for user input\n";
+        next_test;
         last TODO;
     }
 

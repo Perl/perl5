@@ -6,6 +6,7 @@ my $test = 1;
 my $planned;
 
 $TODO = 0;
+$NO_ENDING = 0;
 
 sub plan {
     my $n;
@@ -21,8 +22,8 @@ sub plan {
 
 END {
     my $ran = $test - 1;
-    if (defined $planned && $planned != $ran) {
-	print STDOUT "# Looks like you planned $planned tests but ran $ran.\n";
+    if (!$NO_ENDING && defined $planned && $planned != $ran) {
+        print STDOUT "# Looks like you planned $planned tests but ran $ran.\n";
     }
 }
 
