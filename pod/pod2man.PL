@@ -566,7 +566,7 @@ print <<'END';
 END
 
 print <<"END";
-.TH $name $section "$RP" "$date" "$center"
+.TH $name $section "$date" "$RP" "$center"
 .UC
 END
 
