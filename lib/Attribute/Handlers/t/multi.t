@@ -191,7 +191,10 @@ ok( $match, 52 );
 
 my ($code_applied, $scalar_applied);
 sub Scotty :ATTR(CODE,BEGIN)   { $code_applied = $_[5] }
+{
+no warnings 'redefine';
 sub Scotty :ATTR(SCALAR,CHECK) { $scalar_applied = $_[5] }
+}
 
 sub warp_coil :Scotty {}
 my $photon_torpedo :Scotty;
