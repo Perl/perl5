@@ -3931,7 +3931,6 @@ Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop, I32 whileline, OP *
     OP *next = 0;
     OP *listop;
     OP *o;
-    OP *condop;
     U8 loopflags = 0;
 
     if (expr && (expr->op_type == OP_READLINE || expr->op_type == OP_GLOB
@@ -3993,7 +3992,7 @@ Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop, I32 whileline, OP *
 	    return Nullop;		/* listop already freed by new_logop */
 	}
 	if (listop)
-	    ((LISTOP*)listop)->op_last->op_next = condop =
+	    ((LISTOP*)listop)->op_last->op_next =
 		(o == listop ? redo : LINKLIST(o));
     }
     else

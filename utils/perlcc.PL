@@ -146,8 +146,10 @@ sub vprint {
 sub parse_argv {
 
     use Getopt::Long; 
-#    Getopt::Long::Configure("bundling"); turned off. this is silly because 
-#                                         it doesn't allow for long switches.
+
+    # disallows using long arguments
+    # Getopt::Long::Configure("bundling");
+
     Getopt::Long::Configure("no_ignore_case");
 
     # no difference in exists and defined for %ENV; also, a "0"
@@ -173,17 +175,6 @@ sub parse_argv {
 	'log:s'         # where to log compilation process information
     );
         
-    # This is an attempt to make perlcc's arg. handling look like cc.
-    # if ( opt('s') ) {  # must quote: looks like s)foo)bar)!
-    #   if (opt('s') eq 'hared') {
-    #        $Options->{shared}++; 
-    #    } elsif (opt('s') eq 'tatic') {
-    #        $Options->{static}++; 
-    #    } else {
-    #        warn "$0: Unknown option -s", opt('s');
-    #    }
-    # }
-
     $Options->{v} += 0;
 
     helpme() if opt(h); # And exit
@@ -334,6 +325,7 @@ sub cc_harness {
 	$command .= " -L".$_ for split /\s+/, opt(L);
 	my @mods = split /-?u /, $stash;
 	$command .= " ".ExtUtils::Embed::ldopts("-std", \@mods);
+        $command .= " -lperl";
 	vprint 3, "running $Config{cc} $command";
 	system("$Config{cc} $command");
 }
@@ -582,8 +574,10 @@ perlcc - generate executables from Perl programs
     $ perlcc -e 'print q//'     # Compiles a one-liner into 'a.out'
     $ perlcc -c -e 'print q//'  # Creates a C file 'a.out.c'
 
-    $ perlcc -r hello           # compiles 'hello' into 'a.out', runs 'a.out'.
+    $ perlcc -I /foo hello	# extra headers (notice the space after -I)
+    $ perlcc -L /foo hello	# extra libraries (notice the space after -L)
 
+    $ perlcc -r hello           # compiles 'hello' into 'a.out', runs 'a.out'.
     $ perlcc -r hello a b c     # compiles 'hello' into 'a.out', runs 'a.out'.
                                 # with arguments 'a b c' 
 

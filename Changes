@@ -31,6 +31,238 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 11058] By: jhi                                   on 2001/07/01  04:57:05
+        Log: Still one typo, regen toc.
+     Branch: perl
+	   ! lib/Unicode/UCD.pm pod/perltoc.pod
+____________________________________________________________________________
+[ 11057] By: jhi                                   on 2001/07/01  04:54:35
+        Log: Detypos and regen toc.
+     Branch: perl
+	   ! README.os2 lib/Unicode/UCD.pm pod/perltoc.pod
+____________________________________________________________________________
+[ 11056] By: jhi                                   on 2001/07/01  04:26:08
+        Log: VERSION tweak.
+     Branch: perl
+	   ! ext/List/Util/lib/List/Util.pm
+____________________________________________________________________________
+[ 11055] By: jhi                                   on 2001/06/30  22:18:37
+        Log: Attempt at plugging the leak under ithreads detected by Doug.
+     Branch: perl
+	   ! op.h
+____________________________________________________________________________
+[ 11054] By: jhi                                   on 2001/06/30  21:33:29
+        Log: gcc -Wall lint after #11051.
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 11053] By: jhi                                   on 2001/06/30  21:13:55
+        Log: Integrate perlio.
+     Branch: perl
+	  !> lib/File/Find/taint.t
+____________________________________________________________________________
+[ 11052] By: jhi                                   on 2001/06/30  21:07:38
+        Log: Don't use the v-strings for module VERSIONs.
+     Branch: perl
+	   ! lib/Unicode/UCD.pm
+____________________________________________________________________________
+[ 11051] By: jhi                                   on 2001/06/30  20:59:57
+        Log: Code cleanup based on turning off the -woffs in IRIX.
+             Not all of the gripes cleaned up (hairy code in hv.c and
+             regcomp.c; unused newsp, gimme, and optype from cop.h macros;
+             unused 'key' arguments in ?DBM_File.xs) (and the -woffs left
+             to the IRIX hints)
+     Branch: perl
+	   ! ext/DB_File/DB_File.xs ext/Data/Dumper/Dumper.xs
+	   ! ext/IPC/SysV/SysV.xs ext/List/Util/Util.xs
+	   ! ext/PerlIO/Scalar/Scalar.xs gv.c mg.c op.c perlio.c pp_sys.c
+	   ! regcomp.c sv.c
+____________________________________________________________________________
+[ 11050] By: nick                                  on 2001/06/30  20:46:46
+        Log: Jeffrey Friedl's <jfriedl@yahoo.com> fix for lib/File/Find/taint.t
+     Branch: perlio
+	   ! lib/File/Find/taint.t
+____________________________________________________________________________
+[ 11049] By: nick                                  on 2001/06/30  18:13:33
+        Log: Integrate mainline
+     Branch: perlio
+	  +> NetWare/nwstdio.h NetWare/perlsdio.h
+	  +> ext/Encode/Encode/7bit-jis.enc ext/Encode/Encode/7bit-kana.enc
+	  +> ext/Encode/Encode/7bit-kr.enc lib/Unicode/UCD.pm
+	  +> lib/Unicode/UCD.t t/run/exit.t
+	  !> (integrate 60 files)
+____________________________________________________________________________
+[ 11048] By: jhi                                   on 2001/06/30  16:23:39
+        Log: Delta delta.
+     Branch: perl
+	   ! pod/perl572delta.pod
+____________________________________________________________________________
+[ 11047] By: jhi                                   on 2001/06/30  16:03:40
+        Log: More VERSION tuning: to avoid unnecessary Perl upgrades
+             by CPAN.pm, use rather _00.
+     Branch: perl
+	   ! ext/Errno/Errno_pm.PL ext/IO/lib/IO/Dir.pm
+	   ! ext/IO/lib/IO/Handle.pm ext/IO/lib/IO/Seekable.pm
+	   ! ext/IO/lib/IO/Socket/UNIX.pm ext/IPC/SysV/Msg.pm
+	   ! ext/IPC/SysV/Semaphore.pm ext/IPC/SysV/SysV.pm
+	   ! ext/Time/HiRes/HiRes.pm lib/CGI/Pretty.pm lib/CPAN/Nox.pm
+	   ! lib/ExtUtils/Embed.pm lib/Test.pm
+____________________________________________________________________________
+[ 11046] By: jhi                                   on 2001/06/30  15:53:22
+        Log: Add a simple Unicode character database interface, Unicode::UCD.
+     Branch: perl
+	   + lib/Unicode/UCD.pm lib/Unicode/UCD.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 11045] By: jhi                                   on 2001/06/30  13:42:37
+        Log: Subject: [PATCH] op/numconver.t
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sat, 30 Jun 2001 15:40:10 +0100
+             Message-ID: <20010630154010.I59620@plum.flirble.org>
+     Branch: perl
+	   ! t/op/numconvert.t
+____________________________________________________________________________
+[ 11044] By: jhi                                   on 2001/06/30  13:29:25
+        Log: The $^N is now taken (by #11038).
+     Branch: perl
+	   ! t/base/lex.t
+____________________________________________________________________________
+[ 11043] By: jhi                                   on 2001/06/30  13:15:59
+        Log: The #11040 had slipped to a wrong function...
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 11042] By: jhi                                   on 2001/06/30  13:08:25
+        Log: In 64-bit AIX 5L (oslevel 5.1.0.0, ccversion 5.0.2.0)
+             the Configure library symbol probe mysteriously finds all
+             symbols but those of pipe() and times().
+     Branch: perl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[ 11041] By: jhi                                   on 2001/06/30  13:01:25
+        Log: Subject: [PATCH] (was Re: not OK: perl@11006 on HP-UX B.11.00)
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Fri, 29 Jun 2001 23:49:07 +0100
+             Message-ID: <20010629234907.D59620@plum.flirble.org>
+     Branch: perl
+	   ! lib/ExtUtils.t
+____________________________________________________________________________
+[ 11040] By: jhi                                   on 2001/06/30  13:00:24
+        Log: Subject: [PATCH] weakref fix 2, not yet there
+             From: Artur Bergman <artur@contiller.se>
+             Date: Sat, 30 Jun 2001 01:18:16 +0200
+             Message-ID: <B762D957.1CC9%artur@contiller.se>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 11039] By: jhi                                   on 2001/06/30  12:59:25
+        Log: Subject: [PATCH t/run/exit.t] Another shot at testing exit codes.
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Fri, 29 Jun 2001 19:39:11 -0400
+             Message-ID: <20010629193910.D25304@blackrider>
+     Branch: perl
+	   + t/run/exit.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 11038] By: jhi                                   on 2001/06/30  12:58:16
+        Log: Add support for $^N, the most-recently closed group.
+     Branch: perl
+	   ! embedvar.h gv.c mg.c perlapi.h pod/perlretut.pod
+	   ! pod/perltoc.pod pod/perlvar.pod regexec.c regexp.h t/op/pat.t
+	   ! thrdvar.h
+____________________________________________________________________________
+[ 11037] By: jhi                                   on 2001/06/30  12:53:40
+        Log: Subject: [ID 20010630.001] Editorial nits in README.solaris
+             From: lvirden@cas.org
+             Date: Sat, 30 Jun 2001 04:12:36 -0400 (EDT)
+             Message-Id: <200106300812.f5U8CaG10447@lwv26awu.cas.org>
+             
+             Subject: [ID 20010630.002] Another editorial tweak to README.solaris
+             From: lvirden@cas.org
+             Date: Sat, 30 Jun 2001 04:17:55 -0400 (EDT)
+             Message-Id: <200106300817.f5U8HtN10626@lwv26awu.cas.org>
+     Branch: perl
+	   ! README.solaris
+____________________________________________________________________________
+[ 11036] By: jhi                                   on 2001/06/30  12:51:45
+        Log: Subject: [PATCH] Encode.pm to use escape-sequence encoding
+             From: SADAHIRO Tomoyuki <BQW10602@nifty.com>
+             Date: Sat, 30 Jun 2001 07:33:37 +0900
+             Message-Id: <20010630073226.7C79.BQW10602@nifty.com>
+             
+             Subject: Re: [PATCH] Encode.pm to use escape-sequence encoding
+             From: SADAHIRO Tomoyuki <BQW10602@nifty.com>
+             Date: Sat, 30 Jun 2001 21:38:14 +0900
+             Message-Id: <20010630213554.F67A.BQW10602@nifty.com>
+     Branch: perl
+	   + ext/Encode/Encode/7bit-jis.enc ext/Encode/Encode/7bit-kana.enc
+	   + ext/Encode/Encode/7bit-kr.enc
+	   ! MANIFEST ext/Encode/Encode/Tcl.pm
+____________________________________________________________________________
+[ 11035] By: jhi                                   on 2001/06/30  12:44:51
+        Log: NetWare tweaks from Guruprasad.
+     Branch: perl
+	   + NetWare/nwstdio.h NetWare/perlsdio.h
+	   ! MANIFEST NetWare/Makefile NetWare/config.wc
+	   ! NetWare/config_H.wc NetWare/nwperlsys.c NetWare/nwperlsys.h
+	   ! NetWare/t/Readme.txt
+____________________________________________________________________________
+[ 11034] By: jhi                                   on 2001/06/29  23:28:16
+        Log: More module $VERSION bump-ups.
+     Branch: perl
+	   ! ext/Devel/Peek/Peek.pm lib/ExtUtils/Embed.pm
+	   ! lib/ExtUtils/Liblist.pm lib/ExtUtils/Manifest.pm
+	   ! lib/ExtUtils/Mksymlists.pm lib/IPC/Open3.pm
+____________________________________________________________________________
+[ 11033] By: jhi                                   on 2001/06/29  21:25:23
+        Log: Doc update due to #11032.
+     Branch: perl
+	   ! pod/perl572delta.pod
+____________________________________________________________________________
+[ 11032] By: jhi                                   on 2001/06/29  21:19:44
+        Log: Subject: [PATCH: perl@11006] s/div/lib\$ediv/ in Time::HiRes for VAX
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Fri, 29 Jun 2001 14:02:16 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10106291337520.65853-100000@aspara.forte.com>
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.xs
+____________________________________________________________________________
+[ 11031] By: jhi                                   on 2001/06/29  14:31:53
+        Log: -lpthreads missing in AIX.
+     Branch: perl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[ 11030] By: jhi                                   on 2001/06/29  14:08:12
+        Log: Subject: [PATCH] CLONE && weakrefs
+             From: Artur Bergman <artur@contiller.se>
+             Date: Fri, 29 Jun 2001 17:02:00 +0200
+             Message-ID: <B7626508.1CA0%artur@contiller.se>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 11029] By: jhi                                   on 2001/06/29  14:06:50
+        Log: Subject: Re: Bug report: split splits on wrong pattern
+             From: Radu Greab <radu@netsoft.ro>
+             Date: Wed, 27 Jun 2001 21:50:52 +0300
+             Message-ID: <15162.11020.279064.471031@ix.netsoft.ro>
+     Branch: perl
+	   ! pp_ctl.c t/op/split.t
+____________________________________________________________________________
+[ 11028] By: jhi                                   on 2001/06/29  13:47:38
+        Log: Metaconfig unit change for #11027.
+     Branch: metaconfig/U/perl
+	   ! d_modfl.U
+____________________________________________________________________________
+[ 11027] By: jhi                                   on 2001/06/29  13:47:03
+        Log: I thought this Configure glitch for AIX was just recently fixed?
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 11026] By: jhi                                   on 2001/06/29  13:14:07
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 11025] By: jhi                                   on 2001/06/29  13:07:57
         Log: Subject: Re: perl@10967, File::Find, and Cwd
              From: Mike Guy <mjtg@cam.ac.uk>

@@ -1998,16 +1998,18 @@ db_put(db, key, value, flags=0)
 int
 db_fd(db)
 	DB_File		db
-	int		status = 0 ;
 	CODE:
 	  CurrentDB = db ;
 #ifdef DB_VERSION_MAJOR
 	  RETVAL = -1 ;
-	  status = (db->in_memory
-		? -1 
-		: ((db->dbp)->fd)(db->dbp, &RETVAL) ) ;
-	  if (status != 0)
-	    RETVAL = -1 ;
+	  {
+	    int	status = 0 ;
+	    status = (db->in_memory
+		      ? -1 
+		      : ((db->dbp)->fd)(db->dbp, &RETVAL) ) ;
+	    if (status != 0)
+	      RETVAL = -1 ;
+	  }
 #else
 	  RETVAL = (db->in_memory
 		? -1 

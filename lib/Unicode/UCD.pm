@@ -3,7 +3,7 @@ package Unicode::UCD;
 use strict;
 use warnings;
 
-our $VERSION = v3.1.0;
+our $VERSION = '3.1.0';
 
 require Exporter;
 
@@ -14,7 +14,7 @@ use Carp;
 
 =head1 NAME
 
-Unicode - Unicode character database
+Unicode::UCD - Unicode character database
 
 =head1 SYNOPSIS
 
@@ -119,7 +119,7 @@ sub charinfo {
     return;
 }
 
-=head2 charbloc
+=head2 charblock
 
     use Unicode::UCD 'charblock';
 

@@ -1357,11 +1357,18 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
   CV *cv=NULL;
   CV **cvp=NULL, **ocvp=NULL;
   AMT *amtp=NULL, *oamtp=NULL;
-  int fl=0, off=0, off1, lr=0, assign=AMGf_assign & flags, notfound=0;
+  int off=0, off1, lr=0, assign=AMGf_assign & flags, notfound=0;
   int postpr = 0, force_cpy = 0, assignshift = assign ? 1 : 0;
+#ifdef DEBUGGING
+  int fl=0;
   HV* stash=NULL;
+#endif
   if (!(AMGf_noleft & flags) && SvAMAGIC(left)
-      && (mg = mg_find((SV*)(stash=SvSTASH(SvRV(left))),
+      && (mg = mg_find((SV*)(
+#ifdef DEGUGGING
+			     stash=
+#endif
+			     SvSTASH(SvRV(left))),
 			PERL_MAGIC_overload_table))
       && (ocvp = cvp = (AMT_AMAGIC((AMT*)mg->mg_ptr)
 			? (oamtp = amtp = (AMT*)mg->mg_ptr)->table
@@ -1369,7 +1376,11 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
       && ((cv = cvp[off=method+assignshift])
 	  || (assign && amtp->fallback > AMGfallNEVER && /* fallback to
 						          * usual method */
-		  (fl = 1, cv = cvp[off=method])))) {
+		  (
+#ifdef DEBUGGING
+		   fl = 1,
+#endif 
+		   cv = cvp[off=method])))) {
     lr = -1;			/* Call method for left argument */
   } else {
     if (cvp && amtp->fallback > AMGfallNEVER && flags & AMGf_unary) {
@@ -1475,7 +1486,11 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	 }
 	 if (!cv) goto not_found;
     } else if (!(AMGf_noright & flags) && SvAMAGIC(right)
-	       && (mg = mg_find((SV*)(stash=SvSTASH(SvRV(right))),
+	       && (mg = mg_find((SV*)(
+#ifdef DEBUGGING
+				      stash=
+#endif
+				      SvSTASH(SvRV(right))),
 			PERL_MAGIC_overload_table))
 	       && (cvp = (AMT_AMAGIC((AMT*)mg->mg_ptr)
 			  ? (amtp = (AMT*)mg->mg_ptr)->table
@@ -1562,21 +1577,23 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
       force_cpy = force_cpy || assign;
     }
   }
+#ifdef DEBUGGING
   if (!notfound) {
-    DEBUG_o( Perl_deb(aTHX_
-  "Overloaded operator `%s'%s%s%s:\n\tmethod%s found%s in package %s%s\n",
-		 AMG_id2name(off),
-		 method+assignshift==off? "" :
-		             " (initially `",
-		 method+assignshift==off? "" :
-		             AMG_id2name(method+assignshift),
-		 method+assignshift==off? "" : "')",
-		 flags & AMGf_unary? "" :
-		   lr==1 ? " for right argument": " for left argument",
-		 flags & AMGf_unary? " for argument" : "",
-		 HvNAME(stash),
-		 fl? ",\n\tassignment variant used": "") );
+    DEBUG_o(Perl_deb(aTHX_
+		     "Overloaded operator `%s'%s%s%s:\n\tmethod%s found%s in package %s%s\n",
+		     AMG_id2name(off),
+		     method+assignshift==off? "" :
+		     " (initially `",
+		     method+assignshift==off? "" :
+		     AMG_id2name(method+assignshift),
+		     method+assignshift==off? "" : "')",
+		     flags & AMGf_unary? "" :
+		     lr==1 ? " for right argument": " for left argument",
+		     flags & AMGf_unary? " for argument" : "",
+		     HvNAME(stash),
+		     fl? ",\n\tassignment variant used": "") );
   }
+#endif
     /* Since we use shallow copy during assignment, we need
      * to dublicate the contents, probably calling user-supplied
      * version of copy operator

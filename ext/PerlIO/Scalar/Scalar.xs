@@ -225,12 +225,11 @@ PerlIOScalar_set_ptrcnt(PerlIO *f, STDCHAR *ptr, SSize_t cnt)
 PerlIO *
 PerlIOScalar_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers, IV n, const char *mode, int fd, int imode, int perm, PerlIO *f, int narg, SV **args)
 {
- PerlIOScalar *s;
  SV *arg = (narg > 0) ? *args : PerlIOArg;
  if (SvROK(arg) || SvPOK(arg))
   {
    f = PerlIO_allocate(aTHX);
-   s = PerlIOSelf(PerlIO_push(aTHX_ f,self,mode,arg),PerlIOScalar);
+   (void)PerlIOSelf(PerlIO_push(aTHX_ f,self,mode,arg),PerlIOScalar);
    PerlIOBase(f)->flags |= PERLIO_F_OPEN;
    return f;
   }

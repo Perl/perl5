@@ -954,8 +954,7 @@ PerlIO_binmode(pTHX_ PerlIO *f, int iotype, int mode, const char *names)
  if (!names && (O_TEXT != O_BINARY && (mode & O_BINARY)))
   {
    PerlIO *top = f;
-   PerlIOl *l;
-   while ((l = *top))
+   while (*top)
     {
      if (PerlIOBase(top)->tab == &PerlIO_crlf)
       {

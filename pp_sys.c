@@ -699,8 +699,6 @@ PP(pp_binmode)
     PerlIO *fp;
     MAGIC *mg;
     SV *discp = Nullsv;
-    STRLEN len  = 0;
-    char *names = NULL;
 
     if (MAXARG < 1)
 	RETPUSHUNDEF;
@@ -728,10 +726,6 @@ PP(pp_binmode)
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 	    report_evil_fh(gv, io, PL_op->op_type);
         RETPUSHUNDEF;
-    }
-
-    if (discp) {
-	names = SvPV(discp,len);
     }
 
     if (PerlIO_binmode(aTHX_ fp,IoTYPE(io),mode_from_discipline(discp),

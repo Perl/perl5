@@ -159,7 +159,6 @@ CODE:
 {
     SV *ret;
     int index;
-    I32 markix;
     GV *agv,*bgv,*gv;
     HV *stash;
     CV *cv;
@@ -180,7 +179,6 @@ CODE:
     SAVETMPS;
     SAVESPTR(PL_op);
     ret = ST(1);
-    markix = sp - PL_stack_base;
     for(index = 2 ; index < items ; index++) {
 	GvSV(agv) = ret;
 	GvSV(bgv) = ST(index);
@@ -199,7 +197,6 @@ PROTOTYPE: &@
 CODE:
 {
     int index;
-    I32 markix;
     GV *gv;
     HV *stash;
     CV *cv;
@@ -216,7 +213,6 @@ CODE:
     PL_curpad = AvARRAY((AV*)AvARRAY(CvPADLIST(cv))[1]);
     SAVETMPS;
     SAVESPTR(PL_op);
-    markix = sp - PL_stack_base;
     for(index = 1 ; index < items ; index++) {
 	GvSV(PL_defgv) = ST(index);
 	PL_op = reducecop;

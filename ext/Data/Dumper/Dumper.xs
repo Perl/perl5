@@ -190,13 +190,11 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
     AV *seenentry = Nullav;
     char *iname;
     STRLEN inamelen, idlen = 0;
-    U32 flags;
     U32 realtype;
 
     if (!val)
 	return 0;
 
-    flags = SvFLAGS(val);
     realtype = SvTYPE(val);
 
     if (SvGMAGICAL(val))
@@ -221,7 +219,6 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	}
 	
 	ival = SvRV(val);
-	flags = SvFLAGS(ival);
 	realtype = SvTYPE(ival);
         (void) sprintf(id, "0x%lx", (unsigned long)ival);
 	idlen = strlen(id);
@@ -776,9 +773,9 @@ Data_Dumper_Dumpxs(href, ...)
 	    HV *seenhv = Nullhv;
 	    AV *postav, *todumpav, *namesav;
 	    I32 level = 0;
-	    I32 indent, terse, useqq, i, imax, postlen;
+	    I32 indent, terse, i, imax, postlen;
 	    SV **svp;
-	    SV *val, *name, *pad, *xpad, *apad, *sep, *tmp, *varname;
+	    SV *val, *name, *pad, *xpad, *apad, *sep, *varname;
 	    SV *freezer, *toaster, *bless;
 	    I32 purity, deepcopy, quotekeys, maxdepth = 0;
 	    char tmpbuf[1024];
@@ -811,11 +808,11 @@ Data_Dumper_Dumpxs(href, ...)
 
 	    todumpav = namesav = Nullav;
 	    seenhv = Nullhv;
-	    val = pad = xpad = apad = sep = tmp = varname
+	    val = pad = xpad = apad = sep = varname
 		= freezer = toaster = bless = &PL_sv_undef;
 	    name = sv_newmortal();
 	    indent = 2;
-	    terse = useqq = purity = deepcopy = 0;
+	    terse = purity = deepcopy = 0;
 	    quotekeys = 1;
 	
 	    retval = newSVpvn("", 0);
@@ -835,8 +832,10 @@ Data_Dumper_Dumpxs(href, ...)
 		    purity = SvIV(*svp);
 		if ((svp = hv_fetch(hv, "terse", 5, FALSE)))
 		    terse = SvTRUE(*svp);
+#if 0 /* useqq currently unused */
 		if ((svp = hv_fetch(hv, "useqq", 5, FALSE)))
 		    useqq = SvTRUE(*svp);
+#endif
 		if ((svp = hv_fetch(hv, "pad", 3, FALSE)))
 		    pad = *svp;
 		if ((svp = hv_fetch(hv, "xpad", 4, FALSE)))

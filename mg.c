@@ -169,7 +169,6 @@ U32
 Perl_mg_length(pTHX_ SV *sv)
 {
     MAGIC* mg;
-    char *junk;
     STRLEN len;
 
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
@@ -186,7 +185,7 @@ Perl_mg_length(pTHX_ SV *sv)
 	}
     }
 
-    junk = SvPV(sv, len);
+    (void)SvPV(sv, len);
     return len;
 }
 
@@ -1148,19 +1147,16 @@ int
 Perl_magic_getnkeys(pTHX_ SV *sv, MAGIC *mg)
 {
     HV *hv = (HV*)LvTARG(sv);
-    HE *entry;
     I32 i = 0;
-
+     
     if (hv) {
-	(void) hv_iterinit(hv);
-	if (! SvTIED_mg((SV*)hv, PERL_MAGIC_tied))
-	    i = HvKEYS(hv);
-	else {
-	    /*SUPPRESS 560*/
-	    while ((entry = hv_iternext(hv))) {
-		i++;
-	    }
-	}
+         (void) hv_iterinit(hv);
+         if (! SvTIED_mg((SV*)hv, PERL_MAGIC_tied))
+	     i = HvKEYS(hv);
+         else {
+	     while (hv_iternext(hv))
+	         i++;
+         }
     }
 
     sv_setiv(sv, (IV)i);
@@ -2223,7 +2219,6 @@ Perl_sighandler(int sig)
     CV *cv = Nullcv;
     OP *myop = PL_op;
     U32 flags = 0;
-    I32 o_save_i = PL_savestack_ix;
     XPV *tXpv = PL_Xpv;
 
 #if defined(WIN32) && defined(PERL_IMPLICIT_CONTEXT)
@@ -2247,7 +2242,6 @@ Perl_sighandler(int sig)
        infinity, so we fix 4 (in fact 5): */
     if (flags & 1) {
 	PL_savestack_ix += 5;		/* Protect save in progress. */
-	o_save_i = PL_savestack_ix;
 	SAVEDESTRUCTOR_X(unwind_handler_stack, (void*)&flags);
     }
     if (flags & 4)
