@@ -2370,7 +2370,7 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 	    sstr = SvRV(sstr);
 	    if (sstr == dstr) {
 		if (GvIMPORTED(dstr) != GVf_IMPORTED
-		    && CopSTASH(PL_curcop) != GvSTASH(dstr))
+		    && CopSTASH_ne(PL_curcop, GvSTASH(dstr)))
 		{
 		    GvIMPORTED_on(dstr);
 		}
@@ -2428,7 +2428,7 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 	    GvGP(dstr) = gp_ref(GvGP(sstr));
 	    SvTAINT(dstr);
 	    if (GvIMPORTED(dstr) != GVf_IMPORTED
-		&& CopSTASH(PL_curcop) != GvSTASH(dstr))
+		&& CopSTASH_ne(PL_curcop, GvSTASH(dstr)))
 	    {
 		GvIMPORTED_on(dstr);
 	    }
@@ -2463,7 +2463,7 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 
 		if (intro) {
 		    GP *gp;
-		    GvGP(dstr)->gp_refcnt--;
+		    gp_free((GV*)dstr);
 		    GvINTRO_off(dstr);	/* one-shot flag */
 		    Newz(602,gp, 1, GP);
 		    GvGP(dstr) = gp_ref(gp);
@@ -2480,7 +2480,7 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 			dref = (SV*)GvAV(dstr);
 		    GvAV(dstr) = (AV*)sref;
 		    if (GvIMPORTED_AV_off(dstr)
-			&& CopSTASH(PL_curcop) != GvSTASH(dstr))
+			&& CopSTASH_ne(PL_curcop, GvSTASH(dstr)))
 		    {
 			GvIMPORTED_AV_on(dstr);
 		    }
@@ -2492,7 +2492,7 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 			dref = (SV*)GvHV(dstr);
 		    GvHV(dstr) = (HV*)sref;
 		    if (GvIMPORTED_HV_off(dstr)
-			&& CopSTASH(PL_curcop) != GvSTASH(dstr))
+			&& CopSTASH_ne(PL_curcop, GvSTASH(dstr)))
 		    {
 			GvIMPORTED_HV_on(dstr);
 		    }
@@ -2548,7 +2548,7 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 			PL_sub_generation++;
 		    }
 		    if (GvIMPORTED_CV_off(dstr)
-			&& CopSTASH(PL_curcop) != GvSTASH(dstr))
+			&& CopSTASH_ne(PL_curcop, GvSTASH(dstr)))
 		    {
 			GvIMPORTED_CV_on(dstr);
 		    }
@@ -2567,7 +2567,7 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 			dref = (SV*)GvSV(dstr);
 		    GvSV(dstr) = sref;
 		    if (GvIMPORTED_SV_off(dstr)
-			&& CopSTASH(PL_curcop) != GvSTASH(dstr))
+			&& CopSTASH_ne(PL_curcop, GvSTASH(dstr)))
 		    {
 			GvIMPORTED_SV_on(dstr);
 		    }
@@ -5674,18 +5674,18 @@ Perl_gp_dup(pTHX_ GP *gp)
     sv_table_store(PL_sv_table, (SV*)gp, (SV*)ret);
 
     /* clone */
+    ret->gp_refcnt	= 0;			/* must be before any other dups! */
     ret->gp_sv		= sv_dup_inc(gp->gp_sv);
     ret->gp_io		= io_dup_inc(gp->gp_io);
     ret->gp_form	= cv_dup_inc(gp->gp_form);
     ret->gp_av		= av_dup_inc(gp->gp_av);
     ret->gp_hv		= hv_dup_inc(gp->gp_hv);
-    ret->gp_egv		= 0;
+    ret->gp_egv		= gv_dup(gp->gp_egv);	/* GvEGV is not refcounted */
     ret->gp_cv		= cv_dup_inc(gp->gp_cv);
     ret->gp_cvgen	= gp->gp_cvgen;
     ret->gp_flags	= gp->gp_flags;
     ret->gp_line	= gp->gp_line;
     ret->gp_file	= gp->gp_file;		/* points to COP.cop_file */
-    ret->gp_refcnt	= 0;
     return ret;
 }
 
@@ -5847,7 +5847,7 @@ Perl_sv_dup(pTHX_ SV *sstr)
     /* clone */
     SvFLAGS(dstr)	= SvFLAGS(sstr);
     SvFLAGS(dstr)	&= ~SVf_OOK;		/* don't propagate OOK hack */
-    SvREFCNT(dstr)	= 0;
+    SvREFCNT(dstr)	= 0;			/* must be before any other dups! */
 
 #ifdef DEBUGGING
     if (SvANY(sstr) && PL_watch_pvx && SvPVX(sstr) == PL_watch_pvx)
@@ -5979,10 +5979,6 @@ Perl_sv_dup(pTHX_ SV *sstr)
 	GvFLAGS(dstr)	= GvFLAGS(sstr);
 	GvGP(dstr)	= gp_dup(GvGP(sstr));
 	(void)GpREFCNT_inc(GvGP(dstr));
-	if (GvEGV(sstr) == (GV*)sstr)
-	    GvEGV(dstr)	= (GV*)dstr;
-	else
-	    GvEGV(dstr)	= gv_dup_inc(GvEGV(sstr));
 	break;
     case SVt_PVIO:
 	SvANY(dstr)	= new_XPVIO();
@@ -6032,11 +6028,11 @@ Perl_sv_dup(pTHX_ SV *sstr)
 	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr));
 	AvARYLEN((AV*)dstr) = sv_dup_inc(AvARYLEN((AV*)sstr));
 	AvFLAGS((AV*)dstr) = AvFLAGS((AV*)sstr);
-	if (AvALLOC((AV*)sstr)) {
+	if (AvARRAY((AV*)sstr)) {
 	    SV **dst_ary, **src_ary;
 	    SSize_t items = AvFILLp((AV*)sstr) + 1;
 
-	    src_ary = AvALLOC((AV*)sstr);
+	    src_ary = AvARRAY((AV*)sstr);
 	    Newz(0, dst_ary, AvMAX((AV*)sstr)+1, SV*);
 	    SvPVX(dstr)	= (char*)dst_ary;
 	    AvALLOC((AV*)dstr) = dst_ary;
@@ -6105,6 +6101,7 @@ Perl_sv_dup(pTHX_ SV *sstr)
 	break;
     case SVt_PVFM:
 	SvANY(dstr)	= new_XPVFM();
+	FmLINES(dstr)	= FmLINES(sstr);
 	goto dup_pvcv;
 	/* NOTREACHED */
     case SVt_PVCV:
@@ -6144,7 +6141,7 @@ dup_pvcv:
 	break;
     }
 
-    if (SvOBJECT(dstr))
+    if (SvOBJECT(dstr) && SvTYPE(dstr) != SVt_PVIO)
 	++PL_sv_objcount;
 
     return dstr;

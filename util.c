@@ -1420,8 +1420,8 @@ Perl_vmess(pTHX_ const char *pat, va_list *args)
     if (!SvCUR(sv) || *(SvEND(sv) - 1) != '\n') {
 	dTHR;
 	if (CopLINE(PL_curcop))
-	    Perl_sv_catpvf(aTHX_ sv, " at %_ line %"IVdf,
-			   CopFILESV(PL_curcop), (IV)CopLINE(PL_curcop));
+	    Perl_sv_catpvf(aTHX_ sv, " at %s line %"IVdf,
+			   CopFILE(PL_curcop), (IV)CopLINE(PL_curcop));
 	if (GvIO(PL_last_in_gv) && IoLINES(GvIOp(PL_last_in_gv))) {
 	    bool line_mode = (RsSIMPLE(PL_rs) &&
 			      SvCUR(PL_rs) == 1 && *SvPVX(PL_rs) == '\n');

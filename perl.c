@@ -1689,10 +1689,10 @@ Perl_moreswitches(pTHX_ char *s)
 	    my_setenv("PERL5DB", Perl_form(aTHX_ "use Devel::%s;", ++s));
 	    s += strlen(s);
 	}
-	if (!PL_perldb)
+	if (!PL_perldb) {
 	    PL_perldb = PERLDB_ALL;
-	if (!PL_debstash)
 	    init_debugger();
+	}
 	return s;
     case 'D':
     {	
@@ -2086,6 +2086,7 @@ S_init_main_stash(pTHX)
     sv_setpvn(ERRSV, "", 0);
     PL_curstash = PL_defstash;
     CopSTASH_set(&PL_compiling, PL_defstash);
+    PL_debstash = GvHV(gv_fetchpv("DB::", GV_ADDMULTI, SVt_PVHV));
     PL_globalstash = GvHV(gv_fetchpv("CORE::GLOBAL::", GV_ADDMULTI, SVt_PVHV));
     /* We must init $/ before switches are processed. */
     sv_setpvn(get_sv("/", TRUE), "\n", 1);
@@ -2644,7 +2645,6 @@ Perl_init_debugger(pTHX)
     dTHR;
     HV *ostash = PL_curstash;
 
-    PL_debstash = GvHV(gv_fetchpv("DB::", GV_ADDMULTI, SVt_PVHV));
     PL_curstash = PL_debstash;
     PL_dbargs = GvAV(gv_AVadd((gv_fetchpv("args", GV_ADDMULTI, SVt_PVAV))));
     AvREAL_off(PL_dbargs);

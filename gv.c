@@ -59,6 +59,9 @@ Perl_gv_fetchfile(pTHX_ const char *name)
     STRLEN tmplen;
     GV *gv;
 
+    if (!PL_defstash)
+	return Nullgv;
+
     tmplen = strlen(name) + 2;
     if (tmplen < sizeof smallbuf)
 	tmpbuf = smallbuf;
@@ -445,8 +448,8 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	name++;
 
     for (namend = name; *namend; namend++) {
-	if ((*namend == '\'' && namend[1]) ||
-	    (*namend == ':' && namend[1] == ':'))
+	if ((*namend == ':' && namend[1] == ':')
+	    || (*namend == '\'' && namend[1]))
 	{
 	    if (!stash)
 		stash = PL_defstash;
