@@ -5,17 +5,27 @@ use strict;
 use Carp;
 
 require Exporter;
-use XSLoader ();
 require AutoLoader;
 
 our @ISA     = qw/ Exporter AutoLoader /;
 our @EXPORT  = qw/ hostname /;
 
-our $VERSION = '1.1';
+our $VERSION;
 
 our $host;
 
-XSLoader::load 'Sys::Hostname', $VERSION;
+BEGIN {
+    $VERSION = '1.1';
+    {
+	local $SIG{__DIE__};
+	eval {
+	    require XSLoader;
+	    XSLoader::load('Sys::Hostname', $VERSION);
+	};
+	warn $@ if $@;
+    }
+}
+
 
 sub hostname {
 
@@ -23,7 +33,7 @@ sub hostname {
   return $host if defined $host;
 
   # method 1' - try to ask the system
-  $host = ghname();
+  $host = ghname() if defined &ghname;
   return $host if defined $host;
 
   if ($^O eq 'VMS') {
