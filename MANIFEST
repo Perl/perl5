@@ -1453,7 +1453,6 @@ t/harness		Finer diagnostics from test suite
 t/io/argv.t		See if ARGV stuff works
 t/io/dup.t		See if >& works right
 t/io/fflush.t		See if auto-flush on fork/exec/system/qx works
-t/io/format.t		See if formats work
 t/io/fs.t		See if directory manipulations work
 t/io/inplace.t		See if inplace editing works
 t/io/iprefix.t		See if inplace editing works with prefixes
@@ -1809,7 +1808,7 @@ t/op/utf8decode.t	See if UTF-8 decoding works
 t/op/vec.t		See if vectors work
 t/op/ver.t		See if v-strings and the %v format flag work
 t/op/wantarray.t	See if wantarray works
-t/op/write.t		See if write works
+t/op/write.t		See if write works (formats work)
 t/pod/emptycmd.t	Test empty pod directives
 t/pod/emptycmd.xr	Expected results for emptycmd.t
 t/pod/find.t		See if Pod::Find works
