@@ -78,6 +78,188 @@ Version 5.005_03        Third maintenance release of 5.005
 ----------------
 
 ____________________________________________________________________________
+[  2728] By: gbarr                                 on 1999/01/29  04:10:37
+        Log: From: Ted Law <tedlaw@cibcwg.com>
+             Date: Wed, 27 Jan 1999 14:54:03 -0500 (EST)
+             Message-Id: <199901271954.OAA07391@dcm2.cibcwg.com>
+             Subject: POSIX::strftime buffer overflow problem
+     Branch: maint-5.005/perl
+           ! ext/POSIX/POSIX.xs
+____________________________________________________________________________
+[  2727] By: gbarr                                 on 1999/01/29  04:09:57
+        Log: From: Tom Spindler <dogcow@isi.net>
+             Date: Thu, 28 Jan 1999 17:15:11 -0800
+             Message-ID: <19990128171510.A11778@isi.net>
+             Subject: [PATCH] BeOS dynamic loading support for perl5.005_03_MT4
+     Branch: maint-5.005/perl
+           + ext/DynaLoader/dl_beos.xs
+	   ! Configure MANIFEST Makefile.SH README.beos hints/beos.sh
+           ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[  2726] By: gbarr                                 on 1999/01/29  03:30:51
+        Log: Remove use of File::Slurp in t/lib/textfill.t
+     Branch: maint-5.005/perl
+           ! t/lib/textfill.t
+____________________________________________________________________________
+[  2725] By: gbarr                                 on 1999/01/29  03:11:41
+        Log: From: Gurusamy Sarathy <gsar@ActiveState.com>
+             Date: Wed, 27 Jan 1999 23:14:33 -0800
+             Message-Id: <199901280714.XAA10176@activestate.com>
+             Subject: Re: NOT OK: "@INC contains: ." after make install - MAINT_TRIAL_4 - 5.005_03 maintenance trial 4 MSWin32-x86-object
+     Branch: maint-5.005/perl
+           ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  2724] By: jhi                                   on 1999/01/28  19:27:15
+        Log: Change jhi@iki.fi to perlbug@perl.com.
+             Cosmetic change in semctl probing messages.
+     Branch: maint-5.005/perl
+           ! Configure hints/freebsd.sh
+____________________________________________________________________________
+[  2723] By: jhi                                   on 1999/01/28  17:27:49
+        Log: Yet another typo in a test program.
+     Branch: maint-5.005/perl
+           ! Configure
+____________________________________________________________________________
+[  2722] By: jhi                                   on 1999/01/28  17:13:52
+        Log: The pthreads_created_joinable test had a typo,
+             by blind luck the default value works almost anywhere.
+     Branch: maint-5.005/perl
+           ! Configure
+____________________________________________________________________________
+[  2721] By: jhi                                   on 1999/01/28  13:04:23
+        Log: MinT support, adapted from change #2594.
+     Branch: maint-5.005/perl
+	   + README.mint ext/POSIX/hints/mint.pl hints/mint.sh
+	   + mint/Makefile mint/README mint/errno.h mint/pwd.c mint/stdio.h
+           + mint/sys/time.h mint/time.h
+	   ! MANIFEST doio.c malloc.c miniperlmain.c perl.c
+	   ! pod/perldelta.pod t/io/fs.t t/lib/safe2.t t/op/groups.t
+           ! t/op/mkdir.t t/op/taint.t
+____________________________________________________________________________
+[  2719] By: jhi                                   on 1999/01/27  19:49:49
+        Log: From: "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+             To: perl5-porters@perl.org
+             Subject: Re: [PATCH] perl5.005_03-MAINT_TRIAL_3: clarify Sv[INU]V versus Sv[INU]VX in perlguts
+             Date: Tue, 26 Jan 1999 22:25:07 +0000
+             Message-Id: <E105Gux-0000Ac-00@taurus.cus.cam.ac.uk>
+     Branch: maint-5.005/perl
+           ! pod/perlguts.pod
+____________________________________________________________________________
+[  2718] By: jhi                                   on 1999/01/27  19:46:04
+        Log: io/fs.t fails test #18 (sense of tests appears to have been
+             changed incompletely; this patch just skips the test attached,
+             a la test #17 preceding it).
+             
+             From: "G. Del Merritt" <del@intranetics.com>
+             To: perlbug@perl.com
+             Subject: NOT OK: perl 5.00503 +MAINT_TRIAL_4 on MSWin32-x86-object (PATCHES included)
+             Date: Tue, 26 Jan 1999 12:09:09 -0700
+             Message-Id: <199901261909.MAA25525@jhereg.perl.com>
+     Branch: maint-5.005/perl
+           ! t/io/fs.t
+____________________________________________________________________________
+[  2717] By: jhi                                   on 1999/01/27  19:44:46
+        Log: Miniperl fails to build (pp_sys.c was changed and iperlsys.h wasn't)
+             
+             From: "G. Del Merritt" <del@intranetics.com>
+             To: perlbug@perl.com
+             Subject: NOT OK: perl 5.00503 +MAINT_TRIAL_4 on MSWin32-x86-object (PATCHES included)
+             Date: Tue, 26 Jan 1999 12:09:09 -0700
+             Message-Id: <199901261909.MAA25525@jhereg.perl.com>
+     Branch: maint-5.005/perl
+           ! iperlsys.h
+____________________________________________________________________________
+[  2716] By: jhi                                   on 1999/01/27  19:38:36
+        Log: From: Dan Sugalski <sugalskd@osshe.edu>
+             To: perlbug@perl.com, vmsperl@perl.org
+             Subject: NOT OK: perl 5.00503 +MAINT_TRIAL_4 on VMSAXP (Patch included, of course)
+             Date: Tue, 26 Jan 1999 14:40:38 -0800
+             Message-Id: <3.0.6.32.19990126144038.02e5d650@ous.edu>
+             
+             From: Dan Sugalski <sugalskd@osshe.edu>
+             To: perl5-porters@perl.org, vmsperl@perl.org
+             Subject: [PATCH 5.005_03-MAILT_TRIAL_4]VMS test patches
+             Date: Tue, 26 Jan 1999 14:55:29 -0800
+             Message-Id: <3.0.6.32.19990126145529.02f22280@ous.edu>
+     Branch: maint-5.005/perl
+	   ! t/lib/textfill.t t/lib/textwrap.t vms/ext/Stdio/test.pl
+           ! vms/subconfigure.com
+____________________________________________________________________________
+[  2715] By: jhi                                   on 1999/01/27  19:34:28
+        Log: From: Mark Bixby <markb@spock.dis.cccd.edu>
+             To: perl5-porters@perl.org
+             Subject: [PATCH perl5.005_03-MAINT_TRIAL_4] MPE port tweaks
+             Date: Tue, 26 Jan 1999 16:32:18 -0800 (PST)
+             Message-Id: <199901270032.QAA13395@spock.dis.cccd.edu>
+     Branch: maint-5.005/perl
+           ! hints/mpeix.sh mpeix/relink
+____________________________________________________________________________
+[  2714] By: jhi                                   on 1999/01/27  19:32:41
+        Log: NetBSD does not do setruid, setrgid.
+     Branch: maint-5.005/perl
+           ! hints/netbsd.sh
+____________________________________________________________________________
+[  2713] By: jhi                                   on 1999/01/27  19:28:53
+        Log: FreeBSD usethreads, based on private email with
+             Anton Berezin <tobez@plab.ku.dk>.
+     Branch: maint-5.005/perl
+           ! hints/freebsd.sh
+____________________________________________________________________________
+[  2712] By: jhi                                   on 1999/01/27  19:26:17
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             To: Mailing list Perl5 <perl5-porters@perl.org>
+             Subject: [PATCH 5.005_*] OS/2 threads
+             Date: Tue, 26 Jan 1999 13:39:46 -0500
+             Message-ID: <19990126133946.A11594@monk.mps.ohio-state.edu>
+     Branch: maint-5.005/perl
+           ! os2/os2ish.h
+____________________________________________________________________________
+[  2711] By: jhi                                   on 1999/01/27  19:24:28
+        Log: "make ok", "make okfile", and "make nok" were broken
+             with -Duseshrplib, because of a shared typo.
+             
+             From: Spider Boardman <spider@web.zk3.dec.com>
+             To: perlbug@perl.com
+             Subject: Not OK: perl 5.00503 +MAINT_TRIAL_4 on alpha-dec_osf-thread 5.0 (UNINSTALLED)
+             Date: Wed, 27 Jan 1999 12:27:15 -0500
+             Message-Id: <199901271727.MAA233455@web.zk3.dec.com>
+     Branch: maint-5.005/perl
+           ! Makefile.SH
+____________________________________________________________________________
+[  2710] By: jhi                                   on 1999/01/27  19:22:23
+        Log: Errno fixes:
+             
+             From: Spider Boardman <spider@web.zk3.dec.com>
+             To: perlbug@perl.com
+             Subject: Not OK: perl 5.00503 +MAINT_TRIAL_4 on alpha-dec_osf-thread 5.0 (UNINSTALLED)
+             Date: Wed, 27 Jan 1999 12:27:15 -0500
+             Message-Id: <199901271727.MAA233455@web.zk3.dec.com>
+             
+             From: Spider Boardman <spider@web.zk3.dec.com>
+             To: perlbug@perl.com
+             Subject: Not OK: perl 5.00503 +MAINT_TRIAL_4 on alpha-dec_osf-thread 5.0 (UNINSTALLED)
+             Date: Wed, 27 Jan 1999 13:31:16 -0500
+             Message-Id: <199901271831.NAA241001@web.zk3.dec.com>
+     Branch: maint-5.005/perl
+           ! Configure ext/Errno/Errno_pm.PL
+____________________________________________________________________________
+[  2709] By: jhi                                   on 1999/01/27  19:17:35
+        Log: Fix Configure installusrbinperl:
+             
+             From: Spider Boardman <spider@web.zk3.dec.com>
+             To: jhi@iki.fi
+             cc: perl5-porters@perl.org
+             Subject: Re: Not OK: perl 5.00503 +MAINT_TRIAL_4 on alpha-dec_osf-thread 5.0 (UNINSTALLED)
+             Date: Wed, 27 Jan 1999 13:03:35 -0500
+             Message-Id: <199901271803.NAA238257@web.zk3.dec.com>
+     Branch: maint-5.005/perl
+           ! Configure
+____________________________________________________________________________
+[  2708] By: gbarr                                 on 1999/01/26  04:14:42
+        Log: Trial release 4
+     Branch: maint-5.005/perl
+           ! Changes patchlevel.h pod/perlhist.pod
+____________________________________________________________________________
 [  2707] By: gbarr                                 on 1999/01/26  02:06:17
         Log: Add redef IO::Handle::* for setv?buf()
      Branch: maint-5.005/perl
