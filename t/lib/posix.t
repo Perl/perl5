@@ -96,5 +96,6 @@ print &POSIX::acos(1.0) == 0.0 ? "ok 17\n" : "not ok 17\n";
 print POSIX::strftime("ok 18 # %H:%M, on %D\n", localtime());
 
 $| = 0;
-print '@#!*$@(!@#$';
+# The following line assumes buffered output, which may be not true with EMX:
+print '@#!*$@(!@#$' unless $^O eq 'os2';
 _exit(0);

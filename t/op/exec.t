@@ -13,7 +13,12 @@ if ($^O eq 'MSWin32') {
 
 print "1..8\n";
 
-print "not ok 1\n" if system "echo ok \\1";	# shell interpreted
+if ($^O ne 'os2') {
+  print "not ok 1\n" if system "echo ok \\1";	# shell interpreted
+} 
+else {
+  print "ok 1 # skipped: bug/feature of pdksh\n"; # shell interpreted
+}
 print "not ok 2\n" if system "echo ok 2";	# split and directly called
 print "not ok 3\n" if system "echo", "ok", "3"; # directly called
 

@@ -112,6 +112,7 @@ Contents
          -  Threading 
          -  Calls to external programs 
          -  Memory allocation 
+         -  Threads
       AUTHOR 
       SEE ALSO 
   
@@ -883,50 +884,65 @@ Now run
 
   make test
 
-Some tests (4..6) should fail. Some perl invocations should end in a
-segfault (system error C<SYS3175>). To get finer error reports, call
+All tests should succeed (with some of them skipped).  Note that on one
+of the systems I see intermittent failures of F<io/pipe.t> subtest 9.
+Any help to track what happens with this test is appreciated.
+
+Some tests may generate extra messages similar to
+
+=over 4
+
+=item A lot of C<bad free>
+
+in database tests related to Berkeley DB. This is a confirmed bug of
+DB. You may disable this warnings, see L<"PERL_BADFREE">.
+
+There is not much we can do with it (but apparently it does not cause 
+any real error with data).
+
+=item Process terminated by SIGTERM/SIGINT
+
+This is a standard message issued by OS/2 applications. *nix
+applications die in silence. It is considered a feature. One can
+easily disable this by appropriate sighandlers. 
+
+However the test engine bleeds these message to screen in unexpected
+moments. Two messages of this kind I<should> be present during
+testing.
+
+=back
+
+Two F<lib/io_*> tests may generate popups (system error C<SYS3175>), 
+but should succeed anyway.  This is due to a bug of EMX related to 
+fork()ing with dynamically loaded libraries.
+
+I submitted a patch to EMX which makes it possible to fork() with EMX 
+dynamic libraries loaded, which makes F<lib/io*> tests pass without
+skipping offended tests. This means that soon the number of skipped tests
+may decrease yet more.
+
+To get finer test reports, call
 
   perl t/harness
 
-The report you get may look like
+The report with F<io/pipe.t> failing may look like this:
 
   Failed Test  Status Wstat Total Fail  Failed  List of failed
-  ---------------------------------------------------------------
-  io/fs.t                      26   11  42.31%  2-5, 7-11, 18, 25
-  lib/io_pipe.t     3   768     6   ??       %  ??
-  lib/io_sock.t     3   768     5   ??       %  ??
-  op/stat.t                    56    5   8.93%  3-4, 20, 35, 39
-  Failed 4/140 test scripts, 97.14% okay. 27/2937 subtests failed, 99.08% okay.
+  ------------------------------------------------------------
+  io/pipe.t                    12    1   8.33%  9
+  7 tests skipped, plus 56 subtests skipped.
+  Failed 1/195 test scripts, 99.49% okay. 1/6542 subtests failed, 99.98% okay.
 
-Note that using C<make test> target two more tests may fail: C<op/exec:1>
-because of (mis)feature of pdksh, and C<lib/posix:15>, which checks
-that the buffers are not flushed on C<_exit> (this is a bug in the test
-which assumes that tty output is buffered).
-
-I submitted a patch to EMX which makes it possible to fork() with EMX 
-dynamic libraries loaded, which makes F<lib/io*> tests pass. This means
-that soon the number of failing tests may decrease yet more.
-
-However, the test F<lib/io_udp.t> is disabled, since it never terminates, I
-do not know why. Comments/fixes welcome.
-
-The reasons for failed tests are:
+The reasons for most important skipped tests are:
 
 =over 8
 
-=item F<io/fs.t>
-
-Checks I<file system> operations. Tests:
-
-=over 10
-
-=item 2-5, 7-11
-
-Check C<link()> and C<inode count> - nonesuch under OS/2.
+=item F<op/fs.t>
 
 =item 18
 
-Checks C<atime> and C<mtime> of C<stat()> - I could not understand this test.
+Checks C<atime> and C<mtime> of C<stat()> - unfortunately, HPFS
+provides only 2sec time granularity (for compatibility with FAT?).
 
 =item 25
 
@@ -951,61 +967,19 @@ Checks C<stat()>. Tests:
 
 =over 4
 
-=item 3
-
-Checks C<inode count> - nonesuch under OS/2.
-
 =item 4
 
-Checks C<mtime> and C<ctime> of C<stat()> - I could not understand this test.
-
-=item 20
-
-Checks C<-x> - determined by the file extension only under OS/2.
-
-=item 35
-
-Needs F</usr/bin>.
-
-=item 39
-
-Checks C<-t> of F</dev/null>. Should not fail!
+Checks C<atime> and C<mtime> of C<stat()> - unfortunately, HPFS
+provides only 2sec time granularity (for compatibility with FAT?).
 
 =back
 
-=back
+=item F<lib/io_udp.t>
 
-In addition to errors, you should get a lot of warnings. 
-
-=over 4
-
-=item A lot of C<bad free>
-
-in databases related to Berkeley DB. This is a confirmed bug of
-DB. You may disable this warnings, see L<"PERL_BADFREE">.
-
-=item Process terminated by SIGTERM/SIGINT
-
-This is a standard message issued by OS/2 applications. *nix
-applications die in silence. It is considered a feature. One can
-easily disable this by appropriate sighandlers. 
-
-However the test engine bleeds these message to screen in unexpected
-moments. Two messages of this kind I<should> be present during
-testing.
-
-=item F<*/sh.exe>: ln: not found
-
-=item C<ls>: /dev: No such file or directory
-
-The last two should be self-explanatory. The test suite discovers that
-the system it runs on is not I<that much> *nixish.
+It never terminates, apparently some bug in storing the last socket from
+which we obtained a message.
 
 =back
-
-A lot of C<bad free>... in databases, bug in DB confirmed on other
-platforms. You may disable it by setting PERL_BADFREE environment variable
-to 1.
 
 =head2 Installing the built perl
 
@@ -1550,14 +1524,10 @@ as when processing B<-S> command-line switch.
 =head2 Memory allocation
 
 Perl uses its own malloc() under OS/2 - interpreters are usually malloc-bound
-for speed, but perl is not, since its malloc is lightning-fast. 
-Unfortunately, it is also quite frivolous with memory usage as well.
-
-Since kitchen-top machines are usually low on memory, perl is compiled with
-all the possible memory-saving options. This probably makes perl's 
-malloc() as greedy with memory as the neighbor's malloc(), but still
-much quickier. Note that this is true only for a "typical" usage,
-it is possible that the perl malloc will be worse for some very special usage.
+for speed, but perl is not, since its malloc is lightning-fast.
+Perl-memory-usage-tuned benchmarks show that Perl's malloc is 5 times quickier
+than EMX one.  I do not have convincing data about memory footpring, but
+a (pretty random) benchmark showed that Perl one is 5% better.
 
 Combination of perl's malloc() and rigid DLL name resolution creates
 a special problem with library functions which expect their return value to
@@ -1565,6 +1535,31 @@ be free()d by system's free(). To facilitate extensions which need to call
 such functions, system memory-allocation functions are still available with
 the prefix C<emx_> added. (Currently only DLL perl has this, it should 
 propagate to F<perl_.exe> shortly.)
+
+=head2 Threads
+
+One can build perl with thread support enabled by providing C<-D usethreads>
+option to F<Configure>.  Currently OS/2 support of threads is very 
+preliminary.
+
+Most notable problems: 
+
+=over
+
+=item C<COND_WAIT> 
+
+may have a race condition.  Needs a reimplementation (in terms of chaining
+waiting threads, with linker list stored in per-thread structure?).
+
+=item F<os2.c>
+
+has a couple of static variables used in OS/2-specific functions.  (Need to be
+moved to per-thread structure, or serialized?)
+
+=back
+
+Note that these problems should not discourage experimenting, since they
+have a low probability of affecting small programs.
 
 =cut
 
