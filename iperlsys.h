@@ -285,7 +285,7 @@ struct IPerlStdIOInfo
 #define PerlSIO_ferror(f)		ferror(f)
 #define PerlSIO_clearerr(f)		clearerr(f)
 #define PerlSIO_fgetc(f)			fgetc(f)
-#if PerlSIO_has_base
+#ifdef FILE_base
 #define PerlSIO_get_base(f)		FILE_base(f)
 #define PerlSIO_get_bufsiz(f)		FILE_bufsiz(f)
 #else
