@@ -1650,7 +1650,7 @@ SV *sv;
 	char *cpp = CPPSTDIN;
 
 	if (strEQ(cpp,"cppstdin"))
-	    sprintf(tokenbuf, "%s/%s", SCRIPTDIR, cpp);
+	    sprintf(tokenbuf, "%s/%s", BIN_EXP, cpp);
 	else
 	    sprintf(tokenbuf, "%s", cpp);
 	sv_catpv(sv,"-I");

@@ -56,6 +56,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define BIN "$bin"	/**/
 
+/* BIN_EXP:
+ *	This symbol is the filename expanded version of the BIN symbol, for
+ *	programs that do not want to deal with that at run-time.
+ */
+#define BIN_EXP "$binexp"	/**/
+
 /* CAT2:
  *	This macro catenates 2 tokens together.
  */
