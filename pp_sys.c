@@ -2557,9 +2557,15 @@ PP(pp_stat)
 
     if (PL_op->op_flags & OPf_REF) {
 	gv = cGVOP_gv;
-	if (PL_op->op_type == OP_LSTAT && ckWARN(WARN_IO) && gv != PL_defgv)
-	    Perl_warner(aTHX_ WARN_IO,
+	if (PL_op->op_type == OP_LSTAT) {
+	    if (PL_laststype != OP_LSTAT)
+		Perl_croak(aTHX_ "The stat preceding lstat() wasn't an lstat");
+	    if (ckWARN(WARN_IO) && gv != PL_defgv)
+		Perl_warner(aTHX_ WARN_IO,
 			"lstat() on filehandle %s", GvENAME(gv));
+		/* Perl_my_lstat (-l) croak's on filehandle, why warn here? */
+	}
+
       do_fstat:
 	if (gv != PL_defgv) {
 	    PL_laststype = OP_STAT;
