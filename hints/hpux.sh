@@ -83,8 +83,12 @@ case `$cc -v 2>&1`"" in
 			    gnu_ld=yes
 			    ;;
 			*)			# HPld
-			    ldflags="$ldflags -Wl,+vnocompatwarnings"
-			    ccflags="$ccflags -Wl,+vnocompatwarnings"
+                           case "$gccversion" in
+                               [12]*)
+                                   ldflags="$ldflags -Wl,+vnocompatwarnings"
+                                   ccflags="$ccflags -Wl,+vnocompatwarnings"
+                                   ;;
+                               esac
 			    ;;
 			esac
 		    ;;
