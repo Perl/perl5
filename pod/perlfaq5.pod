@@ -289,8 +289,8 @@ pair to make it easy to sort the hash in insertion order.
     }
 
 For passing filehandles to functions, the easiest way is to 
-prefer them with a star, as in func(*STDIN).  See L<perlfaq7/"Passing
-Filehandles"> for details.
+prefer them with a star, as in func(*STDIN).
+See L<perlfaq7/"Passing Filehandles"> for details.
 
 If you want to create many, anonymous handles, you should check out the
 Symbol, FileHandle, or IO::Handle (etc.) modules.  Here's the equivalent
