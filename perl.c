@@ -1029,7 +1029,9 @@ setuid perl scripts securely.\n");
 
 #if defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT)
     /* [perl #22371] Algorimic Complexity Attack on Perl 5.6.1, 5.8.0
-     * This MUST be done before any hash stores or fetches take place. */
+     * This MUST be done before any hash stores or fetches take place.
+     * If you set PL_hash_seed (and assumedly also PL_hash_seed_set) yourself,
+     * it is your responsibility to provide a good random seed! */
     if (!PL_hash_seed_set)
 	 PL_hash_seed = get_seed();
     {
