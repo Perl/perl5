@@ -5742,13 +5742,12 @@ S_new_constant(pTHX_ char *s, STRLEN len, const char *key, SV *sv, SV *pv,
     SAVETMPS;
     
     PUSHMARK(SP) ;
-    EXTEND(sp, 4);
+    EXTEND(sp, 3);
     if (pv)
  	PUSHs(pv);
     PUSHs(sv);
     if (pv)
  	PUSHs(typesv);
-    PUSHs(cv);
     PUTBACK;
     call_sv(cv, G_SCALAR | ( PL_in_eval ? 0 : G_EVAL));
     
