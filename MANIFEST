@@ -2172,6 +2172,7 @@ perly.fixer			A program to remove yacc stack limitations
 perly.h				The header file for perly.c
 perlyline.pl			Perl code to fix #line directives and gcc warnings in perly.c
 perly.y				Yacc grammar for perl
+perl_keyword.pl			A script to generate Perl_keyword() in toke.c
 plan9/aperl			Shell to make Perl error messages Acme-friendly
 plan9/arpa/inet.h		Plan9 port: replacement C header file
 plan9/buildinfo			Plan9 port: configuration information
