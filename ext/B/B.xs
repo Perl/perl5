@@ -699,7 +699,7 @@ B::SV
 SVOP_sv(o)
 	B::SVOP	o
 
-B::SV
+B::GV
 SVOP_gv(o)
 	B::SVOP	o
 
