@@ -398,6 +398,7 @@ sub run_filter {
 
 Copies each key of %from_to to its corresponding value efficiently.
 Filenames with the extension .pm are autosplit into the $autosplit_dir.
+Any destination directories are created.
 
 $filter_cmd is an optional shell command to run each .pm file through
 prior to splitting and copying.  Input is the contents of the module,
@@ -416,8 +417,6 @@ sub pm_to_blib {
     use File::Path qw(mkpath);
     use File::Compare qw(compare);
     use AutoSplit;
-    # my $my_req = $self->catfile(qw(auto ExtUtils Install forceunlink.al));
-    # require $my_req; # Hairy, but for the first
 
     if (!ref($fromto) && -r $fromto)
      {

@@ -20,7 +20,7 @@ use vars qw($VERSION @ISA
 
 use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
-$VERSION = '1.44';
+$VERSION = '1.45';
 
 require ExtUtils::MM_Any;
 @ISA = qw(ExtUtils::MM_Any);
@@ -559,6 +559,73 @@ sub depend {
     join "", @m;
 }
 
+
+=item dir_target B<DEPRECATED>
+
+    my $make_frag = $mm->dir_target(@directories);
+
+I<This function is deprecated> its use is no longer necessary and is I<only
+provided for backwards compatibility>.  blibdirs_target provides a much
+simpler mechanism and pm_to_blib() can create its own directories anyway.
+
+Returns a Makefile entry for a .exists file in each of the @directories.
+The purpose is to create a directory and provide a make target to depend on.
+The make target is a .exists file in each of those directories.
+
+For example
+
+    $mm->dir_target('$(INST_ARCHDIR)');
+
+would return the make target C<$(INST_ARCHDIR)/.exists> which would
+create $(INST_ARCHDIR) and touch .exists.  You would depend on this target
+to make sure $(INST_ARCHDIR) is created.
+
+Ignores directories which have already gone through dir_target() so you
+might wind up getting nothing.
+
+=cut
+
+sub dir_target {
+    my($self, @dirs) = @_;
+
+    my @targs = ();
+    my $make = '';
+    foreach my $dir (@dirs) {
+        my $targ = $self->catfile($dir, '.exists');
+
+        my $targdir;
+        if ($Is_VMS) { # Just remove file name; dirspec is often in macro
+            ($targdir = $targ) =~ s:/?\.exists\z::;
+        }
+        else { # while elsewhere we expect to see the dir separator in $targ
+            $targdir = dirname($targ);
+        }
+
+        next if $self->{DIR_TARGET}{$self}{$targdir}++;
+
+        push @targs, $targ;
+        $make .= <<MAKE_FRAG;
+$targ ::
+	\$(NOECHO) \$(MKPATH) $targdir
+	\$(NOECHO) \$(TOUCH) $targ
+	\$(NOECHO) \$(CHMOD) \$(PERM_RWX) $targdir
+
+MAKE_FRAG
+
+    }
+
+    # So these new .exists targets get called along with blibdirs.
+    my $blib_addition = '';
+    $blib_addition = <<MAKE_FRAG if @targs;
+blibdirs :: @targs
+	\$(NOECHO) \$(NOOP)
+
+MAKE_FRAG
+
+    return $blib_addition . $make;
+}
+
+
 =item init_DEST
 
   $mm->init_DEST
@@ -1083,9 +1150,9 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) blibdirs $(EXPORT_LIST) $(PE
 	# platforms.  We peek at lddlflags to see if we need -Wl,-R
 	# or -R to add paths to the run-time library search path.
         if ($Config{'lddlflags'} =~ /-Wl,-R/) {
-            $libs .= ' -L$(PERL_INC) -Wl,-R$(INSTALLARCHLIB)/CORE -lperl';
+            $libs .= ' -L$(PERL_INC) -Wl,-R$(INSTALLARCHLIB)/CORE -Wl,-R$(PERL_ARCHLIB)/CORE -lperl';
         } elsif ($Config{'lddlflags'} =~ /-R/) {
-            $libs .= ' -L$(PERL_INC) -R$(INSTALLARCHLIB)/CORE -lperl';
+            $libs .= ' -L$(PERL_INC) -R$(INSTALLARCHLIB)/CORE -R$(PERL_ARCHLIB)/CORE -lperl';
         }
     }
 
@@ -3966,8 +4033,6 @@ subdirs :: $(MYEXTLIB)
 config :: $(FIRST_MAKEFILE) blibdirs
 	$(NOECHO) $(NOOP)
 ';
-
-    push @m, $self->blibdirs_target;
 
     push @m, '
 $(O_FILES): $(H_FILES)

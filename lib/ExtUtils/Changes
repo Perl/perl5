@@ -1,3 +1,12 @@
+6.21 Tue Nov 11 00:12:56 PST 2003
+    - NetBSD was looking in INSTALLARCHLIB/CORE for libperl isntead of 
+      PERL_ARCHLIB/CORE.  Would cause problems if INSTALLARCHLIB was changed
+      (ie. LIB or PREFIX used). [Jochen Eisinger]
+    - Turns out a handful of modules use dir_target().  Restored a version
+      for backwards compatibility.
+    - Moved blibdirs target from top_targets() to its own section.  Lots of
+      modules rewrite top_targets() so blibdirs wouldn't be written.
+
 6.20 Thu Nov  6 02:25:58 PST 2003
     - Fixing dos2unix on Cygwin.  In-place editing doesn't work 100% so we
       take a more conservative approach.
