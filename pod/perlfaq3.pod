@@ -187,8 +187,8 @@ For Windows editors: you can download GNU Emacs
 (http://www.gnu.org/software/emacs/windows/ntemacs.html) or XEmacs
 (http://www.xemacs.org/Download/index.html), or a vi clone such as
 Elvis (ftp://ftp.cs.pdx.edu/pub/elvis/, http://www.fh-wedel.de/elvis/),
-Vile (http://www.clark.net/pub/dickey/vile/vile.html), or
-Vim (http://www.vim.org/) (win32: http://www.cs.vu.nl/%7Etmgil/vi.html).
+Vile (http://vile.cx), or Vim (http://www.vim.org/)
+(win32: http://www.cs.vu.nl/%7Etmgil/vi.html).
 For vi lovers in general, Windows or elsewhere:
 http://www.thomer.com/thomer/vi/vi.html.
 
@@ -198,7 +198,7 @@ UNIX platforms you might be interested in trying it out, firstly because
 strictly speaking it is not a vi clone, it is the real vi, or the new
 incarnation of it, and secondly because you can embed Perl inside it
 to use Perl as the scripting language.  nvi is not alone in this,
-though: at least also vim offers an embedded Perl.
+though: at least also vim and vile offer an embedded Perl.
 
 The following are Win32 multilanguage editor/IDESs that support Perl: 
 Codewright (http://www.starbase.com/), MultiEdit (http://www.MultiEdit.com/),
