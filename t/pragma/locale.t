@@ -354,8 +354,12 @@ foreach (0..15) {
 
 # Sanitize the environment so that we can run the external 'locale'
 # program without the taint mode getting grumpy.
-# Deleting PATH in VMS leads into serious trouble.
-delete @ENV{qw(PATH IFS CDPATH ENV BASH_ENV)} unless $^O eq 'VMS';
+
+# $ENV{PATH} is special in VMS.
+delete $ENV{PATH} if $^O ne 'VMS' or $Config{d_setenv};
+
+# Other subversive stuff.
+delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};
 
 if (-x "/usr/bin/locale" && open(LOCALES, "/usr/bin/locale -a|")) {
     while (<LOCALES>) {
