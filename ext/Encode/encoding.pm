@@ -397,13 +397,13 @@ This counterintuitive behavior has been fixed in perl 5.8.1.
 
 =head3 workaround to tr///;
 
-In perl 5.8.0, you can work aroud as follows;
+In perl 5.8.0, you can work around as follows;
 
   use encoding 'euc-jp';
   #  ....
   eval qq{ \$kana =~ tr/\xA4\xA1-\xA4\xF3/\xA5\xA1-\xA5\xF3/ };
 
-Note the C<tr//> expression is surronded by C<qq{}>.  The idea behind
+Note the C<tr//> expression is surrounded by C<qq{}>.  The idea behind
 is the same as classic idiom that makes C<tr///> 'interpolate'.
 
    tr/$from/$to/;            # wrong!
