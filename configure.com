@@ -5793,19 +5793,38 @@ $ WC "vms_ver='" + vms_ver + "'" ! VMS specific
 $ WC "voidflags='15'"
 $ WC "xs_apiversion='" + version + "'"
 $ WC "PERL_CONFIG_SH='true'"
-
 $!
 $! ## The UNIXy POSIXy reentrantey thingys ##
+$! See "Appendix B, Version-Dependency Tables" in the C RTL
+$! manual for when assorted _r functions became available.
 $!
-
-$ WC "asctime_r_proto='0'"
+$ IF use_threads .AND. vms_ver .GES. "7.2"
+$ THEN
+$   WC "asctime_r_proto='1'"
+$   WC "d_asctime_r='define'"
+$   WC "d_ctime_r='define'"
+$   WC "d_gmtime_r='define'"
+$   WC "d_localtime_r='define'"
+$ ELSE
+$   WC "asctime_r_proto='0'"
+$   WC "d_asctime_r='undef'"
+$   WC "d_ctime_r='undef'"
+$   WC "d_gmtime_r='undef'"
+$   WC "d_localtime_r='undef'"
+$ ENDIF
+$ IF use_threads .AND. vms_ver .GES. "7.3-1"
+$ THEN
+$   WC "d_readdir_r='define'"
+$   WC "readdir64_r_proto='1'"
+$ ELSE
+$   WC "d_readdir_r='undef'"
+$   WC "readdir64_r_proto='0'"
+$ ENDIF
 $ WC "crypt_r_proto='0'"
 $ WC "ctermid_r_proto='0'"
 $ WC "ctime_r_proto='0'"
-$ WC "d_asctime_r='undef'"
 $ WC "d_crypt_r='undef'"
 $ WC "d_ctermid_r='undef'"
-$ WC "d_ctime_r='undef'"
 $ WC "d_drand48_r='undef'"
 $ WC "d_endgrent_r='undef'"
 $ WC "d_endhostent_r='undef'"
@@ -5833,11 +5852,8 @@ $ WC "d_getservbyname_r='undef'"
 $ WC "d_getservbyport_r='undef'"
 $ WC "d_getservent_r='undef'"
 $ WC "d_getspnam_r='undef'"
-$ WC "d_gmtime_r='undef'"
-$ WC "d_localtime_r='undef'"
 $ WC "d_random_r='undef'"
 $ WC "d_readdir64_r='undef'"
-$ WC "d_readdir_r='undef'"
 $ WC "d_setgrent_r='undef'"
 $ WC "d_sethostent_r='undef'"
 $ WC "d_setlocale_r='undef'"
@@ -5881,8 +5897,6 @@ $ WC "gmtime_r_proto='0'"
 $ WC "i_crypt='undef'"
 $ WC "localtime_r_proto='0'"
 $ WC "random_r_proto='0'"
-$ WC "readdir64_r_proto='0'"
-$ WC "readdir_r_proto='0'"
 $ WC "setgrent_r_proto='0'"
 $ WC "sethostent_r_proto='0'"
 $ WC "setlocale_r_proto='0'"
@@ -5895,7 +5909,6 @@ $ WC "srandom_r_proto='0'"
 $ WC "strerror_r_proto='0'"
 $ WC "tmpnam_r_proto='0'"
 $ WC "ttyname_r_proto='0'
-
 $!
 $! ##END WRITE NEW CONSTANTS HERE##
 $!

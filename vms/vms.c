@@ -3886,7 +3886,7 @@ static void mp_expand_wild_cards(pTHX_ char *item,
 				struct list_item **tail,
 				int *count);
 
-static int background_process(int argc, char **argv);
+static int background_process(pTHX_ int argc, char **argv);
 
 static void pipe_and_fork(pTHX_ char **cmargv);
 
@@ -4336,7 +4336,7 @@ pipe_and_fork(pTHX_ char **cmargv)
 	}
 }
 
-static int background_process(int argc, char **argv)
+static int background_process(pTHX_ int argc, char **argv)
 {
 char command[2048] = "$";
 $DESCRIPTOR(value, "");
