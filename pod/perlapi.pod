@@ -4568,7 +4568,7 @@ Found in file sv.c
 
 Returns a string describing what the SV is a reference to.
 
-	const char*	sv_reftype(const SV* sv, int ob)
+	char*	sv_reftype(const SV* sv, int ob)
 
 =for hackers
 Found in file sv.c

@@ -7018,9 +7018,8 @@ Perl_peep(pTHX_ register OP *o)
     LEAVE;
 }
 
-
-
-const char* Perl_custom_op_name(pTHX_ const OP* o)
+char*
+Perl_custom_op_name(pTHX_ const OP* o)
 {
     const IV index = PTR2IV(o->op_ppaddr);
     SV* keysv;
@@ -7038,7 +7037,8 @@ const char* Perl_custom_op_name(pTHX_ const OP* o)
     return SvPV_nolen(HeVAL(he));
 }
 
-const char* Perl_custom_op_desc(pTHX_ const OP* o)
+char*
+Perl_custom_op_desc(pTHX_ const OP* o)
 {
     const IV index = PTR2IV(o->op_ppaddr);
     SV* keysv;
@@ -7055,7 +7055,6 @@ const char* Perl_custom_op_desc(pTHX_ const OP* o)
 
     return SvPV_nolen(HeVAL(he));
 }
-
 
 #include "XSUB.h"
 

@@ -132,8 +132,8 @@ PERL_CALLCONV void	Perl_cx_dump(pTHX_ PERL_CONTEXT* cs);
 PERL_CALLCONV SV*	Perl_filter_add(pTHX_ filter_t funcp, SV* datasv);
 PERL_CALLCONV void	Perl_filter_del(pTHX_ filter_t funcp);
 PERL_CALLCONV I32	Perl_filter_read(pTHX_ int idx, SV* buffer, int maxlen);
-PERL_CALLCONV const char**	Perl_get_op_descs(pTHX);
-PERL_CALLCONV const char**	Perl_get_op_names(pTHX);
+PERL_CALLCONV char**	Perl_get_op_descs(pTHX);
+PERL_CALLCONV char**	Perl_get_op_names(pTHX);
 PERL_CALLCONV const char*	Perl_get_no_modify(pTHX);
 PERL_CALLCONV U32*	Perl_get_opargs(pTHX);
 PERL_CALLCONV PPADDR_t*	Perl_get_ppaddr(pTHX);
@@ -734,7 +734,7 @@ PERL_CALLCONV char*	Perl_sv_pvutf8n_force(pTHX_ SV* sv, STRLEN* lp);
 PERL_CALLCONV char*	Perl_sv_pvbyten_force(pTHX_ SV* sv, STRLEN* lp);
 PERL_CALLCONV char*	Perl_sv_recode_to_utf8(pTHX_ SV* sv, SV *encoding);
 PERL_CALLCONV bool	Perl_sv_cat_decode(pTHX_ SV* dsv, SV *encoding, SV *ssv, int *offset, char* tstr, int tlen);
-PERL_CALLCONV const char*	Perl_sv_reftype(pTHX_ const SV* sv, int ob);
+PERL_CALLCONV char*	Perl_sv_reftype(pTHX_ const SV* sv, int ob);
 PERL_CALLCONV void	Perl_sv_replace(pTHX_ SV* sv, SV* nsv);
 PERL_CALLCONV void	Perl_sv_report_used(pTHX);
 PERL_CALLCONV void	Perl_sv_reset(pTHX_ const char* s, HV* stash);
@@ -911,8 +911,8 @@ PERL_CALLCONV void	Perl_sys_intern_clear(pTHX);
 PERL_CALLCONV void	Perl_sys_intern_init(pTHX);
 #endif
 
-PERL_CALLCONV const char *	Perl_custom_op_name(pTHX_ const OP* op);
-PERL_CALLCONV const char *	Perl_custom_op_desc(pTHX_ const OP* op);
+PERL_CALLCONV char *	Perl_custom_op_name(pTHX_ const OP* op);
+PERL_CALLCONV char *	Perl_custom_op_desc(pTHX_ const OP* op);
 
 #if defined(PERL_COPY_ON_WRITE)
 PERL_CALLCONV int	Perl_sv_release_IVX(pTHX_ SV *sv);

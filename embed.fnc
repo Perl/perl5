@@ -143,8 +143,8 @@ Ap	|void	|cx_dump	|PERL_CONTEXT* cs
 Ap	|SV*	|filter_add	|filter_t funcp|SV* datasv
 Ap	|void	|filter_del	|filter_t funcp
 Ap	|I32	|filter_read	|int idx|SV* buffer|int maxlen
-Ap	|const char**	|get_op_descs
-Ap	|const char**	|get_op_names
+Ap	|char**	|get_op_descs
+Ap	|char**	|get_op_names
 p	|const char*	|get_no_modify
 p	|U32*	|get_opargs
 Ap	|PPADDR_t*|get_ppaddr
@@ -769,7 +769,7 @@ Apd	|char*	|sv_pvbyten_force|SV* sv|STRLEN* lp
 Apd	|char*	|sv_recode_to_utf8	|SV* sv|SV *encoding
 Apd	|bool	|sv_cat_decode	|SV* dsv|SV *encoding|SV *ssv|int *offset \
 				|char* tstr|int tlen
-Apd	|const char*|sv_reftype	|const SV* sv|int ob
+Apd	|char*	|sv_reftype	|const SV* sv|int ob
 Apd	|void	|sv_replace	|SV* sv|SV* nsv
 Apd	|void	|sv_report_used
 Apd	|void	|sv_reset	|const char* s|HV* stash
@@ -951,8 +951,8 @@ Ap	|void	|sys_intern_clear
 Ap	|void	|sys_intern_init
 #endif
 
-Ap	|const char *|custom_op_name	|const OP* op
-Ap	|const char *|custom_op_desc	|const OP* op
+Ap	|char *	|custom_op_name	|const OP* op
+Ap	|char *	|custom_op_desc	|const OP* op
 
 #if defined(PERL_COPY_ON_WRITE)
 pMX	|int	|sv_release_IVX	|SV *sv

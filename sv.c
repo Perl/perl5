@@ -8424,11 +8424,11 @@ Returns a string describing what the SV is a reference to.
 =cut
 */
 
-const char *
+char *
 Perl_sv_reftype(pTHX_ const SV *sv, int ob)
 {
     if (ob && SvOBJECT(sv)) {
-        const char *name = HvNAME(SvSTASH(sv));
+	char *name = HvNAME(SvSTASH(sv));
 	return name ? name : "__ANON__";
     }
     else {
@@ -8442,13 +8442,13 @@ Perl_sv_reftype(pTHX_ const SV *sv, int ob)
 	case SVt_PVNV:
 	case SVt_PVMG:
 	case SVt_PVBM:
-	    			if (SvVOK(sv))
+				if (SvVOK(sv))
 				    return "VSTRING";
 				if (SvROK(sv))
 				    return "REF";
 				else
 				    return "SCALAR";
-				
+
 	case SVt_PVLV:		return SvROK(sv) ? "REF"
 				/* tied lvalues should appear to be
 				 * scalars for backwards compatitbility */

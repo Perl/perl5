@@ -3008,13 +3008,13 @@ Perl_GetVars(pTHX)
 }
 #endif
 
-const char **
+char **
 Perl_get_op_names(pTHX)
 {
  return PL_op_name;
 }
 
-const char **
+char **
 Perl_get_op_descs(pTHX)
 {
  return PL_op_desc;

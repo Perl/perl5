@@ -98,9 +98,9 @@ START_EXTERN_C
                     PL_op_desc[(o)->op_type])
 
 #ifndef DOINIT
-EXT const char *PL_op_name[];
+EXT char *PL_op_name[];
 #else
-EXT const char *PL_op_name[] = {
+EXT char *PL_op_name[] = {
 END
 
 for (@ops) {
@@ -115,9 +115,9 @@ END
 
 print <<END;
 #ifndef DOINIT
-EXT const char *PL_op_desc[];
+EXT char *PL_op_desc[];
 #else
-EXT const char *PL_op_desc[] = {
+EXT char *PL_op_desc[] = {
 END
 
 for (@ops) {
