@@ -618,8 +618,12 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 		  SetLastError(dwErr);
 	     }
 #else
-	     sv_setnv(sv, (NV)errno);
-	     sv_setpv(sv, errno ? Strerror(errno) : "");
+	     {
+		 int saveerrno = errno;
+		 sv_setnv(sv, (NV)errno);
+		 sv_setpv(sv, errno ? Strerror(errno) : "");
+		 errno = saveerrno;
+	     }
 #endif
 #endif
 #endif
