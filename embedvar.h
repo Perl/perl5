@@ -716,6 +716,7 @@
 #define sv_no			(Perl_Vars.Gsv_no)
 #define sv_undef		(Perl_Vars.Gsv_undef)
 #define sv_yes			(Perl_Vars.Gsv_yes)
+#define svref_mutex		(Perl_Vars.Gsvref_mutex)
 #define thisexpr		(Perl_Vars.Gthisexpr)
 #define thr_key			(Perl_Vars.Gthr_key)
 #define threads_mutex		(Perl_Vars.Gthreads_mutex)
@@ -834,6 +835,7 @@
 #define Gsv_no			sv_no
 #define Gsv_undef		sv_undef
 #define Gsv_yes			sv_yes
+#define Gsvref_mutex		svref_mutex
 #define Gthisexpr		thisexpr
 #define Gthr_key		thr_key
 #define Gthreads_mutex		threads_mutex
@@ -952,6 +954,7 @@
 #define sv_no			Perl_sv_no
 #define sv_undef		Perl_sv_undef
 #define sv_yes			Perl_sv_yes
+#define svref_mutex		Perl_svref_mutex
 #define thisexpr		Perl_thisexpr
 #define thr_key			Perl_thr_key
 #define threads_mutex		Perl_threads_mutex
