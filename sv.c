@@ -1907,7 +1907,9 @@ Perl_looks_like_number(pTHX_ SV *sv)
     I32 numtype = 0;
     I32 sawinf  = 0;
     STRLEN len;
+#ifdef USE_LOCALE_NUMERIC
     bool specialradix = FALSE;
+#endif
 
     if (SvPOK(sv)) {
 	sbegin = SvPVX(sv); 
@@ -1952,9 +1954,11 @@ Perl_looks_like_number(pTHX_ SV *sv)
 	    || (specialradix = IS_NUMERIC_RADIX(s))
 #endif
 	    ) {
+#ifdef USE_LOCALE_NUMERIC
 	    if (specialradix)
 		s += SvCUR(PL_numeric_radix_sv);
 	    else
+#endif
 		s++;
 	    numtype |= IS_NUMBER_NOT_IV;
             while (isDIGIT(*s))  /* optional digits after the radix */
@@ -1966,9 +1970,11 @@ Perl_looks_like_number(pTHX_ SV *sv)
 	    || (specialradix = IS_NUMERIC_RADIX(s))
 #endif
 	    ) {
+#ifdef USE_LOCALE_NUMERIC
 	if (specialradix)
 	    s += SvCUR(PL_numeric_radix_sv);
 	else
+#endif
 	    s++;
 	numtype |= IS_NUMBER_TO_INT_BY_ATOL | IS_NUMBER_NOT_IV;
         /* no digits before the radix means we need digits after it */

@@ -68,6 +68,7 @@ END_EXTERN_C
 #define UTF8_IS_START(c)		(((U8)c) >= 0xc0 && (((U8)c) <= 0xfd))
 #define UTF8_IS_CONTINUATION(c)		(((U8)c) >= 0x80 && (((U8)c) <= 0xbf))
 #define UTF8_IS_CONTINUED(c) 		(((U8)c) &  0x80)
+#define UTF8_IS_DOWNGRADEABLE_START(c)	(((U8)c & 0xfc) != 0xc0)
 
 #define UTF8_CONTINUATION_MASK		((U8)0x3f)
 #define UTF8_ACCUMULATION_SHIFT		6
