@@ -9,6 +9,11 @@ extern "C" {
 #else
 #include <sys/time.h>
 #endif
+#ifdef HAS_SELECT
+# ifdef I_SYS_SELECT
+#  include <sys/select.h>
+# endif
+#endif
 #ifdef __cplusplus
 }
 #endif
