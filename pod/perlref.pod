@@ -579,7 +579,7 @@ The second is to use exists() on the hash reference sitting in the
 first array element.  This checks to see if the given key is a valid
 field in the pseudo-hash.
 
-	exists $phash->[0]{pants};	# true, 'pants' is a valid field
+	exists $phash->[0]{bar};	# true, 'bar' is a valid field
 	exists $phash->[0]{shoes};	# false, 'shoes' can't be used
 
 =head2 Function Templates
