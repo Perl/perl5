@@ -6,14 +6,16 @@
 # 	Andy Dougherty <doughera@lafcol.lafayette.edu>
 # 	with help from Dean Roehrich <roehrich@cray.com>.
 #   cc -n32 update info from Krishna Sethuraman, krishna@sgi.com.
+#       additional update from Scott Henry, scotth@sgi.com
 
 # Use   sh Configure -Dcc='cc -n32' to try compiling with -n32.
 
 case "$cc" in
 *"cc -n32"*)
 	ld=ld
-	ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1184 -OPT:fprop_limit=1500"
-	optimize='none'  # Miniperl core dumps with -O
+	ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1184 -OPT:Olimit=0"
+#	optimize='none'	# for pre-7.1 compilers. Miniperl core dumps with -O
+	optimize='-O3'	# This works with the 7.1 and later compilers
 	ldflags=' -L/usr/local/lib -L/usr/lib32 -L/lib32'
 	cccdlflags=' '
 	lddlflags="-n32 -shared"
@@ -23,7 +25,9 @@ case "$cc" in
 	nm_so_opt='-p'
 	;;
 *)
-	ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -Olimit 3000"
+	# this is needed to force the old-32 paths
+	#  since the system default can be changed.
+	ccflags="$ccflags -32 -D_BSD_TYPES -D_BSD_TIME -Olimit 3000"
 	;;
 esac
 
@@ -48,6 +52,12 @@ libswanted="$*"
 # tests would pass some times and fail at other times.
 # The safest thing to do seems to be to eliminate them.
 #
+#  Actually, the only libs that you want are '-lm'.  Everything else
+# you need is in libc.  You do also need '-lbsd' if you choose not
+# to use the -D_BSD_* defines.  Note that as of 6.2 the only
+# difference between '-lmalloc' and '-lc' malloc is the debugging
+# and control calls. -- scotth@sgi.com
+
 set `echo X "$libswanted "|sed -e 's/ sun / /' -e 's/ crypt / /' -e 's/ bsd / /' -e 's/ PW / /'`
 shift
 libswanted="$*"
