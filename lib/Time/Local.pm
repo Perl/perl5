@@ -3,134 +3,115 @@ use 5.006;
 require Exporter;
 use Carp;
 use strict;
+use integer;
 
-our $VERSION    = '1.02';
+our $VERSION    = '1.03';
 our @ISA	= qw( Exporter );
 our @EXPORT	= qw( timegm timelocal );
 our @EXPORT_OK	= qw( timegm_nocheck timelocal_nocheck );
 
-# Set up constants
-our $SEC  = 1;
-our $MIN  = 60 * $SEC;
-our $HR   = 60 * $MIN;
-our $DAY  = 24 * $HR;
-# Determine breakpoint for rolling century
-    my $ThisYear = (localtime())[5];
-    my $NextCentury = int($ThisYear / 100) * 100;
-    my $Breakpoint = ($ThisYear + 50) % 100;
-       $NextCentury += 100 if $Breakpoint < 50;
+my @MonthDays = (31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
 
-our(%Options, %Cheat);
+# Determine breakpoint for rolling century
+my $ThisYear     = (localtime())[5];
+my $Breakpoint   = ($ThisYear + 50) % 100;
+my $NextCentury  = $ThisYear - $ThisYear % 100;
+   $NextCentury += 100 if $Breakpoint < 50;
+my $Century      = $NextCentury - 100;
+
+my (%Options, %Cheat);
+
+# Determine the EPOC day for this machine
+my $Epoc = 0; $Epoc = _daygm(gmtime(0));
+%Cheat=(); # clear the cache as epoc has changed
+
+my $MaxDay = do {
+  no integer;
+  int((~0>>1-43200)/86400)-1;
+};
+
+
+sub _daygm {
+    $_[3] + ($Cheat{pack("ss",@_[4,5])} ||= do {
+	my $month = ($_[4] + 10) % 12;
+	my $year = $_[5] + 1900 - $month/10;
+	365*$year + $year/4 - $year/100 + $year/400 + ($month*306 + 5)/10 - $Epoc
+    });
+}
+
+
+sub _timegm {
+    $_[0]  +  60 * $_[1]  +  3600 * $_[2]  +  86400 * &_daygm;
+}
+
 
 sub timegm {
-    my (@date) = @_;
-    if ($date[5] > 999) {
-        $date[5] -= 1900;
+    my ($sec,$min,$hour,$mday,$month,$year) = @_;
+
+    if ($year >= 1000) {
+	$year -= 1900;
     }
-    elsif ($date[5] >= 0 && $date[5] < 100) {
-        $date[5] -= 100 if $date[5] > $Breakpoint;
-        $date[5] += $NextCentury;
+    elsif ($year < 100 and $year >= 0) {
+	$year += ($year > $Breakpoint) ? $Century : $NextCentury;
     }
-    my $ym = pack('C2', @date[5,4]);
-    my $cheat = $Cheat{$ym} || &cheat($ym, @date);
-    $cheat
-    + $date[0] * $SEC
-    + $date[1] * $MIN
-    + $date[2] * $HR
-    + ($date[3]-1) * $DAY;
+
+    unless ($Options{no_range_check}) {
+	if (abs($year) >= 0x7fff) {
+	    $year += 1900;
+	    croak "Cannot handle date ($sec, $min, $hour, $mday, $month, $year)";
+	}
+
+	croak "Month '$month' out of range 0..11" if $month > 11 or $month < 0;
+
+	my $md = $MonthDays[$month];
+	++$md unless $month != 1 or $year % 4 or !($year % 400);
+
+	croak "Day '$mday' out of range 1..$md"   if $mday  > $md  or $mday  < 1;
+	croak "Hour '$hour' out of range 0..23"   if $hour  > 23   or $hour  < 0;
+	croak "Minute '$min' out of range 0..59"  if $min   > 59   or $min   < 0;
+	croak "Second '$sec' out of range 0..59"  if $sec   > 59   or $sec   < 0;
+    }
+
+    my $days = _daygm(undef, undef, undef, $mday, $month, $year);
+
+    unless ($Options{no_range_check} or abs($days) < $MaxDay) {
+	$year += 1900;
+	croak "Cannot handle date ($sec, $min, $hour, $mday, $month, $year)";
+    }
+
+    $sec + 60*$min + 3600*$hour + 86400*$days;
 }
+
 
 sub timegm_nocheck {
     local $Options{no_range_check} = 1;
     &timegm;
 }
 
+
 sub timelocal {
-    my $t = &timegm;
-    my $tt = $t;
+    my $ref_t = &timegm;
+    my $loc_t = _timegm(localtime($ref_t));
 
-    my (@lt) = localtime($t);
-    my (@gt) = gmtime($t);
-    if ($t < $DAY and ($lt[5] >= 70 or $gt[5] >= 70 )) {
-	# Wrap error, too early a date
-	# Try a safer date
-	$tt += $DAY;
-	@lt = localtime($tt);
-	@gt = gmtime($tt);
-    }
+    # Is there a timezone offset from GMT or are we done
+    my $zone_off = $ref_t - $loc_t
+	or return $loc_t;
 
-    my $tzsec = ($gt[1] - $lt[1]) * $MIN + ($gt[2] - $lt[2]) * $HR;
+    # Adjust for timezone
+    $loc_t = $ref_t + $zone_off;
 
-    if($lt[5] > $gt[5]) {
-	$tzsec -= $DAY;
-    }
-    elsif($gt[5] > $lt[5]) {
-	$tzsec += $DAY;
-    }
-    else {
-	$tzsec += ($gt[7] - $lt[7]) * $DAY;
-    }
+    # Are we close to a DST change or are we done
+    my $dst_off = $ref_t - _timegm(localtime($loc_t))
+	or return $loc_t;
 
-    $tzsec += $HR if($lt[8]);
-    
-    my $time = $t + $tzsec;
-    my @test = localtime($time + ($tt - $t));
-    $time -= $HR if $test[2] != $_[2];
-    $time;
+    # Adjust for DST change
+    $loc_t + $dst_off;
 }
+
 
 sub timelocal_nocheck {
     local $Options{no_range_check} = 1;
     &timelocal;
-}
-
-sub cheat {
-    my($ym, @date) = @_;
-    my($sec, $min, $hour, $day, $month, $year) = @date;
-    unless ($Options{no_range_check}) {
- croak "Month '$month' out of range 0..11" if $month > 11   || $month < 0;
-        my $md = (31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)[$month];
-	$md++ if $month == 1 &&
-	    $year % 4 == 0 && ($year % 100 > 0 || $year % 400 == 100);	# leap
- croak "Day '$day' out of range 1..$md"    if $day   > $md  || $day   < 1;
- croak "Hour '$hour' out of range 0..23"   if $hour  > 23   || $hour  < 0;
- croak "Minute '$min' out of range 0..59"  if $min   > 59   || $min   < 0;
- croak "Second '$sec' out of range 0..59"  if $sec   > 59   || $sec   < 0;
-    }
-    my $guess = $^T;
-    my @g = gmtime($guess);
-    my $lastguess = "";
-    my $counter = 0;
-    while (my $diff = $year - $g[5]) {
-        my $thisguess;
-	croak "Can't handle date (".join(", ",@date).")" if ++$counter > 255;
-	$guess += $diff * (363 * $DAY);
-	@g = gmtime($guess);
-	if (($thisguess = "@g") eq $lastguess){
-	    croak "Can't handle date (".join(", ",@date).")";
-	    #date beyond this machine's integer limit
-	}
-	$lastguess = $thisguess;
-    }
-    while (my $diff = $month - $g[4]) {
-        my $thisguess;
-	croak "Can't handle date (".join(", ",@date).")" if ++$counter > 255;
-	$guess += $diff * (27 * $DAY);
-	@g = gmtime($guess);
-	if (($thisguess = "@g") eq $lastguess){
-	    croak "Can't handle date (".join(", ",@date).")";
-	    #date beyond this machine's integer limit
-	}
-	$lastguess = $thisguess;
-    }
-    my @gfake = gmtime($guess-1); #still being sceptic
-    if ("@gfake" eq $lastguess){
-        croak "Can't handle date (".join(", ",@date).")";
-        #date beyond this machine's integer limit
-    }
-    $g[3]--;
-    $guess -= $g[0] * $SEC + $g[1] * $MIN + $g[2] * $HR + $g[3] * $DAY;
-    $Cheat{$ym} = $guess;
 }
 
 1;
@@ -227,27 +208,21 @@ These routines are quite efficient and yet are always guaranteed to agree
 with localtime() and gmtime().  We manage this by caching the start times
 of any months we've seen before.  If we know the start time of the month,
 we can always calculate any time within the month.  The start times
-themselves are guessed by successive approximation starting at the
-current time, since most dates seen in practice are close to the
-current date.  Unlike algorithms that do a binary search (calling gmtime
-once for each bit of the time value, resulting in 32 calls), this algorithm
-calls it at most 6 times, and usually only once or twice.  If you hit
-the month cache, of course, it doesn't call it at all.
+are calculated using a mathematical formula. Unlike other algorithms
+that do multiple calls to gmtime().
 
 timelocal() is implemented using the same cache.  We just assume that we're
 translating a GMT time, and then fudge it when we're done for the timezone
 and daylight savings arguments.  Note that the timezone is evaluated for
 each date because countries occasionally change their official timezones.
 Assuming that localtime() corrects for these changes, this routine will
-also be correct.  The daylight savings offset is currently assumed 
-to be one hour.
+also be correct.
 
 =head1 BUGS
 
 The whole scheme for interpreting two-digit years can be considered a bug.
 
-Note that the cache currently handles only years from 1900 through 2155.
-
 The proclivity to croak() is probably a bug.
 
 =cut
+
