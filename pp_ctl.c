@@ -2234,6 +2234,8 @@ PP(pp_goto)
 		    AvFLAGS(av) = AVf_REIFY;
 		    PAD_SVl(0) = (SV*)(cx->blk_sub.argarray = av);
 		}
+		else
+		    CLEAR_ARGARRAY(av);
 	    }
 	    else if (CvXSUB(cv)) {	/* put GvAV(defgv) back onto stack */
 		AV* av;
