@@ -2210,6 +2210,10 @@ PP(pp_socket)
     fcntl(fd, F_SETFD, fd > PL_maxsysfd);	/* ensure close-on-exec */
 #endif
 
+#ifdef EPOC
+    setbuf( IoIFP(io), NULL); /* EPOC gets confused about sockets */
+#endif
+
     RETPUSHYES;
 #else
     DIE(aTHX_ PL_no_sock_func, "socket");
