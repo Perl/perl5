@@ -530,7 +530,7 @@ XS(XS_DB_sub)
 
         DBG_SUB_NOTIFY("XS DBsub(%s)\n", SvPV_nolen(Sub));
 
-	SAVEDESTRUCTOR_X(check_depth, (void*)g_depth);
+	SAVEDESTRUCTOR_X(check_depth, INT2PTR(void*,g_depth));
 	g_depth++;
 
         prof_mark(aTHX_ OP_ENTERSUB);
