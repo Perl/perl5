@@ -80,9 +80,9 @@ static I32 utf16rev_textfilter(pTHXo_ int idx, SV *sv, int maxlen);
 #endif
 
 #ifdef USE_PURE_BISON
-#ifndef YYMAXLEVEL
-#define YYMAXLEVEL 100
-#endif
+#  ifndef YYMAXLEVEL
+#    define YYMAXLEVEL 100
+#  endif
 YYSTYPE* yylval_pointer[YYMAXLEVEL];
 int* yychar_pointer[YYMAXLEVEL];
 int yyactlevel = 0;
@@ -92,7 +92,7 @@ int yyactlevel = 0;
 #  define yychar (*yychar_pointer[yyactlevel])
 #  define PERL_YYLEX_PARAM yylval_pointer[yyactlevel],yychar_pointer[yyactlevel]
 #  undef yylex 
-#  define yylex()      Perl_yylex(aTHX_ yylval_pointer[yyactlevel],yychar_pointer[yyactlevel])
+#  define yylex()      Perl_yylex_r(aTHX_ yylval_pointer[yyactlevel],yychar_pointer[yyactlevel])
 #endif
 
 #include "keywords.h"
@@ -2071,38 +2071,40 @@ S_find_in_my_stash(pTHX_ char *pkgname, I32 len)
       if we already built the token before, use it.
 */
 
+#ifdef USE_PURE_BISON
+#ifdef __SC__
+#pragma segment Perl_yylex_r
+#endif
+int
+Perl_yylex_r(pTHX_ YYSTYPE *lvalp, int *lcharp)
+{
+    dTHR;
+    int r;
+
+    yylval_pointer[yyactlevel] = lvalp;
+    yychar_pointer[yyactlevel] = lcharp;
+    yyactlevel++;
+    if (yyactlevel >= YYMAXLEVEL)
+	Perl_croak(aTHX_ "panic: YYMAXLEVEL");
+
+    r = Perl_yylex(aTHX);
+
+    yyactlevel--;
+
+    return r;
+}
+#endif
+
 #ifdef __SC__
 #pragma segment Perl_yylex
 #endif
+
 int
 #ifdef USE_PURE_BISON
 Perl_yylex(pTHX_ YYSTYPE *lvalp, int *lcharp)
 #else
 Perl_yylex(pTHX)
 #endif
-{
-    dTHR;
-    int r;
-
-#ifdef USE_PURE_BISON
-    yylval_pointer[yyactlevel] = lvalp;
-    yychar_pointer[yyactlevel] = lcharp;
-    yyactlevel++;
-    if (yyactlevel >= YYMAXLEVEL)
-	Perl_croak(aTHX_ "panic: YYMAXLEVEL");
-#endif
-
-    r = S_syylex(aTHX);
-
-#ifdef USE_PURE_BISON
-    yyactlevel--;
-#endif
-
-    return r;
-}
-
-STATIC int
-S_syylex(pTHX) /* need to be separate from yylex for reentrancy */
 {
     dTHR;
     register char *s;
