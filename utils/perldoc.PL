@@ -154,6 +154,10 @@ sub containspod {
  	my $ret;
  	my $i;
  	my $dir;
+
+	if (-f $s and containspod $s) {
+		return $s;
+	}
   	for ($i=0;$i<@dirs;$i++) {
   		$dir = $dirs[$i];
   		($dir = VMS::Filespec::unixpath($dir)) =~ s!/$!! if $Is_VMS;
