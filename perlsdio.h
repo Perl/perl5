@@ -106,7 +106,7 @@
 #define PerlIO_has_cntptr(f)		0
 #define PerlIO_canset_cnt(f)		0
 #define PerlIO_get_cnt(f)		(abort(),0)
-#define PerlIO_get_ptr(f)		(abort(),0)
+#define PerlIO_get_ptr(f)		(abort(),(void *)0)
 #define PerlIO_set_cnt(f,c)		abort()
 #define PerlIO_set_ptrcnt(f,p,c)	abort()
 
@@ -123,7 +123,7 @@
 #define PerlIO_get_bufsiz(f)		FILE_bufsiz(f)       
 #else
 #define PerlIO_has_base(f)		0
-#define PerlIO_get_base(f)		(abort(),0)
+#define PerlIO_get_base(f)		(abort(),(void *)0)
 #define PerlIO_get_bufsiz(f)		(abort(),0)
 #endif
 #else /* PERLIO_IS_STDIO */

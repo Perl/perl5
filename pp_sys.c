@@ -1502,7 +1502,7 @@ PP(pp_ioctl)
     unsigned int func = U_I(POPn);
     int optype = op->op_type;
     char *s;
-    int retval;
+    IV retval;
     GV *gv = (GV*)POPs;
     IO *io = GvIOn(gv);
 
@@ -1513,22 +1513,19 @@ PP(pp_ioctl)
 
     if (SvPOK(argsv) || !SvNIOK(argsv)) {
 	STRLEN len;
+	STRLEN need;
 	s = SvPV_force(argsv, len);
-	retval = IOCPARM_LEN(func);
-	if (len < retval) {
-	    s = Sv_Grow(argsv, retval+1);
-	    SvCUR_set(argsv, retval);
+	need = IOCPARM_LEN(func);
+	if (len < need) {
+	    s = Sv_Grow(argsv, need + 1);
+	    SvCUR_set(argsv, need);
 	}
 
 	s[SvCUR(argsv)] = 17;	/* a little sanity check here */
     }
     else {
 	retval = SvIV(argsv);
-#ifdef DOSISH
-	s = (char*)(long)retval;	/* ouch */
-#else
 	s = (char*)retval;		/* ouch */
-#endif
     }
 
     TAINT_PROPER(optype == OP_IOCTL ? "ioctl" : "fcntl");
