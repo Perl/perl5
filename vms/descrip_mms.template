@@ -237,16 +237,8 @@ MYEXT = DynaLoader
 # there are any object files specified
 # These must be built separately, or you must add rules below to build them
 myextobj = [.ext.dynaloader]dl_vms$(O),
-#: We include the Socket extension by default if we're building with socket
-#: support, since it's small and not really worth bothering to keep track
-#: of separately.
-.ifdef SOCKET
-EXT = $(MYEXT) Socket
-extobj = $(myextobj) [.ext.socket]socket$(O), 
-.else
 EXT = $(MYEXT)
 extobj = $(myextobj)
-.endif
 
 .ifdef LIBS2
 .else
@@ -616,7 +608,7 @@ dynext : $(LIBPREREQ) $(DBG)perlshr$(E) preplibrary
 	$(MINIPERL) $(MMS$SOURCE)
 	Copy/Log [.pod]podselect.com $(MMS$TARGET)
 
-preplibrary : $(MINIPERL_EXE) $(LIBPREREQ) $(SOCKPM)
+preplibrary : $(MINIPERL_EXE) $(LIBPREREQ) 
 	@ Write Sys$Output "Autosplitting Perl library . . ."
 	@ Create/Directory [.lib.auto]
 	@ $(MINIPERL) -e "use AutoSplit; autosplit_lib_modules(@ARGV)" [.lib]*.pm [.lib.*]*.pm
@@ -861,15 +853,6 @@ printconfig :
 
 .ifdef SOCKET
 
-.ifdef LINK_ONLY
-.else
-[.ext.Socket]Socket$(O) : [.ext.Socket]Socket.c
-	$(CC) $(CFLAGS) /Object=$(MMS$TARGET) $(MMS$SOURCE)
-
-[.ext.Socket]Socket.c : [.ext.Socket]Socket.xs [.lib.ExtUtils]XSSymSet.pm $(MINIPERL_EXE)
-	$(XSUBPP) $(MMS$SOURCE) >$(MMS$TARGET)
-.endif # !LINK_ONLY
-
 vmsish.h : $(SOCKH)
 
 $(SOCKO) : $(SOCKC) EXTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h opnames.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h perlio.h
@@ -880,8 +863,6 @@ $(SOCKC) : [.vms]$(SOCKC)
 $(SOCKH) : [.vms]$(SOCKH)
 	Copy/Log/NoConfirm [.vms]$(SOCKH) []$(SOCKH)
 
-[.lib]Socket.pm : [.ext.Socket]Socket.pm
-	Copy/Log/NoConfirm $(MMS$SOURCE) $(MMS$TARGET)
 .endif
 
 # The following files are generated automatically
@@ -958,8 +939,8 @@ archify : all
 # Should move to VMS installperl when we get one
 .ifdef SOCKET
 $(SOCKARCH) : $(SOCKH)
-	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
-	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+       @ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
+       Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 .endif
 $(ARCHCORE)av.h : av.h
 	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
@@ -1262,7 +1243,6 @@ tidy : cleanlis
 	- If F$Search("Perlshr_Gbl*.Mar;-1")   .nes."" Then Purge/NoConfirm/Log Perlshr_Gbl*.Mar
 	- If F$Search("[.Ext.DynaLoader]DL_VMS$(O);-1").nes."" Then Purge/NoConfirm/Log [.Ext.DynaLoader]DL_VMS$(O)
 	- If F$Search("[.Ext.DynaLoader]DL_VMS.C;-1").nes."" Then Purge/NoConfirm/Log [.Ext.DynaLoader]DL_VMS.C
-	- If F$Search("[.Ext.Socket]Socket.C;-1").nes."" Then Purge/NoConfirm/Log [.Ext.DynaLoader]DL_VMS.C
 	- If F$Search("[.Ext.Opcode...];-1").nes."" Then Purge/NoConfirm/Log [.Ext.Opcode]
 	- If F$Search("[.VMS.Ext...]*.C;-1").nes."" Then Purge/NoConfirm/Log [.VMS.Ext...]*.C
 	- If F$Search("[.VMS.Ext...]*$(O);-1").nes."" Then Purge/NoConfirm/Log [.VMS.Ext...]*$(O)
@@ -1270,7 +1250,6 @@ tidy : cleanlis
 	- If F$Search("[.Lib.Auto...]autosplit.ix;-1").nes."" Then Purge/NoConfirm/Log [.Lib.Auto...]autosplit.ix
 	- If F$Search("[.Lib]DynaLoader.pm;-1").nes."" Then Purge/NoConfirm/Log [.Lib]DynaLoader.pm
 	- If F$Search("[.Lib]XSLoader.pm;-1").nes."" Then Purge/NoConfirm/Log [.Lib]XSLoader.pm
-	- If F$Search("[.Lib]Socket.pm;-1").nes."" Then Purge/NoConfirm/Log [.Lib]Socket.pm
 	- If F$Search("[.Lib]Config.pm;-1").nes."" Then Purge/NoConfirm/Log [.Lib]Config.pm
 	- If F$Search("$(ARCHDIR)Config.pm;-1").nes."" Then Purge/NoConfirm/Log $(ARCHDIR)Config.pm
 	- If F$Search("[.lib.ExtUtils]Miniperl.pm").nes."" Then Purge/NoConfirm/Log [.lib.ExtUtils]Miniperl.pm
@@ -1303,8 +1282,6 @@ clean : tidy cleantest
 	- If F$Search("[.Ext.DynaLoader]DL_VMS.C").nes."" Then Delete/NoConfirm/Log [.Ext.DynaLoader]DL_VMS.C;*
 	- If F$Search("[.Ext.DynaLoader]DynaLoader.pm").nes."" Then Delete/NoConfirm/Log [.Ext.DynaLoader]DynaLoader.pm;*
 	- If F$Search("[.Ext.DynaLoader]XSLoader.pm").nes."" Then Delete/NoConfirm/Log [.Ext.DynaLoader]XSLoader.pm;*
-	- If F$Search("[.Ext.Socket]Socket$(O)").nes."" Then Delete/NoConfirm/Log [.Ext.Socket]Socket$(O);*
-	- If F$Search("[.Ext.Socket]Socket.C").nes."" Then Delete/NoConfirm/Log [.Ext.Socket]Socket.C;*
 	- If F$Search("[.VMS.Ext...]*.C").nes."" Then Delete/NoConfirm/Log [.VMS.Ext...]*.C;*
 	- If F$Search("[.VMS.Ext...]*$(O)").nes."" Then Delete/NoConfirm/Log [.VMS.Ext...]*$(O);*
 	- If F$Search("[.pod]*.com").nes."" Then Delete/NoConfirm/Log [.pod]*.com;*
@@ -1324,7 +1301,6 @@ realclean : clean
 	- If F$Search("*.TS").nes."" Then Delete/NoConfirm/Log *.TS;*
 	- If F$Search("[.Lib]DynaLoader.pm").nes."" Then Delete/NoConfirm/Log [.Lib]DynaLoader.pm;*
 	- If F$Search("[.Lib]XSLoader.pm").nes."" Then Delete/NoConfirm/Log [.Lib]XSLoader.pm;*
-	- If F$Search("[.Lib]Socket.pm").nes."" Then Delete/NoConfirm/Log [.Lib]Socket.pm;*
 	- If F$Search("[.Lib]Config.pm").nes."" Then Delete/NoConfirm/Log [.Lib]Config.pm;*
 	- If F$Search("[.Lib]*.com").nes."" Then Delete/NoConfirm/Log [.Lib]*.com;*
 	- If F$Search("[.pod]*.com").nes."" Then Delete/NoConfirm/Log [.pod]*.com;*
