@@ -324,14 +324,6 @@ ext.libs: $(static_ext)
 
 !NO!SUBS!
 
-# if test -f .patch ; then $spitshell >>Makefile <<'!NO!SUBS!' 
-# patchlevel.h: .patch
-# 	perl fix_pl || (make -f Makefile.micro && ./microperl fix_pl)
-#	$(SHELL) Makefile.SH
-# fi
-# 
-# !NO!SUBS!
-
 # How to build libperl.  This is still rather convoluted.
 # Load up custom Makefile.SH fragment for shared loading and executables:
 case "$osname" in
