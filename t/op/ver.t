@@ -206,6 +206,7 @@ eval { require Socket; gethostbyaddr(v127.0.0.1, Socket::AF_INET) };
 if ($@)
  {
   # No - so don't test insane fails.
+  $@ =~ s/\n/\n# /g;
   skip("No Socket::AF_INET # $@");
  }
 else
