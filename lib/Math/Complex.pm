@@ -9,7 +9,7 @@ package Math::Complex;
 
 our($VERSION, @ISA, @EXPORT, %EXPORT_TAGS, $Inf);
 
-$VERSION = 1.32;
+$VERSION = 1.33;
 
 BEGIN {
     unless ($^O eq 'unicosmk') {
@@ -36,6 +36,9 @@ use strict;
 
 my $i;
 my %LOGN;
+
+# Regular expression for floating point numbers.
+my $gre = qr'\s*([\+\-]?(?:(?:(?:\d+(?:_\d+)*(?:\.\d*(?:_\d+)*)?|\.\d+(?:_\d+)*)(?:[eE][\+\-]?\d+(?:_\d+)*)?)))';
 
 require Exporter;
 
@@ -108,6 +111,26 @@ sub _cannot_make {
     die "@{[(caller(1))[3]]}: Cannot take $_[0] of $_[1].\n";
 }
 
+sub _remake {
+    my $arg = shift;
+    my ($made, $p, $q);
+
+    if ($arg =~ /^(?:$gre)?$gre\s*i\s*$/) {
+	($p, $q) = ($1 || 0, $2);
+	$made = 'cart';
+    } elsif ($arg =~ /^\s*\[\s*$gre\s*(?:,\s*$gre\s*)?\]\s*$/) {
+	($p, $q) = ($1, $2 || 0);
+	$made = 'exp';
+    }
+
+    if ($made) {
+	$p =~ s/^\+//;
+	$q =~ s/^\+//;
+    }
+
+    return ($made, $p, $q);
+}
+
 #
 # ->make
 #
@@ -116,6 +139,16 @@ sub _cannot_make {
 sub make {
 	my $self = bless {}, shift;
 	my ($re, $im) = @_;
+	if (@_ == 1) {
+	    my ($remade, $p, $q) = _remake($re);
+	    if ($remade) {
+		if ($remade eq 'cart') {
+		    ($re, $im) = ($p, $q);
+		} else {
+		    return (ref $self)->emake($p, $q);
+		}
+	    }
+	}
 	my $rre = ref $re;
 	if ( $rre ) {
 	    if ( $rre eq ref $self ) {
@@ -132,6 +165,9 @@ sub make {
 		_cannot_make("imaginary part", $rim);
 	    }
 	}
+	_cannot_make("real part",      $re) unless $re =~ /^$gre$/;
+	$im ||= 0;
+	_cannot_make("imaginary part", $im) unless $im =~ /^$gre$/;
 	$self->{'cartesian'} = [ $re, $im ];
 	$self->{c_dirty} = 0;
 	$self->{p_dirty} = 1;
@@ -147,6 +183,16 @@ sub make {
 sub emake {
 	my $self = bless {}, shift;
 	my ($rho, $theta) = @_;
+	if (@_ == 1) {
+	    my ($remade, $p, $q) = _remake($rho);
+	    if ($remade) {
+		if ($remade eq 'exp') {
+		    ($rho, $theta) = ($p, $q);
+		} else {
+		    return (ref $self)->make($p, $q);
+		}
+	    }
+	}
 	my $rrh = ref $rho;
 	if ( $rrh ) {
 	    if ( $rrh eq ref $self ) {
@@ -167,6 +213,9 @@ sub emake {
 	    $rho   = -$rho;
 	    $theta = ($theta <= 0) ? $theta + pi() : $theta - pi();
 	}
+	_cannot_make("rho",   $rho)   unless $rho   =~ /^$gre$/;
+	$theta ||= 0;
+	_cannot_make("theta", $theta) unless $theta =~ /^$gre$/;
 	$self->{'polar'} = [$rho, $theta];
 	$self->{p_dirty} = 0;
 	$self->{c_dirty} = 1;
@@ -183,8 +232,7 @@ sub new { &make }		# For backward compatibility only.
 # This avoids the burden of writing Math::Complex->make(re, im).
 #
 sub cplx {
-	my ($re, $im) = @_;
-	return __PACKAGE__->make($re, defined $im ? $im : 0);
+	return __PACKAGE__->make(@_);
 }
 
 #
@@ -194,8 +242,7 @@ sub cplx {
 # This avoids the burden of writing Math::Complex->emake(rho, theta).
 #
 sub cplxe {
-	my ($rho, $theta) = @_;
-	return __PACKAGE__->emake($rho, defined $theta ? $theta : 0);
+	return __PACKAGE__->emake(@_);
 }
 
 #
@@ -1713,12 +1760,24 @@ but that will be silently converted into C<[3,-3pi/4]>, since the
 modulus must be non-negative (it represents the distance to the origin
 in the complex plane).
 
-It is also possible to have a complex number as either argument of
-either the C<make> or C<emake>: the appropriate component of
+It is also possible to have a complex number as either argument of the
+C<make>, C<emake>, C<cplx>, and C<cplxe>: the appropriate component of
 the argument will be used.
 
 	$z1 = cplx(-2,  1);
 	$z2 = cplx($z1, 4);
+
+The C<new>, C<make>, C<emake>, C<cplx>, and C<cplxe> will also
+understand a single (string) argument of the forms
+
+    	2-3i
+    	-3i
+	[2,3]
+	[2]
+
+in which case the appropriate cartesian and exponential components
+will be parsed from the string and used to create new complex numbers.
+The imaginary component and the theta, respectively, will default to zero.
 
 =head1 STRINGIFICATION
 
