@@ -135,7 +135,7 @@ while (defined ($file = next_file())) {
 			}
 		    }
 		    else {
-                      print OUT "unless defined(\&$name) {\nsub $name $proto\{\n    ${args}eval \"$new\";\n}\n}\n";
+                      print OUT "unless (defined(\&$name)) {\nsub $name $proto\{\n    ${args}eval \"$new\";\n}\n}\n";
 		    }
 		    %curargs = ();
 		}
