@@ -440,6 +440,7 @@ Perl_sv_isobject
 Perl_sv_len
 Perl_sv_len_utf8
 Perl_sv_magic
+Perl_sv_magicext
 Perl_sv_mortalcopy
 Perl_sv_newmortal
 Perl_sv_newref

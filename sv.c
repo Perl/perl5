@@ -4415,43 +4415,34 @@ Perl_newSV(pTHX_ STRLEN len)
     }
     return sv;
 }
-
 /*
-=for apidoc sv_magic
+=for apidoc sv_magicext
 
-Adds magic to an SV. First upgrades C<sv> to type C<SVt_PVMG> if necessary,
-then adds a new magic item of type C<how> to the head of the magic list.
+Adds magic to an SV, upgrading it if necessary. Applies the 
+supplied vtable and returns pointer to the magic added.
 
-C<name> is assumed to contain an C<SV*> if C<(name && namelen == HEf_SVKEY)>
+Note that sv_magicext will allow things that sv_magic will not.
+In particular you can add magic to SvREADONLY SVs and and more than 
+one instance of the same 'how'
+
+I C<namelen> is greater then zero then a savepvn() I<copy> of C<name> is stored,
+(if C<name> is NULL then namelen bytes are allocated and Zero()-ed),
+if C<namelen> is zero then C<name> is stored as-is and - as another special 
+case - if C<(name && namelen == HEf_SVKEY)> then C<name> is assumed to contain 
+an C<SV*> and has its REFCNT incremented
+
+(This is now used as a subroutine by sv_magic.)
 
 =cut
 */
-
-void
-Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 namlen)
+MAGIC *	
+Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, MGVTBL *vtable,
+		 const char* name, I32 namlen)
 {
     MAGIC* mg;
-
-    if (SvREADONLY(sv)) {
-	if (PL_curcop != &PL_compiling
-	    && how != PERL_MAGIC_regex_global
-	    && how != PERL_MAGIC_bm
-	    && how != PERL_MAGIC_fm
-	    && how != PERL_MAGIC_sv
-	   )
-	{
-	    Perl_croak(aTHX_ PL_no_modify);
-	}
-    }
-    if (SvMAGICAL(sv) || (how == PERL_MAGIC_taint && SvTYPE(sv) >= SVt_PVMG)) {
-	if (SvMAGIC(sv) && (mg = mg_find(sv, how))) {
-	    if (how == PERL_MAGIC_taint)
-		mg->mg_len |= 1;
-	    return;
-	}
-    }
-    else {
-        (void)SvUPGRADE(sv, SVt_PVMG);
+    
+    if (SvTYPE(sv) < SVt_PVMG) {
+	(void)SvUPGRADE(sv, SVt_PVMG);
     }
     Newz(702,mg, 1, MAGIC);
     mg->mg_moremagic = SvMAGIC(sv);
@@ -4478,129 +4469,182 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
     mg->mg_type = how;
     mg->mg_len = namlen;
     if (name) {
-	if (namlen >= 0)
+	if (namlen > 0)
 	    mg->mg_ptr = savepvn(name, namlen);
 	else if (namlen == HEf_SVKEY)
 	    mg->mg_ptr = (char*)SvREFCNT_inc((SV*)name);
+	else 
+	    mg->mg_ptr = (char *) name;
     }
+    mg->mg_virtual = vtable;
+    
+    mg_magical(sv);
+    if (SvGMAGICAL(sv))
+	SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
+    return mg;
+}
 
+/*
+=for apidoc sv_magic
+
+Adds magic to an SV. First upgrades C<sv> to type C<SVt_PVMG> if necessary,
+then adds a new magic item of type C<how> to the head of the magic list.
+
+=cut
+*/
+
+void
+Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 namlen)
+{ 
+    MAGIC* mg;
+    MGVTBL *vtable = 0;
+
+    if (SvREADONLY(sv)) {
+	if (PL_curcop != &PL_compiling
+	    && how != PERL_MAGIC_regex_global
+	    && how != PERL_MAGIC_bm
+	    && how != PERL_MAGIC_fm
+	    && how != PERL_MAGIC_sv
+	   )
+	{
+	    Perl_croak(aTHX_ PL_no_modify);
+	}
+    }
+    if (SvMAGICAL(sv) || (how == PERL_MAGIC_taint && SvTYPE(sv) >= SVt_PVMG)) {
+	if (SvMAGIC(sv) && (mg = mg_find(sv, how))) {
+	    /* sv_magic() refuses to add a magic of the same 'how' as an 
+	       existing one 
+	     */
+	    if (how == PERL_MAGIC_taint)
+		mg->mg_len |= 1;
+	    return;
+	}
+    }
+        
     switch (how) {
     case PERL_MAGIC_sv:
-	mg->mg_virtual = &PL_vtbl_sv;
+	vtable = &PL_vtbl_sv;
 	break;
     case PERL_MAGIC_overload:
-        mg->mg_virtual = &PL_vtbl_amagic;
+        vtable = &PL_vtbl_amagic;
         break;
     case PERL_MAGIC_overload_elem:
-        mg->mg_virtual = &PL_vtbl_amagicelem;
+        vtable = &PL_vtbl_amagicelem;
         break;
     case PERL_MAGIC_overload_table:
-        mg->mg_virtual = &PL_vtbl_ovrld;
+        vtable = &PL_vtbl_ovrld;
         break;
     case PERL_MAGIC_bm:
-	mg->mg_virtual = &PL_vtbl_bm;
+	vtable = &PL_vtbl_bm;
 	break;
     case PERL_MAGIC_regdata:
-	mg->mg_virtual = &PL_vtbl_regdata;
+	vtable = &PL_vtbl_regdata;
 	break;
     case PERL_MAGIC_regdatum:
-	mg->mg_virtual = &PL_vtbl_regdatum;
+	vtable = &PL_vtbl_regdatum;
 	break;
     case PERL_MAGIC_env:
-	mg->mg_virtual = &PL_vtbl_env;
+	vtable = &PL_vtbl_env;
 	break;
     case PERL_MAGIC_fm:
-	mg->mg_virtual = &PL_vtbl_fm;
+	vtable = &PL_vtbl_fm;
 	break;
     case PERL_MAGIC_envelem:
-	mg->mg_virtual = &PL_vtbl_envelem;
+	vtable = &PL_vtbl_envelem;
 	break;
     case PERL_MAGIC_regex_global:
-	mg->mg_virtual = &PL_vtbl_mglob;
+	vtable = &PL_vtbl_mglob;
 	break;
     case PERL_MAGIC_isa:
-	mg->mg_virtual = &PL_vtbl_isa;
+	vtable = &PL_vtbl_isa;
 	break;
     case PERL_MAGIC_isaelem:
-	mg->mg_virtual = &PL_vtbl_isaelem;
+	vtable = &PL_vtbl_isaelem;
 	break;
     case PERL_MAGIC_nkeys:
-	mg->mg_virtual = &PL_vtbl_nkeys;
+	vtable = &PL_vtbl_nkeys;
 	break;
     case PERL_MAGIC_dbfile:
-	SvRMAGICAL_on(sv);
-	mg->mg_virtual = 0;
+	vtable = 0;
 	break;
     case PERL_MAGIC_dbline:
-	mg->mg_virtual = &PL_vtbl_dbline;
+	vtable = &PL_vtbl_dbline;
 	break;
 #ifdef USE_5005THREADS
     case PERL_MAGIC_mutex:
-	mg->mg_virtual = &PL_vtbl_mutex;
+	vtable = &PL_vtbl_mutex;
 	break;
 #endif /* USE_5005THREADS */
 #ifdef USE_LOCALE_COLLATE
     case PERL_MAGIC_collxfrm:
-        mg->mg_virtual = &PL_vtbl_collxfrm;
+        vtable = &PL_vtbl_collxfrm;
         break;
 #endif /* USE_LOCALE_COLLATE */
     case PERL_MAGIC_tied:
-	mg->mg_virtual = &PL_vtbl_pack;
+	vtable = &PL_vtbl_pack;
 	break;
     case PERL_MAGIC_tiedelem:
     case PERL_MAGIC_tiedscalar:
-	mg->mg_virtual = &PL_vtbl_packelem;
+	vtable = &PL_vtbl_packelem;
 	break;
     case PERL_MAGIC_qr:
-	mg->mg_virtual = &PL_vtbl_regexp;
+	vtable = &PL_vtbl_regexp;
 	break;
     case PERL_MAGIC_sig:
-	mg->mg_virtual = &PL_vtbl_sig;
+	vtable = &PL_vtbl_sig;
 	break;
     case PERL_MAGIC_sigelem:
-	mg->mg_virtual = &PL_vtbl_sigelem;
+	vtable = &PL_vtbl_sigelem;
 	break;
     case PERL_MAGIC_taint:
-	mg->mg_virtual = &PL_vtbl_taint;
-	mg->mg_len = 1;
+	vtable = &PL_vtbl_taint;
 	break;
     case PERL_MAGIC_uvar:
-	mg->mg_virtual = &PL_vtbl_uvar;
+	vtable = &PL_vtbl_uvar;
 	break;
     case PERL_MAGIC_vec:
-	mg->mg_virtual = &PL_vtbl_vec;
+	vtable = &PL_vtbl_vec;
 	break;
     case PERL_MAGIC_substr:
-	mg->mg_virtual = &PL_vtbl_substr;
+	vtable = &PL_vtbl_substr;
 	break;
     case PERL_MAGIC_defelem:
-	mg->mg_virtual = &PL_vtbl_defelem;
+	vtable = &PL_vtbl_defelem;
 	break;
     case PERL_MAGIC_glob:
-	mg->mg_virtual = &PL_vtbl_glob;
+	vtable = &PL_vtbl_glob;
 	break;
     case PERL_MAGIC_arylen:
-	mg->mg_virtual = &PL_vtbl_arylen;
+	vtable = &PL_vtbl_arylen;
 	break;
     case PERL_MAGIC_pos:
-	mg->mg_virtual = &PL_vtbl_pos;
+	vtable = &PL_vtbl_pos;
 	break;
     case PERL_MAGIC_backref:
-	mg->mg_virtual = &PL_vtbl_backref;
+	vtable = &PL_vtbl_backref;
 	break;
     case PERL_MAGIC_ext:
 	/* Reserved for use by extensions not perl internals.	        */
 	/* Useful for attaching extension internal data to perl vars.	*/
 	/* Note that multiple extensions may clash if magical scalars	*/
 	/* etc holding private data from one are passed to another.	*/
-	SvRMAGICAL_on(sv);
 	break;
     default:
 	Perl_croak(aTHX_ "Don't know how to handle magic of type \\%o", how);
     }
-    mg_magical(sv);
-    if (SvGMAGICAL(sv))
-	SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
+    
+    /* Rest of work is done else where */
+    mg = sv_magicext(sv,obj,how,vtable,name,namlen);
+    
+    switch (how) {
+    case PERL_MAGIC_taint:
+	mg->mg_len = 1;
+	break;
+    case PERL_MAGIC_ext:
+    case PERL_MAGIC_dbfile:
+	SvRMAGICAL_on(sv);
+	break;
+    }
 }
 
 /*
@@ -4626,7 +4670,7 @@ Perl_sv_unmagic(pTHX_ SV *sv, int type)
 	    if (vtbl && vtbl->svt_free)
 		CALL_FPTR(vtbl->svt_free)(aTHX_ sv, mg);
 	    if (mg->mg_ptr && mg->mg_type != PERL_MAGIC_regex_global) {
-		if (mg->mg_len >= 0)
+		if (mg->mg_len > 0)
 		    Safefree(mg->mg_ptr);
 		else if (mg->mg_len == HEf_SVKEY)
 		    SvREFCNT_dec((SV*)mg->mg_ptr);
