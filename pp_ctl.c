@@ -41,8 +41,8 @@ static void save_lines _((AV *array, SV *sv));
 static I32 sortcv _((SV *a, SV *b));
 static void qsortsv _((SV **array, size_t num_elts, I32 (*fun)(SV *a, SV *b)));
 static OP *doeval _((int gimme, OP** startop));
-static I32 amagic_cmp _((SV *str1, SV *str2));
-static I32 amagic_cmp_locale _((SV *str1, SV *str2));
+I32 amagic_cmp _((SV *str1, SV *str2));
+I32 amagic_cmp_locale _((SV *str1, SV *str2));
 #endif
 
 PP(pp_wantarray)
@@ -764,7 +764,7 @@ PP(pp_mapwhile)
 	  } \
 	} STMT_END
 
-STATIC I32
+I32
 amagic_cmp(register SV *str1, register SV *str2)
 {
     SV *tmpsv;
@@ -786,7 +786,7 @@ amagic_cmp(register SV *str1, register SV *str2)
     return sv_cmp(str1, str2);
 }
 
-STATIC I32
+I32
 amagic_cmp_locale(register SV *str1, register SV *str2)
 {
     SV *tmpsv;
