@@ -1,7 +1,7 @@
 package ExtUtils::Install;
 
-$VERSION = substr q$Revision: 1.12 $, 10;
-# $Id: Install.pm,v 1.12 1996/06/23 20:46:07 k Exp $
+$VERSION = substr q$Revision: 1.15 $, 10;
+# $Date: 1996/09/03 21:58:58 $
 
 use Exporter;
 use Carp ();
@@ -34,16 +34,9 @@ sub install {
     use File::Copy qw(copy);
     use File::Find qw(find);
     use File::Path qw(mkpath);
-    # The following lines were needed with AutoLoader (left for the record)
-    # my $my_req = $self->catfile(qw(auto ExtUtils Install my_cmp.al));
-    # require $my_req;
-    # $my_req = $self->catfile(qw(auto ExtUtils Install forceunlink.al));
-    # require $my_req; # Hairy, but for the first
-    # time use we are in a different directory when autoload happens, so
-    # the relativ path to ./blib is ill.
 
     my(%hash) = %$hash;
-    my(%pack, %write, $dir);
+    my(%pack, %write, $dir, $warn_permissions);
     local(*DIR, *P);
     for (qw/read write/) {
 	$pack{$_}=$hash{$_};
@@ -59,7 +52,8 @@ sub install {
 	    if (-w $hash{$source_dir_or_file} || mkpath($hash{$source_dir_or_file})) {
 		last;
 	    } else {
-		Carp::croak("You do not have permissions to install into $hash{$source_dir_or_file}");
+		warn "Warning: You do not have permissions to install into $hash{$source_dir_or_file}"
+		    unless $warn_permissions++;
 	    }
 	}
 	closedir DIR;
@@ -253,7 +247,9 @@ sub pm_to_blib {
 	    mkpath(dirname($fromto->{$_}),0,0755);
 	}
 	copy($_,$fromto->{$_});
-	chmod(0444 | ( (stat)[2] & 0111 ? 0111 : 0 ),$fromto->{$_});
+	my($mode,$atime,$mtime) = (stat)[2,8,9];
+	utime($atime,$mtime+$Is_VMS,$fromto->{$_});
+	chmod(0444 | ( $mode & 0111 ? 0111 : 0 ),$fromto->{$_});
 	print "cp $_ $fromto->{$_}\n";
 	next unless /\.pm$/;
 	autosplit($fromto->{$_},$autodir);
@@ -334,4 +330,3 @@ the extension pm are autosplit. Second argument is the autosplit
 directory.
 
 =cut
-
