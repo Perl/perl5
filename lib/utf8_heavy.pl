@@ -6,9 +6,9 @@ sub DEBUG () { 0 }
 
 sub DESTROY {}
 
-sub croak { require Carp; Carp::croak(@_) }
-
 my %Cache;
+
+sub croak { require Carp; Carp::croak(@_) }
 
 ##
 ## "SWASH" == "SWATCH HASH". A "swatch" is a swatch of the Unicode landscape
