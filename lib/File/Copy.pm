@@ -271,7 +271,7 @@ File::Copy - Copy files or filehandles
 
   	use File::Copy;
 
-	copy("file1","file2");
+	copy("file1","file2") or die "Copy failed: $!";
   	copy("Copy.pm",\*STDOUT);'
 	move("/dev1/fileA","/dev2/fileB");
 
