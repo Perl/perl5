@@ -109,7 +109,7 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 
 EOT
 
-for (my $i = 0; $i < @specialsv; $i++) {
+for my $i ( 0 .. $#specialsv ) {
     print BYTERUN_C "    specialsv_list[$i] = $specialsv[$i];\n";
 }
 
@@ -209,7 +209,7 @@ EOT
 
 my $add_enum_value = 0;
 my $max_insn;
-for ($i = 0; $i < @insn_name; $i++) {
+for $i ( 0 .. $#insn_name ) {
     $insn = uc($insn_name[$i]);
     if (defined($insn)) {
 	$max_insn = $i;
