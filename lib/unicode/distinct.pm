@@ -1,4 +1,4 @@
-package unicode:distinct;
+package unicode::distinct;
 
 our $VERSION = '0.01';
 
