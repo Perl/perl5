@@ -4915,9 +4915,9 @@ case "$usethreads$usemultiplicity" in
 	;;
 *)	$cat <<EOM
 
-Perl 5.006 can be compiled for binary compatibility with 5.005.
-If you decide to do so, you will be able to continue using most
-of the extensions that were compiled for Perl 5.005.
+This version of Perl can be compiled for binary compatibility with 5.005.
+If you decide to do so, you will be able to continue using most of the
+extensions that were compiled for Perl 5.005.
 
 EOM
 	case "$bincompat5005$d_bincompat5005" in

@@ -8,7 +8,7 @@ BEGIN {
 }
 
 $| = 1;
-print "1..5\n";
+print "1..10\n";
 
 use charnames ':full';
 
@@ -44,7 +44,6 @@ $encoded_alpha = "\316\261";
 $encoded_bet = "\327\221";
 {
   use charnames ':full';
-  use utf8;
 
   print "not " unless "\N{CYRILLIC SMALL LETTER BE}" eq $encoded_be;
   print "ok 4\n";
@@ -54,4 +53,18 @@ $encoded_bet = "\327\221";
   print "not " unless "\N{be},\N{alpha},\N{hebrew:bet}" 
     eq "$encoded_be,$encoded_alpha,$encoded_bet";
   print "ok 5\n";
+}
+
+{
+    use charnames ':full';
+    print "not " unless "\x{263a}" eq "\N{WHITE SMILING FACE}";
+    print "ok 6\n";
+    print "not " unless length("\x{263a}") == 1;
+    print "ok 7\n";
+    print "not " unless length("\N{WHITE SMILING FACE}") == 1;
+    print "ok 8\n";
+    print "not " unless sprintf("%vx", "\x{263a}") eq "263a";
+    print "ok 9\n";
+    print "not " unless sprintf("%vx", "\N{WHITE SMILING FACE}") eq "263a";
+    print "ok 10\n";
 }

@@ -154,10 +154,11 @@ It will be filled, and maybe even
 justified.  Certain interior sequences are recognized both
 here and in commands:
 
-    I<text>     italicize text, used for emphasis or variables
-    B<text>     embolden text, used for switches and programs
-    S<text>     text contains non-breaking spaces
-    C<code>	literal code
+    I<text>     Italicize text, used for emphasis or variables
+    B<text>     Embolden text, used for switches and programs
+    S<text>     Text contains non-breaking spaces
+    C<code>     Render code in a typewriter font, or give some other
+                indication that this represents program text
     L<name>     A link (cross reference) to name
 		    L<name>		manual page
 		    L<name/ident>	item in manual page

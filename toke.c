@@ -1479,6 +1479,8 @@ S_scan_const(pTHX_ char *start)
 		    res = new_constant( Nullch, 0, "charnames", 
 					res, Nullsv, "\\N{...}" );
 		    str = SvPV(res,len);
+		    if (len > 1)
+			has_utf = TRUE;
 		    if (len > e - s + 4) {
 			char *odest = SvPVX(sv);
 
