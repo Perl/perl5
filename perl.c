@@ -232,7 +232,9 @@ register PerlInterpreter *sv_interp;
     int destruct_level;  /* 0=none, 1=full, 2=full with checks */
     I32 last_sv_count;
     HV *hv;
+#ifdef USE_THREADS
     Thread t;
+#endif /* USE_THREADS */
 
     if (!(curinterp = sv_interp))
 	return;

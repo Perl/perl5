@@ -4237,8 +4237,8 @@ OP *o;
 {
     GV *gv;
 
-    if ((op->op_flags & OPf_KIDS) && !cLISTOP->op_first->op_sibling)
-	append_elem(OP_GLOB, op, newSVREF(newGVOP(OP_GV, 0, defgv)));
+    if ((o->op_flags & OPf_KIDS) && !cLISTOPo->op_first->op_sibling)
+	append_elem(OP_GLOB, o, newSVREF(newGVOP(OP_GV, 0, defgv)));
 
     if (!((gv = gv_fetchpv("glob", FALSE, SVt_PVCV)) && GvIMPORTED_CV(gv)))
 	gv = gv_fetchpv("CORE::GLOBAL::glob", FALSE, SVt_PVCV);
@@ -4248,6 +4248,14 @@ OP *o;
 
 	append_elem(OP_GLOB, o,
 		    newSVOP(OP_CONST, 0, newSViv(glob_index++)));
+	o->op_type = OP_LIST;
+	o->op_ppaddr = ppaddr[OP_LIST];
+	cLISTOPo->op_first->op_type = OP_PUSHMARK;
+	cLISTOPo->op_first->op_ppaddr = ppaddr[OP_PUSHMARK];
+	o = newUNOP(OP_ENTERSUB, OPf_STACKED,
+		    append_elem(OP_LIST, o, 
+				scalar(newUNOP(OP_RV2CV, 0,
+					       newGVOP(OP_GV, 0, gv)))));
 	o = newUNOP(OP_NULL, 0, ck_subr(o));
 	o->op_targ = OP_GLOB;		/* hint at what it used to be */
 	return o;
