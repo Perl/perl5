@@ -965,7 +965,11 @@ TEST q(Data::Dumper->new([[$c, $d]])->Dumpxs;)
 #        };
 EOT
 
-  TEST q(Data::Dumper->new([{ foo => sub { print "foo"; } }])->Dump);
+  if(" $Config{'extensions'} " !~ m[ B ]) {
+    SKIP_TEST "Perl configured without B module";
+  } else {
+    TEST q(Data::Dumper->new([{ foo => sub { print "foo"; } }])->Dump);
+  }
 }
 
 ############# 214

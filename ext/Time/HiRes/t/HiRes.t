@@ -4,6 +4,11 @@ BEGIN {
     if ($ENV{PERL_CORE}) {
 	chdir 't' if -d 't';
 	@INC = '../lib';
+	require Config; import Config;
+	if (" $Config{'extensions'} " !~ m[ Time/HiRes ]) {
+	    print "1..0 # Skip -- Perl configured without Time::HiRes module\n";
+	    exit 0;
+	}
     }
 }
 
