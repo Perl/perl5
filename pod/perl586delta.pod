@@ -17,7 +17,7 @@ The perl interpreter is now more tolerant of UTF-16-encoded scripts.
 
 On Win32, Perl can now use non-IFS compatible LSPs, which allows Perl to
 work in conjunction with firewalls such as McAfee Guardian. For full details
-see the file README.win32, particularly if you're running Win95.
+see the file F<README.win32>, particularly if you're running Win95.
 
 =head1 Modules and Pragmata
 
@@ -132,6 +132,10 @@ has been changed to the more informative
 
 =head1 Changed Internals
 
+From now on all applications embedding perl will behave as if perl
+were compiled with -DPERL_USE_SAFE_PUTENV.  See "Environment access" in
+the F<INSTALL> file for details.
+
 Most C<C> source files now have comments at the top explaining their purpose,
 which should help anyone wishing to get an overview of the implementation.
 
@@ -164,5 +168,3 @@ The F<README> file for general stuff.
 The F<Artistic> and F<Copying> files for copyright information.
 
 =cut
-
-Yes. It's boring. Enjoy. :-)
