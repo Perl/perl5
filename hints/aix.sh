@@ -134,8 +134,8 @@ d_setreuid='undef'
 # Changes for dynamic linking by Wayne Scott <wscott@ichips.intel.com>
 #
 # Tell perl which symbols to export for dynamic linking.
-cccdlflags='none'      # All AIX code is position independent
-cc_type=xlc
+cccdlflags='none'	# All AIX code is position independent
+   cc_type=xlc		# do not export to config.sh
 case "$cc" in
 *gcc*)
    cc_type=gcc
@@ -145,9 +145,9 @@ case "$cc" in
      gccversion=`$cc --version | sed 's/.*(GCC) *//`
      fi
    ;;
-*) ccversion=`lslpp -L | grep 'C for AIX Compiler$' | grep -v '\.msg\.[A-Za-z_]*\.' | awk '{print $2}'`
+*) ccversion=`lslpp -L | grep 'C for AIX Compiler$' | grep -v '\.msg\.[A-Za-z_]*\.' | awk '{print $1,$2}'`
    case "$ccversion" in
-     '') ccversion=`lslpp -L | grep 'IBM C and C++ Compilers LUM$' | awk '{print $2}'`
+     '') ccversion=`lslpp -L | grep 'IBM C and C++ Compilers LUM$'`
 	 ;;
      *.*.*.*.*.*.*)		# Ahhrgg, more than one C compiler installed
 	 first_cc_path=`which ${cc:-cc}`
@@ -164,9 +164,13 @@ case "$cc" in
 	       fi
 	     ;;
 	   esac
-	 ccversion=`lslpp -L | grep 'C for AIX Compiler$' | grep -i $cc_type | awk '{print $2}' | head -1`
+	 ccversion=`lslpp -L | grep 'C for AIX Compiler$' | grep -i $cc_type | head -1`
+	 ;;
+     vac*.*.*.*)
+         cc_type=vac
 	 ;;
      esac
+   ccversion=`echo "$ccversion" | awk '{print $2}'`
    case "$ccversion" in
      3.6.6.0)
 	optimize='none'
@@ -209,6 +213,20 @@ esac
 # the required -bE:$installarchlib/CORE/perl.exp is added by
 # libperl.U (Configure) later.
 
+# The first 3 options would not be needed if dynamic libs. could be linked
+# with the compiler instead of ld.
+# -bI:$(PERL_INC)/perl.exp  Read the exported symbols from the perl binary
+# -bE:$(BASEEXT).exp	    Export these symbols.  This file contains only one
+#			    symbol: boot_$(EXP)	 can it be auto-generated?
+case "$osvers" in
+    3*) 
+	lddlflags="$lddlflags -H512 -T512 -bhalt:4 -bM:SRE -bI:\$(PERL_INC)/perl.exp -bE:\$(BASEEXT).exp -e _nostart -lc"
+	;;
+    *) 
+	lddlflags="$lddlflags -bhalt:4 -bM:SRE -bI:\$(PERL_INC)/perl.exp -bE:\$(BASEEXT).exp -bnoentry -lc"
+	;;
+    esac
+
 case "$use64bitall" in
     $define|true|[yY]*) use64bitint="$define" ;;
     esac
@@ -223,6 +241,7 @@ case $cc_type in
 	    $define|true|[yY]*)
 		ccflags="$ccflags -qlongdouble"
 		libswanted="c128 $libswanted"
+		lddlflags=`echo "$lddlflags " | sed -e 's/ -lc / -lc128 -lc /'`
 		;;
 	    esac
     esac
@@ -257,19 +276,6 @@ case "$ldlibpthname" in
 '') ldlibpthname=LIBPATH ;;
 esac
 
-# The first 3 options would not be needed if dynamic libs. could be linked
-# with the compiler instead of ld.
-# -bI:$(PERL_INC)/perl.exp  Read the exported symbols from the perl binary
-# -bE:$(BASEEXT).exp	    Export these symbols.  This file contains only one
-#			    symbol: boot_$(EXP)	 can it be auto-generated?
-case "$osvers" in
-3*) 
-    lddlflags="$lddlflags -H512 -T512 -bhalt:4 -bM:SRE -bI:\$(PERL_INC)/perl.exp -bE:\$(BASEEXT).exp -e _nostart -lc"
-    ;;
-*) 
-    lddlflags="$lddlflags -bhalt:4 -bM:SRE -bI:\$(PERL_INC)/perl.exp -bE:\$(BASEEXT).exp -bnoentry -lc"
-    ;;
-esac
 # AIX 4.2 (using latest patchlevels on 20001130) has a broken bind
 # library (getprotobyname and getprotobynumber are outversioned by
 # the same calls in libc, at least for xlc version 3...
