@@ -2344,10 +2344,17 @@ yylex()
 
 	/* Is this a label? */
 	if (expect == XSTATE && d < bufend && *d == ':' && *(d + 1) != ':') {
-	    s = d + 1;
-	    yylval.pval = savepv(tokenbuf);
-	    CLINE;
-	    TOKEN(LABEL);
+	    if (len == 1 && strchr("syq", tokenbuf[0]) ||
+		len == 2 && ((tokenbuf[0] == 't' && tokenbuf[1] == 'r') ||
+			     (tokenbuf[0] == 'q' &&
+			      strchr("qwx", tokenbuf[1]))))
+		; /* no */
+	    else {
+		s = d + 1;
+		yylval.pval = savepv(tokenbuf);
+		CLINE;
+		TOKEN(LABEL);
+	    }
 	}
 
 	/* Check for keywords */
