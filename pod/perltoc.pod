@@ -2031,11 +2031,13 @@ to enable a few features
 
 =item POSIX-BC
 
+=item Unicode and UTF
+
 =back
 
 =item SINGLE OCTET TABLES
 
-recipe 0, recipe 1, recipe 2, recipe 3, recipe 4
+recipe 0, recipe 1, recipe 2, recipe 3, recipe 4, recipe 5, recipe 6
 
 =item IDENTIFYING CHARACTER CODE SETS
 
@@ -2075,7 +2077,7 @@ chr(), ord(), pack(), print(), printf(), sort(), sprintf(), unpack()
 
 =back
 
-=item TRANFORMATION FORMATS
+=item TRANSFORMATION FORMATS
 
 =over 4
 
@@ -2085,7 +2087,7 @@ chr(), ord(), pack(), print(), printf(), sort(), sprintf(), unpack()
 
 =item Quoted-Printable encoding and decoding
 
-=item Caesarian cyphers
+=item Caesarian ciphers
 
 =back
 
@@ -2103,9 +2105,9 @@ chr(), ord(), pack(), print(), printf(), sort(), sprintf(), unpack()
 
 IFS access
 
-=item OS/390 
+=item OS/390, z/OS
 
-chcp, dataset access, OS/390 iconv, locales
+chcp, dataset access, OS/390, z/OS iconv, locales
 
 =item VM/ESA?
 
@@ -2118,6 +2120,8 @@ chcp, dataset access, OS/390 iconv, locales
 =item SEE ALSO
 
 =item REFERENCES
+
+=item HISTORY
 
 =item AUTHOR
 
@@ -9888,9 +9892,9 @@ C<untaint_pattern>, C<untaint_skip>
 
 =item DESCRIPTION
 
-C<GLOB_ERR>, C<GLOB_MARK>, C<GLOB_NOCASE>, C<GLOB_NOCHECK>, C<GLOB_NOSORT>,
-C<GLOB_BRACE>, C<GLOB_NOMAGIC>, C<GLOB_QUOTE>, C<GLOB_TILDE>, C<GLOB_CSH>,
-C<GLOB_ALPHASORT>
+C<GLOB_ERR>, C<GLOB_LIMIT>, C<GLOB_MARK>, C<GLOB_NOCASE>, C<GLOB_NOCHECK>,
+C<GLOB_NOSORT>, C<GLOB_BRACE>, C<GLOB_NOMAGIC>, C<GLOB_QUOTE>,
+C<GLOB_TILDE>, C<GLOB_CSH>, C<GLOB_ALPHASORT>
 
 =item DIAGNOSTICS
 
@@ -11154,6 +11158,58 @@ set ( NAME => VALUE [, NAME => VALUE ...] ), setall ( VALUES ), setval ( N
 
 =back
 
+=head2 List::Util - A selection of general-utility list subroutines
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+first BLOCK LIST, max LIST, maxstr LIST, min LIST, minstr LIST, reduce
+BLOCK LIST, sum LIST
+
+=item SUGGESTED ADDITIONS
+
+=item COPYRIGHT
+
+=back
+
+=head2 List::Utilib::List::Util, List::Util - A selection of
+general-utility list subroutines
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+first BLOCK LIST, max LIST, maxstr LIST, min LIST, minstr LIST, reduce
+BLOCK LIST, sum LIST
+
+=item SUGGESTED ADDITIONS
+
+=item COPYRIGHT
+
+=back
+
+=head2 List::Utilib::Scalar::Util, Scalar::Util - A selection of
+general-utility scalar subroutines
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+blessed EXPR, dualvar NUM, STRING, isweak EXPR, reftype EXPR, weaken REF
+
+=item COPYRIGHT
+
+=item BLATANT PLUG
+
+=back
+
 =head2 Locale::Constants - constants for Locale codes
 
 =over 4
@@ -11532,12 +11588,14 @@ C<O_RDONLY>, C<O_WRONLY>, C<O_RDWR>
 
 =item DESCRIPTION
 
+icmp, udp, tcp, stream, external
+
 =over 4
 
 =item Functions
 
 Net::Ping->new([$proto [, $def_timeout [, $bytes]]]);, $p->ping($host [,
-$timeout]);, $p->close();, pingecho($host [, $timeout]);
+$timeout]);, $p->open($host);, $p->close();, pingecho($host [, $timeout]);
 
 =back
 
@@ -13077,6 +13135,22 @@ Memory, CPU, Snooping, Signals, State Changes
 
 =back
 
+=head2 Scalar::Util - A selection of general-utility scalar subroutines
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+blessed EXPR, dualvar NUM, STRING, isweak EXPR, reftype EXPR, weaken REF
+
+=item COPYRIGHT
+
+=item BLATANT PLUG
+
+=back
+
 =head2 Search::Dict, look - search for key in dictionary file
 
 =over 4
@@ -13773,6 +13847,32 @@ TIESCALAR classname, LIST, FETCH this, STORE this, value, DESTROY this
 
 =back
 
+=head2 Time::HiRes - High resolution ualarm, usleep, and gettimeofday
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+gettimeofday (), usleep ( $useconds ), ualarm ( $useconds [,
+$interval_useconds ] ), tv_interval ( $ref_to_gettimeofday [,
+$ref_to_later_gettimeofday] ), time (), sleep ( $floating_seconds ), alarm
+( $floating_seconds [, $interval_floating_seconds ] ), setitimer ( $which,
+$floating_seconds [, $interval_floating_seconds ] ), getitimer ( $which )
+
+=item EXAMPLES
+
+=item C API
+
+=item AUTHORS
+
+=item REVISION
+
+=item COPYRIGHT
+
+=back
+
 =head2 Time::Local - efficiently compute time from local and GMT time
 
 =over 4
@@ -13784,6 +13884,59 @@ TIESCALAR classname, LIST, FETCH this, STORE this, value, DESTROY this
 =item IMPLEMENTATION
 
 =item BUGS
+
+=back
+
+=head2 Time::Piece - Object Oriented time objects
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item USAGE
+
+=over 4
+
+=item Local Locales
+
+=item Date Calculations
+
+=item Date Comparisons
+
+=item Global Overriding
+
+=back
+
+=item AUTHOR
+
+=over 4
+
+=item License
+
+=item Bugs
+
+=back
+
+=back
+
+=head2 Time::Piece::Seconds, Time::Seconds - a simple API to convert
+seconds to other date values
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=item AUTHOR
+
+=item LICENSE
+
+=item Bugs
 
 =back
 
