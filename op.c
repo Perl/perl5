@@ -78,9 +78,9 @@ Perl_Slab_Free(pTHX_ void *op)
     assert( ptr < ( (I32 **) slab + PERL_SLAB_SIZE) );
     assert( *slab > 0 );
     if (--(*slab) == 0) {
-     #ifdef NETWARE
-      #define PerlMemShared PerlMem
-     #endif
+#  ifdef NETWARE
+#    define PerlMemShared PerlMem
+#  endif
 	
     PerlMemShared_free(slab);
 	if (slab == PL_OpSlab) {
