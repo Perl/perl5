@@ -719,6 +719,9 @@ the caching optimization and making (??{...}) constructs obscenely
 slow (and consequently useless).  See also L<perlguts/"Magic Variables">.
 Regexp::Copy was affected by this change.
 
+The Perl internal debugging macros DEBUG() and DEB() have been renamed
+to PERL_DEBUG() and PERL_DEB() to avoid namespace conflicts.
+
 C<-DL> removed (the leaktest had been broken and unsupported for years,
 use alternative debugging mallocs or tools like valgrind and Purify).
 
