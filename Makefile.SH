@@ -205,8 +205,9 @@ SHELL = $sh
 TRNL = '$trnl'
 
 # not used by Makefile but by installperl;
-# mentioned here so that metaconfig picks it up
+# mentioned here so that metaconfig picks these up
 INSTALL_USR_BIN_PERL = $installusrbinperl
+INSTALL_SCRIPTS = $installscripts
 
 !GROK!THIS!
 

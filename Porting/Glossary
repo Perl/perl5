@@ -2351,6 +2351,10 @@ installscript (scriptdir.U):
 	a system running AFS, in which case they may differ slightly. You
 	should always use this variable within your makefiles for portability.
 
+installscripts (installscripts.U):
+	This variable tells whether the various scripts accompanying
+	Perl should be installed.    Usually this is the case.
+
 installsitearch (sitearch.U):
 	This variable is really the same as sitearchexp but may differ on
 	those systems using AFS. For extra portability, only this variable
@@ -2885,6 +2889,10 @@ PERL_VERSION (Oldsyms.U):
 
 perladmin (perladmin.U):
 	Electronic mail address of the perl5 administrator.
+
+perllibs (End.U):
+	The list of libraries needed by Perl only (any libraries needed
+	by extensions only will by dropped, if using dynamic loading).
 
 perlpath (perlpath.U):
 	This variable contains the eventual value of the PERLPATH symbol,
