@@ -934,7 +934,7 @@ numeric or symbolic values, eg C<$^D = 10> or C<$^D = "st">.
 The current value of the regex debugging flags. Set to 0 for no debug output
 even when the re 'debug' module is loaded. See L<re> for details.
 
-=item ${^RE_TRIE_MAXBUFF}
+=item ${^RE_TRIE_MAXBUF}
 
 Controls how certain regex optimisations are applied and how much memory they
 utilize. This value by default is 65536 which corresponds to a 512kB temporary

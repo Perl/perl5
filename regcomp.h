@@ -337,7 +337,7 @@ START_EXTERN_C
 EXTCONST U8 PL_varies[];
 #else
 EXTCONST U8 PL_varies[] = {
-    BRANCH, BACK, STAR, PLUS, CURLY, CURLYX, REF, REFF, REFFL, 
+    BRANCH, BACK, STAR, PLUS, CURLY, CURLYX, REF, REFF, REFFL,
     WHILEM, CURLYM, CURLYN, BRANCHJ, IFTHEN, SUSPEND, CLUMP, 0
 };
 #endif
@@ -369,7 +369,7 @@ typedef struct re_scream_pos_data_s
 
 /* .what is a character array with one character for each member of .data
  * The character describes the function of the corresponding .data item:
- *   f - start-class data for regstclass optimization  
+ *   f - start-class data for regstclass optimization
  *   n - Root of op tree for (?{EVAL}) item
  *   o - Start op for (?{EVAL}) item
  *   p - Pad for (?{EVAL} item
@@ -485,9 +485,8 @@ typedef struct _reg_trie_data reg_trie_data;
 #define DO_TRIE 1
 #define TRIE_DEBUG 1
 
-
-#define TRIE_SIMPLE_MAX_BUFF 65536
-#define RE_TRIE_MAXBUFF "\022E_TRIE_MAXBUFF"
+#define RE_TRIE_MAXBUF_INIT 65536
+#define RE_TRIE_MAXBUF_NAME "\022E_TRIE_MAXBUF"
 #define RE_DEBUG_FLAGS "\022E_DEBUG_FLAGS"
 
 /* If you change these be sure to update ext/re/re.pm as well */

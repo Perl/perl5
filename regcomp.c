@@ -866,9 +866,9 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
     });
 
 
-    re_trie_maxbuff=get_sv(RE_TRIE_MAXBUFF, 1);
+    re_trie_maxbuff = get_sv(RE_TRIE_MAXBUF_NAME, 1);
     if (!SvIOK(re_trie_maxbuff)) {
-        sv_setiv(re_trie_maxbuff, TRIE_SIMPLE_MAX_BUFF);
+        sv_setiv(re_trie_maxbuff, RE_TRIE_MAXBUF_INIT);
     }
 
     /*  -- First loop and Setup --
@@ -941,8 +941,8 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
     /*
         We now know what we are dealing with in terms of unique chars and
         string sizes so we can calculate how much memory a naive
-        representation using a flat table  will take. If its over a reasonable
-        limit (as specified by $^RE_TRIE_MAXBUFF) we use a more memory
+        representation using a flat table  will take. If it's over a reasonable
+        limit (as specified by ${^RE_TRIE_MAXBUF}) we use a more memory
         conservative but potentially much slower representation using an array
         of lists.
 
@@ -1834,13 +1834,12 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		   it would just call its tail, no WHILEM/CURLY needed.
 
 		*/
-                if (DO_TRIE) {
-                    if (!re_trie_maxbuff) {
-                        re_trie_maxbuff=get_sv(RE_TRIE_MAXBUFF, 1);
-                        if (!SvIOK(re_trie_maxbuff))
-                            sv_setiv(re_trie_maxbuff, TRIE_SIMPLE_MAX_BUFF);
-
-	    }
+		if (DO_TRIE) {
+		    if (!re_trie_maxbuff) {
+			re_trie_maxbuff = get_sv(RE_TRIE_MAXBUF_NAME, 1);
+			if (!SvIOK(re_trie_maxbuff))
+			    sv_setiv(re_trie_maxbuff, RE_TRIE_MAXBUF_INIT);
+		    }
                     if ( SvIV(re_trie_maxbuff)>=0 && OP( startbranch )==BRANCH ) {
                         regnode *cur;
                         regnode *first = (regnode *)NULL;
@@ -1901,7 +1900,6 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
                         for ( cur = startbranch ; cur != scan ; cur = regnext( cur ) ) {
                             regnode *noper = NEXTOPER( cur );
                             regnode *noper_next = regnext( noper );
-
 
                             DEBUG_OPTIMISE_r({
                                 regprop( mysv, cur);

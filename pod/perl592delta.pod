@@ -66,7 +66,7 @@ effect for the regular expression engine when running under C<use re
 =head2 Trie optimization for regexp engine
 
 The regexp engine is now able to factorize common prefixes and suffixes in
-regular expressions. A new special variable, ${^RE_TRIE_MAXBUFF}, has been
+regular expressions. A new special variable, ${^RE_TRIE_MAXBUF}, has been
 added to fine tune this optimization.
 
 =head1 Installation and Configuration Improvements
