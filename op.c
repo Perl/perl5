@@ -512,8 +512,12 @@ Perl_pad_free(pTHX_ PADOFFSET po)
     DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%"UVxf" free %"IVdf"\n",
 			  PTR2UV(PL_curpad), (IV)po));
 #endif /* USE_THREADS */
-    if (PL_curpad[po] && PL_curpad[po] != &PL_sv_undef)
+    if (PL_curpad[po] && PL_curpad[po] != &PL_sv_undef) {
 	SvPADTMP_off(PL_curpad[po]);
+#ifdef USE_ITHREADS
+	SvREADONLY_off(PL_curpad[po]);	/* could be a freed constant */
+#endif
+    }
     if ((I32)po < PL_padix)
 	PL_padix = po - 1;
 }
