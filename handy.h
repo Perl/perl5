@@ -23,6 +23,15 @@
 #define Nullfp Null(FILE*)
 #define Nullsv Null(SV*)
 
+#ifdef TRUE
+#undef TRUE
+#endif
+#ifdef FALSE
+#undef FALSE
+#endif
+#define TRUE (1)
+#define FALSE (0)
+
 /* bool is built-in for g++-2.6.3, which might be used for an extension.
    If the extension includes <_G_config.h> before this file then
    _G_HAVE_BOOL will be properly set.  If, however, the extension includes
@@ -37,6 +46,19 @@
 # endif
 #endif
 
+/* The NeXT dynamic loader headers will not build with the bool macro
+   So declare them now to clear confusion.
+*/
+#ifdef NeXT
+# undef FALSE
+# undef TRUE
+  typedef enum bool { FALSE = 0, TRUE = 1 } bool;
+# define ENUM_BOOL 1
+# ifndef HAS_BOOL
+#  define HAS_BOOL 1
+# endif /* !HAS_BOOL */
+#endif /* NeXT */
+
 #ifndef HAS_BOOL
 # ifdef UTS
 #  define bool int
@@ -44,15 +66,6 @@
 #  define bool char
 # endif
 #endif
-
-#ifdef TRUE
-#undef TRUE
-#endif
-#ifdef FALSE
-#undef FALSE
-#endif
-#define TRUE (1)
-#define FALSE (0)
 
 typedef char		I8;
 typedef unsigned char	U8;
@@ -133,6 +146,7 @@ typedef U16 line_t;
 char *safemalloc _((MEM_SIZE));
 char *saferealloc _((char *, MEM_SIZE));
 void safefree _((char *));
+char *safecalloc _((MEM_SIZE, MEM_SIZE));
 #endif
 #ifndef MSDOS
 #define New(x,v,n,t)  (v = (t*)safemalloc((MEM_SIZE)((n) * sizeof(t))))
@@ -155,6 +169,7 @@ void safefree _((char *));
 char *safexmalloc();
 char *safexrealloc();
 void safexfree();
+char *safexcalloc();
 #define New(x,v,n,t)  (v = (t*)safexmalloc(x,(MEM_SIZE)((n) * sizeof(t))))
 #define Newc(x,v,n,t,c)  (v = (c*)safexmalloc(x,(MEM_SIZE)((n) * sizeof(t))))
 #define Newz(x,v,n,t) (v = (t*)safexmalloc(x,(MEM_SIZE)((n) * sizeof(t)))), \
