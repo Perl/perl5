@@ -10,7 +10,7 @@ BEGIN {
 package main;
 require './test.pl';
 
-plan( tests => 33 );
+plan( tests => 35 );
 
 my($x);
 
@@ -23,6 +23,8 @@ is($x // 1, 1, 		'	// : left-hand operand undef');
 $x='';
 is($x // 0, '',		'	// : left-hand operand defined but empty');
 
+like([] // 0, qr/^ARRAY/,	'	// : left-hand operand a referece');
+
 $x=1;
 is(($x err 0), 1,	'	err: left-hand operand defined');
 
@@ -32,16 +34,18 @@ is(($x err 1), 1, 	'	err: left-hand operand undef');
 $x='';
 is(($x err 0), '',	'	err: left-hand operand defined but empty');
 
+like(([] err 0), qr/^ARRAY/,	'	err: left-hand operand a referece');
+
 $x=undef;
 $x //= 1;
 is($x, 1, 		'	//=: left-hand operand undefined');
 
 $x //= 0;
-is($x, 1, 		'	//=: left-hand operand defined');
+is($x, 1, 		'//=: left-hand operand defined');
 
 $x = '';
 $x //= 0;
-is($x, '', 		'	//=: left-hand operand defined but empty');
+is($x, '', 		'//=: left-hand operand defined but empty');
 
 @ARGV = (undef, 0, 3);
 is(shift       // 7, 7,	'shift // ... works');
