@@ -169,21 +169,19 @@ sub init_others
  $self->{'TEST_F'} = '$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) -MExtUtils::Command -e test_f';
  $self->{'LD'}     = $Config{'ld'} || 'link';
  $self->{'AR'}     = $Config{'ar'} || 'lib';
- if ($GCC)
-  {
-   $self->{'LDLOADLIBS'} ||= ' ';
-  }
- else
-  {
-   $self->{'LDLOADLIBS'}
-      ||= ( $BORLAND
-            ? 'import32.lib'
-            : # compiler adds msvcrtd?.lib according to debug switches
-               'oldnames.lib kernel32.lib comdlg32.lib winspool.lib gdi32.lib '
-	      .'advapi32.lib user32.lib shell32.lib netapi32.lib ole32.lib '
-	      .'oleaut32.lib uuid.lib wsock32.lib mpr.lib winmm.lib version.lib'
-  	) . ' $(LIBC) odbc32.lib odbccp32.lib';
-  }
+ $self->{'LDLOADLIBS'} ||= $Config{'libs'};
+ if ($BORLAND) {
+     my $libs = $self->{'LDLOADLIBS'};
+     my $libpath = '';
+     $libs = " $libs ";
+     while ($libs =~ s/\s(("?)-L.+?\2)\s/ /g) {
+         $libpath .= ' ' if length $libpath;
+         $libpath .= $1;
+     }
+     $self->{'LDLOADLIBS'} = $libs;
+     $self->{'LDDLFLAGS'} ||= $Config{'lddlflags'};
+     $self->{'LDDLFLAGS'} .= " $libpath";
+ }
  $self->{'DEV_NULL'} = '> NUL';
  # $self->{'NOECHO'} = ''; # till we have it working
 }
