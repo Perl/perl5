@@ -2618,6 +2618,12 @@
 /*#define PERL_PRIeldbl	"e"	/**/
 /*#define PERL_SCNfldbl	undef	/**/
 
+#$d_PRIfldbl PERL_PRIfldbl	$sPRIfldbl	/**/
+#$d_PRIgldbl PERL_PRIgldbl	$sPRIgldbl	/**/
+#$d_PRIeldbl PERL_PRIeldbl	$sPRIeldbl	/**/
+
+/*#$d_SCNfldbl PERL_SCNfldbl	$sSCNfldbl	/**/
+
 /* Off_t:
  *	This symbol holds the type used to declare offsets in the kernel.
  *	It can be int, long, off_t, etc... It may be necessary to include
