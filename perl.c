@@ -1939,7 +1939,7 @@ init_main_stash(void)
     PL_debstash = GvHV(gv_fetchpv("DB::", GV_ADDMULTI, SVt_PVHV));
     PL_globalstash = GvHV(gv_fetchpv("CORE::GLOBAL::", GV_ADDMULTI, SVt_PVHV));
     /* We must init $/ before switches are processed. */
-    sv_setpvn(GvSV(gv_fetchpv("/", TRUE, SVt_PV)), "\n", 1);
+    sv_setpvn(perl_get_sv("/", TRUE), "\n", 1);
 }
 
 STATIC void
