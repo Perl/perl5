@@ -2402,7 +2402,7 @@ PP(pp_goto)
 	    switch (CxTYPE(cx)) {
 	    case CXt_EVAL:
 		leaving_eval = TRUE;
-                if (CxREALEVAL(cx)) {
+                if (!CxTRYBLOCK(cx)) {
 		    gotoprobe = (last_eval_cx ?
 				last_eval_cx->blk_eval.old_eval_root :
 				PL_eval_root);
