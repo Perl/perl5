@@ -3834,7 +3834,7 @@ PP(pp_gprotoent)
 
 PP(pp_gsbyname)
 {
-#ifdef HAS_GETSERVICEBYNAME
+#ifdef HAS_GETSERVBYNAME
     return pp_gservent(ARGS);
 #else
     DIE(no_sock_func, "getservbyname");
@@ -3843,7 +3843,7 @@ PP(pp_gsbyname)
 
 PP(pp_gsbyport)
 {
-#ifdef HAS_GETSERVICEBYPORT
+#ifdef HAS_GETSERVBYPORT
     return pp_gservent(ARGS);
 #else
     DIE(no_sock_func, "getservbyport");
