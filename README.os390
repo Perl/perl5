@@ -80,4 +80,3 @@ op/stat...........Out of memory!
 op/taint..........FAILED at test 73
 lib/errno.........FAILED at test 1
 lib/posix.........FAILED at test 19
-lib/searchdict....FAILED at test 1
