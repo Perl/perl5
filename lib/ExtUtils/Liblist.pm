@@ -225,6 +225,9 @@ sub _win32_ext {
     my $search		= 1;
     my($fullname, $thislib, $thispth);
 
+    # add "$Config{installarchlib}/CORE" to default search path
+    push @libpath, "$Config{installarchlib}/CORE";
+
     foreach (Text::ParseWords::quotewords('\s+', 0, $potential_libs)){
 
 	$thislib = $_;
@@ -240,8 +243,8 @@ sub _win32_ext {
 
 	# if searching is disabled, do compiler-specific translations
 	unless ($search) {
-	    s/^-L/-libpath:/ if $VC;
 	    s/^-l(.+)$/$1.lib/ unless $GC;
+	    s/^-L/-libpath:/ if $VC;
 	    push(@extralibs, $_);
 	    $found++;
 	    next;
@@ -625,9 +628,10 @@ Unix-OS/2 version in several respects:
 If C<$potential_libs> is empty, the return value will be empty.
 Otherwise, the libraries specified by C<$Config{libs}> (see Config.pm)
 will be appended to the list of C<$potential_libs>.  The libraries
-will be searched for in the directories specified in C<$potential_libs>
-as well as in C<$Config{libpth}>. For each library that is found,  a
-space-separated list of fully qualified library pathnames is generated.
+will be searched for in the directories specified in C<$potential_libs>,
+C<$Config{libpth}>, and in C<$Config{installarchlib}/CORE>.
+For each library that is found,  a space-separated list of fully qualified
+library pathnames is generated.
 
 =item *
 
