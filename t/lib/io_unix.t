@@ -8,6 +8,7 @@ BEGIN {
     # ``use IO::Socket'' executes too early below in the os2 block
     if ($^O eq 'dos') {
         print "1..0 # Skip: no fork\n";
+	exit 0;
     }
 }
 
