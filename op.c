@@ -6433,9 +6433,18 @@ Perl_peep(pTHX_ register OP *o)
 	     * for reference counts, sv_upgrade() etc. */
 	    if (cSVOP->op_sv) {
 		PADOFFSET ix = pad_alloc(OP_CONST, SVs_PADTMP);
-		SvREFCNT_dec(PL_curpad[ix]);
-		SvPADTMP_on(cSVOPo->op_sv);
-		PL_curpad[ix] = cSVOPo->op_sv;
+		if (SvPADTMP(cSVOPo->op_sv)) {
+		    /* If op_sv is already a PADTMP then it is being used by
+		     * another pad, so make a copy. */
+		    sv_setsv(PL_curpad[ix],cSVOPo->op_sv);
+		    SvREADONLY_on(PL_curpad[ix]);
+		    SvREFCNT_dec(cSVOPo->op_sv);
+		}
+		else {
+		    SvREFCNT_dec(PL_curpad[ix]);
+		    SvPADTMP_on(cSVOPo->op_sv);
+		    PL_curpad[ix] = cSVOPo->op_sv;
+		}
 		cSVOPo->op_sv = Nullsv;
 		o->op_targ = ix;
 	    }
