@@ -1,7 +1,7 @@
-#
-# NOTE! This module is deprecated (obsolete) after the Perl release
-# 5.003_06 as the functionality has been integrated into the Perl core.
-#
+#-----------------------------------------------------------------------#
+# NOTE! This module is deprecated (obsolete) after the Perl release     #
+# 5.003_06 as the functionality has been integrated into the Perl core. #
+#-----------------------------------------------------------------------#
 
 package I18N::Collate;
 
@@ -28,21 +28,20 @@ You can compare $s1 and $s2 above with
 
 to extract the data itself, you'll need a dereference: $$s1
 
-This uses POSIX::setlocale(). The basic collation conversion is done by
-strxfrm() which terminates at NUL characters being a decent C routine.
-collate_xfrm() handles embedded NUL characters gracefully.  Due to C<cmp>
-and overload magic, C<lt>, C<le>, C<eq>, C<ge>, and C<gt> work also.  The
-available locales depend on your operating system; try whether C<locale
--a> shows them or man pages for "locale" or "nlsinfo" or
-the direct approach C<ls /usr/lib/nls/loc> or C<ls
-/usr/lib/nls>.  Not all the locales that your vendor supports
-are necessarily installed: please consult your operating system's
-documentation and possibly your local system administration.
+This module uses POSIX::setlocale(). The basic collation conversion is
+done by strxfrm() which terminates at NUL characters being a decent C
+routine.  collate_xfrm() handles embedded NUL characters gracefully.
 
-The locale names are probably something like
-C<"xx_XX.(ISO)?8859-N"> or C<"xx_XX.(ISO)?8859N">, for example
-C<"fr_CH.ISO8859-1"> is the Swiss (CH) variant of French (fr),
-ISO Latin (8859) 1 (-1) which is the Western European character set.
+The available locales depend on your operating system; try whether
+C<locale -a> shows them or man pages for "locale" or "nlsinfo" or the
+direct approach C<ls /usr/lib/nls/loc> or C<ls /usr/lib/nls> or
+C<ls /usr/lib/locale>.  Not all the locales that your vendor supports
+are necessarily installed: please consult your operating system's
+documentation and possibly your local system administration.  The
+locale names are probably something like C<xx_XX.(ISO)?8859-N> or
+C<xx_XX.(ISO)?8859N>, for example C<fr_CH.ISO8859-1> is the Swiss (CH)
+variant of French (fr), ISO Latin (8859) 1 (-1) which is the Western
+European character set.
 
 =cut
 
@@ -123,14 +122,10 @@ sub new {
 	HAS BEEN DEPRECATED
 
   (that is, please do not use it anymore for any new applications and please
-  migrate the old applications away from it) because its functionality
-  was integrated into the Perl core language in the release 5.003_06.
+  migrate the old applications away from it) because its functionality was
+  integrated into the Perl core language in the release 5.003_06.
 
-  All scalar data is now collated according to the current locale setting.
-  Also, Perl does automatically the setlocale(LC_COLLATE, "") for you.
-
-  To convert: forget I18N::Collate completely and use scalar data in
-  a completely normal way.
+  See pod/perli18n.pod for further information.
 
 ***
 ___EOD___
