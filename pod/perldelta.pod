@@ -207,11 +207,35 @@ The following new flags may be enabled on the Configure command line
 by running Configure with C<-Dflag>.
 
     usemultiplicity
+
+    uselongdouble
     usemorebits
     uselargefiles
-    [what others?]
 
-[TODO - Jarkko Hietaniemi <jhi@iki.fi>]
+=head2 -Dusethreads and -Duse64bits now more daring
+
+The Configure options enabling the use of threads and the use of
+64-bitness are now more daring in the sense that they no more have
+an explicit list of operating systems of known threads/64-bit
+capabilities.  In other words: if your operating system has the
+necessary APIs, you should be able just to go ahead and use them.
+See also L<"64-bit support">.
+
+=head2 Long Doubles
+
+Some platforms have "long doubles", floating point numbers of even
+larger range than ordinary "doubles".  To enable using ng doubles for
+Perl's scalars, use -Duselongdouble.
+
+=head2 -Dusemorebits
+
+You can enable both -Duse64bits and -Dlongdouble by -Dusemorebits.
+See also L<"64-bit support">.
+
+=head2 -Duselargefiles
+
+Some platforms support large files, files larger than two gigabytes.
+See L<"Large file support"> for more information. 
 
 =head2 installusrbinperl
 
@@ -231,6 +255,11 @@ You can "post-edit" the Configure variables using the Configure C<-A>
 flag.  The editing happens immediately after the platform specific
 hints files have been processed but before the actual configuration
 process starts.  Run C<Configure -h> to find out the full C<-A> syntax.
+
+=head2 New Installation Scheme
+
+vendorprefix et al
+[TODO - Andy Dougherty <doughera@lafcol.lafayette.edu>]
 
 =head1 Core Changes
 
@@ -685,8 +714,13 @@ enabled.
 
 =head2 Locale bugs fixed
 
-change#3542
-[TODO - Jarkko Hietaniemi <jhi@iki.fi>]
+printf() and sprintf() previously did reset the numeric locale
+back to the default "C" locale.  This has been fixed.
+
+Numbers formatted according to the local numeric locale
+(such as using a decimal comma instead of a decimal dot) caused
+"isn't numeric" warnings, even while the operations accessing
+those numbers produced correct results.  The warnings are gone.
 
 =head2 Memory leaks
 
@@ -1156,12 +1190,12 @@ attribute.
 Lexical warnings pragma, C<use warnings;>, to control optional warnings.
 See L<perllexwarn>.
 
-C<use filetest> to control the behaviour of filetests (C<-r> C<-w> ...).
-Currently only one subpragma implemented, "use filetest 'access';",
-that enables the use of access(2) or equivalent to check
-permissions instead of using stat(2) as usual.  This matters
-in filesystems where there are ACLs (access control lists): the
-stat(2) might lie, but access(2) knows better.
+C<use filetest> to control the behaviour of filetests (C<-r> C<-w>
+...).  Currently only one subpragma implemented, "use filetest
+'access';", that uses access(2) or equivalent to check permissions
+instead of using stat(2) as usual.  This matters in filesystems
+where there are ACLs (access control lists): the stat(2) might lie,
+but access(2) knows better.
 
 =head1 Utility Changes
 
