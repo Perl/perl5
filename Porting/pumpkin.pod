@@ -223,6 +223,11 @@ units, which tends to be complicated operations.  But be careful, this
 can quickly spiral out of control.  Running metaconfig is not really
 hard.
 
+Finally, the sample files in the F<Porting/> subdirectory are
+generated automatically by the script F<U/mksample> included 
+with the metaconfig units.  See L<"run metaconfig"> below for
+information on obtaining the metaconfig units.
+
 =head1 How to Make a Distribution
 
 There really ought to be a 'make dist' target, but there isn't.
@@ -279,10 +284,11 @@ will regenerate Configure and config_h.SH.  More information on
 obtaining and running metaconfig is in the F<U/README> file that comes
 with Perl's metaconfig units.  Perl's metaconfig units should be
 available the same place you found this file.  On CPAN, look under my
-directory F<authors/id/ANDYD/> for a file such as F<5.003_07-02.U.tar.gz>.
+directory F<authors/id/ANDYD/> for a file such as 
+F<mc_units-5.004_70-01.tar.gz>.
 That file should be unpacked in your main perl source directory.  It
 contains the files needed to run B<metaconfig> to reproduce Perl's
-Configure script.  (Those units are for 5.003_07.  There have been
+Configure script.  (Those units are for 5.004_70.  There may have been
 changes since then; please contact me if you want more recent
 versions, and I will try to point you in the right direction.)
 
@@ -1302,4 +1308,4 @@ All opinions expressed herein are those of the authorZ<>(s).
 
 =head1 LAST MODIFIED
 
-$Id: pumpkin.pod,v 1.17 1998/06/30 17:00:06 doughera Released $
+$Id: pumpkin.pod,v 1.19 1998/07/06 20:48:55 doughera Released $
