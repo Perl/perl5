@@ -1062,6 +1062,7 @@ lib/ExtUtils/t/Manifest.t	See if ExtUtils::Manifest works
 lib/ExtUtils/t/Mkbootstrap.t	See if ExtUtils::Mkbootstrap works
 lib/ExtUtils/t/MM_BeOS.t	See if ExtUtils::MM_BeOS works
 lib/ExtUtils/t/MM_Cygwin.t	See if ExtUtils::MM_Cygwin works
+lib/ExtUtils/t/MM_NW5.t		See if ExtUtils::MM_NW5 works
 lib/ExtUtils/t/MM_OS2.t		See if ExtUtils::MM_OS2 works
 lib/ExtUtils/t/MM_Unix.t	See if ExtUtils::MM_UNIX works
 lib/ExtUtils/t/MM_VMS.t		See if ExtUtils::MM_VMS works
@@ -1101,6 +1102,7 @@ lib/File/Spec/Cygwin.pm		portable operations on Cygwin file names
 lib/File/Spec/Epoc.pm		portable operations on EPOC file names
 lib/File/Spec/Functions.pm	Function interface to File::Spec object methods
 lib/File/Spec/Mac.pm		portable operations on Mac file names
+lib/File/Spec/NW5.pm		portable operations on NetWare5 file names
 lib/File/Spec/OS2.pm		portable operations on OS2 file names
 lib/File/Spec/t/Functions.t	See if File::Spec::Functions works
 lib/File/Spec/t/rel2abs2rel.t	See if File::Spec->rel2abs/abs2rel works
@@ -1946,18 +1948,11 @@ mpeix/nm			MPE/iX port
 mpeix/relink			MPE/iX port
 mv-if-diff			Script to mv a file if it changed
 myconfig.SH			Prints summary of the current configuration
-NetWare/bat/BldNWExt-Exist.bat	NetWare port
-NetWare/bat/BldNWExt.bat	NetWare port
 NetWare/bat/Buildtype.bat	NetWare port
-NetWare/bat/CWbuild.bat		NetWare port
-NetWare/bat/MPKBuild.bat	NetWare port
-NetWare/bat/Setcw.bat		NetWare port
-NetWare/bat/Setmpksdk.bat	NetWare port
+NetWare/bat/SetCodeWar.bat	NetWare port
 NetWare/bat/Setnlmsdk.bat	NetWare port
 NetWare/bat/SetNWBld.bat	NetWare port
-NetWare/bat/SetNWDef.bat	NetWare port
 NetWare/bat/ToggleD2.bat	NetWare port
-NetWare/bat/ToggleXDC.bat	NetWare port
 NetWare/CLIBsdio.h		NetWare port
 NetWare/CLIBstr.h		NetWare port
 NetWare/CLIBstuf.c		NetWare port

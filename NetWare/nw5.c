@@ -104,8 +104,22 @@ nw_setbuf(FILE *pf, char *buf)
 int
 nw_setmode(FILE *fp, int mode)
 {
+/**
+	// Commented since a few abends were happening in fnFpSetMode
 	int *dummy = 0;
 	return(fnFpSetMode(fp, mode, dummy));
+**/
+
+	int handle = -1;
+	errno = 0;
+
+	handle = fileno(fp);
+	if (errno)
+	{
+		errno = 0;
+		return -1;
+	}
+	return setmode(handle, mode);
 }
 
 int

@@ -7577,15 +7577,33 @@ Perl_yyerror(pTHX_ char *s)
 	where = "at EOF";
     else if (PL_bufptr > PL_oldoldbufptr && PL_bufptr - PL_oldoldbufptr < 200 &&
       PL_oldoldbufptr != PL_oldbufptr && PL_oldbufptr != PL_bufptr) {
+	/*
+		Only for NetWare:
+		The code below is removed for NetWare because it abends/crashes on NetWare
+		when the script has error such as not having the closing quotes like:
+		    if ($var eq "value)
+		Checking of white spaces is anyway done in NetWare code.
+	*/
+#ifndef NETWARE
 	while (isSPACE(*PL_oldoldbufptr))
 	    PL_oldoldbufptr++;
+#endif
 	context = PL_oldoldbufptr;
 	contlen = PL_bufptr - PL_oldoldbufptr;
     }
     else if (PL_bufptr > PL_oldbufptr && PL_bufptr - PL_oldbufptr < 200 &&
       PL_oldbufptr != PL_bufptr) {
+	/*
+		Only for NetWare:
+		The code below is removed for NetWare because it abends/crashes on NetWare
+		when the script has error such as not having the closing quotes like:
+		    if ($var eq "value)
+		Checking of white spaces is anyway done in NetWare code.
+	*/
+#ifndef NETWARE
 	while (isSPACE(*PL_oldbufptr))
 	    PL_oldbufptr++;
+#endif
 	context = PL_oldbufptr;
 	contlen = PL_bufptr - PL_oldbufptr;
     }
