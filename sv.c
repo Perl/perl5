@@ -2064,49 +2064,53 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	    (void)SvIOK_on(sv);
 	    SvIVX(sv) = Atol(SvPVX(sv));
 	} else {
-#ifdef HAS_STRTOUL
-	    UV u;
 	    int save_errno = errno;
-	    /* Is it an integer that we could convert with strtoul?
-	       So try it, and if it doesn't set errno then it's pukka.
-	       This should be faster than going atof and then thinking.  */
-	    if (((numtype & (IS_NUMBER_TO_INT_BY_STRTOL | IS_NUMBER_NOT_INT))
-		 == IS_NUMBER_TO_INT_BY_STRTOL)
-		&& ((errno = 0), 1) /* always true */
-		&& ((u = Strtoul(SvPVX(sv), Null(char**), 10)), 1) /* ditto */
-		&& (errno == 0)
-		/* If known to be negative, check it didn't undeflow IV */
-		&& ((numtype & IS_NUMBER_NEG) ? ((IV)u <= 0) : 1)) {
-		errno = save_errno;
-
-		if (SvTYPE(sv) < SVt_PVIV)
-		    sv_upgrade(sv, SVt_PVIV);
-		(void)SvIOK_on(sv);
-
-		/* If it's negative must use IV.
-		   IV-over-UV optimisation */
-		if (numtype & IS_NUMBER_NEG || u <= (UV) IV_MAX) {
-		    /* strtoul is defined to return negated value if the
-		       number starts with a minus sign. Assuming 2s
-		       complement, this value will be in range for a negative
-		       IV if casting the bit pattern to IV doesn't produce
-		       a positive value. Allow -0 by checking it's <= 0
-		       hence (numtype & IS_NUMBER_NEG) test above
-		    */
-		    SvIVX(sv) = (IV)u;
-		} else {
-		    /* it didn't overflow, and it was positive. */
-		    SvUVX(sv) = u;
-		    SvIsUV_on(sv);
+#ifdef HAS_STRTOUL
+	    {
+		UV u;
+		/* Is it an integer that we could convert with strtoul?
+		   So try it, and if it doesn't set errno then it's pukka.
+		   This should be faster than going atof and then thinking.  */
+		if (((numtype &
+		      (IS_NUMBER_TO_INT_BY_STRTOL | IS_NUMBER_NOT_INT))
+		     == IS_NUMBER_TO_INT_BY_STRTOL)
+		    && ((errno = 0), 1) /* always true */
+		    && ((u = Strtoul(SvPVX(sv), Null(char**), 10)), 1) /* ditto */
+		    && (errno == 0)
+		    /* If known to be negative, check it didn't undeflow IV */
+		    && ((numtype & IS_NUMBER_NEG) ? ((IV)u <= 0) : 1)) {
+		    errno = save_errno;
+		    
+		    if (SvTYPE(sv) < SVt_PVIV)
+			sv_upgrade(sv, SVt_PVIV);
+		    (void)SvIOK_on(sv);
+		    
+		    /* If it's negative must use IV.
+		       IV-over-UV optimisation */
+		    if (numtype & IS_NUMBER_NEG || u <= (UV) IV_MAX) {
+			/* strtoul is defined to return negated value if the
+			   number starts with a minus sign. Assuming 2s
+			   complement, this value will be in range for
+			   a negative IV if casting the bit pattern to
+			   IV doesn't produce a positive value. Allow -0
+			   by checking it's <= 0
+			   hence (numtype & IS_NUMBER_NEG) test above
+			   */
+			SvIVX(sv) = (IV)u;
+		    } else {
+			/* it didn't overflow, and it was positive. */
+			SvUVX(sv) = u;
+			SvIsUV_on(sv);
+		    }
 		}
-	    } else {
+	    }
+#endif
+	    {
 		NV d;
 		/* Hopefully trace flow will optimise this away where possible
 		 */
 		errno = save_errno;
-#else
-		NV d;
-#endif
+
 		/* It wasn't an integer, or it overflowed, or we don't have
 		   strtol. Do things the slow way - check if it's a IV etc. */
 		d = Atof(SvPVX(sv));
