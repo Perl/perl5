@@ -4814,13 +4814,35 @@ PerlIO_stdoutf(const char *fmt, ...)
 PerlIO *
 PerlIO_tmpfile(void)
 {
-     dTHX;
-     PerlIO *f = Perl_my_tmpfp(aTHX);
-
-     if (f)
-	  PerlIOBase(f)->flags |= PERLIO_F_TEMP;
-
-     return f;
+    /*
+     * I have no idea how portable mkstemp() is ...
+     */
+#if defined(WIN32) || !defined(HAVE_MKSTEMP)
+    dTHX;
+    PerlIO *f = NULL;
+    FILE *stdio = PerlSIO_tmpfile();
+    if (stdio) {
+	if ((f = PerlIO_push(aTHX_(PerlIO_allocate(aTHX)), &PerlIO_stdio, "w+", Nullsv))) {
+	    PerlIOStdio *s = PerlIOSelf(f, PerlIOStdio);
+	    s->stdio = stdio;
+	}
+    }
+    return f;
+#else
+    dTHX;
+    SV *sv = newSVpv("/tmp/PerlIO_XXXXXX", 0);
+    int fd = mkstemp(SvPVX(sv));
+    PerlIO *f = NULL;
+    if (fd >= 0) {
+	f = PerlIO_fdopen(fd, "w+");
+	if (f) {
+	    PerlIOBase(f)->flags |= PERLIO_F_TEMP;
+	}
+	PerlLIO_unlink(SvPVX(sv));
+	SvREFCNT_dec(sv);
+    }
+    return f;
+#endif
 }
 
 #undef HAS_FSETPOS
@@ -4949,3 +4971,11 @@ PerlIO_sprintf(char *s, int n, const char *fmt, ...)
     return result;
 }
 #endif
+
+
+
+
+
+
+
+

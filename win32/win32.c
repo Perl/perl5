@@ -2615,8 +2615,8 @@ win32_rewind(FILE *pf)
     return;
 }
 
-DllExport int
-win32_tmpfd(void)
+DllExport FILE*
+win32_tmpfile(void)
 {
     dTHX;
     char prefix[MAX_PATH+1];
@@ -2640,20 +2640,11 @@ win32_tmpfd(void)
 #endif
 		    DEBUG_p(PerlIO_printf(Perl_debug_log,
 					  "Created tmpfile=%s\n",filename));
-		    return fd;
+		    return fdopen(fd, "w+b");
 		}
 	    }
 	}
     }
-    return -1;
-}
-
-DllExport FILE*
-win32_tmpfile(void)
-{
-    int fd = win32_tmpfd();
-    if (fd >= 0)
-	return win32_fdopen(fd, "w+b");
     return NULL;
 }
 
