@@ -29,11 +29,16 @@ static char *svclassnames[] = {
     "B::PVNV",
     "B::PVMG",
     "B::BM",
+#if PERL_VERSION >= 9
     "B::GV",
+#endif
     "B::PVLV",
     "B::AV",
     "B::HV",
     "B::CV",
+#if PERL_VERSION <= 8
+    "B::GV",
+#endif
     "B::FM",
     "B::IO",
 };
@@ -416,9 +421,15 @@ oplist(pTHX_ OP *o, SV **SP)
 {
     for(; o; o = o->op_next) {
 	SV *opsv;
-	if (o->op_opt == 0) 
+#if PERL_VERSION >= 9
+	if (o->op_opt == 0)
 	    break;
 	o->op_opt = 0;
+#else
+	if (o->op_seq == 0)
+	    break;
+	o->op_seq = 0;
+#endif
 	opsv = sv_newmortal();
 	sv_setiv(newSVrv(opsv, cc_opclassname(aTHX_ (OP*)o)), PTR2IV(o));
 	XPUSHs(opsv);
@@ -494,6 +505,9 @@ BOOT:
     specialsv_list[4] = pWARN_ALL;
     specialsv_list[5] = pWARN_NONE;
     specialsv_list[6] = pWARN_STD;
+#if PERL_VERSION <= 9
+#  define CVf_ASSERTION	0
+#endif
 #include "defsubs.h"
 }
 
@@ -714,8 +728,12 @@ threadsv_names()
 #define OP_desc(o)	PL_op_desc[o->op_type]
 #define OP_targ(o)	o->op_targ
 #define OP_type(o)	o->op_type
-#define OP_opt(o)	o->op_opt
-#define OP_static(o)	o->op_static
+#if PERL_VERSION >= 9
+#  define OP_opt(o)	o->op_opt
+#  define OP_static(o)	o->op_static
+#else
+#  define OP_seq(o)	o->op_seq
+#endif
 #define OP_flags(o)	o->op_flags
 #define OP_private(o)	o->op_private
 #define OP_spare(o)	o->op_spare
@@ -773,6 +791,8 @@ U16
 OP_type(o)
 	B::OP		o
 
+#if PERL_VERSION >= 9
+
 U8
 OP_opt(o)
 	B::OP		o
@@ -780,6 +800,14 @@ OP_opt(o)
 U8
 OP_static(o)
 	B::OP		o
+
+#else
+
+U16
+OP_seq(o)
+	B::OP		o
+
+#endif
 
 U8
 OP_flags(o)
@@ -789,9 +817,13 @@ U8
 OP_private(o)
 	B::OP		o
 
+#if PERL_VERSION >= 9
+
 U8
 OP_spare(o)
 	B::OP		o
+
+#endif
 
 void
 OP_oplist(o)

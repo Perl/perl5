@@ -73,6 +73,8 @@ $got = "@got";
 
 my $expected = "attributes Carp Carp::Heavy DB Exporter Exporter::Heavy Internals main Regexp utf8 version warnings";
 
+$expected =~ s/version // if $] < 5.009;
+
 {
     no strict 'vars';
     use vars '$OS2::is_aout';
