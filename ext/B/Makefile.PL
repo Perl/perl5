@@ -35,12 +35,14 @@ sub upupfile {
 			File::Spec->updir, $_[0]);
 }
 
-sub postamble {
-    my $op_h  = upupfile('op.h');
-    my $cop_h = upupfile('cop.h');
+sub MY::postamble {
+    my $op_h   = upupfile('op.h');
+    my $cop_h  = upupfile('cop.h');
+    my $noecho = shift->{NOECHO};
 "
-B\$(OBJ_EXT) : defsubs.h 
+B\$(OBJ_EXT) : defsubs.h              
 
-defsubs.h :: $op_h $cop_h
-"
+defsubs.h :: $op_h $cop_h                     
+        $noecho \$(NOOP)
+" 
 }
