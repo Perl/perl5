@@ -31,8 +31,6 @@ char *getenv _((char *)); /* Usually in <stdlib.h> */
 #include <sys/file.h>
 #endif
 
-dEXTCONST char rcsid[] = "perl.c\nPatch level: ###\n";
-
 #ifdef IAMSUID
 #ifndef DOSUID
 #define DOSUID

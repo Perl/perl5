@@ -7,10 +7,6 @@
  * page-level routines
  */
 
-#ifndef lint
-static char rcsid[] = "$Id: pair.c,v 1.10 90/12/13 13:00:35 oz Exp $";
-#endif
-
 #include "config.h"
 #include "EXTERN.h"
 #include "sdbm.h"

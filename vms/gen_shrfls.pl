@@ -427,7 +427,6 @@ exec "\$ \@$drvrname" if $isvax;
 __END__
 
 # Oddball cases, so we can keep the perl.h scan above simple
-rcsid=vars      # declared in perl.c
 regkind=vars    # declared in regcomp.h
 simple=vars     # declared in regcomp.h
 varies=vars     # declared in regcomp.h
