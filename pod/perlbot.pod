@@ -251,8 +251,8 @@ This example demonstrates an interface for the SDBM class.  This creates a
 	package Mydbm;
 
 	require SDBM_File;
-	require TieHash;
-	@ISA = qw( TieHash );
+	require Tie::Hash;
+	@ISA = qw( Tie::Hash );
 
 	sub TIEHASH {
 	    my $type = shift;
@@ -494,8 +494,8 @@ behavior by adding custom FETCH() and STORE() methods, if this is desired.
 	package Mydbm;
 
 	require SDBM_File;
-	require TieHash;
-	@ISA = qw(TieHash);
+	require Tie::Hash;
+	@ISA = qw(Tie::Hash);
 
 	sub TIEHASH {
 		my $type = shift;
