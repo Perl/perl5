@@ -562,6 +562,18 @@ Found in file cv.h
 
 =over 8
 
+=item cv_undef
+
+Clear out all the active components of a CV. This can happen either
+by an explicit C<undef &foo>, or by the reference count going to zero.
+In the former case, we keep the CvOUTSIDE pointer, so that any anonymous
+children can still follow the full lexical scope chain.
+
+	void	cv_undef(CV* cv)
+
+=for hackers
+Found in file op.c
+
 =item load_module
 
 Loads the module whose name is pointed to by the string part of name.

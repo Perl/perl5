@@ -2700,7 +2700,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
     cxstack[cxstack_ix].blk_eval.cv = PL_compcv;
 
     CvOUTSIDE_SEQ(PL_compcv) = seq;
-    CvOUTSIDE(PL_compcv) = outside ? (CV*)SvREFCNT_inc(outside) : outside;
+    CvOUTSIDE(PL_compcv) = (CV*)SvREFCNT_inc(outside);
 
     /* set up a scratch pad */
 

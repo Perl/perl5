@@ -198,6 +198,9 @@ PL_*pad* global vars so that we don't have any dangling references left.
 We also repoint the CvOUTSIDE of any about-to-be-orphaned
 inner subs to the outer of this cv.
 
+(This function should really be called pad_free, but the name was already
+taken)
+
 =cut
 */
 
@@ -216,16 +219,15 @@ Perl_pad_undef(pTHX_ CV* cv)
 	  "Pad undef: padlist=0x%"UVxf"\n" , PTR2UV(padlist))
     );
 
-    /* pads may be cleared out already during global destruction */
-    if ((CvEVAL(cv) && !CvGV(cv) /* is this eval"" ? */
-	    && !PL_dirty) || CvSPECIAL(cv))
-    {
-	CV *outercv = CvOUTSIDE(cv);
-	U32 seq     = CvOUTSIDE_SEQ(cv);
-	/* XXX DAPM the following code is very similar to
-	 * pad_fixup_inner_anons(). Merge??? */
+    /* detach any '&' anon children in the pad; if afterwards they
+     * are still live, fix up their CvOUTSIDEs to point to our outside,
+     * bypassing us. */
+    /* XXX DAPM for efficiency, we should only do this if we know we have
+     * children, or integrate this loop with general cleanup */
 
-	/* inner references to eval's/BEGIN's/etc cv must be fixed up */
+    if (!PL_dirty) { /* don't bother during global destruction */
+	CV *outercv = CvOUTSIDE(cv);
+	U32 seq = CvOUTSIDE_SEQ(cv);
 	AV *comppad_name = (AV*)AvARRAY(padlist)[0];
 	SV **namepad = AvARRAY(comppad_name);
 	AV *comppad = (AV*)AvARRAY(padlist)[1];
@@ -233,25 +235,26 @@ Perl_pad_undef(pTHX_ CV* cv)
 	for (ix = AvFILLp(comppad_name); ix > 0; ix--) {
 	    SV *namesv = namepad[ix];
 	    if (namesv && namesv != &PL_sv_undef
-		&& *SvPVX(namesv) == '&'
-		&& ix <= AvFILLp(comppad))
+		&& *SvPVX(namesv) == '&')
 	    {
 		CV *innercv = (CV*)curpad[ix];
-		if (innercv && SvTYPE(innercv) == SVt_PVCV
+		namepad[ix] = Nullsv;
+		SvREFCNT_dec(namesv);
+		curpad[ix] = Nullsv;
+		SvREFCNT_dec(innercv);
+		if (SvREFCNT(innercv) /* in use, not just a prototype */
 		    && CvOUTSIDE(innercv) == cv)
 		{
+		    assert(CvWEAKOUTSIDE(innercv));
+		    CvWEAKOUTSIDE_off(innercv);
 		    CvOUTSIDE(innercv) = outercv;
 		    CvOUTSIDE_SEQ(innercv) = seq;
-		    /* anon prototypes aren't refcounted */
-		    if (!CvANON(innercv) || CvCLONED(innercv)) {
-			(void)SvREFCNT_inc(outercv);
-			if (SvREFCNT(cv))
-			    SvREFCNT_dec(cv);
-		    }
+		    SvREFCNT_inc(outercv);
 		}
 	    }
 	}
     }
+
     ix = AvFILLp(padlist);
     while (ix >= 0) {
 	SV* sv = AvARRAY(padlist)[ix--];
@@ -434,6 +437,14 @@ Perl_pad_add_anon(pTHX_ SV* sv, OPCODE op_type)
     /* XXX DAPM use PL_curpad[] ? */
     av_store(PL_comppad, ix, sv);
     SvPADMY_on(sv);
+
+    /* to avoid ref loops, we never have parent + child referencing each
+     * other simultaneously */
+    if (CvOUTSIDE((CV*)sv)) {
+	assert(!CvWEAKOUTSIDE((CV*)sv));
+	CvWEAKOUTSIDE_on((CV*)sv);
+	SvREFCNT_dec(CvOUTSIDE((CV*)sv));
+    }
     return ix;
 }
 
@@ -611,6 +622,8 @@ S_pad_findlex(pTHX_ char *name, PADOFFSET newoff, CV* innercv)
 	);
 
 	curlist = CvPADLIST(cv);
+	if (!curlist)
+	    continue; /* an undef CV */
 	svp = av_fetch(curlist, 0, FALSE);
 	if (!svp || *svp == &PL_sv_undef)
 	    continue;
@@ -1277,7 +1290,7 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
 
     cv = PL_compcv = (CV*)NEWSV(1104, 0);
     sv_upgrade((SV *)cv, SvTYPE(proto));
-    CvFLAGS(cv) = CvFLAGS(proto) & ~CVf_CLONE;
+    CvFLAGS(cv) = CvFLAGS(proto) & ~(CVf_CLONE|CVf_WEAKOUTSIDE);
     CvCLONED_on(cv);
 
 #ifdef USE_ITHREADS
@@ -1359,6 +1372,9 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
 	    CvCLONE_on(kid);
 	    SvPADMY_on(kid);
 	    PL_curpad[ix] = (SV*)kid;
+	    /* '&' entry points to child, so child mustn't refcnt parent */
+	    CvWEAKOUTSIDE_on(kid);
+	    SvREFCNT_dec(cv);
 	}
     }
 
@@ -1387,7 +1403,8 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
 =for apidoc pad_fixup_inner_anons
 
 For any anon CVs in the pad, change CvOUTSIDE of that CV from
-old_cv to new_cv if necessary.
+old_cv to new_cv if necessary. Needed when a newly-compiled CV has to be
+moved to a pre-existing CV struct.
 
 =cut
 */
@@ -1406,17 +1423,13 @@ Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv, CV *new_cv)
 	    && *SvPVX(namesv) == '&')
 	{
 	    CV *innercv = (CV*)curpad[ix];
-	    if (CvOUTSIDE(innercv) == old_cv) {
-		CvOUTSIDE(innercv) = new_cv;
-		/* anon prototypes aren't refcounted */
-		if (!CvANON(innercv) || CvCLONED(innercv)) {
-		    (void)SvREFCNT_inc(new_cv);
-		    SvREFCNT_dec(old_cv);
-		}
-	    }
+	    assert(CvWEAKOUTSIDE(innercv));
+	    assert(CvOUTSIDE(innercv) == old_cv);
+	    CvOUTSIDE(innercv) = new_cv;
 	}
     }
 }
+
 
 /*
 =for apidoc pad_push

@@ -130,7 +130,7 @@ p	|void	|cv_ckproto	|CV* cv|GV* gv|char* p
 pd	|CV*	|cv_clone	|CV* proto
 Apd	|SV*	|cv_const_sv	|CV* cv
 p	|SV*	|op_const_sv	|OP* o|CV* cv
-Ap	|void	|cv_undef	|CV* cv
+Apd	|void	|cv_undef	|CV* cv
 Ap	|void	|cx_dump	|PERL_CONTEXT* cs
 Ap	|SV*	|filter_add	|filter_t funcp|SV* datasv
 Ap	|void	|filter_del	|filter_t funcp
