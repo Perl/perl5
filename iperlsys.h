@@ -597,7 +597,11 @@ public:
 #define PerlLIO_ioctl(fd, u, buf)	ioctl((fd), (u), (buf))
 #define PerlLIO_isatty(fd)		isatty((fd))
 #define PerlLIO_lseek(fd, offset, mode)	lseek((fd), (offset), (mode))
+#ifdef HAS_LSTAT
 #define PerlLIO_lstat(name, buf)	lstat((name), (buf))
+#else
+#define PerlLIO_lstat(name, buf)	PerlLIO_stat((name), (buf))
+#endif
 #define PerlLIO_mktemp(file)		mktemp((file))
 #define PerlLIO_mkstemp(file)		mkstemp((file))
 #define PerlLIO_open(file, flag)	open((file), (flag))

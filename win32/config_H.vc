@@ -224,27 +224,6 @@
  */
 /*#define HAS_GETGROUPS		/**/
 
-/* HAS_GETHOSTNAME:
- *	This symbol, if defined, indicates that the C program may use the
- *	gethostname() routine to derive the host name.  See also HAS_UNAME
- *	and PHOSTNAME.
- */
-/* HAS_UNAME:
- *	This symbol, if defined, indicates that the C program may use the
- *	uname() routine to derive the host name.  See also HAS_GETHOSTNAME
- *	and PHOSTNAME.
- */
-/* PHOSTNAME:
- *	This symbol, if defined, indicates that the C program may use the
- *	contents of PHOSTNAME as a command to feed to the popen() routine
- *	to derive the host name.  See also HAS_GETHOSTNAME and HAS_UNAME.
- *	Note that the command uses a fully qualified path, so that it is safe
- *	even if used by a process with super-user privileges.
- */
-#define HAS_GETHOSTNAME	/**/
-#define HAS_UNAME		/**/
-/*#define PHOSTNAME ""	/ * How to get the host name */
-
 /* HAS_GETLOGIN:
  *	This symbol, if defined, indicates that the getlogin routine is
  *	available to get the login name.
@@ -708,11 +687,6 @@
  */
 #define HAS_UMASK		/**/
 
-/* HAS_VFORK:
- *	This symbol, if defined, indicates that vfork() exists.
- */
-/*#define HAS_VFORK	/**/
-
 /* HASVOLATILE:
  *	This symbol, if defined, indicates that this C compiler knows about
  *	the volatile declaration.
@@ -1053,20 +1027,54 @@
  */
 /*#define   I_SYS_SECURITY	/**/
 
-/* MEM_ALIGNBYTES:
- *	 This symbol contains the number of bytes required to align a
- *	 double. Usual values are 2, 4 and 8.
- *	 On NeXT starting with 3.2, you can build "Fat" Multiple Architecture
- *	 Binaries (MAB) for targets with varying alignment.  This only matters
- *	 for perl, where the config.h can be generated and installed on one
- *	 system, and used by a different architecture to build an extension.
- *	 The default is eight, for safety.
+/* CROSSCOMPILE:
+ *	This symbol, if defined, signifies that we our
+ *	build process is a cross-compilation.
  */
-#define MEM_ALIGNBYTES 8	/**/
+/*#define CROSSCOMPILE		/**/
+
+/* INTSIZE:
+ *	This symbol contains the value of sizeof(int) so that the C
+ *	preprocessor can make decisions based on it.
+ */
+/* LONGSIZE:
+ *	This symbol contains the value of sizeof(long) so that the C
+ *	preprocessor can make decisions based on it.
+ */
+/* SHORTSIZE:
+ *	This symbol contains the value of sizeof(short) so that the C
+ *	preprocessor can make decisions based on it.
+ */
+#define INTSIZE 4		/**/
+#define LONGSIZE 4		/**/
+#define SHORTSIZE 2		/**/
+
+/* MULTIARCH:
+ *	This symbol, if defined, signifies that the build
+ *	process will produce some binary files that are going to be
+ *	used in a cross-platform environment.  This is the case for
+ *	example with the NeXT "fat" binaries that contain executables
+ *	for several CPUs.
+ */
+/*#define MULTIARCH		/**/
+
+/* MEM_ALIGNBYTES:
+ *	This symbol contains the number of bytes required to align a
+ *	double. Usual values are 2, 4 and 8. The default is eight,
+ *	for safety.
+ */
+#if defined(CROSSCOMPILE) || defined(MULTIARCH)
+#  define MEM_ALIGNBYTES 8
+#else
+#define MEM_ALIGNBYTES 8
+#endif
 
 /* BYTEORDER:
  *	This symbol holds the hexadecimal constant defined in byteorder,
  *	i.e. 0x1234 or 0x4321, etc...
+ *	If the compiler supports cross-compiling or multiple-architecture
+ *	binaries (eg. on NeXT systems), use compiler-defined macros to
+ *	determine the byte order.
  *	On NeXT 3.2 (and greater), you can build "Fat" Multiple Architecture
  *	Binaries (MAB) on either big endian or little endian machines.
  *	The endian-ness is available at compile-time.  This only matters
@@ -1077,14 +1085,31 @@
  *	so the default case (for NeXT) is big endian to catch them. 
  *	This might matter for NeXT 3.0.
  */
-#ifndef NeXT
+#if defined(CROSSCOMPILE) || defined(MULTIARCH)
+#  ifdef __LITTLE_ENDIAN__
+#    if LONGSIZE == 4
+#      define BYTEORDER 0x1234
+#    else
+#      if LONGSIZE == 8
+#        define BYTEORDER 0x12345678
+#      endif
+#    endif
+#  else
+#    ifdef __BIG_ENDIAN__
+#      if LONGSIZE == 4
+#        define BYTEORDER 0x4321
+#      else
+#        if LONGSIZE == 8
+#          define BYTEORDER 0x87654321
+#        endif
+#      endif
+#    endif
+#  endif
+#  if !defined(BYTEORDER) && (defined(NeXT) || defined(__NeXT__))
+#    define BYTEORDER 0x4321
+#  endif
+#else
 #define BYTEORDER 0x1234	/* large digits for MSB */
-#else  /* NeXT */
-#ifdef __LITTLE_ENDIAN__
-#define BYTEORDER 0x1234
-#else /* __BIG_ENDIAN__ */
-#define BYTEORDER 0x4321
-#endif /* ENDIAN CHECK */
 #endif /* NeXT */
 
 /* CASTI32:
@@ -1316,22 +1341,6 @@
 /*#define I_SYS_TIME		/**/
 /*#define I_SYS_TIME_KERNEL		/**/
 
-/* INTSIZE:
- *	This symbol contains the value of sizeof(int) so that the C
- *	preprocessor can make decisions based on it.
- */
-/* LONGSIZE:
- *	This symbol contains the value of sizeof(long) so that the C
- *	preprocessor can make decisions based on it.
- */
-/* SHORTSIZE:
- *	This symbol contains the value of sizeof(short) so that the C
- *	preprocessor can make decisions based on it.
- */
-#define INTSIZE 4		/**/
-#define LONGSIZE 4		/**/
-#define SHORTSIZE 2		/**/
-
 /* VAL_O_NONBLOCK:
  *	This symbol is to be used during open() or fcntl(F_SETFL) to turn on
  *	non-blocking I/O for the file descriptor. Note that there is no way
@@ -1538,6 +1547,30 @@
  */
 /*#define HAS_GETHOSTENT		/**/
 
+/* HAS_GETHOSTNAME:
+ *	This symbol, if defined, indicates that the C program may use the
+ *	gethostname() routine to derive the host name.  See also HAS_UNAME
+ *	and PHOSTNAME.
+ */
+/* HAS_UNAME:
+ *	This symbol, if defined, indicates that the C program may use the
+ *	uname() routine to derive the host name.  See also HAS_GETHOSTNAME
+ *	and PHOSTNAME.
+ */
+/* PHOSTNAME:
+ *	This symbol, if defined, indicates the command to feed to the
+ *	popen() routine to derive the host name.  See also HAS_GETHOSTNAME
+ *	and HAS_UNAME.	Note that the command uses a fully qualified path,
+ *	so that it is safe even if used by a process with super-user
+ *	privileges.
+ */
+#define HAS_GETHOSTNAME	/**/
+#define HAS_UNAME		/**/
+#undef HAS_PHOSTNAME
+#ifdef HAS_PHOSTNAME
+#define PHOSTNAME ""	/* How to get the host name */
+#endif
+
 /* HAS_GETNETBYADDR:
  *	This symbol, if defined, indicates that the getnetbyaddr() routine is
  *	available to look up networks by their IP addresses.
@@ -1648,6 +1681,12 @@
 #ifdef HAS_LONG_LONG
 #define LONGLONGSIZE 8		/**/
 #endif
+
+/* HAS_MEMCHR:
+ *	This symbol, if defined, indicates that the memchr routine is available
+ *	to locate characters within a C string.
+ */
+/*#define HAS_MEMCHR	/**/
 
 /* HAS_MMAP:
  *	This symbol, if defined, indicates that the mmap system call is
@@ -1847,6 +1886,11 @@
 /*#define USE_SEMCTL_SEMUN	/**/
 /*#define USE_SEMCTL_SEMID_DS	/**/
 
+/* HAS_VFORK:
+ *	This symbol, if defined, indicates that vfork() exists.
+ */
+/*#define HAS_VFORK	/**/
+
 /* Signal_t:
  *	This symbol's value is either "void" or "int", corresponding to the
  *	appropriate return type of a signal handler.  Thus, you can declare
@@ -2044,6 +2088,18 @@
  */
 /*#define HAS_FTELLO		/**/
 
+/* HAS_GETMNTENT:
+ *	This symbol, if defined, indicates that the getmntent routine is
+ *	available to iterate through mounted file systems.
+ */
+/*#define HAS_GETMNTENT		/**/
+
+/* HAS_HASMNTOPT:
+ *	This symbol, if defined, indicates that the hasmntopt routine is
+ *	available to query the mount options of file systems.
+ */
+/*#define HAS_HASMNTOPT		/**/
+
 /* HAS_MADVISE:
  *	This symbol, if defined, indicates that the madvise system call is
  *	available to map a file into memory.
@@ -2055,18 +2111,6 @@
  *	available to modify the access protection of a memory mapped file.
  */
 /*#define HAS_MPROTECT		/**/
-
-/* MULTIARCH:
- *	This symbol, if defined, indicates that we have a multiarchitecture
- *	build.
- */
-/*#define MULTIARCH		/**/
-
-/* CROSSCOMPILE:
- *	This symbol, if defined, indicates that we have a cross-compile
- *	build.
- */
-/*#define MULTIARCH		/**/
 
 /* HAS_READV:
  *	This symbol, if defined, indicates that the readv routine is
@@ -2083,21 +2127,21 @@
 
 /* HAS_FSTATFS:
  *	This symbol, if defined, indicates that the fstatfs routine is
- *	available to do stat filesystems of file descriptors.
+ *	available to stat filesystems of file descriptors.
  */
 /* HAS_STRUCT_STATFS_FLAGS:
  *	This symbol, if defined, indicates that the struct statfs
  *	does have the f_flags member containing the mount flags of
  *	the filesystem holding the file.
- *	This kind of struct statfs is coming from sys/mount.h (BSD)
- *	and not from sys/statfs.h (SYSV).
+ *	This kind of struct statfs is coming from sys/mount.h (BSD),
+ *	not from sys/statfs.h (SYSV).
  */
 /*#define HAS_FSTATFS		/**/
 /*#define HAS_STRUCT_STATFS_FLAGS		/**/
 
 /* HAS_FSTATVFS:
  *	This symbol, if defined, indicates that the fstatvfs routine is
- *	available to do stat filesystems of file descriptors.
+ *	available to stat filesystems of file descriptors.
  */
 /*#define HAS_FSTATVFS		/**/
 
@@ -2157,6 +2201,20 @@
  */
 #define USE_DYNAMIC_LOADING		/**/
 
+/* FFLUSH_NULL:
+ *	This symbol, if defined, tells that fflush(NULL) does flush
+ *	all pending stdio output.
+ */
+/* FFLUSH_ALL:
+ *	This symbol, if defined, tells that to flush
+ *	all pending stdio output one must loop through all
+ *	the stdio file handles stored in an array and fflush them.
+ *	Note that if fflushNULL is defined, fflushall will not
+ *	even be probed for and will be left undefined.
+ */
+#define	FFLUSH_NULL 		/**/
+/*#define	FFLUSH_ALL 		/**/
+
 /* DB_Prefix_t:
  *	This symbol contains the type of the prefix structure element
  *	in the <db.h> header file.  In older versions of DB, it was
@@ -2187,6 +2245,12 @@
  *	should be included.
  */
 /*#define	I_MNTENT		/**/
+
+/* I_NETINET_TCP:
+ *     This symbol, if defined, indicates to the C program that it should
+ *     include <netinet/tcp.h>.
+ */
+/*#define   I_NETINET_TCP                /**/
 
 /* I_POLL:
  *	This symbol, if defined, indicates that <poll.h> exists and
@@ -2388,6 +2452,17 @@
 /*#define     HAS_FTELL64		/**/
 /*#define    HAS_FTELLO64		/**/
 /*#define   HAS_TMPFILE64	/**/
+
+/* HAS_STDIO_STREAM_ARRAY:
+ *	This symbol, if defined, tells that there is an array
+ *	holding the stdio streams.
+ */
+/* STDIO_STREAM_ARRAY:
+ *	This symbol tells the name of the array holding the stdio streams.
+ *	Usual values include _iob, __iob, and __sF.
+ */
+/*#define	HAS_STDIO_STREAM_ARRAY	/**/
+#define STDIO_STREAM_ARRAY	undef
 
 /* USE_64_BITS:
  *	This symbol, if defined, indicates that 64-bit interfaces should
