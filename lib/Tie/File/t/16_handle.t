@@ -1,28 +1,35 @@
 #!/usr/bin/perl
+#
+# Basic operation, initializing the object from an already-open handle
+# instead of from a filename
 
 my $file = "tf$$.txt";
 
-print "1..56\n";
+print "1..39\n";
 
 my $N = 1;
 use Tie::File;
 print "ok $N\n"; $N++;
 
-my $o = tie @a, 'Tie::File', $file;
+use Fcntl 'O_CREAT', 'O_RDWR';
+sysopen F, $file, O_CREAT | O_RDWR 
+  or die "Couldn't create temp file $file: $!; aborting";
+
+my $o = tie @a, 'Tie::File', \*F;
 print $o ? "ok $N\n" : "not ok $N\n";
 $N++;
 
-# 3-5 create
+# 3-4 create
 $a[0] = 'rec0';
 check_contents("rec0");
 
-# 6-11 append
+# 5-8 append
 $a[1] = 'rec1';
 check_contents("rec0", "rec1");
 $a[2] = 'rec2';
 check_contents("rec0", "rec1", "rec2");
 
-# 12-20 same-length alterations
+# 9-14 same-length alterations
 $a[0] = 'new0';
 check_contents("new0", "rec1", "rec2");
 $a[1] = 'new1';
@@ -30,7 +37,7 @@ check_contents("new0", "new1", "rec2");
 $a[2] = 'new2';
 check_contents("new0", "new1", "new2");
 
-# 21-35 lengthening alterations
+# 15-24 lengthening alterations
 $a[0] = 'long0';
 check_contents("long0", "new1", "new2");
 $a[1] = 'long1';
@@ -42,7 +49,7 @@ check_contents("long0", "longer1", "long2");
 $a[0] = 'longer0';
 check_contents("longer0", "longer1", "long2");
 
-# 36-50 shortening alterations, including truncation
+# 25-34 shortening alterations, including truncation
 $a[0] = 'short0';
 check_contents("short0", "longer1", "long2");
 $a[1] = 'short1';
@@ -54,12 +61,31 @@ check_contents("short0", "sh1", "short2");
 $a[0] = 'sh0';
 check_contents("sh0", "sh1", "short2");
 
-# (51-56) file with holes
+# file with holes
 $a[4] = 'rec4';
 check_contents("sh0", "sh1", "short2", "", "rec4");
 $a[3] = 'rec3';
 check_contents("sh0", "sh1", "short2", "rec3", "rec4");
 
+close F;
+undef $o;
+untie @a;
+
+# Does it correctly detect a non-seekable handle?
+{  eval {pipe *R, *W};
+   close R;
+   if ($@) {
+     print "ok $N # skipped\n";
+     last;
+   }
+   $o = eval {tie @a, 'Tie::File', \*W};
+   if ($@ && $@ =~ /filehandle does not appear to be seekable/) {
+     print "ok $N\n";
+   } else {
+     print "not ok $N\n";
+   }
+   $N++;
+}
 
 # try inserting a record into the middle of an empty file
 
@@ -93,10 +119,6 @@ sub check_contents {
   }
   print $good ? "ok $N\n" : "not ok $N # $msg\n";
   $N++;
-
-  print $o->_check_integrity($file, $ENV{INTEGRITY}) 
-      ? "ok $N\n" : "not ok $N\n";
-  $N++;
 }
 
 END {
@@ -104,4 +126,5 @@ END {
   untie @a;
   1 while unlink $file;
 }
+
 

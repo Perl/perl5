@@ -5,7 +5,7 @@ use POSIX 'SEEK_SET';
 use Fcntl 'O_CREAT', 'O_RDWR', 'LOCK_EX';
 require 5.005;
 
-$VERSION = "0.15";
+$VERSION = "0.16";
 
 # Idea: The object will always contain an array of byte offsets
 # this will be filled in as is necessary and convenient.
@@ -52,10 +52,20 @@ sub TIEARRAY {
   }
 
   my $mode = defined($opts{mode}) ? $opts{mode} : O_CREAT|O_RDWR;
+  my $fh;
 
-  my $fh = \do { local *FH };   # only works in 5.005 and later
-  sysopen $fh, $file, $mode, 0666 or return;
-  binmode $fh;
+  if (UNIVERSAL::isa($file, 'GLOB')) {
+    unless (seek $file, 0, SEEK_SET) {
+      croak "$pack: your filehandle does not appear to be seekable";
+    }
+    $fh = $file;
+  } elsif (ref $file) {
+    croak "usage: tie \@array, $pack, filename, [option => value]...";
+  } else {
+    $fh = \do { local *FH };   # only works in 5.005 and later
+    sysopen $fh, $file, $mode, 0666 or return;
+    binmode $fh;
+  }
   { my $ofh = select $fh; $| = 1; select $ofh } # autoflush on write
   $opts{fh} = $fh;
 
@@ -98,7 +108,10 @@ sub STORE {
   my $oldrec = $self->FETCH($n);
 
   # _check_cache promotes record $n to MRU.  Is this correct behavior?
-  $self->{cache}{$n} = $rec if $self->_check_cache($n);
+  if (my $cached = $self->_check_cache($n)) {
+    $self->{cache}{$n} = $rec;
+    $self->{cached} += length($rec) - length($cached);
+  }
 
   if (not defined $oldrec) {
     # We're storing a record beyond the end of the file
@@ -194,6 +207,9 @@ sub DELETE {
   if ($n == $lastrec) {
     $self->_seek($n);
     $self->_chop_file;
+    $#{$self->{offsets}}--;
+    delete $self->{cached}{$n};
+    @{$self->{lru}} = grep $_ != $n, @{$self->{lru}};
     # perhaps in this case I should also remove trailing null records?
   } else {
     $self->STORE($n, "");
@@ -493,8 +509,7 @@ sub _extend_file_to {
   # Todo : just use $self->{recsep} x $extras here?
   while ($extras-- > 0) {
     $self->_write_record($self->{recsep});
-    $pos += $self->{recseplen};
-    push @{$self->{offsets}}, $pos;
+    push @{$self->{offsets}}, tell $self->{fh};
   }
 }
 
@@ -533,15 +548,17 @@ sub flock {
 sub _check_integrity {
   my ($self, $file, $warn) = @_;
   my $good = 1; 
-  local *F = $self->{fh};
-  seek F, 0, SEEK_SET;
-#  open F, $file or die "Couldn't open file $file: $!";
-#  binmode F;
-  local $/ = $self->{recsep};
+
   unless ($self->{offsets}[0] == 0) {
     $warn && print STDERR "# rec 0: offset <$self->{offsets}[0]> s/b 0!\n";
     $good = 0;
   }
+
+  local *F = $self->{fh};
+  seek F, 0, SEEK_SET;
+  local $/ = $self->{recsep};
+  $. = 0;
+
   while (<F>) {
     my $n = $. - 1;
     my $cached = $self->{cache}{$n};
@@ -549,6 +566,7 @@ sub _check_integrity {
     my $ao = tell F;
     if (defined $offset && $offset != $ao) {
       $warn && print STDERR "# rec $n: offset <$offset> actual <$ao>\n";
+      $good = 0;
     }
     if (defined $cached && $_ ne $cached) {
       $good = 0;
@@ -595,13 +613,15 @@ sub _check_integrity {
   $good;
 }
 
+"Cogito, ergo sum.";  # don't forget to return a true value from the file
+
 =head1 NAME
 
 Tie::File - Access the lines of a disk file via a Perl array
 
 =head1 SYNOPSIS
 
-	# This file documents Tie::File version 0.15
+	# This file documents Tie::File version 0.16
 
 	tie @array, 'Tie::File', filename or die ...;
 
@@ -746,7 +766,7 @@ argument to the Perl built-in C<flock> function; for example
 C<LOCK_SH> or C<LOCK_EX | LOCK_NB>.  (These constants are provided by
 the C<use Fcntl ':flock'> declaration.)
 
-C<MODE> is optional; C<< $o->flock >> simply locks the file with
+C<MODE> is optional; C<$o-E<gt>flock> simply locks the file with
 C<LOCK_EX>.
 
 The best way to unlock a file is to discard the object and untie the
@@ -765,6 +785,24 @@ have a green light, that does not prevent the idiot coming the other
 way from plowing into you sideways; it merely guarantees to you that
 the idiot does not also have a green light at the same time.
 
+=head2 Tying to an already-opened filehandle
+
+If C<$fh> is a filehandle, such as is returned by C<IO::File> or one
+of the other C<IO> modules, you may use:
+
+	tie @array, 'Tie::File', $fh, ...;
+
+Similarly if you opened that handle C<FH> with regular C<open> or
+C<sysopen>, you may use:
+
+	tie @array, 'Tie::File', \*FH, ...;
+
+Handles that were opened write-only won't work.  Handles that were
+opened read-only will work as long as you don't try to write to them.
+Handles must be attached to seekable sources of data---that means no
+pipes or sockets.  If you try to supply a non-seekable handle, the
+C<tie> call will abort your program.
+
 =head1 CAVEATS
 
 (That's Latin for 'warnings'.)
@@ -773,7 +811,7 @@ the idiot does not also have a green light at the same time.
 
 Every effort was made to make this module efficient.  Nevertheless,
 changing the size of a record in the middle of a large file will
-always be slow, because everything after the new record must be move.
+always be slow, because everything after the new record must be moved.
 
 In particular, note that:
 
@@ -805,7 +843,7 @@ The author has supposed that since this module is concerned with file
 I/O, almost all normal use of it will be heavily I/O bound, and that
 the time to maintain complicated data structures inside the module
 will be dominated by the time to actually perform the I/O.  This
-suggests, for example, that and LRU read-cache is a good tradeoff,
+suggests, for example, that an LRU read-cache is a good tradeoff,
 even if it requires substantial adjustment following a C<splice>
 operation.
 
@@ -838,7 +876,7 @@ C<mjd-perl-tiefile-subscribe@plover.com>.
 
 =head1 LICENSE
 
-C<Tie::File> version 0.15 is copyright (C) 2002 Mark Jason Dominus.
+C<Tie::File> version 0.16 is copyright (C) 2002 Mark Jason Dominus.
 
 This library is free software; you may redistribute it and/or modify
 it under the same terms as Perl itself.
@@ -866,19 +904,34 @@ For licensing inquiries, contact the author at:
 
 =head1 WARRANTY
 
-C<Tie::File> version 0.15 comes with ABSOLUTELY NO WARRANTY.
+C<Tie::File> version 0.16 comes with ABSOLUTELY NO WARRANTY.
 For details, see the license.
+
+=head1 THANKS
+
+Gigantic thanks to Jarkko Hietaniemi, for agreeing to put this in the
+core when I hadn't written it yet, and for generally being helpful,
+supportive, and competent.  (Usually the rule is "choose any one.")
+Also big thanks to Abhijit Menon-Sen for all of the same things.
+
+Special thanks to Craig Berry (for VMS portability help), Randy Kobes
+(for Win32 portability help), the rest of the CPAN testers (for
+testing).
+
+More thanks to:
+Gerrit Haase /
+Tassilo von Parseval /
+H. Dieter Pearcey /
+Peter Somu /
+Tels
 
 =head1 TODO
 
-Allow tie to seekable filehandle rather than named file.
+Test DELETE machinery more carefully.
 
-Tests for default arguments to SPLICE.  Tests for CLEAR/EXTEND.
-Tests for DELETE/EXISTS.
-
-More tests.  (Configuration options, cache flushery, locking.  _twrite
-should be tested separately, because there are a lot of weird special
-cases lurking in there.)
+More tests.  (Configuration options, cache flushery.  _twrite should
+be tested separately, because there are a lot of weird special cases
+lurking in there.)
 
 More tests.  (Stuff I didn't think of yet.)
 
@@ -889,6 +942,8 @@ Paragraph mode?
 More tests.
 
 Fixed-length mode.
+
+Maybe an autolocking mode?
 
 =cut
 
