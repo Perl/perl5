@@ -1406,9 +1406,15 @@ typedef union any ANY;
 #endif
 
 #if defined(USE_64_BIT_FILES) || defined(USE_LARGE_FILES)
-#   define USE_64_BIT_OFFSETS
+#   define USE_64_BIT_OFFSETS /* Explicit */
 #   define USE_64_BIT_STDIO
 #endif
+
+#if LSEEKSIZE == 8 && !defined(USE_64_BIT_OFFSETS)
+#   define USE_64_BIT_OFFSETS /* Implicit */
+#endif
+
+/* Do we need FSEEKSIZE? */
 
 /* I couldn't find any -Ddefine or -flags in IRIX 6.5 that would
  * have done the necessary symbol renaming using cpp. --jhi */
