@@ -7,7 +7,7 @@ require Exporter;
 @EXPORT_OK = qw(rearrange make_attributes unescape escape 
 		expires ebcdic2ascii ascii2ebcdic);
 
-$VERSION = '1.3';
+$VERSION = '1.4';
 
 $EBCDIC = "\t" ne "\011";
 if ($EBCDIC) {
