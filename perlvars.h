@@ -11,11 +11,7 @@
  *
  * The 'G' prefix is only needed for vars that need appropriate #defines
  * generated in embed*.h.  Such symbols are also used to generate
- * the appropriate export list for win32.
- *
- * Avoid build-specific #ifdefs here, like DEBUGGING.  That way,
- * we can keep binary compatibility of the curinterp structure */
-
+ * the appropriate export list for win32. */
 
 /* global state */
 PERLVAR(Gcurinterp,	PerlInterpreter *)

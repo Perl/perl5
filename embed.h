@@ -774,8 +774,10 @@
 #define do_pmop_dump		Perl_do_pmop_dump
 #define do_sv_dump		Perl_do_sv_dump
 #define magic_dump		Perl_magic_dump
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
 #define default_protect		Perl_default_protect
 #define vdefault_protect	Perl_vdefault_protect
+#endif
 #define reginitcolors		Perl_reginitcolors
 #define sv_2pv_nolen		Perl_sv_2pv_nolen
 #define sv_2pvutf8_nolen	Perl_sv_2pvutf8_nolen
@@ -902,8 +904,13 @@
 #define parse_body		S_parse_body
 #define run_body		S_run_body
 #define call_body		S_call_body
-#define call_xbody		S_call_xbody
 #define call_list_body		S_call_list_body
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
+#define vparse_body		S_vparse_body
+#define vrun_body		S_vrun_body
+#define vcall_body		S_vcall_body
+#define vcall_list_body		S_vcall_list_body
+#endif
 #  if defined(USE_THREADS)
 #define init_main_thread	S_init_main_thread
 #  endif
@@ -919,6 +926,9 @@
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
 #define docatch			S_docatch
 #define docatch_body		S_docatch_body
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
+#define vdocatch_body		S_vdocatch_body
+#endif
 #define dofindlabel		S_dofindlabel
 #define doparseform		S_doparseform
 #define dopoptoeval		S_dopoptoeval
@@ -2187,7 +2197,9 @@
 #define do_pmop_dump(a,b,c)	Perl_do_pmop_dump(aTHX_ a,b,c)
 #define do_sv_dump(a,b,c,d,e,f,g)	Perl_do_sv_dump(aTHX_ a,b,c,d,e,f,g)
 #define magic_dump(a)		Perl_magic_dump(aTHX_ a)
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
 #define vdefault_protect(a,b,c,d)	Perl_vdefault_protect(aTHX_ a,b,c,d)
+#endif
 #define reginitcolors()		Perl_reginitcolors(aTHX)
 #define sv_2pv_nolen(a)		Perl_sv_2pv_nolen(aTHX_ a)
 #define sv_2pvutf8_nolen(a)	Perl_sv_2pvutf8_nolen(aTHX_ a)
@@ -2311,11 +2323,16 @@
 #  if defined(IAMSUID)
 #define fd_on_nosuid_fs(a)	S_fd_on_nosuid_fs(aTHX_ a)
 #  endif
-#define parse_body(a)		S_parse_body(aTHX_ a)
+#define parse_body(a,b)		S_parse_body(aTHX_ a,b)
 #define run_body(a)		S_run_body(aTHX_ a)
-#define call_body(a)		S_call_body(aTHX_ a)
-#define call_xbody(a,b)		S_call_xbody(aTHX_ a,b)
+#define call_body(a,b)		S_call_body(aTHX_ a,b)
 #define call_list_body(a)	S_call_list_body(aTHX_ a)
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
+#define vparse_body(a)		S_vparse_body(aTHX_ a)
+#define vrun_body(a)		S_vrun_body(aTHX_ a)
+#define vcall_body(a)		S_vcall_body(aTHX_ a)
+#define vcall_list_body(a)	S_vcall_list_body(aTHX_ a)
+#endif
 #  if defined(USE_THREADS)
 #define init_main_thread()	S_init_main_thread(aTHX)
 #  endif
@@ -2330,7 +2347,10 @@
 #endif
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
 #define docatch(a)		S_docatch(aTHX_ a)
-#define docatch_body(a)		S_docatch_body(aTHX_ a)
+#define docatch_body()		S_docatch_body(aTHX)
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
+#define vdocatch_body(a)	S_vdocatch_body(aTHX_ a)
+#endif
 #define dofindlabel(a,b,c,d)	S_dofindlabel(aTHX_ a,b,c,d)
 #define doparseform(a)		S_doparseform(aTHX_ a)
 #define dopoptoeval(a)		S_dopoptoeval(aTHX_ a)
@@ -4289,10 +4309,12 @@
 #define do_sv_dump		Perl_do_sv_dump
 #define Perl_magic_dump		CPerlObj::Perl_magic_dump
 #define magic_dump		Perl_magic_dump
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
 #define Perl_default_protect	CPerlObj::Perl_default_protect
 #define default_protect		Perl_default_protect
 #define Perl_vdefault_protect	CPerlObj::Perl_vdefault_protect
 #define vdefault_protect	Perl_vdefault_protect
+#endif
 #define Perl_reginitcolors	CPerlObj::Perl_reginitcolors
 #define reginitcolors		Perl_reginitcolors
 #define Perl_sv_2pv_nolen	CPerlObj::Perl_sv_2pv_nolen
@@ -4521,10 +4543,18 @@
 #define run_body		S_run_body
 #define S_call_body		CPerlObj::S_call_body
 #define call_body		S_call_body
-#define S_call_xbody		CPerlObj::S_call_xbody
-#define call_xbody		S_call_xbody
 #define S_call_list_body	CPerlObj::S_call_list_body
 #define call_list_body		S_call_list_body
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
+#define S_vparse_body		CPerlObj::S_vparse_body
+#define vparse_body		S_vparse_body
+#define S_vrun_body		CPerlObj::S_vrun_body
+#define vrun_body		S_vrun_body
+#define S_vcall_body		CPerlObj::S_vcall_body
+#define vcall_body		S_vcall_body
+#define S_vcall_list_body	CPerlObj::S_vcall_list_body
+#define vcall_list_body		S_vcall_list_body
+#endif
 #  if defined(USE_THREADS)
 #define S_init_main_thread	CPerlObj::S_init_main_thread
 #define init_main_thread	S_init_main_thread
@@ -4549,6 +4579,10 @@
 #define docatch			S_docatch
 #define S_docatch_body		CPerlObj::S_docatch_body
 #define docatch_body		S_docatch_body
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
+#define S_vdocatch_body		CPerlObj::S_vdocatch_body
+#define vdocatch_body		S_vdocatch_body
+#endif
 #define S_dofindlabel		CPerlObj::S_dofindlabel
 #define dofindlabel		S_dofindlabel
 #define S_doparseform		CPerlObj::S_doparseform

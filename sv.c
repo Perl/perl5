@@ -107,7 +107,7 @@ Perl_sv_add_arena(pTHX_ char *ptr, U32 size, U32 flags)
     SV* sva = (SV*)ptr;
     register SV* sv;
     register SV* svend;
-    Zero(sva, size, char);
+    Zero(ptr, size, char);
 
     /* The first SV in an arena isn't an SV. */
     SvANY(sva) = (void *) PL_sv_arenaroot;		/* ptr to next arena */
@@ -7853,7 +7853,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_dirty		= proto_perl->Tdirty;
     PL_localizing	= proto_perl->Tlocalizing;
 
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
     PL_protect		= proto_perl->Tprotect;
+#endif
     PL_errors		= sv_dup_inc(proto_perl->Terrors);
     PL_av_fetch_sv	= Nullsv;
     PL_hv_fetch_sv	= Nullsv;

@@ -10,10 +10,7 @@
  *
  * When building without USE_THREADS, these variables will be truly global.
  * When building without USE_THREADS but with MULTIPLICITY, these variables
- * will be global per-interpreter.
- *
- * Avoid build-specific #ifdefs here, like DEBUGGING.  That way,
- * we can keep binary compatibility of the curinterp structure */
+ * will be global per-interpreter. */
 
 /* Important ones in the first cache line (if alignment is done right) */
 
@@ -112,7 +109,9 @@ PERLVAR(Tmainstack,	AV *)		/* the stack when nothing funny is happening */
 
 PERLVAR(Ttop_env,	JMPENV *)	/* ptr. to current sigjmp() environment */
 PERLVAR(Tstart_env,	JMPENV)		/* empty startup sigjmp() environment */
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
 PERLVARI(Tprotect,	protect_proc_t,	MEMBER_TO_FPTR(Perl_default_protect))
+#endif
 PERLVARI(Terrors,	SV *, Nullsv)	/* outstanding queued errors */
 
 /* statics "owned" by various functions */

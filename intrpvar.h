@@ -8,10 +8,7 @@
  * generated when built with or without MULTIPLICITY.  It is also used
  * to generate the appropriate export list for win32.
  *
- * When building without MULTIPLICITY, these variables will be truly global.
- *
- * Avoid build-specific #ifdefs here, like DEBUGGING.  That way,
- * we can keep binary compatibility of the curinterp structure */
+ * When building without MULTIPLICITY, these variables will be truly global. */
 
 /* pseudo environmental stuff */
 PERLVAR(Iorigargc,	int)

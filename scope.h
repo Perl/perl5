@@ -193,19 +193,21 @@ struct jmpenv {
     Sigjmp_buf		je_buf;		/* only for use if !je_throw */
     int			je_ret;		/* last exception thrown */
     bool		je_mustcatch;	/* need to call longjmp()? */
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
     void		(*je_throw)(int v); /* last for bincompat */
     bool		je_noset;	/* no need for setjmp() */
+#endif
 };
 
 typedef struct jmpenv JMPENV;
 
-/*
- * Function that catches/throws, and its callback for the
- *  body of protected processing.
- */
-typedef void *(CPERLscope(*protect_body_t)) (pTHX_ va_list);
-typedef void *(CPERLscope(*protect_proc_t)) (pTHX_ volatile JMPENV *pcur_env,
-					     int *, protect_body_t, ...);
+#ifdef OP_IN_REGISTER
+#define OP_REG_TO_MEM	PL_opsave = op
+#define OP_MEM_TO_REG	op = PL_opsave
+#else
+#define OP_REG_TO_MEM	NOOP
+#define OP_MEM_TO_REG	NOOP
+#endif
 
 /*
  * How to build the first jmpenv.
@@ -219,21 +221,13 @@ typedef void *(CPERLscope(*protect_proc_t)) (pTHX_ volatile JMPENV *pcur_env,
 
 #define JMPENV_BOOTSTRAP \
     STMT_START {				\
-	PL_start_env.je_prev = NULL;		\
-	PL_start_env.je_throw = NULL;		\
+	Zero(&PL_start_env, 1, JMPENV);		\
 	PL_start_env.je_ret = -1;		\
 	PL_start_env.je_mustcatch = TRUE;	\
-	PL_start_env.je_noset = 0;		\
 	PL_top_env = &PL_start_env;		\
     } STMT_END
 
-#ifdef OP_IN_REGISTER
-#define OP_REG_TO_MEM	PL_opsave = op
-#define OP_MEM_TO_REG	op = PL_opsave
-#else
-#define OP_REG_TO_MEM	NOOP
-#define OP_MEM_TO_REG	NOOP
-#endif
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
 
 /*
  * These exception-handling macros are split up to
@@ -265,6 +259,14 @@ typedef void *(CPERLscope(*protect_proc_t)) (pTHX_ volatile JMPENV *pcur_env,
  *    JMPENV_POP;  // don't forget this!
  */
 
+/*
+ * Function that catches/throws, and its callback for the
+ *  body of protected processing.
+ */
+typedef void *(CPERLscope(*protect_body_t)) (pTHX_ va_list);
+typedef void *(CPERLscope(*protect_proc_t)) (pTHX_ volatile JMPENV *pcur_env,
+					     int *, protect_body_t, ...);
+
 #define dJMPENV	JMPENV cur_env;	\
 		volatile JMPENV *pcur_env = ((cur_env.je_noset = 0),&cur_env)
 
@@ -288,10 +290,11 @@ typedef void *(CPERLscope(*protect_proc_t)) (pTHX_ volatile JMPENV *pcur_env,
 
 #define JMPENV_POST_CATCH JMPENV_POST_CATCH_ENV(*(JMPENV*)pcur_env)
 
-
 #define JMPENV_PUSH_ENV(ce,v) \
     STMT_START {						\
 	if (!(ce).je_noset) {					\
+	    DEBUG_l(Perl_deb(aTHX_ "Setting up jumplevel %p, was %p\n",	\
+			     ce, PL_top_env));			\
 	    JMPENV_PUSH_INIT_ENV(ce,NULL);			\
 	    EXCEPT_SET_ENV(ce,PerlProc_setjmp((ce).je_buf, 1));\
 	    (ce).je_noset = 1;					\
@@ -305,7 +308,10 @@ typedef void *(CPERLscope(*protect_proc_t)) (pTHX_ volatile JMPENV *pcur_env,
 #define JMPENV_PUSH(v) JMPENV_PUSH_ENV(*(JMPENV*)pcur_env,v) 
 
 #define JMPENV_POP_ENV(ce) \
-    STMT_START { PL_top_env = (ce).je_prev; } STMT_END
+    STMT_START {						\
+	if (PL_top_env == &(ce))				\
+	    PL_top_env = (ce).je_prev;				\
+    } STMT_END
 
 #define JMPENV_POP  JMPENV_POP_ENV(*(JMPENV*)pcur_env) 
 
@@ -328,6 +334,39 @@ typedef void *(CPERLscope(*protect_proc_t)) (pTHX_ volatile JMPENV *pcur_env,
 #define EXCEPT_GET		EXCEPT_GET_ENV(*(JMPENV*)pcur_env)
 #define EXCEPT_SET_ENV(ce,v)	((ce).je_ret = (v))
 #define EXCEPT_SET(v)		EXCEPT_SET_ENV(*(JMPENV*)pcur_env,v)
+
+#else /* !PERL_FLEXIBLE_EXCEPTIONS */
+
+#define dJMPENV		JMPENV cur_env
+
+#define JMPENV_PUSH(v) \
+    STMT_START {							\
+	DEBUG_l(Perl_deb(aTHX_ "Setting up jumplevel %p, was %p\n",	\
+			 &cur_env, PL_top_env));			\
+	cur_env.je_prev = PL_top_env;					\
+	OP_REG_TO_MEM;							\
+	cur_env.je_ret = PerlProc_setjmp(cur_env.je_buf, 1);		\
+	OP_MEM_TO_REG;							\
+	PL_top_env = &cur_env;						\
+	cur_env.je_mustcatch = FALSE;					\
+	(v) = cur_env.je_ret;						\
+    } STMT_END
+
+#define JMPENV_POP \
+    STMT_START { PL_top_env = cur_env.je_prev; } STMT_END
+
+#define JMPENV_JUMP(v) \
+    STMT_START {						\
+	OP_REG_TO_MEM;						\
+	if (PL_top_env->je_prev)				\
+	    PerlProc_longjmp(PL_top_env->je_buf, (v));		\
+	if ((v) == 2)						\
+	    PerlProc_exit(STATUS_NATIVE_EXPORT);		\
+	PerlIO_printf(PerlIO_stderr(), "panic: top_env\n");	\
+	PerlProc_exit(1);					\
+    } STMT_END
+
+#endif /* PERL_FLEXIBLE_EXCEPTIONS */
 
 #define CATCH_GET		(PL_top_env->je_mustcatch)
 #define CATCH_SET(v)		(PL_top_env->je_mustcatch = (v))

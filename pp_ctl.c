@@ -2521,8 +2521,16 @@ S_save_lines(pTHX_ AV *array, SV *sv)
     }
 }
 
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
 STATIC void *
 S_docatch_body(pTHX_ va_list args)
+{
+    return docatch_body();
+}
+#endif
+
+STATIC void *
+S_docatch_body(pTHX)
 {
     CALLRUNOPS(aTHX);
     return NULL;
@@ -2541,10 +2549,18 @@ S_docatch(pTHX_ OP *o)
     assert(CATCH_GET == TRUE);
 #endif
     PL_op = o;
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
  redo_body:
     CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_docatch_body));
+#else
+    JMPENV_PUSH(ret);
+#endif
     switch (ret) {
     case 0:
+#ifndef PERL_FLEXIBLE_EXCEPTIONS
+ redo_body:
+	docatch_body();
+#endif
 	break;
     case 3:
 	if (PL_restartop && cursi == PL_curstackinfo) {
@@ -2554,10 +2570,12 @@ S_docatch(pTHX_ OP *o)
 	}
 	/* FALL THROUGH */
     default:
+	JMPENV_POP;
 	PL_op = oldop;
 	JMPENV_JUMP(ret);
 	/* NOTREACHED */
     }
+    JMPENV_POP;
     PL_op = oldop;
     return Nullop;
 }

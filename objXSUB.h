@@ -1987,6 +1987,7 @@
 #define Perl_magic_dump		pPerl->Perl_magic_dump
 #undef  magic_dump
 #define magic_dump		Perl_magic_dump
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
 #undef  Perl_default_protect
 #define Perl_default_protect	pPerl->Perl_default_protect
 #undef  default_protect
@@ -1995,6 +1996,7 @@
 #define Perl_vdefault_protect	pPerl->Perl_vdefault_protect
 #undef  vdefault_protect
 #define vdefault_protect	Perl_vdefault_protect
+#endif
 #undef  Perl_reginitcolors
 #define Perl_reginitcolors	pPerl->Perl_reginitcolors
 #undef  reginitcolors
@@ -2151,12 +2153,16 @@
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
 #  if defined(IAMSUID)
 #  endif
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
+#endif
 #  if defined(USE_THREADS)
 #  endif
 #endif
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
 #endif
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
+#endif
 #endif
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
 #endif
