@@ -1227,27 +1227,40 @@ supplied to the operation after the I<scale>:
 
 =over 2
 
-=item ffround ( +$scale ) rounds to the $scale'th place left from the '.', counting from the dot. The first digit is numbered 1. 
+=item ffround ( +$scale )
 
-=item ffround ( -$scale ) rounds to the $scale'th place right from the '.', counting from the dot
+rounds to the $scale'th place left from the '.', counting from the dot.
+The first digit is numbered 1.
 
-=item ffround ( 0 ) rounds to an integer
+=item ffround ( -$scale )
 
-=item fround  ( +$scale ) preserves accuracy to $scale digits from the left (aka significant digits) and paddes the rest with zeros. If the number is between 1 and -1, the significant digits count from the first non-zero after the '.'
+rounds to the $scale'th place right from the '.', counting from the dot
 
-=item fround  ( -$scale ) and fround ( 0 ) are a no-ops
+=item ffround ( 0 )
+
+rounds to an integer
+
+=item fround  ( +$scale )
+
+preserves accuracy to $scale digits from the left (aka significant
+digits) and pads the rest with zeros. If the number is between 1 and
+-1, the significant digits count from the first non-zero after the '.'
+
+=item fround  ( -$scale ) and fround ( 0 )
+
+are a no-ops
 
 =back
 
-All rounding functions take as a second parameter a rounding mode from one of
-the following: 'even', 'odd', '+inf', '-inf', 'zero' or 'trunc'.
+All rounding functions take as a second parameter a rounding mode from
+one of the following: 'even', 'odd', '+inf', '-inf', 'zero' or 'trunc'.
 
 The default rounding mode is 'even'. By using
-C<< Math::BigFloat::round_mode($rnd_mode); >> you can get and set the default
-mode for subsequent rounding. The usage of C<$Math::BigFloat::$rnd_mode> is
-no longer supported.
-                                                                                The second parameter to the round functions then overrides the default
-temporarily. 
+C<< Math::BigFloat::round_mode($rnd_mode); >> you can get and set the
+default mode for subsequent rounding. The usage of
+C<$Math::BigFloat::$rnd_mode> is no longer supported.
+The second parameter to the round functions then overrides the default
+temporarily.
 
 The C<< as_number() >> function returns a BigInt from a Math::BigFloat. It uses
 'trunc' as rounding mode to make it equivalent to:
