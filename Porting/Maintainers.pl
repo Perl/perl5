@@ -359,6 +359,13 @@ package Maintainers;
 		'CPAN'		=> 0,
 		},
 
+	'Pod::Checker' => {	
+		'MAINTAINER'	=> 'marekr',
+		'FILES' => q[lib/Pod/Checker.pm pod/podchecker.PL
+					t/pod/testpchk.pl],
+		'CPAN'		=> 1,
+		},
+
 	'Pod::Find' =>
 		{
 		'MAINTAINER'	=> 'marekr',
@@ -380,6 +387,15 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+	'Pod::Parser' => {
+		'MAINTAINER'	=> 'marekr',
+		'FILES' => q[lib/Pod/{InputObjects,Parse{r,Utils}}.pm	
+				t/pod/testcmp.pl 
+				t/pod/{emptycmd,for,headings,include{,d},lref,{multiline,nested}_items,{nested,special}_seqs,oneline_cmds,poderrs}.{t,xr}
+			    ],
+		'CPAN'		=> 1,
+		},
+
 	'Pod::Perldoc' =>
 		{
 		'MAINTAINER'	=> 'sburke',
@@ -392,6 +408,26 @@ package Maintainers;
 		'MAINTAINER'	=> 'rmbarker',
 		'FILES'		=> q[lib/Pod/Plainer.pm t/pod/plainer.t],
 		'CPAN'		=> 0,
+		},
+
+	'Pod::PlainText' => {
+		'MAINTAINER'	=> 'marekr',
+		'FILES' => q[lib/Pod/PlainText.pm t/pod/testp2pt.pl],
+		'CPAN'		=> 1,
+		},
+
+	'Pod::Select'	 => {
+		'MAINTAINER'	=> 'marekr',
+		'FILES' => q[lib/Pod/Select.pm pod/podselect.PL
+					t/pod/podselect.{t,xr}],
+		'CPAN'		=> 1,
+		},
+
+	'Pod::Usage' => {	
+		'MAINTAINER'	=> 'marekr',
+		'FILES' => q[lib/Pod/Usage.pm pod/pod2usage.PL
+					t/pod/pod2usage.{t,xr}],
+		'CPAN'		=> 1,
 		},
 
 	'Safe' =>
