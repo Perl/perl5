@@ -1895,15 +1895,6 @@ Clears a hash, making it empty.
 
 	void	hv_clear (HV* tb)
 
-=item hv_delayfree_ent
-
-Releases a hash entry, such as while iterating though the hash, but
-delays actual freeing of key and value until the end of the current
-statement (or thereabouts) with C<sv_2mortal>.  See C<hv_iternext>
-and C<hv_free_ent>.
-
-	void    hv_delayfree_ent (HV* hv, HE* entry)
-
 =item hv_delete
 
 Deletes a key/value pair in the hash.  The value SV is removed from the hash
@@ -1962,13 +1953,6 @@ See L<Understanding the Magic of Tied Hashes and Arrays> for more
 information on how to use this function on tied hashes.
 
 	HE*     hv_fetch_ent  (HV* tb, SV* key, I32 lval, U32 hash)
-
-=item hv_free_ent
-
-Releases a hash entry, such as while iterating though the hash.  See
-C<hv_iternext> and C<hv_delayfree_ent>.
-
-	void    hv_free_ent (HV* hv, HE* entry)
 
 =item hv_iterinit
 
