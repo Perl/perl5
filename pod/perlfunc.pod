@@ -3579,6 +3579,9 @@ When used with C<Z>, C<*> results in the addition of a trailing null
 byte (so the packed result will be one longer than the byte C<length>
 of the item).
 
+When used with C<@>, the repeat count represents an offset from the start
+of the innermost () group.
+
 The repeat count for C<u> is interpreted as the maximal number of bytes
 to encode per line of output, with 0, 1 and 2 replaced by 45. The repeat 
 count should not be more than 65.
