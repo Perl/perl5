@@ -183,7 +183,9 @@ loop:
 #endif
 
 	/* It's okay if the close fails, what's an fd more or less? */
+#ifdef HAS_FCHDIR
 	(void)close(fd);
+#endif
 	return (resolved);
 
 err1:	serrno = errno;
