@@ -165,6 +165,173 @@ names of the C<In> classes are the official Unicode block names but
 with all non-alphanumeric characters removed, for example the block
 name C<"Latin-1 Supplement"> becomes C<\p{InLatin1Supplement}>.
 
+Here is the list as of Unicode 3.1.0 (the two-letter classes) and
+Perl 5.8.0 (the one-letter classes):
+
+   L  Letter
+   Lu Letter, Uppercase
+   Ll Letter, Lowercase
+   Lt Letter, Titlecase
+   Lm Letter, Modifier
+   Lo Letter, Other
+   M  Mark
+   Mn Mark, Non-Spacing
+   Mc Mark, Spacing Combining
+   Me Mark, Enclosing
+   N  Number
+   Nd Number, Decimal Digit
+   Nl Number, Letter
+   No Number, Other
+   P  Punctuation
+   Pc Punctuation, Connector
+   Pd Punctuation, Dash
+   Ps Punctuation, Open
+   Pe Punctuation, Close
+   Pi Punctuation, Initial quote
+       (may behave like Ps or Pe depending on usage)
+   Pf Punctuation, Final quote
+       (may behave like Ps or Pe depending on usage)
+   Po Punctuation, Other
+   S  Symbol
+   Sm Symbol, Math
+   Sc Symbol, Currency
+   Sk Symbol, Modifier
+   So Symbol, Other
+   Z  Separator
+   Zs Separator, Space
+   Zl Separator, Line
+   Zp Separator, Paragraph
+   C  Other
+   Cc Other, Control
+   Cf Other, Format
+   Cs Other, Surrogate
+   Co Other, Private Use
+   Cn Other, Not Assigned (Unicode defines no Cn characters)
+
+Additionally, because scripts differ in their directionality
+(for example Hebrew is written right to left), all characters
+have their directionality defined:
+
+   BidiL   Left-to-Right
+   BidiLRE Left-to-Right Embedding
+   BidiLRO Left-to-Right Override
+   BidiR   Right-to-Left
+   BidiAL  Right-to-Left Arabic
+   BidiRLE Right-to-Left Embedding
+   BidiRLO Right-to-Left Override
+   BidiPDF Pop Directional Format
+   BidiEN  European Number
+   BidiES  European Number Separator
+   BidiET  European Number Terminator
+   BidiAN  Arabic Number
+   BidiCS  Common Number Separator
+   BidiNSM Non-Spacing Mark
+   BidiBN  Boundary Neutral
+   BidiB   Paragraph Separator
+   BidiS   Segment Separator
+   BidiWS  Whitespace
+   BidiON  Other Neutrals
+
+The blocks available for C<\p{InBlock}> and C<\P{InBlock}>, for
+example \p{InCyrillic>, are as follows:
+
+    BasicLatin
+    Latin1Supplement
+    LatinExtendedA
+    LatinExtendedB
+    IPAExtensions
+    SpacingModifierLetters
+    CombiningDiacriticalMarks
+    Greek
+    Cyrillic
+    Armenian
+    Hebrew
+    Arabic
+    Syriac
+    Thaana
+    Devanagari
+    Bengali
+    Gurmukhi
+    Gujarati
+    Oriya
+    Tamil
+    Telugu
+    Kannada
+    Malayalam
+    Sinhala
+    Thai
+    Lao
+    Tibetan
+    Myanmar
+    Georgian
+    HangulJamo
+    Ethiopic
+    Cherokee
+    UnifiedCanadianAboriginalSyllabics
+    Ogham
+    Runic
+    Khmer
+    Mongolian
+    LatinExtendedAdditional
+    GreekExtended
+    GeneralPunctuation
+    SuperscriptsandSubscripts
+    CurrencySymbols
+    CombiningMarksforSymbols
+    LetterlikeSymbols
+    NumberForms
+    Arrows
+    MathematicalOperators
+    MiscellaneousTechnical
+    ControlPictures
+    OpticalCharacterRecognition
+    EnclosedAlphanumerics
+    BoxDrawing
+    BlockElements
+    GeometricShapes
+    MiscellaneousSymbols
+    Dingbats
+    BraillePatterns
+    CJKRadicalsSupplement
+    KangxiRadicals
+    IdeographicDescriptionCharacters
+    CJKSymbolsandPunctuation
+    Hiragana
+    Katakana
+    Bopomofo
+    HangulCompatibilityJamo
+    Kanbun
+    BopomofoExtended
+    EnclosedCJKLettersandMonths
+    CJKCompatibility
+    CJKUnifiedIdeographsExtensionA
+    CJKUnifiedIdeographs
+    YiSyllables
+    YiRadicals
+    HangulSyllables
+    HighSurrogates
+    HighPrivateUseSurrogates
+    LowSurrogates
+    PrivateUse
+    CJKCompatibilityIdeographs
+    AlphabeticPresentationForms
+    ArabicPresentationFormsA
+    CombiningHalfMarks
+    CJKCompatibilityForms
+    SmallFormVariants
+    ArabicPresentationFormsB
+    Specials
+    HalfwidthandFullwidthForms
+    OldItalic
+    Gothic
+    Deseret
+    ByzantineMusicalSymbols
+    MusicalSymbols
+    MathematicalAlphanumericSymbols
+    CJKUnifiedIdeographsExtensionB
+    CJKCompatibilityIdeographsSupplement
+    Tags
+
 =item *
 
 The special pattern C<\X> match matches any extended Unicode sequence
@@ -253,6 +420,6 @@ tend to run slower.  Avoidance of locales is strongly encouraged.
 
 =head1 SEE ALSO
 
-L<bytes>, L<utf8>, L<perlvar/"${^WIDE_SYSTEM_CALLS}">
+L<bytes>, L<utf8>, L<perlretut>, L<perlvar/"${^WIDE_SYSTEM_CALLS}">
 
 =cut

@@ -1746,72 +1746,11 @@ C<\P>, like C<\p{L}> for Unicode 'letters', or C<\p{Lu}> for uppercase
 letters, or C<\P{Nd}> for non-digits.  If a C<name> is just one
 letter, the braces can be dropped.  For instance, C<\pM> is the
 character class of Unicode 'marks', for example accent marks.
-Here is the list as of Unicode 3.1.0 (the two-letter classes) and
-Perl 5.8.0 (the one-letter classes):
+For the full list see L<perlunicode>.
 
-   L  Letter
-   Lu Letter, Uppercase
-   Ll Letter, Lowercase
-   Lt Letter, Titlecase
-   Lm Letter, Modifier
-   Lo Letter, Other
-   M  Mark
-   Mn Mark, Non-Spacing
-   Mc Mark, Spacing Combining
-   Me Mark, Enclosing
-   N  Number
-   Nd Number, Decimal Digit
-   Nl Number, Letter
-   No Number, Other
-   P  Punctuation
-   Pc Punctuation, Connector
-   Pd Punctuation, Dash
-   Ps Punctuation, Open
-   Pe Punctuation, Close
-   Pi Punctuation, Initial quote
-       (may behave like Ps or Pe depending on usage)
-   Pf Punctuation, Final quote
-       (may behave like Ps or Pe depending on usage)
-   Po Punctuation, Other
-   S  Symbol
-   Sm Symbol, Math
-   Sc Symbol, Currency
-   Sk Symbol, Modifier
-   So Symbol, Other
-   Z  Separator
-   Zs Separator, Space
-   Zl Separator, Line
-   Zp Separator, Paragraph
-   C  Other
-   Cc Other, Control
-   Cf Other, Format
-   Cs Other, Surrogate
-   Co Other, Private Use
-   Cn Other, Not Assigned (Unicode defines no Cn characters)
-
-Additionally, because scripts differ in their directionality
-(for example Hebrew is written right to left), all characters
-have their directionality defined:
-
-   BidiL   Left-to-Right
-   BidiLRE Left-to-Right Embedding
-   BidiLRO Left-to-Right Override
-   BidiR   Right-to-Left
-   BidiAL  Right-to-Left Arabic
-   BidiRLE Right-to-Left Embedding
-   BidiRLO Right-to-Left Override
-   BidiPDF Pop Directional Format
-   BidiEN  European Number
-   BidiES  European Number Separator
-   BidiET  European Number Terminator
-   BidiAN  Arabic Number
-   BidiCS  Common Number Separator
-   BidiNSM Non-Spacing Mark
-   BidiBN  Boundary Neutral
-   BidiB   Paragraph Separator
-   BidiS   Segment Separator
-   BidiWS  Whitespace
-   BidiON  Other Neutrals
+The Unicode has also been separated into blocks of charaters which you
+can test with C<\p{InBlock}> and C<\P{InBlock}>, for example C<\p{InGreek}>
+and C<\P{InKatakana}.  For the full list see L<perlunicode>.
 
 For the the full and latest information see the latest Unicode standard.
 
