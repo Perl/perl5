@@ -33,6 +33,7 @@ $Config{'startperl'}
 # In the following, perl variables are not expanded during extraction.
 
 print OUT <<'!NO!SUBS!';
+
 =head1 NAME
 
 h2xs - convert .h C header files to Perl extensions
