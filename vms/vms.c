@@ -91,6 +91,10 @@ static struct dsc$descriptor_s *defenv[] = { &fildevdsc, &crtlenvdsc, NULL };
 static struct dsc$descriptor_s **env_tables = defenv;
 static bool will_taint = FALSE;  /* tainting active, but no PL_curinterp yet */
 
+/* True if we shouldn't treat barewords as logicals during directory */
+/* munching */ 
+static int no_translate_barewords;
+
 /*{{{int vmstrnenv(const char *lnm, char *eqv, unsigned long int idx, struct dsc$descriptor_s **tabvec, unsigned long int flags) */
 int
 vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
@@ -1721,7 +1725,8 @@ static char *do_pathify_dirspec(char *dir,char *buf, int ts)
     if (*dir) strcpy(trndir,dir);
     else getcwd(trndir,sizeof trndir - 1);
 
-    while (!strpbrk(trndir,"/]:>") && my_trnlnm(trndir,trndir,0)) {
+    while (!strpbrk(trndir,"/]:>") && !no_translate_barewords
+	   && my_trnlnm(trndir,trndir,0)) {
       STRLEN trnlen = strlen(trndir);
 
       /* Trap simple rooted lnms, and return lnm:[000000] */
@@ -5030,6 +5035,12 @@ init_os_extras()
 {
   char* file = __FILE__;
   dTHX;
+  char temp_buff[512];
+  if (my_trnlnm("DECC$DISABLE_TO_VMS_LOGNAME_TRANSLATION", temp_buff, 0)) {
+    no_translate_barewords = TRUE;
+  } else {
+    no_translate_barewords = FALSE;
+  }
 
   newXSproto("VMS::Filespec::rmsexpand",rmsexpand_fromperl,file,"$;$");
   newXSproto("VMS::Filespec::vmsify",vmsify_fromperl,file,"$");
