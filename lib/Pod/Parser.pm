@@ -10,7 +10,7 @@
 package Pod::Parser;
 
 use vars qw($VERSION);
-$VERSION = 1.10;  ## Current version of this package
+$VERSION = 1.11;  ## Current version of this package
 require  5.004;    ## requires this Perl version or later
 
 #############################################################################
@@ -1062,7 +1062,7 @@ sub parse_from_filehandle {
         next unless (($textline =~ /^(\s*)$/) && (length $paragraph));
 
         ## Issue a warning about any non-empty blank lines
-        if ( length($1) > 1 ) {
+        if (length($1) > 1  and  ! $self->{_CUTTING}) {
             my $errorsub = $self->errorsub();
             my $file = $self->input_file();
             my $errmsg = "*** WARNING: line containing nothing but whitespace".

@@ -442,44 +442,51 @@ L<perlipc/"Sockets: Client/Server Communication">.
 =item binmode FILEHANDLE
 
 Arranges for FILEHANDLE to be read or written in "binary" mode on
-systems whose run-time libraries force the programmer to guess
-between binary and text files.  If FILEHANDLE is an expression, the
-value is taken as the name of the filehandle.  binmode() should be
-called after the C<open> but before any I/O is done on the filehandle.
-The only way to reset binary mode on a filehandle is to reopen the
-file.
+systems where the run-time libraries distinguish between binary and
+text files.  If FILEHANDLE is an expression, the value is taken as the
+name of the filehandle.  binmode() should be called after open() but
+before any I/O is done on the filehandle.  The only way to reset
+binary mode on a filehandle is to reopen the file.
+
+On many systems binmode() has no effect, and on some systems it is
+necessary when you're not working with a text file.  For the sake of
+portability it is a good idea to always use it when appropriate, and
+to never use it when it isn't appropriate.
+
+In other words:  Regardless of platform, use binmode() on binary
+files, and do not use binmode() on text files.
 
 The operating system, device drivers, C libraries, and Perl run-time
-system all conspire to let the programmer conveniently treat a
-simple, one-byte C<\n> as the line terminator, irrespective of its
-external representation.  On Unix and its brethren, the native file
-representation exactly matches the internal representation, making
-everyone's lives unbelievably simpler.  Consequently, L<binmode>
-has no effect under Unix, Plan9, or Mac OS, all of which use C<\n>
-to end each line.  (Unix and Plan9 think C<\n> means C<\cJ> and
-C<\r> means C<\cM>, whereas the Mac goes the other way--it uses
-C<\cM> for c<\n> and C<\cJ> to mean C<\r>.  But that's ok, because
-it's only one byte, and the internal and external representations
-match.)
+system all work together to let the programmer treat a single
+character (C<\n>) as the line terminator, irrespective of the external
+representation.  On many operating systems, the native text file
+representation matches the internal representation, but on some
+platforms the external representation of C<\n> is made up of more than
+one character.
 
-In legacy systems like MS-DOS and its embellishments, your program
-sees a C<\n> as a simple C<\cJ> (just as in Unix), but oddly enough,
-that's not what's physically stored on disk.  What's worse, these
-systems refuse to help you with this; it's up to you to remember
-what to do.  And you mustn't go applying binmode() with wild abandon,
-either, because if your system does care about binmode(), then using
-it when you shouldn't is just as perilous as failing to use it when
-you should.
+Mac OS and all variants of Unix use a single character to end each line
+in the external representation of text (even though that single
+character is not necessarily the same across these platforms).
+Consequently binmode() has no effect on these operating systems.  In
+other systems like VMS, MS-DOS and the various flavors of MS-Windows
+your program sees a C<\n> as a simple C<\cJ>, but what's stored in text
+files are the two characters C<\cM\cJ>.  That means that, if you don't
+use binmode() on these systems, C<\cM\cJ> sequences on disk will be
+converted to C<\n> on input, and any C<\n> in your program will be
+converted back to C<\cM\cJ> on output.  This is what you want for text
+files, but it can be disastrous for binary files.
 
-That means that on any version of Microsoft WinXX that you might
-care to name (or not), binmode() causes C<\cM\cJ> sequences on disk
-to be converted to C<\n> when read into your program, and causes
-any C<\n> in your program to be converted back to C<\cM\cJ> on
-output to disk.  This sad discrepancy leads to no end of
-problems in not just the readline operator, but also when using
-seek(), tell(), and read() calls.  See L<perlport> for other painful
-details.  See the C<$/> and C<$\> variables in L<perlvar> for how
-to manually set your input and output line-termination sequences.
+Another consequence of using binmode() (on some systems) is that
+special end-of-file markers will be seen as part of the data stream.
+For systems from the Microsoft family this means that if your binary
+data contains C<\cZ>, the I/O subsystem will ragard it as the end of
+the file, unless you use binmode().
+
+binmode() is not only important for readline() and print() operations,
+but also when using read(), seek(), sysread(), syswrite() and tell()
+(see L<perlport> for more details).  See the C<$/> and C<$\> variables
+in L<perlvar> for how to manually set your input and output
+line-termination sequences.
 
 =item bless REF,CLASSNAME
 
