@@ -5369,6 +5369,42 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =over 4
 
+=item The Compiler Suite Is Still Very Experimental
+
+=item Localising Tied Arrays and Hashes Is Broken
+
+=item Building Extensions Can Fail Because Of Largefiles
+
+=item Modifying $_ Inside for(..)
+
+=item mod_perl 1.26 Doesn't Build With Threaded Perl
+
+=item lib/ftmp-security tests warn 'system possibly insecure'
+
+=item libwww-perl (LWP) fails base/date #51
+
+=item PDL failing some tests
+
+=item Perl_get_sv
+
+=item Self-tying Problems
+
+=item ext/threads/t/libc
+
+=item Failure of Thread (5.005-style) tests
+
+=item Timing problems
+
+=item Tied/Magical Array/Hash Elements Do Not Autovivify
+
+=item Unicode in package/class and subroutine names does not work
+
+=back
+
+=item Platform Specific Problems
+
+=over 4
+
 =item AIX
 
 =item Alpha systems with old gccs fail several tests
@@ -5383,19 +5419,11 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item DJGPP does not build
 
-=item ext/threads/t/libc
-
 =item FreeBSD built with ithreads coredumps reading large directories
 
 =item FreeBSD Failing locale Test 117 For ISO 8859-15 Locales
 
-=item IRIX fails ext/List/Util/t/shuffle.t
-
-=item Modifying $_ Inside for(..)
-
-=item mod_perl 1.26 Doesn't Build With Threaded Perl
-
-=item lib/ftmp-security tests warn 'system possibly insecure'
+=item IRIX fails ext/List/Util/t/shuffle.t or Digest::MD5
 
 =item HP-UX lib/posix Subtest 9 Fails When LP64-Configured
 
@@ -5403,9 +5431,9 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item Linux With Sfio Fails op/misc Test 48
 
-=item libwww-perl (LWP) fails base/date #51
-
 =item Mac OS X
+
+=item Mac OS X dyld undefined symbols
 
 =item OS/2 Test Failures
 
@@ -5417,17 +5445,7 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item SUPER-UX (NEC SX)
 
-=item PDL failing some tests
-
-=item Perl_get_sv
-
 =item Term::ReadKey not working on Win32
-
-=item Failure of Thread (5.005-style) tests
-
-=item Timing problems
-
-=item Unicode in package/class and subroutine names does not work
 
 =item UNICOS/mk
 
@@ -5443,17 +5461,7 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item z/OS (OS/390)
 
-=item Localising Tied Arrays and Hashes Is Broken
-
-=item Self-tying Problems
-
-=item Tied/Magical Array/Hash Elements Do Not Autovivify
-
-=item Building Extensions Can Fail Because Of Largefiles
-
 =item Unicode Support on EBCDIC Still Spotty
-
-=item The Compiler Suite Is Still Very Experimental
 
 =item Seen In Perl 5.7 But Gone Now
 
@@ -14947,7 +14955,7 @@ C<all_country_codes( [ CODESET ] )>, C<all_country_names( [ CODESET ] )>
 Locale::Language, Locale::Script, Locale::Currency, Locale::SubCountry, ISO
 3166-1, http://www.iso.org/iso/en/prods-services/iso3166ma/index.html,
 http://www.egt.ie/standards/iso3166/iso3166-1-en.html,
-http://www.cia.gov/cia/publications/factbook/docs/app-f.html
+http://www.cia.gov/cia/publications/factbook/docs/app-d-1.html
 
 =item AUTHOR
 
