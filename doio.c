@@ -546,8 +546,8 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     }
 
     fd = PerlIO_fileno(fp);
-    /* If there is no fd (e.g. PerlIO::Scalar) assume it isn't a
-     * socket - this covers PerlIO::Scalar - otherwise unless we "know" the
+    /* If there is no fd (e.g. PerlIO::scalar) assume it isn't a
+     * socket - this covers PerlIO::scalar - otherwise unless we "know" the
      * type probe for socket-ness.
      */
     if (IoTYPE(io) && IoTYPE(io) != IoTYPE_PIPE && IoTYPE(io) != IoTYPE_STD && fd >= 0) {
@@ -596,7 +596,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    }
 	}
 	if (savefd != fd) {
-	    /* Still a small can-of-worms here if (say) PerlIO::Scalar
+	    /* Still a small can-of-worms here if (say) PerlIO::scalar
 	       is assigned to (say) STDOUT - for now let dup2() fail
 	       and provide the error
 	     */
@@ -667,7 +667,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    if (*s == 'I' || *s == '#')
 	     s++;
 	    *s = 'w';
-	    if (!(IoOFP(io) = PerlIO_openn(aTHX_ type,mode,fd,0,0,NULL,0,svp))) {
+	    if (!(IoOFP(io) = PerlIO_openn(aTHX_ type,s,fd,0,0,NULL,0,svp))) {
 		PerlIO_close(fp);
 		IoIFP(io) = Nullfp;
 		goto say_false;

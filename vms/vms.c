@@ -4721,7 +4721,7 @@ Perl_opendir(pTHX_ char *name)
      * accurately report whether it's a directory.
      */
     if (!cando_by_name(S_IRUSR,0,dir)) {
-      set_errno(EACCES); set_vaxc_errno(RMS$_PRV);
+      /* cando_by_name has already set errno */
       return NULL;
     }
     if (flex_stat(dir,&sb) == -1) return NULL;

@@ -324,7 +324,7 @@ to change during one "get".)
 
 =over 4
 
-=item size
+=item fsize
 
 	Size_t fsize;
 
@@ -780,27 +780,31 @@ makes this layer available, although F<PerlIO.pm> "knows" where to
 find it.  It is an example of a layer which takes an argument as it is
 called thus:
 
-   open($fh,"<:encoding(iso-8859-7)",$pathname)
+   open( $fh, "<:encoding(iso-8859-7)", $pathname );
 
-=item ":Scalar"
+=item ":scalar"
 
-Provides support for
+Provides support for reading data from and writing data to a scalar.
 
-   open($fh,"...",\$scalar)
+   open( $fh, "+<:scalar", \$scalar );
 
 When a handle is so opened, then reads get bytes from the string value
 of I<$scalar>, and writes change the value. In both cases the position
 in I<$scalar> starts as zero but can be altered via C<seek>, and
 determined via C<tell>.
 
-=item ":Via"
+Please note that this layer is implied when calling open() thus:
+
+   open( $fh, "+<", \$scalar );
+
+=item ":via"
 
 Provided to allow layers to be implemented as Perl code.  For instance:
 
-   use MIME::QuotedPrint;
-   open(my $fh, ">Via(MIME::QuotedPrint)", "qp");
+   use PerlIO::via::StripHTML;
+   open( my $fh, "<:via(StripHTML)", "index.html" );
 
-See L<PerlIO::Via> for details.
+See L<PerlIO::via> for details.
 
 =back
 
@@ -867,6 +871,3 @@ a person who is not a PerlIO guru (yet).
 =back
 
 =cut
-
-
-

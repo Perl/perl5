@@ -1309,7 +1309,7 @@ sub B::IO::save_data {
         GvSV( gv ) = sv;
     }
 CODE
-    # for PerlIO::Scalar
+    # for PerlIO::scalar
     $use_xsloader = 1;
     $init->add_eval( sprintf 'open(%s, "<", $%s)', $globname, $globname );
 }

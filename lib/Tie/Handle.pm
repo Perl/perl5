@@ -201,7 +201,7 @@ use Carp;
 sub TIEHANDLE 
 {
  my $class = shift;
- my $fh    = do { \local *HANDLE};
+ my $fh    = \do { local *HANDLE};
  bless $fh,$class;
  $fh->OPEN(@_) if (@_);
  return $fh;

@@ -400,54 +400,53 @@ in perl5
 
 I<-X> FILEHANDLE, I<-X> EXPR, I<-X>, abs VALUE, abs, accept
 NEWSOCKET,GENERICSOCKET, alarm SECONDS, alarm, atan2 Y,X, bind SOCKET,NAME,
-binmode FILEHANDLE, DISCIPLINE, binmode FILEHANDLE, bless REF,CLASSNAME,
-bless REF, caller EXPR, caller, chdir EXPR, chmod LIST, chomp VARIABLE,
-chomp( LIST ), chomp, chop VARIABLE, chop( LIST ), chop, chown LIST, chr
-NUMBER, chr, chroot FILENAME, chroot, close FILEHANDLE, close, closedir
-DIRHANDLE, connect SOCKET,NAME, continue BLOCK, cos EXPR, cos, crypt
-PLAINTEXT,SALT, dbmclose HASH, dbmopen HASH,DBNAME,MASK, defined EXPR,
-defined, delete EXPR, die LIST, do BLOCK, do SUBROUTINE(LIST), do EXPR,
-dump LABEL, dump, each HASH, eof FILEHANDLE, eof (), eof, eval EXPR, eval
-BLOCK, exec LIST, exec PROGRAM LIST, exists EXPR, exit EXPR, exp EXPR, exp,
-fcntl FILEHANDLE,FUNCTION,SCALAR, fileno FILEHANDLE, flock
-FILEHANDLE,OPERATION, fork, format, formline PICTURE,LIST, getc FILEHANDLE,
-getc, getlogin, getpeername SOCKET, getpgrp PID, getppid, getpriority
-WHICH,WHO, getpwnam NAME, getgrnam NAME, gethostbyname NAME, getnetbyname
-NAME, getprotobyname NAME, getpwuid UID, getgrgid GID, getservbyname
-NAME,PROTO, gethostbyaddr ADDR,ADDRTYPE, getnetbyaddr ADDR,ADDRTYPE,
-getprotobynumber NUMBER, getservbyport PORT,PROTO, getpwent, getgrent,
-gethostent, getnetent, getprotoent, getservent, setpwent, setgrent,
-sethostent STAYOPEN, setnetent STAYOPEN, setprotoent STAYOPEN, setservent
-STAYOPEN, endpwent, endgrent, endhostent, endnetent, endprotoent,
-endservent, getsockname SOCKET, getsockopt SOCKET,LEVEL,OPTNAME, glob EXPR,
-glob, gmtime EXPR, goto LABEL, goto EXPR, goto &NAME, grep BLOCK LIST, grep
-EXPR,LIST, hex EXPR, hex, import, index STR,SUBSTR,POSITION, index
-STR,SUBSTR, int EXPR, int, ioctl FILEHANDLE,FUNCTION,SCALAR, join
-EXPR,LIST, keys HASH, kill SIGNAL, LIST, last LABEL, last, lc EXPR, lc,
-lcfirst EXPR, lcfirst, length EXPR, length, link OLDFILE,NEWFILE, listen
-SOCKET,QUEUESIZE, local EXPR, localtime EXPR, lock THING, log EXPR, log,
-lstat EXPR, lstat, m//, map BLOCK LIST, map EXPR,LIST, mkdir FILENAME,MASK,
-mkdir FILENAME, msgctl ID,CMD,ARG, msgget KEY,FLAGS, msgrcv
-ID,VAR,SIZE,TYPE,FLAGS, msgsnd ID,MSG,FLAGS, my EXPR, my TYPE EXPR, my EXPR
-: ATTRS, my TYPE EXPR : ATTRS, next LABEL, next, no Module VERSION LIST, no
-Module VERSION, no Module LIST, no Module, oct EXPR, oct, open
-FILEHANDLE,EXPR, open FILEHANDLE,MODE,EXPR, open FILEHANDLE,MODE,EXPR,LIST,
-open FILEHANDLE,MODE,REFERENCE, open FILEHANDLE, opendir DIRHANDLE,EXPR,
-ord EXPR, ord, our EXPR, our EXPR TYPE, our EXPR : ATTRS, our TYPE EXPR :
-ATTRS, pack TEMPLATE,LIST, package NAMESPACE, package, pipe
-READHANDLE,WRITEHANDLE, pop ARRAY, pop, pos SCALAR, pos, print FILEHANDLE
-LIST, print LIST, print, printf FILEHANDLE FORMAT, LIST, printf FORMAT,
-LIST, prototype FUNCTION, push ARRAY,LIST, q/STRING/, qq/STRING/,
-qr/STRING/, qx/STRING/, qw/STRING/, quotemeta EXPR, quotemeta, rand EXPR,
-rand, read FILEHANDLE,SCALAR,LENGTH,OFFSET, read FILEHANDLE,SCALAR,LENGTH,
-readdir DIRHANDLE, readline EXPR, readlink EXPR, readlink, readpipe EXPR,
-recv SOCKET,SCALAR,LENGTH,FLAGS, redo LABEL, redo, ref EXPR, ref, rename
-OLDNAME,NEWNAME, require VERSION, require EXPR, require, reset EXPR, reset,
-return EXPR, return, reverse LIST, rewinddir DIRHANDLE, rindex
-STR,SUBSTR,POSITION, rindex STR,SUBSTR, rmdir FILENAME, rmdir, s///, scalar
-EXPR, seek FILEHANDLE,POSITION,WHENCE, seekdir DIRHANDLE,POS, select
-FILEHANDLE, select, select RBITS,WBITS,EBITS,TIMEOUT, semctl
-ID,SEMNUM,CMD,ARG, semget KEY,NSEMS,FLAGS, semop KEY,OPSTRING, send
+binmode FILEHANDLE, LAYER, binmode FILEHANDLE, bless REF,CLASSNAME, bless
+REF, caller EXPR, caller, chdir EXPR, chmod LIST, chomp VARIABLE, chomp(
+LIST ), chomp, chop VARIABLE, chop( LIST ), chop, chown LIST, chr NUMBER,
+chr, chroot FILENAME, chroot, close FILEHANDLE, close, closedir DIRHANDLE,
+connect SOCKET,NAME, continue BLOCK, cos EXPR, cos, crypt PLAINTEXT,SALT,
+dbmclose HASH, dbmopen HASH,DBNAME,MASK, defined EXPR, defined, delete
+EXPR, die LIST, do BLOCK, do SUBROUTINE(LIST), do EXPR, dump LABEL, dump,
+each HASH, eof FILEHANDLE, eof (), eof, eval EXPR, eval BLOCK, exec LIST,
+exec PROGRAM LIST, exists EXPR, exit EXPR, exp EXPR, exp, fcntl
+FILEHANDLE,FUNCTION,SCALAR, fileno FILEHANDLE, flock FILEHANDLE,OPERATION,
+fork, format, formline PICTURE,LIST, getc FILEHANDLE, getc, getlogin,
+getpeername SOCKET, getpgrp PID, getppid, getpriority WHICH,WHO, getpwnam
+NAME, getgrnam NAME, gethostbyname NAME, getnetbyname NAME, getprotobyname
+NAME, getpwuid UID, getgrgid GID, getservbyname NAME,PROTO, gethostbyaddr
+ADDR,ADDRTYPE, getnetbyaddr ADDR,ADDRTYPE, getprotobynumber NUMBER,
+getservbyport PORT,PROTO, getpwent, getgrent, gethostent, getnetent,
+getprotoent, getservent, setpwent, setgrent, sethostent STAYOPEN, setnetent
+STAYOPEN, setprotoent STAYOPEN, setservent STAYOPEN, endpwent, endgrent,
+endhostent, endnetent, endprotoent, endservent, getsockname SOCKET,
+getsockopt SOCKET,LEVEL,OPTNAME, glob EXPR, glob, gmtime EXPR, goto LABEL,
+goto EXPR, goto &NAME, grep BLOCK LIST, grep EXPR,LIST, hex EXPR, hex,
+import, index STR,SUBSTR,POSITION, index STR,SUBSTR, int EXPR, int, ioctl
+FILEHANDLE,FUNCTION,SCALAR, join EXPR,LIST, keys HASH, kill SIGNAL, LIST,
+last LABEL, last, lc EXPR, lc, lcfirst EXPR, lcfirst, length EXPR, length,
+link OLDFILE,NEWFILE, listen SOCKET,QUEUESIZE, local EXPR, localtime EXPR,
+lock THING, log EXPR, log, lstat EXPR, lstat, m//, map BLOCK LIST, map
+EXPR,LIST, mkdir FILENAME,MASK, mkdir FILENAME, msgctl ID,CMD,ARG, msgget
+KEY,FLAGS, msgrcv ID,VAR,SIZE,TYPE,FLAGS, msgsnd ID,MSG,FLAGS, my EXPR, my
+TYPE EXPR, my EXPR : ATTRS, my TYPE EXPR : ATTRS, next LABEL, next, no
+Module VERSION LIST, no Module VERSION, no Module LIST, no Module, oct
+EXPR, oct, open FILEHANDLE,EXPR, open FILEHANDLE,MODE,EXPR, open
+FILEHANDLE,MODE,EXPR,LIST, open FILEHANDLE,MODE,REFERENCE, open FILEHANDLE,
+opendir DIRHANDLE,EXPR, ord EXPR, ord, our EXPR, our EXPR TYPE, our EXPR :
+ATTRS, our TYPE EXPR : ATTRS, pack TEMPLATE,LIST, package NAMESPACE,
+package, pipe READHANDLE,WRITEHANDLE, pop ARRAY, pop, pos SCALAR, pos,
+print FILEHANDLE LIST, print LIST, print, printf FILEHANDLE FORMAT, LIST,
+printf FORMAT, LIST, prototype FUNCTION, push ARRAY,LIST, q/STRING/,
+qq/STRING/, qr/STRING/, qx/STRING/, qw/STRING/, quotemeta EXPR, quotemeta,
+rand EXPR, rand, read FILEHANDLE,SCALAR,LENGTH,OFFSET, read
+FILEHANDLE,SCALAR,LENGTH, readdir DIRHANDLE, readline EXPR, readlink EXPR,
+readlink, readpipe EXPR, recv SOCKET,SCALAR,LENGTH,FLAGS, redo LABEL, redo,
+ref EXPR, ref, rename OLDNAME,NEWNAME, require VERSION, require EXPR,
+require, reset EXPR, reset, return EXPR, return, reverse LIST, rewinddir
+DIRHANDLE, rindex STR,SUBSTR,POSITION, rindex STR,SUBSTR, rmdir FILENAME,
+rmdir, s///, scalar EXPR, seek FILEHANDLE,POSITION,WHENCE, seekdir
+DIRHANDLE,POS, select FILEHANDLE, select, select RBITS,WBITS,EBITS,TIMEOUT,
+semctl ID,SEMNUM,CMD,ARG, semget KEY,NSEMS,FLAGS, semop KEY,OPSTRING, send
 SOCKET,MSG,FLAGS,TO, send SOCKET,MSG,FLAGS, setpgrp PID,PGRP, setpriority
 WHICH,WHO,PRIORITY, setsockopt SOCKET,LEVEL,OPTNAME,OPTVAL, shift ARRAY,
 shift, shmctl ID,CMD,ARG, shmget KEY,SIZE,FLAGS, shmread ID,VAR,POS,SIZE,
@@ -2374,8 +2373,8 @@ LC_NUMERIC, LC_TIME, LANG
 
 =item Important Caveats
 
-Input and Output Disciplines, Regular Expressions, C<use utf8> still needed
-to enable UTF-8/UTF-EBCDIC in scripts
+Input and Output Layers, Regular Expressions, C<use utf8> still needed to
+enable UTF-8/UTF-EBCDIC in scripts
 
 =item Byte and Character Semantics
 
@@ -2662,9 +2661,9 @@ ExtUtils::Mkbootstrap, ExtUtils::Mksymlists, ExtUtils::Packlist,
 ExtUtils::testlib, Fatal, Fcntl, File::Basename, File::CheckTree,
 File::Compare, File::Copy, File::DosGlob, File::Find, File::Path,
 File::Spec, File::Spec::Cygwin, File::Spec::Epoc, File::Spec::Functions,
-File::Spec::Mac, File::Spec::NW5, File::Spec::OS2, File::Spec::Unix,
-File::Spec::VMS, File::Spec::Win32, File::Temp, File::stat, FileCache,
-FileHandle, Filter::Simple, FindBin, Getopt::Long, Getopt::Std, Hash::Util,
+File::Spec::Mac, File::Spec::OS2, File::Spec::Unix, File::Spec::VMS,
+File::Spec::Win32, File::Temp, File::stat, FileCache, FileHandle,
+Filter::Simple, FindBin, Getopt::Long, Getopt::Std, Hash::Util,
 I18N::Collate, I18N::LangTags, I18N::LangTags::List, IO, IPC::Open2,
 IPC::Open3, Locale::Constants, Locale::Country, Locale::Currency,
 Locale::Language, Locale::Maketext, Locale::Maketext::TPJ13,
@@ -2675,13 +2674,13 @@ Memoize::NDBM_File, Memoize::SDBM_File, Memoize::Storable, NDBM_File, NEXT,
 Net::Cmd, Net::Config, Net::Domain, Net::FTP, Net::NNTP, Net::Netrc,
 Net::POP3, Net::Ping, Net::SMTP, Net::Time, Net::hostent, Net::libnetFAQ,
 Net::netent, Net::protoent, Net::servent, O, ODBM_File, Opcode, POSIX,
-PerlIO, Pod::Checker, Pod::Find, Pod::Functions, Pod::Html,
-Pod::InputObjects, Pod::LaTeX, Pod::Man, Pod::ParseLink, Pod::ParseUtils,
-Pod::Parser, Pod::Plainer, Pod::Select, Pod::Text, Pod::Text::Color,
-Pod::Text::Overstrike, Pod::Text::Termcap, Pod::Usage, SDBM_File, Safe,
-Search::Dict, SelectSaver, SelfLoader, Shell, Socket, Storable, Switch,
-Symbol, Term::ANSIColor, Term::Cap, Term::Complete, Term::ReadLine, Test,
-Test::Builder, Test::Harness, Test::Harness::Assert,
+PerlIO, PerlIO::via::QuotedPrint, Pod::Checker, Pod::Find, Pod::Functions,
+Pod::Html, Pod::InputObjects, Pod::LaTeX, Pod::Man, Pod::ParseLink,
+Pod::ParseUtils, Pod::Parser, Pod::Plainer, Pod::Select, Pod::Text,
+Pod::Text::Color, Pod::Text::Overstrike, Pod::Text::Termcap, Pod::Usage,
+SDBM_File, Safe, Search::Dict, SelectSaver, SelfLoader, Shell, Socket,
+Storable, Switch, Symbol, Term::ANSIColor, Term::Cap, Term::Complete,
+Term::ReadLine, Test, Test::Builder, Test::Harness, Test::Harness::Assert,
 Test::Harness::Iterator, Test::Harness::Straps, Test::More, Test::Simple,
 Test::Tutorial, Text::Abbrev, Text::Balanced, Text::ParseWords,
 Text::Soundex, Text::Tabs, Text::Wrap, Thread, Thread::Queue,
@@ -2700,17 +2699,45 @@ Unicode::UCD, User::grent, User::pwent, Win32
 
 =item Africa
 
+South Africa
+
 =item Asia
+
+China, India, Indonesia, Israel, Japan, Korea, Philippines, Russian
+Federation, Saudi Arabia, Singapore, South Korea, Taiwan, Thailand
 
 =item Central America
 
+Costa Rica
+
 =item Europe
+
+Austria, Belgium, Bulgaria, Croatia, Czech Republic, Denmark, Estonia,
+Finland, France, Germany, Greece, Hungary, Iceland, Ireland, Italy, Latvia,
+Lithuania, Netherlands, Norway, Poland, Portugal, Romania, Russia,
+Slovakia, Slovenia, Spain, Sweden, Switzerland, Turkey, Ukraine, United
+Kingdom
 
 =item North America
 
+Alberta, Manitoba, Nova Scotia, Ontario, Quebec, Mexico
+
+=item United States
+
+Alabama, California, Colorado, Delaware, District of Columbia, Florida,
+Illinois, Indiana, Kentucky, Massachusetts, Michigan, New Jersey, New York,
+North Carolina, Ohio, Oklahoma, Oregon, Pennsylvania, Tennessee, Texas,
+Utah, Virginia, ashington, Wisconsin
+
 =item Oceania
 
+Australia, New Zealand
+
 =item South America
+
+Argentina, Brazil, Chile
+
+=item RSYNC Mirrors
 
 =back
 
@@ -4661,7 +4688,7 @@ PERLIO_F_TEMP, PERLIO_F_OPEN, PERLIO_F_FASTGETS
 
 =item Methods in Detail
 
-size, name, size, kind, PERLIO_K_BUFFERED, PERLIO_K_RAW, PERLIO_K_CANCRLF,
+fsize, name, size, kind, PERLIO_K_BUFFERED, PERLIO_K_RAW, PERLIO_K_CANCRLF,
 PERLIO_K_FASTGETS, PERLIO_K_MULTIARG, Pushed, Popped, Open, Binmode,
 Getarg, Fileno, Dup, Read, Write, Seek, Tell, Close, Flush, Fill, Eof,
 Error,	Clearerr, Setlinebuf, Get_base, Get_bufsiz, Get_ptr, Get_cnt,
@@ -4673,7 +4700,7 @@ Set_ptrcnt
 
 =item Extension Layers
 
-":encoding", ":Scalar", ":Via"
+":encoding", ":scalar", ":via"
 
 =back
 
@@ -5347,6 +5374,8 @@ I<The Road goes ever on and on, down from the door where it began.>
 =item BeOS
 
 =item Cygwin "unable to remap"
+
+=item Cygwin ndbm tests fail on FAT
 
 =item ext/threads/t/libc
 
@@ -7202,6 +7231,8 @@ I<dlsym()>, Win9x and C<d_eofnblk>, Compiler/Preprocessor defines
 
 =item File Permissions on Cygwin
 
+=item NDBM_File does not work on FAT filesystems
+
 =item Script Portability on Cygwin
 
 Pathnames, Text/Binary, F<.exe>, chown(), Miscellaneous
@@ -7343,7 +7374,7 @@ DJGPP, Pthreads
 
 =item $^X doesn't always contain a full path in FreeBSD
 
-=item Perl will no more be part of "base FreeBSD"
+=item Perl will no longer be part of "base FreeBSD"
 
 =back
 
@@ -7735,11 +7766,13 @@ C<OS2::Error(do_harderror,do_exception)>, C<OS2::Errors2Drive(drive)>,
 OS2::SysInfo(), OS2::BootDrive(), C<OS2::MorphPM(serve)>,
 C<OS2::UnMorphPM(serve)>, C<OS2::Serve_Messages(force)>,
 C<OS2::Process_Messages(force [, cnt])>, C<OS2::_control87(new,mask)>,
-OS2::get_control87(), C<OS2::set_control87_em(new=MCW_EM,mask=MCW_EM)>
+OS2::get_control87(), C<OS2::set_control87_em(new=MCW_EM,mask=MCW_EM)>,
+C<OS2::DLLname([how [, \&xsub]])>
 
 =item Prebuilt variables:
 
-$OS2::emx_rev, $OS2::emx_env, $OS2::os_ver
+$OS2::emx_rev, $OS2::emx_env, $OS2::os_ver, $OS2::is_aout, $OS2::can_fork,
+$OS2::nsyserror
 
 =item Misfeatures
 
@@ -7752,7 +7785,10 @@ C<flock>
 
 =item Centralized management of resources
 
-C<HAB>, C<HMQ>
+C<HAB>, C<HMQ>, Treating errors reported by OS/2 API,
+C<CheckOSError(expr)>, C<CheckWinError(expr)>, C<SaveWinError(expr)>,
+C<SaveCroakWinError(expr,die,name1,name2)>, C<WinError_2_Perl_rc>,
+C<FillWinError>, C<FillOSError(rc)>, Loading DLLs and ordinals in DLLs
 
 =back
 
@@ -7797,6 +7833,8 @@ C<HAB>, C<HMQ>
 =item Evolution
 
 =over 4
+
+=item Text-mode filehandles
 
 =item Priorities
 
@@ -8303,37 +8341,6 @@ method, locked
 
 =back
 
-=head2 threadshared::queue, threads::shared::queue - thread-safe queues
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item FUNCTIONS AND METHODS
-
-new, enqueue LIST, dequeue, dequeue_nb, pending
-
-=item SEE ALSO
-
-=back
-
-=head2 threadshared::semaphore, threads::shared::semaphore - thread-safe
-semaphores
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item FUNCTIONS AND METHODS
-
-new, new NUMBER, down, down NUMBER, up, up NUMBER
-
-=back
-
 =head2 threadshared::shared, threads::shared - Perl extension for sharing
 data structures between threads
 
@@ -8370,17 +8377,19 @@ from perl
 =item DESCRIPTION
 
 $thread = threads->create(function, LIST), $thread->join, $thread->detach,
-threads->self, $thread->tid, threads->yield();, threads->list();, async
-BLOCK;
+threads->self, $thread->tid, threads->object( tid ), threads->yield();,
+threads->list();, async BLOCK;
 
 =item WARNINGS
 
 A thread exited while %d other threads were still running
 
-=item BUGS / TODO
+=item TODO
 
-Parent-Child threads, tid is I32, Returning objects, PERL_OLD_SIGNALS are
-not threadsafe, will not be
+=item BUGS
+
+Parent-Child threads, Returning objects, Creating threads inside BEGIN
+blocks, PERL_OLD_SIGNALS are not threadsafe, will not be
 
 =item AUTHOR and COPYRIGHT
 
@@ -8828,7 +8837,7 @@ operations
 
 =back
 
-=head2 open - perl pragma to set default disciplines for input and output
+=head2 open - perl pragma to set default PerlIO layers for input and output
 
 =over 4
 
@@ -9039,17 +9048,19 @@ from perl
 =item DESCRIPTION
 
 $thread = threads->create(function, LIST), $thread->join, $thread->detach,
-threads->self, $thread->tid, threads->yield();, threads->list();, async
-BLOCK;
+threads->self, $thread->tid, threads->object( tid ), threads->yield();,
+threads->list();, async BLOCK;
 
 =item WARNINGS
 
 A thread exited while %d other threads were still running
 
-=item BUGS / TODO
+=item TODO
 
-Parent-Child threads, tid is I32, Returning objects, PERL_OLD_SIGNALS are
-not threadsafe, will not be
+=item BUGS
+
+Parent-Child threads, Returning objects, Creating threads inside BEGIN
+blocks, PERL_OLD_SIGNALS are not threadsafe, will not be
 
 =item AUTHOR and COPYRIGHT
 
@@ -9080,37 +9091,6 @@ cond_broadcast VARIABLE
 =item AUTHOR
 
 =item SEE ALSO
-
-=back
-
-=head2 threadshared::queue, threads::shared::queue - thread-safe queues
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item FUNCTIONS AND METHODS
-
-new, enqueue LIST, dequeue, dequeue_nb, pending
-
-=item SEE ALSO
-
-=back
-
-=head2 threadshared::semaphore, threads::shared::semaphore - thread-safe
-semaphores
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item FUNCTIONS AND METHODS
-
-new, new NUMBER, down, down NUMBER, up, up NUMBER
 
 =back
 
@@ -16546,7 +16526,7 @@ name space
 
 =item DESCRIPTION
 
-unix, stdio, perlio, crlf, utf8, bytes, raw
+unix, stdio, perlio, crlf, utf8, bytes, raw, pop
 
 =over 4
 
@@ -16562,41 +16542,6 @@ unix, stdio, perlio, crlf, utf8, bytes, raw
 
 =back
 
-=head2 PerlIO::Scalar - support module for in-memory IO.
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=back
-
-=head2 PerlIO::Via - Helper class for PerlIO layers implemented in perl
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-$class->PUSHED([$mode[,$fh]]), $obj->POPPED([$fh]),
-$class->OPEN($path,$mode[,$fh]), $obj->BINMODE([,$fh]),
-$class->FDOPEN($fd), $class->SYSOPEN($path,$imode,$perm,$fh),
-$obj->FILENO($fh), $obj->READ($buffer,$len,$fh), $obj->WRITE($buffer,$fh),
-$obj->FILL($fh), $obj->CLOSE($fh), $obj->SEEK($posn,$whence,$fh),
-$obj->TELL($fh), $obj->UNREAD($buffer,$fh), $obj->FLUSH($fh),
-$obj->SETLINEBUF($fh), $obj->CLEARERR($fh), $obj->ERROR($fh),
-$obj->EOF($fh)
-
-=over 4
-
-=item Example - a Hexadecimal Handle
-
-=back
-
-=back
-
 =head2 PerlIO::encoding - encoding layer
 
 =over 4
@@ -16606,6 +16551,59 @@ $obj->EOF($fh)
 =item DESCRIPTION
 
 =item SEE ALSO
+
+=back
+
+=head2 PerlIO::scalar - support module for in-memory IO.
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+=head2 PerlIO::via - Helper class for PerlIO layers implemented in perl
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item EXPECTED METHODS
+
+$class->PUSHED([$mode[,$fh]]), $obj->POPPED([$fh]),
+$obj->OPEN($path,$mode[,$fh]), $obj->BINMODE([,$fh]),
+$obj->FDOPEN($fd[,$fh]), $obj->SYSOPEN($path,$imode,$perm,[,$fh]),
+$obj->FILENO($fh), $obj->READ($buffer,$len,$fh), $obj->WRITE($buffer,$fh),
+$obj->FILL($fh), $obj->CLOSE($fh), $obj->SEEK($posn,$whence,$fh),
+$obj->TELL($fh), $obj->UNREAD($buffer,$fh), $obj->FLUSH($fh),
+$obj->SETLINEBUF($fh), $obj->CLEARERR($fh), $obj->ERROR($fh),
+$obj->EOF($fh)
+
+=item EXAMPLES
+
+=over 4
+
+=item Example - a Hexadecimal Handle
+
+=back
+
+=back
+
+=head2 PerlIO::via::QuotedPrint - PerlIO layer for quoted-printable strings
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=item COPYRIGHT
 
 =back
 
@@ -18947,11 +18945,9 @@ join, eval, detach, equal, tid, flags, done
 
 =back
 
-=head2 Thread::Queue - thread-safe queues (for old code only)
+=head2 Thread::Queue - thread-safe queues
 
 =over 4
-
-=item CAVEAT
 
 =item SYNOPSIS
 
@@ -18965,11 +18961,9 @@ new, enqueue LIST, dequeue, dequeue_nb, pending
 
 =back
 
-=head2 Thread::Semaphore - thread-safe semaphores (for old code only)
+=head2 Thread::Semaphore - thread-safe semaphores
 
 =over 4
-
-=item CAVEAT
 
 =item SYNOPSIS
 
@@ -18982,8 +18976,11 @@ new, new NUMBER, down, down NUMBER, up, up NUMBER
 =back
 
 =head2 Thread::Signal - Start a thread which runs signal handlers reliably
+(for old code)
 
 =over 4
+
+=item CAVEAT
 
 =item SYNOPSIS
 
@@ -19551,51 +19548,6 @@ Win32::Sleep(TIME), Win32::Spawn(COMMAND, ARGS, PID),
 Win32::UnregisterServer(LIBRARYNAME)
 
 =back
-
-=back
-
-=head2 XS::APItest - Test the perl C API
-
-=over 4
-
-=item SYNOPSIS
-
-=item ABSTRACT
-
-=item DESCRIPTION
-
-=over 4
-
-=item EXPORT
-
-B<print_double>, B<print_long_double>, B<have_long_double>, B<print_nv>,
-B<print_iv>, B<print_uv>, B<print_int>, B<print_long>, B<print_float>
-
-=back
-
-=item SEE ALSO
-
-=item AUTHORS
-
-=item COPYRIGHT AND LICENSE
-
-=back
-
-=head2 XS::Typemap - module to test the XS typemaps distributed with perl
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=back
-
-=over 4
-
-=item NOTES
-
-=item AUTHOR
 
 =back
 

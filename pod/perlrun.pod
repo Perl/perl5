@@ -917,13 +917,13 @@ are disabled.
 Arranges for all accesses go straight to the lowest buffered layer provided
 by the configration. That is it strips off any layers above that layer.
 
-In Perl 5.6 and some books the C<:raw> layer (also called a discipline)
-is documented as the inverse of the C<:crlf> layer. That is no longer
-the case - other layers which would alter binary nature of the
-stream are also disabled.  If you want UNIX line endings on a platform
-that normally does CRLF translation, but still want UTF-8 or encoding
-defaults the appropriate thing to do is to add C<:perlio> to PERLIO
-environment variable.
+In Perl 5.6 and some books the C<:raw> layer (previously sometimes also
+referred to as a "discipline") is documented as the inverse of the
+C<:crlf> layer. That is no longer the case - other layers which would
+alter binary nature of the stream are also disabled.  If you want UNIX
+line endings on a platform that normally does CRLF translation, but still
+want UTF-8 or encoding defaults the appropriate thing to do is to add
+C<:perlio> to PERLIO environment variable.
 
 =item :stdio
 

@@ -177,6 +177,9 @@ You may not even need to write the module.  Check whether it's already
 been done in Perl, and avoid re-inventing the wheel unless you have a 
 good reason.
 
+Good places to look for pre-existing modules include
+http://search.cpan.org/ and asking on modules@perl.org
+
 If an existing module B<almost> does what you want, consider writing a
 patch, writing a subclass, or otherwise extending the existing module
 rather than rewriting it.

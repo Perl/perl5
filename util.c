@@ -3391,6 +3391,7 @@ Perl_my_fflush_all(pTHX)
     return PerlIO_flush(NULL);
 #else
 # if defined(HAS__FWALK)
+    extern int fflush(FILE *);
     /* undocumented, unprototyped, but very useful BSDism */
     extern void _fwalk(int (*)(FILE *));
     _fwalk(&fflush);

@@ -337,6 +337,12 @@ these options, these tests will fail (listing not updated yet):
   lib/sdbm.t            2
   op/stat.t             9, 20 (.tmp not an executable extension)
 
+=head2 NDBM_File does not work on FAT filesystems
+
+Do not install NDBM_File on FAT filesystem.  It can be built on a FAT
+filesystem, but many ndbm tests will fail.  With NTFS, there should be
+no problems either way.
+
 =head2 Script Portability on Cygwin
 
 Cygwin does an outstanding job of providing UNIX-like semantics on top of

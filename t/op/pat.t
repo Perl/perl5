@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..910\n";
+print "1..922\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2884,3 +2884,21 @@ EOF
 print "d" =~ /\p{InConsonant}/ ? "ok $test\n" : "not ok $test\n"; $test++;
 print "e" =~ /\P{InConsonant}/ ? "ok $test\n" : "not ok $test\n"; $test++;
 
+{
+    print "# [ID 20020630.002] utf8 regex only matches 32k\n";
+    $test = 911;
+    for ([ 'byte', "\x{ff}" ], [ 'utf8', "\x{1ff}" ]) {
+	my($type, $char) = @$_;
+	for my $len (32000, 32768, 33000) {
+	    my $s = $char . "f" x $len;
+	    my $r = $s =~ /$char([f]*)/gc;
+	    print $r ? "ok $test\n" : "not ok $test\t# <$type x $len> fail\n";
+	    ++$test;
+	    print +(!$r or pos($s) == $len + 1) ? "ok $test\n"
+		: "not ok $test\t# <$type x $len> pos @{[ pos($s) ]}\n";
+	    ++$test;
+	}
+    }
+}
+
+$test = 923;

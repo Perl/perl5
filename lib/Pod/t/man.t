@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: man.t,v 1.1 2002/01/02 09:03:28 eagle Exp $
+# $Id: man.t,v 1.2 2002/06/23 19:16:25 eagle Exp $
 #
 # man.t -- Additional specialized tests for Pod::Man.
 #
@@ -17,7 +17,7 @@ BEGIN {
     }
     unshift (@INC, '../blib/lib');
     $| = 1;
-    print "1..2\n";
+    print "1..3\n";
 }
 
 END {
@@ -83,4 +83,14 @@ gcc \- GNU project C and C++ compiler
 .SH "\*(C+ NOTES"
 .IX Header " NOTES"
 Other mentions of \*(C+.
+###
+
+###
+=head1 PERIODS
+
+This C<.> should be quoted.
+###
+.SH "PERIODS"
+.IX Header "PERIODS"
+This \f(CW\*(C`.\*(C'\fR should be quoted.
 ###

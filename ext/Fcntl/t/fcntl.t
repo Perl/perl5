@@ -12,7 +12,7 @@ BEGIN {
 
 use Fcntl;
 
-print "1..6\n";
+print "1..7\n";
 
 print "ok 1\n";
 
@@ -45,7 +45,24 @@ if (sysopen(my $wo, "fcntl$$", O_WRONLY|O_CREAT)) {
     print "not ok 2 # sysopen O_WRONLY failed: $!\n";
 }
 
+# Opening of character special devices gets special treatment in doio.c
+# Didn't work as of perl-5.8.0-RC2.
+use File::Spec;   # To portably get /dev/null
+
+my $devnull = File::Spec->devnull;
+if (-c $devnull) {
+    if (sysopen(my $wo, $devnull,  O_WRONLY)) {
+	print "ok 7 # open /dev/null O_WRONLY\n";
+	close($wo);
+    }
+    else {
+        print "not ok 7 # open /dev/null O_WRONLY\n";
+    }
+} 
+else {
+    print "ok 7 # Skipping /dev/null sysopen O_WRONLY test\n";
+}
+
 END {
     1 while unlink "fcntl$$";
 }
-

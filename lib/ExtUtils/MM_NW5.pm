@@ -124,10 +124,10 @@ XS_DEFINE_VERSION = -D\$(XS_VERSION_MACRO)=\\\"\$(XS_VERSION)\\\"
     # Copy this to makefile as INCLUDE = d:\...;d:\;
     (my $inc = $Config{'incpath'}) =~ s/([ ]*)-I/;/g;
 
-    # Get the additional include path and append to INCLUDE, keeping it
-    # in INC will give problems during compilation, hence reset it
-    # after getting the value
-    $self->{INC} = '';
+    # Get the additional include path from the user through the command prompt
+    # and append to INCLUDE
+#    $self->{INC} = '';
+    push @m, "INC = $self->{'INC'}\n";
 
     push @m, qq{
 INCLUDE = $inc;

@@ -1,6 +1,6 @@
 package threads;
 
-use 5.007_003;
+use 5.008;
 use strict;
 use warnings;
 use Config;
@@ -65,6 +65,14 @@ sub async (&;@) {
     return threads->new($cref,@_);
 }
 
+sub object {
+    return undef unless @_ > 1;
+    foreach (threads->list) {
+        return $_ if $_->tid == $_[1];
+    }
+    return undef;
+}
+
 $threads::threads = 1;
 
 bootstrap threads $VERSION;
@@ -97,6 +105,7 @@ threads - Perl extension allowing use of interpreter based threads from perl
     $thread->detach();
 
     $thread = threads->self();
+    $thread = threads->object( $tid );
 
     $thread->tid();
     threads->tid();
@@ -111,7 +120,7 @@ threads - Perl extension allowing use of interpreter based threads from perl
 Perl 5.6 introduced something called interpreter threads.  Interpreter
 threads are different from "5005threads" (the thread model of Perl
 5.005) by creating a new perl interpreter per thread and not sharing
-any data or state between threads.
+any data or state between threads by default.
 
 Prior to perl 5.8 this has only been available to people embedding
 perl and for emulating fork() on windows.
@@ -121,12 +130,13 @@ important to note that variables are not shared between threads, all
 variables are per default thread local.  To use shared variables one
 must use threads::shared.
 
-It is also important to note that you must enable threads by
-doing C<use threads> as early as possible and that it is not possible
-to enable threading inside an eval "";  In particular, if you are
-intending to share variables with threads::shared, you must
-C<use threads> before you C<use threads::shared> and threads will emit
-a warning if you do it the other way around.
+It is also important to note that you must enable threads by doing
+C<use threads> as early as possible in the script itself and that it
+is not possible to enable threading inside an C<eval "">, C<do>,
+C<require>, or C<use>.  In particular, if you are intending to share
+variables with threads::shared, you must C<use threads> before you
+C<use threads::shared> and C<threads> will emit a warning if you do
+it the other way around.
 
 =over
 
@@ -138,18 +148,18 @@ object. The new() method is an alias for create().
 
 =item $thread->join
 
-This will wait for the corresponding thread to join. When the thread finishes,
-join() will return the return values of the entry point function. If the
-thread has been detached, an error will be thrown. If the program
-exits without all other threads having been either joined or detached,
-then a warning will be issued. (A program exits either because one of its
-threads explicitly calls exit(), or in the case of the main thread, reaches
-the end of the main program file.)
+This will wait for the corresponding thread to join. When the thread
+finishes, join() will return the return values of the entry point
+function. If the thread has been detached, an error will be thrown.
+If the program exits without all other threads having been either
+joined or detached, then a warning will be issued. (A program exits
+either because one of its threads explicitly calls exit(), or in the
+case of the main thread, reaches the end of the main program file.)
 
 =item $thread->detach
 
-Will make the thread unjoinable, and cause any eventual return value to be
-discarded.
+Will make the thread unjoinable, and cause any eventual return value
+to be discarded.
 
 =item threads->self
 
@@ -157,14 +167,20 @@ This will return the thread object for the current thread.
 
 =item $thread->tid
 
-This will return the id of the thread.  Thread IDs are integers, with the
-main thread in a program being 0.  Currently Perl assigns a unique tid to
-every thread ever created in your program, assigning the first thread to
-be created a tid of 1, and increasing the tid by 1 for each new thread
-that's created.
+This will return the id of the thread.  Thread IDs are integers, with
+the main thread in a program being 0.  Currently Perl assigns a unique
+tid to every thread ever created in your program, assigning the first
+thread to be created a tid of 1, and increasing the tid by 1 for each
+new thread that's created.
 
 NB the class method C<< threads->tid() >> is a quick way to get the
 current thread id if you don't have your thread object handy.
+
+=item threads->object( tid )
+
+This will return the thread object for the thread associated with the
+specified tid.  Returns undef if there is no thread associated with the tid
+or no tid is specified or the specified tid is undef.
 
 =item threads->yield();
 
@@ -197,11 +213,11 @@ returns a thread object.
 A thread (not necessarily the main thread) exited while there were
 still other threads running.  Usually it's a good idea to first collect
 the return values of the created threads by joining them, and only then
-exit from then main thread.
+exit from the main thread.
 
 =back
 
-=head1 BUGS / TODO
+=head1 TODO
 
 The current implementation of threads has been an attempt to get
 a correct threading system working that could be built on, 
@@ -212,6 +228,8 @@ also the cost of returning values can be large. These are areas
 were there most likely will be work done to optimize what data
 that needs to be cloned.
 
+=head1 BUGS
+
 =over
 
 =item Parent-Child threads.
@@ -219,20 +237,31 @@ that needs to be cloned.
 On some platforms it might not be possible to destroy "parent"
 threads while there are still existing child "threads".
 
-This will be possibly be fixed in later versions of perl.
-
+This will possibly be fixed in later versions of perl.
+  
 =item tid is I32
 
-The tid is a 32 bit integer, it can potentially overflow. 
+The thread id is a 32 bit integer, it can potentially overflow.
 This might be fixed in a later version of perl.
 
 =item Returning objects
 
 When you return an object the entire stash that the object is blessed
-as well. This will lead to a large memory usage.
-The ideal situation would be to detect the original stash if it existed.
+as well.  This will lead to a large memory usage.  The ideal situation
+would be to detect the original stash if it existed.
+
+=item Creating threads inside BEGIN blocks
+
+Creating threads inside BEGIN blocks (or during the compilation phase
+in general) does not work.  (In Windows, trying to use fork() inside
+BEGIN blocks is an equally losing proposition, since it has been
+implemented in very much the same way as threads.)
 
 =item PERL_OLD_SIGNALS are not threadsafe, will not be.
+
+If your Perl has been built with PERL_OLD_SIGNALS (one has
+to explicitly add that symbol to ccflags, see C<perl -V>),
+signal handling is not threadsafe.
 
 =back
 

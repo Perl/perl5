@@ -5313,9 +5313,11 @@ Perl_sv_pos_b2u(pTHX_ register SV *sv, I32* offsetp)
     send = s + *offsetp;
     len = 0;
     while (s < send) {
-	STRLEN n;
-	/* Call utf8n_to_uvchr() to validate the sequence */
-	utf8n_to_uvchr(s, UTF8SKIP(s), &n, 0);
+	STRLEN n = 1;
+	/* Call utf8n_to_uvchr() to validate the sequence
+	 * (unless a simple non-UTF character) */
+	if (!UTF8_IS_INVARIANT(*s))
+	    utf8n_to_uvchr(s, UTF8SKIP(s), &n, 0);
 	if (n > 0) {
 	    s += n;
 	    len++;
@@ -10150,16 +10152,24 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     Copy(proto_perl->Inexttype, PL_nexttype, 5,	I32);
     PL_nexttoke		= proto_perl->Inexttoke;
 
-    PL_linestr		= sv_dup_inc(proto_perl->Ilinestr, param);
-    i = proto_perl->Ibufptr - SvPVX(proto_perl->Ilinestr);
-    PL_bufptr		= SvPVX(PL_linestr) + (i < 0 ? 0 : i);
-    i = proto_perl->Ioldbufptr - SvPVX(proto_perl->Ilinestr);
-    PL_oldbufptr	= SvPVX(PL_linestr) + (i < 0 ? 0 : i);
-    i = proto_perl->Ioldoldbufptr - SvPVX(proto_perl->Ilinestr);
-    PL_oldoldbufptr	= SvPVX(PL_linestr) + (i < 0 ? 0 : i);
+    if (SvANY(proto_perl->Ilinestr)) {
+	PL_linestr		= sv_dup_inc(proto_perl->Ilinestr, param);
+	i = proto_perl->Ibufptr - SvPVX(proto_perl->Ilinestr);
+	PL_bufptr		= SvPVX(PL_linestr) + (i < 0 ? 0 : i);
+	i = proto_perl->Ioldbufptr - SvPVX(proto_perl->Ilinestr);
+	PL_oldbufptr	= SvPVX(PL_linestr) + (i < 0 ? 0 : i);
+	i = proto_perl->Ioldoldbufptr - SvPVX(proto_perl->Ilinestr);
+	PL_oldoldbufptr	= SvPVX(PL_linestr) + (i < 0 ? 0 : i);
+	i = proto_perl->Ilinestart - SvPVX(proto_perl->Ilinestr);
+	PL_linestart	= SvPVX(PL_linestr) + (i < 0 ? 0 : i);
+    }
+    else {
+        PL_linestr = NEWSV(65,79);
+        sv_upgrade(PL_linestr,SVt_PVIV);
+        sv_setpvn(PL_linestr,"",0);
+	PL_bufptr = PL_oldbufptr = PL_oldoldbufptr = PL_linestart = SvPVX(PL_linestr);
+    }
     PL_bufend		= SvPVX(PL_linestr) + SvCUR(PL_linestr);
-    i = proto_perl->Ilinestart - SvPVX(proto_perl->Ilinestr);
-    PL_linestart	= SvPVX(PL_linestr) + (i < 0 ? 0 : i);
     PL_pending_ident	= proto_perl->Ipending_ident;
     PL_sublex_info	= proto_perl->Isublex_info;	/* XXX not quite right */
 
@@ -10180,11 +10190,18 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_padix_floor		= proto_perl->Ipadix_floor;
     PL_pad_reset_pending	= proto_perl->Ipad_reset_pending;
 
-    i = proto_perl->Ilast_uni - SvPVX(proto_perl->Ilinestr);
-    PL_last_uni		= SvPVX(PL_linestr) + (i < 0 ? 0 : i);
-    i = proto_perl->Ilast_lop - SvPVX(proto_perl->Ilinestr);
-    PL_last_lop		= SvPVX(PL_linestr) + (i < 0 ? 0 : i);
-    PL_last_lop_op	= proto_perl->Ilast_lop_op;
+    if (SvANY(proto_perl->Ilinestr)) {
+	i = proto_perl->Ilast_uni - SvPVX(proto_perl->Ilinestr);
+	PL_last_uni		= SvPVX(PL_linestr) + (i < 0 ? 0 : i);
+	i = proto_perl->Ilast_lop - SvPVX(proto_perl->Ilinestr);
+	PL_last_lop		= SvPVX(PL_linestr) + (i < 0 ? 0 : i);
+	PL_last_lop_op	= proto_perl->Ilast_lop_op;
+    }
+    else {
+	PL_last_uni	= SvPVX(PL_linestr);
+	PL_last_lop	= SvPVX(PL_linestr);
+	PL_last_lop_op	= 0;
+    }
     PL_in_my		= proto_perl->Iin_my;
     PL_in_my_stash	= hv_dup(proto_perl->Iin_my_stash, param);
 #ifdef FCRYPT
@@ -10514,7 +10531,7 @@ The PV of the sv is returned.
 char *
 Perl_sv_recode_to_utf8(pTHX_ SV *sv, SV *encoding)
 {
-     if (SvPOK(sv) && !DO_UTF8(sv) && SvROK(encoding)) {
+    if (SvPOK(sv) && !DO_UTF8(sv) && SvROK(encoding)) {
 	  SV *uni;
 	  STRLEN len;
 	  char *s;
@@ -10525,7 +10542,16 @@ Perl_sv_recode_to_utf8(pTHX_ SV *sv, SV *encoding)
 	  EXTEND(SP, 3);
 	  XPUSHs(encoding);
 	  XPUSHs(sv);
+/* 
+  NI-S 2002/07/09
+  Passing sv_yes is wrong - it needs to be or'ed set of constants
+  for Encode::XS, while UTf-8 decode (currently) assumes a true value means 
+  remove converted chars from source.
+
+  Both will default the value - let them.
+  
 	  XPUSHs(&PL_sv_yes);
+*/
 	  PUTBACK;
 	  call_method("decode", G_SCALAR);
 	  SPAGAIN;
@@ -10541,8 +10567,9 @@ Perl_sv_recode_to_utf8(pTHX_ SV *sv, SV *encoding)
 	  FREETMPS;
 	  LEAVE;
 	  SvUTF8_on(sv);
-     }
-     return SvPVX(sv);
+    }
+    return SvPVX(sv);
 }
+
 
 

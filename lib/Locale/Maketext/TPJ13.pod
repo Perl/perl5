@@ -81,7 +81,7 @@ And you write:
   printf(gettext("I scanned %g %s."),
          $dir_scan_count,
          $dir_scan_count == 1 ?
-           gettext("directory") : gettext("directory"),
+           gettext("directory") : gettext("directories"),
   );
 
 But you then read in the gettext manual (Drepper, Miller, and Pinard 1995)
@@ -149,8 +149,8 @@ written, but this seems the way to go.  You mail off to the
 translators asking for translations for these four cases.  The
 Chinese guy replies with the one phrase that these all translate to in
 Chinese, and that phrase has two "%g"s in it, as it should -- but
-there's a problem.  He translates it word-for-word back: "To your
-question, in %g directories you would find %g answers."  The "%g"
+there's a problem.  He translates it word-for-word back: "In %g
+directories contains %g files match your query."  The %g
 slots are in an order reverse to what they are in English.  You wonder
 how you'll get gettext to handle that.
 

@@ -482,8 +482,6 @@ for reference.
 
 =head2 Perlbug remote interface
 
-=over 4
-
 There are three (3) remote administrative interfaces for modifying bug
 status, category, etc.  In all cases an admin must be first registered
 with the Perlbug database by sending an email request to
@@ -498,9 +496,12 @@ For more info on the web see
 
 	http://bugs.perl.org/perlbug.cgi?req=spec
 
+=over 4
+
 =item 1 http://bugs.perl.org
 
-Login via the web, (remove B<admin/> if only browsing), where interested Cc's, tests, patches and change-ids, etc. may be assigned.
+Login via the web, (remove B<admin/> if only browsing), where interested
+Cc's, tests, patches and change-ids, etc. may be assigned.
 
 	http://bugs.perl.org/admin/index.html
 
@@ -527,7 +528,8 @@ Where the address itself is the source for the commands:
 
 =item notes, patches, tests
 
-For patches and tests, the message body is assigned to the appropriate bug/s and forwarded to p5p for their attention.  
+For patches and tests, the message body is assigned to the appropriate
+bugs and forwarded to p5p for their attention.
 
 	To: test_<bugid1>_aix_close@bugs.perl.org
 	Subject: this is a test for the (now closed) aix bug
@@ -619,12 +621,11 @@ wanting to go about Perl development.
 
 =item The perl5-porters FAQ
 
-This is posted to perl5-porters at the beginning on every month, and
-should be available from http://perlhacker.org/p5p-faq ; alternatively,
-you can get the FAQ emailed to you by sending mail to
-C<perl5-porters-faq@perl.org>. It contains hints on reading
-perl5-porters, information on how perl5-porters works and how Perl
-development in general works.
+This should be available from http://simon-cozens.org/writings/p5p-faq ;
+alternatively, you can get the FAQ emailed to you by sending mail to
+C<perl5-porters-faq@perl.org>. It contains hints on reading perl5-porters,
+information on how perl5-porters works and how Perl development in general
+works.
 
 =back
 
@@ -944,7 +945,8 @@ operations in.
 
 The easiest way to examine the op tree is to stop Perl after it has
 finished parsing, and get it to dump out the tree. This is exactly what
-the compiler backends L<B::Terse|B::Terse> and L<B::Debug|B::Debug> do.
+the compiler backends L<B::Terse|B::Terse>, L<B::Concise|B::Concise>
+and L<B::Debug|B::Debug> do.
 
 Let's have a look at how Perl sees C<$a = $b + $c>:
 
@@ -1813,7 +1815,7 @@ aliases.
 
 =item coretest
 
-Run F<perl> on all but F<lib/*> tests.
+Run F<perl> on all core tests (F<t/*> and F<lib/[a-z]*> pragma tests).
 
 =item test.deparse
 

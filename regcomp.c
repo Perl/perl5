@@ -4882,9 +4882,13 @@ Perl_pregfree(pTHX_ struct regexp *r)
     if (!r || (--r->refcnt > 0))
 	return;
     DEBUG_r({
-         char *s = pv_uni_display(dsv, (U8*)r->precomp, r->prelen, 60,
-				  UNI_DISPLAY_REGEX);
-	 int len = SvCUR(dsv);
+	 int len;
+         char *s;
+
+	 s = (r->reganch & ROPT_UTF8) ? pv_uni_display(dsv, (U8*)r->precomp,
+		r->prelen, 60, UNI_DISPLAY_REGEX)
+            : pv_display(dsv, r->precomp, r->prelen, 0, 60);
+	 len = SvCUR(dsv);
 	 if (!PL_colorset)
 	      reginitcolors();
 	 PerlIO_printf(Perl_debug_log,

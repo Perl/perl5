@@ -29,6 +29,16 @@ my %PLATFORM;
 defined $PLATFORM || die "PLATFORM undefined, must be one of: @PLATFORM\n";
 exists $PLATFORM{$PLATFORM} || die "PLATFORM must be one of: @PLATFORM\n";
 
+my %exportperlmalloc =
+    (
+       Perl_malloc		=>	"malloc",
+       Perl_mfree		=>	"free",
+       Perl_realloc		=>	"realloc",
+       Perl_calloc		=>	"calloc",
+    );
+
+my $exportperlmalloc = $PLATFORM eq 'os2';
+
 my $config_sh   = "config.sh";
 my $config_h    = "config.h";
 my $thrdvar_h   = "thrdvar.h";
@@ -1131,6 +1141,7 @@ elsif ($PLATFORM eq 'os2') {
 
     @missing = grep { !exists $mapped{$_} }
 		    keys %export;
+    @missing = grep { !exists $exportperlmalloc{$_} } @missing;
     delete $export{$_} foreach @missing;
 }
 elsif ($PLATFORM eq 'MacOS') {
@@ -1304,6 +1315,8 @@ sub emit_symbol {
 
 sub output_symbol {
     my $symbol = shift;
+    $symbol = $exportperlmalloc{$symbol}
+        if $exportperlmalloc and exists $exportperlmalloc{$symbol};
     if ($PLATFORM =~ /^win(?:32|ce)$/) {
 	$symbol = "_$symbol" if $CCTYPE eq 'BORLAND';
 	print "\t$symbol\n";

@@ -129,7 +129,7 @@ ${"$mbf\::precision"} = undef;		# reset
 
 ${"$mbi\::precision"} = undef; ${"$mbf\::precision"} = undef;
 ${"$mbi\::accuracy"} = 4; ${"$mbf\::accuracy"} = undef;
-ok (Math::BigFloat->new('123.456'),'123.456');
+ok ($mbf->new('123.456'),'123.456');
 ${"$mbi\::accuracy"} = undef; 		# reset
 
 ###############################################################################
@@ -249,6 +249,29 @@ $x = $mbi->new(-123401); $x->{_a} = 4; ok ($x->bneg(),123401);
 # test fdiv rounding to A and R (bug in v1.48 and maybe earlier versions)
 $mbf->round_mode('even');
 $x = $mbf->new('740.7')->fdiv('6',4,undef,'zero'); ok ($x,'123.4');
+
+###############################################################################
+# test (also under Bare) that bfac() rounds at last step
+
+ok ($mbi->new(12)->bfac(),'479001600');
+ok ($mbi->new(12)->bfac(2),'480000000');
+$x = $mbi->new(12); $x->accuracy(2); ok ($x->bfac(),'480000000');
+$x = $mbi->new(13); $x->accuracy(2); ok ($x->bfac(),'6200000000');
+$x = $mbi->new(13); $x->accuracy(3); ok ($x->bfac(),'6230000000');
+$x = $mbi->new(13); $x->accuracy(4); ok ($x->bfac(),'6227000000');
+# this does 1,2,3...9,10,11,12...20
+$x = $mbi->new(20); $x->accuracy(1); ok ($x->bfac(),'2000000000000000000');
+
+###############################################################################
+# test bsqrt) rounding to given A/P/R (bug prior to v1.60)
+$x = $mbi->new('123456')->bsqrt(2,undef); ok ($x,'350');	# not 351
+$x = $mbi->new('3')->bsqrt(2,undef); ok ($x->accuracy(),2);
+
+$mbi->round_mode('even'); $x = $mbi->new('126025')->bsqrt(2,undef,'+inf');
+ok ($x,'360');	# not 355 nor 350
+
+$x = $mbi->new('126025')->bsqrt(undef,2); ok ($x,'400');	 # not 355
+
 
 ###############################################################################
 # test mixed arguments
@@ -519,26 +542,50 @@ ${"$mbi\::precision"} = undef;			# reset
 ###############################################################################
 # test whether bone/bzero take additional A & P, or reset it etc
 
-foreach my $class ($mbi,$mbf)
+foreach my $c ($mbi,$mbf)
   {
-  $x = $class->new(2)->bzero(); ok_undef ($x->{_a}); ok_undef ($x->{_p});
-  $x = $class->new(2)->bone();  ok_undef ($x->{_a}); ok_undef ($x->{_p});
-  $x = $class->new(2)->binf();  ok_undef ($x->{_a}); ok_undef ($x->{_p});
-  $x = $class->new(2)->bnan();  ok_undef ($x->{_a}); ok_undef ($x->{_p});
+  $x = $c->new(2)->bzero(); ok_undef ($x->{_a}); ok_undef ($x->{_p});
+  $x = $c->new(2)->bone();  ok_undef ($x->{_a}); ok_undef ($x->{_p});
+  $x = $c->new(2)->binf();  ok_undef ($x->{_a}); ok_undef ($x->{_p});
+  $x = $c->new(2)->bnan();  ok_undef ($x->{_a}); ok_undef ($x->{_p});
 
-  $x = $class->new(2); $x->{_a} = 1; $x->{_p} = 2; $x->bnan();
+  $x = $c->new(2); $x->{_a} = 1; $x->{_p} = 2; $x->bnan();
   ok_undef ($x->{_a}); ok_undef ($x->{_p});
-  $x = $class->new(2); $x->{_a} = 1; $x->{_p} = 2; $x->binf();
+  $x = $c->new(2); $x->{_a} = 1; $x->{_p} = 2; $x->binf();
   ok_undef ($x->{_a}); ok_undef ($x->{_p});
 
-  $x = $class->new(2,1); ok ($x->{_a},1); ok_undef ($x->{_p});
-  $x = $class->new(2,undef,1); ok_undef ($x->{_a}); ok ($x->{_p},1);
+  $x = $c->new(2,1); ok ($x->{_a},1); ok_undef ($x->{_p});
+  $x = $c->new(2,undef,1); ok_undef ($x->{_a}); ok ($x->{_p},1);
   
-  $x = $class->new(2,1)->bzero(); ok ($x->{_a},1); ok_undef ($x->{_p});
-  $x = $class->new(2,undef,1)->bzero(); ok_undef ($x->{_a}); ok ($x->{_p},1);
+  $x = $c->new(2,1)->bzero(); ok ($x->{_a},1); ok_undef ($x->{_p});
+  $x = $c->new(2,undef,1)->bzero(); ok_undef ($x->{_a}); ok ($x->{_p},1);
 
-  $x = $class->new(2,1)->bone(); ok ($x->{_a},1); ok_undef ($x->{_p});
-  $x = $class->new(2,undef,1)->bone(); ok_undef ($x->{_a}); ok ($x->{_p},1);
+  $x = $c->new(2,1)->bone(); ok ($x->{_a},1); ok_undef ($x->{_p});
+  $x = $c->new(2,undef,1)->bone(); ok_undef ($x->{_a}); ok ($x->{_p},1);
+
+  $x = $c->new(2); $x->bone('+',2,undef); ok ($x->{_a},2); ok_undef ($x->{_p});
+  $x = $c->new(2); $x->bone('+',undef,2); ok_undef ($x->{_a}); ok ($x->{_p},2);
+  $x = $c->new(2); $x->bone('-',2,undef); ok ($x->{_a},2); ok_undef ($x->{_p});
+  $x = $c->new(2); $x->bone('-',undef,2); ok_undef ($x->{_a}); ok ($x->{_p},2);
+  
+  $x = $c->new(2); $x->bzero(2,undef); ok ($x->{_a},2); ok_undef ($x->{_p});
+  $x = $c->new(2); $x->bzero(undef,2); ok_undef ($x->{_a}); ok ($x->{_p},2);
+  }
+
+###############################################################################
+# test whether bone/bzero honour globals
+
+for my $c ($mbi,$mbf)
+  {
+  $c->accuracy(2);
+  $x = $c->bone(); ok ($x->accuracy(),2);
+  $x = $c->bzero(); ok ($x->accuracy(),2);
+  $c->accuracy(undef);
+  
+  $c->precision(-2);
+  $x = $c->bone(); ok ($x->precision(),-2);
+  $x = $c->bzero(); ok ($x->precision(),-2);
+  $c->precision(undef);
   }
 
 ###############################################################################
@@ -546,14 +593,14 @@ foreach my $class ($mbi,$mbf)
 
 # new with set accuracy/precision and with parameters
 
-foreach my $class ($mbi,$mbf)
+foreach my $c ($mbi,$mbf)
   {
-  ok ($class->new(123,4,-3),'NaN');		# with parameters
-  ${"$class\::accuracy"} = 42;
-  ${"$class\::precision"} = 2;
-  ok ($class->new(123),'NaN');			# with globals
-  ${"$class\::accuracy"} = undef;
-  ${"$class\::precision"} = undef;
+  ok ($c->new(123,4,-3),'NaN');			# with parameters
+  ${"$c\::accuracy"} = 42;
+  ${"$c\::precision"} = 2;
+  ok ($c->new(123),'NaN');			# with globals
+  ${"$c\::accuracy"} = undef;
+  ${"$c\::precision"} = undef;
   }
 
 # binary ops
@@ -637,8 +684,22 @@ while (<DATA>)
 
   # print "Check a=$a p=$p\n";
   # print "# Tried: '$try'\n";
-  ok ($x->{_a}, $a) && ok_undef ($x->{_p}) if $a ne ''; 
-  ok ($x->{_p}, $p) && ok_undef ($x->{_a}) if $p ne ''; 
+  if ($a ne '')
+    {
+    if (!(ok ($x->{_a}, $a) && ok_undef ($x->{_p})))
+      {
+      print "# Check: A=$a and P=undef\n";
+      print "# Tried: '$try'\n";
+      } 
+    }
+  if ($p ne '')
+    {
+    if (!(ok ($x->{_p}, $p) && ok_undef ($x->{_a})))
+      {
+      print "# Check: A=undef and P=$p\n";
+      print "# Tried: '$try'\n";
+      }
+    }
   }
 
 # all done
@@ -652,9 +713,10 @@ sub ok_undef
   {
   my $x = shift;
 
-  ok (1,1) and return if !defined $x;
+  ok (1,1) and return 1 if !defined $x;
   ok ($x,'undef');
   print "# Called from ",join(' ',caller()),"\n";
+  return 0;
   }
 
 ###############################################################################
@@ -717,3 +779,50 @@ __DATA__
 1,,:123,4,:0
 1,,:123,,-4:0
 1,,-4:123,,:0
+&band
+1,,:3,,:1
+1234,1,:0,,:0
+1234,,:0,1,:0
+1234,,-1:0,,:0
+1234,,:0,,-1:0
+0xFF,,:0x10,,:0x0x10
+0xFF,2,:0xFF,,:250
+0xFF,,:0xFF,2,:250
+0xFF,,1:0xFF,,:250
+0xFF,,:0xFF,,1:250
+&bxor
+1,,:3,,:2
+1234,1,:0,,:1000
+1234,,:0,1,:1000
+1234,,3:0,,:1000
+1234,,:0,,3:1000
+0xFF,,:0x10,,:239
+# 250 ^ 255 => 5
+0xFF,2,:0xFF,,:5
+0xFF,,:0xFF,2,:5
+0xFF,,1:0xFF,,:5
+0xFF,,:0xFF,,1:5
+# 250 ^ 4095 = 3845 => 3800
+0xFF,2,:0xFFF,,:3800
+# 255 ^ 4100 = 4347 => 4300
+0xFF,,:0xFFF,2,:4300
+0xFF,,2:0xFFF,,:3800
+# 255 ^ 4100 = 10fb => 4347 => 4300
+0xFF,,:0xFFF,,2:4300
+&bior
+1,,:3,,:3
+1234,1,:0,,:1000
+1234,,:0,1,:1000
+1234,,3:0,,:1000
+1234,,:0,,3:1000
+0xFF,,:0x10,,:0x0xFF
+# FF | FA = FF => 250
+250,2,:0xFF,,:250
+0xFF,,:250,2,:250
+0xFF,,1:0xFF,,:250
+0xFF,,:0xFF,,1:250
+&bpow
+2,,:3,,:8
+2,,:0,,:1
+2,2,:0,,:1
+2,,:0,2,:1

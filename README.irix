@@ -25,7 +25,7 @@ or later compilers (use cc -version to check).
 =head2 Building 64-bit Perl in Irix
 
 Use
-	
+
 	sh Configure -Dcc='cc -64' -Duse64bitint
 
 This requires require a 64-bit MIPS CPU (R8000, R10000, ...)

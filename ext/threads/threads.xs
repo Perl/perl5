@@ -91,6 +91,7 @@ perl_key self_key;
 void
 Perl_ithread_destruct (pTHX_ ithread* thread, const char *why)
 {
+        PerlInterpreter* destroyperl = NULL;        
 	MUTEX_LOCK(&thread->mutex);
 	if (!thread->next) {
 	    Perl_croak(aTHX_ "panic: destruct destroyed thread %p (%s)",thread, why);
@@ -127,14 +128,17 @@ Perl_ithread_destruct (pTHX_ ithread* thread, const char *why)
 	    PERL_SET_CONTEXT(thread->interp);
 	    SvREFCNT_dec(thread->params);
 	    thread->params = Nullsv;
-	    perl_destruct(thread->interp);
-	    perl_free(thread->interp);
+	    destroyperl = thread->interp;
 	    thread->interp = NULL;
 	}
-	PERL_SET_CONTEXT(aTHX);
 	MUTEX_UNLOCK(&thread->mutex);
 	MUTEX_DESTROY(&thread->mutex);
         PerlMemShared_free(thread);
+	if(destroyperl) {
+	    perl_destruct(destroyperl);
+            perl_free(destroyperl);
+	}
+	PERL_SET_CONTEXT(aTHX);
 }
 
 int
@@ -561,15 +565,16 @@ PPCODE:
   ithread *curr_thread;
   MUTEX_LOCK(&create_destruct_mutex);
   curr_thread = threads;
-  PUSHs( sv_2mortal(ithread_to_SV(aTHX_ NULL, curr_thread, classname, TRUE)));
+  if(curr_thread->tid != 0)	
+    PUSHs( sv_2mortal(ithread_to_SV(aTHX_ NULL, curr_thread, classname, TRUE)));
   while(curr_thread) {
     curr_thread = curr_thread->next;
     if(curr_thread == threads)
       break;
     if(curr_thread->state & PERL_ITHR_DETACHED ||
-       curr_thread->state & PERL_ITHR_JOINED) 
-      continue;
-    PUSHs( sv_2mortal(ithread_to_SV(aTHX_ NULL, curr_thread, classname, TRUE)));
+       curr_thread->state & PERL_ITHR_JOINED)
+         continue;
+     PUSHs( sv_2mortal(ithread_to_SV(aTHX_ NULL, curr_thread, classname, TRUE)));
   }	
   MUTEX_UNLOCK(&create_destruct_mutex);
 }

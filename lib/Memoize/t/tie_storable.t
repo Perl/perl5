@@ -1,10 +1,7 @@
 #!/usr/bin/perl
 # -*- mode: perl; perl-indent-level: 2 -*-
 
-BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
-}
+use lib qw(. ..);
 use Memoize 0.45 qw(memoize unmemoize);
 # $Memoize::Storable::Verbose = 0;
 

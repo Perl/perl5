@@ -334,3 +334,14 @@ use strict;
 EXPECT
 Bareword "foo" not allowed while "strict subs" in use at - line 4.
 Execution of - aborted due to compilation errors.
+
+########
+
+# ID 20020703.002
+use strict;
+use warnings;
+my $abc = XYZ ? 1 : 0;
+print "$abc\n";
+EXPECT
+Bareword "XYZ" not allowed while "strict subs" in use at - line 5.
+Execution of - aborted due to compilation errors.

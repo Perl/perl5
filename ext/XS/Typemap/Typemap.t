@@ -313,12 +313,8 @@ if (defined $fh) {
   # print to it using normal perl
   ok(print $fh "$lines[1]");
 
-  # close it using XS
-  # This works fine but causes a segmentation fault during global
-  # destruction when the glob associated with this filehandle is
-  # tidied up.
-#  ok( T_STDIO_close( $fh ) );
-  ok(close($fh)); # using perlio to close the glob works fine
+  # close it using XS if using perlio, using Perl otherwise
+  ok( $Config{useperlio} ? T_STDIO_close( $fh ) : close( $fh ) );
 
   # open from perl, and check contents
   open($fh, "< $testfile");

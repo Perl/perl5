@@ -61,14 +61,25 @@ dogcow@isi.net
 
 The following tests fail on 5.8.0 Perl in BeOS Personal 5.03:
 
-  t/op/magic..........................FAILED at test 24
-  ext/File/Glob/t/basic...............FAILED at test 3
-  ext/POSIX/t/sigaction...............FAILED at test 13
-  ext/POSIX/t/waitpid.................FAILED at test 1
+ t/op/lfs............................FAILED at test 17
+ t/op/magic..........................FAILED at test 24
+ ext/Fcntl/t/syslfs..................FAILED at test 17
+ ext/File/Glob/t/basic...............FAILED at test 3
+ ext/POSIX/t/sigaction...............FAILED at test 13
+ ext/POSIX/t/waitpid.................FAILED at test 1
 
 The reasons for the failures are as follows: 
 
 =over 4
+
+=item *
+
+The t/op/lfs and ext/Fcntl/t/syslfs failures indicate that the
+LFS (large file support, files larger than 2 gigabytes) doesn't
+work from Perl (BeFS itself is well capable of supporting large
+files).  What fails is that trying to position the file pointer
+past 2 gigabytes doesn't work right, the position gets truncated
+to its lower 32 bits.
 
 =item *
 
@@ -79,7 +90,7 @@ in ways that define logic.
 
 =item *
 
-The Glob/t/basic indicates a bug in the getpw*() functions of Perl:
+The Glob/t/basic indicates a bug in the getpw*() functions:
 they do not always return the correct user db entries.
 
 =item *

@@ -237,6 +237,7 @@ sub bootstrap {
     # It may also edit @modparts if required.
     $modfname = &mod2fname(\@modparts) if defined &mod2fname;
 
+    # Truncate the module name to 8.3 format for NetWare
 	if (($^O eq 'NetWare') && (length($modfname) > 8)) {
 		$modfname = substr($modfname, 0, 8);
 	}
@@ -262,22 +263,13 @@ sub bootstrap {
 	} else {
 	    $dir = "$_/auto/$modpname";
 	}
-	if ($^O ne 'NetWare') {
-		next unless -d $dir; # skip over uninteresting directories
-	}
-	else {
-		next if -f $dir; # skip over uninteresting directories
-	}
-
+	
+	next unless -d $dir; # skip over uninteresting directories
+	
 	# check for common cases to avoid autoload of dl_findfile
 	my $try = $Is_MacOS ? "$dir:$modfname.$dl_dlext" : "$dir/$modfname.$dl_dlext";
-	if ($^O ne 'NetWare') {
-		last if $file = ($do_expand) ? dl_expandspec($try) : ((-f $try) && $try);
-	}
-	elsif (!(-d $try)) {
-		last if $file = ($do_expand) ? dl_expandspec($try) : ($try);
-	}
-
+	last if $file = ($do_expand) ? dl_expandspec($try) : ((-f $try) && $try);
+	
 	# no luck here, save dir for possible later dl_findfile search
 	push @dirs, $dir;
     }
@@ -544,7 +536,9 @@ useless for accessing non-Perl libraries because it provides almost no
 Perl-to-C 'glue'.  There is, for example, no mechanism for calling a C
 library function or supplying arguments.  A C::DynaLib module
 is available from CPAN sites which performs that function for some
-common system types.
+common system types.  And since the year 2000, there's also Inline::C,
+a module that allows you to write Perl subroutines in C.  Also available
+from your local CPAN site.
 
 DynaLoader Interface Summary
 

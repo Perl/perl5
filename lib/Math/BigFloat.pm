@@ -12,7 +12,7 @@ package Math::BigFloat;
 #   _p: precision
 #   _f: flags, used to signal MBI not to touch our private parts
 
-$VERSION = '1.34';
+$VERSION = '1.35';
 require 5.005;
 use Exporter;
 use File::Spec;
@@ -335,7 +335,14 @@ sub bcmp
   {
   # Compares 2 values.  Returns one of undef, <0, =0, >0. (suitable for sort)
   # (BFLOAT or num_str, BFLOAT or num_str) return cond_code
-  my ($self,$x,$y) = objectify(2,@_);
+
+  # set up parameters
+  my ($self,$x,$y) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y) = objectify(2,@_);
+    }
 
   if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/))
     {
@@ -391,7 +398,14 @@ sub bacmp
   # Compares 2 values, ignoring their signs. 
   # Returns one of undef, <0, =0, >0. (suitable for sort)
   # (BFLOAT or num_str, BFLOAT or num_str) return cond_code
-  my ($self,$x,$y) = objectify(2,@_);
+  
+  # set up parameters
+  my ($self,$x,$y) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y) = objectify(2,@_);
+    }
 
   # handle +-inf and NaN's
   if ($x->{sign} !~ /^[+-]$/ || $y->{sign} !~ /^[+-]$/)
@@ -438,7 +452,14 @@ sub badd
   {
   # add second arg (BFLOAT or string) to first (BFLOAT) (modifies first)
   # return result as BFLOAT
-  my ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
+
+  # set up parameters
+  my ($self,$x,$y,$a,$p,$r) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
+    }
 
   # inf and NaN handling
   if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/))
@@ -503,7 +524,14 @@ sub bsub
   {
   # (BigFloat or num_str, BigFloat or num_str) return BigFloat
   # subtract second arg from first, modify first
-  my ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
+
+  # set up parameters
+  my ($self,$x,$y,$a,$p,$r) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
+    }
 
   if ($y->is_zero())		# still round for not adding zero
     {
@@ -611,6 +639,7 @@ sub blog
     {
     # simulate old behaviour
     $params[1] = $self->div_scale();	# and round to it as accuracy
+    $params[0] = undef;
     $scale = $params[1]+4; 		# at least four more for proper round
     $params[3] = $r;			# round mode by caller or undef
     $fallback = 1;			# to clear a/p afterwards
@@ -624,7 +653,7 @@ sub blog
 
   return $x->bzero(@params) if $x->is_one();
   return $x->bnan() if $x->{sign} ne '+' || $x->is_zero();
-  #return $x->bone('+',@params) if $x->bcmp($base) == 0;
+  return $x->bone('+',@params) if $x->bcmp($base) == 0;
 
   # when user set globals, they would interfere with our calculation, so
   # disable then and later re-enable them
@@ -787,7 +816,14 @@ sub bmul
   { 
   # multiply two numbers -- stolen from Knuth Vol 2 pg 233
   # (BINT or num_str, BINT or num_str) return BINT
-  my ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
+  
+  # set up parameters
+  my ($self,$x,$y,$a,$p,$r) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
+    }
 
   return $x->bnan() if (($x->{sign} eq $nan) || ($y->{sign} eq $nan));
 
@@ -820,7 +856,14 @@ sub bdiv
   {
   # (dividend: BFLOAT or num_str, divisor: BFLOAT or num_str) return 
   # (BFLOAT,BFLOAT) (quo,rem) or BFLOAT (only rem)
-  my ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
+
+  # set up parameters
+  my ($self,$x,$y,$a,$p,$r) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
+    }
 
   return $self->_div_inf($x,$y)
    if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/) || $y->is_zero());
@@ -923,12 +966,22 @@ sub bdiv
 sub bmod 
   {
   # (dividend: BFLOAT or num_str, divisor: BFLOAT or num_str) return reminder 
-  my ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
+
+  # set up parameters
+  my ($self,$x,$y,$a,$p,$r) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
+    }
 
   if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/))
     {
     my ($d,$re) = $self->SUPER::_div_inf($x,$y);
-    return $re->round($a,$p,$r,$y);
+    $x->{sign} = $re->{sign};
+    $x->{_e} = $re->{_e};
+    $x->{_m} = $re->{_m};
+    return $x->round($a,$p,$r,$y);
     } 
   return $x->bnan() if $x->is_zero() && $y->is_zero();
   return $x if $y->is_zero();
@@ -1120,7 +1173,7 @@ sub bfac
     if (($x->{sign} ne '+') ||		# inf, NaN, <0 etc => NaN
      ($x->{_e}->{sign} ne '+'));	# digits after dot?
 
-  return $x->bone(@r) if $x->is_zero() || $x->is_one();		# 0 or 1 => 1
+  return $x->bone('+',@r) if $x->is_zero() || $x->is_one();	# 0 or 1 => 1
   
   # use BigInt's bfac() for faster calc
   $x->{_m}->blsft($x->{_e},10);		# un-norm m
@@ -1328,7 +1381,13 @@ sub bpow
   # compute power of two numbers, second arg is used as integer
   # modifies first argument
 
-  my ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
+  # set up parameters
+  my ($self,$x,$y,$a,$p,$r) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
+    }
 
   return $x if $x->{sign} =~ /^[+-]inf$/;
   return $x->bnan() if $x->{sign} eq $nan || $y->{sign} eq $nan;
@@ -1388,7 +1447,6 @@ sub bfround
     return $x; 
     }
   return $x if $x->{sign} !~ /^[+-]$/;
-  # print "MBF bfround $x to scale $scale mode $mode\n";
 
   # don't round if x already has lower precision
   return $x if (defined $x->{_p} && $x->{_p} < 0 && $scale < $x->{_p});
@@ -1397,16 +1455,20 @@ sub bfround
   $x->{_a} = undef;			# and clear A
   if ($scale < 0)
     {
-    # print "bfround scale $scale e $x->{_e}\n";
     # round right from the '.'
-    return $x if $x->{_e} >= 0;			# nothing to round
+
+    return $x if $x->{_e}->{sign} eq '+';	# e >= 0 => nothing to round
+
     $scale = -$scale;				# positive for simplicity
     my $len = $x->{_m}->length();		# length of mantissa
-    my $dad = -$x->{_e};			# digits after dot
-    my $zad = 0;				# zeros after dot
-    $zad = -$len-$x->{_e} if ($x->{_e} < -$len);# for 0.00..00xxx style
-    #print "scale $scale dad $dad zad $zad len $len\n";
 
+    # the following poses a restriction on _e, but if _e is bigger than a
+    # scalar, you got other problems (memory etc) anyway
+    my $dad = -($x->{_e}->numify());		# digits after dot
+    my $zad = 0;				# zeros after dot
+    $zad = $dad - $len if (-$dad < -$len);	# for 0.00..00xxx style
+    
+    #print "scale $scale dad $dad zad $zad len $len\n";
     # number  bsstr   len zad dad	
     # 0.123   123e-3	3   0 3
     # 0.0123  123e-4	3   1 4
@@ -1437,15 +1499,16 @@ sub bfround
 	$scale = $dbd+$scale;
         }
       }
-    # print "round to $x->{_m} to $scale\n";
     }
   else
     {
+    # round left from the '.'
+
     # 123 => 100 means length(123) = 3 - $scale (2) => 1
 
     my $dbt = $x->{_m}->length(); 
     # digits before dot 
-    my $dbd = $dbt + $x->{_e}; 
+    my $dbd = $dbt + $x->{_e}->numify(); 
     # should be the same, so treat it as this 
     $scale = 1 if $scale == 0; 
     # shortcut if already integer 
@@ -1467,9 +1530,7 @@ sub bfround
        { 
        $scale = $dbd - $scale; 
        }
-
     }
-  # print "using $scale for $x->{_m} with '$mode'\n";
   # pass sign to bround for rounding modes '+inf' and '-inf'
   $x->{_m}->{sign} = $x->{sign};
   $x->{_m}->bround($scale,$mode);
@@ -1530,10 +1591,6 @@ sub bfloor
   # if $x has digits after dot
   if ($x->{_e}->{sign} eq '-')
     {
-    #$x->{_m}->brsft(-$x->{_e},10);
-    #$x->{_e}->bzero();
-    #$x-- if $x->{sign} eq '-';
-
     $x->{_e}->{sign} = '+';			# negate e
     $x->{_m}->brsft($x->{_e},10);		# cut off digits after dot
     $x->{_e}->bzero();				# trunc/norm	
@@ -1567,26 +1624,40 @@ sub bceil
 
 sub brsft
   {
-  # shift right by $y (divide by power of 2)
-  my ($self,$x,$y,$n,$a,$p,$r) = objectify(2,@_);
+  # shift right by $y (divide by power of $n)
+  
+  # set up parameters
+  my ($self,$x,$y,$n,$a,$p,$r) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,$n,$a,$p,$r) = objectify(2,@_);
+    }
 
   return $x if $x->modify('brsft');
   return $x if $x->{sign} !~ /^[+-]$/;	# nan, +inf, -inf
 
-  $n = 2 if !defined $n; $n = Math::BigFloat->new($n);
-  $x->bdiv($n ** $y,$a,$p,$r,$y);
+  $n = 2 if !defined $n; $n = $self->new($n);
+  $x->bdiv($n->bpow($y),$a,$p,$r,$y);
   }
 
 sub blsft
   {
-  # shift right by $y (divide by power of 2)
-  my ($self,$x,$y,$n,$a,$p,$r) = objectify(2,@_);
+  # shift left by $y (multiply by power of $n)
+  
+  # set up parameters
+  my ($self,$x,$y,$n,$a,$p,$r) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,$n,$a,$p,$r) = objectify(2,@_);
+    }
 
-  return $x if $x->modify('brsft');
+  return $x if $x->modify('blsft');
   return $x if $x->{sign} !~ /^[+-]$/;	# nan, +inf, -inf
 
-  $n = 2 if !defined $n; $n = Math::BigFloat->new($n);
-  $x->bmul($n ** $y,$a,$p,$r,$y);
+  $n = 2 if !defined $n; $n = $self->new($n);
+  $x->bmul($n->bpow($y),$a,$p,$r,$y);
   }
 
 ###############################################################################
@@ -1917,6 +1988,14 @@ Math::BigFloat - Arbitrary size floating point math package
 
   $x->length();			# number of digits (w/o sign and '.')
   ($l,$f) = $x->length();	# number of digits, and length of fraction	
+
+  $x->precision();		# return P of $x (or global, if P of $x undef)
+  $x->precision($n);		# set P of $x to $n
+  $x->accuracy();		# return A of $x (or global, if A of $x undef)
+  $x->accuracy($n);		# set A $x to $n
+
+  Math::BigFloat->precision();	# get/set global P for all BigFloat objects
+  Math::BigFloat->accuracy();	# get/set global A for all BigFloat objects
 
 =head1 DESCRIPTION
 

@@ -168,6 +168,7 @@ ext/Devel/PPPort/t/test.t	See if Devel::PPPort works
 ext/Devel/PPPort/TODO		Devel::PPPort Todo
 ext/Digest/MD5/Changes		Digest::MD5 extension changes
 ext/Digest/MD5/hints/irix_6.pl	Hints for named architecture
+ext/Digest/MD5/hints/MacOS.pl	Hints for named architecture
 ext/Digest/MD5/Makefile.PL	Digest::MD5 extension makefile writer
 ext/Digest/MD5/MD5.pm		Digest::MD5 extension
 ext/Digest/MD5/MD5.xs		Digest::MD5 extension
@@ -491,7 +492,7 @@ ext/MIME/Base64/Changes		MIME::Base64 extension
 ext/MIME/Base64/Makefile.PL	MIME::Base64 extension
 ext/MIME/Base64/QuotedPrint.pm	MIME::Base64 extension
 ext/MIME/Base64/t/base64.t	See whether MIME::Base64 works
-ext/MIME/Base64/t/qp.t		See whether MIME::QuotedPrint works
+ext/MIME/Base64/t/quoted-print.t	See whether MIME::QuotedPrint works
 ext/MIME/Base64/t/unicode.t	See whether MIME::Base64 works
 ext/NDBM_File/hints/cygwin.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/dec_osf.pl	Hint for NDBM_File for named architecture
@@ -508,6 +509,7 @@ ext/NDBM_File/typemap		NDBM extension interface types
 ext/ODBM_File/hints/cygwin.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/dec_osf.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/hpux.pl	Hint for ODBM_File for named architecture
+ext/ODBM_File/hints/linux.pl	Hint for NDBM_File for named architecture
 ext/ODBM_File/hints/sco.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/solaris.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/svr4.pl	Hint for ODBM_File for named architecture
@@ -529,17 +531,17 @@ ext/PerlIO/encoding/encoding.xs PerlIO::encoding
 ext/PerlIO/encoding/Makefile.PL PerlIO::encoding makefile writer
 ext/PerlIO/encoding/MANIFEST	PerlIO::encoding list of files
 ext/PerlIO/PerlIO.t		See if PerlIO works
-ext/PerlIO/Scalar/Makefile.PL	PerlIO layer for scalars
-ext/PerlIO/Scalar/Scalar.pm	PerlIO layer for scalars
-ext/PerlIO/Scalar/Scalar.xs	PerlIO layer for scalars
+ext/PerlIO/scalar/Makefile.PL	PerlIO layer for scalars
+ext/PerlIO/scalar/scalar.pm	PerlIO layer for scalars
+ext/PerlIO/scalar/scalar.xs	PerlIO layer for scalars
 ext/PerlIO/t/encoding.t		See if PerlIO encoding conversion works
 ext/PerlIO/t/fail.t		See if bad layers fail
 ext/PerlIO/t/fallback.t		See if PerlIO fallbacks work
-ext/PerlIO/t/scalar.t		See if PerlIO::Scalar works
-ext/PerlIO/t/via.t		See if PerlIO::Via works
-ext/PerlIO/Via/Makefile.PL	PerlIO layer for layers in perl
-ext/PerlIO/Via/Via.pm		PerlIO layer for layers in perl
-ext/PerlIO/Via/Via.xs		PerlIO layer for layers in perl
+ext/PerlIO/t/scalar.t		See if PerlIO::scalar works
+ext/PerlIO/t/via.t		See if PerlIO::via works
+ext/PerlIO/via/Makefile.PL	PerlIO layer for layers in perl
+ext/PerlIO/via/via.pm		PerlIO layer for layers in perl
+ext/PerlIO/via/via.xs		PerlIO layer for layers in perl
 ext/POSIX/hints/bsdos.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/dynixptx.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/freebsd.pl	Hint for POSIX for named architecture
@@ -649,9 +651,11 @@ ext/Thread/list.tx		Test getting list of all threads
 ext/Thread/lock.tx		Test lock primitive
 ext/Thread/Makefile.PL		Thread extension makefile writer
 ext/Thread/Notes		Thread notes
+ext/Thread/Queue.pmx		Threadsafe queue
 ext/Thread/queue.tx		Test Thread::Queue module
 ext/Thread/README		Thread README
 ext/Thread/README.threads		Notes about multithreading
+ext/Thread/Semaphore.pmx	Threadsafe semaphore
 ext/Thread/specific.tx		Test thread-specific user data
 ext/Thread/sync.tx		Test thread synchronisation
 ext/Thread/sync2.tx		Test thread synchronisation
@@ -668,9 +672,7 @@ ext/threads/Changes		ithreads
 ext/threads/Makefile.PL		ithreads
 ext/threads/README		ithreads
 ext/threads/shared/Makefile.PL	thread shared variables
-ext/threads/shared/queue.pm	Threadsafe queue.
 ext/threads/shared/README	thread shared variables
-ext/threads/shared/semaphore.pm	Threadsafe semaphore
 ext/threads/shared/shared.pm	thread shared variables
 ext/threads/shared/shared.xs	thread shared variables
 ext/threads/shared/t/0nothread.t	Tests for basic shared array functionality.
@@ -680,8 +682,6 @@ ext/threads/shared/t/cond.t	Test condition variables
 ext/threads/shared/t/hv_refs.t	Test shared hashes containing references
 ext/threads/shared/t/hv_simple.t	Tests for basic shared hash functionality.
 ext/threads/shared/t/no_share.t Tests for disabled share on variables.
-ext/threads/shared/t/queue.t	thread shared variables
-ext/threads/shared/t/semaphore.t	test semaphore
 ext/threads/shared/t/shared_attr.t	Test :shared attribute
 ext/threads/shared/t/sv_refs.t	thread shared variables
 ext/threads/shared/t/sv_simple.t	thread shared variables
@@ -717,8 +717,8 @@ ext/Unicode/Normalize/t/test.t	Unicode::Normalize
 ext/util/make_ext		Used by Makefile to execute extension Makefiles
 ext/XS/APItest/APItest.pm	XS::APItest extension
 ext/XS/APItest/APItest.xs	XS::APItest extension
-ext/XS/APItest/MANIFEST		XS::APItest extension
 ext/XS/APItest/Makefile.PL	XS::APItest extension
+ext/XS/APItest/MANIFEST		XS::APItest extension
 ext/XS/APItest/README		XS::APItest extension
 ext/XS/APItest/t/printf.t	XS::APItest extension
 ext/XS/Typemap/Makefile.PL	XS::Typemap extension
@@ -993,6 +993,7 @@ lib/Class/ISA/test.pl		See if Class::ISA works
 lib/Class/Struct.pm		Declare struct-like datatypes as Perl classes
 lib/Class/Struct.t		See if Class::Struct works
 lib/complete.pl			A command completion subroutine
+lib/Config.t			See if Config works
 lib/constant.pm			For "use constant"
 lib/constant.t			See if compile-time constants work
 lib/CPAN.pm			Interface to Comprehensive Perl Archive Network
@@ -1219,6 +1220,7 @@ lib/Math/BigInt.pm		An arbitrary precision integer arithmetic package
 lib/Math/BigInt/Calc.pm		Pure Perl module to support Math::BigInt
 lib/Math/BigInt/t/bare_mbf.t	Test MBF under Math::BigInt::BareCalc
 lib/Math/BigInt/t/bare_mbi.t	Test MBI under Math::BigInt::BareCalc
+lib/Math/BigInt/t/bare_mif.t	Rounding tests under BareCalc
 lib/Math/BigInt/t/bigfltpm.inc	Shared tests for bigfltpm.t and sub_mbf.t
 lib/Math/BigInt/t/bigfltpm.t	See if BigFloat.pm works
 lib/Math/BigInt/t/bigintc.t	See if BigInt/Calc.pm works
@@ -1348,7 +1350,7 @@ lib/NEXT/t/actual.t		NEXT
 lib/NEXT/t/actuns.t		NEXT
 lib/NEXT/t/next.t		NEXT
 lib/NEXT/t/unseen.t		NEXT
-lib/open.pm			Pragma to specify default I/O disciplines
+lib/open.pm			Pragma to specify default I/O layers
 lib/open.t			See if the open pragma works
 lib/open2.pl			Open a two-ended pipe (uses IPC::Open2)
 lib/open3.pl			Open a three-ended pipe (uses IPC::Open3)
@@ -1356,6 +1358,8 @@ lib/overload.pm			Module for overloading perl operators
 lib/overload.t			See if operator overloading works
 lib/perl5db.pl			Perl debugging routines
 lib/PerlIO.pm			PerlIO support module
+lib/PerlIO/via/QuotedPrint.pm	PerlIO::via::QuotedPrint
+lib/PerlIO/via/t/QuotedPrint.t	PerlIO::via::QuotedPrint
 lib/ph.t			See if h2ph works
 lib/Pod/Checker.pm		Pod-Parser - check POD documents for syntax errors
 lib/Pod/Find.pm			used by pod/splitpod
@@ -1389,6 +1393,7 @@ lib/Pod/t/parselink.t		podlators test
 lib/Pod/t/pod2html-lib.pl	pod2html testing library
 lib/Pod/t/Select.t		See if Pod::Select works
 lib/Pod/t/text-errors.t		podlators test
+lib/Pod/t/text.t		podlators test
 lib/Pod/t/Usage.t		See if Pod::Usage works
 lib/Pod/t/utils.t		Test for Pod::ParseUtils
 lib/Pod/Text.pm			Pod-Parser - convert POD data to formatted ASCII text
@@ -1521,8 +1526,10 @@ lib/Text/TabsWrap/t/tabs.t	See if Text::Tabs works
 lib/Text/TabsWrap/t/wrap.t	See if Text::Wrap::wrap works
 lib/Text/Wrap.pm		Paragraph formatter
 lib/Thread.pm			Thread extensions frontend
-lib/Thread/Queue.pm		Thread synchronised queue objects
-lib/Thread/Semaphore.pm		Thread semaphore objects
+lib/Thread/Queue.pm		Threadsafe queue
+lib/Thread/Queue.t		See if threadsafe queue works
+lib/Thread/Semaphore.pm         Threadsafe semaphore
+lib/Thread/Semaphore.t          See if threadsafe semaphore works
 lib/Tie/Array.pm		Base class for tied arrays
 lib/Tie/Array/push.t		Test for Tie::Array
 lib/Tie/Array/splice.t		Test for Tie::Array::SPLICE

@@ -238,13 +238,14 @@ source code level, this shouldn't be that drastic a change.
 =item *
 
 Previous versions of perl and some readings of some sections of Camel III
-implied that C<:raw> "discipline" was the inverse of  C<:crlf>.
+implied that the C<:raw> "discipline" was the inverse of  C<:crlf>.
 Turning off "clrfness" is no longer enough to make a stream truly
-binary. So the PerlIO C<:raw> discipline is now formally defined as being
+binary. So the PerlIO C<:raw> layer (or "discipline", to use the
+Camel book's older terminology) is now formally defined as being
 equivalent to binmode(FH) - which is in turn defined as doing whatever
 is necessary to pass each byte as-is without any translation.
 In particular binmode(FH) - and hence C<:raw> - will now turn off both CRLF
-and UTF-8  translation and remove other "layers" (e.g. :encoding()) which
+and UTF-8  translation and remove other layers (e.g. :encoding()) which
 would modify byte stream.
 
 =item *
@@ -368,10 +369,10 @@ for more information about UTF-8.
 
 If your environment variables (LC_ALL, LC_CTYPE, LANG, LANGUAGE) look
 like you want to use UTF-8 (any of the the variables match C</utf-?8/i>),
-your STDIN, STDOUT, STDERR handles and the default open discipline
+your STDIN, STDOUT, STDERR handles and the default open layer
 (see L<open>) are marked as UTF-8.  (This feature, like other new
 features that combine Unicode and I/O, work only if you are using
-PerlIO, but that's is the default.)
+PerlIO, but that's the default.)
 
 Note that after this Perl really does assume that everything is UTF-8:
 for example if some input handle is not, Perl will probably very soon
@@ -831,6 +832,8 @@ RFC 1321, from Gisle Aas, has been added.  See L<Digest::MD5>.
 NOTE: the C<MD5> backward compatibility module is deliberately not
 included since its further use is discouraged.
 
+See also L<PerlIO::via::QuotedPrint>.
+
 =item *
 
 C<Encode>, originally by Nick Ing-Simmons and now maintained by Dan
@@ -989,13 +992,7 @@ in quoted-printable encoding, as defined in RFC 2045 - I<MIME
 
     print $encoded, "\n"; # "Smiley in Unicode: =263A"
 
-MIME::QuotedPrint has been enhanced to provide the basic methods
-necessary to use it with PerlIO::Via as in :
-
-    use MIME::QuotedPrint;
-    open($fh,">Via(MIME::QuotedPrint)",$path);
-
-See L<MIME::QuotedPrint>.
+See also L<PerlIO::via::QuotedPrint>.
 
 =item *
 
@@ -1004,27 +1001,32 @@ See L<NEXT>.
 
 =item *
 
-C<open> is a new pragma for setting the default I/O disciplines
+C<open> is a new pragma for setting the default I/O layers
 for open().
 
 =item *
 
-C<PerlIO::Scalar>, by Nick Ing-Simmons, provides the implementation
+C<PerlIO::scalar>, by Nick Ing-Simmons, provides the implementation
 of IO to "in memory" Perl scalars as discussed above.  It also serves
 as an example of a loadable PerlIO layer.  Other future possibilities
-include PerlIO::Array and PerlIO::Code.  See L<PerlIO::Scalar>.
+include PerlIO::Array and PerlIO::Code.  See L<PerlIO::scalar>.
 
 =item *
 
-C<PerlIO::Via>, by Nick Ing-Simmons, acts as a PerlIO layer and wraps
+C<PerlIO::via>, by Nick Ing-Simmons, acts as a PerlIO layer and wraps
 PerlIO layer functionality provided by a class (typically implemented
-in perl code).
+in Perl code).
 
-    use MIME::QuotedPrint;
-    open($fh,">Via(MIME::QuotedPrint)",$path);
+=item *
 
-This will automatically convert everything output to C<$fh>
-to Quoted-Printable.  See L<PerlIO::Via>.
+C<PerlIO::via::QuotedPrint>, by Elizabeth Mattijsen, is an example
+of a C<PerlIO::via> class:
+
+    use PerlIO::via::QuotedPrint;
+    open($fh,">:via(QuotedPrint)",$path);
+
+This will automatically convert everything output to C<$fh> to
+Quoted-Printable.  See L<PerlIO::via> and L<PerlIO::via::QuotedPrint>.
 
 =item *
 
@@ -1930,8 +1932,9 @@ The Thread extension is now not built at all under ithreads
 (C<Configure -Duseithreads>) because it wouldn't work anyway (the
 Thread extension requires being Configured with C<-Duse5005threads>).
 
-But note that the Thread.pm interface is now shared by both
-thread models.
+B<Note that the 5.005 threads are unsupported and deprecated: if you
+have code written for the old threads you should migrate it to the
+new ithreads model.>
 
 =item *
 
@@ -2957,7 +2960,7 @@ There are now several profiling make targets.
 
 (This change was already made in 5.7.0 but bears repeating here.)
 (5.7.0 came out before 5.6.1: the development branch 5.7 released
-sooner than the maintenance branch 5.6)
+earlier than the maintenance branch 5.6)
 
 A potential security vulnerability in the optional suidperl component
 of Perl was identified in August 2000.  suidperl is neither built nor
@@ -2987,12 +2990,13 @@ such as sudo ( see http://www.courtesan.com/sudo/ ).
 
 =head1 New Tests
 
-Several new tests have been added, especially for the F<lib> and F<ext>
-subsections.  There are now about 65 000 individual tests (spread over
-about 700 test scripts), in the regression suite (5.6.1 has about
-11700 tests, in 258 test scripts)  Many of the new tests are of course
-introduced by the new modules, but still in general Perl is now more
-thoroughly tested.
+Several new tests have been added, especially for the F<lib> and
+F<ext> subsections.  There are now about 69 000 individual tests
+(spread over about 700 test scripts), in the regression suite (5.6.1
+has about 11 700 tests, in 258 test scripts)  The exact numbers depend
+on the platform and Perl configuration used.  Many of the new tests
+are of course introduced by the new modules, but still in general Perl
+is now more thoroughly tested.
 
 Because of the large number of tests, running the regression suite
 will take considerably longer time than it used to: expect the suite
@@ -3071,6 +3075,8 @@ The following tests fail on 5.8.0 Perl in BeOS Personal 5.03:
 
  t/op/lfs............................FAILED at test 17
  t/op/magic..........................FAILED at test 24
+ ext/Fcntl/t/syslfs..................FAILED at test 17
+ ext/File/Glob/t/basic...............FAILED at test 3
  ext/POSIX/t/sigaction...............FAILED at test 13
  ext/POSIX/t/waitpid.................FAILED at test 1
 
@@ -3082,6 +3088,11 @@ For example when building the Tk extension for Cygwin,
 you may get an error message saying "unable to remap".
 This is known problem with Cygwin, and a workaround is
 detailed in here: http://sources.redhat.com/ml/cygwin/2001-12/msg00894.html
+
+=head2 Cygwin ndbm tests fail on FAT
+
+One can build but not install (or test the build of) the NDBM_File
+on FAT filesystems.  Installation (or build) on NTFS works fine.
 
 =head2 ext/threads/t/libc
 
@@ -3178,19 +3189,19 @@ threadunsafe.)
 The following tests are known to fail on OS/2 (for clarity
 only the failures are shown, not the full error messages):
 
-t/io/utf8............................FAILED at test 19
-t/op/grent...........................FAILED at test 2
-t/op/pwent...........................FAILED at test 1
-t/lib/os2_base.......................FAILED at test 13
-t/lib/os2_process....................FAILED at test 10
-t/lib/os2_process_kid................FAILED at test 10
-t/lib/rx_cmprt.......................FAILED at test 16
-ext/DB_File/t/db-btree...............FAILED at test 0
-ext/DB_File/t/db-hash................FAILED at test 0
-ext/DB_File/t/db-recno...............FAILED at test 0
-lib/ExtUtils/t/basic.................FAILED at test 14
-lib/ExtUtils/t/Constant..............FAILED at test 4
-lib/Memoize/t/errors.................FAILED at test 4
+ t/io/utf8............................FAILED at test 19
+ t/op/grent...........................FAILED at test 2
+ t/op/pwent...........................FAILED at test 1
+ t/lib/os2_base.......................FAILED at test 13
+ t/lib/os2_process....................FAILED at test 10
+ t/lib/os2_process_kid................FAILED at test 10
+ t/lib/rx_cmprt.......................FAILED at test 16
+ ext/DB_File/t/db-btree...............FAILED at test 0
+ ext/DB_File/t/db-hash................FAILED at test 0
+ ext/DB_File/t/db-recno...............FAILED at test 0
+ lib/ExtUtils/t/basic.................FAILED at test 14
+ lib/ExtUtils/t/Constant..............FAILED at test 4
+ lib/Memoize/t/errors.................FAILED at test 4
 
 =head2 op/sprintf tests 91, 129, and 130
 
@@ -3253,26 +3264,31 @@ Use Term::ReadKey 2.20 or later.
 
 B<Note that support for 5.005-style threading is deprecated,
 experimental and practically unsupported.  In 5.10, it is expected
-to be removed.>
+to be removed.  You should migrate your code to ithreads.>
 
 The following tests are known to fail due to fundamental problems in
 the 5.005 threading implementation. These are not new failures--Perl
 5.005_0x has the same bugs, but didn't have these tests.
 
- ../ext/B/t/xref.t                  255 65280    14   12  85.71%  3-14
- ../ext/List/Util/t/first.t         255 65280     7    4  57.14%  2 5-7
- ../lib/English.t                     2   512    54    2   3.70%  2-3
- ../lib/ExtUtils/t/basic.t            1   256    17    1   5.88%  14
- ../lib/FileCache.t                               5    1  20.00%  5
- ../lib/Filter/Simple/t/data.t                    6    3  50.00%  1-3
- ../lib/Filter/Simple/t/filter_onl                9    3  33.33%  1-2 5
- ../lib/Tie/File/t/31_autodefer.t   255 65280    65   32  49.23%  34-65
- ../lib/autouse.t                                10    1  10.00%  4
- op/flip.t                                       15    1   6.67%  15
+ ../ext/B/t/xref.t                    255 65280    14   12  85.71%  3-14
+ ../ext/List/Util/t/first.t           255 65280     7    4  57.14%  2 5-7
+ ../lib/English.t                       2   512    54    2   3.70%  2-3
+ ../lib/FileCache.t                                 5    1  20.00%  5
+ ../lib/Filter/Simple/t/data.t                      6    3  50.00%  1-3
+ ../lib/Filter/Simple/t/filter_only.                9    3  33.33%  1-2 5
+ ../lib/Math/BigInt/t/bare_mbf.t                 1627    4   0.25%  8 11 1626-1627
+ ../lib/Math/BigInt/t/bigfltpm.t                 1629    4   0.25%  10 13 1628-
+                                                                    1629
+ ../lib/Math/BigInt/t/sub_mbf.t                  1633    4   0.24%  8 11 1632-1633
+ ../lib/Math/BigInt/t/with_sub.t                 1628    4   0.25%  9 12 1627-1628
+ ../lib/Tie/File/t/31_autodefer.t     255 65280    65   32  49.23%  34-65
+ ../lib/autouse.t                                  10    1  10.00%  4
+ op/flip.t                                         15    1   6.67%  15
 
 These failures are unlikely to get fixed as 5.005-style threads
 are considered fundamentally broken.  (Basically what happens is that
-competing threads can corrupt shared global state.)
+competing threads can corrupt shared global state, one good example
+being regular expression engine's state.)
 
 =head2 Timing problems
 
@@ -3381,20 +3397,19 @@ tests have been added.
                                                               110-111 150 161
  ../lib/ExtUtils/t/Constant.t   121 30976    48   48 100.00%  1-48
  ../lib/ExtUtils/t/Embed.t                    9    9 100.00%  1-9
- op/pat.t                                   910    7   0.77%  665 776 785 832-
-                                                              834 845
+ op/pat.t                         0    11   922  283  30.69%  640-922
  op/sprintf.t                               224    3   1.34%  98 100 136
  op/tr.t                                     97    5   5.15%  63 71-74
  uni/fold.t                                 780    6   0.77%  61 169 196 661
                                                               710-711
 
 The failures in dumper.t and downgrade.t are problems in the tests,
-those in io_unix and sprintf are problems in the USS (UDP sockets
-and printf formats).  The pat, tr, and fold failures are genuine Perl
+those in io_unix and sprintf are problems in the USS (UDP sockets and
+printf formats).  The pat, tr, and fold failures are genuine Perl
 problems caused by EBCDIC (and in the pat and fold cases, combining
-that with Unicode).  The Constant and Embed are probably problems
-in the tests (since they test Perl's ability to build extensions,
-and that seems to be working reasonably well.)
+that with Unicode).  The Constant and Embed are probably problems in
+the tests (since they test Perl's ability to build extensions, and
+that seems to be working reasonably well.)
 
 =head2 Localising Tied Arrays and Hashes Is Broken
 
@@ -3481,6 +3496,12 @@ accidentally at some point.  Since there are not that many Amiga
 developers available, we could not get this fixed and tested in time
 for 5.8.0.  Perl 5.6.1 still works for AmigaOS (as does the the 5.7.2
 development release).
+
+The C<PerlIO::Scalar> and C<PerlIO::Via> (capitalised) were renamed as
+C<PerlIO::scalar> and C<PerlIO::via> (all lowercase) just before 5.8.0.
+The main rationale was to have all core IO layers to have all
+lowercase names.  The "plugins" are named as usual, for example
+C<PerlIO::via::QuotedPrint>.
 
 =head1 Reporting Bugs
 

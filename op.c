@@ -3899,12 +3899,6 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 	    return first;
 	}
     }
-    else if (first->op_type == OP_WANTARRAY) {
-	if (type == OP_AND)
-	    list(other);
-	else
-	    scalar(other);
-    }
     else if (ckWARN(WARN_MISC) && (first->op_flags & OPf_KIDS)) {
 	OP *k1 = ((UNOP*)first)->op_first;
 	OP *k2 = k1->op_sibling;
@@ -3983,6 +3977,10 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
 
     scalarboolean(first);
     if (first->op_type == OP_CONST) {
+        if (first->op_private & OPpCONST_BARE &&
+           first->op_private & OPpCONST_STRICT) {
+           no_bareword_allowed(first);
+       }
 	if (SvTRUE(((SVOP*)first)->op_sv)) {
 	    op_free(first);
 	    op_free(falseop);
@@ -3993,10 +3991,6 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
 	    op_free(trueop);
 	    return falseop;
 	}
-    }
-    else if (first->op_type == OP_WANTARRAY) {
-	list(trueop);
-	scalar(falseop);
     }
     NewOp(1101, logop, 1, LOGOP);
     logop->op_type = OP_COND_EXPR;
@@ -4344,6 +4338,10 @@ Perl_newLOOPEX(pTHX_ I32 type, OP *label)
 void
 Perl_cv_undef(pTHX_ CV *cv)
 {
+    CV *outsidecv;
+    CV *freecv = Nullcv;
+    bool is_eval = CvEVAL(cv) && !CvGV(cv);	/* is this eval"" ? */
+
 #ifdef USE_5005THREADS
     if (CvMUTEXP(cv)) {
 	MUTEX_DESTROY(CvMUTEXP(cv));
@@ -4379,13 +4377,14 @@ Perl_cv_undef(pTHX_ CV *cv)
     }
     SvPOK_off((SV*)cv);		/* forget prototype */
     CvGV(cv) = Nullgv;
+    outsidecv = CvOUTSIDE(cv);
     /* Since closure prototypes have the same lifetime as the containing
      * CV, they don't hold a refcount on the outside CV.  This avoids
      * the refcount loop between the outer CV (which keeps a refcount to
      * the closure prototype in the pad entry for pp_anoncode()) and the
      * closure prototype, and the ensuing memory leak.  --GSAR */
     if (!CvANON(cv) || CvCLONED(cv))
-	SvREFCNT_dec(CvOUTSIDE(cv));
+        freecv = outsidecv;
     CvOUTSIDE(cv) = Nullcv;
     if (CvCONST(cv)) {
 	SvREFCNT_dec((SV*)CvXSUBANY(cv).any_ptr);
@@ -4394,10 +4393,40 @@ Perl_cv_undef(pTHX_ CV *cv)
     if (CvPADLIST(cv)) {
 	/* may be during global destruction */
 	if (SvREFCNT(CvPADLIST(cv))) {
-	    I32 i = AvFILLp(CvPADLIST(cv));
-	    while (i >= 0) {
-		SV** svp = av_fetch(CvPADLIST(cv), i--, FALSE);
-		SV* sv = svp ? *svp : Nullsv;
+	    AV *padlist = CvPADLIST(cv);
+	    I32 ix;
+	    /* pads may be cleared out already during global destruction */
+	    if (is_eval && !PL_dirty) {
+		/* inner references to eval's cv must be fixed up */
+		AV *comppad_name = (AV*)AvARRAY(padlist)[0];
+		AV *comppad = (AV*)AvARRAY(padlist)[1];
+		SV **namepad = AvARRAY(comppad_name);
+		SV **curpad = AvARRAY(comppad);
+		for (ix = AvFILLp(comppad_name); ix > 0; ix--) {
+		    SV *namesv = namepad[ix];
+		    if (namesv && namesv != &PL_sv_undef
+			&& *SvPVX(namesv) == '&'
+			&& ix <= AvFILLp(comppad))
+		    {
+			CV *innercv = (CV*)curpad[ix];
+			if (innercv && SvTYPE(innercv) == SVt_PVCV
+			    && CvOUTSIDE(innercv) == cv)
+			{
+			    CvOUTSIDE(innercv) = outsidecv;
+			    if (!CvANON(innercv) || CvCLONED(innercv)) {
+				(void)SvREFCNT_inc(outsidecv);
+				if (SvREFCNT(cv))
+				    SvREFCNT_dec(cv);
+			    }
+			}
+		    }
+		}
+	    }
+	    if (freecv)
+		SvREFCNT_dec(freecv);
+	    ix = AvFILLp(padlist);
+	    while (ix >= 0) {
+		SV* sv = AvARRAY(padlist)[ix--];
 		if (!sv)
 		    continue;
 		if (sv == (SV*)PL_comppad_name)
@@ -4412,6 +4441,8 @@ Perl_cv_undef(pTHX_ CV *cv)
 	}
 	CvPADLIST(cv) = Nullav;
     }
+    else if (freecv)
+	SvREFCNT_dec(freecv);
     if (CvXSUB(cv)) {
         CvXSUB(cv) = 0;
     }

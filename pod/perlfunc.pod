@@ -445,7 +445,7 @@ does.  Returns true if it succeeded, false otherwise.  NAME should be a
 packed address of the appropriate type for the socket.  See the examples in
 L<perlipc/"Sockets: Client/Server Communication">.
 
-=item binmode FILEHANDLE, DISCIPLINE
+=item binmode FILEHANDLE, LAYER
 
 =item binmode FILEHANDLE
 
@@ -455,14 +455,21 @@ binary and text files.  If FILEHANDLE is an expression, the value is
 taken as the name of the filehandle.  Returns true on success,
 C<undef> on failure.
 
-If DISCIPLINE is omitted or specified as C<:raw> the filehandle is made
+If LAYER is omitted or specified as C<:raw> the filehandle is made
 suitable for passing binary data. This includes turning off possible CRLF
 translation and marking it as bytes (as opposed to Unicode characters).
 Note that as desipite what may be implied in I<"Programming Perl">
 (the Camel) or elsewhere C<:raw> is I<not> the simply inverse of C<:crlf>
-- other disciplines which would affect binary nature of the stream are
+-- other layers which would affect binary nature of the stream are
 I<also> disabled. See L<PerlIO>, L<perlrun> and the discussion about the
 PERLIO environment variable.
+
+I<The LAYER parameter of the binmode() function is described as "DISCIPLINE"
+in "Programming Perl, 3rd Edition".  However, since the publishing of this
+book, by many known as "Camel III", the consensus of the naming of this
+functionality has moved from "discipline" to "layer".  All documentation
+of this version of Perl therefore refers to "layers" rather than to
+"disciplines".  Now back to the regularly scheduled documentation...>
 
 On some systems (in general, DOS and Windows-based systems) binmode()
 is necessary when you're not working with a text file.  For the sake
@@ -472,26 +479,23 @@ and to never use it when it isn't appropriate.
 In other words: regardless of platform, use binmode() on binary files
 (like for example images).
 
-If DISCIPLINE is present it is a single string, but may contain
+If LAYER is present it is a single string, but may contain
 multiple directives. The directives alter the behaviour of the
-file handle. When DISCIPLINE is present using binmode on text
+file handle. When LAYER is present using binmode on text
 file makes sense.
 
 To mark FILEHANDLE as UTF-8, use C<:utf8>.
 
 The C<:bytes>, C<:crlf>, and C<:utf8>, and any other directives of the
-form C<:...>, are called I/O I<disciplines>. The normal implementation
-of disciplines in Perl 5.8 and later is in terms of I<layers>. See
-L<PerlIO>. (There is typically a one-to-one correspondence between
-layers and disiplines.) The C<open> pragma can be used to establish
-default I/O disciplines.  See L<open>.
+form C<:...>, are called I/O I<layers>.  The C<open> pragma can be used to
+establish default I/O layers.  See L<open>.
 
 In general, binmode() should be called after open() but before any I/O
 is done on the filehandle.  Calling binmode() will normally flush any
 pending buffered output data (and perhaps pending input data) on the
-handle.  An exception to this is the C<:encoding> discipline that
+handle.  An exception to this is the C<:encoding> layer that
 changes the default character encoding of the handle, see L<open>.
-The C<:encoding> discipline sometimes needs to be called in
+The C<:encoding> layer sometimes needs to be called in
 mid-stream, and it doesn't flush the stream.
 
 The operating system, device drivers, C libraries, and Perl run-time
@@ -653,6 +657,13 @@ You can actually chomp anything that's an lvalue, including an assignment:
 If you chomp a list, each element is chomped, and the total number of
 characters removed is returned.
 
+Note that parentheses are necessary when you're chomping anything
+that is not a simple variable.  This is because C<chomp $cwd = `pwd`;>
+is interpreted as C<(chomp $cwd) = `pwd`;>, rather than as
+C<chomp( $cwd = `pwd` )> which you might expect.  Similarly,
+C<chomp $a, $b> is interpreted as C<chomp($a), $b> rather than
+as C<chomp($a, $b)>.
+
 =item chop VARIABLE
 
 =item chop( LIST )
@@ -671,6 +682,8 @@ last C<chop> is returned.
 
 Note that C<chop> returns the last character.  To return all but the last
 character, use C<substr($string, 0, -1)>.
+
+See also L</chomp>.
 
 =item chown LIST
 
@@ -2040,11 +2053,13 @@ Returns the socket option requested, or undef if there is an error.
 
 =item glob
 
-Returns the value of EXPR with filename expansions such as the
-standard Unix shell F</bin/csh> would do.  This is the internal function
-implementing the C<< <*.c> >> operator, but you can use it directly.
-If EXPR is omitted, C<$_> is used.  The C<< <*.c> >> operator is
-discussed in more detail in L<perlop/"I/O Operators">.
+In list context, returns a (possibly empty) list of filename expansions on
+the value of EXPR such as the standard Unix shell F</bin/csh> would do. In
+scalar context, glob iterates through such filename expansions, returning
+undef when the list is exhausted. This is the internal function
+implementing the C<< <*.c> >> operator, but you can use it directly. If
+EXPR is omitted, C<$_> is used.  The C<< <*.c> >> operator is discussed in
+more detail in L<perlop/"I/O Operators">.
 
 Beginning with v5.6.0, this operator is implemented using the standard
 C<File::Glob> extension.  See L<File::Glob> for details.
@@ -2795,16 +2810,16 @@ meaning.
 In the 2-arguments (and 1-argument) form opening C<'-'> opens STDIN
 and opening C<< '>-' >> opens STDOUT.
 
-You may use the three-argument form of open to specify
-I<I/O disciplines>  or IO "layers"  to be applied to the handle that affect how the input and output
-are processed: (see L<open> and L<PerlIO> for more details).
-For example
+You may use the three-argument form of open to specify IO "layers"
+(sometimes also referred to as "disciplines") to be applied to the handle
+that affect how the input and output are processed (see L<open> and
+L<PerlIO> for more details). For example
 
   open(FH, "<:utf8", "file")
 
 will open the UTF-8 encoded file containing Unicode characters,
-see L<perluniintro>. (Note that if disciplines are specified in the
-three-arg form then default disciplines set by the C<open> pragma are
+see L<perluniintro>. (Note that if layers are specified in the
+three-arg form then default layers set by the C<open> pragma are
 ignored.)
 
 Open returns nonzero upon success, the undefined value otherwise.  If
@@ -3757,7 +3772,7 @@ see C<sysread>.
 Note the I<characters>: depending on the status of the filehandle,
 either (8-bit) bytes or characters are read.  By default all
 filehandles operate on bytes, but for example if the filehandle has
-been opened with the C<:utf8> discipline (see L</open>, and the C<open>
+been opened with the C<:utf8> I/O layer (see L</open>, and the C<open>
 pragma, L<open>), the I/O will operate on characters, not bytes.
 
 =item readdir DIRHANDLE
@@ -3829,7 +3844,7 @@ See L<perlipc/"UDP: Message Passing"> for examples.
 Note the I<characters>: depending on the status of the socket, either
 (8-bit) bytes or characters are received.  By default all sockets
 operate on bytes, but for example if the socket has been changed using
-binmode() to operate with the C<:utf8> discipline (see the C<open>
+binmode() to operate with the C<:utf8> I/O layer (see the C<open>
 pragma, L<open>), the I/O will operate on characters, not bytes.
 
 =item redo LABEL
@@ -4177,7 +4192,7 @@ otherwise.
 
 Note the I<in bytes>: even if the filehandle has been set to
 operate on characters (for example by using the C<:utf8> open
-discipline), tell() will return byte offsets, not character offsets
+layer), tell() will return byte offsets, not character offsets
 (because implementing that would render seek() and tell() rather slow).
 
 If you want to position file for C<sysread> or C<syswrite>, don't use
@@ -4349,7 +4364,7 @@ L<perlipc/"UDP: Message Passing"> for examples.
 Note the I<characters>: depending on the status of the socket, either
 (8-bit) bytes or characters are sent.  By default all sockets operate
 on bytes, but for example if the socket has been changed using
-binmode() to operate with the C<:utf8> discipline (see L</open>, or
+binmode() to operate with the C<:utf8> I/O layer (see L</open>, or
 the C<open> pragma, L<open>), the I/O will operate on characters, not
 bytes.
 
@@ -5395,7 +5410,7 @@ last byte of the scalar after the read.
 Note the I<characters>: depending on the status of the filehandle,
 either (8-bit) bytes or characters are read.  By default all
 filehandles operate on bytes, but for example if the filehandle has
-been opened with the C<:utf8> discipline (see L</open>, and the C<open>
+been opened with the C<:utf8> I/O layer (see L</open>, and the C<open>
 pragma, L<open>), the I/O will operate on characters, not bytes.
 
 An OFFSET may be specified to place the read data at some place in the
@@ -5419,7 +5434,7 @@ POSITION, and C<2> to set it to EOF plus POSITION (typically
 negative).
 
 Note the I<in bytes>: even if the filehandle has been set to operate
-on characters (for example by using the C<:utf8> discipline), tell()
+on characters (for example by using the C<:utf8> I/O layer), tell()
 will return byte offsets, not character offsets (because implementing
 that would render sysseek() very slow).
 
@@ -5520,7 +5535,7 @@ In the case the SCALAR is empty you can use OFFSET but only zero offset.
 Note the I<characters>: depending on the status of the filehandle,
 either (8-bit) bytes or characters are written.  By default all
 filehandles operate on bytes, but for example if the filehandle has
-been opened with the C<:utf8> discipline (see L</open>, and the open
+been opened with the C<:utf8> I/O layer (see L</open>, and the open
 pragma, L<open>), the I/O will operate on characters, not bytes.
 
 =item tell FILEHANDLE
@@ -5534,7 +5549,7 @@ last read.
 
 Note the I<in bytes>: even if the filehandle has been set to
 operate on characters (for example by using the C<:utf8> open
-discipline), tell() will return byte offsets, not character offsets
+layer), tell() will return byte offsets, not character offsets
 (because that would render seek() and tell() rather slow).
 
 The return value of tell() for the standard streams like the STDIN
@@ -5852,6 +5867,7 @@ See L</pack> for more examples and notes.
 =item untie VARIABLE
 
 Breaks the binding between a variable and a package.  (See C<tie>.)
+Has no effect if the variable is not tied.
 
 =item unshift ARRAY,LIST
 

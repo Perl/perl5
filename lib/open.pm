@@ -59,7 +59,7 @@ sub _get_locale_encoding {
 
 sub import {
     my ($class,@args) = @_;
-    croak("`use open' needs explicit list of disciplines") unless @args;
+    croak("`use open' needs explicit list of PerlIO layers") unless @args;
     my $std;
     $^H |= $open::hint_bits;
     my ($in,$out) = split(/\0/,(${^OPEN} || "\0"), -1);
@@ -95,7 +95,7 @@ sub import {
 		$target =~ s/^(\w+)\(.+\)$/$1/;	# strip parameters
 
 		unless(PerlIO::Layer::->find($target)) {
-		    warnings::warnif("layer", "Unknown discipline layer '$layer'");
+		    warnings::warnif("layer", "Unknown PerlIO layer '$layer'");
 		}
 	    }
 	    push(@val,":$layer");
@@ -113,7 +113,7 @@ sub import {
 	    $in = $out = join(' ',@val);
 	}
 	else {
-	    croak "Unknown discipline class '$type'";
+	    croak "Unknown PerlIO layer class '$type'";
 	}
     }
     ${^OPEN} = join("\0",$in,$out) if $in or $out;
@@ -142,7 +142,7 @@ __END__
 
 =head1 NAME
 
-open - perl pragma to set default disciplines for input and output
+open - perl pragma to set default PerlIO layers for input and output
 
 =head1 SYNOPSIS
 
@@ -160,17 +160,14 @@ open - perl pragma to set default disciplines for input and output
 
 =head1 DESCRIPTION
 
-Full-fledged support for I/O disciplines is now implemented provided
+Full-fledged support for I/O layers is now implemented provided
 Perl is configured to use PerlIO as its IO system (which is now the
 default).
 
 The C<open> pragma serves as one of the interfaces to declare default
-"layers" (aka disciplines) for all I/O.
-
-The C<open> pragma is used to declare one or more default layers for
-I/O operations.  Any open(), readpipe() (aka qx//) and similar
-operators found within the lexical scope of this pragma will use the
-declared defaults.
+"layers" (also known as "disciplines") for all I/O. Any open(),
+readpipe() (aka qx//) and similar operators found within the lexical
+scope of this pragma will use the declared defaults.
 
 With the C<IN> subpragma you can declare the default layers
 of input streams, and with the C<OUT> subpragma you can declare
@@ -179,7 +176,7 @@ you can control both input and output streams simultaneously.
 
 If you have a legacy encoding, you can use the C<:encoding(...)> tag.
 
-if you want to set your encoding disciplines based on your
+if you want to set your encoding layers based on your
 locale environment variables, you can use the C<:locale> tag.
 For example:
 
@@ -212,7 +209,7 @@ The matching of encoding names is loose: case does not matter, and
 many encodings have several aliases.  See L<Encode::Supported> for
 details and the list of supported locales.
 
-Note that C<:utf8> discipline must always be specified exactly like
+Note that C<:utf8> PerlIO layer must always be specified exactly like
 that, it is not subject to the loose matching of encoding names.
 
 When open() is given an explicit list of layers they are appended to
@@ -258,17 +255,17 @@ contain the strings 'UTF-8' or 'UTF8' (case-insensitive matching),
 the default encoding of your STDIN, STDOUT, and STDERR, and of
 B<any subsequent file open>, is UTF-8.
 
-Directory handles may also support disciplines in future.
+Directory handles may also support PerlIO layers in the future.
 
 =head1 NONPERLIO FUNCTIONALITY
 
 If Perl is not built to use PerlIO as its IO system then only the two
-pseudo-disciplines C<:bytes> and C<:crlf> are available.
+pseudo-layers C<:bytes> and C<:crlf> are available.
 
-The C<:bytes> discipline corresponds to "binary mode" and the C<:crlf>
-discipline corresponds to "text mode" on platforms that distinguish
+The C<:bytes> layer corresponds to "binary mode" and the C<:crlf>
+layer corresponds to "text mode" on platforms that distinguish
 between the two modes when opening files (which is many DOS-like
-platforms, including Windows).  These two disciplines are no-ops on
+platforms, including Windows).  These two layers are no-ops on
 platforms where binmode() is a no-op, but perform their functions
 everywhere if PerlIO is enabled.
 

@@ -133,6 +133,22 @@ a known base on which to build e.g.
 
 will construct a "binary" stream, but then enable UTF-8 translation.
 
+=item pop
+
+A pseudo layer that removes the top-most layer. Gives perl code
+a way to manipulate the layer stack. Should be considered
+as experimental. Note that C<:pop> only works on real layers
+and will not undo the effects of pseudo layers like C<:utf8>.
+An example of a possible use might be:
+
+    open($fh,...)
+    ...
+    binmode($fh,":encoding(...)");  # next chunk is encoded
+    ...
+    binmode($fh,":pop");            # back to un-encocded
+
+A more elegant (and safer) interface is needed.
+
 =back
 
 =head2 Alternatives to raw

@@ -1,5 +1,5 @@
 # Pod::Man -- Convert POD data to formatted *roff input.
-# $Id: Man.pm,v 1.32 2002/01/02 09:02:24 eagle Exp $
+# $Id: Man.pm,v 1.33 2002/06/23 19:16:21 eagle Exp $
 #
 # Copyright 1999, 2000, 2001, 2002 by Russ Allbery <rra@stanford.edu>
 #
@@ -38,7 +38,7 @@ use vars qw(@ISA %ESCAPES $PREAMBLE $VERSION);
 # Don't use the CVS revision as the version, since this module is also in Perl
 # core and too many things could munge CVS magic revision strings.  This
 # number should ideally be the same as the CVS revision in podlators, however.
-$VERSION = 1.32;
+$VERSION = 1.33;
 
 
 ##############################################################################
@@ -1012,7 +1012,7 @@ sub quote_literal {
        | \$+ [\#^]? \S $index                           # special ($^Foo, $")
        | [\$\@%&*]+ \#? [:\'\w]+ $index                 # plain var or func
        | [\$\@%&*]* [:\'\w]+ (?: -> )? \(\s*[^\s,]\s*\) # 0/1-arg func call
-       | [+-]? [\d.]+ (?: [eE] [+-]? \d+ )?             # a number
+       | [+-]? ( \d[\d.]* | \.\d+ ) (?: [eE][+-]?\d+ )? # a number
        | 0x [a-fA-F\d]+                                 # a hex constant
       )
       \s*\z

@@ -12,7 +12,7 @@ from cover to cover, Perl does support many Unicode features.
 
 =over 4
 
-=item Input and Output Disciplines
+=item Input and Output Layers
 
 Perl knows when a filehandle uses Perl's internal Unicode encodings
 (UTF-8, or UTF-EBCDIC if in EBCDIC) if the filehandle is opened with
@@ -87,7 +87,7 @@ Unless explicitly stated, Perl operators use character semantics
 for Unicode data and byte semantics for non-Unicode data.
 The decision to use character semantics is made transparently.  If
 input data comes from a Unicode source--for example, if a character
-encoding discipline is added to a filehandle or a literal Unicode
+encoding layer is added to a filehandle or a literal Unicode
 string constant appears in a program--character semantics apply.
 Otherwise, byte semantics are in effect.  The C<bytes> pragma should
 be used to force byte semantics on Unicode data.

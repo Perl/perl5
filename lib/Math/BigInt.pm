@@ -18,7 +18,8 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 require 5.005;
 
-$VERSION = '1.59';
+# This is a patched v1.60, containing a fix for the "1234567890\n" bug
+$VERSION = '1.60';
 use Exporter;
 @ISA =       qw( Exporter );
 @EXPORT_OK = qw( objectify _swap bgcd blcm); 
@@ -67,7 +68,7 @@ use overload
 
 '<=>'	=>	sub { $_[2] ?
                       ref($_[0])->bcmp($_[1],$_[0]) : 
-                      ref($_[0])->bcmp($_[0],$_[1])},
+                      $_[0]->bcmp($_[1])},
 'cmp'	=>	sub {
          $_[2] ? 
                "$_[1]" cmp $_[0]->bstr() :
@@ -234,12 +235,12 @@ sub accuracy
     return $a;				# shortcut
     }
 
-  if (ref($x))
-    {
-    # $object->accuracy() or fallback to global
-    return $x->{_a} || ${"${class}::accuracy"};
-    }
-  return ${"${class}::accuracy"};
+  my $r;
+  # $object->accuracy() or fallback to global
+  $r = $x->{_a} if ref($x);
+  # but don't return global undef, when $x's accuracy is 0!
+  $r = ${"${class}::accuracy"} if !defined $r;
+  $r;
   } 
 
 sub precision
@@ -273,12 +274,12 @@ sub precision
     return $p;				# shortcut
     }
 
-  if (ref($x))
-    {
-    # $object->precision() or fallback to global
-    return $x->{_p} || ${"${class}::precision"};
-    }
-  return ${"${class}::precision"};
+  my $r;
+  # $object->precision() or fallback to global
+  $r = $x->{_p} if ref($x);
+  # but don't return global undef, when $x's precision is 0!
+  $r = ${"${class}::precision"} if !defined $r;
+  $r;
   } 
 
 sub config
@@ -406,7 +407,7 @@ sub new
   my $self = bless {}, $class;
 
   # shortcut for "normal" numbers
-  if ((!ref $wanted) && ($wanted =~ /^([+-]?)[1-9][0-9]*$/))
+  if ((!ref $wanted) && ($wanted =~ /^([+-]?)[1-9][0-9]*\z/))
     {
     $self->{sign} = $1 || '+';
     my $ref = \$wanted;
@@ -585,12 +586,20 @@ sub bzero
   $self->{sign} = '+';
   if (@_ > 0)
     {
-    $self->{_a} = $_[0]
-     if (defined $self->{_a} && defined $_[0] && $_[0] > $self->{_a});
-    $self->{_p} = $_[1]
-     if (defined $self->{_p} && defined $_[1] && $_[1] < $self->{_p});
+    if (@_ > 3)
+      {
+      # call like: $x->bzero($a,$p,$r,$y);
+      ($self,$self->{_a},$self->{_p}) = $self->_find_round_parameters(@_);
+      }
+    else
+      {
+      $self->{_a} = $_[0]
+       if ( (!defined $self->{_a}) || (defined $_[0] && $_[0] > $self->{_a}));
+      $self->{_p} = $_[1]
+       if ( (!defined $self->{_p}) || (defined $_[1] && $_[1] > $self->{_p}));
+      }
     }
-  return $self;
+  $self;
   }
 
 sub bone
@@ -600,7 +609,7 @@ sub bone
   my $self = shift;
   my $sign = shift; $sign = '+' if !defined $sign || $sign ne '-';
   $self = $class if !defined $self;
-  
+ 
   if (!ref($self))
     {
     my $c = $self; $self = {}; bless $self, $c;
@@ -621,12 +630,20 @@ sub bone
   $self->{sign} = $sign;
   if (@_ > 0)
     {
-    $self->{_a} = $_[0]
-     if (defined $self->{_a} && defined $_[0] && $_[0] > $self->{_a});
-    $self->{_p} = $_[1]
-     if (defined $self->{_p} && defined $_[1] && $_[1] < $self->{_p});
+    if (@_ > 3)
+      {
+      # call like: $x->bone($sign,$a,$p,$r,$y);
+      ($self,$self->{_a},$self->{_p}) = $self->_find_round_parameters(@_);
+      }
+    else
+      {
+      $self->{_a} = $_[0]
+       if ( (!defined $self->{_a}) || (defined $_[0] && $_[0] > $self->{_a}));
+      $self->{_p} = $_[1]
+       if ( (!defined $self->{_p}) || (defined $_[1] && $_[1] > $self->{_p}));
+      }
     }
-  return $self;
+  $self;
   }
 
 ##############################################################################
@@ -844,7 +861,15 @@ sub bcmp
   {
   # Compares 2 values.  Returns one of undef, <0, =0, >0. (suitable for sort)
   # (BINT or num_str, BINT or num_str) return cond_code
-  my ($self,$x,$y) = objectify(2,@_);
+  
+  # set up parameters
+  my ($self,$x,$y) = (ref($_[0]),@_);
+
+  # objectify is costly, so avoid it 
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y) = objectify(2,@_);
+    }
 
   if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/))
     {
@@ -860,13 +885,9 @@ sub bcmp
   return 1 if $x->{sign} eq '+' && $y->{sign} eq '-';	# does also 0 <=> -y
   return -1 if $x->{sign} eq '-' && $y->{sign} eq '+';  # does also -x <=> 0 
 
-  # shortcut
-  my $xz = $x->is_zero();
-  my $yz = $y->is_zero();
-  return 0 if $xz && $yz;                               # 0 <=> 0
-  return -1 if $xz && $y->{sign} eq '+';                # 0 <=> +y
-  return 1 if $yz && $x->{sign} eq '+';                 # +x <=> 0
-  
+  # have same sign, so compare absolute values. Don't make tests for zero here
+  # because it's actually slower than testin in Calc (especially w/ Pari et al)
+
   # post-normalized compare for internal use (honors signs)
   if ($x->{sign} eq '+') 
     {
@@ -875,7 +896,7 @@ sub bcmp
     }
 
   # $x && $y both < 0
-  $CALC->_acmp($y->{value},$x->{value});	# swaped (lib does only 0,1,-1)
+  $CALC->_acmp($y->{value},$x->{value});	# swaped (lib returns 0,1,-1)
   }
 
 sub bacmp 
@@ -883,8 +904,15 @@ sub bacmp
   # Compares 2 values, ignoring their signs. 
   # Returns one of undef, <0, =0, >0. (suitable for sort)
   # (BINT, BINT) return cond_code
-  my ($self,$x,$y) = objectify(2,@_);
   
+  # set up parameters
+  my ($self,$x,$y) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it 
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y) = objectify(2,@_);
+    }
+
   if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/))
     {
     # handle +-inf and NaN
@@ -899,7 +927,14 @@ sub badd
   {
   # add second arg (BINT or string) to first (BINT) (modifies first)
   # return result as BINT
-  my ($self,$x,$y,@r) = objectify(2,@_);
+
+  # set up parameters
+  my ($self,$x,$y,@r) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it 
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,@r) = objectify(2,@_);
+    }
 
   return $x if $x->modify('badd');
   return $upgrade->badd($x,$y,@r) if defined $upgrade &&
@@ -954,14 +989,22 @@ sub badd
       $x->{sign} = $sx;
       }
     }
-  $x->round(@r);
+  $x->round(@r) if !exists $x->{_f} || $x->{_f} & MB_NEVER_ROUND == 0;
+  $x;
   }
 
 sub bsub 
   {
   # (BINT or num_str, BINT or num_str) return num_str
   # subtract second arg from first, modify first
-  my ($self,$x,$y,@r) = objectify(2,@_);
+  
+  # set up parameters
+  my ($self,$x,$y,@r) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,@r) = objectify(2,@_);
+    }
 
   return $x if $x->modify('bsub');
 
@@ -971,7 +1014,8 @@ sub bsub
 
   if ($y->is_zero())
     { 
-    return $x->round(@r);
+    $x->round(@r) if !exists $x->{_f} || $x->{_f} & MB_NEVER_ROUND == 0;
+    return $x;
     }
 
   $y->{sign} =~ tr/+\-/-+/; 	# does nothing for NaN
@@ -989,13 +1033,15 @@ sub binc
   if ($x->{sign} eq '+')
     {
     $x->{value} = $CALC->_inc($x->{value});
-    return $x->round($a,$p,$r);
+    $x->round($a,$p,$r) if !exists $x->{_f} || $x->{_f} & MB_NEVER_ROUND == 0;
+    return $x;
     }
   elsif ($x->{sign} eq '-')
     {
     $x->{value} = $CALC->_dec($x->{value});
     $x->{sign} = '+' if $CALC->_is_zero($x->{value}); # -1 +1 => -0 => +0
-    return $x->round($a,$p,$r);
+    $x->round($a,$p,$r) if !exists $x->{_f} || $x->{_f} & MB_NEVER_ROUND == 0;
+    return $x;
     }
   # inf, nan handling etc
   $x->badd($self->__one(),$a,$p,$r);		# badd does round
@@ -1014,13 +1060,15 @@ sub bdec
     $x->{value} = $CALC->_inc($x->{value});
     $x->{sign} = '-' if $zero;			# 0 => 1 => -1
     $x->{sign} = '+' if $CALC->_is_zero($x->{value}); # -1 +1 => -0 => +0
-    return $x->round($a,$p,$r);
+    $x->round($a,$p,$r) if !exists $x->{_f} || $x->{_f} & MB_NEVER_ROUND == 0;
+    return $x;
     }
   # > 0
   elsif ($x->{sign} eq '+')
     {
     $x->{value} = $CALC->_dec($x->{value});
-    return $x->round($a,$p,$r);
+    $x->round($a,$p,$r) if !exists $x->{_f} || $x->{_f} & MB_NEVER_ROUND == 0;
+    return $x;
     }
   # inf, nan handling etc
   $x->badd($self->__one('-'),$a,$p,$r);			# badd does round
@@ -1206,7 +1254,14 @@ sub bmul
   { 
   # multiply two numbers -- stolen from Knuth Vol 2 pg 233
   # (BINT or num_str, BINT or num_str) return BINT
-  my ($self,$x,$y,@r) = objectify(2,@_);
+
+  # set up parameters
+  my ($self,$x,$y,@r) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,@r) = objectify(2,@_);
+    }
   
   return $x if $x->modify('bmul');
 
@@ -1233,7 +1288,9 @@ sub bmul
 
   $x->{value} = $CALC->_mul($x->{value},$y->{value});	# do actual math
   $x->{sign} = '+' if $CALC->_is_zero($x->{value}); 	# no -0
-  $x->round(@r);
+
+  $x->round(@r) if !exists $x->{_f} || $x->{_f} & MB_NEVER_ROUND == 0;
+  $x;
   }
 
 sub _div_inf
@@ -1254,7 +1311,7 @@ sub _div_inf
   # x / +-inf => 0, remainder x (works even if x == 0)
   if ($y->{sign} =~ /^[+-]inf$/)
     {
-    my $t = $x->copy();		# binf clobbers up $x
+    my $t = $x->copy();		# bzero clobbers up $x
     return wantarray ? ($x->bzero(),$t) : $x->bzero()
     }
   
@@ -1285,14 +1342,20 @@ sub bdiv
   {
   # (dividend: BINT or num_str, divisor: BINT or num_str) return 
   # (BINT,BINT) (quo,rem) or BINT (only rem)
-  my ($self,$x,$y,@r) = objectify(2,@_);
+  
+  # set up parameters
+  my ($self,$x,$y,@r) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it 
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,@r) = objectify(2,@_);
+    } 
 
   return $x if $x->modify('bdiv');
 
   return $self->_div_inf($x,$y)
    if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/) || $y->is_zero());
 
-  #print "mbi bdiv $x $y\n";
   return $upgrade->bdiv($upgrade->new($x),$y,@r)
    if defined $upgrade && !$y->isa($self);
 
@@ -1337,6 +1400,8 @@ sub bdiv
     my $rem = $self->bzero(); 
     ($x->{value},$rem->{value}) = $CALC->_div($x->{value},$y->{value});
     $x->{sign} = '+' if $CALC->_is_zero($x->{value});
+    $rem->{_a} = $x->{_a};
+    $rem->{_p} = $x->{_p};
     $x->round(@r); 
     if (! $CALC->_is_zero($rem->{value}))
       {
@@ -1347,13 +1412,14 @@ sub bdiv
       {
       $rem->{sign} = '+';			# dont leave -0
       }
-    $rem->round(@r);
-    return ($x,$rem);
+    return ($x,$rem->round(@r));
     }
 
   $x->{value} = $CALC->_div($x->{value},$y->{value});
   $x->{sign} = '+' if $CALC->_is_zero($x->{value});
-  $x->round(@r); 
+
+  $x->round(@r) if !exists $x->{_f} || $x->{_f} & MB_NEVER_ROUND == 0;
+  $x;
   }
 
 ###############################################################################
@@ -1363,14 +1429,23 @@ sub bmod
   {
   # modulus (or remainder)
   # (BINT or num_str, BINT or num_str) return BINT
-  my ($self,$x,$y,@r) = objectify(2,@_);
+  
+  # set up parameters
+  my ($self,$x,$y,@r) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,@r) = objectify(2,@_);
+    }
 
   return $x if $x->modify('bmod');
   $r[3] = $y;					# no push!
   if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/) || $y->is_zero())
     {
     my ($d,$r) = $self->_div_inf($x,$y);
-    return $r->round(@r);
+    $x->{sign} = $r->{sign};
+    $x->{value} = $r->{value};
+    return $x->round(@r);
     }
 
   if ($CALC->can('_mod'))
@@ -1383,8 +1458,8 @@ sub bmod
       $x->{sign} = $y->{sign};
       if ($xsign ne $y->{sign})
         {
-        my $t = [ @{$x->{value}} ];			# copy $x
-        $x->{value} = [ @{$y->{value}} ];		# copy $y to $x
+        my $t = $CALC->_copy($x->{value});		# copy $x
+        $x->{value} = $CALC->_copy($y->{value});	# copy $y to $x
         $x->{value} = $CALC->_sub($y->{value},$t,1); 	# $y-$x
         }
       }
@@ -1392,7 +1467,8 @@ sub bmod
       {
       $x->{sign} = '+';				# dont leave -0
       }
-    return $x->round(@r);
+    $x->round(@r) if !exists $x->{_f} || $x->{_f} & MB_NEVER_ROUND == 0;
+    return $x;
     }
   my ($t,$rem) = $self->bdiv($x->copy(),$y,@r);	# slow way (also rounds)
   # modify in place
@@ -1410,28 +1486,34 @@ sub bmodinv
   # alogrithm.  if the number is not relatively prime to the modulus
   # (i.e. their gcd is not one) then NaN is returned.
 
-  my ($self,$num,$mod,@r) = objectify(2,@_);
+  # set up parameters
+  my ($self,$x,$y,@r) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it 
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,@r) = objectify(2,@_);
+    } 
 
-  return $num if $num->modify('bmodinv');
+  return $x if $x->modify('bmodinv');
 
-  return $num->bnan()
-	if ($mod->{sign} ne '+'				# -, NaN, +inf, -inf
-         || $num->is_zero()				# or num == 0
-	 || $num->{sign} !~ /^[+-]$/			# or num NaN, inf, -inf
+  return $x->bnan()
+	if ($y->{sign} ne '+'				# -, NaN, +inf, -inf
+         || $x->is_zero()				# or num == 0
+	 || $x->{sign} !~ /^[+-]$/			# or num NaN, inf, -inf
         );
 
-  # put least residue into $num if $num was negative, and thus make it positive
-  $num->bmod($mod) if $num->{sign} eq '-';
+  # put least residue into $x if $x was negative, and thus make it positive
+  $x->bmod($y) if $x->{sign} eq '-';
 
   if ($CALC->can('_modinv'))
     {
-    $num->{value} = $CALC->_modinv($num->{value},$mod->{value});
-    $num->bnan() if !defined $num->{value} ;            # in case there was no
-    return $num;
+    $x->{value} = $CALC->_modinv($x->{value},$y->{value});
+    $x->bnan() if !defined $x->{value} ;            # in case there was none
+    return $x;
     }
 
   my ($u, $u1) = ($self->bzero(), $self->bone());
-  my ($a, $b) = ($mod->copy(), $num->copy());
+  my ($a, $b) = ($y->copy(), $x->copy());
 
   # first step need always be done since $num (and thus $b) is never 0
   # Note that the loop is aligned so that the check occurs between #2 and #1
@@ -1449,12 +1531,12 @@ sub bmodinv
   # if the gcd is not 1, then return NaN!  It would be pointless to
   # have called bgcd to check this first, because we would then be performing
   # the same Euclidean Algorithm *twice*
-  return $num->bnan() unless $a->is_one();
+  return $x->bnan() unless $a->is_one();
 
-  $u1->bmod($mod);
-  $num->{value} = $u1->{value};
-  $num->{sign} = $u1->{sign};
-  $num;
+  $u1->bmod($y);
+  $x->{value} = $u1->{value};
+  $x->{sign} = $u1->{sign};
+  $x;
   }
 
 sub bmodpow
@@ -1490,8 +1572,8 @@ sub bmodpow
     }
 
   # in the trivial case,
-  return $num->bzero() if $mod->is_one();
-  return $num->bone() if $num->is_zero() or $num->is_one();
+  return $num->bzero(@r) if $mod->is_one();
+  return $num->bone('+',@r) if $num->is_zero() or $num->is_one();
 
   # $num->bmod($mod);           # if $x is large, make it smaller first
   my $acc = $num->copy();	# but this is not really faster...
@@ -1519,12 +1601,12 @@ sub bfac
   # (BINT or num_str, BINT or num_str) return BINT
   # compute factorial numbers
   # modifies first argument
-  my ($self,$x,@r) = objectify(1,@_);
+  my ($self,$x,@r) = ref($_[0]) ? (ref($_[0]),@_) : objectify(1,@_);
 
   return $x if $x->modify('bfac');
  
   return $x->bnan() if $x->{sign} ne '+';	# inf, NnN, <0 etc => NaN
-  return $x->bone(@r) if $x->is_zero() || $x->is_one();		# 0 or 1 => 1
+  return $x->bone('+',@r) if $x->is_zero() || $x->is_one();	# 0 or 1 => 1
 
   if ($CALC->can('_fac'))
     {
@@ -1534,13 +1616,13 @@ sub bfac
 
   my $n = $x->copy();
   $x->bone();
+  # seems we need not to temp. clear A/P of $x since the result is the same
   my $f = $self->new(2);
   while ($f->bacmp($n) < 0)
     {
     $x->bmul($f); $f->binc();
     }
-  $x->bmul($f);					# last step
-  $x->round(@r);				# round
+  $x->bmul($f,@r);			# last step and also round
   }
  
 sub bpow 
@@ -1548,7 +1630,14 @@ sub bpow
   # (BINT or num_str, BINT or num_str) return BINT
   # compute power of two numbers -- stolen from Knuth Vol 2 pg 233
   # modifies first argument
-  my ($self,$x,$y,@r) = objectify(2,@_);
+  
+  # set up parameters
+  my ($self,$x,$y,@r) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,@r) = objectify(2,@_);
+    }
 
   return $x if $x->modify('bpow');
 
@@ -1558,7 +1647,7 @@ sub bpow
   $r[3] = $y;					# no push!
   return $x if $x->{sign} =~ /^[+-]inf$/;	# -inf/+inf ** x
   return $x->bnan() if $x->{sign} eq $nan || $y->{sign} eq $nan;
-  return $x->bone(@r) if $y->is_zero();
+  return $x->bone('+',@r) if $y->is_zero();
   return $x->round(@r) if $x->is_one() || $y->is_one();
   if ($x->{sign} eq '-' && $CALC->_is_one($x->{value}))
     {
@@ -1574,7 +1663,8 @@ sub bpow
   if ($CALC->can('_pow'))
     {
     $x->{value} = $CALC->_pow($x->{value},$y->{value});
-    return $x->round(@r);
+    $x->round(@r) if !exists $x->{_f} || $x->{_f} & MB_NEVER_ROUND == 0;
+    return $x;
     }
 
 # based on the assumption that shifting in base 10 is fast, and that mul
@@ -1583,7 +1673,7 @@ sub bpow
 # stripping them out of the multiplication, and add $count * $y zeros
 # afterwards like this:
 # 300 ** 3 == 300*300*300 == 3*3*3 . '0' x 2 * 3 == 27 . '0' x 6
-# creates deep recursion?
+# creates deep recursion since brsft/blsft use bpow sometimes.
 #  my $zeros = $x->_trailing_zeros();
 #  if ($zeros > 0)
 #    {
@@ -1591,7 +1681,7 @@ sub bpow
 #    $x->bpow($y);		# recursion (will not branch into here again)
 #    $zeros = $y * $zeros; 	# real number of zeros to add
 #    $x->blsft($zeros,10);
-#    return $x->round($a,$p,$r);
+#    return $x->round(@r);
 #    }
 
   my $pow2 = $self->__one();
@@ -1603,47 +1693,62 @@ sub bpow
     $x->bmul($x);
     }
   $x->bmul($pow2);
-  $x->round(@r);
+  $x->round(@r) if !exists $x->{_f} || $x->{_f} & MB_NEVER_ROUND == 0;
+  $x;
   }
 
 sub blsft 
   {
   # (BINT or num_str, BINT or num_str) return BINT
   # compute x << y, base n, y >= 0
-  my ($self,$x,$y,$n,$a,$p,$r) = objectify(2,@_);
-  
+ 
+  # set up parameters
+  my ($self,$x,$y,$n,@r) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,$n,@r) = objectify(2,@_);
+    }
+
   return $x if $x->modify('blsft');
   return $x->bnan() if ($x->{sign} !~ /^[+-]$/ || $y->{sign} !~ /^[+-]$/);
-  return $x->round($a,$p,$r) if $y->is_zero();
+  return $x->round(@r) if $y->is_zero();
 
   $n = 2 if !defined $n; return $x->bnan() if $n <= 0 || $y->{sign} eq '-';
 
   my $t; $t = $CALC->_lsft($x->{value},$y->{value},$n) if $CALC->can('_lsft');
   if (defined $t)
     {
-    $x->{value} = $t; return $x->round($a,$p,$r);
+    $x->{value} = $t; return $x->round(@r);
     }
   # fallback
-  return $x->bmul( $self->bpow($n, $y, $a, $p, $r), $a, $p, $r );
+  return $x->bmul( $self->bpow($n, $y, @r), @r );
   }
 
 sub brsft 
   {
   # (BINT or num_str, BINT or num_str) return BINT
   # compute x >> y, base n, y >= 0
-  my ($self,$x,$y,$n,$a,$p,$r) = objectify(2,@_);
+  
+  # set up parameters
+  my ($self,$x,$y,$n,@r) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,$n,@r) = objectify(2,@_);
+    }
 
   return $x if $x->modify('brsft');
   return $x->bnan() if ($x->{sign} !~ /^[+-]$/ || $y->{sign} !~ /^[+-]$/);
-  return $x->round($a,$p,$r) if $y->is_zero();
-  return $x->bzero($a,$p,$r) if $x->is_zero();		# 0 => 0
+  return $x->round(@r) if $y->is_zero();
+  return $x->bzero(@r) if $x->is_zero();		# 0 => 0
 
   $n = 2 if !defined $n; return $x->bnan() if $n <= 0 || $y->{sign} eq '-';
 
    # this only works for negative numbers when shifting in base 2
   if (($x->{sign} eq '-') && ($n == 2))
     {
-    return $x->round($a,$p,$r) if $x->is_one('-');	# -1 => -1
+    return $x->round(@r) if $x->is_one('-');	# -1 => -1
     if (!$y->is_one())
       {
       # although this is O(N*N) in calc (as_bin!) it is O(N) in Pari et al
@@ -1671,7 +1776,7 @@ sub brsft
       my $res = $self->new('0b'.$bin);	# add prefix and convert back
       $res->binc();			# remember to increment
       $x->{value} = $res->{value};	# take over value
-      return $x->round($a,$p,$r);	# we are done now, magic, isn't?
+      return $x->round(@r);		# we are done now, magic, isn't?
       }
     $x->bdec();				# n == 2, but $y == 1: this fixes it
     }
@@ -1680,10 +1785,10 @@ sub brsft
   if (defined $t)
     {
     $x->{value} = $t;
-    return $x->round($a,$p,$r);
+    return $x->round(@r);
     }
   # fallback
-  $x->bdiv($self->bpow($n,$y, $a,$p,$r), $a,$p,$r);
+  $x->bdiv($self->bpow($n,$y, @r), @r);
   $x;
   }
 
@@ -1691,14 +1796,22 @@ sub band
   {
   #(BINT or num_str, BINT or num_str) return BINT
   # compute x & y
-  my ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
+ 
+  # set up parameters
+  my ($self,$x,$y,@r) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,@r) = objectify(2,@_);
+    }
   
   return $x if $x->modify('band');
 
+  $r[3] = $y;				# no push!
   local $Math::BigInt::upgrade = undef;
 
   return $x->bnan() if ($x->{sign} !~ /^[+-]$/ || $y->{sign} !~ /^[+-]$/);
-  return $x->bzero() if $y->is_zero() || $x->is_zero();
+  return $x->bzero(@r) if $y->is_zero() || $x->is_zero();
 
   my $sign = 0;					# sign of result
   $sign = 1 if ($x->{sign} eq '-') && ($y->{sign} eq '-');
@@ -1708,7 +1821,7 @@ sub band
   if ($CALC->can('_and') && $sx == 1 && $sy == 1)
     {
     $x->{value} = $CALC->_and($x->{value},$y->{value});
-    return $x->round($a,$p,$r);
+    return $x->round(@r);
     }
 
   my $m = $self->bone(); my ($xr,$yr);
@@ -1728,21 +1841,29 @@ sub band
     $m->bmul($x10000);
     }
   $x->bneg() if $sign;
-  return $x->round($a,$p,$r);
+  $x->round(@r);
   }
 
 sub bior 
   {
   #(BINT or num_str, BINT or num_str) return BINT
   # compute x | y
-  my ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
+  
+  # set up parameters
+  my ($self,$x,$y,@r) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,@r) = objectify(2,@_);
+    }
 
   return $x if $x->modify('bior');
+  $r[3] = $y;				# no push!
 
   local $Math::BigInt::upgrade = undef;
 
   return $x->bnan() if ($x->{sign} !~ /^[+-]$/ || $y->{sign} !~ /^[+-]$/);
-  return $x if $y->is_zero();
+  return $x->round(@r) if $y->is_zero();
 
   my $sign = 0;					# sign of result
   $sign = 1 if ($x->{sign} eq '-') || ($y->{sign} eq '-');
@@ -1753,7 +1874,7 @@ sub bior
   if ($CALC->can('_or') && $sx == 1 && $sy == 1)
     {
     $x->{value} = $CALC->_or($x->{value},$y->{value});
-    return $x->round($a,$p,$r);
+    return $x->round(@r);
     }
 
   my $m = $self->bone(); my ($xr,$yr);
@@ -1773,21 +1894,29 @@ sub bior
     $m->bmul($x10000);
     }
   $x->bneg() if $sign;
-  return $x->round($a,$p,$r);
+  $x->round(@r);
   }
 
 sub bxor 
   {
   #(BINT or num_str, BINT or num_str) return BINT
   # compute x ^ y
-  my ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
+  
+  # set up parameters
+  my ($self,$x,$y,@r) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,@r) = objectify(2,@_);
+    }
 
   return $x if $x->modify('bxor');
+  $r[3] = $y;				# no push!
 
   local $Math::BigInt::upgrade = undef;
 
   return $x->bnan() if ($x->{sign} !~ /^[+-]$/ || $y->{sign} !~ /^[+-]$/);
-  return $x if $y->is_zero();
+  return $x->round(@r) if $y->is_zero();
   
   my $sign = 0;					# sign of result
   $sign = 1 if $x->{sign} ne $y->{sign};
@@ -1798,7 +1927,7 @@ sub bxor
   if ($CALC->can('_xor') && $sx == 1 && $sy == 1)
     {
     $x->{value} = $CALC->_xor($x->{value},$y->{value});
-    return $x->round($a,$p,$r);
+    return $x->round(@r);
     }
 
   my $m = $self->bone(); my ($xr,$yr);
@@ -1818,7 +1947,7 @@ sub bxor
     $m->bmul($x10000);
     }
   $x->bneg() if $sign;
-  return $x->round($a,$p,$r);
+  $x->round(@r);
   }
 
 sub length
@@ -1833,9 +1962,8 @@ sub digit
   {
   # return the nth decimal digit, negative values count backward, 0 is right
   my ($self,$x,$n) = ref($_[0]) ? (ref($_[0]),@_) : objectify(1,@_);
-  $n = 0 if !defined $n;
 
-  $CALC->_digit($x->{value},$n);
+  $CALC->_digit($x->{value},$n||0);
   }
 
 sub _trailing_zeros
@@ -1851,28 +1979,28 @@ sub _trailing_zeros
   # if not: since we do not know underlying internal representation:
   my $es = "$x"; $es =~ /([0]*)$/;
   return 0 if !defined $1;	# no zeros
-  return CORE::length("$1");	# as string, not as +0!
+  CORE::length("$1");		# as string, not as +0!
   }
 
 sub bsqrt
   {
-  my ($self,$x,$a,$p,$r) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_);
+  my ($self,$x,@r) = ref($_[0]) ? (ref($_[0]),@_) : objectify(1,@_);
 
   return $x if $x->modify('bsqrt');
 
   return $x->bnan() if $x->{sign} ne '+';	# -x or inf or NaN => NaN
-  return $x->bzero($a,$p) if $x->is_zero();			# 0 => 0
-  return $x->round($a,$p,$r) if $x->is_one();			# 1 => 1
+  return $x->bzero(@r) if $x->is_zero();			# 0 => 0
+  return $x->round(@r) if $x->is_one();			# 1 => 1
 
-  return $upgrade->bsqrt($x,$a,$p,$r) if defined $upgrade;
+  return $upgrade->bsqrt($x,@r) if defined $upgrade;
 
   if ($CALC->can('_sqrt'))
     {
     $x->{value} = $CALC->_sqrt($x->{value});
-    return $x->round($a,$p,$r);
+    return $x->round(@r);
     }
 
-  return $x->bone($a,$p) if $x < 4;				# 2,3 => 1
+  return $x->bone('+',@r) if $x < 4;				# 2,3 => 1
   my $y = $x->copy();
   my $l = int($x->length()/2);
   
@@ -1889,7 +2017,7 @@ sub bsqrt
     $x /= $two;
     }
   $x-- if $x * $x > $y;				# overshot?
-  $x->round($a,$p,$r);
+  $x->round(@r);
   }
 
 sub exponent
@@ -1921,7 +2049,6 @@ sub mantissa
   # that's inefficient
   my $zeros = $m->_trailing_zeros();
   $m->brsft($zeros,10) if $zeros != 0;
-#  $m /= 10 ** $zeros if $zeros != 0;
   $m;
   }
 
@@ -1972,7 +2099,8 @@ sub _scan_for_nonzero
   # since we do not know underlying represention of $x, use decimal string
   #my $r = substr ($$xs,-$follow);
   my $r = substr ("$x",-$follow);
-  return 1 if $r =~ /[^0]/; return 0;
+  return 1 if $r =~ /[^0]/;
+  0;
   }
 
 sub fround
@@ -2028,8 +2156,6 @@ sub bround
   $pl++; $pl ++ if $pad >= $len;
   $digit_after = '0'; $digit_after = substr($$xs,$pl,1) if $pad > 0;
 
- #  print "$pad $pl $$xs dr $digit_round da $digit_after\n";
-
   # in case of 01234 we round down, for 6789 up, and only in case 5 we look
   # closer at the remaining digits of the original $x, remember decision
   my $round_up = 1;					# default round up
@@ -2048,25 +2174,6 @@ sub bround
     );
   my $put_back = 0;					# not yet modified
 	
-  # old code, depend on internal representation
-  # split mantissa at $pad and then pad with zeros
-  #my $s5 = int($pad / 5);
-  #my $i = 0;
-  #while ($i < $s5)
-  #  {
-  #  $x->{value}->[$i++] = 0;				# replace with 5 x 0
-  #  }
-  #$x->{value}->[$s5] = '00000'.$x->{value}->[$s5];	# pad with 0
-  #my $rem = $pad % 5;				# so much left over
-  #if ($rem > 0)
-  #  {
-  #  #print "remainder $rem\n";
-  ##  #print "elem      $x->{value}->[$s5]\n";
-  #  substr($x->{value}->[$s5],-$rem,$rem) = '0' x $rem;	# stamp w/ '0'
-  #  }
-  #$x->{value}->[$s5] = int ($x->{value}->[$s5]);	# str '05' => int '5'
-  #print ${$CALC->_str($pad->{value})}," $len\n";
-
   if (($pad > 0) && ($pad <= $len))
     {
     substr($$xs,-$pad,$pad) = '0' x $pad;
@@ -2083,7 +2190,7 @@ sub bround
     $pad = $len, $$xs = '0'x$pad if $scale < 0;		# tlr: whack 0.51=>1.0	
 
     # we modify directly the string variant instead of creating a number and
-    # adding it
+    # adding it, since that is faster (we already have the string)
     my $c = 0; $pad ++;				# for $pad == $len case
     while ($pad <= $len)
       {
@@ -2093,9 +2200,8 @@ sub bround
       }
     $$xs = '1'.$$xs if $c == 0;
 
-    # $x->badd( Math::BigInt->new($x->{sign}.'1'. '0' x $pad) );
     }
-  $x->{value} = $CALC->_new($xs) if $put_back == 1;	# put back in
+  $x->{value} = $CALC->_new($xs) if $put_back == 1;	# put back in if needed
 
   $x->{_a} = $scale if $scale >= 0;
   if ($scale < 0)
@@ -2110,20 +2216,18 @@ sub bfloor
   {
   # return integer less or equal then number, since it is already integer,
   # always returns $self
-  my ($self,$x,$a,$p,$r) = ref($_[0]) ? (ref($_[0]),@_) : objectify(1,@_);
+  my ($self,$x,@r) = ref($_[0]) ? (ref($_[0]),@_) : objectify(1,@_);
 
-  # not needed: return $x if $x->modify('bfloor');
-  return $x->round($a,$p,$r);
+  $x->round(@r);
   }
 
 sub bceil
   {
   # return integer greater or equal then number, since it is already integer,
   # always returns $self
-  my ($self,$x,$a,$p,$r) = ref($_[0]) ? (ref($_[0]),@_) : objectify(1,@_);
+  my ($self,$x,@r) = ref($_[0]) ? (ref($_[0]),@_) : objectify(1,@_);
 
-  # not needed: return $x if $x->modify('bceil');
-  return $x->round($a,$p,$r);
+  $x->round(@r);
   }
 
 ##############################################################################
@@ -2135,7 +2239,7 @@ sub __one
   my $self = shift;
   my $x = $self->bone(); # $x->{value} = $CALC->_one();
   $x->{sign} = shift || '+';
-  return $x;
+  $x;
   }
 
 sub _swap
@@ -2420,7 +2524,7 @@ sub _split
   $$x =~ s/\s+$//g;			# strip white space at end
 
   # shortcut, if nothing to split, return early
-  if ($$x =~ /^[+-]?\d+$/)
+  if ($$x =~ /^[+-]?\d+\z/)
     {
     $$x =~ s/^([+-])0*([0-9])/$2/; my $sign = $1 || '+';
     return (\$sign, $x, \'', \'', \0);
@@ -2699,6 +2803,15 @@ Math::BigInt - Arbitrary size integer math package
   
   Math::BigInt->config();	# return hash containing configuration/version
 
+  # precision and accuracy (see section about rounding for more)
+  $x->precision();              # return P of $x (or global, if P of $x undef)
+  $x->precision($n);            # set P of $x to $n
+  $x->accuracy();               # return A of $x (or global, if A of $x undef)
+  $x->accuracy($n);             # set A $x to $n
+
+  Math::BigInt->precision();	# get/set global P for all BigInt objects
+  Math::BigInt->accuracy();	# get/set global A for all BigInt objects
+
 =head1 DESCRIPTION
 
 All operators (inlcuding basic math operations) are overloaded if you
@@ -2723,9 +2836,12 @@ zeros suppressed.
 =item Input
 
 Input values to these routines may be either Math::BigInt objects or
-strings of the form C</^\s*[+-]?[\d]+\.?[\d]*E?[+-]?[\d]*$/>.
+strings of the form C</^[+-]?[\d]+\.?[\d]*E?[+-]?[\d]*$/>.
 
-You can include one underscore between any two digits.
+You can include one underscore between any two digits. The input string may
+have leading and trailing whitespace, which will be ignored. In later
+versions, a more strict (no whitespace at all) or more lax (whitespace
+allowed everywhere) input checking will also be possible.
 
 This means integer values like 1.01E2 or even 1000E-2 are also accepted.
 Non integer values result in NaN.

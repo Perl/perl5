@@ -7,7 +7,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan( tests => 89 );
+plan( tests => 122 );
 
 $x = 'foo';
 $_ = "x";
@@ -372,10 +372,122 @@ ok( $_ eq "C B" && $snum == 12 );
     my $l = my $r = $s;
     $l =~ s/[^\w]//g;
     $r =~ s/[^\w\.]//g;
-    is($l, $r, "use utf8");
+    is($l, $r, "use utf8 \\w");
 }
 
 my $pv1 = my $pv2  = "Andreas J. K\303\266nig";
 $pv1 =~ s/A/\x{100}/;
 substr($pv2,0,1) = "\x{100}";
 is($pv1, $pv2);
+
+SKIP: {
+    skip("EBCDIC", 3) if ord("A") == 193; 
+
+    {   
+	# Gregor Chrupala <gregor.chrupala@star-group.net>
+	use utf8;
+	$a = 'Espa&ntilde;a';
+	$a =~ s/&ntilde;/ñ/;
+	like($a, qr/ñ/, "use utf8 RHS");
+    }
+
+    {
+	use utf8;
+	$a = 'España España';
+	$a =~ s/ñ/&ntilde;/;
+	like($a, qr/ñ/, "use utf8 LHS");
+    }
+
+    {
+	use utf8;
+	$a = 'España';
+	$a =~ s/ñ/ñ/;
+	like($a, qr/ñ/, "use utf8 LHS and RHS");
+    }
+}
+
+{
+    # SADAHIRO Tomoyuki <bqw10602@nifty.com>
+
+    $a = "\x{100}\x{101}";
+    $a =~ s/\x{101}/\xFF/;
+    like($a, qr/\xFF/);
+    is(length($a), 2, "SADAHIRO utf8 s///");
+
+    $a = "\x{100}\x{101}";
+    $a =~ s/\x{101}/"\xFF"/e;
+    like($a, qr/\xFF/);
+    is(length($a), 2);
+
+    $a = "\x{100}\x{101}";
+    $a =~ s/\x{101}/\xFF\xFF\xFF/;
+    like($a, qr/\xFF\xFF\xFF/);
+    is(length($a), 4);
+
+    $a = "\x{100}\x{101}";
+    $a =~ s/\x{101}/"\xFF\xFF\xFF"/e;
+    like($a, qr/\xFF\xFF\xFF/);
+    is(length($a), 4);
+
+    $a = "\xFF\x{101}";
+    $a =~ s/\xFF/\x{100}/;
+    like($a, qr/\x{100}/);
+    is(length($a), 2);
+
+    $a = "\xFF\x{101}";
+    $a =~ s/\xFF/"\x{100}"/e;
+    like($a, qr/\x{100}/);
+    is(length($a), 2);
+
+    $a = "\xFF";
+    $a =~ s/\xFF/\x{100}/;
+    like($a, qr/\x{100}/);
+    is(length($a), 1);
+
+    $a = "\xFF";
+    $a =~ s/\xFF/"\x{100}"/e;
+    like($a, qr/\x{100}/);
+    is(length($a), 1);
+}
+
+{
+    # subst with mixed utf8/non-utf8 type
+    my($ua, $ub, $uc, $ud) = ("\x{101}", "\x{102}", "\x{103}", "\x{104}");
+    my($na, $nb) = ("\x{ff}", "\x{fe}");
+    my $a = "$ua--$ub";
+    my $b;
+    ($b = $a) =~ s/--/$na/;
+    is($b, "$ua$na$ub", "s///: replace non-utf8 into utf8");
+    ($b = $a) =~ s/--/--$na--/;
+    is($b, "$ua--$na--$ub", "s///: replace long non-utf8 into utf8");
+    ($b = $a) =~ s/--/$uc/;
+    is($b, "$ua$uc$ub", "s///: replace utf8 into utf8");
+    ($b = $a) =~ s/--/--$uc--/;
+    is($b, "$ua--$uc--$ub", "s///: replace long utf8 into utf8");
+    $a = "$na--$nb";
+    ($b = $a) =~ s/--/$ua/;
+    is($b, "$na$ua$nb", "s///: replace utf8 into non-utf8");
+    ($b = $a) =~ s/--/--$ua--/;
+    is($b, "$na--$ua--$nb", "s///: replace long utf8 into non-utf8");
+
+    # now with utf8 pattern
+    $a = "$ua--$ub";
+    ($b = $a) =~ s/-($ud)?-/$na/;
+    is($b, "$ua$na$ub", "s///: replace non-utf8 into utf8 (utf8 pattern)");
+    ($b = $a) =~ s/-($ud)?-/--$na--/;
+    is($b, "$ua--$na--$ub", "s///: replace long non-utf8 into utf8 (utf8 pattern)");
+    ($b = $a) =~ s/-($ud)?-/$uc/;
+    is($b, "$ua$uc$ub", "s///: replace utf8 into utf8 (utf8 pattern)");
+    ($b = $a) =~ s/-($ud)?-/--$uc--/;
+    is($b, "$ua--$uc--$ub", "s///: replace long utf8 into utf8 (utf8 pattern)");
+    $a = "$na--$nb";
+    ($b = $a) =~ s/-($ud)?-/$ua/;
+    is($b, "$na$ua$nb", "s///: replace utf8 into non-utf8 (utf8 pattern)");
+    ($b = $a) =~ s/-($ud)?-/--$ua--/;
+    is($b, "$na--$ua--$nb", "s///: replace long utf8 into non-utf8 (utf8 pattern)");
+    ($b = $a) =~ s/-($ud)?-/$na/;
+    is($b, "$na$na$nb", "s///: replace non-utf8 into non-utf8 (utf8 pattern)");
+    ($b = $a) =~ s/-($ud)?-/--$na--/;
+    is($b, "$na--$na--$nb", "s///: replace long non-utf8 into non-utf8 (utf8 pattern)");
+}
+

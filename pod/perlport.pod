@@ -1567,7 +1567,7 @@ Available only on Windows NT (not on Windows 95). (Win32)
 
 =item fork
 
-Not implemented. (S<Mac OS>, AmigaOS, S<RISC OS>, VOS, VM/ESA)
+Not implemented. (S<Mac OS>, AmigaOS, S<RISC OS>, VOS, VM/ESA, VMS)
 
 Emulated using multiple interpreters.  See L<perlfork>.  (Win32)
 
@@ -1584,7 +1584,7 @@ Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VOS)
 
 =item getppid
 
-Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>)
+Not implemented. (S<Mac OS>, Win32, S<RISC OS>)
 
 =item getpriority WHICH,WHO
 
@@ -1794,7 +1794,7 @@ Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VOS)
 
 =item setgrent
 
-Not implemented. (S<Mac OS>, MPE/iX, VMS, Win32, VMS, S<RISC OS>)
+Not implemented. (S<Mac OS>, MPE/iX, VMS, Win32, S<RISC OS>)
 
 =item setpgrp PID,PGRP
 
@@ -2094,9 +2094,11 @@ available at http://www.cpan.org/src/index.html
         OpenBSD
         OpenVMS         (VMS)
         OS/2
+        PowerUX
         POSIX-BC        (BS2000)
         QNX
         Solaris
+        SunOS 4
         SUPER-UX
         Tru64 UNIX      (DEC OSF/1, Digital UNIX)
         UNICOS
@@ -2114,22 +2116,22 @@ available at http://www.cpan.org/src/index.html
 The following platforms worked with the previous releases (5.6 and
 5.7), but we did not manage either to fix or to test these in time
 for the 5.8.0 release.  There is a very good chance that many of these
-will work fine with the 5.8.0.  The only one known for certain to be
-broken for 5.8.0 is the AmigaOS (for which 5.6.1 and 5.7.2 can be used)
+will work fine with the 5.8.0.
 
-        AmigaOS
         BSD/OS
         DomainOS
         Hurd
         LynxOS
         MachTen
         PowerMAX
-        PowerUX
         SCO SV
-        SunOS 4
         SVR4
         Unixware
         Windows 3.1
+
+Known to be broken for 5.8.0 (but 5.6.1 and 5.7.2 can be used):
+
+	AmigaOS
 
 The following platforms have been known to build Perl from source in
 the past (5.005_03 and earlier), but we haven't been able to verify

@@ -29,8 +29,8 @@ class, while ithreads uses the L<threads> class. Note the change in case.
 
 The ithreads code has been available since Perl 5.6.0, and is considered
 stable. The user-level interface to ithreads (the L<threads> classes)
-appeared in the 5.8.0 release, and as of this time is considered stable,
-although as with all new features, should be treated with caution.
+appeared in the 5.8.0 release, and as of this time is considered stable
+although it should be treated with caution as with all new features.
 
 =head1 What Is A Thread Anyway?
 
@@ -286,11 +286,11 @@ Future versions of Perl may fix this problem.
 =head2 Creating Threads
 
 The L<threads> package provides the tools you need to create new
-threads.  Like any other module, you need to tell Perl you want to use
+threads.  Like any other module, you need to tell Perl that you want to use
 it; C<use threads> imports all the pieces you need to create basic
 threads.
 
-The simplest, straightforward way to create a thread is with new():
+The simplest, most straightforward way to create a thread is with new():
 
     use threads; 
 
@@ -334,7 +334,7 @@ C<create()> is a synonym for C<new()>.
 There are times when you may find it useful to have a thread
 explicitly give up the CPU to another thread.  Your threading package
 might not support preemptive multitasking for threads, for example, or
-you may be doing something compute-intensive and want to make sure
+you may be doing something processor-intensive and want to make sure
 that the user-interface thread gets called frequently.  Regardless,
 there are times that you might want a thread to give up the processor.
 
@@ -434,7 +434,7 @@ This is similar in feel to what happens when a UNIX process forks,
 except that in this case, the data is just copied to a different part of
 memory within the same process rather than a real fork taking place.
 
-To make use of threading however, one usually want the threads to share
+To make use of threading however, one usually wants the threads to share
 at least some data between themselves. This is done with the
 L<threads::shared> module and the C< : shared> attribute:
 
@@ -465,8 +465,8 @@ assignment will cause the thread to die. For example:
     ... create some threads ...
 
     $hash{a} = 1;	# all threads see exists($hash{a}) and $hash{a} == 1
-    $hash{a} = $var	# okay - copy-by-value: same affect as previous
-    $hash{a} = $svar	# okay - copy-by-value: same affect as previous
+    $hash{a} = $var	# okay - copy-by-value: same effect as previous
+    $hash{a} = $svar	# okay - copy-by-value: same effect as previous
     $hash{a} = \$svar	# okay - a reference to a shared variable
     $hash{a} = \$var	# This will die
     delete $hash{a}	# okay - all threads will see !exists($hash{a})
@@ -533,7 +533,7 @@ Perl provides a number of mechanisms to coordinate the interactions
 between themselves and their data, to avoid race conditions and the like.
 Some of these are designed to resemble the common techniques used in thread
 libraries such as C<pthreads>; others are Perl-specific. Often, the
-standard techniques are clumsily and difficult to get right (such as
+standard techniques are clumsy and difficult to get right (such as
 condition waits). Where possible, it is usually easier to use Perlish
 techniques such as queues, which remove some of the hard work involved.
 
@@ -682,9 +682,9 @@ synchronization issues.  They're pretty straightforward, and look like
 this:
 
     use threads; 
-    use threads::shared::queue;
+    use Thread::Queue;
 
-    my $DataQueue = threads::shared::queue->new; 
+    my $DataQueue = Thread::Queue->new; 
     $thr = threads->new(sub { 
         while ($DataElement = $DataQueue->dequeue) { 
             print "Popped $DataElement off the queue\n";
@@ -698,7 +698,7 @@ this:
     $DataQueue->enqueue(undef);
     $thr->join;
 
-You create the queue with C<new threads::shared::queue>.  Then you can
+You create the queue with C<new Thread::Queue>.  Then you can
 add lists of scalars onto the end with enqueue(), and pop scalars off
 the front of it with dequeue().  A queue has no fixed size, and can grow
 as needed to hold everything pushed on to it.
@@ -723,9 +723,9 @@ semaphore's current count would decrement below zero.  This program
 gives a quick demonstration:
 
     use threads qw(yield); 
-    use threads::shared::semaphore; 
+    use Thread::Semaphore; 
 
-    my $semaphore = new threads::shared::semaphore; 
+    my $semaphore = new Thread::Semaphore; 
     my $GlobalVariable : shared = 0;
 
     $thr1 = new threads \&sample_sub, 1; 
@@ -768,8 +768,8 @@ one, and up() increments by one. However, we can override any or all
 of these defaults simply by passing in different values:
 
     use threads;
-    use threads::shared::semaphore;
-    my $semaphore = threads::shared::semaphore->new(5);
+    use Thread::Semaphore;
+    my $semaphore = Thread::Semaphore->new(5);
                     # Creates a semaphore with the counter set to five
 
     $thr1 = threads->new(\&sub1);
@@ -882,9 +882,9 @@ things we've covered.  This program finds prime numbers using threads.
     4  use strict;
     5
     6  use threads;
-    7  use threads::shared::queue;
+    7  use Thread::Queue;
     8
-    9  my $stream = new threads::shared::queue;
+    9  my $stream = new Thread::Queue;
     10 my $kid    = new threads(\&check_num, $stream, 2);
     11
     12 for my $i ( 3 .. 1000 ) {
@@ -897,7 +897,7 @@ things we've covered.  This program finds prime numbers using threads.
     19 sub check_num {
     20     my ($upstream, $cur_prime) = @_;
     21     my $kid;
-    22     my $downstream = new threads::shared::queue;
+    22     my $downstream = new Thread::Queue;
     23     while (my $num = $upstream->dequeue) {
     24         next unless $num % $cur_prime;
     25         if ($kid) {
@@ -914,7 +914,7 @@ things we've covered.  This program finds prime numbers using threads.
 This program uses the pipeline model to generate prime numbers.  Each
 thread in the pipeline has an input queue that feeds numbers to be
 checked, a prime number that it's responsible for, and an output queue
-that into which it funnels numbers that have failed the check.  If the thread
+into which it funnels numbers that have failed the check.  If the thread
 has a number that's failed its check and there's no child thread, then
 the thread must have found a new prime number.  In that case, a new
 child thread is created for that prime and stuck on the end of the

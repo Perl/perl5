@@ -450,7 +450,7 @@ Perl_lex_start(pTHX_ SV *line)
     if (SvREADONLY(PL_linestr))
 	PL_linestr = sv_2mortal(newSVsv(PL_linestr));
     s = SvPV(PL_linestr, len);
-    if (len && s[len-1] != ';') {
+    if (!len || s[len-1] != ';') {
 	if (!(SvFLAGS(PL_linestr) & SVs_TEMP))
 	    PL_linestr = sv_2mortal(newSVsv(PL_linestr));
 	sv_catpvn(PL_linestr, "\n;", 2);
@@ -2613,6 +2613,19 @@ Perl_yylex(pTHX)
 		    if (sv_eq(x, CopFILESV(PL_curcop))) {
 			sv_setpvn(x, ipath, ipathend - ipath);
 			SvSETMAGIC(x);
+		    }
+		    else {
+			STRLEN blen;
+			STRLEN llen;
+			char *bstart = SvPV(CopFILESV(PL_curcop),blen);
+			char *lstart = SvPV(x,llen);
+			if (llen < blen) {
+			    bstart += blen - llen;
+			    if (strnEQ(bstart, lstart, llen) &&	bstart[-1] == '/') {
+				sv_setpvn(x, ipath, ipathend - ipath);
+				SvSETMAGIC(x);
+			    }
+			}
 		    }
 		    TAINT_NOT;	/* $^X is always tainted, but that's OK */
 		}

@@ -31,6 +31,12 @@
 #define	P_NOWAIT	1
 #endif
 
+#define EXECF_EXEC 1
+#define EXECF_SPAWN 2
+#define EXECF_SPAWN_NOWAIT 3
+
+static BOOL has_shell_metachars(char *ptr);
+
 // The array is used to store pointer to the memory allocated to the TempPipeFile structure everytime
 // a call to the function, nw_Popen. If a simple variable is used, everytime the memory is allocated before
 // the previously allocated memory is freed, the pointer will get overwritten and the previous memory allocations
@@ -43,7 +49,6 @@
 PTEMPPIPEFILE ptpf1[MAX_PIPE_RECURSION] = {'\0'};
 int iPopenCount = 0;
 FILE* File1[MAX_PIPE_RECURSION] = {'\0'};
-
 
 /**
 General:
@@ -917,7 +922,8 @@ do_aspawn(void *vreally, void **vmark, void **vsp)
 	return -1;
 
 	nw_perlshell_items = 0;	// No Shell
-    New(1306, argv, (sp - mark) + nw_perlshell_items + 3, char*);
+//    New(1306, argv, (sp - mark) + nw_perlshell_items + 3, char*);	// In the old code of 5.6.1
+    New(1306, argv, (sp - mark) + nw_perlshell_items + 2, char*);
 
     if (SvNIOKp(*(mark+1)) && !SvPOKp(*(mark+1))) {
 	++mark;
@@ -944,10 +950,9 @@ do_aspawn(void *vreally, void **vmark, void **vsp)
 			   (char*)(really ? SvPV_nolen(really) : argv[0]),
 			   (char**)argv);
 
-
     if (flag != P_NOWAIT) {
 	if (status < 0) {
-    	    dTHR;
+//   	    dTHR;	// Only in old code of 5.6.1
 	    if (ckWARN(WARN_EXEC))
 		Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't spawn \"%s\": %s", argv[0], strerror(errno));
 	    status = 255 * 256;
@@ -967,13 +972,145 @@ do_spawn2(char *cmd, int exectype)
 	// This feature needs to be implemented.
 	// _asm is commented out since it goes into the internal debugger.
 //	_asm {int 3};
-	return(0);
+////	return(0);
+
+	// Below added to make system() work for NetWare
+
+    dTHX;
+    char **a;
+    char *s;
+    char **argv;
+    int status = -1;
+    BOOL needToTry = TRUE;
+    char *cmd2;
+
+    /* Save an extra exec if possible. See if there are shell
+     * metacharacters in it */
+    if (!has_shell_metachars(cmd)) {
+	New(1301,argv, strlen(cmd) / 2 + 2, char*);
+	New(1302,cmd2, strlen(cmd) + 1, char);
+	strcpy(cmd2, cmd);
+	a = argv;
+	for (s = cmd2; *s;) {
+	    while (*s && isSPACE(*s))
+		s++;
+	    if (*s)
+		*(a++) = s;
+	    while (*s && !isSPACE(*s))
+		s++;
+	    if (*s)
+		*s++ = '\0';
+	}
+	*a = Nullch;
+	if (argv[0]) {
+	    switch (exectype) {
+			case EXECF_SPAWN:
+				status = nw_spawnvp(P_WAIT, argv[0], (char **)argv);
+				break;
+
+			case EXECF_SPAWN_NOWAIT:
+				status = nw_spawnvp(P_NOWAIT, argv[0], (char **)argv);
+				break;
+
+			case EXECF_EXEC:
+				status = nw_execvp(argv[0], (char **)argv);
+				break;
+	    }
+	    if (status != -1 || errno == 0)
+		needToTry = FALSE;
+	}
+	Safefree(argv);
+	Safefree(cmd2);
+    }
+
+    if (needToTry) {
+	char **argv = NULL;
+	int i = -1;
+
+	New(1306, argv, nw_perlshell_items + 2, char*);
+	while (++i < nw_perlshell_items)
+	    argv[i] = nw_perlshell_vec[i];
+	argv[i++] = cmd;
+	argv[i] = Nullch;
+	switch (exectype) {
+		case EXECF_SPAWN:
+			status = nw_spawnvp(P_WAIT, argv[0], (char **)argv);
+			break;
+
+		case EXECF_SPAWN_NOWAIT:
+			status = nw_spawnvp(P_NOWAIT, argv[0], (char **)argv);
+			break;
+
+		case EXECF_EXEC:
+			status = nw_execvp(argv[0], (char **)argv);
+			break;
+	}
+	cmd = argv[0];
+	Safefree(argv);
+    }
+
+    if (exectype != EXECF_SPAWN_NOWAIT) {
+	if (status < 0) {
+    	    dTHR;
+	    if (ckWARN(WARN_EXEC))
+		Perl_warner(aTHX_ WARN_EXEC, "Can't %s \"%s\": %s",
+		     (exectype == EXECF_EXEC ? "exec" : "spawn"),
+		     cmd, strerror(errno));
+	    status = 255 * 256;
+	}
+	else
+	    status *= 256;
+	PL_statusvalue = status;
+    }
+    return (status);
 }
 
 int
 do_spawn(char *cmd)
 {
-    return do_spawn2(cmd, 2);
+    return do_spawn2(cmd, EXECF_SPAWN);
+}
+
+// Added to make system() work for NetWare
+static BOOL
+has_shell_metachars(char *ptr)
+{
+    int inquote = 0;
+    char quote = '\0';
+
+    /*
+     * Scan string looking for redirection (< or >) or pipe
+     * characters (|) that are not in a quoted string.
+     * Shell variable interpolation (%VAR%) can also happen inside strings.
+     */
+    while (*ptr) {
+	switch(*ptr) {
+	case '%':
+	    return TRUE;
+	case '\'':
+	case '\"':
+	    if (inquote) {
+		if (quote == *ptr) {
+		    inquote = 0;
+		    quote = '\0';
+		}
+	    }
+	    else {
+		quote = *ptr;
+		inquote++;
+	    }
+	    break;
+	case '>':
+	case '<':
+	case '|':
+	    if (!inquote)
+		return TRUE;
+	default:
+	    break;
+	}
+	++ptr;
+    }
+    return FALSE;
 }
 
 int

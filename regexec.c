@@ -431,7 +431,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	      );
     });
 
-    if (prog->minlen > CHR_DIST((U8*)strend, (U8*)strpos)) {
+    /* CHR_DIST() would be more correct here but it makes things slow. */
+    if (prog->minlen > strend - strpos) {
 	DEBUG_r(PerlIO_printf(Perl_debug_log,
 			      "String too short... [re_intuit_start]\n"));
 	goto fail;
@@ -3989,7 +3990,9 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
     register bool do_utf8 = PL_reg_match_utf8;
 
     scan = PL_reginput;
-    if (max != REG_INFTY && max < loceol - scan)
+    if (max == REG_INFTY)
+	max = I32_MAX;
+    else if (max < loceol - scan)
       loceol = scan + max;
     switch (OP(p)) {
     case REG_ANY:
@@ -4283,15 +4286,16 @@ Perl_regclass_swash(pTHX_ register regnode* node, bool doinit, SV** listsvp, SV 
 	if (PL_regdata->what[n] == 's') {
 	    SV *rv = (SV*)PL_regdata->data[n];
 	    AV *av = (AV*)SvRV((SV*)rv);
+	    SV **ary = AvARRAY(av);
 	    SV **a, **b;
 	
 	    /* See the end of regcomp.c:S_reglass() for
 	     * documentation of these array elements. */
 
-	    si  = *av_fetch(av, 0, FALSE);
-	    a   =  av_fetch(av, 1, FALSE);
-	    b   =  av_fetch(av, 2, FALSE);
-	
+	    si = *ary;
+	    a  = SvTYPE(ary[1]) == SVt_RV   ? &ary[1] : 0;
+	    b  = SvTYPE(ary[2]) == SVt_PVAV ? &ary[2] : 0;
+
 	    if (a)
 		sw = *a;
 	    else if (si && doinit) {
@@ -4326,12 +4330,13 @@ S_reginclass(pTHX_ register regnode *n, register U8* p, STRLEN* lenp, register b
 {
     char flags = ANYOF_FLAGS(n);
     bool match = FALSE;
-    UV c;
+    UV c = *p;
     STRLEN len = 0;
     STRLEN plen;
 
-    c = do_utf8 ? utf8n_to_uvchr(p, UTF8_MAXLEN, &len,
-				 ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY) : *p;
+    if (do_utf8 && !UTF8_IS_INVARIANT(c))
+	 c = utf8n_to_uvchr(p, UTF8_MAXLEN, &len,
+			    ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
 
     plen = lenp ? *lenp : UNISKIP(NATIVE_TO_UNI(c));
     if (do_utf8 || (flags & ANYOF_UNICODE)) {
@@ -4526,7 +4531,7 @@ S_to_utf8_substr(pTHX_ register regexp *prog)
     SV* sv;
     if (prog->float_substr && !prog->float_utf8) {
 	prog->float_utf8 = sv = NEWSV(117, 0);
-	SvSetMagicSV(sv, prog->float_substr);
+	SvSetSV(sv, prog->float_substr);
 	sv_utf8_upgrade(sv);
 	if (SvTAIL(prog->float_substr))
 	    SvTAIL_on(sv);
@@ -4535,7 +4540,7 @@ S_to_utf8_substr(pTHX_ register regexp *prog)
     }
     if (prog->anchored_substr && !prog->anchored_utf8) {
 	prog->anchored_utf8 = sv = NEWSV(118, 0);
-	SvSetMagicSV(sv, prog->anchored_substr);
+	SvSetSV(sv, prog->anchored_substr);
 	sv_utf8_upgrade(sv);
 	if (SvTAIL(prog->anchored_substr))
 	    SvTAIL_on(sv);
@@ -4550,7 +4555,7 @@ S_to_byte_substr(pTHX_ register regexp *prog)
     SV* sv;
     if (prog->float_utf8 && !prog->float_substr) {
 	prog->float_substr = sv = NEWSV(117, 0);
-	SvSetMagicSV(sv, prog->float_utf8);
+	SvSetSV(sv, prog->float_utf8);
 	if (sv_utf8_downgrade(sv, TRUE)) {
 	    if (SvTAIL(prog->float_utf8))
 		SvTAIL_on(sv);
@@ -4563,7 +4568,7 @@ S_to_byte_substr(pTHX_ register regexp *prog)
     }
     if (prog->anchored_utf8 && !prog->anchored_substr) {
 	prog->anchored_substr = sv = NEWSV(118, 0);
-	SvSetMagicSV(sv, prog->anchored_utf8);
+	SvSetSV(sv, prog->anchored_utf8);
 	if (sv_utf8_downgrade(sv, TRUE)) {
 	    if (SvTAIL(prog->anchored_utf8))
 		SvTAIL_on(sv);

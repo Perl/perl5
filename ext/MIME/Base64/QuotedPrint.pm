@@ -72,11 +72,16 @@ require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(encode_qp decode_qp);
 
+use Carp qw(croak);
+
 $VERSION = sprintf("%d.%02d", q$Revision: 2.3 $ =~ /(\d+)\.(\d+)/);
 
 sub encode_qp ($)
 {
     my $res = shift;
+    croak("The Quoted-Printable encoding is only defined for bytes")
+	if $res =~ /[^\0-\xFF]/;
+
     # Do not mention ranges such as $res =~ s/([^ \t\n!-<>-~])/sprintf("=%02X", ord($1))/eg;
     # since that will not even compile on an EBCDIC machine (where ord('!') > ord('<')).
     if (ord('A') == 193) { # EBCDIC style machine
@@ -153,38 +158,5 @@ sub decode_qp ($)
 
 *encode = \&encode_qp;
 *decode = \&decode_qp;
-
-# Methods for use as a PerlIO layer object
-
-sub PUSHED
-{
- my ($class,$mode) = @_;
- # When writing we buffer the data
- my $write = '';
- return bless \$write,$class;
-}
-
-sub FILL
-{
- my ($obj,$fh) = @_;
- my $line = <$fh>;
- return (defined $line) ? decode_qp($line) : undef;
-}
-
-sub WRITE
-{
- my ($obj,$buf,$fh) = @_;
- $$obj .= encode_qp($buf);
- return length($buf);
-}
-
-sub FLUSH
-{
- my ($obj,$fh) = @_;
- print $fh $$obj or return -1;
- $$obj = '';
- return 0;
-}
-
 
 1;
