@@ -85,7 +85,7 @@ The AIX dynaloading now uses in AIX releases 4.3 and newer the native
 dlopen interface of AIX instead of the old emulated interface.  This
 change will probably break backward compatibility with compiled
 modules.  The change was made to make Perl more compliant with other
-applications like modperl which are using the AIX native interface.
+applications like mod_perl which are using the AIX native interface.
 
 =head2 Attributes for C<my> variables now handled at run-time.
 
