@@ -4,7 +4,7 @@
 # the format supported by op/regexp.t.  If you want to add a test
 # that does fit that format, add it to op/re_tests, not here.
 
-print "1..233\n";
+print "1..231\n";
 
 BEGIN {
     chdir 't' if -d 't';
