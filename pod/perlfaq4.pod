@@ -1746,7 +1746,7 @@ if you just want to say, ``Is this a float?''
         } 
     } 
 
-    sub is_numeric { defined &getnum } 
+    sub is_numeric { defined getnum($_[0]) } 
 
 Or you could check out
 http://www.perl.com/CPAN/modules/by-module/String/String-Scanf-1.1.tar.gz
