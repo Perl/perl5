@@ -669,12 +669,8 @@ PP(pp_grepstart)
     ENTER;					/* enter outer scope */
 
     SAVETMPS;
-#ifdef USE_THREADS
-    /* SAVE_DEFSV does *not* suffice here */
-    save_sptr(&THREADSV(0));
-#else
-    SAVESPTR(GvSV(PL_defgv));
-#endif /* USE_THREADS */
+    /* SAVE_DEFSV does *not* suffice here for USE_THREADS */
+    SAVESPTR(DEFSV);
     ENTER;					/* enter inner scope */
     SAVESPTR(PL_curpm);
 

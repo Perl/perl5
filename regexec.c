@@ -1058,9 +1058,10 @@ regtry(regexp *prog, char *startpos)
 
 	if (PL_reg_sv) {
 	    /* Make $_ available to executed code. */
-	    if (PL_reg_sv != GvSV(PL_defgv)) {
-		SAVESPTR(GvSV(PL_defgv));
-		GvSV(PL_defgv) = PL_reg_sv;
+	    if (PL_reg_sv != DEFSV) {
+		/* SAVE_DEFSV does *not* suffice here for USE_THREADS */
+		SAVESPTR(DEFSV);
+		DEFSV = PL_reg_sv;
 	    }
 	
 	    if (!(SvTYPE(PL_reg_sv) >= SVt_PVMG && SvMAGIC(PL_reg_sv) 
