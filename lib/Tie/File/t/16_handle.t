@@ -56,7 +56,7 @@ check_contents("long0", "longer1", "long2");
 $a[0] = 'longer0';
 check_contents("longer0", "longer1", "long2");
 
-# 25-34 shortening alterations, including truncation
+# 25-38 shortening alterations, including truncation
 $a[0] = 'short0';
 check_contents("short0", "longer1", "long2");
 $a[1] = 'short1';
@@ -78,8 +78,12 @@ close F;
 undef $o;
 untie @a;
 
-# Does it correctly detect a non-seekable handle?
-{  if ($^O =~ /^(MSWin32|dos)$/) {
+if ($] < 5.006) {
+  print "ok 39 # skipped - 5.005_03 panics after this test\n";
+  exit 0;
+}
+# (39) Does it correctly detect a non-seekable handle?
+{  if ($^O =~ /^(MSWin32|dos|BeOS)$/) {
      print "ok $N # skipped ($^O has broken pipe semantics)\n";
      last;
    }

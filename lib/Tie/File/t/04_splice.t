@@ -11,10 +11,11 @@
 # Then, it checks the actual contents of the file against the expected
 # contents.
 
+
 my $file = "tf$$.txt";
 $: = Tie::File::_default_recsep();
 my $data = "rec0$:rec1$:rec2$:";
-print "1..101\n";
+print "1..106\n";
 
 init_file($data);
 
@@ -170,7 +171,31 @@ splice @a, 4;
 check_contents("0$:1$:2$:3$:");
 splice @a;
 check_contents("");
+
+# (102-103) I think there's a bug here---it will fail to clear the EOF flag
+@a = (0..11);
+splice @a, -1, 1000;
+check_contents("0$:1$:2$:3$:4$:5$:6$:7$:8$:9$:10$:");
     
+# (104-106) make sure that undefs are treated correctly---they should
+# be converted to empty records, and should not raise any warnings.
+# (Some of these failed in 0.90.  The change to _fixrec fixed them.)
+# 20020331
+{
+  my $good = 1; my $warn;
+  # If any of these raise warnings, we have a problem.
+  local $SIG{__WARN__} = sub { $good = 0; $warn = shift(); ctrlfix($warn)};
+  local $^W = 1;
+  @a = (1);
+  splice @a, 1, 0, undef, undef, undef;
+  print $good ? "ok $N\n" : "not ok $N # $warn\n";
+  $N++; $good = 1;
+  print defined($a[2]) ? "ok $N\n" : "not ok $N\n";
+  $N++; $good = 1;
+  my @r = splice @a, 2;
+  print defined($r[0]) ? "ok $N\n" : "not ok $N\n";
+  $N++; $good = 1;
+}
 
 sub init_file {
   my $data = shift;

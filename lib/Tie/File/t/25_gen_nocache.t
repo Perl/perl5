@@ -1,14 +1,18 @@
 #!/usr/bin/perl
+#
+# Regular read-write tests with caching disabled
+# (Same as 01_gen.t)
+#
 
 my $file = "tf$$.txt";
 
-print "1..72\n";
+print "1..68\n";
 
 my $N = 1;
 use Tie::File;
 print "ok $N\n"; $N++;
 
-my $o = tie @a, 'Tie::File', $file, autochomp => 0, autodefer => 0;
+my $o = tie @a, 'Tie::File', $file, autochomp => 0, autodefer => 0, memory => 0;
 print $o ? "ok $N\n" : "not ok $N\n";
 $N++;
 
@@ -81,28 +85,6 @@ check_contents("", "0", "", "rec3");
 $a[1] = "whoops";
 check_contents("", "whoops", "", "rec3");
 
-# (69-72) make sure that undefs are treated correctly---they should 
-# be converted to empty records, and should not raise any warnings.
-# (Some of these failed in 0.90.  The change to _fixrec fixed them.)
-# 20020331
-{
-  my $good = 1; my $warn;
-  # If any of these raise warnings, we have a problem.
-  local $SIG{__WARN__} = sub { $good = 0; $warn = shift(); ctrlfix($warn)};
-  local $^W = 1;
-  @a = (1);
-  $a[0] = undef;
-  print $good ? "ok $N\n" : "not ok $N # $warn\n";
-  $N++; $good = 1;
-  print defined($a[0]) ? "ok $N\n" : "not ok $N\n";
-  $N++; $good = 1;
-  $a[3] = '3';
-  print defined($a[1]) ? "ok $N\n" : "not ok $N\n";
-  $N++; $good = 1;
-  undef $a[3];
-  print $good ? "ok $N\n" : "not ok $N # $warn\n";
-  $N++; $good = 1;
-}
 
 use POSIX 'SEEK_SET';
 sub check_contents {

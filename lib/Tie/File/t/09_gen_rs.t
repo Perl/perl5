@@ -2,7 +2,7 @@
 
 my $file = "tf$$.txt";
 
-print "1..47\n";
+print "1..56\n";
 
 my $N = 1;
 use Tie::File;
@@ -57,22 +57,21 @@ check_contents("short0", "sh1", "short2");
 $a[0] = 'sh0';
 check_contents("sh0", "sh1", "short2");
 
-# file with holes
+# (35-38) file with holes
 $a[4] = 'rec4';
 check_contents("sh0", "sh1", "short2", "", "rec4");
 $a[3] = 'rec3';
 check_contents("sh0", "sh1", "short2", "rec3", "rec4");
 
-# (35-37) zero out file
+# (39-40) zero out file
 @a = ();
 check_contents();
 
-# (38-40) insert into the middle of an empty file
+# (41-42) insert into the middle of an empty file
 $a[3] = "rec3";
 check_contents("", "", "", "rec3");
 
-
-# (41-46) 20020326 You thought there would be a bug in STORE where if
+# (43-47) 20020326 You thought there would be a bug in STORE where if
 # a cached record was false, STORE wouldn't see it at all.  Yup, there is,
 # and adding the appropriate defined() test fixes the problem.
 undef $o;  untie @a;  1 while unlink $file;
@@ -87,6 +86,63 @@ $a[2] = "oops";
 check_contents("", "", "oops");
 $a[1] = "bah";
 check_contents("", "bah", "oops");
+undef $o; untie @a;
+
+# (48-56) 20020331 Make sure we correctly handle the case where the final
+# record of the file is not properly terminated, Through version 0.90,
+# we would mangle the file.
+my $badrec = "Malformed";
+$: = $RECSEP = Tie::File::_default_recsep();
+# (48-50)
+if (setup_badly_terminated_file(3)) {
+  $o = tie @a, 'Tie::File', $file,
+    recsep => $RECSEP, autochomp => 0, autodefer => 0
+    or die "Couldn't tie file: $!";
+  my $z = $a[0];
+  print $z eq "$badrec$:" ? "ok $N\n" : 
+                        "not ok $N \# got $z, expected $badrec\n";
+  $N++;
+  push @a, "next";
+  check_contents($badrec, "next");
+}
+# (51-52)
+if (setup_badly_terminated_file(2)) {
+  $o = tie @a, 'Tie::File', $file,
+    recsep => $RECSEP, autochomp => 0, autodefer => 0
+    or die "Couldn't tie file: $!";
+  splice @a, 1, 0, "x", "y";
+  check_contents($badrec, "x", "y");
+}
+# (53-56)
+if (setup_badly_terminated_file(4)) {
+  $o = tie @a, 'Tie::File', $file,
+    recsep => $RECSEP, autochomp => 0, autodefer => 0
+    or die "Couldn't tie file: $!";
+  my @r = splice @a, 0, 1, "x", "y";
+  my $n = @r;
+  print $n == 1 ? "ok $N\n" : "not ok $N \# expected 1 elt, got $n\n";
+  $N++;
+  print $r[0] eq "$badrec$:" ? "ok $N\n"
+    : "not ok $N \# expected <$badrec>, got <$r[0]>\n";
+  $N++;
+  check_contents("x", "y");
+}
+
+sub setup_badly_terminated_file {
+  my $NTESTS = shift;
+  open F, "> $file" or die "Couldn't open $file: $!";
+  binmode F;
+  print F $badrec;
+  close F;
+  unless (-s $file == length $badrec) {
+    for (1 .. $NTESTS) {
+      print "ok $N \# skipped - can't create improperly terminated file\n";
+      $N++;
+    }
+    return;
+  }
+  return 1;
+}
 
 
 use POSIX 'SEEK_SET';
