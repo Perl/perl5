@@ -2162,6 +2162,7 @@ doeval(int gimme, OP** startop)
     HV *newstash;
     CV *caller;
     AV* comppadlist;
+    I32 i;
 
     in_eval = 1;
 
@@ -2178,6 +2179,16 @@ doeval(int gimme, OP** startop)
     SAVEI32(max_intro_pending);
 
     caller = compcv;
+    for (i = cxstack_ix - 1; i >= 0; i--) {
+	PERL_CONTEXT *cx = &cxstack[i];
+	if (cx->cx_type == CXt_EVAL)
+	    break;
+	else if (cx->cx_type == CXt_SUB) {
+	    caller = cx->blk_sub.cv;
+	    break;
+	}
+    }
+
     SAVESPTR(compcv);
     compcv = (CV*)NEWSV(1104,0);
     sv_upgrade((SV *)compcv, SVt_PVCV);
