@@ -179,6 +179,7 @@ Perl_hv_undef
 Perl_ibcmp
 Perl_ibcmp_locale
 Perl_ingroup
+Perl_init_debugger
 Perl_init_stacks
 Perl_intro_my
 Perl_instr

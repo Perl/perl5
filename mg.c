@@ -1676,6 +1676,8 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '\020':	/* ^P */
 	PL_perldb = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
+	if (PL_perldb && !PL_DBsingle)
+	    init_debugger();
 	break;
     case '\024':	/* ^T */
 #ifdef BIG_TIME

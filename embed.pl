@@ -1192,6 +1192,7 @@ p	|void	|hv_undef	|HV* tb
 p	|I32	|ibcmp		|const char* a|const char* b|I32 len
 p	|I32	|ibcmp_locale	|const char* a|const char* b|I32 len
 p	|I32	|ingroup	|I32 testgid|I32 effective
+p	|void	|init_debugger
 p	|void	|init_stacks
 p	|U32	|intro_my
 p	|char*	|instr		|const char* big|const char* little
@@ -1820,7 +1821,6 @@ s	|void	|forbid_setid	|char *
 s	|void	|incpush	|char *|int
 s	|void	|init_interp
 s	|void	|init_ids
-s	|void	|init_debugger
 s	|void	|init_lexer
 s	|void	|init_main_stash
 s	|void	|init_perllib

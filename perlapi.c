@@ -1349,6 +1349,13 @@ Perl_ingroup(pTHXo_ I32 testgid, I32 effective)
     return ((CPerlObj*)pPerl)->Perl_ingroup(testgid, effective);
 }
 
+#undef  Perl_init_debugger
+void
+Perl_init_debugger(pTHXo)
+{
+    ((CPerlObj*)pPerl)->Perl_init_debugger();
+}
+
 #undef  Perl_init_stacks
 void
 Perl_init_stacks(pTHXo)

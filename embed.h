@@ -205,6 +205,7 @@
 #define ibcmp			Perl_ibcmp
 #define ibcmp_locale		Perl_ibcmp_locale
 #define ingroup			Perl_ingroup
+#define init_debugger		Perl_init_debugger
 #define init_stacks		Perl_init_stacks
 #define intro_my		Perl_intro_my
 #define instr			Perl_instr
@@ -782,7 +783,6 @@
 #define incpush			S_incpush
 #define init_interp		S_init_interp
 #define init_ids		S_init_ids
-#define init_debugger		S_init_debugger
 #define init_lexer		S_init_lexer
 #define init_main_stash		S_init_main_stash
 #define init_perllib		S_init_perllib
@@ -1525,6 +1525,7 @@
 #define ibcmp(a,b,c)		Perl_ibcmp(aTHX_ a,b,c)
 #define ibcmp_locale(a,b,c)	Perl_ibcmp_locale(aTHX_ a,b,c)
 #define ingroup(a,b)		Perl_ingroup(aTHX_ a,b)
+#define init_debugger()		Perl_init_debugger(aTHX)
 #define init_stacks()		Perl_init_stacks(aTHX)
 #define intro_my()		Perl_intro_my(aTHX)
 #define instr(a,b)		Perl_instr(aTHX_ a,b)
@@ -2093,7 +2094,6 @@
 #define incpush(a,b)		S_incpush(aTHX_ a,b)
 #define init_interp()		S_init_interp(aTHX)
 #define init_ids()		S_init_ids(aTHX)
-#define init_debugger()		S_init_debugger(aTHX)
 #define init_lexer()		S_init_lexer(aTHX)
 #define init_main_stash()	S_init_main_stash(aTHX)
 #define init_perllib()		S_init_perllib(aTHX)
@@ -3027,6 +3027,8 @@
 #define ibcmp_locale		Perl_ibcmp_locale
 #define Perl_ingroup		CPerlObj::Perl_ingroup
 #define ingroup			Perl_ingroup
+#define Perl_init_debugger	CPerlObj::Perl_init_debugger
+#define init_debugger		Perl_init_debugger
 #define Perl_init_stacks	CPerlObj::Perl_init_stacks
 #define init_stacks		Perl_init_stacks
 #define Perl_intro_my		CPerlObj::Perl_intro_my
@@ -4139,8 +4141,6 @@
 #define init_interp		S_init_interp
 #define S_init_ids		CPerlObj::S_init_ids
 #define init_ids		S_init_ids
-#define S_init_debugger		CPerlObj::S_init_debugger
-#define init_debugger		S_init_debugger
 #define S_init_lexer		CPerlObj::S_init_lexer
 #define init_lexer		S_init_lexer
 #define S_init_main_stash	CPerlObj::S_init_main_stash
