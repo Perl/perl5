@@ -3001,6 +3001,8 @@ S_regmatch(pTHX_ regnode *prog)
 	    else
 		c1 = c2 = -1000;
 	    PL_reginput = locinput;
+	    if (paren)
+		PL_regendp[paren] = -1;
 	    if (minmod) {
 		CHECKPOINT lastcp;
 		minmod = 0;
