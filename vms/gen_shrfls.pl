@@ -73,7 +73,6 @@ if ($docc) {
   open CONFIG, "< $config";
   while(<CONFIG>) {
     $debugging_enabled++ if /define\s+DEBUGGING/;
-    $hide_mymalloc++ if /define\s+EMBEDMYMALLOC/;
     $use_mymalloc++ if /define\s+MYMALLOC/;
   }
   
@@ -203,7 +202,7 @@ if ($use_mymalloc) {
   $fcns{'Perl_malloc'}++;
   $fcns{'Perl_calloc'}++;
   $fcns{'Perl_realloc'}++;
-  $fcns{'Perl_myfree'}++;
+  $fcns{'Perl_mfree'}++;
 }
 
 $used_expectation_enum = $used_opcode_enum = 0; # avoid warnings

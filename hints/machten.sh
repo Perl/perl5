@@ -64,13 +64,6 @@ usemymalloc=${usemymalloc:-y}
 # Do not wrap the following long line
 malloc_cflags='ccflags="$ccflags -DPLAIN_MALLOC -DNO_FANCY_MALLOC -DUSE_PERL_SBRK"'
 
-# Note that an empty malloc_cflags appears in config.sh if perl's
-# malloc() is not used.  his is harmless.
-case "$usemymalloc" in
-n) unset malloc_cflags;;
-*) ccflags="$ccflags  -DHIDEMYMALLOC"
-esac
-
 # When MachTen does a fork(), it immediately copies the whole of
 # the parent process' data space for the child.  This can be
 # expensive.  Using vfork() where appropriate avoids this cost.

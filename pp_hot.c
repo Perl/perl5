@@ -655,7 +655,7 @@ PP(pp_aassign)
 		    if (SvSMAGICAL(sv))
 			mg_set(sv);
 		    if (!didstore)
-			SvREFCNT_dec(sv);
+			sv_2mortal(sv);
 		}
 		TAINT_NOT;
 	    }
@@ -682,7 +682,7 @@ PP(pp_aassign)
 			if (SvSMAGICAL(tmpstr))
 			    mg_set(tmpstr);
 			if (!didstore)
-			    SvREFCNT_dec(tmpstr);
+			    sv_2mortal(tmpstr);
 		    }
 		    TAINT_NOT;
 		}
@@ -704,7 +704,7 @@ PP(pp_aassign)
 			    if (SvSMAGICAL(tmpstr))
 				mg_set(tmpstr);
 			    if (!didstore)
-				SvREFCNT_dec(tmpstr);
+				sv_2mortal(tmpstr);
 			}
 			TAINT_NOT;
 		    }

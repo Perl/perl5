@@ -356,6 +356,7 @@ my @staticfuncs = qw(
     add_data
     re_croak2
     regpposixcc
+    clear_re
     regmatch
     regrepeat
     regrepeat_hard

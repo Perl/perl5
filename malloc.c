@@ -827,7 +827,7 @@ botch(char *diag, char *s)
 #endif
 
 Malloc_t
-malloc(register size_t nbytes)
+Perl_malloc(register size_t nbytes)
 {
   	register union overhead *p;
   	register int bucket;
@@ -1330,7 +1330,7 @@ morecore(register int bucket)
 }
 
 Free_t
-free(void *mp)
+Perl_mfree(void *mp)
 {   
   	register MEM_SIZE size;
 	register union overhead *ovp;
@@ -1412,7 +1412,7 @@ free(void *mp)
 #define reall_srchlen  4	/* 4 should be plenty, -1 =>'s whole list */
 
 Malloc_t
-realloc(void *mp, size_t nbytes)
+Perl_realloc(void *mp, size_t nbytes)
 {   
   	register MEM_SIZE onb;
 	union overhead *ovp;
@@ -1431,7 +1431,7 @@ realloc(void *mp, size_t nbytes)
 
 	BARK_64K_LIMIT("Reallocation",nbytes,size);
 	if (!cp)
-		return malloc(nbytes);
+		return Perl_malloc(nbytes);
 
 	MALLOC_LOCK;
 	ovp = (union overhead *)((caddr_t)cp 
@@ -1568,12 +1568,12 @@ realloc(void *mp, size_t nbytes)
 			      "0x%lx: (%05lu) realloc %ld bytes the hard way\n",
 			      (unsigned long)cp,(unsigned long)(PL_an++),
 			      (long)size));
-	    if ((res = (char*)malloc(nbytes)) == NULL)
+	    if ((res = (char*)Perl_malloc(nbytes)) == NULL)
 		return (NULL);
 	    if (cp != res)			/* common optimization */
 		Copy(cp, res, (MEM_SIZE)(nbytes<onb?nbytes:onb), char);
 	    if (was_alloced)
-		free(cp);
+		Perl_mfree(cp);
 	}
   	return ((Malloc_t)res);
 }
@@ -1601,10 +1601,10 @@ findbucket(union overhead *freep, int srchlen)
 }
 
 Malloc_t
-calloc(register size_t elements, register size_t size)
+Perl_calloc(register size_t elements, register size_t size)
 {
     long sz = elements * size;
-    Malloc_t p = malloc(sz);
+    Malloc_t p = Perl_malloc(sz);
 
     if (p) {
 	memset((void*)p, 0, sz);
@@ -1743,14 +1743,6 @@ dump_mstats(char *s)
 #   endif
 
 #   ifdef PERL_SBRK_VIA_MALLOC
-#      if defined(HIDEMYMALLOC) || defined(EMBEDMYMALLOC)
-#         undef malloc		/* Expose names that  */
-#         undef calloc		/* HIDEMYMALLOC hides */
-#         undef realloc
-#         undef free
-#      else
-#         include "Error: -DPERL_SBRK_VIA_MALLOC needs -D(HIDE|EMBED)MYMALLOC"
-#      endif
 
 /* it may seem schizophrenic to use perl's malloc and let it call system */
 /* malloc, the reason for that is only the 3.2 version of the OS that had */

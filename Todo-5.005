@@ -17,7 +17,6 @@ Compiler
 
 Namespace cleanup
     CPP-space:	  restrict what we export from headers
-                  stop malloc()/free() pollution unless asked
     header-space: move into CORE/perl/
     API-space:    begin list of things that constitute public api
 

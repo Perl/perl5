@@ -3838,36 +3838,46 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 	    s = scan_str(s);
 	    if (!s)
 		missingterm((char*)0);
-	    if (ckWARN(WARN_SYNTAX) && SvLEN(PL_lex_stuff)) {
+	    force_next(')');
+	    if (SvCUR(PL_lex_stuff)) {
+		OP *words = Nullop;
+		int warned = 0;
 		d = SvPV_force(PL_lex_stuff, len);
-		for (; len; --len, ++d) {
-		    if (*d == ',') {
-			warner(WARN_SYNTAX,
-			    "Possible attempt to separate words with commas");
-			break;
-		    }
-		    if (*d == '#') {
-			warner(WARN_SYNTAX,
-			    "Possible attempt to put comments in qw() list");
-			break;
+		while (len) {
+		    for (; isSPACE(*d) && len; --len, ++d) ;
+		    if (len) {
+			char *b = d;
+			if (!warned && ckWARN(WARN_SYNTAX)) {
+			    for (; !isSPACE(*d) && len; --len, ++d) {
+				if (*d == ',') {
+				    warner(WARN_SYNTAX,
+					"Possible attempt to separate words with commas");
+				    ++warned;
+				}
+				else if (*d == '#') {
+				    warner(WARN_SYNTAX,
+					"Possible attempt to put comments in qw() list");
+				    ++warned;
+				}
+			    }
+			}
+			else {
+			    for (; !isSPACE(*d) && len; --len, ++d) ;
+			}
+			words = append_elem(OP_LIST, words,
+					    newSVOP(OP_CONST, 0, newSVpvn(b, d-b)));
 		    }
 		}
+		if (words) {
+		    PL_nextval[PL_nexttoke].opval = words;
+		    force_next(THING);
+		}
 	    }
-	    force_next(')');
-	    PL_nextval[PL_nexttoke].opval = (OP*)newSVOP(OP_CONST, 0, tokeq(PL_lex_stuff));
+	    if (PL_lex_stuff)
+		SvREFCNT_dec(PL_lex_stuff);
 	    PL_lex_stuff = Nullsv;
-	    force_next(THING);
-	    force_next(',');
-	    PL_nextval[PL_nexttoke].opval = (OP*)newSVOP(OP_CONST, 0, newSVpv(" ",1));
-	    force_next(THING);
-	    force_next('(');
-	    yylval.ival = OP_SPLIT;
-	    CLINE;
 	    PL_expect = XTERM;
-	    PL_bufptr = s;
-	    PL_last_lop = PL_oldbufptr;
-	    PL_last_lop_op = OP_SPLIT;
-	    return FUNC;
+	    TOKEN('(');
 
 	case KEY_qq:
 	    s = scan_str(s);

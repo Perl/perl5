@@ -880,7 +880,7 @@ magic_clear_all_env(SV *sv, MAGIC *mg)
 #if defined(VMS)
     die("Can't make list assignment to %%ENV on this system");
 #else
-#ifdef WIN32
+#  ifdef WIN32
     char *envv = GetEnvironmentStrings();
     char *cur = envv;
     STRLEN len;
@@ -896,18 +896,21 @@ magic_clear_all_env(SV *sv, MAGIC *mg)
 	    cur += len+1;
     }
     FreeEnvironmentStrings(envv);
-#else
+#  else
+#    ifndef PERL_USE_SAFE_PUTENV
     I32 i;
 
     if (environ == PL_origenviron)
-	New(901, environ, 1, char*);
+	environ = (char**)safesysmalloc(sizeof(char*));
     else
 	for (i = 0; environ[i]; i++)
-	    Safefree(environ[i]);
+	    safesysfree(environ[i]);
+#    endif /* PERL_USE_SAFE_PUTENV */
+
     environ[0] = Nullch;
 
-#endif
-#endif
+#  endif /* WIN32 */
+#endif /* VMS */
     return 0;
 }
 

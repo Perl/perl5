@@ -788,10 +788,10 @@
 #define rxres_free		Perl_rxres_free
 #define rxres_restore		Perl_rxres_restore
 #define rxres_save		Perl_rxres_save
-#define safecalloc		Perl_safecalloc
-#define safefree		Perl_safefree
-#define safemalloc		Perl_safemalloc
-#define saferealloc		Perl_saferealloc
+#define safesyscalloc		Perl_safesyscalloc
+#define safesysfree		Perl_safesysfree
+#define safesysmalloc		Perl_safesysmalloc
+#define safesysrealloc		Perl_safesysrealloc
 #define safexcalloc		Perl_safexcalloc
 #define safexfree		Perl_safexfree
 #define safexmalloc		Perl_safexmalloc
@@ -1080,6 +1080,7 @@
 #define ck_subr			CPerlObj::Perl_ck_subr
 #define ck_svconst		CPerlObj::Perl_ck_svconst
 #define ck_trunc		CPerlObj::Perl_ck_trunc
+#define clear_re		CPerlObj::Perl_clear_re
 #define condpair_magic		CPerlObj::Perl_condpair_magic
 #define convert			CPerlObj::Perl_convert
 #define croak			CPerlObj::Perl_croak
@@ -1946,10 +1947,10 @@
 #define rxres_free		CPerlObj::Perl_rxres_free
 #define rxres_restore		CPerlObj::Perl_rxres_restore
 #define rxres_save		CPerlObj::Perl_rxres_save
-#define safecalloc		CPerlObj::Perl_safecalloc
-#define safefree		CPerlObj::Perl_safefree
-#define safemalloc		CPerlObj::Perl_safemalloc
-#define saferealloc		CPerlObj::Perl_saferealloc
+#define safesyscalloc		CPerlObj::Perl_safesyscalloc
+#define safesysfree		CPerlObj::Perl_safesysfree
+#define safesysmalloc		CPerlObj::Perl_safesysmalloc
+#define safesysrealloc		CPerlObj::Perl_safesysrealloc
 #define safexcalloc		CPerlObj::Perl_safexcalloc
 #define safexfree		CPerlObj::Perl_safexfree
 #define safexmalloc		CPerlObj::Perl_safexmalloc

@@ -329,7 +329,7 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 
     /* Check validity of program. */
     if (UCHARAT(prog->program) != REG_MAGIC) {
-	FAIL("corrupted regexp program");
+	croak("corrupted regexp program");
     }
 
     PL_reg_flags = 0;
@@ -2445,7 +2445,7 @@ regmatch(regnode *prog)
 	default:
 	    PerlIO_printf(PerlIO_stderr(), "%lx %d\n",
 			  (unsigned long)scan, OP(scan));
-	    FAIL("regexp memory corruption");
+	    croak("regexp memory corruption");
 	}
 	scan = next;
     }
@@ -2454,7 +2454,7 @@ regmatch(regnode *prog)
     * We get here only if there's trouble -- normally "case END" is
     * the terminating point.
     */
-    FAIL("corrupted regexp pointers");
+    croak("corrupted regexp pointers");
     /*NOTREACHED*/
     sayNO;
 

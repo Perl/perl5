@@ -371,3 +371,5 @@ eval q% s/a/"b"}/e %;
 print ($@ =~ /Bad evalled substitution/ ? "ok 81\n" : "not ok 81\n");
 eval q% ($_ = "x") =~ s/(.)/"$1 "/e %;
 print +($_ eq "x " and !length $@) ? "ok 82\n" : "not ok 82\n# \$_ eq $_, $@\n";
+
+

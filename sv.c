@@ -603,7 +603,7 @@ more_xpv(void)
 
 #ifdef PURIFY
 #  define my_safemalloc(s) safemalloc(s)
-#  define my_safefree(s) free(s)
+#  define my_safefree(s) safefree(s)
 #else
 STATIC void* 
 my_safemalloc(MEM_SIZE size)
