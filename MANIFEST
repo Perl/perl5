@@ -217,6 +217,10 @@ ext/DB_File/hints/dynixptx.pl	Hint for DB_File for named architecture
 ext/DB_File/hints/sco.pl	Hint for DB_File for named architecture
 ext/DB_File/typemap		Berkeley DB extension interface types
 ext/DB_File/version.c		Berkeley DB extension interface version check
+ext/DB_File/config.in
+ext/DB_File/fallback.h
+ext/DB_File/fallback.xs
+ext/DB_File/ppport.h
 ext/Data/Dumper/Changes		Data pretty printer, changelog
 ext/Data/Dumper/Dumper.pm	Data pretty printer, module
 ext/Data/Dumper/Dumper.xs	Data pretty printer, externals
