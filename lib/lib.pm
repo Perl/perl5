@@ -11,10 +11,15 @@ my $archname = $Config{'archname'};
 sub import {
     shift;
     foreach (reverse @_) {
+	unless (defined $_ and $_ ne '') {
+	    require Carp;
+	    Carp::carp("Empty or undefined compile time value given"); # at foo.pl line ...
+	}
 	unshift(@INC, $_);
 	# Put a corresponding archlib directory infront of $_ if it
 	# looks like $_ has an archlib directory below it.
-	unshift(@INC, "$_/$archname") if -d "$_/$archname/auto";
+	unshift(@INC, "$_/$archname/$]") if -d "$_/$archname/$]/auto";
+	unshift(@INC, "$_/$archname")    if -d "$_/$archname/auto";
     }
 }
 
@@ -118,7 +123,7 @@ can say
 
 =head1 SEE ALSO
 
-AddINC - optional module which deals with paths relative to the source file.
+FindBin - optional module which deals with paths relative to the source file.
 
 =head1 AUTHOR
 
