@@ -2333,7 +2333,7 @@ Perl_sv_utf8_downgrade(pTHX_ register SV* sv, bool fail_ok)
 			return FALSE;
 		    else {
 			/* XXX might want to make a callback here instead */
-			croak("Big byte");
+			Perl_croak(aTHX_ "Big byte");
 		    }
 		}
                 if (!first_hi)
