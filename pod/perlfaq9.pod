@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq9 - Networking ($Revision: 1.14 $, $Date: 2002/12/06 07:40:11 $)
+perlfaq9 - Networking ($Revision: 1.15 $, $Date: 2003/01/31 17:36:57 $)
 
 =head1 DESCRIPTION
 
@@ -557,17 +557,17 @@ SMTP via L<Net::SMTP>.
 =head2 How do I read mail?
 
 While you could use the Mail::Folder module from CPAN (part of the
-MailFolder package) or the Mail::Internet module from CPAN (also part
+MailFolder package) or the Mail::Internet module from CPAN (part
 of the MailTools package), often a module is overkill.  Here's a
 mail sorter.
 
     #!/usr/bin/perl
-    # bysub1 - simple sort by subject
+
     my(@msgs, @sub);
     my $msgno = -1;
     $/ = '';                    # paragraph reads
     while (<>) {
-        if (/^From/m) {
+        if (/^From /m) {
             /^Subject:\s*(?:Re:\s*)*(.*)/mi;
             $sub[++$msgno] = lc($1) || '';
         }
