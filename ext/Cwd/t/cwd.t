@@ -60,12 +60,14 @@ SKIP: {
     # DCL SHOW DEFAULT has leading spaces
     $start =~ s/^\s+// if $IsVMS;
     SKIP: {
-        skip "'$pwd_cmd' failed, nothing to test against", 4 if $?;
+        skip("'$pwd_cmd' failed, nothing to test against", 4) if $?;
+        skip("/afs seen, paths unlikely to match", 4) if $start =~ m|/afs/|;
 
 	my $cwd        = cwd;
 	my $getcwd     = getcwd;
 	my $fastcwd    = fastcwd;
 	my $fastgetcwd = fastgetcwd;
+
 	is($cwd,        $start, 'cwd()');
 	is($getcwd,     $start, 'getcwd()');
 	is($fastcwd,    $start, 'fastcwd()');
