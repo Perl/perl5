@@ -8,8 +8,9 @@ BEGIN
   $| = 1;
   # chdir 't' if -d 't';
   unshift @INC, '../lib'; # for running manually
-  plan tests => 1190;
+  plan tests => 1222;
   }
+my $version = '1.36';	# for $VERSION tests, match current release (by hand!)
 
 ##############################################################################
 # for testing inheritance of _swap
@@ -44,6 +45,10 @@ sub _swap
 package main;
 
 use Math::BigInt;
+#use Math::BigInt lib => 'BitVect';	# for testing
+#use Math::BigInt lib => 'Small';	# for testing
+
+my $CALC = Math::BigInt::_core_lib();
 
 my (@args,$f,$try,$x,$y,$z,$a,$exp,$ans,$ans1,@a,$m,$e,$round_mode);
 
@@ -68,8 +73,6 @@ while (<DATA>)
     $try = "\$x = Math::BigInt->new(\"$args[0]\");";
     if ($f eq "bnorm"){
       # $try .= '$x+0;';
-    } elsif ($f eq "_set") {
-      $try .= '$x->_set($args[1]); "$x";';
     } elsif ($f eq "is_zero") {
       $try .= '$x->is_zero()+0;';
     } elsif ($f eq "is_one") {
@@ -78,14 +81,14 @@ while (<DATA>)
       $try .= '$x->is_odd()+0;';
     } elsif ($f eq "is_even") {
       $try .= '$x->is_even()+0;';
+    } elsif ($f eq "is_inf") {
+      $try .= "\$x->is_inf('$args[1]')+0;";
     } elsif ($f eq "binf") {
       $try .= "\$x->binf('$args[1]');";
     } elsif ($f eq "bfloor") {
       $try .= '$x->bfloor();';
     } elsif ($f eq "bceil") {
       $try .= '$x->bceil();';
-    } elsif ($f eq "is_inf") {
-      $try .= "\$x->is_inf('$args[1]')+0;";
     } elsif ($f eq "bsstr") {
       $try .= '$x->bsstr();';
     } elsif ($f eq "bneg") {
@@ -102,8 +105,6 @@ while (<DATA>)
       $try .= '$x->bsqrt();';
     }elsif ($f eq "length") {
       $try .= "\$x->length();";
-    }elsif ($f eq "bround") {
-      $try .= "$round_mode; \$x->bround($args[1]);";
     }elsif ($f eq "exponent"){
       $try .= '$x = $x->exponent()->bstr();';
     }elsif ($f eq "mantissa"){
@@ -114,11 +115,13 @@ while (<DATA>)
       $try .= '$e = $e->bstr(); $e = "NaN" if !defined $e;';
       $try .= '"$m,$e";';
     } else {
-      $try .= "\$y = new Math::BigInt \"$args[1]\";";
+      $try .= "\$y = new Math::BigInt ('$args[1]');";
       if ($f eq "bcmp"){
         $try .= '$x <=> $y;';
+      }elsif ($f eq "bround") {
+      $try .= "$round_mode; \$x->bround(\$y);";
       }elsif ($f eq "bacmp"){
-        $try .= '$x->bacmp($y);';
+        $try .= "\$x->bacmp(\$y);";
       }elsif ($f eq "badd"){
         $try .= "\$x + \$y;";
       }elsif ($f eq "bsub"){
@@ -191,17 +194,40 @@ while (<DATA>)
       print "# Tried: '$try'\n" if !ok ($ans1, $ans);
       }
     # check internal state of number objects
-    is_valid($ans1) if ref $ans1; 
+    is_valid($ans1,$f) if ref $ans1; 
     }
   } # endwhile data tests
 close DATA;
 
-# test whether constant works or not
-$try = "use Math::BigInt (1.31,'babs',':constant');";
+# XXX Tels 06/29/2000 following tests never fail or do not work :(
+
+# test whether use Math::BigInt qw/version/ works
+$try = "use Math::BigInt ($version.'1');";
+$try .= ' $x = Math::BigInt->new(123); $x = "$x";';
+$ans1 = eval $try;
+ok_undef ( $_ );		# should result in error!
+
+# test whether constant works or not, also test for qw($version)
+$try = "use Math::BigInt ($version,'babs',':constant');";
 $try .= ' $x = 2**150; babs($x); $x = "$x";';
 $ans1 = eval $try;
-
 ok ( $ans1, "1427247692705959881058285969449495136382746624");
+
+# test wether Math::BigInt::Small via use works (w/ dff. spellings of calc)
+#$try = "use Math::BigInt ($version,'CALC','Small');";
+#$try .= ' $x = 2**10; $x = "$x";';
+#$ans1 = eval $try;
+#ok ( $ans1, "1024");
+#$try = "use Math::BigInt ($version,'cAlC','Math::BigInt::Small');";
+#$try .= ' $x = 2**10; $x = "$x";';
+#$ans1 = eval $try;
+#ok ( $ans1, "1024");
+# test wether calc => undef (array element not existing) works
+#$try = "use Math::BigInt ($version,'CALC');";
+#$try = "require Math::BigInt; Math::BigInt::import($version,'CALC');";
+#$try .= ' $x = Math::BigInt->new(2)**10; $x = "$x";';
+#$ans1 = eval $try;
+#ok ( $ans1, 1024);
 
 # test some more
 @a = ();
@@ -217,7 +243,7 @@ $try .= '$a = $x->bmul($x);';
 $ans1 = eval $try;
 print "# Tried: '$try'\n" if !ok ($ans1, Math::BigInt->new(2) ** 64);
 
-# test whether op detroys args or not (should better not)
+# test whether op destroys args or not (should better not)
 
 $x = new Math::BigInt (3);
 $y = new Math::BigInt (4);
@@ -319,20 +345,15 @@ print "# For '$try'\n" if (!ok "$ans" , "ok" );
 ###############################################################################
 # check proper length of internal arrays
 
-$x = Math::BigInt->new(99999); 
-ok ($x,99999);
-ok (scalar @{$x->{value}}, 1);
-$x += 1;
-ok ($x,100000);
-ok (scalar @{$x->{value}}, 2);
-$x -= 1;
-ok ($x,99999);
-ok (scalar @{$x->{value}}, 1);
+$x = Math::BigInt->new(99999); is_valid($x);
+$x += 1; ok ($x,100000); is_valid($x); 
+$x -= 1; ok ($x,99999); is_valid($x); 
 
 ###############################################################################
-# check numify
+# check numify, these tests make only sense with Math::BigInt::Calc, since
+# only this uses $BASE
 
-my $BASE = int(1e5);
+my $BASE = int(1e5);		# should access Math::BigInt::Calc::BASE
 $x = Math::BigInt->new($BASE-1);     ok ($x->numify(),$BASE-1); 
 $x = Math::BigInt->new(-($BASE-1));  ok ($x->numify(),-($BASE-1)); 
 $x = Math::BigInt->new($BASE);       ok ($x->numify(),$BASE); 
@@ -361,9 +382,9 @@ ok ($x, 23456);
 ###############################################################################
 # bug with rest "-0" in div, causing further div()s to fail
 
-$x = Math::BigInt->new(-322056000); ($x,$y) = $x->bdiv('-12882240');
+$x = Math::BigInt->new('-322056000'); ($x,$y) = $x->bdiv('-12882240');
 
-ok ($y,'0');	# not '-0'
+ok ($y,'0','not -0');	# not '-0'
 is_valid($y);
 
 ###############################################################################
@@ -416,14 +437,9 @@ ok ($args[4],7); ok (ref($args[4]),'');
 # test for flaoting-point input (other tests in bnorm() below)
 
 $z = 1050000000000000;          # may be int on systems with 64bit?
-$x = Math::BigInt->new($z); ok ($x->bsstr(),'105e+13');	# not 1.03e+15?
-if ($^O eq 'os390' || $^O eq 's390') { # non-IEEE
-    $z = 1e+75;			# definitely a float
-    $x = Math::BigInt->new($z); ok ($x->bsstr(),$z);
-} else {
-    $z = 1e+129;			# definitely a float
-    $x = Math::BigInt->new($z); ok ($x->bsstr(),$z);
-}
+$x = Math::BigInt->new($z); ok ($x->bsstr(),'105e+13');	# not 1.03e+15
+$z = 1e+129;			# definitely a float (may fail on UTS)
+$x = Math::BigInt->new($z); ok ($x->bsstr(),$z);
 
 ###############################################################################
 # prime number tests, also test for **= and length()
@@ -442,10 +458,10 @@ ok ($x,"170141183460469231731687303715884105727");
 # Also, testing for 2 meg output is a bit hard ;)
 #$x = new Math::BigInt(2); $x **= 6972593; $x--;
 
-# 593573509*2^332162+1 has exactly 100.000 digits
-# takes over 16 mins and still not complete, so can not be done yet ;)
+# 593573509*2^332162+1 has exactly 1,000,000 digits
+# takes about 24 mins on 300 Mhz, so can not be done yet ;)
 #$x = Math::BigInt->new(2); $x **= 332162; $x *= "593573509"; $x++;
-#ok ($x->digits(),100000);
+#ok ($x->length(),1_000_000);
 
 ###############################################################################
 # inheritance and overriding of _swap
@@ -462,26 +478,6 @@ ok (ref($x),'Math::Foo');
 
 ###############################################################################
 # all tests done
-
-# devel test, see whether valid catches errors
-#$x = Math::BigInt->new(0);
-#$x->{sign} = '-';
-#is_valid($x); # nok
-#
-#$x->{sign} = 'e';
-#is_valid($x); # nok
-#
-#$x->{value}->[0] = undef;
-#is_valid($x); # nok
-#
-#$x->{value}->[0] = 1e6;
-#is_valid($x); # nok
-#
-#$x->{value}->[0] = -2;
-#is_valid($x); # nok
-#
-#$x->{sign} = '+';
-#is_valid($x); # ok
 
 ###############################################################################
 # Perl 5.005 does not like ok ($x,undef)
@@ -500,64 +496,60 @@ sub ok_undef
 
 sub is_valid
   {
-  my $x = shift;
+  my ($x,$f) = @_;
 
-  my $error = ["",];
-
+  my $e = 0;			# error?
   # ok as reference? 
-  is_okay('ref($x)','Math::BigInt',ref($x),$error);
+  $e = 'Not a reference to Math::BigInt' if !ref($x);
 
   # has ok sign?
-  is_okay('$x->{sign}',"'+', '-', '-inf', '+inf' or 'NaN'",$x->{sign},$error)
-   if $x->{sign} !~ /^(\+|-|\+inf|-inf|NaN)$/;
+  $e = "Illegal sign $x->{sign} (expected: '+', '-', '-inf', '+inf' or 'NaN'"
+   if $e eq '0' && $x->{sign} !~ /^(\+|-|\+inf|-inf|NaN)$/;
 
-  # is not -0?
-  if (($x->{sign} eq '-') && (@{$x->{value}} == 1) && ($x->{value}->[0] == 0))
-     {
-     is_okay("\$x ne '-0'","0",$x,$error);
-     }
-  # all parts are valid?
-  my $i = 0; my $j = scalar @{$x->{value}}; my $e; my $try;
-  while ($i < $j)
-    {
-    $e = $x->{value}->[$i]; $e = 'undef' unless defined $e;
-    $try = '=~ /^[\+]?[0-9]+\$/; '."($f, $x, $e)";
-    last if $e !~ /^[+]?[0-9]+$/;
-    $try = ' < 0 || >= 1e5; '."($f, $x, $e)";
-    last if $e <0 || $e >= 1e5;
-    # this test is disabled, since new/bnorm and certain ops (like early out
-    # in add/sub) are allowed/expected to leave '00000' in some elements
-    #$try = '=~ /^00+/; '."($f, $x, $e)";
-    #last if $e =~ /^00+/;
-    $i++;
-    }
-  is_okay("\$x->{value}->[$i] $try","not $e",$e,$error)
-   if $i < $j; # trough all?
-  
-  # see whether errors crop up
-  $error->[1] = 'undef' unless defined $error->[1];
-  if ($error->[0] ne "")
-    {
-    ok ($error->[1],$error->[2]);
-    print "# Tried: $error->[0]\n";
-    }
-  else
-    {
-    ok (1,1);
-    }
-  }
+  $e = "-0 is invalid!" if $e ne '0' && $x->{sign} eq '-' && $x == 0;
+  $e = $CALC->_check($x->{value}) if $e eq '0';
 
-sub is_okay
-  {
-  my ($tried,$expected,$try,$error) = @_;
+  # test done, see if error did crop up
+  ok (1,1), return if ($e eq '0');
 
-  return if $error->[0] ne "";	# error, no further testing
-
-  @$error = ( $tried, $try, $expected ) if $try ne $expected;
+  ok (1,$e." op '$f'");
   }
 
 __END__
+&is_odd
+abc:0
+0:0
+1:1
+3:1
+-1:1
+-3:1
+10000001:1
+10000002:0
+2:0
+&is_even
+abc:0
+0:1
+1:0
+3:0
+-1:0
+-3:0
+10000001:0
+10000002:1
+2:1
+&bacmp
++0:-0:0
++0:+1:-1
+-1:+1:0
++1:-1:0
+-1:+2:-1
++2:-1:1
+-123456789:+987654321:-1
++123456789:-987654321:-1
++987654321:+123456789:1
+-987654321:+123456789:1
+-123:+4567889:-1
 &bnorm
+123:123
 # binary input
 0babc:NaN
 0b123:NaN
@@ -644,6 +636,9 @@ NaN::0
 +inf:+:1
 -inf:-:1
 -inf:+:0
+# it must be exactly /^[+-]inf$/
++infinity::0
+-infinity::0
 &blsft
 abc:abc:NaN
 +2:+2:+8
@@ -722,16 +717,17 @@ abc:+0:
 -123456789:+987654321:-1
 +123456789:-987654321:1
 -987654321:+123456789:-1
-&bacmp
-+0:-0:0
-+0:+1:-1
--1:+1:0
-+1:-1:0
--1:+2:-1
-+2:-1:1
--123456789:+987654321:-1
-+123456789:-987654321:-1
--987654321:+123456789:1
+-inf:5432112345:-1
++inf:5432112345:1
+-inf:-5432112345:-1
++inf:-5432112345:1
++inf:+inf:0
+-inf:-inf:0
+# return undef
++inf:NaN:
+NaN:+inf:
+-inf:NaN:
+NaN:-inf:
 &binc
 abc:NaN
 +0:+1
@@ -857,6 +853,9 @@ abc:+0:NaN
 &bdiv
 abc:abc:NaN
 abc:+1:abc:NaN
+# really?
+#+5:0:+inf
+#-5:0:-inf
 +1:abc:NaN
 +0:+0:NaN
 +0:+1:+0
@@ -978,6 +977,8 @@ abc:+0:NaN
 abc:abc:NaN
 abc:0:NaN
 0:abc:NaN
+1:2:0
+3:2:2
 +8:+2:+0
 +281474976710656:+0:+0
 +281474976710656:+1:+0
@@ -986,6 +987,7 @@ abc:0:NaN
 abc:abc:NaN
 abc:0:NaN
 0:abc:NaN
+1:2:3
 +8:+2:+10
 +281474976710656:+0:+281474976710656
 +281474976710656:+1:+281474976710657
@@ -994,6 +996,7 @@ abc:0:NaN
 abc:abc:NaN
 abc:0:NaN
 0:abc:NaN
+1:2:3
 +8:+2:+10
 +281474976710656:+0:+281474976710656
 +281474976710656:+1:+281474976710657
@@ -1049,6 +1052,8 @@ abc:NaN,NaN
 -2:-2,0
 0:0,1
 &bpow
+abc:12:NaN
+12:abc:NaN
 0:0:1
 0:1:0
 0:2:0
@@ -1070,6 +1075,10 @@ abc:NaN,NaN
 -2:-1:NaN
 2:-2:NaN
 -2:-2:NaN
++inf:1234500012:+inf
+-inf:1234500012:-inf
++inf:-12345000123:+inf
+-inf:-12345000123:-inf
 # 1 ** -x => 1 / (1 ** x)
 -1:0:1
 -2:0:1
@@ -1189,37 +1198,12 @@ $round_mode('even')
 +1234567:6:1234570
 +12345000:4:12340000
 -12345000:4:-12340000
-&is_odd
-abc:0
-0:0
-1:1
-3:1
--1:1
--3:1
-10000001:1
-10000002:0
-2:0
-&is_even
-abc:0
-0:1
-1:0
-3:0
--1:0
--3:0
-10000001:0
-10000002:1
-2:1
 &is_zero
 0:1
 NaNzero:0
 123:0
 -1:0
 1:0
-&_set
-2:-1:-1
--2:1:1
-NaN:2:2
-2:abc:NaN
 &is_one
 0:0
 1:1

@@ -8,7 +8,7 @@ BEGIN
   $| = 1;
   unshift @INC, '../lib'; # for running manually
   # chdir 't' if -d 't';
-  plan tests => 514;
+  plan tests => 945;
   }
 
 use Math::BigFloat;
@@ -49,8 +49,6 @@ while (<DATA>)
         $try .= "\$x->binf('$args[1]');";
       } elsif ($f eq "bsstr") {
         $try .= "\$x->bsstr();";
-      } elsif ($f eq "_set") {
-        $try .= "\$x->_set('$args[1]'); \$x;";
       } elsif ($f eq "fneg") {
         $try .= "-\$x;";
       } elsif ($f eq "bfloor") {
@@ -67,8 +65,6 @@ while (<DATA>)
         $try .= "\$x->is_even()+0;";
       } elsif ($f eq "as_number") {
         $try .= "\$x->as_number();";
-      } elsif ($f eq "fpow") {
-        $try .= "\$x ** $args[1];";
       } elsif ($f eq "fabs") {
         $try .= "abs \$x;";
       }elsif ($f eq "fround") {
@@ -83,6 +79,8 @@ while (<DATA>)
       $try .= "\$y = new Math::BigFloat \"$args[1]\";";
       if ($f eq "fcmp") {
         $try .= "\$x <=> \$y;";
+      } elsif ($f eq "fpow") {
+        $try .= "\$x ** \$y;";
       } elsif ($f eq "fadd") {
         $try .= "\$x + \$y;";
       } elsif ($f eq "fsub") {
@@ -117,10 +115,20 @@ while (<DATA>)
       else
         {
         print "# Tried: '$try'\n" if !ok ($ans1, $ans);
+        if (ref($ans1) eq 'Math::BigFloat')
+	  {
+	  #print $ans1->_trailing_zeros(),"\n";
+          print "# Has trailing zeros after '$try'\n" 
+	   if !ok ($ans1->{_m}->_trailing_zeros(), 0);
+	  }
         } 
       } # end pattern or string
     }
   } # end while
+
+# check whether new() for BigInts destroys them ($y == 12 in this case)
+$x = Math::BigInt->new(1200); $y = Math::BigFloat->new($x);
+ok ($y,1200); ok ($x,1200);
 
 # all done
 
@@ -205,6 +213,12 @@ abc:NaN
 2:-2:0.25
 2:-3:0.125
 128:-2:0.00006103515625
+abc:123.456:NaN
+123.456:abc:NaN
++inf:123.45:+inf
+-inf:123.45:-inf
++inf:-123.45:+inf
+-inf:-123.45:-inf
 &fneg
 abc:NaN
 +0:0
@@ -457,6 +471,22 @@ abc:+0:
 0.00512:0.0001:1
 0.005:0.000112:1
 0.00123:0.0005:1
+# infinity
+-inf:5432112345:-1
++inf:5432112345:1
+-inf:-5432112345:-1
++inf:-5432112345:1
+-inf:54321.12345:-1
++inf:54321.12345:1
+-inf:-54321.12345:-1
++inf:-54321.12345:1
++inf:+inf:0
+-inf:-inf:0
+# return undef
++inf:NaN:
+NaN:+inf:
+-inf:NaN:
+NaN:-inf:
 &fadd
 abc:abc:NaN
 abc:+0:NaN
@@ -495,6 +525,7 @@ abc:+0:NaN
 -123456789:+987654321:864197532
 -123456789:-987654321:-1111111110
 +123456789:-987654321:-864197532
+0.001234:0.0001234:0.0013574
 &fsub
 abc:abc:NaN
 abc:+0:NaN
@@ -566,6 +597,8 @@ abc:+0:NaN
 +77777777777:+9:699999999993
 +88888888888:+9:799999999992
 +99999999999:+9:899999999991
+6:120:720
+10:10000:100000
 &fdiv
 $div_scale = 40; $Math::BigFloat::rnd_mode = 'even'
 abc:abc:NaN
@@ -605,6 +638,7 @@ abc:+1:abc:NaN
 +71000000:+226:314159.2920353982300884955752212389380531
 +106500000:+339:314159.2920353982300884955752212389380531
 +1000000000:+3:333333333.3333333333333333333333333333333
+2:25.024996000799840031993601279744051189762:0.07992009269196593320152084692285869265447
 $div_scale = 20
 +1000000000:+9:111111111.11111111111
 +2000000000:+9:222222222.22222222222
@@ -615,7 +649,13 @@ $div_scale = 20
 +7000000000:+9:777777777.77777777778
 +8000000000:+9:888888888.88888888889
 +9000000000:+9:1000000000
-# following two cases are the "old" behaviour, but are now (>v0.01) different
+1:10:0.1
+1:100:0.01
+1:1000:0.001
+1:10000:0.0001
+1:504:0.001984126984126984127
+2:1.987654321:1.0062111801179738436
+# the next two cases are the "old" behaviour, but are now (>v0.01) different
 #+35500000:+113:314159.292035398230088
 #+71000000:+226:314159.292035398230088
 +35500000:+113:314159.29203539823009
@@ -623,8 +663,8 @@ $div_scale = 20
 +106500000:+339:314159.29203539823009
 +1000000000:+3:333333333.33333333333
 $div_scale = 1
-# div_scale will be 3 since $x has 3 digits
-+124:+3:41.3
+# round to accuracy 1 after bdiv
++124:+3:40
 # reset scale for further tests
 $div_scale = 40
 &fmod
@@ -642,14 +682,17 @@ $div_scale = 40
 -2:NaN
 -16:NaN
 -123.45:NaN
+nanfsqrt:NaN
++inf:+inf
+-inf:NaN
 +1:1
-#+1.44:1.2
-#+2:1.41421356237309504880168872420969807857
-#+4:2
-#+16:4
-#+100:10
-#+123.456:11.11107555549866648462149404118219234119
-#+15241.38393:123.456
++2:1.41421356237309504880168872420969807857
++4:2
++16:4
++100:10
++123.456:11.11107555549866648462149404118219234119
++15241.38393:123.4559999756998444766131352122991626468
++1.44:1.2
 &is_odd
 abc:0
 0:0
@@ -659,6 +702,10 @@ abc:0
 3:1
 1000001:1
 1000002:0
++inf:0
+-inf:0
+123.45:0
+-123.45:0
 2:0
 &is_even
 abc:0
@@ -670,6 +717,10 @@ abc:0
 1000001:0
 1000002:1
 2:1
++inf:0
+-inf:0
+123.456:0
+-123.456:0
 &is_zero
 NaNzero:0
 0:1
@@ -681,13 +732,6 @@ NaNzero:0
 1:1
 -1:0
 -2:0
-&_set
-NaN:2:2
-2:abc:NaN
-1:-1:-1
-2:1:1
--2:0:0
-128:-2:-2
 &bfloor
 0:0
 abc:NaN

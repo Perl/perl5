@@ -959,7 +959,9 @@ lib/Locale/Maketext/TPJ13.pod	Locale::Maketext documentation article
 lib/look.pl			A "look" equivalent
 lib/Math/BigFloat.pm		An arbitrary precision floating-point arithmetic package
 lib/Math/BigInt.pm		An arbitrary precision integer arithmetic package
+lib/Math/BigInt/Calc.pm		Pure Perl module to support Math::BigInt
 lib/Math/BigInt/t/bigfltpm.t	See if BigFloat.pm works
+lib/Math/BigInt/t/bigintc.t	See if BigInt/Calc.pm works
 lib/Math/BigInt/t/bigintpm.t	See if BigInt.pm works
 lib/Math/BigInt/t/mbimbf.t	BigInt/BigFloat accuracy, precicion and fallback, round_mode
 lib/Math/Complex.pm		A Complex package
