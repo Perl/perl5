@@ -12,7 +12,7 @@ BEGIN {
     }
 }
 
-BEGIN { $| = 1; print "1..25\n"; }
+BEGIN { $| = 1; print "1..28\n"; }
 
 END {print "not ok 1\n" unless $loaded;}
 
@@ -26,11 +26,13 @@ use strict;
 
 my $have_gettimeofday	= defined &Time::HiRes::gettimeofday;
 my $have_usleep		= defined &Time::HiRes::usleep;
+my $have_nanosleep	= defined &Time::HiRes::nanosleep;
 my $have_ualarm		= defined &Time::HiRes::ualarm;
 my $have_time		= defined &Time::HiRes::time;
 
 import Time::HiRes 'gettimeofday'	if $have_gettimeofday;
 import Time::HiRes 'usleep'		if $have_usleep;
+import Time::HiRes 'nanosleep'		if $have_nanosleep;
 import Time::HiRes 'ualarm'		if $have_ualarm;
 
 use Config;
@@ -41,11 +43,10 @@ my $waitfor = 60; # 10 seconds is normal.
 my $pid;
 
 if ($have_fork) {
-    print "# Testing process $$\n";
-    print "# Starting the timer process\n";
+    print "# I am process $$, starting the timer process\n";
     if (defined ($pid = fork())) {
 	if ($pid == 0) { # We are the kid, set up the timer.
-	    print "# Timer process $$\n";
+	    print "# I am timer process $$\n";
 	    sleep($waitfor);
 	    warn "\n$0: overall time allowed for tests (${waitfor}s) exceeded\n";
 	    print "# Terminating the testing process\n";
@@ -349,29 +350,60 @@ if ($have_gettimeofday) {
     }
 }
 
+if (!$have_nanosleep) {
+    skip 22..23;
+}
+else {
+    my $one = CORE::time;
+    nanosleep(10_000_000);
+    my $two = CORE::time;
+    nanosleep(10_000_000);
+    my $three = CORE::time;
+    ok 22, $one == $two || $two == $three, "slept too long, $one $two $three";
+
+    if (!$have_gettimeofday) {
+    	skip 23;
+    }
+    else {
+    	my $f = Time::HiRes::time();
+	nanosleep(500_000_000);
+        my $f2 = Time::HiRes::time();
+	my $d = $f2 - $f;
+	ok 23, $d > 0.4 && $d < 0.9, "slept $d secs $f to $f2";
+    }
+}
+
 eval { sleep(-1) };
 print $@ =~ /::sleep\(-1\): negative time not invented yet/ ?
-    "ok 22\n" : "not ok 22\n";
+    "ok 24\n" : "not ok 24\n";
 
 eval { usleep(-2) };
 print $@ =~ /::usleep\(-2\): negative time not invented yet/ ?
-    "ok 23\n" : "not ok 23\n";
+    "ok 25\n" : "not ok 25\n";
 
 if ($have_ualarm) {
     eval { alarm(-3) };
     print $@ =~ /::alarm\(-3, 0\): negative time not invented yet/ ?
-	"ok 24\n" : "not ok 24\n";
+	"ok 26\n" : "not ok 26\n";
 
     eval { ualarm(-4) };
     print $@ =~ /::ualarm\(-4, 0\): negative time not invented yet/ ?
-    "ok 25\n" : "not ok 25\n";
+    "ok 27\n" : "not ok 27\n";
 } else {
-    skip 24;
-    skip 25;
+    skip 26;
+    skip 27;
+}
+
+if ($have_nanosleep) {
+    eval { nanosleep(-5) };
+    print $@ =~ /::nanosleep\(-5\): negative time not invented yet/ ?
+	"ok 28\n" : "not ok 28\n";
+} else {
+    skip 28;
 }
 
 if (defined $pid) {
-    print "# Terminating the timer process $pid\n";
+    print "# I am process $$, terminating the timer process $pid\n";
     kill('TERM', $pid); # We are done, the timer can go.
     unlink("ktrace.out");
 }

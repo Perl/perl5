@@ -351,18 +351,18 @@ gettimeofday (struct timeval *tp, void *tpz)
   * The TIME_HIRES_NANOSLEEP is set by Makefile.PL. */
 #if !defined(HAS_USLEEP) && defined(TIME_HIRES_NANOSLEEP)
 #define HAS_USLEEP
-#define usleep hrt_nanosleep  /* could conflict with ncurses for static build */
+#define usleep hrt_unanosleep  /* could conflict with ncurses for static build */
 
 void
-hrt_nanosleep(unsigned long usec)
+hrt_unanosleep(unsigned long usec) /* This is used to emulate usleep. */
 {
     struct timespec res;
     res.tv_sec = usec/1000/1000;
     res.tv_nsec = ( usec - res.tv_sec*1000*1000 ) * 1000;
     nanosleep(&res, NULL);
 }
-#endif
 
+#endif /* #if !defined(HAS_USLEEP) && defined(TIME_HIRES_NANOSLEEP) */
 
 #if !defined(HAS_USLEEP) && defined(HAS_SELECT)
 #ifndef SELECT_IS_BROKEN
@@ -379,7 +379,7 @@ hrt_usleep(unsigned long usec)
 		(Select_fd_set_t)NULL, &tv);
 }
 #endif
-#endif
+#endif /* #if !defined(HAS_USLEEP) && defined(HAS_SELECT) */
 
 #if !defined(HAS_USLEEP) && defined(WIN32)
 #define HAS_USLEEP
@@ -392,7 +392,7 @@ hrt_usleep(unsigned long usec)
     msec = usec / 1000;
     Sleep (msec);
 }
-#endif
+#endif /* #if !defined(HAS_USLEEP) && defined(WIN32) */
 
 
 #if !defined(HAS_UALARM) && defined(HAS_SETITIMER)
@@ -409,7 +409,7 @@ hrt_ualarm(int usec, int interval)
    itv.it_interval.tv_usec = interval % 1000000;
    return setitimer(ITIMER_REAL, &itv, 0);
 }
-#endif
+#endif /* #if !defined(HAS_UALARM) && defined(HAS_SETITIMER) */
 
 #if !defined(HAS_UALARM) && defined(VMS)
 #define HAS_UALARM
@@ -606,7 +606,7 @@ ualarm_AST(Alarm *a)
     }
 }
 
-#endif /* !HAS_UALARM && VMS */
+#endif /* #if !defined(HAS_UALARM) && defined(VMS) */
 
 #ifdef HAS_GETTIMEOFDAY
 
@@ -633,7 +633,7 @@ myNVtime()
   return status == 0 ? Tp.tv_sec + (Tp.tv_usec / 1000000.) : -1.0;
 }
 
-#endif
+#endif /* #ifdef HAS_GETTIMEOFDAY */
 
 MODULE = Time::HiRes            PACKAGE = Time::HiRes
 
@@ -700,6 +700,38 @@ usleep(useconds)
 	OUTPUT:
 	RETVAL
 
+#if defined(TIME_HIRES_NANOSLEEP)
+
+NV
+nanosleep(nseconds)
+        NV nseconds
+	PREINIT:
+	struct timeval Ta, Tb;
+	CODE:
+	gettimeofday(&Ta, NULL);
+	if (items > 0) {
+	    struct timespec tsa;
+	    if (nseconds > 1E9) {
+		IV seconds = (IV) (nseconds / 1E9);
+		if (seconds) {
+		    sleep(seconds);
+		    nseconds -= 1E9 * seconds;
+		}
+	    } else if (nseconds < 0.0)
+	        croak("Time::HiRes::nanosleep(%"NVgf"): negative time not invented yet", nseconds);
+	    tsa.tv_sec  = (IV) (nseconds / 1E9);
+	    tsa.tv_nsec = (IV) nseconds - tsa.tv_sec * 1E9;
+	    nanosleep(&tsa, NULL);
+	} else
+	    PerlProc_pause();
+	gettimeofday(&Tb, NULL);
+	RETVAL = 1E3*(1E6*(Tb.tv_sec-Ta.tv_sec)+(NV)((IV)Tb.tv_usec-(IV)Ta.tv_usec));
+
+	OUTPUT:
+	RETVAL
+
+#endif /* #if defined(TIME_HIRES_NANOSLEEP) */
+
 NV
 sleep(...)
 	PREINIT:
@@ -719,7 +751,7 @@ sleep(...)
 		    * circumstances (if the double is cast to UV more
 		    * than once?) evaluate to -0.5, instead of 0.5. */
 		   useconds = -(IV)useconds;
-#endif
+#endif /* #if defined(__sparc64__) && defined(__GNUC__) */
 		   if ((IV)useconds < 0)
 		     croak("Time::HiRes::sleep(%"NVgf"): internal error: useconds < 0 (unsigned %"UVuf" signed %"IVdf")", seconds, useconds, (IV)useconds);
 		 }
@@ -737,7 +769,7 @@ sleep(...)
 	OUTPUT:
 	RETVAL
 
-#endif
+#endif /* #if defined(HAS_USLEEP) && defined(HAS_GETTIMEOFDAY) */
 
 #ifdef HAS_UALARM
 
@@ -766,7 +798,7 @@ alarm(seconds,interval=0)
 	OUTPUT:
 	RETVAL
 
-#endif
+#endif /* #ifdef HAS_UALARM */
 
 #ifdef HAS_GETTIMEOFDAY
 #    ifdef MACOS_TRADITIONAL	/* fix epoch TZ and use unsigned time_t */
@@ -832,7 +864,7 @@ time()
 	RETVAL
 
 #    endif	/* MACOS_TRADITIONAL */
-#endif
+#endif /* #ifdef HAS_GETTIMEOFDAY */
 
 #if defined(HAS_GETITIMER) && defined(HAS_SETITIMER)
 
@@ -879,5 +911,6 @@ getitimer(which)
 	  }
 	}
 
-#endif
+#endif /* #if defined(HAS_GETITIMER) && defined(HAS_SETITIMER) */
+
 

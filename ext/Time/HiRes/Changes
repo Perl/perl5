@@ -1,5 +1,13 @@
 Revision history for Perl extension Time::HiRes.
 
+1.66
+	- add nanosleep()
+	- fix the 'hierachy' typo in Makefile.PL [rt.cpan.org #8492]
+	- should now build in Solaris [rt.cpan.org #7165] (since 1.64)
+	- should now build in Cygwin [rt.cpan.org #7535] (since 1.64)
+	- close also [rt.cpan.org #5933] "Time::HiRes::time does not pick up time adjustments like ntp" since ever reproducing it in the same environment
+	  has become rather unlikely
+
 1.65
 	- one should not mix u?alarm and sleep (the tests modified
 	  by 1.65, #12 and #13, hung in Solaris), now we just busy
