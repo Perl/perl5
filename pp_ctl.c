@@ -1521,14 +1521,20 @@ PP(pp_caller)
     else
 	PUSHs(sv_2mortal(newSViv(gimme & G_ARRAY)));
     if (CxTYPE(cx) == CXt_EVAL) {
+	/* eval STRING */
 	if (cx->blk_eval.old_op_type == OP_ENTEREVAL) {
 	    PUSHs(cx->blk_eval.cur_text);
 	    PUSHs(&PL_sv_no);
 	}
-	/* try blocks have old_namesv == 0 */
+	/* require */
 	else if (cx->blk_eval.old_namesv) {
 	    PUSHs(sv_2mortal(newSVsv(cx->blk_eval.old_namesv)));
 	    PUSHs(&PL_sv_yes);
+	}
+	/* eval BLOCK (try blocks have old_namesv == 0) */
+	else {
+	    PUSHs(&PL_sv_undef);
+	    PUSHs(&PL_sv_undef);
 	}
     }
     else {
