@@ -2939,8 +2939,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	}
 	else {
 	    Perl_croak(aTHX_
-		       "Can't locate object method \"%s\" via package \"%s\"
-		       " (perhaps you forgot to load \"%s\"?)",
+		       "Can't locate object method \"%s\" via package \"%s\" (perhaps you forgot to load \"%s\"?)",
 		       leaf, packname, packname);
 	}
     }
