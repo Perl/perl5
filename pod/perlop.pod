@@ -620,7 +620,7 @@ the same character fore and aft, but the 4 sorts of brackets
     Customary  Generic        Meaning	     Interpolates
 	''	 q{}	      Literal		  no
 	""	qq{}	      Literal		  yes
-	``	qx{}	      Command		  yes
+	``	qx{}	      Command		  yes (unless '' is delimiter)
 		qw{}	     Word list		  no
 	//	 m{}	   Pattern match	  yes
 		 s{}{}	    Substitution	  yes
@@ -741,8 +741,11 @@ Options are:
     x	Use extended regular expressions.
 
 If "/" is the delimiter then the initial C<m> is optional.  With the C<m>
-you can use any pair of non-alphanumeric, non-whitespace characters as
-delimiters.  This is particularly useful for matching Unix path names
+you can use any pair of non-alphanumeric, non-whitespace characters 
+as delimiters (if single quotes are used, no interpretation is done
+on the replacement string. Unlike Perl 4, Perl 5 treats backticks as normal
+delimiters; the replacement text is not evaluated as a command).
+This is particularly useful for matching Unix path names
 that contain "/", to avoid LTS (leaning toothpick syndrome).  If "?" is
 the delimiter, then the match-only-once rule of C<?PATTERN?> applies.
 
