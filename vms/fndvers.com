@@ -37,17 +37,35 @@ $ Close patchlevel_h
 $!
 $ If sublevel.eq.0 Then sublevel = ""
 $ perl_version = "5_" + plevel + sublevel
+$ If F$GetSyi("HW_MODEL").gt.1024
+$ Then
+$   arch = "AXP"
+$ Else
+$   arch = "VAX"
+$ EndIf
 $ If p2.eqs."#NOFILE#"
 $ Then
 $   Write Sys$Output "Perl version directory name is ""''perl_version'"""
 $   Exit
 $ EndIf
 $!
-$ token = """""""""''perl_version'"""""""""
+$ token = """""""""/perl_root/lib/VMS_''arch'/''perl_version'"""""""""
 $ If sublevel.eqs."" Then token = token + "  "
 $ token = token + "  /**/"
-$ Call update_file "''p2'" "#  define _PVERS" "''token'"
-$ If .not.$Status Then Exit $Status
+$ Call update_file "''p2'" "#define ARCHLIB_EXP" "''token'"
+$ teststs = $Status
+$ If .not.teststs Then Exit teststs
+$!
+$ If teststs.ne.1 ! current values in config.vms are appropriate
+$ Then
+$   token = """""""""/perl_root/lib/VMS_''arch'""""""""  /**/"
+$   Call update_file "''p2'" "#define OLDARCHLIB_EXP" "''token'"
+$   If .not.$Status Then Exit $Status
+$!
+$   token = """""""""/perl_root/lib/site_perl/VMS_''arch'""""""""  /**/"
+$   Call update_file "''p2'" "#define SITEARCH_EXP" "''token'"
+$   If .not.$Status Then Exit $Status
+$EndIf
 $!
 $ token = "''perl_version'"
 $ If sublevel.eqs."" Then token = token + "  "
