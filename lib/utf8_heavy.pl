@@ -8,35 +8,33 @@ sub DESTROY {}
 
 sub croak { require Carp; Carp::croak(@_) }
 
+my %Cache;
+
+##
+## "SWASH" == "SWATCH HASH". A "swatch" is a swatch of the Unicode landscape
+##
+
 sub SWASHNEW {
     my ($class, $type, $list, $minbits, $none) = @_;
     local $^D = 0 if $^D;
 
     print STDERR "SWASHNEW @_\n" if DEBUG;
 
-    ## check to see if we've already got it.
-    {
-        no strict 'refs';
-        if ($type and ref ${"${class}::{$type}"} eq $class) {
-            warn qq/Found \${"${class}::{$type}"}\n/ if DEBUG;
-            return ${"${class}::{$type}"};
-        }
-    }
-
     ##
     ## Get the list of codepoints for the type.
     ## Called from utf8.c
     ##
     ## Given a $type, our goal is to fill $list with the set of codepoint
-    ## ranges. As we try various interpretations of $type, sometimes we'll
-    ## end up with the $list directly, and sometimes we'll end up with a
-    ## $file name that holds the list data.
+    ## ranges.
     ##
     ## To make the parsing of $type clear, this code takes the a rather
     ## unorthadox approach of last'ing out of the block once we have the
     ## info we need. Were this to be a subroutine, the 'last' would just
     ## be a 'return'.
     ##
+    my $file; ## file to load data from, and also part of the %Cache key.
+    my $ListSorted = 0;
+
     if ($type)
     {
         $type =~ s/^\s+//;
@@ -44,131 +42,43 @@ sub SWASHNEW {
 
         print "type = $type\n" if DEBUG;
 
-        my $file;
-        ## Figure out what file to load to get the data....
       GETFILE:
         {
             ##
-            ## First, see if it's an "Is" name (the 'Is' is optional)
+            ## 'Is' is always optional, so if it's there, remove it.
+            ## Same with 'Category=' and 'Script='.
             ##
-            ## Because we check "Is" names first, they have precidence over
-            ## "In" names. For example, "Greek" is both a script and a
-            ## block. "IsGreek" always gets the script, while "InGreek"
-            ## always gets the block. "Greek" gets the script because we
-            ## check "Is" names first.
+            ## 'Block=' is replaced by 'In'.
             ##
-            if ($type =~ m{^
-                           ## "Is" prefix, or "Script=" or "Category="
-                           (?: Is [- _]? | (?:Script|Category)\s*=\s* )?
-                           ## name to check in the "Is" symbol table.
-                           ([A-Z].*)
-                           $
-                          }ix)
-            {
-                my $istype = $1;
-                ##
-                ## Input ($type)     Name To Check ($istype)
-                ## -------------     -----------------------
-                ## IsLu                 Lu
-                ## Lu                   Lu
-                ## Category = Lu        Lu
-                ## Foo                  Foo
-                ## Script = Greek       Greek
-                ##
+            $type =~ s/^Is(?:\s+|[-_])?//i
+              or
+            $type =~ s/^Category\s*=\s*//i
+              or
+            $type =~ s/^Script\s*=\s*//i
+              or
+            $type =~ s/^Block\s*=\s*/In/i;
 
-                print "istype = $istype\n" if DEBUG;
-
-                ## Load "Is" mapping data, if not yet loaded.
-                do "unicore/Is.pl" if not defined %utf8::Is;
-
-                ##
-                ## If the "Is" mapping data has an exact match, it points
-                ## to the file we need.
-                ##
-                if (exists $utf8::Is{$istype})
-                {
-                    $file = "unicore/Is/$utf8::Is{$istype}.pl";
-                    last GETFILE;
-                }
-
-                ##
-                ## Need to look at %utf8::IsPat (loaded from "unicore/Is.pl")
-                ## to see if there's a regex that matches this $istype.
-                ## If so, the associated name is the file we need.
-                ##
-                my $prefix = substr(lc($istype), 0, 2);
-                if (my $hashref = $utf8::IsPat{$prefix})
-                {
-                    while (my ($pat, $name) = each %{$hashref})
-                    {
-                        print "isprefix = $prefix, Is = $istype, pat = $pat\n" if DEBUG;
-                        ##
-                        ## The following regex probably need not be cached,
-                        ## since every time there's a match, the results of
-                        ## the entire call to SWASHNEW() is cached, so there's
-                        ## a very limited number of times any one $pat will
-                        ## be evaluated as a regex, at least with "reasonable"
-                        ## code that doesn't try a baziilion \p{Random} names.
-                        ##
-                        if ($istype =~ /^$pat$/i)
-                        {
-                            $file = "unicore/Is/$name.pl";
-                            keys %{$hashref}; ## reset the 'each' above
-                            last GETFILE;
-                        }
-                    }
-                }
+            ##
+            ## See if it's in the direct mapping table.
+            ##
+            require "unicore/Exact.pl";
+            if (my $base = $utf8::Exact{$type}) {
+                $file = "unicore/lib/$base.pl";
+                last GETFILE;
             }
 
             ##
-            ## Couldn't find via "Is" -- let's try via "In".....
+            ## If not there exactly, try the canonical form. The canonical
+            ## form is lowercased, with any separators (\s+|[-_]) removed.
             ##
-            if ($type =~ m{^
-                           ( In(?!herited$)[- _]? | Block\s*=\s*)?
-                           ([A-Z].*)
-                           $
-                          }xi)
-            {
-                my $intype = $2;
-                print "intype = $intype\n" if DEBUG;
+            my $canonical = lc $type;
+            $canonical =~ s/(?<=[a-z\d])(?:\s+|[-_])(?=[a-z\d])//g;
+            print "canonical = $canonical\n" if DEBUG;
 
-                ##
-                ## Input ($type)      Name To Check ($intype)
-                ## -------------      -----------------------
-                ## Inherited             Inherited
-                ## InGreek               Greek
-                ## Block = Greek         Greek
-                ##
-
-                ## Load "In" mapping data, if not yet loaded.
-                do "unicore/In.pl" if not defined %utf8::In;
-
-                ## If there's a direct match, it points to the file we need
-                if (exists $utf8::In{$intype}) {
-                    $file = "unicore/In/$utf8::In{$intype}.pl";
-                    last GETFILE;
-                }
-
-                ##
-                ## Need to look at %utf8::InPat (loaded from "unicore/In.pl")
-                ## to see if there's a regex that matches this $intype.
-                ## If so, the associated name is the file we need.
-                ##
-                my $prefix = substr(lc($intype), 0, 2);
-                if (my $hashref = $utf8::InPat{$prefix})
-                {
-                    print "inprefix = $prefix, In = $intype\n" if DEBUG;
-                    while (my ($pat, $name) = each %{$hashref})
-                    {
-                        print "inprefix = $prefix, In = $intype, k = $pat\n" if DEBUG;
-                        if ($intype =~ /^$pat$/i) {
-                            $file = "unicore/In/$name.pl";
-                            print "inprefix = $prefix, In = $intype, k = $pat, file = $file\n" if DEBUG;
-                            keys %{$hashref}; ## reset the 'each' above
-                            last GETFILE;
-                        }
-                    }
-                }
+            require "unicore/Canonical.pl";
+            if (my $base = $utf8::Canonical{$canonical}) {
+                $file = "unicore/lib/$base.pl";
+                last GETFILE;
             }
 
             ##
@@ -188,16 +98,28 @@ sub SWASHNEW {
             croak("Can't find Unicode character property \"$type\"");
         }
 
+        print "found it (file='$file')\n" if DEBUG;
+
         ##
         ## If we reach here, it was due to a 'last GETFILE' above, so we
-        ## have a filename, so now we load it.
+        ## have a filename, so now we load it if we haven't already.
+        ## If we have, return the cached results. The cache key is the
+        ## file to load.
         ##
+        if ($Cache{$file} and ref($Cache{$file}) eq $class)
+        {
+            print "Returning cached '$file' for \\p{$type}\n" if DEBUG;
+            return $Cache{$class, $file};
+        }
+
         $list = do $file;
+        $ListSorted = 1; ## we know that these lists are sorted
     }
 
     my $extras;
     my $bits;
 
+    my $ORIG = $list;
     if ($list) {
 	my @tmp = split(/^/m, $list);
 	my %seen;
@@ -247,8 +169,7 @@ sub SWASHNEW {
 
     print STDERR "CLASS = $class, TYPE => $type, BITS => $bits, NONE => $none\nEXTRAS =>\n$extras\nLIST =>\n$list\n" if DEBUG;
 
-    no strict 'refs';
-    ${"${class}::{$type}"} = bless {
+    my $SWASH = bless {
 	TYPE => $type,
 	BITS => $bits,
 	EXTRAS => $extras,
@@ -256,6 +177,12 @@ sub SWASHNEW {
 	NONE => $none,
 	@extras,
     } => $class;
+
+    if ($file) {
+        $Cache{$class, $file} = $SWASH;
+    }
+
+    return $SWASH;
 }
 
 # NOTE: utf8.c:swash_init() assumes entries are never modified once generated.
