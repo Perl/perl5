@@ -23,9 +23,8 @@
 #endif
 #include <setjmp.h>
 #include <signal.h>
-#ifdef I_STDARG
 #include <stdarg.h>
-#endif
+
 #ifdef I_STDDEF
 #include <stddef.h>
 #endif
@@ -99,7 +98,7 @@
 #if defined (WIN32)
 #  undef mkfifo  /* #defined in perl.h */
 #  define mkfifo(a,b) not_here("mkfifo")
-#  define ttyname(a) not_here("ttyname")
+#  define ttyname(a) (char*)not_here("ttyname")
 #  define sigset_t long
 #  define pid_t long
 #  ifdef __BORLANDC__

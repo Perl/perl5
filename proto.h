@@ -67,9 +67,7 @@ CV*	cv_clone _((CV* proto));
 SV*	cv_const_sv _((CV* cv));
 SV*	op_const_sv _((OP* o, CV* cv));
 void	cv_undef _((CV* cv));
-#ifdef DEBUGGING
 void	cx_dump _((PERL_CONTEXT* cs));
-#endif
 SV*	filter_add _((filter_t funcp, SV* datasv));
 void	filter_del _((filter_t funcp));
 I32	filter_read _((int idx, SV* buffer, int maxlen));
@@ -80,9 +78,7 @@ void	deb _((const char* pat,...)) __attribute__((format(printf,1,2)));
 void	deb_growlevel _((void));
 I32	debop _((OP* o));
 I32	debstackptrs _((void));
-#ifdef DEBUGGING
 void	debprofdump _((void));
-#endif
 I32	debstack _((void));
 char*	delimcpy _((char* to, char* toend, char* from, char* fromend,
 		    int delim, I32* retlen));

@@ -913,10 +913,10 @@ sv_upgrade(register SV *sv, U32 mt)
     return TRUE;
 }
 
-#ifdef DEBUGGING
 char *
 sv_peek(SV *sv)
 {
+#ifdef DEBUGGING
     SV *t = sv_newmortal();
     STRLEN prevlen;
     int unref = 0;
@@ -1058,8 +1058,10 @@ sv_peek(SV *sv)
 	    sv_catpv(t, ")");
     }
     return SvPV(t, na);
+#else	/* DEBUGGING */
+    return "";
+#endif	/* DEBUGGING */
 }
-#endif
 
 int
 sv_backoff(register SV *sv)
@@ -3586,16 +3588,8 @@ newSVpvn(char *s, STRLEN len)
     return sv;
 }
 
-#ifdef I_STDARG
 SV *
 newSVpvf(const char* pat, ...)
-#else
-/*VARARGS0*/
-SV *
-newSVpvf(pat, va_alist)
-const char *pat;
-va_dcl
-#endif
 {
     register SV *sv;
     va_list args;
@@ -3604,11 +3598,7 @@ va_dcl
     SvANY(sv) = 0;
     SvREFCNT(sv) = 1;
     SvFLAGS(sv) = 0;
-#ifdef I_STDARG
     va_start(args, pat);
-#else
-    va_start(args);
-#endif
     sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
     va_end(args);
     return sv;
@@ -4225,92 +4215,40 @@ sv_setpviv_mg(SV *sv, IV iv)
     SvSETMAGIC(sv);
 }
 
-#ifdef I_STDARG
 void
 sv_setpvf(SV *sv, const char* pat, ...)
-#else
-/*VARARGS0*/
-void
-sv_setpvf(sv, pat, va_alist)
-    SV *sv;
-    const char *pat;
-    va_dcl
-#endif
 {
     va_list args;
-#ifdef I_STDARG
     va_start(args, pat);
-#else
-    va_start(args);
-#endif
     sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
     va_end(args);
 }
 
 
-#ifdef I_STDARG
 void
 sv_setpvf_mg(SV *sv, const char* pat, ...)
-#else
-/*VARARGS0*/
-void
-sv_setpvf_mg(sv, pat, va_alist)
-    SV *sv;
-    const char *pat;
-    va_dcl
-#endif
 {
     va_list args;
-#ifdef I_STDARG
     va_start(args, pat);
-#else
-    va_start(args);
-#endif
     sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
     va_end(args);
     SvSETMAGIC(sv);
 }
 
-#ifdef I_STDARG
 void
 sv_catpvf(SV *sv, const char* pat, ...)
-#else
-/*VARARGS0*/
-void
-sv_catpvf(sv, pat, va_alist)
-    SV *sv;
-    const char *pat;
-    va_dcl
-#endif
 {
     va_list args;
-#ifdef I_STDARG
     va_start(args, pat);
-#else
-    va_start(args);
-#endif
     sv_vcatpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
     va_end(args);
 }
 
-#ifdef I_STDARG
 void
 sv_catpvf_mg(SV *sv, const char* pat, ...)
-#else
-/*VARARGS0*/
-void
-sv_catpvf_mg(sv, pat, va_alist)
-    SV *sv;
-    const char *pat;
-    va_dcl
-#endif
 {
     va_list args;
-#ifdef I_STDARG
     va_start(args, pat);
-#else
-    va_start(args);
-#endif
     sv_vcatpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
     va_end(args);
     SvSETMAGIC(sv);
@@ -4819,10 +4757,10 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
     }
 }
 
-#ifdef DEBUGGING
 void
 sv_dump(SV *sv)
 {
+#ifdef DEBUGGING
     SV *d = sv_newmortal();
     char *s;
     U32 flags;
@@ -5086,14 +5024,5 @@ sv_dump(SV *sv)
 	PerlIO_printf(Perl_debug_log, "  FLAGS = 0x%lx\n", (long)IoFLAGS(sv));
 	break;
     }
+#endif	/* DEBUGGING */
 }
-#else
-void
-sv_dump(SV *sv)
-{
-}
-#endif
-
-
-
-

@@ -2250,11 +2250,11 @@ regcurly(register char *s)
     return TRUE;
 }
 
-#ifdef DEBUGGING
 
 static regnode *
 dumpuntil(regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 {
+#ifdef DEBUGGING
     register char op = EXACT;	/* Arbitrary non-END op. */
     register regnode *next, *onode;
 
@@ -2311,6 +2311,7 @@ dumpuntil(regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 	else if (op == WHILEM)
 	    l--;
     }
+#endif	/* DEBUGGING */
     return node;
 }
 
@@ -2320,6 +2321,7 @@ dumpuntil(regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 void
 regdump(regexp *r)
 {
+#ifdef DEBUGGING
     SV *sv = sv_newmortal();
 
     (void)dumpuntil(r->program, r->program + 1, NULL, sv, 0);
@@ -2372,6 +2374,7 @@ regdump(regexp *r)
 	PerlIO_printf(Perl_debug_log, "implicit ");
     PerlIO_printf(Perl_debug_log, "minlen %ld ", (long) r->minlen);
     PerlIO_printf(Perl_debug_log, "\n");
+#endif	/* DEBUGGING */
 }
 
 /*
@@ -2380,6 +2383,7 @@ regdump(regexp *r)
 void
 regprop(SV *sv, regnode *o)
 {
+#ifdef DEBUGGING
     register char *p = 0;
 
     sv_setpv(sv, ":");
@@ -2577,8 +2581,8 @@ regprop(SV *sv, regnode *o)
     }
     if (p)
 	sv_catpv(sv, p);
+#endif	/* DEBUGGING */
 }
-#endif /* DEBUGGING */
 
 void
 pregfree(struct regexp *r)
@@ -2648,17 +2652,8 @@ regnext(register regnode *p)
 #endif
 }
 
-#ifdef I_STDARG
 static void	
 re_croak2(const char* pat1,const char* pat2,...)
-#else
-/*VARARGS0*/
-static void	
-re_croak2(const char* pat1,const char* pat2, va_alist)
-    const char* pat1;
-    const char* pat2;
-    va_dcl
-#endif 
 {
     va_list args;
     STRLEN l1 = strlen(pat1);
@@ -2674,11 +2669,7 @@ re_croak2(const char* pat1,const char* pat2, va_alist)
     Copy(pat2, buf + l1, l2 , char);
     buf[l1 + l2 + 1] = '\n';
     buf[l1 + l2 + 2] = '\0';
-#ifdef I_STDARG
     va_start(args, pat2);
-#else
-    va_start(args);
-#endif
     message = mess(buf, &args);
     va_end(args);
     l1 = strlen(message);

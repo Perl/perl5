@@ -53,11 +53,7 @@ SaveError(char* pat, ...)
 
     /* This code is based on croak/warn, see mess() in util.c */
 
-#ifdef I_STDARG
     va_start(args, pat);
-#else
-    va_start(args);
-#endif
     message = mess(pat, &args);
     va_end(args);
 

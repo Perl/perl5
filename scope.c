@@ -803,11 +803,10 @@ leave_scope(I32 base)
     }
 }
 
-#ifdef DEBUGGING
-
 void
 cx_dump(PERL_CONTEXT *cx)
 {
+#ifdef DEBUGGING
     dTHR;
     PerlIO_printf(Perl_debug_log, "CX %ld = %s\n", (long)(cx - cxstack), block_type[cx->cx_type]);
     if (cx->cx_type != CXt_SUBST) {
@@ -896,5 +895,5 @@ cx_dump(PERL_CONTEXT *cx)
 		(long)cx->sb_rxres);
 	break;
     }
+#endif	/* DEBUGGING */
 }
-#endif
