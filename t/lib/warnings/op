@@ -111,6 +111,8 @@
 
     Package `%s' not found (did you use the incorrect case?)
 
+    Use of /g modifier is meaningless in split
+
     Mandatory Warnings 
     ------------------
     Prototype mismatch:		[cv_ckproto]
@@ -952,3 +954,12 @@ EXPECT
 Use of "package" with no arguments is deprecated at - line 3.
 Global symbol "BEGIN" requires explicit package name at - line 4.
 BEGIN not safe after errors--compilation aborted at - line 4.
+########
+# op.c
+# 20020401 mjd@plover.com at suggestion of jfriedl@yahoo.com
+use warnings 'regexp';
+split /blah/g, "blah";
+no warnings 'regexp';
+split /blah/g, "blah";
+EXPECT
+Use of /g modifier is meaningless in split at - line 4.
