@@ -1253,7 +1253,7 @@ SV *   sv ;
 
            svp = hv_fetch(action, "flags", 5, FALSE);
 	   if (svp)
-	       (void)dbp->set_flags(dbp, SvIV(*svp)) ;
+              (void)dbp->set_flags(dbp, (u_int32_t)SvIV(*svp)) ;
    
            svp = hv_fetch(action, "cachesize", 9, FALSE);
 	   if (svp)
