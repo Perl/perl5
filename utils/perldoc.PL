@@ -15,8 +15,7 @@ use File::Basename qw(&basename &dirname);
 chdir(dirname($0));
 ($file = basename($0)) =~ s/\.PL$//;
 $file =~ s/\.pl$//
-	if ($Config{'osname'} eq 'VMS' or
-	    $Config{'osname'} eq 'OS2');  # "case-forgiving"
+	if ($^O eq 'VMS' or $^O eq 'os2');  # "case-forgiving"
 
 open OUT,">$file" or die "Can't create $file: $!";
 
@@ -44,108 +43,10 @@ print OUT <<'!NO!SUBS!';
 # This is not to be confused with Tom Christianson's perlman, which is a
 # man replacement, written in perl. This perldoc is strictly for reading
 # the perl manuals, though it too is written in perl.
-#
-# Version 1.11: Tue Dec 26 09:54:33 EST 1995
-#       Kenneth Albanowski <kjahds@kjahds.com>
-#   -added Charles Bailey's further VMS patches, and -u switch
-#   -added -t switch, with pod2text support
-# 
-# Version 1.10: Thu Nov  9 07:23:47 EST 1995
-#		Kenneth Albanowski <kjahds@kjahds.com>
-#	-added VMS support
-#	-added better error recognition (on no found pages, just exit. On
-#	 missing nroff/pod2man, just display raw pod.)
-#	-added recursive/case-insensitive matching (thanks, Andreas). This
-#	 slows things down a bit, unfortunately. Give a precise name, and
-#	 it'll run faster.
-#
-# Version 1.01:	Tue May 30 14:47:34 EDT 1995
-#		Andy Dougherty  <doughera@lafcol.lafayette.edu>
-#   -added pod documentation.
-#   -added PATH searching.
-#   -added searching pod/ subdirectory (mainly to pick up perlfunc.pod
-#    and friends.
-#
-#
-# TODO:
-#
-#	Cache directories read during sloppy match
-#
-
-=head1 NAME
-
-perldoc - Look up Perl documentation in pod format.
-
-=head1 SYNOPSIS
-
-B<perldoc> [B<-h>] [B<-v>] [B<-t>] [B<-u>] PageName|ModuleName|ProgramName
-
-=head1 DESCRIPTION
-
-I<perldoc> looks up a piece of documentation in .pod format that is
-embedded in the perl installation tree or in a perl script, and displays
-it via pod2man | nroff -man | $PAGER.  This is primarily used for the
-documentation for the perl library modules. 
-
-Your system may also have man pages installed for those modules, in
-which case you can probably just use the man(1) command.
-
-=head1 OPTIONS
-
-=over 5
-
-=item B<-h> help
-
-Prints out a brief help message.
-
-=item B<-v> verbose
-
-Describes search for the item in detail.
-
-=item B<-t> text output
-
-Display docs using plain text converter, instead of nroff. This may be faster,
-but it won't look as nice.
-
-=item B<-u> unformatted
-
-Find docs only; skip reformatting by pod2*
-
-=item B<PageName|ModuleName|ProgramName>
-
-The item you want to look up.  Nested modules (such as C<File::Basename>)
-are specified either as C<File::Basename> or C<File/Basename>.  You may also
-give a descriptive name of a page, such as C<perlfunc>. You make also give a
-partial or wrong-case name, such as "basename" for "File::Basename", but
-this will be slower, if there is more then one page with the same partial
-name, you will only get the first one.
-
-=back
-
-=head1 ENVIRONMENT
-
-Any switches in the C<PERLDOC> environment variable will be used before the 
-command line arguments.  C<perldoc> also searches directories
-specified by the C<PERL5LIB> (or C<PERLLIB> if C<PERL5LIB> is not
-defined) and C<PATH> environment variables.
-(The latter is so that embedded pods for executables, such as
-C<perldoc> itself, are available.)
-
-=head1 AUTHOR
-
-Kenneth Albanowski <kjahds@kjahds.com>
-
-Minor updates by Andy Dougherty <doughera@lafcol.lafayette.edu>
-
-=head1 SEE ALSO
-
-=head1 DIAGNOSTICS
-
-=cut
 
 if(@ARGV<1) {
 	die <<EOF;
-Usage: $0 [-h] [-v] [-t] [-u] PageName|ModuleName|ProgramName
+Usage: $0 [-h] [-v] [-t] [-u] [-m] PageName|ModuleName|ProgramName
 
 We suggest you use "perldoc perldoc" to get aquainted 
 with the system.
@@ -153,8 +54,7 @@ EOF
 }
 
 use Getopt::Std;
-use Config;
-$Is_VMS = $Config{'osname'} eq 'VMS';
+$Is_VMS = $^O eq 'VMS';
 
 sub usage{
         warn "@_\n" if @_;
@@ -163,6 +63,7 @@ perldoc [-h] [-v] [-u] PageName|ModuleName|ProgramName...
     -h   Display this help message.
     -t   Display pod using pod2text instead of pod2man and nroff.
     -u	 Display unformatted pod text
+    -m   Display modules file in its entirety
     -v	 Verbosely describe what's going on.
 PageName|ModuleName...
          is the name of a piece of documentation that you want to look at. You 
@@ -182,27 +83,15 @@ use Text::ParseWords;
 
 unshift(@ARGV,shellwords($ENV{"PERLDOC"}));
 
-getopts("htuv") || usage;
+getopts("mhtuv") || usage;
 
 usage if $opt_h || $opt_h; # avoid -w warning
 
-eval "use Pod::Text" if $opt_t;
+usage("only one of -t, -u, or -m") if $opt_t + $opt_u + $opt_m > 1;
+
+if ($opt_t) { require Pod::Text; import Pod::Text; }
 
 @pages = @ARGV;
-
-# VMS only -- use this hack until support for searchlist
-# logical names is better integrated into the Perl core
-sub translate_searchlist_logical {
-	my($lnm) = @_;
-	my($trans,@trans);
-	return unless $ENV{$lnm};
-	$trans = `show logical $lnm`;
-	$trans =~ s/\n1(.|\n)*//;  # clip off iterative translations
-	@trans = split(/[\"=\s\n]+/,$trans); # break into words
-	splice(@trans,0,2); # pop off initial blank and orig name
-	@trans = grep(!/^\(/,@trans); # filter out table names
-	wantarray ? @trans : $trans[0];
-}
 
 sub containspod {
 	my($file) = @_;
@@ -278,7 +167,7 @@ sub containspod {
 			my(@newdirs) = grep(-d,map("$dir/$_",grep(!/^\.\.?$/,readdir(D))));
 			closedir(D);
 			@newdirs = map((s/.dir$//,$_)[1],@newdirs) if $Is_VMS;
-			last unless @newdirs;
+			next unless @newdirs;
 			print STDERR "Also looking in @newdirs\n" if $opt_v;
 			push(@dirs,@newdirs);
  		}
@@ -292,12 +181,17 @@ foreach (@pages) {
 	# We must look both in @INC for library modules and in PATH
 	# for executables, like h2xs or perldoc itself.
 	@searchdirs = @INC;
-	if ($Is_VMS) {
-		push(@searchdirs, translate_searchlist_logical('DCL$PATH'));
-	} else {
-		push(@searchdirs, grep(-d, split(':', $ENV{'PATH'})));
+	unless ($opt_m) { 
+	    if ($Is_VMS) {
+		my($i,$trn);
+		for ($i = 0; $trn = $ENV{'DCL$PATH'.$i}; $i++) {
+		    push(@searchdirs,$trn);
+		}
+	    } else {
+		    push(@searchdirs, grep(-d, split(':', $ENV{'PATH'})));
+	    }
+	    @files= searchfor(0,$_,@searchdirs);
 	}
-	@files= searchfor(0,$_,@searchdirs);
 	if( @files ) {
 		print STDERR "Found as @files\n" if $opt_v;
 	} else {
@@ -334,8 +228,16 @@ unless($Is_VMS) {
 	$goodresult = 1;
 }
 
+if ($opt_m) {
+    foreach $pager (@pagers) {
+	my($sts) = system("$pager @found");
+	exit 0 if ($Is_VMS ? ($sts & 1) : !$sts);
+    }
+    exit $Is_VMS ? $sts : 1;
+} 
+
 foreach (@found) {
-	
+
 	if($opt_t) {
 		open(TMP,">>$tmp");
 		Pod::Text::pod2text($_,*TMP);
@@ -378,6 +280,113 @@ if( $opt_f ) {
 1 while unlink($tmp); #Possibly pointless VMSism
 
 exit 0;
+
+__END__
+
+=head1 NAME
+
+perldoc - Look up Perl documentation in pod format.
+
+=head1 SYNOPSIS
+
+B<perldoc> [B<-h>] [B<-v>] [B<-t>] [B<-u>] PageName|ModuleName|ProgramName
+
+=head1 DESCRIPTION
+
+I<perldoc> looks up a piece of documentation in .pod format that is
+embedded in the perl installation tree or in a perl script, and displays
+it via pod2man | nroff -man | $PAGER.  This is primarily used for the
+documentation for the perl library modules. 
+
+Your system may also have man pages installed for those modules, in
+which case you can probably just use the man(1) command.
+
+=head1 OPTIONS
+
+=over 5
+
+=item B<-h> help
+
+Prints out a brief help message.
+
+=item B<-v> verbose
+
+Describes search for the item in detail.
+
+=item B<-t> text output
+
+Display docs using plain text converter, instead of nroff. This may be faster,
+but it won't look as nice.
+
+=item B<-u> unformatted
+
+Find docs only; skip reformatting by pod2*
+
+=item B<-m> module
+
+Display the entire module: both code and unformatted pod documentation.
+This may be useful if the docs don't explain a function in the detail
+you need, and you'd like to inspect the code directly; perldoc will find
+the file for you and simply hand it off for display.
+
+=item B<PageName|ModuleName|ProgramName>
+
+The item you want to look up.  Nested modules (such as C<File::Basename>)
+are specified either as C<File::Basename> or C<File/Basename>.  You may also
+give a descriptive name of a page, such as C<perlfunc>. You make also give a
+partial or wrong-case name, such as "basename" for "File::Basename", but
+this will be slower, if there is more then one page with the same partial
+name, you will only get the first one.
+
+=back
+
+=head1 ENVIRONMENT
+
+Any switches in the C<PERLDOC> environment variable will be used before the 
+command line arguments.  C<perldoc> also searches directories
+specified by the C<PERL5LIB> (or C<PERLLIB> if C<PERL5LIB> is not
+defined) and C<PATH> environment variables.
+(The latter is so that embedded pods for executables, such as
+C<perldoc> itself, are available.)
+
+=head1 AUTHOR
+
+Kenneth Albanowski <kjahds@kjahds.com>
+
+Minor updates by Andy Dougherty <doughera@lafcol.lafayette.edu>
+
+=head1 SEE ALSO
+
+=head1 DIAGNOSTICS
+
+=cut
+
+#
+# Version 1.11: Tue Dec 26 09:54:33 EST 1995
+#       Kenneth Albanowski <kjahds@kjahds.com>
+#   -added Charles Bailey's further VMS patches, and -u switch
+#   -added -t switch, with pod2text support
+# 
+# Version 1.10: Thu Nov  9 07:23:47 EST 1995
+#		Kenneth Albanowski <kjahds@kjahds.com>
+#	-added VMS support
+#	-added better error recognition (on no found pages, just exit. On
+#	 missing nroff/pod2man, just display raw pod.)
+#	-added recursive/case-insensitive matching (thanks, Andreas). This
+#	 slows things down a bit, unfortunately. Give a precise name, and
+#	 it'll run faster.
+#
+# Version 1.01:	Tue May 30 14:47:34 EDT 1995
+#		Andy Dougherty  <doughera@lafcol.lafayette.edu>
+#   -added pod documentation.
+#   -added PATH searching.
+#   -added searching pod/ subdirectory (mainly to pick up perlfunc.pod
+#    and friends.
+#
+#
+# TODO:
+#
+#	Cache directories read during sloppy match
 !NO!SUBS!
 
 close OUT or die "Can't close $file: $!";
