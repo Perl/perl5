@@ -2,7 +2,7 @@
 use FileCache;
 use vars qw(@files);
 BEGIN {
-    @files = qw(foo bar baz quux Foo'Bar);
+    @files = qw(foo bar baz quux Foo_Bar);
     chdir 't' if -d 't';
 
     #For tests within the perl distribution
