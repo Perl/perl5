@@ -692,11 +692,8 @@ On POSIX systems, you can detect this condition this way:
 
 Returns the character represented by that NUMBER in the character set.
 For example, C<chr(65)> is C<"A"> in either ASCII or Unicode, and
-chr(0x263a) is a Unicode smiley face. Within the scope of C<use utf8>, 
-characters higher than 127 are encoded in Unicode; if you don't want
-this, temporarily C<use bytes> or use C<pack("C*",...)>
-
-For the reverse, use L</ord>.  
+chr(0x263a) is a Unicode smiley face (but only within the scope of
+a C<use utf8>).  For the reverse, use L</ord>.  
 See L<utf8> for more about Unicode.
 
 If NUMBER is omitted, uses C<$_>.

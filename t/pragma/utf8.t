@@ -304,8 +304,8 @@ sub nok_bytes {
 
 {
     use utf8;
-    ok_bytes chr(0xe2), pack("C*", 0xc3, 0xa2);
-    $test++;                # 66
+    ok join(" ",unpack("C*",chr(128).chr(255))), "128 255";
+    $test++;
 }
 
 {
