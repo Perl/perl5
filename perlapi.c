@@ -3914,25 +3914,11 @@ Perl_sv_dup(pTHXo_ SV* sstr)
 }
 #if defined(HAVE_INTERP_INTERN)
 
-#undef  Perl_sys_intern_clear
-void
-Perl_sys_intern_clear(pTHXo)
-{
-    ((CPerlObj*)pPerl)->Perl_sys_intern_clear();
-}
-
 #undef  Perl_sys_intern_dup
 void
 Perl_sys_intern_dup(pTHXo_ struct interp_intern* src, struct interp_intern* dst)
 {
     ((CPerlObj*)pPerl)->Perl_sys_intern_dup(src, dst);
-}
-
-#undef  Perl_sys_intern_init
-void
-Perl_sys_intern_init(pTHXo)
-{
-    ((CPerlObj*)pPerl)->Perl_sys_intern_init();
 }
 #endif
 
@@ -3962,6 +3948,22 @@ void
 Perl_ptr_table_split(pTHXo_ PTR_TBL_t *tbl)
 {
     ((CPerlObj*)pPerl)->Perl_ptr_table_split(tbl);
+}
+#endif
+#if defined(HAVE_INTERP_INTERN)
+
+#undef  Perl_sys_intern_clear
+void
+Perl_sys_intern_clear(pTHXo)
+{
+    ((CPerlObj*)pPerl)->Perl_sys_intern_clear();
+}
+
+#undef  Perl_sys_intern_init
+void
+Perl_sys_intern_init(pTHXo)
+{
+    ((CPerlObj*)pPerl)->Perl_sys_intern_init();
 }
 #endif
 #if defined(PERL_OBJECT)
