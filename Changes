@@ -55,6 +55,7 @@ And the Keepers of the Patch Pumpkin:
     Andy Dougherty      <doughera@lafcol.lafayette.edu>
     Gurusamy Sarathy    <gsar@umich.edu>
     Chip Salzenberg     <chip@pobox.com>
+    Leon Brocard        <acme@astray.com>
 
 And, of course, the Author of Perl:
 
@@ -74,9 +75,19 @@ indicator:
 
 
 ----------------
-Version 5.005_04-tobe        Fourth maintenance release of 5.005
+Version 5.005_04        Fourth maintenance release of 5.005
 ----------------
 
+____________________________________________________________________________
+[ 22270] By: acme                                  on 2004/02/04  20:50:31
+        Log: Bump up patchlevel for release
+     Branch: maint-5.005/perl
+           ! patchlevel.h
+____________________________________________________________________________
+[ 22269] By: acme                                  on 2004/02/04  20:49:27
+        Log: Documentation updates to prepare for release
+     Branch: maint-5.005/perl
+           ! INSTALL README pod/perl.pod pod/perldelta.pod pod/perlhist.pod
 ____________________________________________________________________________
 [ 22213] By: acme                                  on 2004/01/25  08:53:17
         Log: Applied patch from Jarkko Hietaniemi to add support for Mac OS X
@@ -197,7 +208,7 @@ ____________________________________________________________________________
              Richard Clamp <richardc@unixbeard.net> To:
              perl5-porters@perl.org, Chip Salzenberg <chip@pobox.com> Date:
              Sun, 4 May 2003 20:53:33 +0100
-             First part: Teach makedepend about ggc3's extra output that
+             First part: Teach makedepend about gcc3's extra output that
              needs stripping (stolen from bleadperls makedepend.SH)
      Branch: maint-5.005/perl
            ! makedepend.SH
