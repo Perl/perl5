@@ -1287,23 +1287,33 @@ to the hash is by Perl_to_utf8_case().
 UV
 Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *normal, char *special)
 {
-    UV uv;
+    UV uv0, uv1, uv2;
+    U8 tmpbuf[UTF8_MAXLEN_FOLD+1];
+    STRLEN len;
 
     if (!*swashp)
         *swashp = swash_init("utf8", normal, &PL_sv_undef, 4, 0);
-    uv = swash_fetch(*swashp, p, TRUE);
-    if (!uv) {
+    uv0 = utf8_to_uvchr(p, 0);
+    uv1 = NATIVE_TO_UNI(uv0);
+    uvuni_to_utf8(tmpbuf, uv1);
+    uv2 = swash_fetch(*swashp, tmpbuf, TRUE);
+    if (uv2) {
+	 /* It was "normal" (single character mapping). */
+	 if (lenp)
+	      *lenp = UNISKIP(uv2);
+	 uvuni_to_utf8(ustrp, uv2);
+
+	 return uv2;
+    }
+    else {
 	 HV *hv;
 	 SV *keysv;
 	 HE *he;
 
-	 uv = utf8_to_uvchr(p, 0);
-
 	 if ((hv    = get_hv(special, FALSE)) &&
-	     (keysv = sv_2mortal(Perl_newSVpvf(aTHX_ "%04"UVXf, uv))) &&
+	     (keysv = sv_2mortal(Perl_newSVpvf(aTHX_ "%04"UVXf, uv1))) &&
 	     (he    = hv_fetch_ent(hv, keysv, FALSE, 0))) {
 	      SV *val = HeVAL(he);
-	      STRLEN len;
 	      char *s = SvPV(val, len);
 
 	      if (len > 1) {
@@ -1316,8 +1326,6 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *norma
 			 * mapping, since any characters in the low 256
 			 * are in Unicode code points, not EBCDIC.
 			 * --jhi */
-
-			U8 tmpbuf[UTF8_MAXLEN_FOLD+1];
 			U8 *d = tmpbuf;
 			U8 *t, *tend;
 			
@@ -1351,14 +1359,17 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *norma
 	      }
 	      if (lenp)
 		   *lenp = len;
+
 	      return utf8_to_uvchr(ustrp, 0);
 	 }
-	 uv  = NATIVE_TO_UNI(uv);
+
+	 /* So it was not "special": just copy it. */
+	 len = uvchr_to_utf8(ustrp, uv0) - ustrp;
+	 if (lenp)
+	      *lenp = len;
+
+	 return uv0;
     }
-    if (lenp)
-       *lenp = UNISKIP(uv);
-    uvuni_to_utf8(ustrp, uv);
-    return uv;
 }
 
 /*
