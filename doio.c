@@ -1222,7 +1222,9 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 		sv_utf8_upgrade(sv = sv_mortalcopy(sv));
 	}
 	else if (DO_UTF8(sv)) {
-	    if (!sv_utf8_downgrade((sv = sv_mortalcopy(sv)), TRUE)) {
+	    if (!sv_utf8_downgrade((sv = sv_mortalcopy(sv)), TRUE)
+		&& ckWARN(WARN_UTF8))
+	    {
 		Perl_warner(aTHX_ WARN_UTF8, "Wide character in print");
 	    }
 	}
