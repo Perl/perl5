@@ -28,6 +28,11 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 19856] By: jhi                                   on 2003/06/26  05:55:24
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 19855] By: jhi                                   on 2003/06/26  05:36:41
         Log: Integrate:
              [ 19851]
@@ -3645,18 +3650,6 @@ ____________________________________________________________________________
      Branch: maint-5.8/perl
 	  !> doio.c win32/win32.c
 ____________________________________________________________________________
-[ 19034] By: gsar                                  on 2003/03/20  01:31:39
-        Log: ensure SVs returned by Win32::Get{Short,Full}PathName() are
-             NUL-terminated
-     Branch: maint-5.6/perl
-	   ! win32/win32.c
-____________________________________________________________________________
-[ 19033] By: gsar                                  on 2003/03/20  01:30:46
-        Log: file test operators weren't doing the right thing if the SV
-             passed to them wasn't NUL-terminated
-     Branch: maint-5.6/perl
-	   ! doio.c
-____________________________________________________________________________
 [ 19032] By: gsar                                  on 2003/03/19  23:22:56
         Log: regenerate win32/config_H.*
      Branch: maint-5.8/perl
@@ -5755,7 +5748,7 @@ ____________________________________________________________________________
              From: Dave Mitchell <davem@fdgroup.com>
              Date: Sun, 19 Jan 2003 17:22:05 +0000
              Message-ID: <20030119172204.D24444@fdgroup.com>
-
+             
              [ 18559]
              Upgrade to Encode 1.86.
      Branch: maint-5.8/perl
@@ -5969,6 +5962,16 @@ ____________________________________________________________________________
 	  !> ext/Digest/MD5/MD5.xs ext/Digest/MD5/README
 	  !> ext/Digest/MD5/t/files.t lib/Digest.pm perlio.c t/io/tell.t
 	  !> utils/libnetcfg.PL
+____________________________________________________________________________
+[ 18505] By: jhi                                   on 2003/01/17  13:36:55
+        Log: Integrate:
+             [ 18504]
+             Integrate from perlio:
+             [ 18476]
+             Remove workaround for :stdio layer bug now fixed
+             (Fixes #18975)
+     Branch: maint-5.8/perl
+	  !> pp_sys.c
 ____________________________________________________________________________
 [ 18503] By: jhi                                   on 2003/01/16  23:29:57
         Log: Integrate:
@@ -6815,6 +6818,19 @@ ____________________________________________________________________________
 	   ! Configure config_h.SH
 	  !> (integrate 56 files)
 ____________________________________________________________________________
+[ 18322] By: gsar                                  on 2002/12/17  22:58:09
+        Log: integrate change#18321 from mainline
+             
+             C<require '\foo\bar.pm'> fails on windows if not running
+             from the root directory; for a test case, see:
+             
+             http://bugs.activestate.com/show_bug.cgi?id=19317
+             
+             this was due to not recognizing \foo\bar.pm as an absolute
+             path name
+     Branch: maint-5.8/perl
+	  !> util.h
+____________________________________________________________________________
 [ 18301] By: jhi                                   on 2002/12/13  02:12:54
         Log: Bad location of '==>' under the debugger,
              apply the patch.
@@ -6855,7 +6871,7 @@ ____________________________________________________________________________
 	   ! pod/perlre.pod pod/perlretut.pod
 ____________________________________________________________________________
 [ 18291] By: jhi                                   on 2002/12/11  20:13:30
-        Log: [perl #19048] has already been fixed; add its test.
+        Log: has already been fixed; add its test.
      Branch: maint-5.8/perl
 	   ! t/op/subst.t
 ____________________________________________________________________________
@@ -6863,6 +6879,11 @@ ____________________________________________________________________________
         Log: Fix [perl #15763].
      Branch: maint-5.8/perl
 	   ! regexec.c t/op/pat.t
+____________________________________________________________________________
+[ 18289] By: gsar                                  on 2002/12/11  18:55:36
+        Log: integrate repository.pod change from mainline
+     Branch: maint-5.8/perl
+	  !> Porting/repository.pod
 ____________________________________________________________________________
 [ 18286] By: jhi                                   on 2002/12/11  14:43:36
         Log: Integrate:
@@ -7079,7 +7100,7 @@ ____________________________________________________________________________
 	   ! pp.c
 ____________________________________________________________________________
 [ 18243] By: jhi                                   on 2002/12/03  23:39:28
-        Log: UTF8_IS_INVARIANT() is better then UTF8_IS_CONTINUED().
+        Log: UTF8_IS_INVARIANT() is better than UTF8_IS_CONTINUED().
              (The latter matches also post-initial bytes of a multibyte.)
      Branch: maint-5.8/perl
 	   ! pod/perlguts.pod
@@ -7113,8 +7134,7 @@ ____________________________________________________________________________
 	   ! Changes patchlevel.h
 ____________________________________________________________________________
 [ 18234] By: jhi                                   on 2002/12/02  22:30:41
-        Log: Integrate
-             
+        Log: Integrate:
              [ 17815]
              formatting cleanup and:
              Subject: Re: perl-5.8.0 on HP porting center
@@ -7176,8 +7196,7 @@ ____________________________________________________________________________
 	  !> toke.c utils/perldoc.PL
 ____________________________________________________________________________
 [ 18227] By: jhi                                   on 2002/12/02  13:23:48
-        Log: Integrate
-             
+        Log: Integrate:
              [ 18216]
              64bit Peek failure on HP-UX 11.00
              
@@ -7199,6 +7218,11 @@ ____________________________________________________________________________
      Branch: maint-5.8/perl
 	  +> lib/Pod/PlainText.pm
 	  !> (integrate 37 files)
+____________________________________________________________________________
+[ 18219] By: jhi                                   on 2002/11/30  16:55:14
+        Log: Integrate maint-5.6/macperl #17852.
+     Branch: maint-5.8/perl
+	  !> lib/File/Copy.pm
 ____________________________________________________________________________
 [ 18218] By: jhi                                   on 2002/11/29  18:23:39
         Log: Add test from [perl #8026]
@@ -7226,10 +7250,11 @@ ____________________________________________________________________________
 	   ! lib/fields.t
 ____________________________________________________________________________
 [ 18210] By: jhi                                   on 2002/11/28  21:24:10
-        Log: Integrate from maint-5.8/macperl
-             
+        Log: Integrate:
              [ 18200]
              Yet another approach to signal handling (Matthias)
+             
+             (from maint-5.8/macperl)
      Branch: maint-5.8/perl
 	  +> macos/config.h
 	  !> util.c
@@ -7255,8 +7280,7 @@ ____________________________________________________________________________
 	   ! t/op/magic.t thread.h util.c
 ____________________________________________________________________________
 [ 18206] By: jhi                                   on 2002/11/28  16:45:11
-        Log: Integrate
-             
+        Log: Integrate:
              [ 17920]
              LEAKTEST is dead, RIP
              Subject: Re: [perl #17197] SIGSEGV in perl 5.8.0 multithread build with -DLEAKTEST
@@ -7278,8 +7302,7 @@ ____________________________________________________________________________
 	   ! lib/constant.t
 ____________________________________________________________________________
 [ 18204] By: jhi                                   on 2002/11/28  14:55:34
-        Log: Integrate
-             
+        Log: Integrate:
              [ 18203]
              Slight beauty tweak. 
      Branch: maint-5.8/perl
@@ -7292,7 +7315,6 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [ 18197] By: jhi                                   on 2002/11/28  04:14:27
         Log: Integrate:
-             
              [ 18175]
              Subject: [Encode] 1.83 + bleedperl patch released
              From: Dan Kogai <dankogai@dan.co.jp>
@@ -7395,8 +7417,7 @@ ____________________________________________________________________________
 	   ! lib/Unicode/UCD.pm lib/Unicode/UCD.t
 ____________________________________________________________________________
 [ 18173] By: jhi                                   on 2002/11/23  02:02:33
-        Log: Integrate
-             
+        Log: Integrate:
              [ 18135]
              Subject: [PATCH] perlopentut and PerlIO documentation
              From: Slaven Rezic <slaven.rezic@berlin.de>
@@ -7909,7 +7930,7 @@ ____________________________________________________________________________
 	   ! Changes patchlevel.h
 ____________________________________________________________________________
 [ 18096] By: jhi                                   on 2002/11/04  18:46:09
-        Log: Integrate:
+        Log: Integrate
              
              [ 18090]
              extend #13786 to cover the other four identical chunks of code
