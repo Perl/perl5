@@ -8,6 +8,9 @@ BEGIN {
     @INC = '../lib';
 }
 
+use Config;
+$ENV{'PATH'} = '.' . $Config{'path_sep'} . $ENV{'PATH'};
+
 use Test::More tests => 5;
 use File::Spec;
 

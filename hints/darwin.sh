@@ -81,6 +81,9 @@ ccflags="${ccflags} -DINT32_MIN_BROKEN -DINT64_MIN_BROKEN"
 # cppflags='-traditional-cpp';
 # avoid Apple's cpp precompiler, better for extensions
 cppflags="${cppflags} -no-cpp-precomp"
+# and ccflags needs them aswell since we don't use cpp directly
+ccflags="${ccflags} -no-cpp-precomp"
+
 
 # Shared library extension is .dylib.
 # Bundle extension is .bundle.
@@ -133,9 +136,13 @@ case "$usethreads$useithreads$use5005threads" in
 *define*)
 cat <<EOM >&4
 
-*** You do not have threadsafe libraries, I cannot use threads.
-*** Cannot continue, aborting.
+*** Warning, there might be problems with your libraries with
+*** regards to threading.
+
 EOM
-	exit 1
+#*** You do not have threadsafe libraries, I cannot use threads.
+#*** Cannot continue, aborting.
+#EOM
+#	exit 1
 	;;
 esac

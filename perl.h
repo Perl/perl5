@@ -330,7 +330,7 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 
 /* Use the reentrant APIs like localtime_r and getpwent_r */
 /* Win32 has naturally threadsafe libraries, no need to use any _r variants. */
-#if defined(USE_ITHREADS) && !defined(USE_REENTRANT_API) && !defined(WIN32)
+#if defined(USE_ITHREADS) && !defined(USE_REENTRANT_API) && !defined(WIN32) && !defined(__APPLE__)
 #   define USE_REENTRANT_API
 #endif
 

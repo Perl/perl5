@@ -924,8 +924,11 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	        STRLEN skip = do_utf8 ? UTF8SKIP(s) : 1;
 
 		if (reginclass(c, (U8*)s, do_utf8) ||
-		    (ANYOF_UNICODE_FOLD_SHARP_S(c, s, strend) &&
-		     (skip = 2))) {
+		    (ANYOF_FOLD_SHARP_S(c, s, strend) &&
+		     /* The assignment of 2 is intentional:
+		      * for the sharp s, the skip is 2. */
+		     (skip = SHARP_S_SKIP)
+		     )) {
 		    if (tmp && (norun || regtry(prog, s)))
 			goto got_it;
 		    else
@@ -2439,8 +2442,8 @@ S_regmatch(pTHX_ regnode *prog)
 	    /* If we might have the case of the German sharp s
 	     * in a casefolding Unicode character class. */
 
-	    if (ANYOF_UNICODE_FOLD_SHARP_S(scan, locinput, PL_regeol)) {
-		 locinput += 2;
+	    if (ANYOF_FOLD_SHARP_S(scan, locinput, PL_regeol)) {
+		 locinput += SHARP_S_SKIP;
 		 nextchr = UCHARAT(locinput);
 	    }
 	    else

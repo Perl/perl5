@@ -62,6 +62,7 @@ SKIP: {
     SKIP: {
         skip("no kill() support on Mac OS", 4) if $Is_MacOS;
 
+       print "# warning, darwin seems to loose blocked signals (failing test 10)\n" if($^O eq 'darwin');
 	my $mask   = new POSIX::SigSet &SIGINT;
 	my $action = new POSIX::SigAction 'main::SigHUP', $mask, 0;
 	sigaction(&SIGHUP, $action);
@@ -91,7 +92,8 @@ SKIP: {
     skip("_POSIX_OPEN_MAX is inaccurate on MPE", 1) if $Is_MPE;
     skip("_POSIX_OPEN_MAX undefined ($fds[1])",  1) unless &_POSIX_OPEN_MAX;
 
-    ok( &_POSIX_OPEN_MAX > $fds[1], '_POSIX_OPEN_MAX' );
+    ok( &_POSIX_OPEN_MAX == 16 || &_POSIX_OPEN_MAX == 20, "The two allowed values according to susv2 and susv3" );
+
 }
 
 my $pat;
