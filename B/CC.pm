@@ -26,6 +26,7 @@ sub OPpASSIGN_BACKWARDS () { 64 }
 sub OPpLVAL_INTRO () { 128 }
 sub OPpDEREF_AV () { 32 }
 sub OPpDEREF_HV () { 64 }
+sub OPpDEREF () { OPpDEREF_AV|OPpDEREF_HV }
 sub OPpFLIP_LINENUM () { 64 }
 sub G_ARRAY () { 1 }
 # cop.h
@@ -88,6 +89,8 @@ my ($freetmps_each_bblock, $freetmps_each_loop, $omit_taint);
 my %optimise = (freetmps_each_bblock	=> \$freetmps_each_bblock,
 		freetmps_each_loop	=> \$freetmps_each_loop,
 		omit_taint		=> \$omit_taint);
+# perl patchlevel to generate code for (defaults to current patchlevel)
+my $patchlevel = int(0.5 + 1000 * ($]  - 5));
 
 # Could rewrite push_runtime() and output_runtime() to use a
 # temporary file if memory is at a premium.
@@ -540,9 +543,10 @@ sub pp_padsv {
 	my $private = $op->private;
 	if ($private & OPpLVAL_INTRO) {
 	    runtime("SAVECLEARSV(curpad[$ix]);");
-	} elsif ($private & (OPpDEREF_HV|OPpDEREF_AV)) {
-	    loadop($op);
-	    runtime("provide_ref(op, curpad[$ix]);");
+	} elsif ($private & OPpDEREF) {
+	    loadop($op) if $patchlevel < 4;
+	    runtime(sprintf("vivify_ref(curpad[%d], %d);",
+			    $ix, $private & OPpDEREF));
 	    $pad[$ix]->invalidate;
 	}
     }
@@ -1468,6 +1472,9 @@ sub compile {
 	    $arg ||= shift @options;
 	    $module = $arg;
 	    push(@unused_sub_packages, $arg);
+	} elsif ($opt eq "p") {
+	    $arg ||= shift @options;
+	    $patchlevel = $arg;
 	} elsif ($opt eq "D") {
             $arg ||= shift @options;
 	    foreach $arg (split(//, $arg)) {

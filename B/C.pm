@@ -939,6 +939,10 @@ extern "C" {
 #undef pp_mapstart
 #define pp_mapstart pp_grepstart
 
+#if PATCHLEVEL < 4
+#define vivify_ref(sv, to_what) provide_ref(op, sv)
+#endif
+
 static void xs_init _((void));
 static PerlInterpreter *my_perl;
 EOT

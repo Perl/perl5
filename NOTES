@@ -51,6 +51,10 @@ CC backend invocation
 			boot_Modulename function (which DynaLoader can look
 			for) does the appropriate initialisation and runs the
 			main part of the Perl source that is being compiled.
+	-pn		Generate code for perl patchlevel n (e.g. 3 or 4).
+			The default is to generate C code which will link
+			with the currently executing version of perl.
+			running the perl compiler.
 	-D		Debug options (concat or separate flags like perl -D)
 		r	Writes debugging output to STDERR just as it's about
 			to write to the program's runtime (otherwise writes
