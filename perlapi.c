@@ -211,6 +211,13 @@ Perl_av_push(pTHXo_ AV* ar, SV* val)
     ((CPerlObj*)pPerl)->Perl_av_push(ar, val);
 }
 
+#undef  Perl_av_reify
+void
+Perl_av_reify(pTHXo_ AV* ar)
+{
+    ((CPerlObj*)pPerl)->Perl_av_reify(ar);
+}
+
 #undef  Perl_av_shift
 SV*
 Perl_av_shift(pTHXo_ AV* ar)

@@ -107,6 +107,10 @@
 #define Perl_av_push		pPerl->Perl_av_push
 #undef  av_push
 #define av_push			Perl_av_push
+#undef  Perl_av_reify
+#define Perl_av_reify		pPerl->Perl_av_reify
+#undef  av_reify
+#define av_reify		Perl_av_reify
 #undef  Perl_av_shift
 #define Perl_av_shift		pPerl->Perl_av_shift
 #undef  av_shift

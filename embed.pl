@@ -1410,7 +1410,7 @@ Apd	|I32	|av_len		|AV* ar
 Apd	|AV*	|av_make	|I32 size|SV** svp
 Apd	|SV*	|av_pop		|AV* ar
 Apd	|void	|av_push	|AV* ar|SV* val
-p	|void	|av_reify	|AV* ar
+ApM	|void	|av_reify	|AV* ar
 Apd	|SV*	|av_shift	|AV* ar
 Apd	|SV**	|av_store	|AV* ar|I32 key|SV* val
 Apd	|void	|av_undef	|AV* ar
