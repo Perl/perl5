@@ -1983,6 +1983,12 @@ where you wanted to redirect stdout.
 and found a 'E<gt>' or a 'E<gt>E<gt>' on the command line, but can't find the
 name of the file to which to write data destined for stdout.
 
+=item No package name allowed for variable %s in "our"
+
+(F) Fully qualified variable names are not allowed in "our" declarations,
+because that doesn't make much sense under existing semantics.  Such
+syntax is reserved for future extensions.
+
 =item No Perl script found in input
 
 (F) You called C<perl -x>, but no line was found in the file beginning

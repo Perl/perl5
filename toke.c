@@ -1976,6 +1976,10 @@ Perl_yylex(pTHX)
 	*/
 	if (PL_in_my) {
 	    if (PL_in_my == KEY_our) {	/* "our" is merely analogous to "my" */
+		if (strchr(PL_tokenbuf,':'))
+		    yyerror(Perl_form(aTHX_ "No package name allowed for "
+				      "variable %s in \"our\"",
+				      PL_tokenbuf));
 		tmp = pad_allocmy(PL_tokenbuf);
 	    }
 	    else {
