@@ -2827,20 +2827,17 @@ PP(pp_lslice)
 
     for (lelem = firstlelem; lelem <= lastlelem; lelem++) {
 	ix = SvIVx(*lelem);
-	if (ix < 0) {
+	if (ix < 0)
 	    ix += max;
-	    if (ix < 0)
-		*lelem = &PL_sv_undef;
-	    else if (!(*lelem = firstrelem[ix]))
-		*lelem = &PL_sv_undef;
-	}
-	else {
+	else 
 	    ix -= arybase;
-	    if (ix >= max || !(*lelem = firstrelem[ix]))
+	if (ix < 0 || ix >= max)
+	    *lelem = &PL_sv_undef;
+	else {
+	    is_something_there = TRUE;
+	    if (!(*lelem = firstrelem[ix]))
 		*lelem = &PL_sv_undef;
 	}
-	if (!is_something_there && (SvOK(*lelem) || SvGMAGICAL(*lelem)))
-	    is_something_there = TRUE;
     }
     if (is_something_there)
 	SP = lastlelem;
