@@ -7,7 +7,7 @@ use Scalar::Util qw(weaken);
 use attributes qw(reftype);
 
 BEGIN {
-    if($Config{'useithreads'} && $Config::threads) {
+    if($Config{'useithreads'} && $threads::threads) {
 	*share = \&share_enabled;
 	*cond_wait = \&cond_wait_disabled;
 	*cond_signal = \&cond_signal_disabled;
