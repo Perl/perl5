@@ -933,6 +933,43 @@ setuid perl scripts securely.\n");
     PL_origargc = argc;
     PL_origargv = argv;
 
+    {
+	 char *s = PL_origargv[0];
+	 int i;
+
+	 s += strlen(s);
+	 /* See if all the arguments are contiguous in memory */
+	 for (i = 1; i < PL_origargc; i++) {
+	      if (PL_origargv[i] == s + 1
+#ifdef OS2
+		  || PL_origargv[i] == s + 2
+#endif
+		   )
+	      {
+		   ++s;
+		   s += strlen(s);	/* this one is ok too */
+	      }
+	      else
+		   break;
+	 }
+	 /* Can we grab env area too to be used as the area for $0
+	  * (in case we later modify it)? */
+	 if (PL_origenviron
+	     && (PL_origenviron[0] == s + 1))
+	 {
+	      my_setenv("NoNe  SuCh", Nullch);
+	      /* force copy of environment */
+	      for (i = 0; PL_origenviron[i]; i++)
+		   if (PL_origenviron[i] == s + 1) {
+			++s;
+			s += strlen(s);
+		   }
+		   else
+			break;
+	 }
+	 PL_origalen = s - PL_origargv[0];
+    }
+
     if (PL_do_undump) {
 
 	/* Come here if running an undumped a.out. */

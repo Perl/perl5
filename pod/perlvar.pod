@@ -838,16 +838,17 @@ and C<$)> can be swapped only on machines supporting setregid().
 
 =item $0
 
-Contains the name of the program being executed.  On some operating
-systems assigning to C<$0> modifies the argument area that the B<ps>
-program sees.  This is more useful as a way of indicating the current
-program state than it is for hiding the program you're running.
-(Mnemonic: same as B<sh> and B<ksh>.)
+Contains the name of the program being executed.  On some (read: not
+all) operating systems assigning to C<$0> modifies the argument area
+that the B<ps> program sees.  Also note that depending on the platform,
+the maximum length of C<$0> may be limited to the space occupied by
+the original C<$0>.  This is more useful as a way of indicating the
+current program state than it is for hiding the program you're
+running.  (Mnemonic: same as B<sh> and B<ksh>.)
 
 Note for BSD users: setting C<$0> does not completely remove "perl"
 from the ps(1) output.  For example, setting C<$0> to C<"foobar"> will
-result in C<"perl: foobar (perl)">.  This is an operating system
-feature.
+result in C<"perl: foobar (perl)">.  This is an operating system feature.
 
 In multithreaded scripts Perl coordinates the threads so that any
 thread may modify its copy of the C<$0> and the change becomes visible
