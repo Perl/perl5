@@ -4,9 +4,9 @@ specially designed to be readable as is.
 
 The following documentation is written in Big5 encoding.
 
-如果你用一般的文字編輯器閱覽這份文件, 請忽略文中奇特的註記字符. 這份文
-件是以 POD (簡明文件格式) 寫成; 這種格式是為了能讓人直接讀取而特別設計
-的. 關於此格式的進一步資訊, 請參考 perlpod 線上文件.
+如果你用一般的文字編輯器閱覽這份文件, 請忽略文中奇特的註記字符.
+這份文件是以 POD (簡明文件格式) 寫成; 這種格式是為了能讓人直接讀取,
+而特別設計的. 關於此格式的進一步資訊, 請參考 perlpod 線上文件.
 
 =head1 NAME
 
@@ -16,20 +16,20 @@ perltw - 正體中文 Perl 指南
 
 歡迎來到 Perl 的天地!
 
-從 5.8.0 版開始, Perl 具備了詳盡的 Unicode (萬國碼) 支援, 也連帶支援了
-許多拉丁語系以外的編碼方式; CJK (中日韓) 便是其中的一部份. Unicode 是
-國際性的標準, 試圖涵蓋世界上所有的字符: 西方世界, 東方世界, 以及兩者間
-的一切 (希臘文, 敘利亞文, 阿拉伯文, 希伯來文, 印度文, 印地安文, 等等).
-它也容納了多種作業系統與平臺 (如 PC 及麥金塔).
+從 5.8.0 版開始, Perl 具備了完善的 Unicode (萬國碼) 支援,
+也連帶支援了許多拉丁語系以外的編碼方式; CJK (中日韓) 便是其中的一部份.
+Unicode 是國際性的標準, 試圖涵蓋世界上所有的字符: 西方世界, 東方世界,
+以及兩者間的一切 (希臘文, 敘利亞文, 阿拉伯文, 希伯來文, 印度文,
+印地安文, 等等). 它也容納了多種作業系統與平臺 (如 PC 及麥金塔).
 
 Perl 本身以 Unicode 進行操作. 這表示 Perl 內部的字串資料可用 Unicode
-表示, Perl 的函式與算符 (例如正規表示式比對) 也能對 Unicode 進行操作.
-在輸入及輸出時, 為了處理以 Unicode 之前的編碼方式儲存的資料, Perl 提供
-了「Encode」這個模組, 可以讓你輕易地讀取及寫入舊有的編碼資料.
+表示; Perl 的函式與算符 (例如正規表示式比對) 也能對 Unicode 進行操作.
+在輸入及輸出時, 為了處理以 Unicode 之前的編碼方式儲存的資料, Perl
+提供了 Encode 這個模組, 可以讓你輕易地讀取及寫入舊有的編碼資料.
 
 Encode 延伸模組支援下列正體中文的編碼方式:
 
-    big5	最初的 Big5 編碼
+    big5	原始的 Big5 編碼 (含倚天日文字形)
     big5-hkscs	Big5 + 香港外字集
     cp950	字碼頁 950 (Big5 + 微軟添加的字符)
 
@@ -37,8 +37,7 @@ Encode 延伸模組支援下列正體中文的編碼方式:
 
     perl -Mencoding=big5,STDOUT,utf8 -pe1 < file.big5 > file.utf8
 
-Perl 也內附了「piconv」, 一支完全以 Perl 寫成的字符轉換工具程式, 用法
-如下:
+Perl 也內附了 "piconv", 一支完全以 Perl 寫成的字符轉換工具程式, 用法如下:
 
     piconv -f big5 -t utf8 < file.big5 > file.utf8
     piconv -f utf8 -t big5 < file.utf8 > file.big5
@@ -47,13 +46,15 @@ Perl 也內附了「piconv」, 一支完全以 Perl 寫成的字符轉換工具程式, 用法
 
     #!/usr/bin/env perl
     # 啟動 big5 字串解析; 標準輸出入及標準錯誤都設為 big5 編碼
-    use encoding 'big5', STDIN => 'big5',
-			 STDOUT => 'big5', STDERR => 'big5';
-
+    use encoding 'big5', STDIN => 'big5', STDOUT => 'big5';
     print length("駱駝");	     #  2 (雙引號表示字符)
     print length('駱駝');	     #  4 (單引號表示位元組)
     print index("諄諄教誨", "彖帢"); # -1 (不包含此子字串)
-    print index('諄諄教誨', '彖帢'); #  1 (從第二個字節開始)
+    print index('諄諄教誨', '彖帢'); #  1 (從第二個位元組開始)
+
+在最後一列例子裡, "諄" 的第二個位元組與 "諄" 的第一個位元組結合成 Big5
+碼的 "彖"; "諄" 的第二個位元組則與 "教" 的第一個位元組結合成 "帢".
+這解決了以前 Big5 碼比對處理上常見的問題.
 
 =head2 額外的中文編碼
 
@@ -66,14 +67,18 @@ Encode::HanExtra 模組. 它目前提供下列編碼方式:
 另外, Encode::HanConvert 模組則提供了簡繁轉換用的兩種編碼:
 
     big5-simp	Big5 正體中文與 Unicode 簡體中文互轉
-    gbk-trad	GBK 簡體中文與 Unicode 繁體中文互轉
+    gbk-trad	GBK 簡體中文與 Unicode 正體中文互轉
 
-若想在 GBK 與 Big5 之間互轉, 請參考該模組內附的 b2g.pl 與 g2b.pl 兩
-支程式.
+若想在 GBK 與 Big5 之間互轉, 請參考該模組內附的 b2g.pl 與 g2b.pl 兩支程式,
+或在程式內使用下列寫法:
+
+    use Encode::HanConvert;
+    $euc_cn = big5_to_gb($big5); # 從 Big5 轉為 GBK
+    $big5 = gb_to_big5($euc_cn); # 從 GBK 轉為 Big5
 
 =head2 進一步的資訊
 
-請參考 Perl 內附的大量說明文件 (不幸全是用英文寫的) , 來學習更多關於
+請參考 Perl 內附的大量說明文件 (不幸全是用英文寫的), 來學習更多關於
 Perl 的知識, 以及 Unicode 的使用方式. 不過, 外部的資源相當豐富:
 
 =head2 提供 Perl 資源的網址
@@ -134,7 +139,25 @@ Unicode 學術學會 (Unicode 標準的制定者)
 
 Unix/Linux 上的 UTF-8 及 Unicode 答客問
 
+=head2 中文化資訊
+
+=item 為什麼叫 "正體中文" 不叫 "繁體中文"?
+
+L<http://www.csie.ntu.edu.tw/~b7506051/mozilla/faq.html#faqglossary>
+
+=item 中文化軟體聯盟
+
+L<http://www.cpatch.org/>
+
+=item Linux 軟體中文化計劃
+
+L<http://www.linux.org.tw/CLDP/>
+
 =back
+
+=head1 SEE ALSO
+
+L<Encode>, L<Encode::TW>, L<encoding>, L<perluniintro>, L<perlunicode>
 
 =head1 AUTHORS
 

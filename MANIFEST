@@ -2275,7 +2275,6 @@ t/io/crlf.t			See if :crlf works
 t/io/dup.t			See if >& works right
 t/io/fflush.t			See if auto-flush on fork/exec/system/qx works
 t/io/fs.t			See if directory manipulations work
-t/io/full.t			See if 'disk full' errors are reported
 t/io/inplace.t			See if inplace editing works
 t/io/iprefix.t			See if inplace editing works with prefixes
 t/io/nargv.t			See if nested ARGV stuff works
