@@ -104,7 +104,7 @@ S_Slab_Free(pTHX_ void *op)
 #define CHECKOP(type,o) \
     ((PL_op_mask && PL_op_mask[type])					\
      ? ( op_free((OP*)o),					\
-	 Perl_croak(aTHX_ "%s trapped by operation mask", PL_op_desc[type]),	\
+	 Perl_croak(aTHX_ "'%s' trapped by operation mask", PL_op_desc[type]),	\
 	 Nullop )						\
      : CALL_FPTR(PL_check[type])(aTHX_ (OP*)o))
 

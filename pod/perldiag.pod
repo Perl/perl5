@@ -165,6 +165,11 @@ or a hash or array slice, such as:
 name, and not a subroutine call.  C<exists &sub()> will generate this
 error.
 
+=item '%s' trapped by operation mask
+
+(F) You tried to use an operator from a Safe compartment in which it's
+disallowed. See L<Safe>.
+
 =item Argument "%s" isn't numeric%s
 
 (W numeric) The indicated string was fed as an argument to an operator

@@ -427,7 +427,7 @@ C<main::> package to the code inside the compartment.
 Any attempt by the code in STRING to use an operator which is not permitted
 by the compartment will cause an error (at run-time of the main program
 but at compile-time for the code in STRING).  The error is of the form
-"%s trapped by operation mask operation...".
+"'%s' trapped by operation mask...".
 
 If an operation is trapped in this way, then the code in STRING will
 not be executed. If such a trapped operation occurs or any other
