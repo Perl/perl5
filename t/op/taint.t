@@ -44,7 +44,7 @@ BEGIN {
       eval { require IPC::SysV };
       unless ($@) {
 	  $ipcsysv++;
-	  IPC::SysV->import(qw(IPC_PRIVATE IPC_RMID IPC_CREAT S_IRWXU));
+	  IPC::SysV->import(qw(IPC_PRIVATE IPC_RMID IPC_CREAT S_IRWXU IPC_NOWAIT));
       }
   }
 }
@@ -700,14 +700,14 @@ else {
 	my $type_rcvd;
 
 	if (defined $id) {
-	    if (msgsnd($id, pack("l! a*", $type_sent, $sent), 0)) {
-		if (msgrcv($id, $rcvd, 60, 0, 0)) {
+	    if (msgsnd($id, pack("l! a*", $type_sent, $sent), IPC_NOWAIT)) {
+		if (msgrcv($id, $rcvd, 60, 0, IPC_NOWAIT)) {
 		    ($type_rcvd, $rcvd) = unpack("l! a*", $rcvd);
 		} else {
-		    warn "# msgrcv failed\n";
+		    warn "# msgrcv failed: $!\n";
 		}
 	    } else {
-		warn "# msgsnd failed\n";
+		warn "# msgsnd failed: $!\n";
 	    }
 	    msgctl($id, IPC_RMID, 0) or warn "# msgctl failed: $!\n";
 	} else {
