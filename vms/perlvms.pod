@@ -165,12 +165,20 @@ We have tried to make Perl aware of both VMS-style and Unix-
 style file specifications wherever possible.  You may use 
 either style, or both, on the command line and in scripts, 
 but you may not combine the two styles within a single fle 
-specification.  Filenames are, of course, still case-
-insensitive.  For consistency, most Perl routines return 
-filespecs using lower case letters only, regardless of the 
-case used in the arguments passed to them.  (This is true 
-only when running under VMS; Perl respects the case-
-sensitivity of OSs like Unix.)
+specification.  VMS Perl interprets Unix pathnames in much
+the same way as the CRTL (I<e.g.> the first component of
+an absolute path is read as the device name for the
+VMS file specification).  There are a set of functions
+provided in the C<VMS::Filespec> package for explicit
+interconversion between VMS and Unix syntax; its
+documentation provides more details.
+
+Filenames are, of course, still case-insensitive.  For
+consistency, most Perl routines return  filespecs using
+lower case letters only, regardless of the case used in
+the arguments passed to them.  (This is true  only when
+running under VMS; Perl respects the case-sensitivity
+of OSs like Unix.)
 
 We've tried to minimize the dependence of Perl library 
 modules on Unix syntax, but you may find that some of these, 
@@ -351,9 +359,19 @@ need an approximation of the file's protections.
 
 =item binmode FILEHANDLE
 
-The C<binmode> operator has no effect under VMS.  It will 
-return TRUE whenever called, but will not affect I/O 
-operations on the filehandle given as its argument.
+The C<binmode> operator will attempt to insure that no translation
+of carriage control occurs on input from or output to this filehandle.
+Since this involves reopening the file and then restoring its
+file position indicator, if this function returns FALSE, the
+underlying filehandle may no longer point to an open file, or may
+point to a different position in the file than before C<binmode>
+was called.
+
+Note that C<binmode> is generally not necessary when using normal
+filehandles; it is provided so that you can control I/O to existing
+record-structured files when necessary.  You can also use the
+C<vmsfopen> function in the VMS::Stdio extension to gain finer
+control of I/O to files and devices with different record structures.
 
 =item crypt PLAINTEXT, USER
 
@@ -502,6 +520,12 @@ of the empty string, C<system> spawns an interactive DCL subprocess,
 in the same fashion as typiing B<SPAWN> at the DCL prompt.
 Perl waits for the subprocess to complete before continuing
 execution in the current process.
+
+=item time
+
+The value returned by C<time> is the offset in seconds from
+01-JAN-1970 00:00:00 (just like the CRTL's times() routine), in order
+to make life easier for code coming in from the POSIX/Unix world.
 
 =item times
 
