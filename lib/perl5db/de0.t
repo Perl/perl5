@@ -1,13 +1,13 @@
 #!./perl -- -*- mode: cperl; cperl-indent-level: 4 -*-
 
 BEGIN {
-    require Config; import Config;
-    unless ($Config{d_fork}) {
-	print "1..0\n";
-	exit 0;
-    }
     chdir 't' if -d 't';
     @INC = '../lib';
+    require Config; import Config;
+    unless ($Config{d_fork}) {
+	print "1..0 # no fork\n";
+	exit 0;
+    }
     $ENV{PERL5LIB} = '../lib';    # so children will see it too
 }
 
