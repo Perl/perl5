@@ -401,6 +401,11 @@ sub installlib {
     local($depth) = $dir ? "lib/$dir" : "lib";
 
     my $name = $_;
+
+    if ($name eq 'CVS' && -d $name) {
+	$File::Find::prune = 1;
+	return;
+    }
     
     # ignore patch backups and the .exists files.
     return if $name =~ m{\.orig$|~$|^\.exists};
