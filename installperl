@@ -2,7 +2,7 @@
 
 BEGIN {
     require 5.004;
-    chdir '..' if !-d 'lib' and -d '..\lib';
+    chdir '..' if !-d 'lib' and -d '../lib';
     @INC = 'lib';
     $ENV{PERL5LIB} = 'lib';
 }
@@ -808,6 +808,8 @@ sub installlib {
 	      $dir  =~ m{/t(?:/|$)};
     # ignore the cpan script in lib/CPAN/bin (installed later with other utils)
     return if $name eq 'cpan';
+    # ignore the Makefiles
+    return if $name =~ /^makefile$/i;
     # ignore the test extensions
     return if $dir =~ m{ext/XS/(?:APItest|Typemap)/};
 
