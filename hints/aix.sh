@@ -275,7 +275,8 @@ $define|true|[yY]*)
 	ccflags="$ccflags -DNEED_PTHREAD_INIT"
 	case "$cc" in
 	*gcc*)
-echo "GCC $gccversion disabling some _r functions" >&4
+	    ccflags="-D_THREAD_SAFE $ccflags"
+	    echo "GCC $gccversion disabling some _r functions" >&4
 	    case "$gccversion" in
 		3*) d_drand48_r='undef'
 		    d_endgrent_r='undef'
