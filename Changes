@@ -31,6 +31,122 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 14388] By: jhi                                   on 2002/01/23  15:04:06
+        Log: Small update on todo.  Could use a lot more.
+     Branch: perl
+	   ! pod/perltodo.pod
+____________________________________________________________________________
+[ 14386] By: jhi                                   on 2002/01/23  14:19:01
+        Log: Subject: [ID 20020121.003] perldata doco bug
+             From: John Stumbles <jstumbles@bluearc.com>
+             Date: Mon, 21 Jan 2002 14:19:56 -0000
+             Message-Id: <4586CA8FDDC2D411A1C700508BB4AC33016765D1@ukexchange.synaxia.com>
+     Branch: perl
+	   ! pod/perldata.pod
+____________________________________________________________________________
+[ 14385] By: jhi                                   on 2002/01/23  14:17:52
+        Log: Subject: [PATCH] Re: bless() bug ? Why fails reblessing of 'main::Object' to 'Object' ?
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 21 Jan 2002 15:16:42 -0500
+             Message-ID: <20020121201642.GA6659@blackrider>
+     Branch: perl
+	   ! embed.fnc embed.h proto.h t/op/universal.t universal.c
+____________________________________________________________________________
+[ 14384] By: jhi                                   on 2002/01/23  13:45:30
+        Log: Subject: [PATCH] Re: eval not catching warnings?
+             From: abigail@foad.org
+             Date: Wed, 23 Jan 2002 15:35:47 +0100
+             Message-ID: <20020123143547.24798.qmail@foad.org>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 14383] By: jhi                                   on 2002/01/23  03:57:58
+        Log: Subject: [ID 20020122.012] Not OK: perl v5.7.2 +DEVEL14368 on cygwin-multi-64int 1.3.6(0.4732) (UNINSTALLED)
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Tue, 22 Jan 2002 17:00:54 -0800            
+             Message-Id: <GtgT8gzkg+CG092yn@efn.org> 
+     Branch: perl
+	   ! t/run/fresh_perl.t
+____________________________________________________________________________
+[ 14381] By: jhi                                   on 2002/01/23  03:47:05
+        Log: HP-UX 10.20 cc pacifying from Merijn.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 14380] By: jhi                                   on 2002/01/23  03:41:26
+        Log: Subject: [PATCH] test.com shebang handling (was Re: VMS@14369)
+             From: "Craig A. Berry" <craigberry@mac.com> 
+             Date: Tue, 22 Jan 2002 22:14:26 -0600
+             Message-Id: <a05101000b873de9cf801@[172.16.52.1]>
+     Branch: perl
+	   ! vms/test.com
+____________________________________________________________________________
+[ 14379] By: jhi                                   on 2002/01/23  03:11:31
+        Log: AIX cpp bug: having macro arguments and character constants
+             "the same" means trouble (here s and 's')
+             What broke now was 841 and 842 of t/op/pat.t, because of the
+             ANYOF_UNICODE_FOLD_SHARP_S() in utf8.h, ccversion 5.0.1.0
+             (note that breakage happened only under cc_r and usethreads+
+             useithreads)
+     Branch: perl
+	   ! utf8.h
+____________________________________________________________________________
+[ 14376] By: jhi                                   on 2002/01/22  16:46:48
+        Log: Subject: [PATCH] Support truncate() in VOS port
+             From: Paul_GreenVOS@vos.stratus.com
+             Date: Mon, 21 Jan 02 23:27 est
+             Message-Id: <200201220428.XAA15304@mailhub1.stratus.com>
+     Branch: perl
+	   + vos/vos.c
+	   ! MANIFEST hints/vos.sh vos/vosish.h
+____________________________________________________________________________
+[ 14374] By: jhi                                   on 2002/01/22  16:36:41
+        Log: Get rid of the _() macro since (1) we require ANSI anyway
+             (2) Other software (NU)seems to use it and we don't need it,
+             so let's give it up.
+     Branch: perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH ext/Devel/PPPort/PPPort.pm malloc.c
+	   ! plan9/config.plan9 pod/perltoc.pod uconfig.h
+	   ! vos/config.alpha.h vos/config.ga.h win32/config_H.bc
+	   ! win32/config_H.gc win32/config_H.vc win32/config_H.win64
+	   ! wince/config.h wince/config_H.ce
+____________________________________________________________________________
+[ 14371] By: jhi                                   on 2002/01/21  19:36:04
+        Log: Subject: [BUG] /\_/ an unrecognized escape?
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 21 Jan 2002 15:22:54 -0500
+             Message-ID: <20020121202254.GA6731@blackrider>
+     Branch: perl
+	   ! t/lib/warnings/toke toke.c
+____________________________________________________________________________
+[ 14370] By: jhi                                   on 2002/01/21  19:16:00
+        Log: Undo the renaming of the Unicode data files; the simple
+             solution being not including the *.html files.  This means
+             that in the future there is no need for any renamings
+             (well, assuming that the Consortium doesn't cause any),
+             and the files are named like they are in the Consortium
+             website, thus alleviating confusion.
+     Branch: perl
+	   + lib/unicore/ArabicShaping.txt lib/unicore/BidiMirroring.txt
+	   + lib/unicore/CaseFolding.txt
+	   + lib/unicore/CompositionExclusions.txt
+	   + lib/unicore/EastAsianWidth.txt lib/unicore/LineBreak.txt
+	   + lib/unicore/SpecialCasing.txt lib/unicore/UnicodeData.txt
+	   - lib/unicore/ArabShap.txt lib/unicore/BidiMirr.txt
+	   - lib/unicore/CaseFold.txt lib/unicore/CompExcl.txt
+	   - lib/unicore/EAWidth.txt lib/unicore/LineBrk.txt
+	   - lib/unicore/NamesList.html lib/unicore/PropList.html
+	   - lib/unicore/SpecCase.txt lib/unicore/UCD.html
+	   - lib/unicore/Unicode.html lib/unicore/Unicode.txt
+	   - lib/unicore/rename
+	   ! (edit 285 files)
+____________________________________________________________________________
+[ 14369] By: jhi                                   on 2002/01/21  15:10:59
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 14368] By: jhi                                   on 2002/01/21  14:56:42
         Log: Subject: RE: BCC for Win32 is unhappy @14331
              From: "Konovalov, Vadim" <vkonovalov@spb.Lucent.com>
