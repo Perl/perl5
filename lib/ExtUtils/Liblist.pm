@@ -578,7 +578,7 @@ Unix-OS/2 version in several respects:
 =item *
 
 Input library and path specifications are accepted with or without the
-C<-l> and C<-L> prefices used by Unix linkers.  If neither prefix is
+C<-l> and C<-L> prefixes used by Unix linkers.  If neither prefix is
 present, a token is considered a directory to search if it is in fact
 a directory, and a library to search for otherwise.  Authors who wish
 their extensions to be portable to Unix or OS/2 should use the Unix
@@ -589,7 +589,7 @@ prefixes, since the Unix-OS/2 version of ext() requires them.
 Wherever possible, shareable images are preferred to object libraries,
 and object libraries to plain object files.  In accordance with VMS
 naming conventions, ext() looks for files named I<lib>shr and I<lib>rtl;
-it also looks for I<lib>lib and libI<lib> to accomodate Unix conventions
+it also looks for I<lib>lib and libI<lib> to accommodate Unix conventions
 used in some ported software.
 
 =item *
@@ -636,7 +636,7 @@ library pathnames is generated.
 =item *
 
 Input library and path specifications are accepted with or without the
-C<-l> and C<-L> prefices used by Unix linkers.
+C<-l> and C<-L> prefixes used by Unix linkers.
 
 An entry of the form C<-La:\foo> specifies the C<a:\foo> directory to look
 for the libraries that follow.
@@ -655,7 +655,7 @@ library to search for otherwise.  The C<$Config{lib_ext}> suffix will
 be appended to any entries that are not directories and don't already have
 the suffix.
 
-Note that the C<-L> and <-l> prefixes are B<not required>, but authors
+Note that the C<-L> and C<-l> prefixes are B<not required>, but authors
 who wish their extensions to be portable to Unix or OS/2 should use the
 prefixes, since the Unix-OS/2 version of ext() requires them.
 

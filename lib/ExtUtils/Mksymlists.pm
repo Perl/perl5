@@ -254,7 +254,7 @@ This provides an alternate means to specify function names to be
 exported from the extension.  Its value is a reference to an
 array of function names to be exported by the extension.  These
 names are passed through unaltered to the linker options file.
-Specifying a value for the FUNCLIST attribute supresses automatic
+Specifying a value for the FUNCLIST attribute suppresses automatic
 generation of the bootstrap function for the package. To still create
 the bootstrap name you have to specify the package name in the
 DL_FUNCS hash:
