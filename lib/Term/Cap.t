@@ -14,6 +14,16 @@ END {
 
 use Test::More tests => 43;
 
+# these names are hardcoded in Term::Cap
+my $files = join '', grep { -f $_ } ( $ENV{HOME} . '/.termcap', '/etc/termcap', 
+	'/usr/share/misc/termcap' );
+unless ($files) {
+	SKIP: {
+		skip('no termcap available to test', 43);
+	}
+	exit;
+}
+
 use_ok( 'Term::Cap' );
 
 local (*TCOUT, *OUT);
@@ -27,11 +37,9 @@ if (open(TCOUT, ">tcout")) {
 	$writable = 0;
 }
 
-# termcap_path -- the names are hardcoded in Term::Cap
+# termcap_path
 $ENV{TERMCAP} = '';
 my $path = join '', Term::Cap::termcap_path();
-my $files = join '', grep { -f $_ } ( $ENV{HOME} . '/.termcap', '/etc/termcap', 
-	'/usr/share/misc/termcap' );
 is( $path, $files, 'termcap_path() should find default files' );
 
 SKIP: {
