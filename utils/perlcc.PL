@@ -376,6 +376,8 @@ sub _ccharness
     }
 
     my $libs = _getSharedObjects($sourceprog);
+    @$libs = grep { !(/DynaLoader\.a$/ && ($dynaloader = $_)) } @$libs
+	if($^O =~ /cygwin/i);
 
     my $ccflags = $Config{ccflags};
     $ccflags .= ' -DUSEIMPORTLIB' if $Config{osname} =~ /cygwin/i;

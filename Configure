@@ -2358,6 +2358,9 @@ EOM
 		qnx) osname=qnx
 			osvers="$4"
 			;;
+		cygwin*) osname=cygwin
+			osvers="$3"
+			;;
 		$2) case "$osname" in
 			*isc*) ;;
 			*freebsd*) ;;

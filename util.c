@@ -1889,7 +1889,7 @@ Perl_my_setenv_init(char ***penviron)
 }
 
 void
-Perl_my_setenv(char *nam, char *val)
+Perl_my_setenv(pTHX_ char *nam, char *val)
 {
     /* You can not directly manipulate the environ[] array because
      * the routines do some additional work that syncs the Cygwin
