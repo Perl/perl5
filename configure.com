@@ -4818,9 +4818,11 @@ $ ENDIF
 $ IF use_vmsdebug_perl
 $ THEN
 $   optimize="/Debug/NoOpt"
+$   ldflags="/Debug/Trace/Map"
 $   dbgprefix = "DBG"
 $ ELSE
 $   optimize= ""
+$   ldflags="/NoTrace/NoMap"
 $   dbgprefix = ""
 $ ENDIF
 $!
@@ -5307,7 +5309,7 @@ $ WC "ivtype='" + ivtype + "'"
 $ WC "known_extensions='" + known_extensions + "'"
 $ WC "ld='" + ld + "'"
 $ WC "lddlflags='/Share'"
-$ WC "ldflags='/NoTrace/NoMap'"
+$ WC "ldflags='" + ldflags " "'"
 $ WC "lib_ext='" + lib_ext + "'"
 $ WC "libc='" + libc + "'"
 $ WC "libpth='/sys$share /sys$library'"
