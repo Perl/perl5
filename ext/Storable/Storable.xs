@@ -2080,7 +2080,7 @@ static int store_hook(
 	sv_seen:
 		SvREFCNT_dec(xsv);
 		ary[i] = *svh;
-		TRACEME(("listed object %d at 0x%"UVxf" is tag #%"UVdf,
+		TRACEME(("listed object %d at 0x%"UVxf" is tag #%"UVxf,
 			 i-1, PTR2UV(xsv), PTR2UV(*svh)));
 	}
 
