@@ -147,8 +147,7 @@ It will also croak() if accidentally called in a scalar context.
 =head1 SEE ALSO
 
 L<perlfunc>, 
-L<perlop/"I/O Operators">,
-L<POSIX/"FileHandle">
+L<perlop/"I/O Operators">.
 
 =head1 BUGS
 
@@ -168,6 +167,8 @@ use SelectSaver;
 require Exporter;
 require DynaLoader;
 @ISA = qw(Exporter DynaLoader);
+
+require IO::Handle;  # Kludge for bareword handles
 
 $VERSION = "1.00" ;
 
