@@ -5,7 +5,12 @@
 SRCDIR     = ..
 PV         = 57
 INST_VER   = 5.7.3
+
+INSTALL_ROOT=/netzwerk/sprache/perl
+
+# PERLCEDIR shoud be set to current directory
 PERLCEDIR  = H:\src\wince\perl\wince
+
 WCEROOT    = N:\Windows CE Tools
 WCEROOT    = D:\Windows CE Tools
 NTPERL     = N:\Programme\perl\bin\perl.exe
@@ -19,9 +24,14 @@ CECONSOLEDIR = h:\src\wince\w32console
 COPY       = copy $(YES)
 XCOPY      = xcopy $(YES) /f /r /i /d
 RCOPY	   = xcopy $(YES) /f /r /i /e /d
+
+# cecopy program. Make shure it is in your path, as well as cemkdir, cedel
+CECOPY     = cecopy
+
 NOOP	   = @echo
 # keep this untouched!
 NULL	   =
+
 
 CFG=DEBUG
 #CFG=RELEASE
@@ -532,7 +542,7 @@ EXTRACORE_SRC	= $(EXTRACORE_SRC) perllib.c
 EXTRACORE_SRC	= $(EXTRACORE_SRC) ..\malloc.c
 !ENDIF
 
-EXTRACORE_SRC	= $(EXTRACORE_SRC) ..\perlio.c
+EXTRACORE_SRC	= $(EXTRACORE_SRC) ..\perlio.c .\win32io.c
 
 WIN32_SRC	=		\
 		.\wince.c	\
@@ -861,81 +871,79 @@ clean:
 	-rm -f ../config.sh ../lib/Config.pm
 	-rm -f config.h perl.res
 
-!if "$(MACHINE)" == "wince-sh3-hpc"
+!IF "$(MACHINE)" == "wince-sh3-hpc"
+
 install_perlexe: $(PERLEXE)
 	cedel /speicherkarte2/bin/perl.exe
-	cecopy pc:../perl.exe ce:/speicherkarte2/bin
+	$(CECOPY) pc:../perl.exe ce:/speicherkarte2/bin
 
 install_perldll: $(PERLDLL)
 	cedel /speicherkarte2/bin/perl$(PV).dll
-	cecopy pc:../perl$(PV).dll ce:/speicherkarte2/bin
+	$(CECOPY) pc:../perl$(PV).dll ce:/speicherkarte2/bin
 
 install_perl: install_perlexe install_perldll
 
 test_perl:
-	cecopy pc:test.pl ce:/speicherkarte2/bin
+	$(CECOPY) pc:test.pl ce:/speicherkarte2/bin
 	ceexec /speicherkarte2/bin/perl.exe /speicherkarte2/bin/test.pl
-#	ceexec /speicherkarte2/bin/perl.exe -V
 
 install_lib: ../lib/Config.pm
-	cecopy	pc:../lib/Config.pm ce:/speicherkarte2/usr/lib/perl5
-!endif
+	$(CECOPY)	pc:../lib/Config.pm ce:/speicherkarte2/usr/lib/perl5
 
-!if "$(MACHINE)" == "wince-arm-hpc"
+!ELSEIF "$(MACHINE)" == "wince-arm-hpc"
+
 install_perlexe: $(PERLEXE)
 	-cedel /speicherkarte/bin/perl.exe
-	cecopy pc:$(MACHINE)/perl.exe ce:/speicherkarte/bin
+	$(CECOPY) pc:$(MACHINE)/perl.exe ce:/speicherkarte/bin
 
 install_perldll: $(PERLDLL)
 	-cedel /speicherkarte/bin/perl$(PV).dll
-	cecopy pc:$(MACHINE)/perl$(PV).dll ce:/speicherkarte/bin
+	$(CECOPY) pc:$(MACHINE)/perl$(PV).dll ce:/speicherkarte/bin
 
 install_perl: install_perlexe install_perldll
 
 test_perl:
-	cecopy pc:test.pl ce:/speicherkarte/bin
+	$(CECOPY) pc:test.pl ce:/speicherkarte/bin
 	ceexec /speicherkarte/bin/perl.exe /speicherkarte/bin/test.pl
-#	ceexec /speicherkarte2/bin/perl.exe -V
 
 install_lib: ../lib/Config.pm
-	cecopy	pc:../lib/Config.pm ce:/speicherkarte/usr/lib/perl5
-!endif
+	$(CECOPY)	pc:../lib/Config.pm ce:/speicherkarte/usr/lib/perl5
 
-!if "$(MACHINE)" == "wince-mips-hpc"
+!ELSEIF "$(MACHINE)" == "wince-mips-hpc"
+
 install_perlexe: $(PERLEXE)
-	cecopy pc:../perl.exe ce:/netzwerk/compaq/bin
+	$(CECOPY) pc:../perl.exe ce:$(INSTALL_ROOT)/bin
 
 install_perldll: $(PERLDLL)
-	cecopy pc:../perl$(PV).dll ce:/netzwerk/compaq/bin
+	$(CECOPY) pc:../perl$(PV).dll ce:$(INSTALL_ROOT)/bin
 
 install_perl: install_perlexe install_perldll
 
 test_perl:
-	cecopy pc:test.pl ce:/netzwerk/compaq/bin
-	ceexec /netzwerk/compaq/bin/perl.exe /netzwerk/compaq/bin/test.pl
-#	ceexec /netzwerk/compaq/bin/perl.exe -V
+	$(CECOPY) pc:test.pl ce:/netzwerk/compaq/bin
+	ceexec /netzwerk/compaq/bin/perl.exe $(INSTALL_ROOT)/test.pl
 
 install_lib: ../lib/Config.pm
-	cecopy	pc:../lib/Config.pm ce:/netzwerk/compaq/usr/lib/perl5
-!endif
+	$(CECOPY)	pc:../lib/Config.pm ce:/netzwerk/compaq/usr/lib/perl5
 
-!if "$(MACHINE)" == "wince-x86em-pocket"
+!ELSEIF "$(MACHINE)" == "wince-x86em-pocket"
+
 install_lib:
 	ftpcopy ../lib/Config.pm ftp!ftp@localhost:/perl/lib
 	ftpcopy ../lib/Exporter.pm ftp!ftp@localhost:/perl/lib
 	ftpcopy ../lib/Exporter/Heavy.pm ftp!ftp@localhost:/perl/lib/Exporter
 
 install_perlexe: $(PERLEXE)
-	cecopy pc:../perl.exe ce:/netzwerk/compaq/bin
+	$(CECOPY) pc:../perl.exe ce:/netzwerk/compaq/bin
 
 install_perldll: $(PERLDLL)
-	cecopy pc:../perl$(PV).dll ce:/netzwerk/compaq/bin
+	$(CECOPY) pc:../perl$(PV).dll ce:/netzwerk/compaq/bin
 
 install_perl: install_perlexe install_perldll
 
 test_perl:
 	echo Not yet
-!endif
+!ENDIF
 
 
 XDLLOBJS = \
@@ -974,6 +982,7 @@ $(DLLDIR)\utf8.obj \
 $(DLLDIR)\util.obj \
 $(DLLDIR)\win32thread.obj \
 $(DLLDIR)\wince.obj \
+$(DLLDIR)\win32io.obj \
 $(DLLDIR)\wincesck.obj \
 $(DLLDIR)\xsutils.obj \
 $(DLLDIR)\perllib.obj \
@@ -1040,34 +1049,42 @@ makedist: all dlls
 
 !if "$(MACHINE)" == "wince-arm-hpc-wce300"
 install: all
-	cecopy pc:$(MACHINE)/perl.exe ce:/speicherkarte/bin
-	cecopy pc:$(MACHINE)/perl$(PV).dll ce:/speicherkarte/bin
+	$(CECOPY) pc:$(MACHINE)/perl.exe ce:/speicherkarte/bin
+	$(CECOPY) pc:$(MACHINE)/perl$(PV).dll ce:/speicherkarte/bin
 install_dlls: dlls
-	cecopy pc:../lib/auto/IO/io.dll ce:/speicherkarte/usr/lib/perl5/auto/IO/io.dll
+	$(CECOPY) pc:../lib/auto/IO/io.dll ce:/speicherkarte/usr/lib/perl5/auto/IO/io.dll
+!else
+install: all
+	-cemkdir "$(INSTALL_ROOT)"
+	-cemkdir "$(INSTALL_ROOT)\bin"
+	-cemkdir "$(INSTALL_ROOT)\lib"
+	$(CECOPY) "pc:$(MACHINE)/perl.exe" "ce:$(INSTALL_ROOT)/bin"
+	$(CECOPY) "pc:$(MACHINE)/perl.dll" "ce:$(INSTALL_ROOT)/bin"
+	$(CECOPY) "pc:../lib/Config.pm" "ce:$(INSTALL_ROOT)/lib"
 !endif
 
 !if "$(MACHINE)" == "wince-arm-hpc-wce211"
 install: all
-	cecopy pc:$(MACHINE)/perl.exe ce:/speicherkarte/bin
-	cecopy pc:$(MACHINE)/perl$(PV).dll ce:/speicherkarte/bin
+	$(CECOPY) pc:$(MACHINE)/perl.exe ce:/speicherkarte/bin
+	$(CECOPY) pc:$(MACHINE)/perl$(PV).dll ce:/speicherkarte/bin
 !endif
 
 !if "$(MACHINE)" == "wince-mips-hpc-wce211"
 install:
-	cecopy pc:$(MACHINE)/perl.exe ce:/bin
-	cecopy pc:$(MACHINE)/perl$(PV).dll ce:/bin
+	$(CECOPY) pc:$(MACHINE)/perl.exe ce:/bin
+	$(CECOPY) pc:$(MACHINE)/perl$(PV).dll ce:/bin
 !endif
 
 !if "$(MACHINE)" == "wince-mips-hpc-wce200"
 install:
-	cecopy pc:$(MACHINE)/perl.exe ce:/bin
-	cecopy pc:$(MACHINE)/perl$(PV).dll ce:/bin
+	$(CECOPY) pc:$(MACHINE)/perl.exe ce:/bin
+	$(CECOPY) pc:$(MACHINE)/perl$(PV).dll ce:/bin
 !endif
 
 !if "$(MACHINE)" == "wince-sh3-hpc-wce211"
 install:
-	cecopy pc:$(MACHINE)/perl.exe ce:/speicherkarte2/bin
-	cecopy pc:$(MACHINE)/perl$(PV).dll ce:/speicherkarte2/bin
+	$(CECOPY) pc:$(MACHINE)/perl.exe ce:$(INSTALL_ROOT)/bin
+	$(CECOPY) pc:$(MACHINE)/perl$(PV).dll ce:$(INSTALL_ROOT)/bin
 !endif
 
 perl.ico:

@@ -16,6 +16,11 @@
 #define PERL_IN_PP_SORT_C
 #include "perl.h"
 
+#if defined(UNDER_CE)
+/* looks like 'small' is reserved word for WINCE (or somesuch)*/
+#define	small xsmall
+#endif
+
 static I32 sortcv(pTHX_ SV *a, SV *b);
 static I32 sortcv_stacked(pTHX_ SV *a, SV *b);
 static I32 sortcv_xsub(pTHX_ SV *a, SV *b);
