@@ -590,7 +590,7 @@ L<http://www.cosy.sbg.ac.at/~andi/>. If you use SUNWski, make a
 symbolic link /dev/urandom pointing to /dev/random.  For more details,
 see Document ID27606 entitled "Differing /dev/random support requirements
 within Solaris[TM] Operating Environments", available at
-http://support.sunsoft.com.
+http://sunsolve.sun.com .
 
 It may be possible to use the Entropy Gathering Daemon (written in
 Perl!), available from L<http://www.lothar.com/tech/crypto/>.
