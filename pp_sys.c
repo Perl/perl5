@@ -731,11 +731,16 @@ PP(pp_binmode)
         RETPUSHUNDEF;
     }
 
+    PUTBACK;
     if (PerlIO_binmode(aTHX_ fp,IoTYPE(io),mode_from_discipline(discp),
-                       (discp) ? SvPV_nolen(discp) : Nullch))
+                       (discp) ? SvPV_nolen(discp) : Nullch)) {
+	SPAGAIN;
 	RETPUSHYES;
-    else
+    }
+    else {
+	SPAGAIN;
 	RETPUSHUNDEF;
+    }
 }
 
 PP(pp_tie)
@@ -4040,7 +4045,7 @@ PP(pp_system)
 	TAINT_ENV();
 	while (++MARK <= SP) {
 	    (void)SvPV_nolen(*MARK);      /* stringify for taint check */
-	    if (PL_tainted) 
+	    if (PL_tainted)
 		break;
 	}
 	MARK = ORIGMARK;
@@ -4166,7 +4171,7 @@ PP(pp_exec)
 	TAINT_ENV();
 	while (++MARK <= SP) {
 	    (void)SvPV_nolen(*MARK);      /* stringify for taint check */
-	    if (PL_tainted) 
+	    if (PL_tainted)
 		break;
 	}
 	MARK = ORIGMARK;
