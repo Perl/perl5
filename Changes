@@ -31,6 +31,184 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 12362] By: jhi                                   on 2001/10/08  14:05:50
+        Log: Retract #12358 for now.
+     Branch: perl
+	   ! lib/Term/Cap.t
+____________________________________________________________________________
+[ 12361] By: jhi                                   on 2001/10/08  13:57:10
+        Log: Can't figure out what this is testing.
+             (If it is trying to catch SIGKILL, it should stop
+             trying because that is by definition impossible.)
+     Branch: perl
+	   ! lib/sigtrap.t
+____________________________________________________________________________
+[ 12360] By: jhi                                   on 2001/10/08  13:23:28
+        Log: Subject: [PATCH bleadperl] why some tests fail on Win95...
+             From: Nikola Knezevic <indy@tesla.rcub.bg.ac.yu>
+             Date: Sun, 30 Sep 2001 21:15:13 +0200
+             Message-ID: <5033457805.20010930211513@tesla.rcub.bg.ac.yu>
+     Branch: perl
+	   ! lib/ExtUtils/MM_Win32.pm
+____________________________________________________________________________
+[ 12359] By: jhi                                   on 2001/10/08  12:37:17
+        Log: Clarify the ldlibpth part and condense the overall text.
+     Branch: perl
+	   ! t/TEST
+____________________________________________________________________________
+[ 12358] By: jhi                                   on 2001/10/08  11:56:49
+        Log: Subject: Re: [PATCH] & what's to be done for 5.8.0?
+             From: "chromatic" <chromatic@rmci.net>
+             Date: Sun, 07 Oct 2001 16:59:26 -0600
+             Message-ID: <20011007230518.90917.qmail@onion.perl.org>
+     Branch: perl
+	   ! lib/Term/Cap.t
+____________________________________________________________________________
+[ 12357] By: jhi                                   on 2001/10/08  11:54:50
+        Log: Update the list because fo #12265.
+     Branch: perl
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[ 12356] By: jhi                                   on 2001/10/08  11:53:30
+        Log: Subject: [PATCH] & what's to be done for 5.8.0? 
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sun, 7 Oct 2001 20:53:33 +0100
+             Message-ID: <20011007205333.S38756@plum.flirble.org>   
+     Branch: perl
+	   ! ext/B/t/showlex.t ext/B/t/stash.t ext/Cwd/t/taint.t
+	   ! ext/DB_File/t/db-btree.t ext/DB_File/t/db-hash.t
+	   ! ext/DB_File/t/db-recno.t ext/Fcntl/t/fcntl.t lib/CGI/t/carp.t
+	   ! lib/CGI/t/cookie.t lib/File/Find/t/taint.t lib/FindBin.t
+	   ! lib/Net/t/ftp.t lib/Net/t/hostname.t lib/Net/t/nntp.t
+	   ! lib/Net/t/smtp.t lib/Switch/t/given.t lib/Switch/t/nested.t
+	   ! lib/Switch/t/switch.t lib/Term/Complete.t
+	   ! lib/Test/Simple/t/plan_is_noplan.t lib/Test/Simple/t/todo.t
+	   ! lib/bigfloat.t lib/bigint.t lib/integer.t t/op/flip.t
+	   ! t/op/my_stash.t
+____________________________________________________________________________
+[ 12355] By: jhi                                   on 2001/10/08  11:51:29
+        Log: Integrate patch #12350 from maintperl; typo in
+             IO::Seekable doc.
+     Branch: perl
+	  !> ext/IO/lib/IO/Seekable.pm
+____________________________________________________________________________
+[ 12354] By: jhi                                   on 2001/10/08  11:41:16
+        Log: Detypo.
+     Branch: perl
+	   ! hints/darwin.sh
+____________________________________________________________________________
+[ 12353] By: sky                                   on 2001/10/07  17:16:14
+        Log: Change 12349 didn't really get it right.
+     Branch: perl
+	   ! lib/Unicode/README
+____________________________________________________________________________
+[ 12352] By: jhi                                   on 2001/10/07  15:03:18
+        Log: If running the harness the dynamic library search path
+             may need setting.
+     Branch: perl
+	   ! t/TEST
+____________________________________________________________________________
+[ 12351] By: jhi                                   on 2001/10/07  14:17:12
+        Log: It seems that in MacOS X 10.1 one must use -flat_namespace
+             in ldflags.
+     Branch: perl
+	   ! hints/darwin.sh
+____________________________________________________________________________
+[ 12350] By: gsar                                  on 2001/10/07  13:30:42
+        Log: typo in IO::Seekable doc
+     Branch: maint-5.6/perl
+	   ! ext/IO/lib/IO/Seekable.pm
+____________________________________________________________________________
+[ 12349] By: jhi                                   on 2001/10/07  12:49:31
+        Log: Give up the fantasy of having lib/Unicode and lib/unicode:
+             doesn't work on Mac OS X 10.1 (when unpacking the tar the
+             latter gets renamed as lib/unicode:1, assumedly for security
+             reasons not to overwrite stuff)
+     Branch: perl
+	   + lib/Unicode/README
+	   - lib/unicode/README
+	   ! MANIFEST
+____________________________________________________________________________
+[ 12348] By: ams                                   on 2001/10/07  05:33:40
+        Log: Subject: [PATCH MANIFEST lib/CPAN/t/Nox.t] Add Tests for CPAN::Nox
+             From: "chromatic" <chromatic@rmci.net>
+             Date: Sat, 06 Oct 2001 21:42:03 -0600
+             Message-Id: <20011007034754.21057.qmail@onion.perl.org>
+     Branch: perl
+	   + lib/CPAN/t/Nox.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 12347] By: ams                                   on 2001/10/07  00:48:10
+        Log: Subject: [PATCH MANIFEST lib/sigtrap.t] Add Tests for sigtrap.pm
+             From: "chromatic" <chromatic@rmci.net>
+             Date: Sat, 06 Oct 2001 18:52:10 -0600
+             Message-Id: <20011007005801.98381.qmail@onion.perl.org>
+     Branch: perl
+	   + lib/sigtrap.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 12346] By: ams                                   on 2001/10/06  23:14:01
+        Log: Subject: [PATCH] (was Re: [PATCH] Re: What sort of Makefile.PL should
+             h2xs write?)
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sat, 6 Oct 2001 21:46:43 +0100
+             Message-Id: <20011006214643.L38756@plum.flirble.org>
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[ 12345] By: ams                                   on 2001/10/06  17:39:53
+        Log: Subject: [PATCH] Memoize tests
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sat, 6 Oct 2001 18:04:21 +0100
+             Message-Id: <20011006180421.J38756@plum.flirble.org>
+     Branch: perl
+	   ! lib/Memoize/t/array.t lib/Memoize/t/array_confusion.t
+	   ! lib/Memoize/t/correctness.t lib/Memoize/t/errors.t
+	   ! lib/Memoize/t/expire.t lib/Memoize/t/expire_file.t
+	   ! lib/Memoize/t/expire_module_n.t
+	   ! lib/Memoize/t/expire_module_t.t lib/Memoize/t/flush.t
+	   ! lib/Memoize/t/normalize.t lib/Memoize/t/prototype.t
+	   ! lib/Memoize/t/speed.t lib/Memoize/t/tie.t
+	   ! lib/Memoize/t/tie_gdbm.t lib/Memoize/t/tie_ndbm.t
+	   ! lib/Memoize/t/tie_sdbm.t lib/Memoize/t/tie_storable.t
+	   ! lib/Memoize/t/tiefeatures.t lib/Memoize/t/unmemoize.t
+____________________________________________________________________________
+[ 12344] By: jhi                                   on 2001/10/06  00:30:23
+        Log: Retract the latter part of #12343.
+     Branch: perl
+	   ! ext/IO/lib/IO/Socket/INET.pm
+____________________________________________________________________________
+[ 12343] By: jhi                                   on 2001/10/05  23:32:07
+        Log: Subject: patch to ext/IO/lib/IO/Socket/INET.pm fixes Bug ID (20010803.022)
+             From: David Dyck <dcd@tc.fluke.com>
+             Date: Fri, 5 Oct 2001 16:04:43 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.33.0110051548340.9856-100000@dd.tc.fluke.com>
+             
+             Subject: Re: patch to ext/IO/lib/IO/Socket/INET.pm fixes Bug ID (20010803.022)
+             From: David Dyck <dcd@tc.fluke.com>
+             Date: Fri, 5 Oct 2001 17:27:46 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.33.0110051714350.14248-100000@dd.tc.fluke.com>
+     Branch: perl
+	   ! ext/IO/lib/IO/Socket/INET.pm
+____________________________________________________________________________
+[ 12342] By: jhi                                   on 2001/10/05  16:28:37
+        Log: Subject: [PATCH perl@12307] Re: test names from C<make TEST>
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Fri, 5 Oct 2001 18:20:44 +0100 (BST)
+             Message-Id: <200110051720.SAA17023@tempest.npl.co.uk>
+     Branch: perl
+	   ! t/TEST
+____________________________________________________________________________
+[ 12341] By: jhi                                   on 2001/10/05  13:54:08
+        Log: Don't assume that %x is good for displaying UVs.
+     Branch: perl
+	   ! dump.c
+____________________________________________________________________________
+[ 12340] By: jhi                                   on 2001/10/05  12:41:31
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 12339] By: ams                                   on 2001/10/05  10:22:34
         Log: Subject: [PATCH] perlfunc/select
              From: Nicholas Clark <nick@ccl4.org>
