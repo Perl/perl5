@@ -32,6 +32,255 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  8132] By: jhi                                   on 2000/12/15  15:44:16
+        Log: Some compilers get huffy if you do not cast a const pointer
+             to a non-const when assigning.
+     Branch: perl
+	   ! gv.c
+____________________________________________________________________________
+[  8131] By: jhi                                   on 2000/12/15  15:38:30
+        Log: Subject: [PATCH 5.7.0] speeding up object creation/destruction 4x times
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Fri, 15 Dec 2000 05:26:57 -0500
+             Message-ID: <20001215052657.A8319@math.mps.ohio-state.edu>
+     Branch: perl
+	   ! embed.h embed.pl gv.c objXSUB.h perl.h proto.h sv.c
+	   ! t/pragma/overload.t
+____________________________________________________________________________
+[  8130] By: jhi                                   on 2000/12/15  15:36:08
+        Log: Subject: [PATCH 5.7.0] cosmetic change to overloading
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Thu, 14 Dec 2000 22:02:43 -0500
+             Message-ID: <20001214220243.A18437@monk.mps.ohio-state.edu>
+     Branch: perl
+	   ! gv.c perl.h
+____________________________________________________________________________
+[  8129] By: jhi                                   on 2000/12/15  15:34:16
+        Log: Subject: PATCH: h2xs nit
+             From: Tim Jenness <t.jenness@jach.hawaii.edu>
+             Date: Thu, 14 Dec 2000 18:25:46 -1000 (HST)
+             Message-ID: <Pine.LNX.4.30.0012141820340.2533-100000@lapaki.jach.hawaii.edu>
+             
+             Add a template README.
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[  8128] By: jhi                                   on 2000/12/15  15:32:22
+        Log: Still buggy findgteprime, fix from Eric Joanis <joanis@cs.toronto.edu>.
+     Branch: perl
+	   ! lib/Tie/SubstrHash.pm t/lib/tie-substrhash.t
+____________________________________________________________________________
+[  8127] By: jhi                                   on 2000/12/15  15:19:34
+        Log: Subject:  [PATCH Opcode.XS, Perl 5.6+] stuff for caller and _ in Safe::
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
+             Date:     Thu, 14 Dec 2000 20:04:42 EST
+             Message-Id: <001214200310.49929@DUPHY4.Physics.Drexel.Edu>
+     Branch: perl
+	   ! ext/Opcode/Opcode.xs
+____________________________________________________________________________
+[  8126] By: jhi                                   on 2000/12/15  15:17:49
+        Log: Subject: [PATCH: perl@8102] s/use vars qw\(/our(/ for OS/390 extension builds
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Thu, 14 Dec 2000 15:50:20 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10012141548200.57557-100000@aspara.forte.com>
+     Branch: perl
+	   ! ext/Errno/Errno_pm.PL lib/ExtUtils/MM_Unix.pm
+	   ! lib/ExtUtils/Manifest.pm lib/File/Spec.pm
+	   ! lib/File/Spec/Functions.pm lib/File/Spec/Unix.pm
+____________________________________________________________________________
+[  8125] By: jhi                                   on 2000/12/15  15:11:05
+        Log: This seems to be a stage sane and stable enough to checkin.
+             (it basically is 8102..8118+8122 but no 8120, 8121, 8123, 8124)
+     Branch: perl
+	   ! MANIFEST embed.h embed.pl objXSUB.h op.c perl.h perlapi.c
+	   ! pod/perlapi.pod pp.c pp_hot.c proto.h sv.c sv.h t/lib/peek.t
+	   ! t/op/cmp.t t/op/numconvert.t
+____________________________________________________________________________
+[  8124] By: jhi                                   on 2000/12/15  04:20:26
+        Log: Something is really wonky.
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  8123] By: jhi                                   on 2000/12/15  04:00:50
+        Log: Fixes for the IV UV patches to compile in Digital UNIX.
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  8122] By: jhi                                   on 2000/12/15  02:53:40
+        Log: Subject: Re: [ID 20001214.011] Unreachable value in a search list logical name
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Thu, 14 Dec 2000 19:10:49 -0600
+             Message-Id: <p04330100b65efbe32f30@[172.16.52.1]>
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[  8121] By: jhi                                   on 2000/12/15  02:50:00
+        Log: Metaconfig changes for #8120.
+     Branch: metaconfig
+	   + U/modified/d_strtoul.U
+     Branch: metaconfig/U/perl
+	   ! d_strtoull.U d_strtouq.U
+____________________________________________________________________________
+[  8120] By: jhi                                   on 2000/12/15  02:49:42
+        Log: From: Nicholas Clark <nick@ccl4.org> 
+             Subject: [PATCH] strtoq, strtou(q|ll|l) testing (was [PATCH] faster and 64 bit  preserving arithmetic)
+             Date: Thu, 14 Dec 2000 18:38:57 +0000
+             Message-ID: <20001214183857.B97909@plum.flirble.org>
+     Branch: perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH configure.com epoc/config.sh perl.h sv.c uconfig.h
+	   ! uconfig.sh vos/config.alpha.def vos/config.alpha.h
+	   ! vos/config.ga.def vos/config.ga.h win32/config.bc
+	   ! win32/config.gc win32/config.vc
+____________________________________________________________________________
+[  8119] By: jhi                                   on 2000/12/14  23:40:58
+        Log: Subject: [PATCH] faster and 64 bit preserving arithmetic
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Wed, 13 Dec 2000 20:08:50 +0000
+             Message-ID: <20001213200849.B71166@plum.flirble.org>
+     Branch: perl
+	   ! embed.h embed.pl objXSUB.h op.c perl.h pp.c pp_hot.c proto.h
+	   ! sv.c sv.h t/lib/peek.t t/op/cmp.t t/op/numconvert.t
+____________________________________________________________________________
+[  8118] By: jhi                                   on 2000/12/14  22:46:26
+        Log: Integrate perlio.
+     Branch: perl
+	  !> MANIFEST ext/Encode/compile makedef.pl
+____________________________________________________________________________
+[  8117] By: nick                                  on 2000/12/14  22:38:53
+        Log: Win32 tweaks to get Encode to build
+             - temp hack to makedef.pl till PerlIO is properly "exported".
+             - MSVC dislikes  
+             static encpage_t foo[];
+             so make 'em extern for now.
+     Branch: perlio
+	   ! ext/Encode/compile makedef.pl
+____________________________________________________________________________
+[  8116] By: nick                                  on 2000/12/14  22:00:53
+        Log: Document the new files
+     Branch: perlio
+	   ! MANIFEST
+____________________________________________________________________________
+[  8115] By: jhi                                   on 2000/12/14  21:58:01
+        Log: MANIFEST new files of #8114.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[  8114] By: jhi                                   on 2000/12/14  21:50:49
+        Log: Integrate perlio.
+     Branch: perl
+	  +> ext/Encode/compile ext/Encode/encengine.c ext/Encode/encode.h
+	  !> ext/Encode/Encode.pm ext/Encode/Encode.xs
+	  !> ext/Encode/Encode/ascii.enc ext/Encode/Encode/cp1047.enc
+	  !> ext/Encode/Encode/cp37.enc ext/Encode/Encode/posix-bc.enc
+	  !> ext/Encode/Makefile.PL
+____________________________________________________________________________
+[  8113] By: jhi                                   on 2000/12/14  21:48:49
+        Log: The documentation part of the
+             
+             Subject: [ID 20001214.002] Net::Ping patch
+             From: Jonathan Stowe <gellyfish@gellyfish.com>
+             Date: Thu, 14 Dec 2000 08:28:14 +0000 (GMT)
+             Message-Id: <Pine.LNX.4.10.10012140805480.19767-200000@orpheus.gellyfish.com>
+             since the #7529 had already addressed the same problem.
+     Branch: perl
+	   ! lib/Net/Ping.pm
+____________________________________________________________________________
+[  8112] By: jhi                                   on 2000/12/14  21:42:57
+        Log: Subject: [PATCH] Re: [ID 20001013.006] XS subs are not define()ed
+             From: Dominic Dunlop <domo@computer.org>
+             Date: Tue, 12 Dec 2000 10:47:10 +0100
+             Message-Id: <p04320402b65ba33a92b2@[192.168.1.4]>
+             
+             Document how elusive subroutines can be.
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  8111] By: jhi                                   on 2000/12/14  21:38:05
+        Log: Subject: [ID 20001214.003] [PATCH bleadperl] POSIX::tmpnam() is dangerous
+             From: Dominic Dunlop <domo@computer.org>
+             Date: Thu, 14 Dec 2000 10:13:51 +0100
+             Message-Id: <p04320407b65e3f4853aa@[192.168.1.4]>
+     Branch: perl
+	   ! ext/POSIX/POSIX.pod
+____________________________________________________________________________
+[  8110] By: jhi                                   on 2000/12/14  21:36:32
+        Log: Subject: [patch] perlfaq7
+             From: "Gerrit P. Haase" <gerrit.haase@t-online.de>
+             Date: Thu, 14 Dec 2000 15:31:07 +0100
+             Message-ID: <3A38E7BB.13178.11C40A8@localhost>
+     Branch: perl
+	   ! pod/perlfaq7.pod
+____________________________________________________________________________
+[  8109] By: jhi                                   on 2000/12/14  21:29:20
+        Log: Subject: [8104] Encode
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Thu, 14 Dec 2000 14:49:34 +0100
+             Message-Id: <20001214142101.B338.H.M.BRAND@hccnet.nl>
+             
+             Type casting for nervous compilers.
+     Branch: perl
+	   ! ext/Encode/Encode.xs
+____________________________________________________________________________
+[  8108] By: jhi                                   on 2000/12/14  21:26:17
+        Log: Subject: [8104] DB_File
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Thu, 14 Dec 2000 14:49:35 +0100
+             Message-Id: <20001214144439.B33A.H.M.BRAND@hccnet.nl>
+             
+             Type definition incorrect for DB 2.7.7.  Not known when it
+             changed, so only changed it for a known revision.
+     Branch: perl
+	   ! ext/DB_File/DB_File.xs
+____________________________________________________________________________
+[  8107] By: jhi                                   on 2000/12/14  21:23:41
+        Log: Subject: [PATCH: perl@8102] Re: Encode/cp1047.enc etc.
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Thu, 14 Dec 2000 11:11:50 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10012141057330.57557-100000@aspara.forte.com>
+             
+             Use '?' (0x6F in EBCDIC) for the illegal codepoint.
+     Branch: perl
+	   ! ext/Encode/Encode/cp1047.enc ext/Encode/Encode/cp37.enc
+	   ! ext/Encode/Encode/posix-bc.enc
+____________________________________________________________________________
+[  8106] By: nick                                  on 2000/12/14  20:36:13
+        Log: "Cold" build correction to Encode's Makefile.PL
+     Branch: perlio
+	   ! ext/Encode/Makefile.PL
+____________________________________________________________________________
+[  8105] By: nick                                  on 2000/12/14  20:09:37
+        Log: "Compiled" encodings.
+             Correct replacement character in EBCDIC .enc files
+             Add 0x7F to ASCII repertoire.
+     Branch: perlio
+	   ! ext/Encode/Encode.pm ext/Encode/Encode.xs
+	   ! ext/Encode/Encode/ascii.enc ext/Encode/Encode/cp1047.enc
+	   ! ext/Encode/Encode/cp37.enc ext/Encode/Encode/posix-bc.enc
+	   ! ext/Encode/Makefile.PL ext/Encode/compile
+	   ! ext/Encode/encengine.c ext/Encode/encode.h
+____________________________________________________________________________
+[  8104] By: nick                                  on 2000/12/14  00:38:20
+        Log: Integrate mainline
+     Branch: perlio
+	  !> Changes Configure doio.c embed.h embed.pl ext/DB_File/Changes
+	  !> ext/DB_File/DB_File.pm ext/DB_File/DB_File.xs
+	  !> ext/DB_File/dbinfo ext/DB_File/typemap ext/DB_File/version.c
+	  !> hints/hpux.sh lib/Cwd.pm objXSUB.h patchlevel.h perlapi.c
+	  !> pod/perlapi.pod pp_hot.c proto.h t/lib/db-btree.t
+	  !> t/lib/db-hash.t t/lib/db-recno.t
+____________________________________________________________________________
+[  8103] By: nick                                  on 2000/12/13  23:16:13
+        Log: Beginings of compiled encodings - checked in as a snapshot of thoughts
+             so far and so it does not get lost.
+     Branch: perlio
+	   + ext/Encode/compile ext/Encode/encengine.c ext/Encode/encode.h
+____________________________________________________________________________
+[  8102] By: jhi                                   on 2000/12/13  17:14:22
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  8101] By: jhi                                   on 2000/12/13  16:53:41
         Log: Move the proto of start_glob() to a better place; regen api files.
      Branch: perl
