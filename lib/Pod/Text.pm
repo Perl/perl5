@@ -50,7 +50,7 @@ require Exporter;
 @EXPORT = qw(pod2text);
 
 use vars qw($VERSION);
-$VERSION = "1.0203";
+$VERSION = "1.0204";
 
 use locale;	# make \w work right in non-ASCII lands
 
@@ -274,7 +274,7 @@ sub prepare_for_output {
 		if (length() + 3 < $indent) {
 		    my $paratag = $_;
 		    $_ = <IN>;
-		    if (/^=/) {  # tricked!
+		    if (/^[=\s]/) {  # tricked!, or verbatim paragraph
 			local($indent) = $indent[$#indent - 1] || $DEF_INDENT;
 			output($paratag);
 			redo POD_DIRECTIVE;
