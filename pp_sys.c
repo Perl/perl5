@@ -709,8 +709,10 @@ PP(pp_binmode)
     }
 
     EXTEND(SP, 1);
-    if (!(io = GvIO(gv)) || !(fp = IoIFP(io)))
-	RETPUSHUNDEF;
+    if (!(io = GvIO(gv)) || !(fp = IoIFP(io))) {
+        report_evil_fh(gv, io, PL_op->op_type);
+        RETPUSHUNDEF;
+    }
 
     if (discp) {
 	names = SvPV(discp,len);
