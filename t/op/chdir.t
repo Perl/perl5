@@ -11,7 +11,8 @@ use Config;
 require "test.pl";
 plan(tests => 31);
 
-my $IsVMS = $^O eq 'VMS';
+my $IsVMS   = $^O eq 'VMS';
+my $IsMacOS = $^O eq 'MacOS';
 
 # Might be a little early in the testing process to start using these,
 # but I can't think of a way to write this test without them.
@@ -44,7 +45,7 @@ sub check_env {
     my($key) = @_;
 
     # Make sure $ENV{'SYS$LOGIN'} is only honored on VMS.
-    if( $key eq 'SYS$LOGIN' && !$IsVMS ) {
+    if( $key eq 'SYS$LOGIN' && !$IsVMS && !$IsMacOS ) {
         ok( !chdir(),         "chdir() on $^O ignores only \$ENV{$key} set" );
         is( abs_path, $Cwd,   '  abs_path() did not change' );
         pass( "  no need to test SYS\$LOGIN on $^O" ) for 1..7;
@@ -92,8 +93,10 @@ sub clean_env {
         next if $IsVMS && $env eq 'SYS$LOGIN';
         next if $IsVMS && $env eq 'HOME' && !$Config{'d_setenv'};
 
-        # On VMS, %ENV is many layered.
-        delete $ENV{$env} while exists $ENV{$env};
+        unless ($IsMacOS) { # ENV on MacOS is "special" :-)
+            # On VMS, %ENV is many layered.
+            delete $ENV{$env} while exists $ENV{$env};
+        }
     }
 
     # The following means we won't really be testing for non-existence,
@@ -122,7 +125,7 @@ foreach my $key (@magic_envs) {
 
 {
     clean_env;
-    if ($IsVMS && !$Config{'d_setenv'}) {
+    if (($IsVMS || $IsMacOS) && !$Config{'d_setenv'}) {
         pass("Can't reset HOME, so chdir() test meaningless");
     } else {
         ok( !chdir(),                   'chdir() w/o any ENV set' );

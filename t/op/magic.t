@@ -134,10 +134,15 @@ ok((keys %h)[0] eq "foo\034bar", (keys %h)[0]);
 }
 
 # $?, $@, $$
-system qq[$PERL "-I../lib" -e "use vmsish qw(hushed); exit(0)"];
-ok $? == 0, $?;
-system qq[$PERL "-I../lib" -e "use vmsish qw(hushed); exit(1)"];
-ok $? != 0, $?;
+if ($Is_MacOS) {
+    skip('$? + system are broken on MacPerl') for 1..2;
+}
+else {
+    system qq[$PERL "-I../lib" -e "use vmsish qw(hushed); exit(0)"];
+    ok $? == 0, $?;
+    system qq[$PERL "-I../lib" -e "use vmsish qw(hushed); exit(1)"];
+    ok $? != 0, $?;
+}
 
 eval { die "foo\n" };
 ok $@ eq "foo\n", $@;

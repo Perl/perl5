@@ -11,6 +11,7 @@ BEGIN {
 
 use strict;
 use warnings;
+use File::Spec::Functions;
 
 # Okay, this is the list.
 
@@ -49,7 +50,10 @@ foreach my $module (@Core_Modules) {
 sub compile_module {
     my ($module) = $_[0];
 
-    my $out = scalar `$^X "-I../lib" lib/compmod.pl $module`;
+    my $compmod = catfile(curdir(), 'lib', 'compmod.pl');
+    my $lib     = '-I' . catdir(updir(), 'lib');
+
+    my $out = scalar `$^X $lib $compmod $module`;
     print "# $out";
     return $out =~ /^ok/;
 }

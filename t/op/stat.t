@@ -17,6 +17,7 @@ $Is_Amiga   = $^O eq 'amigaos';
 $Is_Cygwin  = $^O eq 'cygwin';
 $Is_Darwin  = $^O eq 'darwin';
 $Is_Dos     = $^O eq 'dos';
+$Is_MacOS   = $^O eq 'MacOS';
 $Is_MPE     = $^O eq 'mpeix';
 $Is_MSWin32 = $^O eq 'MSWin32';
 $Is_NetWare = $^O eq 'NetWare';
@@ -175,7 +176,7 @@ ok(-w $tmpfile,     '   -w');
 
 SKIP: {
     skip "-x simply determins if a file ends in an executable suffix", 1
-      if $Is_Dosish;
+      if $Is_Dosish || $Is_MacOS;
 
     ok(-x $tmpfile,     '   -x');
 }
@@ -330,9 +331,9 @@ SKIP: {
 
 
 # These aren't strictly "stat" calls, but so what?
-
-ok(-T 'op/stat.t',      '-T');
-ok(! -B 'op/stat.t',    '!-B');
+my $statfile = File::Spec->catfile($Curdir, 'op', 'stat.t');
+ok(  -T $statfile,    '-T');
+ok(! -B $statfile,    '!-B');
 
 SKIP: {
      skip("DG/UX", 1) if $Is_DGUX;
@@ -341,7 +342,7 @@ ok(-B $Perl,      '-B');
 
 ok(! -T $Perl,    '!-T');
 
-open(FOO,'op/stat.t');
+open(FOO,$statfile);
 SKIP: {
     eval { -T FOO; };
     skip "-T/B on filehandle not implemented", 15 if $@ =~ /not implemented/;
@@ -357,7 +358,7 @@ SKIP: {
     ok(! -B FOO,    '   still -B');
     close(FOO);
 
-    open(FOO,'op/stat.t');
+    open(FOO,$statfile);
     $_ = <FOO>;
     like($_, qr/perl/,      'reopened and after readline');
     ok(-T FOO,      '   still -T');
@@ -392,7 +393,7 @@ ok(-f(),    '     -f() "');
 unlink $tmpfile or print "# unlink failed: $!\n";
 
 # bug id 20011101.069
-my @r = \stat(".");
+my @r = \stat($Curdir);
 is(scalar @r, 13,   'stat returns full 13 elements');
 
 SKIP: {

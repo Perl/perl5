@@ -3,8 +3,8 @@
 
 BEGIN {
     if (ord("A") == 193) {
-       print "1..0 # Unicode::Normalize not ported to EBCDIC\n";
-       exit 0;
+	print "1..0 # Unicode::Normalize not ported to EBCDIC\n";
+	exit 0;
     }
 }
 
@@ -13,7 +13,7 @@ BEGIN {
 use Test;
 use strict;
 use warnings;
-BEGIN { plan tests => 10 };
+BEGIN { plan tests => 13 };
 use Unicode::Normalize qw(:all);
 ok(1); # If we made it this far, we're ok.
 
@@ -22,7 +22,7 @@ ok(1); # If we made it this far, we're ok.
 print getCombinClass(   0) == 0
    && getCombinClass( 768) == 230
    && getCombinClass(1809) == 36
-#  && getCombinClass(119143) == 1 # U+1D167, a Unicode 3.1 character
+   && ($] < 5.007003 || getCombinClass(0x1D167) == 1) # Unicode 3.1
   ? "ok" : "not ok", " 2\n";
 
 print ! defined getCanon( 0)
@@ -125,3 +125,15 @@ print 1
   && answer(checkNFKD(pack('U*', 0x20, 0xC1, 0xFF71, 0x2025))) eq "NO"
   && answer(checkNFKC(pack('U*', 0x20, 0xC1, 0xAE00, 0x2025))) eq "NO"
   ? "ok" : "not ok", " 10\n";
+
+"012ABC" =~ /(\d+)(\w+)/;
+print "012" eq NFC $1 && "ABC" eq NFC $2
+  ? "ok" : "not ok", " 11\n";
+
+print "012" eq normalize('C', $1) && "ABC" eq normalize('C', $2)
+  ? "ok" : "not ok", " 12\n";
+
+print "012" eq normalize('NFC', $1) && "ABC" eq normalize('NFC', $2)
+  ? "ok" : "not ok", " 13\n";
+ # s/^NF// in normalize() must not prevent using $1, $&, etc.
+

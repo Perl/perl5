@@ -13,7 +13,7 @@ BEGIN {
     require './test.pl';
 }
 
-if ($^O eq 'dos') {
+if ($^O eq 'dos' || $^O eq 'MacOS') {
     skip_all("no multitasking");
 }
 

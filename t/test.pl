@@ -378,14 +378,27 @@ sub runperl {
 	$runperl .= qq( "$args{progfile}");
     }
     if (defined $args{stdin}) {
-        # so we don't try to put literal newlines and crs onto the
-        # command line.
-        $args{stdin} =~ s/\n/\\n/g;
-        $args{stdin} =~ s/\r/\\r/g;
+	# so we don't try to put literal newlines and crs onto the
+	# command line.
+	$args{stdin} =~ s/\n/\\n/g;
+	$args{stdin} =~ s/\r/\\r/g;
 
 	if ($is_mswin || $is_netware || $is_vms) {
 	    $runperl = qq{$^X -e "print qq(} .
 		$args{stdin} . q{)" | } . $runperl;
+	}
+	elsif ($is_macos) {
+	    # MacOS can only do two processes under MPW at once;
+	    # the test itself is one; we can't do two more, so
+	    # write to temp file
+	    my $stdin = qq{$^X -e 'print qq(} . $args{stdin} . qq{)' > teststdin; };
+	    if ($args{verbose}) {
+		my $stdindisplay = $stdin;
+		$stdindisplay =~ s/\n/\n\#/g;
+		print STDERR "# $stdindisplay\n";
+	    }
+	    `$stdin`;
+	    $runperl .= q{ < teststdin };
 	}
 	else {
 	    $runperl = qq{$^X -e 'print qq(} .

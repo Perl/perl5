@@ -1905,8 +1905,6 @@ lib/warnings.t			See if warning controls work
 lib/warnings/register.pm	For "use warnings::register"
 lib/Win32.pod			Documentation for Win32 extras
 locale.c			locale-specific utility functions
-macos/MacPerlTests.cmd	MacOS ports
-macos/xsubpp.patch	MacOS ports
 makeaperl.SH			perl script that produces a new perl binary
 makedef.pl			Create symbol export lists for linking
 makedepend.SH			Precursor to makedepend
