@@ -956,6 +956,7 @@ ok3
 ########
 
 --FILE-- abc.pm
+$| = 1;
 package abc ;
 no warnings ;
 use warnings::register ;
@@ -978,13 +979,13 @@ use abc ;
 use warnings 'abc';
 abc::in1() ;
 EXPECT
-my message 1 at - line 3
-my message 2 at - line 3
-my message 3 at - line 3
 ok1
 ok2
 ok3
 ok4
+my message 1 at - line 3
+my message 2 at - line 3
+my message 3 at - line 3
 ########
 
 --FILE-- def.pm
@@ -1006,6 +1007,7 @@ sub in2 { no warnings ; check() }
 sub in1 { no warnings ; in2() }
 1;
 --FILE-- abc.pm
+$| = 1;
 package abc ;
 use def ;
 use warnings 'def';
@@ -1016,19 +1018,20 @@ use abc ;
 no warnings;
 abc::in1() ;
 EXPECT
-my message 1 at abc.pm line 4
-	abc::in1() called at - line 3
-my message 2 at abc.pm line 4
-	abc::in1() called at - line 3
-my message 3 at abc.pm line 4
-	abc::in1() called at - line 3
 ok1
 ok2
 ok3
 ok4
+my message 1 at abc.pm line 5
+	abc::in1() called at - line 3
+my message 2 at abc.pm line 5
+	abc::in1() called at - line 3
+my message 3 at abc.pm line 5
+	abc::in1() called at - line 3
 ########
 
 --FILE-- def.pm
+$| = 1;
 package def ;
 no warnings ;
 use warnings::register ;
@@ -1063,12 +1066,12 @@ no warnings;
 use warnings 'abc';
 abc::in1() ;
 EXPECT
-my message 1 at - line 4
-my message 3 at - line 4
 ok2
 ok3
 ok4
 ok5
+my message 1 at - line 4
+my message 3 at - line 4
 ########
 
 --FILE-- def.pm
@@ -1116,6 +1119,7 @@ sub in1
 }
 1;
 --FILE-- abc.pm
+$| = 1;
 package abc ;
 use warnings::register ;
 use def ;
@@ -1137,22 +1141,22 @@ print "**\n";
 $b = new def ;
 $b->in1() ;
 EXPECT
-my message 1 at - line 5
-my message 2 at - line 5
-my message 4 at - line 5
-my message 8 at - line 5
-my message 1 at - line 8
-my message 2 at - line 8
-my message 4 at - line 8
 ok1
 ok2
 ok3
 ok4
 ok5
 ok6
+my message 1 at - line 5
+my message 2 at - line 5
+my message 4 at - line 5
+my message 8 at - line 5
 **
 ok1
 ok2
 ok3
 ok4
 ok5
+my message 1 at - line 8
+my message 2 at - line 8
+my message 4 at - line 8
