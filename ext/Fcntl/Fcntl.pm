@@ -7,6 +7,7 @@ Fcntl - load the C Fcntl.h defines
 =head1 SYNOPSIS
 
     use Fcntl;
+    use Fcntl qw(:DEFAULT :flock);
 
 =head1 DESCRIPTION
 
@@ -21,14 +22,21 @@ far more likely chance of getting the numbers right.
 Only C<#define> symbols get translated; you must still correctly
 pack up your own arguments to pass as args for locking functions, etc.
 
+=head1 EXPORTED SYMBOLS
+
+By default your system's F_* and O_* constants (eg, F_DUPFD and O_CREAT)
+are exported into your namespace.  You can request that the flock()
+constants (LOCK_SH, LOCK_EX, LOCK_NB and LOCK_UN) be provided by using
+the tag C<:flock>.  See L<Exporter>.
+
 =cut
 
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK $AUTOLOAD);
+use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $AUTOLOAD);
 
 require Exporter;
 require DynaLoader;
 @ISA = qw(Exporter DynaLoader);
-$VERSION = "1.00";
+$VERSION = "1.01";
 # Items to export into callers namespace by default
 # (move infrequently used names to @EXPORT_OK below)
 @EXPORT =
@@ -42,6 +50,11 @@ $VERSION = "1.00";
      );
 # Other items we are prepared to export if requested
 @EXPORT_OK = qw(
+    LOCK_SH LOCK_EX LOCK_NB LOCK_UN
+);
+# Named groups of exports
+%EXPORT_TAGS = (
+    'flock' => [qw(LOCK_SH LOCK_EX LOCK_NB LOCK_UN)],
 );
 
 sub AUTOLOAD {

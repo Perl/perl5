@@ -4,7 +4,7 @@ package IO::Pipe;
 
 =head1 NAME
 
-IO::pipe - supply object methods for pipes
+IO::Pipe - supply object methods for pipes
 
 =head1 SYNOPSIS
 

@@ -8,6 +8,96 @@ or in the .../src/5/0/unsupported directory for sub-version
 releases.)
 
 ----------------
+Version 5.003_13
+----------------
+
+The watchword here is "synchronization."  There were a couple of
+show-stopper bugs in 5.003_12, so I'm issuing this patch to bring
+everyone up to a common working base.
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Disallow labels named q, qq, qw, qx, s, y, and tr"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  toke.c
+
+  Title:  "Make evals' lexicals visible to nested evals"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pp_ctl.c
+
+ OTHER CORE CHANGES
+
+  Title:  "Fix core dump bug with anoncode"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  op.c
+
+  Title:  "Allow DESTROY to make refs to dying objects"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  sv.c
+
+ PORTABILITY
+
+  Title:  "Add missing backslash in Configure"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  Configure
+
+ UTILITIES, LIBRARY, AND EXTENSIONS
+
+  Title:  "Include libnet-1.01 instead of old Net::FTP"
+   From:  Graham Barr <Graham.Barr@tiuk.ti.com>
+  Files:  MANIFEST lib/Net/Cmd.pm lib/Net/Domain.pm
+          lib/Net/DummyInetd.pm lib/Net/FTP.pm lib/Net/NNTP.pm
+          lib/Net/Netrc.pm lib/Net/POP3.pm lib/Net/SMTP.pm
+          lib/Net/SNPP.pm lib/Net/Socket.pm lib/Net/Telnet.pm
+          lib/Net/Time.pm pod/perlmod.pod
+
+  Title:  "Use binmode when doing binary FTP"
+   From:  Ilya Zakharevich
+  Files:  lib/Net/FTP.pm
+
+  Title:  "Re: Open3.pm tries to close unopened file handle"
+   From:  Roderick Schertler <roderick@gate.net>
+ Msg-ID:  <pzloavmd9h.fsf@eeyore.ibcinc.com>
+   Date:  18 Dec 1996 22:19:54 -0500
+  Files:  MANIFEST lib/IPC/Open2.pm lib/IPC/Open3.pm lib/open2.pl
+          lib/open3.pl pod/perldiag.pod pod/perlfunc.pod t/lib/open2.t
+          t/lib/open3.t
+
+  Title:  "Long-standing problem in Socket module"
+   From:  Spider Boardman <spider@orb.nashua.nh.us>
+ Msg-ID:  <199612190418.XAA07291@Orb.Nashua.NH.US>
+   Date:  Wed, 18 Dec 1996 23:18:14 -0500
+  Files:  Configure Porting/Glossary config_H config_h.SH
+          ext/Socket/Socket.pm ext/Socket/Socket.xs
+
+  Title:  "flock() constants"
+   From:  Roderick Schertler <roderick@gate.net>
+ Msg-ID:  <26669.850977437@eeyore.ibcinc.com>
+   Date:  Thu, 19 Dec 1996 01:37:17 -0500
+  Files:  ext/Fcntl/Fcntl.pm ext/Fcntl/Fcntl.xs pod/perlfunc.pod
+
+  Title:  "Re: find2perl . -xdev BROKEN still"
+   From:  Roderick Schertler <roderick@gate.net>
+ Msg-ID:  <pzvi9yig3h.fsf@eeyore.ibcinc.com>
+   Date:  19 Dec 1996 12:44:34 -0500
+  Files:  lib/File/Find.pm lib/find.pl lib/finddepth.pl
+
+ DOCUMENTATION
+
+  Title:  "small doc tweaks for _12"
+   From:  Roderick Schertler <roderick@gate.net>
+ Msg-ID:  <1826.851011557@eeyore.ibcinc.com>
+   Date:  Thu, 19 Dec 1996 11:05:57 -0500
+  Files:  lib/UNIVERSAL.pm pod/perldiag.pod pod/perltie.pod
+
+  Title:  "Re: missing E<> POD directive in perlpod.pod"
+   From:  Roderick Schertler <roderick@gate.net>
+ Msg-ID:  <pzwwueimak.fsf@eeyore.ibcinc.com>
+   Date:  19 Dec 1996 10:30:43 -0500
+  Files:  pod/perlpod.pod pod/pod2html.PL
+
+
+----------------
 Version 5.003_12
 ----------------
 

@@ -335,6 +335,13 @@
 #define HAS_NTOHL		/**/
 #define HAS_NTOHS		/**/
 
+/* HAS_INET_ATON:
+ *	This symbol, if defined, indicates to the C program that the
+ *	inet_aton() function is available to parse IP address "dotted-quad"
+ *	strings.
+ */
+#define HAS_INET_ATON		/**/
+
 /* HAS_ISASCII:
  *	This manifest constant lets the C program know that isascii 
  *	is available.

@@ -349,6 +349,13 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_htonl HAS_NTOHL		/**/
 #$d_htonl HAS_NTOHS		/**/
 
+/* HAS_INET_ATON:
+ *	This symbol, if defined, indicates to the C program that the
+ *	inet_aton() function is available to parse IP address "dotted-quad"
+ *	strings.
+ */
+#$d_inetaton HAS_INET_ATON		/**/
+
 /* HAS_ISASCII:
  *	This manifest constant lets the C program know that isascii 
  *	is available.

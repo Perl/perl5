@@ -304,6 +304,7 @@ d_getppid=''
 d_getprior=''
 d_gnulibc=''
 d_htonl=''
+d_inetaton=''
 d_isascii=''
 d_killpg=''
 d_link=''
@@ -2025,7 +2026,7 @@ if xxx=`./loc arch blurfl $pth`; $test -f "$xxx"; then
 	tarch=`arch`"-$osname"
 elif xxx=`./loc uname blurfl $pth`; $test -f "$xxx" ; then
 	if uname -m > tmparch 2>&1 ; then
-		tarch=`$sed -e 's/ *$//' -e 's/ /_/g'
+		tarch=`$sed -e 's/ *$//' -e 's/ /_/g' \
 			-e 's/$/'"-$osname/" tmparch`
 	else
 		tarch="$osname"
@@ -6628,6 +6629,10 @@ set d_strchr; eval $setvar
 val="$vali"
 set d_index; eval $setvar
 
+: check whether inet_aton exists
+set inet_aton d_inetaton
+eval $inlibc
+
 : Look for isascii
 echo " "
 $cat >isascii.c <<'EOCP'
@@ -9926,6 +9931,7 @@ d_gettimeod='$d_gettimeod'
 d_gnulibc='$d_gnulibc'
 d_htonl='$d_htonl'
 d_index='$d_index'
+d_inetaton='$d_inetaton'
 d_isascii='$d_isascii'
 d_killpg='$d_killpg'
 d_link='$d_link'

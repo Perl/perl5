@@ -34,6 +34,10 @@ bin (bin.U):
 	is most often a local directory such as /usr/local/bin. Programs using
 	this variable must be prepared to deal with ~name substitution.
 
+bincompat3 (bincompat3.U):
+	This variable contains y if Perl 5.004 should be binary-compatible
+	with Perl 5.003.
+
 byteorder (byteorder.U):
 	This variable holds the byte order. In the following, larger digits
 	indicate more significance.  The variable byteorder is either 4321
@@ -132,6 +136,11 @@ d_bcmp (d_bcmp.U):
 d_bcopy (d_bcopy.U):
 	This variable conditionally defines the HAS_BCOPY symbol if
 	the bcopy() routine is available to copy strings.
+
+d_bincompat3 (bincompat3.U):
+	This variable conditionally defines BINCOMPAT3 so that embed.h
+	can take special action if Perl 5.004 should be binary-compatible
+	with Perl 5.003.
 
 d_bsdgetpgrp (d_getpgrp.U):
 	This variable conditionally defines USE_BSD_GETPGRP if
@@ -272,9 +281,19 @@ d_fsetpos (d_fsetpos.U):
 	This variable conditionally defines HAS_FSETPOS if fsetpos() is
 	available to set the file position indicator.
 
+d_ftime (d_ftime.U):
+	This variable conditionally defines the HAS_FTIME symbol, which
+	indicates that the ftime() routine exists.  The ftime() routine is
+	basically a sub-second accuracy clock.
+
 d_gethent (d_gethent.U):
 	This variable conditionally defines HAS_GETHOSTENT if gethostent() is
 	available to dup file descriptors.
+
+d_gettimeod (d_ftime.U):
+	This variable conditionally defines the HAS_GETTIMEOFDAY symbol, which
+	indicates that the gettimeofday() system call exists (to obtain a
+	sub-second accuracy clock).
 
 d_getlogin (d_getlogin.U):
 	This variable conditionally defines the HAS_GETLOGIN symbol, which
@@ -311,6 +330,11 @@ d_htonl (d_htonl.U):
 d_index (d_strchr.U):
 	This variable conditionally defines HAS_INDEX if index() and
 	rindex() are available for string searching.
+
+d_inetaton (d_inetaton.U):
+	This variable conditionally defines the HAS_INET_ATON symbol, which
+	indicates to the C program that the inet_aton() function is available
+	to parse IP address "dotted-quad" strings.
 
 d_isascii (d_isascii.U):
 	This variable conditionally defines the HAS_ISASCII constant,
@@ -483,6 +507,11 @@ d_safemcpy (d_safemcpy.U):
 	This variable conditionally defines the HAS_SAFE_MEMCPY symbol if
 	the memcpy() routine can do overlapping copies.
 
+d_sanemcmp (d_sanemcmp.U):
+	This variable conditionally defines the HAS_SANE_MEMCMP symbol if
+	the memcpy() routine is available and can be used to compare relative
+	magnitudes of chars with their high bits set.
+
 d_seekdir (d_readdir.U):
 	This variable conditionally defines HAS_SEEKDIR if seekdir() is
 	available.
@@ -642,6 +671,21 @@ d_strerrm (d_strerror.U):
 d_strerror (d_strerror.U):
 	This variable conditionally defines HAS_STRERROR if strerror() is
 	available to translate error numbers to strings.
+
+d_strtod (d_strtod.U):
+	This variable conditionally defines the HAS_STRTOD symbol, which
+	indicates to the C program that the strtod() routine is available
+	to provide better numeric string conversion than atof().
+
+d_strtol (d_strtol.U):
+	This variable conditionally defines the HAS_STRTOL symbol, which
+	indicates to the C program that the strtol() routine is available
+	to provide better numeric string conversion than atoi() and friends.
+
+d_strtoul (d_strtoul.U):
+	This variable conditionally defines the HAS_STRTOUL symbol, which
+	indicates to the C program that the strtoul() routine is available
+	to provide conversion of strings to unsigned long.
 
 d_strxfrm (d_strxfrm.U):
 	This variable conditionally defines HAS_STRXFRM if strxfrm() is
@@ -1174,6 +1218,11 @@ path_sep (Unix.U):
 
 perladmin (perladmin.U):
 	Electronic mail address of the perl5 administrator.
+
+perlpath (perlpath.U):
+	This variable contains the eventual value of the PERLPATH symbol,
+	which contains the name of the perl interpreter to be used in
+	shell scripts and in the "eval 'exec'" idiom.
 
 prefix (prefix.U):
 	This variable holds the name of the directory below which the

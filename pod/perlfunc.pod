@@ -1040,20 +1040,17 @@ would need to use the more system-specific fcntl() for that.
 
 Here's a mailbox appender for BSD systems.
 
-    $LOCK_SH = 1;
-    $LOCK_EX = 2;
-    $LOCK_NB = 4;
-    $LOCK_UN = 8;
+    use Fcntl ':flock'; # import LOCK_* constants
 
     sub lock {
-	flock(MBOX,$LOCK_EX);
+	flock(MBOX,LOCK_EX);
 	# and, in case someone appended
 	# while we were waiting...
 	seek(MBOX, 0, 2);
     }
 
     sub unlock {
-	flock(MBOX,$LOCK_UN);
+	flock(MBOX,LOCK_UN);
     }
 
     open(MBOX, ">>/usr/spool/mail/$ENV{'USER'}")
@@ -1754,8 +1751,9 @@ If the filename begins with "|", the filename is interpreted as a command
 to which output is to be piped, and if the filename ends with a "|", the
 filename is interpreted See L<perlipc/"Using open() for IPC"> for more
 examples of this.  as command which pipes input to us.  (You may not have
-a raw open() to a command that pipes both in I<and> out, but see L<open2>,
-L<open3>, and L<perlipc/"Bidirectional Communication"> for alternatives.)
+a raw open() to a command that pipes both in I<and> out, but see
+L<IPC::Open2>, L<IPC::Open3>, and L<perlipc/"Bidirectional Communication">
+for alternatives.)
 
 Opening '-' opens STDIN and opening 'E<gt>-' opens STDOUT.  Open returns
 non-zero upon success, the undefined value otherwise.  If the open
@@ -2052,7 +2050,7 @@ unless you are very careful.  In addition, note that Perl's pipes use
 stdio buffering, so you may need to set C<$|> to flush your WRITEHANDLE
 after each command, depending on the application.
 
-See L<open2>, L<open3>, and L<perlipc/"Bidirectional Communication">
+See L<IPC::Open2>, L<IPC::Open3>, and L<perlipc/"Bidirectional Communication">
 for examples of such things.
 
 =item pop ARRAY

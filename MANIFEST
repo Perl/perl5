@@ -302,7 +302,7 @@ lib/File/Compare.pm	Emulation of cmp command
 lib/File/Copy.pm	Emulation of cp command
 lib/File/Find.pm	Routines to do a find
 lib/File/Path.pm	A module to do things like `mkdir -p' and `rm -r'
-lib/File/stat.pm	Object-oriented wrapper around CORE::stat
+lib/File/stat.pm	By-name interface to Perl's built-in stat
 lib/FileCache.pm	Keep more files open than the system permits
 lib/FileHandle.pm	Backward-compatible front end to IO extension
 lib/FindBin.pm		Find name of currently executing program
@@ -314,14 +314,22 @@ lib/IPC/Open3.pm	Open a three-ended pipe!
 lib/Math/BigFloat.pm	An arbitrary precision floating-point arithmetic package
 lib/Math/BigInt.pm	An arbitrary precision integer arithmetic package
 lib/Math/Complex.pm	A Complex package
-lib/Net/FTP.pm		File Transfer Protocol client
-lib/Net/Netrc.pm	Parser for ".netrc" file a la Berkeley UNIX
-lib/Net/Ping.pm		Ping methods
-lib/Net/Socket.pm	Support class for Net::FTP
-lib/Net/hostent.pm	Object-oriented wrapper around CORE::gethost*
-lib/Net/netent.pm	Object-oriented wrapper around CORE::getnet*
-lib/Net/protoent.pm	Object-oriented wrapper around CORE::getproto*
-lib/Net/servent.pm	Object-oriented wrapper around CORE::getserv*
+lib/Net/Cmd.pm		Base class for command-based protocols (libnet-1.01)
+lib/Net/Domain.pm	DNS Domain name lookup (libnet-1.01)
+lib/Net/DummyInetd.pm	Place holder for future Net::Inetd (libnet-1.01)
+lib/Net/FTP.pm		File Transfer Protocol client (libnet-1.01)
+lib/Net/NNTP.pm		Network News Transfer Protocol (libnet-1.01)
+lib/Net/Netrc.pm	.netrc lookup routines (libnet-1.01)
+lib/Net/POP3.pm		Post Office Protocol (libnet-1.01)
+lib/Net/Ping.pm		Hello, anybody home?
+lib/Net/SMTP.pm		Simple Mail Transfer Protocol client (libnet-1.01)
+lib/Net/SNPP.pm		Simple Network Pager Protocol client (libnet-1.01)
+lib/Net/Telnet.pm	Telnet client (libnet-1.01)
+lib/Net/Time.pm		Time & NetTime protocols (libnet-1.01)
+lib/Net/hostent.pm	By-name interface to Perl's built-in gethost*
+lib/Net/netent.pm	By-name interface to Perl's built-in getnet*
+lib/Net/protoent.pm	By-name interface to Perl's built-in getproto*
+lib/Net/servent.pm	By-name interface to Perl's built-in getserv*
 lib/Pod/Functions.pm	used by pod/splitpod
 lib/Pod/Text.pm		Convert POD data to formatted ASCII text
 lib/Search/Dict.pm	A module to do binary search on dictionaries
@@ -345,12 +353,12 @@ lib/Tie/RefHash.pm	Base class for tied hashes with references as keys
 lib/Tie/Scalar.pm	Base class for tied scalars
 lib/Tie/SubstrHash.pm	Compact hash for known key, value and table size
 lib/Time/Local.pm	Reverse translation of localtime, gmtime
-lib/Time/gmtime.pm	Object-oriented wrapper around CORE::gmtime
-lib/Time/localtime.pm	Object-oriented wrapper around CORE::localtime
-lib/Time/tm.pm		Perl implementation of "struct tm" for {gm,local}time
+lib/Time/gmtime.pm	By-name interface to Perl's built-in gmtime
+lib/Time/localtime.pm	By-name interface to Perl's built-in localtime
+lib/Time/tm.pm		Internal oject for Time::{gm,local}time
 lib/UNIVERSAL.pm	Base class for ALL classes.
-lib/User/grent.pm	Object-oriented wrapper around CORE::getgr*
-lib/User/pwent.pm	Object-oriented wrapper around CORE::getpw*
+lib/User/grent.pm	By-name interface to Perl's built-in getgr*
+lib/User/pwent.pm	By-name interface to Perl's built-in getpw*
 lib/abbrev.pl		An abbreviation table builder
 lib/assert.pl		assertion and panic with stack trace
 lib/bigfloat.pl		An arbitrary precision floating point package
@@ -612,6 +620,8 @@ t/lib/io_xs.t		See if XSUB methods from IO work
 t/lib/ndbm.t		See if NDBM_File works
 t/lib/odbm.t		See if ODBM_File works
 t/lib/opcode.t		See if Opcode works
+t/lib/open2.t		See if IPC::Open3 works
+t/lib/open3.t		See if IPC::Open2 works
 t/lib/ops.t		See if Opcode works
 t/lib/parsewords.t	See if Text::ParseWords works
 t/lib/posix.t		See if POSIX works

@@ -648,21 +648,49 @@ complex numbers and associated mathematical functions
 
 tied access to ndbm files
 
+=item Net::Cmd
+
+Base class for command-oriented protocols
+
+=item Net::Domain
+
+Domain Name System client
+
 =item Net::FTP
 
 File Transfer Protocol client
 
-=item Net::Ping
+=item Net::NNTP
 
-check a host for upness
+Network News Transfer Protocol client
 
 =item Net::Netrc
 
-parser for ".netrc" files a la Berkeley UNIX
+.netrc lookup routines
 
-=item Net::Socket
+=item Net::Ping
 
-support class for Net::FTP
+Hello, anybody home?
+
+=item Net::POP3
+
+Post Office Protocol client
+
+=item Net::SMTP
+
+Simple Mail Transfer Protocol client
+
+=item Net::SNPP
+
+Simple Network Pager Protocol client
+
+=item Net::Telnet
+
+Telnet client
+
+=item Net::Time
+
+Time and NetTime protocols
 
 =item Net::hostent
 

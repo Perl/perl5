@@ -635,7 +635,7 @@ Usually this is because you don't have read permission for the file.
 
 (W) You tried to say C<open(CMD, "|cmd|")>, which is not supported.  You can
 try any of several modules in the Perl library to do this, such as
-"open2.pl".  Alternately, direct the pipe's output to a file using "E<gt>",
+IPC::Open2.  Alternately, direct the pipe's output to a file using "E<gt>",
 and then read it in under a different file handle.
 
 =item Can't open error file %s as stderr
@@ -842,7 +842,7 @@ case it indicates something else.
 (W) You probably said %hash{$key} when you meant $hash{$key} or @hash{@keys}.
 On the other hand, maybe you just meant %hash and got carried away.
 
-=item Died.
+=item Died
 
 (F) You passed die() an empty string (the equivalent of C<die "">) or
 you called it with no args and both C<$@> and C<$_> were empty.
@@ -2363,7 +2363,7 @@ on the front of your variable.
 of Perl.  Check the E<lt>#!E<gt> line, or manually feed your script
 into Perl yourself.
 
-=item Warning: something's wrong.
+=item Warning: something's wrong
 
 (W) You passed warn() an empty string (the equivalent of C<warn "">) or
 you called it with no args and C<$_> was empty.
