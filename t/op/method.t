@@ -64,6 +64,7 @@ test (eval { A->x } || "nope", "nope");
 
 eval <<'EOF';
 sub C::e;
+BEGIN { *B::e = \&C::e }	# Shouldn't prevent AUTOLOAD in original pkg
 sub Y::f;
 $counter = 0;
 
@@ -73,14 +74,16 @@ $counter = 0;
 sub B::AUTOLOAD {
   my $c = ++$counter;
   my $method = $B::AUTOLOAD; 
-  *$B::AUTOLOAD = sub { "B: In $method, $c" };
-  goto &$B::AUTOLOAD;
+  my $msg = "B: In $method, $c";
+  eval "sub $method { \$msg }";
+  goto &$method;
 }
 sub C::AUTOLOAD {
   my $c = ++$counter;
   my $method = $C::AUTOLOAD; 
-  *$C::AUTOLOAD = sub { "C: In $method, $c" };
-  goto &$C::AUTOLOAD;
+  my $msg = "C: In $method, $c";
+  eval "sub $method { \$msg }";
+  goto &$method;
 }
 EOF
 

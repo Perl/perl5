@@ -285,8 +285,19 @@ I32 autoload;
     }
     else if (autoload) {
 	CV* cv = GvCV(gv);
-	if (!cv || (!CvROOT(cv) && !CvXSUB(cv))) {
-	    GV* autogv = gv_autoload4(GvSTASH(gv), name, nend - name, TRUE);
+	if (!CvROOT(cv) && !CvXSUB(cv)) {
+	    GV* stubgv;
+	    GV* autogv;
+
+	    if (CvANON(cv))
+		stubgv = gv;
+	    else {
+		stubgv = CvGV(cv);
+		if (GvCV(stubgv) != cv)		/* orphaned import */
+		    stubgv = gv;
+	    }
+	    autogv = gv_autoload4(GvSTASH(stubgv),
+				  GvNAME(stubgv), GvNAMELEN(stubgv), TRUE);
 	    if (autogv)
 		gv = autogv;
 	}

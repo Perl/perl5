@@ -557,7 +557,9 @@ PP(pp_undef)
 		 CvANON((CV*)sv) ? "(anonymous)" : GvENAME(CvGV((CV*)sv)));
 	/* FALL THROUGH */
     case SVt_PVFM:
-	cv_undef((CV*)sv);
+	{ GV* gv = (GV*)SvREFCNT_inc(CvGV((CV*)sv));
+	  cv_undef((CV*)sv);
+	  CvGV((CV*)sv) = gv; }   /* let user-undef'd sub keep its identity */
 	break;
     case SVt_PVGV:
 	if (SvFAKE(sv))
