@@ -98,9 +98,9 @@ unless (@Pods) {
 
 # loop twice through the pods, first to learn the links, then to produce html
 for $count (0,1) {
-    print STTDER "Scanning pods...\n" unless $count;
+    print STDERR "Scanning pods...\n" unless $count;
     foreach $podfh ( @Pods ) {
-	($pod = $podfh) =~ s/\.pod$//;
+	($pod = $podfh) =~ s/\.(?:pod|pm)$//;
 	Debug("files", "opening 2 $podfh" );
 	print "Creating $pod.html from $podfh\n" if $count;
 	$RS = "\n=";         # grok pods by item (Nonstandard but effecient)
@@ -151,7 +151,7 @@ for $count (0,1) {
 		if ($count) {  # producing html
 		    ($depth) or next; # just skip it
 		    do_list("back",$all[$i+1],\$in_list,\$depth);
-		    do_rest("$title.$rest");
+		    do_rest($title.$rest);
 		}
 	    }
 	    elsif ($cmd =~ /^cut/) {
@@ -161,7 +161,7 @@ for $count (0,1) {
                 if ($count) {  # producing html
                     if ($title =~ s/^html//) {
                         $in_html =1;
-                        do_rest("$title.$rest");
+                        do_rest($title.$rest);
                     }
                 }
             }
@@ -501,6 +501,7 @@ sub gensym {
 sub pre_escapes {  # twiddle these, and stay up late  :-)
     my($thing) = @_;
     for ($$thing) { 
+    s/([\200-\377])/noremap("&".ord($1).";")/ge;
 	s/"(.*?)"/``$1''/gs;
 	s/&/noremap("&amp;")/ge;
 	s/<</noremap("&lt;&lt;")/eg;
