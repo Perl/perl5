@@ -3527,6 +3527,11 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol is defined if PROCSELFEXE_PATH is a symlink
  *	to the absolute pathname of the executing program.
  */
+/* PROCSELFEXE_PATH:
+ *	If HAS_PROCSELFEXE is defined this symbol is the filename
+ *	of the symbolic link pointing to the absolute pathname of
+ *	the executing program.
+ */
 #$d_procselfexe HAS_PROCSELFEXE	/**/
 #if defined(HAS_PROCSELFEXE) && !defined(PROCSELFEXE_PATH)
 #define PROCSELFEXE_PATH	$procselfexe	/**/
