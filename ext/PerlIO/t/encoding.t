@@ -16,8 +16,8 @@ print "1..13\n";
 
 my $grk = "grk$$";
 my $utf = "utf$$";
-my $fail1 = "fail$$";
-my $fail2 = "fail_$$";
+my $fail1 = "fa$$";
+my $fail2 = "fb$$";
 my $russki = "koi8r$$";
 
 if (open(GRK, ">$grk")) {
@@ -132,5 +132,5 @@ if (!defined $warn) {
 }
 
 END {
-    unlink($grk, $utf, $fail1, $russki);
+    unlink($grk, $utf, $fail1, $fail2, $russki);
 }
