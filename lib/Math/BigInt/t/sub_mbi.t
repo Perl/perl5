@@ -1,33 +1,31 @@
 #!/usr/bin/perl -w
 
-BEGIN {
-    $| = 1;
-    my $location = $0;
-    # to locate the testing files
-    $location =~ s/sub_mbi.t//i;
-    if ($ENV{PERL_CORE}) {
-        # testing with the core distribution
-	@INC = qw(../lib);
-	if (-d 't') {
-	    chdir 't';
-	    require File::Spec;
-	    unshift @INC, File::Spec->catdir(File::Spec->updir, $location);
-	} else {
-	    unshift @INC, $location;
-	}
-    } else {
-        # for running manually with the CPAN distribution
-	unshift @INC, '../lib';
-	$location =~ s/bigfltpm.t//;
-    }
-    print "# INC = @INC\n";
-}
-
 use Test;
 use strict;
 
 BEGIN
   {
+  $| = 1;
+  $| = 1;
+  # to locate the testing files
+  my $location = $0; $location =~ s/sub_mbi.t//i;
+  if ($ENV{PERL_CORE})
+    {
+    # testing with the core distribution
+    @INC = qw(../lib);
+    }
+  if (-d 't')
+    {
+    chdir 't';
+    require File::Spec;
+    unshift @INC, File::Spec->catdir(File::Spec->updir, $location);
+    }
+  else
+    {
+    unshift @INC, $location;
+    }
+  print "# INC = @INC\n";
+
   plan tests => 1608 + 4;	# +4 own tests
   }
 

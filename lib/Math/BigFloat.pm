@@ -11,7 +11,7 @@
 
 package Math::BigFloat;
 
-$VERSION = '1.23';
+$VERSION = '1.24';
 require 5.005;
 use Exporter;
 use Math::BigInt qw/objectify/;
@@ -525,25 +525,81 @@ sub bsub
   {
   # (BigFloat or num_str, BigFloat or num_str) return BigFloat
   # subtract second arg from first, modify first
-  my ($self,$x,$y) = objectify(2,@_);
+  my ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
 
-  $x->badd($y->bneg()); # badd does not leave internal zeros
-  $y->bneg();           # refix y, assumes no one reads $y in between
-  return $x;  		# badd() already normalized and rounded
+  if (!$y->is_zero())		# don't need to do anything if $y is 0
+    {
+    $y->{sign} =~ tr/+\-/-+/;	# does nothing for NaN
+    $x->badd($y,$a,$p,$r);	# badd does not leave internal zeros
+    $y->{sign} =~ tr/+\-/-+/;	# refix $y (does nothing for NaN)
+    }
+  $x;				# already rounded by badd()
   }
 
 sub binc
   {
   # increment arg by one
   my ($self,$x,$a,$p,$r) = ref($_[0]) ? (ref($_[0]),@_) : objectify(1,@_);
-  $x->badd($self->bone())->round($a,$p,$r);
+
+  if ($x->{_e}->sign() eq '-')
+    {
+    return $x->badd($self->bone(),$a,$p,$r);	#  digits after dot
+    }
+
+  if (!$x->{_e}->is_zero())
+    {
+    $x->{_m}->blsft($x->{_e},10);		# 1e2 => 100
+    $x->{_e}->bzero();
+    }
+  # now $x->{_e} == 0
+  if ($x->{sign} eq '+')
+    {
+    $x->{_m}->binc();
+    return $x->bnorm()->bround($a,$p,$r);
+    }
+  elsif ($x->{sign} eq '-')
+    {
+    $x->{_m}->bdec();
+    $x->{sign} = '+' if $x->{_m}->is_zero(); # -1 +1 => -0 => +0
+    return $x->bnorm()->bround($a,$p,$r);
+    }
+  # inf, nan handling etc
+  $x->badd($self->__one(),$a,$p,$r);		# does round 
   }
 
 sub bdec
   {
   # decrement arg by one
   my ($self,$x,$a,$p,$r) = ref($_[0]) ? (ref($_[0]),@_) : objectify(1,@_);
-  $x->badd($self->bone('-'))->round($a,$p,$r);
+
+  if ($x->{_e}->sign() eq '-')
+    {
+    return $x->badd($self->bone('-'),$a,$p,$r);	#  digits after dot
+    }
+
+  if (!$x->{_e}->is_zero())
+    {
+    $x->{_m}->blsft($x->{_e},10);		# 1e2 => 100
+    $x->{_e}->bzero();
+    }
+  # now $x->{_e} == 0
+  my $zero = $x->is_zero();
+  # <= 0
+  if (($x->{sign} eq '-') || $zero)
+    {
+    $x->{_m}->binc();
+    $x->{sign} = '-' if $zero;			# 0 => 1 => -1
+    $x->{sign} = '+' if $x->{_m}->is_zero();	# -1 +1 => -0 => +0
+    return $x->bnorm()->round($a,$p,$r);
+    }
+  # > 0
+  elsif ($x->{sign} eq '+')
+    {
+    $x->{_m}->bdec();
+    return $x->bnorm()->round($a,$p,$r);
+    }
+  # inf, nan handling etc
+  $x->badd($self->bone('-'),$a,$p,$r);		# does round 
   } 
 
 sub blcm 

@@ -8,7 +8,7 @@ BEGIN
   $| = 1;
   # chdir 't' if -d 't';
   unshift @INC, '../lib'; # for running manually
-  plan tests => 52;
+  plan tests => 56;
   }
 
 # testing of Math::BigInt::BitVect, primarily for interface/api and not for the
@@ -113,6 +113,18 @@ $x = $C->_new(\"123"); $y = $C->_new(\"1111");
 
 # _num
 $x = $C->_new(\"12345"); $x = $C->_num($x); ok (ref($x)||'',''); ok ($x,12345);
+
+# _inc
+$x = $C->_new(\"1000"); $C->_inc($x); ok (${$C->_str($x)},'1001');
+$C->_dec($x); ok (${$C->_str($x)},'1000');
+
+my $BL = Math::BigInt::Calc::_base_len();
+$x = '1' . '0' x $BL;
+$z = '1' . '0' x ($BL-1); $z .= '1';
+$x = $C->_new(\$x); $C->_inc($x); ok (${$C->_str($x)},$z);
+
+$x = '1' . '0' x $BL; $z = '9' x $BL;
+$x = $C->_new(\$x); $C->_dec($x); ok (${$C->_str($x)},$z);
 
 # should not happen:
 # $x = $C->_new(\"-2"); $y = $C->_new(\"4"); ok ($C->_acmp($x,$y),-1);

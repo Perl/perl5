@@ -440,8 +440,8 @@ $x = Math::BigInt->new(12345); $x->{_a} = 5;
 $x->bround(6);                  # must be no-op
 ok ($x,'12345');
 
-$x = Math::BigFloat->new(0.0061); $x->bfround(-2);
-ok ($x,0.01);
+$x = Math::BigFloat->new('0.0061'); $x->bfround(-2);
+ok ($x,'0.01');
 
 ###############################################################################
 # rounding with already set precision/accuracy
