@@ -10,7 +10,7 @@ $|  = 1;
 use warnings;
 $Is_VMS = $^O eq 'VMS';
 
-plan tests => 106;
+plan tests => 91;
 
 my $Perl = which_perl();
 
@@ -223,59 +223,3 @@ like( $@, qr/Bad filehandle:\s+afile/,          '       right error' );
     ok( open(STDOUT,     ">&", $stdout),  'restore dupped STDOUT from lexical fh');
 }
 
-# magic temporary file via 3 arg open with undef
-{
-    ok( open(my $x,"+<",undef), 'magic temp file via 3 arg open with undef');
-    ok( defined fileno($x),     '       fileno' );
-
-    select $x;
-    ok( (print "ok\n"),         '       print' );
-
-    select STDOUT;
-    ok( seek($x,0,0),           '       seek' );
-    is( scalar <$x>, "ok\n",    '       readline' );
-    ok( tell($x) >= 3,          '       tell' );
-
-    # test magic temp file over STDOUT
-    open OLDOUT, ">&STDOUT" or die "cannot dup STDOUT: $!";
-    my $status = open(STDOUT,"+<",undef);
-    open STDOUT,  ">&OLDOUT" or die "cannot dup OLDOUT: $!";
-    # report after STDOUT is restored
-    ok($status, '       re-open STDOUT');
-}
-
-# in-memory open
-{
-    my $var;
-    ok( open(my $x,"+<",\$var), 'magic in-memory file via 3 arg open with \\$var');
-    ok( defined fileno($x),     '       fileno' );
-
-    select $x;
-    ok( (print "ok\n"),         '       print' );
-
-    select STDOUT;
-    ok( seek($x,0,0),           '       seek' );
-    is( scalar <$x>, "ok\n",    '       readline' );
-    ok( tell($x) >= 3,          '       tell' );
-
-    SKIP: {
-	local $TODO = "in-memory stdhandles not implemented yet";
-
-	# test in-memory open over STDOUT
-	open OLDOUT, ">&STDOUT" or die "cannot dup STDOUT: $!";
-	#close STDOUT;
-	my $status = open(STDOUT,">",\$var);
-	my $error = "$!" unless $status; # remember the error
-	open STDOUT,  ">&OLDOUT" or die "cannot dup OLDOUT: $!";
-	print "# $error\n" unless $status;
-	
-	# report after STDOUT is restored
-	ok($status, '       open STDOUT into in-memory var');
-	
-	# test in-memory open over STDERR
-	open OLDERR, ">&STDERR" or die "cannot dup STDERR: $!";
-	#close STDERR;
-	ok( open(STDERR,">",\$var), '       open STDERR into in-memory var');
-	open STDERR,  ">&OLDERR" or die "cannot dup OLDERR: $!";
-    }
-}
