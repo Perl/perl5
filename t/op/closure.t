@@ -614,25 +614,31 @@ SKIP: { skip("tests not in 5.8.", 3) }
 
 $test= 185;
 
-# bugid #23265 - this used to coredump during destruction of PL_maincv
-# and its children
+require './test.pl'; # for runperl()
 
-my $got = runperl(
-    prog => q[
-	print
-	    sub {$_[0]->(@_)} -> (
-		sub {
-		    $_[1]
-			?  $_[0]->($_[0], $_[1] - 1) .  sub {"x"}->()
-			: "y"
-		},   
-		2
-	    )
-	    , "\n"
-	;            
-    
-    ],
-   stderr => 1
-);
-test { $got eq "yxx\n" };
+{
+   # bugid #23265 - this used to coredump during destruction of PL_maincv
+   # and its children
+
+    my $progfile = "b23265.pl";
+    open(T, ">$progfile") or die "$0: $!\n";
+    print T << '__EOF__';
+        print
+            sub {$_[0]->(@_)} -> (
+                sub {
+                    $_[1]
+                        ?  $_[0]->($_[0], $_[1] - 1) .  sub {"x"}->()
+                        : "y"
+                },   
+                2
+            )
+            , "\n"
+        ;
+__EOF__
+    close T;
+    my $got = runperl(progfile => $progfile);
+    test { chomp $got; $got eq "yxx" };
+    END { 1 while unlink $progfile }
+}
+
 
