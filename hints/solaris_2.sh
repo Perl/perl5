@@ -468,12 +468,11 @@ cat > UU/uselongdouble.cbu <<'EOCBU'
 case "$uselongdouble-$uselongdouble_done" in
 "$define-"|true-|[yY]*-)
 	case "$ccisworkshop" in
-	'')	cat <<EOM
+	'')	cat >&4 <<EOM
 
-I do not see the Sun Workshop compiler; therefore there is no
-libsunmath.so; therefore I cannot do long doubles, sorry.
+I do not see the Sun Workshop compiler; therefore I do not see
+the libsunmath; therefore I do not know how to do long doubles, sorry.
 I'm disabling the use of long doubles.
-
 EOM
 		uselongdouble="$undef"
 		;;

@@ -20,8 +20,13 @@ esac
 # (an attempt to use them causes a runtime error)
 # XXX Configure probe for really functional shm*() is needed XXX
 if test "$d_shm" = ""; then
-    test "$d_shmctl" = "" && d_shmctl="$undef"
-    test "$d_shmget" = "" && d_shmget="$undef"
-    d_shm="$undef"
+    d_shmat=${d_shmat:-undef}
+    d_shmdt=${d_shmdt:-undef}
+    d_shmget=${d_shmget:-undef}
+    d_shmctl=${d_shmctl:-undef}
+    case "$d_shmat$d_shmctl$d_shmdt$d_shmget" in
+    *"undef"*) d_shm="$undef" ;;
+    esac
 fi
+
 
