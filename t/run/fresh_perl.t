@@ -779,16 +779,12 @@ sub new {
 }
 sub DESTROY {
         my $self = shift;
-        dbmclose(%{$self->{'LT'}});
-        return 1;
-}
-package main;
-$test = Foo->new(); # must be package var
-END
-{
+	dbmclose(%{$self->{'LT'}});
 	1 while unlink 'dbmtest';
 	1 while unlink <dbmtest.*>;
 	print "ok\n";
 }
+package main;
+$test = Foo->new(); # must be package var
 EXPECT
 ok
