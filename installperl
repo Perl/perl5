@@ -113,7 +113,7 @@ close SCRIPTS;
 
 if ($scr_ext) { @scripts = map { "$_$scr_ext" } @scripts; }
 
-my @pods = (<pod/*.pod>) unless $nopods;
+my @pods = $nopods ? () : (<pod/*.pod>);
 
 # Specify here any .pm files that are actually architecture-dependent.
 # (Those included with XS extensions under ext/ are automatically
