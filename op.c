@@ -3438,9 +3438,9 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 	    CV *cv;
 	    HV *hv;
 
-	    sv_setpvf(sv, "%_:%ld-%ld", GvSV(curcop->cop_filegv),
-		    (long)(subline < 0 ? -subline : subline),
-		    (long)curcop->cop_line);
+	    sv_setpvf(sv, "%_:%ld-%ld",
+		    GvSV(curcop->cop_filegv),
+		    (long)subline, (long)curcop->cop_line);
 	    gv_efullname3(tmpstr, gv, Nullch);
 	    hv_store(GvHV(DBsub), SvPVX(tmpstr), SvCUR(tmpstr), sv, 0);
 	    if (!db_postponed) {
@@ -4412,7 +4412,7 @@ ck_shift(OP *o)
 	
 	op_free(o);
 #ifdef USE_THREADS
-	if (subline > 0) {
+	if (!CvUNIQUE(compcv)) {
 	    argop = newOP(OP_PADAV, OPf_REF);
 	    argop->op_targ = 0;		/* curpad[0] is @_ */
 	}
@@ -4423,7 +4423,7 @@ ck_shift(OP *o)
 	}
 #else
 	argop = newUNOP(OP_RV2AV, 0,
-	    scalar(newGVOP(OP_GV, 0, subline > 0 ?
+	    scalar(newGVOP(OP_GV, 0, !CvUNIQUE(compcv) ?
 			   defgv : gv_fetchpv("ARGV", TRUE, SVt_PVAV))));
 #endif /* USE_THREADS */
 	return newUNOP(type, 0, scalar(argop));
