@@ -147,7 +147,7 @@ S_regcppush(pTHX_ I32 parenfloor)
     if (paren_elems_to_push < 0)
 	Perl_croak(aTHX_ "panic: paren_elems_to_push < 0");
 
-#define REGCP_OTHER_ELEMS 5
+#define REGCP_OTHER_ELEMS 6
     SSCHECK(paren_elems_to_push + REGCP_OTHER_ELEMS);
     for (p = PL_regsize; p > parenfloor; p--) {
 /* REGCP_PARENS_ELEMS are pushed per pairs of parentheses. */
@@ -159,6 +159,7 @@ S_regcppush(pTHX_ I32 parenfloor)
 /* REGCP_OTHER_ELEMS are pushed in any case, parentheses or no. */
     SSPUSHINT(PL_regsize);
     SSPUSHINT(*PL_reglastparen);
+    SSPUSHINT(*PL_reglastcloseparen);
     SSPUSHPTR(PL_reginput);
 #define REGCP_FRAME_ELEMS 2
 /* REGCP_FRAME_ELEMS are part of the REGCP_OTHER_ELEMS and
@@ -192,6 +193,7 @@ S_regcppop(pTHX)
     assert(i == SAVEt_REGCONTEXT); /* Check that the magic cookie is there. */
     i = SSPOPINT; /* Parentheses elements to pop. */
     input = (char *) SSPOPPTR;
+    *PL_reglastcloseparen = SSPOPINT;
     *PL_reglastparen = SSPOPINT;
     PL_regsize = SSPOPINT;
 
@@ -1871,6 +1873,7 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
     PL_regstartp = prog->startp;
     PL_regendp = prog->endp;
     PL_reglastparen = &prog->lastparen;
+    PL_reglastcloseparen = &prog->lastcloseparen;
     prog->lastparen = 0;
     PL_regsize = 0;
     DEBUG_r(PL_reg_starttry = startpos);
@@ -2562,6 +2565,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    cache_re(re);
 		    state.ss = PL_savestack_ix;
 		    *PL_reglastparen = 0;
+		    *PL_reglastcloseparen = 0;
 		    PL_reg_call_cc = &state;
 		    PL_reginput = locinput;
 
@@ -2619,6 +2623,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    PL_regendp[n] = locinput - PL_bostr;
 	    if (n > *PL_reglastparen)
 		*PL_reglastparen = n;
+	    *PL_reglastcloseparen = n;
 	    break;
 	case GROUPP:
 	    n = ARG(scan);  /* which paren pair */

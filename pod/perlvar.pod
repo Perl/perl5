@@ -180,14 +180,29 @@ performance penalty on all regular expression matches.  See L<BUGS>.
 
 =item $+
 
-The last bracket matched by the last search pattern.  This is useful if
-you don't know which one of a set of alternative patterns matched.  For
-example:
+The text matched by the last bracket of the last successful search pattern.
+This is useful if you don't know which one of a set of alternative patterns
+matched. For example:
 
     /Version: (.*)|Revision: (.*)/ && ($rev = $+);
 
 (Mnemonic: be positive and forward looking.)
 This variable is read-only and dynamically scoped to the current BLOCK.
+
+=item $^N
+
+The text matched by the used group most-recently closed (i.e. the group
+with the rightmost closing parenthesis) of the last successful search
+pattern. This is primarly used inside C<(?{...})> blocks for examining text
+recently matched. For example, to effectively capture text to a variable
+(in addition to C<$1>, C<$2>, etc.), replace C<(...)> with
+
+     (?:(...)(?{ $var = $^N }))
+
+By setting and then using C<$var> in this way relieves you from having to
+worry about exactly which numbered set of parentheses they are.
+
+This variable is dynamically scoped to the current BLOCK.
 
 =item @LAST_MATCH_END
 

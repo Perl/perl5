@@ -710,9 +710,12 @@ indicated below it:
     /(ab(cd|ef)((gi)|j))/;
      1  2      34
 
-so that if the regexp matched, e.g., C<$2> would contain 'cd' or 'ef'.
-For convenience, perl sets C<$+> to the highest numbered C<$1>, C<$2>,
-... that got assigned.
+so that if the regexp matched, e.g., C<$2> would contain 'cd' or 'ef'. For
+convenience, perl sets C<$+> to the string held by the highest numbered
+C<$1>, C<$2>, ... that got assigned (and, somewhat related, C<$^N> to the
+value of the C<$1>, C<$2>, ... most-recently assigned; i.e. the C<$1>,
+C<$2>, ... associated with the rightmost closing parenthesis used in the
+match).
 
 Closely associated with the matching variables C<$1>, C<$2>, ... are
 the B<backreferences> C<\1>, C<\2>, ... .  Backreferences are simply

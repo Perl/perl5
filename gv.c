@@ -895,6 +895,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
     case '\006':	/* $^F */
     case '\010':	/* $^H */
     case '\011':	/* $^I, NOT \t in EBCDIC */
+    case '\016':        /* $^N */
     case '\020':	/* $^P */
     case '\024':	/* $^T */
 	if (len > 1)
@@ -1764,6 +1765,7 @@ Perl_is_gv_magical(pTHX_ char *name, STRLEN len, U32 flags)
     case '\010':   /* $^H */
     case '\011':   /* $^I, NOT \t in EBCDIC */
     case '\014':   /* $^L */
+    case '\016':   /* $^N */
     case '\020':   /* $^P */
     case '\023':   /* $^S */
     case '\024':   /* $^T */

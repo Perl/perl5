@@ -802,6 +802,8 @@ START_EXTERN_C
 #define PL_regint_string	(*Perl_Tregint_string_ptr(aTHXo))
 #undef  PL_reginterp_cnt
 #define PL_reginterp_cnt	(*Perl_Treginterp_cnt_ptr(aTHXo))
+#undef  PL_reglastcloseparen
+#define PL_reglastcloseparen	(*Perl_Treglastcloseparen_ptr(aTHXo))
 #undef  PL_reglastparen
 #define PL_reglastparen		(*Perl_Treglastparen_ptr(aTHXo))
 #undef  PL_regnarrate

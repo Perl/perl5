@@ -113,6 +113,7 @@
 #define PL_regint_start		(vTHX->Tregint_start)
 #define PL_regint_string	(vTHX->Tregint_string)
 #define PL_reginterp_cnt	(vTHX->Treginterp_cnt)
+#define PL_reglastcloseparen	(vTHX->Treglastcloseparen)
 #define PL_reglastparen		(vTHX->Treglastparen)
 #define PL_regnarrate		(vTHX->Tregnarrate)
 #define PL_regnaughty		(vTHX->Tregnaughty)
@@ -821,6 +822,7 @@
 #define PL_regint_start		(aTHXo->interp.Tregint_start)
 #define PL_regint_string	(aTHXo->interp.Tregint_string)
 #define PL_reginterp_cnt	(aTHXo->interp.Treginterp_cnt)
+#define PL_reglastcloseparen	(aTHXo->interp.Treglastcloseparen)
 #define PL_reglastparen		(aTHXo->interp.Treglastparen)
 #define PL_regnarrate		(aTHXo->interp.Tregnarrate)
 #define PL_regnaughty		(aTHXo->interp.Tregnaughty)
@@ -1518,6 +1520,7 @@
 #define PL_regint_start		(aTHX->Tregint_start)
 #define PL_regint_string	(aTHX->Tregint_string)
 #define PL_reginterp_cnt	(aTHX->Treginterp_cnt)
+#define PL_reglastcloseparen	(aTHX->Treglastcloseparen)
 #define PL_reglastparen		(aTHX->Treglastparen)
 #define PL_regnarrate		(aTHX->Tregnarrate)
 #define PL_regnaughty		(aTHX->Tregnaughty)
@@ -1654,6 +1657,7 @@
 #define PL_Tregint_start	PL_regint_start
 #define PL_Tregint_string	PL_regint_string
 #define PL_Treginterp_cnt	PL_reginterp_cnt
+#define PL_Treglastcloseparen	PL_reglastcloseparen
 #define PL_Treglastparen	PL_reglastparen
 #define PL_Tregnarrate		PL_regnarrate
 #define PL_Tregnaughty		PL_regnaughty
