@@ -152,7 +152,7 @@ extern int rc;
 #define pthread_setspecific(k,v)	(*_threadstore()=v,0)
 #define pthread_self()			_gettid()
 #define pthread_key_create(keyp,flag)	(*keyp=_gettid(),0)
-#define sched_yield()	DosSleep(0)
+#define YIELD				DosSleep(0)
 
 #ifdef PTHREADS_INCLUDED		/* For ./x2p stuff. */
 int pthread_join(pthread_t tid, void **status);
