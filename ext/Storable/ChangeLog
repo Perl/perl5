@@ -1,3 +1,10 @@
+Mon May  5 10:24:16 IST 2003   Abhijit Menon-Sen <ams@wiw.org>
+
+    Version 2.07
+
+        Minor bugfixes (self-tied objects are now correctly stored, as
+        are the results of additions larger than INT_MAX).
+
 Mon Oct  7 21:56:38 BST 2002   Nicholas Clark  <nick@ccl4.org>
 
     Version 2.06
