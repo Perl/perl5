@@ -116,8 +116,10 @@ PerlIO_debug(char *fmt,...)
    char *s;
    STRLEN len;
    va_start(ap,fmt);
-   Perl_sv_catpvf(aTHX_ sv, "%s:%"IVdf" ",
-                  CopFILE(PL_curcop), (IV)CopLINE(PL_curcop));
+   s = CopFILE(PL_curcop);
+   if (!s)
+    s = "(none)";
+   Perl_sv_catpvf(aTHX_ sv, "%s:%"IVdf" ", s, (IV)CopLINE(PL_curcop));
    Perl_sv_vcatpvf(aTHX_ sv, fmt, &ap);
 
    s = SvPV(sv,len);
@@ -191,44 +193,57 @@ struct _PerlIO
 /* Inner level routines */
 
 /* Table of pointers to the PerlIO structs (malloc'ed) */
-PerlIO **_perlio     = NULL;
-int _perlio_size     = 0;
+PerlIO *_perlio      = NULL;
+#define PERLIO_TABLE_SIZE 64
 
 PerlIO *
 PerlIO_allocate(void)
 {
  /* Find a free slot in the table, growing table as necessary */
+ PerlIO **last = &_perlio;
  PerlIO *f;
- int i = 0;
- while (1)
+ while ((f = *last))
   {
-   PerlIO **table = _perlio;
-   while (i < _perlio_size)
+   int i;
+   last = (PerlIO **)(f);
+   for (i=1; i < PERLIO_TABLE_SIZE; i++)
     {
-     f = table[i];
-     if (!f)
+     if (!*++f)
       {
-       Newz('F',f,1,PerlIO);
-       if (!f)
-        return NULL;
-       table[i] = f;
-      }
-     if (!*f)
-      {
-       PerlIO_debug(__FUNCTION__ " f=%p\n",f);
        return f;
       }
-     i++;
     }
-   Newz('I',table,_perlio_size+16,PerlIO *);
-   if (!table)
-    return NULL;
-   Copy(_perlio,table,_perlio_size,PerlIO *);
-   if (_perlio)
-    Safefree(_perlio);
-   _perlio = table;
-   _perlio_size += 16;
   }
+ Newz('I',f,PERLIO_TABLE_SIZE,PerlIO);
+ if (!f)
+  return NULL;
+ *last = f;
+ return f+1;
+}
+
+void
+PerlIO_cleantable(PerlIO **tablep)
+{
+ PerlIO *table = *tablep;
+ if (table)
+  {
+   int i;
+   PerlIO_cleantable((PerlIO **) &(table[0]));
+   for (i=PERLIO_TABLE_SIZE-1; i > 0; i--)
+    {
+     PerlIO *f = table+i;
+     if (*f)
+      PerlIO_close(f);
+    }
+   Safefree(table);
+   *tablep = NULL;
+  }
+}
+
+void
+PerlIO_cleanup(void)
+{
+ PerlIO_cleantable(&_perlio);
 }
 
 void
@@ -253,28 +268,6 @@ PerlIO_close(PerlIO *f)
   }
  return code;
 }
-
-void
-PerlIO_cleanup(void)
-{
- /* Close all the files */
- int i;
- for (i=_perlio_size-1; i >= 0; i--)
-  {
-   PerlIO *f = _perlio[i];
-   if (f)
-    {
-     if (*f)
-      PerlIO_close(f);
-     Safefree(f);
-    }
-  }
- if (_perlio)
-  Safefree(_perlio);
- _perlio      = NULL;
- _perlio_size = 0;
-}
-
 
 
 /*--------------------------------------------------------------------------------------*/
@@ -427,14 +420,17 @@ PerlIO_flush(PerlIO *f)
   }
  else
   {
+   PerlIO **table = &_perlio;
    int code = 0;
-   int i;
-   for (i=_perlio_size-1; i >= 0; i--)
+   while ((f = *table))
     {
-     if ((f = _perlio[i]))
+     int i;
+     table = (PerlIO **)(f++);
+     for (i=1; i < PERLIO_TABLE_SIZE; i++)
       {
        if (*f && PerlIO_flush(f) != 0)
         code = -1;
+       f++;
       }
     }
    return code;
@@ -538,7 +534,7 @@ PerlIO_get_ptr(PerlIO *f)
 }
 
 #undef PerlIO_get_cnt
-SSize_t
+int
 PerlIO_get_cnt(PerlIO *f)
 {
  return (*PerlIOBase(f)->tab->Get_cnt)(f);
@@ -546,14 +542,14 @@ PerlIO_get_cnt(PerlIO *f)
 
 #undef PerlIO_set_cnt
 void
-PerlIO_set_cnt(PerlIO *f,SSize_t cnt)
+PerlIO_set_cnt(PerlIO *f,int cnt)
 {
  return (*PerlIOBase(f)->tab->Set_ptrcnt)(f,NULL,cnt);
 }
 
 #undef PerlIO_set_ptrcnt
 void
-PerlIO_set_ptrcnt(PerlIO *f, STDCHAR *ptr, SSize_t cnt)
+PerlIO_set_ptrcnt(PerlIO *f, STDCHAR *ptr, int cnt)
 {
  return (*PerlIOBase(f)->tab->Set_ptrcnt)(f,ptr,cnt);
 }
@@ -1242,7 +1238,7 @@ PerlIOBuf_alloc_buf(PerlIOBuf *b)
 {
  if (!b->bufsiz)
   b->bufsiz = 4096;
- New('B',b->buf,b->bufsiz,char);
+ New('B',b->buf,b->bufsiz,STDCHAR);
  if (!b->buf)
   {
    b->buf = (STDCHAR *)&b->oneword;
@@ -1511,7 +1507,7 @@ PerlIOBuf_get_ptr(PerlIO *f)
  return b->ptr;
 }
 
-int
+SSize_t
 PerlIOBuf_get_cnt(PerlIO *f)
 {
  PerlIOBuf *b = PerlIOSelf(f,PerlIOBuf);
@@ -1541,7 +1537,7 @@ PerlIOBuf_bufsiz(PerlIO *f)
 }
 
 void
-PerlIOBuf_set_ptrcnt(PerlIO *f, STDCHAR *ptr, int cnt)
+PerlIOBuf_set_ptrcnt(PerlIO *f, STDCHAR *ptr, SSize_t cnt)
 {
  PerlIOBuf *b = PerlIOSelf(f,PerlIOBuf);
  if (!b->buf)
@@ -1600,7 +1596,7 @@ PerlIO_stdin(void)
 {
  if (!_perlio)
   PerlIO_init();
- return _perlio[0];
+ return &_perlio[1];
 }
 
 #undef PerlIO_stdout
@@ -1609,7 +1605,7 @@ PerlIO_stdout(void)
 {
  if (!_perlio)
   PerlIO_init();
- return _perlio[1];
+ return &_perlio[2];
 }
 
 #undef PerlIO_stderr
@@ -1618,7 +1614,7 @@ PerlIO_stderr(void)
 {
  if (!_perlio)
   PerlIO_init();
- return _perlio[2];
+ return &_perlio[3];
 }
 
 /*--------------------------------------------------------------------------------------*/
