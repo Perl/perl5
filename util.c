@@ -4083,7 +4083,7 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
     I32 offcount;	/* number of digits in least significant part */
 
 #ifdef USE_LOCALE_NUMERIC
-    if (PL_numeric_radix_sv)
+    if (PL_numeric_radix_sv && IN_LOCALE)
 	point = SvPV(PL_numeric_radix_sv, pointlen);
 #endif
 

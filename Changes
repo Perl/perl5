@@ -31,6 +31,144 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 10495] By: jhi                                   on 2001/06/10  10:55:34
+        Log: Subject: Re: pragma/locale.t #107
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Sun, 10 Jun 2001 11:23:30 +0100
+             Message-Id: <200106101023.LAA32085@crypt.compulink.co.uk>
+             
+             Encapsulate the scan of the decimal radix separator.
+     Branch: perl
+	   ! embed.h embed.pl proto.h sv.c
+____________________________________________________________________________
+[ 10494] By: jhi                                   on 2001/06/10  03:00:17
+        Log: Try to grok numbers both with the locale specific separator
+             and with the usual "." (if different from the lss); add a test
+             to locale.t to do also a little bit of math in addition to just
+             equalness testing; remove extraneous logic as suggested in
+             
+             Subject: Re: pragma/locale.t #107
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sat, 9 Jun 2001 22:37:36 +0100
+             Message-ID: <20010609223735.Y76396@plum.flirble.org>
+     Branch: perl
+	   ! sv.c t/pragma/locale.t
+____________________________________________________________________________
+[ 10493] By: jhi                                   on 2001/06/10  01:25:23
+        Log: Metaconfig unit change for #10492.
+     Branch: metaconfig/U/perl
+	   ! Extensions.U
+____________________________________________________________________________
+[ 10492] By: jhi                                   on 2001/06/10  01:23:59
+        Log: Subject: [PATCH] Don't build Thread.pm if USEITHREADS
+             From: Artur Bergman <artur@contiller.se> 
+             Date: Sat, 09 Jun 2001 21:03:51 +0200
+             Message-ID: <B7483FB6.1398%artur@contiller.se>
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 10491] By: jhi                                   on 2001/06/10  01:15:40
+        Log: Integrate perlio.
+     Branch: perl
+	  !> perlsfio.h
+____________________________________________________________________________
+[ 10490] By: jhi                                   on 2001/06/10  01:08:26
+        Log: Do locale specific separator if only in locale.
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[ 10489] By: nick                                  on 2001/06/09  19:13:25
+        Log: Make XS/Typemap compile (but fail) with sfio
+     Branch: perlio
+	   ! perlsfio.h
+____________________________________________________________________________
+[ 10488] By: nick                                  on 2001/06/09  19:12:51
+        Log: Re-integrate mainline
+     Branch: perlio
+	  !> embed.h embed.pl embedvar.h intrpvar.h perl.h perlapi.h
+	  !> proto.h sv.c util.c
+____________________________________________________________________________
+[ 10487] By: nick                                  on 2001/06/09  16:26:29
+        Log: Integrate mainline
+     Branch: perlio
+	  !> (integrate 31 files)
+____________________________________________________________________________
+[ 10486] By: jhi                                   on 2001/06/09  16:11:51
+        Log: Subject: [PATCH] New attempt to clone callack
+             From: Artur Bergman <artur@contiller.se> 
+             Date: Thu, 07 Jun 2001 11:52:16 +0200
+             Message-ID: <B7451B6F.12B7%artur@contiller.se>
+     Branch: perl
+	   ! embedvar.h intrpvar.h perlapi.h sv.c
+____________________________________________________________________________
+[ 10485] By: jhi                                   on 2001/06/09  15:23:52
+        Log: Numeric conversion tweaks suggested by Hugo and Nicholas.
+     Branch: perl
+	   ! embed.h embed.pl perl.h proto.h sv.c util.c
+____________________________________________________________________________
+[ 10484] By: jhi                                   on 2001/06/09  14:47:25
+        Log: Subject: Re: pragma/locale.t #107
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sat, 9 Jun 2001 16:26:10 +0100
+             Message-ID: <20010609162609.V76396@plum.flirble.org>
+             
+             A missing NVification.
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 10483] By: jhi                                   on 2001/06/08  19:40:32
+        Log: Redo the #10482, there already was a test script for formats.
+     Branch: perl
+	   - t/io/format.t
+	   ! MANIFEST t/op/write.t
+____________________________________________________________________________
+[ 10482] By: jhi                                   on 2001/06/08  19:34:45
+        Log: Twisted format testing, from Merijn.
+     Branch: perl
+	   + t/io/format.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 10481] By: jhi                                   on 2001/06/08  19:21:56
+        Log: More \p{In...} testing, combined with \N{...}.
+     Branch: perl
+	   ! lib/utf8_heavy.pl t/op/pat.t
+____________________________________________________________________________
+[ 10480] By: jhi                                   on 2001/06/08  14:16:06
+        Log: Metaconfig changes for #10479.
+     Branch: metaconfig
+	   ! U/Glossary.patch
+     Branch: metaconfig/U/perl
+	   ! d_modfl.U
+____________________________________________________________________________
+[ 10479] By: jhi                                   on 2001/06/08  14:15:32
+        Log: Be inspired more by Hugo-- introduce HAS_MODFL_POW32_BUG.
+     Branch: perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH configure.com epoc/config.sh pp.c uconfig.h
+	   ! uconfig.sh vos/config.alpha.def vos/config.ga.def
+	   ! win32/config.bc win32/config.gc win32/config.vc
+____________________________________________________________________________
+[ 10478] By: jhi                                   on 2001/06/08  12:20:41
+        Log: Subject: Re: [PATCH perl@10439] fix old $^S description in perlvms.pod
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Thu, 7 Jun 2001 14:27:20 -0500
+             Message-Id: <a05100e01b7458075db7d@[172.16.52.1]>
+     Branch: perl
+	   ! vms/perlvms.pod
+____________________________________________________________________________
+[ 10477] By: jhi                                   on 2001/06/08  12:19:00
+        Log: Subject: [PATCH] Unresolved symbol in ext/re/re.xs
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 07 Jun 2001 17:04:29 -0700
+             Message-ID: <lrae3jsupe.fsf@caliper.ActiveState.com>
+     Branch: perl
+	   ! ext/re/re.xs
+____________________________________________________________________________
+[ 10476] By: jhi                                   on 2001/06/08  01:35:42
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 10475] By: jhi                                   on 2001/06/08  00:53:45
         Log: Regen Glossary et alia.
      Branch: perl

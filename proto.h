@@ -1246,6 +1246,7 @@ STATIC I32	S_expect_number(pTHX_ char** pattern);
 STATIC SV*	S_gv_share(pTHX_ SV *sv);
 #  endif
 STATIC int	S_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep);
+STATIC int	S_grok_numeric_radix(pTHX_ const char **sp, const char *send);
 #endif
 
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)

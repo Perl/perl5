@@ -45,7 +45,7 @@ eval {
 # and mingw32 uses said silly CRT
 $have_setlocale = 0 if $^O eq 'MSWin32' && $Config{cc} =~ /^(cl|gcc)/i;
 
-my $last = $have_setlocale ? 116 : 98;
+my $last = $have_setlocale ? &last : &last_without_setlocale;
 
 print "1..$last\n";
 
@@ -234,6 +234,8 @@ check_taint_not  97, $2;
 # After all this tainting $a should be cool.
 
 check_taint_not  98, $a;
+
+sub last_without_setlocale { 98 }
 
 # I think we've seen quite enough of taint.
 # Let us do some *real* locale work now,
@@ -638,7 +640,7 @@ foreach $Locale (@Locale) {
 	my $w = 0;
 	local $SIG{__WARN__} =
 	    sub {
-		print "# @_";
+		print "# @_\n";
 		$w++;
 	    };
 
@@ -665,17 +667,20 @@ foreach $Locale (@Locale) {
 	    tryneoalpha($Locale, 110, $e == $c);
 	}
 	
-	tryneoalpha($Locale, 111, $w == 0);
-
 	my $f = "1.23";
+	my $g = 2.34;
 
-	debug "# 112..114: f = $f, locale = $Locale\n";
+	debug "# 111..115: f = $f, g = $g, locale = $Locale\n";
 
-	tryneoalpha($Locale, 112, $f == 1.23);
+	tryneoalpha($Locale, 111, $f == 1.23);
 
-	tryneoalpha($Locale, 113, $f == $x);
+	tryneoalpha($Locale, 112, $f == $x);
 	
-	tryneoalpha($Locale, 114, $f == $c);
+	tryneoalpha($Locale, 113, $f == $c);
+
+	tryneoalpha($Locale, 114, abs(($f + $g) - 3.57) < 0.01);
+
+	tryneoalpha($Locale, 115, $w == 0);
     }
 
     # Does taking lc separately differ from taking
@@ -698,7 +703,7 @@ foreach $Locale (@Locale) {
         my $y = "aa";
         my $z = "AB";
 
-        tryneoalpha($Locale, 115,
+        tryneoalpha($Locale, 116,
 		    lcA($x, $y) == 1 && lcB($x, $y) == 1 ||
 		    lcA($x, $z) == 0 && lcB($x, $z) == 0);
     }
@@ -711,7 +716,7 @@ foreach $Locale (@Locale) {
 	    # utf8 and locales do not mix.
 	    debug "# skipping UTF-8 locale '$Locale'\n";
 	    push @utf8locale, $Locale;
-            $utf8skip{116}++;
+            $utf8skip{117}++;
 	} else {
 	    use locale;
 	    use locale;
@@ -728,9 +733,9 @@ foreach $Locale (@Locale) {
 		next unless lc $y eq $x;
 		push @f, $x unless $x =~ /$y/i && $y =~ /$x/i;
 	    }
-	    tryneoalpha($Locale, 116, @f == 0);
+	    tryneoalpha($Locale, 117, @f == 0);
 	    if (@f) {
-		print "# failed 116 locale '$Locale' characters @f\n"
+		print "# failed 117 locale '$Locale' characters @f\n"
   	    }
         }
     }
@@ -738,7 +743,7 @@ foreach $Locale (@Locale) {
 
 # Recount the errors.
 
-foreach (99..$last) {
+foreach (&last_without_setlocale()+1..$last) {
     if ($Problem{$_} || !defined $Okay{$_} || !@{$Okay{$_}}) {
 	if ($_ == 102) {
 	    print "# The failure of test 102 is not necessarily fatal.\n";
@@ -828,5 +833,7 @@ if ($didwarn) {
             "# because UTF-8 and locales do not work together in Perl.\n#\n";
     }
 }
+
+sub last { 117 }
 
 # eof
