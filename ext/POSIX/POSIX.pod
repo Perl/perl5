@@ -582,13 +582,13 @@ see L<perlfunc/gmtime>.
 
 This is identical to the C function, except that it can apply to a single
 character or to a whole string.  Consider using regular expressions and the
-C</[[:isalnum:]]/> construct instead, or possibly the C</\w/> construct.
+C</[[:alnum:]]/> construct instead, or possibly the C</\w/> construct.
 
 =item isalpha
 
 This is identical to the C function, except that it can apply to a single
 character or to a whole string.  Consider using regular expressions and the
-C</[[:isalpha:]]/> construct instead.
+C</[[:alpha:]]/> construct instead.
 
 =item isatty
 
@@ -599,55 +599,55 @@ to a tty.  Similar to the C<-t> operator, see L<perlfunc/-X>.
 
 This is identical to the C function, except that it can apply to a single
 character or to a whole string.  Consider using regular expressions and the
-C</[[:iscntrl:]]/> construct instead.
+C</[[:cntrl:]]/> construct instead.
 
 =item isdigit
 
 This is identical to the C function, except that it can apply to a single
 character or to a whole string.  Consider using regular expressions and the
-C</[[:isdigit:]]/> construct instead, or the C</\d/> construct.
+C</[[:digit:]]/> construct instead, or the C</\d/> construct.
 
 =item isgraph
 
 This is identical to the C function, except that it can apply to a single
 character or to a whole string.  Consider using regular expressions and the
-C</[[:isgraph:]]/> construct instead.
+C</[[:graph:]]/> construct instead.
 
 =item islower
 
 This is identical to the C function, except that it can apply to a single
 character or to a whole string.  Consider using regular expressions and the
-C</[[:islower:]]/> construct instead.  Do B<not> use C</a-z/>.
+C</[[:lower:]]/> construct instead.  Do B<not> use C</a-z/>.
 
 =item isprint
 
 This is identical to the C function, except that it can apply to a single
 character or to a whole string.  Consider using regular expressions and the
-C</[[:isprint:]]/> construct instead.
+C</[[:print:]]/> construct instead.
 
 =item ispunct
 
 This is identical to the C function, except that it can apply to a single
 character or to a whole string.  Consider using regular expressions and the
-C</[[:ispunct:]]/> construct instead.
+C</[[:punct:]]/> construct instead.
 
 =item isspace
 
 This is identical to the C function, except that it can apply to a single
 character or to a whole string.  Consider using regular expressions and the
-C</[[:isspace:]]/> construct instead, or the C</\s/> construct.
+C</[[:space:]]/> construct instead, or the C</\s/> construct.
 
 =item isupper
 
 This is identical to the C function, except that it can apply to a single
 character or to a whole string.  Consider using regular expressions and the
-C</[[:isupper:]]/> construct instead.  Do B<not> use C</A-Z/>.
+C</[[:upper:]]/> construct instead.  Do B<not> use C</A-Z/>.
 
 =item isxdigit
 
 This is identical to the C function, except that it can apply to a single
 character or to a whole string.  Consider using regular expressions and the
-C</[[:isxdigit:]]/> construct instead, or simply C</[0-9a-f]/i>.
+C</[[:xdigit:]]/> construct instead, or simply C</[0-9a-f]/i>.
 
 =item kill
 
