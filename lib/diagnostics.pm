@@ -476,11 +476,18 @@ sub death_trap {
     if (caller eq $WHOAMI) { print STDERR "INTERNAL EXCEPTION: $exception"; } 
     &$olddie if defined $olddie and $olddie and $olddie ne \&death_trap;
 
+    return if $in_eval;
+
     # We don't want to unset these if we're coming from an eval because
-    # then we've turned off diagnostics. (Actually what does this next
-    # line do?  -PSeibel)
-    $SIG{__DIE__} = $SIG{__WARN__} = '' unless $in_eval;
+    # then we've turned off diagnostics.
+
+    # Switch off our die/warn handlers so we don't wind up in our own
+    # traps.
+    $SIG{__DIE__} = $SIG{__WARN__} = '';
+
+    # Have carp skip over death_trap() when showing the stack trace.
     local($Carp::CarpLevel) = 1;
+
     confess "Uncaught exception from user code:\n\t$exception";
 	# up we go; where we stop, nobody knows, but i think we die now
 	# but i'm deeply afraid of the &$olddie guy reraising and us getting

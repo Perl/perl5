@@ -5,34 +5,14 @@ BEGIN {
     @INC = 'lib';
 }
 
+use Test::More tests => 2;
 
-######################### We start with some black magic to print on failure.
+BEGIN { use_ok('diagnostics') }
 
-# Change 1..1 below to 1..last_test_to_print .
-# (It may become useful if the test is moved to ./t subdirectory.)
-use strict;
-use warnings;
+require base;
 
-use vars qw($Test_Num $Total_tests);
+eval {
+    'base'->import(qw(I::do::not::exist));
+};
 
-my $loaded;
-BEGIN { $| = 1; $Test_Num = 1 }
-END {print "not ok $Test_Num\n" unless $loaded;}
-print "1..$Total_tests\n";
-BEGIN { require diagnostics; } # Don't want diagnostics' noise yet.
-$loaded = 1;
-ok($loaded, 'compile');
-######################### End of black magic.
-
-sub ok {
-	my($test, $name) = shift;
-	print "not " unless $test;
-	print "ok $Test_Num";
-	print " - $name" if defined $name;
-	print "\n";
-	$Test_Num++;
-}
-
-
-# Change this to your # of ok() calls + 1
-BEGIN { $Total_tests = 1 }
+is( $@, '',   'diagnostics not tripped up by "use base qw(Dont::Exist)"' );
