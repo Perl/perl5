@@ -15,7 +15,7 @@
 ## This file is created by using the makefile that creates Windows Perl as the reference
 ## Author: sgp
 ## Date Created: 13th July 2000
-## Date Modified: 19th June 2001
+## Date Modified: 03th April 2001
 
 # Name of the NLM
 NLM_NAME		= perl.nlm
@@ -273,6 +273,11 @@ RE_NLP		= $(AUTODIR)\re\re.nlp
 BYTELOADER_NLP	= $(AUTODIR)\ByteLoader\ByteLoader.nlp
 DPROF_NLP	= $(AUTODIR)\Devel\DProf\DProf.nlp
 GLOB_NLP	= $(AUTODIR)\File\Glob\Glob.nlp
+CWD_NLP		= $(AUTODIR)\Cwd\Cwd.nlp
+STORABLE_NLP	= $(AUTODIR)\Storable\Storable.nlp
+LISTUTIL_NLP	= $(AUTODIR)\List\Util\Util.nlp
+MIMEBASE64_NLP	= $(AUTODIR)\MIME\Base64\Base64.nlp
+XSTYPEMAP_NLP	= $(AUTODIR)\XS\Typemap\Typemap.nlp
 
 EXTENSION_NLP	= 		\
 		$(FCNTL_NLP)	\
@@ -289,7 +294,13 @@ EXTENSION_NLP	= 		\
 		$(GLOB_NLP)		\
 		$(PEEK_NLP)		\
 		$(RE_NLP)	\
-		$(DPROF_NLP)
+		$(DPROF_NLP)	\
+		$(STORABLE_NLP)	\
+		$(LISTUTIL_NLP)	\
+		$(MIMEBASE64_NLP) \
+		$(XSTYPEMAP_NLP)	\
+#		$(CWD_NLP)	\
+# cwd.pm needs to be modifed for NetWare.
 
 # Begin - Following is required to build NetWare specific extensions Perl2UCS & CGI2Perl
 
@@ -686,36 +697,36 @@ XSUBPP		= ..\$(MINIPERL) -I..\..\lib ..\$(EXTUTILSDIR)\xsubpp \
 		-C++ -prototypes
 
 MICROCORE_SRC	=		\
-		..\av.c			\
-		..\deb.c		\
-		..\doio.c		\
-		..\doop.c		\
-		..\dump.c		\
+		..\av.c		\
+		..\deb.c	\
+		..\doio.c	\
+		..\doop.c	\
+		..\dump.c	\
 		..\globals.c	\
-		..\gv.c			\
-		..\hv.c			\
-		..\locale.c		\
-		..\mg.c			\
+		..\gv.c		\
+		..\hv.c		\
+		..\locale.c	\
+		..\mg.c		\
 		..\numeric.c	\
-		..\op.c			\
-		..\perl.c		\
+		..\op.c		\
+		..\perl.c	\
 		..\perlapi.c	\
-		..\perly.c		\
-		..\pp.c			\
-		..\pp_ctl.c		\
-		..\pp_hot.c		\
+		..\perly.c	\
+		..\pp.c		\
+		..\pp_ctl.c	\
+		..\pp_hot.c	\
 		..\pp_pack.c	\
-		..\pp_sys.c		\
+		..\pp_sys.c	\
 		..\regcomp.c	\
 		..\regexec.c	\
-		..\run.c		\
-		..\scope.c		\
-		..\sv.c			\
-		..\taint.c		\
-		..\toke.c		\
+		..\run.c	\
+		..\scope.c	\
+		..\sv.c		\
+		..\taint.c	\
+		..\toke.c	\
 		..\universal.c	\
-		..\utf8.c		\
-		..\util.c		\
+		..\utf8.c	\
+		..\util.c	\
 		..\xsutils.c
 
 #EXTRACORE_SRC	= $(EXTRACORE_SRC) perllib.c
@@ -805,6 +816,11 @@ PEEK		= $(EXTDIR)\Devel\Peek\Peek
 BYTELOADER	= $(EXTDIR)\ByteLoader\ByteLoader
 DPROF		= $(EXTDIR)\Devel\DProf\DProf
 GLOB		= $(EXTDIR)\File\Glob\Glob
+CWD			= $(EXTDIR)\Cwd\Cwd
+STORABLE	= $(EXTDIR)\Storable\Storable
+LISTUTIL	= $(EXTDIR)\List\Util
+MIMEBASE64	= $(EXTDIR)\MIME\Base64\Base64
+XSTYPEMAP	= $(EXTDIR)\XS\Typemap\Typemap
 
 EXTENSION_C	= 		\
 		$(SOCKET).c	\
@@ -821,7 +837,12 @@ EXTENSION_C	= 		\
 		$(B).c		\
 		$(BYTELOADER).c	\
 		$(DPROF).c	\
-		$(GLOB).c	
+		$(GLOB).c	\
+		$(CWD).c	\
+		$(STORABLE).c	\
+		$(LISTUTIL).c	\
+		$(MIMEBASE64).c	\
+		$(XSTYPEMAP).c	\
 
 POD2HTML	= $(PODDIR)\pod2html
 POD2MAN		= $(PODDIR)\pod2man
@@ -1264,6 +1285,36 @@ $(SDBM_FILE_NLP):
 	$(MAKE)
 	cd ..\..\netware
 
+$(CWD_NLP):
+	cd $(EXTDIR)\$(*B)
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(MAKE)
+	cd ..\..\netware
+
+$(STORABLE_NLP):
+	cd $(EXTDIR)\$(*B)
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(MAKE)
+	cd ..\..\netware
+
+$(LISTUTIL_NLP):
+	cd $(EXTDIR)\List\$(*B)
+	..\..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(MAKE)
+	cd ..\..\..\netware
+
+$(MIMEBASE64_NLP):
+	cd $(EXTDIR)\Mime\$(*B)
+	..\..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(MAKE)
+	cd ..\..\..\netware
+
+$(XSTYPEMAP_NLP):
+	cd $(EXTDIR)\XS\$(*B)
+	..\..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(MAKE)
+	cd ..\..\..\netware
+
 $(ERRNO_PM_NW):
 	cd $(EXTDIR)\$(*B)
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
@@ -1442,7 +1493,16 @@ install : utils installwin
 installnw:
 	$(MINIPERL) -I..\lib ..\installperl -netware
 
-nwinstall: utils installnw
+install_tests :
+	cd ..\t
+	xcopy /f /r /i /s /d *.* $(INST_NW_TOP2)\scripts\t
+	cd ..\lib
+	xcopy /f /r /i /s /d *.t $(INST_NW_TOP2)\scripts\t\lib
+	cd ..\ext
+	xcopy /f /r /i /s /d *.t $(INST_NW_TOP2)\scripts\t\ext
+	cd ..\netware
+
+nwinstall: utils installnw install_tests
 
 inst_lib : $(CONFIGPM)
 	copy ..\win32\splittree.pl .. 

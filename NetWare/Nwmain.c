@@ -1386,10 +1386,8 @@ char ***
 nw_getenviron()
 {
 	if (genviron)
-		// This (and not the next line) is the correct operation since it matches with the return type.
-		// But it is leaking memory upto 11736 bytes!!  So it is commented.
-//		return (&genviron);
-		return genviron;
+		return (&genviron);	// This might leak memory upto 11736 bytes on some versions of NetWare.
+//		return genviron;	// Abending on some versions of NetWare.
 	else
 		fnSetUpEnvBlock(&genviron);
 

@@ -4042,7 +4042,7 @@ PP(pp_split)
 #endif
     if (!pm || !s)
 	DIE(aTHX_ "panic: pp_split");
-    rx = pm->op_pmregexp;
+    rx = PM_GETRE(pm);
 
     TAINT_IF((pm->op_pmflags & PMf_LOCALE) &&
 	     (pm->op_pmflags & (PMf_WHITE | PMf_SKIPWHITE)));

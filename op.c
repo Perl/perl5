@@ -850,8 +850,8 @@ clear_pmop:
 	    }
 	}
 	cPMOPo->op_pmreplroot = Nullop;
-	ReREFCNT_dec(cPMOPo->op_pmregexp);
-	cPMOPo->op_pmregexp = (REGEXP*)NULL;
+	ReREFCNT_dec(PM_GETRE(cPMOPo));
+	PM_SETRE(cPMOPo, (REGEXP*)NULL);
 	break;
     }
 
@@ -2976,8 +2976,8 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl)
 	}
 	if ((PL_hints & HINT_UTF8) || DO_UTF8(pat))
 	    pm->op_pmdynflags |= PMdf_UTF8;
-	pm->op_pmregexp = CALLREGCOMP(aTHX_ p, p + plen, pm);
-	if (strEQ("\\s+", pm->op_pmregexp->precomp))
+	PM_SETRE(pm, CALLREGCOMP(aTHX_ p, p + plen, pm));
+	if (strEQ("\\s+", PM_GETRE(pm)->precomp))
 	    pm->op_pmflags |= PMf_WHITE;
 	op_free(expr);
     }
@@ -3073,14 +3073,14 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl)
 	}
 	if (curop == repl
 	    && !(repl_has_vars
-		 && (!pm->op_pmregexp
-		     || pm->op_pmregexp->reganch & ROPT_EVAL_SEEN))) {
+		 && (!PM_GETRE(pm)
+		     || PM_GETRE(pm)->reganch & ROPT_EVAL_SEEN))) {
 	    pm->op_pmflags |= PMf_CONST;	/* const for long enough */
 	    pm->op_pmpermflags |= PMf_CONST;	/* const for long enough */
 	    prepend_elem(o->op_type, scalar(repl), o);
 	}
 	else {
-	    if (curop == repl && !pm->op_pmregexp) { /* Has variables. */
+	    if (curop == repl && !PM_GETRE(pm)) { /* Has variables. */
 		pm->op_pmflags |= PMf_MAYBE_CONST;
 		pm->op_pmpermflags |= PMf_MAYBE_CONST;
 	    }
@@ -6442,8 +6442,8 @@ Perl_ck_join(pTHX_ OP *o)
 	OP *kid = cLISTOPo->op_first->op_sibling;
 	if (kid && kid->op_type == OP_MATCH) {
 	    char *pmstr = "STRING";
-	    if (kPMOP->op_pmregexp)
-		pmstr = kPMOP->op_pmregexp->precomp;
+	    if (PM_GETRE(kPMOP))
+		pmstr = PM_GETRE(kPMOP)->precomp;
 	    Perl_warner(aTHX_ WARN_SYNTAX,
 			"/%s/ should probably be written as \"%s\"",
 			pmstr, pmstr);

@@ -5,28 +5,28 @@ print "\nModifying the '.t' files...\n\n";
 use File::Basename;
 use File::Copy;
 
-## Change the below line to the directory you want to process
+## Change the below line to the folder you want to process
 $DirName = "/perl/scripts/t";
 
 $FilesTotal = 0;
 $FilesRead = 0;
 $FilesModified = 0;
 
-opendir(DIR, $DirName) or die "Unable to open the directory, $DirName  for reading.\n";
+opendir(DIR, $DirName);
 @Dirs = readdir(DIR);
 
 foreach $DirItem(@Dirs)
 {
 	$DirItem = $DirName."/".$DirItem;
-	push @DirNames, $DirItem;	# All items under  $DirName  directory is copied into an array.
+	push @DirNames, $DirItem;	# All items under  $DirName  folder is copied into an array.
 }
 
 foreach $FileName(@DirNames)
 {
 	if(-d $FileName)
-	{	# If an item is a directory, then open it further.
+	{	# If an item is a folder, then open it further.
 
-		opendir(SUBDIR, $FileName) or die "Unable to open the directory, $FileName  for reading.\n";
+		opendir(SUBDIR, $FileName);
 		@SubDirs = readdir(SUBDIR);
 		close(SUBDIR);
 
@@ -39,7 +39,7 @@ foreach $FileName(@DirNames)
 			else
 			{
 				$SubFileName = $FileName."/".$SubFileName;
-				push @DirNames, $SubFileName;	# If sub-directory, push it into the array.
+				push @DirNames, $SubFileName;	# If sub-folder, push it into the array.
 			}
 		}
 	}
@@ -67,21 +67,19 @@ sub Process_File
 	local($FileToProcess) = @_;		# File name.
 	local($Modified) = 0;
 
-
 	if(!(-w $FileToProcess)) {
 		# If the file is a read-only file, then change its mode to read-write.
 		chmod(0777, $FileToProcess);
 	}
 
-
-	$base = basename($FileToProcess);	# Get the base name
-	$dir = dirname($FileToProcess);		# Get the directory name
-	($base, $dir, $ext) = fileparse($FileToProcess, '\..*');	# Get the extension of the file passed.
-
+	## For example:
 	## If the value of $FileToProcess is '/perl/scripts/t/pragma/warnings.t', then
 		## $dir = '/perl/scripts/t/pragma/'
 		## $base = 'warnings'
 		## $ext = '.t'
+	$dir = dirname($FileToProcess);		# Get the folder name
+	$base = basename($FileToProcess);	# Get the base name
+	($base, $dir, $ext) = fileparse($FileToProcess, '\..*');	# Get the extension of the file passed.
 
 
 	# Do the processing only if the file has '.t' extension.

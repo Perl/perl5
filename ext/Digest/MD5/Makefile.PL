@@ -14,6 +14,7 @@ unless ($Config{d_u32align}) {
 WriteMakefile(
     'NAME'	   => 'Digest::MD5',
     'VERSION_FROM' => 'MD5.pm',
+    MAN3PODS    => {},  # Pods will be built by installman.
     @extra,
     'dist'         => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
 );

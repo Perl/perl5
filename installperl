@@ -30,6 +30,10 @@ use ExtUtils::Packlist;
 use Config;
 use subs qw(unlink link chmod);
 
+if ($Config{d_umask}) {
+    umask(022); # umasks like 077 aren't that useful for installations
+}
+
 $Is_NetWare = $Config{osname} eq 'NetWare';
 if ($Is_NetWare) {
 	$Is_W32 = 0;

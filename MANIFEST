@@ -1,5 +1,12 @@
-AUTHORS				Contact info for contributors
+apollo/netinet/in.h	Apollo DomainOS port: C header file frontend
 Artistic			The "Artistic License"
+AUTHORS				Contact info for contributors
+av.c			Array value code
+av.h			Array value header
+beos/nm.c		BeOS port
+bytecode.pl		Produces ext/ByteLoader/byterun.h, ext/ByteLoader/byterun.c and ext/B/Asmdata.pm
+cc_runtime.h		Macros need by runtime of compiler-generated code
+cflags.SH		A script that emits C compilation flags per file
 Changes				Differences from previous version
 Changes5.000			Differences between 4.x and 5.000
 Changes5.001			Differences between 5.000 and 5.001
@@ -8,129 +15,18 @@ Changes5.003			Differences between 5.002 and 5.003
 Changes5.004			Differences between 5.003 and 5.004
 Changes5.005			Differences between 5.004 and 5.005
 Changes5.6			Differences between 5.005 and 5.6
-Configure			Portability tool
-Copying				The GNU General Public License
-Cross/README			Cross-compilation
-EXTERN.h			Included before foreign .h files
-INSTALL				Detailed installation instructions
-INTERN.h			Included before domestic .h files
-MANIFEST			This list of files
-Makefile.SH			A script that generates Makefile
-Makefile.micro			microperl Makefile
-NetWare/CLIBsdio.h		Netware port
-NetWare/CLIBstr.h		Netware port
-NetWare/CLIBstuf.c		Netware port
-NetWare/CLIBstuf.h		Netware port
-NetWare/Main.c			Netware port
-NetWare/Makefile		Netware port
-NetWare/NWTInfo.c		Netware port
-NetWare/NWUtil.c		Netware port
-NetWare/Nwmain.c		Netware port
-NetWare/Nwpipe.c		Netware port
-NetWare/bat/BldNWExt.bat	Netware port
-NetWare/bat/Buildtype.bat	Netware port
-NetWare/bat/MPKBuild.bat	Netware port
-NetWare/bat/SetNWBld.bat	Netware port
-NetWare/bat/Setmpksdk.bat	Netware port
-NetWare/bat/Setnlmsdk.bat	Netware port
-NetWare/bat/Setwatcom.bat	Netware port
-NetWare/bat/ToggleD2.bat	Netware port
-NetWare/bat/ToggleXDC.bat	Netware port
-NetWare/config.wc		Netware port
-NetWare/config_H.wc		Netware port
-NetWare/config_h.PL		Netware port
-NetWare/config_sh.PL		Netware port
-NetWare/deb.h			Netware port
-NetWare/dl_netware.xs		Netware port
-NetWare/intdef.h		Netware port
-NetWare/interface.c		Netware port
-NetWare/interface.h		Netware port
-NetWare/iperlhost.h		Netware port
-NetWare/netware.h		Netware port
-NetWare/nw5.c			Netware port
-NetWare/nw5iop.h		Netware port
-NetWare/nw5sck.c		Netware port
-NetWare/nw5sck.h		Netware port
-NetWare/nw5thread.c		Netware port
-NetWare/nw5thread.h		Netware port
-NetWare/nwperlsys.c		Netware port
-NetWare/nwperlsys.h		Netware port
-NetWare/nwpipe.h		Netware port
-NetWare/nwplglob.c		Netware port
-NetWare/nwplglob.h		Netware port
-NetWare/nwtinfo.h		Netware port
-NetWare/nwutil.h		Netware port
-NetWare/t/NWModify.pl		Netware port
-NetWare/t/NWScripts.pl		Netware port
-NetWare/t/Readme.txt		Netware port
-NetWare/testnlm/echo/echo.c	Netware port
-NetWare/testnlm/type/type.c	Netware port
-NetWare/win32ish.h		Netware port
-Policy_sh.SH		Hold site-wide preferences between Configure runs.
-Porting/Contract	Social contract for contributed modules in Perl core
-Porting/Glossary	Glossary of config.sh variables
-Porting/config.sh	Sample config.sh
-Porting/config_H	Sample config.h
-Porting/findvars	Find occurrences of words
-Porting/fixCORE		Find and fix modules that generate warnings
-Porting/fixvars		Find undeclared variables with C compiler and fix em
-Porting/genlog		Generate formatted changelogs by querying p4d
-Porting/makerel		Release making utility
-Porting/p4d2p		Generate standard patches from p4 diffs
-Porting/p4desc		Smarter 'p4 describe', outputs diffs for new files
-Porting/patching.pod	How to report changes made to Perl
-Porting/patchls		Flexible patch file listing utility
-Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
-Porting/repository.pod	How to use the Perl repository
-Porting/testall.atom	Cumulative profile of the test suite with Third Degree
-README			The Instructions
-README.Y2K		Notes about Year 2000 concerns
-README.aix		Notes about AIX port
-README.amiga		Notes about AmigaOS port
-README.apollo		Notes about Apollo DomainOS port
-README.beos		Notes about BeOS port
-README.bs2000		Notes about BS2000 POSIX port
-README.cygwin		Notes about Cygwin port
-README.dgux		Notes about DG/UX port
-README.dos		Notes about DOS/DJGPP port
-README.epoc		Notes about EPOC port
-README.hpux		Notes about HP-UX port
-README.hurd		Notes about GNU/Hurd port
-README.machten		Notes about Power MachTen port
-README.macos		Notes about Mac OS (Classic)
-README.micro		Notes about microperl
-README.mint		Notes about Atari MiNT port
-README.mpeix		Notes about MPE/iX port
-README.netware		Notes about Netware port
-README.os2		Notes about OS/2 port
-README.os390		Notes about OS/390 (nee MVS) port
-README.plan9		Notes about Plan9 port
-README.qnx		Notes about QNX port
-README.solaris		Notes about Solaris port
-README.threads		Notes about multithreading
-README.tru64		Notes about Tru64
-README.vmesa		Notes about VM/ESA port
-README.vms		Notes about installing the VMS port
-README.vos		Notes about Stratus VOS port
-README.win32		Notes about Win32 port
-Todo.micro		The Wishlist for microperl
-XSUB.h			Include file for extension subroutines
-apollo/netinet/in.h	Apollo DomainOS port: C header file frontend
-av.c			Array value code
-av.h			Array value header
-beos/nm.c		BeOS port
-bytecode.pl		Produces ext/ByteLoader/byterun.h, ext/ByteLoader/byterun.c and ext/B/Asmdata.pm
-cc_runtime.h		Macros need by runtime of compiler-generated code
-cflags.SH		A script that emits C compilation flags per file
-config_h.SH		Produces config.h
 configpm		Produces lib/Config.pm
+Configure			Portability tool
 configure.com		Configure-equivalent for VMS
 configure.gnu		Crude emulation of GNU configure
+config_h.SH		Produces config.h
 cop.h			Control operator header
+Copying				The GNU General Public License
+Cross/README			Cross-compilation
 cv.h			Code value header
-cygwin/Makefile.SHs	Shared library generation for Cygwin port
 cygwin/cygwin.c		Additional code for Cygwin port
 cygwin/ld2.in		ld wrapper template for Cygwin port
+cygwin/Makefile.SHs	Shared library generation for Cygwin port
 cygwin/perlld.in	dll generator template for Cygwin port
 deb.c			Debugging routines
 djgpp/config.over	DOS/DJGPP port
@@ -151,81 +47,85 @@ embedvar.h		C namespace management
 epoc/config.sh		EPOC port config.sh template
 epoc/createpkg.pl	EPOC port generate PKG file
 epoc/epoc.c		EPOC port
-epoc/epoc_stubs.c	EPOC port
 epoc/epocish.c		EPOC port
 epoc/epocish.h		EPOC port
+epoc/epoc_stubs.c	EPOC port
 epoc/link.pl		EPOC port link a exe
+ext/attrs.t			See if attrs works with C<sub : attrs>
+ext/attrs/attrs.pm		attrs extension Perl module
+ext/attrs/attrs.xs		attrs extension external subroutines
+ext/attrs/Makefile.PL		attrs extension makefile writer
 ext/B/B.pm		Compiler backend support functions and methods
 ext/B/B.t		See if B works
 ext/B/B.xs		Compiler backend external subroutines
 ext/B/B/Asmdata.pm	Compiler backend data for assembler
+ext/B/B/assemble	Assemble compiler bytecode
 ext/B/B/Assembler.pm	Compiler backend assembler support functions
 ext/B/B/Bblock.pm	Compiler basic block analysis support
 ext/B/B/Bytecode.pm	Compiler Bytecode backend
 ext/B/B/C.pm		Compiler C backend
 ext/B/B/CC.pm		Compiler CC backend
+ext/B/B/cc_harness	Simplistic wrapper for using -MO=CC compiler
 ext/B/B/Concise.pm	Compiler Concise backend
 ext/B/B/Debug.pm	Compiler Debug backend
 ext/B/B/Deparse.pm	Compiler Deparse backend
+ext/B/B/disassemble	Disassemble compiler bytecode output
 ext/B/B/Disassembler.pm	Compiler Disassembler backend
 ext/B/B/Lint.pm		Compiler Lint backend
+ext/B/B/makeliblinks	Make a simplistic XSUB .so symlink tree for compiler
 ext/B/B/Showlex.pm	Compiler Showlex backend
 ext/B/B/Stackobj.pm	Compiler stack objects support functions
 ext/B/B/Stash.pm	Compiler module to identify stashes
 ext/B/B/Terse.pm	Compiler Terse backend
 ext/B/B/Xref.pm		Compiler Xref backend
-ext/B/B/assemble	Assemble compiler bytecode
-ext/B/B/cc_harness	Simplistic wrapper for using -MO=CC compiler
-ext/B/B/disassemble	Disassemble compiler bytecode output
-ext/B/B/makeliblinks	Make a simplistic XSUB .so symlink tree for compiler
 ext/B/Debug.t		See if B::Debug works
+ext/B/defsubs_h.PL	Generator for constant subroutines
 ext/B/Deparse.t		See if B::Deparse works
 ext/B/Makefile.PL	Compiler backend makefile writer
 ext/B/NOTES		Compiler backend notes
 ext/B/O.pm		Compiler front-end module (-MO=...)
-ext/B/README		Compiler backend README
-ext/B/Showlex.t		See if B::ShowLex works
-ext/B/Stash.t		See if B::Stash works
-ext/B/TESTS		Compiler backend test data
-ext/B/Todo		Compiler backend Todo list
-ext/B/defsubs_h.PL	Generator for constant subroutines
 ext/B/ramblings/cc.notes	Compiler ramblings: notes on CC backend
 ext/B/ramblings/curcop.runtime	Compiler ramblings: notes on curcop use
 ext/B/ramblings/flip-flop	Compiler ramblings: notes on flip-flop
 ext/B/ramblings/magic		Compiler ramblings: notes on magic
 ext/B/ramblings/reg.alloc	Compiler ramblings: register allocation
 ext/B/ramblings/runtime.porting	Compiler ramblings: porting PP enging
+ext/B/README		Compiler backend README
+ext/B/Showlex.t		See if B::ShowLex works
+ext/B/Stash.t		See if B::Stash works
+ext/B/TESTS		Compiler backend test data
+ext/B/Todo		Compiler backend Todo list
 ext/B/typemap			Compiler backend interface types
+ext/ByteLoader/bytecode.h	Bytecode header for bytecode loader
 ext/ByteLoader/ByteLoader.pm	Bytecode loader Perl module
 ext/ByteLoader/ByteLoader.xs	Bytecode loader external subroutines
-ext/ByteLoader/Makefile.PL	Bytecode loader makefile writer
-ext/ByteLoader/bytecode.h	Bytecode header for bytecode loader
 ext/ByteLoader/byterun.c	Runtime support for bytecode loader
 ext/ByteLoader/byterun.h	Header for byterun.c
 ext/ByteLoader/hints/sunos.pl	Hints for named architecture
+ext/ByteLoader/Makefile.PL	Bytecode loader makefile writer
 ext/Cwd/Cwd.t		See if Cwd works
 ext/Cwd/Cwd.xs		Cwd extension external subroutines
 ext/Cwd/Makefile.PL	Cwd extension makefile maker
+ext/Data/Dumper/Changes		Data pretty printer, changelog
+ext/Data/Dumper/Dumper.pm	Data pretty printer, module
+ext/Data/Dumper/Dumper.xs	Data pretty printer, externals
+ext/Data/Dumper/Makefile.PL	Data pretty printer, makefile writer
+ext/Data/Dumper/t/dumper.t	See if Data::Dumper works
+ext/Data/Dumper/t/overload.t	See if Data::Dumper works for overloaded data
+ext/Data/Dumper/Todo		Data pretty printer, futures
 ext/DB_File/Changes	Berkeley DB extension change log
+ext/DB_File/dbinfo	Berkeley DB database version checker
 ext/DB_File/DB_File.pm	Berkeley DB extension Perl module
 ext/DB_File/DB_File.xs	Berkeley DB extension external subroutines
 ext/DB_File/DB_File_BS	Berkeley DB extension mkbootstrap fodder
-ext/DB_File/Makefile.PL	Berkeley DB extension makefile writer
-ext/DB_File/dbinfo	Berkeley DB database version checker
 ext/DB_File/hints/dynixptx.pl	Hint for DB_File for named architecture
 ext/DB_File/hints/sco.pl	Hint for DB_File for named architecture
+ext/DB_File/Makefile.PL	Berkeley DB extension makefile writer
 ext/DB_File/t/db-btree.t	See if DB_File works
 ext/DB_File/t/db-hash.t		See if DB_File works
 ext/DB_File/t/db-recno.t	See if DB_File works
 ext/DB_File/typemap		Berkeley DB extension interface types
 ext/DB_File/version.c		Berkeley DB extension interface version check
-ext/Data/Dumper/Changes		Data pretty printer, changelog
-ext/Data/Dumper/Dumper.pm	Data pretty printer, module
-ext/Data/Dumper/Dumper.xs	Data pretty printer, externals
-ext/Data/Dumper/Makefile.PL	Data pretty printer, makefile writer
-ext/Data/Dumper/Todo		Data pretty printer, futures
-ext/Data/Dumper/t/dumper.t	See if Data::Dumper works
-ext/Data/Dumper/t/overload.t	See if Data::Dumper works for overloaded data
 ext/Devel/DProf/Changes		Perl code profiler changelog
 ext/Devel/DProf/DProf.pm	Perl code profiler
 ext/Devel/DProf/DProf.xs	Perl code profiler
@@ -237,19 +137,16 @@ ext/Devel/Peek/Peek.pm		Data debugging tool, module and pod
 ext/Devel/Peek/Peek.t		See if Devel::Peek works
 ext/Devel/Peek/Peek.xs		Data debugging tool, externals
 ext/Digest/MD5/Changes		Digest::MD5 extension changes
+ext/Digest/MD5/hints/irix_6.pl	Hints for named architecture
+ext/Digest/MD5/Makefile.PL	Digest::MD5 extension makefile writer
 ext/Digest/MD5/MD5.pm		Digest::MD5 extension
 ext/Digest/MD5/MD5.xs		Digest::MD5 extension
-ext/Digest/MD5/Makefile.PL	Digest::MD5 extension makefile writer
-ext/Digest/MD5/hints/irix_6.pl	Hints for named architecture
 ext/Digest/MD5/t/aaa.t		See if Digest::MD5 extension works
 ext/Digest/MD5/t/align.t	See if Digest::MD5 extension works
 ext/Digest/MD5/t/badfile.t	See if Digest::MD5 extension works
 ext/Digest/MD5/t/files.t	See if Digest::MD5 extension works
 ext/Digest/MD5/typemap		Digest::MD5 extension
-ext/DynaLoader/DynaLoader_pm.PL	Dynamic Loader perl module
-ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
-ext/DynaLoader/README		Dynamic Loader notes and intro
-ext/DynaLoader/XSLoader_pm.PL	Simple XS Loader perl module
+ext/DynaLoader/dlutils.c	Dynamic loader utilities for dl_*.xs files
 ext/DynaLoader/dl_aix.xs	AIX implementation
 ext/DynaLoader/dl_beos.xs	BeOS implementation
 ext/DynaLoader/dl_dld.xs	GNU dld style implementation
@@ -263,16 +160,20 @@ ext/DynaLoader/dl_next.xs	NeXT implementation
 ext/DynaLoader/dl_none.xs	Stub implementation
 ext/DynaLoader/dl_vmesa.xs	VM/ESA implementation
 ext/DynaLoader/dl_vms.xs	VMS implementation
-ext/DynaLoader/dlutils.c	Dynamic loader utilities for dl_*.xs files
+ext/DynaLoader/DynaLoader_pm.PL	Dynamic Loader perl module
 ext/DynaLoader/hints/aix.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/hints/linux.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/hints/netbsd.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/hints/openbsd.pl	Hint for DynaLoader for named architecture
+ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
+ext/DynaLoader/README		Dynamic Loader notes and intro
+ext/DynaLoader/XSLoader_pm.PL	Simple XS Loader perl module
 ext/Encode.t			See if Encode works
+ext/Encode/compile	Encode extension
+ext/Encode/encengine.c	Encode extension
+ext/Encode/encode.h	Encode extension
 ext/Encode/Encode.pm		Encode extension
 ext/Encode/Encode.xs		Encode extension
-ext/Encode/Encode/EncodeFormat.pod	Encoding table format
-ext/Encode/Encode/Tcl.pm	Handler for .enc encodings
 ext/Encode/Encode/ascii.enc	Encoding tables
 ext/Encode/Encode/ascii.ucm	Encoding tables
 ext/Encode/Encode/big5.enc	Encoding tables
@@ -315,6 +216,7 @@ ext/Encode/Encode/cp949.enc	Encoding tables
 ext/Encode/Encode/cp950.enc	Encoding tables
 ext/Encode/Encode/dingbats.enc	Encoding tables
 ext/Encode/Encode/dingbats.ucm	Encoding tables
+ext/Encode/Encode/EncodeFormat.pod	Encoding table format
 ext/Encode/Encode/euc-cn.enc	Encoding tables
 ext/Encode/Encode/euc-jp.enc	Encoding tables
 ext/Encode/Encode/euc-kr.enc	Encoding tables
@@ -376,11 +278,9 @@ ext/Encode/Encode/posix-bc.ucm	Encoding tables
 ext/Encode/Encode/shiftjis.enc	Encoding tables
 ext/Encode/Encode/symbol.enc	Encoding tables
 ext/Encode/Encode/symbol.ucm	Encoding tables
+ext/Encode/Encode/Tcl.pm	Handler for .enc encodings
 ext/Encode/Makefile.PL	Encode extension
 ext/Encode/Todo		Encode extension
-ext/Encode/compile	Encode extension
-ext/Encode/encengine.c	Encode extension
-ext/Encode/encode.h	Encode extension
 ext/Errno/ChangeLog	Errno perl module change log
 ext/Errno/Errno.t	See if Errno works
 ext/Errno/Errno_pm.PL	Errno perl module create script
@@ -390,28 +290,30 @@ ext/Fcntl/Fcntl.t	See if Fcntl works
 ext/Fcntl/Fcntl.xs	Fcntl extension external subroutines
 ext/Fcntl/Makefile.PL	Fcntl extension makefile writer
 ext/Fcntl/syslfs.t	See if large files work for sysio
+ext/File/Glob/bsd_glob.c	File::Glob extension run time code
+ext/File/Glob/bsd_glob.h	File::Glob extension header file
 ext/File/Glob/Changes		File::Glob extension changelog
 ext/File/Glob/Glob.pm		File::Glob extension module
 ext/File/Glob/Glob.xs		File::Glob extension external subroutines
 ext/File/Glob/Makefile.PL	File::Glob extension makefile writer
+ext/File/Glob/t/basic.t		See if File::Glob works
+ext/File/Glob/t/case.t		See if File::Glob works
+ext/File/Glob/t/global.t	See if File::Glob works
+ext/File/Glob/t/taint.t		See if File::Glob works
 ext/File/Glob/TODO		File::Glob extension todo list
-ext/File/Glob/bsd_glob.c	File::Glob extension run time code
-ext/File/Glob/bsd_glob.h	File::Glob extension header file
+ext/Filter/t/call.t		See if Filter::Util::Call works
 ext/Filter/Util/Call/Call.pm	Filter::Util::Call extension module
 ext/Filter/Util/Call/Call.xs	Filter::Util::Call extension external subroutines
 ext/Filter/Util/Call/Makefile.PL	Filter::Util::Call extension makefile writer
-ext/Filter/t/call.t		See if Filter::Util::Call works
+ext/GDBM_File/gdbm.t		See if GDBM_File works
 ext/GDBM_File/GDBM_File.pm	GDBM extension Perl module
 ext/GDBM_File/GDBM_File.xs	GDBM extension external subroutines
-ext/GDBM_File/Makefile.PL	GDBM extension makefile writer
-ext/GDBM_File/gdbm.t		See if GDBM_File works
 ext/GDBM_File/hints/sco.pl	Hint for GDBM_File for named architecture
+ext/GDBM_File/Makefile.PL	GDBM extension makefile writer
 ext/GDBM_File/typemap		GDBM extension interface types
 ext/IO/ChangeLog		IO perl module change log
 ext/IO/IO.pm			Top-level interface to IO::* classes
 ext/IO/IO.xs			IO extension external subroutines
-ext/IO/Makefile.PL		IO extension makefile writer
-ext/IO/README			IO extension maintenance notice
 ext/IO/lib/IO/Dir.pm		IO directory reading package
 ext/IO/lib/IO/File.pm		IO file handle package
 ext/IO/lib/IO/Handle.pm		IO base handle package
@@ -436,27 +338,28 @@ ext/IO/lib/IO/t/io_tell.t	See if seek()/tell()-related methods from IO work
 ext/IO/lib/IO/t/io_udp.t	See if UDP socket-related methods from IO work
 ext/IO/lib/IO/t/io_unix.t	See if UNIX socket-related methods from IO work
 ext/IO/lib/IO/t/io_xs.t		See if XSUB methods from IO work
+ext/IO/Makefile.PL		IO extension makefile writer
 ext/IO/poll.c			IO poll() emulation using select()
 ext/IO/poll.h			IO poll() emulation using select()
+ext/IO/README			IO extension maintenance notice
 ext/IPC/SysV/ChangeLog		IPC::SysV extension Perl module
-ext/IPC/SysV/MANIFEST		IPC::SysV extension Perl module
+ext/IPC/SysV/hints/cygwin.pl	Hint for IPC::SysV for named architecture
+ext/IPC/SysV/hints/next_3.pl	Hint for IPC::SysV for named architecture
+ext/IPC/SysV/ipcsysv.t		See if IPC::SysV works
 ext/IPC/SysV/Makefile.PL	IPC::SysV extension Perl module
+ext/IPC/SysV/MANIFEST		IPC::SysV extension Perl module
 ext/IPC/SysV/Msg.pm		IPC::SysV extension Perl module
 ext/IPC/SysV/README		IPC::SysV extension Perl module
 ext/IPC/SysV/Semaphore.pm	IPC::SysV extension Perl module
 ext/IPC/SysV/SysV.pm		IPC::SysV extension Perl module
 ext/IPC/SysV/SysV.xs		IPC::SysV extension Perl module
-ext/IPC/SysV/hints/cygwin.pl	Hint for IPC::SysV for named architecture
-ext/IPC/SysV/hints/next_3.pl	Hint for IPC::SysV for named architecture
-ext/IPC/SysV/ipcsysv.t		See if IPC::SysV works
 ext/IPC/SysV/t/msg.t		IPC::SysV extension Perl module
 ext/IPC/SysV/t/sem.t		IPC::SysV extension Perl module
 ext/List/Util/ChangeLog		Util extension
-ext/List/Util/Makefile.PL	Util extension
-ext/List/Util/README		Util extension
-ext/List/Util/Util.xs		Util extension
 ext/List/Util/lib/List/Util.pm	List::Util
 ext/List/Util/lib/Scalar/Util.pm	Scalar::Util
+ext/List/Util/Makefile.PL	Util extension
+ext/List/Util/README		Util extension
 ext/List/Util/t/blessed.t	Scalar::Util
 ext/List/Util/t/dualvar.t	Scalar::Util
 ext/List/Util/t/first.t		List::Util
@@ -470,6 +373,7 @@ ext/List/Util/t/reftype.t	Scalar::Util
 ext/List/Util/t/sum.t		List::Util
 ext/List/Util/t/tainted.t	Scalar::Util
 ext/List/Util/t/weak.t		Scalar::Util
+ext/List/Util/Util.xs		Util extension
 ext/MIME/Base64/Base64.pm	MIME::Base64 extension
 ext/MIME/Base64/Base64.xs	MIME::Base64 extension
 ext/MIME/Base64/Changes		MIME::Base64 extension
@@ -478,20 +382,17 @@ ext/MIME/Base64/QuotedPrint.pm	MIME::Base64 extension
 ext/MIME/Base64/t/base64.t	See whether MIME::Base64 works
 ext/MIME/Base64/t/qp.t		See whether MIME::QuotedPrint works
 ext/MIME/Base64/t/unicode.t	See whether MIME::Base64 works
-ext/NDBM_File/Makefile.PL	NDBM extension makefile writer
-ext/NDBM_File/NDBM_File.pm	NDBM extension Perl module
-ext/NDBM_File/NDBM_File.xs	NDBM extension external subroutines
 ext/NDBM_File/hints/cygwin.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/dec_osf.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/dynixptx.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/sco.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/solaris.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/svr4.pl	Hint for NDBM_File for named architecture
+ext/NDBM_File/Makefile.PL	NDBM extension makefile writer
 ext/NDBM_File/ndbm.t		See if NDBM_File works
+ext/NDBM_File/NDBM_File.pm	NDBM extension Perl module
+ext/NDBM_File/NDBM_File.xs	NDBM extension external subroutines
 ext/NDBM_File/typemap		NDBM extension interface types
-ext/ODBM_File/Makefile.PL	ODBM extension makefile writer
-ext/ODBM_File/ODBM_File.pm	ODBM extension Perl module
-ext/ODBM_File/ODBM_File.xs	ODBM extension external subroutines
 ext/ODBM_File/hints/cygwin.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/dec_osf.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/hpux.pl	Hint for ODBM_File for named architecture
@@ -499,21 +400,27 @@ ext/ODBM_File/hints/sco.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/solaris.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/svr4.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/ultrix.pl	Hint for ODBM_File for named architecture
+ext/ODBM_File/Makefile.PL	ODBM extension makefile writer
 ext/ODBM_File/odbm.t		See if ODBM_File works
+ext/ODBM_File/ODBM_File.pm	ODBM extension Perl module
+ext/ODBM_File/ODBM_File.xs	ODBM extension external subroutines
 ext/ODBM_File/sdbm.t		See if SDBM_File works
 ext/ODBM_File/typemap		ODBM extension interface types
 ext/Opcode/Makefile.PL		Opcode extension makefile writer
 ext/Opcode/Opcode.pm		Opcode extension Perl module
 ext/Opcode/Opcode.t		See if Opcode works
 ext/Opcode/Opcode.xs		Opcode extension external subroutines
-ext/Opcode/Safe.pm		Safe extension Perl module
 ext/Opcode/ops.pm		"Pragma" form of Opcode extension Perl module
 ext/Opcode/ops.t		See if Opcode works
-ext/POSIX/Makefile.PL		POSIX extension makefile writer
-ext/POSIX/POSIX.pm		POSIX extension Perl module
-ext/POSIX/POSIX.pod		POSIX extension documentation
-ext/POSIX/POSIX.t		See if POSIX works
-ext/POSIX/POSIX.xs		POSIX extension external subroutines
+ext/Opcode/Safe.pm		Safe extension Perl module
+ext/PerlIO/PerlIO.t		See if PerlIO works
+ext/PerlIO/Scalar/Makefile.PL	PerlIO layer for scalars
+ext/PerlIO/Scalar/Scalar.pm	PerlIO layer for scalars
+ext/PerlIO/Scalar/Scalar.xs	PerlIO layer for scalars
+ext/PerlIO/t/scalar.t		Test of PerlIO::Scalar
+ext/PerlIO/Via/Makefile.PL	PerlIO layer for layers in perl
+ext/PerlIO/Via/Via.pm		PerlIO layer for layers in perl
+ext/PerlIO/Via/Via.xs		PerlIO layer for layers in perl
 ext/POSIX/hints/bsdos.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/dynixptx.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/freebsd.pl	Hint for POSIX for named architecture
@@ -525,25 +432,23 @@ ext/POSIX/hints/openbsd.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/sunos_4.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/svr4.pl		Hint for POSIX for named architecture
 ext/POSIX/hints/uts.pl		Hint for POSIX for named architecture
+ext/POSIX/Makefile.PL		POSIX extension makefile writer
+ext/POSIX/POSIX.pm		POSIX extension Perl module
+ext/POSIX/POSIX.pod		POSIX extension documentation
+ext/POSIX/POSIX.t		See if POSIX works
+ext/POSIX/POSIX.xs		POSIX extension external subroutines
 ext/POSIX/sigaction.t		See if POSIX::sigaction works
 ext/POSIX/typemap		POSIX extension interface types
-ext/PerlIO/PerlIO.t		See if PerlIO works
-ext/PerlIO/Scalar/Makefile.PL	PerlIO layer for scalars
-ext/PerlIO/Scalar/Scalar.pm	PerlIO layer for scalars
-ext/PerlIO/Scalar/Scalar.xs	PerlIO layer for scalars
-ext/PerlIO/Via/Makefile.PL	PerlIO layer for layers in perl
-ext/PerlIO/Via/Via.pm		PerlIO layer for layers in perl
-ext/PerlIO/Via/Via.xs		PerlIO layer for layers in perl
-ext/PerlIO/t/scalar.t		Test of PerlIO::Scalar
+ext/re/hints/mpeix.pl		Hints for re for named architecture
+ext/re/Makefile.PL		re extension makefile writer
+ext/re/re.pm			re extension Perl module
+ext/re/re.xs			re extension external subroutines
+ext/Safe/safe1.t		See if Safe works
+ext/Safe/safe2.t		See if Safe works
 ext/SDBM_File/Makefile.PL	SDBM extension makefile writer
-ext/SDBM_File/SDBM_File.pm	SDBM extension Perl module
-ext/SDBM_File/SDBM_File.xs	SDBM extension external subroutines
+ext/SDBM_File/sdbm/biblio	SDBM kit
 ext/SDBM_File/sdbm/CHANGES	SDBM kit
 ext/SDBM_File/sdbm/COMPARE	SDBM kit
-ext/SDBM_File/sdbm/Makefile.PL	SDBM kit
-ext/SDBM_File/sdbm/README	SDBM kit
-ext/SDBM_File/sdbm/README.too	SDBM kit
-ext/SDBM_File/sdbm/biblio	SDBM kit
 ext/SDBM_File/sdbm/dba.c	SDBM kit
 ext/SDBM_File/sdbm/dbd.c	SDBM kit
 ext/SDBM_File/sdbm/dbe.1	SDBM kit
@@ -552,25 +457,28 @@ ext/SDBM_File/sdbm/dbu.c	SDBM kit
 ext/SDBM_File/sdbm/grind	SDBM kit
 ext/SDBM_File/sdbm/hash.c	SDBM kit
 ext/SDBM_File/sdbm/linux.patches	SDBM kit
+ext/SDBM_File/sdbm/Makefile.PL	SDBM kit
 ext/SDBM_File/sdbm/makefile.sdbm	SDBM kit
 ext/SDBM_File/sdbm/pair.c	SDBM kit
 ext/SDBM_File/sdbm/pair.h	SDBM kit
+ext/SDBM_File/sdbm/README	SDBM kit
 ext/SDBM_File/sdbm/readme.ms	SDBM kit
+ext/SDBM_File/sdbm/README.too	SDBM kit
 ext/SDBM_File/sdbm/sdbm.3	SDBM kit
 ext/SDBM_File/sdbm/sdbm.c	SDBM kit
 ext/SDBM_File/sdbm/sdbm.h	SDBM kit
 ext/SDBM_File/sdbm/tune.h	SDBM kit
 ext/SDBM_File/sdbm/util.c	SDBM kit
+ext/SDBM_File/SDBM_File.pm	SDBM extension Perl module
+ext/SDBM_File/SDBM_File.xs	SDBM extension external subroutines
 ext/SDBM_File/typemap		SDBM extension interface types
-ext/Safe/safe1.t		See if Safe works
-ext/Safe/safe2.t		See if Safe works
 ext/Socket/Makefile.PL		Socket extension makefile writer
 ext/Socket/Socket.pm		Socket extension Perl module
 ext/Socket/Socket.t		See if Socket works
 ext/Socket/Socket.xs		Socket extension external subroutines
 ext/Storable/ChangeLog		Storable extension
-ext/Storable/MANIFEST		Storable extension
 ext/Storable/Makefile.PL	Storable extension
+ext/Storable/MANIFEST		Storable extension
 ext/Storable/README		Storable extension
 ext/Storable/Storable.pm	Storable extension
 ext/Storable/Storable.xs	Storable extension
@@ -595,17 +503,8 @@ ext/Sys/Hostname/Hostname.xs	Sys::Hostname extension external subroutines
 ext/Sys/Hostname/Makefile.PL	Sys::Hostname extension makefile writer
 ext/Sys/Syslog/Makefile.PL	Sys::Syslog extension makefile writer
 ext/Sys/Syslog/Syslog.pm	Sys::Syslog extension Perl module
-ext/Sys/Syslog/Syslog.xs	Sys::Syslog extension external subroutines
 ext/Sys/Syslog/syslog.t		See if Sys::Syslog works
-ext/Thread/Makefile.PL		Thread extension makefile writer
-ext/Thread/Notes		Thread notes
-ext/Thread/README		Thread README
-ext/Thread/Thread.pm		Thread extension Perl module
-ext/Thread/Thread.xs		Thread extension external subroutines
-ext/Thread/Thread/Queue.pm	Thread synchronised queue objects
-ext/Thread/Thread/Semaphore.pm	Thread semaphore objects
-ext/Thread/Thread/Signal.pm	Start a thread to run signal handlers
-ext/Thread/Thread/Specific.pm	Thread specific data access
+ext/Sys/Syslog/Syslog.xs	Sys::Syslog extension external subroutines
 ext/Thread/create.tx		Test thread creation
 ext/Thread/die.tx		Test thread die()
 ext/Thread/die2.tx		Test thread die() differently
@@ -614,11 +513,20 @@ ext/Thread/join.tx		Test thread joining
 ext/Thread/join2.tx		Test thread joining differently
 ext/Thread/list.tx		Test getting list of all threads
 ext/Thread/lock.tx		Test lock primitive
+ext/Thread/Makefile.PL		Thread extension makefile writer
+ext/Thread/Notes		Thread notes
 ext/Thread/queue.tx		Test Thread::Queue module
+ext/Thread/README		Thread README
 ext/Thread/specific.tx		Test thread-specific user data
 ext/Thread/sync.tx		Test thread synchronisation
 ext/Thread/sync2.tx		Test thread synchronisation
 ext/Thread/thr5005.t		Test 5.005-style threading (skipped if no use5005threads)
+ext/Thread/Thread.pm		Thread extension Perl module
+ext/Thread/Thread.xs		Thread extension external subroutines
+ext/Thread/Thread/Queue.pm	Thread synchronised queue objects
+ext/Thread/Thread/Semaphore.pm	Thread semaphore objects
+ext/Thread/Thread/Signal.pm	Start a thread to run signal handlers
+ext/Thread/Thread/Specific.pm	Thread specific data access
 ext/Thread/typemap		Thread extension interface types
 ext/Thread/unsync.tx		Test thread implicit synchronisation
 ext/Thread/unsync2.tx		Test thread implicit synchronisation
@@ -635,23 +543,16 @@ ext/Time/Piece/Piece.t		Test for Time::Piece
 ext/Time/Piece/Piece.xs		Time::Piece extension
 ext/Time/Piece/README		Time::Piece extension
 ext/Time/Piece/Seconds.pm	Time::Piece extension
+ext/util/make_ext		Used by Makefile to execute extension Makefiles
+ext/util/mkbootstrap		Turns ext/*/*_BS into bootstrap info
 ext/XS/Typemap/Makefile.PL	XS::Typemap extension
 ext/XS/Typemap/README		XS::Typemap extension
+ext/XS/Typemap/stdio.c		XS::Typemap extension
+ext/XS/Typemap/typemap		XS::Typemap extension
 ext/XS/Typemap/Typemap.pm	XS::Typemap extension
 ext/XS/Typemap/Typemap.t	test that typemaps work
 ext/XS/Typemap/Typemap.xs	XS::Typemap extension
-ext/XS/Typemap/stdio.c		XS::Typemap extension
-ext/XS/Typemap/typemap		XS::Typemap extension
-ext/attrs.t			See if attrs works with C<sub : attrs>
-ext/attrs/Makefile.PL		attrs extension makefile writer
-ext/attrs/attrs.pm		attrs extension Perl module
-ext/attrs/attrs.xs		attrs extension external subroutines
-ext/re/Makefile.PL		re extension makefile writer
-ext/re/hints/mpeix.pl		Hints for re for named architecture
-ext/re/re.pm			re extension Perl module
-ext/re/re.xs			re extension external subroutines
-ext/util/make_ext		Used by Makefile to execute extension Makefiles
-ext/util/mkbootstrap		Turns ext/*/*_BS into bootstrap info
+EXTERN.h			Included before foreign .h files
 fakesdio.h			stdio in terms of PerlIO
 fakethr.h			Fake threads header
 form.h				Public declarations for formats
@@ -660,7 +561,6 @@ globals.c			File to declare global symbols (for shared library)
 globvar.sym			Global variables that need hiding when embedded
 gv.c				Glob value code
 gv.h				Glob value header
-h2pl/README			How to turn .ph files into .pl files
 h2pl/cbreak.pl			cbreak routines using .ph
 h2pl/cbreak2.pl			cbreak routines using .pl
 h2pl/eg/sizeof.ph		Sample sizeof array initialization
@@ -670,12 +570,12 @@ h2pl/eg/sysexits.pl		Sample translated sysexits.pl
 h2pl/getioctlsizes		Program to extract types from ioctl.h
 h2pl/mksizes			Program to make %sizeof array
 h2pl/mkvars			Program to make .pl from .ph files
+h2pl/README			How to turn .ph files into .pl files
 h2pl/tcbreak			cbreak test routine using .ph
 h2pl/tcbreak2			cbreak test routine using .pl
 handy.h				Handy definitions
 hints/3b1.sh			Hints for named architecture
 hints/3b1cc			Hints for named architecture
-hints/README.hints		Notes about hints
 hints/aix.sh			Hints for named architecture
 hints/altos486.sh		Hints for named architecture
 hints/amigaos.sh		Hints for named architecture
@@ -733,6 +633,7 @@ hints/os390.sh			Hints for named architecture
 hints/posix-bc.sh		Hints for named architecture
 hints/powerux.sh		Hints for named architecture
 hints/qnx.sh			Hints for named architecture
+hints/README.hints		Notes about hints
 hints/rhapsody.sh		Hints for named architecture
 hints/sco.sh			Hints for named architecture
 hints/sco_2_3_0.sh		Hints for named architecture
@@ -759,21 +660,29 @@ hints/uwin.sh			Hints for named architecture
 hints/vmesa.sh			Hints for named architecture
 hv.c				Hash value code
 hv.h				Hash value header
+INSTALL				Detailed installation instructions
 installhtml			Perl script to install html files for pods
 installman			Perl script to install man pages for pods
 installperl			Perl script to do "make install" dirty work
+INTERN.h			Included before domestic .h files
 intrpvar.h			Variables held in each interpreter instance
 iperlsys.h			Perl's interface to the system
+jpl/bin/jpl			JPL compiler
 jpl/ChangeLog			Java/Perl Lingo change log
+jpl/docs/Tutorial.pod		Perl and Java Tutorial
+jpl/get_jdk/get_jdk.pl		JDK download tool
+jpl/get_jdk/jdk_hosts		JDK availability list
+jpl/get_jdk/README		Instructions for using get_jdk.pl
+jpl/install-jpl			JPL install utility
 jpl/JNI/Changes			Java Native Interface changes
 jpl/JNI/Closer.java		Java Native Interface example
 jpl/JNI/JNI.pm			Java Native Interface module
 jpl/JNI/JNI.xs			Java Native Interface module
 jpl/JNI/JNIConfig		Java Native Interface config
-jpl/JNI/JNIConfig.Win32		Java Native Interface config
 jpl/JNI/JNIConfig.kaffe		Java Native Interface config
 jpl/JNI/JNIConfig.noembed	Java Native Interface config
 jpl/JNI/JNIConfig.standard	Java Native Interface config
+jpl/JNI/JNIConfig.Win32		Java Native Interface config
 jpl/JNI/Makefile.PL		Java Native Interface makefile generator
 jpl/JNI/test.pl			Java Native Interface tests
 jpl/JNI/typemap			Java/Perl interface typemap
@@ -783,37 +692,30 @@ jpl/JPL/AutoLoader.pm		Java/Perl compiler module
 jpl/JPL/Class.pm		Java/Perl compiler module
 jpl/JPL/Compile.pm		Java/Perl compiler module
 jpl/JPL/Makefile.PL		Java/Perl makefile generator
+jpl/JPL_Rolo/cardfile		Rolodex sample application
 jpl/JPL_Rolo/JPL_Rolo.jpl	Rolodex sample application
 jpl/JPL_Rolo/Makefile.PL	Makefile generator
 jpl/JPL_Rolo/README		Instructions
-jpl/JPL_Rolo/cardfile		Rolodex sample application
 jpl/PerlInterpreter/Makefile.PL	Makefile generator
 jpl/PerlInterpreter/PerlInterpreter.c	Perl interpreter abstraction
 jpl/PerlInterpreter/PerlInterpreter.h	Perl interpreter abstraction
 jpl/PerlInterpreter/PerlInterpreter.java	Perl interpreter abstraction
 jpl/README			JPL instructions
 jpl/README.JUST-JNI		JPL instructions
-jpl/SETVARS.PL			JPL setup
 jpl/Sample/Makefile.PL		JPL sample makefile generator
 jpl/Sample/Sample.jpl		JPL sample
+jpl/SETVARS.PL			JPL setup
 jpl/Test/Makefile.PL		JPL tests makefile generator
 jpl/Test/Test.jpl		JPL tests
-jpl/bin/jpl			JPL compiler
-jpl/docs/Tutorial.pod		Perl and Java Tutorial
-jpl/get_jdk/README		Instructions for using get_jdk.pl
-jpl/get_jdk/get_jdk.pl		JDK download tool
-jpl/get_jdk/jdk_hosts		JDK availability list
-jpl/install-jpl			JPL install utility
 keywords.h			The keyword numbers
 keywords.pl			Program to write keywords.h
+lib/abbrev.pl			An abbreviation table builder
 lib/AnyDBM_File.pm		Perl module to emulate dbmopen
 lib/AnyDBM_File.t		See if AnyDBM_File works
+lib/assert.pl			assertion and panic with stack trace
 lib/Attribute/Handlers.pm		Attribute::Handlers
-lib/Attribute/Handlers.t		See if Attribute::Handlers works
-lib/Attribute/Handlers/demo/Demo.pm	Attribute::Handlers demo
-lib/Attribute/Handlers/demo/Descriptions.pm	Attribute::Handlers demo
-lib/Attribute/Handlers/demo/MyClass.pm	Attribute::Handlers demo
 lib/Attribute/Handlers/demo/demo.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/Demo.pm	Attribute::Handlers demo
 lib/Attribute/Handlers/demo/demo2.pl	Attribute::Handlers demo
 lib/Attribute/Handlers/demo/demo3.pl	Attribute::Handlers demo
 lib/Attribute/Handlers/demo/demo4.pl	Attribute::Handlers demo
@@ -824,21 +726,34 @@ lib/Attribute/Handlers/demo/demo_hashdir.pl	Attribute::Handlers demo
 lib/Attribute/Handlers/demo/demo_phases.pl	Attribute::Handlers demo
 lib/Attribute/Handlers/demo/demo_range.pl	Attribute::Handlers demo
 lib/Attribute/Handlers/demo/demo_rawdata.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/Descriptions.pm	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/MyClass.pm	Attribute::Handlers demo
+lib/Attribute/Handlers/test.pl		See if Attribute::Handlers works
+lib/attributes.pm		For "sub foo : attrlist"
 lib/AutoLoader.pm		Autoloader base class
 lib/AutoLoader.t		See if AutoLoader works
 lib/AutoSplit.pm		Split up autoload functions
+lib/autouse.pm			Load and call a function only when it's used
+lib/autouse.t			See if autouse works
+lib/base.pm			Establish IS-A relationship at compile time
 lib/Benchmark.pm		Measure execution time
 lib/Benchmark.t			Perl code profiler testsuite driver
+lib/bigfloat.pl			An arbitrary precision floating point package
+lib/bigfloat.t			See if bigfloat.pl works
+lib/bigint.pl			An arbitrary precision integer arithmetic package
+lib/bigint.t			See if bigint.pl works
+lib/bigrat.pl			An arbitrary precision rational arithmetic package
+lib/blib.pm			For "use blib"
+lib/bytes.pm			Pragma to enable byte operations
+lib/bytes_heavy.pl		Support routines for byte pragma
+lib/cacheout.pl			Manages output filehandles when you need too many
+lib/Carp.pm			Error message base class
+lib/Carp.t			See if Carp works
+lib/Carp/Heavy.pm		Error message workhorse
 lib/CGI.pm			Web server interface ("Common Gateway Interface")
 lib/CGI/Apache.pm		Support for Apache's Perl module
 lib/CGI/Carp.pm			Log server errors with helpful context
 lib/CGI/Cookie.pm		Interface to Netscape Cookies
-lib/CGI/Fast.pm			Support for FastCGI (persistent server process)
-lib/CGI/Pretty.pm		Output nicely formatted HTML
-lib/CGI/Push.pm			Support for server push
-lib/CGI/Switch.pm		Simple interface for multiple server types
-lib/CGI/Util.pm			Utility functions
-lib/CGI/eg/RunMeFirst		Setup script for CGI examples
 lib/CGI/eg/caution.xbm		CGI example
 lib/CGI/eg/clickable_image.cgi	CGI example
 lib/CGI/eg/cookie.cgi		CGI example
@@ -857,41 +772,55 @@ lib/CGI/eg/multiple_forms.cgi	CGI example
 lib/CGI/eg/nph-clock.cgi	CGI example
 lib/CGI/eg/nph-multipart.cgi	CGI example
 lib/CGI/eg/popup.cgi		CGI example
+lib/CGI/eg/RunMeFirst		Setup script for CGI examples
 lib/CGI/eg/save_state.cgi	CGI example
 lib/CGI/eg/tryit.cgi		CGI example
 lib/CGI/eg/wilogo_gif.uu	CGI example
+lib/CGI/Fast.pm			Support for FastCGI (persistent server process)
+lib/CGI/Pretty.pm		Output nicely formatted HTML
+lib/CGI/Push.pm			Support for server push
+lib/CGI/Switch.pm		Simple interface for multiple server types
 lib/CGI/t/form.t		See if CGI.pm works
 lib/CGI/t/function.t		See if CGI.pm works
 lib/CGI/t/html.t		See if CGI.pm works
 lib/CGI/t/pretty.t		See if CGI.pm works
 lib/CGI/t/request.t		See if CGI.pm works
 lib/CGI/t/util.t		See if CGI.pm works
+lib/CGI/Util.pm			Utility functions
+lib/charnames.pm		Character names
+lib/charnames.t			See if character names work
+lib/Class/ISA.pm		Class::ISA
+lib/Class/ISA/test.pl		See if Class::ISA works
+lib/Class/Struct.pm		Declare struct-like datatypes as Perl classes
+lib/Class/Struct.t		See if Class::Struct works
+lib/complete.pl			A command completion subroutine
+lib/constant.pm			For "use constant"
+lib/constant.t			See if compile-time constants work
 lib/CPAN.pm			Interface to Comprehensive Perl Archive Network
 lib/CPAN/FirstTime.pm		Utility for creating CPAN config files
 lib/CPAN/Nox.pm			Runs CPAN while avoiding compiled extensions
 lib/CPAN/t/loadme.t		See if CPAN the module works
 lib/CPAN/t/vcmp.t		See if CPAN the module works
-lib/Carp.pm			Error message base class
-lib/Carp.t			See if Carp works
-lib/Carp/Heavy.pm		Error message workhorse
-lib/Class/ISA.pm		Class::ISA
-lib/Class/ISA/test.pl		See if Class::ISA works
-lib/Class/Struct.pm		Declare struct-like datatypes as Perl classes
-lib/Class/Struct.t		See if Class::Struct works
+lib/ctime.pl			A ctime workalike
 lib/Cwd.pm			Various cwd routines (getcwd, fastcwd, chdir)
 lib/DB.pm			Debugger API (draft)
 lib/Devel/SelfStubber.pm	Generate stubs for SelfLoader.pm
 lib/Devel/SelfStubber.t		See if Devel::SelfStubber works
+lib/diagnostics.pm		Print verbose diagnostics
+lib/diagnostics.t		See if diagnostics.pm works
 lib/Digest.pm			Digest extensions
 lib/Digest.t			See if Digest extensions work
 lib/DirHandle.pm		like FileHandle only for directories
 lib/DirHandle.t			See if DirHandle works
+lib/dotsh.pl			Code to "dot" in a shell script
 lib/Dumpvalue.pm		Screen dump of perl values
+lib/dumpvar.pl			A variable dumper
 lib/English.pm			Readable aliases for short variables
 lib/English.t			See if English works
 lib/Env.pm			Map environment into ordinary variables
 lib/Env/array.t			See if Env works
 lib/Env/env.t			See if Env works for arrays
+lib/exceptions.pl		catch and throw routines
 lib/Exporter.pm			Exporter base class
 lib/Exporter.t			See if Exporter works
 lib/Exporter/Heavy.pm		Complicated routines for Exporter
@@ -899,27 +828,30 @@ lib/ExtUtils.t			See if extutils work
 lib/ExtUtils/Command.pm		Utilities for Make on non-UNIX platforms
 lib/ExtUtils/Constant.pm	generate XS code to import C header constants
 lib/ExtUtils/Embed.pm		Utilities for embedding Perl in C programs
+lib/ExtUtils/inst		Give information about installed extensions
 lib/ExtUtils/Install.pm		Handles 'make install' on extensions
 lib/ExtUtils/Installed.pm	Information on installed extensions
 lib/ExtUtils/Liblist.pm		Locates libraries
+lib/ExtUtils/MakeMaker.pm	Write Makefiles for extensions
+lib/ExtUtils/Manifest.pm	Utilities to write MANIFEST files
 lib/ExtUtils/MANIFEST.SKIP	The default MANIFEST.SKIP
+lib/ExtUtils/Mkbootstrap.pm	Writes a bootstrap file (see MakeMaker)
+lib/ExtUtils/Mksymlists.pm	Writes a linker options file for extensions
 lib/ExtUtils/MM_Cygwin.pm	MakeMaker methods for Cygwin
 lib/ExtUtils/MM_NW5.pm		MakeMaker methods for NetWare
 lib/ExtUtils/MM_OS2.pm		MakeMaker methods for OS/2
 lib/ExtUtils/MM_Unix.pm		MakeMaker base class for Unix
 lib/ExtUtils/MM_VMS.pm		MakeMaker methods for VMS
 lib/ExtUtils/MM_Win32.pm	MakeMaker methods for Win32
-lib/ExtUtils/MakeMaker.pm	Write Makefiles for extensions
-lib/ExtUtils/Manifest.pm	Utilities to write MANIFEST files
-lib/ExtUtils/Mkbootstrap.pm	Writes a bootstrap file (see MakeMaker)
-lib/ExtUtils/Mksymlists.pm	Writes a linker options file for extensions
 lib/ExtUtils/Packlist.pm	Manipulates .packlist files
-lib/ExtUtils/inst		Give information about installed extensions
 lib/ExtUtils/testlib.pm		Fixes up @INC to use just-built extension
 lib/ExtUtils/typemap		Extension interface types
 lib/ExtUtils/xsubpp		External subroutine preprocessor
+lib/fastcwd.pl			a faster but more dangerous getcwd
 lib/Fatal.pm			Make errors in functions/builtins fatal
 lib/Fatal.t			See if Fatal works
+lib/fields.pm			Set up object field names for pseudo-hash-using classes
+lib/fields.t			See if base/fields works
 lib/File/Basename.pm		Emulate the basename program
 lib/File/Basename.t		See if File::Basename works
 lib/File/CheckTree.pm		Perl module supporting wholesale file mode validation
@@ -933,10 +865,6 @@ lib/File/DosGlob.t		See if File::DosGlob works
 lib/File/Find.pm		Routines to do a find
 lib/File/Find/find.t		See if File::Find works
 lib/File/Find/taint.t		See if File::Find works with taint
-lib/File/Glob/basic.t		See if File::Glob works
-lib/File/Glob/case.t		See if File::Glob works
-lib/File/Glob/global.t		See if File::Glob works
-lib/File/Glob/taint.t		See if File::Glob works
 lib/File/Path.pm		Do things like `mkdir -p' and `rm -r'
 lib/File/Path.t			See if File::Path works
 lib/File/Spec.pm		portable operations on file names
@@ -949,28 +877,38 @@ lib/File/Spec/OS2.pm		portable operations on OS2 file names
 lib/File/Spec/Unix.pm		portable operations on Unix file names
 lib/File/Spec/VMS.pm		portable operations on VMS file names
 lib/File/Spec/Win32.pm		portable operations on Win32 file names
-lib/File/Temp.pm		create safe temporary files and file handles
-lib/File/Temp/mktemp.t		See if File::Temp works
-lib/File/Temp/posix.t		See if File::Temp works
-lib/File/Temp/security.t	See if File::Temp works
-lib/File/Temp/tempfile.t	See if File::Temp works
 lib/File/stat.pm		By-name interface to Perl's builtin stat
 lib/File/stat.t			See if File::stat works
+lib/File/Temp.pm		create safe temporary files and file handles
+lib/File/Temp/t/mktemp.t	See if File::Temp works
+lib/File/Temp/t/posix.t		See if File::Temp works
+lib/File/Temp/t/security.t	See if File::Temp works
+lib/File/Temp/t/tempfile.t	See if File::Temp works
 lib/FileCache.pm		Keep more files open than the system permits
 lib/FileCache.t			See if FileCache works
 lib/FileHandle.pm		Backward-compatible front end to IO extension
 lib/FileHandle.t		See if FileHandle works
+lib/filetest.pm			For "use filetest"
 lib/Filter/Simple.pm		Simple frontend to Filter::Util::Call
 lib/Filter/Simple/test.pl	See if Filter::Simple works
+lib/find.pl			A find emulator--used by find2perl
 lib/FindBin.pm			Find name of currently executing program
 lib/FindBin.t			See if FindBin works
+lib/finddepth.pl		A depth-first find emulator--used by find2perl
+lib/flush.pl			Routines to do single flush
+lib/ftp.pl			FTP code (obsolete, use Net::FTP instead)
+lib/getcwd.pl			A getcwd() emulator
+lib/getopt.pl			Perl library supporting option parsing
 lib/Getopt/Long.pm		Fetch command options (GetOptions)
-lib/Getopt/Long/basic.t		See if Getopt::Long works
-lib/Getopt/Long/compat.t	See if Getopt::Long works
-lib/Getopt/Long/linkage.t	See if Getopt::Long works
-lib/Getopt/Long/oo.t		See if Getopt::Long works
+lib/Getopt/Long/t/basic.t	See if Getopt::Long works
+lib/Getopt/Long/t/compat.t	See if Getopt::Long works
+lib/Getopt/Long/t/linkage.t	See if Getopt::Long works
+lib/Getopt/Long/t/oo.t		See if Getopt::Long works
 lib/Getopt/Std.pm		Fetch command options (getopt, getopts)
 lib/Getopt/Std.t		See if Getopt::Std and Getopt::Long work
+lib/getopts.pl			Perl library supporting option parsing
+lib/h2ph.t			See if h2ph works like it should
+lib/hostname.pl			Old hostname code
 lib/I18N/Collate.pm		Routines to do strxfrm-based collation
 lib/I18N/Collate.t		See if I18N::Collate works
 lib/I18N/LangTags.pm		I18N::LangTags
@@ -978,11 +916,17 @@ lib/I18N/LangTags/ChangeLog	I18N::LangTags
 lib/I18N/LangTags/List.pm	List of tags for human languages
 lib/I18N/LangTags/README	I18N::LangTags
 lib/I18N/LangTags/test.pl	See if I18N::LangTags works
+lib/importenv.pl		Perl routine to get environment into variables
+lib/integer.pm			For "use integer"
 lib/IPC/Open2.pm		Open a two-ended pipe
 lib/IPC/Open2.t			See if IPC::Open2 works
 lib/IPC/Open3.pm		Open a three-ended pipe!
 lib/IPC/Open3.t			See if IPC::Open3 works
 lib/IPC/SysV.t			See if IPC::SysV works
+lib/less.pm			For "use less"
+lib/lib_pm.PL			For "use lib", produces lib/lib.pm
+lib/locale.pm			For "use locale"
+lib/locale.t			See if locale support works
 lib/Locale/Codes/t/all.t	See if Locale::Codes work
 lib/Locale/Codes/t/constants.t	See if Locale::Codes work
 lib/Locale/Codes/t/country.t	See if Locale::Codes work
@@ -999,6 +943,7 @@ lib/Locale/Maketext/ChangeLog	Locale::Maketext
 lib/Locale/Maketext/README	Locale::Maketext
 lib/Locale/Maketext/test.pl	See if Locale::Maketext works
 lib/Locale/Maketext/TPJ13.pod	Locale::Maketext documentation article
+lib/look.pl			A "look" equivalent
 lib/Math/BigFloat.pm		An arbitrary precision floating-point arithmetic package
 lib/Math/BigInt.pm		An arbitrary precision integer arithmetic package
 lib/Math/BigInt/t/bigfltpm.t	See if BigFloat.pm works
@@ -1015,10 +960,9 @@ lib/Memoize/ExpireFile.pm	Memoize
 lib/Memoize/ExpireTest.pm	Memoize
 lib/Memoize/NDBM_File.pm	Memoize
 lib/Memoize/README		Memoize
-lib/Memoize/SDBM_File.pm	Memoize
 lib/Memoize/Saves.pm		Memoize
+lib/Memoize/SDBM_File.pm	Memoize
 lib/Memoize/Storable.pm		Memoize
-lib/Memoize/TODO		Memoize
 lib/Memoize/t/array.t		Memoize
 lib/Memoize/t/correctness.t	Memoize
 lib/Memoize/t/errors.t		Memoize
@@ -1031,37 +975,17 @@ lib/Memoize/t/normalize.t	Memoize
 lib/Memoize/t/prototype.t	Memoize
 lib/Memoize/t/speed.t		Memoize
 lib/Memoize/t/tie.t		Memoize
+lib/Memoize/t/tiefeatures.t	Memoize
 lib/Memoize/t/tie_gdbm.t	Memoize
 lib/Memoize/t/tie_ndbm.t	Memoize
 lib/Memoize/t/tie_sdbm.t	Memoize
 lib/Memoize/t/tie_storable.t	Memoize
-lib/Memoize/t/tiefeatures.t	Memoize
 lib/Memoize/t/unmemoize.t	Memoize
-lib/NEXT.pm		Pseudo-class NEXT for method redispatch
-lib/NEXT/test.pl		See if NEXT works
+lib/Memoize/TODO		Memoize
 lib/Net/ChangeLog.libnet	libnet
 lib/Net/Cmd.pm			libnet
 lib/Net/Config.eg		libnet
 lib/Net/Config.pm		libnet
-lib/Net/Domain.pm		libnet
-lib/Net/DummyInetd.pm		libnet
-lib/Net/FTP.pm			libnet
-lib/Net/FTP/A.pm		libnet
-lib/Net/FTP/E.pm		libnet
-lib/Net/FTP/I.pm		libnet
-lib/Net/FTP/L.pm		libnet
-lib/Net/FTP/dataconn.pm		libnet
-lib/Net/Hostname.eg		libnet
-lib/Net/NNTP.pm			libnet
-lib/Net/Netrc.pm		libnet
-lib/Net/PH.pm			libnet
-lib/Net/POP3.pm			libnet
-lib/Net/Ping.pm			Hello, anybody home?
-lib/Net/README.config		libnet
-lib/Net/README.libnet		libnet
-lib/Net/SMTP.pm			libnet
-lib/Net/SNPP.pm			libnet
-lib/Net/Time.pm			libnet
 lib/Net/demos/ftp		libnet
 lib/Net/demos/inetd		libnet
 lib/Net/demos/nntp		libnet
@@ -1070,23 +994,52 @@ lib/Net/demos/pop3		libnet
 lib/Net/demos/smtp.self		libnet
 lib/Net/demos/snpp		libnet
 lib/Net/demos/time		libnet
+lib/Net/Domain.pm		libnet
+lib/Net/DummyInetd.pm		libnet
+lib/Net/FTP.pm			libnet
+lib/Net/FTP/A.pm		libnet
+lib/Net/FTP/dataconn.pm		libnet
+lib/Net/FTP/E.pm		libnet
+lib/Net/FTP/I.pm		libnet
+lib/Net/FTP/L.pm		libnet
 lib/Net/hostent.pm		By-name interface to Perl's builtin gethost*
 lib/Net/hostent.t		See if Net::hostent works
+lib/Net/Hostname.eg		libnet
 lib/Net/libnet.ppd		libnet
 lib/Net/libnetFAQ.pod		libnet
 lib/Net/netent.pm		By-name interface to Perl's builtin getnet*
 lib/Net/netent.t		See if Net::netent works
+lib/Net/Netrc.pm		libnet
+lib/Net/NNTP.pm			libnet
+lib/Net/PH.pm			libnet
+lib/Net/Ping.pm			Hello, anybody home?
+lib/Net/POP3.pm			libnet
 lib/Net/protoent.pm		By-name interface to Perl's builtin getproto*
 lib/Net/protoent.t		See if Net::protoent works
+lib/Net/README.config		libnet
+lib/Net/README.libnet		libnet
 lib/Net/servent.pm		By-name interface to Perl's builtin getserv*
 lib/Net/servent.t		See if Net::servtent works
+lib/Net/SMTP.pm			libnet
+lib/Net/SNPP.pm			libnet
 lib/Net/t/ftp.t			libnet
 lib/Net/t/hostname.t		libnet
 lib/Net/t/nntp.t		libnet
 lib/Net/t/ph.t			libnet
 lib/Net/t/require.t		libnet
 lib/Net/t/smtp.t		libnet
+lib/Net/Time.pm			libnet
+lib/newgetopt.pl		A perl library supporting long option parsing
+lib/NEXT.pm		Pseudo-class NEXT for method redispatch
+lib/NEXT/test.pl		See if NEXT works
+lib/open.pm			Pragma to specify default I/O disciplines
+lib/open2.pl			Open a two-ended pipe (uses IPC::Open2)
+lib/open3.pl			Open a three-ended pipe (uses IPC::Open3)
+lib/overload.pm			Module for overloading perl operators
+lib/overload.t			See if operator overloading works
+lib/perl5db.pl			Perl debugging routines
 lib/PerlIO.pm			PerlIO support module
+lib/ph.t			See if h2ph works
 lib/Pod/Checker.pm		Pod-Parser - check POD documents for syntax errors
 lib/Pod/Find.pm			used by pod/splitpod
 lib/Pod/Functions.pm		used by pod/splitpod
@@ -1094,8 +1047,8 @@ lib/Pod/Html.pm			Convert POD data to HTML
 lib/Pod/InputObjects.pm		Pod-Parser - define objects for input streams
 lib/Pod/LaTeX.pm		Convert POD data to LaTeX
 lib/Pod/Man.pm			Convert POD data to *roff
-lib/Pod/ParseUtils.pm		Pod-Parser - pod utility functions
 lib/Pod/Parser.pm		Pod-Parser - define base class for parsing POD
+lib/Pod/ParseUtils.pm		Pod-Parser - pod utility functions
 lib/Pod/Plainer.pm		Pod migration utility module
 lib/Pod/Select.pm		Pod-Parser - select portions of POD docs
 lib/Pod/Text.pm			Pod-Parser - convert POD data to formatted ASCII text
@@ -1103,6 +1056,7 @@ lib/Pod/Text/Color.pm		Convert POD data to color ASCII text
 lib/Pod/Text/Overstrike.pm	Convert POD data to formatted overstrike text
 lib/Pod/Text/Termcap.pm		Convert POD data to ASCII text with format escapes
 lib/Pod/Usage.pm		Pod-Parser - print usage messages
+lib/pwd.pl			Routines to keep track of PWD environment variable
 lib/Search/Dict.pm		Perform binary search on dictionaries
 lib/Search/Dict.t		See if Search::Dict works
 lib/SelectSaver.pm		Enforce proper select scoping
@@ -1110,15 +1064,25 @@ lib/SelectSaver.t		See if SelectSaver works
 lib/SelfLoader.pm		Load functions only on demand
 lib/SelfLoader.t		See if SelfLoader works
 lib/Shell.pm			Make AUTOLOADed system() calls
+lib/shellwords.pl		Perl library to split into words with shell quoting
+lib/sigtrap.pm			For trapping an abort and giving traceback
+lib/stat.pl			Perl library supporting stat function
+lib/strict.pm			For "use strict"
+lib/strict.t			See if strictures work
+lib/subs.pm			Declare overriding subs
+lib/subs.t			See if subroutine pseudo-importation works
 lib/Switch.pm			Switch for Perl
 lib/Switch/test.pl		Test whether switch works
 lib/Symbol.pm			Symbol table manipulation routines
 lib/Symbol.t			See if Symbol works
+lib/syslog.pl			Perl library supporting syslogging
+lib/tainted.pl			Old code for tainting
 lib/Term/ANSIColor.pm		Perl module supporting termcap usage
 lib/Term/ANSIColor/test.pl	See if Term::ANSIColor works
 lib/Term/Cap.pm			Perl module supporting termcap usage
 lib/Term/Complete.pm		A command completion subroutine
 lib/Term/ReadLine.pm		Stub readline library
+lib/termcap.pl			Perl library supporting termcap usage
 lib/Test.pm			A simple framework for writing test scripts
 lib/Test/Harness.pm		A test harness
 lib/Test/Harness.t		See if Test::Harness works
@@ -1146,10 +1110,10 @@ lib/Text/ParseWords.t		See if Text::ParseWords works
 lib/Text/Soundex.pm		Perl module to implement Soundex
 lib/Text/Soundex.t		See if Soundex works
 lib/Text/Tabs.pm		Do expand and unexpand
-lib/Text/Tabs.t			See if Text::Tabs works
+lib/Text/TabsWrap/t/fill.t	See if Text::Wrap::fill works
+lib/Text/TabsWrap/t/tabs.t	See if Text::Tabs works
+lib/Text/TabsWrap/t/wrap.t	See if Text::Wrap::wrap works
 lib/Text/Wrap.pm		Paragraph formatter
-lib/Text/Wrap/fill.t		See if Text::Wrap::fill works
-lib/Text/Wrap/wrap.t		See if Text::Wrap::wrap works
 lib/Tie/Array.pm		Base class for tied arrays
 lib/Tie/Array/push.t		Test for Tie::Array
 lib/Tie/Array/splice.t		Test for Tie::Array::SPLICE
@@ -1163,84 +1127,13 @@ lib/Tie/RefHash.t		Test for Tie::RefHash and Tie::RefHash::Nestable
 lib/Tie/Scalar.pm		Base class for tied scalars
 lib/Tie/SubstrHash.pm		Compact hash for known key, value and table size
 lib/Tie/SubstrHash.t		Test for Tie::SubstrHash
-lib/Time/Local.pm		Reverse translation of localtime, gmtime
-lib/Time/Local.t		See if Time::Local works
 lib/Time/gmtime.pm		By-name interface to Perl's builtin gmtime
 lib/Time/gmtime.t		Test for Time::gmtime
+lib/Time/Local.pm		Reverse translation of localtime, gmtime
+lib/Time/Local.t		See if Time::Local works
 lib/Time/localtime.pm		By-name interface to Perl's builtin localtime
 lib/Time/localtime.t		Test for Time::localtime
 lib/Time/tm.pm			Internal object for Time::{gm,local}time
-lib/UNIVERSAL.pm		Base class for ALL classes
-lib/User/grent.pm		By-name interface to Perl's builtin getgr*
-lib/User/grent.t		See if User::grwent works
-lib/User/pwent.pm		By-name interface to Perl's builtin getpw*
-lib/User/pwent.t		See if User::pwent works
-lib/Win32.pod			Documentation for Win32 extras
-lib/abbrev.pl			An abbreviation table builder
-lib/assert.pl			assertion and panic with stack trace
-lib/attributes.pm		For "sub foo : attrlist"
-lib/autouse.pm			Load and call a function only when it's used
-lib/autouse.t			See if autouse works
-lib/base.pm			Establish IS-A relationship at compile time
-lib/bigfloat.pl			An arbitrary precision floating point package
-lib/bigfloat.t			See if bigfloat.pl works
-lib/bigint.pl			An arbitrary precision integer arithmetic package
-lib/bigint.t			See if bigint.pl works
-lib/bigrat.pl			An arbitrary precision rational arithmetic package
-lib/blib.pm			For "use blib"
-lib/bytes.pm			Pragma to enable byte operations
-lib/bytes_heavy.pl		Support routines for byte pragma
-lib/cacheout.pl			Manages output filehandles when you need too many
-lib/charnames.pm		Character names
-lib/charnames.t			See if character names work
-lib/complete.pl			A command completion subroutine
-lib/constant.pm			For "use constant"
-lib/constant.t			See if compile-time constants work
-lib/ctime.pl			A ctime workalike
-lib/diagnostics.pm		Print verbose diagnostics
-lib/diagnostics.t		See if diagnostics.pm works
-lib/dotsh.pl			Code to "dot" in a shell script
-lib/dumpvar.pl			A variable dumper
-lib/exceptions.pl		catch and throw routines
-lib/fastcwd.pl			a faster but more dangerous getcwd
-lib/fields.pm			Set up object field names for pseudo-hash-using classes
-lib/fields.t			See if base/fields works
-lib/filetest.pm			For "use filetest"
-lib/find.pl			A find emulator--used by find2perl
-lib/finddepth.pl		A depth-first find emulator--used by find2perl
-lib/flush.pl			Routines to do single flush
-lib/ftp.pl			FTP code (obsolete, use Net::FTP instead)
-lib/getcwd.pl			A getcwd() emulator
-lib/getopt.pl			Perl library supporting option parsing
-lib/getopts.pl			Perl library supporting option parsing
-lib/h2ph.t			See if h2ph works like it should
-lib/hostname.pl			Old hostname code
-lib/importenv.pl		Perl routine to get environment into variables
-lib/integer.pm			For "use integer"
-lib/less.pm			For "use less"
-lib/lib_pm.PL			For "use lib", produces lib/lib.pm
-lib/locale.pm			For "use locale"
-lib/locale.t			See if locale support works
-lib/look.pl			A "look" equivalent
-lib/newgetopt.pl		A perl library supporting long option parsing
-lib/open.pm			Pragma to specify default I/O disciplines
-lib/open2.pl			Open a two-ended pipe (uses IPC::Open2)
-lib/open3.pl			Open a three-ended pipe (uses IPC::Open3)
-lib/overload.pm			Module for overloading perl operators
-lib/overload.t			See if operator overloading works
-lib/perl5db.pl			Perl debugging routines
-lib/ph.t			See if h2ph works
-lib/pwd.pl			Routines to keep track of PWD environment variable
-lib/shellwords.pl		Perl library to split into words with shell quoting
-lib/sigtrap.pm			For trapping an abort and giving traceback
-lib/stat.pl			Perl library supporting stat function
-lib/strict.pm			For "use strict"
-lib/strict.t			See if strictures work
-lib/subs.pm			Declare overriding subs
-lib/subs.t			See if subroutine pseudo-importation works
-lib/syslog.pl			Perl library supporting syslogging
-lib/tainted.pl			Old code for tainting
-lib/termcap.pl			Perl library supporting termcap usage
 lib/timelocal.pl		Perl library supporting inverse of localtime, gmtime
 lib/unicode/ArabLink.pl		Unicode character database
 lib/unicode/ArabLnkGrp.pl	Unicode character database
@@ -1254,6 +1147,7 @@ lib/unicode/Category.pl		Unicode character database
 lib/unicode/CombiningClass.pl	Unicode character database
 lib/unicode/CompExcl.txt	Unicode character database
 lib/unicode/Decomposition.pl	Unicode character database
+lib/unicode/distinct.pm		Perl pragma to strictly distinguish UTF8 data and non-UTF data
 lib/unicode/EAWidth.txt		Unicode character database
 lib/unicode/In.pl		Unicode character database
 lib/unicode/In/0.pl		Unicode character database
@@ -1353,9 +1247,9 @@ lib/unicode/In/93.pl		Unicode character database
 lib/unicode/In/94.pl		Unicode character database
 lib/unicode/In/95.pl		Unicode character database
 lib/unicode/Index.txt		Unicode character database
-lib/unicode/Is/ASCII.pl		Unicode character database
 lib/unicode/Is/Alnum.pl		Unicode character database
 lib/unicode/Is/Alpha.pl		Unicode character database
+lib/unicode/Is/ASCII.pl		Unicode character database
 lib/unicode/Is/BidiAL.pl	Unicode character database
 lib/unicode/Is/BidiAN.pl	Unicode character database
 lib/unicode/Is/BidiB.pl		Unicode character database
@@ -1474,6 +1368,7 @@ lib/unicode/Is/SylE.pl		Unicode character database
 lib/unicode/Is/SylEE.pl		Unicode character database
 lib/unicode/Is/SylI.pl		Unicode character database
 lib/unicode/Is/SylII.pl		Unicode character database
+lib/unicode/Is/Syllable.pl	Unicode character database
 lib/unicode/Is/SylN.pl		Unicode character database
 lib/unicode/Is/SylO.pl		Unicode character database
 lib/unicode/Is/SylOO.pl		Unicode character database
@@ -1490,7 +1385,6 @@ lib/unicode/Is/SylWO.pl		Unicode character database
 lib/unicode/Is/SylWOO.pl	Unicode character database
 lib/unicode/Is/SylWU.pl		Unicode character database
 lib/unicode/Is/SylWV.pl		Unicode character database
-lib/unicode/Is/Syllable.pl	Unicode character database
 lib/unicode/Is/Upper.pl		Unicode character database
 lib/unicode/Is/Word.pl		Unicode character database
 lib/unicode/Is/XDigit.pl	Unicode character database
@@ -1502,6 +1396,7 @@ lib/unicode/Jamo.txt		Unicode character database
 lib/unicode/JamoShort.pl	Unicode character database
 lib/unicode/LineBrk.txt		Unicode character database
 lib/unicode/Makefile		Unicode character database
+lib/unicode/mktables.PL		Unicode character database generator
 lib/unicode/Name.pl		Unicode character database
 lib/unicode/NamesList.html	Unicode character database
 lib/unicode/NamesList.txt	Unicode character database
@@ -1510,8 +1405,10 @@ lib/unicode/PropList.html	Unicode character database
 lib/unicode/PropList.txt	Unicode character database
 lib/unicode/README.perl		Unicode character database
 lib/unicode/ReadMe.txt		Unicode character database info
+lib/unicode/rename		Filename mappings used
 lib/unicode/Scripts.txt		Unicode character database
 lib/unicode/SpecCase.txt	Unicode character database
+lib/unicode/syllables.txt	Unicode character database
 lib/unicode/To/Digit.pl		Unicode character database
 lib/unicode/To/Lower.pl		Unicode character database
 lib/unicode/To/Title.pl		Unicode character database
@@ -1519,11 +1416,12 @@ lib/unicode/To/Upper.pl		Unicode character database
 lib/unicode/UCD.html		Unicode character database
 lib/unicode/Unicode.html	Unicode character database
 lib/unicode/Unicode.txt		Unicode character database
-lib/unicode/distinct.pm		Perl pragma to strictly distinguish UTF8 data and non-UTF data
-lib/unicode/mktables.PL		Unicode character database generator
-lib/unicode/rename		Filename mappings used
-lib/unicode/syllables.txt	Unicode character database
 lib/unicode/version		The version of the Unicode
+lib/UNIVERSAL.pm		Base class for ALL classes
+lib/User/grent.pm		By-name interface to Perl's builtin getgr*
+lib/User/grent.t		See if User::grwent works
+lib/User/pwent.pm		By-name interface to Perl's builtin getpw*
+lib/User/pwent.t		See if User::pwent works
 lib/utf8.pm			Pragma to control Unicode support
 lib/utf8.t			See if utf8 operations work
 lib/utf8_heavy.pl		Support routines for utf8 pragma
@@ -1533,20 +1431,24 @@ lib/vars.t			See if "use vars" work
 lib/warnings.pm			For "use warnings"
 lib/warnings.t			See if warning controls work
 lib/warnings/register.pm	For "use warnings::register"
+lib/Win32.pod			Documentation for Win32 extras
 locale.c			locale-specific utility functions
 makeaperl.SH			perl script that produces a new perl binary
 makedef.pl			Create symbol export lists for linking
 makedepend.SH			Precursor to makedepend
 makedir.SH			Precursor to makedir
+Makefile.micro			microperl Makefile
+Makefile.SH			A script that generates Makefile
 malloc.c			A version of malloc you might not want
+MANIFEST			This list of files
 mg.c				Magic code
 mg.h				Magic header
 minimod.pl			Writes lib/ExtUtils/Miniperl.pm
 miniperlmain.c			Basic perl w/o dynamic loading or extensions
-mint/Makefile			MiNT port
-mint/README			MiNT port
 mint/errno.h			MiNT port
+mint/Makefile			MiNT port
 mint/pwd.c			MiNT port
+mint/README			MiNT port
 mint/stdio.h			MiNT port
 mint/sys/time.h			MiNT port
 mint/time.h			MiNT port
@@ -1555,6 +1457,55 @@ mpeix/nm			MPE/iX port
 mpeix/relink			MPE/iX port
 mv-if-diff			Script to mv a file if it changed
 myconfig.SH			Prints summary of the current configuration
+NetWare/bat/BldNWExt.bat	Netware port
+NetWare/bat/Buildtype.bat	Netware port
+NetWare/bat/MPKBuild.bat	Netware port
+NetWare/bat/Setmpksdk.bat	Netware port
+NetWare/bat/Setnlmsdk.bat	Netware port
+NetWare/bat/SetNWBld.bat	Netware port
+NetWare/bat/Setwatcom.bat	Netware port
+NetWare/bat/ToggleD2.bat	Netware port
+NetWare/bat/ToggleXDC.bat	Netware port
+NetWare/CLIBsdio.h		Netware port
+NetWare/CLIBstr.h		Netware port
+NetWare/CLIBstuf.c		Netware port
+NetWare/CLIBstuf.h		Netware port
+NetWare/config.wc		Netware port
+NetWare/config_h.PL		Netware port
+NetWare/config_H.wc		Netware port
+NetWare/config_sh.PL		Netware port
+NetWare/deb.h			Netware port
+NetWare/dl_netware.xs		Netware port
+NetWare/intdef.h		Netware port
+NetWare/interface.c		Netware port
+NetWare/interface.h		Netware port
+NetWare/iperlhost.h		Netware port
+NetWare/Main.c			Netware port
+NetWare/Makefile		Netware port
+NetWare/netware.h		Netware port
+NetWare/nw5.c			Netware port
+NetWare/nw5iop.h		Netware port
+NetWare/nw5sck.c		Netware port
+NetWare/nw5sck.h		Netware port
+NetWare/nw5thread.c		Netware port
+NetWare/nw5thread.h		Netware port
+NetWare/Nwmain.c		Netware port
+NetWare/nwperlsys.c		Netware port
+NetWare/nwperlsys.h		Netware port
+NetWare/Nwpipe.c		Netware port
+NetWare/nwpipe.h		Netware port
+NetWare/nwplglob.c		Netware port
+NetWare/nwplglob.h		Netware port
+NetWare/NWTInfo.c		Netware port
+NetWare/nwtinfo.h		Netware port
+NetWare/NWUtil.c		Netware port
+NetWare/nwutil.h		Netware port
+NetWare/t/NWModify.pl		Netware port
+NetWare/t/NWScripts.pl		Netware port
+NetWare/t/Readme.txt		Netware port
+NetWare/testnlm/echo/echo.c	Netware port
+NetWare/testnlm/type/type.c	Netware port
+NetWare/win32ish.h		Netware port
 nostdio.h			Cause compile error on stdio calls
 numeric.c			Miscellaneous numeric conversion routines
 objXSUB.h			Scoping macros for Perl Object in extensions
@@ -1564,34 +1515,39 @@ opcode.h			Automatically generated opcode header
 opcode.pl			Opcode header generatore
 opnames.h			Automatically generated opcode header
 os2/Changes			Changelog for OS/2 port
+os2/diff.configure		Patches to Configure
+os2/dlfcn.h			Addon for dl_open
+os2/dl_os2.c			Addon for dl_open
 os2/Makefile.SHs		Shared library generation for OS/2
+os2/os2.c			Additional code for OS/2
+os2/os2.sym			Additional symbols to export
 os2/OS2/ExtAttr/Changes		EA access module
 os2/OS2/ExtAttr/ExtAttr.pm	EA access module
 os2/OS2/ExtAttr/ExtAttr.xs	EA access module
-os2/OS2/ExtAttr/MANIFEST	EA access module
 os2/OS2/ExtAttr/Makefile.PL	EA access module
+os2/OS2/ExtAttr/MANIFEST	EA access module
 os2/OS2/ExtAttr/myea.h		EA access module
 os2/OS2/ExtAttr/t/os2_ea.t	EA access module
 os2/OS2/ExtAttr/typemap		EA access module
 os2/OS2/PrfDB/Changes		System database access module
-os2/OS2/PrfDB/MANIFEST		System database access module
 os2/OS2/PrfDB/Makefile.PL	System database access module
+os2/OS2/PrfDB/MANIFEST		System database access module
 os2/OS2/PrfDB/PrfDB.pm		System database access module
 os2/OS2/PrfDB/PrfDB.xs		System database access module
 os2/OS2/PrfDB/t/os2_prfdb.t	System database access module
 os2/OS2/PrfDB/typemap		System database access module
-os2/OS2/Process/MANIFEST	system() constants in a module
 os2/OS2/Process/Makefile.PL	system() constants in a module
+os2/OS2/Process/MANIFEST	system() constants in a module
 os2/OS2/Process/Process.pm	system() constants in a module
 os2/OS2/Process/Process.xs	system() constants in a module
 os2/OS2/REXX/Changes		DLL access module
 os2/OS2/REXX/DLL/Changes	DLL access module
 os2/OS2/REXX/DLL/DLL.pm		DLL access module
 os2/OS2/REXX/DLL/DLL.xs		DLL access module
-os2/OS2/REXX/DLL/MANIFEST	DLL access module
 os2/OS2/REXX/DLL/Makefile.PL	DLL access module
-os2/OS2/REXX/MANIFEST		DLL access module
+os2/OS2/REXX/DLL/MANIFEST	DLL access module
 os2/OS2/REXX/Makefile.PL	DLL access module
+os2/OS2/REXX/MANIFEST		DLL access module
 os2/OS2/REXX/REXX.pm		DLL access module
 os2/OS2/REXX/REXX.xs		DLL access module
 os2/OS2/REXX/t/rx_cmprt.t	DLL access module
@@ -1604,11 +1560,6 @@ os2/OS2/REXX/t/rx_tievar.t	DLL access module
 os2/OS2/REXX/t/rx_tieydb.t	DLL access module
 os2/OS2/REXX/t/rx_varset.t	DLL access module
 os2/OS2/REXX/t/rx_vrexx.t	DLL access module
-os2/diff.configure		Patches to Configure
-os2/dl_os2.c			Addon for dl_open
-os2/dlfcn.h			Addon for dl_open
-os2/os2.c			Additional code for OS/2
-os2/os2.sym			Additional symbols to export
 os2/os2add.sym			Overriding symbols to export
 os2/os2ish.h			Header for OS/2
 os2/os2thread.h			pthread-like typedefs
@@ -1630,8 +1581,8 @@ perly.c				A byacc'ed perly.y
 perly.fixer			A program to remove yacc stack limitations
 perly.h				The header file for perly.c
 perly.y				Yacc grammar for perl
-perly_c.diff			Fixup perly.c to allow recursion
 perlyline.pl			Perl code to fix #line directives and gcc warnings in perly.c
+perly_c.diff			Fixup perly.c to allow recursion
 plan9/aperl			Shell to make Perl error messages Acme-friendly
 plan9/arpa/inet.h		Plan9 port: replacement C header file
 plan9/buildinfo			Plan9 port: configuration information
@@ -1645,9 +1596,9 @@ plan9/plan9.c			Plan9 port: Plan9-specific C routines
 plan9/plan9ish.h		Plan9 port: Plan9-specific C header file
 plan9/setup.rc			Plan9 port: script for easy build+install
 plan9/versnum			Plan9 port: script to print version number
-pod/Makefile.SH			generate Makefile whichs makes pods into something else
 pod/buildtoc.PL			generate buildtoc which generates perltoc.pod
 pod/checkpods.PL		Tool to check for common errors in pods
+pod/Makefile.SH			generate Makefile whichs makes pods into something else
 pod/perl.pod			Top level perl documentation
 pod/perl5004delta.pod		Changes from 5.003 to 5.004
 pod/perl5005delta.pod		Changes from 5.004 to 5.005
@@ -1740,6 +1691,23 @@ pod/roffitall			troff the whole man page set
 pod/rofftoc			Generate a table of contents in troff format
 pod/splitman			Splits perlfunc into multiple man pages
 pod/splitpod			Splits perlfunc into multiple pod pages
+Policy_sh.SH		Hold site-wide preferences between Configure runs.
+Porting/config.sh	Sample config.sh
+Porting/config_H	Sample config.h
+Porting/Contract	Social contract for contributed modules in Perl core
+Porting/findvars	Find occurrences of words
+Porting/fixCORE		Find and fix modules that generate warnings
+Porting/fixvars		Find undeclared variables with C compiler and fix em
+Porting/genlog		Generate formatted changelogs by querying p4d
+Porting/Glossary	Glossary of config.sh variables
+Porting/makerel		Release making utility
+Porting/p4d2p		Generate standard patches from p4 diffs
+Porting/p4desc		Smarter 'p4 describe', outputs diffs for new files
+Porting/patching.pod	How to report changes made to Perl
+Porting/patchls		Flexible patch file listing utility
+Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
+Porting/repository.pod	How to use the Perl repository
+Porting/testall.atom	Cumulative profile of the test suite with Third Degree
 pp.c				Push/Pop code
 pp.h				Push/Pop code defs
 pp.sym				Push/Pop code symbols
@@ -1751,6 +1719,36 @@ pp_sys.c			Push/Pop code for system interaction
 proto.h				Prototypes
 qnx/ar				QNX implementation of "ar" utility
 qnx/cpp				QNX implementation of preprocessor filter
+README			The Instructions
+README.aix		Notes about AIX port
+README.amiga		Notes about AmigaOS port
+README.apollo		Notes about Apollo DomainOS port
+README.beos		Notes about BeOS port
+README.bs2000		Notes about BS2000 POSIX port
+README.cygwin		Notes about Cygwin port
+README.dgux		Notes about DG/UX port
+README.dos		Notes about DOS/DJGPP port
+README.epoc		Notes about EPOC port
+README.hpux		Notes about HP-UX port
+README.hurd		Notes about GNU/Hurd port
+README.machten		Notes about Power MachTen port
+README.macos		Notes about Mac OS (Classic)
+README.micro		Notes about microperl
+README.mint		Notes about Atari MiNT port
+README.mpeix		Notes about MPE/iX port
+README.netware		Notes about Netware port
+README.os2		Notes about OS/2 port
+README.os390		Notes about OS/390 (nee MVS) port
+README.plan9		Notes about Plan9 port
+README.qnx		Notes about QNX port
+README.solaris		Notes about Solaris port
+README.threads		Notes about multithreading
+README.tru64		Notes about Tru64
+README.vmesa		Notes about VM/ESA port
+README.vms		Notes about installing the VMS port
+README.vos		Notes about Stratus VOS port
+README.win32		Notes about Win32 port
+README.Y2K		Notes about Year 2000 concerns
 regcomp.c			Regular expression compiler
 regcomp.h			Private declarations for above
 regcomp.pl			Builder of regnodes.h
@@ -1763,9 +1761,6 @@ scope.c				Scope entry and exit code
 scope.h				Scope entry and exit header
 sv.c				Scalar value code
 sv.h				Scalar value header
-t/README			Instructions for regression tests
-t/TEST				The regression tester
-t/TestInit.pm			Preamble library for core tests
 t/base/commonsense.t		See if configuration meets basic needs
 t/base/cond.t			See if conditionals work
 t/base/if.t			See if if works
@@ -1809,9 +1804,7 @@ t/io/read.t			See if read works
 t/io/tell.t			See if file seeking works
 t/io/utf8.t			See if file seeking works
 t/lib/1_compile.t		See if the various libraries and extensions compile
-t/lib/MyFilter.pm		Helper file for t/lib/filter-simple.t
 t/lib/compmod.pl		Helper for 1_compile.t
-t/lib/dprof/V.pm		Perl code profiler tests
 t/lib/dprof/test1_t		Perl code profiler tests
 t/lib/dprof/test1_v		Perl code profiler tests
 t/lib/dprof/test2_t		Perl code profiler tests
@@ -1824,11 +1817,13 @@ t/lib/dprof/test5_t		Perl code profiler tests
 t/lib/dprof/test5_v		Perl code profiler tests
 t/lib/dprof/test6_t		Perl code profiler tests
 t/lib/dprof/test6_v		Perl code profiler tests
+t/lib/dprof/V.pm		Perl code profiler tests
 t/lib/filter-util.pl		See if Filter::Util::Call works
 t/lib/h2ph.h			Test header file for h2ph
 t/lib/h2ph.pht			Generated output from h2ph.h by h2ph, for comparison
 t/lib/locale/latin1		Part of locale.t in Latin 1
 t/lib/locale/utf8		Part of locale.t in UTF8
+t/lib/MyFilter.pm		Helper file for t/lib/filter-simple.t
 t/lib/sample-tests/bailout		Test data for Test::Harness
 t/lib/sample-tests/combined		Test data for Test::Harness
 t/lib/sample-tests/descriptive		Test data for Test::Harness
@@ -1950,7 +1945,6 @@ t/op/pwent.t			See if getpw*() functions work
 t/op/quotemeta.t		See if quotemeta works
 t/op/rand.t			See if rand works
 t/op/range.t			See if .. works
-t/op/re_tests			Regular expressions for regexp.t
 t/op/read.t			See if read() works
 t/op/readdir.t			See if readdir() works
 t/op/recurse.t			See if deep recursion works
@@ -1960,6 +1954,7 @@ t/op/regexp_noamp.t		See if regular expressions work with optimizations
 t/op/regmesg.t			See if one can get regular expression errors
 t/op/repeat.t			See if x operator works
 t/op/reverse.t			See if reverse operator works
+t/op/re_tests			Regular expressions for regexp.t
 t/op/runlevel.t			See if die() works from perl_call_*()
 t/op/sleep.t			See if sleep works
 t/op/sort.t			See if sort works
@@ -1968,11 +1963,11 @@ t/op/split.t			See if split works
 t/op/sprintf.t			See if sprintf works
 t/op/stat.t			See if stat works
 t/op/study.t			See if study works
-t/op/sub_lval.t			See if lvalue subroutines work
 t/op/subst.t			See if substitution works
+t/op/substr.t			See if substr works
 t/op/subst_amp.t		See if $&-related substitution works
 t/op/subst_wamp.t		See if substitution works with $& present
-t/op/substr.t			See if substr works
+t/op/sub_lval.t			See if lvalue subroutines work
 t/op/sysio.t			See if sysread and syswrite work
 t/op/taint.t			See if tainting works
 t/op/tie.t			See if tie/untie functions work
@@ -2022,10 +2017,14 @@ t/pod/testcmp.pl		Module to compare output against expected results
 t/pod/testp2pt.pl		Module to test Pod::PlainText for a given file
 t/pod/testpchk.pl		Module to test Pod::Checker for a given file
 t/pod/testpods/lib/Pod/Stuff.pm			Sample data for find.t
+t/README			Instructions for regression tests
 t/run/runenv.t			Test if perl honors its environment variables.
+t/TEST				The regression tester
+t/TestInit.pm			Preamble library for core tests
 taint.c				Tainting code
 thrdvar.h			Per-thread variables
 thread.h			Threading header
+Todo.micro		The Wishlist for microperl
 toke.c				The tokener
 uconfig.h			Configuration header for microperl
 uconfig.sh			Configuration script for microperl
@@ -2037,12 +2036,12 @@ utfebcdic.h			Unicode on EBCDIC (UTF-EBCDIC, tr16) header
 util.c				Utility routines
 util.h				Dummy header
 utils.lst			Lists utilities bundled with Perl
-utils/Makefile			Extract the utility scripts
 utils/c2ph.PL			program to translate dbx stabs to perl
 utils/dprofpp.PL		Perl code profile post-processor
 utils/h2ph.PL			A thing to turn C .h files into perl .ph files
 utils/h2xs.PL			Program to make .xs files from C header files
 utils/libnetcfg.PL		libnet
+utils/Makefile			Extract the utility scripts
 utils/perlbug.PL		A simple tool to submit a bug report
 utils/perlcc.PL			Front-end for compiler
 utils/perldoc.PL		A simple tool to find & display perl's documentation
@@ -2059,18 +2058,18 @@ vms/ext/DCLsym/DCLsym.xs	Perl access to CLI symbols
 vms/ext/DCLsym/Makefile.PL	MakeMaker driver for VMS::DCLsym
 vms/ext/DCLsym/test.pl		regression tests for VMS::DCLsym
 vms/ext/Filespec.pm		VMS-Unix file syntax interconversion
+vms/ext/filespec.t		See if VMS::Filespec funtions work
 vms/ext/Stdio/0README.txt	ReadMe file for VMS::Stdio
 vms/ext/Stdio/Makefile.PL	MakeMaker driver for VMS::Stdio
 vms/ext/Stdio/Stdio.pm		VMS options to stdio routines
 vms/ext/Stdio/Stdio.xs		VMS options to stdio routines
 vms/ext/Stdio/test.pl		regression tests for VMS::Stdio
-vms/ext/XSSymSet.pm		manage linker symbols when building extensions
-vms/ext/filespec.t		See if VMS::Filespec funtions work
 vms/ext/vmsish.pm		Control VMS-specific behavior of Perl core
 vms/ext/vmsish.t		Tests for vmsish.pm
-vms/gen_shrfls.pl		generate options files and glue for shareable image
+vms/ext/XSSymSet.pm		manage linker symbols when building extensions
 vms/genconfig.pl		retcon config.sh from config.h
 vms/genopt.com			hack to write options files in case of broken makes
+vms/gen_shrfls.pl		generate options files and glue for shareable image
 vms/make_command.com		record MM[SK] command used to build Perl
 vms/mms2make.pl			convert descrip.mms to make syntax
 vms/munchconfig.c		performs shell $var substitution for VMS
@@ -2082,12 +2081,12 @@ vms/sockadapt.c			glue for SockshShr socket support
 vms/sockadapt.h			glue for SockshShr socket support
 vms/test.com			DCL driver for regression tests
 vms/vms.c			VMS-specific C code for Perl core
-vms/vms_yfix.pl			convert Unix perly.[ch] to VMS perly_[ch].vms
 vms/vmsish.h			VMS-specific C header for Perl core
 vms/vmspipe.com			VMS-specific piped command helper script
+vms/vms_yfix.pl			convert Unix perly.[ch] to VMS perly_[ch].vms
 vms/writemain.pl		Generate perlmain.c from miniperlmain.c+extensions
-vos/Changes			Changes made to port Perl to the VOS operating system
 vos/build.cm			VOS command macro to build Perl
+vos/Changes			Changes made to port Perl to the VOS operating system
 vos/compile_perl.cm		VOS command macro to build multiple version of Perl
 vos/config.alpha.def		definitions used by config.pl
 vos/config.alpha.h		config.h for use with alpha VOS POSIX.1 support
@@ -2099,12 +2098,10 @@ vos/install_perl.cm		VOS command macro to install perl after building
 vos/Makefile			A helper for maintaining the config.*.* in UNIX
 vos/perl.bind			VOS bind control file
 vos/test_vos_dummies.c		Test program for "vos_dummies.c"
-vos/vos_dummies.c		Wrappers to soak up undefined functions
 vos/vosish.h			VOS-specific header file
+vos/vos_dummies.c		Wrappers to soak up undefined functions
 warnings.h			The warning numbers
 warnings.pl			Program to write warnings.h and lib/warnings.pm
-win32/FindExt.pm		Scan for extensions
-win32/Makefile			Win32 makefile for NMAKE (Visual C++ build)
 win32/bin/exetype.pl		Set executable type to CONSOLE or WINDOWS
 win32/bin/mdelete.bat		multifile delete
 win32/bin/perlglob.pl		Win32 globbing
@@ -2117,17 +2114,19 @@ win32/config.gc			Win32 base line config.sh (mingw32/gcc build)
 win32/config.vc			Win32 base line config.sh (Visual C++ build)
 win32/config_H.bc		Win32 config header (Borland C++ build)
 win32/config_H.gc		Win32 config header (GNU build)?
-win32/config_H.vc		Win32 config header (Visual C++ build)
 win32/config_h.PL		Perl code to convert Win32 config.sh to config.h
+win32/config_H.vc		Win32 config header (Visual C++ build)
 win32/config_sh.PL		Perl code to update Win32 config.sh from Makefile
 win32/des_fcrypt.patch		Win32 port
 win32/distclean.bat		Remove _ALL_ files not listed here in MANIFEST
 win32/dl_win32.xs		Win32 port
+win32/FindExt.pm		Scan for extensions
 win32/genmk95.pl		Perl code to generate command.com-usable makefile.95
 win32/include/arpa/inet.h	Win32 port
 win32/include/dirent.h		Win32 port
 win32/include/netdb.h		Win32 port
 win32/include/sys/socket.h	Win32 port
+win32/Makefile			Win32 makefile for NMAKE (Visual C++ build)
 win32/makefile.mk		Win32 makefile for DMAKE (BC++, VC++ builds)
 win32/perlglob.c		Win32 port
 win32/perlhost.h		Perl "host" implementation
@@ -2146,18 +2145,18 @@ win32/win32sck.c		Win32 port
 win32/win32thread.c		Win32 functions for threads
 win32/win32thread.h		Win32 port mapping to threads
 writemain.SH			Generate perlmain.c from miniperlmain.c+extensions
-x2p/EXTERN.h			Same as above
-x2p/INTERN.h			Same as above
-x2p/Makefile.SH			Precursor to Makefile
 x2p/a2p.c			Output of a2p.y run through byacc
 x2p/a2p.h			Global declarations
 x2p/a2p.pod			Pod for awk to perl translator
 x2p/a2p.y			A yacc grammer for awk
 x2p/a2py.c			Awk compiler, sort of
 x2p/cflags.SH			A script that emits C compilation flags per file
+x2p/EXTERN.h			Same as above
 x2p/find2perl.PL		A find to perl translator
 x2p/hash.c			Hashes again
 x2p/hash.h			Public declarations for the above
+x2p/INTERN.h			Same as above
+x2p/Makefile.SH			Precursor to Makefile
 x2p/proto.h			Dummy header
 x2p/s2p.PL			Sed to perl translator
 x2p/str.c			String handling package
@@ -2165,4 +2164,5 @@ x2p/str.h			Public declarations for the above
 x2p/util.c			Utility routines
 x2p/util.h			Public declarations for the above
 x2p/walk.c			Parse tree walker
+XSUB.h			Include file for extension subroutines
 xsutils.c			Additional bundled package methods not in UNIVERSAL::

@@ -88,13 +88,6 @@ PP(pp_regcomp)
     MAGIC *mg = Null(MAGIC*);
 
     tmpstr = POPs;
-
-    /* prevent recompiling under /o and ithreads. */
-#if defined(USE_ITHREADS) || defined(USE_THREADS)
-    if (pm->op_pmflags & PMf_KEEP && PM_GETRE(pm))
-    	RETURN;
-#endif
-
     if (SvROK(tmpstr)) {
 	SV *sv = SvRV(tmpstr);
 	if(SvMAGICAL(sv))
@@ -102,20 +95,20 @@ PP(pp_regcomp)
     }
     if (mg) {
 	regexp *re = (regexp *)mg->mg_obj;
-	ReREFCNT_dec(pm->op_pmregexp);
-	pm->op_pmregexp = ReREFCNT_inc(re);
+	ReREFCNT_dec(PM_GETRE(pm));
+	PM_SETRE(pm, ReREFCNT_inc(re));
     }
     else {
 	t = SvPV(tmpstr, len);
 
 	/* Check against the last compiled regexp. */
-	if (!pm->op_pmregexp || !pm->op_pmregexp->precomp ||
-	    pm->op_pmregexp->prelen != len ||
-	    memNE(pm->op_pmregexp->precomp, t, len))
+	if (!PM_GETRE(pm) || !PM_GETRE(pm)->precomp ||
+	    PM_GETRE(pm)->prelen != len ||
+	    memNE(PM_GETRE(pm)->precomp, t, len))
 	{
-	    if (pm->op_pmregexp) {
-		ReREFCNT_dec(pm->op_pmregexp);
-		pm->op_pmregexp = Null(REGEXP*);	/* crucial if regcomp aborts */
+	    if (PM_GETRE(pm)) {
+		ReREFCNT_dec(PM_GETRE(pm));
+		PM_SETRE(pm, Null(REGEXP*));	/* crucial if regcomp aborts */
 	    }
 	    if (PL_op->op_flags & OPf_SPECIAL)
 		PL_reginterp_cnt = I32_MAX; /* Mark as safe.  */
@@ -128,7 +121,7 @@ PP(pp_regcomp)
 		if (pm->op_pmdynflags & PMdf_UTF8)
 		    t = (char*)bytes_to_utf8((U8*)t, &len);
 	    }
-	    pm->op_pmregexp = CALLREGCOMP(aTHX_ t, t + len, pm);
+	    PM_SETRE(pm, CALLREGCOMP(aTHX_ t, t + len, pm));
 	    if (!DO_UTF8(tmpstr) && (pm->op_pmdynflags & PMdf_UTF8))
 		Safefree(t);
 	    PL_reginterp_cnt = 0;	/* XXXX Be extra paranoid - needed
@@ -145,9 +138,9 @@ PP(pp_regcomp)
     }
 #endif
 
-    if (!pm->op_pmregexp->prelen && PL_curpm)
+    if (!PM_GETRE(pm)->prelen && PL_curpm)
 	pm = PL_curpm;
-    else if (strEQ("\\s+", pm->op_pmregexp->precomp))
+    else if (strEQ("\\s+", PM_GETRE(pm)->precomp))
 	pm->op_pmflags |= PMf_WHITE;
 
     /* XXX runtime compiled output needs to move to the pad */

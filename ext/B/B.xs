@@ -667,7 +667,7 @@ LISTOP_children(o)
 #define PMOP_pmreplroot(o)	o->op_pmreplroot
 #define PMOP_pmreplstart(o)	o->op_pmreplstart
 #define PMOP_pmnext(o)		o->op_pmnext
-#define PMOP_pmregexp(o)	o->op_pmregexp
+#define PMOP_pmregexp(o)	PM_GETRE(o)
 #define PMOP_pmflags(o)		o->op_pmflags
 #define PMOP_pmpermflags(o)	o->op_pmpermflags
 
@@ -712,7 +712,7 @@ PMOP_precomp(o)
 	REGEXP *	rx = NO_INIT
     CODE:
 	ST(0) = sv_newmortal();
-	rx = o->op_pmregexp;
+	rx = PM_GETRE(o);
 	if (rx)
 	    sv_setpvn(ST(0), rx->precomp, rx->prelen);
 

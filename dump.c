@@ -319,9 +319,9 @@ Perl_do_pmop_dump(pTHX_ I32 level, PerlIO *file, PMOP *pm)
 	ch = '?';
     else
 	ch = '/';
-    if (pm->op_pmregexp)
+    if (PM_GETRE(pm))
 	Perl_dump_indent(aTHX_ level, file, "PMf_PRE %c%s%c%s\n",
-	     ch, pm->op_pmregexp->precomp, ch,
+	     ch, PM_GETRE(pm)->precomp, ch,
 	     (pm->op_private & OPpRUNTIME) ? " (RUNTIME)" : "");
     else
 	Perl_dump_indent(aTHX_ level, file, "PMf_PRE (RUNTIME)\n");
@@ -329,7 +329,7 @@ Perl_do_pmop_dump(pTHX_ I32 level, PerlIO *file, PMOP *pm)
 	Perl_dump_indent(aTHX_ level, file, "PMf_REPL = ");
 	op_dump(pm->op_pmreplroot);
     }
-    if (pm->op_pmflags || (pm->op_pmregexp && pm->op_pmregexp->check_substr)) {
+    if (pm->op_pmflags || (PM_GETRE(pm) && PM_GETRE(pm)->check_substr)) {
 	SV *tmpsv = newSVpvn("", 0);
 	if (pm->op_pmdynflags & PMdf_USED)
 	    sv_catpv(tmpsv, ",USED");
@@ -337,11 +337,11 @@ Perl_do_pmop_dump(pTHX_ I32 level, PerlIO *file, PMOP *pm)
 	    sv_catpv(tmpsv, ",TAINTED");
 	if (pm->op_pmflags & PMf_ONCE)
 	    sv_catpv(tmpsv, ",ONCE");
-	if (pm->op_pmregexp && pm->op_pmregexp->check_substr
-	    && !(pm->op_pmregexp->reganch & ROPT_NOSCAN))
+	if (PM_GETRE(pm) && PM_GETRE(pm)->check_substr
+	    && !(PM_GETRE(pm)->reganch & ROPT_NOSCAN))
 	    sv_catpv(tmpsv, ",SCANFIRST");
-	if (pm->op_pmregexp && pm->op_pmregexp->check_substr
-	    && pm->op_pmregexp->reganch & ROPT_CHECK_ALL)
+	if (PM_GETRE(pm) && PM_GETRE(pm)->check_substr
+	    && PM_GETRE(pm)->reganch & ROPT_CHECK_ALL)
 	    sv_catpv(tmpsv, ",ALL");
 	if (pm->op_pmflags & PMf_SKIPWHITE)
 	    sv_catpv(tmpsv, ",SKIPWHITE");

@@ -481,6 +481,7 @@ miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL) opmini$(OBJ_EXT)
 	*)
 		$spitshell >>Makefile <<'!NO!SUBS!'
 miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL) opmini$(OBJ_EXT)
+	-@rm -f miniperl.xok
 	$(LDLIBPTH) $(CC) $(CLDFLAGS) -o miniperl \
 	    miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT) $(LLIBPERL) $(libs)
 	$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
@@ -491,6 +492,7 @@ miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL) opmini$(OBJ_EXT)
 	$spitshell >>Makefile <<'!NO!SUBS!'
 
 perl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs $(PERLEXPORT)
+	-@rm -f miniperl.xok
 	$(SHRPENV) $(LDLIBPTH) $(CC) -o perl$(PERL_SUFFIX) $(PERL_PROFILING) $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
 # Purify/Quantify Perls.
@@ -823,7 +825,7 @@ _mopup:
 	-rm -f perl.loadmap miniperl.loadmap perl.prelmap miniperl.prelmap
 	-rm -f perl.third lib*.so.perl.third perl.3log t/perl.third t/perl.3log
 	-rm -f perl.pixie lib*.so.perl.pixie lib*.so.Addrs
-	-rm -f perl.Addrs perl.Counts t/perl.Addrs t/perl.Counts
+	-rm -f perl.Addrs perl.Counts t/perl.Addrs t/perl.Counts *perl.xok
 	rm -f perl suidperl miniperl $(LIBPERL) libperl.* microperl
 
 # Do not 'make _tidy' directly.

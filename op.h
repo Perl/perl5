@@ -245,8 +245,8 @@ struct pmop {
 #endif
 };
 
-#define PM_GETRE(o)     o->pmregexp
-#define PM_SETRE(o,r)   o->pmregexp = r
+#define PM_GETRE(o)     ((o)->op_pmregexp)
+#define PM_SETRE(o,r)   ((o)->op_pmregexp = (r))
 
 #define PMdf_USED	0x01		/* pm has been used once already */
 #define PMdf_TAINTED	0x02		/* pm compiled from tainted pattern */

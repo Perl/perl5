@@ -512,7 +512,7 @@ PerlLIOFileStat(struct IPerlLIO* piPerl, int handle, struct stat *buffer)
 int
 PerlLIOIOCtl(struct IPerlLIO* piPerl, int i, unsigned int u, char *data)
 {
-	return 0;
+	return ioctl(i, (int) u, (void *) data);
 }
 
 int
@@ -1163,9 +1163,7 @@ PerlSockSetservent(struct IPerlSock* piPerl, int stayopen)
 int
 PerlSockSetsockopt(struct IPerlSock* piPerl, SOCKET s, int level, int optname, const char* optval, int optlen)
 {
-	dTHXo;
-    Perl_croak(aTHX_ "setsockopt not implemented!\n");
-	return 0;
+    return nw_setsockopt(s, level, optname, optval, optlen);
 }
 
 int
