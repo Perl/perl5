@@ -153,6 +153,8 @@ PERLVAR(Tregnarrate,	I32)		/* from regexec.c */
 PERLVAR(Tregprogram,	regnode *)	/* from regexec.c */
 PERLVARI(Tregindent,	int,	    0)	/* from regexec.c */
 PERLVAR(Tregcc,		CURCUR *)	/* from regexec.c */
+PERLVAR(Treg_call_cc,	struct re_cc_state *)	/* from regexec.c */
+PERLVAR(Treg_re,	regexp *)	/* from regexec.c */
 
 PERLVARI(Tregcompp,	regcomp_t, FUNC_NAME_TO_PTR(pregcomp))
 					/* Pointer to RE compiler */

@@ -59,8 +59,10 @@
 #define PL_ofslen		(PL_curinterp->Tofslen)
 #define PL_op			(PL_curinterp->Top)
 #define PL_opsave		(PL_curinterp->Topsave)
+#define PL_reg_call_cc		(PL_curinterp->Treg_call_cc)
 #define PL_reg_eval_set		(PL_curinterp->Treg_eval_set)
 #define PL_reg_flags		(PL_curinterp->Treg_flags)
+#define PL_reg_re		(PL_curinterp->Treg_re)
 #define PL_reg_start_tmp	(PL_curinterp->Treg_start_tmp)
 #define PL_reg_start_tmpl	(PL_curinterp->Treg_start_tmpl)
 #define PL_regbol		(PL_curinterp->Tregbol)
@@ -438,8 +440,10 @@
 #define PL_Tofslen		PL_ofslen
 #define PL_Top			PL_op
 #define PL_Topsave		PL_opsave
+#define PL_Treg_call_cc		PL_reg_call_cc
 #define PL_Treg_eval_set	PL_reg_eval_set
 #define PL_Treg_flags		PL_reg_flags
+#define PL_Treg_re		PL_reg_re
 #define PL_Treg_start_tmp	PL_reg_start_tmp
 #define PL_Treg_start_tmpl	PL_reg_start_tmpl
 #define PL_Tregbol		PL_regbol
@@ -563,8 +567,10 @@
 #define PL_ofslen		(thr->Tofslen)
 #define PL_op			(thr->Top)
 #define PL_opsave		(thr->Topsave)
+#define PL_reg_call_cc		(thr->Treg_call_cc)
 #define PL_reg_eval_set		(thr->Treg_eval_set)
 #define PL_reg_flags		(thr->Treg_flags)
+#define PL_reg_re		(thr->Treg_re)
 #define PL_reg_start_tmp	(thr->Treg_start_tmp)
 #define PL_reg_start_tmpl	(thr->Treg_start_tmpl)
 #define PL_regbol		(thr->Tregbol)

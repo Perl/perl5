@@ -485,3 +485,4 @@ b\Z	a\nb	y	-	-
 b\z	a\nb	y	-	-
 (^|x)(c)	ca	y	$2	c
 a*abc?xyz+pqr{3}ab{2,}xy{4,5}pq{0,6}AB{0,}zz	x	n	-	-
+a(?{$a=2;$b=3;($b)=$a})b	yabz	y	$b	2

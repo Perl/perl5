@@ -709,6 +709,13 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 		if (data)
 		    data->flags |= SF_HAS_EVAL;
 	}
+	else if (OP(scan) == LOGICAL && scan->flags == 2) { /* Embedded */
+		if (flags & SCF_DO_SUBSTR) {
+		    scan_commit(data);
+		    data->longest = &(data->longest_float);
+		}
+		is_inf = is_inf_internal = 1;
+	}
 	/* Else: zero-length, ignore. */
 	scan = regnext(scan);
     }
@@ -1082,6 +1089,7 @@ reg(I32 paren, I32 *flagp)
 	if (*PL_regcomp_parse == '?') {
 	    U16 posflags = 0, negflags = 0;
 	    U16 *flagsp = &posflags;
+	    int logical = 0;
 
 	    PL_regcomp_parse++;
 	    paren = *PL_regcomp_parse++;
@@ -1112,6 +1120,10 @@ reg(I32 paren, I32 *flagp)
 		nextchar();
 		*flagp = TRYAGAIN;
 		return NULL;
+	    case 'p':
+		logical = 1;
+		paren = *PL_regcomp_parse++;
+		/* FALL THROUGH */
 	    case '{':
 	    {
 		dTHR;
@@ -1160,6 +1172,13 @@ reg(I32 paren, I32 *flagp)
 		}
 		
 		nextchar();
+		if (logical) {
+		    ret = reg_node(LOGICAL);
+		    if (!SIZE_ONLY)
+			ret->flags = 2;
+		    regtail(ret, reganode(EVAL, n));
+		    return ret;
+		}
 		return reganode(EVAL, n);
 	    }
 	    case '(':
@@ -1171,6 +1190,8 @@ reg(I32 paren, I32 *flagp)
 			I32 flag;
 			
 			ret = reg_node(LOGICAL);
+			if (!SIZE_ONLY)
+			    ret->flags = 1;
 			regtail(ret, reg(1, &flag));
 			goto insert_if;
 		    } 
@@ -3041,7 +3062,7 @@ regprop(SV *sv, regnode *o)
 	sv_catpvf(sv, "GROUPP%d", ARG(o));
 	break;
     case LOGICAL:
-	p = "LOGICAL";
+	sv_catpvf(sv, "LOGICAL[%d]", o->flags);
 	break;
     case SUSPEND:
 	p = "SUSPEND";

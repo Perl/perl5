@@ -399,6 +399,28 @@ checks, thus to allow $re in the above snippet to contain C<(?{})>
 I<with tainting enabled>, one needs both C<use re 'eval'> and untaint
 the $re.
 
+=item C<(?p{ code })>
+
+I<Very experimental> "postponed" regular subexpression.  C<code> is evaluated
+at runtime, at the moment this subexpression may match.  The result of
+evaluation is considered as a regular expression, and matched as if it
+were inserted instead of this construct.
+
+C<code> is not interpolated.  Currently the rules to
+determine where the C<code> ends are somewhat convoluted.
+
+The following regular expression matches matching parenthesized group:
+
+  $re = qr{
+	     \(
+	     (?:
+		(?> [^()]+ )	# Non-parens without backtracking
+	      |
+		(?p{ $re })	# Group with matching parens
+	     )*
+	     \)
+	  }x;
+
 =item C<(?E<gt>pattern)>
 
 An "independent" subexpression.  Matches the substring that a

@@ -952,14 +952,16 @@ scan_const(char *start)
 
 	/* if we get here, we're not doing a transliteration */
 
-	/* skip for regexp comments /(?#comment)/ */
+	/* skip for regexp comments /(?#comment)/ and code /(?{code})/,
+	   except for the last char, which will be done separately. */
 	else if (*s == '(' && PL_lex_inpat && s[1] == '?') {
 	    if (s[2] == '#') {
 		while (s < send && *s != ')')
 		    *d++ = *s++;
-	    } else if (s[2] == '{') {	/* This should march regcomp.c */
+	    } else if (s[2] == '{'
+		       || s[2] == 'p' && s[3] == '{') {	/* This should march regcomp.c */
 		I32 count = 1;
-		char *regparse = s + 3;
+		char *regparse = s + (s[2] == '{' ? 3 : 4);
 		char c;
 
 		while (count && (c = *regparse)) {
@@ -971,11 +973,9 @@ scan_const(char *start)
 			count--;
 		    regparse++;
 		}
-		if (*regparse == ')')
-		    regparse++;
-		else
+		if (*regparse != ')')
 		    yyerror("Sequence (?{...}) not terminated or not {}-balanced");
-		while (s < regparse && *s != ')')
+		while (s < regparse)
 		    *d++ = *s++;
 	    }
 	}

@@ -93,6 +93,10 @@
 #define PL_regbol				pPerl->PL_regbol		
 #undef  PL_regcc		
 #define PL_regcc				pPerl->PL_regcc		
+#undef  PL_reg_call_cc
+#define PL_reg_call_cc				pPerl->PL_reg_call_cc
+#undef  PL_reg_re
+#define PL_reg_re				pPerl->PL_reg_re
 #undef  PL_regcode		
 #define PL_regcode				pPerl->PL_regcode		
 #undef  PL_regcomp_parse	

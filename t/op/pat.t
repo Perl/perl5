@@ -4,7 +4,7 @@
 # the format supported by op/regexp.t.  If you want to add a test
 # that does fit that format, add it to op/re_tests, not here.
 
-print "1..158\n";
+print "1..161\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -363,6 +363,7 @@ sub matchit {
    /xg;
 }
 
+@ans = ();
 push @ans, $res while $res = matchit;
 
 print "# ans='@ans'\n# expect='$expect'\nnot " if "@ans" ne "1 1 1";
@@ -370,6 +371,26 @@ print "ok $test\n";
 $test++;
 
 @ans = matchit;
+
+print "# ans='@ans'\n# expect='$expect'\nnot " if "@ans" ne $expect;
+print "ok $test\n";
+$test++;
+
+my $matched;
+$matched = qr/\((?:(?>[^()]+)|(?p{$matched}))*\)/;
+
+@ans = @ans1 = ();
+push(@ans, $res), push(@ans1, $&) while $res = m/$matched/g;
+
+print "# ans='@ans'\n# expect='$expect'\nnot " if "@ans" ne "1 1 1";
+print "ok $test\n";
+$test++;
+
+print "# ans1='@ans1'\n# expect='$expect'\nnot " if "@ans1" ne $expect;
+print "ok $test\n";
+$test++;
+
+@ans = m/$matched/g;
 
 print "# ans='@ans'\n# expect='$expect'\nnot " if "@ans" ne $expect;
 print "ok $test\n";
