@@ -4,7 +4,7 @@
 # the format supported by op/regexp.t.  If you want to add a test
 # that does fit that format, add it to op/re_tests, not here.
 
-print "1..240\n";
+print "1..242\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -1182,3 +1182,24 @@ if (/(\C)/g) {
     print "not ok $_\n";
   }
 }
+
+# 241..242
+#
+# The tr is admittedly NOT a regular expression operator,
+# but this test is more of an EBCDIC test, the background is
+# that \x89 is 'i' and \x90 is 'j', and \x8e is not a letter,
+# not even a printable character.  Now for the trick:
+# if the range is specified using letters, the \x8e should most
+# probably not match, but if the range is specified using explicit
+# numeric endpoints, it probably should match.  The first case,
+# not matching if using letters, is already tested elsewhere,
+# here we test for the matching cases.
+
+$_ = qq/\x8E/;
+
+print "not " unless /[\x89-\x91]/;
+print "ok 241\n";
+
+print "not " unless tr/\x89-\x91//d == 1;
+print "ok 242\n";
+

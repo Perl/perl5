@@ -102,9 +102,11 @@ print "ok 7\n";
     GLOB_BRACE | GLOB_NOMAGIC | ($^O eq 'VMS' ? GLOB_NOCASE : 0)
 );
 
-# Working on t/TEST often causes this test to fail because it sees temp
-# and RCS files.  Filter them out, and .pm files too.
-@a = grep !/(,v$|~$|\.pm$)/, @a;
+# Working on t/TEST often causes this test to fail because it sees Emacs temp
+# and RCS files.  Filter them out, and .pm files too, and patch temp files.
+@a = grep !/(,v$|~$|\.(pm|ori?g|rej)$)/, @a;
+
+print "# @a\n";
 
 unless (@a == 3
         and $a[0] eq ($^O eq 'VMS'? 'test.' : 'TEST')
