@@ -2,11 +2,59 @@
 
 Install - Build and Installation guide for perl5.
 
+=head1 Reporting Problems
+
+Wherever possible please use the perlbug tool supplied with this Perl
+to report problems, as it automatically includes summary configuration
+information about your perl, which may help us track down problems far
+more quickly. But first you should read the advice in this file,
+carefully re-read the error message and check the relevant manual pages
+on your system, as these may help you find an immediate solution.  If
+you are not sure whether what you are seeing is a bug, you can send a
+message describing the problem to the comp.lang.perl.misc newsgroup to
+get advice.
+
+The perlbug tool is installed along with perl, so after you have
+completed C<make install> it should be possible to run it with plain
+C<perlbug>.  If the install fails, or you want to report problems with
+C<make test> without installing perl, then you can use C<make nok> to
+run perlbug to report the problem, or run it by hand from this source
+directory with C<./perl -Ilib utils/perlbug>
+
+If the build fails too early to run perlbug uninstalled, then please
+B<run> the C<./myconfig> shell script, and mail its output along with
+an accurate description of your problem to perlbug@perl.org
+
+If C<Configure> itself fails, and does not generate a C<config.sh> file
+(needed to run C<./myconfig>), then please mail perlbug@perl.org the
+description of how C<Configure> fails along with details of your system
+- for example the output from running C<uname -a>
+
+Please try to make your message brief but clear.  Brief, clear bug
+reports tend to get answered more quickly.  Please don't worry if your
+written English is not great - what matters is how well you describe
+the important technical details of the problem you have encountered,
+not whether your grammar and spelling is flawless.
+
+You should trim out unnecessary information.  Do not include large
+files (such as config.sh or a complete Configure or make log) unless
+absolutely necessary.  Do not include a complete transcript of your
+build session.  Just include the failing commands, the relevant error
+messages, and whatever preceding commands are necessary to give the
+appropriate context.  Plain text should usually be sufficient--fancy
+attachments or encodings may actually reduce the number of people who
+read your message.  Your message will get relayed to over 400
+subscribers around the world so please try to keep it brief but clear.
+
+If you are unsure what makes a good bug report please read "How to
+report Bugs Effectively" by Simon Tatham:
+http://www.chiark.greenend.org.uk/~sgtatham/bugs.html
+
 =head1 SYNOPSIS
 
 First, make sure you are installing an up-to-date version of Perl.   If
 you didn't get your Perl source from CPAN, check the latest version at
-<URL:http://www.cpan.org/src/>.
+http://www.cpan.org/src/
 
 The basic steps to build and install perl5 on a Unix system
 with all the defaults are:
@@ -26,7 +74,7 @@ Each of these is explained in further detail below.
 
 B<NOTE>: starting from the release 5.6.0, Perl uses a version
 scheme where even-numbered subreleases (like 5.6 and 5.8) are stable
-maintenance releases and odd-numbered subreleases (like 5.7) are
+maintenance releases and odd-numbered subreleases (like 5.7 and 5.9) are
 unstable development releases.  Development releases should not be
 used in production environments.  Fixes and new features are first
 carefully tested in development releases and only if they prove
@@ -52,7 +100,7 @@ and you should say "make install-all".  (This confusion is brought to you
 by the Perl distribution having a file called INSTALL.)
 
 If you have problems, corrections, or questions, please see
-L<"Reporting Problems"> below.
+L<"Reporting Problems"> above.
 
 For information on what's new in this release, see the
 pod/perldelta.pod file.  For more detailed information about specific
@@ -145,7 +193,7 @@ open to you:
 =item *
 
 You may try obtaining GCC, available from GNU mirrors worldwide,
-listed at <URL:http://www.gnu.org/order/ftp.html>.  If, rather than
+listed at http://www.gnu.org/order/ftp.html .  If, rather than
 building gcc from source code, you locate a binary version configured
 for your platform, be sure that it is compiled for the version of the
 operating system that you are using.
@@ -166,11 +214,12 @@ does not work with some C++ compilers.
 
 =head1 Space Requirements
 
-The complete perl5 source tree takes up about 50 MB of disk space.
+The complete perl5 source tree takes up about 60 MB of disk space.
 After completing make, it takes up roughly 100 MB, though the actual
 total is likely to be quite system-dependent.  The installation
 directories need something on the order of 45 MB, though again that
-value is system-dependent.
+value is system-dependent.  A perl build with debug symbols and
+-DDEBUGGING will require something on the order of 10 MB extra.
 
 =head1 Start with a Fresh Distribution
 
@@ -427,22 +476,27 @@ The directories set up by Configure fall into three broad categories.
 
 =item Directories for the perl distribution
 
-By default, Configure will use the following directories for 5.8.0.
+By default, Configure will use the following directories for 5.8.x.
 $version is the full perl version number, including subversion, e.g.
-5.8.0 or 5.8.1, and $archname is a string like sun4-sunos,
+5.8.3 or 5.8.4, and $archname is a string like sun4-sunos,
 determined by Configure.  The full definitions of all Configure
 variables are in the file Porting/Glossary.
 
     Configure variable	Default value
-    $prefix		/usr/local
-    $bin		$prefix/bin
-    $scriptdir		$prefix/bin
-    $privlib		$prefix/lib/perl5/$version
-    $archlib 		$prefix/lib/perl5/$version/$archname
-    $man1dir		$prefix/man/man1
-    $man3dir		$prefix/man/man3
-    $html1dir		(none)
-    $html3dir		(none)
+    $prefixexp		/usr/local
+    $binexp		$prefixexp/bin
+    $scriptdirexp	$prefixexp/bin
+    $privlibexp		$prefixexp/lib/perl5/$version
+    $archlibexp		$prefixexp/lib/perl5/$version/$archname
+    $man1direxp		$prefixexp/man/man1
+    $man3direxp		$prefixexp/man/man3
+    $html1direxp	(none)
+    $html3direxp	(none)
+
+$prefixexp is generated from $prefix, with ~ expansion done to convert home
+directories into absolute paths. Similarly for the other variables listed. As
+file system calls do not do this, you should always reference the ...exp
+variables, to support users who build perl in their home directory.
 
 Actually, Configure recognizes the SVR3-style
 /usr/local/man/l_man/man1 directories, if present, and uses those
@@ -457,15 +511,15 @@ CPAN) or scripts.  Configure will set up the following directories to
 be used for installing those add-on modules and scripts.
 
     Configure variable	Default value
-    $siteprefix		$prefix
-    $sitebin		$siteprefix/bin
-    $sitescript		$siteprefix/bin
-    $sitelib		$siteprefix/lib/perl5/site_perl/$version
-    $sitearch		$siteprefix/lib/perl5/site_perl/$version/$archname
-    $siteman1dir	$siteprefix/man/man1
-    $siteman3dir	$siteprefix/man/man3
-    $sitehtml1dir	(none)
-    $sitehtml3dir	(none)
+    $siteprefixexp	$prefixexp
+    $sitebinexp		$siteprefixexp/bin
+    $sitescriptexp	$siteprefixexp/bin
+    $sitelibexp		$siteprefixexp/lib/perl5/site_perl/$version
+    $sitearchexp	$siteprefixexp/lib/perl5/site_perl/$version/$archname
+    $siteman1direxp	$siteprefixexp/man/man1
+    $siteman3direxp	$siteprefixexp/man/man3
+    $sitehtml1direxp	(none)
+    $sitehtml3direxp	(none)
 
 By default, ExtUtils::MakeMaker will install architecture-independent
 modules into $sitelib and architecture-dependent modules into $sitearch.
@@ -477,46 +531,48 @@ distribution, Configure can optionally set up the following directories
 for you to use to distribute add-on modules.
 
     Configure variable	Default value
-    $vendorprefix	(none)
+    $vendorprefixexp	(none)
     (The next ones are set only if vendorprefix is set.)
-    $vendorbin		$vendorprefix/bin
-    $vendorscript	$vendorprefix/bin
-    $vendorlib		$vendorprefix/lib/perl5/vendor_perl/$version
-    $vendorarch		$vendorprefix/lib/perl5/vendor_perl/$version/$archname
-    $vendorman1dir	$vendorprefix/man/man1
-    $vendorman3dir	$vendorprefix/man/man3
-    $vendorhtml1dir	(none)
-    $vendorhtml3dir	(none)
+    $vendorbinexp	$vendorprefixexp/bin
+    $vendorscriptexp	$vendorprefixexp/bin
+    $vendorlibexp
+	$vendorprefixexp/lib/perl5/vendor_perl/$version
+    $vendorarchexp
+	$vendorprefixexp/lib/perl5/vendor_perl/$version/$archname
+    $vendorman1direxp	$vendorprefixexp/man/man1
+    $vendorman3direxp	$vendorprefixexp/man/man3
+    $vendorhtml1direxp	(none)
+    $vendorhtml3direxp	(none)
 
 These are normally empty, but may be set as needed.  For example,
 a vendor might choose the following settings:
 
-	$prefix		/usr
-	$siteprefix	/usr/local
-	$vendorprefix	/usr
+    $prefix		/usr
+    $siteprefix		/usr/local
+    $vendorprefix	/usr
 
 This would have the effect of setting the following:
 
-	$bin		/usr/bin
-	$scriptdir	/usr/bin
-	$privlib	/usr/lib/perl5/$version
-	$archlib 	/usr/lib/perl5/$version/$archname
-	$man1dir	/usr/man/man1
-	$man3dir	/usr/man/man3
+    $binexp		/usr/bin
+    $scriptdirexp	/usr/bin
+    $privlibexp		/usr/lib/perl5/$version
+    $archlibexp 	/usr/lib/perl5/$version/$archname
+    $man1direxp		/usr/man/man1
+    $man3direxp		/usr/man/man3
 
-	$sitebin	/usr/local/bin
-	$sitescript	/usr/local/bin
-	$sitelib	/usr/local/lib/perl5/site_perl/$version
-	$sitearch	/usr/local/lib/perl5/site_perl/$version/$archname
-	$siteman1dir	/usr/local/man/man1
-	$siteman3dir	/usr/local/man/man3
+    $sitebinexp		/usr/local/bin
+    $sitescriptexp	/usr/local/bin
+    $sitelibexp		/usr/local/lib/perl5/site_perl/$version
+    $sitearchexp	/usr/local/lib/perl5/site_perl/$version/$archname
+    $siteman1direxp	/usr/local/man/man1
+    $siteman3direxp	/usr/local/man/man3
 
-	$vendorbin	/usr/bin
-	$vendorscript	/usr/bin
-	$vendorlib	/usr/lib/perl5/vendor_perl/$version
-	$vendorarch	/usr/lib/perl5/vendor_perl/$version/$archname
-	$vendorman1dir	/usr/man/man1
-	$vendorman3dir	/usr/man/man3
+    $vendorbinexp	/usr/bin
+    $vendorscriptexp	/usr/bin
+    $vendorlibexp	/usr/lib/perl5/vendor_perl/$version
+    $vendorarchexp	/usr/lib/perl5/vendor_perl/$version/$archname
+    $vendorman1direxp	/usr/man/man1
+    $vendorman3direxp	/usr/man/man3
 
 Note how in this example, the vendor-supplied directories are in the
 /usr hierarchy, while the directories reserved for the end-user are in
@@ -548,7 +604,7 @@ version-specific subdirectories) for add-on modules and extensions.
 For example, if you have a bundle of perl libraries from a previous 
 installation, perhaps in a strange place:
 
-	Configure -Dotherlibdirs=/usr/lib/perl5/site_perl/5.6.1
+	Configure -Dotherlibdirs=/usr/lib/perl5/site_perl/5.8.1
 
 =item APPLLIB_EXP
 
@@ -577,7 +633,7 @@ without resetting MANPATH.
 
 You can continue to use the old default from the command line with
 
-	sh Configure -Dman3dir=/usr/local/lib/perl5/5.8.0/man/man3
+	sh Configure -Dman3dir=/usr/local/lib/perl5/5.8.4/man/man3
 
 Some users also prefer to use a .3pm suffix.  You can do that with
 
@@ -614,13 +670,13 @@ library directory structure is slightly simplified.  Instead of
 suggesting $prefix/lib/perl5/, Configure will suggest $prefix/lib.
 
 Thus, for example, if you Configure with
--Dprefix=/opt/perl, then the default library directories for 5.8.0 are
+-Dprefix=/opt/perl, then the default library directories for 5.8.4 are
 
     Configure variable	Default value
-	$privlib	/opt/perl/lib/5.8.0
-	$archlib	/opt/perl/lib/5.8.0/$archname
-	$sitelib	/opt/perl/lib/site_perl/5.8.0
-	$sitearch	/opt/perl/lib/site_perl/5.8.0/$archname
+	$privlib	/opt/perl/lib/5.8.4
+	$archlib	/opt/perl/lib/5.8.4/$archname
+	$sitelib	/opt/perl/lib/site_perl/5.8.4
+	$sitearch	/opt/perl/lib/site_perl/5.8.4/$archname
 
 =head2 Changing the installation directory
 
@@ -823,7 +879,7 @@ and the long double support.
 
 =head2 Selecting File IO mechanisms
 
-Executive summary: in Perl 5.8, you should use the default "PerlIO"
+Executive summary: as of Perl 5.8, you should use the default "PerlIO"
 as the IO mechanism unless you have a good reason not to.
 
 In more detail: previous versions of perl used the standard IO
@@ -880,29 +936,42 @@ enabling a "Denial of Service" attack against Perl.  Such hashes may be
 a problem for example for mod_perl sites, sites with Perl CGI scripts
 and web services, that process data originating from external sources.
 
-In Perl 5.8.1 a security feature was introduced to make it harder
-to create such degenerate hashes.
+In Perl 5.8.1 a security feature was introduced to make it harder to
+create such degenerate hashes. A visible side effect of this was that
+the keys(), values(), and each() functions may return the hash elements
+in different order between different runs of Perl even with the same
+data.  It also had unintended binary incompatibility issues with
+certain modules compiled against Perl 5.8.0.
 
-Because of this feature the keys(), values(), and each() functions may
-return the hash elements in different order between different runs of
-Perl even with the same data.  One can still revert to the old
-repeatable order by setting the environment variable PERL_HASH_SEED,
-see L<perlrun/PERL_HASH_SEED>.  Another option is to add
--DUSE_HASH_SEED_EXPLICIT to the compilation flags (for example by
-using C<Configure -Accflags=-DUSE_HAS_SEED_EXPLICIT>), in which case
-one has to explicitly set the PERL_HASH_SEED environment variable to
-enable the security feature, or by adding -DNO_HASH_SEED to the compilation
-flags to completely disable the randomisation feature.
+In Perl 5.8.2 an improved scheme was introduced.  Hashes will return
+elements in the same order as Perl 5.8.0 by default.  On a hash by hash
+basis, if pathological data is detected during a hash key insertion,
+then that hash will switch to an alternative random hash seed.  As
+adding keys can always dramatically change returned hash element order,
+existing programs will not be affected by this, unless they
+specifically test for pre-recorded hash return order for contrived
+data. (eg the list of keys generated by C<map {"\0"x$_} 0..15> trigger
+randomisation) In effect the new implementation means that 5.8.1 scheme
+is only being used on hashes which are under attack.
+
+One can still revert to the old guaranteed repeatable order (and be
+vulnerable to attack by wily crackers) by setting the environment
+variable PERL_HASH_SEED, see L<perlrun/PERL_HASH_SEED>.  Another option
+is to add -DUSE_HASH_SEED_EXPLICIT to the compilation flags (for
+example by using C<Configure -Accflags=-DUSE_HAS_SEED_EXPLICIT>), in
+which case one has to explicitly set the PERL_HASH_SEED environment
+variable to enable the security feature, or by adding -DNO_HASH_SEED to
+the compilation flags to completely disable the randomisation feature.
 
 B<Perl has never guaranteed any ordering of the hash keys>, and the
-ordering has already changed several times during the lifetime of
-Perl 5.  Also, the ordering of hash keys has always been, and
-continues to be, affected by the insertion order.
-
-Note that because of this randomisation for example the Data::Dumper
-results will be different between different runs of Perl since
-Data::Dumper by default dumps hashes "unordered".  The use of the
-Data::Dumper C<Sortkeys> option is recommended.
+ordering has already changed several times during the lifetime of Perl
+5.  Also, the ordering of hash keys has always been, and continues to
+be, affected by the insertion order.  It is likely that Perl 5.10 and
+Perl 6 will randomise all hashes.  Note that because of this
+randomisation for example the Data::Dumper results will be different
+between different runs of Perl since Data::Dumper by default dumps
+hashes "unordered".  The use of the Data::Dumper C<Sortkeys> option is
+recommended.
 
 =head2 SOCKS
 
@@ -1294,7 +1363,7 @@ using DB 3.1.17:
 =head2 What if it doesn't work?
 
 If you run into problems, try some of the following ideas.
-If none of them help, then see L<"Reporting Problems"> below.
+If none of them help, then see L<"Reporting Problems"> above.
 
 =over 4
 
@@ -1554,7 +1623,7 @@ These errors are normal, and can be ignored:
 If you can't compile successfully, try some of the following ideas.
 If none of them help, and careful reading of the error message and
 the relevant manual pages on your system doesn't help,
-then see L<"Reporting Problems"> below.
+then see L<"Reporting Problems"> above.
 
 =over 4
 
@@ -2206,13 +2275,13 @@ Perl 5.8 is not binary compatible with earlier versions of Perl.
 In other words, you will have to recompile your XS modules.
 
 In general, you can usually safely upgrade from one version of Perl (e.g.
-5.004_04) to another similar version (e.g. 5.004_05) without re-compiling
+5.8.0) to another similar version (e.g. 5.8.2) without re-compiling
 all of your add-on extensions.  You can also safely leave the old version
 around in case the new version causes you problems for some reason.
 For example, if you want to be sure that your script continues to run
-with 5.004_04, simply replace the '#!/usr/local/bin/perl' line at the
+with 5.8.2, simply replace the '#!/usr/local/bin/perl' line at the
 top of the script with the particular version you want to run, e.g.
-#!/usr/local/bin/perl5.00404.
+#!/usr/local/bin/perl5.8.2.
 
 Usually, most extensions will probably not need to be recompiled to
 use with a newer version of Perl (the Perl 5.6 to Perl 5.8 transition
@@ -2294,9 +2363,9 @@ won't interfere with another version.  (The defaults guarantee this for
 libraries after 5.6.0, but not for executables. TODO?)  One convenient
 way to do this is by using a separate prefix for each version, such as
 
-	sh Configure -Dprefix=/opt/perl5.004
+	sh Configure -Dprefix=/opt/perl5.8.2
 
-and adding /opt/perl5.004/bin to the shell PATH variable.  Such users
+and adding /opt/perl5.8.2/bin to the shell PATH variable.  Such users
 may also wish to add a symbolic link /usr/local/bin/perl so that
 scripts can still start with #!/usr/local/bin/perl.
 
@@ -2309,13 +2378,13 @@ seriously consider using a separate directory, since development
 subversions may not have all the compatibility wrinkles ironed out
 yet.
 
-=head2 Upgrading from 5.005 or 5.6 to 5.8.0
+=head2 Upgrading from 5.005 or 5.6 to 5.8.4
 
-B<Perl 5.8.0 is binary incompatible with Perl 5.6.1, 5.6.0, 5.005,
+B<Perl 5.8.4 is binary incompatible with Perl 5.6.x, 5.005,
 and any earlier Perl release.>  Perl modules having binary parts
 (meaning that a C compiler is used) will have to be recompiled to be
-used with 5.8.0.  If you find you do need to rebuild an extension with
-5.8.0, you may safely do so without disturbing the 5.005 or 5.6.0
+used with 5.8.4.  If you find you do need to rebuild an extension with
+5.8.4, you may safely do so without disturbing the older
 installations.  (See L<"Coexistence with earlier versions of perl5">
 above.)
 
@@ -2335,7 +2404,7 @@ perl4.036.  That will not be touched by the perl5 installation
 process.  Most perl4 scripts should run just fine under perl5.
 However, if you have any scripts that require perl4, you can replace
 the #! line at the top of them by #!/usr/local/bin/perl4.036 (or
-whatever the appropriate pathname is).  See pod/perltrap.pod for
+whatever the appropriate pathname is).  See L<perltrap> for
 possible problems running perl4 scripts under perl5.
 
 =head1 cd /usr/include; h2ph *.h sys/*.h
@@ -2523,31 +2592,6 @@ size about 1.2MB in its i386 version:
   /usr/lib/perl/5.6.1/auto/POSIX/load_imports.al
   /usr/lib/perl/5.6.1/auto/Socket/Socket.so
   /usr/lib/perl/5.6.1/auto/Socket/Socket.bs
-
-=head1 Reporting Problems
-
-If you have difficulty building perl, and none of the advice in this file
-helps, and careful reading of the error message and the relevant manual
-pages on your system doesn't help either, then you should send a message
-to either the comp.lang.perl.misc newsgroup or to perlbug@perl.org with
-an accurate description of your problem.
-
-Please include the output of the ./myconfig shell script that comes with
-the distribution.  Alternatively, you can use the perlbug program that
-comes with the perl distribution, but you need to have perl compiled
-before you can use it.  (If you have not installed it yet, you need to
-run C<./perl -Ilib utils/perlbug> instead of a plain C<perlbug>.)
-
-Please try to make your message brief but clear.  Trim out unnecessary
-information.  Do not include large files (such as config.sh or a complete
-Configure or make log) unless absolutely necessary.  Do not include a
-complete transcript of your build session.  Just include the failing
-commands, the relevant error messages, and whatever preceding commands
-are necessary to give the appropriate context.  Plain text should
-usually be sufficient--fancy attachments or encodings may actually
-reduce the number of people who read your message.  Your message
-will get relayed to over 400 subscribers around the world so please
-try to keep it brief but clear.
 
 =head1 DOCUMENTATION
 
