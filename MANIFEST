@@ -68,6 +68,7 @@ configure.com		Configure-equivalent for VMS
 configure.gnu		Crude emulation of GNU configure
 cop.h			Control operator header
 cv.h			Code value header
+cygwin/cygwin.c		Additional code for Cygwin port
 cygwin/Makefile.SHs	Shared library generation for Cygwin port
 cygwin/ld2.in		ld wrapper template for Cygwin port
 cygwin/perlld.in	dll generator template for Cygwin port

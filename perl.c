@@ -1174,7 +1174,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 
     if (xsinit)
 	(*xsinit)(aTHXo);	/* in case linked C routines want magical variables */
-#if defined(VMS) || defined(WIN32) || defined(DJGPP)
+#if defined(VMS) || defined(WIN32) || defined(DJGPP) || defined(__CYGWIN__)
     init_os_extras();
 #endif
 

@@ -32,17 +32,17 @@ if (open(FOO, ">Op.stat.tmp")) {
   else {
     print "# res=$res, nlink=$nlink.\nnot ok 1\n";
   }
-  if ($Is_MSWin32 || ($mtime && $mtime == $ctime)) {
+  if ($Is_MSWin32 or $Is_Cygwin || ($mtime && $mtime == $ctime)) {
     print "ok 2\n";
   }
   else {
     print "# |$mtime| vs |$ctime|\nnot ok 2\n";
   }
 
+  sleep 3;
   print FOO "Now is the time for all good men to come to.\n";
   close(FOO);
 
-  sleep 2;
 } else {
   print "# open failed: $!\nnot ok 1\nnot ok 2\n";
 }

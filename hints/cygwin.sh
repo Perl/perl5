@@ -8,6 +8,7 @@ firstmakefile='GNUmakefile'
 case "$ldlibpthname" in
 '') ldlibpthname=PATH ;;
 esac
+archobjs='cygwin.o'
 
 # mandatory (overrides incorrect defaults)
 test -z "$cc" && cc='gcc'
@@ -25,9 +26,9 @@ libswanted="$libswanted cygipc cygwin kernel32"
 archname='cygwin'
 
 # dynamic loading
-ld='ld2'
 # - otherwise -fpic
 cccdlflags=' '
+ld='ld2'
 
 # optional(ish)
 # - perl malloc needs to be unpolluted
@@ -37,6 +38,9 @@ bincompat5005='undef'
 d_chroot='undef'
 d_seteuid='undef'
 d_setegid='undef'
+
+# Win9x problem with non-blocking read from a closed pipe
+d_eofnblk='define'
 
 # strip exe's and dll's
 #ldflags="$ldflags -s"
