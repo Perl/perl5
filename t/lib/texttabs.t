@@ -91,9 +91,9 @@ DONE
 
 $| = 1;
 
-print "1..";
-print @tests/2;
-print "\n";
+my $testcount = "1..";
+$testcount .= @tests/2;
+print "$testcount\n";
 
 use Text::Tabs;
 

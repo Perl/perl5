@@ -20,10 +20,11 @@ package main;
 my $test_num = 1;
 sub ok ($;$) {
     my($test, $name) = @_;
-    print "not " unless $test;
-    print "ok $test_num";
-    print " - $name" if defined $name;
-    print "\n";
+    my $okstring = '';
+    $okstring = "not " unless $test;
+    $okstring .= "ok $test_num";
+    $okstring .= " - $name" if defined $name;
+    print "$okstring\n";
     $test_num++;
 }
 
