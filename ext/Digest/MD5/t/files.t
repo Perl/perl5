@@ -20,26 +20,26 @@ use Digest::MD5 qw(md5 md5_hex md5_base64);
 my $EXPECT;
 if (ord "A" == 193) { # EBCDIC
     $EXPECT = <<EOT;
-4ae46ec4a90bbba96182d887e803c947  Changes
+4553104c3c951d43043b3520388b8a1e  Changes
 0565ec21b15c0f23f4c51fb327c8926d  README
-f834d9fb3944664af464815805f67403  MD5.pm
+36dc7eba19a0fea92baf68bec5adc56a  MD5.pm
 45e5e6785b47fb922f33b4a74c29a148  MD5.xs
 276da0aa4e9a08b7fe09430c9c5690aa  rfc1321.txt
 EOT
 } elsif ("\n" eq "\015") { # MacOS
     $EXPECT = <<EOT;
-dc0af6945b7f3977b8784e19a5b8a1da  Changes
+9ffb101ffaa83f2d04bc5cea6ee0bfb4  Changes
 6c950a0211a5a28f023bb482037698cd  README
-b3a7b7f8f98cf78a14e8f7b3c375a4c2  MD5.pm
+188b5ab345169e90094165dd32dd7f6b  MD5.pm
 ca3f8cb317c5d088ed9f97204c6b8cda  MD5.xs
 754b9db19f79dbc4992f7166eb0f37ce  rfc1321.txt
 EOT
 } else {
     # This is the output of: 'md5sum Changes README MD5.pm MD5.xs rfc1321.txt'
     $EXPECT = <<EOT;
-042cef6cd9baf3d4606063dff06eee33  Changes
+6b0b5e6be6ee9dbbfbb1d77f9a82a87f  Changes
 6c950a0211a5a28f023bb482037698cd  README
-b3a7b7f8f98cf78a14e8f7b3c375a4c2  MD5.pm
+188b5ab345169e90094165dd32dd7f6b  MD5.pm
 ca3f8cb317c5d088ed9f97204c6b8cda  MD5.xs
 754b9db19f79dbc4992f7166eb0f37ce  rfc1321.txt
 EOT
