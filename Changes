@@ -31,6 +31,158 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[  9840] By: jhi                                   on 2001/04/25  19:56:51
+        Log: Yet another HP-UX hints version from Merijn.
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[  9839] By: jhi                                   on 2001/04/25  19:53:04
+        Log: abs_path() didn't terminate the filename correctly,
+             in DIRNAMLENless systems like HP-UX this would fail.
+     Branch: perl
+	   ! ext/Cwd/Cwd.xs
+____________________________________________________________________________
+[  9838] By: jhi                                   on 2001/04/25  16:37:26
+        Log: Subject: [PATCH] Re: Useless use of constants other than 0,1 in void context?
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Wed, 25 Apr 2001 18:31:47 +0100
+             Message-Id: <E14sT8l-0004IE-00@libra.cus.cam.ac.uk>
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[  9837] By: jhi                                   on 2001/04/25  16:21:53
+        Log: Subject: Re: patch to perl5db.pl (formatting of h h screen)
+             From: Jon Eveland <jweveland@yahoo.com>
+             Date: Wed, 25 Apr 2001 09:42:46 -0700 (PDT)
+             Message-ID: <20010425164246.21611.qmail@web10405.mail.yahoo.com>
+     Branch: perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[  9836] By: jhi                                   on 2001/04/25  14:17:50
+        Log: Subject: [PATCH bleadperl] Porting/patching.pod: update version number format
+             From: "Philip Newton" <pnewton@gmx.de>
+             Date: Wed, 25 Apr 2001 17:05:58 +0200
+             Message-ID: <3AE703F6.3234.1833C45@localhost>
+     Branch: perl
+	   ! Porting/patching.pod
+____________________________________________________________________________
+[  9835] By: jhi                                   on 2001/04/25  13:58:07
+        Log: It would seem that both ar and full_ar need to be overridden
+             for HP-UX to avoid the GNU ar.
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[  9834] By: jhi                                   on 2001/04/25  13:50:40
+        Log: Subject: Re: [PATCH] foreach defelem magic should only be applied to PL_sv_undef
+             From: "Philip Newton" <pnewton@gmx.de>
+             Date: Wed, 25 Apr 2001 16:09:23 +0200
+             Message-ID: <3AE6F6B3.30503.14F6DEB@localhost>
+             
+             Detypo.
+     Branch: perl
+	   ! t/op/misc.t
+____________________________________________________________________________
+[  9833] By: jhi                                   on 2001/04/25  12:36:11
+        Log: In HP-UX set ar to /usr/bin/ar but only iff none set.
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[  9832] By: jhi                                   on 2001/04/25  12:33:36
+        Log: New version of HP-UX hints from Merijn.
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[  9831] By: jhi                                   on 2001/04/25  03:39:45
+        Log: Reintroduce the avoidance of mixing HP-UX cc and GNU ar.
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[  9830] By: jhi                                   on 2001/04/25  02:53:25
+        Log: The tzname[] bit is not needed by util.c -- and causes
+             heartburn in VMS (and it missing was probably the cause of
+             the Mac OS X trouble).  Ouch.
+     Branch: perl
+	   ! ext/POSIX/POSIX.xs util.c
+____________________________________________________________________________
+[  9829] By: jhi                                   on 2001/04/25  00:10:06
+        Log: Metaconfig unit change for #9828.
+     Branch: metaconfig
+	   ! U/compline/ccflags.U
+____________________________________________________________________________
+[  9828] By: jhi                                   on 2001/04/25  00:04:18
+        Log: Allow setting cppflags hints.  This may affect Darwin (Mac OS X)
+             (which is actually the reason for the change, we need to pass
+             cppflags='-traditional-cpp' so that Errno builds right), Dynix/ptx,
+             EP/IX, OS/2, and TitanOS, based on the hints files.
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  9827] By: jhi                                   on 2001/04/24  23:49:20
+        Log: makedepend.SH patch for AmigaOS from Jan-Erik Karlsson;
+             the $cat must have an absolute path.
+     Branch: perl
+	   ! makedepend.SH
+____________________________________________________________________________
+[  9826] By: jhi                                   on 2001/04/24  23:40:53
+        Log: 5.7.1-updated README.amiga from Jan-Erik Karlsson.
+     Branch: perl
+	   ! README.amiga
+____________________________________________________________________________
+[  9825] By: jhi                                   on 2001/04/24  23:35:35
+        Log: Subject: [ID 20010424.002] [PATCH bleadperl] find2perl: prototypes and doexec
+             From: "Philip Newton" <pnewton@gmx.de>
+             Date: Tue, 24 Apr 2001 18:52:49 +0200
+             Message-Id: <3AE5CB81.12234.1FC246F@localhost>
+     Branch: perl
+	   ! x2p/find2perl.PL
+____________________________________________________________________________
+[  9824] By: jhi                                   on 2001/04/24  23:33:07
+        Log: New HP-UX hints from Jeff and Merijn, should work with IA-64.
+             Some gcc specifics dropped out due to extensive rewriting;
+             will be put back later as needed.
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[  9823] By: jhi                                   on 2001/04/24  23:27:57
+        Log: Mac OS X patch for missing tzname definition from Paul Schinder.
+     Branch: perl
+	   ! ext/POSIX/POSIX.xs
+____________________________________________________________________________
+[  9822] By: jhi                                   on 2001/04/24  23:25:21
+        Log: Subject: Re: [ID 20010421.032] Not OK: perl v5.7.1 +DEVEL9717 on sun4-solaris-64int-ld-stdio 2.8 (UNINSTALLED)
+             From: Tim Jenness <t.jenness@jach.hawaii.edu>
+             Date: Tue, 24 Apr 2001 11:29:28 -1000 (HST)
+             Message-ID: <Pine.LNX.4.30.0104241123020.5085-100000@lapaki.jach.hawaii.edu>
+     Branch: perl
+	   ! ext/XS/Typemap/Typemap.xs
+____________________________________________________________________________
+[  9821] By: jhi                                   on 2001/04/24  23:24:10
+        Log: Subject: [PATCH: pod/perlport.pod] Updated email addresses.
+             From: "Abigail" <abigail@foad.org>
+             Date: Tue, 24 Apr 2001 23:12:03 +0200
+             Message-ID: <20010424211203.7901.qmail@foad.org>
+     Branch: perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[  9820] By: jhi                                   on 2001/04/24  23:23:15
+        Log: Subject: [PATCH pod/perlfaq4.pod] Time::Piece additions
+             From: Matt Sergeant <matt@sergeant.org>
+             Date: Tue, 24 Apr 2001 16:48:17 +0100 (BST)
+             Message-ID: <Pine.LNX.4.30.0104241645030.32279-100000@ted.sergeant.org>
+     Branch: perl
+	   ! pod/perlfaq4.pod
+____________________________________________________________________________
+[  9819] By: nick                                  on 2001/04/24  18:49:43
+        Log: Integrate mainline.
+     Branch: perlio
+	  +> t/lib/cpan-loadme.t t/lib/cpan-vcmp.t
+	  !> (integrate 37 files)
+____________________________________________________________________________
+[  9818] By: jhi                                   on 2001/04/24  14:35:23
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  9817] By: jhi                                   on 2001/04/24  14:09:17
         Log: Subject: Re: [PATCH t/lib/1_compile.t] Skipping known tested libraries 
              From: "Philip Newton" <pnewton@gmx.de>
