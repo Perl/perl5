@@ -1076,7 +1076,9 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	    r->check_offset_min = data.offset_float_min;
 	    r->check_offset_max = data.offset_float_max;
 	}
-	if (r->check_substr) {
+	/* XXXX Currently intuiting is not compatible with ANCH_GPOS.
+	   This should be changed ASAP!  */
+	if (r->check_substr && !(r->reganch & ROPT_ANCH_GPOS)) {
 	    r->reganch |= RE_USE_INTUIT;
 	    if (SvTAIL(r->check_substr))
 		r->reganch |= RE_INTUIT_TAIL;

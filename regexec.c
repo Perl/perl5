@@ -739,19 +739,23 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     /* If there is a "must appear" string, look for it. */
     s = startpos;
 
-    if (prog->reganch & ROPT_GPOS_SEEN) {
+    if (prog->reganch & ROPT_GPOS_SEEN) { /* Need to have PL_reg_ganch */
 	MAGIC *mg;
 
-	if (!(flags & REXEC_IGNOREPOS) && sv && SvTYPE(sv) >= SVt_PVMG
-	    && SvMAGIC(sv) && (mg = mg_find(sv, 'g')) && mg->mg_len >= 0)
-	    PL_reg_ganch = strbeg + mg->mg_len;
-	else
+	if (flags & REXEC_IGNOREPOS)	/* Means: check only at start */
 	    PL_reg_ganch = startpos;
-	if (prog->reganch & ROPT_ANCH_GPOS) {
-	    if (s > PL_reg_ganch)
-		goto phooey;
-	    s = PL_reg_ganch;
+	else if (sv && SvTYPE(sv) >= SVt_PVMG
+		  && SvMAGIC(sv)
+		  && (mg = mg_find(sv, 'g')) && mg->mg_len >= 0) {
+	    PL_reg_ganch = strbeg + mg->mg_len;	/* Defined pos() */
+	    if (prog->reganch & ROPT_ANCH_GPOS) {
+		if (s > PL_reg_ganch)
+		    goto phooey;
+		s = PL_reg_ganch;
+	    }
 	}
+	else				/* pos() not defined */
+	    PL_reg_ganch = strbeg;
     }
 
     if (!(flags & REXEC_CHECKED) && prog->check_substr != Nullsv) {
