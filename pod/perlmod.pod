@@ -489,6 +489,10 @@ Perl interface to IEEE Std 1003.1
 
 load functions only on demand
 
+=item Safe
+
+Creation controlled compartments in which perl code can be evaluated.
+
 =item Socket
 
 load the C socket.h defines and structure manipulators
