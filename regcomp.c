@@ -824,10 +824,8 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 	PL_reg_flags = 0;
 
     PL_regprecomp = savepvn(exp, xend - exp);
-    DEBUG_r(
-	if (!PL_colorset)
-	    reginitcolors();
-	PerlIO_printf(Perl_debug_log, "%sCompiling%s RE `%s%*s%s'\n",
+    DEBUG_r(if (!PL_colorset) reginitcolors());
+    DEBUG_r(PerlIO_printf(Perl_debug_log, "%sCompiling%s RE `%s%*s%s'\n",
 		      PL_colors[4],PL_colors[5],PL_colors[0],
 		      xend - exp, PL_regprecomp, PL_colors[1]));
     PL_regflags = pm->op_pmflags;

@@ -35,10 +35,7 @@
 # define POLL_EVENTS_MASK (POLL_CAN_READ | POLL_CAN_WRITE | POLL_HAS_EXCP)
 
 int
-poll(fds, nfds, timeout)
-struct pollfd *fds;
-unsigned long nfds;
-int timeout;
+poll(struct pollfd *fds, unsigned long nfds, int timeout)
 {
     int i,err;
     fd_set rfd,wfd,efd,ifd;

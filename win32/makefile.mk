@@ -956,7 +956,7 @@ $(DUMPER_DLL): $(PERLEXE) $(DUMPER).xs
 	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\Data\$(*B) && $(MAKE)
 
-$(PEEK_DLL): $(PERLEXE) $(Peek).xs
+$(PEEK_DLL): $(PERLEXE) $(PEEK).xs
 	cd $(EXTDIR)\Devel\$(*B) && \
 	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\Devel\$(*B) && $(MAKE)

@@ -264,7 +264,8 @@ cache_re(regexp *prog)
 
 STATIC void
 restore_pos(void *arg)
-{	
+{
+    dTHR;
     if (PL_reg_eval_set) {    
 	PL_reg_magic->mg_len = PL_reg_oldpos;
 	PL_reg_eval_set = 0;
@@ -402,10 +403,8 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 	    s = startpos;
     }
 
-    DEBUG_r(
-	if (!PL_colorset)
-	    reginitcolors();	
-	PerlIO_printf(Perl_debug_log, 
+    DEBUG_r(if (!PL_colorset) reginitcolors());
+    DEBUG_r(PerlIO_printf(Perl_debug_log, 
 		      "%sMatching%s `%s%.60s%s%s' against `%s%.*s%s%s'\n",
 		      PL_colors[4],PL_colors[5],PL_colors[0],
 		      prog->precomp,
