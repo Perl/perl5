@@ -12,15 +12,27 @@ $| = 1;
 # If we don't say anything, maybe nobody will notice.
 # print STDERR "\nWarning: I'm testing the speedup.  This might take up to thirty seconds.\n                    ";
 
+my $COARSE_TIME = 1;
+
+sub times_to_time { my ($u) = times; $u; }
+if ($^O eq 'riscos') {
+  eval {require Time::HiRes; *my_time = \&Time::HiRes::time };
+  if ($@) { *my_time = sub { time }; $COARSE_TIME = 1 }
+} else {
+  *my_time = \&times_to_time;
+}
+
 
 print "1..6\n";
+
+
 
 # This next test finds an example that takes a long time to run, then
 # checks to make sure that the run is actually speeded up by memoization.
 # In some sense, this is the most essential correctness test in the package.  
 #
 # We do this by running the fib() function with successfily larger
-# arguments until we find one that tales at leasrtt $LONG_RUN seconds
+# arguments until we find one that tales at least $LONG_RUN seconds
 # to execute.  Then we memoize fib() and run the same call cagain.  If
 # it doesn't produce the same test in less than one-tenth the time,
 # something is seriously wrong.

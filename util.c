@@ -3052,8 +3052,7 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
 
     PL_tainted = t->Ttainted;
     PL_curpm = t->Tcurpm;         /* XXX No PMOP ref count */
-    PL_nrs = newSVsv(t->Tnrs);
-    PL_rs = t->Tnrs ? SvREFCNT_inc(PL_nrs) : Nullsv;
+    PL_rs = newSVsv(t->Trs);
     PL_last_in_gv = Nullgv;
     PL_ofs_sv = t->Tofs_sv ? SvREFCNT_inc(PL_ofs_sv) : Nullsv;
     PL_defoutgv = (GV*)SvREFCNT_inc(t->Tdefoutgv);

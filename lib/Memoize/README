@@ -1,7 +1,7 @@
 
 Name:		Memoize
 What:		Transparently speed up functions by caching return values.
-Version:	0.65
+Version:	0.66
 Author:		Mark-Jason Dominus (mjd-perl-memoize+@plover.com)
 
 ################################################################
@@ -23,6 +23,19 @@ If the tests work,
 
 If not, please send me a report that mentions which tests failed.
 The address is: mjd-perl-memoize+@plover.com.
+
+################################################################
+What's new since 0.65:
+
+Test changes only.  
+
+        0.62 was the fist version that would be distributed with Perl.
+        I got so absorbed in integrating it that I wrote some tests
+        that used Time::HiRes.  I knew this was safe because
+        Time::HiRes is also distributed with the same versions of
+        Perl.  I totally forgot that some people will get the module
+        off of CPAN without Perl and they may not have TIme::HiRes.
+        Sorry!
 
 ################################################################
 What's new since 0.62:

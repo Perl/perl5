@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..714\n";
+print "1..715\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2009,6 +2009,7 @@ print "ok 683\n" if @a == 9 && "@a" eq "f o o \n $a $b b a r";
     print "ok 686\n";
 }
 
+
 my $test = 687;
 
 # Force scalar context on the patern match
@@ -2118,3 +2119,11 @@ sub ok ($$) {
     $x = "\x9b" . "y";
     ok ($x =~ /^[\x{09b}y]{2}$/, "\\x{09b} is to be treated as \\x9b");
 }
+
+{
+  # high bit bug -- japhy
+  my $x = "ab\200d";
+  $x =~ /.*?\200/ or print "not ";
+  print "ok 715\n";
+}
+

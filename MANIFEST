@@ -2038,6 +2038,7 @@ t/op/avhv.t			See if pseudo-hashes work
 t/op/bless.t			See if bless works
 t/op/bop.t			See if bitops work
 t/op/chars.t			See if character escapes work
+t/op/chdir.t                    See if chdir works
 t/op/chop.t			See if chop works
 t/op/closure.t			See if closures work
 t/op/cmp.t			See if the various string and numeric compare work

@@ -575,8 +575,9 @@ returns UV_MAX, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
 and writes the value to I<*result> (or the value is discarded if I<result>
 is NULL).
 
-The hex number may optinally be prefixed with "0b" or "b". If
-C<PERL_SCAN_ALLOW_UNDERSCORES> is set in I<*flags> on entry then the binary
+The hex number may optinally be prefixed with "0b" or "b" unless
+C<PERL_SCAN_DISALLOW_PREFIX> is set in I<*flags> on entry. If
+C<PERL_SCAN_ALLOW_UNDERSCORES> is set in I<*flags> then the binary
 number may use '_' characters to separate digits.
 
 	UV	grok_bin(char* start, STRLEN* len, I32* flags, NV *result)
@@ -600,8 +601,9 @@ returns UV_MAX, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
 and writes the value to I<*result> (or the value is discarded if I<result>
 is NULL).
 
-The hex number may optinally be prefixed with "0x" or "x". If
-C<PERL_SCAN_ALLOW_UNDERSCORES> is set in I<*flags> on entry then the hex
+The hex number may optinally be prefixed with "0x" or "x" unless
+C<PERL_SCAN_DISALLOW_PREFIX> is set in I<*flags> on entry. If
+C<PERL_SCAN_ALLOW_UNDERSCORES> is set in I<*flags> then the hex
 number may use '_' characters to separate digits.
 
 	UV	grok_hex(char* start, STRLEN* len, I32* flags, NV *result)

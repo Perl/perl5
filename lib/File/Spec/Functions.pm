@@ -5,7 +5,7 @@ use strict;
 
 our (@ISA,@EXPORT,@EXPORT_OK,%EXPORT_TAGS,$VERSION);
 
-$VERSION = '1.1';
+$VERSION = '1.2';
 
 require Exporter;
 

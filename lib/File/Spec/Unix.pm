@@ -3,7 +3,7 @@ package File::Spec::Unix;
 use strict;
 our($VERSION);
 
-$VERSION = '1.2';
+$VERSION = '1.3';
 
 use Cwd;
 

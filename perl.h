@@ -62,7 +62,7 @@
 #ifdef PERL_IMPLICIT_CONTEXT
 #  ifdef USE_5005THREADS
 struct perl_thread;
-#    define pTHX	register struct perl_thread *thr
+#    define pTHX	register struct perl_thread *thr PERL_UNUSED_DECL
 #    define aTHX	thr
 #    define dTHR	dNOOP /* only backward compatibility */
 #    define dTHXa(a)	pTHX = (struct perl_thread*)a
@@ -70,7 +70,7 @@ struct perl_thread;
 #    ifndef MULTIPLICITY
 #      define MULTIPLICITY
 #    endif
-#    define pTHX	register PerlInterpreter *my_perl
+#    define pTHX	register PerlInterpreter *my_perl PERL_UNUSED_DECL
 #    define aTHX	my_perl
 #    define dTHXa(a)	pTHX = (PerlInterpreter*)a
 #  endif
@@ -3067,7 +3067,7 @@ enum {		/* pass one of these to get_vtbl */
 #define HINT_FILETEST_ACCESS	0x00400000
 #define HINT_UTF8		0x00800000
 
-/* Various states of an input record separator SV (rs, nrs) */
+/* Various states of the input record separator SV (rs) */
 #define RsSNARF(sv)   (! SvOK(sv))
 #define RsSIMPLE(sv)  (SvOK(sv) && (! SvPOK(sv) || SvCUR(sv)))
 #define RsPARA(sv)    (SvPOK(sv) && ! SvCUR(sv))

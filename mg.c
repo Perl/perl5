@@ -1506,7 +1506,7 @@ Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
 	sv_insert(lsv, lvoff, lvlen, tmps, len);
 	SvUTF8_on(lsv);
     }
-    else if (SvUTF8(lsv)) {
+    else if (lsv && SvUTF8(lsv)) {
 	sv_pos_u2b(lsv, &lvoff, &lvlen);
 	tmps = (char*)bytes_to_utf8((U8*)tmps, &len);
 	sv_insert(lsv, lvoff, lvlen, tmps, len);
@@ -1911,10 +1911,8 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	PL_multiline = (i != 0);
 	break;
     case '/':
-	SvREFCNT_dec(PL_nrs);
-	PL_nrs = newSVsv(sv);
 	SvREFCNT_dec(PL_rs);
-	PL_rs = SvREFCNT_inc(PL_nrs);
+	PL_rs = newSVsv(sv);
 	break;
     case '\\':
 	if (PL_ors_sv)

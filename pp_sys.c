@@ -3375,27 +3375,22 @@ PP(pp_chdir)
     SV **svp;
     STRLEN n_a;
 
-    if (MAXARG < 1)
-	tmps = Nullch;
+    if (MAXARG < 1) {
+	if (((svp = hv_fetch(GvHVn(PL_envgv), "HOME", 4, FALSE))
+	    || (svp = hv_fetch(GvHVn(PL_envgv), "LOGDIR", 6, FALSE))
+#ifdef VMS
+	    || (svp = hv_fetch(GvHVn(PL_envgv), "SYS$LOGIN", 9, FALSE))
+#endif
+	    ) && SvPOK(*svp))
+	{
+	    tmps = SvPV(*svp, n_a);
+	}
+	else
+	    tmps = Nullch;
+    }
     else
 	tmps = POPpx;
-    if (!tmps || !*tmps) {
-	svp = hv_fetch(GvHVn(PL_envgv), "HOME", 4, FALSE);
-	if (svp)
-	    tmps = SvPV(*svp, n_a);
-    }
-    if (!tmps || !*tmps) {
-	svp = hv_fetch(GvHVn(PL_envgv), "LOGDIR", 6, FALSE);
-	if (svp)
-	    tmps = SvPV(*svp, n_a);
-    }
-#ifdef VMS
-    if (!tmps || !*tmps) {
-       svp = hv_fetch(GvHVn(PL_envgv), "SYS$LOGIN", 9, FALSE);
-       if (svp)
-           tmps = SvPV(*svp, n_a);
-    }
-#endif
+
     TAINT_PROPER("chdir");
     PUSHi( PerlDir_chdir(tmps) >= 0 );
 #ifdef VMS

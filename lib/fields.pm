@@ -127,7 +127,7 @@ L<perlref/Pseudo-hashes: Using an array as a hash>
 
 =cut
 
-use 5.005_64;
+use 5.6.1;
 use strict;
 no strict 'refs';
 use warnings::register;

@@ -182,8 +182,6 @@ typedef IV IV64;
 	    ENTER;					\
 	    SAVECOPFILE(&PL_compiling);			\
 	    SAVECOPLINE(&PL_compiling);			\
-	    save_svref(&PL_rs);				\
-	    sv_setsv(PL_rs, PL_nrs);			\
 	    if (!PL_beginav)				\
 		PL_beginav = newAV();			\
 	    av_push(PL_beginav, cv);			\

@@ -1,6 +1,6 @@
 package Opcode;
 
-require 5.005_64;
+require 5.6.1;
 
 use strict;
 

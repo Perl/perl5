@@ -1,6 +1,6 @@
 package AutoSplit;
 
-use 5.005_64;
+use 5.6.1;
 use Exporter ();
 use Config qw(%Config);
 use Carp qw(carp);
@@ -11,7 +11,7 @@ use strict;
 our($VERSION, @ISA, @EXPORT, @EXPORT_OK, $Verbose, $Keep, $Maxlen,
     $CheckForAutoloader, $CheckModTime);
 
-$VERSION = "1.0306";
+$VERSION = "1.0307";
 @ISA = qw(Exporter);
 @EXPORT = qw(&autosplit &autosplit_lib_modules);
 @EXPORT_OK = qw($Verbose $Keep $Maxlen $CheckForAutoloader $CheckModTime);

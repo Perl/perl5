@@ -719,8 +719,6 @@ END_EXTERN_C
 #define PL_modcount		(*Perl_Tmodcount_ptr(aTHX))
 #undef  PL_na
 #define PL_na			(*Perl_Tna_ptr(aTHX))
-#undef  PL_nrs
-#define PL_nrs			(*Perl_Tnrs_ptr(aTHX))
 #undef  PL_ofs_sv
 #define PL_ofs_sv		(*Perl_Tofs_sv_ptr(aTHX))
 #undef  PL_op
@@ -907,6 +905,8 @@ END_EXTERN_C
 #define PL_top_env		(*Perl_Ttop_env_ptr(aTHX))
 #undef  PL_toptarget
 #define PL_toptarget		(*Perl_Ttoptarget_ptr(aTHX))
+#undef  PL_unused_1
+#define PL_unused_1		(*Perl_Tunused_1_ptr(aTHX))
 #undef  PL_watchaddr
 #define PL_watchaddr		(*Perl_Twatchaddr_ptr(aTHX))
 #undef  PL_watchok

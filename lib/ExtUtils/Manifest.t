@@ -19,7 +19,7 @@ my @files;
 sub add_file {
 	my ($file, $data) = @_;
 	$data ||= 'foo';
-	open( my $T, ">$file") or return;
+	open( my $T, '>', $file) or return;
 	print $T $data;
 	push @files, $file;
 }

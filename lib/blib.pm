@@ -39,7 +39,7 @@ Nick Ing-Simmons nik@tiuk.ti.com
 use Cwd;
 
 use vars qw($VERSION $Verbose);
-$VERSION = '1.00';
+$VERSION = '1.01';
 $Verbose = 0;
 
 sub import

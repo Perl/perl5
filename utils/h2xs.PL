@@ -740,7 +740,8 @@ if( @path_h ){
     }
 }
 
-
+# Save current directory so that C::Scan can use it
+my $cwd = File::Spec->rel2abs( File::Spec->curdir );
 
 my ($ext, $nested, @modparts, $modfname, $modpname);
 
@@ -811,7 +812,7 @@ if( ! $opt_X ){  # use XS, unless it was disabled
       my @styles = $Config{gccversion} ? qw(C++ C9X GNU) : qw(C++ C9X);
       $c = new C::Scan 'filename' => $filename, 'filename_filter' => $filter,
 	'add_cppflags' => $addflags, 'c_styles' => \@styles;
-      $c->set('includeDirs' => ["$Config::Config{archlib}/CORE"]);
+      $c->set('includeDirs' => ["$Config::Config{archlib}/CORE", $cwd]);
 
       push @$fdecls_parsed, @{ $c->get('parsed_fdecls') };
       push(@$fdecls, @{$c->get('fdecls')});
@@ -870,7 +871,8 @@ if( ! $opt_X ){  # use XS, unless it was disabled
     }
     @fnames_no_prefix = @fnames;
     @fnames_no_prefix
-      = sort map { ++$prefix{$_} if s/^$opt_p(?!\d)//; $_ } @fnames_no_prefix;
+      = sort map { ++$prefix{$_} if s/^$opt_p(?!\d)//; $_ } @fnames_no_prefix
+         if defined $opt_p;
     # Remove macros which expand to typedefs
     print "Typedefs are @td.\n" if $opt_d;
     my %td = map {($_, $_)} @td;

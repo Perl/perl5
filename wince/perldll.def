@@ -184,7 +184,6 @@ EXPORTS
 	PL_no_usym
 	PL_no_wrongref
 	PL_nomemok
-	PL_nrs
 	PL_ofmt
 	PL_oldbufptr
 	PL_oldname

@@ -1,6 +1,6 @@
 package ExtUtils::Packlist;
 
-use 5.005_64;
+use 5.6.1;
 use strict;
 use Carp qw();
 our $VERSION = '0.04';

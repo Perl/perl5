@@ -802,3 +802,12 @@ undef foo;
 EXPECT
 Can't modify constant item in undef operator at - line 1, near "foo;"
 Execution of - aborted due to compilation errors.
+######## (?{...}) compilation bounces on PL_rs
+-0
+{
+  /(?{ $x })/;
+  # {
+}
+BEGIN { print "ok\n" }
+EXPECT
+ok

@@ -518,26 +518,48 @@ sub picklist {
     my($items,$prompt,$default,$require_nonempty,$empty_warning)=@_;
     $default ||= '';
 
-    my ($item, $i);
-    for $item (@$items) {
-	printf "(%d) %s\n", ++$i, $item;
-    }
+	my $pos = 0;
 
     my @nums;
     while (1) {
-	my $num = prompt($prompt,$default);
-	@nums = split (' ', $num);
-	(warn "invalid items entered, try again\n"), next
-	    if grep (/\D/ || $_ < 1 || $_ > $i, @nums);
-	if ($require_nonempty) {
-	    (warn "$empty_warning\n"), next
-		unless @nums;
-	}
-	last;
+
+		# display, at most, 15 items at a time
+		my $limit = $#{ $items } - $pos;
+		$limit = 15 if $limit > 15;
+
+		# show the next $limit items, get the new position
+		$pos = display_some($items, $limit, $pos);
+		$pos = 0 if $pos >= @$items;
+
+		my $num = prompt($prompt,$default);
+		
+		@nums = split (' ', $num);
+		my $i = scalar @$items;
+		(warn "invalid items entered, try again\n"), next
+		    if grep (/\D/ || $_ < 1 || $_ > $i, @nums);
+		if ($require_nonempty) {
+		    (warn "$empty_warning\n");
+		}
+    	print "\n";
+
+		# a blank line continues...
+		next unless @nums;
+		last;
     }
-    print "\n";
     for (@nums) { $_-- }
     @{$items}[@nums];
+}
+
+sub display_some {
+	my ($items, $limit, $pos) = @_;
+	$pos ||= 0;
+
+	my @displayable = @$items[$pos .. ($pos + $limit)];
+    for my $item (@displayable) {
+		printf "(%d) %s\n", ++$pos, $item;
+    }
+	printf "%d more items, hit ENTER\n", (@$items - $pos) if $pos < @$items;
+	return $pos;
 }
 
 sub read_mirrored_by {

@@ -5,7 +5,7 @@ require Exporter;
 use strict;
 our @ISA = qw(Exporter);
 our @EXPORT = qw(Complete);
-our $VERSION = '1.2';
+our $VERSION = '1.3';
 
 #      @(#)complete.pl,v1.2            (me@anywhere.EBay.Sun.COM) 09/23/91
 
@@ -23,8 +23,9 @@ Term::Complete - Perl word completion module
 This routine provides word completion on the list of words in
 the array (or array ref).
 
-The tty driver is put into raw mode using the system command
-C<stty raw -echo> and restored using C<stty -raw echo>.
+The tty driver is put into raw mode and restored using an operating
+system specific command, in UNIX-like environments C<stty raw -echo>
+and C<stty -raw echo>.
 
 The following command characters are defined:
 
@@ -66,12 +67,19 @@ Wayne Thompson
 
 =cut
 
-our($complete, $kill, $erase1, $erase2);
+our($complete, $kill, $erase1, $erase2, $tty_raw_noecho, $tty_restore);
 CONFIG: {
     $complete = "\004";
     $kill     = "\025";
     $erase1 =   "\177";
     $erase2 =   "\010";
+    foreach my $stty (qw(/bin/stty /usr/bin/stty)) {
+	if (-x $stty) {
+	    $tty_raw_noecho = "$stty raw -echo";
+	    $tty_restore    = "$stty -raw echo";
+	    last;
+	}
+    }
 }
 
 sub Complete {
@@ -89,7 +97,7 @@ sub Complete {
 	@cmp_lst = sort(@_);
     }
 
-    system('stty raw -echo');
+    system $tty_raw_noecho if defined $tty_raw_noecho;
     LOOP: {
         print($prompt, $return);
         while (($_ = getc(STDIN)) ne "\r") {
@@ -148,7 +156,7 @@ sub Complete {
             }
         }
     }
-    system('stty -raw echo');
+    system $tty_restore if defined $tty_restore;
     print("\n");
     $return;
 }
