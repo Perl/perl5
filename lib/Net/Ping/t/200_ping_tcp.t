@@ -51,8 +51,8 @@ ok ($p -> {port_num} = (getservbyname("http", "tcp") || 80));
 # Test localhost on the web port
 ok $p -> ping("localhost");
 
-# Hopefully this is not a routeable host
-ok !$p -> ping("10.12.14.16");
+# Hopefully this is never a routeable host
+ok !$p -> ping("172.29.249.249");
 
 # Test a few remote servers
 # Hopefully they are up when the tests are run.

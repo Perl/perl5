@@ -1,13 +1,13 @@
 package Net::Ping;
 
-# $Id: Ping.pm,v 1.1 2002/06/04 00:41:52 rob Exp $
+# $Id: Ping.pm,v 1.6 2002/06/19 15:23:48 rob Exp $
 
 require 5.002;
 require Exporter;
 
 use strict;
 use vars qw(@ISA @EXPORT $VERSION
-            $def_timeout $def_proto $max_datasize $pingstring $hires $udp_source_verify);
+            $def_timeout $def_proto $max_datasize $pingstring $hires $source_verify);
 use FileHandle;
 use Socket qw( SOCK_DGRAM SOCK_STREAM SOCK_RAW PF_INET
                inet_aton inet_ntoa sockaddr_in );
@@ -16,7 +16,7 @@ use POSIX qw(ECONNREFUSED);
 
 @ISA = qw(Exporter);
 @EXPORT = qw(pingecho);
-$VERSION = "2.19";
+$VERSION = "2.20";
 
 # Constants
 
@@ -25,7 +25,7 @@ $def_proto = "tcp";         # Default protocol to use for pinging
 $max_datasize = 1024;       # Maximum data bytes in a packet
 # The data we exchange with the server for the stream protocol
 $pingstring = "pingschwingping!\n";
-$udp_source_verify = 1;     # Default is to verify source endpoint
+$source_verify = 1;         # Default is to verify source endpoint
 
 if ($^O =~ /Win32/i) {
   # Hack to avoid this Win32 spewage:
@@ -171,8 +171,8 @@ sub bind
 sub source_verify
 {
   my $self = shift;
-  $udp_source_verify = 1 unless defined
-    ($udp_source_verify = ((defined $self) && (ref $self)) ? shift() : $self);
+  $source_verify = 1 unless defined
+    ($source_verify = ((defined $self) && (ref $self)) ? shift() : $self);
 }
 
 # Description: allows the module to use milliseconds as returned by
@@ -321,7 +321,7 @@ sub ping_icmp
                 substr($recv_msg, length($recv_msg) - $len_msg,
                        $len_msg));
       if (($from_type == ICMP_ECHOREPLY) &&
-          ($from_ip eq $ip) &&
+          (!$source_verify || $from_ip eq $ip) &&
           ($from_pid == $self->{"pid"}) && # Does the packet check out?
           ($from_seq == $self->{"seq"}))
       {
@@ -650,7 +650,7 @@ sub ping_udp
       $from_saddr = recv($self->{"fh"}, $from_msg, 1500, UDP_FLAGS)
         or last; # For example an unreachable host will make recv() fail.
       ($from_port, $from_ip) = sockaddr_in($from_saddr);
-      if (!$udp_source_verify ||
+      if (!$source_verify ||
           (($from_ip eq $ip) &&        # Does the packet check out?
            ($from_port == $self->{"port_num"}) &&
            ($from_msg eq $msg)))
@@ -685,7 +685,7 @@ __END__
 
 Net::Ping - check a remote host for reachability
 
-$Id: Ping.pm,v 1.1 2002/06/04 00:41:52 rob Exp $
+$Id: Ping.pm,v 1.6 2002/06/19 15:23:48 rob Exp $
 
 =head1 SYNOPSIS
 
@@ -791,12 +791,27 @@ default) number of data bytes is 1 if the protocol is "udp" and 0
 otherwise.  The maximum number of data bytes that can be specified is
 1024.
 
+=item $p->ping($host [, $timeout]);
+
+Ping the remote host and wait for a response.  $host can be either the
+hostname or the IP number of the remote host.  The optional timeout
+must be greater than 0 seconds and defaults to whatever was specified
+when the ping object was created.  Returns a success flag.  If the
+hostname cannot be found or there is a problem with the IP number, the
+success flag returned will be undef.  Otherwise, the success flag will
+be 1 if the host is reachable and 0 if it is not.  For most practical
+purposes, undef and 0 and can be treated as the same case.  In array
+context, the elapsed time is also returned.  The elapsed time value will
+be a float, as retuned by the Time::HiRes::time() function, if hires()
+has been previously called, otherwise it is returned as an integer.
+
 =item $p->source_verify( { 0 | 1 } );
 
 Allows source endpoint verification to be enabled or disabled.
 This is useful for those remote destinations with multiples
 interfaces where the response may not originate from the same
 endpoint that the original destination endpoint was sent to.
+This only affects udp and icmp protocol pings.
 
 This is enabled by default.
 
@@ -820,20 +835,6 @@ the most recent $local_addr.  If the protocol is "icmp" or "udp",
 then bind() must be called at most once per object, and (if it is
 called at all) must be called before the first call to ping() for that
 object.
-
-=item $p->ping($host [, $timeout]);
-
-Ping the remote host and wait for a response.  $host can be either the
-hostname or the IP number of the remote host.  The optional timeout
-must be greater than 0 seconds and defaults to whatever was specified
-when the ping object was created.  Returns a success flag.  If the
-hostname cannot be found or there is a problem with the IP number, the
-success flag returned will be undef.  Otherwise, the success flag will
-be 1 if the host is reachable and 0 if it is not.  For most practical
-purposes, undef and 0 and can be treated as the same case.  In array
-context, the elapsed time is also returned.  The elapsed time value will
-be a float, as retuned by the Time::HiRes::time() function, if hires()
-has been previously called, otherwise it is returned as an integer.
 
 =item $p->open($host);
 
@@ -899,6 +900,43 @@ Because of a lack of anything better, this module uses its own
 routines to pack and unpack ICMP packets.  It would be better for a
 separate module to be written which understands all of the different
 kinds of ICMP packets.
+
+=head1 INSTALL
+
+The latest source tree is available via cvs:
+
+  cvs -z3 -q -d :pserver:anonymous@cvs.roobik.com.:/usr/local/cvsroot/freeware co Net-Ping
+  cd Net-Ping
+
+The tarball can be created as follows:
+
+  perl Makefile.PL ; make ; make dist
+
+The latest Net::Ping release can be found at CPAN:
+
+  $CPAN/modules/by-module/Net/
+
+1) Extract the tarball
+
+  gtar -zxvf Net-Ping-xxxx.tar.gz
+  cd Net-Ping-xxxx
+
+2) Build:
+
+  make realclean
+  perl Makefile.PL
+  make
+  make test
+
+3) Install
+
+  make install
+
+Or install it RPM Style:
+
+  rpm -ta SOURCES/Net-Ping-xxxx.tar.gz
+
+  rpm -ih RPMS/noarch/perl-Net-Ping-xxxx.rpm
 
 =head1 AUTHORS
 

@@ -1,12 +1,24 @@
 CHANGES
 -------
 
+2.20  Jun 20 10:00 2002
+	- Perl 5.8.0 compatibility stuff.
+	  Spot by dcd@tc.fluke.com (David Dyck).
+	  And patch by jhi@iki.fi (Jarkko Hietaniemi).
+	- Move INSTALL doc into perldoc.
+	- Allow source_verify method to work
+	  for icmp protocol as well as udp.
+	  Spot by taner@taner.net (Taner Halicioglu)
+
 2.19  Jun 03 19:00 2002
-	- Add $p->udp_source_verify method to skip source
+	- Add $p->source_verify method to skip source
 	  endpoint verification of udp protocol pings for
 	  those remote destinations with multiple interfaces
 	  that may have the "reverse telnet" bug.
+	  Spot by dcd@tc.fluke.com (David Dyck)
 	- Moved files to more standard locations.
+	- Less common martian used for ping test
+	  to reduce conflicts
 
 2.18  May 06 12:00 2002
 	- More RPM spec generalizations.
