@@ -365,7 +365,7 @@ if (!$versiononly) {
 
 }
 
-$packlist->write() unless $nono;
+$packlist->write() unless $nonono;
 print STDERR "  Installation complete\n";
 
 exit 0;
