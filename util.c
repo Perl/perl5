@@ -1778,13 +1778,116 @@ int newfd;
 }
 #endif
 
+#ifdef HAS_SIGACTION
+
+Sighandler_t rsignal(signo,handler)
+int signo;
+Sighandler_t handler;
+{
+    struct sigaction act,oact;
+    
+    act.sa_handler = handler;
+    sigemptyset(&act.sa_mask);
+    act.sa_flags = 0;
+#ifdef SA_RESTART
+    act.sa_flags |= SA_RESTART;	/* SVR4, 4.3+BSD */
+#endif
+    if (sigaction(signo, &act, &oact) < 0)
+    	return(SIG_ERR);
+    else
+    	return(oact.sa_handler);
+}
+
+int rsignalsave(signo, handler, save)
+int signo;
+Sighandler_t handler;
+Sigsave_t *save;
+{
+    struct sigaction act;
+    
+    act.sa_handler = handler;
+    sigemptyset(&act.sa_mask);
+    act.sa_flags = 0;
+#ifdef SA_RESTART
+    act.sa_flags |= SA_RESTART;	/* SVR4, 4.3+BSD */
+#endif
+    return sigaction(signo, &act, save);
+}
+
+int rsignalrestore(signo, save)
+int signo;
+Sigsave_t *save;
+{
+    return sigaction(signo, save, 0);
+}
+
+Sighandler_t rsignalstate(signo)
+int signo;
+{
+    struct sigaction oact;
+    if (sigaction(signo, 0, &oact)<0)
+        return (SIG_ERR);
+    else
+        return (oact.sa_handler);
+}
+
+#else
+
+static int sig_trapped;
+
+static
+Signal_t sig_trap(signo)
+int signo;
+{
+    sig_trapped++;
+}
+
+Sighandler_t rsignalstate(signo)
+int signo;
+{
+    Sighandler_t oldsig;
+    sig_trapped=0;
+    oldsig = signal(signo, sig_trap);
+    signal(signo, oldsig);
+    if (sig_trapped)
+        kill(getpid(),signo);
+        
+    return oldsig;
+}
+
+Sighandler_t rsignal(signo,handler)
+int signo;
+Sighandler_t handler;
+{
+    return signal(signo,handler);
+}
+
+int rsignalsave(signo, handler, save)
+int signo;
+Sighandler_t handler;
+Sigsave_t *save;
+{
+    *save = signal(signo,handler);
+    return (*save == SIG_ERR) ? -1 : 0;
+}
+
+int rsignalrestore(signo, save)
+int signo;
+Sigsave_t *save;
+{
+    return (signal(signo, *save) == SIG_ERR) ? -1 : 0;
+}
+
+#endif
+
+
 #if  (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) \
      && !defined(VMS)  /* VMS' my_popen() is in VMS.c */
 I32
 my_pclose(ptr)
 PerlIO *ptr;
 {
-    Signal_t (*hstat)(), (*istat)(), (*qstat)();
+    Sigsave_t hstat, istat, qstat;
     int status;
     SV **svp;
     int pid;
@@ -1802,15 +1905,15 @@ PerlIO *ptr;
 #ifdef UTS
     if(kill(pid, 0) < 0) { return(pid); }   /* HOM 12/23/91 */
 #endif
-    hstat = signal(SIGHUP, SIG_IGN);
-    istat = signal(SIGINT, SIG_IGN);
-    qstat = signal(SIGQUIT, SIG_IGN);
+    rsignalsave(SIGHUP, SIG_IGN, &hstat);
+    rsignalsave(SIGINT, SIG_IGN, &istat);
+    rsignalsave(SIGQUIT, SIG_IGN, &qstat);
     do {
 	pid = wait4pid(pid, &status, 0);
     } while (pid == -1 && errno == EINTR);
-    signal(SIGHUP, hstat);
-    signal(SIGINT, istat);
-    signal(SIGQUIT, qstat);
+    rsignalrestore(SIGHUP, &hstat);
+    rsignalrestore(SIGINT, &istat);
+    rsignalrestore(SIGQUIT, &qstat);
     return(pid < 0 ? pid : status);
 }
 #endif /* !DOSISH */

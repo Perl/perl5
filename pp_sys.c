@@ -2856,8 +2856,7 @@ PP(pp_system)
     int childpid;
     int result;
     int status;
-    Signal_t (*ihand)();     /* place to save signal during system() */
-    Signal_t (*qhand)();     /* place to save signal during system() */
+    Sigsave_t ihand,qhand;     /* place to save signals during system() */
 
 #if (defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(OS2)
     if (SP - MARK == 1) {
@@ -2877,13 +2876,13 @@ PP(pp_system)
 	sleep(5);
     }
     if (childpid > 0) {
-	ihand = signal(SIGINT, SIG_IGN);
-	qhand = signal(SIGQUIT, SIG_IGN);
+	rsignalsave(SIGINT, SIG_IGN, &ihand);
+	rsignalsave(SIGQUIT, SIG_IGN, &qhand);
 	do {
 	    result = wait4pid(childpid, &status, 0);
 	} while (result == -1 && errno == EINTR);
-	(void)signal(SIGINT, ihand);
-	(void)signal(SIGQUIT, qhand);
+	(void)rsignalrestore(SIGINT, &ihand);
+	(void)rsignalrestore(SIGQUIT, &qhand);
 	statusvalue = FIXSTATUS(status);
 	if (result < 0)
 	    value = -1;

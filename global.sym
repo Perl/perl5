@@ -979,6 +979,10 @@ regnext
 regprop
 repeatcpy
 rninstr
+rsignal
+rsignalsave
+rsignalstate
+rsignalrestore
 runops
 safecalloc
 safemalloc

@@ -1157,6 +1157,14 @@ I32 unlnk _((char*));
 #  endif
 #endif
 
+typedef Signal_t (*Sighandler_t) _((int));
+
+#ifdef HAS_SIGACTION
+typedef struct sigaction Sigsave_t;
+#else
+typedef Sighandler_t Sigsave_t;
+#endif
+
 #define SCAN_DEF 0
 #define SCAN_TR 1
 #define SCAN_REPL 2
