@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Apr 14 18:21:40 METDST 2004 [metaconfig 3.0 PL70]
+# Generated on Thu May  6 13:54:05 METDST 2004 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -3891,6 +3891,7 @@ case "$gccversion" in
 *) gccshortvers=`echo "$gccversion"|sed 's/ .*//'`
    gccosandvers=`$cc -v 2>&1|grep '/specs$'|sed "s!.*/[^-/]*-[^-/]*-\([^-/]*\)/$gccshortvers/specs!\1!"`
    gccshortvers=''
+   ccflags="$ccflags -pipe"
    case "$gccosandvers" in
    $osname) gccosandvers='' ;; # linux gccs seem to have no linux osvers, grr
    $osname$osvers) ;; # looking good
@@ -10079,7 +10080,7 @@ int main()
 	i32  = ($xxx) g;
 
 	/* x86 processors will probably give 0x8000 0000, which is a
-       sign change.  We don't want that.  We want to mimic SPARC
+	   sign change.  We don't want that.  We want to mimic SPARC
 	   behavior here, which is to preserve the sign and give
 	   back 0x7fff ffff.
 	*/
