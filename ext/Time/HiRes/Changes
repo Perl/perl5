@@ -1,5 +1,9 @@
 Revision history for Perl extension Time::HiRes.
 
+1.51
+	- doc tweaks from mjd (perl change #20456)
+	- NCR MP-RAS hints file added (svr4.pl) (perl change #21249)
+
 1.50
 	- add a message (for non-core builds) to Makefile.PL about
 	  the LC_ALL=C workaround
