@@ -33,7 +33,7 @@ sub forko (&$$); # To prevent deadlock from underlying pthread_* bugs (as in
                  # stock RH9 glibc/NPTL) or from our own errors, we run tests
                  # in separately forked and alarmed processes.
 
-*forko = ($^O =~ /^dos|os2|mswin32|netware$/i)  # Not on DOSish platforms
+*forko = ($^O =~ /^dos|os2|mswin32|netware|vms$/i)
 ? sub (&$$) { my $code = shift; goto &$code; }
 : sub (&$$) {
   my ($code, $expected, $patience) = @_;
