@@ -389,11 +389,14 @@ magic_get
 magic_getarylen
 magic_getdefelem
 magic_getglob
+magic_getnkeys
 magic_getpack
 magic_getpos
 magic_getsig
+magic_getsubstr
 magic_gettaint
 magic_getuvar
+magic_getvec
 magic_len
 magic_mutexfree
 magic_nextpack

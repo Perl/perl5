@@ -1,7 +1,7 @@
 #!/usr/local/bin/perl
 
 use Config;
-use File::Basename qw(&basename &dirname);
+use File::Basename qw(basename dirname);
 
 # List explicitly here the variables you want Configure to
 # generate.  Metaconfig only looks for shell variables, so you
@@ -38,8 +38,7 @@ use Config;
 use File::Path qw(mkpath);
 use Getopt::Std;
 
-getopts('d:rlh');
-
+getopts('Dd:rlh');
 
 my $Exit = 0;
 
@@ -76,8 +75,7 @@ while (defined ($file = next_file())) {
     if ($file eq '-') {
 	open(IN, "-");
 	open(OUT, ">-");
-    }
-    else {
+    } else {
 	($outfile = $file) =~ s/\.h$/.ph/ || next;
 	print "$file -> $outfile\n";
 	if ($file =~ m|^(.*)/|) {
@@ -94,6 +92,7 @@ while (defined ($file = next_file())) {
 	    $_ .= <IN>;
 	    chop;
 	}
+	print OUT "# $_\n" if $opt_D;
 	if (s:/\*:\200:g) {
 	    s:\*/:\201:g;
 	    s/\200[^\201]*\201//g;	# delete single line comments
@@ -103,7 +102,7 @@ while (defined ($file = next_file())) {
 		redo;
 	    }
 	}
-	if (s/^#\s*//) {
+	if (s/^\s*#\s*//) {
 	    if (s/^define\s+(\w+)//) {
 		$name = $1;
 		$new = '';
@@ -122,86 +121,121 @@ while (defined ($file = next_file())) {
 		    }
 		    s/^\s+//;
 		    expr();
-		    $new =~ s/(["\\])/\\$1/g;
+		    $new =~ s/(["\\])/\\$1/g;       #"]);
+		    $new = reindent($new);
+		    $args = reindent($args);
 		    if ($t ne '') {
-			$new =~ s/(['\\])/\\$1/g;
+			$new =~ s/(['\\])/\\$1/g;   #']);
 			if ($opt_h) {
 			    print OUT $t,
-                            "eval \"\\n#line $eval_index $outfile\\n\" . 'sub $name $proto\{\n$t    ${args}eval \"$new\";\n$t}' unless defined(\&$name);\n";
+                            "eval \"\\n#line $eval_index $outfile\\n\" . 'sub $name $proto\{\n$t    ${args}eval q($new);\n$t}' unless defined(\&$name);\n";
                             $eval_index++;
 			} else {
 			    print OUT $t,
-                            "eval 'sub $name $proto\{\n$t    ${args}eval \"$new\";\n$t}' unless defined(\&$name);\n";
+                            "eval 'sub $name $proto\{\n$t    ${args}eval q($new);\n$t}' unless defined(\&$name);\n";
 			}
-		    }
-		    else {
-                      print OUT "unless (defined(\&$name)) {\nsub $name $proto\{\n    ${args}eval \"$new\";\n}\n}\n";
+		    } else {
+                      print OUT "unless(defined(\&$name)) {\n    sub $name $proto\{\n\t${args}eval q($new);\n    }\n}\n";
 		    }
 		    %curargs = ();
-		}
-		else {
+		} else {
 		    s/^\s+//;
 		    expr();
 		    $new = 1 if $new eq '';
+		    $new = reindent($new);
+		    $args = reindent($args);
 		    if ($t ne '') {
-			$new =~ s/(['\\])/\\$1/g;
+			$new =~ s/(['\\])/\\$1/g;        #']);
 			if ($opt_h) {
 			    print OUT $t,"eval \"\\n#line $eval_index $outfile\\n\" . 'sub $name () {",$new,";}' unless defined(\&$name);\n";
 			    $eval_index++;
 			} else {
 			    print OUT $t,"eval 'sub $name () {",$new,";}' unless defined(\&$name);\n";
 			}
-		    }
-		    else {
-                      print OUT $t,"unless(defined(\&$name)) {\nsub $name () {",$new,";}\n}\n";
+		    } else {
+                      print OUT $t,"unless(defined(\&$name)) {\n    sub $name () {\t",$new,";}\n}\n";
 		    }
 		}
-	    }
-	    elsif (/^include\s*<(.*)>/) {
-		($incl = $1) =~ s/\.h$/.ph/;
+	    } elsif (/^(include|import)\s*[<"](.*)[>"]/) {
+		($incl = $2) =~ s/\.h$/.ph/;
 		print OUT $t,"require '$incl';\n";
-	    }
-	    elsif (/^ifdef\s+(\w+)/) {
-		print OUT $t,"if (defined &$1) {\n";
+	    } elsif(/^include_next\s*[<"](.*)[>"]/) {
+		($incl = $1) =~ s/\.h$/.ph/;
+		# should've read up on #include_next properly before attempting
+		# to implement it...
+		# 
+		#print OUT $t, "{\n";
+		#$tab += 4;
+		#$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
+		#print OUT $t, "my(\$INC) = shift(\@INC);\n";
+		#print OUT $t, "require '$incl';\n";
+		#print OUT $t, "unshift(\@INC, \$INC);}\n";
+		#$tab -= 4;
+		#$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
+		#print OUT $t, "}\n";
+		# 
+		# try this instead:
+		print OUT ($t, "my(\$i) = 0;\n");
+		print OUT ($t, "if(exists(\$INC{$incl})) {\n");
 		$tab += 4;
 		$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
-	    }
-	    elsif (/^ifndef\s+(\w+)/) {
-		print OUT $t,"if (!defined &$1) {\n";
+		print OUT ($t, "++\$i while (\$i <= \$#INC",
+			   " and \$INC[\$i].'/$incl' ne \$INC{'$incl'});\n");
+		print OUT ($t, "\$i = 0 if \$INC[\$i].'/$incl' ne",
+			   " \$INC{'$incl'};\n");
+		$tab -= 4;
+		$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
+		print OUT ($t, "}\n");
+		print OUT ($t,
+			   "eval(\"require '\" . ",
+			   "(\$i ? \$INC[\$i].'/' : '') . \"\$incl';\");");
+		# any better? require is smart enough not to try and include a
+		# file twice, i believe, so require-ing the same actual file
+		# should end up just being a null operation...
+	    } elsif (/^ifdef\s+(\w+)/) {
+		print OUT $t,"if(defined(&$1)) {\n";
 		$tab += 4;
 		$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
-	    }
-	    elsif (s/^if\s+//) {
+	    } elsif (/^ifndef\s+(\w+)/) {
+		print OUT $t,"unless(defined(&$1)) {\n";
+		$tab += 4;
+		$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
+	    } elsif (s/^if\s+//) {
 		$new = '';
 		$inif = 1;
 		expr();
 		$inif = 0;
-		print OUT $t,"if ($new) {\n";
+		print OUT $t,"if($new) {\n";
 		$tab += 4;
 		$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
-	    }
-	    elsif (s/^elif\s+//) {
+	    } elsif (s/^elif\s+//) {
 		$new = '';
 		$inif = 1;
 		expr();
 		$inif = 0;
 		$tab -= 4;
 		$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
-		print OUT $t,"}\n${t}elsif ($new) {\n";
+		print OUT $t,"}\n elsif($new) {\n";
 		$tab += 4;
 		$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
-	    }
-	    elsif (/^else/) {
+	    } elsif (/^else/) {
 		$tab -= 4;
 		$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
-		print OUT $t,"}\n${t}else {\n";
+		print OUT $t,"} else {\n";
 		$tab += 4;
 		$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
-	    }
-	    elsif (/^endif/) {
+	    } elsif (/^endif/) {
 		$tab -= 4;
 		$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
 		print OUT $t,"}\n";
+	    } elsif(/^undef\s+(\w+)/) {
+		print OUT $t, "undef(&$1) if defined(&$1);\n";
+	    } elsif(/^error\s+(.*)/) {
+		print OUT $t, "die(\"$1\");\n";
+	    } elsif(/^warning\s+(.*)/) {
+		print OUT $t, "warn(\"$1\");\n";
+	    } elsif(/^ident\s+(.*)/) {
+		print OUT $t, "# $1\n";
 	    }
 	}
     }
@@ -210,10 +244,20 @@ while (defined ($file = next_file())) {
 
 exit $Exit;
 
+sub reindent($) {
+    my($text) = shift;
+    $text =~ s/\n/\n    /g;
+    $text =~ s/        /\t/g;
+    $text;
+}
+
 sub expr {
+    if(keys(%curargs)) {
+	my($joined_args) = join('|', keys(%curargs));
+    }
     while ($_ ne '') {
-	s/^\&\&// && do { $new .= "&&"; next;}; # handle && operator
-	s/^\&//;		# hack for things that take the address of
+	s/^\&\&// && do { $new .= " &&"; next;}; # handle && operator
+	s/^\&([\(a-z\)]+)/$1/i;	# hack for things that take the address of
 	s/^(\s+)//		&& do {$new .= ' '; next;};
 	s/^(0X[0-9A-F]+)[UL]*//i	&& do {$new .= lc($1); next;};
 	s/^(-?\d+\.\d+E[-+]\d+)F?//i	&& do {$new .= $1; next;};
@@ -222,8 +266,7 @@ sub expr {
 	s/^'((\\"|[^"])*)'//	&& do {
 	    if ($curargs{$1}) {
 		$new .= "ord('\$$1')";
-	    }
-	    else {
+	    } else {
 		$new .= "ord('$1')";
 	    }
 	    next;
@@ -260,11 +303,22 @@ sub expr {
 	    }
 	    s/\([\w\s]+[\*\s]*\)// && next;      # then eliminate them.
 	};
-	# struct/union member:
-	s/^([_A-Z]\w*((\.|->)[_A-Z]\w*)+)//i && do {
+	# struct/union member, including arrays:
+	s/^([_A-Z]\w*(\[[^\]]+\])?((\.|->)[_A-Z]\w*(\[[^\]]+\])?)+)//i && do {
 	    $id = $1;
-	    $id =~ s/(\.|(->))([^\.-]*)/->\{$3\}/g;
-	    $new .= ' ($' . $id . ')';
+	    $id =~ s/(\.|(->))([^\.\-]*)/->\{$3\}/g;
+	    $id =~ s/\b([^\$])($joined_args)/$1\$$2/g if length($joined_args);
+	    while($id =~ /\[\s*([^\$\&\d\]]+)\]/) {
+		my($index) = $1;
+		$index =~ s/\s//g;
+		if(exists($curargs{$index})) {
+		    $index = "\$$index";
+		} else {
+		    $index = "&$index";
+		}
+		$id =~ s/\[\s*([^\$\&\d\]]+)\]/[$index]/;
+	    }
+	    $new .= " (\$$id)";
 	};
 	s/^([_a-zA-Z]\w*)//	&& do {
 	    $id = $1;
@@ -272,41 +326,33 @@ sub expr {
 		s/^\s+(\w+)//;
 		$id .= ' ' . $1;
 		$isatype{$id} = 1;
-	    }
-	    elsif ($id =~ /^((un)?signed)|(long)|(short)$/) {
+	    } elsif ($id =~ /^((un)?signed)|(long)|(short)$/) {
 		while (s/^\s+(\w+)//) { $id .= ' ' . $1; }
 		$isatype{$id} = 1;
 	    }
 	    if ($curargs{$id}) {
-		$new .= '$' . $id;
-	    }
-	    elsif ($id eq 'defined') {
+		$new .= "\$$id";
+		$new .= '->' if /^[\[\{]/;
+	    } elsif ($id eq 'defined') {
 		$new .= 'defined';
-	    }
-	    elsif (/^\(/) {
+	    } elsif (/^\(/) {
 		s/^\((\w),/("$1",/ if $id =~ /^_IO[WR]*$/i;	# cheat
 		$new .= " &$id";
-	    }
-	    elsif ($isatype{$id}) {
+	    } elsif ($isatype{$id}) {
 		if ($new =~ /{\s*$/) {
 		    $new .= "'$id'";
-		}
-		elsif ($new =~ /\(\s*$/ && /^[\s*]*\)/) {
+		} elsif ($new =~ /\(\s*$/ && /^[\s*]*\)/) {
 		    $new =~ s/\(\s*$//;
 		    s/^[\s*]*\)//;
-		}
-		else {
+		} else {
 		    $new .= q(').$id.q(');
 		}
-	    }
-	    else {
+	    } else {
 		if ($inif && $new !~ /defined\s*\($/) {
 		    $new .= '(defined(&' . $id . ') ? &' . $id . ' : 0)';
-		}
-		elsif (/^\[/) {
-		    $new .= ' $' . $id;
-		}
-		else {
+		} elsif (/^\[/) {
+		    $new .= " \$$id";
+		} else {
 		    $new .= ' &' . $id;
 		}
 	    }
@@ -334,7 +380,7 @@ sub next_file
             } else {
                 print STDERR "Skipping directory `$file'\n";
             }
-        } else {
+	} else {
             print STDERR "Skipping `$file':  not a file or directory\n";
         }
     }
@@ -356,8 +402,11 @@ sub expand_glob
 
             # expand_glob() is going to be called until $ARGV[0] isn't a
             # directory; so push directories, and unshift everything else.
-            if (-d "$directory/$_") { push    @ARGV, "$directory/$_" }
-            else                    { unshift @ARGV, "$directory/$_" }
+            if (-d "$directory/$_") {
+		push    @ARGV, "$directory/$_";
+	    } else {
+		unshift @ARGV, "$directory/$_";
+	    }
         }
     closedir DIR;
 }
@@ -382,7 +431,6 @@ sub link_if_possible
             unlink "$Dest_dir/$dirlink" or
                 print STDERR "Could not remove link $Dest_dir/$dirlink:  $!\n";
         }
-
         if (eval 'symlink($target, "$Dest_dir/$dirlink")') {
             print "Linking $target -> $Dest_dir/$dirlink\n";
 

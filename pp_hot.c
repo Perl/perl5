@@ -251,6 +251,7 @@ PP(pp_aelemfast)
     djSP;
     AV *av = GvAV((GV*)cSVOP->op_sv);
     SV** svp = av_fetch(av, op->op_private, op->op_flags & OPf_MOD);
+    EXTEND(SP, 1);
     PUSHs(svp ? *svp : &sv_undef);
     RETURN;
 }
@@ -791,7 +792,7 @@ PP(pp_match)
 	DIE("panic: do_match");
     TAINT_NOT;
 
-    if (pm->op_pmflags & PMf_USED) {
+    if (pm->op_pmdynflags & PMdf_USED) {
       failure:
 	if (gimme == G_ARRAY)
 	    RETURN;
@@ -887,7 +888,7 @@ play_it_again:
     {
 	curpm = pm;
 	if (pm->op_pmflags & PMf_ONCE)
-	    pm->op_pmflags |= PMf_USED;
+	    pm->op_pmdynflags |= PMdf_USED;
 	goto gotcha;
     }
     else
@@ -952,7 +953,7 @@ yup:					/* Confirmed by check_substr */
     ++BmUSEFUL(rx->check_substr);
     curpm = pm;
     if (pm->op_pmflags & PMf_ONCE)
-	pm->op_pmflags |= PMf_USED;
+	pm->op_pmdynflags |= PMdf_USED;
     Safefree(rx->subbase);
     rx->subbase = Nullch;
     if (global) {
@@ -1476,6 +1477,7 @@ PP(pp_subst)
     s = SvPV(TARG, len);
     if (!SvPOKp(TARG) || SvTYPE(TARG) == SVt_PVGV)
 	force_on_match = 1;
+    rxtainted = tainted << 1;
     TAINT_NOT;
 
   force_it:
@@ -1562,7 +1564,7 @@ PP(pp_subst)
 	curpm = pm;
 	SvSCREAM_off(TARG);	/* disable possible screamer */
 	if (once) {
-	    rxtainted = RX_MATCH_TAINTED(rx);
+	    rxtainted |= RX_MATCH_TAINTED(rx);
 	    if (rx->subbase) {
 		m = orig + (rx->startp[0] - rx->subbase);
 		d = orig + (rx->endp[0] - rx->subbase);
@@ -1603,12 +1605,11 @@ PP(pp_subst)
 	    else {
 		sv_chop(TARG, d);
 	    }
-	    TAINT_IF(rxtainted);
+	    TAINT_IF(rxtainted & 1);
 	    SPAGAIN;
 	    PUSHs(&sv_yes);
 	}
 	else {
-	    rxtainted = 0;
 	    do {
 		if (iters++ > maxiters)
 		    DIE("Substitution loop");
@@ -1632,11 +1633,12 @@ PP(pp_subst)
 		SvCUR_set(TARG, d - SvPVX(TARG) + i);
 		Move(s, d, i+1, char);		/* include the NUL */
 	    }
-	    TAINT_IF(rxtainted);
+	    TAINT_IF(rxtainted & 1);
 	    SPAGAIN;
 	    PUSHs(sv_2mortal(newSViv((I32)iters)));
 	}
 	(void)SvPOK_only(TARG);
+	TAINT_IF(rxtainted);
 	if (SvSMAGICAL(TARG)) {
 	    PUTBACK;
 	    mg_set(TARG);
@@ -1653,7 +1655,7 @@ PP(pp_subst)
 	    s = SvPV_force(TARG, len);
 	    goto force_it;
 	}
-	rxtainted = RX_MATCH_TAINTED(rx);
+	rxtainted |= RX_MATCH_TAINTED(rx);
 	dstr = NEWSV(25, len);
 	sv_setpvn(dstr, m, s-m);
 	curpm = pm;
@@ -1684,8 +1686,6 @@ PP(pp_subst)
 	} while (regexec_flags(rx, s, strend, orig, s == m, Nullsv, NULL, safebase));
 	sv_catpvn(dstr, s, strend - s);
 
-	TAINT_IF(rxtainted);
-
 	(void)SvOOK_off(TARG);
 	Safefree(SvPVX(TARG));
 	SvPVX(TARG) = SvPVX(dstr);
@@ -1694,11 +1694,14 @@ PP(pp_subst)
 	SvPVX(dstr) = 0;
 	sv_free(dstr);
 
+	TAINT_IF(rxtainted & 1);
+	PUSHs(sv_2mortal(newSViv((I32)iters)));
+
 	(void)SvPOK_only(TARG);
+	TAINT_IF(rxtainted);
 	SvSETMAGIC(TARG);
 	SvTAINT(TARG);
 	SPAGAIN;
-	PUSHs(sv_2mortal(newSViv((I32)iters)));
 	LEAVE_SCOPE(oldsave);
 	RETURN;
     }

@@ -670,7 +670,7 @@ but there is no function to autoload.  Most probable causes are a misprint
 in a function/method name or a failure to C<AutoSplit> the file, say, by
 doing C<make install>.
 
-=item Can't locate %s in @INC
+=item Can't locate file '%s' in @INC
 
 (F) You said to do (or require, or use) a file that couldn't be found
 in any of the libraries mentioned in @INC.  Perhaps you need to set the
@@ -1094,6 +1094,13 @@ a goto, or a loop control statement.
 (W) You are exiting a substitution by unconventional means, such as
 a return, a goto, or a loop control statement.
 
+=item Explicit blessing to '' (assuming package main)
+
+(W) You are blessing a reference to a zero length string.  This has
+the effect of blessing the reference into the package main.  This is
+usually not what you want.  Consider providing a default target
+package, e.g. bless($ref, $p or 'MyPackage');
+
 =item Fatal VMS error at %s, line %d
 
 (P) An error peculiar to VMS.  Something untoward happened in a VMS system
@@ -1271,6 +1278,12 @@ don't take to this kindly.
 
 (W) You may have tried to use an 8 or 9 in a octal number.  Interpretation
 of the octal number stopped before the 8 or 9.
+
+=item Illegal hex digit ignored
+
+(W) You may have tried to use a character other than 0 - 9 or A - F in a
+hexadecimal number.  Interpretation of the hexadecimal number stopped
+before the illegal character.
 
 =item Illegal switch in PERL5OPT: %s
 
@@ -1919,7 +1932,7 @@ was string.
 
 (P) The lexer got into a bad state while processing a case modifier.
 
-=item Pareneses missing around "%s" list
+=item Parentheses missing around "%s" list
 
 (W) You said something like
 
@@ -1957,8 +1970,7 @@ the BSD version, which takes a pid.
 (W) qw() lists contain items separated by whitespace; as with literal
 strings, comment characters are not ignored, but are instead treated
 as literal data.  (You may have used different delimiters than the
-exclamation marks parentheses shown here; braces are also frequently
-used.)
+parentheses shown here; braces are also frequently used.)
 
 You probably wrote something like this:
 
@@ -2062,6 +2074,18 @@ which is why it's currently left out of your copy.
 
 (F) More than 100 levels of inheritance were used.  Probably indicates
 an unintended loop in your inheritance hierarchy.
+
+=item Reference found where even-sized list expected
+
+(W) You gave a single reference where Perl was expecting a list with
+an even number of elements (for assignment to a hash). This
+usually means that you used the anon hash constructor when you meant 
+to use parens. In any case, a hash requires key/value B<pairs>.
+
+    %hash = { one => 1, two => 2, };	# WRONG
+    %hash = [ qw/ an anon array / ];	# WRONG
+    %hash = ( one => 1, two => 2, );	# right
+    %hash = qw( one 1 two 2 );			# also fine
 
 =item Reference found where even-sized list expected
 
@@ -2183,6 +2207,7 @@ or possibly some other missing operator, such as a comma.
 Check your logic flow.
 
 =item Sequence (? incomplete
+
 (F) A regular expression ended with an incomplete extension (?.
 See L<perlre>.
 
@@ -2641,7 +2666,7 @@ the name you call Perl by to C<perl_>, C<perl__>, and so on.
 
 =item Unsupported function %s
 
-(F) This machines doesn't implement the indicated function, apparently.
+(F) This machine doesn't implement the indicated function, apparently.
 At least, Configure doesn't think so.
 
 =item Unsupported socket function "%s" called
@@ -2701,7 +2726,7 @@ a split() explicitly to an array (or list).
 (D) As an (ahem) accidental feature, C<AUTOLOAD> subroutines are looked
 up as methods (using the C<@ISA> hierarchy) even when the subroutines to
 be autoloaded were called as plain functions (e.g. C<Foo::bar()>), not
-as methods (e.g. C<Foo->bar()> or C<$obj->bar()>).
+as methods (e.g. C<Foo-E<gt>bar()> or C<$obj-E<gt>bar()>).
 
 This bug will be rectified in Perl 5.005, which will use method lookup
 only for methods' C<AUTOLOAD>s.  However, there is a significant base
@@ -2716,7 +2741,7 @@ C<BaseClass>, execute C<*AUTOLOAD = \&BaseClass::AUTOLOAD> during startup.
 
 In code that currently says C<use AutoLoader; @ISA = qw(AutoLoader);> you
 should remove AutoLoader from @ISA and change C<use AutoLoader;> to
-C<C<use AutoLoader 'AUTOLOAD';>.
+C<use AutoLoader 'AUTOLOAD';>.
 
 =item Use of %s is deprecated
 

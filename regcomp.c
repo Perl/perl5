@@ -1135,8 +1135,11 @@ reg(I32 paren, I32 *flagp)
                 break;
 	    default:
 		--regparse;
-		while (*regparse && strchr("iogcmsx", *regparse))
-		    pmflag(&regflags, *regparse++);
+		while (*regparse && strchr("iogcmsx", *regparse)) {
+		    if (*regparse != 'o')
+			pmflag(&regflags, *regparse);
+		    ++regparse;
+		}
 	      unknown:
 		if (*regparse != ')')
 		    FAIL2("Sequence (?%c...) not recognized", *regparse);

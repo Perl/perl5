@@ -63,7 +63,7 @@ it prints out the description for just that command.  The special
 argument of C<h h> produces a more compact help listing, designed to fit
 together on one screen.
 
-If the output the C<h> command (or any command, for that matter) scrolls
+If the output of the C<h> command (or any command, for that matter) scrolls
 past your screen, either precede the command with a leading pipe symbol so
 it's run through your pager, as in
 
@@ -281,7 +281,7 @@ The sequence of steps taken by the debugger is
   4. prompt user if at a breakpoint or in single-step
   5. evaluate line
 
-For example, this will print out C<$foo> every time line
+For example, this will print out $foo every time line
 53 is passed:
 
     a 53 print "DB FOUND $foo\n"
@@ -289,6 +289,14 @@ For example, this will print out C<$foo> every time line
 =item A
 
 Delete all installed actions.
+
+=item W [expr]
+
+Add a global watch-expression.
+
+=item W
+
+Delete all watch-expressions.
 
 =item W [expr]
 
@@ -667,8 +675,8 @@ C<main::pests> was called in a scalar context, also from I<camel_flea>,
 but from line 4.
 
 Note that if you execute C<T> command from inside an active C<use>
-statement, the backtrace will contain both C<L<perlfunc/require>>
-frame and an C<L<perlfunc/eval EXPR>>) frame.
+statement, the backtrace will contain both C<require>
+frame and an C<eval>) frame.
 
 =item Listing
 
@@ -868,7 +876,7 @@ compile subname> for the same purpose.
 
 =head2 Debugger Customization
 
-Most probably you not want to modify the debugger, it contains enough
+Most probably you do not want to modify the debugger, it contains enough
 hooks to satisfy most needs.  You may change the behaviour of debugger
 from the debugger itself, using C<O>ptions, from the command line via
 C<PERLDB_OPTS> environment variable, and from I<customization files>.
@@ -966,14 +974,14 @@ application.
 
 =item *
 
-The array C<@{"_<$filename"}> is the line-by-line contents of
+The array C<@{"_E<lt>$filename"}> is the line-by-line contents of
 $filename for all the compiled files.  Same for C<eval>ed strings which
 contain subroutines, or which are currently executed.  The C<$filename>
 for C<eval>ed strings looks like C<(eval 34)>.
 
 =item *
 
-The hash C<%{"_<$filename"}> contains breakpoints and action (it is
+The hash C<%{"_E<lt>$filename"}> contains breakpoints and action (it is
 keyed by line number), and individual entries are settable (as opposed
 to the whole hash).  Only true/false is important to Perl, though the
 values used by F<perl5db.pl> have the form
@@ -981,22 +989,22 @@ C<"$break_condition\0$action">.  Values are magical in numeric context:
 they are zeros if the line is not breakable.
 
 Same for evaluated strings which contain subroutines, or which are
-currently executed.  The C<$filename> for C<eval>ed strings looks like
+currently executed.  The $filename for C<eval>ed strings looks like
 C<(eval 34)>.
 
 =item *
 
-The scalar C<${"_<$filename"}> contains C<"_<$filename">.  Same for
+The scalar C<${"_E<lt>$filename"}> contains C<"_E<lt>$filename">.  Same for
 evaluated strings which contain subroutines, or which are currently
-executed.  The C<$filename> for C<eval>ed strings looks like C<(eval
+executed.  The $filename for C<eval>ed strings looks like C<(eval
 34)>.
 
 =item *
 
 After each C<require>d file is compiled, but before it is executed,
-C<DB::postponed(*{"_<$filename"})> is called (if subroutine
+C<DB::postponed(*{"_E<lt>$filename"})> is called (if subroutine
 C<DB::postponed> exists).  Here the $filename is the expanded name of
-the C<require>d file (as found in values of C<%INC>).
+the C<require>d file (as found in values of %INC).
 
 =item *
 

@@ -39,7 +39,9 @@ print "1..$max\n";
 foreach my $test (1 .. $max) {
     my($bang, $query) = @{$tests{$test}};
     my $exit =
-	system qq($perl -e '\$! = $bang; \$? = $query; die;' 2> /dev/null);
+	($^O eq 'MSWin32'
+	 ? system qq($perl -e "\$! = $bang; \$? = $query; die;" 2> nul)
+	 : system qq($perl -e '\$! = $bang; \$? = $query; die;' 2> /dev/null));
 
     printf "# 0x%04x  0x%04x  0x%04x\nnot ", $exit, $bang, $query
 	unless $exit == (($bang || ($query >> 8) || 255) << 8);

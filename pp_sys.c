@@ -464,7 +464,7 @@ PP(pp_umask)
     TAINT_PROPER("umask");
     XPUSHi(anum);
 #else
-    DIE(no_func, "Unsupported function umask");
+    XPUSHs(&sv_undef)
 #endif
     RETURN;
 }

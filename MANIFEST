@@ -18,6 +18,7 @@ Porting/Glossary	Glossary of config.sh variables
 Porting/config.sh	Sample config.sh
 Porting/config_H	Sample config.h
 Porting/makerel		Release making utility
+Porting/patching.pod	How to report changes made to Perl
 Porting/patchls		Flexible patch file listing utility
 Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
 README			The Instructions
@@ -825,6 +826,7 @@ t/op/chop.t		See if chop works
 t/op/closure.t		See if closures work
 t/op/cmp.t		See if the various string and numeric compare work
 t/op/cond.t		See if conditional expressions work
+t/op/defins.t		See if auto-insert of defined() works
 t/op/delete.t		See if delete works
 t/op/die_exit.t		See if die and exit status interaction works
 t/op/do.t		See if subroutines work

@@ -710,6 +710,15 @@ Free_t   Perl_free _((Malloc_t where));
 #  endif
 #endif
 
+/* XXX Experimental set-up for long long.  Just add -DUSE_LONG_LONG
+   to your ccflags.  --Andy Dougherty   4/1998
+*/
+#ifdef USE_LONG_LONG
+#  if defined(HAS_LONG_LONG) && LONGLONGSIZE == 8
+#    define Quad_t long long
+#  endif
+#endif
+
 #ifdef Quad_t
 #   define HAS_QUAD
     typedef Quad_t IV;
@@ -1809,13 +1818,15 @@ EXT MGVTBL vtbl_glob =	{magic_getglob,
 					0,	0,	0};
 EXT MGVTBL vtbl_mglob =	{0,	magic_setmglob,
 					0,	0,	0};
-EXT MGVTBL vtbl_nkeys =	{0,	magic_setnkeys,
+EXT MGVTBL vtbl_nkeys =	{magic_getnkeys,
+				magic_setnkeys,
 					0,	0,	0};
 EXT MGVTBL vtbl_taint =	{magic_gettaint,magic_settaint,
 					0,	0,	0};
-EXT MGVTBL vtbl_substr =	{0,	magic_setsubstr,
+EXT MGVTBL vtbl_substr =	{magic_getsubstr, magic_setsubstr,
 					0,	0,	0};
-EXT MGVTBL vtbl_vec =	{0,	magic_setvec,
+EXT MGVTBL vtbl_vec =	{magic_getvec,
+				magic_setvec,
 					0,	0,	0};
 EXT MGVTBL vtbl_pos =	{magic_getpos,
 				magic_setpos,

@@ -494,7 +494,7 @@ setting, characters like 'E<aelig>', 'E<eth>', 'E<szlig>', and
 The C<LC_CTYPE> locale also provides the map used in transliterating
 characters between lower and uppercase.  This affects the case-mapping
 functions - lc(), lcfirst, uc() and ucfirst(); case-mapping
-interpolation with C<\l>, C<\L>, C<\u> or <\U> in double-quoted strings
+interpolation with C<\l>, C<\L>, C<\u> or C<\U> in double-quoted strings
 and in C<s///> substitutions; and case-independent regular expression
 pattern matching using the C<i> modifier.
 
@@ -652,7 +652,7 @@ the locale:
 
 Scalar true/false (or less/equal/greater) result is never tainted.
 
-=item B<Case-mapping interpolation> (with C<\l>, C<\L>, C<\u> or <\U>)
+=item B<Case-mapping interpolation> (with C<\l>, C<\L>, C<\u> or C<\U>)
 
 Result string containing interpolated material is tainted if
 C<use locale> is in effect.
@@ -676,7 +676,7 @@ Has the same behavior as the match operator.  Also, the left
 operand of C<=~> becomes tainted when C<use locale> in effect,
 if it is modified as a result of a substitution based on a regular
 expression match involving C<\w>, C<\W>, C<\s>, or C<\S>; or of
-case-mapping with C<\l>, C<\L>,C<\u> or <\U>.
+case-mapping with C<\l>, C<\L>,C<\u> or C<\U>.
 
 =item B<In-memory formatting function> (sprintf()):
 
@@ -754,7 +754,7 @@ of a match involving C<\w> when C<use locale> is in effect.
 
 A string that can suppress Perl's warning about failed locale settings
 at startup.  Failure can occur if the locale support in the operating
-system is lacking (broken) is some way - or if you mistyped the name of
+system is lacking (broken) in some way - or if you mistyped the name of
 a locale when you set up your environment.  If this environment variable
 is absent, or has a value which does not evaluate to integer zero - that
 is "0" or "" - Perl will complain about locale setting failures.
@@ -906,11 +906,36 @@ operating system upgrade.
 
 =head1 SEE ALSO
 
-L<POSIX (3)/isalnum>, L<POSIX (3)/isalpha>, L<POSIX (3)/isdigit>,
-L<POSIX (3)/isgraph>, L<POSIX (3)/islower>, L<POSIX (3)/isprint>,
-L<POSIX (3)/ispunct>, L<POSIX (3)/isspace>, L<POSIX (3)/isupper>,
-L<POSIX (3)/isxdigit>, L<POSIX (3)/localeconv>, L<POSIX (3)/setlocale>,
-L<POSIX (3)/strcoll>, L<POSIX (3)/strftime>, L<POSIX (3)/strtod>,
+L<POSIX (3)/isalnum>
+
+L<POSIX (3)/isalpha>
+
+L<POSIX (3)/isdigit>
+
+L<POSIX (3)/isgraph>
+
+L<POSIX (3)/islower>
+
+L<POSIX (3)/isprint>,
+
+L<POSIX (3)/ispunct>
+
+L<POSIX (3)/isspace>
+
+L<POSIX (3)/isupper>,
+
+L<POSIX (3)/isxdigit>
+
+L<POSIX (3)/localeconv>
+
+L<POSIX (3)/setlocale>,
+
+L<POSIX (3)/strcoll>
+
+L<POSIX (3)/strftime>
+
+L<POSIX (3)/strtod>,
+
 L<POSIX (3)/strxfrm>
 
 =head1 HISTORY

@@ -159,7 +159,7 @@ Do not, however, be tempted to do this:
 
 Because like its flat incoming parameter list, the return list is also
 flat.  So all you have managed to do here is stored everything in @a and
-made @b an empty list.  See L</"Pass by Reference"> for alternatives.
+made @b an empty list.  See L<Pass by Reference> for alternatives.
 
 A subroutine may be called using the "&" prefix.  The "&" is optional
 in modern Perls, and so are the parentheses if the subroutine has been

@@ -160,23 +160,23 @@ sub fileparse {
   if ($fstype =~ /^VMS/i) {
     if ($fullname =~ m#/#) { $fstype = '' }  # We're doing Unix emulation
     else {
-      ($dirpath,$basename) = ($fullname =~ /^(.*[:>\]])?(.*)/);
+      ($dirpath,$basename) = ($fullname =~ /^(.*[:>\]])?(.*)/t);
       $dirpath ||= '';  # should always be defined
     }
   }
   if ($fstype =~ /^MS(DOS|Win32)/i) {
-    ($dirpath,$basename) = ($fullname =~ /^((?:.*[:\\\/])?)(.*)/);
+    ($dirpath,$basename) = ($fullname =~ /^((?:.*[:\\\/])?)(.*)/t);
     $dirpath .= '.\\' unless $dirpath =~ /[\\\/]$/;
   }
   elsif ($fstype =~ /^MacOS/i) {
-    ($dirpath,$basename) = ($fullname =~ /^(.*:)?(.*)/);
+    ($dirpath,$basename) = ($fullname =~ /^(.*:)?(.*)/t);
   }
   elsif ($fstype =~ /^AmigaOS/i) {
-    ($dirpath,$basename) = ($fullname =~ /(.*[:\/])?(.*)/);
+    ($dirpath,$basename) = ($fullname =~ /(.*[:\/])?(.*)/t);
     $dirpath = './' unless $dirpath;
   }
   elsif ($fstype !~ /^VMS/i) {  # default to Unix
-    ($dirpath,$basename) = ($fullname =~ m#^(.*/)?(.*)#);
+    ($dirpath,$basename) = ($fullname =~ m#^(.*/)?(.*)#t);
     if ($^O eq 'VMS' and $fullname =~ m:/[^/]+/000000/?:) {
       # dev:[000000] is top of VMS tree, similar to Unix '/'
       ($basename,$dirpath) = ('',$fullname);
@@ -188,7 +188,7 @@ sub fileparse {
     $tail = '';
     foreach $suffix (@suffices) {
       my $pat = ($igncase ? '(?i)' : '') . "($suffix)\$";
-      if ($basename =~ s/$pat//) {
+      if ($basename =~ s/$pat//t) {
         $taint .= substr($suffix,0,0);
         $tail = $1 . $tail;
       }
@@ -226,30 +226,30 @@ sub dirname {
     }
     if ($fstype =~ /MacOS/i) { return $dirname }
     elsif ($fstype =~ /MSDOS/i) { 
-        $dirname =~ s/([^:])[\\\/]*$/$1/;
+        $dirname =~ s/([^:])[\\\/]*$/$1/t;
         unless( length($basename) ) {
 	    ($basename,$dirname) = fileparse $dirname;
-	    $dirname =~ s/([^:])[\\\/]*$/$1/;
+	    $dirname =~ s/([^:])[\\\/]*$/$1/t;
 	}
     }
     elsif ($fstype =~ /MSWin32/i) { 
-        $dirname =~ s/([^:])[\\\/]*$/$1/;
+        $dirname =~ s/([^:])[\\\/]*$/$1/t;
         unless( length($basename) ) {
 	    ($basename,$dirname) = fileparse $dirname;
-	    $dirname =~ s/([^:])[\\\/]*$/$1/;
+	    $dirname =~ s/([^:])[\\\/]*$/$1/t;
 	}
     }
     elsif ($fstype =~ /AmigaOS/i) {
         if ( $dirname =~ /:$/) { return $dirname }
         chop $dirname;
-        $dirname =~ s#[^:/]+$## unless length($basename);
+        $dirname =~ s#[^:/]+$##t unless length($basename);
     }
     else { 
         $dirname =~ s:(.)/*$:$1:;
         unless( length($basename) ) {
 	    local($File::Basename::Fileparse_fstype) = $fstype;
 	    ($basename,$dirname) = fileparse $dirname;
-	    $dirname =~ s:(.)/*$:$1:;
+	    $dirname =~ s:(.)/*$:$1:t;
 	}
     }
 

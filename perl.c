@@ -668,6 +668,7 @@ setuid perl scripts securely.\n");
 	s = argv[0]+1;
       reswitch:
 	switch (*s) {
+	case ' ':
 	case '0':
 	case 'F':
 	case 'a':
@@ -1165,6 +1166,8 @@ perl_call_method(char *methname, I32 flags)
     XPUSHs(sv_2mortal(newSVpv(methname,0)));
     PUTBACK;
     pp_method(ARGS);
+	if(op == &myop)
+		op = Nullop;
     return perl_call_sv(*stack_sp--, flags);
 }
 
@@ -1562,8 +1565,11 @@ moreswitches(char *s)
 	inplace = savepv(s+1);
 	/*SUPPRESS 530*/
 	for (s = inplace; *s && !isSPACE(*s); s++) ;
-	if (*s)
+	if (*s) {
 	    *s++ = '\0';
+	    if (*s == '-')	/* Additional switches on #! line. */
+	        s++;
+	}
 	return s;
     case 'I':	/* -I handled both here and in parse_perl() */
 	forbid_setid("-I");
@@ -1735,6 +1741,7 @@ Internet, point your browser at http://www.perl.com/, the Perl Home Page.\n\n");
 /* compliments of Tom Christiansen */
 
 /* unexec() can be found in the Gnu emacs distribution */
+/* Known to work with -DUNEXEC and using unexelf.c from GNU emacs-20.2 */
 
 void
 my_unexec(void)
@@ -1742,18 +1749,16 @@ my_unexec(void)
 #ifdef UNEXEC
     SV*    prog;
     SV*    file;
-    int    status;
+    int    status = 1;
     extern int etext;
 
-    prog = newSVpv(BIN_EXP);
+    prog = newSVpv(BIN_EXP, 0);
     sv_catpv(prog, "/perl");
-    file = newSVpv(origfilename);
+    file = newSVpv(origfilename, 0);
     sv_catpv(file, ".perldump");
 
-    status = unexec(SvPVX(file), SvPVX(prog), &etext, sbrk(0), 0);
-    if (status)
-	PerlIO_printf(PerlIO_stderr(), "unexec of %s into %s failed!\n",
-		      SvPVX(prog), SvPVX(file));
+    unexec(SvPVX(file), SvPVX(prog), &etext, sbrk(0), 0);
+    /* unexec prints msg to stderr in case of failure */
     PerlProc_exit(status);
 #else
 #  ifdef VMS

@@ -736,7 +736,7 @@ while (<>) {
 	# first hide the escapes in case we need to
 	# intuit something and get it wrong due to fmting
 
-	s/([A-Z]<[^<>]*>)/noremap($1)/ge;
+	1 while s/([A-Z]<[^<>]*>)/noremap($1)/ge;
 
 	# func() is a reference to a perl function
 	s{
@@ -1050,10 +1050,6 @@ sub mkindex {
     my ($entry) = @_;
     my @entries = split m:\s*/\s*:, $entry;
     push @Indices, ".IX Xref " . join ' ', map {qq("$_")} @entries;
-    for $entry (@entries) {
-	print qq("$entry" );
-    }
-    print "\n";
     return '';
 }
 

@@ -460,7 +460,8 @@ magic_get(SV *sv, MAGIC *mg)
 		    }
 		    sv_setpvn(sv,s,i);
 		    if (tainting)
-			tainted = was_tainted || RX_MATCH_TAINTED(rx);
+			tainted = (was_tainted || RX_MATCH_TAINTED(rx) ||
+				   (curpm->op_pmflags & PMf_TAINTMEM));
 		    break;
 		}
 	    }
@@ -945,11 +946,33 @@ magic_setamagic(SV *sv, MAGIC *mg)
 #endif /* OVERLOAD */
 
 int
+magic_getnkeys(SV *sv, MAGIC *mg)
+{
+    HV *hv = (HV*)LvTARG(sv);
+    HE *entry;
+    I32 i = 0;
+
+    if (hv) {
+	(void) hv_iterinit(hv);
+	if (!SvRMAGICAL(hv) || !mg_find((SV*)hv,'P'))
+	    i = HvKEYS(hv);
+	else {
+	    /*SUPPRESS 560*/
+	    while (entry = hv_iternext(hv)) {
+		i++;
+	    }
+	}
+    }
+
+    sv_setiv(sv, (IV)i);
+    return 0;
+}
+
+int
 magic_setnkeys(SV *sv, MAGIC *mg)
 {
     if (LvTARG(sv)) {
 	hv_ksplit((HV*)LvTARG(sv), SvIV(sv));
-	LvTARG(sv) = Nullsv;	/* Don't allow a ref to reassign this. */
     }
     return 0;
 }          
@@ -1218,6 +1241,23 @@ magic_setglob(SV *sv, MAGIC *mg)
 }
 
 int
+magic_getsubstr(SV *sv, MAGIC *mg)
+{
+    STRLEN len;
+    SV *lsv = LvTARG(sv);
+    char *tmps = SvPV(lsv,len);
+    I32 offs = LvTARGOFF(sv);
+    I32 rem = LvTARGLEN(sv);
+
+    if (offs > len)
+	offs = len;
+    if (rem + offs > len)
+	rem = len - offs;
+    sv_setpvn(sv, tmps + offs, (STRLEN)rem);
+    return 0;
+}
+
+int
 magic_setsubstr(SV *sv, MAGIC *mg)
 {
     STRLEN len;
@@ -1249,6 +1289,72 @@ magic_settaint(SV *sv, MAGIC *mg)
 	mg->mg_len |= 1;
     else
 	mg->mg_len &= ~1;
+    return 0;
+}
+
+int
+magic_getvec(SV *sv, MAGIC *mg)
+{
+    SV *lsv = LvTARG(sv);
+    unsigned char *s;
+    unsigned long retnum;
+    STRLEN lsvlen;
+    I32 len;
+    I32 offset;
+    I32 size;
+
+    if (!lsv) {
+	SvOK_off(sv);
+	return 0;
+    }
+    s = (unsigned char *) SvPV(lsv, lsvlen);
+    offset = LvTARGOFF(sv);
+    size = LvTARGLEN(sv);
+    len = (offset + size + 7) / 8;
+
+    /* Copied from pp_vec() */
+
+    if (len > lsvlen) {
+	if (size <= 8)
+	    retnum = 0;
+	else {
+	    offset >>= 3;
+	    if (size == 16) {
+		if (offset >= lsvlen)
+		    retnum = 0;
+		else
+		    retnum = (unsigned long) s[offset] << 8;
+	    }
+	    else if (size == 32) {
+		if (offset >= lsvlen)
+		    retnum = 0;
+		else if (offset + 1 >= lsvlen)
+		    retnum = (unsigned long) s[offset] << 24;
+		else if (offset + 2 >= lsvlen)
+		    retnum = ((unsigned long) s[offset] << 24) +
+			((unsigned long) s[offset + 1] << 16);
+		else
+		    retnum = ((unsigned long) s[offset] << 24) +
+			((unsigned long) s[offset + 1] << 16) +
+			(s[offset + 2] << 8);
+	    }
+	}
+    }
+    else if (size < 8)
+	retnum = (s[offset >> 3] >> (offset & 7)) & ((1 << size) - 1);
+    else {
+	offset >>= 3;
+	if (size == 8)
+	    retnum = s[offset];
+	else if (size == 16)
+	    retnum = ((unsigned long) s[offset] << 8) + s[offset+1];
+	else if (size == 32)
+	    retnum = ((unsigned long) s[offset] << 24) +
+		((unsigned long) s[offset + 1] << 16) +
+		(s[offset + 2] << 8) + s[offset+3];
+    }
+
+    sv_setuv(sv, (UV)retnum);
     return 0;
 }
 

@@ -462,6 +462,10 @@ $(ARCHDIR)config.pm : [.lib]config.pm
 	@ If F$Search("[.lib]auto.dir").eqs."" Then Create/Directory [.lib.auto]
 	@ $(MINIPERL) -e "use AutoSplit; autosplit_lib_modules(@ARGV)" [.lib]DynaLoader.pm
 
+[.ext.dynaloader]dynaloader.pm : [.ext.dynaloader]dynaloader.pm_pl
+	$(MINIPERL) $(MMS$SOURCE)
+	@ Rename/Log dynaloader.pm [.ext.dynaloader]
+
 Opcode : [.lib]Opcode.pm [.lib]ops.pm [.lib]Safe.pm [.lib.auto.Opcode]Opcode$(E)
 	@ $(NOOP)
 

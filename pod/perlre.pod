@@ -34,6 +34,13 @@ line anywhere within the string,
 Treat string as single line.  That is, change "." to match any character
 whatsoever, even a newline, which it normally would not match.
 
+The /s and /m modifiers both override the C<$*> setting.  That is, no matter
+what C<$*> contains, /s (without /m) will force "^" to match only at the
+beginning of the string and "$" to match only at the end (or just before a
+newline at the end) of the string.  Together, as /ms, they let the "." match
+any character whatsoever, while yet allowing "^" and "$" to match,
+respectively, just after and just before newlines within the string.
+
 =item x
 
 Extend your pattern's legibility by permitting whitespace and comments.
@@ -139,7 +146,7 @@ also work:
     \Q		quote (disable) regexp metacharacters till \E
 
 If C<use locale> is in effect, the case map used by C<\l>, C<\L>, C<\u>
-and <\U> is taken from the current locale.  See L<perllocale>.
+and C<\U> is taken from the current locale.  See L<perllocale>.
 
 In addition, Perl defines the following:
 
@@ -238,7 +245,7 @@ non-alphanumeric characters:
     $pattern =~ s/(\W)/\\$1/g;
 
 Now it is much more common to see either the quotemeta() function or
-the \Q escape sequence used to disable the metacharacters special
+the C<\Q> escape sequence used to disable all metacharacters' special
 meanings like this:
 
     /$unquoted\Q$quoted\E$unquoted/
@@ -278,14 +285,15 @@ matches a word followed by a tab, without including the tab in C<$&>.
 A zero-width negative lookahead assertion.  For example C</foo(?!bar)/>
 matches any occurrence of "foo" that isn't followed by "bar".  Note
 however that lookahead and lookbehind are NOT the same thing.  You cannot
-use this for lookbehind.  If you are looking for a "bar" which isn't preceeded
-"foo", C</(?!foo)bar/> will not do what you want.  That's because
-the C<(?!foo)> is just saying that the next thing cannot be "foo"--and
-it's not, it's a "bar", so "foobar" will match.  You would have to do
-something like C</(?!foo)...bar/> for that.   We say "like" because there's
-the case of your "bar" not having three characters before it.  You could
-cover that this way: C</(?:(?!foo)...|^.{0,2})bar/>.  Sometimes it's still
-easier just to say:
+use this for lookbehind.
+
+If you are looking for a "bar" which isn't preceded by a "foo", C</(?!foo)bar/>
+will not do what you want.  That's because the C<(?!foo)> is just saying that
+the next thing cannot be "foo"--and it's not, it's a "bar", so "foobar" will
+match.  You would have to do something like C</(?!foo)...bar/> for that.   We
+say "like" because there's the case of your "bar" not having three characters
+before it.  You could cover that this way: C</(?:(?!foo)...|^.{0,2})bar/>.
+Sometimes it's still easier just to say:
 
     if (/bar/ && $` !~ /foo$/)
 
@@ -387,7 +395,7 @@ Say,
 matches a chunk of non-parentheses, possibly included in parentheses
 themselves.
 
-=item C<(?imsx)>
+=item C<(?imstx)>
 
 One or more embedded pattern-match modifiers.  This is particularly
 useful for patterns that are specified in a table somewhere, some of

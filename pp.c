@@ -322,7 +322,11 @@ PP(pp_pos)
 	}
 
 	LvTYPE(TARG) = '.';
-	LvTARG(TARG) = sv;
+	if (LvTARG(TARG) != sv) {
+	    if (LvTARG(TARG))
+		SvREFCNT_dec(LvTARG(TARG));
+	    LvTARG(TARG) = SvREFCNT_inc(sv);
+	}
 	PUSHs(TARG);	/* no SvSETMAGIC */
 	RETURN;
     }
@@ -507,8 +511,14 @@ PP(pp_bless)
 
     if (MAXARG == 1)
 	stash = curcop->cop_stash;
-    else
-	stash = gv_stashsv(POPs, TRUE);
+    else {
+	SV *ssv = POPs;
+	STRLEN len;
+	char *ptr = SvPV(ssv,len);
+	if (dowarn && len == 0)
+	    warn("Explicit blessing to '' (assuming package main)");
+	stash = gv_stashpvn(ptr, len, TRUE);
+    }
 
     (void)sv_bless(TOPs, stash);
     RETURN;
@@ -1783,6 +1793,7 @@ PP(pp_substr)
     djSP; dTARGET;
     SV *sv;
     I32 len;
+    I32 len_ok = 0;
     STRLEN curlen;
     I32 pos;
     I32 rem;
@@ -1790,10 +1801,25 @@ PP(pp_substr)
     I32 lvalue = op->op_flags & OPf_MOD;
     char *tmps;
     I32 arybase = curcop->cop_arybase;
+    char *repl = 0;
+    STRLEN repl_len;
 
     SvTAINTED_off(TARG);			/* decontaminate */
-    if (MAXARG > 2)
+    if (MAXARG > 3) {
+	/* pop off replacement string */
+	sv = POPs;
+	repl = SvPV(sv, repl_len);
+	/* pop off length */
+	sv = POPs;
+	if (SvOK(sv)) {
+	    len = SvIV(sv);
+	    len_ok++;
+	}
+    } else if (MAXARG == 3) {
 	len = POPi;
+	len_ok++;
+    }  
+
     pos = POPi;
     sv = POPs;
     PUTBACK;
@@ -1802,7 +1828,7 @@ PP(pp_substr)
 	pos -= arybase;
 	rem = curlen-pos;
 	fail = rem;
-        if (MAXARG > 2) {
+        if (len_ok) {
             if (len < 0) {
 	        rem += len;
                 if (rem < 0)
@@ -1814,7 +1840,7 @@ PP(pp_substr)
     }
     else {
         pos += curlen;
-        if (MAXARG < 3)
+        if (!len_ok)
             rem = curlen;
         else if (len >= 0) {
             rem = pos+len;
@@ -1832,7 +1858,7 @@ PP(pp_substr)
         rem -= pos;
     }
     if (fail < 0) {
-	if (dowarn || lvalue)
+	if (dowarn || lvalue || repl)
 	    warn("substr outside of string");
 	RETPUSHUNDEF;
     }
@@ -1858,10 +1884,16 @@ PP(pp_substr)
 	    }
 
 	    LvTYPE(TARG) = 'x';
-	    LvTARG(TARG) = sv;
+	    if (LvTARG(TARG) != sv) {
+		if (LvTARG(TARG))
+		    SvREFCNT_dec(LvTARG(TARG));
+		LvTARG(TARG) = SvREFCNT_inc(sv);
+	    }
 	    LvTARGOFF(TARG) = pos;
 	    LvTARGLEN(TARG) = rem;
 	}
+        else if (repl)
+	    sv_insert(sv, pos, rem, repl, repl_len);
     }
     SPAGAIN;
     PUSHs(TARG);		/* avoid SvSETMAGIC here */
@@ -1893,7 +1925,11 @@ PP(pp_vec)
 	    }
 
 	    LvTYPE(TARG) = 'v';
-	    LvTARG(TARG) = src;
+	    if (LvTARG(TARG) != src) {
+		if (LvTARG(TARG))
+		    SvREFCNT_dec(LvTARG(TARG));
+		LvTARG(TARG) = SvREFCNT_inc(src);
+	    }
 	    LvTARGOFF(TARG) = offset;
 	    LvTARGLEN(TARG) = size;
 	}

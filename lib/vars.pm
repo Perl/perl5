@@ -61,6 +61,6 @@ outside of the package), it can act as an acceptable substitute by
 pre-declaring global symbols, ensuring their availability to the
 later-loaded routines.
 
-See L<perlmod/Pragmatic Modules>.
+See L<perlmodlib/Pragmatic Modules>.
 
 =cut

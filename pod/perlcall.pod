@@ -1918,7 +1918,7 @@ refers to the last.
 
 =head2 Creating and calling an anonymous subroutine in C
 
-As we've already shown, L<perl_call_sv> can be used to invoke an
+As we've already shown, C<perl_call_sv> can be used to invoke an
 anonymous subroutine.  However, our example showed how Perl script
 invoking an XSUB to preform this operation.  Let's see how it can be
 done inside our C code:
@@ -1931,8 +1931,9 @@ done inside our C code:
 
  perl_call_sv(cvrv, G_VOID|G_NOARGS);
 
-L<perlguts/perl_eval_pv> is used to compile the anonymous subroutine, which
-will be the return value as well.  Once this code reference is in hand, it
+C<perl_eval_pv> is used to compile the anonymous subroutine, which
+will be the return value as well (read more about C<perl_eval_pv> in
+L<perlguts/perl_eval_pv>).  Once this code reference is in hand, it
 can be mixed in with all the previous examples we've shown.
 
 =head1 SEE ALSO

@@ -186,6 +186,11 @@ C<$a>.  If C<$b> is negative, then C<$a % $b> is C<$a> minus the
 smallest multiple of C<$b> that is not less than C<$a> (i.e. the
 result will be less than or equal to zero).
 
+Note than when C<use integer> is in scope "%" give you direct access
+to the modulus operator as implemented by your C compiler.  This
+operator is not as well defined for negative operands, but it will
+execute faster.
+
 Binary "x" is the repetition operator.  In a scalar context, it
 returns a string consisting of the left operand repeated the number of
 times specified by the right operand.  In a list context, if the left
@@ -599,7 +604,7 @@ a transliteration, the first ten of these sequences may be used.
     \Q		quote regexp metacharacters till \E
 
 If C<use locale> is in effect, the case map used by C<\l>, C<\L>, C<\u>
-and <\U> is taken from the current locale.  See L<perllocale>.
+and C<\U> is taken from the current locale.  See L<perllocale>.
 
 Patterns are subject to an additional level of interpretation as a
 regular expression.  This is done as a second pass, after variables are
@@ -651,6 +656,7 @@ Options are:
     m	Treat string as multiple lines.
     o	Compile pattern only once.
     s	Treat string as single line.
+    t	Taint $1 etc. if target string is tainted.
     x	Use extended regular expressions.
 
 If "/" is the delimiter then the initial C<m> is optional.  With the C<m>
@@ -897,7 +903,7 @@ text is not evaluated as a command.  If the
 PATTERN is delimited by bracketing quotes, the REPLACEMENT has its own
 pair of quotes, which may or may not be bracketing quotes, e.g.,
 C<s(foo)(bar)> or C<sE<lt>fooE<gt>/bar/>.  A C</e> will cause the
-replacement portion to be interpreter as a full-fledged Perl expression
+replacement portion to be interpreted as a full-fledged Perl expression
 and eval()ed right then and there.  It is, however, syntax checked at
 compile-time.
 
@@ -1031,7 +1037,7 @@ an eval():
 =head2 I/O Operators
 
 There are several I/O operators you should know about.
-A string is enclosed by backticks (grave accents) first undergoes
+A string enclosed by backticks (grave accents) first undergoes
 variable substitution just like a double quoted string.  It is then
 interpreted as a command, and the output of that command is the value
 of the pseudo-literal, like in a shell.  In a scalar context, a single
@@ -1054,16 +1060,34 @@ Ordinarily you must assign that value to a variable, but there is one
 situation where an automatic assignment happens.  I<If and ONLY if> the
 input symbol is the only thing inside the conditional of a C<while> or
 C<for(;;)> loop, the value is automatically assigned to the variable
-C<$_>.  The assigned value is then tested to see if it is defined.
-(This may seem like an odd thing to you, but you'll use the construct
-in almost every Perl script you write.)  Anyway, the following lines
-are equivalent to each other:
+C<$_>.  In these loop constructs, the assigned value (whether assignment
+is automatic or explcit) is then tested to see if it is defined.
+The defined test avoids problems where line has a string value
+that would be treated as false by perl e.g. "" or "0" with no trailing
+newline. (This may seem like an odd thing to you, but you'll use the 
+construct in almost every Perl script you write.) Anyway, the following 
+lines are equivalent to each other:
 
     while (defined($_ = <STDIN>)) { print; }
+    while ($_ = <STDIN>) { print; }
     while (<STDIN>) { print; }
     for (;<STDIN>;) { print; }
     print while defined($_ = <STDIN>);
+    print while ($_ = <STDIN>);
     print while <STDIN>;
+
+and this also behaves similarly, but avoids the use of $_ :
+
+    while (my $line = <STDIN>) { print $line }    
+
+If you really mean such values to terminate the loop they should be 
+tested for explcitly:
+
+    while (($_ = <STDIN>) ne '0') { ... }
+    while (<STDIN>) { last unless $_; ... }
+
+In other boolean contexts C<E<lt>I<filehandle>E<gt>> without explcit C<defined>
+test or comparison will solicit a warning if C<-w> is in effect.
 
 The filehandles STDIN, STDOUT, and STDERR are predefined.  (The
 filehandles C<stdin>, C<stdout>, and C<stderr> will also work except in
@@ -1124,9 +1148,9 @@ Getopts modules or put a loop on the front like this:
 	...		# code for each line
     }
 
-The E<lt>E<gt> symbol will return FALSE only once.  If you call it again after
-this it will assume you are processing another @ARGV list, and if you
-haven't set @ARGV, will input from STDIN.
+The E<lt>E<gt> symbol will return C<undef> for end-of-file only once.  
+If you call it again after this it will assume you are processing another 
+@ARGV list, and if you haven't set @ARGV, will input from STDIN.
 
 If the string inside the angle brackets is a reference to a scalar
 variable (e.g., E<lt>$fooE<gt>), then that variable contains the name of the
@@ -1174,9 +1198,12 @@ A glob evaluates its (embedded) argument only when it is starting a new
 list.  All values must be read before it will start over.  In a list
 context this isn't important, because you automatically get them all
 anyway.  In a scalar context, however, the operator returns the next value
-each time it is called, or a FALSE value if you've just run out.  Again,
-FALSE is returned only once.  So if you're expecting a single value from
-a glob, it is much better to say
+each time it is called, or a C<undef> value if you've just run out. As
+for filehandles an automatic C<defined> is generated when the glob
+occurs in the test part of a C<while> or C<for> - because legal glob returns
+(e.g. a file called F<0>) would otherwise terminate the loop.
+Again, C<undef> is returned only once.  So if you're expecting a single value 
+from a glob, it is much better to say
 
     ($file) = <blurch*>;
 

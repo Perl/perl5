@@ -315,7 +315,7 @@ be made through methods.
 Perl doesn't impose restrictions on who gets to use which methods.
 The public-versus-private distinction is by convention, not syntax.
 (Well, unless you use the Alias module described below in
-L</"Data Members as Variables">.)  Occasionally you'll see method names beginning or ending
+L<Data Members as Variables>.)  Occasionally you'll see method names beginning or ending
 with an underscore or two.  This marking is a convention indicating
 that the methods are private to that class alone and sometimes to its
 closest acquaintances, its immediate subclasses.  But this distinction

@@ -269,7 +269,7 @@ http://www.perl.com/CPAN/doc/misc/ancient/tutorial/eg/itimers.pl .
 In general, you may not be able to.  The Time::HiRes module (available
 from CPAN) provides this functionality for some systems.
 
-In general, you may not be able to.  But if you system supports both the
+In general, you may not be able to.  But if your system supports both the
 syscall() function in Perl as well as a system call like gettimeofday(2),
 then you may be able to do something like this:
 
@@ -758,8 +758,9 @@ If your version of perl is compiled without dynamic loading, then you
 just need to replace step 3 (B<make>) with B<make perl> and you will
 get a new F<perl> binary with your extension linked in.
 
-See L<ExtUtils::MakeMaker> for more details on building extensions,
-the question "How do I keep my own module/library directory?"
+See L<ExtUtils::MakeMaker> for more details on building extensions
+and an answer to the question "How do I keep my own module/library
+directory?"
 
 =head2 How do I keep my own module/library directory?
 
@@ -778,7 +779,7 @@ See Perl's L<lib> for more information.
 =head2 How do I add the directory my program lives in to the module/library search path?
 
     use FindBin;
-    use lib "$FindBin:Bin";
+    use lib "$FindBin::Bin";
     use your_own_modules;
 
 =head2 How do I add a directory to my include path at runtime?
