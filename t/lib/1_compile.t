@@ -141,7 +141,6 @@ CGI::Switch
 CGI::Util
 Carp::Heavy
 Devel::DProf
-Dumpvalue
 Exporter::Heavy
 ExtUtils::Constant
 ExtUtils::MakeMaker
@@ -196,5 +195,4 @@ UNIVERSAL
 attributes
 base
 bytes
-filetest
 ops
