@@ -95,6 +95,11 @@ Version 5.004_05        Maintenance release 5 for 5.004
       - Many other bugs fixed.
 
 
+Change 3296 by chip@perlsupport.com on 1999/04/29 19:01:36
+
+	Fix a few scripts' permissions.
+	Update MANIFEST and, yet again, Changes.
+
 Change 3295 by chip@perlsupport.com on 1999/04/29 18:53:45
 
 	Final release:  Update patchlevel.h and Changes.
