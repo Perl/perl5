@@ -780,13 +780,13 @@ Level 1 - Basic Unicode Support
              capital letters with certain modifiers: the Full case-folding
              decomposes the letter, while the Simple case-folding would map
              it to a single character.
-        [ 9] see UTR#13 Unicode Newline Guidelines
+        [ 9] see UTR #13 Unicode Newline Guidelines
         [10] should do ^ and $ also on \x{85}, \x{2028} and \x{2029}
              (should also affect <>, $., and script line numbers)
              (the \x{85}, \x{2028} and \x{2029} do match \s)
 
 [a] You can mimic class subtraction using lookahead.
-For example, what TR18 might write as
+For example, what UTR #18 might write as
 
     [{Greek}-[{UNASSIGNED}]]
 
@@ -800,6 +800,9 @@ But in this particular example, you probably really want
     \p{GreekAndCoptic}
 
 which will match assigned characters known to be part of the Greek script.
+
+Also see the Unicode::Regex::Set module, it does implement the full
+UTR #18 grouping, intersection, union, and removal (subtraction) syntax.
 
 [b] See L</"User-Defined Character Properties">.
 
