@@ -147,9 +147,6 @@ PP(pp_rv2gv)
     }
     else {
 	if (SvTYPE(sv) != SVt_PVGV) {
-	    char *sym;
-	    STRLEN len;
-
 	    if (SvGMAGICAL(sv)) {
 		mg_get(sv);
 		if (SvROK(sv))
@@ -195,22 +192,21 @@ PP(pp_rv2gv)
 		    report_uninit(sv);
 		RETSETUNDEF;
 	    }
-	    sym = SvPV(sv,len);
 	    if ((PL_op->op_flags & OPf_SPECIAL) &&
 		!(PL_op->op_flags & OPf_MOD))
 	    {
-		sv = (SV*)gv_fetchpv(sym, FALSE, SVt_PVGV);
-		if (!sv
-		    && (!is_gv_magical(sym,len,0)
-			|| !(sv = (SV*)gv_fetchpv(sym, TRUE, SVt_PVGV))))
-		{
+		SV * temp = (SV*)gv_fetchsv(sv, FALSE, SVt_PVGV);
+		if (!temp
+		    && (!is_gv_magical_sv(sv,0)
+			|| !(sv = (SV*)gv_fetchsv(sv, TRUE, SVt_PVGV)))) {
 		    RETSETUNDEF;
 		}
+		sv = temp;
 	    }
 	    else {
 		if (PL_op->op_private & HINT_STRICT_REFS)
-		    DIE(aTHX_ PL_no_symref, sym, "a symbol");
-		sv = (SV*)gv_fetchpv(sym, TRUE, SVt_PVGV);
+		    DIE(aTHX_ PL_no_symref_sv, sv, "a symbol");
+		sv = (SV*)gv_fetchsv(sv, TRUE, SVt_PVGV);
 	    }
 	}
     }
@@ -238,8 +234,6 @@ PP(pp_rv2sv)
 	}
     }
     else {
-	char *sym;
-	STRLEN len;
 	gv = (GV*)sv;
 
 	if (SvTYPE(gv) != SVt_PVGV) {
@@ -256,22 +250,21 @@ PP(pp_rv2sv)
 		    report_uninit(sv);
 		RETSETUNDEF;
 	    }
-	    sym = SvPV(sv, len);
 	    if ((PL_op->op_flags & OPf_SPECIAL) &&
 		!(PL_op->op_flags & OPf_MOD))
 	    {
-		gv = (GV*)gv_fetchpv(sym, FALSE, SVt_PV);
+		gv = (GV*)gv_fetchsv(sv, FALSE, SVt_PV);
 		if (!gv
-		    && (!is_gv_magical(sym,len,0)
-			|| !(gv = (GV*)gv_fetchpv(sym, TRUE, SVt_PV))))
+		    && (!is_gv_magical_sv(sv, 0)
+			|| !(gv = (GV*)gv_fetchsv(sv, TRUE, SVt_PV))))
 		{
 		    RETSETUNDEF;
 		}
 	    }
 	    else {
 		if (PL_op->op_private & HINT_STRICT_REFS)
-		    DIE(aTHX_ PL_no_symref, sym, "a SCALAR");
-		gv = (GV*)gv_fetchpv(sym, TRUE, SVt_PV);
+		    DIE(aTHX_ PL_no_symref_sv, sv, "a SCALAR");
+		gv = (GV*)gv_fetchsv(sv, TRUE, SVt_PV);
 	    }
 	}
 	sv = GvSV(gv);

@@ -188,6 +188,7 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SVp_SCREAM	0x08000000	/* has been studied? */
 
 #define SVf_UTF8        0x20000000      /* SvPV is UTF-8 encoded */
+/* Ensure this value does not clash with the GV_ADD* flags in gv.h */
 
 #define SVf_THINKFIRST	(SVf_READONLY|SVf_ROK|SVf_FAKE)
 
@@ -606,6 +607,8 @@ and leaves the UTF-8 status as it was.
 =cut
  */
 
+/* Ensure the return value of this macro does not clash with the GV_ADD* flags
+in gv.h: */
 #define SvUTF8(sv)		(SvFLAGS(sv) & SVf_UTF8)
 #define SvUTF8_on(sv)		(SvFLAGS(sv) |= (SVf_UTF8))
 #define SvUTF8_off(sv)		(SvFLAGS(sv) &= ~(SVf_UTF8))

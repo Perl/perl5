@@ -1337,7 +1337,7 @@ PP(pp_leavewrite)
 		if (!IoFMT_NAME(io))
 		    IoFMT_NAME(io) = savepv(GvNAME(gv));
 		topname = sv_2mortal(Perl_newSVpvf(aTHX_ "%s_TOP", GvNAME(gv)));
-		topgv = gv_fetchpv(SvPVX(topname), FALSE, SVt_PVFM);
+		topgv = gv_fetchsv(topname, FALSE, SVt_PVFM);
 		if ((topgv && GvFORM(topgv)) ||
 		  !gv_fetchpv("top",FALSE,SVt_PVFM))
 		    IoTOP_NAME(io) = savepv(SvPVX(topname));
@@ -2111,13 +2111,12 @@ PP(pp_truncate)
     SETERRNO(0,0);
 #if defined(HAS_TRUNCATE) || defined(HAS_CHSIZE) || defined(F_FREESP)
     {
-        STRLEN n_a;
 	int result = 1;
 	GV *tmpgv;
 	IO *io;
 
 	if (PL_op->op_flags & OPf_SPECIAL) {
-	    tmpgv = gv_fetchpv(POPpx, FALSE, SVt_PVIO);
+	    tmpgv = gv_fetchsv(POPs, FALSE, SVt_PVIO);
 
 	do_ftruncate_gv:
 	    if (!GvIO(tmpgv))
@@ -2144,7 +2143,8 @@ PP(pp_truncate)
 	else {
 	    SV *sv = POPs;
 	    char *name;
-	
+	    STRLEN n_a;
+
 	    if (SvTYPE(sv) == SVt_PVGV) {
 	        tmpgv = (GV*)sv;		/* *main::FRED for example */
 		goto do_ftruncate_gv;
@@ -3348,8 +3348,7 @@ PP(pp_fttty)
     dSP;
     int fd;
     GV *gv;
-    char *tmps = Nullch;
-    STRLEN n_a;
+    SV *tmpsv = Nullsv;
 
     STACKED_FTEST_CHECK;
 
@@ -3360,12 +3359,18 @@ PP(pp_fttty)
     else if (SvROK(TOPs) && isGV(SvRV(TOPs)))
 	gv = (GV*)SvRV(POPs);
     else
-	gv = gv_fetchpv(tmps = POPpx, FALSE, SVt_PVIO);
+	gv = gv_fetchsv(tmpsv = POPs, FALSE, SVt_PVIO);
 
     if (GvIO(gv) && IoIFP(GvIOp(gv)))
 	fd = PerlIO_fileno(IoIFP(GvIOp(gv)));
-    else if (tmps && isDIGIT(*tmps))
-	fd = atoi(tmps);
+    else if (tmpsv && SvOK(tmpsv)) {
+	STRLEN n_a;
+	char *tmps = SvPV(tmpsv, n_a);
+	if (isDIGIT(*tmps))
+	    fd = atoi(tmps);
+	else 
+	    RETPUSHUNDEF;
+    }
     else
 	RETPUSHUNDEF;
     if (PerlLIO_isatty(fd))

@@ -1486,4 +1486,8 @@ np	|long	|my_betohl	|long n
 
 np	|void	|my_swabn	|void* ptr|int n
 
+Ap	|GV*	|gv_fetchpvn_flags|const char* name|STRLEN len|I32 flags|I32 sv_type
+Ap	|GV*	|gv_fetchsv|SV *name|I32 flags|I32 sv_type
+dp	|bool	|is_gv_magical_sv|SV *name|U32 flags
+
 END_EXTERN_C

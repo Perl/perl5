@@ -7972,7 +7972,6 @@ Perl_sv_2io(pTHX_ SV *sv)
 {
     IO* io;
     GV* gv;
-    STRLEN n_a;
 
     switch (SvTYPE(sv)) {
     case SVt_PVIO:
@@ -7989,7 +7988,7 @@ Perl_sv_2io(pTHX_ SV *sv)
 	    Perl_croak(aTHX_ PL_no_usym, "filehandle");
 	if (SvROK(sv))
 	    return sv_2io(SvRV(sv));
-	gv = gv_fetchpv(SvPV(sv,n_a), FALSE, SVt_PVIO);
+	gv = gv_fetchsv(sv, FALSE, SVt_PVIO);
 	if (gv)
 	    io = GvIO(gv);
 	else
@@ -8015,7 +8014,6 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
 {
     GV *gv = Nullgv;
     CV *cv = Nullcv;
-    STRLEN n_a;
 
     if (!sv)
 	return *gvp = Nullgv, Nullcv;
@@ -8056,7 +8054,7 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
 	else if (isGV(sv))
 	    gv = (GV*)sv;
 	else
-	    gv = gv_fetchpv(SvPV(sv, n_a), lref, SVt_PVCV);
+	    gv = gv_fetchsv(sv, lref, SVt_PVCV);
 	*gvp = gv;
 	if (!gv)
 	    return Nullcv;

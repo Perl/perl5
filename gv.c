@@ -650,7 +650,21 @@ Perl_gv_stashsv(pTHX_ SV *sv, I32 create)
 
 
 GV *
-Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
+Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type) {
+    STRLEN len = strlen (nambeg);
+    return gv_fetchpvn_flags(nambeg, len, add, sv_type);
+}
+
+GV *
+Perl_gv_fetchsv(pTHX_ SV *name, I32 flags, I32 sv_type) {
+    STRLEN len;
+    const char *nambeg = SvPV(name, len);
+    return gv_fetchpvn_flags(nambeg, len, flags | SvUTF8(name), sv_type);
+}
+
+GV *
+Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
+		       I32 sv_type)
 {
     register const char *name = nambeg;
     register GV *gv = 0;
@@ -658,6 +672,8 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
     I32 len;
     register const char *namend;
     HV *stash = 0;
+    I32 add = flags & ~SVf_UTF8;
+    I32 utf8 = flags & SVf_UTF8;
 
     if (*name == '*' && isALPHA(name[1])) /* accidental stringify on a GV? */
 	name++;
@@ -1814,6 +1830,22 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
       return res;
     }
   }
+}
+
+/*
+=for apidoc is_gv_magical
+
+Returns C<TRUE> if given the name of a magical GV. Calls is_gv_magical.
+
+=cut
+*/
+
+bool
+Perl_is_gv_magical_sv(pTHX_ SV *name, U32 flags)
+{
+    STRLEN len;
+    char *temp = SvPV(name, len);
+    return is_gv_magical(temp, len, flags);
 }
 
 /*

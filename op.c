@@ -4204,10 +4204,13 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     }
     else
 	aname = Nullch;
-    gv = gv_fetchpv(name ? name : (aname ? aname : 
-		    (PL_curstash ? "__ANON__" : "__ANON__::__ANON__")),
-		    GV_ADDMULTI | ((block || attrs) ? 0 : GV_NOINIT),
-		    SVt_PVCV);
+    gv = name ? gv_fetchsv(cSVOPo->op_sv,
+			   GV_ADDMULTI | ((block || attrs) ? 0 : GV_NOINIT),
+			   SVt_PVCV)
+	: gv_fetchpv(aname ? aname
+		     : (PL_curstash ? "__ANON__" : "__ANON__::__ANON__"),
+		     GV_ADDMULTI | ((block || attrs) ? 0 : GV_NOINIT),
+		     SVt_PVCV);
 
     if (o)
 	SAVEFREEOP(o);
@@ -4675,15 +4678,13 @@ void
 Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
 {
     register CV *cv;
-    char *name;
     GV *gv;
-    STRLEN n_a;
 
     if (o)
-	name = SvPVx(cSVOPo->op_sv, n_a);
+	gv = gv_fetchsv(cSVOPo->op_sv, TRUE, SVt_PVFM);
     else
-	name = "STDOUT";
-    gv = gv_fetchpv(name,TRUE, SVt_PVFM);
+	gv = gv_fetchpv("STDOUT", TRUE, SVt_PVFM);
+    
 #ifdef GV_UNIQUE_CHECK
     if (GvUNIQUE(gv)) {
         Perl_croak(aTHX_ "Bad symbol for form (GV is unique)");
@@ -4695,7 +4696,9 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
 	    line_t oldline = CopLINE(PL_curcop);
 	    if (PL_copline != NOLINE)
 		CopLINE_set(PL_curcop, PL_copline);
-	    Perl_warner(aTHX_ packWARN(WARN_REDEFINE), "Format %s redefined",name);
+	    Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
+			o ? "Format %"SVf" redefined"
+			: "Format STDOUT redefined" ,cSVOPo->op_sv);
 	    CopLINE_set(PL_curcop, oldline);
 	}
 	SvREFCNT_dec(cv);
@@ -5109,11 +5112,9 @@ Perl_ck_rvconst(pTHX_ register OP *o)
 
     o->op_private |= (PL_hints & HINT_STRICT_REFS);
     if (kid->op_type == OP_CONST) {
-	char *name;
 	int iscv;
 	GV *gv;
 	SV *kidsv = kid->op_sv;
-	STRLEN n_a;
 
 	/* Is it a constant from cv_const_sv()? */
 	if (SvROK(kidsv) && SvREADONLY(kidsv)) {
@@ -5143,7 +5144,6 @@ Perl_ck_rvconst(pTHX_ register OP *o)
 		Perl_croak(aTHX_ "Constant is not %s reference", badtype);
 	    return o;
 	}
-	name = SvPV(kidsv, n_a);
 	if ((PL_hints & HINT_STRICT_REFS) && (kid->op_private & OPpCONST_BARE)) {
 	    char *badthing = Nullch;
 	    switch (o->op_type) {
@@ -5159,8 +5159,8 @@ Perl_ck_rvconst(pTHX_ register OP *o)
 	    }
 	    if (badthing)
 		Perl_croak(aTHX_
-	  "Can't use bareword (\"%s\") as %s ref while \"strict refs\" in use",
-		      name, badthing);
+	  "Can't use bareword (\"%"SVf"\") as %s ref while \"strict refs\" in use",
+		      kidsv, badthing);
 	}
 	/*
 	 * This is a little tricky.  We only want to add the symbol if we
@@ -5172,7 +5172,7 @@ Perl_ck_rvconst(pTHX_ register OP *o)
 	 */
 	iscv = (o->op_type == OP_RV2CV) * 2;
 	do {
-	    gv = gv_fetchpv(name,
+	    gv = gv_fetchsv(kidsv,
 		iscv | !(kid->op_private & OPpCONST_ENTERED),
 		iscv
 		    ? SVt_PVCV
@@ -5215,9 +5215,8 @@ Perl_ck_ftst(pTHX_ OP *o)
 	SVOP *kid = (SVOP*)cUNOPo->op_first;
 
 	if (kid->op_type == OP_CONST && (kid->op_private & OPpCONST_BARE)) {
-	    STRLEN n_a;
 	    OP *newop = newGVOP(type, OPf_REF,
-		gv_fetchpv(SvPVx(kid->op_sv, n_a), TRUE, SVt_PVIO));
+		gv_fetchsv(kid->op_sv, TRUE, SVt_PVIO));
 	    op_free(o);
 	    o = newop;
 	    return o;
@@ -5259,7 +5258,6 @@ Perl_ck_fun(pTHX_ OP *o)
     }
 
     if (o->op_flags & OPf_KIDS) {
-	STRLEN n_a;
 	tokid = &cLISTOPo->op_first;
 	kid = cLISTOPo->op_first;
 	if (kid->op_type == OP_PUSHMARK ||
@@ -5302,13 +5300,12 @@ Perl_ck_fun(pTHX_ OP *o)
 		if (kid->op_type == OP_CONST &&
 		    (kid->op_private & OPpCONST_BARE))
 		{
-		    char *name = SvPVx(((SVOP*)kid)->op_sv, n_a);
 		    OP *newop = newAVREF(newGVOP(OP_GV, 0,
-			gv_fetchpv(name, TRUE, SVt_PVAV) ));
+			gv_fetchsv(((SVOP*)kid)->op_sv, TRUE, SVt_PVAV) ));
 		    if (ckWARN2(WARN_DEPRECATED, WARN_SYNTAX))
 			Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
-			    "Array @%s missing the @ in argument %"IVdf" of %s()",
-			    name, (IV)numargs, PL_op_desc[type]);
+			    "Array @%"SVf" missing the @ in argument %"IVdf" of %s()",
+			    ((SVOP*)kid)->op_sv, (IV)numargs, PL_op_desc[type]);
 		    op_free(kid);
 		    kid = newop;
 		    kid->op_sibling = sibl;
@@ -5322,13 +5319,12 @@ Perl_ck_fun(pTHX_ OP *o)
 		if (kid->op_type == OP_CONST &&
 		    (kid->op_private & OPpCONST_BARE))
 		{
-		    char *name = SvPVx(((SVOP*)kid)->op_sv, n_a);
 		    OP *newop = newHVREF(newGVOP(OP_GV, 0,
-			gv_fetchpv(name, TRUE, SVt_PVHV) ));
+			gv_fetchsv(((SVOP*)kid)->op_sv, TRUE, SVt_PVHV) ));
 		    if (ckWARN2(WARN_DEPRECATED, WARN_SYNTAX))
 			Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
-			    "Hash %%%s missing the %% in argument %"IVdf" of %s()",
-			    name, (IV)numargs, PL_op_desc[type]);
+			    "Hash %%%"SVf" missing the %% in argument %"IVdf" of %s()",
+			    ((SVOP*)kid)->op_sv, (IV)numargs, PL_op_desc[type]);
 		    op_free(kid);
 		    kid = newop;
 		    kid->op_sibling = sibl;
@@ -5355,8 +5351,7 @@ Perl_ck_fun(pTHX_ OP *o)
 			(kid->op_private & OPpCONST_BARE))
 		    {
 			OP *newop = newGVOP(OP_GV, 0,
-			    gv_fetchpv(SvPVx(((SVOP*)kid)->op_sv, n_a), TRUE,
-					SVt_PVIO) );
+			    gv_fetchsv(((SVOP*)kid)->op_sv, TRUE, SVt_PVIO) );
 			if (!(o->op_private & 1) && /* if not unop */
 			    kid == cLISTOPo->op_last)
 			    cLISTOPo->op_last = newop;
