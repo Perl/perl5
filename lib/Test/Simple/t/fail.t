@@ -51,7 +51,7 @@ not ok 4 - oh no!
 not ok 5 - damnit
 OUT
 
-    My::Test::ok($$err =~ /Looks like you failed 2 tests of 5/;
+    My::Test::ok($$err =~ /Looks like you failed 2 tests of 5/);
 
     # Prevent Test::Simple from exiting with non zero
     exit 0;
