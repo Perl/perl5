@@ -4037,6 +4037,16 @@ Perl_yylex(pTHX)
 	    {
 		tmp = 0;		/* any sub overrides "weak" keyword */
 	    }
+	    else if (gv && !gvp
+		    && tmp == -KEY_err
+		    && GvCVu(gv)
+		    && PL_expect != XOPERATOR
+		    && PL_expect != XTERMORDORDOR)
+	    {
+		/* any sub overrides the "err" keyword, except when really an
+		 * operator is expected */
+		tmp = 0;
+	    }
 	    else {			/* no override */
 		tmp = -tmp;
 		if (tmp == KEY_dump && ckWARN(WARN_MISC)) {
