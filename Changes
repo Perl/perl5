@@ -28,6 +28,339 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.5		Maintenance release working toward v5.8.5
 --------------
 ____________________________________________________________________________
+[ 23055] By: nicholas                              on 2004/07/06  11:35:31
+        Log: Cargo cult 5.8.5 upgrade
+     Branch: maint-5.8/perl
+	   ! Cross/config.sh-arm-linux META.yml NetWare/Makefile README.os2
+	   ! README.vms epoc/createpkg.pl ext/List/Util/t/lln.t
+	   ! patchlevel.h plan9/config.plan9 pod/perl585delta.pod
+	   ! vos/build.cm vos/config.alpha.def vos/config.alpha.h
+	   ! vos/config.ga.def vos/config.ga.h vos/install_perl.cm
+	   ! win32/Makefile win32/config_H.bc win32/config_H.gc
+	   ! win32/config_H.vc win32/config_H.vc64 win32/makefile.mk
+	   ! wince/Makefile.ce
+____________________________________________________________________________
+[ 23054] By: nicholas                              on 2004/07/06  09:54:16
+        Log: Another tweak
+     Branch: maint-5.8/perl
+	   ! pod/perl585delta.pod
+____________________________________________________________________________
+[ 23053] By: nicholas                              on 2004/07/06  09:52:45
+        Log: Improvements suggested by Jarkko
+     Branch: maint-5.8/perl
+	   ! pod/perl585delta.pod
+____________________________________________________________________________
+[ 23050] By: nicholas                              on 2004/07/06  09:13:11
+        Log: Fixup change 22979 in the ChangeLog *properly* (so that tools parse
+             it)
+     Branch: maint-5.8/perl
+	   ! Changes
+____________________________________________________________________________
+[ 23049] By: nicholas                              on 2004/07/05  17:46:57
+        Log: Back out 22997 as it causes Net::DNS to spin forever in 05-rr-txt.t
+     Branch: maint-5.8/perl
+	   ! lib/Text/ParseWords.pm lib/Text/ParseWords.t
+____________________________________________________________________________
+[ 23045] By: nicholas                              on 2004/07/05  15:13:40
+        Log: Change 23035 wasn't meant to integrate t/op/threads.t to maint
+     Branch: maint-5.8/perl
+	   - t/op/threads.t
+____________________________________________________________________________
+[ 23044] By: nicholas                              on 2004/07/05  15:00:22
+        Log: I missed the libnet upgrade. I almost missed Steve Hay reminding me of
+             this.
+     Branch: maint-5.8/perl
+	   ! pod/perl585delta.pod
+____________________________________________________________________________
+[ 23043] By: nicholas                              on 2004/07/05  14:58:20
+        Log: Things noticed by Ronald J Kimball and Steve Hay
+     Branch: maint-5.8/perl
+	   ! pod/perl585delta.pod
+____________________________________________________________________________
+[ 23041] By: nicholas                              on 2004/07/05  13:15:04
+        Log: Integrate:
+             [ 23029]
+             Subject: [PATCH Cwd 2.18] _vms_abs_path on non-directories
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Message-ID: <40E704AA.4090801@mac.com>
+             Date: Sat, 03 Jul 2004 14:10:34 -0500
+     Branch: maint-5.8/perl
+	  !> ext/Cwd/t/cwd.t lib/Cwd.pm
+____________________________________________________________________________
+[ 23039] By: nicholas                              on 2004/07/04  21:32:40
+        Log: Integrate:
+             [ 23022]
+             The microperl config didn't know about usemallocwrap yet.
+             
+             [ 23027]
+             More microperl tweaks.
+     Branch: maint-5.8/perl
+	  !> Makefile.micro README.micro uconfig.h uconfig.sh
+____________________________________________________________________________
+[ 23038] By: nicholas                              on 2004/07/04  21:22:18
+        Log: Integrate:
+             [ 23019]
+             Bump version numbers
+             
+             [ 23025]
+             Bump version number of Safe for CPAN release
+     Branch: maint-5.8/perl
+	  !> ext/File/Glob/Glob.pm ext/Opcode/Safe.pm
+	  !> ext/XS/APItest/APItest.pm ext/threads/threads.pm lib/Carp.pm
+	  !> lib/File/Copy.pm lib/Text/ParseWords.pm lib/Text/Wrap.pm
+	  !> lib/autouse.pm lib/charnames.pm lib/diagnostics.pm lib/utf8.pm
+____________________________________________________________________________
+[ 23037] By: nicholas                              on 2004/07/04  21:12:06
+        Log: Integrate:
+             [ 23010]
+             More caveats in B::Deparse's documentation
+             (suggested by Yves Orton)
+             
+             [ 23011]
+             Note that sv_2mortal isn't just "increase reference count by 1, and
+             mark that it needs a deferred recount"
+             
+             [ 23014]
+             Subject: [PATCH pod/perlop.pod] Documenting undefined behaviour of $i = $i ++.
+             From: Abigail <abigail@abigail.nl>
+             Date: Wed, 30 Jun 2004 12:00:21 +0200
+             Message-ID: <20040630100021.GA23752@abigail.nl>
+             
+             [ 23026]
+             Maintainer change for Safe
+     Branch: maint-5.8/perl
+	  !> Porting/Maintainers.pl ext/B/B/Deparse.pm pod/perlop.pod sv.c
+____________________________________________________________________________
+[ 23036] By: nicholas                              on 2004/07/04  20:59:30
+        Log: Integrate:
+             [ 22995]
+             Subject: [PATCH] regcomp.c, t/op/regmesg.t -- False range with \p and \P
+             From: Jeff 'japhy' Pinyan <japhy@perlmonk.org>
+             Date: Thu, 24 Jun 2004 16:42:54 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.44.0406241636340.8774-200000@perlmonk.org>
+     Branch: maint-5.8/perl
+	  !> regcomp.c t/op/regmesg.t
+____________________________________________________________________________
+[ 23035] By: nicholas                              on 2004/07/04  20:49:10
+        Log: Integrate:
+             [ 22994]
+             More @INC test fixes
+             
+             [ 22998]
+             Correct detection of absent modules. Based on
+             
+             Subject: [PATCH] Config{extensions} uses filesystem names as extensions
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Message-ID: <Pine.SOL.4.58.0406241505530.14039@maxwell.phys.lafayette.edu>
+             Date: Thu, 24 Jun 2004 15:09:47 -0400 (EDT)
+             
+             with improvements from Marcus Holland-Moritz
+             
+             [ 23028]
+             /usr/bin/locale steadfastly delivers 8 bit output independent of
+             LC_ALL. So when perl's expecting utf8, things don't quite work right.
+             This has become visible since fix 22842
+     Branch: maint-5.8/perl
+	  +> t/op/threads.t
+	  !> ext/Devel/PPPort/t/test.t ext/PerlIO/t/scalar.t
+	  !> ext/PerlIO/t/via.t ext/threads/shared/t/disabled.t lib/DB.t
+	  !> lib/Dumpvalue.t lib/PerlIO/via/t/QuotedPrint.t
+	  !> lib/Tie/RefHash.t lib/autouse.t lib/dumpvar.t lib/h2xs.t
+	  !> lib/locale.t lib/overload.t t/io/crlf.t t/uni/chomp.t
+	  !> t/uni/tr_7jis.t t/uni/tr_eucjp.t t/uni/tr_sjis.t
+	  !> t/uni/tr_utf8.t
+____________________________________________________________________________
+[ 23034] By: nicholas                              on 2004/07/04  20:23:50
+        Log: Integrate:
+             [ 22992]
+             Fix for: [perl #30442] Text::ParseWords does not handle backslashed newline inside quoted text
+             Use the suggested regex fix, plus some tests.
+             
+             [ 22997]
+             Cleanup the main regex in Text::ParseWords and make the
+             parse_line() routine faster. Add a Unicode test case.
+     Branch: maint-5.8/perl
+	  !> lib/Text/ParseWords.pm lib/Text/ParseWords.t
+____________________________________________________________________________
+[ 23033] By: nicholas                              on 2004/07/04  20:12:51
+        Log: Integrate:
+             [ 22990]
+             Fix for: [perl #2738] perl segfautls on input
+             The parser was incorrectly accepting <> as a subroutine prototype and
+             newATTRSUB didn't validate the proto argument before accessing op_sv.
+             
+             [ 23006]
+             [perl #30509] use encoding and "eq" cause memory leak
+             Perl_sv_eq() was creating a temp and not always freeing it
+     Branch: maint-5.8/perl
+	   ! t/comp/parser.t
+	  !> op.c pod/perldiag.pod sv.c toke.c
+____________________________________________________________________________
+[ 23032] By: nicholas                              on 2004/07/04  19:46:34
+        Log: Integrate:
+             [ 22942]
+             Upgrade to Locale::Maketext 1.09
+     Branch: maint-5.8/perl
+	  +> lib/Locale/Maketext/t/01_about_verbose.t
+	  +> lib/Locale/Maketext/t/10_make.t lib/Locale/Maketext/t/20_get.t
+	  +> lib/Locale/Maketext/t/40_super.t
+	  +> lib/Locale/Maketext/t/50_super.t
+	  +> lib/Locale/Maketext/t/60_super.t
+	  +> lib/Locale/Maketext/t/90_utf8.t
+	   - lib/Locale/Maketext/t/00about.t lib/Locale/Maketext/t/01make.t
+	   - lib/Locale/Maketext/t/02get.t lib/Locale/Maketext/t/03http.t
+	   - lib/Locale/Maketext/t/04super.t
+	   - lib/Locale/Maketext/t/05super.t
+	   - lib/Locale/Maketext/t/06super.t lib/Locale/Maketext/t/90utf8.t
+	  !> MANIFEST lib/Locale/Maketext.pm lib/Locale/Maketext/ChangeLog
+	  !> lib/Locale/Maketext/README
+____________________________________________________________________________
+[ 23031] By: nicholas                              on 2004/07/04  19:35:48
+        Log: Integrate:
+             [ 22946]
+             Upgrade to I18N::LangTags 0.31.
+             
+             [ 22964]
+             Upgrade to I18N::LangTags 0.32
+             
+             [ 23001]
+             Stop 80_all_env.t failing when LC_ALL is set
+             
+             [ 23024]
+             Upgrade to I18N::LangTags 0.33
+             
+             (this would have all been part of the previous change but
+             http://www.google.com/search?btnI=again&q=perforce+fails+bah )
+     Branch: maint-5.8/perl
+	  !> lib/I18N/LangTags.pm lib/I18N/LangTags/ChangeLog
+	  !> lib/I18N/LangTags/Detect.pm lib/I18N/LangTags/t/10_http.t
+	  !> lib/I18N/LangTags/t/80_all_env.t
+____________________________________________________________________________
+[ 23030] By: nicholas                              on 2004/07/04  19:22:15
+        Log: Integrate:
+             [ 22941]
+             Upgrade to I18N::LangTags 0.30.
+     Branch: maint-5.8/perl
+	  +> lib/I18N/LangTags/Detect.pm
+	  +> lib/I18N/LangTags/t/01_about_verbose.t
+	  +> lib/I18N/LangTags/t/05_main.t lib/I18N/LangTags/t/07_listy.t
+	  +> lib/I18N/LangTags/t/10_http.t lib/I18N/LangTags/t/50_super.t
+	  +> lib/I18N/LangTags/t/55_supers_strict.t
+	  +> lib/I18N/LangTags/t/80_all_env.t
+	   - lib/I18N/LangTags/t/01test.t lib/I18N/LangTags/t/02decency.t
+	  !> MANIFEST lib/I18N/LangTags.pm lib/I18N/LangTags/ChangeLog
+	  !> lib/I18N/LangTags/List.pm
+____________________________________________________________________________
+[ 23020] By: nicholas                              on 2004/07/01  13:35:17
+        Log: Integrate:
+             [ 23016]
+             Sync to libnet-1.19
+     Branch: maint-5.8/perl
+	  !> lib/Net/Changes.libnet lib/Net/Cmd.pm lib/Net/FTP.pm
+	  !> lib/Net/POP3.pm lib/Net/SMTP.pm lib/Net/t/datasend.t
+____________________________________________________________________________
+[ 23017] By: nicholas                              on 2004/06/30  20:28:29
+        Log: Back 22969 out of maint. (reinstate the "Tied variable freed while
+             still in use" error for the moment, as my change causes interesting
+             bugs under utf8 locales)
+     Branch: maint-5.8/perl
+	   ! mg.c pod/perldiag.pod t/op/tie.t
+____________________________________________________________________________
+[ 23015] By: nicholas                              on 2004/06/30  12:17:35
+        Log: Integrate:
+             [ 23002]
+             Assimilate Locale-Codes-2.07
+     Branch: maint-5.8/perl
+	  !> lib/Locale/Codes/ChangeLog lib/Locale/Codes/README
+	  !> lib/Locale/Codes/t/all.t lib/Locale/Codes/t/constants.t
+	  !> lib/Locale/Codes/t/country.t lib/Locale/Codes/t/currency.t
+	  !> lib/Locale/Codes/t/uk.t lib/Locale/Constants.pm
+	  !> lib/Locale/Constants.pod lib/Locale/Country.pm
+	  !> lib/Locale/Country.pod lib/Locale/Currency.pm
+	  !> lib/Locale/Currency.pod lib/Locale/Language.pm
+	  !> lib/Locale/Language.pod lib/Locale/Script.pm
+	  !> lib/Locale/Script.pod
+____________________________________________________________________________
+[ 23013] By: nicholas                              on 2004/06/30  11:25:27
+        Log: Integrate:
+             [ 22988]
+             Upgrade to Cwd 2.17_03
+             
+             [ 22991]
+             Upgrade to Cwd 2.18
+             (with local changes to cwd.t, to adapt it to the core)
+             
+             [ 22993]
+             Fix the Cwd tests for the core.
+     Branch: maint-5.8/perl
+	  !> ext/Cwd/Changes ext/Cwd/Cwd.xs ext/Cwd/t/cwd.t
+	  !> ext/Cwd/t/taint.t lib/Cwd.pm
+____________________________________________________________________________
+[ 23012] By: nicholas                              on 2004/06/30  11:11:43
+        Log: Integrate:
+             [ 22935]
+             Assert SvTYPE is at least PGMV whenever accessing SvSTASH
+             (the Storable.xs part)
+             
+             [ 22943]
+             Storable should cope if the string to thaw happens to be utf8 encoded
+             And anything with bytes >=256 is corrupt
+             
+             [ 22944]
+             Change 22516 forgot to add make_overload.pl to generate test data
+             (submitted from the pub via wireless, bluetooth and then GPRS out
+             to the Internet)
+             
+             [ 22968]
+             Subject: [PATCH] Storable signedness nit	
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Message-ID: <40D3AAC7.6030407@mac.com>
+             Date: Fri, 18 Jun 2004 21:53:59 -0500
+     Branch: maint-5.8/perl
+	  +> ext/Storable/t/make_overload.pl
+	  !> MANIFEST ext/Storable/ChangeLog ext/Storable/README
+	  !> ext/Storable/Storable.pm ext/Storable/Storable.xs
+	  !> ext/Storable/t/utf8.t
+____________________________________________________________________________
+[ 23009] By: nicholas                              on 2004/06/29  11:09:36
+        Log: Integrate:
+             [ 22996]
+             Subject: [perl #30450] perl 5.8.4: enhancement to hints/solaris_2.sh 
+             From: Nicholas Gianniotis (via RT) <perlbug-followup@perl.org>
+             Date: 25 Jun 2004 09:39:51 -0000
+             Message-ID: <rt-3.0.9-30450-91340.10.3279898804255@perl.org>
+             and
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Fri, 25 Jun 2004 11:30:11 -0400 (EDT)
+             Message-ID: <Pine.SOL.4.58.0406251113420.15961@maxwell.phys.lafayette.edu>
+             
+             [ 23007]
+             HP-UX 10.20 still *needs* -Ae for HP C-ANSI-C to be ANSI
+             11.00 and on are ANSI by default for /opt/ansic/bin
+             Error was introduced by #22975 in re-enabling 10.01
+     Branch: maint-5.8/perl
+	  !> hints/hpux.sh hints/solaris_2.sh
+____________________________________________________________________________
+[ 23005] By: nicholas                              on 2004/06/28  17:03:14
+        Log: Draft 1 of perl585delta.
+     Branch: maint-5.8/perl
+	   ! pod/perl585delta.pod
+____________________________________________________________________________
+[ 23004] By: rgs                                   on 2004/06/28  16:29:21
+        Log: Document h2ph changes in perldelta
+     Branch: maint-5.8/perl
+	   ! pod/perl585delta.pod
+____________________________________________________________________________
+[ 23003] By: nicholas                              on 2004/06/28  12:16:52
+        Log: Correct the changelog entry for 22979
+     Branch: maint-5.8/perl
+	   ! Changes
+____________________________________________________________________________
+[ 23000] By: nicholas                              on 2004/06/27  15:19:21
+        Log: Update Changes. Almost time for 5.8.5
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 22999] By: nicholas                              on 2004/06/27  12:18:13
         Log: Integrate:
              [ 21936]
