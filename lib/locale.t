@@ -432,7 +432,10 @@ setlocale(LC_ALL, "C");
 
 @Locale = sort @Locale;
 
-debug "# Locales = @Locale\n";
+debug "# Locales =\n";
+for ( @Locale ) {
+    debug "# $_\n";
+}
 
 my %Problem;
 my %Okay;

@@ -261,9 +261,9 @@ esac
 ## In the following dollars and backticks do not need the extra backslash.
 $spitshell >>Makefile <<'!NO!SUBS!'
 
-CCCMD    = `sh $(shellflags) cflags "optimize='$(OPTIMIZE)'" $(LIBPERL) $@`
+CCCMD    = `sh $(shellflags) cflags "optimize='$(OPTIMIZE)'" $@`
 
-CCCMDSRC = `sh $(shellflags) cflags "optimize='$(OPTIMIZE)'" $(LIBPERL) $<`
+CCCMDSRC = `sh $(shellflags) cflags "optimize='$(OPTIMIZE)'" $<`
 
 private = preplibrary lib/Config.pm lib/ExtUtils/Miniperl.pm
 
@@ -308,16 +308,6 @@ obj2 = hv$(OBJ_EXT) av$(OBJ_EXT) run$(OBJ_EXT) pp_hot$(OBJ_EXT) sv$(OBJ_EXT) pp$
 obj3 = doop$(OBJ_EXT) doio$(OBJ_EXT) regexec$(OBJ_EXT) utf8$(OBJ_EXT) taint$(OBJ_EXT) deb$(OBJ_EXT) universal$(OBJ_EXT) xsutils$(OBJ_EXT) globals$(OBJ_EXT) perlio$(OBJ_EXT) perlapi$(OBJ_EXT) numeric$(OBJ_EXT) locale$(OBJ_EXT) pp_pack$(OBJ_EXT) pp_sort$(OBJ_EXT)
 
 obj = $(obj1) $(obj2) $(obj3) $(ARCHOBJS)
-
-# Once perl has been Configure'd and built ok you build different
-# perl variants (Debugging, Embedded, Multiplicity etc) by saying:
-#	make clean; make LIBPERL=libperl<type>.a
-# where <type> is some combination of 'd' and(or) 'e' or 'm'.
-# See cflags to understand how this works.
-#
-# This mechanism is getting clunky and might not even work any more.
-# EMBEDDING is on by default, and MULTIPLICITY doesn't work.
-#
 
 lintflags = -hbvxac
 

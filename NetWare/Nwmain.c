@@ -181,7 +181,7 @@ void main(int argc, char *argv[])
 		char sNUL[MAX_DN_BYTES] = {'\0'};
 
 		strcpy(sNUL, NWDEFPERLROOT);
-		strcat(sNUL, "\\nul");
+		strcat(sNUL, "\\nwnul");
 		if (access((const char *)sNUL, 0) != 0)
 		{
 			// The file, "nul" is not found and so create the file.
@@ -313,7 +313,7 @@ void fnSigTermHandler(int sig)
 		char sNUL[MAX_DN_BYTES] = {'\0'};
 
 		strcpy(sNUL, NWDEFPERLROOT);
-		strcat(sNUL, "\\nul");
+		strcat(sNUL, "\\nwnul");
 		if (access((const char *)sNUL, 0) == 0)
 		{
 			// The file, "nul" is found and so delete it.

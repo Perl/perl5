@@ -171,7 +171,10 @@ of course, removes the warning.
 If your locale environment variables (LANGUAGE, LC_ALL, LC_CTYPE, LANG)
 contain the strings 'UTF-8' or 'UTF8' (case-insensitive matching),
 the default encoding of your STDIN, STDOUT, and STDERR, and of
-B<any subsequent file open>, is UTF-8.
+B<any subsequent file open>, is UTF-8.  Note that this means
+that Perl expects other software to work, too: if STDIN coming
+in from another command is not UTF-8, Perl will complain about
+malformed UTF-8.
 
 =head2 Unicode and EBCDIC
 
@@ -276,8 +279,8 @@ C<Latin 2>, or C<iso8859-2>, and so forth.  With just
 
     use encoding;
 
-first the environment variable C<PERL_ENCODING> will be consulted,
-and if that doesn't exist, ISO 8859-1 (Latin 1) will be assumed.
+the environment variable C<PERL_ENCODING> will be consulted,
+but if that doesn't exist, the encoding pragma fails.
 
 The C<Encode> module knows about many encodings and it has interfaces
 for doing conversions between those encodings:

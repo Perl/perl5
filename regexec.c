@@ -3073,7 +3073,7 @@ S_regmatch(pTHX_ regnode *prog)
 				  "%*s  %ld out of %ld..%ld  cc=%"UVxf"\n",
 				  REPORT_CODE_OFF+PL_regindent*2, "",
 				  (long)n, (long)cc->min,
-				  (long)cc->max, PTR2UV(cc)
+				  (long)cc->max, PTR2UV(cc))
 		    );
 
 		/* If degenerate scan matches "", assume scan done. */

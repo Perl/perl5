@@ -79,13 +79,12 @@ sub clean_up_filename {
 
 sub manifind {
     my $p = shift || {};
-    my $skip = _maniskip(warn => $p->{warn_on_skip});
     my $found = {};
 
     my $wanted = sub {
 	my $name = clean_up_filename($File::Find::name);
 	warn "Debug: diskfile $name\n" if $Debug;
-	return if $skip->($name) or -d $name;
+	return if -d $name;
 	
         if( $Is_VMS ) {
             $name =~ s#(.*)\.$#\L$1#;
@@ -99,8 +98,6 @@ sub manifind {
     # Also, it's okay to use / here, because MANIFEST files use Unix-style 
     # paths.
     find({wanted => $wanted,
-	  preprocess => 
-          sub {grep {!$skip->( clean_up_filename("$File::Find::dir/$_") )} @_},
 	  no_chdir => 1,
 	 },
 	 $Is_MacOS ? ":" : ".");
@@ -109,61 +106,79 @@ sub manifind {
 }
 
 sub fullcheck {
-    _manicheck({check_files => 1, check_MANIFEST => 1});
+    return [_check_files()], [_check_manifest()];
 }
 
 sub manicheck {
-    return @{(_manicheck({check_files => 1}))[0]};
+    return _check_files();
 }
 
 sub filecheck {
-    return @{(_manicheck({check_MANIFEST => 1}))[1]};
+    return _check_manifest();
 }
 
 sub skipcheck {
-    _manicheck({check_MANIFEST => 1, warn_on_skip => 1});
+    my($p) = @_;
+    my $found = manifind();
+    my $matches = _maniskip();
+
+    my @skipped = ();
+    foreach my $file (sort keys %$found){
+        if (&$matches($file)){
+            warn "Skipping $file\n";
+            push @skipped, $file;
+            next;
+        }
+    }
+
+    return @skipped;
 }
 
-sub _manicheck {
-    my($p) = @_;
-    my $read = maniread();
+
+sub _check_files {
+    my $p = shift;
+    my $dosnames=(defined(&Dos::UseLFN) && Dos::UseLFN()==0);
+    my $read = maniread() || {};
     my $found = manifind($p);
 
-    my $file;
-    my $dosnames=(defined(&Dos::UseLFN) && Dos::UseLFN()==0);
-    my(@missfile,@missentry);
-    if ($p->{check_files}){
-	foreach $file (sort keys %$read){
-	    warn "Debug: manicheck checking from $MANIFEST $file\n" if $Debug;
-            if ($dosnames){
-                $file = lc $file;
-                $file =~ s=(\.(\w|-)+)=substr ($1,0,4)=ge;
-                $file =~ s=((\w|-)+)=substr ($1,0,8)=ge;
-            }
-	    unless ( exists $found->{$file} ) {
-		warn "No such file: $file\n" unless $Quiet;
-		push @missfile, $file;
-	    }
-	}
+    my(@missfile) = ();
+    foreach my $file (sort keys %$read){
+        warn "Debug: manicheck checking from $MANIFEST $file\n" if $Debug;
+        if ($dosnames){
+            $file = lc $file;
+            $file =~ s=(\.(\w|-)+)=substr ($1,0,4)=ge;
+            $file =~ s=((\w|-)+)=substr ($1,0,8)=ge;
+        }
+        unless ( exists $found->{$file} ) {
+            warn "No such file: $file\n" unless $Quiet;
+            push @missfile, $file;
+        }
     }
-    if ($p->{check_MANIFEST}){
-	$read ||= {};
-	my $matches = _maniskip();
-	foreach $file (sort keys %$found){
-	    if (&$matches($file)){
-		warn "Skipping $file\n" if $p->{warn_on_skip};
-		next;
-	    }
-	    warn "Debug: manicheck checking from disk $file\n" if $Debug;
-	    unless ( exists $read->{$file} ) {
-		my $canon = $Is_MacOS ? "\t" . _unmacify($file) : '';
-		warn "Not in $MANIFEST: $file$canon\n" unless $Quiet;
-		push @missentry, $file;
-	    }
-	}
-    }
-    (\@missfile,\@missentry);
+
+    return @missfile;
 }
+
+
+sub _check_manifest {
+    my($p) = @_;
+    my $read = maniread() || {};
+    my $found = manifind($p);
+    my $skip  = _maniskip();
+
+    my @missentry = ();
+    foreach my $file (sort keys %$found){
+        next if $skip->($file);
+        warn "Debug: manicheck checking from disk $file\n" if $Debug;
+        unless ( exists $read->{$file} ) {
+            my $canon = $Is_MacOS ? "\t" . _unmacify($file) : '';
+            warn "Not in $MANIFEST: $file$canon\n" unless $Quiet;
+            push @missentry, $file;
+        }
+    }
+
+    return @missentry;
+}
+
 
 sub maniread {
     my ($mfile) = @_;
@@ -206,10 +221,8 @@ sub maniread {
 
 # returns an anonymous sub that decides if an argument matches
 sub _maniskip {
-    my (%args) = @_;
-
     my @skip ;
-    my $mfile ||= "$MANIFEST.SKIP";
+    my $mfile = "$MANIFEST.SKIP";
     local *M;
     open M, $mfile or open M, $DEFAULT_MSKIP or return sub {0};
     while (<M>){
@@ -225,10 +238,7 @@ sub _maniskip {
     # any of them contain alternations
     my $regex = join '|', map "(?:$_)", @skip;
 
-    return ($args{warn}
-	    ? sub { $_[0] =~ qr{$opts$regex} && warn "Skipping $_[0]\n" }
-	    : sub { $_[0] =~ qr{$opts$regex} }
-	   );
+    return sub { $_[0] =~ qr{$opts$regex} };
 }
 
 sub manicopy {
@@ -294,7 +304,8 @@ sub cp {
     copy($srcFile,$dstFile);
     utime $access, $mod + ($Is_VMS ? 1 : 0), $dstFile;
     # chmod a+rX-w,go-w
-    chmod(  0444 | ( $perm & 0111 ? 0111 : 0 ),  $dstFile ) unless ($^O eq 'MacOS');
+    chmod(  0444 | ( $perm & 0111 ? 0111 : 0 ),  $dstFile ) 
+      unless ($^O eq 'MacOS');
 }
 
 sub ln {
@@ -496,9 +507,11 @@ All diagnostic output is sent to C<STDERR>.
 
 =item C<Not in MANIFEST:> I<file>
 
-is reported if a file is found, that is missing in the C<MANIFEST>
-file which is excluded by a regular expression in the file
-C<MANIFEST.SKIP>.
+is reported if a file is found which is not in C<MANIFEST>.
+
+=item C<Skipping> I<file>
+
+is reported if a file is skipped due to an entry in C<MANIFEST.SKIP>.
 
 =item C<No such file:> I<file>
 

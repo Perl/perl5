@@ -30,36 +30,17 @@ sub BEGIN {
 }
 
 use strict;
-use vars qw($file_magic_str $other_magic $network_magic $major $minor
-           $C_visible_byteorder);
-
-BEGIN {
-# Config.pm does games to figure out byteorder dynamically. In the process
-# it creates an 8 digit entry on long long builds on 32 bit long systems.
-# config.sh, config.h and therefore Storable.xs have a 4 digit entry.
-$C_visible_byteorder = $Config{byteorder};
-if ($^O ne 'MSWin32' and $Config{longsize} != $Config{ivsize}) {
-  if ($C_visible_byteorder =~ /^1234/) {
-    # Little endian
-    substr ($C_visible_byteorder, $Config{longsize}) = '';
-  } elsif ($C_visible_byteorder =~ /4321$/) {
-    # Big endian
-    $C_visible_byteorder = substr ($C_visible_byteorder, -$Config{longsize});
-  } else {
-    die "longs are $Config{longsize} bytes, IVs are $Config{ivsize}, byte order $C_visible_byteorder not regonised";
-  }
-}
-}
+use vars qw($file_magic_str $other_magic $network_magic $major $minor);
 
 # header size depends on the size of the byteorder string
 $file_magic_str = 'pst0';
-$other_magic = 7 + length($C_visible_byteorder);
+$other_magic = 7 + length($Config{byteorder});
 $network_magic = 2;
 $major = 2;
 $minor = 5;
 
 use Test;
-BEGIN { plan tests => 334 + length($C_visible_byteorder) * 4}
+BEGIN { plan tests => 334 + length($Config{byteorder}) * 4}
 
 use Storable qw (store retrieve freeze thaw nstore nfreeze);
 
@@ -90,7 +71,7 @@ sub test_header {
       ok (1, 1, "Network order header has no sizes");
     }
   } else {
-    ok ($header->{byteorder}, $C_visible_byteorder, "byte order");
+    ok ($header->{byteorder}, $Config{byteorder}, "byte order");
     ok ($header->{intsize}, $Config{intsize}, "int size");
     ok ($header->{longsize}, $Config{longsize}, "long size");
     ok ($header->{ptrsize}, $Config{ptrsize}, "long size");

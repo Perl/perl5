@@ -19,7 +19,7 @@ sub cflags {
 
     my $base = $self->SUPER::cflags($libperl);
     foreach (split /\n/, $base) {
-      / *= */ and $self->{$`} = $';
+        /^(\S*)\s*=\s*(\S*)$/ and $self->{$1} = $2;
     };
     $self->{CCFLAGS} .= " -DUSEIMPORTLIB" if ($Config{useshrplib} eq 'true');
 

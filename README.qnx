@@ -69,6 +69,18 @@ from quics for earlier versions.
 
 There is no support for dynamically linked libraries in QNX4.
 
+If you wish to compile with the Socket extension, you need
+to have the TCP/IP toolkit, and you need to make sure that
+-lsocket locates the correct copy of socket3r.lib. Beware
+that the Watcom compiler ships with a stub version of
+socket3r.lib which has very little functionality. Also
+beware the order in which wlink searches directories for
+libraries. You may have /usr/lib/socket3r.lib pointing to
+the correct library, but wlink may pick up
+/usr/watcom/10.6/usr/lib/socket3r.lib instead. Make sure
+they both point to the correct library, that is,
+/usr/tcptk/current/usr/lib/socket3r.lib.
+
 The following tests may report errors under QNX4:
 
 ext/Cwd/Cwd.t will complain if `pwd` and cwd don't give
@@ -111,12 +123,15 @@ options that perl throws at it. This might be reasonably placed in
 
 =head2 Outstanding issues with perl under QNX6
 
-The following tests are still failing for Perl 5.7.1 under QNX 6.1.0:
+The following tests are still failing for Perl 5.7.3 under QNX 6.1.0:
 
   op/sprintf.........................FAILED at test 91
-  lib/1_compile......................FAILED at test 33
-  ext/IO/lib/IO/t/io_sock............FAILED at test 12
-  ext/IO/lib/IO/t/io_udp.............FAILED at test 4
+  lib/Benchmark......................FAILED at test 26
+
+This is due to a bug in the C library's printf routine.
+printf("'%e'", 0. ) produces '0.000000e+0', but ANSI requires
+'0.000000e+00'. QNX has acknowledged the bug and it should be
+fixed in 6.2.0.
 
 =head1 AUTHOR
 

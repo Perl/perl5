@@ -806,18 +806,23 @@ and the long double support.
 
 =head2 Selecting File IO mechanisms
 
-Previous versions of perl used the standard IO mechanisms as defined in
-stdio.h.  Versions 5.003_02 and later of perl allowed alternate IO
-mechanisms via a "PerlIO" abstraction, but the stdio mechanism is still
-the default and is the only supported mechanism.
+Executive summary: in Perl 5.8 you should use the default "PerlIO"
+as the IO mechanism unless you have a good reason not to.
+
+In more detail: previous versions of perl used the standard IO
+mechanisms as defined in stdio.h.  Versions 5.003_02 and later of perl
+introuced alternate IO mechanisms via a "PerlIO" abstraction, but up
+until and including Perl 5.6 stdio mechanism was still the default and
+the only supported mechanism.
 
 Starting from Perl 5.8 the default mechanism is to use the PerlIO
 abstraction, because it allows better control of I/O mechanisms,
 instead of having to work with (often, work around) vendors' I/O
 implementations.
 
-This PerlIO abstraction can be disabled either on the Configure
-command line with
+This PerlIO abstraction can be disabled (but again, unless you know
+what you are doing, should not) either on the Configure command line
+with
 
 	sh Configure -Uuseperlio
 
@@ -2095,6 +2100,9 @@ See also L<"Maintaining completely separate versions"> for another
 approach.
 
 =head1 Coexistence with earlier versions of perl5
+
+Perl 5.8 is not binary compatible with earlier versions of Perl.
+In other words, you have to recompile your XS modules.
 
 In general, you can usually safely upgrade from one version of Perl (e.g.
 5.004_04) to another similar version (e.g. 5.004_05) without re-compiling

@@ -4,10 +4,10 @@
 # Most of the hints in this file are for QNX4, which needed
 # more help. The QNX6 hints are located toward the bottom.
 #
-# perl-5.7.2 passes all tests under QNX4.24G
+# perl-5.7.3 passes all tests under QNX4.24G
 #  Watcom 10.6 with Beta/970211.wcc.update.tar.F
 #  socket3r.lib Nov21 1996.
-# perl-5.7.2 fails 4 known tests under QNX6.1.0
+# perl-5.7.3 fails 2 known tests under QNX6.1.0
 #
 # As with many unix ports, this one depends on a few "standard"
 # unix utilities which are not necessarily standard for QNX4.
@@ -37,6 +37,18 @@
 # Outstanding Issues for QNX4:
 #   There is no support for dynamically linked libraries in
 #   QNX4.
+#
+#   If you wish to compile with the Socket extension, you need
+#   to have the TCP/IP toolkit, and you need to make sure that
+#   -lsocket locates the correct copy of socket3r.lib. Beware
+#   that the Watcom compiler ships with a stub version of
+#   socket3r.lib which has very little functionality. Also
+#   beware the order in which wlink searches directories for
+#   libraries. You may have /usr/lib/socket3r.lib pointing to
+#   the correct library, but wlink may pick up
+#   /usr/watcom/10.6/usr/lib/socket3r.lib instead. Make sure
+#   they both point to the correct library, that is,
+#   /usr/tcptk/current/usr/lib/socket3r.lib.
 # 
 #   ext/Cwd/Cwd.t will complain if `pwd` and cwd don't give
 #   the same results. cwd calls `fullpath -t`, so if you
@@ -60,12 +72,15 @@
 #      Fixed in latest BETA socket3r.lib
 #----------------------------------------------------------------
 # Outstanding Issues for QNX6:
-#  The following tests are still failing as of 5.7.1:
+#  The following tests are still failing as of 5.7.3:
 #
 #   op/sprintf.........................FAILED at test 91
-#   lib/1_compile......................FAILED at test 33
-#   ext/IO/lib/IO/t/io_sock............FAILED at test 12
-#   ext/IO/lib/IO/t/io_udp.............FAILED at test 4
+#   lib/Benchmark......................FAILED at test 26
+#
+# This is due to a bug in the C library's printf routine.
+# printf("'%e'", 0. ) produces '0.000000e+0', but ANSI requires
+# '0.000000e+00'. QNX has acknowledged the bug and it should be
+# fixed in 6.2.0.
 #
 #----------------------------------------------------------------
 # These hints were submitted by:

@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Apr 23 06:12:13 EET DST 2002 [metaconfig 3.0 PL70]
+# Generated on Wed Apr 24 03:05:12 EET DST 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -16166,9 +16166,9 @@ int main()
 	} u;
 
 	if ($uvsize > 4)
-		u.l = (0x08070605L << 32) | 0x04030201L;
+		u.l = (((UV)0x08070605) << 32) | (UV)0x04030201;
 	else
-		u.l = 0x04030201L;
+		u.l = (UV)0x04030201;
 	for (i = 0; i < $uvsize; i++)
 		printf("%c", u.c[i]+'0');
 	printf("\n");

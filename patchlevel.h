@@ -30,8 +30,8 @@
    to include in @INC.  See INSTALL for how this works.
 */
 #define PERL_API_REVISION	5	/* Adjust manually as needed.  */
-#define PERL_API_VERSION	5	/* Adjust manually as needed.  */
-#define PERL_API_SUBVERSION	0	/* Adjust manually as needed.  */
+#define PERL_API_VERSION	7	/* Adjust manually as needed.  */
+#define PERL_API_SUBVERSION	3	/* Adjust manually as needed.  */
 /*
    XXX Note:  The selection of non-default Configure options, such
    as -Duselonglong may invalidate these settings.  Currently, Configure
