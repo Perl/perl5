@@ -267,6 +267,13 @@ S<RISC OS> perl can emulate Unix filenames with C</> as path
 separator, or go native and use C<.> for path separator and C<:> to
 signal filesystems and disk names.
 
+Don't assume UNIX filesystem access semantics: that read, write,
+and execute are all the permissions there are, and even if they exist,
+that their semantics (for example what do r, w, and x mean on
+a directory) are the UNIX ones.  The various UNIX/POSIX compatibility
+layers usually try to make interfaces like chmod() work, but sometimes
+there simply is no good mapping.
+
 If all this is intimidating, have no (well, maybe only a little)
 fear.  There are modules that can help.  The File::Spec modules
 provide methods to do the Right Thing on whatever platform happens
@@ -423,13 +430,13 @@ simple, platform-independent mailing.
 The Unix System V IPC (C<msg*(), sem*(), shm*()>) is not available
 even on all Unix platforms.
 
-Do not use either the bare result of C<pack("N", 10, 20, 30, 40)>
-or bare v-strings (such as C<v10.20.30.40>) or to represent
-IPv4 addresses: both forms just pack the four bytes into network order.
-That this would be equal to the C language C<in_addr> struct (which is
-what the socket code internally uses) is not guaranteed.  To be
-portable use the routines of the Socket extension, such as
-C<inet_aton()>, C<inet_ntoa()>, and C<sockaddr_in()>.
+Do not use either the bare result of C<pack("N", 10, 20, 30, 40)> or
+bare v-strings (such as C<v10.20.30.40>) to represent IPv4 addresses:
+both forms just pack the four bytes into network order.  That this
+would be equal to the C language C<in_addr> struct (which is what the
+socket code internally uses) is not guaranteed.  To be portable use
+the routines of the Socket extension, such as C<inet_aton()>,
+C<inet_ntoa()>, and C<sockaddr_in()>.
 
 The rule of thumb for portable code is: Do it all in portable Perl, or
 use a module (that may internally implement it with platform-specific
@@ -538,12 +545,30 @@ more efficient that the first.
 
 Most multi-user platforms provide basic levels of security, usually
 implemented at the filesystem level.  Some, however, do
-not--unfortunately.  Thus the notion of user id, or "home" directory,
+not-- unfortunately.  Thus the notion of user id, or "home" directory,
 or even the state of being logged-in, may be unrecognizable on many
 platforms.  If you write programs that are security-conscious, it
 is usually best to know what type of system you will be running
 under so that you can write code explicitly for that platform (or
 class of platforms).
+
+Don't assume the UNIX filesystem access semantics: the operating
+system or the filesystem may be using some ACL systems, which are
+richer languages than the usual rwx.  Even if the rwx exist,
+their semantics might be different.
+
+(From security viewpoint testing for permissions before attempting to
+do something is silly anyway: if one tries this, there is potential
+for race conditions-- someone or something might change the
+permissions between the permissions check and the actual operation.
+Just try the operation.)
+
+Don't assume the UNIX user and group semantics: especially, don't
+expect the C<< $< >> and C<< $> >> (or the C<$(> and C<$)>) to work
+for switching identities (or memberships).
+
+Don't assume set-uid and set-gid semantics. (And even if you do,
+think twice: set-uid and set-gid are a known can of security worms.)
 
 =head2 Style
 
@@ -559,7 +584,7 @@ often happens when tests spawn off other processes or call external
 programs to aid in the testing, or when (as noted above) the tests
 assume certain things about the filesystem and paths.  Be careful
 not to depend on a specific output style for errors, such as when
-checking C<$!> after an system call.  Some platforms expect a certain
+checking C<$!> after a system call.  Some platforms expect a certain
 output format, and perl on those platforms may have been adjusted
 accordingly.  Most specifically, don't anchor a regex when testing
 an error value.
@@ -1416,6 +1441,17 @@ Implemented via Spawn. (VM/ESA)
 Does not automatically flush output handles on some platforms.
 (SunOS, Solaris, HP-UX)
 
+=item exit EXPR
+
+=item exit
+
+Emulates UNIX exit() (which considers C<exit 1> to indicate an error) by
+mapping the C<1> to SS$_ABORT (C<44>).  This behavior may be overridden
+with the pragma C<use vmsish 'exit'>.  As with the CRTL's exit()
+function, C<exit 0> is also mapped to an exit status of SS$_NORMAL
+(C<1>); this mapping cannot be overridden.  Any other argument to exit()
+is used directly as Perl's exit status. (VMS)
+
 =item fcntl FILEHANDLE,FUNCTION,SCALAR
 
 Not implemented. (Win32, VMS)
@@ -1559,17 +1595,6 @@ Not implemented. (S<Mac OS>, Win32, Plan9)
 
 Not implemented. (Plan9, Win32)
 
-=item exit EXPR
-
-=item exit
-
-Emulates UNIX exit() (which considers C<exit 1> to indicate an error) by
-mapping the C<1> to SS$_ABORT (C<44>).  This behavior may be overridden
-with the pragma C<use vmsish 'exit'>.  As with the CRTL's exit()
-function, C<exit 0> is also mapped to an exit status of SS$_NORMAL
-(C<1>); this mapping cannot be overridden.  Any other argument to exit()
-is used directly as Perl's exit status. (VMS)
-
 =item getsockopt SOCKET,LEVEL,OPTNAME
 
 Not implemented. (Plan9)
@@ -1658,11 +1683,11 @@ Not implemented. (Win32, VMS, S<RISC OS>)
 
 =item select RBITS,WBITS,EBITS,TIMEOUT
 
-Only implemented on sockets. (Win32)
+Only implemented on sockets. (Win32, VMS)
 
 Only reliable on sockets. (S<RISC OS>)
 
-Note that the C<socket FILEHANDLE> form is generally portable.
+Note that the C<select FILEHANDLE> form is generally portable.
 
 =item semctl ID,SEMNUM,CMD,ARG
 
@@ -1823,7 +1848,7 @@ is finally closed. (AmigaOS)
 
 =item utime LIST
 
-Only the modification time is updated. (S<Mac OS>, VMS, S<RISC OS>)
+Only the modification time is updated. (S<BeOS>, S<Mac OS>, VMS, S<RISC OS>)
 
 May not behave as expected.  Behavior depends on the C runtime
 library's implementation of utime(), and the filesystem being
@@ -1937,7 +1962,7 @@ First public release with perl5.005.
 
 As of early 2001 (the Perl releases 5.6.1 and 5.7.1), the following
 platforms are able to build Perl from the standard source code
-distribution available at http://www.perl.com/CPAN/src/index.html
+distribution available at http://www.cpan.org/src/index.html
 
 	AIX
 	AmigaOS
@@ -2063,7 +2088,7 @@ Support for the following platform is planned for a future Perl release:
 	Netware
 
 The following platforms have their own source code distributions and
-binaries available via http://www.perl.com/CPAN/ports/index.html:
+binaries available via http://www.cpan.org/ports/index.html:
 
 				Perl release
 
@@ -2072,7 +2097,7 @@ binaries available via http://www.perl.com/CPAN/ports/index.html:
 	Tandem Guardian		5.004
 
 The following platforms have only binaries available via
-http://www.perl.com/CPAN/ports/index.html :
+http://www.cpan.org/ports/index.html :
 
 				Perl release
 
@@ -2083,7 +2108,7 @@ http://www.perl.com/CPAN/ports/index.html :
 Although we do suggest that you always build your own Perl from
 the source code, both for maximal configurability and for security,
 in case you are in a hurry you can check
-http://www.perl.com/CPAN/ports/index.html for binary distributions.
+http://www.cpan.org/ports/index.html for binary distributions.
 
 =head1 SEE ALSO
 
