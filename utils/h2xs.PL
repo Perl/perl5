@@ -1242,12 +1242,25 @@ END
     errno = 0;
 END
 
-  print $fh <<"END" if $off;
-    if ($offarg + $off >= len ) {
+  if ($off) {
+      my $null = 0;
+
+      foreach my $letter (keys %leading) {
+	  if ($letter eq '') {
+	      $null = 1;
+	      break;
+	  }
+      }
+
+      my $cmp = $null ? '>' : '>=';
+
+      print $fh <<"END"
+    if ($offarg + $off $cmp len ) {
 	errno = EINVAL;
 	return 0;
     }
 END
+  }
 
   print $fh <<"END";
     switch (name[$offarg + $off]) {
