@@ -289,6 +289,8 @@
 #define invert			Perl_invert
 #define io_close		Perl_io_close
 #define jmaybe			Perl_jmaybe
+#define key_create		Perl_key_create
+#define key_destroy		Perl_key_destroy
 #define keyword			Perl_keyword
 #define know_next		Perl_know_next
 #define last_lop		Perl_last_lop
@@ -459,6 +461,7 @@
 #define newWHILEOP		Perl_newWHILEOP
 #define newXS			Perl_newXS
 #define newXSUB			Perl_newXSUB
+#define new_struct_thread	Perl_new_struct_thread
 #define nextargv		Perl_nextargv
 #define nexttoke		Perl_nexttoke
 #define nexttype		Perl_nexttype
@@ -513,6 +516,7 @@
 #define padix			Perl_padix
 #define patleave		Perl_patleave
 #define peep			Perl_peep
+#define per_thread_magicals	Perl_per_thread_magicals
 #define pidgone			Perl_pidgone
 #define pidstatus		Perl_pidstatus
 #define pmflag			Perl_pmflag
@@ -1263,7 +1267,8 @@
 #define e_tmpname		(curinterp->Ie_tmpname)
 #define endav			(curinterp->Iendav)
 #define envgv			(curinterp->Ienvgv)
-#define errgv			(curinterp->Ierrgv)
+#define errhv			(curinterp->Ierrhv)
+#define errsv			(curinterp->Ierrsv)
 #define eval_root		(curinterp->Ieval_root)
 #define eval_start		(curinterp->Ieval_start)
 #define fdpid			(curinterp->Ifdpid)
@@ -1277,6 +1282,8 @@
 #define incgv			(curinterp->Iincgv)
 #define initav			(curinterp->Iinitav)
 #define inplace			(curinterp->Iinplace)
+#define keys			(curinterp->Ikeys)
+#define keys_mutex		(curinterp->Ikeys_mutex)
 #define last_in_gv		(curinterp->Ilast_in_gv)
 #define lastfd			(curinterp->Ilastfd)
 #define lastretstr		(curinterp->Ilastretstr)
@@ -1289,6 +1296,7 @@
 #define lineary			(curinterp->Ilineary)
 #define localizing		(curinterp->Ilocalizing)
 #define localpatches		(curinterp->Ilocalpatches)
+#define magical_keys		(curinterp->Imagical_keys)
 #define main_cv			(curinterp->Imain_cv)
 #define main_root		(curinterp->Imain_root)
 #define main_start		(curinterp->Imain_start)
@@ -1415,7 +1423,8 @@
 #define Ie_tmpname		e_tmpname
 #define Iendav			endav
 #define Ienvgv			envgv
-#define Ierrgv			errgv
+#define Ierrhv			errhv
+#define Ierrsv			errsv
 #define Ieval_root		eval_root
 #define Ieval_start		eval_start
 #define Ifdpid			fdpid
@@ -1429,6 +1438,8 @@
 #define Iincgv			incgv
 #define Iinitav			initav
 #define Iinplace		inplace
+#define Ikeys			keys
+#define Ikeys_mutex		keys_mutex
 #define Ilast_in_gv		last_in_gv
 #define Ilastfd			lastfd
 #define Ilastretstr		lastretstr
@@ -1441,6 +1452,7 @@
 #define Ilineary		lineary
 #define Ilocalizing		localizing
 #define Ilocalpatches		localpatches
+#define Imagical_keys		magical_keys
 #define Imain_cv		main_cv
 #define Imain_root		main_root
 #define Imain_start		main_start
@@ -1576,7 +1588,8 @@
 #define e_fp			Perl_e_fp
 #define e_tmpname		Perl_e_tmpname
 #define endav			Perl_endav
-#define errgv			Perl_errgv
+#define errhv			Perl_errhv
+#define errsv			Perl_errsv
 #define eval_root		Perl_eval_root
 #define eval_start		Perl_eval_start
 #define fdpid			Perl_fdpid
@@ -1590,6 +1603,8 @@
 #define incgv			Perl_incgv
 #define initav			Perl_initav
 #define inplace			Perl_inplace
+#define keys			Perl_keys
+#define keys_mutex		Perl_keys_mutex
 #define last_in_gv		Perl_last_in_gv
 #define lastfd			Perl_lastfd
 #define lastretstr		Perl_lastretstr
@@ -1602,6 +1617,7 @@
 #define lineary			Perl_lineary
 #define localizing		Perl_localizing
 #define localpatches		Perl_localpatches
+#define magical_keys		Perl_magical_keys
 #define main_cv			Perl_main_cv
 #define main_root		Perl_main_root
 #define main_start		Perl_main_start

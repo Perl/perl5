@@ -413,7 +413,6 @@ refto(SV *sv)
     else if (SvPADTMP(sv))
 	sv = newSVsv(sv);
     else {
-	dTHR;			/* just for SvREFCNT_inc */
 	SvTEMP_off(sv);
 	(void)SvREFCNT_inc(sv);
     }
@@ -4303,5 +4302,17 @@ PP(pp_lock)
 	retsv = refto(retsv);
     }
     SETs(retsv);
+    RETURN;
+}
+
+PP(pp_specific)
+{
+#ifdef USE_THREADS
+    dSP;
+    SV **svp = av_fetch(thr->specific, op->op_targ, TRUE);
+    XPUSHs(svp ? *svp : &sv_undef);
+#else
+    DIE("tried to access thread-specific data in non-threaded perl");
+#endif /* USE_THREADS */
     RETURN;
 }
