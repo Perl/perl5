@@ -1,7 +1,7 @@
 package open;
 use warnings;
 use Carp;
-$open::hint_bits = 0x20000;
+$open::hint_bits = 0x20000; # HINT_LOCALIZE_HH
 
 our $VERSION = '1.01';
 

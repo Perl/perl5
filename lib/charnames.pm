@@ -6,7 +6,7 @@ use File::Spec;
 our $VERSION = '1.02';
 
 use bytes ();		# for $bytes::hint_bits
-$charnames::hint_bits = 0x20000;
+$charnames::hint_bits = 0x20000; # HINT_LOCALIZE_HH
 
 my %alias1 = (
 		# Icky 3.2 names with parentheses.
