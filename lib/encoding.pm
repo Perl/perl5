@@ -100,6 +100,10 @@ If no encoding is specified, the environment variable L<PERL_ENCODING>
 is consulted.  If that fails, "latin1" (ISO 8859-1) is assumed.  If no
 encoding can be found, C<Unknown encoding '...'> error will be thrown.
 
+Note if you want to get back to the original byte encoding, you need
+to use things like I/O with encoding discplines (see L<open>) or the
+Encode module, since C<no encoding> (or re-C<encoding>) do not work.
+
 =head1 KNOWN PROBLEMS
 
 For native multibyte encodings (either fixed or variable length)
@@ -107,6 +111,7 @@ the current implementation of the regular expressions may introduce
 recoding errors for longer regular expression literals than 127 bytes.
 
 The encoding pragma is not supported on EBCDIC platforms.
+(Porters wanted.)
 
 =head1 SEE ALSO
 
