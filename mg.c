@@ -643,8 +643,10 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	    sv_setsv(sv, &PL_sv_undef);
 	break;
     case '\017':		/* ^O & ^OPEN */
-	if (*(mg->mg_ptr+1) == '\0')
+	if (*(mg->mg_ptr+1) == '\0') {
 	    sv_setpv(sv, PL_osname);
+	    SvTAINTED_off(sv);
+	}
 	else if (strEQ(mg->mg_ptr, "\017PEN")) {
 	    if (!PL_compiling.cop_io)
 		sv_setsv(sv, &PL_sv_undef);
@@ -2096,12 +2098,14 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '\017':	/* ^O */
 	if (*(mg->mg_ptr+1) == '\0') {
-	    if (PL_osname)
+	    if (PL_osname) {
 		Safefree(PL_osname);
-	    if (SvOK(sv))
-		PL_osname = savepv(SvPV(sv,len));
-	    else
 		PL_osname = Nullch;
+	    }
+	    if (SvOK(sv)) {
+		TAINT_PROPER("assigning to $^O");
+		PL_osname = savepv(SvPV(sv,len));
+	    }
 	}
 	else if (strEQ(mg->mg_ptr, "\017PEN")) {
 	    if (!PL_compiling.cop_io)
