@@ -4515,7 +4515,7 @@ PP(pp_ghostent)
     EXTEND(SP, 10);
     if (which == OP_GHBYNAME)
 #ifdef HAS_GETHOSTBYNAME
-	hent = PerlSock_gethostbyname(POPpx);
+	hent = PerlSock_gethostbyname(POPpbytex);
 #else
 	DIE(aTHX_ PL_no_sock_func, "gethostbyname");
 #endif
@@ -4524,7 +4524,7 @@ PP(pp_ghostent)
 	int addrtype = POPi;
 	SV *addrsv = POPs;
 	STRLEN addrlen;
-	Netdb_host_t addr = (Netdb_host_t) SvPV(addrsv, addrlen);
+	Netdb_host_t addr = (Netdb_host_t) SvPVbyte(addrsv, addrlen);
 
 	hent = PerlSock_gethostbyaddr(addr, (Netdb_hlen_t) addrlen, addrtype);
 #else

@@ -37,7 +37,7 @@ foreach (keys %datahandle) {
 }
 
 @tests = @ARGV;
-@tests = <base/*.t comp/*.t cmd/*.t io/*.t op/*.t pragma/*.t lib/*.t> unless @tests;
+@tests = <base/*.t comp/*.t cmd/*.t io/*.t op/*.t pragma/*.t lib/*.t camel-III/*.t> unless @tests;
 
 Test::Harness::runtests @tests;
 exit(0) unless -e "../testcompile";
@@ -46,7 +46,7 @@ exit(0) unless -e "../testcompile";
 #        op/bop.t	1
 #        lib/hostname.t	1
 #	 op/lex_assign.t	1
-#	 lib/ph.t	1  
+#	 lib/ph.t	1
 #        );
 
 my $dhwrapper = <<'EOT';
@@ -72,10 +72,10 @@ EOT
 print "The tests ", join(' ', keys(%infinite)),
     " generate infinite loops! Skipping!\n";
 
-$ENV{'HARNESS_COMPILE_TEST'} = 1; 
+$ENV{'HARNESS_COMPILE_TEST'} = 1;
 $ENV{'PERLCC_TIMEOUT'} = 120 unless $ENV{'PERLCC_TIMEOUT'};
 
-Test::Harness::runtests @tests; 
+Test::Harness::runtests @tests;
 foreach (keys %datahandle) {
      unlink "$_.t";
 }
