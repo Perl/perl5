@@ -134,9 +134,12 @@ C<oct()>:
     $answer = 0b101010;
     printf "The answer is: %b\n", oct("0b101010");
 
-=head2 Too large hexadecimal, octal, and binary constants more serious
+=head2 Literal hexadecimal, octal, and binary numbers must fit within native sizes
 
-Too large hexadecimal, octal, and binary constants now cause fatal errors.
+The warning that used to be produced when encountering hexadecimal, octal,
+and binary literals that are too large to be represented as native integers
+has now been promoted to a fatal error.  Literal decimal numbers are
+unaffected.
 
 =head2 syswrite() ease-of-use
 

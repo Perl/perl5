@@ -18,8 +18,11 @@ desperation):
 Optional warnings are enabled by using the B<-w> switch.  Warnings may
 be captured by setting C<$SIG{__WARN__}> to a reference to a routine that
 will be called on each warning instead of printing it.  See L<perlvar>.
+
 Trappable errors may be trapped using the eval operator.  See
-L<perlfunc/eval>.
+L<perlfunc/eval>.  In almost all cases, warnings may be selectively
+disabled or promoted to fatal errors using the C<warning> pragma.
+See L<warning>.
 
 Some of these messages are generic.  Spots that vary are denoted with a %s,
 just as in a printf format.  Note that some messages start with a %s!
@@ -469,18 +472,9 @@ likely depends on its correct operation, Perl just gave up.
 
 =item Binary number > 0b11111111111111111111111111111111 non-portable
 
-(W) The binary number you specified is larger than 2**32-1 and
-therefore non-portable between systems.  If you know that your code is
-always going to be used only in systems that have more than 32-bit
-integers (which means that Perl should be able to use such), you can
-silence this warning by
-
-	{
-	    no warning 'unsafe';
-	    .... your code here ...
-	}
-
-See also L<perlport> for writing portable code.
+(W) The binary number you specified is larger than 2**32-1 and therefore
+generally non-portable between systems.  See L<perlport> for more on
+portability concerns.
 
 =item bind() on closed fd
 
@@ -1356,7 +1350,8 @@ the name.
 
 =item Format %s redefined
 
-(W) You redefined a format.  To suppress this warning, say
+(W) You redefined a format, perhaps accidentally.  To suppress this warning,
+say
 
     {
 	no warning;
@@ -1432,17 +1427,8 @@ is now heavily deprecated.
 =item Hexadecimal number > 0xffffffff non-portable
 
 (W) The hexadecimal number you specified is larger than 2**32-1 and
-therefore non-portable between systems.  If you know that your code is
-always going to be used only in systems that have more than 32-bit
-integers (which means that Perl should be able to use such), you can
-silence this warning by
-
-	{
-	    no warning 'unsafe';
-	    .... your code here ...
-	}
-
-See also L<perlport> for writing portable code.
+therefore non-portable between systems.  See L<perlport> for more on
+portability concerns.
 
 =item Identifier too long
 
@@ -1997,17 +1983,8 @@ try using scientific notation (e.g. "1e6" instead of "1_000_000").
 =item Octal number > 037777777777 non-portable
 
 (W) The octal number you specified is larger than 2**32-1 and
-therefore non-portable between systems.  If you know that your code is
-always going to be used only in systems that have more than 32-bit
-integers (which means that Perl should be able to use such), you can
-silence this warning by
-
-	{
-	    no warning 'unsafe';
-	    .... your code here ...
-	}
-
-See also L<perlport> for writing portable code.
+therefore non-portable between systems.  See L<perlport> for more on
+portability concerns.
 
 =item Odd number of elements in hash assignment
 
@@ -2642,7 +2619,8 @@ may break this.
 
 =item Subroutine %s redefined
 
-(W) You redefined a subroutine.  To suppress this warning, say
+(W) You redefined a subroutine, perhaps accidentally.  To suppress this
+warning, say
 
     {
 	no warning;
