@@ -118,23 +118,43 @@ my %encode_types = (U => \&encode_U,
 eval "\@ARGV = map(glob(\$_),\@ARGV)" if ($^O eq 'MSWin32');
 
 my %opt;
-getopts('qOo:f:n:',\%opt);
+# I think these are:
+# -Q to disable the duplicate codepoint test
+# -q to remove comments written to output files
+# -O to enable the (brute force) substring optimiser
+# -o <output> to specify the output file name (else it's the first arg)
+# -f <inlist> to give a file with a list of input files (else use the args)
+# -n <name> to name the encoding (else use the basename of the input file.
+getopts('QqOo:f:n:',\%opt);
+
+# This really should go first, else the die here causes empty (non-erroneous)
+# output files to be written.
+my @encfiles;
+if (exists $opt{'f'}) {
+    # -F is followed by name of file containing list of filenames
+    my $flist = $opt{'f'};
+    open(FLIST,$flist) || die "Cannot open $flist:$!";
+    chomp(@encfiles = <FLIST>);
+    close(FLIST);
+} else {
+    @encfiles = @ARGV;
+}
+
 my $cname = (exists $opt{'o'}) ? $opt{'o'} : shift(@ARGV);
 chmod(0666,$cname) if -f $cname && !-w $cname;
 open(C,">$cname") || die "Cannot open $cname:$!";
 
-
 my $dname = $cname;
-$dname =~ s/(\.[^\.]*)?$/_def.h/;
+my $hname = $cname;
 
 my ($doC,$doEnc,$doUcm,$doPet);
 
 if ($cname =~ /\.(c|xs)$/)
  {
   $doC = 1;
+  $dname =~ s/(\.[^\.]*)?$/_def.h/;
   chmod(0666,$dname) if -f $cname && !-w $dname;
   open(D,">$dname") || die "Cannot open $dname:$!";
-  my $hname = $cname;
   $hname =~ s/(\.[^\.]*)?$/.h/;
   chmod(0666,$hname) if -f $cname && !-w $hname;
   open(H,">$hname") || die "Cannot open $hname:$!";
@@ -171,20 +191,6 @@ elsif ($cname =~ /\.ucm$/)
 elsif ($cname =~ /\.pet$/)
  {
   $doPet = 1;
- }
-
-my @encfiles;
-if (exists $opt{'f'})
- {
-  # -F is followed by name of file containing list of filenames
-  my $flist = $opt{'f'};
-  open(FLIST,$flist) || die "Cannot open $flist:$!";
-  chomp(@encfiles = <FLIST>);
-  close(FLIST);
- }
-else
- {
-  @encfiles = @ARGV;
  }
 
 my %encoding;
@@ -288,8 +294,9 @@ END
     print C "#include \"$dname\"\n";
     print C "}\n";
    }
-  close(D);
-  close(H);
+  # Close in void context is bad, m'kay
+  close(D) or warn "Error closing '$dname': $!";
+  close(H) or warn "Error closing '$hname': $!";
 
   my $perc_saved    = $strings/($strings + $saved) * 100;
   my $perc_subsaved = $strings/($strings + $subsave) * 100;
@@ -316,9 +323,11 @@ elsif ($doUcm)
    }
  }
 
-close(C);
+# writing half meg files and then not checking to see if you just filled the
+# disk is bad, m'kay
+close(C) or die "Error closing '$cname': $!";
 
-
+# End of the main program.
 
 sub compile_ucm
 {
@@ -432,7 +441,9 @@ sub compile_enc
   my $v = hex($def);
   $rep = &$type_func($v & 0xFF, ($v >> 8) & 0xffe);
  }
- my %seen;
+ my $seen;
+ # use -Q to silence the seen test. Makefile.PL uses this by default.
+ $seen = {} unless $opt{Q};
  do
   {
    my $line = <$fh>;
@@ -463,18 +474,21 @@ sub compile_enc
          $max_el = $el if $el > $max_el;
          $min_el = $el if $el < $min_el;
          my $uch = encode_U($val);
-         # We don't need to read this quickly, so storing it as a scalar,
-         # rather than 3 (anon array, plus the 2 scalars it holds) saves
-         # RAM and may make us faster on low RAM systems. [see __END__]
-         if (exists $seen{$uch})
-          {
-           warn sprintf("U%04X is %02X%02X and %04X\n",
-                        $val,$page,$ch,$seen{$uch});
-          }
-         else
-          {
-           $seen{$uch} = $page << 8 | $ch;
-          }
+         if ($seen) {
+           # We're doing the test.
+           # We don't need to read this quickly, so storing it as a scalar,
+           # rather than 3 (anon array, plus the 2 scalars it holds) saves
+           # RAM and may make us faster on low RAM systems. [see __END__]
+           if (exists $seen->{$uch})
+             {
+               warn sprintf("U%04X is %02X%02X and %04X\n",
+                            $val,$page,$ch,$seen->{$uch});
+             }
+           else
+             {
+               $seen->{$uch} = $page << 8 | $ch;
+             }
+         }
          # Passing 2 extra args each time is 3.6% slower!
          # Even with having to add $fallback ||= 0 later
          enter_fb0($e2u,$ech,$uch);
@@ -756,7 +770,7 @@ sub output_ucm_page
       #foreach my $c (split(//,$out_bytes)) {
       #  $s .= sprintf "\\x%02X",ord($c);
       #}
-      # 9.5% faster changing that lloop to this:
+      # 9.5% faster changing that loop to this:
       $s .= sprintf +("\\x%02X" x length $out_bytes), unpack "C*", $out_bytes;
       $s .= sprintf " |%d # %s\n",($fallback ? 1 : 0),$uname[$u];
       push(@$cmap,$s);
