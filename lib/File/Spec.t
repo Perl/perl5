@@ -36,7 +36,8 @@ require File::Spec::Mac ;
 # $root is only needed by Mac OS tests; these particular
 # tests are skipped on other OSs
 my $root;
-if  ($^O eq 'MacOS') {
+if ($^O eq 'MacOS') {
+	push @INC, "::lib:$MacPerl::Architecture";
 	$root = File::Spec::Mac->rootdir();
 }
 
@@ -264,7 +265,7 @@ if  ($^O eq 'MacOS') {
 [ "VMS->catdir('','-','','d3')",                                          '[-.d3]'            ],
 [ "VMS->catdir('dir.dir','d2.dir','d3.dir')",                             '[.dir.d2.d3]'        ],
 [ "VMS->catdir('[.name]')",                                               '[.name]'            ],
-[ "VMS->catdir('[.name]','[.name]')",                                     '[.name.name]'],    
+[ "VMS->catdir('[.name]','[.name]')",                                     '[.name.name]'],
 
 [  "VMS->abs2rel('node::volume:[t1.t2.t3]','[t1.t2.t3]')", ''                 ],
 [  "VMS->abs2rel('node::volume:[t1.t2.t4]','[t1.t2.t3]')", '[-.t4]'           ],
@@ -295,7 +296,7 @@ if  ($^O eq 'MacOS') {
 
 [ "Mac->catpath('hd','','')",            'hd:'             ],
 [ "Mac->catpath('hd:','','')",           'hd:'             ],
-[ "Mac->catpath('hd:',':','')",          'hd:'             ], 
+[ "Mac->catpath('hd:',':','')",          'hd:'             ],
 [ "Mac->catpath('hd:','::','')",         'hd::'            ],
 
 [ "Mac->catpath('hd','','file')",       'hd:file'          ],
@@ -374,17 +375,17 @@ if  ($^O eq 'MacOS') {
 [ "Mac->catdir(':')",              ':'            ],
 
 [ "Mac->catdir('', '')",           $root, 'MacOS' ], # skipped on other OS
-[ "Mac->catdir('', ':')",          $root, 'MacOS' ], # skipped on other OS 
-[ "Mac->catdir(':', ':')",         ':'            ],  
-[ "Mac->catdir(':', '')",          ':'            ], 
+[ "Mac->catdir('', ':')",          $root, 'MacOS' ], # skipped on other OS
+[ "Mac->catdir(':', ':')",         ':'            ],
+[ "Mac->catdir(':', '')",          ':'            ],
 
 [ "Mac->catdir('', '::')",         $root, 'MacOS' ], # skipped on other OS
-[ "Mac->catdir(':', '::')",        '::'           ], 
+[ "Mac->catdir(':', '::')",        '::'           ],
 
-[ "Mac->catdir('::', '')",         '::'           ],  
-[ "Mac->catdir('::', ':')",        '::'           ], 
+[ "Mac->catdir('::', '')",         '::'           ],
+[ "Mac->catdir('::', ':')",        '::'           ],
 
-[ "Mac->catdir('::', '::')",       ':::'          ], 
+[ "Mac->catdir('::', '::')",       ':::'          ],
 
 [ "Mac->catdir(':d1')",                    ':d1:'        ],
 [ "Mac->catdir(':d1:')",                   ':d1:'        ],
@@ -429,18 +430,18 @@ if  ($^O eq 'MacOS') {
 [ "Mac->catdir('hd:d1:',':d2')",    'hd:d1:d2:'   ],
 [ "Mac->catdir('hd:d1:',':d2:')",   'hd:d1:d2:'   ],
 
-[ "Mac->catfile()",                      ''                      ], 
+[ "Mac->catfile()",                      ''                      ],
 [ "Mac->catfile('')",                    ''                      ],
-[ "Mac->catfile('', '')",                $root         , 'MacOS' ], # skipped on other OS 
+[ "Mac->catfile('', '')",                $root         , 'MacOS' ], # skipped on other OS
 [ "Mac->catfile('', 'file')",            $root . 'file', 'MacOS' ], # skipped on other OS
 [ "Mac->catfile(':')",                   ':'                     ],
 [ "Mac->catfile(':', '')",               ':'                     ],
 
 [ "Mac->catfile('d1','d2','file')",      ':d1:d2:file' ],
 [ "Mac->catfile('d1','d2',':file')",     ':d1:d2:file' ],
-[ "Mac->catfile('file')",                'file'        ], 
-[ "Mac->catfile(':', 'file')",           ':file'       ], 
- 
+[ "Mac->catfile('file')",                'file'        ],
+[ "Mac->catfile(':', 'file')",           ':file'       ],
+
 [ "Mac->canonpath('')",                   ''     ],
 [ "Mac->canonpath(':')",                  ':'    ],
 [ "Mac->canonpath('::')",                 '::'   ],
@@ -449,7 +450,7 @@ if  ($^O eq 'MacOS') {
 
 [ "Mac->abs2rel('hd:d1:d2:','hd:d1:d2:')",            ':'            ],
 [ "Mac->abs2rel('hd:d1:d2:','hd:d1:d2:file')",        ':'            ], # ignore base's file portion
-[ "Mac->abs2rel('hd:d1:d2:file','hd:d1:d2:')",        ':file'        ], 
+[ "Mac->abs2rel('hd:d1:d2:file','hd:d1:d2:')",        ':file'        ],
 [ "Mac->abs2rel('hd:d1:','hd:d1:d2:')",               '::'           ],
 [ "Mac->abs2rel('hd:d3:','hd:d1:d2:')",               ':::d3:'       ],
 [ "Mac->abs2rel('hd:d3:','hd:d1:d2::')",              '::d3:'        ],
@@ -463,8 +464,8 @@ if  ($^O eq 'MacOS') {
 [ "Mac->abs2rel('hd1:d3:d4:d5:','hd2:d1:d2:')",       ':::d3:d4:d5:' ], # ignore base's volume
 [ "Mac->abs2rel('hd:','hd:d1:d2:')",                  ':::'          ],
 
-[ "Mac->rel2abs(':d3:','hd:d1:d2:')",          'hd:d1:d2:d3:'     ], 
-[ "Mac->rel2abs(':d3:d4:','hd:d1:d2:')",       'hd:d1:d2:d3:d4:'  ], 
+[ "Mac->rel2abs(':d3:','hd:d1:d2:')",          'hd:d1:d2:d3:'     ],
+[ "Mac->rel2abs(':d3:d4:','hd:d1:d2:')",       'hd:d1:d2:d3:d4:'  ],
 [ "Mac->rel2abs('','hd:d1:d2:')",              ''                 ],
 [ "Mac->rel2abs('::','hd:d1:d2:')",            'hd:d1:d2::'       ],
 [ "Mac->rel2abs('::','hd:d1:d2:file')",        'hd:d1:d2::'       ],# ignore base's file portion
