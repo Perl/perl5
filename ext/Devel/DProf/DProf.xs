@@ -539,7 +539,7 @@ XS(XS_DB_sub)
     {
 	HV *oldstash = PL_curstash;
 
-        DBG_SUB_NOTIFY("XS DBsub(%s)\n", SvPV(Sub, na));
+        DBG_SUB_NOTIFY("XS DBsub(%s)\n", SvPV_nolen(Sub));
 
 	SAVEDESTRUCTOR_X(check_depth, (void*)g_depth);
 	g_depth++;
@@ -578,7 +578,7 @@ XS(XS_DB_goto)
                 HV *oldstash = PL_curstash;
 		SV *Sub = GvSV(PL_DBsub);	/* name of current sub */
                 /* SP -= items;  added by xsubpp */
-                DBG_SUB_NOTIFY("XS DBsub(%s)\n", SvPV(Sub, na));
+                DBG_SUB_NOTIFY("XS DBsub(%s)\n", SvPV_nolen(Sub));
 
                 sv_setiv(PL_DBsingle, 0);	/* disable DB single-stepping */
 
