@@ -103,7 +103,7 @@ close(CFG);
 # perl.h logic duplication begins
 
 if ($define{USE_ITHREADS}) {
-    if (!$define{MULTIPLICITY} && !define{PERL_OBJECT}) {
+    if (!$define{MULTIPLICITY} && !$define{PERL_OBJECT}) {
         $define{MULTIPLICITY} = 1;
     }
 }
