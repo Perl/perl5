@@ -78,6 +78,10 @@ my @death =
  '/[[.barf.]]/' => 'POSIX syntax [. .] is reserved for future extensions in regex; marked by {#} in m/[[.barf.]{#}]/',
   
  '/[z-a]/' => 'Invalid [] range "z-a" in regex; marked by {#} in m/[z-a{#}]/',
+
+ '/\p/' => 'Empty \p{} in regex; marked by {#} in m/\p{#}/',
+
+ '/\P{}/' => 'Empty \P{} in regex; marked by {#} in m/\P{{#}}/',
 );
 
 ##
