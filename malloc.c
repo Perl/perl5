@@ -670,7 +670,7 @@ static  u_int start_slack;
 static	u_int goodsbrk;
 
 #ifdef DEBUGGING
-#define	ASSERT(p,diag)   if (!(p)) botch(diag,STRINGIFY(p));  else
+#define	P_ASSERT(p,diag)   if (!(p)) botch(diag,STRINGIFY(p));  else
 static void
 botch(char *diag, char *s)
 {
@@ -678,7 +678,7 @@ botch(char *diag, char *s)
 	PerlProc_abort();
 }
 #else
-#define	ASSERT(p, diag)
+#define	P_ASSERT(p, diag)
 #endif
 
 Malloc_t
@@ -1219,7 +1219,7 @@ free(void *mp)
 	    }
 	MUTEX_LOCK(&PL_malloc_mutex);
 #ifdef RCHECK
-  	ASSERT(ovp->ov_rmagic == RMAGIC, "chunk's head overwrite");
+  	P_ASSERT(ovp->ov_rmagic == RMAGIC, "chunk's head overwrite");
 	if (OV_INDEX(ovp) <= MAX_SHORT_BUCKET) {
 	    int i;
 	    MEM_SIZE nbytes = ovp->ov_size + 1;
@@ -1227,16 +1227,16 @@ free(void *mp)
 	    if ((i = nbytes & 3)) {
 		i = 4 - i;
 		while (i--) {
-		    ASSERT(*((char *)((caddr_t)ovp + nbytes - RSLOP + i))
+		    P_ASSERT(*((char *)((caddr_t)ovp + nbytes - RSLOP + i))
 			   == RMAGIC_C, "chunk's tail overwrite");
 		}
 	    }
 	    nbytes = (nbytes + 3) &~ 3; 
-	    ASSERT(*(u_int *)((caddr_t)ovp + nbytes - RSLOP) == RMAGIC, "chunk's tail overwrite");	    
+	    P_ASSERT(*(u_int *)((caddr_t)ovp + nbytes - RSLOP) == RMAGIC, "chunk's tail overwrite");	    
 	}
 	ovp->ov_rmagic = RMAGIC - 1;
 #endif
-  	ASSERT(OV_INDEX(ovp) < NBUCKETS, "chunk's head overwrite");
+  	P_ASSERT(OV_INDEX(ovp) < NBUCKETS, "chunk's head overwrite");
   	size = OV_INDEX(ovp);
 	ovp->ov_next = nextf[size];
   	nextf[size] = ovp;
@@ -1352,11 +1352,11 @@ realloc(void *mp, size_t nbytes)
 		       if ((i = nb & 3)) {
 			   i = 4 - i;
 			   while (i--) {
-			       ASSERT(*((char *)((caddr_t)ovp + nb - RSLOP + i)) == RMAGIC_C, "chunk's tail overwrite");
+			       P_ASSERT(*((char *)((caddr_t)ovp + nb - RSLOP + i)) == RMAGIC_C, "chunk's tail overwrite");
 			   }
 		       }
 		       nb = (nb + 3) &~ 3; 
-		       ASSERT(*(u_int *)((caddr_t)ovp + nb - RSLOP) == RMAGIC, "chunk's tail overwrite");
+		       P_ASSERT(*(u_int *)((caddr_t)ovp + nb - RSLOP) == RMAGIC, "chunk's tail overwrite");
 			/*
 			 * Convert amount of memory requested into
 			 * closest block size stored in hash buckets
