@@ -15,7 +15,7 @@ use ExtUtils::MakeMaker qw(prompt);
 use FileHandle ();
 use File::Path ();
 use vars qw($VERSION);
-$VERSION = substr q$Revision: 1.20 $, 10;
+$VERSION = substr q$Revision: 1.21 $, 10;
 
 =head1 NAME
 
@@ -210,7 +210,7 @@ the default and recommended setting.
     if (@{$CPAN::Config->{urllist}||[]}) {
 	print qq{
 I found a list of URLs in CPAN::Config and will use this.
-You can change it later with the 'o conf' command.
+You can change it later with the 'o conf urllist' command.
 
 }
     } elsif (

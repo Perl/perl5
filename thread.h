@@ -261,6 +261,7 @@ struct thread {
 #ifdef ADD_THREAD_INTERN
     struct thread_intern i;		/* Platform-dependent internals */
 #endif
+    char	trailing_nul;		/* For the sake of thrsv, t->Toursv */
 };
 
 typedef struct thread *Thread;

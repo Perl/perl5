@@ -3178,7 +3178,7 @@ void my_endpwent()
 }
 /*}}}*/
 
-
+#if __VMS_VER < 70000000 || __DECC_VER < 50200000
 /* Used for UTC calculation in my_gmtime(), my_localtime(), my_time(),
  * my_utime(), and flex_stat(), all of which operate on UTC unless
  * VMSISH_TIMES is true.
@@ -3307,6 +3307,7 @@ my_localtime(const time_t *timep)
 #define localtime(t) my_localtime(t)
 #define time(t)      my_time(t)
 
+#endif /* VMS VER < 7.0 || Dec C < 5.2
 
 /* my_utime - update modification time of a file
  * calling sequence is identical to POSIX utime(), but under
@@ -3371,7 +3372,7 @@ int my_utime(char *file, struct utimbuf *utimes)
      */
     lowbit = (utimes->modtime & 1) ? secscale : 0;
     unixtime = (long int) utimes->modtime;
-#   ifdef VMSISH_TIME
+#if defined(VMSISH_TIME) && (__VMS_VER < 70000000 || __DECC_VER < 50200000)
     if (!VMSISH_TIME) {  /* Input was UTC; convert to local for sys svc */
       if (!gmtime_emulation_type) (void) time(NULL);  /* Initialize UTC */
       unixtime += utc_offset_secs;
@@ -3723,10 +3724,12 @@ flex_fstat(int fd, struct mystat *statbufp)
 #   else
     if (1) {
 #   endif
+#if __VMS_VER < 70000000 || __DECC_VER < 50200000
       if (!gmtime_emulation_type) (void)time(NULL);
       statbufp->st_mtime -= utc_offset_secs;
       statbufp->st_atime -= utc_offset_secs;
       statbufp->st_ctime -= utc_offset_secs;
+#endif
     }
     return 0;
   }
@@ -3777,10 +3780,12 @@ flex_stat(char *fspec, struct mystat *statbufp)
 #     else
       if (1) {
 #     endif
+#if __VMS_VER < 70000000 || __DECC_VER < 50200000
         if (!gmtime_emulation_type) (void)time(NULL);
         statbufp->st_mtime -= utc_offset_secs;
         statbufp->st_atime -= utc_offset_secs;
         statbufp->st_ctime -= utc_offset_secs;
+#endif
       }
     }
     return retval;

@@ -89,8 +89,6 @@ minus_p
 multiline
 mystrk
 nrs
-nthreads_cond
-nthreads
 ofmt
 ofs
 ofslen
@@ -140,7 +138,7 @@ sv_root
 sv_arenaroot
 tainted
 tainting
-threads_mutex
+thrsv
 tmps_floor
 tmps_ix
 tmps_max

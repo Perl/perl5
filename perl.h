@@ -1650,6 +1650,8 @@ EXTCONST char* block_type[];
 
 #include "perly.h"
 
+#define LEX_NOTPARSING		11	/* borrowed from toke.c */
+
 typedef enum {
     XOPERATOR,
     XTERM,
@@ -1962,6 +1964,11 @@ IEXT int	Ilaststatval IINIT(-1);
 IEXT I32	Ilaststype IINIT(OP_STAT);
 IEXT SV *	Imess_sv;
 
+#ifdef USE_THREADS
+/* threads stuff */
+IEXT SV *	Ithrsv;		/* holds struct thread for main thread */
+#endif /* USE_THREADS */
+
 #undef IEXT
 #undef IINIT
 
@@ -2002,7 +2009,8 @@ EXT MGVTBL vtbl_sv =	{magic_get,
 				magic_set,
 					magic_len,
 						0,	0};
-EXT MGVTBL vtbl_env =	{0,	0,	0,	magic_clear_all_env,
+EXT MGVTBL vtbl_env =	{0,	magic_set_all_env,
+				0,	magic_clear_all_env,
 							0};
 EXT MGVTBL vtbl_envelem =	{0,	magic_setenv,
 					0,	magic_clearenv,
@@ -2021,7 +2029,8 @@ EXT MGVTBL vtbl_packelem =	{magic_getpack,
 EXT MGVTBL vtbl_dbline =	{0,	magic_setdbline,
 					0,	0,	0};
 EXT MGVTBL vtbl_isa =	{0,	magic_setisa,
-					0,	0,	0};
+					0,	magic_setisa,
+							0};
 EXT MGVTBL vtbl_isaelem =	{0,	magic_setisa,
 					0,	0,	0};
 EXT MGVTBL vtbl_arylen =	{magic_getarylen,

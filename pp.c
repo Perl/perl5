@@ -441,6 +441,68 @@ PP(pp_bless)
     RETURN;
 }
 
+PP(pp_gelem)
+{
+    GV *gv;
+    SV *sv;
+    SV *ref;
+    char *elem;
+    dSP;
+
+    sv = POPs;
+    elem = SvPV(sv, na);
+    gv = (GV*)POPs;
+    ref = Nullsv;
+    sv = Nullsv;
+    switch (elem ? *elem : '\0')
+    {
+    case 'A':
+	if (strEQ(elem, "ARRAY"))
+	    ref = (SV*)GvAV(gv);
+	break;
+    case 'C':
+	if (strEQ(elem, "CODE"))
+	    ref = (SV*)GvCVu(gv);
+	break;
+    case 'F':
+	if (strEQ(elem, "FILEHANDLE")) /* XXX deprecate in 5.005 */
+	    ref = (SV*)GvIOp(gv);
+	break;
+    case 'G':
+	if (strEQ(elem, "GLOB"))
+	    ref = (SV*)gv;
+	break;
+    case 'H':
+	if (strEQ(elem, "HASH"))
+	    ref = (SV*)GvHV(gv);
+	break;
+    case 'I':
+	if (strEQ(elem, "IO"))
+	    ref = (SV*)GvIOp(gv);
+	break;
+    case 'N':
+	if (strEQ(elem, "NAME"))
+	    sv = newSVpv(GvNAME(gv), GvNAMELEN(gv));
+	break;
+    case 'P':
+	if (strEQ(elem, "PACKAGE"))
+	    sv = newSVpv(HvNAME(GvSTASH(gv)), 0);
+	break;
+    case 'S':
+	if (strEQ(elem, "SCALAR"))
+	    ref = GvSV(gv);
+	break;
+    }
+    if (ref)
+	sv = newRV(ref);
+    if (sv)
+	sv_2mortal(sv);
+    else
+	sv = &sv_undef;
+    XPUSHs(sv);
+    RETURN;
+}
+
 /* Pattern matching */
 
 PP(pp_study)
@@ -568,11 +630,11 @@ PP(pp_defined)
 	RETPUSHNO;
     switch (SvTYPE(sv)) {
     case SVt_PVAV:
-	if (AvMAX(sv) >= 0 || SvRMAGICAL(sv))
+	if (AvMAX(sv) >= 0 || SvGMAGICAL(sv))
 	    RETPUSHYES;
 	break;
     case SVt_PVHV:
-	if (HvARRAY(sv) || SvRMAGICAL(sv))
+	if (HvARRAY(sv) || SvGMAGICAL(sv))
 	    RETPUSHYES;
 	break;
     case SVt_PVCV:
@@ -2347,7 +2409,7 @@ PP(pp_anonhash)
 	SV *val = NEWSV(46, 0);
 	if (MARK < SP)
 	    sv_setsv(val, *++MARK);
-	else
+	else if (dowarn)
 	    warn("Odd number of elements in hash list");
 	(void)hv_store_ent(hv,key,val,0);
     }
@@ -2406,6 +2468,12 @@ PP(pp_splice)
 
     newlen = SP - MARK;
     diff = newlen - length;
+    if (newlen && !AvREAL(ary)) {
+	if (AvREIFY(ary))
+	    av_reify(ary);
+	else
+	    assert(AvREAL(ary));		/* would leak, so croak */
+    }
 
     if (diff < 0) {				/* shrinking the area */
 	if (newlen) {
@@ -2717,6 +2785,7 @@ PP(pp_unpack)
     register U32 culong;
     double cdouble;
     static char* bitcount = 0;
+    int commas = 0;
 
     if (gimme != G_ARRAY) {		/* arrange to do first one only */
 	/*SUPPRESS 530*/
@@ -2750,6 +2819,10 @@ PP(pp_unpack)
 	switch(datumtype) {
 	default:
 	    croak("Invalid type in unpack: '%c'", (int)datumtype);
+	case ',': /* grandfather in commas but with a warning */
+	    if (commas++ == 0 && dowarn)
+		warn("Invalid type in unpack: '%c'", (int)datumtype);
+	    break;
 	case '%':
 	    if (len == 1 && pat[-1] != '1')
 		len = 16;
@@ -3502,6 +3575,7 @@ PP(pp_pack)
     char *aptr;
     float afloat;
     double adouble;
+    int commas = 0;
 
     items = SP - MARK;
     MARK++;
@@ -3525,6 +3599,10 @@ PP(pp_pack)
 	switch(datumtype) {
 	default:
 	    croak("Invalid type in pack: '%c'", (int)datumtype);
+	case ',': /* grandfather in commas but with a warning */
+	    if (commas++ == 0 && dowarn)
+		warn("Invalid type in pack: '%c'", (int)datumtype);
+	    break;
 	case '%':
 	    DIE("%% may only be used in unpack");
 	case '@':
@@ -4140,6 +4218,11 @@ PP(pp_split)
     }
     if (realarray) {
 	SWITCHSTACK(ary, oldstack);
+	if (SvSMAGICAL(ary)) {
+	    PUTBACK;
+	    mg_set((SV*)ary);
+	    SPAGAIN;
+	}
 	if (gimme == G_ARRAY) {
 	    EXTEND(SP, iters);
 	    Copy(AvARRAY(ary), SP + 1, iters, SV*);

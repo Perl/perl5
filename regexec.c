@@ -145,7 +145,8 @@ regcppop()
  *	0 > length [ "foobar" =~ / ( (foo) | (bar) )* /x ]->[1]
  */
 static void
-regcppartblow()
+regcppartblow(base)
+I32 base;
 {
     dTHR;
     I32 i = SSPOPINT;
@@ -163,6 +164,7 @@ regcppartblow()
 	if (paren <= *reglastparen && regendp[paren] == endp)
 	    regstartp[paren] = startp;
     }
+    assert(savestack_ix == base);
 }
 
 #define regcpblow(cp) leave_scope(cp)
@@ -667,8 +669,8 @@ char *prog;
 	if (regnarrate) {
 	    SV *prop = sv_newmortal();
 	    regprop(prop, scan);
-	    PerlIO_printf(Perl_debug_log, "%*s%2d%-8.8s\t<%.10s>\n",
-			  regindent*2, "", scan - regprogram,
+	    PerlIO_printf(Perl_debug_log, "%*s%2ld%-8.8s\t<%.10s>\n",
+			  regindent*2, "", (long)(scan - regprogram),
 			  SvPVX(prop), locinput);
 	}
 #else

@@ -65,6 +65,10 @@ that don't resolve:
 	-l && !-e && print "bogus link: $File::Find::name\n";
     } 
 
+=head1 BUGS
+
+There is no way to make find or finddepth follow symlinks.
+
 =cut
 
 @ISA = qw(Exporter);

@@ -6,13 +6,10 @@
 # Trimmed and comments added by 
 #     Andy Dougherty  <doughera@lafcol.lafayette.edu>
 #     Exactly what is required beyond a standard OS/2 installation?
-#     There are notes about "patched pdksh" I do not understand.
+#     (see in README.os2)
 
 # Note that symbol extraction code gives wrong answers (sometimes?) on
 # gethostent and setsid.
-
-# Note that during the .obj compile you need to move the perl.dll file
-# to LIBPATH :-(
 
 # Optimization (GNU make 3.74 cannot be loaded :-():
 emxload -m 30 sh.exe ls.exe tr.exe id.exe sed.exe # make.exe 
@@ -24,28 +21,59 @@ path_sep=\;
 if test -f $sh.exe; then sh=$sh.exe; fi
 
 startsh="#!$sh"
-
-sysman=`../UU/loc . /man/man1 c:/man/man1 c:/usr/man/man1 d:/man/man1 d:/usr/man/man1 e:/man/man1 e:/usr/man/man1 f:/man/man1 f:/usr/man/man1 g:/man/man1 g:/usr/man/man1 /usr/man/man1`
 cc='gcc'
-usrinc='/emx/include'
-emxpath="`../UU/loc . /emx c:/emx d:/emx e:/emx f:/emx g:/emx h:/emx /emx`"
 
-libemx="$emxpath/lib"
+# Get some standard things (indented to avoid putting in config.sh):
+ oifs="$IFS"
+ IFS=" ;"
+ set $MANPATH
+ tryman="$@"
+ set $LIBRARY_PATH
+ libemx="$@"
+ set $C_INCLUDE_PATH
+ usrinc="$@"
+ IFS="$oifs"
+ tryman="`../UU/loc . /man $tryman`"
+ tryman="`echo $tryman | tr '\\\' '/'`"
+ 
+ # indented to avoid having it *two* times at start
+ libemx="`../UU/loc os2.a /emx/lib $libemx`"
+
+usrinc="`../UU/loc stdlib.h /emx/include $usrinc`"
+usrinc="`dirname $usrinc | tr '\\\' '/'`"
+libemx="`dirname $libemx | tr '\\\' '/'`"
+
+if test -d $tryman/man1; then
+  sysman="$tryman/man1"
+else
+  sysman="`../UU/loc . /man/man1 c:/man/man1 c:/usr/man/man1 d:/man/man1 d:/usr/man/man1 e:/man/man1 e:/usr/man/man1 f:/man/man1 f:/usr/man/man1 g:/man/man1 g:/usr/man/man1 /usr/man/man1`"
+fi
+
+emxpath="`dirname $libemx`"
+if test ! -d "$emxpath"; then 
+  emxpath="`../UU/loc . /emx c:/emx d:/emx e:/emx f:/emx g:/emx h:/emx /emx`"
+fi
+
+if test ! -d "$libemx"; then 
+  libemx="$emxpath/lib"
+fi
 if test ! -d "$libemx"; then 
   if test -d "$LIBRARY_PATH"; then
-    usrinc="$LIBRARY_PATH"
+    libemx="$LIBRARY_PATH"
   else
     libemx="`../UU/loc . X c:/emx/lib d:/emx/lib e:/emx/lib f:/emx/lib g:/emx/lib h:/emx/lib /emx/lib`"
   fi
 fi
 
-if test -d "$emxpath/include"; then 
-  usrinc="$emxpath/include"
-else
-  if test -d "$C_INCLUDE_PATH"; then
-    usrinc="$C_INCLUDE_PATH"
+if test ! -d "$usrinc"; then 
+  if test -d "$emxpath/include"; then 
+    usrinc="$emxpath/include"
   else
-    usrinc="`../UU/loc . X c:/emx/include d:/emx/include e:/emx/include f:/emx/include g:/emx/include h:/emx/include /emx/include`"
+    if test -d "$C_INCLUDE_PATH"; then
+      usrinc="$C_INCLUDE_PATH"
+    else
+      usrinc="`../UU/loc . X c:/emx/include d:/emx/include e:/emx/include f:/emx/include g:/emx/include h:/emx/include /emx/include`"
+    fi
   fi
 fi
 

@@ -31,7 +31,7 @@ Summary of my $package ($baserev patchlevel $PATCHLEVEL subversion $SUBVERSION) 
     ccflags ='$ccflags'
     stdchar='$stdchar', d_stdstdio=$d_stdstdio, usevfork=$usevfork
     voidflags=$voidflags, castflags=$castflags, d_casti32=$d_casti32, d_castneg=$d_castneg
-    intsize=$intsize, alignbytes=$alignbytes, usemymalloc=$usemymalloc, randbits=$randbits
+    intsize=$intsize, alignbytes=$alignbytes, usemymalloc=$usemymalloc, prototype=$prototype
   Linker and Libraries:
     ld='$ld', ldflags ='$ldflags'
     libpth=$libpth

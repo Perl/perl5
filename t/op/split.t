@@ -2,7 +2,7 @@
 
 # $RCSfile: split.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:26 $
 
-print "1..16\n";
+print "1..20\n";
 
 $FS = ':';
 
@@ -76,3 +76,17 @@ print "$a|$b" eq "2|4" ? "ok 15\n" : "not ok 15\n";
   local(undef, $a, undef, $b) = qw(1 2 3 4);
   print "$a|$b" eq "2|4" ? "ok 16\n" : "not ok 16\n";
 }
+
+# check splitting of null string
+$_ = join('|', split(/x/,   '',-1), 'Z');
+print $_ eq "Z" ? "ok 17\n" : "#$_\nnot ok 17\n";
+
+$_ = join('|', split(/x/,   '', 1), 'Z');
+print $_ eq "Z" ? "ok 18\n" : "#$_\nnot ok 18\n";
+
+$_ = join('|', split(/(p+)/,'',-1), 'Z');
+print $_ eq "Z" ? "ok 19\n" : "#$_\nnot ok 19\n";
+
+$_ = join('|', split(/.?/,  '',-1), 'Z');
+print $_ eq "Z" ? "ok 20\n" : "#$_\nnot ok 20\n";
+

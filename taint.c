@@ -14,7 +14,7 @@ char *s;
 {
     char *ug;
 
-    DEBUG_u(PerlIO_printf(PerlIO_stderr(),
+    DEBUG_u(PerlIO_printf(Perl_debug_log,
             "%s %d %d %d\n", s, tainted, uid, euid));
 
     if (tainted) {

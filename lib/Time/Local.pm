@@ -107,7 +107,9 @@ sub cheat {
     @g = gmtime($guess);
     $year += $YearFix if $year < $epoch;
     $lastguess = "";
+    $counter = 0;
     while ($diff = $year - $g[5]) {
+	croak "Can't handle date (".join(", ",@_).")" if ++$counter > 255;
 	$guess += $diff * (363 * $DAY);
 	@g = gmtime($guess);
 	if (($thisguess = "@g") eq $lastguess){
@@ -116,6 +118,7 @@ sub cheat {
 	$lastguess = $thisguess;
     }
     while ($diff = $month - $g[4]) {
+	croak "Can't handle date (".join(", ",@_).")" if ++$counter > 255;
 	$guess += $diff * (27 * $DAY);
 	@g = gmtime($guess);
 	if (($thisguess = "@g") eq $lastguess){

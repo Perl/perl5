@@ -208,10 +208,31 @@ ext/SDBM_File/typemap		SDBM extension interface types
 ext/Socket/Makefile.PL	Socket extension makefile writer
 ext/Socket/Socket.pm	Socket extension Perl module
 ext/Socket/Socket.xs	Socket extension external subroutines
+ext/Thread/Makefile.PL	Thread extension makefile writer
+ext/Thread/Notes	Thread notes
+ext/Thread/README	Thread README
+ext/Thread/Thread	Directory for Thread:: submodules
+ext/Thread/Thread/Queue.pm	Thread synchronised queue objects
+ext/Thread/Thread/Semaphore.pm	Thread semaphore objects
+ext/Thread/Thread.pm	Thread extension Perl module
+ext/Thread/Thread.xs	Thread extension external subroutines
+ext/Thread/create.t	Test thread creation
+ext/Thread/io.t		Test threads doing simple I/O
+ext/Thread/join.t	Test thread joining
+ext/Thread/join2.t	Test thread joining differently
+ext/Thread/list.t	Test getting list of all threads
+ext/Thread/lock.t	Test lock primitive
+ext/Thread/queue.t	Test Thread::Queue module
+ext/Thread/sync.t	Test thread synchronisation
+ext/Thread/sync2.t	Test thread synchronisation
+ext/Thread/typemap	Thread extension interface types
+ext/Thread/unsync.t	Test thread implicit synchronisation
+ext/Thread/unsync2.t	Test thread implicit synchronisation
+ext/Thread/unsync3.t	Test thread implicit synchronisation
+ext/Thread/unsync4.t	Test thread implicit synchronisation
 ext/attrs/Makefile.PL	attrs extension makefile writer
 ext/attrs/attrs.pm	attrs extension Perl module
 ext/attrs/attrs.xs	attrs extension external subroutines
-ext/util/extliblist	Used by extension Makefile.PL to make lib lists
 ext/util/make_ext	Used by Makefile to execute extension Makefiles
 ext/util/mkbootstrap	Turns ext/*/*_BS into bootstrap info
 form.h			Public declarations for the above
@@ -280,6 +301,7 @@ hints/next_3_0.sh	Hints for named architecture
 hints/next_4.sh		Hints for named architecture
 hints/opus.sh		Hints for named architecture
 hints/os2.sh		Hints for named architecture
+hints/os390.sh		Hints for named architecture
 hints/powerux.sh	Hints for named architecture
 hints/qnx.sh		Hints for named architecture
 hints/sco.sh		Hints for named architecture
@@ -407,6 +429,7 @@ lib/User/pwent.pm	By-name interface to Perl's builtin getpw*
 lib/abbrev.pl		An abbreviation table builder
 lib/assert.pl		assertion and panic with stack trace
 lib/autouse.pm		Load and call a function only when it's used
+lib/base.pm		Establish IS-A relationship at compile time
 lib/bigfloat.pl		An arbitrary precision floating point package
 lib/bigint.pl		An arbitrary precision integer arithmetic package
 lib/bigrat.pl		An arbitrary precision rational arithmetic package
@@ -659,6 +682,7 @@ t/lib/db-btree.t	See if DB_File works
 t/lib/db-hash.t		See if DB_File works
 t/lib/db-recno.t	See if DB_File works
 t/lib/dirhand.t		See if DirHandle works
+t/lib/dosglob.t		See if File::DosGlob works
 t/lib/english.t		See if English works
 t/lib/env.t		See if Env works
 t/lib/filecache.t	See if FileCache works

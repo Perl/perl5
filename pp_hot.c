@@ -99,68 +99,6 @@ PP(pp_gv)
     RETURN;
 }
 
-PP(pp_gelem)
-{
-    GV *gv;
-    SV *sv;
-    SV *ref;
-    char *elem;
-    dSP;
-
-    sv = POPs;
-    elem = SvPV(sv, na);
-    gv = (GV*)POPs;
-    ref = Nullsv;
-    sv = Nullsv;
-    switch (elem ? *elem : '\0')
-    {
-    case 'A':
-	if (strEQ(elem, "ARRAY"))
-	    ref = (SV*)GvAV(gv);
-	break;
-    case 'C':
-	if (strEQ(elem, "CODE"))
-	    ref = (SV*)GvCVu(gv);
-	break;
-    case 'F':
-	if (strEQ(elem, "FILEHANDLE")) /* XXX deprecate in 5.005 */
-	    ref = (SV*)GvIOp(gv);
-	break;
-    case 'G':
-	if (strEQ(elem, "GLOB"))
-	    ref = (SV*)gv;
-	break;
-    case 'H':
-	if (strEQ(elem, "HASH"))
-	    ref = (SV*)GvHV(gv);
-	break;
-    case 'I':
-	if (strEQ(elem, "IO"))
-	    ref = (SV*)GvIOp(gv);
-	break;
-    case 'N':
-	if (strEQ(elem, "NAME"))
-	    sv = newSVpv(GvNAME(gv), GvNAMELEN(gv));
-	break;
-    case 'P':
-	if (strEQ(elem, "PACKAGE"))
-	    sv = newSVpv(HvNAME(GvSTASH(gv)), 0);
-	break;
-    case 'S':
-	if (strEQ(elem, "SCALAR"))
-	    ref = GvSV(gv);
-	break;
-    }
-    if (ref)
-	sv = newRV(ref);
-    if (sv)
-	sv_2mortal(sv);
-    else
-	sv = &sv_undef;
-    XPUSHs(sv);
-    RETURN;
-}
-
 PP(pp_and)
 {
     dSP;
@@ -653,7 +591,8 @@ PP(pp_aassign)
 		*(relem++) = sv;
 		didstore = av_store(ary,i++,sv);
 		if (magic) {
-		    mg_set(sv);
+		    if (SvSMAGICAL(sv))
+			mg_set(sv);
 		    if (!didstore)
 			SvREFCNT_dec(sv);
 		}
@@ -680,13 +619,14 @@ PP(pp_aassign)
 		    *(relem++) = tmpstr;
 		    didstore = hv_store_ent(hash,sv,tmpstr,0);
 		    if (magic) {
-			mg_set(tmpstr);
+			if (SvSMAGICAL(tmpstr))
+			    mg_set(tmpstr);
 			if (!didstore)
 			    SvREFCNT_dec(tmpstr);
 		    }
 		    TAINT_NOT;
 		}
-		if (relem == lastrelem)
+		if (relem == lastrelem && dowarn)
 		    warn("Odd number of elements in hash list");
 	    }
 	    break;
@@ -1819,8 +1759,11 @@ PP(pp_entersub)
 	if (!SvROK(sv)) {
 	    char *sym;
 
-	    if (sv == &sv_yes)		/* unfound import, ignore */
+	    if (sv == &sv_yes) {		/* unfound import, ignore */
+		if (hasargs)
+		    SP = stack_base + POPMARK;
 		RETURN;
+	    }
 	    if (SvGMAGICAL(sv)) {
 		mg_get(sv);
 		sym = SvPOKp(sv) ? SvPVX(sv) : Nullch;
@@ -2293,6 +2236,14 @@ PP(pp_method)
     char* name;
     char* packname;
     STRLEN packlen;
+
+    if (SvROK(TOPs)) {
+	sv = SvRV(TOPs);
+	if (SvTYPE(sv) == SVt_PVCV) {
+	    SETs(sv);
+	    RETURN;
+	}
+    }
 
     name = SvPV(TOPs, na);
     sv = *(stack_base + TOPMARK + 1);

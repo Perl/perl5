@@ -18,9 +18,9 @@ long names in the current package.  Some of them even have medium names,
 generally borrowed from B<awk>.
 
 To go a step further, those variables that depend on the currently
-selected filehandle may instead be set by calling an object method on
-the FileHandle object.  (Summary lines below for this contain the word
-HANDLE.)  First you must say
+selected filehandle may instead (and preferably) be set by calling an
+object method on the FileHandle object.  (Summary lines below for this
+contain the word HANDLE.)  First you must say
 
     use FileHandle;
 
@@ -41,6 +41,12 @@ autoflush(), which will assume a 1 for you, just to be different.
 A few of these variables are considered "read-only".  This means that if
 you try to assign to this variable, either directly or indirectly through
 a reference, you'll raise a run-time exception.
+
+The following list is ordered by scalar variables first, then the
+arrays, then the hashes (except $^M was added in the wrong place).
+This is somewhat obscured by the fact that %ENV and %SIG are listed as
+$ENV{expr} and $SIG{expr}.
+
 
 =over 8
 
@@ -438,15 +444,12 @@ operator.  (Mnemonic: What just went bang?)
 =item $^E
 
 More specific information about the last system error than that provided by
-C<$!>, if available.  (If not, it's just C<$!> again, except under OS/2.)
+C<$!>, if available.  (If not, it's just C<$!> again.)
 At the moment, this differs from C<$!> under only VMS and OS/2, where it
 provides the VMS status value from the last system error, and OS/2 error
-code of the last call to OS/2 API which was not directed via CRT.  The
+code of the last call to OS/2 API either via CRT, or directly from perl.  The
 caveats mentioned in the description of C<$!> apply here, too.
 (Mnemonic: Extra error explanation.)
-
-Note that under OS/2 C<$!> and C<$^E> do not track each other, so if an
-OS/2-specific call is performed, you may need to check both.
 
 =item $EVAL_ERROR
 
@@ -597,8 +600,8 @@ C<$^F> at the time of the open, not the time of the exec.
 
 =item $^H
 
-The current set of syntax checks enabled by C<use strict>.  See the
-documentation of C<strict> for more details.
+The current set of syntax checks enabled by C<use strict> and other block
+scoped compiler hints.  See the documentation of C<strict> for more details.
 
 =item $INPLACE_EDIT
 
@@ -606,6 +609,20 @@ documentation of C<strict> for more details.
 
 The current value of the inplace-edit extension.  Use C<undef> to disable
 inplace editing.  (Mnemonic: value of B<-i> switch.)
+
+=item $^M
+
+By default, running out of memory it is not trappable.  However, if
+compiled for this, Perl may use the contents of C<$^M> as an emergency
+pool after die()ing with this message.  Suppose that your Perl were
+compiled with -DPERL_EMERGENCY_SBRK and used Perl's malloc.  Then
+
+    $^M = 'a' x (1<<16);
+
+would allocate a 64K buffer for use when in emergency.  See the F<INSTALL>
+file for information on how to enable this option.  As a disincentive to
+casual use of this advanced feature, there is no L<English> long name for
+this variable.
 
 =item $OSNAME
 
@@ -653,6 +670,12 @@ Start with single-step on.
 Note that some bits may be relevent at compile-time only, some at
 run-time only. This is a new mechanism and the details may change.
 
+=item $^S
+
+Current state of the interpreter.  Undefined if parsing of the current
+module/eval is not finished (may happen in $SIG{__DIE__} and
+$SIG{__WARN__} handlers).  True if inside an eval, othewise false.
+
 =item $BASETIME
 
 =item $^T
@@ -699,6 +722,11 @@ to get the machine-dependent library properly loaded also:
     use lib '/mypath/libdir/';
     use SomeMod;
 
+=item @_
+
+Within a subroutine the array @_ contains the parameters passed to that
+subroutine. See L<perlsub>.
+
 =item %INC
 
 The hash %INC contains entries for each filename that has
@@ -707,25 +735,25 @@ specified, and the value is the location of the file actually found.
 The C<require> command uses this array to determine whether a given file
 has already been included.
 
-=item $ENV{expr}
+=item %ENV  $ENV{expr}
 
 The hash %ENV contains your current environment.  Setting a
 value in C<ENV> changes the environment for child processes.
 
-=item $SIG{expr}
+=item %SIG  $SIG{expr}
 
 The hash %SIG is used to set signal handlers for various
 signals.  Example:
 
     sub handler {	# 1st argument is signal name
-	local($sig) = @_;
+	my($sig) = @_;
 	print "Caught a SIG$sig--shutting down\n";
 	close(LOG);
 	exit(0);
     }
 
-    $SIG{'INT'} = 'handler';
-    $SIG{'QUIT'} = 'handler';
+    $SIG{'INT'}  = \&handler;
+    $SIG{'QUIT'} = \&handler;
     ...
     $SIG{'INT'} = 'DEFAULT';	# restore default action
     $SIG{'QUIT'} = 'IGNORE';	# ignore SIGQUIT
@@ -733,8 +761,8 @@ signals.  Example:
 The %SIG array contains values for only the signals actually set within
 the Perl script.  Here are some other examples:
 
-    $SIG{PIPE} = Plumber;       # SCARY!!
-    $SIG{"PIPE"} = "Plumber";   # just fine, assumes main::Plumber
+    $SIG{"PIPE"} = Plumber;     # SCARY!!
+    $SIG{"PIPE"} = "Plumber";   # assumes main::Plumber (not recommended)
     $SIG{"PIPE"} = \&Plumber;   # just fine; assume current Plumber
     $SIG{"PIPE"} = Plumber();   # oops, what did Plumber() return??
 
@@ -775,21 +803,30 @@ argument.  When a __DIE__ hook routine returns, the exception
 processing continues as it would have in the absence of the hook,
 unless the hook routine itself exits via a C<goto>, a loop exit, or a die().
 The C<__DIE__> handler is explicitly disabled during the call, so that you
-can die from a C<__DIE__> handler.  Similarly for C<__WARN__>.  See
-L<perlfunc/die>, L<perlfunc/warn> and L<perlfunc/eval>.
+can die from a C<__DIE__> handler.  Similarly for C<__WARN__>.
 
-=item $^M
+Note that the C<$SIG{__DIE__}> hook is called even inside eval()ed
+blocks/strings.  See L<perlfunc/die>, L<perlvar/$^S> for how to
+circumvent this.
 
-By default, running out of memory it is not trappable.  However, if
-compiled for this, Perl may use the contents of C<$^M> as an emergency
-pool after die()ing with this message.  Suppose that your Perl were
-compiled with -DPERL_EMERGENCY_SBRK and used Perl's malloc.  Then
+Note that C<__DIE__>/C<__WARN__> handlers are very special in one
+respect: they may be called to report (probable) errors found by the
+parser.  In such a case the parser may be in inconsistent state, so
+any attempt to evaluate Perl code from such a handler will probably
+result in a segfault.  This means that calls which result/may-result
+in parsing Perl should be used with extreme causion, like this:
 
-    $^M = 'a' x (1<<16);
+    require Carp if defined $^S;
+    Carp::confess("Something wrong") if defined &Carp::confess;
+    die "Something wrong, but could not load Carp to give backtrace...
+         To see backtrace try starting Perl with -MCarp switch";
 
-would allocate a 64K buffer for use when in emergency.  See the F<INSTALL>
-file for information on how to enable this option.  As a disincentive to
-casual use of this advanced feature, there is no L<English> long name for
-this variable.
+Here the first line will load Carp I<unless> it is the parser who
+called the handler.  The second line will print backtrace and die if
+Carp was available.  The third line will be executed only if Carp was
+not available.
+
+See L<perlfunc/die>, L<perlfunc/warn> and L<perlfunc/eval> for
+additional info.
 
 =back

@@ -16,7 +16,7 @@ BEGIN {
 
 use strict;
 
-print "1..74\n";
+print "1..76\n";
 
 my $i = 1;
 
@@ -375,3 +375,16 @@ sub an_array_ref (\@) {
 an_array_ref @array;
 print "not " unless @array == 4;
 print @array;
+
+# correctly note too-short parameter lists that don't end with '$',
+#  a possible regression.
+
+sub foo1 ($\@);
+eval q{ foo1 "s" };
+print "not " unless $@ =~ /^Not enough/;
+print "ok ", $i++, "\n";
+
+sub foo2 ($\%);
+eval q{ foo2 "s" };
+print "not " unless $@ =~ /^Not enough/;
+print "ok ", $i++, "\n";

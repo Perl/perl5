@@ -1404,7 +1404,7 @@ extensions.
 
 =item AvFILL
 
-See C<av_len>.
+Same as C<av_len>.
 
 =item av_clear
 
@@ -1850,6 +1850,11 @@ C<hv_iternext> and C<hv_delayfree_ent>.
 Prepares a starting point to traverse a hash table.
 
 	I32	hv_iterinit _((HV* tb));
+
+Note that hv_iterinit I<currently> returns the number of I<buckets> in
+the hash and I<not> the number of keys (as indicated in the Advanced
+Perl Programming book). This may change in future. Use the HvKEYS(hv)
+macro to find the number of keys in a hash.
 
 =item hv_iterkey
 
@@ -2822,6 +2827,35 @@ Tells an SV that it is an RV.
 Dereferences an RV to return the SV.
 
 	SV*	SvRV (SV* sv);
+
+=item SvTAINT
+
+Taints an SV if tainting is enabled
+
+	SvTAINT (SV* sv);
+
+=item SvTAINTED
+
+Checks to see if an SV is tainted. Returns TRUE if it is, FALSE if not.
+
+	SvTAINTED (SV* sv);
+
+=item SvTAINTED_off
+
+Untaints an SV. Be I<very> careful with this routine, as it short-circuits
+some of Perl's fundamental security features. XS module authors should
+not use this function unless they fully understand all the implications
+of unconditionally untainting the value. Untainting should be done in
+the standard perl fashion, via a carefully crafted regexp, rather than
+directly untainting variables.
+
+	SvTAINTED_off (SV* sv);
+
+=item SvTAINTED_on
+
+Marks an SV as tainted.
+
+	SvTAINTED_on (SV* sv);
 
 =item sv_setiv
 

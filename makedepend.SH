@@ -28,6 +28,12 @@ MAKE=$make
 !GROK!THIS!
 $spitshell >>makedepend <<'!NO!SUBS!'
 
+# This script should be called with 
+#     sh ./makedepend MAKE=$(MAKE)
+case "$1" in 
+	MAKE=*) eval $1 ;;
+esac
+
 export PATH || (echo "OOPS, this isn't sh.  Desperation time.  I will feed myself to sh."; sh \$0; kill \$\$)
 
 case $CONFIG in
@@ -112,6 +118,7 @@ for file in `$cat .clist`; do
     $cppstdin $finc -I/usr/local/include -I. $cppflags $cppminus <UU/$file.c |
     $sed \
 	-e '/^#.*<stdin>/d' \
+	-e '/^#.*"-"/d' \
 	-e 's#\.[0-9][0-9]*\.c#'"$file.c#" \
 	-e 's/^[	 ]*#[	 ]*line/#/' \
 	-e '/^# *[0-9][0-9]* *[".\/]/!d' \

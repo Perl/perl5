@@ -1372,7 +1372,7 @@ PP(pp_send)
 		if (-offset > blen)
 		    DIE("Offset outside string");
 		offset += blen;
-	    } else if (offset >= blen)
+	    } else if (offset >= blen && blen > 0)
 		DIE("Offset outside string");
 	} else
 	    offset = 0;
@@ -2405,16 +2405,20 @@ PP(pp_fttty)
     dSP;
     int fd;
     GV *gv;
-    char *tmps;
-    if (op->op_flags & OPf_REF) {
+    char *tmps = Nullch;
+
+    if (op->op_flags & OPf_REF)
 	gv = cGVOP->op_gv;
-	tmps = "";
-    }
+    else if (isGV(TOPs))
+	gv = (GV*)POPs;
+    else if (SvROK(TOPs) && isGV(SvRV(TOPs)))
+	gv = (GV*)SvRV(POPs);
     else
 	gv = gv_fetchpv(tmps = POPp, FALSE, SVt_PVIO);
+
     if (GvIO(gv) && IoIFP(GvIOp(gv)))
 	fd = PerlIO_fileno(IoIFP(GvIOp(gv)));
-    else if (isDIGIT(*tmps))
+    else if (tmps && isDIGIT(*tmps))
 	fd = atoi(tmps);
     else
 	RETPUSHUNDEF;
@@ -2708,6 +2712,9 @@ PP(pp_readlink)
     char buf[MAXPATHLEN];
     int len;
 
+#ifndef INCOMPLETE_TAINTS
+    TAINT;
+#endif
     tmps = POPp;
     len = readlink(tmps, buf, sizeof buf);
     EXTEND(SP, 1);
@@ -2884,6 +2891,7 @@ PP(pp_readdir)
     register Direntry_t *dp;
     GV *gv = (GV*)POPs;
     register IO *io = GvIOn(gv);
+    SV *sv;
 
     if (!io || !IoDIRP(io))
 	goto nope;
@@ -2892,20 +2900,28 @@ PP(pp_readdir)
 	/*SUPPRESS 560*/
 	while (dp = (Direntry_t *)readdir(IoDIRP(io))) {
 #ifdef DIRNAMLEN
-	    XPUSHs(sv_2mortal(newSVpv(dp->d_name, dp->d_namlen)));
+	    sv = newSVpv(dp->d_name, dp->d_namlen);
 #else
-	    XPUSHs(sv_2mortal(newSVpv(dp->d_name, 0)));
+	    sv = newSVpv(dp->d_name, 0);
 #endif
+#ifndef INCOMPLETE_TAINTS
+  	    SvTAINTED_on(sv);
+#endif
+	    XPUSHs(sv_2mortal(sv));
 	}
     }
     else {
 	if (!(dp = (Direntry_t *)readdir(IoDIRP(io))))
 	    goto nope;
 #ifdef DIRNAMLEN
-	XPUSHs(sv_2mortal(newSVpv(dp->d_name, dp->d_namlen)));
+	sv = newSVpv(dp->d_name, dp->d_namlen);
 #else
-	XPUSHs(sv_2mortal(newSVpv(dp->d_name, 0)));
+	sv = newSVpv(dp->d_name, 0);
 #endif
+#ifndef INCOMPLETE_TAINTS
+	SvTAINTED_on(sv);
+#endif
+	XPUSHs(sv_2mortal(sv));
     }
     RETURN;
 
@@ -4066,6 +4082,9 @@ PP(pp_gpwent)
 #endif
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setpv(sv, pwent->pw_gecos);
+#ifndef INCOMPLETE_TAINTS
+	SvTAINTED_on(sv);
+#endif
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setpv(sv, pwent->pw_dir);
 	PUSHs(sv = sv_mortalcopy(&sv_no));

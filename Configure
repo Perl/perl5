@@ -1765,7 +1765,6 @@ EOM
 			;;
 		linux) osname=linux
 			case "$3" in
-			1*) osvers=1 ;;
 			*)	osvers="$3" ;;
 			esac
 			;;
@@ -9827,6 +9826,10 @@ for xxx in $known_extensions ; do
 	    esac
 	    ;;
     Socket) case "$d_socket" in 
+	    $define) avail_ext="$avail_ext $xxx" ;;
+	    esac
+	    ;;
+    Thread) case "$usethreads" in 
 	    $define) avail_ext="$avail_ext $xxx" ;;
 	    esac
 	    ;;

@@ -106,12 +106,18 @@
 #define Fflush(fp)         fflush(fp)
 #define Mkdir(path,mode)   mkdir((path),(mode))
 
+#ifndef PERL_SYS_INIT
 #ifdef PERL_SCO5
+/* this should be set in a hint file, not here */
 #  define PERL_SYS_INIT(c,v)	fpsetmask(0)
 #else
 #  define PERL_SYS_INIT(c,v)
 #endif
+#endif
+
+#ifndef PERL_SYS_TERM
 #define PERL_SYS_TERM()
+#endif
 
 #define BIT_BUCKET "/dev/null"
 

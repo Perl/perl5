@@ -47,7 +47,6 @@ sub import
  my $dir = getcwd;
  if (@_)
   {
-   print join(',',@_),"\n";
    $dir = shift;
    $dir =~ s/blib$//;
    $dir =~ s,/+$,,;

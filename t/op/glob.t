@@ -6,11 +6,12 @@ print "1..6\n";
 
 @oops = @ops = <op/*>;
 
-map { $files{$_}++ } <op/*>;
 if ($^O eq 'MSWin32') {
-  map { delete $files{"op/$_"} } split /[\s\n]/, `cmd /c "dir /b /l op"`;
+  map { $files{lc($_)}++ } <op/*>;
+  map { delete $files{"op/$_"} } split /[\s\n]/, `cmd /c "dir /b /l op & dir /b /l /ah op 2>nul"`,
 }
 else {
+  map { $files{$_}++ } <op/*>;
   map { delete $files{$_} } split /[\s\n]/, `echo op/*`;
 }
 if (keys %files) {

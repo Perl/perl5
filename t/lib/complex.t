@@ -1,10 +1,15 @@
 #!./perl
 
-# $RCSfile$
+# $RCSfile: complex.t,v $
 #
 # Regression tests for the Math::Complex pacakge
-# -- Raphael Manfredi, September 1996
-# -- Jarkko Hietaniemi, March-April 1997
+# -- Raphael Manfredi	September 1996
+# -- Jarkko Hietaniemi	March-October 1997
+# -- Daniel S. Lewart	September-October 1997
+
+$VERSION = '1.05';
+
+# $Id: complex.t,v 1.1 1997/10/15 10:02:15 jhi Exp jhi $
 
 BEGIN {
     chdir 't' if -d 't';
@@ -13,9 +18,14 @@ BEGIN {
 
 use Math::Complex;
 
+my ($args, $op, $target, $test, $test_set, $try, $val, $zvalue, @set, @val);
+
 $test = 0;
 $| = 1;
-@script = ();
+my @script = (
+    'my ($res, $s0,$s1,$s2,$s3,$s4,$s5,$s6,$s7,$s8,$s9,$s10, $z0,$z1,$z2);' .
+	"\n\n"
+);
 my $eps = 1e-11;
 
 while (<DATA>) {
@@ -58,7 +68,7 @@ sub test_dbz {
 #	push(@script, qq(print "# '$op'\n";));
 	push(@script, qq(eval '$op';));
 	push(@script, qq(print 'not ' unless (\$@ =~ /Division by zero/);));
-	push(@script, qq(print "ok $test\n";));
+	push(@script, qq( print "ok $test\\n";\n));
     }
 }
 
@@ -71,7 +81,7 @@ sub test_loz {
 #	push(@script, qq(print "# '$op'\n";));
 	push(@script, qq(eval '$op';));
 	push(@script, qq(print 'not ' unless (\$@ =~ /Logarithm of zero/);));
-	push(@script, qq(print "ok $test\n";));
+	push(@script, qq( print "ok $test\\n";\n));
     }
 }
 
@@ -99,7 +109,10 @@ test_dbz(
 	 'acoth(1)',
 	);
 
+my $zero = cplx(0, 0);
+
 test_loz(
+	 'log($zero)',
 	 'atanh(-1)',
 	 'acoth(-1)',
 	);
@@ -112,7 +125,7 @@ sub test_ztz {
 #	push(@script, qq(print "# 0**0\n";));
 	push(@script, qq(eval 'cplx(0)**cplx(0)';));
 	push(@script, qq(print 'not ' unless (\$@ =~ /zero raised to the/);));
-	push(@script, qq(print "ok $test\n";));
+	push(@script, qq( print "ok $test\\n";\n));
 }
 
 test_ztz;
@@ -126,7 +139,7 @@ sub test_broot {
 #	push(@script, qq(print "# root(2, $op)\n";));
 	push(@script, qq(eval 'root(2, $op)';));
 	push(@script, qq(print 'not ' unless (\$@ =~ /root must be/);));
-	push(@script, qq(print "ok $test\n";));
+	push(@script, qq( print "ok $test\\n";\n));
     }
 }
 
@@ -173,11 +186,11 @@ sub test {
 			# check the op= works
 			push @script, <<EOB;
 {
-        my \$za = cplx(ref \$z0 ? \@{\$z0->cartesian} : (\$z0, 0));
+	my \$za = cplx(ref \$z0 ? \@{\$z0->cartesian} : (\$z0, 0));
 
 	my (\$z1r, \$z1i) = ref \$z1 ? \@{\$z1->cartesian} : (\$z1, 0);
 
-        my \$zb = cplx(\$z1r, \$z1i);
+	my \$zb = cplx(\$z1r, \$z1i);
 
 	\$za $op= \$zb;
 	my (\$zbr, \$zbi) = \@{\$zb->cartesian};
@@ -187,7 +200,7 @@ EOB
 			$test++;
 			# check that the rhs has not changed
 			push @script, qq(print "not " unless (\$zbr == \$z1r and \$zbi == \$z1i););
-			push @script, qq(print "ok $test\n";);
+			push @script, qq( print "ok $test\\n";\n);
 			push @script, "}\n";
 		}
 	}
@@ -249,6 +262,17 @@ sub check {
 		print "# '$try' expected: '$expected' got: '$got' for $args\n";
 	}
 }
+
+sub addsq {
+    my ($z1, $z2) = @_;
+    return ($z1 + i*$z2) * ($z1 - i*$z2);
+}
+
+sub subsq {
+    my ($z1, $z2) = @_;
+    return ($z1 + $z2) * ($z1 - $z2);
+}
+
 __END__
 &+;=
 (3,4):(3,4):(6,8)
@@ -372,13 +396,13 @@ __END__
 |'abs(z)':'r'
 |'acot(z)':'acotan(z)'
 |'acsc(z)':'acosec(z)'
-|'abs(acsc(z))':'abs(asin(1 / z))'
-|'abs(asec(z))':'abs(acos(1 / z))'
+|'acsc(z)':'asin(1 / z)'
+|'asec(z)':'acos(1 / z)'
 |'cbrt(z)':'cbrt(r) * exp(i * t/3)'
 |'cos(acos(z))':'z'
-|'cos(z) ** 2 + sin(z) ** 2':1
+|'addsq(cos(z), sin(z))':1
 |'cos(z)':'cosh(i*z)'
-|'cosh(z) ** 2 - sinh(z) ** 2':1
+|'subsq(cosh(z), sinh(z))':1
 |'cot(acot(z))':'z'
 |'cot(z)':'1 / tan(z)'
 |'cot(z)':'cotan(z)'
@@ -429,6 +453,20 @@ __END__
 |'asinh(sinh(z))':'z'
 |'atan(tan(z))':'z'
 |'atanh(tanh(z))':'z'
+
+&log
+(-2.0,0):(   0.69314718055995,  3.14159265358979)
+(-1.0,0):(   0               ,  3.14159265358979)
+(-0.5,0):(  -0.69314718055995,  3.14159265358979)
+( 0.5,0):(  -0.69314718055995,  0               )
+( 1.0,0):(   0               ,  0               )
+( 2.0,0):(   0.69314718055995,  0               )
+
+&log
+( 2, 3):(    1.28247467873077,  0.98279372324733)
+(-2, 3):(    1.28247467873077,  2.15879893034246)
+(-2,-3):(    1.28247467873077, -2.15879893034246)
+( 2,-3):(    1.28247467873077, -0.98279372324733)
 
 &sin
 (-2.0,0):(  -0.90929742682568,  0               )
@@ -777,3 +815,4 @@ __END__
 ( 2,-3):(  0.14694666622553,  0.23182380450040)
 
 # eof
+

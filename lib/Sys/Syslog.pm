@@ -54,15 +54,16 @@ is replaced with C<"$!"> (the latest error message).
 
 Sets log mask I<$mask_priority> and returns the old mask.
 
-=item setlogsock $sock_type
+=item setlogsock $sock_type (added in 5.004_03)
  
 Sets the socket type to be used for the next call to
 C<openlog()> or C<syslog()>.
  
-A value of 'unix' will connect to the UNIX domain socket returned
-by C<_PATH_LOG> in F<syslog.ph>.  A value of 'inet' will connect
-to an INET socket returned by getservbyname().
-Any other value croaks.
+A value of 'unix' will connect to the UNIX domain socket returned by
+C<_PATH_LOG> in F<syslog.ph>. If F<syslog.ph> fails to define
+C<_PATH_LOG>, C<setlogsock> returns C<undef>; otherwise a true value is
+returned. A value of 'inet' will connect to an INET socket returned by
+getservbyname().  Any other value croaks.
 
 The default is for the INET socket to be used.
 
@@ -135,12 +136,17 @@ sub setlogmask {
 sub setlogsock {
     local($setsock) = shift;
     if (lc($setsock) eq 'unix') {
-        $sock_unix = 1;
+	if (defined &_PATH_LOG) {
+	    $sock_unix = 1;
+	} else {
+	    return undef;
+	}
     } elsif (lc($setsock) eq 'inet') {
         undef($sock_unix);
     } else {
         croak "Invalid argument passed to setlogsock; must be 'unix' or 'inet'";
     }
+    return 1;
 }
 
 sub syslog {

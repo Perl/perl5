@@ -227,11 +227,11 @@ myfdopen(int fd, char *mode)
     int retval;
 
     if (hWinSockDll == 0)
-	LoadWinSock();
+	return(fdopen(fd, mode));
 
     retval = pgetsockopt((SOCKET)fd, SOL_SOCKET, SO_TYPE, sockbuf, &optlen);
     if(retval == SOCKET_ERROR && pWSAGetLastError() == WSAENOTSOCK) {
-	return(_fdopen(fd, mode));
+	return(fdopen(fd, mode));
     }
 
     /*
@@ -258,7 +258,7 @@ u_long
 win32_htonl(u_long hostlong)
 {
     if(hWinSockDll == 0)
-	LoadWinSock();
+	StartSockets();
 
     return phtonl(hostlong);
 }
@@ -267,7 +267,7 @@ u_short
 win32_htons(u_short hostshort)
 {
     if(hWinSockDll == 0)
-	LoadWinSock();
+	StartSockets();
 
     return phtons(hostshort);
 }
@@ -276,7 +276,7 @@ u_long
 win32_ntohl(u_long netlong)
 {
     if(hWinSockDll == 0)
-	LoadWinSock();
+	StartSockets();
 
     return pntohl(netlong);
 }
@@ -285,7 +285,7 @@ u_short
 win32_ntohs(u_short netshort)
 {
     if(hWinSockDll == 0)
-	LoadWinSock();
+	StartSockets();
 
     return pntohs(netshort);
 }
@@ -503,6 +503,22 @@ win32_socket(int af, int type, int protocol)
     return s;
 }
 
+#undef fclose
+int
+my_fclose (FILE *pf)
+{
+	int osf, retval;
+	if (hWinSockDll == 0)		/* No WinSockDLL? */
+		return(fclose(pf));	/* Then not a socket. */
+	osf = TO_SOCKET(fileno(pf));	/* Get it now before it's gone! */
+	retval = fclose(pf);		/* Must fclose() before closesocket() */
+	if (osf != -1
+	    && pclosesocket(osf) == SOCKET_ERROR
+	    && WSAGetLastError() != WSAENOTSOCK)
+		retval = EOF;
+	return retval;
+}
+
 struct hostent *
 win32_gethostbyaddr(const char *addr, int len, int type)
 {
@@ -576,7 +592,7 @@ char FAR *
 win32_inet_ntoa(struct in_addr in)
 {
     if(hWinSockDll == 0)
-	LoadWinSock();
+	StartSockets();
 
     return pinet_ntoa(in);
 }
@@ -585,7 +601,7 @@ unsigned long
 win32_inet_addr(const char FAR *cp)
 {
     if(hWinSockDll == 0)
-	LoadWinSock();
+	StartSockets();
 
     return pinet_addr(cp);
 

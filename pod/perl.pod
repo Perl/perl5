@@ -242,6 +242,11 @@ See L<perlrun>.
 
 Larry Wall <F<larry@wall.org>>, with the help of oodles of other folks.
 
+If your Perl success stories and testimonials may be of help to others 
+who wish to advocate the use of Perl in their applications, 
+or if you wish to simply express your gratitude to Larry and the 
+Perl developers, please write to <F<perl-thanks@perl.org>>.
+
 =head1 FILES
 
  "/tmp/perl-e$$"	temporary file for -e commands

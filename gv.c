@@ -172,8 +172,8 @@ I32 level;
     gvp = (GV**)hv_fetch(stash, "ISA", 3, FALSE);
     av = (gvp && (gv = *gvp) && gv != (GV*)&sv_undef) ? GvAV(gv) : Nullav;
 
-    /* create @.*::SUPER::ISA on demand */
-    if (!av) {
+    /* create and re-create @.*::SUPER::ISA on demand */
+    if (!av || !SvMAGIC(av)) {
 	char* packname = HvNAME(stash);
 	STRLEN packlen = strlen(packname);
 
@@ -746,6 +746,7 @@ I32 sv_type;
     case '7':
     case '8':
     case '9':
+    case '\023':
       ro_magicalize:
 	SvREADONLY_on(GvSV(gv));
       magicalize:

@@ -1643,7 +1643,7 @@ case 27:
 			    yyval.opval = block_end(yyvsp[-4].ival,
 				   newSTATEOP(0, yyvsp[-7].pval,
 				     newWHILEOP(0, 1, (LOOP*)Nullop,
-						yyvsp[-3].opval, yyvsp[-1].opval, yyvsp[0].opval))); }
+						yyvsp[-6].ival, yyvsp[-3].opval, yyvsp[-1].opval, yyvsp[0].opval))); }
 break;
 case 28:
 #line 192 "perly.y"
@@ -1651,7 +1651,7 @@ case 28:
 			    yyval.opval = block_end(yyvsp[-4].ival,
 				   newSTATEOP(0, yyvsp[-7].pval,
 				     newWHILEOP(0, 1, (LOOP*)Nullop,
-						yyvsp[-3].opval, yyvsp[-1].opval, yyvsp[0].opval))); }
+						yyvsp[-6].ival, yyvsp[-3].opval, yyvsp[-1].opval, yyvsp[0].opval))); }
 break;
 case 29:
 #line 198 "perly.y"
@@ -1671,19 +1671,19 @@ case 31:
 break;
 case 32:
 #line 209 "perly.y"
-{ copline = yyvsp[-9].ival;
-			    yyval.opval = block_end(yyvsp[-7].ival,
-				   newSTATEOP(0, yyvsp[-10].pval,
-				     append_elem(OP_LINESEQ, scalar(yyvsp[-6].opval),
-				       newWHILEOP(0, 1, (LOOP*)Nullop,
-						  scalar(yyvsp[-4].opval),
-						  yyvsp[0].opval, scalar(yyvsp[-2].opval))))); }
+{ OP *forop = append_elem(OP_LINESEQ,
+					scalar(yyvsp[-6].opval),
+					newWHILEOP(0, 1, (LOOP*)Nullop,
+						   yyvsp[-9].ival, scalar(yyvsp[-4].opval),
+						   yyvsp[0].opval, scalar(yyvsp[-2].opval)));
+			  copline = yyvsp[-9].ival;
+			  yyval.opval = block_end(yyvsp[-7].ival, newSTATEOP(0, yyvsp[-10].pval, forop)); }
 break;
 case 33:
 #line 217 "perly.y"
-{ yyval.opval = newSTATEOP(0,
-				yyvsp[-2].pval, newWHILEOP(0, 1, (LOOP*)Nullop,
-					Nullop, yyvsp[-1].opval, yyvsp[0].opval)); }
+{ yyval.opval = newSTATEOP(0, yyvsp[-2].pval,
+				 newWHILEOP(0, 1, (LOOP*)Nullop,
+					    NOLINE, Nullop, yyvsp[-1].opval, yyvsp[0].opval)); }
 break;
 case 34:
 #line 223 "perly.y"

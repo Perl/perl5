@@ -2273,6 +2273,7 @@ int gimme;
 
     CvDEPTH(compcv) = 1;
     SP = stack_base + POPMARK;		/* pop original mark */
+    op = saveop;					/* The caller may need it. */
 #ifdef USE_THREADS
     MUTEX_LOCK(&eval_mutex);
     eval_owner = 0;

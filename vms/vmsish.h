@@ -111,9 +111,11 @@
 #  define seekdir		Perl_seekdir
 #  define closedir		Perl_closedir
 #  define vmsreaddirversions	Perl_vmsreaddirversions
+#if __VMS_VER < 70000000 || __DECC_VER < 50200000
 #  define my_gmtime		Perl_my_gmtime
 #  define my_localtime		Perl_my_localtime
 #  define my_time		Perl_my_time
+#endif
 #  define cando_by_name		Perl_cando_by_name
 #  define flex_fstat		Perl_flex_fstat
 #  define flex_stat		Perl_flex_stat
@@ -330,9 +332,11 @@ struct utimbuf {
  * in VMS 6.0 or later use.  We also add shims for time() and localtime()
  * so we can run on UTC by default.
  */
+#if __VMS_VER < 70000000 || __DECC_VER < 50200000
 #define gmtime(t) my_gmtime(t)
 #define localtime(t) my_localtime(t)
 #define time(t) my_time(t)
+#endif
 
 /* VMS doesn't use a real sys_nerr, but we need this when scanning for error
  * messages in text strings . . .
@@ -532,9 +536,11 @@ long	telldir _((DIR *));
 void	seekdir _((DIR *, long));
 void	closedir _((DIR *));
 void	vmsreaddirversions _((DIR *, int));
+#ifdef my_gmtime
 struct tm *	my_gmtime _((const time_t *));
 struct tm *	my_localtime _((const time_t *));
 time_t	my_time _((time_t *));
+#endif /* We're assuming these three come as a package */
 I32	cando_by_name _((I32, I32, char *));
 int	flex_fstat _((int, struct mystat *));
 int	flex_stat _((char *, struct mystat *));

@@ -441,6 +441,7 @@ SV *right;
 	    break;
 	}
     }
+    SvTAINT(sv);
 }
 
 OP *
