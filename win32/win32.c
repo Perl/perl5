@@ -1690,6 +1690,8 @@ FAILED:
     return -1;
 }
 
+#ifndef PERL_OBJECT
+
 static UINT timerid = 0;
 
 static VOID CALLBACK TimerProc(HWND win, UINT msg, UINT id, DWORD time)
@@ -1699,10 +1701,12 @@ static VOID CALLBACK TimerProc(HWND win, UINT msg, UINT id, DWORD time)
     timerid=0;  
     sighandler(14);
 }
+#endif	/* !PERL_OBJECT */
 
 DllExport unsigned int
 win32_alarm(unsigned int sec)
 {
+#ifndef PERL_OBJECT
     /* 
      * the 'obvious' implentation is SetTimer() with a callback
      * which does whatever receiving SIGALRM would do 
@@ -1727,6 +1731,7 @@ win32_alarm(unsigned int sec)
         timerid=0;  
        }
      }
+#endif	/* !PERL_OBJECT */
     return 0;
 }
 
@@ -2454,7 +2459,7 @@ win32_link(const char *oldname, const char *newname)
     WCHAR wNewName[MAX_PATH+1];
 
     if (IsWin95())
-	Perl_die(aTHX_ PL_no_func, "link");
+	Perl_croak(aTHX_ PL_no_func, "link");
 
     pfnCreateHardLinkW =
 	(BOOL (__stdcall *)(LPCWSTR, LPCWSTR, LPSECURITY_ATTRIBUTES))

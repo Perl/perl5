@@ -62,6 +62,8 @@ POD = \
 	perlcall.pod	\
 	perlcompile.pod	\
 	perltodo.pod	\
+	perlapi.pod	\
+	perlintern.pod	\
 	perlhack.pod	\
 	perlhist.pod	\
 	perlfaq.pod	\
@@ -124,6 +126,8 @@ MAN = \
 	perlcall.man	\
 	perlcompile.man	\
 	perltodo.man	\
+	perlapi.man	\
+	perlintern.man	\
 	perlhack.man	\
 	perlhist.man	\
 	perlfaq.man	\
@@ -186,6 +190,8 @@ HTML = \
 	perlcall.html	\
 	perlcompile.html	\
 	perltodo.html	\
+	perlapi.html	\
+	perlintern.html	\
 	perlhack.html	\
 	perlhist.html	\
 	perlfaq.html	\
@@ -248,6 +254,8 @@ TEX = \
 	perlcall.tex	\
 	perlcompile.tex	\
 	perltodo.tex	\
+	perlapi.tex	\
+	perlintern.tex	\
 	perlhack.tex	\
 	perlhist.tex	\
 	perlfaq.tex	\

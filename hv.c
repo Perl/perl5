@@ -105,6 +105,20 @@ Perl_he_dup(pTHX_ HE *e, bool shared)
 /* (klen == HEf_SVKEY) is special for MAGICAL hv entries, meaning key slot
  * contains an SV* */
 
+/*
+=for apidoc hv_fetch
+
+Returns the SV which corresponds to the specified key in the hash.  The
+C<klen> is the length of the key.  If C<lval> is set then the fetch will be
+part of a store.  Check that the return value is non-null before
+dereferencing it to a C<SV*>. 
+
+See L<Understanding the Magic of Tied Hashes and Arrays> for more
+information on how to use this function on tied hashes.
+
+=cut
+*/
+
 SV**
 Perl_hv_fetch(pTHX_ HV *hv, const char *key, U32 klen, I32 lval)
 {
@@ -184,6 +198,23 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, U32 klen, I32 lval)
 
 /* returns a HE * structure with the all fields set */
 /* note that hent_val will be a mortal sv for MAGICAL hashes */
+/*
+=for apidoc hv_fetch_ent
+
+Returns the hash entry which corresponds to the specified key in the hash.
+C<hash> must be a valid precomputed hash number for the given C<key>, or 0
+if you want the function to compute it.  IF C<lval> is set then the fetch
+will be part of a store.  Make sure the return value is non-null before
+accessing it.  The return value when C<tb> is a tied hash is a pointer to a
+static location, so be sure to make a copy of the structure if you need to
+store it somewhere. 
+
+See L<Understanding the Magic of Tied Hashes and Arrays> for more
+information on how to use this function on tied hashes.
+
+=cut
+*/
+
 HE *
 Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
 {
@@ -293,6 +324,24 @@ S_hv_magic_check(pTHX_ HV *hv, bool *needs_copy, bool *needs_store)
     }
 }
 
+/*
+=for apidoc hv_store
+
+Stores an SV in a hash.  The hash key is specified as C<key> and C<klen> is
+the length of the key.  The C<hash> parameter is the precomputed hash
+value; if it is zero then Perl will compute it.  The return value will be
+NULL if the operation failed or if the value did not need to be actually
+stored within the hash (as in the case of tied hashes).  Otherwise it can
+be dereferenced to get the original C<SV*>.  Note that the caller is
+responsible for suitably incrementing the reference count of C<val> before
+the call, and decrementing it if the function returned NULL.  
+
+See L<Understanding the Magic of Tied Hashes and Arrays> for more
+information on how to use this function on tied hashes.
+
+=cut
+*/
+
 SV**
 Perl_hv_store(pTHX_ HV *hv, const char *key, U32 klen, SV *val, register U32 hash)
 {
@@ -362,6 +411,25 @@ Perl_hv_store(pTHX_ HV *hv, const char *key, U32 klen, SV *val, register U32 has
 
     return &HeVAL(entry);
 }
+
+/*
+=for apidoc hv_store_ent
+
+Stores C<val> in a hash.  The hash key is specified as C<key>.  The C<hash>
+parameter is the precomputed hash value; if it is zero then Perl will
+compute it.  The return value is the new hash entry so created.  It will be
+NULL if the operation failed or if the value did not need to be actually
+stored within the hash (as in the case of tied hashes).  Otherwise the
+contents of the return value can be accessed using the C<He???> macros
+described here.  Note that the caller is responsible for suitably
+incrementing the reference count of C<val> before the call, and
+decrementing it if the function returned NULL. 
+
+See L<Understanding the Magic of Tied Hashes and Arrays> for more
+information on how to use this function on tied hashes.
+
+=cut
+*/
 
 HE *
 Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, register U32 hash)
@@ -445,6 +513,17 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, register U32 hash)
     return entry;
 }
 
+/*
+=for apidoc hv_delete
+
+Deletes a key/value pair in the hash.  The value SV is removed from the
+hash and returned to the caller.  The C<klen> is the length of the key. 
+The C<flags> value will normally be zero; if set to G_DISCARD then NULL
+will be returned.
+
+=cut
+*/
+
 SV *
 Perl_hv_delete(pTHX_ HV *hv, const char *key, U32 klen, I32 flags)
 {
@@ -515,6 +594,17 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, U32 klen, I32 flags)
     }
     return Nullsv;
 }
+
+/*
+=for apidoc hv_delete_ent
+
+Deletes a key/value pair in the hash.  The value SV is removed from the
+hash and returned to the caller.  The C<flags> value will normally be zero;
+if set to G_DISCARD then NULL will be returned.  C<hash> can be a valid
+precomputed hash value, or 0 to ask for it to be computed.
+
+=cut
+*/
 
 SV *
 Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
@@ -592,6 +682,15 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
     return Nullsv;
 }
 
+/*
+=for apidoc hv_exists
+
+Returns a boolean indicating whether the specified hash key exists.  The
+C<klen> is the length of the key.
+
+=cut
+*/
+
 bool
 Perl_hv_exists(pTHX_ HV *hv, const char *key, U32 klen)
 {
@@ -656,6 +755,16 @@ Perl_hv_exists(pTHX_ HV *hv, const char *key, U32 klen)
     return FALSE;
 }
 
+
+/*
+=for apidoc hv_exists_ent
+
+Returns a boolean indicating whether the specified hash key exists. C<hash>
+can be a valid precomputed hash value, or 0 to ask for it to be
+computed.
+
+=cut
+*/
 
 bool
 Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
@@ -867,6 +976,14 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
     }
 }
 
+/*
+=for apidoc newHV
+
+Creates a new HV.  The reference count is set to 1.
+
+=cut
+*/
+
 HV *
 Perl_newHV(pTHX)
 {
@@ -967,6 +1084,14 @@ Perl_hv_delayfree_ent(pTHX_ HV *hv, register HE *entry)
     del_he(entry);
 }
 
+/*
+=for apidoc hv_clear
+
+Clears a hash, making it empty.
+
+=cut
+*/
+
 void
 Perl_hv_clear(pTHX_ HV *hv)
 {
@@ -1017,6 +1142,14 @@ S_hfreeentries(pTHX_ HV *hv)
     (void)hv_iterinit(hv);
 }
 
+/*
+=for apidoc hv_undef
+
+Undefines the hash.
+
+=cut
+*/
+
 void
 Perl_hv_undef(pTHX_ HV *hv)
 {
@@ -1039,6 +1172,20 @@ Perl_hv_undef(pTHX_ HV *hv)
 	mg_clear((SV*)hv); 
 }
 
+/*
+=for apidoc hv_iterinit
+
+Prepares a starting point to traverse a hash table.  Returns the number of
+keys in the hash (i.e. the same as C<HvKEYS(tb)>).  The return value is
+currently only meaningful for hashes without tie magic. 
+
+NOTE: Before version 5.004_65, C<hv_iterinit> used to return the number of
+hash buckets that happen to be in use.  If you still need that esoteric
+value, you can get it through the macro C<HvFILL(tb)>.
+
+=cut
+*/
+
 I32
 Perl_hv_iterinit(pTHX_ HV *hv)
 {
@@ -1057,6 +1204,14 @@ Perl_hv_iterinit(pTHX_ HV *hv)
     xhv->xhv_eiter = Null(HE*);
     return xhv->xhv_keys;	/* used to be xhv->xhv_fill before 5.004_65 */
 }
+
+/*
+=for apidoc hv_iternext
+
+Returns entries from a hash iterator.  See C<hv_iterinit>.
+
+=cut
+*/
 
 HE *
 Perl_hv_iternext(pTHX_ HV *hv)
@@ -1129,6 +1284,15 @@ Perl_hv_iternext(pTHX_ HV *hv)
     return entry;
 }
 
+/*
+=for apidoc hv_iterkey
+
+Returns the key from the current position of the hash iterator.  See
+C<hv_iterinit>.
+
+=cut
+*/
+
 char *
 Perl_hv_iterkey(pTHX_ register HE *entry, I32 *retlen)
 {
@@ -1145,6 +1309,16 @@ Perl_hv_iterkey(pTHX_ register HE *entry, I32 *retlen)
 }
 
 /* unlike hv_iterval(), this always returns a mortal copy of the key */
+/*
+=for apidoc hv_iterkeysv
+
+Returns the key as an C<SV*> from the current position of the hash
+iterator.  The return value will always be a mortal copy of the key.  Also
+see C<hv_iterinit>.
+
+=cut
+*/
+
 SV *
 Perl_hv_iterkeysv(pTHX_ register HE *entry)
 {
@@ -1154,6 +1328,15 @@ Perl_hv_iterkeysv(pTHX_ register HE *entry)
 	return sv_2mortal(newSVpvn((HeKLEN(entry) ? HeKEY(entry) : ""),
 				  HeKLEN(entry)));
 }
+
+/*
+=for apidoc hv_iterval
+
+Returns the value from the current position of the hash iterator.  See
+C<hv_iterkey>.
+
+=cut
+*/
 
 SV *
 Perl_hv_iterval(pTHX_ HV *hv, register HE *entry)
@@ -1170,6 +1353,15 @@ Perl_hv_iterval(pTHX_ HV *hv, register HE *entry)
     return HeVAL(entry);
 }
 
+/*
+=for apidoc hv_iternextsv
+
+Performs an C<hv_iternext>, C<hv_iterkey>, and C<hv_iterval> in one
+operation.
+
+=cut
+*/
+
 SV *
 Perl_hv_iternextsv(pTHX_ HV *hv, char **key, I32 *retlen)
 {
@@ -1179,6 +1371,14 @@ Perl_hv_iternextsv(pTHX_ HV *hv, char **key, I32 *retlen)
     *key = hv_iterkey(he, retlen);
     return hv_iterval(hv, he);
 }
+
+/*
+=for apidoc hv_magic
+
+Adds magic to a hash.  See C<sv_magic>.
+
+=cut
+*/
 
 void
 Perl_hv_magic(pTHX_ HV *hv, GV *gv, int how)

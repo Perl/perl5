@@ -73,6 +73,16 @@ S_isa_lookup(pTHX_ HV *stash, const char *name, int len, int level)
     return boolSV(strEQ(name, "UNIVERSAL"));
 }
 
+/*
+=for apidoc sv_derived_from
+
+Returns a boolean indicating whether the SV is derived from the specified
+class.  This is the function that implements C<UNIVERSAL::isa>.  It works
+for class names as well as for objects.
+
+=cut
+*/
+
 bool
 Perl_sv_derived_from(pTHX_ SV *sv, const char *name)
 {

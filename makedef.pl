@@ -448,7 +448,7 @@ if ($define{'PERL_GLOBAL_STRUCT'}) {
 
 # functions from *.sym files
 
-my @syms = ($global_sym, $pp_sym, $globvar_sym);
+my @syms = ($global_sym, $globvar_sym); # $pp_sym is not part of the API
 
 if ($define{'USE_PERLIO'}) {
      push @syms, $perlio_sym;

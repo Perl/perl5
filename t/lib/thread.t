@@ -72,7 +72,7 @@ $t->join->join;
 {
     package Loch::Ness;
     sub new { bless [], shift }
-    sub monster : locked, method {
+    sub monster : locked : method {
 	my($s, $m) = @_;
 	print "ok $m\n";
     }

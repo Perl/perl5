@@ -48,6 +48,62 @@ struct xpvhv {
 	(hash) = hash_PeRlHaSh + (hash_PeRlHaSh>>5); \
     } STMT_END
 
+/*
+=for apidoc AmU||HEf_SVKEY
+This flag, used in the length slot of hash entries and magic structures,
+specifies the structure contains a C<SV*> pointer where a C<char*> pointer
+is to be expected. (For information only--not to be used).
+
+=for apidoc AmU||Nullhv
+Null HV pointer.
+
+=for apidoc Am|char*|HvNAME|HV* stash
+Returns the package name of a stash.  See C<SvSTASH>, C<CvSTASH>.
+
+=for apidoc Am|void*|HeKEY|HE* he
+Returns the actual pointer stored in the key slot of the hash entry. The
+pointer may be either C<char*> or C<SV*>, depending on the value of
+C<HeKLEN()>.  Can be assigned to.  The C<HePV()> or C<HeSVKEY()> macros are
+usually preferable for finding the value of a key.
+
+=for apidoc Am|STRLEN|HeKLEN|HE* he
+If this is negative, and amounts to C<HEf_SVKEY>, it indicates the entry
+holds an C<SV*> key.  Otherwise, holds the actual length of the key.  Can
+be assigned to. The C<HePV()> macro is usually preferable for finding key
+lengths.
+
+=for apidoc Am|SV*|HeVAL|HE* he
+Returns the value slot (type C<SV*>) stored in the hash entry.
+
+=for apidoc Am|U32|HeHASH|HE* he
+Returns the computed hash stored in the hash entry.
+
+=for apidoc Am|char*|HePV|HE* he|STRLEN len
+Returns the key slot of the hash entry as a C<char*> value, doing any
+necessary dereferencing of possibly C<SV*> keys.  The length of the string
+is placed in C<len> (this is a macro, so do I<not> use C<&len>).  If you do
+not care about what the length of the key is, you may use the global
+variable C<PL_na>, though this is rather less efficient than using a local
+variable.  Remember though, that hash keys in perl are free to contain
+embedded nulls, so using C<strlen()> or similar is not a good way to find
+the length of hash keys. This is very similar to the C<SvPV()> macro
+described elsewhere in this document.
+
+=for apidoc Am|SV*|HeSVKEY|HE* he
+Returns the key as an C<SV*>, or C<Nullsv> if the hash entry does not
+contain an C<SV*> key.
+
+=for apidoc Am|SV*|HeSVKEY_force|HE* he
+Returns the key as an C<SV*>.  Will create and return a temporary mortal
+C<SV*> if the hash entry contains only a C<char*> key.
+
+=for apidoc Am|SV*|HeSVKEY_set|HE* he|SV* sv
+Sets the key to a given C<SV*>, taking care to set the appropriate flags to
+indicate the presence of an C<SV*> key, and returns the same
+C<SV*>.
+
+=cut
+*/
 
 /* these hash entry flags ride on hent_klen (for use only in magic/tied HVs) */
 #define HEf_SVKEY	-2	/* hent_key is a SV* */
