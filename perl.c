@@ -619,13 +619,13 @@ setuid perl scripts securely.\n");
 #else
 		sv_catpv(Sv,"print \"\\nCharacteristics of this binary (from libperl): \\n\",");
 #endif
-#if defined(DEBUGGING) || defined(NOEMBED) || defined(MULTIPLICITY)
+#if defined(DEBUGGING) || defined(NO_EMBED) || defined(MULTIPLICITY)
 		strcpy(buf,"\"  Compile-time options:");
 #  ifdef DEBUGGING
 		strcat(buf," DEBUGGING");
 #  endif
-#  ifdef NOEMBED
-		strcat(buf," NOEMBED");
+#  ifdef NO_EMBED
+		strcat(buf," NO_EMBED");
 #  endif
 #  ifdef MULTIPLICITY
 		strcat(buf," MULTIPLICITY");
