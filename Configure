@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Feb 17 01:07:48 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Tue Feb 22 06:52:47 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -9518,6 +9518,33 @@ eval $inlibc
 set mktime d_mktime
 eval $inlibc
 
+: see if this is a sys/mman.h system
+set sys/mman.h i_sysmman
+eval $inhdr
+
+: see if mmap exists
+set mmap d_mmap
+eval $inlibc
+: see what shmat returns
+: default to something harmless
+mmaptype='void *'
+case "$i_sysmman$d_mmap" in
+"$define$define")
+	$cat >mmap.c <<'END'
+#include <sys/mman.h>
+void *mmap();
+END
+	if $cc $ccflags -c mmap.c >/dev/null 2>&1; then
+		mmaptype='void *'
+	else
+		mmaptype='caddr_t'
+	fi
+	echo "and it returns ($mmaptype)." >&4
+	;;
+esac
+
+
+
 : see if mprotect exists
 set mprotect d_mprotect
 eval $inlibc
@@ -11487,11 +11514,20 @@ EOM
 *)
 	case "$alignbytes" in
 	'') echo "Checking alignment constraints..." >&4
-		$cat >try.c <<'EOCP'
+		if $test "X$uselongdouble" = Xdefine -a "X$d_longdbl" = Xdefine; then
+			$cat >try.c <<'EOCP'
+typedef long double NV;
+EOCP
+		else
+			$cat >try.c <<'EOCP'
+typedef double NV;
+EOCP
+		fi
+		$cat >>try.c <<'EOCP'
 #include <stdio.h>
 struct foobar {
 	char foo;
-	double bar;
+	NV bar;
 } try_algn;
 int main()
 {
@@ -12622,33 +12658,6 @@ case "$make_set_make" in
 '#') echo "Yup, it does.";;
 *) echo "Nope, it doesn't.";;
 esac
-
-: see if this is a sys/mman.h system
-set sys/mman.h i_sysmman
-eval $inhdr
-
-: see if mmap exists
-set mmap d_mmap
-eval $inlibc
-: see what shmat returns
-: default to something harmless
-mmaptype='void *'
-case "$i_sysmman$d_mmap" in
-"$define$define")
-	$cat >mmap.c <<'END'
-#include <sys/mman.h>
-void *mmap();
-END
-	if $cc $ccflags -c mmap.c >/dev/null 2>&1; then
-		mmaptype='void *'
-	else
-		mmaptype='caddr_t'
-	fi
-	echo "and it returns ($mmaptype)." >&4
-	;;
-esac
-
-
 
 : see what type is used for mode_t
 rp="What is the type used for file modes for system calls (e.g. fchmod())?"

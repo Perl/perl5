@@ -26,7 +26,8 @@ afs (afs.U):
 
 alignbytes (alignbytes.U):
 	This variable holds the number of bytes required to align a
-	double. Usual values are 2, 4 and 8.
+	double-- or a long double when applicable. Usual values are
+	2, 4 and 8.  The default is eight, for safety.
 
 ansi2knr (ansi2knr.U):
 	This variable is set if the user needs to run ansi2knr.  
@@ -2047,6 +2048,10 @@ i_syslog (i_syslog.U):
 i_sysmman (i_sysmman.U):
 	This variable conditionally defines the I_SYS_MMAN symbol, and
 	indicates whether a C program should include <sys/mman.h>.
+
+i_sysmode (i_sysmode.U):
+	This variable conditionally defines the I_SYSMODE symbol,
+	and indicates whether a C program should include <sys/mode.h>.
 
 i_sysmount (i_sysmount.U):
 	This variable conditionally defines the I_SYSMOUNT symbol,
