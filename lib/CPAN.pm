@@ -4418,7 +4418,7 @@ or
 	} else {
 	  $self->{writemakefile} =
 	      qq{NO Makefile.PL refused to write a Makefile.};
-	  # It's probably worth to record the reason, so let's retry
+	  # It's probably worth it to record the reason, so let's retry
 	  # local $/;
 	  # my $fh = IO::File->new("$system |"); # STDERR? STDIN?
 	  # $self->{writemakefile} .= <$fh>;
