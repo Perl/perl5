@@ -563,9 +563,9 @@ previous time C<caller> was called.
 Changes the working directory to EXPR, if possible. If EXPR is omitted,
 changes to the directory specified by C<$ENV{HOME}>, if set; if not,
 changes to the directory specified by C<$ENV{LOGDIR}>. (Under VMS, the
-variable C<$ENV{SYS$LOGIN}> is used instead.) If neither is set,
-C<chdir> does nothing. It returns true upon success, false otherwise.
-See the example under C<die>.
+variable C<$ENV{SYS$LOGIN}> is also checked, and used if it is set.) If
+neither is set, C<chdir> does nothing. It returns true upon success,
+false otherwise. See the example under C<die>.
 
 =item chmod LIST
 

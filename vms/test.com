@@ -201,7 +201,7 @@ while ($test = shift) {
 		next if /^\s*$/;
 
 
-                if (/^(not )?ok (\d+)(\s*#.*)?/ &&
+                if (/^(not )?ok (\d+)[^#]*(\s*#.*)?/ &&
                     $2 == $next)
                 {
                     my($not, $num, $extra) = ($1, $2, $3);

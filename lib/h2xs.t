@@ -43,6 +43,8 @@ my @tests = (
 "-f -n $name", <<"EOXSFILES",
 Writing $name/$name.pm
 Writing $name/$name.xs
+Writing $name/fallback.c
+Writing $name/fallback.xs
 Writing $name/Makefile.PL
 Writing $name/README
 Writing $name/t/1.t
@@ -62,6 +64,8 @@ EONOXSFILES
 "-f -n $name $header", <<"EOXSFILES",
 Writing $name/$name.pm
 Writing $name/$name.xs
+Writing $name/fallback.c
+Writing $name/fallback.xs
 Writing $name/Makefile.PL
 Writing $name/README
 Writing $name/t/1.t

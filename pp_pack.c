@@ -266,13 +266,14 @@ PP(pp_unpack)
 		goto uchar_checksum;
 	    sv = NEWSV(35, len);
 	    sv_setpvn(sv, s, len);
-	    s += len;
 	    if (datumtype == 'A' || datumtype == 'Z') {
 		aptr = s;	/* borrow register */
 		if (datumtype == 'Z') {	/* 'Z' strips stuff after first null */
 		    s = SvPVX(sv);
 		    while (*s)
 			s++;
+		    if (star) /* exact for 'Z*' */
+		        len = s - SvPVX(sv) + 1;
 		}
 		else {		/* 'A' strips both nulls and spaces */
 		    s = SvPVX(sv) + len - 1;
@@ -283,6 +284,7 @@ PP(pp_unpack)
 		SvCUR_set(sv, s - SvPVX(sv));
 		s = aptr;	/* unborrow register */
 	    }
+	    s += len;
 	    XPUSHs(sv_2mortal(sv));
 	    break;
 	case 'B':

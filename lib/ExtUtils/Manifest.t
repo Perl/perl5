@@ -105,6 +105,7 @@ is( join(' ', filecheck() ), 'bar', 'listing skipped with filecheck()' );
 # add a subdirectory and a file there that should be found
 ok( mkdir( 'moretest', 0777 ), 'created moretest directory' );
 my $quux = File::Spec->catfile( 'moretest', 'quux' );
+$quux =~ s#\\#/#g;
 add_file( $quux, 'quux' );
 ok( exists( ExtUtils::Manifest::manifind()->{$quux} ), "manifind found $quux" );
 

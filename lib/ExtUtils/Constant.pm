@@ -1,6 +1,6 @@
 package ExtUtils::Constant;
 use vars qw (@ISA $VERSION %XS_Constant %XS_TypeSet @EXPORT_OK %EXPORT_TAGS);
-$VERSION = '0.09';
+$VERSION = '0.10';
 
 =head1 NAME
 
@@ -68,7 +68,7 @@ NUL terminated string, length will be determined with C<strlen>
 A fixed length thing, given as a [pointer, length] pair. If you know the
 length of a string at compile time you may use this instead of I<PV>
 
-=item PVN
+=item SV
 
 A B<mortal> SV.
 
@@ -107,7 +107,7 @@ $Text::Wrap::columns = 80;
 
 %EXPORT_TAGS = ( 'all' => [ qw(
 	XS_constant constant_types return_clause memEQ_clause C_stringify
-	C_constant autoload WriteConstants
+	C_constant autoload WriteConstants WriteMakefileSnippet
 ) ] );
 
 @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
@@ -465,19 +465,35 @@ sub params {
 
 =item dump_names
 
-dump_names  PACKAGE, SUBNAME, DEFAULT_TYPE, TYPES, INDENT, BREAKOUT, ITEM...
+dump_names DEFAULT_TYPE, TYPES, INDENT, OPTIONS, ITEM...
 
 An internal function to generate the embedded perl code that will regenerate
-the constant subroutines.  Parameters are the same as for C_constant.
+the constant subroutines.  I<DEFAULT_TYPE>, I<TYPES> and I<ITEM>s are the
+same as for C_constant.  I<INDENT> is treated as number of spaces to indent
+by.  I<OPTIONS> is a hashref of options. Currently only C<declare_types> is
+recognised.  If the value is true a C<$types> is always declared in the perl
+code generated, if defined and false never declared, and if undefined C<$types>
+is only declared if the values in I<TYPES> as passed in cannot be inferred from
+I<DEFAULT_TYPES> and the I<ITEM>s.
 
 =cut
 
 sub dump_names {
-  my ($package, $subname, $default_type, $what, $indent, $breakout, @items)
-    = @_;
-  my (@simple, @complex);
+  my ($default_type, $what, $indent, $options, @items) = @_;
+  my $declare_types = $options->{declare_types};
+  $indent = ' ' x ($indent || 0);
+
+  my $result;
+  my (@simple, @complex, %used_types);
   foreach (@items) {
-    my $type = $_->{type} || $default_type;
+    my $type;
+    if (ref $_) {
+      $type = $_->{type} || $default_type;
+    } else {
+      $_ = {name=>$_};
+      $type = $default_type;
+    }
+    $used_types{$type}++;
     if ($type eq $default_type and 0 == ($_->{name} =~ tr/A-Za-z0-9_//c)
         and !defined ($_->{macro}) and !defined ($_->{value})
         and !defined ($_->{default}) and !defined ($_->{pre})
@@ -489,29 +505,25 @@ sub dump_names {
       push @complex, $_;
     }
   }
-  my $result = <<"EOT";
-  /* When generated this function returned values for the list of names given
-     in this section of perl code.  Rather than manually editing these functions
-     to add or remove constants, which would result in this comment and section
-     of code becoming inaccurate, we recommend that you edit this section of
-     code, and use it to regenerate a new set of constant functions which you
-     then use to replace the originals.
 
-     Regenerate these constant functions by feeding this entire source file to
-     perl -x
-
-#!$^X -w
-use ExtUtils::Constant qw (constant_types C_constant XS_constant);
-
-EOT
-  $result .= 'my $types = {map {($_, 1)} qw(' . join (" ", sort keys %$what)
-    . ")};\n";
-  $result .= wrap ("my \@names = (qw(",
-		   "               ", join (" ", sort @simple) . ")");
+  if (!defined $declare_types) {
+    # Do they pass in any types we weren't already using?
+    foreach (keys %$what) {
+      next if $used_types{$_};
+      $declare_types++; # Found one in $what that wasn't used.
+      last; # And one is enough to terminate this loop
+    }
+  }
+  if ($declare_types) {
+    $result = $indent . 'my $types = {map {($_, 1)} qw('
+      . join (" ", sort keys %$what) . ")};\n";
+  }
+  $result .= wrap ($indent . "my \@names = (qw(",
+		   $indent . "               ", join (" ", sort @simple) . ")");
   if (@complex) {
     foreach my $item (sort {$a->{name} cmp $b->{name}} @complex) {
       my $name = C_stringify $item->{name};
-      my $line = ",\n            {name=>\"$name\"";
+      my $line = ",\n$indent            {name=>\"$name\"";
       $line .= ", type=>\"$item->{type}\"" if defined $item->{type};
       foreach my $thing (qw (macro value default pre post def_pre def_post)) {
         my $value = $item->{$thing};
@@ -535,6 +547,38 @@ EOT
   }
   $result .= ");\n";
 
+  $result;
+}
+
+
+=item dogfood
+
+dogfood PACKAGE, SUBNAME, DEFAULT_TYPE, TYPES, INDENT, BREAKOUT, ITEM...
+
+An internal function to generate the embedded perl code that will regenerate
+the constant subroutines.  Parameters are the same as for C_constant.
+
+=cut
+
+sub dogfood {
+  my ($package, $subname, $default_type, $what, $indent, $breakout, @items)
+    = @_;
+  my $result = <<"EOT";
+  /* When generated this function returned values for the list of names given
+     in this section of perl code.  Rather than manually editing these functions
+     to add or remove constants, which would result in this comment and section
+     of code becoming inaccurate, we recommend that you edit this section of
+     code, and use it to regenerate a new set of constant functions which you
+     then use to replace the originals.
+
+     Regenerate these constant functions by feeding this entire source file to
+     perl -x
+
+#!$^X -w
+use ExtUtils::Constant qw (constant_types C_constant XS_constant);
+
+EOT
+  $result .= dump_names ($default_type, $what, 0, {declare_types=>1}, @items);
   $result .= <<'EOT';
 
 print constant_types(); # macro defs
@@ -746,8 +790,8 @@ sub C_constant {
   } else {
     # We are the top level.
     $body .= "  /* Initially switch on the length of the name.  */\n";
-    $body .= dump_names ($package, $subname, $default_type, $what, $indent,
-                         $breakout, @items);
+    $body .= dogfood ($package, $subname, $default_type, $what, $indent,
+                      $breakout, @items);
     $body .= "  switch (len) {\n";
     # Need to group names of the same length
     my @by_length;
@@ -999,6 +1043,45 @@ END
 }
 
 
+=item WriteMakefileSnippet
+
+WriteMakefileSnippet ATTRIBUTE =E<gt> VALUE [, ...] 
+
+An function to generate perl code for Makefile.PL that will regenerate
+the constant subroutines.  Parameters are named as passed to C<WriteConstants>,
+with the addition of C<INDENT> to specify the number of leading spaces
+(default 2).
+
+Currently only C<INDENT>, C<NAME>, C<DEFAULT_TYPE>, C<NAMES>, C<C_FILE> and
+C<XS_FILE> are recognised.
+
+=cut
+
+sub WriteMakefileSnippet {
+  my %args = @_;
+  my $indent = $args{INDENT} || 2;
+
+  my $result = <<"EOT";
+ExtUtils::Constant::WriteConstants(
+                                   NAME         => '$args{NAME}',
+                                   NAMES        => \\\@names,
+                                   DEFAULT_TYPE => '$args{DEFAULT_TYPE}',
+EOT
+  foreach (qw (C_FILE XS_FILE)) {
+    next unless exists $args{$_};
+    $result .= sprintf "                                   %-12s => '%s',\n",
+      $_, $args{$_};
+  }
+  $result .= <<'EOT';
+                                );
+EOT
+
+  $result =~ s/^/' 'x$indent/gem;
+  return dump_names ($args{DEFAULT_TYPE}, undef, $indent, undef,
+                           @{$args{NAMES}})
+          . $result;
+}
+
 =item WriteConstants ATTRIBUTE =E<gt> VALUE [, ...]
 
 Writes a file of C code and a file of XS code which you should C<#include>
@@ -1040,7 +1123,7 @@ C<constants.xs>.
 =item SUBNAME
 
 The perl visible name of the XS subroutine generated which will return the
-constants. The default is C<constant>.  
+constants. The default is C<constant>.
 
 =item C_SUBNAME
 

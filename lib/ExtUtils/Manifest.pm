@@ -142,15 +142,15 @@ sub maniread {
     while (<M>){
 	chomp;
 	next if /^#/;
+
+        my($file, $comment) = /^(\S+)\s*(.*)/;
+        next unless $file;
+
 	if ($Is_MacOS) {
-	    my($item,$text) = /^(\S+)\s*(.*)/;
-	    $item = _macify($item);
-	    $item =~ s/\\([0-3][0-7][0-7])/sprintf("%c", oct($1))/ge;
-	    $read->{$item}=$text;
+	    $file = _macify($file);
+	    $file =~ s/\\([0-3][0-7][0-7])/sprintf("%c", oct($1))/ge;
 	}
 	elsif ($Is_VMS) {
-	    my($file)= /^(\S+)/;
-	    next unless $file;
 	    my($base,$dir) = File::Basename::fileparse($file);
 	    # Resolve illegal file specifications in the same way as tar
 	    $dir =~ tr/./_/;
@@ -158,9 +158,10 @@ sub maniread {
 	    if (@pieces > 2) { $base = shift(@pieces) . '.' . join('_',@pieces); }
 	    my $okfile = "$dir$base";
 	    warn "Debug: Illegal name $file changed to $okfile\n" if $Debug;
-	    $read->{"\L$okfile"}=$_;
+            $file = "\L$okfile";
 	}
-	else { /^(\S+)\s*(.*)/ and $read->{$1}=$2; }
+
+        $read->{$file} = $comment;
     }
     close M;
     $read;

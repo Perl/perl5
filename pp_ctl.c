@@ -3032,6 +3032,7 @@ PP(pp_require)
     GV *filter_child_proc = 0;
     SV *filter_state = 0;
     SV *filter_sub = 0;
+    SV *hook_sv = 0;
 
     sv = POPs;
     if (SvNIOKp(sv)) {
@@ -3230,6 +3231,7 @@ trylocal: {
 		    LEAVE;
 
 		    if (tryrsfp) {
+			hook_sv = dirsv;
 			break;
 		    }
 
@@ -3319,7 +3321,9 @@ trylocal: {
 
     /* Assume success here to prevent recursive requirement. */
     (void)hv_store(GvHVn(PL_incgv), name, strlen(name),
-		   newSVpv(CopFILE(&PL_compiling), 0), 0 );
+		   (hook_sv ? SvREFCNT_inc(hook_sv)
+			    : newSVpv(CopFILE(&PL_compiling), 0)),
+		   0 );
 
     ENTER;
     SAVETMPS;

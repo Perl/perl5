@@ -8,7 +8,7 @@ BEGIN {
 }
 
 use File::Spec;
-use Test::More tests => 30;
+use Test::More tests => 39;
 
 my @tempfiles = ();
 
@@ -24,12 +24,6 @@ sub get_temp_fh {
 }
 
 END { 1 while unlink @tempfiles }
-
-sub get_addr {
-    my $str = shift;
-    $str =~ /(0x[0-9a-f]+)/i;
-    return $1;
-}
 
 sub fooinc {
     my ($self, $filename) = @_;
@@ -47,18 +41,18 @@ ok( !eval { require Bar; 1 },      'Trying non-magic package' );
 
 ok( eval { require Foo; 1 },       'require() magic via code ref'  ); 
 ok( exists $INC{'Foo.pm'},         '  %INC sees it' );
-is( get_addr($INC{'Foo.pm'}), get_addr(\&fooinc),
-				   '  key is correct in %INC' );
+is( ref $INC{'Foo.pm'}, 'CODE',    '  key is a coderef in %INC' );
+is( $INC{'Foo.pm'}, \&fooinc,	   '  key is correct in %INC' );
 
 ok( eval "use Foo1; 1;",           'use()' );  
 ok( exists $INC{'Foo1.pm'},        '  %INC sees it' );
-is( get_addr($INC{'Foo1.pm'}), get_addr(\&fooinc),
-				   '  key is correct in %INC' );
+is( ref $INC{'Foo1.pm'}, 'CODE',   '  key is a coderef in %INC' );
+is( $INC{'Foo1.pm'}, \&fooinc,     '  key is correct in %INC' );
 
 ok( eval { do 'Foo2.pl'; 1 },      'do()' ); 
 ok( exists $INC{'Foo2.pl'},        '  %INC sees it' );
-is( get_addr($INC{'Foo2.pl'}), get_addr(\&fooinc),
-				   '  key is correct in %INC' );
+is( ref $INC{'Foo2.pl'}, 'CODE',   '  key is a coderef in %INC' );
+is( $INC{'Foo2.pl'}, \&fooinc,     '  key is correct in %INC' );
 
 pop @INC;
 
@@ -81,18 +75,18 @@ ok( !eval { require Foo3; 1; },   'Original magic INC purged' );
 
 ok( eval { require Bar; 1 },      'require() magic via array ref' );
 ok( exists $INC{'Bar.pm'},        '  %INC sees it' );
-is( get_addr($INC{'Bar.pm'}), get_addr($arrayref),
-				   '  key is correct in %INC' );
+is( ref $INC{'Bar.pm'}, 'ARRAY',  '  key is an arrayref in %INC' );
+is( $INC{'Bar.pm'}, $arrayref,    '  key is correct in %INC' );
 
 ok( eval "use Bar1; 1;",          'use()' );
 ok( exists $INC{'Bar1.pm'},       '  %INC sees it' );
-is( get_addr($INC{'Bar1.pm'}), get_addr($arrayref),
-				   '  key is correct in %INC' );
+is( ref $INC{'Bar1.pm'}, 'ARRAY', '  key is an arrayref in %INC' );
+is( $INC{'Bar1.pm'}, $arrayref,   '  key is correct in %INC' );
 
 ok( eval { do 'Bar2.pl'; 1 },     'do()' );
 ok( exists $INC{'Bar2.pl'},       '  %INC sees it' );
-is( get_addr($INC{'Bar2.pl'}), get_addr($arrayref),
-				   '  key is correct in %INC' );
+is( ref $INC{'Bar2.pl'}, 'ARRAY', '  key is an arrayref in %INC' );
+is( $INC{'Bar2.pl'}, $arrayref,   '  key is correct in %INC' );
 
 pop @INC;
 
@@ -111,8 +105,9 @@ push @INC, $href;
 
 ok( eval { require Quux; 1 },      'require() magic via hash object' );
 ok( exists $INC{'Quux.pm'},        '  %INC sees it' );
-is( get_addr($INC{'Quux.pm'}), get_addr($href),
-				   '  key is correct in %INC' );
+is( ref $INC{'Quux.pm'}, 'FooLoader',
+				   '  key is an object in %INC' );
+is( $INC{'Quux.pm'}, $href,        '  key is correct in %INC' );
 
 pop @INC;
 
@@ -121,8 +116,9 @@ push @INC, $aref;
 
 ok( eval { require Quux1; 1 },     'require() magic via array object' );
 ok( exists $INC{'Quux1.pm'},       '  %INC sees it' );
-is( get_addr($INC{'Quux1.pm'}), get_addr($aref),
-				   '  key is correct in %INC' );
+is( ref $INC{'Quux1.pm'}, 'FooLoader',
+				   '  key is an object in %INC' );
+is( $INC{'Quux1.pm'}, $aref,       '  key is correct in %INC' );
 
 pop @INC;
 
@@ -131,7 +127,8 @@ push @INC, $sref;
 
 ok( eval { require Quux2; 1 },     'require() magic via scalar object' );
 ok( exists $INC{'Quux2.pm'},       '  %INC sees it' );
-is( get_addr($INC{'Quux2.pm'}), get_addr($sref),
-				   '  key is correct in %INC' );
+is( ref $INC{'Quux2.pm'}, 'FooLoader',
+				   '  key is an object in %INC' );
+is( $INC{'Quux2.pm'}, $sref,       '  key is correct in %INC' );
 
 pop @INC;
