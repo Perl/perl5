@@ -1361,12 +1361,16 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 		PL_preambleav = newAV();
 	    av_push(PL_preambleav, newSVpv("use Config qw(myconfig config_vars)",0));
 	    if (*++s != ':')  {
+                STRLEN opts;
+
 		PL_Sv = newSVpv("print myconfig();",0);
 #ifdef VMS
 		sv_catpv(PL_Sv,"print \"\\nCharacteristics of this PERLSHR image: \\n\",");
 #else
 		sv_catpv(PL_Sv,"print \"\\nCharacteristics of this binary (from libperl): \\n\",");
 #endif
+                opts = SvCUR(PL_Sv);
+
 		sv_catpv(PL_Sv,"\"  Compile-time options:");
 #  ifdef DEBUGGING
 		sv_catpv(PL_Sv," DEBUGGING");
@@ -1404,6 +1408,24 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #  ifdef PERL_IMPLICIT_SYS
 		sv_catpv(PL_Sv," PERL_IMPLICIT_SYS");
 #  endif
+
+                while (SvCUR(PL_Sv) > opts+76) {
+                    /* find last space after "options: " and before col 76 */
+
+                    char *space, *pv = SvPV_nolen(PL_Sv);
+                    char c = pv[opts+76];
+                    pv[opts+76] = '\0';
+                    space = strrchr(pv+opts+26, ' ');
+                    pv[opts+76] = c;
+                    if (!space) break; /* "Can't happen" */
+
+                    /* break the line before that space */
+
+                    opts = space - pv;
+                    sv_insert(PL_Sv, opts, 0,
+                              "\\n                       ", 25);
+                }
+
 		sv_catpv(PL_Sv,"\\n\",");
 
 #if defined(LOCAL_PATCH_COUNT)
