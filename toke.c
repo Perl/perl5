@@ -3554,14 +3554,9 @@ Perl_yylex(pTHX)
 		PL_expect = XTERM;		/* e.g. print $fh .3 */
 	    else if (strchr("?-+", *s) && !isSPACE(s[1]) && s[1] != '=')
  		PL_expect = XTERM;		/* e.g. print $fh -1 */
-	    else if (*s == '/') {
-		if(s[1] == '/') {
-		    PL_expect=XOPERATOR;
-		}
-		else {
-		    PL_expect=XTERM;
-		}
-	    }
+	    else if (*s == '/' && !isSPACE(s[1]) && s[1] != '=' && s[1] != '/')
+		PL_expect = XTERM;		/* e.g. print $fh /.../
+						 XXX except DORDOR operator */
 	    else if (*s == '<' && s[1] == '<' && !isSPACE(s[2]) && s[2] != '=')
 		PL_expect = XTERM;		/* print $fh <<"EOF" */
 	}
