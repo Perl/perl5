@@ -215,7 +215,10 @@ cc*|xlc*) # cc should've been set by line 116 or so if empty.
 	if test ! -x /usr/bin/$cc -a -x /usr/vac/bin/$cc; then
 		case ":$PATH:" in
 		*:/usr/vac/bin:*) ;;
-		*) cat <<EOF
+		*) if test ! -x /QOpenSys/usr/bin/$cc; then
+			# The /QOpenSys/usr/bin/$cc saves us if we are
+			# building natively in OS/400 PASE.
+			cat <<EOF
 
 ***
 *** You either implicitly or explicitly specified an IBM C compiler,
@@ -224,7 +227,8 @@ cc*|xlc*) # cc should've been set by line 116 or so if empty.
 *** in your PATH.  I suggest adding that and retrying Configure.
 ***
 EOF
-		   exit 1
+			exit 1
+		   fi 
 		   ;;
 		esac
 	fi
