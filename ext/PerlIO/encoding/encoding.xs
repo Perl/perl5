@@ -397,14 +397,14 @@ PerlIOEncode_flush(pTHX_ PerlIO * f)
     PerlIOEncode *e = PerlIOSelf(f, PerlIOEncode);
     IV code = 0;
 
-    if (e->bufsv && (e->base.ptr > e->base.buf)) {
+    if (e->bufsv) {
 	dSP;
 	SV *str;
 	char *s;
 	STRLEN len;
 	SSize_t count = 0;
-	if (PerlIOBase(f)->flags & PERLIO_F_WRBUF) {
-	    /* Write case encode the buffer and write() to layer below */
+	if ((PerlIOBase(f)->flags & PERLIO_F_WRBUF) && (e->base.ptr > e->base.buf)) {
+	    /* Write case - encode the buffer and write() to layer below */
 	    PUSHSTACKi(PERLSI_MAGIC);
 	    SPAGAIN;
 	    ENTER;
@@ -439,7 +439,7 @@ PerlIOEncode_flush(pTHX_ PerlIO * f)
 		return code;
 	    }
 	}
-	else if (PerlIOBase(f)->flags & PERLIO_F_RDBUF) {
+	else if ((PerlIOBase(f)->flags & PERLIO_F_RDBUF)) {
 	    /* read case */
 	    /* if we have any untranslated stuff then unread that first */
 	    if (e->dataSV && SvCUR(e->dataSV)) {
@@ -448,6 +448,7 @@ PerlIOEncode_flush(pTHX_ PerlIO * f)
 		if ((STRLEN)count != len) {
 		    code = -1;
 		}
+		SvCUR_set(e->dataSV,0);
 	    }
 	    /* See if there is anything left in the buffer */
 	    if (e->base.ptr < e->base.end) {
@@ -496,9 +497,18 @@ IV
 PerlIOEncode_close(pTHX_ PerlIO * f)
 {
     PerlIOEncode *e = PerlIOSelf(f, PerlIOEncode);
-    IV code = PerlIOBase_close(aTHX_ f);
-
+    IV code;
+    if (PerlIOBase(f)->flags & PERLIO_F_RDBUF) {
+	/* Discard partial character */
+	if (e->dataSV) {
+	    SvCUR_set(e->dataSV,0);
+	}
+	/* Don't back decode and unread any pending data */
+	e->base.ptr = e->base.end = e->base.buf;
+    }
+    code = PerlIOBase_close(aTHX_ f);
     if (e->bufsv) {
+	/* This should only fire for write case */
 	if (e->base.buf && e->base.ptr > e->base.buf) {
 	    Perl_croak(aTHX_ "Close with partial character");
 	}
