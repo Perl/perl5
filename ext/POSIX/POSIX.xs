@@ -1402,7 +1402,7 @@ INIT:
 	    croak("sigset is not of type POSIX::SigSet");
 	}
 
-	if ( items < 3 || SvTYPE(ST(2)) == SVt_NULL) {
+	if (items < 3 || ! SvOK(ST(2))) {
 	    oldsigset = NULL;
 	} else if (sv_isa(ST(2), "POSIX::SigSet")) {
 	    IV tmp = SvIV((SV*)SvRV(ST(2)));
