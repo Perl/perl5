@@ -2368,19 +2368,19 @@ false, defined or undefined.  Does not handle 'get' magic.
 =for hackers
 Found in file sv.h
 
+=item svtype
+
+An enum of flags for Perl types.  These are found in the file B<sv.h> 
+in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
+
+=for hackers
+Found in file sv.h
+
 =item SvTYPE
 
 Returns the type of the SV.  See C<svtype>.
 
 	svtype	SvTYPE(SV* sv)
-
-=for hackers
-Found in file sv.h
-
-=item svtype
-
-An enum of flags for Perl types.  These are found in the file B<sv.h> 
-in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 
 =for hackers
 Found in file sv.h
@@ -3063,9 +3063,25 @@ Found in file sv.c
 
 Unsets the RV status of the SV, and decrements the reference count of
 whatever was being referenced by the RV.  This can almost be thought of
-as a reversal of C<newSVrv>.  See C<SvROK_off>.
+as a reversal of C<newSVrv>.  This is C<sv_unref_flags> with C<flag>
+of zero.  See C<SvROK_off>.  
 
 	void	sv_unref(SV* sv)
+
+=for hackers
+Found in file sv.c
+
+=item sv_unref_flags
+
+Unsets the RV status of the SV, and decrements the reference count of
+whatever was being referenced by the RV.  This can almost be thought of
+as a reversal of C<newSVrv>.  The C<cflags> argument can contain
+C<SV_IMMEDIATE_UNREF> to force the reference count to be decremented
+(otherwise the decrementing is conditional on the reference count being
+different from one or the reference being a readonly SV).
+See C<SvROK_off>.  
+
+	void	sv_unref_flags(SV* sv, U32 flags)
 
 =for hackers
 Found in file sv.c

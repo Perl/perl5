@@ -809,7 +809,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    /* Can clear pad variable in place? */
 	    if (SvREFCNT(sv) <= 1 && !SvOBJECT(sv)) {
 		if (SvTHINKFIRST(sv))
-		    sv_force_normal(sv);
+		    sv_force_normal_flags(sv, SV_IMMEDIATE_UNREF);
 		if (SvMAGICAL(sv))
 		    mg_free(sv);
 

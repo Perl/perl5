@@ -1781,6 +1781,10 @@
 #define Perl_sv_unref		pPerl->Perl_sv_unref
 #undef  sv_unref
 #define sv_unref		Perl_sv_unref
+#undef  Perl_sv_unref_flags
+#define Perl_sv_unref_flags	pPerl->Perl_sv_unref_flags
+#undef  sv_unref_flags
+#define sv_unref_flags		Perl_sv_unref_flags
 #undef  Perl_sv_untaint
 #define Perl_sv_untaint		pPerl->Perl_sv_untaint
 #undef  sv_untaint
@@ -2138,6 +2142,10 @@
 #define Perl_sv_force_normal	pPerl->Perl_sv_force_normal
 #undef  sv_force_normal
 #define sv_force_normal		Perl_sv_force_normal
+#undef  Perl_sv_force_normal_flags
+#define Perl_sv_force_normal_flags	pPerl->Perl_sv_force_normal_flags
+#undef  sv_force_normal_flags
+#define sv_force_normal_flags	Perl_sv_force_normal_flags
 #undef  Perl_tmps_grow
 #define Perl_tmps_grow		pPerl->Perl_tmps_grow
 #undef  tmps_grow

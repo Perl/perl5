@@ -2042,6 +2042,7 @@ Ap	|void	|sv_taint	|SV* sv
 Ap	|bool	|sv_tainted	|SV* sv
 Apd	|int	|sv_unmagic	|SV* sv|int type
 Apd	|void	|sv_unref	|SV* sv
+Apd	|void	|sv_unref_flags	|SV* sv|U32 flags
 Ap	|void	|sv_untaint	|SV* sv
 Apd	|bool	|sv_upgrade	|SV* sv|U32 mt
 Apd	|void	|sv_usepvn	|SV* sv|char* ptr|STRLEN len
@@ -2170,6 +2171,7 @@ ApdM      |bool   |sv_utf8_downgrade|SV *sv|bool fail_ok
 ApdM      |void   |sv_utf8_encode |SV *sv
 Ap      |bool   |sv_utf8_decode |SV *sv
 Ap	|void	|sv_force_normal|SV *sv
+Ap	|void	|sv_force_normal_flags|SV *sv|U32 flags
 Ap	|void	|tmps_grow	|I32 n
 Apd	|SV*	|sv_rvweaken	|SV *sv
 p	|int	|magic_killbackrefs|SV *sv|MAGIC *mg

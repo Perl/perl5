@@ -3068,7 +3068,7 @@ Perl_sv_usepvn_mg(pTHX_ register SV *sv, register char *ptr, register STRLEN len
 }
 
 void
-Perl_sv_force_normal(pTHX_ register SV *sv)
+Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
 {
     if (SvREADONLY(sv)) {
 	if (SvFAKE(sv)) {
@@ -3086,9 +3086,15 @@ Perl_sv_force_normal(pTHX_ register SV *sv)
 	    Perl_croak(aTHX_ PL_no_modify);
     }
     if (SvROK(sv))
-	sv_unref(sv);
+	sv_unref_flags(sv, flags);
     else if (SvFAKE(sv) && SvTYPE(sv) == SVt_PVGV)
 	sv_unglob(sv);
+}
+
+void
+Perl_sv_force_normal(pTHX_ register SV *sv)
+{
+    sv_force_normal_flags(sv, 0);
 }
 
 /*
@@ -5692,17 +5698,21 @@ S_sv_unglob(pTHX_ SV *sv)
 }
 
 /*
-=for apidoc sv_unref
+=for apidoc sv_unref_flags
 
 Unsets the RV status of the SV, and decrements the reference count of
 whatever was being referenced by the RV.  This can almost be thought of
-as a reversal of C<newSVrv>.  See C<SvROK_off>.
+as a reversal of C<newSVrv>.  The C<cflags> argument can contain
+C<SV_IMMEDIATE_UNREF> to force the reference count to be decremented
+(otherwise the decrementing is conditional on the reference count being
+different from one or the reference being a readonly SV).
+See C<SvROK_off>.  
 
 =cut
 */
 
 void
-Perl_sv_unref(pTHX_ SV *sv)
+Perl_sv_unref_flags(pTHX_ SV *sv, U32 flags)
 {
     SV* rv = SvRV(sv);
 
@@ -5714,10 +5724,27 @@ Perl_sv_unref(pTHX_ SV *sv)
     }
     SvRV(sv) = 0;
     SvROK_off(sv);
-    if (SvREFCNT(rv) != 1 || SvREADONLY(rv))
+    if (SvREFCNT(rv) != 1 || SvREADONLY(rv) || flags) /* SV_IMMEDIATE_UNREF */
 	SvREFCNT_dec(rv);
-    else
+    else /* XXX Hack, but hard to make $a=$a->[1] work otherwise */
 	sv_2mortal(rv);		/* Schedule for freeing later */
+}
+
+/*
+=for apidoc sv_unref
+
+Unsets the RV status of the SV, and decrements the reference count of
+whatever was being referenced by the RV.  This can almost be thought of
+as a reversal of C<newSVrv>.  This is C<sv_unref_flags> with the C<flag>
+being zero.  See C<SvROK_off>.  
+
+=cut
+*/
+
+void
+Perl_sv_unref(pTHX_ SV *sv)
+{
+    sv_unref_flags(sv, 0);
 }
 
 void
