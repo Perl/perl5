@@ -3178,9 +3178,11 @@ form Foo/Bar and replaces the slash with C<::>. Returns the replacement.
 sub replace_manpage_separator {
     my($self,$man) = @_;
 	if ($^O eq 'uwin') {
-		$man =~ s,/+,.,g;
+	    $man =~ s,/+,.,g;
+	} elsif ($Is_Dos) {
+	    $man =~ s,/+,__,g;
 	} else {
-		$man =~ s,/+,::,g;
+	    $man =~ s,/+,::,g;
 	}
     $man;
 }
