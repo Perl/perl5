@@ -303,7 +303,8 @@ price is $Z<>100."
     print "The price is $Price.\n";	# interpreted
 
 As in some shells, you can enclose the variable name in braces to
-disambiguate it from following alphanumerics.  You must also do
+disambiguate it from following alphanumerics (and underscores).
+You must also do
 this when interpolating a variable into a string to separate the
 variable name from a following double-colon or an apostrophe, since
 these would be otherwise treated as a package separator:
