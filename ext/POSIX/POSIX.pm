@@ -23,8 +23,9 @@ sub croak { require Carp;  goto &Carp::croak }
 
 XSLoader::load 'POSIX', $VERSION;
 
-my $EINVAL = constant("EINVAL", 0);
-my $EAGAIN = constant("EAGAIN", 0);
+my %NON_CONSTS = (map {($_,1)}
+                  qw(S_ISBLK S_ISCHR S_ISDIR S_ISFIFO S_ISREG WEXITSTATUS
+                     WIFEXITED WIFSIGNALED WIFSTOPPED WSTOPSIG WTERMSIG));
 
 sub AUTOLOAD {
     if ($AUTOLOAD =~ /::(_?[a-z])/) {
@@ -35,18 +36,14 @@ sub AUTOLOAD {
     local $! = 0;
     my $constname = $AUTOLOAD;
     $constname =~ s/.*:://;
-    my $val = constant($constname, @_ ? $_[0] : 0);
-    if ($! == 0) {
+    if ($NON_CONSTS{$constname}) {
+        my ($val, $error) = &int_macro_int($constname, $_[0]);
+        croak $error if $error;
+        *$AUTOLOAD = sub { &int_macro_int($constname, $_[0]) };
+    } else {
+        my ($error, $val) = constant($constname);
+        croak $error if $error;
 	*$AUTOLOAD = sub { $val };
-    }
-    elsif ($! == $EAGAIN) {	# Not really a constant, so always call.
-	*$AUTOLOAD = sub { constant($constname, $_[0]) };
-    }
-    elsif ($! == $EINVAL) {
-	croak "$constname is not a valid POSIX macro";
-    }
-    else {
-	croak "Your vendor has not defined POSIX macro $constname, used";
     }
 
     goto &$AUTOLOAD;
