@@ -1,5 +1,10 @@
 #! /usr/local/bin/perl -w
 
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
+
 use Carp;
 use Switch qw(Perl6 __ fallthrough);
 

@@ -917,8 +917,15 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	    m = STRING(c);
 	    ln = STR_LEN(c);
 	    if (UTF) {
-		c1 = to_utf8_lower((U8*)m);
-		c2 = to_utf8_upper((U8*)m);
+	        STRLEN ulen1, ulen2;
+		U8 tmpbuf1[UTF8_MAXLEN*2+1];
+		U8 tmpbuf2[UTF8_MAXLEN*2+1];
+
+		to_utf8_lower((U8*)m, tmpbuf1, &ulen1);
+		to_utf8_upper((U8*)m, tmpbuf2, &ulen2);
+
+		c1 = utf8_to_uvuni(tmpbuf1, 0);
+		c2 = utf8_to_uvuni(tmpbuf2, 0);
 	    }
 	    else {
 		c1 = *(U8*)m;
@@ -2199,17 +2206,17 @@ S_regmatch(pTHX_ regnode *prog)
 	    if (do_utf8) {
 		char *l = locinput;
 		char *e;
+		STRLEN ulen;
+		U8 tmpbuf[UTF8_MAXLEN*2+1];
 		e = s + ln;
-		c1 = OP(scan) == EXACTF;
 		while (s < e) {
-		    if (l >= PL_regeol) {
+		    if (l >= PL_regeol)
 			sayNO;
-		    }
-		    if ((UTF ? utf8n_to_uvchr((U8*)s, e - s, 0, 0) : *((U8*)s)) !=
-			(c1 ? toLOWER_utf8((U8*)l) : toLOWER_LC_utf8((U8*)l)))
-			    sayNO;
-		    s += UTF ? UTF8SKIP(s) : 1;
-		    l += UTF8SKIP(l);
+		    toLOWER_utf8((U8*)l, tmpbuf, &ulen);
+		    if (memNE(s, tmpbuf, ulen))
+		        sayNO;
+		    s += UTF8SKIP(s);
+		    l += ulen;
 		}
 		locinput = l;
 		nextchr = UCHARAT(locinput);
@@ -2472,23 +2479,18 @@ S_regmatch(pTHX_ regnode *prog)
 		 * have to map both upper and title case to lower case.
 		 */
 		if (OP(scan) == REFF) {
+		    STRLEN ulen1, ulen2;
+		    U8 tmpbuf1[UTF8_MAXLEN*2+1];
+		    U8 tmpbuf2[UTF8_MAXLEN*2+1];
 		    while (s < e) {
 			if (l >= PL_regeol)
 			    sayNO;
-			if (toLOWER_utf8((U8*)s) != toLOWER_utf8((U8*)l))
+			toLOWER_utf8((U8*)s, tmpbuf1, &ulen1);
+			toLOWER_utf8((U8*)l, tmpbuf2, &ulen2);
+			if (ulen1 != ulen2 || memNE(tmpbuf1, tmpbuf2, ulen1))
 			    sayNO;
-			s += UTF8SKIP(s);
-			l += UTF8SKIP(l);
-		    }
-		}
-		else {
-		    while (s < e) {
-			if (l >= PL_regeol)
-			    sayNO;
-			if (toLOWER_LC_utf8((U8*)s) != toLOWER_LC_utf8((U8*)l))
-			    sayNO;
-			s += UTF8SKIP(s);
-			l += UTF8SKIP(l);
+			s += ulen1;
+			l += ulen2;
 		    }
 		}
 		locinput = l;
@@ -2534,11 +2536,18 @@ S_regmatch(pTHX_ regnode *prog)
 	    PL_curpad = AvARRAY((AV*)PL_regdata->data[n + 2]);
 	    PL_regendp[0] = PL_reg_magic->mg_len = locinput - PL_bostr;
 
-	    CALLRUNOPS(aTHX);			/* Scalar context. */
-	    SPAGAIN;
-	    ret = POPs;
-	    PUTBACK;
-	
+	    {
+		SV **before = SP;
+		CALLRUNOPS(aTHX);			/* Scalar context. */
+		SPAGAIN;
+		if (SP == before)
+		    ret = Nullsv;   /* protect against empty (?{}) blocks. */
+		else {
+		    ret = POPs;
+		    PUTBACK;
+		}
+	    }
+
 	    PL_op = oop;
 	    PL_curpad = ocurpad;
 	    PL_curcop = ocurcop;
@@ -3237,8 +3246,15 @@ S_regmatch(pTHX_ regnode *prog)
 		    }
 		    else { /* UTF */
 			if (OP(text_node) == EXACTF) {
-			    c1 = to_utf8_lower(s);
-			    c2 = to_utf8_upper(s);
+			     STRLEN ulen1, ulen2;
+			     U8 tmpbuf1[UTF8_MAXLEN*2+1];
+			     U8 tmpbuf2[UTF8_MAXLEN*2+1];
+
+			     to_utf8_lower((U8*)s, tmpbuf1, &ulen1);
+			     to_utf8_upper((U8*)s, tmpbuf2, &ulen2);
+
+			     c1 = utf8_to_uvuni(tmpbuf1, 0);
+			     c2 = utf8_to_uvuni(tmpbuf2, 0);
 			}
 			else {
 			    c2 = c1 = utf8_to_uvchr(s, NULL);
@@ -3975,14 +3991,10 @@ S_reginclass(pTHX_ register regnode *n, register U8* p, register bool do_utf8)
 		if (swash_fetch(sw, p, do_utf8))
 		    match = TRUE;
 		else if (flags & ANYOF_FOLD) {
-		    U8 tmpbuf[UTF8_MAXLEN+1];
-		
-		    if (flags & ANYOF_LOCALE) {
-			PL_reg_flags |= RF_tainted;
-			uvchr_to_utf8(tmpbuf, toLOWER_LC_utf8(p));
-		    }
-		    else
-		        uvchr_to_utf8(tmpbuf, toLOWER_utf8(p));
+		    STRLEN ulen;
+		    U8 tmpbuf[UTF8_MAXLEN*2+1];
+
+		    toLOWER_utf8(p, tmpbuf, &ulen);
 		    if (swash_fetch(sw, tmpbuf, do_utf8))
 			match = TRUE;
 		}

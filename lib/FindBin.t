@@ -1,8 +1,8 @@
 #!./perl
 
 BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
+    # Can't chdir in BEGIN before FindBin runs, as it then can't find us.
+    @INC = -d 't' ? 'lib' : '../lib';
 }
 
 print "1..1\n";

@@ -23,10 +23,12 @@ sub SWASHNEW {
 
 	defined %utf8::In || do "unicore/In.pl";
 
-	$type =~ s/^In(?:[-_]|\s+)?//i;
+	$type =~ s/^In(?:[-_]|\s+)?(?!herited$)//i;
 	$type =~ s/\s+$//;
 
-	my $inprefix = substr(lc($type), 0, 3);
+        $type = 'Lampersand' if $type =~ /^(?:Is)?L&$/;
+
+	my $inprefix = substr(lc($type), 0, 2);
 	if (exists $utf8::InPat{$inprefix}) {
 	    my $In = $type;
 	    for my $k (keys %{$utf8::InPat{$inprefix}}) {
@@ -41,13 +43,13 @@ sub SWASHNEW {
 	    }
 	}
 
-	# This is separate from 'To' in preparation of Is.pl (a la In.pl).
-	if ((not defined $file) && $type =~ /^Is([A-Z][A-Za-z]*)$/) {
-	    $file = "unicore/Is/$1";
-	}
-
-	if ((not defined $file) && $type =~ /^To([A-Z][A-Za-z]*)$/) {
-	    $file = "unicore/To/$1";
+	unless (defined $file) {
+	    # This is separate from 'To' in preparation of Is.pl (a la In.pl).
+	    if ($type =~ /^Is([A-Z][A-Za-z]*)$/) {
+		$file = "unicore/Is/$1";
+	    } elsif ((not defined $file) && $type =~ /^To([A-Z][A-Za-z]*)$/) {
+		$file = "unicore/To/$1";
+	    }
 	}
     }
 
@@ -97,7 +99,7 @@ sub SWASHNEW {
 	while ($x =~ /^([^0-9a-fA-F\n])(.*)/mg) {
 	    my $char = $1;
 	    my $name = $2;
-#	    print STDERR "$1 => $2\n" if DEBUG;
+	    print STDERR "$1 => $2\n" if DEBUG;
 	    if ($char =~ /[-+!]/) {
 		my ($c,$t) = split(/::/, $name, 2);	# bogus use of ::, really
 		my $subobj = $c->SWASHNEW($t, "", 0, 0, 0);
@@ -145,7 +147,7 @@ sub SWASHGET {
 		my $max = (defined $2 ? hex $2 : $min);
 		my $val = hex $3;
 		next if $max < $start;
-#		print "$min $max $val\n";
+		print "$min $max $val\n" if DEBUG;
 		if ($none) {
 		    if ($min < $start) {
 			$val += $start - $min if $val < $none;
@@ -153,7 +155,7 @@ sub SWASHGET {
 		    }
 		    for ($key = $min; $key <= $max; $key++) {
 			last LINE if $key >= $end;
-#			print STDERR "$key => $val\n" if DEBUG;
+			print STDERR "$key => $val\n" if DEBUG;
 			vec($swatch, $key - $start, $bits) = $val;
 			++$val if $val < $none;
 		    }
@@ -165,7 +167,7 @@ sub SWASHGET {
 		    }
 		    for ($key = $min; $key <= $max; $key++, $val++) {
 			last LINE if $key >= $end;
-#			print STDERR "$key => $val\n" if DEBUG;
+			print STDERR "$key => $val\n" if DEBUG;
 			vec($swatch, $key - $start, $bits) = $val;
 		    }
 		}
@@ -182,7 +184,7 @@ sub SWASHGET {
 		}
 		for ($key = $min; $key <= $max; $key++) {
 		    last LINE if $key >= $end;
-#		    print STDERR "$key => 1\n" if DEBUG;
+		    print STDERR "$key => 1\n" if DEBUG;
 		    vec($swatch, $key - $start, 1) = 1;
 		}
 	    }

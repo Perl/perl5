@@ -326,17 +326,22 @@ The following functions were not implemented in the VMS port,
 and calling them produces a fatal error (usually) or 
 undefined behavior (rarely, we hope):
 
-    chroot, dbmclose, dbmopen, fcntl, flock,
+    chroot, dbmclose, dbmopen, flock,
     getpgrp, getppid, getpriority, getgrent, getgrgid,
     getgrnam, setgrent, endgrent, ioctl, link, lstat,
     msgctl, msgget, msgsend, msgrcv, readlink, semctl,
     semget, semop, setpgrp, setpriority, shmctl, shmget,
     shmread, shmwrite, socketpair, symlink, syscall
 
-The following functions are available on Perls compiled with Dec C 5.2 or
-greater and running VMS 7.0 or greater
+The following functions are available on Perls compiled with Dec C
+5.2 or greater and running VMS 7.0 or greater:
 
     truncate
+
+The following functions are available on Perls built on VMS 7.2 or
+greater:
+
+    fcntl (without locking)
 
 The following functions may or may not be implemented, 
 depending on what type of socket support you've built into 
@@ -604,7 +609,7 @@ or backticks.
 C<unlink> will delete the highest version of a file only; in
 order to delete all versions, you need to say
 
-    1 while (unlink LIST);
+    1 while unlink LIST;
 
 You may need to make this change to scripts written for a
 Unix system which expect that after a call to C<unlink>,
@@ -647,14 +652,19 @@ time of the file (VMS revision date).
 
 If PID is a subprocess started by a piped C<open()> (see L<open>), 
 C<waitpid> will wait for that subprocess, and return its final
-status value.  If PID is a subprocess created in some other way
-(e.g. SPAWNed before Perl was invoked), or is not a subprocess of
-the current process, C<waitpid> will check once per second whether
-the process has completed, and when it has, will return 0.  (If PID
-specifies a process that isn't a subprocess of the current process,
-and you invoked Perl with the C<-w> switch, a warning will be issued.)
+status value in C<$?>.  If PID is a subprocess created in some other
+way (e.g. SPAWNed before Perl was invoked), or is not a subprocess
+of the current process, C<waitpid> will attempt to read from the
+process's termination mailbox, making the final status available in
+C<$?> when the process completes.   If the process specified by PID
+has no termination  mailbox, C<waitpid> will simply check once per
+second whether the process has completed, and return when it has. 
+(If PID specifies a process that isn't a subprocess of the current
+process, and you invoked Perl with the C<-w> switch, a warning will
+be issued.)
 
-The FLAGS argument is ignored in all cases.
+Returns PID on success, -1 on error.  The FLAGS argument is ignored
+in all cases.
 
 =back
 
@@ -883,7 +893,7 @@ problems.
 
 =head1 Revision date
 
-This document was last updated on 7-Aug-2001, for Perl 5, 
+This document was last updated on 2-Oct-2001, for Perl 5, 
 patchlevel 8.
 
 =head1 AUTHOR

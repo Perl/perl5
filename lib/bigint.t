@@ -1,6 +1,9 @@
 #!./perl
 
-BEGIN { @INC = '../lib' }
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
 require "bigint.pl";
 
 $test = 0;

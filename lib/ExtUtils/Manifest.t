@@ -106,6 +106,7 @@ is( join(' ', filecheck() ), 'bar', 'listing skipped with filecheck()' );
 ok( mkdir( 'moretest', 0777 ), 'created moretest directory' );
 my $quux = File::Spec->catfile( 'moretest', 'quux' );
 $quux =~ s#\\#/#g;
+$quux = VMS::Filespec::unixify($quux) if $^O eq 'VMS';
 add_file( $quux, 'quux' );
 ok( exists( ExtUtils::Manifest::manifind()->{$quux} ), "manifind found $quux" );
 
@@ -150,5 +151,7 @@ END {
 
 	# now get rid of the parent directory
 	ok( chdir( $cwd ), 'return to parent directory' );
+	unlink('mantest/MANIFEST');
 	remove_dir( 'mantest' );
 }
+

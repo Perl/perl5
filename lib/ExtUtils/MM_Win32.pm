@@ -95,8 +95,12 @@ sub dlsyms {
 $self->{BASEEXT}.def: Makefile.PL
 ",
      q!	$(PERL) "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" -MExtUtils::Mksymlists \\
-     -e "Mksymlists('NAME' => '!, $self->{NAME},
-     q!', 'DLBASE' => '!,$self->{DLBASE},
+     -e "Mksymlists('NAME'=>\"!, $self->{NAME},
+     q!\", 'DLBASE' => '!,$self->{DLBASE},
+     # The above two lines quoted differently to work around
+     # a bug in the 4DOS/4NT command line interpreter.  The visible
+     # result of the bug was files named q('extension_name',) *with the
+     # single quotes and the comma* in the extension build directories.
      q!', 'DL_FUNCS' => !,neatvalue($funcs),
      q!, 'FUNCLIST' => !,neatvalue($funclist),
      q!, 'IMPORTS' => !,neatvalue($imports),

@@ -18,16 +18,19 @@ BEGIN {
 if ( $symlink_exists ) { print "1..188\n"; }
 else                   { print "1..78\n";  }
 
-use File::Find;
-use File::Spec;
-if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'VMS')
- {
-  # This is a hack - at present File::Find does not produce native names on 
-  # Win32 or VMS, so force File::Spec to use Unix names.
-  require File::Spec::Unix;
-  @File::Spec::ISA = 'File::Spec::Unix';
- }
-
+BEGIN {
+    use File::Spec;
+    if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'VMS')
+     {
+      # This is a hack - at present File::Find does not produce native names on 
+      # Win32 or VMS, so force File::Spec to use Unix names.
+      # must be set *before* importing File::Find
+      require File::Spec::Unix;
+      @File::Spec::ISA = 'File::Spec::Unix';
+     }
+     require File::Find;
+     import File::Find;
+}
 cleanup();
 
 find({wanted => sub { print "ok 1\n" if $_ eq 'commonsense.t'; } },

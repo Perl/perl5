@@ -1,5 +1,10 @@
 #!/usr/local/bin/perl -w
 
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
+
 use strict;
 use Test::More tests => 86;
 use CGI::Util qw(escape unescape);

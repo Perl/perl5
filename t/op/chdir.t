@@ -7,6 +7,7 @@ BEGIN {
     @INC = qw(t . lib ../lib);
 }
 
+use Config;
 require "test.pl";
 plan(tests => 31);
 
@@ -22,7 +23,7 @@ END {
 
 # Might be a little early in the testing process to start using these,
 # but I can't think of a way to write this test without them.
-use File::Spec::Functions qw(:DEFAULT splitdir rel2abs);
+use File::Spec::Functions qw(:DEFAULT splitdir rel2abs splitpath);
 
 # Can't use Cwd::abs_path() because it has different ideas about
 # path separators than File::Spec.
@@ -34,7 +35,8 @@ my $Cwd = abs_path;
 
 # Let's get to a known position
 SKIP: {
-    skip("Already in t/", 2) if (splitdir(abs_path))[-1] eq ($IsVMS ? 'T' : 't');
+    my ($vol,$dir) = splitpath(abs_path,1);
+    skip("Already in t/", 2) if (splitdir($dir))[-1] eq ($IsVMS ? 'T' : 't');
 
     ok( chdir('t'),     'chdir("t")');
     is( abs_path, catdir($Cwd, 't'),       '  abs_path() agrees' );
@@ -89,7 +91,9 @@ WARNING
 }
 
 sub clean_env {
-    delete $ENV{$_} foreach @magic_envs;
+    foreach (@magic_envs) {
+        delete $ENV{$_} unless $IsVMS && $_ eq 'HOME' && !$Config{'d_setenv'};
+    }
     # The following means we won't really be testing for non-existence,
     # but in Perl we can only delete from the process table, not the job 
     # table.
@@ -102,13 +106,16 @@ foreach my $key (@magic_envs) {
 
     clean_env;
     $ENV{$key} = catdir $Cwd, ($IsVMS ? 'OP' : 'op');
-    
+
     check_env($key);
 }
 
 {
     clean_env;
-
-    ok( !chdir(),                   'chdir() w/o any ENV set' );
+    if ($IsVMS && !$Config{'d_setenv'}) {
+        pass("Can't reset HOME, so chdir() test meaningless");
+    } else {
+        ok( !chdir(),                   'chdir() w/o any ENV set' );
+    }
     is( abs_path, $Cwd,             '  abs_path() agrees' );
 }

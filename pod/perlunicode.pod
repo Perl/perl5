@@ -191,118 +191,154 @@ The C<In> and C<Is> can be left out: C<\p{Greek}> is equal to
 C<\p{InGreek}>, C<\P{Pd}> is equal to C<\P{Pd}>.
 
 Here is the list as of Unicode 3.1.1 (the two-letter classes) and as
-defined by Perl (the one-letter classes) (what Perl calls C<L> is
-often in Unicode materials called C<L&>):
+defined by Perl (the one-letter classes).
 
-   L  Letter
-   Lu Letter, Uppercase
-   Ll Letter, Lowercase
-   Lt Letter, Titlecase
-   Lm Letter, Modifier
-   Lo Letter, Other
-   M  Mark
-   Mn Mark, Non-Spacing
-   Mc Mark, Spacing Combining
-   Me Mark, Enclosing
-   N  Number
-   Nd Number, Decimal Digit
-   Nl Number, Letter
-   No Number, Other
-   P  Punctuation
-   Pc Punctuation, Connector
-   Pd Punctuation, Dash
-   Ps Punctuation, Open
-   Pe Punctuation, Close
-   Pi Punctuation, Initial quote
-       (may behave like Ps or Pe depending on usage)
-   Pf Punctuation, Final quote
-       (may behave like Ps or Pe depending on usage)
-   Po Punctuation, Other
-   S  Symbol
-   Sm Symbol, Math
-   Sc Symbol, Currency
-   Sk Symbol, Modifier
-   So Symbol, Other
-   Z  Separator
-   Zs Separator, Space
-   Zl Separator, Line
-   Zp Separator, Paragraph
-   C  Other
-   Cc Other, Control
-   Cf Other, Format
-   Cs Other, Surrogate
-   Co Other, Private Use
-   Cn Other, Not Assigned (Unicode defines no Cn characters)
+    L  Letter
+    Lu Letter, Uppercase
+    Ll Letter, Lowercase
+    Lt Letter, Titlecase
+    Lm Letter, Modifier
+    Lo Letter, Other
+    M  Mark
+    Mn Mark, Non-Spacing
+    Mc Mark, Spacing Combining
+    Me Mark, Enclosing
+    N  Number
+    Nd Number, Decimal Digit
+    Nl Number, Letter
+    No Number, Other
+    P  Punctuation
+    Pc Punctuation, Connector
+    Pd Punctuation, Dash
+    Ps Punctuation, Open
+    Pe Punctuation, Close
+    Pi Punctuation, Initial quote
+        (may behave like Ps or Pe depending on usage)
+    Pf Punctuation, Final quote
+        (may behave like Ps or Pe depending on usage)
+    Po Punctuation, Other
+    S  Symbol
+    Sm Symbol, Math
+    Sc Symbol, Currency
+    Sk Symbol, Modifier
+    So Symbol, Other
+    Z  Separator
+    Zs Separator, Space
+    Zl Separator, Line
+    Zp Separator, Paragraph
+    C  Other
+    Cc Other, Control
+    Cf Other, Format
+    Cs Other, Surrogate
+    Co Other, Private Use
+    Cn Other, Not Assigned
+
+There's also C<L&> which is an alias for C<Ll>, C<Lu>, and C<Lt>.
 
 Additionally, because scripts differ in their directionality
 (for example Hebrew is written right to left), all characters
 have their directionality defined:
 
-   BidiL   Left-to-Right
-   BidiLRE Left-to-Right Embedding
-   BidiLRO Left-to-Right Override
-   BidiR   Right-to-Left
-   BidiAL  Right-to-Left Arabic
-   BidiRLE Right-to-Left Embedding
-   BidiRLO Right-to-Left Override
-   BidiPDF Pop Directional Format
-   BidiEN  European Number
-   BidiES  European Number Separator
-   BidiET  European Number Terminator
-   BidiAN  Arabic Number
-   BidiCS  Common Number Separator
-   BidiNSM Non-Spacing Mark
-   BidiBN  Boundary Neutral
-   BidiB   Paragraph Separator
-   BidiS   Segment Separator
-   BidiWS  Whitespace
-   BidiON  Other Neutrals
+    BidiL   Left-to-Right
+    BidiLRE Left-to-Right Embedding
+    BidiLRO Left-to-Right Override
+    BidiR   Right-to-Left
+    BidiAL  Right-to-Left Arabic
+    BidiRLE Right-to-Left Embedding
+    BidiRLO Right-to-Left Override
+    BidiPDF Pop Directional Format
+    BidiEN  European Number
+    BidiES  European Number Separator
+    BidiET  European Number Terminator
+    BidiAN  Arabic Number
+    BidiCS  Common Number Separator
+    BidiNSM Non-Spacing Mark
+    BidiBN  Boundary Neutral
+    BidiB   Paragraph Separator
+    BidiS   Segment Separator
+    BidiWS  Whitespace
+    BidiON  Other Neutrals
 
 =head2 Scripts
 
 The scripts available for C<\p{In...}> and C<\P{In...}>, for example
 \p{InCyrillic>, are as follows, for example C<\p{InLatin}> or C<\P{InHan}>:
 
-   Latin
-   Greek
-   Cyrillic
-   Armenian
-   Hebrew
-   Arabic
-   Syriac
-   Thaana
-   Devanagari
-   Bengali
-   Gurmukhi
-   Gujarati
-   Oriya
-   Tamil
-   Telugu
-   Kannada
-   Malayalam
-   Sinhala
-   Thai
-   Lao
-   Tibetan
-   Myanmar
-   Georgian
-   Hangul
-   Ethiopic
-   Cherokee
-   CanadianAboriginal
-   Ogham
-   Runic
-   Khmer
-   Mongolian
-   Hiragana
-   Katakana
-   Bopomofo
-   Han
-   Yi
-   OldItalic
-   Gothic
-   Deseret
-   Inherited
+    Latin
+    Greek
+    Cyrillic
+    Armenian
+    Hebrew
+    Arabic
+    Syriac
+    Thaana
+    Devanagari
+    Bengali
+    Gurmukhi
+    Gujarati
+    Oriya
+    Tamil
+    Telugu
+    Kannada
+    Malayalam
+    Sinhala
+    Thai
+    Lao
+    Tibetan
+    Myanmar
+    Georgian
+    Hangul
+    Ethiopic
+    Cherokee
+    CanadianAboriginal
+    Ogham
+    Runic
+    Khmer
+    Mongolian
+    Hiragana
+    Katakana
+    Bopomofo
+    Han
+    Yi
+    OldItalic
+    Gothic
+    Deseret
+    Inherited
+
+There are also extended property classes that supplement the basic
+properties, defined by the F<PropList> Unicode database:
+
+    White_space
+    Bidi_Control
+    Join_Control
+    Dash
+    Hyphen
+    Quotation_Mark
+    Other_Math
+    Hex_Digit
+    ASCII_Hex_Digit
+    Other_Alphabetic
+    Ideographic
+    Diacritic
+    Extender
+    Other_Lowercase
+    Other_Uppercase
+    Noncharacter_Code_Point
+
+and further derived properties:
+
+    Alphabetic      Lu + Ll + Lt + Lm + Lo + Other_Alphabetic
+    Lowercase       Ll + Other_Lowercase
+    Uppercase       Lu + Other_Uppercase
+    Math            Sm + Other_Math
+
+    ID_Start        Lu + Ll + Lt + Lm + Lo + Nl
+    ID_Continue     ID_Start + Mn + Mc + Nd + Pc
+
+    Any             Any character
+    Assigned        Any non-Cn character
+    Common          Any character (or unassigned code point)
+                    not explicitly assigned to a script.
 
 =head2 Blocks
 

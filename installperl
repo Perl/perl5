@@ -425,11 +425,7 @@ if ($Config{installusrbinperl} && $Config{installusrbinperl} eq 'define' &&
 	      (-l $usrbinperl) &&
 	      ((readlink $usrbinperl) eq $expinstperl));
     }
-    if ((! $mainperl_is_instperl) &&
-	(yn("Many scripts expect perl to be installed as $usrbinperl.\n" . 
-	     "Do you wish to have $usrbinperl be the same as\n" .
-	     "$expinstperl? [y] ")))
-    {
+    if (! $mainperl_is_instperl) {
 	unlink($usrbinperl);
 	( $Config{'d_link'} eq 'define' &&
 	  eval { CORE::link $instperl, $usrbinperl } )	||

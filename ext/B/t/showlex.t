@@ -1,8 +1,11 @@
 #!./perl
 
 BEGIN {
+    chdir 't' if -d 't';
     if ($^O eq 'MacOS') {
 	@INC = qw(: ::lib ::macos:lib);
+    } else {
+	@INC = '../lib';
     }
 }
 

@@ -1,3 +1,10 @@
+#! /usr/local/bin/perl -w
+
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
+
 use Switch;
 
 print "1..4\n";

@@ -80,11 +80,15 @@ sub bar {
 	$foo = "a string";
 }
 
-# Schwern's example of finding an RV
-my $path = join " ", map { qq["-I$_"] } @INC;
-my $redir = $^O eq 'MacOS' ? '' : "2>&1";
-my $items = qx{$^X $path "-MO=Terse" -le "print \\42" $redir};
-like( $items, qr/RV $hex \\42/, 'RV' );
+SKIP: {
+    use Config;
+    skip("- printing RVs not working under threads") if $Config{usethreads};
+    # Schwern's example of finding an RV
+    my $path = join " ", map { qq["-I$_"] } @INC;
+    my $redir = $^O eq 'MacOS' ? '' : "2>&1";
+    my $items = qx{$^X $path "-MO=Terse" -le "print \\42" $redir};
+    like( $items, qr/RV $hex \\42/, 'RV' );
+}
 
 package TieOut;
 

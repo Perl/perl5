@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Sep 24 15:24:44 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Wed Oct  3 16:47:48 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -65,7 +65,10 @@ if test -d c:/. ; then
 		PATH=`cmd /c "echo %PATH%" | tr '\\\\' / `
 		OS2_SHELL=`cmd /c "echo %OS2_SHELL%" | tr '\\\\' / | tr '[A-Z]' '[a-z]'`
 	elif test -n "$DJGPP"; then
-		p_=\;
+		case "X${MACHTYPE:-nonesuchmach}" in
+		*cygwin) ;;
+		*) p_=\; ;;
+		esac
 	fi
 fi
 

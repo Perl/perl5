@@ -1,5 +1,10 @@
 #!./perl -w
 
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
+
 use Net::Config;
 use Net::FTP;
 

@@ -612,12 +612,16 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	}
 	break;
     case '\024':		/* ^T */
+        if (*(mg->mg_ptr+1) == '\0') {
 #ifdef BIG_TIME
- 	sv_setnv(sv, PL_basetime);
+            sv_setnv(sv, PL_basetime);
 #else
-	sv_setiv(sv, (IV)PL_basetime);
+            sv_setiv(sv, (IV)PL_basetime);
 #endif
-	break;
+        }
+        else if (strEQ(mg->mg_ptr, "\024AINT"))
+            sv_setiv(sv, PL_tainting);
+        break;
     case '\027':		/* ^W  & $^WARNING_BITS & ^WIDE_SYSTEM_CALLS */
 	if (*(mg->mg_ptr+1) == '\0')
 	    sv_setiv(sv, (IV)((PL_dowarn & G_WARN_ON) ? TRUE : FALSE));

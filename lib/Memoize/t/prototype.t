@@ -1,6 +1,10 @@
 #!/usr/bin/perl
 
-use lib '..';
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
+#use lib '..';
 use Memoize;
 $EXPECTED_WARNING = '(no warning expected)';
 

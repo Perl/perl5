@@ -4111,7 +4111,7 @@ calling select() in scalar context just returns $nfound.
 
 Any of the bit masks can also be undef.  The timeout, if specified, is
 in seconds, which may be fractional.  Note: not all implementations are
-capable of returning the$timeleft.  If not, they always return
+capable of returning the $timeleft.  If not, they always return
 $timeleft equal to the supplied $timeout.
 
 You can effect a sleep of 250 milliseconds this way:

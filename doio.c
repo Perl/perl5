@@ -2195,6 +2195,8 @@ Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
 		ok = ((wilddsc.dsc$a_pointer = tovmspath(SvPVX(tmpglob),vmsspec)) != NULL);
 	    else ok = ((wilddsc.dsc$a_pointer = tovmsspec(SvPVX(tmpglob),vmsspec)) != NULL);
 	    if (ok) wilddsc.dsc$w_length = (unsigned short int) strlen(wilddsc.dsc$a_pointer);
+	    for (cp=wilddsc.dsc$a_pointer; ok && cp && *cp; cp++)
+		if (*cp == '?') *cp = '%';  /* VMS style single-char wildcard */
 	    while (ok && ((sts = lib$find_file(&wilddsc,&rsdsc,&cxt,
 					       &dfltdsc,NULL,NULL,NULL))&1)) {
 		end = rstr + (unsigned long int) *rslt;

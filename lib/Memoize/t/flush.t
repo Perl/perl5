@@ -1,6 +1,9 @@
 #!/usr/bin/perl
 
-use lib '..';
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
 use Memoize 'flush_cache', 'memoize';
 print "1..8\n";
 print "ok 1\n";

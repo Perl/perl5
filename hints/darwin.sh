@@ -88,6 +88,13 @@ so='dylib';
 dlext='bundle';
 dlsrc='dl_dyld.xs'; usedl='define';
 cccdlflags=' '; # space, not empty, because otherwise we get -fpic
+# ldflag: -flat_namespace is only available since OS X 10.1 (Darwin 1.4.1)
+#    - but not in 10.0.x (Darwin 1.3.x)
+# -- Kay Roepke
+case "$osvers" in
+1.[0-3].*)	;;
+*)		ldflags="${ldflags} -flat_namespace" ;;
+esac
 lddlflags="${ldflags} -bundle -undefined suppress";
 ldlibpthname='DYLD_LIBRARY_PATH';
 useshrplib='true';
@@ -108,6 +115,7 @@ usemymalloc='n';
 
 # Locales aren't feeling well.
 LC_ALL=C; export LC_ALL;
+LANG=C; export LANG;
 
 # Case-insensitive filesystems don't get along with Makefile and
 # makefile in the same place.  Since Darwin uses GNU make, this dodges
@@ -115,7 +123,7 @@ LC_ALL=C; export LC_ALL;
 firstmakefile=GNUmakefile;
 
 #
-# The libraries are not threadsafe as of OS X 10. (10.1?)
+# The libraries are not threadsafe as of OS X 10.1.
 # Better stop now.
 #
 # Fix when Apple fixes libc.

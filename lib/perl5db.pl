@@ -721,7 +721,7 @@ EOP
 			    next CMD;
 			} 
 		    }
-                   $cmd =~ /^q$/ && ($fall_off_end = 1) && exit $?;
+                   $cmd =~ /^q$/ && ($fall_off_end = 1) && clean_ENV() && exit $?;
 		    $cmd =~ /^h$/ && do {
 			print_help($help);
 			next CMD; };
@@ -3006,6 +3006,14 @@ sub db_complete {
 
 sub end_report {
   print $OUT "Use `q' to quit or `R' to restart.  `h q' for details.\n"
+}
+
+sub clean_ENV {
+    if (defined($ini_pids)) {
+        $ENV{PERLDB_PIDS} = $ini_pids;
+    } else {
+        delete($ENV{PERLDB_PIDS});
+    }
 }
 
 END {

@@ -3,6 +3,8 @@ package My::Test;
 
 # This feature requires a fairly new version of Test::Harness
 BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
     require Test::Harness;
     if( $Test::Harness::VERSION < 1.20 ) {
         print "1..0\n";

@@ -302,9 +302,6 @@
 #define is_uni_print_lc		Perl_is_uni_print_lc
 #define is_uni_punct_lc		Perl_is_uni_punct_lc
 #define is_uni_xdigit_lc	Perl_is_uni_xdigit_lc
-#define to_uni_upper_lc		Perl_to_uni_upper_lc
-#define to_uni_title_lc		Perl_to_uni_title_lc
-#define to_uni_lower_lc		Perl_to_uni_lower_lc
 #define is_utf8_char		Perl_is_utf8_char
 #define is_utf8_string		Perl_is_utf8_string
 #define is_utf8_alnum		Perl_is_utf8_alnum
@@ -1808,9 +1805,9 @@
 #define is_uni_print(a)		Perl_is_uni_print(aTHX_ a)
 #define is_uni_punct(a)		Perl_is_uni_punct(aTHX_ a)
 #define is_uni_xdigit(a)	Perl_is_uni_xdigit(aTHX_ a)
-#define to_uni_upper(a)		Perl_to_uni_upper(aTHX_ a)
-#define to_uni_title(a)		Perl_to_uni_title(aTHX_ a)
-#define to_uni_lower(a)		Perl_to_uni_lower(aTHX_ a)
+#define to_uni_upper(a,b,c)	Perl_to_uni_upper(aTHX_ a,b,c)
+#define to_uni_title(a,b,c)	Perl_to_uni_title(aTHX_ a,b,c)
+#define to_uni_lower(a,b,c)	Perl_to_uni_lower(aTHX_ a,b,c)
 #define is_uni_alnum_lc(a)	Perl_is_uni_alnum_lc(aTHX_ a)
 #define is_uni_alnumc_lc(a)	Perl_is_uni_alnumc_lc(aTHX_ a)
 #define is_uni_idfirst_lc(a)	Perl_is_uni_idfirst_lc(aTHX_ a)
@@ -1825,9 +1822,6 @@
 #define is_uni_print_lc(a)	Perl_is_uni_print_lc(aTHX_ a)
 #define is_uni_punct_lc(a)	Perl_is_uni_punct_lc(aTHX_ a)
 #define is_uni_xdigit_lc(a)	Perl_is_uni_xdigit_lc(aTHX_ a)
-#define to_uni_upper_lc(a)	Perl_to_uni_upper_lc(aTHX_ a)
-#define to_uni_title_lc(a)	Perl_to_uni_title_lc(aTHX_ a)
-#define to_uni_lower_lc(a)	Perl_to_uni_lower_lc(aTHX_ a)
 #define is_utf8_char(a)		Perl_is_utf8_char(aTHX_ a)
 #define is_utf8_string(a,b)	Perl_is_utf8_string(aTHX_ a,b)
 #define is_utf8_alnum(a)	Perl_is_utf8_alnum(aTHX_ a)
@@ -2246,9 +2240,9 @@
 #define swash_fetch(a,b,c)	Perl_swash_fetch(aTHX_ a,b,c)
 #define taint_env()		Perl_taint_env(aTHX)
 #define taint_proper(a,b)	Perl_taint_proper(aTHX_ a,b)
-#define to_utf8_lower(a)	Perl_to_utf8_lower(aTHX_ a)
-#define to_utf8_upper(a)	Perl_to_utf8_upper(aTHX_ a)
-#define to_utf8_title(a)	Perl_to_utf8_title(aTHX_ a)
+#define to_utf8_lower(a,b,c)	Perl_to_utf8_lower(aTHX_ a,b,c)
+#define to_utf8_upper(a,b,c)	Perl_to_utf8_upper(aTHX_ a,b,c)
+#define to_utf8_title(a,b,c)	Perl_to_utf8_title(aTHX_ a,b,c)
 #if defined(UNLINK_ALL_VERSIONS)
 #define unlnk(a)		Perl_unlnk(aTHX_ a)
 #endif

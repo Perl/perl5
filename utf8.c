@@ -902,33 +902,33 @@ Perl_is_uni_punct(pTHX_ U32 c)
 bool
 Perl_is_uni_xdigit(pTHX_ U32 c)
 {
-    U8 tmpbuf[UTF8_MAXLEN+1];
+    U8 tmpbuf[UTF8_MAXLEN*2+1];
     uvchr_to_utf8(tmpbuf, (UV)c);
     return is_utf8_xdigit(tmpbuf);
 }
 
 U32
-Perl_to_uni_upper(pTHX_ U32 c)
+Perl_to_uni_upper(pTHX_ U32 c, U8* p, STRLEN *lenp)
 {
-    U8 tmpbuf[UTF8_MAXLEN+1];
+    U8 tmpbuf[UTF8_MAXLEN*2+1];
     uvchr_to_utf8(tmpbuf, (UV)c);
-    return to_utf8_upper(tmpbuf);
+    return to_utf8_upper(tmpbuf, p, lenp);
 }
 
 U32
-Perl_to_uni_title(pTHX_ U32 c)
+Perl_to_uni_title(pTHX_ U32 c, U8* p, STRLEN *lenp)
 {
-    U8 tmpbuf[UTF8_MAXLEN+1];
+    U8 tmpbuf[UTF8_MAXLEN*2+1];
     uvchr_to_utf8(tmpbuf, (UV)c);
-    return to_utf8_title(tmpbuf);
+    return to_utf8_title(tmpbuf, p, lenp);
 }
 
 U32
-Perl_to_uni_lower(pTHX_ U32 c)
+Perl_to_uni_lower(pTHX_ U32 c, U8* p, STRLEN *lenp)
 {
     U8 tmpbuf[UTF8_MAXLEN+1];
     uvchr_to_utf8(tmpbuf, (UV)c);
-    return to_utf8_lower(tmpbuf);
+    return to_utf8_lower(tmpbuf, p, lenp);
 }
 
 /* for now these all assume no locale info available for Unicode > 255 */
@@ -1015,24 +1015,6 @@ bool
 Perl_is_uni_xdigit_lc(pTHX_ U32 c)
 {
     return is_uni_xdigit(c);	/* XXX no locale support yet */
-}
-
-U32
-Perl_to_uni_upper_lc(pTHX_ U32 c)
-{
-    return to_uni_upper(c);	/* XXX no locale support yet */
-}
-
-U32
-Perl_to_uni_title_lc(pTHX_ U32 c)
-{
-    return to_uni_title(c);	/* XXX no locale support yet */
-}
-
-U32
-Perl_to_uni_lower_lc(pTHX_ U32 c)
-{
-    return to_uni_lower(c);	/* XXX no locale support yet */
 }
 
 bool
@@ -1199,36 +1181,45 @@ Perl_is_utf8_mark(pTHX_ U8 *p)
 }
 
 UV
-Perl_to_utf8_upper(pTHX_ U8 *p)
+Perl_to_utf8_upper(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp)
 {
     UV uv;
 
     if (!PL_utf8_toupper)
 	PL_utf8_toupper = swash_init("utf8", "ToUpper", &PL_sv_undef, 4, 0);
     uv = swash_fetch(PL_utf8_toupper, p, TRUE);
-    return uv ? UNI_TO_NATIVE(uv) : utf8_to_uvchr(p,0);
+    uv = uv ? UNI_TO_NATIVE(uv) : utf8_to_uvchr(p, 0);
+    *lenp = UNISKIP(uv);
+    uvuni_to_utf8(ustrp, uv);
+    return uv;
 }
 
 UV
-Perl_to_utf8_title(pTHX_ U8 *p)
+Perl_to_utf8_title(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp)
 {
     UV uv;
 
     if (!PL_utf8_totitle)
 	PL_utf8_totitle = swash_init("utf8", "ToTitle", &PL_sv_undef, 4, 0);
     uv = swash_fetch(PL_utf8_totitle, p, TRUE);
-    return uv ? UNI_TO_NATIVE(uv) : utf8_to_uvchr(p,0);
+    uv = uv ? UNI_TO_NATIVE(uv) : utf8_to_uvchr(p, 0);
+    *lenp = UNISKIP(uv);
+    uvuni_to_utf8(ustrp, uv);
+    return uv;
 }
 
 UV
-Perl_to_utf8_lower(pTHX_ U8 *p)
+Perl_to_utf8_lower(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp)
 {
     UV uv;
 
     if (!PL_utf8_tolower)
 	PL_utf8_tolower = swash_init("utf8", "ToLower", &PL_sv_undef, 4, 0);
     uv = swash_fetch(PL_utf8_tolower, p, TRUE);
-    return uv ? UNI_TO_NATIVE(uv) : utf8_to_uvchr(p,0);
+    uv = uv ? UNI_TO_NATIVE(uv) : utf8_to_uvchr(p, 0);
+    *lenp = UNISKIP(uv);
+    uvuni_to_utf8(ustrp, uv);
+    return uv;
 }
 
 /* a "swash" is a swatch hash */

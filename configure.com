@@ -628,8 +628,8 @@ $   THEN
 $     i_rp = 0
 $     firstread_rp_loop:
 $       sub_rp = F$EXTRACT(i_rp,COLUMNS,rp)
-$       echo4 "''sub_rp'"
 $       i_rp = i_rp + COLUMNS
+$       if i_rp .LT. len_rp THEN echo4 "''sub_rp'"
 $       IF i_rp .LT. len_rp THEN GOTO firstread_rp_loop
 $     READ SYS$COMMAND/PROMPT="''sub_rp'" ans
 $   ELSE

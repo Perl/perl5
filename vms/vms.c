@@ -424,6 +424,7 @@ prime_env_iter(void)
 {
   static int primed = 0;
   HV *seenhv = NULL, *envhv;
+  SV *sv = NULL;
   char cmd[LNM$C_NAMLENGTH+24], mbxnam[LNM$C_NAMLENGTH], *buf = Nullch;
   unsigned short int chan;
 #ifndef CLI$M_TRUSTED
@@ -497,8 +498,9 @@ prime_env_iter(void)
         }
         else {
           start++;
-          (void) hv_store(envhv,environ[j],start - environ[j] - 1,
-                          newSVpv(start,0),0);
+          sv = newSVpv(start,0);
+          SvTAINTED_on(sv);
+          (void) hv_store(envhv,environ[j],start - environ[j] - 1,sv,0);
         }
       }
       continue;
@@ -587,7 +589,9 @@ prime_env_iter(void)
         continue;
       }
       PERL_HASH(hash,key,keylen);
-      hv_store(envhv,key,keylen,newSVpvn(cp2,cp1 - cp2 + 1),hash);
+      sv = newSVpvn(cp2,cp1 - cp2 + 1);
+      SvTAINTED_on(sv);
+      hv_store(envhv,key,keylen,sv,hash);
       hv_store(seenhv,key,keylen,&PL_sv_yes,hash);
     }
     if (cmddsc.dsc$w_length == 14) { /* We just read LNM$FILE_DEV */
@@ -597,7 +601,9 @@ prime_env_iter(void)
       int trnlen, i;
       for (i = 0; ppfs[i]; i++) {
         trnlen = vmstrnenv(ppfs[i],eqv,0,fildev,0);
-        hv_store(envhv,ppfs[i],strlen(ppfs[i]),newSVpv(eqv,trnlen),0);
+        sv = newSVpv(eqv,trnlen);
+        SvTAINTED_on(sv);
+        hv_store(envhv,ppfs[i],strlen(ppfs[i]),sv,0);
       }
     }
   }
@@ -6372,6 +6378,7 @@ Perl_flex_stat(pTHX_ const char *fspec, Stat_t *statbufp)
     char temp_fspec[NAM$C_MAXRSS+300];
     int retval = -1;
 
+    if (!fspec) return retval;
     strcpy(temp_fspec, fspec);
     if (statbufp == (Stat_t *) &PL_statcache)
       do_tovmsspec(temp_fspec,namecache,0);

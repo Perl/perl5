@@ -172,6 +172,7 @@ PP(pp_substcont)
     rxres_restore(&cx->sb_rxres, rx);
 
     if (cx->sb_iters++) {
+	I32 saviters = cx->sb_iters;
 	if (cx->sb_iters > cx->sb_maxiters)
 	    DIE(aTHX_ "Substitution loop");
 
@@ -213,6 +214,7 @@ PP(pp_substcont)
 	    POPSUBST(cx);
 	    RETURNOP(pm->op_next);
 	}
+	cx->sb_iters = saviters;
     }
     if (RX_MATCH_COPIED(rx) && rx->subbeg != orig) {
 	m = s;

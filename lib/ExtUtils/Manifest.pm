@@ -69,6 +69,7 @@ sub manifind {
 	      $name =~ s/^:([^:]+)$/$1/ if $Is_MacOS;
 	      warn "Debug: diskfile $name\n" if $Debug;
 	      $name =~ s#(.*)\.$#\L$1# if $Is_VMS;
+	      $name = uc($name) if /^MANIFEST/i && $Is_VMS;
 	      $found->{$name} = "";}, $Is_MacOS ? ":" : ".");
     $found;
 }
@@ -158,7 +159,8 @@ sub maniread {
 	    if (@pieces > 2) { $base = shift(@pieces) . '.' . join('_',@pieces); }
 	    my $okfile = "$dir$base";
 	    warn "Debug: Illegal name $file changed to $okfile\n" if $Debug;
-            $file = "\L$okfile";
+            $file = $okfile;
+            $file = lc($file) unless $file =~ /^MANIFEST/i;
 	}
 
         $read->{$file} = $comment;

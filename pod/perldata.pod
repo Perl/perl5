@@ -87,10 +87,11 @@ that returns a reference to the appropriate type.  For a description
 of this, see L<perlref>.
 
 Names that start with a digit may contain only more digits.  Names
-that do not start with a letter, underscore, or digit are limited to
-one character, e.g.,  C<$%> or C<$$>.  (Most of these one character names
-have a predefined significance to Perl.  For instance, C<$$> is the
-current process id.)
+that do not start with a letter, underscore, digit or a caret (i.e.
+a control character) are limited to one character, e.g.,  C<$%> or
+C<$$>.  (Most of these one character names have a predefined
+significance to Perl.  For instance, C<$$> is the current process
+id.)
 
 =head2 Context
 

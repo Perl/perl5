@@ -3151,19 +3151,12 @@ PP(pp_ucfirst)
 
     if (DO_UTF8(sv) && (s = (U8*)SvPV(sv, slen)) && slen && UTF8_IS_START(*s)) {
 	STRLEN ulen;
-	U8 tmpbuf[UTF8_MAXLEN+1];
+	U8 tmpbuf[UTF8_MAXLEN*2+1];
 	U8 *tend;
 	UV uv;
 
-	if (IN_LOCALE_RUNTIME) {
-	    TAINT;
-	    SvTAINTED_on(sv);
-	    uv = toTITLE_LC_uvchr(utf8n_to_uvchr(s, slen, &ulen, 0));
-	}
-	else {
-	    uv   = toTITLE_utf8(s);
-	    ulen = UNISKIP(uv);
-	}
+	toTITLE_utf8(s, tmpbuf, &ulen); /* XXX --jhi */
+	uv = utf8_to_uvchr(tmpbuf, 0);
 	
 	tend = uvchr_to_utf8(tmpbuf, uv);
 
@@ -3212,19 +3205,12 @@ PP(pp_lcfirst)
 
     if (DO_UTF8(sv) && (s = (U8*)SvPV(sv, slen)) && slen && UTF8_IS_START(*s)) {
 	STRLEN ulen;
-	U8 tmpbuf[UTF8_MAXLEN+1];
+	U8 tmpbuf[UTF8_MAXLEN*2+1];
 	U8 *tend;
 	UV uv;
 
-	if (IN_LOCALE_RUNTIME) {
-	    TAINT;
-	    SvTAINTED_on(sv);
-	    uv = toLOWER_LC_uvchr(utf8n_to_uvchr(s, slen, &ulen, 0));
-	}
-	else {
-	    uv   = toLOWER_utf8(s);
-	    ulen = UNISKIP(uv);
-	}
+	toLOWER_utf8(s, tmpbuf, &ulen); /* XXX --jhi */
+	uv = utf8_to_uvchr(tmpbuf, 0);
 	
 	tend = uvchr_to_utf8(tmpbuf, uv);
 
@@ -3276,6 +3262,7 @@ PP(pp_uc)
 	STRLEN ulen;
 	register U8 *d;
 	U8 *send;
+	U8 tmpbuf[UTF8_MAXLEN*2+1];
 
 	s = (U8*)SvPV(sv,len);
 	if (!len) {
@@ -3289,19 +3276,11 @@ PP(pp_uc)
 	    (void)SvPOK_only(TARG);
 	    d = (U8*)SvPVX(TARG);
 	    send = s + len;
-	    if (IN_LOCALE_RUNTIME) {
-		TAINT;
-		SvTAINTED_on(TARG);
-		while (s < send) {
-		    d = uvchr_to_utf8(d, toUPPER_LC_uvchr( utf8n_to_uvchr(s, len, &ulen, 0)));
-		    s += ulen;
-		}
-	    }
-	    else {
-		while (s < send) {
-		    d = uvchr_to_utf8(d, toUPPER_utf8( s ));
-		    s += UTF8SKIP(s);
-		}
+	    while (s < send) {
+	        toUPPER_utf8(s, tmpbuf, &ulen); /* XXX --jhi */
+		Copy(tmpbuf, d, ulen, U8);
+		d += ulen;
+		s += UTF8SKIP(s);
 	    }
 	    *d = '\0';
 	    SvUTF8_on(TARG);
@@ -3350,6 +3329,7 @@ PP(pp_lc)
 	STRLEN ulen;
 	register U8 *d;
 	U8 *send;
+	U8 tmpbuf[UTF8_MAXLEN*2+1];
 
 	s = (U8*)SvPV(sv,len);
 	if (!len) {
@@ -3363,19 +3343,11 @@ PP(pp_lc)
 	    (void)SvPOK_only(TARG);
 	    d = (U8*)SvPVX(TARG);
 	    send = s + len;
-	    if (IN_LOCALE_RUNTIME) {
-		TAINT;
-		SvTAINTED_on(TARG);
-		while (s < send) {
-		    d = uvchr_to_utf8(d, toLOWER_LC_uvchr( utf8n_to_uvchr(s, len, &ulen, 0)));
-		    s += ulen;
-		}
-	    }
-	    else {
-		while (s < send) {
-		    d = uvchr_to_utf8(d, toLOWER_utf8(s));
-		    s += UTF8SKIP(s);
-		}
+	    while (s < send) {
+	        toLOWER_utf8(s, tmpbuf, &ulen); /* XXX --jhi */
+		Copy(tmpbuf, d, ulen, U8);
+		d += ulen;
+		s += UTF8SKIP(s);
 	    }
 	    *d = '\0';
 	    SvUTF8_on(TARG);

@@ -1,6 +1,10 @@
 #!./perl
 
-BEGIN { @INC = '../lib' }
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
+
 require "bigfloat.pl";
 
 $test = 0;

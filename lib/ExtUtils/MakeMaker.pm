@@ -2147,6 +2147,9 @@ Andy Dougherty <F<doughera@lafcol.lafayette.edu>>, Andreas KE<ouml>nig
 support by Charles Bailey <F<bailey@newman.upenn.edu>>.  OS/2 support
 by Ilya Zakharevich <F<ilya@math.ohio-state.edu>>.
 
+Contact the MakeMaker mailing list <F<makemaker@perl.org>> if you have
+any questions.
+
 Send patches and bug reports to <F<perlbug@perl.org>>.
 
 =cut

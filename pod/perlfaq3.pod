@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq3 - Programming Tools ($Revision: 1.2 $, $Date: 2001/09/29 03:13:13 $)
+perlfaq3 - Programming Tools ($Revision: 1.6 $, $Date: 2001/10/03 23:06:15 $)
 
 =head1 DESCRIPTION
 
@@ -41,10 +41,22 @@ operations typically found in symbolic debuggers.
 
 =head2 Is there a Perl shell?
 
-In general, no.  The Shell.pm module (distributed with Perl) makes
-Perl try commands which aren't part of the Perl language as shell
-commands.  perlsh from the source distribution is simplistic and
-uninteresting, but may still be what you want.
+In general, not yet.  There is psh available at
+
+    http://www.focusresearch.com/gregor/psh
+
+Which includes the following description:
+
+    The Perl Shell is a shell that combines the interactive nature
+    of a Unix shell with the power of Perl. The goal is to eventually
+    have a full featured shell that behaves as expected for normal
+    shell activity. But, the Perl Shell will use Perl syntax and
+    functionality for for control-flow statements and other things.
+
+The Shell.pm module (distributed with Perl) makes Perl try commands
+which aren't part of the Perl language as shell commands.  perlsh
+from the source distribution is simplistic and uninteresting, but
+may still be what you want.
 
 =head2 How do I debug my Perl programs?
 
@@ -118,27 +130,28 @@ to generate cross-reference reports for Perl programs.
 
 =head2 Is there a pretty-printer (formatter) for Perl?
 
-There is no program that will reformat Perl as much as indent(1) does
-for C.  The complex feedback between the scanner and the parser (this
-feedback is what confuses the vgrind and emacs programs) makes it
-challenging at best to write a stand-alone Perl parser.
+Perltidy is a Perl script which indents and reformats Perl scripts
+to make them easier to read by trying to follow the rules of the
+L<perlstyle>. If you write Perl scripts, or spend much time reading
+them, you will probably find it useful.  It is available at
+http://perltidy.sourceforge.net
 
-Of course, if you simply follow the guidelines in L<perlstyle>, you
-shouldn't need to reformat.  The habit of formatting your code as you
-write it will help prevent bugs.  Your editor can and should help you
-with this.  The perl-mode or newer cperl-mode for emacs can provide
-remarkable amounts of help with most (but not all) code, and even less
-programmable editors can provide significant assistance.  Tom swears
-by the following settings in vi and its clones:
+Of course, if you simply follow the guidelines in L<perlstyle>,
+you shouldn't need to reformat.  The habit of formatting your code
+as you write it will help prevent bugs.  Your editor can and should
+help you with this.  The perl-mode or newer cperl-mode for emacs
+can provide remarkable amounts of help with most (but not all)
+code, and even less programmable editors can provide significant
+assistance.  Tom Christiansen and many other VI users  swear by
+the following settings in vi and its clones:
 
     set ai sw=4
     map! ^O {^M}^[O^T
 
-Now put that in your F<.exrc> file (replacing the caret characters
+Put that in your F<.exrc> file (replacing the caret characters
 with control characters) and away you go.  In insert mode, ^T is
 for indenting, ^D is for undenting, and ^O is for blockdenting--
-as it were.  If you haven't used the last one, you're missing
-a lot.  A more complete example, with comments, can be found at
+as it were.  A more complete example, with comments, can be found at
 http://www.perl.com/CPAN-local/authors/id/TOMC/scripts/toms.exrc.gz
 
 If you are used to using the I<vgrind> program for printing out nice code
@@ -151,9 +164,13 @@ related to generating nicely printed output of documents.
 
 =head2 Is there a ctags for Perl?
 
-There's a simple one at
+Recent versions of ctags do much more than older versions did.
+EXUBERANT CTAGS is available from http://ctags.sourceforge.net/
+and does a good job of making tags files for perl code.
+
+There is also a simple one at
 http://www.perl.com/CPAN/authors/id/TOMC/scripts/ptags.gz which may do
-the trick.  And if not, it's easy to hack into what you want.
+the trick.  It can be easy to hack this into what you want.
 
 =head2 Is there an IDE or Windows Perl Editor?
 
@@ -505,6 +522,51 @@ instead of this:
 When the files you're processing are small, it doesn't much matter which
 way you do it, but it makes a huge difference when they start getting
 larger. 
+
+=item * Use map and grep selectively
+
+Remember that both map and grep expect a LIST argument, so doing this:
+
+        @wanted = grep {/pattern/} <FILE>;
+
+will cause the entire file to be slurped. For large files, it's better
+to loop:
+
+        while (<FILE>) {
+                push(@wanted, $_) if /pattern/;
+        }
+
+=item * Avoid unnecessary quotes and stringification
+
+Don't quote large strings unless absolutely necessary:
+
+        my $copy = "$large_string";
+
+makes 2 copies of $large_string (one for $copy and another for the
+quotes), whereas
+
+        my $copy = $large_string;
+
+only makes one copy.
+
+Ditto for stringifying large arrays:
+
+        {
+                local $, = "\n";
+                print @big_array;
+        }
+
+is much more memory-efficient than either
+
+        print join "\n", @big_array;
+
+or
+
+        {
+                local $" = "\n";
+                print "@big_array";
+        }
+
 
 =item * Pass by reference
 

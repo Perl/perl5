@@ -65,14 +65,29 @@ sub split_a_file {
   return $output;
 }
 
+# Brackets are valid in VMS filespecs and this test puts filespecs
+# into regexes a lot.
+
+sub _escape_brackets {
+  my $str = shift;
+  $str =~ s/\[/\\\[/g;   
+  $str =~ s/\]/\\\]/g;
+  return $str;
+}
+
 my $i = 0;
-my $dir = File::Spec->catfile($incdir, 'auto');
+my $dir = File::Spec->catdir($incdir, 'auto');
+if ($^O eq 'VMS') {
+  $dir = VMS::Filespec::unixify($dir);
+  $dir =~ s/\/$//;
+}
 foreach (@tests) {
   my $module = 'A' . $i . '_' . $$ . 'splittest';
   my $file = File::Spec->catfile($incdir,"$module.pm");
   s/\*INC\*/$incdir/gm;
   s/\*DIR\*/$dir/gm;
   s/\*MOD\*/$module/gm;
+  s#//#/#gm;
   # Build a hash for this test.
   my %args = /^\#\#\ ([^\n]*)\n	# Key is on a line starting ##
              ((?:[^\#]+		# Any number of characters not #
@@ -92,6 +107,17 @@ foreach (@tests) {
     $output = split_a_file (undef, $file, $dir, @extra_args);
   }
 
+  if ($^O eq 'VMS') {
+     my ($filespec, $replacement);
+     while ($output =~ m/(\[.+\])/) {
+       $filespec = $1;
+       $replacement =  VMS::Filespec::unixify($filespec);
+       $filespec = _escape_brackets($filespec);
+       $replacement =~ s/\/$//;
+       $output =~ s/$filespec/$replacement/;
+     }
+  }
+
   # test n+1
   is ($output, $args{Get}, "Output from autosplit()ing $args{Name}");
 
@@ -101,6 +127,7 @@ foreach (@tests) {
     find (sub {$got{$File::Find::name}++ unless -d $_}, $dir);
     foreach (split /\n/, $args{Files}) {
       next if /^#/;
+      $_ = lc($_) if $^O eq 'VMS';
       unless (delete $got{$_}) {
         $missing{$_}++;
       }
@@ -143,6 +170,7 @@ foreach (@tests) {
   if ($args{Tests}) {
     foreach my $code (split /\n/, $args{Tests}) {
       next if $code =~ /^\#/;
+      $code =~ s/\[(File::Spec->catfile\(.*\))\]/[_escape_brackets($1)]/ if $^O eq 'VMS';
       defined eval $code or fail(), print "# Code:  $code\n# Error: $@";
     }
   }

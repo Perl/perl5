@@ -17,5 +17,5 @@ sub is_tainted {
 my $cwd;
 eval { $cwd = getcwd; };
 is( $@, '',                 'getcwd() does not explode under taint mode' );
-ok( is_tainted($cwd),       "it's return value is tainted" );
+ok( is_tainted($cwd),       "its return value is tainted" );
 

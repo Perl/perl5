@@ -156,9 +156,9 @@ sub canonpath {
       else          { return vmsify($path);  }
     }
     else {
+      $path =~ s/([\[<])000000\./$1/g;                  # [000000.foo     ==> [foo
+      $path =~ s/([^-]+)\.000000([\]\>])/$1$2/g;        # foo.000000]     ==> foo]
       $path =~ s-\]\[--g;  $path =~ s/><//g;            # foo.][bar       ==> foo.bar
-      $path =~ s/([\[<])000000\./$1/;                   # [000000.foo     ==> [foo
-      $path =~ s/([^-]+)\.000000([\]\>])/$1$2/;         # foo.000000]     ==> foo]
       1 while $path =~ s{([\[<-])\.-}{$1-};             # [.-.-           ==> [--
       $path =~ s/\.[^\[<\.]+\.-([\]\>])/$1/;            # bar.foo.-]      ==> bar]
       $path =~ s/([\[<])(-+)/$1 . "\cx" x length($2)/e; # encode leading '-'s
@@ -406,6 +406,7 @@ sub abs2rel {
     # Figure out the effective $base and clean it up.
     if ( !defined( $base ) || $base eq '' ) {
         $base = cwd() ;
+        $base = $self->canonpath( $base ) ;
     }
     elsif ( ! $self->file_name_is_absolute( $base ) ) {
         $base = $self->rel2abs( $base ) ;
@@ -428,7 +429,9 @@ sub abs2rel {
 
     # Now, remove all leading components that are the same
     my @pathchunks = $self->splitdir( $path_directories );
+    unshift(@pathchunks,'000000') unless $pathchunks[0] eq '000000';
     my @basechunks = $self->splitdir( $base_directories );
+    unshift(@basechunks,'000000') unless $basechunks[0] eq '000000';
 
     while ( @pathchunks && 
             @basechunks && 

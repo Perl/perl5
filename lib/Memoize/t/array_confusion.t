@@ -1,6 +1,9 @@
 #!/usr/bin/perl
 
-use lib '..';
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
 use Memoize 'memoize', 'unmemoize';
 
 sub reff {

@@ -339,9 +339,9 @@ PERL_CALLCONV bool	Perl_is_uni_lower(pTHX_ U32 c);
 PERL_CALLCONV bool	Perl_is_uni_print(pTHX_ U32 c);
 PERL_CALLCONV bool	Perl_is_uni_punct(pTHX_ U32 c);
 PERL_CALLCONV bool	Perl_is_uni_xdigit(pTHX_ U32 c);
-PERL_CALLCONV U32	Perl_to_uni_upper(pTHX_ U32 c);
-PERL_CALLCONV U32	Perl_to_uni_title(pTHX_ U32 c);
-PERL_CALLCONV U32	Perl_to_uni_lower(pTHX_ U32 c);
+PERL_CALLCONV U32	Perl_to_uni_upper(pTHX_ U32 c, U8 *p, STRLEN *lenp);
+PERL_CALLCONV U32	Perl_to_uni_title(pTHX_ U32 c, U8 *p, STRLEN *lenp);
+PERL_CALLCONV U32	Perl_to_uni_lower(pTHX_ U32 c, U8 *p, STRLEN *lenp);
 PERL_CALLCONV bool	Perl_is_uni_alnum_lc(pTHX_ U32 c);
 PERL_CALLCONV bool	Perl_is_uni_alnumc_lc(pTHX_ U32 c);
 PERL_CALLCONV bool	Perl_is_uni_idfirst_lc(pTHX_ U32 c);
@@ -356,9 +356,6 @@ PERL_CALLCONV bool	Perl_is_uni_lower_lc(pTHX_ U32 c);
 PERL_CALLCONV bool	Perl_is_uni_print_lc(pTHX_ U32 c);
 PERL_CALLCONV bool	Perl_is_uni_punct_lc(pTHX_ U32 c);
 PERL_CALLCONV bool	Perl_is_uni_xdigit_lc(pTHX_ U32 c);
-PERL_CALLCONV U32	Perl_to_uni_upper_lc(pTHX_ U32 c);
-PERL_CALLCONV U32	Perl_to_uni_title_lc(pTHX_ U32 c);
-PERL_CALLCONV U32	Perl_to_uni_lower_lc(pTHX_ U32 c);
 PERL_CALLCONV STRLEN	Perl_is_utf8_char(pTHX_ U8 *p);
 PERL_CALLCONV bool	Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len);
 PERL_CALLCONV bool	Perl_is_utf8_alnum(pTHX_ U8 *p);
@@ -800,9 +797,9 @@ PERL_CALLCONV SV*	Perl_swash_init(pTHX_ char* pkg, char* name, SV* listsv, I32 m
 PERL_CALLCONV UV	Perl_swash_fetch(pTHX_ SV *sv, U8 *ptr, bool do_utf8);
 PERL_CALLCONV void	Perl_taint_env(pTHX);
 PERL_CALLCONV void	Perl_taint_proper(pTHX_ const char* f, const char* s);
-PERL_CALLCONV UV	Perl_to_utf8_lower(pTHX_ U8 *p);
-PERL_CALLCONV UV	Perl_to_utf8_upper(pTHX_ U8 *p);
-PERL_CALLCONV UV	Perl_to_utf8_title(pTHX_ U8 *p);
+PERL_CALLCONV UV	Perl_to_utf8_lower(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp);
+PERL_CALLCONV UV	Perl_to_utf8_upper(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp);
+PERL_CALLCONV UV	Perl_to_utf8_title(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp);
 #if defined(UNLINK_ALL_VERSIONS)
 PERL_CALLCONV I32	Perl_unlnk(pTHX_ char* f);
 #endif

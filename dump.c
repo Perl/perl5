@@ -156,7 +156,7 @@ Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, STRLEN pvlim)
 	      break;
 	 }
 	 u = utf8_to_uvchr((U8*)s, 0);
-	 Perl_sv_catpvf(aTHX_ dsv, "\\x{%x}", u);
+	 Perl_sv_catpvf(aTHX_ dsv, "\\x{%"UVxf"}", u);
     }
     sv_catpvn(dsv, "\"", 1);
     if (truncated)

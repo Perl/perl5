@@ -6,14 +6,19 @@ my %Expect_Name = (); # what we expect for $File::Find::name/fullname
 my %Expect_Dir  = (); # what we expect for $File::Find::dir
 my ($cwd, $cwd_untainted);
 
-use Config;
 
 BEGIN {
     chdir 't' if -d 't';
     unshift @INC => '../lib';
+}
 
-    for (keys %ENV) { # untaint ENV
-	($ENV{$_}) = $ENV{$_} =~ /(.*)/;
+use Config;
+
+BEGIN {
+    if ($^O ne 'VMS') {
+	for (keys %ENV) { # untaint ENV
+	    ($ENV{$_}) = $ENV{$_} =~ /(.*)/;
+	}
     }
 
     # Remove insecure directories from PATH

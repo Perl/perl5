@@ -852,6 +852,7 @@ lib/constant.t			See if compile-time constants work
 lib/CPAN.pm			Interface to Comprehensive Perl Archive Network
 lib/CPAN/FirstTime.pm		Utility for creating CPAN config files
 lib/CPAN/Nox.pm			Runs CPAN while avoiding compiled extensions
+lib/CPAN/t/Nox.t		See if CPAN::Nox works
 lib/CPAN/t/loadme.t		See if CPAN the module works
 lib/CPAN/t/vcmp.t		See if CPAN the module works
 lib/ctime.pl			A ctime workalike
@@ -892,6 +893,7 @@ lib/ExtUtils/Manifest.pm	Utilities to write MANIFEST files
 lib/ExtUtils/MANIFEST.SKIP	The default MANIFEST.SKIP
 lib/ExtUtils/Manifest.t		See if ExtUtils::Manifest works
 lib/ExtUtils/Mkbootstrap.pm	Writes a bootstrap file (see MakeMaker)
+lib/ExtUtils/Mkbootstrap.t	See if ExtUtils::Mkbootstrap works
 lib/ExtUtils/Mksymlists.pm	Writes a linker options file for extensions
 lib/ExtUtils/MM_Cygwin.pm	MakeMaker methods for Cygwin
 lib/ExtUtils/MM_NW5.pm		MakeMaker methods for NetWare
@@ -900,6 +902,7 @@ lib/ExtUtils/MM_Unix.pm		MakeMaker base class for Unix
 lib/ExtUtils/MM_VMS.pm		MakeMaker methods for VMS
 lib/ExtUtils/MM_Win32.pm	MakeMaker methods for Win32
 lib/ExtUtils/Packlist.pm	Manipulates .packlist files
+lib/ExtUtils/Packlist.t		See if Packlist works
 lib/ExtUtils/testlib.pm		Fixes up @INC to use just-built extension
 lib/ExtUtils/testlib.t		Fixes up @INC to use just-built extension
 lib/ExtUtils/typemap		Extension interface types
@@ -1135,6 +1138,7 @@ lib/Shell.pm			Make AUTOLOADed system() calls
 lib/Shell.t			Tests for above
 lib/shellwords.pl		Perl library to split into words with shell quoting
 lib/sigtrap.pm			For trapping an abort and giving traceback
+lib/sigtrap.t			See if sigtrap works
 lib/stat.pl			Perl library supporting stat function
 lib/strict.pm			For "use strict"
 lib/strict.t			See if strictures work
@@ -1248,7 +1252,7 @@ lib/Unicode/Normalize/Changes	Unicode::Normalize
 lib/Unicode/Normalize/README	Unicode::Normalize
 lib/Unicode/Normalize/t/norm.t	Unicode::Normalize
 lib/Unicode/Normalize/t/test.t	Unicode::Normalize
-lib/unicode/README		Explanation why this is there is.
+lib/Unicode/README		Explanation what happened to lib/unicode.
 lib/Unicode/UCD.pm		Unicode character database
 lib/Unicode/UCD.t		See if Unicode character database works
 lib/unicore/ArabLink.pl		Unicode character database
@@ -1307,9 +1311,36 @@ lib/unicore/In/132.pl		Unicode character database
 lib/unicore/In/133.pl		Unicode character database
 lib/unicore/In/134.pl		Unicode character database
 lib/unicore/In/135.pl		Unicode character database
+lib/unicore/In/136.pl		Unicode character database
+lib/unicore/In/137.pl		Unicode character database
+lib/unicore/In/138.pl		Unicode character database
+lib/unicore/In/139.pl		Unicode character database
 lib/unicore/In/14.pl		Unicode character database
+lib/unicore/In/140.pl		Unicode character database
+lib/unicore/In/141.pl		Unicode character database
+lib/unicore/In/142.pl		Unicode character database
+lib/unicore/In/143.pl		Unicode character database
+lib/unicore/In/144.pl		Unicode character database
+lib/unicore/In/145.pl		Unicode character database
+lib/unicore/In/146.pl		Unicode character database
+lib/unicore/In/147.pl		Unicode character database
+lib/unicore/In/148.pl		Unicode character database
+lib/unicore/In/149.pl		Unicode character database
 lib/unicore/In/15.pl		Unicode character database
+lib/unicore/In/150.pl		Unicode character database
+lib/unicore/In/151.pl		Unicode character database
+lib/unicore/In/152.pl		Unicode character database
+lib/unicore/In/153.pl		Unicode character database
+lib/unicore/In/154.pl		Unicode character database
+lib/unicore/In/155.pl		Unicode character database
+lib/unicore/In/156.pl		Unicode character database
+lib/unicore/In/157.pl		Unicode character database
+lib/unicore/In/158.pl		Unicode character database
+lib/unicore/In/159.pl		Unicode character database
 lib/unicore/In/16.pl		Unicode character database
+lib/unicore/In/160.pl		Unicode character database
+lib/unicore/In/161.pl		Unicode character database
+lib/unicore/In/162.pl		Unicode character database
 lib/unicore/In/17.pl		Unicode character database
 lib/unicore/In/18.pl		Unicode character database
 lib/unicore/In/19.pl		Unicode character database
