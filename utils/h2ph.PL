@@ -142,7 +142,7 @@ while (defined (my $file = next_file())) {
 			    $curargs{$arg} = 1;
 			}
 			$args =~ s/\b(\w)/\$$1/g;
-			$args = "local($args) = \@_;\n$t    ";
+			$args = "my($args) = \@_;\n$t    ";
 		    }
 		    s/^\s+//;
 		    expr();
@@ -338,7 +338,7 @@ while (defined (my $file = next_file())) {
 	    }
 	    $args = (
 		@args
-		? "local(" . (join ',', map "\$$_", @args) . ") = \@_;\n$t    "
+		? "my(" . (join ',', map "\$$_", @args) . ") = \@_;\n$t    "
 		: ""
 	    );
 	    my $proto = @args ? '' : '() ';
