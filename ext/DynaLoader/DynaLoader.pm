@@ -27,6 +27,20 @@ sub import { }		# override import inherited from AutoLoader
 # enable debug/trace messages from DynaLoader perl code
 $dl_debug = $ENV{PERL_DL_DEBUG} || 0 unless defined $dl_debug;
 
+#
+# Flags to alter dl_load_file behaviour.  Assigned bits:
+#   0x01  make symbols available for linking later dl_load_file's.
+#         (only known to work on Solaris 2 using dlopen(RTLD_GLOBAL))
+#
+# This is called as a class method $module->dl_load_flags.  The
+# definition here will be inherited and result on "default" loading
+# behaviour unless a sub-class of DynaLoader defines its own version.
+#
+
+sub dl_load_flags { 0x00 }
+
+# 
+
 ($dl_dlext, $dlsrc)
 	= @Config::Config{'dlext', 'dlsrc'};
 
@@ -39,6 +53,8 @@ $do_expand = $Is_VMS = $^O eq 'VMS';
 @dl_require_symbols = ();       # names of symbols we need
 @dl_resolve_using   = ();       # names of files to link with
 @dl_library_path    = ();       # path to look for files
+@dl_librefs         = ();       # things we have loaded
+@dl_modules         = ();       # Modules we have loaded
 
 # This is a fix to support DLD's unfortunate desire to relink -lc
 @dl_resolve_using = dl_findfile('-lc') if $dlsrc eq "dl_dld.xs";
@@ -137,8 +153,10 @@ sub bootstrap {
     # in this perl code simply because this was the last perl code
     # it executed.
 
-    my $libref = dl_load_file($file) or
+    my $libref = dl_load_file($file, $module->dl_load_flags) or
 	Carp::croak("Can't load '$file' for module $module: ".dl_error()."\n");
+
+    push(@dl_librefs,$libref);  # record loaded object
 
     my @unresolved = dl_undef_symbols();
     Carp::carp("Undefined symbols present after loading $file: @unresolved\n")
@@ -148,6 +166,8 @@ sub bootstrap {
          Carp::croak("Can't find '$bootname' symbol in $file\n");
 
     my $xs = dl_install_xsub("${module}::bootstrap", $boot_symbol_ref, $file);
+
+    push(@dl_modules, $module); # record loaded module
 
     # See comment block above
     &$xs(@args);
@@ -268,12 +288,22 @@ sub dl_expandspec {
     $file;
 }
 
+sub dl_find_symbol_anywhere
+{
+    my $sym = shift;
+    my $libref;
+    foreach $libref (@dl_librefs) {
+	my $symref = dl_find_symbol($libref,$sym);
+	return $symref if $symref;
+    }
+    return undef;
+}
 
 =head1 NAME
 
 DynaLoader - Dynamically load C libraries into Perl code
 
-dl_error(), dl_findfile(), dl_expandspec(), dl_load_file(), dl_find_symbol(), dl_undef_symbols(), dl_install_xsub(), bootstrap() - routines used by DynaLoader modules
+dl_error(), dl_findfile(), dl_expandspec(), dl_load_file(), dl_find_symbol(), dl_find_symbol_anywhere(), dl_undef_symbols(), dl_install_xsub(), dl_load_flags(), bootstrap() - routines used by DynaLoader modules
 
 =head1 SYNOPSIS
 
@@ -281,6 +311,9 @@ dl_error(), dl_findfile(), dl_expandspec(), dl_load_file(), dl_find_symbol(), dl
     require DynaLoader;
     @ISA = qw(... DynaLoader ...);
     bootstrap YourPackage;
+
+    # optional method for 'global' loading
+    sub dl_load_flags { 0x01 }     
 
 
 =head1 DESCRIPTION
@@ -313,11 +346,15 @@ DynaLoader Interface Summary
   @dl_resolve_using
   @dl_require_symbols
   $dl_debug
+  @dl_librefs
+  @dl_modules
                                                   Implemented in:
   bootstrap($modulename)                               Perl
   @filepaths = dl_findfile(@names)                     Perl
+  $flags = $modulename->dl_load_flags                  Perl
+  $symref  = dl_find_symbol_anywhere($symbol)          Perl
 
-  $libref  = dl_load_file($filename)                   C
+  $libref  = dl_load_file($filename, $flags)           C
   $symref  = dl_find_symbol($libref, $symbol)          C
   @symbols = dl_undef_symbols()                        C
   dl_install_xsub($name, $symref [, $filename])        C
@@ -372,6 +409,17 @@ Example usage:
 
 A list of one or more symbol names that are in the library/object file
 to be dynamically loaded.  This is only required on some platforms.
+
+=item @dl_librefs
+
+An array of the handles returned by successful calls to dl_load_file(),
+made by bootstrap, in the order in which they were loaded.
+Can be used with dl_find_symbol() to look for a symbol in any of
+the loaded files.
+
+=item @dl_modules
+
+An array of module (package) names that have been bootstrap'ed.
 
 =item dl_error()
 
@@ -452,19 +500,25 @@ more information.
 
 Syntax:
 
-    $libref = dl_load_file($filename)
+    $libref = dl_load_file($filename, $flags)
 
 Dynamically load $filename, which must be the path to a shared object
 or library.  An opaque 'library reference' is returned as a handle for
 the loaded object.  Returns undef on error.
+
+The $flags argument to alters dl_load_file behaviour.  
+Assigned bits:
+
+ 0x01  make symbols available for linking later dl_load_file's.
+       (only known to work on Solaris 2 using dlopen(RTLD_GLOBAL))
 
 (On systems that provide a handle for the loaded object such as SunOS
 and HPUX, $libref will be that handle.  On other systems $libref will
 typically be $filename or a pointer to a buffer containing $filename.
 The application should not examine or alter $libref in any way.)
 
-This is function that does the real work.  It should use the current
-values of @dl_require_symbols and @dl_resolve_using if required.
+This is the function that does the real work.  It should use the
+current values of @dl_require_symbols and @dl_resolve_using if required.
 
     SunOS: dlopen($filename)
     HP-UX: shl_load($filename)
@@ -472,6 +526,20 @@ values of @dl_require_symbols and @dl_resolve_using if required.
     NeXT:  rld_load($filename, @dl_resolve_using)
     VMS:   lib$find_image_symbol($filename,$dl_require_symbols[0])
 
+(The dlopen() function is also used by Solaris and some versions of
+Linux, and is a common choice when providing a "wrapper" on other
+mechanisms as is done in the OS/2 port.)
+
+=item dl_loadflags()
+
+Syntax:
+
+    $flags = dl_loadflags $modulename;
+
+Designed to be a method call, and to be overridden by a derived class
+(i.e. a class which has DynaLoader in its @ISA).  The definition in
+DynaLoader itself returns 0, which produces standard behavior from
+dl_load_file().
 
 =item dl_find_symbol()
 
@@ -494,6 +562,15 @@ be passed to, and understood by, dl_install_xsub().
     NeXT:  rld_lookup("_$symbol")
     VMS:   lib$find_image_symbol($libref,$symbol)
 
+
+=item dl_find_symbol_anywhere()
+
+Syntax:
+
+    $symref = dl_find_symbol_anywhere($symbol)
+
+Applies dl_find_symbol() to the members of @dl_librefs and returns
+the first match found.
 
 =item dl_undef_symbols()
 
@@ -555,6 +632,10 @@ are required to load the module on the current platform)
 
 =item *
 
+calls dl_load_flags() to determine how to load the file.
+
+=item *
+
 calls dl_load_file() to load the file
 
 =item *
@@ -589,5 +670,8 @@ Siegel, Thomas Neumann, Paul Marquess, Charles Bailey, myself and others.
 
 Larry Wall designed the elegant inherited bootstrap mechanism and
 implemented the first Perl 5 dynamic loader using it.
+
+Solaris global loading added by Nick Ing-Simmons with design/coding
+assistance from Tim Bunce, January 1996.
 
 =cut

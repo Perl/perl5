@@ -77,14 +77,17 @@ BOOT:
 
 
 char *
-dl_load_file(filename)
+dl_load_file(filename, flags=0)
     char *	filename
-    CODE:
+    int		flags
+    PREINIT:
     int dlderr,x,max;
     GV *gv;
+    CODE:
     RETVAL = filename;
-    DLDEBUG(1,PerlIO_printf(PerlIO_stderr(), "dl_load_file(%s)\n", filename));
-
+    DLDEBUG(1,PerlIO_printf(PerlIO_stderr(), "dl_load_file(%s,%x):\n", filename,flags));
+    if (flags & 0x01)
+	croak("Can't make loaded symbols global on this platform while loading %s",filename);
     max = AvFILL(dl_require_symbols);
     for (x = 0; x <= max; x++) {
 	char *sym = SvPVX(*av_fetch(dl_require_symbols, x, 0));

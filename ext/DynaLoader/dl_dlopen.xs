@@ -143,15 +143,23 @@ BOOT:
 
 
 void *
-dl_load_file(filename)
-    char *		filename
-    CODE:
+dl_load_file(filename, flags=0)
+    char *	filename
+    int		flags
+    PREINIT:
     int mode = RTLD_LAZY;
+    CODE:
 #ifdef RTLD_NOW
     if (dl_nonlazy)
 	mode = RTLD_NOW;
 #endif
-    DLDEBUG(1,PerlIO_printf(PerlIO_stderr(), "dl_load_file(%s):\n", filename));
+    if (flags & 0x01)
+#ifdef RTLD_GLOBAL
+	mode |= RTLD_GLOBAL;
+#else
+	warn("Can't make loaded symbols global on this platform while loading %s",filename);
+#endif
+    DLDEBUG(1,PerlIO_printf(PerlIO_stderr(), "dl_load_file(%s,%x):\n", filename,flags));
     RETVAL = dlopen(filename, mode) ;
     DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), " libref=%x\n", RETVAL));
     ST(0) = sv_newmortal() ;

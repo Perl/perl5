@@ -241,11 +241,15 @@ BOOT:
 
 
 void *
-dl_load_file(filename)
+dl_load_file(filename, flags=0)
     char *	filename
-    CODE:
+    int		flags
+    PREINIT:
     int mode = 1;
-    DLDEBUG(1,PerlIO_printf(PerlIO_stderr(), "dl_load_file(%s):\n", filename));
+    CODE:
+    DLDEBUG(1,PerlIO_printf(PerlIO_stderr(), "dl_load_file(%s,%x):\n", filename,flags));
+    if (flags & 0x01)
+	warn("Can't make loaded symbols global on this platform while loading %s",filename);
     RETVAL = dlopen(filename, mode) ;
     DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), " libref=%x\n", RETVAL));
     ST(0) = sv_newmortal() ;

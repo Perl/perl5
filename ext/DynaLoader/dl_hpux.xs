@@ -38,12 +38,16 @@ BOOT:
 
 
 void *
-dl_load_file(filename)
-    char *		filename
-    CODE:
+dl_load_file(filename, flags=0)
+    char *	filename
+    int		flags
+    PREINIT:
     shl_t obj = NULL;
     int	i, max, bind_type;
-
+    CODE:
+    DLDEBUG(1,PerlIO_printf(PerlIO_stderr(), "dl_load_file(%s,%x):\n", filename,flags));
+    if (flags & 0x01)
+	warn("Can't make loaded symbols global on this platform while loading %s",filename);
     if (dl_nonlazy)
 	bind_type = BIND_IMMEDIATE;
     else
