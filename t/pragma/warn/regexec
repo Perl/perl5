@@ -1,15 +1,20 @@
   regexec.c	
 
-  count exceeded %d
+  Complex regular subexpression recursion limit (%d) exceeded
 
         $_ = 'a' x (2**15+1); /^()(a\1)*$/ ;
-  count exceeded %d
+  Complex regular subexpression recursion limit (%d) exceeded
 
         $_ = 'a' x (2**15+1); /^()(a\1)*?$/ ;
 
+  (The actual value substituted for %d is masked in the tests so that
+  REG_INFTY configuration variable value does not affect outcome.)
 __END__
 # regexec.c
 use warning 'unsafe' ;
+$SIG{__WARN__} = sub{local ($m) = shift;
+                 $m =~ s/\(\d+\)/(*MASKED*)/;
+                 print STDERR $m};
 print("SKIPPED\n# win32 can't increase stacksize in shell\n"),exit
     if $^O eq 'MSWin32';
 $_ = 'a' x (2**15+1); 
@@ -30,10 +35,13 @@ $_ = 'a' x (2**15+1);
 #    % limit stacksize 16000
 #
 EXPECT
-Complex regular subexpression recursion limit (32766) exceeded at - line 6.
+Complex regular subexpression recursion limit (*MASKED*) exceeded at - line 9.
 ########
 # regexec.c
 use warning 'unsafe' ;
+$SIG{__WARN__} = sub{local ($m) = shift;
+                 $m =~ s/\(\d+\)/(*MASKED*)/;
+                 print STDERR $m};
 print("SKIPPED\n# win32 can't increase stacksize in shell\n"),exit
     if $^O eq 'MSWin32';
 $_ = 'a' x (2**15+1);
@@ -54,4 +62,4 @@ $_ = 'a' x (2**15+1);
 #    % limit stacksize 16000
 #
 EXPECT
-Complex regular subexpression recursion limit (32766) exceeded at - line 6.
+Complex regular subexpression recursion limit (*MASKED*) exceeded at - line 9.
