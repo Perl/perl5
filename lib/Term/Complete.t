@@ -10,12 +10,12 @@ use Test::More tests => 8;
 use vars qw( $Term::Complete::complete $complete $Term::Complete::stty );
 
 SKIP: {
-    skip('PERL_SKIP_TTY_TEST', 7) if $ENV{PERL_SKIP_TTY_TEST};
+    skip('PERL_SKIP_TTY_TEST', 8) if $ENV{PERL_SKIP_TTY_TEST};
     
     use_ok( 'Term::Complete' );
   
     # this skips tests AND prevents the "used only once" warning
-    skip('No stty, Term::Complete will not run here', 7)
+    skip('No stty, Term::Complete will not run here', 8)
 	unless defined $Term::Complete::tty_raw_noecho &&
 	       defined $Term::Complete::tty_restore;
 
