@@ -398,12 +398,6 @@ Glob on Mac OS is case-insensitive by default (if you don't use any
 flags). If you specify any flags at all and still want glob
 to be case-insensitive, you must include C<GLOB_NOCASE> in the flags.
 
-The path separator is ':' (aka colon), not '/' (aka slash). Mac OS users
-should be careful about specifying relative pathnames. While a full path
-always begins with a volume name, a relative pathname should always
-begin with a ':'.  If specifying a volume name only, a trailing ':' is
-required.
-
 The specification of pathnames in glob patterns adheres to the usual Mac
 OS conventions: The path separator is a colon ':', not a slash '/'. A
 full path always begins with a volume name. A relative pathname on Mac
