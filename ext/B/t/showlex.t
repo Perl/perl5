@@ -21,7 +21,7 @@ use strict;
 use Config;
 use B::Showlex ();
 
-plan tests => 8;
+plan tests => 15;
 
 my $verbose = @ARGV; # set if ANY ARGS
 
@@ -44,70 +44,78 @@ if ($is_thread) {
 
 # v1.01 tests
 
-my ($na,$nb,$nc); # holds regex-strs
+my ($na,$nb,$nc);	# holds regex-strs
+my ($out, $newlex);	# output, option-flag
+
 sub padrep {
-    my $varname = shift;
-    return "PVNV \\\(0x[0-9a-fA-F]+\\\) \\$varname\n";
+    my ($varname,$newlex) = @_;
+    return ($newlex)
+	? 'PVNV \(0x[0-9a-fA-F]+\) "\\'.$varname.'" = '
+	: "PVNV \\\(0x[0-9a-fA-F]+\\\) \\$varname\n";
 }
 
-my $out = runperl ( switches => ["-MO=Showlex"], 
-		   prog => 'my ($a,$b)', stderr => 1 );
-$na = padrep('$a');
-$nb = padrep('$b');
-like ($out, qr/1: $na/ms, 'found $a in "my ($a,$b)"');
-like ($out, qr/2: $nb/ms, 'found $b in "my ($a,$b)"');
+for $newlex ('', '-newlex') {
 
-print $out if $verbose;
+    $out = runperl ( switches => ["-MO=Showlex,$newlex"],
+		     prog => 'my ($a,$b)', stderr => 1 );
+    $na = padrep('$a',$newlex);
+    $nb = padrep('$b',$newlex);
+    like ($out, qr/1: $na/ms, 'found $a in "my ($a,$b)"');
+    like ($out, qr/2: $nb/ms, 'found $b in "my ($a,$b)"');
+
+    print $out if $verbose;
 
 SKIP: {
     skip "no perlio in this build", 5
     unless $Config::Config{useperlio};
 
-our $buf = 'arb startval';
-my $ak = B::Showlex::walk_output (\$buf);
+    our $buf = 'arb startval';
+    my $ak = B::Showlex::walk_output (\$buf);
 
-my $walker = B::Showlex::compile(sub { my ($foo,$bar) });
-$walker->();
-$na = padrep('$foo');
-$nb = padrep('$bar');
-like ($buf, qr/1: $na/ms, 'found $foo in "sub { my ($foo,$bar) }"');
-like ($buf, qr/2: $nb/ms, 'found $bar in "sub { my ($foo,$bar) }"');
+    my $walker = B::Showlex::compile( $newlex, sub{my($foo,$bar)} );
+    $walker->();
+    $na = padrep('$foo',$newlex);
+    $nb = padrep('$bar',$newlex);
+    like ($buf, qr/1: $na/ms, 'found $foo in "sub { my ($foo,$bar) }"');
+    like ($buf, qr/2: $nb/ms, 'found $bar in "sub { my ($foo,$bar) }"');
 
-print $buf if $verbose;
+    print $buf if $verbose;
 
-$ak = B::Showlex::walk_output (\$buf);
+    $ak = B::Showlex::walk_output (\$buf);
 
-$walker = B::Showlex::compile(sub { my ($scalar,@arr,%hash) });
-$walker->();
-$na = padrep('$scalar');
-$nb = padrep('@arr');
-$nc = padrep('%hash');
-like ($buf, qr/1: $na/ms, 'found $scalar in "sub { my ($scalar,@arr,%hash) }"');
-like ($buf, qr/2: $nb/ms, 'found @arr    in "sub { my ($scalar,@arr,%hash) }"');
-like ($buf, qr/3: $nc/ms, 'found %hash   in "sub { my ($scalar,@arr,%hash) }"');
+    my $src = 'sub { my ($scalar,@arr,%hash) }';
+    my $sub = eval $src;
+    $walker = B::Showlex::compile($sub);
+    $walker->();
+    $na = padrep('$scalar',$newlex);
+    $nb = padrep('@arr',$newlex);
+    $nc = padrep('%hash',$newlex);
+    like ($buf, qr/1: $na/ms, 'found $scalar in "'. $src .'"');
+    like ($buf, qr/2: $nb/ms, 'found @arr    in "'. $src .'"');
+    like ($buf, qr/3: $nc/ms, 'found %hash   in "'. $src .'"');
 
-print $buf if $verbose;
+    print $buf if $verbose;
 
-my $asub = sub {
-    my ($self,%props)=@_;
-    my $total;
-    { # inner block vars
-	my (@fib)=(1,2);
-	for (my $i=2; $i<10; $i++) {
-	    $fib[$i] = $fib[$i-2] + $fib[$i-1];
+    # fibonacci function under test
+    my $asub = sub {
+	my ($self,%props)=@_;
+	my $total;
+	{ # inner block vars
+	    my (@fib)=(1,2);
+	    for (my $i=2; $i<10; $i++) {
+		$fib[$i] = $fib[$i-2] + $fib[$i-1];
+	    }
+	    for my $i(0..10) {
+		$total += $i;
+	    }
 	}
-	for my $i(0..10) {
-	    $total += $i;
-	}
-    }
-};
-$walker = B::Showlex::compile($asub, '-newlex');
-$walker->();
+    };
+    $walker = B::Showlex::compile($asub, $newlex, -nosp);
+    $walker->();
+    print $buf if $verbose;
 
-$walker = B::Concise::compile($asub, '-exec');
-$walker->();
+    $walker = B::Concise::compile($asub, '-exec');
+    $walker->();
 
-
-print $buf if $verbose;
-
+}
 }
