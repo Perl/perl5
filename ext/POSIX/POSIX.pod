@@ -465,6 +465,10 @@ Perl's builtin C<stat> function.
 	$fd = POSIX::open( "foo", &POSIX::O_RDONLY );
 	@stats = POSIX::fstat( $fd );
 
+=item fsync
+
+Use method C<IO::Handle::sync()> instead.
+
 =item ftell
 
 Use method C<IO::Seekable::tell()> instead, or see L<perlfunc/tell>.
