@@ -459,6 +459,7 @@ ext/List/Util/t/max.t		List::Util
 ext/List/Util/t/maxstr.t	List::Util
 ext/List/Util/t/min.t		List::Util
 ext/List/Util/t/minstr.t	List::Util
+ext/List/Util/t/openhan.t	Scalar::Util
 ext/List/Util/t/readonly.t	Scalar::Util
 ext/List/Util/t/reduce.t	List::Util
 ext/List/Util/t/reftype.t	Scalar::Util
