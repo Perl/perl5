@@ -423,7 +423,7 @@ PP(pp_warn)
 	tmpsv = TOPs;
     }
     tmps = SvPV(tmpsv, len);
-    if (!tmps || !len) {
+    if ((!tmps || !len) && PL_errgv) {
   	SV *error = ERRSV;
 	(void)SvUPGRADE(error, SVt_PV);
 	if (SvPOK(error) && SvCUR(error))

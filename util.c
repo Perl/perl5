@@ -1247,7 +1247,7 @@ Perl_vwarn(pTHX_ const char* pat, va_list *args)
     }
 
     /* if STDERR is tied, use it instead */
-    if (PL_stderrgv && (io = GvIOp(PL_stderrgv))
+    if (PL_stderrgv && SvREFCNT(PL_stderrgv) && (io = GvIO(PL_stderrgv))
 	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar))) {
 	dSP; ENTER;
 	PUSHMARK(SP);
