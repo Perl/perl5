@@ -1,6 +1,6 @@
 BEGIN {
     chdir 't' if -d 't';
-#    @INC = '../lib';
+    @INC = '../lib';
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bEncode\b/) {
       print "1..0 # Skip: Encode was not built\n";
@@ -74,24 +74,6 @@ $esc_str{$kr} = {qw(
 my $num_esc = $n * keys(%esc_str);
 foreach (values %esc_str){ $num_esc += $n * keys %$_ }
 
-my $FS_preserves_case = 1; # Unix e.g.
-if ($^O eq 'VMS') { # || $^O eq ...
-    $FS_preserves_case = 0;
-}
-my $hz = 'HZ'; # HanZi
-if (!$FS_preserves_case) {
-    $hz = 'hz'; # HanZi
-}
-
-my @hz_txt = (
-  "~~in GB.~{<:Ky2;S{#,NpJ)l6HK!#~}Bye.~~",
-  "~~in GB.~{<:Ky2;S{#,~}~\cJ~{NpJ)l6HK!#~}Bye.~~",
-  "~~in GB.~\cJ~{<:Ky2;S{#,NpJ)l6HK!#~}~\cJBye.~~",
-);
-
-my $hz_exp = '007e0069006e002000470042002e5df162404e0d6b32'
- . 'ff0c52ff65bd65bc4eba3002004200790065002e007e';
-
 use constant BUFSIZ   => 64; # for test
 use constant hiragana => "\x{3042}\x{3044}\x{3046}\x{3048}\x{304A}";
 use constant han_kana => "\x{FF71}\x{FF72}\x{FF73}\x{FF74}\x{FF75}";
@@ -120,16 +102,10 @@ my @ary_buff = (  # [ encoding, decoded, encoded ]
   ["euc-jp-0212", han_kana, "\x8E\xB1\x8E\xB2\x8E\xB3\x8E\xB4\x8E\xB5" ],
   ["euc-jp-0212", macron, 
      "\x8F\xAA\xA7\x8F\xAA\xB7\x8F\xAA\xC5\x8F\xAA\xD7\x8F\xAA\xE9" ],
-# type-H
-  [  $hz,         hiragana, "~{". '$"$$$&$($*' . "~}" ],
-  [  $hz,         hiragana, "~{". '$"$$' ."~\cJ". '$&$($*' . "~}" ],
 );
 
 plan test => $n*@encodings + $n*@encodings*@greek
-  + $n*@encodings*@ideodigit + $num_esc +
-# + $n + @hz_txt # no HZ for now
-  + @ary_buff
-  - 2; # no HZ for now
+  + $n*@encodings*@ideodigit + $num_esc + @ary_buff;
 
 foreach my $enc (@encodings)
  {
@@ -202,40 +178,9 @@ foreach my $enc (@encodings)
   }
 }
 
-
-{
- my $hz_to_unicode = sub
-  {
-   return unpack('H*', pack 'n*', unpack 'U*', decode $hz, shift);
-  };
-
- my $hz_from_unicode = sub
-  {
-   return encode($hz, pack 'U*', unpack 'n*', pack 'H*', shift);
-  };
-
- if(0){
- foreach my $enc ($hz)
-  {
-   my $tab = Encode->getEncoding($enc);
-   ok(1,defined($tab),"Could not load $enc");
-
-   ok(&$hz_from_unicode($hz_exp), $hz_txt[0],
-       "$enc mangled translating from Unicode");
-
-   foreach my $str (@hz_txt)
-    {
-     ok(&$hz_to_unicode($str), $hz_exp,
-      "$enc mangled translating to Unicode");
-    }
-  }
-  }
-}
-
 for my $ary (@ary_buff) {
   my $NG = 0;
   my $enc = $ary->[0];
-  next if $enc eq 'HZ';
   for my $n ( int(BUFSIZ/2) .. 2*BUFSIZ+4 ){
     my $dst = "a"x$n. $ary->[1] . TAIL;
     my $src = "a"x$n. $ary->[2] . TAIL;
