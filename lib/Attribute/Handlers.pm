@@ -755,7 +755,7 @@ in a single C<ATTR(I<specification>)>.
 =item C<Can't autotie a %s>
 
 You can only declare autoties for types C<"SCALAR">, C<"ARRAY">, and
-C<"SCALAR">. They're the only things (apart from typeglobs -- which are
+C<"HASH">. They're the only things (apart from typeglobs -- which are
 not declarable) that Perl can tie.
 
 =item C<Internal error: %s symbol went missing>
