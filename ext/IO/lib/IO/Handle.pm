@@ -1,4 +1,3 @@
-
 package IO::Handle;
 
 =head1 NAME
@@ -263,7 +262,7 @@ use IO ();	# Load the XS module
 require Exporter;
 @ISA = qw(Exporter);
 
-$VERSION = "1.22_00";
+$VERSION = "1.23";
 $VERSION = eval $VERSION;
 
 @EXPORT_OK = qw(
