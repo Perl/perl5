@@ -16,6 +16,17 @@
 #include "perl.h"
 
 /*
+ * The compiler on Concurrent CX/UX systems has a subtle bug which only
+ * seems to show up when compiling pp.c - it generates the wrong double
+ * precision constant value for (double)UV_MAX when used inline in the body
+ * of the code below, so this makes a static variable up front (which the
+ * compiler seems to get correct) and uses it in place of UV_MAX below.
+ */
+#ifdef CXUX_BROKEN_CONSTANT_CONVERT
+static double UV_MAX_cxux = ((double)UV_MAX);
+#endif
+
+/*
  * Types used in bitwise operations.
  *
  * Normally we'd just use IV and UV.  However, some hardware and
@@ -3714,7 +3725,11 @@ PP(pp_pack)
 #ifdef BW_BITS
 		    adouble <= BW_MASK
 #else
+#ifdef CXUX_BROKEN_CONSTANT_CONVERT
+		    adouble <= UV_MAX_cxux
+#else
 		    adouble <= UV_MAX
+#endif
 #endif
 		    )
 		{
