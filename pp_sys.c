@@ -3946,11 +3946,11 @@ PP(pp_gmtime)
 	tsv = Perl_newSVpvf(aTHX_ "%s %s %2d %02d:%02d:%02d %d",
 			    dayname[tmbuf->tm_wday],
 			    monname[tmbuf->tm_mon],
-			    (IV)tmbuf->tm_mday,
-			    (IV)tmbuf->tm_hour,
-			    (IV)tmbuf->tm_min,
-			    (IV)tmbuf->tm_sec,
-			    (IV)tmbuf->tm_year + 1900);
+			    tmbuf->tm_mday,
+			    tmbuf->tm_hour,
+			    tmbuf->tm_min,
+			    tmbuf->tm_sec,
+			    tmbuf->tm_year + 1900);
 	PUSHs(sv_2mortal(tsv));
     }
     else if (tmbuf) {
