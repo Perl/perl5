@@ -237,6 +237,7 @@ will be difficult.
     CPP-space:    restrict CPP symbols exported from headers
     header-space: move into CORE/perl/
     API-space:    begin list of things that constitute public api
+    env-space:    Configure should use PERL_CONFIG instead of CONFIG etc.
 
 =head2 MULTIPLICITY
 
