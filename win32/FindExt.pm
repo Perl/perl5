@@ -76,7 +76,10 @@ sub is_static
 # NOTE: recursion limit of 10 to prevent runaway in case of symlink madness
 sub find_ext
 {
-    for my $xxx (glob "*") {
+    opendir my $dh, '.';
+    my @items = grep { !/^\.\.?$/ } readdir $dh;
+    closedir $dh;
+    for my $xxx (@items) {
         if ($xxx ne "DynaLoader") {
             if (-f "$xxx/$xxx.xs") {
                 $ext{"$_[0]$xxx"} = $static{"$_[0]$xxx"} ? 'static' : 'dynamic';
