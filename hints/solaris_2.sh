@@ -182,17 +182,32 @@ END
 	esac
 
 	# See if ld(1) is GNU ld(1).  GNU ld(1) won't work for this job.
+	# ld --version doesn't properly report itself as a GNU tool,
+	# as of ld version 2.6, so we need to be more strict. TWP 9/5/96
+	gnu_ld=false
 	case `ld --version < /dev/null 2>&1` in
-	*GNU*)
+	*GNU*|ld\ version\ 2*)
+		gnu_ld=true ;;
+	*) ;;
+	esac
+	if $gnu_ld ; then :
+	else
+		case `which ld` in
+		no\ ld\ in*|[Cc]ommand\ not\ found*)
+			;;
+		/*gnu*/ld|/*GNU*/ld)
+			gnu_ld=true ;;
+		esac
+	fi
+	if $gnu_ld ; then
 		cat <<END
 
 NOTE: You are using GNU ld(1).  GNU ld(1) will not build Perl.
 You must arrange to use /usr/ccs/bin, perhaps by adding it to the
-beginning of your PATH
+beginning of your PATH.
 
 END
-		;;
-	esac
+	fi
 
 	;; #not using gcc
 esac
