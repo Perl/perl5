@@ -3,6 +3,17 @@
 # Check whether there are naming conflicts when names are truncated to
 # the DOSish case-ignoring 8.3 format, plus other portability no-nos.
 
+# The "8.3 rule" is "if reducing the directory entry names within one
+# directory to lowercase and 8.3-truncated causes conflicts, that's
+# a bad thing".  So the rule is NOT "no filename shall be longer
+# than eight and a suffix if present not longer than three".
+
+# TODO: this doesn't actually check for *directory entries*, what
+# this does is to check for *MANIFES entries*, which are only files,
+# not directories.  In other words, a conflict between a directory
+# "abcdefghx" and a file "abcdefghy" wouldn't be noticed-- or even
+# for a directory "abcdefgh" and a file "abcdefghy".
+
 sub eight_dot_three {
     my ($dir, $base, $ext) = ($_[0] =~ m!^(?:(.+)/)?([^/.]+)(?:\.([^/.]+))?$!);
     my $file = $base . defined $ext ? ".$ext" : "";
