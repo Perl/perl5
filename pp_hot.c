@@ -1189,6 +1189,8 @@ PP(pp_qr)
     register PMOP *pm = cPMOP;
     SV *rv = sv_newmortal();
     SV *sv = newSVrv(rv, "Regexp");
+    if (pm->op_pmdynflags & PMdf_TAINTED)
+        SvTAINTED_on(rv);
     sv_magic(sv,(SV*)ReREFCNT_inc(PM_GETRE(pm)), PERL_MAGIC_qr,0,0);
     RETURNX(PUSHs(rv));
 }
