@@ -580,6 +580,11 @@ S_mulexp10(NV value, I32 exponent)
         return NV_MAX;
 #  endif
 #endif
+#if defined(__alpha) && defined(__unix__)
+    if (!negative &&
+	(log10(value) + exponent) >= (DBL_MAX_10_EXP))
+        return NV_INF;
+#endif
     for (bit = 1; exponent; bit <<= 1) {
 	if (exponent & bit) {
 	    exponent ^= bit;
