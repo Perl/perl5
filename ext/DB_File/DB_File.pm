@@ -222,8 +222,9 @@ sub AUTOLOAD {
 ";
 	}
     }
-    eval "sub $AUTOLOAD { $val }";
-    goto &$AUTOLOAD;
+    no strict 'refs';
+    *{$AUTOLOAD} = sub { $val };
+    goto &{$AUTOLOAD};
 }
 
 
