@@ -844,8 +844,8 @@ S_cop_free(pTHX_ COP* cop)
 {
     Safefree(cop->cop_label);
 #ifdef USE_ITHREADS
-    Safefree(CopFILE(cop));		/* XXXXX share in a pvtable? */
-    Safefree(CopSTASHPV(cop));		/* XXXXX share in a pvtable? */
+    Safefree(CopFILE(cop));		/* XXX share in a pvtable? */
+    Safefree(CopSTASHPV(cop));		/* XXX share in a pvtable? */
 #else
     /* NOTE: COP.cop_stash is not refcounted */
     SvREFCNT_dec(CopFILEGV(cop));
@@ -3499,9 +3499,9 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
         PL_copline = NOLINE;
     }
 #ifdef USE_ITHREADS
-    CopFILE_set(cop, CopFILE(PL_curcop));	/* XXXXX share in a pvtable? */
+    CopFILE_set(cop, CopFILE(PL_curcop));	/* XXX share in a pvtable? */
 #else
-    CopFILEGV_set(cop, (GV*)SvREFCNT_inc(CopFILEGV(PL_curcop)));
+    CopFILEGV_set(cop, CopFILEGV(PL_curcop));
 #endif
     CopSTASH_set(cop, PL_curstash);
 
@@ -4709,10 +4709,11 @@ Perl_newCONSTSUB(pTHX_ HV *stash, char *name, SV *sv)
     dTHR;
 
     ENTER;
-    SAVECOPLINE(PL_curcop);
-    SAVEHINTS();
 
+    SAVECOPLINE(PL_curcop);
     CopLINE_set(PL_curcop, PL_copline);
+
+    SAVEHINTS();
     PL_hints &= ~HINT_BLOCK_SCOPE;
 
     if (stash) {

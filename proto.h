@@ -651,6 +651,7 @@ PERL_CALLCONV void	Perl_save_freesv(pTHX_ SV* sv);
 PERL_CALLCONV void	Perl_save_freeop(pTHX_ OP* o);
 PERL_CALLCONV void	Perl_save_freepv(pTHX_ char* pv);
 PERL_CALLCONV void	Perl_save_generic_svref(pTHX_ SV** sptr);
+PERL_CALLCONV void	Perl_save_generic_pvref(pTHX_ char** str);
 PERL_CALLCONV void	Perl_save_gp(pTHX_ GV* gv, I32 empty);
 PERL_CALLCONV HV*	Perl_save_hash(pTHX_ GV* gv);
 PERL_CALLCONV void	Perl_save_helem(pTHX_ HV* hv, SV *key, SV **sptr);

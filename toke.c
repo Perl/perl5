@@ -502,8 +502,14 @@ S_incline(pTHX_ char *s)
 
     ch = *t;
     *t = '\0';
-    if (t - s > 0)
+    if (t - s > 0) {
+#ifdef USE_ITHREADS
+	Safefree(CopFILE(PL_curcop));
+#else
+	SvREFCNT_dec(CopFILEGV(PL_curcop));
+#endif
 	CopFILE_set(PL_curcop, s);
+    }
     *t = ch;
     CopLINE_set(PL_curcop, atoi(n)-1);
 }
@@ -2946,8 +2952,7 @@ Perl_yylex(pTHX)
 	    PL_expect = XTERM;
 	TOKEN('(');
     case ';':
-	if (CopLINE(PL_curcop) < PL_copline)
-	    PL_copline = CopLINE(PL_curcop);
+	CLINE;
 	tmp = *s++;
 	OPERATOR(tmp);
     case ')':

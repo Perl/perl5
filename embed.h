@@ -571,6 +571,7 @@
 #define save_freeop		Perl_save_freeop
 #define save_freepv		Perl_save_freepv
 #define save_generic_svref	Perl_save_generic_svref
+#define save_generic_pvref	Perl_save_generic_pvref
 #define save_gp			Perl_save_gp
 #define save_hash		Perl_save_hash
 #define save_helem		Perl_save_helem
@@ -2019,6 +2020,7 @@
 #define save_freeop(a)		Perl_save_freeop(aTHX_ a)
 #define save_freepv(a)		Perl_save_freepv(aTHX_ a)
 #define save_generic_svref(a)	Perl_save_generic_svref(aTHX_ a)
+#define save_generic_pvref(a)	Perl_save_generic_pvref(aTHX_ a)
 #define save_gp(a,b)		Perl_save_gp(aTHX_ a,b)
 #define save_hash(a)		Perl_save_hash(aTHX_ a)
 #define save_helem(a,b,c)	Perl_save_helem(aTHX_ a,b,c)
@@ -3954,6 +3956,8 @@
 #define save_freepv		Perl_save_freepv
 #define Perl_save_generic_svref	CPerlObj::Perl_save_generic_svref
 #define save_generic_svref	Perl_save_generic_svref
+#define Perl_save_generic_pvref	CPerlObj::Perl_save_generic_pvref
+#define save_generic_pvref	Perl_save_generic_pvref
 #define Perl_save_gp		CPerlObj::Perl_save_gp
 #define save_gp			Perl_save_gp
 #define Perl_save_hash		CPerlObj::Perl_save_hash

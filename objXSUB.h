@@ -1345,6 +1345,10 @@
 #define Perl_save_generic_svref	pPerl->Perl_save_generic_svref
 #undef  save_generic_svref
 #define save_generic_svref	Perl_save_generic_svref
+#undef  Perl_save_generic_pvref
+#define Perl_save_generic_pvref	pPerl->Perl_save_generic_pvref
+#undef  save_generic_pvref
+#define save_generic_pvref	Perl_save_generic_pvref
 #undef  Perl_save_gp
 #define Perl_save_gp		pPerl->Perl_save_gp
 #undef  save_gp
