@@ -74,7 +74,9 @@ that don't resolve:
 sub find {
     my $wanted = shift;
     my $cwd = Cwd::cwd();
-    my ($topdir,$topdev,$topino,$topmode,$topnlink);
+    # Localize these rather than lexicalizing them for backwards
+    # compatibility.
+    local($topdir,$topdev,$topino,$topmode,$topnlink);
     foreach $topdir (@_) {
 	(($topdev,$topino,$topmode,$topnlink) = stat($topdir))
 	  || (warn("Can't stat $topdir: $!\n"), next);
@@ -163,7 +165,9 @@ sub finddepth {
 
     $cwd = Cwd::fastcwd();;
 
-    my($topdir, $topdev, $topino, $topmode, $topnlink);
+    # Localize these rather than lexicalizing them for backwards
+    # compatibility.
+    local($topdir, $topdev, $topino, $topmode, $topnlink);
     foreach $topdir (@_) {
 	(($topdev,$topino,$topmode,$topnlink) = stat($topdir))
 	  || (warn("Can't stat $topdir: $!\n"), next);
