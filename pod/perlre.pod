@@ -784,7 +784,7 @@ and the first "bar" thereafter.
   got <d is under the >
 
 Here's another example: let's say you'd like to match a number at the end
-of a string, and you also want to keep the preceding part the match.
+of a string, and you also want to keep the preceding of part the match.
 So you write this:
 
     $_ = "I have 2 numbers: 53147";
@@ -850,7 +850,7 @@ followed by "123".  You might try to write that as
 
 But that isn't going to match; at least, not the way you're hoping.  It
 claims that there is no 123 in the string.  Here's a clearer picture of
-why it that pattern matches, contrary to popular expectations:
+why that pattern matches, contrary to popular expectations:
 
     $x = 'ABC123' ;
     $y = 'ABC445' ;
