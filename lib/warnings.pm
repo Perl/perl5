@@ -6,7 +6,7 @@
 
 package warnings;
 
-our $VERSION = '1.02';
+our $VERSION = '1.03';
 
 =head1 NAME
 
@@ -131,9 +131,9 @@ See L<perlmodlib/Pragmatic Modules> and L<perllexwarn>.
 
 =cut
 
-use Carp ;
+use Carp ();
 
-%Offsets = (
+our %Offsets : unique = (
 
     # Warnings Categories added in Perl 5.008
 
@@ -190,7 +190,7 @@ use Carp ;
     'assertions'	=> 94,
   );
 
-%Bits = (
+our %Bits : unique = (
     'all'		=> "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55", # [0..47]
     'ambiguous'		=> "\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00", # [29]
     'assertions'	=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x40", # [47]
@@ -241,7 +241,7 @@ use Carp ;
     'y2k'		=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x10", # [46]
   );
 
-%DeadBits = (
+our %DeadBits : unique = (
     'all'		=> "\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa", # [0..47]
     'ambiguous'		=> "\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00", # [29]
     'assertions'	=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80", # [47]
@@ -301,7 +301,7 @@ $All = "" ; vec($All, $Offsets{'all'}, 2) = 3 ;
 sub Croaker
 {
     delete $Carp::CarpInternal{'warnings'};
-    croak(@_);
+    Carp::croak(@_);
 }
 
 sub bits
@@ -470,10 +470,10 @@ sub warn
 
     my $message = pop ;
     my ($callers_bitmask, $offset, $i) = __chk(@_) ;
-    croak($message)
+    Carp::croak($message)
 	if vec($callers_bitmask, $offset+1, 1) ||
 	   vec($callers_bitmask, $Offsets{'all'}+1, 1) ;
-    carp($message) ;
+    Carp::carp($message) ;
 }
 
 sub warnif
@@ -489,11 +489,11 @@ sub warnif
             	(vec($callers_bitmask, $offset, 1) ||
             	vec($callers_bitmask, $Offsets{'all'}, 1)) ;
 
-    croak($message)
+    Carp::croak($message)
 	if vec($callers_bitmask, $offset+1, 1) ||
 	   vec($callers_bitmask, $Offsets{'all'}+1, 1) ;
 
-    carp($message) ;
+    Carp::carp($message) ;
 }
 
 1;
