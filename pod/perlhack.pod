@@ -1810,7 +1810,12 @@ Run F<perl> on all core tests (F<t/*> and F<lib/[a-z]*> pragma tests).
 
 =item test.deparse
 
-Run all the tests through the B::Deparse.  Not all tests will succeed.
+Run all the tests through B::Deparse.  Not all tests will succeed.
+
+=item test.taintwarn
+
+Run all tests with the B<-t> command-line switch.  Not all tests
+are expected to succeed (until they're specifically fixed, of course).
 
 =item minitest
 

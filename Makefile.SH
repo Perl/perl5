@@ -1055,7 +1055,7 @@ makedepend: makedepend.SH config.sh
 	utest ucheck test.utf8 check.utf8 test.torture torturetest \
 	test.third check.third utest.third ucheck.third test_notty.third \
 	test.deparse test_notty.deparse test_harness test_harness_notty \
-	test.bytecompile minitest coretest
+	test.bytecompile minitest coretest test.taintwarn
 
 # Cannot delegate rebuilding of t/perl to make
 # to allow interlaced test and minitest
@@ -1154,6 +1154,11 @@ test.deparse:	test_prep
 
 test_notty.deparse:	test_prep
 	PERL=./perl TEST_ARGS=-deparse $(MAKE) _test_notty
+
+# Targets to run the test suite with -t
+
+test.taintwarn:	test_prep
+	PERL=./perl TEST_ARGS=-taintwarn $(MAKE) _test
 
 # Can't depend on lib/Config.pm because that might be where miniperl
 # is crashing.

@@ -21,8 +21,9 @@ if ($#ARGV >= 0) {
 	$verbose = 1 if $1 eq 'v';
 	$torture = 1 if $1 eq 'torture';
 	$with_utf= 1 if $1 eq 'utf8';
-        $bytecompile = 1 if $1 eq 'bytecompile';
-        $compile = 1 if $1 eq 'compile';
+	$bytecompile = 1 if $1 eq 'bytecompile';
+	$compile = 1 if $1 eq 'compile';
+	$taintwarn = 1 if $1 eq 'taintwarn';
 	if ($1 =~ /^deparse(,.+)?$/) {
 	    $deparse = 1;
 	    $deparse_opts = $1;
@@ -220,7 +221,13 @@ EOT
  	    $switch = qq{"-$1"};
  	}
  	else {
- 	    $switch = '';
+	    if ($taintwarn) {
+		# not all tests are expected to pass with this option
+		$switch = '"-t"';
+	    }
+	    else {
+		$switch = '';
+	    }
  	}
 
         my $test_executable; # for 'compile' tests
