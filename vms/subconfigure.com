@@ -63,6 +63,7 @@ $ myname = myhostname
 $ if "''myname'" .eqs. "" THEN myname = f$trnlnm("SYS$NODE")
 $!
 $! ##ADD NEW CONSTANTS HERE##
+$ perl_d_llseek="undef"
 $ perl_d_madvise="undef"
 $ perl_selectminbits=32
 $ perl_d_msync="undef"
@@ -120,34 +121,6 @@ $ perl_d_sendmsg = "undef"
 $ perl_d_recvmsg = "undef"
 $ perl_d_msghdr_s = "undef"
 $ perl_d_cmsghdr_s = "undef"
-$ perl_d_dbminit64 = "undef"
-$ perl_d_dbmclose64 = "undef"
-$ perl_d_fetch64 = "undef"
-$ perl_d_store64 = "undef"
-$ perl_d_delete64 = "undef"
-$ perl_d_firstkey64 = "undef"
-$ perl_d_nextkey64 = "undef"
-$ perl_d_fstat64 = "undef"
-$ perl_d_ftruncate64 = "undef"
-$ perl_d_lseek64 = "undef"
-$ perl_d_lstat64 = "undef"
-$ perl_d_open64 = "undef"
-$ perl_d_opendir64 = "undef"
-$ perl_d_readdir64 = "undef"
-$ perl_d_seekdir64 = "undef"
-$ perl_d_stat64 = "undef"
-$ perl_d_telldir64 = "undef"
-$ perl_d_truncate64 = "undef"
-$ perl_d_dirent64_s = "undef"
-$ perl_d_fgetpos64 = "undef"
-$ perl_d_fopen64 = "undef"
-$ perl_d_freopen64 = "undef"
-$ perl_d_fseek64 = "undef"
-$ perl_d_fseeko64 = "undef"
-$ perl_d_fsetpos64 = "undef"
-$ perl_d_ftell64 = "undef"
-$ perl_d_ftello64 = "undef"
-$ perl_d_tmpfile64 = "undef"
 $ IF use_64bit .eqs. "Y"
 $ THEN
 $   perl_use64bits = "define"
@@ -348,6 +321,7 @@ $ perl_d_chown="define"
 $ perl_d_chroot="undef"
 $ perl_d_cuserid="define"
 $ perl_d_dbl_dig="define"
+$ perl_d_ldbl_dig="define"
 $ perl_d_difftime="define"
 $ perl_d_fork="undef"
 $ perl_d_getlogin="define"
@@ -1209,6 +1183,42 @@ $ ELSE
 $   perl_d_off64_t="define"
 $ ENDIF
 $ WRITE_RESULT "d_off64_t is ''perl_d_off64_t'"
+$!
+$! Check to see if fpos64_t exists
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "#include <types.h>
+$ WS "#''perl_i_inttypes IIH
+$ WS "#ifdef IIH
+$ WS "#include <inttypes.h>
+$ WS "#endif
+$ WS "#include <unistd.h>
+$ WS "int main()
+$ WS "{"
+$ WS "fpos64_t bar;
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$ DEFINE SYS$ERROR _NLA0:
+$ DEFINE SYS$OUTPUT _NLA0:
+$ on error then continue
+$ on warning then continue
+$ 'Checkcc' temp.c
+$ teststatus = f$extract(9,1,$status)
+$ DEASSIGN SYS$OUTPUT
+$ DEASSIGN SYS$ERROR
+$ if (teststatus.nes."1")
+$ THEN
+$!  Okay, fpos64_t failed. Must not exist
+$   perl_d_fpos64_t = "undef"
+$ ELSE
+$   perl_d_fpos64_t="define"
+$ ENDIF
+$ WRITE_RESULT "d_fpos64_t is ''perl_d_fpos64_t'"
 $!
 $! Check to see if gethostname exists
 $!
@@ -3302,6 +3312,7 @@ $ WC "d_chown='" + perl_d_chown + "'"
 $ WC "d_chroot='" + perl_d_chroot + "'"
 $ WC "d_cuserid='" + perl_d_cuserid + "'"
 $ WC "d_dbl_dig='" + perl_d_dbl_dig + "'"
+$ WC "d_ldbl_dig='" + perl_d_ldbl_dig + "'"
 $ WC "d_difftime='" + perl_d_difftime + "'"
 $ WC "d_fork='" + perl_d_fork + "'"
 $ WC "d_getlogin='" + perl_d_getlogin + "'"
@@ -3494,39 +3505,12 @@ $ WC "d_readv='" + perl_d_readv + "'"
 $ WC "d_writev='" + perl_d_writev + "'"
 $ WC "i_machcthr='" + perl_i_machcthr + "'"
 $ WC "usemultiplicity='" + perl_usemultiplicity + "'"
-$ WC "d_dbminit64='" + perl_d_dbminit64 + "'"
-$ WC "d_dbmclose64='" + perl_d_dbmclose64 + "'"
-$ WC "d_fetch64='" + perl_d_fetch64 + "'"
-$ WC "d_store64='" + perl_d_store64 + "'"
-$ WC "d_delete64='" + perl_d_delete64 + "'"
-$ WC "d_firstkey64='" + perl_d_firstkey64 + "'"
-$ WC "d_nextkey64='" + perl_d_nextkey64 + "'"
 $ WC "i_poll='" + perl_i_poll + "'"
 $ WC "i_inttypes='" + perl_i_inttypes + "'"
 $ WC "d_int64t='" + perl_d_int64t + "'"
 $ WC "d_off64_t='" + perl_d_off64_t + "'"
-$ WC "d_fstat64='" + perl_d_fstat64 + "'"
-$ WC "d_ftruncate64='" + perl_d_ftruncate64 + "'"
-$ WC "d_lseek64='" + perl_d_lseek64 + "'"
-$ WC "d_lstat64='" + perl_d_lstat64 + "'"
-$ WC "d_open64='" + perl_d_open64 + "'"
-$ WC "d_opendir64='" + perl_d_opendir64 + "'"
-$ WC "d_readdir64='" + perl_d_readdir64 + "'"
-$ WC "d_seekdir64='" + perl_d_seekdir64 + "'"
-$ WC "d_stat64='" + perl_d_stat64 + "'"
-$ WC "d_telldir64='" + perl_d_telldir64 + "'"
-$ WC "d_truncate64='" + perl_d_truncate64 + "'"
-$ WC "d_dirent64_s='" + perl_d_dirent64_s + "'"
+$ WC "d_fpos64_t='" + perl_d_fpos64_t + "'"
 $ WC "use64bits='" + perl_use64bits + "'"
-$ WC "d_fgetpos64='" + perl_d_fgetpos64 + "'"
-$ WC "d_fopen64='" + perl_d_fopen64 + "'"
-$ WC "d_freopen64='" + perl_d_freopen64 + "'"
-$ WC "d_fseek64='" + perl_d_fseek64 + "'"
-$ WC "d_fseeko64='" + perl_d_fseeko64 + "'"
-$ WC "d_fsetpos64='" + perl_d_fsetpos64 + "'"
-$ WC "d_ftell64='" + perl_d_ftell64 + "'"
-$ WC "d_ftello64='" + perl_d_ftello64 + "'"
-$ WC "d_tmpfile64='" + perl_d_tmpfile64 + "'"
 $ WC "d_drand48proto='" + perl_d_drand48proto + "'"
 $ WC "d_old_pthread_create_joinable='" + perl_d_old_pthread_create_joinable + "'"
 $ WC "old_pthread_create_joinable='" + perl_old_pthread_create_joinable + "'"
@@ -3585,6 +3569,7 @@ $ WC "sPRId64='" + perl_sPRId64 + "'"
 $ WC "sPRIu64='" + perl_sPRIu64 + "'"
 $ WC "sPRIo64='" + perl_sPRIo64 + "'"
 $ WC "sPRIx64='" + perl_sPRIx64 + "'"
+$ WC "d_llseek='" + perl_d_llseek + "'"
 $!
 $! ##WRITE NEW CONSTANTS HERE##
 $!
