@@ -1,7 +1,10 @@
 .rn '' }`
-''' $Header: perldb.man,v 1.0.1.1 88/01/28 10:28:19 root Exp $
+''' $Header: perldb.man,v 1.0.1.2 88/01/30 17:04:48 root Exp $
 ''' 
 ''' $Log:	perldb.man,v $
+''' Revision 1.0.1.2  88/01/30  17:04:48  root
+''' patch 11: random cleanup
+''' 
 ''' Revision 1.0.1.1  88/01/28  10:28:19  root
 ''' patch8: created this file.
 ''' 
@@ -91,6 +94,7 @@ List the whole program.
 List breakpoints.
 .Ip t 8
 Toggle trace mode.
+Trace mode causes lines to be printed out as they are executed.
 .Ip "b line" 8
 Set breakpoint at indicated line.
 .Ip "d line" 8

@@ -1,7 +1,13 @@
 .rn '' }`
-''' $Header: perl.man.1,v 1.0 87/12/18 16:18:16 root Exp $
+''' $Header: perl.man.1,v 1.0.1.2 88/01/30 17:04:07 root Exp $
 ''' 
 ''' $Log:	perl.man.1,v $
+''' Revision 1.0.1.2  88/01/30  17:04:07  root
+''' patch 11: random cleanup
+''' 
+''' Revision 1.0.1.1  88/01/28  10:24:44  root
+''' patch8: added eval operator.
+''' 
 ''' Revision 1.0  87/12/18  16:18:16  root
 ''' Initial revision
 ''' 
@@ -92,7 +98,7 @@ After locating your script,
 compiles it to an internal form.
 If the script is syntactically correct, it is executed.
 .Sh "Options"
-Note: on first reading this section won't make much sense to you.  It's here
+Note: on first reading this section may not make much sense to you.  It's here
 at the front for easy reference.
 .PP
 A single-character option may be combined with the following option, if any.
@@ -208,6 +214,11 @@ Note that the lines are printed automatically.
 To suppress printing use the
 .B \-n
 switch.
+A
+.B \-p
+overrides a
+.B \-n
+switch.
 .TP 5
 .B \-P
 causes your script to be run through the C preprocessor before
@@ -219,17 +230,17 @@ by the C preprocessor such as \*(L"if\*(R", \*(L"else\*(R" or \*(L"define\*(R".)
 .TP 5
 .B \-s
 enables some rudimentary switch parsing for switches on the command line
-after the script name but before any filename arguments.
-Any switch found there will set the corresponding variable in the
+after the script name but before any filename arguments (or before a --).
+Any switch found there is removed from @ARGV and sets the corresponding variable in the
 .I perl
 script.
 The following script prints \*(L"true\*(R" if and only if the script is
-invoked with a -x switch.
+invoked with a -xyz switch.
 .nf
 
 .ne 2
 	#!/bin/perl -s
-	if ($x) { print "true\en"; }
+	if ($xyz) { print "true\en"; }
 
 .fi
 .Sh "Data Types and Objects"
@@ -307,6 +318,8 @@ The following code segment prints out \*(L"The price is $100.\*(R"
     print "The price is $Price.\e\|n";\h'|3.5i'# interpreted
 
 .fi
+Note that you can put curly brackets around the identifier to delimit it
+from following alphanumerics.
 .PP
 Array literals are denoted by separating individual values by commas, and
 enclosing the list in parentheses.
@@ -315,6 +328,7 @@ is the value of the final element, as in the C comma operator.
 For example,
 .nf
 
+.ne 4
     @foo = ('cc', '\-E', $bar);
 
 assigns the entire array value to array foo, but
@@ -343,6 +357,7 @@ just like in any of the standard shells.
 The command is executed each time the pseudo-literal is evaluated.
 Unlike in \f2csh\f1, no interpretation is done on the
 data\*(--newlines remain newlines.
+The status value of the command is returned in $?.
 .PP
 Evaluating a filehandle in angle brackets yields the next line
 from that file (newline included, so it's never false until EOF).
@@ -409,7 +424,9 @@ variable ARGV.
 It also uses filehandle ARGV internally.
 You can modify @ARGV before the first <> as long as you leave the first
 filename at the beginning of the array.
+Line numbers ($.) continue as if the input was one big happy file.
 .PP
+.ne 5
 If you want to set @ARGV to you own list of files, go right ahead.
 If you want to pass switches into your script, you can
 put a loop on the front like this:
@@ -486,7 +503,7 @@ The following compound commands may be used to control flow:
 	LABEL BLOCK continue BLOCK
 
 .fi
-(Note that, unlike C and Pascal, these are defined in terms of BLOCKs, not
+Note that, unlike C and Pascal, these are defined in terms of BLOCKs, not
 statements.
 This means that the curly brackets are \fIrequired\fR\*(--no dangling statements allowed.
 If you want to write conditionals without curly brackets there are several
@@ -499,9 +516,9 @@ The following all do the same thing:
     die "Can't open $foo" unless open(foo);
     open(foo) || die "Can't open $foo";	# foo or bust!
     open(foo) ? die "Can't open $foo" : 'hi mom';
+			    # a bit exotic, that last one
 
 .fi
-though the last one is a bit exotic.)
 .PP
 The
 .I if
@@ -641,7 +658,7 @@ This is so that you can write loops like:
 (See the
 .I do
 operator below.  Note also that the loop control commands described later will
-NOT work in this construct, since loop modifiers don't take loop labels.
+NOT work in this construct, since modifiers don't take loop labels.
 Sorry.)
 .Sh "Expressions"
 Since
@@ -839,10 +856,10 @@ Note: in order to use the value you must put the whole thing in parentheses.
 	$cnt = (chown $uid,$gid,'foo');
 
 .fi
+.ne 18
 Here's an example of looking up non-numeric uids:
 .nf
 
-.ne 16
 	print "User: ";
 	$user = <stdin>;
 	open(pass,'/etc/passwd') || die "Can't open passwd";
@@ -922,6 +939,7 @@ When the array is entirely read, a null array is returned (which when
 assigned produces a FALSE (0) value).
 The next call to each() after that will start iterating again.
 The iterator can be reset only by reading all the elements from the array.
+You should not modify the array while iterating over it.
 The following prints out your environment like the printenv program, only
 in a different order:
 .nf
@@ -954,6 +972,15 @@ Example:
 	}
 
 .fi
+.Ip "eval EXPR" 8 6
+EXPR is parsed and executed as if it were a little perl program.
+It is executed in the context of the current perl program, so that
+any variable settings, subroutine or format definitions remain afterwards.
+The value returned is the value of the last expression evaluated, just
+as with subroutines.
+If there is a syntax error or runtime error, a null string is returned by
+eval, and $@ is set to the error message.
+If there was no error, $@ is null.
 .Ip "exec LIST" 8 6
 If there is more than one argument in LIST,
 calls execvp() with the arguments in LIST.

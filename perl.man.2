@@ -1,7 +1,13 @@
 ''' Beginning of part 2
-''' $Header: perl.man.2,v 1.0 87/12/18 16:18:41 root Exp $
+''' $Header: perl.man.2,v 1.0.1.2 88/01/30 17:04:28 root Exp $
 '''
 ''' $Log:	perl.man.2,v $
+''' Revision 1.0.1.2  88/01/30  17:04:28  root
+''' patch 11: random cleanup
+''' 
+''' Revision 1.0.1.1  88/01/28  10:25:11  root
+''' patch8: added $@ variable.
+''' 
 ''' Revision 1.0  87/12/18  16:18:41  root
 ''' Initial revision
 ''' 
@@ -145,8 +151,7 @@ as a command to which output is to be piped, and if the filename ends
 with a \*(L"|\*(R", the filename is interpreted as command which pipes
 input to us.
 (You may not have a command that pipes both in and out.)
-On non-pipe opens, the filename '\-' represents either stdin or stdout, as
-appropriate.
+Opening '\-' opens stdin and opening '>\-' opens stdout.
 Open returns 1 upon success, '' otherwise.
 Examples:
 .nf
@@ -310,7 +315,9 @@ but this has no effect on its operation.
 Shifts the first value of the array off, shortening the array by 1 and
 moving everything down.
 If ARRAY is omitted, shifts the ARGV array.
-See also unshift().
+See also unshift(), push() and pop().
+Shift() and unshift() do the same thing to the left end of an array that push()
+and pop() do to the right end.
 .Ip "sleep EXPR" 8 6
 .Ip "sleep" 8
 Causes the script to sleep for EXPR seconds, or forever if no EXPR.
@@ -326,7 +333,8 @@ Anything matching PATTERN is taken to be a delimiter separating the fields.
 (Note that the delimiter may be longer than one character.)
 Trailing null fields are stripped, which potential users of pop() would
 do well to remember.
-A pattern matching the null string will split into separate characters.
+A pattern matching the null string will split the value of EXPR into separate
+characters.
 .sp
 Example:
 .nf
@@ -373,6 +381,7 @@ First character is at offset 0, or whatever you've set $[ to.
 Does exactly the same thing as \*(L"exec LIST\*(R" except that a fork
 is done first, and the parent process waits for the child process to complete.
 Note that argument processing varies depending on the number of arguments.
+The return value is the exit status of the program.
 See exec.
 .Ip "tell(FILEHANDLE)" 8 6
 .Ip "tell" 8
@@ -422,6 +431,7 @@ Note: in order to use the value you must put the whole thing in parentheses:
 	$cnt = (unlink 'a','b','c');
 
 .fi
+.ne 7
 .Ip "unshift(ARRAY,LIST)" 8 4
 Does the opposite of a shift.
 Prepends list to the front of the array, and returns the number of elements
@@ -817,6 +827,11 @@ script being executed.
 The value should be copied elsewhere before any pattern matching happens, which
 clobbers $0.
 (Mnemonic: same as sh and ksh.)
+.Ip $<digit> 8
+Contains the subpattern from the corresponding set of parentheses in the last
+pattern matched, not counting patterns matched in nested blocks that have
+been exited already.
+(Mnemonic: like \edigit.)
 .Ip $[ 8 2
 The index of the first element in an array, and of the first character in
 a substring.
@@ -830,6 +845,10 @@ when subscripting and when evaluating the index() and substr() functions.
 .Ip $! 8 2
 The current value of errno, with all the usual caveats.
 (Mnemonic: What just went bang?)
+.Ip $@ 8 2
+The error message from the last eval command.
+If null, the last eval parsed and executed correctly.
+(Mnemonic: Where was the syntax error "at"?)
 .Ip @ARGV 8 3
 The array ARGV contains the command line arguments intended for the script.
 Note that $#ARGV is the generally number of arguments minus one, since
@@ -882,6 +901,8 @@ commands.
 a2p	awk to perl translator
 .br
 s2p	sed to perl translator
+.br
+perldb	interactive perl debugger
 .SH DIAGNOSTICS
 Compilation errors will tell you the line number of the error, with an
 indication of the next token or token type that was to be examined.
