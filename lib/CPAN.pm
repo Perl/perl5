@@ -6269,8 +6269,6 @@ Returns 1 if the module is installed and up-to-date.
 
 Returns the author's ID of the module.
 
-=item
-
 =back
 
 =head2 Cache Manager

@@ -304,18 +304,30 @@ have the following meanings:
 
 =over 4
 
-=item * C<a?> = match 'a' 1 or 0 times
+=item *
 
-=item * C<a*> = match 'a' 0 or more times, i.e., any number of times
+C<a?> = match 'a' 1 or 0 times
 
-=item * C<a+> = match 'a' 1 or more times, i.e., at least once
+=item *
 
-=item * C<a{n,m}> = match at least C<n> times, but not more than C<m>
+C<a*> = match 'a' 0 or more times, i.e., any number of times
+
+=item *
+
+C<a+> = match 'a' 1 or more times, i.e., at least once
+
+=item *
+
+C<a{n,m}> = match at least C<n> times, but not more than C<m>
 times.
 
-=item * C<a{n,}> = match at least C<n> or more times
+=item *
 
-=item * C<a{n}> = match exactly C<n> times
+C<a{n,}> = match at least C<n> or more times
+
+=item *
+
+C<a{n}> = match exactly C<n> times
 
 =back
 
