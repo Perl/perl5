@@ -1,3 +1,8 @@
+Thu Aug 31 23:06:06 MEST 2000   Raphael Manfredi <Raphael_Manfredi@pobox.com>
+
+	First official release Storable 1.0, for inclusion in perl 5.7.0.
+	The license scheme is now compatible with Perl's.
+
 Thu Aug 24 01:02:02 MEST 2000   Raphael Manfredi <Raphael_Manfredi@pobox.com>
 
 . Description:

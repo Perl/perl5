@@ -1,24 +1,13 @@
-;# $Id: Storable.pm,v 0.7.1.3 2000/08/23 22:49:25 ram Exp $
+;# $Id: Storable.pm,v 1.0 2000/09/01 19:40:41 ram Exp $
 ;#
 ;#  Copyright (c) 1995-2000, Raphael Manfredi
 ;#  
-;#  You may redistribute only under the terms of the Artistic License,
-;#  as specified in the README file that comes with the distribution.
+;#  You may redistribute only under the same terms as Perl 5, as specified
+;#  in the README file that comes with the distribution.
 ;#
 ;# $Log: Storable.pm,v $
-;# Revision 0.7.1.3  2000/08/23 22:49:25  ram
-;# patch3: updated version number
-;#
-;# Revision 0.7.1.2  2000/08/14 07:18:40  ram
-;# patch2: increased version number
-;#
-;# Revision 0.7.1.1  2000/08/13 20:08:58  ram
-;# patch1: mention new Clone(3) extension in SEE ALSO
-;# patch1: contributor Marc Lehmann added overloading and ref to tied items
-;# patch1: updated e-mail from Benjamin Holzman
-;#
-;# Revision 0.7  2000/08/03 22:04:44  ram
-;# Baseline for second beta release.
+;# Revision 1.0  2000/09/01 19:40:41  ram
+;# Baseline for first official release.
 ;#
 
 require DynaLoader;
@@ -27,15 +16,16 @@ package Storable; @ISA = qw(Exporter DynaLoader);
 
 @EXPORT = qw(store retrieve);
 @EXPORT_OK = qw(
-	nstore store_fd nstore_fd retrieve_fd
+	nstore store_fd nstore_fd fd_retrieve
 	freeze nfreeze thaw
 	dclone
+	retrieve_fd
 );
 
 use AutoLoader;
 use vars qw($forgive_me $VERSION);
 
-$VERSION = '0.703';
+$VERSION = '1.000';
 *AUTOLOAD = \&AutoLoader::AUTOLOAD;		# Grrr...
 
 #
@@ -55,8 +45,7 @@ unless (defined @Log::Agent::EXPORT) {
 
 sub logcroak;
 
-# 8.3 limitation avoidance trickery.  --mjtguy
-sub retrieve_fd { goto &fdretrieve };
+sub retrieve_fd { &fd_retrieve }		# Backward compatibility
 
 bootstrap Storable;
 1;
@@ -197,11 +186,11 @@ sub retrieve {
 }
 
 #
-# fdretrieve
+# fd_retrieve
 #
 # Same as retrieve, but perform from an already opened file descriptor instead.
 #
-sub fdretrieve {
+sub fd_retrieve {
 	my ($file) = @_;
 	my $fd = fileno($file);
 	logcroak "not a valid file descriptor" unless defined $fd;
@@ -249,8 +238,8 @@ Storable - persistency for perl data structures
  # Storing to and retrieving from an already opened file
  store_fd \@array, \*STDOUT;
  nstore_fd \%table, \*STDOUT;
- $aryref = retrieve_fd(\*SOCKET);
- $hashref = retrieve_fd(\*SOCKET);
+ $aryref = fd_retrieve(\*SOCKET);
+ $hashref = fd_retrieve(\*SOCKET);
 
  # Serializing to memory
  $serialized = freeze \%table;
@@ -284,13 +273,13 @@ whole thing, the objects will continue to share what they originally shared.
 
 At the cost of a slight header overhead, you may store to an already
 opened file descriptor using the C<store_fd> routine, and retrieve
-from a file via C<retrieve_fd>. Those names aren't imported by default,
+from a file via C<fd_retrieve>. Those names aren't imported by default,
 so you will have to do that explicitely if you need those routines.
 The file descriptor you supply must be already opened, for read
 if you're going to retrieve and for write if you wish to store.
 
 	store_fd(\%table, *STDOUT) || die "can't store to stdout\n";
-	$hashref = retrieve_fd(*STDIN);
+	$hashref = fd_retrieve(*STDIN);
 
 You can also store data in network order to allow easy sharing across
 multiple platforms, or when storing on a socket known to be remotely
@@ -299,7 +288,7 @@ as in C<nstore> and C<nstore_fd>. At retrieval time, your data will be
 correctly restored so you don't have to know whether you're restoring
 from native or network ordered data.
 
-When using C<retrieve_fd>, objects are retrieved in sequence, one
+When using C<fd_retrieve>, objects are retrieved in sequence, one
 object (i.e. one recursive tree) per associated C<store_fd>.
 
 If you're more from the object-oriented camp, you can inherit from
@@ -585,11 +574,6 @@ if you happen to use your numbers as strings between two freezing
 operations on the same data structures, you will get different
 results.
 
-Due to the aforementionned optimizations, Storable is at the mercy
-of perl's internal redesign or structure changes. If that bothers
-you, you can try convincing Larry that what is used in Storable
-should be documented and consistently kept in future revisions.
-
 =head1 CREDITS
 
 Thank you to (in chronological order):
@@ -602,6 +586,8 @@ Thank you to (in chronological order):
 	Jeff Gresham <gresham_jeffrey@jpmorgan.com>
 	Murray Nesbitt <murray@activestate.com>
 	Marc Lehmann <pcg@opengroup.org>
+	Justin Banks <justinb@wamnet.com>
+	Jarkko Hietaniemi <jhi@iki.fi> (AGAIN, as perl 5.7.0 Pumpkin!)
 
 for their bug reports, suggestions and contributions.
 

@@ -1,15 +1,15 @@
 #!./perl
 
-# $Id: store.t,v 0.7 2000/08/03 22:04:45 ram Exp $
+# $Id: store.t,v 1.0 2000/09/01 19:40:42 ram Exp $
 #
 #  Copyright (c) 1995-2000, Raphael Manfredi
 #  
-#  You may redistribute only under the terms of the Artistic License,
-#  as specified in the README file that comes with the distribution.
+#  You may redistribute only under the same terms as Perl 5, as specified
+#  in the README file that comes with the distribution.
 #
 # $Log: store.t,v $
-# Revision 0.7  2000/08/03 22:04:45  ram
-# Baseline for second beta release.
+# Revision 1.0  2000/09/01 19:40:42  ram
+# Baseline for first official release.
 #
 
 sub BEGIN {
@@ -24,8 +24,7 @@ sub BEGIN {
     require 'lib/st-dump.pl';
 }
 
-
-use Storable qw(store retrieve store_fd nstore_fd retrieve_fd);
+use Storable qw(store retrieve store_fd nstore_fd fd_retrieve);
 
 print "1..20\n";
 
@@ -86,31 +85,31 @@ print "ok 11\n";
 print "not " unless open(OUT, 'store');
 binmode OUT;
 
-$r = retrieve_fd(::OUT);
+$r = fd_retrieve(::OUT);
 print "not " unless defined $r;
 print "ok 12\n";
 print "not " unless &dump($foo) eq &dump($r);
 print "ok 13\n";
 
-$r = retrieve_fd(::OUT);
+$r = fd_retrieve(::OUT);
 print "not " unless defined $r;
 print "ok 14\n";
 print "not " unless &dump(\@a) eq &dump($r);
 print "ok 15\n";
 
-$r = retrieve_fd(main::OUT);
+$r = fd_retrieve(main::OUT);
 print "not " unless defined $r;
 print "ok 16\n";
 print "not " unless &dump($foo) eq &dump($r);
 print "ok 17\n";
 
-$r = retrieve_fd(::OUT);
+$r = fd_retrieve(::OUT);
 print "not " unless defined $r;
 print "ok 18\n";
 print "not " unless &dump(\%a) eq &dump($r);
 print "ok 19\n";
 
-eval { $r = retrieve_fd(::OUT); };
+eval { $r = fd_retrieve(::OUT); };
 print "not " unless $@;
 print "ok 20\n";
 

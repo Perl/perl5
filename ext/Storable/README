@@ -1,34 +1,21 @@
-                         Storable 0.7
+                         Storable 1.0
                Copyright (c) 1995-2000, Raphael Manfredi
 
 ------------------------------------------------------------------------
     This program is free software; you can redistribute it and/or modify
-    it under the terms of the Artistic License, a copy of which can be
-    found with perl.
+    it under the same terms as Perl 5 itself.
 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    Artistic License for more details.
+    Perl 5 License schemes for more details.
 ------------------------------------------------------------------------
 
-       *** This is beta software -- use at your own risks ***
-
 +=======================================================================
-|                     PLEASE NOTE CAREFULLY
-|
-|   The serialization format changed between 0.5 and 0.6, and the module
-|   is NOT backward compatible.  Think about it when upgrading from a
-|   pre-0.5@9 version -- images from versions 0.5@9 could still be read
-|   by 0.6, but have not been tested with 0.7.
-|
-|   The next release (0.8 or 1.0) will DROP support for pre-0.6 format.
-|
-|   The serialization format changed between 0.6 and 0.7, and the module
-|   is fully backward compatible, meaning 0.7 can read binary images from
-|   0.6, although it only generates new ones.  If you encounter a situation
-|   where  it is not AND can duplicate it via a small test case, please
-|   send it to me, along with a patch to fix the problem if you can.
+| Storable is distributed as a module, but is also part of the official
+| Perl core distribution.  Maintenance is still done by the Author,
+| whilst the perl5-porters ensure that no change to the Perl internals
+| can break the version of Storable distributed with it.
 +=======================================================================
 
 The Storable extension brings persistency to your data.
@@ -61,7 +48,7 @@ There is an embeded POD manual page in Storable.pm.
 Raphael Manfredi <Raphael_Manfredi@pobox.com>
 
 ------------------------------------------------------------------------
-Thanks to:
+Thanks to (in chronological order):
 
     Jarkko Hietaniemi <jhi@iki.fi>
     Ulrich Pfeifer <pfeifer@charly.informatik.uni-dortmund.de>
@@ -72,6 +59,8 @@ Thanks to:
     Murray Nesbitt <murray@activestate.com>
     Albert N. Micheev <Albert.N.Micheev@f80.n5049.z2.fidonet.org>
     Marc Lehmann <pcg@opengroup.org>
+	Justin Banks <justinb@wamnet.com>
+	Jarkko Hietaniemi <jhi@iki.fi> (AGAIN, as perl 5.7.0 Pumpkin!)
 
 for their contributions.
 

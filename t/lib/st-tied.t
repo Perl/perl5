@@ -1,18 +1,15 @@
 #!./perl
 
-# $Id: tied.t,v 0.7.1.1 2000/08/13 20:10:27 ram Exp $
+# $Id: tied.t,v 1.0 2000/09/01 19:40:42 ram Exp $
 #
 #  Copyright (c) 1995-2000, Raphael Manfredi
 #  
-#  You may redistribute only under the terms of the Artistic License,
-#  as specified in the README file that comes with the distribution.
+#  You may redistribute only under the same terms as Perl 5, as specified
+#  in the README file that comes with the distribution.
 #
 # $Log: tied.t,v $
-# Revision 0.7.1.1  2000/08/13 20:10:27  ram
-# patch1: added test case for "undef" in hashes
-#
-# Revision 0.7  2000/08/03 22:04:45  ram
-# Baseline for second beta release.
+# Revision 1.0  2000/09/01 19:40:42  ram
+# Baseline for first official release.
 #
 
 sub BEGIN {

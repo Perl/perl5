@@ -1,15 +1,15 @@
 #!./perl
 
-# $Id: overload.t,v 0.7.1.1 2000/08/13 20:10:10 ram Exp $
+# $Id: overload.t,v 1.0 2000/09/01 19:40:42 ram Exp $
 #
 #  Copyright (c) 1995-2000, Raphael Manfredi
 #  
-#  You may redistribute only under the terms of the Artistic License,
-#  as specified in the README file that comes with the distribution.
+#  You may redistribute only under the same terms as Perl 5, as specified
+#  in the README file that comes with the distribution.
 #  
 # $Log: overload.t,v $
-# Revision 0.7.1.1  2000/08/13 20:10:10  ram
-# patch1: created
+# Revision 1.0  2000/09/01 19:40:42  ram
+# Baseline for first official release.
 #
 
 sub BEGIN {

@@ -3,29 +3,16 @@
  */
 
 /*
- * $Id: Storable.xs,v 0.7.1.3 2000/08/23 23:00:41 ram Exp $
+ * $Id: Storable.xs,v 1.0 2000/09/01 19:40:41 ram Exp $
  *
  *  Copyright (c) 1995-2000, Raphael Manfredi
  *  
- *  You may redistribute only under the terms of the Artistic License,
- *  as specified in the README file that comes with the distribution.
+ *  You may redistribute only under the same terms as Perl 5, as specified
+ *  in the README file that comes with the distribution.
  *
  * $Log: Storable.xs,v $
- * Revision 0.7.1.3  2000/08/23 23:00:41  ram
- * patch3: ANSI-fied most of the code, preparing for Perl core integration
- * patch3: dispatch tables moved upfront to relieve some compilers
- * patch3: merged 64-bit fixes from perl5-porters
- *
- * Revision 0.7.1.2  2000/08/14 07:19:27  ram
- * patch2: added a refcnt dec in retrieve_tied_key()
- *
- * Revision 0.7.1.1  2000/08/13 20:10:06  ram
- * patch1: was wrongly optimizing for "undef" values in hashes
- * patch1: added support for ref to tied items in hash/array
- * patch1: added overloading support
- *
- * Revision 0.7  2000/08/03 22:04:44  ram
- * Baseline for second beta release.
+ * Revision 1.0  2000/09/01 19:40:41  ram
+ * Baseline for first official release.
  *
  */
 
@@ -34,8 +21,10 @@
 #include <patchlevel.h>		/* Perl's one, needed since 5.6 */
 #include <XSUB.h>
 
-/*#define DEBUGME /* Debug mode, turns assertions on as well */
-/*#define DASSERT /* Assertion mode */
+#if 0
+#define DEBUGME /* Debug mode, turns assertions on as well */
+#define DASSERT /* Assertion mode */
+#endif
 
 /*
  * Pre PerlIO time when none of USE_PERLIO and PERLIO_IS_STDIO is defined
@@ -82,12 +71,12 @@ typedef double NV;			/* Older perls lack the NV type */
 #endif						/* PERL_VERSION -- perls < 5.6 */
 
 #ifndef NVef				/* The following were not part of perl 5.6 */
-#if defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE) && defined(PERL_PRIfldbl)
-#define	NVef		PERL_PRIeldbl
-#define	NVff		PERL_PRIfldbl
-#define	NVgf		PERL_PRIgldbl
-#endif
-#ifndef NVef
+#if defined(USE_LONG_DOUBLE) && \
+	defined(HAS_LONG_DOUBLE) && defined(PERL_PRIfldbl)
+#define NVef		PERL_PRIeldbl
+#define NVff		PERL_PRIfldbl
+#define NVgf		PERL_PRIgldbl
+#else
 #define	NVef		"e"
 #define	NVff		"f"
 #define	NVgf		"g"
@@ -266,8 +255,8 @@ typedef struct stcxt {
 #endif	/* < perl5.004_68 */
 
 #define dSTCXT_PTR(T,name)							\
-	T name = (T)(perinterp_sv && SvIOK(perinterp_sv)\
-				? INT2PTR(T, SvIVX(perinterp_sv)) : NULL)
+	T name = (perinterp_sv && SvIOK(perinterp_sv)	\
+				? INT2PTR(T, SvIVX(perinterp_sv)) : (T) 0)
 #define dSTCXT										\
 	dSTCXT_SV;										\
 	dSTCXT_PTR(stcxt_t *, cxt)
@@ -314,6 +303,37 @@ static stcxt_t *Context_ptr = &Context;
 /*
  * End of "thread-safe" related definitions.
  */
+
+/*
+ * LOW_32BITS
+ *
+ * Keep only the low 32 bits of a pointer (used for tags, which are not
+ * really pointers).
+ */
+
+#if PTRSIZE <= 4
+#define LOW_32BITS(x)	((I32) (x))
+#else
+#define LOW_32BITS(x)	((I32) ((unsigned long) (x) & 0xffffffffUL))
+#endif
+
+/*
+ * oI, oS, oC
+ *
+ * Hack for Crays, where sizeof(I32) == 8, and which are big-endians.
+ * Used in the WLEN and RLEN macros.
+ */
+
+#if INTSIZE > 4
+#define oI(x)	((I32 *) ((char *) (x) + 4))
+#define oS(x)	((x) - 4)
+#define oC(x)	(x = 0)
+#define CRAY_HACK
+#else
+#define oI(x)	(x)
+#define oS(x)	(x)
+#define oC(x)
+#endif
 
 /*
  * key buffer handling
@@ -402,6 +422,16 @@ static stcxt_t *Context_ptr = &Context;
 		return (SV *) 0;			\
 } while (0)
 
+#ifdef CRAY_HACK
+#define MBUF_GETINT(x) do {				\
+	oC(x);								\
+	if ((mptr + 4) <= mend) {			\
+		memcpy(oI(&x), mptr, 4);		\
+		mptr += 4;						\
+	} else								\
+		return (SV *) 0;				\
+} while (0)
+#else
 #define MBUF_GETINT(x) do {				\
 	if ((mptr + sizeof(int)) <= mend) {	\
 		if (int_aligned(mptr))			\
@@ -412,6 +442,7 @@ static stcxt_t *Context_ptr = &Context;
 	} else								\
 		return (SV *) 0;				\
 } while (0)
+#endif
 
 #define MBUF_READ(x,s) do {			\
 	if ((mptr + (s)) <= mend) {		\
@@ -440,6 +471,13 @@ static stcxt_t *Context_ptr = &Context;
 	}								\
 } while (0)
 
+#ifdef CRAY_HACK
+#define MBUF_PUTINT(i) do {			\
+	MBUF_CHK(4);					\
+	memcpy(mptr, oI(&i), 4);		\
+	mptr += 4;						\
+} while (0)
+#else
 #define MBUF_PUTINT(i) do {			\
 	MBUF_CHK(sizeof(int));			\
 	if (int_aligned(mptr))			\
@@ -448,25 +486,13 @@ static stcxt_t *Context_ptr = &Context;
 		memcpy(mptr, &i, sizeof(int));	\
 	mptr += sizeof(int);			\
 } while (0)
+#endif
 
 #define MBUF_WRITE(x,s) do {		\
 	MBUF_CHK(s);					\
 	memcpy(mptr, x, s);				\
 	mptr += s;						\
 } while (0)
-
-/*
- * LOW_32BITS
- *
- * Keep only the low 32 bits of a pointer (used for tags, which are not
- * really pointers).
- */
-
-#if PTRSIZE <= 4
-#define LOW_32BITS(x)	((I32) (x))
-#else
-#define LOW_32BITS(x)	((I32) ((unsigned long) (x) & 0xffffffffUL))
-#endif
 
 /*
  * Possible return values for sv_type().
@@ -520,7 +546,7 @@ static char old_magicstr[] = "perl-store";	/* Magic number before 0.6 */
 static char magicstr[] = "pst0";			/* Used as a magic number */
 
 #define STORABLE_BIN_MAJOR	2				/* Binary major "version" */
-#define STORABLE_BIN_MINOR	1				/* Binary minor "version" */
+#define STORABLE_BIN_MINOR	2				/* Binary minor "version" */
 
 /*
  * Useful store shortcuts...
@@ -533,28 +559,31 @@ static char magicstr[] = "pst0";			/* Used as a magic number */
 		return -1;							\
 } while (0)
 
+#define WRITE_I32(x)	do {			\
+	ASSERT(sizeof(x) == sizeof(I32), ("writing an I32"));	\
+	if (!cxt->fio)						\
+		MBUF_PUTINT(x);					\
+	else if (PerlIO_write(cxt->fio, oI(&x), oS(sizeof(x))) != oS(sizeof(x))) \
+		return -1;					\
+	} while (0)
+
 #ifdef HAS_HTONL
 #define WLEN(x)	do {				\
 	if (cxt->netorder) {			\
 		int y = (int) htonl(x);		\
 		if (!cxt->fio)				\
 			MBUF_PUTINT(y);			\
-		else if (PerlIO_write(cxt->fio, &y, sizeof(y)) != sizeof(y))	\
+		else if (PerlIO_write(cxt->fio,oI(&y),oS(sizeof(y))) != oS(sizeof(y))) \
 			return -1;				\
 	} else {						\
 		if (!cxt->fio)				\
 			MBUF_PUTINT(x);			\
-		else if (PerlIO_write(cxt->fio, &x, sizeof(x)) != sizeof(x))	\
+		else if (PerlIO_write(cxt->fio,oI(&x),oS(sizeof(x))) != oS(sizeof(x))) \
 			return -1;				\
 	}								\
 } while (0)
 #else
-#define WLEN(x)	do {				\
-	if (!cxt->fio)					\
-		MBUF_PUTINT(x);				\
-	else if (PerlIO_write(cxt->fio, &x, sizeof(x)) != sizeof(x))	\
-		return -1;					\
-	} while (0)
+#define WLEN(x)	WRITE_I32(x)
 #endif
 
 #define WRITE(x,y) do {						\
@@ -600,22 +629,27 @@ static char magicstr[] = "pst0";			/* Used as a magic number */
 		return (SV *) 0;						\
 } while (0)
 
-#ifdef HAS_NTOHL
-#define RLEN(x)	do {					\
+#define READ_I32(x)	do {				\
+	ASSERT(sizeof(x) == sizeof(I32), ("reading an I32"));	\
+	oC(x);								\
 	if (!cxt->fio)						\
 		MBUF_GETINT(x);					\
-	else if (PerlIO_read(cxt->fio, &x, sizeof(x)) != sizeof(x))	\
+	else if (PerlIO_read(cxt->fio, oI(&x), oS(sizeof(x))) != oS(sizeof(x)))	\
+		return (SV *) 0;				\
+} while (0)
+
+#ifdef HAS_NTOHL
+#define RLEN(x)	do {					\
+	oC(x);								\
+	if (!cxt->fio)						\
+		MBUF_GETINT(x);					\
+	else if (PerlIO_read(cxt->fio, oI(&x), oS(sizeof(x))) != oS(sizeof(x)))	\
 		return (SV *) 0;				\
 	if (cxt->netorder)					\
 		x = (int) ntohl(x);				\
 } while (0)
 #else
-#define RLEN(x)	do {					\
-	if (!cxt->fio)						\
-		MBUF_GETINT(x);					\
-	else if (PerlIO_read(cxt->fio, &x, sizeof(x)) != sizeof(x))	\
-		return (SV *) 0;				\
-} while (0)
+#define RLEN(x) READ_I32(x)
 #endif
 
 #define READ(x,y) do {						\
@@ -1127,9 +1161,7 @@ static SV *pkg_fetchmeth(
 	gv = gv_fetchmethod_autoload(pkg, method, FALSE);
 	if (gv && isGV(gv)) {
 		sv = newRV((SV*) GvCV(gv));
-		TRACEME(("%s->%s: 0x%"UVxf,
-			 HvNAME(pkg), method,
-			 PTR2UV(sv)));
+		TRACEME(("%s->%s: 0x%"UVxf, HvNAME(pkg), method, PTR2UV(sv)));
 	} else {
 		sv = newSVsv(&PL_sv_undef);
 		TRACEME(("%s->%s: not found", HvNAME(pkg), method));
@@ -1193,8 +1225,7 @@ static SV *pkg_can(
 			return (SV *) 0;
 		} else {
 			TRACEME(("cached %s->%s: 0x%"UVxf,
-				 HvNAME(pkg), method,
-				 PTR2UV(sv)));
+				HvNAME(pkg), method, PTR2UV(sv)));
 			return sv;
 		}
 	}
@@ -1367,8 +1398,7 @@ static int store_ref(stcxt_t *cxt, SV *sv)
 	if (SvOBJECT(sv)) {
 		HV *stash = (HV *) SvSTASH(sv);
 		if (stash && Gv_AMG(stash)) {
-			TRACEME(("ref (0x%"UVxf") is overloaded",
-				 PTR2UV(sv)));
+			TRACEME(("ref (0x%"UVxf") is overloaded", PTR2UV(sv)));
 			PUTMARK(SX_OVERLOAD);
 		} else
 			PUTMARK(SX_REF);
@@ -1468,7 +1498,8 @@ static int store_scalar(stcxt_t *cxt, SV *sv)
 		 */
 	string:
 
-		STORE_SCALAR(pv, len);
+		wlen = (I32) len;				/* WLEN via STORE_SCALAR expects I32 */
+		STORE_SCALAR(pv, wlen);
 		TRACEME(("ok (scalar 0x%"UVxf" '%s', length = %"IVdf")",
 			 PTR2UV(sv), SvPVX(sv), (IV)len));
 
@@ -1479,8 +1510,7 @@ static int store_scalar(stcxt_t *cxt, SV *sv)
 		 * Watch for number being an integer in disguise.
 		 */
 		if (nv == (NV) (iv = I_V(nv))) {
-			TRACEME(("double %"NVff" is actually integer %"IVdf,
-				 nv, iv));
+			TRACEME(("double %"NVff" is actually integer %"IVdf, nv, iv));
 			goto integer;		/* Share code below */
 		}
 
@@ -1493,8 +1523,7 @@ static int store_scalar(stcxt_t *cxt, SV *sv)
 		PUTMARK(SX_DOUBLE);
 		WRITE(&nv, sizeof(nv));
 
-		TRACEME(("ok (double 0x%"UVxf", value = %"NVff")",
-			 PTR2UV(sv), nv));
+		TRACEME(("ok (double 0x%"UVxf", value = %"NVff")", PTR2UV(sv), nv));
 
 	} else if (flags & SVp_IOK) {		/* SvIOKp(sv) => integer */
 		iv = SvIV(sv);
@@ -1515,23 +1544,22 @@ static int store_scalar(stcxt_t *cxt, SV *sv)
 			PUTMARK(siv);
 			TRACEME(("small integer stored as %d", siv));
 		} else if (cxt->netorder) {
-			int niv;
+			I32 niv;
 #ifdef HAS_HTONL
-			niv = (int) htonl(iv);
+			niv = (I32) htonl(iv);
 			TRACEME(("using network order"));
 #else
-			niv = (int) iv;
+			niv = (I32) iv;
 			TRACEME(("as-is for network order"));
 #endif
 			PUTMARK(SX_NETINT);
-			WRITE(&niv, sizeof(niv));
+			WRITE_I32(niv);
 		} else {
 			PUTMARK(SX_INTEGER);
 			WRITE(&iv, sizeof(iv));
 		}
 
-		TRACEME(("ok (integer 0x%"UVxf", value = %"IVdf")",
-			 PTR2UV(sv), iv));
+		TRACEME(("ok (integer 0x%"UVxf", value = %"IVdf")", PTR2UV(sv), iv));
 
 	} else
 		CROAK(("Can't determine type of %s(0x%"UVxf")",
@@ -1684,8 +1712,7 @@ static int store_hash(stcxt_t *cxt, HV *hv)
 			 * Store value first.
 			 */
 			
-			TRACEME(("(#%d) value 0x%"UVxf,
-				 i, PTR2UV(val)));
+			TRACEME(("(#%d) value 0x%"UVxf, i, PTR2UV(val)));
 
 			if (ret = store(cxt, val))
 				goto out;
@@ -1731,8 +1758,7 @@ static int store_hash(stcxt_t *cxt, HV *hv)
 			 * Store value first.
 			 */
 
-			TRACEME(("(#%d) value 0x%"UVxf,
-				 i, PTR2UV(val)));
+			TRACEME(("(#%d) value 0x%"UVxf, i, PTR2UV(val)));
 
 			if (ret = store(cxt, val))
 				goto out;
@@ -1854,14 +1880,12 @@ static int store_tied_item(stcxt_t *cxt, SV *sv)
 	if (mg->mg_ptr) {
 		TRACEME(("store_tied_item: storing a ref to a tied hash item"));
 		PUTMARK(SX_TIED_KEY);
-		TRACEME(("store_tied_item: storing OBJ 0x%"UVxf,
-			 PTR2UV(mg->mg_obj)));
+		TRACEME(("store_tied_item: storing OBJ 0x%"UVxf, PTR2UV(mg->mg_obj)));
 
 		if (ret = store(cxt, mg->mg_obj))
 			return ret;
 
-		TRACEME(("store_tied_item: storing PTR 0x%"UVxf,
-			 PTR2UV(mg->mg_ptr)));
+		TRACEME(("store_tied_item: storing PTR 0x%"UVxf, PTR2UV(mg->mg_ptr)));
 
 		if (ret = store(cxt, (SV *) mg->mg_ptr))
 			return ret;
@@ -1870,8 +1894,7 @@ static int store_tied_item(stcxt_t *cxt, SV *sv)
 
 		TRACEME(("store_tied_item: storing a ref to a tied array item "));
 		PUTMARK(SX_TIED_IDX);
-		TRACEME(("store_tied_item: storing OBJ 0x%"UVxf,
-			 PTR2UV(mg->mg_obj)));
+		TRACEME(("store_tied_item: storing OBJ 0x%"UVxf, PTR2UV(mg->mg_obj)));
 
 		if (ret = store(cxt, mg->mg_obj))
 			return ret;
@@ -2064,8 +2087,7 @@ static int store_hook(
 		if (svh = hv_fetch(cxt->hseen, (char *) &xsv, sizeof(xsv), FALSE))
 			goto sv_seen;		/* Avoid moving code too far to the right */
 
-		TRACEME(("listed object %d at 0x%"UVxf" is unknown",
-			i-1, PTR2UV(xsv)));
+		TRACEME(("listed object %d at 0x%"UVxf" is unknown", i-1, PTR2UV(xsv)));
 
 		/*
 		 * We need to recurse to store that object and get it to be known
@@ -2126,7 +2148,8 @@ static int store_hook(
 	 * If we recursed, the SX_HOOK has already been emitted.
 	 */
 
-	TRACEME(("SX_HOOK (recursed=%d) flags=0x%x class=%"IVdf" len=%"IVdf" len2=%"IVdf" len3=%d",
+	TRACEME(("SX_HOOK (recursed=%d) flags=0x%x "
+			"class=%"IVdf" len=%"IVdf" len2=%"IVdf" len3=%d",
 		 recursed, flags, (IV)classnum, (IV)len, (IV)len2, count-1));
 
 	/* SX_HOOK <flags> */
@@ -2180,7 +2203,7 @@ static int store_hook(
 
 		for (i = 1; i < count; i++) {
 			I32 tagval = htonl(LOW_32BITS(ary[i]));
-			WRITE(&tagval, sizeof(I32));
+			WRITE_I32(tagval);
 			TRACEME(("object %d, tag #%d", i-1, ntohl(tagval)));
 		}
 	}
@@ -2434,11 +2457,10 @@ static int store(stcxt_t *cxt, SV *sv)
 	if (svh) {
 		I32 tagval = htonl(LOW_32BITS(*svh));
 
-		TRACEME(("object 0x%"UVxf" seen as #%d",
-			 PTR2UV(sv), ntohl(tagval)));
+		TRACEME(("object 0x%"UVxf" seen as #%d", PTR2UV(sv), ntohl(tagval)));
 
 		PUTMARK(SX_OBJECT);
-		WRITE(&tagval, sizeof(I32));
+		WRITE_I32(tagval);
 		return 0;
 	}
 
@@ -2531,10 +2553,12 @@ static int magic_write(stcxt_t *cxt)
 	PUTMARK((unsigned char) sizeof(int));
 	PUTMARK((unsigned char) sizeof(long));
 	PUTMARK((unsigned char) sizeof(char *));
+	PUTMARK((unsigned char) sizeof(NV));
 
-	TRACEME(("ok (magic_write byteorder = 0x%lx [%d], I%d L%d P%d)",
+	TRACEME(("ok (magic_write byteorder = 0x%lx [%d], I%d L%d P%d D%d)",
 		 (unsigned long) BYTEORDER, (int) c,
-		 (int) sizeof(int), (int) sizeof(long), (int) sizeof(char *)));
+		 (int) sizeof(int), (int) sizeof(long),
+		 (int) sizeof(char *), (int) sizeof(NV)));
 
 	return 0;
 }
@@ -3051,7 +3075,7 @@ static SV *retrieve_hook(stcxt_t *cxt)
 			SV **svh;
 			SV *xsv;
 
-			READ(&tag, sizeof(I32));
+			READ_I32(tag);
 			tag = ntohl(tag);
 			svh = av_fetch(cxt->aseen, tag, FALSE);
 			if (!svh)
@@ -3379,7 +3403,7 @@ static SV *retrieve_tied_idx(stcxt_t *cxt)
  */
 static SV *retrieve_lscalar(stcxt_t *cxt)
 {
-	STRLEN len;
+	I32 len;
 	SV *sv;
 
 	RLEN(len);
@@ -3502,11 +3526,11 @@ static SV *retrieve_integer(stcxt_t *cxt)
 static SV *retrieve_netint(stcxt_t *cxt)
 {
 	SV *sv;
-	int iv;
+	I32 iv;
 
 	TRACEME(("retrieve_netint (#%d)", cxt->tagnum));
 
-	READ(&iv, sizeof(iv));
+	READ_I32(iv);
 #ifdef HAS_NTOHL
 	sv = newSViv((int) ntohl(iv));
 	TRACEME(("network integer %d", (int) ntohl(iv)));
@@ -4028,6 +4052,12 @@ magic_ok:
 	if ((int) c != sizeof(char *))
 		CROAK(("Pointer integer size is not compatible"));
 
+	if (version_major >= 2 && version_minor >= 2) {
+		GETMARK(c);		/* sizeof(NV) */
+		if ((int) c != sizeof(NV))
+			CROAK(("Double size is not compatible"));
+	}
+
 	return &PL_sv_undef;	/* OK */
 }
 
@@ -4116,7 +4146,7 @@ again:
 
 	if (type == SX_OBJECT) {
 		I32 tag;
-		READ(&tag, sizeof(I32));
+		READ_I32(tag);
 		tag = ntohl(tag);
 		svh = av_fetch(cxt->aseen, tag, FALSE);
 		if (!svh)
