@@ -1,6 +1,6 @@
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 0.90 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 0.93 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 require DynaLoader;
 require Exporter;
@@ -1086,7 +1086,7 @@ to be rationalized.
 =head1 SEE ALSO
 
 L<perlunicode>, L<perlebcdic>, L<perlfunc/open>, L<PerlIO>, L<encoding>,
-L<utf8>
+L<utf8>, the Perl Unicode Mailing List E<lt>perl-unicode@perl.orgE<gt>
 
 
 =cut

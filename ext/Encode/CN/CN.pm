@@ -1,10 +1,13 @@
 package Encode::CN;
-our $VERSION = do { my @r = (q$Revision: 0.90 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 0.93 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use Encode::CN::HZ;
 use XSLoader;
 XSLoader::load('Encode::CN',$VERSION);
+
+Encode::define_alias( qr/euc.*cn$/i     => '"euc-cn"' );
+Encode::define_alias( qr/cn.*euc/i      => '"euc-cn"' );
 
 1;
 __END__
@@ -23,12 +26,17 @@ Encode::CN - China-based Chinese Encodings
 This module implements China-based Chinese charset encodings.
 Encodings supported are as follows.
 
-  euc-cn	EUC (Extended Unix Character)
-  gb2312	The raw (low-bit) GB2312 character map
-  gb12345	Traditional chinese counterpart to GB2312 (raw)
-  iso-ir-165	GB2312 + GB6345 + GB8565 + additions
-  cp936		Code Page 936, also known as GBK (Extended GuoBiao)
-  hz		7-bit escaped GB2312 encoding
+  Canonical   Alias		Description
+  --------------------------------------------------------------------
+  euc-cn      /euc.*cn$/i	EUC (Extended Unix Character)
+	      /cn.*euc$/i
+  gb2312			The raw (low-bit) GB2312 character map
+  gb12345			Traditional chinese counterpart to 
+				GB2312 (raw)
+  iso-ir-165			GB2312 + GB6345 + GB8565 + additions
+  cp936				Code Page 936, also known as GBK 
+				(Extended GuoBiao)
+  hz				7-bit escaped GB2312 encoding
 
 To find how to use this module in detail, see L<Encode>.
 

@@ -196,6 +196,8 @@ ext/DynaLoader/hints/openbsd.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
 ext/DynaLoader/XSLoader_pm.PL	Simple XS Loader perl module
+ext/Encode/AUTHORS		Encode extension
+ext/Encode/Changes		Encode extension
 ext/Encode/CN/CN.pm		Encode extension
 ext/Encode/CN/Makefile.PL	Encode extension
 ext/Encode/compile		Encode extension
@@ -356,6 +358,7 @@ ext/Encode/lib/EncodeFormat.pod		Encode extension
 ext/Encode/Makefile.PL		Encode extension makefile writer
 ext/Encode/MANIFEST		Encode extension
 ext/Encode/README		Encode extension
+ext/Encode/t/CJKalias.t		Encode extension
 ext/Encode/t/CN.t		Encode extension test
 ext/Encode/t/Encode.t		Encode extension test
 ext/Encode/t/jisx0208.euc	Encode extension test

@@ -1,0 +1,28 @@
+# Revision history for Perl extension Encode.
+#
+# $Id$
+#
+
+0.93  Wed Mar 20 2002
+* First release to be uploaded to CPAN.  For prehistoric changes,
+  please see Changes file of perl distibution as well as 
+  perl-unicode@perl.org archive, available at:
+  http://archive.develooper.com/perl-unicode@perl.org/
+
+  Changes Since 0.92 includes;
++ Changes
++ AUTHORS
+! Encode.pm
+! README
+  + Mention to perl-unicode@perl.org added
+! JP/JP.pm
+  + Encoding aliases added so you can feed locale names
+    and MIME Charset="" directly.
+  - Mention to JISX0212 removed because it's fixed
+! CN/CN.pm
+! KR/KR.pm
+  + Encoding aliases added.  Note TW is left untouched because
+    euc-tw is not implemented in TW but in Encode::HanExtra.
+    Autrijus, you may fix Encode::HanExtra.
++ t/CJKalias.t
+  + to test encode aliases added

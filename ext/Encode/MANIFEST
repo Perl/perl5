@@ -1,171 +1,174 @@
-CN/CN.pm
-CN/Makefile.PL
-Encode.pm
-Encode.xs
-Encode/11643-1.enc
-Encode/11643-2.enc
-Encode/2022-cn.enc
-Encode/2022-jp.enc
-Encode/2022-jp1.enc
-Encode/2022-jp2.enc
-Encode/2022-kr.enc
-Encode/2022.enc
-Encode/7bit-greek.enc
-Encode/7bit-jis.enc
-Encode/7bit-kana.enc
-Encode/7bit-latin1.enc
-Encode/8859-1.enc
-Encode/8859-1.ucm
-Encode/8859-10.enc
-Encode/8859-10.ucm
-Encode/8859-11.enc
-Encode/8859-11.ucm
-Encode/8859-13.enc
-Encode/8859-13.ucm
-Encode/8859-14.enc
-Encode/8859-14.ucm
-Encode/8859-15.enc
-Encode/8859-15.ucm
-Encode/8859-16.enc
-Encode/8859-16.ucm
-Encode/8859-2.enc
-Encode/8859-2.ucm
-Encode/8859-3.enc
-Encode/8859-3.ucm
-Encode/8859-4.enc
-Encode/8859-4.ucm
-Encode/8859-5.enc
-Encode/8859-5.ucm
-Encode/8859-6.enc
-Encode/8859-6.ucm
-Encode/8859-7.enc
-Encode/8859-7.ucm
-Encode/8859-8.enc
-Encode/8859-8.ucm
-Encode/8859-9.enc
-Encode/8859-9.ucm
-Encode/ascii.enc
-Encode/ascii.ucm
-Encode/big5-hkscs.enc
-Encode/big5.enc
-Encode/cp1006.enc
-Encode/cp1047.enc
-Encode/cp1047.ucm
-Encode/cp1250.enc
-Encode/cp1250.ucm
-Encode/cp1251.enc
-Encode/cp1252.enc
-Encode/cp1253.enc
-Encode/cp1254.enc
-Encode/cp1255.enc
-Encode/cp1256.enc
-Encode/cp1257.enc
-Encode/cp1258.enc
-Encode/cp37.enc
-Encode/cp37.ucm
-Encode/cp424.enc
-Encode/cp437.enc
-Encode/cp737.enc
-Encode/cp775.enc
-Encode/cp850.enc
-Encode/cp852.enc
-Encode/cp855.enc
-Encode/cp856.enc
-Encode/cp857.enc
-Encode/cp860.enc
-Encode/cp861.enc
-Encode/cp862.enc
-Encode/cp863.enc
-Encode/cp864.enc
-Encode/cp865.enc
-Encode/cp866.enc
-Encode/cp869.enc
-Encode/cp874.enc
-Encode/cp932.enc
-Encode/cp936.enc
-Encode/cp949.enc
-Encode/cp950.enc
-Encode/dingbats.enc
-Encode/dingbats.ucm
-Encode/euc-cn.enc
-Encode/euc-jp.enc
-Encode/euc-jp.ucm
-Encode/euc-kr.enc
-Encode/gb12345.enc
-Encode/gb1988.enc
-Encode/gb2312.enc
-Encode/gsm0338.enc
-Encode/ir-197.enc
-Encode/iso-ir-165.enc
-Encode/jis0201.enc
-Encode/jis0201.ucm
-Encode/jis0208.enc
-Encode/jis0212.enc
-Encode/koi8-f.enc
-Encode/koi8-f.ucm
-Encode/koi8-r.enc
-Encode/koi8-r.ucm
-Encode/koi8-u.enc
-Encode/koi8-u.ucm
-Encode/ksc5601.enc
-Encode/macCentEuro.enc
-Encode/macCroatian.enc
-Encode/macCyrillic.enc
-Encode/macDingbats.enc
-Encode/macGreek.enc
-Encode/macIceland.enc
-Encode/macJapan.enc
-Encode/macRoman.enc
-Encode/macRumanian.enc
-Encode/macSami.enc
-Encode/macThai.enc
-Encode/macTurkish.enc
-Encode/macUkraine.enc
-Encode/nextstep.enc
-Encode/nextstep.ucm
-Encode/posix-bc.enc
-Encode/posix-bc.ucm
-Encode/roman8.enc
-Encode/roman8.ucm
-Encode/shiftjis.enc
-Encode/symbol.enc
-Encode/symbol.ucm
-Encode/viscii.enc
-Encode/viscii.ucm
-JP/JP.pm
-JP/Makefile.PL
-KR/KR.pm
-KR/Makefile.PL
-MANIFEST
-Makefile.PL
-README
-TW/Makefile.PL
-TW/TW.pm
-compile
-encengine.c
-encode.h
-lib/Encode/CN/HZ.pm
-lib/Encode/Encoding.pm
-lib/Encode/Internal.pm
-lib/Encode/JP/Constants.pm
-lib/Encode/JP/H2Z.pm
-lib/Encode/JP/ISO_2022_JP.pm
-lib/Encode/JP/JIS.pm
-lib/Encode/Tcl.pm
-lib/Encode/Tcl/Escape.pm
-lib/Encode/Tcl/Table.pm
-lib/Encode/Unicode.pm
-lib/Encode/XS.pm
-lib/Encode/iso10646_1.pm
-lib/Encode/ucs2_le.pm
-lib/Encode/utf8.pm
-lib/EncodeFormat.pod
-t/CN.t
-t/Encode.t
-t/JP.t
-t/TW.t
-t/Tcl.t
-t/jisx0208.euc
-t/jisx0208.ref
-t/jisx0212.euc
-t/jisx0212.ref
+AUTHORS		List of authors
+CN/CN.pm		Encode extension
+CN/Makefile.PL	Encode extension
+Changes		Change Log
+Encode.pm			Encode extension
+Encode.xs		Encode extension
+Encode/11643-1.enc		Encode table
+Encode/11643-2.enc		Encode table
+Encode/2022-cn.enc		Encode table
+Encode/2022-jp.enc		Encode table
+Encode/2022-jp1.enc		Encode table
+Encode/2022-jp2.enc		Encode table
+Encode/2022-kr.enc		Encode table
+Encode/2022.enc		Encode table
+Encode/7bit-greek.enc	Encode table
+Encode/7bit-jis.enc		Encode table
+Encode/7bit-kana.enc		Encode table
+Encode/7bit-latin1.enc	Encode table
+Encode/8859-1.enc		Encode table
+Encode/8859-1.ucm		Encode table
+Encode/8859-10.enc		Encode table
+Encode/8859-10.ucm		Encode table
+Encode/8859-11.enc		Encode table
+Encode/8859-11.ucm		Encode table
+Encode/8859-13.enc		Encode table
+Encode/8859-13.ucm		Encode table
+Encode/8859-14.enc		Encode table
+Encode/8859-14.ucm		Encode table
+Encode/8859-15.enc		Encode table
+Encode/8859-15.ucm		Encode table
+Encode/8859-16.enc		Encode table
+Encode/8859-16.ucm		Encode table
+Encode/8859-2.enc		Encode table
+Encode/8859-2.ucm		Encode table
+Encode/8859-3.enc		Encode table
+Encode/8859-3.ucm		Encode table
+Encode/8859-4.enc		Encode table
+Encode/8859-4.ucm		Encode table
+Encode/8859-5.enc		Encode table
+Encode/8859-5.ucm		Encode table
+Encode/8859-6.enc		Encode table
+Encode/8859-6.ucm		Encode table
+Encode/8859-7.enc		Encode table
+Encode/8859-7.ucm		Encode table
+Encode/8859-8.enc		Encode table
+Encode/8859-8.ucm		Encode table
+Encode/8859-9.enc		Encode table
+Encode/8859-9.ucm		Encode table
+Encode/ascii.enc		Encode table
+Encode/ascii.ucm		Encode table
+Encode/big5-hkscs.enc	Encode table
+Encode/big5.enc		Encode table
+Encode/cp1006.enc		Encode table
+Encode/cp1047.enc		Encode table
+Encode/cp1047.ucm		Encode table
+Encode/cp1250.enc		Encode table
+Encode/cp1250.ucm		Encode table
+Encode/cp1251.enc		Encode table
+Encode/cp1252.enc		Encode table
+Encode/cp1253.enc		Encode table
+Encode/cp1254.enc		Encode table
+Encode/cp1255.enc		Encode table
+Encode/cp1256.enc		Encode table
+Encode/cp1257.enc		Encode table
+Encode/cp1258.enc		Encode table
+Encode/cp37.enc		Encode table
+Encode/cp37.ucm		Encode table
+Encode/cp424.enc		Encode table
+Encode/cp437.enc		Encode table
+Encode/cp737.enc		Encode table
+Encode/cp775.enc		Encode table
+Encode/cp850.enc		Encode table
+Encode/cp852.enc		Encode table
+Encode/cp855.enc		Encode table
+Encode/cp856.enc		Encode table
+Encode/cp857.enc		Encode table
+Encode/cp860.enc		Encode table
+Encode/cp861.enc		Encode table
+Encode/cp862.enc		Encode table
+Encode/cp863.enc		Encode table
+Encode/cp864.enc		Encode table
+Encode/cp865.enc		Encode table
+Encode/cp866.enc		Encode table
+Encode/cp869.enc		Encode table
+Encode/cp874.enc		Encode table
+Encode/cp932.enc		Encode table
+Encode/cp936.enc		Encode table
+Encode/cp949.enc		Encode table
+Encode/cp950.enc		Encode table
+Encode/dingbats.enc		Encode table
+Encode/dingbats.ucm		Encode table
+Encode/euc-cn.enc		Encode table
+Encode/euc-jp.enc		Encode table
+Encode/euc-jp.ucm		Encode table
+Encode/euc-kr.enc		Encode table
+Encode/gb12345.enc		Encode table
+Encode/gb1988.enc		Encode table
+Encode/gb2312.enc		Encode table
+Encode/gsm0338.enc		Encode table
+Encode/ir-197.enc		Encode table
+Encode/iso-ir-165.enc	Encode table
+Encode/jis0201.enc		Encode table
+Encode/jis0201.ucm		Encode table
+Encode/jis0208.enc		Encode table
+Encode/jis0212.enc		Encode table
+Encode/koi8-f.enc		Encode table
+Encode/koi8-f.ucm		Encode table
+Encode/koi8-r.enc		Encode table
+Encode/koi8-r.ucm		Encode table
+Encode/koi8-u.enc		Encode table
+Encode/koi8-u.ucm		Encode table
+Encode/ksc5601.enc		Encode table
+Encode/macCentEuro.enc	Encode table
+Encode/macCroatian.enc	Encode table
+Encode/macCyrillic.enc	Encode table
+Encode/macDingbats.enc	Encode table
+Encode/macGreek.enc		Encode table
+Encode/macIceland.enc	Encode table
+Encode/macJapan.enc		Encode table
+Encode/macRoman.enc		Encode table
+Encode/macRumanian.enc	Encode table
+Encode/macSami.enc		Encode table
+Encode/macThai.enc		Encode table
+Encode/macTurkish.enc	Encode table
+Encode/macUkraine.enc	Encode table
+Encode/nextstep.enc		Encode table
+Encode/nextstep.ucm		Encode table
+Encode/posix-bc.enc		Encode table
+Encode/posix-bc.ucm		Encode table
+Encode/roman8.enc		Encode table
+Encode/roman8.ucm		Encode table
+Encode/shiftjis.enc		Encode table
+Encode/symbol.enc		Encode table
+Encode/symbol.ucm		Encode table
+Encode/viscii.enc		Encode table
+Encode/viscii.ucm		Encode table
+JP/JP.pm		Encode extension
+JP/Makefile.PL	Encode extension
+KR/KR.pm		Encode extension
+KR/Makefile.PL		Encode extension
+MANIFEST		Encode extension
+Makefile.PL		Encode extension makefile writer
+README		Encode extension
+TW/Makefile.PL	Encode extension
+TW/TW.pm		Encode extension
+compile		Encode extension
+encengine.c		Encode extension
+encode.h		Encode extension
+lib/Encode/CN/HZ.pm		Encode extension
+lib/Encode/Encoding.pm	Encode extension
+lib/Encode/Internal.pm	Encode extension
+lib/Encode/JP/Constants.pm	Encode extension
+lib/Encode/JP/H2Z.pm		Encode extension
+lib/Encode/JP/ISO_2022_JP.pm	Encode extension
+lib/Encode/JP/JIS.pm	Encode extension
+lib/Encode/Tcl.pm		Encode extension
+lib/Encode/Tcl/Escape.pm	Encode extension
+lib/Encode/Tcl/Table.pm	Encode extension
+lib/Encode/Unicode.pm	Encode extension
+lib/Encode/XS.pm		Encode extension
+lib/Encode/iso10646_1.pm	Encode extension
+lib/Encode/ucs2_le.pm	Encode extension
+lib/Encode/utf8.pm		Encode extension
+lib/EncodeFormat.pod		Encode extension
+t/CJKalias.t	Encode extension test
+t/CN.t		Encode extension test
+t/Encode.t		Encode extension test
+t/JP.t		Encode extension test
+t/TW.t		Encode extension test
+t/Tcl.t		Encode extension test
+t/jisx0208.euc	Encode extension test
+t/jisx0208.ref	Encode extension test
+t/jisx0212.euc	Encode extension test
+t/jisx0212.ref	Encode extension test

@@ -18,6 +18,7 @@ BEGIN {
 }
 use strict;
 use Test::More tests => 27;
+#use Test::More qw(no_plan);
 use Encode;
 use File::Basename;
 use File::Spec;
@@ -88,6 +89,7 @@ while (<$src>)
  }
 close($dst);
 close($src);
+
 TODO:
 {
   local $TODO = 'needs debugging on VMS' if $^O eq 'VMS';
@@ -117,6 +119,7 @@ SKIP:
 }
 
 is($enc->name,'euc-jp');
+
 END {
  1 while unlink($utf,$rnd);
 }

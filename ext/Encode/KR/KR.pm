@@ -1,9 +1,12 @@
 package Encode::KR;
-our $VERSION = do { my @r = (q$Revision: 0.90 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 0.93 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use XSLoader;
 XSLoader::load('Encode::KR',$VERSION);
+
+Encode::define_alias( qr/euc.*kr$/i     => '"euc-kr"' );
+Encode::define_alias( qr/kr.*euc/i      => '"euc-kr"' );
 
 1;
 __END__
@@ -22,9 +25,14 @@ Encode::KR - Korean Encodings
 This module implements Korean charset encodings.  Encodings supported
 are as follows.
 
-  euc-kr	EUC (Extended Unix Character)
-  ksc5601	Korean standard code set
-  cp949		Code Page 949 (EUC-KR + Unified Hangul Code)
+
+  Canonical   Alias		Description
+  --------------------------------------------------------------------
+  euc-kr      /euc.*kr$/i	EUC (Extended Unix Character)
+	      /kr.*euc/i
+  ksc5601			Korean standard code set
+  cp949				Code Page 949 
+				(EUC-KR + Unified Hangul Code)
   
 To find how to use this module in detail, see L<Encode>.
 
