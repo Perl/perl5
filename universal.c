@@ -187,6 +187,7 @@ XS(XS_Internals_SvREFCNT);
 XS(XS_Internals_hv_clear_placehold);
 XS(XS_PerlIO_get_layers);
 XS(XS_Regexp_DESTROY);
+XS(XS_Internals_hash_seed);
 
 void
 Perl_boot_core_UNIVERSAL(pTHX)
@@ -230,6 +231,7 @@ Perl_boot_core_UNIVERSAL(pTHX)
     newXSproto("PerlIO::get_layers",
                XS_PerlIO_get_layers, file, "*;@");
     newXS("Regexp::DESTROY", XS_Regexp_DESTROY, file);
+    newXSproto("Internals::hash_seed",XS_Internals_hash_seed, file, "");
 }
 
 
@@ -904,5 +906,11 @@ XS(XS_PerlIO_get_layers)
 #endif
 
     XSRETURN(0);
+}
+
+XS(XS_Internals_hash_seed)
+{
+    dXSARGS;
+    XSRETURN_UV(PL_hash_seed);
 }
 

@@ -6,7 +6,7 @@ BEGIN {
         chdir 't';
     }
 }
-use Test::More tests => 155;
+use Test::More tests => 157;
 use strict;
 
 my @Exported_Funcs;
@@ -14,6 +14,7 @@ BEGIN {
     @Exported_Funcs = qw(lock_keys   unlock_keys
                          lock_value  unlock_value
                          lock_hash   unlock_hash
+			 hash_seed
                         );
     use_ok 'Hash::Util', @Exported_Funcs;
 }
@@ -272,3 +273,6 @@ like( $@, qr/^Attempt to access disallowed key 'I_DONT_EXIST' in a restricted ha
     }
   }
 }
+
+my $hash_seed = hash_seed();
+ok($hash_seed >= 0, "hash_seed $hash_seed");
