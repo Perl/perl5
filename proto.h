@@ -1176,7 +1176,7 @@ STATIC void	S_debprof(pTHX_ OP *o);
 STATIC SV*	S_save_scalar_at(pTHX_ SV **sptr);
 #endif
 
-#if defined(USE_ITHREADS) || defined(PERL_IN_SHAREDSV_C) || defined(PERL_DECL_PROT)
+#if defined(USE_ITHREADS)
 PERL_CALLCONV void	Perl_sharedsv_init(pTHX);
 PERL_CALLCONV shared_sv*	Perl_sharedsv_new(pTHX);
 PERL_CALLCONV shared_sv*	Perl_sharedsv_find(pTHX_ SV* sv);

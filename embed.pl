@@ -2188,7 +2188,7 @@ s	|void	|debprof	|OP *o
 s	|SV*	|save_scalar_at	|SV **sptr
 #endif
 
-#if defined(USE_ITHREADS) || defined(PERL_IN_SHAREDSV_C) || defined(PERL_DECL_PROT)
+#if defined(USE_ITHREADS)
 Adp    |void        |sharedsv_init
 Adp    |shared_sv*  |sharedsv_new
 Adp    |shared_sv*  |sharedsv_find          |SV* sv
