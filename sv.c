@@ -9988,6 +9988,12 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 #endif
     PL_encoding		= sv_dup(proto_perl->Iencoding, param);
 
+#ifdef DEBUGGING
+    sv_setpvn(PERL_DEBUG_PAD(0), "", 0);	/* For regex debugging. */
+    sv_setpvn(PERL_DEBUG_PAD(1), "", 0);
+    sv_setpvn(PERL_DEBUG_PAD(2), "", 0);
+#endif
+
     /* Clone the regex array */
     PL_regex_padav = newAV();
     {
