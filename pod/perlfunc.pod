@@ -3808,6 +3808,57 @@ will complain about not finding "F<Foo::Bar>" there.  In this case you can do:
 
         eval "require $class";
 
+You can also insert hooks into the import facility, by putting directly
+Perl code into the @INC array.  There are three forms of hooks: subroutine
+references, array references and blessed objects.
+
+Subroutine references are the simplest case.  When the inclusion system
+walks through @INC and encounters a subroutine, this subroutine gets
+called with two parameters, the first being a reference to itself, and the
+second the name of the file to be included (e.g. "F<Foo/Bar.pm>").  The
+subroutine should return C<undef> or a filehandle, from which the file to
+include will be read.  If C<undef> is returned, C<require> will look at
+the remaining elements of @INC.
+
+If the hook is an array reference, its first element must be a subroutine
+reference.  This subroutine is called as above, but the first parameter is
+the array reference.  This enables to pass indirectly some arguments to
+the subroutine.
+
+In other words, you can write:
+
+    push @INC, \&my_sub;
+    sub my_sub {
+	my ($coderef, $filename) = @_;	# $coderef is \&my_sub
+	...
+    }
+
+or:
+
+    push @INC, [ \&my_sub, $x, $y, ... ];
+    sub my_sub {
+	my ($arrayref, $filename) = @_;
+	# Retrieve $x, $y, ...
+	my @parameters = @$arrayref[1..$#$arrayref];
+	...
+    }
+
+If the hook is an object, it must provide an INC method, that will be
+called as above, the first parameter being the object itself.  (Note that
+you must fully qualify the sub's name, as it is always forced into package
+C<main>.)  Here is a typical code layout:
+
+    # In Foo.pm
+    package Foo;
+    sub new { ... }
+    sub Foo::INC {
+	my ($self, $filename) = @_;
+	...
+    }
+
+    # In the main program
+    push @INC, new Foo(...);
+
 For a yet-more-powerful import facility, see L</use> and L<perlmod>.
 
 =item reset EXPR
