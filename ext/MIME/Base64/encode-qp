@@ -1,8 +1,0 @@
-#!/usr/bin/perl
-
-use MIME::QuotedPrint qw(encode_qp);
-
-while (<>) {
-    print encode_qp($_);
-}
-

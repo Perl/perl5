@@ -1,8 +1,0 @@
-#!/usr/bin/perl
-
-use MIME::Base64 qw(decode_base64);
-
-while (<>) {
-    print decode_base64($_);
-}
-
