@@ -9,7 +9,7 @@ BEGIN {
 
 use Config;
 
-print "1..56\n";
+print "1..58\n";
 
 $Is_MSWin32 = $^O eq 'MSWin32';
 $Is_Dos = $^O eq 'dos';
@@ -109,8 +109,8 @@ else {
 if (-o 'Op.stat.tmp') {print "ok 26\n";} else {print "not ok 26\n";}
 
 if (-e 'Op.stat.tmp') {print "ok 27\n";} else {print "not ok 27\n";}
-unlink 'Op.stat.tmp', 'Op.stat.tmp2';
-if (! -e 'Op.stat.tmp') {print "ok 28\n";} else {print "not ok 28\n";}
+unlink 'Op.stat.tmp2';
+if (! -e 'Op.stat.tmp2') {print "ok 28\n";} else {print "not ok 28\n";}
 
 if ($Is_MSWin32 || $Is_Dos)
     {print "ok 29\n";}
@@ -234,3 +234,10 @@ close(FOO);
 
 if (-T '/dev/null') {print "ok 55\n";} else {print "not ok 55\n";}
 if (-B '/dev/null') {print "ok 56\n";} else {print "not ok 56\n";}
+
+# and now, a few parsing tests:
+$_ = 'Op.stat.tmp';
+if (-f) {print "ok 57\n";} else {print "not ok 57\n";}
+if (-f()) {print "ok 58\n";} else {print "not ok 58\n";}
+
+unlink 'Op.stat.tmp';

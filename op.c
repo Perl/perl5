@@ -4121,7 +4121,7 @@ ck_ftst(OP *o)
     if (o->op_flags & OPf_REF)
 	return o;
 
-    if (o->op_flags & OPf_KIDS) {
+    if (o->op_flags & OPf_KIDS && cUNOPo->op_first->op_type != OP_STUB) {
 	SVOP *kid = (SVOP*)cUNOPo->op_first;
 
 	if (kid->op_type == OP_CONST && (kid->op_private & OPpCONST_BARE)) {
