@@ -160,6 +160,7 @@ sub all_script_names
     my ($alpha2, $alpha3, $numeric);
     my $script;
 
+    local $_;
 
     while (<DATA>)
     {

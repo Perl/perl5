@@ -107,6 +107,7 @@ sub all_language_names
     my $code;
     my $language;
 
+    local $_;
 
     while (<DATA>)
     {
