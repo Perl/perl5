@@ -397,7 +397,7 @@ DllMain(HANDLE hModule,		/* DLL module handle */
     return TRUE;
 }
 
-#ifdef USE_ITHREADS
+#if defined(USE_ITHREADS) && defined(PERL_IMPLICIT_SYS)
 EXTERN_C PerlInterpreter *
 perl_clone_host(PerlInterpreter* proto_perl, UV flags) {
     dTHXo;
