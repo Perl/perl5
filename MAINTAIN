@@ -313,7 +313,7 @@ hints/broken-db.msg
 hints/bsdos.sh			bsdos
 hints/convexos.sh	
 hints/cxux.sh			cxux
-hints/cygwin.sh			cygwinx
+hints/cygwin.sh			cygwin
 hints/dcosx.sh	
 hints/dec_osf.sh		dec_osf
 hints/dgux.sh			dgux
@@ -332,7 +332,7 @@ hints/irix*			irix
 hints/isc.sh	
 hints/isc_2.sh	
 hints/linux.sh			linux
-hints/lynxos.sh			lynxos
+hints/lynxos.sh
 hints/machten.sh		machten
 hints/machten_2.sh	
 hints/mips.sh	
@@ -460,7 +460,7 @@ lib/Test.pm
 lib/Test/Harness.pm		k
 lib/Text/Abbrev.pm	
 lib/Text/ParseWords.pm		pomeranz
-lib/Text/Soundex.pm		stok
+lib/Text/Soundex.pm		mikestok
 lib/Text/Tabs.pm		muir
 lib/Text/Wrap.pm		muir
 lib/Tie/Array.pm		nik
@@ -582,13 +582,16 @@ pod/perldebug.pod
 pod/perldelta.pod	
 pod/perl5005delta.pod	
 pod/perl5004delta.pod	
+pod/perldebtut.pod		richard
 pod/perldiag.pod	
 pod/perldsc.pod			tchrist
 pod/perlembed.pod		doug,jon
+pod/perlebcdic.pod		pvhp
 pod/perlfaq*			gnat
 pod/perlform.pod	
 pod/perlfunc.pod	
 pod/perlguts.pod	
+pod/perlhack.pod		simon
 pod/perlhist.pod		jhi
 pod/perlipc.pod			tchrist
 pod/perllocale.pod		locale
@@ -602,6 +605,7 @@ pod/perlobj.pod
 pod/perlop.pod	
 pod/perlpod.pod			lwall
 pod/perlport.pod		pudge
+pod/perlposix-bc.pod		posix-bc
 pod/perlre.pod			regex
 pod/perlref.pod	
 pod/perlreftut.pod		mjd
@@ -616,6 +620,8 @@ pod/perltie.pod			tchrist
 pod/perltoc.pod	
 pod/perltoot.pod		tchrist
 pod/perltrap.pod	
+pod/perlunicode.pod		simon
+pod/perlutil.pod		simon
 pod/perlvar.pod	
 pod/perlxs.pod			roehrich
 pod/perlxstut.pod		okamoto
