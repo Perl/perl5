@@ -3045,7 +3045,7 @@ doqsort_all_asserts(
 
 /* ****************************************************************** qsort */
 
-void
+static void
 qsortsv(array, num_elts, compare)
    SV ** array;
    size_t num_elts;

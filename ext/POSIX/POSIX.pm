@@ -68,7 +68,7 @@ $VERSION = "1.02" ;
 		_POSIX_LINK_MAX _POSIX_MAX_CANON _POSIX_MAX_INPUT
 		_POSIX_NAME_MAX _POSIX_NGROUPS_MAX _POSIX_OPEN_MAX
 		_POSIX_PATH_MAX _POSIX_PIPE_BUF _POSIX_SSIZE_MAX
-		_POSIX_STREADM_MAX _POSIX_TZNAME_MAX)],
+		_POSIX_STREAM_MAX _POSIX_TZNAME_MAX)],
 
     locale_h =>	[qw(LC_ALL LC_COLLATE LC_CTYPE LC_MONETARY LC_NUMERIC
 		LC_TIME NULL localeconv setlocale)],
@@ -249,7 +249,7 @@ package POSIX; # return to package POSIX so AutoSplit is happy
 1;
 __END__
 
-sub assert {
+sub assert {	# XXX should pay attention to NDEBUG? ($POSIX::NDEBUG?)
     usage "assert(expr)" if @_ != 1;
     if (!$_[0]) {
 	croak "Assertion failed";

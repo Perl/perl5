@@ -857,6 +857,8 @@ int arg;
 #else
 		goto not_there;
 #endif
+		break;
+	case 'L':
 	    if (strEQ(name, "ELOOP"))
 #ifdef ELOOP
 		return ELOOP;
