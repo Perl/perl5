@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Nov  7 00:26:20 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Wed Nov  8 01:38:53 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -11547,8 +11547,8 @@ $cat >try.c <<EOP
 /* Can we scream? */
 /* Eat dust sed :-) */
 /* In the buffer space, no one can hear you scream. */
-#define FILE_ptr(fp)	((fp)->_ptr)
-#define FILE_cnt(fp)	((fp)->_cnt)
+#define FILE_ptr(fp)	$stdio_ptr
+#define FILE_cnt(fp)	$stdio_cnt
 #include <sys/types.h>
 int main() {
 	FILE *fp = fopen("try.c", "r");
