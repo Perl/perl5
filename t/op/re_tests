@@ -750,6 +750,8 @@ tt+$	xxxtt	y	-	-
 ^([a-z]:)	C:/	n	-	-
 '^\S\s+aa$'m	\nx aa	y	-	-
 (^|a)b	ab	y	-	-
+((?:aaaa|bbbb)cccc)?	aaaacccc	y	-	-
+((?:aaaa|bbbb)cccc)?	bbbbcccc	y	-	-
 ^([ab]*?)(b)?(c)$	abac	y	-$2-	--
 (\w)?(abc)\1b	abcab	n	-	-
 ^(?:.,){2}c	a,b,c	y	-	-
