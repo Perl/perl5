@@ -24,6 +24,31 @@ responsibility to ensure that warnings are enabled judiciously.
 
 =over 4
 
+=item Treatment of list slices of undef has changed
+
+When taking a slice of a literal list (as opposed to a slice of
+an array or hash), Perl used to return an empty list if the
+result happened to be composed of all undef values.
+
+The new behavior is to produce an empty list if (and only if)
+the original list was empty.  Consider the following example:
+
+    @a = (1,undef,undef,2)[2,1,2];
+
+The old behavior would have resulted in @a having no elements.
+The new behavior ensures it has three undefined elements.
+
+Note in particular that the behavior of slices of the following
+cases remains unchanged:
+
+    @a = ()[1,2];
+    @a = (getpwent)[7,0];
+    @a = (anything_returning_empty_list())[2,1,2];
+    @a = @b[2,1,2];
+    @a = @c{'a','b','c'};
+
+See L<perldata>.
+
 =item Possibly changed pseudo-random number generator
 
 In 5.005_0x and earlier, perl's rand() function used the C library
@@ -72,11 +97,11 @@ returned values, but this is can make a significant difference when
 creating references to the returned values.
 
 Keys in the hash are still returned as copies when iterating on
-on a hash.
+a hash.
 
 =item vec(EXPR,OFFSET,BITS) enforces powers-of-two BITS
 
-vec() generates a run-time error if the BITS arguments is not
+vec() generates a run-time error if the BITS argument is not
 a valid power-of-two integer.
 
 =item Text of some diagnostic output has changed
@@ -550,7 +575,7 @@ change#2150
 change#4052
 [TODO - Ilya Zakharevich <ilya@math.ohio-state.edu>]
 
-=head2 Experimental support form user-hooks in @INC
+=head2 Experimental support for user-hooks in @INC
 
 [TODO - Ken Fox <kfox@ford.com>]
 
@@ -565,7 +590,7 @@ See L<perlsub/"Overriding Built-in Functions">.
 
 =head2 New variable $^C reflects C<-c> switch
 
-C<$^C> contains a boolean that reflects whether perl is being run
+C<$^C> has a boolean value that reflects whether perl is being run
 in compile-only mode (i.e. via the C<-c> switch).  Since
 BEGIN blocks are executed under such conditions, this variable
 enables perl code to determine whether actions that make sense
@@ -625,9 +650,9 @@ that was encountered.
 The mechanism for reporting such errors has been reimplemented
 to queue compile-time errors and report them at the end of the
 compilation as true errors rather than as warnings.  This fixes
-error messages that used to leak through as warnings when code
-was compiled at run time using C<eval STRING>, and allows such
-errors to be reliably trapped using __DIE__ hooks.
+cases where error messages leaked through in the form of warnings
+when code was compiled at run time using C<eval STRING>, and
+also allows such errors to be reliably trapped using __DIE__ hooks.
 
 =head2 Automatic flushing of output buffers
 
@@ -686,7 +711,7 @@ the specified value exists, not merely if the key is valid.
 
 =head2 C<goto &sub> and AUTOLOAD
 
-C<goto &sub> construct works correctly when C<&sub> happens
+The C<goto &sub> construct works correctly when C<&sub> happens
 to be autoloaded.
 
 =head2 C<-bareword> allowed under C<use integer>
@@ -702,7 +727,7 @@ Constructs such as C<($a ||= 2) += 1> are now allowed.
 =head2 C<sort $coderef @foo> allowed
 
 sort() did not accept a subroutine reference as the comparison
-function in earlier versions.  This has been fixed.
+function in earlier versions.  This is now permitted.
 
 =head2 Failures in DESTROY()
 
@@ -754,7 +779,7 @@ cause silent failures.  This has been fixed.
 
 Prior versions used to run BEGIN B<and> END blocks when Perl was
 run in compile-only mode.  Since this is typically not the expected
-behavior, END blocks are not executed when the C<-c> switch
+behavior, END blocks are not executed anymore when the C<-c> switch
 is used.
 
 Note that something resembling the previous behavior can still be
@@ -798,7 +823,7 @@ semantics in later versions of Perl.
 
 =head2 Simple sort() using { $a <=> $b } and the like are optimized
 
-Many common sort() opertions using a simple inlined block are now
+Many common sort() operations using a simple inlined block are now
 optimized for faster performance.
 
 =head2 Optimized assignments to lexical variables
@@ -1051,7 +1076,7 @@ comparison functions.  See L<File::Compare>.
 File::Find now works correctly when the wanted() function is either
 autoloaded or is a symbolic reference.
 
-A bug that cause File::Find to lose track of the working directory
+A bug that caused File::Find to lose track of the working directory
 when pruning top-level directories has been fixed.
 
 =item File::Spec

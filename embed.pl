@@ -838,6 +838,7 @@ START_EXTERN_C
 EOT
 
 # functions that take va_list* for implementing vararg functions
+# NOTE: makedef.pl must be updated if you add symbols to %vfuncs
 my %vfuncs = qw(
     Perl_croak			Perl_vcroak
     Perl_warn			Perl_vwarn

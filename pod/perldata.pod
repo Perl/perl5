@@ -648,8 +648,12 @@ You couldn't just loop through C<values %hash> to do this because
 that function produces a new list which is a copy of the values,
 so changing them doesn't change the original.
 
-As a special rule, if a list slice would produce a list consisting
-entirely of undefined values, the null list is produced instead.
+A slice of an empty list is still an empty list.  Thus:
+
+    @a = ()[1,0];           # @a has no elements
+    @b = (@a)[0,1];         # @b has no elements
+    @b = (1,undef)[1,0,1];  # @b has three elements
+
 This makes it easy to write loops that terminate when a null list
 is returned:
 
