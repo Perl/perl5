@@ -89,6 +89,7 @@ ok(close($utffh));
     open STDOUT,  ">&OLDOUT" or die "cannot dup OLDOUT: $!";
     # report after STDOUT is restored
     ok($status, '       re-open STDOUT');
+    close OLDOUT;
 }
 
 # in-memory open
