@@ -380,7 +380,7 @@ respectfully.
 =item share (NAME, ...)
 
 This shares the variable(s) in the argument list with the compartment.
-This is almost identical to exporting variables using the L<Exporter(3)>
+This is almost identical to exporting variables using the L<Exporter>
 module.
 
 Each NAME must be the B<name> of a variable, typically with the leading
