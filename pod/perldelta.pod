@@ -141,13 +141,6 @@ C<oct()>:
     $answer = 0b101010;
     printf "The answer is: %b\n", oct("0b101010");
 
-=head2 Literal hexadecimal, octal, and binary numbers must fit within native sizes
-
-The warning that used to be produced when encountering hexadecimal, octal,
-and binary literals that are too large to be represented as native integers
-has now been promoted to a fatal error.  Literal decimal numbers are
-unaffected.
-
 =head2 syswrite() ease-of-use
 
 The length argument of C<syswrite()> is now optional.

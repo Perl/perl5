@@ -250,7 +250,6 @@ sub full_setup {
     INST_HTMLLIBDIR INST_HTMLSCRIPTDIR
     INST_MAN1DIR INST_MAN3DIR INST_SCRIPT LDFROM LIB LIBPERL_A LIBS
     LINKTYPE MAKEAPERL MAKEFILE MAN1PODS MAN3PODS MAP_TARGET MYEXTLIB
-    PERL_MALLOC_OK
     NAME NEEDS_LINKING NOECHO NORECURS NO_VC OBJECT OPTIMIZE PERL PERLMAINCC
     PERL_ARCHLIB PERL_LIB PERL_SRC PERM_RW PERM_RWX
     PL_FILES PM PMLIBDIRS POLLUTE PPM_INSTALL_EXEC PPM_INSTALL_SCRIPT PREFIX
@@ -1484,34 +1483,6 @@ Directory, where executable files should be installed during
 'make'. Defaults to "./blib/script", just to have a dummy location during
 testing. make install will copy the files in INST_SCRIPT to
 INSTALLSCRIPT.
-
-=item PERL_MALLOC_OK
-
-defaults to 0.  Should be set to TRUE if the extension can work with
-the memory allocation routines substituted by the Perl malloc() subsystem.
-This should be applicable to most extensions with exceptions of those
-
-=over
-
-=item *
-
-with bugs in memory allocations which are caught by Perl's malloc();
-
-=item *
-
-which interact with the memory allocator in other ways than via
-malloc(), realloc(), free(), calloc(), sbrk() and brk();
-
-=item *
-
-which rely on special alignment which is not provided by Perl's malloc().
-
-=back
-
-B<NOTE.>  Negligence to set this flag in I<any one> of loaded extension
-nullifies many advantages of Perl's malloc(), such as better usage of
-system resources, error detection, memory usage reporting, catchable failure
-of memory allocations, etc.
 
 =item LDFROM
 

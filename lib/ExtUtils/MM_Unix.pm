@@ -388,18 +388,12 @@ sub cflags {
 	$self->{CCFLAGS} .= ' -DPERL_POLLUTE ';
     }
 
-    my $pollute = '';
-    if ($Config{usemymalloc} and $self->{PERL_MALLOC_OK}) {
-	$pollute = '$(PERL_MALLOC_DEF)';
-    }
-
     return $self->{CFLAGS} = qq{
 CCFLAGS = $self->{CCFLAGS}
 OPTIMIZE = $self->{OPTIMIZE}
 PERLTYPE = $self->{PERLTYPE}
 LARGE = $self->{LARGE}
 SPLIT = $self->{SPLIT}
-MPOLLUTE = $pollute
 };
 
 }
@@ -456,7 +450,7 @@ sub const_cccmd {
     return '' unless $self->needs_linking();
     return $self->{CONST_CCCMD} =
 	q{CCCMD = $(CC) -c $(INC) $(CCFLAGS) $(OPTIMIZE) \\
-	$(PERLTYPE) $(LARGE) $(SPLIT) $(MPOLLUTE) $(DEFINE_VERSION) \\
+	$(PERLTYPE) $(LARGE) $(SPLIT) $(DEFINE_VERSION) \\
 	$(XS_DEFINE_VERSION)};
 }
 
@@ -541,7 +535,6 @@ VERSION_MACRO = VERSION
 DEFINE_VERSION = -D\$(VERSION_MACRO)=\\\"\$(VERSION)\\\"
 XS_VERSION_MACRO = XS_VERSION
 XS_DEFINE_VERSION = -D\$(XS_VERSION_MACRO)=\\\"\$(XS_VERSION)\\\"
-PERL_MALLOC_DEF = -DPERL_EXTMALLOC_DEF -Dmalloc=Perl_malloc -Dfree=Perl_mfree -Drealloc=Perl_realloc -Dcalloc=Perl_calloc
 };
 
     push @m, qq{

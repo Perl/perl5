@@ -1572,10 +1572,10 @@ p	|OP*	|scalar		|OP* o
 p	|OP*	|scalarkids	|OP* o
 p	|OP*	|scalarseq	|OP* o
 p	|OP*	|scalarvoid	|OP* o
-p	|UV	|scan_bin	|char* start|I32 len|I32* retlen
-p	|UV	|scan_hex	|char* start|I32 len|I32* retlen
+p	|NV	|scan_bin	|char* start|I32 len|I32* retlen
+p	|NV	|scan_hex	|char* start|I32 len|I32* retlen
 p	|char*	|scan_num	|char* s
-p	|UV	|scan_oct	|char* start|I32 len|I32* retlen
+p	|NV	|scan_oct	|char* start|I32 len|I32* retlen
 p	|OP*	|scope		|OP* o
 p	|char*	|screaminstr	|SV* bigsv|SV* littlesv|I32 start_shift \
 				|I32 end_shift|I32 *state|I32 last

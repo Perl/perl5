@@ -536,10 +536,10 @@ VIRTUAL OP*	Perl_scalar(pTHX_ OP* o);
 VIRTUAL OP*	Perl_scalarkids(pTHX_ OP* o);
 VIRTUAL OP*	Perl_scalarseq(pTHX_ OP* o);
 VIRTUAL OP*	Perl_scalarvoid(pTHX_ OP* o);
-VIRTUAL UV	Perl_scan_bin(pTHX_ char* start, I32 len, I32* retlen);
-VIRTUAL UV	Perl_scan_hex(pTHX_ char* start, I32 len, I32* retlen);
+VIRTUAL NV	Perl_scan_bin(pTHX_ char* start, I32 len, I32* retlen);
+VIRTUAL NV	Perl_scan_hex(pTHX_ char* start, I32 len, I32* retlen);
 VIRTUAL char*	Perl_scan_num(pTHX_ char* s);
-VIRTUAL UV	Perl_scan_oct(pTHX_ char* start, I32 len, I32* retlen);
+VIRTUAL NV	Perl_scan_oct(pTHX_ char* start, I32 len, I32* retlen);
 VIRTUAL OP*	Perl_scope(pTHX_ OP* o);
 VIRTUAL char*	Perl_screaminstr(pTHX_ SV* bigsv, SV* littlesv, I32 start_shift, I32 end_shift, I32 *state, I32 last);
 #if !defined(VMS)

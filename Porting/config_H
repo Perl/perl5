@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Wed Jul 28 20:34:48 EET DST 1999
+ * Configuration time: Fri Jul 30 00:00:04 EET DST 1999
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -2128,6 +2128,14 @@
 #define void int		/* is void to be avoided? */
 #define M_VOID			/* Xenix strikes again */
 #endif
+
+/* PERL_BINCOMPAT_5005:
+ *	This symbol, if defined, indicates that Perl 5.006 should be
+ *	binary-compatible with Perl 5.005.  This is impossible for builds
+ *	that use features like threads and multiplicity it is always 
+ *	for those versions.
+ */
+# PERL_BINCOMPAT_5005			/**/
 
 /* DLSYM_NEEDS_UNDERSCORE:
  *	This symbol, if defined, indicates that we need to prepend an

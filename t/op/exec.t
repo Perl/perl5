@@ -2,6 +2,9 @@
 
 $| = 1;				# flush stdout
 
+$ENV{LC_ALL}   = 'C';		# Forge English error messages.
+$ENV{LANGUAGE} = 'C';		# Ditto in GNU.
+
 if ($^O eq 'MSWin32') {
     # XXX the system tests could be written to use ./perl and so work on Win32
     print "1..0 # Skip: shh, win32\n";
@@ -26,7 +29,14 @@ if ((system "/bin/sh -c 'exit 1'") != 256) { print "not "; }
 print "ok 5\n";
 
 $rc = system "lskdfj";
-if ($rc == 255 << 8 or $rc == -1 and ($! == 2 or $! =~ /\bno\b.*\bfile/i))
+if ($rc == 255 << 8 or $rc == -1 and
+     (
+      $! == 2 or
+      $! =~ /\bno\b.*\bfile/i or
+      $! == 13 or
+      $! =~ /permission denied/i
+     )
+   )
  {print "ok 6\n";} else {print "not ok 6\n";}
 
 unless (exec "lskdjfalksdjfdjfkls") {print "ok 7\n";} else {print "not ok 7\n";}

@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Wed Jul 28 20:34:48 EET DST 1999
+# Configuration time: Fri Jul 30 00:00:04 EET DST 1999
 # Configured by     : jhi
 # Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
 
@@ -41,6 +41,7 @@ awk='awk'
 baserev='5.0'
 bash=''
 bin='/opt/perl/bin'
+bincompat5005='undef'
 binexp='/opt/perl/bin'
 bison=''
 byacc='byacc'
@@ -55,7 +56,7 @@ ccflags='-pthread -std -DLANGUAGE_C'
 ccsymbols='__LANGUAGE_C__=1 _LONGLONG=1 LANGUAGE_C=1 SYSTYPE_BSD=1'
 cf_by='jhi'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Wed Jul 28 20:34:48 EET DST 1999'
+cf_time='Fri Jul 30 00:00:04 EET DST 1999'
 chgrp=''
 chmod=''
 chown=''
@@ -85,6 +86,7 @@ d_archlib='define'
 d_attribut='undef'
 d_bcmp='define'
 d_bcopy='define'
+d_bincompat5005=''
 d_bsd='undef'
 d_bsdgetpgrp='undef'
 d_bsdsetpgrp='define'

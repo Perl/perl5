@@ -507,12 +507,10 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 
 #ifdef MYMALLOC
 #  ifdef PERL_POLLUTE_MALLOC
-#   ifndef PERL_EXTMALLOC_DEF
 #    define Perl_malloc		malloc
 #    define Perl_calloc		calloc
 #    define Perl_realloc	realloc
 #    define Perl_mfree		free
-#   endif
 #  else
 #    define EMBEDMYMALLOC	/* for compatibility */
 #  endif
@@ -1027,6 +1025,8 @@ Free_t   Perl_mfree (Malloc_t where);
 #    define UV_MAX PERL_UQUAD_MAX
 #    define UV_MIN PERL_UQUAD_MIN
 #  endif
+#  define IV_SIZEOF 8
+#  define UV_SIZEOF 8
 #else
    typedef          long               IV;
    typedef	    unsigned long      UV;
@@ -1041,6 +1041,8 @@ Free_t   Perl_mfree (Malloc_t where);
 #    define UV_MAX PERL_ULONG_MAX
 #    define UV_MIN PERL_ULONG_MIN
 #  endif
+#  define UV_SIZEOF LONGSIZE
+#  define IV_SIZEOF LONGSIZE
 #endif
 
 #ifdef USE_LONG_DOUBLE

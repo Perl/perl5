@@ -2776,24 +2776,22 @@ Perl_same_dirent(pTHX_ char *a, char *b)
 }
 #endif /* !HAS_RENAME */
 
-UV
+NV
 Perl_scan_bin(pTHX_ char *start, I32 len, I32 *retlen)
 {
     register char *s = start;
-    register UV retval = 0;
-    register UV n;
-    register I32 d = 0;
+    register NV rnv = 0.0;
+    register UV ruv = 0;
     register bool seenb = FALSE;
-    register bool overflow = FALSE;
+    register bool overflowed = FALSE;
 
     for (; len-- && *s; s++) {
 	if (!(*s == '0' || *s == '1')) {
 	    if (*s == '_')
-		continue;
-	    if (seenb == FALSE && *s == 'b' && retval == 0) {
+		continue; /* Note: does not check for __ and the like. */
+	    if (seenb == FALSE && *s == 'b' && ruv == 0) {
 		/* Disallow 0bbb0b0bbb... */
 		seenb = TRUE;
-		d = 0; /* Forget any leading zeros before the 'b'. */
 		continue;
 	    }
 	    else {
@@ -2804,35 +2802,58 @@ Perl_scan_bin(pTHX_ char *start, I32 len, I32 *retlen)
 		break;
 	    }
 	}
-	n = retval << 1;
-	overflow |= (n >> 1) != retval;
-	retval = n | (*s - '0');
-	d++;
+	if (!overflowed) {
+	    register UV xuv = ruv << 1;
+
+	    if ((xuv >> 1) != ruv) {
+		dTHR;
+		overflowed = TRUE;
+		rnv = (NV) ruv;
+		if (ckWARN_d(WARN_UNSAFE))
+		    Perl_warner(aTHX_ WARN_UNSAFE,
+				"Integer overflow in binary number");
+	    } else
+		ruv = xuv | (*s - '0');
+	}
+	if (overflowed) {
+	    rnv *= 2;
+	    /* If an NV has not enough bits in its mantissa to
+	     * represent an UV this summing of small low-order numbers
+	     * is a waste of time (because the NV cannot preserve
+	     * the low-order bits anyway): we could just remember when
+	     * did we overflow and in the end just multiply rnv by the
+	     * right amount. */
+	    rnv += (*s - '0');
+	}
     }
-    if (sizeof(UV) > 4 && d > 32) {
+    if (!overflowed)
+	rnv = (NV) ruv;
+    if (   ( overflowed && rnv > 4294967295.0)
+#if UV_SIZEOF > 4
+	|| (!overflowed && ruv > 0xffffffff  )
+#endif
+	) { 
 	dTHR;
 	if (ckWARN(WARN_UNSAFE))
 	    Perl_warner(aTHX_ WARN_UNSAFE,
 			"Binary number > 0b11111111111111111111111111111111 non-portable");
     }
-    if (overflow)
-	Perl_croak(aTHX_ "Integer overflow in binary number");
     *retlen = s - start;
-    return retval;
+    return rnv;
 }
-UV
+
+NV
 Perl_scan_oct(pTHX_ char *start, I32 len, I32 *retlen)
 {
     register char *s = start;
-    register UV retval = 0;
-    register UV n;
-    register I32 d = 0;
-    register bool overflow = FALSE;
+    register NV rnv = 0.0;
+    register UV ruv = 0;
+    register bool overflowed = FALSE;
 
     for (; len-- && *s; s++) {
 	if (!(*s >= '0' && *s <= '7')) {
 	    if (*s == '_')
-		continue;
+		continue; /* Note: does not check for __ and the like. */
 	    else {
 		/* Allow \octal to work the DWIM way (that is, stop scanning
 		 * as soon as non-octal characters are seen, complain only iff
@@ -2846,69 +2867,112 @@ Perl_scan_oct(pTHX_ char *start, I32 len, I32 *retlen)
 		break;
 	    }
 	}
-	n = retval << 3;
-	overflow |= (n >> 3) != retval;
-	retval = n | (*s - '0');
-	d++;
+	if (!overflowed) {
+	    register UV xuv = ruv << 3;
+
+	    if ((xuv >> 3) != ruv) {
+		dTHR;
+		overflowed = TRUE;
+		rnv = (NV) ruv;
+		if (ckWARN_d(WARN_UNSAFE))
+		    Perl_warner(aTHX_ WARN_UNSAFE,
+				"Integer overflow in octal number");
+	    } else
+		ruv = xuv | (*s - '0');
+	}
+	if (overflowed) {
+	    rnv *= 8.0;
+	    /* If an NV has not enough bits in its mantissa to
+	     * represent an UV this summing of small low-order numbers
+	     * is a waste of time (because the NV cannot preserve
+	     * the low-order bits anyway): we could just remember when
+	     * did we overflow and in the end just multiply rnv by the
+	     * right amount of 8-tuples. */
+	    rnv += (NV)(*s - '0');
+	}
     }
-    if (sizeof(UV) > 4 && d > 10 && (retval >> 30) > 3) {
+    if (!overflowed)
+	rnv = (NV) ruv;
+    if (   ( overflowed && rnv > 4294967295.0)
+#if UV_SIZEOF > 4
+	|| (!overflowed && ruv > 0xffffffff  )
+#endif
+	) {
 	dTHR;
 	if (ckWARN(WARN_UNSAFE))
 	    Perl_warner(aTHX_ WARN_UNSAFE,
 			"Octal number > 037777777777 non-portable");
     }
-    if (overflow)
-	Perl_croak(aTHX_ "Integer overflow in octal number");
     *retlen = s - start;
-    return retval;
+    return rnv;
 }
 
-UV
+NV
 Perl_scan_hex(pTHX_ char *start, I32 len, I32 *retlen)
 {
     register char *s = start;
-    register UV retval = 0;
-    char *tmp = s;
-    register UV n;
-    register I32 d = 0;
+    register NV rnv = 0.0;
+    register UV ruv = 0;
     register bool seenx = FALSE;
-    register bool overflow = FALSE;
+    register bool overflowed = FALSE;
+    char *hexdigit;
 
-    while (len-- && *s) {
-	tmp = strchr((char *) PL_hexdigit, *s++);
-	if (!tmp) {
-	    if (*(s-1) == '_')
-		continue;
-	    if (seenx == FALSE && *(s-1) == 'x' && retval == 0) {
+    for (; len-- && *s; s++) {
+	hexdigit = strchr((char *) PL_hexdigit, *s);
+	if (!hexdigit) {
+	    if (*s == '_')
+		continue; /* Note: does not check for __ and the like. */
+	    if (seenx == FALSE && *s == 'x' && ruv == 0) {
 		/* Disallow 0xxx0x0xxx... */
 		seenx = TRUE;
-		d = 0; /* Forget any leading zeros before the 'x'. */
 		continue;
 	    }
 	    else {
 		dTHR;
-		--s;
 		if (ckWARN(WARN_UNSAFE))
 		    Perl_warner(aTHX_ WARN_UNSAFE,
 				"Illegal hexadecimal digit '%c' ignored", *s);
 		break;
 	    }
 	}
-	d++;
-	n = retval << 4;
-	overflow |= (n >> 4) != retval;
-	retval = n | ((tmp - PL_hexdigit) & 15);
+	if (!overflowed) {
+	    register UV xuv = ruv << 4;
+
+	    if ((xuv >> 4) != ruv) {
+		dTHR;
+		overflowed = TRUE;
+		rnv = (NV) ruv;
+		if (ckWARN_d(WARN_UNSAFE))
+		    Perl_warner(aTHX_ WARN_UNSAFE,
+				"Integer overflow in hexadecimal number");
+	    } else
+		ruv = xuv | ((hexdigit - PL_hexdigit) & 15);
+	}
+	if (overflowed) {
+	    rnv *= 16.0;
+	    /* If an NV has not enough bits in its mantissa to
+	     * represent an UV this summing of small low-order numbers
+	     * is a waste of time (because the NV cannot preserve
+	     * the low-order bits anyway): we could just remember when
+	     * did we overflow and in the end just multiply rnv by the
+	     * right amount of 16-tuples. */
+	    rnv += (NV)((hexdigit - PL_hexdigit) & 15);
+	}
     }
-    if (sizeof(UV) > 4 && d > 8) {
+    if (!overflowed)
+	rnv = (NV) ruv;
+    if (   ( overflowed && rnv > 4294967295.0)
+#if UV_SIZEOF > 4
+	|| (!overflowed && ruv > 0xffffffff  )
+#endif
+	) { 
 	dTHR;
 	if (ckWARN(WARN_UNSAFE))
 	    Perl_warner(aTHX_ WARN_UNSAFE,
 			"Hexadecimal number > 0xffffffff non-portable");
     }
-    if (overflow)
-	Perl_croak(aTHX_ "Integer overflow in hexadecimal number");
     *retlen = s - start;
-    return retval;
+    return rnv;
 }
 
 char*

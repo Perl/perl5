@@ -6257,10 +6257,10 @@ Perl_scan_num(pTHX_ char *start)
     register char *s = start;		/* current position in buffer */
     register char *d;			/* destination in temp buffer */
     register char *e;			/* end of temp buffer */
-    I32 tryiv;				/* used to see if it can be an int */
+    IV tryiv;				/* used to see if it can be an IV */
     NV value;				/* number read, as a double */
     SV *sv;				/* place to put the converted number */
-    I32 floatit;			/* boolean: int or float? */
+    bool floatit;			/* boolean: int or float? */
     char *lastub = 0;			/* position of last underbar */
     static char number_too_long[] = "Number too long";
 
@@ -6286,8 +6286,21 @@ Perl_scan_num(pTHX_ char *start)
 	     when in octal mode.
 	   */
     	    dTHR;
-	    UV u;
+	    NV n = 0.0;
+	    UV u = 0;
 	    I32 shift;
+	    bool overflowed = FALSE;
+	    static NV nvshift[5] = { 1.0, 2.0, 4.0, 8.0, 16.0 };
+	    static char* bases[5] = { "", "binary", "", "octal",
+				      "hexadecimal" };
+	    static char* Bases[5] = { "", "Binary", "", "Octal",
+				      "Hexadecimal" };
+	    static char *maxima[5] = { "",
+				       "0b11111111111111111111111111111111",
+				       "",
+				       "037777777777",
+				       "0xffffffff" };
+	    char *base, *Base, *max;
 
 	    /* check for hex */
 	    if (s[1] == 'x') {
@@ -6303,11 +6316,16 @@ Perl_scan_num(pTHX_ char *start)
 	    /* so it must be octal */
 	    else
 		shift = 3;
-	    u = 0;
+
+	    base = bases[shift];
+	    Base = Bases[shift];
+	    max  = maxima[shift];
 
 	    /* read the rest of the number */
 	    for (;;) {
-		UV n, b;	/* n is used in the overflow test, b is the digit we're adding on */
+		/* x is used in the overflow test,
+		   b is the digit we're adding on. */
+		UV x, b;
 
 		switch (*s) {
 
@@ -6353,16 +6371,34 @@ Perl_scan_num(pTHX_ char *start)
 		    */
 
 		  digit:
-		    n = u << shift;	/* make room for the digit */
-		    if ((n >> shift) != u
-			&& !(PL_hints & HINT_NEW_BINARY))
-		    {
-			Perl_croak(aTHX_
-				   "Integer overflow in %s number",
-				   (shift == 4) ? "hexadecimal"
-				   : ((shift == 3) ? "octal" : "binary"));
+		    if (!overflowed) {
+			x = u << shift;	/* make room for the digit */
+
+			if ((x >> shift) != u
+			    && !(PL_hints & HINT_NEW_BINARY)) {
+			    dTHR;
+			    overflowed = TRUE;
+			    n = (NV) u;
+			    if (ckWARN_d(WARN_UNSAFE))
+				Perl_warner(aTHX_ ((shift == 3) ?
+						   WARN_OCTAL : WARN_UNSAFE),
+					    "Integer overflow in %s number",
+					    base);
+			} else
+			    u = x | b;		/* add the digit to the end */
 		    }
-		    u = n | b;		/* add the digit to the end */
+		    if (overflowed) {
+			n *= nvshift[shift];
+			/* If an NV has not enough bits in its
+			 * mantissa to represent an UV this summing of
+			 * small low-order numbers is a waste of time
+			 * (because the NV cannot preserve the
+			 * low-order bits anyway): we could just
+			 * remember when did we overflow and in the
+			 * end just multiply n by the right
+			 * amount. */
+			n += (NV) b;
+		    }
 		    break;
 		}
 	    }
@@ -6372,8 +6408,25 @@ Perl_scan_num(pTHX_ char *start)
 	  */
 	  out:
 	    sv = NEWSV(92,0);
-	    sv_setuv(sv, u);
-	    if ( PL_hints & HINT_NEW_BINARY)
+	    if (overflowed) {
+		dTHR;
+		if (ckWARN(WARN_UNSAFE) && n > 4294967295.0)
+		    Perl_warner(aTHX_ WARN_UNSAFE,
+				"%s number > %s non-portable",
+				Base, max);
+		sv_setnv(sv, n);
+	    }
+	    else {
+#if UV_SIZEOF > 4
+		dTHR;
+		if (ckWARN(WARN_UNSAFE) && u > 0xffffffff)
+		    Perl_warner(aTHX_ WARN_UNSAFE,
+				"%s number > %s non-portable",
+				Base, max);
+#endif
+		sv_setuv(sv, u);
+	    }
+	    if (PL_hints & HINT_NEW_BINARY)
 		sv = new_constant(start, s - start, "binary", sv, Nullsv, NULL);
 	}
 	break;
@@ -6479,9 +6532,11 @@ Perl_scan_num(pTHX_ char *start)
 	    sv_setiv(sv, tryiv);
 	else
 	    sv_setnv(sv, value);
-	if ( floatit ? (PL_hints & HINT_NEW_FLOAT) : (PL_hints & HINT_NEW_INTEGER) )
+	if ( floatit ? (PL_hints & HINT_NEW_FLOAT) :
+	               (PL_hints & HINT_NEW_INTEGER) )
 	    sv = new_constant(PL_tokenbuf, d - PL_tokenbuf, 
-			      (floatit ? "float" : "integer"), sv, Nullsv, NULL);
+			      (floatit ? "float" : "integer"),
+			      sv, Nullsv, NULL);
 	break;
     }
 

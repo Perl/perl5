@@ -94,6 +94,10 @@ bin (bin.U):
 	is most often a local directory such as /usr/local/bin. Programs using
 	this variable must be prepared to deal with ~name substitution.
 
+bincompat5005 (bincompat5005.U):
+	This variable contains y if Perl 5.006 should be binary-compatible
+	with Perl 5.005.
+
 binexp (bin.U):
 	This is the same as the bin variable, but is filename expanded at
 	configuration time, for use in your makefiles.
@@ -304,6 +308,12 @@ d_bcmp (d_bcmp.U):
 d_bcopy (d_bcopy.U):
 	This variable conditionally defines the HAS_BCOPY symbol if
 	the bcopy() routine is available to copy strings.
+
+d_bincompat5005 (bincompat5005.U):
+	This variable conditionally defines BINCOMPAT5005 so that embed.h
+	can take special action if Perl 5.006 should be binary-compatible
+	with Perl 5.005.  This is impossible for builds that use features
+	like threads and multiplicity it is always $undef for those versions.
 
 d_bsd (Guess.U):
 	This symbol conditionally defines the symbol BSD when running on a

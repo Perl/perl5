@@ -55,27 +55,21 @@ you believe supports POSIX.1c threads then read on.  Additional
 information may be in a platform-specific "hints" file in the hints/
 subdirectory.
 
-First of all, because threads are such an experimentral feature
-there's a failsafe in Configure that stops unknown platforms
-from using threads.  Search for "is not known to support threads". 
-About five lines above that is a line that has a list of operating
-system names separated with |-signs.  Append your operating system
-(perl -le 'print $^O') to that list.
-
-On other platforms that use Configure to build perl, omit the -d
-from your ./Configure arguments. For example, use:
+On platforms that use Configure to build perl, omit the -d from your
+./Configure arguments. For example, use:
 
     ./Configure -Dusethreads
 
 When Configure prompts you for ccflags, insert any other arguments in
-there that your compiler needs to use POSIX threads. When Configure
-prompts you for linking flags, include any flags required for
-threading (usually nothing special is required here).  Finally, when
-Configure prompts you for libraries, include any necessary libraries
-(e.g. -lpthread).  Pay attention to the order of libraries.  It is
-probably necessary to specify your threading library *before* your
-standard C library, e.g.  it might be necessary to have -lpthread -lc,
-instead of -lc -lpthread.  You may also need to use -lc_r instead
+there that your compiler needs to use POSIX threads (-D_REENTRANT,
+-pthreads, -threads, -pthread, -thread, are good guesses). When
+Configure prompts you for linking flags, include any flags required
+for threading (usually nothing special is required here).  Finally,
+when Configure prompts you for libraries, include any necessary
+libraries (e.g. -lpthread).  Pay attention to the order of libraries.
+It is probably necessary to specify your threading library *before*
+your standard C library, e.g.  it might be necessary to have -lpthread
+-lc, instead of -lc -lpthread.  You may also need to use -lc_r instead
 of -lc.
 
 Once you have specified all your compiler flags, you can have Configure

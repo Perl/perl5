@@ -16,7 +16,6 @@ WriteMakefile(
               XSPROTOARG => '-noprototypes', 		# XXX remove later?
               VERSION_FROM => 'SDBM_File.pm',
               DEFINE => $define,
-	      PERL_MALLOC_OK => 1,
              );
 
 sub MY::postamble {

@@ -9,25 +9,45 @@ Integer overflow in octal number at - line 3.
 ########
 # no warning should be displayed 
 no warning ;
-my $a = oct "7777777777777777777777777777777777779" ;
+my $a = oct "7777777777777777777777777777777777778" ;
 EXPECT
-Integer overflow in octal number at - line 3.
 ########
 # all warning should be displayed 
 use warning ;
-my $a = oct "77777777797";
+my $a = oct "7777777777777777777777777777777777778" ;
 EXPECT
-Illegal octal digit '9' ignored at - line 3.
+Integer overflow in octal number at - line 3.
+Illegal octal digit '8' ignored at - line 3.
+Octal number > 037777777777 non-portable at - line 3.
 ########
 # check scope
 use warning ;
-my $a = oct "77777777797";
+my $a = oct "7777777777777777777777777777777777778" ;
 {
     no warning ;
-    my $b = oct "77777777797";
+    my $a = oct "7777777777777777777777777777777777778" ;
 }    
-my $c = oct "7777777777777777777777777777777777779" ;
+my $c = oct "7777777777777777777777777777777777778" ;
 EXPECT
-Illegal octal digit '9' ignored at - line 3.
-Octal number > 037777777777 non-portable at - line 8.
+Integer overflow in octal number at - line 3.
+Illegal octal digit '8' ignored at - line 3.
+Octal number > 037777777777 non-portable at - line 3.
 Integer overflow in octal number at - line 8.
+Illegal octal digit '8' ignored at - line 8.
+Octal number > 037777777777 non-portable at - line 8.
+########
+# all warning should be displayed 
+use warning ;
+my $a = oct "0xfffffffffffffffffg" ;
+EXPECT
+Integer overflow in hexadecimal number at - line 3.
+Illegal hexadecimal digit 'g' ignored at - line 3.
+Hexadecimal number > 0xffffffff non-portable at - line 3.
+########
+# all warning should be displayed 
+use warning ;
+my $a = oct "0b111111111111111111111111111111111111111111111111111111111111111112";
+EXPECT
+Integer overflow in binary number at - line 3.
+Illegal binary digit '2' ignored at - line 3.
+Binary number > 0b11111111111111111111111111111111 non-portable at - line 3.
