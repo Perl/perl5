@@ -73,8 +73,8 @@ if($termcap and !$setuptermcap) {
 }
 
 $SCREEN = ($_[0] =~ /^-(\d+)/ && (shift, $1))
-       || ($ENV{TERMCAP} =~ /co#(\d+)/)[0]
        ||  $ENV{COLUMNS}
+       || ($ENV{TERMCAP} =~ /co#(\d+)/)[0]
        || (`stty -a 2>/dev/null` =~ /(\d+) columns/)[0]
        || 72;
 

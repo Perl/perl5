@@ -17,8 +17,8 @@ $header = "perl5db.pl patch level $VERSION";
 # This file is automatically included if you do perl -d.
 # It's probably not useful to include this yourself.
 #
-# Perl supplies the values for @line and %sub.  It effectively inserts
-# a &DB'DB(<linenum>); in front of every place that can have a
+# Perl supplies the values for %sub.  It effectively inserts
+# a &DB'DB(); in front of every place that can have a
 # breakpoint. Instead of a subroutine call it calls &DB::sub with
 # $DB::sub being the called subroutine. It also inserts a BEGIN
 # {require 'perl5db.pl'} before the first line.
@@ -45,7 +45,7 @@ $header = "perl5db.pl patch level $VERSION";
 # The scalar ${"_<$filename"} contains "_<$filename".
 #
 # Note that no subroutine call is possible until &DB::sub is defined
-# (for subroutines defined outside this file). In fact the same is
+# (for subroutines defined outside of the package DB). In fact the same is
 # true if $deep is not defined.
 #
 # $Log:	perldb.pl,v $
@@ -120,6 +120,9 @@ $header = "perl5db.pl patch level $VERSION";
 #	When restarting debugger breakpoints/actions persist.
 #     Buglet: When restarting debugger only one breakpoint/action per 
 #		autoloaded function persists.
+# Changes: 0.97: NonStop will not stop in at_exit().
+#	Option AutoTrace implemented.
+#	Trace printed differently if frames are printed too.
 
 ####################################################################
 
@@ -140,7 +143,7 @@ warn (			# Do not ;-)
       @ARGS,
       $Carp::CarpLevel,
       $panic,
-      $first_time,
+      $second_time,
      ) if 0;
 
 # Command-line + PERLLIB:
@@ -154,10 +157,10 @@ $inhibit_exit = $option{PrintRet} = 1;
 
 @options     = qw(hashDepth arrayDepth DumpDBFiles DumpPackages 
 		  compactDump veryCompact quote HighBit undefPrint
-		  globPrint PrintRet UsageOnly frame
+		  globPrint PrintRet UsageOnly frame AutoTrace
 		  TTY noTTY ReadLine NonStop LineInfo
 		  recallCommand ShellBang pager tkRunning
-		  signalLevel warnLevel dieLevel);
+		  signalLevel warnLevel dieLevel inhibit_exit);
 
 %optionVars    = (
 		 hashDepth	=> \$dumpvar::hashDepth,
@@ -169,7 +172,9 @@ $inhibit_exit = $option{PrintRet} = 1;
 		 globPrint	=> \$dumpvar::globPrint,
 		 tkRunning	=> \$readline::Tk_toloop,
 		 UsageOnly	=> \$dumpvar::usageOnly,     
-		  frame           => \$frame,
+		 frame          => \$frame,
+		 AutoTrace      => \$trace,
+		 inhibit_exit   => \$inhibit_exit,
 );
 
 %optionAction  = (
@@ -317,15 +322,17 @@ if (defined &afterinit) {	# May be defined in $rcfile
 ############################################################ Subroutines
 
 sub DB {
-    unless ($first_time++) {	# Do when-running init
-      if ($runnonstop) {		# Disable until signal
+    # _After_ the perl program is compiled, $single is set to 1:
+    if ($single and not $second_time++) {
+      if ($runnonstop) {	# Disable until signal
 	for ($i=0; $i <= $#stack; ) {
 	    $stack[$i++] &= ~1;
 	}
 	$single = 0;
-	return;
+	# return;			# Would not print trace!
       }
     }
+    $runnonstop = 0 if $single or $signal; # Disable it if interactive.
     &save;
     ($package, $filename, $line) = caller;
     $filename_ini = $filename;
@@ -341,7 +348,9 @@ sub DB {
 	    $dbline{$line} =~ s/;9($|\0)/$1/;
 	}
     }
-    if ($single || $trace || $signal) {
+    my $was_signal = $signal;
+    $signal = 0;
+    if ($single || $trace || $was_signal) {
 	$term || &setterm;
 	if ($emacs) {
 	    $position = "\032\032$filename:$line:0\n";
@@ -353,25 +362,33 @@ sub DB {
 	    $after = ($dbline[$line] =~ /\n$/ ? '' : "\n");
 	    if (length($prefix) > 30) {
 	        $position = "$prefix$line):\n$line:\t$dbline[$line]$after";
-		print $LINEINFO $position;
 		$prefix = "";
 		$infix = ":\t";
 	    } else {
 		$infix = "):\t";
 		$position = "$prefix$line$infix$dbline[$line]$after";
+	    }
+	    if ($frame) {
+		print $LINEINFO ' ' x $#stack, "$line:\t$dbline[$line]$after";
+	    } else {
 		print $LINEINFO $position;
 	    }
 	    for ($i = $line + 1; $i <= $max && $dbline[$i] == 0; ++$i) { #{ vi
 		last if $dbline[$i] =~ /^\s*[\;\}\#\n]/;
+		last if $signal;
 		$after = ($dbline[$i] =~ /\n$/ ? '' : "\n");
 		$incr_pos = "$prefix$i$infix$dbline[$i]$after";
-		print $LINEINFO $incr_pos;
 		$position .= $incr_pos;
+		if ($frame) {
+		    print $LINEINFO ' ' x $#stack, "$i:\t$dbline[$i]$after";
+		} else {
+		    print $LINEINFO $incr_pos;
+		}
 	    }
 	}
     }
     $evalarg = $action, &eval if $action;
-    if ($single || $signal) {
+    if ($single || $was_signal) {
 	local $level = $level + 1;
 	map {$evalarg = $_, &eval} @$pre;
 	print $OUT $#stack . " levels deep in subroutine calls!\n"
@@ -528,7 +545,7 @@ sub DB {
 			        $arrow = ($i==$line 
 					  and $filename eq $filename_ini) 
 				  ?  '==>' 
-				    : ':' ;
+				    : ($dbline[$i]+0 ? ':' : ' ') ;
 				$arrow .= 'b' if $stop;
 				$arrow .= 'a' if $action;
 				print $OUT "$i$arrow\t", $dbline[$i];
@@ -848,7 +865,7 @@ sub DB {
 			print $OUT "exec failed: $!\n";
 			last CMD; };
 		    $cmd =~ /^T$/ && do {
-			print_trace($OUT, 3); # skip DB print_trace dump_trace
+			print_trace($OUT, 1); # skip DB
 			next CMD; };
 		    $cmd =~ /^\/(.*)$/ && do {
 			$inpat = $1;
@@ -1030,7 +1047,11 @@ sub sub {
     if ($sub =~ /::AUTOLOAD$/) {
       $al = " for $ {$` . '::AUTOLOAD'}";
     }
-    print $LINEINFO ' ' x $#stack, "entering $sub$al\n" if $frame;
+    ($frame & 4 
+     ? ( (print $LINEINFO ' ' x $#stack, "in  "), 
+	 # Why -1? But it works! :-(
+	 print_trace($LINEINFO, -1, 1, 1, "$sub$al") )
+     : print $LINEINFO ' ' x $#stack, "entering $sub$al\n") if $frame;
     push(@stack, $single);
     $single &= 1;
     $single |= 4 if $#stack == $deep;
@@ -1039,14 +1060,20 @@ sub sub {
 	$single |= pop(@stack);
 	print ($OUT "list context return from $sub:\n"), dumpit( \@ret ),
 	  $doret = -2 if $doret eq $#stack;
-	print $LINEINFO ' ' x $#stack, "exited $sub$al\n" if $frame > 1;
+	($frame & 4 
+	 ? ( (print $LINEINFO ' ' x $#stack, "out "), 
+	     print_trace($LINEINFO, -1, 1, 1, "$sub$al") )
+	 : print $LINEINFO ' ' x $#stack, "exited $sub$al\n") if $frame & 2;
 	@ret;
     } else {
 	$ret = &$sub;
 	$single |= pop(@stack);
 	print ($OUT "scalar context return from $sub: "), dumpit( $ret ),
 	  $doret = -2 if $doret eq $#stack;
-	print $LINEINFO ' ' x $#stack, "exited $sub$al\n" if $frame > 1;
+	($frame & 4 
+	 ? ( (print $LINEINFO ' ' x $#stack, "out "), 
+	      print_trace($LINEINFO, -1, 1, 1, "$sub$al") )
+	 : print $LINEINFO ' ' x $#stack, "exited $sub$al\n") if $frame & 2;
 	$ret;
     }
 }
@@ -1071,6 +1098,7 @@ sub eval {
 	$^D = $od;
     }
     my $at = $@;
+    local $saved[0];		# Preserve the old value of $@
     eval "&DB::save";
     if ($at) {
 	print $OUT $at;
@@ -1098,7 +1126,7 @@ sub postponed_sub {
     }
     return;
   }
-  print $OUT "In postponed_sub for `$subname'.\n";
+  #print $OUT "In postponed_sub for `$subname'.\n";
 }
 
 sub postponed {
@@ -1108,7 +1136,9 @@ sub postponed {
   local *dbline = shift;
   my $filename = $dbline;
   $filename =~ s/^_<//;
-  $signal = 1, print $OUT "'$filename' loaded...\n" if $break_on_load{$filename};
+  $signal = 1, print $OUT "'$filename' loaded...\n"
+    if $break_on_load{$filename};
+  print $LINEINFO ' ' x $#stack, "Package $filename.\n" if $frame;
   return unless %{$postponed_file{$filename}};
   $had_breakpoints{$filename}++;
   #%dbline = %{$postponed_file{$filename}}; # Cannot be done: unsufficient magic
@@ -1139,28 +1169,39 @@ sub dumpit {
     select ($savout);    
 }
 
+# Tied method do not create a context, so may get wrong message:
+
 sub print_trace {
   my $fh = shift;
-  my @sub = dump_trace(@_);
+  my @sub = dump_trace($_[0] + 1, $_[1]);
+  my $short = $_[2];		# Print short report, next one for sub name
   for ($i=0; $i <= $#sub; $i++) {
     last if $signal;
     local $" = ', ';
     my $args = defined $sub[$i]{args} 
     ? "(@{ $sub[$i]{args} })"
       : '' ;
-    $file = $sub[$i]{file} eq '-e' ? $sub[$i]{file} :
-      "file `$sub[$i]{file}'";
-    print $fh "$sub[$i]{context}$sub[$i]{sub}$args" .
-      " called from $file" . 
-	" line $sub[$i]{line}\n";
+    my $file = $sub[$i]{file};
+    $file = $file eq '-e' ? $file : "file `$file'" unless $short;
+    if ($short) {
+      my $sub = @_ >= 4 ? $_[3] : $sub[$i]{sub};
+      print $fh "$sub[$i]{context}=$sub$args from $file:$sub[$i]{line}\n";
+    } else {
+      print $fh "$sub[$i]{context} = $sub[$i]{sub}$args" .
+	" called from $file" . 
+	  " line $sub[$i]{line}\n";
+    }
   }
 }
 
 sub dump_trace {
   my $skip = shift;
+  my $count = shift || 1e9;
+  $skip++;
+  $count += $skip;
   my ($p,$file,$line,$sub,$h,$args,$e,$r,@a,@sub,$context);
   for ($i = $skip; 
-       ($p,$file,$line,$sub,$h,$context,$e,$r) = caller($i); 
+       $i < $count and ($p,$file,$line,$sub,$h,$context,$e,$r) = caller($i); 
        $i++) {
     @a = ();
     for $arg (@args) {
@@ -1172,7 +1213,7 @@ sub dump_trace {
       s/([\0-\37\177])/sprintf("^%c",ord($1)^64)/eg;
       push(@a, $_);
     }
-    $context = $context ? '@ = ' : '$ = ';
+    $context = $context ? '@' : '$';
     $args = $h ? [@a] : undef;
     $e =~ s/\n\s*\;\s*\Z// if $e;
     $e =~ s/[\\\']/\\$1/g if $e;
@@ -1514,7 +1555,7 @@ w [line]	List window around line.
 f filename	Switch to viewing filename.
 /pattern/	Search forwards for pattern; final / is optional.
 ?pattern?	Search backwards for pattern; final ? is optional.
-L		List all breakpoints and actions for the current file.
+L		List all breakpoints and actions.
 S [[!]pattern]	List subroutine names [not] matching pattern.
 t		Toggle trace mode.
 t expr		Trace through execution of expr.
@@ -1543,6 +1584,9 @@ O [opt[=val]] [opt\"val\"] [opt?]...
 		be abbreviated.  Several options can be listed.
     recallCommand, ShellBang:	chars used to recall command or spawn shell;
     pager:			program for output of \"|cmd\";
+    tkRunning:			run Tk while prompting (with ReadLine);
+    signalLevel warnLevel dieLevel:	level of verbosity;
+    inhibit_exit		Allows stepping off the end of the script.
   The following options affect what happens with V, X, and x commands:
     arrayDepth, hashDepth:	print only first N elements ('' for all);
     compactDump, veryCompact:	change style of array and hash dump;
@@ -1550,10 +1594,9 @@ O [opt[=val]] [opt\"val\"] [opt?]...
     DumpDBFiles:		dump arrays holding debugged files;
     DumpPackages:		dump symbol tables of packages;
     quote, HighBit, undefPrint:	change style of string dump;
-    tkRunning:			run Tk while prompting (with ReadLine);
-    signalLevel warnLevel dieLevel:	level of verbosity;
   Option PrintRet affects printing of return value after r command,
          frame    affects printing messages on entry and exit from subroutines.
+         AutoTrace affects printing messages on every possible breaking point.
 		During startup options are initialized from \$ENV{PERLDB_OPTS}.
 		You can put additional initialization options TTY, noTTY,
 		ReadLine, and NonStop there.
@@ -1580,6 +1623,9 @@ command		Execute as a perl statement in current package.
 v		Show versions of loaded modules.
 R		Pure-man-restart of debugger, some of debugger state
 		and command-line options may be lost.
+		Currently the following setting are preserved: 
+		history, breakpoints and actions, debugger Options 
+		and the following command-line options: -w, -I, -e.
 h [db_command]	Get help [on a specific debugger command], enter |h to page.
 h h		Summary of debugger commands.
 q or ^D		Quit. Set \$DB::finished to 0 to debug global destruction.
@@ -1818,8 +1864,9 @@ sub end_report { print $OUT "Use `q' to quit and `R' to restart. `h q' for detai
 
 END {
   $finished = $inhibit_exit;	# So that some keys may be disabled.
-  $DB::single = !$exiting;	# Do not trace destructors on exit
-  DB::fake::at_exit() unless $exiting;
+  # Do not stop in at_exit() and destructors on exit:
+  $DB::single = !$exiting && !$runnonstop;
+  DB::fake::at_exit() unless $exiting or $runnonstop;
 }
 
 package DB::fake;
@@ -1827,5 +1874,7 @@ package DB::fake;
 sub at_exit {
   "Debuggee terminated. Use `q' to quit and `R' to restart.";
 }
+
+package DB;			# Do not trace this 1; below!
 
 1;

@@ -40,6 +40,8 @@
 #  define FAST_SV_GETS
 #endif
 
+static IV asIV _((SV* sv));
+static UV asUV _((SV* sv));
 static SV *more_sv _((void));
 static XPVIV *more_xiv _((void));
 static XPVNV *more_xnv _((void));
@@ -1001,7 +1003,7 @@ register SV *sv;
 	    sprintf(t,"(\"%.127s\")",SvPVX(sv));
     }
     else if (SvNOKp(sv)) {
-	NUMERIC_STANDARD();
+	SET_NUMERIC_STANDARD();
 	sprintf(t,"(%g)",SvNVX(sv));
     }
     else if (SvIOKp(sv))
@@ -1248,14 +1250,10 @@ register SV *sv;
 	    else
 		return (IV) U_V(SvNVX(sv));
 	}
-	if (SvPOKp(sv) && SvLEN(sv)) {
-	    if (dowarn && !looks_like_number(sv))
-		not_a_number(sv);
-	    return (IV)atol(SvPVX(sv));
-	}
-        if (!SvROK(sv)) {
-            return 0;
-        }
+	if (SvPOKp(sv) && SvLEN(sv))
+	    return asIV(sv);
+	if (!SvROK(sv))
+	    return 0;
     }
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
@@ -1273,11 +1271,8 @@ register SV *sv;
 		else
 		    return (IV) U_V(SvNVX(sv));
 	    }
-	    if (SvPOKp(sv) && SvLEN(sv)) {
-		if (dowarn && !looks_like_number(sv))
-		    not_a_number(sv);
-		return (IV)atol(SvPVX(sv));
-	    }
+	    if (SvPOKp(sv) && SvLEN(sv))
+		return asIV(sv);
 	    if (dowarn)
 		warn(warn_uninit);
 	    return 0;
@@ -1302,10 +1297,8 @@ register SV *sv;
 	    SvUVX(sv) = U_V(SvNVX(sv));
     }
     else if (SvPOKp(sv) && SvLEN(sv)) {
-	if (dowarn && !looks_like_number(sv))
-	    not_a_number(sv);
 	(void)SvIOK_on(sv);
-	SvIVX(sv) = (IV)atol(SvPVX(sv));
+	SvIVX(sv) = asIV(sv);
     }
     else  {
 	if (dowarn && !localizing && !(SvFLAGS(sv) & SVs_PADTMP))
@@ -1329,14 +1322,10 @@ register SV *sv;
 	    return SvUVX(sv);
 	if (SvNOKp(sv))
 	    return U_V(SvNVX(sv));
-	if (SvPOKp(sv) && SvLEN(sv)) {
-	    if (dowarn && !looks_like_number(sv))
-		not_a_number(sv);
-	    return (UV)atol(SvPVX(sv));
-	}
-        if (!SvROK(sv)) {
-            return 0;
-        }
+	if (SvPOKp(sv) && SvLEN(sv))
+	    return asUV(sv);
+	if (!SvROK(sv))
+	    return 0;
     }
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
@@ -1351,11 +1340,8 @@ register SV *sv;
 	    if (SvNOKp(sv)) {
 		return U_V(SvNVX(sv));
 	    }
-	    if (SvPOKp(sv) && SvLEN(sv)) {
-		if (dowarn && !looks_like_number(sv))
-		    not_a_number(sv);
-		return (UV)atol(SvPVX(sv));
-	    }
+	    if (SvPOKp(sv) && SvLEN(sv))
+		return asUV(sv);
 	    if (dowarn)
 		warn(warn_uninit);
 	    return 0;
@@ -1377,10 +1363,8 @@ register SV *sv;
 	SvUVX(sv) = U_V(SvNVX(sv));
     }
     else if (SvPOKp(sv) && SvLEN(sv)) {
-	if (dowarn && !looks_like_number(sv))
-	    not_a_number(sv);
 	(void)SvIOK_on(sv);
-	SvUVX(sv) = (UV)atol(SvPVX(sv));
+	SvUVX(sv) = asUV(sv);
     }
     else  {
 	if (dowarn && !localizing && !(SvFLAGS(sv) & SVs_PADTMP))
@@ -1405,7 +1389,7 @@ register SV *sv;
 	if (SvPOKp(sv) && SvLEN(sv)) {
 	    if (dowarn && !SvIOKp(sv) && !looks_like_number(sv))
 		not_a_number(sv);
-	    NUMERIC_STANDARD();
+	    SET_NUMERIC_STANDARD();
 	    return atof(SvPVX(sv));
 	}
 	if (SvIOKp(sv))
@@ -1427,7 +1411,7 @@ register SV *sv;
 	    if (SvPOKp(sv) && SvLEN(sv)) {
 		if (dowarn && !SvIOKp(sv) && !looks_like_number(sv))
 		    not_a_number(sv);
-		NUMERIC_STANDARD();
+		SET_NUMERIC_STANDARD();
 		return atof(SvPVX(sv));
 	    }
 	    if (SvIOKp(sv))
@@ -1442,7 +1426,7 @@ register SV *sv;
 	    sv_upgrade(sv, SVt_PVNV);
 	else
 	    sv_upgrade(sv, SVt_NV);
-	DEBUG_c(NUMERIC_STANDARD());
+	DEBUG_c(SET_NUMERIC_STANDARD());
 	DEBUG_c(PerlIO_printf(Perl_debug_log,
 			      "0x%lx num(%g)\n",(unsigned long)sv,SvNVX(sv)));
     }
@@ -1456,7 +1440,7 @@ register SV *sv;
     else if (SvPOKp(sv) && SvLEN(sv)) {
 	if (dowarn && !SvIOKp(sv) && !looks_like_number(sv))
 	    not_a_number(sv);
-	NUMERIC_STANDARD();
+	SET_NUMERIC_STANDARD();
 	SvNVX(sv) = atof(SvPVX(sv));
     }
     else  {
@@ -1465,10 +1449,101 @@ register SV *sv;
 	return 0.0;
     }
     SvNOK_on(sv);
-    DEBUG_c(NUMERIC_STANDARD());
+    DEBUG_c(SET_NUMERIC_STANDARD());
     DEBUG_c(PerlIO_printf(Perl_debug_log,
 			  "0x%lx 2nv(%g)\n",(unsigned long)sv,SvNVX(sv)));
     return SvNVX(sv);
+}
+
+static IV
+asIV(sv)
+SV *sv;
+{
+    I32 numtype = looks_like_number(sv);
+    double d;
+
+    if (numtype == 1)
+	return atol(SvPVX(sv));
+    if (!numtype && dowarn)
+	not_a_number(sv);
+    SET_NUMERIC_STANDARD();
+    d = atof(SvPVX(sv));
+    if (d < 0.0)
+	return I_V(d);
+    else
+	return (IV) U_V(d);
+}
+
+static UV
+asUV(sv)
+SV *sv;
+{
+    I32 numtype = looks_like_number(sv);
+
+    if (numtype == 1)
+	return atol(SvPVX(sv));
+    if (!numtype && dowarn)
+	not_a_number(sv);
+    SET_NUMERIC_STANDARD();
+    return U_V(atof(SvPVX(sv)));
+}
+
+I32
+looks_like_number(sv)
+SV *sv;
+{
+    register char *s;
+    register char *send;
+    register char *sbegin;
+    I32 numtype = 1;
+    STRLEN len;
+
+    if (SvPOK(sv)) {
+	sbegin = SvPVX(sv); 
+	len = SvCUR(sv);
+    }
+    else if (SvPOKp(sv))
+	sbegin = SvPV(sv, len);
+    else
+	return 1;
+    send = sbegin + len;
+
+    s = sbegin;
+    while (isSPACE(*s))
+	s++;
+    if (s >= send)
+	return 0;
+    if (*s == '+' || *s == '-')
+	s++;
+    while (isDIGIT(*s))
+	s++;
+    if (s == send)
+	return numtype;
+    if (*s == '.') {
+	numtype = 1;
+	s++;
+    }
+    else if (s == SvPVX(sv))
+	return 0;
+    while (isDIGIT(*s))
+	s++;
+    if (s == send)
+	return numtype;
+    if (*s == 'e' || *s == 'E') {
+	numtype = 2;
+	s++;
+	if (*s == '+' || *s == '-')
+	    s++;
+	while (isDIGIT(*s))
+	    s++;
+    }
+    while (isSPACE(*s))
+	s++;
+    if (s >= send)
+	return numtype;
+    if (len == 10 && memEQ(sbegin, "0 but true", 10))
+	return 1;
+    return 0;
 }
 
 char *
@@ -1494,7 +1569,7 @@ STRLEN *lp;
 	    goto tokensave;
 	}
 	if (SvNOKp(sv)) {
-	    NUMERIC_STANDARD();
+	    SET_NUMERIC_STANDARD();
 	    Gconvert(SvNVX(sv), DBL_DIG, 0, tokenbuf);
 	    goto tokensave;
 	}
@@ -1530,7 +1605,7 @@ STRLEN *lp;
 		case SVt_PVCV:	s = "CODE";			break;
 		case SVt_PVGV:	s = "GLOB";			break;
 		case SVt_PVFM:	s = "FORMATLINE";		break;
-		case SVt_PVIO:	s = "FILEHANDLE";		break;
+		case SVt_PVIO:	s = "IO";			break;
 		default:	s = "UNKNOWN";			break;
 		}
 		if (SvOBJECT(sv))
@@ -1545,7 +1620,7 @@ STRLEN *lp;
 	}
 	if (SvREADONLY(sv)) {
 	    if (SvNOKp(sv)) {
-		NUMERIC_STANDARD();
+		SET_NUMERIC_STANDARD();
 		Gconvert(SvNVX(sv), DBL_DIG, 0, tokenbuf);
 		goto tokensave;
 	    }
@@ -1573,7 +1648,7 @@ STRLEN *lp;
 	else
 #endif /*apollo*/
 	{
-	    NUMERIC_STANDARD();
+	    SET_NUMERIC_STANDARD();
 	    Gconvert(SvNVX(sv), DBL_DIG, 0, s);
 	}
 	errno = olderrno;
@@ -2280,11 +2355,11 @@ I32 namlen;
     case 'l':
 	mg->mg_virtual = &vtbl_dbline;
 	break;
-#ifdef HAS_STRXFRM
+#ifdef USE_LOCALE_COLLATE
     case 'o':
         mg->mg_virtual = &vtbl_collxfrm;
         break;
-#endif
+#endif /* USE_LOCALE_COLLATE */
     case 'P':
 	mg->mg_virtual = &vtbl_pack;
 	break;
@@ -2721,7 +2796,7 @@ register SV *str2;
     if (cur1 != cur2)
 	return 0;
 
-    return !memcmp(pv1, pv2, cur1);
+    return memEQ(pv1, pv2, cur1);
 }
 
 I32
@@ -2757,7 +2832,7 @@ sv_cmp_locale(sv1, sv2)
 register SV *sv1;
 register SV *sv2;
 {
-#ifdef LC_COLLATE
+#ifdef USE_LOCALE_COLLATE
 
     char *pv1, *pv2;
     STRLEN len1, len2;
@@ -2797,12 +2872,12 @@ register SV *sv2;
   raw_compare:
     /* FALL THROUGH */
 
-#endif /* LC_COLLATE */
+#endif /* USE_LOCALE_COLLATE */
 
     return sv_cmp(sv1, sv2);
 }
 
-#ifdef LC_COLLATE
+#ifdef USE_LOCALE_COLLATE
 
 char *
 sv_collxfrm(sv, nxp)
@@ -2811,8 +2886,8 @@ sv_collxfrm(sv, nxp)
 {
     /* Any scalar variable may carry an 'o' magic that contains the
      * scalar data of the variable transformed to such a format that
-     * a normal memcmp() can be used to compare the data according
-     * to the locale settings. */
+     * a normal memory comparison can be used to compare the data
+     * according to the locale settings. */
 
     MAGIC *mg = NULL;
 
@@ -2846,7 +2921,7 @@ sv_collxfrm(sv, nxp)
     }
 }
 
-#endif /* LC_COLLATE */
+#endif /* USE_LOCALE_COLLATE */
 
 char *
 sv_gets(sv,fp,append)
@@ -2961,7 +3036,7 @@ I32 append;
 		}
 	    }
 	    else {
-	        memcpy((char*)bp, (char*)ptr, cnt);  /* this     |  eat */    
+	        Copy(ptr, bp, cnt, char);	     /* this     |  eat */    
 		bp += cnt;			     /* screams  |  dust */   
 		ptr += cnt;			     /* louder   |  sed :-) */
 		cnt = 0;
@@ -3017,7 +3092,7 @@ I32 append;
 
 thats_all_folks:
     if ((rslen > 1 && (bp - (STDCHAR*)SvPVX(sv) < rslen)) ||
-	  memcmp((char*)bp - rslen, rsptr, rslen))
+	  memNE((char*)bp - rslen, rsptr, rslen))
 	goto screamer;				/* go back to the fray */
 thats_really_all_folks:
     if (shortbuffered)
@@ -3064,7 +3139,7 @@ screamer2:
 	if (i != EOF &&			/* joy */
 	    (!rslen ||
 	     SvCUR(sv) < rslen ||
-	     memcmp(SvPVX(sv) + SvCUR(sv) - rslen, rsptr, rslen)))
+	     memNE(SvPVX(sv) + SvCUR(sv) - rslen, rsptr, rslen)))
 	{
 	    append = -1;
 	    goto screamer2;
@@ -3132,7 +3207,7 @@ register SV *sv;
     while (isALPHA(*d)) d++;
     while (isDIGIT(*d)) d++;
     if (*d) {
-	NUMERIC_STANDARD();
+	SET_NUMERIC_STANDARD();
 	sv_setnv(sv,atof(SvPVX(sv)) + 1.0);  /* punt */
 	return;
     }
@@ -3203,7 +3278,7 @@ register SV *sv;
 	(void)SvNOK_only(sv);
 	return;
     }
-    NUMERIC_STANDARD();
+    SET_NUMERIC_STANDARD();
     sv_setnv(sv,atof(SvPVX(sv)) - 1.0);	/* punt */
 }
 
@@ -3845,18 +3920,23 @@ void
 sv_untaint(sv)
 SV *sv;
 {
-    MAGIC *mg = mg_find(sv, 't');
-    if (mg)
-	mg->mg_len &= ~1;
+    if (SvMAGICAL(sv)) {
+	MAGIC *mg = mg_find(sv, 't');
+	if (mg)
+	    mg->mg_len &= ~1;
+    }
 }
 
 bool
 sv_tainted(sv)
 SV *sv;
 {
-    MAGIC *mg = mg_find(sv, 't');
-    return (mg && ((mg->mg_len & 1)
-		   || (mg->mg_len & 2) && mg->mg_obj == sv));
+    if (SvMAGICAL(sv)) {
+	MAGIC *mg = mg_find(sv, 't');
+	if (mg && ((mg->mg_len & 1) || (mg->mg_len & 2) && mg->mg_obj == sv))
+	    return TRUE;
+    }
+    return FALSE;
 }
 
 #ifdef DEBUGGING
@@ -4002,7 +4082,7 @@ SV* sv;
     if (type >= SVt_PVIV || type == SVt_IV)
 	PerlIO_printf(Perl_debug_log, "  IV = %ld\n", (long)SvIVX(sv));
     if (type >= SVt_PVNV || type == SVt_NV) {
-	NUMERIC_STANDARD();
+	SET_NUMERIC_STANDARD();
 	PerlIO_printf(Perl_debug_log, "  NV = %.*g\n", DBL_DIG, SvNVX(sv));
     }
     if (SvROK(sv)) {

@@ -23,7 +23,7 @@ sub ok
     print "ok $no\n" ;
 }
 
-print "1..47\n";
+print "1..55\n";
 
 my $Dfile = "recno.tmp";
 unlink $Dfile ;
@@ -178,5 +178,71 @@ undef $X ;
 untie(@h);
 
 unlink $Dfile;
+
+{
+    # Check bval defaults to \n
+
+    my @h = () ;
+    my $dbh = new DB_File::RECNOINFO ;
+    ok(48, tie @h, 'DB_File', $Dfile, O_RDWR|O_CREAT, 0640, $dbh ) ;
+    $h[0] = "abc" ;
+    $h[1] = "def" ;
+    $h[3] = "ghi" ;
+    untie @h ;
+    my $x = `cat $Dfile` ;
+    ok(49, $x eq "abc\ndef\n\nghi\n") ;
+    unlink $Dfile;
+}
+
+{
+    # Change bval
+
+    my @h = () ;
+    my $dbh = new DB_File::RECNOINFO ;
+    $dbh->{bval} = "-" ;
+    ok(50, tie @h, 'DB_File', $Dfile, O_RDWR|O_CREAT, 0640, $dbh ) ;
+    $h[0] = "abc" ;
+    $h[1] = "def" ;
+    $h[3] = "ghi" ;
+    untie @h ;
+    my $x = `cat $Dfile` ;
+    ok(51, $x eq "abc-def--ghi-") ;
+    unlink $Dfile;
+}
+
+{
+    # Check R_FIXEDLEN with default bval (space)
+
+    my @h = () ;
+    my $dbh = new DB_File::RECNOINFO ;
+    $dbh->{flags} = R_FIXEDLEN ;
+    $dbh->{reclen} = 5 ;
+    ok(52, tie @h, 'DB_File', $Dfile, O_RDWR|O_CREAT, 0640, $dbh ) ;
+    $h[0] = "abc" ;
+    $h[1] = "def" ;
+    $h[3] = "ghi" ;
+    untie @h ;
+    my $x = `cat $Dfile` ;
+    ok(53, $x eq "abc  def       ghi  ") ;
+    unlink $Dfile;
+}
+
+{
+    # Check R_FIXEDLEN with user-defined bval
+
+    my @h = () ;
+    my $dbh = new DB_File::RECNOINFO ;
+    $dbh->{flags} = R_FIXEDLEN ;
+    $dbh->{bval} = "-" ;
+    $dbh->{reclen} = 5 ;
+    ok(54, tie @h, 'DB_File', $Dfile, O_RDWR|O_CREAT, 0640, $dbh ) ;
+    $h[0] = "abc" ;
+    $h[1] = "def" ;
+    $h[3] = "ghi" ;
+    untie @h ;
+    my $x = `cat $Dfile` ;
+    ok(55, $x eq "abc--def-------ghi--") ;
+    unlink $Dfile;
+}
 
 exit ;

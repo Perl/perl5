@@ -102,6 +102,14 @@ static int dooneliner _((char *cmd, char *filename));
 #  define FLOCK flock
 #else /* no flock() */
 
+   /* fcntl.h might not have been included, even if it exists, because
+      the current Configure only sets I_FCNTL if it's needed to pick up
+      the *_OK constants.  Make sure it has been included before testing
+      the fcntl() locking constants. */
+#  if defined(HAS_FCNTL) && !defined(I_FCNTL)
+#    include <fcntl.h>
+#  endif
+
 #  if defined(HAS_FCNTL) && defined(F_SETLK) && defined (F_SETLKW)
 #    define FLOCK fcntl_emulate_flock
 #    define FCNTL_EMULATE_FLOCK
@@ -281,13 +289,11 @@ PP(pp_open)
     else
 	DIE(no_usym, "filehandle");
     gv = (GV*)POPs;
-    if (IoFLAGS(GvIOn(gv)) & IOf_UNTAINT) /* This GV has UNTAINT previously set */
-	IoFLAGS(GvIOp(gv)) &= ~IOf_UNTAINT; /* Clear it. We don't carry that over */
+    if (GvIOp(gv))
+	IoFLAGS(GvIOp(gv)) &= ~IOf_UNTAINT;
     tmps = SvPV(sv, len);
-    if (do_open(gv, tmps, len, FALSE, 0, 0, Nullfp)) {
-	IoLINES(GvIOp(gv)) = 0;
+    if (do_open(gv, tmps, len, FALSE, 0, 0, Nullfp))
 	PUSHi( (I32)forkprocess );
-    }
     else if (forkprocess == 0)		/* we are a new child */
 	PUSHi(0);
     else
@@ -1039,12 +1045,12 @@ PP(pp_prtf)
 	goto just_say_no;
     }
     else {
-#ifdef LC_NUMERIC
+#ifdef USE_LOCALE_NUMERIC
 	if (op->op_private & OPpLOCALE)
-	    NUMERIC_LOCAL();
+	    SET_NUMERIC_LOCAL();
 	else
-	    NUMERIC_STANDARD();
-#endif /* LC_NUMERIC */
+	    SET_NUMERIC_STANDARD();
+#endif
 	do_sprintf(sv, SP - MARK, MARK + 1);
 	if (!do_print(sv, fp))
 	    goto just_say_no;
@@ -1889,13 +1895,10 @@ PP(pp_stat)
 	    laststype = OP_STAT;
 	    statgv = tmpgv;
 	    sv_setpv(statname, "");
-	    if (!GvIO(tmpgv) || !IoIFP(GvIOp(tmpgv)) ||
-	      Fstat(PerlIO_fileno(IoIFP(GvIOn(tmpgv))), &statcache) < 0) {
-		max = 0;
-		laststatval = -1;
-	    }
+	    laststatval = (GvIO(tmpgv) && IoIFP(GvIOp(tmpgv))
+		? Fstat(PerlIO_fileno(IoIFP(GvIOn(tmpgv))), &statcache) : -1);
 	}
-	else if (laststatval < 0)
+	if (laststatval < 0)
 	    max = 0;
     }
     else {
@@ -1924,15 +1927,17 @@ PP(pp_stat)
 	}
     }
 
-    EXTEND(SP, 13);
-    EXTEND_MORTAL(13);
     if (GIMME != G_ARRAY) {
+	EXTEND(SP, 1);
 	if (max)
 	    RETPUSHYES;
 	else
 	    RETPUSHUNDEF;
     }
     if (max) {
+	EXTEND(SP, max);
+	EXTEND_MORTAL(max);
+
 	PUSHs(sv_2mortal(newSViv((I32)statcache.st_dev)));
 	PUSHs(sv_2mortal(newSViv((I32)statcache.st_ino)));
 	PUSHs(sv_2mortal(newSViv((I32)statcache.st_mode)));
@@ -3655,8 +3660,11 @@ PP(pp_gservent)
     }
     else if (which == OP_GSBYPORT) {
 	char *proto = POPp;
-	int port = POPi;
+	unsigned short port = POPu;
 
+#ifdef HAS_HTONS
+	port = htons(port);
+#endif
 	sent = getservbyport(port, proto);
     }
     else

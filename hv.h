@@ -111,7 +111,7 @@ struct xpvhv {
 #define HeSVKEY_set(he,sv)	(HeKEY_sv(he) = sv)
 
 #define Nullhek Null(HEK*)
-#define HEK_BASESIZE		OFFSETOF(HEK, hek_key)
+#define HEK_BASESIZE		OFFSETOF(HEK, hek_key[0])
 #define HEK_HASH(hek)		(hek)->hek_hash
 #define HEK_LEN(hek)		(hek)->hek_len
 #define HEK_KEY(hek)		(hek)->hek_key

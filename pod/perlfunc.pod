@@ -341,7 +341,9 @@ restart system calls on some systems.  Using eval/die always works.
 
     eval {
     	local $SIG{ALRM} = sub { die "alarm\n" };	# NB \n required
+	alarm $timeout;
 	$nread = sysread SOCKET, $buffer, $size;
+	alarm 0;
     };
     die if $@ && $@ ne "alarm\n";	# propagate errors
     if ($@) {

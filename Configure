@@ -338,6 +338,7 @@ d_rename=''
 d_rmdir=''
 d_safebcpy=''
 d_safemcpy=''
+d_sanemcmp=''
 d_select=''
 d_sem=''
 d_semctl=''
@@ -2429,7 +2430,9 @@ else
 	patchlevel=0
 	subversion=0
 fi
-echo "(You have $package $baserev patchlevel $patchlevel subversion $subversion.)"
+$echo $n "(You have $package $baserev patchlevel $patchlevel" $c
+test 0 -eq "$subversion" || $echo $n " subversion $subversion" $c
+echo ".)"
 
 : set the prefixup variable, to restore leading tilda escape
 prefixup='case "$prefixexp" in
@@ -2447,9 +2450,13 @@ case "$archlib" in
 		set dflt
 		eval $prefixup
 		;;
-	*)	version=`LC_ALL=C;export LC_ALL;\
-			echo $baserev $patchlevel $subversion | \
-			$awk '{print $1 + $2/1000.0 + $3/100000.0}'`
+	*)	if test 0 -eq "$subversion"; then
+			version=`echo $baserev $patchlevel | \
+				 $awk '{ printf "%d.%03d\n",$1,$2 }'`
+		else
+			version=`echo $baserev $patchlevel $subversion | \
+				 $awk '{ printf "%d.%03d%02d\n",$1,$2,$3 }'`
+		fi
 		dflt="$privlib/$archname/$version"
 		;;
 	esac
@@ -6120,6 +6127,7 @@ main()
     handle = dlopen("./dyna.$dlext", mode) ;
     if (handle == NULL) {
         printf ("1\n") ;
+        fflush (stdout) ;
 	    exit(0);
     }
     symbol = dlsym(handle, "fred") ;
@@ -6128,13 +6136,15 @@ main()
         symbol = dlsym(handle, "_fred") ;
         if (symbol == NULL) {
             printf ("2\n") ;
+            fflush (stdout) ;
 	    	exit(0);
 		}
         printf ("3\n") ;
     }
     else
         printf ("4\n") ;
-	exit(0);
+    fflush (stdout) ;
+    exit(0);
 }
 EOM
 	: Call the object file tmp-dyna.o in case dlext=o.
@@ -7031,6 +7041,60 @@ EOCP
 esac
 $rm -f foo.* safemcpy core
 set d_safemcpy
+eval $setvar
+
+: can memcmp be trusted to compare relative magnitude?
+val="$undef"
+case "$d_memcmp" in
+"$define")
+	echo " "
+	echo "Checking to see if memcmp() can compare relative magnitude..." >&4
+	$cat >foo.c <<EOCP
+#$i_memory I_MEMORY
+#$i_stdlib I_STDLIB
+#$i_string I_STRING
+#$i_unistd I_UNISTD
+EOCP
+	$cat >>foo.c <<'EOCP'
+#include <stdio.h>
+
+#ifdef I_MEMORY
+#  include <memory.h>
+#endif
+#ifdef I_STDLIB
+#  include <stdlib.h>
+#endif
+#ifdef I_STRING
+#  include <string.h>
+#else
+#  include <strings.h>
+#endif
+#ifdef I_UNISTD
+#  include <unistd.h>  /* Needed for NetBSD */
+#endif
+main()
+{
+char a = -1;
+char b = 0;
+if ((a < b) && memcmp(&a, &b, 1) < 0)
+	exit(1);
+exit(0);
+}
+EOCP
+	if $cc $ccflags $ldflags foo.c -o sanemcmp $libs >/dev/null 2>&1; then
+		if ./sanemcmp 2>/dev/null; then
+			echo "Yes, it can."
+			val="$define"
+		else
+			echo "No, it can't (it uses signed chars)."
+		fi
+	else
+		echo "(I can't compile the test program, so we'll assume not...)"
+	fi
+	;;
+esac
+$rm -f foo.* sanemcmp core
+set d_sanemcmp
 eval $setvar
 
 : see if select exists
@@ -8896,7 +8960,7 @@ main()
 }
 EOM
 echo " "
-if $cc $ccflags $ldflags -o ssize ssize.c $libs > /dev/null 2>&1  &&
+if $cc $ccflags $ldflags -o ssize ssize.c > /dev/null 2>&1  &&
 		./ssize > /dev/null 2>&1 ; then
 	ssizetype=`./ssize`
 	echo "I'll be using $ssizetype for functions returning a byte count." >&4
@@ -9829,6 +9893,7 @@ d_rewinddir='$d_rewinddir'
 d_rmdir='$d_rmdir'
 d_safebcpy='$d_safebcpy'
 d_safemcpy='$d_safemcpy'
+d_sanemcmp='$d_sanemcmp'
 d_seekdir='$d_seekdir'
 d_select='$d_select'
 d_sem='$d_sem'

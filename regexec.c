@@ -709,7 +709,7 @@ char *prog;
 		sayNO;
 	    if (regeol - locinput < ln)
 		sayNO;
-	    if (ln > 1 && memcmp(s, locinput, ln) != 0)
+	    if (ln > 1 && memNE(s, locinput, ln))
 		sayNO;
 	    locinput += ln;
 	    nextchar = UCHARAT(locinput);
@@ -833,7 +833,7 @@ char *prog;
 	    ln = regendp[n] - s;
 	    if (locinput + ln > regeol)
 		sayNO;
-	    if (ln > 1 && memcmp(s, locinput, ln) != 0)
+	    if (ln > 1 && memNE(s, locinput, ln))
 		sayNO;
 	    locinput += ln;
 	    nextchar = UCHARAT(locinput);

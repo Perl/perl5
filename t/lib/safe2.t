@@ -119,7 +119,8 @@ print $@ =~ /foo bar/ ? "ok 29\n" : "not ok 29\n";
   
 my $t = 30;
 $cpt->rdo('/non/existant/file.name');
-print +(($! =~ /No such file/ || $! =~ /file specification syntax error/) ?
+print +(($! =~ /No such file/ || $! =~ /file specification syntax error/) ||
+      $! =~ /A file or directory in the path name does not exist/ ?
       "ok $t\n" : "not ok $t # $!\n"); $t++;
 print 1 ? "ok $t\n" : "not ok $t\n#$@/$!\n"; $t++;
   

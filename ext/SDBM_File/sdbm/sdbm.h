@@ -185,10 +185,6 @@ extern long sdbm_hash proto((char *, int));
 #include <memory.h>
 #endif
 
-#if defined(mips) && defined(ultrix) && !defined(__STDC__)
-#   undef HAS_MEMCMP
-#endif
-
 #ifdef HAS_MEMCPY
 #  if !defined(STANDARD_C) && !defined(I_STRING) && !defined(I_MEMORY)
 #    ifndef memcpy
@@ -222,24 +218,44 @@ extern long sdbm_hash proto((char *, int));
 #   endif
 #endif /* HAS_MEMSET */
 
-#ifdef HAS_MEMCMP
+#if defined(mips) && defined(ultrix) && !defined(__STDC__)
+#   undef HAS_MEMCMP
+#endif
+
+#if defined(HAS_MEMCMP) && defined(HAS_SANE_MEMCMP)
 #  if !defined(STANDARD_C) && !defined(I_STRING) && !defined(I_MEMORY)
 #    ifndef memcmp
 	extern int memcmp _((char*, char*, int));
 #    endif
 #  endif
+#  ifdef BUGGY_MSC
+  #  pragma function(memcmp)
+#  endif
 #else
 #   ifndef memcmp
-#	define memcmp 	my_memcmp
+#	/* maybe we should have included the full embedding header... */
+#	ifdef NO_EMBED
+#	    define memcmp my_memcmp
+#	else
+#	    define memcmp Perl_my_memcmp
+#	endif
+	extern int memcmp _((char*, char*, int));
 #   endif
 #endif /* HAS_MEMCMP */
 
-/* we prefer bcmp slightly for comparisons that don't care about ordering */
 #ifndef HAS_BCMP
 #   ifndef bcmp
 #	define bcmp(s1,s2,l) memcmp(s1,s2,l)
 #   endif
-#endif /* HAS_BCMP */
+#endif /* !HAS_BCMP */
+
+#ifdef HAS_MEMCMP
+#  define memNE(s1,s2,l) (memcmp(s1,s2,l))
+#  define memEQ(s1,s2,l) (!memcmp(s1,s2,l))
+#else
+#  define memNE(s1,s2,l) (bcmp(s1,s2,l))
+#  define memEQ(s1,s2,l) (!bcmp(s1,s2,l))
+#endif
 
 #ifdef I_NETINET_IN
 #   include <netinet/in.h>

@@ -429,13 +429,13 @@ $Dfile1 = "btree1" ;
 $Dfile2 = "btree2" ;
 $Dfile3 = "btree3" ;
  
-$dbh1 = TIEHASH DB_File::BTREEINFO ;
+$dbh1 = new DB_File::BTREEINFO ;
 $dbh1->{compare} = sub { $_[0] <=> $_[1] } ;
  
-$dbh2 = TIEHASH DB_File::BTREEINFO ;
+$dbh2 = new DB_File::BTREEINFO ;
 $dbh2->{compare} = sub { $_[0] cmp $_[1] } ;
  
-$dbh3 = TIEHASH DB_File::BTREEINFO ;
+$dbh3 = new DB_File::BTREEINFO ;
 $dbh3->{compare} = sub { length $_[0] <=> length $_[1] } ;
  
  

@@ -742,56 +742,6 @@ Off_t length;		/* length to set file to */
 }
 #endif /* F_FREESP */
 
-I32
-looks_like_number(sv)
-SV *sv;
-{
-    register char *s;
-    register char *send;
-
-    if (!SvPOK(sv)) {
-	STRLEN len;
-	if (!SvPOKp(sv))
-	    return TRUE;
-	s = SvPV(sv, len);
-	send = s + len;
-    }
-    else {
-	s = SvPVX(sv); 
-	send = s + SvCUR(sv);
-    }
-    while (isSPACE(*s))
-	s++;
-    if (s >= send)
-	return FALSE;
-    if (*s == '+' || *s == '-')
-	s++;
-    while (isDIGIT(*s))
-	s++;
-    if (s == send)
-	return TRUE;
-    if (*s == '.') 
-	s++;
-    else if (s == SvPVX(sv))
-	return FALSE;
-    while (isDIGIT(*s))
-	s++;
-    if (s == send)
-	return TRUE;
-    if (*s == 'e' || *s == 'E') {
-	s++;
-	if (*s == '+' || *s == '-')
-	    s++;
-	while (isDIGIT(*s))
-	    s++;
-    }
-    while (isSPACE(*s))
-	s++;
-    if (s >= send)
-	return TRUE;
-    return FALSE;
-}
-
 bool
 do_print(sv,fp)
 register SV *sv;

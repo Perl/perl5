@@ -2736,7 +2736,7 @@ setlocale(category, locale = 0)
     CODE:
 	RETVAL = setlocale(category, locale);
 	if (RETVAL) {
-#ifdef LC_CTYPE
+#ifdef USE_LOCALE_CTYPE
 	    if (category == LC_CTYPE
 #ifdef LC_ALL
 		|| category == LC_ALL
@@ -2752,8 +2752,8 @@ setlocale(category, locale = 0)
 		    newctype = RETVAL;
 		perl_new_ctype(newctype);
 	    }
-#endif /* LC_CTYPE */
-#ifdef LC_COLLATE
+#endif /* USE_LOCALE_CTYPE */
+#ifdef USE_LOCALE_COLLATE
 	    if (category == LC_COLLATE
 #ifdef LC_ALL
 		|| category == LC_ALL
@@ -2769,8 +2769,8 @@ setlocale(category, locale = 0)
 		    newcoll = RETVAL;
 		perl_new_collate(newcoll);
 	    }
-#endif /* LC_COLLATE */
-#ifdef LC_NUMERIC
+#endif /* USE_LOCALE_COLLATE */
+#ifdef USE_LOCALE_NUMERIC
 	    if (category == LC_NUMERIC
 #ifdef LC_ALL
 		|| category == LC_ALL
@@ -2786,7 +2786,7 @@ setlocale(category, locale = 0)
 		    newnum = RETVAL;
 		perl_new_numeric(newnum);
 	    }
-#endif /* LC_NUMERIC */
+#endif /* USE_LOCALE_NUMERIC */
 	}
     OUTPUT:
 	RETVAL
@@ -3102,7 +3102,7 @@ strtod(str)
 	double num;
 	char *unparsed;
     PPCODE:
-	NUMERIC_LOCAL();
+	SET_NUMERIC_LOCAL();
 	num = strtod(str, &unparsed);
 	PUSHs(sv_2mortal(newSVnv(num)));
 	if (GIMME == G_ARRAY) {

@@ -8,6 +8,173 @@ or in the .../src/5/0/unsupported directory for sub-version
 releases.)
 
 ----------------
+Version 5.003_11
+----------------
+
+This patch is (still) closing in on 5.004.  Nothing dramatic, lots of
+value.
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Fix precedence problems with subs as uniops or listops"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  perly.c perly.c.diff perly.h perly.y
+
+  Title:  "Don't reset $. on open()"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pp_sys.c
+
+  Title:  "Support *glob{IO} (eventually deprecate *glob{FILEHANDLE})"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pod/perlref.pod pp_hot.c sv.c
+
+  Title:  "Don't let expression context force return context"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  op.c
+
+  Title:  "Properly convert "1E2" et al to IV/UV"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  doio.c sv.c
+
+  Title:  "Fix modulo operator in UV realm"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pp.c
+
+  Title:  "Fix stat(_) after stat(HANDLE)"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pp_sys.c
+
+  Title:  "Fix: s/// and "$x =~ $y" under 'use locale'"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  op.c toke.c
+
+ OTHER CORE CHANGES
+
+  Title:  "Eliminate spurious warning when splicing undefs"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pp.c sv.h
+
+  Title:  "Eliminate spurious warning from "x=" operator"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  op.c
+
+  Title:  "Fix line numbers near control structures"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  op.c perly.c perly.c.diff perly.y proto.h
+
+  Title:  "Don't let scalar unpack() underflow stack"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pp.c
+
+  Title:  "Fix core dump from precedence bug in "@foo" warning"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  toke.c
+
+  Title:  "Move die() to utils.c; add varargs hack to croak()"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pp_ctl.c util.c
+
+  Title:  "Avoid memcmp() for magnitude test if it thinks char is signed"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  Configure config_H config_h.SH doop.c
+          ext/SDBM_File/sdbm/pair.c ext/SDBM_File/sdbm/sdbm.h handy.h
+          hv.c perl.h pp_hot.c proto.h regexec.c sv.c toke.c util.c
+
+  Title:  "Less malloc in magic"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  mg.c
+
+  Title:  "Re: 5.003_09: PADTMP fix"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199611281150.GAA06884@monk.mps.ohio-state.edu>
+   Date:  Thu, 28 Nov 1996 06:50:58 -0500 (EST)
+  Files:  pod/perlguts.pod
+
+  Title:  "Fully paramaterize locales; disable all if NO_LOCALE"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  ext/POSIX/POSIX.xs op.c perl.h pp.c pp_sys.c sv.c util.c
+
+ PORTABILITY AND TESTING
+
+  Title:  "Bitwise op fix for Alpha"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pp.c
+
+  Title:  "hints/dgux.sh update"
+   From:  Roderick Schertler <roderick@gate.net>
+ Msg-ID:  <24178.849309616@eeyore.ibcinc.com>
+   Date:  Fri, 29 Nov 1996 18:20:16 -0500
+  Files:  hints/dgux.sh
+
+  Title:  "BUG in hints/hpux.sh"
+   From:  Jeff McDougal <jmcdo@cris.com>
+ Msg-ID:  <32A42C11.7FA2@cris.com>
+   Date:  Tue, 03 Dec 1996 08:33:05 -0500
+  Files:  hints/hpux.sh
+
+  Title:  "VMS patches for 5.003_10"
+   From:  Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+ Msg-ID:  <01ICMALO8NMS001A1D@hmivax.humgen.upenn.edu>
+   Date:  Wed, 04 Dec 1996 16:40:12 -0500 (EST)
+  Files:  EXTERN.h INTERN.h old_perl_exp.SH perl.c perl.h perl_exp.SH
+          pp.c pp_ctl.c pp_sys.c proto.h sv.c toke.c util.c
+          utils/perldoc.PL vms/config.vms vms/descrip.mms
+          vms/gen_shrfls.pl vms/genconfig.pl vms/vmsish.h
+
+  Title:  "_10+ under OS/2"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199612011107.GAA10805@monk.mps.ohio-state.edu>
+   Date:  Sun, 1 Dec 1996 06:07:19 -0500 (EST)
+  Files:  malloc.c os2/diff.configure
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "{in,ob}structive pods"
+   From:  Tom Christiansen <tchrist@mox.perl.com>
+ Msg-ID:  <199611301652.JAA24201@toy.perl.com>
+   Date:  Sat, 30 Nov 1996 09:52:57 -0700
+  Files:  MANIFEST lib/Class/Template.pm lib/File/stat.pm
+          lib/Net/hostent.pm lib/Net/netent.pm lib/Net/protoent.pm
+          lib/Net/servent.pm lib/Time/gmtime.pm lib/Time/localtime.pm
+          lib/Time/tm.pm lib/User/grent.pm lib/User/pwent.pm
+
+  Title:  "FileHandle that 'ISA' IO::File"
+   From:  Nick Ing-Simmons <nik@tiuk.ti.com>
+ Msg-ID:  <199612021718.RAA04416@pluto>
+   Date:  Mon, 2 Dec 1996 17:18:02 GMT
+  Files:  MANIFEST lib/FileHandle.pm
+
+  Title:  "Make IO::File::import use its parameters"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  ext/IO/lib/IO/File.pm
+
+  Title:  "10+ debugger patch"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199612011137.GAA10864@monk.mps.ohio-state.edu>
+   Date:  Sun, 1 Dec 1996 06:37:31 -0500 (EST)
+  Files:  lib/perl5db.pl perl.c pod/perldebug.pod
+
+  Title:  "Don't call CORE::close in file handle DESTROY method"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  ext/IO/lib/IO/Handle.pm
+
+  Title:  "Re: Namespace cleanup: Does SDBM need binary compatibility?"
+   From:  Hallvard B Furuseth <h.b.furuseth@usit.uio.no>
+ Msg-ID:  <199612031445.PAA19056@bombur2.uio.no>
+   Date:  Tue, 3 Dec 1996 15:45:27 +0100 (MET)
+  Files:  ext/SDBM_File/sdbm/pair.h ext/SDBM_File/sdbm/sdbm.3
+
+  Title:  "DB_File 1.07"
+   From:  pmarquess@bfsec.bt.co.uk (Paul Marquess)
+  Files:  ext/DB_File/DB_File.pm ext/DB_File/DB_File.xs t/lib/db-btree.t
+          t/lib/db-recno.t
+
+  Title:  "DB_File 1.08"
+   From:  pmarquess@bfsec.bt.co.uk (Paul Marquess)
+  Files:  ext/DB_File/DB_File.pm ext/DB_File/DB_File.xs
+
+
+----------------
 Version 5.003_10
 ----------------
 
@@ -20,8 +187,8 @@ valuable changes, but nothing dramatic.
    From:  Chip Salzenberg <chip@atlantic.net>
   Files:  toke.c
 
-  Title:  "Make parens optional on [gs]ethost and [gs]et{pw,gr} function
-   From:  Chip Salzenberg <chip@atlantic.net>
+  Title:  "Make parens optional on [gs]ethost and [gs]et{pw,gr} functions
+   From:  John L. Allen <allen@gateway.grumman.com>
   Files:  toke.c
 
   Title:  "Fix syntax error with "$x [0]" and "$x {y}" and "@x {y}""

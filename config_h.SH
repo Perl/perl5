@@ -550,6 +550,14 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_safemcpy HAS_SAFE_MEMCPY	/**/
 
+/* HAS_SANE_MEMCMP:
+ *	This symbol, if defined, indicates that the memcmp() routine is
+ *	available to compare memory blocks for relative magnitude. If this
+ *	symbol is not defined, and if HAS_MEMCMP is defined, then memcmp()
+ *	may be used only to compare memory blocks for equality.
+ */
+#$d_sanemcmp HAS_SANE_MEMCMP	/**/
+
 /* HAS_SELECT:
  *	This symbol, if defined, indicates that the select routine is
  *	available to select active file descriptors. If the timeout field

@@ -550,7 +550,8 @@ OP *op;
     OP *kid;
 
     /* assumes no premature commitment */
-    if (!op || (op->op_flags & OPf_KNOW) || error_count)
+    if (!op || (op->op_flags & OPf_KNOW) || op->op_type == OP_RETURN
+	 || error_count)
 	return op;
 
     op->op_flags &= ~OPf_LIST;
@@ -621,6 +622,8 @@ OP *op;
     default:
 	if (!(opargs[op->op_type] & OA_FOLDCONST))
 	    break;
+	/* FALL THROUGH */
+    case OP_REPEAT:
 	if (op->op_flags & OPf_STACKED)
 	    break;
 	/* FALL THROUGH */
@@ -739,11 +742,6 @@ OP *op;
 	op->op_ppaddr = ppaddr[OP_PREDEC];
 	break;
 
-    case OP_REPEAT:
-	scalarvoid(cBINOP->op_first);
-	useless = op_desc[op->op_type];
-	break;
-
     case OP_OR:
     case OP_AND:
     case OP_COND_EXPR:
@@ -804,7 +802,8 @@ OP *op;
     OP *kid;
 
     /* assumes no premature commitment */
-    if (!op || (op->op_flags & OPf_KNOW) || error_count)
+    if (!op || (op->op_flags & OPf_KNOW) || op->op_type == OP_RETURN
+	 || error_count)
 	return op;
 
     op->op_flags |= (OPf_KNOW | OPf_LIST);
@@ -1305,15 +1304,12 @@ int full;
 }
 
 OP*
-block_end(line, floor, seq)
-int line;
-int floor;
+block_end(floor, seq)
+I32 floor;
 OP* seq;
 {
     int needblockscope = hints & HINT_BLOCK_SCOPE;
     OP* retval = scalarseq(seq);
-    if (copline > (line_t)line)
-	copline = line;
     LEAVE_SCOPE(floor);
     pad_reset_pending = FALSE;
     if (needblockscope)
@@ -1836,6 +1832,9 @@ I32 flags;
     pmop->op_ppaddr = ppaddr[type];
     pmop->op_flags = flags;
     pmop->op_private = 0 | (flags >> 8);
+
+    if (hints & HINT_LOCALE)
+	pmop->op_pmpermflags = (pmop->op_pmflags |= PMf_LOCALE);
 
     /* link into pm list */
     if (type != OP_TRANS && curstash) {
@@ -3786,7 +3785,7 @@ OP *op;
     op = listkids(op);
 
     op->op_private = 0;
-#ifdef HAS_SETLOCALE
+#ifdef USE_LOCALE
     if (hints & HINT_LOCALE)
 	op->op_private |= OPpLOCALE;
 #endif
@@ -3801,7 +3800,7 @@ OP *op;
     op = ck_fun(op);
 
     op->op_private = 0;
-#ifdef HAS_SETLOCALE
+#ifdef USE_LOCALE
     if (hints & HINT_LOCALE)
 	op->op_private |= OPpLOCALE;
 #endif
@@ -3814,10 +3813,11 @@ ck_scmp(op)
 OP *op;
 {
     op->op_private = 0;
-#ifdef LC_COLLATE
+#ifdef USE_LOCALE
     if (hints & HINT_LOCALE)
 	op->op_private |= OPpLOCALE;
 #endif
+
     return op;
 }
 
@@ -3924,7 +3924,7 @@ ck_sort(op)
 OP *op;
 {
     op->op_private = 0;
-#ifdef LC_COLLATE
+#ifdef USE_LOCALE
     if (hints & HINT_LOCALE)
 	op->op_private |= OPpLOCALE;
 #endif

@@ -557,6 +557,8 @@ I32 SvTRUE _((SV *));
 
 #define SvPEEK(sv) sv_peek(sv)
 
+#define SvIMMORTAL(sv) ((sv)==&sv_undef || (sv)==&sv_yes || (sv)==&sv_no)
+
 #define isGV(sv) (SvTYPE(sv) == SVt_PVGV)
 
 #ifndef DOSISH

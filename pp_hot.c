@@ -100,7 +100,7 @@ PP(pp_gelem)
 	    ref = (SV*)GvCV(gv);
 	break;
     case 'F':
-	if (strEQ(elem, "FILEHANDLE"))
+	if (strEQ(elem, "FILEHANDLE")) /* XXX deprecate in 5.005 */
 	    ref = (SV*)GvIOp(gv);
 	break;
     case 'G':
@@ -110,6 +110,10 @@ PP(pp_gelem)
     case 'H':
 	if (strEQ(elem, "HASH"))
 	    ref = (SV*)GvHV(gv);
+	break;
+    case 'I':
+	if (strEQ(elem, "IO"))
+	    ref = (SV*)GvIOp(gv);
 	break;
     case 'N':
 	if (strEQ(elem, "NAME"))
@@ -180,19 +184,6 @@ PP(pp_unstack)
     oldsave = scopestack[scopestack_ix - 1];
     LEAVE_SCOPE(oldsave);
     return NORMAL;
-}
-
-PP(pp_seq)
-{
-    dSP; tryAMAGICbinSET(seq,0); 
-    {
-      dPOPTOPssrl;
-      bool eq = ((op->op_private & OPpLOCALE)
-		 ? (sv_cmp_locale(left, right) == 0)
-		 : sv_eq(left, right));
-      SETs( eq ? &sv_yes : &sv_no );
-      RETURN;
-    }
 }
 
 PP(pp_concat)
@@ -835,7 +826,7 @@ play_it_again:
 	else if (!multiline) {
 	    if (*SvPVX(pm->op_pmshort) != *s
 		|| (pm->op_pmslen > 1
-		    && memcmp(SvPVX(pm->op_pmshort), s, pm->op_pmslen)))
+		    && memNE(SvPVX(pm->op_pmshort), s, pm->op_pmslen)))
 		goto nope;
 	}
 	if (!rx->naughty && --BmUSEFUL(pm->op_pmshort) < 0) {
@@ -1408,7 +1399,7 @@ PP(pp_subst)
 	else if (!multiline) {
 	    if (*SvPVX(pm->op_pmshort) != *s
 		|| (pm->op_pmslen > 1
-		    && memcmp(SvPVX(pm->op_pmshort), s, pm->op_pmslen)))
+		    && memNE(SvPVX(pm->op_pmshort), s, pm->op_pmslen)))
 		goto nope;
 	}
 	if (!rx->naughty && --BmUSEFUL(pm->op_pmshort) < 0) {

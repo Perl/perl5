@@ -37,6 +37,12 @@ for (@prgs){
 }
 
 __END__
+$cusp = ~0 ^ (~0 >> 1);
+$, = " ";
+print +($cusp - 1) % 8, $cusp % 8, -$cusp % 8, ($cusp + 1) % 8, "!\n";
+EXPECT
+7 0 0 1 !
+########
 $foo=undef; $foo->go;
 EXPECT
 Can't call method "go" without a package or object reference at - line 1.

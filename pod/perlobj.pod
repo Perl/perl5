@@ -305,10 +305,9 @@ less that the given argument. This method is normally called as a class
 method. This method is also called when the C<VERSION> form of C<use> is
 used.
 
-
     use A 1.2 qw(some imported subs);
     
-    A->require_version( 1.2 );
+    A->VERSION( 1.2 );
 
 =item class ()
 

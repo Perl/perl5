@@ -15,12 +15,12 @@
 #include <ssdef.h>   /* explicitly set in the perl source code */
 
 /* Suppress compiler warnings from DECC for VMS-specific extensions:
- * GLOBALEXT, NOSHAREEXT: global[dr]ef declarations
+ * GLOBALEXT, NOSHAREEXT, READONLYEXT: global[dr]ef declarations
  * ADDRCONSTEXT,NEEDCONSTEXT: initialization of data with non-constant values
  *                            (e.g. pointer fields of descriptors)
  */
 #ifdef __DECC
-#  pragma message disable (GLOBALEXT,NOSHAREEXT,ADDRCONSTEXT,NEEDCONSTEXT)
+#  pragma message disable (GLOBALEXT,NOSHAREEXT,READONLYEXT,ADDRCONSTEXT,NEEDCONSTEXT)
 #endif
 
 /* DEC's C compilers and gcc use incompatible definitions of _to(upp|low)er() */

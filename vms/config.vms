@@ -76,7 +76,7 @@
  * when Perl is built.  Please do not change it by hand; make
  * any changes to FndVers.Com instead.
  */
-#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX/5_00308"  /**/
+#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX/5_00310"  /**/
 #define ARCHLIB ARCHLIB_EXP	/*config-skip*/
 
 /* CPPSTDIN:
@@ -255,13 +255,21 @@
  *	This symbol, if defined, indicates that the mbstowcs routine is
  *	available to covert a multibyte string into a wide character string.
  */
-#undef	HAS_MBSTOWCS		/**/
+#ifdef __DECC
+#  define	HAS_MBSTOWCS		/*config-skip*/
+#else
+#  undef	HAS_MBSTOWCS		/*config-skip*/
+#endif
 
 /* HAS_MBTOWC:
  *	This symbol, if defined, indicates that the mbtowc routine is available
  *	to covert a multibyte to a wide character.
  */
-#undef HAS_MBTOWC		/**/
+#ifdef __DECC
+#  define HAS_MBTOWC		/*config-skip*/
+#else
+#  undef HAS_MBTOWC		/*config-skip*/
+#endif
 
 /* HAS_MEMCMP:
  *	This symbol, if defined, indicates that the memcmp routine is available
@@ -371,11 +379,6 @@
  */
 #undef HAS_SETEUID		/**/
 
-/* HAS_SETLOCALE:
- *	This symbol, if defined, indicates that the setlocale routine is
- *	available to handle locale-specific ctype implementations.
- */
-#undef HAS_SETLOCALE	/**/
 
 /* HAS_SETPRIORITY:
  *	This symbol, if defined, indicates that the setpriority routine is
@@ -645,7 +648,11 @@
  *	This symbol, if defined, indicates that the wcstombs routine is
  *	available to convert wide character strings to multibyte strings.
  */
-#undef HAS_WCSTOMBS	/**/
+#ifdef __DECC
+#  define HAS_WCSTOMBS	/*config-skip*/
+#else
+#  undef HAS_WCSTOMBS	/*config-skip*/
+#endif
 
 /* I_DIRENT:
  *	This symbol, if defined, indicates to the C program that it should
@@ -1060,13 +1067,21 @@
  *	This symbol, if defined, indicates that the mblen routine is available
  *	to find the number of bytes in a multibye character.
  */
-#undef HAS_MBLEN		/**/
+#ifdef __DECC
+#  define HAS_MBLEN		/*config-skip*/
+#else
+#  undef HAS_MBLEN		/*config-skip*/
+#endif
 
 /* HAS_MKTIME:
  *	This symbol, if defined, indicates that the mktime routine is
  *	available.
  */
-#undef HAS_MKTIME		/**/
+#ifdef __DECC
+#  define HAS_MKTIME		/*config-skip*/
+#else
+#  undef HAS_MKTIME		/*config-skip*/
+#endif
 
 /* HAS_NICE:
  *	This symbol, if defined, indicates that the nice routine is
@@ -1115,7 +1130,11 @@
  *	This symbol, if defined, indicates that the strcoll routine is
  *	available to compare strings using collating information.
  */
-#undef HAS_STRCOLL	/**/
+#ifdef __DECC
+#  define HAS_STRCOLL	/*config-skip*/
+#else
+#  undef HAS_STRCOLL	/*config-skip*/
+#endif
 
 /* HAS_STRTOD:
  *	This symbol, if defined, indicates that the strtod routine is
@@ -1139,7 +1158,11 @@
  *	This symbol, if defined, indicates that the strxfrm() routine is
  *	available to compare strings using collating information.
  */
-#undef HAS_STRXFRM	/**/
+#ifdef __DECC
+#  define HAS_STRXFRM	/*config-skip*/
+#else
+#  undef HAS_STRXFRM	/*config-skip*/
+#endif
 
 /* HAS_TCGETPGRP:
  *	This symbol, if defined, indicates that the tcgetpgrp routine is
@@ -1176,7 +1199,11 @@
  *	This symbol, if defined, indicates that the wctomb routine is available
  *	to covert a wide character to a multibyte.
  */
-#undef HAS_WCTOMB		/**/
+#ifdef __DECC
+#  define HAS_WCTOMB		/*config-skip*/
+#else
+#  undef HAS_WCTOMB		/*config-skip*/
+#endif
 
 /* Fpos_t:
  *	This symbol holds the type used to declare file positions in libc.
@@ -1216,12 +1243,6 @@
  *	include <math.h>.
  */
 #define I_MATH		/**/
-
-/* I_LOCALE:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <locale.h>.
- */
-#undef	I_LOCALE		/**/
 
 /* INTSIZE:
  *	This symbol contains the size of an int, so that the C preprocessor
@@ -1491,11 +1512,27 @@
  */
 #define HAS_ISASCII		/**/
 
+/* HAS_SETLOCALE:
+ *	This symbol, if defined, indicates that the setlocale routine is
+ *	available to handle locale-specific ctype implementations.
+ */
+/* I_LOCALE:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <locale.h>.
+ */
 /* HAS_LOCALECONV:
  *	This symbol, if defined, indicates that the localeconv routine is
  *	available for numeric and monetary formatting conventions.
  */
-#undef HAS_LOCALECONV	/**/
+#ifdef __DECC
+#  define	I_LOCALE		/*config-skip*/
+#  define HAS_SETLOCALE	/*config-skip*/
+#  define HAS_LOCALECONV	/*config-skip*/
+#else
+#  undef	I_LOCALE		/*config-skip*/
+#  undef HAS_SETLOCALE	/*config-skip*/
+#  undef HAS_LOCALECONV	/*config-skip*/
+#endif
 
 /* HAS_MKFIFO:
  *	This symbol, if defined, indicates that the mkfifo routine is
@@ -1531,6 +1568,14 @@
  *	own version.
  */
 #define HAS_SAFE_MEMCPY	/**/
+
+/* HAS_SANE_MEMCMP:
+ *	This symbol, if defined, indicates that the memcmp() routine is
+ *	available to compare memory blocks for relative magnitude. If this
+ *	symbol is not defined, and if HAS_MEMCMP is defined, then memcmp()
+ *	may be used only to compare memory blocks for equality.
+ */
+#define HAS_SANE_MEMCMP	/**/
 
 /* HAS_SETPGRP:
  *	This symbol, if defined, indicates that the setpgrp routine is

@@ -378,7 +378,7 @@ PP(pp_formline)
 	    gotsome = TRUE;
 	    value = SvNV(sv);
 	    /* Formats aren't yet marked for locales, so assume "yes". */
-	    NUMERIC_LOCAL();
+	    SET_NUMERIC_LOCAL();
 	    if (arg & 256) {
 		sprintf(t, "%#*.*f", (int) fieldsize, (int) arg & 255, value);
 	    } else {
@@ -904,61 +904,6 @@ I32 cxix;
 	    break;
 	}
     }
-}
-
-#ifdef I_STDARG
-OP *
-die(char* pat, ...)
-#else
-/*VARARGS0*/
-OP *
-die(pat, va_alist)
-    char *pat;
-    va_dcl
-#endif
-{
-    va_list args;
-    char *message;
-    int oldrunlevel = runlevel;
-    int was_in_eval = in_eval;
-    HV *stash;
-    GV *gv;
-    CV *cv;
-
-    /* We have to switch back to mainstack or die_where may try to pop
-     * the eval block from the wrong stack if die is being called from a
-     * signal handler.  - dkindred@cs.cmu.edu */
-    if (curstack != mainstack) {
-        dSP;
-        SWITCHSTACK(curstack, mainstack);
-    }
-
-#ifdef I_STDARG
-    va_start(args, pat);
-#else
-    va_start(args);
-#endif
-    message = mess(pat, &args);
-    va_end(args);
-
-    if (diehook && (cv = sv_2cv(diehook, &stash, &gv, 0)) && !CvDEPTH(cv)) {
-	dSP;
-	SV *msg = sv_2mortal(newSVpv(message, 0));
-
-	PUSHMARK(sp);
-	EXTEND(sp, 1);
-	PUSHs(msg);
-	PUTBACK;
-	perl_call_sv((SV*)cv, G_DISCARD);
-
-	/* It's okay for the __DIE__ hook to modify the message. */
-	message = SvPV(msg, na);
-    }
-
-    restartop = die_where(message);
-    if ((!restartop && was_in_eval) || oldrunlevel > 1)
-	Siglongjmp(top_env, 3);
-    return restartop;
 }
 
 OP *
@@ -2078,7 +2023,7 @@ PP(pp_require)
 
     sv = POPs;
     if (SvNIOKp(sv) && !SvPOKp(sv)) {
-	NUMERIC_STANDARD();
+	SET_NUMERIC_STANDARD();
 	if (atof(patchlevel) + 0.00000999 < SvNV(sv))
 	    DIE("Perl %s required--this is only version %s, stopped",
 		SvPV(sv,na),patchlevel);

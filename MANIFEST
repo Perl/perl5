@@ -100,9 +100,6 @@ ext/DynaLoader/dlutils.c	Dynamic loader utilities for dl_*.xs files
 ext/Fcntl/Fcntl.pm		Fcntl extension Perl module
 ext/Fcntl/Fcntl.xs		Fcntl extension external subroutines
 ext/Fcntl/Makefile.PL		Fcntl extension makefile writer
-ext/FileHandle/FileHandle.pm	FileHandle extension Perl module
-ext/FileHandle/FileHandle.xs	FileHandle extension external subroutines
-ext/FileHandle/Makefile.PL	FileHandle extension makefile writer
 ext/GDBM_File/GDBM_File.pm	GDBM extension Perl module
 ext/GDBM_File/GDBM_File.xs	GDBM extension external subroutines
 ext/GDBM_File/Makefile.PL	GDBM extension makefile writer
@@ -240,8 +237,8 @@ hints/next_3_0.sh	Hints for named architecture
 hints/next_4.sh		Hints for named architecture
 hints/opus.sh		Hints for named architecture
 hints/os2.sh		Hints for named architecture
-hints/qnx.sh		Hints for named architecture
 hints/powerux.sh	Hints for named architecture
+hints/qnx.sh		Hints for named architecture
 hints/sco.sh		Hints for named architecture
 hints/sco_2_3_0.sh	Hints for named architecture
 hints/sco_2_3_1.sh	Hints for named architecture
@@ -273,6 +270,7 @@ lib/AutoLoader.pm	Autoloader base class
 lib/AutoSplit.pm	A module to split up autoload functions
 lib/Benchmark.pm	A module to time pieces of code and such
 lib/Carp.pm		Error message base class
+lib/Class/Template.pm	Structure/member template builder; makes nested types
 lib/Cwd.pm		Various cwd routines (getcwd, fastcwd, chdir)
 lib/Devel/SelfStubber.pm Generate stubs for SelfLoader.pm
 lib/DirHandle.pm	like FileHandle only for directories
@@ -298,7 +296,9 @@ lib/File/CheckTree.pm	Perl module supporting wholesale file mode validation
 lib/File/Copy.pm	Emulation of cp command
 lib/File/Find.pm	Routines to do a find
 lib/File/Path.pm	A module to do things like `mkdir -p' and `rm -r'
+lib/File/stat.pm	Object-oriented wrapper around CORE::stat
 lib/FileCache.pm	Keep more files open than the system permits
+lib/FileHandle.pm	Backward-compatible front end to IO extension
 lib/FindBin.pm		Find name of currently executing program
 lib/Getopt/Long.pm	A module to fetch command options (GetOptions)
 lib/Getopt/Std.pm	A module to fetch command options (getopt, getopts)
@@ -309,6 +309,10 @@ lib/Math/BigFloat.pm	An arbitrary precision floating-point arithmetic package
 lib/Math/BigInt.pm	An arbitrary precision integer arithmetic package
 lib/Math/Complex.pm	A Complex package
 lib/Net/Ping.pm		Ping methods
+lib/Net/hostent.pm	Object-oriented wrapper around CORE::gethost*
+lib/Net/netent.pm	Object-oriented wrapper around CORE::getnet*
+lib/Net/protoent.pm	Object-oriented wrapper around CORE::getproto*
+lib/Net/servent.pm	Object-oriented wrapper around CORE::getserv*
 lib/Pod/Functions.pm	used by pod/splitpod
 lib/Pod/Text.pm		Convert POD data to formatted ASCII text
 lib/Search/Dict.pm	A module to do binary search on dictionaries
@@ -331,7 +335,12 @@ lib/Tie/Hash.pm		Base class for tied hashes
 lib/Tie/Scalar.pm	Base class for tied scalars
 lib/Tie/SubstrHash.pm	Compact hash for known key, value and table size
 lib/Time/Local.pm	Reverse translation of localtime, gmtime
+lib/Time/gmtime.pm	Object-oriented wrapper around CORE::gmtime
+lib/Time/localtime.pm	Object-oriented wrapper around CORE::localtime
+lib/Time/tm.pm		Perl implementation of "struct tm" for {gm,local}time
 lib/UNIVERSAL.pm	Base class for ALL classes.
+lib/User/grent.pm	Object-oriented wrapper around CORE::getgr*
+lib/User/pwent.pm	Object-oriented wrapper around CORE::getpw*
 lib/abbrev.pl		An abbreviation table builder
 lib/assert.pl		assertion and panic with stack trace
 lib/bigfloat.pl		An arbitrary precision floating point package

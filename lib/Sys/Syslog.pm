@@ -194,7 +194,7 @@ sub xlate {
     $name = uc $name;
     $name = "LOG_$name" unless $name =~ /^LOG_/;
     $name = "Sys::Syslog::$name";
-    eval(&$name) || -1;
+    defined &$name ? &$name : -1;
 }
 
 sub connect {

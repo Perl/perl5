@@ -1,4 +1,4 @@
-# $Id: Embed.pm,v 1.18 1996/07/02 13:48:17 dougm Exp $
+# $Id: Embed.pm,v 1.21 1996/11/29 17:26:23 dougm Exp $
 require 5.002;
 
 package ExtUtils::Embed;
@@ -17,7 +17,7 @@ use vars qw(@ISA @EXPORT $VERSION
 	    );
 use strict;
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.18 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.21 $ =~ /(\d+)\.(\d+)/);
 #for the namespace change
 $Devel::embed::VERSION = "99.99";
 
@@ -201,7 +201,7 @@ sub ldopts {
 
     my($extralibs, $bsloadlibs, $ldloadlibs, $ld_run_path) =
 	$MM->ext(join ' ', 
-		 $MM->catdir("-L$Config{archlib}", "CORE"), " -lperl", 
+		 $MM->catdir("-L$Config{archlibexp}", "CORE"), " -lperl", 
 		 @potential_libs);
 
     my $ld_or_bs = $bsloadlibs || $ldloadlibs;
@@ -419,11 +419,11 @@ conflict, the additional arguments will be part of the output.
 
 For including perl header files this function simply prints:
 
- -I$Config{archlib}/CORE  
+ -I$Config{archlibexp}/CORE  
 
 So, rather than having to say:
 
- perl -MConfig -e 'print "-I$Config{archlib}/CORE"'
+ perl -MConfig -e 'print "-I$Config{archlibexp}/CORE"'
 
 Just say:
 

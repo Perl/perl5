@@ -121,7 +121,7 @@ register PerlInterpreter *sv_interp;
 
     init_ids();
 
-    NUMERIC_STANDARD();
+    SET_NUMERIC_STANDARD();
 #if defined(SUBVERSION) && SUBVERSION > 0
     sprintf(patchlevel, "%7.5f",   (double) 5 
 				+ ((double) PATCHLEVEL / (double) 1000)
@@ -826,8 +826,12 @@ I32 flags;		/* See G_* flags in cop.h */
     if (flags & G_ARRAY)
       myop.op_flags |= OPf_LIST;
 
-    if (perldb && curstash != debstash 
-         && (DBcv || (DBcv = GvCV(DBsub)))) /* to handle first BEGIN of -d */
+    if (perldb && curstash != debstash
+	   /* Handle first BEGIN of -d. */
+	  && (DBcv || (DBcv = GvCV(DBsub)))
+	   /* Try harder, since this may have been a sighandler, thus
+	    * curstash may be meaningless. */
+	  && (SvTYPE(sv) != SVt_PVCV || CvSTASH((CV*)sv) != debstash))
 	op->op_private |= OPpENTERSUB_DB;
 
     if (flags & G_EVAL) {

@@ -73,6 +73,7 @@ if ($d_dosuid && $>) { die "You must run as root to install suidperl\n"; }
 
 &safe_unlink("$installbin/perl$ver$exe_ext");
 &cmd("cp perl$exe_ext $installbin/perl$ver$exe_ext");
+&chmod(0755, "$installbin/perl$ver$exe_ext");
 
 &safe_unlink("$installbin/sperl$ver$exe_ext");
 if ($d_dosuid) {

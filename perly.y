@@ -41,7 +41,7 @@ dep()
 %token <ival> FORMAT SUB ANONSUB PACKAGE USE
 %token <ival> WHILE UNTIL IF UNLESS ELSE ELSIF CONTINUE FOR
 %token <ival> LOOPEX DOTDOT
-%token <ival> FUNC0 FUNC1 FUNC
+%token <ival> FUNC0 FUNC1 FUNC UNIOP LSTOP
 %token <ival> RELOP EQOP MULOP ADDOP
 %token <ival> DOLSHARP DO HASHBRACK NOAMP
 %token LOCAL MY
@@ -57,7 +57,7 @@ dep()
 %left <ival> OROP
 %left ANDOP
 %right NOTOP
-%nonassoc <ival> LSTOP
+%nonassoc LSTOP LSTOPSUB
 %left ','
 %right <ival> ASSIGNOP
 %right '?' ':'
@@ -68,7 +68,7 @@ dep()
 %left <ival> BITANDOP
 %nonassoc EQOP
 %nonassoc RELOP
-%nonassoc <ival> UNIOP
+%nonassoc UNIOP UNIOPSUB
 %left <ival> SHIFTOP
 %left ADDOP
 %left MULOP
@@ -93,7 +93,9 @@ prog	:	/* NULL */
 	;
 
 block	:	'{' remember lineseq '}'
-			{ $$ = block_end($1,$2,$3); }
+			{ if (copline > (line_t)$1)
+			      copline = $1;
+			  $$ = block_end($2, $3); }
 	;
 
 remember:	/* NULL */	/* start a full lexical scope */
@@ -101,7 +103,9 @@ remember:	/* NULL */	/* start a full lexical scope */
 	;
 
 mblock	:	'{' mremember lineseq '}'
-			{ $$ = block_end($1,$2,$3); }
+			{ if (copline > (line_t)$1)
+			      copline = $1;
+			  $$ = block_end($2, $3); }
 	;
 
 mremember:	/* NULL */	/* start a partial lexical scope */
@@ -163,11 +167,11 @@ else	:	/* NULL */
 
 cond	:	IF '(' remember mexpr ')' mblock else
 			{ copline = $1;
-			    $$ = block_end($1, $3,
+			    $$ = block_end($3,
 				   newCONDOP(0, $4, scope($6), $7)); }
 	|	UNLESS '(' remember miexpr ')' mblock else
 			{ copline = $1;
-			    $$ = block_end($1, $3,
+			    $$ = block_end($3,
 				   newCONDOP(0, $4, scope($6), $7)); }
 	|	IF block block else
 			{ copline = $1;
@@ -188,13 +192,13 @@ cont	:	/* NULL */
 
 loop	:	label WHILE '(' remember mtexpr ')' mblock cont
 			{ copline = $2;
-			    $$ = block_end($2, $4,
+			    $$ = block_end($4,
 				   newSTATEOP(0, $1,
 				     newWHILEOP(0, 1, (LOOP*)Nullop,
 						$5, $7, $8))); }
 	|	label UNTIL '(' remember miexpr ')' mblock cont
 			{ copline = $2;
-			    $$ = block_end($2, $4,
+			    $$ = block_end($4,
 				   newSTATEOP(0, $1,
 				     newWHILEOP(0, 1, (LOOP*)Nullop,
 						$5, $7, $8))); }
@@ -208,19 +212,19 @@ loop	:	label WHILE '(' remember mtexpr ')' mblock cont
 					    invert(scalar(scope($3))),
 					    $4, $5); }
 	|	label FOR MY remember my_scalar '(' mexpr ')' mblock cont
-			{ $$ = block_end($2, $4,
+			{ $$ = block_end($4,
 				 newFOROP(0, $1, $2, $5, $7, $9, $10)); }
 	|	label FOR scalar '(' remember mexpr ')' mblock cont
-			{ $$ = block_end($2, $5,
+			{ $$ = block_end($5,
 				 newFOROP(0, $1, $2, mod($3, OP_ENTERLOOP),
 					  $6, $8, $9)); }
 	|	label FOR '(' remember mexpr ')' mblock cont
-			{ $$ = block_end($2, $4,
+			{ $$ = block_end($4,
 				 newFOROP(0, $1, $2, Nullop, $5, $7, $8)); }
 	|	label FOR '(' remember mnexpr ';' mtexpr ';' mnexpr ')' mblock
 			/* basically fake up an initialize-while lineseq */
 			{ copline = $2;
-			    $$ = block_end($2, $4,
+			    $$ = block_end($4,
 				   append_elem(OP_LINESEQ, scalar($5),
 				     newSTATEOP(0, $1,
 				       newWHILEOP(0, 1, (LOOP*)Nullop,

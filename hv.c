@@ -127,7 +127,7 @@ I32 lval;
 	    continue;
 	if (HeKLEN(entry) != klen)
 	    continue;
-	if (memcmp(HeKEY(entry),key,klen))	/* is this it? */
+	if (memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
 	return &HeVAL(entry);
     }
@@ -207,7 +207,7 @@ register U32 hash;
 	    continue;
 	if (HeKLEN(entry) != klen)
 	    continue;
-	if (memcmp(HeKEY(entry),key,klen))	/* is this it? */
+	if (memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
 	return entry;
     }
@@ -271,7 +271,7 @@ register U32 hash;
 	    continue;
 	if (HeKLEN(entry) != klen)
 	    continue;
-	if (memcmp(HeKEY(entry),key,klen))	/* is this it? */
+	if (memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
 	SvREFCNT_dec(HeVAL(entry));
 	HeVAL(entry) = val;
@@ -344,7 +344,7 @@ register U32 hash;
 	    continue;
 	if (HeKLEN(entry) != klen)
 	    continue;
-	if (memcmp(HeKEY(entry),key,klen))	/* is this it? */
+	if (memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
 	SvREFCNT_dec(HeVAL(entry));
 	HeVAL(entry) = val;
@@ -411,7 +411,7 @@ I32 flags;
 	    continue;
 	if (HeKLEN(entry) != klen)
 	    continue;
-	if (memcmp(HeKEY(entry),key,klen))	/* is this it? */
+	if (memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
 	*oentry = HeNEXT(entry);
 	if (i && !*oentry)
@@ -473,7 +473,7 @@ U32 hash;
 	    continue;
 	if (HeKLEN(entry) != klen)
 	    continue;
-	if (memcmp(HeKEY(entry),key,klen))	/* is this it? */
+	if (memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
 	*oentry = HeNEXT(entry);
 	if (i && !*oentry)
@@ -527,7 +527,7 @@ U32 klen;
 	    continue;
 	if (HeKLEN(entry) != klen)
 	    continue;
-	if (memcmp(HeKEY(entry),key,klen))	/* is this it? */
+	if (memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
 	return TRUE;
     }
@@ -574,7 +574,7 @@ U32 hash;
 	    continue;
 	if (HeKLEN(entry) != klen)
 	    continue;
-	if (memcmp(HeKEY(entry),key,klen))	/* is this it? */
+	if (memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
 	return TRUE;
     }
@@ -1045,7 +1045,7 @@ U32 hash;
 	    continue;
 	if (HeKLEN(entry) != len)
 	    continue;
-	if (memcmp(HeKEY(entry),str,len))		/* is this it? */
+	if (memNE(HeKEY(entry),str,len))	/* is this it? */
 	    continue;
 	found = 1;
 	if (--HeVAL(entry) == Nullsv) {
@@ -1092,7 +1092,7 @@ register U32 hash;
 	    continue;
 	if (HeKLEN(entry) != len)
 	    continue;
-	if (memcmp(HeKEY(entry),str,len))		/* is this it? */
+	if (memNE(HeKEY(entry),str,len))	/* is this it? */
 	    continue;
 	found = 1;
 	break;

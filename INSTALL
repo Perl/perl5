@@ -11,6 +11,11 @@ The basic steps to build and install perl5 on a Unix system are:
 	make
 	make test
 	make install
+	# possibly add these:
+	(cd /usr/include  && h2ph *.h sys/*.h)
+	cd pod; make html && mv *.html <www home dir>  && cd ..
+	cd pod; make tex  && <process the latex files> && cd ..
+
 
 Each of these is explained in further detail below.
 

@@ -156,7 +156,7 @@ sub rmtree {
            print "unlink $root\n" if $verbose;
            while (-e $root || -l $root) { # delete all versions under VMS
                (unlink($root) && ++$count)
-                   or carp "Can't unlink file $root: $!";
+                   or croak "Can't unlink file $root: $!";
            }
         }
     }

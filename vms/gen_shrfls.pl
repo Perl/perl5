@@ -34,7 +34,7 @@
 #     (i.e. /Define=DEBUGGING,EMBED,MULTIPLICITY)?
 #
 # Author: Charles Bailey  bailey@genetics.upenn.edu
-# Revised: 20-Feb-1996
+# Revised:  3-Dec-1996
 
 require 5.000;
 
@@ -355,7 +355,7 @@ if ($ENV{PERLSHR_USE_GSMATCH}) {
     print OPTBLD "CLUSTER=\$\$TRANSFER_VECTOR,,,$_.$objsuffix\n";
   }
 }
-else { $incstr .= ',' . join(',',@symfiles); }
+elsif (@symfiles) { $incstr .= ',' . join(',',@symfiles); }
 # Include object modules and RTLs in options file
 # Linker wants /Include and /Library on different lines
 print OPTBLD "$libperl/Include=($incstr)\n";

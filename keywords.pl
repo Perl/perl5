@@ -1,5 +1,6 @@
 #!/usr/bin/perl
 
+unlink "keywords.h";
 open(KW, ">keywords.h") || die "Can't create keywords.h: $!\n";
 select KW;
 

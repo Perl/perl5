@@ -167,9 +167,9 @@ installed signals.
 
 =item B<stack-trace>
 
-The handler used for subsequently installed signals will output a Perl
-stack trace to STDERR and then tries to dump core.  This is the default
-signal handler.
+The handler used for subsequently installed signals outputs a Perl stack
+trace to STDERR and then tries to dump core.  This is the default signal
+handler.
 
 =item B<die>
 
@@ -186,7 +186,7 @@ assignment to an element of C<%SIG>.
 
 =head2 SIGNAL LISTS
 
-B<sigtrap> has two built-in lists of signals to trap.  They are:
+B<sigtrap> has a few built-in lists of signals to trap.  They are:
 
 =over 4
 
@@ -222,7 +222,7 @@ silently ignored.
 
 =item B<untrapped>
 
-This token tells B<sigtrap> only to install handlers for subsequently
+This token tells B<sigtrap> to install handlers only for subsequently
 listed signals which aren't already trapped or ignored.
 
 =item B<any>
@@ -232,9 +232,9 @@ listed signals.  This is the default behavior.
 
 =item I<signal>
 
-Any argument which looks like a signals name (that is,
-C</^[A-Z][A-Z0-9]*$/>) is taken as a signal name and indicates that
-B<sigtrap> should install a handler for it.
+Any argument which looks like a signal name (that is,
+C</^[A-Z][A-Z0-9]*$/>) indicates that B<sigtrap> should install a
+handler for that name.
 
 =item I<number>
 

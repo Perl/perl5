@@ -15,6 +15,20 @@
 #include "EXTERN.h"
 #include "perl.h"
 
+/*
+ * Types used in bitwise operations.
+ *
+ * Normally we'd just use IV and UV.  However, some hardware and
+ * software combinations (e.g. Alpha and current OSF/1) don't have a
+ * floating-point type to use for NV that has adequate bits to fully
+ * hold an IV/UV.  (In other words, sizeof(long) == sizeof(double).)
+ *
+ * It just so happens that "int" is the right size everywhere, at
+ * least today.
+ */
+typedef int IBW;
+typedef unsigned UBW;
+
 static void doencodes _((SV *sv, char *s, I32 len));
 
 /* variations on pp_null */
@@ -672,19 +686,26 @@ PP(pp_modulo)
 {
     dSP; dATARGET; tryAMAGICbin(mod,opASSIGN);
     {
-      register IV value;
-      register UV uval;
+      register UV right;
 
-      uval = POPn;
-      if (!uval)
+      right = POPu;
+      if (!right)
 	DIE("Illegal modulus zero");
-      value = TOPn;
-      if (value >= 0)
-	value = (UV)value % uval;
-      else {
-	value = (uval - ((UV)(-value - 1) % uval)) - 1;
+
+      if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)) {
+	register IV left = SvIVX(TOPs);
+	if (left < 0)
+	  SETu( (right - ((UV)(-left) - 1) % right) - 1 );
+	else
+	  SETi( left % right );
       }
-      SETi(value);
+      else {
+	register double left = TOPn;
+	if (left < 0.0)
+	  SETu( (right - (U_V(-left) - 1) % right) - 1 );
+	else
+	  SETu( U_V(left) % right );
+      }
       RETURN;
     }
 }
@@ -758,13 +779,13 @@ PP(pp_left_shift)
 {
     dSP; dATARGET; tryAMAGICbin(lshift,opASSIGN); 
     {
-      IV shift = POPi;
+      IBW shift = POPi;
       if (op->op_private & HINT_INTEGER) {
-	IV i = TOPi;
+	IBW i = TOPi;
 	SETi( i << shift );
       }
       else {
-	UV u = TOPu;
+	UBW u = TOPu;
 	SETu( u << shift );
       }
       RETURN;
@@ -775,13 +796,13 @@ PP(pp_right_shift)
 {
     dSP; dATARGET; tryAMAGICbin(rshift,opASSIGN); 
     {
-      IV shift = POPi;
+      IBW shift = POPi;
       if (op->op_private & HINT_INTEGER) {
-	IV i = TOPi;
+	IBW i = TOPi;
 	SETi( i >> shift );
       }
       else {
-	UV u = TOPu;
+	UBW u = TOPu;
 	SETu( u >> shift );
       }
       RETURN;
@@ -908,15 +929,22 @@ PP(pp_sge)
     }
 }
 
+PP(pp_seq)
+{
+    dSP; tryAMAGICbinSET(seq,0); 
+    {
+      dPOPTOPssrl;
+      SETs( sv_eq(left, right) ? &sv_yes : &sv_no );
+      RETURN;
+    }
+}
+
 PP(pp_sne)
 {
     dSP; tryAMAGICbinSET(sne,0); 
     {
       dPOPTOPssrl;
-      bool ne = ((op->op_private & OPpLOCALE)
-		 ? (sv_cmp_locale(left, right) != 0)
-		 : !sv_eq(left, right));
-      SETs( ne ? &sv_yes : &sv_no );
+      SETs( !sv_eq(left, right) ? &sv_yes : &sv_no );
       RETURN;
     }
 }
@@ -940,11 +968,14 @@ PP(pp_bit_and)
     {
       dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
-	UV value = SvUV(left) & SvUV(right); 
-	if (op->op_private & HINT_INTEGER)
-	  SETi( (IV)value );
-	else
+	if (op->op_private & HINT_INTEGER) {
+	  IBW value = SvIV(left) & SvIV(right); 
+	  SETi( value );
+	}
+	else {
+	  UBW value = SvUV(left) & SvUV(right); 
 	  SETu( value );
+	}
       }
       else {
 	do_vop(op->op_type, TARG, left, right);
@@ -960,11 +991,14 @@ PP(pp_bit_xor)
     {
       dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
-	UV value = SvUV(left) ^ SvUV(right);
-	if (op->op_private & HINT_INTEGER)
-	  SETi( (IV)value );
-	else
+	if (op->op_private & HINT_INTEGER) {
+	  IBW value = SvIV(left) ^ SvIV(right); 
+	  SETi( value );
+	}
+	else {
+	  UBW value = SvUV(left) ^ SvUV(right); 
 	  SETu( value );
+	}
       }
       else {
 	do_vop(op->op_type, TARG, left, right);
@@ -980,11 +1014,14 @@ PP(pp_bit_or)
     {
       dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
-	UV value = SvUV(left) | SvUV(right);
-	if (op->op_private & HINT_INTEGER)
-	  SETi( (IV)value );
-	else
+	if (op->op_private & HINT_INTEGER) {
+	  IBW value = SvIV(left) | SvIV(right); 
+	  SETi( value );
+	}
+	else {
+	  UBW value = SvUV(left) | SvUV(right); 
 	  SETu( value );
+	}
       }
       else {
 	do_vop(op->op_type, TARG, left, right);
@@ -1041,11 +1078,14 @@ PP(pp_complement)
     {
       dTOPss;
       if (SvNIOKp(sv)) {
-	UV value = ~SvUV(sv);
-	if (op->op_private & HINT_INTEGER)
-	  SETi( (IV)value );
-	else
+	if (op->op_private & HINT_INTEGER) {
+	  IBW value = ~SvIV(sv);
+	  SETi( value );
+	}
+	else {
+	  UBW value = ~SvUV(sv);
 	  SETu( value );
+	}
       }
       else {
 	register char *tmps;
@@ -1332,7 +1372,7 @@ PP(pp_log)
       double value;
       value = POPn;
       if (value <= 0.0) {
-	NUMERIC_STANDARD();
+	SET_NUMERIC_STANDARD();
 	DIE("Can't take log of %g", value);
       }
       value = log(value);
@@ -1348,7 +1388,7 @@ PP(pp_sqrt)
       double value;
       value = POPn;
       if (value < 0.0) {
-	NUMERIC_STANDARD();
+	SET_NUMERIC_STANDARD();
 	DIE("Can't take sqrt of %g", value);
       }
       value = sqrt(value);
@@ -1637,12 +1677,12 @@ PP(pp_rindex)
 PP(pp_sprintf)
 {
     dSP; dMARK; dORIGMARK; dTARGET;
-#ifdef LC_NUMERIC
+#ifdef USE_LOCALE_NUMERIC
     if (op->op_private & OPpLOCALE)
-	NUMERIC_LOCAL();
+	SET_NUMERIC_LOCAL();
     else
-	NUMERIC_STANDARD();
-#endif /* LC_NUMERIC */
+	SET_NUMERIC_STANDARD();
+#endif
     do_sprintf(TARG, SP-MARK, MARK+1);
     TAINT_IF(SvTAINTED(TARG));
     SP = ORIGMARK;
@@ -2160,15 +2200,19 @@ PP(pp_splice)
 	    Copy(AvARRAY(ary)+offset, MARK, length, SV*);
 	    if (AvREAL(ary)) {
 		EXTEND_MORTAL(length);
-		for (i = length, dst = MARK; i; i--)
-		    sv_2mortal(*dst++);	/* free them eventualy */
+		for (i = length, dst = MARK; i; i--) {
+		    if (!SvIMMORTAL(*dst))
+			sv_2mortal(*dst);	/* free them eventualy */
+		    dst++;
+		}
 	    }
 	    MARK += length - 1;
 	}
 	else {
 	    *MARK = AvARRAY(ary)[offset+length-1];
 	    if (AvREAL(ary)) {
-		sv_2mortal(*MARK);
+		if (!SvIMMORTAL(*MARK))
+		    sv_2mortal(*MARK);
 		for (i = length - 1, dst = &AvARRAY(ary)[offset]; i > 0; i--)
 		    SvREFCNT_dec(*dst++);	/* free them now */
 	    }
@@ -2255,8 +2299,11 @@ PP(pp_splice)
 		Copy(tmparyval, MARK, length, SV*);
 		if (AvREAL(ary)) {
 		    EXTEND_MORTAL(length);
-		    for (i = length, dst = MARK; i; i--)
-			sv_2mortal(*dst++);	/* free them eventualy */
+		    for (i = length, dst = MARK; i; i--) {
+			if (!SvIMMORTAL(*dst))
+			    sv_2mortal(*dst);	/* free them eventualy */
+			dst++;
+		    }
 		}
 		Safefree(tmparyval);
 	    }
@@ -2265,7 +2312,8 @@ PP(pp_splice)
 	else if (length--) {
 	    *MARK = tmparyval[length];
 	    if (AvREAL(ary)) {
-		sv_2mortal(*MARK);
+		if (!SvIMMORTAL(*MARK))
+		    sv_2mortal(*MARK);
 		while (length-- > 0)
 		    SvREFCNT_dec(tmparyval[length]);
 	    }
@@ -2300,7 +2348,7 @@ PP(pp_pop)
     dSP;
     AV *av = (AV*)POPs;
     SV *sv = av_pop(av);
-    if (sv != &sv_undef && AvREAL(av))
+    if (!SvIMMORTAL(sv) && AvREAL(av))
 	(void)sv_2mortal(sv);
     PUSHs(sv);
     RETURN;
@@ -2314,7 +2362,7 @@ PP(pp_shift)
     EXTEND(SP, 1);
     if (!sv)
 	RETPUSHUNDEF;
-    if (sv != &sv_undef && AvREAL(av))
+    if (!SvIMMORTAL(sv) && AvREAL(av))
 	(void)sv_2mortal(sv);
     PUSHs(sv);
     RETURN;
@@ -2416,6 +2464,7 @@ PP(pp_unpack)
 {
     dSP;
     dPOPPOPssrl;
+    SV **oldsp = sp;
     SV *sv;
     STRLEN llen;
     STRLEN rlen;
@@ -3090,6 +3139,8 @@ PP(pp_unpack)
 	    checksum = 0;
 	}
     }
+    if (sp == oldsp && GIMME != G_ARRAY)
+	PUSHs(&sv_undef);
     RETURN;
 }
 

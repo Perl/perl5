@@ -20,8 +20,6 @@
 #undef NO_EMBED
 #define NO_EMBED
 #undef MULTIPLICITY
-#undef HIDEMYMALLOC
-#undef EMBEDMYMALLOC
 #undef USE_STDIO
 #define USE_STDIO
 #endif /* PERL_FOR_X2P */
@@ -190,13 +188,27 @@
 #include <ctype.h>
 #endif /* USE_NEXT_CTYPE */
 
-#ifdef I_LOCALE
-#include <locale.h>
-#endif
-
 #ifdef METHOD 	/* Defined by OSF/1 v3.0 by ctype.h */
 #undef METHOD
 #endif
+
+#ifdef I_LOCALE
+#   include <locale.h>
+#endif
+
+#if !defined(NO_LOCALE) && defined(HAS_SETLOCALE)
+#   define USE_LOCALE
+#   if !defined(NO_LOCALE_COLLATE) && defined(LC_COLLATE) \
+       && defined(HAS_STRXFRM)
+#	define USE_LOCALE_COLLATE
+#   endif
+#   if !defined(NO_LOCALE_CTYPE) && defined(LC_CTYPE)
+#	define USE_LOCALE_CTYPE
+#   endif
+#   if !defined(NO_LOCALE_NUMERIC) && defined(LC_NUMERIC)
+#	define USE_LOCALE_NUMERIC
+#   endif
+#endif /* !NO_LOCALE && HAS_SETLOCALE */
 
 #include <setjmp.h>
 
@@ -262,10 +274,6 @@
 #define strrchr rindex
 #endif
 
-#if defined(mips) && defined(ultrix) && !defined(__STDC__)
-#   undef HAS_MEMCMP
-#endif
-
 #ifdef I_MEMORY
 #  include <memory.h>
 #endif
@@ -303,18 +311,6 @@
 #   endif
 #endif /* HAS_MEMSET */
 
-#ifdef HAS_MEMCMP
-#  if !defined(STANDARD_C) && !defined(I_STRING) && !defined(I_MEMORY)
-#    ifndef memcmp
-	extern int memcmp _((char*, char*, int));
-#    endif
-#  endif
-#else
-#   ifndef memcmp
-#	define memcmp 	my_memcmp
-#   endif
-#endif /* HAS_MEMCMP */
-
 #if !defined(HAS_MEMMOVE) && !defined(memmove)
 #   if defined(HAS_BCOPY) && defined(HAS_SAFE_BCOPY)
 #	define memmove(d,s,l) bcopy(s,d,l)
@@ -326,6 +322,31 @@
 #	endif
 #   endif
 #endif
+
+#if defined(mips) && defined(ultrix) && !defined(__STDC__)
+#   undef HAS_MEMCMP
+#endif
+
+#if defined(HAS_MEMCMP) && defined(HAS_SANE_MEMCMP)
+#  if !defined(STANDARD_C) && !defined(I_STRING) && !defined(I_MEMORY)
+#    ifndef memcmp
+	extern int memcmp _((char*, char*, int));
+#    endif
+#  endif
+#  ifdef BUGGY_MSC
+  #  pragma function(memcmp)
+#  endif
+#else
+#   ifndef memcmp
+#	define memcmp 	my_memcmp
+#   endif
+#endif /* HAS_MEMCMP && HAS_SANE_MEMCMP */
+
+#ifndef HAS_BCMP
+#   ifndef bcmp
+#	define bcmp(s1,s2,l) memcmp(s1,s2,l)
+#   endif
+#endif /* !HAS_BCMP */
 
 #ifdef I_NETINET_IN
 #   include <netinet/in.h>
@@ -1342,7 +1363,7 @@ EXT SV  * psig_name[];
 /* fast case folding tables */
 
 #ifdef DOINIT
-EXT const unsigned char fold[] = {
+EXTCONST  unsigned char fold[] = {
 	0,	1,	2,	3,	4,	5,	6,	7,
 	8,	9,	10,	11,	12,	13,	14,	15,
 	16,	17,	18,	19,	20,	21,	22,	23,
@@ -1876,7 +1897,7 @@ EXT MGVTBL vtbl_uvar =	{magic_getuvar,
 				magic_setuvar,
 					0,	0,	0};
 
-#ifdef LC_COLLATE
+#ifdef USE_LOCALE_COLLATE
 EXT MGVTBL vtbl_collxfrm = {0,
 				magic_setcollxfrm,
 					0,	0,	0};
@@ -1913,7 +1934,7 @@ EXT MGVTBL vtbl_bm;
 EXT MGVTBL vtbl_fm;
 EXT MGVTBL vtbl_uvar;
 
-#ifdef HAS_STRXFRM
+#ifdef USE_LOCALE_COLLATE
 EXT MGVTBL vtbl_collxfrm;
 #endif
 
@@ -2008,32 +2029,39 @@ enum {
   copy_amg,	neg_amg
 };
 #endif /* OVERLOAD */
-  
-#ifdef LC_COLLATE
+
+#ifdef USE_LOCALE_COLLATE
 EXT U32		collation_ix;		/* Collation generation index */
 EXT char *	collation_name;		/* Name of current collation */
 EXT bool	collation_standard INIT(TRUE); /* Assume simple collation */
 EXT Size_t	collxfrm_base;		/* Basic overhead in *xfrm() */
 EXT Size_t	collxfrm_mult INIT(2);	/* Expansion factor in *xfrm() */
-#endif /* LC_COLLATE */
+#endif /* USE_LOCALE_COLLATE */
 
-#ifdef LC_NUMERIC
+#ifdef USE_LOCALE_NUMERIC
 
 EXT char *	numeric_name;		/* Name of current numeric locale */
 EXT bool	numeric_standard INIT(TRUE); /* Assume simple numerics */
 EXT bool	numeric_local INIT(TRUE);    /* Assume local numerics */
 
-#define NUMERIC_STANDARD() \
-    STMT_START { if (! numeric_standard) perl_numeric_standard(); } STMT_END
-#define NUMERIC_LOCAL() \
-    STMT_START { if (! numeric_local) perl_numeric_local(); } STMT_END
+#define SET_NUMERIC_STANDARD() \
+    STMT_START {				\
+	if (! numeric_standard)			\
+	    perl_set_numeric_standard();	\
+    } STMT_END
 
-#else /* !LC_NUMERIC */
+#define SET_NUMERIC_LOCAL() \
+    STMT_START {				\
+	if (! numeric_local)			\
+	    perl_set_numeric_local();		\
+    } STMT_END
 
-#define NUMERIC_STANDARD()  /**/
-#define NUMERIC_LOCAL()     /**/
+#else /* !USE_LOCALE_NUMERIC */
 
-#endif /* !LC_NUMERIC */
+#define SET_NUMERIC_STANDARD()  /**/
+#define SET_NUMERIC_LOCAL()     /**/
+
+#endif /* !USE_LOCALE_NUMERIC */
 
 #if !defined(PERLIO_IS_STDIO) && defined(HAS_ATTRIBUTE)
 /* 

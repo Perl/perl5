@@ -1867,8 +1867,8 @@ EXT OP * (*check[]) _((OP *op)) = {
 	ck_scmp,	/* sgt */
 	ck_scmp,	/* sle */
 	ck_scmp,	/* sge */
-	ck_scmp,	/* seq */
-	ck_scmp,	/* sne */
+	ck_null,	/* seq */
+	ck_null,	/* sne */
 	ck_scmp,	/* scmp */
 	ck_bitop,	/* bit_and */
 	ck_bitop,	/* bit_xor */

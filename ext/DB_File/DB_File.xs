@@ -3,10 +3,14 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess (pmarquess@bfsec.bt.co.uk)
- last modified 27th Nov 1996
- version 1.06
+ last modified 3rd Dec 1996
+ version 1.08
 
  All comments/suggestions/problems are welcome
+
+     Copyright (c) 1995, 1996 Paul Marquess. All rights reserved.
+     This program is free software; you can redistribute it and/or
+     modify it under the same terms as Perl itself.
 
  Changes:
 	0.1 - 	Initial Release
@@ -28,6 +32,8 @@
 	1.05 -  Added logic to allow prefix & hash types to be specified via
 		Makefile.PL
 	1.06 -  Minor namespace cleanup: Localized PrintBtree.
+	1.07 -  Fixed bug with RECNO, where bval wasn't defaulting to "\n". 
+	1.08 -  No change to DB_File.xs
 
 */
 
@@ -270,7 +276,7 @@ RECNOINFO * recno ;
     printf ("  psize     = %d\n", recno->psize) ;
     printf ("  lorder    = %d\n", recno->lorder) ;
     printf ("  reclen    = %d\n", recno->reclen) ;
-    printf ("  bval      = %d\n", recno->bval) ;
+    printf ("  bval      = %d 0x%x\n", recno->bval, recno->bval) ;
     printf ("  bfname    = %d [%s]\n", recno->bfname, recno->bfname) ;
 }
 
@@ -361,7 +367,11 @@ SV *   sv ;
         if (! SvROK(sv) )
             croak ("type parameter is not a reference") ;
 
-        action = (HV*)SvRV(sv);
+        svp  = hv_fetch( (HV*)SvRV(sv), "GOT", 3, FALSE) ;
+        if (svp && SvOK(*svp))
+            action  = (HV*) SvRV(*svp) ;
+	else
+	    croak("internal error") ;
 
         if (sv_isa(sv, "DB_File::HASHINFO"))
         {
@@ -476,10 +486,12 @@ SV *   sv ;
 	    }
          
             svp = hv_fetch(action, "bfname", 6, FALSE); 
-            if (svp) {
+            if (svp && SvOK(*svp)) {
 		char * ptr = SvPV(*svp,na) ;
-                info->recno.bfname = (char*) na ? ptr : 0 ;
+                info->recno.bfname = (char*) na ? ptr : NULL ;
 	    }
+	    else
+		info->recno.bfname = NULL ;
 
             PrintRecno(info) ;
         }

@@ -28,7 +28,7 @@ SV**	av_store _((AV* ar, I32 key, SV* val));
 void	av_undef _((AV* ar));
 void	av_unshift _((AV* ar, I32 num));
 OP*	bind_match _((I32 type, OP* left, OP* pat));
-OP*	block_end _((int line, int floor, OP* seq));
+OP*	block_end _((I32 floor, OP* seq));
 int	block_start _((int full));
 void	boot_core_UNIVERSAL _((void));
 void	calllist _((AV* list));
@@ -234,7 +234,7 @@ char*	my_bzero _((char* loc, I32 len));
 void	my_exit _((U32 status)) __attribute__((noreturn));
 I32	my_lstat _((void));
 #ifndef HAS_MEMCMP
-I32	my_memcmp _((unsigned char* s1, unsigned char* s2, I32 len));
+I32	my_memcmp _((char* s1, char* s2, I32 len));
 #endif
 I32	my_pclose _((PerlIO* ptr));
 PerlIO*	my_popen _((char* cmd, char* mode));
@@ -329,8 +329,8 @@ int	perl_init_i18nl14n _((int printwarn));
 void	perl_new_collate _((char *newcoll));
 void	perl_new_ctype _((char *newctype));
 void	perl_new_numeric _((char *newcoll));
-void	perl_numeric_local _((void));
-void	perl_numeric_standard _((void));
+void	perl_set_numeric_local _((void));
+void	perl_set_numeric_standard _((void));
 int	perl_parse _((PerlInterpreter* sv_interp, void(*xsinit)(void), int argc, char** argv, char** env));
 void	perl_require_pv _((char* pv));
 #define perl_requirepv perl_require_pv

@@ -18,14 +18,6 @@
 #include <signal.h>
 #endif
 
-#ifdef BUGGY_MSC
- #pragma function(memcmp)
-#endif /* BUGGY_MSC */
-
-#ifdef BUGGY_MSC
- #pragma intrinsic(memcmp)
-#endif /* BUGGY_MSC */
-
 I32
 do_trans(sv,arg)
 SV *sv;
@@ -507,7 +499,7 @@ register SV *sv;
 		    goto nope;
 		len -= rslen - 1;
 		s -= rslen - 1;
-		if (memcmp(s, rsptr, rslen))
+		if (memNE(s, rsptr, rslen))
 		    goto nope;
 		count += rslen;
 	    }

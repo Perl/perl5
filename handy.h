@@ -124,6 +124,14 @@ typedef unsigned short	U16;
 #define strnNE(s1,s2,l) (strncmp(s1,s2,l))
 #define strnEQ(s1,s2,l) (!strncmp(s1,s2,l))
 
+#ifdef HAS_MEMCMP
+#  define memNE(s1,s2,l) (memcmp(s1,s2,l))
+#  define memEQ(s1,s2,l) (!memcmp(s1,s2,l))
+#else
+#  define memNE(s1,s2,l) (bcmp(s1,s2,l))
+#  define memEQ(s1,s2,l) (!bcmp(s1,s2,l))
+#endif
+
 /*
  * Character classes.
  *

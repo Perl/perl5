@@ -1,5 +1,6 @@
 #!/usr/bin/perl
 
+unlink "embed.h";
 open(EM, ">embed.h") || die "Can't create embed.h: $!\n";
 
 print EM <<'END';

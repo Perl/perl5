@@ -1255,7 +1255,7 @@ yylex()
 	/* Force them to make up their mind on "@foo". */
 	if (pit == '@' && lex_state != LEX_NORMAL && !lex_brackets) {
 	    GV *gv = gv_fetchpv(tokenbuf+1, FALSE, SVt_PVAV);
-	    if (!gv || (tokenbuf[0] == '@') ? !GvAV(gv) : !GvHV(gv)) {
+	    if (!gv || ((tokenbuf[0] == '@') ? !GvAV(gv) : !GvHV(gv))) {
 		char tmpbuf[1024];
 		sprintf(tmpbuf, "Literal %s now requires backslash", tokenbuf);
 		yyerror(tmpbuf);
@@ -4341,8 +4341,6 @@ char *start;
     pm = (PMOP*)newPMOP(OP_MATCH, 0);
     if (multi_open == '?')
 	pm->op_pmflags |= PMf_ONCE;
-    if (hints & HINT_LOCALE)
-	pm->op_pmflags |= PMf_LOCALE;
     while (*s && strchr("iogmsx", *s))
 	pmflag(&pm->op_pmflags,*s++);
     pm->op_pmpermflags = pm->op_pmflags;
@@ -4570,7 +4568,7 @@ register char *s;
     if (!rsfp) {
 	d = s;
 	while (s < bufend &&
-	  (*s != term || memcmp(s,tokenbuf,len) != 0) ) {
+	  (*s != term || memNE(s,tokenbuf,len)) ) {
 	    if (*s++ == '\n')
 		curcop->cop_line++;
 	}
@@ -4603,7 +4601,7 @@ register char *s;
 	      (I32)curcop->cop_line,sv);
 	}
 	bufend = SvPVX(linestr) + SvCUR(linestr);
-	if (*s == term && memcmp(s,tokenbuf,len) == 0) {
+	if (*s == term && memEQ(s,tokenbuf,len)) {
 	    s = bufend - 1;
 	    *s = ' ';
 	    sv_catsv(linestr,herewas);
@@ -4882,7 +4880,7 @@ char *start;
 	}
 	*d = '\0';
 	sv = NEWSV(92,0);
-	NUMERIC_STANDARD();
+	SET_NUMERIC_STANDARD();
 	value = atof(tokenbuf);
 	tryi32 = I_32(value);
 	if (!floatit && (double)tryi32 == value)

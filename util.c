@@ -19,6 +19,10 @@
 #include <signal.h>
 #endif
 
+#ifndef SIG_ERR
+# define SIG_ERR ((Sighandler_t) -1)
+#endif
+
 /* XXX If this causes problems, set i_unistd=undef in the hint file.  */
 #ifdef I_UNISTD
 #  include <unistd.h>
@@ -400,8 +404,6 @@ char *lend;
     return Nullch;
 }
 
-#ifdef LC_CTYPE
-
 /*
  * Set up for a new ctype locale.
  */
@@ -409,6 +411,8 @@ void
 perl_new_ctype(newctype)
     char *newctype;
 {
+#ifdef USE_LOCALE_CTYPE
+
     int i;
 
     for (i = 0; i < 256; i++) {
@@ -419,11 +423,9 @@ perl_new_ctype(newctype)
 	else
 	    fold_locale[i] = i;
     }
+
+#endif /* USE_LOCALE_CTYPE */
 }
-
-#endif /* LC_CTYPE */
-
-#ifdef LC_COLLATE
 
 /*
  * Set up for a new collation locale.
@@ -432,16 +434,16 @@ void
 perl_new_collate(newcoll)
     char *newcoll;
 {
+#ifdef USE_LOCALE_COLLATE
+
     if (! newcoll) {
 	if (collation_name) {
 	    ++collation_ix;
 	    Safefree(collation_name);
 	    collation_name = NULL;
 	    collation_standard = TRUE;
-#ifdef HAS_STRXFRM
 	    collxfrm_base = 0;
 	    collxfrm_mult = 2;
-#endif /* HAS_STRXFRM */
 	}
 	return;
     }
@@ -452,7 +454,6 @@ perl_new_collate(newcoll)
 	collation_name = savepv(newcoll);
 	collation_standard = (strEQ(newcoll, "C") || strEQ(newcoll, "POSIX"));
 
-#ifdef HAS_STRXFRM
 	{
 	  /*  2: at most so many chars ('a', 'b'). */
 	  /* 50: surely no system expands a char more. */
@@ -466,13 +467,10 @@ perl_new_collate(newcoll)
 	  collxfrm_base = (fa > mult) ? (fa - mult) : 0;
 	  collxfrm_mult = mult;
 	}
-#endif /* HAS_STRXFRM */
     }
+
+#endif /* USE_LOCALE_COLLATE */
 }
-
-#endif /* LC_COLLATE */
-
-#ifdef LC_NUMERIC
 
 /*
  * Set up for a new numeric locale.
@@ -481,6 +479,8 @@ void
 perl_new_numeric(newnum)
     char *newnum;
 {
+#ifdef USE_LOCALE_NUMERIC
+
     if (! newnum) {
 	if (numeric_name) {
 	    Safefree(numeric_name);
@@ -497,10 +497,14 @@ perl_new_numeric(newnum)
 	numeric_standard = (strEQ(newnum, "C") || strEQ(newnum, "POSIX"));
 	numeric_local = TRUE;
     }
+
+#endif /* USE_LOCALE_NUMERIC */
 }
 
+#ifdef USE_LOCALE_NUMERIC
+
 void
-perl_numeric_standard()
+perl_set_numeric_standard()
 {
     if (! numeric_standard) {
 	setlocale(LC_NUMERIC, "C");
@@ -510,7 +514,7 @@ perl_numeric_standard()
 }
 
 void
-perl_numeric_local()
+perl_set_numeric_local()
 {
     if (! numeric_local) {
 	setlocale(LC_NUMERIC, numeric_name);
@@ -519,9 +523,12 @@ perl_numeric_local()
     }
 }
 
-#endif /* LC_NUMERIC */
+#endif /* USE_LOCALE_NUMERIC */
 
-/* Initialize locale awareness */
+
+/*
+ * Initialize locale awareness.
+ */
 int
 perl_init_i18nl10n(printwarn)	
     int printwarn;
@@ -533,22 +540,22 @@ perl_init_i18nl10n(printwarn)
      *   -1 = fallback to C locale failed
      */
 
-#ifdef HAS_SETLOCALE
+#ifdef USE_LOCALE
 
     char *lc_all     = getenv("LC_ALL");
     char *lang       = getenv("LANG");
-#ifdef LC_CTYPE
+#ifdef USE_LOCALE_CTYPE
     char *lc_ctype   = getenv("LC_CTYPE");
     char *curctype   = NULL;
-#endif /* LC_CTYPE */
-#ifdef LC_COLLATE
+#endif /* USE_LOCALE_CTYPE */
+#ifdef USE_LOCALE_COLLATE
     char *lc_collate = getenv("LC_COLLATE");
     char *curcoll    = NULL;
-#endif /* LC_COLLATE */
-#ifdef LC_NUMERIC
+#endif /* USE_LOCALE_COLLATE */
+#ifdef USE_LOCALE_NUMERIC
     char *lc_numeric = getenv("LC_NUMERIC");
     char *curnum     = NULL;
-#endif /* LC_NUMERIC */
+#endif /* USE_LOCALE_NUMERIC */
     bool setlocale_failure = FALSE;
     char *subloc;
 
@@ -560,18 +567,18 @@ perl_init_i18nl10n(printwarn)
     subloc = "";
 #endif /* LC_ALL */
 
-#ifdef LC_CTYPE
+#ifdef USE_LOCALE_CTYPE
     if (! (curctype = setlocale(LC_CTYPE, subloc)))
 	setlocale_failure = TRUE;
-#endif /* LC_CTYPE */
-#ifdef LC_COLLATE
+#endif /* USE_LOCALE_CTYPE */
+#ifdef USE_LOCALE_COLLATE
     if (! (curcoll = setlocale(LC_COLLATE, subloc)))
 	setlocale_failure = TRUE;
-#endif /* LC_COLLATE */
-#ifdef LC_NUMERIC
+#endif /* USE_LOCALE_COLLATE */
+#ifdef USE_LOCALE_NUMERIC
     if (! (curnum = setlocale(LC_NUMERIC, subloc)))
 	setlocale_failure = TRUE;
-#endif /* LC_NUMERIC */
+#endif /* USE_LOCALE_NUMERIC */
 
     if (setlocale_failure && (lc_all || lang)) {
 	char *perl_badlang;
@@ -582,18 +589,18 @@ perl_init_i18nl10n(printwarn)
 	  
 	    PerlIO_printf(PerlIO_stderr(),
 	       "perl: warning: Setting locale failed for the categories:\n\t");
-#ifdef LC_CTYPE
+#ifdef USE_LOCALE_CTYPE
 	    if (! curctype)
-		PerlIO_printf(PerlIO_stderr(), "LC_CTYPE ");
-#endif /* LC_CTYPE */
-#ifdef LC_COLLATE
+		PerlIO_printf(PerlIO_stderr(), "USE_LOCALE_CTYPE ");
+#endif /* USE_LOCALE_CTYPE */
+#ifdef USE_LOCALE_COLLATE
 	    if (! curcoll)
-		PerlIO_printf(PerlIO_stderr(), "LC_COLLATE ");
-#endif /* LC_COLLATE */
-#ifdef LC_NUMERIC
+		PerlIO_printf(PerlIO_stderr(), "USE_LOCALE_COLLATE ");
+#endif /* USE_LOCALE_COLLATE */
+#ifdef USE_LOCALE_NUMERIC
 	    if (! curnum)
-		PerlIO_printf(PerlIO_stderr(), "LC_NUMERIC ");
-#endif /* LC_NUMERIC */
+		PerlIO_printf(PerlIO_stderr(), "USE_LOCALE_NUMERIC ");
+#endif /* USE_LOCALE_NUMERIC */
 	    PerlIO_printf(PerlIO_stderr(), "\n");
 
 	    PerlIO_printf(PerlIO_stderr(),
@@ -604,30 +611,30 @@ perl_init_i18nl10n(printwarn)
 			  lc_all ? '"' : '(',
 			  lc_all ? lc_all : "unset",
 			  lc_all ? '"' : ')');
-#ifdef LC_CTYPE
+#ifdef USE_LOCALE_CTYPE
 	    if (! curctype)
 		PerlIO_printf(PerlIO_stderr(),
 			      "\tLC_CTYPE = %c%s%c,\n",
 			      lc_ctype ? '"' : '(',
 			      lc_ctype ? lc_ctype : "unset",
 			      lc_ctype ? '"' : ')');
-#endif /* LC_CTYPE */
-#ifdef LC_COLLATE
+#endif /* USE_LOCALE_CTYPE */
+#ifdef USE_LOCALE_COLLATE
 	    if (! curcoll)
 		PerlIO_printf(PerlIO_stderr(),
 			      "\tLC_COLLATE = %c%s%c,\n",
 			      lc_collate ? '"' : '(',
 			      lc_collate ? lc_collate : "unset",
 			      lc_collate ? '"' : ')');
-#endif /* LC_COLLATE */
-#ifdef LC_NUMERIC
-	    if (! curcoll)
+#endif /* USE_LOCALE_COLLATE */
+#ifdef USE_LOCALE_NUMERIC
+	    if (! curnum)
 		PerlIO_printf(PerlIO_stderr(),
 			      "\tLC_NUMERIC = %c%s%c,\n",
 			      lc_numeric ? '"' : '(',
 			      lc_numeric ? lc_numeric : "unset",
 			      lc_numeric ? '"' : ')');
-#endif /* LC_NUMERIC */
+#endif /* USE_LOCALE_NUMERIC */
 	    PerlIO_printf(PerlIO_stderr(),
 			  "\tLANG = %c%s%c\n",
 			  lang ? '"' : ')',
@@ -645,15 +652,15 @@ perl_init_i18nl10n(printwarn)
 	    PerlIO_printf(PerlIO_stderr(),
 			"perl: warning: Falling back to the \"C\" locale.\n");
 	    if (setlocale(LC_ALL, "C")) {
-#ifdef LC_CTYPE
+#ifdef USE_LOCALE_CTYPE
 		curctype = "C";
-#endif /* LC_CTYPE */
-#ifdef LC_COLLATE
+#endif /* USE_LOCALE_CTYPE */
+#ifdef USE_LOCALE_COLLATE
 		curcoll = "C";
-#endif /* LC_COLLATE */
-#ifdef LC_NUMERIC
+#endif /* USE_LOCALE_COLLATE */
+#ifdef USE_LOCALE_NUMERIC
 		curnum = "C";
-#endif /* LC_NUMERIC */
+#endif /* USE_LOCALE_NUMERIC */
 	    }
 	    else {
 		PerlIO_printf(PerlIO_stderr(),
@@ -667,19 +674,19 @@ perl_init_i18nl10n(printwarn)
 #endif /* ! LC_ALL */
     }
 
-#ifdef LC_CTYPE
+#ifdef USE_LOCALE_CTYPE
     perl_new_ctype(curctype);
-#endif /* LC_NUMERIC */
+#endif /* USE_LOCALE_CTYPE */
 
-#ifdef LC_COLLATE
+#ifdef USE_LOCALE_COLLATE
     perl_new_collate(curcoll);
-#endif /* LC_NUMERIC */
+#endif /* USE_LOCALE_COLLATE */
 
-#ifdef LC_NUMERIC
+#ifdef USE_LOCALE_NUMERIC
     perl_new_numeric(curnum);
-#endif /* LC_NUMERIC */
+#endif /* USE_LOCALE_NUMERIC */
 
-#endif /* #if defined(HAS_SETLOCALE) */
+#endif /* USE_LOCALE */
 
     return ok;
 }
@@ -692,7 +699,7 @@ perl_init_i18nl14n(printwarn)
     perl_init_i18nl10n(printwarn);
 }
 
-#ifdef HAS_STRXFRM
+#ifdef USE_LOCALE_COLLATE
 
 /*
  * mem_collxfrm() is a bit like strxfrm() but with two important
@@ -752,7 +759,7 @@ mem_collxfrm(s, len, xlen)
     return NULL;
 }
 
-#endif /* HAS_STRXFRM */
+#endif /* USE_LOCALE_COLLATE */
 
 void
 fbm_compile(sv)
@@ -824,12 +831,12 @@ SV *littlestr;
 	    return Nullch;
 	little = (unsigned char*)SvPVX(littlestr);
 	s = bigend - littlelen;
-	if (*s == *little && memcmp((char*)s,(char*)little,littlelen)==0)
+	if (*s == *little && memEQ((char*)s,(char*)little,littlelen))
 	    return (char*)s;		/* how sweet it is */
 	else if (bigend[-1] == '\n' && little[littlelen-1] != '\n'
 		 && s > big) {
 	    s--;
-	    if (*s == *little && memcmp((char*)s,(char*)little,littlelen)==0)
+	    if (*s == *little && memEQ((char*)s,(char*)little,littlelen))
 		return (char*)s;
 	}
 	return Nullch;
@@ -991,159 +998,6 @@ register I32 len;
     return newaddr;
 }
 
-#if !defined(I_STDARG) && !defined(I_VARARGS)
-
-/*
- * Fallback on the old hackers way of doing varargs
- */
-
-/*VARARGS1*/
-char *
-mess(pat,a1,a2,a3,a4)
-char *pat;
-long a1, a2, a3, a4;
-{
-    char *s;
-    char *s_start;
-    I32 usermess = strEQ(pat,"%s");
-    SV *tmpstr;
-
-    s = s_start = buf;
-    if (usermess) {
-	tmpstr = sv_newmortal();
-	sv_setpv(tmpstr, (char*)a1);
-	*s++ = SvPVX(tmpstr)[SvCUR(tmpstr)-1];
-    }
-    else {
-	(void)sprintf(s,pat,a1,a2,a3,a4);
-	s += strlen(s);
-    }
-
-    if (s[-1] != '\n') {
-	if (dirty)
-	    strcpy(s, " during global destruction.\n");
-	else {
-	    if (curcop->cop_line) {
-		(void)sprintf(s," at %s line %ld",
-		  SvPVX(GvSV(curcop->cop_filegv)), (long)curcop->cop_line);
-		s += strlen(s);
-	    }
-	    if (GvIO(last_in_gv) &&
-		IoLINES(GvIOp(last_in_gv)) ) {
-		(void)sprintf(s,", <%s> %s %ld",
-		  last_in_gv == argvgv ? "" : GvENAME(last_in_gv),
-		  strEQ(rs,"\n") ? "line" : "chunk", 
-		  (long)IoLINES(GvIOp(last_in_gv)));
-		s += strlen(s);
-	    }
-	    (void)strcpy(s,".\n");
-	    s += 2;
-	}
-	if (usermess)
-	    sv_catpv(tmpstr,buf+1);
-    }
-
-    if (s - s_start >= sizeof(buf)) {	/* Ooops! */
-	if (usermess)
-	    PerlIO_puts(PerlIO_stderr(), SvPVX(tmpstr));
-	else
-	    PerlIO_puts(PerlIO_stderr(), buf);
-	PerlIO_puts(PerlIO_stderr(),"panic: message overflow - memory corrupted!\n");
-	my_exit(1);
-    }
-    if (usermess)
-	return SvPVX(tmpstr);
-    else
-	return buf;
-}
-
-/*VARARGS1*/
-void croak(pat,a1,a2,a3,a4)
-char *pat;
-long a1, a2, a3, a4;
-{
-    char *tmps;
-    char *message;
-    HV *stash;
-    GV *gv;
-    CV *cv;
-
-    message = mess(pat,a1,a2,a3,a4);
-    if (diehook) {
-	SV *olddiehook = diehook;
-	diehook = Nullsv;			/* sv_2cv might call croak() */
-	cv = sv_2cv(olddiehook, &stash, &gv, 0);
-	diehook = olddiehook;
-	if (cv && !CvDEPTH(cv)) {
-	    dSP;
-
-	    PUSHMARK(sp);
-	    EXTEND(sp, 1);
-	    PUSHs(sv_2mortal(newSVpv(message,0)));
-	    PUTBACK;
-	    perl_call_sv((SV*)cv, G_DISCARD);
-	}
-    }
-    if (in_eval) {
-	restartop = die_where(message);
-	Siglongjmp(top_env, 3);
-    }
-    PerlIO_puts(PerlIO_stderr(),message);
-    (void)PerlIO_flush(PerlIO_stderr());
-    if (e_tmpname) {
-	if (e_fp) {
-	    PerlIO_close(e_fp);
-	    e_fp = Nullfp;
-	}
-	(void)UNLINK(e_tmpname);
-	Safefree(e_tmpname);
-	e_tmpname = Nullch;
-    }
-    statusvalue = SHIFTSTATUS(statusvalue);
-#ifdef VMS
-    my_exit((U32)vaxc$errno?vaxc$errno:errno?errno:statusvalue?statusvalue:SS$_ABORT);
-#else
-    my_exit((U32)((errno&255)?errno:((statusvalue&255)?statusvalue:255)));
-#endif
-}
-
-/*VARARGS1*/
-void warn(pat,a1,a2,a3,a4)
-char *pat;
-long a1, a2, a3, a4;
-{
-    char *message;
-    SV *sv;
-    HV *stash;
-    GV *gv;
-    CV *cv;
-
-    message = mess(pat,a1,a2,a3,a4);
-    if (warnhook) {
-	SV *oldwarnhook = warnhook;
-	warnhook = Nullsv;	/* sv_2cv might end up calling warn() */
-	cv = sv_2cv(oldwarnhook, &stash, &gv, 0);
-	warnhook = oldwarnhook;
-	if (cv && !CvDEPTH(cv)) {
-	    dSP;
-	    
-	    PUSHMARK(sp);
-	    EXTEND(sp, 1);
-	    PUSHs(sv_2mortal(newSVpv(message,0)));
-	    PUTBACK;
-	    perl_call_sv((SV*)cv, G_DISCARD);
-	    return;
-	}
-    }
-    PerlIO_puts(PerlIO_stderr(),message);
-#ifdef LEAKTEST
-    DEBUG_L(xstat());
-#endif
-    (void)PerlIO_flush(PerlIO_stderr());
-}
-
-#else /* !defined(I_STDARG) && !defined(I_VARARGS) */
-
 #ifdef I_STDARG
 char *
 mess(char *pat, va_list *args)
@@ -1220,6 +1074,61 @@ mess(pat, args)
 }
 
 #ifdef I_STDARG
+OP *
+die(char* pat, ...)
+#else
+/*VARARGS0*/
+OP *
+die(pat, va_alist)
+    char *pat;
+    va_dcl
+#endif
+{
+    va_list args;
+    char *message;
+    int oldrunlevel = runlevel;
+    int was_in_eval = in_eval;
+    HV *stash;
+    GV *gv;
+    CV *cv;
+
+    /* We have to switch back to mainstack or die_where may try to pop
+     * the eval block from the wrong stack if die is being called from a
+     * signal handler.  - dkindred@cs.cmu.edu */
+    if (curstack != mainstack) {
+        dSP;
+        SWITCHSTACK(curstack, mainstack);
+    }
+
+#ifdef I_STDARG
+    va_start(args, pat);
+#else
+    va_start(args);
+#endif
+    message = mess(pat, &args);
+    va_end(args);
+
+    if (diehook && (cv = sv_2cv(diehook, &stash, &gv, 0)) && !CvDEPTH(cv)) {
+	dSP;
+	SV *msg = sv_2mortal(newSVpv(message, 0));
+
+	PUSHMARK(sp);
+	EXTEND(sp, 1);
+	PUSHs(msg);
+	PUTBACK;
+	perl_call_sv((SV*)cv, G_DISCARD);
+
+	/* It's okay for the __DIE__ hook to modify the message. */
+	message = SvPV(msg, na);
+    }
+
+    restartop = die_where(message);
+    if ((!restartop && was_in_eval) || oldrunlevel > 1)
+	Siglongjmp(top_env, 3);
+    return restartop;
+}
+
+#ifdef I_STDARG
 void
 croak(char* pat, ...)
 #else
@@ -1250,12 +1159,16 @@ croak(pat, va_alist)
 	diehook = olddiehook;
 	if (cv && !CvDEPTH(cv)) {
 	    dSP;
+	    SV *msg = sv_2mortal(newSVpv(message, 0));
 
 	    PUSHMARK(sp);
 	    EXTEND(sp, 1);
-	    PUSHs(sv_2mortal(newSVpv(message,0)));
+	    PUSHs(msg);
 	    PUTBACK;
 	    perl_call_sv((SV*)cv, G_DISCARD);
+
+	    /* It's okay for the __DIE__ hook to modify the message. */
+	    message = SvPV(msg, na);
 	}
     }
     if (in_eval) {
@@ -1327,7 +1240,6 @@ warn(pat,va_alist)
 #endif
     (void)PerlIO_flush(PerlIO_stderr());
 }
-#endif /* !defined(I_STDARG) && !defined(I_VARARGS) */
 
 #ifndef VMS  /* VMS' my_setenv() is in VMS.c */
 void
@@ -1439,22 +1351,24 @@ register I32 len;
 }
 #endif
 
-#ifndef HAS_MEMCMP
+#if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
 I32
 my_memcmp(s1,s2,len)
-register unsigned char *s1;
-register unsigned char *s2;
+char *s1;
+char *s2;
 register I32 len;
 {
+    register U8 *a = (U8 *)s1;
+    register U8 *b = (U8 *)s2;
     register I32 tmp;
 
     while (len--) {
-	if (tmp = *s1++ - *s2++)
+	if (tmp = *a++ - *b++)
 	    return tmp;
     }
     return 0;
 }
-#endif /* HAS_MEMCMP */
+#endif /* !HAS_MEMCMP || !HAS_SANE_MEMCMP */
 
 #if defined(I_STDARG) || defined(I_VARARGS)
 #ifndef HAS_VPRINTF
@@ -1799,9 +1713,9 @@ Sighandler_t handler;
     act.sa_flags |= SA_RESTART;	/* SVR4, 4.3+BSD */
 #endif
     if (sigaction(signo, &act, &oact) == -1)
-    	return(SIG_ERR);
+    	return SIG_ERR;
     else
-    	return(oact.sa_handler);
+    	return oact.sa_handler;
 }
 
 Sighandler_t
@@ -1886,7 +1800,7 @@ Sigsave_t *save;
 }
 
 int
-rsignalrestore(signo, save)
+rsignal_restore(signo, save)
 int signo;
 Sigsave_t *save;
 {

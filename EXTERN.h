@@ -15,12 +15,18 @@
  */
 #undef EXT
 #undef dEXT
+#undef EXTCONST
+#undef dEXTCONST
 #if defined(VMS) && !defined(__GNUC__)
 #  define EXT globalref
 #  define dEXT globaldef {"$GLOBAL_RW_VARS"} noshare
+#  define EXTCONST globalref
+#  define dEXTCONST globaldef {"$GLOBAL_RO_VARS"} readonly
 #else
 #  define EXT extern
 #  define dEXT
+#  define EXTCONST extern const
+#  define dEXTCONST const
 #endif
 
 #undef INIT

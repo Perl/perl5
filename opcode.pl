@@ -1,5 +1,6 @@
 #!/usr/bin/perl
 
+unlink "opcode.h";
 open(OC, ">opcode.h") || die "Can't create opcode.h: $!\n";
 select OC;
 
@@ -300,8 +301,8 @@ slt		string lt		ck_scmp		ifs	S S
 sgt		string gt		ck_scmp		ifs	S S
 sle		string le		ck_scmp		ifs	S S
 sge		string ge		ck_scmp		ifs	S S
-seq		string eq		ck_scmp		ifs	S S
-sne		string ne		ck_scmp		ifs	S S
+seq		string eq		ck_null		ifs	S S
+sne		string ne		ck_null		ifs	S S
 scmp		string comparison	ck_scmp		ifst	S S
 
 bit_and		bitwise and		ck_bitop	fst	S S

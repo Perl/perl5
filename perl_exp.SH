@@ -35,8 +35,8 @@ perl_init_i18nl14n
 perl_new_collate
 perl_new_ctype
 perl_new_numeric
-perl_numeric_local
-perl_numeric_standard
+perl_set_numeric_local
+perl_set_numeric_standard
 perl_alloc
 perl_construct
 perl_destruct
