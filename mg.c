@@ -441,8 +441,7 @@ MAGIC *mg;
 		    }
 		    sv_setpvn(sv,s,i);
 		    if (tainting)
-			tainted = (was_tainted || rx->exec_tainted ||
-				   (curpm->op_pmflags & PMf_TAINTMEM));
+			tainted = (was_tainted || rx->exec_tainted);
 		    break;
 		}
 	    }
