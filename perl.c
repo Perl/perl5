@@ -438,6 +438,20 @@ perl_destruct(pTHXx)
 	return;
     }
 
+    /* jettison our possibly duplicated environment */
+
+#ifdef USE_ENVIRON_ARRAY
+    if (environ != PL_origenviron) {
+	I32 i;
+
+	for (i = 0; environ[i]; i++)
+	    Safefree(environ[i]);
+	Safefree(environ);
+
+	environ = PL_origenviron;
+    }
+#endif
+
     /* loosen bonds of global variables */
 
     if(PL_rsfp) {
