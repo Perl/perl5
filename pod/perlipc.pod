@@ -168,6 +168,66 @@ module.  Lamentably, this is almost entirely undocumented, but
 the F<t/lib/posix.t> file from the Perl source distribution has some
 examples in it.
 
+=head2 Handling the SIGHUP Signal in Daemons
+
+A process that usually starts when the system boots and shuts down
+when the system is shut down is called a daemon (Disk And Execution
+MONitor). If a daemon process has a configuration file which is
+modified after the process has been started, there should be a way to
+tell that process to re-read its configuration file, without stopping
+the process. Many daemons provide this mechanism using the C<SIGHUP>
+signal handler. When you want to tell the daemon to re-read the file
+you simply send it the C<SIGHUP> signal.
+
+The implementation of such a mechanism in Perl using a normal signal
+handler works only the first time the signal is sent. The solution to
+this problem is to use C<POSIX> signal handlers if available.
+
+The following example implements a simple daemon, which restarts
+itself every time the C<SIGHUP> signal is received. The actual code is
+located in the subroutine C<code()>, which simply prints some debug
+info to show that it works and should be replaced with the real code.
+
+  #!/usr/bin/perl -w
+  
+  use POSIX ();
+  use FindBin ();
+  use File::Basename ();
+  use File::Spec::Functions;
+  
+  $|=1;
+  
+  # make the daemon cross-platform, so exec always calls the script
+  # itself with the right path, no matter how the script was invoked.
+  my $script = File::Basename::basename($0);
+  my $SELF = catfile $FindBin::Bin, $script;
+  
+  # POSIX unmasks the sigprocmask properly
+  my $sigset = POSIX::SigSet->new();
+  my $action = POSIX::SigAction->new('sigHUP_handler',
+                                     $sigset,
+                                     &POSIX::SA_NODEFER);
+  POSIX::sigaction(&POSIX::SIGHUP, $action);
+  
+  sub sigHUP_handler {
+      print "got SIGHUP\n";
+      exec($SELF, @ARGV) or die "Couldn't restart: $!\n";
+  }
+  
+  code();
+  
+  sub code {
+      print "PID: $$\n";
+      print "ARGV: @ARGV\n";
+      my $c = 0;
+      while (++$c) {
+          sleep 2;
+          print "$c\n";
+      }
+  }
+  __END__
+
+
 =head1 Named Pipes
 
 A named pipe (often referred to as a FIFO) is an old Unix IPC
