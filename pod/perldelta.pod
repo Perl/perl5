@@ -254,6 +254,10 @@ GNU/Hurd is now supported.
 
 Rhapsody is now supported.
 
+=item *
+
+EPOC is is now supported (on Psion 5).
+
 =back
 
 =head1 New tests
@@ -495,17 +499,17 @@ Todo.
 
 =head1 Configuration Changes
 
-You can use "Configure -Uinstallusrbinperl" which causes installperl
-to skip installing perl also as /usr/bin/perl.  This is useful if you
-prefer not to modify /usr/bin for some reason or another but harmful
-because many scripts assume to find Perl in /usr/bin/perl.
-
-=head1 Configuration Changes
+=head2 installusrbinperl
 
 You can use "Configure -Uinstallusrbinperl" which causes installperl
 to skip installing perl also as /usr/bin/perl.  This is useful if you
 prefer not to modify /usr/bin for some reason or another but harmful
 because many scripts assume to find Perl in /usr/bin/perl.
+
+=head2 SOCKS support
+
+You can use "Configure -Dusesocks" which causes Perl to probe
+for the SOCKS proxy protocol library, http://www.socks.nec.com/
 
 =head1 BUGS
 
