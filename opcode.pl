@@ -530,7 +530,7 @@ flop		range (or flop)		ck_null		1
 
 and		logical and		ck_null		|	
 or		logical or		ck_null		|	
-xor		logical xor		ck_null		fs|	S S	
+xor		logical xor		ck_null		fs2	S S	
 cond_expr	conditional expression	ck_null		d|	
 andassign	logical and assignment	ck_null		s|	
 orassign	logical or assignment	ck_null		s|	

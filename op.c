@@ -5779,6 +5779,8 @@ Perl_peep(pTHX_ register OP *o)
 	case OP_GREPWHILE:
 	case OP_AND:
 	case OP_OR:
+	case OP_ANDASSIGN:
+	case OP_ORASSIGN:
 	case OP_COND_EXPR:
 	case OP_RANGE:
 	    o->op_seq = PL_op_seqmax++;
