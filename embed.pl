@@ -1852,9 +1852,9 @@ Apd	|HV*	|get_hv		|const char* name|I32 create
 Apd	|CV*	|get_cv		|const char* name|I32 create
 Ap	|int	|init_i18nl10n	|int printwarn
 Ap	|int	|init_i18nl14n	|int printwarn
-Ap	|void	|new_collate	|const char* newcoll
-Ap	|void	|new_ctype	|const char* newctype
-Ap	|void	|new_numeric	|const char* newcoll
+Ap	|void	|new_collate	|char* newcoll
+Ap	|void	|new_ctype	|char* newctype
+Ap	|void	|new_numeric	|char* newcoll
 Ap	|void	|set_numeric_local
 Ap	|void	|set_numeric_radix
 Ap	|void	|set_numeric_standard
@@ -2521,6 +2521,7 @@ s	|SV*|isa_lookup	|HV *stash|const char *name|int len|int level
 #endif
 
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
+s	|char*	|stdize_locale	|char* locs
 s	|SV*	|mess_alloc
 #  if defined(LEAKTEST)
 s	|void	|xstat		|int

@@ -595,9 +595,9 @@ PERL_CALLCONV HV*	Perl_get_hv(pTHX_ const char* name, I32 create);
 PERL_CALLCONV CV*	Perl_get_cv(pTHX_ const char* name, I32 create);
 PERL_CALLCONV int	Perl_init_i18nl10n(pTHX_ int printwarn);
 PERL_CALLCONV int	Perl_init_i18nl14n(pTHX_ int printwarn);
-PERL_CALLCONV void	Perl_new_collate(pTHX_ const char* newcoll);
-PERL_CALLCONV void	Perl_new_ctype(pTHX_ const char* newctype);
-PERL_CALLCONV void	Perl_new_numeric(pTHX_ const char* newcoll);
+PERL_CALLCONV void	Perl_new_collate(pTHX_ char* newcoll);
+PERL_CALLCONV void	Perl_new_ctype(pTHX_ char* newctype);
+PERL_CALLCONV void	Perl_new_numeric(pTHX_ char* newcoll);
 PERL_CALLCONV void	Perl_set_numeric_local(pTHX);
 PERL_CALLCONV void	Perl_set_numeric_radix(pTHX);
 PERL_CALLCONV void	Perl_set_numeric_standard(pTHX);
@@ -1257,6 +1257,7 @@ STATIC SV*	S_isa_lookup(pTHX_ HV *stash, const char *name, int len, int level);
 #endif
 
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
+STATIC char*	S_stdize_locale(pTHX_ char* locs);
 STATIC SV*	S_mess_alloc(pTHX);
 #  if defined(LEAKTEST)
 STATIC void	S_xstat(pTHX_ int);

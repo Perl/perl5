@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Nov  4 01:58:40 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Sun Nov  5 00:37:41 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -2264,7 +2264,10 @@ if test -f config.sh; then
 	rp="I see a config.sh file.  Shall I use it to set the defaults?"
 	. UU/myread
 	case "$ans" in
-	n*|N*) echo "OK, I'll ignore it."; mv config.sh config.sh.old;;
+	n*|N*) echo "OK, I'll ignore it."
+		mv config.sh config.sh.old
+		myuname="$newmyuname"
+		;;
 	*)  echo "Fetching default answers from your old config.sh file..." >&4
 		tmp_n="$n"
 		tmp_c="$c"
@@ -2675,7 +2678,6 @@ cd UU
 	;;
 esac
 test "$override" && . ./optdef.sh
-myuname="$newmyuname"
 
 : Restore computed paths
 for file in $loclist $trylist; do

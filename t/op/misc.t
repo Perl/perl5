@@ -589,7 +589,7 @@ exit(0) unless @locales;
 for (@locales) {
     use POSIX qw(locale_h);
     use locale;
-    setlocale(LC_NUMERIC, $_) or die "setlocale(LC_NUMERIC, $_): $!";
+    setlocale(LC_NUMERIC, $_) or next;
     my $s = sprintf "%g %g", 3.1, 3.1;
     next if $s eq '3.1 3.1' || $s =~ /^(3.+1) \1$/;
     print "$_ $s\n";
