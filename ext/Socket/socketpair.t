@@ -60,9 +60,11 @@ foreach (@right) {
 # stream socket, so our writes will become joined:
 my ($buffer, $expect);
 $expect = join '', @right;
+undef $buffer;
 is (read (LEFT, $buffer, length $expect), length $expect, "read on left");
 is ($buffer, $expect, "content what we expected?");
 $expect = join '', @left;
+undef $buffer;
 is (read (RIGHT, $buffer, length $expect), length $expect, "read on right");
 is ($buffer, $expect, "content what we expected?");
 
@@ -99,6 +101,7 @@ foreach (@gripping) {
 ok (!eof LEFT, "left is not at EOF");
 
 $expect = join '', @gripping;
+undef $buffer;
 is (read (LEFT, $buffer, length $expect), length $expect, "read on left");
 is ($buffer, $expect, "content what we expected?");
 
@@ -126,11 +129,13 @@ foreach (@right) {
 my ($total);
 $total = join '', @right;
 foreach $expect (@right) {
+  undef $buffer;
   is (sysread (LEFT, $buffer, length $total), length $expect, "read on left");
   is ($buffer, $expect, "content what we expected?");
 }
 $total = join '', @left;
 foreach $expect (@left) {
+  undef $buffer;
   is (sysread (RIGHT, $buffer, length $total), length $expect, "read on right");
   is ($buffer, $expect, "content what we expected?");
 }
@@ -144,6 +149,7 @@ ok (shutdown(LEFT, 1), "shutdown left for writing");
   local $SIG{ALRM} = sub { $alarmed = 1; };
   print "# Approximate forever as 3 seconds. Wait 'forever'...\n";
   alarm 3;
+  undef $buffer;
   is (sysread (RIGHT, $buffer, 1), undef,
       "read on right should be interrupted");
   is ($alarmed, 1, "alarm should have fired");
@@ -158,6 +164,7 @@ foreach (@gripping) {
 
 $total = join '', @gripping;
 foreach $expect (@gripping) {
+  undef $buffer;
   is (sysread (LEFT, $buffer, length $total), length $expect, "read on left");
   is ($buffer, $expect, "content what we expected?");
 }
