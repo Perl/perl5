@@ -1683,14 +1683,50 @@ DEC OSF/1).
 
 When building Perl, you must first run Configure with -Doptimize=-g
 and -Uusemymalloc flags, after that you can use the make targets
+"perl.third" and "test.third".
 
-"perl.third" and "test.third".  The short story is that with "atom"
-you can instrument the Perl executable to create a new executable
-called "perl.third."  When the instrumented executable is run, it
-creates a log of dubious memory traffic in file called "perl.3log".
-See man atom and man third for more information.  The most extensive
-Third Degree documentation is available in the Compaq "Tru64 UNIX
-Programmer's Guide", chapter "Debugging Programs with Third Degree".
+The short story is that with "atom" you can instrument the Perl
+executable to create a new executable called "perl.third".
+When the instrumented executable is run, it creates a log of dubious
+memory traffic in file called "perl.3log".  See man atom and man third
+for more information.  The most extensive Third Degree documentation
+is available in the Compaq "Tru64 UNIX Programmer's Guide", chapter
+"Debugging Programs with Third Degree".
+
+The "test.third" leaves a lot of files named perl.3log.* in the t/
+subdirectory.  There is a problem with these files: Third Degree is so
+effective that it finds problems also in the system libraries.
+Therefore there are certain types of errors that you should ignore
+in your debugging.  Errors with stack traces matching
+
+    __actual_atof|__catgets|_doprnt|__exc_|__exec|_findio|__localtime|setlocale|__sia_|__strxfrm
+
+(all in libc.so) are known to be non-serious.  You can also
+ignore the combinations
+
+    Perl_gv_fetchfile() calling strcpy()
+    S_doopen_pmc() calling strcmp()
+
+causing "rih" (reading invalid heap) errors.
+
+There are also leaks that for given certain definition of a leak,
+aren't.  See L</PERL_DESTRUCT_LEVEL> for more information.
+
+=head2 PERL_DESTRUCT_LEVEL
+
+If you want to run any of the tests yourself manually using the
+pureperl or perl.third executables, please note that by default
+perl B<does not> explicitly cleanup all the memory it has allocated
+(such as global memory arenas) but instead lets the exit() of
+the whole program "take care" of such allocations, also known
+as "global destruction of objects".
+
+There is a way to tell perl to do complete cleanup: set the
+environment variable PERL_DESTRUCT_LEVEL to a non-zero value.
+The t/TEST wrapper does set this to 2, and this is what you
+need to do too, if you don't want to see the "global leaks":
+
+	PERL_DESTRUCT_LEVEL=2 ./perl.third t/foo/bar.t
 
 =head2 CONCLUSION
 
