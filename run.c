@@ -17,18 +17,12 @@
  * know.  Run now!  Hope is in speed!"  --Gandalf
  */
 
-#ifdef PERL_OBJECT
-#define CALLOP this->*PL_op
-#else
-#define CALLOP *PL_op
-#endif
-
 int
 Perl_runops_standard(pTHX)
 {
     dTHR;
 
-    while ( PL_op = (CALLOP->op_ppaddr)(aTHX) ) ;
+    while ( PL_op = CALL_FPTR(PL_op->op_ppaddr)(aTHX) ) ;
 
     TAINT_NOT;
     return 0;
@@ -54,7 +48,7 @@ Perl_runops_debug(pTHX)
 	    DEBUG_t(debop(PL_op));
 	    DEBUG_P(debprof(PL_op));
 	}
-    } while ( PL_op = (CALLOP->op_ppaddr)(aTHX) );
+    } while ( PL_op = CALL_FPTR(PL_op->op_ppaddr)(aTHX) );
 
     TAINT_NOT;
     return 0;

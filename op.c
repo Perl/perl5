@@ -19,12 +19,6 @@
 #define PERL_IN_OP_C
 #include "perl.h"
 
-#ifdef PERL_OBJECT
-#define CHECKCALL this->*PL_check
-#else
-#define CHECKCALL *PL_check
-#endif              
-
 /* #define PL_OP_SLAB_ALLOC */
                                                             
 #ifdef PL_OP_SLAB_ALLOC 
@@ -57,7 +51,7 @@ S_Slab_Alloc(pTHX_ int m, size_t sz)
      ? ( op_free((OP*)o),					\
 	 Perl_croak(aTHX_ "%s trapped by operation mask", PL_op_desc[type]),	\
 	 Nullop )						\
-     : (CHECKCALL[type])(aTHX_ (OP*)o))
+     : CALL_FPTR(PL_check[type])(aTHX_ (OP*)o))
 
 #define PAD_MAX 999999999
 

@@ -26,7 +26,6 @@
 /* See L<perlguts/"The Perl API"> for detailed notes on
  * PERL_IMPLICIT_CONTEXT and PERL_IMPLICIT_SYS */
 
-/* XXXXXX testing threads via implicit pointer */
 #ifdef USE_THREADS
 #  ifndef PERL_IMPLICIT_CONTEXT
 #    define PERL_IMPLICIT_CONTEXT
@@ -36,7 +35,6 @@
 #  endif
 #endif
 
-/* XXXXXX testing multiplicity via implicit pointer */
 #if defined(MULTIPLICITY)
 #  ifndef PERL_IMPLICIT_CONTEXT
 #    define PERL_IMPLICIT_CONTEXT
@@ -148,22 +146,17 @@ class CPerlObj;
 
 #define pTHXo			CPerlObj *pPerl
 #define pTHXo_			pTHXo,
-#define _pTHXo			,pTHXo
 #define aTHXo			this
 #define aTHXo_			this,
-#define _aTHXo			,this
 #define PERL_OBJECT_THIS	aTHXo
 #define PERL_OBJECT_THIS_	aTHXo_
-#define _PERL_OBJECT_THIS	_aTHXo
-#define dTHXoa(a)		pTHXo = (CPerlObj *)a
-#define dTHXo			dTHXoa(PERL_GET_INTERP)
+#define dTHXoa(a)		pTHXo = a
+#define dTHXo			dTHXoa(PERL_GET_THX)
 
 #define pTHXx		void
 #define pTHXx_
-#define _pTHXx
 #define aTHXx
 #define aTHXx_
-#define _aTHXx
 
 #else /* !PERL_OBJECT */
 
@@ -172,8 +165,6 @@ class CPerlObj;
 struct perl_thread;
 #    define pTHX	register struct perl_thread *thr
 #    define aTHX	thr
-#    define dTHXa(a)	pTHX = (struct perl_thread *)a
-#    define dTHX	dTHXa(THR)
 #    define dTHR	dNOOP
 #  else
 #    ifndef MULTIPLICITY
@@ -181,13 +172,11 @@ struct perl_thread;
 #    endif
 #    define pTHX	register PerlInterpreter *my_perl
 #    define aTHX	my_perl
-#    define dTHXa(a)	pTHX = (PerlInterpreter *)a
-#    define dTHX	dTHXa(PERL_GET_INTERP)
 #  endif
+#  define dTHXa(a)	pTHX = a
+#  define dTHX		dTHXa(PERL_GET_THX)
 #  define pTHX_		pTHX,
-#  define _pTHX		,pTHX
 #  define aTHX_		aTHX,
-#  define _aTHX		,aTHX
 #endif
 
 #define STATIC static
@@ -216,10 +205,8 @@ struct perl_thread;
 #ifndef pTHX
 #  define pTHX		void
 #  define pTHX_
-#  define _pTHX
 #  define aTHX
 #  define aTHX_
-#  define _aTHX
 #  define dTHXa(a)	dNOOP
 #  define dTHX		dNOOP
 #endif
@@ -227,20 +214,16 @@ struct perl_thread;
 #ifndef pTHXo
 #  define pTHXo		pTHX
 #  define pTHXo_	pTHX_
-#  define _pTHXo	_pTHX
 #  define aTHXo		aTHX
 #  define aTHXo_	aTHX_
-#  define _aTHXo	_aTHX
 #  define dTHXo		dTHX
 #endif
 
 #ifndef pTHXx
 #  define pTHXx		register PerlInterpreter *my_perl
 #  define pTHXx_	pTHXx,
-#  define _pTHXx	,pTHXx
 #  define aTHXx		my_perl
 #  define aTHXx_	aTHXx,
-#  define _aTHXx	,aTHXx
 #  define dTHXx		dTHX
 #endif
 
@@ -1087,6 +1070,13 @@ Free_t   Perl_mfree (Malloc_t where);
 #define DBL_DIG	15   /* A guess that works lots of places */
 #endif
 #endif
+#ifdef I_FLOAT
+#include <float.h>
+#endif
+#ifndef HAS_DBL_DIG
+#define DBL_DIG	15   /* A guess that works lots of places */
+#endif
+#endif
 
 #ifdef OVR_LDBL_DIG
 /* Use an overridden LDBL_DIG */
@@ -1674,12 +1664,32 @@ typedef pthread_key_t	perl_key;
 # endif
 #endif
 
+/* the traditional thread-unsafe notion of "current interpreter".
+ * XXX todo: a thread-safe version that fetches it from TLS (akin to THR)
+ * needs to be defined elsewhere (conditional on pthread_getspecific()
+ * availability). */
 #ifndef PERL_SET_INTERP
 #  define PERL_SET_INTERP(i)		(PL_curinterp = (PerlInterpreter*)(i))
 #endif
 
 #ifndef PERL_GET_INTERP
 #  define PERL_GET_INTERP		(PL_curinterp)
+#endif
+
+#if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_GET_THX)
+#  ifdef USE_THREADS
+#    define PERL_GET_THX		THR
+#  else
+#  ifdef MULTIPLICITY
+#    define PERL_GET_THX		PERL_GET_INTERP
+#  else
+#  ifdef PERL_OBJECT
+#    define PERL_GET_THX		((CPerlObj*)PERL_GET_INTERP)
+#  else
+#    define PERL_GET_THX		((void*)0)
+#  endif
+#  endif
+#  endif
 #endif
 
 /* Some unistd.h's give a prototype for pause() even though
@@ -1933,7 +1943,10 @@ Gid_t getegid (void);
 #  if defined(PERL_OBJECT)
 #    define DEBUG_m(a) if (PL_debug & 128)	a
 #  else
-#    define DEBUG_m(a) if (PERL_GET_INTERP && PL_debug & 128)	a
+#    define DEBUG_m(a)  \
+    STMT_START {							\
+	if (PERL_GET_INTERP) { dTHX; if (PL_debug & 128) { a; } }	\
+    } STMT_END
 #  endif
 #define DEBUG_f(a) if (PL_debug & 256)	a
 #define DEBUG_r(a) if (PL_debug & 512)	a
@@ -2568,7 +2581,9 @@ struct perl_vars *PL_VarsPtr;
 */
 
 struct interpreter {
-#include "thrdvar.h"
+#ifndef USE_THREADS
+#  include "thrdvar.h"
+#endif
 #include "intrpvar.h"
 };
 
