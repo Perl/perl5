@@ -118,24 +118,8 @@
 #define Fflush(fp)         fflush(fp)
 #define Mkdir(path,mode)   mkdir((path),(mode))
 
-/* these should be set in a hint file, not here */
 #ifndef PERL_SYS_INIT
-#if defined(PERL_SCO5) || defined(__FreeBSD__)
-#  ifdef __FreeBSD__
-#    include <floatingpoint.h>
-#  endif
-#  define PERL_SYS_INIT(c,v)	fpsetmask(0); MALLOC_INIT
-#else
-#  ifdef POSIX_BC
-#    define PERL_SYS_INIT(c,v)	sigignore(SIGFPE); MALLOC_INIT
-#  else
-#    ifdef UTS
-#      define PERL_SYS_INIT(c,v)	signal(SIGFPE, SIG_IGN); MALLOC_INIT
-#    else
-#      define PERL_SYS_INIT(c,v) MALLOC_INIT
-#    endif
-#  endif
-#endif
+#  define PERL_SYS_INIT(c,v) PERL_FPU_INIT MALLOC_INIT
 #endif
 
 #ifndef PERL_SYS_TERM
