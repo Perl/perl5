@@ -3043,6 +3043,41 @@ sub re_uninterp_extended {
 }
 }
 
+my %unctrl = # portable to to EBCDIC
+    (
+     "\c@" => '\c@',	# unused
+     "\cA" => '\cA',
+     "\cB" => '\cB',
+     "\cC" => '\cC',
+     "\cD" => '\cD',
+     "\cE" => '\cE',
+     "\cF" => '\cF',
+     "\cG" => '\cG',
+     "\cH" => '\cH',
+     "\cI" => '\cI',
+     "\cJ" => '\cJ',
+     "\cK" => '\cK',
+     "\cL" => '\cL',
+     "\cM" => '\cM',
+     "\cN" => '\cN',
+     "\cO" => '\cO',
+     "\cP" => '\cP',
+     "\cQ" => '\cQ',
+     "\cR" => '\cR',
+     "\cS" => '\cS',
+     "\cT" => '\cT',
+     "\cU" => '\cU',
+     "\cV" => '\cV',
+     "\cW" => '\cW',
+     "\cX" => '\cX',
+     "\cY" => '\cY',
+     "\cZ" => '\cZ',
+     "\c[" => '\c[',	# unused
+     "\c\\" => '\c\\',	# unused
+     "\c]" => '\c]',	# unused
+     "\c_" => '\c_',	# unused
+    );
+
 # character escapes, but not delimiters that might need to be escaped
 sub escape_str { # ASCII, UTF8
     my($str) = @_;
@@ -3054,7 +3089,8 @@ sub escape_str { # ASCII, UTF8
     $str =~ s/\e/\\e/g;
     $str =~ s/\f/\\f/g;
     $str =~ s/\r/\\r/g;
-    $str =~ s/([\cA-\cZ])/sprintf("\\c%c", ord('@') + ord($1))/ge;
+    # The funny gaps are for the benefit of EBCDIC.
+    $str =~ s/([\cA-\cI\cJ-\cR\cS-\cZ])/$unctrl{$1}/ge;
     $str =~ s/([[:^print:]])/sprintf("\\%03o", ord($1))/ge;
     return $str;
 }
