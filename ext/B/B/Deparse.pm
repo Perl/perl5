@@ -2208,8 +2208,15 @@ sub pp_list {
 	# This assumes that no other private flags equal 128, and that
 	# OPs that store things other than flags in their op_private,
 	# like OP_AELEMFAST, won't be immediate children of a list.
-	unless ($lop->private & OPpLVAL_INTRO
+	#
+	# OP_ENTERSUB can break this logic, so check for it.
+	# I suspect that open and exit can too.
+
+	if (!($lop->private & (OPpLVAL_INTRO|OPpOUR_INTRO)
 		or $lop->name eq "undef")
+	    or $lop->name eq "entersub"
+	    or $lop->name eq "exit"
+	    or $lop->name eq "open")
 	{
 	    $local = ""; # or not
 	    last;
@@ -2217,8 +2224,10 @@ sub pp_list {
 	if ($lop->name =~ /^pad[ash]v$/) { # my()
 	    ($local = "", last) if $local eq "local" || $local eq "our";
 	    $local = "my";
-	} elsif ($op->name =~ /^(gv|rv2)[ash]v$/
-			&& $op->private & OPpOUR_INTRO) { # our()
+	} elsif ($lop->name =~ /^(gv|rv2)[ash]v$/
+			&& $lop->private & OPpOUR_INTRO
+		or $lop->name eq "null" && $lop->first->name eq "gvsv"
+			&& $lop->first->private & OPpOUR_INTRO) { # our()
 	    ($local = "", last) if $local eq "my" || $local eq "local";
 	    $local = "our";
 	} elsif ($lop->name ne "undef") { # local()
