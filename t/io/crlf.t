@@ -32,7 +32,9 @@ if (find PerlIO::Layer 'perlio') {
 
  SKIP:
  {
-  if ($^X =~ /\bminiperl\b/) { skip(q/miniperl can't load PerlIO layers/) }
+  eval 'use PerlIO::scalar';
+  skip(q/miniperl cannnot load PerlIO::scalar/)
+      if $@ =~ /dynamic loading not available/;
   my $fcontents = join "", map {"$_\r\n"} "a".."zzz";
   open my $fh, "<:crlf", \$fcontents;
   local $/ = "xxx";
