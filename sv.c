@@ -4044,10 +4044,14 @@ I32 n;
 }
 
 SV*
+#ifndef CAN_PROTOTYPE
 sv_bless3(sv,stash,zaptilde)
 SV* sv;
 HV* stash;
 bool zaptilde;
+#else
+sv_bless3(SV *sv, HV *stash, bool zaptilde)
+#endif /* CAN_PROTOTYPE */
 {
     dTHR;
     SV *ref;
