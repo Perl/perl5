@@ -443,6 +443,7 @@ $   perl_sPRIu64 = ""
 $   perl_sPRIo64 = ""
 $   perl_sPRIx64 = ""
 $ ENDIF
+$ perl_d_llsekk="undef"
 $!
 $!
 $! Now some that we build up
@@ -1181,6 +1182,42 @@ $ ELSE
 $   perl_d_off64_t="define"
 $ ENDIF
 $ WRITE_RESULT "d_off64_t is ''perl_d_off64_t'"
+$!
+$! Check to see if fpos64_t exists
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "#include <types.h>
+$ WS "#''perl_i_inttypes IIH
+$ WS "#ifdef IIH
+$ WS "#include <inttypes.h>
+$ WS "#endif
+$ WS "#include <unistd.h>
+$ WS "int main()
+$ WS "{"
+$ WS "fpos64_t bar;
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$ DEFINE SYS$ERROR _NLA0:
+$ DEFINE SYS$OUTPUT _NLA0:
+$ on error then continue
+$ on warning then continue
+$ 'Checkcc' temp.c
+$ teststatus = f$extract(9,1,$status)
+$ DEASSIGN SYS$OUTPUT
+$ DEASSIGN SYS$ERROR
+$ if (teststatus.nes."1")
+$ THEN
+$!  Okay, fpos64_t failed. Must not exist
+$   perl_d_fpos64_t = "undef"
+$ ELSE
+$   perl_d_fpos64_t="define"
+$ ENDIF
+$ WRITE_RESULT "d_fpos64_t is ''perl_d_fpos64_t'"
 $!
 $! Check to see if gethostname exists
 $!
@@ -3470,6 +3507,7 @@ $ WC "i_poll='" + perl_i_poll + "'"
 $ WC "i_inttypes='" + perl_i_inttypes + "'"
 $ WC "d_int64t='" + perl_d_int64t + "'"
 $ WC "d_off64_t='" + perl_d_off64_t + "'"
+$ WC "d_fpos64_t='" + perl_d_fpos64_t + "'"
 $ WC "use64bits='" + perl_use64bits + "'"
 $ WC "d_drand48proto='" + perl_d_drand48proto + "'"
 $ WC "d_old_pthread_create_joinable='" + perl_d_old_pthread_create_joinable + "'"
@@ -3529,6 +3567,7 @@ $ WC "sPRId64='" + perl_sPRId64 + "'"
 $ WC "sPRIu64='" + perl_sPRIu64 + "'"
 $ WC "sPRIo64='" + perl_sPRIo64 + "'"
 $ WC "sPRIx64='" + perl_sPRIx64 + "'"
+$ WC "d_llseek='" + perl_d_llseek + "'"
 $!
 $! ##WRITE NEW CONSTANTS HERE##
 $!
