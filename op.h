@@ -464,7 +464,7 @@ struct loop {
 typedef struct {
   struct tm* tmbuff;
 } REBUF;
-#define localtime(a)       localtime_r(a,PL_reentrant_buffer->tmbuff)
-#define gmtime(a)          gmtime_r(a,PL_reentrant_buffer->tmbuff)
+#define localtime(a)       (localtime_r(a,PL_reentrant_buffer->tmbuff) && PL_reentrant_buffer->tmbuff)
+#define gmtime(a)          (gmtime_r(a,PL_reentrant_buffer->tmbuff) && PL_reentrant_buffer->tmbuff)
 #endif
 
