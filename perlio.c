@@ -407,6 +407,7 @@ PerlIO_list_free(PerlIO_list_t *list)
 void
 PerlIO_list_push(PerlIO_list_t *list,PerlIO_funcs *funcs,SV *arg)
 {
+ dTHX;
  PerlIO_pair_t *p;
  if (list->cur >= list->len)
   {
