@@ -3,36 +3,13 @@ package threads::shared;
 use 5.007_003;
 use strict;
 use warnings;
-use Config;
-
-BEGIN {
-    unless ($Config{useithreads}) {
-	my @caller = caller(2);
-        die <<EOF;
-$caller[1] line $caller[2]:
-
-This Perl hasn't been configured and built properly for the threads
-module to work.  (The 'useithreads' configuration option hasn't been used.)
-
-Having threads support requires all of Perl and all of the XS modules in
-the Perl installation to be rebuilt, it is not just a question of adding
-the threads module.  (In other words, threaded and non-threaded Perls
-are binary incompatible.)
-
-If you want to the use the threads module, please contact the people
-who built your Perl.
-
-Cannot continue, aborting.
-EOF
-    }
-}
 
 require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT = qw(share cond_wait cond_broadcast cond_signal _refcnt _id _thrcnt);
 our $VERSION = '0.90';
 
-if ($Config{'useithreads'}) {
+if ($threads::threads) {
 	*cond_wait = \&cond_wait_enabled;
 	*cond_signal = \&cond_signal_enabled;
 	*cond_broadcast = \&cond_broadcast_enabled;
@@ -77,8 +54,8 @@ threads::shared - Perl extension for sharing data structures between threads
   share($scalar);
   share(@array);
   share(%hash);
-  my $bar = share([]);
-  $hash{bar} = share({});
+  my $bar = &share([]);
+  $hash{bar} = &share({});
 
   { lock(%hash); ...  }
 
@@ -111,6 +88,9 @@ C<share(\$a)> is equivalent to C<share($a)>, while C<share(\\$a)> is not.
 
 A variable can also be marked as shared at compile time by using the
 C<shared> attribute: C<my $var : shared>.
+
+If you want to share a newly created reference, unfourtunetly you need to use
+C<&share([])> and C<&share({})> syntax due to problems with perls prototyping.
 
 =item lock VARIABLE
 
