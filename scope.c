@@ -852,8 +852,8 @@ PERL_CONTEXT *cx;
 		(long)cx->sb_iters);
 	PerlIO_printf(Perl_debug_log, "SB_MAXITERS = %ld\n",
 		(long)cx->sb_maxiters);
-	PerlIO_printf(Perl_debug_log, "SB_SAVEMATCH = %ld\n",
-		(long)cx->sb_savematch);
+	PerlIO_printf(Perl_debug_log, "SB_SAFEBASE = %ld\n",
+		(long)cx->sb_safebase);
 	PerlIO_printf(Perl_debug_log, "SB_ONCE = %ld\n",
 		(long)cx->sb_once);
 	PerlIO_printf(Perl_debug_log, "SB_ORIG = %s\n",
