@@ -1784,9 +1784,9 @@ S_call_body(pTHX_ OP *myop, int is_eval)
 
     if (PL_op == myop) {
 	if (is_eval)
-	    PL_op = Perl_pp_entereval(aTHX);
+	    PL_op = Perl_pp_entereval(aTHX);	/* this doesn't do a POPMARK */
 	else
-	    PL_op = Perl_pp_entersub(aTHX);
+	    PL_op = Perl_pp_entersub(aTHX);	/* this does */
     }
     if (PL_op)
 	CALLRUNOPS(aTHX);
@@ -1908,7 +1908,6 @@ Perl_eval_pv(pTHX_ const char *p, I32 croak_on_error)
     dSP;
     SV* sv = newSVpv(p, 0);
 
-    PUSHMARK(SP);
     eval_sv(sv, G_SCALAR);
     SvREFCNT_dec(sv);
 
