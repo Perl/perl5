@@ -230,7 +230,7 @@ that filehandle (and ONLY if you want to), you should either
 the C<__DATA__> token and put your own data after those
 declarations, using the C<__END__> token to mark the end
 of subroutine declarations. You must also ensure that the B<SelfLoader>
-reads first by  calling 'SelfLoader->load_stubs();', or by using a
+reads first by  calling 'SelfLoader-E<gt>load_stubs();', or by using a
 function which is selfloaded;
 
 or
@@ -258,7 +258,7 @@ need for stubs as far as autoloading is concerned.
 For modules which ARE classes, and need to handle inherited methods,
 stubs are needed to ensure that the method inheritance mechanism works
 properly. You can load the stubs into the module at 'require' time, by
-adding the statement 'SelfLoader->load_stubs();' to the module to do
+adding the statement 'SelfLoader-E<gt>load_stubs();' to the module to do
 this.
 
 The alternative is to put the stubs in before the C<__DATA__> token BEFORE

@@ -509,7 +509,7 @@ types of data structures.
 
  # calling a function  that returns a key,value list, like
  # "lead","fred","daughter","pebbles"
- while ( %fields = getnextpairset() )
+ while ( %fields = getnextpairset() ) {
      push @LoH, { %fields };
  }
 
@@ -601,12 +601,6 @@ types of data structures.
      }
  }
 
- # calling a function  that returns a key,value list, like
- # "lead","fred","daughter","pebbles"
- while ( %fields = getnextpairset() )
-     push @a, { %fields };
- }
-
  # calling a function  that returns a key,value hash
  for $group ( "simpsons", "jetsons", "flintstones" ) {
      $HoH{$group} = { get_family($group) };
@@ -638,7 +632,7 @@ types of data structures.
 
  # print the whole thing
  foreach $family ( keys %HoH ) {
-     print "$family: ";
+     print "$family: { ";
      for $role ( keys %{ $HoH{$family} } ) {
          print "$role=$HoH{$family}{$role} ";
      }
@@ -647,7 +641,7 @@ types of data structures.
 
  # print the whole thing  somewhat sorted
  foreach $family ( sort keys %HoH ) {
-     print "$family: ";
+     print "$family: { ";
      for $role ( sort keys %{ $HoH{$family} } ) {
          print "$role=$HoH{$family}{$role} ";
      }
@@ -657,7 +651,7 @@ types of data structures.
 
  # print the whole thing sorted by number of members
  foreach $family ( sort { keys %{$HoH{$b}} <=> keys %{$HoH{$b}} } keys %HoH ) {
-     print "$family: ";
+     print "$family: { ";
      for $role ( sort keys %{ $HoH{$family} } ) {
          print "$role=$HoH{$family}{$role} ";
      }
@@ -670,9 +664,9 @@ types of data structures.
 
  # now print the whole thing sorted by number of members
  foreach $family ( sort { keys %{$HoH{$b}} <=> keys %{$HoH{$b}} } keys %HoH ) {
-     print "$family: ";
+     print "$family: { ";
      # and print these according to rank order
-     for $role ( sort { $rank{$a} <=> $rank{$b} keys %{ $HoH{$family} } ) {
+     for $role ( sort { $rank{$a} <=> $rank{$b} keys %{ $HoH{$family} } } ) {
          print "$role=$HoH{$family}{$role} ";
      }
      print "}\n";
@@ -762,7 +756,7 @@ many different sorts:
 
      @members = ();
      # assume this file in field=value syntax
-     while () {
+     while (<>) {
          %fields = split /[\s=]+/;
          push @members, { %fields };
      }
@@ -829,7 +823,7 @@ source code to MLDBM.
 
 =head1 SEE ALSO
 
-L<perlref>, L<perllol>, L<perldata>, L<perlobj>
+perlref(1), perllol(1), perldata(1), perlobj(1)
 
 =head1 AUTHOR
 

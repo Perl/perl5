@@ -41,9 +41,9 @@ Aa a program:
 =head2 The C<diagnostics> Pragma
 
 This module extends the terse diagnostics normally emitted by both the
-perl compiler and the perl interpeter, augmenting them wtih the more
+perl compiler and the perl interpeter, augmenting them with the more
 explicative and endearing descriptions found in L<perldiag>.  Like the
-other pragmata, it affects to compilation phase of your program rather
+other pragmata, it affects the compilation phase of your program rather
 than merely the execution phase.
 
 To use in your program as a pragma, merely invoke
@@ -62,8 +62,8 @@ However, you may control there behaviour at runtime using the
 disable() and enable() methods to turn them off and on respectively.
 
 The B<-verbose> flag first prints out the L<perldiag> introduction before
-any other diagnostics.  The $diagnostics::PRETTY can generate nicer escape
-sequences for pgers.
+any other diagnostics.  The $diagnostics::PRETTY variable can generate nicer
+escape sequences for pagers.
 
 =head2 The I<splain> Program
 
@@ -98,7 +98,7 @@ afterwards, do this:
     ./splain < test.out
 
 Note that this is not in general possible in shells of more dubious heritage, 
-as the theorectical 
+as the theoretical 
 
     (perl -w test.pl >/dev/tty) >& test.out
     ./splain < test.out
@@ -143,7 +143,7 @@ runtime.  Otherwise, they may be embedded in the file itself when the
 splain package is built.   See the F<Makefile> for details.
 
 If an extant $SIG{__WARN__} handler is discovered, it will continue
-to be honored, but only after the diagnostic::splainthis() function 
+to be honored, but only after the diagnostics::splainthis() function 
 (the module's $SIG{__WARN__} interceptor) has had its way with your
 warnings.
 

@@ -28,13 +28,13 @@ A separate F<pod2text> program is included that is primarily a wrapper for
 Pod::Text.
 
 The single function C<pod2text()> can take one or two arguments. The first
-should be the name of a file to read the pod from, or "<&STDIN" to read from
+should be the name of a file to read the pod from, or "E<lt>&STDIN" to read from
 STDIN. A second argument, if provided, should be a filehandle glob where
 output should be sent.
 
 =head1 AUTHOR
 
-Tom Christiansen E<lt>tchrist@mox.perl.comE<gt>
+Tom Christiansen E<lt>F<tchrist@mox.perl.com>E<gt>
 
 =head1 TODO
 

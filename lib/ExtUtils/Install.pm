@@ -314,8 +314,8 @@ be copied preserving timestamps and permissions.
 
 There are two keys with a special meaning in the hash: "read" and
 "write". After the copying is done, install will write the list of
-target files to the file named by $hashref->{write}. If there is
-another file named by $hashref->{read}, the contents of this file will
+target files to the file named by C<$hashref-E<gt>{write}>. If there is
+another file named by C<$hashref-E<gt>{read}>, the contents of this file will
 be merged into the written file. The read and the written file may be
 identical, but on AFS it is quite likely, people are installing to a
 different directory than the one where the files later appear.

@@ -115,10 +115,10 @@ Will croak if the structure does not have AF_INET in the right place.
 =item sockaddr_un SOCKADDR_UN
 
 In an array context, unpacks its SOCKADDR_UN argument and returns an array
-consisting of (PATHNAME).  In a scalar context, packs its PATHANE
+consisting of (PATHNAME).  In a scalar context, packs its PATHNAME
 arguments as a SOCKADDR_UN and returns it.  If this is confusing, use
 pack_sockaddr_un() and unpack_sockaddr_un() explicitly.
-These are only supported if your system has <sys/un.h>.
+These are only supported if your system has E<lt>F<sys/un.h>E<gt>.
 
 =item pack_sockaddr_un PATH
 

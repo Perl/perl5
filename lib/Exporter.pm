@@ -264,7 +264,7 @@ try to use @EXPORT_OK in preference to @EXPORT and avoid short or
 common symbol names to reduce the risk of name clashes.
 
 Generally anything not exported is still accessible from outside the
-module using the ModuleName::item_name (or $blessed_ref->method)
+module using the ModuleName::item_name (or $blessed_ref-E<gt>method)
 syntax.  By convention you can use a leading underscore on names to
 informally indicate that they are 'internal' and not for public use.
 
@@ -328,7 +328,7 @@ into modules.
 =head2 Module Version Checking
 
 The Exporter module will convert an attempt to import a number from a
-module into a call to $module_name->require_version($value). This can
+module into a call to $module_name-E<gt>require_version($value). This can
 be used to validate that the version of the module being used is
 greater than or equal to the required version.
 

@@ -238,7 +238,7 @@ example in L<perlfunc/eof>).
 =item B<-I>I<directory>
 
 Directories specified by B<-I> are prepended to the search path for
-modules (@INC), and also tells the C preprocessor where to search for
+modules (C<@INC>), and also tells the C preprocessor where to search for
 include files.  The C preprocessor is invoked with B<-P>; by default it
 searches /usr/include and /usr/lib/perl.
 
@@ -259,7 +259,7 @@ separator if the B<-l> switch is followed by a B<-0> switch:
 
     gnufind / -print0 | perl -ln0e 'print "found $_" if -p'
 
-This sets $\ to newline and then sets $/ to the null character.
+This sets C<$\> to newline and then sets C<$/> to the null character.
 
 =item B<-m>[B<->]I<module>
 

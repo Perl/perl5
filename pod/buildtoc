@@ -2,11 +2,13 @@ use File::Find;
 use Cwd;
 
 @pods = qw{
-	    perl perldata perlsyn perlop perlre perlrun perlfunc perlvar
-	    perlsub perlmod perlref perldsc perllol perlobj perltie
-	    perlbot perldebug perldiag perlform perlipc perlsec perltrap
-	    perlstyle perlxs perlxstut perlguts perlcall perlembed perlpod
-	    perlbook 
+	    perl
+	    perldata perlsyn perlop perlre perlrun perlfunc perlvar
+	        perlsub perlmod perlform
+	    perlref perldsc perllol perlobj perltie perlbot perlipc
+	    perldebug perldiag perlsec perltrap perlstyle
+	    perlpod perlbook
+	    perlembed perlapio perlxs perlxstut perlguts perlcall
 	};
 for (@pods) { s/$/.pod/ } 
 
@@ -100,7 +102,7 @@ podset( @modules[ sort { $modname[$a] cmp $modname[$b] } 0 .. $#modules ] );
 
 	=head1 AUXILIARY DOCUMENTATION
 
-	Here should be listed all the extra program's docs, but they
+	Here should be listed all the extra programs' docs, but they
 	don't all have man pages yet:
 
 	=item a2p

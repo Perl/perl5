@@ -24,7 +24,7 @@ Locates the full path to the script bin directory to allow the use
 of paths relative to the bin directory.
 
 This allows a user to setup a directory tree for some software with
-directories <root>/bin and <root>/lib and then the above example will allow
+directories E<lt>rootE<gt>/bin and E<lt>rootE<gt>/lib and then the above example will allow
 the use of modules in the lib directory without knowing where the software
 tree is installed.
 
@@ -55,8 +55,8 @@ Workaround is to invoke perl as
 
 =head1 AUTHORS
 
-Graham Barr <bodg@tiuk.ti.com>
-Nick Ing-Simmons <nik@tiuk.ti.com>
+Graham Barr E<lt>F<bodg@tiuk.ti.com>E<gt>
+Nick Ing-Simmons E<lt>F<nik@tiuk.ti.com>E<gt>
 
 =head1 COPYRIGHT
 

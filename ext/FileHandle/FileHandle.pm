@@ -60,7 +60,7 @@ parameters, the first parameter is a filename that may include
 whitespace or other special characters, and the second parameter is
 the open mode, optionally followed by a file permission value.
 
-If C<FileHandle::open> receives a Perl mode string (">", "+<", etc.)
+If C<FileHandle::open> receives a Perl mode string ("E<gt>", "+E<lt>", etc.)
 or a POSIX fopen() mode string ("w", "r+", etc.), it uses the basic
 Perl C<open> operator.
 
@@ -122,23 +122,23 @@ Furthermore, for doing normal I/O you might need these:
 
 =over 
 
-=item $fh->print
+=item $fh-E<gt>print
 
 See L<perlfunc/print>.
 
-=item $fh->printf
+=item $fh-E<gt>printf
 
 See L<perlfunc/printf>.
 
-=item $fh->getline
+=item $fh-E<gt>getline
 
-This works like <$fh> described in L<perlop/"I/O Operators">
+This works like E<lt>$fhE<gt> described in L<perlop/"I/O Operators">
 except that it's more readable and can be safely called in an
 array context but still returns just one line.
 
-=item $fh->getlines
+=item $fh-E<gt>getlines
 
-This works like <$fh> when called in an array context to
+This works like E<lt>$fhE<gt> when called in an array context to
 read all the remaining lines in a file, except that it's more readable.
 It will also croak() if accidentally called in a scalar context.
 

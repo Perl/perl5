@@ -196,7 +196,7 @@ Shell variables from the F<config.sh> file (written by Configure) are
 stored in the readonly-variable C<%Config>, indexed by their names.
 
 Values stored in config.sh as 'undef' are returned as undefined
-values.  The perl C<exists> function can be used to check is a
+values.  The perl C<exists> function can be used to check if a
 named variable exists.
 
 =over 4

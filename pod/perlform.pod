@@ -54,7 +54,7 @@ with either "@" (at) or "^" (caret).  These lines do not undergo any kind
 of variable interpolation.  The at field (not to be confused with the array
 marker @) is the normal kind of field; the other kind, caret fields, are used
 to do rudimentary multi-line text block filling.  The length of the field
-is supplied by padding out the field with multiple "<", ">", or "|"
+is supplied by padding out the field with multiple "E<lt>", "E<gt>", or "|"
 characters to specify, respectively, left justification, right
 justification, or centering.  If the variable would exceed the width
 specified, it is truncated.
@@ -147,18 +147,18 @@ Examples:
  .
 
 It is possible to intermix print()s with write()s on the same output
-channel, but you'll have to handle $- ($FORMAT_LINES_LEFT)
+channel, but you'll have to handle C<$-> (C<$FORMAT_LINES_LEFT>)
 yourself.
 
 =head2 Format Variables
 
-The current format name is stored in the variable C<$~> ($FORMAT_NAME),
-and the current top of form format name is in C<$^> ($FORMAT_TOP_NAME).
-The current output page number is stored in C<$%> ($FORMAT_PAGE_NUMBER),
-and the number of lines on the page is in C<$=> ($FORMAT_LINES_PER_PAGE).
+The current format name is stored in the variable C<$~> (C<$FORMAT_NAME>),
+and the current top of form format name is in C<$^> (C<$FORMAT_TOP_NAME>).
+The current output page number is stored in C<$%> (C<$FORMAT_PAGE_NUMBER>),
+and the number of lines on the page is in C<$=> (C<$FORMAT_LINES_PER_PAGE>).
 Whether to autoflush output on this handle is stored in C<$|>
-($OUTPUT_AUTOFLUSH).  The string output before each top of page (except
-the first) is stored in C<$^L> ($FORMAT_FORMFEED).  These variables are
+(C<$OUTPUT_AUTOFLUSH>).  The string output before each top of page (except
+the first) is stored in C<$^L> (C<$FORMAT_FORMFEED>).  These variables are
 set on a per-filehandle basis, so you'll need to select() into a different
 one to affect them:
 

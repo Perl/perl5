@@ -58,7 +58,7 @@ indistinguishable list.
 Perl does not have named formal parameters, but in practice all you do is
 assign to a my() list of these.  Any variables you use in the function
 that aren't declared private are global variables.  For the gory details
-on creating private variables, see the sections below on
+on creating private variables, see
 L<"Private Variables via my()"> and L<"Temporary Values via local()">.
 To create protected environments for a set of functions in a separate
 package (and probably a separate file), see L<perlmod/"Packages">.
@@ -106,7 +106,7 @@ Use array assignment to a local list to name your formal arguments:
 
 This also has the effect of turning call-by-reference into call-by-value,
 since the assignment copies the values.  Otherwise a function is free to
-do in-place modifications of @_ and change its callers values.
+do in-place modifications of @_ and change its caller's values.
 
     upcase_in($v1, $v2);  # this changes $v1 and $v2
     sub upcase_in {
@@ -362,7 +362,7 @@ Synopsis:
     local *merlyn = \$randal;   # just alias $merlyn, not @merlyn etc 
 
 A local() modifies its listed variables to be local to the enclosing
-block, (or subroutine, C<eval{}> or C<do>) and I<the any called from
+block, (or subroutine, C<eval{}> or C<do>) and I<any called from
 within that block>.  A local() just gives temporary values to global
 (meaning package) variables.  This is known as dynamic scoping.  Lexical
 scoping is done with "my", which works more like C's auto declarations.
@@ -392,7 +392,7 @@ subroutine.  Examples:
     }
     # old %digits restored here
 
-Because local() is a run-time command, and so gets executed every time
+Because local() is a run-time command, it gets executed every time
 through a loop.  In releases of Perl previous to 5.0, this used more stack
 storage each time until the loop was exited.  Perl now reclaims the space
 each time through, but it's still more efficient to declare your variables
@@ -442,7 +442,7 @@ whatever "*" value was assigned to it.  Example:
 
 Note that scalars are already passed by reference, so you can modify
 scalar arguments without using this mechanism by referring explicitly
-to $_[0] etc.  You can modify all the elements of an array by passing
+to C<$_[0]> etc.  You can modify all the elements of an array by passing
 all the elements as scalars, but you have to use the * mechanism (or
 the equivalent reference mechanism) to push, pop or change the size of
 an array.  It will certainly be faster to pass the typeglob (or reference).

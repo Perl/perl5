@@ -95,6 +95,6 @@ should be set to the full width of your output device.
 
 =head1 AUTHOR
 
-David Muir Sharnoff <muir@idiom.com>
+David Muir Sharnoff E<lt>F<muir@idiom.com>E<gt>
 
 =cut

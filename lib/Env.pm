@@ -39,7 +39,7 @@ the environment, assign it the undefined value
 
 =head1 AUTHOR
 
-Chip Salzenberg <chip@fin.uucp>
+Chip Salzenberg E<lt>F<chip@fin.uucp>E<gt>
 
 =cut
 

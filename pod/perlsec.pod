@@ -134,7 +134,7 @@ a child of lesser privilege.
 
 =head2 Cleaning Up Your Path
 
-For "Insecure $ENV{PATH}" messages, you need to set C<$ENV{'PATH'}> to a
+For "Insecure C<$ENV{PATH}>" messages, you need to set C<$ENV{'PATH'}> to a
 known value, and each directory in the path must be non-writable by others
 than its owner and group.  You may be surprised to get this message even
 if the pathname to your executable is fully qualified.  This is I<not>

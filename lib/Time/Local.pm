@@ -8,7 +8,7 @@ use Carp;
 
 =head1 NAME
 
-Time::Local - efficiently compute tome from local and GMT time
+Time::Local - efficiently compute time from local and GMT time
 
 =head1 SYNOPSIS
 

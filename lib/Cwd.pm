@@ -39,7 +39,7 @@ the trailing line terminator). It is recommended that cwd (or another
 If you ask to override your chdir() built-in function, then your PWD
 environment variable will be kept up to date.  (See
 L<perlsub/Overriding builtin functions>.) Note that it will only be
-kept up to date it all packages which use chdir import it from Cwd.
+kept up to date if all packages which use chdir import it from Cwd.
 
 =cut
 

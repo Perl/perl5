@@ -287,8 +287,8 @@ compilation to fail with an error. The code will not be executed.
 The default operator mask for a newly created compartment is
 the ':default' optag.
 
-It is important that you read the L<Opcode(3)> module documentation
-for more information. Especially for details definitions of opnames,
+It is important that you read the Opcode(3) module documentation
+for more information, especially for detailed definitions of opnames,
 optags and opsets.
 
 Since it is only at the compilation stage that the operator mask
@@ -454,7 +454,7 @@ problem.
 
 Consider a function foo() in package pkg compiled outside a compartment
 but shared with it. Assume the compartment has a root package called
-'Root'. If foo() contains an eval statement like eval '$baz = 1' then,
+'Root'. If foo() contains an eval statement like eval '$foo = 1' then,
 normally, $pkg::foo will be set to 1.  If foo() is called from the
 compartment (by whatever means) then instead of setting $pkg::foo, the
 eval will actually set $Root::pkg::foo.
@@ -549,7 +549,7 @@ Originally designed and implemented by Malcolm Beattie,
 mbeattie@sable.ox.ac.uk.
 
 Reworked to use the Opcode module and other changes added by Tim Bunce
-<Tim.Bunce@ig.co.uk>.
+E<lt>F<Tim.Bunce@ig.co.uk>E<gt>.
 
 =cut
 

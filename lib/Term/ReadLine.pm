@@ -33,7 +33,7 @@ or as
 
   $term->addhistory('row');
 
-where $term is a return value of Term::ReadLine->Init.
+where $term is a return value of Term::ReadLine-E<gt>Init.
 
 =over 12
 
@@ -74,7 +74,7 @@ history. Returns the old value.
 =item C<findConsole>
 
 returns an array with two strings that give most appropriate names for
-files for input and output using conventions C<"<$in">, C<"E<gt>out">.
+files for input and output using conventions C<"E<lt>$in">, C<"E<gt>out">.
 
 =item C<Features>
 

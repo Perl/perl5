@@ -56,7 +56,7 @@ name without fully qualifying it.
 
 This disables the poetry optimization, generating a compile-time error if
 you try to use a bareword identifier that's not a subroutine, unless it
-appears in curly braces or on the left hand side of the "=>" symbol.
+appears in curly braces or on the left hand side of the "=E<gt>" symbol.
 
 
     use strict 'subs';

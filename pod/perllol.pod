@@ -12,7 +12,7 @@ that applies here will also be applicable later on with the fancier data
 structures.
 
 A list of lists, or an array of an array if you would, is just a regular
-old array @LoL that you can get at with two subscripts, like $LoL[3][2].  Here's
+old array @LoL that you can get at with two subscripts, like C<$LoL[3][2]>.  Here's
 a declaration of the array:
 
     # assign to our array a list of list references
@@ -42,7 +42,7 @@ but rather just a reference to it, you could do something more like this:
 Notice that the outer bracket type has changed, and so our access syntax 
 has also changed.  That's because unlike C, in perl you can't freely
 interchange arrays and references thereto.  $ref_to_LoL is a reference to an 
-array, whereas @LoL is an array proper.  Likewise, $LoL[2] is not an 
+array, whereas @LoL is an array proper.  Likewise, C<$LoL[2]> is not an 
 array, but an array ref.  So how come you can write these:
 
     $LoL[2][2]
@@ -54,7 +54,7 @@ instead of having to write these:
     $ref_to_LoL->[2]->[2]
 
 Well, that's because the rule is that on adjacent brackets only (whether
-square or curly), you are free to omit the pointer dereferencing array.
+square or curly), you are free to omit the pointer dereferencing arrow.
 But you cannot do so for the very first one if it's a scalar containing
 a reference, which means that $ref_to_LoL always needs it.
 
@@ -116,7 +116,7 @@ You also don't have to use push().  You could just make a direct assignment
 if you knew where you wanted to put it:
 
     my (@LoL, $i, $line);
-    for $i ( 0 .. 10 ) 
+    for $i ( 0 .. 10 ) {
 	$line = <>;
 	$LoL[$i] = [ split ' ', $line ];
     } 
@@ -124,7 +124,7 @@ if you knew where you wanted to put it:
 or even just
 
     my (@LoL, $i);
-    for $i ( 0 .. 10 ) 
+    for $i ( 0 .. 10 ) {
 	$LoL[$i] = [ split ' ', <> ];
     } 
 
@@ -133,7 +133,7 @@ in a scalar context without explicitly stating such.
 This would be clearer to the casual reader:
 
     my (@LoL, $i);
-    for $i ( 0 .. 10 ) 
+    for $i ( 0 .. 10 ) {
 	$LoL[$i] = [ split ' ', scalar(<>) ];
     } 
 
@@ -308,6 +308,6 @@ perldata(1), perlref(1), perldsc(1)
 
 =head1 AUTHOR
 
-Tom Christiansen <tchrist@perl.com>
+Tom Christiansen E<lt>F<tchrist@perl.com>E<gt>
 
 Last udpate: Sat Oct  7 19:35:26 MDT 1995

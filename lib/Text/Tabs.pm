@@ -69,15 +69,15 @@ __END__
 
 =head1 NAME
 
-Text::Tabs -- expand and unexpand tabs per the unix expand(1) and unexpand(1)
+Text::Tabs - expand and unexpand tabs per the unix expand(1) and unexpand(1)
 
 =head1 SYNOPSIS
 
-use Text::Tabs;
+    use Text::Tabs;
 
-$tabstop = 4;
-@lines_without_tabs = expand(@lines_with_tabs);
-@lines_with_tabs = unexpand(@lines_without_tabs);
+    $tabstop = 4;
+    @lines_without_tabs = expand(@lines_with_tabs);
+    @lines_with_tabs = unexpand(@lines_without_tabs);
 
 =head1 DESCRIPTION
 
@@ -94,4 +94,4 @@ entire document in one string.  Instead feed it an array of lines.
 
 =head1 AUTHOR
 
-David Muir Sharnoff <muir@idiom.com>
+David Muir Sharnoff E<lt>F<muir@idiom.com>E<gt>

@@ -25,7 +25,7 @@ All nulls, returns, and newlines are removed from the result.
 
 =head1 AUTHOR
 
-David Sundstrom <sunds@asictest.sc.ti.com>
+David Sundstrom E<lt>F<sunds@asictest.sc.ti.com>E<gt>
 
 Texas Instruments
 

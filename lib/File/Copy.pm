@@ -192,8 +192,8 @@ associated with an old version of that file after C<rmscopy>
 returns, not the newly created version.)
 
 The third parameter is an integer flag, which tells C<rmscopy>
-how to handle timestamps.  If it is < 0, none of the input file's
-timestamps are propagated to the output file.  If it is > 0, then
+how to handle timestamps.  If it is E<lt> 0, none of the input file's
+timestamps are propagated to the output file.  If it is E<gt> 0, then
 it is interpreted as a bitmask: if bit 0 (the LSB) is set, then
 timestamps other than the revision date are propagated; if bit 1
 is set, the revision date is propagated.  If the third parameter

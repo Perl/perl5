@@ -30,10 +30,6 @@ $Config{'startperl'}
     eval 'exec perl -S \$0 "\$@"'
 	if 0;
 
-'di ';
-'ds 00 \"';
-'ig 00 ';
-
 !GROK!THIS!
 
 # In the following, perl variables are not expanded during extraction.
@@ -253,56 +249,63 @@ sub expr {
     }
 }
 ##############################################################################
+__END__
 
-	# These next few lines are legal in both Perl and nroff.
+=head1 NAME
 
-.00 ;			# finish .ig
+h2ph - convert .h C header files to .ph Perl header files
 
-'di			\" finish diversion--previous line must be blank
-.nr nl 0-1		\" fake up transition to first page again
-.nr % 0			\" start at page 1
-'; __END__ ############# From here on it's a standard manual page ############
-.TH H2PH 1 "August 8, 1990"
-.AT 3
-.SH NAME
-h2ph \- convert .h C header files to .ph Perl header files
-.SH SYNOPSIS
-.B h2ph [headerfiles]
-.SH DESCRIPTION
-.I h2ph
+=head1 SYNOPSIS
+
+B<h2ph [headerfiles]>
+
+=head1 DESCRIPTION
+
+I<h2ph>
 converts any C header files specified to the corresponding Perl header file
 format.
 It is most easily run while in /usr/include:
-.nf
 
 	cd /usr/include; h2ph * sys/*
 
-.fi
 If run with no arguments, filters standard input to standard output.
-.SH ENVIRONMENT
+
+=head1 ENVIRONMENT
+
 No environment variables are used.
-.SH FILES
-/usr/include/*.h
-.br
-/usr/include/sys/*.h
-.br
+
+=head1 FILES
+
+ /usr/include/*.h
+ /usr/include/sys/*.h
+
 etc.
-.SH AUTHOR
+
+=head1 AUTHOR
+
 Larry Wall
-.SH "SEE ALSO"
+
+=head1 SEE ALSO
+
 perl(1)
-.SH DIAGNOSTICS
+
+=head1 DIAGNOSTICS
+
 The usual warnings if it can't read or write the files involved.
-.SH BUGS
+
+=head1 BUGS
+
 Doesn't construct the %sizeof array for you.
-.PP
+
 It doesn't handle all C constructs, but it does attempt to isolate
 definitions inside evals so that you can get at the definitions
 that it can translate.
-.PP
+
 It's only intended as a rough tool.
 You may need to dicker with the files produced.
-.ex
+
+=cut
+
 !NO!SUBS!
 
 close OUT or die "Can't close $file: $!";

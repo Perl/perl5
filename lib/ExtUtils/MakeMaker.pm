@@ -1140,7 +1140,7 @@ so
 =item CONFIGURE
 
 CODE reference. The subroutine should return a hash reference. The
-hash may contain further attributes, e.g. {LIBS => ...}, that have to
+hash may contain further attributes, e.g. {LIBS =E<gt> ...}, that have to
 be determined by some evaluation method.
 
 =item DEFINE

@@ -118,7 +118,7 @@ So, for classes and subclasses to have inheritance correctly
 work with autoloading, you need to ensure stubs are loaded.
 
 The SelfLoader can load stubs automatically at module initialization
-with the statement 'SelfLoader->load_stubs()';, but you may wish to
+with the statement 'SelfLoader-E<gt>load_stubs()';, but you may wish to
 avoid having the stub loading overhead associated with your
 initialization (though note that the SelfLoader::load_stubs method
 will be called sooner or later - at latest when the first sub

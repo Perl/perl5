@@ -273,7 +273,7 @@ sub dl_expandspec {
 
 DynaLoader - Dynamically load C libraries into Perl code
 
-dl_error(), dl_findfile(), dl_expandspec(), dl_load_file(), dl_find_symbol(), dl_undef_symbols(), dl_install_xsub(), boostrap() - routines used by DynaLoader modules
+dl_error(), dl_findfile(), dl_expandspec(), dl_load_file(), dl_find_symbol(), dl_undef_symbols(), dl_install_xsub(), bootstrap() - routines used by DynaLoader modules
 
 =head1 SYNOPSIS
 
@@ -523,7 +523,7 @@ the function if required by die(), caller() or the debugger.  If
 $filename is not defined then "DynaLoader" will be used.
 
 
-=item boostrap()
+=item bootstrap()
 
 Syntax:
 

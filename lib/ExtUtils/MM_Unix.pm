@@ -42,8 +42,8 @@ overrides by defining rather primitive operations within
 ExtUtils::MM_Unix.
 
 If you are going to write a platform specific MM package, please try
-to limit the necessary overrides to primitiv methods, and if it is not
-possible to do so, let's work it out how to achieve that gain.
+to limit the necessary overrides to primitive methods, and if it is not
+possible to do so, let's work out how to achieve that gain.
 
 If you are overriding any of these methods in your Makefile.PL (in the
 MY class), please report that to the makemaker mailing list. We are
@@ -60,7 +60,7 @@ sections and complain loudly to the makemaker mailing list.
 Not all of the methods below are overridable in a
 Makefile.PL. Overridable methods are marked as (o). All methods are
 overridable by a platform specific MM_*.pm file (See
-L<ExtUtils::MM_VMS>) and L<ExtUtils::MM_OS2>).
+L<ExtUtils::MM_VMS> and L<ExtUtils::MM_OS2>).
 
 =head2 Preloaded methods
 
@@ -1031,7 +1031,7 @@ sub extliblist {
 
 =item file_name_is_absolute
 
-Takes as argument a path and returns true, it it is an absolute path.
+Takes as argument a path and returns true, if it is an absolute path.
 
 =cut
 
@@ -2475,7 +2475,7 @@ sub post_constants{
 
 =item post_initialize (o)
 
-Returns an ampty string per default. Used in Makefile.PLs to add some
+Returns an empty string per default. Used in Makefile.PLs to add some
 chunk of text to the Makefile after the object is initialized.
 
 =cut

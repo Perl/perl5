@@ -22,14 +22,10 @@ while (@ARGV) {
 
 umask 022;
 
-@scripts = qw(	utils/c2ph utils/h2ph utils/h2xs utils/pstruct
-		utils/perlbug utils/perldoc
+@scripts = qw(	utils/c2ph utils/h2ph utils/h2xs
+		utils/perlbug utils/perldoc utils/pl2pm
 		x2p/s2p x2p/find2perl
 		pod/pod2man pod/pod2html pod/pod2latex pod/pod2text);
-
-# pod documentation now handled by separate installman script.
-# These two are archaic leftovers.
-@manpages = qw(x2p/a2p.man x2p/s2p.man);
 
 @pods = (<pod/*.pod>);
 
@@ -120,35 +116,16 @@ for (@scripts) {
     s#.*/##; &chmod(0755, "$installscript/$_");
 }
 
+# pstruct should be a link to c2ph
+
+&safe_unlink("$installscript/pstruct");
+&link("$installscript/c2ph","$installscript/pstruct");
+
 # Install pod pages.  Where? I guess in $installprivlib/pod.
 mkpath("${installprivlib}/pod", 1, 0777);
 foreach $file (@pods) {
     # $file is a name like  pod/perl.pod
     cp_if_diff($file, "${installprivlib}/${file}");
-}
-
-# Install old man pages.
-
-if ($installman1dir ne '') {
-    mkpath($installman1dir, 1, 0777);
-
-    if (! &samepath($installman1dir, '.')) {
-	for (@manpages) {
-	    ($new = $_) =~ s/man$/$man1ext/;
-	    $new =~ s#.*/##;
-	    print STDERR "  Installing $installman1dir/$new\n";
-	    next if $nonono;
-	    open(MI,$_) || warn "Can't open $_: $!\n";
-	    open(MO,">$installman1dir/$new") || 
-		    warn "Can't install $installman1dir/$new: $!\n";
-	    print MO ".ds RP Release $release Patchlevel $patchlevel\n";
-	    while (<MI>) {
-		print MO;
-	    }
-	    close MI;
-	    close MO;
-	}
-    }
 }
 
 # Install library files.

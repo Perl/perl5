@@ -19,9 +19,9 @@ connects RDRFH for reading, WTRFH for writing, and ERRFH for errors.  If
 ERRFH is '', or the same as RDRFH, then STDOUT and STDERR of the child are
 on the same file handle.
 
-If WTRFH begins with "<&", then WTRFH will be closed in the parent, and
+If WTRFH begins with "E<lt>&", then WTRFH will be closed in the parent, and
 the child will read from it directly.  If RDRFH or ERRFH begins with
-">&", then the child will send output directly to that file handle.  In both
+"E<gt>&", then the child will send output directly to that file handle.  In both
 cases, there will be a dup(2) instead of a pipe(2) made.
 
 If you try to read from the child's stdout writer and their stderr

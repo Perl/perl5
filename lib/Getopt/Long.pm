@@ -85,7 +85,7 @@ followed by an argument specifier. Values for argument specifiers are:
 
 =over 8
 
-=item <none>
+=item E<lt>noneE<gt>
 
 Option does not take an argument. 
 The option variable will be set to 1.
@@ -208,7 +208,7 @@ The option name is always the true name, not an abbreviation or alias.
 
 The option name may actually be a list of option names, separated by
 "|"s, e.g. "foo|bar|blech=s". In this example, "foo" is the true name
-op this option. If no linkage is specified, options "foo", "bar" and
+of this option. If no linkage is specified, options "foo", "bar" and
 "blech" all will set $opt_foo.
 
 Option names may be abbreviated to uniqueness, depending on
@@ -216,7 +216,7 @@ configuration variable $Getopt::Long::autoabbrev.
 
 =head2 Non-option call-back routine
 
-A special option specifier, <>, can be used to designate a subroutine
+A special option specifier, E<lt>E<gt>, can be used to designate a subroutine
 to handle non-option arguments. GetOptions will immediately call this
 subroutine for every non-option it encounters in the options list.
 This subroutine gets the name of the non-option passed.
@@ -285,18 +285,18 @@ In GNU or POSIX format, option names and values can be combined:
    --bar=		-> $opt_bar = ''
    --bar=--		-> $opt_bar = '--'
 
-Example of using variabel references:
+Example of using variable references:
 
    $ret = &GetOptions ('foo=s', \$foo, 'bar=i', 'ar=s', \@ar);
 
 With command line options "-foo blech -bar 24 -ar xx -ar yy" 
 this will result in:
 
-   $bar = 'blech'
+   $foo = 'blech'
    $opt_bar = 24
    @ar = ('xx','yy')
 
-Example of using the <> option specifier:
+Example of using the E<lt>E<gt> option specifier:
 
    @ARGV = qw(-foo 1 bar -foo 2 blech);
    &GetOptions("foo=i", \$myfoo, "<>", \&mysub);

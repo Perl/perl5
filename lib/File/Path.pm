@@ -78,8 +78,8 @@ treated as ordinary files.
 
 =head1 AUTHORS
 
-Tim Bunce <Tim.Bunce@ig.co.uk>
-Charles Bailey <bailey@genetics.upenn.edu>
+Tim Bunce E<lt>F<Tim.Bunce@ig.co.uk>E<gt>
+Charles Bailey E<lt>F<bailey@genetics.upenn.edu>E<gt>
 
 =head1 REVISION
 

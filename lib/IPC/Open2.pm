@@ -20,7 +20,7 @@ The open2() function spawns the given $cmd and connects $rdr for
 reading and $wtr for writing.  It's what you think should work 
 when you try
 
-    open(HANDLE, "|cmd args");
+    open(HANDLE, "|cmd args|");
 
 open2() returns the process ID of the child process.  It doesn't return on
 failure: it just raises an exception matching C</^open2:/>.
