@@ -353,6 +353,48 @@ char *lend;
     return Nullch;
 }
 
+/* Initialize locale (and the fold[] array).*/
+int
+perl_init_i18nl14n(printwarn)	
+    int printwarn;
+{
+    int ok = 1;
+    /* returns
+     *    1 = set ok or not applicable,
+     *    0 = fallback to C locale,
+     *   -1 = fallback to C locale failed
+     */
+#if defined(HAS_SETLOCALE) && defined(LC_CTYPE)
+    char * lang     = getenv("LANG");
+    char * lc_all   = getenv("LC_ALL");
+    char * lc_ctype = getenv("LC_CTYPE");
+    int i;
+
+    if (setlocale(LC_CTYPE, "") == NULL && (lc_all || lc_ctype || lang)) {
+	if (printwarn) {
+	    fprintf(stderr, "warning: setlocale(LC_CTYPE, \"\") failed.\n");
+	    fprintf(stderr,
+	      "warning: LC_ALL = \"%s\", LC_CTYPE = \"%s\", LANG = \"%s\",\n",
+	      lc_all   ? lc_all   : "(null)",
+	      lc_ctype ? lc_ctype : "(null)",
+	      lang     ? lang     : "(null)"
+	      );
+	    fprintf(stderr, "warning: falling back to the \"C\" locale.\n");
+	}
+	ok = 0;
+	if (setlocale(LC_CTYPE, "C") == NULL)
+	    ok = -1;
+    }
+
+    for (i = 0; i < 256; i++) {
+	if (isUPPER(i)) fold[i] = toLOWER(i);
+	else if (isLOWER(i)) fold[i] = toUPPER(i);
+	else fold[i] = i;
+    }
+#endif
+    return ok;
+}
+
 void
 fbm_compile(sv, iflag)
 SV *sv;
@@ -703,10 +745,11 @@ char *pat;
 long a1, a2, a3, a4;
 {
     char *s;
+    char *s_start;
     I32 usermess = strEQ(pat,"%s");
     SV *tmpstr;
 
-    s = buf;
+    s = s_start = buf;
     if (usermess) {
 	tmpstr = sv_newmortal();
 	sv_setpv(tmpstr, (char*)a1);
@@ -735,9 +778,19 @@ long a1, a2, a3, a4;
 		s += strlen(s);
 	    }
 	    (void)strcpy(s,".\n");
+	    s += 2;
 	}
 	if (usermess)
 	    sv_catpv(tmpstr,buf+1);
+    }
+
+    if (s - s_start >= sizeof(buf)) {	/* Ooops! */
+	if (usermess)
+	    fputs(SvPVX(tmpstr), stderr);
+	else
+	    fputs(buf, stderr);
+	fputs("panic: message overflow - memory corrupted!\n",stderr);
+	my_exit(1);
     }
     if (usermess)
 	return SvPVX(tmpstr);
@@ -772,8 +825,12 @@ long a1, a2, a3, a4;
     }
     fputs(message,stderr);
     (void)fflush(stderr);
-    if (e_fp)
+    if (e_fp) {
+#ifdef DOSISH
+        fclose(e_fp);
+#endif
 	(void)UNLINK(e_tmpname);
+    }
     statusvalue = SHIFTSTATUS(statusvalue);
 #ifdef VMS
     my_exit((U32)vaxc$errno?vaxc$errno:errno?errno:statusvalue?statusvalue:SS$_ABORT);
@@ -826,6 +883,7 @@ mess(pat, args)
 #endif
 {
     char *s;
+    char *s_start;
     SV *tmpstr;
     I32 usermess;
 #ifndef HAS_VPRINTF
@@ -836,7 +894,7 @@ mess(pat, args)
 #endif
 #endif
 
-    s = buf;
+    s = s_start = buf;
     usermess = strEQ(pat, "%s");
     if (usermess) {
 	tmpstr = sv_newmortal();
@@ -868,11 +926,20 @@ mess(pat, args)
 		s += strlen(s);
 	    }
 	    (void)strcpy(s,".\n");
+	    s += 2;
 	}
 	if (usermess)
 	    sv_catpv(tmpstr,buf+1);
     }
 
+    if (s - s_start >= sizeof(buf)) {	/* Ooops! */
+	if (usermess)
+	    fputs(SvPVX(tmpstr), stderr);
+	else
+	    fputs(buf, stderr);
+	fputs("panic: message overflow - memory corrupted!\n",stderr);
+	my_exit(1);
+    }
     if (usermess)
 	return SvPVX(tmpstr);
     else
@@ -918,8 +985,12 @@ croak(pat, va_alist)
     }
     fputs(message,stderr);
     (void)fflush(stderr);
-    if (e_fp)
+    if (e_fp) {
+#ifdef DOSISH
+        fclose(e_fp);
+#endif
 	(void)UNLINK(e_tmpname);
+    }
     statusvalue = SHIFTSTATUS(statusvalue);
 #ifdef VMS
     my_exit((U32)(vaxc$errno?vaxc$errno:(statusvalue?statusvalue:44)));
@@ -1287,7 +1358,8 @@ VTOH(vtohs,short)
 VTOH(vtohl,long)
 #endif
 
-#if  !defined(DOSISH) && !defined(VMS)  /* VMS' my_popen() is in VMS.c */
+#if  !defined(DOSISH) && !defined(VMS)  /* VMS' my_popen() is in
+					   VMS.c, same with OS/2. */
 FILE *
 my_popen(cmd,mode)
 char	*cmd;
@@ -1364,7 +1436,7 @@ char	*mode;
     return fdopen(p[this], mode);
 }
 #else
-#if defined(atarist) || defined(OS2)
+#if defined(atarist)
 FILE *popen();
 FILE *
 my_popen(cmd,mode)
