@@ -4617,7 +4617,7 @@ PP(pp_gpwent)
     register SV *sv;
     struct passwd *pwent;
     STRLEN n_a;
-#ifdef HAS_GETSPENT
+#if defined(HAS_GETSPENT) || defined(HAS_GETSPNAM)
     struct spwd *spwent = NULL;
 #endif
 
@@ -4639,8 +4639,10 @@ PP(pp_gpwent)
 	    spwent = getspnam(pwent->pw_name);
     }
 #  endif
+#  ifdef HAS_GETSPENT
     else
 	spwent = (struct spwd *)getspent();
+#  endif
 #endif
 
     EXTEND(SP, 10);
@@ -4661,7 +4663,7 @@ PP(pp_gpwent)
 
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #ifdef PWPASSWD
-#   ifdef HAS_GETSPENT
+#   if defined(HAS_GETSPENT) || defined(HAS_GETSPNAM)
       if (spwent)
               sv_setpv(sv, spwent->sp_pwdp);
       else
