@@ -49,10 +49,10 @@
 static IV asIV _((SV* sv));
 static UV asUV _((SV* sv));
 static SV *more_sv _((void));
-static XPVIV *more_xiv _((void));
-static XPVNV *more_xnv _((void));
-static XPV *more_xpv _((void));
-static XRV *more_xrv _((void));
+static void more_xiv _((void));
+static void more_xnv _((void));
+static void more_xpv _((void));
+static void more_xrv _((void));
 static XPVIV *new_xiv _((void));
 static XPVNV *new_xnv _((void));
 static XPV *new_xpv _((void));
@@ -417,26 +417,29 @@ STATIC XPVIV*
 new_xiv(void)
 {
     IV* xiv;
-    if (PL_xiv_root) {
-	xiv = PL_xiv_root;
-	/*
-	 * See comment in more_xiv() -- RAM.
-	 */
-	PL_xiv_root = *(IV**)xiv;
-	return (XPVIV*)((char*)xiv - STRUCT_OFFSET(XPVIV, xiv_iv));
-    }
-    return more_xiv();
+    LOCK_SV_MUTEX;
+    if (!PL_xiv_root)
+	more_xiv();
+    xiv = PL_xiv_root;
+    /*
+     * See comment in more_xiv() -- RAM.
+     */
+    PL_xiv_root = *(IV**)xiv;
+    UNLOCK_SV_MUTEX;
+    return (XPVIV*)((char*)xiv - STRUCT_OFFSET(XPVIV, xiv_iv));
 }
 
 STATIC void
 del_xiv(XPVIV *p)
 {
     IV* xiv = (IV*)((char*)(p) + STRUCT_OFFSET(XPVIV, xiv_iv));
+    LOCK_SV_MUTEX;
     *(IV**)xiv = PL_xiv_root;
     PL_xiv_root = xiv;
+    UNLOCK_SV_MUTEX;
 }
 
-STATIC XPVIV*
+STATIC void
 more_xiv(void)
 {
     register IV* xiv;
@@ -455,30 +458,32 @@ more_xiv(void)
 	xiv++;
     }
     *(IV**)xiv = 0;
-    return new_xiv();
 }
 
 STATIC XPVNV*
 new_xnv(void)
 {
     double* xnv;
-    if (PL_xnv_root) {
-	xnv = PL_xnv_root;
-	PL_xnv_root = *(double**)xnv;
-	return (XPVNV*)((char*)xnv - STRUCT_OFFSET(XPVNV, xnv_nv));
-    }
-    return more_xnv();
+    LOCK_SV_MUTEX;
+    if (!PL_xnv_root)
+	more_xnv();
+    xnv = PL_xnv_root;
+    PL_xnv_root = *(double**)xnv;
+    UNLOCK_SV_MUTEX;
+    return (XPVNV*)((char*)xnv - STRUCT_OFFSET(XPVNV, xnv_nv));
 }
 
 STATIC void
 del_xnv(XPVNV *p)
 {
     double* xnv = (double*)((char*)(p) + STRUCT_OFFSET(XPVNV, xnv_nv));
+    LOCK_SV_MUTEX;
     *(double**)xnv = PL_xnv_root;
     PL_xnv_root = xnv;
+    UNLOCK_SV_MUTEX;
 }
 
-STATIC XPVNV*
+STATIC void
 more_xnv(void)
 {
     register double* xnv;
@@ -492,29 +497,31 @@ more_xnv(void)
 	xnv++;
     }
     *(double**)xnv = 0;
-    return new_xnv();
 }
 
 STATIC XRV*
 new_xrv(void)
 {
     XRV* xrv;
-    if (PL_xrv_root) {
-	xrv = PL_xrv_root;
-	PL_xrv_root = (XRV*)xrv->xrv_rv;
-	return xrv;
-    }
-    return more_xrv();
+    LOCK_SV_MUTEX;
+    if (!PL_xrv_root)
+	more_xrv();
+    xrv = PL_xrv_root;
+    PL_xrv_root = (XRV*)xrv->xrv_rv;
+    UNLOCK_SV_MUTEX;
+    return xrv;
 }
 
 STATIC void
 del_xrv(XRV *p)
 {
+    LOCK_SV_MUTEX;
     p->xrv_rv = (SV*)PL_xrv_root;
     PL_xrv_root = p;
+    UNLOCK_SV_MUTEX;
 }
 
-STATIC XRV*
+STATIC void
 more_xrv(void)
 {
     register XRV* xrv;
@@ -527,29 +534,31 @@ more_xrv(void)
 	xrv++;
     }
     xrv->xrv_rv = 0;
-    return new_xrv();
 }
 
 STATIC XPV*
 new_xpv(void)
 {
     XPV* xpv;
-    if (PL_xpv_root) {
-	xpv = PL_xpv_root;
-	PL_xpv_root = (XPV*)xpv->xpv_pv;
-	return xpv;
-    }
-    return more_xpv();
+    LOCK_SV_MUTEX;
+    if (!PL_xpv_root)
+	more_xpv();
+    xpv = PL_xpv_root;
+    PL_xpv_root = (XPV*)xpv->xpv_pv;
+    UNLOCK_SV_MUTEX;
+    return xpv;
 }
 
 STATIC void
 del_xpv(XPV *p)
 {
+    LOCK_SV_MUTEX;
     p->xpv_pv = (char*)PL_xpv_root;
     PL_xpv_root = p;
+    UNLOCK_SV_MUTEX;
 }
 
-STATIC XPV*
+STATIC void
 more_xpv(void)
 {
     register XPV* xpv;
@@ -562,7 +571,6 @@ more_xpv(void)
 	xpv++;
     }
     xpv->xpv_pv = 0;
-    return new_xpv();
 }
 
 #ifdef PURIFY
