@@ -1404,6 +1404,7 @@ p	|HV*	|newHV
 p	|HV*	|newHVhv	|HV* hv
 p	|IO*	|newIO
 p	|OP*	|newLISTOP	|I32 type|I32 flags|OP* first|OP* last
+p	|OP*	|newPADOP	|I32 type|I32 flags|SV* sv
 p	|OP*	|newPMOP	|I32 type|I32 flags
 p	|OP*	|newPVOP	|I32 type|I32 flags|char* pv
 p	|SV*	|newRV		|SV* pref
@@ -1771,6 +1772,23 @@ p	|CV*	|newATTRSUB	|I32 floor|OP *o|OP *proto|OP *attrs|OP *block
 p	|void	|newMYSUB	|I32 floor|OP *o|OP *proto|OP *attrs|OP *block
 p	|OP *	|my_attrs	|OP *o|OP *attrs
 p	|void	|boot_core_xsutils
+#if defined(USE_ITHREADS)
+p	|HE*	|he_dup		|HE* e|bool shared
+p	|REGEXP*|re_dup		|REGEXP* r
+p	|PerlIO*|fp_dup		|PerlIO* fp|char type
+p	|DIR*	|dirp_dup	|DIR* dp
+p	|GP*	|gp_dup		|GP* gp
+p	|MAGIC*	|mg_dup		|MAGIC* mg
+p	|SV*	|sv_dup		|SV* sstr
+#if defined(HAVE_INTERP_INTERN)
+p	|void	|sys_intern_dup	|struct interp_intern* src \
+				|struct interp_intern* dst
+#endif
+p	|SVTBL*	|sv_table_new
+p	|SV*	|sv_table_fetch	|SVTBL *tbl|SV *sv
+p	|void	|sv_table_store	|SVTBL *tbl|SV *oldsv|SV *newsv
+p	|void	|sv_table_split	|SVTBL *tbl
+#endif
 
 #if defined(PERL_OBJECT)
 protected:

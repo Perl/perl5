@@ -293,9 +293,7 @@ sub B::COP::save {
     my ($op, $level) = @_;
     my $sym = objsym($op);
     return $sym if defined $sym;
-    my $gvsym = $op->filegv->save;
-    my $stashsym = $op->stash->save;
-    warn sprintf("COP: line %d file %s\n", $op->line, $op->filegv->SV->PV)
+    warn sprintf("COP: line %d file %s\n", $op->line, $op->file)
 	if $debug_cops;
     $copsect->add(sprintf("s\\_%x, s\\_%x, %s,$handle_VC_problem %u, %u, %u, 0x%x, 0x%x, %s, Nullhv, Nullgv, %u, %d, %u",
 			  ${$op->next}, ${$op->sibling}, $op->ppaddr,
@@ -303,8 +301,8 @@ sub B::COP::save {
 			  $op->private, cstring($op->label), $op->cop_seq,
 			  $op->arybase, $op->line));
     my $copix = $copsect->index;
-    $init->add(sprintf("cop_list[%d].cop_filegv = %s;", $copix, $gvsym),
-	       sprintf("cop_list[%d].cop_stash = %s;", $copix, $stashsym));
+    $init->add(sprintf("CopFILE_set(&cop_list[%d], %s);", $copix, cstring($op->file)),
+	       sprintf("CopSTASHPV_set(&cop_list[%d], %s);", $copix, cstring($op->stashpv));
     savesym($op, "(OP*)&cop_list[$copix]");
 }
 
@@ -700,6 +698,7 @@ sub B::CV::save {
 	warn sprintf("done saving GV 0x%x for CV 0x%x\n",
 		     $$gv, $$cv) if $debug_cv;
     }
+    $init->add(sprintf("CvFILE($sym) = %s;", cstring($cv->FILE)));
     my $stash = $cv->STASH;
     if ($$stash) {
 	$stash->save;
@@ -1011,9 +1010,7 @@ typedef struct {
     void      (*xcv_xsub) (CV*);
     void *	xcv_xsubany;
     GV *	xcv_gv;
-#if defined(PERL_BINCOMPAT_5005)
-    GV *	xcv_filegv;	/* XXX unused (and deprecated) */
-#endif
+    char *	xcv_file;
     long	xcv_depth;	/* >= 2 indicates recursive call */
     AV *	xcv_padlist;
     CV *	xcv_outside;

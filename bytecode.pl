@@ -339,6 +339,7 @@ xcv_stash	*(SV**)&CvSTASH(bytecode_sv)		svindex
 xcv_start	CvSTART(bytecode_sv)			opindex
 xcv_root	CvROOT(bytecode_sv)			opindex
 xcv_gv		*(SV**)&CvGV(bytecode_sv)		svindex
+xcv_file	CvFILE(bytecode_sv)			pvcontents
 xcv_depth	CvDEPTH(bytecode_sv)			long
 xcv_padlist	*(SV**)&CvPADLIST(bytecode_sv)		svindex
 xcv_outside	*(SV**)&CvOUTSIDE(bytecode_sv)		svindex
@@ -399,11 +400,11 @@ op_redoop	cLOOP->op_redoop			opindex
 op_nextop	cLOOP->op_nextop			opindex
 op_lastop	cLOOP->op_lastop			opindex
 cop_label	cCOP->cop_label				pvcontents
-cop_stash	*(SV**)&cCOP->cop_stash			svindex
-cop_filegv	*(SV**)&cCOP->cop_filegv		svindex
+cop_stashpv	cCOP					pvcontents	x
+cop_file	cCOP					pvcontents	x
 cop_seq		cCOP->cop_seq				U32
 cop_arybase	cCOP->cop_arybase			I32
-cop_line	cCOP->cop_line				line_t
+cop_line	cCOP					line_t		x
 cop_warnings	cCOP->cop_warnings			svindex
 main_start	PL_main_start				opindex
 main_root	PL_main_root				opindex

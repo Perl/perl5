@@ -1419,9 +1419,9 @@ Perl_vmess(pTHX_ const char *pat, va_list *args)
     sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
     if (!SvCUR(sv) || *(SvEND(sv) - 1) != '\n') {
 	dTHR;
-	if (PL_curcop->cop_line)
+	if (CopLINE(PL_curcop))
 	    Perl_sv_catpvf(aTHX_ sv, " at %_ line %"IVdf,
-			   CopFILESV(PL_curcop), (IV)PL_curcop->cop_line);
+			   CopFILESV(PL_curcop), (IV)CopLINE(PL_curcop));
 	if (GvIO(PL_last_in_gv) && IoLINES(GvIOp(PL_last_in_gv))) {
 	    bool line_mode = (RsSIMPLE(PL_rs) &&
 			      SvCUR(PL_rs) == 1 && *SvPVX(PL_rs) == '\n');
@@ -3396,8 +3396,6 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
     Zero(thr, 1, struct perl_thread);
 #endif
 
-    PL_protect = MEMBER_TO_FPTR(Perl_default_protect);
-
     thr->oursv = sv;
     init_stacks();
 
@@ -3410,18 +3408,7 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
     thr->flags = THRf_R_JOINABLE;
     MUTEX_INIT(&thr->mutex);
 
-    /* top_env needs to be non-zero. It points to an area
-       in which longjmp() stuff is stored, as C callstack
-       info there at least is thread specific this has to
-       be per-thread. Otherwise a 'die' in a thread gives
-       that thread the C stack of last thread to do an eval {}!
-       See comments in scope.h    
-       Initialize top entry (as in perl.c for main thread)
-     */
-    PL_start_env.je_prev = NULL;
-    PL_start_env.je_ret = -1;
-    PL_start_env.je_mustcatch = TRUE;
-    PL_top_env  = &PL_start_env;
+    JMPENV_BOOTSTRAP;
 
     PL_in_eval = EVAL_NULL;	/* ~(EVAL_INEVAL|EVAL_WARNONLY|EVAL_KEEPERR) */
     PL_restartop = 0;
@@ -3461,9 +3448,12 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
     PL_ofs = savepvn(t->Tofs, PL_ofslen);
     PL_defoutgv = (GV*)SvREFCNT_inc(t->Tdefoutgv);
     PL_chopset = t->Tchopset;
-    PL_formtarget = newSVsv(t->Tformtarget);
     PL_bodytarget = newSVsv(t->Tbodytarget);
     PL_toptarget = newSVsv(t->Ttoptarget);
+    if (t->Tformtarget == t->Ttoptarget)
+	PL_formtarget = PL_toptarget;
+    else
+	PL_formtarget = PL_bodytarget;
 
     /* Initialise all per-thread SVs that the template thread used */
     svp = AvARRAY(t->threadsv);

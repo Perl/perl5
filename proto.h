@@ -397,6 +397,7 @@ PERL_CALLCONV HV*	Perl_newHV(pTHX);
 PERL_CALLCONV HV*	Perl_newHVhv(pTHX_ HV* hv);
 PERL_CALLCONV IO*	Perl_newIO(pTHX);
 PERL_CALLCONV OP*	Perl_newLISTOP(pTHX_ I32 type, I32 flags, OP* first, OP* last);
+PERL_CALLCONV OP*	Perl_newPADOP(pTHX_ I32 type, I32 flags, SV* sv);
 PERL_CALLCONV OP*	Perl_newPMOP(pTHX_ I32 type, I32 flags);
 PERL_CALLCONV OP*	Perl_newPVOP(pTHX_ I32 type, I32 flags, char* pv);
 PERL_CALLCONV SV*	Perl_newRV(pTHX_ SV* pref);
@@ -737,6 +738,22 @@ PERL_CALLCONV CV*	Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, 
 PERL_CALLCONV void	Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block);
 PERL_CALLCONV OP *	Perl_my_attrs(pTHX_ OP *o, OP *attrs);
 PERL_CALLCONV void	Perl_boot_core_xsutils(pTHX);
+#if defined(USE_ITHREADS)
+PERL_CALLCONV HE*	Perl_he_dup(pTHX_ HE* e, bool shared);
+PERL_CALLCONV REGEXP*	Perl_re_dup(pTHX_ REGEXP* r);
+PERL_CALLCONV PerlIO*	Perl_fp_dup(pTHX_ PerlIO* fp, char type);
+PERL_CALLCONV DIR*	Perl_dirp_dup(pTHX_ DIR* dp);
+PERL_CALLCONV GP*	Perl_gp_dup(pTHX_ GP* gp);
+PERL_CALLCONV MAGIC*	Perl_mg_dup(pTHX_ MAGIC* mg);
+PERL_CALLCONV SV*	Perl_sv_dup(pTHX_ SV* sstr);
+#if defined(HAVE_INTERP_INTERN)
+PERL_CALLCONV void	Perl_sys_intern_dup(pTHX_ struct interp_intern* src, struct interp_intern* dst);
+#endif
+PERL_CALLCONV SVTBL*	Perl_sv_table_new(pTHX);
+PERL_CALLCONV SV*	Perl_sv_table_fetch(pTHX_ SVTBL *tbl, SV *sv);
+PERL_CALLCONV void	Perl_sv_table_store(pTHX_ SVTBL *tbl, SV *oldsv, SV *newsv);
+PERL_CALLCONV void	Perl_sv_table_split(pTHX_ SVTBL *tbl);
+#endif
 #if defined(PERL_OBJECT)
 protected:
 #endif

@@ -110,6 +110,16 @@
 	}					\
     } STMT_END
 
+#ifdef USE_ITHREADS
+#  define SAVECOPSTASH(cop)	SAVEPPTR(CopSTASHPV(cop))
+#  define SAVECOPFILE(cop)	SAVEPPTR(CopFILE(cop))
+#else
+#  define SAVECOPSTASH(cop)	SAVESPTR(CopSTASH(cop))
+#  define SAVECOPFILE(cop)	SAVESPTR(CopFILEGV(cop))
+#endif
+
+#define SAVECOPLINE(cop)	SAVEI16(CopLINE(cop))
+
 /* SSNEW() temporarily allocates a specified number of bytes of data on the
  * savestack.  It returns an integer index into the savestack, because a
  * pointer would get broken if the savestack is moved on reallocation.

@@ -378,3 +378,7 @@ PERLVAR(IDir,		struct IPerlDir*)
 PERLVAR(ISock,		struct IPerlSock*)
 PERLVAR(IProc,		struct IPerlProc*)
 #endif
+
+#if defined(USE_ITHREADS)
+PERLVAR(Isv_table,	SVTBL*)
+#endif

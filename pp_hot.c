@@ -58,9 +58,9 @@ PP(pp_gvsv)
     djSP;
     EXTEND(SP,1);
     if (PL_op->op_private & OPpLVAL_INTRO)
-	PUSHs(save_scalar((GV*)cSVOP->op_sv));
+	PUSHs(save_scalar(cGVOP));
     else
-	PUSHs(GvSV((GV*)cSVOP->op_sv));
+	PUSHs(GvSV(cGVOP));
     RETURN;
 }
 
@@ -95,7 +95,7 @@ PP(pp_stringify)
 PP(pp_gv)
 {
     djSP;
-    XPUSHs(cSVOP->op_sv);
+    XPUSHs((SV*)cGVOP);
     RETURN;
 }
 
@@ -271,7 +271,7 @@ PP(pp_add)
 PP(pp_aelemfast)
 {
     djSP;
-    AV *av = GvAV((GV*)cSVOP->op_sv);
+    AV *av = GvAV(cGVOP);
     U32 lval = PL_op->op_flags & OPf_MOD;
     SV** svp = av_fetch(av, PL_op->op_private, lval);
     SV *sv = (svp ? *svp : &PL_sv_undef);
@@ -2500,6 +2500,9 @@ try_autoload:
 			    SvPADMY_on(sv);
 			}
 		    }
+		    else if (IS_PADGV(oldpad[ix])) {
+			av_store(newpad, ix, sv = SvREFCNT_inc(oldpad[ix]));
+		    }
 		    else {
 			av_store(newpad, ix, sv = NEWSV(0,0));
 			SvPADTMP_on(sv);
@@ -2782,7 +2785,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 		sep = p, leaf = p + 2;
 	}
 	if (!sep || ((sep - name) == 5 && strnEQ(name, "SUPER", 5))) {
-	    packname = HvNAME(sep ? PL_curcop->cop_stash : stash);
+	    packname = sep ? CopSTASHPV(PL_curcop) : HvNAME(stash);
 	    packlen = strlen(packname);
 	}
 	else {

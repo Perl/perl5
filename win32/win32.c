@@ -100,29 +100,6 @@ HANDLE	w32_perldll_handle = INVALID_HANDLE_VALUE;
 char	w32_module_name[MAX_PATH+1];
 static DWORD	w32_platform = (DWORD)-1;
 
-#ifdef USE_THREADS
-#  ifdef USE_DECLSPEC_THREAD
-__declspec(thread) char	strerror_buffer[512];
-__declspec(thread) char	getlogin_buffer[128];
-__declspec(thread) char	w32_perllib_root[MAX_PATH+1];
-#    ifdef HAVE_DES_FCRYPT
-__declspec(thread) char	crypt_buffer[30];
-#    endif
-#  else
-#    define strerror_buffer	(thr->i.Wstrerror_buffer)
-#    define getlogin_buffer	(thr->i.Wgetlogin_buffer)
-#    define w32_perllib_root	(thr->i.Ww32_perllib_root)
-#    define crypt_buffer	(thr->i.Wcrypt_buffer)
-#  endif
-#else
-static char	strerror_buffer[512];
-static char	getlogin_buffer[128];
-static char	w32_perllib_root[MAX_PATH+1];
-#  ifdef HAVE_DES_FCRYPT
-static char	crypt_buffer[30];
-#  endif
-#endif
-
 int 
 IsWin95(void)
 {
@@ -916,8 +893,8 @@ char *
 getlogin(void)
 {
     dTHXo;
-    char *buf = getlogin_buffer;
-    DWORD size = sizeof(getlogin_buffer);
+    char *buf = w32_getlogin_buffer;
+    DWORD size = sizeof(w32_getlogin_buffer);
     if (GetUserName(buf,&size))
 	return buf;
     return (char*)NULL;
@@ -1571,7 +1548,6 @@ win32_alarm(unsigned int sec)
     return 0;
 }
 
-#if defined(HAVE_DES_FCRYPT) || defined(PERL_OBJECT)
 #ifdef HAVE_DES_FCRYPT
 extern char *	des_fcrypt(const char *txt, const char *salt, char *cbuf);
 #endif
@@ -1582,13 +1558,12 @@ win32_crypt(const char *txt, const char *salt)
     dTHXo;
 #ifdef HAVE_DES_FCRYPT
     dTHR;
-    return des_fcrypt(txt, salt, crypt_buffer);
+    return des_fcrypt(txt, salt, w32_crypt_buffer);
 #else
-    die("The crypt() function is unimplemented due to excessive paranoia.");
+    Perl_croak(aTHX_ "The crypt() function is unimplemented due to excessive paranoia.");
     return Nullch;
 #endif
 }
-#endif
 
 #ifdef USE_FIXED_OSFHANDLE
 
@@ -1808,10 +1783,11 @@ win32_strerror(int e)
 	    e = GetLastError();
 
 	if (FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, &source, e, 0,
-			 strerror_buffer, sizeof(strerror_buffer), NULL) == 0) 
-	    strcpy(strerror_buffer, "Unknown Error");
+			  w32_strerror_buffer,
+			  sizeof(w32_strerror_buffer), NULL) == 0) 
+	    strcpy(w32_strerror_buffer, "Unknown Error");
 
-	return strerror_buffer;
+	return w32_strerror_buffer;
     }
     return strerror(e);
 }
@@ -2971,8 +2947,8 @@ static
 XS(w32_LoginName)
 {
     dXSARGS;
-    char *name = getlogin_buffer;
-    DWORD size = sizeof(getlogin_buffer);
+    char *name = w32_getlogin_buffer;
+    DWORD size = sizeof(w32_getlogin_buffer);
     EXTEND(SP,1);
     if (GetUserName(name,&size)) {
 	/* size includes NULL */
@@ -3353,6 +3329,21 @@ Perl_win32_init(int *argcp, char ***argvp)
     MALLOC_INIT;
 }
 
+#ifdef USE_ITHREADS
+void
+Perl_sys_intern_dup(pTHX_ struct interp_intern *src, struct interp_intern *dst)
+{
+    dst->perlshell_tokens	= Nullch;
+    dst->perlshell_vec		= (char**)NULL;
+    dst->perlshell_items	= 0;
+    dst->fdpid			= newAV();
+    New(1313, dst->children, 1, child_tab);
+    dst->children->num		= 0;
+    dst->hostlist		= src->hostlist;	/* XXX */
+    dst->thr_intern.Winit_socktype = src->thr_intern.Winit_socktype;
+}
+#endif
+
 #ifdef USE_BINMODE_SCRIPTS
 
 void
@@ -3377,4 +3368,3 @@ win32_strip_return(SV *sv)
 }
 
 #endif
-

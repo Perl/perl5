@@ -74,9 +74,9 @@ Perl_debop(pTHX_ OP *o)
 	break;
     case OP_GVSV:
     case OP_GV:
-	if (cSVOPo->op_sv) {
+	if (cGVOPo) {
 	    sv = NEWSV(0,0);
-	    gv_fullname3(sv, (GV*)cSVOPo->op_sv, Nullch);
+	    gv_fullname3(sv, cGVOPo, Nullch);
 	    PerlIO_printf(Perl_debug_log, "(%s)", SvPV(sv, n_a));
 	    SvREFCNT_dec(sv);
 	}

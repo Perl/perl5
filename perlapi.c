@@ -2636,6 +2636,13 @@ Perl_newLISTOP(pTHXo_ I32 type, I32 flags, OP* first, OP* last)
     return ((CPerlObj*)pPerl)->Perl_newLISTOP(type, flags, first, last);
 }
 
+#undef  Perl_newPADOP
+OP*
+Perl_newPADOP(pTHXo_ I32 type, I32 flags, SV* sv)
+{
+    return ((CPerlObj*)pPerl)->Perl_newPADOP(type, flags, sv);
+}
+
 #undef  Perl_newPMOP
 OP*
 Perl_newPMOP(pTHXo_ I32 type, I32 flags)
@@ -4848,6 +4855,94 @@ Perl_boot_core_xsutils(pTHXo)
 {
     ((CPerlObj*)pPerl)->Perl_boot_core_xsutils();
 }
+#if defined(USE_ITHREADS)
+
+#undef  Perl_he_dup
+HE*
+Perl_he_dup(pTHXo_ HE* e, bool shared)
+{
+    return ((CPerlObj*)pPerl)->Perl_he_dup(e, shared);
+}
+
+#undef  Perl_re_dup
+REGEXP*
+Perl_re_dup(pTHXo_ REGEXP* r)
+{
+    return ((CPerlObj*)pPerl)->Perl_re_dup(r);
+}
+
+#undef  Perl_fp_dup
+PerlIO*
+Perl_fp_dup(pTHXo_ PerlIO* fp, char type)
+{
+    return ((CPerlObj*)pPerl)->Perl_fp_dup(fp, type);
+}
+
+#undef  Perl_dirp_dup
+DIR*
+Perl_dirp_dup(pTHXo_ DIR* dp)
+{
+    return ((CPerlObj*)pPerl)->Perl_dirp_dup(dp);
+}
+
+#undef  Perl_gp_dup
+GP*
+Perl_gp_dup(pTHXo_ GP* gp)
+{
+    return ((CPerlObj*)pPerl)->Perl_gp_dup(gp);
+}
+
+#undef  Perl_mg_dup
+MAGIC*
+Perl_mg_dup(pTHXo_ MAGIC* mg)
+{
+    return ((CPerlObj*)pPerl)->Perl_mg_dup(mg);
+}
+
+#undef  Perl_sv_dup
+SV*
+Perl_sv_dup(pTHXo_ SV* sstr)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_dup(sstr);
+}
+#if defined(HAVE_INTERP_INTERN)
+
+#undef  Perl_sys_intern_dup
+void
+Perl_sys_intern_dup(pTHXo_ struct interp_intern* src, struct interp_intern* dst)
+{
+    ((CPerlObj*)pPerl)->Perl_sys_intern_dup(src, dst);
+}
+#endif
+
+#undef  Perl_sv_table_new
+SVTBL*
+Perl_sv_table_new(pTHXo)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_table_new();
+}
+
+#undef  Perl_sv_table_fetch
+SV*
+Perl_sv_table_fetch(pTHXo_ SVTBL *tbl, SV *sv)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_table_fetch(tbl, sv);
+}
+
+#undef  Perl_sv_table_store
+void
+Perl_sv_table_store(pTHXo_ SVTBL *tbl, SV *oldsv, SV *newsv)
+{
+    ((CPerlObj*)pPerl)->Perl_sv_table_store(tbl, oldsv, newsv);
+}
+
+#undef  Perl_sv_table_split
+void
+Perl_sv_table_split(pTHXo_ SVTBL *tbl)
+{
+    ((CPerlObj*)pPerl)->Perl_sv_table_split(tbl);
+}
+#endif
 #if defined(PERL_OBJECT)
 #endif
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)

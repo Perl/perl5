@@ -792,7 +792,7 @@ PP(pp_sort)
 	    kid = kUNOP->op_first;			/* pass rv2gv */
 	    kid = kUNOP->op_first;			/* pass leave */
 	    PL_sortcop = kid->op_next;
-	    stash = PL_curcop->cop_stash;
+	    stash = CopSTASH(PL_curcop);
 	}
 	else {
 	    cv = sv_2cv(*++MARK, &stash, &gv, 0);
@@ -822,7 +822,7 @@ PP(pp_sort)
     }
     else {
 	PL_sortcop = Nullop;
-	stash = PL_curcop->cop_stash;
+	stash = CopSTASH(PL_curcop);
     }
 
     up = myorigmark + 1;
@@ -1428,8 +1428,8 @@ PP(pp_caller)
 	    cx = &ccstack[dbcxix];
     }
 
+    hv = CopSTASH(cx->blk_oldcop);
     if (GIMME != G_ARRAY) {
-	hv = cx->blk_oldcop->cop_stash;
 	if (!hv)
 	    PUSHs(&PL_sv_undef);
 	else {
@@ -1440,13 +1440,12 @@ PP(pp_caller)
 	RETURN;
     }
 
-    hv = cx->blk_oldcop->cop_stash;
     if (!hv)
 	PUSHs(&PL_sv_undef);
     else
 	PUSHs(sv_2mortal(newSVpv(HvNAME(hv), 0)));
     PUSHs(sv_2mortal(newSVsv(CopFILESV(cx->blk_oldcop))));
-    PUSHs(sv_2mortal(newSViv((I32)cx->blk_oldcop->cop_line)));
+    PUSHs(sv_2mortal(newSViv((I32)CopLINE(cx->blk_oldcop))));
     if (!MAXARG)
 	RETURN;
     if (CxTYPE(cx) == CXt_SUB) { /* So is ccstack[dbcxix]. */
@@ -1480,7 +1479,7 @@ PP(pp_caller)
 	PUSHs(&PL_sv_undef);
     }
     if (CxTYPE(cx) == CXt_SUB && cx->blk_sub.hasargs
-	&& PL_curcop->cop_stash == PL_debstash)
+	&& CopSTASH(PL_curcop) == PL_debstash)
     {
 	AV *ary = cx->blk_sub.argarray;
 	int off = AvARRAY(ary) - AvALLOC(ary);
@@ -1516,7 +1515,7 @@ PP(pp_reset)
 	tmps = "";
     else
 	tmps = POPpx;
-    sv_reset(tmps, PL_curcop->cop_stash);
+    sv_reset(tmps, CopSTASH(PL_curcop));
     PUSHs(&PL_sv_yes);
     RETURN;
 }
@@ -2111,7 +2110,6 @@ PP(pp_goto)
 		if (CvDEPTH(cv) < 2)
 		    (void)SvREFCNT_inc(cv);
 		else {	/* save temporaries on recursion? */
-		    PERL_STACK_OVERFLOW_CHECK();
 		    if (CvDEPTH(cv) == 100 && ckWARN(WARN_RECURSION))
 			sub_crush_depth(cv);
 		    if (CvDEPTH(cv) > AvFILLp(padlist)) {
@@ -2138,6 +2136,9 @@ PP(pp_goto)
 					av_store(newpad, ix, sv = NEWSV(0,0));
 				    SvPADMY_on(sv);
 				}
+			    }
+			    else if (IS_PADGV(oldpad[ix])) {
+				av_store(newpad, ix, sv = SvREFCNT_inc(oldpad[ix]));
 			    }
 			    else {
 				av_store(newpad, ix, sv = NEWSV(0,0));
@@ -2486,14 +2487,14 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, AV** avp)
     /* switch to eval mode */
 
     if (PL_curcop == &PL_compiling) {
-	SAVESPTR(PL_compiling.cop_stash);
-	PL_compiling.cop_stash = PL_curstash;
+	SAVECOPSTASH(&PL_compiling);
+	CopSTASH_set(&PL_compiling, PL_curstash);
     }
-    SAVESPTR(CopFILEGV(&PL_compiling));
-    SAVEI16(PL_compiling.cop_line);
+    SAVECOPFILE(&PL_compiling);
+    SAVECOPLINE(&PL_compiling);
     sprintf(tmpbuf, "_<(%.10s_eval %lu)", code, (unsigned long)++PL_evalseq);
-    CopFILEGV_set(&PL_compiling, gv_fetchfile(tmpbuf+2));
-    PL_compiling.cop_line = 1;
+    CopFILE_set(&PL_compiling, tmpbuf+2);
+    CopLINE_set(&PL_compiling, 1);
     /* XXX For C<eval "...">s within BEGIN {} blocks, this ends up
        deleting the eval's FILEGV from the stash before gv_check() runs
        (i.e. before run-time proper). To work around the coredump that
@@ -2603,7 +2604,7 @@ S_doeval(pTHX_ int gimme, OP** startop)
 
     /* make sure we compile in the right package */
 
-    newstash = PL_curcop->cop_stash;
+    newstash = CopSTASH(PL_curcop);
     if (PL_curstash != newstash) {
 	SAVESPTR(PL_curstash);
 	PL_curstash = newstash;
@@ -2669,7 +2670,7 @@ S_doeval(pTHX_ int gimme, OP** startop)
     }
     SvREFCNT_dec(PL_rs);
     PL_rs = SvREFCNT_inc(PL_nrs);
-    PL_compiling.cop_line = 0;
+    CopLINE_set(&PL_compiling, 0);
     if (startop) {
 	*startop = PL_eval_root;
 	SvREFCNT_dec(CvOUTSIDE(PL_compcv));
@@ -2780,42 +2781,14 @@ PP(pp_require)
 
     /* prepare to compile file */
 
-#ifdef MACOS_TRADITIONAL
-    if (strchr(name, ':')
-#else
-    if (*name == '/' ||
-	(*name == '.' && 
-	    (name[1] == '/' ||
-	     (name[1] == '.' && name[2] == '/')))
-#ifdef DOSISH
-      || (name[0] && name[1] == ':')
-#endif
-#ifdef WIN32
-      || (name[0] == '\\' && name[1] == '\\')	/* UNC path */
-#endif
-#ifdef VMS
-	|| (strchr(name,':')  || ((*name == '[' || *name == '<') &&
-	    (isALNUM(name[1]) || strchr("$-_]>",name[1]))))
-#endif
-#endif
-    )
+    if (PERL_FILE_IS_ABSOLUTE(name)
+	|| (*name == '.' && (name[1] == '/' ||
+			     (name[1] == '.' && name[2] == '/'))))
     {
 	tryname = name;
 	tryrsfp = doopen_pmc(name,PERL_SCRIPT_MODE);
-#ifdef MACOS_TRADITIONAL
-	/* We consider paths of the form :a:b ambiguous and interpret them first
-	   as global then as local
-	*/
-    if (name[0] == ':' && !tryrsfp && name[1] != ':' && strchr(name+2, ':'))
-	goto trylocal;
-#endif
     }
-#ifdef MACOS_TRADITIONAL
-    else 
-trylocal: {
-#else
     else {
-#endif
 	AV *ar = GvAVn(PL_incgv);
 	I32 i;
 #ifdef VMS
@@ -2933,24 +2906,6 @@ trylocal: {
 		}
 		else {
 		    char *dir = SvPVx(dirsv, n_a);
-#ifdef MACOS_TRADITIONAL
-		    /* We have ensured in incpush that library ends with ':' */
-		    int   dirlen = strlen(dir);
-	    	    char *colon  = strchr(dir, ':') ? "" : ":";
-	    	    int   colons = (dir[dirlen-1] == ':') + (*name == ':');
-		
-	    	    switch (colons) {
-	    	    case 2:
-		    	sv_setpvfaTHX_ (namesv, "%s%s%s", colon, dir, name+1);
-		    	break;
-	    	    case 1:
-		    	sv_setpvf(aTHX_ namesv, "%s%s%s", colon, dir, name);
-		    	break;
-	            case 0: 
-		    	sv_setpvf(aTHX_ namesv, "%s%s:%s", colon, dir, name);
-		    	break;
-	            }
-#else
 #ifdef VMS
 		    char *unixdir;
 		    if ((unixdir = tounixpath(dir, Nullch)) == Nullch)
@@ -2960,13 +2915,8 @@ trylocal: {
 #else
 		    Perl_sv_setpvf(aTHX_ namesv, "%s/%s", dir, name);
 #endif
-#endif
 		    TAINT_PROPER("require");
 		    tryname = SvPVX(namesv);
-#ifdef MACOS_TRADITIONAL
-		for (colon = tryname+dirlen; colon = strchr(colon, '/'); )
-		    *colon++ = ':';
-#endif
 		    tryrsfp = doopen_pmc(tryname, PERL_SCRIPT_MODE);
 		    if (tryrsfp) {
 			if (tryname[0] == '.' && tryname[1] == '/')
@@ -2977,8 +2927,8 @@ trylocal: {
 	    }
 	}
     }
-    SAVESPTR(CopFILEGV(&PL_compiling));
-    CopFILEGV_set(&PL_compiling, gv_fetchfile(tryrsfp ? tryname : name));
+    SAVECOPFILE(&PL_compiling);
+    CopFILE_set(&PL_compiling, tryrsfp ? tryname : name);
     SvREFCNT_dec(namesv);
     if (!tryrsfp) {
 	if (PL_op->op_type == OP_REQUIRE) {
@@ -3047,8 +2997,8 @@ trylocal: {
     PUSHBLOCK(cx, CXt_EVAL, SP);
     PUSHEVAL(cx, name, Nullgv);
 
-    SAVEI16(PL_compiling.cop_line);
-    PL_compiling.cop_line = 0;
+    SAVECOPLINE(&PL_compiling);
+    CopLINE_set(&PL_compiling, 0);
 
     PUTBACK;
 #ifdef USE_THREADS
@@ -3088,10 +3038,10 @@ PP(pp_entereval)
  
     /* switch to eval mode */
 
-    SAVESPTR(CopFILEGV(&PL_compiling));
+    SAVECOPFILE(&PL_compiling);
     sprintf(tmpbuf, "_<(eval %lu)", (unsigned long)++PL_evalseq);
-    CopFILEGV_set(&PL_compiling, gv_fetchfile(tmpbuf+2));
-    PL_compiling.cop_line = 1;
+    CopFILE_set(&PL_compiling, tmpbuf+2);
+    CopLINE_set(&PL_compiling, 1);
     /* XXX For C<eval "...">s within BEGIN {} blocks, this ends up
        deleting the eval's FILEGV from the stash before gv_check() runs
        (i.e. before run-time proper). To work around the coredump that

@@ -490,8 +490,11 @@ Perl_nextargv(pTHX_ register GV *gv)
 	PL_argvoutgv = gv_fetchpv("ARGVOUT",TRUE,SVt_PVIO);
     if (io && (IoFLAGS(io) & IOf_ARGV) && (IoFLAGS(io) & IOf_START)) {
 	IoFLAGS(io) &= ~IOf_START;
-	if (PL_inplace)
+	if (PL_inplace) {
+	    if (!PL_argvout_stack)
+		PL_argvout_stack = newAV();
 	    av_push(PL_argvout_stack, SvREFCNT_inc(PL_defoutgv));
+	}
     }
     if (PL_filemode & (S_ISUID|S_ISGID)) {
 	PerlIO_flush(IoIFP(GvIOn(PL_argvoutgv)));  /* chmod must follow last write */
@@ -668,7 +671,9 @@ Perl_nextargv(pTHX_ register GV *gv)
 	IoFLAGS(io) |= IOf_START;
     if (PL_inplace) {
 	(void)do_close(PL_argvoutgv,FALSE);
-	if (io && (IoFLAGS(io) & IOf_ARGV) && AvFILLp(PL_argvout_stack) >= 0) {
+	if (io && (IoFLAGS(io) & IOf_ARGV)
+	    && PL_argvout_stack && AvFILLp(PL_argvout_stack) >= 0)
+	{
 	    GV *oldout = (GV*)av_pop(PL_argvout_stack);
 	    setdefout(oldout);
 	    SvREFCNT_dec(oldout);
@@ -1059,7 +1064,7 @@ Perl_my_stat(pTHX)
 
     if (PL_op->op_flags & OPf_REF) {
 	EXTEND(SP,1);
-	tmpgv = (GV*)cSVOP->op_sv;
+	tmpgv = cGVOP;
       do_fstat:
 	io = GvIO(tmpgv);
 	if (io && IoIFP(io)) {
@@ -1112,7 +1117,7 @@ Perl_my_lstat(pTHX)
     STRLEN n_a;
     if (PL_op->op_flags & OPf_REF) {
 	EXTEND(SP,1);
-	if ((GV*)cSVOP->op_sv == PL_defgv) {
+	if (cGVOP == PL_defgv) {
 	    if (PL_laststype != OP_LSTAT)
 		Perl_croak(aTHX_ "The stat preceding -l _ wasn't an lstat");
 	    return PL_laststatval;

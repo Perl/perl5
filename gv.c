@@ -71,12 +71,6 @@ Perl_gv_fetchfile(pTHX_ const char *name)
     if (!isGV(gv)) {
 	gv_init(gv, PL_defstash, tmpbuf, tmplen, FALSE);
 	sv_setpv(GvSV(gv), name);
-#ifdef MACOS_TRADITIONAL
-	if (strchr(name, ':') && instr(name,".pm"))
-#else
-	if (*name == '/' && (instr(name, "/lib/") || instr(name, ".pm")))
-#endif
-	    GvMULTI_on(gv);
 	if (PERLDB_LINE)
 	    hv_magic(GvHVn(gv_AVadd(gv)), gv, 'L');
     }
@@ -125,6 +119,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 
 	PL_sub_generation++;
 	CvGV(GvCV(gv)) = (GV*)SvREFCNT_inc(gv);
+	CvFILE(GvCV(gv)) = CopFILE(PL_curcop);
 	CvSTASH(GvCV(gv)) = PL_curstash;
 #ifdef USE_THREADS
 	CvOWNER(GvCV(gv)) = 0;
@@ -305,7 +300,7 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 	if ((nsplit - origname) == 5 && strnEQ(origname, "SUPER", 5)) {
 	    /* ->SUPER::method should really be looked up in original stash */
 	    SV *tmpstr = sv_2mortal(Perl_newSVpvf(aTHX_ "%s::SUPER",
-					     HvNAME(PL_curcop->cop_stash)));
+						  CopSTASHPV(PL_curcop)));
 	    stash = gv_stashpvn(SvPVX(tmpstr), SvCUR(tmpstr), TRUE);
 	    DEBUG_o( Perl_deb(aTHX_ "Treating %s as %s::%s\n",
 			 origname, HvNAME(stash), name) );
@@ -564,7 +559,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 		}
 	    }
 	    else
-		stash = PL_curcop->cop_stash;
+		stash = CopSTASH(PL_curcop);
 	}
 	else
 	    stash = PL_defstash;
@@ -883,7 +878,6 @@ Perl_gv_check(pTHX_ HV *stash)
     register I32 i;
     register GV *gv;
     HV *hv;
-    GV *filegv;
 
     if (!HvARRAY(stash))
 	return;
@@ -896,14 +890,25 @@ Perl_gv_check(pTHX_ HV *stash)
 		     gv_check(hv);              /* nested package */
 	    }
 	    else if (isALPHA(*HeKEY(entry))) {
+		char *file;
 		gv = (GV*)HeVAL(entry);
 		if (SvTYPE(gv) != SVt_PVGV || GvMULTI(gv))
 		    continue;
-		CopLINE_set(PL_curcop, GvLINE(gv));
-		filegv = GvFILEGV(gv);		/* XXX could be made faster */
-		CopFILEGV_set(PL_curcop, filegv);
-		if (filegv && GvMULTI(filegv))	/* Filename began with slash */
+		file = GvFILE(gv);
+		/* performance hack: if filename is absolute and it's a standard
+		 * module, don't bother warning */
+		if (file
+		    && PERL_FILE_IS_ABSOLUTE(file)
+		    && (instr(file, "/lib/") || instr(file, ".pm")))
+		{
 		    continue;
+		}
+		CopLINE_set(PL_curcop, GvLINE(gv));
+#ifdef USE_ITHREADS
+		CopFILE(PL_curcop) = file;	/* set for warning */
+#else
+		CopFILEGV(PL_curcop) = gv_fetchfile(file);
+#endif
 		Perl_warner(aTHX_ WARN_ONCE,
 			"Name \"%s::%s\" used only once: possible typo",
 			HvNAME(stash), GvNAME(gv));

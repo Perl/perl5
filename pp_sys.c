@@ -411,7 +411,7 @@ PP(pp_indread)
 
 PP(pp_rcatline)
 {
-    PL_last_in_gv = (GV*)cSVOP->op_sv;
+    PL_last_in_gv = cGVOP;
     return do_readline();
 }
 
@@ -476,7 +476,7 @@ PP(pp_die)
 		GV *gv = gv_fetchmethod(stash, "PROPAGATE");
 		if (gv) {
 		    SV *file = sv_2mortal(newSVsv(CopFILESV(PL_curcop)));
-		    SV *line = sv_2mortal(newSViv(PL_curcop->cop_line));
+		    SV *line = sv_2mortal(newSViv(CopLINE(PL_curcop)));
 		    EXTEND(SP, 3);
 		    PUSHMARK(SP);
 		    PUSHs(error);
@@ -2412,7 +2412,7 @@ PP(pp_stat)
     STRLEN n_a;
 
     if (PL_op->op_flags & OPf_REF) {
-	tmpgv = (GV*)cSVOP->op_sv;
+	tmpgv = cGVOP;
       do_fstat:
 	if (tmpgv != PL_defgv) {
 	    PL_laststype = OP_STAT;
@@ -2874,7 +2874,7 @@ PP(pp_fttty)
     STRLEN n_a;
 
     if (PL_op->op_flags & OPf_REF)
-	gv = (GV*)cSVOP->op_sv;
+	gv = cGVOP;
     else if (isGV(TOPs))
 	gv = (GV*)POPs;
     else if (SvROK(TOPs) && isGV(SvRV(TOPs)))
@@ -2916,7 +2916,7 @@ PP(pp_fttext)
     PerlIO *fp;
 
     if (PL_op->op_flags & OPf_REF)
-	gv = (GV*)cSVOP->op_sv;
+	gv = cGVOP;
     else if (isGV(TOPs))
 	gv = (GV*)POPs;
     else if (SvROK(TOPs) && isGV(SvRV(TOPs)))
@@ -2967,7 +2967,7 @@ PP(pp_fttext)
 	else {
 	    if (ckWARN(WARN_UNOPENED))
 		Perl_warner(aTHX_ WARN_UNOPENED, "Test on unopened file <%s>",
-		  GvENAME((GV*)cSVOP->op_sv));
+			    GvENAME(cGVOP));
 	    SETERRNO(EBADF,RMS$_IFI);
 	    RETPUSHUNDEF;
 	}

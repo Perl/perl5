@@ -348,6 +348,32 @@ EXT void win32_strip_return(struct sv *sv);
 #define win32_strip_return(sv) NOOP
 #endif
 
+/* 
+ * Now Win32 specific per-thread data stuff 
+ */
+
+struct thread_intern {
+    /* XXX can probably use one buffer instead of several */
+    char		Wstrerror_buffer[512];
+    struct servent	Wservent;
+    char		Wgetlogin_buffer[128];
+#    ifdef USE_SOCKETS_AS_HANDLES
+    int			Winit_socktype;
+#    endif
+#    ifdef HAVE_DES_FCRYPT
+    char		Wcrypt_buffer[30];
+#    endif
+#    ifdef USE_RTL_THREAD_API
+    void *		retv;	/* slot for thread return value */
+#    endif
+};
+
+#ifdef USE_THREADS
+#  ifndef USE_DECLSPEC_THREAD
+#    define HAVE_THREAD_INTERN
+#  endif /* !USE_DECLSPEC_THREAD */
+#endif /* USE_THREADS */
+
 #define HAVE_INTERP_INTERN
 typedef struct {
     long	num;
@@ -368,6 +394,9 @@ struct interp_intern {
     child_tab *	children;
     HANDLE	child_handles[MAXIMUM_WAIT_OBJECTS];
     struct host_link *	hostlist;
+#ifndef USE_THREADS
+    struct thread_intern	thr_intern;
+#endif
 };
 
 
@@ -380,32 +409,18 @@ struct interp_intern {
 #define w32_child_pids		(w32_children->pids)
 #define w32_child_handles	(PL_sys_intern.child_handles)
 #define w32_host_link		(PL_sys_intern.hostlist)
-
-/* 
- * Now Win32 specific per-thread data stuff 
- */
-
 #ifdef USE_THREADS
-#  ifndef USE_DECLSPEC_THREAD
-#    define HAVE_THREAD_INTERN
-
-struct thread_intern {
-    /* XXX can probably use one buffer instead of several */
-    char		Wstrerror_buffer[512];
-    struct servent	Wservent;
-    char		Wgetlogin_buffer[128];
-    char		Ww32_perllib_root[MAX_PATH+1];
-#    ifdef USE_SOCKETS_AS_HANDLES
-    int			Winit_socktype;
-#    endif
-#    ifdef HAVE_DES_FCRYPT
-    char		Wcrypt_buffer[30];
-#    endif
-#    ifdef USE_RTL_THREAD_API
-    void *		retv;	/* slot for thread return value */
-#    endif
-};
-#  endif /* !USE_DECLSPEC_THREAD */
+#  define w32_strerror_buffer	(thr->i.Wstrerror_buffer)
+#  define w32_getlogin_buffer	(thr->i.Wgetlogin_buffer)
+#  define w32_crypt_buffer	(thr->i.Wcrypt_buffer)
+#  define w32_servent		(thr->i.Wservent)
+#  define w32_init_socktype	(thr->i.Winit_socktype)
+#else
+#  define w32_strerror_buffer	(PL_sys_intern.thr_intern.Wstrerror_buffer)
+#  define w32_getlogin_buffer	(PL_sys_intern.thr_intern.Wgetlogin_buffer)
+#  define w32_crypt_buffer	(PL_sys_intern.thr_intern.Wcrypt_buffer)
+#  define w32_servent		(PL_sys_intern.thr_intern.Wservent)
+#  define w32_init_socktype	(PL_sys_intern.thr_intern.Winit_socktype)
 #endif /* USE_THREADS */
 
 /* UNICODE<>ANSI translation helpers */

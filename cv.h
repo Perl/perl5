@@ -7,7 +7,8 @@
  *
  */
 
-/* This structure much match the beginning of XPVFM */
+/* This structure much match XPVCV in B/C.pm and the beginning of XPVFM
+ * in sv.h  */
 
 struct xpvcv {
     char *	xpv_pv;		/* pointer to malloced string */
@@ -24,9 +25,7 @@ struct xpvcv {
     void	(*xcv_xsub) (pTHXo_ CV*);
     ANY		xcv_xsubany;
     GV *	xcv_gv;
-#if defined(PERL_BINCOMPAT_5005)
-    GV *	xcv_filegv;	/* XXX unused (and deprecated) */
-#endif
+    char *	xcv_file;
     long	xcv_depth;	/* >= 2 indicates recursive call */
     AV *	xcv_padlist;
     CV *	xcv_outside;
@@ -45,6 +44,8 @@ struct xpvcv {
 #define CvXSUB(sv)	((XPVCV*)SvANY(sv))->xcv_xsub
 #define CvXSUBANY(sv)	((XPVCV*)SvANY(sv))->xcv_xsubany
 #define CvGV(sv)	((XPVCV*)SvANY(sv))->xcv_gv
+#define CvFILE(sv)	((XPVCV*)SvANY(sv))->xcv_file
+#define CvFILEGV(sv)	(gv_fetchfile(CvFILE(sv))
 #define CvDEPTH(sv)	((XPVCV*)SvANY(sv))->xcv_depth
 #define CvPADLIST(sv)	((XPVCV*)SvANY(sv))->xcv_padlist
 #define CvOUTSIDE(sv)	((XPVCV*)SvANY(sv))->xcv_outside

@@ -289,7 +289,7 @@ Perl_save_gp(pTHX_ GV *gv, I32 empty)
 	}
 	GvGP(gv) = gp_ref(gp);
 	GvSV(gv) = NEWSV(72,0);
-	GvLINE(gv) = PL_curcop->cop_line;
+	GvLINE(gv) = CopLINE(PL_curcop);
 	GvEGV(gv) = gv;
     }
     else {

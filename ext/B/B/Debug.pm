@@ -60,17 +60,15 @@ sub B::PMOP::debug {
 sub B::COP::debug {
     my ($op) = @_;
     $op->B::OP::debug();
-    my ($filegv) = $op->filegv;
-    printf <<'EOT', $op->label, ${$op->stash}, $$filegv, $op->seq, $op->arybase, $op->line, ${$op->warnings};
+    printf <<'EOT', $op->label, $op->stashpv, $op->file, $op->seq, $op->arybase, $op->line, ${$op->warnings};
 	cop_label	%s
-	cop_stash	0x%x
-	cop_filegv	0x%x
+	cop_stashpv	%s
+	cop_file	%s
 	cop_seq		%d
 	cop_arybase	%d
 	cop_line	%d
 	cop_warnings	0x%x
 EOT
-    $filegv->debug;
 }
 
 sub B::SVOP::debug {
@@ -177,12 +175,14 @@ sub B::CV::debug {
     my ($start) = $sv->START;
     my ($root) = $sv->ROOT;
     my ($padlist) = $sv->PADLIST;
+    my ($file) = $sv->FILE;
     my ($gv) = $sv->GV;
-    printf <<'EOT', $$stash, $$start, $$root, $$gv, $sv->DEPTH, $padlist, ${$sv->OUTSIDE};
+    printf <<'EOT', $$stash, $$start, $$root, $$gv, $file, $sv->DEPTH, $padlist, ${$sv->OUTSIDE};
 	STASH		0x%x
 	START		0x%x
 	ROOT		0x%x
 	GV		0x%x
+	FILE		%s
 	DEPTH		%d
 	PADLIST		0x%x			       
 	OUTSIDE		0x%x

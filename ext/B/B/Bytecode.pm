@@ -278,28 +278,27 @@ sub B::LOOP::bytecode {
 
 sub B::COP::bytecode {
     my $op = shift;
-    my $stash = $op->stash;
-    my $stashix = $stash->objix;
-    my $filegv = $op->filegv;
-    my $filegvix = $filegv->objix;
+    my $stashpv = $op->stashpv;
+    my $file = $op->file;
     my $line = $op->line;
     my $warnings = $op->warnings;
     my $warningsix = $warnings->objix;
     if ($debug_bc) {
-	printf "# line %s:%d\n", $filegv->SV->PV, $line;
+	printf "# line %s:%d\n", $file, $line;
     }
     $op->B::OP::bytecode;
-    printf <<"EOT", pvstring($op->label), $op->cop_seq, $op->arybase;
+    printf <<"EOT", pvstring($op->label), pvstring($stashpv), $op->cop_seq, pvstring($file), $op->arybase;
 newpv %s
 cop_label
-cop_stash $stashix
+newpv %s
+cop_stashpv
 cop_seq %d
-cop_filegv $filegvix
+newpv %s
+cop_file
 cop_arybase %d
 cop_line $line
 cop_warnings $warningsix
 EOT
-    $filegv->bytecode;
     $stash->bytecode;
 }
 
@@ -583,6 +582,7 @@ sub B::CV::bytecode {
 	printf "xcv_%s %d\n", lc($subfield_names[$i]), $ixes[$i];
     }
     printf "xcv_depth %d\nxcv_flags 0x%x\n", $cv->DEPTH, $cv->FLAGS;
+    printf "newpv %s\nxcv_file\n", pvstring($cv->FILE);
     # Now save all the subfields (except for CvROOT which was handled
     # above) and CvSTART (now the initial element of @subfields).
     shift @subfields; # bye-bye CvSTART
