@@ -463,7 +463,6 @@ PERL_CALLCONV void	Perl_markstack_grow(pTHX);
 #if defined(USE_LOCALE_COLLATE)
 PERL_CALLCONV char*	Perl_mem_collxfrm(pTHX_ const char* s, STRLEN len, STRLEN* xlen);
 #endif
-PERL_CALLCONV int	Perl_memcmp_byte_utf8(pTHX_ char *sbyte, STRLEN lbyte, char *sutf, STRLEN lutf);
 PERL_CALLCONV SV*	Perl_mess(pTHX_ const char* pat, ...)
 #ifdef CHECK_FORMAT
  __attribute__((format(printf,pTHX_1,pTHX_2)))
@@ -595,6 +594,9 @@ PERL_CALLCONV void	Perl_peep(pTHX_ OP* o);
 PERL_CALLCONV PerlIO*	Perl_start_glob(pTHX_ SV* pattern, IO *io);
 #if defined(USE_5005THREADS)
 PERL_CALLCONV struct perl_thread*	Perl_new_struct_thread(pTHX_ struct perl_thread *t);
+#endif
+#if defined(USE_REENTRANT_API)
+PERL_CALLCONV void	Perl_reentrant_init(pTHX);
 #endif
 PERL_CALLCONV void	Perl_call_atexit(pTHX_ ATEXIT_t fn, void *ptr);
 PERL_CALLCONV I32	Perl_call_argv(pTHX_ const char* sub_name, I32 flags, char** argv);

@@ -249,7 +249,7 @@ esac
 cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in
 $define|true|[yY]*)
-        ccflags="-D_REENTRANT $ccflags"
+        ccflags="-D_GNU_SOURCE -D_REENTRANT $ccflags"
         set `echo X "$libswanted "| sed -e 's/ c / pthread c /'`
         shift
         libswanted="$*"

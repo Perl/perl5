@@ -97,7 +97,7 @@ The most recent upgrade to the PA-RISC design, it added support for
 64-bit integer data.
 
 As of the date of this document's last update, the following systems
-contain PA-RISC 2.0 chips (this is very likely to be out of date):
+contain PA-RISC 2.0 chips:
 
     700, 780, 781, 782, 783, 785, 802, 804, 810, 820, 861, 871, 879, 889,
     893, 895, 896, 898, 899, A400, A500, B1000, B2000, C130, C140, C160,
@@ -105,9 +105,9 @@ contain PA-RISC 2.0 chips (this is very likely to be out of date):
     D280, D370, D380, D390, D650, J220, J2240, J280, J282, J400, J410,
     J5000, J5500XM, J5600, J7000, J7600, K250, K260, K260-EG, K270, K360,
     K370, K380, K450, K460, K460-EG, K460-XP, K470, K570, K580, L1000,
-    L2000, L3000, N4000, R380, R390, RP5400, RP5430, RP5450, RP5470,
-    RP7400, RP8400, SD16000, SD32000, SD64000, T540, T600, V2000, V2200,
-    V2250, V2500, V2600
+    L2000, L3000, N4000, R380, R390, RP2400, RP2430, RP2450, RP2470,
+    RP5400, RP5430, RP5450, RP5470, RP7400, RP7410, RP8400, SD16000,
+    SD32000, SD64000, T540, T600, V2000, V2200, V2250, V2500, V2600
 
 =head2 Itanium
 

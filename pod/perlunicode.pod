@@ -483,7 +483,7 @@ These block names are supported:
 
 =item *
 
-The special pattern C<\X> match matches any extended Unicode sequence
+The special pattern C<\X> matches any extended Unicode sequence
 (a "combining character sequence" in Standardese), where the first
 character is a base character and subsequent characters are mark
 characters that apply to the base character.  It is equivalent to
@@ -588,18 +588,7 @@ And finally, C<scalar reverse()> reverses by character rather than by byte.
 
 See L<Encode>.
 
-=head1 CAVEATS
-
-Whether an arbitrary piece of data will be treated as "characters" or
-"bytes" by internal operations cannot be divined at the current time.
-
-Use of locales with Unicode data may lead to odd results.  Currently
-there is some attempt to apply 8-bit locale info to characters in the
-range 0..255, but this is demonstrably incorrect for locales that use
-characters above that range when mapped into Unicode.  It will also
-tend to run slower.  Avoidance of locales is strongly encouraged.
-
-=head1 UNICODE REGULAR EXPRESSION SUPPORT LEVEL
+=head2 Unicode Regular Expression Support Level
 
 The following list of Unicode regular expression support describes
 feature by feature the Unicode support implemented in Perl as of Perl
@@ -692,7 +681,7 @@ numbers.  To use these numbers various encodings are needed.
 
 =over 4
 
-=item
+=item *
 
 UTF-8
 
@@ -730,13 +719,13 @@ As you can see, the continuation bytes all begin with C<10>, and the
 leading bits of the start byte tell how many bytes the are in the
 encoded character.
 
-=item
+=item *
 
 UTF-EBCDIC
 
 Like UTF-8, but EBCDIC-safe, as UTF-8 is ASCII-safe.
 
-=item
+=item *
 
 UTF-16, UTF-16BE, UTF16-LE, Surrogates, and BOMs (Byte Order Marks)
 
@@ -789,7 +778,7 @@ sequence of bytes 0xFF 0xFE is unambiguously "BOM, represented in
 little-endian format" and cannot be "0xFFFE, represented in big-endian
 format".
 
-=item
+=item *
 
 UTF-32, UTF-32BE, UTF32-LE
 
@@ -798,7 +787,7 @@ the units are 32-bit, and therefore the surrogate scheme is not
 needed.  The BOM signatures will be 0x00 0x00 0xFE 0xFF for BE and
 0xFF 0xFE 0x00 0x00 for LE.
 
-=item
+=item *
 
 UCS-2, UCS-4
 
@@ -806,7 +795,7 @@ Encodings defined by the ISO 10646 standard.  UCS-2 is a 16-bit
 encoding, UCS-4 is a 32-bit encoding.  Unlike UTF-16, UCS-2
 is not extensible beyond 0xFFFF, because it does not use surrogates.
 
-=item
+=item *
 
 UTF-7
 
@@ -937,6 +926,67 @@ as usual.)
 For more information, see L<perlapi>, and F<utf8.c> and F<utf8.h>
 in the Perl source code distribution.
 
+=head1 BUGS
+
+Use of locales with Unicode data may lead to odd results.  Currently
+there is some attempt to apply 8-bit locale info to characters in the
+range 0..255, but this is demonstrably incorrect for locales that use
+characters above that range when mapped into Unicode.  It will also
+tend to run slower.  Avoidance of locales is strongly encouraged.
+
+Some functions are slower when working on UTF-8 encoded strings than
+on byte encoded strings. All functions that need to hop over
+characters such as length(), substr() or index() can work B<much>
+faster when the underlying data are byte-encoded. Witness the
+following benchmark:
+  
+  % perl -e '
+  use Benchmark;
+  use strict;
+  our $l = 10000;
+  our $u = our $b = "x" x $l;
+  substr($u,0,1) = "\x{100}";
+  timethese(-2,{
+  LENGTH_B => q{ length($b) },
+  LENGTH_U => q{ length($u) },
+  SUBSTR_B => q{ substr($b, $l/4, $l/2) },
+  SUBSTR_U => q{ substr($u, $l/4, $l/2) },
+  });
+  '
+  Benchmark: running LENGTH_B, LENGTH_U, SUBSTR_B, SUBSTR_U for at least 2 CPU seconds...
+    LENGTH_B:  2 wallclock secs ( 2.36 usr +  0.00 sys =  2.36 CPU) @ 5649983.05/s (n=13333960)
+    LENGTH_U:  2 wallclock secs ( 2.11 usr +  0.00 sys =  2.11 CPU) @ 12155.45/s (n=25648)
+    SUBSTR_B:  3 wallclock secs ( 2.16 usr +  0.00 sys =  2.16 CPU) @ 374480.09/s (n=808877)
+    SUBSTR_U:  2 wallclock secs ( 2.11 usr +  0.00 sys =  2.11 CPU) @ 6791.00/s (n=14329)
+  
+The numbers show an incredible slowness on long UTF-8 strings and you
+should carefully avoid to use these functions within tight loops. For
+example if you want to iterate over characters, it is infinitely
+better to split into an array than to use substr, as the following
+benchmark shows:
+
+  % perl -e '
+  use Benchmark;
+  use strict;
+  our $l = 10000;
+  our $u = our $b = "x" x $l;
+  substr($u,0,1) = "\x{100}";
+  timethese(-5,{
+  SPLIT_B => q{ for my $c (split //, $b){}  },
+  SPLIT_U => q{ for my $c (split //, $u){}  },
+  SUBSTR_B => q{ for my $i (0..length($b)-1){my $c = substr($b,$i,1);} },
+  SUBSTR_U => q{ for my $i (0..length($u)-1){my $c = substr($u,$i,1);} },
+  });
+  '
+  Benchmark: running SPLIT_B, SPLIT_U, SUBSTR_B, SUBSTR_U for at least 5 CPU seconds...
+     SPLIT_B:  6 wallclock secs ( 5.29 usr +  0.00 sys =  5.29 CPU) @ 56.14/s (n=297)
+     SPLIT_U:  5 wallclock secs ( 5.17 usr +  0.01 sys =  5.18 CPU) @ 55.21/s (n=286)
+    SUBSTR_B:  5 wallclock secs ( 5.34 usr +  0.00 sys =  5.34 CPU) @ 123.22/s (n=658)
+    SUBSTR_U:  7 wallclock secs ( 6.20 usr +  0.00 sys =  6.20 CPU) @  0.81/s (n=5)
+
+You see, the algorithm based on substr() was faster with byte encoded
+data but it is pathologically slow with UTF-8 data.
+  
 =head1 SEE ALSO
 
 L<perluniintro>, L<encoding>, L<Encode>, L<open>, L<utf8>, L<bytes>,

@@ -13,9 +13,9 @@ Encode::KR - Korean Encodings
 
 =head1 SYNOPSIS
 
-    use Encode::CN;
-    $euc_kr = encode("euc-kr", $utf8);
-    $utf8   = encode("euc-kr", $euc_kr);
+    use Encode 'encode';
+    $euc_kr = encode("euc-kr", $utf8);   # loads Encode::KR implicitly
+    $utf8   = encode("euc-kr", $euc_kr); # ditto
 
 =head1 DESCRIPTION
 

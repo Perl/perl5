@@ -115,6 +115,9 @@ PerlInterpreter *
 perl_alloc(void)
 {
     PerlInterpreter *my_perl;
+#ifdef USE_5005THREADS
+    dTHX;
+#endif
 
     /* New() needs interpreter, so call malloc() instead */
     my_perl = (PerlInterpreter*)PerlMem_malloc(sizeof(PerlInterpreter));
@@ -261,8 +264,7 @@ perl_construct(pTHXx)
     PL_regex_pad = AvARRAY(PL_regex_padav);
 #endif
 #ifdef USE_REENTRANT_API
-    New(31337, PL_reentrant_buffer,1, REBUF);
-    New(31337, PL_reentrant_buffer->tmbuff,1, struct tm);
+    Perl_reentrant_init(aTHX);
 #endif
 
     /* Note that strtab is a rather special HV.  Assumptions are made
@@ -833,7 +835,7 @@ perl_destruct(pTHXx)
 #endif /* USE_5005THREADS */
 
 #ifdef USE_REENTRANT_API
-    Safefree(PL_reentrant_buffer->tmbuff);
+    Safefree(PL_reentrant_buffer->tmbuf);
     Safefree(PL_reentrant_buffer);
 #endif
 

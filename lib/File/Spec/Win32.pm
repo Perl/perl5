@@ -266,11 +266,11 @@ sub abs2rel {
     }
 
     # Figure out the effective $base and clean it up.
-    if ( ! $self->file_name_is_absolute( $base ) ) {
-        $base = $self->rel2abs( $base ) ;
-    }
-    elsif ( !defined( $base ) || $base eq '' ) {
+    if ( !defined( $base ) || $base eq '' ) {
         $base = cwd() ;
+    }
+    elsif ( ! $self->file_name_is_absolute( $base ) ) {
+        $base = $self->rel2abs( $base ) ;
     }
     else {
         $base = $self->canonpath( $base ) ;

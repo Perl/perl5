@@ -878,7 +878,7 @@ your system supports it.  If you want to force perl to be compiled
 statically, you can either choose this when Configure prompts you or
 you can use the Configure command line option -Uusedl.
 
-=head2 Building a shared libperl.so Perl library
+=head2 Building a shared Perl library
 
 Currently, for most systems, the main perl executable is built by
 linking the "perl library" libperl.a with perlmain.o, your static
@@ -922,7 +922,10 @@ NeXTSTEP/OPENSTEP/Darwin, LIBRARY_PATH for BeOS, LD_LIBRARY_PATH/SHLIB_PATH
 for HP-UX, LIBPATH for AIX, PATH for Cygwin) must be set up to include
 the Perl build directory because that's where the shared libperl will
 be created.  Configure arranges makefile to have the correct shared
-library search settings.
+library search settings.  You can find the name of the environment
+variable Perl thinks works in your your system by
+
+	grep ldlibpthname config.sh
 
 However, there are some special cases where manually setting the
 shared library path might be required.  For example, if you want to run
@@ -943,7 +946,8 @@ for Bourne-style shells, or
    setenv LD_LIBRARY_PATH `pwd`
 
 for Csh-style shells.  (This procedure may also be needed if for some
-unexpected reason Configure fails to set up makefile correctly.)
+unexpected reason Configure fails to set up makefile correctly.) (And
+again, it may be something else than LD_LIBRARY_PATH for you, see above.)
 
 You can often recognize failures to build/use a shared libperl from error
 messages complaining about a missing libperl.so (or libperl.sl in HP-UX),
@@ -1893,10 +1897,23 @@ individual subtests is to cd to the t directory and run
 	./perl harness
 
 (this assumes that most basic tests succeed, since harness uses
-complicated constructs).
+complicated constructs).  For extension and library tests you
+need a little bit more: you need to setup your environment variable
+PERL_CORE to a true value (like "1"), and you need to supply the
+right Perl library path:
 
+	setenv PERL_CORE 1
+	./perl -I../lib ../ext/Socket/Socket.t
+	./perl -I../lib ../lib/less.t
+
+(For csh-like shells on UNIX, adjust appropriately for other platforms.)
 You should also read the individual tests to see if there are any helpful
-comments that apply to your system.
+comments that apply to your system.  You may also need to setup your
+shared library path if you get errors like:
+
+	/sbin/loader: Fatal Error: cannot map libperl.so
+
+See L</"Building a shared Perl library"> earlier in this document.
 
 =over 4
 

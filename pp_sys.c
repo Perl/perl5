@@ -984,18 +984,7 @@ PP(pp_sselect)
     }
 
 /* little endians can use vecs directly */
-#if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
-#  if SELECT_MIN_BITS > 1
-    /* If SELECT_MIN_BITS is greater than one we most probably will want
-     * to align the sizes with SELECT_MIN_BITS/8 because for example
-     * in many little-endian (Intel, Alpha) systems (Linux, OS/2, Digital
-     * UNIX, Solaris, NeXT, Darwin) the smallest quantum select() operates
-     * on (sets/tests/clears bits) is 32 bits.  */
-    growsize = maxlen + (SELECT_MIN_BITS/8 - (maxlen % (SELECT_MIN_BITS/8)));
-#  else
-    growsize = sizeof(fd_set);
-#  endif
-# else
+#if BYTEORDER != 0x1234 && BYTEORDER != 0x12345678
 #  ifdef NFDBITS
 
 #    ifndef NBBY
@@ -1006,9 +995,19 @@ PP(pp_sselect)
 #  else
     masksize = sizeof(long);	/* documented int, everyone seems to use long */
 #  endif
-    growsize = maxlen + (masksize - (maxlen % masksize));
     Zero(&fd_sets[0], 4, char*);
 #endif
+
+#  if SELECT_MIN_BITS > 1
+    /* If SELECT_MIN_BITS is greater than one we most probably will want
+     * to align the sizes with SELECT_MIN_BITS/8 because for example
+     * in many little-endian (Intel, Alpha) systems (Linux, OS/2, Digital
+     * UNIX, Solaris, NeXT, Darwin) the smallest quantum select() operates
+     * on (sets/tests/clears bits) is 32 bits.  */
+    growsize = maxlen + (SELECT_MIN_BITS/8 - (maxlen % (SELECT_MIN_BITS/8)));
+#  else
+    growsize = sizeof(fd_set);
+#  endif
 
     sv = SP[4];
     if (SvOK(sv)) {
@@ -1158,7 +1157,8 @@ PP(pp_getc)
 	RETURN;
     }
     if (!gv || do_eof(gv)) { /* make sure we have fp with something */
-	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED) && IoTYPE(io) != IoTYPE_WRONLY)
+	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED)
+		&& (!io || (!IoIFP(io) && IoTYPE(io) != IoTYPE_WRONLY)))
 	    report_evil_fh(gv, io, PL_op->op_type);
 	RETPUSHUNDEF;
     }
@@ -4618,9 +4618,9 @@ PP(pp_ghostent)
     register char **elem;
     register SV *sv;
 #ifndef HAS_GETHOST_PROTOS /* XXX Do we need individual probes? */
-    struct hostent *PerlSock_gethostbyaddr(Netdb_host_t, Netdb_hlen_t, int);
-    struct hostent *PerlSock_gethostbyname(Netdb_name_t);
-    struct hostent *PerlSock_gethostent(void);
+    struct hostent *gethostbyaddr(Netdb_host_t, Netdb_hlen_t, int);
+    struct hostent *gethostbyname(Netdb_name_t);
+    struct hostent *gethostent(void);
 #endif
     struct hostent *hent;
     unsigned long len;
@@ -4727,9 +4727,9 @@ PP(pp_gnetent)
     register char **elem;
     register SV *sv;
 #ifndef HAS_GETNET_PROTOS /* XXX Do we need individual probes? */
-    struct netent *PerlSock_getnetbyaddr(Netdb_net_t, int);
-    struct netent *PerlSock_getnetbyname(Netdb_name_t);
-    struct netent *PerlSock_getnetent(void);
+    struct netent *getnetbyaddr(Netdb_net_t, int);
+    struct netent *getnetbyname(Netdb_name_t);
+    struct netent *getnetent(void);
 #endif
     struct netent *nent;
     STRLEN n_a;
@@ -4815,9 +4815,9 @@ PP(pp_gprotoent)
     register char **elem;
     register SV *sv;
 #ifndef HAS_GETPROTO_PROTOS /* XXX Do we need individual probes? */
-    struct protoent *PerlSock_getprotobyname(Netdb_name_t);
-    struct protoent *PerlSock_getprotobynumber(int);
-    struct protoent *PerlSock_getprotoent(void);
+    struct protoent *getprotobyname(Netdb_name_t);
+    struct protoent *getprotobynumber(int);
+    struct protoent *getprotoent(void);
 #endif
     struct protoent *pent;
     STRLEN n_a;
@@ -4898,9 +4898,9 @@ PP(pp_gservent)
     register char **elem;
     register SV *sv;
 #ifndef HAS_GETSERV_PROTOS /* XXX Do we need individual probes? */
-    struct servent *PerlSock_getservbyname(Netdb_name_t, Netdb_name_t);
-    struct servent *PerlSock_getservbyport(int, Netdb_name_t);
-    struct servent *PerlSock_getservent(void);
+    struct servent *getservbyname(Netdb_name_t, Netdb_name_t);
+    struct servent *getservbyport(int, Netdb_name_t);
+    struct servent *getservent(void);
 #endif
     struct servent *sent;
     STRLEN n_a;

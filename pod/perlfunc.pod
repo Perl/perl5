@@ -294,9 +294,9 @@ X<-S>X<-b>X<-c>X<-t>X<-u>X<-g>X<-k>X<-T>X<-B>X<-M>X<-A>X<-C>
     -T	File is an ASCII text file (heuristic guess).
     -B	File is a "binary" file (opposite of -T).
 
-    -M	Age of file in days when script started.
+    -M	Script start time minus file modification time, in days.
     -A	Same for access time.
-    -C	Same for inode change time.
+    -C	Same for inode change time (Unix, may differ for other platforms)
 
 Example:
 

@@ -102,6 +102,7 @@ ext/B/t/bblock.t        See if B::Bblock works
 ext/B/t/concise.t	See whether B::Concise works
 ext/B/t/debug.t		See if B::Debug works
 ext/B/t/deparse.t	See if B::Deparse works
+ext/B/t/lint.t		See if B::Lint works
 ext/B/t/showlex.t	See if B::ShowLex works
 ext/B/t/stash.t		See if B::Stash works
 ext/B/t/terse.t		See if B::Terse works
@@ -212,7 +213,6 @@ ext/Encode/Encode/2022.enc		Encode table
 ext/Encode/Encode/7bit-greek.enc	Encode table
 ext/Encode/Encode/7bit-jis.enc		Encode table
 ext/Encode/Encode/7bit-kana.enc		Encode table
-ext/Encode/Encode/7bit-kr.enc		Encode table
 ext/Encode/Encode/7bit-latin1.enc	Encode table
 ext/Encode/Encode/8859-1.enc		Encode table
 ext/Encode/Encode/8859-1.ucm		Encode table
@@ -337,7 +337,7 @@ ext/Encode/JP/JP.pm		Encode extension
 ext/Encode/JP/Makefile.PL	Encode extension
 ext/Encode/KR/KR.pm		Encode extension
 ext/Encode/KR/Makefile.PL		Encode extension
-ext/Encode/lib/Encode/CN/HZ.pm		Encode table
+ext/Encode/lib/Encode/CN/HZ.pm		Encode extension
 ext/Encode/lib/Encode/Encoding.pm	Encode extension
 ext/Encode/lib/Encode/Internal.pm	Encode extension
 ext/Encode/lib/Encode/iso10646_1.pm	Encode extension
@@ -345,11 +345,9 @@ ext/Encode/lib/Encode/JP/Constants.pm	Encode extension
 ext/Encode/lib/Encode/JP/H2Z.pm		Encode extension
 ext/Encode/lib/Encode/JP/ISO_2022_JP.pm	Encode extension
 ext/Encode/lib/Encode/JP/JIS.pm	Encode extension
-ext/Encode/lib/Encode/JP/Tr.pm	Encode extension
 ext/Encode/lib/Encode/Tcl.pm		Encode extension
 ext/Encode/lib/Encode/Tcl/Escape.pm	Encode extension
 ext/Encode/lib/Encode/Tcl/Extended.pm	Encode extension
-ext/Encode/lib/Encode/Tcl/HanZi.pm	Encode extension
 ext/Encode/lib/Encode/Tcl/Table.pm	Encode extension
 ext/Encode/lib/Encode/ucs2_le.pm	Encode extension
 ext/Encode/lib/Encode/Unicode.pm	Encode extension
@@ -359,12 +357,14 @@ ext/Encode/lib/EncodeFormat.pod		Encode extension
 ext/Encode/Makefile.PL		Encode extension makefile writer
 ext/Encode/MANIFEST		Encode extension
 ext/Encode/README		Encode extension
+ext/Encode/t/CN.t		Encode extension test
 ext/Encode/t/Encode.t		Encode extension test
 ext/Encode/t/japanese.pl	Encode extension
 ext/Encode/t/JP.t		Encode extension test
 ext/Encode/t/table.euc		Encode extension test
 ext/Encode/t/table.ref		Encode extension test
 ext/Encode/t/Tcl.t		Encode extension test
+ext/Encode/t/TW.t		Encode extension test
 ext/Encode/TW/Makefile.PL	Encode extension
 ext/Encode/TW/TW.pm		Encode extension
 ext/Errno/ChangeLog	Errno perl module change log
@@ -397,7 +397,6 @@ ext/GDBM_File/GDBM_File.xs	GDBM extension external subroutines
 ext/GDBM_File/hints/sco.pl	Hint for GDBM_File for named architecture
 ext/GDBM_File/Makefile.PL	GDBM extension makefile writer
 ext/GDBM_File/typemap		GDBM extension interface types
-ext/I18N/Langinfo/fallback.c	I18N::Langinfo
 ext/I18N/Langinfo/fallback.xs	I18N::Langinfo
 ext/I18N/Langinfo/Langinfo.pm	I18N::Langinfo
 ext/I18N/Langinfo/Langinfo.t	I18N::Langinfo
@@ -2058,6 +2057,7 @@ Porting/config.sh	Sample config.sh
 Porting/config_H	Sample config.h
 Porting/Contract	Social contract for contributed modules in Perl core
 Porting/findvars	Find occurrences of words
+Porting/findrfuncs	Find reentrant variants of functions used in an executable
 Porting/fixCORE		Find and fix modules that generate warnings
 Porting/fixvars		Find undeclared variables with C compiler and fix em
 Porting/genlog		Generate formatted changelogs by querying p4d

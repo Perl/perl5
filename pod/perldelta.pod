@@ -114,12 +114,6 @@ C<\p{InTibetan}> refers to the block. When there is no name conflict, you
 can omit the C<In> from the block name (e.g. C<\p{BraillePatterns}>), but
 to be safe, it's probably best to always use the C<In>).
 
-=head2 Perl Parser Stress Tested
-
-The Perl parser has been stress tested using both random input and
-Markov chain input and the few found crashes and lockups have been
-fixed.
-
 =head2 REF(...) Instead Of SCALAR(...)
 
 A reference to a reference now stringifies as "REF(0x81485ec)" instead
@@ -131,7 +125,7 @@ value of ref().
 The undocumented pack/unpack template letters D/F have been recycled
 for better use: now they stand for long double (if supported by the
 platform) and NV (Perl internal floating point type).  (They used
-to be aliases for f/d, but you never knew that.)
+to be aliases for d/f, but you never knew that.)
 
 =head2 Deprecations
 
@@ -331,7 +325,8 @@ doing, like finishing an internal operation (like sort()) or an
 external operation (like an I/O operation), and only then look at any
 arrived signals (and before starting the next operation).  No more corrupt
 internal state since the current operation is always finished first,
-but the signal may take more time to get heard.
+but the signal may take more time to get heard.  Note that breaking
+out from potentially blocking operations should still work, though.
 
 =head2 Unicode Overhaul
 
@@ -408,9 +403,9 @@ removed/changed in future releases.)
 
 =item *
 
-chomp() and chop() have been demoted back to I<not> being overridable
-because they cannot really be overridden-- the problem is that their
-prototype cannot be expressed and therefore one really cannot write
+chomp() and chop() are now overridable.  Note, however, that their
+prototype (as given by C<prototype("CORE::chomp")> is undefined,
+because it cannot be expressed and therefore one cannot really write
 replacements to override these builtins.
 
 =item *
@@ -536,6 +531,20 @@ simply B<between digits>.
 Rather than relying on C's argv[0] (which may not contain a full pathname)
 where possible $^X is now set by asking the operating system.
 (eg by reading F</proc/self/exe> on Linux, F</proc/curproc/file> on FreeBSD)
+
+=item *
+
+A new variable, C<${^TAINT}>, indicates whether taint mode is enabled.
+
+=item *
+
+You can now override the readline() builtin, and this overrides also
+the <FILEHANDLE> angle bracket operator.
+
+=item *
+
+The command-line options -s and -F are now recognized on the shebang
+(#!) line.
 
 =back
 
@@ -999,6 +1008,11 @@ correctly changes directories when chasing symbolic links.  Callbacks
 
 File::Find is now (again) reentrant.  It also has been made
 more portable.
+
+=item *
+
+The warnings issued by File::Find now belong to their own category.
+You can enable/disable them with C<use/no warnings 'File::Find';>.
 
 =item *
 
@@ -1579,6 +1593,13 @@ Thread extension requires being Configured with C<-Duse5005threads>).
 But note that the Thread.pm interface is now shared by both
 thread models.
 
+=item *
+
+The Gconvert macro ($Config{d_Gconvert}) used by perl for stringifying
+floating-point numbers is now more picky about using sprintf %.*g
+rules for the conversion.  Some platforms that used to use gcvt may
+now resort to the slower sprintf.
+
 =back
 
 =head2 New Or Improved Platforms
@@ -1973,6 +1994,11 @@ Allow read-only string on left hand side of non-modifying tr///.
 
 =item *
 
+If C<STDERR> is tied, warnings caused by C<warn> and C<die> now
+correctly pass to it.
+
+=item *
+
 Several Unicode fixes.
 
 =over 8
@@ -2056,7 +2082,7 @@ Setting C<$0> now works (as much as possible; see L<perlvar> for details).
 
 Cygwin
 
-Numerous updates; currently synchronised with Cygwin 1.1.4.
+Numerous updates; currently synchronised with Cygwin 1.3.10.
 
 =item *
 
@@ -2078,7 +2104,7 @@ Perl now works on post-3.0 FreeBSDs.
 
 HP-UX
 
-README.hpux updated; C<Configure -Duse64bitall> now almost works.
+README.hpux updated; C<Configure -Duse64bitall> now works.
 
 =item *
 
@@ -2280,6 +2306,12 @@ Windows 9x.
 
 winsock handle leak fixed.
 
+=item *
+
+The Perl parser has been stress tested using both random input and
+Markov chain input and the few found crashes and lockups have been
+fixed.
+
 =back
 
 =back
@@ -2360,6 +2392,11 @@ the entire regex.  You will an optional warning if you try to do otherwise.
 
 Using arrays or hashes as references (e.g. C<< %foo-&gt;{bar} >>
 has been deprecated for a while.  Now you will get an optional warning.
+
+=item *
+
+Using C<sort> in scalar context now issues an optional warning.
+This didn't do anything useful, as the sort was not performed.
 
 =back
 
@@ -2475,8 +2512,8 @@ such as sudo (see http://www.courtesan.com/sudo/).
 =head1 New Tests
 
 Several new tests have been added, especially for the F<lib>
-subsection.  There are now about 34 000 individual tests (spread over
-about 530 test scripts), in the regression suite (5.6.1 has about
+subsection.  There are now about 56 000 individual tests (spread over
+about 620 test scripts), in the regression suite (5.6.1 has about
 11700 tests, in 258 test scripts) Many of the new tests are introduced
 by the new modules, but still in general Perl is now more thoroughly
 tested.
@@ -2484,7 +2521,7 @@ tested.
 Because of the large number of tests, running the regression suite
 will take considerably longer time than it used to: expect the suite
 to take up to 4-5 times longer to run than in perl 5.6.  In a really
-fast machine you can hope to finish the suite in about 5 minutes
+fast machine you can hope to finish the suite in about 6-8 minutes
 (wallclock time).
 
 The tests are now reported in a different order than in earlier Perls.
@@ -2515,7 +2552,7 @@ The AIX C compiler vac version 5.0.0.0 may produce buggy code,
 resulting in few random tests failing, but when the failing tests
 are run by hand, they succeed.  We suggest upgrading to at least
 vac version 5.0.1.0, that has been known to compile Perl correctly.
-"lslpp -L|grep vac.C" will tell you the vac version.
+"lslpp -L|grep vac.C" will tell you the vac version. See README.aix.
 
 =back
 
@@ -2529,28 +2566,18 @@ known but the current suspect is the F<ixemul> library.
 
 Don't panic.  Read INSTALL 'make test' section instead.
 
-=head2 Cygwin intermittent failures of lib/Memoize/t/expire_file 11 and 12
+=head2 FreeBSD 4.3, 4.4, 4.5 fail lib/File/Spec/t/rel2abs2rel.t
 
-The subtests 11 and 12 sometimes fail and sometimes work.
-
-=head2 FreeBSD 4.5 fails lib/File/Spec/t/rel2abs2rel.t
-
-F<lib/File/Spec/t/rel2abs2rel.t> tests that "`` works" by running a
-a perl 1 liner in backticks, using "$^X" as the path to perl.
-It is failing on FreeBSD 4.5, but only when run as part of make test.
+F<lib/File/Spec/t/rel2abs2rel.t> tests that "`` works" by running a a perl 1
+liner in backticks, using "$^X" as the path to perl. It is known to be
+failing on FreeBSD 4.3, 4.4 and 4.5, but only when run as part of make test.
 This seems to be a kernel problem rather than perl - reading the symlink
 F</proc/curproc/file> returns "unknown" rather than the path to perl, and a
 kernel debugger reveals that variable C<numfullpathfail2> in
 F</usr/src/sys/kern/vfs_cache.c> is being incremented whenever
 F</proc/curproc/file> fails to return the perl executable's path.
-
-=head2 HP-UX lib/io_multihomed Fails When LP64-Configured
-
-The lib/io_multihomed test may hang in HP-UX if Perl has been
-configured to be 64-bit. Because other 64-bit platforms do not hang in
-this test, HP-UX is suspect. All other tests pass in 64-bit HP-UX. The
-test attempts to create and connect to "multihomed" sockets (sockets
-which have multiple IP addresses).
+[If you find that if fails on other versions of FreeBSD, please use perlbug
+to report them to us. If you are able to fix the bug, even better.]
 
 =head2  HP-UX lib/posix Subtest 9 Fails When LP64-Configured
 
@@ -2573,29 +2600,30 @@ The following tests are known to fail:
  ../ext/DB_File/t/db-recno.t              149    3   2.01%  61 63 65
  ../ext/POSIX/t/posix.t                    31    1   3.23%  10
 
+If you are building on a UFS partition, you will also probably see
+t/op/stat.t subtest #9 fail.  This is caused by Darwin's UFS not
+supporting inode change time.
+
 =head2 OS/390
 
 OS/390 has rather many test failures but the situation is actually
 better than it was in 5.6.0, it's just that so many new modules and
 tests have been added.
 
-Failed 10/611 test scripts, 98.36% okay. 72/53809 subtests failed, 99.87% okay.
-Failed Test                  Stat Wstat Total Fail  Failed  List of Failed
--------------------------------------------------------------------------------
-../ext/B/t/deparse.t                       17    1   5.88%  14
-../ext/IO/lib/IO/t/io_unix.t                5    4  80.00%  2-5
-../lib/utf8.t                              94   13  13.83%  27 30-31 43 46 73
-                                                            76 79 82 85 88 91
-                                                            94
-../lib/Benchmark.t              1   256   159    1   0.63%  75
-../lib/ExtUtils/t/Embed.t                   9    9 100.00%  1-9
-../lib/ExtUtils/t/ExtUtils.t               27   19  70.37%  5-23
-op/pat.t                                  858    9   1.05%  242-243 665 776 785
-                                                            832-834 845
-op/sprintf.t                              224    3   1.34%  98 100 136
-op/tr.t                                    97    5   5.15%  63 71-74
-uni/fold.t                                767    8   1.04%  25-26 62 169 196
-                                                            648 697-698
+ ../ext/B/t/deparse.t                       17    1   5.88%  14
+ ../ext/IO/lib/IO/t/io_unix.t                5    4  80.00%  2-5
+ ../lib/utf8.t                              94   13  13.83%  27 30-31 43 46 73
+                                                             76 79 82 85 88 91
+                                                             94
+ ../lib/Benchmark.t              1   256   159    1   0.63%  75
+ ../lib/ExtUtils/t/Embed.t                   9    9 100.00%  1-9
+ ../lib/ExtUtils/t/ExtUtils.t               27   19  70.37%  5-23
+ op/pat.t                                  858    9   1.05%  242-243 665 776 785
+                                                             832-834 845
+ op/sprintf.t                              224    3   1.34%  98 100 136
+ op/tr.t                                    97    5   5.15%  63 71-74
+ uni/fold.t                                767    8   1.04%  25-26 62 169 196
+                                                             648 697-698
 57 tests and 377 subtests skipped.
 
 =head2 op/sprintf tests 129 and 130
@@ -2616,21 +2644,24 @@ The following tests are known to fail due to fundamental problems in
 the 5.005 threading implementation. These are not new failures--Perl
 5.005_0x has the same bugs, but didn't have these tests.
 
-  ext/List/Util/t/first         2
-  lib/autouse                   4
-  ext/Thread/thr5005            19-20
+ ../ext/List/Util/t/first.t         255 65280     7    4  57.14%  2 5-7
+ ../lib/English.t                     2   512    54    2   3.70%  2-3
+ ../lib/Filter/Simple/t/data.t                    6    3  50.00%  1-3
+ ../lib/Filter/Simple/t/filter_onl                9    3  33.33%  1-2 5
+ ../lib/autouse.t                                10    1  10.00%  4
+ op/flip.t                                       15    1   6.67%  15
 
 These failures are unlikely to get fixed as the 5.005-style
 threads are considered fundamentally broken.
 
 =head2 UNICOS
 
-  ../ext/Socket/socketpair.t    1   256    45    1   2.22%  12
-  ../lib/Math/Trig.t                       26    1   3.85%  25
-  ../lib/warnings.t                       460    1   0.22%  425
-  io/fs.t                                  36    1   2.78%  31
-  op/numconvert.t                        1440   13   0.90%  208 509-510
-  657-658 665-666 829-830 989-990 1149-1150
+ ../ext/Socket/socketpair.t    1   256    45    1   2.22%  12
+ ../lib/Math/Trig.t                       26    1   3.85%  25
+ ../lib/warnings.t                       460    1   0.22%  425
+ io/fs.t                                  36    1   2.78%  31
+ op/numconvert.t                        1440   13   0.90%  208 509-510
+ 657-658 665-666 829-830 989-990 1149-1150
 
 =head2 UNICOS and UNICOS/mk
 

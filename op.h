@@ -105,6 +105,7 @@ Deprecated.  Use C<GIMME_V> instead.
 				/*  On pushre, re is /\s+/ imp. by split " " */
 				/*  On regcomp, "use re 'eval'" was in scope */
 				/*  On OP_READLINE, was <$filehandle> */
+				/*  On RV2[SG]V, don't create GV--in defined()*/
 
 /* old names; don't use in new code, but don't break them, either */
 #define OPf_LIST	OPf_WANT_LIST
@@ -478,11 +479,11 @@ struct loop {
 #ifdef USE_REENTRANT_API
 
 typedef struct {
-  struct tm* tmbuff;
-} REBUF;
+  struct tm* tmbuf;
+} REENTBUF;
 
-#define localtime(a)       (localtime_r((a),PL_reentrant_buffer->tmbuff) ? PL_reentrant_buffer->tmbuff : NULL)
-#define gmtime(a)          (gmtime_r((a),PL_reentrant_buffer->tmbuff) ?  PL_reentrant_buffer->tmbuff : NULL)
+#define localtime(a)       (localtime_r((a),PL_reentrant_buffer->tmbuf) ? PL_reentrant_buffer->tmbuf : NULL)
+#define gmtime(a)          (gmtime_r((a),PL_reentrant_buffer->tmbuf) ?  PL_reentrant_buffer->tmbuf : NULL)
 
 #ifdef OLD_PTHREADS_API
 
@@ -492,8 +493,8 @@ typedef struct {
 
 #undef localtime
 #undef gmtime
-#define localtime(a)       ((localtime_r((a),PL_reentrant_buffer->tmbuff) == 0) ? PL_reentrant_buffer->tmbuff : NULL)
-#define gmtime(a)          ((gmtime_r((a),PL_reentrant_buffer->tmbuff) == 0) ? PL_reentrant_buffer->tmbuff : NULL)
+#define localtime(a)       ((localtime_r((a),PL_reentrant_buffer->tmbuf) == 0) ? PL_reentrant_buffer->tmbuf : NULL)
+#define gmtime(a)          ((gmtime_r((a),PL_reentrant_buffer->tmbuf) == 0) ? PL_reentrant_buffer->tmbuf : NULL)
 #endif /* HP-UX 10.20 */
 
 #endif

@@ -262,6 +262,9 @@ timestamp (meaning that about the only portable timestamp is the
 modification timestamp), or one second granularity of any timestamps
 (e.g. the FAT filesystem limits the time granularity to two seconds).
 
+The "inode change timestamp" (the <-C> filetest) may really be the
+"creation timestamp" (which it is not in UNIX).
+
 VOS perl can emulate Unix filenames with C</> as path separator.  The
 native pathname characters greater-than, less-than, number-sign, and
 percent-sign are always accepted.
@@ -359,6 +362,10 @@ many networking schemes and utilities for separating the nodename and
 the pathname, and so on).  For the same reasons, avoid C<@>, C<;> and
 C<|>.
 
+Don't assume that in pathnames you can collapse two leading slashes
+C<//> into one: some networking and clustering filesystems have special
+semantics for that.  Let the operating system to sort it out.
+
 The I<portable filename characters> as defined by ANSI C are
 
  a b c d e f g h i j k l m n o p q r t u v w x y z
@@ -367,11 +374,11 @@ The I<portable filename characters> as defined by ANSI C are
  . _ -
 
 and the "-" shouldn't be the first character.  If you want to be
-hypercorrect, stay within the 8.3 naming convention (all the files and
-directories have to be unique within one directory if their names are
-lowercased and truncated to eight characters before the C<.>, if any,
-and to three characters after the C<.>, if any).  (And do not use
-C<.>s in directory names.)
+hypercorrect, stay case-insensitive and within the 8.3 naming
+convention (all the files and directories have to be unique within one
+directory if their names are lowercased and truncated to eight
+characters before the C<.>, if any, and to three characters after the
+C<.>, if any).  (And do not use C<.>s in directory names.)
 
 =head2 System Interaction
 
@@ -673,6 +680,7 @@ are a few of the more popular Unix flavors:
     --------------------------------------------
     AIX           aix        aix
     BSD/OS        bsdos      i386-bsdos
+    Darwin        darwin     darwin
     dgux          dgux       AViiON-dgux
     DYNIX/ptx     dynixptx   i386-dynixptx
     FreeBSD       freebsd    freebsd-i386    
@@ -1782,7 +1790,11 @@ as '', so numeric comparison or manipulation of these fields may cause
 'not numeric' warnings.
 
 mtime and atime are the same thing, and ctime is creation time instead of
-inode change time. (S<Mac OS>)
+inode change time. (S<Mac OS>).
+
+ctime not supported on UFS (S<Mac OS X>).
+
+ctime is creation time instead of inode change time  (Win32).
 
 device and inode are not meaningful.  (Win32)
 
@@ -2187,7 +2199,7 @@ Andrew M. Langmead <aml@world.std.com>,
 Larry Moore <ljmoore@freespace.net>,
 Paul Moore <Paul.Moore@uk.origin-it.com>,
 Chris Nandor <pudge@pobox.com>,
-Matthias Neeracher <neeri@iis.ee.ethz.ch>,
+Matthias Neeracher <neeracher@mac.com>,
 Philip Newton <pne@cpan.org>,
 Gary Ng <71564.1743@CompuServe.COM>,
 Tom Phoenix <rootbeer@teleport.com>,
@@ -2200,6 +2212,3 @@ Michael G Schwern <schwern@pobox.com>,
 Dan Sugalski <dan@sidhe.org>,
 Nathan Torkington <gnat@frii.com>.
 
-=head1 VERSION
-
-Version 1.50, last modified 10 Jul 2001

@@ -1021,7 +1021,7 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "5.7.2\\lib"		/**/
+#define ARCHLIB "5.7.3\\lib"		/**/
 /*#define ARCHLIB_EXP ""	/**/
 
 /* ARCHNAME:
@@ -1052,8 +1052,8 @@
  *	This symbol is the filename expanded version of the BIN symbol, for
  *	programs that do not want to deal with that at run-time.
  */
-#define BIN "5.7.2\\bin"	/**/
-#define BIN_EXP "5.7.2\\bin"	/**/
+#define BIN "5.7.3\\bin"	/**/
+#define BIN_EXP "5.7.3\\bin"	/**/
 
 /* PERL_BINCOMPAT_5005:
  *	This symbol, if defined, indicates that this version of Perl should be
@@ -2894,8 +2894,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "5.7.2\\lib"		/**/
-#define PRIVLIB_EXP (win32_get_privlib("5.7.2"))	/**/
+#define PRIVLIB "5.7.3\\lib"		/**/
+#define PRIVLIB_EXP (win32_get_privlib("5.7.3"))	/**/
 
 /* PTRSIZE:
  *	This symbol contains the size of a pointer, so that the C preprocessor
@@ -2998,7 +2998,7 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH "\\site5.7.2\\lib"		/**/
+#define SITEARCH "\\site5.7.3\\lib"		/**/
 /*#define SITEARCH_EXP ""	/**/
 
 /* SITELIB:
@@ -3021,8 +3021,8 @@
  *	removed.  The elements in inc_version_list (inc_version_list.U) can
  *	be tacked onto this variable to generate a list of directories to search.
  */
-#define SITELIB "\\site5.7.2\\lib"		/**/
-#define SITELIB_EXP (win32_get_sitelib("5.7.2"))	/**/
+#define SITELIB "\\site5.7.3\\lib"		/**/
+#define SITELIB_EXP (win32_get_sitelib("5.7.3"))	/**/
 #define SITELIB_STEM ""		/**/
 
 /* Size_t_size:
@@ -3259,7 +3259,7 @@
 /* PERL_XS_APIVERSION:
  *	This variable contains the version of the oldest perl binary
  *	compatible with the present perl.  perl.c:incpush() and
- *	lib/lib.pm will automatically search in \\site5.7.2\\lib for older
+ *	lib/lib.pm will automatically search in \\site5.7.3\\lib for older
  *	directories across major versions back to xs_apiversion.
  *	This is only useful if you have a perl library directory tree
  *	structured like the default one.
@@ -3278,7 +3278,7 @@
  *	compatible with the present perl.  (That is, pure perl modules
  *	written for pm_apiversion will still work for the current
  *	version).  perl.c:incpush() and lib/lib.pm will automatically
- *	search in \\site5.7.2\\lib for older directories across major versions
+ *	search in \\site5.7.3\\lib for older directories across major versions
  *	back to pm_apiversion.  This is only useful if you have a perl
  *	library directory tree structured like the default one.  The
  *	versioned site_perl library was introduced in 5.005, so that's

@@ -1077,6 +1077,11 @@ Control.)  Example:
 
     warn "No \"our\" declarations!\n" if $^V and $^V lt v5.6.0;
 
+To convert C<$^V> into its string representation use sprintf()'s
+C<"%vd"> conversion:
+
+    printf "version is v%vd\n", $^V;  # Perl's version
+
 See the documentation of C<use VERSION> and C<require VERSION>
 for a convenient way to fail if the running Perl interpreter is too old.
 

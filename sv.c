@@ -3359,7 +3359,7 @@ Perl_sv_utf8_upgrade_flags(pTHX_ register SV *sv, I32 flags)
     }
 
     if (PL_encoding)
-        Perl_sv_recode_to_utf8(aTHX_ sv, PL_encoding);
+        sv_recode_to_utf8(sv, PL_encoding);
     else { /* Assume Latin-1/EBCDIC */
 	 /* This function could be much more efficient if we
 	  * had a FLAG in SVs to signal if there are any hibit
@@ -5349,6 +5349,8 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
     char *pv2;
     STRLEN cur2;
     I32  eq     = 0;
+    char *tpv   = Nullch;
+    SV* svrecode = Nullsv;
 
     if (!sv1) {
 	pv1 = "";
@@ -5364,13 +5366,59 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
     else
 	pv2 = SvPV(sv2, cur2);
 
-    if (SvUTF8(sv1) == SvUTF8(sv2) || IN_BYTES)
-	eq = (cur1 == cur2) && memEQ(pv1, pv2, cur1);
-    else if (SvUTF8(sv1)) /* do not utf8ize the comparands as a side-effect */
-	eq = !memcmp_byte_utf8(pv2, cur2, pv1, cur1);
-    else
-	eq = !memcmp_byte_utf8(pv1, cur1, pv2, cur2);
+    if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTES) {
+        /* Differing utf8ness.
+	 * Do not UTF8size the comparands as a side-effect. */
+	 if (PL_encoding) {
+	      if (SvUTF8(sv1)) {
+		   svrecode = newSVpvn(pv2, cur2);
+		   sv_recode_to_utf8(svrecode, PL_encoding);
+		   pv2 = SvPV(svrecode, cur2);
+	      }
+	      else {
+		   svrecode = newSVpvn(pv1, cur1);
+		   sv_recode_to_utf8(svrecode, PL_encoding);
+		   pv1 = SvPV(svrecode, cur1);
+	      }
+	      /* Now both are in UTF-8. */
+	      if (cur1 != cur2)
+		   return FALSE;
+	 }
+	 else {
+	      bool is_utf8 = TRUE;
+
+	      if (SvUTF8(sv1)) {
+		   /* sv1 is the UTF-8 one,
+		    * if is equal it must be downgrade-able */
+		   char *pv = (char*)bytes_from_utf8((U8*)pv1,
+						     &cur1, &is_utf8);
+		   if (pv != pv1)
+			pv1 = tpv = pv;
+	      }
+	      else {
+		   /* sv2 is the UTF-8 one,
+		    * if is equal it must be downgrade-able */
+		   char *pv = (char *)bytes_from_utf8((U8*)pv2,
+						      &cur2, &is_utf8);
+		   if (pv != pv2)
+			pv2 = tpv = pv;
+	      }
+	      if (is_utf8) {
+		   /* Downgrade not possible - cannot be eq */
+		   return FALSE;
+	      }
+	 }
+    }
+
+    if (cur1 == cur2)
+	eq = memEQ(pv1, pv2, cur1);
 	
+    if (svrecode)
+	 SvREFCNT_dec(svrecode);
+
+    if (tpv)
+	Safefree(tpv);
+
     return eq;
 }
 
@@ -5389,8 +5437,9 @@ I32
 Perl_sv_cmp(pTHX_ register SV *sv1, register SV *sv2)
 {
     STRLEN cur1, cur2;
-    char *pv1, *pv2;
-    I32  retval;
+    char *pv1, *pv2, *tpv = Nullch;
+    I32  cmp;
+    SV *svrecode = Nullsv;
 
     if (!sv1) {
 	pv1 = "";
@@ -5399,35 +5448,61 @@ Perl_sv_cmp(pTHX_ register SV *sv1, register SV *sv2)
     else
 	pv1 = SvPV(sv1, cur1);
 
-    if (!sv2){
+    if (!sv2) {
 	pv2 = "";
 	cur2 = 0;
     }
     else
 	pv2 = SvPV(sv2, cur2);
 
+    if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTES) {
+        /* Differing utf8ness.
+	 * Do not UTF8size the comparands as a side-effect. */
+	if (SvUTF8(sv1)) {
+	    if (PL_encoding) {
+		 svrecode = newSVpvn(pv2, cur2);
+		 sv_recode_to_utf8(svrecode, PL_encoding);
+		 pv2 = SvPV(svrecode, cur2);
+	    }
+	    else {
+		 pv2 = tpv = (char*)bytes_to_utf8((U8*)pv2, &cur2);
+	    }
+	}
+	else {
+	    if (PL_encoding) {
+		 svrecode = newSVpvn(pv1, cur1);
+		 sv_recode_to_utf8(svrecode, PL_encoding);
+		 pv1 = SvPV(svrecode, cur1);
+	    }
+	    else {
+		 pv1 = tpv = (char*)bytes_to_utf8((U8*)pv1, &cur1);
+	    }
+	}
+    }
+
     if (!cur1) {
-	return cur2 ? -1 : 0;
+	cmp = cur2 ? -1 : 0;
     } else if (!cur2) {
-	return 1;
-    } else if (SvUTF8(sv1) == SvUTF8(sv2) || IN_BYTES) {
-	retval = memcmp((void*)pv1, (void*)pv2, cur1 < cur2 ? cur1 : cur2);
+	cmp = 1;
+    } else {
+	I32 retval = memcmp((void*)pv1, (void*)pv2, cur1 < cur2 ? cur1 : cur2);
 
 	if (retval) {
-	    return retval < 0 ? -1 : 1;
+	    cmp = retval < 0 ? -1 : 1;
 	} else if (cur1 == cur2) {
-	    return 0;
-	} else {
-	    return cur1 < cur2 ? -1 : 1;
+	    cmp = 0;
+        } else {
+	    cmp = cur1 < cur2 ? -1 : 1;
 	}
-    } else if (SvUTF8(sv1)) /* do not utf8ize the comparands as a side-effect */
-	retval = -memcmp_byte_utf8(pv2, cur2, pv1, cur1);
-    else
-	retval = memcmp_byte_utf8(pv1, cur1, pv2, cur2);
+    }
 
-    if (retval)				/* CURs taken into account already */
-	return retval < 0 ? -1 : 1;
-    return 0;
+    if (svrecode)
+	 SvREFCNT_dec(svrecode);
+
+    if (tpv)
+	Safefree(tpv);
+
+    return cmp;
 }
 
 /*
@@ -9792,8 +9867,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_debug		= proto_perl->Idebug;
 
 #ifdef USE_REENTRANT_API
-    New(31337, PL_reentrant_buffer,1, REBUF);
-    New(31337, PL_reentrant_buffer->tmbuff,1, struct tm);
+    Perl_reentrant_init(aTHX);
 #endif
 
     /* create SV map for pointer relocation */

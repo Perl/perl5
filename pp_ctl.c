@@ -896,13 +896,16 @@ PP(pp_flip)
     else {
 	dTOPss;
 	SV *targ = PAD_SV(PL_op->op_targ);
- 	int flip;
+ 	int flip = 0;
 
  	if (PL_op->op_private & OPpFLIP_LINENUM) {
- 	    struct io *gp_io;
- 	    flip = PL_last_in_gv
- 		&& (gp_io = GvIO(PL_last_in_gv))
- 		&& SvIV(sv) == (IV)IoLINES(gp_io);
+	    if (GvIO(PL_last_in_gv)) {
+		flip = SvIV(sv) == (IV)IoLINES(GvIOp(PL_last_in_gv));
+	    }
+	    else {
+		GV *gv = gv_fetchpv(".", TRUE, SVt_PV);
+		if (gv && GvSV(gv)) flip = SvIV(sv) == SvIV(GvSV(gv));
+	    }
  	} else {
  	    flip = SvTRUE(sv);
  	}
@@ -980,11 +983,23 @@ PP(pp_flop)
     else {
 	dTOPss;
 	SV *targ = PAD_SV(cUNOP->op_first->op_targ);
+	int flop = 0;
 	sv_inc(targ);
-	if ((PL_op->op_private & OPpFLIP_LINENUM)
-	  ? (GvIO(PL_last_in_gv)
-	     && SvIV(sv) == (IV)IoLINES(GvIOp(PL_last_in_gv)))
-	  : SvTRUE(sv) ) {
+
+	if (PL_op->op_private & OPpFLIP_LINENUM) {
+	    if (GvIO(PL_last_in_gv)) {
+		flop = SvIV(sv) == (IV)IoLINES(GvIOp(PL_last_in_gv));
+	    }
+	    else {
+		GV *gv = gv_fetchpv(".", TRUE, SVt_PV);
+		if (gv && GvSV(gv)) flop = SvIV(sv) == SvIV(GvSV(gv));
+	    }
+	}
+	else {
+	    flop = SvTRUE(sv);
+	}
+
+	if (flop) {
 	    sv_setiv(PAD_SV(((UNOP*)cUNOP->op_first)->op_first->op_targ), 0);
 	    sv_catpv(targ, "E0");
 	}

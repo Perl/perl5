@@ -1795,6 +1795,14 @@ d_times (d_times.U):
 	that the times() routine exists.  The times() routine is normaly
 	provided on UNIX systems. You may have to include <sys/times.h>.
 
+d_tm_tm_gmtoff (i_time.U):
+	This variable conditionally defines HAS_TM_TM_GMTOFF, which indicates
+	indicates to the C program that the struct tm has the tm_gmtoff field.
+
+d_tm_tm_zone (i_time.U):
+	This variable conditionally defines HAS_TM_TM_ZONE, which indicates
+	indicates to the C program that the struct tm has the tm_zone field.
+
 d_truncate (d_truncate.U):
 	This variable conditionally defines HAS_TRUNCATE if truncate() is
 	available to truncate files.

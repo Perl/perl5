@@ -840,7 +840,9 @@ is(scalar unpack('A /A /A Z20', '3004bcde'), 'bcde');
   ok( length $p);
   my @b = unpack "$t X[$t] $t", $p;	# Extract, step back, extract again
   is(scalar @b, 2 * scalar @a);
-  is("@b", "@a @a");
+  $b = "@b";
+  $b =~ s/(?:17000+|16999+)\d+(e-45) /17$1 /gi; # stringification is gamble
+  is($b, "@a @a");
 
   my $warning;
   local $SIG{__WARN__} = sub {
@@ -850,7 +852,9 @@ is(scalar unpack('A /A /A Z20', '3004bcde'), 'bcde');
 
   is($warning, undef);
   is(scalar @b, scalar @a);
-  is("@b", "@a");
+  $b = "@b";
+  $b =~ s/(?:17000+|16999+)\d+(e-45) /17$1 /gi; # stringification is gamble
+  is($b, "@a");
 }
 
 is(length(pack("j", 0)), $Config{ivsize});

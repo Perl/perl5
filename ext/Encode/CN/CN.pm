@@ -6,9 +6,6 @@ use Encode::CN::HZ;
 use XSLoader;
 XSLoader::load('Encode::CN',$VERSION);
 
-local $@;
-eval "use Encode::HanExtra"; # load extra encodings if they exist
-
 1;
 __END__
 =head1 NAME
@@ -17,9 +14,9 @@ Encode::CN - China-based Chinese Encodings
 
 =head1 SYNOPSIS
 
-    use Encode::CN;
-    $euc_cn = encode("euc-cn", $utf8);
-    $utf8   = encode("euc-cn", $euc_cn);
+    use Encode 'encode'; 
+    $euc_cn = encode("euc-cn", $utf8);   # loads Encode::CN implicitly
+    $utf8   = encode("euc-cn", $euc_cn); # ditto
 
 =head1 DESCRIPTION
 
@@ -40,9 +37,6 @@ To find how to use this module in detail, see L<Encode>.
 Due to size concerns, C<GB 18030> (an extension to C<GBK>) is distributed
 separately on CPAN, under the name L<Encode::HanExtra>. That module
 also contains extra Taiwan-based encodings.
-
-This module will automatically load L<Encode::HanExtra> if you have it on
-your machine.
 
 =head1 BUGS
 

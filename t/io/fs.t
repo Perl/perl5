@@ -275,7 +275,11 @@ SKIP: {
 	close (FH); open (FH, ">>Iofs.tmp") or die "Can't reopen Iofs.tmp";
     }
        
-    is(-s "Iofs.tmp", 200, "fh resize to 200 working (filename check)");
+    if ($^O eq 'vos') {
+     is(-s "Iofs.tmp", 200, "TODO - hit VOS bug posix-973 - fh resize to 200 working (filename check)");
+    } else {
+     is(-s "Iofs.tmp", 200, "fh resize to 200 working (filename check)");
+    }
 
     ok(truncate(FH, 0), "fh resize to zero");
 

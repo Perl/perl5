@@ -5,9 +5,6 @@ use Encode;
 use XSLoader;
 XSLoader::load('Encode::TW',$VERSION);
 
-local $@;
-eval "use Encode::HanExtra"; # load extra encodings if they exist
-
 1;
 __END__
 =head1 NAME
@@ -16,9 +13,9 @@ Encode::TW - Taiwan-based Chinese Encodings
 
 =head1 SYNOPSIS
 
-    use Encode::CN;
-    $big5 = encode("big5", $utf8);
-    $utf8 = encode("big5", $big5);
+    use Encode 'encode'; 
+    $big5 = encode("big5", $utf8); # loads Encode::TW implicitly
+    $utf8 = encode("big5", $big5); # ditto
 
 =head1 DESCRIPTION
 
@@ -36,9 +33,6 @@ To find how to use this module in detail, see L<Encode>.
 Due to size concerns, C<EUC-TW> (Extended Unix Character) and C<BIG5PLUS>
 (CMEX's Big5+) are distributed separately on CPAN, under the name
 L<Encode::HanExtra>. That module also contains extra China-based encodings.
-
-This module will automatically load L<Encode::HanExtra> if you have it on
-your machine.
 
 =head1 BUGS
 

@@ -1,6 +1,6 @@
 package B::Lint;
 
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 
 =head1 NAME
 
@@ -111,6 +111,8 @@ include other package names whose subs are then checked by Lint.
 
 This is only a very preliminary version.
 
+This module doesn't work correctly on thread-enabled perls.
+
 =head1 AUTHOR
 
 Malcolm Beattie, mbeattie@sable.ox.ac.uk.
@@ -118,7 +120,7 @@ Malcolm Beattie, mbeattie@sable.ox.ac.uk.
 =cut
 
 use strict;
-use B qw(walkoptree main_root walksymtable svref_2object parents
+use B qw(walkoptree_slow main_root walksymtable svref_2object parents
          OPf_WANT_LIST OPf_WANT OPf_STACKED G_ARRAY
         );
 
@@ -164,7 +166,7 @@ sub gimme {
     my $op = shift;
     my $flags = $op->flags;
     if ($flags & OPf_WANT) {
-	return(($flags & OPf_WANT_LIST) ? 1 : 0);
+	return(($flags & OPf_WANT) == OPf_WANT_LIST ? 1 : 0);
     }
     return undef;
 }
@@ -279,12 +281,12 @@ sub B::GV::lintcv {
     return if !$$cv || $done_cv{$$cv}++;
     my $root = $cv->ROOT;
     #warn "    root = $root (0x$$root)\n";#debug
-    walkoptree($root, "lint") if $$root;
+    walkoptree_slow($root, "lint") if $$root;
 }
 
 sub do_lint {
     my %search_pack;
-    walkoptree(main_root, "lint") if ${main_root()};
+    walkoptree_slow(main_root, "lint") if ${main_root()};
     
     # Now do subs in main
     no strict qw(vars refs);

@@ -427,7 +427,6 @@ Ap	|void	|markstack_grow
 #if defined(USE_LOCALE_COLLATE)
 p	|char*	|mem_collxfrm	|const char* s|STRLEN len|STRLEN* xlen
 #endif
-Apd	|int	|memcmp_byte_utf8	|char *sbyte|STRLEN lbyte|char *sutf|STRLEN lutf
 Afp	|SV*	|mess		|const char* pat|...
 Ap	|SV*	|vmess		|const char* pat|va_list* args
 p	|void	|qerror		|SV* err
@@ -554,6 +553,9 @@ p	|void	|peep		|OP* o
 dopM	|PerlIO*|start_glob	|SV* pattern|IO *io
 #if defined(USE_5005THREADS)
 Ap	|struct perl_thread*	|new_struct_thread|struct perl_thread *t
+#endif
+#if defined(USE_REENTRANT_API)
+Ap	|void	|reentrant_init
 #endif
 Ap	|void	|call_atexit	|ATEXIT_t fn|void *ptr
 Apd	|I32	|call_argv	|const char* sub_name|I32 flags|char** argv

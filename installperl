@@ -395,6 +395,10 @@ if (! $versiononly && ! samepath($installbin, '.') && ($^O ne 'dos') && ! $Is_VM
 	# MPE doesn't support hard links, so use a symlink.
 	# We don't want another cloned copy.
         symlink($Config{perlpath}, "$installbin/perl$exe_ext");
+    } elsif ($^O eq 'vos') {
+	# VOS doesn't support hard links, so use a symlink.
+        symlink("$installbin/$perl_verbase$ver$exe_ext",
+                "$installbin/$perl$exe_ext");
     } else {
 	link("$installbin/$perl_verbase$ver$exe_ext",
 		"$installbin/$perl$exe_ext");
@@ -409,8 +413,8 @@ if (! $versiononly && ! samepath($installbin, '.') && ($^O ne 'dos') && ! $Is_VM
 if ($archname && ! samepath($installbin, '.') && ($^O ne 'dos') && ! $Is_VMS) {
     my $archperl = "$perl_verbase$ver-$Config{archname}$exe_ext";
     safe_unlink("$installbin/$archperl");
-    if ($^O eq 'mpeix') {
-	# MPE doesn't support hard links, so use a symlink.
+    if ($^O eq 'mpeix' || $^O eq 'vos') {
+	# MPE and VOS don't support hard links, so use a symlink.
 	# We don't want another cloned copy.
         symlink($Config{perlpath}, "$installbin/$archperl");
     } else {
@@ -480,6 +484,9 @@ sub script_alias {
     if ($^O eq 'dos' or $Is_VMS or $^O eq 'transit') {
 	copy("$installscript/$orig$scr_ext",
 	     "$installscript/$alias$scr_ext");
+    } elsif ($^O eq 'vos') {
+	symlink("$installscript/$orig$scr_ext",
+	        "$installscript/$alias$scr_ext");
     } else {
 	link("$installscript/$orig$scr_ext",
 	     "$installscript/$alias$scr_ext");

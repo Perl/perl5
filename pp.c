@@ -3147,9 +3147,9 @@ PP(pp_ord)
     U8 *s = (U8*)SvPVx(argsv, len);
     SV *tmpsv;
 
-    if (PL_encoding && !DO_UTF8(argsv)) {
+    if (PL_encoding && SvPOK(argsv) && !DO_UTF8(argsv)) {
         tmpsv = sv_2mortal(newSVsv(argsv));
-        s = (U8*)Perl_sv_recode_to_utf8(aTHX_ tmpsv, PL_encoding);
+        s = (U8*)sv_recode_to_utf8(tmpsv, PL_encoding);
         argsv = tmpsv;
     }
 
@@ -3184,7 +3184,7 @@ PP(pp_chr)
     *tmps = '\0';
     (void)SvPOK_only(TARG);
     if (PL_encoding)
-        Perl_sv_recode_to_utf8(aTHX_ TARG, PL_encoding);
+        sv_recode_to_utf8(TARG, PL_encoding);
     XPUSHs(TARG);
     RETURN;
 }
