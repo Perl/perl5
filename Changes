@@ -32,6 +32,230 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  8805] By: jhi                                   on 2001/02/14  03:29:01
+        Log: More MacOS Classic fixes from Chris Nandor.
+     Branch: perl
+	   ! doop.c lib/Cwd.pm
+____________________________________________________________________________
+[  8804] By: jhi                                   on 2001/02/14  03:18:35
+        Log: Don't skip too much of the locale error message if no environ array,
+             from Chris Nandor.
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[  8803] By: jhi                                   on 2001/02/14  03:14:14
+        Log: Duplicate environment for JPL so that JDK 1.2/1.3 don't get upset.
+     Branch: perl
+	   ! perl.c perl.h
+____________________________________________________________________________
+[  8802] By: jhi                                   on 2001/02/13  18:31:33
+        Log: AUTHORS update.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[  8801] By: jhi                                   on 2001/02/13  17:55:19
+        Log: Integrate change #8792 from mainline.
+             
+             Subject: buncha MacPerl patches for bleadperl
+             From: Chris Nandor <pudge@pobox.com>
+             Date: Tue, 13 Feb 2001 00:02:43 -0500
+             Message-Id: <p05010404b6ae6f85e07a@[10.0.1.177]>
+     Branch: maint-5.6/perl
+	  !> lib/AutoLoader.pm lib/AutoSplit.pm lib/ExtUtils/MakeMaker.pm
+	  !> lib/File/Basename.pm makedef.pl perl.c pp_ctl.c
+	  !> t/lib/basename.t toke.c util.h
+____________________________________________________________________________
+[  8800] By: jhi                                   on 2001/02/13  17:46:43
+        Log: When doing that Fpos_t used in PerlIO_getpos proto needs
+             to be forced to Off_t.
+             
+             Subject: [ID 20010201.009] 5.6.1-TRIAL2 sfio build fails
+             From: nick@ccl4.org
+             Date: Thu, 1 Feb 2001 12:01:04 +0000
+             Message-Id: <20010201120103.E11401@plum.flirble.org>
+     Branch: maint-5.6/perl
+	   ! iperlsys.h perlio.c
+____________________________________________________________________________
+[  8799] By: jhi                                   on 2001/02/13  16:52:51
+        Log: Duplex duplex hunk hunk.
+     Branch: maint-5.6/perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  8797] By: jhi                                   on 2001/02/13  14:52:04
+        Log: Subject: [PATCH perl@8773] integral ok lines for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Mon, 12 Feb 2001 11:05:25 -0600
+             Message-Id: <p04330104b6ac5dfe6d45@[172.16.52.1]>
+     Branch: perl
+	   ! t/lib/filehand.t t/lib/test-harness.t t/lib/texttabs.t
+____________________________________________________________________________
+[  8796] By: jhi                                   on 2001/02/13  14:36:47
+        Log: Subject: [ID 20010210.002] perldiag doesn't include the "Scalars leaked" message
+             From: simon.cozens@pembroke.oxford.ac.uk 
+             Date: Sat, 10 Feb 2001 17:57:02 +0000
+             Message-Id: <E14ReGc-0005Pk-00@pembro26.pmb.ox.ac.uk>
+             
+             Now it does include.
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[  8795] By: jhi                                   on 2001/02/13  14:30:11
+        Log: Sort the MANIFEST.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[  8794] By: jhi                                   on 2001/02/13  14:26:51
+        Log: Integrate change #8793 from mainline, FAQ updates.
+     Branch: maint-5.6/perl
+	  !> pod/perlfaq5.pod pod/perlfaq6.pod pod/perlfaq9.pod
+____________________________________________________________________________
+[  8793] By: jhi                                   on 2001/02/13  14:25:13
+        Log: FAQ updates from Chris Fedde <chris@fedde.littleton.co.us>.
+     Branch: perl
+	   ! pod/perlfaq5.pod pod/perlfaq6.pod pod/perlfaq9.pod
+____________________________________________________________________________
+[  8792] By: jhi                                   on 2001/02/13  14:22:50
+        Log: Subject: buncha MacPerl patches for bleadperl
+             From: Chris Nandor <pudge@pobox.com>
+             Date: Tue, 13 Feb 2001 00:02:43 -0500
+             Message-Id: <p05010404b6ae6f85e07a@[10.0.1.177]>
+     Branch: perl
+	   ! lib/AutoLoader.pm lib/AutoSplit.pm lib/ExtUtils/MakeMaker.pm
+	   ! lib/File/Basename.pm makedef.pl perl.c pp_ctl.c
+	   ! t/lib/basename.t toke.c util.h
+____________________________________________________________________________
+[  8791] By: jhi                                   on 2001/02/13  14:10:39
+        Log: Integrate change #8790 from mainline.
+             
+             environ array wrongly assumed in Perl_init_i18nl10n(),
+     Branch: maint-5.6/perl
+	  !> util.c
+____________________________________________________________________________
+[  8790] By: jhi                                   on 2001/02/13  14:06:15
+        Log: environ array wrongly assumed in Perl_init_i18nl10n(),
+             noticed by Chris Nandor in MacOS Classic.
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[  8789] By: jhi                                   on 2001/02/13  13:58:07
+        Log: Integrate changes #8373,8487,8544,8783 from mainline.
+             
+             Synchronize the EBCDIC platforms (os390,posix-bc,vmesa):
+             hints files, the dynaloading, assimilate ebcdic into util.c.
+     Branch: maint-5.6/perl
+	   - ebcdic.c
+	   ! MANIFEST hints/posix-bc.sh
+	  !> Makefile.SH embed.h embed.pl ext/DynaLoader/dl_dllload.xs
+	  !> handy.h hints/os390.sh hints/vmesa.sh installperl objXSUB.h
+	  !> perlapi.c proto.h util.c
+____________________________________________________________________________
+[  8788] By: alanbur                               on 2001/02/13  10:33:13
+        Log: Integrated changes from maint-5.6
+     Branch: maint-5.6/pureperl
+	  !> Makefile.SH README.vos hints/openbsd.sh pod/perlport.pod
+	  !> regcomp.c t/op/re_tests vos/Changes vos/build.cm
+	  !> vos/config.alpha.def vos/config.alpha.h vos/config.ga.def
+	  !> vos/config.ga.h vos/configure_perl.cm
+____________________________________________________________________________
+[  8787] By: jhi                                   on 2001/02/13  05:56:36
+        Log: Integrate change #8786 from maintperl, posix-bc byacc handling.
+     Branch: perl
+	  !> Makefile.SH
+____________________________________________________________________________
+[  8786] By: jhi                                   on 2001/02/13  05:54:34
+        Log: Subject: perl@8671 on posix-bc aka BS2000 Posix (small Patch included!)
+             From: Dorner Thomas <Thomas.Dorner@start.de>
+             Date: Mon, 12 Feb 2001 15:06:26 +0100
+             Message-ID: <6727B1DACFCDD311A757009027CA8D69010A8853@Ex02.inhouse.start.de>
+     Branch: maint-5.6/perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  8785] By: jhi                                   on 2001/02/13  05:29:04
+        Log: Integrate change #8781 from maintperl, OpenBSD hints update.
+     Branch: perl
+	  !> hints/openbsd.sh
+____________________________________________________________________________
+[  8784] By: jhi                                   on 2001/02/13  02:25:24
+        Log: Subject: [PATCH: perl@8773] small fixups to perlclib.pod
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Mon, 12 Feb 2001 18:23:09 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10102121821090.126445-100000@aspara.forte.com>
+     Branch: perl
+	   ! pod/perlclib.pod
+____________________________________________________________________________
+[  8783] By: jhi                                   on 2001/02/13  02:22:36
+        Log: Merge ebcdic.c (only one function, ebcdic_control()) into util.c.
+     Branch: perl
+	   - ebcdic.c
+	   ! MANIFEST embed.h embed.pl handy.h hints/os390.sh
+	   ! hints/posix-bc.sh hints/vmesa.sh objXSUB.h perlapi.c proto.h
+	   ! util.c
+____________________________________________________________________________
+[  8782] By: jhi                                   on 2001/02/13  02:00:07
+        Log: Add OpenBSD to the list of 5.6.1-okay platforms.
+     Branch: maint-5.6/perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[  8781] By: jhi                                   on 2001/02/13  01:58:44
+        Log: OpenBSD hints update for 5.6.1-TRIAL2 from Todd C. Miller.
+     Branch: maint-5.6/perl
+	   ! hints/openbsd.sh
+____________________________________________________________________________
+[  8780] By: jhi                                   on 2001/02/13  01:57:33
+        Log: Synchronize the regexp tests between maintperl and mainline.
+     Branch: maint-5.6/perl
+	  !> t/op/re_tests
+____________________________________________________________________________
+[  8779] By: jhi                                   on 2001/02/13  01:49:35
+        Log: Subject: Re: [ID 20010212.006] Core dump with /((?:hard|soft)cover)?/ 
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Tue, 13 Feb 2001 00:11:11 +0000
+             Message-Id: <200102130011.AAA14310@crypt.compulink.co.uk>
+     Branch: perl
+	   ! regcomp.c t/op/re_tests
+____________________________________________________________________________
+[  8778] By: jhi                                   on 2001/02/13  00:23:10
+        Log: Comments do not nest.
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[  8777] By: jhi                                   on 2001/02/13  00:17:54
+        Log: Subject: Re: [ID 20010212.006] Core dump with /((?:hard|soft)cover)?/ 
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Tue, 13 Feb 2001 00:11:11 +0000
+             Message-Id: <200102130011.AAA14310@crypt.compulink.co.uk>
+     Branch: maint-5.6/perl
+	   ! regcomp.c t/op/re_tests
+____________________________________________________________________________
+[  8776] By: jhi                                   on 2001/02/12  23:25:52
+        Log: Add VOS to the list of 5.6.1 known-to-be-working platforms.
+     Branch: maint-5.6/perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[  8775] By: jhi                                   on 2001/02/12  23:04:28
+        Log: VOS updates for 5.6-TRIAL2 from Paul Green.
+     Branch: maint-5.6/perl
+	   ! README.vos vos/Changes vos/build.cm vos/config.alpha.def
+	   ! vos/config.alpha.h vos/config.ga.def vos/config.ga.h
+	   ! vos/configure_perl.cm
+____________________________________________________________________________
+[  8774] By: jhi                                   on 2001/02/12  22:59:11
+        Log: Subject: Re: [patch] context for 'U' magic functions
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Mon, 12 Feb 2001 09:22:45 -0800 (PST)
+             Message-ID: <Pine.LNX.4.21.0102120919040.26437-100000@mako.covalent.net>
+             
+             plus the suggestion by Nick Ing-Simmons to name the macro
+             as PERL_MG_UFUNC to avoid namespace pollution, plus add
+             the advice by Doug for XS writers to perl.h
+     Branch: perl
+	   ! mg.c perl.h
+____________________________________________________________________________
+[  8773] By: jhi                                   on 2001/02/11  20:14:12
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  8772] By: jhi                                   on 2001/02/11  18:47:52
         Log: Subject: Re: [PATCH] pod/perlclib.pod - Replacements for C library functions
              From: Simon Cozens <simon@cozens.net>
