@@ -38,10 +38,10 @@ END
 EQ
 GE
 GT
+INIT
 LE
 LT
 NE
-RESTART
 abs
 accept
 alarm

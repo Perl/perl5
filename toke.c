@@ -2739,7 +2739,7 @@ yylex()
 	case KEY_DESTROY:
 	case KEY_BEGIN:
 	case KEY_END:
-	case KEY_RESTART:
+	case KEY_INIT:
 	    if (expect == XSTATE) {
 		s = bufptr;
 		goto really_sub;
@@ -3931,6 +3931,9 @@ I32 len;
     case 'h':
 	if (strEQ(d,"hex"))			return -KEY_hex;
 	break;
+    case 'I':
+	if (strEQ(d,"INIT"))			return KEY_INIT;
+	break;
     case 'i':
 	switch (len) {
 	case 2:
@@ -4069,9 +4072,6 @@ I32 len;
 	    if (strEQ(d,"qx"))			return KEY_qx;
 	}
 	else if (strEQ(d,"quotemeta"))		return -KEY_quotemeta;
-	break;
-    case 'R':
-	if (strEQ(d,"RESTART"))			return KEY_RESTART;
 	break;
     case 'r':
 	switch (len) {

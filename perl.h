@@ -1851,7 +1851,7 @@ IEXT HV *	Idebstash;	/* symbol table for perldb package */
 IEXT SV *	Icurstname;	/* name of current package */
 IEXT AV *	Ibeginav;	/* names of BEGIN subroutines */
 IEXT AV *	Iendav;		/* names of END subroutines */
-IEXT AV *	Irestartav;	/* names of RESTART subroutines */
+IEXT AV *	Iinitav;	/* names of INIT subroutines */
 IEXT HV *	Istrtab;	/* shared string table */
 
 /* memory management */

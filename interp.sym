@@ -59,6 +59,7 @@ formtarget
 gensym
 in_eval
 incgv
+initav
 inplace
 last_in_gv
 lastfd
@@ -110,7 +111,6 @@ perl_destruct_level
 preambled
 preambleav
 preprocess
-restartav
 restartop
 rightgv
 rs

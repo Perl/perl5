@@ -3510,10 +3510,10 @@ OP *block;
 	    av_store(endav, 0, (SV *)cv);
 	    GvCV(gv) = 0;
 	}
-	else if (strEQ(s, "RESTART") && !error_count) {
-	    if (!restartav)
-		restartav = newAV();
-	    av_push(restartav, SvREFCNT_inc(cv));
+	else if (strEQ(s, "INIT") && !error_count) {
+	    if (!initav)
+		initav = newAV();
+	    av_push(initav, SvREFCNT_inc(cv));
 	}
     }
 
@@ -3608,10 +3608,10 @@ char *filename;
 	    av_store(endav, 0, (SV *)cv);
 	    GvCV(gv) = 0;
 	}
-	else if (strEQ(s, "RESTART")) {
-	    if (!restartav)
-		restartav = newAV();
-	    av_push(restartav, (SV *)cv);
+	else if (strEQ(s, "INIT")) {
+	    if (!initav)
+		initav = newAV();
+	    av_push(initav, (SV *)cv);
 	}
     }
     else
