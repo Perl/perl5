@@ -39,10 +39,10 @@ case "$usemymalloc" in
     '')  usemymalloc='n' ;;
     esac
 
-# malloc wrap works
+# malloc wrap works, but not in vac-5, see later
 case "$usemallocwrap" in
-'') usemallocwrap='define' ;;
-esac
+    '') usemallocwrap='define' ;;
+    esac
 
 # Intuiting the existence of system calls under AIX is difficult,
 # at best; the safest technique is to find them empirically.
@@ -143,6 +143,9 @@ case "$cc" in
 
 	ccversion=`echo "$ccversion" | awk '{print $2}'`
 	# Redbooks state AIX-5 only supports vac-5.0.2.0 and up
+	case "$ccversion" in
+	    5*) usemallocwrap='n' ;; # panic in miniperl
+	    esac
 	;;
     esac
 

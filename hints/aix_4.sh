@@ -111,8 +111,7 @@ cc=${cc:-cc}
 ccflags="$ccflags -D_ALL_SOURCE -D_ANSI_C_SOURCE -D_POSIX_SOURCE"
 case "$cc" in
     *gcc*) ;;
-    *) ccflags="$ccflags -qmaxmem=-1 -qnoansialias"
-       usemallocwrap='n' ;;
+    *) ccflags="$ccflags -qmaxmem=-1 -qnoansialias" ;;
     esac
 nm_opt='-B'
 
@@ -204,6 +203,9 @@ EOF
 EOF
 regcomp_cflags='optimize='
 		;;
+	    esac
+	case "$ccversion" in
+	    5*) usemallocwrap='n' ;; # causes panic in miniperl
 	    esac
     esac
 # the required -bE:$installarchlib/CORE/perl.exp is added by

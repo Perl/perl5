@@ -21,17 +21,6 @@
 #include "perl.h"
 
 /*
- * The compiler on Concurrent CX/UX systems has a subtle bug which only
- * seems to show up when compiling pp.c - it generates the wrong double
- * precision constant value for (double)UV_MAX when used inline in the body
- * of the code below, so this makes a static variable up front (which the
- * compiler seems to get correct) and uses it in place of UV_MAX below.
- */
-#ifdef CXUX_BROKEN_CONSTANT_CONVERT
-static double UV_MAX_cxux = ((double)UV_MAX);
-#endif
-
-/*
  * Offset for integer pack/unpack.
  *
  * On architectures where I16 and I32 aren't really 16 and 32 bits,

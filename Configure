@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Mar 31 15:14:15 METDST 2004 [metaconfig 3.0 PL70]
+# Generated on Wed Apr 14 18:21:40 METDST 2004 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -2875,37 +2875,37 @@ ABYZ)
 	up='[:upper:]'
 	low='[:lower:]'
 	;;
-*)	# There is a discontinuity in EBCDIC between 'I' and 'J'
-        # (0xc9 and 0xd1), therefore that is a nice testing point.
-        if test "X$up" = X -o "X$low" = X; then
-	    case "`echo IJ | $tr '[I-J]' '[i-j]' 2>/dev/null`" in
-	    ij) up='[A-Z]'
-	        low='[a-z]'
+*)	# There is a discontinuity in EBCDIC between 'R' and 'S'
+	# (0xd9 and 0xe2), therefore that is a nice testing point.
+	if test "X$up" = X -o "X$low" = X; then
+	    case "`echo RS | $tr '[R-S]' '[r-s]' 2>/dev/null`" in
+	    rs) up='[A-Z]'
+		low='[a-z]'
 		;;
 	    esac
-        fi
+	fi
 	if test "X$up" = X -o "X$low" = X; then
-	    case "`echo IJ | $tr I-J i-j 2>/dev/null`" in
-	    ij) up='A-Z'
+	    case "`echo RS | $tr R-S r-s 2>/dev/null`" in
+	    rs) up='A-Z'
 		low='a-z'
 		;;
 	    esac
-        fi
+	fi
 	if test "X$up" = X -o "X$low" = X; then
-	    case "`echo IJ | od -x 2>/dev/null`" in
-	    *C9D1*|*c9d1*)
+	    case "`echo RS | od -x 2>/dev/null`" in
+	    *D9E2*|*d9e2*)
 		echo "Hey, this might be EBCDIC." >&4
 		if test "X$up" = X -o "X$low" = X; then
-		    case "`echo IJ | $tr '[A-IJ-RS-Z]' '[a-ij-rs-z]' 2>/dev/null`" in
-		    ij) up='[A-IJ-RS-Z]'
-		        low='[a-ij-rs-z]'
+		    case "`echo RS | $tr '[A-IJ-RS-Z]' '[a-ij-rs-z]' 2>/dev/null`" in
+		    rs) up='[A-IJ-RS-Z]'
+			low='[a-ij-rs-z]'
 			;;
 		    esac
 		fi
 		if test "X$up" = X -o "X$low" = X; then
-		    case "`echo IJ | $tr A-IJ-RS-Z a-ij-rs-z 2>/dev/null`" in
-		    ij) up='A-IJ-RS-Z'
-		        low='a-ij-rs-z'
+		    case "`echo RS | $tr A-IJ-RS-Z a-ij-rs-z 2>/dev/null`" in
+		    rs) up='A-IJ-RS-Z'
+			low='a-ij-rs-z'
 			;;
 		    esac
 		fi
@@ -2913,8 +2913,8 @@ ABYZ)
 	    esac
 	fi
 esac
-case "`echo IJ | $tr \"$up\" \"$low\" 2>/dev/null`" in
-ij)
+case "`echo RS | $tr \"$up\" \"$low\" 2>/dev/null`" in
+rs)
     echo "Using $up and $low to convert case." >&4
     ;;
 *)
