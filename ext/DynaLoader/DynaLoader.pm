@@ -27,14 +27,14 @@ sub import { }		# override import inherited from AutoLoader
 # enable debug/trace messages from DynaLoader perl code
 $dl_debug = $ENV{PERL_DL_DEBUG} || 0 unless defined $dl_debug;
 
-($dl_dlext, $dlsrc, $osname)
-	= @Config::Config{'dlext', 'dlsrc', 'osname'};
+($dl_dlext, $dlsrc)
+	= @Config::Config{'dlext', 'dlsrc'};
 
 # Some systems need special handling to expand file specifications
 # (VMS support by Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>)
 # See dl_expandspec() for more details. Should be harmless but
 # inefficient to define on systems that don't need it.
-$do_expand = $Is_VMS = $osname eq 'VMS';
+$do_expand = $Is_VMS = $^O eq 'VMS';
 
 @dl_require_symbols = ();       # names of symbols we need
 @dl_resolve_using   = ();       # names of files to link with
@@ -125,7 +125,7 @@ sub bootstrap {
     my $bs = $file;
     $bs =~ s/(\.\w+)?$/\.bs/; # look for .bs 'beside' the library
     if (-s $bs) { # only read file if it's not empty
-        print STDERR "BS: $bs ($osname, $dlsrc)\n" if $dl_debug;
+        print STDERR "BS: $bs ($^O, $dlsrc)\n" if $dl_debug;
         eval { do $bs; };
         warn "$bs: $@\n" if $@;
     }
@@ -173,6 +173,7 @@ sub dl_findfile {
     my (@args) = @_;
     my (@dirs,  $dir);   # which directories to search
     my (@found);         # full paths to real files we have found
+    my $dl_ext= $Config::Config{'dlext'}; # suffix for perl extensions
     my $dl_so = $Config::Config{'so'};	# suffix for shared libraries
 
     print STDERR "dl_findfile(@args)\n" if $dl_debug;
@@ -211,9 +212,9 @@ sub dl_findfile {
             push(@names,"lib$_.a");
         } else {                # Umm, a bare name. Try various alternatives:
             # these should be ordered with the most likely first
+            push(@names,"$_.$dl_ext")    unless m/\.$dl_ext$/o;
             push(@names,"$_.$dl_so")     unless m/\.$dl_so$/o;
             push(@names,"lib$_.$dl_so")  unless m:/:;
-            push(@names,"$_.o")          unless m/\.(o|$dl_so)$/o;
             push(@names,"$_.a")          if !m/\.a$/ and $dlsrc eq "dl_dld.xs";
             push(@names, $_);
         }
@@ -258,7 +259,7 @@ sub dl_expandspec {
 
     my $file = $spec; # default output to input
 
-    if ($osname eq 'VMS') { # dl_expandspec should be defined in dl_vms.xs
+    if ($Is_VMS) { # dl_expandspec should be defined in dl_vms.xs
 	Carp::croak("dl_expandspec: should be defined in XS file!\n");
     } else {
 	return undef unless -f $file;
