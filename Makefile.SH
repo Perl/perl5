@@ -314,19 +314,11 @@ utilities:	miniperl lib/Config.pm $(plextract) FORCE
 FORCE:
 	@sh -c true
 !NO!SUBS!
-$spitshell >>Makefile <<!GROK!THIS!
 
-!NO!SUBS!
 $spitshell >>Makefile <<!GROK!THIS!
 opmini\$(OBJ_EXT): op.c config.h
 	\$(RMS) opmini.c
 	\$(LNS) op.c opmini.c
-	\$(CCCMD) \$(PLDLFLAGS) $DPERL_EXTERNAL_GLOB opmini.c
-	\$(RMS) opmini.c
-
-opmini\$(OBJ_EXT): op.c config.h
-	\$(RMS) opmini.c
-	\$(CPS) op.c opmini.c
 	\$(CCCMD) \$(PLDLFLAGS) $DPERL_EXTERNAL_GLOB opmini.c
 	\$(RMS) opmini.c
 
