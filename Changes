@@ -28,6 +28,49 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 21101] By: jhi                                   on 2003/09/08  19:39:43
+        Log: Integrate:
+             [ 21100]
+             Bad export.
+     Branch: maint-5.8/perl
+	  !> lib/Hash/Util.t
+____________________________________________________________________________
+[ 21099] By: jhi                                   on 2003/09/08  19:29:58
+        Log: Integrate:
+             [ 21093]
+             Slightly more intelligent paranoia.
+             
+             [ 21094]
+             Subject: [patch] AUTHORS
+             From: Juerd <juerd@cpan.org>
+             Date: Mon, 8 Sep 2003 08:42:13 +0200
+             Message-ID: <20030908064213.GC23461@c3.convolution.nl>
+             
+             [ 21095]
+             Mac OS X "last resort" recipe.
+             
+             [ 21096]
+             Scott A. Crosby believes in not disclosing
+             any more information than necessary: therefore
+             instead of hash_seed() we have now hashes_random().
+             
+             [ 21097]
+             Try to make the de0.t test more robust.
+             The test is so flakey (too many external things influencing
+             the result) that I'm likely to leave it out from the maint.
+             
+             [ 21098]
+             The IPC::Open3 is just too unreliable for this task.
+     Branch: maint-5.8/perl
+	  !> AUTHORS README.macosx lib/Hash/Util.pm lib/Hash/Util.t
+	  !> lib/perl5db/de0.t pod/perldiag.pod pod/perlrun.pod universal.c
+	  !> util.c
+____________________________________________________________________________
+[ 21092] By: jhi                                   on 2003/09/08  14:19:55
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 21091] By: jhi                                   on 2003/09/08  14:10:40
         Log: Integrate:
              [ 21090]
