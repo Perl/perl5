@@ -872,6 +872,15 @@ S_force_next(pTHX_ I32 type)
     }
 }
 
+STATIC SV *
+S_newSV_maybe_utf8(pTHX_ const char *start, STRLEN len)
+{
+    SV *sv = newSVpvn(start,len);
+    if (UTF && !IN_BYTES && is_utf8_string((U8*)start, len))
+	SvUTF8_on(sv);
+    return sv;
+}
+
 /*
  * S_force_word
  * When the lexer knows the next thing is a word (for instance, it has
@@ -911,10 +920,10 @@ S_force_word(pTHX_ register char *start, int token, int check_keyword, int allow
 		PL_expect = XOPERATOR;
 	    }
 	}
-	PL_nextval[PL_nexttoke].opval = (OP*)newSVOP(OP_CONST,0, newSVpv(PL_tokenbuf,0));
+	PL_nextval[PL_nexttoke].opval
+	    = (OP*)newSVOP(OP_CONST,0,
+			   S_newSV_maybe_utf8(aTHX_ PL_tokenbuf, len));
 	PL_nextval[PL_nexttoke].opval->op_private |= OPpCONST_BARE;
-	if (UTF && !IN_BYTES && is_utf8_string((U8*)PL_tokenbuf, len))
-	    SvUTF8_on(((SVOP*)PL_nextval[PL_nexttoke].opval)->op_sv);
 	force_next(token);
     }
     return s;
@@ -4010,10 +4019,10 @@ Perl_yylex(pTHX)
 	/* Is this a word before a => operator? */
 	if (*d == '=' && d[1] == '>') {
 	    CLINE;
-	    yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpv(PL_tokenbuf,0));
+	    yylval.opval
+		= (OP*)newSVOP(OP_CONST, 0,
+			       S_newSV_maybe_utf8(aTHX_ PL_tokenbuf, len));
 	    yylval.opval->op_private = OPpCONST_BARE;
-	    if (UTF && !IN_BYTES && is_utf8_string((U8*)PL_tokenbuf, len))
-	      SvUTF8_on(((SVOP*)yylval.opval)->op_sv);
 	    TERM(WORD);
 	}
 
@@ -6330,6 +6339,9 @@ S_new_constant(pTHX_ char *s, STRLEN len, const char *key, SV *sv, SV *pv,
     return res;
 }
 
+/* Returns a NUL terminated string, with the length of the string written to
+   *slp
+   */
 STATIC char *
 S_scan_word(pTHX_ register char *s, char *dest, STRLEN destlen, int allow_package, STRLEN *slp)
 {
