@@ -178,7 +178,8 @@ if (! $versiononly && ! samepath($installbin, '.') && ($^O ne 'dos')) {
 
 $mainperl_is_instperl = 0;
 
-if (!$versiononly && !$nonono && $^O ne 'MSWin32' && -t STDIN && -t STDERR
+if ($Config{installusrbinperl} eq 'define' &&
+    !$versiononly && !$nonono && $^O ne 'MSWin32' && -t STDIN && -t STDERR
 	&& -w $mainperldir && ! samepath($mainperldir, $installbin)) {
     local($usrbinperl)	= "$mainperldir/perl$exe_ext";
     local($instperl)	= "$installbin/perl$exe_ext";
