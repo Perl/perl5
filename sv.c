@@ -4663,17 +4663,23 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
 
 	if (SvUTF8(sv1)) {
 	    (void)utf8_to_bytes((U8*)(pv1 = savepvn(pv1, cur1)), &cur1);
-	    if (cur1 < 0) {
-		Safefree(pv1);
-		return 0;
+	    {
+		IV scur1 = cur1;
+		if (scur1 < 0) {
+		    Safefree(pv1);
+		    return 0;
+		}
 	    }
 	    pv1tmp = TRUE;
 	}
 	else {
 	    (void)utf8_to_bytes((U8*)(pv2 = savepvn(pv2, cur2)), &cur2);
-	    if (cur2 < 0) {
-		Safefree(pv2);
-		return 0;
+	    {
+		IV scur2 = cur2;
+		if (scur2 < 0) {
+		    Safefree(pv2);
+		    return 0;
+		}
 	    }
 	    pv2tmp = TRUE;
 	}
