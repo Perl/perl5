@@ -1,0 +1,65 @@
+=head1 NAME
+
+perldelta - what's new for perl v5.8.0
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.6 release and this one.
+
+=head1 Core Enhancements
+
+=head1 Modules and Pragmata
+
+=head1 Utility Changes
+
+=head1 Improved Documentation
+
+=head1 Performance enhancements
+
+=head1 Installation and Configuration Improvements
+
+=head1 Platform specific changes
+
+=head1 Significant bug fixes
+
+=head1 New or Changed Diagnostics
+
+=head1 New tests
+
+=head1 Incompatible Changes
+
+=head1 Known Problems
+
+=head1 Obsolete Diagnostics
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the
+articles recently posted to the comp.lang.perl.misc newsgroup.
+There may also be information at http://www.perl.com/perl/, the Perl
+Home Page.
+
+If you believe you have an unreported bug, please run the B<perlbug>
+program included with your release.  Be sure to trim your bug down
+to a tiny but sufficient test case.  Your bug report, along with the
+output of C<perl -V>, will be sent off to perlbug@perl.com to be
+analysed by the Perl porting team.
+
+=head1 SEE ALSO
+
+The F<Changes> file for exhaustive details on what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=head1 HISTORY
+
+Written by Gurusamy Sarathy <F<gsar@activestate.com>>, with many
+contributions from The Perl Porters.
+
+Send omissions or corrections to <F<perlbug@perl.com>>.
+
+=cut
