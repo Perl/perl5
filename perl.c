@@ -115,6 +115,9 @@ PerlInterpreter *
 perl_alloc(void)
 {
     PerlInterpreter *my_perl;
+#ifdef USE_5005THREADS
+    dTHX;
+#endif
 
     /* New() needs interpreter, so call malloc() instead */
     my_perl = (PerlInterpreter*)PerlMem_malloc(sizeof(PerlInterpreter));
