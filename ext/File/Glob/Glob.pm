@@ -19,6 +19,7 @@ require AutoLoader;
     bsd_glob
     glob
     GLOB_ABEND
+    GLOB_ALPHASORT
     GLOB_ALTDIRFUNC
     GLOB_BRACE
     GLOB_CSH
@@ -37,6 +38,7 @@ require AutoLoader;
 %EXPORT_TAGS = (
     'glob' => [ qw(
         GLOB_ABEND
+	GLOB_ALPHASORT
         GLOB_ALTDIRFUNC
         GLOB_BRACE
         GLOB_CSH
@@ -104,7 +106,13 @@ sub GLOB_ERROR {
     return constant('GLOB_ERROR', 0);
 }
 
-sub GLOB_CSH () { GLOB_BRACE() | GLOB_NOMAGIC() | GLOB_QUOTE() | GLOB_TILDE() }
+sub GLOB_CSH () {
+    GLOB_BRACE()
+	| GLOB_NOMAGIC()
+	| GLOB_QUOTE()
+	| GLOB_TILDE()
+	| GLOB_ALPHASORT()
+}
 
 $DEFAULT_FLAGS = GLOB_CSH();
 if ($^O =~ /^(?:MSWin32|VMS|os2|dos|riscos|MacOS)$/) {
@@ -288,7 +296,7 @@ Expand patterns that start with '~' to user name home directories.
 =item C<GLOB_CSH>
 
 For convenience, C<GLOB_CSH> is a synonym for
-C<GLOB_BRACE | GLOB_NOMAGIC | GLOB_QUOTE | GLOB_TILDE>.
+C<GLOB_BRACE | GLOB_NOMAGIC | GLOB_QUOTE | GLOB_TILDE | GLOB_ALPHASORT>.
 
 =back
 
@@ -296,6 +304,18 @@ The POSIX provided C<GLOB_APPEND>, C<GLOB_DOOFFS>, and the FreeBSD
 extensions C<GLOB_ALTDIRFUNC>, and C<GLOB_MAGCHAR> flags have not been
 implemented in the Perl version because they involve more complex
 interaction with the underlying C structures.
+
+The following flag has been added in the Perl implementation for
+csh compatibility:
+
+=over 4
+
+=item C<GLOB_ALPHASORT>
+
+If C<GLOB_NOSORT> is not in effect, sort filenames is alphabetical
+order (case does not matter) rather than in ASCII order.
+
+=back
 
 =head1 DIAGNOSTICS
 
