@@ -3013,9 +3013,10 @@ specified, it gives the name of a subroutine that returns an integer
 less than, equal to, or greater than 0, depending on how the elements
 of the array are to be ordered.  (The C<E<lt>=E<gt>> and C<cmp>
 operators are extremely useful in such routines.)  SUBNAME may be a
-scalar variable name, in which case the value provides the name of the
-subroutine to use.  In place of a SUBNAME, you can provide a BLOCK as
-an anonymous, in-line sort subroutine.
+scalar variable name (unsubscripted), in which case the value provides
+the name of (or a reference to) the actual subroutine to use.  In place
+of a SUBNAME, you can provide a BLOCK as an anonymous, in-line sort
+subroutine.
 
 In the interests of efficiency the normal calling code for subroutines is
 bypassed, with the following effects: the subroutine may not be a
