@@ -33,6 +33,16 @@ sub B::BINOP::debug {
     printf "\top_last\t\t0x%x\n", ${$op->last};
 }
 
+sub B::LOOP::debug {
+    my ($op) = @_;
+    $op->B::BINOP::debug();
+    printf <<'EOT', ${$op->redoop}, ${$op->nextop}, ${$op->lastop};
+       op_redoop       0x%x
+       op_nextop       0x%x
+       op_lastop       0x%x
+EOT
+}
+
 sub B::LOGOP::debug {
     my ($op) = @_;
     $op->B::UNOP::debug();
