@@ -589,12 +589,6 @@ local copy, I<not> the global copy.
 
 =item 4.
 
-The only flag specified this time is G_DISCARD. Because we are passing 2
-parameters to the Perl subroutine this time, we have not specified
-G_NOARGS.
-
-=item 5.
-
 Next, we come to XPUSHs. This is where the parameters actually get
 pushed onto the stack. In this case we are pushing a string and an
 integer.
@@ -602,7 +596,7 @@ integer.
 See L<perlguts/"XSUBs and the Argument Stack"> for details
 on how the XPUSH macros work.
 
-=item 6.
+=item 5.
 
 Because we created temporary values (by means of sv_2mortal() calls)
 we will have to tidy up the Perl stack and dispose of mortal SVs.
@@ -632,10 +626,12 @@ to limit the scope of local variables.
 See the section I<Using Perl to dispose of temporaries> for details of
 an alternative to using these macros.
 
-=item 7.
+=item 6.
 
-Finally, I<LeftString> can now be called via the I<call_pv>
-function.
+Finally, I<LeftString> can now be called via the I<call_pv> function.
+The only flag specified this time is G_DISCARD. Because we are passing
+2 parameters to the Perl subroutine this time, we have not specified
+G_NOARGS.
 
 =back
 

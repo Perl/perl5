@@ -345,7 +345,7 @@ INST_LIB	= $(INST_TOP)$(INST_VER)\lib
 INST_ARCHLIB	= $(INST_LIB)$(INST_ARCH)
 INST_COREDIR	= $(INST_ARCHLIB)\CORE
 INST_POD	= $(INST_LIB)\pod
-INST_HTML	= $(INST_POD)\html
+INST_HTML	= $(INST_TOP)$(INST_VER)\html
 
 #
 # Programs to compile, build .lib files and link
@@ -998,13 +998,20 @@ utils: $(PERLEXE) $(X2P)
 	cd ..\utils
 	$(MAKE) PERL=$(MINIPERL)
 	cd ..\pod
+	copy ..\README.aix .\perlaix.pod
 	copy ..\README.amiga .\perlamiga.pod
 	copy ..\README.cygwin .\perlcygwin.pod
 	copy ..\README.dos .\perldos.pod
+	copy ..\README.epoc .\perlepoc.pod
 	copy ..\README.hpux .\perlhpux.pod
 	copy ..\README.machten .\perlmachten.pod
 	copy ..\README.os2 .\perlos2.pod
+	copy ..\README.os390 .\perlos390.pod
+	copy ..\README.vmesa .\perlvmesa.pod
+	copy ..\README.bs2000 .\perlbs2000.pod
+	copy ..\README.solaris .\perlsolaris.pod
 	copy ..\vms\perlvms.pod .\perlvms.pod
+	copy ..\README.vos ..\perlvos.pod
 	copy ..\README.win32 .\perlwin32.pod
 	$(MAKE) -f ..\win32\pod.mak converters
 	cd ..\win32

@@ -664,7 +664,7 @@ sub Re {
 #
 sub Im {
 	my ($z, $Im) = @_;
-	return $z unless ref $z;
+	return 0 unless ref $z;
 	if (defined $Im) {
 	    $z->{'cartesian'} = [ ${$z->cartesian}[0], $Im ];
 	    $z->{c_dirty} = 0;
