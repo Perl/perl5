@@ -59,6 +59,10 @@ static void sv_mortalgrow _((void));
 static void sv_unglob _((SV* sv));
 static void sv_check_thinkfirst _((SV *sv));
 
+#ifndef PURIFY
+static void *my_safemalloc(MEM_SIZE size);
+#endif
+
 typedef void (*SVFUNC) _((SV*));
 
 #ifdef PURIFY
@@ -576,8 +580,7 @@ more_xpv(void)
 #  define my_safefree(s) free(s)
 #else
 static void* 
-my_safemalloc(size)
-    MEM_SIZE size;
+my_safemalloc(MEM_SIZE size)
 {
     char *p;
     New(717, p, size, char);
@@ -1135,12 +1138,26 @@ sv_setiv(register SV *sv, IV i)
 }
 
 void
+sv_setiv_mg(register SV *sv, IV i)
+{
+    sv_setiv(sv,i);
+    SvSETMAGIC(sv);
+}
+
+void
 sv_setuv(register SV *sv, UV u)
 {
     if (u <= IV_MAX)
 	sv_setiv(sv, u);
     else
 	sv_setnv(sv, (double)u);
+}
+
+void
+sv_setuv_mg(register SV *sv, UV u)
+{
+    sv_setuv(sv,u);
+    SvSETMAGIC(sv);
 }
 
 void
@@ -1185,6 +1202,13 @@ sv_setnv(register SV *sv, double num)
     SvNVX(sv) = num;
     (void)SvNOK_only(sv);			/* validate number */
     SvTAINT(sv);
+}
+
+void
+sv_setnv_mg(register SV *sv, double num)
+{
+    sv_setnv(sv,num);
+    SvSETMAGIC(sv);
 }
 
 static void
@@ -2166,6 +2190,13 @@ sv_setsv(SV *dstr, register SV *sstr)
 }
 
 void
+sv_setsv_mg(SV *dstr, register SV *sstr)
+{
+    sv_setsv(dstr,sstr);
+    SvSETMAGIC(dstr);
+}
+
+void
 sv_setpvn(register SV *sv, register const char *ptr, register STRLEN len)
 {
     assert(len >= 0);  /* STRLEN is probably unsigned, so this may
@@ -2187,6 +2218,13 @@ sv_setpvn(register SV *sv, register const char *ptr, register STRLEN len)
     *SvEND(sv) = '\0';
     (void)SvPOK_only(sv);		/* validate pointer */
     SvTAINT(sv);
+}
+
+void
+sv_setpvn_mg(register SV *sv, register const char *ptr, register STRLEN len)
+{
+    sv_setpvn(sv,ptr,len);
+    SvSETMAGIC(sv);
 }
 
 void
@@ -2214,6 +2252,13 @@ sv_setpv(register SV *sv, register const char *ptr)
 }
 
 void
+sv_setpv_mg(register SV *sv, register const char *ptr)
+{
+    sv_setpv(sv,ptr);
+    SvSETMAGIC(sv);
+}
+
+void
 sv_usepvn(register SV *sv, register char *ptr, register STRLEN len)
 {
     sv_check_thinkfirst(sv);
@@ -2232,6 +2277,13 @@ sv_usepvn(register SV *sv, register char *ptr, register STRLEN len)
     *SvEND(sv) = '\0';
     (void)SvPOK_only(sv);		/* validate pointer */
     SvTAINT(sv);
+}
+
+void
+sv_usepvn_mg(register SV *sv, register char *ptr, register STRLEN len)
+{
+    sv_usepvn_mg(sv,ptr,len);
+    SvSETMAGIC(sv);
 }
 
 static void
@@ -2291,6 +2343,13 @@ sv_catpvn(register SV *sv, register char *ptr, register STRLEN len)
 }
 
 void
+sv_catpvn_mg(register SV *sv, register char *ptr, register STRLEN len)
+{
+    sv_catpvn(sv,ptr,len);
+    SvSETMAGIC(sv);
+}
+
+void
 sv_catsv(SV *dstr, register SV *sstr)
 {
     char *s;
@@ -2299,6 +2358,13 @@ sv_catsv(SV *dstr, register SV *sstr)
 	return;
     if (s = SvPV(sstr, len))
 	sv_catpvn(dstr,s,len);
+}
+
+void
+sv_catsv_mg(SV *dstr, register SV *sstr)
+{
+    sv_catsv(dstr,sstr);
+    SvSETMAGIC(dstr);
 }
 
 void
@@ -2319,6 +2385,13 @@ sv_catpv(register SV *sv, register char *ptr)
     SvCUR(sv) += len;
     (void)SvPOK_only(sv);		/* validate pointer */
     SvTAINT(sv);
+}
+
+void
+sv_catpv_mg(register SV *sv, register char *ptr)
+{
+    sv_catpv_mg(sv,ptr);
+    SvSETMAGIC(sv);
 }
 
 SV *
@@ -2643,37 +2716,37 @@ sv_clear(register SV *sv)
 	if (defstash) {		/* Still have a symbol table? */
 	    djSP;
 	    GV* destructor;
+	    HV* stash;
+	    SV ref;
 
-	    ENTER;
-	    SAVEFREESV(SvSTASH(sv));
+	    Zero(&ref, 1, SV);
+	    sv_upgrade(&ref, SVt_RV);
+	    SvROK_on(&ref);
+	    SvREADONLY_on(&ref);	/* DESTROY() could be naughty */
+	    SvREFCNT(&ref) = 1;
 
-	    destructor = gv_fetchmethod(SvSTASH(sv), "DESTROY");
-	    if (destructor) {
-		SV ref;
+	    do {
+		stash = SvSTASH(sv);
+		destructor = gv_fetchmethod(SvSTASH(sv), "DESTROY");
+		if (destructor) {
+		    ENTER;
+		    SvRV(&ref) = SvREFCNT_inc(sv);
+		    EXTEND(SP, 2);
+		    PUSHMARK(SP);
+		    PUSHs(&ref);
+		    PUTBACK;
+		    perl_call_sv((SV*)GvCV(destructor),
+				 G_DISCARD|G_EVAL|G_KEEPERR);
+		    SvREFCNT(sv)--;
+		    LEAVE;
+		}
+	    } while (SvOBJECT(sv) && SvSTASH(sv) != stash);
 
-		Zero(&ref, 1, SV);
-		sv_upgrade(&ref, SVt_RV);
-		SvRV(&ref) = SvREFCNT_inc(sv);
-		SvROK_on(&ref);
-		SvREFCNT(&ref) = 1;	/* Fake, but otherwise
-					   creating+destructing a ref
-					   leads to disaster. */
-
-		EXTEND(SP, 2);
-		PUSHMARK(SP);
-		PUSHs(&ref);
-		PUTBACK;
-		perl_call_sv((SV*)GvCV(destructor),
-			     G_DISCARD|G_EVAL|G_KEEPERR);
-		del_XRV(SvANY(&ref));
-		SvREFCNT(sv)--;
-	    }
-
-	    LEAVE;
+	    del_XRV(SvANY(&ref));
 	}
-	else
-	    SvREFCNT_dec(SvSTASH(sv));
+
 	if (SvOBJECT(sv)) {
+	    SvREFCNT_dec(SvSTASH(sv));	/* possibly of changed persuasion */
 	    SvOBJECT_off(sv);	/* Curse the object. */
 	    if (SvTYPE(sv) != SVt_PVIO)
 		--sv_objcount;	/* XXX Might want something more general */
@@ -4086,6 +4159,14 @@ sv_setpviv(SV *sv, IV iv)
     SvCUR(sv) = p - SvPVX(sv);
 }
 
+
+void
+sv_setpviv_mg(SV *sv, IV iv)
+{
+    sv_setpviv(sv,iv);
+    SvSETMAGIC(sv);
+}
+
 #ifdef I_STDARG
 void
 sv_setpvf(SV *sv, const char* pat, ...)
@@ -4108,6 +4189,30 @@ sv_setpvf(sv, pat, va_alist)
     va_end(args);
 }
 
+
+#ifdef I_STDARG
+void
+sv_setpvf_mg(SV *sv, const char* pat, ...)
+#else
+/*VARARGS0*/
+void
+sv_setpvf_mg(sv, pat, va_alist)
+    SV *sv;
+    const char *pat;
+    va_dcl
+#endif
+{
+    va_list args;
+#ifdef I_STDARG
+    va_start(args, pat);
+#else
+    va_start(args);
+#endif
+    sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
+    va_end(args);
+    SvSETMAGIC(sv);
+}
+
 #ifdef I_STDARG
 void
 sv_catpvf(SV *sv, const char* pat, ...)
@@ -4128,6 +4233,29 @@ sv_catpvf(sv, pat, va_alist)
 #endif
     sv_vcatpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
     va_end(args);
+}
+
+#ifdef I_STDARG
+void
+sv_catpvf_mg(SV *sv, const char* pat, ...)
+#else
+/*VARARGS0*/
+void
+sv_catpvf_mg(sv, pat, va_alist)
+    SV *sv;
+    const char *pat;
+    va_dcl
+#endif
+{
+    va_list args;
+#ifdef I_STDARG
+    va_start(args, pat);
+#else
+    va_start(args);
+#endif
+    sv_vcatpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
+    va_end(args);
+    SvSETMAGIC(sv);
 }
 
 void

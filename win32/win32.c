@@ -35,6 +35,12 @@
 #include <string.h>
 #include <stdarg.h>
 #include <float.h>
+#include <time.h>
+#ifdef _MSC_VER
+#include <sys/utime.h>
+#else
+#include <utime.h>
+#endif
 
 #ifdef __GNUC__
 /* Mingw32 defaults to globing command line 
@@ -53,6 +59,7 @@ static long		tokenize(char *str, char **dest, char ***destv);
 static int		do_spawn2(char *cmd, int exectype);
 static BOOL		has_redirection(char *ptr);
 static long		filetime_to_clock(PFILETIME ft);
+static BOOL		filetime_from_time(PFILETIME ft, time_t t);
 
 char *	w32_perlshell_tokens = Nullch;
 char **	w32_perlshell_vec;
@@ -469,7 +476,10 @@ opendir(char *filename)
 
     /* check to see if filename is a directory */
     if (win32_stat(filename, &sbuf) < 0 || (sbuf.st_mode & S_IFDIR) == 0) {
-	return NULL;
+	/* CRT is buggy on sharenames, so make sure it really isn't */
+	DWORD r = GetFileAttributes(filename);
+	if (r == 0xffffffff || !(r & FILE_ATTRIBUTE_DIRECTORY))
+	    return NULL;
     }
 
     /* get the file system characteristics */
@@ -798,6 +808,68 @@ win32_times(struct tms *timebuf)
 	timebuf->tms_cstime = 0;
     }
     return 0;
+}
+
+/* fix utime() so it works on directories in NT
+ * thanks to Jan Dubois <jan.dubois@ibm.net>
+ */
+static BOOL
+filetime_from_time(PFILETIME pFileTime, time_t Time)
+{
+    struct tm *pTM = gmtime(&Time);
+    SYSTEMTIME SystemTime;
+
+    if (pTM == NULL)
+	return FALSE;
+
+    SystemTime.wYear   = pTM->tm_year + 1900;
+    SystemTime.wMonth  = pTM->tm_mon + 1;
+    SystemTime.wDay    = pTM->tm_mday;
+    SystemTime.wHour   = pTM->tm_hour;
+    SystemTime.wMinute = pTM->tm_min;
+    SystemTime.wSecond = pTM->tm_sec;
+    SystemTime.wMilliseconds = 0;
+
+    return SystemTimeToFileTime(&SystemTime, pFileTime);
+}
+
+DllExport int
+win32_utime(const char *filename, struct utimbuf *times)
+{
+    HANDLE handle;
+    FILETIME ftCreate;
+    FILETIME ftAccess;
+    FILETIME ftWrite;
+    struct utimbuf TimeBuffer;
+
+    int rc = utime(filename,times);
+    /* EACCES: path specifies directory or readonly file */
+    if (rc == 0 || errno != EACCES /* || !IsWinNT() */)
+	return rc;
+
+    if (times == NULL) {
+	times = &TimeBuffer;
+	time(&times->actime);
+	times->modtime = times->actime;
+    }
+
+    /* This will (and should) still fail on readonly files */
+    handle = CreateFile(filename, GENERIC_READ | GENERIC_WRITE,
+			FILE_SHARE_READ | FILE_SHARE_DELETE, NULL,
+			OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+    if (handle == INVALID_HANDLE_VALUE)
+	return rc;
+
+    if (GetFileTime(handle, &ftCreate, &ftAccess, &ftWrite) &&
+	filetime_from_time(&ftAccess, times->actime) &&
+	filetime_from_time(&ftWrite, times->modtime) &&
+	SetFileTime(handle, &ftCreate, &ftAccess, &ftWrite))
+    {
+	rc = 0;
+    }
+
+    CloseHandle(handle);
+    return rc;
 }
 
 DllExport int
@@ -1885,14 +1957,21 @@ XS(w32_GetShortPathName)
     XSRETURN(1);
 }
 
+static
+XS(w32_Sleep)
+{
+    dXSARGS;
+    if (items != 1)
+	croak("usage: Win32::Sleep($milliseconds)");
+    Sleep(SvIV(ST(0)));
+    XSRETURN_YES;
+}
+
 void
 Perl_init_os_extras()
 {
     char *file = __FILE__;
     dXSUB_SYS;
-
-    /* XXX should be removed after checking with Nick */
-    newXS("Win32::GetCurrentDirectory", w32_GetCwd, file);
 
     /* these names are Activeware compatible */
     newXS("Win32::GetCwd", w32_GetCwd, file);
@@ -1910,6 +1989,7 @@ Perl_init_os_extras()
     newXS("Win32::Spawn", w32_Spawn, file);
     newXS("Win32::GetTickCount", w32_GetTickCount, file);
     newXS("Win32::GetShortPathName", w32_GetShortPathName, file);
+    newXS("Win32::Sleep", w32_Sleep, file);
 
     /* XXX Bloat Alert! The following Activeware preloads really
      * ought to be part of Win32::Sys::*, so they're not included
@@ -1962,11 +2042,3 @@ win32_strip_return(SV *sv)
 }
 
 #endif
-
-
-
-
-
-
-
-
