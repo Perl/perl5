@@ -2314,7 +2314,7 @@ int
 PerlIO_getpos(PerlIO *f, Fpos_t *pos)
 {
  *pos = PerlIO_tell(f);
- return 0;
+ return *pos == -1 ? -1 : 0;
 }
 #else
 #ifndef PERLIO_IS_STDIO
@@ -2359,7 +2359,8 @@ PerlIO_vsprintf(char *s, int n, const char *fmt, va_list ap)
    if (strlen(s) >= (STRLEN)n)
     {
      dTHX;
-     PerlIO_puts(Perl_error_log,"panic: sprintf overflow - memory corrupted!\n");
+     (void)PerlIO_puts(Perl_error_log,
+		       "panic: sprintf overflow - memory corrupted!\n");
      my_exit(1);
     }
   }

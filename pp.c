@@ -1476,31 +1476,50 @@ PP(pp_complement)
 	tmps = (U8*)SvPV_force(TARG, len);
 	anum = len;
 	if (SvUTF8(TARG)) {
-	  /* Calculate exact length, let's not estimate */
+	  /* Calculate exact length, let's not estimate. */
 	  STRLEN targlen = 0;
 	  U8 *result;
 	  U8 *send;
 	  STRLEN l;
+	  UV nchar = 0;
+	  UV nwide = 0;
 
 	  send = tmps + len;
 	  while (tmps < send) {
 	    UV c = utf8_to_uv(tmps, 0, &l, UTF8_ALLOW_ANY);
 	    tmps += UTF8SKIP(tmps);
 	    targlen += UNISKIP(~c);
+	    nchar++;
+	    if (c > 0xff)
+		nwide++;
 	  }
 
 	  /* Now rewind strings and write them. */
 	  tmps -= len;
-	  Newz(0, result, targlen + 1, U8);
-	  while (tmps < send) {
-	    UV c = utf8_to_uv(tmps, 0, &l, UTF8_ALLOW_ANY);
-	    tmps += UTF8SKIP(tmps);
-	    result = uv_to_utf8(result,(UV)~c);
+
+	  if (nwide) {
+	      Newz(0, result, targlen + 1, U8);
+	      while (tmps < send) {
+		  UV c = utf8_to_uv(tmps, 0, &l, UTF8_ALLOW_ANY);
+		  tmps += UTF8SKIP(tmps);
+		  result = uv_to_utf8(result, ~c);
+	      }
+	      *result = '\0';
+	      result -= targlen;
+	      sv_setpvn(TARG, (char*)result, targlen);
+	      SvUTF8_on(TARG);
 	  }
-	  *result = '\0';
-	  result -= targlen;
-	  sv_setpvn(TARG, (char*)result, targlen);
-	  SvUTF8_on(TARG);
+	  else {
+	      Newz(0, result, nchar + 1, U8);
+	      while (tmps < send) {
+		  U8 c = (U8)utf8_to_uv(tmps, 0, &l, UTF8_ALLOW_ANY);
+		  tmps += UTF8SKIP(tmps);
+		  *result++ = ~c;
+	      }
+	      *result = '\0';
+	      result -= nchar;
+	      sv_setpvn(TARG, (char*)result, nchar);
+	  }
 	  Safefree(result);
 	  SETs(TARG);
 	  RETURN;

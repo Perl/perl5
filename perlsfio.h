@@ -35,7 +35,7 @@ extern int	_stdprintf _ARG_((const char*, ...));
 #define PerlIO_fileno(f)		sffileno(f)
 #define PerlIO_clearerr(f)		sfclrerr(f)
 #define PerlIO_flush(f)			sfsync(f)
-#define PerlIO_tell(f)			sftell(f)
+#define PerlIO_tell(f)                 sfseek(f,0,1|SF_SHARE)
 #define PerlIO_seek(f,o,w)		sfseek(f,o,w)
 #define PerlIO_rewind(f)		(void) sfseek((f),0L,0)
 #define PerlIO_tmpfile()		sftmp(0)

@@ -142,12 +142,17 @@ fgetpos(handle)
     CODE:
 	if (handle) {
 	    Fpos_t pos;
+	    if (
 #ifdef PerlIO
-	    PerlIO_getpos(handle, &pos);
+		PerlIO_getpos(handle, &pos)
 #else
-	    fgetpos(handle, &pos);
+		fgetpos(handle, &pos)
 #endif
-	    ST(0) = sv_2mortal(newSVpv((char*)&pos, sizeof(Fpos_t)));
+		) {
+		ST(0) = &PL_sv_undef;
+	    } else {
+		ST(0) = sv_2mortal(newSVpv((char*)&pos, sizeof(Fpos_t)));
+	    }
 	}
 	else {
 	    ST(0) = &PL_sv_undef;
