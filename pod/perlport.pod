@@ -494,12 +494,25 @@ Don't assume that you can reach the public Internet.
 Don't assume that there is only one way to get through firewalls
 to the public Internet.
 
+Don't assume that you can reach outside world through any other port
+than 80, or some web proxy.  ftp is blocked by many firewalls.
+
 Don't assume that you can reach yourself or any node by the name
-'localhost'.  The same goes for '127.0.0.1'.
+'localhost'.  The same goes for '127.0.0.1'.  You will have to try
+both.
+
+Don't assume that the host has only network card, or that it can't
+bind to many virtual IP addresses.
+
+Don't assume a particular network device name.
 
 Don't assume that any particular port (service) will respond.
 
 Don't assume that you can ping hosts and get replies.
+
+All the above "don't":s may look daunting, and they are -- but the key
+is to degrade gracefully if one cannot reach the particular network
+service one wants.  Croaking or hanging do not look very professional.
 
 =head2 Interprocess Communication (IPC)
 
