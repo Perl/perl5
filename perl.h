@@ -2840,7 +2840,6 @@ enum {		/* pass one of these to get_vtbl */
 #define HINT_FILETEST_ACCESS	0x00400000
 #define HINT_UTF8		0x00800000
 #define HINT_UTF8_DISTINCT	0x01000000
-#define HINT_RE_ASCIIR		0x02000000
 
 /* Various states of an input record separator SV (rs, nrs) */
 #define RsSNARF(sv)   (! SvOK(sv))
