@@ -175,9 +175,14 @@ NDBM_File
 ODBM_File
 Pod::Checker
 Pod::Find
+Pod::Html
 Pod::LaTeX
+Pod::Man
+Pod::ParseLink
 Pod::ParseUtils
 Pod::Text
+Pod::Text::Overstrike
+Pod::Text::Termcap
 Pod::Usage
 SDBM_File
 Safe
