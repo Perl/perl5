@@ -4,7 +4,7 @@
 # grep() and map() tests
 #
 
-print "1..33\n";
+print "1..34\n";
 
 $test = 1;
 
