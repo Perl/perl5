@@ -78,6 +78,13 @@ Version 5.005_04-tobe        Fourth maintenance release of 5.005
 ----------------
 
 ____________________________________________________________________________
+[ 22062] By: acme                                  on 2004/01/05  21:11:24
+        Log: Fix locale-dependant test failures
+             From: "Marcus Holland-Moritz" <mhx-perl@gmx.net>
+             Subject: [PATCH perl-5.005xx] Locale-dependant test failures
+     Branch: maint-5.005/perl
+           ! t/lib/safe2.t t/op/mkdir.t
+__________________________________________________________________________
 [ 22060] By: acme                                  on 2004/01/05  20:50:07
         Log: Remove test files from DB_File's MANIFEST as they are in t/ now
      Branch: maint-5.005/perl
