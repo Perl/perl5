@@ -2058,7 +2058,6 @@ read_e_script(idx, buf_sv, maxlen)
     int maxlen;
 {
     char *p, *nl;
-    FILTER_READ(idx+1, buf_sv, maxlen);
     p  = SvPVX(e_script);
     nl = strchr(p, '\n');
     nl = (nl) ? nl+1 : SvEND(e_script);
