@@ -28,6 +28,18 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 19828] By: jhi                                   on 2003/06/19  20:23:43
+        Log: Integrate:
+             [ 19827]
+             Apparently this is needed for VMS (Craig Berry).
+     Branch: maint-5.8/perl
+	  !> lib/Tie/File.pm
+____________________________________________________________________________
+[ 19826] By: jhi                                   on 2003/06/19  15:16:27
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 19825] By: jhi                                   on 2003/06/19  15:12:52
         Log: Integrate:
              [ 19824]
