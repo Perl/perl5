@@ -95,6 +95,75 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6735] By: jhi                                   on 2000/08/21  02:57:20
+        Log: Draft 0.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  6734] By: jhi                                   on 2000/08/21  02:57:03
+        Log: Add Storable 0.7.2 from Raphael Manfredi,
+             plus the patch from
+             
+             Subject: Re: someone with too much time and a 64-bit box and interest in Storable?
+             From: Radu Greab <radu@netsoft.ro>
+             Date: Mon, 21 Aug 2000 03:10:05 +0300 (EEST)
+             Message-ID: <Pine.LNX.4.10.10008210258160.1292-100000@busy.netsoft.ro>
+             
+             plus changes to get Storable to compile with
+             picky ANSI compilers.
+     Branch: perl
+	   + ext/Storable/ChangeLog ext/Storable/MANIFEST
+	   + ext/Storable/Makefile.PL ext/Storable/README
+	   + ext/Storable/Storable.pm ext/Storable/Storable.xs
+	   + ext/Storable/patchlevel.h t/lib/st-06compat.t
+	   + t/lib/st-blessed.t t/lib/st-canonical.t t/lib/st-dclone.t
+	   + t/lib/st-dump.pl t/lib/st-forgive.t t/lib/st-freeze.t
+	   + t/lib/st-overload.t t/lib/st-recurse.t t/lib/st-retrieve.t
+	   + t/lib/st-store.t t/lib/st-tied.t t/lib/st-tiedhook.t
+	   + t/lib/st-tieditems.t
+	   ! MANIFEST
+____________________________________________________________________________
+[  6733] By: jhi                                   on 2000/08/21  02:29:09
+        Log: The correct cleaning order is an art.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  6732] By: jhi                                   on 2000/08/21  01:23:39
+        Log: The #6724 is here.
+     Branch: perl
+	   ! t/lib/ftmp-security.t
+____________________________________________________________________________
+[  6731] By: jhi                                   on 2000/08/20  23:17:03
+        Log: s/this one/the 5.6.0 release/
+     Branch: perl
+	   ! pod/perl56delta.pod
+____________________________________________________________________________
+[  6730] By: jhi                                   on 2000/08/20  23:07:34
+        Log: Mention perlebcdic and perlposix-bc.
+     Branch: perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[  6729] By: jhi                                   on 2000/08/20  21:32:59
+        Log: Document the number of exponent digits.
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  6728] By: jhi                                   on 2000/08/20  21:16:47
+        Log: Use File::Spec->tmpdir().
+             
+             Subject: Re: [ID 20000820.001] not OK - Perl 5.7.0 (uninstalled)
+             From: Tim Jenness <timj@jach.hawaii.edu>
+             Message-ID: <Pine.LNX.4.21.0008201057080.20544-100000@lapaki.jach.hawaii.edu>
+             MIME-Version: 1.0
+             Date: Sun, 20 Aug 2000 11:01:25 -1000 (HST)
+     Branch: perl
+	   ! utils/perlbug.PL
+____________________________________________________________________________
+[  6727] By: jhi                                   on 2000/08/20  20:43:32
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  6726] By: jhi                                   on 2000/08/20  20:41:44
         Log: The veryclean target needs to clobber.
      Branch: perl

@@ -71,7 +71,7 @@
 static	char	*local_patches[] = {
         NULL
 	,"SUIDMAIL - fixes for suidperl security"
-	,"DEVEL6726"
+	,"DEVEL6735"
 	,NULL
 };
 
