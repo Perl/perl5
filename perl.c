@@ -3111,9 +3111,7 @@ S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv)
     }
 #ifdef IAMSUID
     else {
-	Perl_croak(aTHX_ "suidperl needs fd script\n"
-		   "You should not call suidperl directly; do you need to "
-		   "change a #! line\nfrom suidperl to perl?\n");
+	Perl_croak(aTHX_ "suidperl needs fd script\n");
 /* PSz 11 Nov 03
  * Do not open (or do other fancy stuff) while setuid.
  * Perl does the open, and hands script to suidperl on a fd;
@@ -3359,7 +3357,7 @@ S_validate_suid(pTHX_ char *validarg, char *scriptname)
      * in perl will not fix that problem, but if you have disabled setuid
      * scripts in the kernel, this will attempt to emulate setuid and setgid
      * on scripts that have those now-otherwise-useless bits set.  The setuid
-     * root version must be called suidperl or suidperlN.NNN.  If regular perl
+     * root version must be called suidperl or sperlN.NNN.  If regular perl
      * discovers that it has opened a setuid script, it calls suidperl with
      * the same argv that it had.  If suidperl finds that the script it has
      * just opened is NOT setuid root, it sets the effective uid back to the
@@ -3368,7 +3366,7 @@ S_validate_suid(pTHX_ char *validarg, char *scriptname)
      * uid.
      * PSz 27 Feb 04
      * Description/comments above do not match current workings:
-     *   suidperl must be hardlinked to suidperlN.NNN (that is what we exec);
+     *   suidperl must be hardlinked to sperlN.NNN (that is what we exec);
      *   suidperl called with script open and name changed to /dev/fd/N/X;
      *   suidperl croaks if script is not setuid;
      *   making perl setuid would be a huge security risk (and yes, that
@@ -3389,10 +3387,8 @@ S_validate_suid(pTHX_ char *validarg, char *scriptname)
 	STRLEN n_a;
 
 #ifdef IAMSUID
-	if (PL_fdscript < 0 || PL_suidscript != 1) {
-	    Perl_croak(aTHX_ "Need (suid) fdscript in suidperl\n");
-	    /* We already checked this */
-	}
+	if (PL_fdscript < 0 || PL_suidscript != 1)
+	    Perl_croak(aTHX_ "Need (suid) fdscript in suidperl\n");	/* We already checked this */
 	/* PSz 11 Nov 03
 	 * Since the script is opened by perl, not suidperl, some of these
 	 * checks are superfluous. Leaving them in probably does not lower
@@ -3546,7 +3542,7 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
 	    PL_euid) {	/* oops, we're not the setuid root perl */
 	    /* PSz 18 Feb 04
 	     * When root runs a setuid script, we do not go through the same
-	     * steps of execing suidperl and then perl with fd scripts, but
+	     * steps of execing sperl and then perl with fd scripts, but
 	     * simply set up UIDs within the same perl invocation; so do
 	     * not have the same checks (on options, whatever) that we have
 	     * for plain users. No problem really: would have to be a script
@@ -3590,13 +3586,12 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
 	    fcntl(PerlIO_fileno(PL_rsfp),F_SETFD,0);	/* ensure no close-on-exec */
 #endif
 	    PERL_FPU_PRE_EXEC
-	    PerlProc_execv(Perl_form(aTHX_ "%s/suidperl"PERL_FS_VER_FMT,
-				     BIN_EXP, (int)PERL_REVISION,
-				     (int)PERL_VERSION, (int)PERL_SUBVERSION),
-			   PL_origargv);
+	    PerlProc_execv(Perl_form(aTHX_ "%s/sperl"PERL_FS_VER_FMT, BIN_EXP,
+				     (int)PERL_REVISION, (int)PERL_VERSION,
+				     (int)PERL_SUBVERSION), PL_origargv);
 	    PERL_FPU_POST_EXEC
 #endif /* IAMSUID */
-	    Perl_croak(aTHX_ "Can't do setuid (cannot exec suidperl)\n");
+	    Perl_croak(aTHX_ "Can't do setuid (cannot exec sperl)\n");
 	}
 
 	if (PL_statbuf.st_mode & S_ISGID && PL_statbuf.st_gid != PL_egid) {
