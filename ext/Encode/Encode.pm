@@ -96,9 +96,24 @@ sub define_alias
   }
 }
 
-define_alias( qr/^iso\W?(\d+)\W(\d+)$/i => '"iso-$1-$2"' );
-define_alias( qr/^(?:iso\W?)?(?:8859|latin)\W(\d+)$/i => '"iso-8859-$1"' );
-define_alias( qr/^(\S+)\s+(.*)$/i => '"$1-$2"' );
+my %isolatin2num =
+	(
+	1 =>  1,
+	2 =>  2,
+	3 =>  3,
+	4 =>  4,
+	5 =>  9,
+	6 => 10,
+	7 => 13,
+	8 => 14,
+	9 => 15,
+       10 => 16,
+	);
+
+define_alias( qr/^iso[-_]?(\d+)[-_](\d+)$/i => '"iso-$1-$2"' );
+define_alias( qr/^(?:iso[-_]?)?latin[-_]?(\d+)$/i =>
+              '"iso-8859-$isolatin2num{$1}"' );
+define_alias( qr/^(\S+)[\s_]+(.*)$/i => '"$1-$2"' );
 #define_alias( sub { return /^iso-(\d+-\d+)$/i  ? "iso$1" : '' } );
 define_alias( 'ascii' => 'US-ascii');
 define_alias( 'ibm-1047' => 'cp1047');
