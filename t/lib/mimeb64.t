@@ -5,12 +5,12 @@ BEGIN {
 
 use MIME::Base64;
 
-print "1..282\n";
+print "1..283\n";
 
 print "# Testing MIME::Base64-", $MIME::Base64::VERSION, "\n";
 
 BEGIN {
- if (ord('A') != 193) {
+ if (ord('A') == 41) {
   *ASCII = sub { return $_[0] };
  }
  else {
@@ -365,6 +365,7 @@ sub decodeTest
         ['YWFh====' =>  ASCII('aaa')],
         ['YQ'       =>  ASCII('a')],
         ['Y'        => ''],
+        ['x=='      => ''],
         [''         => ''],
         [undef()    => ''],
     );
