@@ -2524,7 +2524,11 @@ $ IF .NOT. Has_socketshr .AND. .NOT. Has_Dec_C_Sockets
 $ THEN
 $   dflt = dflt - "Socket"            ! optional on VMS
 $ ENDIF
-$ IF .NOT. use_ithreads THEN dflt = dflt - "threads"
+$ IF .NOT. use_ithreads 
+$ THEN 
+$   dflt = dflt - "threads/shared"
+$   dflt = dflt - "threads"
+$ ENDIF
 $ dflt = F$EDIT(dflt,"TRIM,COMPRESS")
 $!
 $! Ask for their default list of extensions to build

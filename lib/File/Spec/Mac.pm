@@ -41,15 +41,15 @@ sub canonpath {
 
 Concatenate two or more directory names to form a path separated by colons
 (":") ending with a directory. Resulting paths are B<relative> by default,
-but can be forced to be absolute (but avoid this, see below). Automatically 
-puts a trailing ":" on the end of the complete path, because that's what's 
-done in MacPerl's environment and helps to distinguish a file path from a 
+but can be forced to be absolute (but avoid this, see below). Automatically
+puts a trailing ":" on the end of the complete path, because that's what's
+done in MacPerl's environment and helps to distinguish a file path from a
 directory path.
 
-B<IMPORTANT NOTE:> Beginning with version 1.3 of this module, the resulting 
-path is relative by default and I<not> absolute. This descision was made due 
-to portability reasons. Since C<File::Spec-E<gt>catdir()> returns relative paths 
-on all other operating systems, it will now also follow this convention on Mac 
+B<IMPORTANT NOTE:> Beginning with version 1.3 of this module, the resulting
+path is relative by default and I<not> absolute. This descision was made due
+to portability reasons. Since C<File::Spec-E<gt>catdir()> returns relative paths
+on all other operating systems, it will now also follow this convention on Mac
 OS. Note that this may break some existing scripts.
 
 The intended purpose of this routine is to concatenate I<directory names>.
@@ -107,7 +107,6 @@ or trailing colons when necessary. E.g.
     catdir(":::a","::b","c")    = ":::a::b:c:"
     catdir(":::a::","::b","c")  = ":::a:::b:c:"
 
-
 =item 5.
 
 Adding a colon ":" or empty string "" to a path at I<any> position
@@ -133,7 +132,7 @@ like passingC<File::Spec-E<gt>rootdir()> as the first argument, i.e.
 
     catdir("","a","b")          is the same as
 
-    catdir(rootdir(),"a","b"). 
+    catdir(rootdir(),"a","b").
 
 This is true on Unix, where C<catdir("","a","b")> yields "/a/b" and
 C<rootdir()> is "/". Note that C<rootdir()> on Mac OS is the startup
@@ -184,32 +183,31 @@ yields
 
     "MacintoshHD:tmp:sources:" .
 
-
 =cut
 
 sub catdir {
-    my $self = shift;	
-	return '' unless @_;	
-    my @args = @_;
-    my $first_arg;	
-	my $relative;	
-	
+	my $self = shift;
+	return '' unless @_;
+	my @args = @_;
+	my $first_arg;
+	my $relative;
+
 	# take care of the first argument
-	
+
 	if ($args[0] eq '')  { # absolute path, rootdir
 		shift @args;
 		$relative = 0;
 		$first_arg = $self->rootdir;
-	
+
 	} elsif ($args[0] =~ /^[^:]+:/) { # absolute path, volume name
 		$relative = 0;
 		$first_arg = shift @args;
 		# add a trailing ':' if need be (may be it's a path like HD:dir)
 		$first_arg = "$first_arg:" unless ($first_arg =~ /:\Z(?!\n)/);
-		
+
 	} else { # relative path
 		$relative = 1;
-		if ( $args[0] =~ /^::+\Z(?!\n)/ ) { 
+		if ( $args[0] =~ /^::+\Z(?!\n)/ ) {
 			# updir colon path ('::', ':::' etc.), don't shift
 			$first_arg = ':';
 		} elsif ($args[0] eq ':') {
@@ -218,16 +216,16 @@ sub catdir {
 			# add a trailing ':' if need be
 			$first_arg = shift @args;
 			$first_arg = "$first_arg:" unless ($first_arg =~ /:\Z(?!\n)/);
-		} 
-	}	
-		
-	# For all other arguments,    
+		}
+	}
+
+	# For all other arguments,
 	# (a) ignore arguments that equal ':' or '',
 	# (b) handle updir paths specially:
 	#     '::' 			-> concatenate '::'
 	#     '::' . '::' 	-> concatenate ':::' etc.
 	# (c) add a trailing ':' if need be
-	
+
 	my $result = $first_arg;
 	while (@args) {
 		my $arg = shift @args;
@@ -235,51 +233,51 @@ sub catdir {
 			if ($arg =~ /^::+\Z(?!\n)/ ) { # updir colon path like ':::'
 				my $updir_count = length($arg) - 1;
 				while ((@args) && ($args[0] =~ /^::+\Z(?!\n)/) ) { # while updir colon path
-					$arg = shift @args; 
+					$arg = shift @args;
 					$updir_count += (length($arg) - 1);
 				}
-				$arg = (':' x $updir_count); 
+				$arg = (':' x $updir_count);
 			} else {
 				$arg =~ s/^://s; # remove a leading ':' if any
 				$arg = "$arg:" unless ($arg =~ /:\Z(?!\n)/); # ensure trailing ':'
 			}
 			$result .= $arg;
 		}#unless
-    }
-	
-	if ( ($relative) && ($result !~ /^:/) ) {   
+	}
+
+	if ( ($relative) && ($result !~ /^:/) ) {
 		# add a leading colon if need be
 		$result = ":$result";
 	}
-	
-	unless ($relative) { 
+
+	unless ($relative) {
 		# remove updirs immediately following the volume name
 		$result =~ s/([^:]+:)(:*)(.*)\Z(?!\n)/$1$3/;
 	}
-	
-    return $result;
+
+	return $result;
 }
 
 =item catfile
 
 Concatenate one or more directory names and a filename to form a
-complete path ending with a filename. Resulting paths are B<relative> 
-by default, but can be forced to be absolute (but avoid this). 
+complete path ending with a filename. Resulting paths are B<relative>
+by default, but can be forced to be absolute (but avoid this).
 
-B<IMPORTANT NOTE:> Beginning with version 1.3 of this module, the 
-resulting path is relative by default and I<not> absolute. This 
-descision was made due to portability reasons. Since 
-C<File::Spec-E<gt>catfile()> returns relative paths on all other 
-operating systems, it will now also follow this convention on Mac OS. 
+B<IMPORTANT NOTE:> Beginning with version 1.3 of this module, the
+resulting path is relative by default and I<not> absolute. This
+descision was made due to portability reasons. Since
+C<File::Spec-E<gt>catfile()> returns relative paths on all other
+operating systems, it will now also follow this convention on Mac OS.
 Note that this may break some existing scripts.
 
-The last argument is always considered to be the file portion. Since 
-C<catfile()> uses C<catdir()> (see above) for the concatenation of the 
-directory portions (if any), the following with regard to relative and  
+The last argument is always considered to be the file portion. Since
+C<catfile()> uses C<catdir()> (see above) for the concatenation of the
+directory portions (if any), the following with regard to relative and
 absolute paths is true:
 
     catfile("")     = ""
-    catfile("file") = "file"    
+    catfile("file") = "file"
 
 but
 
@@ -287,7 +285,7 @@ but
     catfile("","file")    = rootdir() . file  # (e.g. "HD:file")
     catfile("HD:","file") = "HD:file"
 
-This means that C<catdir()> is called only when there are two or more 
+This means that C<catdir()> is called only when there are two or more
 arguments, as one might expect.
 
 Note that the leading ":" is removed from the filename, so that
@@ -296,9 +294,9 @@ Note that the leading ":" is removed from the filename, so that
 
     catfile("a","b",":file") = ":a:b:file"
 
-give the same answer. 
+give the same answer.
 
-To concatenate I<volume names>, I<directory paths> and I<filenames>, 
+To concatenate I<volume names>, I<directory paths> and I<filenames>,
 you are encouraged to use C<catpath()> (see below).
 
 =cut
@@ -391,8 +389,8 @@ absolute path, unless the path doesn't contain any colons, i.e. it's a name
 like "a". In this particular case, the path is considered to be relative
 (i.e. it is considered to be a filename). Use ":" in the appropriate place
 in the path if you want to distinguish unambiguously. As a special case,
-the filename '' is always considered to be absolute. Note that with version 
-1.2 of File::Spec::Mac, this does no longer consult the local filesystem. 
+the filename '' is always considered to be absolute. Note that with version
+1.2 of File::Spec::Mac, this does no longer consult the local filesystem.
 
 E.g.
 
@@ -523,10 +521,10 @@ yields:
 =cut
 
 sub splitdir {
-    my ($self, $path) = @_;
+	my ($self, $path) = @_;
 	my @result = ();
 	my ($head, $sep, $tail, $volume, $directories);
-    
+
 	return ('') if ( (!defined($path)) || ($path eq '') );
 	return (':') if ($path eq ':');
 
@@ -537,14 +535,14 @@ sub splitdir {
 		push (@result, $volume);
 		$sep .= ':';
 	}
-	
+
 	while ($sep || $directories) {
 		if (length($sep) > 1) {
 			my $updir_count = length($sep) - 1;
 			for (my $i=0; $i<$updir_count; $i++) {
 				# push '::' updir_count times;
 				# simulate Unix '..' updirs
-				push (@result, '::'); 
+				push (@result, '::');
 			}
 		}
 		$sep = '';
@@ -553,12 +551,12 @@ sub splitdir {
 			push (@result, $head);
 			$directories = $tail;
 		}
-	}	
+	}
 	return @result;
 }
 
 
-=item catpath()
+=item catpath
 
     $path = File::Spec->catpath($volume,$directory,$file);
 
@@ -669,22 +667,19 @@ sub abs2rel {
     my $base_dirs = ($self->splitpath( $base ))[1] ;
 
     # Now, remove all leading components that are the same
-    my @pathchunks = $self->splitdir( $path_dirs );
-    my @basechunks = $self->splitdir( $base_dirs );
-
+    my @pathchunks = $self->splitdir( $path_dirs ); # expected: ('')
+    my @basechunks = $self->splitdir( $base_dirs ); # expected: (d1, d2)
+	
     while ( @pathchunks &&
 	    @basechunks &&
 	    lc( $pathchunks[0] ) eq lc( $basechunks[0] ) ) {
         shift @pathchunks ;
         shift @basechunks ;
     }
-	
+
     # @pathchunks now has the directories to descend in to.
-	if ( (@pathchunks) && ($pathchunks[0] ne '') ) {
-    	$path_dirs = $self->catdir( @pathchunks );
-	} else {
-		$path_dirs = '';
-	}
+    # ensure relative path, even if @pathchunks is empty
+    $path_dirs = $self->catdir( ':', @pathchunks );
 
     # @basechunks now contains the number of directories to climb out of.
     $base_dirs = (':' x @basechunks) . ':' ;

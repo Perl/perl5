@@ -251,7 +251,7 @@ Perl_boot_core_PerlIO(pTHX)
 #ifdef PERLIO_IS_STDIO
 
 void
-PerlIO_init(void)
+PerlIO_init(pTHX)
 {
     /*
      * Does nothing (yet) except force this file to be included in perl
@@ -288,7 +288,7 @@ PerlIO_tmpfile(void)
 }
 
 void
-PerlIO_init(void)
+PerlIO_init(pTHX)
 {
     /*
      * Force this file to be included in perl binary. Which allows this

@@ -577,7 +577,7 @@ else {
 # Test for system/library calls returning string data of dubious origin.
 {
     # No reliable %Config check for getpw*
-    if (eval { setpwent(); getpwent(); 1 }) {
+    if (eval { setpwent(); getpwent() }) {
 	setpwent();
 	my @getpwent = getpwent();
 	die "getpwent: $!\n" unless (@getpwent);
