@@ -357,7 +357,6 @@ Perl_lex_start(pTHX_ SV *line)
 	    SAVEVPTR(PL_nextval[toke]);
 	}
 	SAVEI32(PL_nexttoke);
-	PL_nexttoke = 0;
     }
     SAVECOPLINE(PL_curcop);
     SAVEPPTR(PL_bufptr);
@@ -391,6 +390,7 @@ Perl_lex_start(pTHX_ SV *line)
     PL_lex_stuff = Nullsv;
     PL_lex_repl = Nullsv;
     PL_lex_inpat = 0;
+    PL_nexttoke = 0;
     PL_lex_inwhat = 0;
     PL_sublex_info.sub_inwhat = 0;
     PL_linestr = line;
