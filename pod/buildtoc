@@ -84,13 +84,13 @@ foreach (<MASTER>) {
   next if /^\#/;
 
   # At least one upper case letter somewhere in the first group
-  if (/^(\S+)\s(.*)/ && $1 =~ tr/A-Z//) {
+  if (/^(\S+)\s(.*)/ && $1 =~ tr/h//) {
     # it's a heading
     my $flags = $1;
+    $flags =~ tr/h//d;
     my %flags = (header => 1);
-    $flags{toc_omit} = 1 if $flags =~ tr/O//d;
-    $flags{include} = 1 if $flags =~ tr/I//d;
-    $flags{aux} = 1 if $flags =~ tr/A//d;
+    $flags{toc_omit} = 1 if $flags =~ tr/o//d;
+    $flags{aux} = 1 if $flags =~ tr/a//d;
     die "$0: Unknown flag found in heading line: $_" if length $flags;
     push @Master, [\%flags, $2];
 
