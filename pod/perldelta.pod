@@ -201,11 +201,11 @@ A subroutine reference may now be suffixed with an arrow and a
 (possibly empty) parameter list.  This syntax denotes a call of the
 referenced subroutine, with the given parameters (if any).
 
-This new syntax follows the pattern of C<$hashref-E<gt>{FOO}> and
-C<$aryref-E<gt>[$foo]>; now, C<&$subref($foo)> may now be written
-C<$subref-E<gt>($foo)>.  All of these arrow terms may be chained;
-thus, C<&{$table-E<gt>{FOO}}($bar)> may now be written
-C<$table-E<gt>{FOO}->($bar)>.
+This new syntax follows the pattern of S<C<$hashref-E<gt>{FOO}>> and
+S<C<$aryref-E<gt>[$foo]>>: You may now write S<C<&$subref($foo)>> as
+S<C<$subref-E<gt>($foo)>>.  All of these arrow terms may be chained;
+thus, S<C<&{$table-E<gt>{FOO}}($bar)>> may now be written
+S<C<$table-E<gt>{FOO}-E<gt>($bar)>>.
 
 =back
 
