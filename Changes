@@ -31,6 +31,391 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[  9916] By: jhi                                   on 2001/04/30  12:57:03
+        Log: T_w_e_a_k_a_g_e.
+     Branch: perl
+	   ! pod/perldata.pod pod/perldiag.pod
+____________________________________________________________________________
+[  9915] By: jhi                                   on 2001/04/30  12:39:29
+        Log: Install s2p also as psed.
+             
+             TODO: psed documentation?
+     Branch: perl
+	   ! installperl
+____________________________________________________________________________
+[  9914] By: jhi                                   on 2001/04/30  12:29:21
+        Log: Subject: Re: [ID 20010303.009] SOCKS5 work around breaks other sockets
+             From: Jens Hamisch <jens@Strawberry.COM>
+             Date: Fri, 27 Apr 2001 17:00:36 +0200
+             Message-ID: <20010427170036.K1372@Strawberry.COM>
+             
+             SOCKS5_VERSION_NAME is the right symbol to detect
+             the presence of SOCKS5.  (HAS_SOCKS5_INIT is telling whether
+             function called socks5_init() is available, and even that is
+             not universal, most SOCKS5 installations use SOCKSinit()).
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[  9913] By: jhi                                   on 2001/04/30  12:22:15
+        Log: Allow a zero timeout on IO::Socket accept and connect--
+             though one really shouldn't do that.  Based on
+             
+             Subject: Not possible to set zero second timeout on accept() in IO::Socket and company..
+             From: "John Holdsworth" <coldwave@bigfoot.com>
+             Date: Sun, 4 Feb 2001 12:48:18 +0100
+             Message-ID: <005a01c08ea0$5e6039d0$03ac2ac0@planc>
+     Branch: perl
+	   ! ext/IO/lib/IO/Socket.pm
+____________________________________________________________________________
+[  9912] By: jhi                                   on 2001/04/30  11:27:27
+        Log: Save the spot of regprev (see #9911) for binary compatibility;
+             regen API.
+     Branch: perl
+	   ! embedvar.h perlapi.h thrdvar.h
+____________________________________________________________________________
+[  9911] By: jhi                                   on 2001/04/30  11:22:03
+        Log: Subject: Re: [PATCH bleadperl] [ID 20010426.002] Word boundry regex [...] 
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Sun, 29 Apr 2001 17:09:30 +0100
+             Message-Id: <200104291609.RAA17790@crypt.compulink.co.uk>
+     Branch: perl
+	   ! regcomp.c regexec.c sv.c t/op/re_tests t/op/subst.t thrdvar.h
+____________________________________________________________________________
+[  9910] By: jhi                                   on 2001/04/30  11:15:12
+        Log: Change PL_numeric_radix to PL_numeric_radix_sv (and leave in
+             a dummy for PL_numeric_radix); no pressing reason to break
+             binary compatibility; regen API.
+     Branch: perl
+	   ! embedvar.h global.sym intrpvar.h objXSUB.h perl.c perl.h
+	   ! perlapi.c perlapi.h pod/perlapi.pod sv.c util.c
+____________________________________________________________________________
+[  9909] By: jhi                                   on 2001/04/30  10:56:08
+        Log: Subject: [DOC PATCH bleadperl] Document generation of random integers
+             From: Walt Mankowski <waltman@netaxs.com>
+             Date: Sun, 29 Apr 2001 21:53:48 -0400
+             Message-ID: <20010429215348.A3971@netaxs.com>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  9908] By: jhi                                   on 2001/04/30  10:49:40
+        Log: Reintroduce #9889 to unbuffer the stderr/stdout on stdio configs.
+     Branch: perl
+	   ! t/lib/selfstubber.t
+____________________________________________________________________________
+[  9907] By: nick                                  on 2001/04/30  09:26:50
+        Log: Integrate mainline.
+     Branch: perlio
+	  !> pod/perldata.pod pod/perldiag.pod t/pragma/warn/toke toke.c
+____________________________________________________________________________
+[  9906] By: jhi                                   on 2001/04/29  23:24:20
+        Log: Abigail spotted a thinko in #9905.
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[  9905] By: jhi                                   on 2001/04/29  15:55:39
+        Log: Changed the underscore/undebar syntax in numeric constants;
+             now any grouping will do, as long as the underscores are not
+             consecutive (so "zero-grouping" is out), and they do not begin
+             or end the integer or fractional parts.
+     Branch: perl
+	   ! pod/perldata.pod pod/perldiag.pod t/pragma/warn/toke toke.c
+____________________________________________________________________________
+[  9904] By: nick                                  on 2001/04/29  15:43:22
+        Log: Integrate mainline.
+     Branch: perlio
+	  +> (branch 98 files)
+	   - lib/unicode/Block.pl
+	   - lib/unicode/In/AlphabeticPresentationForms.pl
+	   - lib/unicode/In/Arabic.pl
+	   - lib/unicode/In/ArabicPresentationForms-A.pl
+	   - lib/unicode/In/ArabicPresentationForms-B.pl
+	   - lib/unicode/In/Armenian.pl lib/unicode/In/Arrows.pl
+	   - lib/unicode/In/BasicLatin.pl lib/unicode/In/Bengali.pl
+	   - lib/unicode/In/BlockElements.pl lib/unicode/In/Bopomofo.pl
+	   - lib/unicode/In/BopomofoExtended.pl
+	   - lib/unicode/In/BoxDrawing.pl lib/unicode/In/BraillePatterns.pl
+	   - lib/unicode/In/CJKCompatibility.pl
+	   - lib/unicode/In/CJKCompatibilityForms.pl
+	   - lib/unicode/In/CJKCompatibilityIdeographs.pl
+	   - lib/unicode/In/CJKRadicalsSupplement.pl
+	   - lib/unicode/In/CJKSymbolsandPunctuation.pl
+	   - lib/unicode/In/CJKUnifiedIdeographs.pl
+	   - lib/unicode/In/CJKUnifiedIdeographsExtensionA.pl
+	   - lib/unicode/In/Cherokee.pl
+	   - lib/unicode/In/CombiningDiacriticalMarks.pl
+	   - lib/unicode/In/CombiningHalfMarks.pl
+	   - lib/unicode/In/CombiningMarksforSymbols.pl
+	   - lib/unicode/In/ControlPictures.pl
+	   - lib/unicode/In/CurrencySymbols.pl lib/unicode/In/Cyrillic.pl
+	   - lib/unicode/In/Devanagari.pl lib/unicode/In/Dingbats.pl
+	   - lib/unicode/In/EnclosedAlphanumerics.pl
+	   - lib/unicode/In/EnclosedCJKLettersandMonths.pl
+	   - lib/unicode/In/Ethiopic.pl
+	   - lib/unicode/In/GeneralPunctuation.pl
+	   - lib/unicode/In/GeometricShapes.pl lib/unicode/In/Georgian.pl
+	   - lib/unicode/In/Greek.pl lib/unicode/In/GreekExtended.pl
+	   - lib/unicode/In/Gujarati.pl lib/unicode/In/Gurmukhi.pl
+	   - lib/unicode/In/HalfwidthandFullwidthForms.pl
+	   - lib/unicode/In/HangulCompatibilityJamo.pl
+	   - lib/unicode/In/HangulJamo.pl lib/unicode/In/HangulSyllables.pl
+	   - lib/unicode/In/Hebrew.pl
+	   - lib/unicode/In/HighPrivateUseSurrogates.pl
+	   - lib/unicode/In/HighSurrogates.pl lib/unicode/In/Hiragana.pl
+	   - lib/unicode/In/IPAExtensions.pl
+	   - lib/unicode/In/IdeographicDescriptionCharacters.pl
+	   - lib/unicode/In/Kanbun.pl lib/unicode/In/KangxiRadicals.pl
+	   - lib/unicode/In/Kannada.pl lib/unicode/In/Katakana.pl
+	   - lib/unicode/In/Khmer.pl lib/unicode/In/Lao.pl
+	   - lib/unicode/In/Latin-1Supplement.pl
+	   - lib/unicode/In/LatinExtended-A.pl
+	   - lib/unicode/In/LatinExtended-B.pl
+	   - lib/unicode/In/LatinExtendedAdditional.pl
+	   - lib/unicode/In/LetterlikeSymbols.pl
+	   - lib/unicode/In/LowSurrogates.pl lib/unicode/In/Malayalam.pl
+	   - lib/unicode/In/MathematicalOperators.pl
+	   - lib/unicode/In/MiscellaneousSymbols.pl
+	   - lib/unicode/In/MiscellaneousTechnical.pl
+	   - lib/unicode/In/Mongolian.pl lib/unicode/In/Myanmar.pl
+	   - lib/unicode/In/NumberForms.pl lib/unicode/In/Ogham.pl
+	   - lib/unicode/In/OpticalCharacterRecognition.pl
+	   - lib/unicode/In/Oriya.pl lib/unicode/In/PrivateUse.pl
+	   - lib/unicode/In/Runic.pl lib/unicode/In/Sinhala.pl
+	   - lib/unicode/In/SmallFormVariants.pl
+	   - lib/unicode/In/SpacingModifierLetters.pl
+	   - lib/unicode/In/Specials.pl
+	   - lib/unicode/In/SuperscriptsandSubscripts.pl
+	   - lib/unicode/In/Syriac.pl lib/unicode/In/Tamil.pl
+	   - lib/unicode/In/Telugu.pl lib/unicode/In/Thaana.pl
+	   - lib/unicode/In/Thai.pl lib/unicode/In/Tibetan.pl
+	   - lib/unicode/In/UnifiedCanadianAboriginalSyllabics.pl
+	   - lib/unicode/In/YiRadicals.pl lib/unicode/In/YiSyllables.pl
+	  !> INSTALL MANIFEST doop.c embed.h embed.pl ext/B/B/Deparse.pm
+	  !> ext/IO/lib/IO/Seekable.pm hints/hpux.sh
+	  !> lib/unicode/mktables.PL lib/utf8_heavy.pl objXSUB.h perl.h
+	  !> pod/perldiag.pod pod/perlunicode.pod proto.h regcomp.c
+	  !> regexec.c t/lib/b-deparse.t t/lib/selfstubber.t t/op/pat.t
+	  !> utf8.c win32/Makefile
+____________________________________________________________________________
+[  9903] By: jhi                                   on 2001/04/29  14:30:53
+        Log: Subject: [PATCH: perl@9885] win32/Makefile (nmake) update
+             From: Prymmer/Kahn <pvhp@best.com>
+             Date: Sat, 28 Apr 2001 21:56:51 -0700 (PDT)
+             Message-ID: <Pine.BSF.4.21.0104282147270.2927-100000@shell8.ba.best.com>
+     Branch: perl
+	   ! win32/Makefile
+____________________________________________________________________________
+[  9902] By: jhi                                   on 2001/04/29  02:52:44
+        Log: Subject: [PATCH ext/IO/lib/IO/Seekable.pm] Doc fixes.
+             From: "Abigail" <abigail@foad.org>
+             Date: Sun, 29 Apr 2001 03:14:25 +0200
+             Message-ID: <20010429011425.24503.qmail@foad.org>
+     Branch: perl
+	   ! ext/IO/lib/IO/Seekable.pm
+____________________________________________________________________________
+[  9901] By: jhi                                   on 2001/04/29  02:04:46
+        Log: In character classes one couldn't have 0x80..0xff characters
+             at the left hand side if there were 0x100.. characters in the
+             character class.
+     Branch: perl
+	   ! doop.c embed.h embed.pl objXSUB.h proto.h regcomp.c regexec.c
+	   ! t/op/pat.t utf8.c
+____________________________________________________________________________
+[  9900] By: jhi                                   on 2001/04/28  22:55:04
+        Log: Forgot the latest mktables.PL from #9899.
+     Branch: perl
+	   ! lib/unicode/mktables.PL
+____________________________________________________________________________
+[  9899] By: jhi                                   on 2001/04/28  22:53:28
+        Log: Explain the \p{} and \P{} error message better and
+             have prettier prettyprint in In.pl.
+     Branch: perl
+	   ! lib/unicode/In.pl lib/unicode/mktables.PL lib/utf8_heavy.pl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[  9898] By: jhi                                   on 2001/04/28  21:03:34
+        Log: Add one possible explanation for the "Invalid [] range" error.
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[  9897] By: jhi                                   on 2001/04/28  17:18:26
+        Log: Add a level of indirection to the implementation of \p{InFoo}
+             so that we don't have to have long filenames.  (Nothing changes
+             in the user interface.)   The indirection is defined in
+             the file lib/unicode/In.pl and it is handled in lib/utf8_heavy.pl.
+             Also rename some the character classes by removing '-' from
+             the classnames, and finally renamed Block.pl as Blocks.pl.
+     Branch: perl
+	   + lib/unicode/Blocks.pl lib/unicode/In.pl lib/unicode/In/0.pl
+	   + lib/unicode/In/1.pl lib/unicode/In/10.pl lib/unicode/In/11.pl
+	   + lib/unicode/In/12.pl lib/unicode/In/13.pl lib/unicode/In/14.pl
+	   + lib/unicode/In/15.pl lib/unicode/In/16.pl lib/unicode/In/17.pl
+	   + lib/unicode/In/18.pl lib/unicode/In/19.pl lib/unicode/In/2.pl
+	   + lib/unicode/In/20.pl lib/unicode/In/21.pl lib/unicode/In/22.pl
+	   + lib/unicode/In/23.pl lib/unicode/In/24.pl lib/unicode/In/25.pl
+	   + lib/unicode/In/26.pl lib/unicode/In/27.pl lib/unicode/In/28.pl
+	   + lib/unicode/In/29.pl lib/unicode/In/3.pl lib/unicode/In/30.pl
+	   + lib/unicode/In/31.pl lib/unicode/In/32.pl lib/unicode/In/33.pl
+	   + lib/unicode/In/34.pl lib/unicode/In/35.pl lib/unicode/In/36.pl
+	   + lib/unicode/In/37.pl lib/unicode/In/38.pl lib/unicode/In/39.pl
+	   + lib/unicode/In/4.pl lib/unicode/In/40.pl lib/unicode/In/41.pl
+	   + lib/unicode/In/42.pl lib/unicode/In/43.pl lib/unicode/In/44.pl
+	   + lib/unicode/In/45.pl lib/unicode/In/46.pl lib/unicode/In/47.pl
+	   + lib/unicode/In/48.pl lib/unicode/In/49.pl lib/unicode/In/5.pl
+	   + lib/unicode/In/50.pl lib/unicode/In/51.pl lib/unicode/In/52.pl
+	   + lib/unicode/In/53.pl lib/unicode/In/54.pl lib/unicode/In/55.pl
+	   + lib/unicode/In/56.pl lib/unicode/In/57.pl lib/unicode/In/58.pl
+	   + lib/unicode/In/59.pl lib/unicode/In/6.pl lib/unicode/In/60.pl
+	   + lib/unicode/In/61.pl lib/unicode/In/62.pl lib/unicode/In/63.pl
+	   + lib/unicode/In/64.pl lib/unicode/In/65.pl lib/unicode/In/66.pl
+	   + lib/unicode/In/67.pl lib/unicode/In/68.pl lib/unicode/In/69.pl
+	   + lib/unicode/In/7.pl lib/unicode/In/70.pl lib/unicode/In/71.pl
+	   + lib/unicode/In/72.pl lib/unicode/In/73.pl lib/unicode/In/74.pl
+	   + lib/unicode/In/75.pl lib/unicode/In/76.pl lib/unicode/In/77.pl
+	   + lib/unicode/In/78.pl lib/unicode/In/79.pl lib/unicode/In/8.pl
+	   + lib/unicode/In/80.pl lib/unicode/In/81.pl lib/unicode/In/82.pl
+	   + lib/unicode/In/83.pl lib/unicode/In/84.pl lib/unicode/In/85.pl
+	   + lib/unicode/In/86.pl lib/unicode/In/87.pl lib/unicode/In/88.pl
+	   + lib/unicode/In/89.pl lib/unicode/In/9.pl lib/unicode/In/90.pl
+	   + lib/unicode/In/91.pl lib/unicode/In/92.pl lib/unicode/In/93.pl
+	   + lib/unicode/In/94.pl lib/unicode/In/95.pl
+	   - lib/unicode/Block.pl
+	   - lib/unicode/In/AlphabeticPresentationForms.pl
+	   - lib/unicode/In/Arabic.pl
+	   - lib/unicode/In/ArabicPresentationForms-A.pl
+	   - lib/unicode/In/ArabicPresentationForms-B.pl
+	   - lib/unicode/In/Armenian.pl lib/unicode/In/Arrows.pl
+	   - lib/unicode/In/BasicLatin.pl lib/unicode/In/Bengali.pl
+	   - lib/unicode/In/BlockElements.pl lib/unicode/In/Bopomofo.pl
+	   - lib/unicode/In/BopomofoExtended.pl
+	   - lib/unicode/In/BoxDrawing.pl lib/unicode/In/BraillePatterns.pl
+	   - lib/unicode/In/CJKCompatibility.pl
+	   - lib/unicode/In/CJKCompatibilityForms.pl
+	   - lib/unicode/In/CJKCompatibilityIdeographs.pl
+	   - lib/unicode/In/CJKRadicalsSupplement.pl
+	   - lib/unicode/In/CJKSymbolsandPunctuation.pl
+	   - lib/unicode/In/CJKUnifiedIdeographs.pl
+	   - lib/unicode/In/CJKUnifiedIdeographsExtensionA.pl
+	   - lib/unicode/In/Cherokee.pl
+	   - lib/unicode/In/CombiningDiacriticalMarks.pl
+	   - lib/unicode/In/CombiningHalfMarks.pl
+	   - lib/unicode/In/CombiningMarksforSymbols.pl
+	   - lib/unicode/In/ControlPictures.pl
+	   - lib/unicode/In/CurrencySymbols.pl lib/unicode/In/Cyrillic.pl
+	   - lib/unicode/In/Devanagari.pl lib/unicode/In/Dingbats.pl
+	   - lib/unicode/In/EnclosedAlphanumerics.pl
+	   - lib/unicode/In/EnclosedCJKLettersandMonths.pl
+	   - lib/unicode/In/Ethiopic.pl
+	   - lib/unicode/In/GeneralPunctuation.pl
+	   - lib/unicode/In/GeometricShapes.pl lib/unicode/In/Georgian.pl
+	   - lib/unicode/In/Greek.pl lib/unicode/In/GreekExtended.pl
+	   - lib/unicode/In/Gujarati.pl lib/unicode/In/Gurmukhi.pl
+	   - lib/unicode/In/HalfwidthandFullwidthForms.pl
+	   - lib/unicode/In/HangulCompatibilityJamo.pl
+	   - lib/unicode/In/HangulJamo.pl lib/unicode/In/HangulSyllables.pl
+	   - lib/unicode/In/Hebrew.pl
+	   - lib/unicode/In/HighPrivateUseSurrogates.pl
+	   - lib/unicode/In/HighSurrogates.pl lib/unicode/In/Hiragana.pl
+	   - lib/unicode/In/IPAExtensions.pl
+	   - lib/unicode/In/IdeographicDescriptionCharacters.pl
+	   - lib/unicode/In/Kanbun.pl lib/unicode/In/KangxiRadicals.pl
+	   - lib/unicode/In/Kannada.pl lib/unicode/In/Katakana.pl
+	   - lib/unicode/In/Khmer.pl lib/unicode/In/Lao.pl
+	   - lib/unicode/In/Latin-1Supplement.pl
+	   - lib/unicode/In/LatinExtended-A.pl
+	   - lib/unicode/In/LatinExtended-B.pl
+	   - lib/unicode/In/LatinExtendedAdditional.pl
+	   - lib/unicode/In/LetterlikeSymbols.pl
+	   - lib/unicode/In/LowSurrogates.pl lib/unicode/In/Malayalam.pl
+	   - lib/unicode/In/MathematicalOperators.pl
+	   - lib/unicode/In/MiscellaneousSymbols.pl
+	   - lib/unicode/In/MiscellaneousTechnical.pl
+	   - lib/unicode/In/Mongolian.pl lib/unicode/In/Myanmar.pl
+	   - lib/unicode/In/NumberForms.pl lib/unicode/In/Ogham.pl
+	   - lib/unicode/In/OpticalCharacterRecognition.pl
+	   - lib/unicode/In/Oriya.pl lib/unicode/In/PrivateUse.pl
+	   - lib/unicode/In/Runic.pl lib/unicode/In/Sinhala.pl
+	   - lib/unicode/In/SmallFormVariants.pl
+	   - lib/unicode/In/SpacingModifierLetters.pl
+	   - lib/unicode/In/Specials.pl
+	   - lib/unicode/In/SuperscriptsandSubscripts.pl
+	   - lib/unicode/In/Syriac.pl lib/unicode/In/Tamil.pl
+	   - lib/unicode/In/Telugu.pl lib/unicode/In/Thaana.pl
+	   - lib/unicode/In/Thai.pl lib/unicode/In/Tibetan.pl
+	   - lib/unicode/In/UnifiedCanadianAboriginalSyllabics.pl
+	   - lib/unicode/In/YiRadicals.pl lib/unicode/In/YiSyllables.pl
+	   ! MANIFEST lib/unicode/mktables.PL lib/utf8_heavy.pl
+	   ! pod/perlunicode.pod
+____________________________________________________________________________
+[  9896] By: jhi                                   on 2001/04/28  14:33:17
+        Log: Update the information on shared library path on HP-UX.
+     Branch: perl
+	   ! INSTALL
+____________________________________________________________________________
+[  9895] By: jhi                                   on 2001/04/28  14:32:30
+        Log: Because #9894 seems to do the trick, this workaround can be removed.
+     Branch: perl
+	   ! t/lib/selfstubber.t
+____________________________________________________________________________
+[  9894] By: jhi                                   on 2001/04/28  14:26:13
+        Log: For PerlIO flush the children's file handles (on fork/exec/system).
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[  9893] By: jhi                                   on 2001/04/28  14:23:15
+        Log: Test tweak for #9891.
+     Branch: perl
+	   ! t/lib/b-deparse.t
+____________________________________________________________________________
+[  9892] By: jhi                                   on 2001/04/28  14:10:13
+        Log: New HP-UX hints from Merijn.
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[  9891] By: jhi                                   on 2001/04/28  14:07:27
+        Log: Subject: [PATCH B::Deparse] non-block scopes
+             From: Robin Houston <robin@kitsite.com>
+             Date: Fri, 27 Apr 2001 19:15:14 +0100
+             Message-ID: <20010427191514.A30951@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9890] By: nick                                  on 2001/04/27  19:41:25
+        Log: Integrate mainline
+     Branch: perlio
+	  +> t/lib/selfstubber.t
+	  !> (integrate 50 files)
+____________________________________________________________________________
+[  9889] By: jhi                                   on 2001/04/27  18:23:46
+        Log: Subject: Re: selfstubber test fail on bleadperl
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Fri, 27 Apr 2001 19:31:18 +0100
+             Message-Id: <E14tD1S-0001tJ-00@libra.cus.cam.ac.uk>
+     Branch: perl
+	   ! t/lib/selfstubber.t
+____________________________________________________________________________
+[  9888] By: jhi                                   on 2001/04/27  16:20:54
+        Log: Test tweak for #9886.
+     Branch: perl
+	   ! t/lib/b-deparse.t
+____________________________________________________________________________
+[  9887] By: jhi                                   on 2001/04/27  16:16:33
+        Log: Buffering issue at least in Solaris (even with perlio).
+     Branch: perl
+	   ! t/lib/selfstubber.t
+____________________________________________________________________________
+[  9886] By: jhi                                   on 2001/04/27  14:59:23
+        Log: Subject: [PATCH B::Deparse] Human-readable pragmas &c
+             From: Robin Houston <robin@kitsite.com>
+             Date: Fri, 27 Apr 2001 16:53:20 +0100
+             Message-ID: <20010427165320.A30479@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9885] By: jhi                                   on 2001/04/27  14:23:51
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  9884] By: jhi                                   on 2001/04/27  14:14:12
         Log: Subject: [DOC PATCH bleadperl] Document underscores in numeric literals
              From: "Philip Newton" <pnewton@gmx.de>
