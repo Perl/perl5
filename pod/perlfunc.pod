@@ -1644,7 +1644,7 @@ For example:
     fcntl($filehandle, F_GETFL, $packed_return_buffer)
 	or die "can't fcntl F_GETFL: $!";
 
-You don't have to check for C<defined> on the return from C<fnctl>.
+You don't have to check for C<defined> on the return from C<fcntl>.
 Like C<ioctl>, it maps a C<0> return from the system call into
 C<"0 but true"> in Perl.  This string is true in boolean context and C<0>
 in numeric context.  It is also exempt from the normal B<-w> warnings
@@ -5671,7 +5671,7 @@ and C<SEEK_END> (start of the file, current position, end of the file)
 from the Fcntl module.  Use of the constants is also more portable
 than relying on 0, 1, and 2.  For example to define a "systell" function:
 
-	use Fnctl 'SEEK_CUR';
+	use Fcntl 'SEEK_CUR';
 	sub systell { sysseek($_[0], 0, SEEK_CUR) }
 
 Returns the new position, or the undefined value on failure.  A position
