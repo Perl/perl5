@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Jun 22 01:49:37 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Fri Jun 22 05:07:22 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -12099,10 +12099,15 @@ esac
 case "$d_sfio" in
 $define) ;;
 *)	: Remove sfio from list of libraries to use
-	set `echo X $libs | $sed -e 's/-lsfio / /' -e 's/-lsfio$//'`
-	shift
-	libs="$*"
-	echo "libs = $libs" >&4
+	case "$libs" in
+	*-lsfio*)
+		echo "Removing unneeded -lsfio from library list" >&4
+		set `echo X $libs | $sed -e 's/-lsfio / /' -e 's/-lsfio$//'`
+		shift
+		libs="$*"
+		echo "libs = $libs" >&4
+		;;
+	esac
 ;;
 esac
 
