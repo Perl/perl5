@@ -7,7 +7,7 @@ perlmod - Perl modules (packages)
 =head2 Packages
 
 Perl provides a mechanism for alternative namespaces to protect packages
-from stomping on each others variables.  In fact, apart from certain
+from stomping on each other's variables.  In fact, apart from certain
 magical variables, there's really no such thing as a global variable in
 Perl.  The package statement declares the compilation unit as being in the
 given namespace.  The scope of the package declaration is from the
@@ -22,7 +22,7 @@ symbol table is used by the compiler for the rest of that block.  You can
 refer to variables and filehandles in other packages by prefixing the
 identifier with the package name and a double colon:
 C<$Package::Variable>.  If the package name is null, the C<main> package
-as assumed.  That is, C<$::sail> is equivalent to C<$main::sail>.
+is assumed.  That is, C<$::sail> is equivalent to C<$main::sail>.
 
 (The old package delimiter was a single quote, but double colon
 is now the preferred delimiter, in part because it's more readable
@@ -69,8 +69,8 @@ or L<perlref> regarding closures.
 
 The symbol table for a package happens to be stored in the associative
 array of that name appended with two colons.  The main symbol table's
-name is thus C<%main::>, or C<%::> for short.  Likewise the nested package
-mentioned earlier is named C<%OUTER::INNER::>.
+name is thus C<%main::>, or C<%::> for short.  Likewise symbol table for
+the nested package mentioned earlier is named C<%OUTER::INNER::>.
 
 The value in each entry of the associative array is what you are referring
 to when you use the C<*name> typeglob notation.  In fact, the following
@@ -120,7 +120,7 @@ Assignment to a typeglob performs an aliasing operation, i.e.,
     *dick = *richard;
 
 causes variables, subroutines and file handles accessible via the
-identifier C<richard> to also be accessible via the symbol C<dick>.  If
+identifier C<richard> to also be accessible via the identifier C<dick>.  If
 you only want to alias a particular variable or subroutine, you can
 assign a reference instead:
 
@@ -305,7 +305,7 @@ F<.pl> files will all eventually be converted into standard modules, and
 the F<.ph> files made by B<h2ph> will probably end up as extension modules
 made by B<h2xs>.  (Some F<.ph> values may already be available through the
 POSIX module.)  The B<pl2pm> file in the distribution may help in your
-conversion, but it's just a mechanical process, so is far from bullet proof.
+conversion, but it's just a mechanical process, so is far from bulletproof.
 
 =head2 Pragmatic Modules
 
@@ -335,6 +335,10 @@ Pragma to compute arithmetic in integer instead of double
 
 Pragma to request less of something from the compiler
 
+=item ops
+
+Pragma to restrict use of unsafe opcodes
+
 =item overload
 
 Pragma for overloading operators 
@@ -350,6 +354,10 @@ Pragma to restrict unsafe constructs
 =item subs
 
 Pragma to predeclare sub names
+
+=item vars
+
+Pragma to predeclare global symbols
 
 =back
 
@@ -602,7 +610,7 @@ Miscellaneous Modules
 
 =back
 
-Some of the reguster CPAN sites as of this writing include the following.
+The registered CPAN sites as of this writing include the following.
 You should try to choose one close to you:
 
 =over
@@ -676,7 +684,7 @@ ftp://ftp.is.co.za/programming/perl/CPAN/
 =back
 
 For an up-to-date listing of CPAN sites, 
-see http://www.perl.com/perl/ or ftp://ftp.perl.com/perl/ .
+see F<http://www.perl.com/perl/CPAN> or F<ftp://ftp.perl.com/perl/>.
 
 =head1 Modules: Creation, Use and Abuse
 
@@ -910,6 +918,8 @@ If the README file seems to be getting too large you may wish to
 split out some of the sections into separate files: INSTALL,
 Copying, ToDo etc.
 
+=over 4
+
 =item Adding a Copyright Notice.
 
 How you choose to licence your work is a personal decision.
@@ -991,6 +1001,8 @@ old behaviour if people rely on it. Document incompatible changes.
 
 =back
 
+=back
+
 =head2 Guidelines for Converting Perl 4 Library Scripts into Modules
 
 =over 4
@@ -1063,7 +1075,7 @@ the application could invoked as:
 
      perl -e 'use Module::Name; method(@ARGV)' ...
 or   
-     perl -mModule::Name ...    (in perl5.002?)
+     perl -mModule::Name ...    (in perl5.002)
 
 =back
 
