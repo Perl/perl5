@@ -5448,6 +5448,10 @@ if "$useshrplib"; then
 	beos)
 		# beos doesn't like the default, either.
 		;;
+	hpux*)
+		# hpux doesn't like the default, either.
+		tmp_shrpenv="env LDOPTS=\"+s +b${shrpdir}\""
+		;;
 	*)
 		tmp_shrpenv="env LD_RUN_PATH=$shrpdir"
 		;;
