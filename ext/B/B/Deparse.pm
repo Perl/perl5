@@ -944,7 +944,6 @@ sub pp_prototype { unop(@_, "prototype") }
 sub pp_close { unop(@_, "close") }
 sub pp_fileno { unop(@_, "fileno") }
 sub pp_umask { unop(@_, "umask") }
-sub pp_binmode { unop(@_, "binmode") }
 sub pp_untie { unop(@_, "untie") }
 sub pp_tied { unop(@_, "tied") }
 sub pp_dbmclose { unop(@_, "dbmclose") }
@@ -1487,6 +1486,7 @@ sub pp_return { listop(@_, "return") }
 sub pp_open { listop(@_, "open") }
 sub pp_pipe_op { listop(@_, "pipe") }
 sub pp_tie { listop(@_, "tie") }
+sub pp_binmode { listop(@_, "binmode") }
 sub pp_dbmopen { listop(@_, "dbmopen") }
 sub pp_sselect { listop(@_, "select") }
 sub pp_select { listop(@_, "select") }
