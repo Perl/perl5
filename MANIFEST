@@ -1150,6 +1150,7 @@ lib/Test/Simple/t/skipall.t     Test::More test, skip all tests
 lib/Test/Simple/t/todo.t        Test::More test, TODO tests
 lib/Test/Simple/t/undef.t       Test::More test, undefs don't cause warnings
 lib/Test/Simple/t/useing.t      Test::More test, compile test
+lib/Test/Tutorial.pod           A tutorial on writing tests
 lib/Test/t/fail.t		See if Test works
 lib/Test/t/mix.t		See if Test works
 lib/Test/t/onfail.t		See if Test works
