@@ -1870,7 +1870,9 @@ The autouse pragma didn't work for Multi::Part::Function::Names.
 =item *
 
 caller() could cause core dumps in certain situations.  Carp was sometimes
-affected by this problem.
+affected by this problem.  In particular, caller() now returns a
+subroutine name of C<(unknown)> for subroutines that have been removed
+from the symbol table.
 
 =item *
 
