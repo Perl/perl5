@@ -40,9 +40,9 @@ sub B::LOOP::debug {
     my ($op) = @_;
     $op->B::BINOP::debug();
     printf <<'EOT', ${$op->redoop}, ${$op->nextop}, ${$op->lastop};
-       op_redoop       0x%x
-       op_nextop       0x%x
-       op_lastop       0x%x
+	op_redoop	0x%x
+	op_nextop	0x%x
+	op_lastop	0x%x
 EOT
 }
 
@@ -205,7 +205,7 @@ sub B::CV::debug {
 	GV		0x%x
 	FILE		%s
 	DEPTH		%d
-	PADLIST		0x%x			       
+	PADLIST		0x%x
 	OUTSIDE		0x%x
 	OUTSIDE_SEQ	%d
 EOT
@@ -221,13 +221,13 @@ sub B::AV::debug {
     my(@array) = $av->ARRAY;
     print "\tARRAY\t\t(", join(", ", map("0x" . $$_, @array)), ")\n";
     printf <<'EOT', scalar(@array), $av->MAX, $av->OFF, $av->AvFLAGS;
-	FILL		%d    
+	FILL		%d
 	MAX		%d
 	OFF		%d
 	AvFLAGS		%d
 EOT
 }
-    
+
 sub B::GV::debug {
     my ($gv) = @_;
     if ($done_gv{$$gv}++) {
