@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Tue Oct 26 16:45:55 EET DST 1999
+ * Configuration time: Wed Oct 27 15:23:59 EET DST 1999
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -2184,6 +2184,11 @@
  */
 /*#define HAS_FSEEKO		/ **/
 
+/* HAS_FSTATFS:
+ *	This symbol, if defined, indicates that the fstatfs routine is
+ *	available to stat filesystems by file descriptors.
+ */
+#define HAS_FSTATFS		/**/
 /* HAS_FTELLO:
  *	This symbol, if defined, indicates that the ftello routine is
  *	available to ftell beyond 32 bits (useful for ILP32 hosts).
@@ -2259,20 +2264,31 @@
  */
 #define HAS_SQRTL		/**/
 
-/* HAS_FSTATFS:
- *	This symbol, if defined, indicates that the fstatfs routine is
- *	available to stat filesystems by file descriptors.
+/* HAS_STATFS:
+ *	This symbol, if defined, indicates that the statfs routine is
+ *	available to stat filesystems by filenames.
  */
-/* HAS_STRUCT_STATFS_FLAGS:
+/* HAS_STRUCT_STATFS:
+ *	This symbol, if defined, indicates that the struct statfs
+ *	to do statfs() is supported.
+ */
+/* HAS_STRUCT_FS_DATA:
+ *	This symbol, if defined, indicates that the struct fs_data
+ *	to do statfs() is supported.
+ */
+/* HAS_STRUCT_STATFS_F_FLAGS:
  *	This symbol, if defined, indicates that the struct statfs
  *	does have the f_flags member containing the mount flags of
- *	the filesystem holding the file.
+ *	the filesystem containing the file.
  *	This kind of struct statfs is coming from <sys/mount.h> (BSD 4.3),
  *	not from <sys/statfs.h> (SYSV).  Older BSDs (like Ultrix) do not
- *	have statfs() and struct statfs, they have getmnt().
+ *	have statfs() and struct statfs, they have ustat() and statfs()
+ *	with struct fs_data.
  */
-#define HAS_FSTATFS		/**/
-#define HAS_STRUCT_STATFS_FLAGS		/**/
+#define HAS_STATFS		/**/
+#define HAS_STRUCT_STATFS	/**/
+/*#define HAS_STRUCT_FS_DATA	/ **/
+#define HAS_STRUCT_STATFS_F_FLAGS		/**/
 
 /* HAS_FSTATVFS:
  *	This symbol, if defined, indicates that the fstatvfs routine is
@@ -2287,6 +2303,12 @@
  *		extern long telldir _((DIR*));
  */
 #define	HAS_TELLDIR_PROTO	/**/
+
+/* HAS_USTAT:
+ *	This symbol, if defined, indicates that the ustat system call is
+ *	available to query file system statistics by dev_t.
+ */
+#define HAS_USTAT		/**/
 
 /* HAS_WRITEV:
  *	This symbol, if defined, indicates that the writev routine is
@@ -2381,11 +2403,28 @@
  */
 #define	I_SYS_MOUNT		/**/
 
+/* I_SYS_STATFS:
+ *	This symbol, if defined, indicates that <sys/statfs.h> exists.
+ */
+/*#define	I_SYS_STATFS		/ **/
+
 /* I_SYS_STATVFS:
  *	This symbol, if defined, indicates that <sys/statvfs.h> exists and
  *	should be included.
  */
 #define	I_SYS_STATVFS		/**/
+
+/* I_SYS_VFS:
+ *	This symbol, if defined, indicates that <sys/vfs.h> exists and
+ *	should be included.
+ */
+/*#define	I_SYS_VFS		/ **/
+
+/* I_USTAT:
+ *	This symbol, if defined, indicates that <ustat.h> exists and
+ *	should be included.
+ */
+#define	I_USTAT		/**/
 
 /* HAS_OFF64_T:
  *	This symbol will be defined if the C compiler supports off64_t.

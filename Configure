@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Oct 26 16:44:39 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Wed Oct 27 14:42:21 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -355,6 +355,7 @@ d_flock=''
 d_fork=''
 d_fseeko=''
 d_fsetpos=''
+d_fstatfs=''
 d_ftello=''
 d_ftime=''
 d_gettimeod=''
@@ -512,9 +513,10 @@ sockethdr=''
 socketlib=''
 d_sqrtl=''
 d_statblks=''
-d_fstatfs=''
+d_fs_data_s=''
 d_statfs=''
-d_statfsflags=''
+d_statfs_f_flags=''
+d_statfs_s=''
 d_fstatvfs=''
 d_statvfs=''
 d_stdio_cnt_lval=''
@@ -555,6 +557,7 @@ d_umask=''
 d_semctl_semid_ds=''
 d_semctl_semun=''
 d_union_semun=''
+d_ustat=''
 d_vfork=''
 usevfork=''
 d_voidsig=''
@@ -648,12 +651,14 @@ i_sysresrc=''
 i_syssecrt=''
 i_sysselct=''
 i_sysstat=''
+i_sysstatfs=''
 i_sysstatvfs=''
 i_systimes=''
 i_systypes=''
 d_iovec_s=''
 i_sysuio=''
 i_sysun=''
+i_sysvfs=''
 i_syswait=''
 i_sgtty=''
 i_termio=''
@@ -663,6 +668,7 @@ i_systimek=''
 i_time=''
 timeincl=''
 i_unistd=''
+i_ustat=''
 i_utime=''
 i_values=''
 i_stdarg=''
@@ -7713,8 +7719,9 @@ while $test $# -ge 2; do
 	esac ;
     shift 2;
 done > try.c;
-echo "int main () { struct $struct foo; foo.$field = 0; }" >> try.c;
-if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
+echo "int main () { struct $struct foo; char* bar; bar = (char*)foo.$field; }" >> try.c;
+set try;
+if eval $compile; then
 	val="$define";
 else
 	val="$undef";
@@ -8664,13 +8671,23 @@ $rm -f try.*
 set d_fpos64_t
 eval $setvar
 
-: see if fseeko exists
-set fseeko d_fseeko
-eval $inlibc
-
-: see if fsetpos exists
-set fsetpos d_fsetpos
-eval $inlibc
+hasstruct='varname=$1; struct=$2; shift; shift;
+while $test $# -ge 2; do
+	case "$1" in
+	$define) echo "#include <$2>";;
+	esac ;
+    shift 2;
+done > try.c;
+echo "int main () { struct $struct foo; }" >> try.c;
+set try;
+if eval $compile; then
+	val="$define";
+else
+	val="$undef";
+fi;
+set $varname;
+eval $setvar;
+$rm -f try.c try.o'
 
 : see if this is a sys/param system
 set sys/param.h i_sysparam
@@ -8680,25 +8697,68 @@ eval $inhdr
 set sys/mount.h i_sysmount
 eval $inhdr
 
+: see if sys/types.h has to be included
+set sys/types.h i_systypes
+eval $inhdr
+
+: see if this is a sys/vfs.h system
+set sys/vfs.h i_sysvfs
+eval $inhdr
+
+: see if this is a sys/statfs.h system
+set sys/statfs.h i_sysstatfs
+eval $inhdr
+
 
 : see if statfs exists
 set statfs d_statfs
 eval $inlibc
 
-: see if fstatfs exists
-set fstatfs d_fstatfs
-eval $inlibc
+echo "Checking to see if your system supports struct statfs..." >&4
+set d_statfs_s statfs $i_systypes sys/types.h $i_sysparam sys/param.h $i_sysmount sys/mount.h $i_sysvfs sys/vfs.h $i_sysstatfs sys/statfs.h
+eval $hasstruct
+case "$d_statfs_s" in
+"$define")      echo "Yup, it does."     >&4 ;;
+*)              echo "Nope, it doesn't." >&4 ;;
+esac
 
-: see if statfs knows about mount flags
-case "$d_statfs" in
-define)	set d_statfsflags statfs f_flags $i_sysparam sys/param.h $i_sysmount sys/mount.h
+: see if struct statfs knows about f_flags
+case "$d_statfs_s" in
+define)	
+	echo "Checking to see if your struct statfs has f_flags field..." >&4
+	set d_statfs_f_flags statfs f_flags $i_systypes sys/types.h $i_sysparam sys/param.h $i_sysmount sys/mount.h $i_sysvfs sys/vfs.h $i_sysstatfs sys/statfs.h
 	eval $hasfield
 	;;
 *)	val="$undef"
-	set d_statfsflags
+	set d_statfs_f_flags
 	eval $setvar
 	;;
 esac
+case "$d_statfs_f_flags" in
+"$define")      echo "Yup, it does."     >&4 ;;
+*)              echo "Nope, it doesn't." >&4 ;;
+esac
+
+echo "Checking to see if your system supports struct fs_data..." >&4
+set d_fs_data_s fs_data $i_systypes sys/types.h $i_sysparam sys/param.h $i_sysmount sys/mount.h
+eval $hasstruct
+case "$d_fs_data_s" in
+"$define")      echo "Yup, it does."     >&4 ;;
+*)              echo "Nope, it doesn't." >&4 ;;
+esac
+
+: see if fseeko exists
+set fseeko d_fseeko
+eval $inlibc
+
+: see if fsetpos exists
+set fsetpos d_fsetpos
+eval $inlibc
+
+
+: see if fstatfs exists
+set fstatfs d_fstatfs
+eval $inlibc
 
 
 : see if statvfs exists
@@ -10621,10 +10681,6 @@ eval $inlibc
 set tcsetpgrp d_tcsetpgrp
 eval $inlibc
 
-: see if sys/types.h has to be included
-set sys/types.h i_systypes
-eval $inhdr
-
 : see if prototype for telldir is available
 echo " "
 set d_telldirproto telldir $i_systypes sys/types.h $i_dirent dirent.h
@@ -10726,6 +10782,10 @@ eval $setvar
 
 : see if umask exists
 set umask d_umask
+eval $inlibc
+
+: see if ustat exists
+set ustat d_ustat
 eval $inlibc
 
 : backward compatibility for d_hvfork
@@ -13113,6 +13173,10 @@ eval $inhdr
 set sys/wait.h i_syswait
 eval $inhdr
 
+: see if this is a ustat.h system
+set ustat.h i_ustat
+eval $inhdr
+
 : see if this is an utime system
 set utime.h i_utime
 eval $inhdr
@@ -13587,6 +13651,7 @@ d_flock='$d_flock'
 d_fork='$d_fork'
 d_fpathconf='$d_fpathconf'
 d_fpos64_t='$d_fpos64_t'
+d_fs_data_s='$d_fs_data_s'
 d_fseeko='$d_fseeko'
 d_fsetpos='$d_fsetpos'
 d_fstatfs='$d_fstatfs'
@@ -13750,7 +13815,8 @@ d_sockpair='$d_sockpair'
 d_sqrtl='$d_sqrtl'
 d_statblks='$d_statblks'
 d_statfs='$d_statfs'
-d_statfsflags='$d_statfsflags'
+d_statfs_f_flags='$d_statfs_f_flags'
+d_statfs_s='$d_statfs_s'
 d_statvfs='$d_statvfs'
 d_stdio_cnt_lval='$d_stdio_cnt_lval'
 d_stdio_ptr_lval='$d_stdio_ptr_lval'
@@ -13785,6 +13851,7 @@ d_tzname='$d_tzname'
 d_umask='$d_umask'
 d_uname='$d_uname'
 d_union_semun='$d_union_semun'
+d_ustat='$d_ustat'
 d_vendorbin='$d_vendorbin'
 d_vendorlib='$d_vendorlib'
 d_vfork='$d_vfork'
@@ -13891,6 +13958,7 @@ i_syssecrt='$i_syssecrt'
 i_sysselct='$i_sysselct'
 i_syssockio='$i_syssockio'
 i_sysstat='$i_sysstat'
+i_sysstatfs='$i_sysstatfs'
 i_sysstatvfs='$i_sysstatvfs'
 i_systime='$i_systime'
 i_systimek='$i_systimek'
@@ -13898,11 +13966,13 @@ i_systimes='$i_systimes'
 i_systypes='$i_systypes'
 i_sysuio='$i_sysuio'
 i_sysun='$i_sysun'
+i_sysvfs='$i_sysvfs'
 i_syswait='$i_syswait'
 i_termio='$i_termio'
 i_termios='$i_termios'
 i_time='$i_time'
 i_unistd='$i_unistd'
+i_ustat='$i_ustat'
 i_utime='$i_utime'
 i_values='$i_values'
 i_varargs='$i_varargs'

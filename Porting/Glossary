@@ -534,6 +534,10 @@ d_fpathconf (d_pathconf.U):
 d_fpos64_t (io64.U):
 	This symbol will be defined if the C compiler supports fpos64_t.
 
+d_fs_data_s (d_statfs.U):
+	This variable conditionally defines the HAS_STRUCT_FS_DATA symbol,
+	which indicates that the struct fs_data is supported.
+
 d_fseeko (d_fseeko.U):
 	This variable conditionally defines the HAS_FSEEKO symbol, which
 	indicates to the C program that the fseeko() routine is available.
@@ -542,7 +546,7 @@ d_fsetpos (d_fsetpos.U):
 	This variable conditionally defines HAS_FSETPOS if fsetpos() is
 	available to set the file position indicator.
 
-d_fstatfs (d_statfs.U):
+d_fstatfs (d_fstatfs.U):
 	This variable conditionally defines the HAS_FSTATFS symbol, which
 	indicates to the C program that the fstatfs() routine is available.
 
@@ -1327,11 +1331,15 @@ d_statfs (d_statfs.U):
 	This variable conditionally defines the HAS_STATFS symbol, which
 	indicates to the C program that the statfs() routine is available.
 
-d_statfsflags (d_statfs.U):
-	This variable conditionally defines the HAS_STRUCT_STATFS_FLAGS
+d_statfs_f_flags (d_statfs.U):
+	This variable conditionally defines the HAS_STRUCT_STATFS_F_FLAGS
 	symbol, which indicates to struct statfs from has f_flags member.
 	This kind of struct statfs is coming from sys/mount.h (BSD),
 	not from sys/statfs.h (SYSV).
+
+d_statfs_s (d_statfs.U):
+	This variable conditionally defines the HAS_STRUCT_STATFS symbol,
+	which indicates that the struct statfs is supported.
 
 d_statvfs (d_statvfs.U):
 	This variable conditionally defines the HAS_STATVFS symbol, which
@@ -1486,6 +1494,10 @@ d_uname (d_gethname.U):
 d_union_semun (d_union_semun.U):
 	This variable conditionally defines HAS_UNION_SEMUN if the
 	union semun is defined by including <sys/sem.h>.
+
+d_ustat (d_ustat.U):
+	This variable conditionally defines HAS_USTAT if ustat() is
+	available to query file system statistics by dev_t.
 
 d_vendorbin (vendorbin.U):
 	This variable conditionally defines PERL_VENDORBIN.
@@ -1973,6 +1985,10 @@ i_sysstat (i_sysstat.U):
 	This variable conditionally defines the I_SYS_STAT symbol,
 	and indicates whether a C program should include <sys/stat.h>.
 
+i_sysstatfs (i_sysstatfs.U):
+	This variable conditionally defines the I_SYSSTATFS symbol,
+	and indicates whether a C program should include <sys/statfs.h>.
+
 i_sysstatvfs (i_sysstatvfs.U):
 	This variable conditionally defines the I_SYSSTATVFS symbol,
 	and indicates whether a C program should include <sys/statvfs.h>.
@@ -2003,6 +2019,10 @@ i_sysun (i_sysun.U):
 	to the C program that it should include <sys/un.h> to get UNIX
 	domain socket definitions.
 
+i_sysvfs (i_sysvfs.U):
+	This variable conditionally defines the I_SYSVFS symbol,
+	and indicates whether a C program should include <sys/vfs.h>.
+
 i_syswait (i_syswait.U):
 	This variable conditionally defines I_SYS_WAIT, which indicates
 	to the C program that it should include <sys/wait.h>.
@@ -2024,6 +2044,10 @@ i_time (i_time.U):
 i_unistd (i_unistd.U):
 	This variable conditionally defines the I_UNISTD symbol, and indicates
 	whether a C program should include <unistd.h>.
+
+i_ustat (i_ustat.U):
+	This variable conditionally defines the I_USTAT symbol, and indicates
+	whether a C program should include <ustat.h>.
 
 i_utime (i_utime.U):
 	This variable conditionally defines the I_UTIME symbol, and indicates
