@@ -4,20 +4,29 @@ use ExtUtils::MakeMaker;
 
 my $name = 'Byte';
 my %tables = (
-	      byte_t => 
+	      misc_t => 
 	      [
-	       # 'ascii.ucm', 
-	       'koi8-r.ucm', 
+	       'gsm0338.ucm',
+	       'nextstep.ucm',
+	       'roman8.ucm',
 	       'viscii.ucm',
 	       ],
+	      koi8_t => [ 'koi8-f.ucm', 'koi8-r.ucm', 'koi8-u.ucm', ],
 	      mac_t => 
 	      [
-	       qw(macCentEuro.enc  macCroatian.enc 
-		 macCyrillic.enc  macDingbats.enc 
-		 macGreek.enc     macIceland.enc 
-		 macRoman.enc 	  macRumanian.enc 
-		 macSami.enc 	  macThai.enc 
-		 macTurkish.enc	  macUkraine.enc),
+	       qw(
+		  macCentEuro.ucm 
+		  macSami.ucm
+		  macUkraine.ucm
+		  macCroatian.ucm
+		  macGreek.ucm
+		  macRoman.ucm
+		  macThai.ucm
+		  macCyrillic.ucm
+		  macIceland.ucm
+		  macRumanian.ucm 
+		  macTurkish.ucm
+		  ),
 	      ],
              );
 

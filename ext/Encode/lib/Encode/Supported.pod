@@ -1,6 +1,6 @@
 =head1 NAME
 
-Encode::Supported -- Supported encodings by Encode
+Encode::Supports -- Supported encodings by Encode
 
 =head1 DESCRIPTION
 
@@ -90,13 +90,16 @@ non-ASCII characters.
   macroman
   maccyrillic
   macromanian
-  macdingbats       
   macsami
   macgreek 
   macthai
   macicelandic    
   macturkish
   macukraine
+
+  nextstep
+  gsm0338	# used in GSM handsets
+  roman8	# what is this?
   -----------------------
 
 =head2 The CJK: Chinese, Japanese, Korean (Multibyte)
@@ -181,6 +184,7 @@ For symbols  and dingbats.
   -----------------------
   symbol
   dingbats
+  macdingbats
   -----------------------
 
 =back

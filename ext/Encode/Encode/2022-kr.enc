@@ -1,7 +1,0 @@
-# Encoding file: iso2022-kr, escape-driven
-E
-name		iso2022-kr
-init		\x1b$)C
-final		{}
-ascii		{}
-ksc5601		\x1b$)C

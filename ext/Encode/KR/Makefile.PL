@@ -2,9 +2,10 @@ use 5.7.2;
 use strict;
 use ExtUtils::MakeMaker;
 
-my %tables = (euc_kr_t   => ['euc-kr.enc'],
-	      '5601_t'   => ['ksc5601.enc'],
-	      cp_kr_t    => ['cp949.enc'],
+my %tables = (euc_kr_t   => ['euc-kr.ucm',
+			     'cp949.ucm',
+			     ],
+	      '5601_t'   => ['ksc5601.ucm'],
              );
 
 my $name = 'KR';

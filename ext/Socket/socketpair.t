@@ -156,7 +156,7 @@ ok (close RIGHT, "close right");
 
 SKIP: {
   skip "No usable SOCK_DGRAM for socketpair", 24 if ($^O =~ /^(MSWin32|os2)\z/);
-
+  local $TODO = "socketpair not supported on $^O" if $^O eq 'nto';
 
 ok (socketpair (LEFT, RIGHT, AF_UNIX, SOCK_DGRAM, PF_UNSPEC),
     "socketpair (LEFT, RIGHT, AF_UNIX, SOCK_DGRAM, PF_UNSPEC)")

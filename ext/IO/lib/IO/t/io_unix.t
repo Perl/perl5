@@ -27,7 +27,7 @@ BEGIN {
 	    eval {IO::Socket::pack_sockaddr_un('/tmp/foo') || 1}
 	      or $@ !~ /not implemented/ or
 		$reason = 'compiled without TCP/IP stack v4';
-	} elsif ($^O =~ m/^(?:qnx|nto)$/ ) {
+	} elsif ($^O =~ m/^(?:qnx|nto|vos)$/ ) {
 	    $reason = 'Not implemented';
 	}
 	if ($reason) {

@@ -1,5 +1,5 @@
-*** perly.c.orig	ma 25 maalis 17.32.52 2002
---- perly.c	ma 25 maalis 17.32.53 2002
+*** perly.c.orig	Tue Mar 26 01:38:52 2002
+--- perly.c	Tue Mar 26 01:38:54 2002
 ***************
 *** 1,5 ****
   #ifndef lint
@@ -15,7 +15,7 @@
   #line 16 "perly.y"
 ***************
 *** 9,15 ****
-  #if defined(EBCDIC) || defined(VMS)
+  #ifdef EBCDIC
   #undef YYDEBUG
   #endif
 ! #define dep() deprecate("\"do\" to call subroutines")
@@ -23,7 +23,7 @@
   /* stuff included here to make perly_c.diff apply better */
   
 --- 9,15 ----
-  #if defined(EBCDIC) || defined(VMS)
+  #ifdef EBCDIC
   #undef YYDEBUG
   #endif
 ! #define dep() deprecate_old("\"do\" to call subroutines")

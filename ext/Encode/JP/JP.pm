@@ -5,14 +5,14 @@ BEGIN {
     }
 }
 use Encode;
-our $VERSION = do { my @r = (q$Revision: 0.98 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 0.99 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use XSLoader;
 XSLoader::load('Encode::JP',$VERSION);
 
 use Encode::JP::JIS;
-use Encode::JP::ISO_2022_JP;
-use Encode::JP::ISO_2022_JP_1;
+use Encode::JP::2022_JP;
+use Encode::JP::2022_JP1;
 
 1;
 __END__

@@ -6,7 +6,7 @@
 #include "EXTERN.h"
 #define PERL_IN_PERLY_C
 #include "perl.h"
-#if defined(EBCDIC) || defined(VMS)
+#ifdef EBCDIC
 #undef YYDEBUG
 #endif
 #define dep() deprecate_old("\"do\" to call subroutines")

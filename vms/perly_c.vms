@@ -7,7 +7,7 @@
 #include "EXTERN.h"
 #define PERL_IN_PERLY_C
 #include "perl.h"
-#if defined(EBCDIC) || defined(VMS)
+#ifdef EBCDIC
 #undef YYDEBUG
 #endif
 #define dep() deprecate_old("\"do\" to call subroutines")
@@ -1438,13 +1438,21 @@ yyparse()
     ysave->oldyylval	= yylval;
 
 #if YYDEBUG
+  {
+    register int saved_errno = errno;
+#ifdef VMS
+    register int saved_vaxc_errno = vaxc$errno;
+#else
+    register int saved_vaxc_errno = 0;
+#endif
     if ((yys = getenv("YYDEBUG")))
     {
         yyn = *yys;
         if (yyn >= '0' && yyn <= '9')
             yydebug = yyn - '0';
     }
-	else SETERRNO(0,SS$_NORMAL);
+    else SETERRNO(saved_errno,saved_vaxc_errno);
+  }
 #endif
 
     yynerrs = 0;

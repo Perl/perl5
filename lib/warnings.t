@@ -31,6 +31,7 @@ my $files = 0;
 foreach my $file (@w_files) {
 
     next if $file =~ /(~|\.orig|,v)$/;
+    next if $file =~ /perlio$/ && !$Config{useperlio};
 
     open F, "<$file" or die "Cannot open $file: $!\n" ;
     my $line = 0;

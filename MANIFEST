@@ -196,199 +196,129 @@ ext/DynaLoader/hints/openbsd.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
 ext/DynaLoader/XSLoader_pm.PL	Simple XS Loader perl module
-ext/Encode/AUTHORS		Encode extension
-ext/Encode/Byte/Byte.pm			Encode extension
-ext/Encode/Byte/Makefile.PL			Encode extension
-ext/Encode/Changes		Encode extension
+ext/Encode/AUTHORS		List of authors
+ext/Encode/Byte/Byte.pm	Encode extension
+ext/Encode/Byte/Makefile.PL       Encode extension
 ext/Encode/CN/CN.pm		Encode extension
 ext/Encode/CN/Makefile.PL	Encode extension
-ext/Encode/compile		Encode extension
-ext/Encode/EBCDIC/EBCDIC.pm			Encode extension
-ext/Encode/EBCDIC/Makefile.PL			Encode extension
-ext/Encode/encengine.c		Encode extension
-ext/Encode/encode.h		Encode extension
+ext/Encode/Changes		Change Log
+ext/Encode/EBCDIC/EBCDIC.pm       Encode extension
+ext/Encode/EBCDIC/Makefile.PL     Encode extension
 ext/Encode/Encode.pm			Encode extension
-ext/Encode/Encode.xs			Encode extension
-ext/Encode/Encode/11643-1.enc		Encode table
-ext/Encode/Encode/11643-2.enc		Encode table
-ext/Encode/Encode/2022-cn.enc		Encode table
-ext/Encode/Encode/2022-jp.enc		Encode table
-ext/Encode/Encode/2022-jp1.enc		Encode table
-ext/Encode/Encode/2022-jp2.enc		Encode table
-ext/Encode/Encode/2022-kr.enc		Encode table
-ext/Encode/Encode/2022.enc		Encode table
-ext/Encode/Encode/7bit-greek.enc	Encode table
-ext/Encode/Encode/7bit-jis.enc		Encode table
-ext/Encode/Encode/7bit-kana.enc		Encode table
-ext/Encode/Encode/7bit-latin1.enc	Encode table
-ext/Encode/Encode/8859-1.enc		Encode table
-ext/Encode/Encode/8859-1.ucm		Encode table
-ext/Encode/Encode/8859-10.enc		Encode table
-ext/Encode/Encode/8859-10.ucm		Encode table
-ext/Encode/Encode/8859-11.enc		Encode table
-ext/Encode/Encode/8859-11.ucm		Encode table
-ext/Encode/Encode/8859-13.enc		Encode table
-ext/Encode/Encode/8859-13.ucm		Encode table
-ext/Encode/Encode/8859-14.enc		Encode table
-ext/Encode/Encode/8859-14.ucm		Encode table
-ext/Encode/Encode/8859-15.enc		Encode table
-ext/Encode/Encode/8859-15.ucm		Encode table
-ext/Encode/Encode/8859-16.enc		Encode table
-ext/Encode/Encode/8859-16.ucm		Encode table
-ext/Encode/Encode/8859-2.enc		Encode table
-ext/Encode/Encode/8859-2.ucm		Encode table
-ext/Encode/Encode/8859-3.enc		Encode table
-ext/Encode/Encode/8859-3.ucm		Encode table
-ext/Encode/Encode/8859-4.enc		Encode table
-ext/Encode/Encode/8859-4.ucm		Encode table
-ext/Encode/Encode/8859-5.enc		Encode table
-ext/Encode/Encode/8859-5.ucm		Encode table
-ext/Encode/Encode/8859-6.enc		Encode table
-ext/Encode/Encode/8859-6.ucm		Encode table
-ext/Encode/Encode/8859-7.enc		Encode table
-ext/Encode/Encode/8859-7.ucm		Encode table
-ext/Encode/Encode/8859-8.enc		Encode table
-ext/Encode/Encode/8859-8.ucm		Encode table
-ext/Encode/Encode/8859-9.enc		Encode table
-ext/Encode/Encode/8859-9.ucm		Encode table
-ext/Encode/Encode/ascii.enc		Encode table
-ext/Encode/Encode/ascii.ucm		Encode table
-ext/Encode/Encode/big5-hkscs.enc	Encode table
-ext/Encode/Encode/big5.enc		Encode table
-ext/Encode/Encode/cp1006.enc		Encode table
-ext/Encode/Encode/cp1047.enc		Encode table
-ext/Encode/Encode/cp1047.ucm		Encode table
-ext/Encode/Encode/cp1250.enc		Encode table
-ext/Encode/Encode/cp1250.ucm		Encode table
-ext/Encode/Encode/cp1251.enc		Encode table
-ext/Encode/Encode/cp1252.enc		Encode table
-ext/Encode/Encode/cp1253.enc		Encode table
-ext/Encode/Encode/cp1254.enc		Encode table
-ext/Encode/Encode/cp1255.enc		Encode table
-ext/Encode/Encode/cp1256.enc		Encode table
-ext/Encode/Encode/cp1257.enc		Encode table
-ext/Encode/Encode/cp1258.enc		Encode table
-ext/Encode/Encode/cp37.enc		Encode table
-ext/Encode/Encode/cp37.ucm		Encode table
-ext/Encode/Encode/cp424.enc		Encode table
-ext/Encode/Encode/cp437.enc		Encode table
-ext/Encode/Encode/cp737.enc		Encode table
-ext/Encode/Encode/cp775.enc		Encode table
-ext/Encode/Encode/cp850.enc		Encode table
-ext/Encode/Encode/cp852.enc		Encode table
-ext/Encode/Encode/cp855.enc		Encode table
-ext/Encode/Encode/cp856.enc		Encode table
-ext/Encode/Encode/cp857.enc		Encode table
-ext/Encode/Encode/cp860.enc		Encode table
-ext/Encode/Encode/cp861.enc		Encode table
-ext/Encode/Encode/cp862.enc		Encode table
-ext/Encode/Encode/cp863.enc		Encode table
-ext/Encode/Encode/cp864.enc		Encode table
-ext/Encode/Encode/cp865.enc		Encode table
-ext/Encode/Encode/cp866.enc		Encode table
-ext/Encode/Encode/cp869.enc		Encode table
-ext/Encode/Encode/cp874.enc		Encode table
-ext/Encode/Encode/cp932.enc		Encode table
-ext/Encode/Encode/cp936.enc		Encode table
-ext/Encode/Encode/cp949.enc		Encode table
-ext/Encode/Encode/cp950.enc		Encode table
-ext/Encode/Encode/dingbats.enc		Encode table
-ext/Encode/Encode/dingbats.ucm		Encode table
-ext/Encode/Encode/euc-cn.enc		Encode table
-ext/Encode/Encode/euc-jp.enc		Encode table
-ext/Encode/Encode/euc-jp.ucm		Encode table
-ext/Encode/Encode/euc-kr.enc		Encode table
-ext/Encode/Encode/gb12345.enc		Encode table
-ext/Encode/Encode/gb1988.enc		Encode table
-ext/Encode/Encode/gb2312.enc		Encode table
-ext/Encode/Encode/gsm0338.enc		Encode table
-ext/Encode/Encode/ibm-1250.ucm	Encode table
-ext/Encode/Encode/ibm-1251.ucm	Encode table
-ext/Encode/Encode/ibm-1252.ucm	Encode table
-ext/Encode/Encode/ibm-1253.ucm	Encode table
-ext/Encode/Encode/ibm-1254.ucm	Encode table
-ext/Encode/Encode/ibm-1255.ucm	Encode table
-ext/Encode/Encode/ibm-1256.ucm	Encode table
-ext/Encode/Encode/ibm-1257.ucm	Encode table
-ext/Encode/Encode/ibm-1258.ucm	Encode table
-ext/Encode/Encode/ir-197.enc		Encode table
-ext/Encode/Encode/iso-ir-165.enc	Encode table
-ext/Encode/Encode/jis0201.enc		Encode table
-ext/Encode/Encode/jis0201.ucm		Encode table
-ext/Encode/Encode/jis0208.enc		Encode table
-ext/Encode/Encode/jis0212.enc		Encode table
-ext/Encode/Encode/koi8-f.enc		Encode table
-ext/Encode/Encode/koi8-f.ucm		Encode table
-ext/Encode/Encode/koi8-r.enc		Encode table
-ext/Encode/Encode/koi8-r.ucm		Encode table
-ext/Encode/Encode/koi8-u.enc		Encode table
-ext/Encode/Encode/koi8-u.ucm		Encode table
-ext/Encode/Encode/ksc5601.enc		Encode table
-ext/Encode/Encode/macCentEuro.enc	Encode table
-ext/Encode/Encode/macCroatian.enc	Encode table
-ext/Encode/Encode/macCyrillic.enc	Encode table
-ext/Encode/Encode/macDingbats.enc	Encode table
-ext/Encode/Encode/macGreek.enc		Encode table
-ext/Encode/Encode/macIceland.enc	Encode table
-ext/Encode/Encode/macJapan.enc		Encode table
-ext/Encode/Encode/macRoman.enc		Encode table
-ext/Encode/Encode/macRumanian.enc	Encode table
-ext/Encode/Encode/macSami.enc		Encode table
-ext/Encode/Encode/macThai.enc		Encode table
-ext/Encode/Encode/macTurkish.enc	Encode table
-ext/Encode/Encode/macUkraine.enc	Encode table
-ext/Encode/Encode/nextstep.enc		Encode table
-ext/Encode/Encode/nextstep.ucm		Encode table
-ext/Encode/Encode/posix-bc.enc		Encode table
-ext/Encode/Encode/posix-bc.ucm		Encode table
-ext/Encode/Encode/roman8.enc		Encode table
-ext/Encode/Encode/roman8.ucm		Encode table
-ext/Encode/Encode/shiftjis.enc		Encode table
-ext/Encode/Encode/symbol.enc		Encode table
-ext/Encode/Encode/symbol.ucm		Encode table
-ext/Encode/Encode/viscii.enc		Encode table
-ext/Encode/Encode/viscii.ucm		Encode table
+ext/Encode/Encode.xs		Encode extension
+ext/Encode/Encode/8859-1.ucm	Unicode Character Map
+ext/Encode/Encode/8859-10.ucm	Unicode Character Map
+ext/Encode/Encode/8859-11.ucm	Unicode Character Map
+ext/Encode/Encode/8859-13.ucm	Unicode Character Map
+ext/Encode/Encode/8859-14.ucm	Unicode Character Map
+ext/Encode/Encode/8859-15.ucm	Unicode Character Map
+ext/Encode/Encode/8859-16.ucm	Unicode Character Map
+ext/Encode/Encode/8859-2.ucm	Unicode Character Map
+ext/Encode/Encode/8859-3.ucm	Unicode Character Map
+ext/Encode/Encode/8859-4.ucm	Unicode Character Map
+ext/Encode/Encode/8859-5.ucm	Unicode Character Map
+ext/Encode/Encode/8859-6.ucm	Unicode Character Map
+ext/Encode/Encode/8859-7.ucm	Unicode Character Map
+ext/Encode/Encode/8859-8.ucm	Unicode Character Map
+ext/Encode/Encode/8859-9.ucm	Unicode Character Map
+ext/Encode/Encode/ascii.ucm	Unicode Character Map
+ext/Encode/Encode/big5-hk.ucm	Unicode Character Map
+ext/Encode/Encode/big5.ucm	Unicode Character Map
+ext/Encode/Encode/cp1047.ucm	Unicode Character Map
+ext/Encode/Encode/cp1250.ucm	Unicode Character Map
+ext/Encode/Encode/cp37.ucm	Unicode Character Map
+ext/Encode/Encode/cp932.ucm	Unicode Character Map
+ext/Encode/Encode/cp936.ucm	Unicode Character Map
+ext/Encode/Encode/cp949.ucm	Unicode Character Map
+ext/Encode/Encode/cp950.ucm	Unicode Character Map
+ext/Encode/Encode/dingbats.ucm	Unicode Character Map
+ext/Encode/Encode/euc-cn.ucm	Unicode Character Map
+ext/Encode/Encode/euc-jp.ucm	Unicode Character Map
+ext/Encode/Encode/euc-kr.ucm	Unicode Character Map
+ext/Encode/Encode/gb12345.ucm	Unicode Character Map
+ext/Encode/Encode/gb2312.ucm	Unicode Character Map
+ext/Encode/Encode/gsm0338.ucm	Unicode Character Map
+ext/Encode/Encode/ibm-1250.ucm	Unicode Character Map
+ext/Encode/Encode/ibm-1251.ucm	Unicode Character Map
+ext/Encode/Encode/ibm-1252.ucm	Unicode Character Map
+ext/Encode/Encode/ibm-1253.ucm	Unicode Character Map
+ext/Encode/Encode/ibm-1254.ucm	Unicode Character Map
+ext/Encode/Encode/ibm-1255.ucm	Unicode Character Map
+ext/Encode/Encode/ibm-1256.ucm	Unicode Character Map
+ext/Encode/Encode/ibm-1257.ucm	Unicode Character Map
+ext/Encode/Encode/ibm-1258.ucm	Unicode Character Map
+ext/Encode/Encode/ir-165.ucm	Unicode Character Map
+ext/Encode/Encode/jis0201.ucm	Unicode Character Map
+ext/Encode/Encode/koi8-f.ucm	Unicode Character Map
+ext/Encode/Encode/koi8-r.ucm	Unicode Character Map
+ext/Encode/Encode/koi8-u.ucm	Unicode Character Map
+ext/Encode/Encode/ksc5601.ucm	Unicode Character Map
+ext/Encode/Encode/macCentEuro.ucm	Unicode Character Map
+ext/Encode/Encode/macCroatian.ucm	Unicode Character Map
+ext/Encode/Encode/macCyrillic.ucm	Unicode Character Map
+ext/Encode/Encode/macDingbats.ucm	Unicode Character Map
+ext/Encode/Encode/macGreek.ucm	Unicode Character Map
+ext/Encode/Encode/macIceland.ucm	Unicode Character Map
+ext/Encode/Encode/macJapan.ucm	Unicode Character Map
+ext/Encode/Encode/macRoman.ucm	Unicode Character Map
+ext/Encode/Encode/macRumanian.ucm	Unicode Character Map
+ext/Encode/Encode/macSami.ucm	Unicode Character Map
+ext/Encode/Encode/macThai.ucm	Unicode Character Map
+ext/Encode/Encode/macTurkish.ucm	Unicode Character Map
+ext/Encode/Encode/macUkraine.ucm	Unicode Character Map
+ext/Encode/Encode/nextstep.ucm	Unicode Character Map
+ext/Encode/Encode/posix-bc.ucm	Unicode Character Map
+ext/Encode/Encode/roman8.ucm	Unicode Character Map
+ext/Encode/Encode/shiftjis.ucm	Unicode Character Map
+ext/Encode/Encode/symbol.ucm	Unicode Character Map
+ext/Encode/Encode/viscii.ucm	Unicode Character Map
 ext/Encode/JP/JP.pm		Encode extension
 ext/Encode/JP/Makefile.PL	Encode extension
 ext/Encode/KR/KR.pm		Encode extension
 ext/Encode/KR/Makefile.PL		Encode extension
-ext/Encode/lib/Encode/Alias.pm	Encode extension
-ext/Encode/lib/Encode/CN/HZ.pm		Encode extension
-ext/Encode/lib/Encode/Details.pod	Encode extension
-ext/Encode/lib/Encode/EncFormat.pod	Encode extension
-ext/Encode/lib/Encode/Encoding.pm	Encode extension
-ext/Encode/lib/Encode/Internal.pm	Encode extension
-ext/Encode/lib/Encode/iso10646_1.pm	Encode extension
-ext/Encode/lib/Encode/JP/Constants.pm	Encode extension
-ext/Encode/lib/Encode/JP/H2Z.pm		Encode extension
-ext/Encode/lib/Encode/JP/ISO_2022_JP.pm	Encode extension
-ext/Encode/lib/Encode/JP/ISO_2022_JP_1.pm	Encode extension
-ext/Encode/lib/Encode/JP/JIS.pm	Encode extension
-ext/Encode/lib/Encode/Supported.pod	Encode extension
-ext/Encode/lib/Encode/Tcl.pm		Encode extension
-ext/Encode/lib/Encode/Tcl/Escape.pm	Encode extension
-ext/Encode/lib/Encode/Tcl/Table.pm	Encode extension
-ext/Encode/lib/Encode/ucs2_le.pm	Encode extension
-ext/Encode/lib/Encode/Unicode.pm	Encode extension
-ext/Encode/lib/Encode/utf8.pm		Encode extension
-ext/Encode/lib/Encode/XS.pm		Encode extension
-ext/Encode/Makefile.PL		Encode extension makefile writer
 ext/Encode/MANIFEST		Encode extension
+ext/Encode/Makefile.PL		Encode extension makefile writer
 ext/Encode/README		Encode extension
-ext/Encode/Symbol/Makefile.PL			Encode extension
-ext/Encode/Symbol/Symbol.pm			Encode extension
-ext/Encode/t/Aliases.t	Encode extension
-ext/Encode/t/CN.t		Encode extension test
-ext/Encode/t/Encode.t		Encode extension test
-ext/Encode/t/jisx0208.euc	Encode extension test
-ext/Encode/t/jisx0208.ref	Encode extension test
-ext/Encode/t/jisx0212.euc	Encode extension test
-ext/Encode/t/jisx0212.ref	Encode extension test
-ext/Encode/t/JP.t		Encode extension test
-ext/Encode/t/Tcl.t		Encode extension test
-ext/Encode/t/TW.t		Encode extension test
+ext/Encode/Symbol/Makefile.PL     Encode extension
+ext/Encode/Symbol/Symbol.pm       Encode extension
 ext/Encode/TW/Makefile.PL	Encode extension
 ext/Encode/TW/TW.pm		Encode extension
+ext/Encode/compile		Encode extension
+ext/Encode/encengine.c		Encode extension
+ext/Encode/encode.h		Encode extension
+ext/Encode/lib/Encode/10646_1.pm	Encode extension
+ext/Encode/lib/Encode/Alias.pm	        Encode extension
+ext/Encode/lib/Encode/CJKConstants.pm	Encode extension
+ext/Encode/lib/Encode/CN/2022_CN.pm	 Encode extension
+ext/Encode/lib/Encode/CN/HZ.pm		Encode extension
+ext/Encode/lib/Encode/Details.pod	Detailed topics on character encodings
+ext/Encode/lib/Encode/Encoding.pm	Encode extension
+ext/Encode/lib/Encode/Internal.pm	Encode extension
+ext/Encode/lib/Encode/JP/2022_JP.pm	Encode extension
+ext/Encode/lib/Encode/JP/2022_JP1.pm	Encode extension
+ext/Encode/lib/Encode/JP/H2Z.pm		Encode extension
+ext/Encode/lib/Encode/JP/JIS.pm	Encode extension
+ext/Encode/lib/Encode/KR/2022_KR.pm	 Encode extension
+ext/Encode/lib/Encode/Supported.pod	Documents supported encodings
+ext/Encode/lib/Encode/Unicode.pm	Encode extension
+ext/Encode/lib/Encode/XS.pm		Encode extension
+ext/Encode/lib/Encode/ucs2_le.pm	Encode extension
+ext/Encode/lib/Encode/utf8.pm		Encode extension
+ext/Encode/t/Aliases.t	Encode extension test
+ext/Encode/t/CN.t		Encode extension test
+ext/Encode/t/Encode.t		Encode extension test
+ext/Encode/t/JP.t		Encode extension test
+ext/Encode/t/KR.t		Encode extension test
+ext/Encode/t/TW.t		Encode extension test
+ext/Encode/t/gb2312.euc	test data
+ext/Encode/t/gb2312.ref	test data
+ext/Encode/t/jisx0208.euc	test data
+ext/Encode/t/jisx0208.ref	test data
+ext/Encode/t/jisx0212.euc	test data
+ext/Encode/t/jisx0212.ref	test data
+ext/Encode/t/ksc5601.euc	test data
+ext/Encode/t/ksc5601.ref	test data
+ext/Encode/ucm2table	Table Generator for testing
 ext/Errno/ChangeLog	Errno perl module change log
 ext/Errno/Errno.t	See if Errno works
 ext/Errno/Errno_pm.PL	Errno perl module create script

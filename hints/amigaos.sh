@@ -9,11 +9,9 @@ firstmakefile='GNUmakefile'
 usenm='true'
 
 usemymalloc='n'
-usevfork='true'
 useperlio='true'
 d_eofnblk='define'
-d_fork='undef'
-d_vfork='define'
+d_fork='define'
 groupstype='int'
 
 # libs
@@ -30,7 +28,7 @@ so=' '
 # compiler & linker flags
 # Respect command-line values.
 
-ccflags="$ccflags -DAMIGAOS -mstackextend"
+ccflags="$ccflags -DAMIGAOS -mstackextend -Dfork=ix_vfork_resume"
 case "$optimize" in
 '') optimize='-O2 -fomit-frame-pointer';;
 esac

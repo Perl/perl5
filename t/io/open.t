@@ -10,7 +10,7 @@ $|  = 1;
 use warnings;
 $Is_VMS = $^O eq 'VMS';
 
-plan tests => 95;
+plan tests => 91;
 
 my $Perl = which_perl();
 
@@ -216,16 +216,10 @@ like( $@, qr/Bad filehandle:\s+afile/,          '       right error' );
     }
 }
 
-# magic temporary file via 3 arg open with undef
+
+# other dupping techniques
 {
-    ok( open(my $x,"+<",undef), 'magic temp file via 3 arg open with undef');
-    ok( defined fileno($x),     '       fileno' );
-
-    select $x;
-    ok( (print "ok\n"),         '       print' );
-
-    select STDOUT;
-    ok( seek($x,0,0),           '       seek' );
-    is( scalar <$x>, "ok\n",    '       readline' );
-    ok( tell($x) >= 3,          '       tell' );
+    ok( open(my $stdout, ">&", \*STDOUT), 'dup \*STDOUT into lexical fh');
+    ok( open(STDOUT,     ">&", $stdout),  'restore dupped STDOUT from lexical fh');
 }
+
