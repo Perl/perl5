@@ -147,10 +147,11 @@ informally indicate that they are 'internal' and not for public use.
 (It is actually possible to get private functions by saying:
 
   my $subref = sub { ... };
-  &$subref;
+  $subref->(@args);            # Call it as a function
+  $obj->$subref(@args);        # Use it as a method
 
-But there's no way to call that directly as a method, since a method
-must have a name in the symbol table.)
+However if you use them for methods it is up to you to figure out
+how to make inheritance work.)
 
 As a general rule, if the module is trying to be object oriented
 then export nothing. If it's just a collection of functions then
