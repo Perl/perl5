@@ -1346,7 +1346,6 @@ lib/Net/Ping/t/150_syn_inst.t	Ping Net::Ping
 lib/Net/Ping/t/200_ping_tcp.t	Ping Net::Ping
 lib/Net/Ping/t/250_ping_hires.t	Ping Net::Ping
 lib/Net/Ping/t/300_ping_stream.t	Ping Net::Ping
-lib/Net/Ping/t/300_ping_stream.t	Ping Net::Ping
 lib/Net/Ping/t/400_ping_syn.t	Ping Net::Ping
 lib/Net/Ping/t/410_syn_host.t	Ping Net::Ping
 lib/Net/Ping/t/450_service.t	Ping Net::Ping
