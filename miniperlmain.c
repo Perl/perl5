@@ -48,6 +48,12 @@ main(int argc, char **argv, char **env)
 
     PERL_SYS_INIT3(&argc,&argv,&env);
 
+#ifdef USE_ITHREADS
+    PTHREAD_ATFORK(Perl_atfork_lock,
+                   Perl_atfork_unlock,
+                   Perl_atfork_unlock);
+#endif
+
     if (!PL_do_undump) {
 	my_perl = perl_alloc();
 	if (!my_perl)
