@@ -4348,42 +4348,5 @@ Perl_sv_nounlocking(pTHX_ SV *sv)
 {
 }
 
-/*
-=for apidoc memcmp_byte_utf8
 
-Similar to memcmp(), but the first string is with bytes, the second
-with utf8.  Takes into account that the lengths may be different.
 
-=cut
-*/
-
-int
-Perl_memcmp_byte_utf8(pTHX_ char *sb, STRLEN lbyte, char *su, STRLEN lutf)
-{
-    U8 *sbyte = (U8*)sb;
-    U8 *sutf  = (U8*)su;
-    U8 *ebyte = sbyte + lbyte;
-    U8 *eutf  = sutf  + lutf;
-
-    while (sbyte < ebyte) {
-	if (sutf >= eutf)
-	    return 1;			/* utf one shorter */
-	if (NATIVE_IS_INVARIANT(*sbyte)) {
-	    if (*sbyte != *sutf)
-		return *sbyte - *sutf;
-	    sbyte++; sutf++;	/* CONTINUE */
-	} else if ((*sutf & UTF_CONTINUATION_MASK) ==
-                   (*sbyte >> UTF_ACCUMULATION_SHIFT)) {
-	    if ((sutf[1] & UTF_CONTINUATION_MASK) !=
-                (*sbyte & UTF_CONTINUATION_MASK))
-		return (*sbyte & UTF_CONTINUATION_MASK) -
-                       (*sutf & UTF_CONTINUATION_MASK);
-	    sbyte++, sutf += 2;	/* CONTINUE */
-	} else
-	    return (*sbyte >> UTF_ACCUMULATION_SHIFT) -
-                   (*sutf & UTF_CONTINUATION_MASK);
-    }
-    if (sutf >= eutf)
-	return 0;
-    return -1;				/* byte one shorter */
-}

@@ -463,7 +463,6 @@ PERL_CALLCONV void	Perl_markstack_grow(pTHX);
 #if defined(USE_LOCALE_COLLATE)
 PERL_CALLCONV char*	Perl_mem_collxfrm(pTHX_ const char* s, STRLEN len, STRLEN* xlen);
 #endif
-PERL_CALLCONV int	Perl_memcmp_byte_utf8(pTHX_ char *sbyte, STRLEN lbyte, char *sutf, STRLEN lutf);
 PERL_CALLCONV SV*	Perl_mess(pTHX_ const char* pat, ...)
 #ifdef CHECK_FORMAT
  __attribute__((format(printf,pTHX_1,pTHX_2)))

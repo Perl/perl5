@@ -229,7 +229,6 @@ Perl_grok_number
 Perl_grok_numeric_radix
 Perl_grok_oct
 Perl_markstack_grow
-Perl_memcmp_byte_utf8
 Perl_mess
 Perl_vmess
 Perl_sortsv

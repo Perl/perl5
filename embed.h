@@ -411,7 +411,6 @@
 #if defined(USE_LOCALE_COLLATE)
 #define mem_collxfrm		Perl_mem_collxfrm
 #endif
-#define memcmp_byte_utf8	Perl_memcmp_byte_utf8
 #define mess			Perl_mess
 #define vmess			Perl_vmess
 #define qerror			Perl_qerror
@@ -1970,7 +1969,6 @@
 #if defined(USE_LOCALE_COLLATE)
 #define mem_collxfrm(a,b,c)	Perl_mem_collxfrm(aTHX_ a,b,c)
 #endif
-#define memcmp_byte_utf8(a,b,c,d)	Perl_memcmp_byte_utf8(aTHX_ a,b,c,d)
 #define vmess(a,b)		Perl_vmess(aTHX_ a,b)
 #define qerror(a)		Perl_qerror(aTHX_ a)
 #define sortsv(a,b,c)		Perl_sortsv(aTHX_ a,b,c)
