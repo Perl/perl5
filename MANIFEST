@@ -2522,6 +2522,7 @@ util.h				Dummy header
 utils.lst			Lists utilities bundled with Perl
 utils/c2ph.PL			program to translate dbx stabs to perl
 utils/dprofpp.PL		Perl code profile post-processor
+utils/enc2xs.PL			Encode module generator
 utils/h2ph.PL			A thing to turn C .h files into perl .ph files
 utils/h2xs.PL			Program to make .xs files from C header files
 utils/libnetcfg.PL		libnet
