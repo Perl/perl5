@@ -97,6 +97,16 @@ sub curdir {
     return '[]';
 }
 
+=item devnull (override)
+
+Returns a string representing the null device.
+
+=cut
+
+sub devnull {
+    return 'NL:';
+}
+
 =item rootdir (override)
 
 Returns a string representing of the root directory.

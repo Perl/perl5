@@ -105,6 +105,16 @@ sub curdir {
     return "." ;
 }
 
+=item devnull
+
+Returns the name of the null device (bit bucket). "/dev/null" on UNIX.
+
+=cut
+
+sub devnull {
+    return "/dev/null";
+}
+
 =item rootdir
 
 Returns a string representing of the root directory.  "/" on UNIX.
