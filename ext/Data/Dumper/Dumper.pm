@@ -9,7 +9,7 @@
 
 package Data::Dumper;
 
-$VERSION = $VERSION = '2.10';
+$VERSION = $VERSION = '2.101';
 
 #$| = 1;
 
@@ -326,8 +326,7 @@ sub _dump {
       $out .= ($name =~ /^\%/) ? ')' : '}';
     }
     elsif ($realtype eq 'CODE') {
-      $out .= '"DUMMY"';
-      $out = 'sub { ' . $out . ' }';
+      $out .= 'sub { "DUMMY" }';
       carp "Encountered CODE ref, using dummy placeholder" if $s->{purity};
     }
     else {
