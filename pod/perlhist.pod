@@ -347,7 +347,8 @@ the strings?).
           5.6.1-TRIAL3  2001-Mar-19
           5.6.1-foolish 2001-Apr-01     The "fools-gold" release.
           5.6.1         2001-Apr-08
- Rafael	  5.6.2-RC1	2003-Nov-08
+ Rafael   5.6.2-RC1     2003-Nov-08
+          5.6.2         2003-Nov-15     Fix new build issues
 
  Jarkko   5.7.0         2000-Sep-02     The 5.7 track: Development.
           5.7.1         2001-Apr-09
