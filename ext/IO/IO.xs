@@ -62,23 +62,28 @@ io_blocking(InputStream f, int block)
 	/* POSIX style */ 
 #if defined(O_NDELAY) && O_NDELAY != O_NONBLOCK
 	/* Ooops has O_NDELAY too - make sure we don't 
-	 * get SysV behaviour by mistake
-	 */
-	RETVAL = RETVAL & O_NONBLOCK ? 0 : 1;
+	 * get SysV behaviour by mistake. */
 
-	if ((mode & O_NDELAY) || ((block == 0) && !(mode & O_NONBLOCK))) {
-	    int ret;
-	    mode = (mode & ~O_NDELAY) | O_NONBLOCK;
-	    ret = fcntl(PerlIO_fileno(f),F_SETFL,mode);
-	    if(ret < 0)
-		RETVAL = ret;
-	}
-	else if ((mode & O_NDELAY) || ((block > 0) && (mode & O_NONBLOCK))) {
-	    int ret;
-	    mode &= ~(O_NONBLOCK | O_NDELAY);
-	    ret = fcntl(PerlIO_fileno(f),F_SETFL,mode);
-	    if(ret < 0)
-		RETVAL = ret;
+	/* E.g. In UNICOS and UNICOS/mk a F_GETFL returns an O_NDELAY
+	 * after a successful F_SETFL of an O_NONBLOCK. */
+	RETVAL = RETVAL & (O_NONBLOCK | O_NDELAY) ? 0 : 1;
+
+	if (block >= 0) {
+	    if ((mode & O_NDELAY) || ((block == 0) && !(mode & O_NONBLOCK))) {
+	        int ret;
+	        mode = (mode & ~O_NDELAY) | O_NONBLOCK;
+	        ret = fcntl(PerlIO_fileno(f),F_SETFL,mode);
+	        if(ret < 0)
+		    RETVAL = ret;
+	    }
+	    else
+              if ((mode & O_NDELAY) || ((block > 0) && (mode & O_NONBLOCK))) {
+	        int ret;
+	        mode &= ~(O_NONBLOCK | O_NDELAY);
+	        ret = fcntl(PerlIO_fileno(f),F_SETFL,mode);
+	        if(ret < 0)
+		    RETVAL = ret;
+              }
 	}
 #else
 	/* Standard POSIX */ 
