@@ -1882,7 +1882,7 @@ Perl_newPROG(pTHX_ OP *o)
 	CALL_PEEP(PL_eval_start);
     }
     else {
-	if (!o)
+	if (o->op_type == OP_STUB)
 	    return;
 	PL_main_root = scope(sawparens(scalarvoid(o)));
 	PL_curcop = &PL_compiling;

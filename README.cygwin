@@ -206,7 +206,9 @@ These are B<not> yet available with Cygwin.
 
 =item * C<-Dusethreads>
 
-POSIX threads are B<not> yet implemented in Cygwin completely.
+POSIX threads are implemented in Cygwin, define this symbol if you want
+a threaded perl.  If there is trouble, check that your Cygwin installation 
+is up to date.
 
 =item * C<-Duselargefiles>
 
@@ -441,7 +443,8 @@ access by native Win32 programs).
 
 Inplace editing C<perl -i> of files doesn't work without doing a backup 
 of the file being edited C<perl -i.bak> because of windowish restrictions,
-so Perl adds the C<.bak> automatically if you just use C<perl -i>.
+therefore Perl adds the C<.bak> automatically if you use C<perl -i> 
+without specifying a backup extension.
 
 Using fork() after loading multiple dlls may fail with an internal cygwin
 error like the following:
@@ -451,9 +454,9 @@ error like the following:
     200 [main] perl 377147 sync_with_child: child -395691(0xB8) died before initialization with status code 0x1
    1370 [main] perl 377147 sync_with_child: *** child state child loading dlls
 
-Use the rebase utility to resolve the conflicting dll addresses.
-See: http://www.tishler.net/jason/software/rebase/
-and http://sources.redhat.com/ml/cygwin/2002-07/msg00276.html
+Use the rebase utility to resolve the conflicting dll addresses.  The
+rebase package is included in the Cygwin netrelease.  Use setup.exe from
+F<http://www.cygwin.com/setup.exe> to install it.
 
 =back
 
@@ -565,8 +568,8 @@ alexander smishlajev <als@turnhere.com>,
 Steven Morlock <newspost@morlock.net>,
 Sebastien Barre <Sebastien.Barre@utc.fr>,
 Teun Burgers <burgers@ecn.nl>,
-Gerrit Haase <gh@familiehaase.de>.
+Gerrit P. Haase <gp@familiehaase.de>.
 
 =head1 HISTORY
 
-Last updated: 2002-10-07
+Last updated: 2003-03-20
