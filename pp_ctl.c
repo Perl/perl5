@@ -729,7 +729,7 @@ PP(pp_sort)
 	    SAVEOP();
 
 	    CATCH_SET(TRUE);
-	    PUSHSTACKi(SI_SORT);
+	    PUSHSTACKi(PERLSI_SORT);
 	    if (sortstash != stash) {
 		firstgv = gv_fetchpv("a", TRUE, SVt_PV);
 		secondgv = gv_fetchpv("b", TRUE, SVt_PV);
@@ -1471,7 +1471,7 @@ PP(pp_return)
     PMOP *newpm;
     I32 optype = 0;
 
-    if (curstackinfo->si_type == SI_SORT) {
+    if (curstackinfo->si_type == PERLSI_SORT) {
 	if (cxstack_ix == sortcxix || dopoptosub(cxstack_ix) <= sortcxix) {
 	    if (cxstack_ix > sortcxix)
 		dounwind(sortcxix);

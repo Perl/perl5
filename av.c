@@ -53,7 +53,7 @@ av_extend(AV *av, I32 key)
 	dSP;
 	ENTER;
 	SAVETMPS;
-	PUSHSTACKi(SI_MAGIC);
+	PUSHSTACKi(PERLSI_MAGIC);
 	PUSHMARK(SP);
 	EXTEND(SP,2);
 	PUSHs(mg->mg_obj);
@@ -399,7 +399,7 @@ av_push(register AV *av, SV *val)
 
     if (SvRMAGICAL(av) && (mg = mg_find((SV*)av,'P'))) {
 	dSP;
-	PUSHSTACKi(SI_MAGIC);
+	PUSHSTACKi(PERLSI_MAGIC);
 	PUSHMARK(SP);
 	EXTEND(SP,2);
 	PUSHs(mg->mg_obj);
@@ -426,7 +426,7 @@ av_pop(register AV *av)
 	croak(no_modify);
     if (SvRMAGICAL(av) && (mg = mg_find((SV*)av,'P'))) {
 	dSP;    
-	PUSHSTACKi(SI_MAGIC);
+	PUSHSTACKi(PERLSI_MAGIC);
 	PUSHMARK(SP);
 	XPUSHs(mg->mg_obj);
 	PUTBACK;
@@ -461,7 +461,7 @@ av_unshift(register AV *av, register I32 num)
 
     if (SvRMAGICAL(av) && (mg = mg_find((SV*)av,'P'))) {
 	dSP;
-	PUSHSTACKi(SI_MAGIC);
+	PUSHSTACKi(PERLSI_MAGIC);
 	PUSHMARK(SP);
 	EXTEND(SP,1+num);
 	PUSHs(mg->mg_obj);
@@ -512,7 +512,7 @@ av_shift(register AV *av)
 	croak(no_modify);
     if (SvRMAGICAL(av) && (mg = mg_find((SV*)av,'P'))) {
 	dSP;
-	PUSHSTACKi(SI_MAGIC);
+	PUSHSTACKi(PERLSI_MAGIC);
 	PUSHMARK(SP);
 	XPUSHs(mg->mg_obj);
 	PUTBACK;
@@ -555,7 +555,7 @@ av_fill(register AV *av, I32 fill)
 	dSP;            
 	ENTER;
 	SAVETMPS;
-	PUSHSTACKi(SI_MAGIC);
+	PUSHSTACKi(PERLSI_MAGIC);
 	PUSHMARK(SP);
 	EXTEND(SP,2);
 	PUSHs(mg->mg_obj);

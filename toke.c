@@ -4769,7 +4769,7 @@ new_constant(char *s, STRLEN len, char *key, SV *sv, SV *pv, char *type)
     myop.op_next = Nullop;
     myop.op_flags = OPf_WANT_SCALAR | OPf_STACKED;
 
-    PUSHSTACKi(SI_OVERLOAD);
+    PUSHSTACKi(PERLSI_OVERLOAD);
     ENTER;
     SAVEOP();
     op = (OP *) &myop;

@@ -554,7 +554,7 @@ PP(pp_tie)
     items = SP - MARK++;
     if (sv_isobject(*MARK)) {
 	ENTER;
-	PUSHSTACKi(SI_MAGIC);
+	PUSHSTACKi(PERLSI_MAGIC);
 	PUSHMARK(SP);
 	EXTEND(SP,items);
 	while (items--)
@@ -572,7 +572,7 @@ PP(pp_tie)
 		 methname, SvPV(*MARK,na));                   
 	}
 	ENTER;
-	PUSHSTACKi(SI_MAGIC);
+	PUSHSTACKi(PERLSI_MAGIC);
 	PUSHMARK(SP);
 	EXTEND(SP,items);
 	while (items--)

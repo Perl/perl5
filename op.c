@@ -3475,7 +3475,7 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 		goto done;
 	    }
 	    /* ahem, death to those who redefine active sort subs */
-	    if (curstackinfo->si_type == SI_SORT && sortcop == CvSTART(cv))
+	    if (curstackinfo->si_type == PERLSI_SORT && sortcop == CvSTART(cv))
 		croak("Can't redefine active sort subroutine %s", name);
 	    if(const_sv = cv_const_sv(cv))
 		const_changed = sv_cmp(const_sv, op_const_sv(block, Nullcv));

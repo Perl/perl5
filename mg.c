@@ -981,7 +981,7 @@ magic_methpack(SV *sv, MAGIC *mg, char *meth)
 
     ENTER;
     SAVETMPS;
-    PUSHSTACKi(SI_MAGIC);
+    PUSHSTACKi(PERLSI_MAGIC);
 
     if (magic_methcall(mg, meth, G_SCALAR, 2, NULL)) {
 	sv_setsv(sv, *stack_sp--);
@@ -1007,7 +1007,7 @@ magic_setpack(SV *sv, MAGIC *mg)
 {
     dSP;
     ENTER;
-    PUSHSTACKi(SI_MAGIC);
+    PUSHSTACKi(PERLSI_MAGIC);
     magic_methcall(mg, "STORE", G_SCALAR|G_DISCARD, 3, sv);
     POPSTACK;
     LEAVE;
@@ -1029,7 +1029,7 @@ magic_sizepack(SV *sv, MAGIC *mg)
 
     ENTER;
     SAVETMPS;
-    PUSHSTACKi(SI_MAGIC);
+    PUSHSTACKi(PERLSI_MAGIC);
     if (magic_methcall(mg, "FETCHSIZE", G_SCALAR, 2, NULL)) {
 	sv = *stack_sp--;
 	retval = (U32) SvIV(sv)-1;
@@ -1045,7 +1045,7 @@ int magic_wipepack(SV *sv, MAGIC *mg)
     dSP;
 
     ENTER;
-    PUSHSTACKi(SI_MAGIC);
+    PUSHSTACKi(PERLSI_MAGIC);
     PUSHMARK(SP);
     XPUSHs(mg->mg_obj);
     PUTBACK;
@@ -1063,7 +1063,7 @@ magic_nextpack(SV *sv, MAGIC *mg, SV *key)
 
     ENTER;
     SAVETMPS;
-    PUSHSTACKi(SI_MAGIC);
+    PUSHSTACKi(PERLSI_MAGIC);
     PUSHMARK(SP);
     EXTEND(SP, 2);
     PUSHs(mg->mg_obj);
@@ -1947,7 +1947,7 @@ sighandler(int sig)
 	sv_setpv(sv,sig_name[sig]);
     }
 
-    PUSHSTACKi(SI_SIGNAL);
+    PUSHSTACKi(PERLSI_SIGNAL);
     PUSHMARK(SP);
     PUSHs(sv);
     PUTBACK;

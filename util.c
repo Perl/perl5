@@ -1289,7 +1289,7 @@ die(const char* pat, ...)
 		msg = ERRSV;
 	    }
 
-	    PUSHSTACKi(SI_DIEHOOK);
+	    PUSHSTACKi(PERLSI_DIEHOOK);
 	    PUSHMARK(SP);
 	    XPUSHs(msg);
 	    PUTBACK;
@@ -1343,7 +1343,7 @@ croak(const char* pat, ...)
 	    SvREADONLY_on(msg);
 	    SAVEFREESV(msg);
 
-	    PUSHSTACKi(SI_DIEHOOK);
+	    PUSHSTACKi(PERLSI_DIEHOOK);
 	    PUSHMARK(SP);
 	    XPUSHs(msg);
 	    PUTBACK;
@@ -1392,7 +1392,7 @@ warn(const char* pat,...)
 	    SvREADONLY_on(msg);
 	    SAVEFREESV(msg);
 
-	    PUSHSTACKi(SI_WARNHOOK);
+	    PUSHSTACKi(PERLSI_WARNHOOK);
 	    PUSHMARK(SP);
 	    XPUSHs(msg);
 	    PUTBACK;

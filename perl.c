@@ -1443,7 +1443,7 @@ perl_require_pv(char *pv)
 {
     SV* sv;
     dSP;
-    PUSHSTACKi(SI_REQUIRE);
+    PUSHSTACKi(PERLSI_REQUIRE);
     PUTBACK;
     sv = sv_newmortal();
     sv_setpv(sv, "require '");
@@ -2356,7 +2356,7 @@ init_stacks(ARGSproto)
     /* start with 128-item stack and 8K cxstack */
     curstackinfo = new_stackinfo(REASONABLE(128),
 				 REASONABLE(8192/sizeof(PERL_CONTEXT) - 1));
-    curstackinfo->si_type = SI_MAIN;
+    curstackinfo->si_type = PERLSI_MAIN;
     curstack = curstackinfo->si_stack;
     mainstack = curstack;		/* remember in case we switch stacks */
 

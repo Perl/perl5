@@ -1356,7 +1356,7 @@ amagic_call(SV *left, SV *right, int method, int flags)
     myop.op_next = Nullop;
     myop.op_flags = OPf_WANT_SCALAR | OPf_STACKED;
 
-    PUSHSTACKi(SI_OVERLOAD);
+    PUSHSTACKi(PERLSI_OVERLOAD);
     ENTER;
     SAVEOP();
     op = (OP *) &myop;
