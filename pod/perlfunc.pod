@@ -4104,6 +4104,7 @@ and the conversion letter:
            for integer
    l       interpret integer as C type "long" or "unsigned long"
    h       interpret integer as C type "short" or "unsigned short"
+           If no flags, interpret integer as C type "int" or "unsigned"
 
 There is also one Perl-specific flag:
 
@@ -4121,7 +4122,7 @@ See L<perllocale>.
 
 If Perl understands "quads" (64-bit integers) (this requires
 either that the platform natively supports quads or that Perl
-has been specifically compiled to support quads), the flags
+has been specifically compiled to support quads), the characters
 
 	d u o x X b i D U O
 
