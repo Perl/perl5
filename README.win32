@@ -287,29 +287,38 @@ If you are accustomed to using perl from various command-line
 shells found in UNIX environments, you will be less than pleased
 with what Windows offers by way of a command shell.
 
-The crucial thing to understand about the "cmd" shell (which is
-the default on Windows NT) is that it does not do any wildcard
-expansions of command-line arguments (so wildcards need not be
-quoted).  It also provides only rudimentary quoting.  The only
-(useful) quote character is the double quote (").  It can be used to
-protect spaces in arguments and other special characters.  The
-Windows NT documentation has almost no description of how the
-quoting rules are implemented, but here are some general observations
-based on experiments:  The shell breaks arguments at spaces and
-passes them to programs in argc/argv.  Doublequotes can be used
-to prevent arguments with spaces in them from being split up.
-You can put a double quote in an argument by escaping it with
-a backslash and enclosing the whole argument within double quotes.
-The backslash and the pair of double quotes surrounding the
-argument will be stripped by the shell.
+The crucial thing to understand about the Windows environment is that
+the command line you type in is processed twice before Perl sees it.
+First, your command shell (usually CMD.EXE on Windows NT, and
+COMMAND.COM on Windows 9x) preprocesses the command line, to handle
+redirection, environment variable expansion, and location of the
+executable to run. Then, the perl executable splits the remaining
+command line into individual arguments, using the C runtime library
+upon which Perl was built.
 
-The file redirection characters "<", ">", and "|" cannot be quoted
-by double quotes (there are probably more such).  Single quotes
-will protect those three file redirection characters, but the
-single quotes don't get stripped by the shell (just to make this
-type of quoting completely useless).  The caret "^" has also
-been observed to behave as a quoting character (and doesn't get
-stripped by the shell also).
+It is particularly important to note that neither the shell nor the C
+runtime do any wildcard expansions of command-line arguments (so
+wildcards need not be quoted).  Also, the quoting behaviours of the
+shell and the C runtime are rudimentary at best (and may, if you are
+using a non-standard shell, be inconsistent).  The only (useful) quote
+character is the double quote (").  It can be used to protect spaces in
+arguments and other special characters.  The Windows NT documentation
+has almost no description of how the quoting rules are implemented, but
+here are some general observations based on experiments:  The C runtime
+breaks arguments at spaces and passes them to programs in argc/argv.
+Doublequotes can be used to prevent arguments with spaces in them from
+being split up.  You can put a double quote in an argument by escaping
+it with a backslash and enclosing the whole argument within double
+quotes.  The backslash and the pair of double quotes surrounding the
+argument will be stripped by the C runtime.
+
+The file redirection characters "<", ">", and "|" can be quoted by
+double quotes (although there are suggestions that this may not always
+be true).  Single quotes are not treated as quotes by the shell or the C
+runtime.  The caret "^" has also been observed to behave as a quoting
+character, but this appears to be a shell feature, and the caret is not
+stripped from the command line, so Perl still sees it (and the C runtime
+phase does not treat the caret as a quote character).
 
 Here are some examples of usage of the "cmd" shell:
 
@@ -348,6 +357,13 @@ This pipes "foo" to the pager and writes "bar" in the file "blurch":
 
 Discovering the usefulness of the "command.com" shell on Windows 9x
 is left as an exercise to the reader :)
+
+One particularly pernicious problem with the 4NT command shell for
+Windows NT is that it (nearly) always treats a % character as indicating
+that environment variable expansion is needed.  Under this shell, it is
+therefore important to always double any % characters which you want
+Perl to see (for example, for hash variables), even when they are
+quoted.
 
 =item Building Extensions
 
