@@ -3188,16 +3188,22 @@ tryagain:
 				   foldlen;
 				   foldlen -= numlen) {
 				   ender = utf8_to_uvchr(foldbuf, &numlen);
-				   reguni(pRExC_state, ender, s, &numlen);
-				   s       += numlen;
-				   len     += numlen;
-				   foldbuf += numlen;
+				   if (numlen > 0) {
+					reguni(pRExC_state, ender, s, &numlen);
+					s       += numlen;
+					len     += numlen;
+					foldbuf += numlen;
+				   }
+				   else
+					break; /* "Can't happen." */
 			      }
 			 }
 			 else {
 			      reguni(pRExC_state, ender, s, &numlen);
-			      s   += numlen;
-			      len += numlen;
+			      if (numlen > 0) {
+				   s   += numlen;
+				   len += numlen;
+			      }
 			 }
 		    }
 		    else {
@@ -3213,16 +3219,22 @@ tryagain:
 			       foldlen;
 			       foldlen -= numlen) {
 			       ender = utf8_to_uvchr(foldbuf, &numlen);
-			       reguni(pRExC_state, ender, s, &numlen);
-			       s       += numlen;
-			       len     += numlen;
-			       foldbuf += numlen;
+			       if (numlen > 0) {
+				    reguni(pRExC_state, ender, s, &numlen);
+				    s       += numlen;
+				    len     += numlen;
+				    foldbuf += numlen;
+			       }
+			       else
+				    break;
 			  }
 		     }
 		     else {
 			  reguni(pRExC_state, ender, s, &numlen);
-			  s   += numlen;
-			  len += numlen;
+			  if (numlen > 0) {
+			       s   += numlen;
+			       len += numlen;
+			  }
 		     }
 		     len--;
 		}

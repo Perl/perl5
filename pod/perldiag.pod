@@ -2782,7 +2782,9 @@ marked by <-- HERE in m/%s/
 
 (F) The class in the character class [: :] syntax is unknown.  The <-- HERE
 shows in the regular expression about where the problem was discovered.
-See L<perlre>.
+Note that the POSIX character classes do B<not> have the C<is> prefix
+the corresponding C interfaces have: in other words, it's C<[[:print:]]>,
+not C<isprint>.  See L<perlre>.
 
 =item POSIX getpgrp can't take an argument
 

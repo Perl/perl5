@@ -318,18 +318,22 @@ the user to override the default location of the file.
 Don't assume a text file will end with a newline.  They should,
 but people forget.
 
-Do not have two files of the same name with different case, like
-F<test.pl> and F<Test.pl>, as many platforms have case-insensitive
-filenames.  Also, try not to have non-word characters (except for C<.>)
-in the names, and keep them to the 8.3 convention, for maximum
-portability, onerous a burden though this may appear.
+Do not have two files or directories of the same name with different
+case, like F<test.pl> and F<Test.pl>, as many platforms have
+case-insensitive (or at least case-forgiving) filenames.  Also, try
+not to have non-word characters (except for C<.>) in the names, and
+keep them to the 8.3 convention, for maximum portability, onerous a
+burden though this may appear.
 
 Likewise, when using the AutoSplit module, try to keep your functions to
 8.3 naming and case-insensitive conventions; or, at the least,
 make it so the resulting files have a unique (case-insensitively)
 first 8 characters.
 
-Whitespace in filenames is tolerated on most systems, but not all.
+Whitespace in filenames is tolerated on most systems, but not all,
+and even on systems where it might be tolerated, some utilities
+might becoem confused by such whitespace.
+
 Many systems (DOS, VMS) cannot have more than one C<.> in their filenames.
 
 Don't assume C<< > >> won't be the first character of a filename.
@@ -342,6 +346,20 @@ If filenames might use strange characters, it is safest to open it
 with C<sysopen> instead of C<open>.  C<open> is magic and can
 translate characters like C<< > >>, C<< < >>, and C<|>, which may
 be the wrong thing to do.  (Sometimes, though, it's the right thing.)
+
+Don't use C<:> as a part of a filename since many systems use that for
+their own semantics (MacOS Classic for separating pathname components,
+many networking schemes and utilities for separating the nodename and
+the pathname, and so on).
+
+The I<portable filename characters> as defined by ANSI C are
+
+ a b c d e f g h i j k l m n o p q r t u v w x y z
+ A B C D E F G H I J K L M N O P Q R T U V W X Y Z
+ 0 1 2 3 4 5 6 7 8 9
+ . _ -
+
+and the "-" shouldn't be the first character.
 
 =head2 System Interaction
 
@@ -502,15 +520,20 @@ to get what should be the proper value on any system.
 
 =head2 Character sets and character encoding
 
-Assume little about character sets.  Assume nothing about
-numerical values (C<ord>, C<chr>) of characters.  Do not
-assume that the alphabetic characters are encoded contiguously (in
-the numeric sense).  Do not assume anything about the ordering of the
-characters.  The lowercase letters may come before or after the
-uppercase letters; the lowercase and uppercase may be interlaced so
-that both `a' and `A' come before `b'; the accented and other
-international characters may be interlaced so that E<auml> comes
-before `b'.
+Assume very little about character sets.
+
+Assume nothing about numerical values (C<ord>, C<chr>) of characters.
+Do not use explicit code point ranges (like \xHH-\xHH); use for
+example symbolic character classes like C<[:print:]>.
+
+Do not assume that the alphabetic characters are encoded contiguously
+(in the numeric sense).  There may be gaps.
+
+Do not assume anything about the ordering of the characters.
+The lowercase letters may come before or after the uppercase letters;
+the lowercase and uppercase may be interlaced so that both `a' and `A'
+come before `b'; the accented and other international characters may
+be interlaced so that E<auml> comes before `b'.
 
 =head2 Internationalisation
 

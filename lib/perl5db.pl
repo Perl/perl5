@@ -398,12 +398,12 @@ warnLevel($warnLevel);
 dieLevel($dieLevel);
 signalLevel($signalLevel);
 
-&pager(
-    (defined($ENV{PAGER}) 
-	? $ENV{PAGER}
-	: ($^O eq 'os2' 
-	   ? 'cmd /c more' 
-	   : 'more'))) unless defined $pager;
+pager(
+      defined $ENV{PAGER}              ? $ENV{PAGER} :
+      eval { require Config } && 
+        defined $Config::Config{pager} ? $Config::Config{pager}
+                                       : 'more'
+     ) unless defined $pager;
 setman();
 &recallCommand("!") unless defined $prc;
 &shellBang("!") unless defined $psh;

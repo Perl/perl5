@@ -531,8 +531,13 @@ EOP
   is($z, $expect);
 }
 
-is("1.20.300.4000", sprintf "%vd", pack("U*",1,20,300,4000));
-is("1.20.300.4000", sprintf "%vd", pack("  U*",1,20,300,4000));
+
+SKIP: {
+    skip("(EBCDIC and) version strings are bad idea", 2) if $Is_EBCDIC;
+
+    is("1.20.300.4000", sprintf "%vd", pack("U*",1,20,300,4000));
+    is("1.20.300.4000", sprintf "%vd", pack("  U*",1,20,300,4000));
+}
 isnt(v1.20.300.4000, sprintf "%vd", pack("C0U*",1,20,300,4000));
 
 my $rslt = $Is_EBCDIC ? "156 67" : "199 162";
