@@ -67,7 +67,7 @@ Perl_uvuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 		   ((uv & 0xFFFE) == 0xFFFE && /* Either FFFE or FFFF. */
 		    !(flags & UNICODE_ALLOW_FFFF))) &&
 		  /* UNICODE_ALLOW_SUPER includes
-		   * FFFFs beyond 0x10FFFF. */
+		   * FFFEs and FFFFs beyond 0x10FFFF. */
 		  ((uv <= PERL_UNICODE_MAX) ||
 		   !(flags & UNICODE_ALLOW_SUPER))
 		  )
