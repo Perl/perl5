@@ -4226,9 +4226,10 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	{
 	    environ[0] = Nullch;
 	}
-	if (env)
+	if (env) {
+          char** origenv = environ;
 	  for (; *env; env++) {
-	    if (!(s = strchr(*env,'=')))
+	    if (!(s = strchr(*env,'=')) || s == *env)
 		continue;
 #if defined(MSDOS) && !defined(DJGPP)
 	    *s = '\0';
@@ -4239,7 +4240,13 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	    (void)hv_store(hv, *env, s - *env, sv, 0);
 	    if (env != environ)
 	        mg_set(sv);
+	    if (origenv != environ) {
+	      /* realloc has shifted us */
+	      env = (env - origenv) + environ;
+	      origenv = environ;
+	    }
 	  }
+      }
 #endif /* USE_ENVIRON_ARRAY */
 #endif /* !PERL_MICRO */
     }
