@@ -1373,6 +1373,7 @@ sub stringify_polar {
 1;
 __END__
 
+=pod
 =head1 NAME
 
 Math::Complex - complex numbers and associated mathematical functions
@@ -1673,19 +1674,15 @@ When printed, a complex number is usually shown under its cartesian
 style I<a+bi>, but there are legitimate cases where the polar style
 I<[r,t]> is more appropriate.
 
-In the polar style Math::Complex will try to recognize certain common
-numbers such as multiples or small rationals of pi (2pi, pi/2) and
-prettyprint those numbers.
-
 By calling the class method C<Math::Complex::display_format> and
 supplying either C<"polar"> or C<"cartesian"> as an argument, you
-override the default display format, which is C<"cartesian">. Not
+override the default display style, which is C<"cartesian">. Not
 supplying any argument returns the current settings.
 
 This default can be overridden on a per-number basis by calling the
 C<display_format> method instead. As before, not supplying any argument
-returns the current display format for this number. Otherwise whatever you
-specify will be the new display format for I<this> particular number.
+returns the current display style for this number. Otherwise whatever you
+specify will be the new display style for I<this> particular number.
 
 For instance:
 
@@ -1697,8 +1694,9 @@ For instance:
 	$j->display_format('cartesian');
 	print "j = $j\n";		# Prints "j = -0.5+0.866025403784439i"
 
-The polar format attempts to emphasize arguments like I<k*pi/n>
-(where I<n> is a positive integer and I<k> an integer within [-9,+9]).
+The polar style attempts to emphasize arguments like I<k*pi/n>
+(where I<n> is a positive integer and I<k> an integer within [-9,+9]),
+this is called I<polar pretty-printing>.
 
 =head2 CHANGED IN PERL 5.6
 
@@ -1731,9 +1729,9 @@ will be returned, as opposed to only the style parameter value.  If
 you want to know the whole truth for a complex number, you must call
 both the class method and the object method:
 
-The second new display parameter is C<"polar_pretty_print">, which can be
-set to true or false, the default being true.  See above for what this
-means.
+The second new display parameter is C<"polar_pretty_print">, which can
+be set to true or false, the default being true.  See the previous
+section for what this means.
 
 =head1 USAGE
 
