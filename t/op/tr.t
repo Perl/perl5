@@ -5,7 +5,7 @@ BEGIN {
     unshift @INC, "../lib";
 }
 
-print "1..4\n";
+print "1..8\n";
 
 $_ = "abcdefghijklmnopqrstuvwxyz";
 
@@ -37,3 +37,27 @@ print "ok 3\n";
     print "ok 4\n";
 }
 #
+
+# make sure that tr cancels IOK and NOK
+($x = 12) =~ tr/1/3/;
+(my $y = 12) =~ tr/1/3/;
+($f = 1.5) =~ tr/1/3/;
+(my $g = 1.5) =~ tr/1/3/;
+print "not " unless $x + $y + $f + $g == 71;
+print "ok 5\n";
+
+# make sure tr is harmless if not updating  -  see [ID 20000511.005]
+$_ = 'fred';
+/([a-z]{2})/;
+$1 =~ tr/A-Z//;
+s/^(\s*)f/$1F/;
+print "not " if $_ ne 'Fred';
+print "ok 6\n";
+
+# check tr handles UTF8 correctly
+($x = 256.65.258) =~ tr/a/b/;
+print "not " if $x ne 256.65.258 or length $x != 3;
+print "ok 7\n";
+$x =~ tr/A/B/;
+print "not " if $x ne 256.66.258 or length $x != 3;
+print "ok 8\n";
