@@ -32,7 +32,7 @@ $VERSION = '0.06';
 # USE_MUL: due to problems on certain os (os390, posix-bc) "* 1e-5" is used
 # instead of "/ 1e5" at some places, (marked with USE_MUL). But instead of
 # using the reverse only on problematic machines, I used it everytime to avoid
-# the costly comparisations. This _should_ work everywhere. Thanx Peter Prymmer
+# the costly comparisons. This _should_ work everywhere. Thanx Peter Prymmer
 
 ##############################################################################
 # global constants, flags and accessory
@@ -128,7 +128,7 @@ sub _add
   # (ref to int_num_array, ref to int_num_array)
   # routine to add two base 1e5 numbers
   # stolen from Knuth Vol 2 Algorithm A pg 231
-  # there are separate routines to add and sub as per Kunth pg 233
+  # there are separate routines to add and sub as per Knuth pg 233
   # This routine clobbers up array x, but not y.
  
   shift @_ if $_[0] eq $class;
@@ -137,7 +137,7 @@ sub _add
   # for each in Y, add Y to X and carry. If after that, something is left in
   # X, foreach in X add carry to X and then return X, carry
   # Trades one "$j++" for having to shift arrays, $j could be made integer
-  # but this would impose a limit to number-length to 2**32.
+  # but this would impose a limit to number-length of 2**32.
   my $i; my $car = 0; my $j = 0;
   for $i (@$y)
     {
@@ -156,7 +156,7 @@ sub _sub
   {
   # (ref to int_num_array, ref to int_num_array)
   # subtract base 1e5 numbers -- stolen from Knuth Vol 2 pg 232, $x > $y
-  # subtract Y from X (X is always greater/equal!) by modifiyng x in place
+  # subtract Y from X (X is always greater/equal!) by modifying x in place
   shift @_ if $_[0] eq $class;
   my ($sx,$sy,$s) = @_;
  
@@ -197,7 +197,7 @@ sub _mul
   {
   # (BINT, BINT) return nothing
   # multiply two numbers in internal representation
-  # modifies first arg, second needs not be different from first
+  # modifies first arg, second need not be different from first
   shift @_ if $_[0] eq $class;
   my ($xv,$yv) = @_;
  
@@ -241,9 +241,9 @@ sub _mul
 
 sub _div
   {
-  # ref to array, ref to array, modify first array and return reminder if 
+  # ref to array, ref to array, modify first array and return remainder if 
   # in list context
-  # does no longer handle sign
+  # no longer handles sign
   shift @_ if $_[0] eq $class;
   my ($x,$yorg) = @_;
   my ($car,$bar,$prd,$dd,$xi,$yi,@q,$v2,$v1);
@@ -336,7 +336,7 @@ sub _acmp
   {
   # internal absolute post-normalized compare (ignore signs)
   # ref to array, ref to array, return <0, 0, >0
-  # arrays must have at least on entry, this is not checked for
+  # arrays must have at least one entry; this is not checked for
 
   shift @_ if $_[0] eq $class;
   my ($cx, $cy) = @_;
@@ -350,7 +350,7 @@ sub _acmp
   #print "full compare\n";
   $i = 0; $a = 0;
   # first way takes 5.49 sec instead of 4.87, but has the early out advantage
-  # so grep is slightly faster, but more unflexible. hm. $_ instead if $k
+  # so grep is slightly faster, but more inflexible. hm. $_ instead of $k
   # yields 5.6 instead of 5.5 sec huh?
   # manual way (abort if unequal, good for early ne)
   my $j = scalar @$cx - 1;
@@ -370,7 +370,7 @@ sub _acmp
 sub _len
   {
   # computer number of digits in bigint, minus the sign
-  # int() because add/sub leaves sometimes strings (like '00005') instead of
+  # int() because add/sub sometimes leaves strings (like '00005') instead of
   # int ('5') in this place, causing length to fail
   shift @_ if $_[0] eq $class;
   my $cx = shift;
@@ -549,10 +549,10 @@ the use by Math::BigInt:
 	_add(obj,obj)	Simple addition of two objects
 	_mul(obj,obj)	Multiplication of two objects
 	_div(obj,obj)	Division of the 1st object by the 2nd
-			In list context, returns (result,reminder).
-			NOTE: this is integer math, so there will no
-			fractional part be returned.
-	_sub(obj,obj)	Simple substraction of 1 object from another
+			In list context, returns (result,remainder).
+			NOTE: this is integer math, so no
+			fractional part will be returned.
+	_sub(obj,obj)	Simple subtraction of 1 object from another
 			a third, optional parameter indicates that the params
 			are swapped. In this case, the first param needs to
 			be preserved, while you can destroy the second.
@@ -575,7 +575,7 @@ the use by Math::BigInt:
 
 The following functions are optional, and can be exported if the underlying lib
 has a fast way to do them. If not defined, Math::BigInt will use a pure, but
-slow Perl function as fallback to emulate these:
+slow, Perl function as fallback to emulate these:
 
 	_from_hex(str)	return ref to new object from ref to hexadecimal string
 	_from_bin(str)	return ref to new object from ref to binary string
@@ -592,17 +592,17 @@ slow Perl function as fallback to emulate these:
 	_pow(obj,obj)	return object 1 to the power of object 2
 	_gcd(obj,obj)	return Greatest Common Divisor of two objects
 	
-	_zeros(obj)	return amount of trailing decimal zeros
+	_zeros(obj)	return number of trailing decimal zeros
 
 	_dec(obj)	decrement object by one (input is >= 1)
 	_inc(obj)	increment object by one
 
-Input strings come in as unsigned but with prefix (aka as '123', '0xabc'
+Input strings come in as unsigned but with prefix (i.e. as '123', '0xabc'
 or '0b1101').
 
-Testing of input parameter validity is done by the caller, so you need not to
-worry about underflow (C<_sub()>, C<_dec()>) nor division by zero or similiar
-cases.
+Testing of input parameter validity is done by the caller, so you need not
+worry about underflow (C<_sub()>, C<_dec()>) nor about division by zero or
+similar cases.
 
 =head1 LICENSE
  

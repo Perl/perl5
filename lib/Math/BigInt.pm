@@ -253,12 +253,12 @@ sub copy
 
 sub new 
   {
-  # create a new BigInt object from a string or another BigIint object. 
+  # create a new BigInt object from a string or another BigInt object. 
   # see hash keys documented at top
 
   # the argument could be an object, so avoid ||, && etc on it, this would
-  # cause costly overloaded code to be called. The only allowed op are ref() 
-  # and definend.
+  # cause costly overloaded code to be called. The only allowed ops are
+  # ref() and defined.
 
   my $class = shift;
  
@@ -768,8 +768,8 @@ sub is_inf
 
 sub is_one
   {
-  # return true if arg (BINT or num_str) is +1 (array '+', '1')
-  # or -1 if signis given
+  # return true if arg (BINT or num_str) is +1
+  # or -1 if sign is given
   #my ($self,$x) = objectify(1,@_); 
   my $x = shift; $x = $class->new($x) unless ref $x;
   my $sign = shift || '+';
@@ -787,7 +787,7 @@ sub is_odd
   my $x = shift; $x = $class->new($x) unless ref $x;
   #my ($self,$x) = objectify(1,@_);
 
-  return 0 if ($x->{sign} !~ /^[+-]$/);
+  return 0 if $x->{sign} !~ /^[+-]$/;			# NaN & +-inf aren't
   return $CALC->_is_odd($x->{value});
   #return (($x->{sign} ne $nan) && ($x->{value}->[0] & 1));
   }
@@ -798,7 +798,7 @@ sub is_even
   my $x = shift; $x = $class->new($x) unless ref $x;
   #my ($self,$x) = objectify(1,@_);
 
-  return 0 if ($x->{sign} !~ /^[+-]$/);
+  return 0 if $x->{sign} !~ /^[+-]$/;			# NaN & +-inf aren't
   return $CALC->_is_even($x->{value});
   #return (($x->{sign} ne $nan) && (!($x->{value}->[0] & 1)));
   #return (($x->{sign} !~ /^[+-]$/) && ($CALC->_is_even($x->{value})));
@@ -808,14 +808,14 @@ sub is_positive
   {
   # return true when arg (BINT or num_str) is positive (>= 0)
   my $x = shift; $x = $class->new($x) unless ref $x;
-  return ($x->{sign} =~ /^[\+]/);
+  return ($x->{sign} =~ /^\+/);
   }
 
 sub is_negative
   {
   # return true when arg (BINT or num_str) is negative (< 0)
   my $x = shift; $x = $class->new($x) unless ref $x;
-  return ($x->{sign} =~ /^[\-]/);
+  return ($x->{sign} =~ /^-/);
   }
 
 ###############################################################################
@@ -843,7 +843,7 @@ sub bdiv
 
   return $x if $x->modify('bdiv');
 
-  # 5 / 0 => +inf, -6 / 0 => -inf (0 /0 => 1 or +inf?)
+  # 5 / 0 => +inf, -6 / 0 => -inf (0 / 0 => 1 or +inf or NaN?)
   #return wantarray 
   # ? ($x->binf($x->{sign}),binf($x->{sign})) : $x->binf($x->{sign})
   # if ($x->{sign} =~ /^[+-]$/ && $y->is_zero());
@@ -920,7 +920,7 @@ sub bpow
     {
     # if $x == -1 and odd/even y => +1/-1
     return $y->is_odd() ? $x : $x->babs();
-    # my Casio FX-5500L has here a bug, -1 ** 2 is -1, but -1 * -1 is 1; LOL
+    # my Casio FX-5500L has a bug here: -1 ** 2 is -1, but -1 * -1 is 1; LOL
     }
   # 1 ** -y => 1 / (1**y), so do test for negative $y after above's clause
   return $x->bnan() if $y->{sign} eq '-';
@@ -1200,7 +1200,7 @@ sub _trailing_zeros
 
   return $CALC->_zeros($x->{value}) if $CALC->can('_zeros');
 
-  # if not: since we do not know underlying internal represantation:
+  # if not: since we do not know underlying internal representation:
   my $es = "$x"; $es =~ /([0]*)$/;
  
   return 0 if !defined $1;	# no zeros
@@ -1297,7 +1297,7 @@ sub _scan_for_nonzero
   return 0 if $follow > $len || $follow < 1;
   #print "checking $x $r\n";
 
-  # since we do not know underlying represantion of $x, use decimal string
+  # since we do not know underlying represention of $x, use decimal string
   #my $r = substr ($$xs,-$follow);
   my $r = substr ("$x",-$follow);
   return 1 if $r =~ /[^0]/; return 0;
@@ -1372,7 +1372,7 @@ sub bround
   # this is triggering warnings, and buggy for $scale < 0
   #if (-$scale != $len)
     {
-    # old code, depend on internal represantation
+    # old code, depend on internal representation
     # split mantissa at $pad and then pad with zeros
     #my $s5 = int($pad / 5);
     #my $i = 0;
@@ -1502,7 +1502,7 @@ sub objectify
   # Class->badd( Class->(1),2); => classname x (scalar), ref x, scalar y
   # Math::BigInt::badd(1,2);    => scalar x, scalar y
   # In the last case we check number of arguments to turn it silently into
-  # $class,1,2. (We can not take '1' as class ;o)
+  # $class,1,2. (We cannot take '1' as class ;o)
   # badd($class,1) is not supported (it should, eventually, try to add undef)
   # currently it tries 'Math::BigInt' + 1, which will not work.
  
@@ -1592,7 +1592,7 @@ sub import
       {
       # this causes a different low lib to take care...
       $CALC = $_[$i+1] || $CALC;
-      my $s = 2; $s = 1 if @a-$j < 2; # avoid "can not modify non-existant..."
+      my $s = 2; $s = 1 if @a-$j < 2; # avoid "cannot modify non-existant..."
       splice @a, $j, $s; $j -= $s;
       }
     }
@@ -1603,7 +1603,9 @@ sub import
 
   # load core math lib
   $CALC = 'Math::BigInt::'.$CALC if $CALC !~ /^Math::BigInt/i;
-  my $c = $CALC; $c =~ s/::/\//g; $c .= '.pm' if $c !~ /\.pm$/;
+  my $c = $CALC;
+  $c =~ s!::!/!g;                               # XXX portability, e.g. MacOS?
+  $c .= '.pm' if $c !~ /\.pm$/;
   require $c;
   }
 
@@ -1636,9 +1638,9 @@ sub _from_hex
   my $x = Math::BigInt->bzero();
   return $x->bnan() if $$hs !~ /^[\-\+]?0x[0-9A-Fa-f]+$/;
 
-  my $sign = '+'; $sign = '-' if ($$hs =~ /^\-/);
+  my $sign = '+'; $sign = '-' if ($$hs =~ /^-/);
 
-  $$hs =~ s/^[+-]?//;			# strip sign
+  $$hs =~ s/^[+-]//;			# strip sign
   if ($CALC->can('_from_hex'))
     {
     $x->{value} = $CALC->_from_hex($hs);
@@ -1654,7 +1656,7 @@ sub _from_hex
     while ($len >= 0)
       {
       $val = substr($$hs,$i,4);
-      $val =~ s/^[\-\+]?0x// if $len == 0;	# for last part only because
+      $val =~ s/^[+-]?0x// if $len == 0;	# for last part only because
       $val = hex($val); 			# hex does not like wrong chars
       # print "$val ",substr($$hs,$i,4),"\n";
       $i -= 4; $len --;
@@ -1672,13 +1674,13 @@ sub _from_bin
   my $bs = shift;
 
   my $x = Math::BigInt->bzero();
-  return $x->bnan() if $$bs !~ /^[\-\+]?0b[01]+$/;
+  return $x->bnan() if $$bs !~ /^[+-]?0b[01]+$/;
 
   my $mul = Math::BigInt->bzero(); $mul++;
   my $x256 = Math::BigInt->new(256);
 
   my $sign = '+'; $sign = '-' if ($$bs =~ /^\-/);
-  $$bs =~ s/^[+-]?//;				# strip sign
+  $$bs =~ s/^[+-]//;				# strip sign
   if ($CALC->can('_from_bin'))
     {
     $x->{value} = $CALC->_from_bin($bs);
@@ -1691,8 +1693,8 @@ sub _from_bin
     while ($len >= 0)
       {
       $val = substr($$bs,$i,8);
-      $val =~ s/^[\-\+]?0b// if $len == 0;	# for last part only
-      #$val = oct('0b'.$val);	# does not work on Perl prior 5.6.0
+      $val =~ s/^[+-]?0b// if $len == 0;	# for last part only
+      #$val = oct('0b'.$val);	# does not work on Perl prior to 5.6.0
       $val = ('0' x (8-CORE::length($val))).$val if CORE::length($val) < 8;
       $val = ord(pack('B8',$val));
       # print "$val ",substr($$bs,$i,16),"\n";
@@ -1970,32 +1972,33 @@ return either undef, <0, 0 or >0 and are suited for sort.
 
 =head1 ACCURACY and PRECISION
 
-Since version v1.33 Math::BigInt and Math::BigFloat do have full support for
+Since version v1.33, Math::BigInt and Math::BigFloat have full support for
 accuracy and precision based rounding, both automatically after every
-operation as manual.
+operation as well as manually.
 
 This section describes the accuracy/precision handling in Math::Big* as it
-used to be and is now, completed with an explanation of all terms and
+used to be and as it is now, complete with an explanation of all terms and
 abbreviations.
 
 Not yet implemented things (but with correct description) are marked with '!',
 things that need to be answered are marked with '?'.
 
 In the next paragraph follows a short description of terms used here (because
-these may differ from terms used by others people or documentations).
+these may differ from terms used by other people or documentation).
 
-During the rest of this document the shortcuts A (for accuracy), P (for
+During the rest of this document, the shortcuts A (for accuracy), P (for
 precision), F (fallback) and R (rounding mode) will be used.
 
 =head2 Precision P
 
 A fixed number of digits before (positive) or after (negative)
-the dot. F.i. 123.45 has a precision of -2. 0 means an integer like 123
-(or 120). A precision of 2 means two digits left of the dot are zero, so
-123 with P = 1 becomes 120. Note that numbers with zeros before the dot may
-have different precisions, because 1200 can have p = 0, 1 or 2 (depending
-on what the inital value was). It could also have p < 0, when the digits
-after the dot are zero.
+the decimal point. For example, 123.45 has a precision of -2. 0 means an
+integer like 123 (or 120). A precision of 2 means two digits to the left
+of the decimal point are zero, so 123 with P = 1 becomes 120. Note that
+numbers with zeros before the decimal point may have different precisions,
+because 1200 can have p = 0, 1 or 2 (depending on what the inital value
+was). It could also have p < 0, when the digits after the decimal point
+are zero.
 
  !The string output of such a number should be padded with zeros:
  !
@@ -2012,8 +2015,8 @@ after the dot are zero.
 
 Number of significant digits. Leading zeros are not counted. A
 number may have an accuracy greater than the non-zero digits
-when there are zeros in it or trailing zeros. F.i. 123.456 has A of 6,
-10203 has 5, 123.0506 has 7, 123.450000 has 8, and 0.000123 has 3.
+when there are zeros in it or trailing zeros. For example, 123.456 has
+A of 6, 10203 has 5, 123.0506 has 7, 123.450000 has 8 and 0.000123 has 3.
 
 =head2 Fallback F
 
@@ -2031,9 +2034,9 @@ Math::Round, is not implemented.)
 
 truncation invariably removes all digits following the
 rounding place, replacing them with zeros. Thus, 987.65 rounded
-to tenths (P=1) becomes 980, and rounded to the fourth sigdig
+to tens (P=1) becomes 980, and rounded to the fourth sigdig
 becomes 987.6 (A=4). 123.456 rounded to the second place after the
-dot (P=-2) becomes 123.46.
+decimal point (P=-2) becomes 123.46.
 
 All other implemented styles of rounding attempt to round to the
 "nearest digit." If the digit D immediately to the right of the
@@ -2065,7 +2068,7 @@ becomes 0.5, -0.55 becomes -0.5, but 0.5501 becomes 0.6.
 
 round to plus infinity, i.e. always round up. E.g., when
 rounding to the first sigdig, 0.45 becomes 0.5, -0.55 becomes -0.5,
-but 0.4501 becomes 0.5.
+and 0.4501 also becomes 0.5.
 
 =item '-inf'
 
@@ -2088,18 +2091,19 @@ versions <= 5.7.2) is like this:
 
 =item Precision
 
-  * ffround($p) is able to round to $p number of digits after the dot
+  * ffround($p) is able to round to $p number of digits after the decimal
+    point
   * otherwise P is unused
 
 =item Accuracy (significant digits)
 
   * fround($a) rounds to $a significant digits
   * only fdiv() and fsqrt() take A as (optional) paramater
-    + other operations simple create the same amount (fneg etc), or more (fmul)
+    + other operations simply create the same number (fneg etc), or more (fmul)
       of digits
     + rounding/truncating is only done when explicitly calling one of fround
       or ffround, and never for BigInt (not implemented)
-  * fsqrt() simple hands it's accuracy argument over to fdiv.
+  * fsqrt() simply hands its accuracy argument over to fdiv.
   * the documentation and the comment in the code indicate two different ways
     on how fdiv() determines the maximum number of digits it should calculate,
     and the actual code does yet another thing
@@ -2110,7 +2114,7 @@ versions <= 5.7.2) is like this:
     Actual code:
       scale = max(scale, length(dividend)-1,length(divisor)-1);
       scale += length(divisior) - length(dividend);
-    So for lx =3, ly = 9, scale = 10, scale will be actually 16 (10+9-3).
+    So for lx = 3, ly = 9, scale = 10, scale will actually be 16 (10+9-3).
     Actually, the 'difference' added to the scale is calculated from the
     number of "significant digits" in dividend and divisor, which is derived
     by looking at the length of the mantissa. Which is wrong, since it includes
@@ -2120,8 +2124,8 @@ versions <= 5.7.2) is like this:
     '17', not '17.1' since 120 is thought to have 2 significant digits.
     The rounding after the division then uses the reminder and $y to determine
     wether it must round up or down.
- ?  I have no idea which is the right way. Thats why I used scheme a bit more
- ?  simple and tweaked the few failing the testcases to match it.
+ ?  I have no idea which is the right way. That's why I used a slightly more
+ ?  simple scheme and tweaked the few failing testcases to match it.
 
 =back
 
@@ -2138,8 +2142,9 @@ This is how it works now:
   * to undefine A, use $Math::SomeCLass::accuracy = undef
   * to undefine P, use $Math::SomeClass::precision = undef
   * To be valid, A must be > 0, P can have any value.
-  * If P is negative, this means round to the P's place right of the dot,
-    positive values mean left from the dot. P of 0 means round to integer.
+  * If P is negative, this means round to the P'th place to the right of the
+    decimal point; positive values mean to the left of the decimal point.
+    P of 0 means round to integer.
   * to find out the current global A, take $Math::SomeClass::accuracy
   * use $x->accuracy() for the local setting of $x.
   * to find out the current global P, take $Math::SomeClass::precision
@@ -2147,54 +2152,54 @@ This is how it works now:
 
 =item Creating numbers
 
- !* When you create a number, there should be a way to define it's A & P
+ !* When you create a number, there should be a way to define its A & P
   * When a number without specific A or P is created, but the globals are
-    defined, these should be used to round the number immidiately and also
-    stored locally at the number. Thus changing the global defaults later on
-    will not change the A or P of previously created numbers (aka A and P of
+    defined, these should be used to round the number immediately and also
+    stored locally with the number. Thus changing the global defaults later on
+    will not change the A or P of previously created numbers (i.e., A and P of
     $x will be what was in effect when $x was created) 
 
 =item Usage
 
-  * If A or P are enabled/defined, the are used to round the result of each
+  * If A or P are enabled/defined, they are used to round the result of each
     operation according to the rules below
-  * Negative P are ignored in Math::BigInt, since it never has digits after
-    the dot
- !* Since Math::BigFloat uses Math::BigInts internally, setting A or P inside
- !  Math::BigInt as globals should not hamper with the parts of a BigFloat.
- !  Thus a flag is used to mark all Math::BigFloat numbers as 'do never round'
+  * Negative P is ignored in Math::BigInt, since BigInts never have digits
+    after the decimal point
+ !* Math::BigFloat uses Math::BigInts internally, but setting A or P inside
+ !  Math::BigInt as globals should not tamper with the parts of a BigFloat.
+ !  Thus a flag is used to mark all Math::BigFloat numbers as 'never round'
 
 =item Precedence
 
-  * It makes only sense that a number has only A or P at a time. Since you can
-    set/get both A and P, there is a rule that will practically enforce only
-    A or P to be in effect at a time, even if both are set. This is called
-    precedence.
- !* If two objects are engaged in an operation, and one of them has A in
+  * It only makes sense that a number has only one of A or P at a time.
+    Since you can set/get both A and P, there is a rule that will practically
+    enforce only A or P to be in effect at a time, even if both are set.
+    This is called precedence.
+ !* If two objects are involved in an operation, and one of them has A in
  !  effect, and the other P, this should result in a warning or an error,
  !  probably in NaN.
   * A takes precendence over P (Hint: A comes before P). If A is defined, it
-    is used, otherwise P is used. If none of them is defined, nothing is used,
-    e.g. the result will have as many digits as it can (with an exception
-    for fdiv/fsqrt) and will not be rounded.
-  * There is another setting for fdiv() (and thus for fsqrt()). If none of A
-    or P are defined, fdiv() will use a fallback (F) of $div_scale digits.
-    If either the dividend or the divisors mantissa have more digits than the
-    F, the higher value will be used instead as F.
-    This is to limit the digits (A) of the result (just think if what happens
-    with unlimited A and P in case of 1/3 :-)
-  * fdiv will calculate 1 more digits than required (determined by
+    is used, otherwise P is used. If neither of them is defined, nothing is
+    used, i.e. the result will have as many digits as it can (with an
+    exception for fdiv/fsqrt) and will not be rounded.
+  * There is another setting for fdiv() (and thus for fsqrt()). If neither of
+    A or P is defined, fdiv() will use a fallback (F) of $div_scale digits.
+    If either the dividend's or the divisor's mantissa has more digits than
+    the value of F, the higher value will be used instead of F.
+    This is to limit the digits (A) of the result (just consider what would
+    happen with unlimited A and P in the case of 1/3 :-)
+  * fdiv will calculate 1 more digit than required (determined by
     A, P or F), and, if F is not used, round the result
-    (this will still fail in case of a result like 0.12345000000001 with A
-    or P of 5, but this can not be helped - or can it?)
-  * Thus you can have the math done by on Math::Big* class in three modi:
+    (this will still fail in the case of a result like 0.12345000000001 with A
+    or P of 5, but this cannot be helped - or can it?)
+  * Thus you can have the math done by on Math::Big* class in three modes:
     + never round (this is the default):
       This is done by setting A and P to undef. No math operation
-      will round the result, with fdiv() and fsqrt() as exception to guard
+      will round the result, with fdiv() and fsqrt() as exceptions to guard
       against overflows. You must explicitely call bround(), bfround() or
-      round() (the latter with with parameters).
-      Note: Once you rounded a number, the settings will 'stick' on it and
-      'infect' all other numbers engaged in math operations with it, since
+      round() (the latter with parameters).
+      Note: Once you have rounded a number, the settings will 'stick' on it
+      and 'infect' all other numbers engaged in math operations with it, since
       local settings have the highest precedence. So, to get SaferRound[tm],
       use a copy() before rounding like this:
 
@@ -2206,24 +2211,24 @@ This is how it works now:
                                                 # copy would have been 1210!
 
     + round after each op:
-      After each single operation (except for testing like is_zero()) the
-      method round() is called and the result appropriately rounded. By
+      After each single operation (except for testing like is_zero()), the
+      method round() is called and the result is rounded appropriately. By
       setting proper values for A and P, you can have all-the-same-A or
-      all-the-same-P modi. F.i. Math::Current might set A to undef, and P
-      to -2, globally.
+      all-the-same-P modes. For example, Math::Currency might set A to undef,
+      and P to -2, globally.
 
- ?Maybe an extra option, that forbids local A & P settings would be in order,
- ?so that intermidiate rounding does not 'poison' further math? 
+ ?Maybe an extra option that forbids local A & P settings would be in order,
+ ?so that intermediate rounding does not 'poison' further math? 
 
 =item Overriding globals
 
   * you will be able to give A, P and R as an argument to all the calculation
-    routines, the second parameter is A, the third one is P, and the fourth is
+    routines; the second parameter is A, the third one is P, and the fourth is
     R (shift place by one for binary operations like add). P is used only if
-    the first one (A) is undefined. These three parameters override the
-    globals in the order detailed as follows, aka the first defined value
+    the first parameter (A) is undefined. These three parameters override the
+    globals in the order detailed as follows, i.e. the first defined value
     wins:
-    (local: per object, global: globally default, parameter: argument to sub)
+    (local: per object, global: global default, parameter: argument to sub)
       + parameter A
       + parameter P
       + local A (if defined on both of the operands: smaller one is taken)
@@ -2231,18 +2236,18 @@ This is how it works now:
       + global A
       + global P
       + global F
-  * fsqrt() will hand it's arguments to fdiv(), as it used to, only now for two
+  * fsqrt() will hand its arguments to fdiv(), as it used to, only now for two
     arguments (A and P) instead of one
 
 =item Local settings
 
   * You can set A and P locally by using $x->accuracy() and $x->precision()
     and thus force different A and P for different objects/numbers.
-  * Setting A or P this way immidiately rounds $x to the new value.
+  * Setting A or P this way immediately rounds $x to the new value.
 
 =item Rounding
 
-  * the rounding routines will use the respective global or local settings
+  * the rounding routines will use the respective global or local settings.
     fround()/bround() is for accuracy rounding, while ffround()/bfround()
     is for precision
   * the two rounding functions take as the second parameter one of the
@@ -2251,12 +2256,12 @@ This is how it works now:
   * you can set and get the global R by using Math::SomeClass->round_mode()
     or by setting $Math::SomeClass::rnd_mode
   * after each operation, $result->round() is called, and the result may
-    eventually be rounded (that is, if A or P were set either local, global
-    or as parameter to the operation)
+    eventually be rounded (that is, if A or P were set either locally,
+    globally or as parameter to the operation)
   * to manually round a number, call $x->round($A,$P,$rnd_mode);
-    This will round the number by using the appropriate rounding function
+    this will round the number by using the appropriate rounding function
     and then normalize it.
-  * rounding does modify the local settings of the number, so that
+  * rounding modifies the local settings of the number:
 
         $x = Math::BigFloat->new(123.456);
         $x->accuracy(5);
@@ -2284,7 +2289,7 @@ This is how it works now:
 
 =head1 INTERNALS
 
-The actual numbers are stored as unsigned big integers, and math with them
+The actual numbers are stored as unsigned big integers, and math with them is
 done (by default) by a module called Math::BigInt::Calc. This is equivalent to:
 
 	use Math::BigInt lib => 'calc';
@@ -2300,12 +2305,12 @@ with the least significant digit first, BitVect.pm uses a bit vector of base 2,
 most significant bit first.
 
 The sign C</^[+-]$/> is stored separately. The string 'NaN' is used to 
-represent the result when input arguments are not numbers, as well as 
-the result of dividing by zero. '+inf' or '-inf' represent infinity.
+represent the result when input arguments are not numbers. '+inf' and
+'-inf' represent infinity.
 
-You sould neither care nor depend on the internal representation, it might
-change without notice. Use only method calls like C<< $x->sign(); >> instead
-relying on the internal hash keys like in C<< $x->{sign}; >>. 
+You should neither care about nor depend on the internal representation; it
+might change without notice. Use only method calls like C<< $x->sign(); >>
+instead of relying on the internal hash keys like in C<< $x->{sign}; >>.
 
 =head2 mantissa(), exponent() and parts()
 
@@ -2317,15 +2322,15 @@ that:
         $y = $m * ( 10 ** $e );
         print "ok\n" if $x == $y;
 
-C<($m,$e) = $x->parts()> is just a shortcut that gives you both of them in one
-go. Both the returned mantissa and exponent do have a sign.
+C<< ($m,$e) = $x->parts() >> is just a shortcut that gives you both of them
+in one go. Both the returned mantissa and exponent have a sign.
 
 Currently, for BigInts C<$e> will be always 0, except for NaN where it will be
-NaN and for $x == 0, then it will be 1 (to be compatible with Math::BigFlaot's
+NaN and for $x == 0, then it will be 1 (to be compatible with Math::BigFloat's
 internal representation of a zero as C<0E1>).
 
 C<$m> will always be a copy of the original number. The relation between $e
-and $m might change in the future, but will be always equivalent in a
+and $m might change in the future, but will always be equivalent in a
 numerical sense, e.g. $m might get minimized.
 
 =head1 EXAMPLES
@@ -2379,7 +2384,7 @@ After C<use Math::BigInt ':constant'> all the B<integer> decimal constants
 in the given scope are converted to C<Math::BigInt>. This conversion
 happens at compile time.
 
-In particular
+In particular,
 
   perl -MMath::BigInt=:constant -e 'print 2**100,"\n"'
 
@@ -2393,21 +2398,22 @@ so that
 
 	$x = 1234567890123456789012345678901234567890
 		+ 123456789123456789;
-	$x = '1234567890123456789012345678901234567890'
+	$y = '1234567890123456789012345678901234567890'
 		+ '123456789123456789';
 
-do both not work. You need a explicit Math::BigInt->new() around one of them.
+do not work. You need an explicit Math::BigInt->new() around one of the
+operands.
 
 =head1 PERFORMANCE
 
 Using the form $x += $y; etc over $x = $x + $y is faster, since a copy of $x
 must be made in the second case. For long numbers, the copy can eat up to 20%
-of the work (in case of addition/subtraction, less for
+of the work (in the case of addition/subtraction, less for
 multiplication/division). If $y is very small compared to $x, the form
 $x += $y is MUCH faster than $x = $x + $y since making the copy of $x takes
 more time then the actual addition.
 
-With a technic called copy-on-write the cost of copying with overload could
+With a technique called copy-on-write, the cost of copying with overload could
 be minimized or even completely avoided. This is currently not implemented.
 
 The new version of this module is slower on new(), bstr() and numify(). Some
@@ -2424,11 +2430,11 @@ You can use an alternative library to drive Math::BigInt via:
 	use Math::BigInt lib => 'Module';
 
 The default is called Math::BigInt::Calc and is a pure-perl base 100,000
-math package that consist of the standard routine present in earlier versions
+math package that consists of the standard routine present in earlier versions
 of Math::BigInt.
 
 There are also Math::BigInt::Scalar (primarily for testing) and
-Math::BigInt::BitVect, these and others can be found via
+Math::BigInt::BitVect; these and others can be found via
 L<http://search.cpan.org/>:
 
 	use Math::BigInt lib => 'BitVect';
@@ -2580,7 +2586,7 @@ If you want a true copy of $x, use:
 
         $y = $x->copy();
 
-See also the documentation in for overload.pm regarding C<=>.
+See also the documentation for overload.pm regarding C<=>.
 
 =item bpow
 

@@ -199,7 +199,7 @@ while (<DATA>)
   } # endwhile data tests
 close DATA;
 
-# XXX Tels 06/29/2000 following tests never fail or do not work :(
+# XXX Tels 06/29/2001 following tests never fail or do not work :(
 
 # test whether use Math::BigInt qw/version/ works
 $try = "use Math::BigInt ($version.'1');";
@@ -350,7 +350,7 @@ $x += 1; ok ($x,100000); is_valid($x);
 $x -= 1; ok ($x,99999); is_valid($x); 
 
 ###############################################################################
-# check numify, these tests make only sense with Math::BigInt::Calc, since
+# check numify, these tests only make sense with Math::BigInt::Calc, since
 # only this uses $BASE
 
 my $BASE = int(1e5);		# should access Math::BigInt::Calc::BASE
@@ -434,7 +434,7 @@ ok ($args[3],6); ok (ref($args[3]),'');
 ok ($args[4],7); ok (ref($args[4]),'');
 
 ###############################################################################
-# test for flaoting-point input (other tests in bnorm() below)
+# test for floating-point input (other tests in bnorm() below)
 
 $z = 1050000000000000;          # may be int on systems with 64bit?
 $x = Math::BigInt->new($z); ok ($x->bsstr(),'105e+13');	# not 1.03e+15
@@ -459,7 +459,7 @@ ok ($x,"170141183460469231731687303715884105727");
 #$x = new Math::BigInt(2); $x **= 6972593; $x--;
 
 # 593573509*2^332162+1 has exactly 1,000,000 digits
-# takes about 24 mins on 300 Mhz, so can not be done yet ;)
+# takes about 24 mins on 300 Mhz, so cannot be done yet ;)
 #$x = Math::BigInt->new(2); $x **= 332162; $x *= "593573509"; $x++;
 #ok ($x->length(),1_000_000);
 
