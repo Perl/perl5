@@ -46,7 +46,7 @@ open(ASMDATA_PM, ">ext/B/B/Asmdata.pm") or die "ext/B/B/Asmdata.pm: $!";
 print ASMDATA_PM $perl_header, <<'EOT';
 package B::Asmdata;
 
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 
 use Exporter;
 @ISA = qw(Exporter);

@@ -16,7 +16,7 @@ no warnings;			# XXX
 
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(assemble_fh newasm endasm assemble asm);
-$VERSION = 0.04;
+$VERSION = 0.05;
 
 use strict;
 my %opnumber;
