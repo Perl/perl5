@@ -924,6 +924,6 @@ threadsv	per-thread value	ck_null		ds0
 setstate	set statement info	ck_null		s;
 method_named	method with known name	ck_null		d$
 
-# Add new ops before this, before the custom operator.
+# Add new ops before this, the custom operator.
 
 custom		unknown custom operator		ck_null		0
