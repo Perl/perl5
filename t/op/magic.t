@@ -292,7 +292,9 @@ else {
             my $mydollarzero = sub {
               my($arg) = shift;
               $0 = $arg if defined $arg;
-              my $ps = `ps -o command= -p $$`;
+	      # In FreeBSD the ps -o command= will cause
+	      # an empty header line, grab only the last line.
+              my $ps = (`ps -o command= -p $$`)[-1];
               return if $?;
               chomp $ps;
               printf "# 0[%s]ps[%s]\n", $0, $ps;
