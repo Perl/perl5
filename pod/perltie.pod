@@ -1080,6 +1080,13 @@ regardless of whether the hash is empty or hash elements).
 Localizing tied arrays or hashes does not work.  After exiting the
 scope the arrays or the hashes are not restored.
 
+Counting the number of entries in a hash via C<scalar(keys(%hash))>
+or C<scalar(values(%hash)>) is inefficient since it needs to iterate
+through all the entries with FIRSTKEY/NEXTKEY.
+
+Tied hash/array slices cause multiple FETCH/STORE pairs, there are no
+tie methods for slice operations.
+
 You cannot easily tie a multilevel data structure (such as a hash of
 hashes) to a dbm file.  The first problem is that all but GDBM and
 Berkeley DB have size limitations, but beyond that, you also have problems
@@ -1090,10 +1097,6 @@ source code to MLDBM.
 
 Tied filehandles are still incomplete.  sysopen(), truncate(),
 flock(), fcntl(), stat() and -X can't currently be trapped.
-
-Counting the number of entries in a hash via C<scalar(keys(%hash))>
-or C<scalar(values(%hash)>) is inefficient since it needs to iterate
-through all the entries with FIRSTKEY/NEXTKEY.
 
 =head1 AUTHOR
 
