@@ -340,7 +340,7 @@ PerlIO_define_layer(PerlIO_funcs *tab)
 {
  dTHX;
  HV *stash = gv_stashpv("perlio::Layer", TRUE);
- SV *sv = sv_bless(newRV_noinc(newSViv((IV) tab)),stash);
+ SV *sv = sv_bless(newRV_noinc(newSViv(PTR2IV(tab))),stash);
  hv_store(PerlIO_layer_hv,tab->name,strlen(tab->name),sv,0);
 }
 
@@ -409,7 +409,7 @@ PerlIO_default_layer(I32 n)
  svp = av_fetch(PerlIO_layer_av,n,0);
  if (svp && (layer = *svp) && SvROK(layer) && SvIOK((layer = SvRV(layer))))
   {
-   tab = (PerlIO_funcs *) SvIV(layer);
+   tab = INT2PTR(PerlIO_funcs *, SvIV(layer));
   }
  /* PerlIO_debug("Layer %d is %s\n",n,tab->name); */
  return tab;
