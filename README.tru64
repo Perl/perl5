@@ -35,16 +35,12 @@ is harmless).
 
 =head2 Threaded Perl on Tru64
 
-If you want to use threads, you should primarily use the new Perl
+If you want to use threads, you should primarily use the Perl
 5.8.0 threads model by running Configure with -Duseithreads.
 
-The old Perl 5.005 threads is obsolete, unmaintained, and its use is
-discouraged.  If you really want it, run Configure with the
--Dusethreads -Duse5005threads options as described in INSTALL.
-
-Either thread model is going to work only in Tru64 4.0 and newer
-releases, older operating releases like 3.2 aren't probably going
-to work properly with threads.
+Perl threading is going to work only in Tru64 4.0 and newer releases,
+older operating releases like 3.2 aren't probably going to work
+properly with threads.
 
 =head2 Long Doubles on Tru64
 
