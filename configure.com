@@ -4837,7 +4837,7 @@ $ WC ""
 $ WC "CONFIG='true'"
 $ WC "Makefile_SH='" + Makefile_SH + "'"
 $ WC "Mcc='" + Mcc + "'"
-$! WC "PERL_SUBVERSION='" + subversion + "'" ! VMS specific to descrip_mms.template
+$ WC "PERL_SUBVERSION='" + subversion + "'" ! VMS specific to descrip_mms.template
 $ WC "PERL_VERSION='" + patchlevel + "'" ! VMS specific to descrip_mms.template
 $ WC "alignbytes='" + alignbytes + "'"
 $ WC "aphostname='" + "'"
