@@ -185,9 +185,9 @@ eval { require Socket; gethostbyaddr(v127.0.0.1, Socket::AF_INET) };
 if ($@) {
     # No - so do not test insane fails.
     $@ =~ s/\n/\n# /g;
-    skip("No Socket::AF_INET # $@");
 }
-else {
+SKIP: {
+    skip("No Socket::AF_INET # $@") if $@;
     my $ip   = v2004.148.0.1;
     my $host;
     eval { $host = gethostbyaddr($ip,Socket::AF_INET) };
