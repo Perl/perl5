@@ -81,6 +81,25 @@ sub SWASHNEW {
                 last GETFILE;
             }
 
+	    ##
+	    ## It could be a user-defined property.
+	    ##
+
+	    if ($type =~ /^I[ns](\w+)$/) {
+                my @caller = caller(1);
+
+                if (defined $caller[0]) {
+                    my $prop = $caller[0] . "::" . $type;
+
+                    if (exists &{$prop}) {
+                        no strict 'refs';
+
+                        $list = &{$prop};
+                        last GETFILE;
+                    }
+                }
+            }
+
             ##
             ## Last attempt -- see if it's a "To" name (e.g. "ToLower")
             ##
@@ -99,21 +118,25 @@ sub SWASHNEW {
             return $type;
         }
 
-        print "found it (file='$file')\n" if DEBUG;
+	if (defined $file) {
+	    print "found it (file='$file')\n" if DEBUG;
 
-        ##
-        ## If we reach here, it was due to a 'last GETFILE' above, so we
-        ## have a filename, so now we load it if we haven't already.
-        ## If we have, return the cached results. The cache key is the
-        ## file to load.
-        ##
-        if ($Cache{$file} and ref($Cache{$file}) eq $class)
-        {
-            print "Returning cached '$file' for \\p{$type}\n" if DEBUG;
-            return $Cache{$class, $file};
-        }
+	    ##
+	    ## If we reach here, it was due to a 'last GETFILE' above
+	    ## (exception: user-defined properties), so we
+	    ## have a filename, so now we load it if we haven't already.
+	    ## If we have, return the cached results. The cache key is the
+	    ## file to load.
+	    ##
+	    if ($Cache{$file} and ref($Cache{$file}) eq $class)
+	    {
+		print "Returning cached '$file' for \\p{$type}\n" if DEBUG;
+		return $Cache{$class, $file};
+	    }
 
-        $list = do $file;
+	    $list = do $file;
+	}
+
         $ListSorted = 1; ## we know that these lists are sorted
     }
 

@@ -21,9 +21,9 @@ BEGIN {
 #
 sub skip {
     my $why  = shift;
-    my $test = curr_test;
     my $n    = @_ ? shift : 1;
     for (1..$n) {
+        my $test = curr_test;
         print STDOUT "ok $test # skip: $why\n";
         next_test;
     }
@@ -80,7 +80,7 @@ plan tests => 130;
     if ($^O eq 'MSWin32' ||
         $^O eq 'NetWare' ||
         $^O eq 'VMS') {
-            skip 3, "Your platform quotes differently.\n";
+            skip "Your platform quotes differently.", 3;
             last;
     }
 
@@ -108,7 +108,7 @@ plan tests => 130;
     if ($^O eq 'MSWin32' ||
         $^O eq 'NetWare' ||
         $^O eq 'VMS') {
-            skip 1, "Your platform quotes differently.\n";
+            skip "Your platform quotes differently.", 1;
             last;
     }
     is (runperl (switches => [qw /-sweprint --/,
@@ -170,14 +170,16 @@ plan tests => 130;
     foreach my $program (@progs) {
         if (exists $program -> {SKIP}) {
             chomp  $program -> {SKIP};
-            skip   $program -> {SKIP};
+            skip   $program -> {SKIP}, 1;
             next;
         }
 
-        if (@{$program -> {SKIP_OS}} &&
-            grep {$^O eq $_} @{$program -> {SKIP_OS}}) {
-            skip "Your OS uses different quoting.";
-            next;
+        if (@{$program -> {SKIP_OS}}) {
+            chomp @{$program -> {SKIP_OS}};
+            if (grep {$^O eq $_} @{$program -> {SKIP_OS}}) {
+                skip "Your OS uses different quoting.", 1;
+                next;
+            }
         }
 
         map {s/\$datafile/$datafile/} @{$program -> {ARGS}};
@@ -211,6 +213,20 @@ BEGIN{$SIG{__WARN__}=sub{$_=pop;y-_- -;print/".*(.)"/;
 truncate$0,-1+-s$0;exec$0;}}//rekcaH_lreP_rehtona_tsuJ
     --
     chomp @programs;
+
+    if ($^O eq 'VMS') {
+        # VMS needs extensions for files to be executable,
+        # but the Japhs above rely on $0 being exactly the
+        # filename of the program.
+        skip "VMS", 2 * @programs;
+        last
+    }
+
+    use Config;
+    unless (defined $Config {useperlio}) {
+        skip "Uuseperlio", 2 * @programs;
+        last
+    }
 
     my $i = 1;
     foreach my $program (@programs) {

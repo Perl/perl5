@@ -131,6 +131,12 @@ After the user's program is loaded and parsed, that returned sub ref
 is invoked which can then go ahead and do the compilation, usually by
 making use of the C<B> module's functionality.
 
+=head1 BUGS
+
+The C<-q> and C<-qq> options don't work correctly if perl isn't
+compiled with PerlIO support : STDOUT will be closed instead of being
+redirected to C<$O::BEGIN_output>.
+
 =head1 AUTHOR
 
 Malcolm Beattie, C<mbeattie@sable.ox.ac.uk>

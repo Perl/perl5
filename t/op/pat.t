@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..900\n";
+print "1..908\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2800,7 +2800,7 @@ print "# some Unicode properties\n";
 }
 
 {
-    # [ID 20020412.005] wrong pmop flags checked when empty pattern
+    print "# [ID 20020412.005] wrong pmop flags checked when empty pattern\n";
     # requires reuse of last successful pattern
     my $test = 898;
     $test =~ /\d/;
@@ -2823,3 +2823,50 @@ print "# some Unicode properties\n";
     }
     ++$test;
 }
+
+print "# user-defined character properties\n";
+
+sub InKana1 {
+    return <<'END';
+3040	309F
+30A0	30FF
+END
+}
+
+sub InKana2 {
+    return <<'END';
++utf8::InHiragana
++utf8::InKatakana
+END
+}
+
+sub InKana3 {
+    return <<'END';
++utf8::InHiragana
++utf8::InKatakana
+-utf8::IsCn
+END
+}
+
+sub InNotKana {
+    return <<'END';
+!utf8::InHiragana
+-utf8::InKatakana
++utf8::IsCn
+END
+}
+
+$test = 901;
+
+print "\x{3040}" =~ /\p{InKana1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
+print "\x{303F}" =~ /\P{InKana1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
+
+print "\x{3040}" =~ /\p{InKana2}/ ? "ok $test\n" : "not ok $test\n"; $test++;
+print "\x{303F}" =~ /\P{InKana2}/ ? "ok $test\n" : "not ok $test\n"; $test++;
+
+print "\x{3041}" =~ /\p{InKana3}/ ? "ok $test\n" : "not ok $test\n"; $test++;
+print "\x{3040}" =~ /\P{InKana3}/ ? "ok $test\n" : "not ok $test\n"; $test++;
+
+print "\x{3040}" =~ /\p{InNotKana}/ ? "ok $test\n" : "not ok $test\n"; $test++;
+print "\x{3041}" =~ /\P{InNotKana}/ ? "ok $test\n" : "not ok $test\n"; $test++;
+

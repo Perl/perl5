@@ -27,10 +27,10 @@ Perl 本身以 Unicode 進行操作. 這表示 Perl 內部的字串資料可用 Unicode
 在輸入及輸出時, 為了處理以 Unicode 之前的編碼方式儲存的資料, Perl
 提供了 Encode 這個模組, 可以讓你輕易地讀取及寫入舊有的編碼資料.
 
-Encode 延伸模組支援下列正體中文的編碼方式:
+Encode 延伸模組支援下列正體中文的編碼方式 ('big5' 表示 'big5-eten'):
 
-    big5	原始的 Big5 編碼 (含倚天日文字形)
-    big5-hkscs	Big5 + 香港外字集
+    big5-eten	Big5 編碼 (含倚天延伸字形)
+    big5-hkscs	Big5 + 香港外字集, 2001 年版
     cp950	字碼頁 950 (Big5 + 微軟添加的字符)
 
 舉例來說, 將 Big5 編碼的檔案轉成 Unicode, 祗需鍵入下列指令:
@@ -61,8 +61,10 @@ Perl 也內附了 "piconv", 一支完全以 Perl 寫成的字符轉換工具程式, 用法如下:
 如果需要更多的中文編碼, 可以從 CPAN (L<http://www.cpan.org/>) 下載
 Encode::HanExtra 模組. 它目前提供下列編碼方式:
 
+    cccii	1980 年文建會的中文資訊交換碼
     euc-tw	Unix 延伸字符集, 包含 CNS11643 平面 1-7
     big5plus	中文數位化技術推廣基金會的 Big5+
+    big5ext	中文數位化技術推廣基金會的 Big5e
 
 另外, Encode::HanConvert 模組則提供了簡繁轉換用的兩種編碼:
 
@@ -163,6 +165,6 @@ L<Encode>, L<Encode::TW>, L<encoding>, L<perluniintro>, L<perlunicode>
 
 Jarkko Hietaniemi E<lt>jhi@iki.fiE<gt>
 
-唐宗漢 E<lt>autrijus@autrijus.orgE<gt>
+Autrijus Tang (唐宗漢) E<lt>autrijus@autrijus.orgE<gt>
 
 =cut

@@ -198,8 +198,8 @@ C<\d>, and C<\D> within character classes, but if you try to use them
 as endpoints of a range, that's not a range, the "-" is understood
 literally.  If Unicode is in effect, C<\s> matches also "\x{85}",
 "\x{2028}, and "\x{2029}", see L<perlunicode> for more details about
-C<\pP>, C<\PP>, and C<\X>, and L<perluniintro> about Unicode in
-general.
+C<\pP>, C<\PP>, and C<\X>, and L<perluniintro> about Unicode in general.
+You can define your own C<\p> and C<\P> propreties, see L<perlunicode>.
 
 The POSIX character class syntax
 
