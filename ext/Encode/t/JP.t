@@ -1,6 +1,6 @@
 BEGIN {
-#   chdir 't' if -d 't';
-#   @INC = (-d '../../lib' ? '../lib';
+    chdir 't' if -d 't';
+    @INC = '../lib';
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bEncode\b/) {
       print "1..0 # Skip: Encode was not built\n";
@@ -23,9 +23,9 @@ ok($enc->isa('Encode::XS'));
 is($enc->name,'euc-jp');
 my $dir = dirname(__FILE__);
 my $euc = File::Spec->catfile($dir,"table.euc");
-my $utf = File::Spec->catfile($dir,"table.utf8");
+my $utf = File::Spec->catfile($dir,"$$.utf8");
 my $ref = File::Spec->catfile($dir,"table.ref");
-my $rnd = File::Spec->catfile($dir,"table.rnd");
+my $rnd = File::Spec->catfile($dir,"$$.rnd");
 print "# Basic decode test\n";
 open($src,"<",$euc) || die "Cannot open $euc:$!";
 ok(defined($src) && fileno($src));
@@ -92,6 +92,5 @@ SKIP:
 
 is($enc->name,'euc-jp');
 END {
-# unlink($utf,$rnd);
-
+ 1 while unlink($utf,$rnd);
 }
