@@ -27,9 +27,9 @@
 #endif
 
 #define TAINT_FROM_REGEX(sv,rx) \
-	if ((rx)->exec_tainted) {	\
-	    SvTAINTED_on(sv);		\
-	} else				\
+	if ((rx)->exec_tainted)	\
+	    SvTAINTED_on(sv);	\
+	else			\
 	    SvTAINTED_off(sv);
 
 /*
@@ -44,15 +44,13 @@ typedef struct magic_state MGS;
 
 static void restore_magic _((void *p));
 
-static MGS *
-save_magic(sv)
+static void
+save_magic(mgs, sv)
+MGS* mgs;
 SV* sv;
 {
-    MGS* mgs;
-
     assert(SvMAGICAL(sv));
 
-    mgs = (MGS*)safemalloc(sizeof(MGS));
     mgs->mgs_sv = sv;
     mgs->mgs_flags = SvMAGICAL(sv) | SvREADONLY(sv);
     SAVEDESTRUCTOR(restore_magic, mgs);
@@ -60,15 +58,13 @@ SV* sv;
     SvMAGICAL_off(sv);
     SvREADONLY_off(sv);
     SvFLAGS(sv) |= (SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
-
-    return mgs;
 }
 
 static void
 restore_magic(p)
 void* p;
 {
-    MGS *mgs = (MGS*)p;
+    MGS* mgs = (MGS*)p;
     SV* sv = mgs->mgs_sv;
 
     if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv))
@@ -80,8 +76,6 @@ void* p;
 	if (SvGMAGICAL(sv))
 	    SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
     }
-
-    Safefree(mgs);
 }
 
 
@@ -107,13 +101,13 @@ int
 mg_get(sv)
 SV* sv;
 {
-    MGS* mgs;
+    MGS mgs;
     MAGIC* mg;
     MAGIC** mgp;
     int mgp_valid = 0;
 
     ENTER;
-    mgs = save_magic(sv);
+    save_magic(&mgs, sv);
 
     mgp = &SvMAGIC(sv);
     while ((mg = *mgp) != 0) {
@@ -121,8 +115,9 @@ SV* sv;
 	if (!(mg->mg_flags & MGf_GSKIP) && vtbl && vtbl->svt_get) {
 	    (*vtbl->svt_get)(sv, mg);
 	    /* Ignore this magic if it's been deleted */
-	    if ((mg == (mgp_valid ? *mgp : SvMAGIC(sv))) && (mg->mg_flags & MGf_GSKIP))
-		mgs->mgs_flags = 0;
+	    if ((mg == (mgp_valid ? *mgp : SvMAGIC(sv))) &&
+		  (mg->mg_flags & MGf_GSKIP))
+		mgs.mgs_flags = 0;
 	}
 	/* Advance to next magic (complicated by possible deletion) */
 	if (mg == (mgp_valid ? *mgp : SvMAGIC(sv))) {
@@ -141,19 +136,19 @@ int
 mg_set(sv)
 SV* sv;
 {
-    MGS* mgs;
+    MGS mgs;
     MAGIC* mg;
     MAGIC* nextmg;
 
     ENTER;
-    mgs = save_magic(sv);
+    save_magic(&mgs, sv);
 
     for (mg = SvMAGIC(sv); mg; mg = nextmg) {
 	MGVTBL* vtbl = mg->mg_virtual;
 	nextmg = mg->mg_moremagic;	/* it may delete itself */
 	if (mg->mg_flags & MGf_GSKIP) {
 	    mg->mg_flags &= ~MGf_GSKIP;	/* setting requires another read */
-	    mgs->mgs_flags = 0;
+	    mgs.mgs_flags = 0;
 	}
 	if (vtbl && vtbl->svt_set)
 	    (*vtbl->svt_set)(sv, mg);
@@ -174,8 +169,10 @@ SV* sv;
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	MGVTBL* vtbl = mg->mg_virtual;
 	if (vtbl && vtbl->svt_len) {
+	    MGS mgs;
+
 	    ENTER;
-	    save_magic(sv);
+	    save_magic(&mgs, sv);
 	    /* omit MGf_GSKIP -- not changed here */
 	    len = (*vtbl->svt_len)(sv, mg);
 	    LEAVE;
@@ -191,10 +188,11 @@ int
 mg_clear(sv)
 SV* sv;
 {
+    MGS mgs;
     MAGIC* mg;
 
     ENTER;
-    save_magic(sv);
+    save_magic(&mgs, sv);
 
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	MGVTBL* vtbl = mg->mg_virtual;
