@@ -232,7 +232,7 @@ inet_ntoa(ip_address_sv)
 	 * in which case using & (address-of) on it or taking sizeof()
 	 * wouldn't go over too well.  (Those are not attempted
 	 * now but in case someone thinks to change the below code
-	 * to use addr.s_addr instead of addr, you have warned.)
+	 * to use addr.s_addr instead of addr, you have been warned.)
 	 *
 	 * Bad Assumption 3: the s_addr is the first field in
 	 * an in_addr, or that its bytes are the first bytes in
@@ -245,15 +245,23 @@ inet_ntoa(ip_address_sv)
 	 *
 	 * --jhi */
 #define PERL_IN_ADDR_S_ADDR_SIZE 4
-#if INTSIZE == PERL_IN_ADDR_S_ADDR_SIZE
-	if (addrlen == PERL_IN_ADDR_S_ADDR_SIZE)
-	     addr.s_addr = ntohl(*(int*)ip_address);
-	else
-#endif
-	{
-	     /* The following could be optimized away if we knew
-	      * during compile time what size is struct in_addr. */
+	if (addrlen == PERL_IN_ADDR_S_ADDR_SIZE) {
+	     /* It must be (better be) a network-order 32-bit integer.
+	      * We can't use any fancy casting of ip_address to pointer ofn
+	      * some type (int or long) and the dereferencing that sincen
+	      * neither int not long is guaranteed to be 32 bits. */
+	     addr.s_addr  = (ip_address[0] & 0xFF) << 24;
+	     addr.s_addr |= (ip_address[1] & 0xFF) << 16;
+	     addr.s_addr |= (ip_address[2] & 0xFF) <<  8;
+	     addr.s_addr |= (ip_address[3] & 0xFF);
+	}
+	else {
+	     /* It could be a struct in_addr that is not 32 bits. */
+
 	     if (addrlen == sizeof(addr))
+		  /* This branch could be optimized away if we knew
+		   * during compile time what size is struct in_addr.
+		   * If it's four, the above code should have worked. */
 		  Copy( ip_address, &addr, sizeof addr, char );
 	     else {
 		  if (PERL_IN_ADDR_S_ADDR_SIZE == sizeof(addr))
