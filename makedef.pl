@@ -541,6 +541,8 @@ unless ($define{'USE_ITHREADS'}) {
     skip_symbols [qw(
 		    PL_ptr_table
 		    PL_op_mutex
+		    PL_regex_pad
+		    PL_regex_padav
 		    Perl_dirp_dup
 		    Perl_cx_dup
 		    Perl_si_dup
