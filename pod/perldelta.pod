@@ -4,14 +4,17 @@ perldelta - what is new for perl v5.8.0
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.6.0 release and the
-5.8.0 release.  Changes that have been integrated into the 5.6.1
-release are marked [561]. Changes that also appear in 5.6.1 but have
-been improved since are marked [561+].
+This document describes differences between the 5.6.0 release and
+the 5.8.0 release.
 
 Many of the bug fixes in 5.8.0 were already seen in the 5.6.1
 maintenance release since the two releases were kept closely
-coordinated.
+coordinated (while 5.8.0 was still called 5.7.something).
+
+Changes that were integrated into the 5.6.1 release are marked C<[561]>.
+
+You can see the list of changes in the 5.6.1 (from 5.6.0) by reading
+L<perl561delta>.
 
 If you are upgrading from Perl 5.005_03, you might also want
 to read L<perl56delta>.
@@ -395,7 +398,7 @@ and L<perlunicode> for details.
 
 The Unicode Character Database coming with Perl has been upgraded
 to Unicode 3.2.0.  For more information, see http://www.unicode.org/ .
-[561+]
+
 
 =item *
 
@@ -490,7 +493,7 @@ Formats now support zero-padded decimal fields.
 =item *
 
 Lvalue subroutines can now return C<undef> in list context.  However,
-the lvalue subroutine feature still remains experimental. [561+]
+the lvalue subroutine feature still remains experimental.
 
 =item *
 
@@ -666,7 +669,7 @@ See L<Attribute::Handlers>.
 
 C<B::Concise>, by Stephen McCamant, is a new compiler backend for
 walking the Perl syntax tree, printing concise info about ops.
-The output is highly customisable.  See L<B::Concise>. [561+]
+The output is highly customisable.  See L<B::Concise>.
 
 =item *
 
@@ -780,7 +783,7 @@ Filter::Util::Call.  See L<Filter::Simple>.
 
 C<File::Temp>, by Tim Jenness, allows one to create temporary files
 and directories in an easy, portable, and secure way.  See
-L<File::Temp>. [561+]
+L<File::Temp>.
 
 =item *
 
@@ -916,7 +919,7 @@ perlpodspec.
 
 C<Pod::Text::Overstrike>, by Joe Smith, has been added.
 It converts POD data to formatted overstrike text.
-See L<Pod::Text::Overstrike>. [561+]
+See L<Pod::Text::Overstrike>.
 
 =item *
 
@@ -1060,7 +1063,7 @@ for extension writers.
 The following independently supported modules have been updated to the
 newest versions from CPAN: CGI, CPAN, DB_File, File::Spec, File::Temp,
 Getopt::Long, Math::BigFloat, Math::BigInt, the podlators bundle
-(Pod::Man, Pod::Text), Pod::LaTeX [561+], Pod::Parser, Storable,
+(Pod::Man, Pod::Text), Pod::LaTeX, Pod::Parser, Storable,
 Term::ANSIColor, Test, Text-Tabs+Wrap.
 
 =item *
@@ -1391,16 +1394,16 @@ perl56delta details the changes between the 5.005 release and the
 
 perlclib documents the internal replacements for standard C library
 functions.  (Interesting only for extension writers and Perl core
-hackers.) [561+]
+hackers.)
 
 =item *
 
-perldebtut is a Perl debugging tutorial. [561+]
+perldebtut is a Perl debugging tutorial.
 
 =item *
 
 perlebcdic contains considerations for running Perl on EBCDIC
-platforms. [561+]
+platforms.
 
 =item *
 
@@ -1416,7 +1419,7 @@ perlmodstyle is a style guide for writing modules.
 
 =item *
 
-perlnewmod tells about writing and submitting a new module. [561+]
+perlnewmod tells about writing and submitting a new module.
 
 =item *
 
@@ -1435,7 +1438,7 @@ people writing in pod.
 
 =item *
 
-perlretut is a regular expression tutorial. [561+]
+perlretut is a regular expression tutorial.
 
 =item *
 
@@ -1460,7 +1463,7 @@ information)
 =item *
 
 perlutil explains the command line utilities packaged with the Perl
-distribution. [561+]
+distribution.
 
 =back
 
@@ -1893,7 +1896,7 @@ in unexpected order.
 Stratus VOS is now supported using Perl's native build method
 (Configure).  This is the recommended method to build Perl on
 VOS.  The older methods, which build miniperl, are still
-available.  See L<perlvos>. [561+]
+available.  See L<perlvos>.
 
 =item *
 
@@ -1928,7 +1931,7 @@ The autouse pragma didn't work for Multi::Part::Function::Names.
 caller() could cause core dumps in certain situations.  Carp was sometimes
 affected by this problem.  In particular, caller() now returns a
 subroutine name of C<(unknown)> for subroutines that have been removed
-from the symbol table. [561+]
+from the symbol table.
 
 =item *
 
@@ -1997,7 +2000,7 @@ were declared before the lexicals.
 =item *
 
 Lexical warnings now propagating correctly between scopes
-and into C<eval "...">. [561+]
+and into C<eval "...">.
 
 =item *
 
@@ -2131,7 +2134,7 @@ without the q L ll prefixes (assuming you are on a quad-capable platform).
 
 =item *
 
-Regular expressions on references and overloaded scalars now work. [561+]
+Regular expressions on references and overloaded scalars now work.
 
 =item *
 
@@ -2336,7 +2339,7 @@ Previously DYNIX/ptx had problems in its Configure probe for non-blocking I/O.
 
 EPOC
 
-EPOC update after Perl 5.6.0.  See README.epoc. [561]
+EPOC now better supported.  See README.epoc. [561]
 
 =item *
 
@@ -2515,7 +2518,7 @@ $ENV{LIB} now used to search for libs under Visual C.
 =item *
 
 fork() emulation has been improved in various ways, but still continues
-to be experimental.  See L<perlfork> for known bugs and caveats. [561+]
+to be experimental.  See L<perlfork> for known bugs and caveats.
 
 =item *
 
@@ -2783,7 +2786,7 @@ should only be used by security experts who know exactly what they are
 doing and why they are using suidperl instead of some other solution
 such as sudo ( see http://www.courtesan.com/sudo/ ).
 
-=head1 New Tests [561+]
+=head1 New Tests
 
 Several new tests have been added, especially for the F<lib> and F<ext>
 subsections.  There are now about 65 000 individual tests (spread over
@@ -2858,9 +2861,10 @@ use the bundled C compiler.)
 
 =head2 AmigaOS
 
-Perl 5.8.0 doesn't build in AmigaOS.  It broke at some point
-during the ithreads work and we could not find Amiga experts
-to unbreak the problems. [561]
+Perl 5.8.0 doesn't build in AmigaOS.  It broke at some point during
+the ithreads work and we could not find Amiga experts to unbreak the
+problems.  Perl 5.6.1 still works for AmigaOS (as does the the 5.7.2
+development release).
 
 =head2 BeOS
 
@@ -3223,10 +3227,11 @@ because it was felt that it didn't have enough value in it to be a
 core module.  It is still a useful module, though, and is available
 from the CPAN.
 
-Perl 5.8 unfortunately does not build anymore on AmigaOS;
-this broke accidentally at some point.  Since there are not that many
-Amiga developers available, we could not get this fixed and tested in
-time for 5.8.0.
+Perl 5.8 unfortunately does not build anymore on AmigaOS; this broke
+accidentally at some point.  Since there are not that many Amiga
+developers available, we could not get this fixed and tested in time
+for 5.8.0.  Perl 5.6.1 still works for AmigaOS (as does the the 5.7.2
+development release).
 
 =head1 Reporting Bugs
 
