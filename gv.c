@@ -194,6 +194,10 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 	    return 0;
     }
 
+    if (!HvNAME(stash))
+      Perl_croak(aTHX_
+		 "Can't use anonymous symbol table for method lookup");
+
     if ((level > 100) || (level < -100))
 	Perl_croak(aTHX_ "Recursive inheritance detected while looking for method '%s' in package '%s'",
 	      name, HvNAME(stash));
@@ -1064,14 +1068,20 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 void
 Perl_gv_fullname4(pTHX_ SV *sv, GV *gv, const char *prefix, bool keepmain)
 {
+    char *name;
     HV *hv = GvSTASH(gv);
     if (!hv) {
 	(void)SvOK_off(sv);
 	return;
     }
     sv_setpv(sv, prefix ? prefix : "");
-    if (keepmain || strNE(HvNAME(hv), "main")) {
-	sv_catpv(sv,HvNAME(hv));
+    
+    if (!HvNAME(hv))
+	name = "__ANON__";
+    else 
+	name = HvNAME(hv);
+    if (keepmain || strNE(name, "main")) {
+	sv_catpv(sv,name);
 	sv_catpvn(sv,"::", 2);
     }
     sv_catpvn(sv,GvNAME(gv),GvNAMELEN(gv));
@@ -1393,7 +1403,7 @@ Perl_gv_handler(pTHX_ HV *stash, I32 id)
     AMT *amtp;
     CV *ret;
 
-    if (!stash)
+    if (!stash || !HvNAME(stash))
         return Nullcv;
     mg = mg_find((SV*)stash, PERL_MAGIC_overload_table);
     if (!mg) {

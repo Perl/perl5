@@ -594,8 +594,12 @@ PP(pp_gelem)
 	    sv = newSVpvn(GvNAME(gv), GvNAMELEN(gv));
 	break;
     case 'P':
-	if (strEQ(elem, "PACKAGE"))
-	    sv = newSVpv(HvNAME(GvSTASH(gv)), 0);
+        if (strEQ(elem, "PACKAGE")) {
+            if (HvNAME(GvSTASH(gv)))
+                sv = newSVpv(HvNAME(GvSTASH(gv)), 0);
+            else
+                sv = newSVpv("__ANON__",0);
+        }
 	break;
     case 'S':
 	if (strEQ(elem, "SCALAR"))

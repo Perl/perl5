@@ -818,6 +818,7 @@ CFG_VARS	=					\
 		_a=$(a)				~	\
 		lib_ext=$(a)			~	\
 		static_ext=$(STATIC_EXT)	~	\
+		usethreads=$(USE_ITHREADS)	~	\
 		useithreads=$(USE_ITHREADS)	~	\
 		usemultiplicity=$(USE_MULTI)	~	\
 		useperlio=$(USE_PERLIO)		~	\

@@ -94,7 +94,12 @@ sub TIEARRAY {
   } elsif (ref $file) {
     croak "usage: tie \@array, $pack, filename, [option => value]...";
   } else {
-    $fh = \do { local *FH };   # only works in 5.005 and later
+    # $fh = \do { local *FH };  # XXX this is buggy
+    if ($] < 5.006) {
+	# perl 5.005 and earlier don't autovivify filehandles
+	require Symbol;
+	$fh = Symbol::gensym();
+    }
     sysopen $fh, $file, $opts{mode}, 0666 or return;
     binmode $fh;
     ++$opts{ourfh};

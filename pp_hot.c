@@ -3024,7 +3024,11 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	    /* the method name is unqualified or starts with SUPER:: */ 
 	    packname = sep ? CopSTASHPV(PL_curcop) :
 		stash ? HvNAME(stash) : packname;
-	    packlen = strlen(packname);
+	    if (!packname)
+		Perl_croak(aTHX_
+			   "Can't use anonymous symbol table for method lookup");
+	    else
+		packlen = strlen(packname);
 	}
 	else {
 	    /* the method name is qualified */
