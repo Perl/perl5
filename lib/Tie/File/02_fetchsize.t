@@ -10,6 +10,7 @@ use Tie::File;
 print "ok $N\n"; $N++;
 
 open F, "> $file" or die $!;
+binmode F;
 print F $data;
 close F;
 

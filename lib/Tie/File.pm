@@ -5,7 +5,7 @@ use POSIX 'SEEK_SET';
 use Fcntl 'O_CREAT', 'O_RDWR';
 require 5.005;
 
-$VERSION = "0.12";
+$VERSION = "0.13";
 
 # Idea: The object will always contain an array of byte offsets
 # this will be filled in as is necessary and convenient.
@@ -434,6 +434,7 @@ sub _check_integrity {
   my $good = 1; 
   local *F;
   open F, $file or die "Couldn't open file $file: $!";
+  binmode F;
   local $/ = $self->{recsep};
   unless ($self->{offsets}[0] == 0) {
     $warn && print STDERR "# rec 0: offset <$self->{offsets}[0]> s/b 0!\n";
@@ -498,7 +499,7 @@ Tie::File - Access the lines of a disk file via a Perl array
 
 =head1 SYNOPSIS
 
-	# This file documents Tie::File version 0.12
+	# This file documents Tie::File version 0.13
 
 	tie @array, 'Tie::File', filename or die ...;
 
@@ -692,7 +693,7 @@ C<mjd-perl-tiefile-subscribe@plover.com>.
 
 =head1 LICENSE
 
-C<Tie::File> version 0.12 is copyright (C) 2002 Mark Jason Dominus.
+C<Tie::File> version 0.13 is copyright (C) 2002 Mark Jason Dominus.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -717,7 +718,7 @@ For licensing inquiries, contact the author at:
 
 =head1 WARRANTY
 
-C<Tie::File> version 0.12 comes with ABSOLUTELY NO WARRANTY.
+C<Tie::File> version 0.13 comes with ABSOLUTELY NO WARRANTY.
 For details, see the license.
 
 =head1 TODO

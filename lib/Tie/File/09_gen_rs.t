@@ -70,6 +70,7 @@ sub check_contents {
   my $x = join 'blah', @c, '';
   local *FH;
   my $open = open FH, "< $file";
+  binmode FH;
   my $a;
   { local $/; $a = <FH> }
   print (($open && $a eq $x) ? "ok $N\n" : "not ok $N # file @c\n");

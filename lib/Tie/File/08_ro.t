@@ -30,6 +30,7 @@ for my $i (0..$#items) {
 sub init_file {
   my $data = shift;
   open F, "> $file" or die $!;
+  binmode F;
   print F $data;
   close F;
 }
