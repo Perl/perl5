@@ -115,7 +115,15 @@ if ($wd =~ m#/afs/# || $^O eq 'amigaos' || $^O eq 'dos' || $^O eq 'MSWin32')
     {print "ok 18 # skipped: granularity of the filetime\n";}
 elsif ($atime == 500000000 && $mtime == 500000000 + $delta)
     {print "ok 18\n";}
-else
+elsif ($^O =~ /\blinux\b/i) {
+    # Maybe stat() cannot get the correct atime, as happens via NFS on linux?
+    $foo = (utime 400000000,500000000 + 2*$delta,'b');
+    my ($new_atime, $new_mtime) = (stat('b'))[8,9];
+    if ($new_atime == $atime && $new_mtime - $mtime == $delta)
+	{print "ok 18 # accounted for possible NFS/glibc2.2 bug on linux\n";}
+    else
+	{print "not ok 18 $atime/$new_atime $mtime/$new_mtime\n";}
+} else
     {print "not ok 18 $atime $mtime\n";}
 
 if ((unlink 'b') == 1) {print "ok 19\n";} else {print "not ok 19\n";}

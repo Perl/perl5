@@ -262,8 +262,22 @@ sub inc_uninstall {
     }
 }
 
+sub run_filter {
+    my ($cmd, $src, $dest) = @_;
+    local *SRC, *CMD;
+    open(CMD, "|$cmd >$dest") || die "Cannot fork: $!";
+    open(SRC, $src)           || die "Cannot open $src: $!";
+    my $buf;
+    my $sz = 1024;
+    while (my $len = sysread(SRC, $buf, $sz)) {
+	syswrite(CMD, $buf, $len);
+    }
+    close SRC;
+    close CMD or die "Filter command '$cmd' failed for $src";
+}
+
 sub pm_to_blib {
-    my($fromto,$autodir) = @_;
+    my($fromto,$autodir,$pm_filter) = @_;
 
     use File::Basename qw(dirname);
     use File::Copy qw(copy);
@@ -286,23 +300,37 @@ sub pm_to_blib {
 
     mkpath($autodir,0,0755);
     foreach (keys %$fromto) {
-	next if -f $fromto->{$_} && -M $fromto->{$_} < -M $_;
-	unless (compare($_,$fromto->{$_})){
-	    print "Skip $fromto->{$_} (unchanged)\n";
+	my $dest = $fromto->{$_};
+	next if -f $dest && -M $dest < -M $_;
+
+	# When a pm_filter is defined, we need to pre-process the source first
+	# to determine whether it has changed or not.  Therefore, only perform
+	# the comparison check when there's no filter to be ran.
+	#    -- RAM, 03/01/2001
+
+	my $need_filtering = defined $pm_filter && length $pm_filter && /\.pm$/;
+
+	if (!$need_filtering && 0 == compare($_,$dest)) {
+	    print "Skip $dest (unchanged)\n";
 	    next;
 	}
-	if (-f $fromto->{$_}){
-	    forceunlink($fromto->{$_});
+	if (-f $dest){
+	    forceunlink($dest);
 	} else {
-	    mkpath(dirname($fromto->{$_}),0,0755);
+	    mkpath(dirname($dest),0,0755);
 	}
-	copy($_,$fromto->{$_});
+	if ($need_filtering) {
+	    run_filter($pm_filter, $_, $dest);
+	    print "$pm_filter <$_ >$dest\n";
+	} else {
+	    copy($_,$dest);
+	    print "cp $_ $dest\n";
+	}
 	my($mode,$atime,$mtime) = (stat)[2,8,9];
-	utime($atime,$mtime+$Is_VMS,$fromto->{$_});
-	chmod(0444 | ( $mode & 0111 ? 0111 : 0 ),$fromto->{$_});
-	print "cp $_ $fromto->{$_}\n";
-	next unless /\.pm\z/;
-	autosplit($fromto->{$_},$autodir);
+	utime($atime,$mtime+$Is_VMS,$dest);
+	chmod(0444 | ( $mode & 0111 ? 0111 : 0 ),$dest);
+	next unless /\.pm$/;
+	autosplit($dest,$autodir);
     }
 }
 
@@ -392,7 +420,9 @@ no-don't-really-do-it-now switch.
 pm_to_blib() takes a hashref as the first argument and copies all keys
 of the hash to the corresponding values efficiently. Filenames with
 the extension pm are autosplit. Second argument is the autosplit
-directory.
+directory.  If third argument is not empty, it is taken as a filter command
+to be ran on each .pm file, the output of the command being what is finally
+copied, and the source for auto-splitting.
 
 You can have an environment variable PERL_INSTALL_ROOT set which will
 be prepended as a directory to each installed file (and directory).
