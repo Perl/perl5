@@ -58,6 +58,15 @@ $ vms_default_directory_name = F$ENVIRONMENT("DEFAULT")
 $ max_allowed_dir_depth = 3  ! e.g. [A.B.PERLxxx] not [A.B.C.PERLxxx]
 $! max_allowed_dir_depth = 2 ! e.g. [A.PERLxxx] not [A.B.PERLxxx]
 $!
+$! Sebastian Bazley's request: close the CONFIG handle with /NOLOG
+$! qualifier "just in case" (configure.com is re @ed in a bad state).
+$! This construct was tested to be not a problem as far back as
+$! VMS V5.5-2, hopefully earlier versions are OK as well.
+$!
+$ CLOSE/NOLOG CONFIG
+$!
+$! Now keep track of open files
+$!
 $ vms_filcnt = F$GETJPI ("","FILCNT")
 $!
 $!: compute my invocation name
@@ -2599,6 +2608,39 @@ $     GOTO Clean_up
 $   ENDIF
 $ ENDIF
 $!
+$! PerlIO abstraction
+$!
+$ dflt = "n"
+$ IF F$TYPE(useperlio) .NES. ""
+$ THEN
+$   IF useperlio THEN dflt = "y"
+$   IF useperlio .EQS. "define" THEN dflt = "y"
+$ ENDIF
+$ IF .NOT. silent
+$ THEN
+$   echo "Previous version of ''package' used the standard IO mechanisms as"
+$   TYPE SYS$INPUT:
+$   DECK
+defined in <stdio.h>.  Versions 5.003_02 and later of perl allow
+alternate IO mechanisms via the PerlIO abstraction layer, but the
+stdio mechanism is still the default.  This abstraction layer can
+use AT&T's sfio (if you already have sfio installed) or regular stdio.
+Using PerlIO with sfio may cause problems with some extension modules.
+
+$   EOD
+$   echo "If this does not make any sense to you, just accept the default '" + dflt + "'."
+$ ENDIF
+$ rp = "Use the experimental PerlIO abstraction layer? [''dflt'] "
+$ GOSUB myread
+$ IF ans .EQS. "" THEN ans = dflt
+$ IF ans
+$ THEN
+$   useperlio = "define"
+$ ELSE
+$   echo "Ok, doing things the stdio way."
+$   useperlio = "undef"
+$ ENDIF
+$!
 $ echo ""
 $ echo4 "Checking the C run-time library."
 $!
@@ -3853,6 +3895,43 @@ $ CS
 $ tmp = "setvbuf"
 $ GOSUB inlibc
 $ d_setvbuf = tmp
+$!
+$! see if sfio.h is available
+$! see if sfio library is available
+$! Ok, but do we want to use it.
+$! IF F$TYPE(usesfio) .EQS. "" THEN usesfio = "undef"
+$! IF val .EQS. "define"
+$! THEN
+$!   IF usesfio .EQS. "define"
+$!   THEN dflt = "y"
+$!   ELSE dflt = "n"
+$!   ENDIF
+$!   echo "''package' can use the sfio library, but it is experimental."
+$!   IF useperlio .EQS. "undef"
+$!   THEN
+$!     echo "For sfio also the PerlIO abstraction layer is needed."
+$!     echo "Earlier you said you would not want that."
+$!   ENDIF
+$!   rp="You seem to have sfio available, do you want to try using it? [''dflt'] "
+$!   GOSUB myread
+$!   IF ans .EQS. "" THEN ans = dflt
+$!   IF ans
+$!   THEN
+$!     echo "Ok, turning on both sfio and PerlIO, then."
+$!     useperlio="define"
+$!     val="define"
+$!   ELSE
+$!     echo "Ok, avoiding sfio this time.  I'll use stdio instead."
+$!     val="undef"
+$!   ENDIF
+$! ELSE
+$!   IF usesfio .EQS. "define"
+$!   THEN
+$!     echo4 "Sorry, cannot find sfio on this machine."
+$!     echo4 "Ignoring your setting of usesfio=''usesfio'."
+$!     val="undef"
+$!   ENDIF
+$! ENDIF
 $!
 $! Check for setenv
 $!
@@ -5348,7 +5427,7 @@ $ WC "uselongdouble='" + uselongdouble + "'"
 $ WC "usemorebits='" + usemorebits + "'"
 $ WC "usemultiplicity='" + usemultiplicity + "'"
 $ WC "usemymalloc='" + usemymalloc + "'"
-$ WC "useperlio='undef'"
+$ WC "useperlio='" + useperlio + "'"
 $ WC "useposix='false'"
 $ WC "usesocks='undef'"
 $ WC "usethreads='" + usethreads + "'"

@@ -600,3 +600,20 @@ die qr(x)
 EXPECT
 (?-xism:x) at - line 1.
 ########
+# 20001210.003 mjd@plover.com
+format REMITOUT_TOP =
+FOO
+.
+
+format REMITOUT =
+BAR
+.
+
+# This loop causes a segv in 5.6.0
+for $lineno (1..61) {
+   write REMITOUT;
+}
+
+print "It's OK!";
+EXPECT
+It's OK!

@@ -8240,7 +8240,8 @@ C<installarchlib>, C<installbin>, C<installman1dir>, C<installman3dir>,
 C<installprefix>, C<installprefixexp>, C<installprivlib>, C<installscript>,
 C<installsitearch>, C<installsitebin>, C<installsitelib>, C<installstyle>,
 C<installusrbinperl>, C<installvendorarch>, C<installvendorbin>,
-C<installvendorlib>, C<intsize>, C<ivdformat>, C<ivsize>, C<ivtype>
+C<installvendorlib>, C<intsize>, C<issymlink>, C<ivdformat>, C<ivsize>,
+C<ivtype>
 
 =item k
 
