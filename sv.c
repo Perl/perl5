@@ -9682,7 +9682,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_savestack = 0;
     PL_retstack = 0;
     PL_sig_pending = 0;
-    Zero(&PL_debug_pad, 1, struct perl_debug_pad); 
+    Zero(&PL_debug_pad, 1, struct perl_debug_pad);
 #  else	/* !DEBUGGING */
     Zero(my_perl, 1, PerlInterpreter);
 #  endif	/* DEBUGGING */
@@ -9712,6 +9712,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_savestack = 0;
     PL_retstack = 0;
     PL_sig_pending = 0;
+    Zero(&PL_debug_pad, 1, struct perl_debug_pad);
 #    else	/* !DEBUGGING */
     Zero(my_perl, 1, PerlInterpreter);
 #    endif	/* DEBUGGING */
