@@ -325,8 +325,19 @@ static void
 do_clean_named_objs(sv)
 SV* sv;
 {
-    if (SvTYPE(sv) == SVt_PVGV && GvSV(sv))
-	do_clean_objs(GvSV(sv));
+    if (SvTYPE(sv) == SVt_PVGV) {
+	if ( SvOBJECT(GvSV(sv)) ||
+	     GvAV(sv) && SvOBJECT(GvAV(sv)) ||
+	     GvHV(sv) && SvOBJECT(GvHV(sv)) ||
+	     GvIO(sv) && SvOBJECT(GvIO(sv)) ||
+	     GvCV(sv) && SvOBJECT(GvCV(sv)) )
+	{
+	    DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning named glob object:\n "), sv_dump(sv));)
+	    SvREFCNT_dec(sv);
+	}
+	else if (GvSV(sv))
+	    do_clean_objs(GvSV(sv));
+    }
 }
 #endif
 
@@ -2774,6 +2785,7 @@ void
 sv_clear(sv)
 register SV *sv;
 {
+    HV* stash;
     assert(sv);
     assert(SvREFCNT(sv) == 0);
 
@@ -2781,7 +2793,6 @@ register SV *sv;
 	if (defstash) {		/* Still have a symbol table? */
 	    dSP;
 	    GV* destructor;
-	    HV* stash;
 	    SV ref;
 
 	    Zero(&ref, 1, SV);
@@ -2825,6 +2836,7 @@ register SV *sv;
     }
     if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv))
 	mg_free(sv);
+    stash = NULL;
     switch (SvTYPE(sv)) {
     case SVt_PVIO:
 	if (IoIFP(sv) != PerlIO_stdin() &&
@@ -2850,7 +2862,11 @@ register SV *sv;
     case SVt_PVGV:
 	gp_free((GV*)sv);
 	Safefree(GvNAME(sv));
-	SvREFCNT_dec(GvSTASH(sv));
+	/* cannot decrease stash refcount yet, as we might recursively delete
+	   ourselves when the refcnt drops to zero. Delay SvREFCNT_dec
+	   of stash until current sv is completely gone.
+	   -- JohnPC, 27 Mar 1998 */
+	stash = GvSTASH(sv);
 	/* FALL THROUGH */
     case SVt_PVLV:
     case SVt_PVMG:
@@ -2912,7 +2928,13 @@ register SV *sv;
 	break;
     case SVt_PVGV:
 	del_XPVGV(SvANY(sv));
-	break;
+	/* code duplication for increased performance. */
+	SvFLAGS(sv) &= SVf_BREAK;
+	SvFLAGS(sv) |= SVTYPEMASK;
+	/* decrease refcount of the stash that owns this GV, if any */
+	if (stash)
+	    SvREFCNT_dec(stash);
+	return; /* not break, SvFLAGS reset already happened */
     case SVt_PVBM:
 	del_XPVBM(SvANY(sv));
 	break;
@@ -5127,7 +5149,8 @@ SV* sv;
     case SVt_PVGV:
 	PerlIO_printf(Perl_debug_log, "  NAME = \"%s\"\n", GvNAME(sv));
 	PerlIO_printf(Perl_debug_log, "  NAMELEN = %ld\n", (long)GvNAMELEN(sv));
-	PerlIO_printf(Perl_debug_log, "  STASH = \"%s\"\n", HvNAME(GvSTASH(sv)));
+	PerlIO_printf(Perl_debug_log, "  STASH = \"%s\"\n",
+	    SvTYPE(GvSTASH(sv)) == SVt_PVHV ? HvNAME(GvSTASH(sv)) : "(deleted)");
 	PerlIO_printf(Perl_debug_log, "  GP = 0x%lx\n", (long)GvGP(sv));
 	PerlIO_printf(Perl_debug_log, "    SV = 0x%lx\n", (long)GvSV(sv));
 	PerlIO_printf(Perl_debug_log, "    REFCNT = %ld\n", (long)GvREFCNT(sv));
