@@ -790,9 +790,6 @@ filehandle, usually the real filehandle name.
 Closes a directory opened by C<opendir> and returns the success of that
 system call.
 
-DIRHANDLE may be an expression whose value can be used as an indirect
-dirhandle, usually the real dirhandle name.
-
 =item connect SOCKET,NAME
 
 Attempts to connect to a remote socket, just as the connect system call
@@ -2757,11 +2754,11 @@ FILEHANDLE.
 (The following is a comprehensive reference to open(): for a gentler
 introduction you may consider L<perlopentut>.)
 
-If FILEHANDLE is an undefined lexical (C<my>) variable the variable is
-assigned a reference to a new anonymous filehandle, otherwise if
-FILEHANDLE is an expression, its value is used as the name of the real
-filehandle wanted.  (This is considered a symbolic reference, so C<use
-strict 'refs'> should I<not> be in effect.)
+If FILEHANDLE is an undefined scalar variable (or array or hash element)
+the variable is assigned a reference to a new anonymous filehandle,
+otherwise if FILEHANDLE is an expression, its value is used as the name of
+the real filehandle wanted.  (This is considered a symbolic reference, so
+C<use strict 'refs'> should I<not> be in effect.)
 
 If EXPR is omitted, the scalar variable of the same name as the
 FILEHANDLE contains the filename.  (Note that lexical variables--those
@@ -3089,6 +3086,10 @@ See L</seek> for some details about mixing reading and writing.
 
 Opens a directory named EXPR for processing by C<readdir>, C<telldir>,
 C<seekdir>, C<rewinddir>, and C<closedir>.  Returns true if successful.
+DIRHANDLE may be an expression whose value can be used as an indirect
+dirhandle, usually the real dirhandle name.  If DIRHANDLE is an undefined
+scalar variable (or array or hash element), the variable is assigned a
+reference to a new anonymous dirhandle.
 DIRHANDLEs have their own namespace separate from FILEHANDLEs.
 
 =item ord EXPR
