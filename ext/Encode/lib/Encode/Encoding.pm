@@ -1,7 +1,7 @@
 package Encode::Encoding;
 # Base class for classes which implement encodings
 use strict;
-our $VERSION = '0.02';
+our $VERSION = do { my @r = (q$Revision: 0.90 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 sub Define
 {

@@ -1,6 +1,7 @@
 package Encode::ucs_2le;
 use strict;
-our $VERSION = do {my @r=(q$Revision: 0.30 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r};
+our $VERSION = do { my @r = (q$Revision: 0.90 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+
 use base 'Encode::Encoding';
 
 __PACKAGE__->Define(qw(UCS-2le UCS-2LE ucs-2le));

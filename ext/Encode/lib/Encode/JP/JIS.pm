@@ -5,7 +5,7 @@ use base 'Encode::Encoding';
 use strict;
 
 use vars qw($VERSION);
-$VERSION = 0.01;
+$VERSION = do { my @r = (q$Revision: 0.90 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 # Just for the time being, we implement jis-7bit
 # encoding via EUC

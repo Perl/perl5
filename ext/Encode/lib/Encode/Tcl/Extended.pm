@@ -1,6 +1,7 @@
 package Encode::Tcl::Extended;
 use strict;
-our $VERSION = do {my @r=(q$Revision: 1.1 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r};
+our $VERSION = do { my @r = (q$Revision: 0.90 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+
 use base 'Encode::Encoding';
 
 use Carp;

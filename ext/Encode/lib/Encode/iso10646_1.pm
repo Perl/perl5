@@ -1,6 +1,7 @@
 package Encode::iso10646_1;
 use strict;
-our $VERSION = do {my @r=(q$Revision: 0.30 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r};
+our $VERSION = do { my @r = (q$Revision: 0.90 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+
 use base 'Encode::Encoding';
 # Encoding is 16-bit network order Unicode (no surogates)
 # Used for X font encodings

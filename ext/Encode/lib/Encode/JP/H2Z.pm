@@ -1,5 +1,5 @@
 #
-# $Id: H2Z.pm,v 0.77 2002/01/14 11:06:55 dankogai Exp $
+# $Id: H2Z.pm,v 0.90 2002/03/19 13:14:18 dankogai Exp dankogai $
 #
 
 package Encode::JP::H2Z;
@@ -7,8 +7,8 @@ package Encode::JP::H2Z;
 use strict;
 use vars qw($RCSID $VERSION);
 
-$RCSID = q$Id: H2Z.pm,v 0.77 2002/01/14 11:06:55 dankogai Exp $;
-$VERSION = do { my @r = (q$Revision: 0.77 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+$RCSID = q$Id: H2Z.pm,v 0.90 2002/03/19 13:14:18 dankogai Exp dankogai $;
+$VERSION = do { my @r = (q$Revision: 0.90 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Carp;
 

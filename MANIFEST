@@ -289,6 +289,7 @@ ext/Encode/Encode/cp950.enc		Encode table
 ext/Encode/Encode/dingbats.enc		Encode table
 ext/Encode/Encode/dingbats.ucm		Encode table
 ext/Encode/Encode/euc-cn.enc		Encode table
+ext/Encode/Encode/euc-jp+0212.ucm	Encode extension
 ext/Encode/Encode/euc-jp-0212.enc	Encode table
 ext/Encode/Encode/euc-jp.enc		Encode table
 ext/Encode/Encode/euc-jp.ucm		Encode table
@@ -360,10 +361,11 @@ ext/Encode/MANIFEST		Encode extension
 ext/Encode/README		Encode extension
 ext/Encode/t/CN.t		Encode extension test
 ext/Encode/t/Encode.t		Encode extension test
-ext/Encode/t/japanese.pl	Encode extension
+ext/Encode/t/jisx0208.euc	Encode extension test
+ext/Encode/t/jisx0208.ref	Encode extension test
+ext/Encode/t/jisx0212.euc	Encode extension test
+ext/Encode/t/jisx0212.ref	Encode extension test
 ext/Encode/t/JP.t		Encode extension test
-ext/Encode/t/table.euc		Encode extension test
-ext/Encode/t/table.ref		Encode extension test
 ext/Encode/t/Tcl.t		Encode extension test
 ext/Encode/t/TW.t		Encode extension test
 ext/Encode/TW/Makefile.PL	Encode extension

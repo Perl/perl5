@@ -1,5 +1,5 @@
 package Encode::CN;
-our $VERSION = '0.02';
+our $VERSION = do { my @r = (q$Revision: 0.90 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use Encode::CN::HZ;
@@ -16,7 +16,7 @@ Encode::CN - China-based Chinese Encodings
 
     use Encode 'encode'; 
     $euc_cn = encode("euc-cn", $utf8);   # loads Encode::CN implicitly
-    $utf8   = encode("euc-cn", $euc_cn); # ditto
+    $utf8   = decode("euc-cn", $euc_cn); # ditto
 
 =head1 DESCRIPTION
 

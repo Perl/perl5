@@ -1,5 +1,5 @@
 package Encode::TW;
-our $VERSION = '0.02';
+our $VERSION = do { my @r = (q$Revision: 0.90 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use XSLoader;
@@ -15,7 +15,7 @@ Encode::TW - Taiwan-based Chinese Encodings
 
     use Encode 'encode'; 
     $big5 = encode("big5", $utf8); # loads Encode::TW implicitly
-    $utf8 = encode("big5", $big5); # ditto
+    $utf8 = decode("big5", $big5); # ditto
 
 =head1 DESCRIPTION
 

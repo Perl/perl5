@@ -1,6 +1,7 @@
 package Encode::Internal;
 use strict;
-our $VERSION = do {my @r=(q$Revision: 0.30 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r};
+our $VERSION = do { my @r = (q$Revision: 0.90 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+
 use base 'Encode::Encoding';
 
 # Dummy package that provides the encode interface but leaves data

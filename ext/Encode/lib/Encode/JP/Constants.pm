@@ -1,5 +1,5 @@
 #
-# $Id: Constants.pm,v 1.2 2001/05/18 05:14:38 dankogai Exp dankogai $
+# $Id: Constants.pm,v 0.90 2002/03/19 13:14:18 dankogai Exp dankogai $
 #
 
 package Encode::JP::Constants;
@@ -7,8 +7,8 @@ package Encode::JP::Constants;
 use strict;
 use vars qw($RCSID $VERSION);
 
-$RCSID = q$Id: Constants.pm,v 1.2 2001/05/18 05:14:38 dankogai Exp dankogai $;
-$VERSION = do { my @r = (q$Revision: 1.2 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+$RCSID = q$Id: Constants.pm,v 0.90 2002/03/19 13:14:18 dankogai Exp dankogai $;
+$VERSION = do { my @r = (q$Revision: 0.90 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Carp;
 

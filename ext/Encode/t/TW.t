@@ -1,6 +1,6 @@
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    unshift @INC,  '../lib';
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bEncode\b/) {
       print "1..0 # Skip: Encode was not built\n";

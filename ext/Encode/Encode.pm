@@ -1,6 +1,6 @@
 package Encode;
 use strict;
-our $VERSION = '0.40';
+our $VERSION = do { my @r = (q$Revision: 0.90 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 require DynaLoader;
 require Exporter;
@@ -66,6 +66,8 @@ our %external_tables =
 	cp936		=> 'Encode/CN.pm',
 	'iso-ir-165'	=> 'Encode/CN.pm',
 	'euc-jp'	=> 'Encode/JP.pm',
+	'iso-2022-jp'	=> 'Encode/JP.pm',
+	'7bit-jis'	=> 'Encode/JP.pm',
 	shiftjis	=> 'Encode/JP.pm',
 	macjapan	=> 'Encode/JP.pm',
 	cp932		=> 'Encode/JP.pm',

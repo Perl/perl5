@@ -4,7 +4,7 @@ use strict;
 no warnings 'redefine'; # to quell the "use Encode" below
 
 use vars qw($VERSION);
-$VERSION = 0.01;
+$VERSION = do { my @r = (q$Revision: 0.90 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode::CN;
 use Encode qw|encode decode|;

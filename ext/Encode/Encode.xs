@@ -559,8 +559,8 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 		       for real characters, but some encodings have non-assigned
 		       codes which may occur.
 		     */
-		    Perl_croak(aTHX_ "%s \"\\x%02X\" does not map to Unicode",
-			       enc->name[0], (U8) s[slen]);
+		    Perl_croak(aTHX_ "%s \"\\x%02X\" does not map to Unicode (%d)",
+			       enc->name[0], (U8) s[slen], code);
 		}
 		break;
 

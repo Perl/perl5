@@ -1,5 +1,5 @@
 package Encode::KR;
-our $VERSION = '0.02';
+our $VERSION = do { my @r = (q$Revision: 0.90 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use XSLoader;
@@ -15,7 +15,7 @@ Encode::KR - Korean Encodings
 
     use Encode 'encode';
     $euc_kr = encode("euc-kr", $utf8);   # loads Encode::KR implicitly
-    $utf8   = encode("euc-kr", $euc_kr); # ditto
+    $utf8   = decode("euc-kr", $euc_kr); # ditto
 
 =head1 DESCRIPTION
 

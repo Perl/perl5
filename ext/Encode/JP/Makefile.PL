@@ -2,7 +2,9 @@ use 5.7.2;
 use strict;
 use ExtUtils::MakeMaker;
 
-my %tables = (EUC_JP   => ['euc-jp.enc'],
+my %tables = (
+	      #EUC_JP   => ['euc-jp.enc'],
+	      EUC_JP   => ['euc-jp+0212.ucm'],
               SHIFTJIS => ['shiftjis.enc'],
 	      MACJAPAN => ['macJapan.enc'],
 	      CP932    => ['cp932.enc'],

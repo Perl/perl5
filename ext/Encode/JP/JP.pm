@@ -5,7 +5,8 @@ BEGIN {
     }
 }
 use Encode;
-our $VERSION = '0.02';
+our $VERSION = do { my @r = (q$Revision: 0.90 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+
 use XSLoader;
 XSLoader::load('Encode::JP',$VERSION);
 
@@ -22,7 +23,7 @@ Encode::JP - Japanese Encodings
 
     use Encode 'encode';
     $euc_jp = encode("euc-jp", $utf8);   # loads Encode::JP implicitly
-    $utf8   = encode("euc-jp", $euc_jp); # ditto
+    $utf8   = decode("euc-jp", $euc_jp); # ditto
 
 =head1 ABSTRACT
 
@@ -42,7 +43,8 @@ To find how to use this module in detail, see L<Encode>.
 
 =head1 BUGS
 
-JIS X0212-1990 is not supported.
+JISX0212-1990 -> utf8 conversion does not work 
+(the reverse does, however.  encengine|compile bug?)
 
 ASCII part (0x00-0x7f) is preserved for all encodings, even though it
 conflicts with mappings by the Unicode Consortium.  See
