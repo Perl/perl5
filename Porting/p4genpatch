@@ -18,10 +18,10 @@ sub Usage ();
 my $VERSION = '0.03';
 $0 =~ s|^.*/||;
 our(%OPT, @P4opt);
-%OPT = ( "d" => "u", b => "//depot/perl/" );
+%OPT = ( "d" => "u", b => "//depot/perl/", "D" => "diff" );
 use Getopt::Long;
 Getopt::Long::Configure("no_ignore_case");
-GetOptions(\%OPT, "b=s", "p=s", "d=s", "h", "v", "V") or die Usage;
+GetOptions(\%OPT, "b=s", "p=s", "d=s", "D=s", "h", "v", "V") or die Usage;
 print Usage and exit if $OPT{h};
 print "$VERSION\n" and exit if $OPT{V};
 die Usage unless @ARGV == 1;
@@ -90,7 +90,7 @@ for my $a (@action) {
     my @filelog = `p4 @P4opt filelog $file`;
     correctmtime(\@filelog,$prev,"$tempdir/$d1");
     correctmtime(\@filelog,$number,"$tempdir/$d2");
-    $system = "cd $tempdir && diff -$OPT{d} '$d1' '$d2'";
+    $system = "cd $tempdir && $OPT{D} -$OPT{d} '$d1' '$d2'";
     system($system); # no return check because diff doesn't always return 0
   }
   for ("$tempdir/$d1","$tempdir/$d2") {
@@ -127,6 +127,7 @@ sub Usage () {
 
           -p host:port       p4 port (e.g. myhost:1666)
           -d diffopt         option to pass to diff(1)
+          -D diff            diff(1) to use
 	  -b branch(es)      which branches to include (regex)
 		             (default: //depot/perl/)
           -v                 verbose
