@@ -1877,6 +1877,19 @@ This function isn't exported out of the Perl core.
 If you edit F<embed.pl>, you will need to run C<make regen_headers> to
 force a rebuild of F<embed.h> and other auto-generated files.
 
+=head2 Formatted Printing of IVs and UVs
+
+If you are printing IVs or UVs instead of the stdio(3) style formatting
+codes like C<%d> you should use the following macros for portability
+
+	IVdf		IV in decimal
+	UVuf		UV in decimal
+	UVof		UV in octal
+	UVxf		UV in hexadecimal
+
+For example: printf("IV is %"IVdf"\n", iv);  That will expand
+to whatever is the correct format for the IVs.
+
 =head2 Source Documentation
 
 There's an effort going on to document the internal functions and
