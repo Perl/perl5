@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 8 $
+##  $Revision: 9 $
 ##  $Author: mhx $
-##  $Date: 2004/09/08 21:12:15 +0200 $
+##  $Date: 2004/09/08 22:15:16 +0200 $
 ##
 ################################################################################
 ##
@@ -32,8 +32,6 @@ _aMY_CXT
 
 =implementation
 
-#ifndef START_MY_CXT
-
 /*
  * Boilerplate macros for initializing and accessing interpreter-local
  * data from C.  All statics in extensions should be reworked to use
@@ -55,6 +53,8 @@ _aMY_CXT
 
 #if defined(MULTIPLICITY) || defined(PERL_OBJECT) || \
     defined(PERL_CAPI)    || defined(PERL_IMPLICIT_CONTEXT)
+
+#ifndef START_MY_CXT
 
 /* This must appear in all extensions that define a my_cxt_t structure,
  * right after the definition (i.e. at file scope).  The non-threads
@@ -87,13 +87,6 @@ _aMY_CXT
 	Zero(my_cxtp, 1, my_cxt_t);					\
 	sv_setuv(my_cxt_sv, PTR2UV(my_cxtp))
 
-/* Clones the per-interpreter data. */
-#define MY_CXT_CLONE \
-	dMY_CXT_SV;							\
-	my_cxt_t *my_cxtp = (my_cxt_t*)SvPVX(newSV(sizeof(my_cxt_t)-1));\
-	Copy(INT2PTR(my_cxt_t*, SvUV(my_cxt_sv)), my_cxtp, 1, my_cxt_t);\
-	sv_setuv(my_cxt_sv, PTR2UV(my_cxtp))
-
 /* This macro must be used to access members of the my_cxt_t structure.
  * e.g. MYCXT.some_data */
 #define MY_CXT		(*my_cxtp)
@@ -107,13 +100,25 @@ _aMY_CXT
 #define aMY_CXT_	aMY_CXT,
 #define _aMY_CXT	,aMY_CXT
 
+#endif /* START_MY_CXT */
+
+#ifndef MY_CXT_CLONE
+/* Clones the per-interpreter data. */
+#define MY_CXT_CLONE \
+	dMY_CXT_SV;							\
+	my_cxt_t *my_cxtp = (my_cxt_t*)SvPVX(newSV(sizeof(my_cxt_t)-1));\
+	Copy(INT2PTR(my_cxt_t*, SvUV(my_cxt_sv)), my_cxtp, 1, my_cxt_t);\
+	sv_setuv(my_cxt_sv, PTR2UV(my_cxtp))
+#endif
+
 #else /* single interpreter */
+
+#ifndef START_MY_CXT
 
 #define START_MY_CXT	static my_cxt_t my_cxt;
 #define dMY_CXT_SV	dNOOP
 #define dMY_CXT		dNOOP
 #define MY_CXT_INIT	NOOP
-#define MY_CXT_CLONE	NOOP
 #define MY_CXT		my_cxt
 
 #define pMY_CXT		void
@@ -123,9 +128,13 @@ _aMY_CXT
 #define aMY_CXT_
 #define _aMY_CXT
 
-#endif 
-
 #endif /* START_MY_CXT */
+
+#ifndef MY_CXT_CLONE
+#define MY_CXT_CLONE	NOOP
+#endif
+
+#endif
 
 =xsmisc
 
@@ -167,8 +176,17 @@ MY_CXT_2()
 	OUTPUT:
 		RETVAL
 
-=tests plan => 2
+int
+MY_CXT_CLONE()
+	CODE:
+		MY_CXT_CLONE;
+		RETVAL = 42;
+	OUTPUT:
+		RETVAL
+
+=tests plan => 3
 
 ok(&Devel::PPPort::MY_CXT_1());
 ok(&Devel::PPPort::MY_CXT_2());
+ok(&Devel::PPPort::MY_CXT_CLONE());
 

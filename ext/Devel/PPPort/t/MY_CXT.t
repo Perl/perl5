@@ -24,10 +24,10 @@ BEGIN {
   eval "use Test";
   if ($@) {
     require 'testutil.pl';
-    print "1..2\n";
+    print "1..3\n";
   }
   else {
-    plan(tests => 2);
+    plan(tests => 3);
   }
 }
 
@@ -37,4 +37,5 @@ $^W = 1;
 
 ok(&Devel::PPPort::MY_CXT_1());
 ok(&Devel::PPPort::MY_CXT_2());
+ok(&Devel::PPPort::MY_CXT_CLONE());
 

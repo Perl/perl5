@@ -873,7 +873,7 @@ require DynaLoader;
 use strict;
 use vars qw($VERSION @ISA $data);
 
-$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.02 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
+$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.03 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
 
 @ISA = qw(DynaLoader);
 
@@ -4290,8 +4290,6 @@ DPPP_(my_newCONSTSUB)(HV *stash, char *name, SV *sv)
 #endif
 #endif
 
-#ifndef START_MY_CXT
-
 /*
  * Boilerplate macros for initializing and accessing interpreter-local
  * data from C.  All statics in extensions should be reworked to use
@@ -4313,6 +4311,8 @@ DPPP_(my_newCONSTSUB)(HV *stash, char *name, SV *sv)
 
 #if defined(MULTIPLICITY) || defined(PERL_OBJECT) || \
     defined(PERL_CAPI)    || defined(PERL_IMPLICIT_CONTEXT)
+
+#ifndef START_MY_CXT
 
 /* This must appear in all extensions that define a my_cxt_t structure,
  * right after the definition (i.e. at file scope).  The non-threads
@@ -4345,13 +4345,6 @@ DPPP_(my_newCONSTSUB)(HV *stash, char *name, SV *sv)
 	Zero(my_cxtp, 1, my_cxt_t);					\
 	sv_setuv(my_cxt_sv, PTR2UV(my_cxtp))
 
-/* Clones the per-interpreter data. */
-#define MY_CXT_CLONE \
-	dMY_CXT_SV;							\
-	my_cxt_t *my_cxtp = (my_cxt_t*)SvPVX(newSV(sizeof(my_cxt_t)-1));\
-	Copy(INT2PTR(my_cxt_t*, SvUV(my_cxt_sv)), my_cxtp, 1, my_cxt_t);\
-	sv_setuv(my_cxt_sv, PTR2UV(my_cxtp))
-
 /* This macro must be used to access members of the my_cxt_t structure.
  * e.g. MYCXT.some_data */
 #define MY_CXT		(*my_cxtp)
@@ -4365,13 +4358,25 @@ DPPP_(my_newCONSTSUB)(HV *stash, char *name, SV *sv)
 #define aMY_CXT_	aMY_CXT,
 #define _aMY_CXT	,aMY_CXT
 
+#endif /* START_MY_CXT */
+
+#ifndef MY_CXT_CLONE
+/* Clones the per-interpreter data. */
+#define MY_CXT_CLONE \
+	dMY_CXT_SV;							\
+	my_cxt_t *my_cxtp = (my_cxt_t*)SvPVX(newSV(sizeof(my_cxt_t)-1));\
+	Copy(INT2PTR(my_cxt_t*, SvUV(my_cxt_sv)), my_cxtp, 1, my_cxt_t);\
+	sv_setuv(my_cxt_sv, PTR2UV(my_cxtp))
+#endif
+
 #else /* single interpreter */
+
+#ifndef START_MY_CXT
 
 #define START_MY_CXT	static my_cxt_t my_cxt;
 #define dMY_CXT_SV	dNOOP
 #define dMY_CXT		dNOOP
 #define MY_CXT_INIT	NOOP
-#define MY_CXT_CLONE	NOOP
 #define MY_CXT		my_cxt
 
 #define pMY_CXT		void
@@ -4381,9 +4386,13 @@ DPPP_(my_newCONSTSUB)(HV *stash, char *name, SV *sv)
 #define aMY_CXT_
 #define _aMY_CXT
 
-#endif 
-
 #endif /* START_MY_CXT */
+
+#ifndef MY_CXT_CLONE
+#define MY_CXT_CLONE	NOOP
+#endif
+
+#endif
 
 #ifndef IVdf
 #  if IVSIZE == LONGSIZE

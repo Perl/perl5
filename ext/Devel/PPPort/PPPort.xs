@@ -721,6 +721,14 @@ MY_CXT_2()
 	OUTPUT:
 		RETVAL
 
+int
+MY_CXT_CLONE()
+	CODE:
+		MY_CXT_CLONE;
+		RETVAL = 42;
+	OUTPUT:
+		RETVAL
+
 ##----------------------------------------------------------------------
 ##  XSUBs from parts/inc/newCONSTSUB
 ##----------------------------------------------------------------------

@@ -1,3 +1,7 @@
+3.03 - 2004-09-08
+
+    * MY_CXT_CLONE was broken
+
 3.02 - 2004-09-08
 
     * added support for the following API:
