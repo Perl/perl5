@@ -1827,9 +1827,7 @@ NetWare/NWTInfo.c		NetWare port
 NetWare/nwtinfo.h		NetWare port
 NetWare/NWUtil.c		NetWare port
 NetWare/nwutil.h		NetWare port
-NetWare/t/NWModify-Exist.pl	NetWare port
 NetWare/t/NWModify.pl		NetWare port
-NetWare/t/NWScripts-Exist.pl	NetWare port
 NetWare/t/NWScripts.pl		NetWare port
 NetWare/t/Readme.txt		NetWare port
 NetWare/testnlm/echo/echo.c	NetWare port
