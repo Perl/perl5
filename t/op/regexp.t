@@ -71,6 +71,8 @@ while (<TESTS>) {
     $skip = ($skip_amp ? ($result =~ s/B//i) : ($result =~ s/B//));
     # Certain tests don't work with utf8 (the re_test should be in UTF8)
     $skip = 1 if ($^H &= ~0x00000008) && $pat =~ /\[:\^(alnum|print|word):\]/;
+    # ebcdic platforms do not do [:ascii:]
+    $skip = 1 if ("\t" ne "\011") && $pat =~ /\[:\^?ascii:\]/;
     $result =~ s/B//i unless $skip;
     for $study ('', 'study \$subject') {
  	$c = $iters;

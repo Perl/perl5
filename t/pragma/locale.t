@@ -286,6 +286,11 @@ Turkish:tr:tr:9 turkish8
 Yiddish:::1 15
 EOF
 
+if ($^O eq 'os390') {
+    $locales =~ s/Svenska Swedish:sv:fi se:1 15\n//;
+    $locales =~ s/Thai:th:th:11 tis620\n//;
+}
+
 sub in_utf8 () { $^H & 0x08 }
 
 if (in_utf8) {
@@ -322,6 +327,9 @@ sub decode_encodings {
 	} else {
 	    push @enc, $_;
 	}
+    }
+    if ($^O eq 'os390') {
+	push @enc, qw(IBM-037 IBM-819 IBM-1047);
     }
 
     return @enc;
