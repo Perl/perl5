@@ -9851,6 +9851,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_curstname	= sv_dup_inc(proto_perl->Icurstname, param);
 
     PL_beginav		= av_dup_inc(proto_perl->Ibeginav, param);
+    PL_beginav_save	= av_dup_inc(proto_perl->Ibeginav_save, param);
     PL_endav		= av_dup_inc(proto_perl->Iendav, param);
     PL_checkav		= av_dup_inc(proto_perl->Icheckav, param);
     PL_initav		= av_dup_inc(proto_perl->Iinitav, param);
