@@ -69,13 +69,15 @@ like( $args->manifypods(), qr/pure_all\n\tnoecho/,
 
 $args->{MAN3PODS} = { foo => 1 };
 my $out = tie *STDOUT, 'FakeOut';
-my $res = $args->manifypods();
-like( $$out, qr/could not locate your pod2man/,
+{
+  local *MM::perl_script = sub { return };
+  my $res = $args->manifypods();
+  like( $$out, qr/could not locate your pod2man/,
 	'... should warn if pod2man cannot be located' );
-like( $res, qr/POD2MAN_EXE = -S pod2man/,
+  like( $res, qr/POD2MAN_EXE = -S pod2man/,
 	'... should use default pod2man target' );
-like( $res, qr/pure_all.+foo/, '... should add MAN3PODS targets' );
-
+  like( $res, qr/pure_all.+foo/, '... should add MAN3PODS targets' );
+}
 $args->{PERL_SRC} = File::Spec->updir;
 $args->{MAN1PODS} = { bar => 1 };
 $$out = '';
