@@ -673,14 +673,14 @@ extras.prep: perl
 	-@test -f extras.lst || touch extras.lst
 
 extras.make: extras.prep
-	$(LDLIBPTH) PATH=`pwd`:`pwd`/pod:${PATH} ./perl -Ilib -MCPAN -e 'make(@ARGV)' `cat extras.lst`
+	$(LDLIBPTH) PATH=`pwd`:${PATH} PERL5LIB=`pwd`/lib ./perl -Ilib -MCPAN -e 'make(@ARGV)' `cat extras.lst`
 
 extras.test: extras.prep
-	$(LDLIBPTH) PATH=`pwd`:`pwd`/pod:${PATH} ./perl -Ilib -MCPAN -e 'test(@ARGV)' `cat extras.lst`
+	$(LDLIBPTH) PATH=`pwd`:${PATH} PERL5LIB=`pwd`/lib ./perl -Ilib -MCPAN -e 'test(@ARGV)' `cat extras.lst`
 
 extras.install: extras.prep
 	-@test -f extras.lst || touch extras.lst
-	$(LDLIBPTH) PATH=`pwd`:`pwd`/pod:${PATH} ./perl -Ilib -MCPAN -e 'install(@ARGV)' `cat extras.lst`
+	$(LDLIBPTH) PATH=`pwd`:${PATH} PERL5LIB=`pwd`/lib ./perl -Ilib -MCPAN -e 'install(@ARGV)' `cat extras.lst`
 
 .PHONY: install install-strip install-all install-verbose install-silent \
 	no-install install.perl install.man installman install.html installhtml
