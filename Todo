@@ -22,6 +22,11 @@ Would be nice to have
 	support in perlmain to rerun debugger
 	regression tests using __DIE__ hook
 	lexically scoped functions: my sub foo { ... }
+		the basic concept is easy and sound,
+		the difficulties begin with self-referential
+		and mutually referential lexical subs: how to
+		declare the subs?
+	lexically scoped typeglobs? (lexical I/O handles work now)
         wantlvalue?  more generalized want()/caller()?
 	named prototypes: sub foo ($foo, @bar) { ... } ?
 	regression/sanity tests for suidperl

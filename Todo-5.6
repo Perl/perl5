@@ -48,11 +48,12 @@ Configure
   	uselargefiles <-> ...  
     make configuring+building away from source directory work (VPATH et al)
 	this is related to: cross-compilation configuring
-	scenarios to consider: the host and the target might have
-	shared filesystems, or they might not (the communication
-	channel might be e.g. rsh/ssh, or some batch submission system)
-	most obviously: they might not share the same CPU
-	meaning: assume nothing about shared properties/resources
+	host vs target: compile in the host, get the executable to the target,
+	get the possible input files to the target, execute in the target,
+	get possible output files back to to host.  this needs to work
+	both during Configure and during the build.  You cannot assume
+	shared filesystems between the host and the target, executing
+	the target executable may involve e.g. rsh
     _r support (see Todo for mode detailed description)
     POSIX 1003.1 1996 Edition support--realtime stuff:
 	POSIX semaphores, message queues, shared memory, realtime clocks,
@@ -91,6 +92,18 @@ Locales
 
 Regexen
    make RE engine thread-safe
+   a way to do full character set arithmetics: now one can do
+	addition, negate a whole class, and negate certain subclasses
+	(e.g. \D, [:^digit:]), but a more generic way to add/subtract/
+	intersect characters/classes, like described in the Unicode technical
+	report on Regular Expression Guidelines,
+	http://www.unicode.org/unicode/reports/tr18/
+	(amusingly, the TR notes that difference and intersection
+	 can be done using "Perl-style look-ahead")
+	difference syntax?  maybe [[:alpha:][^abc]] meaning
+	"all alphabetic expect a, b, and c"? or [[:alpha:]-[abc]]?
+	(maybe bad, as we explicitly disallow such 'ranges')
+	intersection syntax? maybe [[..]&[...]]?
    POSIX [=bar=] and [.zap.] would nice too but there's no API for them
    	=bar= could be done with Unicode, though, see the Unicode TR #15 about
 	normalization forms:
