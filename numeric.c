@@ -783,17 +783,17 @@ Perl_my_atof(pTHX_ const char* s)
 
 	/* Scan the number twice; once using locale and once without;
 	 * choose the larger result (in absolute value). */
-	Perl_atof2(aTHX_ s, &x);
+	Perl_atof2(s, x);
 	SET_NUMERIC_STANDARD();
-	Perl_atof2(aTHX_ s, &y);
+	Perl_atof2(s, y);
 	SET_NUMERIC_LOCAL();
 	if ((y < 0.0 && y < x) || (y > 0.0 && y > x))
 	    return y;
     }
     else
-	Perl_atof2(aTHX_ s, &x);
+	Perl_atof2(s, x);
 #else
-    Perl_atof2(aTHX_ s, &x);
+    Perl_atof2(s, x);
 #endif
     return x;
 }
@@ -802,8 +802,9 @@ char*
 Perl_my_atof2(pTHX_ const char* orig, NV* value)
 {
     NV result = 0.0;
-    bool negative = 0;
     char* s = (char*)orig;
+#ifdef USE_PERL_ATOF
+    bool negative = 0;
     char* send = s + strlen(orig) - 1;
     bool seendigit = 0;
     I32 expextra = 0;
@@ -926,6 +927,7 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
     /* now apply the sign */
     if (negative)
 	result = -result;
+#endif /* USE_PERL_ATOF */
     *value = result;
     return s;
 }

@@ -1428,8 +1428,30 @@ int isnan(double d);
 #   endif
 #endif
 
-#define Perl_atof(s) Perl_my_atof(s)
-#define Perl_atof2(s, np) Perl_my_atof2(s, np)
+/* The default is to use Perl's own atof() implementation (in numeric.c).
+ * Usually that is the one to use but for some platforms (e.g. UNICOS)
+ * it is however best to use the native implementation of atof.
+ * You can experiment with using your native one by -DUSE_PERL_ATOF=0.
+ * Some good tests to try out with either setting are t/base/num.t,
+ * t/op/numconvert.t, and t/op/pack.t. */
+
+#ifndef USE_PERL_ATOF
+#   ifndef _UNICOS
+#       define USE_PERL_ATOF
+#   endif
+#else
+#   if USE_PERL_ATOF == 0
+#       undef USE_PERL_ATOF
+#   endif
+#endif
+
+#ifdef USE_PERL_ATOF
+#   define Perl_atof(s) Perl_my_atof(s)
+#   define Perl_atof2(s, n) Perl_my_atof2(aTHX_ (s), &(n))
+#else
+#   define Perl_atof(s) (NV)atof(s)
+#   define Perl_atof2(s, n) ((n) = atof(s))
+#endif
 
 /* Previously these definitions used hardcoded figures.
  * It is hoped these formula are more portable, although
