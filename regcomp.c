@@ -1764,7 +1764,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     r->reganch = pm->op_pmflags & PMf_COMPILETIME; /* Again? */
     pm->op_pmflags = RExC_flags16;
     if (UTF)
-	r->reganch |= ROPT_UTF8;
+        r->reganch |= ROPT_UTF8;	/* Unicode in it? */
     r->regstclass = NULL;
     if (RExC_naughty >= 10)	/* Probably an expensive pattern. */
 	r->reganch |= ROPT_NAUGHTY;
@@ -3168,6 +3168,7 @@ tryagain:
 	      RExC_emit += STR_SZ(newlen) - STR_SZ(oldlen);
 	 } else
 	      RExC_size += STR_SZ(newlen) - STR_SZ(oldlen);
+	 RExC_utf8 = 1;
     }
 
     return(ret);

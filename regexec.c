@@ -2204,43 +2204,40 @@ S_regmatch(pTHX_ regnode *prog)
 	    s = STRING(scan);
 	    ln = STR_LEN(scan);
 	    if (do_utf8 != (UTF!=0)) {
+		/* The target and the pattern have differing "utf8ness". */
 		char *l = locinput;
 		char *e = s + ln;
 		STRLEN len;
 
-		if (do_utf8)
+		if (do_utf8) {
+		    /* The target is utf8, the pattern is not utf8. */
 		    while (s < e) {
-			UV uv;
-
 			if (l >= PL_regeol)
-			    sayNO;
-			uv = NATIVE_TO_UNI(*(U8*)s);
-			if (UTF8_IS_START(uv)) {
-			     len = UTF8SKIP(s);
-			     if (memNE(s, l, len))
-				  sayNO;
-			     l += len;
-			     s += len;
-			} else {
-			     if (uv != utf8_to_uvchr((U8*)l, &len))
-				  sayNO;
-			     l += len;
-			     s ++;
-			}
+			     sayNO;
+			if (NATIVE_TO_UNI(*(U8*)s) !=
+			    utf8_to_uvchr((U8*)l, &len))
+			     sayNO;
+			l += len;
+			s ++;
 		    }
-		else
+		}
+		else {
+		    /* The target is not utf8, the pattern is utf8. */
 		    while (s < e) {
 			if (l >= PL_regeol)
 			    sayNO;
-			if (*((U8*)l) != utf8_to_uvchr((U8*)s, &len))
+			if (NATIVE_TO_UNI(*((U8*)l)) !=
+			    utf8_to_uvchr((U8*)s, &len))
 			    sayNO;
 			s += len;
 			l ++;
 		    }
+		}
 		locinput = l;
 		nextchr = UCHARAT(locinput);
 		break;
 	    }
+	    /* The target and the pattern have the same "utf8ness". */
 	    /* Inline the first character, for speed. */
 	    if (UCHARAT(s) != nextchr)
 		sayNO;
