@@ -970,21 +970,22 @@ or -DEMBEDMYMALLOC to your ccflags variable in config.sh.
 =item varargs
 
 If you get varargs problems with gcc, be sure that gcc is installed
-correctly.  When using gcc, you should probably have i_stdarg='define'
+correctly and that you are not passing -I/usr/include to gcc.
+When using gcc, you should probably have i_stdarg='define'
 and i_varargs='undef' in config.sh.  The problem is usually solved by
 running fixincludes correctly.  If you do change config.sh, don't
 forget to propagate your changes (see
 L<"Propagating your changes to config.sh"> below).
 See also the L<"vsprintf"> item below.
 
-=item croak
+=item util.c
 
 If you get error messages such as the following (the exact line
 numbers will vary in different versions of perl):
 
-    util.c: In function `Perl_croak':
-    util.c:962: number of arguments doesn't match prototype
-    proto.h:45: prototype declaration
+    util.c: In function `Perl_form':
+    util.c:1107: number of arguments doesn't match prototype
+    proto.h:125: prototype declaration
 
 it might well be a symptom of the gcc "varargs problem".  See the
 previous L<"varargs"> item.

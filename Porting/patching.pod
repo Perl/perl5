@@ -67,6 +67,25 @@ Also, if your patch is to the core (rather than to a module) it
 is better to create it as a context diff as some machines have
 broken patch utilities that choke on unified diffs.
 
+GNU diff has many desirable features not provided by most vendor-supplied
+diffs.  Some examples using GNU diff:
+
+    # generate a patch for a newly added file
+    % diff -u /dev/null new/file
+    
+    # generate a patch to remove a file (patch > v2.4 will remove it cleanly)
+    % diff -u old/goner /dev/null
+    
+    # get additions, deletions along with everything else, recursively
+    % diff -ruN olddir newdir
+    
+    # ignore whitespace
+    % diff -bu a/file b/file
+    
+    # show function name in every hunk (safer, more informative)
+    % diff -u -F '^[_a-zA-Z0-9]+ *(' old/file new/file
+
+
 =item Directories
 
 Patches should be generated from the source root directory, not from the

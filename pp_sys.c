@@ -1973,7 +1973,7 @@ PP(pp_ssockopt)
 		buf = SvPV(sv, na);
 		len = na;
 	    }
-	    else if (SvOK(sv)) {
+	    else {
 		aint = (int)SvIV(sv);
 		buf = (char*)&aint;
 		len = sizeof(int);
