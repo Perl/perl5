@@ -2959,7 +2959,7 @@ new_struct_thread(struct perl_thread *t)
     PL_start_env.je_mustcatch = TRUE;
     PL_top_env  = &PL_start_env;
 
-    PL_in_eval = FALSE;
+    PL_in_eval = EVAL_NULL;	/* ~(EVAL_INEVAL|EVAL_WARNONLY|EVAL_KEEPERR) */
     PL_restartop = 0;
 
     PL_statname = NEWSV(66,0);

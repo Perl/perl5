@@ -6360,9 +6360,9 @@ yywarn(char *s)
 {
     dTHR;
     --PL_error_count;
-    PL_in_eval |= 2;
+    PL_in_eval |= EVAL_WARNONLY;
     yyerror(s);
-    PL_in_eval &= ~2;
+    PL_in_eval &= ~EVAL_WARNONLY;
     return 0;
 }
 
@@ -6425,7 +6425,7 @@ yyerror(char *s)
 		(int)PL_multi_open,(int)PL_multi_close,(long)PL_multi_start);
         PL_multi_end = 0;
     }
-    if (PL_in_eval & 2)
+    if (PL_in_eval & EVAL_WARNONLY)
 	warn("%_", msg);
     else if (PL_in_eval)
 	sv_catsv(ERRSV, msg);

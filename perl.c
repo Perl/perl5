@@ -1315,9 +1315,9 @@ perl_call_sv(SV *sv, I32 flags)
 	    PUSHEVAL(cx, 0, 0);
 	    PL_eval_root = PL_op;             /* Only needed so that goto works right. */
 	    
-	    PL_in_eval = 1;
+	    PL_in_eval = EVAL_INEVAL;
 	    if (flags & G_KEEPERR)
-		PL_in_eval |= 4;
+		PL_in_eval |= EVAL_KEEPERR;
 	    else
 		sv_setpv(ERRSV,"");
 	}

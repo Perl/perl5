@@ -136,7 +136,7 @@ assertref(OP *o)
 	    SV *msg = sv_2mortal(
 			newSVpvf("(Did you mean $ or @ instead of %c?)\n",
 				 type == OP_ENTERSUB ? '&' : '%'));
-	    if (PL_in_eval & 2)
+	    if (PL_in_eval & EVAL_WARNONLY)
 		warn("%_", msg);
 	    else if (PL_in_eval)
 		sv_catsv(GvSV(PL_errgv), msg);
@@ -1764,7 +1764,9 @@ newPROG(OP *o)
     if (PL_in_eval) {
 	if (PL_eval_root)
 		return;
-	PL_eval_root = newUNOP(OP_LEAVEEVAL, ((PL_in_eval & 4) ? OPf_SPECIAL : 0), o);
+	PL_eval_root = newUNOP(OP_LEAVEEVAL,
+			       ((PL_in_eval & EVAL_KEEPERR)
+				? OPf_SPECIAL : 0), o);
 	PL_eval_start = linklist(PL_eval_root);
 	PL_eval_root->op_next = 0;
 	peep(PL_eval_start);
@@ -3997,7 +3999,7 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 	    if (strEQ(s, "BEGIN")) {
 		char *not_safe =
 		    "BEGIN not safe after errors--compilation aborted";
-		if (PL_in_eval & 4)
+		if (PL_in_eval & EVAL_KEEPERR)
 		    croak(not_safe);
 		else {
 		    /* force display of errors found but not reported */

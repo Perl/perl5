@@ -1335,7 +1335,7 @@ die_where(char *message, STRLEN msglen)
 	SV **newsp;
 
 	if (message) {
-	    if (PL_in_eval & 4) {
+	    if (PL_in_eval & EVAL_KEEPERR) {
 		SV **svp;
 		
 		svp = hv_fetch(ERRHV, message, msglen, TRUE);
@@ -2612,7 +2612,7 @@ doeval(int gimme, OP** startop)
     AV* comppadlist;
     I32 i;
 
-    PL_in_eval = 1;
+    PL_in_eval = EVAL_INEVAL;
 
     PUSHMARK(SP);
 
@@ -2691,7 +2691,7 @@ doeval(int gimme, OP** startop)
     SvREFCNT_dec(PL_rs);
     PL_rs = newSVpvn("\n", 1);
     if (saveop && saveop->op_flags & OPf_SPECIAL)
-	PL_in_eval |= 4;
+	PL_in_eval |= EVAL_KEEPERR;
     else
 	sv_setpv(ERRSV,"");
     if (yyparse() || PL_error_count || !PL_eval_root) {
@@ -3145,7 +3145,7 @@ PP(pp_entertry)
     PUSHEVAL(cx, 0, 0);
     PL_eval_root = PL_op;		/* Only needed so that goto works right. */
 
-    PL_in_eval = 1;
+    PL_in_eval = EVAL_INEVAL;
     sv_setpv(ERRSV,"");
     PUTBACK;
     return DOCATCH(PL_op->op_next);
