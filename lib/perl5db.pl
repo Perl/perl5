@@ -2,7 +2,7 @@ package DB;
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 
-$VERSION = 0.9905;
+$VERSION = 0.9906;
 $header = "perl5db.pl patch level $VERSION";
 
 # Enhanced by ilya@math.ohio-state.edu (Ilya Zakharevich)
@@ -1736,11 +1736,14 @@ sub diesignal {
     local $doret = -2;
     $SIG{'ABRT'} = 'DEFAULT';
     kill 'ABRT', $$ if $panic++;
-    print $DB::OUT "Got $_[0]!\n";	# in the case cannot continue
-    local $SIG{__WARN__} = '';
-    require Carp; 
-    local $Carp::CarpLevel = 2;		# mydie + confess
-    &warn(Carp::longmess("Signal @_"));
+    if (defined &Carp::longmess) {
+	local $SIG{__WARN__} = '';
+	local $Carp::CarpLevel = 2;		# mydie + confess
+	&warn(Carp::longmess("Signal @_"));
+    }
+    else {
+	print $DB::OUT "Got signal @_\n";
+    }
     kill 'ABRT', $$;
 }
 
