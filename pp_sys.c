@@ -2178,7 +2178,9 @@ PP(pp_ioctl)
 	DIE(aTHX_ "ioctl is not implemented");
 #endif
     else
-#ifdef HAS_FCNTL
+#ifndef HAS_FCNTL
+      DIE(aTHX_ "fcntl is not implemented");
+#else
 #if defined(OS2) && defined(__EMX__)
 	retval = fcntl(PerlIO_fileno(IoIFP(io)), func, (int)s);
 #else
@@ -2201,11 +2203,8 @@ PP(pp_ioctl)
     else {
 	PUSHp(zero_but_true, ZBTLEN);
     }
-    RETURN;
-
-#else
-    DIE(aTHX_ "fcntl is not implemented");
 #endif
+    RETURN;
 }
 
 PP(pp_flock)
