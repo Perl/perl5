@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Oct 24 21:00:34 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Fri Oct 27 18:18:06 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -2908,7 +2908,7 @@ if test -f /osf_boot || $contains 'OSF/1' /usr/include/ctype.h >/dev/null 2>&1
 then
 	echo "Looks kind of like an OSF/1 system, but we'll see..."
 	echo exit 0 >osf1
-elif test `echo abc | tr a-z A-Z` = Abc ; then
+elif test `echo abc | $tr a-z A-Z` = Abc ; then
 	xxx=`./loc addbib blurfl $pth`
 	if $test -f $xxx; then
 	echo "Looks kind of like a USG system with BSD features, but we'll see..."
@@ -3288,7 +3288,7 @@ esac
 
 case "$fn" in
 *\(*)
-	expr $fn : '.*(\(.*\)).*' | tr ',' $trnl >getfile.ok
+	expr $fn : '.*(\(.*\)).*' | $tr ',' $trnl >getfile.ok
 	fn=`echo $fn | sed 's/(.*)//'`
 	;;
 esac
@@ -4741,7 +4741,7 @@ unknown)
 				s/0*\([0-9][0-9][0-9][0-9][0-9]\)/\1/g
 				G
 				s/\n/ /' | \
-			 sort | $sed -e 's/^.* //'`
+			 $sort | $sed -e 's/^.* //'`
 		eval set \$$#
 	done
 	$test -r $1 || set /usr/ccs/lib/libc.$so
@@ -4801,7 +4801,7 @@ compiler, or your machine supports multiple models), you can override it here.
 EOM
 else
 	dflt=''
-	echo $libpth | tr ' ' $trnl | sort | uniq > libpath
+	echo $libpth | $tr ' ' $trnl | $sort | $uniq > libpath
 	cat >&4 <<EOM
 I can't seem to find your C library.  I've looked in the following places:
 
@@ -4819,7 +4819,7 @@ rp='Where is your C library?'
 libc="$ans"
 
 echo " "
-echo $libc $libnames | tr ' ' $trnl | sort | uniq > libnames
+echo $libc $libnames | $tr ' ' $trnl | $sort | $uniq > libnames
 set X `cat libnames`
 shift
 xxx=files
@@ -14592,7 +14592,7 @@ EOSH
 ./tr '[a-z]' '[A-Z]' < Cppsym.know > Cppsym.a
 ./tr '[A-Z]' '[a-z]' < Cppsym.know > Cppsym.b
 $cat Cppsym.know > Cppsym.c
-$cat Cppsym.a Cppsym.b Cppsym.c | $tr ' ' $trnl | sort | uniq > Cppsym.know
+$cat Cppsym.a Cppsym.b Cppsym.c | $tr ' ' $trnl | $sort | $uniq > Cppsym.know
 $rm -f Cppsym.a Cppsym.b Cppsym.c
 cat <<EOSH > Cppsym
 $startsh
@@ -16137,9 +16137,9 @@ echo "CONFIGDOTSH=true" >>config.sh
 
 : propagate old symbols
 if $test -f UU/config.sh; then
-	<UU/config.sh sort | uniq >UU/oldconfig.sh
+	<UU/config.sh $sort | $uniq >UU/oldconfig.sh
 	sed -n 's/^\([a-zA-Z_0-9]*\)=.*/\1/p' config.sh config.sh UU/oldconfig.sh |\
-	sort | uniq -u >UU/oldsyms
+	$sort | $uniq >UU/oldsyms
 	set X `cat UU/oldsyms`
 	shift
 	case $# in
