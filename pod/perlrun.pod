@@ -1111,6 +1111,20 @@ fit for interactive use, and setting COMSPEC to such a shell may
 interfere with the proper functioning of other programs (which usually
 look in COMSPEC to find a shell fit for interactive use).
 
+=item PERL_ALLOW_NON_IFS_LSP (specific to the Win32 port)
+
+Set to 1 to allow the use of non-IFS compatible LSP's.
+Perl normally searches for an IFS-compatible LSP because this is required
+for its emulation of Windows sockets as real filehandles.  However, this may
+cause problems if you have a firewall such as McAfee Guardian which requires
+all applications to use its LSP which is not IFS-compatible, because clearly
+Perl will normally avoid using such an LSP.
+Setting this environment variable to 1 means that Perl will simply use the
+first suitable LSP enumerated in the catalog, which keeps McAfee Guardian
+happy (and in that particular case Perl still works too because McAfee
+Guardian's LSP actually plays some other games which allow applications
+requiring IFS compatibility to work).
+
 =item PERL_DEBUG_MSTATS
 
 Relevant only if perl is compiled with the malloc included with the perl

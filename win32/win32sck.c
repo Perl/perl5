@@ -398,9 +398,14 @@ convert_proto_info_w2a(WSAPROTOCOL_INFOW *in, WSAPROTOCOL_INFOA *out)
 SOCKET
 open_ifs_socket(int af, int type, int protocol)
 {
+    dTHX;
+    char *s;
     unsigned long proto_buffers_len = 0;
     int error_code;
     SOCKET out = INVALID_SOCKET;
+
+    if ((s = PerlEnv_getenv("PERL_ALLOW_NON_IFS_LSP")) && atoi(s))
+        return WSASocket(af, type, protocol, NULL, 0, 0);
 
     if (WSCEnumProtocols(NULL, NULL, &proto_buffers_len, &error_code) == SOCKET_ERROR
         && error_code == WSAENOBUFS)
