@@ -1,3 +1,17 @@
+Sat Jan 24 16:22:32 IST 2004   Abhijit Menon-Sen <ams@wiw.org>
+
+    Version 2.10
+
+        1. Thread safety: Storable::CLONE/init_perlinterp() now create
+           a new Perl context for each new ithread.
+           (From Stas Bekman and Jan Dubois.)
+        2. Fix a tag count mismatch with $Storable::Deparse that caused
+           all back-references after a stored sub to be off-by-N (where
+           N was the number of code references in between).
+           (From Sam Vilain.)
+        3. Prevent CODE references from turning into SCALAR references.
+           (From Slaven Rezic.)
+
 Sat Jan  3 18:49:18 GMT 2004   Nicholas Clark <nick@ccl4.org>
 
     Version 2.09

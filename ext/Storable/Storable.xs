@@ -791,6 +791,13 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
  * Useful store shortcuts...
  */
 
+/*
+ * Note that if you put more than one mark for storing a particular
+ * type of thing, *and* in the retrieve_foo() function you mark both
+ * the thingy's you get off with SEEN(), you *must* increase the
+ * tagnum with cxt->tagnum++ along with this macro!
+ *     - samv 20Jan04
+ */
 #define PUTMARK(x) 							\
   STMT_START {								\
 	if (!cxt->fio)							\
@@ -2463,6 +2470,7 @@ static int store_code(stcxt_t *cxt, CV *cv)
 	 */
 
 	PUTMARK(SX_CODE);
+	cxt->tagnum++;   /* necessary, as SX_CODE is a SEEN() candidate */
 	TRACEME(("size = %d", len));
 	TRACEME(("code = %s", SvPV_nolen(text)));
 
@@ -4202,10 +4210,11 @@ static SV *retrieve_overloaded(stcxt_t *cxt, char *cname)
 	/*
 	 * Restore overloading magic.
 	 */
-
-	stash = (HV *) SvSTASH (sv);
-	if (!stash || !Gv_AMG(stash))
-		CROAK(("Cannot restore overloading on %s(0x%"UVxf") (package %s)",
+	if (!SvTYPE(sv)
+	    || !(stash = (HV *) SvSTASH (sv))
+	    || !Gv_AMG(stash))
+		CROAK(("Cannot restore overloading on %s(0x%"UVxf
+		       ") (package %s)",
 		       sv_reftype(sv, FALSE),
 		       PTR2UV(sv),
 			   stash ? HvNAME(stash) : "<unknown>"));
@@ -4695,6 +4704,7 @@ static SV *retrieve_sv_no(stcxt_t *cxt, char *cname)
 
 	TRACEME(("retrieve_sv_no"));
 
+	cxt->tagnum--; /* undo the tagnum increment in retrieve_l?scalar */
 	SEEN(sv, cname);
 	return sv;
 }
@@ -4975,11 +4985,22 @@ static SV *retrieve_code(stcxt_t *cxt, char *cname)
     CROAK(("retrieve_code does not work with perl 5.005 or less\n"));
 #else
 	dSP;
-	int type, count;
+	int type, count, tagnum;
 	SV *cv;
 	SV *sv, *text, *sub;
 
 	TRACEME(("retrieve_code (#%d)", cxt->tagnum));
+
+	/*
+	 *  Insert dummy SV in the aseen array so that we don't screw
+	 *  up the tag numbers.  We would just make the internal
+	 *  scalar an untagged item in the stream, but
+	 *  retrieve_scalar() calls SEEN().  So we just increase the
+	 *  tag number.
+	 */
+	tagnum = cxt->tagnum;
+	sv = newSViv(0);
+	SEEN(sv, cname);
 
 	/*
 	 * Retrieve the source of the code reference
@@ -5023,6 +5044,8 @@ static SV *retrieve_code(stcxt_t *cxt, char *cname)
 			CROAK(("Can't eval, please set $Storable::Eval to a true value"));
 		} else {
 			sv = newSVsv(sub);
+			/* fix up the dummy entry... */
+			av_store(cxt->aseen, tagnum, SvREFCNT_inc(sv));
 			return sv;
 		}
 	}
@@ -5060,8 +5083,9 @@ static SV *retrieve_code(stcxt_t *cxt, char *cname)
 
 	FREETMPS;
 	LEAVE;
+	/* fix up the dummy entry... */
+	av_store(cxt->aseen, tagnum, SvREFCNT_inc(sv));
 
-	SEEN(sv, cname);
 	return sv;
 #endif
 }
@@ -5900,6 +5924,9 @@ BOOT:
 #ifdef USE_56_INTERWORK_KLUDGE
     gv_fetchpv("Storable::interwork_56_64bit",   GV_ADDMULTI, SVt_PV);
 #endif
+
+void
+init_perinterp()
 
 int
 pstore(f,obj)

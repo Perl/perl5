@@ -21,7 +21,7 @@ package Storable; @ISA = qw(Exporter DynaLoader);
 use AutoLoader;
 use vars qw($canonical $forgive_me $VERSION);
 
-$VERSION = '2.09';
+$VERSION = '2.10';
 *AUTOLOAD = \&AutoLoader::AUTOLOAD;		# Grrr...
 
 #
@@ -45,6 +45,11 @@ BEGIN {
 			sub LOCK_EX ()	{2}
 		};
 	}
+}
+
+sub CLONE {
+    # clone context under threads
+    Storable::init_perinterp();
 }
 
 # Can't Autoload cleanly as this clashes 8.3 with &retrieve

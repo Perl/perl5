@@ -38,7 +38,7 @@ BEGIN {
     }
 }
 
-BEGIN { plan tests => 49 }
+BEGIN { plan tests => 59 }
 
 use Storable qw(retrieve store nstore freeze nfreeze thaw dclone);
 use Safe;
@@ -282,3 +282,30 @@ ok(prototype($thawed->[4]), prototype($obj[0]->[4]));
     }
 }
 
+{
+    # Check internal "seen" code
+    my $short_sub = sub { "short sub" }; # for SX_SCALAR
+    # for SX_LSCALAR
+    my $long_sub_code = 'sub { "' . "x"x255 . '" }';
+    my $long_sub = eval $long_sub_code; die $@ if $@;
+    my $sclr = \1;
+
+    local $Storable::Deparse = 1;
+    local $Storable::Eval    = 1;
+
+    for my $sub ($short_sub, $long_sub) {
+	my $res;
+
+	$res = thaw freeze [$sub, $sub];
+	ok(int($res->[0]), int($res->[1]));
+
+	$res = thaw freeze [$sclr, $sub, $sub, $sclr];
+	ok(int($res->[0]), int($res->[3]));
+	ok(int($res->[1]), int($res->[2]));
+
+	$res = thaw freeze [$sub, $sub, $sclr, $sclr];
+	ok(int($res->[0]), int($res->[1]));
+	ok(int($res->[2]), int($res->[3]));
+    }
+
+}
