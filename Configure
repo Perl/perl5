@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Jun  8 12:04:14 EDT 1998 [metaconfig 3.0 PL70]
+# Generated on Tue Jun  9 14:56:54 EDT 1998 [metaconfig 3.0 PL70]
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -6216,10 +6216,14 @@ main()
 	$xxx i32;
 	double f, g;
 	int result = 0;
+	char str[16];
 	signal(SIGFPE, blech);
 
-	/* Don't let compiler optimize the test away */
-	sscanf("2147483647", "%lf", &f); /* f = (double) 0x7fffffff; */
+	/* Don't let compiler optimize the test away.  Store the number 
+	   in a writable string for gcc to pass to sscanf under HP/UX.
+	*/
+	sprintf(str, "2147483647");
+	sscanf(str, "%lf", &f); /* f = (double) 0x7fffffff; */
 	g = 10 * f;
 	i32  = ($xxx) g;
 
@@ -6272,11 +6276,17 @@ main()
 	unsigned int aint;
 	unsigned short ashort;
 	int result = 0;
+	char str[16];
+	
 	/* Frustrate gcc-2.7.2's optimizer which failed this test with
 	   a direct f = -123. assignment.  gcc-2.8.0 reportedly
 	   optimized the whole file away
 	*/
-	sscanf("-123.", "%lf", &f);  /* f = -123.; */
+	/* Store the number in a writable string for gcc to pass to 
+	   sscanf under HP/UX.
+	*/
+	sprintf(str, "-123");
+	sscanf(str, "%lf", &f);  /* f = -123.; */
 
 	signal(SIGFPE, blech);
 	along = (unsigned long)f;
@@ -6288,7 +6298,8 @@ main()
 		result |= 1;
 	if (ashort != (unsigned short)-123)
 		result |= 1;
-	sscanf("1073741824.", "%lf", &f); /* f = (double)0x40000000; */
+	sprintf(str, "1073741824.");
+	sscanf(str, "%lf", &f); /* f = (double)0x40000000; */
 	f = f + f;
 	along = 0;
 	along = (unsigned long)f;
@@ -6307,7 +6318,8 @@ main()
 	if (result)
 		exit(result);
 	signal(SIGFPE, blech_in_list);
-	sscanf("123.", "%lf", &f);  /* f = 123.; */
+	sprintf(str, "123.");
+	sscanf(str, "%lf", &f);  /* f = 123.; */
 	along = dummy_long((unsigned long)f);
 	aint = dummy_int((unsigned int)f);
 	ashort = dummy_short((unsigned short)f);
