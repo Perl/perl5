@@ -118,6 +118,20 @@ point format on OpenVMS Alpha, potentially breaking binary compatibility
 with external libraries or existing data.  G_FLOAT is still available as
 a configuration option.  The default on VAX (D_FLOAT) has not changed.
 
+=head2 New Unicode Semantics (no more C<use utf8>)
+
+Previously in Perl 5.6 to use Unicode one would say "use utf8" and
+then the operations (like string concatenation) were Unicode-aware
+in that lexical scope.
+
+This was found to be an inconvenient interface, and in Perl 5.8 the
+Unicode model has completely changed: now the "Unicodeness" is bound
+to the data itself, and for most of the time "use utf8" is not needed
+at all.  The only remaining use of "use utf8" is when the Perl script
+itself has been written in the UTF-8 encoding of Unicode.
+
+See L<perluniintro> for the explanation of the current model. 
+
 =head2 New Unicode Properties
 
 Unicode I<scripts> are now supported. Scripts are similar to (and superior
