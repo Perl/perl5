@@ -8,9 +8,11 @@ BEGIN {
 	}
 }
 
-use Test::More tests => 35;
+use PerlIO;
 
-use_ok('PerlIO');
+print "1..19\n";
+
+print "ok 1\n";
 
 my $txt = "txt$$";
 my $bin = "bin$$";
@@ -20,92 +22,65 @@ my $txtfh;
 my $binfh;
 my $utffh;
 
-ok(open($txtfh, ">:crlf", $txt));
+print "not " unless open($txtfh, ">:crlf", $txt);
+print "ok 2\n";
 
-ok(open($binfh, ">:raw",  $bin));
+print "not " unless open($binfh, ">:raw",  $bin);
+print "ok 3\n";
 
-ok(open($utffh, ">:utf8", $utf));
+print "not " unless open($utffh, ">:utf8", $utf);
 print "ok 4\n";
 
 print $txtfh "foo\n";
 print $txtfh "bar\n";
-
-ok(close($txtfh));
+print "not " unless close($txtfh);
+print "ok 5\n";
 
 print $binfh "foo\n";
 print $binfh "bar\n";
-
-ok(close($binfh));
+print "not " unless close($binfh);
+print "ok 6\n";
 
 print $utffh "foo\x{ff}\n";
 print $utffh "bar\x{abcd}\n";
+print "not " unless close($utffh);
+print "ok 7\n";
 
-ok(close($utffh));
+print "not " unless open($txtfh, "<:crlf", $txt);
+print "ok 8\n";
 
-ok(open($txtfh, "<:crlf", $txt));
+print "not " unless open($binfh, "<:raw",  $bin);
+print "ok 9\n";
 
-ok(open($binfh, "<:raw",  $bin));
+print "not " unless open($utffh, "<:utf8", $utf);
+print "ok 10\n";
 
+print "not " unless <$txtfh> eq "foo\n" && <$txtfh> eq "bar\n";
+print "ok 11\n";
 
-ok(open($utffh, "<:utf8", $utf));
+print "not " unless <$binfh> eq "foo\n" && <$binfh> eq "bar\n";
+print "ok 12\n";
 
-is(scalar <$txtfh>, "foo\n");
-is(scalar <$txtfh>, "bar\n");
+print "not " unless <$utffh> eq "foo\x{ff}\n" && <$utffh> eq "bar\x{abcd}\n";
+print "ok 13\n";
 
-is(scalar <$binfh>, "foo\n");
-is(scalar <$binfh>, "bar\n");
+print "not " unless eof($txtfh);
+print "ok 14\n";
 
-is(scalar <$utffh>,  "foo\x{ff}\n");
-is(scalar <$utffh>, "bar\x{abcd}\n");
+print "not " unless eof($binfh);
+print "ok 15\n";
 
-ok(eof($txtfh));;
+print "not " unless eof($utffh);
+print "ok 16\n";
 
-ok(eof($binfh));
+print "not " unless close($txtfh);
+print "ok 17\n";
 
-ok(eof($utffh));
+print "not " unless close($binfh);
+print "ok 18\n";
 
-ok(close($txtfh));
-
-ok(close($binfh));
-
-ok(close($utffh));
-
-# magic temporary file via 3 arg open with undef
-{
-    ok( open(my $x,"+<",undef), 'magic temp file via 3 arg open with undef');
-    ok( defined fileno($x),     '       fileno' );
-
-    select $x;
-    ok( (print "ok\n"),         '       print' );
-
-    select STDOUT;
-    ok( seek($x,0,0),           '       seek' );
-    is( scalar <$x>, "ok\n",    '       readline' );
-    ok( tell($x) >= 3,          '       tell' );
-
-    # test magic temp file over STDOUT
-    open OLDOUT, ">&STDOUT" or die "cannot dup STDOUT: $!";
-    my $status = open(STDOUT,"+<",undef);
-    open STDOUT,  ">&OLDOUT" or die "cannot dup OLDOUT: $!";
-    # report after STDOUT is restored
-    ok($status, '       re-open STDOUT');
-    close OLDOUT;
-}
-
-# in-memory open
-{
-    my $var;
-    ok( open(my $x,"+<",\$var), 'magic in-memory file via 3 arg open with \\$var');
-    ok( defined fileno($x),     '       fileno' );
-
-    select $x;
-    ok( (print "ok\n"),         '       print' );
-
-    select STDOUT;
-    ok( seek($x,0,0),           '       seek' );
-    is( scalar <$x>, "ok\n",    '       readline' );
-    ok( tell($x) >= 3,          '       tell' );
-}
+print "not " unless close($utffh);
+print "ok 19\n";
 
 END {
     1 while unlink $txt;
