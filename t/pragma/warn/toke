@@ -585,3 +585,11 @@ EXPECT
 Integer overflow in binary number at - line 5.
 Integer overflow in hexadecimal number at - line 8.
 Integer overflow in octal number at - line 11.
+########
+# toke.c
+use warnings 'ambiguous';
+"@mjd_previously_unused_array";        
+no warnings 'ambiguous';
+"@mjd_previously_unused_array";        
+EXPECT
+Possible unintended interpolation of @mjd_previously_unused_array in string at - line 3.

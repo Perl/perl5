@@ -2149,9 +2149,14 @@ Perl_yylex(pTHX)
 	*/
 	if (pit == '@' && PL_lex_state != LEX_NORMAL && !PL_lex_brackets) {
 	    GV *gv = gv_fetchpv(PL_tokenbuf+1, FALSE, SVt_PVAV);
-	    if (!gv || ((PL_tokenbuf[0] == '@') ? !GvAV(gv) : !GvHV(gv)))
-		yyerror(Perl_form(aTHX_ "In string, %s now must be written as \\%s",
-			     PL_tokenbuf, PL_tokenbuf));
+	    if ((!gv || ((PL_tokenbuf[0] == '@') ? !GvAV(gv) : !GvHV(gv)))
+		 && ckWARN(WARN_AMBIGUOUS))
+	    {
+                /* Downgraded from fatal to warning 20000522 mjd */
+		Perl_warner(aTHX_ WARN_AMBIGUOUS,
+			    "Possible unintended interpolation of %s in string",
+			     PL_tokenbuf);
+	    }
 	}
 
 	/* build ops for a bareword */
