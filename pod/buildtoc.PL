@@ -149,8 +149,9 @@ if (-d "pod") {
     perlsec
 
     perlmod
-    perlmodlib
     perlmodinstall
+    perlmodlib
+    perlmodstyle
     perlnewmod
 
     perlfaq1            

@@ -238,7 +238,7 @@ unary &, unary *, (TYPE)
 ?PATTERN?, m/PATTERN/cgimosx, /PATTERN/cgimosx, q/STRING/, C<'STRING'>,
 qq/STRING/, "STRING", qr/STRING/imosx, qx/STRING/, `STRING`, qw/STRING/,
 s/PATTERN/REPLACEMENT/egimosx, tr/SEARCHLIST/REPLACEMENTLIST/cds,
-y/SEARCHLIST/REPLACEMENTLIST/cds
+y/SEARCHLIST/REPLACEMENTLIST/cds, <<EOF
 
 =item Gory details of parsing quoted constructs
 
@@ -908,10 +908,10 @@ $GID, $(, $EFFECTIVE_GROUP_ID, $EGID, $), $PROGRAM_NAME, $0, $[, $],
 $COMPILING, $^C, $DEBUGGING, $^D, $SYSTEM_FD_MAX, $^F, $^H, %^H,
 $INPLACE_EDIT, $^I, $^M, $OSNAME, $^O, $PERLDB, $^P, 0x01, 0x02, 0x04,
 0x08, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200, $LAST_REGEXP_CODE_RESULT, $^R,
-$EXCEPTIONS_BEING_CAUGHT, $^S, $BASETIME, $^T, $PERL_VERSION, $^V,
-$WARNING, $^W, ${^WARNING_BITS}, ${^WIDE_SYSTEM_CALLS}, $EXECUTABLE_NAME,
-$^X, ARGV, $ARGV, @ARGV, @F, @INC, @_, %INC, %ENV, $ENV{expr}, %SIG,
-$SIG{expr}
+$EXCEPTIONS_BEING_CAUGHT, $^S, $BASETIME, $^T, ${^TAINT}, $PERL_VERSION,
+$^V, $WARNING, $^W, ${^WARNING_BITS}, ${^WIDE_SYSTEM_CALLS},
+$EXECUTABLE_NAME, $^X, ARGV, $ARGV, @ARGV, @F, @INC, @_, %INC, %ENV,
+$ENV{expr}, %SIG, $SIG{expr}
 
 =item Error Indicators
 
@@ -2196,6 +2196,31 @@ chcp, dataset access, OS/390, z/OS iconv, locales
 
 =back
 
+=head2 perlmodinstall - Installing CPAN Modules
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item PREAMBLE
+
+B<DECOMPRESS> the file, B<UNPACK> the file into a directory, B<BUILD> the
+module (sometimes unnecessary), B<INSTALL> the module
+
+=back
+
+=item PORTABILITY
+
+=item HEY
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
 =head2 perlmodlib - constructing new Perl modules and finding existing ones
 
 =over 4
@@ -2299,28 +2324,104 @@ Adding a Copyright Notice
 
 =back
 
-=head2 perlmodinstall - Installing CPAN Modules
+=head2 perlmodstyle - Perl module style guide
 
 =over 4
 
-=item DESCRIPTION
+=item INTRODUCTION
+
+=item QUICK CHECKLIST
 
 =over 4
 
-=item PREAMBLE
+=item Before you start
 
-B<DECOMPRESS> the file, B<UNPACK> the file into a directory, B<BUILD> the
-module (sometimes unnecessary), B<INSTALL> the module
+=item The API
+
+=item Stability
+
+=item Documentation
+
+=item Release considerations
 
 =back
 
-=item PORTABILITY
+=item BEFORE YOU START WRITING A MODULE
 
-=item HEY
+=over 4
+
+=item Has it been done before?
+
+=item Do one thing and do it well
+
+=item What's in a name?
+
+=back
+
+=item DESIGNING AND WRITING YOUR MODULE
+
+=over 4
+
+=item To OO or not to OO?
+
+=item Designing your API
+
+Write simple routines to do simple things, Separate functionality from
+output, Provide sensible shortcuts and defaults, Naming conventions,
+Parameter passing
+
+=item Strictness and warnings
+
+=item Backwards compatibility
+
+=item Error handling and messages
+
+=back
+
+=item DOCUMENTING YOUR MODULE
+
+=over 4
+
+=item POD
+
+=item README, INSTALL, release notes, changelogs
+
+=back
+
+=item RELEASE CONSIDERATIONS
+
+=over 4
+
+=item Version numbering
+
+=item Pre-requisites
+
+=item Testing
+
+=item Packaging
+
+=item Licensing
+
+=back
+
+=item COMMON PITFALLS
+
+=over 4
+
+=item Reinventing the wheel
+
+=item Trying to do too much
+
+=item Inappropriate documentation
+
+=back
+
+=item SEE ALSO
+
+L<perlstyle>, L<perlnewmod>, L<perlpod>, L<podchecker>, Testing tools,
+http://pause.perl.org/, Any good book on software engineering
 
 =item AUTHOR
-
-=item COPYRIGHT
 
 =back
 
@@ -2462,8 +2563,8 @@ References, Tutorials, Task-Oriented, Special Topics
 
 =back
 
-=head2 perlfaq3 - Programming Tools ($Revision: 1.1 $, $Date: 2001/09/20
-03:03:00 $)
+=head2 perlfaq3 - Programming Tools ($Revision: 1.7 $, $Date: 2001/10/09
+22:17:53 $)
 
 =over 4
 
@@ -2509,6 +2610,9 @@ MultiEdit, SlickEdit, Bash, Ksh, Tcsh, Zsh, BBEdit and BBEdit Lite, Alpha
 
 =item How can I make my Perl program take less memory?
 
+Don't slurp!, Use map and grep selectively, Avoid unnecessary quotes and
+stringification, Pass by reference, Tie large variables to disk
+
 =item Is it unsafe to return a pointer to local data?
 
 =item How can I free an array or hash so my program shrinks?
@@ -2547,8 +2651,8 @@ mean?
 
 =back
 
-=head2 perlfaq4 - Data Manipulation ($Revision: 1.1 $, $Date: 2001/09/20
-03:03:00 $)
+=head2 perlfaq4 - Data Manipulation ($Revision: 1.5 $, $Date: 2001/10/12
+15:20:13 $)
 
 =over 4
 
@@ -2757,8 +2861,8 @@ array of hashes or arrays?
 
 =back
 
-=head2 perlfaq5 - Files and Formats ($Revision: 1.1 $, $Date: 2001/09/20
-03:03:00 $)
+=head2 perlfaq5 - Files and Formats ($Revision: 1.2 $, $Date: 2001/09/26
+10:44:41 $)
 
 =over 4
 
@@ -3123,7 +3227,7 @@ search path?
 
 =back
 
-=head2 perlfaq9 - Networking ($Revision: 1.1 $, $Date: 2001/09/20 03:03:00
+=head2 perlfaq9 - Networking ($Revision: 1.2 $, $Date: 2001/09/28 06:40:07
 $)
 
 =over 4
@@ -3131,6 +3235,8 @@ $)
 =item DESCRIPTION
 
 =over 4
+
+=item What is the correct form of response from a CGI script?
 
 =item My CGI script runs from the command line but not the browser.  (500
 Server Error)
@@ -3936,19 +4042,19 @@ PL_sv_yes, POPi, POPl, POPn, POPp, POPpbytex, POPpx, POPs, PUSHi, PUSHMARK,
 PUSHn, PUSHp, PUSHs, PUSHu, PUTBACK, Renew, Renewc, require_pv, RETVAL,
 Safefree, savepv, savepvn, SAVETMPS, scan_bin, scan_hex, scan_oct,
 sharedsv_find, sharedsv_init, sharedsv_lock, sharedsv_new,
-sharedsv_thrcnt_dec, sharedsv_thrcnt_inc, sharedsv_unlock, SP, SPAGAIN, ST,
-strEQ, strGE, strGT, strLE, strLT, strNE, strnEQ, strnNE, StructCopy,
-SvCUR, SvCUR_set, SvEND, SvGETMAGIC, SvGROW, SvIOK, SvIOKp, SvIOK_notUV,
-SvIOK_off, SvIOK_on, SvIOK_only, SvIOK_only_UV, SvIOK_UV, SvIV, SvIVX,
-SvIVx, SvLEN, SvNIOK, SvNIOKp, SvNIOK_off, SvNOK, SvNOKp, SvNOK_off,
-SvNOK_on, SvNOK_only, SvNV, SvNVx, SvNVX, SvOK, SvOOK, SvPOK, SvPOKp,
-SvPOK_off, SvPOK_on, SvPOK_only, SvPOK_only_UTF8, SvPV, SvPVbyte,
+sharedsv_thrcnt_dec, sharedsv_thrcnt_inc, sharedsv_unlock, sortsv, SP,
+SPAGAIN, ST, strEQ, strGE, strGT, strLE, strLT, strNE, strnEQ, strnNE,
+StructCopy, SvCUR, SvCUR_set, SvEND, SvGETMAGIC, SvGROW, SvIOK, SvIOKp,
+SvIOK_notUV, SvIOK_off, SvIOK_on, SvIOK_only, SvIOK_only_UV, SvIOK_UV,
+SvIV, SvIVX, SvIVx, SvLEN, SvNIOK, SvNIOKp, SvNIOK_off, SvNOK, SvNOKp,
+SvNOK_off, SvNOK_on, SvNOK_only, SvNV, SvNVX, SvNVx, SvOK, SvOOK, SvPOK,
+SvPOKp, SvPOK_off, SvPOK_on, SvPOK_only, SvPOK_only_UTF8, SvPV, SvPVbyte,
 SvPVbytex, SvPVbytex_force, SvPVbyte_force, SvPVbyte_nolen, SvPVutf8,
-SvPVutf8x, SvPVutf8x_force, SvPVutf8_force, SvPVutf8_nolen, SvPVX, SvPVx,
+SvPVutf8x, SvPVutf8x_force, SvPVutf8_force, SvPVutf8_nolen, SvPVx, SvPVX,
 SvPV_force, SvPV_force_nomg, SvPV_nolen, SvREFCNT, SvREFCNT_dec,
 SvREFCNT_inc, SvROK, SvROK_off, SvROK_on, SvRV, SvSETMAGIC, SvSetMagicSV,
 SvSetMagicSV_nosteal, SvSetSV, SvSetSV_nosteal, SvSTASH, SvTAINT,
-SvTAINTED, SvTAINTED_off, SvTAINTED_on, SvTRUE, svtype, SvTYPE, SVt_IV,
+SvTAINTED, SvTAINTED_off, SvTAINTED_on, SvTRUE, SvTYPE, svtype, SVt_IV,
 SVt_NV, SVt_PV, SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG, SvUOK, SvUPGRADE,
 SvUTF8, SvUTF8_off, SvUTF8_on, SvUV, SvUVX, SvUVx, sv_2bool, sv_2cv,
 sv_2io, sv_2iv, sv_2mortal, sv_2nv, sv_2pvbyte, sv_2pvbyte_nolen,
@@ -6072,6 +6178,8 @@ Source, Compiled Module Source, Perl Modules/Scripts
 
 =over 4
 
+=item Using perl as shipped with HP-UX
+
 =item Compiling Perl 5 on HP-UX
 
 =item PA-RISC
@@ -6081,6 +6189,8 @@ Source, Compiled Module Source, Perl Modules/Scripts
 =item PA-RISC 1.1
 
 =item PA-RISC 2.0
+
+=item Itanium
 
 =item Portability Between PA-RISC Versions
 
@@ -6105,6 +6215,8 @@ Source, Compiled Module Source, Perl Modules/Scripts
 =item HP-UX Kernel Parameters (maxdsiz) for Compiling Perl
 
 =back
+
+=item nss_delete core dump from op/pwent or op/grent
 
 =item AUTHOR
 
@@ -6669,6 +6781,8 @@ DATAMODEL_NATIVE specified", sh: ar: not found
 
 =item op/stat.t test 4 in Solaris
 
+=item nss_delete core dump from op/pwent or op/grent
+
 =back
 
 =item PREBUILT BINARIES OF PERL FOR SOLARIS.
@@ -6938,7 +7052,8 @@ leaks!
 
 =item BUGS
 
-creating a thread from within a thread is unsafe under win32
+creating a thread from within a thread is unsafe under win32,
+PERL_OLD_SIGNALS are not threadsafe, will not be
 
 =item SEE ALSO
 
@@ -7425,7 +7540,8 @@ leaks!
 
 =item BUGS
 
-creating a thread from within a thread is unsafe under win32
+creating a thread from within a thread is unsafe under win32,
+PERL_OLD_SIGNALS are not threadsafe, will not be
 
 =item SEE ALSO
 
@@ -9315,7 +9431,9 @@ $Data::Dumper::Toaster	I<or>  $I<OBJ>->Toaster(I<[NEWVAL]>),
 $Data::Dumper::Deepcopy  I<or>	$I<OBJ>->Deepcopy(I<[NEWVAL]>),
 $Data::Dumper::Quotekeys  I<or>  $I<OBJ>->Quotekeys(I<[NEWVAL]>),
 $Data::Dumper::Bless  I<or>  $I<OBJ>->Bless(I<[NEWVAL]>),
-$Data::Dumper::Maxdepth  I<or>	$I<OBJ>->Maxdepth(I<[NEWVAL]>)
+$Data::Dumper::Maxdepth  I<or>	$I<OBJ>->Maxdepth(I<[NEWVAL]>),
+$Data::Dumper::Useperl	I<or>  $I<OBJ>->Useperl(I<[NEWVAL]>),
+$Data::Dumper::Sortkeys  I<or>	$I<OBJ>->Sortkeys(I<[NEWVAL]>)
 
 =item Exports
 
@@ -9487,8 +9605,8 @@ $md5->addfile($io_handle), $md5->digest, $md5->hexdigest, $md5->b64digest
 =item Creation
 
 C<arrayDepth>, C<hashDepth>, C<compactDump>, C<veryCompact>, C<globPrint>,
-C<DumpDBFiles>, C<DumpPackages>, C<DumpReused>, C<tick>, C<HighBit>,
-C<printUndef>, C<UsageOnly>, unctrl, subdump, bareStringify, quoteHighBit,
+C<dumpDBFiles>, C<dumpPackages>, C<dumpReused>, C<tick>, C<quoteHighBit>,
+C<printUndef>, C<usageOnly>, unctrl, subdump, bareStringify, quoteHighBit,
 stopDbSignal
 
 =item Methods
@@ -9785,7 +9903,7 @@ test_f file
 
 =item USAGE
 
-IV, UV, NV, PV, PVN, PVN, YES, NO, UNDEF
+IV, UV, NV, PV, PVN, SV, YES, NO, UNDEF
 
 =item FUNCTIONS
 
@@ -9807,12 +9925,16 @@ params WHAT
 
 dump_names
 
+dogfood
+
 C_constant, name, type, value, macro, default, pre, post, def_pre =item
 def_post
 
 XS_constant PACKAGE, TYPES, SUBNAME, C_SUBNAME
 
 autoload PACKAGE, VERSION, AUTOLOADER
+
+WriteMakefileSnippet
 
 WriteConstants ATTRIBUTE =E<gt> VALUE [, ...], NAME, DEFAULT_TYPE,
 BREAKOUT_AT, NAMES, C_FILE, XS_FILE, SUBNAME, C_SUBNAME
@@ -10401,8 +10523,8 @@ MAKEAPERL, MAKEFILE, MAN1PODS, MAN3PODS, MAP_TARGET, MYEXTLIB, NAME,
 NEEDS_LINKING, NOECHO, NORECURS, NO_VC, OBJECT, OPTIMIZE, PERL, PERL_CORE,
 PERLMAINCC, PERL_ARCHLIB, PERL_LIB, PERL_MALLOC_OK, PERLRUN, PERM_RW,
 PERM_RWX, PL_FILES, PM, PMLIBDIRS, PM_FILTER, POLLUTE, PPM_INSTALL_EXEC,
-PPM_INSTALL_SCRIPT, PREFIX, PREREQ_PM, SKIP, TEST_LIBS, VERSION,
-VERSION_FROM, XS, XSOPT, XSPROTOARG, XS_VERSION
+PPM_INSTALL_SCRIPT, PREFIX, PREREQ_FATAL, PREREQ_PM, SKIP, TEST_LIBS,
+VERSION, VERSION_FROM, XS, XSOPT, XSPROTOARG, XS_VERSION
 
 =item Additional lowercase attributes
 
@@ -10629,6 +10751,8 @@ rmscopy($from,$to[,$date_flag])
 
 =item DESCRIPTION
 
+=item NOTES
+
 =item EXPORTS (by request only)
 
 =item BUGS
@@ -10707,7 +10831,7 @@ C<GLOB_NOSPACE>, C<GLOB_ABEND>
 
 canonpath, catdir, catfile, curdir, devnull, rootdir, tmpdir, updir,
 no_upwards, case_tolerant, file_name_is_absolute, path, join, splitpath,
-splitdir, catpath, abs2rel, rel2abs
+splitdir, catpath(), abs2rel, rel2abs()
 
 =item SEE ALSO
 
@@ -10731,7 +10855,7 @@ tmpdir
 
 path
 
-canonpath
+canonpath()
 
 splitpath
 
@@ -10741,7 +10865,7 @@ catpath
 
 abs2rel
 
-rel2abs
+rel2abs()
 
 =over 4
 
@@ -10767,7 +10891,7 @@ rel2abs
 
 =back
 
-=head2 File::Spec::Mac - File::Spec for MacOS
+=head2 File::Spec::Mac - File::Spec for Mac OS (Classic)
 
 =over 4
 
@@ -10781,7 +10905,7 @@ canonpath
 
 =back
 
-catdir
+catdir()
 
 catfile
 
@@ -10803,13 +10927,15 @@ splitpath
 
 splitdir
 
-catpath
+catpath()
 
 abs2rel
 
 rel2abs
 
 =over 4
+
+=item AUTHORS
 
 =item SEE ALSO
 
@@ -10836,11 +10962,11 @@ modules
 
 =item METHODS
 
-canonpath
+canonpath()
 
 =back
 
-catdir
+catdir()
 
 catfile
 
@@ -10868,11 +10994,11 @@ splitpath
 
 splitdir
 
-catpath
+catpath()
 
 abs2rel
 
-rel2abs
+rel2abs()
 
 =over 4
 
@@ -11179,6 +11305,8 @@ B<$_>, B<$status>, B<filter_read> and B<filter_read_exact>, B<filter_del>
 =item DESCRIPTION
 
 =item EXPORTABLE VARIABLES
+
+=item KNOWN ISSUES
 
 =item KNOWN BUGS
 
@@ -15640,6 +15768,8 @@ unexpand(1)
 =item SYNOPSIS 
 
 =item DESCRIPTION
+
+=item OVERRIDES
 
 =item EXAMPLE
 

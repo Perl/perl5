@@ -69,8 +69,9 @@ For ease of access, the Perl manual has been split up into several sections:
     perlsec		Perl security
 
     perlmod		Perl modules: how they work
-    perlmodlib		Perl modules: how to write and use
     perlmodinstall	Perl modules: how to install from CPAN
+    perlmodlib		Perl modules: how to write and use
+    perlmodstyle	Perl modules: how to write modules with style
     perlnewmod		Perl modules: preparing a new module for distribution
 
     perlfaq1		General Questions About Perl
