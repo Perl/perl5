@@ -1092,13 +1092,12 @@ Perl_gv_fullname4(pTHX_ SV *sv, GV *gv, const char *prefix, bool keepmain)
     }
     sv_setpv(sv, prefix ? prefix : "");
     
-    if (!HvNAME(hv))
+    name = HvNAME(hv);
+    if (!name)
 	name = "__ANON__";
-    else 
-	name = HvNAME(hv);
+	
     if (keepmain || strNE(name, "main")) {
-	sv_catpv(sv,name);
-	sv_catpvn(sv,"::", 2);
+	Perl_sv_catpvf(aTHX_ sv,"%s::", name);
     }
     sv_catpvn(sv,GvNAME(gv),GvNAMELEN(gv));
 }
