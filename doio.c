@@ -359,9 +359,6 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		}
 	    } /* & */
 	    else {
-		if (num_svs > 1) {
-		    Perl_croak(aTHX_ "More than one argument to '>' open");
-		}
 		/*SUPPRESS 530*/
 		for (; isSPACE(*type); type++) ;
 		if (*type == IoTYPE_STD && (!type[1] || isSPACE(type[1]) || type[1] == ':')) {
@@ -369,6 +366,9 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		    type++;
 		    fp = PerlIO_stdout();
 		    IoTYPE(io) = IoTYPE_STD;
+		    if (num_svs > 1) {
+			Perl_croak(aTHX_ "More than one argument to '>%c' open",IoTYPE_STD);
+		    }
 		}
 		else  {
 		    if (!num_svs) {
@@ -382,9 +382,6 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    } /* !& */
 	}
 	else if (*type == IoTYPE_RDONLY) {
-	    if (num_svs > 1) {
-		Perl_croak(aTHX_ "More than one argument to '<' open");
-	    }
 	    /*SUPPRESS 530*/
 	    for (type++; isSPACE(*type); type++) ;
 	    mode[0] = 'r';
@@ -401,6 +398,9 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		type++;
 		fp = PerlIO_stdin();
 		IoTYPE(io) = IoTYPE_STD;
+		if (num_svs > 1) {
+		    Perl_croak(aTHX_ "More than one argument to '<%c' open",IoTYPE_STD);
+		}
 	    }
 	    else {
 		if (!num_svs) {
