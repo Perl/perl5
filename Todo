@@ -10,7 +10,7 @@ Would be nice to have
 	lexperl
 	Bundled perl preprocessor
 	Use posix calls internally where possible
-	gettimeofday
+	gettimeofday (possibly best left for a module?)
 	format BOTTOM
 	-i rename file only when successfully changed
 	All ARGV input should act like <>

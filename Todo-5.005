@@ -4,7 +4,6 @@ Multi-threading
     SvREFCNT_dec(curstack) in threadstart() in Thread.xs
     better support for externally created threads
     Thread::Pool
-    more Configure support
     spot-check globals like statcache and global GVs for thread-safety
 
 Compiler
@@ -50,9 +49,9 @@ Miscellaneous
 Ongoing
     keep filenames 8.3 friendly, where feasible
     upgrade to newer versions of all independently maintained modules
+    comprehensive perldelta.pod
 
 Documentation
-    comprehensive perldelta.pod
     describe new age patterns
     update perl{guts,call,embed,xs} with additions, changes to API
     document Win32 choices
