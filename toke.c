@@ -126,40 +126,42 @@ int yyactlevel = -1;
  * Also see LOP and lop() below.
  */
 
+/* Note that REPORT() and REPORT2() will be expressions that supply
+ * their own trailing comma, not suitable for statements as such. */
 #ifdef DEBUGGING /* Serve -DT. */
-#   define REPORT(x,retval) tokereport(x,s,(int)retval)
-#   define REPORT2(x,retval) tokereport(x,s, yylval.ival)
+#   define REPORT(x,retval) tokereport(x,s,(int)retval),
+#   define REPORT2(x,retval) tokereport(x,s, yylval.ival),
 #else
-#   define REPORT(x,retval) 1
-#   define REPORT2(x,retval) 1
+#   define REPORT(x,retval)
+#   define REPORT2(x,retval)
 #endif
 
-#define TOKEN(retval) return (REPORT2("token",retval), PL_bufptr = s,(int)retval)
-#define OPERATOR(retval) return (REPORT2("operator",retval), PL_expect = XTERM, PL_bufptr = s,(int)retval)
-#define AOPERATOR(retval) return ao((REPORT2("aop",retval), PL_expect = XTERM, PL_bufptr = s,(int)retval))
-#define PREBLOCK(retval) return (REPORT2("preblock",retval), PL_expect = XBLOCK,PL_bufptr = s,(int)retval)
-#define PRETERMBLOCK(retval) return (REPORT2("pretermblock",retval), PL_expect = XTERMBLOCK,PL_bufptr = s,(int)retval)
-#define PREREF(retval) return (REPORT2("preref",retval), PL_expect = XREF,PL_bufptr = s,(int)retval)
-#define TERM(retval) return (CLINE, REPORT2("term",retval), PL_expect = XOPERATOR, PL_bufptr = s,(int)retval)
-#define LOOPX(f) return(yylval.ival=f, REPORT("loopx",f), PL_expect = XTERM,PL_bufptr = s,(int)LOOPEX)
-#define FTST(f) return(yylval.ival=f, REPORT("ftst",f), PL_expect = XTERM,PL_bufptr = s,(int)UNIOP)
-#define FUN0(f) return(yylval.ival = f, REPORT("fun0",f), PL_expect = XOPERATOR,PL_bufptr = s,(int)FUNC0)
-#define FUN1(f) return(yylval.ival = f, REPORT("fun1",f), PL_expect = XOPERATOR,PL_bufptr = s,(int)FUNC1)
-#define BOop(f) return ao((yylval.ival=f, REPORT("bitorop",f), PL_expect = XTERM,PL_bufptr = s,(int)BITOROP))
-#define BAop(f) return ao((yylval.ival=f, REPORT("bitandop",f), PL_expect = XTERM,PL_bufptr = s,(int)BITANDOP))
-#define SHop(f) return ao((yylval.ival=f, REPORT("shiftop",f), PL_expect = XTERM,PL_bufptr = s,(int)SHIFTOP))
-#define PWop(f) return ao((yylval.ival=f, REPORT("powop",f), PL_expect = XTERM,PL_bufptr = s,(int)POWOP))
-#define PMop(f) return(yylval.ival=f, REPORT("matchop",f), PL_expect = XTERM,PL_bufptr = s,(int)MATCHOP)
-#define Aop(f) return ao((yylval.ival=f, REPORT("add",f), PL_expect = XTERM,PL_bufptr = s,(int)ADDOP))
-#define Mop(f) return ao((yylval.ival=f, REPORT("mul",f), PL_expect = XTERM,PL_bufptr = s,(int)MULOP))
-#define Eop(f) return(yylval.ival=f, REPORT("eq",f), PL_expect = XTERM,PL_bufptr = s,(int)EQOP)
-#define Rop(f) return(yylval.ival=f, REPORT("rel",f), PL_expect = XTERM,PL_bufptr = s,(int)RELOP)
+#define TOKEN(retval) return (REPORT2("token",retval) PL_bufptr = s,(int)retval)
+#define OPERATOR(retval) return (REPORT2("operator",retval) PL_expect = XTERM, PL_bufptr = s,(int)retval)
+#define AOPERATOR(retval) return ao((REPORT2("aop",retval) PL_expect = XTERM, PL_bufptr = s,(int)retval))
+#define PREBLOCK(retval) return (REPORT2("preblock",retval) PL_expect = XBLOCK,PL_bufptr = s,(int)retval)
+#define PRETERMBLOCK(retval) return (REPORT2("pretermblock",retval) PL_expect = XTERMBLOCK,PL_bufptr = s,(int)retval)
+#define PREREF(retval) return (REPORT2("preref",retval) PL_expect = XREF,PL_bufptr = s,(int)retval)
+#define TERM(retval) return (CLINE, REPORT2("term",retval) PL_expect = XOPERATOR, PL_bufptr = s,(int)retval)
+#define LOOPX(f) return(yylval.ival=f, REPORT("loopx",f) PL_expect = XTERM,PL_bufptr = s,(int)LOOPEX)
+#define FTST(f) return(yylval.ival=f, REPORT("ftst",f) PL_expect = XTERM,PL_bufptr = s,(int)UNIOP)
+#define FUN0(f) return(yylval.ival = f, REPORT("fun0",f) PL_expect = XOPERATOR,PL_bufptr = s,(int)FUNC0)
+#define FUN1(f) return(yylval.ival = f, REPORT("fun1",f) PL_expect = XOPERATOR,PL_bufptr = s,(int)FUNC1)
+#define BOop(f) return ao((yylval.ival=f, REPORT("bitorop",f) PL_expect = XTERM,PL_bufptr = s,(int)BITOROP))
+#define BAop(f) return ao((yylval.ival=f, REPORT("bitandop",f) PL_expect = XTERM,PL_bufptr = s,(int)BITANDOP))
+#define SHop(f) return ao((yylval.ival=f, REPORT("shiftop",f) PL_expect = XTERM,PL_bufptr = s,(int)SHIFTOP))
+#define PWop(f) return ao((yylval.ival=f, REPORT("powop",f) PL_expect = XTERM,PL_bufptr = s,(int)POWOP))
+#define PMop(f) return(yylval.ival=f, REPORT("matchop",f) PL_expect = XTERM,PL_bufptr = s,(int)MATCHOP)
+#define Aop(f) return ao((yylval.ival=f, REPORT("add",f) PL_expect = XTERM,PL_bufptr = s,(int)ADDOP))
+#define Mop(f) return ao((yylval.ival=f, REPORT("mul",f) PL_expect = XTERM,PL_bufptr = s,(int)MULOP))
+#define Eop(f) return(yylval.ival=f, REPORT("eq",f) PL_expect = XTERM,PL_bufptr = s,(int)EQOP)
+#define Rop(f) return(yylval.ival=f, REPORT("rel",f) PL_expect = XTERM,PL_bufptr = s,(int)RELOP)
 
 /* This bit of chicanery makes a unary function followed by
  * a parenthesis into a function with one argument, highest precedence.
  */
 #define UNI(f) return(yylval.ival = f, \
-	REPORT("uni",f), \
+	REPORT("uni",f) \
 	PL_expect = XTERM, \
 	PL_bufptr = s, \
 	PL_last_uni = PL_oldbufptr, \
@@ -167,7 +169,7 @@ int yyactlevel = -1;
 	(*s == '(' || (s = skipspace(s), *s == '(') ? (int)FUNC1 : (int)UNIOP) )
 
 #define UNIBRACK(f) return(yylval.ival = f, \
-        REPORT("uni",f), \
+        REPORT("uni",f) \
 	PL_bufptr = s, \
 	PL_last_uni = PL_oldbufptr, \
 	(*s == '(' || (s = skipspace(s), *s == '(') ? (int)FUNC1 : (int)UNIOP) )
@@ -709,7 +711,7 @@ S_lop(pTHX_ I32 f, int x, char *s)
 {
     yylval.ival = f;
     CLINE;
-    REPORT("lop", f);
+    REPORT("lop", f)
     PL_expect = x;
     PL_bufptr = s;
     PL_last_lop = PL_oldbufptr;
