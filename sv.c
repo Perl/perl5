@@ -3683,8 +3683,16 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    goto glob_assign;
 	}
 	break;
-    case SVt_PV:
     case SVt_PVFM:
+#ifdef PERL_COPY_ON_WRITE
+	if ((SvFLAGS(sstr) & CAN_COW_MASK) == CAN_COW_FLAGS) {
+	    if (dtype < SVt_PVIV)
+		sv_upgrade(dstr, SVt_PVIV);
+	    break;
+	}
+	/* Fall through */
+#endif
+    case SVt_PV:
 	if (dtype < SVt_PV)
 	    sv_upgrade(dstr, SVt_PV);
 	break;
@@ -4006,6 +4014,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
                 /* making another shared SV.  */
                 STRLEN cur = SvCUR(sstr);
                 STRLEN len = SvLEN(sstr);
+		assert (SvTYPE(dstr) >= SVt_PVIV);
                 if (len) {
                     /* SvIsCOW_normal */
                     /* splice us in between source and next-after-source.  */
@@ -4448,11 +4457,11 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
 	    char *pvx = SvPVX(sv);
 	    STRLEN len = SvCUR(sv);
             U32 hash   = SvUVX(sv);
+	    SvFAKE_off(sv);
+	    SvREADONLY_off(sv);
 	    SvGROW(sv, len + 1);
 	    Move(pvx,SvPVX(sv),len,char);
 	    *SvEND(sv) = '\0';
-	    SvFAKE_off(sv);
-	    SvREADONLY_off(sv);
 	    unsharepvn(pvx, SvUTF8(sv) ? -(I32)len : len, hash);
 	}
 	else if (PL_curcop != &PL_compiling)
@@ -6289,7 +6298,8 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
     I32 rspara = 0;
     I32 recsize;
 
-    SV_CHECK_THINKFIRST_COW_DROP(sv);
+    if (SvTHINKFIRST(sv))
+	sv_force_normal_flags(sv, append ? 0 : SV_COW_DROP_PV);
     /* XXX. If you make this PVIV, then copy on write can copy scalars read
        from <>.
        However, perlbench says it's slower, because the existing swipe code

@@ -1,5 +1,5 @@
 # -*- Mode: cperl; cperl-indent-level: 4 -*-
-# $Id: Harness.pm,v 1.38 2002/06/19 21:01:01 schwern Exp $
+# $Id: Harness.pm,v 1.43 2003/03/24 20:09:50 andy Exp $
 
 package Test::Harness;
 
@@ -22,7 +22,7 @@ use vars qw($VERSION $Verbose $Switches $Have_Devel_Corestack $Curtest
 
 $Have_Devel_Corestack = 0;
 
-$VERSION = '2.26';
+$VERSION = '2.27_02';
 
 $ENV{HARNESS_ACTIVE} = 1;
 
@@ -469,7 +469,7 @@ sub _run_all_tests {
                     failed      => \@failed,
                     bonus       => $results{bonus},
                     skipped     => $results{skip},
-                    skip_reason => $Strap->{_skip_reason},
+                    skip_reason => $results{skip_reason},
                     skip_all    => $Strap->{skip_all},
                     ml          => $ml,
                    );
@@ -482,12 +482,7 @@ sub _run_all_tests {
 
         my($estatus, $wstatus) = @results{qw(exit wait)};
 
-        if ($wstatus) {
-            $failedtests{$tfile} = _dubious_return(\%test, \%tot, 
-                                                  $estatus, $wstatus);
-            $failedtests{$tfile}{name} = $tfile;
-        }
-        elsif ($results{passing}) {
+        if ($results{passing}) {
             if ($test{max} and $test{skipped} + $test{bonus}) {
                 my @msg;
                 push(@msg, "$test{skipped}/$test{max} skipped: $test{skip_reason}")
@@ -507,10 +502,26 @@ sub _run_all_tests {
             $tot{good}++;
         }
         else {
-            if ($test{max}) {
-                if ($test{'next'} <= $test{max}) {
-                    push @{$test{failed}}, $test{'next'}..$test{max};
+            # List unrun tests as failures.
+            if ($test{'next'} <= $test{max}) {
+                push @{$test{failed}}, $test{'next'}..$test{max};
+            }
+            # List overruns as failures.
+            else {
+                my $details = $results{details};
+                foreach my $overrun ($test{max}+1..@$details)
+                {
+                    next unless ref $details->[$overrun-1];
+                    push @{$test{failed}}, $overrun
                 }
+            }
+
+            if ($wstatus) {
+                $failedtests{$tfile} = _dubious_return(\%test, \%tot, 
+                                                       $estatus, $wstatus);
+                $failedtests{$tfile}{name} = $tfile;
+            }
+            elsif($results{seen}) {
                 if (@{$test{failed}}) {
                     my ($txt, $canon) = canonfailed($test{max},$test{skipped},
                                                     @{$test{failed}});
@@ -536,7 +547,7 @@ sub _run_all_tests {
                                            };
                 }
                 $tot{bad}++;
-            } elsif ($test{'next'} == 0) {
+            } else {
                 print "FAILED before any test output arrived\n";
                 $tot{bad}++;
                 $failedtests{$tfile} = { canon       => '??',
@@ -697,10 +708,10 @@ $Handlers{test} = sub {
         _print_ml("ok $curr/$max");
 
         if( $detail->{type} eq 'skip' ) {
-            $self->{_skip_reason} = $detail->{reason}
-              unless defined $self->{_skip_reason};
-            $self->{_skip_reason} = 'various reasons'
-              if $self->{_skip_reason} ne $detail->{reason};
+            $totals->{skip_reason} = $detail->{reason}
+              unless defined $totals->{skip_reason};
+            $totals->{skip_reason} = 'various reasons'
+              if $totals->{skip_reason} ne $detail->{reason};
         }
     }
     else {
@@ -858,12 +869,15 @@ sub _create_fmts {
     sub corestatus {
         my($st) = @_;
 
-        eval {
+        my $did_core;
+        eval { # we may not have a WCOREDUMP
             local $^W = 0;  # *.ph files are often *very* noisy
-            require 'wait.ph'
+            require 'wait.ph';
+            $did_core = WCOREDUMP($st);
         };
-        return if $@;
-        my $did_core = defined &WCOREDUMP ? WCOREDUMP($st) : $st & 0200;
+        if( $@ ) {
+            $did_core = $st & 0200;
+        }
 
         eval { require Devel::CoreStack; $Have_Devel_Corestack++ } 
           unless $tried_devel_corestack++;
@@ -1057,6 +1071,14 @@ with perl distributions for ages. Numerous anonymous contributors
 exist.  Andreas Koenig held the torch for many years.
 
 Current maintainer is Michael G Schwern E<lt>schwern@pobox.comE<gt>
+
+=head1 LICENSE
+
+This program is free software; you can redistribute it and/or 
+modify it under the same terms as Perl itself.
+
+See F<http://www.perl.com/perl/misc/Artistic.html>
+
 
 =head1 TODO
 

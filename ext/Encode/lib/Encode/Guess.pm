@@ -2,7 +2,7 @@ package Encode::Guess;
 use strict;
 
 use Encode qw(:fallbacks find_encoding);
-our $VERSION = do { my @r = (q$Revision: 1.6 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.7 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 my $Canon = 'Guess';
 our $DEBUG = 0;
@@ -143,7 +143,7 @@ Encode::Guess -- Guesses encoding from data
   my $data = encode("Guess", $utf8);   # this doesn't work!
 
   # more elaborate way
-  use Encode::Guess,
+  use Encode::Guess;
   my $enc = guess_encoding($data, qw/euc-jp shiftjis 7bit-jis/);
   ref($enc) or die "Can't guess: $enc"; # trap error this way
   $utf8 = $enc->decode($data);
@@ -198,9 +198,21 @@ When you are content with suspects list, you can now
 
 =item Encode::Guess->guess($data)
 
-But it will croak if Encode::Guess fails to eliminate all other
-suspects but the right one or no suspect was good.  So you should
-instead try this;
+But it will croak if:
+
+=over
+
+=item *
+
+Two or more suspects remain
+
+=item *
+
+No suspects left
+
+=back
+
+So you should instead try this;
 
   my $decoder = Encode::Guess->guess($data);
 
@@ -249,7 +261,7 @@ one suspect (besides ascii and utf8).
 
 The reason is that Encode::Guess guesses encoding by trial and error.
 It first splits $data into lines and tries to decode the line for each
-suspect.  It keeps it going until all but one encoding was eliminated
+suspect.  It keeps it going until all but one encoding is eliminated
 out of suspects list.  ISO-8859 series is just too successful for most
 cases (because it fills almost all code points in \x00-\xff).
 

@@ -4618,6 +4618,12 @@ vms_image_init(int *argcp, char ***argvp)
   if (tabidx) { tabvec[tabidx] = NULL; env_tables = tabvec; }
 
   getredirection(argcp,argvp);
+#if defined(USE_ITHREADS) && ( defined(__DECC) || defined(__DECCXX) )
+  {
+# include <reentrancy.h>
+  (void) decc$set_reentrancy(C$C_MULTITHREAD);
+  }
+#endif
   return;
 }
 /*}}}*/
@@ -4845,7 +4851,7 @@ Perl_opendir(pTHX_ char *name)
     dd->pat.dsc$w_length = strlen(dd->pattern);
     dd->pat.dsc$b_dtype = DSC$K_DTYPE_T;
     dd->pat.dsc$b_class = DSC$K_CLASS_S;
-#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
+#if defined(USE_ITHREADS)
     New(1308,dd->mutex,1,perl_mutex);
     MUTEX_INIT( (perl_mutex *) dd->mutex );
 #else
@@ -4876,7 +4882,7 @@ closedir(DIR *dd)
 {
     (void)lib$find_file_end(&dd->context);
     Safefree(dd->pattern);
-#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
+#if defined(USE_ITHREADS)
     MUTEX_DESTROY( (perl_mutex *) dd->mutex );
     Safefree(dd->mutex);
 #endif

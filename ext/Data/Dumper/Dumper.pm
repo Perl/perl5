@@ -664,7 +664,7 @@ Data::Dumper - stringified perl data structures, suitable for both printing and 
 
     # configuration variables
     {
-      local $Data::Dump::Purity = 1;
+      local $Data::Dumper::Purity = 1;
       eval Data::Dumper->Dump([$foo, $bar], [qw(foo *ary)]);
     }
 

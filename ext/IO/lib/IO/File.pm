@@ -158,9 +158,11 @@ sub open {
 	    defined $perms or $perms = 0666;
 	    return sysopen($fh, $file, $mode, $perms);
 	}
-	if (! File::Spec->file_name_is_absolute($file)) {
-            $file = File::Spec->catfile(File::Spec->curdir(),$file);
-        }
+	if (defined($file) && length($file)
+	    && ! File::Spec->file_name_is_absolute($file))
+	{
+	    $file = File::Spec->catfile(File::Spec->curdir(),$file);
+	}
 	$file = IO::Handle::_open_mode_string($mode) . " $file\0";
     }
     open($fh, $file);

@@ -26,7 +26,7 @@ print "1..4\n";
 
 print "ok 1\n";
 
-$vs = 49.46.48;
+$vs = ord("A") == 193 ? 241.75.240 : 49.46.48;
 
 print "not " unless $vs == "1.0";
 print "ok 2\n";

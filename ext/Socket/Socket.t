@@ -26,8 +26,11 @@ if (socket(T,PF_INET,SOCK_STREAM,6)) {
   print "ok 1\n";
   
   arm(5);
-  my $host = $^O eq 'MacOS' ? '127.0.0.1' : 'localhost';
-  if ($has_echo && connect(T,pack_sockaddr_in(7,inet_aton($host)))){
+  my $host = $^O eq 'MacOS' || ($^O eq 'irix' && $Config{osvers} == 5) ?
+                 '127.0.0.1' : 'localhost';
+  my $localhost = inet_aton($host);
+
+  if ($has_echo && defined $localhost && connect(T,pack_sockaddr_in(7,$localhost))){
 	arm(0);
 
 	print "ok 2\n";
@@ -53,7 +56,9 @@ if (socket(T,PF_INET,SOCK_STREAM,6)) {
   }
   else {
 	print "# You're allowed to fail tests 2 and 3 if\n";
-	print "# the echo service has been disabled.\n";
+	print "# the echo service has been disabled or if your\n";
+        print "# gethostbyname() cannot resolve your localhost.\n";
+	print "# 'Connection refused' indicates disabled echo service.\n";
 	print "# 'Interrupted system call' indicates a hanging echo service.\n";
 	print "# Error: $!\n";
 	print "ok 2 - skipped\n";

@@ -32,6 +32,8 @@ Unless otherwise stated, it works just like ExtUtils::MM_Unix
 
 =item B<replace_manpage_separator>
 
+Generates Foo__Bar.3 style man page names
+
 =cut
 
 sub replace_manpage_separator {
@@ -52,4 +54,5 @@ Michael G Schwern <schwern@pobox.com> with code from ExtUtils::MM_Unix
 L<ExtUtils::MM_Unix>, L<ExtUtils::MakeMaker>
 
 =cut
+
 1;

@@ -14,7 +14,7 @@ chdir 't';
 use strict;
 
 # these files help the test run
-use Test::More tests => 33;
+use Test::More tests => 37;
 use Cwd;
 
 # these files are needed for the module itself
@@ -28,12 +28,12 @@ use File::Path;
 # keep track of everything added so it can all be deleted
 my %files;
 sub add_file {
-	my ($file, $data) = @_;
-	$data ||= 'foo';
+    my ($file, $data) = @_;
+    $data ||= 'foo';
     unlink $file;  # or else we'll get multiple versions on VMS
-	open( T, '>'.$file) or return;
-	print T $data;
-	++$files{$file};
+    open( T, '>'.$file) or return;
+    print T $data;
+    ++$files{$file};
     close T;
 }
 
@@ -58,7 +58,7 @@ sub remove_dir {
 BEGIN { 
     use_ok( 'ExtUtils::Manifest', 
             qw( mkmanifest manicheck filecheck fullcheck 
-                maniread manicopy skipcheck ) ); 
+                maniread manicopy skipcheck maniadd) ); 
 }
 
 my $cwd = Cwd::getcwd();
@@ -173,11 +173,20 @@ like( $warn, qr{^Skipping moretest/quux$}i, 'got skipping warning again' );
 # There was a bug where entries in MANIFEST would be blotted out
 # by MANIFEST.SKIP rules.
 add_file( 'MANIFEST.SKIP' => 'foo' );
-add_file( 'MANIFEST'      => 'foobar'   );
+add_file( 'MANIFEST'      => "foobar\n"   );
 add_file( 'foobar'        => '123' );
 ($res, $warn) = catch_warning( \&manicheck );
 is( $res,  '',      'MANIFEST overrides MANIFEST.SKIP' );
 is( $warn, undef,   'MANIFEST overrides MANIFEST.SKIP, no warnings' );
+
+$files = maniread;
+ok( !$files->{wibble},     'MANIFEST in good state' );
+maniadd({ wibble => undef });
+maniadd({ yarrow => "hock" });
+$files = maniread;
+is( $files->{wibble}, '',    'maniadd() with undef comment' );
+is( $files->{yarrow}, 'hock','          with comment' );
+is( $files->{foobar}, '',    '          preserved old entries' );
 
 
 END {

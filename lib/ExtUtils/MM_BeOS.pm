@@ -28,18 +28,20 @@ use vars qw(@ISA $VERSION);
 $VERSION = 1.03;
 
 
-=item perl_archive
+=item init_linker
 
-This is internal method that returns path to libperl.a equivalent
-to be linked to dynamic extensions. UNIX does not have one, but at
-least BeOS has one.
+libperl.a equivalent to be linked to dynamic extensions.
 
 =cut
 
-sub perl_archive
-  {
-  return File::Spec->catdir('$(PERL_INC)',$Config{libperl});
-  }
+sub init_linker {
+    my($self) = shift;
+
+    $self->{PERL_ARCHIVE} ||= 
+      File::Spec->catdir('$(PERL_INC)',$Config{libperl});
+    $self->{PERL_ARCHIVE_AFTER} ||= '';
+    $self->{EXPORT_LIST}  ||= '';
+}
 
 =back
 

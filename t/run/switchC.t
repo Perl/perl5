@@ -20,10 +20,12 @@ my $r;
 my @tmpfiles = ();
 END { unlink @tmpfiles }
 
+my $b = pack("C*", unpack("U0C*", pack("U",256)));
+
 $r = runperl( switches => [ '-CO', '-w' ],
 	      prog     => 'print chr(256)',
               stderr   => 1 );
-like( $r, qr/^\xC4\x80(?:\r?\n)?$/s, '-CO: no warning on UTF-8 output' );
+like( $r, qr/^$b(?:\r?\n)?$/s, '-CO: no warning on UTF-8 output' );
 
 SKIP: {
     if (exists $ENV{PERL_UNICODE} &&
@@ -33,14 +35,14 @@ SKIP: {
     $r = runperl( switches => [ '-CI', '-w' ],
 		  prog     => 'print ord(<STDIN>)',
 		  stderr   => 1,
-		  stdin    => "\xC4\x80" );
+		  stdin    => $b );
     like( $r, qr/^256(?:\r?\n)?$/s, '-CI: read in UTF-8 input' );
 }
 
 $r = runperl( switches => [ '-CE', '-w' ],
 	      prog     => 'warn chr(256), qq(\n)',
               stderr   => 1 );
-like( $r, qr/^\xC4\x80(?:\r?\n)?$/s, '-CE: UTF-8 stderr' );
+like( $r, qr/^$b(?:\r?\n)?$/s, '-CE: UTF-8 stderr' );
 
 $r = runperl( switches => [ '-Co', '-w' ],
 	      prog     => 'open(F, q(>out)); print F chr(256); close F',
