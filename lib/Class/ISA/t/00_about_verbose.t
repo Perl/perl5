@@ -1,3 +1,7 @@
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
 
 require 5;
 # Time-stamp: "2004-12-29 20:57:15 AST"
