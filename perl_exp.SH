@@ -14,6 +14,7 @@
 
 echo "Extracting perl.exp"
 
+rm -f perl.exp
 echo "#!" > perl.exp
 
 sed -n '/^[A-Za-z]/ s/^/Perl_/p' global.sym >> perl.exp
@@ -42,6 +43,7 @@ perl_call_pv
 perl_call_method
 perl_call_sv
 perl_requirepv
+safecalloc
 safemalloc
 saferealloc
 safefree
