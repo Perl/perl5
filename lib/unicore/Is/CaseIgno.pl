@@ -3,6 +3,7 @@
 # Any changes made here will be lost!
 
 return <<'END';
+00AD		
 0300	034E	
 0360	0362	
 0483	0486	
@@ -90,6 +91,7 @@ return <<'END';
 17C6		
 17C9	17D3	
 18A9		
+2010		
 20D0	20DC	
 20E1		
 302A	302F	

@@ -1491,7 +1491,7 @@ lib/unicore/In/YiRadica.pl	Unicode character database
 lib/unicore/In/YiSyllab.pl	Unicode character database
 lib/unicore/Index.txt		Unicode character database
 lib/unicore/Is.pl		Unicode character database
-lib/unicore/Is/2.pl		Unicode character database
+lib/unicode/Is/2.pl		Unicode character database
 lib/unicore/Is/Alnum.pl		Unicode character database
 lib/unicore/Is/Alpha.pl		Unicode character database
 lib/unicore/Is/Alphabet.pl	Unicode character database
@@ -1527,6 +1527,8 @@ lib/unicore/Is/Bopomofo.pl	Unicode character database
 lib/unicore/Is/C.pl		Unicode character database
 lib/unicore/Is/Canadian.pl	Unicode character database
 lib/unicore/Is/Canon.pl		Unicode character database
+lib/unicore/Is/CanonDCI.pl	Unicode character database
+lib/unicore/Is/CaseIgno.pl	Unicode character database
 lib/unicore/Is/Cc.pl		Unicode character database
 lib/unicore/Is/Cf.pl		Unicode character database
 lib/unicore/Is/Cherokee.pl	Unicode character database
@@ -1534,6 +1536,7 @@ lib/unicore/Is/Cn.pl		Unicode character database
 lib/unicore/Is/Cntrl.pl		Unicode character database
 lib/unicore/Is/Co.pl		Unicode character database
 lib/unicore/Is/Common.pl	Unicode character database
+lib/unicore/Is/CombAbov.pl	Unicode character database
 lib/unicore/Is/Compat.pl	Unicode character database
 lib/unicore/Is/Cs.pl		Unicode character database
 lib/unicore/Is/Cyrillic.pl	Unicode character database

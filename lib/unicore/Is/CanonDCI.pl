@@ -3,5 +3,8 @@
 # Any changes made here will be lost!
 
 return <<'END';
-2FF0	2FFF	Ideographic Description Characters
+0069	006A	
+012F		
+1E2D		
+1ECB		
 END
