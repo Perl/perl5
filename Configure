@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Apr  3 16:20:23 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Sat Apr  3 16:33:12 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -108,12 +108,13 @@ if test -d /usr/lpp -a -f /usr/bin/bsh -a -f /usr/bin/uname; then
 		newsh=/usr/bin/bsh
 	fi
 fi
-case "`uname -s`" in
-OSF1)
-        avoidksh="to avoid Digital UNIX' ksh"
-        newsh=/bin/sh
-        unset BIN_SH # if this is 'xpg4' sh will start up ksh
-esac
+if test -f /osf_boot -a -f /usr/sbin/setld; then
+	if test X`/usr/bin/uname -s` = XOSF1; then
+	        avoidksh="to avoid Digital UNIX' ksh"
+	        newsh=/bin/sh
+	        unset BIN_SH # if this is 'xpg4' sh will start up ksh
+	fi
+fi
 case "$inksh/$needksh" in
 /[a-z]*)
 		ENV=''
