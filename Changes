@@ -31,6 +31,259 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 11865] By: jhi                                   on 2001/09/04  13:36:58
+        Log: Add the \[$@%&*] prototype support.
+     Branch: perl
+	   ! op.c pod/perlsub.pod t/comp/proto.t
+____________________________________________________________________________
+[ 11864] By: jhi                                   on 2001/09/04  13:10:38
+        Log: Subject: [PATCH lib/CGI/t/form.t] Cleanup
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 3 Sep 2001 18:59:01 -0400
+             Message-ID: <20010903185901.Z9233@blackrider>
+     Branch: perl
+	   ! lib/CGI/t/form.t
+____________________________________________________________________________
+[ 11863] By: jhi                                   on 2001/09/04  13:06:39
+        Log: Subject: [PATCH gv.c] @& sets PL_sawampersand
+             From: "Jeff 'japhy/Marillion' Pinyan" <jeffp@crusoe.net>
+             Date: Mon, 3 Sep 2001 12:36:20 -0400 (EDT)
+             Message-ID: <Pine.GSO.4.21.0109031235240.7601-100000@crusoe.crusoe.net>
+     Branch: perl
+	   ! gv.c
+____________________________________________________________________________
+[ 11862] By: jhi                                   on 2001/09/04  13:05:23
+        Log: More srand entry tweakage based on Randal's suggestion.
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 11861] By: jhi                                   on 2001/09/04  12:48:14
+        Log: Subject: [PATCH] 'main' *is* a reserved word
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Mon, 3 Sep 2001 22:55:41 +0200
+             Message-ID: <20010903225541.A24097@rafael>
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[ 11860] By: jhi                                   on 2001/09/04  12:46:30
+        Log: Subject: [PATCH: bleedperl] s/ROOT\./_ROOT./ for VMS default install prefix appendage
+             From: Peter Prymmer <pvhp@best.com>
+             Date: Mon, 3 Sep 2001 13:43:04 -0700 (PDT)
+             Message-ID: <Pine.BSF.4.21.0109031338300.5068-100000@shell8.ba.best.com>
+     Branch: perl
+	   ! README.vms configure.com
+____________________________________________________________________________
+[ 11859] By: jhi                                   on 2001/09/04  12:44:29
+        Log: Subject: Re: A slightly better default seed?   
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 3 Sep 2001 18:08:15 -0400 
+             Message-ID: <20010903180815.W9233@blackrider>
+     Branch: perl
+	   ! t/op/srand.t
+____________________________________________________________________________
+[ 11858] By: jhi                                   on 2001/09/04  12:41:59
+        Log: Add sharedsv.o to microperl object files.
+     Branch: perl
+	   ! Makefile.micro
+____________________________________________________________________________
+[ 11857] By: jhi                                   on 2001/09/04  12:27:51
+        Log: AUTHORS updates and
+             
+             Subject: [PATCH] Just some preening :-)        
+             From: Ian Phillipps <Ian_Phillipps@yahoo.co.uk>
+             Date: Tue, 4 Sep 2001 14:16:59 +0100
+             Message-ID: <20010904141659.A10129@homer.diplex.co.uk>            
+     Branch: perl
+	   ! AUTHORS ext/Data/Dumper/Changes lib/Text/Soundex.pm
+____________________________________________________________________________
+[ 11856] By: jhi                                   on 2001/09/04  12:09:43
+        Log: Typo fix and slight rewording.
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 11855] By: jhi                                   on 2001/09/04  12:04:16
+        Log: Update the FAQ now that Scalar-List-Utils 1.03 has shuffle().
+     Branch: perl
+	   ! pod/perlfaq4.pod
+____________________________________________________________________________
+[ 11854] By: jhi                                   on 2001/09/03  20:12:21
+        Log: The helper file changed name.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 11853] By: gbarr                                 on 2001/09/03  20:00:00
+        Log: Update to Scalar-List-Utils 1.03
+     Branch: perl
+	   + ext/List/Util/t/shuffle.t
+	   ! MANIFEST ext/List/Util/ChangeLog ext/List/Util/Util.xs
+	   ! ext/List/Util/lib/List/Util.pm ext/List/Util/t/blessed.t
+	   ! ext/List/Util/t/dualvar.t ext/List/Util/t/first.t
+	   ! ext/List/Util/t/max.t ext/List/Util/t/maxstr.t
+	   ! ext/List/Util/t/min.t ext/List/Util/t/minstr.t
+	   ! ext/List/Util/t/readonly.t ext/List/Util/t/reduce.t
+	   ! ext/List/Util/t/reftype.t ext/List/Util/t/sum.t
+	   ! ext/List/Util/t/tainted.t ext/List/Util/t/weak.t
+____________________________________________________________________________
+[ 11852] By: jhi                                   on 2001/09/03  19:50:57
+        Log: Make crypt() do something more sane for Unicode
+             (take crypt() of the low eight bits of the characters,
+             instead of taking crypt() of the UTF-8 of the scalar);
+             add a test for crypt().
+     Branch: perl
+	   + t/op/crypt.t
+	   ! MANIFEST pod/perlfunc.pod pp.c
+____________________________________________________________________________
+[ 11851] By: jhi                                   on 2001/09/03  19:19:35
+        Log: Reorganize the srand entry.
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 11850] By: jhi                                   on 2001/09/03  18:54:51
+        Log: Remove the tests that assume something about
+             calling srand() without arguments multiple times.
+     Branch: perl
+	   ! t/op/srand.t
+____________________________________________________________________________
+[ 11849] By: jhi                                   on 2001/09/03  18:15:16
+        Log: Upgrade to Math::BigInt 1.42.
+     Branch: perl
+	   ! lib/Math/BigFloat.pm lib/Math/BigInt.pm
+	   ! lib/Math/BigInt/Calc.pm lib/Math/BigInt/t/bigfltpm.t
+	   ! lib/Math/BigInt/t/bigintc.t lib/Math/BigInt/t/bigintpm.t
+	   ! lib/Math/BigInt/t/mbimbf.t
+____________________________________________________________________________
+[ 11848] By: gsar                                  on 2001/09/03  17:07:54
+        Log: integrate change#11847 from maint-5.6
+             
+             typo in perl_clone() code causes local(*foo) breakage in pseudo-fork()
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 11847] By: gsar                                  on 2001/09/03  16:47:54
+        Log: typo in perl_clone() code causes local(*foo) breakage in pseudo-fork()
+     Branch: maint-5.6/perl
+	   ! sv.c
+____________________________________________________________________________
+[ 11846] By: jhi                                   on 2001/09/03  15:12:58
+        Log: As far as I can tell these functions have been Unicodified.
+     Branch: perl
+	   ! doop.c
+____________________________________________________________________________
+[ 11845] By: jhi                                   on 2001/09/03  15:11:27
+        Log: Update to Storable 1.0.13.
+     Branch: perl
+	   ! ext/Storable/ChangeLog ext/Storable/Storable.pm
+	   ! ext/Storable/Storable.xs
+____________________________________________________________________________
+[ 11844] By: jhi                                   on 2001/09/03  12:42:06
+        Log: Patch the Filter::Simple test to work with
+             the core test suite (since the FilterTest.pm
+             is in t/lib, not in lib).
+     Branch: perl
+	   ! lib/Filter/Simple/t/filter.t
+____________________________________________________________________________
+[ 11843] By: jhi                                   on 2001/09/03  12:39:11
+        Log: Damian's Filter::Simple test uses FilterTest, not MyFilter.
+     Branch: perl
+	   + t/lib/FilterTest.pm
+	   - t/lib/MyFilter.pm
+____________________________________________________________________________
+[ 11842] By: jhi                                   on 2001/09/03  12:17:30
+        Log: Damian-o-rama: upgrade to Attribute::Handlers 0.75,
+             Filter::Simple 0.61, NEXT 0.02, Switch 2.05, and
+             Text::Balanced 1.86.
+     Branch: perl
+	   + lib/Attribute/Handlers/t/multi.t lib/Filter/Simple/Changes
+	   + lib/Filter/Simple/README lib/Filter/Simple/t/filter.t
+	   + lib/NEXT/Changes lib/NEXT/README lib/Switch/t/given.t
+	   + lib/Switch/t/nested.t lib/Switch/t/switch.t
+	   + lib/Text/Balanced/Changes lib/Text/Balanced/README
+	   + lib/Text/Balanced/t/extbrk.t lib/Text/Balanced/t/extcbk.t
+	   + lib/Text/Balanced/t/extdel.t lib/Text/Balanced/t/extmul.t
+	   + lib/Text/Balanced/t/extqlk.t lib/Text/Balanced/t/exttag.t
+	   + lib/Text/Balanced/t/extvar.t lib/Text/Balanced/t/gentag.t
+	   - lib/Filter/Simple/test.pl lib/Switch/t/given_when.t
+	   - lib/Switch/t/switch_case.t lib/Text/Balanced.pod
+	   - lib/Text/Balanced/t/genxt.t lib/Text/Balanced/t/xbrak.t
+	   - lib/Text/Balanced/t/xcode.t lib/Text/Balanced/t/xdeli.t
+	   - lib/Text/Balanced/t/xmult.t lib/Text/Balanced/t/xquot.t
+	   - lib/Text/Balanced/t/xtagg.t lib/Text/Balanced/t/xvari.t
+	   ! MANIFEST lib/Attribute/Handlers.pm
+	   ! lib/Attribute/Handlers/Changes lib/Attribute/Handlers/README
+	   ! lib/Attribute/Handlers/demo/Demo.pm
+	   ! lib/Attribute/Handlers/demo/Descriptions.pm
+	   ! lib/Attribute/Handlers/demo/MyClass.pm
+	   ! lib/Attribute/Handlers/demo/demo.pl
+	   ! lib/Attribute/Handlers/demo/demo2.pl
+	   ! lib/Attribute/Handlers/demo/demo3.pl
+	   ! lib/Attribute/Handlers/demo/demo4.pl
+	   ! lib/Attribute/Handlers/demo/demo_call.pl
+	   ! lib/Attribute/Handlers/demo/demo_chain.pl
+	   ! lib/Attribute/Handlers/demo/demo_cycle.pl
+	   ! lib/Attribute/Handlers/demo/demo_hashdir.pl
+	   ! lib/Attribute/Handlers/demo/demo_phases.pl
+	   ! lib/Attribute/Handlers/demo/demo_range.pl
+	   ! lib/Attribute/Handlers/demo/demo_rawdata.pl
+	   ! lib/Filter/Simple.pm lib/NEXT.pm lib/NEXT/test.pl
+	   ! lib/Switch.pm lib/Switch/Changes lib/Switch/README
+	   ! lib/Text/Balanced.pm
+____________________________________________________________________________
+[ 11841] By: sky                                   on 2001/09/03  11:04:15
+        Log: Forgot to add a file with Change #11840
+     Branch: perl
+	   + t/op/srand.t
+____________________________________________________________________________
+[ 11840] By: sky                                   on 2001/09/03  11:02:04
+        Log: Subject: [PATCH t/op/srand.t t/op/rand.t pod/perlfunc.pod MANIFEST] Tests for srand()
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 3 Sep 2001 07:43:00 -0400
+             Message-ID: <20010903074300.E9233@blackrider>
+     Branch: perl
+	   ! MANIFEST pod/perlfunc.pod t/op/rand.t
+____________________________________________________________________________
+[ 11839] By: sky                                   on 2001/09/03  10:47:11
+        Log: Document the changes with regards to running of END blocks.
+             And DESTROY on global objects are called in perl_destruct()!
+     Branch: perl
+	   ! pod/perl572delta.pod pod/perlembed.pod
+____________________________________________________________________________
+[ 11838] By: sky                                   on 2001/09/03  09:34:44
+        Log: Subject: [PATCH t/op/time.t] Partial cleanup
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 3 Sep 2001 06:29:42 -0400
+             Message-ID: <20010903062942.C9233@blackrider>
+     Branch: perl
+	   ! t/op/time.t
+____________________________________________________________________________
+[ 11837] By: sky                                   on 2001/09/03  09:30:02
+        Log: Subject: [PATCH t/op/rand.t] Increase the repetitions
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 3 Sep 2001 06:24:13 -0400
+             Message-ID: <20010903062413.B9233@blackrider>
+     Branch: perl
+	   ! t/op/rand.t
+____________________________________________________________________________
+[ 11836] By: sky                                   on 2001/09/03  07:56:47
+        Log: Subject: [PATCH] CGI::Cookie, Apache & Switch tests
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sun, 2 Sep 2001 21:38:43 -0400
+             Message-ID: <20010902213843.L2711@blackrider>
+     Branch: perl
+	   + lib/CGI/t/apache.t lib/CGI/t/cookie.t lib/CGI/t/switch.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 11835] By: nick                                  on 2001/09/03  06:20:06
+        Log: Integrate mainline
+     Branch: perlio
+	  +> lib/Shell.t t/op/inccode.t t/run/kill_perl.t
+	   - t/op/misc.t
+	  !> (integrate 187 files)
+____________________________________________________________________________
+[ 11834] By: jhi                                   on 2001/09/02  13:07:53
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 11833] By: jhi                                   on 2001/09/02  12:59:05
         Log: Slight tweaks.
      Branch: perl
