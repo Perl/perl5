@@ -247,6 +247,11 @@ if ($define{'MYMALLOC'})
     Perl_realloc
     Perl_calloc)];
  }
+else
+ {
+  skip_symbols [qw(
+    Perl_malloced_size)];
+ }
 
 unless ($define{'USE_THREADS'})
  {
