@@ -272,11 +272,13 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 #  define XS_VERSION_BOOTCHECK
 #endif
 
-#define dXCPT             dJMPENV; int rEtV = 0
-#define XCPT_TRY_START    JMPENV_PUSH(rEtV); if (rEtV == 0)
-#define XCPT_TRY_END      JMPENV_POP;
-#define XCPT_CATCH        if (rEtV != 0)
-#define XCPT_RETHROW      JMPENV_JUMP(rEtV)
+#ifdef NO_XSLOCKS
+#  define dXCPT             dJMPENV; int rEtV = 0
+#  define XCPT_TRY_START    JMPENV_PUSH(rEtV); if (rEtV == 0)
+#  define XCPT_TRY_END      JMPENV_POP;
+#  define XCPT_CATCH        if (rEtV != 0)
+#  define XCPT_RETHROW      JMPENV_JUMP(rEtV)
+#endif
 
 /* 
    The DBM_setFilter & DBM_ckFilter macros are only used by 

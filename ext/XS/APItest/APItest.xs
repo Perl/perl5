@@ -2,32 +2,8 @@
 #include "perl.h"
 #include "XSUB.h"
 
-static void throws_exception(int throw_e)
-{
-  if (throw_e)
-    croak("boo\n");
-}
-
-static int exception(int throw_e)
-{
-  dTHR;
-  dXCPT;
-  SV *caught = get_sv("XS::APItest::exception_caught", 0);
-
-  XCPT_TRY_START {
-    throws_exception(throw_e);
-  } XCPT_TRY_END
-
-  XCPT_CATCH
-  {
-    sv_setiv(caught, 1);
-    XCPT_RETHROW;
-  }
-
-  sv_setiv(caught, 0);
-
-  return 42;
-}
+/* from exception.c */
+int exception(int);
 
 MODULE = XS::APItest:Hash		PACKAGE = XS::APItest::Hash
 

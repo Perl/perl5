@@ -2262,10 +2262,15 @@ and
 
 =head2 Exception Handling
 
-There are a couple of macros to do very basic exception handling in
-XS modules. You can use these macros if you call code that may croak,
-but you need to do some cleanup before giving control back to Perl.
-For example:
+There are a couple of macros to do very basic exception handling in XS
+modules. You have to define C<NO_XSLOCKS> before including F<XSUB.h> to
+be able to use these macros:
+
+        #define NO_XSLOCKS
+        #include "XSUB.h"
+
+You can use these macros if you call code that may croak, but you need
+to do some cleanup before giving control back to Perl. For example:
 
         dXCPT;    /* set up neccessary variables */
 

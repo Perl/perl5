@@ -920,6 +920,7 @@ ext/XS/APItest/APItest.xs	XS::APItest extension
 ext/XS/APItest/Makefile.PL	XS::APItest extension
 ext/XS/APItest/MANIFEST		XS::APItest extension
 ext/XS/APItest/README		XS::APItest extension
+ext/XS/APItest/exception.c	XS::APItest extension
 ext/XS/APItest/t/call.t		XS::APItest extension
 ext/XS/APItest/t/exception.t	XS::APItest extension
 ext/XS/APItest/t/hash.t		XS::APItest extension
