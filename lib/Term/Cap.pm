@@ -184,10 +184,29 @@ sub Tgetent { ## public -- static method
     {
 	# last resort--fake up a termcap from terminfo 
 	local $ENV{TERM} = $term;
+	if ($^O eq 'VMS') {  # we use REAL dec terminals, not stinkin' emulators!
+    $entry = 'vt220|vt200|DEC VT220 in vt100 emulation mode:'
+           .'am:mi:xn:xo:'
+           .'co#80:li#24:'
+           .'RA=\E[?7l:SA=\E[?7h:'
+           .'ac=kkllmmjjnnwwqquuttvvxx:ae=\E(B:al=\E[L:as=\E(0:'
+           .'bl=^G:cd=\E[J:ce=\E[K:cl=\E[H\E[2J:cm=\E[%i%d;%dH:'
+           .'cr=^M:cs=\E[%i%d;%dr:dc=\E[P:dl=\E[M:do=\E[B:'
+           .'ei=\E[4l:ho=\E[H:im=\E[4h:'
+           .'is=\E[1;24r\E[24;1H:'
+           .'nd=\E[C:'
+           .'kd=\E[B::kl=\E[D:kr=\E[C:ku=\E[A:le=^H:'
+           .'mb=\E[5m:md=\E[1m:me=\E[m:mr=\E[7m:'
+           .'kb=\0177:'
+           .'r2=\E>\E[24;1H\E[?3l\E[?4l\E[?5l\E[?7h\E[?8h\E=:rc=\E8:'
+           .'sc=\E7:se=\E[27m:sf=\ED:so=\E[7m:sr=\EM:ta=^I:'
+           .'ue=\E[24m:up=\E[A:us=\E[4m:ve=\E[?25h:vi=\E[?25l:';
+	} else {
 	eval
 	{
 	    $entry = `infocmp -C 2>/dev/null`;
 	}
+    }
     }
 
     croak "Can't find a valid termcap file" unless @termcap_path || $entry;
