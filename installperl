@@ -239,7 +239,7 @@ my @corefiles;
 if ($Is_VMS) {  # We did core file selection during build
     my $coredir = "lib/$Config{'arch'}/$ver";
     $coredir =~ tr/./_/;
-    @corefiles = <$coredir/*.*>;
+    @corefiles = map { s|^$coredir/||i; } <$coredir/*.*>;
 }
 else {
     # [als] hard-coded 'libperl' name... not good!
