@@ -127,7 +127,7 @@ DeadCode(pTHX)
 
 #define _CvGV(cv)					\
 	(SvROK(cv) && (SvTYPE(SvRV(cv))==SVt_PVCV)	\
-	 ? (SV*)CvGV((CV*)SvRV(cv)) : &PL_sv_undef)
+	 ? SvREFCNT_inc(CvGV((CV*)SvRV(cv))) : &PL_sv_undef)
 
 MODULE = Devel::Peek		PACKAGE = Devel::Peek
 
