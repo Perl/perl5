@@ -176,6 +176,10 @@ while (my ($args, $version, $expectation) = splice @tests, 0, 3) {
       $_ = ':' . join(':',split(/\//,$_));
       $_ =~ s/$name:t:1.t/$name:t\/1.t/; # is this an h2xs bug?
     }
+    if ($^O eq 'VMS') {
+      $_ .= '.' unless $_ =~ m/\./;
+      $_ = lc($_) unless exists $got{$_};
+    }
     ok (-e $_, "check for $_") and delete $got{$_};
   }
   my @extra = keys %got;
