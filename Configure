@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun Jan 21 21:30:32 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Tue Jan 23 16:39:46 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -5278,6 +5278,51 @@ EOCP
 esac
 $rm -f try.* try
 
+case "$useperlio" in
+$define|true|[yY]*)	dflt='y';;
+*) dflt='n';;
+esac
+cat <<EOM
+
+Previous version of $package used the standard IO mechanisms as
+defined in <stdio.h>.  Versions 5.003_02 and later of perl allow
+alternate IO mechanisms via the PerlIO abstraction layer, but the
+stdio mechanism is still the default.  This abstraction layer can
+use AT&T's sfio (if you already have sfio installed) or regular stdio.
+Using PerlIO with sfio may cause problems with some extension modules.
+
+If this doesn't make any sense to you, just accept the default '$dflt'.
+EOM
+rp='Use the experimental PerlIO abstraction layer?'
+. ./myread
+case "$ans" in
+y|Y) 
+	val="$define"
+	;;     
+*)      
+	echo "Ok, doing things the stdio way."
+	val="$undef"
+	;;
+esac
+set useperlio
+eval $setvar 
+
+case "$usesocks" in
+$define|true|[yY]*)
+	case "$useperlio" in
+	$define|true|[yY]*) ;;
+	*)	cat >&4 <<EOM
+
+You are using the SOCKS proxy protocol library which means that you
+should also use the PerlIO layer.  You may be headed for trouble.
+
+EOM
+		;;
+	esac
+	;;
+esac
+
+	
 : determine the architecture name
 echo " "
 if xxx=`./loc arch blurfl $pth`; $test -f "$xxx"; then
@@ -5372,6 +5417,18 @@ $define)
 	        esac
 		;;
 	esac
+	;;
+esac
+case "$useperlio" in
+$define)
+	echo "Perlio selected." >&4
+	case "$archname" in
+        *-perlio*) echo "...and architecture name already has -perlio." >&4
+                ;;
+        *)      archname="$archname-perlio"
+                echo "...setting architecture name to $archname." >&4
+                ;;
+        esac
 	;;
 esac
 
@@ -7532,51 +7589,6 @@ else
 	installsitebin="$sitebinexp"
 fi
 
-case "$useperlio" in
-$define|true|[yY]*)	dflt='y';;
-*) dflt='n';;
-esac
-cat <<EOM
-
-Previous version of $package used the standard IO mechanisms as
-defined in <stdio.h>.  Versions 5.003_02 and later of perl allow
-alternate IO mechanisms via the PerlIO abstraction layer, but the
-stdio mechanism is still the default.  This abstraction layer can
-use AT&T's sfio (if you already have sfio installed) or regular stdio.
-Using PerlIO with sfio may cause problems with some extension modules.
-
-If this doesn't make any sense to you, just accept the default '$dflt'.
-EOM
-rp='Use the experimental PerlIO abstraction layer?'
-. ./myread
-case "$ans" in
-y|Y) 
-	val="$define"
-	;;     
-*)      
-	echo "Ok, doing things the stdio way."
-	val="$undef"
-	;;
-esac
-set useperlio
-eval $setvar 
-
-case "$usesocks" in
-$define|true|[yY]*)
-	case "$useperlio" in
-	$define|true|[yY]*) ;;
-	*)	cat >&4 <<EOM
-
-You are using the SOCKS proxy protocol library which means that you
-should also use the PerlIO layer.  You may be headed for trouble.
-
-EOM
-		;;
-	esac
-	;;
-esac
-
-	
 case "$vendorprefix" in
 '')	d_vendorbin="$undef"
 	vendorbin=''

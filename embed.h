@@ -755,10 +755,8 @@
 #define yyerror			Perl_yyerror
 #ifdef USE_PURE_BISON
 #define yylex_r			Perl_yylex_r
-#define yylex			Perl_yylex
-#else
-#define yylex			Perl_yylex
 #endif
+#define yylex			Perl_yylex
 #define yyparse			Perl_yyparse
 #define yywarn			Perl_yywarn
 #if defined(MYMALLOC)
@@ -2231,10 +2229,8 @@
 #define yyerror(a)		Perl_yyerror(aTHX_ a)
 #ifdef USE_PURE_BISON
 #define yylex_r(a,b)		Perl_yylex_r(aTHX_ a,b)
-#define yylex(a,b)		Perl_yylex(aTHX_ a,b)
-#else
-#define yylex()			Perl_yylex(aTHX)
 #endif
+#define yylex()			Perl_yylex(aTHX)
 #define yyparse()		Perl_yyparse(aTHX)
 #define yywarn(a)		Perl_yywarn(aTHX_ a)
 #if defined(MYMALLOC)
@@ -4379,12 +4375,9 @@
 #ifdef USE_PURE_BISON
 #define Perl_yylex_r		CPerlObj::Perl_yylex_r
 #define yylex_r			Perl_yylex_r
-#define Perl_yylex		CPerlObj::Perl_yylex
-#define yylex			Perl_yylex
-#else
-#define Perl_yylex		CPerlObj::Perl_yylex
-#define yylex			Perl_yylex
 #endif
+#define Perl_yylex		CPerlObj::Perl_yylex
+#define yylex			Perl_yylex
 #define Perl_yyparse		CPerlObj::Perl_yyparse
 #define yyparse			Perl_yyparse
 #define Perl_yywarn		CPerlObj::Perl_yywarn

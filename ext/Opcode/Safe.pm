@@ -47,6 +47,7 @@ sub new {
     # the whole glob *_ rather than $_ and @_ separately, otherwise
     # @_ in non default packages within the compartment don't work.
     $obj->share_from('main', $default_share);
+    Opcode::_safe_pkg_prep($obj->{Root});
     return $obj;
 }
 
