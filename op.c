@@ -1323,8 +1323,9 @@ OP *op;
     if (type == OP_LIST) {
 	for (kid = cLISTOP->op_first; kid; kid = kid->op_sibling)
 	    my(kid);
-    }
-    else if (type != OP_PADSV &&
+    } else if (type == OP_UNDEF) {
+	return op;
+    } else if (type != OP_PADSV &&
 	     type != OP_PADAV &&
 	     type != OP_PADHV &&
 	     type != OP_PUSHMARK)

@@ -10,7 +10,8 @@ sub foo {
     my $d;
     $c = "ok 3\n";
     $d = "ok 4\n";
-    { my($a,$c) = ("ok 9\n", "ok 10\n"); ($x, $y) = ($a, $c); }
+    { my($a, undef, $c) = ("ok 9\n", "not ok 10\n", "ok 10\n");
+      ($x, $y) = ($a, $c); }
     print $a, $b;
     $c . $d;
 }
