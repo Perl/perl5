@@ -96,7 +96,7 @@ chdir($testdir);
 END {
     chdir($cwd) && rmtree("$cwd/$testdir") if -d "$cwd/$testdir";
 }
-if (open(my $EIN, "$cwd/op/${exename}_exe.uu")) {
+if (open(my $EIN, "$cwd/win32/${exename}_exe.uu")) {
     print "# Unpacking $exename.exe\n";
     my $e;
     {
@@ -142,8 +142,8 @@ unless (-x "$testdir/$exename.exe") {
     exit(0);
 }
 
-open my $T, "$^X -I../lib -w op/system_tests |"
-    or die "Can't spawn op/system_tests: $!";
+open my $T, "$^X -I../lib -w win32/system_tests |"
+    or die "Can't spawn win32/system_tests: $!";
 my $expect;
 my $comment = "";
 my $test = 0;

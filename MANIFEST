@@ -2523,7 +2523,6 @@ t/op/subst_amp.t		See if $&-related substitution works
 t/op/subst_wamp.t		See if substitution works with $& present
 t/op/sub_lval.t			See if lvalue subroutines work
 t/op/sysio.t			See if sysread and syswrite work
-t/op/system_tests		Test runner for system.t
 t/op/taint.t			See if tainting works
 t/op/tie.t			See if tie/untie functions work
 t/op/tiearray.t			See if tie for arrays works
@@ -2599,6 +2598,7 @@ t/uni/title.t			See if Unicode casing works
 t/uni/upper.t			See if Unicode casing works
 t/win32/longpath.t		Test if Win32::GetLongPathName() works
 t/win32/system.t		See if system works in Win*
+t/win32/system_tests		Test runner for system.t
 t/x2p/s2p.t			See if s2p/psed work
 taint.c				Tainting code
 thrdvar.h			Per-thread variables
