@@ -58,7 +58,7 @@ for my $tref ( @NumTests ){
 my $bas_tests = 20;
 
 # number of tests in section 3
-my $hmb_tests = 36;
+my $hmb_tests = 37;
 
 printf "1..%d\n", $bas_tests + $num_tests + $hmb_tests;
 
@@ -497,7 +497,7 @@ for my $tref ( @NumTests ){
 		 : $writeres eq $expected;
 	
         print $ok
-	    ? "ok $nt\n"
+	    ? "ok $nt - $writefmt\n"
 	    : "not ok $nt\n# f=[$writefmt] exp=[$expected] got=[$writeres]\n";
     }
 }
@@ -552,6 +552,7 @@ $= = 10;
     $test++;
 }
 select $oldfh;
+close STDOUT_DUP;
 
 $^  = "STDOUT_TOP";
 $=  =  7;		# Page length
@@ -561,19 +562,46 @@ my $tm =  1;		# Top margin (empty lines before first output)
 my $bm =  2;		# Bottom marging (empty lines between last text and footer)
 my $lm =  4;		# Left margin (indent in spaces)
 
-select ((select (STDOUT), $| = 1)[0]);
-if ($lm > 0 and !open STDOUT, "|-") {	# Left margin (in this test ALWAYS set)
-    select ((select (STDOUT), $| = 1)[0]);
+# -----------------------------------------------------------------------
+#
+# execute the rest of the script in a child process. The parent reads the
+# output from the child and compares it with <DATA>.
+
+my @data = <DATA>;
+
+select ((select (STDOUT), $| = 1)[0]); # flush STDOUT
+
+my $opened = open FROM_CHILD, "-|";
+unless (defined $opened) {
+    print "not ok $test - open gave $!\n"; exit 0;
+}
+
+if ($opened) {
+    # in parent here
+
+    print "ok $test - open\n"; $test++;
     my $s = " " x $lm;
-    while (<STDIN>) {
-	s/^/$s/;
-	print + ($_ eq <DATA> ? "" : "not "), "ok ", $test++, "\n";
+    while (<FROM_CHILD>) {
+	unless (@data) {
+	    print "not ok $test - too much output\n";
+	    exit;
 	}
-    close STDIN;
-    print + (<DATA>?"not ":""), "ok ", $test++, "\n";
-    close STDOUT;
-    exit;
+	s/^/$s/;
+	my $exp = shift @data;
+	print + ($_ eq $exp ? "" : "not "), "ok ", $test++, " \n";
+	if ($_ ne $exp) {
+	    s/\n/\\n/g for $_, $exp;
+	    print "#expected: $exp\n#got:      $_\n";
+	}
     }
+    close FROM_CHILD;
+    print + (@data?"not ":""), "ok ", $test++, " - too litle output\n";
+    exit;
+}
+
+# in child here
+
+    select ((select (STDOUT), $| = 1)[0]);
 $tm = "\n" x $tm;
 $= -= $bm + 1; # count one for the trailing "----"
 my $lastmin = 0;
