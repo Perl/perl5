@@ -542,9 +542,6 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 			    start_shift + (s - strbeg), end_shift, pp, 0);
 	else
 	    goto fail_finish;
-	/* we may be pointing at the wrong string */
-	if (s && RX_MATCH_COPIED(prog))
-	    s = prog->subbeg + (s - SvPVX(sv));
 	if (data)
 	    *data->scream_olds = s;
     }
@@ -1860,9 +1857,6 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 		 : (s = fbm_instr((unsigned char*)HOP3(s, back_min, strend),
 				  (unsigned char*)strend, must,
 				  PL_multiline ? FBMrf_MULTILINE : 0))) ) {
-	    /* we may be pointing at the wrong string */
-	    if ((flags & REXEC_SCREAM) && RX_MATCH_COPIED(prog))
-		s = prog->subbeg + (s - SvPVX(sv));
 	    DEBUG_r( did_match = 1 );
 	    if (HOPc(s, -back_max) > last1) {
 		last1 = HOPc(s, -back_min);
@@ -1949,9 +1943,6 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 				   end_shift, &scream_pos, 1); /* last one */
 		if (!last)
 		    last = scream_olds; /* Only one occurrence. */
-		/* we may be pointing at the wrong string */
-		else if (RX_MATCH_COPIED(prog))
-		    s = prog->subbeg + (s - SvPVX(sv));
 	    }
 	    else {
 		STRLEN len;
