@@ -159,8 +159,9 @@ PP(pp_unpack)
     float afloat;
     double adouble;
     I32 checksum = 0;
-    register U32 culong = 0;
+    UV culong = 0;
     NV cdouble = 0.0;
+    const int bits_in_uv = 8 * sizeof(culong);
     int commas = 0;
     int star;
 #ifdef PERL_NATINT_PACK
@@ -171,14 +172,30 @@ PP(pp_unpack)
 
     if (gimme != G_ARRAY) {		/* arrange to do first one only */
 	/*SUPPRESS 530*/
-	for (patend = pat; !isALPHA(*patend) || *patend == 'x'; patend++) ;
-	if (strchr("aAZbBhHP", *patend) || *pat == '%') {
-	    patend++;
-	    while (isDIGIT(*patend) || *patend == '*')
-		patend++;
-	}
-	else
-	    patend++;
+        /* Skipping spaces will be useful later on.  */
+        while (isSPACE(*pat))
+            pat++;
+        /* Give up on optimisation of only doing first if the pattern
+           is getting too complex to parse.  */
+        if (*pat != '#') {
+            /* This pre-parser will let through certain invalid patterns
+               such as rows of !s, but the nothing that would cause multiple
+               conversions to be attempted.  */
+            char *here = pat;
+            bool seen_percent = FALSE;
+            if (*here == '%')
+                seen_percent = TRUE;
+            while (!isALPHA(*here) || *here == 'x')
+                here++;
+            if (strchr("aAZbBhHP", *here) || seen_percent) {
+                here++;
+                while (isDIGIT(*here) || *here == '*' || *here == '!')
+                    here++;
+            }
+            else
+                here++;
+            patend = here;
+        }
     }
     while (pat < patend) {
       reparse:
@@ -206,7 +223,7 @@ PP(pp_unpack)
 		DIE(aTHX_ "'!' allowed only after types %s", natstr);
 	}
 	star = 0;
-	if (pat > patend)
+	if (pat >= patend)
 	    len = 1;
 	else if (*pat == '*') {
 	    len = strend - strbeg;	/* long enough */
@@ -400,7 +417,10 @@ PP(pp_unpack)
 		    aint = *s++;
 		    if (aint >= 128)	/* fake up signed chars */
 			aint -= 256;
-		    culong += aint;
+		    if (checksum > bits_in_uv)
+			cdouble += (NV)aint;
+		    else
+			culong += aint;
 		}
 	    }
 	    else {
@@ -457,7 +477,7 @@ PP(pp_unpack)
 		    auint = utf8n_to_uvchr((U8*)s, strend - s, &alen, 0);
 		    along = alen;
 		    s += along;
-		    if (checksum > 32)
+		    if (checksum > bits_in_uv)
 			cdouble += (NV)auint;
 		    else
 			culong += auint;
@@ -492,7 +512,10 @@ PP(pp_unpack)
 		    while (len-- > 0) {
 			COPYNN(s, &ashort, sizeof(short));
 			s += sizeof(short);
-			culong += ashort;
+			if (checksum > bits_in_uv)
+			    cdouble += (NV)ashort;
+			else
+			    culong += ashort;
 
 		    }
 		}
@@ -506,7 +529,10 @@ PP(pp_unpack)
 			  ashort -= 65536;
 #endif
 			s += SIZE16;
-			culong += ashort;
+			if (checksum > bits_in_uv)
+			    cdouble += (NV)ashort;
+			else
+			    culong += ashort;
 		    }
 		}
 	    }
@@ -559,7 +585,10 @@ PP(pp_unpack)
 		    while (len-- > 0) {
 			COPYNN(s, &aushort, sizeof(unsigned short));
 			s += sizeof(unsigned short);
-			culong += aushort;
+			if (checksum > bits_in_uv)
+			    cdouble += (NV)aushort;
+			else
+			    culong += aushort;
 		    }
 		}
 		else
@@ -576,7 +605,10 @@ PP(pp_unpack)
 			if (datumtype == 'v')
 			    aushort = vtohs(aushort);
 #endif
-			culong += aushort;
+			if (checksum > bits_in_uv)
+			    cdouble += (NV)aushort;
+			else
+			    culong += aushort;
 		    }
 		}
 	    }
@@ -623,7 +655,7 @@ PP(pp_unpack)
 		while (len-- > 0) {
 		    Copy(s, &aint, 1, int);
 		    s += sizeof(int);
-		    if (checksum > 32)
+		    if (checksum > bits_in_uv)
 			cdouble += (NV)aint;
 		    else
 			culong += aint;
@@ -674,7 +706,7 @@ PP(pp_unpack)
 		while (len-- > 0) {
 		    Copy(s, &auint, 1, unsigned int);
 		    s += sizeof(unsigned int);
-		    if (checksum > 32)
+		    if (checksum > bits_in_uv)
 			cdouble += (NV)auint;
 		    else
 			culong += auint;
@@ -713,7 +745,7 @@ PP(pp_unpack)
 		    while (len-- > 0) {
 			COPYNN(s, &along, sizeof(long));
 			s += sizeof(long);
-			if (checksum > 32)
+			if (checksum > bits_in_uv)
 			    cdouble += (NV)along;
 			else
 			    culong += along;
@@ -732,7 +764,7 @@ PP(pp_unpack)
 			  along -= 4294967296;
 #endif
 			s += SIZE32;
-			if (checksum > 32)
+			if (checksum > bits_in_uv)
 			    cdouble += (NV)along;
 			else
 			    culong += along;
@@ -790,7 +822,7 @@ PP(pp_unpack)
 		    while (len-- > 0) {
 			COPYNN(s, &aulong, sizeof(unsigned long));
 			s += sizeof(unsigned long);
-			if (checksum > 32)
+			if (checksum > bits_in_uv)
 			    cdouble += (NV)aulong;
 			else
 			    culong += aulong;
@@ -810,7 +842,7 @@ PP(pp_unpack)
 			if (datumtype == 'V')
 			    aulong = vtohl(aulong);
 #endif
-			if (checksum > 32)
+			if (checksum > bits_in_uv)
 			    cdouble += (NV)aulong;
 			else
 			    culong += aulong;
@@ -932,43 +964,67 @@ PP(pp_unpack)
 	    along = (strend - s) / sizeof(Quad_t);
 	    if (len > along)
 		len = along;
-	    EXTEND(SP, len);
-	    EXTEND_MORTAL(len);
-	    while (len-- > 0) {
-		if (s + sizeof(Quad_t) > strend)
-		    aquad = 0;
-		else {
+	    if (checksum) {
+		while (len-- > 0) {
 		    Copy(s, &aquad, 1, Quad_t);
 		    s += sizeof(Quad_t);
+		    if (checksum > bits_in_uv)
+			cdouble += (NV)aquad;
+		    else
+			culong += aquad;
 		}
-		sv = NEWSV(42, 0);
-		if (aquad >= IV_MIN && aquad <= IV_MAX)
-		    sv_setiv(sv, (IV)aquad);
-		else
-		    sv_setnv(sv, (NV)aquad);
-		PUSHs(sv_2mortal(sv));
 	    }
+            else {
+                EXTEND(SP, len);
+                EXTEND_MORTAL(len);
+                while (len-- > 0) {
+                    if (s + sizeof(Quad_t) > strend)
+                        aquad = 0;
+                    else {
+		    Copy(s, &aquad, 1, Quad_t);
+		    s += sizeof(Quad_t);
+                    }
+                    sv = NEWSV(42, 0);
+                    if (aquad >= IV_MIN && aquad <= IV_MAX)
+		    sv_setiv(sv, (IV)aquad);
+                    else
+                        sv_setnv(sv, (NV)aquad);
+                    PUSHs(sv_2mortal(sv));
+                }
+            }
 	    break;
 	case 'Q':
 	    along = (strend - s) / sizeof(Quad_t);
 	    if (len > along)
 		len = along;
-	    EXTEND(SP, len);
-	    EXTEND_MORTAL(len);
-	    while (len-- > 0) {
-		if (s + sizeof(Uquad_t) > strend)
-		    auquad = 0;
-		else {
+	    if (checksum) {
+		while (len-- > 0) {
 		    Copy(s, &auquad, 1, Uquad_t);
 		    s += sizeof(Uquad_t);
+		    if (checksum > bits_in_uv)
+			cdouble += (NV)auquad;
+		    else
+			culong += auquad;
 		}
-		sv = NEWSV(43, 0);
-		if (auquad <= UV_MAX)
-		    sv_setuv(sv, (UV)auquad);
-		else
-		    sv_setnv(sv, (NV)auquad);
-		PUSHs(sv_2mortal(sv));
 	    }
+            else {
+                EXTEND(SP, len);
+                EXTEND_MORTAL(len);
+                while (len-- > 0) {
+                    if (s + sizeof(Uquad_t) > strend)
+                        auquad = 0;
+                    else {
+                        Copy(s, &auquad, 1, Uquad_t);
+                        s += sizeof(Uquad_t);
+                    }
+                    sv = NEWSV(43, 0);
+                    if (auquad <= UV_MAX)
+                        sv_setuv(sv, (UV)auquad);
+                    else
+		    sv_setnv(sv, (NV)auquad);
+                    PUSHs(sv_2mortal(sv));
+                }
+            }
 	    break;
 #endif
 	/* float and double added gnb@melba.bby.oz.au 22/11/89 */
@@ -1082,30 +1138,23 @@ PP(pp_unpack)
 	if (checksum) {
 	    sv = NEWSV(42, 0);
 	    if (strchr("fFdD", datumtype) ||
-	      (checksum > 32 && strchr("iIlLNU", datumtype)) ) {
+	      (checksum > bits_in_uv && strchr("csSiIlLnNUvVqQ", datumtype)) ) {
 		NV trouble;
 
-		adouble = 1.0;
+                adouble = (NV) (1 << (checksum & 15));
 		while (checksum >= 16) {
 		    checksum -= 16;
 		    adouble *= 65536.0;
 		}
-		while (checksum >= 4) {
-		    checksum -= 4;
-		    adouble *= 16.0;
-		}
-		while (checksum--)
-		    adouble *= 2.0;
-		along = (1 << checksum) - 1;
 		while (cdouble < 0.0)
 		    cdouble += adouble;
 		cdouble = Perl_modf(cdouble / adouble, &trouble) * adouble;
 		sv_setnv(sv, cdouble);
 	    }
 	    else {
-		if (checksum < 32) {
-		    aulong = (1 << checksum) - 1;
-		    culong &= aulong;
+		if (checksum < bits_in_uv) {
+		    UV mask = ((UV)1 << checksum) - 1;
+		    culong &= mask;
 		}
 		sv_setuv(sv, (UV)culong);
 	    }
