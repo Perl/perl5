@@ -2,7 +2,7 @@ package Time::gmtime;
 use strict;
 use Time::tm;
 
-use 5.005_64;
+use 5.6.1;
 our(@ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS, $VERSION);
 BEGIN { 
     use Exporter   ();

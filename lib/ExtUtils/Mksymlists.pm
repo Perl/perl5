@@ -1,6 +1,6 @@
 package ExtUtils::Mksymlists;
 
-use 5.005_64;
+use 5.6.1;
 use strict qw[ subs refs ];
 # no strict 'vars';  # until filehandles are exempted
 

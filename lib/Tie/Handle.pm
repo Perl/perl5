@@ -1,6 +1,6 @@
 package Tie::Handle;
 
-use 5.005_64;
+use 5.6.1;
 our $VERSION = '4.1';
 
 =head1 NAME
