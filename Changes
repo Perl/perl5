@@ -27,3 +27,1822 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 --------------
 Version v5.9.X		Development release working toward v5.10
 --------------
+____________________________________________________________________________
+[ 18096] By: jhi                                   on 2002/11/04  18:46:09
+        Log: Integrate:
+             
+             [ 18090]
+             extend #13786 to cover the other four identical chunks of code
+             to avoid looping under overload.
+             
+             [ 18091]
+             How pre-5.9.0 Perl can be fooled by a defined-or.
+             
+             [ 18093]
+             s/Perlf/Perl/ (thanks rgs)
+     Branch: maint-5.8/perl
+	  !> pod/perldiag.pod sv.c
+____________________________________________________________________________
+[ 18095] By: jhi                                   on 2002/11/04  17:45:47
+        Log: Integrate (now tests 100% in Tru64 5.1A):
+             
+             [ 18083]
+             [PATCH] Typo configpm
+             Mon, 4 Nov 2002; Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             
+             [ 18084]
+             Tru64, gcc -O3, datasize
+             Sun, 3 Nov 2002; Jarkko Hietaniemi <jhi@iki.fi>
+             
+             [ 18085]
+             Subject: Re: [perl #17064] illegal legal unicode character
+             From: hv@crypt.org
+             Date: Mon, 04 Nov 2002 13:23:49 +0000
+             Message-Id: <200211041323.gA4DNn313132@crypt.compulink.co.uk>
+             
+             [ 18086]
+             integrate from perlio: changes #17709, #17795, #17796, #18032
+             
+             [ 18088]
+             Charnames take 4
+             Mon, 04 Nov 2002; H.Merijn Brand <h.m.brand@hccnet.nl>
+     Branch: maint-5.8/perl
+	  !> Porting/apply README.tru64 configpm ext/PerlIO/t/encoding.t
+	  !> ext/PerlIO/t/via.t ext/PerlIO/via/via.xs hints/dec_osf.sh
+	  !> lib/charnames.pm lib/charnames.t perlio.c regexec.c
+	  !> t/io/crlf.t t/op/split.t
+____________________________________________________________________________
+[ 18089] By: jhi                                   on 2002/11/04  15:44:28
+        Log: The //= meme seems to be catching on.
+     Branch: maint-5.8/perl
+	   ! t/op/anonsub.t
+____________________________________________________________________________
+[ 18087] By: jhi                                   on 2002/11/04  15:28:23
+        Log: Integrate:
+             
+             [ 17677]
+             Main branch no longer needs op/taint.t version check.
+     Branch: maint-5.8/perl
+	  !> t/op/taint.t
+____________________________________________________________________________
+[ 18082] By: jhi                                   on 2002/11/04  05:38:52
+        Log: Integrate: the same caveat as for #18080.
+             
+             [ 17779]
+             upgrade bignum to v0.13: fix test failures and update docs
+             
+             [ 17780]
+             fix bignum test failures
+             
+             [ 17784]
+             #17780 relies on unixy paths to locate own directory for bignum tests.
+             
+             [ 17785]
+             fix non-ANSI C++-style comment
+             Subject: [ PATCH ]  Smoke 17780 /pro/3gl/CPAN/perl-current
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Mon, 26 Aug 2002 09:15:18 +0200
+             Message-Id: <20020826090145.6975.H.M.BRAND@hccnet.nl>
+             
+             [ 17841]
+             Subject: [PATCH] op/getpid.t failure
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 3 Sep 2002 17:48:24 -0700
+             Message-ID: <20020904004824.GG2701@ool-18b93024.dyn.optonline.net>
+             
+             [ 17872]
+             temporarily skip failing Storable tests caused by #17869
+             
+             [ 17901]
+             Subject: [PATCH] more PASE wisdom
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Fri, 13 Sep 2002 00:17:39 +0300
+             Message-ID: <20020912211739.GB6980@lyta.hut.fi>
+             
+             [ 17912]
+             Subject: [PATCH] AIX test shouldn't trip OS/400 PASE
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Thu, 19 Sep 2002 18:59:48 +0300
+             Message-Id: <20020919155948.GU208696@lyta.hut.fi>
+             
+             Subject: [PATCH] more PASE tweakage
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Thu, 19 Sep 2002 18:01:44 +0300
+             Message-Id: <20020919150144.GJ208696@lyta.hut.fi>
+             
+             [ 17963]
+             Subject: Re: [perl #17376] Bug Report - our(%)
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Tue, 01 Oct 2002 09:54:30 -0700
+             Message-ID: <GNdm9gzkgWOS092yn@efn.org>
+             
+             [ 17969]
+             Subject: [PATCH] Storable and code serialization: documentation
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: Wed, 2 Oct 2002 10:21:37 +0200 (CEST)
+             Message-Id: <200210020821.g928Lb2i003767@vran.herceg.de>
+             
+             [ 17970]
+             Add a line about 2.05.
+             
+             [ 17971]
+             Subject: Re: Not OK 17969
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: 03 Oct 2002 13:12:58 +0200
+             Message-Id: <87lm5fn5c5.fsf@vran.herceg.de>
+             
+             [ 17974]
+             Fix a precedence problem.
+             
+             [ 17977]
+             Complement to change #17976 :
+             there was a similar bug on rdo().
+             Increment $Safe::VERSION.
+             
+             [ 17980]
+             Upgrade Safe.pm to 2.09 after CPAN backport.
+             Fix testcases to run properly outside perl core build enviroment.
+             
+             [ 17986]
+             Remove use of caller() in strict.pm, and tighten Safe compartment
+             for Storable tests to match.
+             
+             [ 18000]
+             Subject: [PATCH] perl573delta delinting
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Fri, 4 Oct 2002 16:19:31 +0300
+             Message-ID: <20021004131931.GE278184@lyta.hut.fi>
+             
+             [ 18008]
+             Subject: [PATCH] Storable 2.06 (was Re: Bug in ext/Storable/t/integer.t)
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Mon, 7 Oct 2002 23:35:34 +0100
+             Message-ID: <20021007223534.GD286@Bagpuss.unfortu.net>
+             
+             [ 18014]
+             Subject: Re: [PATCH] perl573delta delinting
+             From: Philip Newton <Philip.Newton@gmx.net>
+             Date: Sat, 12 Oct 2002 21:25:49 +0200
+             Message-ID: <iotgqucnbttvvc43o0j7kv55p5dstui4oc@4ax.com>
+             
+             [ 18019]
+             Subject: Japanese translation of Storable
+             From: "KAWAI,Takanori" <GCD00051@nifty.ne.jp>
+             Date: Tue, 15 Oct 2002 06:31:01 +0900
+             Message-Id: <003801c273c9$05888910$1401a8c0@hipposam>
+             
+             [ 18024]
+             Subject: Re: [perl #17061] no strict 'garbage'
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: 10 Oct 2002 16:23:22 +0200
+             Message-ID: <87ptui5q5h.fsf@vran.herceg.de>
+             
+             [ 18061]
+             Subject: [PATCH lib/IO.t] Add tests for IO.pm
+             From: chromatic <chromatic@wgz.org>
+             Date: Mon, 21 Oct 2002 20:27:43 -0700
+             Message-ID: <20021022033253.57952.qmail@onion.perl.org>
+             
+             [ 18063]
+             change #18038 gives too many problems on t/450_service.t; disable
+             it for now
+     Branch: maint-5.8/perl
+	  !> (integrate 32 files)
+____________________________________________________________________________
+[ 18081] By: jhi                                   on 2002/11/04  05:26:36
+        Log: Integrate:
+             
+             [ 17741]
+             Subject: Re: [PATCH] Storable and CODE references
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: 17 Aug 2002 21:58:03 +0200
+             Message-id: <87bs812r78.fsf@vran.herceg.de>
+     Branch: maint-5.8/perl
+	  +> ext/Storable/t/code.t
+	  !> MANIFEST ext/Storable/Storable.xs ext/Storable/t/forgive.t
+	  !> ext/Storable/t/malice.t
+____________________________________________________________________________
+[ 18080] By: jhi                                   on 2002/11/04  05:23:04
+        Log: The first big import towards 5.8.1, @18078.  Please do NOT
+             expect all to work yet, some tests will fail.  This is just
+             a reasonably optimal/maximal push in the general direction.
+             
+             [ 17655]
+             Upgrade to Unicode::Collate 0.20.
+             
+             [ 17656]
+             Subject: [PATCH] Typo in regcomp.c
+             From: Chris Ball <chris@cpan.org>
+             Date: 26 Jul 2002 17:49:35 +0100
+             Message-Id: <868z3yzb6o.fsf@void.printf.net>
+             (With additional tweak to s_reginclasslen.)
+             
+             [ 17672]
+             Subject: Re: mention of "use sort" botched in perlfunc?
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sat, 20 Jul 2002 13:49:58 -0400 (18:49 BST)
+             Message-id: <20020720174958.GL362@ool-18b93024.dyn.optonline.net>
+             
+             [ 17673]
+             Subject: [PATCH] AUTHORS
+             From: Walt Mankowski <waltman@pobox.com>
+             Date: Sat, 20 Jul 2002 22:56:12 -0400 (Sun 03:56 BST)
+             Message-id: <20020721025612.GB15958@pobox.com>
+             
+             [ 17674]
+             Subject: [PATCH] AUTHORS
+             From: Colin Watson <colinw@zeus.com>
+             Date: Thu, 25 Jul 2002 15:54:37 +0100
+             Message-id: <20020725145437.GC4921@zeus.com>
+             
+             [ 17675]
+             Fix email address for Kragen Sitaker <kragen@pobox.com>.
+             
+             [ 17676]
+             Subject: Re: [PATCH] Re: taint news
+             From: Rick Delaney <rick.delaney@rogers.com>
+             Date: 04 Aug 2002 00:28:58 EDT
+             Message-ID: <m3heibs0vp.fsf@cs839290-a.mtth.phub.net.cable.rogers.com>
+             Ref: 20020208.005
+             
+             [ 17678]
+             Subject: Re: [ID 20020704.001] my $foo = $1 won't taint $foo (with use re 'taint')
+             From: hv@crypt.org
+             Date: Sun, 04 Aug 2002 17:40:30 +0100
+             Message-id: <200208041640.g74GeUU25061@crypt.compulink.co.uk>
+             
+             [ 17679]
+             [ID 20020704.001] again: #17678 caused test failures in pod2html,
+             in which $1 could leak from previous regexp
+             
+             [ 17680]
+             warn that keywords.h is generated
+             
+             [ 17681]
+             typo
+             
+             [ 17683]
+             Integrate from maint-5.6/macperl via macperl
+             Changes 17660, 17661, 17662, 17663, 17664
+             
+             [ 17684]
+             Integrate from perlio: change #17653 fixes bug RT15283
+             
+             [ 17685]
+             Subject: Re: mention of "use sort" botched in perlfunc? + PATCH
+             From: "John P. Linderman" <jpl@research.att.com>
+             Date: Sun, 21 Jul 2002 12:13:32 -0400 (17:13 BST)
+             Message-id: <200207211613.MAA69505@raptor.research.att.com>
+             
+             [ 17686]
+             More regression tests for $^H and %^H.
+             Add a TODO test for eval "" preserving %^H.
+             
+             [ 17687]
+             PerlIO::scalar wasn't able to read from non-string
+             scalar ; now stringifies its argument.
+             
+             [ 17688]
+             Subject: [PATCH] XS build fix for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Sun, 4 Aug 2002 12:13:06 -0500
+             Message-ID: <a05111b07b97256e1c335@[172.16.52.1]>
+             
+             [ 17689]
+             Subject: Re: no warnings 'io';
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Sat, 27 Jul 2002 21:49:55 +0100
+             Message-ID: <20020727204954.GB5117@Bagpuss.unfortu.net>
+             
+             Plus a little bit of regression tests.
+             
+             [ 17690]
+             Doc fix : the symbol for COPs wasn't documented.
+             
+             [ 17691]
+             Subject: [perl #15398] Usage::pod2usage looks for perldoc in $Config{bin} and not in $Config{scriptdir}
+             From: Henrik Tougaard (via RT) <perlbug@perl.org>
+             Date: 23 Jul 2002 13:45:49 -0000 (Tue 14:45 BST)
+             Message-id: <rt-15398-31095.6.30466042998663@perl>
+             
+             [ 17692]
+             Subject: [PATCH] README.jp and README.cn
+             From: Autrijus Tang <autrijus@autrijus.org>
+             Date: Thu, 25 Jul 2002 07:05:11 +0800
+             Message-id: <20020724230511.GA1327@not.autrijus.org>
+             
+             [ 17693]
+             Subject: [PATCH: lib/ExtUtils/MM_Unix.pm] Be less strict about what's POD.
+             From: Abigail <abigail@foad.org>
+             Date: Thu, 25 Jul 2002 08:52:52 -0700 (16:52 BST)
+             Message-id: <20020725085252.A2703@ucan.foad.org>
+             
+             [ 17694]
+             Subject: Re: [RE-PATCH] Not OK: perl v5.8.0 on PA-RISC2.0 11.00
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Wed, 31 Jul 2002 16:04:02 +0200
+             Message-id: <20020731155005.4915.H.M.BRAND@hccnet.nl>
+             
+             [ 17695]
+             Subject: [PATCH] Re: [perl #15479] perl 5.8.0 segfault
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Fri, 2 Aug 2002 00:13:10 +0200
+             Message-id: <20020802001310.7e1dc694.rgarciasuarez@free.fr>
+             
+             [ 17696]
+             Subject: Re: [perl #15523] Memory Leak in split with trailing empty elements
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: 31 Jul 2002 09:50:06 +0200
+             Message-id: <87ado85ob5.fsf@vran.herceg.de>
+             
+             [ 17697]
+             Subject: Doc patch for Class::Struct under 5.8.0
+             From: Damian Conway <damian@conway.org>
+             Date: Tue, 30 Jul 2002 23:03:14 +1000
+             Message-id: <3D471FCF.1C7C6E6B@conway.org>
+             
+             [ 17698]
+             Subject: [perl #16000] Configure -Dstatic_ext=foo builds foo as both static and dynamic
+             From: Yitzchak Scott-Thoennes (via RT) <perlbug@perl.org>
+             Date: 6 Aug 2002 04:28:15 -0000 (Tue 05:28 BST)
+             Message-id: <rt-16000-32913.8.41582281961522@bugs6.perl.org>
+             
+             [ 17699]
+             Subject: [PATCH] Re: [perl #15898] coredump with variable our
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Fri, 2 Aug 2002 23:44:21 +0200
+             Message-id: <20020802234421.11c62fe6.rgarciasuarez@free.fr>
+             
+             [ 17700]
+             Subject: [DOC PATCH] perlipc.pod
+             From: Arjen Laarhoven <arjen@nl.demon.net>
+             Date: Tue, 6 Aug 2002 14:16:01 +0200
+             Message-id: <20020806121601.GK40785@aragorn.noc.nl.demon.net>
+             
+             [ 17701]
+             Subject: [PATCH] Re: pp_sys.c compile failed..
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Tue, 6 Aug 2002 10:42:07 -0400 (EDT) (15:42 BST)
+             Message-id: <Pine.SOL.4.10.10208061024250.5315-100000@maxwell.phys.lafayette.edu>
+             
+             [ 17702]
+             Subject: Re: README.aix
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Tue, 30 Jul 2002 13:30:29 +0200
+             Message-id: <20020730130812.48B9.H.M.BRAND@hccnet.nl>
+             
+             [ 17704]
+             Fix bug #16080 : an attribute list should end at '}'
+             
+             [ 17705]
+             More tests for the attribute syntax, from the
+             attributes manpage.
+             
+             [ 17706]
+             Subject: Re: missing lower range in {} regex 
+             From: "John P. Linderman" <jpl@research.att.com>
+             Date: Fri, 09 Aug 2002 12:48:55 -0400
+             Message-ID: <200208091648.MAA77577@raptor.research.att.com>
+             
+             [ 17707]
+             Subject: New HP-UX itanium servers
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Wed, 07 Aug 2002 13:25:57 +0200
+             Message-ID: <20020807132518.FCBF.H.M.BRAND@hccnet.nl>
+             
+             [ 17710]
+             Subject: [PATCH] pod/perlfaq4.pod
+             From: Abigail <abigail@foad.org>
+             Date: Tue, 30 Jul 2002 09:52:02 -0700 (17:52 BST)
+             Message-id: <20020730095202.A6462@ucan.foad.org>
+             Add references to Regexp::Common.
+             
+             [ 17711]
+             Subject: [PATCH s2p] Small typo correction
+             From: "Newton, Philip" <Philip.Newton@datenrevision.de>
+             Date: Wed, 7 Aug 2002 11:50:51 +0200
+             Message-id: <C9A98F2128EDD411B0920008C7B337A13DCE2B@hamsem01.de.gedas.vwg>
+             
+             [ 17712]
+             Subject: Re: Smoke 17703 /pro/3gl/CPAN/perl-current
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Mon, 12 Aug 2002 10:25:20 +0200
+             Message-id: <20020812102347.AFB6.H.M.BRAND@hccnet.nl>
+             gcc bug test needs -lm
+             
+             [ 17713]
+             Subject: [PATCH] gv_fullname3 as call to gv_fullname4
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Sun, 11 Aug 2002 16:59:16 +0100
+             Message-id: <20020811155914.GE300@Bagpuss.unfortu.net>
+             
+             [ 17714]
+             Subject: [PATCH] perltodo.pod
+             From: Richard.Foley@t-online.de
+             Date: Sun, 11 Aug 2002 18:26:10 +0200
+             Message-id: <17dwY1-0spbdoC@fwd06.sul.t-online.com>
+             perlbug credits
+             
+             [ 17716]
+             Subject: Re: [ID 20020713.001] chomp($data=<tied_fh>) strangeness.
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk>
+             Date: Sat, 13 Jul 2002 17:44:02 +0100
+             Message-id: <200207131644.g6DGi2214456@crypt.compulink.co.uk>
+             
+             [ 17717]
+             Subject: Re: [PATCH@8545] [ID 20000808.005] OP_REFGEN as an lvalue
+             From: Stephen McCamant <smcc@CSUA.Berkeley.EDU>
+             Date: Sat, 27 Jan 2001 19:31:29 -0800 (PST)
+             Message-ID: <14963.32943.102669.67625@soda.csua.berkeley.edu>
+             
+             [ 17719]
+             Subject: [perl #15987] Tests fail when sources are under CVS control
+             From: Warren Jones (via RT) <perlbug@perl.org>
+             Date: 5 Aug 2002 19:08:50 -0000 (Mon 20:08 BST)
+             Message-id: <rt-15987-32864.15.6255441902154@bugs6.perl.org>
+             
+             [ 17720]
+             Subject: Re: [PATCH] Re: taint news
+             From: Rick Delaney <rick.delaney@rogers.com>
+             Date: 04 Aug 2002 00:28:58 EDT
+             Message-ID: <m3heibs0vp.fsf@cs839290-a.mtth.phub.net.cable.rogers.com>
+             missed patch fragment from Change #17676
+             
+             [ 17721]
+             #17717 needed tests fixing up
+             
+             [ 17722]
+             Subject: Minor perlrun.pod patch
+             From: Iain Truskett <spoon@cpan.org>
+             Date: Fri, 16 Aug 2002 16:20:27 +1000
+             Message-Id: <20020816162027.D17196@eh.org>
+             
+             [ 17724]
+             ext/B/defsubs.h also depends on the program that builds it
+             
+             [ 17727]
+             Subject: [PATCH 5.7.3] Negative subscripts optionally passed to tied array methods
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Sun, 14 Apr 2002 23:38:55 -0400 (Mon 04:38 BST)
+             Message-id: <20020415033855.6343.qmail@plover.com>
+             
+             [ 17729]
+             Subject: [PATCH] Safe.pm documentation
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: Sat, 10 Aug 2002 19:30:38 +0200 (CEST)
+             Message-id: <200208101730.g7AHUc9p001668@vran.herceg.de>
+             
+             [ 17733]
+             Subject: Server rename revisited
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Tue, 13 Aug 2002 19:19:03 +0200
+             Message-id: <20020813191821.DC98.H.M.BRAND@hccnet.nl>
+             
+             [ 17734]
+             Subject: [PATCH] Re: Pod::Functions tpyo
+             From: Abe Timmerman <abe@ztreet.demon.nl>
+             Date: Tue, 13 Aug 2002 23:47:00 +0200
+             Message-id: <200208132347.00782.abe@ztreet.demon.nl>
+             
+             [ 17735]
+             Subject: Re: [perl #16198] pod tpyo in hostent.pm
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Tue, 13 Aug 2002 21:19:08 -0400 (Wed 02:19 BST)
+             Message-id: <20020814011909.22744.qmail@plover.com>
+             
+             [ 17736]
+             Subject: [PATCH] Re: 5.8.0 sprintf (?) problem with floats?
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Fri, 16 Aug 2002 23:31:07 +0100
+             Message-id: <20020816233107.E9388@fdgroup.com>
+             
+             [ 17737]
+             Effect a speedy recovery from POD affected by (ahem, Australian)
+             negligence.
+             
+             [ 17743]
+             Subject: Re: [PATCH] fix typos in perlpacktut
+             From: "Mr. Nobody" <mrnobo1024@yahoo.com>
+             Date: Fri, 16 Aug 2002 20:40:58 -0700 (PDT) (Sat 04:40 BST)
+             Message-id: <20020817034058.45633.qmail@web20802.mail.yahoo.com>
+             
+             [ 17744]
+             Subject: typo in perfunc.pod
+             From: "John P. Linderman" <jpl@research.att.com>
+             Date: Mon, 19 Aug 2002 08:45:31 -0400 (EDT) (13:45 BST)
+             Message-id: <200208191245.IAA20072@raptor.research.att.com>
+             
+             [ 17748]
+             todo test for linux $0 modification
+             Subject: Re: [perl #16206] $0 in 5.8
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: 17 Aug 2002 21:32:37 +0200
+             Message-id: <87elcx2sdm.fsf@vran.herceg.de>
+             
+             [ 17749]
+             avoid use of %caller::EXPORT
+             Subject: [PATCH] Re: question about Exporter::import
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Wed, 14 Aug 2002 21:33:12 +0100
+             Message-id: <20020814203311.GD278@Bagpuss.unfortu.net>
+             
+             [ 17750]
+             Subject: [PATCH] Fix DBM filters
+             From: "Paul Marquess" <Paul.Marquess@btinternet.com>
+             Date: Wed, 21 Aug 2002 11:40:49 +0100
+             Message-ID: <AIEAJICLCBDNAAOLLOKLAEHCFEAA.Paul.Marquess@btinternet.com>
+             
+             [ 17752]
+             Subject: [Announce] Unicode::Collate 0.20 -> UCA version 9
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date: Fri, 26 Jul 2002 02:59:12 +0900
+             Message-Id: <20020726025828.B5E9.BQW10602@nifty.com>
+             
+             [ 17753]
+             Subject: podlators 1.24 released
+             From: Russ Allbery <rra@stanford.edu>
+             Date: Sat, 03 Aug 2002 20:56:42 -0700
+             Message-ID: <ylbs8jff9h.fsf@windlord.stanford.edu>
+             
+             [ 17754]
+             Subject: ANNOUNCE: Math-BigInt v1.62
+             From: Tels <perl_dummy@bloodgate.com>
+             Date: Wed, 21 Aug 2002 19:12:59 +0200 (CEST)
+             Message-Id: <200208211513.g7LFDUs02512@crypt.org>
+             
+             [ 17755]
+             new files from #17754
+             
+             [ 17756]
+             Subject: ANNOUCNE: Math::BigRat v0.09
+             From: Tels <perl_dummy@bloodgate.com>
+             Date: Wed, 14 Aug 2002 20:12:03 +0200 (CEST)
+             Message-Id: <200208141812.g7EICrV23771@crypt.org>
+             
+             [ 17757]
+             new file for #17756
+             
+             [ 17758]
+             bignum-0.12 updates from:
+             Subject: [ANNOUCNE] Big Math::Big* update
+             From: Tels <perl_dummy@bloodgate.com>
+             Date: Tue, 13 Aug 2002 22:02:09 +0200 (CEST)
+             Message-Id: <200208132121.g7DLLRV21408@crypt.org>
+             
+             [ 17759]
+             Subject: [PATCH] x2p/str.c signedness nits
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Fri, 23 Aug 2002 02:43:30 +0300
+             Message-Id: <20020822234330.GC31624@lyta.hut.fi>
+             
+             [ 17760]
+             Subject: [PATCH] PPPort IVSIZE and SvPV_nolen
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Fri, 23 Aug 2002 05:29:09 +0300
+             Message-Id: <20020823022909.GC9135@lyta.hut.fi>
+             
+             [ 17761]
+             Incorporate fix from JHI at:
+             http://rt.perl.org/rt2/Ticket/Display.html?id=16708
+             
+             [ 17764]
+             a2p wasn't installed with -Dversiononly
+             
+             [ 17765]
+             Subject: [PATCH] remove 2 unit warnings from lib/Net/t/hostname.t
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Sat, 24 Aug 2002 17:01:08 +0100
+             Message-ID: <20020824160107.GI280@Bagpuss.unfortu.net>
+             (plus a typo fix)
+             
+             [ 17766]
+             Subject: [perl #16737] [PATCH] Perl5.8.0 two simple typos in perlxstut  
+             From: Peter BARABAS (via RT) <perlbug@perl.org>
+             Date: 24 Aug 2002 08:16:19 -0000
+             Message-ID: <rt-16737-35573.3.51579548306248@bugs6.perl.org> 
+             
+             [ 17767]
+             Subject: [perl #16281] patch to enable perldoc -n for MSWin32 (perl-5.8.0)
+             From: "Randy W. Sims" (via RT) <perlbug@perl.org>
+             Date: 18 Aug 2002 13:27:12 -0000
+             Message-Id: <rt-16281-34264.3.49471192322156@bugs6.perl.org>
+             
+             [ 17768]
+             Subject: [PATCH] fix lib.pm's import() to accept readonly parameters
+             From: Anton Berezin <tobez@tobez.org>
+             Date: Tue, 20 Aug 2002 23:44:25 +0200
+             Message-ID: <20020820214425.GG16178@heechee.tobez.org>
+             
+             [ 17769]
+             Subject: bit more for WinCE
+             From: "Vadim Konovalov" <vkonovalov@peterstar.ru>
+             Date: Wed, 21 Aug 2002 01:31:52 +0400
+             Message-ID: <000f01c24891$045c4990$2b5ec3d9@vad>
+             
+             [ 17770]
+             Subject: [PATCH] let perlfaq1.pod mention 5.8 as the current stable release
+             From: "Jos I. Boumans" <kane@cpan.org>
+             Date: Wed, 21 Aug 2002 14:55:51 +0200
+             Message-ID: <20020821124817.34761.qmail@onion.perl.org>
+             
+             [ 17771]
+             Subject: Newdated info for HP-UX
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Wed, 21 Aug 2002 20:20:17 +0200
+             Message-Id: <20020821201737.697B.H.M.BRAND@hccnet.nl>
+             
+             [ 17772]
+             Subject: Re: p5p patches
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Fri, 23 Aug 2002 15:27:48 +0200
+             Message-Id: <20020823152535.D3EA.H.M.BRAND@hccnet.nl>
+             
+             [ 17773]
+             Subject: Re: a bugfix for Pod::Html (in diff -u format)
+             From: DH <crazyinsomniac@yahoo.com>
+             Date: Thu, 22 Aug 2002 02:32:50 -0700 (PDT)
+             Message-ID: <20020822093250.30523.qmail@web40205.mail.yahoo.com>
+             
+             [ 17774]
+             Subject: [PATCH lib/Benchmark.(pm|t)]  Make cmpthese work as documented.
+             From: Abigail <abigail@foad.org>
+             Date: Thu, 22 Aug 2002 04:10:39 -0700
+             Message-ID: <20020822041039.A2089@ucan.foad.org>
+             
+             [ 17775]
+             Subject: [perl #16729] crypt() doesn't work in multithreaded perl
+             From: "mls@suse.de (via RT)" <perlbug@perl.org>
+             Date: 23 Aug 2002 15:24:39 -0000
+             Message-Id: <rt-16729-35555.9.25145891475907@bugs6.perl.org>
+             
+             [ 17776]
+             Subject: [PATCH] ExtUtils::Constant 0.13
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Fri, 23 Aug 2002 19:21:12 +0100
+             Message-ID: <20020823182111.GA281@Bagpuss.unfortu.net>
+             
+             [ 17778]
+             Subject: Encode 1.76 Released
+             From: Dan Kogai <dankogai@dan.co.jp>
+             Date: su elo 25, 2002  11:27:07 US/Eastern
+             Message-Id: <1DE68466-B83F-11D6-8805-0003939A104C@dan.co.jp>
+             
+             [ 17781]
+             #17775 changed reentr.c instead of reentr.pl, which generates it
+             
+             [ 17782]
+             new test for change #17773
+             Subject: lib/Pod/t/htmlview.t and lib/Pod/t/htmlview.pod patch (to account for the Pod::Html patch)
+             From: DH <crazyinsomniac@yahoo.com>
+             Date: Mon, 26 Aug 2002 01:36:27 -0700 (PDT)
+             Message-ID: <20020826083627.46199.qmail@web40207.mail.yahoo.com>
+             
+             [ 17783]
+             Subject: [ANNOUNCE] Test::Simple 0.47
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 26 Aug 2002 04:13:03 -0700
+             Message-ID: <20020826111303.GJ758@ool-18b93024.dyn.optonline.net>
+             
+             [ 17786]
+             Subject: CPAN Upload: S/SB/SBURKE/Test-1.21.tar.gz
+             From: "Sean M. Burke" <sburke@cpan.org>
+             Date: Mon, 26 Aug 2002 04:38:19 -0600
+             Message-Id: <5.1.0.14.1.20020826043702.022ca320@mail.spinn.net>
+             
+             [ 17787]
+             fix for:
+             Subject: [perl #16773] "abc" =~ /(ab)()(c)??/ broken
+             From: (Randal L. Schwartz) (via RT) <perlbug@perl.org>
+             Date: 26 Aug 2002 15:01:36 -0000
+             Message-Id: <rt-16773-35748.5.13188490159294@bugs6.perl.org>
+             
+             [ 17789]
+             Subject: Patch perlvar.pod
+             From: mjd@plover.com
+             Date: 27 Aug 2002 03:03:01 -0000
+             Message-Id: <20020827030301.32481.qmail@plover.com>
+             
+             [ 17790]
+             #17783 introduced an outdated test module, causing failure in
+             lib/ExtUtils/t/problems.t. This grabs a more recent copy from
+             ExtUtils::MakeMaker.
+             
+             [ 17791]
+             Missing MANIFEST files for #17783.
+             
+             [ 17797]
+             Subject: Re: [perl #16677] B::SV::FLAGS dumps core
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Sun, 25 Aug 2002 22:31:54 -0400
+             Message-ID: <20020826023154.22986.qmail@plover.com>
+             
+             [ 17798]
+             Subject: [PATCH] posixify getppid on linux-multithread
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Tue, 6 Aug 2002 21:56:46 +0200
+             Message-Id: <20020806215646.3f6852bb.rgarciasuarez@free.fr>
+             
+             [ 17799]
+             Subject: Re: if.pm bug.
+             From: "Steffen Mueller" <kjx9zthh3001@sneakemail.com>
+             Date: Sun, 25 Aug 2002 00:27:59 +0200
+             Message-ID: <20020824222210.16387.qmail@onion.perl.org>
+             
+             [ 17800]
+             Subject: Patch: Put local($^I, @ARGV) = ... trick back into perlfaq5
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Sun, 25 Aug 2002 12:09:53 -0400
+             Message-ID: <20020825160953.15987.qmail@plover.com>
+             
+             [ 17801]
+             Subject: [PATCH] ExtUtils::Constant 0.14
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Sun, 25 Aug 2002 18:06:00 +0100
+             Message-ID: <20020825170600.GE322@Bagpuss.unfortu.net>
+             
+             [ 17802]
+             Subject: [perl #16769] Documention bug
+             From: "dformosa@dformosa.zeta.org.au (via RT)" <perlbug@perl.org>
+             Date: 26 Aug 2002 10:01:04 -0000
+             Message-Id: <rt-16769-35720.17.1057454913803@bugs6.perl.org>
+             
+             [ 17803]
+             Subject: [PATCH] AIX compiler setup sanity checking
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Thu, 29 Aug 2002 16:43:51 +0300
+             Message-Id: <20020829134351.GG5219@lyta.hut.fi>
+             
+             [ 17804]
+             Subject: [PATCH] B::check_av() ; B::Deparse for CHECK blocks
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Tue, 27 Aug 2002 23:36:53 +0200
+             Message-Id: <20020827233653.535bc211.rgarciasuarez@free.fr>
+             
+             [ 17805]
+             Fix based on:
+             Subject: [perl #16799] Perl 5.8.0 breaks POSIX::isprint() (and other POSIX::xxx)
+             From: "esm@pobox.com (via RT)" <perlbug@perl.org>
+             Date: 27 Aug 2002 22:10:16 -0000
+             Message-Id: <rt-16799-35846.14.4842888832041@bugs6.perl.org>
+             
+             [ 17806]
+             #17449 failed to apply the actual patch. This is it.
+             
+             [ 17807]
+             Subject: [PATCH] IRIX + INSTALL
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Fri, 30 Aug 2002 06:31:48 +0300
+             Message-Id: <20020830033148.GA874@lyta.hut.fi>
+             
+             [ 17808]
+             Subject: [PATCH] Tru64 vs Berkeley DB
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Fri, 30 Aug 2002 06:56:38 +0300
+             Message-Id: <20020830035638.GB874@lyta.hut.fi>
+             
+             [ 17810]
+             Subject: [PATCH] Fixes to threads::shared when disabled
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Wed, 28 Aug 2002 06:04:18 -0700
+             Message-ID: <20020828130418.GG773@ool-18b93024.dyn.optonline.net>
+             
+             [ 17811]
+             Subject: Re: Recent changes on the HP porting center
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Wed, 28 Aug 2002 17:39:27 +0200
+             Message-Id: <20020828173024.3E95.H.M.BRAND@hccnet.nl>
+             
+             [ 17812]
+             Subject: [PATCH] typos in Hash::Util documentation
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: Wed, 28 Aug 2002 17:08:50 +0200 (CEST)
+             Message-Id: <200208281508.g7SF8o9Z015197@vran.herceg.de>
+             
+             [ 17813]
+             Subject: [PATCH] Re: glob names and Regexp type introspection
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Thu, 29 Aug 2002 17:31:31 -0700
+             Message-ID: <jzrb9gzkgO7W092yn@efn.org>
+             
+             [ 17814]
+             Subject: [PATCH] perlmod.pod nit
+             From: Autrijus Tang <autrijus@autrijus.org>
+             Date: Thu, 29 Aug 2002 03:49:34 +0800
+             Message-ID: <20020828194934.GA12244@not.autrijus.org>
+             
+             [ 17816]
+             Subject: [PATCH 5.8.0] Term::Cap allow # comments in infcocmp output
+             From: "Brendan O'Dea" <bod@debian.org>
+             Date: Thu, 29 Aug 2002 22:46:47 +1000
+             Message-ID: <20020829124647.GA1498@londo.odea.dropbear.id.au>
+             
+             [ 17817]
+             Subject: [PATCH] AUTHORS
+             From: "Brendan O'Dea" <bod@debian.org>
+             Date: Thu, 29 Aug 2002 22:49:34 +1000
+             Message-ID: <20020829124934.GA1984@londo.odea.dropbear.id.au>
+             
+             [ 17818]
+             add test related to change #17799:
+             Subject: Re: if.pm bug.
+             From: "Steffen Mueller" <kjx9zthh3001@sneakemail.com>
+             Date: Thu, 29 Aug 2002 19:39:58 +0200
+             Message-ID: <20020829173358.34731.qmail@onion.perl.org>
+             
+             [ 17821]
+             Advertise Linux::Pid.
+             
+             [ 17822]
+             Some simple tests for the POSIX::isXXX() functions.
+             
+             [ 17823]
+             Fix bug #16828.
+             Add a few tests to ext/B/t/b.t, make it use Test::More.
+             
+             [ 17824]
+             Subject: [perl #16971] [PATCH] Fix a couple of URLs that changed recently.
+             From: Richard Soderberg (via RT) <perlbug@perl.org>
+             Date: 3 Sep 2002 18:48:54 -0000
+             Message-ID: <rt-16971-36426.15.5276119194873@bugs6.perl.org>
+             
+             Subject: [PATCH] A variety of README nitpicks.
+             From: Richard Soderberg <rs@crystalflame.net>
+             Date: Tue, 3 Sep 2002 11:54:39 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.33.0209031148280.32671-200000@oregonnet.com>
+             
+             [ 17825]
+             Subject: Re: Possible bug in IPC/Semaphore.pm [PATCH]
+             From: "John P. Linderman" <jpl@research.att.com>
+             Date: Wed, 28 Aug 2002 08:04:29 -0400 (EDT)
+             Message-Id: <200208271900.PAA98096@raptor.research.att.com>
+             
+             [ 17826]
+             Subject: [PATCH 5.8.0] allow Sys::Syslog test to fail gracefully
+             From: "Brendan O'Dea" <bod@debian.org>
+             Date: Thu, 29 Aug 2002 22:42:39 +1000
+             Message-ID: <20020829124239.GA31934@londo.odea.dropbear.id.au>
+             
+             [ 17827]
+             Subject: [PATCH] OS/400 PASE port
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Thu, 29 Aug 2002 22:22:51 +0300
+             Message-ID: <20020829192251.GA27102@lyta.hut.fi>
+             
+             [ 17828]
+             Subject: [PATCH] File::Spec->catfile not canonicalizing consistently
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Fri, 30 Aug 2002 03:40:45 -0700
+             Message-ID: <20020830104044.GF859@ool-18b93024.dyn.optonline.net>
+             
+             [ 17829]
+             Subject: Correction for AUTHORS.html
+             From: Sean Davis <dive@ender.com>
+             Date: Fri, 30 Aug 2002 03:51:16 -0700
+             Message-ID: <20020830035116.A18739@endersgame.net>
+             
+             [ 17830]
+             update email address for Paul Marquess
+             
+             [ 17833]
+             Subject: [PATCH] use sysconf(_SC_CLK_TCK) for times()
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Sun, 1 Sep 2002 19:23:55 +0300
+             Message-ID: <20020901162355.GH12536@lyta.hut.fi>
+             
+             [ 17834]
+             perldoc: allow arguments for pager
+             Subject: perldoc patch for better $Config{pager} support, mandir patch, fhs patch
+             From: Chip Turner <cturner@redhat.com>
+             Date: 02 Sep 2002 01:17:23 -0400
+             Message-ID: <vzku1l9x95o.fsf@minbar.devel.redhat.com>
+             
+             [ 17835]
+             fix coredump after 64k-deep recursion
+             Subject: Re: debugging coredump with -DD
+             From: hv@crypt.org
+             Date: Tue, 03 Sep 2002 14:34:20 +0100
+             Message-Id: <200209031334.g83DYLN09709@crypt.compulink.co.uk>
+             
+             [ 17836]
+             Subject: [PATCH] DB_File 1.805
+             From: "Paul Marquess" <Paul.Marquess@btinternet.com>
+             Date: Mon, 2 Sep 2002 23:56:40 +0100
+             Message-ID: <AIEAJICLCBDNAAOLLOKLAEMCFFAA.Paul.Marquess@btinternet.com>
+             
+             [ 17837]
+             Subject: [PATCH lib/Config.t] test grandfathered Config variables
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 2 Sep 2002 22:29:07 -0700
+             Message-ID: <20020903052907.GR8061@ool-18b93024.dyn.optonline.net>
+             
+             [ 17838]
+             Subject: [PATCHes] Still no working Berkeley DB in OS X 10.2
+             From: =?ISO-8859-1?Q?Kay_R=F6pke?= <kay@dolphin-services.de>
+             Date: Tue, 3 Sep 2002 13:46:18 +0200
+             Message-Id: <C287A20E-BF32-11D6-A454-000393414688@dolphin-services.de>
+             
+             [ 17839]
+             Subject: Re: [PATCH 5.8.0] add accessors for POSIX::SigAction
+             From: "Brendan O'Dea" <bod@debian.org>
+             Date: Wed, 4 Sep 2002 02:36:10 +1000
+             Message-ID: <20020903163610.GA14595@londo.odea.dropbear.id.au>
+             
+             [ 17840]
+             Subject: [PATCH] File::Basename doesn't lazy load Carp right.
+             and Subject: [PATCH] More modules that don't lazy load Carp right.
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 3 Sep 2002 17:21:57 -0700
+             Message-ID: <20020904002157.GD2701@ool-18b93024.dyn.optonline.net>
+             and Message-ID: <20020904003857.GE2701@ool-18b93024.dyn.optonline.net>
+             
+             [ 17844]
+             #17836 (DB_File-1.805) misses a couple of dTHX declarations
+             
+             [ 17845]
+             Avoid 'unportable' warnings for lib/Math/BigInt/t/constant.t
+             
+             [ 17846]
+             Subject: Re: [PATCH] A variety of README nitpicks.
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Wed, 04 Sep 2002 09:10:05 +0200
+             Message-Id: <20020904090853.F13D.H.M.BRAND@hccnet.nl>
+             
+             [ 17848]
+             AUTHORS: preferred address for Allen Smith
+             
+             [ 17849]
+             document setting the email address
+             
+             [ 17850]
+             Subject: [PATCH] (mostly (Unicode)) pod nits
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Fri, 6 Sep 2002 06:01:57 +0300
+             Message-Id: <20020906030157.GA28252@lyta.hut.fi>
+             
+             [ 17859]
+             Subject: Re: [PATCH] Attempt at speeding up Config.pm.  Didn't work.
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Mon, 2 Sep 2002 23:22:32 +0100
+             Message-ID: <20020902222231.GG284@Bagpuss.unfortu.net>
+             
+             [ 17860]
+             #17859 misuses s/// return values
+             
+             [ 17861]
+             Subject: Re: [PATCH t/test.pl] Let is/isnt() handle undef without warnings
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Fri, 6 Sep 2002 14:03:16 -0700
+             Message-ID: <20020906210315.GC808@ool-18b93024.dyn.optonline.net>
+             
+             [ 17862]
+             Subject: [PATCH t/TestInit.pm] Set env PERL_CORE
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Wed, 4 Sep 2002 11:38:01 -0700
+             Message-ID: <20020904183801.GF8367@ool-18b93024.dyn.optonline.net>
+             
+             [ 17863]
+             setting PERL_CORE as in #17861 violates assumptions made by taint tests
+             
+             [ 17864]
+             Subject: sv_2pv_flags and ROK and UTF8 flags
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Wed, 04 Sep 2002 21:09:01 -0700
+             Message-ID: <djtd9gzkgyLd092yn@efn.org>
+             Date: Fri, 06 Sep 2002 09:23:03 -0700
+             Message-ID: <nZNe9gzkgKdH092yn@efn.org>
+             
+             [ 17865]
+             Subject: Unicode::Collate 0.23 Released
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date: Thu, 05 Sep 2002 23:28:32 +0900
+             Message-Id: <20020905232316.8151.BQW10602@nifty.com>
+             
+             [ 17866]
+             Subject: [PATCH] OS/400 PASE symbol scan tweak
+             From: Jarkko Hietaniemi <jhi@kosh.hut.fi>
+             Date: Thu, 5 Sep 2002 21:46:20 +0300 (EET DST)
+             Message-Id: <200209051846.g85IkKOk013697@kosh.hut.fi>
+             
+             [ 17867]
+             Subject: [PATCH] allow using hires time() in Benchmark
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Fri, 6 Sep 2002 00:38:11 +0300
+             Message-ID: <20020905213811.GA23771@lyta.hut.fi>
+             
+             [ 17868]
+             small fix to perl58delta for MIME::QuotedPrint, from Jarkko
+             
+             [ 17869]
+             Subject: [perl #17061] no strict 'garbage'
+             From: Elizabeth Mattijsen (via RT) <perlbug@perl.org>
+             Date: 6 Sep 2002 19:31:02 -0000
+             Message-Id: <rt-17061-36808.6.19994322284541@bugs6.perl.org>
+             Date: Sat, 07 Sep 2002 13:40:22 +0200
+             Message-Id: <4.2.0.58.20020907133846.02476d40@mickey.dijkmat.nl>
+             
+             [ 17870]
+             regularise whitespace and formatting in util.c
+             
+             [ 17871]
+             Subject: [PATCH] tiddly tidy up for util.c
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Fri, 6 Sep 2002 23:00:14 +0100
+             Message-ID: <20020906220013.GD428@Bagpuss.unfortu.net>
+             
+             [ 17874]
+             Subject: Re: [PATCH: perl #17849] (corrected) Long double bugs - sprintf.t _and_ num.t
+             From: "Allen Smith" <easmith@beatrice.rutgers.edu>
+             Date: Sat, 7 Sep 2002 05:25:45 -0400
+             Message-Id: <10209070525.ZM1584639@puck2.rutgers.edu>
+             
+             [ 17875]
+             Subject: [PATCH] cleanup temp files (was Re: Smoke 17805 irix 6.5 6.5.16m IP32 r5000 /usr/share/src/cpan-current-benedick)
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Sun, 8 Sep 2002 15:46:44 +0100
+             Message-ID: <20020908144643.GC286@Bagpuss.unfortu.net>
+             
+             Plus two other similar tweaks
+             
+             [ 17876]
+             Subject: Re: Smoke 17849 MSWin32 (w2k/GCC)
+             From: Abe Timmerman <abe@ztreet.demon.nl>
+             Date: Mon, 9 Sep 2002 01:32:19 +0200
+             Message-Id: <200209090132.19891.abe@ztreet.demon.nl>
+             
+             [ 17877]
+             Subject: [PATCH] configpm
+             From: Abe Timmerman <abe@ztreet.demon.nl>
+             Date: Sun, 8 Sep 2002 17:21:19 +0200
+             Message-Id: <200209081721.19233.abe@ztreet.demon.nl>
+             
+             [ 17878]
+             small grammar fix in Benchmark docs
+             
+             [ 17879]
+             Subject: [PATCH] Configure locincpth vs Jaguar gcc 3
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Mon, 9 Sep 2002 00:07:46 +0300
+             Message-ID: <20020908210746.GB4136@lyta.hut.fi>
+             
+             [ 17880]
+             integrate Math::BigInt-1.63
+             Subject: Re: [perl #16997] Math::BigFloat hang on bsqrt [ANNOUNCE v1.63
+             From: Tels <perl_dummy@bloodgate.com>
+             Date: Mon, 09 Sep 2002 00:23:01 +0200 (CEST)
+             Message-Id: <200209082022.g88KMGY20194@crypt.org>
+             
+             [ 17881]
+             Subject: Re: [PATCH: perl #17849] (corrected) Long double bugs - sprintf.t _and_ num.t
+             From: "Allen Smith" <easmith@beatrice.rutgers.edu>
+             Date: Mon, 9 Sep 2002 01:48:08 -0400
+             Message-Id: <10209090148.ZM1555835@puck2.rutgers.edu>
+             
+             [ 17883]
+             Subject: [PATCH] Quieten warnings in Deparse.pm
+             From: Paul Johnson <paul@pjcj.net>
+             Date: Sun, 8 Sep 2002 23:50:11 +0200
+             Message-ID: <20020908215011.GA879@pjcj.net>
+             
+             [ 17884]
+             Subject: [PATCH] File/Find/t/find.t tests 1 and 2 (was Re: [perl #17061] no strict 'garbage')
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Sun, 8 Sep 2002 19:45:52 +0100
+             Message-ID: <20020908184551.GH286@Bagpuss.unfortu.net>
+             
+             [ 17885]
+             Subject: [PATCH] strict.pm pod at __END__
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Sun, 8 Sep 2002 22:36:09 +0100
+             Message-ID: <20020908213608.GM286@Bagpuss.unfortu.net>
+             
+             [ 17886]
+             Subject: [PATCH] Re: [PATCH] Attempt at speeding up Config.pm.  Didn't work.
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Sun, 8 Sep 2002 23:05:54 +0100
+             Message-ID: <20020908220553.GO286@Bagpuss.unfortu.net>
+             
+             [ 17887]
+             Subject: Re: [PATCH] Quieten warnings in Deparse.pm
+             From: Paul Johnson <paul@pjcj.net>
+             Date: Mon, 9 Sep 2002 23:37:33 +0200
+             Message-ID: <20020909213733.GD879@pjcj.net>
+             
+             [ 17888]
+             New low-price HP servers
+             
+             [ 17892]
+             Callback behaviour in hints
+             Mon, 9 Sep 2002, Allen Smith
+             
+             [ 17897]
+             Subject: [perl #17119] typo in utils/dprofpp.PL
+             From: "Todd C. Miller" (via RT) <perlbug@perl.org>
+             Date: 10 Sep 2002 18:49:56 -0000
+             Message-ID: <rt-17119-37126.4.55444095171472@bugs6.perl.org>
+             
+             [ 17898]
+             Fix bug #17006 : remove spurious do{} in the deparsing
+             of s/.../.../e.
+             
+             [ 17899]
+             Re: [perl #17170] NetBSD and useshrplib config option
+             Thu 12 Sep 2002 09:22, Rafael Garcia-Suarez
+             
+             [ 17906]
+             Fix pod/perlmodlib.PL (it wasn't generating a complete list
+             of modules.) Regenerate pod/perlmodlib.pod. Add a warning :
+             not all modules listed in perlmodlib are necessarily installed.
+             Plus some corrections by Vincent Lefevre.
+             
+             [ 17907]
+             Subject: Re: [perl #17174] perl 5.8.0 fails tests on NetBSD/Alpha
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Sun, 15 Sep 2002 18:02:17 +0300
+             Message-ID: <20020915150217.GB21300@lyta.hut.fi>
+             
+             [ 17908]
+             Subject: [perl #17340] When used/requied Locale::*** modules unexpectedly modify $_
+             From: (Ilya Martynov) (via RT) <perlbug@perl.org>
+             Date: 15 Sep 2002 19:06:56 -0000
+             Message-Id: <rt-17340-37749.5.67862754668525@bugs6.perl.org>
+             
+             [ 17909]
+             Pod formatting nit, found by Merijn and Jos Boumans.
+             
+             [ 17910]
+             Fix #17375 (rcatline didn't work on a formerly-defined undef) by
+             checking for SvOK in do_readline().
+             
+             [ 17911]
+             Typo fix.
+             
+             [ 17913]
+             Subject: [PATCH perl@17882] file spec tweaks for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Wed, 18 Sep 2002 16:57:02 -0500
+             Message-ID: <3D88F6AE.3020708@mac.com>
+             
+             [ 17914]
+             Subject: [PATCH] PASE saga continues
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Thu, 19 Sep 2002 23:30:20 +0300
+             Message-ID: <20020919203020.GB274453@lyta.hut.fi>
+             
+             [ 17915]
+             Patch #17914 was empty ; this should have been applied instead.
+             
+             [ 17916]
+             Subject: [PATCH 5.8.0] perlembed.pod: make some examples work with multiplicity
+             From: "Brendan O'Dea" <bod@debian.org>
+             Date: Tue, 10 Sep 2002 09:19:05 +1000
+             Message-ID: <20020909231905.GA31868@londo.odea.dropbear.id.au>
+             
+             [ 17917]
+             Subject: Re: [perl #17141] Text::Wrap "this should not happen" message
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: 11 Sep 2002 19:37:09 +0200
+             Message-ID: <871y80a0my.fsf@vran.herceg.de>
+             
+             [ 17918]
+             Subject: [PATCH] perldoc -f stat (perlfunc.pod)
+             From: "Brendan O'Dea" <bod@debian.org>
+             Date: Mon, 23 Sep 2002 22:45:40 +1000
+             Message-ID: <20020923124540.GB28031@londo.odea.dropbear.id.au>
+             
+             [ 17921]
+             add TODO tests for slow our() declaration
+             Subject: Re: [perl #17376] Bug Report - our(%)
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Thu, 19 Sep 2002 22:34:01 -0700
+             Message-ID: <JNri9gzkgSBB092yn@efn.org>
+             
+             [ 17922]
+             Subject: Re: [PATCH] spurious t/auto directory appears
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Fri, 13 Sep 2002 23:56:05 -0400
+             Message-ID: <20020914035605.GF18928@ool-18b93024.dyn.optonline.net>
+             
+             [ 17923]
+             Subject: [PATCH] Re: Advice on coredump
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Wed, 18 Sep 2002 22:14:57 +0200
+             Message-Id: <20020918221457.16cb1b43.rgarciasuarez@free.fr>
+             
+             [ 17925]
+             Subject: [PATCH v2] enable -ansi -pedantic
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Wed, 18 Sep 2002 01:19:25 +0300
+             Message-ID: <20020917221925.GF85044@lyta.hut.fi>
+             
+             [ 17926]
+             Subject: [PATCH] defuse installusrbinperl
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Thu, 19 Sep 2002 18:01:03 +0300
+             Message-ID: <20020919150103.GI208696@lyta.hut.fi>
+             
+             [ 17927]
+             Subject: [PATCH] Re: [perl #17439] broken Locale::Language in a UTF environment
+             From: Marty Pauley <marty+p5p@kasei.com>
+             Date: Fri, 20 Sep 2002 09:52:16 +0100
+             Message-Id: 20020920085216.GC10512@soto.kasei.com
+             
+             [ 17928]
+             Subject: [PATCH] bug in utf8.c(?)
+             From: Marty Pauley <marty+p5p@kasei.com>
+             Date: Fri, 20 Sep 2002 10:55:33 +0100
+             Subject: [PATCH] bug in utf8.c(?)
+             
+             [ 17930]
+             Subject: [perl #17445] Class::Struct patch: version number, examples
+             From: Ken Neighbors (via RT) <perlbug@perl.org>
+             Date: 19 Sep 2002 18:48:22 -0000 
+             Message-Id: <rt-17445-38150.7.26118647008619@bugs6.perl.org>
+             
+             [ 17931]
+             Subject: [PATCH] [perl #10021] Fixing bareword usage under strict.pm
+             From: Kay_Röpke <kay@dolphin-services.de>
+             Date: Fri, 20 Sep 2002 16:09:08 +0200
+             Message-Id: <8775B355-CCA2-11D6-AADE-000393414688@dolphin-services.de>
+             
+             [ 17932]
+             #17931 checked for wrong constant
+             
+             [ 17933]
+             Subject: [PATCH] perl #17453
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Fri, 20 Sep 2002 17:22:45 +0300
+             Message-ID: <20020920142245.GG280265@lyta.hut.fi>
+             
+             [ 17934]
+             missing '.' in test from #17932
+             
+             [ 17935]
+             Subject: [PATCH 5.8.0 DOC] perlopentut.pod, #3: The last of the content changes.
+             From: Andy Lester <andy@petdance.com>
+             Date: Fri, 20 Sep 2002 12:23:41 -0500
+             Message-ID: <20020920172341.GA15672@petdance.com>
+             
+             [ 17936]
+             Subject: [PATCH] configure.com -- don't exclude threads::shared
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Wed, 25 Sep 2002 17:14:33 -0500
+             Message-ID: <3D923549.6050809@mac.com>
+             
+             [ 17938]
+             Email address change for Stéphane Payrard
+             
+             [ 17939]
+             Subject: [perl #17222] [PATCH] h2ph and Fortran, other wacky headers on IRIX
+             From: Allen Smith (via RT) <perlbug@perl.org>
+             Date: 13 Sep 2002 03:01:30 -0000
+             Message-Id: <rt-17222-37356.6.04859798196188@bugs6.perl.org>
+             
+             [ 17940]
+             Subject: Re: [perl #17587] Attribute::Handlers and Config in 5.9.0
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Fri, 27 Sep 2002 13:52:18 +0200
+             Message-Id: <20020927135218.3a20dd68.rgarciasuarez@free.fr>
+             
+             [ 17941]
+             Subject: [perl #16796] Configure script buglet
+             From: "Amick, Eric" (via RT) <perlbug@perl.org>
+             Date: 27 Aug 2002 20:09:29 -0000 
+             Message-Id: <rt-16796-35837.19.7072355819815@bugs6.perl.org>
+             
+             [ 17945]
+             -Dgccansipedantic only for gcc 3+
+             Mon, 30 Sep 2002, Jarkko Hietaniemi <jhi@iki.fi>
+             
+             [ 17947]
+             Subject: Re: sv_2pv_flags and ROK and UTF8 flags
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Wed, 11 Sep 2002 22:22:45 -0700
+             Message-ID: <lSCg9gzkgymX092yn@efn.org>
+             
+             [ 17948]
+             Subject: [REPATCH lib/AutoLoader.pm] Remove Dependency on Exporter (take 2 or 3)
+             From: chromatic <chromatic@wgz.org>
+             Date: Fri, 13 Sep 2002 14:26:08 -0700
+             Message-Id: <200209131426.08116.chromatic@wgz.org>
+             
+             [ 17949]
+             patch based on:
+             Subject: Re: [perl #17376] Bug Report - our(%)
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Mon, 30 Sep 2002 15:22:18 -0700
+             Message-ID: <a6Mm9gzkgK0P092yn@efn.org>
+             
+             [ 17950]
+             Add silly bandaid to stop segfaults on subsequent accesses to
+             the Nullgv returned by gv_fetchpv() in S_scan_inputsymbol()
+             (<$fred>).
+             
+             [ 17952]
+             better handling of whitespace in autodoc declarations; fragment from:
+             Subject: [PATCH pad.c,h] move all pad-related code to its own src file
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Wed, 25 Sep 2002 23:40:23 +0100
+             Message-ID: <20020925234023.A20044@fdgroup.com>
+             
+             [ 17954]
+             Subject: [PATCH] Re: perlio bug?
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Wed, 25 Sep 2002 21:58:12 +0200
+             Message-Id: <20020925215812.3b7adb0d.rgarciasuarez@free.fr>
+             
+             [ 17955]
+             add precedence warning for bitwise docs
+             Subject: [PATCH] Bug in ARM's floating point emulation - Need someone, really...
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Thu, 26 Sep 2002 13:20:45 +0100
+             Message-Id: <E17uXdN-0003ko-00@libra.cus.cam.ac.uk>
+             
+             [ 17956]
+             Devel::Peek tests from:
+             Subject: [PATCH] MGf_TAINTEDDIR and MGf_MINMATCH reuse unknown to dump.c
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Thu, 26 Sep 2002 22:16:39 -0700
+             Message-ID: <3m+k9gzkgqnP092yn@efn.org>
+             
+             [ 17957]
+             document how to set APPLLIB_EXP
+             Subject: Re: [perl #15957] error installing perl 5.8.0
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Fri, 27 Sep 2002 09:13:29 -0400 (EDT)
+             Message-ID: <Pine.SOL.4.10.10209270902210.6800-100000@maxwell.phys.lafayette.edu>
+             
+             [ 17958]
+             missing quote from #17957
+             
+             [ 17959]
+             Subject: [DOCPATCH] Unicode porting advice
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: Fri, 27 Sep 2002 15:30:16 +0200
+             Message-ID: <m3znu3zhjr.fsf@k242.linux.bogus>
+             
+             [ 17961]
+             Subject: Re: Hash::Util::lock_keys inhibits bless
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: Mon, 30 Sep 2002 17:24:06 +0200
+             Message-ID: <m3zntzwlex.fsf@k242.linux.bogus>
+             
+             [ 17962]
+             Subject: [PATCH] no [] in tr///
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Wed, 2 Oct 2002 17:09:11 +0300
+             Message-Id: <20021002140911.GH278184@lyta.hut.fi>
+             
+             [ 17964]
+             Subject: Re: [PATCH] Re: builtin die parsed differently to CORE::GLOBAL::die
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Tue, 1 Oct 2002 23:34:35 +0200
+             Message-Id: <20021001233435.318514f3.rgarciasuarez@free.fr>
+             
+             [ 17965]
+             op/tr.t test is affected by #17962
+             
+             [ 17966]
+             Subject: [PATCH] retropatch
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Fri, 27 Sep 2002 03:51:34 +0300
+             Message-ID: <20020927005134.GB339120@lyta.hut.fi>
+             
+             [ 17967]
+             Subject: [PATCH] reentrant buffers
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Fri, 27 Sep 2002 01:08:56 +0300
+             Message-ID: <20020926220856.GA339120@lyta.hut.fi>
+             
+             [ 17968]
+             Subject: [PATCH] Re: speed of my
+             From: Stephen McCamant <smcc@mit.edu>
+             Date: Wed, 2 Oct 2002 21:48:59 -0400
+             Message-Id: <15771.41483.524281.299958@syllepsis.MIT.EDU>
+             
+             [ 17972]
+             Add a new warning, "Possible precedence problem on bitwise
+             %c operator", triggerred when a bitwise op has a numeric
+             comparison op as child.
+             
+             [ 17973]
+             Change the warning message "%s trapped by operation mask"
+             to include '' around the op name. Document it in perldiag.
+             
+             [ 17976]
+             Fix bug #17744, suggested by Andreas Jurenda,
+             tweaked by rgs (security hole in Safe).
+             
+             [ 17978]
+             Upgrade to Attribute::Handlers 0.78
+             
+             [ 17979]
+             Subject: [PATCH] fix typo in Tie::Array
+             From: "Jos I. Boumans" <kane@cpan.org>
+             Date: sat okt 5, 2002  20:39:17 Europe/Stockholm
+             Message-Id: <20021005183920.14746.qmail@onion.perl.org>
+             
+             [ 17981]
+             Try #3 for Porting/pumpkin.pod APPLLIB_EXP quoting
+             Tue, 8 Oct 2002; Andy Dougherty <doughera@lafayette.edu>
+             
+             [ 17982]
+             Correct mailing list archive URL
+             Wed, 9 Oct 2002; Slaven Rezic <slaven.rezic@berlin.de>
+             
+             [ 17983]
+             Tru64 and gcc and threads
+             Sat, 5 Oct 2002; Jarkko Hietaniemi <jhi@iki.fi>
+             
+             [ 17984]
+             Fix bug #17823 : non-modifying tr/// stringifies references
+             
+             [ 17985]
+             Subject: Re: README.cygwin draft update
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Mon, 07 Oct 2002 17:15:09 -0700
+             Message-ID: <NOio9gzkg6oR092yn@efn.org>
+             
+             [ 17987]
+             Subject: Re: [perl #17075] sprintf: '%.[num](g|G)' documentation incorrect
+             From: "Allen Smith" <easmith@beatrice.rutgers.edu>
+             Date: Mon, 9 Sep 2002 17:36:55 -0400
+             Message-Id: <10209091736.ZM1631710@puck2.rutgers.edu>
+             
+             [ 17988]
+             Subject: [PATCH] Make Exporter cope with changing EXPORT_OK (was Re: Recent changes to Exporter::Heavy break Math::Pari)
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Sat, 28 Sep 2002 18:52:00 +0100
+             Message-ID: <20020928175159.GC403@Bagpuss.unfortu.net>
+             
+             [ 17989]
+             Subject: PATCH: lib/ExtUtils/typemap
+             From: Brian Ingerson <ingy@ttul.org>
+             Date: Sat, 28 Sep 2002 13:03:24 -0700
+             Message-ID: <20020928130324.A16900@ttul.org>
+             
+             [ 17992]
+             Subject: Re: Hash::Util::lock_keys inhibits bless
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: Fri, 04 Oct 2002 06:38:57 +0200
+             Message-ID: <m3bs6astr2.fsf@k242.linux.bogus>
+             
+             [ 17993]
+             croak() is better written Perl_croak() in C code.
+             
+             [ 17994]
+             Fix bug #17776 : memory corruption in qr/##/x
+             
+             [ 17995]
+             Subject: [perl #17819] Typo in perltooc?
+             From: Bob Wilkinson (via RT) <perlbug@perl.org>
+             Date: 9 Oct 2002 09:50:40 -0000
+             Message-Id: <rt-17819-39445.14.7484532089852@bugs6.perl.org>
+             
+             Subject: [perl #17821] Typo in perltooc
+             From: Bob Wilkinson (via RT) <perlbug@perl.org>
+             Date: 9 Oct 2002 10:12:51 -0000
+             Message-Id: <rt-17821-39458.9.41452851965508@bugs6.perl.org>
+             
+             [ 17996]
+             Subject: [PROPOSED PATCH lib/AutoLoader.t lib/AutoLoader.pm] Test and Improve unimport()
+             From: chromatic <chromatic@wgz.org>
+             Date: Thu, 03 Oct 2002 22:56:54 -0700
+             Message-ID: <20021004060120.33329.qmail@onion.perl.org>
+             
+             [ 17997]
+             Subject: [perl #17751] File::Spec::Win32::canonpath patch try#3
+             From: Information Service <info@lingo.kiev.ua>
+             Date: Wed, 09 Oct 2002 07:17:00 +0400
+             Message-ID: <3DA39FAC.85471200@lingo.kiev.ua>
+             
+             [ 17998]
+             Fix bug #17771 : segfault with the 'for' statement modifier
+             used inside a map or a grep.
+             
+             [ 17999]
+             Subject: [PATCH] No warn, just ERANGE (Was: Re: [PATCH] reentrant buffers)
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Fri, 4 Oct 2002 16:11:57 +0300
+             Message-ID: <20021004131157.GD278184@lyta.hut.fi>
+             
+             [ 18001]
+             Subject: Re: Smoke 17977 FAIL(F) MSWin32 5.0 W2000Pro (MSWin32-x86)
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Thu, 10 Oct 2002 14:28:55 -0700
+             Message-ID: <XEfp9gzkgquV092yn@efn.org>
+             
+             [ 18002]
+             Subject: [Encode] 1.77 Released
+             From: Dan Kogai <dankogai@dan.co.jp>
+             Date: Sun, 6 Oct 2002 12:52:52 +0900
+             Message-Id: <16D4C6C9-D8DF-11D6-A5EA-0003939A104C@dan.co.jp>
+             
+             [ 18003]
+             Second attempt to fix Devel::Peek test of $ENV{PATH}, after #17956
+             and #18001.
+             
+             [ 18004]
+             updated hints for Darwin from Wilfredo Sanchez <wsanchez@mit.edu>
+             
+             [ 18005]
+             Subject: Re: Building bleadperl (minperl) fails completely under VC7
+             From: Abe Timmerman <abeltje@cpan.org>
+             Date: Tue, 8 Oct 2002 14:16:56 +0200
+             Message-Id: <200210081416.56942.abeltje@cpan.org>
+             
+             [ 18007]
+             Subject: [perl #17773] errors in c2ph(1) man page
+             From: Eric Melville (via RT) <perlbug@perl.org>
+             Date: 7 Oct 2002 02:58:34 -0000
+             Message-Id: <rt-17773-39313.12.4820309875481@bugs6.perl.org>
+             
+             [ 18009]
+             Subject: [PATCH perldoc] For screaming hell's sake
+             From: Simon Cozens <simon@netthink.co.uk>
+             Date: Tue, 8 Oct 2002 11:13:07 +0100
+             Message-ID: <20021008101307.GA8175@netthink.co.uk>
+             
+             [ 18010]
+             Subject: [PATCH] Re: [perl #17772] pack "w" /* this cannot happen ;-) */ is fallacious
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Tue, 8 Oct 2002 21:52:53 +0100
+             Message-ID: <20021008205253.GA283@Bagpuss.unfortu.net>
+             
+             [ 18011]
+             Subject: [perl #17805] BUG: Grammar bug during Configure
+             From: Richard Hitt (via RT) <perlbug@perl.org>
+             Date: 8 Oct 2002 21:04:30 -0000
+             Message-Id: <rt-17805-39395.9.0319493317925@bugs6.perl.org>
+             
+             [ 18012]
+             #18005 was not enough
+             Subject: [PATCH win32/makefile.mk] (Was Re: Building bleadperl (minperl) fails completely under VC7)
+             From: Abe Timmerman <abeltje@cpan.org>
+             Date: Sat, 12 Oct 2002 17:56:39 +0200
+             Message-Id: <200210121756.39803.abeltje@cpan.org>
+             
+             [ 18013]
+             Subject: [PATCH] for -Dm
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: Wed, 9 Oct 2002 00:49:33 +0200 (CEST)
+             Message-Id: <200210082249.g98MnXqM076566@vran.herceg.de>
+             
+             [ 18015]
+             The -0 command-line switch wasn't setting $/ at compile-time.
+             Move the initialization of $/ just after switch parsing
+             (it was done after yyparse().)
+             
+             [ 18016]
+             Subject: [PATCH] minor typos in perlhist.pod and perlunicode.pod
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date: Sun, 13 Oct 2002 09:02:36 +0900
+             Message-Id: <20021013090227.FFCD.BQW10602@nifty.com>
+             
+             [ 18017]
+             Subject: [PATCH] perlipc.pod
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: Sun, 13 Oct 2002 14:26:26 +0200 (CEST)
+             Message-Id: <200210131226.g9DCQQLN014591@vran.herceg.de>
+             
+             [ 18018]
+             Subject: Re: [PATCH] cv.h: Comment update
+             From: Paul Johnson <paul@pjcj.net>
+             Date: Mon, 14 Oct 2002 20:00:50 +0200
+             Message-ID: <20021014180050.GC7333@pjcj.net>
+             
+             [ 18020]
+             prototype() didn't warn when used in void context.
+             
+             [ 18021]
+             Subject: [PATCH] minor tweaks in Porting/pumpkin.pod
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: Thu, 3 Oct 2002 21:54:22 +0200 (CEST)
+             Message-Id: <200210031954.g93JsMiZ034457@vran.herceg.de>
+             
+             [ 18022]
+             Subject: Re: [perl #17809] Different warning behaviour between normal and tied hashes
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Tue, 15 Oct 2002 17:01:43 -0700
+             Message-ID: <nxKr9gzkgmBO092yn@efn.org>
+             
+             [ 18023]
+             Subject: Re: [perl #17830] open FH, "<&", $fd
+             From: Steve Grazzini <grazz@nyc.rr.com>
+             Date: 11 Oct 2002 22:28:58 -0000
+             Message-ID: <20021011222858.452.qmail@onion.perl.org>
+             
+             [ 18025]
+             definition of MAXPATHLEN
+             Subject: [PATCH] standard lawyerism
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Fri, 11 Oct 2002 02:48:26 +0300
+             Message-ID: <20021010234825.GM292305@lyta.hut.fi>
+             
+             [ 18028]
+             Subject: [PATCH t/run/switches.t] Re: Smoke 18027 FAIL(F) MSWin32 5.0 Win2000Pro (MSWin32-x86)
+             From: Abe Timmerman <abe@ztreet.demon.nl>
+             Date: Thu, 17 Oct 2002 23:38:34 +0200
+             Message-Id: <200210172338.34728.abe@ztreet.demon.nl>
+             
+             [ 18029]
+             minor tweaks in Porting/pumpkin.pod
+             Fri, 18 Oct 2002; Philip Newton <Philip.Newton@gmx.net>
+             
+             [ 18033]
+             Upgrade to Test.pm v1.23
+             
+             [ 18034]
+             Update to Time::HiRes v1.38
+             
+             [ 18035]
+             Subject: Re: [perl #17951] Strange UTF error
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Wed, 16 Oct 2002 18:50:51 +0300
+             Message-ID: <20021016155051.GB268437@lyta.hut.fi>
+             
+             [ 18036]
+             Subject: Re: [perl #17892] Perl's mkdir() doesn't remove trailing slashes
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: 14 Oct 2002 09:37:18 +0200
+             Message-ID: <8765w5wjwx.fsf@vran.herceg.de>
+             
+             [ 18037]
+             Subject: [PATCH] t/op/pack.t: Tru64 5.1A gcc 3.2.1 no inf
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Mon, 14 Oct 2002 14:49:54 +0300
+             Message-ID: <20021014114954.GB80937@lyta.hut.fi>
+             
+             [ 18038]
+             Update to Net::Ping v2.23
+             
+             [ 18039]
+             Subject: Re: [PATCH] Warning on pararameterless 'use IO' and doc update
+             From: =?iso-8859-1?Q?St=E9phane?= Payrard <s.payrard@wanadoo.fr>
+             Date: Tue, 15 Oct 2002 02:17:03 +0200
+             Message-ID: <20021015001703.GG7914@stefp.dyndns.org>
+             
+             [ 18041]
+             Subject: Re: [perl #18019] regex overoptimization
+             From: hv@crypt.org
+             Date: Mon, 21 Oct 2002 03:21:54 +0100
+             Message-Id: <200210210221.g9L2LsU32598@crypt.compulink.co.uk>
+             
+             [ 18042]
+             Subject: Re: [perl #16184] Unexpected warning when using C<< open FH => >>
+             From: hv@crypt.org
+             Date: Mon, 21 Oct 2002 11:27:40 +0100
+             Message-Id: <200210211027.g9LARef05722@crypt.compulink.co.uk>
+             
+             [ 18044]
+             Subject: [PATCH] Shell.pm object methods broken
+             From: Dan Brook <dbrook@easyspace.com>
+             Date: Thu, 17 Oct 2002 16:05:04 +0100
+             Message-Id: <20021017160504.63926a1b.dbrook@easyspace.com>
+             
+             [ 18045]
+             improve 'atomicity' wording
+             
+             [ 18046]
+             Subject: Re: Smoke 18027 FAIL(F) MSWin32 5.0 Win2000Pro (MSWin32-x86)
+             From: Alain Barbet <alian@alianwebserver.com>
+             Date: Fri, 18 Oct 2002 15:29:29 +0200
+             Message-ID: <3DB00CB9.70708@alianwebserver.com>
+             
+             [ 18047]
+             Subject: [PATCH] AutoLoader gives wrong message
+             From: Peter Scott <peter@psdt.com>
+             Date: Thu, 17 Oct 2002 19:54:56 -0700
+             Message-id: <4.3.2.7.2.20021017192450.00b3dce0@shell2.webquarry.com>
+             
+             [ 18049]
+             Subject: [PATCH] perluniintro
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Sun, 20 Oct 2002 15:48:09 +0300
+             Message-ID: <20021020124809.GE444369@lyta.hut.fi>
+             
+             [ 18050]
+             perlmodlib.pod nit suggested by David Dyck (bug #18055)
+             Regenerate perlmodlib.pod
+             
+             [ 18051]
+             Further tweaks to perluniintro.pod
+             
+             [ 18052]
+             Further tweaks to perlmodlib.pod.
+             Add a note about perllocal.pod, which wasn't documented.
+             
+             [ 18053]
+             charnames pragma extended with :alias for customized
+             unicode naming aliases
+             Mon, 21 Oct 2002; "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             
+             [ 18055]
+             Reverse change #8066 and sense of test, to satisfy [perl #17763]
+             
+             [ 18056]
+             Subject: [PATCH] B/C.pm: make $0 to argv[0] again
+             From: Autrijus Tang <autrijus@autrijus.org>
+             Date: Sat, 19 Oct 2002 17:51:57 +0800
+             Message-ID: <20021019095157.GA430@not.autrijus.org>
+             
+             [ 18057]
+             Subject: [Encode] 1.80 released
+             From: Dan Kogai <dankogai@dan.co.jp>
+             Date: Tue, 22 Oct 2002 05:47:16 +0900
+             Message-Id: <48F1B85D-E536-11D6-A87D-0003939A104C@dan.co.jp>
+             
+             [ 18058]
+             Subject: The Inaba patch for tr/// vs. use encoding
+             From: Dan Kogai <dankogai@dan.co.jp>
+             Date: Mon, 21 Oct 2002 17:36:02 +0900
+             Message-Id: <218B4434-E4D0-11D6-A668-0003939A104C@dan.co.jp>
+             
+             [ 18059]
+             Subject: [perl #18036] perldoc refuses to run on BeOS
+             From: "mauzo@csv.warwick.ac.uk (via RT)" <perlbug@perl.org>
+             Date: 21 Oct 2002 10:18:50 -0000
+             Message-Id: <rt-18036-40246.15.4017814246886@bugs6.perl.org>
+             
+             [ 18060]
+             2 lines of change #18039 had several problems
+             
+             [ 18062]
+             Subject: [PATCH] DB_File 1.806
+             From: "Paul Marquess" <Paul.Marquess@btinternet.com>
+             Date: Tue, 22 Oct 2002 11:16:21 +0100
+             Message-ID: <AIEAJICLCBDNAAOLLOKLCEDMFLAA.Paul.Marquess@btinternet.com>
+             
+             [ 18069]
+             Subject: [PATCH] Re: [PATCH] Re: [perl #17772] pack "w" /* this cannot happen ;-) */ is fallacious
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Sun, 27 Oct 2002 22:31:08 +0000
+             Message-ID: <20021027223108.GK292@Bagpuss.unfortu.net>
+             
+             [ 18071]
+             Subject: RE: [PATCH] Warning on pararameterless 'use IO' and doc update
+             From: "Paul Marquess" <Paul.Marquess@btinternet.com>
+             Date: Mon, 28 Oct 2002 12:53:52 -0000
+             Message-ID: <AIEAJICLCBDNAAOLLOKLAEOEFLAA.Paul.Marquess@btinternet.com>
+             
+             [ 18072]
+             Partial fix of bug [perl #17589] : prevent the parser to
+             segfault when encountering the erroneous construct "sub;".
+             
+             [ 18073]
+             Subject: [perl #18165] "0" fails as right-hand argument to ..
+             From: Mark-Jason Dominus (via RT) <perlbug@perl.org>
+             Date: 30 Oct 2002 17:27:53 -0000
+             Message-Id: <rt-18165-40816.6.86096008382222@bugs6.perl.org>
+             
+             (Fixed by making an exception for .."0" in pp_flop.)
+             
+             [ 18074]
+             Subject: Re: [perl #18114] [no subject] BUG: "-4\n".."0\n" is not DWIM
+             but "-4\n".."-0\n" is!
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: 30 Oct 2002 16:22:36 +0100
+             Message-Id: <87n0ow0x4z.fsf@vran.herceg.de>
+             
+             Subject: RE: [perl #18114] [no subject] [TEST PATCH]BUG: "-4\n".."0\n"
+             is not DWIM but "-4\n".."-0\n" is!
+             From: "Orton, Yves" <yves.orton@mciworldcom.de>
+             Date: Wed, 30 Oct 2002 11:59:31 -0000
+             Message-Id: <71B318898201D311845C0008C75DAD1C07B78BF7@defra1ex2>
+             
+             (Applied over previous fix.)
+             
+             [ 18075]
+             Adjust the number of tests in t/op/range.t
+             
+             [ 18076]
+             Update to Scalar-List-Utils 1.08
+             
+             [ 18077]
+             Subject: [PATCH lib/Config.*] Document and test Config::config_re().
+             (with tweaks)
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Wed, 4 Sep 2002 12:06:08 -0700
+             Message-ID: <20020904190607.GG8367@ool-18b93024.dyn.optonline.net>
+             
+             [ 18078]
+             avoid reliance on croak() prototype
+     Branch: maint-5.8/perl
+	  +> (branch 34 files)
+	  !> (integrate 343 files)
+____________________________________________________________________________
+[ 18079] By: jhi                                   on 2002/11/04  02:06:17
+        Log: Integrate:
+             
+             [ 17639]
+             It's all yours, Hugo.
+             (Flip Changes as Changes5.8, start new Changes)
+             
+             [ 17644]
+             Copy perldelta as perl58delta, purge the perldelta.
+             
+             The 17639 required editing to talk about 5.8.1 instead of
+             5.9.X; the 17644 required manual resolving since perldelta
+             was a bit confused between three Perl versions.
+     Branch: maint-5.8/perl
+	  +> Changes5.8 pod/perl58delta.pod
+	  !> Changes MANIFEST pod/perldelta.pod
