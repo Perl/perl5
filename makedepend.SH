@@ -18,10 +18,6 @@ case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
 
-case "$osname" in
-amigaos) cat=/bin/cat ;; # must be absolute
-esac
-
 echo "Extracting makedepend (with variable substitutions)"
 rm -f makedepend
 $spitshell >makedepend <<!GROK!THIS!
@@ -61,6 +57,10 @@ esac
 # an older one lying about in /usr/local/bin.
 PATH=".$path_sep..$path_sep$PATH"
 export PATH
+
+case "$osname" in
+amigaos) cat=/bin/cat ;; # must be absolute
+esac
 
 $cat /dev/null >.deptmp
 $rm -f *.c.c c/*.c.c
