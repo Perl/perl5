@@ -869,6 +869,10 @@ from the ps(1) output.  For example, setting C<$0> to C<"foobar"> will
 result in C<"perl: foobar (perl)">.  This is an operating system
 feature.
 
+In multithreaded scripts Perl coordinates the threads so that any
+thread may modify its copy of the C<$0> and the change becomes visible
+to ps(1) (assuming the operating system plays along).
+
 =item $[
 
 The index of the first element in an array, and of the first character

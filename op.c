@@ -1734,6 +1734,8 @@ int
 Perl_block_start(pTHX_ int full)
 {
     int retval = PL_savestack_ix;
+    /* If there were syntax errors, don't try to start a block */
+    if (PL_yynerrs) return retval;
 
     pad_block_start(full);
     SAVEHINTS();
@@ -1757,6 +1759,8 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
     int needblockscope = PL_hints & HINT_BLOCK_SCOPE;
     line_t copline = PL_copline;
     OP* retval = scalarseq(seq);
+    /* If there were syntax errors, don't try to close a block */
+    if (PL_yynerrs) return retval;
     if (!seq) {
 	/* scalarseq() gave us an OP_STUB */
 	retval->op_flags |= OPf_PARENS;
@@ -3752,7 +3756,6 @@ Perl_newLOOPEX(pTHX_ I32 type, OP *label)
 void
 Perl_cv_undef(pTHX_ CV *cv)
 {
-    CV *outsidecv;
     CV *freecv = Nullcv;
 
 #ifdef USE_ITHREADS
@@ -3776,20 +3779,21 @@ Perl_cv_undef(pTHX_ CV *cv)
     }
     SvPOK_off((SV*)cv);		/* forget prototype */
     CvGV(cv) = Nullgv;
-    outsidecv = CvOUTSIDE(cv);
+
+    pad_undef(cv);
+
     /* Since closure prototypes have the same lifetime as the containing
      * CV, they don't hold a refcount on the outside CV.  This avoids
      * the refcount loop between the outer CV (which keeps a refcount to
      * the closure prototype in the pad entry for pp_anoncode()) and the
      * closure prototype, and the ensuing memory leak.  --GSAR */
     if (!CvANON(cv) || CvCLONED(cv))
-        freecv = outsidecv;
+        freecv = CvOUTSIDE(cv);
     CvOUTSIDE(cv) = Nullcv;
     if (CvCONST(cv)) {
 	SvREFCNT_dec((SV*)CvXSUBANY(cv).any_ptr);
 	CvCONST_off(cv);
     }
-    pad_undef(cv, outsidecv);
     if (freecv)
 	SvREFCNT_dec(freecv);
     if (CvXSUB(cv)) {
@@ -4082,9 +4086,11 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    SAVEFREESV(PL_compcv);
 	    goto done;
 	}
+	/* transfer PL_compcv to cv */
 	cv_undef(cv);
 	CvFLAGS(cv) = CvFLAGS(PL_compcv);
 	CvOUTSIDE(cv) = CvOUTSIDE(PL_compcv);
+	CvOUTSIDE_SEQ(cv) = CvOUTSIDE_SEQ(PL_compcv);
 	CvOUTSIDE(PL_compcv) = 0;
 	CvPADLIST(cv) = CvPADLIST(PL_compcv);
 	CvPADLIST(PL_compcv) = 0;

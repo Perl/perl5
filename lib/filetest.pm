@@ -50,7 +50,7 @@ operators is a filename, not when it is a filehandle.
 
 =cut
 
-$filetest::hint_bits = 0x00400000;
+$filetest::hint_bits = 0x00400000; # HINT_FILETEST_ACCESS
 
 sub import {
     if ( $_[1] eq 'access' ) {

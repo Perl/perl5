@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 1.49 2002/10/21 19:47:47 dankogai Exp $
+ $Id: Encode.xs,v 1.52 2002/11/18 17:28:49 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -241,16 +241,16 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 MODULE = Encode         PACKAGE = Encode::utf8  PREFIX = Method_
 
 void
-Method_decode(obj,src,check = 0)
-SV *    obj
-SV *    src
-int     check
+Method_decode_xs(obj,src,check = 0)
+SV *	obj
+SV *	src
+int	check
 CODE:
 {
     STRLEN slen;
     U8 *s = (U8 *) SvPV(src, slen);
     U8 *e = (U8 *) SvEND(src);
-    SV *dst = newSV(slen);
+    SV *dst = newSV(slen>0?slen:1); /* newSV() abhors 0 -- inaba */
     SvPOK_only(dst);
     SvCUR_set(dst,0);
     if (SvUTF8(src)) {
@@ -321,32 +321,32 @@ CODE:
 }
 
 void
-Method_encode(obj,src,check = 0)
-SV *    obj
-SV *    src
-int     check
+Method_encode_xs(obj,src,check = 0)
+SV *	obj
+SV *	src
+int	check
 CODE:
 {
     STRLEN slen;
     U8 *s = (U8 *) SvPV(src, slen);
     U8 *e = (U8 *) SvEND(src);
-    SV *dst = newSV(slen);
+    SV *dst = newSV(slen>0?slen:1); /* newSV() abhors 0 -- inaba */
     if (SvUTF8(src)) {
 	/* Already encoded - trust it and just copy the octets */
 	sv_setpvn(dst,(char *)s,(e-s));
 	s = e;
     }
     else {
-	/* Native bytes - can always encode */
-	U8 *d = (U8 *) SvGROW(dst,2*slen+1);
-	while (s < e) {
-	    UV uv = NATIVE_TO_UNI((UV) *s++);
-	    if (UNI_IS_INVARIANT(uv))
-		*d++ = (U8)UTF_TO_NATIVE(uv);
-	    else {
-		*d++ = (U8)UTF8_EIGHT_BIT_HI(uv);
-		*d++ = (U8)UTF8_EIGHT_BIT_LO(uv);
-	    }
+    	/* Native bytes - can always encode */
+	U8 *d = (U8 *) SvGROW(dst, 2*slen+1); /* +1 or assertion will botch */
+    	while (s < e) {
+    	    UV uv = NATIVE_TO_UNI((UV) *s++);
+            if (UNI_IS_INVARIANT(uv))
+            	*d++ = (U8)UTF_TO_NATIVE(uv);
+            else {
+    	        *d++ = (U8)UTF8_EIGHT_BIT_HI(uv);
+                *d++ = (U8)UTF8_EIGHT_BIT_LO(uv);
+            }
 	}
 	SvCUR_set(dst, d- (U8 *)SvPVX(dst));
 	*SvEND(dst) = '\0';

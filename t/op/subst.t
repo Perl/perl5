@@ -7,7 +7,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan( tests => 122 );
+plan( tests => 124 );
 
 $x = 'foo';
 $_ = "x";
@@ -490,4 +490,13 @@ SKIP: {
     ($b = $a) =~ s/-($ud)?-/--$na--/;
     is($b, "$na--$na--$nb", "s///: replace long non-utf8 into non-utf8 (utf8 pattern)");
 }
+
+$_ = 'aaaa';
+$r = 'x';
+$s = s/a(?{})/$r/g;
+is("<$_> <$s>", "<xxxx> <4>", "perl #7806");
+
+$_ = 'aaaa';
+$s = s/a(?{})//g;
+is("<$_> <$s>", "<> <4>", "perl #7806");
 

@@ -1388,7 +1388,7 @@ Here's the code.  We'll
    $client->autoflush(1);
    print $client "Welcome to $0; type help for command list.\n";
    $hostinfo = gethostbyaddr($client->peeraddr);
-   printf "[Connect from %s]\n", $hostinfo->name || $client->peerhost;
+   printf "[Connect from %s]\n", $hostinfo ? $hostinfo->name : $client->peerhost;
    print $client "Command? ";
    while ( <$client>) {
      next unless /\S/;	     # blank line

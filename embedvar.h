@@ -271,6 +271,7 @@
 #define PL_hints		(vTHX->Ihints)
 #define PL_in_clean_all		(vTHX->Iin_clean_all)
 #define PL_in_clean_objs	(vTHX->Iin_clean_objs)
+#define PL_in_load_module	(vTHX->Iin_load_module)
 #define PL_in_my		(vTHX->Iin_my)
 #define PL_in_my_stash		(vTHX->Iin_my_stash)
 #define PL_incgv		(vTHX->Iincgv)
@@ -559,6 +560,7 @@
 #define PL_Ihints		PL_hints
 #define PL_Iin_clean_all	PL_in_clean_all
 #define PL_Iin_clean_objs	PL_in_clean_objs
+#define PL_Iin_load_module	PL_in_load_module
 #define PL_Iin_my		PL_in_my
 #define PL_Iin_my_stash		PL_in_my_stash
 #define PL_Iincgv		PL_incgv
@@ -892,6 +894,7 @@
 #define PL_Yes			(PL_Vars.GYes)
 #define PL_curinterp		(PL_Vars.Gcurinterp)
 #define PL_do_undump		(PL_Vars.Gdo_undump)
+#define PL_dollarzero_mutex	(PL_Vars.Gdollarzero_mutex)
 #define PL_hexdigit		(PL_Vars.Ghexdigit)
 #define PL_lockhook		(PL_Vars.Glockhook)
 #define PL_malloc_mutex		(PL_Vars.Gmalloc_mutex)
@@ -911,6 +914,7 @@
 #define PL_GYes			PL_Yes
 #define PL_Gcurinterp		PL_curinterp
 #define PL_Gdo_undump		PL_do_undump
+#define PL_Gdollarzero_mutex	PL_dollarzero_mutex
 #define PL_Ghexdigit		PL_hexdigit
 #define PL_Glockhook		PL_lockhook
 #define PL_Gmalloc_mutex	PL_malloc_mutex

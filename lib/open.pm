@@ -1,7 +1,7 @@
 package open;
 use warnings;
 use Carp;
-$open::hint_bits = 0x20000;
+$open::hint_bits = 0x20000; # HINT_LOCALIZE_HH
 
 our $VERSION = '1.01';
 
@@ -27,6 +27,7 @@ sub _get_locale_encoding {
 	    } elsif ($ENV{LANG} =~ /^([^.]+)\.([^.]+)$/) {
 		($country_language, $locale_encoding) = ($1, $2);
 	    }
+	    # LANGUAGE affects only LC_MESSAGES only on glibc
 	} elsif (not $locale_encoding) {
 	    if ($ENV{LC_ALL} =~ /\butf-?8\b/i ||
 		$ENV{LANG}   =~ /\butf-?8\b/i) {
@@ -250,7 +251,7 @@ pragma.
 
 =back
 
-If your locale environment variables (LANGUAGE, LC_ALL, LC_CTYPE, LANG)
+If your locale environment variables (LC_ALL, LC_CTYPE, LANG)
 contain the strings 'UTF-8' or 'UTF8' (case-insensitive matching),
 the default encoding of your STDIN, STDOUT, and STDERR, and of
 B<any subsequent file open>, is UTF-8.

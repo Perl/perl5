@@ -95,7 +95,7 @@ ext/B/ramblings/curcop.runtime	Compiler ramblings: notes on curcop use
 ext/B/ramblings/flip-flop	Compiler ramblings: notes on flip-flop
 ext/B/ramblings/magic		Compiler ramblings: notes on magic
 ext/B/ramblings/reg.alloc	Compiler ramblings: register allocation
-ext/B/ramblings/runtime.porting Compiler ramblings: porting PP enging
+ext/B/ramblings/runtime.porting Compiler ramblings: porting PP engine
 ext/B/README		Compiler backend README
 ext/B/t/asmdata.t	See if B::Asmdata works
 ext/B/t/assembler.t	See if B::Assembler, B::Disassembler comply
@@ -226,7 +226,7 @@ ext/Encode/Encode/Makefile_PL.e2x	Skeleton file for enc2xs
 ext/Encode/Encode/README.e2x	Skeleton file for enc2xs
 ext/Encode/Encode/_PM.e2x	Skeleton file for enc2xs
 ext/Encode/Encode/_T.e2x	Skeleton file for enc2xs
-ext/Encode/encoding.pm		Perl Pragmactic Module
+ext/Encode/encoding.pm		Perl Pragmatic Module
 ext/Encode/JP/JP.pm		Encode extension
 ext/Encode/JP/Makefile.PL	Encode extension
 ext/Encode/KR/KR.pm		Encode extension
@@ -563,6 +563,7 @@ ext/POSIX/Makefile.PL		POSIX extension makefile writer
 ext/POSIX/POSIX.pm		POSIX extension Perl module
 ext/POSIX/POSIX.pod		POSIX extension documentation
 ext/POSIX/POSIX.xs		POSIX extension external subroutines
+ext/POSIX/t/is.t		See if POSIX isxxx() work
 ext/POSIX/t/posix.t		See if POSIX works
 ext/POSIX/t/sigaction.t		See if POSIX::sigaction works
 ext/POSIX/t/taint.t		See if POSIX works with taint
@@ -625,7 +626,7 @@ ext/Storable/t/downgrade.t	See if Storable works
 ext/Storable/t/forgive.t	See if Storable works
 ext/Storable/t/freeze.t		See if Storable works
 ext/Storable/t/integer.t	See if Storable works
-ext/Storable/t/interwork56.t	Test combatibility kludge for 64bit data under 5.6.x
+ext/Storable/t/interwork56.t	Test compatibility kludge for 64bit data under 5.6.x
 ext/Storable/t/lock.t		See if Storable works
 ext/Storable/t/make_56_interwork.pl	Make test data for interwork56.t
 ext/Storable/t/make_downgrade.pl	Make test data for downgrade.t
@@ -697,7 +698,7 @@ ext/threads/shared/typemap	thread::shared types
 ext/threads/t/basic.t		ithreads
 ext/threads/t/end.t		Test end functions
 ext/threads/t/join.t		Testing the join function
-ext/threads/t/libc.t		testing libc functions for threadsafetyness
+ext/threads/t/libc.t		testing libc functions for threadsafety
 ext/threads/t/list.t		Test threads->list()
 ext/threads/t/stress_cv.t	Test with multiple threads, coderef cv argument.
 ext/threads/t/stress_re.t	Test with multiple threads, string cv argument and regexes.
@@ -1250,8 +1251,8 @@ lib/Math/BigInt/t/constant.t	Test Math::BigInt/BigFloat under :constant
 lib/Math/BigInt/t/downgrade.t	Test if use Math::BigInt(); under downgrade works
 lib/Math/BigInt/t/inf_nan.t	Special tests for inf and NaN handling
 lib/Math/BigInt/t/isa.t		Test for Math::BigInt inheritance
-lib/Math/BigInt/t/mbimbf.inc	Actual BigInt/BigFloat accuracy, precicion and fallback, round_mode tests
-lib/Math/BigInt/t/mbimbf.t	BigInt/BigFloat accuracy, precicion and fallback, round_mode
+lib/Math/BigInt/t/mbimbf.inc	Actual BigInt/BigFloat accuracy, precision and fallback, round_mode tests
+lib/Math/BigInt/t/mbimbf.t	BigInt/BigFloat accuracy, precision and fallback, round_mode
 lib/Math/BigInt/t/mbi_rand.t	Test Math::BigInt randomly
 lib/Math/BigInt/t/require.t	Test if require Math::BigInt works
 lib/Math/BigInt/t/sub_mbf.t	Empty subclass test of BigFloat
@@ -1394,7 +1395,22 @@ lib/Pod/Man.pm			Convert POD data to *roff
 lib/Pod/ParseLink.pm		Perl an L<> formatting code in POD text
 lib/Pod/Parser.pm		Pod-Parser - define base class for parsing POD
 lib/Pod/ParseUtils.pm		Pod-Parser - pod utility functions
+lib/Pod/Perldoc.pm		guts of the 'perldoc' utility
+lib/Pod/Perldoc/BaseTo.pm	utility module for perldoc
+lib/Pod/Perldoc/GetOptsOO.pm	options parsing for perldoc
+lib/Pod/Perldoc/ToChecker.pm	let perldoc check POD for errors
+lib/Pod/Perldoc/ToMan.pm	render POD as man pages
+lib/Pod/Perldoc/ToNroff.pm	convert POD to nroff
+lib/Pod/Perldoc/ToPod.pm	convert POD to POD
+lib/Pod/Perldoc/ToRtf.pm	convert POD to RTF
+lib/Pod/Perldoc/ToText.pm	convert POD to plain text
+lib/Pod/Perldoc/ToTk.pm		convert POD via Tk::Pod
+lib/Pod/Perldoc/ToXml.pm	convert POD to XML
+lib/Pod/Perldoc/t/checkerbasic.t	test Pod::Perldoc::ToChecker
+lib/Pod/Perldoc/t/perldocbasic.t	test Pod::Perldoc basic operation
+lib/Pod/Perldoc/t/textbasic.t	test Pod::Perldoc::ToText
 lib/Pod/Plainer.pm		Pod migration utility module
+lib/Pod/PlainText.pm		Convert POD data to formatted ASCII text
 lib/Pod/Select.pm		Pod-Parser - select portions of POD docs
 lib/Pod/t/basic.cap		podlators test
 lib/Pod/t/basic.clr		podlators test
@@ -1963,7 +1979,7 @@ lib/utf8.t			See if utf8 operations work
 lib/utf8_heavy.pl		Support routines for utf8 pragma
 lib/validate.pl			Perl library supporting wholesale file mode validation
 lib/vars.pm			Declare pseudo-imported global variables
-lib/vars.t			See if "use vars" work
+lib/vars.t			See if "use vars" works
 lib/version.pm			Support for version objects
 lib/version.t			Tests for version objects
 lib/vmsish.pm			Control VMS-specific behavior of Perl core
@@ -2058,7 +2074,7 @@ numeric.c			Miscellaneous numeric conversion routines
 op.c				Opcode syntax tree code
 op.h				Opcode syntax tree header
 opcode.h			Automatically generated opcode header
-opcode.pl			Opcode header generatore
+opcode.pl			Opcode header generator
 opnames.h			Automatically generated opcode header
 os2/Changes			Changelog for OS/2 port
 os2/diff.configure		Patches to Configure
@@ -2151,7 +2167,7 @@ plan9/setup.rc			Plan9 port: script for easy build+install
 plan9/versnum			Plan9 port: script to print version number
 pod/buildtoc.PL			generate buildtoc which generates perltoc.pod
 pod/checkpods.PL		Tool to check for common errors in pods
-pod/Makefile.SH			generate Makefile whichs makes pods into something else
+pod/Makefile.SH			generate Makefile which makes pods into something else
 pod/perl.pod			Top level perl documentation
 pod/perl5004delta.pod		Changes from 5.003 to 5.004
 pod/perl5005delta.pod		Changes from 5.004 to 5.005
@@ -2177,6 +2193,7 @@ pod/perldebtut.pod		Perl debugging tutorial
 pod/perldebug.pod		Debugger info
 pod/perldelta.pod		Changes since last version
 pod/perldiag.pod		Diagnostic info
+pod/perldoc.pod			docs for utils/perldoc
 pod/perldsc.pod			Data Structures Cookbook
 pod/perlebcdic.pod		Considerations for running Perl on EBCDIC platforms
 pod/perlembed.pod		Embedding info
@@ -2197,7 +2214,7 @@ pod/perlfunc.pod		Function info
 pod/perlguts.pod		Internals info
 pod/perlhack.pod		Perl hackers guide
 pod/perlhist.pod		Perl history info
-pod/perlintern.pod		Perl internal function docs (autogenrated)
+pod/perlintern.pod		Perl internal function docs (autogenerated)
 pod/perlintro.pod		Perl introduction for beginners
 pod/perliol.pod			Internals of PerlIO with layers.
 pod/perlipc.pod			IPC info
@@ -2332,6 +2349,8 @@ regcomp.c			Regular expression compiler
 regcomp.h			Private declarations for above
 regcomp.pl			Builder of regnodes.h
 regcomp.sym			Data for regnodes.h
+regen.pl			Common file routines for generator scripts
+regen_headers.pl		Run all scripts that (re)generate files
 regexec.c			Regular expression evaluator
 regexp.h			Public declarations for the above
 regnodes.h			Description of nodes of RE engine
@@ -2363,12 +2382,13 @@ t/comp/hints.t			See if %^H works
 t/comp/multiline.t		See if multiline strings work
 t/comp/our.t			Tests for our declaration
 t/comp/package.t		See if packages work
+t/comp/parser.t			See if the parser works in edge cases
 t/comp/proto.t			See if function prototypes work
 t/comp/redef.t			See if we get correct warnings on redefined subs
 t/comp/require.t		See if require works
-t/comp/script.t			See if script invokation works
+t/comp/script.t			See if script invocation works
 t/comp/term.t			See if more terms work
-t/comp/use.t			See if pragmas work
+t/comp/use.t			See if pragmata work
 t/harness			Finer diagnostics from test suite
 t/io/argv.t			See if ARGV stuff works
 t/io/binmode.t			See if binmode() works
@@ -2724,7 +2744,7 @@ vms/ext/DCLsym/DCLsym.xs	Perl access to CLI symbols
 vms/ext/DCLsym/Makefile.PL	MakeMaker driver for VMS::DCLsym
 vms/ext/DCLsym/test.pl		regression tests for VMS::DCLsym
 vms/ext/Filespec.pm		VMS-Unix file syntax interconversion
-vms/ext/filespec.t		See if VMS::Filespec funtions work
+vms/ext/filespec.t		See if VMS::Filespec functions work
 vms/ext/Stdio/0README.txt	ReadMe file for VMS::Stdio
 vms/ext/Stdio/Makefile.PL	MakeMaker driver for VMS::Stdio
 vms/ext/Stdio/Stdio.pm		VMS options to stdio routines
@@ -2843,7 +2863,7 @@ writemain.SH			Generate perlmain.c from miniperlmain.c+extensions
 x2p/a2p.c			Output of a2p.y run through byacc
 x2p/a2p.h			Global declarations
 x2p/a2p.pod			Pod for awk to perl translator
-x2p/a2p.y			A yacc grammer for awk
+x2p/a2p.y			A yacc grammar for awk
 x2p/a2py.c			Awk compiler, sort of
 x2p/cflags.SH			A script that emits C compilation flags per file
 x2p/EXTERN.h			Same as above

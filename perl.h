@@ -3210,17 +3210,19 @@ enum {		/* pass one of these to get_vtbl */
 				/* Note: the lowest 8 bits are reserved for
 				   stuffing into op->op_private */
 #define HINT_PRIVATE_MASK	0x000000ff
-#define HINT_INTEGER		0x00000001
-#define HINT_STRICT_REFS	0x00000002
-#define HINT_LOCALE		0x00000004
-#define HINT_BYTES		0x00000008
+#define HINT_INTEGER		0x00000001 /* integer pragma */
+#define HINT_STRICT_REFS	0x00000002 /* strict pragma */
+#define HINT_LOCALE		0x00000004 /* locale pragma */
+#define HINT_BYTES		0x00000008 /* bytes pragma */
 /* #define HINT_notused10	0x00000010 */
 				/* Note: 20,40,80 used for NATIVE_HINTS */
+				/* currently defined by vms/vmsish.h */
 
 #define HINT_BLOCK_SCOPE	0x00000100
-#define HINT_STRICT_SUBS	0x00000200
-#define HINT_STRICT_VARS	0x00000400
+#define HINT_STRICT_SUBS	0x00000200 /* strict pragma */
+#define HINT_STRICT_VARS	0x00000400 /* strict pragma */
 
+/* The HINT_NEW_* constants are used by the overload pragma */
 #define HINT_NEW_INTEGER	0x00001000
 #define HINT_NEW_FLOAT		0x00002000
 #define HINT_NEW_BINARY		0x00004000
@@ -3228,12 +3230,13 @@ enum {		/* pass one of these to get_vtbl */
 #define HINT_NEW_RE		0x00010000
 #define HINT_LOCALIZE_HH	0x00020000 /* %^H needs to be copied */
 
-#define HINT_RE_TAINT		0x00100000
-#define HINT_RE_EVAL		0x00200000
+#define HINT_RE_TAINT		0x00100000 /* re pragma */
+#define HINT_RE_EVAL		0x00200000 /* re pragma */
 
-#define HINT_FILETEST_ACCESS	0x00400000
-#define HINT_UTF8		0x00800000
+#define HINT_FILETEST_ACCESS	0x00400000 /* filetest pragma */
+#define HINT_UTF8		0x00800000 /* utf8 pragma */
 
+/* The following are stored in $sort::hints, not in PL_hints */
 #define HINT_SORT_SORT_BITS	0x000000FF /* allow 256 different ones */
 #define HINT_SORT_QUICKSORT	0x00000001
 #define HINT_SORT_MERGESORT	0x00000002

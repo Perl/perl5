@@ -1211,6 +1211,7 @@
 #  endif
 #define cv_clone2		S_cv_clone2
 #endif
+#define find_runcv		Perl_find_runcv
 #define ck_anoncode		Perl_ck_anoncode
 #define ck_bitop		Perl_ck_bitop
 #define ck_concat		Perl_ck_concat
@@ -2513,7 +2514,7 @@
 #define dopoptosub(a)		S_dopoptosub(aTHX_ a)
 #define dopoptosub_at(a,b)	S_dopoptosub_at(aTHX_ a,b)
 #define save_lines(a,b)		S_save_lines(aTHX_ a,b)
-#define doeval(a,b)		S_doeval(aTHX_ a,b)
+#define doeval(a,b,c,d)		S_doeval(aTHX_ a,b,c,d)
 #define doopen_pmc(a,b)		S_doopen_pmc(aTHX_ a,b)
 #define path_is_absolute(a)	S_path_is_absolute(aTHX_ a)
 #endif
@@ -2740,7 +2741,7 @@
 #define deb_stack_n(a,b,c,d,e)	S_deb_stack_n(aTHX_ a,b,c,d,e)
 #endif
 #define pad_new(a)		Perl_pad_new(aTHX_ a)
-#define pad_undef(a,b)		Perl_pad_undef(aTHX_ a,b)
+#define pad_undef(a)		Perl_pad_undef(aTHX_ a)
 #define pad_add_name(a,b,c,d)	Perl_pad_add_name(aTHX_ a,b,c,d)
 #define pad_add_anon(a,b)	Perl_pad_add_anon(aTHX_ a,b)
 #define pad_check_dup(a,b,c)	Perl_pad_check_dup(aTHX_ a,b,c)
@@ -2753,12 +2754,13 @@
 #define pad_fixup_inner_anons(a,b,c)	Perl_pad_fixup_inner_anons(aTHX_ a,b,c)
 #define pad_push(a,b,c)		Perl_pad_push(aTHX_ a,b,c)
 #if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
-#define pad_findlex(a,b,c,d,e,f,g)	S_pad_findlex(aTHX_ a,b,c,d,e,f,g)
+#define pad_findlex(a,b,c)	S_pad_findlex(aTHX_ a,b,c)
 #  if defined(DEBUGGING)
 #define cv_dump(a,b)		S_cv_dump(aTHX_ a,b)
 #  endif
 #define cv_clone2(a,b)		S_cv_clone2(aTHX_ a,b)
 #endif
+#define find_runcv()		Perl_find_runcv(aTHX)
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)
 #define ck_concat(a)		Perl_ck_concat(aTHX_ a)

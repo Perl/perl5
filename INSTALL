@@ -1722,6 +1722,13 @@ tests whether utime() can change timestamps.  The Y2K patch seems to
 break utime() so that over NFS the timestamps do not get changed
 (on local filesystems utime() still works).
 
+Building Perl on a system that has also BIND (headers and libraries)
+installed may run into troubles because BIND installs its own netdb.h
+and socket.h, which may not agree with the operating system's ideas of
+the same files.  Similarly, including -lbind may conflict with libc's
+view of the world.  You may have to tweak -Dlocincpth and -Dloclibpth
+to avoid the BIND.
+
 =back
 
 =head2 Cross-compilation

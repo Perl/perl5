@@ -155,6 +155,9 @@ perl_construct(pTHXx)
 
    /* Init the real globals (and main thread)? */
     if (!PL_linestr) {
+#ifdef USE_ITHREADS
+	MUTEX_INIT(&PL_dollarzero_mutex);       /* for $0 modifying */
+#endif
 #ifdef PERL_FLEXIBLE_EXCEPTIONS
 	PL_protect = MEMBER_TO_FPTR(Perl_default_protect); /* for exceptions */
 #endif
@@ -488,11 +491,6 @@ perl_destruct(pTHXx)
 	SvREFCNT_dec(PL_e_script);
 	PL_e_script = Nullsv;
     }
-
-    while (--PL_origargc >= 0) {
-        Safefree(PL_origargv[PL_origargc]);
-    }
-    Safefree(PL_origargv);
 
     /* magical thingies */
 
@@ -897,21 +895,7 @@ setuid perl scripts securely.\n");
 #endif
 
     PL_origargc = argc;
-    {
-        /* we copy rather than point to argv
-         * since perl_clone will copy and perl_destruct
-         * has no way of knowing if we've made a copy or
-         * just point to argv
-         */
-        int i = PL_origargc;
-        New(0, PL_origargv, i+1, char*);
-        PL_origargv[i] = '\0';
-        while (i-- > 0) {
-            PL_origargv[i] = savepv(argv[i]);
-        }
-    }
-
-
+    PL_origargv = argv;
 
     if (PL_do_undump) {
 

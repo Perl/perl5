@@ -1611,13 +1611,16 @@ S_scan_const(pTHX_ char *start)
 	    /* \c is a control character */
 	    case 'c':
 		s++;
-		{
+		if (s < send) {
 		    U8 c = *s++;
 #ifdef EBCDIC
 		    if (isLOWER(c))
 			c = toUPPER(c);
 #endif
 		    *d++ = NATIVE_TO_NEED(has_utf8,toCTRL(c));
+		}
+		else {
+		    yyerror("Missing control char name in \\c");
 		}
 		continue;
 
@@ -7568,6 +7571,7 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
     PL_subline = CopLINE(PL_curcop);
     CvPADLIST(PL_compcv) = pad_new(padnew_SAVE|padnew_SAVESUB);
     CvOUTSIDE(PL_compcv) = (CV*)SvREFCNT_inc(outsidecv);
+    CvOUTSIDE_SEQ(PL_compcv) = PL_cop_seqmax;
 
     return oldsavestack_ix;
 }

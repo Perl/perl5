@@ -33,6 +33,7 @@ bin/enc2xs	Encode module generator
 bin/piconv	iconv by perl
 bin/ucm2table	Table Generator for testing
 bin/ucmlint	A UCM Lint utility
+bin/ucmsort	Sorts UCM lines
 bin/unidump	Unicode Dump like hexdump(1)
 encengine.c		Encode extension
 encoding.pm	Perl Pragmactic Module
@@ -77,6 +78,7 @@ t/ksc5601.enc	test data
 t/ksc5601.utf	test data
 t/mime-header.t	test script
 t/perlio.t	test script
+t/rt.pl		even more test script
 t/unibench.pl	benchmark script
 ucm/8859-1.ucm	Unicode Character Map
 ucm/8859-10.ucm	Unicode Character Map

@@ -62,3 +62,7 @@ PERLVARI(Gthreadhook,	thrhook_proc_t,	MEMBER_TO_FPTR(Perl_nothreadhook))
 #ifdef THREADS_HAVE_PIDS
 PERLVARI(Gppid,		IV,		0)
 #endif
+
+#ifdef USE_ITHREADS
+PERLVAR(Gdollarzero_mutex, perl_mutex)	/* Modifying $0 */
+#endif

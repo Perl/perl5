@@ -5185,7 +5185,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
 		    PUSHMARK(SP);
 		    PUSHs(&tmpref);
 		    PUTBACK;
-		    call_sv((SV*)destructor, G_DISCARD|G_EVAL|G_KEEPERR);
+		    call_sv((SV*)destructor, G_DISCARD|G_EVAL|G_KEEPERR|G_VOID);
 		    SvREFCNT(sv)--;
 		    POPSTACK;
 		    SPAGAIN;
@@ -9602,10 +9602,12 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	  CvDEPTH(dstr) = 0;
 	}
 	PAD_DUP(CvPADLIST(dstr), CvPADLIST(sstr), param);
+	/* anon prototypes aren't refcounted */
 	if (!CvANON(sstr) || CvCLONED(sstr))
 	    CvOUTSIDE(dstr)	= cv_dup_inc(CvOUTSIDE(sstr), param);
 	else
 	    CvOUTSIDE(dstr)	= cv_dup(CvOUTSIDE(sstr), param);
+	CvOUTSIDE_SEQ(dstr)	= CvOUTSIDE_SEQ(sstr);
 	CvFLAGS(dstr)	= CvFLAGS(sstr);
 	CvFILE(dstr) = CvXSUB(sstr) ? CvFILE(sstr) : SAVEPV(CvFILE(sstr));
 	break;
@@ -10231,12 +10233,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     /* pseudo environmental stuff */
     PL_origargc		= proto_perl->Iorigargc;
-    i = PL_origargc;
-    New(0, PL_origargv, i+1, char*);
-    PL_origargv[i] = '\0';
-    while (i-- > 0) {
-	PL_origargv[i]	= SAVEPV(proto_perl->Iorigargv[i]);
-    }
+    PL_origargv		= proto_perl->Iorigargv;
 
     param->stashes      = newAV();  /* Setup array of objects to call clone on */
 

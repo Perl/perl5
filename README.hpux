@@ -68,7 +68,7 @@ difficulty, but also can take advantage of features listed later that
 require the use of HP compiler-specific command-line flags.
 
 If you decide to use gcc, make sure your installation is recent and
-complete, and be sure to read the Perl README file for more gcc-specific
+complete, and be sure to read the Perl INSTALL file for more gcc-specific
 details.
 
 =head2 PA-RISC
@@ -203,6 +203,7 @@ To create a shared library, the following steps must be performed:
     1. Compile source modules with +z or +Z flag to create a .o module
        which contains Position-Independent Code (PIC).  The linker will
        tell you in the next step if +Z was needed.
+       (For gcc, the appropriate flag is -fpic or -fPIC.)
 
     2. Link the shared library using the -b flag.  If the code calls
        any functions in other system libraries (e.g., libm), it must
@@ -238,7 +239,8 @@ run into an error like "invalid loader fixup" during load phase.
 HP is aware of this problem.  Search the HP-UX cxx-dev forums for
 discussions about the subject.  The short answer is that B<everything>
 (all libraries, everything) must be compiled with C<+z> or C<+Z> to be
-PIC (position independent code).  In HP-UX 11.00 or newer the linker
+PIC (position independent code).  (For gcc, that would be
+C<-fpic> or C<-fPIC>).  In HP-UX 11.00 or newer the linker
 error message should tell the name of the offending object file.
 
 A more general approach is to intervene manually, as with an example for

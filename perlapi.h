@@ -274,6 +274,8 @@ END_EXTERN_C
 #define PL_in_clean_all		(*Perl_Iin_clean_all_ptr(aTHX))
 #undef  PL_in_clean_objs
 #define PL_in_clean_objs	(*Perl_Iin_clean_objs_ptr(aTHX))
+#undef  PL_in_load_module
+#define PL_in_load_module	(*Perl_Iin_load_module_ptr(aTHX))
 #undef  PL_in_my
 #define PL_in_my		(*Perl_Iin_my_ptr(aTHX))
 #undef  PL_in_my_stash
@@ -928,6 +930,8 @@ END_EXTERN_C
 #define PL_curinterp		(*Perl_Gcurinterp_ptr(NULL))
 #undef  PL_do_undump
 #define PL_do_undump		(*Perl_Gdo_undump_ptr(NULL))
+#undef  PL_dollarzero_mutex
+#define PL_dollarzero_mutex	(*Perl_Gdollarzero_mutex_ptr(NULL))
 #undef  PL_hexdigit
 #define PL_hexdigit		(*Perl_Ghexdigit_ptr(NULL))
 #undef  PL_lockhook

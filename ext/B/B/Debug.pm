@@ -198,7 +198,7 @@ sub B::CV::debug {
     my ($padlist) = $sv->PADLIST;
     my ($file) = $sv->FILE;
     my ($gv) = $sv->GV;
-    printf <<'EOT', $$stash, $$start, $$root, $$gv, $file, $sv->DEPTH, $padlist, ${$sv->OUTSIDE};
+    printf <<'EOT', $$stash, $$start, $$root, $$gv, $file, $sv->DEPTH, $padlist, ${$sv->OUTSIDE}, $sv->OUTSIDE_SEQ;
 	STASH		0x%x
 	START		0x%x
 	ROOT		0x%x
@@ -207,6 +207,7 @@ sub B::CV::debug {
 	DEPTH		%d
 	PADLIST		0x%x			       
 	OUTSIDE		0x%x
+	OUTSIDE_SEQ	%d
 EOT
     $start->debug if $start;
     $root->debug if $root;

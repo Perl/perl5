@@ -16,7 +16,7 @@ BEGIN
 	unshift @INC, $dir;
 }
 
-use Test::More tests => 13;
+use Test::More tests => 14;
 
 # First we must set up some autoloader files
 my $fulldir = File::Spec->catdir( $dir, 'auto', 'Foo' );
@@ -48,6 +48,24 @@ sub bazmarkhianish { shift; shift || "baz" }
 1;
 EOT
 close(BAZ);
+
+open(BLECH, '>', File::Spec->catfile( $fulldir, 'blechanawilla.al' ))
+       or die "Can't open blech file: $!";
+print BLECH <<'EOT';
+package Foo;
+sub blechanawilla { compilation error (
+EOT
+close(BLECH);
+
+# This is just to keep the old SVR3 systems happy; they may fail
+# to find the above file so we duplicate it where they should find it.
+open(BLECH, '>', File::Spec->catfile( $fulldir, 'blechanawil.al' ))
+       or die "Can't open blech file: $!";
+print BLECH <<'EOT';
+package Foo;
+sub blechanawilla { compilation error (
+EOT
+close(BLECH);
 
 # Let's define the package
 package Foo;
@@ -84,6 +102,14 @@ is( $foo->bar($1), 'foo', 'autoloaded method should not stomp match vars' );
 is( $foo->bar($1), 'foo', '(again)' );
 is( $foo->bazmarkhianish($1), 'foo', 'for any method call' );
 is( $foo->bazmarkhianish($1), 'foo', '(again)' );
+
+# Used to retry long subnames with shorter filenames on any old
+# exception, including compilation error.  Now AutoLoader only
+# tries shorter filenames if it can't find the long one.
+eval {
+  $foo->blechanawilla;
+};
+like( $@, qr/syntax error/, 'require error propagates' );
 
 # test recursive autoloads
 open(F, '>', File::Spec->catfile( $fulldir, 'a.al'))
@@ -130,5 +156,5 @@ package main;
 # cleanup
 END {
 	return unless $dir && -d $dir;
-	rmtree $fulldir;
+	rmtree $dir;
 }

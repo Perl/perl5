@@ -142,11 +142,11 @@ it refers to \texttt{Pod::LaTeX}: \textsf{test}.
 
 
 
-Standard link: the \emph{Pod::LaTeX} manpage.
+Standard link: \emph{Pod::LaTeX}.
 
 
 
-Now refer to an external section: the section on \textsf{sec} in the \emph{Pod::LaTeX} manpage
+Now refer to an external section: \textsf{sec} in \emph{Pod::LaTeX}
 
 \section{Lists\label{Lists}\index{Lists}}
 

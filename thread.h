@@ -326,6 +326,9 @@
 #  define THREAD_RET_CAST(p)	((void *)(p))
 #endif /* THREAD_RET */
 
+#  define LOCK_DOLLARZERO_MUTEX		MUTEX_LOCK(&PL_dollarzero_mutex)
+#  define UNLOCK_DOLLARZERO_MUTEX	MUTEX_UNLOCK(&PL_dollarzero_mutex)
+
 #endif /* USE_ITHREADS */
 
 #ifndef MUTEX_LOCK
@@ -402,6 +405,14 @@
 
 #ifndef UNLOCK_SV_LOCK_MUTEX
 #  define UNLOCK_SV_LOCK_MUTEX
+#endif
+
+#ifndef LOCK_DOLLARZERO_MUTEX
+#  define LOCK_DOLLARZERO_MUTEX
+#endif
+
+#ifndef UNLOCK_DOLLARZERO_MUTEX
+#  define UNLOCK_DOLLARZERO_MUTEX
 #endif
 
 /* THR, SET_THR, and dTHR are there for compatibility with old versions */

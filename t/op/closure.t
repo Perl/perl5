@@ -13,7 +13,7 @@ BEGIN {
 
 use Config;
 
-print "1..174\n";
+print "1..177\n";
 
 my $test = 1;
 sub test (&) {
@@ -534,3 +534,18 @@ test {1};
     $x =~ s/o//eg;
     test { $x eq 'fbar' }
 }
+
+# DAPM 24-Nov-02
+# SvFAKE lexicals should be visible thoughout a function.
+# On <= 5.8.0, the third test failed,  eg bugid #18286
+
+{
+    my $x = 1;
+    sub fake {
+		test { sub {eval'$x'}->() == 1 };
+	{ $x;	test { sub {eval'$x'}->() == 1 } }
+		test { sub {eval'$x'}->() == 1 };
+    }
+}
+fake();
+

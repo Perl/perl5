@@ -30,6 +30,9 @@ struct xpvcv {
     PADLIST *	xcv_padlist;
     CV *	xcv_outside;
     cv_flags_t	xcv_flags;
+    U32		xcv_outside_seq; /* the COP sequence (at the point of our
+				  * compilation) in the lexically enclosing
+				  * sub */
 };
 
 /*
@@ -65,6 +68,7 @@ Returns the stash of the CV.
 #define CvPADLIST(sv)	((XPVCV*)SvANY(sv))->xcv_padlist
 #define CvOUTSIDE(sv)	((XPVCV*)SvANY(sv))->xcv_outside
 #define CvFLAGS(sv)	((XPVCV*)SvANY(sv))->xcv_flags
+#define CvOUTSIDE_SEQ(sv) ((XPVCV*)SvANY(sv))->xcv_outside_seq
 
 #define CVf_CLONE	0x0001	/* anon CV uses external lexicals */
 #define CVf_CLONED	0x0002	/* a clone of one of those */

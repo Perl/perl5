@@ -12,7 +12,7 @@ BEGIN {
 
 use Devel::Peek;
 
-print "1..21\n";
+print "1..22\n";
 
 our $DEBUG = 0;
 open(SAVERR, ">&STDERR") or die "Can't dup STDERR: $!";
@@ -221,6 +221,7 @@ do_test(13,
 (?:    MUTEXP = $ADDR
     OWNER = $ADDR
 )?    FLAGS = 0x4
+    OUTSIDE_SEQ = \\d+
     PADLIST = $ADDR
     PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
     OUTSIDE = $ADDR \\(MAIN\\)');
@@ -247,11 +248,12 @@ do_test(14,
 (?:    MUTEXP = $ADDR
     OWNER = $ADDR
 )?    FLAGS = 0x0
+    OUTSIDE_SEQ = \\d+
     PADLIST = $ADDR
     PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
-       \\d+\\. $ADDR<\\d+>      \\(\\d+,\\d+\\) "\\$pattern"
-      \\d+\\. $ADDR<\\d+> FAKE \\(\\d+,\\d+\\) "\\$DEBUG"
-      \\d+\\. $ADDR<\\d+>      \\(\\d+,\\d+\\) "\\$dump"
+       \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$pattern"
+      \\d+\\. $ADDR<\\d+> FAKE "\\$DEBUG"
+      \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$dump"
     OUTSIDE = $ADDR \\(MAIN\\)');
 
 do_test(15,
@@ -440,3 +442,24 @@ do_test(21,
 END {
   1 while unlink("peek$$");
 }
+
+# blessed refs
+do_test(22,
+	bless(\\undef, 'Foobar'),
+'SV = RV\\($ADDR\\) at $ADDR
+  REFCNT = 1
+  FLAGS = \\(ROK\\)
+  RV = $ADDR
+  SV = PVMG\\($ADDR\\) at $ADDR
+    REFCNT = 2
+    FLAGS = \\(OBJECT,ROK\\)
+    IV = -?\d+
+    NV = $FLOAT
+    RV = $ADDR
+    SV = NULL\\(0x0\\) at $ADDR
+      REFCNT = \d+
+      FLAGS = \\(READONLY\\)
+    PV = $ADDR ""
+    CUR = 0
+    LEN = 0
+    STASH = $ADDR\s+"Foobar"');

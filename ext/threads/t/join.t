@@ -1,4 +1,3 @@
-
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
@@ -11,7 +10,7 @@ BEGIN {
 
 use ExtUtils::testlib;
 use strict;
-BEGIN { print "1..10\n" };
+BEGIN { print "1..11\n" };
 use threads;
 use threads::shared;
 
@@ -28,6 +27,10 @@ sub ok {
     printf "# Failed test at line %d\n", (caller)[2] unless $ok;
     $test_id++;
     return $ok;
+}
+
+sub skip {
+    ok(1, "# Skipped: @_");
 }
 
 ok(1,"");
@@ -86,4 +89,30 @@ ok(1,"");
 	return $foo{bar} = \$foo;
     })->join();
     ok(1,"");
+}
+
+if ($^O eq 'linux') { # We parse ps output so this is OS-dependent.
+  # First modify $0 in a subthread.
+  print "# 1a: \$0 = $0\n";
+  join( threads->new( sub {
+	print "# 2a: \$0 = $0\n";
+	$0 = "foobar";
+	print "# 2b: \$0 = $0\n" } ) );
+  print "# 1b: \$0 = $0\n";
+  if (open PS, "ps -f |") {
+    my $ok;
+    while (<PS>) {
+      print "# $_";
+      if (/^\S+\s+$$\s.+\sfoobar\s*$/) {
+	$ok++;
+	last;
+      }
+    }
+    close PS;
+    ok($ok, 'altering $0 is effective');
+  } else {
+    skip("\$0 check: opening 'ps -f |' failed: $!");
+  }
+} else {
+  skip("\$0 check: only on Linux");
 }

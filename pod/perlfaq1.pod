@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq1 - General Questions About Perl ($Revision: 1.8 $, $Date: 2002/04/07 18:46:13 $)
+perlfaq1 - General Questions About Perl ($Revision: 1.10 $, $Date: 2002/08/29 03:34:00 $)
 
 =head1 DESCRIPTION
 
@@ -40,7 +40,7 @@ http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 and http://archive.develooper.com/perl5-porters@perl.org/
 or the news gateway nntp://nntp.perl.org/perl.perl5.porters or
 its web interface at http://nntp.perl.org/group/perl.perl5.porters ,
-or read the faq at http://perlhacker.org/p5p-faq ,
+or read the faq at http://simon-cozens.org/writings/p5p-faq ,
 or you can subscribe to the mailing list by sending
 perl5-porters-request@perl.org a subscription request
 (an empty message with no subject is fine).

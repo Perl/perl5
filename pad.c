@@ -74,7 +74,9 @@ same package can be detected).  SvCUR is sometimes hijacked to
 store the generation number during compilation.
 
 If SvFAKE is set on the name SV then slot in the frame AVs are
-a REFCNT'ed references to a lexical from "outside".
+a REFCNT'ed references to a lexical from "outside". In this case,
+the name SV does not have a cop_seq range, since it is in scope
+throughout.
 
 If the 'name' is '&' the the corresponding entry in frame AV
 is a CV representing a possible closure.
@@ -194,13 +196,13 @@ Free the padlist associated with a CV.
 If parts of it happen to be current, we null the relevant
 PL_*pad* global vars so that we don't have any dangling references left.
 We also repoint the CvOUTSIDE of any about-to-be-orphaned
-inner subs to outercv.
+inner subs to the outer of this cv.
 
 =cut
 */
 
 void
-Perl_pad_undef(pTHX_ CV* cv, CV* outercv)
+Perl_pad_undef(pTHX_ CV* cv)
 {
     I32 ix;
     PADLIST *padlist = CvPADLIST(cv);
@@ -218,10 +220,12 @@ Perl_pad_undef(pTHX_ CV* cv, CV* outercv)
     if ((CvEVAL(cv) && !CvGV(cv) /* is this eval"" ? */
 	    && !PL_dirty) || CvSPECIAL(cv))
     {
+	CV *outercv = CvOUTSIDE(cv);
+	U32 seq     = CvOUTSIDE_SEQ(cv);
 	/* XXX DAPM the following code is very similar to
 	 * pad_fixup_inner_anons(). Merge??? */
 
-	/* inner references to eval's cv must be fixed up */
+	/* inner references to eval's/BEGIN's/etc cv must be fixed up */
 	AV *comppad_name = (AV*)AvARRAY(padlist)[0];
 	SV **namepad = AvARRAY(comppad_name);
 	AV *comppad = (AV*)AvARRAY(padlist)[1];
@@ -237,6 +241,8 @@ Perl_pad_undef(pTHX_ CV* cv, CV* outercv)
 		    && CvOUTSIDE(innercv) == cv)
 		{
 		    CvOUTSIDE(innercv) = outercv;
+		    CvOUTSIDE_SEQ(innercv) = seq;
+		    /* anon prototypes aren't refcounted */
 		    if (!CvANON(innercv) || CvCLONED(innercv)) {
 			(void)SvREFCNT_inc(outercv);
 			if (SvREFCNT(cv))
@@ -294,24 +300,13 @@ Perl_pad_add_name(pTHX_ char *name, HV* typestash, HV* ourstash, bool fake)
 {
     PADOFFSET offset = pad_alloc(OP_PADSV, SVs_PADMY);
     SV* namesv = NEWSV(1102, 0);
-    U32 min, max;
 
     ASSERT_CURPAD_ACTIVE("pad_add_name");
 
-    if (fake) {
-	min = PL_curcop->cop_seq;
-	max = PAD_MAX;
-    }
-    else {
-	/* not yet introduced */
-	min = PAD_MAX;
-	max = 0;
-    }
 
     DEBUG_Xv(PerlIO_printf(Perl_debug_log,
-	  "Pad addname: %ld \"%s\", (%lu,%lu)%s\n",
-	   (long)offset, name, (unsigned long)min, (unsigned long)max,
-	  (fake ? " FAKE" : "")
+	  "Pad addname: %ld \"%s\"%s\n",
+	   (long)offset, name, (fake ? " FAKE" : "")
 	  )
     );
 
@@ -328,11 +323,13 @@ Perl_pad_add_name(pTHX_ char *name, HV* typestash, HV* ourstash, bool fake)
     }
 
     av_store(PL_comppad_name, offset, namesv);
-    SvNVX(namesv) = (NV)min;
-    SvIVX(namesv) = max;
     if (fake)
 	SvFAKE_on(namesv);
     else {
+	/* not yet introduced */
+	SvNVX(namesv) = (NV)PAD_MAX;	/* min */
+	SvIVX(namesv) = 0;		/* max */
+
 	if (!PL_min_intro_pending)
 	    PL_min_intro_pending = offset;
 	PL_max_intro_pending = offset;
@@ -474,6 +471,7 @@ Perl_pad_check_dup(pTHX_ char *name, bool is_our, HV *ourstash)
     for (off = top; (I32)off > PL_comppad_name_floor; off--) {
 	if ((sv = svp[off])
 	    && sv != &PL_sv_undef
+	    && !SvFAKE(sv)
 	    && (SvIVX(sv) == PAD_MAX || SvIVX(sv) == 0)
 	    && (!is_our
 		|| ((SvFLAGS(sv) & SVpad_OUR) && GvSTASH(sv) == ourstash))
@@ -493,6 +491,7 @@ Perl_pad_check_dup(pTHX_ char *name, bool is_our, HV *ourstash)
 	do {
 	    if ((sv = svp[off])
 		&& sv != &PL_sv_undef
+		&& !SvFAKE(sv)
 		&& (SvIVX(sv) == PAD_MAX || SvIVX(sv) == 0)
 		&& ((SvFLAGS(sv) & SVpad_OUR) && GvSTASH(sv) == ourstash)
 		&& strEQ(name, SvPVX(sv)))
@@ -525,51 +524,43 @@ PADOFFSET
 Perl_pad_findmy(pTHX_ char *name)
 {
     I32 off;
-    I32 pendoff = 0;
+    I32 fake_off = 0;
     SV *sv;
     SV **svp = AvARRAY(PL_comppad_name);
     U32 seq = PL_cop_seqmax;
-    PERL_CONTEXT *cx;
-    CV *outside;
 
     ASSERT_CURPAD_ACTIVE("pad_findmy");
     DEBUG_Xv(PerlIO_printf(Perl_debug_log, "Pad findmy:  \"%s\"\n", name));
 
     /* The one we're looking for is probably just before comppad_name_fill. */
     for (off = AvFILLp(PL_comppad_name); off > 0; off--) {
-	if ((sv = svp[off]) &&
-	    sv != &PL_sv_undef &&
-	    (!SvIVX(sv) ||
-	     (seq <= (U32)SvIVX(sv) &&
-	      seq > (U32)I_32(SvNVX(sv)))) &&
-	    strEQ(SvPVX(sv), name))
-	{
-	    if (SvIVX(sv) || SvFLAGS(sv) & SVpad_OUR)
-		return (PADOFFSET)off;
-	    pendoff = off;	/* this pending def. will override import */
+	sv = svp[off];
+	if (!sv || sv == &PL_sv_undef || !strEQ(SvPVX(sv), name))
+	    continue;
+	if (SvFAKE(sv)) {
+	    /* we'll use this later if we don't find a real entry */
+	    fake_off = off;
+	    continue;
+	}
+	else {
+	    if (
+		   (   seq >  (U32)I_32(SvNVX(sv))	/* min */
+		    && seq <= (U32)SvIVX(sv))		/* max */
+		||
+		    /* 'our' is visible before introduction */
+		    (!SvIVX(sv) && (SvFLAGS(sv) & SVpad_OUR))
+	    )
+		return off;
 	}
     }
-
-    outside = CvOUTSIDE(PL_compcv);
-
-    /* Check if if we're compiling an eval'', and adjust seq to be the
-     * eval's seq number.  This depends on eval'' having a non-null
-     * CvOUTSIDE() while it is being compiled.  The eval'' itself is
-     * identified by CvEVAL being true and CvGV being null. */
-    if (outside && CvEVAL(PL_compcv) && !CvGV(PL_compcv) && cxstack_ix >= 0) {
-	cx = &cxstack[cxstack_ix];
-	if (CxREALEVAL(cx))
-	    seq = cx->blk_oldcop->cop_seq;
-    }
+    if (fake_off)
+	return fake_off;
 
     /* See if it's in a nested scope */
-    off = pad_findlex(name, 0, seq, outside, cxstack_ix, 0, 0);
+    off = pad_findlex(name, 0, PL_compcv);
     if (!off)			/* pad_findlex returns 0 for failure...*/
 	return NOT_IN_PAD;	/* ...but we return NOT_IN_PAD for failure */
 
-    /* If there is a pending local definition, this new alias must die */
-    if (pendoff)
-	SvIVX(AvARRAY(PL_comppad_name)[off]) = seq;
     return off;
 }
 
@@ -579,216 +570,187 @@ Perl_pad_findmy(pTHX_ char *name)
 =for apidoc pad_findlex
 
 Find a named lexical anywhere in a chain of nested pads. Add fake entries
-in the inner pads if its found in an outer one.
-
-If flags == FINDLEX_NOSEARCH we don't bother searching outer contexts.
+in the inner pads if it's found in an outer one. innercv is the CV *inside*
+the chain of outer CVs to be searched. If newoff is non-null, this is a
+run-time cloning: don't add fake entries, just find the lexical and add a
+ref to it at newoff in the current pad.
 
 =cut
 */
 
-#define FINDLEX_NOSEARCH	1	/* don't search outer contexts */
-
 STATIC PADOFFSET
-S_pad_findlex(pTHX_ char *name, PADOFFSET newoff, U32 seq, CV* startcv,
-	    I32 cx_ix, I32 saweval, U32 flags)
+S_pad_findlex(pTHX_ char *name, PADOFFSET newoff, CV* innercv)
 {
     CV *cv;
-    I32 off;
+    I32 off = 0;
     SV *sv;
-    register I32 i;
-    register PERL_CONTEXT *cx;
+    CV* startcv;
+    U32 seq;
+    I32 depth;
+    AV *oldpad;
+    SV *oldsv;
+    AV *curlist;
 
     ASSERT_CURPAD_ACTIVE("pad_findlex");
     DEBUG_Xv(PerlIO_printf(Perl_debug_log,
-	"Pad findlex: \"%s\" off=%ld seq=%lu cv=0x%"UVxf
-	    " ix=%ld saweval=%d flags=%lu\n",
-	    name, (long)newoff, (unsigned long)seq, PTR2UV(startcv),
-	    (long)cx_ix, (int)saweval, (unsigned long)flags
-	)
+	"Pad findlex: \"%s\" off=%ld startcv=0x%"UVxf"\n",
+	    name, (long)newoff, PTR2UV(innercv))
     );
 
-    for (cv = startcv; cv; cv = CvOUTSIDE(cv)) {
-	AV *curlist = CvPADLIST(cv);
-	SV **svp = av_fetch(curlist, 0, FALSE);
+    seq = CvOUTSIDE_SEQ(innercv);
+    startcv = CvOUTSIDE(innercv);
+
+    for (cv = startcv; cv; seq = CvOUTSIDE_SEQ(cv), cv = CvOUTSIDE(cv)) {
+	SV **svp;
 	AV *curname;
+	I32 fake_off = 0;
 
 	DEBUG_Xv(PerlIO_printf(Perl_debug_log,
-	    "             searching: cv=0x%"UVxf"\n", PTR2UV(cv))
+	    "             searching: cv=0x%"UVxf" seq=%d\n",
+	    PTR2UV(cv), (int) seq )
 	);
 
+	curlist = CvPADLIST(cv);
+	svp = av_fetch(curlist, 0, FALSE);
 	if (!svp || *svp == &PL_sv_undef)
 	    continue;
 	curname = (AV*)*svp;
 	svp = AvARRAY(curname);
+
+	depth = CvDEPTH(cv);
 	for (off = AvFILLp(curname); off > 0; off--) {
-	    I32 depth;
-	    AV *oldpad;
-	    SV *oldsv;
-
-	    if ( ! (
-		    (sv = svp[off]) &&
-		    sv != &PL_sv_undef &&
-		    seq <= (U32)SvIVX(sv) &&
-		    seq > (U32)I_32(SvNVX(sv)) &&
-		    strEQ(SvPVX(sv), name))
-	    )
+	    sv = svp[off];
+	    if (!sv || sv == &PL_sv_undef || !strEQ(SvPVX(sv), name))
 		continue;
-
-	    depth = CvDEPTH(cv);
-	    if (!depth) {
-		if (newoff) {
-		    if (SvFAKE(sv))
-			continue;
-		    return 0; /* don't clone from inactive stack frame */
-		}
-		depth = 1;
+	    if (SvFAKE(sv)) {
+		/* we'll use this later if we don't find a real entry */
+		fake_off = off;
+		continue;
 	    }
+	    else {
+		if (   seq >  (U32)I_32(SvNVX(sv))	/* min */
+		    && seq <= (U32)SvIVX(sv)		/* max */
+		    && !(newoff && !depth) /* ignore inactive when cloning */
+		)
+		    goto found;
+	    }
+	}
 
-	    oldpad = (AV*)AvARRAY(curlist)[depth];
-	    oldsv = *av_fetch(oldpad, off, TRUE);
+	/* no real entry - but did we find a fake one? */
+	if (fake_off) {
+	    if (newoff && !depth)
+		return 0; /* don't clone from inactive stack frame */
+	    off = fake_off;
+	    sv = svp[off];
+	    goto found;
+	}
+    }
+    return 0;
 
-	    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
-			"             matched:   offset %ld"
-			    " %s(%lu,%lu), sv=0x%"UVxf"\n",
-			(long)off,
-			SvFAKE(sv) ? "FAKE " : "",
-			(unsigned long)I_32(SvNVX(sv)),
-			(unsigned long)SvIVX(sv),
-			PTR2UV(oldsv)
-		    )
-	    );
+found:
 
-	    if (!newoff) {		/* Not a mere clone operation. */
-		newoff = pad_add_name(
-		    SvPVX(sv),
-		    (SvFLAGS(sv) & SVpad_TYPED) ? SvSTASH(sv) : Nullhv,
-		    (SvFLAGS(sv) & SVpad_OUR)   ? GvSTASH(sv) : Nullhv,
-		    1  /* fake */
-		);
+    if (!depth) 
+	depth = 1;
 
-		if (CvANON(PL_compcv) || SvTYPE(PL_compcv) == SVt_PVFM) {
-		    /* "It's closures all the way down." */
-		    CvCLONE_on(PL_compcv);
-		    if (cv == startcv) {
-			if (CvANON(PL_compcv))
-			    oldsv = Nullsv; /* no need to keep ref */
+    oldpad = (AV*)AvARRAY(curlist)[depth];
+    oldsv = *av_fetch(oldpad, off, TRUE);
+
+#ifdef DEBUGGING
+    if (SvFAKE(sv))
+	DEBUG_Xv(PerlIO_printf(Perl_debug_log,
+		"             matched:   offset %ld"
+		    " FAKE, sv=0x%"UVxf"\n",
+		(long)off,
+		PTR2UV(oldsv)
+	    )
+	);
+    else
+	DEBUG_Xv(PerlIO_printf(Perl_debug_log,
+		"             matched:   offset %ld"
+		    " (%lu,%lu), sv=0x%"UVxf"\n",
+		(long)off,
+		(unsigned long)I_32(SvNVX(sv)),
+		(unsigned long)SvIVX(sv),
+		PTR2UV(oldsv)
+	    )
+	);
+#endif
+
+    if (!newoff) {		/* Not a mere clone operation. */
+	newoff = pad_add_name(
+	    SvPVX(sv),
+	    (SvFLAGS(sv) & SVpad_TYPED) ? SvSTASH(sv) : Nullhv,
+	    (SvFLAGS(sv) & SVpad_OUR)   ? GvSTASH(sv) : Nullhv,
+	    1  /* fake */
+	);
+
+	if (CvANON(PL_compcv) || SvTYPE(PL_compcv) == SVt_PVFM) {
+	    /* "It's closures all the way down." */
+	    CvCLONE_on(PL_compcv);
+	    if (cv == startcv) {
+		if (CvANON(PL_compcv))
+		    oldsv = Nullsv; /* no need to keep ref */
+	    }
+	    else {
+		CV *bcv;
+		for (bcv = startcv;
+		     bcv && bcv != cv && !CvCLONE(bcv);
+		     bcv = CvOUTSIDE(bcv))
+		{
+		    if (CvANON(bcv)) {
+			/* install the missing pad entry in intervening
+			 * nested subs and mark them cloneable. */
+			AV *ocomppad_name = PL_comppad_name;
+			PAD *ocomppad = PL_comppad;
+			AV *padlist = CvPADLIST(bcv);
+			PL_comppad_name = (AV*)AvARRAY(padlist)[0];
+			PL_comppad = (AV*)AvARRAY(padlist)[1];
+			PL_curpad = AvARRAY(PL_comppad);
+			pad_add_name(
+			    SvPVX(sv),
+			    (SvFLAGS(sv) & SVpad_TYPED)
+				? SvSTASH(sv) : Nullhv,
+			    (SvFLAGS(sv) & SVpad_OUR)
+				? GvSTASH(sv) : Nullhv,
+			    1  /* fake */
+			);
+
+			PL_comppad_name = ocomppad_name;
+			PL_comppad = ocomppad;
+			PL_curpad = ocomppad ?
+				AvARRAY(ocomppad) : Null(SV **);
+			CvCLONE_on(bcv);
 		    }
 		    else {
-			CV *bcv;
-			for (bcv = startcv;
-			     bcv && bcv != cv && !CvCLONE(bcv);
-			     bcv = CvOUTSIDE(bcv))
+			if (ckWARN(WARN_CLOSURE)
+			    && !CvUNIQUE(bcv) && !CvUNIQUE(cv))
 			{
-			    if (CvANON(bcv)) {
-				/* install the missing pad entry in intervening
-				 * nested subs and mark them cloneable. */
-				AV *ocomppad_name = PL_comppad_name;
-				PAD *ocomppad = PL_comppad;
-				AV *padlist = CvPADLIST(bcv);
-				PL_comppad_name = (AV*)AvARRAY(padlist)[0];
-				PL_comppad = (AV*)AvARRAY(padlist)[1];
-				PL_curpad = AvARRAY(PL_comppad);
-				pad_add_name(
-				    SvPVX(sv),
-				    (SvFLAGS(sv) & SVpad_TYPED)
-					? SvSTASH(sv) : Nullhv,
-				    (SvFLAGS(sv) & SVpad_OUR)
-					? GvSTASH(sv) : Nullhv,
-				    1  /* fake */
-				);
-
-				PL_comppad_name = ocomppad_name;
-				PL_comppad = ocomppad;
-				PL_curpad = ocomppad ?
-				    	AvARRAY(ocomppad) : Null(SV **);
-				CvCLONE_on(bcv);
-			    }
-			    else {
-				if (ckWARN(WARN_CLOSURE)
-				    && !CvUNIQUE(bcv) && !CvUNIQUE(cv))
-				{
-				    Perl_warner(aTHX_ packWARN(WARN_CLOSURE),
-				      "Variable \"%s\" may be unavailable",
-					 name);
-				}
-				break;
-			    }
+			    Perl_warner(aTHX_ packWARN(WARN_CLOSURE),
+			      "Variable \"%s\" may be unavailable",
+				 name);
 			}
-		    }
-		}
-		else if (!CvUNIQUE(PL_compcv)) {
-		    if (ckWARN(WARN_CLOSURE) && !SvFAKE(sv) && !CvUNIQUE(cv)
-			&& !(SvFLAGS(sv) & SVpad_OUR))
-		    {
-			Perl_warner(aTHX_ packWARN(WARN_CLOSURE),
-			    "Variable \"%s\" will not stay shared", name);
+			break;
 		    }
 		}
 	    }
-	    av_store(PL_comppad, newoff, SvREFCNT_inc(oldsv));
-	    ASSERT_CURPAD_ACTIVE("pad_findlex 2");
-	    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
-			"Pad findlex: set offset %ld to sv 0x%"UVxf"\n",
-			(long)newoff, PTR2UV(oldsv)
-		    )
-	    );
-	    return newoff;
+	}
+	else if (!CvUNIQUE(PL_compcv)) {
+	    if (ckWARN(WARN_CLOSURE) && !SvFAKE(sv) && !CvUNIQUE(cv)
+		&& !(SvFLAGS(sv) & SVpad_OUR))
+	    {
+		Perl_warner(aTHX_ packWARN(WARN_CLOSURE),
+		    "Variable \"%s\" will not stay shared", name);
+	    }
 	}
     }
-
-    if (flags & FINDLEX_NOSEARCH)
-	return 0;
-
-    /* Nothing in current lexical context--try eval's context, if any.
-     * This is necessary to let the perldb get at lexically scoped variables.
-     * XXX This will also probably interact badly with eval tree caching.
-     */
-
-    for (i = cx_ix; i >= 0; i--) {
-	cx = &cxstack[i];
-	switch (CxTYPE(cx)) {
-	default:
-	    if (i == 0 && saweval) {
-		return pad_findlex(name, newoff, seq, PL_main_cv, -1, saweval, 0);
-	    }
-	    break;
-	case CXt_EVAL:
-	    switch (cx->blk_eval.old_op_type) {
-	    case OP_ENTEREVAL:
-		if (CxREALEVAL(cx)) {
-		    PADOFFSET off;
-		    saweval = i;
-		    seq = cxstack[i].blk_oldcop->cop_seq;
-		    startcv = cxstack[i].blk_eval.cv;
-		    if (startcv && CvOUTSIDE(startcv)) {
-			off = pad_findlex(name, newoff, seq, CvOUTSIDE(startcv),
-					  i - 1, saweval, 0);
-			if (off)	/* continue looking if not found here */
-			    return off;
-		    }
-		}
-		break;
-	    case OP_DOFILE:
-	    case OP_REQUIRE:
-		/* require/do must have their own scope */
-		return 0;
-	    }
-	    break;
-	case CXt_FORMAT:
-	case CXt_SUB:
-	    if (!saweval)
-		return 0;
-	    cv = cx->blk_sub.cv;
-	    if (PL_debstash && CvSTASH(cv) == PL_debstash) {	/* ignore DB'* scope */
-		saweval = i;	/* so we know where we were called from */
-		seq = cxstack[i].blk_oldcop->cop_seq;
-		continue;
-	    }
-	    return pad_findlex(name, newoff, seq, cv, i - 1, saweval, FINDLEX_NOSEARCH);
-	}
-    }
-
-    return 0;
+    av_store(PL_comppad, newoff, SvREFCNT_inc(oldsv));
+    ASSERT_CURPAD_ACTIVE("pad_findlex 2");
+    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
+		"Pad findlex: set offset %ld to sv 0x%"UVxf"\n",
+		(long)newoff, PTR2UV(oldsv)
+	    )
+    );
+    return newoff;
 }
 
 
@@ -897,7 +859,9 @@ Perl_intro_my(pTHX)
 
     svp = AvARRAY(PL_comppad_name);
     for (i = PL_min_intro_pending; i <= PL_max_intro_pending; i++) {
-	if ((sv = svp[i]) && sv != &PL_sv_undef && !SvIVX(sv)) {
+	if ((sv = svp[i]) && sv != &PL_sv_undef
+		&& !SvFAKE(sv) && !SvIVX(sv))
+	{
 	    SvIVX(sv) = PAD_MAX;	/* Don't know scope end yet. */
 	    SvNVX(sv) = (NV)PL_cop_seqmax;
 	    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
@@ -936,14 +900,17 @@ Perl_pad_leavemy(pTHX)
     ASSERT_CURPAD_ACTIVE("pad_leavemy");
     if (PL_min_intro_pending && PL_comppad_name_fill < PL_min_intro_pending) {
 	for (off = PL_max_intro_pending; off >= PL_min_intro_pending; off--) {
-	    if ((sv = svp[off]) && sv != &PL_sv_undef && ckWARN_d(WARN_INTERNAL))
+	    if ((sv = svp[off]) && sv != &PL_sv_undef
+		    && !SvFAKE(sv) && ckWARN_d(WARN_INTERNAL))
 		Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
 					"%s never introduced", SvPVX(sv));
 	}
     }
     /* "Deintroduce" my variables that are leaving with this scope. */
     for (off = AvFILLp(PL_comppad_name); off > PL_comppad_name_fill; off--) {
-	if ((sv = svp[off]) && sv != &PL_sv_undef && SvIVX(sv) == PAD_MAX) {
+	if ((sv = svp[off]) && sv != &PL_sv_undef
+		&& !SvFAKE(sv) && SvIVX(sv) == PAD_MAX)
+	{
 	    SvIVX(sv) = PL_cop_seqmax;
 	    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 		"Pad leavemy: %ld \"%s\", (%lu,%lu)\n",
@@ -1191,16 +1158,24 @@ Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full)
 	    namesv = Nullsv;
 	}
 	if (namesv) {
-	    Perl_dump_indent(aTHX_ level+1, file,
-		"%2d. 0x%"UVxf"<%lu> %s (%lu,%lu) \"%s\"\n",
-		(int) ix,
-		PTR2UV(ppad[ix]),
-		(unsigned long) (ppad[ix] ? SvREFCNT(ppad[ix]) : 0),
-		SvFAKE(namesv) ? "FAKE" : "    ",
-		(unsigned long)I_32(SvNVX(namesv)),
-		(unsigned long)SvIVX(namesv),
-		SvPVX(namesv)
-	    );
+	    if (SvFAKE(namesv))
+		Perl_dump_indent(aTHX_ level+1, file,
+		    "%2d. 0x%"UVxf"<%lu> FAKE \"%s\"\n",
+		    (int) ix,
+		    PTR2UV(ppad[ix]),
+		    (unsigned long) (ppad[ix] ? SvREFCNT(ppad[ix]) : 0),
+		    SvPVX(namesv)
+		);
+	    else
+		Perl_dump_indent(aTHX_ level+1, file,
+		    "%2d. 0x%"UVxf"<%lu> (%lu,%lu) \"%s\"\n",
+		    (int) ix,
+		    PTR2UV(ppad[ix]),
+		    (unsigned long) (ppad[ix] ? SvREFCNT(ppad[ix]) : 0),
+		    (unsigned long)I_32(SvNVX(namesv)),
+		    (unsigned long)SvIVX(namesv),
+		    SvPVX(namesv)
+		);
 	}
 	else if (full) {
 	    Perl_dump_indent(aTHX_ level+1, file,
@@ -1315,8 +1290,10 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
     CvSTASH(cv)		= CvSTASH(proto);
     CvROOT(cv)		= OpREFCNT_inc(CvROOT(proto));
     CvSTART(cv)		= CvSTART(proto);
-    if (outside)
+    if (outside) {
 	CvOUTSIDE(cv)	= (CV*)SvREFCNT_inc(outside);
+	CvOUTSIDE_SEQ(cv) = CvOUTSIDE_SEQ(proto);
+    }
 
     if (SvPOK(proto))
 	sv_setpvn((SV*)cv, SvPVX(proto), SvCUR(proto));
@@ -1334,8 +1311,7 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
 	if (namesv && namesv != &PL_sv_undef) {
 	    char *name = SvPVX(namesv);    /* XXX */
 	    if (SvFLAGS(namesv) & SVf_FAKE) {   /* lexical from outside? */
-		I32 off = pad_findlex(name, ix, SvIVX(namesv),
-				      CvOUTSIDE(cv), cxstack_ix, 0, 0);
+		I32 off = pad_findlex(name, ix, cv);
 		if (!off)
 		    PL_curpad[ix] = SvREFCNT_inc(ppad[ix]);
 		else if (off != ix)
@@ -1432,6 +1408,7 @@ Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv, CV *new_cv)
 	    CV *innercv = (CV*)curpad[ix];
 	    if (CvOUTSIDE(innercv) == old_cv) {
 		CvOUTSIDE(innercv) = new_cv;
+		/* anon prototypes aren't refcounted */
 		if (!CvANON(innercv) || CvCLONED(innercv)) {
 		    (void)SvREFCNT_inc(new_cv);
 		    SvREFCNT_dec(old_cv);
