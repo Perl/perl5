@@ -4090,7 +4090,9 @@ following subroutine:
     }
 
 Note that the file will not be included twice under the same specified
-name.  The file must return true as the last statement to indicate
+name.
+
+The file must return true as the last statement to indicate
 successful execution of any initialization code, so it's customary to
 end such a file with C<1;> unless you're sure it'll return true
 otherwise.  But it's better just to put the C<1;>, in case you add more

@@ -1084,7 +1084,7 @@ You can actually specify -g and -DDEBUGGING independently, but usually
 it's convenient to have both.
 
 If you are using a shared libperl, see the warnings about multiple
-versions of perl under L<Building a shared libperl.so Perl library>.
+versions of perl under L<Building a shared Perl library>.
 
 =head2 Extensions
 
@@ -1108,6 +1108,9 @@ extensions statically linked into the perl binary, then this offers a
 convenient way to do that in one step.  (It is not necessary, however;
 you can build and install extensions just fine even if you don't have
 dynamic loading.  See lib/ExtUtils/MakeMaker.pm for more details.)
+
+If you have dynamic loading, another way of specifying extra modules
+is described in L<"Adding extra modules to the build"> below.
 
 You can learn more about each of the supplied extensions by consulting the
 documentation in the individual .pm modules, located under the
@@ -1471,6 +1474,9 @@ command line parameter to Configure, for example like this:
 or answer first 'y' to the question 'Install any extra modules?' and
 then answer "Compress::Zlib Bundle::LWP DBI" to the 'Extras?' question.
 The module or the bundle names are as for the CPAN module 'install' command.
+This will only work if those modules are to be built as dynamic
+extensions.  If you wish to include those extra modules as static
+extensions, see L<"Extensions"> above.
 
 Notice that because the CPAN module will be used to fetch the extra
 modules, you will need access to the CPAN, either via the Internet,
@@ -1790,7 +1796,7 @@ archive, please report it to the site's maintainer.
 =item invalid token: ##
 
 You are using a non-ANSI-compliant C compiler.  See L<WARNING:  This
-version requires a compiler that supports ANSI C>.
+version requires a compiler that supports ANSI C.>
 
 =item Miscellaneous
 
