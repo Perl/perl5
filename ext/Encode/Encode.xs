@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 1.43 2002/05/01 05:41:06 dankogai Exp dankogai $
+ $Id: Encode.xs,v 1.44 2002/05/02 07:33:09 dankogai Exp $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -53,6 +53,9 @@ call_failure(SV * routine, U8 * done, U8 * dest, U8 * orig)
     /* Exists for breakpointing */
 }
 
+
+#define ERR_ENCODE_NOMAP "\"\\x{%04" UVxf "}\" does not map to %s"
+#define ERR_DECODE_NOMAP "%s \"\\x%02" UVXf "\" does not map to Unicode"
 
 static SV *
 encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
@@ -129,15 +132,13 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 		    utf8n_to_uvuni(s+slen, (SvCUR(src)-slen),
 				   &clen, UTF8_ALLOW_ANY|UTF8_CHECK_ONLY);
 		if (check & ENCODE_DIE_ON_ERR) {
-		    Perl_croak(
-                       aTHX_ "\"\\x{%04" UVxf "}\" does not map to %s",
-			(UV)ch, enc->name[0]);
+		    Perl_croak(aTHX_ ERR_ENCODE_NOMAP,
+			       (UV)ch, enc->name[0]);
 		    return &PL_sv_undef; /* never reaches but be safe */
 		}
 		if (check & ENCODE_WARN_ON_ERR){
 		    Perl_warner(aTHX_ packWARN(WARN_UTF8),
-                               "\"\\x{%" UVxf "}\" does not map to %s",
-				(UV)ch, enc->name[0]);
+				ERR_ENCODE_NOMAP, (UV)ch, enc->name[0]);
 		}
 		if (check & ENCODE_RETURN_ON_ERR){
 		    goto ENCODE_SET_SRC;
@@ -170,18 +171,15 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 	    /* decoding */
 	    else {
 		if (check & ENCODE_DIE_ON_ERR){
-		    Perl_croak(
-			aTHX_ "%s \"\\x%02" UVXf 
-			"\" does not map to Unicode (%d)",
-			(UV)enc->name[0], (U8)s[slen], code);
+		    Perl_croak(aTHX_ ERR_DECODE_NOMAP,
+			       (UV)enc->name[0], (U8)s[slen]);
 		    return &PL_sv_undef; /* never reaches but be safe */
 		}
 		if (check & ENCODE_WARN_ON_ERR){
 		    Perl_warner(
 			aTHX_ packWARN(WARN_UTF8),
-			"%s \"\\x%02" UVXf
-			"\" does not map to Unicode (%d)",
-			(UV)enc->name[0], (U8)s[slen], code);
+			ERR_DECODE_NOMAP,
+			(UV)enc->name[0], (U8)s[slen]);
 		}
 		if (check & ENCODE_RETURN_ON_ERR){
 		    goto ENCODE_SET_SRC;

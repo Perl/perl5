@@ -1,9 +1,9 @@
 #
-# $Id: Encode.pm,v 1.66 2002/05/01 05:41:06 dankogai Exp dankogai $
+# $Id: Encode.pm,v 1.67 2002/05/02 07:33:34 dankogai Exp $
 #
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.66 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.67 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 use XSLoader ();
 XSLoader::load(__PACKAGE__, $VERSION);

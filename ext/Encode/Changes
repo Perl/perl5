@@ -1,9 +1,17 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.66 2002/05/01 05:41:06 dankogai Exp dankogai $
+# $Id: Changes,v 1.67 2002/05/02 07:33:09 dankogai Exp $
 #
 
-$Revision: 1.66 $ $Date: 2002/05/01 05:41:06 $
+$Revision: 1.67 $ $Date: 2002/05/02 07:33:09 $
+! Encode.xs
+  Error message now consistent w/ perlqq (\N{U+} -> \x{})
+  done in perl@16308 but Philip linted me further.  Now the error
+  messages are macronized as ERR_ENCODE_NOMAP and ERR_DECODE_NOMAP
+! lib/Encode/Guess.pm
+  Sanity check for happier -w by Autrijus
+
+1.66 2002/05/01 05:41:06
 ! Encode.xs t/fallback.t
   WARN_ON_ERR no longer assumes RETURN_ON_ERR so you can issue a warning
   while fallback is in effect.  This even came with a welcome side-effect
@@ -566,7 +574,7 @@ $Revision: 1.66 $ $Date: 2002/05/01 05:41:06 $
   Typo fixes and improvements by jhi
   Message-Id: <200204010201.FAA03564@alpha.hut.fi>, et al.
 
-1.11  $Date: 2002/05/01 05:41:06 $
+1.11  $Date: 2002/05/02 07:33:09 $
 + t/encoding.t
 + t/jperl.t
 ! MANIFEST
