@@ -364,30 +364,26 @@ if (! $versiononly && (-f 'cppstdin') && (! samepath($installbin, '.'))) {
     chmod(0755, "$installbin/cppstdin");
 }
 
-if ($Config{installscripts} eq 'define') {
-    # Install scripts.
+# Install scripts.
 
-    mkpath($installscript, $verbose, 0777);
+mkpath($installscript, $verbose, 0777);
 
-    if (! $versiononly) {
-	for (@scripts) {
-	    (my $base = $_) =~ s#.*/##;
-	    copy($_, "$installscript/$base");
-	    chmod(0755, "$installscript/$base");
-	}
+if (! $versiononly) {
+    for (@scripts) {
+	(my $base = $_) =~ s#.*/##;
+	copy($_, "$installscript/$base");
+	chmod(0755, "$installscript/$base");
     }
+}
 
-    # pstruct should be a link to c2ph
-    
-    if (! $versiononly) {
-	safe_unlink("$installscript/pstruct$scr_ext");
-	if ($^O eq 'dos' or $Is_VMS or $^O eq 'transit') {
-	    copy("$installscript/c2ph$scr_ext",
-		 "$installscript/pstruct$scr_ext"); 
-	} else {
-	    link("$installscript/c2ph$scr_ext",
-		 "$installscript/pstruct$scr_ext");
-	}
+# pstruct should be a link to c2ph
+
+if (! $versiononly) {
+    safe_unlink("$installscript/pstruct$scr_ext");
+    if ($^O eq 'dos' or $Is_VMS or $^O eq 'transit') {
+        copy("$installscript/c2ph$scr_ext", "$installscript/pstruct$scr_ext"); 
+    } else {
+        link("$installscript/c2ph$scr_ext", "$installscript/pstruct$scr_ext");
     }
 }
 

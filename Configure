@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Oct  9 21:51:54 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Wed Oct 11 00:00:47 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -709,7 +709,6 @@ inc_version_list=''
 inc_version_list_init=''
 installprefix=''
 installprefixexp=''
-installscripts=''
 installstyle=''
 installusrbinperl=''
 intsize=''
@@ -6270,26 +6269,6 @@ case "$inc_version_list" in
 	;;
 esac
 $rm -f getverlist
-
-: determine whether to install the scripts
-
-echo " "
-$cat <<EOM
-Do you want to install the various scripts accompanying Perl?
-Usually you do want this.
-EOM
-case "$installscripts" in
-"$undef"|[nN]*)	dflt='n';;
-*)		dflt='y';;
-esac
-rp="Do you want to install the scripts?"
-. ./myread
-case "$ans" in
-[yY]*)	val="$define";;
-*)	val="$undef" ;;
-esac
-set installscripts
-eval $setvar
 
 : determine whether to install perl also as /usr/bin/perl
 
@@ -15767,7 +15746,6 @@ installprefix='$installprefix'
 installprefixexp='$installprefixexp'
 installprivlib='$installprivlib'
 installscript='$installscript'
-installscripts='$installscripts'
 installsitearch='$installsitearch'
 installsitebin='$installsitebin'
 installsitelib='$installsitelib'
