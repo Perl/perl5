@@ -105,7 +105,7 @@
    Andy Dougherty	April 1998
 */
 
-#ifdef I_INTTYPES
+#if defined(UINT8_MAX) && defined(INT16_MAX) && defined(INT32_MAX)
 
 typedef int8_t		I8;
 typedef uint8_t		U8;

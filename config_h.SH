@@ -2286,6 +2286,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_pthreads_created_joinable PTHREADS_CREATED_JOINABLE /**/
 
+/* MULTIPLICITY:
+ *	This symbol, if defined, indicates that Perl should
+ *	be built to use multiplicity.
+ */
+#$usemultiplicity	MULTIPLICITY		/**/
+
 /* USE_THREADS:
  *	This symbol, if defined, indicates that Perl should
  *	be built to use threads.

@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Sep 29 00:08:14 EET DST 1998 [metaconfig 3.0 PL70]
+# Generated on Wed Sep 30 02:04:24 EET DST 1998 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by jhi@iki.fi)
 
 cat >/tmp/c1$$ <<EOF
@@ -3976,16 +3976,6 @@ fi
 case "$hint" in
 none|recommended) dflt="$ccflags $dflt" ;;
 *) dflt="$ccflags";;
-esac
-
-case "$usemultiplicity" in
-$define)
-	case "$dflt" in
-	*-DMULTIPLICITY* ) ;;
-	*)	dflt="$dflt -DMULTIPLICITY"
-		;;
-	esac
-	;;
 esac
 
 case "$dflt" in
