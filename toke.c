@@ -6410,21 +6410,23 @@ Perl_scan_num(pTHX_ char *start)
 	    sv = NEWSV(92,0);
 	    if (overflowed) {
 		dTHR;
-		if (ckWARN(WARN_UNSAFE) && (double) n > 4294967295.0)
+		if (ckWARN(WARN_UNSAFE) && (NV) n > 4294967295.0)
 		    Perl_warner(aTHX_ WARN_UNSAFE,
 				"%s number > %s non-portable",
 				Base, max);
 		sv_setnv(sv, n);
 	    }
 	    else {
+#if UV_SIZEOF > 4
 		dTHR;
-		if (ckWARN(WARN_UNSAFE) && u > 4294967295)
+		if (ckWARN(WARN_UNSAFE) && u > 0xffffffff)
 		    Perl_warner(aTHX_ WARN_UNSAFE,
 				"%s number > %s non-portable",
 				Base, max);
+#endif
 		sv_setuv(sv, u);
 	    }
-	    if ( PL_hints & HINT_NEW_BINARY)
+	    if (PL_hints & HINT_NEW_BINARY)
 		sv = new_constant(start, s - start, "binary", sv, Nullsv, NULL);
 	}
 	break;

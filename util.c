@@ -2784,13 +2784,12 @@ Perl_scan_bin(pTHX_ char *start, I32 len, I32 *retlen)
     register UV ruv = 0;
     register bool seenb = FALSE;
     register bool overflowed = FALSE;
-    char *nonzero = NULL;
 
     for (; len-- && *s; s++) {
 	if (!(*s == '0' || *s == '1')) {
 	    if (*s == '_')
 		continue; /* Note: does not check for __ and the like. */
-	    if (seenb == FALSE && *s == 'b' && nonzero == NULL) {
+	    if (seenb == FALSE && *s == 'b' && ruv == 0) {
 		/* Disallow 0bbb0b0bbb... */
 		seenb = TRUE;
 		continue;
@@ -2802,9 +2801,6 @@ Perl_scan_bin(pTHX_ char *start, I32 len, I32 *retlen)
 				"Illegal binary digit '%c' ignored", *s);
 		break;
 	    }
-	} else {
-	    if (nonzero == NULL && *s != '0')
-		nonzero = s;
 	}
 	if (!overflowed) {
 	    register UV xuv = ruv << 1;
@@ -2826,13 +2822,13 @@ Perl_scan_bin(pTHX_ char *start, I32 len, I32 *retlen)
 	     * is a waste of time (because the NV cannot preserve
 	     * the low-order bits anyway): we could just remember when
 	     * did we overflow and in the end just multiply rnv by the
-	     * right amount of 16-tuples. */
+	     * right amount. */
 	    rnv += (*s - '0');
 	}
     }
     if (!overflowed)
 	rnv = (NV) ruv;
-    if (sizeof(UV) > 4 && nonzero && (s - nonzero) > 32) {
+    if (rnv > 4294967295.0) {
 	dTHR;
 	if (ckWARN(WARN_UNSAFE))
 	    Perl_warner(aTHX_ WARN_UNSAFE,
@@ -2849,7 +2845,6 @@ Perl_scan_oct(pTHX_ char *start, I32 len, I32 *retlen)
     register NV rnv = 0.0;
     register UV ruv = 0;
     register bool overflowed = FALSE;
-    char *nonzero = NULL;
 
     for (; len-- && *s; s++) {
 	if (!(*s >= '0' && *s <= '7')) {
@@ -2867,10 +2862,6 @@ Perl_scan_oct(pTHX_ char *start, I32 len, I32 *retlen)
 		}
 		break;
 	    }
-	}
-	else {
-	    if (nonzero == NULL && *s != '0')
-		nonzero = s;
 	}
 	if (!overflowed) {
 	    register xuv = ruv << 3;
@@ -2898,9 +2889,7 @@ Perl_scan_oct(pTHX_ char *start, I32 len, I32 *retlen)
     }
     if (!overflowed)
 	rnv = (NV) ruv;
-    if (sizeof(UV) > 4 &&
-	overflowed ? rnv > 4294967295.0 :
-	(nonzero && (s - nonzero) > 10 && (ruv >> 30) > 3)) {
+    if (rnv > 4294967295.0) { 
 	dTHR;
 	if (ckWARN(WARN_UNSAFE))
 	    Perl_warner(aTHX_ WARN_UNSAFE,
@@ -2918,7 +2907,6 @@ Perl_scan_hex(pTHX_ char *start, I32 len, I32 *retlen)
     register UV ruv = 0;
     register bool seenx = FALSE;
     register bool overflowed = FALSE;
-    char *nonzero = NULL;
     char *hexdigit;
 
     for (; len-- && *s; s++) {
@@ -2926,7 +2914,7 @@ Perl_scan_hex(pTHX_ char *start, I32 len, I32 *retlen)
 	if (!hexdigit) {
 	    if (*s == '_')
 		continue; /* Note: does not check for __ and the like. */
-	    if (seenx == FALSE && *s == 'x' && nonzero == NULL) {
+	    if (seenx == FALSE && *s == 'x' && ruv == 0) {
 		/* Disallow 0xxx0x0xxx... */
 		seenx = TRUE;
 		continue;
@@ -2938,10 +2926,6 @@ Perl_scan_hex(pTHX_ char *start, I32 len, I32 *retlen)
 				"Illegal hexadecimal digit '%c' ignored", *s);
 		break;
 	    }
-	}
-	else {
-	    if (nonzero == NULL && *s != '0')
-		nonzero = s;
 	}
 	if (!overflowed) {
 	    register UV xuv = ruv << 4;
@@ -2969,8 +2953,7 @@ Perl_scan_hex(pTHX_ char *start, I32 len, I32 *retlen)
     }
     if (!overflowed)
 	rnv = (NV) ruv;
-    if (sizeof(UV) > 4 &&
-	nonzero && (s - nonzero) > 8) {
+    if (rnv > 4294967295.0) {
 	dTHR;
 	if (ckWARN(WARN_UNSAFE))
 	    Perl_warner(aTHX_ WARN_UNSAFE,
