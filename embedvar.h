@@ -99,6 +99,7 @@
 #define PL_regcode		(vTHX->Tregcode)
 #define PL_regcomp_parse	(vTHX->Tregcomp_parse)
 #define PL_regcomp_rx		(vTHX->Tregcomp_rx)
+#define PL_regcompat1		(vTHX->Tregcompat1)
 #define PL_regcompp		(vTHX->Tregcompp)
 #define PL_regdata		(vTHX->Tregdata)
 #define PL_regdummy		(vTHX->Tregdummy)
@@ -117,7 +118,6 @@
 #define PL_regnaughty		(vTHX->Tregnaughty)
 #define PL_regnpar		(vTHX->Tregnpar)
 #define PL_regprecomp		(vTHX->Tregprecomp)
-#define PL_regprev		(vTHX->Tregprev)
 #define PL_regprogram		(vTHX->Tregprogram)
 #define PL_regsawback		(vTHX->Tregsawback)
 #define PL_regseen		(vTHX->Tregseen)
@@ -807,6 +807,7 @@
 #define PL_regcode		(aTHXo->interp.Tregcode)
 #define PL_regcomp_parse	(aTHXo->interp.Tregcomp_parse)
 #define PL_regcomp_rx		(aTHXo->interp.Tregcomp_rx)
+#define PL_regcompat1		(aTHXo->interp.Tregcompat1)
 #define PL_regcompp		(aTHXo->interp.Tregcompp)
 #define PL_regdata		(aTHXo->interp.Tregdata)
 #define PL_regdummy		(aTHXo->interp.Tregdummy)
@@ -825,7 +826,6 @@
 #define PL_regnaughty		(aTHXo->interp.Tregnaughty)
 #define PL_regnpar		(aTHXo->interp.Tregnpar)
 #define PL_regprecomp		(aTHXo->interp.Tregprecomp)
-#define PL_regprev		(aTHXo->interp.Tregprev)
 #define PL_regprogram		(aTHXo->interp.Tregprogram)
 #define PL_regsawback		(aTHXo->interp.Tregsawback)
 #define PL_regseen		(aTHXo->interp.Tregseen)
@@ -1504,6 +1504,7 @@
 #define PL_regcode		(aTHX->Tregcode)
 #define PL_regcomp_parse	(aTHX->Tregcomp_parse)
 #define PL_regcomp_rx		(aTHX->Tregcomp_rx)
+#define PL_regcompat1		(aTHX->Tregcompat1)
 #define PL_regcompp		(aTHX->Tregcompp)
 #define PL_regdata		(aTHX->Tregdata)
 #define PL_regdummy		(aTHX->Tregdummy)
@@ -1522,7 +1523,6 @@
 #define PL_regnaughty		(aTHX->Tregnaughty)
 #define PL_regnpar		(aTHX->Tregnpar)
 #define PL_regprecomp		(aTHX->Tregprecomp)
-#define PL_regprev		(aTHX->Tregprev)
 #define PL_regprogram		(aTHX->Tregprogram)
 #define PL_regsawback		(aTHX->Tregsawback)
 #define PL_regseen		(aTHX->Tregseen)
@@ -1640,6 +1640,7 @@
 #define PL_Tregcode		PL_regcode
 #define PL_Tregcomp_parse	PL_regcomp_parse
 #define PL_Tregcomp_rx		PL_regcomp_rx
+#define PL_Tregcompat1		PL_regcompat1
 #define PL_Tregcompp		PL_regcompp
 #define PL_Tregdata		PL_regdata
 #define PL_Tregdummy		PL_regdummy
@@ -1658,7 +1659,6 @@
 #define PL_Tregnaughty		PL_regnaughty
 #define PL_Tregnpar		PL_regnpar
 #define PL_Tregprecomp		PL_regprecomp
-#define PL_Tregprev		PL_regprev
 #define PL_Tregprogram		PL_regprogram
 #define PL_Tregsawback		PL_regsawback
 #define PL_Tregseen		PL_regseen

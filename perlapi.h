@@ -774,6 +774,8 @@ START_EXTERN_C
 #define PL_regcomp_parse	(*Perl_Tregcomp_parse_ptr(aTHXo))
 #undef  PL_regcomp_rx
 #define PL_regcomp_rx		(*Perl_Tregcomp_rx_ptr(aTHXo))
+#undef  PL_regcompat1
+#define PL_regcompat1		(*Perl_Tregcompat1_ptr(aTHXo))
 #undef  PL_regcompp
 #define PL_regcompp		(*Perl_Tregcompp_ptr(aTHXo))
 #undef  PL_regdata
@@ -810,8 +812,6 @@ START_EXTERN_C
 #define PL_regnpar		(*Perl_Tregnpar_ptr(aTHXo))
 #undef  PL_regprecomp
 #define PL_regprecomp		(*Perl_Tregprecomp_ptr(aTHXo))
-#undef  PL_regprev
-#define PL_regprev		(*Perl_Tregprev_ptr(aTHXo))
 #undef  PL_regprogram
 #define PL_regprogram		(*Perl_Tregprogram_ptr(aTHXo))
 #undef  PL_regsawback
