@@ -40,8 +40,9 @@ if ( -f $file ) {
     }
 }
 if ($< == $> and !$CONFIGURE)  {
-    my $home = eval { (getpwuid($>))[7] } || $ENV{HOME};
-    $file = $home . "/.libnetrc";
+    use File::Spec;
+    my $home = eval { (getpwuid($>))[7] } || $ENV{HOME} || $ENV{HOMEDRIVE} || $ENV{HOMEPATH} || File::Spec->curdir;
+    $file = File::Spec->catfile($home, ".libnetrc");
     $ref = eval { do $file } if -f $file;
     %NetConfig = (%NetConfig, %{ $ref })
 	if ref($ref) eq 'HASH';	
