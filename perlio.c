@@ -192,6 +192,9 @@ PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags)
 #ifdef PERL_IMPLICIT_SYS
     return PerlSIO_fdupopen(f); 
 #else
+#ifdef WIN32
+    return win32_fdupopen(f);
+#else
     if (f) {
 	int fd = PerlLIO_dup(PerlIO_fileno(f));
 	if (fd >= 0) {
@@ -211,6 +214,7 @@ PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags)
     }
 #endif
     return NULL;
+#endif
 #endif
 }
 

@@ -4036,6 +4036,58 @@ win32_get_osfhandle(int fd)
     return (intptr_t)_get_osfhandle(fd);
 }
 
+FILE *
+win32_fdupopen(FILE *pf)
+{
+    FILE* pfdup;
+    fpos_t pos;
+    char mode[3];
+    int fileno = win32_dup(win32_fileno(pf));
+
+    /* open the file in the same mode */
+#ifdef __BORLANDC__
+    if((pf)->flags & _F_READ) {
+	mode[0] = 'r';
+	mode[1] = 0;
+    }
+    else if((pf)->flags & _F_WRIT) {
+	mode[0] = 'a';
+	mode[1] = 0;
+    }
+    else if((pf)->flags & _F_RDWR) {
+	mode[0] = 'r';
+	mode[1] = '+';
+	mode[2] = 0;
+    }
+#else
+    if((pf)->_flag & _IOREAD) {
+	mode[0] = 'r';
+	mode[1] = 0;
+    }
+    else if((pf)->_flag & _IOWRT) {
+	mode[0] = 'a';
+	mode[1] = 0;
+    }
+    else if((pf)->_flag & _IORW) {
+	mode[0] = 'r';
+	mode[1] = '+';
+	mode[2] = 0;
+    }
+#endif
+
+    /* it appears that the binmode is attached to the
+     * file descriptor so binmode files will be handled
+     * correctly
+     */
+    pfdup = win32_fdopen(fileno, mode);
+
+    /* move the file pointer to the same position */
+    if (!fgetpos(pf, &pos)) {
+	fsetpos(pfdup, &pos);
+    }
+    return pfdup;
+}
+
 DllExport void*
 win32_dynaload(const char* filename)
 {
