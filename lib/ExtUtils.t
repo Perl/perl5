@@ -33,6 +33,7 @@ my @files;
 print "# $dir being created...\n";
 mkdir $dir, 0777 or die "mkdir: $!\n";
 
+my $output = "output";
 
 END {
     use File::Path;
@@ -157,8 +158,21 @@ open FH, ">$testpl" or die "open >$testpl: $!\n";
 
 print FH "use strict;\n";
 print FH "use $package qw(@names_only);\n";
-print FH <<'EOT';
+print FH <<"EOT";
 
+print "1..1\n";
+if (open OUTPUT, ">$output") {
+  print "ok 1\n";
+  select OUTPUT;
+} else {
+  print "not ok 1 # Failed to open '$output': $!\n";
+  exit 1;
+}
+EOT
+
+print FH << 'EOT';
+
+# What follows goes to the temporary file.
 # IV
 my $five = FIVE;
 if ($five == 5) {
@@ -383,12 +397,13 @@ $make = $ENV{MAKE} if exists $ENV{MAKE};
 
 if ($^O eq 'MSWin32' && $make eq 'nmake') { $make .= " -nologo"; }
 
-my $makeout;
+my @makeout;
 
 print "# make = '$make'\n";
-$makeout = `$make`;
+@makeout = `$make`;
 if ($?) {
   print "not ok 3 # $make failed: $?\n";
+  print "# $_" foreach @makeout;
   exit($?);
 } else {
   print "ok 3\n";
@@ -399,37 +414,36 @@ if ($Config{usedl}) {
 } else {
   my $makeperl = "$make perl";
   print "# make = '$makeperl'\n";
-  $makeout = `$makeperl`;
+  @makeout = `$makeperl`;
   if ($?) {
     print "not ok 4 # $makeperl failed: $?\n";
+  print "# $_" foreach @makeout;
     exit($?);
   } else {
     print "ok 4\n";
   }
 }
 
-my $test = 23;
+push @files, $output;
+
 my $maketest = "$make test";
 print "# make = '$maketest'\n";
-$makeout = `$maketest`;
 
-# echo of running the test script
-$makeout =~ s/^\s*PERL_DL_NONLAZY=.+?\n//m;
-$makeout =~ s/^MCR.+test.pl\n//mig if $^O eq 'VMS';
+@makeout = `$maketest`;
 
-# GNU make babblings
-$makeout =~ s/^\w*?make.+?(?:entering|leaving) directory.+?\n//mig;
+if (open OUTPUT, "<$output") {
+  print while <OUTPUT>;
+  close OUTPUT or print "# Close $output failed: $!\n";
+} else {
+  # Harness will report missing test results at this point.
+  print "# Open <$output failed: $!\n";
+}
 
-# Hopefully gets most make's babblings
-# make -f Makefile.aperl perl
-$makeout =~ s/^\w*?make.+\sperl[^A-Za-z0-9]*\n//mig;
-# make[1]: `perl' is up to date.
-$makeout =~ s/^\w*?make.+perl.+?is up to date.*?\n//mig;
-
-print $makeout;
+my $test = 23;
 
 if ($?) {
   print "not ok $test # $maketest failed: $?\n";
+  print "# $_" foreach @makeout;
 } else {
   print "ok $test\n";
 }
@@ -457,9 +471,10 @@ $test++;
 
 my $makeclean = "$make clean";
 print "# make = '$makeclean'\n";
-$makeout = `$makeclean`;
+@makeout = `$makeclean`;
 if ($?) {
   print "not ok $test # $make failed: $?\n";
+  print "# $_" foreach @makeout;
 } else {
   print "ok $test\n";
 }
