@@ -18,7 +18,7 @@ BEGIN {
         plan skip_all => 'Non-Unix platform';
     }
     else {
-        plan tests => 115;
+        plan tests => 117;
     }
 }
 
@@ -235,10 +235,15 @@ is ($t->replace_manpage_separator('Foo/Bar'),'Foo::Bar','manpage_separator');
 ###############################################################################
 
 $t->init_linker;
-foreach (qw/ EXPORT_LIST PERL_ARCHIVE PERL_ARCHIVE_AFTER /)
+foreach (qw/ EXPORT_LIST PERL_ARCHIVE PERL_ARCHIVE_AFTER LD /)
 {
+    use Config;
     ok( exists $t->{$_}, "$_ was defined" );
-    is( $t->{$_}, '', "$_ is empty on Unix"); 
+    if (exists $Config{lc $_}) {
+	is($t->{$_}, $Config{lc $_}, "$_ is like in %Config ($t->{$_})"); 
+    } else {
+	is($t->{$_}, '', "$_ is empty on Unix"); 
+    }
 }
 
 

@@ -155,8 +155,8 @@ sub init_DIRFILESEP {
 Override some of the Unix specific commands with portable
 ExtUtils::Command ones.
 
-Also provide defaults for LD and AR in case the %Config values aren't
-set.
+Also provide a default for AR in case the %Config values aren't
+set. LD is now set in init_linker().
 
 LDLOADLIBS's default is changed to $Config{libs}.
 
@@ -181,7 +181,7 @@ sub init_others {
     $self->{TEST_F}   ||= '$(PERLRUN) -MExtUtils::Command -e test_f';
     $self->{DEV_NULL} ||= '> NUL';
 
-    $self->{LD}     ||= $Config{ld} || 'link';
+
     $self->{AR}     ||= $Config{ar} || 'lib';
 
     $self->SUPER::init_others;
@@ -382,11 +382,15 @@ END
 
 =item init_linker
 
+Unless previosuly set initializes LD to be the linker specified in Config and falls back
+to the standard Win32 linker 'link'.
+
 =cut
 
 sub init_linker {
     my $self = shift;
 
+    $self->{LD}     ||= $Config{ld} || 'link';
     $self->{PERL_ARCHIVE}       = "\$(PERL_INC)\\$Config{libperl}";
     $self->{PERL_ARCHIVE_AFTER} = '';
     $self->{EXPORT_LIST}        = '$(BASEEXT).def';

@@ -180,6 +180,7 @@ sub rmsexpand ($;$) {
   ($node,$dev,$dir,$name,$type,$ver) = $fspec =~
      /([^:]*::)?([^:]*:)?([^>\]]*[>\]])?([^.;]*)(\.?[^.;]*)([.;]?\d*)/;
   foreach ((@$defaults,$ENV{'DEFAULT'})) {
+    next unless defined;
     last if $node && $ver && $type && $dev && $dir && $name;
     ($dnode,$ddev,$ddir,$dname,$dtype,$dver) =
        /([^:]*::)?([^:]*:)?([^>\]]*[>\]])?([^.;]*)(\.?[^.;]*)([.;]?\d*)/;
