@@ -47,6 +47,7 @@ sections:
     perltie		Perl objects hidden behind simple variables
     perlbot		Perl OO tricks and examples
     perlipc		Perl interprocess communication
+    perlfork		Perl fork() information
     perlthrtut		Perl threads tutorial
     perldbmfilter	Perl DBM Filters
 

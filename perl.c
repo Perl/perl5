@@ -47,40 +47,42 @@ static I32 read_e_script(pTHXo_ int idx, SV *buf_sv, int maxlen);
 #endif
 
 #ifdef PERL_OBJECT
-CPerlObj*
-perl_alloc(struct IPerlMem* ipM, struct IPerlEnv* ipE,
-		 struct IPerlStdIO* ipStd, struct IPerlLIO* ipLIO,
-		 struct IPerlDir* ipD, struct IPerlSock* ipS,
-		 struct IPerlProc* ipP)
-{
-    CPerlObj* pPerl = new(ipM) CPerlObj(ipM, ipE, ipStd, ipLIO, ipD, ipS, ipP);
-    if (pPerl != NULL)
-	pPerl->Init();
-
-    return pPerl;
-}
-#else
+#define perl_construct	Perl_construct
+#define perl_parse	Perl_parse
+#define perl_run	Perl_run
+#define perl_destruct	Perl_destruct
+#define perl_free	Perl_free
+#endif
 
 #ifdef PERL_IMPLICIT_SYS
 PerlInterpreter *
-perl_alloc_using(struct IPerlMem* ipM, struct IPerlEnv* ipE,
+perl_alloc_using(struct IPerlMem* ipM, struct IPerlMem* ipMS,
+		 struct IPerlMem* ipMP, struct IPerlEnv* ipE,
 		 struct IPerlStdIO* ipStd, struct IPerlLIO* ipLIO,
 		 struct IPerlDir* ipD, struct IPerlSock* ipS,
 		 struct IPerlProc* ipP)
 {
     PerlInterpreter *my_perl;
-
+#ifdef PERL_OBJECT
+    my_perl = (PerlInterpreter*)new(ipM) CPerlObj(ipM, ipMS, ipMP, ipE, ipStd,
+						  ipLIO, ipD, ipS, ipP);
+    PERL_SET_INTERP(my_perl);
+#else
     /* New() needs interpreter, so call malloc() instead */
     my_perl = (PerlInterpreter*)(*ipM->pMalloc)(ipM, sizeof(PerlInterpreter));
     PERL_SET_INTERP(my_perl);
     Zero(my_perl, 1, PerlInterpreter);
     PL_Mem = ipM;
+    PL_MemShared = ipMS;
+    PL_MemParse = ipMP;
     PL_Env = ipE;
     PL_StdIO = ipStd;
     PL_LIO = ipLIO;
     PL_Dir = ipD;
     PL_Sock = ipS;
     PL_Proc = ipP;
+#endif
+
     return my_perl;
 }
 #else
@@ -95,7 +97,6 @@ perl_alloc(void)
     return my_perl;
 }
 #endif /* PERL_IMPLICIT_SYS */
-#endif /* PERL_OBJECT */
 
 void
 perl_construct(pTHXx)
@@ -234,6 +235,9 @@ perl_destruct(pTHXx)
     Thread t;
     dTHX;
 #endif /* USE_THREADS */
+
+    /* wait for all pseudo-forked children to finish */
+    PERL_WAIT_FOR_CHILDREN;
 
 #ifdef USE_THREADS
 #ifndef FAKE_THREADS
@@ -2873,7 +2877,7 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
     }
     TAINT_NOT;
     if (tmpgv = gv_fetchpv("$",TRUE, SVt_PV))
-	sv_setiv(GvSV(tmpgv), (IV)getpid());
+	sv_setiv(GvSV(tmpgv), (IV)PerlProc_getpid());
 }
 
 STATIC void

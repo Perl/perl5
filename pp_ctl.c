@@ -686,7 +686,7 @@ PP(pp_grepstart)
     /* SAVE_DEFSV does *not* suffice here for USE_THREADS */
     SAVESPTR(DEFSV);
     ENTER;					/* enter inner scope */
-    SAVESPTR(PL_curpm);
+    SAVEVPTR(PL_curpm);
 
     src = PL_stack_base[*PL_markstack_ptr];
     SvTEMP_off(src);
@@ -756,7 +756,7 @@ PP(pp_mapwhile)
 	SV *src;
 
 	ENTER;					/* enter inner scope */
-	SAVESPTR(PL_curpm);
+	SAVEVPTR(PL_curpm);
 
 	src = PL_stack_base[PL_markstack_ptr[-1]];
 	SvTEMP_off(src);
@@ -785,7 +785,7 @@ PP(pp_sort)
     }
 
     ENTER;
-    SAVEPPTR(PL_sortcop);
+    SAVEVPTR(PL_sortcop);
     if (PL_op->op_flags & OPf_STACKED) {
 	if (PL_op->op_flags & OPf_SPECIAL) {
 	    OP *kid = cLISTOP->op_first->op_sibling;	/* pass pushmark */
@@ -813,10 +813,10 @@ PP(pp_sort)
 		DIE(aTHX_ "Not a CODE reference in sort");
 	    }
 	    PL_sortcop = CvSTART(cv);
-	    SAVESPTR(CvROOT(cv)->op_ppaddr);
+	    SAVEVPTR(CvROOT(cv)->op_ppaddr);
 	    CvROOT(cv)->op_ppaddr = PL_ppaddr[OP_NULL];
 
-	    SAVESPTR(PL_curpad);
+	    SAVEVPTR(PL_curpad);
 	    PL_curpad = AvARRAY((AV*)AvARRAY(CvPADLIST(cv))[1]);
 	}
     }
@@ -1040,6 +1040,11 @@ S_dopoptolabel(pTHX_ char *label)
 		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting subroutine via %s", 
 			PL_op_name[PL_op->op_type]);
 	    break;
+	case CXt_FORMAT:
+	    if (ckWARN(WARN_UNSAFE))
+		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting format via %s", 
+			PL_op_name[PL_op->op_type]);
+	    break;
 	case CXt_EVAL:
 	    if (ckWARN(WARN_UNSAFE))
 		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting eval via %s", 
@@ -1115,6 +1120,7 @@ S_dopoptosub_at(pTHX_ PERL_CONTEXT *cxstk, I32 startingblock)
 	    continue;
 	case CXt_EVAL:
 	case CXt_SUB:
+	case CXt_FORMAT:
 	    DEBUG_l( Perl_deb(aTHX_ "(Found sub #%ld)\n", (long)i));
 	    return i;
 	}
@@ -1158,6 +1164,11 @@ S_dopoptoloop(pTHX_ I32 startingblock)
 	case CXt_SUB:
 	    if (ckWARN(WARN_UNSAFE))
 		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting subroutine via %s", 
+			PL_op_name[PL_op->op_type]);
+	    break;
+	case CXt_FORMAT:
+	    if (ckWARN(WARN_UNSAFE))
+		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting format via %s", 
 			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_EVAL:
@@ -1207,6 +1218,9 @@ Perl_dounwind(pTHX_ I32 cxix)
 	    POPLOOP(cx);
 	    break;
 	case CXt_NULL:
+	    break;
+	case CXt_FORMAT:
+	    POPFORMAT(cx);
 	    break;
 	}
 	cxstack_ix--;
@@ -1420,7 +1434,7 @@ PP(pp_caller)
     }
 
     cx = &ccstack[cxix];
-    if (CxTYPE(cx) == CXt_SUB) {
+    if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT) {
         dbcxix = dopoptosub_at(ccstack, cxix - 1);
 	/* We expect that ccstack[dbcxix] is CXt_SUB, anyway, the
 	   field below is defined for any cx. */
@@ -1448,7 +1462,8 @@ PP(pp_caller)
     PUSHs(sv_2mortal(newSViv((I32)CopLINE(cx->blk_oldcop))));
     if (!MAXARG)
 	RETURN;
-    if (CxTYPE(cx) == CXt_SUB) { /* So is ccstack[dbcxix]. */
+    if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT) {
+	/* So is ccstack[dbcxix]. */
 	sv = NEWSV(49, 0);
 	gv_efullname3(sv, CvGV(ccstack[cxix].blk_sub.cv), Nullch);
 	PUSHs(sv_2mortal(sv));
@@ -1563,7 +1578,7 @@ PP(pp_dbstate)
 	PUSHSUB(cx);
 	CvDEPTH(cv)++;
 	(void)SvREFCNT_inc(cv);
-	SAVESPTR(PL_curpad);
+	SAVEVPTR(PL_curpad);
 	PL_curpad = AvARRAY((AV*)*av_fetch(CvPADLIST(cv),1,FALSE));
 	RETURNOP(CvSTART(cv));
     }
@@ -1582,6 +1597,10 @@ PP(pp_enteriter)
     register PERL_CONTEXT *cx;
     I32 gimme = GIMME_V;
     SV **svp;
+    U32 cxtype = CXt_LOOP;
+#ifdef USE_ITHREADS
+    void *iterdata;
+#endif
 
     ENTER;
     SAVETMPS;
@@ -1598,17 +1617,29 @@ PP(pp_enteriter)
     if (PL_op->op_targ) {
 	svp = &PL_curpad[PL_op->op_targ];		/* "my" variable */
 	SAVESPTR(*svp);
+#ifdef USE_ITHREADS
+	iterdata = (void*)PL_op->op_targ;
+	cxtype |= CXp_PADVAR;
+#endif
     }
     else {
-	svp = &GvSV((GV*)POPs);			/* symbol table variable */
+	GV *gv = (GV*)POPs;
+	svp = &GvSV(gv);			/* symbol table variable */
 	SAVEGENERICSV(*svp);
 	*svp = NEWSV(0,0);
+#ifdef USE_ITHREADS
+	iterdata = (void*)gv;
+#endif
     }
 
     ENTER;
 
-    PUSHBLOCK(cx, CXt_LOOP, SP);
+    PUSHBLOCK(cx, cxtype, SP);
+#ifdef USE_ITHREADS
+    PUSHLOOP(cx, iterdata, MARK);
+#else
     PUSHLOOP(cx, svp, MARK);
+#endif
     if (PL_op->op_flags & OPf_STACKED) {
 	cx->blk_loop.iterary = (AV*)SvREFCNT_inc(POPs);
 	if (SvTYPE(cx->blk_loop.iterary) != SVt_PVAV) {
@@ -1703,7 +1734,9 @@ PP(pp_return)
     SV *sv;
 
     if (PL_curstackinfo->si_type == PERLSI_SORT) {
-	if (cxstack_ix == PL_sortcxix || dopoptosub(cxstack_ix) <= PL_sortcxix) {
+	if (cxstack_ix == PL_sortcxix
+	    || dopoptosub(cxstack_ix) <= PL_sortcxix)
+	{
 	    if (cxstack_ix > PL_sortcxix)
 		dounwind(PL_sortcxix);
 	    AvARRAY(PL_curstack)[1] = *SP;
@@ -1736,6 +1769,9 @@ PP(pp_return)
 	    (void)hv_delete(GvHVn(PL_incgv), name, strlen(name), G_DISCARD);
 	    DIE(aTHX_ "%s did not return a true value", name);
 	}
+	break;
+    case CXt_FORMAT:
+	POPFORMAT(cx);
 	break;
     default:
 	DIE(aTHX_ "panic: return");
@@ -1824,6 +1860,10 @@ PP(pp_last)
 	break;
     case CXt_EVAL:
 	POPEVAL(cx);
+	nextop = pop_return();
+	break;
+    case CXt_FORMAT:
+	POPFORMAT(cx);
 	nextop = pop_return();
 	break;
     default:
@@ -2072,7 +2112,7 @@ PP(pp_goto)
 			SP[1] = SP[0];
 			SP--;
 		    }
-		    fp3 = (I32(*)(int,int,int)))CvXSUB(cv;
+		    fp3 = (I32(*)(int,int,int))CvXSUB(cv);
 		    items = (*fp3)(CvXSUBANY(cv).any_i32,
 		                   mark - PL_stack_base + 1,
 				   items);
@@ -2116,9 +2156,10 @@ PP(pp_goto)
 			AV *newpad = newAV();
 			SV **oldpad = AvARRAY(svp[CvDEPTH(cv)-1]);
 			I32 ix = AvFILLp((AV*)svp[1]);
+			I32 names_fill = AvFILLp((AV*)svp[0]);
 			svp = AvARRAY(svp[0]);
 			for ( ;ix > 0; ix--) {
-			    if (svp[ix] != &PL_sv_undef) {
+			    if (names_fill >= ix && svp[ix] != &PL_sv_undef) {
 				char *name = SvPVX(svp[ix]);
 				if ((SvFLAGS(svp[ix]) & SVf_FAKE)
 				    || *name == '&')
@@ -2137,7 +2178,7 @@ PP(pp_goto)
 				    SvPADMY_on(sv);
 				}
 			    }
-			    else if (IS_PADGV(oldpad[ix])) {
+			    else if (IS_PADGV(oldpad[ix]) || IS_PADCONST(oldpad[ix])) {
 				av_store(newpad, ix, sv = SvREFCNT_inc(oldpad[ix]));
 			    }
 			    else {
@@ -2170,7 +2211,7 @@ PP(pp_goto)
 		    }
 		}
 #endif /* USE_THREADS */		
-		SAVESPTR(PL_curpad);
+		SAVEVPTR(PL_curpad);
 		PL_curpad = AvARRAY((AV*)svp[CvDEPTH(cv)]);
 #ifndef USE_THREADS
 		if (cx->blk_sub.hasargs)
@@ -2275,6 +2316,7 @@ PP(pp_goto)
 		    break;
 		}
 		/* FALL THROUGH */
+	    case CXt_FORMAT:
 	    case CXt_NULL:
 		DIE(aTHX_ "Can't \"goto\" outside a block");
 	    default:
@@ -2506,7 +2548,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, AV** avp)
 #ifdef OP_IN_REGISTER
     PL_opsave = op;
 #else
-    SAVEPPTR(PL_op);
+    SAVEVPTR(PL_op);
 #endif
     PL_hints = 0;
 
@@ -2549,7 +2591,7 @@ S_doeval(pTHX_ int gimme, OP** startop)
     /* set up a scratch pad */
 
     SAVEI32(PL_padix);
-    SAVESPTR(PL_curpad);
+    SAVEVPTR(PL_curpad);
     SAVESPTR(PL_comppad);
     SAVESPTR(PL_comppad_name);
     SAVEI32(PL_comppad_name_fill);
@@ -2561,7 +2603,7 @@ S_doeval(pTHX_ int gimme, OP** startop)
 	PERL_CONTEXT *cx = &cxstack[i];
 	if (CxTYPE(cx) == CXt_EVAL)
 	    break;
-	else if (CxTYPE(cx) == CXt_SUB) {
+	else if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT) {
 	    caller = cx->blk_sub.cv;
 	    break;
 	}
@@ -2970,11 +3012,9 @@ PP(pp_require)
     PL_rsfp_filters = Nullav;
 
     PL_rsfp = tryrsfp;
-    name = savepv(name);
-    SAVEFREEPV(name);
     SAVEHINTS();
     PL_hints = 0;
-    SAVEPPTR(PL_compiling.cop_warnings);
+    SAVESPTR(PL_compiling.cop_warnings);
     if (PL_dowarn & G_WARN_ALL_ON)
         PL_compiling.cop_warnings = WARN_ALL ;
     else if (PL_dowarn & G_WARN_ALL_OFF)
@@ -3049,7 +3089,7 @@ PP(pp_entereval)
     SAVEDELETE(PL_defstash, safestr, strlen(safestr));
     SAVEHINTS();
     PL_hints = PL_op->op_targ;
-    SAVEPPTR(PL_compiling.cop_warnings);
+    SAVESPTR(PL_compiling.cop_warnings);
     if (!specialWARN(PL_compiling.cop_warnings)) {
         PL_compiling.cop_warnings = newSVsv(PL_compiling.cop_warnings) ;
         SAVEFREESV(PL_compiling.cop_warnings) ;

@@ -2302,7 +2302,7 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 #endif	/* defined OS2 */
 	/*SUPPRESS 560*/
 	if (tmpgv = gv_fetchpv("$",TRUE, SVt_PV))
-	    sv_setiv(GvSV(tmpgv), getpid());
+	    sv_setiv(GvSV(tmpgv), PerlProc_getpid());
 	PL_forkprocess = 0;
 	hv_clear(PL_pidstatus);	/* we have no children */
 	return Nullfp;
@@ -2497,7 +2497,7 @@ Perl_rsignal_state(pTHX_ int signo)
     oldsig = PerlProc_signal(signo, sig_trap);
     PerlProc_signal(signo, oldsig);
     if (sig_trapped)
-        PerlProc_kill(getpid(), signo);
+        PerlProc_kill(PerlProc_getpid(), signo);
     return oldsig;
 }
 

@@ -364,7 +364,7 @@ Perl_lex_start(pTHX_ SV *line)
     SAVEI32(PL_lex_casemods);
     SAVEI32(PL_lex_starts);
     SAVEI32(PL_lex_state);
-    SAVESPTR(PL_lex_inpat);
+    SAVEVPTR(PL_lex_inpat);
     SAVEI32(PL_lex_inwhat);
     SAVECOPLINE(PL_curcop);
     SAVEPPTR(PL_bufptr);
@@ -967,7 +967,7 @@ S_sublex_push(pTHX)
     SAVEI32(PL_lex_casemods);
     SAVEI32(PL_lex_starts);
     SAVEI32(PL_lex_state);
-    SAVESPTR(PL_lex_inpat);
+    SAVEVPTR(PL_lex_inpat);
     SAVEI32(PL_lex_inwhat);
     SAVECOPLINE(PL_curcop);
     SAVEPPTR(PL_bufptr);
@@ -6886,10 +6886,10 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
     if (PL_compcv) {
 	assert(SvTYPE(PL_compcv) == SVt_PVCV);
     }
-    save_I32(&PL_subline);
+    SAVEI32(PL_subline);
     save_item(PL_subname);
     SAVEI32(PL_padix);
-    SAVESPTR(PL_curpad);
+    SAVEVPTR(PL_curpad);
     SAVESPTR(PL_comppad);
     SAVESPTR(PL_comppad_name);
     SAVESPTR(PL_compcv);

@@ -238,6 +238,7 @@
 #    define setjmp		PerlProc_setjmp
 #    define longjmp		PerlProc_longjmp
 #    define signal		PerlProc_signal
+#    define getpid		PerlProc_getpid
 #    define htonl		PerlSock_htonl
 #    define htons		PerlSock_htons
 #    define ntohl		PerlSock_ntohl

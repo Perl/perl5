@@ -81,8 +81,16 @@ Perl_he_dup(pTHX_ HE *e, bool shared)
 
     if (!e)
 	return Nullhe;
+    /* look for it in the table first */
+    ret = (HE*)ptr_table_fetch(PL_ptr_table, e);
+    if (ret)
+	return ret;
+
+    /* create anew and remember what it is */
     ret = new_he();
-    HeNEXT(ret) = (HE*)NULL;
+    ptr_table_store(PL_ptr_table, e, ret);
+
+    HeNEXT(ret) = he_dup(HeNEXT(e),shared);
     if (HeKLEN(e) == HEf_SVKEY)
 	HeKEY_sv(ret) = SvREFCNT_inc(sv_dup(HeKEY_sv(e)));
     else if (shared)

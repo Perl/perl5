@@ -65,6 +65,21 @@ INST_ARCH	= \$(ARCHNAME)
 #USE_OBJECT	= define
 
 #
+# XXX WARNING! This option currently undergoing changes.  May be broken.
+#
+# Beginnings of interpreter cloning/threads: still rather rough, fails
+# tests.  This should be enabled to get the fork() emulation.  Do not
+# enable unless you know what you're doing!
+#
+USE_ITHREADS	= define
+
+#
+# uncomment to enable the implicit "host" layer for all system calls
+# made by perl.  This is needed and auto-enabled by USE_OBJECT above.
+#
+USE_IMP_SYS	= define
+
+#
 # uncomment one of the following lines if you are using either
 # Visual C++ 2.x or Visual C++ 6.x (aka Visual Studio 98)
 #
@@ -84,6 +99,7 @@ INST_ARCH	= \$(ARCHNAME)
 # and follow the directions in the package to install.
 #
 #USE_PERLCRT	= define
+#BUILD_FOR_WIN95    = define
 
 #
 # uncomment to enable linking with setargv.obj under the Visual C
@@ -145,10 +161,8 @@ CCLIBDIR	= $(CCHOME)\lib
 #
 #BUILDOPT	= $(BUILDOPT) -DPERL_INTERNAL_GLOB
 
-# Beginnings of interpreter cloning/threads: still rather rough, fails
-# many tests.  Do not enable unless you know what you're doing!
-#
-#BUILDOPT	= $(BUILDOPT) -DUSE_ITHREADS
+# Enabling this runs a cloned toplevel interpreter (fails tests)
+#BUILDOPT	= $(BUILDOPT) -DTOP_CLONE
 
 # specify semicolon-separated list of extra directories that modules will
 # look for libraries (spaces in path names need not be quoted)
@@ -178,6 +192,7 @@ CRYPT_FLAG	= -DHAVE_DES_FCRYPT
 PERL_MALLOC	= undef
 USE_THREADS	= undef
 USE_MULTI	= undef
+USE_IMP_SYS	= define
 !ENDIF
 
 !IF "$(PERL_MALLOC)" == ""
@@ -188,6 +203,10 @@ PERL_MALLOC	= undef
 USE_THREADS	= undef
 !ENDIF
 
+!IF "$(USE_THREADS)" == "define"
+USE_ITHREADS	= undef
+!ENDIF
+
 !IF "$(USE_MULTI)" == ""
 USE_MULTI	= undef
 !ENDIF
@@ -196,8 +215,24 @@ USE_MULTI	= undef
 USE_OBJECT	= undef
 !ENDIF
 
+!IF "$(USE_ITHREADS)" == ""
+USE_ITHREADS	= undef
+!ENDIF
+
+!IF "$(USE_IMP_SYS)" == ""
+USE_IMP_SYS	= undef
+!ENDIF
+
 !IF "$(USE_MULTI)$(USE_THREADS)$(USE_OBJECT)" != "undefundefundef"
 BUILDOPT	= $(BUILDOPT) -DPERL_IMPLICIT_CONTEXT
+!ENDIF
+
+!IF "$(USE_ITHREADS)" != "undef"
+BUILDOPT	= $(BUILDOPT) -DUSE_ITHREADS
+!ENDIF
+
+!IF "$(USE_IMP_SYS)" != "undef"
+BUILDOPT	= $(BUILDOPT) -DPERL_IMPLICIT_SYS
 !ENDIF
 
 !IF "$(PROCESSOR_ARCHITECTURE)" == ""
@@ -365,6 +400,7 @@ PERLDLL		= ..\perl.dll
 MINIPERL	= ..\miniperl.exe
 MINIDIR		= .\mini
 PERLEXE		= ..\perl.exe
+WPERLEXE	= ..\wperl.exe
 GLOBEXE		= ..\perlglob.exe
 CONFIGPM	= ..\lib\Config.pm
 MINIMOD		= ..\lib\ExtUtils\Miniperl.pm
@@ -404,7 +440,7 @@ MAKE		= nmake -nologo
 CFGSH_TMPL	= config.vc
 CFGH_TMPL	= config_H.vc
 
-!IF "$(USE_PERLCRT)" == ""
+!IF "$(BUILD_FOR_WIN95)" == "define"
 PERL95EXE	= ..\perl95.exe
 !ENDIF
 
@@ -527,7 +563,10 @@ CORE_NOCFG_H	=		\
 		.\include\dirent.h	\
 		.\include\netdb.h	\
 		.\include\sys\socket.h	\
-		.\win32.h
+		.\win32.h	\
+		.\perlhost.h	\
+		.\vdir.h	\
+		.\vmem.h
 
 CORE_H		= $(CORE_NOCFG_H) .\config.h
 
@@ -727,6 +766,12 @@ $(MINICORE_OBJ) : $(CORE_NOCFG_H)
 $(MINIWIN32_OBJ) : $(CORE_NOCFG_H)
 	$(CC) -c $(CFLAGS) $(OBJOUT_FLAG)$@ $(*F).c
 
+# -DPERL_IMPLICIT_SYS needs C++ for perllib.c
+!IF "$(USE_IMP_SYS)$(USE_OBJECT)" == "defineundef"
+perllib$(o)	: perllib.c
+	$(CC) -c -I. $(CFLAGS_O) $(CXX_FLAG) $(OBJOUT_FLAG)$@ perllib.c
+!ENDIF
+
 # 1. we don't want to rebuild miniperl.exe when config.h changes
 # 2. we don't want to rebuild miniperl.exe with non-default config.h
 $(MINI_OBJ)	: $(CORE_NOCFG_H)
@@ -781,10 +826,12 @@ perlmain$(o) : perlmain.c
 $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ)
 	$(LINK32) -subsystem:console -out:$@ $(LINK_FLAGS) $(LIBFILES) \
 	    $(PERLEXE_OBJ) $(SETARGV_OBJ) $(PERLIMPLIB) 
+	copy $(PERLEXE) $(WPERLEXE)
+	editbin /subsystem:windows $(WPERLEXE)
 	copy splittree.pl .. 
 	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" $(AUTODIR)
 
-!IF "$(USE_PERLCRT)" == ""
+!IF "$(BUILD_FOR_WIN95)" == "define"
 
 perl95.c : runperl.c 
 	copy runperl.c perl95.c
@@ -977,9 +1024,10 @@ install : all installbare installhtml
 
 installbare : utils
 	$(PERLEXE) ..\installperl
-!IF "$(USE_PERLCRT)" == ""
+!IF "$(BUILD_FOR_WIN95)" == "define"
 	$(XCOPY) $(PERL95EXE) $(INST_BIN)\*.*
 !ENDIF
+	if exist $(WPERLEXE) $(XCOPY) $(WPERLEXE) $(INST_BIN)\*.*
 	$(XCOPY) $(GLOBEXE) $(INST_BIN)\*.*
 	$(XCOPY) bin\*.bat $(INST_SCRIPT)\*.*
 
@@ -1025,6 +1073,7 @@ clean :
 	-@erase /f config.h
 	-@erase $(GLOBEXE)
 	-@erase $(PERLEXE)
+	-@erase $(WPERLEXE)
 	-@erase $(PERLDLL)
 	-@erase $(CORE_OBJ)
 	-rmdir /s /q $(MINIDIR) || rmdir /s $(MINIDIR)

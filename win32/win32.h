@@ -378,13 +378,8 @@ struct thread_intern {
 typedef struct {
     long	num;
     DWORD	pids[MAXIMUM_WAIT_OBJECTS];
+    HANDLE	handles[MAXIMUM_WAIT_OBJECTS];
 } child_tab;
-
-struct host_link {
-    char *	nameId;
-    void *	host_data;
-    struct host_link *	next;
-};
 
 struct interp_intern {
     char *	perlshell_tokens;
@@ -392,8 +387,11 @@ struct interp_intern {
     long	perlshell_items;
     struct av *	fdpid;
     child_tab *	children;
-    HANDLE	child_handles[MAXIMUM_WAIT_OBJECTS];
-    struct host_link *	hostlist;
+#ifdef USE_ITHREADS
+    DWORD	pseudo_id;
+    child_tab *	pseudo_children;
+#endif
+    void *	internal_host;
 #ifndef USE_THREADS
     struct thread_intern	thr_intern;
 #endif
@@ -407,8 +405,13 @@ struct interp_intern {
 #define w32_children		(PL_sys_intern.children)
 #define w32_num_children	(w32_children->num)
 #define w32_child_pids		(w32_children->pids)
-#define w32_child_handles	(PL_sys_intern.child_handles)
-#define w32_host_link		(PL_sys_intern.hostlist)
+#define w32_child_handles	(w32_children->handles)
+#define w32_pseudo_id		(PL_sys_intern.pseudo_id)
+#define w32_pseudo_children	(PL_sys_intern.pseudo_children)
+#define w32_num_pseudo_children		(w32_pseudo_children->num)
+#define w32_pseudo_child_pids		(w32_pseudo_children->pids)
+#define w32_pseudo_child_handles	(w32_pseudo_children->handles)
+#define w32_internal_host		(PL_sys_intern.internal_host)
 #ifdef USE_THREADS
 #  define w32_strerror_buffer	(thr->i.Wstrerror_buffer)
 #  define w32_getlogin_buffer	(thr->i.Wgetlogin_buffer)
@@ -434,6 +437,20 @@ struct interp_intern {
     lpa[0] = '\0', WideCharToMultiByte((IN_UTF8) ? CP_UTF8 : CP_ACP, 0, lpw, -1, (LPSTR)lpa, nChars, NULL, NULL)
 
 #define USING_WIDE()	(PerlEnv_os_id() == VER_PLATFORM_WIN32_NT)
+
+#ifdef USE_ITHREADS
+#  define PERL_WAIT_FOR_CHILDREN \
+    STMT_START {							\
+	if (w32_pseudo_children && w32_num_pseudo_children) {		\
+	    long children = w32_num_pseudo_children;			\
+	    WaitForMultipleObjects(children,				\
+				   w32_pseudo_child_handles,		\
+				   TRUE, INFINITE);			\
+	    while (children)						\
+		CloseHandle(w32_pseudo_child_handles[--children]);	\
+	}								\
+    } STMT_END
+#endif
 
 /*
  * This provides a layer of functions and macros to ensure extensions will

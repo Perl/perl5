@@ -30,21 +30,11 @@
 #  ifndef PERL_IMPLICIT_CONTEXT
 #    define PERL_IMPLICIT_CONTEXT
 #  endif
-#  ifndef PERL_IMPLICIT_SYS
-#    if defined(WIN32) && !defined(__MINGW32__)
-#      define PERL_IMPLICIT_SYS		/* XXX not implemented everywhere yet */
-#    endif
-#  endif
 #endif
 
 #if defined(MULTIPLICITY)
 #  ifndef PERL_IMPLICIT_CONTEXT
 #    define PERL_IMPLICIT_CONTEXT
-#  endif
-#  ifndef PERL_IMPLICIT_SYS
-#    if defined(WIN32) && !defined(__MINGW32__)
-#      define PERL_IMPLICIT_SYS		/* XXX not implemented everywhere yet */
-#    endif
 #  endif
 #endif
 
@@ -146,7 +136,7 @@ class CPerlObj;
 
 #define STATIC
 #define CPERLscope(x)		CPerlObj::x
-#define CALL_FPTR(fptr)		(this->*fptr)
+#define CALL_FPTR(fptr)		(aTHXo->*fptr)
 
 #define pTHXo			CPerlObj *pPerl
 #define pTHXo_			pTHXo,
@@ -1621,6 +1611,10 @@ typedef pthread_key_t	perl_key;
 # endif
 #endif
 
+#ifndef PERL_WAIT_FOR_CHILDREN
+#  define PERL_WAIT_FOR_CHILDREN	NOOP
+#endif
+
 /* the traditional thread-unsafe notion of "current interpreter".
  * XXX todo: a thread-safe version that fetches it from TLS (akin to THR)
  * needs to be defined elsewhere (conditional on pthread_getspecific()
@@ -2144,13 +2138,9 @@ EXTCONST char PL_uuemap[65]
 #ifdef DOINIT
 EXT char *PL_sig_name[] = { SIG_NAME };
 EXT int   PL_sig_num[]  = { SIG_NUM };
-EXT SV	* PL_psig_ptr[sizeof(PL_sig_num)/sizeof(*PL_sig_num)];
-EXT SV  * PL_psig_name[sizeof(PL_sig_num)/sizeof(*PL_sig_num)];
 #else
 EXT char *PL_sig_name[];
 EXT int   PL_sig_num[];
-EXT SV  * PL_psig_ptr[];
-EXT SV  * PL_psig_name[];
 #endif
 
 /* fast case folding tables */
@@ -2487,44 +2477,25 @@ typedef struct exitlistentry {
     void *ptr;
 } PerlExitListEntry;
 
-#ifdef PERL_OBJECT
-#undef perl_alloc
-#define perl_alloc Perl_alloc
-CPerlObj* Perl_alloc (IPerlMem*, IPerlEnv*, IPerlStdIO*, IPerlLIO*, IPerlDir*, IPerlSock*, IPerlProc*);
-
-#undef EXT
-#define EXT
-#undef EXTCONST
-#define EXTCONST
-#undef INIT
-#define INIT(x)
-
-class CPerlObj {
-public:
-	CPerlObj(IPerlMem*, IPerlEnv*, IPerlStdIO*, IPerlLIO*, IPerlDir*, IPerlSock*, IPerlProc*);
-	void Init(void);
-	void* operator new(size_t nSize, IPerlMem *pvtbl);
-	static void operator delete(void* pPerl, IPerlMem *pvtbl);
-#endif /* PERL_OBJECT */
-
 #ifdef PERL_GLOBAL_STRUCT
 struct perl_vars {
-#include "perlvars.h"
+#  include "perlvars.h"
 };
 
-#ifdef PERL_CORE
+#  ifdef PERL_CORE
 EXT struct perl_vars PL_Vars;
 EXT struct perl_vars *PL_VarsPtr INIT(&PL_Vars);
-#else /* PERL_CORE */
-#if !defined(__GNUC__) || !defined(WIN32)
+#  else /* PERL_CORE */
+#    if !defined(__GNUC__) || !defined(WIN32)
 EXT
-#endif /* WIN32 */
+#    endif /* WIN32 */
 struct perl_vars *PL_VarsPtr;
-#define PL_Vars (*((PL_VarsPtr) ? PL_VarsPtr : (PL_VarsPtr = Perl_GetVars(aTHX))))
-#endif /* PERL_CORE */
+#    define PL_Vars (*((PL_VarsPtr) \
+		       ? PL_VarsPtr : (PL_VarsPtr = Perl_GetVars(aTHX))))
+#  endif /* PERL_CORE */
 #endif /* PERL_GLOBAL_STRUCT */
 
-#ifdef MULTIPLICITY
+#if defined(MULTIPLICITY) || defined(PERL_OBJECT)
 /* If we have multiple interpreters define a struct 
    holding variables which must be per-interpreter
    If we don't have threads anything that would have 
@@ -2532,17 +2503,22 @@ struct perl_vars *PL_VarsPtr;
 */
 
 struct interpreter {
-#ifndef USE_THREADS
-#  include "thrdvar.h"
-#endif
-#include "intrpvar.h"
+#  ifndef USE_THREADS
+#    include "thrdvar.h"
+#  endif
+#  include "intrpvar.h"
+/*
+ * The following is a buffer where new variables must
+ * be defined to maintain binary compatibility with PERL_OBJECT
+ */
+PERLVARA(object_compatibility,30,	char)
 };
 
 #else
 struct interpreter {
     char broiled;
 };
-#endif
+#endif /* MULTIPLICITY || PERL_OBJECT */
 
 #ifdef USE_THREADS
 /* If we have threads define a struct with all the variables
@@ -2583,25 +2559,18 @@ typedef void *Thread;
 #endif
 
 #ifdef PERL_OBJECT
-#define PERL_DECL_PROT
-#define perl_alloc Perl_alloc
+#  define PERL_DECL_PROT
 #endif
-
-#include "proto.h"
 
 #undef PERL_CKDEF
 #undef PERL_PPDEF
 #define PERL_CKDEF(s)	OP *s (pTHX_ OP *o);
 #define PERL_PPDEF(s)	OP *s (pTHX);
-#ifdef PERL_OBJECT
-public:
-#endif
 
-#include "pp_proto.h"
+#include "proto.h"
 
 #ifdef PERL_OBJECT
-int CPerlObj::do_aspawn (void *vreally, void **vmark, void **vsp);
-#undef PERL_DECL_PROT
+#  undef PERL_DECL_PROT
 #endif
 
 #ifndef PERL_OBJECT
@@ -2625,29 +2594,17 @@ int CPerlObj::do_aspawn (void *vreally, void **vmark, void **vsp);
 #define PERLVARI(var,type,init) EXT type  PL_##var INIT(init);
 #define PERLVARIC(var,type,init) EXTCONST type PL_##var INIT(init);
 
-#ifndef MULTIPLICITY
-
+#if !defined(MULTIPLICITY) && !defined(PERL_OBJECT)
+START_EXTERN_C
 #  include "intrpvar.h"
 #  ifndef USE_THREADS
 #    include "thrdvar.h"
 #  endif
-
+END_EXTERN_C
 #endif
 
 #ifdef PERL_OBJECT
-/*
- * The following is a buffer where new variables must
- * be defined to maintain binary compatibility with PERL_OBJECT
- * for 5.005
- */
-PERLVARA(object_compatibility,30,	char)
-};
-
-
 #  include "embed.h"
-#  if defined(WIN32) && !defined(WIN32IO_IS_STDIO)
-#    define errno	CPerlObj::ErrorNo()
-#  endif
 
 #  ifdef DOINIT
 #    include "INTERN.h"

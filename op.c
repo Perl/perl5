@@ -105,7 +105,7 @@ S_no_bareword_allowed(pTHX_ OP *o)
 {
     qerror(Perl_mess(aTHX_
 		     "Bareword \"%s\" not allowed while \"strict subs\" in use",
-		     SvPV_nolen(cSVOPo->op_sv)));
+		     SvPV_nolen(cSVOPo_sv)));
 }
 
 /* "register" allocation */
@@ -319,6 +319,7 @@ S_pad_findlex(pTHX_ char *name, PADOFFSET newoff, U32 seq, CV* startcv,
 		return 0;
 	    }
 	    break;
+	case CXt_FORMAT:
 	case CXt_SUB:
 	    if (!saweval)
 		return 0;
@@ -498,7 +499,7 @@ Perl_pad_free(pTHX_ PADOFFSET po)
 	Perl_croak(aTHX_ "panic: pad_free po");
 #ifdef USE_THREADS
     DEBUG_X(PerlIO_printf(Perl_debug_log,
-			  "0x%"UVxf" Pad 0x%"UVxf" free %"IVd"\n",
+			  "0x%"UVxf" Pad 0x%"UVxf" free %"IVdf"\n",
 			  PTR2UV(thr), PTR2UV(PL_curpad), (IV)po));
 #else
     DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%"UVxf" free %"IVdf"\n",
@@ -1069,7 +1070,7 @@ Perl_scalarvoid(pTHX_ OP *o)
 	break;
 
     case OP_CONST:
-	sv = cSVOPo->op_sv;
+	sv = cSVOPo_sv;
 	if (cSVOPo->op_private & OPpCONST_STRICT)
 	    no_bareword_allowed(o);
 	else {
@@ -1299,7 +1300,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	if (!(o->op_private & (OPpCONST_ARYBASE)))
 	    goto nomod;
 	if (PL_eval_start && PL_eval_start->op_type == OP_CONST) {
-	    PL_compiling.cop_arybase = (I32)SvIV(((SVOP*)PL_eval_start)->op_sv);
+	    PL_compiling.cop_arybase = (I32)SvIV(cSVOPx(PL_eval_start)->op_sv);
 	    PL_eval_start = 0;
 	}
 	else if (!type) {
@@ -1979,7 +1980,7 @@ Perl_block_start(pTHX_ int full)
     PL_pad_reset_pending = FALSE;
     SAVEHINTS();
     PL_hints &= ~HINT_BLOCK_SCOPE;
-    SAVEPPTR(PL_compiling.cop_warnings); 
+    SAVESPTR(PL_compiling.cop_warnings); 
     if (! specialWARN(PL_compiling.cop_warnings)) {
         PL_compiling.cop_warnings = newSVsv(PL_compiling.cop_warnings) ;
         SAVEFREESV(PL_compiling.cop_warnings) ;
@@ -2948,7 +2949,9 @@ Perl_newPADOP(pTHX_ I32 type, I32 flags, SV *sv)
     padop->op_type = type;
     padop->op_ppaddr = PL_ppaddr[type];
     padop->op_padix = pad_alloc(type, SVs_PADTMP);
+    SvREFCNT_dec(PL_curpad[padop->op_padix]);
     PL_curpad[padop->op_padix] = sv;
+    SvPADTMP_on(sv);
     padop->op_next = (OP*)padop;
     padop->op_flags = flags;
     if (PL_opargs[type] & OA_RETSCALAR)
@@ -3362,13 +3365,7 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 	SV **svp = av_fetch(CopFILEAV(PL_curcop), (I32)CopLINE(cop), FALSE);
 	if (svp && *svp != &PL_sv_undef && !SvIOK(*svp)) {
 	    (void)SvIOK_on(*svp);
-	    SvIVX(*svp) = 1;
-#ifndef USE_ITHREADS
-	    /* XXX This nameless kludge interferes with cloning SVs. :-(
-	     * What's more, it seems entirely redundant when considering
-	     * PL_DBsingle exists to do the same thing */
-	    SvSTASH(*svp) = (HV*)cop;
-#endif
+	    SvIVX(*svp) = (IV)cop;
 	}
     }
 
@@ -3907,7 +3904,7 @@ Perl_cv_undef(pTHX_ CV *cv)
 #endif /* USE_THREADS */
 	ENTER;
 
-	SAVESPTR(PL_curpad);
+	SAVEVPTR(PL_curpad);
 	PL_curpad = 0;
 
 	if (!CvCLONED(cv))
@@ -4010,7 +4007,7 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
     assert(!CvUNIQUE(proto));
 
     ENTER;
-    SAVESPTR(PL_curpad);
+    SAVEVPTR(PL_curpad);
     SAVESPTR(PL_comppad);
     SAVESPTR(PL_comppad_name);
     SAVESPTR(PL_compcv);
@@ -4085,7 +4082,7 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
 		PL_curpad[ix] = sv;
 	    }
 	}
-	else if (IS_PADGV(ppad[ix])) {
+	else if (IS_PADGV(ppad[ix]) || IS_PADCONST(ppad[ix])) {
 	    PL_curpad[ix] = SvREFCNT_inc(ppad[ix]);
 	}
 	else {
@@ -4191,9 +4188,9 @@ Perl_op_const_sv(pTHX_ OP *o, CV *cv)
 	    break;
 	if (sv)
 	    return Nullsv;
-	if (type == OP_CONST)
+	if (type == OP_CONST && cSVOPo->op_sv)
 	    sv = cSVOPo->op_sv;
-	else if (type == OP_PADSV && cv) {
+	else if ((type == OP_PADSV || type == OP_CONST) && cv) {
 	    AV* padav = (AV*)(AvARRAY(CvPADLIST(cv))[1]);
 	    sv = padav ? AvARRAY(padav)[o->op_targ] : Nullsv;
 	    if (!sv || (!SvREADONLY(sv) && SvREFCNT(sv) > 1))
@@ -4397,12 +4394,25 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     if (AvFILLp(PL_comppad_name) < AvFILLp(PL_comppad))
 	av_store(PL_comppad_name, AvFILLp(PL_comppad), Nullsv);
 
+    if (CvLVALUE(cv)) {
+	CvROOT(cv) = newUNOP(OP_LEAVESUBLV, 0, scalarseq(block));
+    }
+    else {
+	CvROOT(cv) = newUNOP(OP_LEAVESUB, 0, scalarseq(block));
+    }
+    CvROOT(cv)->op_private |= OPpREFCOUNTED;
+    OpREFCNT_set(CvROOT(cv), 1);
+    CvSTART(cv) = LINKLIST(CvROOT(cv));
+    CvROOT(cv)->op_next = 0;
+    peep(CvSTART(cv));
+
+    /* now that optimizer has done its work, adjust pad values */
     if (CvCLONE(cv)) {
 	SV **namep = AvARRAY(PL_comppad_name);
 	for (ix = AvFILLp(PL_comppad); ix > 0; ix--) {
 	    SV *namesv;
 
-	    if (SvIMMORTAL(PL_curpad[ix]) || IS_PADGV(PL_curpad[ix]))
+	    if (SvIMMORTAL(PL_curpad[ix]) || IS_PADGV(PL_curpad[ix]) || IS_PADCONST(PL_curpad[ix]))
 		continue;
 	    /*
 	     * The only things that a clonable function needs in its
@@ -4426,24 +4436,12 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	AvFLAGS(av) = AVf_REIFY;
 
 	for (ix = AvFILLp(PL_comppad); ix > 0; ix--) {
-	    if (SvIMMORTAL(PL_curpad[ix]) || IS_PADGV(PL_curpad[ix]))
+	    if (SvIMMORTAL(PL_curpad[ix]) || IS_PADGV(PL_curpad[ix]) || IS_PADCONST(PL_curpad[ix]))
 		continue;
 	    if (!SvPADMY(PL_curpad[ix]))
 		SvPADTMP_on(PL_curpad[ix]);
 	}
     }
-
-    if (CvLVALUE(cv)) {
-	CvROOT(cv) = newUNOP(OP_LEAVESUBLV, 0, scalarseq(block));
-    }
-    else {
-	CvROOT(cv) = newUNOP(OP_LEAVESUB, 0, scalarseq(block));
-    }
-    CvROOT(cv)->op_private |= OPpREFCOUNTED;
-    OpREFCNT_set(CvROOT(cv), 1);
-    CvSTART(cv) = LINKLIST(CvROOT(cv));
-    CvROOT(cv)->op_next = 0;
-    peep(CvSTART(cv));
 
     if (name) {
 	char *s;
@@ -6140,7 +6138,7 @@ Perl_peep(pTHX_ register OP *o)
 	return;
     ENTER;
     SAVEOP();
-    SAVESPTR(PL_curcop);
+    SAVEVPTR(PL_curcop);
     for (; o; o = o->op_next) {
 	if (o->op_seq)
 	    break;
@@ -6159,6 +6157,19 @@ Perl_peep(pTHX_ register OP *o)
 	case OP_CONST:
 	    if (cSVOPo->op_private & OPpCONST_STRICT)
 		no_bareword_allowed(o);
+#ifdef USE_ITHREADS
+	    /* Relocate sv to the pad for thread safety.
+	     * Despite being a "constant", the SV is written to,
+	     * for reference counts, sv_upgrade() etc. */
+	    if (cSVOP->op_sv) {
+		PADOFFSET ix = pad_alloc(OP_CONST, SVs_PADTMP);
+		SvREFCNT_dec(PL_curpad[ix]);
+		SvPADTMP_on(cSVOPo->op_sv);
+		PL_curpad[ix] = cSVOPo->op_sv;
+		cSVOPo->op_sv = Nullsv;
+		o->op_targ = ix;
+	    }
+#endif
 	    /* FALL THROUGH */
 	case OP_UC:
 	case OP_UCFIRST:
@@ -6337,7 +6348,7 @@ Perl_peep(pTHX_ register OP *o)
 	    fields = (GV**)hv_fetch(SvSTASH(lexname), "FIELDS", 6, FALSE);
 	    if (!fields || !GvHV(*fields))
 		break;
-	    svp = &((SVOP*)((BINOP*)o)->op_last)->op_sv;
+	    svp = &cSVOPx_sv(((BINOP*)o)->op_last);
 	    key = SvPV(*svp, keylen);
 	    indsvp = hv_fetch(GvHV(*fields), key, keylen, FALSE);
 	    if (!indsvp) {

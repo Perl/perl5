@@ -1,8 +1,7 @@
 #ifndef _WIN32THREAD_H
 #define _WIN32THREAD_H
 
-#define  WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include "win32.h"
 
 typedef struct win32_cond { LONG waiters; HANDLE sem; } perl_cond;
 typedef DWORD perl_key;
@@ -193,7 +192,7 @@ END_EXTERN_C
 	if ((WaitForSingleObject((t)->self,INFINITE) == WAIT_FAILED)	\
 	     || (GetExitCodeThread((t)->self,(LPDWORD)(avp)) == 0)	\
 	     || (CloseHandle((t)->self) == 0))				\
-	    Perl_croak(aTHX_ "panic: JOIN");					\
+	    Perl_croak(aTHX_ "panic: JOIN");				\
     } STMT_END
 #endif	/* !USE_RTL_THREAD_API || _MSC_VER */
 

@@ -1138,9 +1138,9 @@ S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
     SAVETMPS;
 
     push_return(retop);
-    PUSHBLOCK(cx, CXt_SUB, PL_stack_sp);
+    PUSHBLOCK(cx, CXt_FORMAT, PL_stack_sp);
     PUSHFORMAT(cx);
-    SAVESPTR(PL_curpad);
+    SAVEVPTR(PL_curpad);
     PL_curpad = AvARRAY((AV*)svp[1]);
 
     setdefout(gv);	    /* locally select filehandle so $% et al work */
@@ -2990,9 +2990,11 @@ PP(pp_fttext)
 		len = 512;
 	}
 	else {
-	    if (ckWARN(WARN_UNOPENED))
+	    if (ckWARN(WARN_UNOPENED)) {
+		gv = cGVOP;
 		Perl_warner(aTHX_ WARN_UNOPENED, "Test on unopened file <%s>",
-			    GvENAME(cGVOP));
+			    GvENAME(gv));
+	    }
 	    SETERRNO(EBADF,RMS$_IFI);
 	    RETPUSHUNDEF;
 	}
@@ -3576,24 +3578,20 @@ PP(pp_fork)
     if (!childpid) {
 	/*SUPPRESS 560*/
 	if (tmpgv = gv_fetchpv("$", TRUE, SVt_PV))
-	    sv_setiv(GvSV(tmpgv), (IV)getpid());
+	    sv_setiv(GvSV(tmpgv), (IV)PerlProc_getpid());
 	hv_clear(PL_pidstatus);	/* no kids, so don't wait for 'em */
     }
     PUSHi(childpid);
     RETURN;
 #else
-#  ifdef USE_ITHREADS
-    /* XXXXXX testing */
+#  if defined(USE_ITHREADS) && defined(WIN32)
     djSP; dTARGET;
-    /* XXX this just an approximation of what will eventually be run
-     * in a different thread */
-    PerlInterpreter *new_perl = perl_clone(my_perl, 0);
-    Perl_pp_enter(new_perl);
-    new_perl->Top = new_perl->Top->op_next; /* continue from next op */
-    CALLRUNOPS(new_perl);
+    Pid_t childpid;
 
-    /* parent returns with negative pseudo-pid */
-    PUSHi(-1);
+    EXTEND(SP, 1);
+    PERL_FLUSHALL_FOR_CHILD;
+    childpid = PerlProc_fork();
+    PUSHi(childpid);
     RETURN;
 #  else
     DIE(aTHX_ PL_no_func, "Unsupported function fork");
@@ -3783,6 +3781,12 @@ PP(pp_exec)
 #  endif
 #endif
     }
+
+#ifdef USE_ITHREADS
+    if (value >= 0)
+	my_exit(value);
+#endif
+
     SP = ORIGMARK;
     PUSHi(value);
     RETURN;
@@ -3827,7 +3831,7 @@ PP(pp_getpgrp)
 #ifdef BSD_GETPGRP
     pgrp = (I32)BSD_GETPGRP(pid);
 #else
-    if (pid != 0 && pid != getpid())
+    if (pid != 0 && pid != PerlProc_getpid())
 	DIE(aTHX_ "POSIX getpgrp can't take an argument");
     pgrp = getpgrp();
 #endif
@@ -3857,8 +3861,11 @@ PP(pp_setpgrp)
 #ifdef BSD_SETPGRP
     SETi( BSD_SETPGRP(pid, pgrp) >= 0 );
 #else
-    if ((pgrp != 0 && pgrp != getpid()) || (pid != 0 && pid != getpid()))
+    if ((pgrp != 0 && pgrp != PerlProc_getpid())
+	|| (pid != 0 && pid != PerlProc_getpid()))
+    {
 	DIE(aTHX_ "setpgrp can't take arguments");
+    }
     SETi( setpgrp() >= 0 );
 #endif /* USE_BSDPGRP */
     RETURN;

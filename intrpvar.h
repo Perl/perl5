@@ -369,8 +369,13 @@ PERLVAR(Icred_mutex,	perl_mutex)	/* altered credentials in effect */
 
 #endif /* USE_THREADS */
 
+PERLVAR(Ipsig_ptr, SV**)
+PERLVAR(Ipsig_name, SV**)
+
 #if defined(PERL_IMPLICIT_SYS)
 PERLVAR(IMem,		struct IPerlMem*)
+PERLVAR(IMemShared,	struct IPerlMem*)
+PERLVAR(IMemParse,	struct IPerlMem*)
 PERLVAR(IEnv,		struct IPerlEnv*)
 PERLVAR(IStdIO,		struct IPerlStdIO*)
 PERLVAR(ILIO,		struct IPerlLIO*)

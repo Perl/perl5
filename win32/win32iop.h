@@ -132,6 +132,7 @@ DllExport  int		win32_stat(const char *path, struct stat *buf);
 DllExport  char*	win32_longpath(char *path);
 DllExport  int		win32_ioctl(int i, unsigned int u, char *data);
 DllExport  int          win32_link(const char *oldname, const char *newname);
+DllExport  int		win32_unlink(const char *f);
 DllExport  int		win32_utime(const char *f, struct utimbuf *t);
 DllExport  int		win32_uname(struct utsname *n);
 DllExport  int		win32_wait(int *status);
@@ -139,6 +140,9 @@ DllExport  int		win32_waitpid(int pid, int *status, int flags);
 DllExport  int		win32_kill(int pid, int sig);
 DllExport  unsigned long	win32_os_id(void);
 DllExport  void*	win32_dynaload(const char*filename);
+DllExport  int		win32_access(const char *path, int mode);
+DllExport  int		win32_chmod(const char *path, int mode);
+DllExport  int		win32_getpid(void);
 
 DllExport char *	win32_crypt(const char *txt, const char *salt);
 
@@ -162,6 +166,7 @@ END_EXTERN_C
 #undef times
 #undef alarm
 #undef ioctl
+#undef unlink
 #undef utime
 #undef uname
 #undef wait
@@ -254,6 +259,9 @@ END_EXTERN_C
 #define getchar			win32_getchar
 #undef putchar
 #define putchar			win32_putchar
+#define access(p,m)		win32_access(p,m)
+#define chmod(p,m)		win32_chmod(p,m)
+
 
 #if !defined(MYMALLOC) || !defined(PERL_CORE)
 #undef malloc
@@ -273,6 +281,7 @@ END_EXTERN_C
 #define alarm			win32_alarm
 #define ioctl			win32_ioctl
 #define link			win32_link
+#define unlink			win32_unlink
 #define utime			win32_utime
 #define uname			win32_uname
 #define wait			win32_wait
@@ -286,6 +295,7 @@ END_EXTERN_C
 #define rewinddir		win32_rewinddir
 #define closedir		win32_closedir
 #define os_id			win32_os_id
+#define getpid			win32_getpid
 
 #undef crypt
 #define crypt(t,s)		win32_crypt(t,s)

@@ -4,6 +4,20 @@
 # and run 'make regen_headers' to effect changes.
 #
 
+perl_alloc_using
+perl_alloc
+perl_construct
+perl_destruct
+perl_free
+perl_run
+perl_parse
+perl_clone
+perl_clone_using
+Perl_malloc
+Perl_calloc
+Perl_realloc
+Perl_mfree
+Perl_malloced_size
 Perl_amagic_call
 Perl_Gv_AMupdate
 Perl_append_elem
@@ -292,7 +306,6 @@ Perl_magic_set_all_env
 Perl_magic_sizepack
 Perl_magic_wipepack
 Perl_magicname
-Perl_malloced_size
 Perl_markstack_grow
 Perl_mem_collxfrm
 Perl_mess
@@ -393,17 +406,6 @@ Perl_pad_free
 Perl_pad_reset
 Perl_pad_swipe
 Perl_peep
-perl_construct
-perl_destruct
-perl_free
-perl_run
-perl_parse
-perl_alloc
-perl_construct
-perl_destruct
-perl_free
-perl_run
-perl_parse
 Perl_new_struct_thread
 Perl_call_atexit
 Perl_call_argv
@@ -486,6 +488,7 @@ Perl_save_nogv
 Perl_save_op
 Perl_save_scalar
 Perl_save_pptr
+Perl_save_vptr
 Perl_save_re_context
 Perl_save_sptr
 Perl_save_svref
@@ -619,10 +622,6 @@ Perl_yylex
 Perl_yyparse
 Perl_yywarn
 Perl_dump_mstats
-Perl_malloc
-Perl_calloc
-Perl_realloc
-Perl_mfree
 Perl_safesysmalloc
 Perl_safesyscalloc
 Perl_safesysrealloc
@@ -678,6 +677,7 @@ Perl_boot_core_xsutils
 Perl_cx_dup
 Perl_si_dup
 Perl_ss_dup
+Perl_any_dup
 Perl_he_dup
 Perl_re_dup
 Perl_fp_dup
@@ -690,5 +690,3 @@ Perl_ptr_table_new
 Perl_ptr_table_fetch
 Perl_ptr_table_store
 Perl_ptr_table_split
-perl_clone
-perl_clone_using

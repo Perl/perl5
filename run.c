@@ -71,7 +71,7 @@ Perl_debop(pTHX_ OP *o)
     Perl_deb(aTHX_ "%s", PL_op_name[o->op_type]);
     switch (o->op_type) {
     case OP_CONST:
-	PerlIO_printf(Perl_debug_log, "(%s)", SvPEEK(cSVOPo->op_sv));
+	PerlIO_printf(Perl_debug_log, "(%s)", SvPEEK(cSVOPo_sv));
 	break;
     case OP_GVSV:
     case OP_GV:

@@ -45,7 +45,18 @@
 #if !defined(PERL_OBJECT)
 #if !defined(PERL_IMPLICIT_CONTEXT)
 
+#if defined(PERL_IMPLICIT_SYS)
+#else
+#endif
+#if defined(USE_ITHREADS)
+#endif
+#if defined(MYMALLOC)
+#define malloced_size		Perl_malloced_size
+#endif
 #if defined(PERL_OBJECT)
+#endif
+#if defined(PERL_OBJECT)
+#else
 #endif
 #define amagic_call		Perl_amagic_call
 #define Gv_AMupdate		Perl_Gv_AMupdate
@@ -355,9 +366,6 @@
 #define magic_sizepack		Perl_magic_sizepack
 #define magic_wipepack		Perl_magic_wipepack
 #define magicname		Perl_magicname
-#if defined(MYMALLOC)
-#define malloced_size		Perl_malloced_size
-#endif
 #define markstack_grow		Perl_markstack_grow
 #if defined(USE_LOCALE_COLLATE)
 #define mem_collxfrm		Perl_mem_collxfrm
@@ -473,10 +481,9 @@
 #define pad_swipe		Perl_pad_swipe
 #define peep			Perl_peep
 #if defined(PERL_OBJECT)
-#else
+#endif
 #if defined(USE_THREADS)
 #define new_struct_thread	Perl_new_struct_thread
-#endif
 #endif
 #define call_atexit		Perl_call_atexit
 #define call_argv		Perl_call_argv
@@ -561,6 +568,7 @@
 #define save_op			Perl_save_op
 #define save_scalar		Perl_save_scalar
 #define save_pptr		Perl_save_pptr
+#define save_vptr		Perl_save_vptr
 #define save_re_context		Perl_save_re_context
 #define save_sptr		Perl_save_sptr
 #define save_svref		Perl_save_svref
@@ -767,6 +775,7 @@
 #define cx_dup			Perl_cx_dup
 #define si_dup			Perl_si_dup
 #define ss_dup			Perl_ss_dup
+#define any_dup			Perl_any_dup
 #define he_dup			Perl_he_dup
 #define re_dup			Perl_re_dup
 #define fp_dup			Perl_fp_dup
@@ -783,6 +792,7 @@
 #define ptr_table_split		Perl_ptr_table_split
 #endif
 #if defined(PERL_OBJECT)
+#else
 #endif
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
 #define avhv_index_sv		S_avhv_index_sv
@@ -1057,6 +1067,8 @@
 #  if defined(LEAKTEST)
 #define xstat			S_xstat
 #  endif
+#endif
+#if defined(PERL_OBJECT)
 #endif
 #define ck_anoncode		Perl_ck_anoncode
 #define ck_bitop		Perl_ck_bitop
@@ -1444,7 +1456,18 @@
 
 #else	/* PERL_IMPLICIT_CONTEXT */
 
+#if defined(PERL_IMPLICIT_SYS)
+#else
+#endif
+#if defined(USE_ITHREADS)
+#endif
+#if defined(MYMALLOC)
+#define malloced_size		Perl_malloced_size
+#endif
 #if defined(PERL_OBJECT)
+#endif
+#if defined(PERL_OBJECT)
+#else
 #endif
 #define amagic_call(a,b,c,d)	Perl_amagic_call(aTHX_ a,b,c,d)
 #define Gv_AMupdate(a)		Perl_Gv_AMupdate(aTHX_ a)
@@ -1737,9 +1760,6 @@
 #define magic_sizepack(a,b)	Perl_magic_sizepack(aTHX_ a,b)
 #define magic_wipepack(a,b)	Perl_magic_wipepack(aTHX_ a,b)
 #define magicname(a,b,c)	Perl_magicname(aTHX_ a,b,c)
-#if defined(MYMALLOC)
-#define malloced_size		Perl_malloced_size
-#endif
 #define markstack_grow()	Perl_markstack_grow(aTHX)
 #if defined(USE_LOCALE_COLLATE)
 #define mem_collxfrm(a,b,c)	Perl_mem_collxfrm(aTHX_ a,b,c)
@@ -1853,10 +1873,9 @@
 #define pad_swipe(a)		Perl_pad_swipe(aTHX_ a)
 #define peep(a)			Perl_peep(aTHX_ a)
 #if defined(PERL_OBJECT)
-#else
+#endif
 #if defined(USE_THREADS)
 #define new_struct_thread(a)	Perl_new_struct_thread(aTHX_ a)
-#endif
 #endif
 #define call_atexit(a,b)	Perl_call_atexit(aTHX_ a,b)
 #define call_argv(a,b,c)	Perl_call_argv(aTHX_ a,b,c)
@@ -1941,6 +1960,7 @@
 #define save_op()		Perl_save_op(aTHX)
 #define save_scalar(a)		Perl_save_scalar(aTHX_ a)
 #define save_pptr(a)		Perl_save_pptr(aTHX_ a)
+#define save_vptr(a)		Perl_save_vptr(aTHX_ a)
 #define save_re_context()	Perl_save_re_context(aTHX)
 #define save_sptr(a)		Perl_save_sptr(aTHX_ a)
 #define save_svref(a)		Perl_save_svref(aTHX_ a)
@@ -2138,7 +2158,8 @@
 #if defined(USE_ITHREADS)
 #define cx_dup(a,b,c)		Perl_cx_dup(aTHX_ a,b,c)
 #define si_dup(a)		Perl_si_dup(aTHX_ a)
-#define ss_dup(a,b,c)		Perl_ss_dup(aTHX_ a,b,c)
+#define ss_dup(a)		Perl_ss_dup(aTHX_ a)
+#define any_dup(a,b)		Perl_any_dup(aTHX_ a,b)
 #define he_dup(a,b)		Perl_he_dup(aTHX_ a,b)
 #define re_dup(a)		Perl_re_dup(aTHX_ a)
 #define fp_dup(a,b)		Perl_fp_dup(aTHX_ a,b)
@@ -2155,6 +2176,7 @@
 #define ptr_table_split(a)	Perl_ptr_table_split(aTHX_ a)
 #endif
 #if defined(PERL_OBJECT)
+#else
 #endif
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
 #define avhv_index_sv(a)	S_avhv_index_sv(aTHX_ a)
@@ -2428,6 +2450,8 @@
 #  if defined(LEAKTEST)
 #define xstat(a)		S_xstat(aTHX_ a)
 #  endif
+#endif
+#if defined(PERL_OBJECT)
 #endif
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)
@@ -2816,7 +2840,22 @@
 #endif	/* PERL_IMPLICIT_CONTEXT */
 #else	/* PERL_OBJECT */
 
+#if defined(PERL_IMPLICIT_SYS)
+#else
+#endif
+#if defined(USE_ITHREADS)
+#endif
+#if defined(MYMALLOC)
+#define malloc			Perl_malloc
+#define calloc			Perl_calloc
+#define realloc			Perl_realloc
+#define mfree			Perl_mfree
+#define malloced_size		Perl_malloced_size
+#endif
 #if defined(PERL_OBJECT)
+#endif
+#if defined(PERL_OBJECT)
+#else
 #endif
 #define Perl_amagic_call	CPerlObj::Perl_amagic_call
 #define amagic_call		Perl_amagic_call
@@ -3414,10 +3453,6 @@
 #define magic_wipepack		Perl_magic_wipepack
 #define Perl_magicname		CPerlObj::Perl_magicname
 #define magicname		Perl_magicname
-#if defined(MYMALLOC)
-#define Perl_malloced_size	CPerlObj::Perl_malloced_size
-#define malloced_size		Perl_malloced_size
-#endif
 #define Perl_markstack_grow	CPerlObj::Perl_markstack_grow
 #define markstack_grow		Perl_markstack_grow
 #if defined(USE_LOCALE_COLLATE)
@@ -3633,22 +3668,15 @@
 #define Perl_peep		CPerlObj::Perl_peep
 #define peep			Perl_peep
 #if defined(PERL_OBJECT)
-#define perl_construct		CPerlObj::perl_construct
-#define perl_destruct		CPerlObj::perl_destruct
-#define perl_free		CPerlObj::perl_free
-#define perl_run		CPerlObj::perl_run
-#define perl_parse		CPerlObj::perl_parse
-#else
-#define perl_alloc		CPerlObj::perl_alloc
-#define perl_construct		CPerlObj::perl_construct
-#define perl_destruct		CPerlObj::perl_destruct
-#define perl_free		CPerlObj::perl_free
-#define perl_run		CPerlObj::perl_run
-#define perl_parse		CPerlObj::perl_parse
+#define Perl_construct		CPerlObj::Perl_construct
+#define Perl_destruct		CPerlObj::Perl_destruct
+#define Perl_free		CPerlObj::Perl_free
+#define Perl_run		CPerlObj::Perl_run
+#define Perl_parse		CPerlObj::Perl_parse
+#endif
 #if defined(USE_THREADS)
 #define Perl_new_struct_thread	CPerlObj::Perl_new_struct_thread
 #define new_struct_thread	Perl_new_struct_thread
-#endif
 #endif
 #define Perl_call_atexit	CPerlObj::Perl_call_atexit
 #define call_atexit		Perl_call_atexit
@@ -3814,6 +3842,8 @@
 #define save_scalar		Perl_save_scalar
 #define Perl_save_pptr		CPerlObj::Perl_save_pptr
 #define save_pptr		Perl_save_pptr
+#define Perl_save_vptr		CPerlObj::Perl_save_vptr
+#define save_vptr		Perl_save_vptr
 #define Perl_save_re_context	CPerlObj::Perl_save_re_context
 #define save_re_context		Perl_save_re_context
 #define Perl_save_sptr		CPerlObj::Perl_save_sptr
@@ -4092,14 +4122,6 @@
 #if defined(MYMALLOC)
 #define Perl_dump_mstats	CPerlObj::Perl_dump_mstats
 #define dump_mstats		Perl_dump_mstats
-#define Perl_malloc		CPerlObj::Perl_malloc
-#define malloc			Perl_malloc
-#define Perl_calloc		CPerlObj::Perl_calloc
-#define calloc			Perl_calloc
-#define Perl_realloc		CPerlObj::Perl_realloc
-#define realloc			Perl_realloc
-#define Perl_mfree		CPerlObj::Perl_mfree
-#define mfree			Perl_mfree
 #endif
 #define Perl_safesysmalloc	CPerlObj::Perl_safesysmalloc
 #define safesysmalloc		Perl_safesysmalloc
@@ -4216,6 +4238,8 @@
 #define si_dup			Perl_si_dup
 #define Perl_ss_dup		CPerlObj::Perl_ss_dup
 #define ss_dup			Perl_ss_dup
+#define Perl_any_dup		CPerlObj::Perl_any_dup
+#define any_dup			Perl_any_dup
 #define Perl_he_dup		CPerlObj::Perl_he_dup
 #define he_dup			Perl_he_dup
 #define Perl_re_dup		CPerlObj::Perl_re_dup
@@ -4242,10 +4266,9 @@
 #define ptr_table_store		Perl_ptr_table_store
 #define Perl_ptr_table_split	CPerlObj::Perl_ptr_table_split
 #define ptr_table_split		Perl_ptr_table_split
-#define perl_clone		CPerlObj::perl_clone
-#define perl_clone_using	CPerlObj::perl_clone_using
 #endif
 #if defined(PERL_OBJECT)
+#else
 #endif
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
 #define S_avhv_index_sv		CPerlObj::S_avhv_index_sv
@@ -4737,6 +4760,8 @@
 #define S_xstat			CPerlObj::S_xstat
 #define xstat			S_xstat
 #  endif
+#endif
+#if defined(PERL_OBJECT)
 #endif
 #define Perl_ck_anoncode	CPerlObj::Perl_ck_anoncode
 #define ck_anoncode		Perl_ck_anoncode

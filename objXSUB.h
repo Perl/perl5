@@ -34,6 +34,10 @@
 #define PL_LIO			(*Perl_ILIO_ptr(aTHXo))
 #undef  PL_Mem
 #define PL_Mem			(*Perl_IMem_ptr(aTHXo))
+#undef  PL_MemParse
+#define PL_MemParse		(*Perl_IMemParse_ptr(aTHXo))
+#undef  PL_MemShared
+#define PL_MemShared		(*Perl_IMemShared_ptr(aTHXo))
 #undef  PL_Proc
 #define PL_Proc			(*Perl_IProc_ptr(aTHXo))
 #undef  PL_Sock
@@ -366,6 +370,10 @@
 #define PL_preprocess		(*Perl_Ipreprocess_ptr(aTHXo))
 #undef  PL_profiledata
 #define PL_profiledata		(*Perl_Iprofiledata_ptr(aTHXo))
+#undef  PL_psig_name
+#define PL_psig_name		(*Perl_Ipsig_name_ptr(aTHXo))
+#undef  PL_psig_ptr
+#define PL_psig_ptr		(*Perl_Ipsig_ptr_ptr(aTHXo))
 #undef  PL_ptr_table
 #define PL_ptr_table		(*Perl_Iptr_table_ptr(aTHXo))
 #undef  PL_replgv
@@ -809,7 +817,17 @@
 
 /* XXX soon to be eliminated, only a few things in PERLCORE need these now */
 
+#if defined(PERL_IMPLICIT_SYS)
+#else
+#endif
+#if defined(USE_ITHREADS)
+#endif
+#if defined(MYMALLOC)
+#endif
 #if defined(PERL_OBJECT)
+#endif
+#if defined(PERL_OBJECT)
+#else
 #endif
 #undef  Perl_amagic_call
 #define Perl_amagic_call	pPerl->Perl_amagic_call
@@ -1983,12 +2001,6 @@
 #define Perl_magicname		pPerl->Perl_magicname
 #undef  magicname
 #define magicname		Perl_magicname
-#if defined(MYMALLOC)
-#undef  Perl_malloced_size
-#define Perl_malloced_size	pPerl->Perl_malloced_size
-#undef  malloced_size
-#define malloced_size		Perl_malloced_size
-#endif
 #undef  Perl_markstack_grow
 #define Perl_markstack_grow	pPerl->Perl_markstack_grow
 #undef  markstack_grow
@@ -2404,35 +2416,22 @@
 #undef  peep
 #define peep			Perl_peep
 #if defined(PERL_OBJECT)
-#undef  perl_construct
-#define perl_construct		pPerl->perl_construct
-#undef  perl_destruct
-#define perl_destruct		pPerl->perl_destruct
-#undef  perl_free
-#define perl_free		pPerl->perl_free
-#undef  perl_run
-#define perl_run		pPerl->perl_run
-#undef  perl_parse
-#define perl_parse		pPerl->perl_parse
-#else
-#undef  perl_alloc
-#define perl_alloc		pPerl->perl_alloc
-#undef  perl_construct
-#define perl_construct		pPerl->perl_construct
-#undef  perl_destruct
-#define perl_destruct		pPerl->perl_destruct
-#undef  perl_free
-#define perl_free		pPerl->perl_free
-#undef  perl_run
-#define perl_run		pPerl->perl_run
-#undef  perl_parse
-#define perl_parse		pPerl->perl_parse
+#undef  Perl_construct
+#define Perl_construct		pPerl->Perl_construct
+#undef  Perl_destruct
+#define Perl_destruct		pPerl->Perl_destruct
+#undef  Perl_free
+#define Perl_free		pPerl->Perl_free
+#undef  Perl_run
+#define Perl_run		pPerl->Perl_run
+#undef  Perl_parse
+#define Perl_parse		pPerl->Perl_parse
+#endif
 #if defined(USE_THREADS)
 #undef  Perl_new_struct_thread
 #define Perl_new_struct_thread	pPerl->Perl_new_struct_thread
 #undef  new_struct_thread
 #define new_struct_thread	Perl_new_struct_thread
-#endif
 #endif
 #undef  Perl_call_atexit
 #define Perl_call_atexit	pPerl->Perl_call_atexit
@@ -2760,6 +2759,10 @@
 #define Perl_save_pptr		pPerl->Perl_save_pptr
 #undef  save_pptr
 #define save_pptr		Perl_save_pptr
+#undef  Perl_save_vptr
+#define Perl_save_vptr		pPerl->Perl_save_vptr
+#undef  save_vptr
+#define save_vptr		Perl_save_vptr
 #undef  Perl_save_re_context
 #define Perl_save_re_context	pPerl->Perl_save_re_context
 #undef  save_re_context
@@ -3304,22 +3307,6 @@
 #define Perl_dump_mstats	pPerl->Perl_dump_mstats
 #undef  dump_mstats
 #define dump_mstats		Perl_dump_mstats
-#undef  Perl_malloc
-#define Perl_malloc		pPerl->Perl_malloc
-#undef  malloc
-#define malloc			Perl_malloc
-#undef  Perl_calloc
-#define Perl_calloc		pPerl->Perl_calloc
-#undef  calloc
-#define calloc			Perl_calloc
-#undef  Perl_realloc
-#define Perl_realloc		pPerl->Perl_realloc
-#undef  realloc
-#define realloc			Perl_realloc
-#undef  Perl_mfree
-#define Perl_mfree		pPerl->Perl_mfree
-#undef  mfree
-#define mfree			Perl_mfree
 #endif
 #undef  Perl_safesysmalloc
 #define Perl_safesysmalloc	pPerl->Perl_safesysmalloc
@@ -3546,6 +3533,10 @@
 #define Perl_ss_dup		pPerl->Perl_ss_dup
 #undef  ss_dup
 #define ss_dup			Perl_ss_dup
+#undef  Perl_any_dup
+#define Perl_any_dup		pPerl->Perl_any_dup
+#undef  any_dup
+#define any_dup			Perl_any_dup
 #undef  Perl_he_dup
 #define Perl_he_dup		pPerl->Perl_he_dup
 #undef  he_dup
@@ -3596,12 +3587,9 @@
 #define Perl_ptr_table_split	pPerl->Perl_ptr_table_split
 #undef  ptr_table_split
 #define ptr_table_split		Perl_ptr_table_split
-#undef  perl_clone
-#define perl_clone		pPerl->perl_clone
-#undef  perl_clone_using
-#define perl_clone_using	pPerl->perl_clone_using
 #endif
 #if defined(PERL_OBJECT)
+#else
 #endif
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
 #endif
@@ -3659,6 +3647,8 @@
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 #  if defined(LEAKTEST)
 #  endif
+#endif
+#if defined(PERL_OBJECT)
 #endif
 #undef  Perl_ck_anoncode
 #define Perl_ck_anoncode	pPerl->Perl_ck_anoncode

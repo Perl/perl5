@@ -29,6 +29,7 @@
 #define SAVEt_ALLOC		28
 #define SAVEt_GENERIC_SVREF	29
 #define SAVEt_DESTRUCTOR_X	30
+#define SAVEt_VPTR		31
 
 #define SSCHECK(need) if (PL_savestack_ix + need > PL_savestack_max) savestack_grow()
 #define SSPUSHINT(i) (PL_savestack[PL_savestack_ix++].any_i32 = (I32)(i))
@@ -77,6 +78,7 @@
 #define SAVELONG(l)	save_long(SOFT_CAST(long*)&(l))
 #define SAVESPTR(s)	save_sptr((SV**)&(s))
 #define SAVEPPTR(s)	save_pptr(SOFT_CAST(char**)&(s))
+#define SAVEVPTR(s)	save_vptr(&(s))
 #define SAVEFREESV(s)	save_freesv((SV*)(s))
 #define SAVEFREEOP(o)	save_freeop(SOFT_CAST(OP*)(o))
 #define SAVEFREEPV(p)	save_freepv(SOFT_CAST(char*)(p))

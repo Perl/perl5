@@ -70,6 +70,21 @@ INST_ARCH	*= \$(ARCHNAME)
 #USE_OBJECT	*= define
 
 #
+# XXX WARNING! This option currently undergoing changes.  May be broken.
+#
+# Beginnings of interpreter cloning/threads: still rather rough, fails
+# tests.  This should be enabled to get the fork() emulation.  Do not
+# enable unless you know what you're doing!
+#
+USE_ITHREADS	*= define
+
+#
+# uncomment to enable the implicit "host" layer for all system calls
+# made by perl.  This is needed and auto-enabled by USE_OBJECT above.
+#
+USE_IMP_SYS	*= define
+
+#
 # uncomment exactly one of the following
 # 
 # Visual C++ 2.x
@@ -165,6 +180,9 @@ CCLIBDIR	*= $(CCHOME)\lib
 #
 #BUILDOPT	+= -DPERL_INTERNAL_GLOB
 
+# Enabling this runs a cloned toplevel interpreter (fails tests)
+#BUILDOPT	+= -DTOP_CLONE
+
 #
 # specify semicolon-separated list of extra directories that modules will
 # look for libraries (spaces in path names need not be quoted)
@@ -200,18 +218,33 @@ CRYPT_FLAG	= -DHAVE_DES_FCRYPT
 PERL_MALLOC	!= undef
 USE_THREADS	!= undef
 USE_MULTI	!= undef
+USE_IMP_SYS	!= define
 .ENDIF
 
 PERL_MALLOC	*= undef
 
 USE_THREADS	*= undef
+
+.IF "$(USE_THREADS)" == "define"
+USE_ITHREADS	!= undef
+.ENDIF
+
 USE_MULTI	*= undef
 USE_OBJECT	*= undef
+USE_ITHREADS	*= undef
+USE_IMP_SYS	*= undef
 
 .IF "$(USE_MULTI)$(USE_THREADS)$(USE_OBJECT)" != "undefundefundef"
 BUILDOPT	+= -DPERL_IMPLICIT_CONTEXT
 .ENDIF
 
+.IF "$(USE_ITHREADS)" != "undef"
+BUILDOPT	+= -DUSE_ITHREADS
+.ENDIF
+
+.IF "$(USE_IMP_SYS)" != "undef"
+BUILDOPT	+= -DPERL_IMPLICIT_SYS
+.ENDIF
 
 .IMPORT .IGNORE : PROCESSOR_ARCHITECTURE
 
@@ -459,6 +492,7 @@ $(o).dll:
 MINIPERL	= ..\miniperl.exe
 MINIDIR		= .\mini
 PERLEXE		= ..\perl.exe
+WPERLEXE	= ..\wperl.exe
 GLOBEXE		= ..\perlglob.exe
 CONFIGPM	= ..\lib\Config.pm
 MINIMOD		= ..\lib\ExtUtils\Miniperl.pm
@@ -644,7 +678,10 @@ CORE_NOCFG_H	=		\
 		.\include\dirent.h	\
 		.\include\netdb.h	\
 		.\include\sys\socket.h	\
-		.\win32.h
+		.\win32.h	\
+		.\perlhost.h	\
+		.\vdir.h	\
+		.\vmem.h
 
 CORE_H		= $(CORE_NOCFG_H) .\config.h
 
@@ -870,6 +907,12 @@ $(MINICORE_OBJ) : $(CORE_NOCFG_H)
 $(MINIWIN32_OBJ) : $(CORE_NOCFG_H)
 	$(CC) -c $(CFLAGS) $(OBJOUT_FLAG)$@ $(*B).c
 
+# -DPERL_IMPLICIT_SYS needs C++ for perllib.c
+.IF "$(USE_IMP_SYS)$(USE_OBJECT)" == "defineundef"
+perllib$(o)	: perllib.c
+	$(CC) -c -I. $(CFLAGS_O) $(CXX_FLAG) $(OBJOUT_FLAG)$@ perllib.c
+.ENDIF
+
 # 1. we don't want to rebuild miniperl.exe when config.h changes
 # 2. we don't want to rebuild miniperl.exe with non-default config.h
 $(MINI_OBJ)	: $(CORE_NOCFG_H)
@@ -959,6 +1002,8 @@ $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ)
 .ELSE
 	$(LINK32) -subsystem:console -out:$@ $(LINK_FLAGS) $(LIBFILES) \
 	    $(PERLEXE_OBJ) $(SETARGV_OBJ) $(PERLIMPLIB) 
+	copy $(PERLEXE) $(WPERLEXE)
+	editbin /subsystem:windows $(WPERLEXE)
 .ENDIF
 	copy splittree.pl .. 
 	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" $(AUTODIR)
@@ -1137,6 +1182,7 @@ installbare : utils
 .IF "$(PERL95EXE)" != ""
 	$(XCOPY) $(PERL95EXE) $(INST_BIN)\*.*
 .ENDIF
+	if exist $(WPERLEXE) $(XCOPY) $(WPERLEXE) $(INST_BIN)\*.*
 	$(XCOPY) $(GLOBEXE) $(INST_BIN)\*.*
 	$(XCOPY) bin\*.bat $(INST_SCRIPT)\*.*
 
@@ -1185,6 +1231,7 @@ clean :
 	-@erase /f config.h
 	-@erase $(GLOBEXE)
 	-@erase $(PERLEXE)
+	-@erase $(WPERLEXE)
 	-@erase $(PERLDLL)
 	-@erase $(CORE_OBJ)
 	-rmdir /s /q $(MINIDIR) || rmdir /s $(MINIDIR)

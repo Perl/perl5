@@ -3502,39 +3502,39 @@ Perl_save_re_context(pTHX)
     SAVEPPTR(PL_reginput);		/* String-input pointer. */
     SAVEPPTR(PL_regbol);		/* Beginning of input, for ^ check. */
     SAVEPPTR(PL_regeol);		/* End of input, for $ check. */
-    SAVESPTR(PL_regstartp);		/* Pointer to startp array. */
-    SAVESPTR(PL_regendp);		/* Ditto for endp. */
-    SAVESPTR(PL_reglastparen);		/* Similarly for lastparen. */
+    SAVEVPTR(PL_regstartp);		/* Pointer to startp array. */
+    SAVEVPTR(PL_regendp);		/* Ditto for endp. */
+    SAVEVPTR(PL_reglastparen);		/* Similarly for lastparen. */
     SAVEPPTR(PL_regtill);		/* How far we are required to go. */
     SAVEI32(PL_regprev);		/* char before regbol, \n if none */
-    SAVESPTR(PL_reg_start_tmp);		/* from regexec.c */
+    SAVEVPTR(PL_reg_start_tmp);		/* from regexec.c */
     PL_reg_start_tmp = 0;
     SAVEFREEPV(PL_reg_start_tmp);
     SAVEI32(PL_reg_start_tmpl);		/* from regexec.c */
     PL_reg_start_tmpl = 0;
-    SAVESPTR(PL_regdata);
+    SAVEVPTR(PL_regdata);
     SAVEI32(PL_reg_flags);		/* from regexec.c */
     SAVEI32(PL_reg_eval_set);		/* from regexec.c */
     SAVEI32(PL_regnarrate);		/* from regexec.c */
-    SAVESPTR(PL_regprogram);		/* from regexec.c */
+    SAVEVPTR(PL_regprogram);		/* from regexec.c */
     SAVEINT(PL_regindent);		/* from regexec.c */
-    SAVESPTR(PL_regcc);			/* from regexec.c */
-    SAVESPTR(PL_curcop);
-    SAVESPTR(PL_regcomp_rx);		/* from regcomp.c */
+    SAVEVPTR(PL_regcc);			/* from regexec.c */
+    SAVEVPTR(PL_curcop);
+    SAVEVPTR(PL_regcomp_rx);		/* from regcomp.c */
     SAVEI32(PL_regseen);		/* from regcomp.c */
     SAVEI32(PL_regsawback);		/* Did we see \1, ...? */
     SAVEI32(PL_regnaughty);		/* How bad is this pattern? */
-    SAVESPTR(PL_regcode);		/* Code-emit pointer; &regdummy = don't */
+    SAVEVPTR(PL_regcode);		/* Code-emit pointer; &regdummy = don't */
     SAVEPPTR(PL_regxend);		/* End of input for compile */
     SAVEPPTR(PL_regcomp_parse);		/* Input-scan pointer. */
-    SAVESPTR(PL_reg_call_cc);		/* from regexec.c */
-    SAVESPTR(PL_reg_re);		/* from regexec.c */
+    SAVEVPTR(PL_reg_call_cc);		/* from regexec.c */
+    SAVEVPTR(PL_reg_re);		/* from regexec.c */
     SAVEPPTR(PL_reg_ganch);		/* from regexec.c */
     SAVESPTR(PL_reg_sv);		/* from regexec.c */
-    SAVESPTR(PL_reg_magic);		/* from regexec.c */
+    SAVEVPTR(PL_reg_magic);		/* from regexec.c */
     SAVEI32(PL_reg_oldpos);			/* from regexec.c */
-    SAVESPTR(PL_reg_oldcurpm);		/* from regexec.c */
-    SAVESPTR(PL_reg_curpm);		/* from regexec.c */
+    SAVEVPTR(PL_reg_oldcurpm);		/* from regexec.c */
+    SAVEVPTR(PL_reg_curpm);		/* from regexec.c */
 #ifdef DEBUGGING
     SAVEPPTR(PL_reg_starttry);		/* from regexec.c */    
 #endif
