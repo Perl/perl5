@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Feb 24 03:09:49 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Thu Feb 24 03:13:49 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -8844,7 +8844,7 @@ echo " "
 echo "Checking to see if your system supports fpos64_t..." >&4
 $cat >try.c <<EOCP
 #include <stdio.h>
-int main() { fpos64_t x x = 7; }
+int main() { fpos64_t x = 7; }
 EOCP
 set try
 if eval $compile; then
