@@ -3211,4 +3211,15 @@ save_re_context(void)
     SAVESPTR(PL_regcode);		/* Code-emit pointer; &regdummy = don't */
     SAVEPPTR(PL_regxend);		/* End of input for compile */
     SAVEPPTR(PL_regcomp_parse);		/* Input-scan pointer. */
+    SAVESPTR(PL_reg_call_cc);		/* from regexec.c */
+    SAVESPTR(PL_reg_re);		/* from regexec.c */
+    SAVEPPTR(PL_reg_ganch);		/* from regexec.c */
+    SAVESPTR(PL_reg_sv);		/* from regexec.c */
+    SAVESPTR(PL_reg_magic);		/* from regexec.c */
+    SAVEI32(PL_reg_oldpos);			/* from regexec.c */
+    SAVESPTR(PL_reg_oldcurpm);		/* from regexec.c */
+    SAVESPTR(PL_reg_curpm);		/* from regexec.c */
+#ifdef DEBUGGING
+    SAVEPPTR(PL_reg_starttry);		/* from regexec.c */    
+#endif
 }
