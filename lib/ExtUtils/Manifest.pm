@@ -360,6 +360,7 @@ expression to start with a sharp character. A typical example:
     ~$
     \.old$
     ^#.*#$
+    ^\.#
 
 If no MANIFEST.SKIP file is found, a default set of skips will be
 used, similar to the example above.  If you want nothing skipped,
