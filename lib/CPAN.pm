@@ -1095,6 +1095,36 @@ sub init {
     1;
 }
 
+# This is a piece of repeated code that is abstracted here for
+# maintainability.  RMB
+#
+sub _configpmtest {
+    my($configpmdir, $configpmtest) = @_; 
+    if (-w $configpmtest) {
+        return $configpmtest;
+    } elsif (-w $configpmdir) {
+        #_#_# following code dumped core on me with 5.003_11, a.k.
+        my $configpm_bak = "$configpmtest.bak";
+        unlink $configpm_bak if -f $configpm_bak;
+        if( -f $configpmtest ) {	
+            if( rename $configpmtest, $configpm_bak ) {  
+                $CPAN::Frontend->mywarn(<<END)
+Old configuration file $configpmtest
+    moved to $configpm_bak
+END
+	    }
+	}	
+	my $fh = FileHandle->new;
+	if ($fh->open(">$configpmtest")) {
+	    $fh->print("1;\n");
+	    return $configpmtest;
+	} else {
+	    # Should never happen
+	    Carp::confess("Cannot open >$configpmtest");
+	}
+    } else { return } 
+}
+
 #-> sub CPAN::Config::load ;
 sub load {
     my($self) = shift;
@@ -1125,39 +1155,14 @@ sub load {
 	my($configpmdir) = File::Spec->catdir($path_to_cpan,"CPAN");
 	my($configpmtest) = File::Spec->catfile($configpmdir,"Config.pm");
 	if (-d $configpmdir or File::Path::mkpath($configpmdir)) {
-	    if (-w $configpmtest) {
-		$configpm = $configpmtest;
-	    } elsif (-w $configpmdir) {
-		#_#_# following code dumped core on me with 5.003_11, a.k.
-		unlink "$configpmtest.bak" if -f "$configpmtest.bak";
-		rename $configpmtest, "$configpmtest.bak" if -f $configpmtest;
-		my $fh = FileHandle->new;
-		if ($fh->open(">$configpmtest")) {
-		    $fh->print("1;\n");
-		    $configpm = $configpmtest;
-		} else {
-		    # Should never happen
-		    Carp::confess("Cannot open >$configpmtest");
-		}
-	    }
+	    $configpm = _configpmtest($configpmdir,$configpmtest); 
 	}
 	unless ($configpm) {
 	    $configpmdir = File::Spec->catdir($ENV{HOME},".cpan","CPAN");
 	    File::Path::mkpath($configpmdir);
 	    $configpmtest = File::Spec->catfile($configpmdir,"MyConfig.pm");
-	    if (-w $configpmtest) {
-		$configpm = $configpmtest;
-	    } elsif (-w $configpmdir) {
-		#_#_# following code dumped core on me with 5.003_11, a.k.
-		my $fh = FileHandle->new;
-		if ($fh->open(">$configpmtest")) {
-		    $fh->print("1;\n");
-		    $configpm = $configpmtest;
-		} else {
-		    # Should never happen
-		    Carp::confess("Cannot open >$configpmtest");
-		}
-	    } else {
+	    $configpm = _configpmtest($configpmdir,$configpmtest); 
+	    unless ($configpm) {
 		Carp::confess(qq{WARNING: CPAN.pm is unable to }.
 			      qq{create a configuration file.});
 	    }
