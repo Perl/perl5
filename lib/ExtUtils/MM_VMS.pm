@@ -2226,7 +2226,7 @@ sub init_linker {
     $self->{EXPORT_LIST} ||= '$(BASEEXT).opt';
 
     my $shr = $Config{dbgprefix} . 'PERLSHR';
-    $self->{PERL_ARCHIVE} ||=  $ENV{$shr} ? $ENV{$shr} : "Sys\$Share:$shr.$Config{'dlext'}";
+    $self->{PERL_ARCHIVE} ||= $self->catfile($self->{PERL_SRC},"$shr.$Config{'dlext'}");
 
     $self->{PERL_ARCHIVE_AFTER} ||= '';
 }
