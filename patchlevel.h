@@ -4,7 +4,7 @@
  * exactly on the third column */
 
 #define PERL_REVISION	5		/* age */
-#define PERL_VERSION	6		/* epoch */
+#define PERL_VERSION	7		/* epoch */
 #define PERL_SUBVERSION	0		/* generation */
 
 /* The following numbers describe the earliest compatible version of
@@ -71,6 +71,7 @@
 static	char	*local_patches[] = {
         NULL
 	,"SUIDMAIL - fixes for suidperl security"
+	,"NOTREALLY570"
 	,NULL
 };
 
