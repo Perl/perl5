@@ -5530,7 +5530,7 @@ use eval:
 
     $symlink_exists = eval { symlink("",""); 1 };
 
-=item syscall LIST
+=item syscall NUMBER, LIST
 
 Calls the system call specified as the first element of the list,
 passing the remaining elements as arguments to the system call.  If
