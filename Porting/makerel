@@ -21,9 +21,15 @@ $patchlevel_h = `grep '#define ' patchlevel.h`;
 print $patchlevel_h;
 $patchlevel = $1 if $patchlevel_h =~ /PATCHLEVEL\s+(\d+)/;
 $subversion = $1 if $patchlevel_h =~ /SUBVERSION\s+(\d+)/;
-die "Unable to parse patchlevel.h" unless $subversion > 0;
+die "Unable to parse patchlevel.h" unless $subversion >= 0;
 $vers = sprintf("5.%03d", $patchlevel);
-$vers.= sprintf( "_%02d", $subversion) if $subversion;
+$vms_vers = sprintf("5_%03d", $patchlevel);
+if ($subversion) {
+    $vers.= sprintf( "_%02d", $subversion);
+    $vms_vers.= sprintf( "%02d", $subversion);
+} else {
+    $vms_vers.= "  ";
+}
 
 $perl = "perl$vers";
 $reldir = "$relroot/$perl";
@@ -45,6 +51,10 @@ if ("@$missentry" =~ m/\.orig\b/) {
 }
 die "Aborted.\n" if @$missentry or @$missfile;
 print "\n";
+
+
+print "Updating VMS version specific files with $vms_vers...\n";
+system("perl -pi -e 's/^\QPERL_VERSION = \E\d\_\d+(\s*\#)/PERL_VERSION = $vms_vers$1/' vms/descrip.mms");
 
 
 print "Setting file permissions...\n";
@@ -78,7 +88,7 @@ print "\n";
 
 
 print "Creating $reldir release directory...\n";
-die "$reldir release directory already exists\n"   if -e "../$perl";
+die "$reldir release directory already exists\n"   if -e "../$reldir";
 die "$reldir.tar.gz release file already exists\n" if -e "../$reldir.tar.gz";
 mkdir($reldir, 0755) or die "mkdir $reldir: $!\n";
 print "\n";

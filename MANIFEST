@@ -16,6 +16,7 @@ Makefile.SH		A script that generates Makefile
 Porting/Contract	Guidelines for creating patches to Perl
 Porting/Glossary	Glossary of config.sh variables
 Porting/makerel		Release making utility
+Porting/patching.pod	How to report changes made to Perl
 Porting/patchls		Flexible patch file listing utility
 Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
 README			The Instructions
