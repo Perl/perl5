@@ -29,6 +29,56 @@ Version v5.9.X		Development release working toward v5.10
 --------------
 
 ____________________________________________________________________________
+[ 24131] By: steveh                                on 2005/04/01  08:18:27
+        Log: Remove dependency on tr(1) for MinGW builds on Win32
+             
+             This leaves things slightly (more) broken for MinGW builds on Cygwin,
+             but that doesn't currently quite work in other respects and isn't
+             documented anyway.  See:
+             
+             http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2005-03/msg00751.html
+     Branch: perl
+	   ! pod/perl592delta.pod win32/makefile.mk
+____________________________________________________________________________
+[ 24130] By: rgs                                   on 2005/04/01  07:47:26
+        Log: Regenerate perltoc and perlmodlib
+     Branch: perl
+	   ! pod/perlmodlib.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 24129] By: rgs                                   on 2005/04/01  07:36:04
+        Log: POD fixes.
+     Branch: perl
+	   ! pod/perlfaq1.pod
+____________________________________________________________________________
+[ 24128] By: rgs                                   on 2005/04/01  07:19:27
+        Log: FAQ sync.
+     Branch: perl
+	   ! pod/perlfaq.pod pod/perlfaq3.pod pod/perlfaq4.pod
+	   ! pod/perlfaq6.pod pod/perlfaq7.pod
+____________________________________________________________________________
+[ 24127] By: rgs                                   on 2005/04/01  07:14:22
+        Log: Add a note about installhtml
+     Branch: perl
+	   ! pod/perltodo.pod
+____________________________________________________________________________
+[ 24126] By: rgs                                   on 2005/03/31  21:51:28
+        Log: Subject: [PATCH] pp_pack.c warnings on VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Thu, 31 Mar 2005 14:51:05 -0600
+             Message-ID: <424C62B9.2030601@mac.com>
+     Branch: perl
+	   ! pp_pack.c
+____________________________________________________________________________
+[ 24125] By: rgs                                   on 2005/03/31  17:14:01
+        Log: Mention the current MinGW compilation problems
+     Branch: perl
+	   ! pod/perl592delta.pod
+____________________________________________________________________________
+[ 24124] By: rgs                                   on 2005/03/31  17:11:15
+        Log: Update Changes
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
 [ 24123] By: rgs                                   on 2005/03/31  15:52:46
         Log: This is 5.9.2. Mostly.
      Branch: perl
