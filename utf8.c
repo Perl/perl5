@@ -645,7 +645,10 @@ Perl_is_utf8_alnum(pTHX_ U8 *p)
     if (!is_utf8_char(p))
 	return FALSE;
     if (!PL_utf8_alnum)
-	PL_utf8_alnum = swash_init("utf8", "IsAlnum", &PL_sv_undef, 0, 0);
+	/* NOTE: "IsWord", not "IsAlnum", since Alnum is a true
+	 * descendant of isalnum(3), in other words, it doesn't
+	 * contain the '_'. --jhi */
+	PL_utf8_alnum = swash_init("utf8", "IsWord", &PL_sv_undef, 0, 0);
     return swash_fetch(PL_utf8_alnum, p);
 /*    return *p == '_' || is_utf8_alpha(p) || is_utf8_digit(p); */
 #ifdef SURPRISINGLY_SLOWER  /* probably because alpha is usually true */

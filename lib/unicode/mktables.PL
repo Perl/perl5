@@ -9,9 +9,9 @@ $PropData = "PropList.txt";
 
 # Note: we try to keep filenames unique within first 8 chars.  Using
 # subdirectories for the following helps.
-mkdir "In", 0777;
-mkdir "Is", 0777;
-mkdir "To", 0777;
+mkdir "In", 0755;
+mkdir "Is", 0755;
+mkdir "To", 0755;
 
 @todo = (
 # typical

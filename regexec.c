@@ -3735,4 +3735,3 @@ restore_pos(pTHXo_ void *arg)
 	PL_curpm = PL_reg_oldcurpm;
     }	
 }
-
