@@ -3823,7 +3823,7 @@ else
 fi
 case "$dflt" in
 y)
-	$cat try.msg
+	$cat try.msg >&4
 	case "$knowitall" in
 	'')
 		echo "(The supplied flags might be incorrect with this C compiler.)"
