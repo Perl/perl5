@@ -24,7 +24,7 @@ found in the top-level directory where the Perl distribution
 was extracted.  Make sure you read and understand the terms under
 which this software is being distributed.
 
-Also make sure you read the L<BUGS AND CAVEATS> section below for the
+Also make sure you read L<BUGS AND CAVEATS> below for the
 known limitations of this port.
 
 The INSTALL file in the perl top-level has much information that is
@@ -290,7 +290,7 @@ This pipes "foo" to the pager and writes "bar" in the file "blurch":
     perl -e "print 'foo'; print STDERR 'bar'" 2> blurch | less
 
 
-Discovering the usage of the "command.com" shell on Windows95
+Discovering the usefullness of the "command.com" shell on Windows95
 is left as an exercise to the reader :)
 
 =item Building Extensions
@@ -337,7 +337,7 @@ all of the Activeware extensions and most other Win32 extensions from
 CPAN in source form, along with many added bugfixes, and with MakeMaker
 support.  This bundle is available at:
 
-   http://www.perl.com/CPAN/authors/id/GSAR/libwin32-0.07.tar.gz
+   http://www.perl.com/CPAN/authors/id/GSAR/libwin32-0.08.tar.gz
 
 See the README in that distribution for building and installation
 instructions.  Look for later versions that may be available at the
@@ -374,18 +374,20 @@ time because some details are still in flux and there may be
 changes in any of these areas: build process, installation structure,
 supported utilities/modules, and supported perl functionality.
 In particular, functionality specific to the Win32 environment may
-ultimately be supported as either core modules or extensions.  This
-means that you should be prepared to recompile extensions when binary
-incompatibilites arise due to changes in the internal structure of
-the code.
+ultimately be supported as either core modules or extensions.  The
+beta status implies, among other things, that you should be prepared
+to recompile extensions when binary incompatibilites arise due to
+changes in the internal structure of the code.
 
-The DLLs produced by the two supported compilers are incompatible
-with each other due to the conventions they use to export symbols,
-and due to differences in the Runtime libraries that they provide.
-This means that extension binaries built under either compiler will
-only work with the perl binaries built under the same compiler.
-If you know of a robust, freely available C Runtime that can
-be used under win32, let us know.
+An effort has been made to ensure that the DLLs produced by the two
+supported compilers are compatible with each other (despite the
+best efforts of the compiler vendors).  Extension binaries produced
+by one compiler should also coexist with a perl binary built by
+a different compiler.  In order to accomplish this, PERL.DLL provides
+a layer of runtime code that uses the C Runtime that perl was compiled
+with.  Extensions which include "perl.h" will transparently access
+the functions in this layer, thereby ensuring that both perl and
+extensions use the same runtime functions.
 
 If you have had prior exposure to Perl on Unix platforms, you will notice
 this port exhibits behavior different from what is documented.  Most of the
@@ -446,7 +448,12 @@ returned values or effects may be bogus.
 =item *
 
 Signal handling may not behave as on Unix platforms (where it
-doesn't exactly "behave", either :).
+doesn't exactly "behave", either :).  For instance, calling C<die()>
+or C<exit()> from signal handlers will cause an exception, since most
+implementations of C<signal()> on Win32 are severely crippled.
+Thus, signals may work only for simple things like setting a flag
+variable in the handler.  Using signals under this port should
+currently be considered unsupported.
 
 =item *
 
@@ -479,6 +486,8 @@ Nick Ing-Simmons E<lt>nick@ni-s.u-net.comE<gt>
 
 =back
 
+This document is maintained by Gurusamy Sarathy.
+
 =head1 SEE ALSO
 
 L<perl>
@@ -494,7 +503,7 @@ sundry hacks since then.
 
 Borland support was added in 5.004_01 (Gurusamy Sarathy).
 
-Last updated: 15 June 1997
+Last updated: 25 July 1997
 
 =cut
 

@@ -367,7 +367,7 @@ config.w32 : $(CFGSH_TMPL)
 ..\config.sh : config.w32 $(MINIPERL) config_sh.PL
 	$(MINIPERL) -I..\lib config_sh.PL "INST_DRV=$(INST_DRV)" \
 	    "INST_TOP=$(INST_TOP)" "cc=$(CC)" "ccflags=$(RUNTIME) -DWIN32" \
-	    "cf_email=$(EMAIL)" "libs=$(LIBFILES:f)" \
+	    "cf_email=$(EMAIL)" "libs=$(LIBFILES:f)" "incpath=$(CCINCDIR)" \
 	    "libpth=$(strip $(CCLIBDIR) $(LIBFILES:d))" "libc=$(LIBC)" \
 	    config.w32 > ..\config.sh
 

@@ -705,7 +705,8 @@ Support for the following operating systems is new in Perl 5.004.
 
 Perl 5.004 now includes support for building a "native" perl under
 Windows NT, using the Microsoft Visual C++ compiler (versions 2.0
-and above).  The resulting perl can be used under Windows 95 (if it
+and above) or the Borland C++ compiler (versions 5.02 and above).
+The resulting perl can be used under Windows 95 (if it
 is installed in the same directory locations as it got installed
 in Windows NT).  This port includes support for perl extension
 building tools like L<MakeMaker> and L<h2xs>, so that many extensions
@@ -719,8 +720,6 @@ Cygwin32 is a set of GNU tools that make it possible to compile and run
 many UNIX programs under Windows NT by providing a mostly UNIX-like 
 interface for compilation and execution.  See L<README.cygwin32> for
 more details on this port, and how to obtain the Cygwin32 toolkit.
-This port has not been as well tested as the "native" port described
-above (which is not as well tested as we'd like either :)
 
 =head2 Plan 9
 
