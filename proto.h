@@ -37,7 +37,7 @@ VIRTUAL I32	Perl_block_gimme(pTHX);
 VIRTUAL int	Perl_block_start(pTHX_ int full);
 VIRTUAL void	Perl_boot_core_UNIVERSAL(pTHX);
 VIRTUAL void	Perl_call_list(pTHX_ I32 oldscope, AV* av_list);
-VIRTUAL I32	Perl_cando(pTHX_ I32 bit, Uid_t effective, Stat_t* statbufp);
+VIRTUAL bool	Perl_cando(pTHX_ Mode_t mode, Uid_t effective, Stat_t* statbufp);
 VIRTUAL U32	Perl_cast_ulong(pTHX_ NV f);
 VIRTUAL I32	Perl_cast_i32(pTHX_ NV f);
 VIRTUAL IV	Perl_cast_iv(pTHX_ NV f);
@@ -845,7 +845,7 @@ STATIC SV*	S_method_common(pTHX_ SV* meth, U32* hashp);
 #endif
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
 STATIC OP*	S_doform(pTHX_ CV *cv, GV *gv, OP *retop);
-STATIC int	S_emulate_eaccess(pTHX_ const char* path, int mode);
+STATIC int	S_emulate_eaccess(pTHX_ const char* path, Mode_t mode);
 #  if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
 STATIC int	S_dooneliner(pTHX_ char *cmd, char *filename);
 #  endif

@@ -1051,7 +1051,7 @@ p	|I32	|block_gimme
 p	|int	|block_start	|int full
 p	|void	|boot_core_UNIVERSAL
 p	|void	|call_list	|I32 oldscope|AV* av_list
-p	|I32	|cando		|I32 bit|Uid_t effective|Stat_t* statbufp
+p	|bool	|cando		|Mode_t mode|Uid_t effective|Stat_t* statbufp
 p	|U32	|cast_ulong	|NV f
 p	|I32	|cast_i32	|NV f
 p	|IV	|cast_iv	|NV f
@@ -1909,7 +1909,7 @@ s	|SV*	|method_common	|SV* meth|U32* hashp
 
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
 s	|OP*	|doform		|CV *cv|GV *gv|OP *retop
-s	|int	|emulate_eaccess|const char* path|int mode
+s	|int	|emulate_eaccess|const char* path|Mode_t mode
 #  if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
 s	|int	|dooneliner	|char *cmd|char *filename
 #  endif

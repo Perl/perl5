@@ -230,7 +230,7 @@ static char zero_but_true[ZBTLEN + 1] = "0 but true";
 	|| defined(HAS_SETREGID) || defined(HAS_SETRESGID))
 /* The Hard Way. */
 STATIC int
-S_emulate_eaccess(pTHX_ const char* path, int mode)
+S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
 {
     Uid_t ruid = getuid();
     Uid_t euid = geteuid();
@@ -295,7 +295,7 @@ S_emulate_eaccess(pTHX_ const char* path, int mode)
 
 #if !defined(PERL_EFF_ACCESS_R_OK)
 STATIC int
-S_emulate_eaccess(pTHX_ const char* path, int mode)
+S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
 {
     Perl_croak(aTHX_ "switching effective uid is not implemented");
     /*NOTREACHED*/

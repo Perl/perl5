@@ -1487,9 +1487,10 @@ nothing in the core.
 
 /* Do the permissions allow some operation?  Assumes statcache already set. */
 #ifndef VMS /* VMS' cando is in vms.c */
-I32
-Perl_cando(pTHX_ I32 bit, Uid_t effective, register struct stat *statbufp)
-/* Note: we use `effective' both for uids and gids. */
+bool
+Perl_cando(pTHX_ Mode_t mode, Uid_t effective, register Stat_t *statbufp)
+/* Note: we use `effective' both for uids and gids.
+ * Here we are betting on Uid_t being equal or wider than Gid_t.  */
 {
 #ifdef DOSISH
     /* [Comments and code from Len Reed]
@@ -1513,11 +1514,11 @@ Perl_cando(pTHX_ I32 bit, Uid_t effective, register struct stat *statbufp)
      /* Atari stat() does pretty much the same thing. we set x_bit_set_in_stat
       * too so it will actually look into the files for magic numbers
       */
-     return (bit & statbufp->st_mode) ? TRUE : FALSE;
+     return (mode & statbufp->st_mode) ? TRUE : FALSE;
 
 #else /* ! DOSISH */
     if ((effective ? PL_euid : PL_uid) == 0) {	/* root is special */
-	if (bit == S_IXUSR) {
+	if (mode == S_IXUSR) {
 	    if (statbufp->st_mode & 0111 || S_ISDIR(statbufp->st_mode))
 		return TRUE;
 	}
@@ -1526,14 +1527,14 @@ Perl_cando(pTHX_ I32 bit, Uid_t effective, register struct stat *statbufp)
 	return FALSE;
     }
     if (statbufp->st_uid == (effective ? PL_euid : PL_uid) ) {
-	if (statbufp->st_mode & bit)
+	if (statbufp->st_mode & mode)
 	    return TRUE;	/* ok as "user" */
     }
     else if (ingroup(statbufp->st_gid,effective)) {
-	if (statbufp->st_mode & bit >> 3)
+	if (statbufp->st_mode & mode >> 3)
 	    return TRUE;	/* ok as "group" */
     }
-    else if (statbufp->st_mode & bit >> 6)
+    else if (statbufp->st_mode & mode >> 6)
 	return TRUE;	/* ok as "other" */
     return FALSE;
 #endif /* ! DOSISH */

@@ -253,10 +253,10 @@ Perl_call_list(pTHXo_ I32 oldscope, AV* av_list)
 }
 
 #undef  Perl_cando
-I32
-Perl_cando(pTHXo_ I32 bit, Uid_t effective, Stat_t* statbufp)
+bool
+Perl_cando(pTHXo_ Mode_t mode, Uid_t effective, Stat_t* statbufp)
 {
-    return ((CPerlObj*)pPerl)->Perl_cando(bit, effective, statbufp);
+    return ((CPerlObj*)pPerl)->Perl_cando(mode, effective, statbufp);
 }
 
 #undef  Perl_cast_ulong
