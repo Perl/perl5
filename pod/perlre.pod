@@ -179,7 +179,6 @@ In addition, Perl defines the following:
     \X	Match eXtended Unicode "combining character sequence",
         equivalent to C<(?:\PM\pM*)>
     \C	Match a single C char (octet) even under utf8.
-	(Currently this does not work correctly.)
 
 A C<\w> matches a single alphanumeric character or C<_>, not a whole word.
 Use C<\w+> to match a string of Perl-identifier characters (which isn't 

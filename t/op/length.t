@@ -33,7 +33,7 @@ print "ok 3\n";
 }
 
 {
-    my $a = qu"\x{80}"; # make "\x{80}" to produce UTF-8
+    my $a = pack("U", 0x80);
     
     print "not " unless length($a) == 1;
     print "ok 6\n";

@@ -4744,11 +4744,7 @@ Perl_yylex(pTHX)
 	    TOKEN('(');
 
 	case KEY_qq:
-	case KEY_qu:
 	    s = scan_str(s,FALSE,FALSE);
-	    if (tmp == KEY_qu &&
-		is_utf8_string((U8*)SvPVX(PL_lex_stuff), SvCUR(PL_lex_stuff)))
-		SvUTF8_on(PL_lex_stuff);
 	    if (!s)
 		missingterm((char*)0);
 	    yylval.ival = OP_STRINGIFY;
@@ -5581,7 +5577,6 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	    if (strEQ(d,"q"))			return KEY_q;
 	    if (strEQ(d,"qr"))			return KEY_qr;
 	    if (strEQ(d,"qq"))			return KEY_qq;
-	    if (strEQ(d,"qu"))			return KEY_qu;
 	    if (strEQ(d,"qw"))			return KEY_qw;
 	    if (strEQ(d,"qx"))			return KEY_qx;
 	}
