@@ -6,13 +6,15 @@ BEGIN {
 }
 
 require './test.pl';
-plan(tests => 25);
+plan(tests => 33);
 
 # compile time
 
 is('-' x 5, '-----',    'compile time x');
 is('-' x 1, '-',        '  x 1');
 is('-' x 0, '',         '  x 0');
+is('-' x -1, '',        '  x -1');
+is('-' x undef, '',     '  x undef');
 
 is('ab' x 3, 'ababab',  '  more than one char');
 
@@ -22,9 +24,15 @@ $a = '-';
 is($a x 5, '-----',     'run time x');
 is($a x 1, '-',         '  x 1');
 is($a x 0, '',          '  x 0');
+is($a x -3, '',         '  x -3');
+is($a x undef, '',      '  x undef');
 
 $a = 'ab';
 is($a x 3, 'ababab',    '  more than one char');
+$a = 'ab';
+is($a x 0, '',          '  more than one char');
+$a = 'ab';
+is($a x -12, '',        '  more than one char');
 
 $a = 'xyz';
 $a x= 2;
@@ -44,6 +52,9 @@ is(join(':', () x 4),       '',                     '() x Y');
 is(join(':', (9) x 4),      '9:9:9:9',              '(X) x Y');
 is(join(':', (9,9) x 4),    '9:9:9:9:9:9:9:9',      '(X,X) x Y');
 is(join('', (split(//,"123")) x 2), '123123',       'split and x');
+
+is(join('', @x x -12),      '',                     '@x x -12');
+is(join('', (@x) x -14),    '',                     '(@x) x -14');
 
 
 # This test is actually testing for Digital C compiler optimizer bug,

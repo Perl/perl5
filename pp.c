@@ -1381,6 +1381,8 @@ PP(pp_repeat)
   dSP; dATARGET; tryAMAGICbin(repeat,opASSIGN);
   {
     register IV count = POPi;
+    if (count < 0)
+	count = 0;
     if (GIMME == G_ARRAY && PL_op->op_private & OPpREPEAT_DOLIST) {
 	dMARK;
 	I32 items = SP - MARK;
