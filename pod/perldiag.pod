@@ -2449,6 +2449,12 @@ immediately after the switch, without intervening spaces.
 (F) The indicated command line switch needs a mandatory argument, but
 you haven't specified one.
 
+=item No such class field "%s" in variable %s of type %s
+
+(F) You tried to access a key from a hash through the indicated typed variable
+but that key is not allowed by the package of the same type.  The indicated
+package has restricted the set of allowed keys using the L<fields> pragma.
+
 =item No such class %s
 
 (F) You provided a class qualifier in a "my" or "our" declaration, but

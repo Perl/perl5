@@ -39,12 +39,12 @@ is_deeply( [sort &show_fields('Foo', fields::PRIVATE)],
            [sort qw(_no _up_yours)]);
 
 # We should get compile time failures field name typos
-eval q(my Foo $obj = Foo->new; $obj->{notthere} = "");
+eval q(return; my Foo $obj = Foo->new; $obj->{notthere} = "");
 
 my $error = $Has_PH ? 'No such(?: [\w-]+)? field "notthere"'
-                    : q[Attempt to access disallowed key 'notthere' in a ].
-                      q[restricted hash at ];
-ok( $@ && $@ =~ /^$error/i );
+                    : q[No such class field "notthere" in variable $obj ].
+                      q[of type Foo];
+ok( $@ && $@ =~ /^\Q$error/i );
 
 
 foreach (Foo->new) {

@@ -1,8 +1,9 @@
 #!/usr/bin/perl -w
 
-my $Has_PH;
+my ($Has_PH, $Field);
 BEGIN { 
     $Has_PH = $] < 5.009;
+    $Field = $Has_PH ? "pseudo-hash field" : "class field";
 }
 
 my $W;
@@ -20,7 +21,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 26;
+use Test::More tests => 28;
 
 BEGIN { use_ok('base'); }
 
@@ -156,17 +157,22 @@ my D3 $obj2 = $obj1;
 $obj2->{b1} = "D3";
 
 # We should get compile time failures field name typos
-eval q(my D3 $obj3 = $obj2; $obj3->{notthere} = "");
-if( $Has_PH ) {
-    like $@, 
-      qr/^No such pseudo-hash field "notthere" in variable \$obj3 of type D3/;
-}
-else {
-    like $@, 
-      qr/^Attempt to access disallowed key 'notthere' in a restricted hash/;
-}
+eval q(return; my D3 $obj3 = $obj2; $obj3->{notthere} = "");
+like $@, 
+    qr/^No such $Field "notthere" in variable \$obj3 of type D3/,
+    "Compile failure of undeclared fields (helem)";
 
 # Slices
+# We should get compile time failures field name typos
+eval q(return; my D3 $obj3 = $obj2; my $k; @$obj3{$k,'notthere'} = ());
+like $@, 
+    qr/^No such $Field "notthere" in variable \$obj3 of type D3/,
+    "Compile failure of undeclared fields (hslice)";
+eval q(return; my D3 $obj3 = $obj2; my $k; @{$obj3}{$k,'notthere'} = ());
+like 
+    $@, qr/^No such $Field "notthere" in variable \$obj3 of type D3/,
+    "Compile failure of undeclared fields (hslice (block form))";
+
 @$obj1{"_b1", "b1"} = (17, 29);
 is( $obj1->{_b1}, 17 );
 is( $obj1->{b1},  29 );
