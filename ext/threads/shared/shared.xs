@@ -911,13 +911,14 @@ EXISTS(shared_sv *shared, SV *index)
 CODE:
 	dTHXc;
 	bool exists;
-	SHARED_EDIT;
 	if (SvTYPE(SHAREDSvPTR(shared)) == SVt_PVAV) {
+	    SHARED_EDIT;
 	    exists = av_exists((AV*) SHAREDSvPTR(shared), SvIV(index));
 	}
 	else {
 	    STRLEN len;
 	    char *key = SvPV(index,len);
+	    SHARED_EDIT;
 	    exists = hv_exists((HV*) SHAREDSvPTR(shared), key, len);
 	}
 	SHARED_RELEASE;
