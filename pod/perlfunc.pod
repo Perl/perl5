@@ -2553,9 +2553,8 @@ follows:
 
     q	A signed quad (64-bit) value.
     Q	An unsigned quad value.
-	  (Available only if your system supports 64-bit integer values
-	   _and_ if Perl has been compiled to support those.
-           Causes a fatal error otherwise.)
+	  (Works only on native 64-bit platforms.
+           Causes a fatal runtime error otherwise.)
 
     f	A single-precision float in the native format.
     d	A double-precision float in the native format.
