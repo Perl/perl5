@@ -408,10 +408,10 @@ walkoptree(pTHX_ SV *opsv, char *method)
 	    walkoptree(aTHX_ opsv, method);
 	}
     }
-    if (o && (cc_opclass(aTHX_ o) == OPc_PMOP)
+    if (o && (cc_opclass(aTHX_ o) == OPc_PMOP) && o->op_type != OP_PUSHRE
 	    && (kid = cPMOPo->op_pmreplroot))
     {
-	sv_setiv(newSVrv(opsv, opclassnames[OPc_PMOP]), PTR2IV(kid));
+	sv_setiv(newSVrv(opsv, cc_opclassname(aTHX_ kid)), PTR2IV(kid));
 	walkoptree(aTHX_ opsv, method);
     }
 }
