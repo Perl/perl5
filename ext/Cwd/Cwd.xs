@@ -85,10 +85,14 @@ _cwdxs_fastcwd(void)
     pathlen += (namelen + 1);
     ++i;
 
+#ifdef VOID_CLOSEDIR
+    PerlDir_close(dir);
+#else
     if (PerlDir_close(dir) < 0) {
       Safefree(names);
       return FALSE;
     }
+#endif
   }
 
   Newz(0, path, pathlen + 1, char);
