@@ -156,6 +156,19 @@ PP(pp_concat)
     if (TARG != left)
 	sv_setsv(TARG, left);
 
+#if defined(PERL_Y2KWARN)
+    if ((SvIOK(right) || SvNOK(right)) && ckWARN(WARN_Y2K) && SvOK(TARG)) {
+       STRLEN n;
+       char *s = SvPV(TARG,n);
+       if (n >= 2 && s[n-2] == '1' && s[n-1] == '9'
+           && (n == 2 || !isDIGIT(s[n-3])))
+       {
+           Perl_warner(aTHX_ WARN_Y2K, "Possible Y2K bug: %s",
+                       "about to append an integer to '19'");
+       }
+    }
+#endif
+
     if (TARG == right) {
 	if (left == right) {
 	    /*  $right = $right . $right; */
@@ -174,19 +187,6 @@ PP(pp_concat)
 	/* $left  = $left . $right; */
 	sv_catsv(TARG, right);
     }
-
-#if defined(PERL_Y2KWARN)
-    if ((SvIOK(right) || SvNOK(right)) && ckWARN(WARN_Y2K)) {
-	STRLEN n;
-	char *s = SvPV(TARG,n);
-	if (n >= 2 && s[n-2] == '1' && s[n-1] == '9'
-	    && (n == 2 || !isDIGIT(s[n-3])))
-	{
-	    Perl_warner(aTHX_ WARN_Y2K, "Possible Y2K bug: %s",
-			"about to append an integer to '19'");
-	}
-    }
-#endif
 
     SETTARG;
     RETURN;
