@@ -671,8 +671,6 @@ $define)
 #define yynerrs    PL_yynerrs\
 #define yyerrflag  PL_yyerrflag\
 #define yychar     PL_yychar\
-#define yyssp      PL_yyssp\
-#define yyvsp      PL_yyvsp\
 #define yyval      PL_yyval\
 #define yylval     PL_yylval'				\
             -e '/YYSTYPE *yyval;/D'			\

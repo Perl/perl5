@@ -1532,8 +1532,6 @@ filter_gets(register SV *sv, register PerlIO *fp, STRLEN append)
 	{ "OPERATOR", "TERM", "REF", "STATE", "BLOCK", "TERMBLOCK" };
 #endif
 
-EXT int yychar;		/* last token */
-
 /*
   yylex
 

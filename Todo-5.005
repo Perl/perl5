@@ -19,7 +19,7 @@ Compiler
 	from where newASSIGNOP steals the field)
 
 Namespace cleanup
-    symbol-space: "pl_" prefix for all global vars
+    symbol-space: "PL_" prefix for all global vars
                   "Perl_" prefix for all functions
     CPP-space:	  restrict what we export from headers
                   stop malloc()/free() pollution unless asked
@@ -43,17 +43,15 @@ Win32 stuff
     rename new headers to be consistent with the rest
     sort out the spawnvp() mess
     work out DLL versioning
-    put perlobject in $ARCHNAME so it can coexist with rest
     get PERL_OBJECT building on non-win32?
     style-check
 
 Miscellaneous
     rename and alter ISA.pm
     magic_setisa should be made to update %FIELDS [???]
-    be generous in accepting foreign line terminations
     make filenames 8.3 friendly, where feasible
     upgrade to newer versions of all independently maintained modules
-    add new modules (Data-Dumper, Storable?)
+    add new modules (Archive::Tar, Compress::Zlib, CPAN::FTP?)
     test it with large parts of CPAN
     fix pod2html to generate relative URLs
 
@@ -65,4 +63,3 @@ Documentation
     rework INSTALL to reflect changes in installation structure
     spot-check all new modules for completeness
     better docs for pack()/unpack()
-    add perlport.pod

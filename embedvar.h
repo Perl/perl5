@@ -772,9 +772,7 @@
 #define PL_yyerrflag		(PL_Vars.Gyyerrflag)
 #define PL_yylval		(PL_Vars.Gyylval)
 #define PL_yynerrs		(PL_Vars.Gyynerrs)
-#define PL_yyssp		(PL_Vars.Gyyssp)
 #define PL_yyval		(PL_Vars.Gyyval)
-#define PL_yyvsp		(PL_Vars.Gyyvsp)
 
 #else /* !PERL_GLOBAL_STRUCT */
 
@@ -907,9 +905,7 @@
 #define PL_Gyyerrflag		PL_yyerrflag
 #define PL_Gyylval		PL_yylval
 #define PL_Gyynerrs		PL_yynerrs
-#define PL_Gyyssp		PL_yyssp
 #define PL_Gyyval		PL_yyval
-#define PL_Gyyvsp		PL_yyvsp
 
 #ifdef EMBED
 
