@@ -448,6 +448,7 @@ ext/IPC/SysV/SysV.pm		IPC::SysV extension Perl module
 ext/IPC/SysV/SysV.xs		IPC::SysV extension Perl module
 ext/IPC/SysV/hints/cygwin.pl	Hint for IPC::SysV for named architecture
 ext/IPC/SysV/hints/next_3.pl	Hint for IPC::SysV for named architecture
+ext/IPC/SysV/ipcsysv.t		See if IPC::SysV works
 ext/IPC/SysV/t/msg.t		IPC::SysV extension Perl module
 ext/IPC/SysV/t/sem.t		IPC::SysV extension Perl module
 ext/List/Util/ChangeLog		Util extension
@@ -605,7 +606,7 @@ ext/Thread/Thread/Queue.pm	Thread synchronised queue objects
 ext/Thread/Thread/Semaphore.pm	Thread semaphore objects
 ext/Thread/Thread/Signal.pm	Start a thread to run signal handlers
 ext/Thread/Thread/Specific.pm	Thread specific data access
-ext/Thread/create.t		Test thread creation
+ext/Thread/create.tx		Test thread creation
 ext/Thread/die.tx		Test thread die()
 ext/Thread/die2.tx		Test thread die() differently
 ext/Thread/io.tx			Test threads doing simple I/O
