@@ -43,14 +43,22 @@ struct xpvhv {
 };
 
 /* hash a key */
+/* FYI: This is the "One-at-a-Time" algorithm by Bob Jenkins */
+/* from requirements by Colin Plumb. */
+/* (http://burtleburtle.net/bob/hash/doobs.html) */
 #define PERL_HASH(hash,str,len) \
      STMT_START	{ \
 	register const char *s_PeRlHaSh = str; \
 	register I32 i_PeRlHaSh = len; \
 	register U32 hash_PeRlHaSh = 0; \
-	while (i_PeRlHaSh--) \
-	    hash_PeRlHaSh = hash_PeRlHaSh * 33 + *s_PeRlHaSh++; \
-	(hash) = hash_PeRlHaSh + (hash_PeRlHaSh>>5); \
+	while (i_PeRlHaSh--) { \
+	    hash_PeRlHaSh += *s_PeRlHaSh++; \
+	    hash_PeRlHaSh += (hash_PeRlHaSh << 10); \
+	    hash_PeRlHaSh ^= (hash_PeRlHaSh >> 6); \
+	} \
+	hash_PeRlHaSh += (hash_PeRlHaSh << 3); \
+	hash_PeRlHaSh ^= (hash_PeRlHaSh >> 11); \
+	(hash) = (hash_PeRlHaSh += (hash_PeRlHaSh << 15)); \
     } STMT_END
 
 /*

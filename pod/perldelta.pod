@@ -101,6 +101,13 @@ The tr///C and tr///U features have been removed and will not return;
 the interface was a mistake.  Sorry about that.  For similar
 functionality, see pack('U0', ...) and pack('C0', ...).
 
+=item *
+
+Although "you shouldn't do that", it was possible to write code that
+depends on Perl's hashed key order (Data::Dumper does this).  The new
+algorithm "One-at-a-Time" produces a different hashed key order.
+More details are in L<perldelta/Performance Enhancements>.
+
 =back
 
 =head1 Core Enhancements
@@ -323,6 +330,17 @@ is now better (in computer science terms it now runs in time O(N log N),
 as opposed to quicksort's Theta(N**2) worst-case run time behaviour),
 and that sort() is now stable (meaning that elements with identical
 keys will stay ordered as they were before the sort).
+
+=item *
+
+Hashes now use Bob Jenkins "One-at-a-Time" hashing key algorithm
+(http://burtleburtle.net/bob/hash/doobs.html).
+This algorithm is reasonably fast while producing a much better spread
+of values.  Hash values output from the algorithm on a hash of all
+3-char printable ASCII keys comes much closer to passing the DIEHARD
+random number generation tests.  According to perlbench, this change
+has not affected the overall speed of Perl.
+
 
 =back
 
