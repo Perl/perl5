@@ -455,6 +455,12 @@ is not the same as
     $var = 'myvar';
     $sym = "mypack::$var";
 
+=item Bad realloc() ignored
+
+(S) An internal routine called realloc() on something that had never been
+malloc()ed in the first place. Mandatory, but can be disabled by
+setting environment variable C<PERL_BADFREE> to 1.
+
 =item Bad symbol for array
 
 (P) An internal request asked to add an array entry to something that
@@ -2470,6 +2476,11 @@ increment by prepending "0" to your numbers.
 
 (W) The filehandle you're reading from got itself closed sometime before now.
 Check your logic flow.
+
+=item realloc() of freed memory ignored
+
+(S) An internal routine called realloc() on something that had already
+been freed.
 
 =item Reallocation too large: %lx
 
