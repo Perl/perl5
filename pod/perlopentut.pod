@@ -84,7 +84,7 @@ C<popen> function.  But in the shell, you just use a different redirection
 character.  That's also the case for Perl.  The C<open> call 
 remains the same--just its argument differs.  
 
-If the leading character is a pipe symbol, C<open) starts up a new
+If the leading character is a pipe symbol, C<open> starts up a new
 command and open a write-only filehandle leading into that command.
 This lets you write into that handle and have what you write show up on
 that command's standard input.  For example:

@@ -504,7 +504,7 @@ iperlsys.h		Perl's interface to the system
 jpl/JNI/Changes		Java Native Interface changes
 jpl/JNI/Closer.java	Java Native Interface example
 jpl/JNI/JNI.pm		Java Native Interface module
-jpl/JNI/JNI.pm		Java Native Interface module
+jpl/JNI/JNI.xs		Java Native Interface module
 jpl/JNI/JNIConfig	Java Native Interface config
 jpl/JNI/JNIConfig.Win32	Java Native Interface config
 jpl/JNI/JNIConfig.kaffe	Java Native Interface config
@@ -623,6 +623,7 @@ lib/Pod/Checker.pm	Pod-Parser - check POD documents for syntax errors
 lib/Pod/Functions.pm	used by pod/splitpod
 lib/Pod/Html.pm		Convert POD data to HTML
 lib/Pod/InputObjects.pm	Pod-Parser - define objects for input streams
+lib/Pod/Man.pm		Convert POD data to *roff
 lib/Pod/Parser.pm	Pod-Parser - define base class for parsing POD
 lib/Pod/Select.pm	Pod-Parser - select portions of POD docs
 lib/Pod/Text.pm		Pod-Parser - convert POD data to formatted ASCII text

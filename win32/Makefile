@@ -141,6 +141,11 @@ CCLIBDIR	= $(CCHOME)\lib
 #BUILDOPT	= $(BUILDOPT) -DPERL_POLLUTE
 
 #
+# enable this to test the File::Glob implementation of CORE::glob
+#
+#BUILDOPT	= $(BUILDOPT) -DPERL_INTERNAL_GLOB
+
+#
 # specify semicolon-separated list of extra directories that modules will
 # look for libraries (spaces in path names need not be quoted)
 #
