@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Oct 27 09:57:04 EET 1998 [metaconfig 3.0 PL70]
+# Generated on Tue Oct 27 14:23:10 EET 1998 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by jhi@iki.fi)
 
 cat >/tmp/c1$$ <<EOF
@@ -412,7 +412,6 @@ d_portable=''
 d_pthread_yield=''
 d_sched_yield=''
 sched_yield=''
-d_pthreads_created_joinable=''
 d_readdir=''
 d_rewinddir=''
 d_seekdir=''
@@ -717,6 +716,7 @@ sh=''
 sig_name=''
 sig_name_init=''
 sig_num=''
+sig_num_init=''
 installsitearch=''
 sitearch=''
 sitearchexp=''
@@ -8248,66 +8248,6 @@ esac
 
 $rm -f try try.*
 
-: test whether pthreads are created in joinable -- aka undetached -- state
-if test "X$usethreads" = "X$define"; then
-	echo $n "Checking whether pthreads are created joinable. $c" >&4 
-	$cat >try.c <<'EOCP'
-#include <pthread.h>
-#ifdef PTHREAD_CREATE_UNDETACHED
-#  define ATTR_JOINABLE PTHREAD_CREATE_UNDETACHED
-#else
-#  ifdef __UNDETACHED
-#    define ATTR_JOINABLE __UNDETACHED
-#  endif
-#endif
-#include <stdio.h>
-int main() {
-    pthread_attr_t attr;
-    int detachstate;
-    printf("%s\n",
-	pthread_attr_init(&attr) == 0 &&
-#if PTHREAD_ATTR_GETDETACHSTATE_INT
-        pthread_attr_getdetachstate(&attr) == ATTR_JOINABLE &&
-#else
-        pthread_attr_getdetachstate(&attr, &detachstate) == 0 &&
-        detachstate == PTHREAD_ATTR_JOINABLE
-#endif
-        ? "detached" : "joinable");
-    exit(0);
-}
-EOCP
-	set try
-	if eval $compile; then
-		yyy=`./try`
-		case "$yyy" in
-			detached) echo "Nope, they aren't." >&4 ;;
-			*) echo "Yup, they are." >&4 ;;
-		esac
-	else
-		set try -DPTHREAD_ATTR_GETDETACHSTATE_INT
-		if eval $compile; then
-			yyy=`./try`
-			case "$yyy" in
-				detached) echo "Nope, they aren't." >&4 ;;
-				*) echo "Yup, they are." >&4 ;;
-			esac
-		else		
-			echo " "
-			echo "(I can't execute the test program--assuming they are.)" >&4
-			yyy=joinable
-		fi
-	fi
-	$rm -f try try.*
-	case "$yyy" in
-		detached) val="$undef" ;;
-		*) val="$define" ;;
-	esac
-	set d_pthreads_created_joinable
-	eval $setvar
-else
-    d_pthreads_created_joinable="$undef"
-fi
-
 : see if this is a pwd.h system
 set pwd.h i_pwd
 eval $inhdr
@@ -11221,6 +11161,10 @@ $eunicefix signal_cmd
 
 : generate list of signal names
 echo " "
+case "$sig_num" in
+*,*)	sig_num="" # Ignore old-style sig_num with commas from config.sh.
+	;;
+esac
 case "$sig_name_init" in
 '')
 	echo "Generating a list of signal names and numbers..." >&4
@@ -11230,7 +11174,9 @@ case "$sig_name_init" in
 	sig_name_init=`$awk 'BEGIN { printf "\"ZERO\", " }
 						{ printf "\"%s\", ", $1 }
 						END { printf "0\n" }' signal.lst`
-	sig_num=`$awk 'BEGIN { printf "0, " }
+	sig_num=`$awk '{printf "%d ", $2}' signal.lst`
+	sig_num="0 $sig_num"
+	sig_num_init=`$awk 'BEGIN { printf "0, " }
 					{ printf "%d, ", $2}
 					END { printf "0\n"}' signal.lst`
 	;;
@@ -12352,7 +12298,6 @@ d_pipe='$d_pipe'
 d_poll='$d_poll'
 d_portable='$d_portable'
 d_pthread_yield='$d_pthread_yield'
-d_pthreads_created_joinable='$d_pthreads_created_joinable'
 d_pwage='$d_pwage'
 d_pwchange='$d_pwchange'
 d_pwclass='$d_pwclass'
@@ -12684,6 +12629,7 @@ shsharp='$shsharp'
 sig_name='$sig_name'
 sig_name_init='$sig_name_init'
 sig_num='$sig_num'
+sig_num_init='$sig_num_init'
 signal_t='$signal_t'
 sitearch='$sitearch'
 sitearchexp='$sitearchexp'
