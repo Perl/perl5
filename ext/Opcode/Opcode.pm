@@ -6,7 +6,7 @@ use strict;
 
 our($VERSION, $XS_VERSION, @ISA, @EXPORT_OK);
 
-$VERSION = "1.05";
+$VERSION = "1.06";
 $XS_VERSION = "1.03";
 
 use Carp;
