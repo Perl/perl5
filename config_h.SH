@@ -1038,14 +1038,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define BIN "$bin"	/**/
 #define BIN_EXP "$binexp"	/**/
 
-/* PERL_BINCOMPAT_5005:
- *	This symbol, if defined, indicates that this version of Perl should be
- *	binary-compatible with Perl 5.005.  This is impossible for builds
- *	that use features like threads and multiplicity it is always $undef
- *	for those versions.
- */
-#$d_bincompat5005 PERL_BINCOMPAT_5005			/**/
-
 /* BYTEORDER:
  *	This symbol holds the hexadecimal constant defined in byteorder,
  *	in a UV, i.e. 0x1234 or 0x4321 or 0x12345678, etc...

@@ -62,7 +62,7 @@ api_revision (patchlevel.U):
 	possible value.  The version list appropriate for the current
 	system is determined in inc_version_list.U.
 		XXX To do:  Since compatibility can depend on compile time
-	options (such as longlong, etc.) it should
+	options (such as bincompat, longlong, etc.) it should
 	(perhaps) be set by Configure, but currently it isn't.
 	Currently, we read a hard-wired value from patchlevel.h.
 	Perhaps what we ought to do is take the hard-wired value from
