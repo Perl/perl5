@@ -36,6 +36,7 @@ true)
 	esac
 
 	pldlflags="$cccdlflags"
+	static_target='static_pic'
 	case "${osname}${osvers}" in
 	next4*)
 		ld=libtool
@@ -97,6 +98,7 @@ true)
         esac
 	;;
 *)	pldlflags=''
+	static_target='static'
 	;;
 esac
 
@@ -187,6 +189,13 @@ PLDLFLAGS = $pldlflags
 LIBPERL = $libperl
 LLIBPERL= $linklibperl
 SHRPENV = $shrpenv
+
+# Static targets are ordinarily built without CCCDLFLAGS.  However,
+# if building a shared libperl.so that might later be linked into
+# another application, then it might be appropriate to also build static
+# extensions (usually just DynaLoader) with relocatable code (e.g. -fPIC
+# for GNU cc).  This is handled by ext/util/make_ext.
+STATIC = $static_target
 
 # The following is used to include the current directory in
 # the dynamic loader path you are building a shared libperl.
@@ -843,13 +852,13 @@ regen_all: $(PERLYVMS) regen_headers regen_pods
 # DynaLoader may be needed for extensions that use Makefile.PL.
 
 $(DYNALOADER):	miniperl$(EXE_EXT) preplibrary FORCE
-	@$(LDLIBPTH) sh ext/util/make_ext static $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+	@$(LDLIBPTH) sh ext/util/make_ext $(STATIC) $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 
 d_dummy $(dynamic_ext):	miniperl$(EXE_EXT) preplibrary $(DYNALOADER) FORCE
 	@$(LDLIBPTH) sh ext/util/make_ext dynamic $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 
 s_dummy $(static_ext):	miniperl$(EXE_EXT) preplibrary $(DYNALOADER) FORCE
-	@$(LDLIBPTH) sh ext/util/make_ext static $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+	@$(LDLIBPTH) sh ext/util/make_ext $(STATIC) $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 
 n_dummy $(nonxs_ext):	miniperl$(EXE_EXT) preplibrary $(DYNALOADER) FORCE
 	@$(LDLIBPTH) sh ext/util/make_ext nonxs $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
