@@ -2860,7 +2860,8 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 	if (SvTEMP(sstr) &&		/* slated for free anyway? */
 	    SvREFCNT(sstr) == 1 && 	/* and no other references to it? */
 	    !(sflags & SVf_OOK) && 	/* and not involved in OOK hack? */
-	    SvLEN(sstr))			/* and really is a string */
+	    SvLEN(sstr) 	&&	/* and really is a string */
+	    !(PL_op && PL_op->op_type == OP_AASSIGN)) /* and won't be needed again, potentially */
 	{
 	    if (SvPVX(dstr)) {		/* we know that dtype >= SVt_PV */
 		if (SvOOK(dstr)) {
