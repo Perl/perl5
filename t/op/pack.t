@@ -12,7 +12,7 @@ my $no_endianness = $] > 5.009 ? '' :
 my $no_signedness = $] > 5.009 ? '' :
   "Signed/unsigned pack modifiers not available on this perl";
 
-plan tests => 13823;
+plan tests => 13855;
 
 use strict;
 use warnings;
@@ -228,8 +228,9 @@ sub list_eq ($$) {
   # expect it for this perl.
   my $can_endian = $no_endianness ? '' : 'sSiIlLqQjJfFdDpP';
   my $can_shriek = 'sSiIlL';
+  $can_shriek .= 'nNvV' unless $no_signedness;
   # h and H can't do either, so act as sanity checks in blead
-  foreach my $base (split '', 'sSiIlLqQjJfFdDpPhH') {
+  foreach my $base (split '', 'hHsSiIlLqQjJfFdDpPnNvV') {
     foreach my $mod ('', '<', '>', '!', '<!', '>!', '!<', '!>') {
     SKIP: {
 	# Avoid void context warnings.
@@ -271,7 +272,6 @@ sub list_eq ($$) {
     }
   }
 
-  $can_shriek .= 'nNvV' unless $no_signedness;
  SKIP: {
     skip $no_endianness, 2*3 + 2*8 if $no_endianness;
     for my $mod (qw( ! < > )) {
