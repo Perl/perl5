@@ -230,25 +230,31 @@ not called with a string that the shell could expand.  This is by far the
 best way to call something that might be subjected to shell escapes: just
 never call the shell at all.  
 
-    use English;
-    die "Can't fork: $!" unless defined $pid = open(KID, "-|");
-    if ($pid) {	          # parent
-	while (<KID>) {
-	    # do something
-	}
-	close KID;
-    } else {
-	my @temp = ($EUID, $EGID);
-	$EUID = $UID;
-	$EGID = $GID;    # 	initgroups() also called!
-	# Make sure privs are really gone
-	($EUID, $EGID) = @temp;
-	die "Can't drop privileges" 
-		unless $UID == $EUID  && $GID eq $EGID;	
-	$ENV{PATH} = "/bin:/usr/bin";
-	exec 'myprog', 'arg1', 'arg2' 
-	    or die "can't exec myprog: $!";
-    }
+        use English;
+        die "Can't fork: $!" unless defined($pid = open(KID, "-|"));
+        if ($pid) {           # parent
+            while (<KID>) {
+                # do something
+            }
+            close KID;
+        } else {
+            my @temp     = ($EUID, $EGID);
+            my $orig_uid = $UID;
+            my $orig_gid = $GID;
+            $EUID = $UID;
+            $EGID = $GID;
+            # Drop privileges
+            $UID  = $orig_uid;
+            $GID  = $orig_gid;
+            # Make sure privs are really gone
+            ($EUID, $EGID) = @temp;
+            die "Can't drop privileges"
+                unless $UID == $EUID  && $GID eq $EGID;
+            $ENV{PATH} = "/bin:/usr/bin"; # Minimal PATH.
+	    # Consider sanitizing the environment even more.
+            exec 'myprog', 'arg1', 'arg2'
+                or die "can't exec myprog: $!";
+        }
 
 A similar strategy would work for wildcard expansion via C<glob>, although
 you can use C<readdir> instead.
