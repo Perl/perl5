@@ -417,7 +417,7 @@ do_test(20,
 #
 # TAINTEDDIR is not set on: OS2, AMIGAOS, WIN32, MSDOS
 # environment variables may be invisibly case-forced, hence the (?i:PATH)
-# C<scalar(@ARGV)> is turned into an IV on VMS hence the (?:IV)
+# C<scalar(@ARGV)> is turned into an IV on VMS hence the (?:IV)?
 #
 do_test(21,
         $ENV{PATH}=@ARGV,  # scalar(@ARGV) is a handy known tainted value
@@ -436,7 +436,7 @@ do_test(21,
       TAINTEDDIR
 )?    MG_LEN = -?\d+
     MG_PTR = $ADDR (?:"(?i:PATH)"|=> HEf_SVKEY
-    SV = PV(?:IV)\\($ADDR\\) at $ADDR
+    SV = PV(?:IV)?\\($ADDR\\) at $ADDR
       REFCNT = \d+
       FLAGS = \\(TEMP,POK,pPOK\\)
 (?:      IV = 0
