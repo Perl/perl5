@@ -951,7 +951,7 @@ A double-quoted, interpolated string.
 
 =item qr/STRING/imosx
 
-This operators quotes--and compiles--its I<STRING> as a regular
+This operators quotes (and possiby compiles) its I<STRING> as a regular
 expression.  I<STRING> is interpolated the same way as I<PATTERN>
 in C<m/PATTERN/>.  If "'" is used as the delimiter, no interpolation
 is done.  Returns a Perl value which may be used instead of the
