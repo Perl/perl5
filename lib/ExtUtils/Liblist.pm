@@ -3,14 +3,14 @@ package ExtUtils::Liblist;
 # Broken out of MakeMaker from version 4.11
 
 use Config;
-use Cwd;
+use Cwd 'cwd';
 use File::Basename;
 
 my $Config_libext = $Config{lib_ext} || ".a";
 
 sub ext {
     my($self,$potential_libs, $Verbose) = @_;
-    if ($Config{osname} =~ m|^os/?2$|i and $Config{libs}) { 
+    if ($^O eq 'os2' and $Config{libs}) { 
 	# Dynamic libraries are not transitive, so we may need including
 	# the libraries linked against perl.dll again.
 
@@ -32,7 +32,7 @@ sub ext {
     my(@libpath) = split " ", $Config{'libpth'};
     my(@ldloadlibs, @bsloadlibs, @extralibs, @ld_run_path, %ld_run_path_seen);
     my($fullname, $thislib, $thispth, @fullname);
-    my($pwd) = fastcwd(); # from Cwd.pm
+    my($pwd) = cwd(); # from Cwd.pm
     my($found) = 0;
 
     foreach $thislib (split ' ', $potential_libs){
@@ -104,7 +104,7 @@ sub ext {
 	    } elsif (-f ($fullname="$thispth/lib$thislib$Config_libext")){
 	    } elsif (-f ($fullname="$thispth/$thislib$Config_libext")){
 	    } elsif (-f ($fullname="$thispth/Slib$thislib$Config_libext")){
-	    } elsif ($Config{'osname'} eq 'dgux'
+	    } elsif ($^O eq 'dgux'
 		 && -l ($fullname="$thispth/lib$thislib$Config_libext")
 		 && readlink($fullname) =~ /^elink:/) {
 		 # Some of DG's libraries look like misconnected symbolic
@@ -136,7 +136,7 @@ sub ext {
 	    # We have to special-case the NeXT, because all the math 
 	    # is also in libsys_s
 	    unless ($in_perl || 
-		    ($Config{'osname'} eq 'next' && $thislib eq 'm') ){
+		    ($^O eq 'next' && $thislib eq 'm') ){
 		push(@extralibs, "-l$thislib");
 	    }
 
@@ -155,7 +155,7 @@ sub ext {
                     # For SunOS4, do not add in this shared library if
                     # it is already linked in the main perl executable
 		    push(@ldloadlibs, "-l$thislib")
-			unless ($in_perl and $Config{'osname'} eq 'sunos');
+			unless ($in_perl and $^O eq 'sunos');
 		} else {
 		    push(@ldloadlibs, "-l$thislib");
 		}
