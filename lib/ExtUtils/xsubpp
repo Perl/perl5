@@ -842,6 +842,7 @@ while (fetch_para()) {
 
     $PPCODE = grep(/^\s*PPCODE\s*:/, @line);
     $CODE = grep(/^\s*CODE\s*:/, @line);
+    $EXPLICIT_RETURN = $CODE && ("@line" =~ /\bST\s*\([^;]*=/ );
     $ALIAS  = grep(/^\s*ALIAS\s*:/,  @line);
 
     # print function header
@@ -1025,7 +1026,7 @@ EOF
 #	croak(errbuf);
 EOF
 
-    if ($ret_type ne "void" or $CODE) {
+    if ($ret_type ne "void" or $EXPLICIT_RETURN) {
         print Q<<EOF unless $PPCODE;
 #    XSRETURN(1);
 EOF
