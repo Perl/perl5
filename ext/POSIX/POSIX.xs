@@ -3246,7 +3246,7 @@ sigaction(sig, action, oldaction = 0)
 		}
 		else {
 		    New(0, sigset, 1, sigset_t);
-		    sv_setptrobj(*svp, sigset, "POSIX::SigSet");
+		    sv_setptrobj(*svp, PTR_CAST sigset, "POSIX::SigSet");
 		}
 		*sigset = oact.sa_mask;
 
@@ -3274,7 +3274,7 @@ INIT:
 	}
 	else if (sv_derived_from(ST(2), "POSIX::SigSet")) {
 	    IV tmp = SvIV((SV*)SvRV(ST(2)));
-	    oldsigset = (POSIX__SigSet) tmp;
+	    oldsigset = (POSIX__SigSet)PTR_CAST tmp;
 	}
 	else {
 	    New(0, oldsigset, 1, sigset_t);
@@ -3455,10 +3455,12 @@ strtol(str, base = 0)
 	char *unparsed;
     PPCODE:
 	num = strtol(str, &unparsed, base);
-	if (num >= IV_MIN && num <= IV_MAX)
-	    PUSHs(sv_2mortal(newSViv((IV)num)));
-	else
+#if IVSIZE <= LONGSIZE
+	if (num < IV_MIN || num > IV_MAX)
 	    PUSHs(sv_2mortal(newSVnv((double)num)));
+	else
+#endif
+	    PUSHs(sv_2mortal(newSViv((IV)num)));
 	if (GIMME == G_ARRAY) {
 	    EXTEND(SP, 1);
 	    if (unparsed)

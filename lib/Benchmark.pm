@@ -253,7 +253,7 @@ sub _doeval { eval shift }
 use Carp;
 use Exporter;
 @ISA=(Exporter);
-@EXPORT=qw(timeit timethis timethese timediff timestr);
+@EXPORT=qw(timeit timethis timethese timediff timesum timestr);
 @EXPORT_OK=qw(clearcache clearallcache disablecache enablecache);
 
 &init;

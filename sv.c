@@ -612,8 +612,8 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	pv	= (char*)SvRV(sv);
 	cur	= 0;
 	len	= 0;
-	iv	= (IV)pv;
-	nv	= (NV)(unsigned long)pv;
+	iv	= (IV)PTR_CAST pv;
+	nv	= (NV)(PTRV)pv;
 	del_XRV(SvANY(sv));
 	magic	= 0;
 	stash	= 0;
@@ -1077,7 +1077,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 	  SV* tmpstr;
 	  if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv, numer)))
 	      return SvIV(tmpstr);
-	  return (IV)SvRV(sv);
+	  return (IV)PTR_CAST SvRV(sv);
 	}
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    dTHR;
@@ -1113,7 +1113,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 #ifdef IV_IS_QUAD
 	    DEBUG_c(PerlIO_printf(Perl_debug_log, 
 				  "0x%" PERL_PRIx64 " 2iv(%" PERL_PRIu64 " => %" PERL_PRId64 ") (as unsigned)\n",
-				  (UV)sv,
+				  (UV)PTR_CAST sv,
 				  (UV)SvUVX(sv), (IV)SvUVX(sv)));
 #else
 	    DEBUG_c(PerlIO_printf(Perl_debug_log, 
@@ -1222,7 +1222,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	  SV* tmpstr;
 	  if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv, numer)))
 	      return SvUV(tmpstr);
-	  return (UV)SvRV(sv);
+	  return (UV)PTR_CAST SvRV(sv);
 	}
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    dTHR;
@@ -1393,7 +1393,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	  SV* tmpstr;
 	  if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,numer)))
 	      return SvNV(tmpstr);
-	  return (NV)(unsigned long)SvRV(sv);
+	  return (NV)(PTRV)SvRV(sv);
 	}
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    dTHR;
@@ -1777,7 +1777,7 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 		else
 		    sv_setpv(tsv, s);
 #ifdef IV_IS_QUAD
-		Perl_sv_catpvf(aTHX_ tsv, "(0x%" PERL_PRIx64")", (UV)sv);
+		Perl_sv_catpvf(aTHX_ tsv, "(0x%" PERL_PRIx64")", (UV)PTR_CAST sv);
 #else
 		Perl_sv_catpvf(aTHX_ tsv, "(0x%lx)", (unsigned long)sv);
 #endif
@@ -3691,7 +3691,7 @@ Perl_sv_inc(pTHX_ register SV *sv)
 	    IV i;
 	    if (SvAMAGIC(sv) && AMG_CALLun(sv,inc))
 		return;
-	    i = (IV)SvRV(sv);
+	    i = (IV)PTR_CAST SvRV(sv);
 	    sv_unref(sv);
 	    sv_setiv(sv, i);
 	}
@@ -3791,7 +3791,7 @@ Perl_sv_dec(pTHX_ register SV *sv)
 	    IV i;
 	    if (SvAMAGIC(sv) && AMG_CALLun(sv,dec))
 		return;
-	    i = (IV)SvRV(sv);
+	    i = (IV)PTR_CAST SvRV(sv);
 	    sv_unref(sv);
 	    sv_setiv(sv, i);
 	}
@@ -4395,7 +4395,7 @@ Perl_sv_setref_pv(pTHX_ SV *rv, const char *classname, void *pv)
 	SvSETMAGIC(rv);
     }
     else
-	sv_setiv(newSVrv(rv,classname), (IV)pv);
+	sv_setiv(newSVrv(rv,classname), (IV)PTR_CAST pv);
     return rv;
 }
 
@@ -4898,15 +4898,15 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	case 'p':
 	    if (args)
-		uv = (UV)va_arg(*args, void*);
+		uv = (UV)PTR_CAST va_arg(*args, void*);
 	    else
-		uv = (svix < svmax) ? (UV)svargs[svix++] : 0;
+		uv = (svix < svmax) ? (UV)PTR_CAST svargs[svix++] : 0;
 	    base = 16;
 	    goto integer;
 
 	case 'D':
 #ifdef IV_IS_QUAD
-	    /* nothing */
+	    intsize = 'q';
 #else
 	    intsize = 'l';
 #endif
@@ -4916,11 +4916,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    if (args) {
 		switch (intsize) {
 		case 'h':	iv = (short)va_arg(*args, int); break;
-#ifdef IV_IS_QUAD
-		default:	iv = va_arg(*args, IV); break;
-#else
 		default:	iv = va_arg(*args, int); break;
-#endif
 		case 'l':	iv = va_arg(*args, long); break;
 		case 'V':	iv = va_arg(*args, IV); break;
 #ifdef HAS_QUAD
@@ -4932,11 +4928,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		iv = (svix < svmax) ? SvIVx(svargs[svix++]) : 0;
 		switch (intsize) {
 		case 'h':	iv = (short)iv; break;
-#ifdef IV_IS_QUAD
-		default:	break;
-#else
 		default:	iv = (int)iv; break;
-#endif
 		case 'l':	iv = (long)iv; break;
 		case 'V':	break;
 #ifdef HAS_QUAD
@@ -4958,7 +4950,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	case 'U':
 #ifdef IV_IS_QUAD
-	    /* nothing */
+	    intsize = 'q';
 #else
 	    intsize = 'l';
 #endif
@@ -4973,7 +4965,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	case 'O':
 #ifdef IV_IS_QUAD
-	    /* nothing */
+	    intsize = 'q';
 #else
 	    intsize = 'l';
 #endif
@@ -4990,11 +4982,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    if (args) {
 		switch (intsize) {
 		case 'h':  uv = (unsigned short)va_arg(*args, unsigned); break;
-#ifdef UV_IS_QUAD
-		default:   uv = va_arg(*args, UV); break;
-#else
 		default:   uv = va_arg(*args, unsigned); break;
-#endif
 		case 'l':  uv = va_arg(*args, unsigned long); break;
 		case 'V':  uv = va_arg(*args, UV); break;
 #ifdef HAS_QUAD
@@ -5006,11 +4994,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		uv = (svix < svmax) ? SvUVx(svargs[svix++]) : 0;
 		switch (intsize) {
 		case 'h':	uv = (unsigned short)uv; break;
-#ifdef UV_IS_QUAD
-		default:	break;
-#else
 		default:	uv = (unsigned)uv; break;
-#endif
 		case 'l':	uv = (unsigned long)uv; break;
 		case 'V':	break;
 #ifdef HAS_QUAD
@@ -5160,11 +5144,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    if (args) {
 		switch (intsize) {
 		case 'h':	*(va_arg(*args, short*)) = i; break;
-#ifdef IV_IS_QUAD
-		default:	*(va_arg(*args, IV*)) = i; break;
-#else
 		default:	*(va_arg(*args, int*)) = i; break;
-#endif
 		case 'l':	*(va_arg(*args, long*)) = i; break;
 		case 'V':	*(va_arg(*args, IV*)) = i; break;
 #ifdef HAS_QUAD

@@ -150,37 +150,31 @@ use "quads" (64-integers) as follows:
 
 =over 4
 
-=item literal numeric constants in the code
+=item constants in the code 
 
 =item arguments to oct() and hex()
 
 =item arguments to print(), printf() and sprintf()
 
-=item pack() and unpack() "q" and "Q" formats
+=item pack() and unpack() "q" format
 
-=item in basic arithmetics: +, -, *, /, %
+=item in basic arithmetics
 
-=item in bit arithmetics: &, |, ^, ~, <<, >>, vec()
+=item vec() (but see the below note about bit arithmetics)
     
 =back
 
 Note that unless you have the case (a) you will have to configure
 and compile Perl using the -Duse64bits Configure flag.
 
+Unfortunately bit arithmetics (&, |, ^, ~, <<, >>) are not 64-bit clean.
+
 Last but not least: note that due to Perl's habit of always using
-floating point numbers (inherently inexact) the quads are still not
-true integers (exact).  When the quads overflow their limits
-(0...18_446_744_073_709_551_615 unsigned, -9_223_372_036_854_775_808...
-9_223_372_036_854_775_807 signed), they are silently promoted to
-floating point numbers, after which they will start losing precision
-(their lower digits).  What this means, among other things, is that
-adding/subtracting small numbers doesn't change the large number,
-and that == may return equalness for numbers that are not equal.
-One particular cause of grief is using the ~ operator which when
-used on small numbers produces large numbers.  These large numbers
-stay (internally) integers for only as long as bit arithmetics are
-used, but for example + will turn the results into floating point
-numbers.
+floating point numbers the quads are still not true integers.
+When quads overflow their limits (0...18_446_744_073_709_551_615 unsigned,
+-9_223_372_036_854_775_808...9_223_372_036_854_775_807 signed), they
+are silently promoted to floating point numbers, after which they will
+start losing precision (their lower digits).
 
 =head2 Large file support
 
@@ -188,10 +182,9 @@ If you have filesystems that support "large files" (files larger than
 2 gigabytes), you may now also be able to create and access them from Perl.
 
 Note that in addition to requiring a proper file system to do this you
-may also need to adjust your per-process (or even your per-system, or
-per-user group) maximum filesize limits before running Perl scripts
-that try to handle large files, especially if you intend to write such
-files (reading may work even without adjustments).
+may also need to adjust your per-process (or even your per-system)
+maximum filesize limits before running Perl scripts that try to handle
+large files, especially if you intend to write such files.
 
 Adjusting your file system/system limits is outside the scope of Perl.
 For process limits, you may try to increase the limits using your
@@ -724,6 +717,13 @@ character to get your parentheses to balance.
 of a subroutine attribute, and it wasn't a semicolon or the start of a
 block.  Perhaps you terminated the parameter list of the previous attribute
 too soon.
+
+=item /%s/ should probably be written as "%s"
+
+(W) You have used a pattern where Perl expected to find a string,
+like in the first argument to C<join>.  Perl will treat the true
+or false result of matching the pattern against $_ as the string,
+which is probably not what you had in mind.
 
 =item /%s/ should probably be written as "%s"
 

@@ -1588,7 +1588,7 @@ PP(pp_iter)
 	}
 	LvTARG(lv) = SvREFCNT_inc(av);
 	LvTARGOFF(lv) = cx->blk_loop.iterix;
-	LvTARGLEN(lv) = (UV) -1;
+	LvTARGLEN(lv) = (STRLEN)UV_MAX;
 	sv = (SV*)lv;
     }
 
@@ -2112,7 +2112,7 @@ S_get_db_sub(pTHX_ SV **svp, CV *cv)
 	SvUPGRADE(dbsv, SVt_PVIV);
 	SvIOK_on(dbsv);
 	SAVEIV(SvIVX(dbsv));
-	SvIVX(dbsv) = (IV)cv;		/* Do it the quickest way  */
+	SvIVX(dbsv) = (IV)PTR_CAST cv;	/* Do it the quickest way  */
     }
 
     if (CvXSUB(cv))

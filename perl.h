@@ -1018,7 +1018,11 @@ Free_t   Perl_mfree (Malloc_t where);
 #  if defined(INT32_MAX) && LONGSIZE == 4
 #    define IV_MAX INT32_MAX
 #    define IV_MIN INT32_MIN
-#    define UV_MAX UINT32_MAX
+#    ifndef UINT32_MAX_BROKEN /* e.g. HP-UX with gcc messes this up */
+#        define UV_MAX UINT32_MAX
+#    else
+#        define UV_MAX 4294967295U
+#    endif
 #    ifndef UINT32_MIN
 #      define UINT32_MIN 0
 #    endif
@@ -1040,8 +1044,20 @@ Free_t   Perl_mfree (Malloc_t where);
 #  define IVSIZE LONGSIZE
 #endif
 #define IV_DIG (BIT_DIGITS(IVSIZE * 8))
-#define UV_DIG (BIT_DIGITS(IVSIZE * 8))
+#define UV_DIG (BIT_DIGITS(UVSIZE * 8))
 
+#if (IVSIZE > PTRSIZE) || (UVSIZE > PTRSIZE)
+#  if PTRSIZE == LONGSIZE 
+#    define PTRV	unsigned long
+#  else
+#    define PTRV	unsigned
+#  endif
+#  define PTR_CAST	(PTRV)
+#else
+#  define PTRV      	UV
+#  define PTR_CAST 
+#endif
+  
 #ifdef USE_LONG_DOUBLE
 #  if defined(HAS_LONG_DOUBLE) && (LONG_DOUBLESIZE > DOUBLESIZE)
 #    define LDoub_t long double

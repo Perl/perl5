@@ -192,6 +192,11 @@ case "$ldlibpthname" in
 '') ldlibpthname=SHLIB_PATH ;;
 esac
 
+# HP-UX 10.20 and gcc 2.8.1 break UINT32_MAX.
+case "$cc" in
+*gcc*) ccflags="$ccflags -DUINT32_MAX_BROKEN" ;;
+esac
+
 # Date: Fri, 6 Sep 96 23:15:31 CDT
 # From: "Daniel S. Lewart" <d-lewart@uiuc.edu>
 # I looked through the gcc.info and found this:

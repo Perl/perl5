@@ -13,221 +13,170 @@ BEGIN {
 # Nota bene: bit operations (&, |, ^, ~, <<, >>) are not 64-bit clean.
 # See the beginning of pp.c and the explanation next to IBW/UBW.
 
-# So that using > 0xfffffff constants and
-# 32+ bit vector sizes and shift doesn't cause noise.
+# so that using > 0xfffffff constants and
+# 32+ bit vector sizes doesn't cause noise
 no warnings qw(overflow portable);
 
-print "1..48\n";
+print "1..34\n";
 
 my $q = 12345678901;
 my $r = 23456789012;
 my $f = 0xffffffff;
 my $x;
 my $y;
-my $z;
-
 
 $x = unpack "q", pack "q", $q;
 print "not " unless $x == $q && $x > $f;
 print "ok 1\n";
 
 
-$x = sprintf("%d", 12345678901);
+$x = sprintf("%lld", 12345678901);
 print "not " unless $x eq $q && $x > $f;
 print "ok 2\n";
 
 
-$x = sprintf("%d", $q);
+$x = sprintf("%lld", $q);
 print "not " unless $x == $q && $x eq $q && $x > $f;
 print "ok 3\n";
 
-$x = sprintf("%lld", $q);
+$x = sprintf("%Ld", $q);
 print "not " unless $x == $q && $x eq $q && $x > $f;
 print "ok 4\n";
 
-$x = sprintf("%Ld", $q);
+$x = sprintf("%qd", $q);
 print "not " unless $x == $q && $x eq $q && $x > $f;
 print "ok 5\n";
 
-$x = sprintf("%qd", $q);
-print "not " unless $x == $q && $x eq $q && $x > $f;
-print "ok 6\n";
-
-
-$x = sprintf("%x", $q);
-print "not " unless hex($x) == 0x2dfdc1c35 && hex($x) > $f;
-print "ok 7\n";
 
 $x = sprintf("%llx", $q);
 print "not " unless hex($x) == 0x2dfdc1c35 && hex($x) > $f;
-print "ok 8\n";
+print "ok 6\n";
 
 $x = sprintf("%Lx", $q);
 print "not " unless hex($x) == 0x2dfdc1c35 && hex($x) > $f;
-print "ok 9\n";
+print "ok 7\n";
 
 $x = sprintf("%qx", $q);
 print "not " unless hex($x) == 0x2dfdc1c35 && hex($x) > $f;
-print "ok 10\n";
+print "ok 8\n";
 
-
-$x = sprintf("%o", $q);
-print "not " unless oct("0$x") == 0133767016065 && oct($x) > $f;
-print "ok 11\n";
 
 $x = sprintf("%llo", $q);
 print "not " unless oct("0$x") == 0133767016065 && oct($x) > $f;
-print "ok 12\n";
+print "ok 9\n";
 
 $x = sprintf("%Lo", $q);
 print "not " unless oct("0$x") == 0133767016065 && oct($x) > $f;
-print "ok 13\n";
+print "ok 10\n";
 
 $x = sprintf("%qo", $q);
 print "not " unless oct("0$x") == 0133767016065 && oct($x) > $f;
-print "ok 14\n";
+print "ok 11\n";
 
-
-$x = sprintf("%b", $q);
-print "not " unless oct("0b$x") == 0b1011011111110111000001110000110101 &&
-                    oct("0b$x") > $f;
-print "ok 15\n";
 
 $x = sprintf("%llb", $q);
 print "not " unless oct("0b$x") == 0b1011011111110111000001110000110101 &&
                     oct("0b$x") > $f;
-print "ok 16\n";
+print "ok 12\n";
 
 $x = sprintf("%Lb", $q);
 print "not " unless oct("0b$x") == 0b1011011111110111000001110000110101 &&
                                    oct("0b$x") > $f;
-print "ok 17\n";
+print "ok 13\n";
 
 $x = sprintf("%qb", $q);
 print "not " unless oct("0b$x") == 0b1011011111110111000001110000110101 &&
                     oct("0b$x") > $f;
-print "ok 18\n";
+print "ok 14\n";
 
-
-$x = sprintf("%u", 12345678901);
-print "not " unless $x eq $q && $x > $f;
-print "ok 19\n";
-
-$x = sprintf("%u", $q);
-print "not " unless $x == $q && $x eq $q && $x > $f;
-print "ok 20\n";
 
 $x = sprintf("%llu", $q);
-print "not " unless $x == $q && $x eq $q && $x > $f;
-print "ok 21\n";
+print "not " unless $x eq $q && $x > $f;
+print "ok 15\n";
 
 $x = sprintf("%Lu", $q);
 print "not " unless $x == $q && $x eq $q && $x > $f;
-print "ok 22\n";
+print "ok 16\n";
+
+$x = sprintf("%qu", $q);
+print "not " unless $x == $q && $x eq $q && $x > $f;
+print "ok 17\n";
 
 
 $x = sprintf("%D", $q);
 print "not " unless $x == $q && $x eq $q && $x > $f;
-print "ok 23\n";
+print "ok 18\n";
 
 $x = sprintf("%U", $q);
 print "not " unless $x == $q && $x eq $q && $x > $f;
-print "ok 24\n";
+print "ok 19\n";
 
 $x = sprintf("%O", $q);
 print "not " unless oct($x) == $q && oct($x) > $f;
-print "ok 25\n";
+print "ok 20\n";
 
 
 $x = $q + $r;
 print "not " unless $x == 35802467913 && $x > $f;
-print "ok 26\n";
+print "ok 21\n";
 
 $x = $q - $r;
 print "not " unless $x == -11111110111 && -$x > $f;
-print "ok 27\n";
+print "ok 22\n";
 
 $x = $q * 1234567;
 print "not " unless $x == 15241567763770867 && $x > $f;
-print "ok 28\n";
+print "ok 23\n";
 
 $x /= 1234567;
 print "not " unless $x == $q && $x > $f;
-print "ok 29\n";
+print "ok 24\n";
 
 $x = 98765432109 % 12345678901;
 print "not " unless $x == 901;
-print "ok 30\n";
+print "ok 25\n";
 
 # The following six adapted from op/inc.
 
 $a = 9223372036854775807;
 $c = $a++;
 print "not " unless $a == 9223372036854775808;
-print "ok 31\n";
+print "ok 26\n";
 
 $a = 9223372036854775807;
 $c = ++$a;
 print "not " unless $a == 9223372036854775808;
-print "ok 32\n";
+print "ok 27\n";
 
 $a = 9223372036854775807;
 $c = $a + 1;
 print "not " unless $a == 9223372036854775808;
-print "ok 33\n";
+print "ok 28\n";
 
 $a = -9223372036854775808;
 $c = $a--;
 print "not " unless $a == -9223372036854775809;
-print "ok 34\n";
+print "ok 29\n";
 
 $a = -9223372036854775808;
 $c = --$a;
 print "not " unless $a == -9223372036854775809;
-print "ok 35\n";
+print "ok 30\n";
 
 $a = -9223372036854775808;
 $c = $a - 1;
 print "not " unless $a == -9223372036854775809;
-print "ok 36\n";
+print "ok 31\n";
 
 
 $x = '';
 print "not " unless (vec($x, 1, 64) = $q) == $q;
-print "ok 37\n";
+print "ok 32\n";
 
 print "not " unless vec($x, 1, 64) == $q && vec($x, 1, 64) > $f;
-print "ok 38\n";
+print "ok 33\n";
 
 print "not " unless vec($x, 0, 64) == 0 && vec($x, 2, 64) == 0;
-print "ok 39\n";
-
-
-print "not " unless ($q & $r) == 1442844692;
-print "ok 40\n";
-
-print "not " unless ($q | $r) == 34359623221;
-print "ok 41\n";
-
-print "not " unless ($q ^ $r) == 32916778529;
-print "ok 42\n";
-
-print "not " unless ~$q == 18446744061363872714;
-print "ok 43\n";
-
-print "not " unless ($q << 1) == 24691357802;
-print "ok 44\n";
-
-print "not " unless (($q << 1) >> 1) == $q;
-print "ok 45\n";
-
-print "not " unless (1 << 32) == 2**32; # Risky because of the **?
-print "ok 46\n";
-
-print "not " unless ((1 << 40) >> 32) == 256;
-print "ok 47\n";
-
-print "not " unless (1 << 63) == ~0 ^ (~0 >> 1);
-print "ok 48\n";
+print "ok 34\n";
 
 # eof

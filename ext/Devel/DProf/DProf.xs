@@ -292,7 +292,7 @@ prof_mark( opcode ptype )
 	    static U32 lastid;
 	    CV *cv;
 
-	    cv = (CV*)SvIVX(Sub);
+	    cv = (CV*)PTR_CAST SvIVX(Sub);
 	    svp = hv_fetch(cv_hash, (char*)&cv, sizeof(CV*), TRUE);
 	    if (!SvOK(*svp)) {
 		GV *gv = CvGV(cv);
@@ -568,7 +568,7 @@ XS(XS_DB_sub)
         PUSHMARK( ORIGMARK );
 
 #ifdef G_NODEBUG
-        perl_call_sv( (SV*)SvIV(Sub), GIMME | G_NODEBUG);
+        perl_call_sv( (SV*)PTR_CAST SvIV(Sub), GIMME | G_NODEBUG);
 #else
         curstash = debstash;    /* To disable debugging of perl_call_sv */
 #ifdef PERLDBf_NONAME

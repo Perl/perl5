@@ -1,4 +1,4 @@
-# $Header$ 
+# $Header: /home/rmb1/misc/perl/build/perl5.005_60/lib/ExtUtils/../../../RCS/perl5.005_61/lib/ExtUtils/typemap,v 1.2 1999/09/07 10:05:21 rmb1 Exp $ 
 # basic C types
 int			T_IV
 unsigned		T_UV
@@ -107,11 +107,11 @@ T_DOUBLE
 T_PV
 	$var = ($type)SvPV($arg,PL_na)
 T_PTR
-	$var = ($type)SvIV($arg)
+	$var = ($type)PTR_CAST SvIV($arg)
 T_PTRREF
 	if (SvROK($arg)) {
 	    IV tmp = SvIV((SV*)SvRV($arg));
-	    $var = ($type) tmp;
+	    $var = ($type)PTR_CAST tmp;
 	}
 	else
 	    croak(\"$var is not a reference\")
@@ -132,7 +132,7 @@ T_REF_IV_PTR
 T_PTROBJ
 	if (sv_derived_from($arg, \"${ntype}\")) {
 	    IV tmp = SvIV((SV*)SvRV($arg));
-	    $var = ($type) tmp;
+	    $var = ($type)PTR_CAST tmp;
 	}
 	else
 	    croak(\"$var is not of type ${ntype}\")
@@ -147,14 +147,14 @@ T_PTRDESC
 T_REFREF
 	if (SvROK($arg)) {
 	    IV tmp = SvIV((SV*)SvRV($arg));
-	    $var = *($type) tmp;
+	    $var = *($type)PTR_CAST tmp;
 	}
 	else
 	    croak(\"$var is not a reference\")
 T_REFOBJ
 	if (sv_isa($arg, \"${ntype}\")) {
 	    IV tmp = SvIV((SV*)SvRV($arg));
-	    $var = *($type) tmp;
+	    $var = *($type)PTR_CAST tmp;
 	}
 	else
 	    croak(\"$var is not of type ${ntype}\")
