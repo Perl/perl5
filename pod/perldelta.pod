@@ -246,7 +246,8 @@ to be removed in a future release.
 
 The 5.005 threads model (module C<Thread>) is deprecated and expected
 to be removed in Perl 5.10.  Multithreaded code should be migrated to
-the new ithreads model (see L<threads> and L<threads::shared>).
+the new ithreads model (see L<threads>, L<threads::shared> and
+L<perlthrtut>).
 
 =item *
 
@@ -989,7 +990,8 @@ parsing algorithms.  See L<Text::Balanced>.
 C<threads>, by Arthur Bergman, is an interface to interpreter threads.
 Interpreter threads (ithreads) is the new thread model introduced in
 Perl 5.6 but only available as an internal interface for extension
-writers (and for Win32 Perl for C<fork()> emulation).  See L<threads>.
+writers (and for Win32 Perl for C<fork()> emulation).  See L<threads>,
+L<threads::shared>, and L<perlthrtut>.
 
 =item *
 

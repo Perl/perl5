@@ -201,11 +201,6 @@ Documentation borrowed from Thread.pm
 
 =head1 SEE ALSO
 
-L<perl> L<threads>
+L<threads>, L<perlthrtut>
 
 =cut
-
-
-
-
-
