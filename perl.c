@@ -1,6 +1,6 @@
 /*    perl.c
  *
- *    Copyright (c) 1987-1999 Larry Wall
+ *    Copyright (c) 1987-2000 Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -2036,7 +2036,7 @@ Perl_moreswitches(pTHX_ char *s)
 		(int)LOCAL_PATCH_COUNT, (LOCAL_PATCH_COUNT!=1) ? "es" : "");
 #endif
 
-	printf("\n\nCopyright 1987-1999, Larry Wall\n");
+	printf("\n\nCopyright 1987-2000, Larry Wall\n");
 #ifdef MSDOS
 	printf("\nMS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n");
 #endif

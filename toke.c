@@ -1,6 +1,6 @@
 /*    toke.c
  *
- *    Copyright (c) 1991-1999, Larry Wall
+ *    Copyright (c) 1991-2000, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -6890,6 +6890,7 @@ Perl_scan_num(pTHX_ char *start)
 		U8 tmpbuf[10];
 		U8 *tmpend;
 		NV nshift = 1.0;
+		bool utf8 = FALSE;
 		s++;				/* get past 'v' */
 
 		sv = NEWSV(92,5);
@@ -6904,7 +6905,14 @@ Perl_scan_num(pTHX_ char *start)
 		    while (isDIGIT(*pos))
 			pos++;
 
-		    tmpend = uv_to_utf8(tmpbuf, rev);
+		    if (rev > 127) {
+			tmpend = uv_to_utf8(tmpbuf, rev);
+			utf8 = TRUE;
+		    }
+		    else {
+			tmpbuf[0] = (U8)rev;
+			tmpend = &tmpbuf[1];
+		    }
 		    *tmpend = '\0';
 		    sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);
 		    if (rev > 0)
@@ -6917,6 +6925,7 @@ Perl_scan_num(pTHX_ char *start)
 		rev = atoi(s);
 		s = pos;
 		tmpend = uv_to_utf8(tmpbuf, rev);
+		utf8 = utf8 || rev > 127;
 		*tmpend = '\0';
 		sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);
 		if (rev > 0)
@@ -6925,7 +6934,8 @@ Perl_scan_num(pTHX_ char *start)
 		SvPOK_on(sv);
 		SvNOK_on(sv);
 		SvREADONLY_on(sv);
-		SvUTF8_on(sv);
+		if (utf8)
+		    SvUTF8_on(sv);
 	    }
 	}
 	break;
