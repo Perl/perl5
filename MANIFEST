@@ -461,6 +461,12 @@ lib/File/Copy.pm	Emulation of cp command
 lib/File/DosGlob.pm	Win32 DOS-globbing module
 lib/File/Find.pm	Routines to do a find
 lib/File/Path.pm	Do things like `mkdir -p' and `rm -r'
+lib/File/Spec.pm	portable operations on file names
+lib/File/Spec/Mac.pm	portable operations on Mac file names
+lib/File/Spec/OS2.pm	portable operations on OS2 file names
+lib/File/Spec/Unix.pm	portable operations on Unix file names
+lib/File/Spec/VMS.pm	portable operations on VMS file names
+lib/File/Spec/Win32.pm	portable operations on Win32 file names
 lib/File/stat.pm	By-name interface to Perl's builtin stat
 lib/FileCache.pm	Keep more files open than the system permits
 lib/FileHandle.pm	Backward-compatible front end to IO extension
@@ -791,6 +797,7 @@ t/lib/filecopy.t	See if File::Copy works
 t/lib/filefind.t	See if File::Find works
 t/lib/filehand.t	See if FileHandle works
 t/lib/filepath.t	See if File::Path works
+t/lib/filespec.t	See if File::Spec works
 t/lib/findbin.t		See if FindBin works
 t/lib/gdbm.t		See if GDBM_File works
 t/lib/getopt.t		See if Getopt::Std and Getopt::Long works
