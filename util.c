@@ -1091,7 +1091,7 @@ screaminstr(SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift, I32 *old_
     }
 #ifdef POINTERRIGOR
     do {
-	if (pos >= stop_pos) return Nullch;
+	if (pos >= stop_pos) break;
 	if (big[pos-previous] != first)
 	    continue;
 	for (x=big+pos+1-previous,s=little; s < littleend; /**/ ) {
@@ -1110,7 +1110,7 @@ screaminstr(SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift, I32 *old_
 #else /* !POINTERRIGOR */
     big -= previous;
     do {
-	if (pos >= stop_pos) return Nullch;
+	if (pos >= stop_pos) break;
 	if (big[pos] != first)
 	    continue;
 	for (x=big+pos+1,s=little; s < littleend; /**/ ) {

@@ -765,6 +765,7 @@ pregcomp(char *exp, char *xend, PMOP *pm)
     r->prelen = xend - exp;
     r->precomp = regprecomp;
     r->subbeg = r->subbase = NULL;
+    r->nparens = regnpar - 1;		/* set early to validate backrefs */
     regcomp_rx = r;
 
     /* Second pass: emit code. */
@@ -936,7 +937,6 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 	r->check_substr = r->anchored_substr = r->float_substr = Nullsv;
     }
 
-    r->nparens = regnpar - 1;
     r->minlen = minlen;
     if (regseen & REG_SEEN_GPOS) 
 	r->reganch |= ROPT_GPOS_SEEN;
@@ -1609,6 +1609,8 @@ tryagain:
 		if (num > 9 && num >= regnpar)
 		    goto defchar;
 		else {
+		    if (!SIZE_ONLY && num > regcomp_rx->nparens)
+			FAIL("reference to nonexistent group");
 		    regsawback = 1;
 		    ret = reganode((regflags & PMf_FOLD)
 				   ? ((regflags & PMf_LOCALE) ? REFFL : REFF)

@@ -164,6 +164,16 @@ a(bc)d	abcd	y	$1-\$1-\\$1	bc-$1-\bc
 a[-]?c	ac	y	$&	ac
 (abc)\1	abcabc	y	$1	abc
 ([a-c]*)\1	abcabc	y	$1	abc
+\1	-	c	-	/\1/: reference to nonexistent group
+\2	-	c	-	/\2/: reference to nonexistent group
+(a)|\1	a	y	-	-
+(a)|\1	x	n	-	-
+(a)|\2	-	c	-	/(a)|\2/: reference to nonexistent group
+(([a-c])b*?\2)*	ababbbcbc	y	$&-$1-$2	ababb-bb-b
+(([a-c])b*?\2){3}	ababbbcbc	y	$&-$1-$2	ababbbcbc-cbc-c
+((\3|b)\2(a)x)+	aaxabxbaxbbx	n	-	-
+((\3|b)\2(a)x)+	aaaxabaxbaaxbbax	y	$&-$1-$2-$3	bbax-bbax-b-a
+((\3|b)\2(a)){2,}	bbaababbabaaaaabbaaaabba	y	$&-$1-$2-$3	bbaaaabba-bba-b-a
 'abc'i	ABC	y	$&	ABC
 'abc'i	XBC	n	-	-
 'abc'i	AXC	n	-	-
