@@ -2607,7 +2607,7 @@ yylex()
 	    }
 	    else if (gv && !gvp
 		     && -tmp==KEY_lock	/* XXX generalizable kludge */
-		     && !gv_fetchpv("Thread::join",FALSE,SVt_PVCV))
+		     && !hv_fetch(GvHVn(incgv), "Thread.pm", 9, FALSE))
 	    {
 		tmp = 0;		/* any sub overrides "weak" keyword */
 	    }
