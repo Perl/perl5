@@ -3253,7 +3253,19 @@ screamer2:
 	     memNE(SvPVX(sv) + SvCUR(sv) - rslen, rsptr, rslen)))
 	{
 	    append = -1;
-	    goto screamer2;
+	    /*
+	     * If we're reading from a TTY and we get a short read,
+	     * indicating that the user hit his EOF character, we need
+	     * to notice it now, because if we try to read from the TTY
+	     * again, the EOF condition will disappear.
+	     *
+	     * The comparison of cnt to sizeof(buf) is an optimization
+	     * that prevents unnecessary calls to feof().
+	     *
+	     * - jik 9/25/96
+	     */
+	    if (!(cnt < sizeof(buf) && PerlIO_eof(fp)))
+		goto screamer2;
 	}
     }
 
