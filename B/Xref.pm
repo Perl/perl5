@@ -250,7 +250,8 @@ sub pp_gv {
 sub pp_const {
     my $op = shift;
     my $sv = $op->sv;
-    $top = ["?", "", $sv->FLAGS & SVf_POK ? $sv->PV : "?"];
+    $top = ["?", "",
+	    (class($sv) ne "SPECIAL" && $sv->FLAGS & SVf_POK) ? $sv->PV : "?"];
 }
 
 sub pp_method {
