@@ -31,6 +31,154 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 11563] By: jhi                                   on 2001/08/03  12:13:17
+        Log: Subject: [PATCH perl@11523] fix Stash.t for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Thu, 02 Aug 2001 23:15:24 -0500
+             Message-Id: <5.1.0.14.0.20010802230843.03530e58@mail.mac.com>
+     Branch: perl
+	   ! ext/B/Stash.t
+____________________________________________________________________________
+[ 11562] By: jhi                                   on 2001/08/03  12:11:57
+        Log: Subject: [patch] plug PL_cshname leak
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Thu, 2 Aug 2001 20:59:04 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0108022058020.8991-100000@mako.covalent.net>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 11561] By: jhi                                   on 2001/08/03  12:10:32
+        Log: Subject: [patch] plug PL_sh_path leak
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Thu, 2 Aug 2001 20:54:08 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0108022043040.8991-100000@mako.covalent.net>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 11560] By: jhi                                   on 2001/08/03  12:09:50
+        Log: Subject: [patch] plug PL_regex_padav leaks
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Thu, 2 Aug 2001 20:24:55 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0108022020100.8991-100000@mako.covalent.net>
+     Branch: perl
+	   ! op.c op.h perl.c
+____________________________________________________________________________
+[ 11559] By: jhi                                   on 2001/08/03  12:08:59
+        Log: Subject: [patch] plug PL_origargv leak
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Thu, 2 Aug 2001 18:15:22 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0108021813380.8991-100000@mako.covalent.net>
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[ 11558] By: jhi                                   on 2001/08/03  12:07:58
+        Log: Subject: [PATCH hv.c] newHVhv shouldn't reset xhv_max so often
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Fri, 3 Aug 2001 06:38:11 +0530
+             Message-ID: <20010803063811.A19266@lustre.dyn.wiw.org>
+     Branch: perl
+	   ! hv.c
+____________________________________________________________________________
+[ 11557] By: nick                                  on 2001/08/03  08:17:38
+        Log: Integrate mainline
+     Branch: perlio
+	  +> (branch 47 files)
+	   - lib/Switch/test.pl
+	  !> (integrate 49 files)
+____________________________________________________________________________
+[ 11556] By: jhi                                   on 2001/08/02  22:46:22
+        Log: Subject: [PATCH perl@11523] fix Showlex.t for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Thu, 02 Aug 2001 12:56:19 -0500
+             Message-Id: <5.1.0.14.0.20010802124618.034c5008@exchi01>
+     Branch: perl
+	   ! ext/B/Showlex.t
+____________________________________________________________________________
+[ 11555] By: jhi                                   on 2001/08/02  22:29:34
+        Log: Be more careful about non-existent files.
+     Branch: perl
+	   ! lib/File/Copy.pm
+____________________________________________________________________________
+[ 11554] By: jhi                                   on 2001/08/02  21:37:27
+        Log: Subject: [PATCH resend] deparse empty formats
+             From: Robin Houston <robin@kitsite.com> 
+             Date: Thu, 2 Aug 2001 14:32:36 +0100
+             Message-ID: <20010802143236.A894@robin.kitsite.com>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 11553] By: jhi                                   on 2001/08/02  16:37:32
+        Log: Subject: [patch] ithreads + refto fix improvement
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Thu, 2 Aug 2001 09:41:53 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0108020939030.8991-100000@mako.covalent.net>
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[ 11552] By: jhi                                   on 2001/08/02  14:24:26
+        Log: Readability nit from Abhijit.
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[ 11551] By: jhi                                   on 2001/08/02  14:22:31
+        Log: setproctitle() API version nit from Anton Berezin.
+     Branch: perl
+	   ! mg.c
+____________________________________________________________________________
+[ 11550] By: jhi                                   on 2001/08/02  13:51:41
+        Log: Add PerlCE to the docs.
+     Branch: perl
+	   ! MANIFEST pod/buildtoc.PL pod/perl.pod pod/perlport.pod
+	   ! pod/perltoc.pod win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 11549] By: jhi                                   on 2001/08/02  13:25:43
+        Log: Integrate the PerlCE (WinCE Perl) port;
+             kindly supplied by Rainer Keuchel <rkeuc@allgeier.com>.
+     Branch: perl
+	   + README.ce wince/FindExt.pm wince/Makefile.ce
+	   + wince/README.compile wince/README.perlce wince/bin/exetype.pl
+	   + wince/bin/perlglob.pl wince/bin/pl2bat.pl wince/bin/runperl.pl
+	   + wince/bin/search.pl wince/config.ce wince/config.h
+	   + wince/config_H.ce wince/config_h.PL wince/config_sh.PL
+	   + wince/dl_win32.xs wince/include/arpa/inet.h
+	   + wince/include/cectype.h wince/include/errno.h
+	   + wince/include/netdb.h wince/include/sys/socket.h
+	   + wince/include/sys/stat.h wince/include/sys/types.h
+	   + wince/include/sys/utime.h wince/include/time.h wince/perl.ico
+	   + wince/perl.rc wince/perldll.def wince/perllib.c
+	   + wince/perlmain.c wince/registry.bat wince/runperl.c
+	   + wince/splittree.pl wince/win32.h wince/win32iop.h
+	   + wince/win32thread.c wince/win32thread.h wince/wince.c
+	   + wince/wince.h wince/wincesck.c wince/xbuildall.ksh
+	   + wince/xdistclean.ksh wince/xmakediffs.ksh
+	   ! MANIFEST perl.c perl.h perlio.c
+____________________________________________________________________________
+[ 11548] By: jhi                                   on 2001/08/02  13:18:08
+        Log: setproctitle() made simpler.  (This assumes the string is
+             \0-terminated: if not, the three-arg form setproctitle(fmt, len, s)
+             should be used.  Note len, not len + 1.)  BSD-fu from Anton
+             Berezin.
+     Branch: perl
+	   ! mg.c
+____________________________________________________________________________
+[ 11547] By: jhi                                   on 2001/08/02  12:49:54
+        Log: Subject: [PATCH] -Wall cleanup: op.c
+             From: Richard Soderberg <rs@oregonnet.com>
+             Date: Thu, 2 Aug 2001 00:17:09 -0700
+             Message-Id: <200108020717.AAA26895@oregonnet.com>
+             
+             Subject: [PATCH] -Wall cleanup: sv.c
+             From: Richard Soderberg <rs@oregonnet.com>
+             Date: Thu, 2 Aug 2001 00:49:21 -0700
+             Message-Id: <200108020749.AAA27492@oregonnet.com>
+     Branch: perl
+	   ! op.c sv.c
+____________________________________________________________________________
+[ 11546] By: jhi                                   on 2001/08/02  00:53:34
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 11545] By: jhi                                   on 2001/08/02  00:48:55
         Log: Subject: Re: [PATCH pp_ctl.c] proposed Windows safe-guard
              From: Doug MacEachern <dougm@covalent.net>
