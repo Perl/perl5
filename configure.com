@@ -4917,21 +4917,21 @@ $ myuname="''osname' ''myname' ''osvers' ''F$EDIT(hwname, "TRIM")'"
 $!
 $ IF ccname .EQS. "DEC"
 $ THEN
-$   ccflags="/Include=[]/Standard=Relaxed_ANSI/Prefix=All/Obj=''obj_ext'/NoList''ccflags'"
+$   ccflags="/Include=[]/Standard=Relaxed_ANSI/Prefix=All/Obj=''obj_ext' ''ccflags'"
 $ ENDIF
 $ i_dirent = "undef"
 $ IF ccname .EQS. "CXX"
 $ THEN
 $   i_dirent = "define"
-$   ccflags="/Include=[]/Standard=ANSI/Prefix=All/Obj=''obj_ext'/NoList''ccflags'"
+$   ccflags="/Include=[]/Standard=ANSI/Prefix=All/Obj=''obj_ext' ''ccflags'"
 $ ENDIF
 $ IF use_vmsdebug_perl
 $ THEN
-$   optimize="/Debug/NoOpt"
+$   optimize="/List/Debug/NoOpt"
 $   ldflags="/Debug/Trace/Map"
 $   dbgprefix = "DBG"
 $ ELSE
-$   optimize= ""
+$   optimize= "/NoList"
 $   ldflags="/NoTrace/NoMap"
 $   dbgprefix = ""
 $ ENDIF
