@@ -1955,11 +1955,11 @@ Perl_looks_like_number(pTHX_ SV *sv)
 	else
 	    numtype |= IS_NUMBER_TO_INT_BY_ATOL;
 
-        if (*s == '.'
+        if (
 #ifdef USE_LOCALE_NUMERIC
-	    || (specialradix = IS_NUMERIC_RADIX(s))
+	    (specialradix = IS_NUMERIC_RADIX(s, send)) ||
 #endif
-	    ) {
+	    *s == '.') {
 #ifdef USE_LOCALE_NUMERIC
 	    if (specialradix)
 		s += SvCUR(PL_numeric_radix_sv);
@@ -1971,10 +1971,11 @@ Perl_looks_like_number(pTHX_ SV *sv)
                 s++;
         }
     }
-    else if (*s == '.'
+    else if (
 #ifdef USE_LOCALE_NUMERIC
-	    || (specialradix = IS_NUMERIC_RADIX(s))
+	     (specialradix = IS_NUMERIC_RADIX(s, send)) ||
 #endif
+	    *s == '.'
 	    ) {
 #ifdef USE_LOCALE_NUMERIC
 	if (specialradix)

@@ -3192,9 +3192,10 @@ typedef struct am_table_short AMTS;
 #define IN_LOCALE \
 	(PL_curcop == &PL_compiling ? IN_LOCALE_COMPILETIME : IN_LOCALE_RUNTIME)
 
-#define IS_NUMERIC_RADIX(s)	\
+#define IS_NUMERIC_RADIX(s, send)	\
 	(PL_numeric_radix_sv \
 	 && IN_LOCALE \
+	 && SvCUR(PL_numeric_radix_sv) <= ((send)-(s)) \
 	 && memEQ(s, SvPVX(PL_numeric_radix_sv), SvCUR(PL_numeric_radix_sv)))
 
 #define STORE_NUMERIC_LOCAL_SET_STANDARD() \
@@ -3217,7 +3218,7 @@ typedef struct am_table_short AMTS;
 
 #define SET_NUMERIC_STANDARD()  	/**/
 #define SET_NUMERIC_LOCAL()     	/**/
-#define IS_NUMERIC_RADIX(c)		(0)
+#define IS_NUMERIC_RADIX(a, b)		(0)
 #define STORE_NUMERIC_LOCAL_SET_STANDARD()	/**/
 #define STORE_NUMERIC_STANDARD_SET_LOCAL()	/**/
 #define RESTORE_NUMERIC_LOCAL()		/**/
