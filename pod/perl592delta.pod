@@ -13,9 +13,12 @@ differences between 5.8.0 and 5.9.1.
 =head2 Packing and UTF-8 strings
 
 The semantics of pack() and unpack() regarding UTF-8-encoded data has been
-clarified. B<The character mode is now the default.> Notably, code that
-uses C<pack("a*", $string)> to see through the encoding of string will now
-simply return $string.
+changed. Processing is now by default character per character instead of
+byte per byte on the underlying encoding. Notably, code that used things
+like C<pack("a*", $string)> to see through the encoding of string will now
+simply get back the original $string. Packed strings can also get upgraded
+during processing when you store upgraded characters. You can get the old
+behaviour by using C<use bytes>.
 
 To be consistent with pack(), the C<C0> in unpack() templates indicates
 that the data is to be processed in character mode, i.e. character by
@@ -26,14 +29,16 @@ by byte basis. This is reversed with regard to perl 5.8.X.
 Moreover, C<C0> and C<U0> can also be used in pack() templates to specify
 respectively character and byte modes.
 
-C<C0> and C<U0> in the middle of a pack format now switch to the specified
-encoding mode, honoring parens grouping. Previously, parens were ignored.
+C<C0> and C<U0> in the middle of a pack or unpack format now switch to the
+specified encoding mode, honoring parens grouping. Previously, parens were
+ignored.
 
 Also, there is a new pack() character format, C<W>, which is intended to
-replace the old C<C>. C<C> is kept for unsigned chars coded on eight bits.
-C<W> represents unsigned character values, which can be greater than 255.
-It is therefore more robust when dealing with potentially UTF-8-encoded
-data (as C<C> will wrap values outside the range 0..255).
+replace the old C<C>. C<C> is kept for unsigned chars coded as bytes in
+the strings internal representation. C<W> represents unsigned (logical)
+character values, which can be greater than 255. It is therefore more
+robust when dealing with potentially UTF-8-encoded data (as C<C> will wrap
+values outside the range 0..255, and not respect the string encoding).
 
 In practice, that means that pack formats are now encoding-neutral, except
 C<C>.
