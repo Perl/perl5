@@ -224,7 +224,8 @@ bless		bless			ck_fun		s	S S?
 # Pushy I/O.
 
 backtick	backticks		ck_null		t	
-glob		glob			ck_glob		t	S S
+# glob defaults its first arg to $_
+glob		glob			ck_glob		t	S? S?
 readline	<HANDLE>		ck_null		t	
 rcatline	append I/O operator	ck_null		t	
 

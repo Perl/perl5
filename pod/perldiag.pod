@@ -342,30 +342,37 @@ the return value of your socket() call?  See L<perlfunc/bind>.
 (F) A subroutine invoked from an external package via perl_call_sv()
 exited by calling exit.
 
+=item Can't "goto" outside a block
+
+(F) A "goto" statement was executed to jump out of what might look
+like a block, except that it isn't a proper block.  This usually
+occurs if you tried to jump out of a sort() block or subroutine, which
+is a no-no.  See L<perlfunc/goto>.
+
 =item Can't "last" outside a block
 
 (F) A "last" statement was executed to break out of the current block,
 except that there's this itty bitty problem called there isn't a
 current block.  Note that an "if" or "else" block doesn't count as a
-"loopish" block.  You can usually double the curlies to get the same
-effect though, because the inner curlies will be considered a block
-that loops once.  See L<perlfunc/last>.
+"loopish" block, as doesn't a block given to sort().  You can usually double
+the curlies to get the same effect though, because the inner curlies
+will be considered a block that loops once.  See L<perlfunc/last>.
 
 =item Can't "next" outside a block
 
 (F) A "next" statement was executed to reiterate the current block, but
 there isn't a current block.  Note that an "if" or "else" block doesn't
-count as a "loopish" block.  You can usually double the curlies to get
-the same effect though, because the inner curlies will be considered a block
-that loops once.  See L<perlfunc/last>.
+count as a "loopish" block, as doesn't a block given to sort().  You can
+usually double the curlies to get the same effect though, because the inner
+curlies will be considered a block that loops once.  See L<perlfunc/last>.
 
 =item Can't "redo" outside a block
 
 (F) A "redo" statement was executed to restart the current block, but
 there isn't a current block.  Note that an "if" or "else" block doesn't
-count as a "loopish" block.  You can usually double the curlies to get
-the same effect though, because the inner curlies will be considered a block
-that loops once.  See L<perlfunc/last>.
+count as a "loopish" block, as doesn't a block given to sort().  You can
+usually double the curlies to get the same effect though, because the inner
+curlies will be considered a block that loops once.  See L<perlfunc/last>.
 
 =item Can't bless non-reference value
 
@@ -922,6 +929,12 @@ case the conversion routines don't handle.  Drat.
 (W) You are exiting an eval by unconventional means, such as
 a goto, or a loop control statement.
 
+=item Exiting pseudo-block via %s
+
+(W) You are exiting a rather special block construct (like a sort block or
+subroutine) by unconventional means, such as a goto, or a loop control
+statement.  See L<perlfunc/sort>.
+
 =item Exiting subroutine via %s
 
 (W) You are exiting a subroutine by unconventional means, such as
@@ -1303,6 +1316,18 @@ See L<perlsec>.
 (F) A list operator that has a filehandle or "indirect object" is not
 allowed to have a comma between that and the following arguments.
 Otherwise it'd be just another one of the arguments.
+
+One possible cause for this is that you expected to have imported a
+constant to your name space with B<use> or B<import> while no such
+importing took place, it may for example be that your operating system
+does not support that particular constant. Hopefully you did use an
+explicit import list for the constants you expect to see, please see
+L<perlfunc/use> and L<perlfunc/import>. While an explicit import list
+would probably have caught this error earlier it naturally does not
+remedy the fact that your operating system still does not support that
+constant. Maybe you have a typo in the constants of the symbol import
+list of B<use> or B<import> or in the constant name at the line where
+this error was triggered?
 
 =item No command into which to pipe on command line
 

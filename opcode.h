@@ -2158,7 +2158,7 @@ EXT U32 opargs[] = {
 	0x0000098c,	/* ref */
 	0x00009104,	/* bless */
 	0x00000008,	/* backtick */
-	0x00001108,	/* glob */
+	0x00009908,	/* glob */
 	0x00000008,	/* readline */
 	0x00000008,	/* rcatline */
 	0x00000104,	/* regcmaybe */

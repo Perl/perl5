@@ -1,0 +1,4 @@
+3c3
+< #define BIT_BUCKET "NUL"
+---
+> #define BIT_BUCKET "\dev\nul"

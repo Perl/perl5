@@ -9,6 +9,192 @@ releases.)
 
 
 ----------------
+Version 5.003_24
+----------------
+
+This release is the second candidate for a public beta test.
+It's, well, bunches better than _23.
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "glob defaults to $_"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199701270809.DAA00934@aatma.engin.umich.edu>
+   Date:  Mon, 27 Jan 1997 03:09:13 -0500
+  Files:  op.c opcode.pl pod/perlfunc.pod t/op/glob.t
+
+  Title:  "Re: an overloading bug "
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199701270007.TAA26525@aatma.engin.umich.edu>
+   Date:  Sun, 26 Jan 1997 19:07:45 -0500
+  Files:  pod/perldiag.pod pod/perlfunc.pod pp_ctl.c
+
+  Title:  "Don't warn on C<$\ = undef>"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  mg.c
+
+ CORE PORTABILITY
+
+  Title:  "Win32 port"
+   From:  Gary Ng <71564.1743@compuserve.com>
+  Files:  MANIFEST win32/*
+
+  Title:  "Amiga files"
+   From:  Norbert Pueschel <pueschel@imsdd.meb.uni-bonn.de>
+ Msg-ID:  <77724712@Armageddon.meb.uni-bonn.de>
+   Date:  Sun, 26 Jan 1997 17:42:15 +0100
+  Files:  MANIFEST README.amiga hints/amigaos.sh
+
+  Title:  "New dec_osf hints"
+   From:  Jarkko.Hietaniemi@cc.hut.fi
+ Msg-ID:  <199701271233.OAA21548@alpha.hut.fi>
+   Date:  Mon, 27 Jan 1997 14:33:01 +0200 (EET)
+  Files:  hints/dec_osf.sh
+
+ OTHER CORE CHANGES
+
+  Title:  "Prevent premature death of @_ during leavesub"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pp_hot.c t/op/misc.t
+
+  Title:  "Deref old stash when re-blessing"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  sv.c
+
+  Title:  "Don't abort when RCHECK and DEBUGGING"
+   From:  Tim Bunce <Tim.Bunce@ig.co.uk>
+ Msg-ID:  <9701272339.AA16537@toad.ig.co.uk>
+   Date:  Mon, 27 Jan 1997 23:39:48 +0000
+  Files:  malloc.c
+
+  Title:  "Fix overloading macro conflict with Digital 'cc -fast'"
+   From:  Jarkko Hietaniemi <jhi@cc.hut.fi>
+ Msg-ID:  <199701272216.AAA04557@alpha.hut.fi>
+   Date:  Tue, 28 Jan 1997 00:16:49 +0200 (EET)
+  Files:  perl.h
+
+  Title:  "global.sym: typo?"
+   From:  Jarkko Hietaniemi <jhi@cc.hut.fi>
+ Msg-ID:  <199701261937.VAA07556@alpha.hut.fi>
+   Date:  Sun, 26 Jan 1997 21:37:59 +0200 (EET)
+  Files:  global.sym
+
+ BUILD PROCESS
+
+  Title:  "Put all extensions' modules in $archlib"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  installperl
+
+  Title:  "Configure fixes: set $archlib, omit _NO_PROTO"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  Configure
+
+  Title:  "Make configure{,.gnu} ignore --cache-file option"
+   From:  Norbert Pueschel <pueschel@imsdd.meb.uni-bonn.de>
+  Files:  configure configure.gnu
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "Version checking in XS bootstrap is optional"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  XSUB.h
+
+  Title:  "Update $VERSION of DynaLoader and POSIX"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  ext/DynaLoader/DynaLoader.pm ext/POSIX/POSIX.pm
+
+  Title:  "Refresh Text::Wrap to 97.011701"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  lib/Text/Wrap.pm
+
+  Title:  "Fcntl.xs: F_[GS]ETOWN were in wrong case branch"
+   From:  Jarkko Hietaniemi <jhi@cc.hut.fi>
+ Msg-ID:  <199701251510.RAA05142@alpha.hut.fi>
+   Date:  Sat, 25 Jan 1997 17:10:20 +0200 (EET)
+  Files:  ext/Fcntl/Fcntl.pm ext/Fcntl/Fcntl.xs
+
+  Title:  "Fix $Is_VMS typo in Test::Harness"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  lib/Test/Harness.pm
+
+  Title:  "Allow for really big keys in Tie::SubstrHash"
+   From:  data-drift@so.uio.no
+ Msg-ID:  <199701282014.VAA12645@selters.uio.no>
+   Date:  Tue, 28 Jan 1997 21:14:34 +0100 (MET)
+  Files:  lib/Tie/SubstrHash.pm
+
+  Title:  "Avoid newRV_noinc() in IO, for compiling with old Perls"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  ext/IO/IO.xs
+
+ TESTS
+
+  Title:  "New test op/closure.t"
+   From:  Tom Phoenix <rootbeer@teleport.com>, Ulrich Pfeifer
+  Files:  MANIFEST t/op/closure.t
+
+ UTILITIES
+
+  Title:  "xsubpp handing of void funcs breaks extensions using XST_m*()"
+   From:  Tim Bunce <Tim.Bunce@ig.co.uk>
+ Msg-ID:  <9701271659.AA15137@toad.ig.co.uk>
+   Date:  Mon, 27 Jan 1997 16:59:06 +0000
+  Files:  lib/ExtUtils/xsubpp
+
+ DOCUMENTATION
+
+  Title:  "perldelta Fcntl enhancement"
+   From:  Jarkko Hietaniemi <jhi@cc.hut.fi>
+ Msg-ID:  <199701251505.RAA22159@alpha.hut.fi>
+   Date:  Sat, 25 Jan 1997 17:05:34 +0200 (EET)
+  Files:  pod/perldelta.pod
+
+  Title:  "Updates to perldelta re: Fcntl, DB_File, Net::Ping"
+   From:  pmarquess@bfsec.bt.co.uk (Paul Marquess)
+  Files:  pod/perldelta.pod
+
+  Title:  "Document restrictions on gv_fetchmethod() and perl_call_sv()"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pod/perldelta.pod pod/perlguts.pod
+
+  Title:  "perldiag.pod: No comma allowed after %s"
+   From:  Jarkko.Hietaniemi@cc.hut.fi
+ Msg-ID:  <199701251541.RAA04120@alpha.hut.fi>
+   Date:  Sat, 25 Jan 1997 17:41:53 +0200 (EET)
+  Files:  pod/perldiag.pod
+
+  Title:  "perlfunc.pod: localtime"
+   From:  Jarkko Hietaniemi <jhi@cc.hut.fi>
+ Msg-ID:  <199701251629.SAA08114@alpha.hut.fi>
+   Date:  Sat, 25 Jan 1997 18:29:37 +0200 (EET)
+  Files:  pod/perlfunc.pod
+
+  Title:  "perlfunc diff: gmtime"
+   From:  Peter Haworth <pmh@edison.ioppublishing.com>
+ Msg-ID:  <32EE1298.7B90@edison.ioppublishing.com>
+   Date:  Tue, 28 Jan 1997 14:52:08 +0000
+  Files:  pod/perlfunc.pod
+
+  Title:  "Updates to guts"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199701270034.TAA13177@monk.mps.ohio-state.edu>
+   Date:  Sun, 26 Jan 1997 19:34:18 -0500 (EST)
+  Files:  pod/perlguts.pod
+
+  Title:  "perltoot fixes"
+   From:  Tom Christiansen <tchrist@mox.perl.com>
+ Msg-ID:  <6807.854214205@jinete>
+   Date:  Sat, 25 Jan 1997 09:43:25 -0800
+  Files:  pod/perltoot.pod
+
+  Title:  "5.003_23: small typo in perlsyn.pod"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199701270824.DAA01169@aatma.engin.umich.edu>
+   Date:  Mon, 27 Jan 1997 03:24:25 -0500
+  Files:  pod/perlsyn.pod
+
+
+----------------
 Version 5.003_23
 ----------------
 

@@ -8,6 +8,8 @@ This document attempts to describe some of the internal functions of the
 Perl executable.  It is far from complete and probably contains many errors.
 Please refer any questions or comments to the author below.
 
+=head1 Variables
+
 =head2 Datatypes
 
 Perl has three typedefs that handle Perl's three main data types:
@@ -557,7 +559,47 @@ as any other SV.
 
 For more information on references and blessings, consult L<perlref>.
 
-=head2 Magic
+=head2 Double-Typed SV's
+
+Scalar variables normally contain only one type of value, an integer,
+double, pointer, or reference.  Perl will automatically convert the
+actual scalar data from the stored type into the requested type.
+
+Some scalar variables contain more than one type of scalar data.  For
+example, the variable C<$!> contains either the numeric value of C<errno>
+or its string equivalent from either C<strerror> or C<sys_errlist[]>.
+
+To force multiple data values into an SV, you must do two things: use the
+C<sv_set*v> routines to add the additional scalar type, then set a flag
+so that Perl will believe it contains more than one type of data.  The
+four macros to set the flags are:
+
+	SvIOK_on
+	SvNOK_on
+	SvPOK_on
+	SvROK_on
+
+The particular macro you must use depends on which C<sv_set*v> routine
+you called first.  This is because every C<sv_set*v> routine turns on
+only the bit for the particular type of data being set, and turns off
+all the rest.
+
+For example, to create a new Perl variable called "dberror" that contains
+both the numeric and descriptive string error values, you could use the
+following code:
+
+    extern int  dberror;
+    extern char *dberror_list;
+
+    SV* sv = perl_get_sv("dberror", TRUE);
+    sv_setiv(sv, (IV) dberror);
+    sv_setpv(sv, dberror_list[dberror]);
+    SvIOK_on(sv);
+
+If the order of C<sv_setiv> and C<sv_setpv> had been reversed, then the
+macro C<SvPOK_on> would need to be called instead of C<SvIOK_on>.
+
+=head2 Magic Variables
 
 [This section still under construction.  Ignore everything here.  Post no
 bills.  Everything not permitted is forbidden.]
@@ -724,45 +766,7 @@ This routine checks to see what types of magic C<sv> has.  If the mg_type
 field is an upper-case letter, then the mg_obj is copied to C<nsv>, but
 the mg_type field is changed to be the lower-case letter.
 
-=head2 Double-Typed SV's
-
-Scalar variables normally contain only one type of value, an integer,
-double, pointer, or reference.  Perl will automatically convert the
-actual scalar data from the stored type into the requested type.
-
-Some scalar variables contain more than one type of scalar data.  For
-example, the variable C<$!> contains either the numeric value of C<errno>
-or its string equivalent from either C<strerror> or C<sys_errlist[]>.
-
-To force multiple data values into an SV, you must do two things: use the
-C<sv_set*v> routines to add the additional scalar type, then set a flag
-so that Perl will believe it contains more than one type of data.  The
-four macros to set the flags are:
-
-	SvIOK_on
-	SvNOK_on
-	SvPOK_on
-	SvROK_on
-
-The particular macro you must use depends on which C<sv_set*v> routine
-you called first.  This is because every C<sv_set*v> routine turns on
-only the bit for the particular type of data being set, and turns off
-all the rest.
-
-For example, to create a new Perl variable called "dberror" that contains
-both the numeric and descriptive string error values, you could use the
-following code:
-
-    extern int  dberror;
-    extern char *dberror_list;
-
-    SV* sv = perl_get_sv("dberror", TRUE);
-    sv_setiv(sv, (IV) dberror);
-    sv_setpv(sv, dberror_list[dberror]);
-    SvIOK_on(sv);
-
-If the order of C<sv_setiv> and C<sv_setpv> had been reversed, then the
-macro C<SvPOK_on> would need to be called instead of C<SvIOK_on>.
+=head1 Subroutines
 
 =head2 XSUB's and the Argument Stack
 
@@ -914,8 +918,6 @@ is being used.
 
 For a complete description of the PerlIO abstraction, consult L<perlapio>.
 
-=head2 Scratchpads
-
 =head2 Putting a C value on Perl stack
 
 A lot of opcodes (this is an elementary operation in the internal perl
@@ -924,7 +926,7 @@ the corresponding SV is (usually) not recreated each time. The opcodes
 reuse specially assigned SVs (I<target>s) which are (as a corollary)
 not constantly freed/created.
 
-Each of the targets is created only once (but see 
+Each of the targets is created only once (but see
 L<Scratchpads and recursion> below), and when an opcode needs to put
 an integer, a double, or a string on stack, it just sets the
 corresponding parts of its I<target> and puts the I<target> on stack.
@@ -973,7 +975,144 @@ if it is, new scratchpad is created and pushed into the array.
 The I<target>s on this scratchpad are C<undef>s, but they are already
 marked with correct flags.
 
-=head2 API LISTING
+=head1 Compiled code
+
+=head2 Code tree
+
+Here we describe the internal form your code is converted to by
+Perl. Start with a simple example:
+
+  $a = $b + $c;
+
+This is converted to a tree similar to this one:
+
+             assign-to
+           /           \
+          +             $a
+        /   \
+      $b     $c
+
+(but slightly more complicated).  This tree reflect the way Perl
+parsed your code, but has nothing to do with the execution order.
+There is an additional "thread" going through the nodes of the tree
+which shows the order of execution of the nodes.  In our simplified
+example above it looks like:
+
+     $b ---> $c ---> + ---> $a ---> assign-to
+
+But with the actual compile tree for C<$a = $b + $c> it is different:
+some nodes I<optimized away>.  As a corollary, though the actual tree
+contains more nodes than our simplified example, the execution order
+is the same as in our example.
+
+=head2 Examining the tree
+
+If you have your perl compiled for debugging (usually done with C<-D
+optimize=-g> on C<Configure> command line), you may examine the
+compiled tree by specifying C<-Dx> on the Perl command line.  The
+output takes several lines per node, and for C<$b+$c> it looks like
+this:
+
+    5           TYPE = add  ===> 6
+                TARG = 1
+                FLAGS = (SCALAR,KIDS)
+                {
+                    TYPE = null  ===> (4)
+                      (was rv2sv)
+                    FLAGS = (SCALAR,KIDS)
+                    {
+    3                   TYPE = gvsv  ===> 4
+                        FLAGS = (SCALAR)
+                        GV = main::b
+                    }
+                }
+                {
+                    TYPE = null  ===> (5)
+                      (was rv2sv)
+                    FLAGS = (SCALAR,KIDS)
+                    {
+    4                   TYPE = gvsv  ===> 5
+                        FLAGS = (SCALAR)
+                        GV = main::c
+                    }
+                }
+
+This tree has 5 nodes (one per C<TYPE> specifier), only 3 of them are
+not optimized away (one per number in the left column).  The immediate
+children of the given node correspond to C<{}> pairs on the same level
+of indentation, thus this listing corresponds to the tree:
+
+                   add
+                 /     \
+               null    null
+                |       |
+               gvsv    gvsv
+
+The execution order is indicated by C<===E<gt>> marks, thus it is C<3
+4 5 6> (node C<6> is not included into above listing), i.e.,
+C<gvsv gvsv add whatever>.
+
+=head2 Compile pass 1: check routines
+
+The tree is created by the I<pseudo-compiler> while yacc code feeds it
+the constructions it recognizes. Since yacc works bottom-up, so does
+the first pass of perl compilation.
+
+What makes this pass interesting for perl developers is that some
+optimization may be performed on this pass.  This is optimization by
+so-called I<check routines>.  The correspondence between node names
+and corresponding check routines is described in F<opcode.pl> (do not
+forget to run C<make regen_headers> if you modify this file).
+
+A check routine is called when the node is fully constructed except
+for the execution-order thread.  Since at this time there is no
+back-links to the currently constructed node, one can do most any
+operation to the top-level node, including freeing it and/or creating
+new nodes above/below it.
+
+The check routine returns the node which should be inserted into the
+tree (if the top-level node was not modified, check routine returns
+its argument).
+
+By convention, check routines have names C<ck_*>. They are usually
+called from C<new*OP> subroutines (or C<convert>) (which in turn are
+called from F<perly.y>).
+
+=head2 Compile pass 1a: constant folding
+
+Immediately after the check routine is called the returned node is
+checked for being compile-time executable.  If it is (the value is
+judged to be constant) it is immediately executed, and a I<constant>
+node with the "return value" of the corresponding subtree is
+substituted instead.  The subtree is deleted.
+
+If constant folding was not performed, the execution-order thread is
+created.
+
+=head2 Compile pass 2: context propagation
+
+When a context for a part of compile tree is known, it is propagated
+down through the tree.  Aat this time the context can have 5 values
+(instead of 2 for runtime context): void, boolean, scalar, list, and
+lvalue.  In contrast with the pass 1 this pass is processed from top
+to bottom: a node's context determines the context for its children.
+
+Additional context-dependent optimizations are performed at this time.
+Since at this moment the compile tree contains back-references (via
+"thread" pointers), nodes cannot be free()d now.  To allow
+optimized-away nodes at this stage, such nodes are null()ified instead
+of free()ing (i.e. their type is changed to OP_NULL).
+
+=head2 Compile pass 3: peephole optimization
+
+After the compile tree for a subroutine (or for an C<eval> or a file)
+is created, an additional pass over the code is performed. This pass
+is neither top-down or bottom-up, but in the execution order (with
+additional compilications for conditionals).  These optimizations are
+done in the subroutine peep().  Optimizations performed at this stage
+are subject to the same restrictions as in the pass 2.
+
+=head1 API LISTING
 
 This is a listing of functions, macros, flags, and variables that may be
 useful to extension writers or that may be found while reading other
@@ -1192,10 +1331,16 @@ Returns the glob with the given C<name> and a defined subroutine or
 C<NULL>. The glob lives in the given C<stash>, or in the stashes accessable
 via @ISA and @<UNIVERSAL>.
 
-As a side-effect creates a glob with the given C<name> in the given C<stash>
-which in the case of success contains an alias for the subroutine, and
-sets up caching info for this glob.  Similarly for all the searched
-stashes.
+The argument C<level> should be either 0 or -1. If C<level==0>, as a
+side-effect creates a glob with the given C<name> in the given
+C<stash> which in the case of success contains an alias for the
+subroutine, and sets up caching info for this glob.  Similarly for all
+the searched stashes.
+
+The GV returned from C<gv_fetchmeth> may be a method cache entry,
+which is not visible to Perl code.  So when calling C<perl_call_sv>,
+you should not use the GV directly; instead, you should use the
+method's CV, which can be obtained from the GV with the C<GvCV> macro.
 
         GV*     gv_fetchmeth _((HV* stash, char* name, STRLEN len, I32 level));
 
@@ -1214,8 +1359,10 @@ Use the glob created via a side effect to do this.
 This function grants C<"SUPER"> token as prefix of name or postfix of
 the stash name.
 
-Has the same side-effects and as C<gv_fetchmeth()>.  C<name> should be
-writable if contains C<':'> or C<'\''>.
+Has the same side-effects and as C<gv_fetchmeth> with C<level==0>.
+C<name> should be writable if contains C<':'> or C<'\''>.
+The warning against passing the GV returned by C<gv_fetchmeth> to
+C<perl_call_sv> apply equally to C<gv_fetchmethod>.
 
         GV*     gv_fetchmethod _((HV* stash, char* name));
 
@@ -2601,4 +2748,4 @@ API Listing by Dean Roehrich <roehrich@cray.com>.
 
 =head1 DATE
 
-Version 30: 1997/1/17
+Version 31: 1997/1/27

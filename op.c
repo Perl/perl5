@@ -3880,6 +3880,8 @@ OP *op;
 						newGVOP(OP_GV, 0, gv)))));
 	return ck_subr(op);
     }
+    if ((op->op_flags & OPf_KIDS) && !cLISTOP->op_first->op_sibling)
+	append_elem(OP_GLOB, op, newSVREF(newGVOP(OP_GV, 0, defgv)));
     gv = newGVgen("main");
     gv_IOadd(gv);
     append_elem(OP_GLOB, op, newGVOP(OP_GV, 0, gv));

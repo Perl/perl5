@@ -643,7 +643,7 @@ PP(pp_sort)
 
 	    SAVESPTR(GvSV(firstgv));
 	    SAVESPTR(GvSV(secondgv));
-	    PUSHBLOCK(cx, CXt_LOOP, stack_base);
+	    PUSHBLOCK(cx, CXt_NULL, stack_base);
 	    sortcxix = cxstack_ix;
 
 	    qsort((char*)(myorigmark+1), max, sizeof(SV*), sortcv);
@@ -784,6 +784,10 @@ char *label;
 	    if (dowarn)
 		warn("Exiting eval via %s", op_name[op->op_type]);
 	    break;
+	case CXt_NULL:
+	    if (dowarn)
+		warn("Exiting pseudo-block via %s", op_name[op->op_type]);
+	    return -1;
 	case CXt_LOOP:
 	    if (!cx->blk_loop.label ||
 	      strNE(label, cx->blk_loop.label) ) {
@@ -873,6 +877,10 @@ I32 startingblock;
 	    if (dowarn)
 		warn("Exiting eval via %s", op_name[op->op_type]);
 	    break;
+	case CXt_NULL:
+	    if (dowarn)
+		warn("Exiting pseudo-block via %s", op_name[op->op_type]);
+	    return -1;
 	case CXt_LOOP:
 	    DEBUG_l( deb("(Found loop #%d)\n", i));
 	    return i;
@@ -904,6 +912,7 @@ I32 cxix;
 	case CXt_LOOP:
 	    POPLOOP(cx);
 	    break;
+	case CXt_NULL:
 	case CXt_SUBST:
 	    break;
 	}
@@ -1751,6 +1760,9 @@ PP(pp_goto)
 		    gotoprobe = cx->blk_oldcop->op_sibling;
 		else
 		    gotoprobe = main_root;
+		break;
+	    case CXt_NULL:
+		DIE("Can't \"goto\" outside a block");
 		break;
 	    default:
 		if (ix)

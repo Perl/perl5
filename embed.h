@@ -850,7 +850,6 @@
 #define push_return		Perl_push_return
 #define push_scope		Perl_push_scope
 #define q			Perl_q
-#define qrt_amg			Perl_qrt_amg
 #define rcsid			Perl_rcsid
 #define reall_srchlen		Perl_reall_srchlen
 #define ref			Perl_ref
@@ -970,6 +969,7 @@
 #define sle_amg			Perl_sle_amg
 #define slt_amg			Perl_slt_amg
 #define sne_amg			Perl_sne_amg
+#define sqrt_amg		Perl_sqrt_amg
 #define stack_base		Perl_stack_base
 #define stack_grow		Perl_stack_grow
 #define stack_max		Perl_stack_max

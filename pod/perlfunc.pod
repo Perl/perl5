@@ -1408,9 +1408,12 @@ Returns the socket option requested, or undefined if there is an error.
 
 =item glob EXPR
 
+=item glob
+
 Returns the value of EXPR with filename expansions such as a shell
 would do.  This is the internal function implementing the E<lt>*.*E<gt>
 operator, except it's easier to use.
+If EXPR is omitted, $_ is used.
 
 =item gmtime EXPR
 
@@ -1426,6 +1429,13 @@ All array elements are numeric, and come straight out of a struct tm.
 In particular this means that $mon has the range 0..11 and $wday has
 the range 0..6.  If EXPR is omitted, does C<gmtime(time())>.
 
+In a scalar context, prints out the ctime(3) value:
+
+    $now_string = gmtime;  # e.g., "Thu Oct 13 04:54:34 1994"
+
+Also see the F<timegm.pl> library, and the strftime(3) function available
+via the POSIX module.
+
 =item goto LABEL
 
 =item goto EXPR
@@ -1435,8 +1445,9 @@ the range 0..6.  If EXPR is omitted, does C<gmtime(time())>.
 The goto-LABEL form finds the statement labeled with LABEL and resumes
 execution there.  It may not be used to go into any construct that
 requires initialization, such as a subroutine or a foreach loop.  It
-also can't be used to go into a construct that is optimized away.  It
-can be used to go almost anywhere else within the dynamic scope,
+also can't be used to go into a construct that is optimized away,
+or to get out of a block or subroutine given to sort().
+It can be used to go almost anywhere else within the dynamic scope,
 including out of subroutines, but it's usually better to use some other
 construct such as last or die.  The author of Perl has never felt the
 need to use this form of goto (in Perl, that is--C is another matter).
@@ -1692,13 +1703,14 @@ follows:
 
 All array elements are numeric, and come straight out of a struct tm.
 In particular this means that $mon has the range 0..11 and $wday has
-the range 0..6.  If EXPR is omitted, does localtime(time).
+the range 0..6 and $year is year-1900, that is, $year is 123 in year
+2023.  If EXPR is omitted, uses the current time ("localtime(time)").
 
-In a scalar context, prints out the ctime(3) value:
+In a scalar context, returns the ctime(3) value:
 
     $now_string = localtime;  # e.g., "Thu Oct 13 04:54:34 1994"
 
-Also see the F<timelocal.pl> library, and the strftime(3) function available
+Also see the Time::Local module, and the strftime(3) function available
 via the POSIX module.
 
 =item log EXPR
@@ -2786,6 +2798,9 @@ recursive subroutine, and the two elements to be compared are passed into
 the subroutine not via @_ but as the package global variables $a and
 $b (see example below).  They are passed by reference, so don't
 modify $a and $b.  And don't try to declare them as lexicals either.
+
+You also cannot exit out of the sort block or subroutine using any of the
+loop control operators described in L<perlsyn> or with goto().
 
 When C<use locale> is in effect, C<sort LIST> sorts LIST according to the
 current collation locale.  See L<perllocale>.

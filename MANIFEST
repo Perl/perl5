@@ -15,6 +15,7 @@ MANIFEST		This list of files
 Makefile.SH		A script that generates Makefile
 Porting/Glossary	Glossary of config.sh variables
 README			The Instructions
+README.amiga		Notes about AmigaOS port
 README.os2		Notes about OS/2 port
 README.plan9		Notes about Plan9 port
 README.qnx		Notes about QNX port
@@ -528,7 +529,7 @@ pod/perlxstut.pod	XS tutorial
 pod/pod2html.PL		Precursor for translator to turn pod into HTML
 pod/pod2latex.PL	Precursor for translator to turn pod into LaTeX
 pod/pod2man.PL		Precursor for translator to turn pod into manpage
-pod/pod2text.PL	        Precursor for translator to turn pod into text
+pod/pod2text.PL		Precursor for translator to turn pod into text
 pod/roffitall		troff the whole man page set
 pod/rofftoc		Generate a table of contents in troff format
 pod/splitman		Splits perlfunc into multiple man pages
@@ -641,6 +642,7 @@ t/op/assignwarn.t	See if OP= operators warn correctly for undef targets
 t/op/auto.t		See if autoincrement et all work
 t/op/bop.t		See if bitops work
 t/op/chop.t		See if chop works
+t/op/closure.t		See if closures work
 t/op/cmp.t		See if the various string and numeric compare work
 t/op/cond.t		See if conditional expressions work
 t/op/delete.t		See if delete works
@@ -752,6 +754,53 @@ vms/vms.c		VMS-specific C code for Perl core
 vms/vms_yfix.pl		convert Unix perly.[ch] to VMS perly_[ch].vms
 vms/vmsish.h		VMS-specific C header for Perl core
 vms/writemain.pl	Generate perlmain.c from miniperlmain.c+extensions
+win32/EXTERN.h		Win32 port
+win32/Fcntl.mak		Win32 port
+win32/IO.mak		Win32 port
+win32/Makefile		Win32 port
+win32/Opcode.mak	Win32 port
+win32/README		Win32 port
+win32/SDBM_File.mak	Win32 port
+win32/Socket.mak	Win32 port
+win32/TEST		Win32 port
+win32/autosplit.pl	Win32 port
+win32/bin/PL2BAT.BAT	Win32 port
+win32/bin/network.pl	Win32 port
+win32/bin/search.bat	Win32 port
+win32/bin/test.bat	Win32 port
+win32/bin/webget.bat	Win32 port
+win32/bin/www.pl	Win32 port
+win32/config.h		Win32 port
+win32/config.w32	Win32 port
+win32/dl_win32.xs	Win32 port
+win32/dosish.diff	Win32 port
+win32/dosish.h		Win32 port
+win32/genxsdef.pl	Win32 port
+win32/include/arpa/inet.h	Win32 port
+win32/include/dirent.h		Win32 port
+win32/include/netdb.h		Win32 port
+win32/include/sys/socket.h	Win32 port
+win32/libperl.mak	Win32 port
+win32/makedef.pl	Win32 port
+win32/makemain.pl	Win32 port
+win32/makeperldef.pl	Win32 port
+win32/miniperl.mak	Win32 port
+win32/modules.mak	Win32 port
+win32/perl.mak		Win32 port
+win32/perldll.mak	Win32 port
+win32/perlglob.c	Win32 port
+win32/perlglob.mak	Win32 port
+win32/perllib.c		Win32 port
+win32/perlmain.c	Win32 port
+win32/runperl.c		Win32 port
+win32/splittree.pl	Win32 port
+win32/win32.c		Win32 port
+win32/win32.h		Win32 port
+win32/win32aux.cpp	Win32 port
+win32/win32io.cpp	Win32 port
+win32/win32io.h		Win32 port
+win32/win32iop.h	Win32 port
+win32/win32sck.c	Win32 port
 writemain.SH		Generate perlmain.c from miniperlmain.c+extensions
 x2p/EXTERN.h		Same as above
 x2p/INTERN.h		Same as above

@@ -6,10 +6,7 @@
 archname='m68k-amigaos'
 cc='gcc'
 firstmakefile='GNUmakefile'
-ccflags='-DAMIGAOS -mstackextend'
-optimize='-O2 -fomit-frame-pointer'
-
-usenm='y'
+usenm='true'
 usemymalloc='n'
 usevfork='true'
 useperlio='true'
@@ -18,21 +15,37 @@ d_fork='undef'
 d_vfork='define'
 groupstype='int'
 
+# compiler & linker flags
+
+ccflags='-DAMIGAOS -mstackextend'
+ldflags=''
+optimize='-O2 -fomit-frame-pointer'
+
+# uncomment the following settings if you are compiling for an 68020+ system
+
+# ccflags='-DAMIGAOS -mstackextend -m68020 -resident32'
+# ldflags='-m68020 -resident32'
+
 # libs
 
-libpth="/local/lib $prefix/lib"
+libpth="$prefix/lib /local/lib"
 glibpth="$libpth"
 xlibpth="$libpth"
 
-libswanted='dld m c gdbm'
+libswanted='gdbm m'
 so=' '
 
 # dynamic loading
 
-dlext='o'
-cccdlflags='none'
-ccdlflags='none'
-lddlflags='-oformat a.out-amiga -r'
+usedl='n'
+
+# uncomment the following line if a working version of dld is available
+
+# usedl='y'
+# dlext='o'
+# cccdlflags='none'
+# ccdlflags='none'
+# lddlflags='-oformat a.out-amiga -r'
 
 # Avoid telldir prototype conflict in pp_sys.c  (AmigaOS uses const DIR *)
 # Configure should test for this.  Volunteers?

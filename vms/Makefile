@@ -32,7 +32,7 @@ ARCH = VMS_VAX
 OBJVAL = $@
 
 # Updated by fndvers.com -- do not edit by hand
-PERL_VERSION = 5_00323#
+PERL_VERSION = 5_00324#
 
 
 ARCHDIR =  [.lib.$(ARCH).$(PERL_VERSION)]

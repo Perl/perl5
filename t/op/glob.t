@@ -2,9 +2,9 @@
 
 # $RCSfile: glob.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:55 $
 
-print "1..4\n";
+print "1..6\n";
 
-@ops = <op/*>;
+@oops = @ops = <op/*>;
 
 map { $files{$_}++ } <op/*>;
 map { delete $files{$_} } split /[\s\n]/, `echo op/*`;
@@ -21,3 +21,11 @@ while (<jskdfjskdfj* op/* jskdjfjkosvk*>) {
 print "${not}ok 3\n";
 
 print $/ eq "\n" ? "ok 4\n" : "not ok 4\n";
+
+# test the "glob" operator
+$_ = "op/*";
+@glops = glob $_;
+print "@glops" eq "@oops" ? "ok 5\n" : "not ok 5\n";
+
+@glops = glob;
+print "@glops" eq "@oops" ? "ok 6\n" : "not ok 6\n";

@@ -54,8 +54,6 @@ HOME, LOGDIR, PATH, PERL5LIB, PERL5DB, PERL_DESTRUCT_LEVEL, PERLLIB
 
 =item New Opcode Module and Revised Safe Module
 
-=item Extended Fcntl Module
-
 =item Internal Change: FileHandle Deprecated
 
 =item Internal Change: PerlIO internal IO abstraction interface
@@ -99,6 +97,10 @@ use blib, use blib 'dir', use locale, use ops
 
 =item Math::Complex
 
+=item DB_File
+
+=item Net::Ping
+
 =item Overridden Built-ins
 
 =back
@@ -112,6 +114,10 @@ use blib, use blib 'dir', use locale, use ops
 C<void> XSUBs now default to returning nothing
 
 =back
+
+=item C Language API Changes
+
+C<gv_fetchmethod> and C<perl_call_sv>
 
 =item Documentation Changes
 
@@ -353,8 +359,8 @@ getgrent, gethostent, getnetent, getprotoent, getservent, setpwent,
 setgrent, sethostent STAYOPEN, setnetent STAYOPEN, setprotoent STAYOPEN,
 setservent STAYOPEN, endpwent, endgrent, endhostent, endnetent,
 endprotoent, endservent, getsockname SOCKET, getsockopt
-SOCKET,LEVEL,OPTNAME, glob EXPR, gmtime EXPR, goto LABEL, goto EXPR, goto
-&NAME, grep BLOCK LIST, grep EXPR,LIST, hex EXPR, hex, import, index
+SOCKET,LEVEL,OPTNAME, glob EXPR, glob, gmtime EXPR, goto LABEL, goto EXPR,
+goto &NAME, grep BLOCK LIST, grep EXPR,LIST, hex EXPR, hex, import, index
 STR,SUBSTR,POSITION, index STR,SUBSTR, int EXPR, int, ioctl
 FILEHANDLE,FUNCTION,SCALAR, join EXPR,LIST, keys ASSOC_ARRAY, kill LIST,
 last LABEL, last, lc EXPR, lc, lcfirst EXPR, lcfirst, length EXPR, length,
@@ -1395,6 +1401,8 @@ B<PerlIO_get_base(f)>, B<PerlIO_get_bufsiz(f)>
 
 =item DESCRIPTION
 
+=item Variables
+
 =over
 
 =item Datatypes
@@ -1419,7 +1427,9 @@ B<PerlIO_get_base(f)>, B<PerlIO_get_bufsiz(f)>
 
 =item Stashes and Globs
 
-=item Magic
+=item Double-Typed SV's
+
+=item Magic Variables
 
 =item Assigning Magic
 
@@ -1427,7 +1437,11 @@ B<PerlIO_get_base(f)>, B<PerlIO_get_bufsiz(f)>
 
 =item Finding Magic
 
-=item Double-Typed SV's
+=back
+
+=item Subroutines
+
+=over
 
 =item XSUB's and the Argument Stack
 
@@ -1437,13 +1451,31 @@ B<PerlIO_get_base(f)>, B<PerlIO_get_bufsiz(f)>
 
 =item PerlIO
 
-=item Scratchpads
-
 =item Putting a C value on Perl stack
 
 =item Scratchpads
 
 =item Scratchpads and recursions
+
+=back
+
+=item Compiled code
+
+=over
+
+=item Code tree
+
+=item Examining the tree
+
+=item Compile pass 1: check routines
+
+=item Compile pass 1a: constant folding
+
+=item Compile pass 2: context propagation
+
+=item Compile pass 3: peephole optimization
+
+=back
 
 =item API LISTING
 
@@ -1481,8 +1513,6 @@ sv_yes, THIS, toLOWER, toUPPER, warn, XPUSHi, XPUSHn, XPUSHp, XPUSHs, XS,
 XSRETURN, XSRETURN_EMPTY, XSRETURN_IV, XSRETURN_NO, XSRETURN_NV,
 XSRETURN_PV, XSRETURN_UNDEF, XSRETURN_YES, XST_mIV, XST_mNV, XST_mNO,
 XST_mPV, XST_mUNDEF, XST_mYES, XS_VERSION, XS_VERSION_BOOTCHECK, Zero
-
-=back
 
 =item EDITOR
 
@@ -3409,6 +3439,8 @@ unexpand(1)
 =item DESCRIPTION
 
 =item EXAMPLE
+
+=item BUGS
 
 =item AUTHOR
 
