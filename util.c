@@ -4135,7 +4135,11 @@ Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
     struct sockaddr_in connect_addr;
     Sock_size_t size;
 
-    if (protocol || family != AF_UNIX) {
+    if (protocol
+#ifdef AF_UNIX
+	|| family != AF_UNIX
+#endif
+	) {
         errno = EAFNOSUPPORT;
         return -1;
     }
