@@ -277,6 +277,8 @@ elsif ($PLATFORM eq 'os2') {
 		    my_tmpfile
 		    my_tmpnam
 		    my_flock
+		    my_rmdir
+		    my_mkdir
 		    malloc_mutex
 		    threads_mutex
 		    nthreads
@@ -389,6 +391,8 @@ if ($define{'MYMALLOC'}) {
 		    Perl_mfree
 		    Perl_realloc
 		    Perl_calloc
+		    Perl_strdup
+		    Perl_putenv
 		    )];
     if ($define{'USE_5005THREADS'} || $define{'USE_ITHREADS'}) {
 	emit_symbols [qw(

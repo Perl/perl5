@@ -97,7 +97,7 @@ exec_in_REXX(pTHX_ char *cmd, char * handlerName, RexxFunctionHandler *handler)
     if (rc || SvTRUE(GvSV(PL_errgv))) {
 	if (SvTRUE(GvSV(PL_errgv))) {
 	    STRLEN n_a;
-	    Perl_die(aTHX_ "Error inside perl function called from REXX compartment.\n%s", SvPV(GvSV(PL_errgv), n_a)) ;
+	    Perl_die(aTHX_ "Error inside perl function called from REXX compartment:\n%s", SvPV(GvSV(PL_errgv), n_a)) ;
 	}
 	Perl_die(aTHX_ "REXX compartment returned non-zero status %li", rc);
     }
@@ -129,6 +129,7 @@ PERLCALL(PCSZ name, ULONG argc, PRXSTRING argv, PCSZ queue, PRXSTRING ret)
     unsigned long len;
     char *str;
     char **arr;
+    SV *res;
     dSP;
 
     DosSetExceptionHandler(&xreg);
@@ -144,47 +145,41 @@ PERLCALL(PCSZ name, ULONG argc, PRXSTRING argv, PCSZ queue, PRXSTRING ret)
     }
 #endif 
 
+    for (i = 0; i < argc; ++i)
+	XPUSHs(sv_2mortal(newSVpvn(argv[i].strptr, argv[i].strlength)));
+    PUTBACK;
     if (name) {
-	int ac = 0;
-	char **arr = alloca((argc + 1) * sizeof(char *));
-
-	for (i = 0; i < argc; ++i)
-	    arr[ac++] = argv[i].strptr;
-	arr[ac] = NULL;
-
-	rc = perl_call_argv(name, G_SCALAR | G_EVAL, arr);
+	rc = perl_call_pv(name, G_SCALAR | G_EVAL);
     } else if (exec_cv) {
 	SV *cv = exec_cv;
 
 	exec_cv = NULL;
 	rc = perl_call_sv(cv, G_SCALAR | G_EVAL);
-    } else rc = -1;
+    } else
+	rc = -1;
 
     SPAGAIN;
 
-    if (rc == 1 && SvOK(TOPs)) { 
-	str = SvPVx(POPs, len);
-	if (len > 256)
-	    if (DosAllocMem((PPVOID)&ret->strptr, len, PAG_READ|PAG_WRITE|PAG_COMMIT)) {
-		DosUnsetExceptionHandler(&xreg);
-		return 1;
-	    }
-	memcpy(ret->strptr, str, len);
-	ret->strlength = len;
-    }
+    if (rc == 1)			/* must be! */
+	res = POPs;
+    if (rc == 1 && SvOK(res)) { 
+	str = SvPVx(res, len);
+	if (len <= 256			/* Default buffer is 256-char long */
+	    || !CheckOSError(DosAllocMem((PPVOID)&ret->strptr, len,
+					PAG_READ|PAG_WRITE|PAG_COMMIT))) {
+	    memcpy(ret->strptr, str, len);
+	    ret->strlength = len;
+	} else
+	    rc = 0;
+    } else
+	rc = 0;
 
     PUTBACK ;
     FREETMPS ;
     LEAVE ;
 
-    if (rc != 1) {
-	DosUnsetExceptionHandler(&xreg);
-	return 1;
-    }
-
-
     DosUnsetExceptionHandler(&xreg);
-    return 0;
+    return rc == 1 ? 0 : 1;			/* 0 means SUCCESS */
 }
 
 static void

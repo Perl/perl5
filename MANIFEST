@@ -1179,6 +1179,7 @@ os2/dl_os2.c		Addon for dl_open
 os2/dlfcn.h		Addon for dl_open
 os2/os2.c		Additional code for OS/2
 os2/os2.sym		Additional symbols to export
+os2/os2add.sym		Overriding symbols to export
 os2/os2ish.h		Header for OS/2
 os2/os2thread.h		pthread-like typedefs
 os2/perl2cmd.pl		Corrects installed binaries under OS/2

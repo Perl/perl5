@@ -210,6 +210,7 @@ sub ExtUtils::MM_Unix::parse_version ;
 sub ExtUtils::MM_Unix::pasthru ;
 sub ExtUtils::MM_Unix::path ;
 sub ExtUtils::MM_Unix::perl_archive;
+sub ExtUtils::MM_Unix::perl_archive_after;
 sub ExtUtils::MM_Unix::perl_script ;
 sub ExtUtils::MM_Unix::perldepend ;
 sub ExtUtils::MM_Unix::pm_to_blib ;
@@ -684,6 +685,10 @@ EXPORT_LIST = $tmp
     push @m, "
 PERL_ARCHIVE = $tmp
 ";
+    $tmp = $self->perl_archive_after;
+    push @m, "
+PERL_ARCHIVE_AFTER = $tmp
+";
 
 #    push @m, q{
 #INST_PM = }.join(" \\\n\t", sort values %{$self->{PM}}).q{
@@ -1071,7 +1076,7 @@ ARMAYBE = '.$armaybe.'
 OTHERLDFLAGS = '.$otherldflags.'
 INST_DYNAMIC_DEP = '.$inst_dynamic_dep.'
 
-$(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)/.exists $(EXPORT_LIST) $(PERL_ARCHIVE) $(INST_DYNAMIC_DEP)
+$(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)/.exists $(EXPORT_LIST) $(PERL_ARCHIVE) $(PERL_ARCHIVE_AFTER) $(INST_DYNAMIC_DEP)
 ');
     if ($armaybe ne ':'){
 	$ldfrom = 'tmp$(LIB_EXT)';
@@ -1093,7 +1098,7 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)/.exists 
 ');
 
     push(@m,'	LD_RUN_PATH="$(LD_RUN_PATH)" $(LD) -o $@ '.$ldrun.' $(LDDLFLAGS) '.$ldfrom.
-		' $(OTHERLDFLAGS) $(MYEXTLIB) $(PERL_ARCHIVE) $(LDLOADLIBS) $(EXPORT_LIST)');
+		' $(OTHERLDFLAGS) $(MYEXTLIB) $(PERL_ARCHIVE) $(LDLOADLIBS) $(PERL_ARCHIVE_AFTER) $(EXPORT_LIST)');
     push @m, '
 	$(CHMOD) $(PERM_RWX) $@
 ';
@@ -3826,6 +3831,21 @@ and Win32 do.
 sub perl_archive
 {
  return '$(PERL_INC)' . "/$Config{libperl}" if $^O eq "beos";
+ return "";
+}
+
+=item perl_archive_after
+
+This is an internal method that returns path to a library which
+should be put on the linker command line I<after> the external libraries
+to be linked to dynamic extensions.  This may be needed if the linker
+is one-pass, and Perl includes some overrides for C RTL functions,
+such as malloc().
+
+=cut 
+
+sub perl_archive_after
+{
  return "";
 }
 
