@@ -41,6 +41,8 @@ sub _ok {
     # VMS will avenge.
     my $out;
     if ($name) {
+        # escape out '#' or it will interfere with '# skip' and such
+        $name =~ s/#/\\#/g;
 	$out = $pass ? "ok $test - $name" : "not ok $test - $name";
     } else {
 	$out = $pass ? "ok $test" : "not ok $test";
@@ -265,31 +267,45 @@ sub BAILOUT {
 
 # A way to display scalars containing control characters and Unicode.
 sub display {
-    join("", map { $_ > 255 ? sprintf("\\x{%x}", $_) : chr($_) =~ /[[:cntrl:]]/ ? sprintf("\\%03o", $_) : chr($_) } unpack("U*", $_[0]));
+    map { join("", map { $_ > 255 ? sprintf("\\x{%x}", $_) : chr($_) =~ /[[:cntrl:]]/ ? sprintf("\\%03o", $_) : chr($_) } unpack("U*", $_)) } @_;
 }
 
 
 # A somewhat safer version of the sometimes wrong $^X.
-BEGIN: {
-    eval {
-        require File::Spec;
-        require Config;
-        Config->import;
-    };
-    warn "test.pl had problems loading other modules: $@" if $@;
-}
-
-# We do this at compile time before the test might have chdir'd around
-# and make sure its absolute in case they do later.
-my $Perl = $^X;
-$Perl = File::Spec->rel2abs(File::Spec->catfile(File::Spec->curdir(), $Perl))
-               if $^X eq "perl$Config{_exe}";
-warn "Can't generate which_perl from $^X" unless -f $Perl;
-
-# For subcommands to use.
-$ENV{PERLEXE} = $Perl;
-
+my $Perl;
 sub which_perl {
+    unless (defined $Perl) {
+	$Perl = $^X;
+	
+	my $exe;
+	eval "require Config; Config->import";
+	if ($@) {
+	    warn "test.pl had problems loading Config: $@";
+	    $exe = '';
+	} else {
+	    $exe = $Config{_exe};
+	}
+	
+	# This doesn't absolutize the path: beware of future chdirs().
+	# We could do File::Spec->abs2rel() but that does getcwd()s,
+	# which is a bit heavyweight to do here.
+	
+	if ($Perl =~ /^perl\Q$exe\E$/i) {
+	    my $perl = "perl$exe";
+	    eval "require File::Spec";
+	    if ($@) {
+		warn "test.pl had problems loading File::Spec: $@";
+		$Perl = "./$perl";
+	    } else {
+		$Perl = File::Spec->catfile(File::Spec->curdir(), $perl);
+	    }
+	}
+	
+	warn "which_perl: cannot find $Perl from $^X" unless -f $Perl;
+	
+	# For subcommands to use.
+	$ENV{PERLEXE} = $Perl;
+    }
     return $Perl;
 }
 

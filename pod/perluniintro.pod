@@ -274,8 +274,8 @@ the C<open> pragma; see L<open>:
 
 With the C<open> pragma you can use the C<:locale> discipline
 
-    $ENV{LANG} = 'ru_RU.KOI8-R';
-    # the :locale will probe the locale environment variables like LANG
+    $ENV{LC_ALL} = $ENV{LANG} = 'ru_RU.KOI8-R';
+    # the :locale will probe the locale environment variables like LC_ALL
     use open OUT => ':locale'; # russki parusski
     open(O, ">koi8");
     print O chr(0x430); # Unicode CYRILLIC SMALL LETTER A = KOI8-R 0xc1
@@ -303,10 +303,10 @@ streams, use explicit disciplines directly in the C<open()> call.
 You can switch encodings on an already opened stream by using
 C<binmode()>, see L<perlfunc/binmode>.
 
-The C<:locale> does not currently work with C<open()> and
-C<binmode()>, only with the C<open> pragma.  The C<:utf8> and
-C<:encoding(...)> do work with all of C<open()>, C<binmode()>,
-and the C<open> pragma.
+The C<:locale> does not currently (as of Perl 5.8.0) work with
+C<open()> and C<binmode()>, only with the C<open> pragma.  The
+C<:utf8> and C<:encoding(...)> do work with all of C<open()>,
+C<binmode()>, and the C<open> pragma.
 
 Similarly, you may use these I/O disciplines on input streams to
 automatically convert data from the specified encoding when it is
@@ -344,6 +344,27 @@ by repeatedly encoding it in UTF-8:
 If you run this code twice, the contents of the F<file> will be twice
 UTF-8 encoded.  A C<use open ':utf8'> would have avoided the bug, or
 explicitly opening also the F<file> for input as UTF-8.
+
+=head2 Displaying Unicode As Text
+
+Sometimes you might want to display Perl scalars containing Unicode as
+simple ASCII (or EBCDIC) text.  The following subroutine will convert
+its argument so that Unicode characters with code points greater than
+255 are displayed as "\x{...}", control characters (like "\n") are
+displayed as "\x..", and the rest of the characters as themselves.
+
+sub nice_string {
+   join("",
+	map { $_ > 255 ?			# if wide character...
+	          sprintf("\\x{%x}", $_) :	# \x{...}
+	          chr($_) =~ /[[:cntrl:]]/ ?	# else if control character ...
+	              sprintf("\\x%02x", $_) :	# \x..
+                      chr($_) }			# else as themselves
+            unpack("U*", $_[0]));		# unpack Unicode characters
+}
+
+For example, C<nice_string("foo\x{100}bar\n")> will return
+C<"foo\x{100}bar\x0a">.
 
 =head2 Special Cases
 

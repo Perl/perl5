@@ -11,6 +11,10 @@ require "./test.pl";
 
 plan(tests => 14);
 
+# due to a bug in VMS's piping which makes it impossible for runperl()
+# to emulate echo -n, these tests almost totally fail.
+$TODO = "runperl() unable to emulate echo -n due to pipe bug" if $^O eq 'VMS';
+
 my $r;
 my @tmpfiles = ();
 END { unlink @tmpfiles }
@@ -63,6 +67,8 @@ is( $r, 'abc-def--ghi-jkl-mno--pq-/', '-0777 (slurp mode)' );
 
 my $filename = 'swctest.tmp';
 SKIP: {
+    local $TODO = '';   # this one works on VMS
+
     open my $f, ">$filename" or skip( "Can't write temp file $filename: $!" );
     print $f <<'SWTEST';
 BEGIN { print "block 1\n"; }
@@ -122,7 +128,7 @@ SWTEST
 	progfile    => $filename,
 	args	    => [ '-x=foo' ],
     );
-    is( $r, 'foo', '-s on the #! line' );
+    is( $r, 'foo', '-s on the shebang line' );
     push @tmpfiles, $filename;
 }
 
@@ -151,7 +157,11 @@ SWTESTPM
 	switches    => [ '-mswtest' ],
 	prog	    => '1',
     );
-    is( $r, '', '-m' );
+
+    {
+        local $TODO = '';  # this one works on VMS
+        is( $r, '', '-m' );
+    }
     $r = runperl(
 	switches    => [ '-mswtest=foo,bar' ],
 	prog	    => '1',

@@ -134,9 +134,9 @@ ok((keys %h)[0] eq "foo\034bar", (keys %h)[0]);
 }
 
 # $?, $@, $$
-system qq[$PERL -e "exit(0)"];
+system qq[$PERL "-I../lib" -e "use vmsish qw(hushed); exit(0)"];
 ok $? == 0, $?;
-system qq[$PERL -e "exit(1)"];
+system qq[$PERL "-I../lib" -e "use vmsish qw(hushed); exit(1)"];
 ok $? != 0, $?;
 
 eval { die "foo\n" };
@@ -251,9 +251,11 @@ else {
 }
 
 {
-    local $SIG{'__WARN__'} = sub { print "# @_\nnot " };
+    my $ok = 1;
+    my $warn = '';
+    local $SIG{'__WARN__'} = sub { $ok = 0; $warn = join '', @_; };
     $! = undef;
-    ok 1;
+    ok($ok, $warn, $Is_VMS ? "'\$!=undef' does throw a warning" : '');
 }
 
 # test case-insignificance of %ENV (these tests must be enabled only
