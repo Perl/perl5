@@ -11,8 +11,6 @@ BEGIN {
 use strict;
 use Config;
 
-plan tests => 2;
-
 BEGIN {
     if (!$Config{useithreads}) {
 	print "1..0 # Skip: no ithreads\n";
@@ -22,10 +20,19 @@ BEGIN {
 	print "1..0 # Skip: no getppid\n";
 	exit;
     }
+    eval 'use threads; use threads::shared';
+    if ($@ =~ /dynamic loading not available/) {
+	print "1..0 # Skip: no dynamic loading, no threads\n";
+	exit;
+    }
+    plan tests => 3;
+    if ($@) {
+	fail("unable to load thread modules");
+    }
+    else {
+	pass("thread modules loaded");
+    }
 }
-
-use threads;
-use threads::shared;
 
 my ($pid, $ppid) = ($$, getppid());
 my $pid2 : shared = 0;
