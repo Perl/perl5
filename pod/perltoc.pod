@@ -5502,8 +5502,6 @@ Unicode::Normalize, Test::Harness, threads::shared
 
 =item New Documentation
 
-=item Performance Enhancements
-
 =item Installation and Configuration Improvements
 
 =item Selected Bug Fixes
@@ -5514,11 +5512,13 @@ Unicode::Normalize, Test::Harness, threads::shared
 
 =item Configuration and Building
 
-=item New Tests
+=item Platform Specific Problems
 
 =item Known Problems
 
-=item Platform Specific Problems
+=item Future Directions
+
+=item Obituary
 
 =item Reporting Bugs
 
@@ -5546,8 +5546,6 @@ Unicode::Normalize, Test::Harness, threads::shared
 
 =item New Documentation
 
-=item Performance Enhancements
-
 =item Installation and Configuration Improvements
 
 =item Selected Bug Fixes
@@ -5558,11 +5556,13 @@ Unicode::Normalize, Test::Harness, threads::shared
 
 =item Configuration and Building
 
-=item New Tests
+=item Platform Specific Problems
 
 =item Known Problems
 
-=item Platform Specific Problems
+=item Future Directions
+
+=item Obituary
 
 =item Reporting Bugs
 
@@ -5570,7 +5570,7 @@ Unicode::Normalize, Test::Harness, threads::shared
 
 =back
 
-=head2 perl582delta, perldelta - what is new for perl v5.8.2
+=head2 perl582delta - what is new for perl v5.8.2
 
 =over 4
 
@@ -5614,7 +5614,7 @@ Unicode::Normalize, UNIVERSAL
 
 =back
 
-=head2 perl581delta, perldelta - what is new for perl v5.8.1
+=head2 perl581delta - what is new for perl v5.8.1
 
 =over 4
 
@@ -5773,7 +5773,7 @@ Win32::GetOSVersion
 
 =back
 
-=head2 perl58delta, perldelta - what is new for perl v5.8.0
+=head2 perl58delta - what is new for perl v5.8.0
 
 =over 4
 
