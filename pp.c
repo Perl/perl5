@@ -1559,7 +1559,7 @@ PP(pp_i_add)
 {
     djSP; dATARGET; tryAMAGICbin(add,opASSIGN);
     {
-      dPOPTOPiirl;
+      dPOPTOPiirl_ul;
       SETi( left + right );
       RETURN;
     }
@@ -1569,7 +1569,7 @@ PP(pp_i_subtract)
 {
     djSP; dATARGET; tryAMAGICbin(subtr,opASSIGN);
     {
-      dPOPTOPiirl;
+      dPOPTOPiirl_ul;
       SETi( left - right );
       RETURN;
     }

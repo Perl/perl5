@@ -2089,12 +2089,12 @@ Ap	|void	|vwarner	|U32 err|const char* pat|va_list* args
 p	|void	|watch		|char** addr
 Ap	|I32	|whichsig	|char* sig
 p	|int	|yyerror	|char* s
-#if defined(USE_PURE_BISON)
+#ifdef USE_PURE_BISON
+p	|int	|yylex_r	|YYSTYPE *lvalp|int *lcharp
 p	|int	|yylex		|YYSTYPE *lvalp|int *lcharp
 #else
 p	|int	|yylex
 #endif
-sp	|int	|syylex
 p	|int	|yyparse
 p	|int	|yywarn		|char* s
 #if defined(MYMALLOC)

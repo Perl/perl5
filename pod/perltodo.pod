@@ -111,10 +111,6 @@ problem for free.
 
 =head1 Perl Language
 
-=head2 our ($var)
-
-Declare global variables (lexically or otherwise).
-
 =head2 64-bit Perl
 
 Verify complete 64 bit support so that the value of sysseek, or C<-s>, or
@@ -531,14 +527,6 @@ required loading a few terabytes of Tk code.
 Kurt Starsinic is working on h2ph.  mjd has fixed bugs in a2p in the
 past.  a2p apparently doesn't work on nawk and gawk extensions.
 Graham Barr has an Include module that does h2ph work at runtime.
-
-=head2 POD Converters
-
-Brad's PodParser code needs to become part of the core, and the Pod::*
-and pod2* programs rewritten to use this standard parser.  Currently
-the converters take different options, some behave in different
-fashions, and some are more picky than others in terms of the POD
-files they accept.
 
 =head2 pod2html
 

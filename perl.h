@@ -1172,9 +1172,13 @@ typedef NVTYPE NV;
 /* e.g. libsunmath doesn't have modfl and frexpl as of mid-March 2000 */
 #   ifdef HAS_MODFL
 #       define Perl_modf(x,y) modfl(x,y)
+#   else
+#       define Perl_modf(x,y) ((long double)modf((double)(x),(double*)(y)))
 #   endif
 #   ifdef HAS_FREXPL
 #       define Perl_frexp(x,y) frexpl(x,y)
+#   else
+#       define Perl_frexp(x,y) ((long double)frexp((double)(x),y))
 #   endif
 #   ifdef HAS_ISNANL
 #       define Perl_isnan(x) isnanl(x)
@@ -2641,10 +2645,6 @@ typedef char* (CPERLscope(*re_intuit_start_t)) (pTHX_ regexp *prog, SV *sv,
 						struct re_scream_pos_data_s *d);
 typedef SV*	(CPERLscope(*re_intuit_string_t)) (pTHX_ regexp *prog);
 typedef void	(CPERLscope(*regfree_t)) (pTHX_ struct regexp* r);
-
-#ifdef USE_PURE_BISON
-int Perl_yylex(pTHX_ YYSTYPE *lvalp, int *lcharp);
-#endif
 
 typedef void (*DESTRUCTORFUNC_NOCONTEXT_t) (void*);
 typedef void (*DESTRUCTORFUNC_t) (pTHXo_ void*);
