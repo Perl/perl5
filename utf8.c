@@ -1270,44 +1270,40 @@ The "ustrp" is a pointer to the character buffer to put the
 conversion result to.  The "lenp" is a pointer to the length
 of the result.
 
-The "swash" is a pointer to the swash to use.
+The "swashp" is a pointer to the swash to use.
+
+Both the special and normal mappings are stored lib/unicore/To/Foo.pl,
+and loaded by SWASHGET, using lib/utf8_heavy.pl.  The special (usually,
+but not always, a multicharacter mapping), is tried first.
+
+The "special" is a string like "utf8::ToSpecLower", which means the
+hash %utf8::ToSpecLower.  The access to the hash is through
+Perl_to_utf8_case().
 
 The "normal" is a string like "ToLower" which means the swash
-$utf8::ToLower, which is stored in lib/unicore/To/Lower.pl,
-and loaded by SWASHGET, using lib/utf8_heavy.pl.
+%utf8::ToLower.
 
-The "special" is a string like "utf8::ToSpecLower", which means
-the hash %utf8::ToSpecLower, which is stored in the same file,
-lib/unicore/To/Lower.pl, and also loaded by SWASHGET.  The access
-to the hash is by Perl_to_utf8_case().
-
-=cut
- */
+=cut */
 
 UV
 Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *normal, char *special)
 {
-    UV uv0, uv1, uv2;
+    UV uv0, uv1;
     U8 tmpbuf[UTF8_MAXLEN_FOLD+1];
-    STRLEN len;
+    STRLEN len = 0;
 
-    if (!*swashp)
-        *swashp = swash_init("utf8", normal, &PL_sv_undef, 4, 0);
     uv0 = utf8_to_uvchr(p, 0);
     /* The NATIVE_TO_UNI() and UNI_TO_NATIVE() mappings
      * are necessary in EBCDIC, they are redundant no-ops
      * in ASCII-ish platforms, and hopefully optimized away. */
     uv1 = NATIVE_TO_UNI(uv0);
     uvuni_to_utf8(tmpbuf, uv1);
-    uv2 = swash_fetch(*swashp, tmpbuf, TRUE);
-    if (uv2) {
-	 /* It was "normal" (a single character mapping). */
-         UV uv3 = UNI_TO_NATIVE(uv2);
-	
-         len = uvuni_to_utf8(ustrp, uv3) - ustrp;
-    }
-    else {
-	 /* It might be "special" (sometimes, but not always,
+
+    if (!*swashp) /* load on-demand */
+         *swashp = swash_init("utf8", normal, &PL_sv_undef, 4, 0);
+
+    if (special) {
+         /* It might be "special" (sometimes, but not always,
 	  * a multicharacter mapping) */
 	 HV *hv;
 	 SV *keysv;
@@ -1355,16 +1351,26 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *norma
 	      }
 #endif
 	 }
-	 else {
-	      /* It was not "special", either. */
-	      len = uvchr_to_utf8(ustrp, uv0) - ustrp;
+    }
+
+    if (!len && *swashp) {
+	 UV uv2 = swash_fetch(*swashp, tmpbuf, TRUE);
+	 
+	 if (uv2) {
+	      /* It was "normal" (a single character mapping). */
+	      UV uv3 = UNI_TO_NATIVE(uv2);
+	      
+	      len = uvuni_to_utf8(ustrp, uv3) - ustrp;
 	 }
     }
+
+    if (!len) /* Neither: just copy. */
+	 len = uvchr_to_utf8(ustrp, uv0) - ustrp;
 
     if (lenp)
 	 *lenp = len;
 
-    return utf8_to_uvchr(ustrp, 0);
+    return len ? utf8_to_uvchr(ustrp, 0) : 0;
 }
 
 /*
