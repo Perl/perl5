@@ -208,7 +208,7 @@ if (! $versiononly) {
 
 # Install pod pages.  Where? I guess in $installprivlib/pod.
 
-if (! $versiononly && !($installprivlib =~ m/\Q$]/)) {
+if (! ($versiononly && !($installprivlib =~ m/\Q$]/))) {
     mkpath("${installprivlib}/pod", 1, 0777);
     foreach $file (@pods) {
 	# $file is a name like  pod/perl.pod
