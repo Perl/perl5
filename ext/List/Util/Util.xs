@@ -268,15 +268,16 @@ CODE:
     SV *my_pad[2];
     SV **old_curpad = PL_curpad;
 
-    /* We call pp_rand here so that Drand01 get initialized if rand()
-       or srand() has not already been called
-    */
     my_pad[1] = sv_newmortal();
     memzero((char*)(&dmy_op), sizeof(struct op));
     dmy_op.op_targ = 1;
     PL_op = &dmy_op;
     PL_curpad = (SV **)&my_pad;
-    pp_rand();
+    /* Call *(PL_ppaddr[OP_RAND]) so that Drand01 get initialized if rand()
+       or srand() has not already been called.  Can't call pp_rand()
+       since it's not in the public API (and shouldn't be).
+    */
+    *(PL_ppaddr[OP_RAND]);
     PL_op = old_op;
     PL_curpad = old_curpad;
     for (index = items ; index > 1 ; ) {
