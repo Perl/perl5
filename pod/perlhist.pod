@@ -321,6 +321,8 @@ the strings?).
           5.005_03-MT6  1999-Mar-05
           5.005_03      1999-Mar-28
  Leon     5.005_04-RC1  2004-Feb-05
+          5.005_04-RC2  2004-Feb-18
+          5.005_04      2004-Feb-23
 
  Sarathy  5.005_50      1998-Jul-26     The 5.6 development track.
           5.005_51      1998-Aug-10
