@@ -180,15 +180,17 @@ sub WriteMakefile {
 
 sub prompt ($;$) {
     my($mess,$def)=@_;
-    $ISA_TTY = -t STDIN && -t STDOUT ;
+    $ISA_TTY = -t STDIN && (-t STDOUT || !(-f STDOUT || -c STDOUT)) ;	# Pipe?
     Carp::confess("prompt function called without an argument") unless defined $mess;
     my $dispdef = defined $def ? "[$def] " : " ";
     $def = defined $def ? $def : "";
     my $ans;
+    local $|=1;
+    print "$mess $dispdef";
     if ($ISA_TTY) {
-	local $|=1;
-	print "$mess $dispdef";
 	chomp($ans = <STDIN>);
+    } else {
+	print "$def\n";
     }
     return $ans || $def;
 }

@@ -43,6 +43,7 @@ sub replace_manpage_separator {
 
 sub maybe_command {
     my($self,$file) = @_;
+    $file =~ s,[/\\]+,/,g;
     return $file if -x $file && ! -d _;
     return "$file.exe" if -x "$file.exe" && ! -d _;
     return "$file.cmd" if -x "$file.cmd" && ! -d _;
