@@ -4872,7 +4872,7 @@ char *start;
 	    s++;
 	    es++;
 	}
-	else if (strchr("iogcmstx", *s))
+	else if (strchr("iogcmsx", *s))
 	    pmflag(&pm->op_pmflags,*s++);
 	else
 	    break;
