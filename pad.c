@@ -378,9 +378,7 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
     if (PL_pad_reset_pending)
 	pad_reset();
     if (tmptype & SVs_PADMY) {
-	do {
-	    sv = *av_fetch(PL_comppad, AvFILLp(PL_comppad) + 1, TRUE);
-	} while (SvPADBUSY(sv));		/* need a fresh one */
+	sv = *av_fetch(PL_comppad, AvFILLp(PL_comppad) + 1, TRUE);
 	retval = AvFILLp(PL_comppad);
     }
     else {
@@ -1344,8 +1342,7 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
 		    sv = (SV*)newHV();
 		else
 		    sv = NEWSV(0, 0);
-		if (!SvPADBUSY(sv))
-		    SvPADMY_on(sv);
+		SvPADMY_on(sv);
 		PL_curpad[ix] = sv;
 	    }
 	}

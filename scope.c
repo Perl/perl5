@@ -920,7 +920,7 @@ Perl_leave_scope(pTHX_ I32 base)
 		}
 	    }
 	    else {	/* Someone has a claim on this, so abandon it. */
-		U32 padflags = SvFLAGS(sv) & (SVs_PADBUSY|SVs_PADMY|SVs_PADTMP);
+		U32 padflags = SvFLAGS(sv) & (SVs_PADMY|SVs_PADTMP);
 		switch (SvTYPE(sv)) {	/* Console ourselves with a new value */
 		case SVt_PVAV:	*(SV**)ptr = (SV*)newAV();	break;
 		case SVt_PVHV:	*(SV**)ptr = (SV*)newHV();	break;

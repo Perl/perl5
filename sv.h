@@ -148,7 +148,7 @@ perform the upgrade if necessary.  See C<svtype>.
 
 #define SvUPGRADE(sv, mt) (SvTYPE(sv) >= mt || sv_upgrade(sv, mt))
 
-#define SVs_PADBUSY	0x00000100	/* reserved for tmp or my already */
+/* XXX spare */
 #define SVs_PADTMP	0x00000200	/* in use as tmp */
 #define SVs_PADMY	0x00000400	/* in use a "my" variable */
 #define SVs_TEMP	0x00000800	/* string is stealable? */
@@ -637,14 +637,12 @@ and leaves the UTF8 status as it was.
 
 #define SvTHINKFIRST(sv)	(SvFLAGS(sv) & SVf_THINKFIRST)
 
-#define SvPADBUSY(sv)		(SvFLAGS(sv) & SVs_PADBUSY)
-
 #define SvPADTMP(sv)		(SvFLAGS(sv) & SVs_PADTMP)
-#define SvPADTMP_on(sv)		(SvFLAGS(sv) |= SVs_PADTMP|SVs_PADBUSY)
+#define SvPADTMP_on(sv)		(SvFLAGS(sv) |= SVs_PADTMP)
 #define SvPADTMP_off(sv)	(SvFLAGS(sv) &= ~SVs_PADTMP)
 
 #define SvPADMY(sv)		(SvFLAGS(sv) & SVs_PADMY)
-#define SvPADMY_on(sv)		(SvFLAGS(sv) |= SVs_PADMY|SVs_PADBUSY)
+#define SvPADMY_on(sv)		(SvFLAGS(sv) |= SVs_PADMY)
 
 #define SvTEMP(sv)		(SvFLAGS(sv) & SVs_TEMP)
 #define SvTEMP_on(sv)		(SvFLAGS(sv) |= SVs_TEMP)
