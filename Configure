@@ -5132,19 +5132,6 @@ EOM
 		beos*)  xxx='' ;;
 		*)		xxx='LD_LIBRARY_PATH' ;;
 		esac
-		if test X"$xxx" != "X"; then
-			$cat <<EOM  | $tee -a ../config.msg >&4
-
-To build perl, you must add the current working directory to your
-$xxx environment variable before running make.  You can do
-this with
-   $xxx=\`pwd\`; export $xxx
-for Bourne-style shells, or
-   setenv $xxx \`pwd\`
-for Csh-style shells.  You *MUST* do this before running make.
-
-EOM
-		fi
 		;;
 	*)	useshrplib='false' ;;
 	esac

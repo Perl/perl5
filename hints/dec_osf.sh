@@ -183,11 +183,9 @@ esac
 # "-Uuseshrplib" prevents this default.
 #
 
-# This or the glibpth change above breaks the build. Commented out
-# for this snapshot.
-#case "$_DEC_cc_style.$useshrplib" in
-#	new.)	useshrplib="$define"	;;
-#esac
+case "$_DEC_cc_style.$useshrplib" in
+	new.)	useshrplib="$define"	;;
+esac
 
 # This script UU/usethreads.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use threads.
