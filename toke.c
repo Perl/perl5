@@ -4504,7 +4504,7 @@ Perl_yylex(pTHX)
 			    for (; !isSPACE(*d) && len; --len, ++d) ;
 			}
 			words = append_elem(OP_LIST, words,
-					    newSVOP(OP_CONST, 0, newSVpvn(b, d-b)));
+					    newSVOP(OP_CONST, 0, tokeq(newSVpvn(b, d-b))));
 		    }
 		}
 		if (words) {
