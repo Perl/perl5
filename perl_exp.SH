@@ -26,8 +26,9 @@ sed -n '/^[A-Za-z]/ p' interp.sym >> perl.exp
 
 # extra globals not included above.
 cat <<END >> perl.exp
-perl_init_i18nl14n
 perl_init_ext
+perl_init_fold
+perl_init_i18nl14n
 perl_alloc
 perl_construct
 perl_destruct
