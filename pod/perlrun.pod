@@ -858,7 +858,7 @@ enabled, and any subsequent options ignored.
 =item PERLIO
 
 A space (or colon) separated list of PerlIO layers. If perl is built
-to use PerlIO system for IO (the default) these layers effect perl's IO.
+to use PerlIO system for IO (the default) these layers affect perl's IO.
 
 It is conventional to start layer names with a colon e.g. C<:perlio> to
 emphasise their similarity to variable "attributes". But the code that parses
