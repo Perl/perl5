@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..57\n";
+print "1..61\n";
 
 $_ = "abcdefghijklmnopqrstuvwxyz";
 
@@ -325,3 +325,28 @@ print "ok 56\n";
 print "not " unless $a eq "X";
 print "ok 57\n";
 
+# Tricky on EBCDIC: while [a-z] [A-Z] must not match the gap characters,
+# (i-j, r-s, I-J, R-S), [\x89-\x91] [\xc9-\xd1] has to match them,
+# from Karsten Sperling.
+
+$c = ($a = "\x89\x8a\x8b\x8c\x8d\x8f\x90\x91") =~ tr/\x89-\x91/X/;
+print "not " unless $c == 8 and $a eq "XXXXXXXX";
+print "ok 58\n";
+   
+$c = ($a = "\xc9\xca\xcb\xcc\xcd\xcf\xd0\xd1") =~ tr/\xc9-\xd1/X/;
+print "not " unless $c == 8 and $a eq "XXXXXXXX";
+print "ok 59\n";
+   
+if (ord('i') == 0x89 & ord('J') == 0xd1) {
+
+$c = ($a = "\x89\x8a\x8b\x8c\x8d\x8f\x90\x91") =~ tr/i-j/X/;
+print "not " unless $c == 2 and $a eq "X\x8a\x8b\x8c\x8d\x8f\x90X";
+print "ok 60\n";
+   
+$c = ($a = "\xc9\xca\xcb\xcc\xcd\xcf\xd0\xd1") =~ tr/I-J/X/;
+print "not " unless $c == 2 and $a eq "X\xca\xcb\xcc\xcd\xcf\xd0X";
+print "ok 61\n";
+
+} else {
+  for (60..61) { print "ok $_ # Skip: not EBCDIC\n" }
+}

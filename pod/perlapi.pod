@@ -318,7 +318,7 @@ L<perlsub/"Constant Functions">.
 	SV*	cv_const_sv(CV* cv)
 
 =for hackers
-Found in file opmini.c
+Found in file op.c
 
 =item dMARK
 
@@ -1223,7 +1223,7 @@ eligible for inlining at compile-time.
 	CV*	newCONSTSUB(HV* stash, char* name, SV* sv)
 
 =for hackers
-Found in file opmini.c
+Found in file op.c
 
 =item newHV
 
@@ -1369,7 +1369,7 @@ Found in file sv.c
 Used by C<xsubpp> to hook up XSUBs as Perl subs.
 
 =for hackers
-Found in file opmini.c
+Found in file op.c
 
 =item newXSproto
 
@@ -1568,9 +1568,30 @@ Found in file pp.h
 
 =item POPp
 
-Pops a string off the stack.
+Pops a string off the stack. Deprecated. New code should provide
+a STRLEN n_a and use POPpx.
 
 	char*	POPp
+
+=for hackers
+Found in file pp.h
+
+=item POPpbytex
+
+Pops a string off the stack which must consist of bytes i.e. characters < 256.
+Requires a variable STRLEN n_a in scope.
+
+	char*	POPpbytex
+
+=for hackers
+Found in file pp.h
+
+=item POPpx
+
+Pops a string off the stack.
+Requires a variable STRLEN n_a in scope.
+
+	char*	POPpx
 
 =for hackers
 Found in file pp.h
@@ -2368,19 +2389,19 @@ false, defined or undefined.  Does not handle 'get' magic.
 =for hackers
 Found in file sv.h
 
-=item svtype
-
-An enum of flags for Perl types.  These are found in the file B<sv.h> 
-in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
-
-=for hackers
-Found in file sv.h
-
 =item SvTYPE
 
 Returns the type of the SV.  See C<svtype>.
 
 	svtype	SvTYPE(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item svtype
+
+An enum of flags for Perl types.  These are found in the file B<sv.h> 
+in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 
 =for hackers
 Found in file sv.h

@@ -261,6 +261,8 @@ PerlIO *my_syspopen(pTHX_ char *cmd, char *mode);
 int my_syspclose(PerlIO *f);
 FILE *my_tmpfile (void);
 char *my_tmpnam (char *);
+int my_mkdir (__const__ char *, long);
+int my_rmdir (__const__ char *);
 
 #undef L_tmpnam
 #define L_tmpnam MAXPATHLEN
@@ -283,6 +285,8 @@ char *my_tmpnam (char *);
 
 #define my_getenv(var) getenv(var)
 #define flock	my_flock
+#define rmdir	my_rmdir
+#define mkdir	my_mkdir
 
 void *emx_calloc (size_t, size_t);
 void emx_free (void *);
@@ -394,6 +398,8 @@ struct PMWIN_entries_t {
 		  unsigned long hwndFilter, unsigned long msgFilterFirst,
 		  unsigned long msgFilterLast);
     void * (*DispatchMsg)(unsigned long hab, struct _QMSG *pqmsg);
+    unsigned long (*GetLastError)(unsigned long hab);
+    unsigned long (*CancelShutdown)(unsigned long hmq, unsigned long fCancelAlways);
 };
 extern struct PMWIN_entries_t PMWIN_entries;
 void init_PMWIN_entries(void);
@@ -418,9 +424,14 @@ void init_PMWIN_entries(void);
 #define CheckWinError(expr) ((expr) ? 0: (FillWinError, 1))
 #define FillOSError(rc) (os2_setsyserrno(rc),				\
 			Perl_severity = SEVERITY_ERROR) 
-#define FillWinError (Perl_severity = ERRORIDSEV(Perl_rc),		\
-			Perl_rc = ERRORIDERROR(Perl_rc)),		\
-			os2_setsyserrno(Perl_rc)
+
+/* At this moment init_PMWIN_entries() should be a nop (WinInitialize should
+   be called already, right?), so we do not risk stepping over our own error */
+#define FillWinError (	init_PMWIN_entries(),				\
+			Perl_rc=(*PMWIN_entries.GetLastError)(perl_hab_GET()),\
+			Perl_severity = ERRORIDSEV(Perl_rc),		\
+			Perl_rc = ERRORIDERROR(Perl_rc),		\
+			os2_setsyserrno(Perl_rc))
 
 #define STATIC_FILE_LENGTH 127
 

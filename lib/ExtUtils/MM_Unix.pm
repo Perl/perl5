@@ -210,6 +210,7 @@ sub ExtUtils::MM_Unix::parse_version ;
 sub ExtUtils::MM_Unix::pasthru ;
 sub ExtUtils::MM_Unix::path ;
 sub ExtUtils::MM_Unix::perl_archive;
+sub ExtUtils::MM_Unix::perl_archive_after;
 sub ExtUtils::MM_Unix::perl_script ;
 sub ExtUtils::MM_Unix::perldepend ;
 sub ExtUtils::MM_Unix::pm_to_blib ;
@@ -684,6 +685,10 @@ EXPORT_LIST = $tmp
     push @m, "
 PERL_ARCHIVE = $tmp
 ";
+    $tmp = $self->perl_archive_after;
+    push @m, "
+PERL_ARCHIVE_AFTER = $tmp
+";
 
 #    push @m, q{
 #INST_PM = }.join(" \\\n\t", sort values %{$self->{PM}}).q{
@@ -1071,7 +1076,7 @@ ARMAYBE = '.$armaybe.'
 OTHERLDFLAGS = '.$otherldflags.'
 INST_DYNAMIC_DEP = '.$inst_dynamic_dep.'
 
-$(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)/.exists $(EXPORT_LIST) $(PERL_ARCHIVE) $(INST_DYNAMIC_DEP)
+$(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)/.exists $(EXPORT_LIST) $(PERL_ARCHIVE) $(PERL_ARCHIVE_AFTER) $(INST_DYNAMIC_DEP)
 ');
     if ($armaybe ne ':'){
 	$ldfrom = 'tmp$(LIB_EXT)';
@@ -1081,7 +1086,7 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)/.exists 
     $ldfrom = "-all $ldfrom -none" if ($^O eq 'dec_osf');
 
     # The IRIX linker doesn't use LD_RUN_PATH
-    $ldrun = qq{-rpath "$self->{LD_RUN_PATH}"}
+    my $ldrun = qq{-rpath "$self->{LD_RUN_PATH}"}
 	if ($^O eq 'irix' && $self->{LD_RUN_PATH});
 
     # For example in AIX the shared objects/libraries from previous builds
@@ -1093,7 +1098,7 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)/.exists 
 ');
 
     push(@m,'	LD_RUN_PATH="$(LD_RUN_PATH)" $(LD) -o $@ '.$ldrun.' $(LDDLFLAGS) '.$ldfrom.
-		' $(OTHERLDFLAGS) $(MYEXTLIB) $(PERL_ARCHIVE) $(LDLOADLIBS) $(EXPORT_LIST)');
+		' $(OTHERLDFLAGS) $(MYEXTLIB) $(PERL_ARCHIVE) $(LDLOADLIBS) $(PERL_ARCHIVE_AFTER) $(EXPORT_LIST)');
     push @m, '
 	$(CHMOD) $(PERM_RWX) $@
 ';
@@ -2514,7 +2519,7 @@ MAP_LIBPERL = $libperl
 
 push @m, "
 \$(MAP_TARGET) :: $tmp/perlmain\$(OBJ_EXT) \$(MAP_LIBPERL) \$(MAP_STATIC) \$(INST_ARCHAUTODIR)/extralibs.all
-	\$(MAP_LINKCMD) -o \$\@ \$(OPTIMIZE) $tmp/perlmain\$(OBJ_EXT) $ldfrom \$(MAP_STATIC) $llibperl `cat \$(INST_ARCHAUTODIR)/extralibs.all` \$(MAP_PRELIBS)
+	\$(MAP_LINKCMD) -o \$\@ \$(OPTIMIZE) $tmp/perlmain\$(OBJ_EXT) \$(LDFROM) \$(MAP_STATIC) $llibperl `cat \$(INST_ARCHAUTODIR)/extralibs.all` \$(MAP_PRELIBS)
 	$self->{NOECHO}echo 'To install the new \"\$(MAP_TARGET)\" binary, call'
 	$self->{NOECHO}echo '    make -f $makefilename inst_perl MAP_TARGET=\$(MAP_TARGET)'
 	$self->{NOECHO}echo 'To remove the intermediate files say'
@@ -3122,6 +3127,7 @@ sub processPL {
         my $list = ref($self->{PL_FILES}->{$plfile})
 		? $self->{PL_FILES}->{$plfile}
 		: [$self->{PL_FILES}->{$plfile}];
+	my $target;
 	foreach $target (@$list) {
 	push @m, "
 all :: $target
@@ -3825,6 +3831,21 @@ and Win32 do.
 sub perl_archive
 {
  return '$(PERL_INC)' . "/$Config{libperl}" if $^O eq "beos";
+ return "";
+}
+
+=item perl_archive_after
+
+This is an internal method that returns path to a library which
+should be put on the linker command line I<after> the external libraries
+to be linked to dynamic extensions.  This may be needed if the linker
+is one-pass, and Perl includes some overrides for C RTL functions,
+such as malloc().
+
+=cut 
+
+sub perl_archive_after
+{
  return "";
 }
 
