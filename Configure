@@ -571,6 +571,7 @@ ssizetype=''
 startperl=''
 startsh=''
 stdchar=''
+subversion=''
 sysman=''
 uidtype=''
 nm_opt=''
@@ -2306,10 +2307,12 @@ echo " "
 echo "Getting the current patchlevel..." >&4
 if $test -r ../patchlevel.h;then
 	patchlevel=`awk '/PATCHLEVEL/ {print $3}' < ../patchlevel.h`
+	subversion=`awk '/SUBVERSION/ {print $3}' < ../patchlevel.h`
 else
 	patchlevel=0
+	subversion=0
 fi
-echo "(You have $package $baserev PL$patchlevel.)"
+echo "(You have $package $baserev PL$patchlevel sub$subversion.)"
 
 : set the prefixup variable, to restore leading tilda escape
 prefixup='case "$prefixexp" in
@@ -2328,7 +2331,8 @@ case "$archlib" in
 		set dflt
 		eval $prefixup
 		;;
-	*)	version=`echo $baserev $patchlevel | $awk '{print $1 + $2/1000.0}'`
+	*)	version=`echo $baserev $patchlevel $subversion | \
+		    $awk '{print $1 + $2/1000.0 + $3/100000.0}'`
 		dflt="$privlib/$archname/$version"
 		;;
 	esac
@@ -9358,6 +9362,7 @@ stdio_cnt='$stdio_cnt'
 stdio_ptr='$stdio_ptr'
 strings='$strings'
 submit='$submit'
+subversion='$subversion'
 sysman='$sysman'
 tail='$tail'
 tar='$tar'
