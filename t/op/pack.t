@@ -8,7 +8,7 @@ BEGIN {
     require Config; import Config;
 }
 
-print "1..60\n";
+print "1..72\n";
 
 $format = "c2 x5 C C x s d i l a6";
 # Need the expression in here to force ary[5] to be numeric.  This avoids
@@ -209,3 +209,42 @@ print "ok ", $test++, "\n";
 # binary values of the uuencoded version would not be portable between
 # character sets.  Uuencoding is meant for encoding binary data, not
 # text data.
+
+# test the ascii template types (A, a, Z)
+
+print "not " unless pack('A*', "foo\0bar\0 ") eq "foo\0bar\0 ";
+print "ok ", $test++, "\n";
+
+print "not " unless pack('A11', "foo\0bar\0 ") eq "foo\0bar\0   ";
+print "ok ", $test++, "\n";
+
+print "not " unless unpack('A*', "foo\0bar \0") eq "foo\0bar";
+print "ok ", $test++, "\n";
+
+print "not " unless unpack('A8', "foo\0bar \0") eq "foo\0bar";
+print "ok ", $test++, "\n";
+
+print "not " unless pack('a*', "foo\0bar\0 ") eq "foo\0bar\0 ";
+print "ok ", $test++, "\n";
+
+print "not " unless pack('a11', "foo\0bar\0 ") eq "foo\0bar\0 \0\0";
+print "ok ", $test++, "\n";
+
+print "not " unless unpack('a*', "foo\0bar \0") eq "foo\0bar \0";
+print "ok ", $test++, "\n";
+
+print "not " unless unpack('a8', "foo\0bar \0") eq "foo\0bar ";
+print "ok ", $test++, "\n";
+
+print "not " unless pack('Z*', "foo\0bar\0 ") eq "foo\0bar\0 ";
+print "ok ", $test++, "\n";
+
+print "not " unless pack('Z11', "foo\0bar\0 ") eq "foo\0bar\0 \0\0";
+print "ok ", $test++, "\n";
+
+print "not " unless unpack('Z*', "foo\0bar \0") eq "foo";
+print "ok ", $test++, "\n";
+
+print "not " unless unpack('Z8', "foo\0bar \0") eq "foo";
+print "ok ", $test++, "\n";
+

@@ -2485,8 +2485,10 @@ returning the string containing the structure.  The TEMPLATE is a
 sequence of characters that give the order and type of values, as
 follows:
 
+    a	A string with arbitrary binary data, will be null padded.
     A	An ascii string, will be space padded.
-    a	An ascii string, will be null padded.
+    Z	A null terminated (asciz) string, will be null padded.
+
     b	A bit string (ascending bit order, like vec()).
     B	A bit string (descending bit order).
     h	A hex string (low nybble first).
@@ -2544,30 +2546,58 @@ follows:
     X	Back up a byte.
     @	Null fill to absolute position.
 
+The following rules apply:
+
+=over 8
+
+=item *
+
 Each letter may optionally be followed by a number giving a repeat
-count.  With all types except C<"a">, C<"A">, C<"b">, C<"B">, C<"h">, C<"H">, and C<"P"> the
-pack function will gobble up that many values from the LIST.  A C<*> for the
-repeat count means to use however many items are left.  The C<"a"> and C<"A">
-types gobble just one value, but pack it as a string of length count,
-padding with nulls or spaces as necessary.  (When unpacking, C<"A"> strips
-trailing spaces and nulls, but C<"a"> does not.)  Likewise, the C<"b"> and C<"B">
-fields pack a string that many bits long.  The C<"h"> and C<"H"> fields pack a
-string that many nybbles long.  The C<"p"> type packs a pointer to a null-
-terminated string.  You are responsible for ensuring the string is not a
-temporary value (which can potentially get deallocated before you get
-around to using the packed result).  The C<"P"> packs a pointer to a structure
-of the size indicated by the length. A NULL pointer is created if the 
-corresponding value for C<"p"> or C<"P"> is C<undef>.
-Real numbers (floats and doubles) are
-in the native machine format only; due to the multiplicity of floating
-formats around, and the lack of a standard "network" representation, no
-facility for interchange has been made.  This means that packed floating
-point data written on one machine may not be readable on another - even if
-both use IEEE floating point arithmetic (as the endian-ness of the memory
-representation is not part of the IEEE spec).  Note that Perl uses doubles
-internally for all numeric calculation, and converting from double into
-float and thence back to double again will lose precision (i.e.,
-C<unpack("f", pack("f", $foo)>) will not in general equal C<$foo>).
+count.  With all types except C<"a">, C<"A">, C<"Z">, C<"b">, C<"B">, C<"h">,
+C<"H">, and C<"P"> the pack function will gobble up that many values from
+the LIST.  A C<*> for the repeat count means to use however many items are
+left.
+
+=item *
+
+The C<"a">, C<"A"> and C<"Z"> types gobble just one value, but pack it as a
+string of length count, padding with nulls or spaces as necessary.  When
+unpacking, C<"A"> strips trailing spaces and nulls, C<"Z"> strips everything
+after the first null, and C<"a"> returns data verbatim.
+
+=item *
+
+Likewise, the C<"b"> and C<"B"> fields pack a string that many bits long.
+
+=item *
+
+The C<"h"> and C<"H"> fields pack a string that many nybbles long.
+
+=item *
+
+The C<"p"> type packs a pointer to a null-terminated string.  You are
+responsible for ensuring the string is not a temporary value (which can
+potentially get deallocated before you get around to using the packed result).
+The C<"P"> type packs a pointer to a structure of the size indicated by the
+length. A NULL pointer is created if the corresponding value for C<"p"> or
+C<"P"> is C<undef>.
+
+=item *
+
+Real numbers (floats and doubles) are in the native machine format only;
+due to the multiplicity of floating formats around, and the lack of a
+standard "network" representation, no facility for interchange has been
+made.  This means that packed floating point data written on one machine
+may not be readable on another - even if both use IEEE floating point
+arithmetic (as the endian-ness of the memory representation is not part
+of the IEEE spec).
+
+Note that Perl uses doubles internally for all numeric calculation, and
+converting from double into float and thence back to double again will
+lose precision (i.e., C<unpack("f", pack("f", $foo)>) will not in general
+equal C<$foo>).
+
+=back
 
 Examples:
 
@@ -2597,11 +2627,18 @@ Examples:
     $foo = pack("i9pl", gmtime);
     # a real struct tm (on my system anyway)
 
+    $utmp_template = "Z8 Z8 Z16 L";
+    $utmp = pack($utmp_template, @utmp1);
+    # a struct utmp (BSDish)
+
+    @utmp2 = unpack($utmp_template, $utmp);
+    # "@utmp1" eq "@utmp2"
+
     sub bintodec {
 	unpack("N", pack("B32", substr("0" x 32 . shift, -32)));
     }
 
-The same template may generally also be used in the unpack function.
+The same template may generally also be used in unpack().
 
 =item package 
 
@@ -4346,6 +4383,8 @@ computes the same number as the System V sum program:
 The following efficiently counts the number of set bits in a bit vector:
 
     $setbits = unpack("%32b*", $selectmask);
+
+See L</pack> for more examples.
 
 =item untie VARIABLE
 

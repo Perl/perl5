@@ -3222,7 +3222,7 @@ PP(pp_unpack)
     if (gimme != G_ARRAY) {		/* arrange to do first one only */
 	/*SUPPRESS 530*/
 	for (patend = pat; !isALPHA(*patend) || *patend == 'x'; patend++) ;
-	if (strchr("aAbBhHP", *patend) || *pat == '%') {
+	if (strchr("aAZbBhHP", *patend) || *pat == '%') {
 	    patend++;
 	    while (isDIGIT(*patend) || *patend == '*')
 		patend++;
@@ -3280,6 +3280,7 @@ PP(pp_unpack)
 	    s += len;
 	    break;
 	case 'A':
+	case 'Z':
 	case 'a':
 	    if (len > strend - s)
 		len = strend - s;
@@ -3288,12 +3289,19 @@ PP(pp_unpack)
 	    sv = NEWSV(35, len);
 	    sv_setpvn(sv, s, len);
 	    s += len;
-	    if (datumtype == 'A') {
+	    if (datumtype == 'A' || datumtype == 'Z') {
 		aptr = s;	/* borrow register */
-		s = SvPVX(sv) + len - 1;
-		while (s >= SvPVX(sv) && (!*s || isSPACE(*s)))
-		    s--;
-		*++s = '\0';
+		if (datumtype == 'Z') {	/* 'Z' strips stuff after first null */
+		    s = SvPVX(sv);
+		    while (*s)
+			s++;
+		}
+		else {		/* 'A' strips both nulls and spaces */
+		    s = SvPVX(sv) + len - 1;
+		    while (s >= SvPVX(sv) && (!*s || isSPACE(*s)))
+			s--;
+		    *++s = '\0';
+		}
 		SvCUR_set(sv, s - SvPVX(sv));
 		s = aptr;	/* unborrow register */
 	    }
@@ -4128,6 +4136,7 @@ PP(pp_pack)
 	    sv_catpvn(cat, null10, len);
 	    break;
 	case 'A':
+	case 'Z':
 	case 'a':
 	    fromstr = NEXTFROM;
 	    aptr = SvPV(fromstr, fromlen);
