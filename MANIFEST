@@ -708,6 +708,7 @@ ext/Time/HiRes/HiRes.pm		Time::HiRes extension
 ext/Time/HiRes/HiRes.t		Test for Time::HiRes
 ext/Time/HiRes/HiRes.xs		Time::HiRes extension
 ext/Time/HiRes/Makefile.PL	Time::HiRes extension
+ext/Time/HiRes/typemap		Time::HiRes extension
 ext/Unicode/Normalize/Changes	Unicode::Normalize
 ext/Unicode/Normalize/Makefile.PL	Unicode::Normalize
 ext/Unicode/Normalize/mkheader	Unicode::Normalize
