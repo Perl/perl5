@@ -4,7 +4,7 @@ perlrun - how to execute the Perl interpreter
 
 =head1 SYNOPSIS
 
-B<perl>	S<[ B<-CsTtuUWX> ]>
+B<perl>	S<[ B<-sTtuUWX> ]>
 	S<[ B<-hv> ] [ B<-V>[:I<configvar>] ]>
 	S<[ B<-cw> ] [ B<-d>[:I<debugger>] ] [ B<-D>[I<number/list>] ]>
 	S<[ B<-pna> ] [ B<-F>I<pattern> ] [ B<-l>[I<octal>] ] [ B<-0>[I<octal>] ]>
@@ -14,6 +14,7 @@ B<perl>	S<[ B<-CsTtuUWX> ]>
 	S<[ B<-x>[I<dir>] ]>
 	S<[ B<-i>[I<extension>] ]>
 	S<[ B<-e> I<'command'> ] [ B<--> ] [ I<programfile> ] [ I<argument> ]...>
+	S<[ B<-C [I<number/list>] >]> ]>
 
 =head1 DESCRIPTION
 
@@ -264,18 +265,45 @@ is equivalent to
 
 An alternate delimiter may be specified using B<-F>.
 
-=item B<-C>
+=item B<-C [I<number/list>]>
 
-enables Perl to use the Unicode APIs on the target system.
+The C<-C> flag controls some Unicode of the Perl Unicode features.
 
-As of Perl 5.8.1, if C<-C> is used and the locale settings (the LC_ALL,
-LC_CTYPE, and LANG environment variables) indicate a UTF-8 locale,
-the STDIN is expected to be in UTF-8, the STDOUT and STDERR are
-expected to be in UTF-8, and C<:utf8> is the default file open layer.
-See L<perluniintro>, L<perlfunc/open>, and L<open> for more information.
-The magic variable C<${^UTF8_LOCALE}> reflects this state,
-see L<perlvar/"${^UTF8_LOCALE}">.  (Another way of setting this
-variable is to set the environment variable PERL_UTF8_LOCALE.)
+As of 5.8.1, the C<-C> can be followed either by a number or a list
+of option letters.  The letters, their numeric values, and effects
+are as follows; listing the letters is equal to summing the numbers.
+
+    I     1    STDIN is assumed to be in UTF-8
+    O     2    STDOUT will be in UTF-8
+    E     4    STDERR will be in UTF-8
+    S     7    I + O + E
+    i     8    the default input layer expects UTF-8
+    o    16    the default output layer enforces UTF-8
+    D    24    i + o
+    A    32    the @ARGV elements are supposed to be in UTF-8
+    L    64    normally the "IOEioA" are unconditional,
+               the L makes them conditional on the locale environment
+               variables (the LC_ALL, LC_TYPE, and LANG, in the order
+               of decreasing precedence) -- if the variables indicate
+               UTF-8, then the selected "IOEioA" are in effect
+
+For example, C<-COE> and C<-C6> will both turn on UTF-8-ness on both
+STDOUT and STDERR.  Repeating letters is just redundant, not cumulative
+nor toggling.
+
+C<-C> on its own (not followed by any number or option list), or the
+empty string C<""> for the C<$ENV{PERL_UNICODE}, has the same effect
+as <-CSDL>.  In other words, the standard I/O handles and the default
+C<open()> layer are UTF-8-fied B<but> only if the locale environment
+variables indicate a UTF-8 locale.  This behaviour follows the
+I<implicit> UTF-8 behaviour of Perl 5.8.0.
+
+You can use C<-C0> to explicitly disable all the above Unicode features.
+
+See L<perlfunc/open>, and L<open> for more information.
+
+The read-only magic variable C<${^UNICODE}> reflects the numeric value
+of this setting, see L<perlvar/"${^UNICODE}">.
 
 (In Perls earlier than 5.8.1 the C<-C> switch was a Win32-only switch
 that enabled the use of Unicode-aware "wide system call" Win32 APIs.
@@ -319,6 +347,7 @@ B<-D14> is equivalent to B<-Dtls>):
 
         1  p  Tokenizing and parsing
         2  s  Stack snapshots
+                with v, displays all stacks
         4  l  Context (loop) stack processing
         8  t  Trace execution
        16  o  Method and overloading resolution
@@ -337,6 +366,8 @@ B<-D14> is equivalent to B<-Dtls>):
    131072  T  Tokenising
    262144  R  Include reference counts of dumped variables (eg when using -Ds)
    524288  J  Do not s,t,P-debug (Jump over) opcodes within package DB
+  1048576  v  Verbose: use in conjunction with other flags
+  2097152  C  Copy On Write
 
 All these flags require B<-DDEBUGGING> when you compile the Perl
 executable (but see L<Devel::Peek>, L<re> which may change this).
@@ -1053,7 +1084,7 @@ affect perl on VMS include PERLSHR, PERL_ENV_TABLES, and
 SYS$TIMEZONE_DIFFERENTIAL but are optional and discussed further in
 L<perlvms> and in F<README.vms> in the Perl source distribution.
 
-=item PERL_UTF8_LOCALE
+=item PERL_UNICODE
 
 Equivalent to the B<-C> command-line switch.
 

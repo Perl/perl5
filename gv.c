@@ -992,7 +992,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
         else
             break;
     case '\025':
-        if (len > 1 && strNE(name, "\025TF8_LOCALE")) 
+        if (len > 1 && strNE(name, "\025NICODE")) 
 	    break;
 	goto ro_magicalize;
 
@@ -1819,7 +1819,7 @@ Perl_is_gv_magical(pTHX_ char *name, STRLEN len, U32 flags)
 	}
 	break;
     case '\025':
-        if (len > 1 && strEQ(name, "\025TF8_LOCALE"))
+        if (len > 1 && strEQ(name, "\025NICODE"))
 	    goto yes;
     case '\027':   /* $^W & $^WARNING_BITS */
 	if (len == 1

@@ -1043,14 +1043,10 @@ there are a couple of exceptions:
 
 =item *
 
-If your locale environment variables (LC_ALL, LC_CTYPE, LANG)
-contain the strings 'UTF-8' or 'UTF8' (matched case-insensitively)
-B<and> you enable using UTF-8 either by using the C<-C> command line
-switch or setting the PERL_UTF8_LOCALE environment variable to a true
-value, then the default encodings of your STDIN, STDOUT, and STDERR,
-and of B<any subsequent file open>, are considered to be UTF-8.
-See L<perluniintro>, L<perlfunc/open>, and L<open> for more
-information.  The magic variable C<${^UTF8_LOCALE}> will also be set.
+You can enable automatic UTF-8-ification of your standard file
+handles, default C<open()> layer, and C<@ARGV> by using either
+the C<-C> command line switch or the C<PERL_UNICODE> environment
+variable, see L<perlrun> for the documentation of the C<-C> switch.
 
 =item *
 
@@ -1407,6 +1403,6 @@ the UTF-8 flag:
 =head1 SEE ALSO
 
 L<perluniintro>, L<encoding>, L<Encode>, L<open>, L<utf8>, L<bytes>,
-L<perlretut>, L<perlvar/"${^UTF8_LOCALE}">
+L<perlretut>, L<perlvar/"${^UNICODE}">
 
 =cut

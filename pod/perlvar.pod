@@ -1109,15 +1109,11 @@ Reflects if taint mode is on or off.  1 for on (the program was run with
 B<-T>), 0 for off, -1 when only taint warnings are enabled (i.e. with
 B<-t> or B<-TU>).
 
-=item ${^UTF8_LOCALE}
+=item ${^UNICODE}
 
-Reflects whether the locale settings indicated the use of UTF-8 and that
-the use of UTF-8 was enabled either by the C<-C> command line switch or
-by setting the PERL_UTF8_LOCALE environment variable to a true value.
-This variable is read-only.  If true, the STDIN is expected to be in
-UTF-8, the STDOUT and STDERR are in UTF-8, and C<:utf8> is the default
-file open layer.  See L<perluniintro>, L<perlfunc/open>, and L<open>
-for more information.
+Reflects certain Unicode settings of Perl.  See L<perlrun> for more
+information about the possible values. This variable is set during
+Perl startup and thereafter read-only.
 
 =item $PERL_VERSION
 

@@ -730,6 +730,7 @@
 #define PL_thrsv		(vTHX->Ithrsv)
 #define PL_tokenbuf		(vTHX->Itokenbuf)
 #define PL_uid			(vTHX->Iuid)
+#define PL_unicode		(vTHX->Iunicode)
 #define PL_unsafe		(vTHX->Iunsafe)
 #define PL_utf8_alnum		(vTHX->Iutf8_alnum)
 #define PL_utf8_alnumc		(vTHX->Iutf8_alnumc)
@@ -753,8 +754,8 @@
 #define PL_utf8_xdigit		(vTHX->Iutf8_xdigit)
 #define PL_utf8locale		(vTHX->Iutf8locale)
 #define PL_uudmap		(vTHX->Iuudmap)
-#define PL_wantutf8		(vTHX->Iwantutf8)
 #define PL_warnhook		(vTHX->Iwarnhook)
+#define PL_widesyscalls		(vTHX->Iwidesyscalls)
 #define PL_xiv_arenaroot	(vTHX->Ixiv_arenaroot)
 #define PL_xiv_root		(vTHX->Ixiv_root)
 #define PL_xnv_arenaroot	(vTHX->Ixnv_arenaroot)
@@ -1038,6 +1039,7 @@
 #define PL_Ithrsv		PL_thrsv
 #define PL_Itokenbuf		PL_tokenbuf
 #define PL_Iuid			PL_uid
+#define PL_Iunicode		PL_unicode
 #define PL_Iunsafe		PL_unsafe
 #define PL_Iutf8_alnum		PL_utf8_alnum
 #define PL_Iutf8_alnumc		PL_utf8_alnumc
@@ -1061,8 +1063,8 @@
 #define PL_Iutf8_xdigit		PL_utf8_xdigit
 #define PL_Iutf8locale		PL_utf8locale
 #define PL_Iuudmap		PL_uudmap
-#define PL_Iwantutf8		PL_wantutf8
 #define PL_Iwarnhook		PL_warnhook
+#define PL_Iwidesyscalls	PL_widesyscalls
 #define PL_Ixiv_arenaroot	PL_xiv_arenaroot
 #define PL_Ixiv_root		PL_xiv_root
 #define PL_Ixnv_arenaroot	PL_xnv_arenaroot

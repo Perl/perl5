@@ -1117,6 +1117,9 @@
 #define wait4pid		Perl_wait4pid
 #endif
 #ifdef PERL_CORE
+#define parse_unicode_opts	Perl_parse_unicode_opts
+#endif
+#ifdef PERL_CORE
 #define report_evil_fh		Perl_report_evil_fh
 #endif
 #ifdef PERL_CORE
@@ -3546,6 +3549,9 @@
 #endif
 #ifdef PERL_CORE
 #define wait4pid(a,b,c)		Perl_wait4pid(aTHX_ a,b,c)
+#endif
+#ifdef PERL_CORE
+#define parse_unicode_opts(a)	Perl_parse_unicode_opts(aTHX_ a)
 #endif
 #ifdef PERL_CORE
 #define report_evil_fh(a,b,c)	Perl_report_evil_fh(aTHX_ a,b,c)
