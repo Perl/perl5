@@ -141,7 +141,12 @@ cc_type=xlc
 case "$cc" in
 *gcc*)
    cc_type=gcc
-   ccdlflags='-Xlinker' ;;
+   ccdlflags='-Xlinker'
+   if [ "X$gccversion" = "X" ]; then
+     # Done too late in Configure if hinted
+     gccversion=`$cc --version | sed 's/.*(GCC) *//`
+     fi
+   ;;
 *) ccversion=`lslpp -L | grep 'C for AIX Compiler$' | awk '{print $2}'`
    case "$ccversion" in
      '') ccversion=`lslpp -L | grep 'IBM C and C++ Compilers LUM$' | awk '{print $2}'`
@@ -245,7 +250,20 @@ case "$usethreads" in
 $define|true|[yY]*)
 	ccflags="$ccflags -DNEED_PTHREAD_INIT"
 	case "$cc" in
-	gcc) ;;
+	*gcc*)
+echo "GCC $gccversion disabling some _r functions" >&4
+	    case "$gccversion" in
+		3*) d_drand48_r='undef'
+		    d_endgrent_r='undef'
+		    d_endpwent_r='undef'
+		    d_getgrent_r='undef'
+		    d_getpwent_r='undef'
+		    d_random_r='undef'
+		    d_srand48_r='undef'
+		    d_strerror_r='undef'
+		    ;;
+		esac
+	    ;;
 	cc_r) ;;
 	cc|xl[cC]_r) 
 	    echo >&4 "Switching cc to cc_r because of POSIX threads."
@@ -254,9 +272,9 @@ $define|true|[yY]*)
 	    # --jhi@iki.fi
 	    cc=cc_r
 
-           case "`oslevel`" in
-               4.2.1.*) i_crypt='undef' ;;
-               esac
+	    case "`oslevel`" in
+		4.2.1.*) i_crypt='undef' ;;
+		esac
 	    ;;
 	'') 
 	    cc=cc_r
