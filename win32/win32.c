@@ -202,7 +202,9 @@ get_emd_part(char *prev_path, char *trailing_path, ...)
     va_start(ap, trailing_path);
     strip = va_arg(ap, char *);
 
-    GetModuleFileName(GetModuleHandle(NULL), mod_name, sizeof(mod_name));
+    GetModuleFileName((w32_perldll_handle == INVALID_HANDLE_VALUE)
+		      ? GetModuleHandle(NULL)
+		      : w32_perldll_handle, mod_name, sizeof(mod_name));
     ptr = strrchr(mod_name, '\\');
     while (ptr && strip) {
         /* look for directories to skip back */
