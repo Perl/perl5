@@ -591,8 +591,8 @@ sub _find_opt {
     local ($wanted_callback, $avoid_nlink, $bydepth, $no_chdir, $follow,
 	$follow_skip, $full_check, $untaint, $untaint_skip, $untaint_pat,
 	$pre_process, $post_process, $dangling_symlinks);
-    my @_args = @_;
-    local($dir, $name, $fullname, $prune, *_);
+    local($dir, $name, $fullname, $prune);
+    for (my $_temp) { # creates a local $_ without retaining magic
 
     my $cwd            = $wanted->{bydepth} ? Cwd::fastcwd() : Cwd::getcwd();
     my $cwd_untainted  = $cwd;
@@ -619,7 +619,7 @@ sub _find_opt {
     my ($abs_dir, $Is_Dir);
 
     Proc_Top_Item:
-    foreach my $TOP (@_args) {
+    foreach my $TOP (@_) {
 	my $top_item = $TOP;
 
 	if ($Is_MacOS) {
@@ -742,6 +742,7 @@ sub _find_opt {
 		die "Can't cd to $cwd: $!\n";
 	    }
 	}
+    }
     }
 }
 
