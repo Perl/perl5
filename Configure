@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Aug  2 17:42:55 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Sat Aug  7 00:11:31 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -13361,9 +13361,8 @@ case "$d_portable" in
 	echo " "
 	echo "Stripping down executable paths..." >&4
 	for file in $loclist $trylist; do
-		if test X$file != Xln -a X$file != Xar -o X$osname != Xos2; then
-			eval $file="\$file"
-		fi
+		eval temp=\$$file
+		eval $file=`basename $temp`
 	done
 	;;
 esac
