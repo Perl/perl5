@@ -277,7 +277,7 @@ struct pmop {
 
 #ifdef USE_ITHREADS
 #  define PmopSTASHPV(o)	((o)->op_pmstashpv)
-#  define PmopSTASHPV_set(o,pv)	((o)->op_pmstashpv = ((pv) ? savepv(pv) : Nullch))
+#  define PmopSTASHPV_set(o,pv)	(Safefree((o)->op_pmstashpv), (o)->op_pmstashpv = ((pv) ? savepv(pv) : Nullch))
 #  define PmopSTASH(o)		(PmopSTASHPV(o) \
 				 ? gv_stashpv(PmopSTASHPV(o),GV_ADD) : Nullhv)
 #  define PmopSTASH_set(o,hv)	PmopSTASHPV_set(o, (hv) ? HvNAME(hv) : Nullch)
