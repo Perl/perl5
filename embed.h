@@ -1601,33 +1601,19 @@
 #  endif
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_DECL_PROT)
-#ifdef PERL_CORE
 #define reg			S_reg
-#endif
-#ifdef PERL_CORE
 #define reganode		S_reganode
-#endif
-#ifdef PERL_CORE
 #define regatom			S_regatom
-#endif
-#ifdef PERL_CORE
 #define regbranch		S_regbranch
-#endif
 #ifdef PERL_CORE
 #define reguni			S_reguni
 #endif
-#ifdef PERL_CORE
 #define regclass		S_regclass
-#endif
 #ifdef PERL_CORE
 #define regcurly		S_regcurly
 #endif
-#ifdef PERL_CORE
 #define reg_node		S_reg_node
-#endif
-#ifdef PERL_CORE
 #define regpiece		S_regpiece
-#endif
 #ifdef PERL_CORE
 #define reginsert		S_reginsert
 #endif
@@ -1637,16 +1623,10 @@
 #ifdef PERL_CORE
 #define regtail			S_regtail
 #endif
-#ifdef PERL_CORE
 #define regwhite		S_regwhite
-#endif
-#ifdef PERL_CORE
 #define nextchar		S_nextchar
-#endif
 #  ifdef DEBUGGING
-#ifdef PERL_CORE
 #define dumpuntil		S_dumpuntil
-#endif
 #ifdef PERL_CORE
 #define put_byte		S_put_byte
 #endif
@@ -1716,21 +1696,11 @@
 #ifdef PERL_CORE
 #define cache_re		S_cache_re
 #endif
-#ifdef PERL_CORE
 #define reghop			S_reghop
-#endif
-#ifdef PERL_CORE
 #define reghop3			S_reghop3
-#endif
-#ifdef PERL_CORE
 #define reghopmaybe		S_reghopmaybe
-#endif
-#ifdef PERL_CORE
 #define reghopmaybe3		S_reghopmaybe3
-#endif
-#ifdef PERL_CORE
 #define find_byclass		S_find_byclass
-#endif
 #ifdef PERL_CORE
 #define to_utf8_substr		S_to_utf8_substr
 #endif
@@ -4025,33 +3995,19 @@
 #  endif
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_DECL_PROT)
-#ifdef PERL_CORE
 #define reg(a,b,c)		S_reg(aTHX_ a,b,c)
-#endif
-#ifdef PERL_CORE
 #define reganode(a,b,c)		S_reganode(aTHX_ a,b,c)
-#endif
-#ifdef PERL_CORE
 #define regatom(a,b)		S_regatom(aTHX_ a,b)
-#endif
-#ifdef PERL_CORE
 #define regbranch(a,b,c)	S_regbranch(aTHX_ a,b,c)
-#endif
 #ifdef PERL_CORE
 #define reguni(a,b,c,d)		S_reguni(aTHX_ a,b,c,d)
 #endif
-#ifdef PERL_CORE
 #define regclass(a)		S_regclass(aTHX_ a)
-#endif
 #ifdef PERL_CORE
 #define regcurly(a)		S_regcurly(aTHX_ a)
 #endif
-#ifdef PERL_CORE
 #define reg_node(a,b)		S_reg_node(aTHX_ a,b)
-#endif
-#ifdef PERL_CORE
 #define regpiece(a,b)		S_regpiece(aTHX_ a,b)
-#endif
 #ifdef PERL_CORE
 #define reginsert(a,b,c)	S_reginsert(aTHX_ a,b,c)
 #endif
@@ -4061,16 +4017,10 @@
 #ifdef PERL_CORE
 #define regtail(a,b,c)		S_regtail(aTHX_ a,b,c)
 #endif
-#ifdef PERL_CORE
 #define regwhite(a,b)		S_regwhite(aTHX_ a,b)
-#endif
-#ifdef PERL_CORE
 #define nextchar(a)		S_nextchar(aTHX_ a)
-#endif
 #  ifdef DEBUGGING
-#ifdef PERL_CORE
 #define dumpuntil(a,b,c,d,e)	S_dumpuntil(aTHX_ a,b,c,d,e)
-#endif
 #ifdef PERL_CORE
 #define put_byte(a,b)		S_put_byte(aTHX_ a,b)
 #endif
@@ -4139,21 +4089,11 @@
 #ifdef PERL_CORE
 #define cache_re(a)		S_cache_re(aTHX_ a)
 #endif
-#ifdef PERL_CORE
 #define reghop(a,b)		S_reghop(aTHX_ a,b)
-#endif
-#ifdef PERL_CORE
 #define reghop3(a,b,c)		S_reghop3(aTHX_ a,b,c)
-#endif
-#ifdef PERL_CORE
 #define reghopmaybe(a,b)	S_reghopmaybe(aTHX_ a,b)
-#endif
-#ifdef PERL_CORE
 #define reghopmaybe3(a,b,c)	S_reghopmaybe3(aTHX_ a,b,c)
-#endif
-#ifdef PERL_CORE
 #define find_byclass(a,b,c,d,e,f)	S_find_byclass(aTHX_ a,b,c,d,e,f)
-#endif
 #ifdef PERL_CORE
 #define to_utf8_substr(a)	S_to_utf8_substr(aTHX_ a)
 #endif

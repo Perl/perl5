@@ -1124,22 +1124,22 @@ s	|int	|dooneliner	|char *cmd|char *filename
 #endif
 
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_DECL_PROT)
-s	|regnode*|reg		|struct RExC_state_t*|I32|I32 *
-s	|regnode*|reganode	|struct RExC_state_t*|U8|U32
-s	|regnode*|regatom	|struct RExC_state_t*|I32 *
-s	|regnode*|regbranch	|struct RExC_state_t*|I32 *|I32
+As	|regnode*|reg		|struct RExC_state_t*|I32|I32 *
+As	|regnode*|reganode	|struct RExC_state_t*|U8|U32
+As	|regnode*|regatom	|struct RExC_state_t*|I32 *
+As	|regnode*|regbranch	|struct RExC_state_t*|I32 *|I32
 s	|void	|reguni		|struct RExC_state_t*|UV|char *|STRLEN*
-s	|regnode*|regclass	|struct RExC_state_t*
+As	|regnode*|regclass	|struct RExC_state_t*
 s	|I32	|regcurly	|char *
-s	|regnode*|reg_node	|struct RExC_state_t*|U8
-s	|regnode*|regpiece	|struct RExC_state_t*|I32 *
+As	|regnode*|reg_node	|struct RExC_state_t*|U8
+As	|regnode*|regpiece	|struct RExC_state_t*|I32 *
 s	|void	|reginsert	|struct RExC_state_t*|U8|regnode *
 s	|void	|regoptail	|struct RExC_state_t*|regnode *|regnode *
 s	|void	|regtail	|struct RExC_state_t*|regnode *|regnode *
-s	|char*|regwhite	|char *|char *
-s	|char*|nextchar	|struct RExC_state_t*
+As	|char*|regwhite	|char *|char *
+As	|char*|nextchar	|struct RExC_state_t*
 #  ifdef DEBUGGING
-s	|regnode*|dumpuntil	|regnode *start|regnode *node \
+As	|regnode*|dumpuntil	|regnode *start|regnode *node \
 				|regnode *last|SV* sv|I32 l
 s	|void	|put_byte	|SV* sv|int c
 #  endif
@@ -1171,11 +1171,11 @@ s	|CHECKPOINT|regcppush	|I32 parenfloor
 s	|char*|regcppop
 s	|char*|regcp_set_to	|I32 ss
 s	|void	|cache_re	|regexp *prog
-s	|U8*	|reghop		|U8 *pos|I32 off
-s	|U8*	|reghop3	|U8 *pos|I32 off|U8 *lim
-s	|U8*	|reghopmaybe	|U8 *pos|I32 off
-s	|U8*	|reghopmaybe3	|U8 *pos|I32 off|U8 *lim
-s	|char*	|find_byclass	|regexp * prog|regnode *c|char *s|char *strend|char *startpos|I32 norun
+As	|U8*	|reghop		|U8 *pos|I32 off
+As	|U8*	|reghop3	|U8 *pos|I32 off|U8 *lim
+As	|U8*	|reghopmaybe	|U8 *pos|I32 off
+As	|U8*	|reghopmaybe3	|U8 *pos|I32 off|U8 *lim
+As	|char*	|find_byclass	|regexp * prog|regnode *c|char *s|char *strend|char *startpos|I32 norun
 s	|void	|to_utf8_substr	|regexp * prog
 s	|void	|to_byte_substr	|regexp * prog
 #endif
