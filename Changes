@@ -32,6 +32,33 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  8204] By: jhi                                   on 2000/12/19  22:58:18
+        Log: Recode the naughty binary bytes ([\x00-\x08\x0b-\x1f\x7f-\xff])
+             using the \xHH notation.  No more inlined UTF-8, sigh, but easier
+             on editors and diffing/patching.
+     Branch: perl
+	   ! t/op/utf8decode.t
+____________________________________________________________________________
+[  8203] By: nick                                  on 2000/12/19  21:36:16
+        Log: Integrate mainline (forgot my own change...)
+     Branch: perlio
+	  !> ext/Encode/compile
+____________________________________________________________________________
+[  8202] By: nick                                  on 2000/12/19  21:34:42
+        Log: Integrate mainline.
+     Branch: perlio
+	  !> (integrate 61 files)
+____________________________________________________________________________
+[  8201] By: nick                                  on 2000/12/19  21:34:06
+        Log: Avoid looking for File::Glob when we don't need it.
+     Branch: perl
+	   ! ext/Encode/compile
+____________________________________________________________________________
+[  8200] By: jhi                                   on 2000/12/19  18:35:49
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  8199] By: jhi                                   on 2000/12/19  18:35:07
         Log: Microperl tweaks.
      Branch: perl
