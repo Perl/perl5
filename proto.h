@@ -1191,6 +1191,8 @@ OP *ck_trunc _((OP *o));
 void unwind_handler_stack _((void *p));
 void restore_magic _((void *p));
 void restore_rsfp _((void *f));
+void restore_expect _((void *e));
+void restore_lex_expect _((void *e));
 void yydestruct _((void *ptr));
 VIRTUAL int fprintf _((PerlIO *, const char *, ...));
 

@@ -1206,7 +1206,6 @@ perl_call_sv(SV *sv, I32 flags)
     I32 oldmark;
     I32 retval;
     I32 oldscope;
-    static CV *DBcv;
     bool oldcatch = CATCH_GET;
     dJMPENV;
     int ret;
@@ -2752,7 +2751,6 @@ STATIC void
 incpush(char *p, int addsubdirs)
 {
     SV *subdir = Nullsv;
-    static char *archpat_auto;
 
     if (!p)
 	return;

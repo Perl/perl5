@@ -64,20 +64,6 @@
 #undef op
 #endif /* op */
 
-static regnode regdummy;
-static char *  regparse;       /* Input-scan pointer. */
-static char *  regxend;        /* End of input for compile */
-static regnode *       regcode;        /* Code-emit pointer; &regdummy = don't. */
-static I32             regnaughty;     /* How bad is this pattern? */
-static I32             regsawback;     /* Did we see \1, ...? */
-
-/* This guys appear both in regcomp.c and regexec.c, but there is no
-   other reason to have them global. */
-static char *  regprecomp;     /* uncompiled string. */
-static I32		regnpar;	/* () count. */
-static I32		regsize;	/* Code size. */
-static U16		regflags;	/* are we folding, multilining? */
-
 #ifdef MSDOS
 # if defined(BUGGY_MSC6)
  /* MSC 6.00A breaks on op/regexp.t test 85 unless we turn this off */
@@ -133,16 +119,6 @@ static void regset _((char *, I32));
 static void regtail _((regnode *, regnode *));
 static char* nextchar _((void));
 #endif
-
-static U32 regseen;
-static I32 seen_zerolen;
-static regexp *rx;
-static I32 extralen;
-
-#ifdef DEBUGGING
-static int colorset;
-char *colors[4];
-#endif 
 
 /* Length of a variant. */
 

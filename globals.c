@@ -1474,6 +1474,7 @@ CPerlObj::Init(void)
 	copline = NOLINE;
 	laststatval = -1;
 	laststype = OP_STAT;
+	generation = 100;
 
 #ifdef WIN32
 	New(2904, environ, 1, char*);

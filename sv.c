@@ -348,8 +348,6 @@ do_clean_named_objs(SV *sv)
 }
 #endif
 
-static bool in_clean_objs = FALSE;
-
 void
 sv_clean_objs(void)
 {
@@ -368,8 +366,6 @@ do_clean_all(SV *sv)
     SvFLAGS(sv) |= SVf_BREAK;
     SvREFCNT_dec(sv);
 }
-
-static bool in_clean_all = FALSE;
 
 void
 sv_clean_all(void)

@@ -42,8 +42,6 @@ static void qsortsv _((SV **array, size_t num_elts, I32 (*fun)(SV *a, SV *b)));
 static OP *doeval _((int gimme, OP** startop));
 #endif
 
-static I32 sortcxix;
-
 PP(pp_wantarray)
 {
     djSP;
@@ -1633,8 +1631,6 @@ PP(pp_redo)
     LEAVE_SCOPE(oldsave);
     return cx->blk_loop.redo_op;
 }
-
-static OP* lastgotoprobe;
 
 STATIC OP *
 dofindlabel(OP *o, char *label, OP **opstack, OP **oplimit)

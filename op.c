@@ -1067,8 +1067,6 @@ modkids(OP *o, I32 type)
     return o;
 }
 
-static I32 modcount;
-
 OP *
 mod(OP *o, I32 type)
 {
@@ -2457,7 +2455,6 @@ newASSIGNOP(I32 flags, OP *left, I32 optype, OP *right)
 		list(force_list(left)) );
 	o->op_private = 0 | (flags >> 8);
 	if (!(left->op_private & OPpLVAL_INTRO)) {
-	    static int generation = 100;
 	    OP *curop;
 	    OP *lastop = o;
 	    generation++;

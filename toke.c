@@ -56,16 +56,6 @@ static void restore_lex_expect _((void *e));
 
 static char ident_too_long[] = "Identifier too long";
 
-static char *linestart;		/* beg. of most recently read line */
-
-static char pending_ident;	/* pending identifier lookup */
-
-static struct {
-    I32 super_state;	/* lexer state to save */
-    I32 sub_inwhat;	/* "lex_inwhat" to use */
-    OP *sub_op;		/* "lex_op" to use */
-} sublex_info;
-
 /* The following are arranged oddly so that the guard on the switch statement
  * can get by with a single comparison (if the compiler is smart enough).
  */
@@ -320,16 +310,14 @@ restore_rsfp(void *f)
 }
 
 STATIC void
-restore_expect(e)
-void *e;
+restore_expect(void *e)
 {
     /* a safe way to store a small integer in a pointer */
     expect = (expectation)((char *)e - tokenbuf);
 }
 
 STATIC void
-restore_lex_expect(e)
-void *e;
+restore_lex_expect(void *e)
 {
     /* a safe way to store a small integer in a pointer */
     lex_expect = (expectation)((char *)e - tokenbuf);

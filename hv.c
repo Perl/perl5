@@ -142,7 +142,7 @@ hv_fetch(HV *hv, char *key, U32 klen, I32 lval)
     if (HvNAME(hv) && strEQ(HvNAME(hv),ENV_HV_NAME)) {
       char *gotenv;
 
-      if ((gotenv = ENV_getenv(key)) != Nullch) {
+      if ((gotenv = PerlEnv_getenv(key)) != Nullch) {
         sv = newSVpv(gotenv,strlen(gotenv));
         SvTAINTED_on(sv);
         return hv_store(hv,key,klen,sv,hash);
@@ -172,8 +172,6 @@ hv_fetch_ent(HV *hv, SV *keysv, I32 lval, register U32 hash)
 
     if (SvRMAGICAL(hv)) {
 	if (mg_find((SV*)hv,'P')) {
-	    static HE mh;
-
 	    sv = sv_newmortal();
 	    keysv = sv_2mortal(newSVsv(keysv));
 	    mg_copy((SV*)hv, sv, (char*)keysv, HEf_SVKEY);
@@ -234,7 +232,7 @@ hv_fetch_ent(HV *hv, SV *keysv, I32 lval, register U32 hash)
     if (HvNAME(hv) && strEQ(HvNAME(hv),ENV_HV_NAME)) {
       char *gotenv;
 
-      if ((gotenv = ENV_getenv(key)) != Nullch) {
+      if ((gotenv = PerlEnv_getenv(key)) != Nullch) {
         sv = newSVpv(gotenv,strlen(gotenv));
         SvTAINTED_on(sv);
         return hv_store_ent(hv,keysv,sv,hash);

@@ -427,7 +427,7 @@ mg_copy
 mg_find
 mg_free
 mg_get
-mg_len
+mg_length
 mg_magical
 mg_set
 mg_size

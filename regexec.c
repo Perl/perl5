@@ -55,26 +55,6 @@
 #include "perl.h"
 #include "regcomp.h"
 
-static char *  reginput;       /* String-input pointer. */
-static char *  regbol;         /* Beginning of input, for ^ check. */
-static char *  regeol;         /* End of input, for $ check. */
-static char ** regstartp;      /* Pointer to startp array. */
-static char ** regendp;        /* Ditto for endp. */
-static U32 *   reglastparen;   /* Similarly for lastparen. */
-static char *  regtill;        /* How far we are required to go. */
-static char    regprev;        /* char before regbol, \n if none */
-
-static char *  regprecomp;     /* uncompiled string. */
-static I32		regnpar;	/* () count. */
-static I32		regsize;	/* Largest OPEN seens. */
-static char ** reg_start_tmp;
-static U32 reg_start_tmpl;
-static struct reg_data *data;
-static char *bostr;
-
-static U32 reg_flags;			/* tainted/warned */
-static I32 reg_eval_set;
-
 #define RF_tainted	1		/* tainted information used? */
 #define RF_warned	2		/* warned about big count? */
 #define RF_evaled	4		/* Did an EVAL? */
@@ -82,27 +62,6 @@ static I32 reg_eval_set;
 #ifndef STATIC
 #define	STATIC	static
 #endif
-
-#ifdef DEBUGGING
-static I32	regnarrate = 0;
-static regnode* regprogram = 0;
-#endif
-
-/* Current curly descriptor */
-typedef struct curcur CURCUR;
-struct curcur {
-    int		parenfloor;	/* how far back to strip paren data */
-    int		cur;		/* how many instances of scan we've matched */
-    int		min;		/* the minimal number of scans to match */
-    int		max;		/* the maximal number of scans to match */
-    int		minmod;		/* whether to work our way up or down */
-    regnode *	scan;		/* the thing to match */
-    regnode *	next;		/* what has to match after it */
-    char *	lastloc;	/* where we started matching this scan */
-    CURCUR *	oldcc;		/* current curly before we started this one */
-};
-
-static CURCUR* regcc;
 
 #ifndef PERL_OBJECT
 typedef I32 CHECKPOINT;
@@ -705,7 +664,7 @@ regtry(regexp *prog, char *startpos)
 
     sp = prog->startp;
     ep = prog->endp;
-    data = prog->data;
+    regdata = prog->data;
     if (prog->nparens) {
 	for (i = prog->nparens; i >= 0; i--) {
 	    *sp++ = NULL;
@@ -751,7 +710,6 @@ regmatch(regnode *prog)
     register I32 c1, c2, paren;	/* case fold search, parenth */
     int minmod = 0, sw = 0, logical = 0;
 #ifdef DEBUGGING
-    static int regindent = 0;
     regindent++;
 #endif
 
@@ -1017,9 +975,9 @@ regmatch(regnode *prog)
 	    SV *ret;
 	    
 	    n = ARG(scan);
-	    op = (OP_4tree*)data->data[n];
+	    op = (OP_4tree*)regdata->data[n];
 	    DEBUG_r( PerlIO_printf(Perl_debug_log, "  re_eval 0x%x\n", op) );
-	    curpad = AvARRAY((AV*)data->data[n + 1]);
+	    curpad = AvARRAY((AV*)regdata->data[n + 1]);
 	    if (!reg_eval_set) {
 		/* Preserve whatever is on stack now, otherwise
 		   OP_NEXTSTATE will overwrite it. */

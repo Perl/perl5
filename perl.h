@@ -1129,6 +1129,27 @@ union any {
 #include "mg.h"
 #include "scope.h"
 
+/* Current curly descriptor */
+typedef struct curcur CURCUR;
+struct curcur {
+    int		parenfloor;	/* how far back to strip paren data */
+    int		cur;		/* how many instances of scan we've matched */
+    int		min;		/* the minimal number of scans to match */
+    int		max;		/* the maximal number of scans to match */
+    int		minmod;		/* whether to work our way up or down */
+    regnode *	scan;		/* the thing to match */
+    regnode *	next;		/* what has to match after it */
+    char *	lastloc;	/* where we started matching this scan */
+    CURCUR *	oldcc;		/* current curly before we started this one */
+};
+
+typedef struct _sublex_info SUBLEXINFO;
+struct _sublex_info {
+    I32 super_state;	/* lexer state to save */
+    I32 sub_inwhat;	/* "lex_inwhat" to use */
+    OP *sub_op;		/* "lex_op" to use */
+};
+
 #ifdef PERL_OBJECT
 struct magic_state {
     SV* mgs_sv;
