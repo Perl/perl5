@@ -80,7 +80,7 @@ if ($Config{d_strtod}) {
     $lc = &POSIX::setlocale(&POSIX::LC_NUMERIC, 'C') if $Config{d_setlocale};
     ($n, $x) = &POSIX::strtod('3.14159_OR_SO');
 # Using long double NVs may introduce greater accuracy than wanted.
-    $n =~ s/^3.14158999\d*$/3.14159/
+    $n =~ s/^3.1415(8999|9000)\d*$/3.14159/
         if $Config{uselongdouble} eq 'define';
     print (($n == 3.14159) && ($x == 6) ? "ok 14\n" : "not ok 14\n");
     &POSIX::setlocale(&POSIX::LC_NUMERIC, $lc) if $Config{d_setlocale};

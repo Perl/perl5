@@ -194,6 +194,7 @@ typedef U64TYPE U64;
 
 #endif
 
+/* log(2) is pretty close to  0.30103, just in case anyone is grepping for it */
 #define BIT_DIGITS(N)   (((N)*146)/485 + 1)  /* log2(10) =~ 146/485 */
 #define TYPE_DIGITS(T)  BIT_DIGITS(sizeof(T) * 8)
 #define TYPE_CHARS(T)   (TYPE_DIGITS(T) + 2) /* sign, NUL */
