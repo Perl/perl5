@@ -4665,7 +4665,11 @@ win32_signal_context(void)
     }
     return my_perl;
 #else
+#ifdef USE_5005THREADS
     return aTHX;
+#else
+    return PL_curinterp;
+#endif
 #endif
 }
 
