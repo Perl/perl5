@@ -12,7 +12,7 @@ use Config;
 $Is_VMS = $^O eq 'VMS';
 $Is_MacOS = $^O eq 'MacOS';
 
-plan tests => 106;
+plan tests => 107;
 
 my $Perl = which_perl();
 
@@ -311,3 +311,7 @@ SKIP: {
 fresh_perl_like('open m', qr/^Search pattern not terminated at/,
 	{ stderr => 1 }, 'open m test');
 
+fresh_perl_is(
+    'sub f { open(my $fh, "xxx"); $fh = "f"; } f; f;print "ok"',
+    'ok', { stderr => 1 },
+    '#29102: Crash on assignment to lexical filehandle');
