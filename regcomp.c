@@ -2970,8 +2970,11 @@ tryagain:
 		    }
 		    RExC_end++;
 		}
-		else
+		else {
 		    RExC_end = RExC_parse + 2;
+		    if (RExC_end > oldregxend)
+			RExC_end = oldregxend;
+		}
 		RExC_parse--;
 
 		ret = regclass(pRExC_state);
@@ -3593,6 +3596,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	    case 'D':	namedclass = ANYOF_NDIGIT;	break;
 	    case 'p':
 	    case 'P':
+		if (RExC_parse >= RExC_end)
+		    vFAIL("Empty \\p{}");
 		if (*RExC_parse == '{') {
 		    U8 c = (U8)value;
 		    e = strchr(RExC_parse++, '}');

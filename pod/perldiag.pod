@@ -1328,7 +1328,9 @@ unlikely to be what you want.
 
 =item Empty %s
 
-(F) Empty C<\p{}> or C<\P{}>.
+(F) C<\p> and C<\P> are used to introduce a named Unicode property, as
+described in L<perlunicode> and L<perlre>. You used C<\p> or C<\P> in
+a regular expression without specifying the property name.
 
 =item entering effective %s failed
 
