@@ -41,13 +41,6 @@
 #  include "error: USE_ITHREADS and USE_5005THREADS are incompatible"
 #endif
 
-/* XXX This next guard can disappear if the sources are revised
-   to use USE_5005THREADS throughout. -- A.D  1/6/2000
-*/
-#if defined(USE_ITHREADS) && defined(USE_5005THREADS)
-#  include "error: USE_ITHREADS and USE_5005THREADS are incompatible"
-#endif
-
 /* See L<perlguts/"The Perl API"> for detailed notes on
  * PERL_IMPLICIT_CONTEXT and PERL_IMPLICIT_SYS */
 
