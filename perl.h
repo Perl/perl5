@@ -2358,11 +2358,12 @@ Gid_t getegid (void);
 #define DEBUG_S_FLAG		0x00010000 /*  65536 */
 #define DEBUG_T_FLAG		0x00020000 /* 131072 */
 #define DEBUG_R_FLAG		0x00040000 /* 262144 */
-#define DEBUG_MASK		0x0007FFFF /* mask of all the standard flags */
+#define DEBUG_J_FLAG		0x00080000 /* 524288 */
+#define DEBUG_MASK		0x000FFFFF /* mask of all the standard flags */
 
 #define DEBUG_DB_RECURSE_FLAG	0x40000000
-#define DEBUG_TOP_FLAG		0x80000000 /* XXX what's this for ??? */
-
+#define DEBUG_TOP_FLAG		0x80000000 /* XXX what's this for ??? Signal
+					      that something was done? */
 
 #  define DEBUG_p_TEST_ (PL_debug & DEBUG_p_FLAG)
 #  define DEBUG_s_TEST_ (PL_debug & DEBUG_s_FLAG)
@@ -2383,6 +2384,7 @@ Gid_t getegid (void);
 #  define DEBUG_S_TEST_ (PL_debug & DEBUG_S_FLAG)
 #  define DEBUG_T_TEST_ (PL_debug & DEBUG_T_FLAG)
 #  define DEBUG_R_TEST_ (PL_debug & DEBUG_R_FLAG)
+#  define DEBUG_J_TEST_ (PL_debug & DEBUG_J_FLAG)
 
 #ifdef DEBUGGING
 
@@ -2408,6 +2410,7 @@ Gid_t getegid (void);
 #  define DEBUG_S_TEST DEBUG_S_TEST_
 #  define DEBUG_T_TEST DEBUG_T_TEST_
 #  define DEBUG_R_TEST DEBUG_R_TEST_
+#  define DEBUG_J_TEST DEBUG_J_TEST_
 
 #  define DEB(a)     a
 #  define DEBUG(a)   if (PL_debug)   a
@@ -2470,6 +2473,7 @@ Gid_t getegid (void);
 #  define DEBUG_S_TEST (0)
 #  define DEBUG_T_TEST (0)
 #  define DEBUG_R_TEST (0)
+#  define DEBUG_J_TEST (0)
 
 #  define DEB(a)
 #  define DEBUG(a)

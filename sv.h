@@ -1229,7 +1229,7 @@ Returns a pointer to the character buffer.
 #define SvSetMagicSV_nosteal(dst,src) \
 		SvSetSV_nosteal_and(dst,src,SvSETMAGIC(dst))
 
-#ifdef DEBUGGING
+#if !defined(SKIP_DEBUGGING)
 #define SvPEEK(sv) sv_peek(sv)
 #else
 #define SvPEEK(sv) ""

@@ -1402,6 +1402,10 @@ Perl_debop(pTHX_ OP *o)
     CV *cv;
     SV *sv;
     STRLEN n_a;
+
+    if (CopSTASH_eq(PL_curcop, PL_debstash) && !DEBUG_J_TEST_)
+	return 0;
+
     Perl_deb(aTHX_ "%s", OP_NAME(o));
     switch (o->op_type) {
     case OP_CONST:
@@ -1435,7 +1439,7 @@ Perl_debop(pTHX_ OP *o)
            PerlIO_printf(Perl_debug_log, "[%"UVuf"]", (UV)o->op_targ);
         break;
     default:
-	break;
+	return 0;
     }
     PerlIO_printf(Perl_debug_log, "\n");
     return 0;
@@ -1469,6 +1473,8 @@ Perl_watch(pTHX_ char **addr)
 STATIC void
 S_debprof(pTHX_ OP *o)
 {
+    if (CopSTASH_eq(PL_curcop, PL_debstash) && !DEBUG_J_TEST_)
+	return;
     if (!PL_profiledata)
 	Newz(000, PL_profiledata, MAXO, U32);
     ++PL_profiledata[o->op_type];
