@@ -2625,7 +2625,7 @@ sub parse_abstract {
     open(FH,$parsefile) or die "Could not open '$parsefile': $!";
     my $inpod = 0;
     my $package = $self->{DISTNAME};
-    $package =~ s/-/::/;
+    $package =~ s/-/::/g;
     while (<FH>) {
         $inpod = /^=(?!cut)/ ? 1 : /^=cut/ ? 0 : $inpod;
         next if !$inpod;
