@@ -609,7 +609,7 @@ SETARGV_OBJ	= setargv$(o)
 DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
 		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob \
 		Sys/Hostname Storable Filter/Util/Call Encode Digest/MD5 \
-		PerlIO/Scalar MIME/Base64 Time/HiRes
+		PerlIO/Scalar MIME/Base64 Time/HiRes Time/Piece
 STATIC_EXT	= DynaLoader
 NONXS_EXT	= Errno
 
@@ -638,6 +638,7 @@ MD5		= $(EXTDIR)\Digest\MD5\MD5
 PERLIOSCALAR	= $(EXTDIR)\PerlIO\Scalar\Scalar
 MIMEBASE64	= $(EXTDIR)\MIME\Base64\Base64
 TIMEHIRES	= $(EXTDIR)\Time\HiRes\HiRes
+TIMEPIECE	= $(EXTDIR)\Time\Piece\Piece
 
 SOCKET_DLL	= $(AUTODIR)\Socket\Socket.dll
 FCNTL_DLL	= $(AUTODIR)\Fcntl\Fcntl.dll
@@ -662,6 +663,7 @@ MD5_DLL		= $(AUTODIR)\Digest\MD5\MD5.dll
 PERLIOSCALAR_DLL= $(AUTODIR)\PerlIO\Scalar\Scalar.dll
 MIMEBASE64_DLL	= $(AUTODIR)\MIME\Base64\Base64.dll
 TIMEHIRES_DLL	= $(AUTODIR)\Time\HiRes\HiRes.dll
+TIMEPIECE_DLL	= $(AUTODIR)\Time\Piece\Piece.dll
 
 ERRNO_PM	= $(LIBDIR)\Errno.pm
 
@@ -688,7 +690,8 @@ EXTENSION_C	= 		\
 		$(MD5).c	\
 		$(PERLIOSCALAR).c	\
 		$(MIMEBASE64).c	\
-		$(TIMEHIRES).c	
+		$(TIMEHIRES).c	\
+		$(TIMEPIECE).c	
 
 EXTENSION_DLL	= 		\
 		$(SOCKET_DLL)	\
@@ -713,7 +716,8 @@ EXTENSION_DLL	= 		\
 		$(MD5_DLL)	\
 		$(PERLIOSCALAR_DLL) \
 		$(MIMEBASE64_DLL) \
-		$(TIMEHIRES_DLL)
+		$(TIMEHIRES_DLL)  \
+		$(TIMEPIECE_DLL)
 
 EXTENSION_PM	=		\
 		$(ERRNO_PM)
@@ -1039,6 +1043,12 @@ $(TIMEHIRES_DLL): $(PERLEXE) $(TIMEHIRES).xs
 	$(MAKE)
 	cd ..\..\win32
 
+$(TIMEPIECE_DLL): $(PERLEXE) $(TIMEPIECE).xs
+	cd $(EXTDIR)\$(*B)
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(MAKE)
+	cd ..\..\win32
+
 $(ERRNO_PM): $(PERLEXE) $(ERRNO)_pm.PL
 	cd $(EXTDIR)\$(*B)
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
@@ -1100,6 +1110,7 @@ distclean: clean
 	-del /f $(LIBDIR)\MIME\Base64\Base64.pm
 	-del /f $(LIBDIR)\MIME\Base64\QuotedPrint.pm
 	-del /f $(LIBDIR)\Time\HiRes\HiRes.pm
+	-del /f $(LIBDIR)\Time\Piece\Piece.pm
 	-if exist $(LIBDIR)\IO rmdir /s /q $(LIBDIR)\IO
 	-rmdir /s $(LIBDIR)\IO
 	-if exist $(LIBDIR)\Thread rmdir /s /q $(LIBDIR)\Thread
@@ -1120,6 +1131,8 @@ distclean: clean
 	-rmdir /s $(LIBDIR)\MIME
 	-if exist $(LIBDIR)\Time\HiRes rmdir /s /q $(LIBDIR)\Time\HiRes
 	-rmdir /s $(LIBDIR)\Time\HiRes
+	-if exist $(LIBDIR)\Time\Piece rmdir /s /q $(LIBDIR)\Time\Piece
+	-rmdir /s $(LIBDIR)\Time\Piece
 	cd $(PODDIR)
 	-del /f *.html *.bat checkpods \
 	    perlaix.pod perlamiga.pod perlbs2000.pod perlcygwin.pod \

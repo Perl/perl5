@@ -19,7 +19,7 @@ size_t			T_IV
 ssize_t			T_IV
 time_t			T_NV
 unsigned long *		T_OPAQUEPTR
-char **			T_PACKED
+char **			T_PACKEDARRAY
 void *			T_PTR
 Time_t *		T_PV
 SV *			T_SV
@@ -120,7 +120,7 @@ T_PTRREF
 	else
 	    Perl_croak(aTHX_ \"$var is not a reference\")
 T_REF_IV_REF
-	if (sv_isa($arg, \"${type}\")) {
+	if (sv_isa($arg, \"${ntype}\")) {
 	    IV tmp = SvIV((SV*)SvRV($arg));
 	    $var = *INT2PTR($type *, tmp);
 	}
@@ -163,7 +163,7 @@ T_REFOBJ
 	else
 	    Perl_croak(aTHX_ \"$var is not of type ${ntype}\")
 T_OPAQUE
-	$var NOT IMPLEMENTED
+	$var = *($type *)SvPV($arg,PL_na)
 T_OPAQUEPTR
 	$var = ($type)SvPV($arg,PL_na)
 T_PACKED

@@ -1817,7 +1817,7 @@ PP(pp_iter)
 	SvTEMP_off(sv);
     else
 	sv = &PL_sv_undef;
-    if (av != PL_curstack && SvIMMORTAL(sv)) {
+    if (av != PL_curstack && sv == &PL_sv_undef) {
 	SV *lv = cx->blk_loop.iterlval;
 	if (lv && SvREFCNT(lv) > 1) {
 	    SvREFCNT_dec(lv);

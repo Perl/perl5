@@ -1,0 +1,111 @@
+NAME
+    Time::Object - Object Oriented time objects
+
+SYNOPSIS
+        use Time::Object;
+        
+        my $t = localtime;
+        print "Time is $t\n";
+        print "Year is ", $t->year, "\n";
+
+DESCRIPTION
+    This module replaces the standard localtime and gmtime functions
+    with implementations that return objects. It does so in a
+    backwards compatible manner, so that using localtime/gmtime in
+    the way documented in perlfunc will still return what you
+    expect.
+
+    The module actually implements most of an interface described by
+    Larry Wall on the perl5-porters mailing list here:
+    http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2000-
+    01/msg00241.html
+
+USAGE
+    After importing this module, when you use localtime or gmtime in
+    a scalar context, rather than getting an ordinary scalar string
+    representing the date and time, you get a Time::Object object,
+    whose stringification happens to produce the same effect as the
+    localtime and gmtime functions. There is also a new()
+    constructor provided, which is the same as localtime(), except
+    when passed a Time::Object object, in which case it's a copy
+    constructor. The following methods are available on the object:
+
+        $t->sec               # also available as $t->second
+        $t->min               # also available as $t->minute
+        $t->hour
+        $t->mday              # also available as $t->day_of_month
+        $t->mon               # based at 1
+        $t->_mon              # based at 0
+        $t->monname           # February
+        $t->month             # same as $t->monname
+        $t->year              # based at 0 (year 0 AD is, of course 1 BC).
+        $t->_year             # year minus 1900
+        $t->yr                # 2 digit year
+        $t->wday              # based at 1 = Sunday
+        $t->_wday             # based at 0 = Sunday
+        $t->day_of_week       # based at 0 = Sunday
+        $t->wdayname          # Tuesday
+        $t->day               # same as wdayname
+        $t->yday              # also available as $t->day_of_year
+        $t->isdst             # also available as $t->daylight_savings
+        $t->hms               # 01:23:45
+        $t->ymd               # 2000/02/29
+        $t->mdy               # 02/29/2000
+        $t->dmy               # 29/02/2000
+        $t->date              # Tue Feb 29 01:23:45 2000
+        "$t"                  # same as $t->date
+        $t->epoch             # seconds since the epoch
+        $t->tzoffset          # timezone offset in a Time::Seconds object
+        $t->strftime(FORMAT)  # same as POSIX::strftime (without POSIX.pm)
+
+  Date Calculations
+
+    It's possible to use simple addition and subtraction of objects:
+
+        use Time::Seconds;
+            
+            my $seconds = $t1 - $t2;
+            $t1 += ONE_DAY; # add 1 day (constant from Time::Seconds)
+
+    The following are valid ($t1 and $t2 are Time::Object objects):
+
+            $t1 - $t2; # returns Time::Seconds object
+            $t1 - 42; # returns Time::Object object
+            $t1 + 533; # returns Time::Object object
+
+    However adding a Time::Object object to another Time::Object
+    object will cause a runtime error.
+
+    Note that the first of the above returns a Time::Seconds object,
+    so while examining the object will print the number of seconds
+    (because of the overloading), you can also get the number of
+    minutes, hours, days, weeks and years in that delta, using the
+    Time::Seconds API.
+
+  Date Comparisons
+
+    Date comparisons are also possible, using the full suite of "<",
+    ">", "<=", ">=", "<=>", "==" and "!=".
+
+  Global Overriding
+
+    Finally, it's possible to override localtime and gmtime
+    everywhere, by including the 'overrideGlobally' tag in the
+    import list:
+
+            use Time::Object 'overrideGlobally';
+
+    I'm not too keen on this name yet - suggestions welcome...
+
+AUTHOR
+    Matt Sergeant, matt@sergeant.org
+
+  License
+
+    This module is free software, you may distribute it under the
+    same terms as Perl.
+
+  Bugs
+
+    The test harness leaves much to be desired. Patches welcome.
+

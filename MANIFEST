@@ -491,10 +491,15 @@ ext/Thread/unsync.t	Test thread implicit synchronisation
 ext/Thread/unsync2.t	Test thread implicit synchronisation
 ext/Thread/unsync3.t	Test thread implicit synchronisation
 ext/Thread/unsync4.t	Test thread implicit synchronisation
-ext/Time/HiRes/Changes	Time::HiRes
-ext/Time/HiRes/HiRes.pm	Time::HiRes
-ext/Time/HiRes/HiRes.xs	Time::HiRes
-ext/Time/HiRes/Makefile.PL	Time::HiRes
+ext/Time/HiRes/Changes	Time::HiRes extension
+ext/Time/HiRes/HiRes.pm	Time::HiRes extension
+ext/Time/HiRes/HiRes.xs	Time::HiRes extension
+ext/Time/HiRes/Makefile.PL	Time::HiRes extension
+ext/Time/Piece/Makefile.PL	Time::Piece extension
+ext/Time/Piece/Piece.pm	Time::Piece extension
+ext/Time/Piece/Piece.xs	Time::Piece extension
+ext/Time/Piece/README	Time::Piece extension
+ext/Time/Piece/Seconds.pm	Time::Piece extension
 ext/XS/Typemap/Makefile.PL	XS::Typemap extension
 ext/XS/Typemap/README		XS::Typemap extension
 ext/XS/Typemap/Typemap.pm	XS::Typemap extension
@@ -1612,7 +1617,8 @@ t/lib/tie-stdarray.t	Test for Tie::StdArray
 t/lib/tie-stdhandle.t	Test for Tie::StdHandle
 t/lib/tie-stdpush.t	Test for Tie::StdArray
 t/lib/tie-substrhash.t	Test for Tie::SubstrHash
-t/lib/time-hires.t	Time::HiRes
+t/lib/time-hires.t	Test for Time::HiRes
+t/lib/time-piece.t	Test for Time::Piece
 t/lib/timelocal.t	See if Time::Local works
 t/lib/trig.t		See if Math::Trig works
 t/lib/u-blessed.t	Scalar::Util

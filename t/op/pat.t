@@ -5,7 +5,7 @@
 # that does fit that format, add it to op/re_tests, not here.
 
 $| = 1;
-print "1..586\n";
+print "1..587\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -1573,4 +1573,13 @@ EOT
 	print "not " unless $i == 2;
 	print "ok " . $test++ . "\n";
     }
+}
+
+{
+    # from Robin Houston
+
+    my $x = "\x{12345678}";
+    $x =~ s/(.)/$1/g;
+    print "not " unless ord($x) == 0x12345678 && length($x) == 1;
+    print "ok 587\n";
 }

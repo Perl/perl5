@@ -121,6 +121,8 @@ _cwdxs_fastcwd(void)
 
 MODULE = Cwd		PACKAGE = Cwd
 
+PROTOTYPES: ENABLE
+
 char *
 _fastcwd()
 PPCODE:

@@ -163,14 +163,14 @@ Perl_is_utf8_char(pTHX_ U8 *s)
 
     slen = len - 1;
     s++;
-    /* The initial value is dubious */
+    u &= UTF_START_MASK(len);
     uv  = u;
     ouv = uv;
     while (slen--) {
 	if (!UTF8_IS_CONTINUATION(*s))
 	    return 0;
 	uv = UTF8_ACCUMULATE(uv, *s);
-	if (uv < ouv)
+	if (uv < ouv) 
 	    return 0;
 	ouv = uv;
 	s++;

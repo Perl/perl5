@@ -258,6 +258,15 @@ my @a; $a[2] = 1; for (@a) { $_ = 2 } print "@a\n"
 EXPECT
 2 2 2
 ########
+# used to attach defelem magic too all immortal values,
+# which made restore of local $_ fail.
+foo(2>1);
+sub foo { bar() for @_;  }
+sub bar { local $_; }
+print "ok\n";
+EXPECT
+ok
+########
 @a = ($a, $b, $c, $d) = (5, 6);
 print "ok\n"
   if ($a[0] == 5 and $a[1] == 6 and !defined $a[2] and !defined $a[3]);

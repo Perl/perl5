@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..6\n";
+print "1..7\n";
 
 @oops = @ops = <op/*>;
 
@@ -38,3 +38,13 @@ print "@glops" eq "@oops" ? "ok 5\n" : "not ok 5\n";
 
 @glops = glob;
 print "@glops" eq "@oops" ? "ok 6\n" : "not ok 6\n";
+
+# glob should still work even after the File::Glob stash has gone away
+# (this used to dump core)
+my $i = 0;
+for (1..2) {
+    eval "<.>";
+    undef %File::Glob::;
+    ++$i;
+}
+print $i == 2 ? "ok 7\n" : "not ok 7\n";

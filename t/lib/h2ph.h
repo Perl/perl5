@@ -38,7 +38,7 @@
 #if !(defined __SOMETHING_MORE_IMPORTANT)
 #    warn Be careful...
 #elif !(defined __SOMETHING_REALLY_REALLY_IMPORTANT)
-#    error Nup, can't go on /* ' /* stupid font-lock-mode */
+#    error "Nup, can't go on" /* ' /* stupid font-lock-mode */
 #else /* defined __SOMETHING_MORE_IMPORTANT && defined __SOMETHING_REALLY_REALLY_IMPORTANT */
 #    define EVERYTHING_IS_OK
 #endif

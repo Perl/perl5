@@ -271,6 +271,7 @@
 #define ingroup			Perl_ingroup
 #define init_debugger		Perl_init_debugger
 #define init_stacks		Perl_init_stacks
+#define init_tm			Perl_init_tm
 #define intro_my		Perl_intro_my
 #define instr			Perl_instr
 #define io_close		Perl_io_close
@@ -409,6 +410,7 @@
 #define mg_magical		Perl_mg_magical
 #define mg_set			Perl_mg_set
 #define mg_size			Perl_mg_size
+#define mini_mktime		Perl_mini_mktime
 #define mod			Perl_mod
 #define mode_from_discipline	Perl_mode_from_discipline
 #define moreswitches		Perl_moreswitches
@@ -437,6 +439,7 @@
 #endif
 #define my_setenv		Perl_my_setenv
 #define my_stat			Perl_my_stat
+#define my_strftime		Perl_my_strftime
 #if defined(MYSWAP)
 #define my_swap			Perl_my_swap
 #define my_htonl		Perl_my_htonl
@@ -1766,6 +1769,7 @@
 #define ingroup(a,b)		Perl_ingroup(aTHX_ a,b)
 #define init_debugger()		Perl_init_debugger(aTHX)
 #define init_stacks()		Perl_init_stacks(aTHX)
+#define init_tm(a)		Perl_init_tm(aTHX_ a)
 #define intro_my()		Perl_intro_my(aTHX)
 #define instr(a,b)		Perl_instr(aTHX_ a,b)
 #define io_close(a,b)		Perl_io_close(aTHX_ a,b)
@@ -1902,6 +1906,7 @@
 #define mg_magical(a)		Perl_mg_magical(aTHX_ a)
 #define mg_set(a)		Perl_mg_set(aTHX_ a)
 #define mg_size(a)		Perl_mg_size(aTHX_ a)
+#define mini_mktime(a)		Perl_mini_mktime(aTHX_ a)
 #define mod(a,b)		Perl_mod(aTHX_ a,b)
 #define mode_from_discipline(a)	Perl_mode_from_discipline(aTHX_ a)
 #define moreswitches(a)		Perl_moreswitches(aTHX_ a)
@@ -1930,6 +1935,7 @@
 #endif
 #define my_setenv(a,b)		Perl_my_setenv(aTHX_ a,b)
 #define my_stat()		Perl_my_stat(aTHX)
+#define my_strftime(a,b,c,d,e,f,g,h,i,j)	Perl_my_strftime(aTHX_ a,b,c,d,e,f,g,h,i,j)
 #if defined(MYSWAP)
 #define my_swap(a)		Perl_my_swap(aTHX_ a)
 #define my_htonl(a)		Perl_my_htonl(aTHX_ a)
@@ -3462,6 +3468,8 @@
 #define init_debugger		Perl_init_debugger
 #define Perl_init_stacks	CPerlObj::Perl_init_stacks
 #define init_stacks		Perl_init_stacks
+#define Perl_init_tm		CPerlObj::Perl_init_tm
+#define init_tm			Perl_init_tm
 #define Perl_intro_my		CPerlObj::Perl_intro_my
 #define intro_my		Perl_intro_my
 #define Perl_instr		CPerlObj::Perl_instr
@@ -3732,6 +3740,8 @@
 #define mg_set			Perl_mg_set
 #define Perl_mg_size		CPerlObj::Perl_mg_size
 #define mg_size			Perl_mg_size
+#define Perl_mini_mktime	CPerlObj::Perl_mini_mktime
+#define mini_mktime		Perl_mini_mktime
 #define Perl_mod		CPerlObj::Perl_mod
 #define mod			Perl_mod
 #define Perl_mode_from_discipline	CPerlObj::Perl_mode_from_discipline
@@ -3778,6 +3788,8 @@
 #define my_setenv		Perl_my_setenv
 #define Perl_my_stat		CPerlObj::Perl_my_stat
 #define my_stat			Perl_my_stat
+#define Perl_my_strftime	CPerlObj::Perl_my_strftime
+#define my_strftime		Perl_my_strftime
 #if defined(MYSWAP)
 #define Perl_my_swap		CPerlObj::Perl_my_swap
 #define my_swap			Perl_my_swap

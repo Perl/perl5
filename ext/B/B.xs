@@ -911,6 +911,7 @@ SvPV(sv)
     CODE:
 	ST(0) = sv_newmortal();
 	sv_setpvn(ST(0), SvPVX(sv), SvCUR(sv));
+	SvFLAGS(ST(0)) |= SvUTF8(sv);
 
 STRLEN
 SvLEN(sv)

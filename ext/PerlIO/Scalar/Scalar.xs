@@ -238,6 +238,8 @@ PerlIO_funcs PerlIO_scalar = {
 
 MODULE = PerlIO::Scalar	PACKAGE = PerlIO::Scalar
 
+PROTOTYPES: ENABLE
+
 BOOT:
 {
 #ifdef PERLIO_LAYERS

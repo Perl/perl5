@@ -16,7 +16,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber cstring
 	 OPpCONST_ARYBASE
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK
          CVf_METHOD CVf_LOCKED CVf_LVALUE
-	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
+	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE PMf_SKIPWHITE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
 $VERSION = 0.60;
 use strict;
@@ -97,7 +97,6 @@ use strict;
 # - left/right context
 # - recognize `use utf8', `use integer', etc
 # - treat top-level block specially for incremental output
-# - interpret high bit chars in string as utf8 \x{...} (when?)
 # - copy comments (look at real text with $^P?)
 # - avoid semis in one-statement blocks
 # - associativity of &&=, ||=, ?:
@@ -145,6 +144,10 @@ use strict;
 # subs_done, forms_done:
 # keys are addresses of GVs for subs and formats we've already
 # deparsed (or at least put into subs_todo)
+#
+# subs_declared
+# keys are names of subs for which we've printed declarations.
+# That means we can omit parentheses from the arguments.
 #
 # parens: -p
 # linenums: -l
@@ -231,6 +234,7 @@ sub next_todo {
 	return "format $name =\n"
 	    . $self->deparse_format($ent->[1]->FORM). "\n";
     } else {
+	$self->{'subs_declared'}{$name} = 1;
 	return "sub $name " . $self->deparse_sub($ent->[1]->CV);
     }
 }
@@ -356,6 +360,7 @@ sub new {
 
     $self->{'ambient_arybase'} = 0;
     $self->{'ambient_warnings'} = "\0"x12;
+    $self->{'ambient_hints'} = 0;
     $self->init();
 
     while (my $arg = shift @_) {
@@ -384,6 +389,10 @@ sub init {
 
     $self->{'arybase'}  = $self->{'ambient_arybase'};
     $self->{'warnings'} = $self->{'ambient_warnings'};
+    $self->{'hints'}    = $self->{'ambient_hints'} & 0xFF;
+
+    # also a convenient place to clear out subs_declared
+    delete $self->{'subs_declared'};
 }
 
 sub compile {
@@ -439,7 +448,7 @@ sub ambient_pragmas {
 		@names = @$val;
 	    }
 	    else {
-		@names = split/\s+/, $val;
+		@names = split' ', $val;
 	    }
 	    $hint_bits |= strict::bits(@names);
 	}
@@ -448,14 +457,36 @@ sub ambient_pragmas {
 	    $arybase = $val;
 	}
 
-	elsif ($name eq 'integer') {
-	    require integer;
+	elsif ($name eq 'integer'
+	    || $name eq 'bytes'
+	    || $name eq 'utf8') {
+	    require "$name.pm";
 	    if ($val) {
-		$hint_bits |= $integer::hint_bits;
+		$hint_bits |= ${$::{"${name}::"}{"hint_bits"}};
 	    }
 	    else {
-		$hint_bits &= ~$integer::hint_bits;
+		$hint_bits &= ~${$::{"${name}::"}{"hint_bits"}};
 	    }
+	}
+
+	elsif ($name eq 're') {
+	    require re;
+	    if ($val eq 'none') {
+		$hint_bits &= ~re::bits(qw/taint eval asciirange/);
+		next();
+	    }
+
+	    my @names;
+	    if ($val eq 'all') {
+		@names = qw/taint eval asciirange/;
+	    }
+	    elsif (ref $val) {
+		@names = @$val;
+	    }
+	    else {
+		@names = split' ',$val;
+	    }
+	    $hint_bits |= re::bits(@names);
 	}
 
 	elsif ($name eq 'warnings') {
@@ -494,8 +525,7 @@ sub ambient_pragmas {
 
     $self->{'ambient_arybase'} = $arybase;
     $self->{'ambient_warnings'} = $warning_bits;
-
-    # $^H pragmas not yet implemented here
+    $self->{'ambient_hints'} = $hint_bits;
 }
 
 sub deparse {
@@ -553,7 +583,8 @@ sub deparse_sub {
     }
 
     local($self->{'curcv'}) = $cv;
-    local($self->{'curstash'}) = $self->{'curstash'};
+    local(@$self{qw'curstash warnings hints'})
+		= @$self{qw'curstash warnings hints'};
     if (not null $cv->ROOT) {
 	# skip leavesub
 	return $proto . "{\n\t" . 
@@ -573,7 +604,8 @@ sub deparse_format {
     my $form = shift;
     my @text;
     local($self->{'curcv'}) = $form;
-    local($self->{'curstash'}) = $self->{'curstash'};
+    local(@$self{qw'curstash warnings hints'})
+		= @$self{'curstash warnings hints'};
     my $op = $form->ROOT;
     my $kid;
     $op = $op->first->first; # skip leavewrite, lineseq
@@ -833,7 +865,9 @@ sub scopeop {
     my($real_block, $self, $op, $cx) = @_;
     my $kid;
     my @kids;
-    local($self->{'curstash'}) = $self->{'curstash'} if $real_block;
+
+    local(@$self{qw'curstash warnings hints'})
+		= @$self{qw'curstash warnings hints'} if $real_block;
     if ($real_block) {
 	$kid = $op->first->sibling; # skip enter
 	if (is_miniwhile($kid)) {
@@ -895,7 +929,7 @@ sub gv_name {
 }
 
 # Notice how subs and formats are inserted between statements here;
-# also $[ assignments and the warnings pragma.
+# also $[ assignments and pragmas.
 sub pp_nextstate {
     my $self = shift;
     my($op, $cx) = @_;
@@ -903,7 +937,7 @@ sub pp_nextstate {
     @text = $op->label . ": " if $op->label;
     my $seq = $op->cop_seq;
     while (scalar(@{$self->{'subs_todo'}})
-	   and $seq > $self->{'subs_todo'}[0][0]) {
+	   and $seq >= $self->{'subs_todo'}[0][0]) {
 	push @text, $self->next_todo;
     }
     my $stash = $op->stashpv;
@@ -938,12 +972,30 @@ sub pp_nextstate {
 	$self->{'warnings'} = $warning_bits;
     }
 
+    if ($self->{'hints'} != $op->private) {
+	push @text, declare_hints($self->{'hints'}, $op->private);
+	$self->{'hints'} = $op->private;
+    }
+
     return join("", @text);
 }
 
 sub declare_warnings {
     my ($from, $to) = @_;
-    return "BEGIN {\${^WARNING_BITS} = ".cstring($to)."};\n";
+    require warnings;
+    if ($to eq warnings::bits("all")) {
+	return "use warnings;\n";
+    }
+    elsif ($to eq "\0"x12) {
+	return "no warnings;\n";
+    }
+    return "BEGIN {\${^WARNING_BITS} = ".cstring($to)."}\n";
+}
+
+sub declare_hints {
+    my ($from, $to) = @_;
+    my $bits = $to;
+    return sprintf "BEGIN {\$^H &= ~0xFF; \$^H |= %x}\n", $bits;
 }
 
 sub pp_dbstate { pp_nextstate(@_) }
@@ -1868,7 +1920,8 @@ sub loop_common {
     my($op, $cx, $init) = @_;
     my $enter = $op->first;
     my $kid = $enter->sibling;
-    local($self->{'curstash'}) = $self->{'curstash'};
+    local(@$self{qw'curstash warnings hints'})
+		= @$self{qw'curstash warnings hints'};
     my $head = "";
     my $bare = 0;
     my $body;
@@ -2414,8 +2467,13 @@ sub pp_entersub {
 	my $arrow = is_subscriptable($kid->first) ? "" : "->";
 	$kid = $self->deparse($kid, 24) . $arrow;
     }
+
+    # Doesn't matter how many prototypes there are, if
+    # they haven't happened yet!
+    my $declared = exists $self->{'subs_declared'}{$kid};
+
     my $args;
-    if (defined $proto and not $amper) {
+    if ($declared and defined $proto and not $amper) {
 	($amper, $args) = $self->check_proto($proto, @exprs);
 	if ($amper eq "&") {
 	    $args = join(", ", map($self->deparse($_, 6), @exprs));
@@ -2430,7 +2488,9 @@ sub pp_entersub {
 	    return $prefix . $amper. $kid;
 	}
     } else {
-	if (defined $proto and $proto eq "") {
+        if (!$declared) {
+	    return "$kid(" . $args . ")";
+	} elsif (defined $proto and $proto eq "") {
 	    return $kid;
 	} elsif (defined $proto and $proto eq "\$") {
 	    return $self->maybe_parens_func($kid, $args, $cx, 16);
@@ -2461,8 +2521,9 @@ sub re_uninterp {
 }
 
 # character escapes, but not delimiters that might need to be escaped
-sub escape_str { # ASCII
+sub escape_str { # ASCII, UTF8
     my($str) = @_;
+    $str =~ s/(.)/ord($1)>255 ? sprintf("\\x{%x}", ord($1)) : $1/eg;
     $str =~ s/\a/\\a/g;
 #    $str =~ s/\cH/\\b/g; # \b means someting different in a regex 
     $str =~ s/\t/\\t/g;
@@ -2976,6 +3037,15 @@ sub pp_split {
     for (; !null($kid); $kid = $kid->sibling) {
 	push @exprs, $self->deparse($kid, 6);
     }
+
+    # handle special case of split(), and split(" ") that compiles to /\s+/
+    $kid = $op->first;
+    if ($kid->flags & OPf_SPECIAL
+	&& $exprs[0] eq '/\\s+/'
+	&& $kid->pmflags & PMf_SKIPWHITE ) {
+	    $exprs[0] = '" "';
+    }
+
     $expr = "split(" . join(", ", @exprs) . ")";
     if ($ary) {
 	return $self->maybe_parens("$ary = $expr", $cx, 7);
@@ -3298,6 +3368,18 @@ Assigning to the special variable $[
 
 use integer;
 
+=item *
+
+use bytes;
+
+=item *
+
+use utf8;
+
+=item *
+
+use re;
+
 =back
 
 Ordinarily, if you use B::Deparse on a subroutine which has
@@ -3327,10 +3409,23 @@ expect.
 
 Takes a number, the value of the array base $[.
 
+=item bytes
+
+=item utf8
+
 =item integer
 
-If the value is true, then the B<integer> pragma is assumed to
+If the value is true, then the appropriate pragma is assumed to
 be in the ambient scope, otherwise not.
+
+=item re
+
+Takes a string, possibly containing a whitespace-separated list of
+values. The values "all" and "none" are special. It's also permissible
+to pass an array reference here.
+
+    $deparser->ambient_pragmas(re => 'eval');
+
 
 =item warnings
 
