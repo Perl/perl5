@@ -7,10 +7,10 @@ Perl -Sx "{0}" {"Parameters"}; Exit {Status}
 
 use Mac::Resources;
 use Mac::Memory;
-require "StandardFile.pl";
+use Mac::StandardFile;
 
-$file = $ARGV[0] || StandardFile::GetFile();
-$res = OpenResFile($file) || die "$^E";
+$file = $ARGV[0] || StandardGetFile(0, '');
+$res = OpenResFile($file->sfFile) || die "$^E";
 
 print "Types: ", Count1Types(), "\n\n";
 
@@ -19,7 +19,7 @@ for ($types = Count1Types(); $types; --$types) {
 	print "Resources of type “$type”: ", Count1Resources($type), "\n";
 	for ($rsrcs = Count1Resources($type); $rsrcs; --$rsrcs) {
 		$rsrc = Get1IndResource($type, $rsrcs);
-		($id, $type, $name) = GetResInfo($rsrc);
+		my($id, $type, $name) = GetResInfo($rsrc);
 		printf("%4s %6d %s\n", $type, $id, $name);
 	}
 }

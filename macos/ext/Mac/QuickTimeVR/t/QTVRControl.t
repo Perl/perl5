@@ -18,13 +18,12 @@ use Mac::QuickDraw;
 use Mac::Movies;
 use Mac::QuickTimeVR;
 use Mac::Sound;
-
-require "StandardFile.pl"; 
+use Mac::StandardFile;
 
 sub GetMovie {
-   my($file) = StandardFile::GetFile('MooV');
+   my($file) = StandardGetFile(0, 'MooV');
    die "I'll be back!" unless defined $file;
-   my($resfile) = OpenMovieFile($file);
+   my($resfile) = OpenMovieFile($file->sfFile);
    die $^E unless $resfile;
    my($movie)   = NewMovieFromFile($resfile, 0, newMovieActive);
    die $^E unless $movie;
@@ -35,11 +34,12 @@ sub GetMovie {
 
 EnterMovies() or die $^E;
 
+$movie = GetMovie();
+
 $bounds = new Rect 50, 50, 550, 400;
 $win = new MacWindow $bounds, "You Gotta Move", 1, documentProc, 1;
 
 SetPort($win->window);
-$movie = GetMovie();
 
 $pane = $win->new_movie($movie, $win->window->portRect);
 $track = QTVRGetQTVRTrack($movie, 1);  die $^E unless $track;

@@ -13,10 +13,10 @@ This script demonstrates a simple menu.
 use Mac::Menus;
 use Mac::Events;
 use Mac::Resources;
+use Mac::Memory;
 
 $res = FSpOpenResFile("MenuBar.rsrc", 0) or die $^E;
 $bar = GetNewMBar(30000);
-print $bar;
 
 $old = GetMenuBar();
 SetMenuBar($bar);
