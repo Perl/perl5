@@ -174,8 +174,8 @@ plan tests => 130;
             next;
         }
 
+	chomp @{$program -> {SKIP_OS}};
         if (@{$program -> {SKIP_OS}}) {
-            chomp @{$program -> {SKIP_OS}};
             if (grep {$^O eq $_} @{$program -> {SKIP_OS}}) {
                 skip "Your OS uses different quoting.", 1;
                 next;
@@ -237,13 +237,18 @@ truncate$0,-1+-s$0;exec$0;}}//rekcaH_lreP_rehtona_tsuJ
         chmod 0755   => $progfile or die "Failed to chmod $progfile: $!\n";
         my $command  = "./$progfile";
            $command .= ' 2>&1' unless $^O eq 'MacOS';
-        my $output   = `$command`;
+        if ( $^O eq 'qnx' ) {
+          skip "#!./perl not supported in QNX4";
+          skip "#!./perl not supported in QNX4";
+        } else {
+          my $output   = `$command`;
 
+          is ($output, $JaPH, "Self correcting code $i");
+
+                 $output   = `$command`;
+          is ($output, "",    "Self corrected code $i");
+        }
         $i ++;
-        is ($output, $JaPH, "Self correcting code $i");
-
-           $output   = `$command`;
-        is ($output, "",    "Self corrected code $i");
     }
 }
 
@@ -258,12 +263,14 @@ $_ = q *4a75737420616e6f74686572205065726c204861636b65720a*;
 for ($*=******;$**=******;$**=******) {$**=*******s*..*qq}
 print chr 0x$& and q
 qq}*excess********}
+SKIP_OS: qnx
 
 #######  Funky loop 3.
 $_ = q *4a75737420616e6f74686572205065726c204861636b65720a*;
 for ($*=******;$**=******;$**=******) {$**=*******s*..*qq}
 print chr 0x$& and q
 qq}*excess********}
+SKIP_OS: qnx
 
 #######  Funky loop 4.
 $_ = q ?4a75737420616e6f74686572205065726c204861636b65720as?;??;
@@ -500,6 +507,7 @@ SWITCHES: -w
 #######  Overloaded constants 1
 BEGIN {$^H {q} = sub {pop and pop and print pop}; $^H = 2**4.2**12}
 "Just "; "another "; "Perl "; "Hacker";
+SKIP_OS: qnx
 
 #######  Overloaded constants 2
 BEGIN {$^H {q} = sub {$_ [1] =~ y/S-ZA-IK-O/q-tc-fe-m/d; $_ [1]}; $^H = 0x28100}
