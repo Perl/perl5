@@ -12,8 +12,8 @@ sub mk {
     $r=~/^(.*)\/[^\/]*?$/;
     mk($1);
   }
-  system("$^X comp.pl --do cemkdir [p]\\lib\\$r");
-  print STDERR "$^X comp.pl --do cemkpath [p]\\lib\\$r\n";
+  print STDERR "..\\miniperl.exe comp.pl --do cemkdir [p]\\lib\\$r\n";
+  system("..\\miniperl.exe -I..\\lib comp.pl --do cemkdir [p]\\lib\\$r");
   $dirs{$r}++;
 }
 for (@files) {
@@ -22,7 +22,7 @@ for (@files) {
     mk($1);
   }
   # currently no stripping POD
-  system("$^X comp.pl --do cecopy pc:..\\lib\\$_ ce:[p]\\lib\\$_");
+  system("..\\miniperl.exe -I..\\lib comp.pl --copy pc:..\\lib\\$_ ce:[p]\\lib\\$_");
 }
 
 sub BEGIN {

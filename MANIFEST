@@ -2742,6 +2742,7 @@ wince/bin/pl2bat.pl			WinCE port
 wince/bin/runperl.pl			WinCE port
 wince/bin/search.pl			WinCE port
 wince/cecopy-lib.pl			WinCE port
+wince/compile.bat			WinCE port
 wince/comp.pl				WinCE port
 wince/config.ce				WinCE port
 wince/config.h				WinCE port
@@ -2762,7 +2763,6 @@ wince/include/time.h			WinCE port
 wince/Makefile.ce			WinCE port
 wince/makeico.pl			WinCE port
 wince/perl.rc				WinCE port
-wince/perldll.def			WinCE port
 wince/perllib.c				WinCE port
 wince/perlmain.c			WinCE port
 wince/README.compile			WinCE port
@@ -2774,6 +2774,7 @@ wince/win32.h				WinCE port
 wince/win32iop.h			WinCE port
 wince/win32thread.c			WinCE port
 wince/win32thread.h			WinCE port
+wince/win32io.c				WinCE port
 wince/wince.c				WinCE port
 wince/wince.h				WinCE port
 wince/wincesck.c			WinCE port
