@@ -7,7 +7,7 @@ use Exporter;
 use vars qw( @ISA @EXPORT $VERSION );
 @ISA = 'Exporter';
 @EXPORT = '&Mksymlists';
-$VERSION = substr q$Revision: 1.16 $, 10;
+$VERSION = substr q$Revision: 1.17 $, 10;
 
 sub Mksymlists {
     my(%spec) = @_;
@@ -69,6 +69,8 @@ sub _write_aix {
 
 sub _write_os2 {
     my($data) = @_;
+    require Config;
+    my $threaded = ($Config::Config{archname} =~ /-thread/ ? " threaded" : "");
 
     if (not $data->{DLBASE}) {
         ($data->{DLBASE} = $data->{NAME}) =~ s/.*:://;
@@ -79,6 +81,7 @@ sub _write_os2 {
     open(DEF,">$data->{FILE}.def")
         or croak("Can't create $data->{FILE}.def: $!\n");
     print DEF "LIBRARY '$data->{DLBASE}' INITINSTANCE TERMINSTANCE\n";
+    print DEF "DESCRIPTION 'Perl (v$]$threaded) module $data->{NAME} v$data->{VERSION}'\n";
     print DEF "CODE LOADONCALL\n";
     print DEF "DATA LOADONCALL NONSHARED MULTIPLE\n";
     print DEF "EXPORTS\n  ";

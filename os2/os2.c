@@ -40,16 +40,16 @@ const char *pthreads_states[] = {
 
 typedef struct {
     void *status;
-    pthread_cond_t cond;
+    perl_cond cond;
     enum pthreads_state state;
 } thread_join_t;
 
 thread_join_t *thread_join_data;
 int thread_join_count;
-pthread_mutex_t start_thread_mutex;
+perl_mutex start_thread_mutex;
 
 int
-pthread_join(pthread_t tid, void **status)
+pthread_join(perl_os_thread tid, void **status)
 {
     MUTEX_LOCK(&start_thread_mutex);
     switch (thread_join_data[tid].state) {
@@ -117,7 +117,7 @@ pthread_startit(void *arg)
 }
 
 int
-pthread_create(pthread_t *tid, const pthread_attr_t *attr, 
+pthread_create(perl_os_thread *tid, const pthread_attr_t *attr, 
 	       void *(*start_routine)(void*), void *arg)
 {
     void *args[2];
@@ -134,7 +134,7 @@ pthread_create(pthread_t *tid, const pthread_attr_t *attr,
 }
 
 int 
-pthread_detach(pthread_t tid)
+pthread_detach(perl_os_thread tid)
 {
     MUTEX_LOCK(&start_thread_mutex);
     switch (thread_join_data[tid].state) {
@@ -157,7 +157,7 @@ pthread_detach(pthread_t tid)
 
 /* This is a very bastardized version: */
 int
-os2_cond_wait(pthread_cond_t *c, pthread_mutex_t *m)
+os2_cond_wait(perl_cond *c, perl_mutex *m)
 {						
     int rc;
     if ((rc = DosResetEventSem(*c,&na)) && (rc != ERROR_ALREADY_RESET))
@@ -881,6 +881,9 @@ mod2fname(sv)
 	}
 	avlen --;
     }
+#ifdef USE_THREADS
+    sum++;				/* Avoid conflict of DLLs in memory. */
+#endif 
     fname[pos] = 'A' + (sum % 26);
     fname[pos + 1] = 'A' + (sum / 26 % 26);
     fname[pos + 2] = '\0';

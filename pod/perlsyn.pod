@@ -409,6 +409,18 @@ or
 	$nothing = 1;
     }
 
+or, using experimental C<EVAL blocks> of regular expressions
+(see L<perlre/"(?{ code })">),
+
+	/ ^abc (?{ $abc = 1 })
+         |
+	  ^def (?{  $def = 1 })
+	 |
+	  ^xyz (?{ $xyz = 1 })
+	 |
+	  (?{ $nothing = 1 })
+	/x;
+
 or even, horrors,
 
     if (/^abc/)
