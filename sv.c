@@ -8082,9 +8082,9 @@ Perl_sv_dup(pTHX_ SV *sstr)
 	break;
     case SVt_RV:
 	SvANY(dstr)	= new_XRV();
-	SvRV(dstr)	= SvWEAKREF(SvRV(sstr))
-			? sv_dup_inc(SvRV(sstr))
-			: sv_dup(SvRV(sstr));
+	SvRV(dstr)	= SvRV(sstr) && SvWEAKREF(SvRV(sstr))
+			? sv_dup(SvRV(sstr))
+			: sv_dup_inc(SvRV(sstr));
 	break;
     case SVt_PV:
 	SvANY(dstr)	= new_XPV();
@@ -8092,8 +8092,8 @@ Perl_sv_dup(pTHX_ SV *sstr)
 	SvLEN(dstr)	= SvLEN(sstr);
 	if (SvROK(sstr))
 	    SvRV(dstr)	= SvWEAKREF(SvRV(sstr))
-			? sv_dup_inc(SvRV(sstr))
-			: sv_dup(SvRV(sstr));
+			? sv_dup(SvRV(sstr))
+			: sv_dup_inc(SvRV(sstr));
 	else if (SvPVX(sstr) && SvLEN(sstr))
 	    SvPVX(dstr)	= SAVEPVN(SvPVX(sstr), SvLEN(sstr)-1);
 	else
@@ -8106,8 +8106,8 @@ Perl_sv_dup(pTHX_ SV *sstr)
 	SvIVX(dstr)	= SvIVX(sstr);
 	if (SvROK(sstr))
 	    SvRV(dstr)	= SvWEAKREF(SvRV(sstr))
-			? sv_dup_inc(SvRV(sstr))
-			: sv_dup(SvRV(sstr));
+			? sv_dup(SvRV(sstr))
+			: sv_dup_inc(SvRV(sstr));
 	else if (SvPVX(sstr) && SvLEN(sstr))
 	    SvPVX(dstr)	= SAVEPVN(SvPVX(sstr), SvLEN(sstr)-1);
 	else
@@ -8121,8 +8121,8 @@ Perl_sv_dup(pTHX_ SV *sstr)
 	SvNVX(dstr)	= SvNVX(sstr);
 	if (SvROK(sstr))
 	    SvRV(dstr)	= SvWEAKREF(SvRV(sstr))
-			? sv_dup_inc(SvRV(sstr))
-			: sv_dup(SvRV(sstr));
+			? sv_dup(SvRV(sstr))
+			: sv_dup_inc(SvRV(sstr));
 	else if (SvPVX(sstr) && SvLEN(sstr))
 	    SvPVX(dstr)	= SAVEPVN(SvPVX(sstr), SvLEN(sstr)-1);
 	else
@@ -8138,8 +8138,8 @@ Perl_sv_dup(pTHX_ SV *sstr)
 	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr));
 	if (SvROK(sstr))
 	    SvRV(dstr)	= SvWEAKREF(SvRV(sstr))
-			? sv_dup_inc(SvRV(sstr))
-			: sv_dup(SvRV(sstr));
+			? sv_dup(SvRV(sstr))
+			: sv_dup_inc(SvRV(sstr));
 	else if (SvPVX(sstr) && SvLEN(sstr))
 	    SvPVX(dstr)	= SAVEPVN(SvPVX(sstr), SvLEN(sstr)-1);
 	else
@@ -8155,8 +8155,8 @@ Perl_sv_dup(pTHX_ SV *sstr)
 	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr));
 	if (SvROK(sstr))
 	    SvRV(dstr)	= SvWEAKREF(SvRV(sstr))
-			? sv_dup_inc(SvRV(sstr))
-			: sv_dup(SvRV(sstr));
+			? sv_dup(SvRV(sstr))
+			: sv_dup_inc(SvRV(sstr));
 	else if (SvPVX(sstr) && SvLEN(sstr))
 	    SvPVX(dstr)	= SAVEPVN(SvPVX(sstr), SvLEN(sstr)-1);
 	else
@@ -8175,8 +8175,8 @@ Perl_sv_dup(pTHX_ SV *sstr)
 	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr));
 	if (SvROK(sstr))
 	    SvRV(dstr)	= SvWEAKREF(SvRV(sstr))
-			? sv_dup_inc(SvRV(sstr))
-			: sv_dup(SvRV(sstr));
+			? sv_dup(SvRV(sstr))
+			: sv_dup_inc(SvRV(sstr));
 	else if (SvPVX(sstr) && SvLEN(sstr))
 	    SvPVX(dstr)	= SAVEPVN(SvPVX(sstr), SvLEN(sstr)-1);
 	else
@@ -8208,8 +8208,8 @@ Perl_sv_dup(pTHX_ SV *sstr)
 	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr));
 	if (SvROK(sstr))
 	    SvRV(dstr)	= SvWEAKREF(SvRV(sstr))
-			? sv_dup_inc(SvRV(sstr))
-			: sv_dup(SvRV(sstr));
+			? sv_dup(SvRV(sstr))
+			: sv_dup_inc(SvRV(sstr));
 	else if (SvPVX(sstr) && SvLEN(sstr))
 	    SvPVX(dstr)	= SAVEPVN(SvPVX(sstr), SvLEN(sstr)-1);
 	else
@@ -8231,8 +8231,8 @@ Perl_sv_dup(pTHX_ SV *sstr)
 	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr));
 	if (SvROK(sstr))
 	    SvRV(dstr)	= SvWEAKREF(SvRV(sstr))
-			? sv_dup_inc(SvRV(sstr))
-			: sv_dup(SvRV(sstr));
+			? sv_dup(SvRV(sstr))
+			: sv_dup_inc(SvRV(sstr));
 	else if (SvPVX(sstr) && SvLEN(sstr))
 	    SvPVX(dstr)	= SAVEPVN(SvPVX(sstr), SvLEN(sstr)-1);
 	else
