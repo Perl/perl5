@@ -1332,7 +1332,7 @@ PERL_CALLCONV char*	Perl_sv_pvn_force_flags(pTHX_ SV* sv, STRLEN* lp, I32 flags)
 PERL_CALLCONV char*	Perl_sv_2pv_flags(pTHX_ SV* sv, STRLEN* lp, I32 flags);
 PERL_CALLCONV char*	Perl_my_atof2(pTHX_ const char *s, NV* value);
 #if !defined(HAS_SOCKETPAIR) && defined(HAS_SOCKET)
-PERL_CALLCONV int	Perl_my_socketpair(pTHX_ int family, int type, int protocol, int fd[2]);
+PERL_CALLCONV int	Perl_my_socketpair(int family, int type, int protocol, int fd[2]);
 #endif
 
 
