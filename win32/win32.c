@@ -1884,10 +1884,12 @@ win32_async_check(pTHX)
 
 	case WM_TIMER: {
 	    /* alarm() is a one-shot but SetTimer() repeats so kill it */
-	    if (w32_timerid) {
+	    if (w32_timerid && w32_timerid==msg.wParam) {
 	    	KillTimer(NULL,w32_timerid);
 	    	w32_timerid=0;
 	    }
+            else
+		goto FallThrough;
 	    /* Now fake a call to signal handler */
 	    if (do_raise(aTHX_ 14)) {
 	    	sig_terminate(aTHX_ 14);
@@ -1897,6 +1899,7 @@ win32_async_check(pTHX)
 
 	/* Otherwise do normal Win32 thing - in case it is useful */
 	default:
+	FallThrough:
 	    TranslateMessage(&msg);
 	    DispatchMessage(&msg);
 	    ours = 0;
