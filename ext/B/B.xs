@@ -454,6 +454,7 @@ BOOT:
 #define B_init_av()	PL_initav
 #define B_main_root()	PL_main_root
 #define B_main_start()	PL_main_start
+#define B_amagic_generation()	PL_amagic_generation
 #define B_comppadlist()	(PL_main_cv ? CvPADLIST(PL_main_cv) : CvPADLIST(PL_compcv))
 #define B_sv_undef()	&PL_sv_undef
 #define B_sv_yes()	&PL_sv_yes
@@ -470,6 +471,9 @@ B_main_root()
 
 B::OP
 B_main_start()
+
+long 
+B_amagic_generation()
 
 B::AV
 B_comppadlist()

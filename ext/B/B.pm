@@ -11,7 +11,7 @@ require Exporter;
 @ISA = qw(Exporter DynaLoader);
 @EXPORT_OK = qw(byteload_fh byteload_string minus_c ppname
 		class peekop cast_I32 cstring cchar hash threadsv_names
-		main_root main_start main_cv svref_2object opnumber
+		main_root main_start main_cv svref_2object opnumber amagic_generation
 		walkoptree walkoptree_slow walkoptree_exec walksymtable
 		parents comppadlist sv_undef compile_stats timing_info init_av);
 sub OPf_KIDS ();
@@ -749,6 +749,10 @@ Returns the SV object corresponding to the C variable C<sv_yes>.
 =item sv_no
 
 Returns the SV object corresponding to the C variable C<sv_no>.
+
+=item amagic_generation
+
+Returns the SV object corresponding to the C variable C<amagic_generation>.
 
 =item walkoptree(OP, METHOD)
 

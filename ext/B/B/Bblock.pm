@@ -21,8 +21,8 @@ sub mark_leader {
 sub find_leaders {
     my ($root, $start) = @_;
     $bblock = {};
-    mark_leader($start);
-    walkoptree($root, "mark_if_leader");
+    mark_leader($start) if ( ref $start ne "B::NULL" );
+    walkoptree($root, "mark_if_leader") if ((ref $root) ne "B::NULL") ;
     return $bblock;
 }
 
@@ -95,6 +95,12 @@ sub B::CONDOP::mark_if_leader {
     mark_leader($op->next);
     mark_leader($op->true);
     mark_leader($op->false);
+}
+
+sub B::LISTOP::mark_if_leader {
+    my $op = shift;
+    mark_leader($op->first);
+    mark_leader($op->next);
 }
 
 sub B::LISTOP::mark_if_leader {

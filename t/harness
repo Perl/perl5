@@ -19,15 +19,43 @@ $Test::Harness::verbose = shift if @ARGV && $ARGV[0] eq '-v';
 @tests = <base/*.t comp/*.t cmd/*.t io/*.t op/*.t pragma/*.t lib/*.t> unless @tests;
 
 Test::Harness::runtests @tests;
+exit(0) unless -e "../testcompile";
 
-%infinite = ('comp/require.t', 1, 'op/bop.t', 1, 'lib/hostname.t', 1 );
+%infinite =   qw(
+		op/bop.t		1
+		lib/hostname.t		1
+		);
+#fudge DATA for now.
+%datahandle = qw(
+		lib/bigint.t		1
+		lib/bigintpm.t		1
+		lib/bigfloat.t	 	1
+		lib/bigfloatpm.t	1
+		);
+
+my $dhwrapper = <<'EOT';
+open DATA,"<".__FILE__;
+until (($_=<DATA>) =~ /^__END__/) {};
+EOT
 
 @tests = grep (!$infinite{$_}, @tests);
+@tests = map {
+		 my $new = $_;
+		 if ($datahandle{$_}) {
+		     $new .= '.t';
+		     local(*F, *T);
+		     open(F,"<$_") or die "Can't open $_: $!";
+		     open(T,">$new") or die "Can't open $new: $!";
+		     print T $dhwrapper, <F>;
+		     close F;
+		     close T;
+		 }
+		 $new;
+	     } @tests;
 
-if (-e "../testcompile") 
-{ 
-	print "The tests ", join(' ', keys(%infinite)), 
-							" generate infinite loops! Skipping!\n";
-
-	$ENV{'COMPILE_TEST'} = 1; Test::Harness::runtests @tests; 
+print "The tests ", join(' ', keys(%infinite)), 
+	" generate infinite loops! Skipping!\n";
+$ENV{'COMPILE_TEST'} = 1; Test::Harness::runtests @tests; 
+foreach (keys %datahandle) {
+     unlink "$_.t";
 }
