@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..683\n";
+print "1..684\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -1979,3 +1979,11 @@ print "ok 682\n" if @a == 9 && "@a" eq "f o o \n $a $b b a r";
 @a = ("foo\n\x{100}bar" =~ /\C/gs);
 print "ok 683\n" if @a == 9 && "@a" eq "f o o \n $a $b b a r";
 
+{
+    # [ID 20010814.004] pos() doesn't work when using =~m// in list context
+    $_ = "ababacadaea";
+    $a = join ":", /b./gc;
+    $b = join ":", /a./gc;
+    $c = pos;
+    print "$a $b $c" eq 'ba:ba ad:ae 10' ? "ok 684\n" : "not ok 684\t# $a $b $c\n";
+}

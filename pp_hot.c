@@ -1336,6 +1336,22 @@ play_it_again:
 	    }
 	}
 	if (global) {
+	    if (pm->op_pmflags & PMf_CONTINUE) {
+		MAGIC* mg = 0;
+		if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG))
+		    mg = mg_find(TARG, PERL_MAGIC_regex_global);
+		if (!mg) {
+		    sv_magic(TARG, (SV*)0, PERL_MAGIC_regex_global, Nullch, 0);
+		    mg = mg_find(TARG, PERL_MAGIC_regex_global);
+		}
+		if (rx->startp[0] != -1) {
+		    mg->mg_len = rx->endp[0];
+		    if (rx->startp[0] == rx->endp[0])
+			mg->mg_flags |= MGf_MINMATCH;
+		    else
+			mg->mg_flags &= ~MGf_MINMATCH;
+		}
+	    }
 	    had_zerolen = (rx->startp[0] != -1
 			   && rx->startp[0] == rx->endp[0]);
 	    PUTBACK;			/* EVAL blocks may use stack */
