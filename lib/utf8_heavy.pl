@@ -1,12 +1,15 @@
 package utf8;
 use strict;
 use warnings;
+require "utf8_pva.pl";
 
 sub DEBUG () { 0 }
 
 sub DESTROY {}
 
 my %Cache;
+
+our (%PropertyAlias, %PA_reverse, %PropValueAlias, %PVA_reverse, %PVA_abbr_map);
 
 sub croak { require Carp; Carp::croak(@_) }
 
@@ -45,28 +48,67 @@ sub SWASHNEW {
 
       GETFILE:
         {
-            ##
-            ## 'Is' is always optional, so if it's there, remove it.
-            ## Same with 'Category=' and 'Script='.
-            ##
-            ## 'Block=' is replaced by 'In'.
-            ##
+	    ##
+	    ## It could be a user-defined property.
+	    ##
+
+	    my $caller1 = $type =~ s/(.+)::// ? $1 : caller(1);
+
+	    if (defined $caller1 && $type =~ /^(?:\w+)$/) {
+		my $prop = "${caller1}::$type";
+		if (exists &{$prop}) {
+		    no strict 'refs';
+		    
+		    $list = &{$prop};
+		    last GETFILE;
+		}
+	    }
+
             my $wasIs;
 
             ($wasIs = $type =~ s/^Is(?:\s+|[-_])?//i)
               or
-            $type =~ s/^Category\s*=\s*//i
+            $type =~ s/^(?:(?:General(?:\s+|_)?)?Category|gc)\s*[:=]\s*//i
               or
-            $type =~ s/^Script\s*=\s*//i
+            $type =~ s/^(?:Script|sc)\s*[:=]\s*//i
               or
-            $type =~ s/^Block\s*=\s*/In/i;
+            $type =~ s/^Block\s*[:=]\s*/In/i;
+
+
+	    ##
+	    ## See if it's in some enumeration.
+	    ##
+	    if ($type =~ /^([\w\s]+)[:=]\s*(.*)/) {
+		require "utf8_pva.pl";
+		my ($enum, $val) = (lc $1, lc $2);
+		$enum =~ tr/ _-//d;
+		$val =~ tr/ _-//d;
+
+		my $pa = $PropertyAlias{$enum} ? $enum : $PA_reverse{$enum};
+		my $f = $PropValueAlias{$pa}{$val} ? $val : $PVA_reverse{$pa}{lc $val};
+
+		if ($pa and $f) {
+		    $pa = "gc_sc" if $pa eq "gc" or $pa eq "sc";
+		    $file = "unicore/lib/$pa/$PVA_abbr_map{$pa}{lc $f}.pl";
+		    last GETFILE;
+		}
+	    }
+	    else {
+		my $t = lc $type;
+		$t =~ tr/ _-//d;
+
+		if ($PropValueAlias{gc}{$t} or $PropValueAlias{sc}{$t}) {
+		    $file = "unicore/lib/gc_sc/$PVA_abbr_map{gc_sc}{$t}.pl";
+		    last GETFILE;
+		}
+	    }
 
             ##
             ## See if it's in the direct mapping table.
             ##
             require "unicore/Exact.pl";
             if (my $base = $utf8::Exact{$type}) {
-                $file = "unicore/lib/$base.pl";
+                $file = "unicore/lib/gc_sc/$base.pl";
                 last GETFILE;
             }
 
@@ -79,26 +121,10 @@ sub SWASHNEW {
             print "canonical = $canonical\n" if DEBUG;
 
             require "unicore/Canonical.pl";
-            if (my $base = $utf8::Canonical{$canonical}) {
-                $file = "unicore/lib/$base.pl";
+            if (my $base = ($utf8::Canonical{$canonical} || $utf8::Canonical{ lc $utf8::PropertyAlias{$canonical} })) {
+                $file = "unicore/lib/gc_sc/$base.pl";
                 last GETFILE;
             }
-
-	    ##
-	    ## It could be a user-defined property.
-	    ##
-
-	    my $caller1 = $type =~ s/(.+)::// ? $1 : caller(1);
-
-	    if (defined $caller1 && $type =~ /^(?:\w+)$/) {
-		my $prop = $caller1 . "::" . ( $wasIs ? "Is" : "" ) . $type;
-		if (exists &{$prop}) {
-		    no strict 'refs';
-		    
-		    $list = &{$prop};
-		    last GETFILE;
-		}
-	    }
 
 	    ##
 	    ## See if it's a user-level "To".

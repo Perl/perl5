@@ -207,6 +207,7 @@ for instance, are identical.
     Short       Long
 
     L           Letter
+    LC          CasedLetter
     Lu          UppercaseLetter
     Ll          LowercaseLetter
     Lt          TitlecaseLetter
@@ -254,7 +255,8 @@ for instance, are identical.
 
 Single-letter properties match all characters in any of the
 two-letter sub-properties starting with the same letter.
-C<L&> is a special case, which is an alias for C<Ll>, C<Lu>, and C<Lt>.
+C<LC> and C<L&> are special cases, which are aliases for the set of
+C<Ll>, C<Lu>, and C<Lt>.
 
 Because Perl hides the need for the user to understand the internal
 representation of Unicode characters, there is no need to implement
@@ -262,31 +264,32 @@ the somewhat messy concept of surrogates. C<Cs> is therefore not
 supported.
 
 Because scripts differ in their directionality--Hebrew is
-written right to left, for example--Unicode supplies these properties:
+written right to left, for example--Unicode supplies these properties in
+the BidiClass class:
 
     Property    Meaning
 
-    BidiL       Left-to-Right
-    BidiLRE     Left-to-Right Embedding
-    BidiLRO     Left-to-Right Override
-    BidiR       Right-to-Left
-    BidiAL      Right-to-Left Arabic
-    BidiRLE     Right-to-Left Embedding
-    BidiRLO     Right-to-Left Override
-    BidiPDF     Pop Directional Format
-    BidiEN      European Number
-    BidiES      European Number Separator
-    BidiET      European Number Terminator
-    BidiAN      Arabic Number
-    BidiCS      Common Number Separator
-    BidiNSM     Non-Spacing Mark
-    BidiBN      Boundary Neutral
-    BidiB       Paragraph Separator
-    BidiS       Segment Separator
-    BidiWS      Whitespace
-    BidiON      Other Neutrals
+    L           Left-to-Right
+    LRE         Left-to-Right Embedding
+    LRO         Left-to-Right Override
+    R           Right-to-Left
+    AL          Right-to-Left Arabic
+    RLE         Right-to-Left Embedding
+    RLO         Right-to-Left Override
+    PDF         Pop Directional Format
+    EN          European Number
+    ES          European Number Separator
+    ET          European Number Terminator
+    AN          Arabic Number
+    CS          Common Number Separator
+    NSM         Non-Spacing Mark
+    BN          Boundary Neutral
+    B           Paragraph Separator
+    S           Segment Separator
+    WS          Whitespace
+    ON          Other Neutrals
 
-For example, C<\p{BidiR}> matches characters that are normally
+For example, C<\p{BidiClass:R}> matches characters that are normally
 written right to left.
 
 =back
@@ -824,7 +827,9 @@ Level 1 - Basic Unicode Support
         [ 1] \x{...}
         [ 2] \N{...}
         [ 3] . \p{...} \P{...}
-        [ 4] now scripts (see UTR#24 Script Names) in addition to blocks
+        [ 4] support for scripts (see UTR#24 Script Names), blocks,
+             binary properties, enumerated non-binary properties, and
+             numeric properties (as listed in UTR#18 Other Properties)
         [ 5] have negation
         [ 6] can use regular expression look-ahead [a]
              or user-defined character properties [b] to emulate subtraction

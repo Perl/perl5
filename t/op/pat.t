@@ -2236,10 +2236,11 @@ print "# some Unicode properties\n";
 }
 
 {
-    print "not " unless "a" =~ /\p{L&}/;
+    # L& and LC are the same
+    print "not " unless "a" =~ /\p{LC}/ and "a" =~ /\p{L&}/;
     print "ok 743\n";
 
-    print "not " if     "1" =~ /\p{L&}/;
+    print "not " if     "1" =~ /\p{LC}/ or "1" =~ /\p{L&}/;
     print "ok 744\n";
 }
 
