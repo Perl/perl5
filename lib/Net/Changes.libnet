@@ -1,3 +1,10 @@
+libnet 1.19  -- Wed Jun 30 14:53:48 BST 2004
+
+Bug Fixes
+  * Fixed datasend test to work on Win32 platform
+  * Fixed Authen::SASL checking in SMTP.pm and POP3.pm
+  * Fixed bug that a restarted get with Net::FTP did not append to local file
+
 libnet 1.18  -- Mon Mar 22 16:19:01 GMT 2004
 
 Bug Fixes

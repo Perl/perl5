@@ -13,7 +13,7 @@ use Net::Cmd;
 use Carp;
 use Net::Config;
 
-$VERSION = "2.27";
+$VERSION = "2.28";
 
 @ISA = qw(Net::Cmd IO::Socket::INET);
 
@@ -401,7 +401,7 @@ sub auth {
     eval {
 	require MIME::Base64;
 	require Authen::SASL;
-    } or return $self->set_error(500,["Need MIME::Base64 and Authen::SASL todo auth"]);
+    } or $self->set_status(500,["Need MIME::Base64 and Authen::SASL todo auth"]), return 0;
 
     my $capa = $self->capa;
     my $mechanisms = $capa->{SASL} || 'CRAM-MD5';
