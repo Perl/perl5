@@ -128,6 +128,11 @@ use warnings ();
 # curcv:
 # CV for current sub (or main program) being deparsed
 #
+# curcvlex:
+# Cached hash of lexical variables for curcv: keys are names,
+# each value is an array of pairs, indicating the cop_seq of scopes
+# in which a var of that name is valid.
+#
 # curcop:
 # COP for statement being deparsed
 #
@@ -398,8 +403,9 @@ sub stash_subs {
 	    if (class(my $cv = $val->CV) ne "SPECIAL") {
 		next unless $cv->FILE eq $0 || $self->{'files'}{$cv->FILE};
 		next if $self->{'subs_done'}{$$val}++;
-		$self->todo($val->CV, 0);
-		$self->walk_sub($val->CV);
+		next if ${$cv->GV} != $$val;
+		$self->todo($cv, 0);
+		$self->walk_sub($cv);
 	    }
 	    if (class($val->FORM) ne "SPECIAL") {
 		next if $self->{'forms_done'}{$$val}++;
@@ -519,6 +525,7 @@ sub compile {
 	}
 	$self->stash_subs();
 	$self->{'curcv'} = main_cv;
+	$self->{'curcvlex'} = undef;
 	$self->walk_sub(main_cv, main_start);
 	print $self->print_protos;
 	@{$self->{'subs_todo'}} =
@@ -700,6 +707,7 @@ Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
     }
 
     local($self->{'curcv'}) = $cv;
+    local($self->{'curcvlex'});
     local(@$self{qw'curstash warnings hints'})
 		= @$self{qw'curstash warnings hints'};
     if (not null $cv->ROOT) {
@@ -721,6 +729,7 @@ sub deparse_format {
     my $form = shift;
     my @text;
     local($self->{'curcv'}) = $form;
+    local($self->{'curcvlex'});
     local(@$self{qw'curstash warnings hints'})
 		= @$self{'curstash warnings hints'};
     my $op = $form->ROOT;
@@ -1044,6 +1053,54 @@ Carp::confess() if $gv->isa("B::CV");
         $name = "{$name}";       # ${^WARNING_BITS} etc
     }
     return $stash . $name;
+}
+
+# Return the name to use for a stash variable.
+# If a lexical with the same name is in scope, it may need to be
+# fully-qualified.
+sub stash_variable {
+    my ($self, $prefix, $name) = @_;
+
+    return "$prefix$name" if $name =~ /::/;
+
+    unless ($prefix eq '$' || $prefix eq '@' ||
+	    $prefix eq '%' || $prefix eq '$#') {
+	return "$prefix$name";
+    }
+
+    my $v = ($prefix eq '$#' ? '@' : $prefix) . $name;
+    return $prefix .$self->{'curstash'}.'::'. $name if $self->lex_in_scope($v);
+    return "$prefix$name";
+}
+
+sub lex_in_scope {
+    my ($self, $name) = @_;
+    $self->populate_curcvlex() if !defined $self->{'curcvlex'};
+
+    my $seq = $self->{'curcop'}->cop_seq;
+    return 0 if !exists $self->{'curcvlex'}{$name};
+    for my $a (@{$self->{'curcvlex'}{$name}}) {
+	my ($st, $en) = @$a;
+	return 1 if $seq > $st && $seq <= $en;
+    }
+    return 0;
+}
+
+sub populate_curcvlex {
+    my $self = shift;
+    for (my $cv = $self->{'curcv'}; $$cv; $cv = $cv->OUTSIDE) {
+	my @padlist = $cv->PADLIST->ARRAY;
+	my @ns = $padlist[0]->ARRAY;
+
+	for (my $i=0; $i<@ns; ++$i) {
+	    next if class($ns[$i]) eq "SPECIAL";
+            my $name = $ns[$i]->PVX;
+	    my $seq_st = $ns[$i]->NVX;
+	    my $seq_en = int($ns[$i]->IVX);
+
+	    push @{$self->{'curcvlex'}{$name}}, [$seq_st, $seq_en];
+	}
+    }
 }
 
 # Recurses down the tree, looking for a COP
@@ -2292,7 +2349,8 @@ sub pp_gvsv {
     my $self = shift;
     my($op, $cx) = @_;
     my $gv = $self->gv_or_padgv($op);
-    return $self->maybe_local($op, $cx, "\$" . $self->gv_name($gv));
+    return $self->maybe_local($op, $cx, $self->stash_variable("\$",
+				 $self->gv_name($gv)));
 }
 
 sub pp_gv {
@@ -2315,7 +2373,8 @@ sub rv2x {
     my($op, $cx, $type) = @_;
     my $kid = $op->first;
     my $str = $self->deparse($kid, 0);
-    return $type . (is_scalar($kid) ? $str : "{$str}");
+    return $self->stash_variable($type, $str) if is_scalar($kid);
+    return $type ."{$str}";
 }
 
 sub pp_rv2sv { maybe_local(@_, rv2x(@_, "\$")) }
