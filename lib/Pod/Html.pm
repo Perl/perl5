@@ -11,6 +11,8 @@ use Cwd;
 
 use Carp;
 
+use locale;	# make \w work right in non-ASCII lands
+
 use strict;
 
 use Config;
