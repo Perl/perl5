@@ -270,10 +270,10 @@ sub DESTROY {
 
    if ($fh =~ /=FILEHANDLE\(/) {
      local *TMP = $fh;
-     close(TMP) if fileno(TMP);
+     close(TMP) if defined fileno(TMP);
    }
    else {
-     close($fh) if fileno($fh);
+     close($fh) if defined fileno($fh);
    }
 }
 
