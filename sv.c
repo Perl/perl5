@@ -6067,7 +6067,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	bool is_utf = FALSE;
 	
 	char esignbuf[4];
-	U8 utf8buf[UTF8_MAXLEN];
+	U8 utf8buf[UTF8_MAXLEN+1];
 	STRLEN esignlen = 0;
 
 	char *eptr = Nullch;

@@ -3795,7 +3795,7 @@ S_reginclassutf8(pTHX_ regnode *f, U8 *p)
     if (swash_fetch(sv, p))
 	match = TRUE;
     else if (flags & ANYOF_FOLD) {
-	U8 tmpbuf[UTF8_MAXLEN];
+	U8 tmpbuf[UTF8_MAXLEN+1];
 	if (flags & ANYOF_LOCALE) {
 	    PL_reg_flags |= RF_tainted;
 	    uv_to_utf8(tmpbuf, toLOWER_LC_utf8(p));

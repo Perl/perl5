@@ -2646,7 +2646,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	I32 to_utf	= o->op_private & OPpTRANS_TO_UTF;
 
 	if (complement) {
-	    U8 tmpbuf[UTF8_MAXLEN];
+	    U8 tmpbuf[UTF8_MAXLEN+1];
 	    U8** cp;
 	    I32* cl;
 	    UV nextmin = 0;

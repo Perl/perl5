@@ -7183,7 +7183,7 @@ vstring:
 		pos++;
 	    if (!isALPHA(*pos)) {
 		UV rev;
-		U8 tmpbuf[UTF8_MAXLEN];
+		U8 tmpbuf[UTF8_MAXLEN+1];
 		U8 *tmpend;
 		bool utf8 = FALSE;
 		s++;				/* get past 'v' */
