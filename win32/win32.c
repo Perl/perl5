@@ -34,10 +34,7 @@
 static DWORD IdOS(void);
 
 extern WIN32_IOSUBSYSTEM	win32stdio;
-#ifndef __BORLANDC__	/* pointers cannot be declared TLS! */
-__declspec(thread)
-#endif
-PWIN32_IOSUBSYSTEM pIOSubSystem = &win32stdio;
+static PWIN32_IOSUBSYSTEM pIOSubSystem = &win32stdio;
 
 BOOL  ProbeEnv = FALSE;
 DWORD Win32System = (DWORD)-1;
