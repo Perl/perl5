@@ -25,6 +25,7 @@
 
 #ifdef PERL_COPY_ON_WRITE
 #define SV_COW_NEXT_SV(sv)	INT2PTR(SV *,SvUVX(sv))
+#define SV_COW_NEXT_SV_SET(current,next)	SvUVX(current) = PTR2UV(next)
 /* This is a pessamistic view. Scalar must be purely a read-write PV to copy-
    on-write.  */
 #define CAN_COW_MASK	(SVs_OBJECT|SVs_GMG|SVs_SMG|SVs_RMG|SVf_IOK|SVf_NOK| \
@@ -3937,7 +3938,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
                     SvFAKE_on(sstr);
                     /* Make the source SV into a loop of 1.
                        (about to become 2) */
-                    SV_COW_NEXT_SV(sstr) = sstr;
+                    SV_COW_NEXT_SV_SET(sstr, sstr);
                 }
             }
 #endif
@@ -3960,8 +3961,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
                 if (len) {
                     /* SvIsCOW_normal */
                     /* splice us in between source and next-after-source.  */
-                    SV_COW_NEXT_SV(dstr) = SV_COW_NEXT_SV(sstr);
-                    SV_COW_NEXT_SV(sstr) = dstr;
+                    SV_COW_NEXT_SV_SET(dstr, SV_COW_NEXT_SV(sstr));
+                    SV_COW_NEXT_SV_SET(sstr, dstr);
                     SvPV_set(dstr, SvPVX(sstr));
                 } else {
                     /* SvIsCOW_shared_hash */
@@ -4250,7 +4251,7 @@ S_sv_release_COW(pTHX_ register SV *sv, char *pvx, STRLEN cur, STRLEN len,
                 assert (SvPVX(current) == pvx);
             }
             /* Make the SV before us point to the SV after us.  */
-            SV_COW_NEXT_SV(current) = after;
+            SV_COW_NEXT_SV_SET(current, after);
         }
     } else {
         unsharepvn(pvx, SvUTF8(sv) ? -(I32)cur : cur, hash);
@@ -5090,10 +5091,11 @@ Perl_sv_replace(pTHX_ register SV *sv, register SV *nsv)
 	if (DEBUG_C_TEST) {
 	    PerlIO_printf(Perl_debug_log, "previous is\n");
 	    sv_dump(current);
-	    PerlIO_printf(Perl_debug_log, "move it from "UVxf" to "UVxf"\n",
+	    PerlIO_printf(Perl_debug_log,
+                          "move it from 0x%"UVxf" to 0x%"UVxf"\n",
 			  (UV) SV_COW_NEXT_SV(current), (UV) sv);
 	}
-	SV_COW_NEXT_SV(current) = sv;
+	SV_COW_NEXT_SV_SET(current, sv);
     }
 #endif
     SvREFCNT(sv) = refcnt;
