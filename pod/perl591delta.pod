@@ -5,7 +5,7 @@ perldelta - what is new for perl v5.9.1
 =head1 DESCRIPTION
 
 This document describes differences between the 5.9.0 and the 5.9.1
-developement releases. See L<perl590delta> for the differences between
+development releases. See L<perl590delta> for the differences between
 5.8.0 and 5.9.0.
 
 =head1 Incompatible Changes
@@ -15,7 +15,7 @@ developement releases. See L<perl590delta> for the differences between
 The lvalues returned by the three argument form of substr() used to be a
 "fixed length window" on the original string. In some cases this could
 cause surprising action at distance or other undefined behaviour. Now the
-length of the window adjusts iself to the length of the string assigned to
+length of the window adjusts itself to the length of the string assigned to
 it.
 
 =head2 The C<:unique> attribute is only meaningful for globals

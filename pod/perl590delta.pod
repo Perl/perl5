@@ -121,7 +121,7 @@ modifiers, has been removed.
 
 =head2 Assertions
 
-Perl 5.9.0 has experimental support for assertions.  Note that hhe user
+Perl 5.9.0 has experimental support for assertions.  Note that the user
 interface is not fully stabilized yet, and it may change until the 5.10.0
 release.  A new command-line switch, B<-A>, is used to activate
 assertions, which are declared with the C<assertions> pragma.  See

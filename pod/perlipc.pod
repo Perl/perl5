@@ -388,7 +388,7 @@ will generate the signal again. The result of this is a rather odd
 "loop". In future Perl's signal mechanism may be changed to avoid this
 - perhaps by simply disallowing %SIG handlers on signals of that
 type. Until then the work-round is not to set a %SIG handler on those
-signals. (Which signals they are is operating system dependant.)
+signals. (Which signals they are is operating system dependent.)
 
 =item Signals triggered by operating system state
 
