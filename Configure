@@ -7869,7 +7869,7 @@ eval $setvar
 
 : see if _ptr and _cnt from stdio act std
 echo " "
-if $contains '_IO_fpos_t' `./findhdr stdio.h` >/dev/null 2>&1 ; then
+if $contains '_IO_fpos_t' `./findhdr stdio.h` `./findhdr libio.h` >/dev/null 2>&1 ; then
 	echo "(Looks like you have stdio.h from Linux.)"
 	case "$stdio_ptr" in
 	'') stdio_ptr='((fp)->_IO_read_ptr)'
