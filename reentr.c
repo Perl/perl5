@@ -146,10 +146,8 @@ Perl_reentrant_init(pTHX) {
 	New(31338, PL_reentrant_buffer->_asctime_buffer, PL_reentrant_buffer->_asctime_size, char);
 #endif /* HAS_ASCTIME_R */
 #ifdef HAS_CRYPT_R
-#if defined(__GLIBC__) || defined(__EMX__)
-	PL_reentrant_buffer->_crypt_struct.initialized = 0;
-	/* work around glibc-2.2.5 bug */
-	PL_reentrant_buffer->_crypt_struct.current_saltbits = 0;
+#if CRYPT_R_PROTO != REENTRANT_PROTO_B_CCD
+	PL_reentrant_buffer->_crypt_struct_buffer = 0;
 #endif
 #endif /* HAS_CRYPT_R */
 #ifdef HAS_CTIME_R
@@ -230,6 +228,9 @@ Perl_reentrant_free(pTHX) {
 	Safefree(PL_reentrant_buffer->_asctime_buffer);
 #endif /* HAS_ASCTIME_R */
 #ifdef HAS_CRYPT_R
+#if CRYPT_R_PROTO != REENTRANT_PROTO_B_CCD
+	Safefree(PL_reentrant_buffer->_crypt_struct_buffer);
+#endif
 #endif /* HAS_CRYPT_R */
 #ifdef HAS_CTIME_R
 	Safefree(PL_reentrant_buffer->_ctime_buffer);

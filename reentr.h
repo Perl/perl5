@@ -604,7 +604,7 @@ typedef struct {
 #if CRYPT_R_PROTO == REENTRANT_PROTO_B_CCD
 	CRYPTD* _crypt_data;
 #else
-	struct crypt_data _crypt_struct;
+	struct crypt_data *_crypt_struct_buffer;
 #endif
 #endif /* HAS_CRYPT_R */
 #ifdef HAS_CTIME_R
@@ -781,7 +781,7 @@ typedef struct {
 #ifdef HAS_CRYPT_R
 #   undef crypt
 #   if !defined(crypt) && CRYPT_R_PROTO == REENTRANT_PROTO_B_CCS
-#       define crypt(a, b) crypt_r(a, b, &PL_reentrant_buffer->_crypt_struct)
+#       define crypt(a, b) crypt_r(a, b, PL_reentrant_buffer->_crypt_struct_buffer)
 #   endif
 #   if !defined(crypt) && CRYPT_R_PROTO == REENTRANT_PROTO_B_CCD
 #       define crypt(a, b) crypt_r(a, b, &PL_reentrant_buffer->_crypt_data)
