@@ -568,7 +568,11 @@ sub maybe_local {
     my $self = shift;
     my($op, $cx, $text) = @_;
     if ($op->private & OPpLVAL_INTRO and not $self->{'avoid_local'}{$$op}) {
-	return $self->maybe_parens_func("local", $text, $cx, 16);
+        if (want_scalar($op)) {
+	    return "local $text";
+	} else {
+	    return $self->maybe_parens_func("local", $text, $cx, 16);
+	}
     } else {
 	return $text;
     }
@@ -596,7 +600,11 @@ sub maybe_my {
     my $self = shift;
     my($op, $cx, $text) = @_;
     if ($op->private & OPpLVAL_INTRO and not $self->{'avoid_local'}{$$op}) {
-	return $self->maybe_parens_func("my", $text, $cx, 16);
+	if (want_scalar($op)) {
+	    return "my $text";
+	} else {
+	    return $self->maybe_parens_func("my", $text, $cx, 16);
+	}
     } else {
 	return $text;
     }
@@ -2403,7 +2411,9 @@ sub pp_const {
 #	return $self->const_sv($op)->PV;
 #    }
     my $sv = $self->const_sv($op);
-    return const($sv);
+#    return const($sv);
+    my $c = const $sv; 
+    return $c < 0 ? $self->maybe_parens($c, $cx, 21) : $c;
 }
 
 sub dq {

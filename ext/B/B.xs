@@ -901,6 +901,10 @@ SvRV(sv)
 
 MODULE = B	PACKAGE = B::PV		PREFIX = Sv
 
+char*
+SvPVX(sv)
+	B::PV	sv
+
 void
 SvPV(sv)
 	B::PV	sv
