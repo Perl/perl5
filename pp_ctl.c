@@ -2899,23 +2899,28 @@ PP(pp_require)
     SvREFCNT_dec(namesv);
     if (!tryrsfp) {
 	if (PL_op->op_type == OP_REQUIRE) {
-	    SV *msg = sv_2mortal(newSVpvf("Can't locate %s in @INC", name));
-	    SV *dirmsgsv = NEWSV(0, 0);
-	    AV *ar = GvAVn(PL_incgv);
-	    I32 i;
-	    if (instr(SvPVX(msg), ".h "))
-		sv_catpv(msg, " (change .h to .ph maybe?)");
-	    if (instr(SvPVX(msg), ".ph "))
-		sv_catpv(msg, " (did you run h2ph?)");
-	    sv_catpv(msg, " (@INC contains:");
-	    for (i = 0; i <= AvFILL(ar); i++) {
-		char *dir = SvPVx(*av_fetch(ar, i, TRUE), n_a);
-		sv_setpvf(dirmsgsv, " %s", dir);
-	        sv_catsv(msg, dirmsgsv);
+	    char *msgstr = name;
+	    if (namesv) {			/* did we lookup @INC? */
+		SV *msg = sv_2mortal(newSVpv(msgstr,0));
+		SV *dirmsgsv = NEWSV(0, 0);
+		AV *ar = GvAVn(PL_incgv);
+		I32 i;
+		sv_catpvn(msg, " in @INC", 8);
+		if (instr(SvPVX(msg), ".h "))
+		    sv_catpv(msg, " (change .h to .ph maybe?)");
+		if (instr(SvPVX(msg), ".ph "))
+		    sv_catpv(msg, " (did you run h2ph?)");
+		sv_catpv(msg, " (@INC contains:");
+		for (i = 0; i <= AvFILL(ar); i++) {
+		    char *dir = SvPVx(*av_fetch(ar, i, TRUE), n_a);
+		    sv_setpvf(dirmsgsv, " %s", dir);
+		    sv_catsv(msg, dirmsgsv);
+		}
+		sv_catpvn(msg, ")", 1);
+		SvREFCNT_dec(dirmsgsv);
+		msgstr = SvPV_nolen(msg);
 	    }
-	    sv_catpvn(msg, ")", 1);
-    	    SvREFCNT_dec(dirmsgsv);
-	    DIE("%_", msg);
+	    DIE("Can't locate %s", msgstr);
 	}
 
 	RETPUSHUNDEF;
