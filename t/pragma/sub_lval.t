@@ -1,4 +1,4 @@
-print "1..46\n";
+print "1..47\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -427,3 +427,12 @@ $a = \&lv1nn;
 $a->() = 8;
 print "# '$nnewvar'.\nnot " unless $nnewvar eq '8';
 print "ok 46\n";
+
+# This must happen at run time
+eval {
+    sub AUTOLOAD : lvalue { $newvar };
+};
+foobar() = 12;
+print "# '$newvar'.\nnot " unless $newvar eq "12";
+print "ok 47\n";
+

@@ -385,8 +385,12 @@ PP(pp_rv2cv)
     if (cv) {
 	if (CvCLONE(cv))
 	    cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
-	if ((PL_op->op_private & OPpLVAL_INTRO) && !CvLVALUE(cv))
-	    DIE(aTHX_ "Can't modify non-lvalue subroutine call");
+	if ((PL_op->op_private & OPpLVAL_INTRO)) {
+	    if (gv && GvCV(gv) == cv && (gv = gv_autoload4(GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv), FALSE)))
+		cv = GvCV(gv);
+	    if (!CvLVALUE(cv))
+		DIE(aTHX_ "Can't modify non-lvalue subroutine call");
+	}
     }
     else
 	cv = (CV*)&PL_sv_undef;
