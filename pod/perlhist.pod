@@ -67,6 +67,7 @@ the strings?).
           1.001..10     1988-Jan-30
           1.011..14     1988-Feb-02
  Schwern  1.0.15        2002-Dec-18     Modernization
+ Richard  1.0.16        2003-Dec-18
 
  Larry   2.000          1988-Jun-05
 
