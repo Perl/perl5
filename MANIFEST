@@ -1522,7 +1522,9 @@ NetWare/nwplglob.h		Netware port
 NetWare/NWTInfo.c		Netware port
 NetWare/nwtinfo.h		Netware port
 NetWare/NWUtil.c		Netware port
+NetWare/nwstdio.h		Netware port
 NetWare/nwutil.h		Netware port
+NetWare/perlsdio.h		Netware port
 NetWare/t/NWModify.pl		Netware port
 NetWare/t/NWScripts.pl		Netware port
 NetWare/t/Readme.txt		Netware port

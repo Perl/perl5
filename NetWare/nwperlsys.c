@@ -122,42 +122,71 @@ perl_alloc(void)
 
 ==============================================================================================*/
 EXTERN_C PerlInterpreter*
-perl_alloc_override(struct IPerlMem* ppMem, struct IPerlMem* ppMemShared,
-		 struct IPerlMem* ppMemParse, struct IPerlEnv* ppEnv,
-		 struct IPerlStdIO* ppStdIO, struct IPerlLIO* ppLIO,
-		 struct IPerlDir* ppDir, struct IPerlSock* ppSock,
-		 struct IPerlProc* ppProc)
+perl_alloc_override(struct IPerlMem** ppMem, struct IPerlMem** ppMemShared,
+		 struct IPerlMem** ppMemParse, struct IPerlEnv** ppEnv,
+		 struct IPerlStdIO** ppStdIO, struct IPerlLIO** ppLIO,
+		 struct IPerlDir** ppDir, struct IPerlSock** ppSock,
+		 struct IPerlProc** ppProc)
 {
     PerlInterpreter *my_perl = NULL;
+
+	struct IPerlMem*	lpMem;
+	struct IPerlEnv*	lpEnv;
+	struct IPerlStdIO*	lpStdio;
+	struct IPerlLIO*	lpLIO;
+	struct IPerlDir*	lpDir;
+	struct IPerlSock*	lpSock;
+	struct IPerlProc*	lpProc;
 
 	WCValHashTable<void*>*	m_allocList;
 	m_allocList = new WCValHashTable<void*> (fnAllocListHash, 256);
 	fnInsertHashListAddrs(m_allocList, FALSE);
 
 	if (!ppMem)
-		ppMem=&perlMem;
-	if (!ppEnv)
-		ppEnv=&perlEnv;
-	if (!ppStdIO)
-		ppStdIO=&perlStdIO;
-	if (!ppLIO)
-		ppLIO=&perlLIO;
-	if (!ppDir)
-		ppDir=&perlDir;
-	if (!ppSock)
-		ppSock=&perlSock;
-	if (!ppProc)
-		ppProc=&perlProc;
+		lpMem=&perlMem;
+	else
+		lpMem=*ppMem;
 
-	my_perl = perl_alloc_using(ppMem,
-				   ppMemShared,
-				   ppMemParse,
-				   ppEnv,
-				   ppStdIO,
-				   ppLIO,
-				   ppDir,
-				   ppSock,
-				   ppProc);
+	if (!ppEnv)
+		lpEnv=&perlEnv;
+	else
+		lpEnv=*ppEnv;
+	
+	if (!ppStdIO)
+		lpStdio=&perlStdIO;
+	else
+		lpStdio=*ppStdIO;
+
+	if (!ppLIO)
+		lpLIO=&perlLIO;
+	else
+		lpLIO=*ppLIO;
+	
+	if (!ppDir)
+		lpDir=&perlDir;
+	else
+		lpDir=*ppDir;
+
+	if (!ppSock)
+		lpSock=&perlSock;
+	else
+		lpSock=*ppSock;
+
+	if (!ppProc)
+		lpProc=&perlProc;
+	else
+		lpProc=*ppProc;
+
+	my_perl = perl_alloc_using(lpMem,
+				   NULL,
+				   NULL,
+				   lpEnv,
+				   lpStdio,
+				   lpLIO,
+				   lpDir,
+				   lpSock,
+				   lpProc);
+	
 	if (my_perl) {
 #ifdef PERL_OBJECT
 	    CPerlObj* pPerl = (CPerlObj*)my_perl;

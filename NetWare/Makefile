@@ -15,7 +15,7 @@
 ## This file is created by using the makefile that creates Windows Perl as the reference
 ## Author: sgp
 ## Date Created: 13th July 2000
-## Date Modified: 03th April 2001
+## Date Modified: 30th June 2001
 
 # Name of the NLM
 NLM_NAME		= perl.nlm
@@ -1501,7 +1501,9 @@ install_tests :
 	xcopy /f /r /i /s /d *.t $(INST_NW_TOP2)\scripts\t\lib
 	cd ..\ext
 	xcopy /f /r /i /s /d *.t $(INST_NW_TOP2)\scripts\t\ext
-	cd ..\netware
+	cd ..\netware\t
+	xcopy /f /r /i /s /d *.pl $(INST_NW_TOP2)\scripts\t
+	cd ..
 
 nwinstall: utils installnw install_tests
 
