@@ -952,7 +952,7 @@ register SV *sv;
 
     case SVt_NULL:
 	sv_catpv(t, "UNDEF");
-	return tokenbuf;
+	goto finish;
     case SVt_IV:
 	sv_catpv(t, "IV");
 	break;
