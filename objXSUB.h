@@ -2919,6 +2919,8 @@
 #define sv_2nv			pPerl->Perl_sv_2nv
 #undef  sv_2pv
 #define sv_2pv			pPerl->Perl_sv_2pv
+#undef  sv_2pv_nolen
+#define sv_2pv_nolen		pPerl->Perl_sv_2pv_nolen
 #undef  sv_2uv
 #define sv_2uv			pPerl->Perl_sv_2uv
 #undef  sv_add_arena
@@ -3013,6 +3015,8 @@
 #define sv_pos_b2u		pPerl->Perl_sv_pos_b2u
 #undef  sv_pos_u2b
 #define sv_pos_u2b		pPerl->Perl_sv_pos_u2b
+#undef  sv_pv
+#define sv_pv			pPerl->Perl_sv_pv
 #undef  sv_pvn
 #define sv_pvn			pPerl->Perl_sv_pvn
 #undef  sv_pvn_force

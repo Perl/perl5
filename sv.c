@@ -1507,6 +1507,13 @@ looks_like_number(SV *sv)
 }
 
 char *
+sv_2pv_nolen(register SV *sv)
+{
+    STRLEN n_a;
+    return sv_2pv(sv, &n_a);
+}
+
+char *
 sv_2pv(register SV *sv, STRLEN *lp)
 {
     register char *s;
@@ -3973,6 +3980,17 @@ sv_nv(register SV *sv)
     if (SvNOK(sv))
 	return SvNVX(sv);
     return sv_2nv(sv);
+}
+
+char *
+sv_pv(SV *sv)
+{
+    STRLEN n_a;
+
+    if (SvPOK(sv))
+	return SvPVX(sv);
+
+    return sv_2pv(sv, &n_a);
 }
 
 char *

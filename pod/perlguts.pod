@@ -89,16 +89,19 @@ To access the actual value that an SV points to, you can use the macros:
     SvIV(SV*)
     SvNV(SV*)
     SvPV(SV*, STRLEN len)
+    SvPV_nolen(SV*)
 
 which will automatically coerce the actual scalar type into an IV, double,
 or string.
 
 In the C<SvPV> macro, the length of the string returned is placed into the
-variable C<len> (this is a macro, so you do I<not> use C<&len>).  If you do not
-care what the length of the data is, use the global variable C<PL_na>, though
-this is rather less efficient than using a local variable.  Remember,
-however, that Perl allows arbitrary strings of data that may both contain
-NULs and might not be terminated by a NUL.
+variable C<len> (this is a macro, so you do I<not> use C<&len>).  If you do
+not care what the length of the data is, use the C<SvPV_nolen> macro.
+Historically the C<SvPV> macro with the global variable C<PL_na> has been
+used in this case.  But that can be quite inefficient because C<PL_na> must
+be accessed in thread-local storage in threaded Perl.  In any case, remember
+that Perl allows arbitrary strings of data that may both contain NULs and
+might not be terminated by a NUL.
 
 If you want to know if the scalar value is TRUE, you can use:
 
@@ -2196,7 +2199,8 @@ the type.  Can do overlapping moves.  See also C<Copy>.
 
 A convenience variable which is typically used with C<SvPV> when one doesn't
 care about the length of the string.  It is usually more efficient to
-declare a local variable and use that instead.
+either declare a local variable and use that instead or to use the C<SvPV_nolen>
+macro.
 
 =item New
 
@@ -3026,7 +3030,7 @@ Checks the B<private> setting.  Use C<SvPOK>.
 Returns a pointer to the string in the SV, or a stringified form of the SV
 if the SV does not contain a string.  Handles 'get' magic.
 
-	char*	SvPV (SV* sv, int len )
+	char*	SvPV (SV* sv, int len)
 
 =item SvPV_force
 
@@ -3035,6 +3039,12 @@ want force if you are going to update the SvPVX directly.
 
 	char*	SvPV_force(SV* sv, int len)
 
+=item SvPV_nolen
+
+Returns a pointer to the string in the SV, or a stringified form of the SV
+if the SV does not contain a string.  Handles 'get' magic.
+
+	char*	SvPV (SV* sv)
 
 =item SvPVX
 

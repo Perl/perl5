@@ -965,3 +965,5 @@ VIRTUAL void do_pmop_dump _((I32 level, PerlIO *file, PMOP *pm));
 VIRTUAL void do_sv_dump _((I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bool dumpops, STRLEN pvlim));
 VIRTUAL void magic_dump _((MAGIC *mg));
 VIRTUAL void reginitcolors _((void));
+VIRTUAL char* sv_2pv_nolen _((SV* sv));
+VIRTUAL char* sv_pv _((SV *sv));
