@@ -181,6 +181,7 @@ perl_construct(pTHXx)
 	
 	MUTEX_INIT(&PL_cred_mutex);
 	MUTEX_INIT(&PL_sv_lock_mutex);
+	MUTEX_INIT(&PL_fdpid_mutex);
 
 	thr = init_main_thread();
 #endif /* USE_THREADS */
@@ -726,6 +727,7 @@ perl_destruct(pTHXx)
     MUTEX_DESTROY(&PL_sv_mutex);
     MUTEX_DESTROY(&PL_eval_mutex);
     MUTEX_DESTROY(&PL_cred_mutex);
+    MUTEX_DESTROY(&PL_fdpid_mutex);
     COND_DESTROY(&PL_eval_cond);
 #ifdef EMULATE_ATOMIC_REFCOUNTS
     MUTEX_DESTROY(&PL_svref_mutex);

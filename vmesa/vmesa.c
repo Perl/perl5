@@ -182,11 +182,13 @@ do_aspawn(SV* really, SV **mark, SV **sp)
              /* be used by my_pclose                        */
              /*---------------------------------------------*/
              close(fd);
+             FDPID_LOCK();
              p_sv  = av_fetch(PL_fdpid,fd,TRUE);
              fd    = (int) SvIVX(*p_sv);
              SvREFCNT_dec(*p_sv);
              *p_sv = &PL_sv_undef;
              sv    = *av_fetch(PL_fdpid,fd,TRUE);
+             FDPID_UNLOCK();
              (void) SvUPGRADE(sv, SVt_IV);
              SvIVX(sv) = pid;
              status    = 0;
@@ -408,11 +410,13 @@ my_popen(char *cmd, char *mode)
          Perl_stdin_fd = pFd[that];
       if (strNE(cmd,"-"))
       {
-	 PERL_FLUSHALL_FOR_CHILD;
+         PERL_FLUSHALL_FOR_CHILD;
          pid = spawn_cmd(cmd, Perl_stdin_fd, Perl_stdout_fd);
          if (pid >= 0)
          {
+            FDPID_LOCK();
             sv = *av_fetch(PL_fdpid,pFd[this],TRUE);
+            FDPID_UNLOCK();
             (void) SvUPGRADE(sv, SVt_IV);
             SvIVX(sv) = pid;
             fd = PerlIO_fdopen(pFd[this], mode);
@@ -423,7 +427,9 @@ my_popen(char *cmd, char *mode)
       }
       else
       {
+         FDPID_LOCK();
          sv = *av_fetch(PL_fdpid,pFd[that],TRUE);
+         FDPID_UNLOCK();
          (void) SvUPGRADE(sv, SVt_IV);
          SvIVX(sv) = pFd[this];
          fd = PerlIO_fdopen(pFd[this], mode);
@@ -460,7 +466,9 @@ my_pclose(FILE *fp)
  SV   **sv;
  FILE *other;
 
+   FDPID_LOCK();
    sv        = av_fetch(PL_fdpid,PerlIO_fileno(fp),TRUE);
+   FDPID_UNLOCK();
    pid       = (int) SvIVX(*sv);
    SvREFCNT_dec(*sv);
    *sv       = &PL_sv_undef;
