@@ -28,6 +28,53 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.6		Maintenance release working toward v5.8.6
 --------------
 ____________________________________________________________________________
+[ 23414] By: nicholas                              on 2004/10/22  17:48:44
+        Log: Integrate:
+             [ 23410]
+             Subject: docpatch for perltie.pod
+             From: David Cantrell <david@cantrell.org.uk>
+             Date: Thu, 21 Oct 2004 12:21:52 +0100
+             Message-ID: <20041021112151.GA22862@bytemark.barnyard.co.uk>
+     Branch: maint-5.8/perl
+	  !> pod/perltie.pod
+____________________________________________________________________________
+[ 23413] By: nicholas                              on 2004/10/22  17:47:25
+        Log: Integrate:
+             [ 23372]
+             Implement a new -dt command-line flag, to enable threads under the
+             debugger (bug #31666).
+             
+             Subject: RE: [PATCH] debugger handles threads [perl #31666]
+             From: <richard.foley@ubs.com>
+             Date: Wed, 13 Oct 2004 13:01:18 +0200
+             Message-ID: <B374141B0A424D4F9CF143CC51B3ADD903FB9E12@NZURC900PEX1.ubsgs.ubsgroup.net>
+             
+             Subject: Re: [PATCH] debugger handles threads [perl #31666]
+             From: Yitzchak Scott-Thoennes <sthoenna@efn.org>
+             Date: Wed, 13 Oct 2004 02:49:58 -0700
+             Message-ID: <20041013094957.GA17184@efn.org>
+     Branch: maint-5.8/perl
+	  !> lib/perl5db.pl perl.c pod/perlrun.pod
+____________________________________________________________________________
+[ 23412] By: nicholas                              on 2004/10/22  15:51:06
+        Log: Back out changes 23347 and 23349 for now, as they cause URI to fail
+             regression tests. (Integrated with change 23391).
+             It's not clear to me whether the regression tests are buggy, or this
+             change, or something else which this change now exposes.
+     Branch: maint-5.8/perl
+	   ! lib/overload.pm lib/overload.t
+____________________________________________________________________________
+[ 23411] By: nicholas                              on 2004/10/22  15:26:39
+        Log: Ooops. I forgot to move Changes to Changes5.8.5. Split things properly
+     Branch: maint-5.8/perl
+	  +> Changes5.8.5
+	   ! Changes MANIFEST
+____________________________________________________________________________
+[ 23409] By: nicholas                              on 2004/10/21  15:49:06
+        Log: Update Changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 23408] By: nicholas                              on 2004/10/21  15:42:32
         Log: Rebuild table of contents and re-sort MANIFEST
      Branch: maint-5.8/perl
