@@ -1059,24 +1059,28 @@ my $pod = <<"END" unless $opt_P;
 #
 #Blah blah blah.
 $exp_doc$meth_doc$revhist
+#
+#=head1 SEE ALSO
+#
+#Mention other useful documentation such as the documentation of
+#related modules or operating system documentation (such as man pages
+#in UNIX), or any relevant external documentation such as RFCs or
+#standards.
+#
+#If you have a mailing list set up for your module, mention it here.
+#
+#If you have a web site set up for your module, mention it here.
+#
 #=head1 AUTHOR
 #
 #$author, E<lt>${email}E<gt>
 #
-#=head1 MAILING LIST
-#
-#If you have a mailing list set up for your module, mention it here.
-#
 #=head1 COPYRIGHT AND LICENSE
 #
-#Copyright (C) YEAR YOURNAMEHERE
+#Copyright YEAR(S) by YOUR NAME(s)
 #
 #This library is free software; you can redistribute it and/or modify
 #it under the same terms as Perl itself. 
-#
-#=head1 SEE ALSO
-#
-#L<perl>.
 #
 #=cut
 END
