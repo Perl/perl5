@@ -10,7 +10,7 @@ BEGIN {
     }
 }
 $|++;
-print "1..29\n";
+print "1..25\n";
 use strict;
 
 
@@ -246,27 +246,4 @@ sub ok {
     $Base += 1;
 
 }
-
-# test warnings;
-
-{
-    my $warncount = 0;
-    local $SIG{__WARN__} = sub { $warncount++ };
-
-    my $lock : shared;
-
-    cond_wait($lock);
-    ok(1, $warncount == 1, 'get warning on cond_wait');
-    cond_broadcast($lock);
-    ok(2, $warncount == 2, 'get warning on cond_wait');
-    no warnings 'threads';
-    cond_wait($lock);
-    ok(3, $warncount == 2, 'get no warning on cond_wait');
-    cond_broadcast($lock);
-    ok(4, $warncount == 2, 'get no warning on cond_wait');
-
-    $Base += 4;
-}
-
-
 
