@@ -427,6 +427,28 @@ parameters as integers correctly formatted in the current locale:
         }
         print "\n";
 
+=head2 I18::Langinfo
+
+Another interface for querying locale-dependent information is the
+I18N::Langinfo::langinfo() function, available at least in UNIX-like
+systems and VMS.
+
+The following example will import the langinfo() function itself
+(implicitly) and (explicitly) three string constants: a string for the
+abbreviated first day of the week (the numbering starts from Sunday =
+1) and two strings for the affirmative and negative answers for a
+yes/no question in the current locale.
+
+    use I18N::Langinfo qw(ABDAY_1 YESSTR NOSTR);
+
+    print ABDAY_1, "? [", YESSTR, "/", NOSTR, "] ";
+
+In other words, in the "C" (or English) locale the above will print:
+
+    Sun? [y/n] 
+
+See L<I18N::Langinfo> for more information.
+
 =head1 LOCALE CATEGORIES
 
 The following subsections describe basic locale categories.  Beyond these,
@@ -574,6 +596,8 @@ string formats:
         print "DECIMAL POINT IS COMMA\n"
             if $n == (strtod("2,5"))[0]; # Locale-dependent conversion
 
+See also L<I18N::Langinfo> and C<RADIXCHAR>.
+
 =head2 Category LC_MONETARY: Formatting of monetary amounts
 
 The C standard defines the C<LC_MONETARY> category, but no function
@@ -586,6 +610,8 @@ application's own formatting of currency amounts.  However, you may well
 find that the information, voluminous and complex though it may be, still 
 does not quite meet your requirements: currency formatting is a hard nut 
 to crack.
+
+See also L<I18N::Langinfo> and C<CRNCYSTR>.
 
 =head2 LC_TIME
 
@@ -605,6 +631,9 @@ current locale:
 Note: C<use locale> isn't needed in this example: as a function that
 exists only to generate locale-dependent results, strftime() always
 obeys the current C<LC_TIME> locale.
+
+See also L<I18N::Langinfo> and C<ABDAY_1>..C<ABDAY_7>, C<DAY_1>..C<DAY_7>,
+C<ABMON_1>..C<ABMON_12>, and C<ABMON_1>..C<ABMON_12>; and L<Time::Piece>.
 
 =head2 Other categories
 
@@ -964,12 +993,12 @@ operating system upgrade.
 
 =head1 SEE ALSO
 
-L<POSIX/isalnum>, L<POSIX/isalpha>, L<POSIX/isdigit>, 
-L<POSIX/isgraph>, L<POSIX/islower>, L<POSIX/isprint>, 
-L<POSIX/ispunct>, L<POSIX/isspace>, L<POSIX/isupper>, 
-L<POSIX/isxdigit>, L<POSIX/localeconv>, L<POSIX/setlocale>, 
-L<POSIX/strcoll>, L<POSIX/strftime>, L<POSIX/strtod>, 
-L<POSIX/strxfrm>.
+L<I18N::Langinfo>, L<POSIX/isalnum>, L<POSIX/isalpha>,
+L<POSIX/isdigit>, L<POSIX/isgraph>, L<POSIX/islower>,
+L<POSIX/isprint>, L<POSIX/ispunct>, L<POSIX/isspace>,
+L<POSIX/isupper>, L<POSIX/isxdigit>, L<POSIX/localeconv>,
+L<POSIX/setlocale>, L<POSIX/strcoll>, L<POSIX/strftime>,
+L<POSIX/strtod>, L<POSIX/strxfrm>.
 
 =head1 HISTORY
 

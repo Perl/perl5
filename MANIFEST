@@ -315,6 +315,10 @@ ext/GDBM_File/GDBM_File.xs	GDBM extension external subroutines
 ext/GDBM_File/hints/sco.pl	Hint for GDBM_File for named architecture
 ext/GDBM_File/Makefile.PL	GDBM extension makefile writer
 ext/GDBM_File/typemap		GDBM extension interface types
+ext/I18N/Langinfo/Langinfo.pm	I18N::Langinfo
+ext/I18N/Langinfo/Langinfo.t	I18N::Langinfo
+ext/I18N/Langinfo/Langinfo.xs	I18N::Langinfo
+ext/I18N/Langinfo/Makefile.PL	I18N::Langinfo
 ext/IO/ChangeLog		IO perl module change log
 ext/IO/IO.pm			Top-level interface to IO::* classes
 ext/IO/IO.xs			IO extension external subroutines
