@@ -147,8 +147,12 @@ S_regcppush(pTHX_ I32 parenfloor)
     SSPUSHINT(PL_regsize);
     SSPUSHINT(*PL_reglastparen);
     SSPUSHPTR(PL_reginput);
-    SSPUSHINT(paren_elems_to_push + (REGCP_PAREN_ELEMS - 1));
+#define REGCP_FRAME_ELEMS 2
+/* REGCP_FRAME_ELEMS are part of the REGCP_OTHER_ELEMS and
+ * are needed for the regexp context stack bookkeeping. */
+    SSPUSHINT(paren_elems_to_push + REGCP_OTHER_ELEMS - REGCP_FRAME_ELEMS);
     SSPUSHINT(SAVEt_REGCONTEXT); /* Magic cookie. */
+
     return retval;
 }
 
@@ -179,7 +183,8 @@ S_regcppop(pTHX)
     PL_regsize = SSPOPINT;
 
     /* Now restore the parentheses context. */
-    for (i -= (REGCP_PAREN_ELEMS - 1); i > 0; i -= REGCP_PAREN_ELEMS) {
+    for (i -= (REGCP_OTHER_ELEMS - REGCP_FRAME_ELEMS);
+	 i > 0; i -= REGCP_PAREN_ELEMS) {
 	paren = (U32)SSPOPINT;
 	PL_reg_start_tmp[paren] = (char *) SSPOPPTR;
 	PL_regstartp[paren] = SSPOPINT;
