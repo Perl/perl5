@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib' if -d '../lib';
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bSocket\b/ && 
-        !(($Config{'osname'} eq 'VMS') && $Config{d_has_socket})) {
+        !(($^O eq 'VMS') && $Config{d_has_socket})) {
 	print "1..0\n";
 	exit 0;
     }
@@ -25,8 +25,8 @@ if (socket(T,PF_INET,SOCK_STREAM,6)) {
 		inet_ntoa((unpack_sockaddr_in(getpeername(T)))[1]),"\n";
 
 	syswrite(T,"hello",5);
-	sysread(T,$buff,10);
-	print $buff eq "hello" ? "ok 3\n" : "not ok 3\n";
+	$read = sysread(T,$buff,10);	# Connection may be granted, then closed!
+	print(($read == 0 || $buff eq "hello") ? "ok 3\n" : "not ok 3\n");
   }
   else {
 	print "# You're allowed to fail tests 2 and 3 if.\n";
@@ -51,8 +51,8 @@ if( socket(S,PF_INET,SOCK_STREAM,6) ){
 		inet_ntoa((unpack_sockaddr_in(getpeername(S)))[1]),"\n";
 
 	syswrite(S,"olleh",5);
-	sysread(S,$buff,10);
-	print $buff eq "olleh" ? "ok 6\n" : "not ok 6\n";
+	$read = sysread(S,$buff,10);	# Connection may be granted, then closed!
+	print(($read == 0 || $buff eq "olleh") ? "ok 6\n" : "not ok 6\n");
   }
   else {
 	print "# You're allowed to fail tests 5 and 6 if.\n";
