@@ -225,7 +225,7 @@ been fixed.
 
 fork(), exec(), system(), qx// and pipe open()s now flush the buffers
 of all files that were opened for output at the time the operation
-was attempted.  The mostly eliminates the often confusing effects of
+was attempted.  This mostly eliminates the often confusing effects of
 buffering mishaps suffered by users unaware of how Perl internally
 handled I/O.
 
