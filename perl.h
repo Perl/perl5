@@ -3460,7 +3460,7 @@ typedef struct am_table_short AMTS;
 
 #define SET_NUMERIC_STANDARD()  	/**/
 #define SET_NUMERIC_LOCAL()     	/**/
-#define IS_NUMERIC_RADIX(c)		(0)
+#define IS_NUMERIC_RADIX(a, b)		(0)
 #define STORE_NUMERIC_LOCAL_SET_STANDARD()	/**/
 #define STORE_NUMERIC_STANDARD_SET_LOCAL()	/**/
 #define RESTORE_NUMERIC_LOCAL()		/**/
