@@ -1132,7 +1132,7 @@ S_scan_const(pTHX_ char *start)
 	: UTF;
     char *leaveit =			/* set of acceptably-backslashed characters */
 	PL_lex_inpat
-	    ? "\\.^$@AGZdDwWsSbBpPXC+*?|()-nrtfeaxcz0123456789[{]} \t\n\r\f\v#"
+	    ? "\\.^$@AGZdDwWsSbBpPXO+*?|()-nrtfeaxcz0123456789[{]} \t\n\r\f\v#"
 	    : "";
 
     while (s < send || dorange) {
@@ -1351,6 +1351,43 @@ S_scan_const(pTHX_ char *start)
 		    }
 		    s += len;
 		}
+		continue;
+
+ 	    /* \C{latin small letter a} is a named character */
+ 	    case 'C':
+ 		++s;
+ 		if (*s == '{') {
+ 		    char* e = strchr(s, '}');
+ 		    HV *hv;
+ 		    SV **svp;
+ 		    SV *res, *cv;
+ 		    STRLEN len;
+ 		    char *str;
+ 		    char *why = Nullch;
+ 
+ 		    if (!e) {
+			yyerror("Missing right brace on \\C{}");
+			e = s - 1;
+			goto cont_scan;
+		    }
+		    res = newSVpvn(s + 1, e - s - 1);
+		    res = new_constant( Nullch, 0, "charnames", 
+					res, Nullsv, "\\C{...}" );
+		    str = SvPV(res,len);
+		    if (len > e - s + 4) {
+			char *odest = SvPVX(sv);
+
+			SvGROW(sv, (SvCUR(sv) + len - (e - s + 4)));
+			d = SvPVX(sv) + (d - odest);
+		    }
+		    Copy(str, d, len, char);
+		    d += len;
+		    SvREFCNT_dec(res);
+		  cont_scan:
+		    s = e + 1;
+		}
+		else
+		    yyerror("Missing braces on \\C{}");
 		continue;
 
 	    /* \c is a control character */
@@ -5251,76 +5288,101 @@ S_checkcomma(pTHX_ register char *s, char *name, char *what)
     }
 }
 
+/* Either returns sv, or mortalizes sv and returns a new SV*.
+   Best used as sv=new_constant(..., sv, ...).
+   If s, pv are NULL, calls subroutine with one argument,
+   and type is used with error messages only. */
+
 STATIC SV *
 S_new_constant(pTHX_ char *s, STRLEN len, char *key, SV *sv, SV *pv, char *type) 
 {
     dSP;
     HV *table = GvHV(PL_hintgv);		 /* ^H */
-    BINOP myop;
     SV *res;
-    bool oldcatch = CATCH_GET;
     SV **cvp;
     SV *cv, *typesv;
-	    
+    char *why, *why1, *why2;
+    
+    if (!(PL_hints & HINT_LOCALIZE_HH)) {
+	SV *msg;
+	
+	why = "%^H is not localized";
+    report_short:
+	why1 = why2 = "";
+    report:
+	msg = Perl_newSVpvf(aTHX_ "constant(%s): %s%s%s", 
+			    (type ? type: "undef"), why1, why2, why);
+	yyerror(SvPVX(msg));
+ 	SvREFCNT_dec(msg);
+  	return sv;
+    }
     if (!table) {
-	yyerror("%^H is not defined");
-	return sv;
+	why = "%^H is not defined";
+	goto report_short;
     }
     cvp = hv_fetch(table, key, strlen(key), FALSE);
     if (!cvp || !SvOK(*cvp)) {
-	char buf[128];
-	sprintf(buf,"$^H{%s} is not defined", key);
-	yyerror(buf);
-	return sv;
+	why = "} is not defined";
+	why1 = "$^H{";
+	why2 = key;
+	goto report;
     }
     sv_2mortal(sv);			/* Parent created it permanently */
     cv = *cvp;
-    if (!pv)
-	pv = sv_2mortal(newSVpvn(s, len));
-    if (type)
-	typesv = sv_2mortal(newSVpv(type, 0));
+    if (!pv && s)
+  	pv = sv_2mortal(newSVpvn(s, len));
+    if (type && pv)
+  	typesv = sv_2mortal(newSVpv(type, 0));
     else
-	typesv = &PL_sv_undef;
-    CATCH_SET(TRUE);
-    Zero(&myop, 1, BINOP);
-    myop.op_last = (OP *) &myop;
-    myop.op_next = Nullop;
-    myop.op_flags = OPf_WANT_SCALAR | OPf_STACKED;
-
+  	typesv = &PL_sv_undef;
+    
     PUSHSTACKi(PERLSI_OVERLOAD);
-    ENTER;
-    SAVEOP();
-    PL_op = (OP *) &myop;
-    if (PERLDB_SUB && PL_curstash != PL_debstash)
-	PL_op->op_private |= OPpENTERSUB_DB;
-    PUTBACK;
-    Perl_pp_pushmark(aTHX);
-
+    ENTER ;
+    SAVETMPS;
+    
+    PUSHMARK(SP) ;
     EXTEND(sp, 4);
-    PUSHs(pv);
+    if (pv)
+ 	PUSHs(pv);
     PUSHs(sv);
-    PUSHs(typesv);
+    if (pv)
+ 	PUSHs(typesv);
     PUSHs(cv);
     PUTBACK;
-
-    if (PL_op = Perl_pp_entersub(aTHX))
-      CALLRUNOPS(aTHX);
-    LEAVE;
-    SPAGAIN;
-
-    res = POPs;
-    PUTBACK;
-    CATCH_SET(oldcatch);
-    POPSTACK;
-
-    if (!SvOK(res)) {
-	char buf[128];
-	sprintf(buf,"Call to &{$^H{%s}} did not return a defined value", key);
-	yyerror(buf);
+    call_sv(cv, G_SCALAR | ( PL_in_eval ? 0 : G_EVAL));
+    
+    SPAGAIN ;
+    
+    /* Check the eval first */
+    if (!PL_in_eval && SvTRUE(ERRSV))
+    {
+	STRLEN n_a;
+ 	sv_catpv(ERRSV, "Propagated");
+	yyerror(SvPV(ERRSV, n_a)); /* Duplicates the message inside eval */
+	POPs ;
+ 	res = SvREFCNT_inc(sv);
     }
-    return SvREFCNT_inc(res);
-}
+    else {
+ 	res = POPs;
+ 	SvREFCNT_inc(res);
+    }
+    
+    PUTBACK ;
+    FREETMPS ;
+    LEAVE ;
+    POPSTACK;
+    
+    if (!SvOK(res)) {
+ 	why = "}} did not return a defined value";
+ 	why1 = "Call to &{$^H{";
+ 	why2 = key;
+ 	sv = res;
+ 	goto report;
+     }
 
+     return res;
+}
+  
 STATIC char *
 S_scan_word(pTHX_ register char *s, char *dest, STRLEN destlen, int allow_package, STRLEN *slp)
 {

@@ -149,6 +149,7 @@ also work:
     \x1B	hex char
     \x{263a}	wide hex char         (Unicode SMILEY)
     \c[		control char
+    \C{name}	named char
     \l		lowercase next char (think vi)
     \u		uppercase next char (think vi)
     \L		lowercase till \E (think vi)
@@ -157,7 +158,8 @@ also work:
     \Q		quote (disable) pattern metacharacters till \E
 
 If C<use locale> is in effect, the case map used by C<\l>, C<\L>, C<\u>
-and C<\U> is taken from the current locale.  See L<perllocale>.
+and C<\U> is taken from the current locale.  See L<perllocale>.  For
+documentation of C<\C{name}>, see L<charnames>.
 
 You cannot include a literal C<$> or C<@> within a C<\Q> sequence.
 An unescaped C<$> or C<@> interpolates the corresponding variable,
@@ -176,7 +178,7 @@ In addition, Perl defines the following:
     \PP	Match non-P
     \X	Match eXtended Unicode "combining character sequence",
         equivalent to C<(?:\PM\pM*)>
-    \C	Match a single C char (octet) even under utf8.
+    \O	Match a single C char (octet) even under utf8.
 
 A C<\w> matches a single alphanumeric character, not a whole word.
 Use C<\w+> to match a string of Perl-identifier characters (which isn't 

@@ -1779,7 +1779,7 @@ tryagain:
 	    PL_seen_zerolen++;		/* Do not optimize RE away */
 	    nextchar();
 	    break;
-	case 'C':
+	case 'O':
 	    ret = reg_node(SANY);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar();

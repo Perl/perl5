@@ -477,6 +477,7 @@ lib/bigint.pl
 lib/bigrat.pl	
 lib/blib.pm	
 lib/cacheout.pl	
+lib/charnames.pm		ilya
 lib/chat2.pl	
 lib/complete.pl	
 lib/constant.pm	
@@ -683,6 +684,7 @@ t/lib/cgi-form.t
 t/lib/cgi-function.t	
 t/lib/cgi-html.t	
 t/lib/cgi-request.t	
+t/lib/charnames.t		ilya
 t/lib/checktree.t	
 t/lib/complex.t			complex
 t/lib/db-btree.t		pmarquess

@@ -1130,6 +1130,16 @@ workarounds.
 inlining.  See L<perlsub/"Constant Functions"> for commentary and
 workarounds.
 
+=item constant(%s): %%^H is not localized
+
+(F) When setting compile-time-lexicalized hash %^H one should set the 
+corresponding bit of $^H as well.
+
+=item constant(%s): %s
+
+(F) Compile-time-substitutions (such as overloaded constants and
+character names) were not correctly set up.
+
 =item Copy method did not return a reference
 
 (F) The method which overloads "=" is buggy. See L<overload/Copy Constructor>.
@@ -1661,6 +1671,11 @@ ended earlier on the current line.
 (F) Apparently you've been programming in B<csh> too much.  Variables are always
 mentioned with the $ in Perl, unlike in the shells, where it can vary from
 one line to the next.
+
+=item Missing %sbrace%s on \C{}
+
+(F) Wrong syntax of character name literal C<\C{charname}> within
+double-quotish context.
 
 =item Missing comma after first argument to %s function
 
