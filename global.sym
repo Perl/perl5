@@ -302,6 +302,7 @@ Perl_newSVsv
 Perl_newUNOP
 Perl_newWHILEOP
 Perl_new_stackinfo
+Perl_new_vstring
 Perl_ninstr
 Perl_op_free
 Perl_pad_sv

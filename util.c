@@ -3884,3 +3884,76 @@ Perl_getcwd_sv(pTHX_ register SV *sv)
 #endif
 }
 
+/*
+=for apidoc new_vstring
+
+Returns a pointer to the next character after the parsed
+vstring, as well as updating the passed in sv.
+ * 
+Function must be called like 
+ 	
+        sv = NEWSV(92,5);
+	s = new_vstring(s,sv);
+
+The sv must already be large enough to store the vstring
+passed in.
+
+=cut
+*/
+
+char *
+Perl_new_vstring(pTHX_ char *s, SV *sv)
+{
+    char *pos = s;
+    if (*pos == 'v') pos++;  /* get past 'v' */
+    while (isDIGIT(*pos) || *pos == '_')
+    pos++;
+    if (!isALPHA(*pos)) {
+	UV rev;
+	U8 tmpbuf[UTF8_MAXLEN+1];
+	U8 *tmpend;
+
+	if (*s == 'v') s++;  /* get past 'v' */
+
+	sv_setpvn(sv, "", 0);
+
+	for (;;) {
+	    rev = 0;
+	    {
+	    /* this is atoi() that tolerates underscores */
+	    char *end = pos;
+	    UV mult = 1;
+	    if ( *(s-1) == '_') {
+	    	mult = 10;
+	    }
+	    while (--end >= s) {
+		UV orev;
+		orev = rev;
+		rev += (*end - '0') * mult;
+		mult *= 10;
+		if (orev > rev && ckWARN_d(WARN_OVERFLOW))
+		Perl_warner(aTHX_ WARN_OVERFLOW,
+			"Integer overflow in decimal number");
+	    }
+	    }
+	    /* Append native character for the rev point */
+	    tmpend = uvchr_to_utf8(tmpbuf, rev);
+	    sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);
+	    if (!UNI_IS_INVARIANT(NATIVE_TO_UNI(rev)))
+	    SvUTF8_on(sv);
+	    if ( (*pos == '.' || *pos == '_') && isDIGIT(pos[1]))
+	    s = ++pos;
+	    else {
+	    s = pos;
+	    break;
+	    }
+	    while (isDIGIT(*pos) )
+	    pos++;
+	}
+	SvPOK_on(sv);
+	SvREADONLY_on(sv);
+    }
+    return s;
+}
+
+

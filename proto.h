@@ -561,6 +561,7 @@ PERL_CALLCONV OP*	Perl_newUNOP(pTHX_ I32 type, I32 flags, OP* first);
 PERL_CALLCONV OP*	Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP* loop, I32 whileline, OP* expr, OP* block, OP* cont);
 
 PERL_CALLCONV PERL_SI*	Perl_new_stackinfo(pTHX_ I32 stitems, I32 cxitems);
+PERL_CALLCONV char*	Perl_new_vstring(pTHX_ char *vstr, SV *sv);
 PERL_CALLCONV PerlIO*	Perl_nextargv(pTHX_ GV* gv);
 PERL_CALLCONV char*	Perl_ninstr(pTHX_ const char* big, const char* bigend, const char* little, const char* lend);
 PERL_CALLCONV OP*	Perl_oopsCV(pTHX_ OP* o);

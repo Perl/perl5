@@ -7222,7 +7222,7 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 	    }
 	    if (*s == '.' && isDIGIT(s[1])) {
 		/* oops, it's really a v-string, but without the "v" */
-		s = start - 1;
+		s = start;
 		goto vstring;
 	    }
 	}
@@ -7316,58 +7316,8 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
     /* if it starts with a v, it could be a v-string */
     case 'v':
 vstring:
-	{
-	    char *pos = s;
-	    pos++;
-	    while (isDIGIT(*pos) || *pos == '_')
-		pos++;
-	    if (!isALPHA(*pos)) {
-		UV rev;
-		U8 tmpbuf[UTF8_MAXLEN+1];
-		U8 *tmpend;
-		s++;				/* get past 'v' */
-
-		sv = NEWSV(92,5);
-		sv_setpvn(sv, "", 0);
-
-		for (;;) {
-		    if (*s == '0' && isDIGIT(s[1]))
-			yyerror("Octal number in vector unsupported");
-		    rev = 0;
-		    {
-			/* this is atoi() that tolerates underscores */
-			char *end = pos;
-			UV mult = 1;
-			while (--end >= s) {
-			    UV orev;
-			    if (*end == '_')
-				continue;
-			    orev = rev;
-			    rev += (*end - '0') * mult;
-			    mult *= 10;
-			    if (orev > rev && ckWARN_d(WARN_OVERFLOW))
-				Perl_warner(aTHX_ WARN_OVERFLOW,
-					    "Integer overflow in decimal number");
-			}
-		    }
-		    /* Append native character for the rev point */
-		    tmpend = uvchr_to_utf8(tmpbuf, rev);
-		    sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);
-		    if (!UNI_IS_INVARIANT(NATIVE_TO_UNI(rev)))
-			SvUTF8_on(sv);
-		    if (*pos == '.' && isDIGIT(pos[1]))
-			s = ++pos;
-		    else {
-			s = pos;
-			break;
-		    }
-		    while (isDIGIT(*pos) || *pos == '_')
-			pos++;
-		}
-		SvPOK_on(sv);
-		SvREADONLY_on(sv);
-	    }
-	}
+		sv = NEWSV(92,5); /* preallocate storage space */
+		s = new_vstring(s,sv);
 	break;
     }
 

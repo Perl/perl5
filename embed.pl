@@ -1573,6 +1573,7 @@ Ap	|OP*	|newWHILEOP	|I32 flags|I32 debuggable|LOOP* loop \
 				|I32 whileline|OP* expr|OP* block|OP* cont
 
 Ap	|PERL_SI*|new_stackinfo|I32 stitems|I32 cxitems
+Apd	|char*	|new_vstring	|char *vstr|SV *sv
 p	|PerlIO*|nextargv	|GV* gv
 Ap	|char*	|ninstr		|const char* big|const char* bigend \
 				|const char* little|const char* lend

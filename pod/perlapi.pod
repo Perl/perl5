@@ -794,7 +794,7 @@ Found in file cop.h
 =item HEf_SVKEY
 
 This flag, used in the length slot of hash entries and magic structures,
-specifies the structure contains a C<SV*> pointer where a C<char*> pointer
+specifies the structure contains an C<SV*> pointer where a C<char*> pointer
 is to be expected. (For information only--not to be used).
 
 =for hackers
@@ -958,7 +958,7 @@ Found in file hv.c
 Returns the SV which corresponds to the specified key in the hash.  The
 C<klen> is the length of the key.  If C<lval> is set then the fetch will be
 part of a store.  Check that the return value is non-null before
-dereferencing it to a C<SV*>.
+dereferencing it to an C<SV*>.
 
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
@@ -1552,6 +1552,24 @@ memory is zeroed with C<memzero>.
 
 =for hackers
 Found in file handy.h
+
+=item new_vstring
+
+Returns a pointer to the next character after the parsed
+vstring, as well as updating the passed in sv.
+ * 
+Function must be called like 
+ 	
+        sv = NEWSV(92,5);
+	s = new_vstring(s,sv);
+
+The sv must already be large enough to store the vstring
+passed in.
+
+	char*	new_vstring(char *vstr, SV *sv)
+
+=for hackers
+Found in file util.c
 
 =item Nullav
 
@@ -2220,7 +2238,7 @@ Found in file sv.h
 
 =item SvIOK_notUV
 
-Returns a boolean indicating whether the SV contains an signed integer.
+Returns a boolean indicating whether the SV contains a signed integer.
 
 	void	SvIOK_notUV(SV* sv)
 
@@ -2282,22 +2300,22 @@ version which guarantees to evaluate sv only once.
 =for hackers
 Found in file sv.h
 
-=item SvIVx
-
-Coerces the given SV to an integer and returns it. Guarantees to evaluate
-sv only once. Use the more efficient C<SvIV> otherwise.
-
-	IV	SvIVx(SV* sv)
-
-=for hackers
-Found in file sv.h
-
 =item SvIVX
 
 Returns the raw value in the SV's IV slot, without checks or conversions.
 Only use when you are sure SvIOK is true. See also C<SvIV()>.
 
 	IV	SvIVX(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvIVx
+
+Coerces the given SV to an integer and returns it. Guarantees to evaluate
+sv only once. Use the more efficient C<SvIV> otherwise.
+
+	IV	SvIVx(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -2397,22 +2415,22 @@ which guarantees to evaluate sv only once.
 =for hackers
 Found in file sv.h
 
-=item SvNVX
-
-Returns the raw value in the SV's NV slot, without checks or conversions.
-Only use when you are sure SvNOK is true. See also C<SvNV()>.
-
-	NV	SvNVX(SV* sv)
-
-=for hackers
-Found in file sv.h
-
 =item SvNVx
 
 Coerces the given SV to a double and returns it. Guarantees to evaluate
 sv only once. Use the more efficient C<SvNV> otherwise.
 
 	NV	SvNVx(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvNVX
+
+Returns the raw value in the SV's NV slot, without checks or conversions.
+Only use when you are sure SvNOK is true. See also C<SvNV()>.
+
+	NV	SvNVX(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -4521,7 +4539,7 @@ Found in file XSUB.h
 
 =item XSRETURN_NV
 
-Return an double from an XSUB immediately.  Uses C<XST_mNV>.
+Return a double from an XSUB immediately.  Uses C<XST_mNV>.
 
 	void	XSRETURN_NV(NV nv)
 

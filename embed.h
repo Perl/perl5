@@ -498,6 +498,7 @@
 #define newUNOP			Perl_newUNOP
 #define newWHILEOP		Perl_newWHILEOP
 #define new_stackinfo		Perl_new_stackinfo
+#define new_vstring		Perl_new_vstring
 #define nextargv		Perl_nextargv
 #define ninstr			Perl_ninstr
 #define oopsCV			Perl_oopsCV
@@ -2015,6 +2016,7 @@
 #define newUNOP(a,b,c)		Perl_newUNOP(aTHX_ a,b,c)
 #define newWHILEOP(a,b,c,d,e,f,g)	Perl_newWHILEOP(aTHX_ a,b,c,d,e,f,g)
 #define new_stackinfo(a,b)	Perl_new_stackinfo(aTHX_ a,b)
+#define new_vstring(a,b)	Perl_new_vstring(aTHX_ a,b)
 #define nextargv(a)		Perl_nextargv(aTHX_ a)
 #define ninstr(a,b,c,d)		Perl_ninstr(aTHX_ a,b,c,d)
 #define oopsCV(a)		Perl_oopsCV(aTHX_ a)
