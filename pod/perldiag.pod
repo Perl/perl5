@@ -3071,6 +3071,11 @@ declared or defined with a different function prototype.
 (F) You've omitted the closing parenthesis in a function prototype
 definition.
 
+=item Pseudo-hashes are deprecated
+
+(D deprecated)  Pseudo-hashes were deprecated in Perl 5.8.0 and they
+will be removed in Perl 5.10.0, see L<perl58delta> for more details.
+
 =item Quantifier in {,} bigger than %d in regex;
 
 marked by <-- HERE in m/%s/

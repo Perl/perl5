@@ -1,11 +1,11 @@
 =head1 NAME
 
-perldelta - what is new for perl v5.9.0
+perldelta - what is new for perl v5.8.1
 
 =head1 DESCRIPTION
 
 This document describes differences between the 5.8.0 release and
-the 5.9.0 release.
+the 5.8.1 release.
 
 =head1 Incompatible Changes
 
@@ -21,6 +21,23 @@ array method.  This behavior is now optional.  If the tied array class
 contains a package variable named C<$NEGATIVE_INDICES> which is set to
 a true value, negative values will be passed to C<FETCH>, C<STORE>,
 C<EXISTS>, and C<DELETE> unchanged.
+
+=head2 Warnings
+
+Perl 5.8.0 forgot to add some deprecation warnings.  These warnings
+have now been added.
+
+=over 4
+
+=item *
+
+Pseudo-hashes were deprecated in Perl 5.8.0 and will be removed in Perl
+5.10, see L<perl58delta> for details.  If you really want to continue
+using pseudo-hashes but not to see the warnings, add:
+
+    no warnings 'deprecated';
+
+=back
 
 =head1 Modules and Pragmata
 
