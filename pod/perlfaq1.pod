@@ -33,13 +33,13 @@ distribution for more details.  See L<perlhist> (new as of 5.005)
 for Perl's milestone releases.
 
 In particular, the core development team (known as the Perl Porters)
-are a rag-tag band of highly altruistic individuals committed
-to producing better software for free than you could hope to
-purchase for money.  You may snoop on pending developments via
-nntp://news.perl.com/perl.porters-gw/ and the Deja archive at
-http://www.deja.com/ using the perl.porters-gw newsgroup, or you can
-subscribe to the mailing list by sending perl5-porters-request@perl.org
-a subscription request.
+are a rag-tag band of highly altruistic individuals committed to
+producing better software for free than you could hope to purchase for
+money.  You may snoop on pending developments via
+nntp://news.perl.com/perl.porters-gw/
+or you can subscribe to the mailing list by sending
+perl5-porters-request@perl.org a subscription request
+(an empty message with no subject is fine).
 
 While the GNU project includes Perl in its distributions, there's no
 such thing as "GNU Perl".  Perl is not produced nor maintained by the

@@ -18,11 +18,6 @@ A searchable archive of the list is at:
 
     http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 
-The list is also archived under the usenet group name
-C<perl.porters-gw> at:
-
-    http://www.deja.com/
-
 List subscribers (the porters themselves) come in several flavours.
 Some are quiet curious lurkers, who rarely pitch in and instead watch
 the ongoing development to ensure they're forewarned of new changes or
