@@ -688,34 +688,43 @@ PP(pp_modulo)
     {
       UV left;
       UV right;
-      bool negate;
+      bool left_neg;
+      bool right_neg;
       UV ans;
 
       if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)) {
 	IV i = SvIVX(POPs);
-	right = (i < 0) ? -i : i;
+	right = (right_neg = (i < 0)) ? -i : i;
       }
       else {
 	double n = POPn;
-	right = U_V((n < 0) ? -n : n);
+	right = U_V((right_neg = (n < 0)) ? -n : n);
       }
 
       if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)) {
 	IV i = SvIVX(POPs);
-	left = (negate = (i < 0)) ? -i : i;
+	left = (left_neg = (i < 0)) ? -i : i;
       }
       else {
 	double n = POPn;
-	left = U_V((negate = (n < 0)) ? -n : n);
+	left = U_V((left_neg = (n < 0)) ? -n : n);
       }
 
       if (!right)
 	DIE("Illegal modulus zero");
 
       ans = left % right;
-      if (negate && ans)
+      if ((left_neg != right_neg) && ans)
 	ans = right - ans;
-      PUSHu(ans);
+      if (right_neg) {
+	if (ans <= -(UV)IV_MAX)
+	  sv_setiv(TARG, (IV) -ans);
+	else
+	  sv_setnv(TARG, -(double)ans);
+      }
+      else
+	sv_setuv(TARG, ans);
+      PUSHTARG;
       RETURN;
     }
 }
