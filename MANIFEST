@@ -261,6 +261,7 @@ ext/Encode/t/big5-hkscs.utf	test data
 ext/Encode/t/CJKT.t		test script
 ext/Encode/t/Encode.t		test script
 ext/Encode/t/Encoder.t		test script
+ext/Encode/t/enc_data.t		test script for utf8 DATA
 ext/Encode/t/enc_eucjp.t	test script
 ext/Encode/t/enc_module.enc	test data for t/enc_module.t
 ext/Encode/t/enc_module.t	test script
