@@ -138,8 +138,8 @@ use of UTF-8.
 
 For example, if you had C<en_US.UTF-8> as your locale, your STDIN and
 STDOUT were automatically "UTF-8", in other words an implicit
-C<< binmode(..., ":utf8") >> was made.  This meant that trying to print,
-say, C<< chr(0xff) >>, ended up printing the bytes 0xc3 0xbf.  Hardly what
+binmode(..., ":utf8") was made.  This meant that trying to print, say,
+chr(0xff), ended up printing the bytes 0xc3 0xbf.  Hardly what
 you had in mind unless you were aware of this feature of Perl 5.8.0.
 The problem is that the vast majority of people weren't: for example
 in RedHat releases 8 and 9 the B<default> locale setting is UTF-8, so
@@ -250,6 +250,9 @@ the deprecation warnings, use:
 
 =head2 Miscellaneous Enhancements
 
+C<map> in void context is no longer expensive. C<map> is now context
+aware, and will not construct a list if called in void context.
+
 If a socket gets closed by the server while printing to it, the client
 now gets a SIGPIPE.  While this new feature was not planned, it fell
 naturally out of PerlIO changes, and is to be considered an accidental
@@ -263,9 +266,6 @@ indicate whether the layer wants to "auto-:utf8" the stream.
 
 utf8::is_utf8() has been added as a quick way to test whether
 a scalar is encoded internally in UTF-8 (Unicode).
-
-C<map> in void context is no longer expensive. C<map> is now context
-aware, and will not construct a list if called in void context.
 
 =head1 Modules and Pragmata
 
@@ -580,8 +580,8 @@ immediately given - instead of being silent about it and Perl being
 unhappy about the broken data later.  (The C<:encoding(utf8)> layer
 also works the same way.)
 
-C<< binmode(SOCKET, ":utf8") >> only worked on the input side, not
-on the output side of the socket.  Now it works both ways.
+binmode(SOCKET, ":utf8") only worked on the input side, not on the
+output side of the socket.  Now it works both ways.
 
 For threaded Perls certain system database functions like getpwent()
 and getgrent() now grow their result buffer dynamically, instead of
