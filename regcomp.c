@@ -129,25 +129,25 @@
  */
 
 #ifndef PERL_OBJECT
-static regnode *reg _((I32, I32 *));
-static regnode *reganode _((U8, U32));
-static regnode *regatom _((I32 *));
-static regnode *regbranch _((I32 *, I32));
-static void regc _((U8, char *));
-static void reguni _((UV, char *, I32*));
-static regnode *regclass _((void));
-static regnode *regclassutf8 _((void));
-STATIC I32 regcurly _((char *));
-static regnode *reg_node _((U8));
-static regnode *regpiece _((I32 *));
-static void reginsert _((U8, regnode *));
-static void regoptail _((regnode *, regnode *));
-static void regtail _((regnode *, regnode *));
-static char* regwhite _((char *, char *));
-static char* nextchar _((void));
-static void re_croak2 _((const char* pat1,const char* pat2,...)) __attribute__((noreturn));
-static char* regpposixcc _((I32 value));
-static void clear_re _((void *r));
+static regnode *reg (I32, I32 *);
+static regnode *reganode (U8, U32);
+static regnode *regatom (I32 *);
+static regnode *regbranch (I32 *, I32);
+static void regc (U8, char *);
+static void reguni (UV, char *, I32*);
+static regnode *regclass (void);
+static regnode *regclassutf8 (void);
+STATIC I32 regcurly (char *);
+static regnode *reg_node (U8);
+static regnode *regpiece (I32 *);
+static void reginsert (U8, regnode *);
+static void regoptail (regnode *, regnode *);
+static void regtail (regnode *, regnode *);
+static char* regwhite (char *, char *);
+static char* nextchar (void);
+static void re_croak2 (const char* pat1,const char* pat2,...) __attribute__((noreturn));
+static char* regpposixcc (I32 value);
+static void clear_re (void *r);
 #endif
 
 /* Length of a variant. */

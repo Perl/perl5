@@ -27,7 +27,7 @@
 #ifdef HAS_SHM
 #include <sys/shm.h>
 # ifndef HAS_SHMAT_PROTOTYPE
-    extern Shmat_t shmat _((int, char *, int));
+    extern Shmat_t shmat (int, char *, int);
 # endif
 #endif
 #endif

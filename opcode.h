@@ -1072,8 +1072,8 @@ START_EXTERN_C
 
 #undef PERL_CKDEF
 #undef PERL_PPDEF
-#define PERL_CKDEF(s) OP *s _((OP *o));
-#define PERL_PPDEF(s) OP *s _((ARGSproto));
+#define PERL_CKDEF(s) OP *s (OP *o);
+#define PERL_PPDEF(s) OP *s (ARGSproto);
 
 #include "pp_proto.h"
 
@@ -1437,9 +1437,9 @@ EXT OP * (CPERLscope(*PL_ppaddr)[])(ARGSproto) = {
 #endif
 
 #ifndef DOINIT
-EXT OP * (CPERLscope(*PL_check)[]) _((OP *op));
+EXT OP * (CPERLscope(*PL_check)[]) (OP *op);
 #else
-EXT OP * (CPERLscope(*PL_check)[]) _((OP *op)) = {
+EXT OP * (CPERLscope(*PL_check)[]) (OP *op) = {
 	ck_null,	/* null */
 	ck_null,	/* stub */
 	ck_fun,		/* scalar */

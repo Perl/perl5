@@ -19,7 +19,7 @@ print "\tNULL,\n";
 print "\t};\n";
 print "\n";
 foreach (@ARGV) {
-	print "EXTERN_C void boot_$_ _((CV* cv));\n"
+	print "EXTERN_C void boot_$_ (CV* cv);\n"
 	}
 
 print <<EOP;

@@ -14,12 +14,12 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-static void hv_magic_check _((HV *hv, bool *needs_copy, bool *needs_store));
+static void hv_magic_check (HV *hv, bool *needs_copy, bool *needs_store);
 #ifndef PERL_OBJECT
-static void hsplit _((HV *hv));
-static void hfreeentries _((HV *hv));
-static void more_he _((void));
-static HEK *save_hek _((const char *str, I32 len, U32 hash));
+static void hsplit (HV *hv);
+static void hfreeentries (HV *hv);
+static void more_he (void);
+static HEK *save_hek (const char *str, I32 len, U32 hash);
 #endif
 
 #if defined(STRANGE_MALLOC) || defined(MYMALLOC)

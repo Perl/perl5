@@ -20,7 +20,7 @@
 #endif
 
 #if !defined(STANDARD_C) && !defined(HAS_GETENV_PROTOTYPE)
-char *getenv _((char *)); /* Usually in <stdlib.h> */
+char *getenv (char *); /* Usually in <stdlib.h> */
 #endif
 
 #ifdef I_FCNTL
@@ -43,36 +43,36 @@ char *getenv _((char *)); /* Usually in <stdlib.h> */
 #endif
 
 #ifdef PERL_OBJECT
-static I32 read_e_script _((CPerlObj* pPerl, int idx, SV *buf_sv, int maxlen));
+static I32 read_e_script (CPerlObj* pPerl, int idx, SV *buf_sv, int maxlen);
 #else
-static void find_beginning _((void));
-static void forbid_setid _((char *));
-static void incpush _((char *, int));
-static void init_interp _((void));
-static void init_ids _((void));
-static void init_debugger _((void));
-static void init_lexer _((void));
-static void init_main_stash _((void));
-static void *perl_parse_body _((va_list args));
-static void *perl_run_body _((va_list args));
-static void *perl_call_body _((va_list args));
-static void perl_call_xbody _((OP *myop, int is_eval));
-static void *call_list_body _((va_list args));
+static void find_beginning (void);
+static void forbid_setid (char *);
+static void incpush (char *, int);
+static void init_interp (void);
+static void init_ids (void);
+static void init_debugger (void);
+static void init_lexer (void);
+static void init_main_stash (void);
+static void *perl_parse_body (va_list args);
+static void *perl_run_body (va_list args);
+static void *perl_call_body (va_list args);
+static void perl_call_xbody (OP *myop, int is_eval);
+static void *call_list_body (va_list args);
 #ifdef USE_THREADS
-static struct perl_thread * init_main_thread _((void));
+static struct perl_thread * init_main_thread (void);
 #endif /* USE_THREADS */
-static void init_perllib _((void));
-static void init_postdump_symbols _((int, char **, char **));
-static void init_predump_symbols _((void));
-static void my_exit_jump _((void)) __attribute__((noreturn));
-static void nuke_stacks _((void));
-static void open_script _((char *, bool, SV *, int *fd));
-static void usage _((char *));
+static void init_perllib (void);
+static void init_postdump_symbols (int, char **, char **);
+static void init_predump_symbols (void);
+static void my_exit_jump (void) __attribute__((noreturn));
+static void nuke_stacks (void);
+static void open_script (char *, bool, SV *, int *fd);
+static void usage (char *);
 #ifdef IAMSUID
-static int  fd_on_nosuid_fs _((int));
+static int  fd_on_nosuid_fs (int);
 #endif
-static void validate_suid _((char *, char*, int));
-static I32 read_e_script _((int idx, SV *buf_sv, int maxlen));
+static void validate_suid (char *, char*, int);
+static I32 read_e_script (int idx, SV *buf_sv, int maxlen);
 #endif
 
 #ifdef PERL_OBJECT

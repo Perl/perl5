@@ -82,8 +82,8 @@ START_EXTERN_C
 
 #undef PERL_CKDEF
 #undef PERL_PPDEF
-#define PERL_CKDEF(s) OP *s _((OP *o));
-#define PERL_PPDEF(s) OP *s _((ARGSproto));
+#define PERL_CKDEF(s) OP *s (OP *o);
+#define PERL_PPDEF(s) OP *s (ARGSproto);
 
 #include "pp_proto.h"
 
@@ -92,13 +92,13 @@ END
 # Emit function declarations.
 
 #for (sort keys %ckname) {
-#    print "OP *\t", &tab(3,$_),"_((OP* o));\n";
+#    print "OP *\t", &tab(3,$_),"(OP* o);\n";
 #}
 #
 #print "\n";
 #
 #for (@ops) {
-#    print "OP *\t", &tab(3, "pp_$_"), "_((ARGSproto));\n";
+#    print "OP *\t", &tab(3, "pp_$_"), "(ARGSproto);\n";
 #}
 
 # Emit ppcode switch array.
@@ -128,9 +128,9 @@ END
 
 print <<END;
 #ifndef DOINIT
-EXT OP * (CPERLscope(*PL_check)[]) _((OP *op));
+EXT OP * (CPERLscope(*PL_check)[]) (OP *op);
 #else
-EXT OP * (CPERLscope(*PL_check)[]) _((OP *op)) = {
+EXT OP * (CPERLscope(*PL_check)[]) (OP *op) = {
 END
 
 for (@ops) {
@@ -219,7 +219,7 @@ open PPSYM, '>pp.sym' or die "Error creating pp.sym: $!";
 
 for (sort keys %ckname) {
     print PP "PERL_CKDEF($_)\n";
-#OP *\t", &tab(3,$_),"_((OP* o));\n";
+#OP *\t", &tab(3,$_),"(OP* o);\n";
 }
 
 print PP "\n\n";

@@ -182,7 +182,7 @@ int si_fileno(FILE *);
 #  undef getpeername
 #endif
 #define getpeername my_getpeername
-int my_getpeername _((int, struct sockaddr *, int *));
+int my_getpeername (int, struct sockaddr *, int *);
 
 #endif /* SOCKETSHR stuff */
 #endif /* include guard */

@@ -76,11 +76,11 @@ extern int h_errno;
 # ifdef I_PWD
 #  include <pwd.h>
 # else
-    struct passwd *getpwnam _((char *));
-    struct passwd *getpwuid _((Uid_t));
+    struct passwd *getpwnam (char *);
+    struct passwd *getpwuid (Uid_t);
 # endif
 # ifdef HAS_GETPWENT
-  struct passwd *getpwent _((void));
+  struct passwd *getpwent (void);
 # endif
 #endif
 
@@ -88,11 +88,11 @@ extern int h_errno;
 # ifdef I_GRP
 #  include <grp.h>
 # else
-    struct group *getgrnam _((char *));
-    struct group *getgrgid _((Gid_t));
+    struct group *getgrnam (char *);
+    struct group *getgrgid (Gid_t);
 # endif
 # ifdef HAS_GETGRENT
-    struct group *getgrent _((void));
+    struct group *getgrent (void);
 # endif
 #endif
 
@@ -125,7 +125,7 @@ extern int h_errno;
 #endif
 
 #if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
-static int dooneliner _((char *cmd, char *filename));
+static int dooneliner (char *cmd, char *filename);
 #endif
 
 #ifdef HAS_CHSIZE
@@ -158,7 +158,7 @@ static int dooneliner _((char *cmd, char *filename));
 #  endif /* no flock() or fcntl(F_SETLK,...) */
 
 #  ifdef FLOCK
-     static int FLOCK _((int, int));
+     static int FLOCK (int, int);
 
     /*
      * These are the flock() constants.  Since this sytems doesn't have
@@ -3335,7 +3335,7 @@ PP(pp_readdir)
     djSP;
 #if defined(Direntry_t) && defined(HAS_READDIR)
 #ifndef I_DIRENT
-    Direntry_t *readdir _((DIR *));
+    Direntry_t *readdir (DIR *);
 #endif
     register Direntry_t *dp;
     GV *gv = (GV*)POPs;
@@ -3395,7 +3395,7 @@ PP(pp_telldir)
     XXX HAS_TELLDIR_PROTO is new style, NEED_TELLDIR_PROTO is old style.
     --JHI 1999-Feb-02 */
 # if !defined(HAS_TELLDIR_PROTO) || defined(NEED_TELLDIR_PROTO)
-    long telldir _((DIR *));
+    long telldir (DIR *);
 # endif
     GV *gv = (GV*)POPs;
     register IO *io = GvIOn(gv);

@@ -184,10 +184,10 @@ typedef struct termios* POSIX__Termios;
 #endif
 
 /* Possibly needed prototypes */
-char *cuserid _((char *));
-double strtod _((const char *, char **));
-long strtol _((const char *, char **, int));
-unsigned long strtoul _((const char *, char **, int));
+char *cuserid (char *);
+double strtod (const char *, char **);
+long strtol (const char *, char **, int);
+unsigned long strtoul (const char *, char **, int);
 
 #ifndef HAS_CUSERID
 #define cuserid(a) (char *) not_here("cuserid")

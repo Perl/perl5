@@ -18,44 +18,44 @@
 #define yylval	PL_yylval
 
 #ifndef PERL_OBJECT
-static void check_uni _((void));
-static void  force_next _((I32 type));
-static char *force_version _((char *start));
-static char *force_word _((char *start, int token, int check_keyword, int allow_pack, int allow_tick));
-static SV *tokeq _((SV *sv));
-static char *scan_const _((char *start));
-static char *scan_formline _((char *s));
-static char *scan_heredoc _((char *s));
-static char *scan_ident _((char *s, char *send, char *dest, STRLEN destlen,
-			   I32 ck_uni));
-static char *scan_inputsymbol _((char *start));
-static char *scan_pat _((char *start, I32 type));
-static char *scan_str _((char *start));
-static char *scan_subst _((char *start));
-static char *scan_trans _((char *start));
-static char *scan_word _((char *s, char *dest, STRLEN destlen,
-			  int allow_package, STRLEN *slp));
-static char *skipspace _((char *s));
-static void checkcomma _((char *s, char *name, char *what));
-static void force_ident _((char *s, int kind));
-static void incline _((char *s));
-static int intuit_method _((char *s, GV *gv));
-static int intuit_more _((char *s));
-static I32 lop _((I32 f, expectation x, char *s));
-static void missingterm _((char *s));
-static void no_op _((char *what, char *s));
-static void set_csh _((void));
-static I32 sublex_done _((void));
-static I32 sublex_push _((void));
-static I32 sublex_start _((void));
+static void check_uni (void);
+static void  force_next (I32 type);
+static char *force_version (char *start);
+static char *force_word (char *start, int token, int check_keyword, int allow_pack, int allow_tick);
+static SV *tokeq (SV *sv);
+static char *scan_const (char *start);
+static char *scan_formline (char *s);
+static char *scan_heredoc (char *s);
+static char *scan_ident (char *s, char *send, char *dest, STRLEN destlen,
+			 I32 ck_uni);
+static char *scan_inputsymbol (char *start);
+static char *scan_pat (char *start, I32 type);
+static char *scan_str (char *start);
+static char *scan_subst (char *start);
+static char *scan_trans (char *start);
+static char *scan_word (char *s, char *dest, STRLEN destlen,
+			int allow_package, STRLEN *slp);
+static char *skipspace (char *s);
+static void checkcomma (char *s, char *name, char *what);
+static void force_ident (char *s, int kind);
+static void incline (char *s);
+static int intuit_method (char *s, GV *gv);
+static int intuit_more (char *s);
+static I32 lop (I32 f, expectation x, char *s);
+static void missingterm (char *s);
+static void no_op (char *what, char *s);
+static void set_csh (void);
+static I32 sublex_done (void);
+static I32 sublex_push (void);
+static I32 sublex_start (void);
 #ifdef CRIPPLED_CC
-static int uni _((I32 f, char *s));
+static int uni (I32 f, char *s);
 #endif
-static char * filter_gets _((SV *sv, PerlIO *fp, STRLEN append));
-static void restore_rsfp _((void *f));
-static SV *new_constant _((char *s, STRLEN len, char *key, SV *sv, SV *pv, char *type));
-static void restore_expect _((void *e));
-static void restore_lex_expect _((void *e));
+static char * filter_gets (SV *sv, PerlIO *fp, STRLEN append);
+static void restore_rsfp (void *f);
+static SV *new_constant (char *s, STRLEN len, char *key, SV *sv, SV *pv, char *type);
+static void restore_expect (void *e);
+static void restore_lex_expect (void *e);
 #endif /* PERL_OBJECT */
 
 static char ident_too_long[] = "Identifier too long";

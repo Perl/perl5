@@ -324,7 +324,7 @@ typedef unsigned short	U16;
 #define toLOWER_LC_utf8(p)	toLOWER_LC_uni(utf8_to_uv(p, 0))
 
 #ifdef EBCDIC
-EXT int ebcdic_control _((int));
+EXT int ebcdic_control (int);
 #  define toCTRL(c)	ebcdic_control(c)
 #else
   /* This conversion works both ways, strangely enough. */

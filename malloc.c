@@ -412,10 +412,10 @@ union	overhead {
 };
 
 #ifdef DEBUGGING
-static void botch _((char *diag, char *s));
+static void botch (char *diag, char *s);
 #endif
-static void morecore _((int bucket));
-static int findbucket _((union overhead *freep, int srchlen));
+static void morecore (int bucket);
+static int findbucket (union overhead *freep, int srchlen);
 static void add_to_chain(void *p, MEM_SIZE size, MEM_SIZE chip);
 
 #define	MAGIC		0xff		/* magic # on accounting info */
@@ -790,7 +790,7 @@ static	union overhead *nextf[NBUCKETS];
 
 #ifdef USE_PERL_SBRK
 #define sbrk(a) Perl_sbrk(a)
-Malloc_t Perl_sbrk _((int size));
+Malloc_t Perl_sbrk (int size);
 #else 
 #ifdef DONT_DECLARE_STD
 #ifdef I_UNISTD

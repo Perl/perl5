@@ -11,11 +11,11 @@ static SV *opset_all;		/* mask with all bits set		*/
 static IV  opset_len;		/* length of opmasks in bytes		*/
 static int opcode_debug = 0;
 
-static SV  *new_opset _((SV *old_opset));
-static int  verify_opset _((SV *opset, int fatal));
-static void set_opset_bits _((char *bitmap, SV *bitspec, int on, char *opname));
-static void put_op_bitspec _((char *optag,  STRLEN len, SV *opset));
-static SV  *get_op_bitspec _((char *opname, STRLEN len, int fatal));
+static SV  *new_opset (SV *old_opset);
+static int  verify_opset (SV *opset, int fatal);
+static void set_opset_bits (char *bitmap, SV *bitspec, int on, char *opname);
+static void put_op_bitspec (char *optag,  STRLEN len, SV *opset);
+static SV  *get_op_bitspec (char *opname, STRLEN len, int fatal);
 
 
 /* Initialise our private op_named_bits HV.
@@ -209,7 +209,7 @@ opmask_addlocal(SV *opset, char *op_mask_buf) /* Localise PL_op_mask then opmask
      * is disallowed by Borland
      */
     if (opcode_debug >= 2)
-	SAVEDESTRUCTOR((void(CPERLscope(*))_((void*)))warn,"PL_op_mask restored");
+	SAVEDESTRUCTOR((void(CPERLscope(*))(void*))warn,"PL_op_mask restored");
 #endif
     PL_op_mask = &op_mask_buf[0];
     if (orig_op_mask)

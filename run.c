@@ -35,7 +35,7 @@ runops_standard(void)
 
 #ifdef DEBUGGING
 #ifndef PERL_OBJECT
-static void debprof _((OP*o));
+static void debprof (OP*o);
 #endif
 
 #endif	/* DEBUGGING */

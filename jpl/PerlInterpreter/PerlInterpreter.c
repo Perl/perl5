@@ -16,7 +16,7 @@
 #  endif
 #endif
 
-static void xs_init _((void));
+static void xs_init (void);
 static PerlInterpreter *my_perl;
 
 int jpldebug = 0;
@@ -117,8 +117,8 @@ Java_PerlInterpreter_eval(JNIEnv *env, jobject obj, jint ji)
 /* Register any extra external extensions */
 
 /* Do not delete this line--writemain depends on it */
-EXTERN_C void boot_DynaLoader _((CV* cv));
-EXTERN_C void boot_JNI _((CV* cv));
+EXTERN_C void boot_DynaLoader (CV* cv);
+EXTERN_C void boot_JNI (CV* cv);
 
 static void
 xs_init()

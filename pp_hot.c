@@ -2315,7 +2315,7 @@ try_autoload:
     if (CvXSUB(cv)) {
 #ifdef PERL_XSUB_OLDSTYLE
 	if (CvOLDSTYLE(cv)) {
-	    I32 (*fp3)_((int,int,int));
+	    I32 (*fp3)(int,int,int);
 	    dMARK;
 	    register I32 items = SP - MARK;
 					/* We dont worry to copy from @_. */
@@ -2324,7 +2324,7 @@ try_autoload:
 		SP--;
 	    }
 	    PL_stack_sp = mark + 1;
-	    fp3 = (I32(*)_((int,int,int)))CvXSUB(cv);
+	    fp3 = (I32(*)(int,int,int)))CvXSUB(cv;
 	    items = (*fp3)(CvXSUBANY(cv).any_i32, 
 			   MARK - PL_stack_base + 1,
 			   items);

@@ -54,7 +54,7 @@
 
 #ifdef LEAKTEST
 
-static void xstat _((int));
+static void xstat (int);
 long xcount[MAXXCOUNT];
 long lastxcount[MAXXCOUNT];
 long xycount[MAXXCOUNT][MAXYCOUNT];
@@ -2978,7 +2978,7 @@ perl_cond_wait(perl_cond *cp)
 
 #ifdef PTHREAD_GETSPECIFIC_INT
 struct perl_thread *
-getTHR _((void))
+getTHR(void)
 {
     pthread_addr_t t;
 

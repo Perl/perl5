@@ -60,23 +60,23 @@ Slab_Alloc(int m, size_t sz)
 
 #define PAD_MAX 999999999
 
-static bool scalar_mod_type _((OP *o, I32 type));
+static bool scalar_mod_type (OP *o, I32 type);
 #ifndef PERL_OBJECT
-static I32 list_assignment _((OP *o));
-static void bad_type _((I32 n, char *t, char *name, OP *kid));
-static OP *modkids _((OP *o, I32 type));
-static OP *no_fh_allowed _((OP *o));
-static void no_bareword_allowed _((OP *o));
-static OP *scalarboolean _((OP *o));
-static OP *too_few_arguments _((OP *o, char* name));
-static OP *too_many_arguments _((OP *o, char* name));
-static void null _((OP* o));
-static PADOFFSET pad_findlex _((char* name, PADOFFSET newoff, U32 seq,
-	CV* startcv, I32 cx_ix, I32 saweval, U32 flags));
-static OP *newDEFSVOP _((void));
-static OP *new_logop _((I32 type, I32 flags, OP **firstp, OP **otherp));
-static void simplify_sort _((OP *o));
-static bool is_handle_constructor _((OP *o, I32 argnum));
+static I32 list_assignment (OP *o);
+static void bad_type (I32 n, char *t, char *name, OP *kid);
+static OP *modkids (OP *o, I32 type);
+static OP *no_fh_allowed (OP *o);
+static void no_bareword_allowed (OP *o);
+static OP *scalarboolean (OP *o);
+static OP *too_few_arguments (OP *o, char* name);
+static OP *too_many_arguments (OP *o, char* name);
+static void null (OP* o);
+static PADOFFSET pad_findlex (char* name, PADOFFSET newoff, U32 seq,
+	CV* startcv, I32 cx_ix, I32 saweval, U32 flags);
+static OP *newDEFSVOP (void);
+static OP *new_logop (I32 type, I32 flags, OP **firstp, OP **otherp);
+static void simplify_sort (OP *o);
+static bool is_handle_constructor (OP *o, I32 argnum);
 #endif
 
 STATIC char*
@@ -5010,6 +5010,7 @@ ck_lfun(OP *o)
 OP *
 ck_defined(OP *o)		/* 19990527 MJD */
 {
+    dTHR;
     if (ckWARN(WARN_DEPRECATED)) {
       switch (cUNOPo->op_first->op_type) {
       case OP_RV2AV:

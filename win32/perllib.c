@@ -7,7 +7,7 @@
 #include "perl.h"
 #include "XSUB.h"
 
-static void xs_init _((void));
+static void xs_init (void);
 
 DllExport int
 RunPerl(int argc, char **argv, char **env, void *iosubsystem)
@@ -96,7 +96,7 @@ char *staticlinkmodules[] = {
     NULL,
 };
 
-EXTERN_C void boot_DynaLoader _((CV* cv));
+EXTERN_C void boot_DynaLoader (CV* cv);
 
 static void
 xs_init()

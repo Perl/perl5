@@ -194,23 +194,23 @@ typedef unsigned short	mode_t;
 #define STRUCT_MGVTBL_DEFINITION					\
 struct mgvtbl {								\
     union {								\
-	int	    (CPERLscope(*svt_get))	_((SV *sv, MAGIC* mg));	\
+	int	    (CPERLscope(*svt_get))	(SV *sv, MAGIC* mg);	\
 	char	    handle_VC_problem1[16];				\
     };									\
     union {								\
-	int	    (CPERLscope(*svt_set))	_((SV *sv, MAGIC* mg));	\
+	int	    (CPERLscope(*svt_set))	(SV *sv, MAGIC* mg);	\
 	char	    handle_VC_problem2[16];				\
     };									\
     union {								\
-	U32	    (CPERLscope(*svt_len))	_((SV *sv, MAGIC* mg));	\
+	U32	    (CPERLscope(*svt_len))	(SV *sv, MAGIC* mg);	\
 	char	    handle_VC_problem3[16];				\
     };									\
     union {								\
-	int	    (CPERLscope(*svt_clear))	_((SV *sv, MAGIC* mg));	\
+	int	    (CPERLscope(*svt_clear))	(SV *sv, MAGIC* mg);	\
 	char	    handle_VC_problem4[16];				\
     };									\
     union {								\
-	int	    (CPERLscope(*svt_free))	_((SV *sv, MAGIC* mg));	\
+	int	    (CPERLscope(*svt_free))	(SV *sv, MAGIC* mg);	\
 	char	    handle_VC_problem5[16];				\
     };									\
 }
@@ -218,7 +218,7 @@ struct mgvtbl {								\
 #define BASEOP_DEFINITION		\
     OP*		op_next;		\
     OP*		op_sibling;		\
-    OP*		(CPERLscope(*op_ppaddr))_((ARGSproto));		\
+    OP*		(CPERLscope(*op_ppaddr))(ARGSproto);		\
     char	handle_VC_problem[12];	\
     PADOFFSET	op_targ;		\
     OPCODE	op_type;		\
@@ -231,7 +231,7 @@ struct mgvtbl {								\
     I32		any_i32;				\
     IV		any_iv;					\
     long	any_long;				\
-    void	(CPERLscope(*any_dptr)) _((void*));	\
+    void	(CPERLscope(*any_dptr)) (void*);	\
     char	handle_VC_problem[16];			\
 }
 

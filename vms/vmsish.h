@@ -552,7 +552,7 @@ typedef unsigned myino_t;
  * In order to keep Gen_ShrFls.Pl happy, functions which are to be made
  * available to images linked to PerlShr.Exe must be declared between the
  * __VMS_PROTOTYPES__ and __VMS_SEPYTOTORP__ lines, and must be in the form
- *    <data type><TAB>name<WHITESPACE>_((<prototype args>));
+ *    <data type><TAB>name<WHITESPACE>(<prototype args>);
  */
 
 #ifdef NO_PERL_TYPEDEFS
@@ -574,71 +574,71 @@ typedef unsigned myino_t;
 #  endif
 #endif
 
-void	prime_env_iter _((void));
-void	init_os_extras _(());
+void	prime_env_iter (void);
+void	init_os_extras ();
 /* prototype section start marker; `typedef' passes through cpp */
 typedef char  __VMS_PROTOTYPES__;
-int	vmstrnenv _((const char *, char *, unsigned long int, struct dsc$descriptor_s **, unsigned long int));
-int	my_trnlnm _((const char *, char *, unsigned long int));
-char *	my_getenv _((const char *, bool));
-char *	my_getenv_len _((const char *, unsigned long *, bool));
-int	vmssetenv _((char *, char *, struct dsc$descriptor_s **));
-char *	my_crypt _((const char *, const char *));
-Pid_t	my_waitpid _((Pid_t, int *, int));
-char *	my_gconvert _((double, int, int, char *));
-int	do_rmdir _((char *));
-int	kill_file _((char *));
-int	my_mkdir _((char *, Mode_t));
-int	my_utime _((char *, struct utimbuf *));
-char *	rmsexpand _((char *, char *, char *, unsigned));
-char *	rmsexpand_ts _((char *, char *, char *, unsigned));
-char *	fileify_dirspec _((char *, char *));
-char *	fileify_dirspec_ts _((char *, char *));
-char *	pathify_dirspec _((char *, char *));
-char *	pathify_dirspec_ts _((char *, char *));
-char *	tounixspec _((char *, char *));
-char *	tounixspec_ts _((char *, char *));
-char *	tovmsspec _((char *, char *));
-char *	tovmsspec_ts _((char *, char *));
-char *	tounixpath _((char *, char *));
-char *	tounixpath_ts _((char *, char *));
-char *	tovmspath _((char *, char *));
-char *	tovmspath_ts _((char *, char *));
-void	vms_image_init _((int *, char ***));
-DIR *	opendir _((char *));
-struct dirent *	readdir _((DIR *));
-long	telldir _((DIR *));
-void	seekdir _((DIR *, long));
-void	closedir _((DIR *));
-void	vmsreaddirversions _((DIR *, int));
-struct tm *	my_gmtime _((const time_t *));
-struct tm *	my_localtime _((const time_t *));
-time_t	my_time _((time_t *));
+int	vmstrnenv (const char *, char *, unsigned long int, struct dsc$descriptor_s **, unsigned long int);
+int	my_trnlnm (const char *, char *, unsigned long int);
+char *	my_getenv (const char *, bool);
+char *	my_getenv_len (const char *, unsigned long *, bool);
+int	vmssetenv (char *, char *, struct dsc$descriptor_s **);
+char *	my_crypt (const char *, const char *);
+Pid_t	my_waitpid (Pid_t, int *, int);
+char *	my_gconvert (double, int, int, char *);
+int	do_rmdir (char *);
+int	kill_file (char *);
+int	my_mkdir (char *, Mode_t);
+int	my_utime (char *, struct utimbuf *);
+char *	rmsexpand (char *, char *, char *, unsigned);
+char *	rmsexpand_ts (char *, char *, char *, unsigned);
+char *	fileify_dirspec (char *, char *);
+char *	fileify_dirspec_ts (char *, char *);
+char *	pathify_dirspec (char *, char *);
+char *	pathify_dirspec_ts (char *, char *);
+char *	tounixspec (char *, char *);
+char *	tounixspec_ts (char *, char *);
+char *	tovmsspec (char *, char *);
+char *	tovmsspec_ts (char *, char *);
+char *	tounixpath (char *, char *);
+char *	tounixpath_ts (char *, char *);
+char *	tovmspath (char *, char *);
+char *	tovmspath_ts (char *, char *);
+void	vms_image_init (int *, char ***);
+DIR *	opendir (char *);
+struct dirent *	readdir (DIR *);
+long	telldir (DIR *);
+void	seekdir (DIR *, long);
+void	closedir (DIR *);
+void	vmsreaddirversions (DIR *, int);
+struct tm *	my_gmtime (const time_t *);
+struct tm *	my_localtime (const time_t *);
+time_t	my_time (time_t *);
 #ifdef HOMEGROWN_POSIX_SIGNALS
-int     my_sigemptyset _((sigset_t *));
-int     my_sigfillset  _((sigset_t *));
-int     my_sigaddset   _((sigset_t *, int));
-int     my_sigdelset   _((sigset_t *, int));
-int     my_sigismember _((sigset_t *, int));
-int     my_sigprocmask _((int, sigset_t *, sigset_t *));
+int     my_sigemptyset (sigset_t *);
+int     my_sigfillset  (sigset_t *);
+int     my_sigaddset   (sigset_t *, int);
+int     my_sigdelset   (sigset_t *, int);
+int     my_sigismember (sigset_t *, int);
+int     my_sigprocmask (int, sigset_t *, sigset_t *);
 #endif
-I32	cando_by_name _((I32, I32, char *));
-int	flex_fstat _((int, Stat_t *));
-int	flex_stat _((char *, Stat_t *));
-int	trim_unixpath _((char *, char*, int));
-int	my_vfork _(());
-bool	vms_do_aexec _((SV *, SV **, SV **));
-bool	vms_do_exec _((char *));
-unsigned long int	do_aspawn _((void *, void **, void **));
-unsigned long int	do_spawn _((char *));
-int	my_fwrite _((void *, size_t, size_t, FILE *));
-int	my_flush _((FILE *));
-struct passwd *	my_getpwnam _((char *name));
-struct passwd *	my_getpwuid _((Uid_t uid));
-struct passwd *	my_getpwent _(());
-void	my_endpwent _(());
-char *	my_getlogin _(());
-int	rmscopy _((char *, char *, int));
+I32	cando_by_name (I32, I32, char *);
+int	flex_fstat (int, Stat_t *);
+int	flex_stat (char *, Stat_t *);
+int	trim_unixpath (char *, char*, int);
+int	my_vfork ();
+bool	vms_do_aexec (SV *, SV **, SV **);
+bool	vms_do_exec (char *);
+unsigned long int	do_aspawn (void *, void **, void **);
+unsigned long int	do_spawn (char *);
+int	my_fwrite (void *, size_t, size_t, FILE *);
+int	my_flush (FILE *);
+struct passwd *	my_getpwnam (char *name);
+struct passwd *	my_getpwuid (Uid_t uid);
+struct passwd *	my_getpwent ();
+void	my_endpwent ();
+char *	my_getlogin ();
+int	rmscopy (char *, char *, int);
 typedef char __VMS_SEPYTOTORP__;
 /* prototype section end marker; `typedef' passes through cpp */
 

@@ -1,7 +1,7 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-static void xs_init _((void));
+static void xs_init (void);
 static PerlInterpreter *my_perl;
 
 int
@@ -81,8 +81,8 @@ main(int argc, char **argv, char **env)
 
 #ifdef INDIRECT_BGET_MACROS
     bs.data = fp;
-    bs.fgetc = (int(*) _((void*)))fgetc;
-    bs.fread = (int(*) _((char*,size_t,size_t,void*)))fread;
+    bs.fgetc = (int(*) (void*))fgetc;
+    bs.fread = (int(*) (char*,size_t,size_t,void*))fread;
     bs.freadpv = freadpv;
     byterun(bs);
 #else    
