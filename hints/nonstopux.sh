@@ -9,7 +9,7 @@ case "$cc" in
                 lddlflags='-shared'
                 ldflags=''
 		;;
-        '')
+        *)
                 cc="cc -Xa -Olimit 4096"
                 malloctype="void *"
 		;;
