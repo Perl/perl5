@@ -79,6 +79,26 @@ Version 5.005_60        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  3904] By: gsar                                  on 1999/08/02  20:30:23
+        Log: don't enable PERL_POLLUTE_MALLOC when EMBEDMYMALLOC is
+             in effect (from Spider Boardman <spider@leggy.zk3.dec.com>);
+             regen headers
+     Branch: perl
+	   ! embed.h embed.pl global.sym opcode.h perlapi.c
+____________________________________________________________________________
+[  3903] By: gsar                                  on 1999/08/02  20:26:07
+        Log: native int pack/unpack fixes (from Spider Boardman
+             <spider@leggy.zk3.dec.com>)
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[  3902] By: gsar                                  on 1999/08/02  20:24:41
+        Log: fix broken -DDEBUGGING_OPS (from Spider Boardman
+             <spider@leggy.zk3.dec.com>)
+     Branch: perl
+	   + opnames.h
+	   ! Changes MANIFEST opcode.pl perl.h
+____________________________________________________________________________
 [  3901] By: gsar                                  on 1999/08/02  18:51:18
         Log: integrate cfgperl contents
      Branch: perl
