@@ -2630,6 +2630,14 @@ ptrsize (ptrsize.U):
 	This variable contains the value of the PTRSIZE symbol, which
 	indicates to the C program how many bytes there are in a pointer.
 
+quadcase (quadtype.U):
+	This variable, if defined, encodes the type of a quad:
+	1 = int, 2 = long, 3 = long long, 4 = int64_t.
+
+quadtype (quadtype.U):
+	This variable defines Quad_t to be something like long, int, 
+	long long, int64_t, or whatever type is used for 64-bit integers.
+
 randbits (randfunc.U):
 	Indicates how many bits are produced by the function used to
 	generate normalized random numbers.
@@ -3090,6 +3098,11 @@ uniq (Loc.U):
 	full pathname (if any) of the uniq program.  After Configure runs,
 	the value is reset to a plain "uniq" and is not useful.
 
+uquadtype (quadtype.U):
+	This variable defines Uquad_t to be something like unsigned long,
+	unsigned int, unsigned long long, uint64_t, or whatever type is
+	used for 64-bit integers.
+
 use64bits (use64bits.U):
 	This variable conditionally defines the USE_64_BITS symbol,
 	and indicates that explicit 64-bit interfaces should be used
@@ -3107,6 +3120,10 @@ uselargefiles (uselfs.U):
 uselongdouble (uselongdbl.U):
 	This variable conditionally defines the USE_LONG_DOUBLE symbol,
 	and indicates that long doubles should be used when available.
+
+uselonglong (uselonglong.U):
+	This variable conditionally defines the USE_LONG_LONG symbol,
+	and indicates that long longs should be used when available.
 
 usemorebits (usemorebits.U):
 	This variable conditionally defines the USE_MORE_BITS symbol,

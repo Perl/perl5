@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Fri Oct 29 01:05:28 EET DST 1999
+ * Configuration time: Fri Oct 29 18:38:18 EET DST 1999
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -1886,7 +1886,9 @@
  *	This symbol is defined if this system has a stat structure declaring
  *	st_blksize and st_blocks.
  */
+#ifndef USE_STAT_BLOCKS
 #define USE_STAT_BLOCKS 	/**/
+#endif
 
 /* HAS_STRERROR:
  *	This symbol, if defined, indicates that the strerror routine is
@@ -2428,39 +2430,63 @@
  *	be used when available.  If not defined, the native default interfaces
  *	will be used (be they 32 or 64 bits).
  */
+#ifndef USE_64_BITS
 #define	USE_64_BITS		/**/
+#endif
 
 /* USE_LARGE_FILES:
  *	This symbol, if defined, indicates that large file support
  *	should be used when available.  The USE_64_BITS symbol will
  *	also be turned on if necessary.
  */
+#ifndef USE_LARGE_FILES
 /*#define	USE_LARGE_FILES		/ **/
+#endif
 
 /* USE_LONG_DOUBLE:
  *	This symbol, if defined, indicates that long doubles should
  *	be used when available.
  */
+#ifndef USE_LONG_DOUBLE
 /*#define	USE_LONG_DOUBLE		/ **/
+#endif
+
+/* USE_LONG_LONG:
+ *	This symbol, if defined, indicates that long longs should
+ *	be used when available.
+ */
+#ifndef USE_LONG_LONG
+/*#define	USE_LONG_LONG		/ **/
+#endif
+
+#ifndef USE_MORE_BITS
+/*#define	USE_MORE_BITS		/ **/
+#endif
 
 /* MULTIPLICITY:
  *	This symbol, if defined, indicates that Perl should
  *	be built to use multiplicity.
  */
+#ifndef MULTIPLICTY
 /*#define	MULTIPLICITY		/ **/
+#endif
 
 /* USE_PERLIO:
  *	This symbol, if defined, indicates that the PerlIO abstraction should
  *	be used throughout.  If not defined, stdio should be
  *	used in a fully backward compatible manner.
  */
+#ifndef USE_PERLIO
 /*#define	USE_PERLIO		/ **/
+#endif
 
 /* USE_SOCKS:
  *	This symbol, if defined, indicates that Perl should
  *	be built to use socks.
  */
+#ifndef USE_SOCKS
 /*#define	USE_SOCKS		/ **/
+#endif
 
 /* PERL_XS_APIVERSION:
  *	This variable contains the version of the oldest perl binary
@@ -2623,7 +2649,9 @@
  *	This symbol, if defined, indicates that Perl should
  *	be built to use the old draft POSIX threads API.
  */
+#ifndef USE_TTHREADS
 #define	USE_THREADS		/**/
+#endif
 /*#define	OLD_PTHREADS_API		/ **/
 
 /* Time_t:
@@ -2692,6 +2720,23 @@
  *	<sys/types.h> to get any typedef'ed information.
  */
 #define Pid_t pid_t		/* PID type */
+
+/* Quad_t:
+ *	This symbol holds the type used for 64-bit integers.
+ *	It can be int, long, long long, int64_t etc...
+ */
+/* QUADCASE:
+ *	This symbol, if defined, encodes the type of a quad:
+ *	1 = int, 2 = long, 3 = long long, 4 = int64_t.
+ */
+/* Uquad_t:
+ *	This symbol holds the type used for unsigned 64-bit integers.
+ *	It can be unsigned int, unsigned long, unsigned long long,
+ *	uint64_t etc...
+ */
+#define Quad_t long
+#define Uquad_t unsigned long
+#define QUADCASE 2
 
 /* Size_t:
  *	This symbol holds the type used to declare length parameters
