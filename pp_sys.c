@@ -742,6 +742,14 @@ PP(pp_binmode)
     PUTBACK;
     if (PerlIO_binmode(aTHX_ fp,IoTYPE(io),mode_from_discipline(discp),
                        (discp) ? SvPV_nolen(discp) : Nullch)) {
+	if (IoOFP(io) && IoOFP(io) != IoIFP(io)) {
+	     if (!PerlIO_binmode(aTHX_ IoOFP(io),IoTYPE(io),
+			mode_from_discipline(discp),
+                       (discp) ? SvPV_nolen(discp) : Nullch)) {
+		SPAGAIN;
+		RETPUSHUNDEF;
+	     }
+	}
 	SPAGAIN;
 	RETPUSHYES;
     }

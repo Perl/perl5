@@ -378,6 +378,7 @@ compose(arg)
 	}
 	uvS = uv;
     } /* for */
+    *d = '\0';
     SvCUR_set(dst, d - (U8*)SvPVX(dst));
     RETVAL = dst;
   OUTPUT:

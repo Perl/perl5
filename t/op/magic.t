@@ -302,7 +302,7 @@ else {
             ok(!$ps ||   # we allow that something goes wrong with the ps command
                $ps eq "x", 'altering $0 is effective (testing with `ps`)');
 	} else {
-	    skip("\$0 check only on Linux and FreeBSD") for 0,1;
+	    skip("\$0 check only on Linux and FreeBSD") for 0, 1;
 	}
 }
 

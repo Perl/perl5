@@ -104,12 +104,6 @@ sub B::PADOP::debug {
     printf "\top_padix\t\t%ld\n", $op->padix;
 }
 
-sub B::CVOP::debug {
-    my ($op) = @_;
-    $op->B::OP::debug();
-    printf "\top_cv\t\t0x%x\n", ${$op->cv};
-}
-
 sub B::NULL::debug {
     my ($sv) = @_;
     if ($$sv == ${sv_undef()}) {

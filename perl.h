@@ -4444,7 +4444,6 @@ extern void moncontrol(int);
 
    HAS_UALARM
    HAS_USLEEP
-   HAS_NANOSLEEP
 
    HAS_SETITIMER
    HAS_GETITIMER

@@ -61,7 +61,9 @@ MakeMaker.
 
 =over 4
 
-=item How do I keep my $VERSION up to date without resetting it manually?
+=item
+
+How do I keep my $VERSION up to date without resetting it manually?
 
 Often you want to manually set the $VERSION in the main module
 distribution because this is the version that everybody sees on CPAN
@@ -95,7 +97,9 @@ complicated.
     # must be all on one line or MakeMaker will get confused.
     $VERSION = do { my @r = (q$Revision$ =~ /\d+/g); sprintf "%d."."%03d" x $#r, @r };
 
-=item What's this F<META.yml> thing and how did it get in my F<MANIFEST>?!
+=item
+
+What's this F<META.yml> thing and how did it get in my F<MANIFEST>?!
 
 F<META.yml> is a module meta-data file pioneered by Module::Build and
 automatically generated as part of the 'distdir' target (and thus
@@ -109,7 +113,10 @@ To shut off its generation, pass the C<NO_META> flag to C<WriteMakefile()>.
 
 =over 4
 
-=item How to I prevent "object version X.XX does not match bootstrap parameter Y.YY" errors?
+=item
+
+How to I prevent "object version X.XX does not match bootstrap parameter Y.YY"
+errors?
 
 XS code is very sensitive to the module version number and will
 complain if the version number in your Perl module doesn't match.  If
@@ -124,7 +131,9 @@ WriteMakefile() arguments.
     depend => { '$(FIRST_MAKEFILE)' => '$(VERSION_FROM)' }
 
 
-=item How do I make two or more XS files coexist in the same directory?
+=item
+
+How do I make two or more XS files coexist in the same directory?
 
 Sometimes you need to have two and more XS files in the same package.
 One way to go is to put them into separate directories, but sometimes
