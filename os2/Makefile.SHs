@@ -97,7 +97,7 @@ perl.linkexp: perl.exports perl.map  os2/os2.sym
 # We link miniperl statically, since .DLL depends on $(DYNALOADER) 
 
 miniperl.map miniperl: $(obj) perl$(OBJ_EXT) miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT)
-	$(CC) $(LARGE) $(CLDFLAGS) -o miniperl miniperlmain$(OBJ_EXT) perl$(OBJ_EXT) `echo $(obj)|sed -e 's/\bop\./opmini./g'` $(libs) -Zmap -Zlinker /map/PM:VIO
+	$(CC) $(CLDFLAGS) -o miniperl miniperlmain$(OBJ_EXT) perl$(OBJ_EXT) `echo $(obj)|sed -e 's/\bop\./opmini./g'` $(libs) -Zmap -Zlinker /map/PM:VIO
 	@./miniperl -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
 
 depend: os2ish.h dlfcn.h os2thread.h os2.c
@@ -123,7 +123,7 @@ dlfcn.h: os2/dlfcn.h
 # This one is compiled OMF, so cannot fork():
 
 perl___: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
-	$(SHRPENV) $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o perl___ perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LIBPERL) `cat ext.libs` $(libs)
+	$(SHRPENV) $(CC) $(CLDFLAGS) $(CCDLFLAGS) -o perl___ perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LIBPERL) `cat ext.libs` $(libs)
 
 # This one is compiled -Zsys, so cannot do many things:
 
@@ -131,7 +131,7 @@ perl___: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
 SYS_CLDFLAGS = -Zexe -Zomf -Zmt -Zsys -Zstack 32000
 
 perl_sys: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
-	$(SHRPENV) $(CC) $(LARGE) $(SYS_CLDFLAGS) $(CCDLFLAGS) -o perl_sys perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LIBPERL) `cat ext.libs` $(libs)
+	$(SHRPENV) $(CC) $(SYS_CLDFLAGS) $(CCDLFLAGS) -o perl_sys perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LIBPERL) `cat ext.libs` $(libs)
 
 installcmd : 
 	perl -e 'die qq{Give the option INSTALLCMDDIR=... to make!} if $$ARGV[0] eq ""' $(INSTALLCMDDIR)
@@ -173,20 +173,20 @@ aout_perlmain.c: miniperlmain.c config.sh makefile $(static_ext_autoinit)
 	sh mv-if-diff tmp aout_perlmain.c
 
 miniperl_: $& miniperlmain$(AOUT_OBJ_EXT) $(AOUT_LIBPERL) opmini$(AOUT_OBJ_EXT)
-	$(CC) $(LARGE) $(AOUT_CLDFLAGS) $(CCDLFLAGS) -o miniperl_ miniperlmain$(AOUT_OBJ_EXT) opmini$(AOUT_OBJ_EXT) $(AOUT_LIBPERL) $(libs)
+	$(CC) $(AOUT_CLDFLAGS) $(CCDLFLAGS) -o miniperl_ miniperlmain$(AOUT_OBJ_EXT) opmini$(AOUT_OBJ_EXT) $(AOUT_LIBPERL) $(libs)
 
 perl_: $& aout_perlmain$(AOUT_OBJ_EXT) $(AOUT_LIBPERL) $(AOUT_DYNALOADER) $(aout_static_ext) ext.libs
-	$(CC) $(LARGE) $(AOUT_CLDFLAGS) $(CCDLFLAGS) -o perl_ aout_perlmain$(AOUT_OBJ_EXT) $(AOUT_DYNALOADER) $(aout_static_ext) $(AOUT_LIBPERL) `cat ext.libs` $(libs)
+	$(CC) $(AOUT_CLDFLAGS) $(CCDLFLAGS) -o perl_ aout_perlmain$(AOUT_OBJ_EXT) $(AOUT_DYNALOADER) $(aout_static_ext) $(AOUT_LIBPERL) `cat ext.libs` $(libs)
 
 perl : perl__ perl___
 
 perl__: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
-	$(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o perl__ perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LIBPERL) `cat ext.libs` $(libs) -Zlinker /PM:PM
+	$(CC) $(CLDFLAGS) $(CCDLFLAGS) -o perl__ perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LIBPERL) `cat ext.libs` $(libs) -Zlinker /PM:PM
 
 # Forking dynamically loaded perl:
 
 perl: $& perlmain$(AOUT_OBJ_EXT) $(AOUT_DYNALOADER_OBJ) $(aout_static_ext_dll) $(AOUT_LIBPERL_DLL) ext.libs
-	$(CC) $(LARGE) $(AOUT_CLDFLAGS_DLL) $(CCDLFLAGS) -o perl perlmain$(AOUT_OBJ_EXT) $(AOUT_DYNALOADER_OBJ) $(aout_static_ext_dll) $(AOUT_LIBPERL_DLL) `cat ext.libs` $(libs)
+	$(CC) $(AOUT_CLDFLAGS_DLL) $(CCDLFLAGS) -o perl perlmain$(AOUT_OBJ_EXT) $(AOUT_DYNALOADER_OBJ) $(aout_static_ext_dll) $(AOUT_LIBPERL_DLL) `cat ext.libs` $(libs)
 
 clean: aout_clean
 

@@ -1633,7 +1633,7 @@ win32_uname(struct utsname *name)
 	char *arch;
 	GetSystemInfo(&info);
 
-#if defined(__BORLANDC__) || defined(__MINGW32__)
+#if (defined(__BORLANDC__)&&(__BORLANDC__<=0x520)) || defined(__MINGW32__)
 	switch (info.u.s.wProcessorArchitecture) {
 #else
 	switch (info.wProcessorArchitecture) {
@@ -4143,7 +4143,7 @@ Perl_sys_intern_dup(pTHX_ struct interp_intern *src, struct interp_intern *dst)
     Newz(1313, dst->children, 1, child_tab);
     dst->pseudo_id		= 0;
     Newz(1313, dst->pseudo_children, 1, child_tab);
-    dst->thr_intern.Winit_socktype = src->thr_intern.Winit_socktype;
+    dst->thr_intern.Winit_socktype = 0;
 }
 #  endif /* USE_ITHREADS */
 #endif /* HAVE_INTERP_INTERN */

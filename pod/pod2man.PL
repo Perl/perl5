@@ -36,7 +36,7 @@ $Config{startperl}
 print OUT <<'!NO!SUBS!';
 
 # pod2man -- Convert POD data to formatted *roff input.
-# $Id: pod2man.PL,v 1.2 2000/03/16 21:08:23 eagle Exp $
+# $Id: pod2man.PL,v 1.3 2000/09/03 09:20:52 eagle Exp $
 #
 # Copyright 1999, 2000 by Russ Allbery <rra@stanford.edu>
 #
@@ -63,7 +63,8 @@ my %options;
 Getopt::Long::config ('bundling_override');
 GetOptions (\%options, 'section|s=s', 'release|r=s', 'center|c=s',
             'date|d=s', 'fixed=s', 'fixedbold=s', 'fixeditalic=s',
-            'fixedbolditalic=s', 'official|o', 'lax|l', 'help|h') or exit 1;
+            'fixedbolditalic=s', 'official|o', 'quotes|q=s', 'lax|l',
+            'help|h') or exit 1;
 pod2usage (0) if $options{help};
 
 # Official sets --center, but don't override things explicitly set.
@@ -86,8 +87,8 @@ pod2man - Convert POD data to formatted *roff input
 pod2man [B<--section>=I<manext>] [B<--release>=I<version>]
 [B<--center>=I<string>] [B<--date>=I<string>] [B<--fixed>=I<font>]
 [B<--fixedbold>=I<font>] [B<--fixeditalic>=I<font>]
-[B<--fixedbolditalic>=I<font>] [B<--official>] [B<--lax>] [I<input>
-[I<output>]]
+[B<--fixedbolditalic>=I<font>] [B<--official>] [B<--lax>]
+[B<--quotes>=I<quotes>] [I<input> [I<output>]]
 
 pod2man B<--help>
 
@@ -172,6 +173,19 @@ POD checking functionality is not yet implemented in Pod::Man.
 
 Set the default header to indicate that this page is part of the standard
 Perl release, if B<--center> is not also given.
+
+=item B<-q> I<quotes>, B<--quotes>=I<quotes>
+
+Sets the quote marks used to surround CE<lt>> text to I<quotes>.  If
+I<quotes> is a single character, it is used as both the left and right
+quote; if I<quotes> is two characters, the first character is used as the
+left quote and the second as the right quoted; and if I<quotes> is four
+characters, the first two are used as the left quote and the second two as
+the right quote.
+
+I<quotes> may also be set to the special value C<none>, in which case no
+quote marks are added around CE<lt>> text (but the font is still changed for
+troff output).
 
 =item B<-r>, B<--release>
 

@@ -75,7 +75,8 @@ my %options;
 $options{sentence} = 0;
 Getopt::Long::config ('bundling');
 GetOptions (\%options, 'alt|a', 'color|c', 'help|h', 'indent|i=i',
-            'loose|l', 'sentence|s', 'termcap|t', 'width|w=i') or exit 1;
+            'loose|l', 'quotes|q=s', 'sentence|s', 'termcap|t',
+            'width|w=i') or exit 1;
 pod2usage (1) if $options{help};
 
 # Figure out what formatter we're going to use.  -c overrides -t.
@@ -103,7 +104,8 @@ pod2text - Convert POD data to formatted ASCII text
 
 =head1 SYNOPSIS
 
-pod2text [B<-aclst>] [B<-i> I<indent>] [B<-w> I<width>] [I<input> [I<output>]]
+pod2text [B<-aclst>] [B<-i> I<indent>] [B<-q> I<quotes>] [B<-w> I<width>]
+[I<input> [I<output>]]
 
 pod2text B<-h>
 
@@ -147,6 +149,18 @@ Print a blank line after a C<=head1> heading.  Normally, no blank line is
 printed after C<=head1>, although one is still printed after C<=head2>,
 because this is the expected formatting for manual pages; if you're
 formatting arbitrary text documents, using this option is recommended.
+
+=item B<-q> I<quotes>, B<--quotes>=I<quotes>
+
+Sets the quote marks used to surround CE<lt>> text to I<quotes>.  If
+I<quotes> is a single character, it is used as both the left and right
+quote; if I<quotes> is two characters, the first character is used as the
+left quote and the second as the right quoted; and if I<quotes> is four
+characters, the first two are used as the left quote and the second two as
+the right quote.
+
+I<quotes> may also be set to the special value C<none>, in which case no
+quote marks are added around CE<lt>> text.
 
 =item B<-s>, B<--sentence>
 

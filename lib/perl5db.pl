@@ -617,7 +617,7 @@ EOP
 			    next CMD;
 			} 
 		    }
-		    $cmd =~ /^q$/ && ($exiting = 1) && exit $?;
+                   $cmd =~ /^q$/ && ($fall_off_end = 1) && exit $?;
 		    $cmd =~ /^h$/ && do {
 			print_help($help);
 			next CMD; };
@@ -1430,7 +1430,7 @@ EOP
 		$piped= "";
 	    }
 	}			# CMD:
-	$exiting = 1 unless defined $cmd;
+       $fall_off_end = 1 unless defined $cmd; # Emulate `q' on EOF
 	foreach $evalarg (@$post) {
 	  &eval;
 	}
@@ -2684,10 +2684,11 @@ sub end_report {
 }
 
 END {
-  $finished = $inhibit_exit;	# So that some keys may be disabled.
+  $finished = 1 if $inhibit_exit;      # So that some keys may be disabled.
+  $fall_off_end = 1 unless $inhibit_exit;
   # Do not stop in at_exit() and destructors on exit:
-  $DB::single = !$exiting && !$runnonstop;
-  DB::fake::at_exit() unless $exiting or $runnonstop;
+  $DB::single = !$fall_off_end && !$runnonstop;
+  DB::fake::at_exit() unless $fall_off_end or $runnonstop;
 }
 
 package DB::fake;

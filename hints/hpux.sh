@@ -110,7 +110,7 @@ cc=${cc:-cc}
 case `$cc -v 2>&1`"" in
 *gcc*) ccisgcc="$define" ;;
 *) ccisgcc=''
-   ccversion=`which cc | xargs what | grep Compiler | awk '{print $2}'`
+   ccversion=`which cc | xargs what | awk '/Compiler/{print $2}'`
    ;;
 esac
 

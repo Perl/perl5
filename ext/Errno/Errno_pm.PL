@@ -102,7 +102,7 @@ sub get_files {
 	    $pat = '^/\*\s+(.+)\s+\d+\s*:\s+\*/';
 	}
 	else {
-	    $pat = '^#(?:line)?\s*\d+\s+"([^"]+)"';
+	    $pat = '^#\s*(?:line)?\s*\d+\s+"([^"]+)"';
 	}
 	while(<CPPO>) {
 	    if ($^O eq 'os2' or $^O eq 'MSWin32') {

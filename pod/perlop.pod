@@ -851,9 +851,11 @@ string also resets the search position.
 
 You can intermix C<m//g> matches with C<m/\G.../g>, where C<\G> is a
 zero-width assertion that matches the exact position where the previous
-C<m//g>, if any, left off.  The C<\G> assertion is not supported without
-the C</g> modifier.  (Currently, without C</g>, C<\G> behaves just like
-C<\A>, but that's accidental and may change in the future.)
+C<m//g>, if any, left off.  Without the C</g> modifier, the C<\G> assertion
+still anchors at pos(), but the match is of course only attempted once.
+Using C<\G> without C</g> on a target string that has not previously had a
+C</g> match applied to it is the same as using the C<\A> assertion to match
+the beginning of the string.
 
 Examples:
 
@@ -861,7 +863,7 @@ Examples:
     ($one,$five,$fifteen) = (`uptime` =~ /(\d+\.\d+)/g);
 
     # scalar context
-    $/ = ""; $* = 1;  # $* deprecated in modern perls
+    $/ = "";
     while (defined($paragraph = <>)) {
 	while ($paragraph =~ /[a-z]['")]*[.!?]+['")]*\s/g) {
 	    $sentences++;
@@ -879,6 +881,7 @@ Examples:
         print "3: '";
         print $1 while /(p)/gc; print "', pos=", pos, "\n";
     }
+    print "Final: '$1', pos=",pos,"\n" if /\G(.)/;
 
 The last example should print:
 
@@ -888,6 +891,13 @@ The last example should print:
     1: '', pos=7
     2: 'q', pos=8
     3: '', pos=8
+    Final: 'q', pos=8
+
+Notice that the final match matched C<q> instead of C<p>, which a match
+without the C<\G> anchor would have done. Also note that the final match
+did not update C<pos> -- C<pos> is only updated on a C</g> match. If the
+final match did indeed match C<p>, it's a good bet that you're running an
+older (pre-5.6.0) Perl.
 
 A useful idiom for C<lex>-like scanners is C</\G.../gc>.  You can
 combine several regexps like this to process a string part-by-part,

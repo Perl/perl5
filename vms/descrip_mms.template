@@ -218,6 +218,7 @@ NOOP = continue
 # are built using these macros should depend on $(MINIPERL_EXE)
 MINIPERL_EXE = Sys$Disk:[]miniperl$(E)
 MINIPERL = MCR $(MINIPERL_EXE) "-I[.lib]"
+MINIPERLQ = MCR $(MINIPERL_EXE) ""-I[.lib]""
 XSUBPP = $(MINIPERL) "-I[.ext.re]" [.lib.extutils]xsubpp -noprototypes
 # Macro to invoke a preexisting copy of Perl.  This is used to regenerate
 # some header files when rebuilding Perl, but premade versions are provided
@@ -327,17 +328,19 @@ CRTLOPTS =,$(CRTL)/Options
 .endif
 
 # Modules which must be installed before we can build extensions
-LIBPREREQ = $(ARCHDIR)Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm [.lib]XSLoader.pm [.lib]lib.pm [.lib]vmsish.pm [.lib.ExtUtils]XSSymSet.pm $(ARCHDIR)vmspipe.com
+LIBPREREQ = $(ARCHDIR)Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm [.lib]XSLoader.pm [.lib]lib.pm [.lib]vmsish.pm [.lib.ExtUtils]XSSymSet.pm $(ARCHDIR)vmspipe.com [.lib]re.pm
 
 utils1 = [.lib.pod]perldoc.com [.lib.ExtUtils]Miniperl.pm [.utils]c2ph.com [.utils]h2ph.com [.utils]h2xs.com [.lib]perlbug.com [.lib]perlcc.com [.utils]dprofpp.com
 utils2 = [.lib]splain.com [.utils]pl2pm.com
 
 .ifdef NOX2P
 all : base extras archcorefiles preplibrary perlpods
-	@ $(NOOP)
+	@ write sys$output " "
+	@ write sys$output " Everything is up to date. '$(MMS)$(MMSQUALIFIERS) test' to run test suite."
 .else
 all : base extras x2p archcorefiles preplibrary perlpods
-	@ $(NOOP)
+	@ write sys$output " "
+	@ write sys$output " Everything is up to date. '$(MMS)$(MMSQUALIFIERS) test' to run test suite."
 .endif
 base : miniperl perl
 	@ $(NOOP)
@@ -382,8 +385,11 @@ perlpods : $(pod)
 archcorefiles : $(ac) $(acth) $(ARCHAUTO)time.stamp
 	@ $(NOOP)
 
+[.lib]re.pm  : [.ext.re]re.pm
+	copy/log $(MMS$SOURCE) $(MMS$TARGET)
+
 vmspipe.com : [.vms]vmspipe.com
-    copy/log $(MMS$SOURCE) $(MMS$TARGET)
+	copy/log $(MMS$SOURCE) $(MMS$TARGET)
 
 miniperl : $(DBG)miniperl$(E)  vmspipe.com
 	@ Continue
@@ -887,6 +893,7 @@ perly$(O) : perly.c, perly.h, $(h)
 
 test : all [.t.lib]vmsfspec.t [.t.lib]vmsish.t
 	- @[.VMS]Test.Com "$(E)" "$(__DEBUG__)"
+	@ $(MINIPERL) -e "print ""Ran tests"";" > [.t]rantests.
 
 # install ought not need a source, but it doesn't work if one's not
 # there. Go figure...
@@ -1168,6 +1175,25 @@ $(CRTL) : $(MAKEFILE)
 	@ @[.vms]genopt "$(CRTL)/Write" "|" "$(LIBS1)|$(FULLLIBS2)|$(SOCKLIB)"
 
 
+ok : $(utils)
+	$(MINIPERL) lib/perlbug.com -ok -s "(UNINSTALLED)"
+
+okfile : $(utils)
+	$(MINIPERL) lib/perlbug.com -ok -s "(UNINSTALLED)" "-F" perl.ok
+
+nok : $(utils)
+	@ write sys$output " "
+	@ write sys$output " Please type the command:"
+	@ write sys$output " "
+	@ write sys$output "$(MINIPERLQ) lib/perlbug.com -nok -s ""(UNINSTALLED)"""
+
+nokfile : $(utils)
+	@ write sys$output " "
+	@ write sys$output " Please type the command:"
+	@ write sys$output " "
+	@ write sys$output "$(MINIPERLQ) lib/perlbug.com -nok -s ""(UNINSTALLED)"" ""-F"" perl.nok"
+
+
 cleanlis :
 	- If F$Search("*.Lis").nes."" Then Delete/NoConfirm/Log *.Lis;*
 	- If F$Search("*.CPP").nes."" Then Delete/NoConfirm/Log *.CPP;*
@@ -1262,6 +1288,7 @@ realclean : clean
 	- If F$Search("[.t.lib]vms*.t").nes."" Then Delete/NoConfirm/Log [.t.lib]vms*.t;*
 	- If F$Search("[...]*$(E)").nes."" Then Delete/NoConfirm/Log [...]*$(E);*
 	- If F$Search("[.vms]Perl_Setup.Com").nes."" Then Delete/NoConfirm/Log [.vms]Perl_Setup.Com;*
+	- If F$Search("[.t]rantests.").nes."" Then Delete/NoConfirm/Log [.t]rantests.;*
 
 cleansrc : clean
 !GROK!THIS!

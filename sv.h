@@ -442,6 +442,15 @@ Unsets the IV status of an SV.
 =for apidoc Am|void|SvIOK_only|SV* sv
 Tells an SV that it is an integer and disables all other OK bits.
 
+=for apidoc Am|void|SvIOK_only_UV|SV* sv
+Tells and SV that it is an unsigned integer and disables all other OK bits.
+
+=for apidoc Am|void|SvIOK_UV|SV* sv
+Returns a boolean indicating whether the SV contains an unsigned integer.
+
+=for apidoc Am|void|SvIOK_notUV|SV* sv
+Returns a boolean indicating whether the SV contains an signed integer.
+
 =for apidoc Am|bool|SvNOK|SV* sv
 Returns a boolean indicating whether the SV contains a double.
 
@@ -565,6 +574,23 @@ Set the length of the string which is in the SV.  See C<SvCUR>.
 #define SvNOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_NOK|SVp_NOK))
 #define SvNOK_only(sv)		((void)SvOK_off(sv), \
 				    SvFLAGS(sv) |= (SVf_NOK|SVp_NOK))
+
+/*
+=for apidoc Am|void|SvUTF8|SV* sv
+Returns a boolean indicating whether the SV contains UTF-8 encoded data.
+
+=for apidoc Am|void|SvUTF8_on|SV *sv
+Tells an SV that it is a string and encoded in UTF8.  Do not use frivolously.
+
+=for apidoc Am|void|SvUTF8_off|SV *sv
+Unsets the UTF8 status of an SV.
+
+=for apidoc Am|void|SvPOK_only_UTF8|SV* sv
+Tells an SV that it is a UTF8 string (do not use frivolously)
+and disables all other OK bits.
+  
+=cut
+ */
 
 #define SvUTF8(sv)		(SvFLAGS(sv) & SVf_UTF8)
 #define SvUTF8_on(sv)		(SvFLAGS(sv) |= (SVf_UTF8))

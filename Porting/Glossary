@@ -174,8 +174,8 @@ cat (Loc.U):
 cc (cc.U):
 	This variable holds the name of a command to execute a C compiler which
 	can resolve multiple global references that happen to have the same
-	name.  Usual values are 'cc', 'Mcc', 'cc -M', and 'gcc'.
-	Fervent ANSI compilers may be called 'c89'. AIX has xlc.
+	name.  Usual values are 'cc' and 'gcc'.
+	Fervent ANSI compilers may be called 'c89'.  AIX has xlc.
 
 cccdlflags (dlsrc.U):
 	This variable contains any special flags that might need to be
@@ -1913,12 +1913,6 @@ hostcat (nis.U):
 	On some systems, such as os390, there may be no equivalent
 	command, in which case this variable is unset.
 
-huge (models.U):
-	This variable contains a flag which will tell the C compiler and loader
-	to produce a program running with a huge memory model.  If the
-	huge model is not supported, contains the flag to produce large
-	model programs.  It is up to the Makefile to use this.
-
 i16size (perlxv.U):
 	This variable is the size of an I16 in bytes.
 
@@ -2432,11 +2426,6 @@ ksh (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is a plain '' and is not useful.
 
-large (models.U):
-	This variable contains a flag which will tell the C compiler and loader
-	to produce a program running with a large memory model.  It is up to
-	the Makefile to use this.
-
 ld (dlsrc.U):
 	This variable indicates the program to be used to link
 	libraries for dynamic loading.  On some systems, it is 'ld'.
@@ -2660,12 +2649,6 @@ Mcc (Loc.U):
 	full pathname (if any) of the Mcc program.  After Configure runs,
 	the value is reset to a plain "Mcc" and is not useful.
 
-medium (models.U):
-	This variable contains a flag which will tell the C compiler and loader
-	to produce a program running with a medium memory model.  If the
-	medium model is not supported, contains the flag to produce large
-	model programs.  It is up to the Makefile to use this.
-
 mips_type (usrinc.U):
 	This variable holds the environment type for the mips system.
 	Possible values are "BSD 4.3" and "System V".
@@ -2679,11 +2662,6 @@ mmaptype (d_mmap.U):
 	This symbol contains the type of pointer returned by mmap()
 	(and simultaneously the type of the first argument).
 	It can be 'void *' or 'caddr_t'.
-
-models (models.U):
-	This variable contains the list of memory models supported by this
-	system.  Possible component values are none, split, unsplit, small,
-	medium, large, and huge.  The component values are space separated.
 
 modetype (modetype.U):
 	This variable defines modetype to be something like mode_t, 
@@ -3230,11 +3208,6 @@ smail (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is a plain '' and is not useful.
 
-small (models.U):
-	This variable contains a flag which will tell the C compiler and loader
-	to produce a program running with a small memory model.  It is up to
-	the Makefile to use this.
-
 so (so.U):
 	This variable holds the extension used to identify shared libraries
 	(also known as shared objects) on the system. Usually set to 'so'.
@@ -3263,12 +3236,6 @@ spackage (package.U):
 spitshell (spitshell.U):
 	This variable contains the command necessary to spit out a runnable
 	shell on this system.  It is either cat or a grep '-v' for # comments.
-
-split (models.U):
-	This variable contains a flag which will tell the C compiler and loader
-	to produce a program that will run in separate I and D space, for those
-	machines that support separation of instruction and data space.  It is
-	up to the Makefile to use this.
 
 sPRId64 (quadfio.U):
 	This variable, if defined, contains the string used by stdio to

@@ -106,7 +106,7 @@ sub begin_input {
 sub podinc2plaintext( $ $ ) {
     my ($infile, $outfile) = @_;
     local $_;
-    my $text_parser = $MYPKG->new;
+    my $text_parser = $MYPKG->new(quotes => "`'");
     $text_parser->parse_from_file($infile, $outfile);
 }
 

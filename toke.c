@@ -209,10 +209,8 @@ S_no_op(pTHX_ char *what, char *s)
 
     if (!s)
 	s = oldbp;
-    else {
-	assert(s >= oldbp);
+    else
 	PL_bufptr = s;
-    }
     yywarn(Perl_form(aTHX_ "%s found where operator expected", what));
     if (is_first)
 	Perl_warn(aTHX_ "\t(Missing semicolon on previous line?)\n");
@@ -223,8 +221,10 @@ S_no_op(pTHX_ char *what, char *s)
 	    Perl_warn(aTHX_ "\t(Do you need to predeclare %.*s?)\n",
 		t - PL_oldoldbufptr, PL_oldoldbufptr);
     }
-    else
+    else {
+	assert(s >= oldbp);
 	Perl_warn(aTHX_ "\t(Missing operator before %.*s?)\n", s - oldbp, oldbp);
+    }
     PL_bufptr = oldbp;
 }
 
@@ -5078,12 +5078,12 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	    if (strEQ(d,"cos"))			return -KEY_cos;
 	    break;
 	case 4:
-	    if (strEQ(d,"chop"))		return KEY_chop;
+	    if (strEQ(d,"chop"))		return -KEY_chop;
 	    break;
 	case 5:
 	    if (strEQ(d,"close"))		return -KEY_close;
 	    if (strEQ(d,"chdir"))		return -KEY_chdir;
-	    if (strEQ(d,"chomp"))		return KEY_chomp;
+	    if (strEQ(d,"chomp"))		return -KEY_chomp;
 	    if (strEQ(d,"chmod"))		return -KEY_chmod;
 	    if (strEQ(d,"chown"))		return -KEY_chown;
 	    if (strEQ(d,"crypt"))		return -KEY_crypt;

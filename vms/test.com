@@ -171,7 +171,7 @@ while ($test = shift) {
 	} else {
 	    $switch = '';
 	}
-	open(results,"\$ MCR Sys\$Disk:[]Perl. \"-I[-.lib]\" $switch $test |") || (print "can't run.\n");
+	open(results,"\$ MCR Sys\$Disk:[]Perl. \"-I[-.lib]\" $switch $test 2>&1|") || (print "can't run.\n");
     $ok = 0;
     $next = 0;
     $pending_not = 0;

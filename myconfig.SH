@@ -37,7 +37,9 @@ Summary of my $package (revision $baserev version $PERL_VERSION subversion $PERL
     useperlio=$useperlio d_sfio=$d_sfio uselargefiles=$uselargefiles usesocks=$usesocks
     use64bitint=$use64bitint use64bitall=$use64bitall uselongdouble=$uselongdouble
   Compiler:
-    cc='$cc', ccflags ='$ccflags', optimize='$optimize', cppflags='$cppflags'
+    cc='$cc', ccflags ='$ccflags',
+    optimize='$optimize',
+    cppflags='$cppflags'
     ccversion='$ccversion', gccversion='$gccversion', gccosandvers='$gccosandvers'
     intsize=$intsize, longsize=$longsize, ptrsize=$ptrsize, doublesize=$doublesize, byteorder=$byteorder
     d_longlong=$d_longlong, longlongsize=$longlongsize, d_longdbl=$d_longdbl, longdblsize=$longdblsize

@@ -1890,6 +1890,7 @@ $(OBJECT) : $(PERL_INC)iperlsys.h
 # We do NOT just update config.h because that is not sufficient.
 # An out of date config.h is not fatal but complains loudly!
 $(PERL_INC)config.h : $(PERL_SRC)config.sh
+	$(NOOP)
 
 $(PERL_ARCHLIB)Config.pm : $(PERL_SRC)config.sh
 	$(NOECHO) Write Sys$Error "$(PERL_ARCHLIB)Config.pm may be out of date with config.h or genconfig.pl"

@@ -157,20 +157,10 @@ C<(?:\PM\pM*)>.
 
 =item *
 
-The C<tr///> operator translates characters instead of bytes.  It can also
-be forced to translate between 8-bit codes and UTF-8.  For instance, if you
-know your input in Latin-1, you can say:
-
-    while (<>) {
-	tr/\0-\xff//CU;		# latin1 char to utf8
-	...
-    }
-
-Similarly you could translate your output with
-
-    tr/\0-\x{ff}//UC;		# utf8 to latin1 char
-
-No, C<s///> doesn't take /U or /C (yet?).
+The C<tr///> operator translates characters instead of bytes.  Note
+that the C<tr///CU> functionality has been removed, as the interface
+was a mistake.  For similar functionality see pack('U0', ...) and
+pack('C0', ...).
 
 =item *
 

@@ -1509,10 +1509,10 @@ OUTPUT code fragments should be used to map a given C type to a Perl value.
 The section labels C<TYPEMAP>, C<INPUT>, or C<OUTPUT> must begin
 in the first column on a line by themselves, and must be in uppercase.
 
-The default typemap in the C<ext> directory of the Perl source contains many
-useful types which can be used by Perl extensions.  Some extensions define
-additional typemaps which they keep in their own directory.  These
-additional typemaps may reference INPUT and OUTPUT maps in the main
+The default typemap in the C<lib/ExtUtils> directory of the Perl source
+contains many useful types which can be used by Perl extensions.  Some
+extensions define additional typemaps which they keep in their own directory.
+These additional typemaps may reference INPUT and OUTPUT maps in the main
 typemap.  The B<xsubpp> compiler will allow the extension's own typemap to
 override any mappings which are in the default typemap.
 

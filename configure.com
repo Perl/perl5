@@ -743,7 +743,7 @@ $ sharpbang = "$ "
 $!: figure out how to guarantee sh startup !sfn
 $!: find out where common programs are     !sfn
 $!loclist="awk/cat/comm/cp/echo/expr/find/grep/ln/ls/mkdir/rm/sed/sort/touch/tr/uniq"
-$!trylist="Mcc/byacc/cpp/csh/date/egrep/less/line/more/nroff/perl/pg/sendmail/test/uname"
+$!trylist="byacc/cpp/csh/date/egrep/less/line/more/nroff/perl/pg/sendmail/test/uname"
 $! echo "I don't know where '$file' is, and my life depends on it."
 $! echo "Go find a public domain implementation or fix your PATH setting!"
 $! echo ""
@@ -2491,8 +2491,17 @@ $ make = F$EDIT(build,"UPCASE")
 $!
 $!: locate the preferred pager for this system
 $!pagers = "most|more|less|type/page"
-$!rp="What pager is used on your system? [''dflt'] "
-$ pager="most"
+$ dflt = "type/page"
+$! assume that the presence of a most symbol indicates the presence
+$! of the pager.
+$ IF F$TYPE(most) .EQS. "STRING" THEN dflt = "most"
+$ IF F$TYPE(pager) .EQS. "STRING" THEN dflt = pager
+$ rp="What pager is used on your system? [''dflt'] "
+$ GOSUB myread
+$ IF (ans .EQS. "") 
+$ THEN pager = dflt
+$ ELSE pager = ans
+$ ENDIF
 $!
 $! update [.vms]config.vms here
 $!
@@ -2699,6 +2708,10 @@ $ ELSE
 $   libc=" "
 $ ENDIF
 $!
+$! perllibs should be libs with all non-core libs (such as gdbm) removed.
+$!
+$ perllibs=libs
+$!
 $! Are we 64 bit?
 $!
 $ IF use64bitint .OR. use64bitint .EQS. "define"
@@ -2730,6 +2743,7 @@ $   quadtype = "long long"
 $   uquadtype = "unsigned long long"
 $   quadkind  = "QUAD_IS_LONG_LONG"
 $   d_frexpl = "define"
+$   d_isnan = "define"
 $   d_isnanl = "define"
 $   d_modfl = "define"
 $ ELSE
@@ -2761,6 +2775,7 @@ $   quadtype = "long"
 $   uquadtype = "unsigned long"
 $   quadkind  = "QUAD_IS_LONG"
 $   d_frexpl = "undef"
+$   d_isnan = "undef"
 $   d_isnanl = "undef"
 $   d_modfl = "undef"
 $ ENDIF
@@ -4747,7 +4762,7 @@ $ WC "d_index='" + d_index + "'"
 $ WC "d_inetaton='undef'"
 $ WC "d_int64_t='" + d_int64_t + "'"
 $ WC "d_isascii='define'"
-$ WC "d_isnan='define'"
+$ WC "d_isnan='" + d_isnan + "'"
 $ WC "d_isnanl='" + d_isnanl + "'"
 $ WC "d_killpg='undef'"
 $ WC "d_lchown='undef'"
@@ -5095,6 +5110,7 @@ $ WC "patchlevel='" + patchlevel + "'"
 $ WC "path_sep='|'"
 $ WC "perl_root='" + perl_root + "'" ! VMS specific $trnlnm()
 $ WC "perladmin='" + perladmin + "'"
+$ WC "perllibs='" + perllibs + "'"
 $ WC "pgflquota='" + pgflquota + "'"
 $ WC "pidtype='" + pidtype + "'"
 $ WC "pm_apiversion='" + version + "'"
