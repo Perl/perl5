@@ -1798,15 +1798,7 @@ Say C<kill -l> in your shell to see the valid signal names on your system.
 
 =item no UTC offset information; assuming local time is UTC
 
-(S) A warning peculiar to VMS.  Per was unable to find the local
-timezone offset, so it's assuming that local system time is equivalent
-to UTC.  If it's not, define the logical name F<SYS$TIMEZONE_DIFFERENTIAL>
-to translate to the number of seconds which need to be added to UTC to
-get local time.
-
-=item no UTC offset information; assuming local time is UTC
-
-(S) A warning peculiar to VMS.  Per was unable to find the local
+(S) A warning peculiar to VMS.  Perl was unable to find the local
 timezone offset, so it's assuming that local system time is equivalent
 to UTC.  If it's not, define the logical name F<SYS$TIMEZONE_DIFFERENTIAL>
 to translate to the number of seconds which need to be added to UTC to

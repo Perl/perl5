@@ -4692,7 +4692,7 @@ PP(pp_pack)
 		{
 		    char   buf[1 + sizeof(UV)];
 		    char  *in = buf + sizeof(buf);
-		    UV     auv = U_V(adouble);;
+		    UV     auv = U_V(adouble);
 
 		    do {
 			*--in = (auv & 0x7f) | 0x80;

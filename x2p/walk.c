@@ -1292,7 +1292,7 @@ sub Pick {\n\
 	if (len > 0)
 	    tmpstr = walk(1,level,ops[node+1].ival,&numarg,P_MIN);
 	else
-	    tmpstr = str_new(0);;
+	    tmpstr = str_new(0);
 	if (!tmpstr->str_ptr || !*tmpstr->str_ptr) {
 	    if (lval_field) {
 		t = saw_OFS ? "$," : "' '";
@@ -1417,7 +1417,7 @@ sub Pick {\n\
 	str_scat(str,fstr=walk(1,level,ops[node+1].ival,&numarg,P_MIN));
 	str_free(fstr);
 	if (str->str_ptr[str->str_cur - 1] == '\n')
-	    --str->str_cur;;
+	    --str->str_cur;
 	str_cat(str," while (");
 	str_scat(str,fstr=walk(0,level,ops[node+2].ival,&numarg,P_MIN));
 	str_free(fstr);

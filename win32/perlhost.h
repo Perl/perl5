@@ -593,9 +593,10 @@ public:
 	}
 	if (0 == dwLen) {
 	    sMsg = (char*)LocalAlloc(0, 64/**sizeof(TCHAR)*/);
-	    dwLen = sprintf(sMsg,
-			"Unknown error #0x%lX (lookup 0x%lX)",
-			dwErr, GetLastError());
+	    if (sMsg)
+		dwLen = sprintf(sMsg,
+			    "Unknown error #0x%lX (lookup 0x%lX)",
+			    dwErr, GetLastError());
 	}
     };
     virtual void FreeBuf(char* sMsg)

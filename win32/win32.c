@@ -1716,12 +1716,15 @@ win32_str_os_error(void *sv, DWORD dwErr)
     }
     if (0 == dwLen) {
 	sMsg = (char*)LocalAlloc(0, 64/**sizeof(TCHAR)*/);
-	dwLen = sprintf(sMsg,
-			"Unknown error #0x%lX (lookup 0x%lX)",
-			dwErr, GetLastError());
+	if (sMsg)
+	    dwLen = sprintf(sMsg,
+			    "Unknown error #0x%lX (lookup 0x%lX)",
+			    dwErr, GetLastError());
     }
-    sv_setpvn((SV*)sv, sMsg, dwLen);
-    LocalFree(sMsg);
+    if (sMsg) {
+	sv_setpvn((SV*)sv, sMsg, dwLen);
+	LocalFree(sMsg);
+    }
 }
 
 

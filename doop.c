@@ -665,7 +665,7 @@ do_join(register SV *sv, SV *del, register SV **mark, register SV **sp)
 	SvGROW(sv, len + 1);		/* so try to pre-extend */
 
 	mark = oldmark;
-	items = sp - mark;;
+	items = sp - mark;
 	++mark;
     }
 
