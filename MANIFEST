@@ -2208,6 +2208,7 @@ Porting/Glossary	Glossary of config.sh variables
 Porting/makerel		Release making utility
 Porting/p4d2p		Generate standard patches from p4 diffs
 Porting/p4desc		Smarter 'p4 describe', outputs diffs for new files
+Porting/p4genpatch	Obsoletes both p4desc and p4d2p
 Porting/patching.pod	How to report changes made to Perl
 Porting/patchls		Flexible patch file listing utility
 Porting/pumpkin.pod	Guidelines and hints for Perl maintainers

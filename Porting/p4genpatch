@@ -1,0 +1,145 @@
+#!/usr/bin/perl -w
+
+
+# p4genpatch - Generate a perl patch from the repository
+
+# Usage: $0 -h
+
+# andreas.koenig@anima.de
+
+use strict;
+use File::Temp qw(tempdir);
+use File::Compare;
+use Time::Local;
+
+sub correctmtime ($$$);
+sub Usage ();
+
+my $VERSION = '0.03';
+$0 =~ s|^.*/||;
+our(%OPT, @P4opt);
+%OPT = ( "d" => "u", b => "//depot/perl/" );
+use Getopt::Long;
+Getopt::Long::Configure("no_ignore_case");
+GetOptions(\%OPT, "b=s", "p=s", "d=s", "h", "v", "V") or die Usage;
+print Usage and exit if $OPT{h};
+print "$VERSION\n" and exit if $OPT{V};
+die Usage unless @ARGV == 1;
+
+for my $p4opt (qw(p)) {
+  push @P4opt, "-$p4opt $OPT{$p4opt}" if $OPT{$p4opt};
+}
+
+my $system = "p4 @P4opt describe -s @ARGV |";
+open my $p4, $system or die "Could not run $system";
+my @action;
+while (<$p4>) {
+  print;
+  next unless m|$OPT{b}|;
+  if (my($file,$action) = m|^\.\.\. (//depot.*)\s(\w+)$|) {
+    next if $action eq "delete";
+    push @action, [$action, $file];
+  }
+}
+close $p4;
+
+my $tempdir;
+print "Differences ...\n";
+for my $a (@action) {
+  $tempdir ||= tempdir( "tmp-XXXX", CLEANUP => 1 );
+  my($action,$file) = @$a;
+  my($path,$basename,$number) = $file =~ m|//depot/(.+/)?([^/]+)#(\d+)|;
+  $path = "" unless defined $path;
+  my($d1,$d2,$prev);
+  $prev = $number-1;
+  if ($prev==0 or $action =~ /^(add|branch)$/) {
+    $d1 = "/dev/null";
+  } elsif ($action =~ /^(edit|integrate)$/) {
+    $d1 = "$path$basename#$prev";
+    warn "==> $d1 <==\n" if $OPT{v};
+    my $system = "p4 @P4opt print -o $tempdir/$d1 //depot/$path$basename#$prev";
+    my $status = `$system`;
+    if ($?) {
+      warn "$0: system[$system] failed, status[$?]\n";
+      next;
+    }
+    if (my($prevch) = $status =~ / \s change \s (\d+) \s /x) {
+      my $oldd1 = $d1;
+      $d1 .= "~$prevch~";
+      rename "$tempdir/$oldd1", "$tempdir/$d1";
+    }
+  } else {
+    die "Unknown action[$action]";
+  }
+  $d2 = "$path$basename";
+  warn "==> $d2#$number <==\n" if $OPT{v};
+  my $system = "p4 @P4opt print -o $tempdir/$d2 $file";
+  # warn "system[$system]";
+  my $type = `$system`;
+  if ($?) {
+    warn "$0: `$system` failed, status[$?]\n";
+    next;
+  }
+  $type =~ m|^//.*\((.+)\)$| or next;
+  $type = $1;
+  if (File::Compare::compare("$tempdir/$d1", "$tempdir/$d2")) {
+    print "\n==== $file ($type) ====\nIndex: $path$basename\n";
+    unless ($type =~ /text/) {
+      next;
+    }
+    my @filelog = `p4 @P4opt filelog $file`;
+    correctmtime(\@filelog,$prev,"$tempdir/$d1");
+    correctmtime(\@filelog,$number,"$tempdir/$d2");
+    $system = "cd $tempdir && diff -$OPT{d} '$d1' '$d2'";
+    system($system); # no return check because diff doesn't always return 0
+  }
+  for ("$tempdir/$d1","$tempdir/$d2") {
+    unlink or warn "Could not unlink $_: $!" if -f;
+  }
+}
+print "End of Patch.\n";
+
+sub correctmtime ($$$) {
+  my($filelog,$nr,$file) = @_;
+  for my $line (@$filelog) {
+    my($rev,$change,$action,$date) =
+        $line =~ m{ ^ \.\.\. \s
+                    \#
+                    (\d+)            # rev
+                    \s change \s
+                    (\d+)            # change
+                    \s (\w+) \s      # action
+                    on \s (\S+)      # date
+                  }x or next;
+    # warn "rev[$rev]";
+    next unless $rev == $nr;
+    my(@date) = split m|/|, $date;
+    $date[0] -= 1900;
+    $date[1]--;
+    my $time = timelocal(0,0,0,reverse @date);
+    utime $time, $time, $file;
+    last;
+  }
+}
+
+sub Usage () {
+    qq{Usage: $0 [OPTIONS] patchnumber
+
+          -p host:port       p4 port (e.g. myhost:1666)
+          -d diffopt         option to pass to diff(1)
+	  -b branch(es)      which branches to include (regex)
+		             (default: //depot/perl/)
+          -v                 verbose
+          -h                 print this help and exit
+          -V                 print version number and exit
+
+Fetches all required files from the repository, puts them into a
+temporary directory with sensible names and sensible modification
+times and composes a patch to STDOUT using external diff command.
+Requires repository access.
+
+Examples:
+          perl $0 12345 | gzip -c > 12345.gz
+          perl $0 -dc 12345 > change-12345.patch
+};
+}
