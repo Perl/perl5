@@ -46,7 +46,7 @@ void XS_attributes_bootstrap(pTHX_ CV *cv);
 void
 Perl_boot_core_xsutils(pTHX)
 {
-    char *file = __FILE__;
+    const char file[] = __FILE__;
 
     newXS("attributes::bootstrap",	XS_attributes_bootstrap,	file);
 }
@@ -159,7 +159,7 @@ modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 XS(XS_attributes_bootstrap)
 {
     dXSARGS;
-    char *file = __FILE__;
+    const char file[] = __FILE__;
 
     if( items > 1 )
         Perl_croak(aTHX_ "Usage: attributes::bootstrap $module");

@@ -604,7 +604,7 @@ Perl_save_aelem(pTHX_ const AV *av, I32 idx, SV **sptr)
 }
 
 void
-Perl_save_helem(pTHX_ const HV *hv, SV *key, SV **sptr)
+Perl_save_helem(pTHX_ HV *hv, SV *key, SV **sptr)
 {
     SV *sv;
     SSCHECK(4);

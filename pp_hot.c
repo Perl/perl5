@@ -1840,7 +1840,7 @@ PP(pp_iter)
 	    /* string increment */
 	    register SV* cur = cx->blk_loop.iterlval;
 	    STRLEN maxlen = 0;
-	    char *max = SvOK((SV*)av) ? SvPV((SV*)av, maxlen) : "";
+	    const char *max = SvOK((SV*)av) ? SvPV((SV*)av, maxlen) : "";
 	    if (!SvNIOK(cur) && SvCUR(cur) <= maxlen) {
 		if (SvREFCNT(*itersvp) == 1 && !SvMAGICAL(*itersvp)) {
 		    /* safe to reuse old SV */
@@ -2885,8 +2885,8 @@ PP(pp_aelem)
     SV* elemsv = POPs;
     IV elem = SvIV(elemsv);
     AV* av = (AV*)POPs;
-    U32 lval = PL_op->op_flags & OPf_MOD || LVRET;
-    U32 defer = (PL_op->op_private & OPpLVAL_DEFER) && (elem > AvFILL(av));
+    const U32 lval = PL_op->op_flags & OPf_MOD || LVRET;
+    const U32 defer = (PL_op->op_private & OPpLVAL_DEFER) && (elem > av_len(av));
     SV *sv;
 
     if (SvROK(elemsv) && !SvGAMAGIC(elemsv) && ckWARN(WARN_MISC))

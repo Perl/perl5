@@ -288,7 +288,7 @@ Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result) {
     }
 
     for (; len-- && *s; s++) {
-	hexdigit = strchr((char *) PL_hexdigit, *s);
+        hexdigit = strchr(PL_hexdigit, *s);
         if (hexdigit) {
             /* Write it in this wonky order with a goto to attempt to get the
                compiler to make the common case integer-only loop pretty tight.
@@ -317,7 +317,7 @@ Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result) {
             continue;
         }
         if (*s == '_' && len && allow_underscores && s[1]
-		&& (hexdigit = strchr((char *) PL_hexdigit, s[1])))
+		&& (hexdigit = strchr(PL_hexdigit, s[1])))
 	    {
 		--len;
 		++s;
@@ -843,11 +843,11 @@ char*
 Perl_my_atof2(pTHX_ const char* orig, NV* value)
 {
     NV result[3] = {0.0, 0.0, 0.0};
-    char* s = (char*)orig;
+    const char* s = orig;
 #ifdef USE_PERL_ATOF
     UV accumulator[2] = {0,0};	/* before/after dp */
     bool negative = 0;
-    char* send = s + strlen(orig) - 1;
+    const char* send = s + strlen(orig) - 1;
     bool seen_digit = 0;
     I32 exp_adjust[2] = {0,0};
     I32 exp_acc[2] = {-1, -1};
@@ -945,7 +945,7 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
 		++exp_acc[seen_dp];
 	    }
 	}
-	else if (!seen_dp && GROK_NUMERIC_RADIX((const char **)&s, send)) {
+	else if (!seen_dp && GROK_NUMERIC_RADIX(&s, send)) {
 	    seen_dp = 1;
 	    if (sig_digits > MAX_SIG_DIGITS) {
 		++s;

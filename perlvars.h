@@ -53,7 +53,7 @@ PERLVAR(Gdollarzero_mutex, perl_mutex)	/* Modifying $0 */
 #endif
 
 /* This is constant on most architectures, a global on OS/2 */
-PERLVARI(Gsh_path,	char *,	SH_PATH)/* full path of shell */
+PERLVARI(Gsh_path,	const char *,	SH_PATH)/* full path of shell */
 
 #ifndef PERL_MICRO
 /* If Perl has to ignore SIGPFE, this is its saved state.

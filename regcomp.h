@@ -311,7 +311,7 @@ struct regnode_charclass_class {	/* has [[:blah:]] classes */
  */
 #ifndef lint
 #ifndef CHARMASK
-#define	UCHARAT(p)	((int)*(U8*)(p))
+#define	UCHARAT(p)	((int)*(const U8*)(p))
 #else
 #define	UCHARAT(p)	((int)*(p)&CHARMASK)
 #endif
@@ -528,7 +528,7 @@ typedef struct _reg_trie_data reg_trie_data;
 
 
 #ifdef DEBUGGING
-#define GET_RE_DEBUG_FLAGS_DECL SV *re_debug_flags; GET_RE_DEBUG_FLAGS;
+#define GET_RE_DEBUG_FLAGS_DECL SV *re_debug_flags = NULL; GET_RE_DEBUG_FLAGS;
 #else
 #define GET_RE_DEBUG_FLAGS_DECL
 #endif

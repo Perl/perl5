@@ -540,7 +540,7 @@ Found in file pad.c
 
 dump the contents of a CV
 
-	void	cv_dump(CV *cv, char *title)
+	void	cv_dump(const CV *cv, const char *title)
 
 =for hackers
 Found in file pad.c
@@ -583,7 +583,7 @@ GvSTASH to that value
 
 If fake, it means we're cloning an existing entry
 
-	PADOFFSET	pad_add_name(char *name, HV* typestash, HV* ourstash, bool clone)
+	PADOFFSET	pad_add_name(const char *name, HV* typestash, HV* ourstash, bool clone)
 
 =for hackers
 Found in file pad.c
@@ -616,7 +616,7 @@ Check for duplicate declarations: report any of:
        as C<ourstash>
 C<is_our> indicates that the name to check is an 'our' declaration
 
-	void	pad_check_dup(char* name, bool is_our, HV* ourstash)
+	void	pad_check_dup(const char* name, bool is_our, const HV* ourstash)
 
 =for hackers
 Found in file pad.c
@@ -640,7 +640,7 @@ then comes back down, adding fake entries as it goes. It has to be this way
 because fake namesvs in anon protoypes have to store in NVX the index into
 the parent pad.
 
-	PADOFFSET	pad_findlex(char *name, CV* cv, U32 seq, int warn, SV** out_capture, SV** out_name_sv, int *out_flags)
+	PADOFFSET	pad_findlex(const char *name, const CV* cv, U32 seq, int warn, SV** out_capture, SV** out_name_sv, int *out_flags)
 
 =for hackers
 Found in file pad.c
@@ -653,7 +653,7 @@ the complications introduced by eval). If the name is found in an outer pad,
 then a fake entry is added to the current pad.
 Returns the offset in the current pad, or NOT_IN_PAD on failure.
 
-	PADOFFSET	pad_findmy(char* name)
+	PADOFFSET	pad_findmy(const char* name)
 
 =for hackers
 Found in file pad.c

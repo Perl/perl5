@@ -455,7 +455,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		    if (isLOWER(key[i])) {
 			/* Would be nice if we had a routine to do the
 			   copy and upercase in a single pass through.  */
-			char *nkey = strupr(savepvn(key,klen));
+			const char *nkey = strupr(savepvn(key,klen));
 			/* Note that this fetch is for nkey (the uppercased
 			   key) whereas the store is for key (the original)  */
 			entry = hv_fetch_common(hv, Nullsv, nkey, klen,

@@ -875,7 +875,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	s = find_byclass(prog, prog->regstclass, s, endpos, startpos, 1);
 	if (!s) {
 #ifdef DEBUGGING
-	    char *what = 0;
+	    const char *what = 0;
 #endif
 	    if (endpos == strend) {
 		DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,

@@ -478,8 +478,8 @@ static void clear_re(pTHX_ void *r);
 STATIC void
 S_scan_commit(pTHX_ RExC_state_t *pRExC_state, scan_data_t *data)
 {
-    STRLEN l = CHR_SVLEN(data->last_found);
-    STRLEN old_l = CHR_SVLEN(*data->longest);
+    const STRLEN l = CHR_SVLEN(data->last_found);
+    const STRLEN old_l = CHR_SVLEN(*data->longest);
 
     if ((l >= old_l) && ((l > old_l) || (data->flags & SF_BEFORE_EOL))) {
 	SvSetMagicSV(*data->longest, data->last_found);
@@ -793,13 +793,13 @@ and would end up looking like:
 	       scan += len;                                                   \
 	       len = 0;                                                       \
 	    } else {                                                          \
-		uvc = utf8n_to_uvuni( (U8*)uc, UTF8_MAXLEN, &len, uniflags);  \
+		uvc = utf8n_to_uvuni( (const U8*)uc, UTF8_MAXLEN, &len, uniflags);\
 		uvc = to_uni_fold( uvc, foldbuf, &foldlen );                  \
 		foldlen -= UNISKIP( uvc );                                    \
 		scan = foldbuf + UNISKIP( uvc );                              \
 	    }                                                                 \
 	} else {                                                              \
-	    uvc = utf8n_to_uvuni( (U8*)uc, UTF8_MAXLEN, &len, uniflags);      \
+	    uvc = utf8n_to_uvuni( (const U8*)uc, UTF8_MAXLEN, &len, uniflags);\
 	}                                                                     \
     } else {                                                                  \
 	uvc = (U32)*uc;                                                       \
@@ -837,13 +837,13 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
     /* first pass, loop through and scan words */
     reg_trie_data *trie;
     regnode *cur;
-    U32 uniflags = ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY;
+    const U32 uniflags = ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY;
     STRLEN len = 0;
     UV uvc = 0;
     U16 curword = 0;
     U32 next_alloc = 0;
     /* we just use folder as a flag in utf8 */
-    const U8 *folder=( flags == EXACTF
+    const U8 * const folder = ( flags == EXACTF
                        ? PL_fold
                        : ( flags == EXACTFL
                            ? PL_fold_locale
@@ -851,7 +851,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                          )
                      );
 
-    U32 data_slot = add_data( pRExC_state, 1, "t" );
+    const U32 data_slot = add_data( pRExC_state, 1, "t" );
     SV *re_trie_maxbuff;
 
     GET_RE_DEBUG_FLAGS_DECL;
@@ -897,11 +897,11 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 
     for ( cur = first ; cur < last ; cur = regnext( cur ) ) {
         regnode *noper = NEXTOPER( cur );
-        U8 *uc  = (U8*)STRING( noper );
-        U8 *e   = uc + STR_LEN( noper );
+        const U8 *uc = (U8*)STRING( noper );
+        const U8 *e  = uc + STR_LEN( noper );
         STRLEN foldlen = 0;
         U8 foldbuf[ UTF8_MAXBYTES_CASE + 1 ];
-        U8 *scan;
+        const U8 *scan;
 
         for ( ; uc < e ; uc += len ) {
             trie->charcount++;
@@ -3591,8 +3591,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
     }
 
     {
-	const char *p;
-	static const char parens[] = "=!<,>";
+        const char *p;
+        static const char parens[] = "=!<,>";
 
 	if (paren && (p = strchr(parens, paren))) {
 	    U8 node = ((p - parens) % 2) ? UNLESSM : IFMATCH;
@@ -5710,10 +5710,10 @@ S_dumpuntil(pTHX_ regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 	    node = dumpuntil(start, NEXTOPER(node), next, sv, l + 1);
 	}
 	else if ( PL_regkind[(U8)op]  == TRIE ) {
-	    I32 n = ARG(node);
-	    reg_trie_data *trie=(reg_trie_data*)PL_regdata->data[n];
+            const I32 n = ARG(node);
+            const reg_trie_data *trie = (reg_trie_data*)PL_regdata->data[n];
+            const I32 arry_len = av_len(trie->words)+1;
 	    I32 word_idx;
-	    I32 arry_len=av_len(trie->words)+1;
 	    PerlIO_printf(Perl_debug_log,
 		       "%*s[Words:%d Chars Stored:%d Unique Chars:%d States:%d%s]\n",
 		       (int)(2*(l+3)), "",
@@ -5870,7 +5870,7 @@ Perl_regdump(pTHX_ regexp *r)
     PerlIO_printf(Perl_debug_log, "\n");
     if (r->offsets) {
       U32 i;
-      U32 len = r->offsets[0];
+      const U32 len = r->offsets[0];
         GET_RE_DEBUG_FLAGS_DECL;
         DEBUG_OFFSETS_r({
       PerlIO_printf(Perl_debug_log, "Offsets: [%"UVuf"]\n\t", (UV)r->offsets[0]);
@@ -5928,7 +5928,7 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 	  pv_uni_display(dsv, (U8*)STRING(o), STR_LEN(o), 60,
 			 UNI_DISPLAY_REGEX) :
 	  STRING(o);
-	int len = do_utf8 ?
+	const int len = do_utf8 ?
 	  strlen(s) :
 	  STR_LEN(o);
 	Perl_sv_catpvf(aTHX_ sv, " <%s%.*s%s>",
@@ -6131,13 +6131,10 @@ Perl_pregfree(pTHX_ struct regexp *r)
     if (!r || (--r->refcnt > 0))
 	return;
     DEBUG_r(if (re_debug_flags && (SvIV(re_debug_flags) & RE_DEBUG_COMPILE)) {
-	 int len;
-         char *s;
-
-	 s = (r->reganch & ROPT_UTF8) ? pv_uni_display(dsv, (U8*)r->precomp,
-		r->prelen, 60, UNI_DISPLAY_REGEX)
+        const char *s = (r->reganch & ROPT_UTF8)
+            ? pv_uni_display(dsv, (U8*)r->precomp, r->prelen, 60, UNI_DISPLAY_REGEX)
             : pv_display(dsv, r->precomp, r->prelen, 0, 60);
-	 len = SvCUR(dsv);
+        const int len = SvCUR(dsv);
 	 if (!PL_colorset)
 	      reginitcolors();
 	 PerlIO_printf(Perl_debug_log,

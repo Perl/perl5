@@ -77,7 +77,7 @@ xs_init(pTHX)
 EOP
 
 if test X"$args" != "X" ; then
-    echo "    char *file = __FILE__;"
+    echo "    const char file[] = __FILE__;"
     echo "    dXSUB_SYS;"
 
     ai=''

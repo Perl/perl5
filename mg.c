@@ -119,7 +119,7 @@ Turns on the magical status of an SV.  See C<sv_magic>.
 void
 Perl_mg_magical(pTHX_ SV *sv)
 {
-    MAGIC* mg;
+    const MAGIC* mg;
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	const MGVTBL* const vtbl = mg->mg_virtual;
 	if (vtbl) {
@@ -231,7 +231,7 @@ Perl_mg_set(pTHX_ SV *sv)
     save_magic(mgs_ix, sv);
 
     for (mg = SvMAGIC(sv); mg; mg = nextmg) {
-	MGVTBL* vtbl = mg->mg_virtual;
+        const MGVTBL* vtbl = mg->mg_virtual;
 	nextmg = mg->mg_moremagic;	/* it may delete itself */
 	if (mg->mg_flags & MGf_GSKIP) {
 	    mg->mg_flags &= ~MGf_GSKIP;	/* setting requires another read */
@@ -1454,7 +1454,7 @@ Perl_magic_setnkeys(pTHX_ SV *sv, MAGIC *mg)
 
 /* caller is responsible for stack switching/cleanup */
 STATIC int
-S_magic_methcall(pTHX_ SV *sv, MAGIC *mg, char *meth, I32 flags, int n, SV *val)
+S_magic_methcall(pTHX_ SV *sv, const MAGIC *mg, const char *meth, I32 flags, int n, SV *val)
 {
     dSP;
 
@@ -1481,7 +1481,7 @@ S_magic_methcall(pTHX_ SV *sv, MAGIC *mg, char *meth, I32 flags, int n, SV *val)
 }
 
 STATIC int
-S_magic_methpack(pTHX_ SV *sv, MAGIC *mg, char *meth)
+S_magic_methpack(pTHX_ SV *sv, const MAGIC *mg, const char *meth)
 {
     dSP;
 
@@ -2045,7 +2045,7 @@ Perl_magic_setutf8(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 {
-    register char *s;
+    register const char *s;
     I32 i;
     STRLEN len;
     switch (*mg->mg_ptr) {
@@ -2195,12 +2195,12 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '^':
 	Safefree(IoTOP_NAME(GvIOp(PL_defoutgv)));
-	IoTOP_NAME(GvIOp(PL_defoutgv)) = s = savesvpv(sv);
+	s = IoTOP_NAME(GvIOp(PL_defoutgv)) = savesvpv(sv);
 	IoTOP_GV(GvIOp(PL_defoutgv)) = gv_fetchsv(sv,TRUE, SVt_PVIO);
 	break;
     case '~':
 	Safefree(IoFMT_NAME(GvIOp(PL_defoutgv)));
-	IoFMT_NAME(GvIOp(PL_defoutgv)) = s = savesvpv(sv);
+	s = IoFMT_NAME(GvIOp(PL_defoutgv)) = savesvpv(sv);
 	IoFMT_GV(GvIOp(PL_defoutgv)) = gv_fetchsv(sv,TRUE, SVt_PVIO);
 	break;
     case '=':
@@ -2494,7 +2494,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 I32
 Perl_whichsig(pTHX_ const char *sig)
 {
-    register char **sigv;
+    register const char **sigv;
 
     for (sigv = PL_sig_name; *sigv; sigv++)
 	if (strEQ(sig,*sigv))
@@ -2675,7 +2675,7 @@ restore_magic(pTHX_ const void *p)
 static void
 unwind_handler_stack(pTHX_ const void *p)
 {
-    const U32 flags = *(U32*)p;
+    const U32 flags = *(const U32*)p;
 
     if (flags & 1)
 	PL_savestack_ix -= 5; /* Unprotect save in progress. */

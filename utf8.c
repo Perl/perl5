@@ -240,7 +240,7 @@ Perl_is_utf8_string(pTHX_ const U8 *s, STRLEN len)
     STRLEN c;
 
     if (!len && s)
-	len = strlen((char *)s);
+	len = strlen((const char *)s);
     send = s + len;
 
     while (x < send) {
@@ -280,7 +280,7 @@ Perl_is_utf8_string_loc(pTHX_ const U8 *s, STRLEN len, const U8 **p)
     STRLEN c;
 
     if (!len && s)
-	len = strlen((char *)s);
+        len = strlen((const char *)s);
     send = s + len;
 
     while (x < send) {
@@ -766,7 +766,7 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *len)
 }
 
 /*
-=for apidoc A|U8 *|bytes_from_utf8|U8 *s|STRLEN *len|bool *is_utf8
+=for apidoc A|U8 *|bytes_from_utf8|const U8 *s|STRLEN *len|bool *is_utf8
 
 Converts a string C<s> of length C<len> from UTF-8 into byte encoding.
 Unlike C<utf8_to_bytes> but like C<bytes_to_utf8>, returns a pointer to
@@ -779,11 +779,11 @@ is unchanged. Do nothing if C<is_utf8> points to 0. Sets C<is_utf8> to
 */
 
 U8 *
-Perl_bytes_from_utf8(pTHX_ U8 *s, STRLEN *len, bool *is_utf8)
+Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *len, bool *is_utf8)
 {
     U8 *d;
-    U8 *start = s;
-    U8 *send;
+    const U8 *start = s;
+    const U8 *send;
     I32 count = 0;
 
     if (!*is_utf8)
@@ -791,7 +791,7 @@ Perl_bytes_from_utf8(pTHX_ U8 *s, STRLEN *len, bool *is_utf8)
 
     /* ensure valid UTF-8 and chars < 256 before converting string */
     for (send = s + *len; s < send;) {
-	U8 c = *s++;
+        U8 c = *s++;
 	if (!UTF8_IS_INVARIANT(c)) {
 	    if (UTF8_IS_DOWNGRADEABLE_START(c) && s < send &&
                 (c = *s++) && UTF8_IS_CONTINUATION(c))
@@ -1397,7 +1397,7 @@ The "normal" is a string like "ToLower" which means the swash
 =cut */
 
 UV
-Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *normal, char *special)
+Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, const char *normal, const char *special)
 {
     UV uv1;
     U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
@@ -1693,14 +1693,14 @@ Perl_swash_fetch(pTHX_ SV *sv, const U8 *ptr, bool do_utf8)
 
     if (hv   == PL_last_swash_hv &&
 	klen == PL_last_swash_klen &&
-	(!klen || memEQ((char *)ptr, (char *)PL_last_swash_key, klen)) )
+	(!klen || memEQ(ptr, PL_last_swash_key, klen)) )
     {
 	tmps = PL_last_swash_tmps;
 	slen = PL_last_swash_slen;
     }
     else {
 	/* Try our second-level swatch cache, kept in a hash. */
-	SV** svp = hv_fetch(hv, (char*)ptr, klen, FALSE);
+	SV** svp = hv_fetch(hv, (const char*)ptr, klen, FALSE);
 
 	/* If not cached, generate it via utf8::SWASHGET */
 	if (!svp || !SvPOK(*svp) || !(tmps = (U8*)SvPV(*svp, slen))) {
@@ -1738,7 +1738,7 @@ Perl_swash_fetch(pTHX_ SV *sv, const U8 *ptr, bool do_utf8)
 	    if (IN_PERL_COMPILETIME)
 		PL_curcop->op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
 
-	    svp = hv_store(hv, (char*)ptr, klen, retval, 0);
+	    svp = hv_store(hv, (const char *)ptr, klen, retval, 0);
 
 	    if (!svp || !(tmps = (U8*)SvPV(*svp, slen)) || (slen << 3) < needents)
 		Perl_croak(aTHX_ "SWASHGET didn't return result of proper length");
@@ -1844,13 +1844,13 @@ The pointer to the PV of the dsv is returned.
 
 =cut */
 char *
-Perl_pv_uni_display(pTHX_ SV *dsv, U8 *spv, STRLEN len, STRLEN pvlim, UV flags)
+Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim, UV flags)
 {
     int truncated = 0;
-    char *s, *e;
+    const char *s, *e;
 
     sv_setpvn(dsv, "", 0);
-    for (s = (char *)spv, e = s + len; s < e; s += UTF8SKIP(s)) {
+    for (s = (const char *)spv, e = s + len; s < e; s += UTF8SKIP(s)) {
 	 UV u;
 	  /* This serves double duty as a flag and a character to print after
 	     a \ when flags & UNI_DISPLAY_BACKSLASH is true.
@@ -1946,10 +1946,11 @@ http://www.unicode.org/unicode/reports/tr21/ (Case Mappings).
 I32
 Perl_ibcmp_utf8(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const char *s2, char **pe2, register UV l2, bool u2)
 {
-     register U8 *p1  = (U8*)s1;
-     register U8 *p2  = (U8*)s2;
-     register U8 *e1 = 0, *f1 = 0, *q1 = 0;
-     register U8 *e2 = 0, *f2 = 0, *q2 = 0;
+     register const U8 *p1  = (const U8*)s1;
+     register const U8 *p2  = (const U8*)s2;
+     register const U8 *f1 = 0, *f2 = 0;
+     register U8 *e1 = 0, *q1 = 0;
+     register U8 *e2 = 0, *q2 = 0;
      STRLEN n1 = 0, n2 = 0;
      U8 foldbuf1[UTF8_MAXBYTES_CASE+1];
      U8 foldbuf2[UTF8_MAXBYTES_CASE+1];
@@ -1959,12 +1960,12 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const
      
      if (pe1)
 	  e1 = *(U8**)pe1;
-     if (e1 == 0 || (l1 && l1 < (UV)(e1 - (U8*)s1)))
-	  f1 = (U8*)s1 + l1;
+     if (e1 == 0 || (l1 && l1 < (UV)(e1 - (const U8*)s1)))
+	  f1 = (const U8*)s1 + l1;
      if (pe2)
 	  e2 = *(U8**)pe2;
-     if (e2 == 0 || (l2 && l2 < (UV)(e2 - (U8*)s2)))
-	  f2 = (U8*)s2 + l2;
+     if (e2 == 0 || (l2 && l2 < (UV)(e2 - (const U8*)s2)))
+	  f2 = (const U8*)s2 + l2;
 
      if ((e1 == 0 && f1 == 0) || (e2 == 0 && f2 == 0) || (f1 == 0 && f2 == 0))
 	  return 1; /* mismatch; possible infinite loop or false positive */

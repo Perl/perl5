@@ -138,7 +138,7 @@ yysymprint (pTHX_ PerlIO *yyoutput, int yytype, YYSTYPE *yyvaluep)
  *  meanings as the local vars in yyparse() of the same name */
 
 static void
-yy_stack_print (pTHX_ short *yyss, short *yyssp, YYSTYPE *yyvs, char**yyns)
+yy_stack_print (pTHX_ short *yyss, short *yyssp, YYSTYPE *yyvs, const char**yyns)
 {
     int i;
     int start = 1;
@@ -310,7 +310,7 @@ Perl_yyparse (pTHX)
 
 #ifdef DEBUGGING
     /* maintain also a stack of token/rule names for debugging with -Dpv */
-    char **yyns, **yynsp;
+    const char **yyns, **yynsp;
     SV *yyns_sv;
 #  define YYPOPSTACK   (yyvsp--, yyssp--, yynsp--)
 #else
@@ -349,7 +349,7 @@ Perl_yyparse (pTHX)
 #ifdef DEBUGGING
     yyns_sv = NEWSV(73, YYINITDEPTH * sizeof(char *));
     SAVEFREESV(yyns_sv);
-    yyns = (char **) SvPVX(yyns_sv);
+    yyns = (const char **) SvPVX(yyns_sv);
     yynsp = yyns;
 #endif
 
@@ -393,7 +393,7 @@ Perl_yyparse (pTHX)
 	 yyvs = (YYSTYPE *) SvPVX(yyvs_sv);
 #ifdef DEBUGGING
 	 SvGROW(yyns_sv, yystacksize * sizeof(char *));
-	 yyns = (char **) SvPVX(yyns_sv);
+	 yyns = (const char **) SvPVX(yyns_sv);
 	 if (! yyns)
 	       goto yyoverflowlab;
 	 yynsp = yyns + yysize - 1;
@@ -476,7 +476,7 @@ Perl_yyparse (pTHX)
 
     *++yyvsp = yylval;
 #ifdef DEBUGGING
-    *++yynsp = (char *)(yytname[yytoken]);
+    *++yynsp = (const char *)(yytname[yytoken]);
 #endif
 
 
@@ -538,7 +538,7 @@ Perl_yyparse (pTHX)
 
     *++yyvsp = yyval;
 #ifdef DEBUGGING
-    *++yynsp = (char *)(yytname [yyr1[yyn]]);
+    *++yynsp = (const char *)(yytname [yyr1[yyn]]);
 #endif
 
     /* Now `shift' the result of the reduction.  Determine what state

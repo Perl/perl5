@@ -137,7 +137,7 @@ for class names as well as for objects.
 bool
 Perl_sv_derived_from(pTHX_ SV *sv, const char *name)
 {
-    char *type;
+    const char *type;
     HV *stash;
     HV *name_stash;
 
@@ -199,7 +199,7 @@ XS(XS_Internals_HvREHASH);
 void
 Perl_boot_core_UNIVERSAL(pTHX)
 {
-    char *file = __FILE__;
+    const char file[] = __FILE__;
 
     newXS("UNIVERSAL::isa",             XS_UNIVERSAL_isa,         file);
     newXS("UNIVERSAL::can",             XS_UNIVERSAL_can,         file);
@@ -320,7 +320,7 @@ XS(XS_UNIVERSAL_VERSION)
     GV **gvp;
     GV *gv;
     SV *sv;
-    char *undef;
+    const char *undef;
 
     if (SvROK(ST(0))) {
         sv = (SV*)SvRV(ST(0));
@@ -357,7 +357,7 @@ XS(XS_UNIVERSAL_VERSION)
 			     "%s does not define $%s::VERSION--version check failed",
 			     HvNAME(pkg), HvNAME(pkg));
 	     else {
-		  char *str = SvPVx(ST(0), len);
+                  const char *str = SvPVx(ST(0), len);
 
 		  Perl_croak(aTHX_
 			     "%s defines neither package nor VERSION--version check failed", str);
@@ -394,7 +394,7 @@ XS(XS_version_new)
 	Perl_croak(aTHX_ "Usage: version::new(class, version)");
     SP -= items;
     {
-	char *	class = (char *)SvPV_nolen(ST(0));
+        const char *class = SvPV_nolen(ST(0));
         SV *vs = ST(1);
 	SV *rv;
 	if (items == 3 )

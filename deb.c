@@ -173,7 +173,6 @@ Perl_deb_stack_all(pTHX)
 #ifdef DEBUGGING
     I32		 ix, si_ix;
     PERL_SI	 *si;
-    PERL_CONTEXT *cx;
 
     /* rewind to start of chain */
     si = PL_curstackinfo;
@@ -183,18 +182,14 @@ Perl_deb_stack_all(pTHX)
     si_ix=0;
     for (;;)
     {
-	char *si_name;
-	int si_name_ix = si->si_type+1; /* -1 is a valid index */
-	if (si_name_ix>= sizeof(si_names))
-	    si_name = "????";
-	else
-	    si_name = si_names[si_name_ix];
+        const int si_name_ix = si->si_type+1; /* -1 is a valid index */
+        const char *si_name = (si_name_ix>= sizeof(si_names)) ? "????" : si_names[si_name_ix];
 	PerlIO_printf(Perl_debug_log, "STACK %"IVdf": %s\n",
 						(IV)si_ix, si_name);
 
 	for (ix=0; ix<=si->si_cxix; ix++) {
 
-	    cx = &(si->si_cxstack[ix]);
+	    const PERL_CONTEXT *cx = &(si->si_cxstack[ix]);
 	    PerlIO_printf(Perl_debug_log,
 		    "  CX %"IVdf": %-6s => ",
 		    (IV)ix, PL_block_type[CxTYPE(cx)]

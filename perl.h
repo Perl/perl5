@@ -3268,10 +3268,10 @@ EXTCONST char PL_uuemap[65]
 
 
 #ifdef DOINIT
-EXT char *PL_sig_name[] = { SIG_NAME };
+EXT const char *PL_sig_name[] = { SIG_NAME };
 EXT int   PL_sig_num[]  = { SIG_NUM };
 #else
-EXT char *PL_sig_name[];
+EXT const char *PL_sig_name[];
 EXT int   PL_sig_num[];
 #endif
 
@@ -3963,7 +3963,7 @@ enum {
 };
 
 #define NofAMmeth max_amg_code
-#define AMG_id2name(id) ((char*)PL_AMG_names[id]+1)
+#define AMG_id2name(id) (PL_AMG_names[id]+1)
 
 #ifdef DOINIT
 EXTCONST char * PL_AMG_names[NofAMmeth] = {

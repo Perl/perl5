@@ -147,7 +147,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     if (as_raw) {
         /* sysopen style args, i.e. integer mode and permissions */
 	STRLEN ix = 0;
-	int appendtrunc =
+	const int appendtrunc =
 	     0
 #ifdef O_APPEND	/* Not fully portable. */
 	     |O_APPEND
@@ -156,8 +156,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	     |O_TRUNC
 #endif
 	     ;
-	int modifyingmode =
-	     O_WRONLY|O_RDWR|O_CREAT|appendtrunc;
+	int modifyingmode = O_WRONLY|O_RDWR|O_CREAT|appendtrunc;
 	int ismodifying;
 
 	if (num_svs != 0) {
@@ -353,7 +352,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 			fd = atoi(type);
 		    }
 		    else {
-			IO* thatio;
+			const IO* thatio;
 			if (num_svs) {
 			    thatio = sv_2io(*svp);
 			}
@@ -1235,7 +1234,7 @@ Perl_do_binmode(pTHX_ PerlIO *fp, int iotype, int mode)
  /* The old body of this is now in non-LAYER part of perlio.c
   * This is a stub for any XS code which might have been calling it.
   */
- char *name = ":raw";
+ const char *name = ":raw";
 #ifdef PERLIO_USING_CRLF
  if (!(mode & O_BINARY))
      name = ":crlf";
@@ -1297,7 +1296,7 @@ Off_t length;		/* length to set file to */
 bool
 Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 {
-    register char *tmps;
+    register const char *tmps;
     STRLEN len;
 
     /* assuming fp is checked earlier */
@@ -1473,7 +1472,7 @@ Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
     Perl_croak(aTHX_ "exec? I'm not *that* kind of operating system");
 #else
     register char **a;
-    char *tmps = Nullch;
+    const char *tmps = Nullch;
     STRLEN n_a;
 
     if (sp > mark) {
@@ -1670,7 +1669,7 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
     register I32 val;
     register I32 val2;
     register I32 tot = 0;
-    char *what;
+    const char *what;
     char *s;
     SV **oldmark = mark;
     STRLEN n_a;

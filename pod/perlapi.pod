@@ -310,7 +310,7 @@ Performs a callback to the specified Perl sub.  See L<perlcall>.
 
 NOTE: the perl_ form of this function is deprecated.
 
-	I32	call_argv(const char* sub_name, I32 flags, char** argv)
+	I32	call_argv(const char* sub_name, I32 flags, const char** argv)
 
 =for hackers
 Found in file perl.c
@@ -1828,7 +1828,7 @@ is a alpha version).  The boolean qv denotes that the version
 should be interpreted as if it had multiple decimals, even if
 it doesn't.
 
-	char*	scan_version(char *vstr, SV *sv, bool qv)
+	char*	scan_version(const char *vstr, SV *sv, bool qv)
 
 =for hackers
 Found in file util.c
@@ -2187,7 +2187,7 @@ Found in file op.c
 Creates a constant sub equivalent to Perl C<sub FOO () { 123 }> which is
 eligible for inlining at compile-time.
 
-	CV*	newCONSTSUB(HV* stash, char* name, SV* sv)
+	CV*	newCONSTSUB(HV* stash, const char* name, SV* sv)
 
 =for hackers
 Found in file op.c
@@ -4296,7 +4296,7 @@ Found in file sv.c
 Inserts a string at the specified offset/length within the SV. Similar to
 the Perl substr() function.
 
-	void	sv_insert(SV* bigsv, STRLEN offset, STRLEN len, char* little, STRLEN littlelen)
+	void	sv_insert(SV* bigsv, STRLEN offset, STRLEN len, const char* little, STRLEN littlelen)
 
 =for hackers
 Found in file sv.c
@@ -4385,7 +4385,7 @@ to contain an C<SV*> and is stored as-is with its REFCNT incremented.
 
 (This is now used as a subroutine by C<sv_magic>.)
 
-	MAGIC *	sv_magicext(SV* sv, SV* obj, int how, MGVTBL *vtbl, const char* name, I32 namlen)
+	MAGIC *	sv_magicext(SV* sv, SV* obj, int how, const MGVTBL *vtbl, const char* name, I32 namlen)
 
 =for hackers
 Found in file sv.c
@@ -4601,7 +4601,7 @@ Found in file sv.c
 Underlying implementation for the C<reset> Perl function.
 Note that the perl-level function is vaguely deprecated.
 
-	void	sv_reset(char* s, HV* stash)
+	void	sv_reset(const char* s, HV* stash)
 
 =for hackers
 Found in file sv.c
@@ -5169,7 +5169,7 @@ is unchanged. Do nothing if C<is_utf8> points to 0. Sets C<is_utf8> to
 NOTE: this function is experimental and may change or be
 removed without notice.
 
-	U8*	bytes_from_utf8(U8 *s, STRLEN *len, bool *is_utf8)
+	U8*	bytes_from_utf8(const U8 *s, STRLEN *len, bool *is_utf8)
 
 =for hackers
 Found in file utf8.c
@@ -5268,7 +5268,7 @@ UNI_DISPLAY_BACKSLASH and UNI_DISPLAY_ISPRINT turned on.
 
 The pointer to the PV of the dsv is returned.
 
-	char*	pv_uni_display(SV *dsv, U8 *spv, STRLEN len, STRLEN pvlim, UV flags)
+	char*	pv_uni_display(SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim, UV flags)
 
 =for hackers
 Found in file utf8.c
@@ -5345,7 +5345,7 @@ Perl_to_utf8_case().
 The "normal" is a string like "ToLower" which means the swash
 %utf8::ToLower.
 
-	UV	to_utf8_case(const U8 *p, U8* ustrp, STRLEN *lenp, SV **swash, char *normal, char *special)
+	UV	to_utf8_case(const U8 *p, U8* ustrp, STRLEN *lenp, SV **swash, const char *normal, const char *special)
 
 =for hackers
 Found in file utf8.c
