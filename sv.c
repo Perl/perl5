@@ -4418,17 +4418,16 @@ Perl_newSV(pTHX_ STRLEN len)
 /*
 =for apidoc sv_magicext
 
-Adds magic to an SV, upgrading it if necessary. Applies the 
+Adds magic to an SV, upgrading it if necessary. Applies the
 supplied vtable and returns pointer to the magic added.
 
 Note that sv_magicext will allow things that sv_magic will not.
-In particular you can add magic to SvREADONLY SVs and and more than 
+In particular you can add magic to SvREADONLY SVs and and more than
 one instance of the same 'how'
 
 I C<namelen> is greater then zero then a savepvn() I<copy> of C<name> is stored,
-(if C<name> is NULL then namelen bytes are allocated and Zero()-ed),
-if C<namelen> is zero then C<name> is stored as-is and - as another special 
-case - if C<(name && namelen == HEf_SVKEY)> then C<name> is assumed to contain 
+if C<namelen> is zero then C<name> is stored as-is and - as another special
+case - if C<(name && namelen == HEf_SVKEY)> then C<name> is assumed to contain
 an C<SV*> and has its REFCNT incremented
 
 (This is now used as a subroutine by sv_magic.)
@@ -4440,7 +4439,7 @@ Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, MGVTBL *vtable,
 		 const char* name, I32 namlen)
 {
     MAGIC* mg;
-    
+
     if (SvTYPE(sv) < SVt_PVMG) {
 	(void)SvUPGRADE(sv, SVt_PVMG);
     }
@@ -4473,11 +4472,11 @@ Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, MGVTBL *vtable,
 	    mg->mg_ptr = savepvn(name, namlen);
 	else if (namlen == HEf_SVKEY)
 	    mg->mg_ptr = (char*)SvREFCNT_inc((SV*)name);
-	else 
+	else
 	    mg->mg_ptr = (char *) name;
     }
     mg->mg_virtual = vtable;
-    
+
     mg_magical(sv);
     if (SvGMAGICAL(sv))
 	SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
@@ -4495,7 +4494,7 @@ then adds a new magic item of type C<how> to the head of the magic list.
 
 void
 Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 namlen)
-{ 
+{
     MAGIC* mg;
     MGVTBL *vtable = 0;
 
@@ -4512,15 +4511,15 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
     }
     if (SvMAGICAL(sv) || (how == PERL_MAGIC_taint && SvTYPE(sv) >= SVt_PVMG)) {
 	if (SvMAGIC(sv) && (mg = mg_find(sv, how))) {
-	    /* sv_magic() refuses to add a magic of the same 'how' as an 
-	       existing one 
+	    /* sv_magic() refuses to add a magic of the same 'how' as an
+	       existing one
 	     */
 	    if (how == PERL_MAGIC_taint)
 		mg->mg_len |= 1;
 	    return;
 	}
     }
-        
+
     switch (how) {
     case PERL_MAGIC_sv:
 	vtable = &PL_vtbl_sv;
@@ -4632,10 +4631,10 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
     default:
 	Perl_croak(aTHX_ "Don't know how to handle magic of type \\%o", how);
     }
-    
+
     /* Rest of work is done else where */
     mg = sv_magicext(sv,obj,how,vtable,name,namlen);
-    
+
     switch (how) {
     case PERL_MAGIC_taint:
 	mg->mg_len = 1;
@@ -8702,7 +8701,7 @@ Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS* param)
 	nmg->mg_len	= mg->mg_len;
 	nmg->mg_ptr	= mg->mg_ptr;	/* XXX random ptr? */
 	if (mg->mg_ptr && mg->mg_type != PERL_MAGIC_regex_global) {
-	    if (mg->mg_len >= 0) {
+	    if (mg->mg_len > 0) {
 		nmg->mg_ptr	= SAVEPVN(mg->mg_ptr, mg->mg_len);
 		if (mg->mg_type == PERL_MAGIC_overload_table &&
 			AMT_AMAGIC((AMT*)mg->mg_ptr))
@@ -8717,6 +8716,9 @@ Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS* param)
 	    }
 	    else if (mg->mg_len == HEf_SVKEY)
 		nmg->mg_ptr	= (char*)sv_dup_inc((SV*)mg->mg_ptr, param);
+	}
+	if ((mg->mg_flags & MGf_DUP) && mg->mg_virtual && mg->mg_virtual->svt_dup) {
+	    CALL_FPTR(nmg->mg_virtual->svt_dup)(aTHX_ nmg, param);
 	}
 	mgprev = nmg;
     }
@@ -8938,9 +8940,9 @@ Perl_rvpv_dup(pTHX_ SV *dstr, SV *sstr, CLONE_PARAMS* param)
     else if (SvPVX(sstr)) {
 	/* Has something there */
 	if (SvLEN(sstr)) {
-	    /* Normal PV - clone whole allocated space */ 
+	    /* Normal PV - clone whole allocated space */
 	    SvPVX(dstr) = SAVEPVN(SvPVX(sstr), SvLEN(sstr)-1);
-	}  
+	}
 	else {
 	    /* Special case - not normally malloced for some reason */
 	    if (SvREADONLY(sstr) && SvFAKE(sstr)) {
@@ -10493,4 +10495,5 @@ Perl_sv_recode_to_utf8(pTHX_ SV *sv, SV *encoding)
      }
      return SvPVX(sv);
 }
+
 

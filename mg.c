@@ -319,7 +319,11 @@ Perl_mg_copy(pTHX_ SV *sv, SV *nsv, const char *key, I32 klen)
     int count = 0;
     MAGIC* mg;
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
-	if (isUPPER(mg->mg_type)) {
+	MGVTBL* vtbl = mg->mg_virtual;
+	if ((mg->mg_flags & MGf_COPY) && vtbl->svt_copy){
+	    count += CALL_FPTR(vtbl->svt_copy)(aTHX_ sv, mg, nsv, key, klen);
+	}
+	else if (isUPPER(mg->mg_type)) {
 	    sv_magic(nsv,
 		     mg->mg_type == PERL_MAGIC_tied ? SvTIED_obj(sv, mg) :
 		     (mg->mg_type == PERL_MAGIC_regdata && mg->mg_obj)

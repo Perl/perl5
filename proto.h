@@ -980,6 +980,9 @@ PERL_CALLCONV void	Perl_sys_intern_init(pTHX);
 PERL_CALLCONV char *	Perl_custom_op_name(pTHX_ OP* op);
 PERL_CALLCONV char *	Perl_custom_op_desc(pTHX_ OP* op);
 
+PERL_CALLCONV void	Perl_sv_nosharing(pTHX_ SV *);
+PERL_CALLCONV void	Perl_sv_nolocking(pTHX_ SV *);
+PERL_CALLCONV void	Perl_sv_nounlocking(pTHX_ SV *);
 
 END_EXTERN_C
 
@@ -1187,17 +1190,6 @@ STATIC void	S_debprof(pTHX_ OP *o);
 
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
 STATIC SV*	S_save_scalar_at(pTHX_ SV **sptr);
-#endif
-
-#if defined(USE_ITHREADS)
-PERL_CALLCONV void	Perl_sharedsv_init(pTHX);
-PERL_CALLCONV shared_sv*	Perl_sharedsv_new(pTHX);
-PERL_CALLCONV shared_sv*	Perl_sharedsv_find(pTHX_ SV* sv);
-PERL_CALLCONV void	Perl_sharedsv_lock(pTHX_ shared_sv* ssv);
-PERL_CALLCONV void	Perl_sharedsv_unlock(pTHX_ shared_sv* ssv);
-PERL_CALLCONV void	Perl_sharedsv_unlock_scope(pTHX_ shared_sv* ssv);
-PERL_CALLCONV void	Perl_sharedsv_thrcnt_inc(pTHX_ shared_sv* ssv);
-PERL_CALLCONV void	Perl_sharedsv_thrcnt_dec(pTHX_ shared_sv* ssv);
 #endif
 
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)

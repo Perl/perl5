@@ -1,11 +1,286 @@
+/*    sharedsv.c
+ *
+ *    Copyright (c) 2001, Larry Wall
+ *
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
+ *
+ */
 
+/*
+* Contributed by Arthur Bergman arthur@contiller.se
+*
+* "Hand any two wizards a piece of rope and they would instinctively pull in
+* opposite directions."
+*                         --Sourcery
+*
+*/
+
+#define PERL_NO_GET_CONTEXT
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
 
+PerlInterpreter	*PL_sharedsv_space;		/* The shared sv space */
+perl_mutex	 PL_sharedsv_space_mutex;	/* Mutex protecting the shared sv space */
+
+typedef struct {
+    SV                 *sv;             /* The actual SV */
+    perl_mutex          mutex;          /* Our mutex */
+    perl_cond           cond;           /* Our condition variable */
+    perl_cond           user_cond;      /* For user-level conditions */
+    IV                  locks;          /* Number of locks held */
+    PerlInterpreter    *owner;          /* Who owns the lock? */
+    U16                 index;          /* Update index */
+} shared_sv;
+
+#define SHAREDSvGET(a)      (a->sv)
+#define SHAREDSvLOCK(a)     Perl_sharedsv_lock(aTHX_ a)
+#define SHAREDSvUNLOCK(a)   Perl_sharedsv_unlock(aTHX_ a)
+
+#define SHAREDSvEDIT(a)     STMT_START {                                \
+                                MUTEX_LOCK(&PL_sharedsv_space_mutex);   \
+                                SHAREDSvLOCK((a));                      \
+                                PERL_SET_CONTEXT(PL_sharedsv_space);    \
+                            } STMT_END
+
+#define SHAREDSvRELEASE(a)  STMT_START {                                \
+                                PERL_SET_CONTEXT((a)->owner);           \
+                                SHAREDSvUNLOCK((a));                    \
+                                MUTEX_UNLOCK(&PL_sharedsv_space_mutex); \
+                            } STMT_END
+
+extern void	Perl_sharedsv_init(pTHX);
+extern shared_sv*	Perl_sharedsv_new(pTHX);
+extern shared_sv*	Perl_sharedsv_find(pTHX_ SV* sv);
+extern void	Perl_sharedsv_lock(pTHX_ shared_sv* ssv);
+extern void	Perl_sharedsv_unlock(pTHX_ shared_sv* ssv);
+extern void	Perl_sharedsv_unlock_scope(pTHX_ shared_sv* ssv);
+extern void	Perl_sharedsv_thrcnt_inc(pTHX_ shared_sv* ssv);
+extern void	Perl_sharedsv_thrcnt_dec(pTHX_ shared_sv* ssv);
+
+/*
+  Shared SV
+
+  Shared SV is a structure for keeping the backend storage
+  of shared svs.
+
+*/
+
+/*
+
+ =head1 Shared SV Functions
+
+ =for apidoc sharedsv_init 
+
+Saves a space for keeping SVs wider than an interpreter,
+currently only stores a pointer to the first interpreter.
+
+ =cut
+
+*/
+
+void
+Perl_sharedsv_init(pTHX)
+{
+  PerlInterpreter* old_context = PERL_GET_CONTEXT;
+  PL_sharedsv_space = perl_alloc();
+  perl_construct(PL_sharedsv_space);
+  PERL_SET_CONTEXT(old_context);
+  MUTEX_INIT(&PL_sharedsv_space_mutex);
+}
+
+/*
+ =for apidoc sharedsv_new
+
+Allocates a new shared sv struct, you must yourself create the SV/AV/HV.
+ =cut
+*/
+
+shared_sv *
+Perl_sharedsv_new(pTHX)
+{
+    shared_sv* ssv;
+    New(2555,ssv,1,shared_sv);
+    MUTEX_INIT(&ssv->mutex);
+    COND_INIT(&ssv->cond);
+    COND_INIT(&ssv->user_cond);
+    ssv->owner = 0;
+    ssv->locks = 0;
+    ssv->index = 0;
+    return ssv;
+}
+
+
+/*
+ =for apidoc sharedsv_find
+
+Tries to find if a given SV has a shared backend, either by
+looking at magic, or by checking if it is tied again threads::shared.
+
+ =cut
+*/
+
+shared_sv *
+Perl_sharedsv_find(pTHX_ SV* sv)
+{
+  /* does all it can to find a shared_sv struct, returns NULL otherwise */
+    shared_sv* ssv = NULL;
+    switch (SvTYPE(sv)) {
+        case SVt_PVMG:
+        case SVt_PVAV:
+        case SVt_PVHV: {
+            MAGIC* mg = mg_find(sv, PERL_MAGIC_ext);
+            if(mg) {
+	        if(strcmp(mg->mg_ptr,"threads::shared"))
+                    break;
+                ssv = INT2PTR(shared_sv *, SvIV(mg->mg_obj));
+	        break;
+             }
+	
+	     mg = mg_find(sv,PERL_MAGIC_tied);
+             if(mg) {
+                 SV* obj = SvTIED_obj(sv,mg);
+	         if(sv_derived_from(obj, "threads::shared"))
+                     ssv = INT2PTR(shared_sv *, SvIV(SvRV(obj)));
+                 break;
+             }
+	}
+    }
+    return ssv;
+}
+
+/*
+ =for apidoc sharedsv_lock
+
+Recursive locks on a sharedsv.
+Locks are dynamically scoped at the level of the first lock.
+ =cut
+*/
+void
+Perl_sharedsv_lock(pTHX_ shared_sv* ssv)
+{
+    if(!ssv)
+        return;
+    MUTEX_LOCK(&ssv->mutex);
+    if(ssv->owner && ssv->owner == my_perl) {
+        ssv->locks++;
+	MUTEX_UNLOCK(&ssv->mutex);
+        return;
+    }
+    while(ssv->owner)
+      COND_WAIT(&ssv->cond,&ssv->mutex);
+    ssv->locks++;
+    ssv->owner = my_perl;
+    if(ssv->locks == 1)
+        SAVEDESTRUCTOR_X(Perl_sharedsv_unlock_scope,ssv);
+    MUTEX_UNLOCK(&ssv->mutex);
+}
+
+/*
+ =for apidoc sharedsv_unlock
+
+Recursively unlocks a shared sv.
+
+ =cut
+*/
+
+void
+Perl_sharedsv_unlock(pTHX_ shared_sv* ssv)
+{
+    MUTEX_LOCK(&ssv->mutex);
+    if(ssv->owner != my_perl) {
+        Perl_croak(aTHX_ "panic: Perl_sharedsv_unlock unlocking mutex that we don't own");
+        MUTEX_UNLOCK(&ssv->mutex);
+        return;
+    }
+
+    if(--ssv->locks == 0) {
+        ssv->owner = NULL;
+	COND_SIGNAL(&ssv->cond);
+    }
+    MUTEX_UNLOCK(&ssv->mutex);
+ }
+
+void
+Perl_sharedsv_unlock_scope(pTHX_ shared_sv* ssv)
+{
+    MUTEX_LOCK(&ssv->mutex);
+    if(ssv->owner != my_perl) {
+        MUTEX_UNLOCK(&ssv->mutex);
+        return;
+    }
+    ssv->locks = 0;
+    ssv->owner = NULL;
+    COND_SIGNAL(&ssv->cond);
+    MUTEX_UNLOCK(&ssv->mutex);
+}
+
+/*
+ =for apidoc sharedsv_thrcnt_inc
+
+Increments the threadcount of a sharedsv.
+ =cut
+*/
+void
+Perl_sharedsv_thrcnt_inc(pTHX_ shared_sv* ssv)
+{
+  SHAREDSvLOCK(ssv);
+  SvREFCNT_inc(ssv->sv);
+  SHAREDSvUNLOCK(ssv);
+}
+
+/*
+ =for apidoc sharedsv_thrcnt_dec
+
+Decrements the threadcount of a shared sv. When a threads frontend is freed
+this function should be called.
+
+ =cut
+*/
+
+void
+Perl_sharedsv_thrcnt_dec(pTHX_ shared_sv* ssv)
+{
+    SV* sv;
+    SHAREDSvLOCK(ssv);
+    sv = SHAREDSvGET(ssv);
+    if (SvREFCNT(sv) == 1) {
+        switch (SvTYPE(sv)) {
+        case SVt_RV:
+            if (SvROK(sv))
+            Perl_sharedsv_thrcnt_dec(aTHX_ INT2PTR(shared_sv *, SvIV(SvRV(sv))));
+            break;
+        case SVt_PVAV: {
+            SV **src_ary  = AvARRAY((AV *)sv);
+            SSize_t items = AvFILLp((AV *)sv) + 1;
+
+            while (items-- > 0) {
+            if(SvTYPE(*src_ary))
+                Perl_sharedsv_thrcnt_dec(aTHX_ INT2PTR(shared_sv *, SvIV(*src_ary)));
+                src_ary++;
+            }
+            break;
+        }
+        case SVt_PVHV: {
+            HE *entry;
+            (void)hv_iterinit((HV *)sv);
+            while ((entry = hv_iternext((HV *)sv)))
+                Perl_sharedsv_thrcnt_dec(
+                    aTHX_ INT2PTR(shared_sv *, SvIV(hv_iterval((HV *)sv, entry)))
+                );
+            break;
+        }
+        }
+    }
+    Perl_sv_free(PL_sharedsv_space,SHAREDSvGET(ssv));
+    SHAREDSvUNLOCK(ssv);
+}
+
+
 MGVTBL svtable;
 
-SV* shared_sv_attach_sv (SV* sv, shared_sv* shared) {
+SV* Perl_shared_sv_attach_sv (pTHX_ SV* sv, shared_sv* shared) {
     HV* shared_hv = get_hv("threads::shared::shared", FALSE);
     SV* id = newSViv(PTR2IV(shared));
     STRLEN length = sv_len(id);
@@ -99,7 +374,7 @@ int shared_sv_store_mg (pTHX_ SV* sv, MAGIC *mg) {
         shared_sv* target = Perl_sharedsv_find(aTHX_ SvRV(sv));
         if(!target) {
             sv_setsv(sv,SHAREDSvGET(shared));
-            SHAREDSvUNLOCK(shared);            
+            SHAREDSvUNLOCK(shared);
             Perl_croak(aTHX_ "You cannot assign a non shared reference to a shared scalar");
         }
         SHAREDSvEDIT(shared);
@@ -120,7 +395,7 @@ int shared_sv_store_mg (pTHX_ SV* sv, MAGIC *mg) {
 
 int shared_sv_destroy_mg (pTHX_ SV* sv, MAGIC *mg) {
     shared_sv* shared = INT2PTR(shared_sv*, SvIV(mg->mg_obj));
-    if(!shared) 
+    if(!shared)
         return 0;
     {
 	HV* shared_hv = get_hv("threads::shared::shared", FALSE);
@@ -167,7 +442,7 @@ _thrcnt(ref)
         RETVAL = newSViv(SvREFCNT(SHAREDSvGET(shared)));
         SHAREDSvUNLOCK(shared);
 	OUTPUT:
-        RETVAL   
+        RETVAL
 
 
 void
@@ -178,7 +453,7 @@ thrcnt_inc(ref,perl)
 	shared_sv* shared;
 	PerlInterpreter* origperl = INT2PTR(PerlInterpreter*, SvIV(perl));
 	PerlInterpreter* oldperl = PERL_GET_CONTEXT;
-        if(SvROK(ref)) 
+        if(SvROK(ref))
             ref = SvRV(ref);
         shared = Perl_sharedsv_find(aTHX, ref);
         if(!shared)
@@ -196,7 +471,7 @@ _thrcnt_dec(ref)
            croak("thrcnt can only be used on shared values");
 	Perl_sharedsv_thrcnt_dec(aTHX_ shared);
 
-void 
+void
 unlock_enabled(ref)
 	SV* ref
 	PROTOTYPE: \[$@%]
@@ -296,7 +571,7 @@ new(class, value)
 
 MODULE = threads::shared		PACKAGE = threads::shared::av
 
-SV* 
+SV*
 new(class, value)
 	SV* class
 	SV* value
@@ -315,7 +590,7 @@ STORE(self, index, value)
         SV* self
 	SV* index
         SV* value
-        CODE:    
+        CODE:
         shared_sv* shared = INT2PTR(shared_sv*, SvIV(SvRV(self)));
         shared_sv* slot;
         SV* aentry;
@@ -370,7 +645,7 @@ FETCH(self, index)
 	        slot = INT2PTR(shared_sv*, SvIV(aentry));
 		if(SvROK(SHAREDSvGET(slot))) {
 		     shared_sv* target = INT2PTR(shared_sv*, SvIV(SvRV(SHAREDSvGET(slot))));
-		     retval = shared_sv_attach_sv(NULL,target);
+		     retval = Perl_shared_sv_attach_sv(aTHX_ NULL,target);
 		} else {
 	             retval = newSVsv(SHAREDSvGET(slot));
 		}
@@ -453,7 +728,7 @@ POP(self)
 	    slot = INT2PTR(shared_sv*, SvIV(retval));
 	    if(SvROK(SHAREDSvGET(slot))) {
 		 shared_sv* target = INT2PTR(shared_sv*, SvIV(SvRV(SHAREDSvGET(slot))));
-		 retval = shared_sv_attach_sv(NULL,target);
+		 retval = Perl_shared_sv_attach_sv(aTHX_ NULL,target);
 	    } else {
 	         retval = newSVsv(SHAREDSvGET(slot));
             }
@@ -482,7 +757,7 @@ SHIFT(self)
 	    slot = INT2PTR(shared_sv*, SvIV(retval));
             if(SvROK(SHAREDSvGET(slot))) {
                  shared_sv* target = INT2PTR(shared_sv*, SvIV(SvRV(SHAREDSvGET(slot))));
-                 retval = shared_sv_attach_sv(NULL,target);
+                 retval = Perl_shared_sv_attach_sv(aTHX_ NULL,target);
             } else {
                  retval = newSVsv(SHAREDSvGET(slot));
             }
@@ -584,14 +859,14 @@ DELETE(self,index)
 		slot = INT2PTR(shared_sv*, SvIV(tmp));
                 if(SvROK(SHAREDSvGET(slot))) {
                    shared_sv* target = INT2PTR(shared_sv*, SvIV(SvRV(SHAREDSvGET(slot))));
-                   RETVAL = shared_sv_attach_sv(NULL,target);
+                   RETVAL = Perl_shared_sv_attach_sv(aTHX_ NULL,target);
                 } else {
                    RETVAL = newSVsv(SHAREDSvGET(slot));
                 }
-                Perl_sharedsv_thrcnt_dec(aTHX_ slot);               
+                Perl_sharedsv_thrcnt_dec(aTHX_ slot);
 	    } else {
                 RETVAL = &PL_sv_undef;
-	    }	    
+	    }	
 	} else {
 	    RETVAL = &PL_sv_undef;
 	}	
@@ -609,7 +884,7 @@ SPLICE(self, offset, length, ...)
 	
 MODULE = threads::shared		PACKAGE = threads::shared::hv
 
-SV* 
+SV*
 new(class, value)
 	SV* class
 	SV* value
@@ -689,7 +964,7 @@ FETCH(self, key)
                 slot = INT2PTR(shared_sv*, SvIV(hentry));
 		if(SvROK(SHAREDSvGET(slot))) {
 		    shared_sv* target = INT2PTR(shared_sv*, SvIV(SvRV(SHAREDSvGET(slot))));
-		    retval = shared_sv_attach_sv(NULL, target);
+		    retval = Perl_shared_sv_attach_sv(aTHX_ NULL, target);
 		} else {
 	            retval = newSVsv(SHAREDSvGET(slot));
 		}
@@ -802,7 +1077,7 @@ DELETE(self, key)
 		slot = INT2PTR(shared_sv*, SvIV(tmp));
 		if(SvROK(SHAREDSvGET(slot))) {
 		    shared_sv* target = INT2PTR(shared_sv*, SvIV(SvRV(SHAREDSvGET(slot))));
-		    RETVAL = shared_sv_attach_sv(NULL, target);
+		    RETVAL = Perl_shared_sv_attach_sv(aTHX_ NULL, target);
 		} else {
 		    RETVAL = newSVsv(SHAREDSvGET(slot));
 		}
@@ -813,3 +1088,8 @@ DELETE(self, key)
         SHAREDSvUNLOCK(shared);
         OUTPUT:
         RETVAL
+
+BOOT:
+{
+     Perl_sharedsv_init(aTHX);
+}

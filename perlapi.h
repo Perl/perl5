@@ -941,6 +941,8 @@ END_EXTERN_C
 #define PL_do_undump		(*Perl_Gdo_undump_ptr(NULL))
 #undef  PL_hexdigit
 #define PL_hexdigit		(*Perl_Ghexdigit_ptr(NULL))
+#undef  PL_lockhook
+#define PL_lockhook		(*Perl_Glockhook_ptr(NULL))
 #undef  PL_malloc_mutex
 #define PL_malloc_mutex		(*Perl_Gmalloc_mutex_ptr(NULL))
 #undef  PL_op_mutex
@@ -951,12 +953,12 @@ END_EXTERN_C
 #define PL_runops_dbg		(*Perl_Grunops_dbg_ptr(NULL))
 #undef  PL_runops_std
 #define PL_runops_std		(*Perl_Grunops_std_ptr(NULL))
-#undef  PL_sharedsv_space
-#define PL_sharedsv_space	(*Perl_Gsharedsv_space_ptr(NULL))
-#undef  PL_sharedsv_space_mutex
-#define PL_sharedsv_space_mutex	(*Perl_Gsharedsv_space_mutex_ptr(NULL))
+#undef  PL_sharehook
+#define PL_sharehook		(*Perl_Gsharehook_ptr(NULL))
 #undef  PL_thr_key
 #define PL_thr_key		(*Perl_Gthr_key_ptr(NULL))
+#undef  PL_unlockhook
+#define PL_unlockhook		(*Perl_Gunlockhook_ptr(NULL))
 
 #endif /* !PERL_CORE */
 #endif /* MULTIPLICITY */
