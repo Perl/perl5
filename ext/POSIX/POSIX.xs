@@ -2719,9 +2719,16 @@ localeconv()
 	RETVAL
 
 char *
-setlocale(category, locale)
+setlocale(category, locale = 0)
 	int		category
 	char *		locale
+    CODE:
+	RETVAL = setlocale(category, locale);
+	if (RETVAL)
+	    perl_init_fold();
+    OUTPUT:
+	RETVAL
+
 
 double
 acos(x)
