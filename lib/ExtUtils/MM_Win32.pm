@@ -37,9 +37,14 @@ $PERLMAKE = 1 if $Config{'make'} =~ /^pmake/i;
 $OBJ   = 1 if $Config{'ccflags'} =~ /PERL_OBJECT/i;
 
 # a few workarounds for command.com (very basic)
-if (Win32::IsWin95()) {
+{
     package ExtUtils::MM_Win95;
-    unshift @MM::ISA, 'ExtUtils::MM_Win95';
+
+    # the $^O test may be overkill, but we want to be sure Win32::IsWin95()
+    # exists before we try it
+
+    unshift @MM::ISA, 'ExtUtils::MM_Win95'
+	if ($^O =~ /Win32/ && Win32::IsWin95());
 
     sub xs_c {
 	my($self) = shift;
@@ -65,8 +70,6 @@ if (Win32::IsWin95()) {
     sub xs_o {
 	my($self) = shift;
 	return '' unless $self->needs_linking();
-	# Dmake gets confused with 2 ways of making things
-	return '' if $ExtUtils::MM_Win32::DMAKE;
 	'
 .xs$(OBJ_EXT):
 	$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) $(XSUBPP) \\
@@ -74,7 +77,7 @@ if (Win32::IsWin95()) {
 	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.c
 	';
     }
-}
+}	# end of command.com workarounds
 
 sub dlsyms {
     my($self,%attribs) = @_;
@@ -481,6 +484,20 @@ sub dynamic_lib {
     my($inst_dynamic_dep) = $attribs{INST_DYNAMIC_DEP} || "";
     my($ldfrom) = '$(LDFROM)';
     my(@m);
+
+# several things for GCC/Mingw32:
+# 1. use correct CRT startup objects (possibly unnecessary)
+# 2. try to overcome non-relocateable-DLL problems by generating
+#    a (hopefully unique) image-base from the dll's name
+# -- BKS, 10-19-1999
+    if ($GCC) { 
+	$otherldflags .= ' -L$(PERL_ARCHIVE:d) -nostdlib $(PERL_ARCHIVE:d)gdllcrt0.o ';
+	my $dllname = $self->{BASEEXT} . "." . $self->{DLEXT};
+	$dllname =~ /(....)(.{0,4})/;
+	my $baseaddr = unpack("n", $1 ^ $2);
+	$otherldflags .= sprintf("-Wl,--image-base,0x%x0000 ", $baseaddr);
+    }
+
     push(@m,'
 # This section creates the dynamically loadable $(INST_DYNAMIC)
 # from $(OBJECT) and possibly $(MYEXTLIB).

@@ -268,13 +268,6 @@ typedef long		gid_t;
 #  endif
 #endif
 
-#ifndef _O_NOINHERIT
-#  define _O_NOINHERIT	0x0080
-#  ifndef _NO_OLDNAMES
-#    define O_NOINHERIT	_O_NOINHERIT
-#  endif
-#endif
-
 #endif /* __MINGW32__ */
 
 /* compatibility stuff for other compilers goes here */

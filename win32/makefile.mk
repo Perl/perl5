@@ -18,7 +18,7 @@
 ##
 
 #
-# Set these to wherever you want "nmake install" to put your
+# Set these to wherever you want "dmake install" to put your
 # newly built perl.
 #
 INST_DRV	*= c:
@@ -111,9 +111,10 @@ CCTYPE		*= BORLAND
 #CFG		*= Debug
 
 #
-# uncomment to enable use of PerlCRT.DLL when using the Visual C compiler.
-# Highly recommended.  It has patches that fix known bugs in MSVCRT.DLL.
-# This currently requires VC 5.0 with Service Pack 3 or later.
+# uncomment to enable use of PerlCRT.DLL when using the Visual C compiler
+# or GCC/Mingw32. Highly recommended. It has patches that fix known bugs in 
+# MSVCRT.DLL. This currently requires VC 5.0 with Service Pack 3 or later
+# or GCC/Mingw32.
 # Get it from CPAN at http://www.perl.com/CPAN/authors/id/D/DO/DOUGL/
 # and follow the directions in the package to install.
 #
@@ -344,18 +345,31 @@ a = .a
 #
 # Options
 #
-RUNTIME		=
+
+# GCC headers need to know that we're using MSVCRT (or a clone thereof)
+RUNTIME		= -D__MSVCRT__
 INCLUDES	= -I$(COREDIR) -I.\include -I. -I..
 DEFINES		= -DWIN32 $(CRYPT_FLAG)
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 SUBSYS		= console
 CXX_FLAG	= -xc++
 
-# crtdll doesn't define _wopen and friends
-#LIBC		= -lcrtdll
-LIBC		= -lmsvcrt
-LIBFILES	= $(CRYPT_LIB) -ladvapi32 -luser32 -lnetapi32 -lwsock32 \
-		-lmingw32 -lgcc -lmoldname $(LIBC) -lkernel32
+.IF "$(USE_PERLCRT)" == ""
+LIBCDLL	= msvcrt.dll
+CRTIMPLIBS	= $(OLDNAMES_A)
+.ELSE
+LIBCDLL	= PerlCRT.dll
+CRTIMPLIBS	= $(PERLCRT_A) $(OLDNAMES_A)
+.ENDIF
+
+LIBC		= -l$(LIBCDLL:s/.dll//)
+GCCLIBS		= -lmingw32 -lgcc
+
+# same libs as MSVC, but no -luuid32 or -lodbccp32 yet
+LIBFILES	=  $(GCCLIBS) $(CRYPT_LIB) $(LIBC) -loldnames -lkernel32 \
+		-luser32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32 -lshell32 \
+		-lole32 -loleaut32 -lnetapi32 -lwsock32 -lmpr -lwinmm \
+		-lversion -lodbc32
 
 .IF  "$(CFG)" == "Debug"
 OPTIMIZE	= -g $(RUNTIME) -DDEBUGGING
@@ -370,6 +384,9 @@ LINK_FLAGS	= $(LINK_DBG) -L"$(INST_COREDIR)" -L"$(CCLIBDIR)"
 OBJOUT_FLAG	= -o
 EXEOUT_FLAG	= -o
 LIBOUT_FLAG	= 
+
+# tack COREDIR on for perl build
+PRIV_LINK_FLAGS = -L"$(COREDIR)"
 
 .ELSE
 
@@ -430,8 +447,8 @@ LINK_DBG	= -release
 LIBBASEFILES	= $(DELAYLOAD) $(CRYPT_LIB) \
 		oldnames.lib kernel32.lib user32.lib gdi32.lib \
 		winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib \
-		oleaut32.lib netapi32.lib uuid.lib wsock32.lib mpr.lib winmm.lib \
-		version.lib odbc32.lib odbccp32.lib
+		oleaut32.lib netapi32.lib uuid.lib wsock32.lib mpr.lib \
+		winmm.lib version.lib odbc32.lib odbccp32.lib
 
 # we add LIBC here, since we may be using PerlCRT.dll
 LIBFILES	= $(LIBBASEFILES) $(LIBC)
@@ -452,7 +469,18 @@ OPTIMIZE	+= $(CXX_FLAG)
 BUILDOPT	+= -DPERL_OBJECT
 .ENDIF
 
+CRTIMPLIBS	*= __not_needed
+PERLCRT_A	*= $(COREDIR)\libPerlCRT.a
+PERLCRT_DEF	*= PerlCRT.def
+OLDNAMES_A	*= $(COREDIR)\liboldnames.a
+OLDNAMES_DEF	*= oldnames.def
+
 CFLAGS_O	= $(CFLAGS) $(BUILDOPT)
+
+# used to allow local linking flags that are not propogated into Config.pm
+#   -- BKS, 11-15-1999
+PRIV_LINK_FLAGS	*=
+BLINK_FLAGS	= $(PRIV_LINK_FLAGS) $(LINK_FLAGS)
 
 #################### do not edit below this line #######################
 ############# NO USER-SERVICEABLE PARTS BEYOND THIS POINT ##############
@@ -477,14 +505,14 @@ LKPOST		= )
 
 $(o).dll:
 .IF "$(CCTYPE)" == "BORLAND"
-	$(LINK32) -Tpd -ap $(LINK_FLAGS) c0d32$(o) $<,$@,,$(LIBFILES),$(*B).def
+	$(LINK32) -Tpd -ap $(BLINK_FLAGS) c0d32$(o) $<,$@,,$(LIBFILES),$(*B).def
 	$(IMPLIB) $(*B).lib $@
 .ELIF "$(CCTYPE)" == "GCC"
-	$(LINK32) -o $@ $(LINK_FLAGS) $< $(LIBFILES)
+	$(LINK32) -o $@ $(BLINK_FLAGS) $< $(LIBFILES)
 	$(IMPLIB) -def $(*B).def $(*B).a $@
 .ELSE
 	$(LINK32) -dll -subsystem:windows -implib:$(*B).lib -def:$(*B).def \
-	    -out:$@ $(LINK_FLAGS) $(LIBFILES) $< $(LIBPERL)  
+	    -out:$@ $(BLINK_FLAGS) $(LIBFILES) $< $(LIBPERL)  
 .ENDIF
 
 #
@@ -697,6 +725,12 @@ X2P_OBJ		= $(X2P_SRC:db:+$(o))
 PERLDLL_OBJ	= $(CORE_OBJ)
 PERLEXE_OBJ	= perlmain$(o)
 
+.IF "$(CCTYPE)" == "GCC"
+PERLEXE_OBJ	+= .\gcrt0$(o)
+MINI_OBJ	+= $(MINIDIR)\gcrt0$(o)
+DLL_OBJ		+= .\gdllcrt0$(o)
+.ENDIF
+
 PERLDLL_OBJ	+= $(WIN32_OBJ) $(DLL_OBJ)
 
 .IF "$(USE_SETARGV)" != ""
@@ -786,68 +820,146 @@ POD2MAN		= $(PODDIR)\pod2man
 POD2LATEX	= $(PODDIR)\pod2latex
 POD2TEXT	= $(PODDIR)\pod2text
 
+# vars must be separated by "\t+~\t+", since we're using the tempfile
+# version of config_sh.pl (we were overflowing someone's buffer by
+# trying to fit them all on the command line)
+#	-- BKS 10-17-1999
 CFG_VARS	=					\
-		"INST_DRV=$(INST_DRV)"			\
-		"INST_TOP=$(INST_TOP)"			\
-		"INST_VER=$(INST_VER)"			\
-		"INST_ARCH=$(INST_ARCH)"		\
-		"archname=$(ARCHNAME)"			\
-		"cc=$(CC)"				\
-		"ccflags=$(OPTIMIZE:s/"/\"/) $(DEFINES) $(BUILDOPT)"	\
-		"cf_email=$(EMAIL)"			\
-		"d_crypt=$(D_CRYPT)"			\
-		"d_mymalloc=$(PERL_MALLOC)"		\
-		"libs=$(LIBFILES:f)"			\
-		"incpath=$(CCINCDIR:s/"/\"/)"		\
-		"libperl=$(PERLIMPLIB:f)"		\
-		"libpth=$(CCLIBDIR:s/"/\"/);$(EXTRALIBDIRS:s/"/\"/)"	\
-		"libc=$(LIBC)"				\
-		"make=dmake"				\
-		"_o=$(o)" "obj_ext=$(o)"		\
-		"_a=$(a)" "lib_ext=$(a)"		\
-		"static_ext=$(STATIC_EXT)"		\
-		"dynamic_ext=$(DYNAMIC_EXT)"		\
-		"nonxs_ext=$(NONXS_EXT)"		\
-		"usethreads=$(USE_THREADS)"		\
-		"usemultiplicity=$(USE_MULTI)"		\
-		"LINK_FLAGS=$(LINK_FLAGS:s/"/\"/)"		\
-		"optimize=$(OPTIMIZE:s/"/\"/)"
+		INST_DRV=$(INST_DRV)		~	\
+		INST_TOP=$(INST_TOP)		~	\
+		INST_VER=$(INST_VER:s/\/\\/)	~	\
+		INST_ARCH=$(INST_ARCH)		~	\
+		archname=$(ARCHNAME)		~	\
+		cc=$(CC)			~	\
+		ccflags=$(OPTIMIZE) $(DEFINES) $(BUILDOPT)	~	\
+		cf_email=$(EMAIL)		~	\
+		d_crypt=$(D_CRYPT)		~	\
+		d_mymalloc=$(PERL_MALLOC)	~	\
+		libs=$(LIBFILES:f)		~	\
+		incpath=$(CCINCDIR)		~	\
+		libperl=$(PERLIMPLIB:f)		~	\
+		libpth=$(CCLIBDIR);$(EXTRALIBDIRS)		~	\
+		libc=$(LIBC)			~	\
+		make=dmake			~	\
+		_o=$(o)	obj_ext=$(o)		~	\
+		_a=$(a)	lib_ext=$(a)		~	\
+		static_ext=$(STATIC_EXT)	~	\
+		dynamic_ext=$(DYNAMIC_EXT)	~	\
+		nonxs_ext=$(NONXS_EXT)		~	\
+		usethreads=$(USE_THREADS)	~	\
+		usemultiplicity=$(USE_MULTI)	~	\
+		LINK_FLAGS=$(LINK_FLAGS:s/\/\\/)		~	\
+		optimize=$(OPTIMIZE)
+
+#
+# set up targets varying between Win95 and WinNT builds
+#
+
+.IF "$(IS_WIN95)" == "define"
+MK2 		= .\makefile.95
+RIGHTMAKE	= __switch_makefiles
+NOOP		= @rem
+.ELSE
+MK2		= __not_needed
+RIGHTMAKE	= __not_needed
+.ENDIF
 
 #
 # Top targets
 #
 
-.IF "$(IS_WIN95)" != ""
-MK2		= .\makew95.mk
-
-all : .\config.h $(GLOBEXE) $(MINIMOD) $(MK2)
-all2 : $(CONFIGPM) $(PERLEXE) $(PERL95EXE) $(X2P) $(EXTENSION_DLL) \
-	$(EXTENSIOM_PM)
-.ELSE
-all : .\config.h $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(PERLEXE) $(PERL95EXE) \
+all : $(CRTIMPLIBS) .\config.h $(GLOBEXE) $(MINIPERL) $(MK2)		\
+	$(RIGHTMAKE) $(MINIMOD) $(CONFIGPM) $(PERLEXE) $(PERL95EXE)	\
 	$(X2P) $(EXTENSION_DLL) $(EXTENSION_PM)
-.ENDIF
 
 $(DYNALOADER)$(o) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
 
-#------------------------------------------------------------
+#----------------------------------------------------------------
 
-# This target is used to generate the makew95.mk for Win95
-.IF "$(IS_WIN95)" != ""
-$(MK2): makefile.mk
-	$(MINIPERL) genmk95.pl makefile.mk $(MK2)
-	$(MAKE) -f $(MK2) all2
+#-------------------- BEGIN Win95 SPECIFIC ----------------------
+
+# this target is a jump-off point for Win95
+#  1. it switches to the Win95-specific makefile if it exists
+#     (__do_switc_makefiles)
+#  2. it prints a message when the Win95-specific one finishes (__done)
+#  3. it then kills this makefile by trying to make __no_such_target
+
+__switch_makefiles: __do_switch_makefiles __done __no_such_target
+
+__do_switch_makefiles:
+.IF "$(NOTFIRST)" != "true"
+	if exist $(MK2) $(MAKE:s/-S//) -f $(MK2) $(MAKETARGETS) NOTFIRST=true
+.ELSE
+	$(NOOP)
 .ENDIF
+
+.IF "$(NOTFIRST)" != "true"
+__done:
+	@echo Build process complete. Ignore any errors after this message.
+	@echo Run "dmake test" to test and "dmake install" to install
+
+.ELSE
+# dummy targets for Win95-specific makefile
+
+__done:
+	$(NOOP)
+
+__no_such_target:
+	$(NOOP)
+
+.ENDIF
+
+# This target is used to generate the new makefile (.\makefile.95) for Win95
+
+.\makefile.95: .\makefile.mk
+	$(MINIPERL) genmk95.pl makefile.mk $(MK2)
+
+#--------------------- END Win95 SPECIFIC ---------------------
+
+#--------------------- BEGIN GCC/Mingw32 SPECIFIC -------------
+
+# make GCC-ish implib for PerlCRT.dll if needed
+$(PERLCRT_A): $(PERLCRT_DEF)
+	if not exist $(COREDIR) mkdir $(COREDIR)
+	$(IMPLIB) --def $(PERLCRT_DEF)	\
+		--dllname $(LIBCDLL)		\
+		--output-lib $(PERLCRT_A)
+
+# make GCC-ish oldnames implib for our CRT (whether it's MSVCRT or PerlCRT)
+$(OLDNAMES_A): $(OLDNAMES_DEF)
+	$(IMPLIB) --def $(OLDNAMES_DEF)	\
+		--dllname $(LIBCDLL)		\
+		--output-lib $(OLDNAMES_A)	\
+		--add-underscore
+
+# MSVCRT-using runtime startup files
+$(MINIDIR)\gcrt0$(o): .\gstartup.c
+	$(CC) -c $(CFLAGS) -DEXESTARTUP $(OBJOUT_FLAG)$@ .\gstartup.c
+
+.\gcrt0$(o): .\gstartup.c
+	$(CC) -c $(CFLAGS) -DEXESTARTUP $(OBJOUT_FLAG)$@ .\gstartup.c
+
+.\gdllcrt0$(o): .\gstartup.c
+	$(CC) -c $(CFLAGS) -DDLLSTARTUP $(OBJOUT_FLAG)$@ .\gstartup.c
+	$(XCOPY) $@ $(COREDIR)
+
+
+#--------------------- END GCC/Mingw32 SPECIFIC ---------------
+
+# a blank target for when builds don't need to do certain things
+# this target added for Win95 port but used to keep the WinNT port able to 
+# use this file
+__not_needed:
 
 $(GLOBEXE) : perlglob$(o)
 .IF "$(CCTYPE)" == "BORLAND"
 	$(CC) -c -w -v -tWM -I"$(CCINCDIR)" perlglob.c
-	$(LINK32) -Tpe -ap $(LINK_FLAGS) c0x32$(o) perlglob$(o) \
+	$(LINK32) -Tpe -ap $(BLINK_FLAGS) c0x32$(o) perlglob$(o) \
 	    "$(CCLIBDIR)\32BIT\wildargs$(o)",$@,,import32.lib cw32mt.lib,
 .ELIF "$(CCTYPE)" == "GCC"
-	$(LINK32) $(LINK_FLAGS) -o $@ perlglob$(o) $(LIBFILES)
+	$(LINK32) $(BLINK_FLAGS) -o $@ perlglob$(o) $(LIBFILES)
 .ELSE
-	$(LINK32) $(LINK_FLAGS) $(LIBFILES) -out:$@ -subsystem:$(SUBSYS) \
+	$(LINK32) $(BLINK_FLAGS) $(LIBFILES) -out:$@ -subsystem:$(SUBSYS) \
 	    perlglob$(o) setargv$(o) 
 .ENDIF
 
@@ -861,7 +973,8 @@ config.w32 : $(CFGSH_TMPL)
 	copy $(CFGH_TMPL) config.h
 
 ..\config.sh : config.w32 $(MINIPERL) config_sh.PL
-	$(MINIPERL) -I..\lib config_sh.PL $(CFG_VARS) config.w32 > ..\config.sh
+	$(MINIPERL) -I..\lib config_sh.PL --cfgsh-option-file \
+	    $(mktmp $(CFG_VARS)) config.w32 > ..\config.sh
 
 # this target is for when changes to the main config.sh happen
 # edit config.{b,v,g}c and make this target once for each supported
@@ -885,16 +998,16 @@ $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 	$(MINIPERL) -I..\lib config_h.PL "INST_VER=$(INST_VER)" \
 	    || $(MAKE) $(MAKEMACROS) $(CONFIGPM) $(MAKEFILE)
 
-$(MINIPERL) : $(MINIDIR) $(MINI_OBJ)
+$(MINIPERL) : $(MINIDIR) $(MINI_OBJ) $(CRTIPMLIBS)
 .IF "$(CCTYPE)" == "BORLAND"
-	$(LINK32) -Tpe -ap $(LINK_FLAGS) \
+	$(LINK32) -Tpe -ap $(BLINK_FLAGS) \
 	    @$(mktmp c0x32$(o) $(MINI_OBJ:s,\,\\),$(@:s,\,\\),,$(LIBFILES),)
 .ELIF "$(CCTYPE)" == "GCC"
-	$(LINK32) -v -o $@ $(LINK_FLAGS) \
-	    $(mktmp $(LKPRE) $(MINI_OBJ:s,\,\\) $(LIBFILES) $(LKPOST))
+	$(LINK32) -v -nostdlib -o $@ $(BLINK_FLAGS) \
+	    $(mktmp $(LKPRE) $(MINI_OBJ:s,\,\\) $(LIBFILES) $(LKPOST)) 
 .ELSE
 	$(LINK32) -subsystem:console -out:$@ \
-	    @$(mktmp $(LINK_FLAGS) $(LIBFILES) $(MINI_OBJ:s,\,\\))
+	    @$(mktmp $(BLINK_FLAGS) $(LIBFILES) $(MINI_OBJ:s,\,\\))
 .ENDIF
 
 $(MINIDIR) :
@@ -973,14 +1086,14 @@ $(X2P) : $(MINIPERL) $(X2P_OBJ)
 	$(MINIPERL) ..\x2p\find2perl.PL
 	$(MINIPERL) ..\x2p\s2p.PL
 .IF "$(CCTYPE)" == "BORLAND"
-	$(LINK32) -Tpe -ap $(LINK_FLAGS) \
+	$(LINK32) -Tpe -ap $(BLINK_FLAGS) \
 	    @$(mktmp c0x32$(o) $(X2P_OBJ:s,\,\\),$(@:s,\,\\),,$(LIBFILES),)
 .ELIF "$(CCTYPE)" == "GCC"
-	$(LINK32) -v -o $@ $(LINK_FLAGS) \
+	$(LINK32) -v -o $@ $(BLINK_FLAGS) \
 	    $(mktmp $(LKPRE) $(X2P_OBJ:s,\,\\) $(LIBFILES) $(LKPOST))
 .ELSE
 	$(LINK32) -subsystem:console -out:$@ \
-	    @$(mktmp $(LINK_FLAGS) $(LIBFILES) $(X2P_OBJ:s,\,\\))
+	    @$(mktmp $(BLINK_FLAGS) $(LIBFILES) $(X2P_OBJ:s,\,\\))
 .ENDIF
 
 perlmain.c : runperl.c 
@@ -991,15 +1104,15 @@ perlmain$(o) : perlmain.c
 
 $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ)
 .IF "$(CCTYPE)" == "BORLAND"
-	$(LINK32) -Tpe -ap $(LINK_FLAGS) \
+	$(LINK32) -Tpe -ap $(BLINK_FLAGS) \
 	    @$(mktmp c0x32$(o) $(PERLEXE_OBJ:s,\,\\)\n \
 	    $(@:s,\,\\),\n \
 	    $(PERLIMPLIB) $(LIBFILES)\n)
 .ELIF "$(CCTYPE)" == "GCC"
-	$(LINK32) -o $@ $(LINK_FLAGS)  \
+	$(LINK32) -nostdlib -o $@ $(BLINK_FLAGS)  \
 	    $(PERLEXE_OBJ) $(PERLIMPLIB) $(LIBFILES)
 .ELSE
-	$(LINK32) -subsystem:console -out:$@ $(LINK_FLAGS) $(LIBFILES) \
+	$(LINK32) -subsystem:console -out:$@ $(BLINK_FLAGS) $(LIBFILES) \
 	    $(PERLEXE_OBJ) $(SETARGV_OBJ) $(PERLIMPLIB) 
 	copy $(PERLEXE) $(WPERLEXE)
 	editbin /subsystem:windows $(WPERLEXE)
@@ -1030,7 +1143,7 @@ DynaLoadmt$(o) : $(DYNALOADER).c
 	    $(OBJOUT_FLAG)DynaLoadmt$(o) $(DYNALOADER).c
 
 $(PERL95EXE): $(PERLDLL) $(CONFIGPM) $(PERL95_OBJ)
-	$(LINK32) -subsystem:console -nodefaultlib -out:$@ $(LINK_FLAGS) \
+	$(LINK32) -subsystem:console -nodefaultlib -out:$@ $(BLINK_FLAGS) \
 	    $(LIBBASEFILES) $(PERL95_OBJ) $(SETARGV_OBJ) $(PERLIMPLIB) \
 	    libcmt.lib
 
@@ -1179,7 +1292,7 @@ distclean: clean
 
 install : all installbare installhtml
 
-installbare : utils
+installbare : $(RIGHTMAKE) utils
 	$(PERLEXE) ..\installperl
 .IF "$(PERL95EXE)" != ""
 	$(XCOPY) $(PERL95EXE) $(INST_BIN)\*.*
@@ -1217,7 +1330,7 @@ test-prep : all utils
 	$(XCOPY) $(GLOBEXE) ..\t\$(NULL)
 .ENDIF
 
-test : test-prep
+test : $(RIGHTMAKE) test-prep
 	cd ..\t && $(PERLEXE) -I..\lib harness
 
 test-notty : test-prep

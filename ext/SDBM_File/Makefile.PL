@@ -20,13 +20,26 @@ WriteMakefile(
              );
 
 sub MY::postamble {
-  if ($^O ne 'VMS') {
+  if ($^O =~ /MSWin32/ && Win32::IsWin95()) {
+    # XXX: dmake-specific, like rest of Win95 port
+    return
+    '
+$(MYEXTLIB): sdbm/Makefile
+@[
+	cd sdbm
+	$(MAKE) all
+	cd ..
+]
+';
+  }
+  elsif ($^O ne 'VMS') {
     '
 $(MYEXTLIB): sdbm/Makefile
 	cd sdbm && $(MAKE) all
 ';
-  } else {
-  '   
+  }
+  else {
+    '   
 $(MYEXTLIB) : [.sdbm]descrip.mms
 	set def [.sdbm]
     $(MMS) all
