@@ -91,7 +91,6 @@ perl_key self_key;
 void
 Perl_ithread_destruct (pTHX_ ithread* thread, const char *why)
 {
-        PerlInterpreter* destroyperl = NULL;        
 	MUTEX_LOCK(&thread->mutex);
 	if (!thread->next) {
 	    Perl_croak(aTHX_ "panic: destruct destroyed thread %p (%s)",thread, why);
@@ -123,26 +122,25 @@ Perl_ithread_destruct (pTHX_ ithread* thread, const char *why)
 #endif
 	MUTEX_UNLOCK(&create_destruct_mutex);
 	/* Thread is now disowned */
-	if (thread->interp) {
+
+	if(thread->interp) {
 	    dTHXa(thread->interp);
+	    ithread*        current_thread;
 	    PERL_SET_CONTEXT(thread->interp);
+	    PERL_THREAD_GETSPECIFIC(self_key,current_thread);
+	    PERL_THREAD_SETSPECIFIC(self_key,thread);
 	    SvREFCNT_dec(thread->params);
 	    thread->params = Nullsv;
-	    destroyperl = thread->interp;
+	    perl_destruct(thread->interp);
+            perl_free(thread->interp);
 	    thread->interp = NULL;
+	    PERL_THREAD_SETSPECIFIC(self_key,current_thread);
+
 	}
 	MUTEX_UNLOCK(&thread->mutex);
 	MUTEX_DESTROY(&thread->mutex);
         PerlMemShared_free(thread);
-	if(destroyperl) {
-	    ithread*        current_thread;
-	    PERL_THREAD_GETSPECIFIC(self_key,current_thread);
-	    PERL_THREAD_SETSPECIFIC(self_key,thread);
-	    perl_destruct(destroyperl);
-            perl_free(destroyperl);
-	    PERL_THREAD_SETSPECIFIC(self_key,current_thread);
 
-	}
 	PERL_SET_CONTEXT(aTHX);
 }
 

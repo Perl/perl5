@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq5 - Files and Formats ($Revision: 1.27 $, $Date: 2002/12/06 07:40:11 $)
+perlfaq5 - Files and Formats ($Revision: 1.28 $, $Date: 2003/01/26 17:45:46 $)
 
 =head1 DESCRIPTION
 
@@ -434,7 +434,7 @@ isn't as exclusive as you might wish.
 
 See also the new L<perlopentut> if you have it (new for 5.6).
 
-=head2 Why do I sometimes get an "Argument list too long" when I use <*>?
+=head2 Why do I sometimes get an "Argument list too long" when I use E<lt>*E<gt>?
 
 The C<< <> >> operator performs a globbing operation (see above).
 In Perl versions earlier than v5.6.0, the internal glob() operator forks
@@ -537,7 +537,7 @@ L<perlopentut/"File Locking"> if you have it (new for 5.6).
 
 =back
 
-=head2 Why can't I just open(FH, ">file.lock")?
+=head2 Why can't I just open(FH, "E<gt>file.lock")?
 
 A common bit of code B<NOT TO USE> is this:
 

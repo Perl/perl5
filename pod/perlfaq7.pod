@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq7 - General Perl Language Issues ($Revision: 1.12 $, $Date: 2002/12/06 07:40:11 $)
+perlfaq7 - General Perl Language Issues ($Revision: 1.13 $, $Date: 2003/01/26 17:45:46 $)
 
 =head1 DESCRIPTION
 
@@ -519,7 +519,7 @@ However, dynamic variables (aka global, local, or package variables)
 are effectively shallowly bound.  Consider this just one more reason
 not to use them.  See the answer to L<"What's a closure?">.
 
-=head2 Why doesn't "my($foo) = <FILE>;" work right?
+=head2 Why doesn't "my($foo) = E<lt>FILEE<gt>;" work right?
 
 C<my()> and C<local()> give list context to the right hand side
 of C<=>.  The <FH> read operation, like so many of Perl's

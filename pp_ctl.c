@@ -1578,7 +1578,7 @@ PP(pp_dbstate)
 
 	push_return(PL_op->op_next);
 	PUSHBLOCK(cx, CXt_SUB, SP);
-	PUSHSUB(cx);
+	PUSHSUB_DB(cx);
 	CvDEPTH(cv)++;
 	(void)SvREFCNT_inc(cv);
 	SAVEVPTR(PL_curpad);

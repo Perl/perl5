@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..968\n";
+print "1..972\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3054,5 +3054,11 @@ print "\x{072F}" =~ /\P{Syriac1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
     ok($a !~ /^\C{4}y/,     q{don't match \C{4}y});
 }
 
-# last test 968
+$_ = 'aaaaaaaaaa';
+utf8::upgrade($_); chop $_; $\="\n";
+ok(/[^\s]+/, "m/[^\s]/ utf8");
+ok(/[^\d]+/, "m/[^\d]/ utf8");
+ok(($a = $_, $_ =~ s/[^\s]+/./g), "s/[^\s]/ utf8");
+ok(($a = $_, $a =~ s/[^\d]+/./g), "s/[^\s]/ utf8");
 
+# last test 972

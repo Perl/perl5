@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq - frequently asked questions about Perl ($Date: 2003/01/03 20:00:25 $)
+perlfaq - frequently asked questions about Perl ($Date: 2003/01/26 17:45:46 $)
 
 =head1 DESCRIPTION
 
@@ -516,7 +516,7 @@ What's wrong with always quoting "$vars"?
 
 =item *
 
-Why don't my <<HERE documents work?
+Why don't my E<lt>E<lt>HERE documents work?
 
 =item *
 
@@ -733,7 +733,7 @@ How come when I open a file read-write it wipes it out?
 
 =item *
 
-Why do I sometimes get an "Argument list too long" when I use <*>?
+Why do I sometimes get an "Argument list too long" when I use E<lt>*E<gt>?
 
 =item *
 
@@ -753,7 +753,7 @@ How can I lock a file?
 
 =item *
 
-Why can't I just open(FH, ">file.lock")?
+Why can't I just open(FH, "E<gt>file.lock")?
 
 =item *
 
@@ -1012,7 +1012,7 @@ What's the difference between deep and shallow binding?
 
 =item *
 
-Why doesn't "my($foo) = <FILE>;" work right?
+Why doesn't "my($foo) = E<lt>FILEE<gt>;" work right?
 
 =item *
 

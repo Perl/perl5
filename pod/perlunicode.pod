@@ -178,7 +178,7 @@ You can also use negation in both C<\p{}> and C<\P{}> by introducing a caret
 equal to C<\P{Tamil}>.
 
 Here are the basic Unicode General Category properties, followed by their
-long form.  You can use either; C<\p{Lu}> and C<\p{LowercaseLetter}>,
+long form.  You can use either; C<\p{Lu}> and C<\p{UppercaseLetter}>,
 for instance, are identical.
 
     Short       Long
