@@ -226,7 +226,7 @@ libswanted="`echo $libswanted | sed -e 's/ ndbm / /'`"
 lddlflags='-shared -expect_unresolved "*"'
 
 # Intentional leading tab.
-	myosvers="`/usr/sbin/sizer -v 2>/dev/null || head -1 /etc/motd`"
+	myosvers="`/usr/sbin/sizer -v 2>/dev/null || uname -r`"
 
 # Fancy compiler suites use optimising linker as well as compiler.
 # <spider@Orb.Nashua.NH.US>
@@ -255,6 +255,10 @@ esac
 # Yes, the above loses if gcc does not use the system linker.
 # If that happens, let me know about it. <jhi@iki.fi>
 
+# Because there is no other handy way to recognize 3.X.
+case "`uname -r`" in
+*3.*)	ccflags="$ccflags -DDEC_OSF1_3_X" ;;
+esac
 
 # If debugging or (old systems and doing shared)
 # then do not strip the lib, otherwise, strip.

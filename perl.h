@@ -672,6 +672,14 @@ int usleep(unsigned int);
 #  define WIN32SCK_IS_STDSCK		/* don't pull in custom wsock layer */
 #endif
 
+/* In Tru64 use the 4.4BSD struct msghdr, not the 4.3 one.
+ * This is important for using IPv6. 
+ * For OSF/1 3.2, however, defining _SOCKADDR_LEN would be
+ * a bad idea since it breaks send() and recv(). */
+#if defined(__osf__) && defined(__alpha) && !defined(_SOCKADDR_LEN) && !defined(DEC_OSF1_3_X)
+#   define _SOCKADDR_LEN
+#endif
+
 #if defined(HAS_SOCKET) && !defined(VMS) && !defined(WIN32) /* VMS/WIN32 handle sockets via vmsish.h/win32.h */
 # include <sys/socket.h>
 # if defined(USE_SOCKS) && defined(I_SOCKS)
