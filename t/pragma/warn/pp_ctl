@@ -86,7 +86,7 @@ Exiting subroutine via last at - line 3.
 ########
 # pp_ctl.c
 use warning 'unsafe' ;
-{ eval "last" } 
+{ eval "last;" } 
 print STDERR $@ ;
 EXPECT
 Exiting eval via last at (eval 1) line 1.
@@ -119,10 +119,10 @@ Exiting subroutine via last at - line 3.
 ########
 # pp_ctl.c
 use warning 'unsafe' ;
-joe: { eval "last joe" }
+joe: { eval "last joe;" }
 print STDERR $@ ;
 EXPECT
-Exiting eval via last at (eval 1) line 2.
+Exiting eval via last at (eval 1) line 1.
 ########
 # pp_ctl.c
 use warning 'unsafe' ;
