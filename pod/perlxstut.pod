@@ -476,7 +476,7 @@ section on the argument stack.
 In general, it's not a good idea to write extensions that modify their input
 parameters, as in Example 3.  Instead, you should probably return multiple
 values in an array and let the caller handle them (we'll do this in a later
-example).  However, in order to better accomodate calling pre-existing C
+example).  However, in order to better accommodate calling pre-existing C
 routines, which often do modify their input parameters, this behavior is
 tolerated.
 

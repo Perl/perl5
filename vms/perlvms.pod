@@ -569,7 +569,7 @@ invoked using C<MCR> or a text file which should be passed to DCL
 as a command procedure.
 
 If LIST consists of the empty string, C<system> spawns an
-interactive DCL subprocess, in the same fashion as typiing
+interactive DCL subprocess, in the same fashion as typing
 B<SPAWN> at the DCL prompt.
 
 Perl waits for the subprocess to complete before continuing
@@ -597,7 +597,7 @@ not appear separately in the "child time" field, depending on
 whether L<times> keeps track of subprocesses separately.  Note
 especially that the VAXCRTL (at least) keeps track only of
 subprocesses spawned using L<fork> and L<exec>; it will not
-accumulate the times of suprocesses spawned via pipes, L<system>,
+accumulate the times of subprocesses spawned via pipes, L<system>,
 or backticks.
 
 =item unlink LIST
@@ -661,7 +661,7 @@ The FLAGS argument is ignored in all cases.
 
 The following VMS-specific information applies to the indicated
 "special" Perl variables, in addition to the general information
-in L<perlvar>.  Where there is a conflict, this infrmation
+in L<perlvar>.  Where there is a conflict, this information
 takes precedence.
 
 =over 4

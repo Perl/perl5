@@ -534,7 +534,7 @@ the parameters in the correct order for that function.
 =head2 The PREINIT: Keyword
 
 The PREINIT: keyword allows extra variables to be declared immediately
-before or after the declartions of the parameters from the INPUT: section
+before or after the declarations of the parameters from the INPUT: section
 are emitted.
 
 If a variable is declared inside a CODE: section it will follow any typemap

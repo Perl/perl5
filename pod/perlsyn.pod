@@ -172,7 +172,7 @@ If the LABEL is omitted, the loop control statement
 refers to the innermost enclosing loop.  This may include dynamically
 looking back your call-stack at run time to find the LABEL.  Such
 desperate behavior triggers a warning if you use the C<use warnings>
-praga or the B<-w> flag.
+pragma or the B<-w> flag.
 Unlike a C<foreach> statement, a C<while> statement never implicitly
 localises any variables.
 
@@ -483,7 +483,7 @@ Or
 
 Or if you are certainly that all the C<&&> clauses are true, you can use
 something like this, which "switches" on the value of the
-C<HTTP_USER_AGENT> envariable.
+C<HTTP_USER_AGENT> environment variable.
 
     #!/usr/bin/perl 
     # pick out jargon file page based on browser
