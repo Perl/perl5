@@ -35,7 +35,7 @@ FileHandle - supply object methods for filehandles
     ($readfh, $writefh) = FileHandle::pipe;
 
     autoflush STDOUT 1;
-  
+
 =head1 DESCRIPTION
 
 C<FileHandle::new> creates a C<FileHandle>, which is a reference to a
@@ -131,8 +131,8 @@ class from C<FileHandle> and inherit those methods.
 =cut
 
 require 5.000;
+use vars qw($VERSION @EXPORT @EXPORT_OK $AUTOLOAD);
 use Carp;
-use Fcntl;
 use Symbol;
 use English;
 use SelectSaver;
@@ -141,8 +141,9 @@ require Exporter;
 require DynaLoader;
 @ISA = qw(Exporter DynaLoader);
 
-@EXPORT = (@Fcntl::EXPORT,
-	   qw(_IOFBF _IOLBF _IONBF));
+$VERSION = "1.00" ;
+
+@EXPORT = qw(_IOFBF _IOLBF _IONBF);
 
 @EXPORT_OK = qw(
     autoflush
@@ -166,10 +167,31 @@ require DynaLoader;
 
 
 ################################################
+## If the Fcntl extension is available,
+##  export its constants.
+##
+
+sub import {
+    my $pkg = shift;
+    my $callpkg = caller;
+    Exporter::export $pkg, $callpkg;
+    eval {
+	require Fcntl;
+	Exporter::export 'Fcntl', $callpkg;
+    };
+};
+
+
+################################################
 ## Interaction with the XS.
 ##
 
-bootstrap FileHandle;
+eval {
+    bootstrap FileHandle;
+};
+if ($@) {
+    *constant = sub { undef };
+}
 
 sub AUTOLOAD {
     if ($AUTOLOAD =~ /::(_?[a-z])/) {
