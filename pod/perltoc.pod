@@ -827,13 +827,15 @@ file on another machine?
 
 =item $PERL5OPT environment variable
 
+=item Limitations on B<-M>, and C<-m>, and B<-T> options
+
 =item More precise warnings
 
 =item Deprecated: Inherited C<AUTOLOAD> for non-methods
 
 =item Subroutine arguments created only when they're modified
 
-=item C<$)> is writable
+=item Group vector changeable with C<$)>
 
 =item Fixed parsing of $$<digit>, &$<digit>, etc.
 
@@ -1322,7 +1324,7 @@ strict, subs, vmsish, vars
 =item Standard Modules
 
 AnyDBM_File, AutoLoader, AutoSplit, Benchmark, CPAN, CPAN::FirstTime,
-CPAN::Nox, Carp, Class::Template, Config, Cwd, DB_File, Devel::SelfStubber,
+CPAN::Nox, Carp, Class::Struct, Config, Cwd, DB_File, Devel::SelfStubber,
 DirHandle, DynaLoader, English, Env, Exporter, ExtUtils::Embed,
 ExtUtils::Install, ExtUtils::Liblist, ExtUtils::MM_OS2, ExtUtils::MM_Unix,
 ExtUtils::MM_VMS, ExtUtils::MakeMaker, ExtUtils::Manifest,
@@ -1696,7 +1698,7 @@ more elaborate constructs
 
 =over
 
-=item Class::Template
+=item Class::Struct
 
 =item Data Members as Variables
 
@@ -3112,17 +3114,28 @@ module
 
 =item DESCRIPTION
 
-=head2 Class::Template - struct/member template builder
+=head2 Class::Struct - declare struct-like datatypes as Perl classes
 
 =item SYNOPSIS
 
 =item DESCRIPTION
 
+=over
+
+=item The C<struct()> function
+
+=item Element Types and Accessor Methods
+
+Scalar (C<'$'> or C<'*$'>), Array (C<'@'> or C<'*@'>), Hash (C<'%'> or
+C<'*%'>), Class (C<'Class_Name'> or C<'*Class_Name'>)
+
+=back
+
 =item EXAMPLES
 
 Example 1, Example 2
 
-=item NOTES
+=item Author and Modification History
 
 =head2 Config - access Perl configuration information
 
@@ -3801,8 +3814,9 @@ new (), new_from_fd ( FD, MODE )
 
 =item METHODS
 
-$fh->getline, $fh->getlines, $fh->fdopen ( FD, MODE ), $fh->write ( BUF,
-LEN [, OFFSET }\] ), $fh->opened, $fh->untaint
+$fh->fdopen ( FD, MODE ), $fh->opened, $fh->getline, $fh->getlines,
+$fh->ungetc ( ORD ), $fh->write ( BUF, LEN [, OFFSET }\] ), $fh->flush,
+$fh->error, $fh->clearerr, $fh->untaint
 
 =item NOTE
 
@@ -3935,8 +3949,9 @@ new (), new_from_fd ( FD, MODE )
 
 =item METHODS
 
-$fh->getline, $fh->getlines, $fh->fdopen ( FD, MODE ), $fh->write ( BUF,
-LEN [, OFFSET }\] ), $fh->opened, $fh->untaint
+$fh->fdopen ( FD, MODE ), $fh->opened, $fh->getline, $fh->getlines,
+$fh->ungetc ( ORD ), $fh->write ( BUF, LEN [, OFFSET }\] ), $fh->flush,
+$fh->error, $fh->clearerr, $fh->untaint
 
 =item NOTE
 

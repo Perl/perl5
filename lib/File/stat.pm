@@ -3,8 +3,7 @@ use strict;
 
 BEGIN { 
     use Exporter   ();
-    use vars       qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
-    @ISA         = qw(Exporter);
+    use vars       qw(@EXPORT @EXPORT_OK %EXPORT_TAGS);
     @EXPORT      = qw(stat lstat);
     @EXPORT_OK   = qw( $st_dev	   $st_ino    $st_mode 
 		       $st_nlink   $st_uid    $st_gid 
@@ -16,7 +15,10 @@ BEGIN {
 }
 use vars      @EXPORT_OK;
 
-use Class::Template qw(struct);
+# Class::Struct forbids use of @ISA
+sub import { goto &Exporter::import }
+
+use Class::Struct qw(struct);
 struct 'File::stat' => [
      map { $_ => '$' } qw{
 	 dev ino mode nlink uid gid rdev size
@@ -103,7 +105,7 @@ via the C<CORE::> pseudo-package.
 
 =head1 NOTE
 
-While this class is currently implemented using the Class::Template
+While this class is currently implemented using the Class::Struct
 module to build a struct-like class, you shouldn't rely upon this.
 
 =head1 AUTHOR

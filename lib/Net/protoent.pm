@@ -3,15 +3,17 @@ use strict;
 
 BEGIN { 
     use Exporter   ();
-    use vars       qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
-    @ISA         = qw(Exporter);
+    use vars       qw(@EXPORT @EXPORT_OK %EXPORT_TAGS);
     @EXPORT      = qw(getprotobyname getprotobynumber getprotoent);
     @EXPORT_OK   = qw( $p_name @p_aliases $p_proto );
     %EXPORT_TAGS = ( FIELDS => [ @EXPORT_OK, @EXPORT ] );
 }
 use vars      @EXPORT_OK;
 
-use Class::Template qw(struct);
+# Class::Struct forbids use of @ISA
+sub import { goto &Exporter::import }
+
+use Class::Struct qw(struct);
 struct 'Net::protoent' => [
    name		=> '$',
    aliases	=> '@',
@@ -84,7 +86,7 @@ via the C<CORE::> pseudo-package.
 
 =head1 NOTE
 
-While this class is currently implemented using the Class::Template
+While this class is currently implemented using the Class::Struct
 module to build a struct-like class, you shouldn't rely upon this.
 
 =head1 AUTHOR

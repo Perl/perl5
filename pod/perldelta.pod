@@ -35,6 +35,29 @@ variable as if its contents had appeared on a "#!perl" line at the
 beginning of your script, except that hyphens are optional.  PERL5OPT
 may only be used to set the following switches: B<-[DIMUdmw]>.
 
+=head2 Limitations on B<-M>, and C<-m>, and B<-T> options
+
+The C<-M> and C<-m> options are no longer allowed on the C<#!> line of
+a script.  If a script needs a module, it should invoke it with the
+C<use> pragma.
+
+The B<-T> option is also forbidden on the C<#!> line of a script,
+unless it was present on the Perl command line.  Due to the way C<#!>
+works, this usually means that B<-T> must be in the first argument.
+Thus:
+
+    #!/usr/bin/perl -T -w
+
+will probably work for an executable script invoked as C<scriptname>,
+while:
+
+    #!/usr/bin/perl -w -T
+
+will probably fail under the same conditions.  (Non-Unix systems will
+probably not follow this rule.)  But C<perl scriptname> is guaranteed
+to fail, since then there is no chance of B<-T> being found on the
+command line before it is found on the C<#!> line.
+
 =head2 More precise warnings
 
 If you removed the B<-w> option from your Perl 5.003 scripts because it
@@ -84,18 +107,18 @@ After this code executes in Perl 5.004, $a{b} exists but $a[2] does
 not.  In Perl 5.002 and 5.003, both $a{b} and $a[2] would have existed
 (but $a[2]'s value would have been undefined).
 
-=head2 C<$)> is writable
+=head2 Group vector changeable with C<$)>
 
 The C<$)> special variable has always (well, in Perl 5, at least)
-reflected not only the current effective group, but also the group
-list as returned by the C<getgroups()> C function (if there is one).
-However, due to an oversight, assigning to C<$)> has not called
-C<setgroups()>, only C<setegid()>.
+reflected not only the current effective group, but also the group list
+as returned by the C<getgroups()> C function (if there is one).
+However, until this release, there has not been a way to call the
+C<setgroups()> C function from Perl.
 
-In Perl 5.004, assigning to C<$)> is exactly symmetrical with
-examining it: The first number in its string value is used as the
-effective gid, and all the others are passed to the C<setgroups()> C
-function (if there is one).
+In Perl 5.004, assigning to C<$)> is exactly symmetrical with examining
+it: The first number in its string value is used as the effective gid;
+if there are any numbers after the first one, they are passed to the
+C<setgroups()> C function (if there is one).
 
 =head2 Fixed parsing of $$<digit>, &$<digit>, etc.
 
@@ -127,9 +150,9 @@ calculation of a return value if it isn't going to be used.
 =head2 Changes to tainting checks
 
 A bug in previous versions may have failed to detect some insecure
-conditions when taint checks are turned on. (Taint checks are used
+conditions when taint checks are turned on.  (Taint checks are used
 in setuid or setgid scripts, or when explicitly turned on with the
-C<-T> invocation option.) Although it's unlikely, this may cause a
+C<-T> invocation option.)  Although it's unlikely, this may cause a
 previously-working script to now fail -- which should be construed
 as a blessing, since that indicates a potentially-serious security
 hole was just plugged.
@@ -662,17 +685,17 @@ alphabetically:
 
     FindBin.pm           Find path of currently executing program
 
-    Class/Template.pm    Structure/member template builder
-    File/stat.pm         Object-oriented wrapper around CORE::stat
-    Net/hostent.pm       Object-oriented wrapper around CORE::gethost*
-    Net/netent.pm        Object-oriented wrapper around CORE::getnet*
-    Net/protoent.pm      Object-oriented wrapper around CORE::getproto*
-    Net/servent.pm       Object-oriented wrapper around CORE::getserv*
-    Time/gmtime.pm       Object-oriented wrapper around CORE::gmtime
-    Time/localtime.pm    Object-oriented wrapper around CORE::localtime
-    Time/tm.pm           Perl implementation of "struct tm" for {gm,local}time
-    User/grent.pm        Object-oriented wrapper around CORE::getgr*
-    User/pwent.pm        Object-oriented wrapper around CORE::getpw*
+    Class/Struct.pm      Declare struct-like datatypes as Perl classes
+    File/stat.pm         By-name interface to Perl's built-in stat
+    Net/hostent.pm       By-name interface to Perl's built-in gethost*
+    Net/netent.pm        By-name interface to Perl's built-in getnet*
+    Net/protoent.pm      By-name interface to Perl's built-in getproto*
+    Net/servent.pm       By-name interface to Perl's built-in getserv*
+    Time/gmtime.pm       By-name interface to Perl's built-in gmtime
+    Time/localtime.pm    By-name interface to Perl's built-in localtime
+    Time/tm.pm           Internal object for Time::{gm,local}time
+    User/grent.pm        By-name interface to Perl's built-in getgr*
+    User/pwent.pm        By-name interface to Perl's built-in getpw*
 
     Tie/RefHash.pm       Base class for tied hashes with references as keys
 

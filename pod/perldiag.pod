@@ -2263,10 +2263,10 @@ system call to call, silly dilly.
 =item Too late for "B<-T>" option
 
 (X) The #! line (or local equivalent) in a Perl script contains the
-B<-T> option, but Perl was not invoked with B<-T> in its argument
-list.  This is an error because, by the time Perl discovers a B<-T> in
-a script, it's too late to properly taint everything from the
-environment.  So Perl gives up.
+B<-T> option, but Perl was not invoked with B<-T> in its command line.
+This is an error because, by the time Perl discovers a B<-T> in a
+script, it's too late to properly taint everything from the environment.
+So Perl gives up.
 
 If the Perl script is being executed as a command using the #!
 mechanism (or its local equivalent), this error can usually be fixed
@@ -2275,6 +2275,12 @@ first argument: e.g. change C<perl -n -T> to C<perl -T -n>.
 
 If the Perl script is being executed as C<perl scriptname>, then the
 B<-T> option must appear on the command line: C<perl -T scriptname>.
+
+=item Too late for "-%s" option
+
+(X) The #! line (or local equivalent) in a Perl script contains the
+B<-M> or B<-m> option.  This is an error because B<-M> and B<-m> options
+are not intended for use inside scripts.  Use the C<use> pragma instead.
 
 =item Too many ('s
 

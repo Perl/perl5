@@ -79,7 +79,7 @@ via the C<CORE::> pseudo-package.
 
 =head1 NOTE
 
-While this class is currently implemented using the Class::Template
+While this class is currently implemented using the Class::Struct
 module to build a struct-like class, you shouldn't rely upon this.
 
 =head1 AUTHOR

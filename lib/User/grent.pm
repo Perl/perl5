@@ -3,15 +3,17 @@ use strict;
 
 BEGIN { 
     use Exporter   ();
-    use vars       qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
-    @ISA         = qw(Exporter);
+    use vars       qw(@EXPORT @EXPORT_OK %EXPORT_TAGS);
     @EXPORT      = qw(getgrent getgrgid getgrnam getgr);
     @EXPORT_OK   = qw($gr_name $gr_gid $gr_passwd $gr_mem @gr_members);
     %EXPORT_TAGS = ( FIELDS => [ @EXPORT_OK, @EXPORT ] );
 }
 use vars      @EXPORT_OK;
 
-use Class::Template qw(struct);
+# Class::Struct forbids use of @ISA
+sub import { goto &Exporter::import }
+
+use Class::Struct qw(struct);
 struct 'User::grent' => [
     name    => '$',
     passwd  => '$',
@@ -83,7 +85,7 @@ via the C<CORE::> pseudo-package.
 
 =head1 NOTE
 
-While this class is currently implemented using the Class::Template
+While this class is currently implemented using the Class::Struct
 module to build a struct-like class, you shouldn't rely upon this.
 
 =head1 AUTHOR

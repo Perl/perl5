@@ -18,7 +18,7 @@ void Perl_DJGPP_init();
 #endif	/* DJGPP */
 
 #define PERL_SYS_TERM()
-#define dXSUB_SYS int dummy
+#define dXSUB_SYS
 #define TMPPATH "plXXXXXX"
 
 #ifdef WIN32
@@ -86,6 +86,7 @@ void Perl_DJGPP_init();
 
 #define Fstat(fd,bufptr)   fstat((fd),(bufptr))
 #define Fflush(fp)         fflush(fp)
+#define Mkdir(path,mode)   mkdir((path),(mode))
 
 #ifndef WIN32
 #  define Stat(fname,bufptr) stat((fname),(bufptr))

@@ -490,8 +490,9 @@ The effective uid of this process.  Example:
     $< = $>;		# set real to effective uid
     ($<,$>) = ($>,$<);	# swap real and effective uid
 
-(Mnemonic: it's the uid you went I<TO>, if you're running setuid.)  Note:
-"C<$E<lt>>" and "C<$E<gt>>" can be swapped on only machines supporting setreuid().
+(Mnemonic: it's the uid you went I<TO>, if you're running setuid.)
+Note: "C<$E<lt>>" and "C<$E<gt>>" can be swapped only on machines
+supporting setreuid().
 
 =item $REAL_GROUP_ID
 
@@ -503,8 +504,14 @@ The real gid of this process.  If you are on a machine that supports
 membership in multiple groups simultaneously, gives a space separated
 list of groups you are in.  The first number is the one returned by
 getgid(), and the subsequent ones by getgroups(), one of which may be
-the same as the first number.  (Mnemonic: parentheses are used to I<GROUP>
-things.  The real gid is the group you I<LEFT>, if you're running setgid.)
+the same as the first number.
+
+However, a value assigned to "C<$(>" must be a single number used to
+set the real gid.  So the value given by "C<$(>" should I<not> be assigned
+back to "C<$(>" without being forced numeric, such as by adding zero.
+
+(Mnemonic: parentheses are used to I<GROUP> things.  The real gid is the
+group you I<LEFT>, if you're running setgid.)
 
 =item $EFFECTIVE_GROUP_ID
 
@@ -516,15 +523,21 @@ The effective gid of this process.  If you are on a machine that
 supports membership in multiple groups simultaneously, gives a space
 separated list of groups you are in.  The first number is the one
 returned by getegid(), and the subsequent ones by getgroups(), one of
-which may be the same as the first number.  (Mnemonic: parentheses are
-used to I<GROUP> things.  The effective gid is the group that's I<RIGHT> for
-you, if you're running setgid.)
+which may be the same as the first number.
+
+Similarly, a value assigned to "C<$)>" must also be a space-separated
+list of numbers.  The first number is used to set the effective gid, and
+the rest (if any) are passed to setgroups().  To get the effect of an
+empty list for setgroups(), just repeat the new effective gid; that is,
+to force an effective gid of 5 and an effectively empty setgroups()
+list, say C< $) = "5 5" >.
+
+(Mnemonic: parentheses are used to I<GROUP> things.  The effective gid
+is the group that's I<RIGHT> for you, if you're running setgid.)
 
 Note: "C<$E<lt>>", "C<$E<gt>>", "C<$(>" and "C<$)>" can be set only on
 machines that support the corresponding I<set[re][ug]id()> routine.  "C<$(>"
-and "C<$)>" can be swapped on only machines supporting setregid().  Because
-Perl doesn't currently use initgroups(), you can't set your group vector to
-multiple groups.
+and "C<$)>" can be swapped only on machines supporting setregid().
 
 =item $PROGRAM_NAME
 

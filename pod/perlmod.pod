@@ -502,9 +502,9 @@ run CPAN while avoiding compiled extensions
 
 warn of errors (from perspective of caller)
 
-=item Class::Template
+=item Class::Struct
 
-struct/member template builder
+declare struct-like datatypes
 
 =item Config
 

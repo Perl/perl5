@@ -3,8 +3,7 @@ use strict;
 
 BEGIN { 
     use Exporter   ();
-    use vars       qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
-    @ISA         = qw(Exporter);
+    use vars       qw(@EXPORT @EXPORT_OK %EXPORT_TAGS);
     @EXPORT      = qw(gethostbyname gethostbyaddr gethost);
     @EXPORT_OK   = qw(
 			$h_name	    	@h_aliases
@@ -15,7 +14,10 @@ BEGIN {
 }
 use vars      @EXPORT_OK;
 
-use Class::Template qw(struct);
+# Class::Struct forbids use of @ISA
+sub import { goto &Exporter::import }
+
+use Class::Struct qw(struct);
 struct 'Net::hostent' => [
    name		=> '$',
    aliases	=> '@',
@@ -139,7 +141,7 @@ via the C<CORE::> pseudo-package.
 
 =head1 NOTE
 
-While this class is currently implemented using the Class::Template
+While this class is currently implemented using the Class::Struct
 module to build a struct-like class, you shouldn't rely upon this.
 
 =head1 AUTHOR

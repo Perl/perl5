@@ -319,7 +319,7 @@ lib/CPAN.pm		Interface to Comprehensive Perl Archive Network
 lib/CPAN/FirstTime.pm	Utility for creating CPAN config files
 lib/CPAN/Nox.pm		Runs CPAN while avoiding compiled extensions
 lib/Carp.pm		Error message base class
-lib/Class/Template.pm	Structure/member template builder; makes nested types
+lib/Class/Struct.pm	Declare struct-like datatypes as Perl classes
 lib/Cwd.pm		Various cwd routines (getcwd, fastcwd, chdir)
 lib/Devel/SelfStubber.pm Generate stubs for SelfLoader.pm
 lib/DirHandle.pm	like FileHandle only for directories
@@ -391,7 +391,7 @@ lib/Tie/SubstrHash.pm	Compact hash for known key, value and table size
 lib/Time/Local.pm	Reverse translation of localtime, gmtime
 lib/Time/gmtime.pm	By-name interface to Perl's built-in gmtime
 lib/Time/localtime.pm	By-name interface to Perl's built-in localtime
-lib/Time/tm.pm		Internal oject for Time::{gm,local}time
+lib/Time/tm.pm		Internal object for Time::{gm,local}time
 lib/UNIVERSAL.pm	Base class for ALL classes
 lib/User/grent.pm	By-name interface to Perl's built-in getgr*
 lib/User/pwent.pm	By-name interface to Perl's built-in getpw*

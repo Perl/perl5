@@ -88,6 +88,7 @@
 #  define my_gconvert		Perl_my_gconvert
 #  define do_rmdir		Perl_do_rmdir
 #  define kill_file		Perl_kill_file
+#  define my_mkdir		Perl_my_mkdir
 #  define my_utime		Perl_my_utime
 #  define rmsexpand	Perl_rmsexpand
 #  define rmsexpand_ts	Perl_rmsexpand_ts
@@ -226,7 +227,7 @@
 #define BIT_BUCKET "_NLA0:"
 #define PERL_SYS_INIT(c,v)  getredirection((c),(v))
 #define PERL_SYS_TERM()
-#define dXSUB_SYS int dummy
+#define dXSUB_SYS
 #define HAS_KILL
 #define HAS_WAIT
 
@@ -348,6 +349,9 @@ struct utimbuf {
 
 /* Ditto for sys$hash_passwrod() . . . */
 #define crypt  my_crypt
+
+/* Tweak arg to mkdir first, so we can tolerate trailing /. */
+#define Mkdir(dir,mode) my_mkdir((dir),(mode))
 
 /* Use our own stat() clones, which handle Unix-style directory names */
 #define Stat(name,bufptr) flex_stat(name,bufptr)
@@ -506,6 +510,7 @@ Pid_t	my_waitpid _((Pid_t, int *, int));
 char *	my_gconvert _((double, int, int, char *));
 int	do_rmdir _((char *));
 int	kill_file _((char *));
+int	my_mkdir _((char *, mode_t));
 int	my_utime _((char *, struct utimbuf *));
 char *	rmsexpand _((char *, char *, char *, unsigned));
 char *	rmsexpand_ts _((char *, char *, char *, unsigned));

@@ -113,6 +113,8 @@ sub mkpath {
     my(@created);
     foreach $path (@$paths) {
         next if -d $path;
+        # Logic wants Unix paths, so go with the flow.
+        $path = VMS::Filespec::unixify($path) if $Is_VMS;
         my $parent = dirname($path);
         push(@created,mkpath($parent, $verbose, $mode)) unless (-d $parent);
         print "mkdir $path\n" if $verbose;

@@ -4413,8 +4413,12 @@ EOM
 		'') case "$osname" in
 			hpux)	dflt='+z' ;;
 			next)	dflt='none' ;;
-			solaris|svr4*|esix*) dflt='-Kpic' ;;
-			irix*)  dflt='-KPIC' ;;
+			svr4*|esix*)	dflt='-Kpic' ;;
+			irix*)	dflt='-KPIC' ;;
+			solaris) case "$ccflags" in
+				*-DDEBUGGING*)	dflt='-KPIC' ;;
+				*)		dflt='-Kpic' ;;
+				esac ;;
 			sunos)	dflt='-pic' ;;
 			*)	dflt='none' ;;
 		    esac ;;
@@ -8495,7 +8499,7 @@ eval $inlibc
 set setgroups d_setgrps
 eval $inlibc
 
-: Find type of 2nd arg to getgroups (and setgroups)
+: Find type of 2nd arg to 'getgroups()' and 'setgroups()'
 echo " "
 case "$d_getgrps$d_setgrps" in
 *define*)

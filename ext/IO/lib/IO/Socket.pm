@@ -118,7 +118,7 @@ use Exporter;
 
 @ISA = qw(IO::Handle);
 
-$VERSION = "1.16";
+$VERSION = "1.1602";
 
 sub import {
     my $pkg = shift;
@@ -157,7 +157,7 @@ sub configure {
 	unless ref($fh) eq "IO::Socket";
 
     bless($fh, $domain2pkg[$domain]);
-    $fh->configure;
+    $fh->configure($arg);
 }
 
 sub socket {
@@ -417,7 +417,7 @@ the service name.
 Examples:
 
    $sock = IO::Socket::INET->new(PeerAddr => 'www.perl.org',
-                                 PeerPort => http(80),
+                                 PeerPort => 'http(80)',
                                  Proto    => 'tcp');
 
    $sock = IO::Socket::INET->new(PeerAddr => 'localhost:smtp(25)');

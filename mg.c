@@ -1536,7 +1536,8 @@ MAGIC* mg;
 		    break;
 		gary[i] = I_V(atof(p));
 	    }
-	    (void)setgroups(i, gary);
+	    if (i)
+		(void)setgroups(i, gary);
 	}
 #else  /* HAS_SETGROUPS */
 	egid = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);

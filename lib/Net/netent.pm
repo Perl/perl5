@@ -3,8 +3,7 @@ use strict;
 
 BEGIN { 
     use Exporter   ();
-    use vars       qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
-    @ISA         = qw(Exporter);
+    use vars       qw(@EXPORT @EXPORT_OK %EXPORT_TAGS);
     @EXPORT      = qw(getnetbyname getnetbyaddr getnet);
     @EXPORT_OK   = qw(
 			$n_name	    	@n_aliases
@@ -14,7 +13,10 @@ BEGIN {
 }
 use vars      @EXPORT_OK;
 
-use Class::Template qw(struct);
+# Class::Struct forbids use of @ISA
+sub import { goto &Exporter::import }
+
+use Class::Struct qw(struct);
 struct 'Net::netent' => [
    name		=> '$',
    aliases	=> '@',
@@ -157,7 +159,7 @@ This seems a bug, but here's how to deal with it:
 
 =head1 NOTE
 
-While this class is currently implemented using the Class::Template
+While this class is currently implemented using the Class::Struct
 module to build a struct-like class, you shouldn't rely upon this.
 
 =head1 AUTHOR

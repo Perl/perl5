@@ -46,6 +46,113 @@ And the Keepers of the Patch Pumpkin:
 
 
 -------------------
+ Version 5.003_97c
+-------------------
+
+That second public beta will be Real Soon Now...
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Refine setgroups() behavior of C<$)>"
+   From:  Chip Salzenberg
+  Files:  mg.c pod/perldelta.pod pod/perlvar.pod
+
+  Title:  "Forbid -[Mm] on #! line"
+   From:  Chip Salzenberg
+  Files:  pod/perldelta.pod pod/perldiag.pod toke.c
+
+ CORE PORTABILITY
+
+  Title:  "Fix dynamic loading (and argv[0]) under AmigaOS"
+   From:  Norbert Pueschel
+ Msg-ID:  <77724842@Armageddon.meb.uni-bonn.de>
+   Date:  Tue, 08 Apr 1997 22:01:45 +0200
+  Files:  hints/amigaos.sh
+
+  Title:  "Special mkdir() for VMS"
+   From:  Charles Bailey
+ Msg-ID:  <01IHGOXN6MZM0004K3@hmivax.humgen.upenn.edu>
+   Date:  Tue, 08 Apr 1997 12:33:56 -0400 (EDT)
+  Files:  dosish.h lib/ExtUtils/MM_Unix.pm lib/File/Path.pm os2/os2ish.h
+          plan9/plan9ish.h pp_sys.c unixish.h vms/vms.c vms/vmsish.h
+
+ OTHER CORE CHANGES
+
+  Title:  "Fix assignment from magic SV that becomes a glob"
+   From:  Chip Salzenberg
+  Files:  sv.c
+
+ BUILD PROCESS
+
+  Title:  "Fix syntax error in Configure comment(!)"
+   From:  Chip Salzenberg
+  Files:  Configure
+
+  Title:  "For Solaris, if -DDEBUGGING, default to '-KPIC', not '-Kpic'"
+   From:  Chip Salzenberg
+  Files:  Configure
+
+  Title:  "Fix usage of dXSUB_SYS, esp. in ExtUtils::Miniperl"
+   From:  Chip Salzenberg
+  Files:  dosish.h minimod.pl os2/os2ish.h plan9/plan9ish.h vms/vmsish.h
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "Replace Class::Template with improved Class::Struct"
+   From:  Jim Miner <jfm@winternet.com>
+  Files:  MANIFEST lib/Class/Struct.pm lib/Class/Template.pm
+          lib/File/stat.pm lib/Net/hostent.pm lib/Net/netent.pm
+          lib/Net/protoent.pm lib/Net/servent.pm lib/Time/gmtime.pm
+          lib/Time/localtime.pm lib/Time/tm.pm lib/User/grent.pm
+          lib/User/pwent.pm pod/perldelta.pod pod/perlfaq7.pod
+          pod/perlmod.pod pod/perltoot.pod
+
+  Title:  "MakeMaker pathname patch"
+   From:  Nick Ing-Simmons
+ Msg-ID:  <199704091908.UAA00877@ni-s.u-net.com>
+   Date:  Wed, 9 Apr 1997 20:08:23 +0100
+  Files:  lib/ExtUtils/MM_Unix.pm lib/ExtUtils/MakeMaker.pm
+
+  Title:  "Fix configuration of new socket"
+   From:  Chip Salzenberg
+  Files:  ext/IO/lib/IO/Socket.pm
+
+  Title:  "Improve IO::Handle docs; don't export _open_mode_string"
+   From:  Chip Salzenberg
+  Files:  ext/IO/lib/IO/File.pm ext/IO/lib/IO/Handle.pm
+
+  Title:  "Complex.pm: 0**0 sanity"
+   From:  Jarkko Hietaniemi
+ Msg-ID:  <199704091804.VAA13930@alpha.hut.fi>
+   Date:  Wed, 9 Apr 1997 21:04:23 +0300 (EET DST)
+  Files:  lib/Math/Complex.pm
+
+  Title:  "Fix typos in Math::Trig"
+   From:  Jarkko Hietaniemi
+  Files:  lib/Math/Trig.pm
+
+ TESTS
+
+  Title:  "Accommodate CodeBuilder variant of Machten 4.0.3"
+   From:  Dominic Dunlop <domo@slipper.ip.lu>
+ Msg-ID:  <v03020902af704d320f27@[194.51.248.88]>
+   Date:  Tue, 8 Apr 1997 22:15:15 +0200
+  Files:  t/io/fs.t t/op/stat.t
+
+ UTILITIES
+
+   (no changes)
+
+ DOCUMENTATION
+
+  Title:  "IO::Socket doc fix"
+   From:  Roderick Schertler
+ Msg-ID:  <28383.860527843@eeyore.ibcinc.com>
+   Date:  Tue, 08 Apr 1997 15:30:43 -0400
+  Files:  ext/IO/lib/IO/Socket.pm
+
+
+-------------------
  Version 5.003_97b
 -------------------
 

@@ -1696,7 +1696,15 @@ yylex()
 		    while (*d == ' ' || *d == '\t') d++;
 
 		    if (*d++ == '-') {
-			while (d = moreswitches(d)) ;
+			do {
+			    if (*d == 'M' || *d == 'm') {
+				char *m = d;
+				while (*d && !isSPACE(*d)) d++;
+				croak("Too late for \"-%.*s\" option",
+				      (int)(d - m), m);
+			    }
+			    d = moreswitches(d);
+			} while (d);
 			if (perldb && !oldpdb ||
 			    ( minus_n || minus_p ) && !(oldn || oldp) )
 			      /* if we have already added "LINE: while (<>) {",

@@ -99,7 +99,7 @@
 
 #define BIT_BUCKET "/dev/null"
 #define PERL_SYS_INIT(c,v)
-#define dXSUB_SYS int dummy
+#define dXSUB_SYS
 #define PERL_SYS_TERM()
 
 /*
@@ -113,6 +113,7 @@
 #define Stat(fname,bufptr) stat((fname),(bufptr))
 #define Fstat(fd,bufptr)   fstat((fd),(bufptr))
 #define Fflush(fp)         fflush(fp)
+#define Mkdir(path,mode)   mkdir((path),(mode))
 
 /* getenv related stuff */
 #define my_getenv(var) getenv(var)

@@ -78,7 +78,7 @@ void Perl_OS2_init(char **);
 /* #define PERL_SYS_TERM() STMT_START {	\
     if (Perl_HAB_set) WinTerminate(Perl_hab);	} STMT_END */
 
-#define dXSUB_SYS int fake = OS2_XS_init()
+#define dXSUB_SYS OS2_XS_init()
 
 #ifdef PERL_IS_AOUT
 /* #  define HAS_FORK */
@@ -156,6 +156,7 @@ void *emx_realloc (void *, size_t);
 #define Stat(fname,bufptr) os2_stat((fname),(bufptr))
 #define Fstat(fd,bufptr)   fstat((fd),(bufptr))
 #define Fflush(fp)         fflush(fp)
+#define Mkdir(path,mode)   mkdir((path),(mode))
 
 #undef S_IFBLK
 #undef S_ISBLK
@@ -167,6 +168,7 @@ void *emx_realloc (void *, size_t);
 #define Stat(fname,bufptr) stat((fname),(bufptr))
 #define Fstat(fd,bufptr)   fstat((fd),(bufptr))
 #define Fflush(fp)         fflush(fp)
+#define Mkdir(path,mode)   mkdir((path),(mode))
 
 #endif
 
