@@ -333,7 +333,7 @@ EOFUNC
 	# strip formatting directives in =item line
 	($header = $1) =~ s/[A-Z]<(.*?)>/$1/g;
 
-	if ($header =~ /%[sd]/) {
+	if ($header =~ /%[csd]/) {
 	    $rhs = $lhs = $header;
 	    #if ($lhs =~ s/(.*?)%d(?!%d)(.*)/\Q$1\E\\d+\Q$2\E\$/g)  {
 	    if ($lhs =~ s/(.*?)%d(?!%d)(.*)/\Q$1\E\\d+\Q$2\E/g)  {
@@ -346,6 +346,7 @@ EOFUNC
 		$lhs =~ s/\377//g;
 		$lhs =~ s/\.\*\?$/.*/; # Allow %s at the end to eat it all
 	    } 
+	    $lhs =~ s/\\%c/./g;
 	    $transmo .= "    s{^$lhs}\n     {\Q$rhs\E}s\n\t&& return 1;\n";
 	} else {
 	    $transmo .= "    m{^\Q$header\E} && return 1;\n";

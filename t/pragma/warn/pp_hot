@@ -9,7 +9,7 @@
   Filehandle %s opened only for output		[pp_print]
     print <STDOUT> ;
 
-  print on closed filehandle %s			[pp_print]
+  print() on closed filehandle %s		[pp_print]
     close STDIN ; print STDIN "abc" ;
 
   uninitialized					[pp_rv2av]
@@ -30,7 +30,7 @@
 
   glob failed (can't start child: %s)		[Perl_do_readline] <<TODO
 
-  Read on closed filehandle %s			[Perl_do_readline]
+  readline() on closed filehandle %s		[Perl_do_readline]
     close STDIN ; $a = <STDIN>;
 
   glob failed (child exited with status %d%s)	[Perl_do_readline] <<TODO
@@ -86,7 +86,7 @@ print STDIN "anc";
 no warnings 'closed' ;
 print STDIN "anc";
 EXPECT
-print on closed filehandle main::STDIN at - line 4.
+print() on closed filehandle main::STDIN at - line 4.
 ########
 # pp_hot.c [pp_rv2av]
 use warnings 'uninitialized' ;
@@ -128,7 +128,7 @@ close STDIN ; $a = <STDIN> ;
 no warnings 'closed' ;
 $a = <STDIN> ;
 EXPECT
-Read on closed filehandle main::STDIN at - line 3.
+readline() on closed filehandle main::STDIN at - line 3.
 ########
 # pp_hot.c [Perl_do_readline]
 use warnings 'io' ;

@@ -1,6 +1,6 @@
   doio.c	
 
-  Can't do bidirectional pipe		[Perl_do_open9]
+  Can't open bidirectional pipe		[Perl_do_open9]
     open(F, "| true |");
 
   Missing command in piped open		[Perl_do_open9]
@@ -64,7 +64,7 @@ no warnings 'io' ;
 open(G, '|'.($^O eq 'VMS' ? 'mcr ':'')."$^X -e 1|");
 close(G);
 EXPECT
-Can't do bidirectional pipe at - line 3.
+Can't open bidirectional pipe at - line 3.
 ########
 # doio.c [Perl_do_open9]
 use warnings 'io' ;

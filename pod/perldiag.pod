@@ -280,7 +280,7 @@ the string being unpacked.  See L<perlfunc/pack>.
 (F) You wrote C<require E<lt>fileE<gt>> when you should have written
 C<require 'file'>.
 
-=item accept() on closed fd
+=item accept() on closed socket
 
 (W) You tried to do an accept on a closed socket.  Did you forget to check
 the return value of your socket() call?  See L<perlfunc/accept>.
@@ -518,7 +518,7 @@ likely depends on its correct operation, Perl just gave up.
 (4294967295) and therefore non-portable between systems.  See
 L<perlport> for more on portability concerns.
 
-=item bind() on closed fd
+=item bind() on closed socket
 
 (W) You tried to do a bind on a closed socket.  Did you forget to check
 the return value of your socket() call?  See L<perlfunc/bind>.
@@ -1068,7 +1068,7 @@ most likely an unexpected right brace '}'.
 reference of the type needed.  You can use the ref() function to
 test the type of the reference, if need be.
 
-=item Can't use \1 to mean $1 in expression
+=item Can't use \%c to mean $%c in expression
 
 (W) In an ordinary expression, backslash is a unary operator that creates
 a reference to its argument.  The use of backslash to indicate a backreference
@@ -1076,7 +1076,7 @@ to a matched substring is valid only as part of a regular expression pattern.
 Trying to do this in ordinary Perl code produces a value that prints
 out looking like SCALAR(0xdecaf).  Use the $1 form instead.
 
-=item Can't use bareword ("%s") as %s ref while \"strict refs\" in use
+=item Can't use bareword ("%s") as %s ref while "strict refs" in use
 
 (F) Only hard references are allowed by "strict refs".  Symbolic references
 are disallowed.  See L<perlref>.
@@ -1187,7 +1187,7 @@ than in the regular expression engine; or rewriting the regular
 expression so that it is simpler or backtracks less.  (See L<perlbook>
 for information on I<Mastering Regular Expressions>.)
 
-=item connect() on closed fd
+=item connect() on closed socket
 
 (W) You tried to do a connect on a closed socket.  Did you forget to check
 the return value of your socket() call?  See L<perlfunc/connect>.
@@ -1489,7 +1489,7 @@ when you meant
 because if it did, it'd feel morally obligated to return every hostname
 on the Internet.
 
-=item get{sock,peer}name() on closed fd
+=item get%sname() on closed socket
 
 (W) You tried to get a socket or peer socket name on a closed socket.
 Did you forget to check the return value of your socket() call?
@@ -1766,7 +1766,7 @@ L<perlfunc/last>.
 (F) While under the C<use filetest> pragma, switching the real and
 effective uids or gids failed.
 
-=item listen() on closed fd
+=item listen() on closed socket
 
 (W) You tried to do a listen on a closed socket.  Did you forget to check
 the return value of your socket() call?  See L<perlfunc/listen>.
@@ -2483,12 +2483,12 @@ instead of "||".
 
 See Server error.
 
-=item print on closed filehandle %s
+=item print() on closed filehandle %s
 
 (W) The filehandle you're printing on got itself closed sometime before now.
 Check your logic flow.
 
-=item printf on closed filehandle %s
+=item printf() on closed filehandle %s
 
 (W) The filehandle you're writing to got itself closed sometime before now.
 Check your logic flow.
@@ -2513,7 +2513,7 @@ are outside the range which can be represented by integers internally.
 One possible workaround is to force Perl to use magical string
 increment by prepending "0" to your numbers.
 
-=item Read on closed filehandle %s
+=item readline() on closed filehandle %s
 
 (W) The filehandle you're reading from got itself closed sometime before now.
 Check your logic flow.
@@ -2654,9 +2654,9 @@ that had previously been marked as free.
 (W) A nearby syntax error was probably caused by a missing semicolon,
 or possibly some other missing operator, such as a comma.
 
-=item Send on closed socket
+=item send() on closed socket
 
-(W) The filehandle you're sending to got itself closed sometime before now.
+(W) The socket you're sending to got itself closed sometime before now.
 Check your logic flow.
 
 =item Sequence (? incomplete
@@ -2743,7 +2743,7 @@ because the world might have written on it already.
 
 (F) You don't have System V shared memory IPC on your system.
 
-=item shutdown() on closed fd
+=item shutdown() on closed socket
 
 (W) You tried to do a shutdown on a closed socket.  Seems a bit superfluous.
 
@@ -2881,7 +2881,7 @@ into Perl yourself.
 machine.  In some machines the functionality can exist but be
 unconfigured.  Consult your system support.
 
-=item Syswrite on closed filehandle
+=item syswrite() on closed filehandle
 
 (W) The filehandle you're writing to got itself closed sometime before now.
 Check your logic flow.
@@ -3449,7 +3449,7 @@ but in actual fact, you got
 
 So put in parentheses to say what you really mean.
 
-=item Write on closed filehandle %s
+=item write() on closed filehandle %s
 
 (W) The filehandle you're writing to got itself closed sometime before now.
 Check your logic flow.
@@ -3492,11 +3492,11 @@ already have a subroutine of that name declared, which means that Perl 5
 will try to call the subroutine when the assignment is executed, which is
 probably not what you want.  (If it IS what you want, put an & in front.)
 
-=item [gs]etsockopt() on closed fd
+=item %cetsockopt() on closed fd
 
 (W) You tried to get or set a socket option on a closed socket.
 Did you forget to check the return value of your socket() call?
-See L<perlfunc/getsockopt>.
+See L<perlfunc/getsockopt> and L<perlfunc/setsockopt>.
 
 =item \1 better written as $1
 
