@@ -390,6 +390,7 @@ op.c			Opcode syntax tree code
 op.h			Opcode syntax tree header
 opcode.h		Automatically generated opcode header
 opcode.pl		Opcode header generatore
+os2/Changes		Changelog for OS/2 port
 os2/Makefile.SHs	Shared library generation for OS/2
 os2/OS2/ExtAttr/Changes		EA access module
 os2/OS2/ExtAttr/ExtAttr.pm	EA access module
@@ -577,6 +578,7 @@ t/lib/hostname.t	See if Sys::Hostname works
 t/lib/io_dup.t		See if dup()-related methods from IO work
 t/lib/io_pipe.t		See if pipe()-related methods from IO work
 t/lib/io_sock.t		See if INET socket-related methods from IO work
+t/lib/io_taint.t	See if the untaint method from IO works
 t/lib/io_tell.t		See if seek()/tell()-related methods from IO work
 t/lib/io_udp.t		See if UDP socket-related methods from IO work
 t/lib/io_xs.t		See if XSUB methods from IO work
