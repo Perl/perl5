@@ -4965,7 +4965,7 @@ effect as the C<-> flag: left-justification.
 
 =item precision, or maximum width
 
-You can specify a precision (for numeric converions) or a maximum
+You can specify a precision (for numeric conversions) or a maximum
 width (for string conversions) by specifying a C<.> followed by a number.
 For floating point formats, this specifies the number of decimal places
 to show (the default being 6), eg:
