@@ -1,5 +1,8 @@
 #!./perl
 
+use strict;
+use warnings;
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
@@ -11,22 +14,38 @@ BEGIN {
 
 my $tmp = "via$$";
 
-print "1..3\n";
+use Test::More tests => 11;
 
-$a = join("", map { chr } 0..255) x 10;
+my $fh;
+my $a = join("", map { chr } 0..255) x 10;
+my $b;
 
-use MIME::QuotedPrint;
-open(my $fh,">Via(MIME::QuotedPrint)", $tmp);
-print $fh $a;
-close($fh);
-print "ok 1\n";
+BEGIN { use_ok('MIME::QuotedPrint'); }
 
-open(my $fh,"<Via(MIME::QuotedPrint)", $tmp);
+ok( open($fh,">Via(MIME::QuotedPrint)", $tmp), 'open QuotedPrint for output');
+ok( (print $fh $a), "print to output file");
+ok( close($fh), 'close output file');
+
+ok( open($fh,"<Via(MIME::QuotedPrint)", $tmp), 'open QuotedPrint for input');
 { local $/; $b = <$fh> }
-close($fh);
-print "ok 2\n";
+ok( close($fh), "close input file");
 
-print "ok 3\n" if $a eq $b;
+is($a, $b, 'compare original data with filtered version');
+
+
+{
+    my $warnings = '';
+    local $SIG{__WARN__} = sub { $warnings = join '', @_ };
+
+    use warnings 'layer';
+    ok( ! open($fh,">Via(Unknown::Module)", $tmp), 'open Via Unknown::Module will fail');
+    like( $warnings, qr/^Cannot find package 'Unknown::Module'/,  'warn about unknown package' );
+
+    $warnings = '';
+    no warnings 'layer';
+    ok( ! open($fh,">Via(Unknown::Module)", $tmp), 'open Via Unknown::Module will fail');
+    is( $warnings, "",  "don't warn about unknown package" );
+}    
 
 END {
     1 while unlink $tmp;

@@ -115,7 +115,8 @@ PerlIOVia_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg)
    PerlIOVia *s = PerlIOSelf(f,PerlIOVia);
    if (!arg)
     {
-     Perl_warn(aTHX_ "No package specified");
+     if (ckWARN(WARN_LAYER))
+      Perl_warner(aTHX_ packWARN(WARN_LAYER), "No package specified");
      code = -1;
     }
    else
@@ -145,7 +146,8 @@ PerlIOVia_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg)
       }
      else
       {
-       Perl_warn(aTHX_ "Cannot find package '%.*s'",(int) pkglen,pkg);
+       if (ckWARN(WARN_LAYER))
+         Perl_warner(aTHX_ packWARN(WARN_LAYER), "Cannot find package '%.*s'",(int) pkglen,pkg);
 #ifdef ENOSYS
        errno = ENOSYS;
 #else

@@ -1,4 +1,5 @@
 package open;
+use warnings;
 use Carp;
 $open::hint_bits = 0x20000;
 
@@ -81,7 +82,7 @@ sub import {
 		use Encode;
 		_get_locale_encoding()
 		    unless defined $locale_encoding;
-		(carp("Cannot figure out an encoding to use"), last)
+		(warnings::warnif("layer", "Cannot figure out an encoding to use"), last)
 		    unless defined $locale_encoding;
 		if ($locale_encoding =~ /^utf-?8$/i) {
 		    $layer = "utf8";
@@ -94,7 +95,7 @@ sub import {
 		$target =~ s/^(\w+)\(.+\)$/$1/;	# strip parameters
 
 		unless(PerlIO::Layer::->find($target)) {
-		    carp("Unknown discipline layer '$layer'");
+		    warnings::warnif("layer", "Unknown discipline layer '$layer'");
 		}
 	    }
 	    push(@val,":$layer");

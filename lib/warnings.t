@@ -7,6 +7,8 @@ BEGIN {
     require Config; import Config;
 }
 
+use File::Path;
+
 $| = 1;
 
 my $Is_VMS     = $^O eq 'VMS';
@@ -58,6 +60,7 @@ for (@prgs){
      }
     my $switch = "";
     my @temps = () ;
+    my @temp_path = () ;
     if (s/^\s*-\w+//){
         $switch = $&;
         $switch =~ s/(-\S*[A-Z]\S*)/"$1"/ if $Is_VMS; # protect uc switches
@@ -73,6 +76,10 @@ for (@prgs){
 	    my $filename = shift @files ;
 	    my $code = shift @files ;
     	    push @temps, $filename ;
+    	    if ($filename =~ m#(.*)/#) {
+                mkpath($1);
+                push(@temp_path, $1);
+    	    }
 	    open F, ">$filename" or die "Cannot open $filename: $!\n" ;
 	    print F $code ;
 	    close F or die "Cannot close $filename: $!\n";
@@ -154,6 +161,8 @@ for (@prgs){
     print "ok ", ++$i, "\n";
     foreach (@temps)
 	{ unlink $_ if $_ }
+    foreach (@temp_path)
+	{ rmtree $_ if -d $_ }
 }
 
 sub randomMatch

@@ -6,7 +6,7 @@ BEGIN {
 	require Config; import Config;
 }
 
-use Test::More tests => 15;
+use Test::More tests => 16;
 
 # open::import expects 'open' as its first argument, but it clashes with open()
 sub import {
@@ -32,7 +32,13 @@ local $SIG{__WARN__} = sub {
 };
 
 # and it shouldn't be able to find this discipline
-eval{ import( 'IN', 'macguffin' ) };
+$warn = '';
+eval q{ no warnings 'layer'; use open IN => ':macguffin' ; };
+is( $warn, '',
+	'should not warn about unknown discipline with bad discipline provided' );
+
+$warn = '';
+eval q{ use warnings 'layer'; use open IN => ':macguffin' ; };
 like( $warn, qr/Unknown discipline layer/, 
 	'should warn about unknown discipline with bad discipline provided' );
 
