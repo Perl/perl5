@@ -183,8 +183,8 @@ sub list_eq ($$) {
     skip "-- the IEEE infinity model is unavailable in this configuration."
        if (($^O eq 'VMS') && !defined($Config{useieee}));
 
-    skip "-- MPE/iX has serious fp indigestionf on w-packed infinities"
-       if (($^O eq 'mpeix'));
+    skip "-- $^O has serious fp indigestion on w-packed infinities"
+       if (($^O eq 'mpeix') || ($^O eq 'ultrix'));
 
     my $inf = eval '2**10000';
 
@@ -203,6 +203,9 @@ sub list_eq ($$) {
 
     skip "-- the full range of an IEEE double may not be available in this configuration."
        if (($^O eq 'VMS') && !defined($Config{useieee}));
+
+    skip "-- $^O does not like 2**1023"
+       if (($^O eq 'ultrix'));
 
     # This should be about the biggest thing possible on an IEEE double
     my $big = eval '2**1023';
