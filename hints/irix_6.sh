@@ -170,7 +170,7 @@ esac'
        test -z "$plibpth" && plibpth='/usr/lib64 /lib64 /usr/ccs/lib'
 	;;
 *gcc*)
-	ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -D_POSIX_C_SOURCE"
+	ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME"
        test -z "$optimize" && optimize="-O3"
 	usenm='undef'
 	case "`uname -s`" in

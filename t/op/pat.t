@@ -2996,7 +2996,8 @@ print "\x{0712}" =~ /\p{Syriac1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
 print "\x{072F}" =~ /\P{Syriac1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
 
 {
-    # Change #18179: previously failed with "panic: end_shift"
+    print "# Change #18179\n";
+    # previously failed with "panic: end_shift
     my $s = "\x{100}" x 5;
     my $ok = $s =~ /(\x{100}{4})/;
     my($ord, $len) = (ord $1, length $1);

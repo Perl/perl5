@@ -164,7 +164,7 @@ or a dot.
     if ($data =~ /^([-\@\w.]+)$/) {
 	$data = $1; 			# $data now untainted
     } else {
-	die "Bad data in $data"; 	# log this somewhere
+	die "Bad data in '$data'"; 	# log this somewhere
     }
 
 This is fairly secure because C</\w+/> doesn't normally match shell

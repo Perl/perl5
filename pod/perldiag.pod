@@ -3668,6 +3668,13 @@ target of the change to
 (F) Your version of the C library apparently doesn't do times().  I
 suspect you're not running on Unix.
 
+=item To%s: illegal mapping '%s'
+
+(F) You tried to define a customized To-mapping for lc(), lcfirst,
+uc(), or ucfirst() (or their string-inlined versions), but you
+specified an illegal mapping.
+See L<perlunicode/"User-Defined Character Properties">.
+
 =item Too few args to syscall
 
 (F) There has to be at least one argument to syscall() to specify the
