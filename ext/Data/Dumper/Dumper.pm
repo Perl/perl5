@@ -9,7 +9,7 @@
 
 package Data::Dumper;
 
-$VERSION = '2.121_01';
+$VERSION = '2.121_02';
 
 #$| = 1;
 
@@ -689,7 +689,8 @@ variable is output in a single Perl statement.  Handles self-referential
 structures correctly.
 
 The return value can be C<eval>ed to get back an identical copy of the
-original reference structure.
+original reference structure (although you might need to turn off strictures
+to eval it).
 
 Any references that are the same as one of those passed in will be named
 C<$VAR>I<n> (where I<n> is a numeric suffix), and other duplicate references
