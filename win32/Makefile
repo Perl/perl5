@@ -29,7 +29,7 @@ INST_TOP	= $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-INST_VER	= \5.00562
+INST_VER	= \5.00563
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -65,6 +65,21 @@ INST_ARCH	= \$(ARCHNAME)
 #USE_OBJECT	= define
 
 #
+# XXX WARNING! This option currently undergoing changes.  May be broken.
+#
+# Beginnings of interpreter cloning/threads: still rather rough, fails
+# tests.  This should be enabled to get the fork() emulation.  Do not
+# enable unless you know what you're doing!
+#
+#USE_ITHREADS	= define
+
+#
+# uncomment to enable the implicit "host" layer for all system calls
+# made by perl.  This is needed and auto-enabled by USE_OBJECT above.
+#
+#USE_IMP_SYS	= define
+
+#
 # uncomment one of the following lines if you are using either
 # Visual C++ 2.x or Visual C++ 6.x (aka Visual Studio 98)
 #
@@ -84,6 +99,7 @@ INST_ARCH	= \$(ARCHNAME)
 # and follow the directions in the package to install.
 #
 #USE_PERLCRT	= define
+#BUILD_FOR_WIN95    = define
 
 #
 # uncomment to enable linking with setargv.obj under the Visual C
@@ -141,11 +157,13 @@ CCLIBDIR	= $(CCHOME)\lib
 #BUILDOPT	= $(BUILDOPT) -DPERL_POLLUTE
 
 #
-# enable this to test the File::Glob implementation of CORE::glob
+# enable this to disable the File::Glob implementation of CORE::glob
 #
-#BUILDOPT	= $(BUILDOPT) -DPERL_INTERNAL_GLOB
+#BUILDOPT	= $(BUILDOPT) -DPERL_EXTERNAL_GLOB
 
-#
+# Enabling this runs a cloned toplevel interpreter (fails tests)
+#BUILDOPT	= $(BUILDOPT) -DTOP_CLONE
+
 # specify semicolon-separated list of extra directories that modules will
 # look for libraries (spaces in path names need not be quoted)
 #
@@ -174,6 +192,7 @@ CRYPT_FLAG	= -DHAVE_DES_FCRYPT
 PERL_MALLOC	= undef
 USE_THREADS	= undef
 USE_MULTI	= undef
+USE_IMP_SYS	= define
 !ENDIF
 
 !IF "$(PERL_MALLOC)" == ""
@@ -184,6 +203,10 @@ PERL_MALLOC	= undef
 USE_THREADS	= undef
 !ENDIF
 
+!IF "$(USE_THREADS)" == "define"
+USE_ITHREADS	= undef
+!ENDIF
+
 !IF "$(USE_MULTI)" == ""
 USE_MULTI	= undef
 !ENDIF
@@ -192,8 +215,24 @@ USE_MULTI	= undef
 USE_OBJECT	= undef
 !ENDIF
 
+!IF "$(USE_ITHREADS)" == ""
+USE_ITHREADS	= undef
+!ENDIF
+
+!IF "$(USE_IMP_SYS)" == ""
+USE_IMP_SYS	= undef
+!ENDIF
+
 !IF "$(USE_MULTI)$(USE_THREADS)$(USE_OBJECT)" != "undefundefundef"
 BUILDOPT	= $(BUILDOPT) -DPERL_IMPLICIT_CONTEXT
+!ENDIF
+
+!IF "$(USE_ITHREADS)" != "undef"
+BUILDOPT	= $(BUILDOPT) -DUSE_ITHREADS
+!ENDIF
+
+!IF "$(USE_IMP_SYS)" != "undef"
+BUILDOPT	= $(BUILDOPT) -DPERL_IMPLICIT_SYS
 !ENDIF
 
 !IF "$(PROCESSOR_ARCHITECTURE)" == ""
@@ -361,6 +400,7 @@ PERLDLL		= ..\perl.dll
 MINIPERL	= ..\miniperl.exe
 MINIDIR		= .\mini
 PERLEXE		= ..\perl.exe
+WPERLEXE	= ..\wperl.exe
 GLOBEXE		= ..\perlglob.exe
 CONFIGPM	= ..\lib\Config.pm
 MINIMOD		= ..\lib\ExtUtils\Miniperl.pm
@@ -378,7 +418,6 @@ UTILS		=			\
 		..\utils\c2ph		\
 		..\utils\h2xs		\
 		..\utils\perldoc	\
-		..\utils\pstruct	\
 		..\utils\perlcc		\
 		..\pod\checkpods	\
 		..\pod\pod2html		\
@@ -400,7 +439,7 @@ MAKE		= nmake -nologo
 CFGSH_TMPL	= config.vc
 CFGH_TMPL	= config_H.vc
 
-!IF "$(USE_PERLCRT)" == ""
+!IF "$(BUILD_FOR_WIN95)" == "define"
 PERL95EXE	= ..\perl95.exe
 !ENDIF
 
@@ -523,7 +562,10 @@ CORE_NOCFG_H	=		\
 		.\include\dirent.h	\
 		.\include\netdb.h	\
 		.\include\sys\socket.h	\
-		.\win32.h
+		.\win32.h	\
+		.\perlhost.h	\
+		.\vdir.h	\
+		.\vmem.h
 
 CORE_H		= $(CORE_NOCFG_H) .\config.h
 
@@ -718,10 +760,16 @@ $(MINIDIR) :
 	if not exist "$(MINIDIR)" mkdir "$(MINIDIR)"
 
 $(MINICORE_OBJ) : $(CORE_NOCFG_H)
-	$(CC) -c $(CFLAGS) $(OBJOUT_FLAG)$@ ..\$(*F).c
+	$(CC) -c $(CFLAGS) -DPERL_EXTERNAL_GLOB $(OBJOUT_FLAG)$@ ..\$(*F).c
 
 $(MINIWIN32_OBJ) : $(CORE_NOCFG_H)
 	$(CC) -c $(CFLAGS) $(OBJOUT_FLAG)$@ $(*F).c
+
+# -DPERL_IMPLICIT_SYS needs C++ for perllib.c
+!IF "$(USE_IMP_SYS)$(USE_OBJECT)" == "defineundef"
+perllib$(o)	: perllib.c
+	$(CC) -c -I. $(CFLAGS_O) $(CXX_FLAG) $(OBJOUT_FLAG)$@ perllib.c
+!ENDIF
 
 # 1. we don't want to rebuild miniperl.exe when config.h changes
 # 2. we don't want to rebuild miniperl.exe with non-default config.h
@@ -777,10 +825,12 @@ perlmain$(o) : perlmain.c
 $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ)
 	$(LINK32) -subsystem:console -out:$@ $(LINK_FLAGS) $(LIBFILES) \
 	    $(PERLEXE_OBJ) $(SETARGV_OBJ) $(PERLIMPLIB) 
+	copy $(PERLEXE) $(WPERLEXE)
+	editbin /subsystem:windows $(WPERLEXE)
 	copy splittree.pl .. 
 	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" $(AUTODIR)
 
-!IF "$(USE_PERLCRT)" == ""
+!IF "$(BUILD_FOR_WIN95)" == "define"
 
 perl95.c : runperl.c 
 	copy runperl.c perl95.c
@@ -811,8 +861,10 @@ $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 	if not exist $(AUTODIR) mkdir $(AUTODIR)
 	cd $(EXTDIR)\$(*B)
 	..\$(MINIPERL) -I..\..\lib $(*B)_pm.PL
+	..\$(MINIPERL) -I..\..\lib XSLoader_pm.PL
 	cd ..\..\win32
 	$(XCOPY) $(EXTDIR)\$(*B)\$(*B).pm $(LIBDIR)\$(NULL)
+	$(XCOPY) $(EXTDIR)\$(*B)\XSLoader.pm $(LIBDIR)\$(NULL)
 	cd $(EXTDIR)\$(*B)
 	$(XSUBPP) dl_win32.xs > $(*B).c
 	cd ..\..\win32
@@ -938,6 +990,7 @@ distclean: clean
 	-del /f $(EXTENSION_C) $(DYNALOADER).c $(ERRNO).pm
 	-del /f $(EXTDIR)\DynaLoader\dl_win32.xs
 	-del /f $(LIBDIR)\.exists $(LIBDIR)\attrs.pm $(LIBDIR)\DynaLoader.pm
+	-del /f $(LIBDIR)\XSLoader.pm
 	-del /f $(LIBDIR)\Fcntl.pm $(LIBDIR)\IO.pm $(LIBDIR)\Opcode.pm
 	-del /f $(LIBDIR)\ops.pm $(LIBDIR)\Safe.pm $(LIBDIR)\Thread.pm
 	-del /f $(LIBDIR)\SDBM_File.pm $(LIBDIR)\Socket.pm $(LIBDIR)\POSIX.pm
@@ -952,7 +1005,7 @@ distclean: clean
 	-del /f $(PODDIR)\*.html
 	-del /f $(PODDIR)\*.bat
 	cd ..\utils
-	-del /f h2ph splain perlbug pl2pm c2ph h2xs perldoc pstruct dprofpp
+	-del /f h2ph splain perlbug pl2pm c2ph h2xs perldoc dprofpp
 	-del /f *.bat
 	cd ..\win32
 	cd ..\x2p
@@ -973,9 +1026,10 @@ install : all installbare installhtml
 
 installbare : utils
 	$(PERLEXE) ..\installperl
-!IF "$(USE_PERLCRT)" == ""
+!IF "$(BUILD_FOR_WIN95)" == "define"
 	$(XCOPY) $(PERL95EXE) $(INST_BIN)\*.*
 !ENDIF
+	if exist $(WPERLEXE) $(XCOPY) $(WPERLEXE) $(INST_BIN)\*.*
 	$(XCOPY) $(GLOBEXE) $(INST_BIN)\*.*
 	$(XCOPY) bin\*.bat $(INST_SCRIPT)\*.*
 
@@ -1021,6 +1075,7 @@ clean :
 	-@erase /f config.h
 	-@erase $(GLOBEXE)
 	-@erase $(PERLEXE)
+	-@erase $(WPERLEXE)
 	-@erase $(PERLDLL)
 	-@erase $(CORE_OBJ)
 	-rmdir /s /q $(MINIDIR) || rmdir /s $(MINIDIR)

@@ -54,10 +54,9 @@ sub B::SVOP::terse {
     $op->sv->terse(0);
 }
 
-sub B::GVOP::terse {
+sub B::PADOP::terse {
     my ($op, $level) = @_;
-    print indent($level), peekop($op), "  ";
-    $op->gv->terse(0);
+    print indent($level), peekop($op), "  ", $op->padix, "\n";
 }
 
 sub B::PMOP::terse {

@@ -34,11 +34,12 @@ engine), while others seem to do nothing but complain.  In other
 words, it's your usual mix of technical people.
 
 Over this group of porters presides Larry Wall.  He has the final word
-in what does and does not change in the Perl language.  Various releases
-of Perl are shepherded by a ``pumpking'', a porter responsible for
-gathering patches, deciding on a patch-by-patch feature-by-feature
-basis what will and will not go into the release.  For instance,
-Gurusamy Sarathy is the pumpking for the 5.6 release of Perl.
+in what does and does not change in the Perl language.  Various
+releases of Perl are shepherded by a ``pumpking'', a porter
+responsible for gathering patches, deciding on a patch-by-patch
+feature-by-feature basis what will and will not go into the release.
+For instance, Gurusamy Sarathy is the pumpking for the 5.6 release of
+Perl.
 
 In addition, various people are pumpkings for different things.  For
 instance, Andy Dougherty and Jarkko Hietaniemi share the I<Configure>
@@ -177,6 +178,15 @@ another man's pointless cruft.
 Work for the pumpking, work for Perl programmers, work for module
 authors, ...  Perl is supposed to be easy.
 
+=item Patches speak louder than words
+
+Working code is always preferred to pie-in-the-sky ideas.  A patch to
+add a feature stands a much higher chance of making it to the language
+than does a random feature request, no matter how fervently argued the
+request might be.  This ties into ``Will it be useful?'', as the fact
+that someone took the time to make the patch demonstrates a strong
+desire for the feature.
+
 =back
 
 If you're on the list, you might hear the word ``core'' bandied
@@ -195,16 +205,16 @@ anonymous CVS access to the latest versions.
 
 Always submit patches to I<perl5-porters@perl.org>.  This lets other
 porters review your patch, which catches a surprising number of errors
-in patches.  Either use the diff program (available in source code form
-from I<ftp://ftp.gnu.org/pub/gnu/>), or use Johan Vromans' I<makepatch>
-(available from I<CPAN/authors/id/JV/>).  Unified diffs are preferred,
-but context diffs are ok too.  Do not send RCS-style diffs or diffs
-without context lines.  More information is given in the
-I<Porting/patching.pod> file in the Perl source distribution.  Please
-patch against the latest B<development> version (e.g., if you're fixing
-a bug in the 5.005 track, patch against the latest 5.005_5x version).
-Only patches that survive the heat of the development branch get
-applied to maintenance versions.
+in patches.  Either use the diff program (available in source code
+form from I<ftp://ftp.gnu.org/pub/gnu/>), or use Johan Vromans'
+I<makepatch> (available from I<CPAN/authors/id/JV/>).  Unified diffs
+are preferred, but context diffs are accepted.  Do not send RCS-style
+diffs or diffs without context lines.  More information is given in
+the I<Porting/patching.pod> file in the Perl source distribution.
+Please patch against the latest B<development> version (e.g., if
+you're fixing a bug in the 5.005 track, patch against the latest
+5.005_5x version).  Only patches that survive the heat of the
+development branch get applied to maintenance versions.
 
 Your patch should update the documentation and test suite.
 
@@ -220,9 +230,9 @@ the searchable archives.
 
 The CPAN testers (I<http://testers.cpan.org/>) are a group of
 volunteers who test CPAN modules on a variety of platforms.  Perl Labs
-(I<http://labs.perl.org/>) automatically tests modules and Perl source
-releases on platforms and gives feedback to the CPAN testers mailing
-list.  Both efforts welcome volunteers.
+(I<http://labs.perl.org/>) automatically tests Perl source releases on
+platforms and gives feedback to the CPAN testers mailing list.  Both
+efforts welcome volunteers.
 
 To become an active and patching Perl porter, you'll need to learn how
 Perl works on the inside.  Chip Salzenberg, a pumpking, has written
@@ -231,9 +241,9 @@ articles on Perl internals for The Perl Journal
 interpreter work.  The C<perlguts> manpage explains the internal data
 structures.  And, of course, the C source code (sometimes sparsely
 commented, sometimes commented well) is a great place to start (begin
-with C<perl.c> and see where it goes from there).  A lot of the
-style of the Perl source is explained in the I<Porting/pumpkin.pod>
-file in the source distribution.
+with C<perl.c> and see where it goes from there).  A lot of the style
+of the Perl source is explained in the I<Porting/pumpkin.pod> file in
+the source distribution.
 
 It is essential that you be comfortable using a good debugger
 (e.g. gdb, dbx) before you can patch perl.  Stepping through perl
@@ -255,14 +265,11 @@ personalities of the players, and hopefully be better prepared to make
 a useful contribution when do you speak up.
 
 If after all this you still think you want to join the perl5-porters
-mailing list, send mail to I<perl5-porters-request@perl.org> with the
-body of your message reading I<subscribe>.  To unsubscribe, either
-send mail to the same address with the body reading I<unsubscribe>, or
-send mail to I<perl5-porters-unsubscribe@perl.org>.
+mailing list, send mail to I<perl5-porters-subscribe@perl.org>.  To
+unsubscribe, send mail to I<perl5-porters-unsubscribe@perl.org>.
 
 =head1 AUTHOR
 
 This document was written by Nathan Torkington, and is maintained by
 the perl5-porters mailing list.
 
-=cut

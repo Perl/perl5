@@ -21,7 +21,7 @@ unlink "errno.c" if -f "errno.c";
 sub process_file {
     my($file) = @_;
 
-    return unless defined $file;
+    return unless defined $file and -f $file;
 
     local *FH;
     if (($^O eq 'VMS') && ($Config{vms_cc_type} ne 'gnuc')) {
@@ -180,8 +180,9 @@ use Exporter ();
 use Config;
 use strict;
 
-\$Config{'myarchname'} eq "$Config{'myarchname'}" or
-	die "Errno architecture ($Config{'myarchname'}) does not match executable architecture (\$Config{'myarchname'})";
+"\$Config{'archname'}-\$Config{'osvers'}" eq
+"$Config{'archname'}-$Config{'osvers'}" or
+	die "Errno architecture ($Config{'archname'}-$Config{'osvers'}) does not match executable architecture (\$Config{'archname'}-\$Config{'osvers'})";
 
 \$VERSION = "$VERSION";
 \@ISA = qw(Exporter);

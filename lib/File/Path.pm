@@ -126,13 +126,15 @@ sub mkpath {
 	my $parent = File::Basename::dirname($path);
 	# Allow for creation of new logical filesystems under VMS
 	if (not $Is_VMS or $parent !~ m:/[^/]+/000000/?:) {
-	    push(@created,mkpath($parent, $verbose, $mode)) unless (-d $parent);
+	    unless (-d $parent or $path eq $parent) {
+		push(@created,mkpath($parent, $verbose, $mode));
+	    }
 	}
 	print "mkdir $path\n" if $verbose;
 	unless (mkdir($path,$mode)) {
-	  my $e = $!;
-	  # allow for another process to have created it meanwhile
-	  croak "mkdir $path: $e" unless -d $path;
+	    my $e = $!;
+	    # allow for another process to have created it meanwhile
+	    croak "mkdir $path: $e" unless -d $path;
 	}
 	push(@created, $path);
     }

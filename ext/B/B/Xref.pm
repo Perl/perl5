@@ -201,7 +201,7 @@ sub xref_main {
 
 sub pp_nextstate {
     my $op = shift;
-    $file = $op->filegv->SV->PV;
+    $file = $op->file;
     $line = $op->line;
     $top = UNKNOWN;
 }
@@ -272,7 +272,7 @@ sub B::GV::xref {
     my $cv = $gv->CV;
     if ($$cv) {
 	#return if $done{$$cv}++;
-	$file = $gv->FILEGV->SV->PV;
+	$file = $gv->FILE;
 	$line = $gv->LINE;
 	process([$gv->STASH->NAME, "&", $gv->NAME], "subdef");
 	push(@todo, $cv);
@@ -280,7 +280,7 @@ sub B::GV::xref {
     my $form = $gv->FORM;
     if ($$form) {
 	return if $done{$$form}++;
-	$file = $gv->FILEGV->SV->PV;
+	$file = $gv->FILE;
 	$line = $gv->LINE;
 	process([$gv->STASH->NAME, "", $gv->NAME], "formdef");
     }

@@ -770,14 +770,14 @@ sub pp_nextstate {
 	   and $seq > $self->{'subs_todo'}[0][0]) {
 	push @text, $self->next_todo;
     }
-    my $stash = $op->stash->NAME;
+    my $stash = $op->stashpv;
     if ($stash ne $self->{'curstash'}) {
 	push @text, "package $stash;\n";
 	$self->{'curstash'} = $stash;
     }
     if ($self->{'linenums'}) {
 	push @text, "\f#line " . $op->line . 
-	  ' "' . substr($op->filegv->NAME, 2), qq'"\n';
+	  ' "' . $op->file, qq'"\n';
     }
     return join("", @text);
 }
@@ -1109,7 +1109,7 @@ sub ftst {
 	# Genuine `-X' filetests are exempt from the LLAFR, but not
 	# l?stat(); for the sake of clarity, give'em all parens
 	return $self->maybe_parens_unop($name, $op->first, $cx);
-    } elsif (class($op) eq "GVOP") {
+    } elsif (class($op) eq "SVOP") {
 	return $self->maybe_parens_func($name, $self->pp_gv($op, 1), $cx, 16);
     } else { # I don't think baseop filetests ever survive ck_ftst, but...
 	return $name;

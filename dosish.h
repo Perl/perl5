@@ -31,7 +31,6 @@
 
 #define PERL_SYS_TERM() MALLOC_TERM
 #define dXSUB_SYS
-#define TMPPATH "plXXXXXX"
 
 /*
  * 5.003_07 and earlier keyed on #ifdef MSDOS for determining if we were 

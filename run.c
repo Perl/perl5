@@ -22,7 +22,9 @@ Perl_runops_standard(pTHX)
 {
     dTHR;
 
-    while ( PL_op = CALL_FPTR(PL_op->op_ppaddr)(aTHX) ) ;
+    while ( PL_op = CALL_FPTR(PL_op->op_ppaddr)(aTHX) ) {
+	PERL_ASYNC_CHECK();
+    }
 
     TAINT_NOT;
     return 0;
@@ -40,10 +42,13 @@ Perl_runops_debug(pTHX)
     }
 
     do {
+	PERL_ASYNC_CHECK();
 	if (PL_debug) {
 	    if (PL_watchaddr != 0 && *PL_watchaddr != PL_watchok)
-		PerlIO_printf(Perl_debug_log, "WARNING: %lx changed from %lx to %lx\n",
-		    (long)PL_watchaddr, (long)PL_watchok, (long)*PL_watchaddr);
+		PerlIO_printf(Perl_debug_log,
+			      "WARNING: %"UVxf" changed from %"UVxf" to %"UVxf"\n",
+			      PTR2UV(PL_watchaddr), PTR2UV(PL_watchok),
+			      PTR2UV(*PL_watchaddr));
 	    DEBUG_s(debstack());
 	    DEBUG_t(debop(PL_op));
 	    DEBUG_P(debprof(PL_op));
@@ -66,13 +71,13 @@ Perl_debop(pTHX_ OP *o)
     Perl_deb(aTHX_ "%s", PL_op_name[o->op_type]);
     switch (o->op_type) {
     case OP_CONST:
-	PerlIO_printf(Perl_debug_log, "(%s)", SvPEEK(cSVOPo->op_sv));
+	PerlIO_printf(Perl_debug_log, "(%s)", SvPEEK(cSVOPo_sv));
 	break;
     case OP_GVSV:
     case OP_GV:
-	if (cGVOPo->op_gv) {
+	if (cGVOPo_gv) {
 	    sv = NEWSV(0,0);
-	    gv_fullname3(sv, cGVOPo->op_gv, Nullch);
+	    gv_fullname3(sv, cGVOPo_gv, Nullch);
 	    PerlIO_printf(Perl_debug_log, "(%s)", SvPV(sv, n_a));
 	    SvREFCNT_dec(sv);
 	}
@@ -94,8 +99,8 @@ Perl_watch(pTHX_ char **addr)
     dTHR;
     PL_watchaddr = addr;
     PL_watchok = *addr;
-    PerlIO_printf(Perl_debug_log, "WATCHING, %lx is currently %lx\n",
-	(long)PL_watchaddr, (long)PL_watchok);
+    PerlIO_printf(Perl_debug_log, "WATCHING, %"UVxf" is currently %"UVxf"\n",
+	PTR2UV(PL_watchaddr), PTR2UV(PL_watchok));
 #endif	/* DEBUGGING */
 }
 

@@ -3,12 +3,6 @@
 # If you modify/add tests here, remember to update also t/op/lfs.t.
 
 BEGIN {
-	# Don't bother if there are no quads.
-	eval { my $q = pack "q", 0 };
-	if ($@) {
-		print "1..0\n# no 64-bit types\n";
-		exit(0);
-	}
 	chdir 't' if -d 't';
 	unshift @INC, '../lib';
 	require Config; import Config;
@@ -43,20 +37,22 @@ sub explain {
 EOM
 }
 
+print "# checking whether we have sparse files...\n";
+
 # Known have-nots.
 if ($^O eq 'win32' || $^O eq 'vms') {
-    print "1..0\n# no sparse files\n";
+    print "1..0\n# no sparse files (because this is $^O) \n";
     bye();
 }
 
 # Known haves that have problems running this test
 # (for example because they do not support sparse files, like UNICOS)
 if ($^O eq 'unicos') {
-    print "1..0\n# large files known to work but unable to test them here\n";
+    print "1..0\n# large files known to work but unable to test them here ($^O)\n";
     bye();
 }
 
-# Then try to deduce whether we have sparse files.
+# Then try heuristically to deduce whether we have sparse files.
 
 # We'll start off by creating a one megabyte file which has
 # only three "true" bytes.  If we have sparseness, we should
@@ -85,24 +81,31 @@ unless (@s == 13 &&
     bye();
 }
 
+print "# we seem to have sparse files...\n";
+
 # By now we better be sure that we do have sparse files:
 # if we are not, the following will hog 5 gigabytes of disk.  Ooops.
 
 $ENV{LC_ALL} = "C";
 
 sysopen(BIG, "big", O_WRONLY|O_CREAT|O_TRUNC) or
-	do { warn "sysopen failed: $!\n"; bye };
-sysseek(BIG, 5_000_000_000, SEEK_SET);
+	do { warn "sysopen 'big' failed: $!\n"; bye };
+my $sysseek = sysseek(BIG, 5_000_000_000, SEEK_SET);
+unless (defined $sysseek && $sysseek == 5_000_000_000) {
+    print "1..0\n# seeking past 2GB failed: $! (sysseek returned ",
+          defined $sysseek ? $sysseek : 'undef', ")\n";
+    explain();
+    bye();
+}
 
 # The syswrite will fail if there are are filesize limitations (process or fs).
-my $syswrite = syswrite(BIG, "big") == 3;
-my $close   = close BIG if $syswrite;
+my $syswrite = syswrite(BIG, "big");
+print "# syswrite failed: $! (syswrite returned ",
+      defined $syswrite ? $syswrite : 'undef', ")\n"
+    unless defined $syswrite && $syswrite == 3;
+my $close     = close BIG;
+print "# close failed: $!\n" unless $close;
 unless($syswrite && $close) {
-    unless ($syswrite) {
-        print "# syswrite failed: $!\n"
-    } else {
-        print "# close failed: $!\n"
-    }
     if ($! =~/too large/i) {
 	print "1..0\n# writing past 2GB failed: process limits?\n";
     } elsif ($! =~ /quota/i) {

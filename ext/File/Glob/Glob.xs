@@ -80,6 +80,12 @@ constant(char *name, int arg)
 #endif
 	break;
     case 'N':
+	if (strEQ(name, "GLOB_NOCASE"))
+#ifdef GLOB_NOCASE
+	    return GLOB_NOCASE;
+#else
+	    goto not_there;
+#endif
 	if (strEQ(name, "GLOB_NOCHECK"))
 #ifdef GLOB_NOCHECK
 	    return GLOB_NOCHECK;

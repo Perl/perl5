@@ -3,9 +3,9 @@ targettype exe
 uid        0x100051d8 
 
 project perl5.005
-subproject perl5.005_60
+subproject perl5.005_62
 
-SOURCE av.c deb.c doio.c doop.c dump.c globals.c gv.c hv.c mg.c miniperlmain.c op.c perl.c perlio.c perly.c pp.c pp_ctl.c pp_hot.c pp_sys.c regcomp.c regexec.c run.c scope.c sv.c taint.c toke.c universal.c utf8.c  util.c epoc.c epoc_stubs.c
+SOURCE av.c deb.c doio.c doop.c dump.c globals.c gv.c hv.c mg.c miniperlmain.c op.c perl.c perlapi.c perlio.c perly.c pp.c pp_ctl.c pp_hot.c pp_sys.c regcomp.c regexec.c run.c scope.c sv.c taint.c toke.c universal.c utf8.c  util.c xsutils.c epoc.c epoc_stubs.c
 systeminclude \epoc32\include\libc \epoc32\include
 
 #if defined(MARM)

@@ -337,7 +337,7 @@ startformsub:	/* NULL */	/* start a format subroutine scope */
 
 subname	:	WORD	{ STRLEN n_a; char *name = SvPV(((SVOP*)$1)->op_sv,n_a);
 			  if (strEQ(name, "BEGIN") || strEQ(name, "END")
-			      || strEQ(name, "INIT"))
+			      || strEQ(name, "STOP") || strEQ(name, "INIT"))
 			      CvSPECIAL_on(PL_compcv);
 			  $$ = $1; }
 	;

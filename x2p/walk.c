@@ -863,7 +863,7 @@ sub Pick {\n\
 	    str_scat(tmp3str,tmp2str);
 	    str_cat(tmp3str,").'\"') =~ s/&/\\$&/g, ");
 	    str_set(tmp2str,"eval $s_");
-	    s = (*s == 'g' ? "ge" : "e");
+	    s = (char*)(*s == 'g' ? "ge" : "e");
 	    i++;
 	}
 	type = ops[ops[node+1].ival].ival;
@@ -1219,7 +1219,7 @@ sub Pick {\n\
 	}
 	tmpstr = walk(1+(type==OPRINT),level,ops[node+1].ival,&numarg,P_MIN);
 	if (!*tmpstr->str_ptr && lval_field) {
-	    t = saw_OFS ? "$," : "' '";
+	    t = (char*)(saw_OFS ? "$," : "' '");
 	    if (split_to_array) {
 		sprintf(tokenbuf,"join(%s,@Fld)",t);
 		str_cat(tmpstr,tokenbuf);
@@ -1295,7 +1295,7 @@ sub Pick {\n\
 	    tmpstr = str_new(0);
 	if (!tmpstr->str_ptr || !*tmpstr->str_ptr) {
 	    if (lval_field) {
-		t = saw_OFS ? "$," : "' '";
+		t = (char*)(saw_OFS ? "$," : "' '");
 		if (split_to_array) {
 		    sprintf(tokenbuf,"join(%s,@Fld)",t);
 		    str_cat(tmpstr,tokenbuf);

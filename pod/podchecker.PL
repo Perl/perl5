@@ -45,7 +45,7 @@ print OUT <<'!NO!SUBS!';
 #############################################################################
 
 use strict;
-use diagnostics;
+#use diagnostics;
 
 =head1 NAME
 
@@ -53,7 +53,7 @@ podchecker - check the syntax of POD format documentation files
 
 =head1 SYNOPSIS
 
-B<podchecker> [B<-help>] [B<-man>] [I<file>S< >...]
+B<podchecker> [B<-help>] [B<-man>] [B<-(no)warnings>] [I<file>S< >...]
 
 =head1 OPTIONS AND ARGUMENTS
 
@@ -66,6 +66,10 @@ Print a brief help message and exit.
 =item B<-man>
 
 Print the manual page and exit.
+
+=item B<-warnings> B<-nowarnings>
+
+Turn on/off printing of warnings.
 
 =item I<file>
 
@@ -83,13 +87,30 @@ indicating the number of errors found.
 B<podchecker> invokes the B<podchecker()> function exported by B<Pod::Checker>
 Please see L<Pod::Checker/podchecker()> for more details.
 
+=head1 RETURN VALUE
+
+B<podchecker> returns a 0 (zero) exit status if all specified
+POD files are ok.
+
+=head1 ERRORS
+
+B<podchecker> returns the exit status 1 if at least one of
+the given POD files has syntax errors.
+
+The status 2 indicates that at least one of the specified 
+files does not contain I<any> POD commands.
+
+Status 1 overrides status 2. If you want unambigouus
+results, call B<podchecker> with one single argument only.
+
 =head1 SEE ALSO
 
 L<Pod::Parser> and L<Pod::Checker>
 
-=head1 AUTHOR
+=head1 AUTHORS
 
-Brad Appleton E<lt>bradapp@enteract.comE<gt>
+Brad Appleton E<lt>bradapp@enteract.comE<gt>,
+Marek Rouchal E<lt>marek@saftsack.fs.uni-bayreuth.deE<gt>
 
 Based on code for B<Pod::Text::pod2text(1)> written by
 Tom Christiansen E<lt>tchrist@mox.perl.comE<gt>
@@ -105,10 +126,11 @@ use Getopt::Long;
 my %options = (
         "help"     => 0,
         "man"      => 0,
+        "warnings" => 1,
 );
 
 ## Parse options
-GetOptions(\%options, "help", "man")  ||  pod2usage(2);
+GetOptions(\%options, "help", "man", "warnings!")  ||  pod2usage(2);
 pod2usage(1)  if ($options{help});
 pod2usage(-verbose => 2)  if ($options{man});
 
@@ -116,11 +138,20 @@ pod2usage(-verbose => 2)  if ($options{man});
 pod2usage(2) if ((@ARGV == 0) && (-t STDIN));
 
 ## Invoke podchecker()
-if(@ARGV) {
-   for (@ARGV) { podchecker($_) };
-} else {
-	podchecker("<&STDIN");
+my $status = 0;
+@ARGV = ("<&STDIN") unless(@ARGV);
+for (@ARGV) {
+    my $s = podchecker($_, undef, '-warnings' => $options{warnings});
+    if($s > 0) {
+        # errors occurred
+        $status = 1;
+    }
+    elsif($s < 0) {
+        # no pod found
+        $status = 2 unless($status);
+    }
 }
+exit $status;
 
 !NO!SUBS!
 

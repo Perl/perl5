@@ -197,6 +197,36 @@ case "$cc" in
 *gcc*) ccflags="$ccflags -DUINT32_MAX_BROKEN" ;;
 esac
 
+cat > UU/cc.cbu <<'EOSH'
+# XXX This script UU/cc.cbu will get 'called-back' by Configure after it
+# XXX has prompted the user for the C compiler to use.
+# Get gcc to share its secrets.
+echo 'main() { return 0; }' > try.c
+	# Indent to avoid propagation to config.sh
+	verbose=`${cc:-cc} -v -o try try.c 2>&1`
+if echo "$verbose" | grep '^Reading specs from' >/dev/null 2>&1; then
+	# Using gcc.
+	: nothing to see here, move on.
+else
+	# Using cc.
+        ar=${ar:-ar}
+	case "`$ar -V 2>&1`" in
+	*GNU*)
+	    if test -x /usr/bin/ar; then
+	    	cat <<END >&2
+
+NOTE: You are using HP cc(1) but GNU ar(1).  This might lead into trouble
+later on, I'm switching to HP ar to play safe.
+
+END
+		ar=/usr/bin/ar
+	    fi
+	;;
+    esac
+fi
+
+EOSH
+
 # Date: Fri, 6 Sep 96 23:15:31 CDT
 # From: "Daniel S. Lewart" <d-lewart@uiuc.edu>
 # I looked through the gcc.info and found this:
@@ -260,10 +290,47 @@ EOM
 esac
 EOCBU
 
+# This script UU/uselfs.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use 64 bits.
+cat > UU/uselfs.cbu <<'EOCBU'
+case "$uselargefiles" in
+$define|true|[yY]*)
+	lfcflags="`getconf _CS_XBS5_ILP32_OFFBIG_CFLAGS 2>/dev/null`"
+	lfldflags="`getconf _CS_XBS5_ILP32_OFFBIG_LDFLAGS 2>/dev/null`"
+	lflibs="`getconf _CS_XBS5_ILP32_OFFBIG_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
+	case "$lfcflags$lfldflags$lflibs" in
+	'');;
+	*) # This sucks.  To get the HP-UX strict ANSI mode (-Aa) to
+	   # approve of large file offsets, we must turn on the 64-bitness
+	   # (+DD64), too.  A callback file (a hack) calling another, yuck.
+	   case "$use64bits" in
+           $undef|false|[nN]*|'')
+	       use64bits="$define"
+	       if $test -f use64bits.cbu; then
+                   echo "(Large files in HP-UX require also 64-bitness, picking up 64-bit hints...)"
+		   . ./use64bits.cbu
+	       fi
+               ;;
+           esac
+	   ccflags="$ccflags $lfcflags"
+	   ldflags="$ldflags $ldldflags"
+	   libswanted="$libswanted $lflibs"
+	   ;;
+	esac
+	lfcflags=''
+	lfldflags=''
+	lflibs=''
+	;;
+esac
+EOCBU
+
 # This script UU/use64bits.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use 64 bits.
 cat > UU/use64bits.cbu <<'EOCBU'
-case "$use64bits" in
+case "$ccflags" in
+*+DD64*) # Been here, done this (via uselfs.cbu, most likely.)
+   ;;
+*) case "$use64bits" in
 $define|true|[yY]*)
 	    if [ "$xxOsRevMajor" -lt 11 ]; then
 		cat <<EOM >&4
@@ -281,11 +348,16 @@ Cannot continue, aborting.
 EOM
 		exit 1
 	    fi
-	    ccflags="$ccflags +DD64 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
+	    ccflags="$ccflags +DD64"
 	    ldflags="$ldflags +DD64"
 	    ld=/usr/bin/ld
 	    set `echo " $libswanted " | sed -e 's@ dl @ @'`
 	    libswanted="$*"
 	    glibpth="/lib/pa20_64"
+   esac
+   ;;
 esac
 EOCBU
+
+
+

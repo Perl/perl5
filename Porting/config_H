@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Sun Oct  3 02:17:38 EET DST 1999
+ * Configuration time: Sat Nov 13 15:28:21 EET 1999
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -361,18 +361,6 @@
  *	available.
  */
 #define HAS_MKTIME		/**/
-
-/* HAS_MSYNC:
- *	This symbol, if defined, indicates that the msync system call is
- *	available to synchronize a mapped file.
- */
-#define HAS_MSYNC		/**/
-
-/* HAS_MUNMAP:
- *	This symbol, if defined, indicates that the munmap system call is
- *	available to unmap a region, usually mapped by mmap().
- */
-#define HAS_MUNMAP		/**/
 
 /* HAS_NICE:
  *	This symbol, if defined, indicates that the nice routine is
@@ -996,6 +984,30 @@
  */
 #define STDCHAR unsigned char	/**/
 
+/* HAS_QUAD:
+ *	This symbol, if defined, tells that there's a 64-bit integer type,
+ *	Quad_t.
+ */
+/* Quad_t:
+ *	This symbol holds the type used for 64-bit integers.
+ *	It can be int, long, long long, int64_t etc...
+ */
+/* Uquad_t:
+ *	This symbol holds the type used for unsigned 64-bit integers.
+ *	It can be unsigned int, unsigned long, unsigned long long,
+ *	uint64_t etc...
+ */
+#define HAS_QUAD	/**/
+#define Quad_t long	/**/
+#define Uquad_t unsigned long	/**/
+#ifdef HAS_QUAD
+#   define QUADKIND 2	/**/
+#   define QUAD_IS_INT	1
+#   define QUAD_IS_LONG	2
+#   define QUAD_IS_LONG_LONG	3
+#   define QUAD_IS_INT64_T	4
+#endif
+
 /* HAS_ACCESSX:
  *	This symbol, if defined, indicates that the accessx routine is
  *	available to do extended access checks.
@@ -1423,8 +1435,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "/opt/perl/lib/5.00561/alpha-dec_osf-thread"		/**/
-#define ARCHLIB_EXP "/opt/perl/lib/5.00561/alpha-dec_osf-thread"		/**/
+#define ARCHLIB "/opt/perl/lib/5.00563/alpha-dec_osf-thread"		/**/
+#define ARCHLIB_EXP "/opt/perl/lib/5.00563/alpha-dec_osf-thread"		/**/
 
 /* BIN:
  *	This symbol holds the path of the bin directory where the package will
@@ -1453,8 +1465,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "/opt/perl/lib/5.00561"		/**/
-#define PRIVLIB_EXP "/opt/perl/lib/5.00561"		/**/
+#define PRIVLIB "/opt/perl/lib/5.00563"		/**/
+#define PRIVLIB_EXP "/opt/perl/lib/5.00563"		/**/
 
 /* SITEARCH:
  *	This symbol contains the name of the private library for this package.
@@ -1462,15 +1474,17 @@
  *	execution path, but it should be accessible by the world.  The program
  *	should be prepared to do ~ expansion.
  *	The standard distribution will put nothing in this directory.
- *	Individual sites may place their own extensions and modules in
- *	this directory.
+ *	After perl has been installed, users may install their own local
+ *	architecture-dependent modules in this directory with
+ *		MakeMaker Makefile.PL
+ *	or equivalent.  See INSTALL for details.
  */
 /* SITEARCH_EXP:
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH "/opt/perl/lib/site_perl/5.00561/alpha-dec_osf-thread"		/**/
-#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.00561/alpha-dec_osf-thread"		/**/
+#define SITEARCH "/opt/perl/lib/site_perl/5.00563/alpha-dec_osf-thread"		/**/
+#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.00563/alpha-dec_osf-thread"		/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -1478,8 +1492,10 @@
  *	execution path, but it should be accessible by the world.  The program
  *	should be prepared to do ~ expansion.
  *	The standard distribution will put nothing in this directory.
- *	Individual sites may place their own extensions and modules in
- *	this directory.
+ *	After perl has been installed, users may install their own local
+ *	architecture-independent modules in this directory with
+ *		MakeMaker Makefile.PL
+ *	or equivalent.  See INSTALL for details.
  */
 /* SITELIB_EXP:
  *	This symbol contains the ~name expanded version of SITELIB, to be used
@@ -1775,18 +1791,6 @@
  */
 #define HAS_MEMCHR	/**/
 
-/* HAS_MMAP:
- *	This symbol, if defined, indicates that the mmap system call is
- *	available to map a file into memory.
- */
-/* Mmap_t:
- *	This symbol holds the return type of the mmap() system call
- *	(and simultaneously the type of the first argument).
- *	Usually set to 'void *' or 'cadd_t'.
- */
-#define HAS_MMAP		/**/
-#define Mmap_t void *	/**/
-
 /* HAS_MSG:
  *	This symbol, if defined, indicates that the entire msg*(2) library is
  *	supported (IPC mechanism based on message queues).
@@ -1893,26 +1897,6 @@
  *	Checking just with #ifdef might not be enough because this symbol
  *	has been known to be an enum.
  */
-/* HAS_SENDMSG:
- *	This symbol, if defined, indicates that the sendmsg is supported
- *	to send messages between sockets.  You will also need struct
- *	iovec from <sys/uio.h>, HAS_STRUCT_IOVEC and I_SYSUIO.
- */
-/* HAS_RECVMSG:
- *	This symbol, if defined, indicates that the recvmsg is supported
- *	to send messages between sockets.  You will also need struct
- *	iovec from <sys/uio.h>, HAS_STRUCT_IOVEC and I_SYSUIO.
- */
-/* HAS_STRUCT_MSGHDR:
- *	This symbol, if defined, indicates that the struct msghdr
- *	(BSD 4.3 or 4.4) is supported.  You will also need struct
- *	iovec from <sys/uio.h>, HAS_STRUCT_IOVEC and I_SYSUIO.
- */
-/* HAS_STRUCT_CMSGHDR:
- *	This symbol, if defined, indicates that the struct cmsghdr
- *	(BSD 4.4) is supported.  You will also need struct
- *	iovec from <sys/uio.h>, HAS_STRUCT_IOVEC and I_SYSUIO.
- */
 #define	HAS_SOCKET		/**/
 #define	HAS_SOCKETPAIR	/**/
 #define	HAS_MSG_CTRUNC	/**/
@@ -1921,16 +1905,14 @@
 #define	HAS_MSG_PEEK	/**/
 /*#define	HAS_MSG_PROXY	/ **/
 #define	HAS_SCM_RIGHTS	/**/
-#define	HAS_SENDMSG	/**/
-#define	HAS_RECVMSG	/**/
-#define	HAS_STRUCT_MSGHDR	/**/
-#define	HAS_STRUCT_CMSGHDR	/**/
 
 /* USE_STAT_BLOCKS:
  *	This symbol is defined if this system has a stat structure declaring
  *	st_blksize and st_blocks.
  */
+#ifndef USE_STAT_BLOCKS
 #define USE_STAT_BLOCKS 	/**/
+#endif
 
 /* HAS_STRERROR:
  *	This symbol, if defined, indicates that the strerror routine is
@@ -2066,12 +2048,7 @@
  *	This symbol, if defined, indicates that <sys/uio.h> exists and
  *	should be included.
  */
-/* HAS_STRUCT_IOVEC:
- *	This symbol, if defined, indicates that the struct iovec
- *	to do scatter writes/gather reads is supported.
- */
 #define	I_SYSUIO		/**/
-#define	HAS_STRUCT_IOVEC		/**/
 
 /* Free_t:
  *	This variable contains the return type of free().  It is usually
@@ -2178,21 +2155,38 @@
  */
 /*#define HAS_ENDSPENT		/ **/
 
+/* HAS_STRUCT_FS_DATA:
+ *	This symbol, if defined, indicates that the struct fs_data
+ *	to do statfs() is supported.
+ */
+/*#define HAS_STRUCT_FS_DATA	/ **/
+
 /* HAS_FSEEKO:
  *	This symbol, if defined, indicates that the fseeko routine is
  *	available to fseek beyond 32 bits (useful for ILP32 hosts).
  */
 /*#define HAS_FSEEKO		/ **/
 
+/* HAS_FSTATFS:
+ *	This symbol, if defined, indicates that the fstatfs routine is
+ *	available to stat filesystems by file descriptors.
+ */
+#define HAS_FSTATFS		/**/
 /* HAS_FTELLO:
  *	This symbol, if defined, indicates that the ftello routine is
  *	available to ftell beyond 32 bits (useful for ILP32 hosts).
  */
 /*#define HAS_FTELLO		/ **/
 
+/* HAS_GETMNT:
+ *	This symbol, if defined, indicates that the getmnt routine is
+ *	available to get filesystem mount info by filename.
+ */
+/*#define HAS_GETMNT		/ **/
+
 /* HAS_GETMNTENT:
  *	This symbol, if defined, indicates that the getmntent routine is
- *	available to iterate through mounted file systems.
+ *	available to iterate through mounted file systems to get their info.
  */
 /*#define HAS_GETMNTENT		/ **/
 
@@ -2214,6 +2208,13 @@
  */
 /*#define HAS_HASMNTOPT		/ **/
 
+/* HAS_INT64_T:
+ *     This symbol will defined if the C compiler supports int64_t.
+ *     Usually the <inttypes.h> needs to be included, but sometimes
+ *	<sys/types.h> is enough.
+ */
+/*#define     HAS_INT64_T               / **/
+
 /* HAS_LDBL_DIG:
  *	This symbol, if defined, indicates that this system's <float.h>
  *	or <limits.h> defines the symbol LDBL_DIG, which is the number
@@ -2221,25 +2222,6 @@
  *	for DBL_DIG, there's no good guess for LDBL_DIG if it is undefined.
  */
 #define HAS_LDBL_DIG 	/* */
-
-/* HAS_MADVISE:
- *	This symbol, if defined, indicates that the madvise system call is
- *	available to map a file into memory.
- */
-#define HAS_MADVISE		/**/
-
-/* HAS_MPROTECT:
- *	This symbol, if defined, indicates that the mprotect system call is
- *	available to modify the access protection of a memory mapped file.
- */
-#define HAS_MPROTECT		/**/
-
-/* HAS_READV:
- *	This symbol, if defined, indicates that the readv routine is
- *	available to do gather reads.  You will also need <sys/uio.h>
- *	and there I_SYSUIO.
- */
-#define HAS_READV		/**/
 
 /* HAS_SETSPENT:
  *	This symbol, if defined, indicates that the setspent system call is
@@ -2253,23 +2235,32 @@
  */
 /*#define	USE_SFIO		/ **/
 
-/* HAS_FSTATFS:
- *	This symbol, if defined, indicates that the fstatfs routine is
- *	available to stat filesystems of file descriptors.
+/* HAS_SQRTL:
+ *	This symbol, if defined, indicates that the sqrtl routine is
+ *	available to do long double square roots.
  */
-/* HAS_STRUCT_STATFS_FLAGS:
+#define HAS_SQRTL		/**/
+
+/* HAS_STRUCT_STATFS_F_FLAGS:
  *	This symbol, if defined, indicates that the struct statfs
  *	does have the f_flags member containing the mount flags of
- *	the filesystem holding the file.
- *	This kind of struct statfs is coming from sys/mount.h (BSD),
- *	not from sys/statfs.h (SYSV).
+ *	the filesystem containing the file.
+ *	This kind of struct statfs is coming from <sys/mount.h> (BSD 4.3),
+ *	not from <sys/statfs.h> (SYSV).  Older BSDs (like Ultrix) do not
+ *	have statfs() and struct statfs, they have ustat() and getmnt()
+ *	with struct ustat and struct fs_data.
  */
-#define HAS_FSTATFS		/**/
-#define HAS_STRUCT_STATFS_FLAGS		/**/
+#define HAS_STRUCT_STATFS_F_FLAGS		/**/
+
+/* HAS_STRUCT_STATFS:
+ *	This symbol, if defined, indicates that the struct statfs
+ *	to do statfs() is supported.
+ */
+#define HAS_STRUCT_STATFS	/**/
 
 /* HAS_FSTATVFS:
  *	This symbol, if defined, indicates that the fstatvfs routine is
- *	available to stat filesystems of file descriptors.
+ *	available to stat filesystems by file descriptors.
  */
 #define HAS_FSTATVFS		/**/
 
@@ -2281,11 +2272,11 @@
  */
 #define	HAS_TELLDIR_PROTO	/**/
 
-/* HAS_WRITEV:
- *	This symbol, if defined, indicates that the writev routine is
- *	available to do scatter writes.
+/* HAS_USTAT:
+ *	This symbol, if defined, indicates that the ustat system call is
+ *	available to query file system statistics by dev_t.
  */
-#define HAS_WRITEV		/**/
+#define HAS_USTAT		/**/
 
 /* USE_DYNAMIC_LOADING:
  *	This symbol, if defined, indicates that dynamic loading of
@@ -2324,13 +2315,7 @@
  *     This symbol, if defined, indicates to the C program that it should
  *     include <inttypes.h>.
  */
-/* HAS_INT64_T:
- *     This symbol will defined if the C compiler supports int64_t.
- *     Usually the <inttypes.h> needs to be included, but sometimes
- *	<sys/types.h> is enough.
- */
 /*#define   I_INTTYPES                / **/
-/*#define     HAS_INT64_T               / **/
 
 /* I_MNTENT:
  *	This symbol, if defined, indicates that <mntent.h> exists and
@@ -2362,23 +2347,34 @@
  */
 /*#define	I_SOCKS		/ **/
 
-/* I_SYS_MMAN:
- *	This symbol, if defined, indicates that <sys/mman.h> exists and
- *	should be included.
- */
-#define	I_SYS_MMAN		/**/
-
 /* I_SYS_MOUNT:
  *	This symbol, if defined, indicates that <sys/mount.h> exists and
  *	should be included.
  */
 #define	I_SYS_MOUNT		/**/
 
+/* I_SYS_STATFS:
+ *	This symbol, if defined, indicates that <sys/statfs.h> exists.
+ */
+/*#define	I_SYS_STATFS		/ **/
+
 /* I_SYS_STATVFS:
  *	This symbol, if defined, indicates that <sys/statvfs.h> exists and
  *	should be included.
  */
 #define	I_SYS_STATVFS		/**/
+
+/* I_SYS_VFS:
+ *	This symbol, if defined, indicates that <sys/vfs.h> exists and
+ *	should be included.
+ */
+/*#define	I_SYS_VFS		/ **/
+
+/* I_USTAT:
+ *	This symbol, if defined, indicates that <ustat.h> exists and
+ *	should be included.
+ */
+#define	I_USTAT		/**/
 
 /* HAS_OFF64_T:
  *	This symbol will be defined if the C compiler supports off64_t.
@@ -2400,26 +2396,119 @@
 #define PERL_PRIfldbl	"f"	/**/
 #define PERL_PRIgldbl	"g"	/**/
 
-/* PERL_PRId64:
- *	This symbol, if defined, contains the string used by stdio to
- *	format 64-bit decimal numbers (format 'd') for output.
+/* IVTYPE:
+ *	This symbol defines the C type used for Perl's IV.
  */
-/* PERL_PRIu64:
- *	This symbol, if defined, contains the string used by stdio to
- *	format 64-bit unsigned decimal numbers (format 'u') for output.
+/* UVTYPE:
+ *	This symbol defines the C type used for Perl's UV.
  */
-/* PERL_PRIo64:
- *	This symbol, if defined, contains the string used by stdio to
- *	format 64-bit octal numbers (format 'o') for output.
+/* I8TYPE:
+ *	This symbol defines the C type used for Perl's I8.
  */
-/* PERL_PRIx64:
- *	This symbol, if defined, contains the string used by stdio to
- *	format 64-bit hexadecimal numbers (format 'x') for output.
+/* U8TYPE:
+ *	This symbol defines the C type used for Perl's U8.
  */
-#define PERL_PRId64	"ld"	/**/
-#define PERL_PRIu64	"lu"	/**/
-#define PERL_PRIo64	"lo"	/**/
-#define PERL_PRIx64	"lx"	/**/
+/* I16TYPE:
+ *	This symbol defines the C type used for Perl's I16.
+ */
+/* U16TYPE:
+ *	This symbol defines the C type used for Perl's U16.
+ */
+/* I32TYPE:
+ *	This symbol defines the C type used for Perl's I32.
+ */
+/* U32TYPE:
+ *	This symbol defines the C type used for Perl's U32.
+ */
+/* I64TYPE:
+ *	This symbol defines the C type used for Perl's I64.
+ */
+/* U64TYPE:
+ *	This symbol defines the C type used for Perl's U64.
+ */
+/* NVTYPE:
+ *	This symbol defines the C type used for Perl's NV.
+ */
+/* IVSIZE:
+ *	This symbol contains the sizeof(IV).
+ */
+/* UVSIZE:
+ *	This symbol contains the sizeof(UV).
+ */
+/* I8SIZE:
+ *	This symbol contains the sizeof(I8).
+ */
+/* U8SIZE:
+ *	This symbol contains the sizeof(U8).
+ */
+/* I16SIZE:
+ *	This symbol contains the sizeof(I16).
+ */
+/* U16SIZE:
+ *	This symbol contains the sizeof(U16).
+ */
+/* I32SIZE:
+ *	This symbol contains the sizeof(I32).
+ */
+/* U32SIZE:
+ *	This symbol contains the sizeof(U32).
+ */
+/* I64SIZE:
+ *	This symbol contains the sizeof(I64).
+ */
+/* U64SIZE:
+ *	This symbol contains the sizeof(U64).
+ */
+/* NVSIZE:
+ *	This symbol contains the sizeof(NV).
+ */
+#define	IVTYPE		long		/**/
+#define	UVTYPE		unsigned long		/**/
+#define	I8TYPE		char		/**/
+#define	U8TYPE		unsigned char		/**/
+#define	I16TYPE		short	/**/
+#define	U16TYPE		unsigned short	/**/
+#define	I32TYPE		int	/**/
+#define	U32TYPE		unsigned int	/**/
+#ifdef HAS_QUAD
+#define	I64TYPE		long	/**/
+#define	U64TYPE		unsigned long	/**/
+#endif
+#define	NVTYPE		double		/**/
+#define	IVSIZE		8		/**/
+#define	UVSIZE		8		/**/
+#define	I8SIZE		1		/**/
+#define	U8SIZE		1		/**/
+#define	I16SIZE		2	/**/
+#define	U16SIZE		2	/**/
+#define	I32SIZE		4	/**/
+#define	U32SIZE		4	/**/
+#ifdef HAS_QUAD
+#define	I64SIZE		8	/**/
+#define	U64SIZE		8	/**/
+#endif
+#define	NVSIZE		8		/**/
+
+/* IVdf:
+ *	This symbol defines the format string used for printing a Perl IV
+ *	as a signed decimal integer.
+ */
+/* UVuf:
+ *	This symbol defines the format string used for printing a Perl UV
+ *	as an unsigned decimal integer.
+ */
+/* UVof:
+ *	This symbol defines the format string used for printing a Perl UV
+ *	as an unsigned octal integer.
+ */
+/* UVxf:
+ *	This symbol defines the format string used for printing a Perl UV
+ *	as an unsigned hexadecimal integer.
+ */
+#define	IVdf		"ld"		/**/
+#define	UVuf		"lu"		/**/
+#define	UVof		"lo"		/**/
+#define	UVxf		"lx"		/**/
 
 /* SELECT_MIN_BITS:
  *	This symbol holds the minimum number of bits operated by select.
@@ -2459,44 +2548,68 @@
  *	be used when available.  If not defined, the native default interfaces
  *	will be used (be they 32 or 64 bits).
  */
+#ifndef USE_64_BITS
 #define	USE_64_BITS		/**/
+#endif
 
 /* USE_LARGE_FILES:
  *	This symbol, if defined, indicates that large file support
  *	should be used when available.  The USE_64_BITS symbol will
  *	also be turned on if necessary.
  */
+#ifndef USE_LARGE_FILES
 /*#define	USE_LARGE_FILES		/ **/
+#endif
 
 /* USE_LONG_DOUBLE:
  *	This symbol, if defined, indicates that long doubles should
  *	be used when available.
  */
+#ifndef USE_LONG_DOUBLE
 /*#define	USE_LONG_DOUBLE		/ **/
+#endif
+
+/* USE_LONG_LONG:
+ *	This symbol, if defined, indicates that long longs should
+ *	be used when available.
+ */
+#ifndef USE_LONG_LONG
+/*#define	USE_LONG_LONG		/ **/
+#endif
+
+#ifndef USE_MORE_BITS
+/*#define	USE_MORE_BITS		/ **/
+#endif
 
 /* MULTIPLICITY:
  *	This symbol, if defined, indicates that Perl should
  *	be built to use multiplicity.
  */
+#ifndef MULTIPLICTY
 /*#define	MULTIPLICITY		/ **/
+#endif
 
 /* USE_PERLIO:
  *	This symbol, if defined, indicates that the PerlIO abstraction should
  *	be used throughout.  If not defined, stdio should be
  *	used in a fully backward compatible manner.
  */
+#ifndef USE_PERLIO
 /*#define	USE_PERLIO		/ **/
+#endif
 
 /* USE_SOCKS:
  *	This symbol, if defined, indicates that Perl should
  *	be built to use socks.
  */
+#ifndef USE_SOCKS
 /*#define	USE_SOCKS		/ **/
+#endif
 
 /* PERL_XS_APIVERSION:
  *	This variable contains the version of the oldest perl binary
  *	compatible with the present perl.  perl.c:incpush() and
- *	lib/lib.pm will automatically search in /opt/perl/lib/site_perl/5.00561/alpha-dec_osf-thread for older
+ *	lib/lib.pm will automatically search in /opt/perl/lib/site_perl/5.00563/alpha-dec_osf-thread for older
  *	directories across major versions back to xs_apiversion.
  *	This is only useful if you have a perl library directory tree
  *	structured like the default one.
@@ -2525,7 +2638,7 @@
  *	(presumably) be similar.
  *	See the INSTALL file for how this works.
  */
-#define PERL_XS_APIVERSION 5.00561 /* Change to string for tuples?*/
+#define PERL_XS_APIVERSION 5.00563 /* Change to string for tuples?*/
 #define PERL_PM_APIVERSION 5.005 /* Change to string for tuples?*/
 
 /* HAS_DRAND48_PROTO:
@@ -2654,7 +2767,9 @@
  *	This symbol, if defined, indicates that Perl should
  *	be built to use the old draft POSIX threads API.
  */
+#ifndef USE_TTHREADS
 #define	USE_THREADS		/**/
+#endif
 /*#define	OLD_PTHREADS_API		/ **/
 
 /* Time_t:
@@ -2678,6 +2793,16 @@
  */
 #define Fpos_t fpos_t		/* File position type */
 
+/* Gid_t_f:
+ *	This symbol defines the format string used for printing a Gid_t.
+ */
+#define	Gid_t_f		"u"		/**/
+
+/* Gid_t_size:
+ *	This symbol holds the size of a Gid_t in bytes.
+ */
+#define Gid_t_size 4		/* GID size */
+
 /* Gid_t:
  *	This symbol holds the return type of getgid() and the type of
  *	argument to setrgid() and related functions.  Typically,
@@ -2695,8 +2820,12 @@
 /* LSEEKSIZE:
  *	This symbol holds the number of bytes used by the Off_t.
  */
+/* Off_t_size:
+ *	This symbol holds the number of bytes used by the Off_t.
+ */
 #define Off_t off_t		/* <offset> type */
 #define LSEEKSIZE 8		/* <offset> size */
+#define Off_t_size 8	/* <offset> size */
 
 /* Mode_t:
  *	This symbol holds the type used to declare file modes 
@@ -2713,6 +2842,11 @@
  */
 #define Pid_t pid_t		/* PID type */
 
+/* Size_t_size:
+ *	This symbol holds the size of a Size_t in bytes.
+ */
+#define Size_t_size 8		/* */
+
 /* Size_t:
  *	This symbol holds the type used to declare length parameters
  *	for string functions.  It is usually size_t, but may be
@@ -2721,11 +2855,15 @@
  */
 #define Size_t size_t	 /* length paramater for string functions */
 
-/* Uid_t_SIGN:
- *	This symbol holds the signedess of a Uid_t.
- *	1 for unsigned, -1 for signed.
+/* Uid_t_f:
+ *	This symbol defines the format string used for printing a Uid_t.
  */
-#define Uid_t_SIGN	1		/* UID sign */
+#define	Uid_t_f		"u"		/**/
+
+/* Uid_t_size:
+ *	This symbol holds the size of a Uid_t in bytes.
+ */
+#define Uid_t_size 4		/* UID size */
 
 /* Uid_t:
  *	This symbol holds the type used to declare user ids in the kernel.

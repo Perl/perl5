@@ -75,18 +75,6 @@ static struct servent* win32_savecopyservent(struct servent*d,
                                              struct servent*s,
                                              const char *proto);
 
-#ifdef USE_THREADS
-#ifdef USE_DECLSPEC_THREAD
-__declspec(thread) struct servent myservent;
-__declspec(thread) int init_socktype;
-#else
-#define myservent (thr->i.Wservent)
-#define init_socktype (thr->i.Winit_socktype)
-#endif
-#else
-static struct servent myservent;
-#endif
-
 static int wsock_started = 0;
 
 void
@@ -117,16 +105,16 @@ set_socktype(void)
 #ifdef USE_SOCKETS_AS_HANDLES
 #ifdef USE_THREADS
     dTHX;
-    if(!init_socktype) {
+    if (!w32_init_socktype) {
 #endif
-    int iSockOpt = SO_SYNCHRONOUS_NONALERT;
-    /*
-     * Enable the use of sockets as filehandles
-     */
-    setsockopt(INVALID_SOCKET, SOL_SOCKET, SO_OPENTYPE,
-		(char *)&iSockOpt, sizeof(iSockOpt));
+	int iSockOpt = SO_SYNCHRONOUS_NONALERT;
+	/*
+	 * Enable the use of sockets as filehandles
+	 */
+	setsockopt(INVALID_SOCKET, SOL_SOCKET, SO_OPENTYPE,
+		    (char *)&iSockOpt, sizeof(iSockOpt));
 #ifdef USE_THREADS
-    init_socktype = 1;
+	w32_init_socktype = 1;
     }
 #endif
 #endif	/* USE_SOCKETS_AS_HANDLES */
@@ -500,7 +488,7 @@ win32_getservbyname(const char *name, const char *proto)
 
     SOCKET_TEST(r = getservbyname(name, proto), NULL);
     if (r) {
-	r = win32_savecopyservent(&myservent, r, proto);
+	r = win32_savecopyservent(&w32_servent, r, proto);
     }
     return r;
 }
@@ -513,7 +501,7 @@ win32_getservbyport(int port, const char *proto)
 
     SOCKET_TEST(r = getservbyport(port, proto), NULL);
     if (r) {
-	r = win32_savecopyservent(&myservent, r, proto);
+	r = win32_savecopyservent(&w32_servent, r, proto);
     }
     return r;
 }

@@ -212,9 +212,9 @@ This also has implications for the use of the SUPER:: qualifier
 
 =head2 Package Constructors and Destructors
 
-Three special subroutines act as package
-constructors and destructors.  These are the C<BEGIN>, C<INIT>, and
-C<END> routines.  The C<sub> is optional for these routines.
+Four special subroutines act as package constructors and destructors.
+These are the C<BEGIN>, C<STOP>, C<INIT>, and C<END> routines.  The
+C<sub> is optional for these routines.
 
 A C<BEGIN> subroutine is executed as soon as possible, that is, the moment
 it is completely defined, even before the rest of the containing file
@@ -225,23 +225,30 @@ files in time to be visible to the rest of the file.  Once a C<BEGIN>
 has run, it is immediately undefined and any code it used is returned to
 Perl's memory pool.  This means you can't ever explicitly call a C<BEGIN>.
 
-Similar to C<BEGIN> blocks, C<INIT> blocks are run just before the
-Perl runtime begins execution.  For example, the code generators
-documented in L<perlcc> make use of C<INIT> blocks to initialize
-and resolve pointers to XSUBs.
-
-An C<END> subroutine is executed as late as possible, that is, when
-the interpreter is being exited, even if it is exiting as a result of
-a die() function.  (But not if it's polymorphing into another program
-via C<exec>, or being blown out of the water by a signal--you have to
-trap that yourself (if you can).)  You may have multiple C<END> blocks
-within a file--they will execute in reverse order of definition; that is:
-last in, first out (LIFO).
+An C<END> subroutine is executed as late as possible, that is, after
+perl has finished running the program and just before the interpreter
+is being exited, even if it is exiting as a result of a die() function.
+(But not if it's polymorphing into another program via C<exec>, or
+being blown out of the water by a signal--you have to trap that yourself
+(if you can).)  You may have multiple C<END> blocks within a file--they
+will execute in reverse order of definition; that is: last in, first
+out (LIFO).  C<END> blocks are not executed when you run perl with the
+C<-c> switch.
 
 Inside an C<END> subroutine, C<$?> contains the value that the program is
 going to pass to C<exit()>.  You can modify C<$?> to change the exit
 value of the program.  Beware of changing C<$?> by accident (e.g. by
 running something via C<system>).
+
+Similar to C<BEGIN> blocks, C<INIT> blocks are run just before the
+Perl runtime begins execution, in "first in, first out" (FIFO) order.
+For example, the code generators documented in L<perlcc> make use of
+C<INIT> blocks to initialize and resolve pointers to XSUBs.
+
+Similar to C<END> blocks, C<STOP> blocks are run just after the
+Perl compile phase ends and before the run time begins, in
+LIFO order.  C<STOP> blocks are again useful in the Perl compiler
+suite to save the compiled state of the program.
 
 When you use the B<-n> and B<-p> switches to Perl, C<BEGIN> and
 C<END> work just as they do in B<awk>, as a degenerate case.  As currently

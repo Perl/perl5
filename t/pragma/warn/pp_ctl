@@ -126,7 +126,7 @@ no warnings 'unsafe' ;
 @b = sort { last } @a ;
 EXPECT
 Exiting pseudo-block via last at - line 4.
-Can't "last" outside a block at - line 4.
+Can't "last" outside a loop block at - line 4.
 ########
 # pp_ctl.c
 use warnings 'unsafe' ;

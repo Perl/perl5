@@ -39,7 +39,7 @@ static void unset_cvowner(pTHXo_ void *cvarg);
 PP(pp_const)
 {
     djSP;
-    XPUSHs(cSVOP->op_sv);
+    XPUSHs(cSVOP_sv);
     RETURN;
 }
 
@@ -57,9 +57,9 @@ PP(pp_gvsv)
     djSP;
     EXTEND(SP,1);
     if (PL_op->op_private & OPpLVAL_INTRO)
-	PUSHs(save_scalar(cGVOP->op_gv));
+	PUSHs(save_scalar(cGVOP_gv));
     else
-	PUSHs(GvSV(cGVOP->op_gv));
+	PUSHs(GvSV(cGVOP_gv));
     RETURN;
 }
 
@@ -94,7 +94,7 @@ PP(pp_stringify)
 PP(pp_gv)
 {
     djSP;
-    XPUSHs((SV*)cGVOP->op_gv);
+    XPUSHs((SV*)cGVOP_gv);
     RETURN;
 }
 
@@ -270,7 +270,7 @@ PP(pp_add)
 PP(pp_aelemfast)
 {
     djSP;
-    AV *av = GvAV((GV*)cSVOP->op_sv);
+    AV *av = GvAV(cGVOP_gv);
     U32 lval = PL_op->op_flags & OPf_MOD;
     SV** svp = av_fetch(av, PL_op->op_private, lval);
     SV *sv = (svp ? *svp : &PL_sv_undef);
@@ -458,7 +458,7 @@ PP(pp_rv2av)
 		      PL_op->op_private & HINT_STRICT_REFS)
 			DIE(aTHX_ PL_no_usym, "an ARRAY");
 		    if (ckWARN(WARN_UNINITIALIZED))
-			Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
+			report_uninit();
 		    if (GIMME == G_ARRAY) {
 			(void)POPs;
 			RETURN;
@@ -558,7 +558,7 @@ PP(pp_rv2hv)
 		      PL_op->op_private & HINT_STRICT_REFS)
 			DIE(aTHX_ PL_no_usym, "a HASH");
 		    if (ckWARN(WARN_UNINITIALIZED))
-			Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
+			report_uninit();
 		    if (GIMME == G_ARRAY) {
 			SP--;
 			RETURN;
@@ -1084,9 +1084,9 @@ Perl_do_readline(pTHX)
 	if (!fp) {
 	    if (IoFLAGS(io) & IOf_ARGV) {
 		if (IoFLAGS(io) & IOf_START) {
-		    IoFLAGS(io) &= ~IOf_START;
 		    IoLINES(io) = 0;
 		    if (av_len(GvAVn(PL_last_in_gv)) < 0) {
+			IoFLAGS(io) &= ~IOf_START;
 			do_open(PL_last_in_gv,"-",1,FALSE,O_RDONLY,0,Nullfp);
 			sv_setpvn(GvSV(PL_last_in_gv), "-", 1);
 			SvSETMAGIC(GvSV(PL_last_in_gv));
@@ -1097,7 +1097,6 @@ Perl_do_readline(pTHX)
 		fp = nextargv(PL_last_in_gv);
 		if (!fp) { /* Note: fp != IoIFP(io) */
 		    (void)do_close(PL_last_in_gv, FALSE); /* now it does*/
-		    IoFLAGS(io) |= IOf_START;
 		}
 	    }
 	    else if (type == OP_GLOB) {
@@ -1189,6 +1188,11 @@ Perl_do_readline(pTHX)
 		    }
 		}
 #else /* !VMS */
+#ifdef MACOS_TRADITIONAL
+		sv_setpv(tmpcmd, "glob ");
+		sv_catsv(tmpcmd, tmpglob);
+		sv_catpv(tmpcmd, " |");
+#else
 #ifdef DOSISH
 #ifdef OS2
 		sv_setpv(tmpcmd, "for a in ");
@@ -1220,6 +1224,7 @@ Perl_do_readline(pTHX)
 #endif
 #endif /* !CSH */
 #endif /* !DOSISH */
+#endif /* MACOS_TRADITIONAL */
 		(void)do_open(PL_last_in_gv, SvPVX(tmpcmd), SvCUR(tmpcmd),
 			      FALSE, O_RDONLY, 0, Nullfp);
 		fp = IoIFP(io);
@@ -1295,7 +1300,6 @@ Perl_do_readline(pTHX)
 		if (fp)
 		    continue;
 		(void)do_close(PL_last_in_gv, FALSE);
-		IoFLAGS(io) |= IOf_START;
 	    }
 	    else if (type == OP_GLOB) {
 		if (!do_close(PL_last_in_gv, FALSE) && ckWARN(WARN_CLOSED)) {
@@ -1504,12 +1508,14 @@ PP(pp_iter)
     register PERL_CONTEXT *cx;
     SV* sv;
     AV* av;
+    SV **itersvp;
 
     EXTEND(SP, 1);
     cx = &cxstack[cxstack_ix];
     if (CxTYPE(cx) != CXt_LOOP)
 	DIE(aTHX_ "panic: pp_iter");
 
+    itersvp = CxITERVAR(cx);
     av = cx->blk_loop.iterary;
     if (SvTYPE(av) != SVt_PVAV) {
 	/* iterate ($min .. $max) */
@@ -1520,11 +1526,9 @@ PP(pp_iter)
 	    char *max = SvPV((SV*)av, maxlen);
 	    if (!SvNIOK(cur) && SvCUR(cur) <= maxlen) {
 #ifndef USE_THREADS			  /* don't risk potential race */
-		if (SvREFCNT(*cx->blk_loop.itervar) == 1
-		    && !SvMAGICAL(*cx->blk_loop.itervar))
-		{
+		if (SvREFCNT(*itersvp) == 1 && !SvMAGICAL(*itersvp)) {
 		    /* safe to reuse old SV */
-		    sv_setsv(*cx->blk_loop.itervar, cur);
+		    sv_setsv(*itersvp, cur);
 		}
 		else 
 #endif
@@ -1532,8 +1536,8 @@ PP(pp_iter)
 		    /* we need a fresh SV every time so that loop body sees a
 		     * completely new SV for closures/references to work as
 		     * they used to */
-		    SvREFCNT_dec(*cx->blk_loop.itervar);
-		    *cx->blk_loop.itervar = newSVsv(cur);
+		    SvREFCNT_dec(*itersvp);
+		    *itersvp = newSVsv(cur);
 		}
 		if (strEQ(SvPVX(cur), max))
 		    sv_setiv(cur, 0); /* terminate next time */
@@ -1548,11 +1552,9 @@ PP(pp_iter)
 	    RETPUSHNO;
 
 #ifndef USE_THREADS			  /* don't risk potential race */
-	if (SvREFCNT(*cx->blk_loop.itervar) == 1
-	    && !SvMAGICAL(*cx->blk_loop.itervar))
-	{
+	if (SvREFCNT(*itersvp) == 1 && !SvMAGICAL(*itersvp)) {
 	    /* safe to reuse old SV */
-	    sv_setiv(*cx->blk_loop.itervar, cx->blk_loop.iterix++);
+	    sv_setiv(*itersvp, cx->blk_loop.iterix++);
 	}
 	else 
 #endif
@@ -1560,8 +1562,8 @@ PP(pp_iter)
 	    /* we need a fresh SV every time so that loop body sees a
 	     * completely new SV for closures/references to work as they
 	     * used to */
-	    SvREFCNT_dec(*cx->blk_loop.itervar);
-	    *cx->blk_loop.itervar = newSViv(cx->blk_loop.iterix++);
+	    SvREFCNT_dec(*itersvp);
+	    *itersvp = newSViv(cx->blk_loop.iterix++);
 	}
 	RETPUSHYES;
     }
@@ -1570,7 +1572,7 @@ PP(pp_iter)
     if (cx->blk_loop.iterix >= (av == PL_curstack ? cx->blk_oldsp : AvFILL(av)))
 	RETPUSHNO;
 
-    SvREFCNT_dec(*cx->blk_loop.itervar);
+    SvREFCNT_dec(*itersvp);
 
     if (sv = (SvMAGICAL(av)) 
 	    ? *av_fetch(av, ++cx->blk_loop.iterix, FALSE) 
@@ -1598,7 +1600,7 @@ PP(pp_iter)
 	sv = (SV*)lv;
     }
 
-    *cx->blk_loop.itervar = SvREFCNT_inc(sv);
+    *itersvp = SvREFCNT_inc(sv);
     RETPUSHYES;
 }
 
@@ -1895,7 +1897,7 @@ PP(pp_grepwhile)
 	SV *src;
 
 	ENTER;					/* enter inner scope */
-	SAVESPTR(PL_curpm);
+	SAVEVPTR(PL_curpm);
 
 	src = PL_stack_base[*PL_markstack_ptr];
 	SvTEMP_off(src);
@@ -2398,7 +2400,7 @@ try_autoload:
 		SP--;
 	    }
 	    PL_stack_sp = mark + 1;
-	    fp3 = (I32(*)(int,int,int)))CvXSUB(cv;
+	    fp3 = (I32(*)(int,int,int))CvXSUB(cv);
 	    items = (*fp3)(CvXSUBANY(cv).any_i32, 
 			   MARK - PL_stack_base + 1,
 			   items);
@@ -2434,7 +2436,7 @@ try_autoload:
 	    }
 	    /* We assume first XSUB in &DB::sub is the called one. */
 	    if (PL_curcopdb) {
-		SAVESPTR(PL_curcop);
+		SAVEVPTR(PL_curcop);
 		PL_curcop = PL_curcopdb;
 		PL_curcopdb = NULL;
 	    }
@@ -2470,14 +2472,16 @@ try_autoload:
 	if (CvDEPTH(cv) < 2)
 	    (void)SvREFCNT_inc(cv);
 	else {	/* save temporaries on recursion? */
+	    PERL_STACK_OVERFLOW_CHECK();
 	    if (CvDEPTH(cv) > AvFILLp(padlist)) {
 		AV *av;
 		AV *newpad = newAV();
 		SV **oldpad = AvARRAY(svp[CvDEPTH(cv)-1]);
 		I32 ix = AvFILLp((AV*)svp[1]);
+		I32 names_fill = AvFILLp((AV*)svp[0]);
 		svp = AvARRAY(svp[0]);
 		for ( ;ix > 0; ix--) {
-		    if (svp[ix] != &PL_sv_undef) {
+		    if (names_fill >= ix && svp[ix] != &PL_sv_undef) {
 			char *name = SvPVX(svp[ix]);
 			if ((SvFLAGS(svp[ix]) & SVf_FAKE) /* outer lexical? */
 			    || *name == '&')		  /* anonymous code? */
@@ -2493,6 +2497,9 @@ try_autoload:
 				av_store(newpad, ix, sv = NEWSV(0,0));
 			    SvPADMY_on(sv);
 			}
+		    }
+		    else if (IS_PADGV(oldpad[ix]) || IS_PADCONST(oldpad[ix])) {
+			av_store(newpad, ix, sv = SvREFCNT_inc(oldpad[ix]));
 		    }
 		    else {
 			av_store(newpad, ix, sv = NEWSV(0,0));
@@ -2522,7 +2529,7 @@ try_autoload:
 	    }
 	}
 #endif /* USE_THREADS */		
-	SAVESPTR(PL_curpad);
+	SAVEVPTR(PL_curpad);
     	PL_curpad = AvARRAY((AV*)svp[CvDEPTH(cv)]);
 #ifndef USE_THREADS
 	if (hasargs)
@@ -2776,7 +2783,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 		sep = p, leaf = p + 2;
 	}
 	if (!sep || ((sep - name) == 5 && strnEQ(name, "SUPER", 5))) {
-	    packname = HvNAME(sep ? PL_curcop->cop_stash : stash);
+	    packname = sep ? CopSTASHPV(PL_curcop) : HvNAME(stash);
 	    packlen = strlen(packname);
 	}
 	else {

@@ -15,24 +15,28 @@ use charnames ':full';
 print "not " unless "Here\N{EXCLAMATION MARK}?" eq 'Here!?';
 print "ok 1\n";
 
-print "# \$res=$res \$\@='$@'\nnot "
-  if $res = eval <<'EOE'
+{
+  no utf8;			# UTEST can switch it on
+
+  print "# \$res=$res \$\@='$@'\nnot "
+    if $res = eval <<'EOE'
 use charnames ":full";
 "Here: \N{CYRILLIC SMALL LETTER BE}!";
 1
 EOE
-  or $@ !~ /above 0xFF/;
-print "ok 2\n";
-# print "# \$res=$res \$\@='$@'\n";
+      or $@ !~ /above 0xFF/;
+  print "ok 2\n";
+  # print "# \$res=$res \$\@='$@'\n";
 
-print "# \$res=$res \$\@='$@'\nnot "
-  if $res = eval <<'EOE'
+  print "# \$res=$res \$\@='$@'\nnot "
+    if $res = eval <<'EOE'
 use charnames 'cyrillic';
 "Here: \N{Be}!";
 1
 EOE
-  or $@ !~ /CYRILLIC CAPITAL LETTER BE.*above 0xFF/;
-print "ok 3\n";
+      or $@ !~ /CYRILLIC CAPITAL LETTER BE.*above 0xFF/;
+  print "ok 3\n";
+}
 
 # If octal representation of unicode char is \0xyzt, then the utf8 is \3xy\2zt
 $encoded_be = "\320\261";

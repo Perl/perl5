@@ -13,11 +13,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *	This product includes software developed by the University of
- *	California, Berkeley and its contributors.
- * 4. Neither the name of the University nor the names of its contributors
+ * 3. Neither the name of the University nor the names of its contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -32,12 +28,6 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- */
-
-/*
- * Clause 3 above should be considered "deleted in its entirety".
- * For the actual notice of withdrawal, see:
- *    ftp://ftp.cs.berkeley.edu/pub/4bsd/README.Impt.License.Change
  */
 
 #if defined(LIBC_SCCS) && !defined(lint)
@@ -101,6 +91,9 @@ static char sccsid[] = "@(#)glob.c	8.3 (Berkeley) 10/13/93";
 #define	BG_RANGE	'-'
 #define	BG_RBRACKET	']'
 #define	BG_SEP		'/'
+#ifdef DOSISH
+#define BG_SEP2		'\\'
+#endif
 #define	BG_STAR		'*'
 #define	BG_TILDE	'~'
 #define	BG_UNDERSCORE	'_'
@@ -142,6 +135,7 @@ typedef U8 Char;
 
 
 static int	 compare(const void *, const void *);
+static int	 ci_compare(const void *, const void *);
 static void	 g_Ctoc(const Char *, char *);
 static int	 g_lstat(Char *, Stat_t *, glob_t *);
 static DIR	*g_opendir(Char *, glob_t *);
@@ -158,7 +152,7 @@ static int	 globextend(const Char *, glob_t *);
 static const Char *	 globtilde(const Char *, Char *, glob_t *);
 static int	 globexp1(const Char *, glob_t *);
 static int	 globexp2(const Char *, const Char *, glob_t *, int *);
-static int	 match(Char *, Char *, Char *);
+static int	 match(Char *, Char *, Char *, int);
 #ifdef GLOB_DEBUG
 static void	 qprintf(const char *, Char *);
 #endif /* GLOB_DEBUG */
@@ -196,11 +190,41 @@ bsd_glob(const char *pattern, int flags,
 
 	bufnext = patbuf;
 	bufend = bufnext + MAXPATHLEN;
+#ifdef DOSISH
+	/* Nasty hack to treat patterns like "C:*" correctly. In this
+	 * case, the * should match any file in the current directory
+	 * on the C: drive. However, the glob code does not treat the
+	 * colon specially, so it looks for files beginning "C:" in
+	 * the current directory. To fix this, change the pattern to
+	 * add an explicit "./" at the start (just after the drive
+	 * letter and colon - ie change to "C:./*").
+	 */
+	if (isalpha(pattern[0]) && pattern[1] == ':' &&
+	    pattern[2] != BG_SEP && pattern[2] != BG_SEP2 &&
+	    bufend - bufnext > 4) {
+		*bufnext++ = pattern[0];
+		*bufnext++ = ':';
+		*bufnext++ = '.';
+		*bufnext++ = BG_SEP;
+		patnext += 2;
+	}
+#endif
 	if (flags & GLOB_QUOTE) {
 		/* Protect the quoted characters. */
 		while (bufnext < bufend && (c = *patnext++) != BG_EOS)
 			if (c == BG_QUOTE) {
+#ifdef DOSISH
+				    /* To avoid backslashitis on Win32,
+				     * we only treat \ as a quoting character
+				     * if it precedes one of the
+				     * metacharacters []-{}~\
+				     */
+				if ((c = *patnext++) != '[' && c != ']' &&
+				    c != '-' && c != '{' && c != '}' &&
+				    c != '~' && c != '\\') {
+#else
 				if ((c = *patnext++) == BG_EOS) {
+#endif
 					c = BG_QUOTE;
 					--patnext;
 				}
@@ -506,9 +530,24 @@ glob0(const Char *pattern, glob_t *pglob)
         }
 	else if (!(pglob->gl_flags & GLOB_NOSORT))
 		qsort(pglob->gl_pathv + pglob->gl_offs + oldpathc,
-		    pglob->gl_pathc - oldpathc, sizeof(char *), compare);
+		    pglob->gl_pathc - oldpathc, sizeof(char *), 
+		    (pglob->gl_flags & GLOB_NOCASE) ? ci_compare : compare);
 	pglob->gl_flags = oldflags;
 	return(0);
+}
+
+static int
+ci_compare(const void *p, const void *q)
+{
+    const char *pp = *(const char **)p;
+    const char *qq = *(const char **)q;
+    while (*pp && *qq) {
+	if (tolower(*pp) != tolower(*qq))
+	    break;
+	++pp;
+	++qq;
+    }
+    return (tolower(*pp) - tolower(*qq));
 }
 
 static int
@@ -552,7 +591,11 @@ glob2(Char *pathbuf, Char *pathend, Char *pattern, glob_t *pglob)
 				return(0);
 
 			if (((pglob->gl_flags & GLOB_MARK) &&
-			    pathend[-1] != BG_SEP) && (S_ISDIR(sb.st_mode)
+			    pathend[-1] != BG_SEP
+#ifdef DOSISH
+			    && pathend[-1] != BG_SEP2
+#endif
+			    ) && (S_ISDIR(sb.st_mode)
 			    || (S_ISLNK(sb.st_mode) &&
 			    (g_stat(pathbuf, &sb, pglob) == 0) &&
 			    S_ISDIR(sb.st_mode)))) {
@@ -569,7 +612,11 @@ glob2(Char *pathbuf, Char *pathend, Char *pattern, glob_t *pglob)
 		/* Find end of next segment, copy tentatively to pathend. */
 		q = pathend;
 		p = pattern;
-		while (*p != BG_EOS && *p != BG_SEP) {
+		while (*p != BG_EOS && *p != BG_SEP
+#ifdef DOSISH
+		       && *p != BG_SEP2
+#endif
+		       ) {
 			if (ismeta(*p))
 				anymeta = 1;
 			*q++ = *p++;
@@ -578,7 +625,11 @@ glob2(Char *pathbuf, Char *pathend, Char *pattern, glob_t *pglob)
 		if (!anymeta) {		/* No expansion, do next segment. */
 			pathend = q;
 			pattern = p;
-			while (*pattern == BG_SEP)
+			while (*pattern == BG_SEP
+#ifdef DOSISH
+			       || *pattern == BG_SEP2
+#endif
+			       )
 				*pathend++ = *pattern++;
 		} else			/* Need expansion, recurse. */
 			return(glob3(pathbuf, pathend, pattern, p, pglob));
@@ -593,6 +644,7 @@ glob3(Char *pathbuf, Char *pathend, Char *pattern,
 	register Direntry_t *dp;
 	DIR *dirp;
 	int err;
+	int nocase;
 	char buf[MAXPATHLEN];
 
 	/*
@@ -618,6 +670,7 @@ glob3(Char *pathbuf, Char *pathend, Char *pattern,
 	}
 
 	err = 0;
+	nocase = ((pglob->gl_flags & GLOB_NOCASE) != 0);
 
 	/* Search directory for matching names. */
 	if (pglob->gl_flags & GLOB_ALTDIRFUNC)
@@ -634,7 +687,7 @@ glob3(Char *pathbuf, Char *pathend, Char *pattern,
 		for (sc = (U8 *) dp->d_name, dc = pathend;
 		     (*dc++ = *sc++) != BG_EOS;)
 			continue;
-		if (!match(pathend, pattern, restpattern)) {
+		if (!match(pathend, pattern, restpattern, nocase)) {
 			*pathend = BG_EOS;
 			continue;
 		}
@@ -713,7 +766,7 @@ globextend(const Char *path, glob_t *pglob)
  * pattern causes a recursion level.
  */
 static int
-match(register Char *name, register Char *pat, register Char *patend)
+match(register Char *name, register Char *pat, register Char *patend, int nocase)
 {
 	int ok, negate_range;
 	Char c, k;
@@ -725,7 +778,7 @@ match(register Char *name, register Char *pat, register Char *patend)
 			if (pat == patend)
 				return(1);
 			do
-			    if (match(name, pat, patend))
+			    if (match(name, pat, patend, nocase))
 				    return(1);
 			while (*name++ != BG_EOS);
 			return(0);
@@ -741,16 +794,22 @@ match(register Char *name, register Char *pat, register Char *patend)
 				++pat;
 			while (((c = *pat++) & M_MASK) != M_END)
 				if ((*pat & M_MASK) == M_RNG) {
-					if (c <= k && k <= pat[1])
-						ok = 1;
+					if (nocase) {
+						if (tolower(c) <= tolower(k) && tolower(k) <= tolower(pat[1]))
+							ok = 1;
+					} else {
+						if (c <= k && k <= pat[1])
+							ok = 1;
+					}
 					pat += 2;
-				} else if (c == k)
+				} else if (nocase ? (tolower(c) == tolower(k)) : (c == k))
 					ok = 1;
 			if (ok == negate_range)
 				return(0);
 			break;
 		default:
-			if (*name++ != c)
+			k = *name++;
+			if (nocase ? (tolower(k) != tolower(c)) : (k != c))
 				return(0);
 			break;
 		}

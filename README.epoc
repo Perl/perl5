@@ -3,13 +3,13 @@ Perl 5 README file for the EPOC operating system.
 ==================================================
 
 Olaf Flebbe <o.flebbe@gmx.de>
-http://www.fortunecity.de/wolkenkratzer/trumpet/84/perl5.html
-Aug 25, 1999
+http://www.linuxstart.com/~oflebbe/perl/perl.html
+1999-11-01
 
 Introduction
 ------------ 
 
-This is a port of Perl version 5.005_60 to EPOC. 
+This is a port of Perl version 5.005_62 to EPOC. 
 
 There are many features left out, because of restrictions of the POSIX
 support in the SDK.

@@ -484,9 +484,18 @@ Perl_nextargv(pTHX_ register GV *gv)
 #endif
     Uid_t fileuid;
     Gid_t filegid;
+    IO *io = GvIOp(gv);
 
     if (!PL_argvoutgv)
 	PL_argvoutgv = gv_fetchpv("ARGVOUT",TRUE,SVt_PVIO);
+    if (io && (IoFLAGS(io) & IOf_ARGV) && (IoFLAGS(io) & IOf_START)) {
+	IoFLAGS(io) &= ~IOf_START;
+	if (PL_inplace) {
+	    if (!PL_argvout_stack)
+		PL_argvout_stack = newAV();
+	    av_push(PL_argvout_stack, SvREFCNT_inc(PL_defoutgv));
+	}
+    }
     if (PL_filemode & (S_ISUID|S_ISGID)) {
 	PerlIO_flush(IoIFP(GvIOn(PL_argvoutgv)));  /* chmod must follow last write */
 #ifdef HAS_FCHMOD
@@ -610,11 +619,12 @@ Perl_nextargv(pTHX_ register GV *gv)
 		SETERRNO(0,0);		/* in case sprintf set errno */
 #ifdef VMS
 		if (!do_open(PL_argvoutgv,SvPVX(sv),SvCUR(sv),PL_inplace!=0,
-                 O_WRONLY|O_CREAT|O_TRUNC,0,Nullfp)) { 
+                 O_WRONLY|O_CREAT|O_TRUNC,0,Nullfp))
 #else
 		if (!do_open(PL_argvoutgv,SvPVX(sv),SvCUR(sv),PL_inplace!=0,
-			     O_WRONLY|O_CREAT|OPEN_EXCL,0666,Nullfp)) {
+			     O_WRONLY|O_CREAT|OPEN_EXCL,0666,Nullfp))
 #endif
+		{
 		    if (ckWARN_d(WARN_INPLACE))	
 		        Perl_warner(aTHX_ WARN_INPLACE, "Can't do inplace edit on %s: %s",
 		          PL_oldname, Strerror(errno) );
@@ -657,8 +667,18 @@ Perl_nextargv(pTHX_ register GV *gv)
 	    }
 	}
     }
+    if (io && (IoFLAGS(io) & IOf_ARGV))
+	IoFLAGS(io) |= IOf_START;
     if (PL_inplace) {
 	(void)do_close(PL_argvoutgv,FALSE);
+	if (io && (IoFLAGS(io) & IOf_ARGV)
+	    && PL_argvout_stack && AvFILLp(PL_argvout_stack) >= 0)
+	{
+	    GV *oldout = (GV*)av_pop(PL_argvout_stack);
+	    setdefout(oldout);
+	    SvREFCNT_dec(oldout);
+	    return Nullfp;
+	}
 	setdefout(gv_fetchpv("STDOUT",TRUE,SVt_PVIO));
     }
     return Nullfp;
@@ -1006,7 +1026,7 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 	{
 	    dTHR;
 	    if (ckWARN(WARN_UNINITIALIZED))
-		Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
+		report_uninit();
 	}
 	return TRUE;
     case SVt_IV:
@@ -1044,7 +1064,7 @@ Perl_my_stat(pTHX)
 
     if (PL_op->op_flags & OPf_REF) {
 	EXTEND(SP,1);
-	tmpgv = cGVOP->op_gv;
+	tmpgv = cGVOP_gv;
       do_fstat:
 	io = GvIO(tmpgv);
 	if (io && IoIFP(io)) {
@@ -1097,7 +1117,7 @@ Perl_my_lstat(pTHX)
     STRLEN n_a;
     if (PL_op->op_flags & OPf_REF) {
 	EXTEND(SP,1);
-	if (cGVOP->op_gv == PL_defgv) {
+	if (cGVOP_gv == PL_defgv) {
 	    if (PL_laststype != OP_LSTAT)
 		Perl_croak(aTHX_ "The stat preceding -l _ wasn't an lstat");
 	    return PL_laststatval;
@@ -1126,6 +1146,9 @@ bool
 Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
 	       int fd, int do_report)
 {
+#ifdef MACOS_TRADITIONAL
+    Perl_croak(aTHX_ "exec? I'm not *that* kind of operating system");
+#else
     register char **a;
     char *tmps;
     STRLEN n_a;
@@ -1158,6 +1181,7 @@ Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
 	}
     }
     do_execfree();
+#endif
     return FALSE;
 }
 
@@ -1174,7 +1198,7 @@ Perl_do_execfree(pTHX)
     }
 }
 
-#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP) && !defined(EPOC)
+#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP) && !defined(EPOC) && !defined(MACOS_TRADITIONAL)
 
 bool
 Perl_do_exec(pTHX_ char *cmd)
@@ -1555,6 +1579,10 @@ Perl_cando(pTHX_ Mode_t mode, Uid_t effective, register Stat_t *statbufp)
 bool
 Perl_ingroup(pTHX_ Gid_t testgid, Uid_t effective)
 {
+#ifdef MACOS_TRADITIONAL
+    /* This is simply not correct for AppleShare, but fix it yerself. */
+    return TRUE;
+#else
     if (testgid == (effective ? PL_egid : PL_gid))
 	return TRUE;
 #ifdef HAS_GETGROUPS
@@ -1572,6 +1600,7 @@ Perl_ingroup(pTHX_ Gid_t testgid, Uid_t effective)
     }
 #endif
     return FALSE;
+#endif
 }
 
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)

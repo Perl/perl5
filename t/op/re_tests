@@ -742,3 +742,9 @@ tt+$	xxxtt	y	-	-
 ([[:digit:]-z]+)	=0-z=	y	$1	0-z
 ([[:digit:]-[:alpha:]]+)	=0-z=	y	$1	0-z
 \GX.*X	aaaXbX	n	-	-
+(\d+\.\d+)	3.1415926	y	$1	3.1415926
+(\ba.{0,10}br)	have a web browser	y	$1	a web br
+'\.c(pp|xx|c)?$'i	Changes	n	-	-
+'\.c(pp|xx|c)?$'i	IO.c	y	-	-
+'(\.c(pp|xx|c)?$)'i	IO.c	y	$1	.c
+^([a-z]:)	C:/	n	-	-

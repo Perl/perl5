@@ -978,7 +978,7 @@ The F<Artistic> and F<Copying> files for copyright information.
 
 =head1 HISTORY
 
-Written by Gurusamy Sarathy <F<gsar@umich.edu>>, with many contributions
+Written by Gurusamy Sarathy <F<gsar@activestate.com>>, with many contributions
 from The Perl Porters.
 
 Send omissions or corrections to <F<perlbug@perl.com>>.

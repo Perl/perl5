@@ -381,7 +381,9 @@ print $@ eq '' && $x eq 'ab3456789012' ? "ok $test\n" : "not ok $test\n";
 $test++;
 
 eval { ($x) = unpack 'a/a*/b*', '212ab' };
-print $@ eq '' && $x eq '100001100100' ? "ok $test\n" : "#$x,$@\nnot ok $test\n";
+my $expected_x = '100001100100';
+if ($Config{ebcdic} eq 'define') { $expected_x = '100000010100'; }
+print $@ eq '' && $x eq $expected_x ? "ok $test\n" : "#$x,$@\nnot ok $test\n";
 $test++;
 
 # 153..156: / with #

@@ -3,7 +3,7 @@
 #
 # Munge "p4 describe ..." output to include new files.
 #
-# Gurusamy Sarathy <gsar@umich.edu>
+# Gurusamy Sarathy <gsar@activestate.com>
 #
 
 use vars qw($thisfile $change $file $fnum $h $v $p4port @addfiles);

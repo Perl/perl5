@@ -279,12 +279,17 @@ Perl_save_gp(pTHX_ GV *gv, I32 empty)
     if (empty) {
 	register GP *gp;
 
+	Newz(602, gp, 1, GP);
+
 	if (GvCVu(gv))
 	    PL_sub_generation++;	/* taking a method out of circulation */
-	Newz(602, gp, 1, GP);
+	if (GvIOp(gv) && (IoFLAGS(GvIOp(gv)) & IOf_ARGV)) {
+	    gp->gp_io = newIO();
+	    IoFLAGS(gp->gp_io) |= IOf_ARGV|IOf_START;
+	}
 	GvGP(gv) = gp_ref(gp);
 	GvSV(gv) = NEWSV(72,0);
-	GvLINE(gv) = PL_curcop->cop_line;
+	GvLINE(gv) = CopLINE(PL_curcop);
 	GvEGV(gv) = gv;
     }
     else {
@@ -400,6 +405,16 @@ Perl_save_I16(pTHX_ I16 *intp)
 }
 
 void
+Perl_save_I8(pTHX_ I8 *bytep)
+{
+    dTHR;
+    SSCHECK(3);
+    SSPUSHINT(*bytep);
+    SSPUSHPTR(bytep);
+    SSPUSHINT(SAVEt_I8);
+}
+
+void
 Perl_save_iv(pTHX_ IV *ivp)
 {
     dTHR;
@@ -423,6 +438,16 @@ Perl_save_pptr(pTHX_ char **pptr)
 }
 
 void
+Perl_save_vptr(pTHX_ void *ptr)
+{
+    dTHR;
+    SSCHECK(3);
+    SSPUSHPTR(*(char**)ptr);
+    SSPUSHPTR(ptr);
+    SSPUSHINT(SAVEt_VPTR);
+}
+
+void
 Perl_save_sptr(pTHX_ SV **sptr)
 {
     dTHR;
@@ -438,8 +463,8 @@ Perl_save_threadsv(pTHX_ PADOFFSET i)
 #ifdef USE_THREADS
     dTHR;
     SV **svp = &THREADSV(i);	/* XXX Change to save by offset */
-    DEBUG_S(PerlIO_printf(Perl_debug_log, "save_threadsv %u: %p %p:%s\n",
-			  i, svp, *svp, SvPEEK(*svp)));
+    DEBUG_S(PerlIO_printf(Perl_debug_log, "save_threadsv %"UVuf": %p %p:%s\n",
+			  (UV)i, svp, *svp, SvPEEK(*svp)));
     save_svref(svp);
     return svp;
 #else
@@ -736,6 +761,10 @@ Perl_leave_scope(pTHX_ I32 base)
 	    ptr = SSPOPPTR;
 	    *(I16*)ptr = (I16)SSPOPINT;
 	    break;
+	case SAVEt_I8:				/* I8 reference */
+	    ptr = SSPOPPTR;
+	    *(I8*)ptr = (I8)SSPOPINT;
+	    break;
 	case SAVEt_IV:				/* IV reference */
 	    ptr = SSPOPPTR;
 	    *(IV*)ptr = (IV)SSPOPIV;
@@ -744,6 +773,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    ptr = SSPOPPTR;
 	    *(SV**)ptr = (SV*)SSPOPPTR;
 	    break;
+	case SAVEt_VPTR:			/* random* reference */
 	case SAVEt_PPTR:			/* char* reference */
 	    ptr = SSPOPPTR;
 	    *(char**)ptr = (char*)SSPOPPTR;
@@ -918,28 +948,38 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
     PerlIO_printf(Perl_debug_log, "CX %ld = %s\n", (long)(cx - cxstack), PL_block_type[CxTYPE(cx)]);
     if (CxTYPE(cx) != CXt_SUBST) {
 	PerlIO_printf(Perl_debug_log, "BLK_OLDSP = %ld\n", (long)cx->blk_oldsp);
-	PerlIO_printf(Perl_debug_log, "BLK_OLDCOP = 0x%lx\n", (long)cx->blk_oldcop);
+	PerlIO_printf(Perl_debug_log, "BLK_OLDCOP = 0x%"UVxf"\n",
+		      PTR2UV(cx->blk_oldcop));
 	PerlIO_printf(Perl_debug_log, "BLK_OLDMARKSP = %ld\n", (long)cx->blk_oldmarksp);
 	PerlIO_printf(Perl_debug_log, "BLK_OLDSCOPESP = %ld\n", (long)cx->blk_oldscopesp);
 	PerlIO_printf(Perl_debug_log, "BLK_OLDRETSP = %ld\n", (long)cx->blk_oldretsp);
-	PerlIO_printf(Perl_debug_log, "BLK_OLDPM = 0x%lx\n", (long)cx->blk_oldpm);
+	PerlIO_printf(Perl_debug_log, "BLK_OLDPM = 0x%"UVxf"\n",
+		      PTR2UV(cx->blk_oldpm));
 	PerlIO_printf(Perl_debug_log, "BLK_GIMME = %s\n", cx->blk_gimme ? "LIST" : "SCALAR");
     }
     switch (CxTYPE(cx)) {
     case CXt_NULL:
     case CXt_BLOCK:
 	break;
+    case CXt_FORMAT:
+	PerlIO_printf(Perl_debug_log, "BLK_SUB.CV = 0x%"UVxf"\n",
+		PTR2UV(cx->blk_sub.cv));
+	PerlIO_printf(Perl_debug_log, "BLK_SUB.GV = 0x%"UVxf"\n",
+		PTR2UV(cx->blk_sub.gv));
+	PerlIO_printf(Perl_debug_log, "BLK_SUB.DFOUTGV = 0x%"UVxf"\n",
+		PTR2UV(cx->blk_sub.dfoutgv));
+	PerlIO_printf(Perl_debug_log, "BLK_SUB.HASARGS = %d\n",
+		(int)cx->blk_sub.hasargs);
+	break;
     case CXt_SUB:
-	PerlIO_printf(Perl_debug_log, "BLK_SUB.CV = 0x%lx\n",
-		(long)cx->blk_sub.cv);
-	PerlIO_printf(Perl_debug_log, "BLK_SUB.GV = 0x%lx\n",
-		(long)cx->blk_sub.gv);
-	PerlIO_printf(Perl_debug_log, "BLK_SUB.DFOUTGV = 0x%lx\n",
-		(long)cx->blk_sub.dfoutgv);
+	PerlIO_printf(Perl_debug_log, "BLK_SUB.CV = 0x%"UVxf"\n",
+		PTR2UV(cx->blk_sub.cv));
 	PerlIO_printf(Perl_debug_log, "BLK_SUB.OLDDEPTH = %ld\n",
 		(long)cx->blk_sub.olddepth);
 	PerlIO_printf(Perl_debug_log, "BLK_SUB.HASARGS = %d\n",
 		(int)cx->blk_sub.hasargs);
+	PerlIO_printf(Perl_debug_log, "BLK_SUB.LVAL = %d\n",
+		(int)cx->blk_sub.lval);
 	break;
     case CXt_EVAL:
 	PerlIO_printf(Perl_debug_log, "BLK_EVAL.OLD_IN_EVAL = %ld\n",
@@ -949,8 +989,8 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 		PL_op_desc[cx->blk_eval.old_op_type]);
 	PerlIO_printf(Perl_debug_log, "BLK_EVAL.OLD_NAME = %s\n",
 		cx->blk_eval.old_name);
-	PerlIO_printf(Perl_debug_log, "BLK_EVAL.OLD_EVAL_ROOT = 0x%lx\n",
-		(long)cx->blk_eval.old_eval_root);
+	PerlIO_printf(Perl_debug_log, "BLK_EVAL.OLD_EVAL_ROOT = 0x%"UVxf"\n",
+		PTR2UV(cx->blk_eval.old_eval_root));
 	break;
 
     case CXt_LOOP:
@@ -958,23 +998,23 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 		cx->blk_loop.label);
 	PerlIO_printf(Perl_debug_log, "BLK_LOOP.RESETSP = %ld\n",
 		(long)cx->blk_loop.resetsp);
-	PerlIO_printf(Perl_debug_log, "BLK_LOOP.REDO_OP = 0x%lx\n",
-		(long)cx->blk_loop.redo_op);
-	PerlIO_printf(Perl_debug_log, "BLK_LOOP.NEXT_OP = 0x%lx\n",
-		(long)cx->blk_loop.next_op);
-	PerlIO_printf(Perl_debug_log, "BLK_LOOP.LAST_OP = 0x%lx\n",
-		(long)cx->blk_loop.last_op);
+	PerlIO_printf(Perl_debug_log, "BLK_LOOP.REDO_OP = 0x%"UVxf"\n",
+		PTR2UV(cx->blk_loop.redo_op));
+	PerlIO_printf(Perl_debug_log, "BLK_LOOP.NEXT_OP = 0x%"UVxf"\n",
+		PTR2UV(cx->blk_loop.next_op));
+	PerlIO_printf(Perl_debug_log, "BLK_LOOP.LAST_OP = 0x%"UVxf"\n",
+		PTR2UV(cx->blk_loop.last_op));
 	PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERIX = %ld\n",
 		(long)cx->blk_loop.iterix);
-	PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERARY = 0x%lx\n",
-		(long)cx->blk_loop.iterary);
-	PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERVAR = 0x%lx\n",
-		(long)cx->blk_loop.itervar);
-	if (cx->blk_loop.itervar)
-	    PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERSAVE = 0x%lx\n",
-		(long)cx->blk_loop.itersave);
-	PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERLVAL = 0x%lx\n",
-		(long)cx->blk_loop.iterlval);
+	PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERARY = 0x%"UVxf"\n",
+		PTR2UV(cx->blk_loop.iterary));
+	PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERVAR = 0x%"UVxf"\n",
+		PTR2UV(CxITERVAR(cx)));
+	if (CxITERVAR(cx))
+	    PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERSAVE = 0x%"UVxf"\n",
+		PTR2UV(cx->blk_loop.itersave));
+	PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERLVAL = 0x%"UVxf"\n",
+		PTR2UV(cx->blk_loop.iterlval));
 	break;
 
     case CXt_SUBST:
@@ -988,18 +1028,18 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 		(long)cx->sb_once);
 	PerlIO_printf(Perl_debug_log, "SB_ORIG = %s\n",
 		cx->sb_orig);
-	PerlIO_printf(Perl_debug_log, "SB_DSTR = 0x%lx\n",
-		(long)cx->sb_dstr);
-	PerlIO_printf(Perl_debug_log, "SB_TARG = 0x%lx\n",
-		(long)cx->sb_targ);
-	PerlIO_printf(Perl_debug_log, "SB_S = 0x%lx\n",
-		(long)cx->sb_s);
-	PerlIO_printf(Perl_debug_log, "SB_M = 0x%lx\n",
-		(long)cx->sb_m);
-	PerlIO_printf(Perl_debug_log, "SB_STREND = 0x%lx\n",
-		(long)cx->sb_strend);
-	PerlIO_printf(Perl_debug_log, "SB_RXRES = 0x%lx\n",
-		(long)cx->sb_rxres);
+	PerlIO_printf(Perl_debug_log, "SB_DSTR = 0x%"UVxf"\n",
+		PTR2UV(cx->sb_dstr));
+	PerlIO_printf(Perl_debug_log, "SB_TARG = 0x%"UVxf"\n",
+		PTR2UV(cx->sb_targ));
+	PerlIO_printf(Perl_debug_log, "SB_S = 0x%"UVxf"\n",
+		PTR2UV(cx->sb_s));
+	PerlIO_printf(Perl_debug_log, "SB_M = 0x%"UVxf"\n",
+		PTR2UV(cx->sb_m));
+	PerlIO_printf(Perl_debug_log, "SB_STREND = 0x%"UVxf"\n",
+		PTR2UV(cx->sb_strend));
+	PerlIO_printf(Perl_debug_log, "SB_RXRES = 0x%"UVxf"\n",
+		PTR2UV(cx->sb_rxres));
 	break;
     }
 #endif	/* DEBUGGING */

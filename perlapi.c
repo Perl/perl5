@@ -17,9 +17,9 @@ START_EXTERN_C
 #undef PERLVARI
 #undef PERLVARIC
 #define PERLVAR(v,t)	t* Perl_##v##_ptr(pTHXo)			\
-			{ return &(aTHXo->PL_##v); }
+			{ return &(aTHXo->interp.v); }
 #define PERLVARA(v,n,t)	PL_##v##_t* Perl_##v##_ptr(pTHXo)		\
-			{ return &(aTHXo->PL_##v); }
+			{ return &(aTHXo->interp.v); }
 #define PERLVARI(v,t,i)	PERLVAR(v,t)
 #define PERLVARIC(v,t,i) PERLVAR(v, const t)
 
@@ -39,7 +39,19 @@ START_EXTERN_C
 #undef PERLVARI
 #undef PERLVARIC
 
+#if defined(PERL_IMPLICIT_SYS)
+#else
+#endif
+#if defined(USE_ITHREADS)
+#  if defined(PERL_IMPLICIT_SYS)
+#  endif
+#endif
+#if defined(MYMALLOC)
+#endif
 #if defined(PERL_OBJECT)
+#endif
+#if defined(PERL_OBJECT)
+#else
 #endif
 
 #undef  Perl_amagic_call
@@ -597,13 +609,6 @@ void
 Perl_vdeb(pTHXo_ const char* pat, va_list* args)
 {
     ((CPerlObj*)pPerl)->Perl_vdeb(pat, args);
-}
-
-#undef  Perl_deb_growlevel
-void
-Perl_deb_growlevel(pTHXo)
-{
-    ((CPerlObj*)pPerl)->Perl_deb_growlevel();
 }
 
 #undef  Perl_debprofdump
@@ -2157,16 +2162,6 @@ Perl_magicname(pTHXo_ char* sym, char* name, I32 namlen)
 {
     ((CPerlObj*)pPerl)->Perl_magicname(sym, name, namlen);
 }
-#if defined(MYMALLOC)
-
-#undef  Perl_malloced_size
-MEM_SIZE
-Perl_malloced_size(void *p)
-{
-    dTHXo;
-    return ((CPerlObj*)pPerl)->Perl_malloced_size(p);
-}
-#endif
 
 #undef  Perl_markstack_grow
 void
@@ -2643,6 +2638,13 @@ Perl_newLISTOP(pTHXo_ I32 type, I32 flags, OP* first, OP* last)
     return ((CPerlObj*)pPerl)->Perl_newLISTOP(type, flags, first, last);
 }
 
+#undef  Perl_newPADOP
+OP*
+Perl_newPADOP(pTHXo_ I32 type, I32 flags, SV* sv)
+{
+    return ((CPerlObj*)pPerl)->Perl_newPADOP(type, flags, sv);
+}
+
 #undef  Perl_newPMOP
 OP*
 Perl_newPMOP(pTHXo_ I32 type, I32 flags)
@@ -2887,15 +2889,42 @@ Perl_peep(pTHXo_ OP* o)
     ((CPerlObj*)pPerl)->Perl_peep(o);
 }
 #if defined(PERL_OBJECT)
-#else
 
-#undef  perl_alloc
-PerlInterpreter*
-perl_alloc()
+#undef  Perl_construct
+void
+Perl_construct(pTHXo)
 {
-    dTHXo;
-    return ((CPerlObj*)pPerl)->perl_alloc();
+    ((CPerlObj*)pPerl)->Perl_construct();
 }
+
+#undef  Perl_destruct
+void
+Perl_destruct(pTHXo)
+{
+    ((CPerlObj*)pPerl)->Perl_destruct();
+}
+
+#undef  Perl_free
+void
+Perl_free(pTHXo)
+{
+    ((CPerlObj*)pPerl)->Perl_free();
+}
+
+#undef  Perl_run
+int
+Perl_run(pTHXo)
+{
+    return ((CPerlObj*)pPerl)->Perl_run();
+}
+
+#undef  Perl_parse
+int
+Perl_parse(pTHXo_ XSINIT_t xsinit, int argc, char** argv, char** env)
+{
+    return ((CPerlObj*)pPerl)->Perl_parse(xsinit, argc, argv, env);
+}
+#endif
 #if defined(USE_THREADS)
 
 #undef  Perl_new_struct_thread
@@ -2904,7 +2933,6 @@ Perl_new_struct_thread(pTHXo_ struct perl_thread *t)
 {
     return ((CPerlObj*)pPerl)->Perl_new_struct_thread(t);
 }
-#endif
 #endif
 
 #undef  Perl_call_atexit
@@ -3413,6 +3441,13 @@ Perl_save_I32(pTHXo_ I32* intp)
     ((CPerlObj*)pPerl)->Perl_save_I32(intp);
 }
 
+#undef  Perl_save_I8
+void
+Perl_save_I8(pTHXo_ I8* bytep)
+{
+    ((CPerlObj*)pPerl)->Perl_save_I8(bytep);
+}
+
 #undef  Perl_save_int
 void
 Perl_save_int(pTHXo_ int* intp)
@@ -3474,6 +3509,13 @@ void
 Perl_save_pptr(pTHXo_ char** pptr)
 {
     ((CPerlObj*)pPerl)->Perl_save_pptr(pptr);
+}
+
+#undef  Perl_save_vptr
+void
+Perl_save_vptr(pTHXo_ void* pptr)
+{
+    ((CPerlObj*)pPerl)->Perl_save_vptr(pptr);
 }
 
 #undef  Perl_save_re_context
@@ -4252,7 +4294,7 @@ Perl_taint_env(pTHXo)
 
 #undef  Perl_taint_proper
 void
-Perl_taint_proper(pTHXo_ const char* f, char* s)
+Perl_taint_proper(pTHXo_ const char* f, const char* s)
 {
     ((CPerlObj*)pPerl)->Perl_taint_proper(f, s);
 }
@@ -4380,6 +4422,13 @@ Perl_wait4pid(pTHXo_ Pid_t pid, int* statusp, int flags)
     return ((CPerlObj*)pPerl)->Perl_wait4pid(pid, statusp, flags);
 }
 
+#undef  Perl_report_uninit
+void
+Perl_report_uninit(pTHXo)
+{
+    ((CPerlObj*)pPerl)->Perl_report_uninit();
+}
+
 #undef  Perl_warn
 void
 Perl_warn(pTHXo_ const char* pat, ...)
@@ -4472,38 +4521,6 @@ void
 Perl_dump_mstats(pTHXo_ char* s)
 {
     ((CPerlObj*)pPerl)->Perl_dump_mstats(s);
-}
-
-#undef  Perl_malloc
-Malloc_t
-Perl_malloc(MEM_SIZE nbytes)
-{
-    dTHXo;
-    return ((CPerlObj*)pPerl)->Perl_malloc(nbytes);
-}
-
-#undef  Perl_calloc
-Malloc_t
-Perl_calloc(MEM_SIZE elements, MEM_SIZE size)
-{
-    dTHXo;
-    return ((CPerlObj*)pPerl)->Perl_calloc(elements, size);
-}
-
-#undef  Perl_realloc
-Malloc_t
-Perl_realloc(Malloc_t where, MEM_SIZE nbytes)
-{
-    dTHXo;
-    return ((CPerlObj*)pPerl)->Perl_realloc(where, nbytes);
-}
-
-#undef  Perl_mfree
-Free_t
-Perl_mfree(Malloc_t where)
-{
-    dTHXo;
-    ((CPerlObj*)pPerl)->Perl_mfree(where);
 }
 #endif
 
@@ -4925,7 +4942,124 @@ Perl_boot_core_xsutils(pTHXo)
 {
     ((CPerlObj*)pPerl)->Perl_boot_core_xsutils();
 }
+#if defined(USE_ITHREADS)
+
+#undef  Perl_cx_dup
+PERL_CONTEXT*
+Perl_cx_dup(pTHXo_ PERL_CONTEXT* cx, I32 ix, I32 max)
+{
+    return ((CPerlObj*)pPerl)->Perl_cx_dup(cx, ix, max);
+}
+
+#undef  Perl_si_dup
+PERL_SI*
+Perl_si_dup(pTHXo_ PERL_SI* si)
+{
+    return ((CPerlObj*)pPerl)->Perl_si_dup(si);
+}
+
+#undef  Perl_ss_dup
+ANY*
+Perl_ss_dup(pTHXo_ PerlInterpreter* proto_perl)
+{
+    return ((CPerlObj*)pPerl)->Perl_ss_dup(proto_perl);
+}
+
+#undef  Perl_any_dup
+void*
+Perl_any_dup(pTHXo_ void* v, PerlInterpreter* proto_perl)
+{
+    return ((CPerlObj*)pPerl)->Perl_any_dup(v, proto_perl);
+}
+
+#undef  Perl_he_dup
+HE*
+Perl_he_dup(pTHXo_ HE* e, bool shared)
+{
+    return ((CPerlObj*)pPerl)->Perl_he_dup(e, shared);
+}
+
+#undef  Perl_re_dup
+REGEXP*
+Perl_re_dup(pTHXo_ REGEXP* r)
+{
+    return ((CPerlObj*)pPerl)->Perl_re_dup(r);
+}
+
+#undef  Perl_fp_dup
+PerlIO*
+Perl_fp_dup(pTHXo_ PerlIO* fp, char type)
+{
+    return ((CPerlObj*)pPerl)->Perl_fp_dup(fp, type);
+}
+
+#undef  Perl_dirp_dup
+DIR*
+Perl_dirp_dup(pTHXo_ DIR* dp)
+{
+    return ((CPerlObj*)pPerl)->Perl_dirp_dup(dp);
+}
+
+#undef  Perl_gp_dup
+GP*
+Perl_gp_dup(pTHXo_ GP* gp)
+{
+    return ((CPerlObj*)pPerl)->Perl_gp_dup(gp);
+}
+
+#undef  Perl_mg_dup
+MAGIC*
+Perl_mg_dup(pTHXo_ MAGIC* mg)
+{
+    return ((CPerlObj*)pPerl)->Perl_mg_dup(mg);
+}
+
+#undef  Perl_sv_dup
+SV*
+Perl_sv_dup(pTHXo_ SV* sstr)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_dup(sstr);
+}
+#if defined(HAVE_INTERP_INTERN)
+
+#undef  Perl_sys_intern_dup
+void
+Perl_sys_intern_dup(pTHXo_ struct interp_intern* src, struct interp_intern* dst)
+{
+    ((CPerlObj*)pPerl)->Perl_sys_intern_dup(src, dst);
+}
+#endif
+
+#undef  Perl_ptr_table_new
+PTR_TBL_t*
+Perl_ptr_table_new(pTHXo)
+{
+    return ((CPerlObj*)pPerl)->Perl_ptr_table_new();
+}
+
+#undef  Perl_ptr_table_fetch
+void*
+Perl_ptr_table_fetch(pTHXo_ PTR_TBL_t *tbl, void *sv)
+{
+    return ((CPerlObj*)pPerl)->Perl_ptr_table_fetch(tbl, sv);
+}
+
+#undef  Perl_ptr_table_store
+void
+Perl_ptr_table_store(pTHXo_ PTR_TBL_t *tbl, void *oldsv, void *newsv)
+{
+    ((CPerlObj*)pPerl)->Perl_ptr_table_store(tbl, oldsv, newsv);
+}
+
+#undef  Perl_ptr_table_split
+void
+Perl_ptr_table_split(pTHXo_ PTR_TBL_t *tbl)
+{
+    ((CPerlObj*)pPerl)->Perl_ptr_table_split(tbl);
+}
+#endif
 #if defined(PERL_OBJECT)
+#else
 #endif
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
 #endif
@@ -4983,6 +5117,8 @@ Perl_boot_core_xsutils(pTHXo)
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 #  if defined(LEAKTEST)
 #  endif
+#endif
+#if defined(PERL_OBJECT)
 #endif
 
 #undef  Perl_ck_anoncode
@@ -7673,7 +7809,7 @@ Perl_fprintf_nocontext(PerlIO *stream, const char *format, ...)
     dTHXo;
     va_list(arglist);
     va_start(arglist, format);
-    return (*pPerl->PL_StdIO->pVprintf)(pPerl->PL_StdIO, stream, format, arglist);
+    return (*PL_StdIO->pVprintf)(PL_StdIO, stream, format, arglist);
 }
 
 END_EXTERN_C

@@ -114,3 +114,13 @@ struct xpvhv {
 #define HEK_HASH(hek)		(hek)->hek_hash
 #define HEK_LEN(hek)		(hek)->hek_len
 #define HEK_KEY(hek)		(hek)->hek_key
+
+#if defined(STRANGE_MALLOC) || defined(MYMALLOC)
+#  define PERL_HV_ARRAY_ALLOC_BYTES(size) ((size) * sizeof(HE*))
+#else
+#  define MALLOC_OVERHEAD 16
+#  define PERL_HV_ARRAY_ALLOC_BYTES(size) \
+			(((size) < 64)					\
+			 ? (size) * sizeof(HE*)				\
+			 : (size) * sizeof(HE*) * 2 - MALLOC_OVERHEAD)
+#endif

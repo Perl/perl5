@@ -117,10 +117,6 @@ Perl_boot_core_UNIVERSAL(pTHX)
     newXS("UNIVERSAL::VERSION", 	XS_UNIVERSAL_VERSION, 	  file);
 }
 
-#ifdef PERL_OBJECT
-#define NO_XSLOCKS
-#endif  /* PERL_OBJECT */
-
 #include "XSUB.h"
 
 XS(XS_UNIVERSAL_isa)

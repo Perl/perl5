@@ -28,7 +28,11 @@ repair()
      -e 's/thread/Thread/'\
      -e 's/byteload/ByteLoader/'\
      -e 's=devel/peek=Devel/Peek='\
-     -e 's=devel/dprof=Devel/DProf='
+     -e 's=devel/dprof=Devel/DProf='\
+     -e 's=file/=='\
+     -e 's=File/=='\
+     -e 's=glob=='\
+     -e 's=Glob=='
 }
 static_ext=$(repair "$static_ext")
 extensions=$(repair "$extensions")

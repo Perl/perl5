@@ -74,6 +74,10 @@
 extern void PerlIO_init (void);
 #endif
 
+#ifndef Sighandler_t
+typedef Signal_t (*Sighandler_t) (int);
+#endif
+
 #if defined(PERL_IMPLICIT_SYS)
 
 #ifndef PerlIO
@@ -82,6 +86,7 @@ typedef struct _PerlIO PerlIO;
 
 /* IPerlStdIO		*/
 struct IPerlStdIO;
+struct IPerlStdIOInfo;
 typedef PerlIO*		(*LPStdin)(struct IPerlStdIO*);
 typedef PerlIO*		(*LPStdout)(struct IPerlStdIO*);
 typedef PerlIO*		(*LPStderr)(struct IPerlStdIO*);
@@ -128,6 +133,7 @@ typedef int		(*LPSetpos)(struct IPerlStdIO*, PerlIO*,
 			    const Fpos_t*);
 typedef void		(*LPInit)(struct IPerlStdIO*);
 typedef void		(*LPInitOSExtras)(struct IPerlStdIO*);
+typedef PerlIO*		(*LPFdupopen)(struct IPerlStdIO*, PerlIO*);
 
 struct IPerlStdIO
 {
@@ -169,6 +175,7 @@ struct IPerlStdIO
     LPSetpos		pSetpos;
     LPInit		pInit;
     LPInitOSExtras	pInitOSExtras;
+    LPFdupopen		pFdupopen;
 };
 
 struct IPerlStdIOInfo
@@ -279,11 +286,14 @@ struct IPerlStdIOInfo
 #undef 	init_os_extras
 #define init_os_extras()						\
 	(*PL_StdIO->pInitOSExtras)(PL_StdIO)
+#define PerlIO_fdupopen(f)						\
+	(*PL_StdIO->pFdupopen)(PL_StdIO, (f))
 
 #else	/* PERL_IMPLICIT_SYS */
 
 #include "perlsdio.h"
 #include "perl.h"
+#define PerlIO_fdupopen(f)		(f)
 
 #endif	/* PERL_IMPLICIT_SYS */
 
@@ -461,6 +471,9 @@ extern int	PerlIO_getpos		(PerlIO *,Fpos_t *);
 #ifndef PerlIO_setpos
 extern int	PerlIO_setpos		(PerlIO *,const Fpos_t *);
 #endif
+#ifndef PerlIO_fdupopen
+extern PerlIO *	PerlIO_fdupopen		(PerlIO *);
+#endif
 
 
 /*
@@ -471,6 +484,7 @@ extern int	PerlIO_setpos		(PerlIO *,const Fpos_t *);
 
 /* IPerlDir		*/
 struct IPerlDir;
+struct IPerlDirInfo;
 typedef int		(*LPMakedir)(struct IPerlDir*, const char*, int);
 typedef int		(*LPChdir)(struct IPerlDir*, const char*);
 typedef int		(*LPRmdir)(struct IPerlDir*, const char*);
@@ -480,6 +494,10 @@ typedef struct direct*	(*LPDirRead)(struct IPerlDir*, DIR*);
 typedef void		(*LPDirRewind)(struct IPerlDir*, DIR*);
 typedef void		(*LPDirSeek)(struct IPerlDir*, DIR*, long);
 typedef long		(*LPDirTell)(struct IPerlDir*, DIR*);
+#ifdef WIN32
+typedef char*		(*LPDirMapPathA)(struct IPerlDir*, const char*);
+typedef WCHAR*		(*LPDirMapPathW)(struct IPerlDir*, const WCHAR*);
+#endif
 
 struct IPerlDir
 {
@@ -492,6 +510,10 @@ struct IPerlDir
     LPDirRewind		pRewind;
     LPDirSeek		pSeek;
     LPDirTell		pTell;
+#ifdef WIN32
+    LPDirMapPathA	pMapPathA;
+    LPDirMapPathW	pMapPathW;
+#endif
 };
 
 struct IPerlDirInfo
@@ -518,6 +540,12 @@ struct IPerlDirInfo
 	(*PL_Dir->pSeek)(PL_Dir, (dir), (loc))
 #define PerlDir_tell(dir)					\
 	(*PL_Dir->pTell)(PL_Dir, (dir))
+#ifdef WIN32
+#define PerlDir_mapA(dir)					\
+	(*PL_Dir->pMapPathA)(PL_Dir, (dir))
+#define PerlDir_mapW(dir)					\
+	(*PL_Dir->pMapPathW)(PL_Dir, (dir))
+#endif
 
 #else	/* PERL_IMPLICIT_SYS */
 
@@ -534,6 +562,10 @@ struct IPerlDirInfo
 #define PerlDir_rewind(dir)		rewinddir((dir))
 #define PerlDir_seek(dir, loc)		seekdir((dir), (loc))
 #define PerlDir_tell(dir)		telldir((dir))
+#ifdef WIN32
+#define PerlDir_mapA(dir)		dir
+#define PerlDir_mapW(dir)		dir
+#endif
 
 #endif	/* PERL_IMPLICIT_SYS */
 
@@ -545,6 +577,7 @@ struct IPerlDirInfo
 
 /* IPerlEnv		*/
 struct IPerlEnv;
+struct IPerlEnvInfo;
 typedef char*		(*LPEnvGetenv)(struct IPerlEnv*, const char*);
 typedef int		(*LPEnvPutenv)(struct IPerlEnv*, const char*);
 typedef char*		(*LPEnvGetenv_len)(struct IPerlEnv*,
@@ -637,7 +670,7 @@ struct IPerlEnvInfo
 #define PerlEnv_putenv(str)		putenv((str))
 #define PerlEnv_getenv(str)		getenv((str))
 #define PerlEnv_getenv_len(str,l)	getenv_len((str), (l))
-#define PerlEnv_clear()			clearenv()
+#define PerlEnv_clearenv()		clearenv()
 #define PerlEnv_get_childenv()		get_childenv()
 #define PerlEnv_free_childenv(e)	free_childenv((e))
 #define PerlEnv_get_childdir()		get_childdir()
@@ -665,6 +698,7 @@ struct IPerlEnvInfo
 
 /* IPerlLIO		*/
 struct IPerlLIO;
+struct IPerlLIOInfo;
 typedef int		(*LPLIOAccess)(struct IPerlLIO*, const char*, int);
 typedef int		(*LPLIOChmod)(struct IPerlLIO*, const char*, int);
 typedef int		(*LPLIOChown)(struct IPerlLIO*, const char*, uid_t,
@@ -678,6 +712,8 @@ typedef int		(*LPLIOFileStat)(struct IPerlLIO*, int, struct stat*);
 typedef int		(*LPLIOIOCtl)(struct IPerlLIO*, int, unsigned int,
 			    char*);
 typedef int		(*LPLIOIsatty)(struct IPerlLIO*, int);
+typedef int		(*LPLIOLink)(struct IPerlLIO*, const char*,
+				     const char *);
 typedef long		(*LPLIOLseek)(struct IPerlLIO*, int, long, int);
 typedef int		(*LPLIOLstat)(struct IPerlLIO*, const char*,
 			    struct stat*);
@@ -710,6 +746,7 @@ struct IPerlLIO
     LPLIOFileStat	pFileStat;
     LPLIOIOCtl		pIOCtl;
     LPLIOIsatty		pIsatty;
+    LPLIOLink		pLink;
     LPLIOLseek		pLseek;
     LPLIOLstat		pLstat;
     LPLIOMktemp		pMktemp;
@@ -754,6 +791,8 @@ struct IPerlLIOInfo
 	(*PL_LIO->pIOCtl)(PL_LIO, (fd), (u), (buf))
 #define PerlLIO_isatty(fd)						\
 	(*PL_LIO->pIsatty)(PL_LIO, (fd))
+#define PerlLIO_link(oldname, newname)					\
+	(*PL_LIO->pLink)(PL_LIO, (oldname), (newname))
 #define PerlLIO_lseek(fd, offset, mode)					\
 	(*PL_LIO->pLseek)(PL_LIO, (fd), (offset), (mode))
 #define PerlLIO_lstat(name, buf)					\
@@ -796,6 +835,7 @@ struct IPerlLIOInfo
 #define PerlLIO_fstat(fd, buf)		Fstat((fd), (buf))
 #define PerlLIO_ioctl(fd, u, buf)	ioctl((fd), (u), (buf))
 #define PerlLIO_isatty(fd)		isatty((fd))
+#define PerlLIO_link(oldname, newname)	link((oldname), (newname))
 #define PerlLIO_lseek(fd, offset, mode)	lseek((fd), (offset), (mode))
 #define PerlLIO_stat(name, buf)		Stat((name), (buf))
 #ifdef HAS_LSTAT
@@ -826,15 +866,24 @@ struct IPerlLIOInfo
 
 /* IPerlMem		*/
 struct IPerlMem;
+struct IPerlMemInfo;
 typedef void*		(*LPMemMalloc)(struct IPerlMem*, size_t);
 typedef void*		(*LPMemRealloc)(struct IPerlMem*, void*, size_t);
 typedef void		(*LPMemFree)(struct IPerlMem*, void*);
+typedef void*		(*LPMemCalloc)(struct IPerlMem*, size_t, size_t);
+typedef void		(*LPMemGetLock)(struct IPerlMem*);
+typedef void		(*LPMemFreeLock)(struct IPerlMem*);
+typedef int		(*LPMemIsLocked)(struct IPerlMem*);
 
 struct IPerlMem
 {
     LPMemMalloc		pMalloc;
     LPMemRealloc	pRealloc;
     LPMemFree		pFree;
+    LPMemCalloc		pCalloc;
+    LPMemGetLock	pGetLock;
+    LPMemFreeLock	pFreeLock;
+    LPMemIsLocked	pIsLocked;
 };
 
 struct IPerlMemInfo
@@ -843,18 +892,84 @@ struct IPerlMemInfo
     struct IPerlMem	perlMemList;
 };
 
+/* Interpreter specific memory macros */
 #define PerlMem_malloc(size)				    \
 	(*PL_Mem->pMalloc)(PL_Mem, (size))
 #define PerlMem_realloc(buf, size)			    \
 	(*PL_Mem->pRealloc)(PL_Mem, (buf), (size))
 #define PerlMem_free(buf)				    \
 	(*PL_Mem->pFree)(PL_Mem, (buf))
+#define PerlMem_calloc(num, size)			    \
+	(*PL_Mem->pCalloc)(PL_Mem, (num), (size))
+#define PerlMem_get_lock()				    \
+	(*PL_Mem->pGetLock)(PL_Mem)
+#define PerlMem_free_lock()				    \
+	(*PL_Mem->pFreeLock)(PL_Mem)
+#define PerlMem_is_locked()				    \
+	(*PL_Mem->pIsLocked)(PL_Mem)
+
+/* Shared memory macros */
+#define PerlMemShared_malloc(size)			    \
+	(*PL_MemShared->pMalloc)(PL_Mem, (size))
+#define PerlMemShared_realloc(buf, size)		    \
+	(*PL_MemShared->pRealloc)(PL_Mem, (buf), (size))
+#define PerlMemShared_free(buf)				    \
+	(*PL_MemShared->pFree)(PL_Mem, (buf))
+#define PerlMemShared_calloc(num, size)			    \
+	(*PL_MemShared->pCalloc)(PL_Mem, (num), (size))
+#define PerlMemShared_get_lock()			    \
+	(*PL_MemShared->pGetLock)(PL_Mem)
+#define PerlMemShared_free_lock()			    \
+	(*PL_MemShared->pFreeLock)(PL_Mem)
+#define PerlMemShared_is_locked()			    \
+	(*PL_MemShared->pIsLocked)(PL_Mem)
+
+
+/* Parse tree memory macros */
+#define PerlMemParse_malloc(size)			    \
+	(*PL_MemParse->pMalloc)(PL_Mem, (size))
+#define PerlMemParse_realloc(buf, size)			    \
+	(*PL_MemParse->pRealloc)(PL_Mem, (buf), (size))
+#define PerlMemParse_free(buf)				    \
+	(*PL_MemParse->pFree)(PL_Mem, (buf))
+#define PerlMemParse_calloc(num, size)			    \
+	(*PL_MemParse->pCalloc)(PL_Mem, (num), (size))
+#define PerlMemParse_get_lock()				    \
+	(*PL_MemParse->pGetLock)(PL_Mem)
+#define PerlMemParse_free_lock()			    \
+	(*PL_MemParse->pFreeLock)(PL_Mem)
+#define PerlMemParse_is_locked()			    \
+	(*PL_MemParse->pIsLocked)(PL_Mem)
+
 
 #else	/* PERL_IMPLICIT_SYS */
 
+/* Interpreter specific memory macros */
 #define PerlMem_malloc(size)		malloc((size))
 #define PerlMem_realloc(buf, size)	realloc((buf), (size))
 #define PerlMem_free(buf)		free((buf))
+#define PerlMem_calloc(num, size)	calloc((num), (size))
+#define PerlMem_get_lock()		
+#define PerlMem_free_lock()
+#define PerlMem_is_locked()		0
+
+/* Shared memory macros */
+#define PerlMemShared_malloc(size)		malloc((size))
+#define PerlMemShared_realloc(buf, size)	realloc((buf), (size))
+#define PerlMemShared_free(buf)			free((buf))
+#define PerlMemShared_calloc(num, size)		calloc((num), (size))
+#define PerlMemShared_get_lock()		
+#define PerlMemShared_free_lock()
+#define PerlMemShared_is_locked()		0
+
+/* Parse tree memory macros */
+#define PerlMemParse_malloc(size)	malloc((size))
+#define PerlMemParse_realloc(buf, size)	realloc((buf), (size))
+#define PerlMemParse_free(buf)		free((buf))
+#define PerlMemParse_calloc(num, size)	calloc((num), (size))
+#define PerlMemParse_get_lock()		
+#define PerlMemParse_free_lock()
+#define PerlMemParse_is_locked()	0
 
 #endif	/* PERL_IMPLICIT_SYS */
 
@@ -865,15 +980,13 @@ struct IPerlMemInfo
 
 #if defined(PERL_IMPLICIT_SYS)
 
-#ifndef Sighandler_t
-typedef Signal_t (*Sighandler_t) (int);
-#endif
 #ifndef jmp_buf
 #include <setjmp.h>
 #endif
 
 /* IPerlProc		*/
 struct IPerlProc;
+struct IPerlProcInfo;
 typedef void		(*LPProcAbort)(struct IPerlProc*);
 typedef char*		(*LPProcCrypt)(struct IPerlProc*, const char*,
 			    const char*);
@@ -905,8 +1018,10 @@ typedef int		(*LPProcTimes)(struct IPerlProc*, struct tms*);
 typedef int		(*LPProcWait)(struct IPerlProc*, int*);
 typedef int		(*LPProcWaitpid)(struct IPerlProc*, int, int*, int);
 typedef Sighandler_t	(*LPProcSignal)(struct IPerlProc*, int, Sighandler_t);
-typedef void*		(*LPProcDynaLoader)(struct IPerlProc*, const char*);
+typedef int		(*LPProcFork)(struct IPerlProc*);
+typedef int		(*LPProcGetpid)(struct IPerlProc*);
 #ifdef WIN32
+typedef void*		(*LPProcDynaLoader)(struct IPerlProc*, const char*);
 typedef void		(*LPProcGetOSError)(struct IPerlProc*,
 			    SV* sv, DWORD dwErr);
 typedef void		(*LPProcFreeBuf)(struct IPerlProc*, char*);
@@ -944,6 +1059,8 @@ struct IPerlProc
     LPProcWait		pWait;
     LPProcWaitpid	pWaitpid;
     LPProcSignal	pSignal;
+    LPProcFork		pFork;
+    LPProcGetpid	pGetpid;
 #ifdef WIN32
     LPProcDynaLoader	pDynaLoader;
     LPProcGetOSError	pGetOSError;
@@ -1010,6 +1127,10 @@ struct IPerlProcInfo
 	(*PL_Proc->pWaitpid)(PL_Proc, (p), (s), (f))
 #define PerlProc_signal(n, h)						\
 	(*PL_Proc->pSignal)(PL_Proc, (n), (h))
+#define PerlProc_fork()							\
+	(*PL_Proc->pFork)(PL_Proc)
+#define PerlProc_getpid()						\
+	(*PL_Proc->pGetpid)(PL_Proc)
 #define PerlProc_setjmp(b, n) Sigsetjmp((b), (n))
 #define PerlProc_longjmp(b, n) Siglongjmp((b), (n))
 
@@ -1058,6 +1179,8 @@ struct IPerlProcInfo
 #define PerlProc_setjmp(b, n)	Sigsetjmp((b), (n))
 #define PerlProc_longjmp(b, n)	Siglongjmp((b), (n))
 #define PerlProc_signal(n, h)	signal((n), (h))
+#define PerlProc_fork()		fork()
+#define PerlProc_getpid()	getpid()
 
 #ifdef WIN32
 #define PerlProc_DynaLoad(f)						\
@@ -1075,6 +1198,7 @@ struct IPerlProcInfo
 
 /* PerlSock		*/
 struct IPerlSock;
+struct IPerlSockInfo;
 typedef u_long		(*LPHtonl)(struct IPerlSock*, u_long);
 typedef u_short		(*LPHtons)(struct IPerlSock*, u_short);
 typedef u_long		(*LPNtohl)(struct IPerlSock*, u_long);
@@ -1344,23 +1468,6 @@ struct IPerlSockInfo
 #endif
 
 #endif	/* PERL_IMPLICIT_SYS */
-
-/* Mention
-
-   HAS_READV
-   HAS_RECVMSG
-   HAS_SENDMSG
-   HAS_WRITEV
-   HAS_STRUCT_MSGHDR
-   HAS_STRUCT_CMSGHDR
-
-   here so that Configure picks them up.  Perl core does not
-   use them but somebody might want to extend Socket:: or IO::
-   someday.
-
-   Jarkko Hietaniemi November 1998
-
-   */
 
 #endif	/* __Inc__IPerl___ */
 

@@ -129,7 +129,7 @@ EXT OP * (CPERLscope(*PL_ppaddr)[])(pTHX) = {
 END
 
 for (@ops) {
-    print "\tPerl_pp_$_,\n";
+    print "\tMEMBER_TO_FPTR(Perl_pp_$_),\n";
 }
 
 print <<END;
@@ -148,7 +148,7 @@ EXT OP * (CPERLscope(*PL_check)[]) (pTHX_ OP *op) = {
 END
 
 for (@ops) {
-    print "\t", &tab(3, "Perl_$check{$_},"), "/* $_ */\n";
+    print "\t", &tab(3, "MEMBER_TO_FPTR(Perl_$check{$_}),"), "\t/* $_ */\n";
 }
 
 print <<END;
@@ -183,8 +183,8 @@ END
     '|',  3,		# logop
     '@',  4,		# listop
     '/',  5,		# pmop
-    '$',  6,		# svop
-    '*',  7,		# gvop
+    '$',  6,		# svop_or_padop
+    '#',  7,		# padop
     '"',  8,		# pvop_or_svop
     '{',  9,		# loop
     ';',  10,		# cop
@@ -350,8 +350,8 @@ wantarray	wantarray		ck_null		is0
 
 const		constant item		ck_svconst	s$	
 
-gvsv		scalar variable		ck_null		ds*	
-gv		glob value		ck_null		ds*	
+gvsv		scalar variable		ck_null		ds$	
+gv		glob value		ck_null		ds$	
 gelem		glob elem		ck_null		d2	S S
 padsv		private variable	ck_null		ds0
 padav		private array		ck_null		d0
@@ -363,9 +363,9 @@ pushre		push regexp		ck_null		d/
 # References and stuff.
 
 rv2gv		ref-to-glob cast	ck_rvconst	ds1	
-rv2sv		scalar deref		ck_rvconst	ds1	
+rv2sv		scalar dereference	ck_rvconst	ds1	
 av2arylen	array length		ck_null		is1	
-rv2cv		subroutine deref	ck_rvconst	d1
+rv2cv		subroutine dereference	ck_rvconst	d1
 anoncode	anonymous subroutine	ck_anoncode	$	
 prototype	subroutine prototype	ck_null		s%	S
 refgen		reference constructor	ck_spair	m1	L
@@ -511,7 +511,7 @@ quotemeta	quotemeta		ck_fun		fsTu%	S?
 # Arrays.
 
 rv2av		array dereference	ck_rvconst	dt1	
-aelemfast	constant array element	ck_null		s*	A S
+aelemfast	constant array element	ck_null		s$	A S
 aelem		array element		ck_null		s2	A S
 aslice		array slice		ck_null		m@	A L
 
@@ -734,6 +734,10 @@ getpriority	getpriority		ck_fun		isT@	S S
 setpriority	setpriority		ck_fun		isT@	S S S
 
 # Time calls.
+
+# NOTE: MacOS patches the 'i' of time() away later when the interpreter
+# is created because in MacOS time() is already returning times > 2**31-1,
+# that is, non-integers.
 
 time		time			ck_null		isT0	
 tms		times			ck_null		0	

@@ -1,5 +1,6 @@
 # svr5 hints, System V Release 5.x (UnixWare 7)
-# Reworked by hops@sco.com Sept 1999 for better platform support 
+# mods after mail fm Andy Dougherty
+# Reworked by hops@sco.com Sept/Oct 1999 for UW7.1 platform support 
 #   Boyd Gerber, gerberb@zenez.com 1999/09/21 for threads support.
 # Originally taken from svr4 hints.sh  21-Sep-98 hops@sco.com
 # which was version of 1996/10/25 by Tye McQueen, tye@metronet.com
@@ -7,9 +8,6 @@
 # Use Configure -Dusethreads to enable threads.
 # Use Configure -Dcc=gcc to use gcc.
 case "$cc" in
-'') cc='/bin/cc'
-    test -f $cc || cc='/usr/ccs/bin/cc'
-    ;;
 *gcc*)
     #  "$gccversion" not set yet
     vers=`gcc -v 2>&1 | sed -n -e 's@.*version \([^ ][^ ]*\) .*@\1@p'`
@@ -43,17 +41,18 @@ esac
 
 #    Leave leading tabs so Configure doesn't propagate variables to config.sh
 
-	want_ucb=''         # don't use anything from /usr/ucblib - icky
-	want_dbm='yes'      # use dbm if can find library in /usr/local/lib
-	want_gdbm='yes'     # use gdbm if can find library in /usr/local/lib
-	want_udk70=''       # link with old static libc pieces
-            # link with udk70 if want resulting binary to run on uw7.0*
-            # - it will link in referenced static symbols of libc that are (now)
-            # in the shared libc.so on 7.1 but were not in 7.0.
+	want_ucb=''		# don't use anything from /usr/ucblib - icky
+	want_dbm='yes'		# use dbm if can find library in /usr/local/lib
+	want_gdbm='yes'		# use gdbm if can find library in /usr/local/lib
+	want_udk70=''		# link with old static libc pieces
+            # link with udk70 if building on 7.1 abd want resulting binary 
+            # to run on uw7.0* - it will link in referenced static symbols 
+            # of libc that are (now) in the shared libc.so on 7.1 but were 
+            # not there in 7.0.
             # There are still scenarios where this is still insufficient so 
             # overall it is preferable to get ptf7051e 
             #   ftp://ftp.sco.com/SLS/ptf7051e.Z
-            # installed on any/all 7.0 systems.
+            # installed on any/all 7.0 systems and leave the above unset.
 
 if [ "$want_ucb" ] ; then 
     ldflags= '-L/usr/ucblib'
@@ -71,10 +70,8 @@ else
     fi
 fi
 
-if [ "$want_gdbm" -a -f /usr/local/lib/libgdbm.so ] ; then 
-    i_gdbm='define'
-else
-    i_gdbm='undef'
+if [ ! "$want_gdbm" ] ; then 
+   i_gdbm='undef'
    libswanted=`echo " $libswanted " | sed -e 's/ gdbm / /'`
 fi
 
@@ -83,10 +80,6 @@ fi
 #   libmalloc.a - Probably using Perl's malloc() anyway.
 #   libc:  on UW7 don't want -lc explicitly as native cc gives warnings/errors
 libswanted=`echo " $libswanted " | sed -e 's/ malloc / /' -e 's/ c / /'`
-
-# Don't use irrelevant  (but existing) lib dirs
-# don't want /usr/gnu/lib - original(older) system supplied distrib of perl5
-loclibpth=`echo " $loclibpth " | sed -e 's@ /usr/gnu/lib @ @'`
 
 # remove /shlib and /lib from library search path as both symlink to /usr/lib
 # where runtime shared libc is 
@@ -100,11 +93,6 @@ d_index='undef' d_killpg='undef' d_getprior='undef' d_setprior='undef'
 d_setlinebuf='undef' 
 d_setregid='undef' d_setreuid='undef'  # -- in /usr/lib/libc.so.1
 
-
-# use nm to probe libs - its fast enough on uw7
-case "$usenm" in
-'') usenm=true;;
-esac
 
 # Broken C-Shell tests (Thanks to Tye McQueen):
 # The OS-specific checks may be obsoleted by the this generic test.
@@ -158,38 +146,32 @@ fi
 # End of Unixware-specific tests.
 
 ###############################################################
-# Dynamic loading section:
+# Dynamic loading section: Is default so it should just happen.
+# set below to explicitly force.
+# usedl='define'
+# dlext='so'
+# dlsrc='dl_dlopen.xs'
 #
 # ccdlflags : must tell the linker to export all global symbols
 # cccdlflags: must tell the compiler to generate relocatable code
 # lddlflags : must tell the linker to output a shared library
-#
-# /usr/local/lib is added for convenience, since additional libraries
-# are usually put there 
-#
+
 # use shared perl lib    
 useshrplib='true'
 
 case "$cc" in
        *gcc*)
-           ccdlflags='-Xlinker -Bexport -L/usr/local/lib'
+           ccdlflags='-Xlinker -Bexport '
            cccdlflags='-fpic'
-           lddlflags='-G -L/usr/local/lib'
+           lddlflags='-G '
         ;;
 
         *)
-           ccdlflags='-Wl,-Bexport -L/usr/local/lib'
+           ccdlflags='-Wl,-Bexport'
            cccdlflags='-Kpic'
-           lddlflags='-G -Wl,-Bexport -L/usr/local/lib'
+           lddlflags='-G -Wl,-Bexport'
         ;;
 esac
-
-###############################################################
-# Use dynamic loading
-usedl='define'
-dlext='so'
-dlsrc='dl_dlopen.xs'
-
 
 ############################################################################
 # Thread support
@@ -200,28 +182,40 @@ cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in
 $define|true|[yY]*)
         ccflags="$ccflags"
-        set `echo X "$libswanted "| sed -e 's/ c / pthread c /'`
         shift
         libswanted="$*"
   case "$cc" in
        *gcc*)
            ccflags="-D_REENTRANT $ccflags -fpic -pthread"
            cccdlflags='-fpic'
-           lddlflags='-pthread -G -L/usr/local/lib '
+           lddlflags='-pthread -G '
         ;;
         *)
            ccflags="-D_REENTRANT $ccflags -KPIC -Kthread"
-           ccdlflags='-Kthread -Wl,-Bexport -L/usr/local/lib'
+           ccdlflags='-Kthread -Wl,-Bexport'
            cccdlflags='-KPIC -Kthread'
-           lddlflags='-G -Kthread -Wl,-Bexport -L/usr/local/lib'
-     	   ldflags='-Kthread -L/usr/local/lib'
+           lddlflags='-G -Kthread -Wl,-Bexport '
+     	   ldflags='-Kthread'
         ;;
   esac
 esac
 EOCBU
 
 
-# Just in case Configure fails to find lstat() Its in /usr/lib/libc.so.1.
-d_lstat=define
-
 d_suidsafe='define'	# "./Configure -d" can't figure this out easily
+
+################## final caveat msgs to builder ###############
+cat <<'EOM' >&4
+
+If you wish to use dynamic linking, you must use 
+	LD_LIBRARY_PATH=`pwd`; export LD_LIBRARY_PATH
+or
+	setenv LD_LIBRARY_PATH `pwd`
+before running make.
+
+If you are using shared libraries from /usr/local/lib
+for libdbm or libgdbm you may need to set
+	LD_RUN_PATH=/usr/local/lib; export LD_RUN_PATH
+in order for Configure to compile the simple test program
+
+EOM

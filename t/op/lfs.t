@@ -3,12 +3,6 @@
 # If you modify/add tests here, remember to update also t/lib/syslfs.t.
 
 BEGIN {
-	# Don't bother if there are no quads.
-	eval { my $q = pack "q", 0 };
-	if ($@) {
-		print "1..0\n# no 64-bit types\n";
-		exit(0);
-	}
 	chdir 't' if -d 't';
 	unshift @INC, '../lib';
 	# Don't bother if there are no quad offsets.
@@ -42,20 +36,22 @@ sub explain {
 EOM
 }
 
+print "# checking whether we have sparse files...\n";
+
 # Known have-nots.
 if ($^O eq 'win32' || $^O eq 'vms') {
-    print "1..0\n# no sparse files\n";
+    print "1..0\n# no sparse files (because this is $^O) \n";
     bye();
 }
 
 # Known haves that have problems running this test
 # (for example because they do not support sparse files, like UNICOS)
 if ($^O eq 'unicos') {
-    print "1..0\n# large files known to work but unable to test them here\n";
+    print "1..0\n# large files known to work but unable to test them here ($^O)\n";
     bye();
 }
 
-# Then try to deduce whether we have sparse files.
+# Then try to heuristically deduce whether we have sparse files.
 
 # Let's not depend on Fcntl or any other extension.
 
@@ -88,6 +84,8 @@ unless (@s == 13 &&
     bye();
 }
 
+print "# we seem to have sparse files...\n";
+
 # By now we better be sure that we do have sparse files:
 # if we are not, the following will hog 5 gigabytes of disk.  Ooops.
 
@@ -95,18 +93,19 @@ $ENV{LC_ALL} = "C";
 
 open(BIG, ">big") or do { warn "open failed: $!\n"; bye };
 binmode BIG;
-seek(BIG, 5_000_000_000, $SEEK_SET);
+unless (seek(BIG, 5_000_000_000, $SEEK_SET)) {
+    print "1..0\n# seeking past 2GB failed: $!\n";
+    explain();
+    bye();
+}
 
 # Either the print or (more likely, thanks to buffering) the close will
 # fail if there are are filesize limitations (process or fs).
 my $print = print BIG "big";
-my $close = close BIG if $print;
+print "# print failed: $!\n" unless $print;
+my $close = close BIG;
+print "# close failed: $!\n" unless $close;
 unless ($print && $close) {
-    unless ($print) {
-        print "# print failed: $!\n"
-    } else {
-        print "# close failed: $!\n"
-    }
     if ($! =~/too large/i) {
 	print "1..0\n# writing past 2GB failed: process limits?\n";
     } elsif ($! =~ /quota/i) {

@@ -63,6 +63,15 @@ $ myname = myhostname
 $ if "''myname'" .eqs. "" THEN myname = f$trnlnm("SYS$NODE")
 $!
 $! ##ADD NEW CONSTANTS HERE##
+$ perl_d_fs_data_s = "undef"
+$ perl_d_getmnt = "undef"
+$ perl_d_sqrtl = "define"
+$ perl_d_statfs_f_flags = "undef"
+$ perl_d_statfs_s = "undef"
+$ perl_d_ustat = "undef"
+$ perl_i_sysstatfs = "undef"
+$ perl_i_sysvfs = "undef"
+$ perl_i_ustat = "undef"
 $ perl_d_llseek="undef"
 $ perl_d_madvise="undef"
 $ perl_selectminbits=32
@@ -124,8 +133,14 @@ $ perl_d_cmsghdr_s = "undef"
 $ IF use_64bit .eqs. "Y"
 $ THEN
 $   perl_use64bits = "define"
+$   perl_uselargefiles = "define"
+$   perl_uselongdouble = "define"
+$   perl_usemorebits = "define"
 $ ELSE
 $   perl_use64bits = "undef"
+$   perl_uselargefiles = "undef"
+$   perl_uselongdouble = "undef"
+$   perl_usemorebits = "undef"
 $ ENDIF
 $ perl_d_drand48proto = "define"
 $ perl_libpth="/sys$share /sys$library"
@@ -431,6 +446,9 @@ $   perl_sPRId64 = """Ld"""
 $   perl_sPRIu64 = """Lu"""
 $   perl_sPRIo64 = """Lo"""
 $   perl_sPRIx64 = """Lx"""
+$   perl_d_quad = "define"
+$   perl_quadtype = "long long"
+$   perl_uquadtype = "unsigned long long"
 $ ELSE
 $   perl_d_PRIfldbl = "undef"
 $   perl_d_PRIgldbl = "undef"
@@ -444,8 +462,8 @@ $   perl_sPRId64 = ""
 $   perl_sPRIu64 = ""
 $   perl_sPRIo64 = ""
 $   perl_sPRIx64 = ""
+$   perl_d_quad = "undef"
 $ ENDIF
-$!
 $!
 $! Now some that we build up
 $!
@@ -540,6 +558,7 @@ $   DEASSIGN SYS$ERROR
 $   OPEN/READ TEMPOUT [-.uu]tempout.lis
 $   READ TEMPOUT line
 $   CLOSE TEMPOUT
+$   DELETE/NOLOG [-.uu]tempout.lis;
 $ 
 $ perl_cpp_stuff=line
 $ WRITE_RESULT "cpp_stuff is ''perl_cpp_stuff'"
@@ -570,7 +589,6 @@ $     link temp.obj,temp.opt/opt
 $   else
 $     link temp.obj
 $   endif
-$!   link temp.obj
 $   OPEN/WRITE TEMPOUT [-.uu]tempout.lis
 $   DEASSIGN SYS$OUTPUT
 $   DEASSIGN SYS$ERROR
@@ -583,6 +601,7 @@ $   DEASSIGN SYS$ERROR
 $   OPEN/READ TEMPOUT [-.uu]tempout.lis
 $   READ TEMPOUT line
 $   CLOSE TEMPOUT
+$ DELETE/NOLOG [-.uu]tempout.lis;
 $ 
 $ perl_doublesize=line
 $ WRITE_RESULT "doublesize is ''perl_doublesize'"
@@ -637,6 +656,7 @@ $       DEASSIGN SYS$ERROR
 $       OPEN/READ TEMPOUT [-.uu]tempout.lis
 $       READ TEMPOUT line
 $       CLOSE TEMPOUT
+$       DELETE/NOLOG [-.uu]tempout.lis;
 $ 
 $       perl_longdblsize=line
 $       perl_d_longdbl="define"
@@ -687,140 +707,12 @@ $     DEASSIGN SYS$ERROR
 $     OPEN/READ TEMPOUT [-.uu]tempout.lis
 $     READ TEMPOUT line
 $     CLOSE TEMPOUT
-$ 
+$     DELETE/NOLOG [-.uu]tempout.lis;
 $     perl_longlongsize=line
 $     perl_d_longlong="define"
 $   ENDIF
 $ WRITE_RESULT "longlongsize is ''perl_longlongsize'"
 $ WRITE_RESULT "d_longlong is ''perl_d_longlong'"
-$!
-$! Check for int size
-$!
-$ OS
-$ WS "#ifdef __DECC
-$ WS "#include <stdlib.h>
-$ WS "#endif
-$ WS "#include <stdio.h>
-$ WS "int main()
-$ WS "{"
-$ WS "printf(""%d\n"", sizeof(int));
-$ WS "exit(0);
-$ WS "}"
-$ CS
-$   DEFINE SYS$ERROR _NLA0:
-$   DEFINE SYS$OUTPUT _NLA0:
-$   on error then continue
-$   on warning then continue
-$   'Checkcc' temp.c
-$   If (Needs_Opt.eqs."Yes")
-$   THEN
-$     link temp.obj,temp.opt/opt
-$   else
-$     link temp.obj
-$   endif
-$   If (Needs_Opt.eqs."Yes")
-$   THEN
-$     link temp.obj,temp.opt/opt
-$   else
-$     link temp.obj
-$   endif
-$   OPEN/WRITE TEMPOUT [-.uu]tempout.lis
-$   DEASSIGN SYS$OUTPUT
-$   DEASSIGN SYS$ERROR
-$   DEFINE SYS$ERROR TEMPOUT
-$   DEFINE SYS$OUTPUT TEMPOUT
-$   mcr []temp
-$   CLOSE TEMPOUT
-$   DEASSIGN SYS$OUTPUT
-$   DEASSIGN SYS$ERROR
-$   OPEN/READ TEMPOUT [-.uu]tempout.lis
-$   READ TEMPOUT line
-$   CLOSE TEMPOUT
-$ 
-$   perl_intsize=line
-$ WRITE_RESULT "intsize is ''perl_intsize'"
-$!
-$! Check for short size
-$!
-$ OS
-$ WS "#ifdef __DECC
-$ WS "#include <stdlib.h>
-$ WS "#endif
-$ WS "#include <stdio.h>
-$ WS "int main()
-$ WS "{"
-$ WS "printf(""%d\n"", sizeof(short));
-$ WS "exit(0);
-$ WS "}"
-$ CS
-$   DEFINE SYS$ERROR _NLA0:
-$   DEFINE SYS$OUTPUT _NLA0:
-$   on error then continue
-$   on warning then continue
-$   'Checkcc' temp.c
-$   If (Needs_Opt.eqs."Yes")
-$   THEN
-$     link temp.obj,temp.opt/opt
-$   else
-$     link temp.obj
-$   endif
-$   OPEN/WRITE TEMPOUT [-.uu]tempout.lis
-$   DEASSIGN SYS$OUTPUT
-$   DEASSIGN SYS$ERROR
-$   DEFINE SYS$ERROR TEMPOUT
-$   DEFINE SYS$OUTPUT TEMPOUT
-$   mcr []temp
-$   CLOSE TEMPOUT
-$   DEASSIGN SYS$OUTPUT
-$   DEASSIGN SYS$ERROR
-$   OPEN/READ TEMPOUT [-.uu]tempout.lis
-$   READ TEMPOUT line
-$   CLOSE TEMPOUT
-$ 
-$   perl_shortsize=line
-$ WRITE_RESULT "shortsize is ''perl_shortsize'"
-$!
-$! Check for long size
-$!
-$ OS
-$ WS "#ifdef __DECC
-$ WS "#include <stdlib.h>
-$ WS "#endif
-$ WS "#include <stdio.h>
-$ WS "int main()
-$ WS "{"
-$ WS "int foo;
-$ WS "foo = sizeof(long);
-$ WS "printf(""%d\n"", foo);
-$ WS "exit(0);
-$ WS "}"
-$ CS
-$   DEFINE SYS$ERROR _NLA0:
-$   DEFINE SYS$OUTPUT _NLA0:
-$   on error then continue
-$   on warning then continue
-$   'Checkcc' temp.c
-$   If (Needs_Opt.eqs."Yes")
-$   THEN
-$     link temp.obj,temp.opt/opt
-$   else
-$     link temp.obj
-$   endif
-$   OPEN/WRITE TEMPOUT [-.uu]tempout.lis
-$   DEASSIGN SYS$OUTPUT
-$   DEASSIGN SYS$ERROR
-$   DEFINE SYS$ERROR TEMPOUT
-$   DEFINE SYS$OUTPUT TEMPOUT
-$   mcr []temp
-$   CLOSE TEMPOUT
-$   DEASSIGN SYS$OUTPUT
-$   DEASSIGN SYS$ERROR
-$   OPEN/READ TEMPOUT [-.uu]tempout.lis
-$   READ TEMPOUT line
-$   CLOSE TEMPOUT
-$ 
-$   perl_longsize=line
-$ WRITE_RESULT "longsize is ''perl_longsize'"
 $!
 $! Check the prototype for getgid
 $!
@@ -2770,35 +2662,33 @@ $ WS "printf(""%d\n"", foo);
 $ WS "exit(0);
 $ WS "}"
 $ CS
-$! copy temp.c sys$output
-$!
-$   DEFINE SYS$ERROR _NLA0:
-$   DEFINE SYS$OUTPUT _NLA0:
-$   ON ERROR THEN CONTINUE
-$   ON WARNING THEN CONTINUE
-$   'Checkcc' temp.c
-$   If (Needs_Opt.eqs."Yes")
-$   THEN
-$     link temp.obj,temp.opt/opt
-$   else
-$     link temp.obj
-$   endif
-$   OPEN/WRITE TEMPOUT [-.uu]tempout.lis
-$   DEASSIGN SYS$OUTPUT
-$   DEASSIGN SYS$ERROR
-$   DEFINE SYS$ERROR TEMPOUT
-$   DEFINE SYS$OUTPUT TEMPOUT
-$   mcr []temp
-$   CLOSE TEMPOUT
-$   DEASSIGN SYS$OUTPUT
-$   DEASSIGN SYS$ERROR
-$   OPEN/READ TEMPOUT [-.uu]tempout.lis
-$   READ TEMPOUT line
-$   CLOSE TEMPOUT
+$ DEFINE SYS$ERROR _NLA0:
+$ DEFINE SYS$OUTPUT _NLA0:
+$ ON ERROR THEN CONTINUE
+$ ON WARNING THEN CONTINUE
+$ 'Checkcc' temp.c
+$ If (Needs_Opt.eqs."Yes")
+$ THEN
+$   link temp.obj,temp.opt/opt
+$ ELSE
+$   link temp.obj
+$ ENDIF
+$ OPEN/WRITE TEMPOUT [-.uu]tempout.lis
+$ DEASSIGN SYS$OUTPUT
+$ DEASSIGN SYS$ERROR
+$ DEFINE SYS$ERROR TEMPOUT
+$ DEFINE SYS$OUTPUT TEMPOUT
+$ mcr []temp.exe
+$ CLOSE TEMPOUT
+$ DEASSIGN SYS$OUTPUT
+$ DEASSIGN SYS$ERROR
+$ OPEN/READ TEMPOUT [-.uu]tempout.lis
+$ READ TEMPOUT line
+$ CLOSE TEMPOUT
+$ DELETE/NOLOG [-.uu]tempout.lis;
 $ 
 $ perl_ptrsize=line
 $ WRITE_RESULT "ptrsize is ''perl_ptrsize'"
-$!
 $!
 $! Check rand48 and its ilk
 $!
@@ -2813,7 +2703,6 @@ $ WS "srand48(12L);"
 $ WS "exit(0);
 $ WS "}"
 $ CS
-$! copy temp.c sys$output
 $!
 $   DEFINE SYS$ERROR _NLA0:
 $   DEFINE SYS$OUTPUT _NLA0:
@@ -2979,7 +2868,6 @@ $ THEN
 $ perl_vms_cc_type="vaxc"
 $ ENDIF
 $!
-$!
 $! Sockets?
 $ if ("''Has_Socketshr'".EQS."T").OR.("''Has_Dec_C_Sockets'".EQS."T")
 $ THEN
@@ -3043,6 +2931,146 @@ $
 $   perl_d_pthreads_created_joinable="undef"
 $ ENDIF
 $! 
+$! new (5.005_62++) typedefs for primitives
+$! 
+$ perl_ivtype="long"
+$ perl_uvtype="unsigned long"
+$ perl_i8type="char"
+$ perl_u8type="unsigned char"
+$ perl_i16type="short"
+$ perl_u16type="unsigned short"
+$ perl_i32type="int"
+$ perl_u32type="unsigned int"
+$ perl_i64type="long"
+$ perl_u64type="unsigned long"
+$ perl_nvtype="double"
+$!
+$ GOTO beyond_type_size_check
+$!
+$type_size_check: 
+$!
+$! Check for type sizes 
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "int main()
+$ WS "{"
+$ WS "printf(""%d\n"", sizeof(''type'));"
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$ DEFINE SYS$ERROR _NLA0:
+$ DEFINE SYS$OUTPUT _NLA0:
+$ ON ERROR THEN CONTINUE
+$ ON WARNING THEN CONTINUE
+$ 'Checkcc' temp.c
+$ If (Needs_Opt.eqs."Yes")
+$ THEN
+$   link temp.obj,temp.opt/opt
+$ ELSE
+$   link temp.obj
+$ ENDIF
+$ OPEN/WRITE TEMPOUT [-.uu]tempout.lis
+$ DEASSIGN SYS$OUTPUT
+$ DEASSIGN SYS$ERROR
+$ DEFINE SYS$ERROR TEMPOUT
+$ DEFINE SYS$OUTPUT TEMPOUT
+$ mcr []temp.exe
+$ CLOSE TEMPOUT
+$ DEASSIGN SYS$OUTPUT
+$ DEASSIGN SYS$ERROR
+$ OPEN/READ TEMPOUT [-.uu]tempout.lis
+$ READ TEMPOUT line
+$ CLOSE TEMPOUT
+$ DELETE/NOLOG [-.uu]tempout.lis;
+$ WRITE_RESULT "''size_name' is ''line'"
+$ DS
+$ RETURN
+$!
+$beyond_type_size_check:
+$!
+$ line = ""
+$ type = "''perl_ivtype'"
+$ size_name = "ivsize"
+$ gosub type_size_check
+$ perl_ivsize="''line'"
+$ IF type .eqs. "long"
+$ THEN perl_longsize = "''line'"
+$ ELSE
+$   type = "long"
+$   size_name = "longsize"
+$   gosub type_size_check
+$   perl_longsize="''line'"
+$ ENDIF
+$
+$ type = "''perl_uvtype'"
+$ size_name = "uvsize"
+$ gosub type_size_check
+$ perl_uvsize="''line'"
+$
+$ type = "''perl_i8type'"
+$ size_name = "i8size"
+$ gosub type_size_check
+$ perl_i8size="''line'"
+$
+$ type = "''perl_u8type'"
+$ size_name = "u8size"
+$ gosub type_size_check
+$ perl_u8size="''line'"
+$
+$ type = "''perl_i16type'"
+$ size_name = "i16size"
+$ gosub type_size_check
+$ perl_i16size="''line'"
+$ IF type .eqs. "short"
+$ THEN perl_shortsize="''line'"
+$ ELSE
+$   type = "''perl_i16type'"
+$   size_name = "shortsize"
+$   gosub type_size_check
+$   perl_shortsize="''line'"
+$ ENDIF
+$
+$ type = "''perl_u16type'"
+$ size_name = "u16size"
+$ gosub type_size_check
+$ perl_u16size="''line'"
+$
+$ type = "''perl_i32type'"
+$ size_name = "i32size"
+$ gosub type_size_check
+$ perl_i32size="''line'"
+$ IF type .eqs. "int"
+$ THEN perl_intsize="''perl_i32size'"
+$ ELSE
+$   type = "int"
+$   size_name = "intsize"
+$   gosub type_size_check
+$   perl_intsize="''line'"
+$ ENDIF
+$
+$ type = "''perl_u32type'"
+$ size_name = "u32size"
+$ gosub type_size_check
+$ perl_u32size="''line'"
+$
+$ type = "''perl_i64type'"
+$ size_name = "i64size"
+$ gosub type_size_check
+$ perl_i64size="''line'"
+$
+$ type = "''perl_u64type'"
+$ size_name = "u64size"
+$ gosub type_size_check
+$ perl_u64size="''line'"
+$!
+$ perl_ivdformat="""ld"""
+$ perl_uvuformat="""lu"""
+$ perl_uvoformat="""lo"""
+$ perl_uvxformat="""lx"""
 $! 
 $! Finally the composite ones. All config
 $ perl_installarchlib="''perl_prefix':[lib.''perl_arch'.''localperlver']"
@@ -3441,6 +3469,7 @@ $ WC "d_oldpthreads='" + perl_d_oldpthreads + "'"
 $ WC "d_longdbl='" + perl_d_longdbl + "'"
 $ WC "longdblsize='" + perl_longdblsize + "'"
 $ WC "d_longlong='" + perl_d_longlong + "'"
+$ WC "uselonglong='" + perl_d_longlong + "'"
 $ WC "longlongsize='" + perl_longlongsize + "'"
 $ WC "d_mkstemp='" + perl_d_mkstemp + "'"
 $ WC "d_setvbuf='" + perl_d_setvbuf + "'"
@@ -3570,6 +3599,49 @@ $ WC "sPRIu64='" + perl_sPRIu64 + "'"
 $ WC "sPRIo64='" + perl_sPRIo64 + "'"
 $ WC "sPRIx64='" + perl_sPRIx64 + "'"
 $ WC "d_llseek='" + perl_d_llseek + "'"
+$ WC "uselargefiles='" + perl_uselargefiles + "'"
+$ WC "uselongdouble='" + perl_uselongdouble + "'"
+$ WC "usemorebits='" + perl_usemorebits + "'"
+$ WC "d_quad='" + perl_d_quad + "'"
+$ if (use_64bit .eqs. "Y")
+$ THEN
+$   WC "quadtype='" + perl_quadtype + "'" 
+$   WC "uquadtype='" + perl_uquadtype + "'" 
+$ ENDIF
+$ WC "d_fs_data_s='" + perl_d_fs_data_s + "'" 
+$ WC "d_getmnt='" + perl_d_getmnt + "'"
+$ WC "d_sqrtl='" + perl_d_sqrtl + "'"
+$ WC "d_statfs_f_flags='" + perl_d_statfs_f_flags + "'"
+$ WC "d_statfs_s='" + perl_d_statfs_s + "'"
+$ WC "d_ustat='" + perl_d_ustat + "'"
+$ WC "i_sysstatfs='" + perl_i_sysstatfs + "'"
+$ WC "i_sysvfs='" + perl_i_sysvfs + "'"
+$ WC "i_ustat='" + perl_i_ustat + "'"
+$ WC "ivtype='" + perl_ivtype + "'"
+$ WC "uvtype='" + perl_uvtype + "'"
+$ WC "i8type='" + perl_i8type + "'"
+$ WC "i16type='" + perl_i16type + "'"
+$ WC "u8type='" + perl_u8type + "'"
+$ WC "u16type='" + perl_u16type + "'"
+$ WC "i32type='" + perl_i32type + "'"
+$ WC "u32type='" + perl_u32type + "'"
+$ WC "i64type='" + perl_i64type + "'"
+$ WC "u64type='" + perl_u64type + "'"
+$ WC "nvtype='" + perl_nvtype + "'"
+$ WC "ivsize='" + perl_ivsize + "'"
+$ WC "uvsize='" + perl_uvsize + "'"
+$ WC "i8size='" + perl_i8size + "'"
+$ WC "u8size='" + perl_u8size + "'"
+$ WC "i16size='" + perl_i16size + "'"
+$ WC "u16size='" + perl_u16size + "'"
+$ WC "i32size='" + perl_i32size + "'"
+$ WC "u32size='" + perl_u32size + "'"
+$ WC "i64size='" + perl_i64size + "'"
+$ WC "u64size='" + perl_u64size + "'"
+$ WC "ivdformat='" + perl_ivdformat + "'"
+$ WC "uvuformat='" + perl_uvuformat + "'"
+$ WC "uvoformat='" + perl_uvoformat + "'"
+$ WC "uvxformat='" + perl_uvxformat + "'"
 $!
 $! ##WRITE NEW CONSTANTS HERE##
 $!

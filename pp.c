@@ -241,31 +241,30 @@ PP(pp_rv2gv)
 		 * NI-S 1999/05/07
 		 */ 
 		if (PL_op->op_private & OPpDEREF) {
-		    GV *gv = (GV *) newSV(0);
-		    STRLEN len = 0;
-		    char *name = "";
-		    if (cUNOP->op_first->op_type == OP_PADSV) {
-			SV **namep = av_fetch(PL_comppad_name, cUNOP->op_first->op_targ, 4);
-			if (namep && *namep) {
-			    name = SvPV(*namep,len);
-			    if (!name) {
-				name = "";
-				len  = 0;
-			    }
-			}
+		    char *name;
+		    GV *gv;
+		    if (cUNOP->op_targ) {
+			STRLEN len;
+			SV *namesv = PL_curpad[cUNOP->op_targ];
+			name = SvPV(namesv, len);
+			gv = (GV*)NEWSV(0,0);
+			gv_init(gv, CopSTASH(PL_curcop), name, len, 0);
 		    }
-		    gv_init(gv, PL_curcop->cop_stash, name, len, 0);
+		    else {
+			name = CopSTASHPV(PL_curcop);
+			gv = newGVgen(name);
+		    }
 		    sv_upgrade(sv, SVt_RV);
-		    SvRV(sv) = (SV *) gv;
+		    SvRV(sv) = (SV*)gv;
 		    SvROK_on(sv);
 		    SvSETMAGIC(sv);
 		    goto wasref;
-		}  
+		}
 		if (PL_op->op_flags & OPf_REF ||
 		    PL_op->op_private & HINT_STRICT_REFS)
 		    DIE(aTHX_ PL_no_usym, "a symbol");
 		if (ckWARN(WARN_UNINITIALIZED))
-		    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
+		    report_uninit();
 		RETSETUNDEF;
 	    }
 	    sym = SvPV(sv, n_a);
@@ -321,7 +320,7 @@ PP(pp_rv2sv)
 		    PL_op->op_private & HINT_STRICT_REFS)
 		    DIE(aTHX_ PL_no_usym, "a SCALAR");
 		if (ckWARN(WARN_UNINITIALIZED))
-		    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
+		    report_uninit();
 		RETSETUNDEF;
 	    }
 	    sym = SvPV(sv, n_a);
@@ -581,7 +580,7 @@ PP(pp_bless)
     HV *stash;
 
     if (MAXARG == 1)
-	stash = PL_curcop->cop_stash;
+	stash = CopSTASH(PL_curcop);
     else {
 	SV *ssv = POPs;
 	STRLEN len;
@@ -854,7 +853,7 @@ PP(pp_undef)
 	    Newz(602, gp, 1, GP);
 	    GvGP(sv) = gp_ref(gp);
 	    GvSV(sv) = NEWSV(72,0);
-	    GvLINE(sv) = PL_curcop->cop_line;
+	    GvLINE(sv) = CopLINE(PL_curcop);
 	    GvEGV(sv) = (GV*)sv;
 	    GvMULTI_on(sv);
 	}
@@ -1789,7 +1788,7 @@ S_seed(pTHX)
     u = (U32)SEED_C1 * when;
 #  endif
 #endif
-    u += SEED_C3 * (U32)getpid();
+    u += SEED_C3 * (U32)PerlProc_getpid();
     u += SEED_C4 * (U32)PTR2UV(PL_stack_sp);
 #ifndef PLAN9           /* XXX Plan9 assembler chokes on this; fix needed  */
     u += SEED_C5 * (U32)PTR2UV(&when);
@@ -2262,7 +2261,7 @@ PP(pp_ucfirst)
 	
 	tend = uv_to_utf8(tmpbuf, uv);
 
-	if (!SvPADTMP(sv) || tend - tmpbuf != ulen) {
+	if (!SvPADTMP(sv) || tend - tmpbuf != ulen || SvREADONLY(sv)) {
 	    dTARGET;
 	    sv_setpvn(TARG, (char*)tmpbuf, tend - tmpbuf);
 	    sv_catpvn(TARG, (char*)(s + ulen), slen - ulen);
@@ -2274,7 +2273,7 @@ PP(pp_ucfirst)
 	}
     }
     else {
-	if (!SvPADTMP(sv)) {
+	if (!SvPADTMP(sv) || SvREADONLY(sv)) {
 	    dTARGET;
 	    sv_setsv(TARG, sv);
 	    sv = TARG;
@@ -2319,7 +2318,7 @@ PP(pp_lcfirst)
 	
 	tend = uv_to_utf8(tmpbuf, uv);
 
-	if (!SvPADTMP(sv) || tend - tmpbuf != ulen) {
+	if (!SvPADTMP(sv) || tend - tmpbuf != ulen || SvREADONLY(sv)) {
 	    dTARGET;
 	    sv_setpvn(TARG, (char*)tmpbuf, tend - tmpbuf);
 	    sv_catpvn(TARG, (char*)(s + ulen), slen - ulen);
@@ -2331,7 +2330,7 @@ PP(pp_lcfirst)
 	}
     }
     else {
-	if (!SvPADTMP(sv)) {
+	if (!SvPADTMP(sv) || SvREADONLY(sv)) {
 	    dTARGET;
 	    sv_setsv(TARG, sv);
 	    sv = TARG;
@@ -2398,7 +2397,7 @@ PP(pp_uc)
 	}
     }
     else {
-	if (!SvPADTMP(sv)) {
+	if (!SvPADTMP(sv) || SvREADONLY(sv)) {
 	    dTARGET;
 	    sv_setsv(TARG, sv);
 	    sv = TARG;
@@ -2469,7 +2468,7 @@ PP(pp_lc)
 	}
     }
     else {
-	if (!SvPADTMP(sv)) {
+	if (!SvPADTMP(sv) || SvREADONLY(sv)) {
 	    dTARGET;
 	    sv_setsv(TARG, sv);
 	    sv = TARG;
@@ -3136,6 +3135,7 @@ PP(pp_reverse)
 	    *MARK++ = *SP;
 	    *SP-- = tmp;
 	}
+	/* safe as long as stack cannot get extended in the above */
 	SP = oldsp;
     }
     else {
@@ -3236,7 +3236,7 @@ PP(pp_unpack)
 {
     djSP;
     dPOPPOPssrl;
-    SV **oldsp = SP;
+    I32 start_sp_offset = SP - PL_stack_base;
     I32 gimme = GIMME_V;
     SV *sv;
     STRLEN llen;
@@ -3249,6 +3249,7 @@ PP(pp_unpack)
     I32 datumtype;
     register I32 len;
     register I32 bits;
+    register char *str;
 
     /* These must not be in registers: */
     I16 ashort;
@@ -3364,7 +3365,7 @@ PP(pp_unpack)
 	    s += len;
 	    break;
 	case '/':
-	    if (oldsp >= SP)
+	    if (start_sp_offset >= SP - PL_stack_base)
 		DIE(aTHX_ "/ must follow a numeric type");
 	    datumtype = *pat++;
 	    if (*pat == '*')
@@ -3444,8 +3445,7 @@ PP(pp_unpack)
 	    sv = NEWSV(35, len + 1);
 	    SvCUR_set(sv, len);
 	    SvPOK_on(sv);
-	    aptr = pat;			/* borrow register */
-	    pat = SvPVX(sv);
+	    str = SvPVX(sv);
 	    if (datumtype == 'b') {
 		aint = len;
 		for (len = 0; len < aint; len++) {
@@ -3453,7 +3453,7 @@ PP(pp_unpack)
 			bits >>= 1;
 		    else
 			bits = *s++;
-		    *pat++ = '0' + (bits & 1);
+		    *str++ = '0' + (bits & 1);
 		}
 	    }
 	    else {
@@ -3463,11 +3463,10 @@ PP(pp_unpack)
 			bits <<= 1;
 		    else
 			bits = *s++;
-		    *pat++ = '0' + ((bits & 128) != 0);
+		    *str++ = '0' + ((bits & 128) != 0);
 		}
 	    }
-	    *pat = '\0';
-	    pat = aptr;			/* unborrow register */
+	    *str = '\0';
 	    XPUSHs(sv_2mortal(sv));
 	    break;
 	case 'H':
@@ -3477,8 +3476,7 @@ PP(pp_unpack)
 	    sv = NEWSV(35, len + 1);
 	    SvCUR_set(sv, len);
 	    SvPOK_on(sv);
-	    aptr = pat;			/* borrow register */
-	    pat = SvPVX(sv);
+	    str = SvPVX(sv);
 	    if (datumtype == 'h') {
 		aint = len;
 		for (len = 0; len < aint; len++) {
@@ -3486,7 +3484,7 @@ PP(pp_unpack)
 			bits >>= 4;
 		    else
 			bits = *s++;
-		    *pat++ = PL_hexdigit[bits & 15];
+		    *str++ = PL_hexdigit[bits & 15];
 		}
 	    }
 	    else {
@@ -3496,11 +3494,10 @@ PP(pp_unpack)
 			bits <<= 4;
 		    else
 			bits = *s++;
-		    *pat++ = PL_hexdigit[(bits >> 4) & 15];
+		    *str++ = PL_hexdigit[(bits >> 4) & 15];
 		}
 	    }
-	    *pat = '\0';
-	    pat = aptr;			/* unborrow register */
+	    *str = '\0';
 	    XPUSHs(sv_2mortal(sv));
 	    break;
 	case 'c':
@@ -4204,7 +4201,7 @@ PP(pp_unpack)
 	    checksum = 0;
 	}
     }
-    if (SP == oldsp && gimme == G_SCALAR)
+    if (SP - PL_stack_base == start_sp_offset && gimme == G_SCALAR)
 	PUSHs(&PL_sv_undef);
     RETURN;
 }
@@ -4468,15 +4465,14 @@ PP(pp_pack)
 	case 'B':
 	case 'b':
 	    {
-		char *savepat = pat;
+		register char *str;
 		I32 saveitems;
 
 		fromstr = NEXTFROM;
 		saveitems = items;
-		aptr = SvPV(fromstr, fromlen);
+		str = SvPV(fromstr, fromlen);
 		if (pat[-1] == '*')
 		    len = fromlen;
-		pat = aptr;
 		aint = SvCUR(cat);
 		SvCUR(cat) += (len+7)/8;
 		SvGROW(cat, SvCUR(cat) + 1);
@@ -4487,7 +4483,7 @@ PP(pp_pack)
 		items = 0;
 		if (datumtype == 'B') {
 		    for (len = 0; len++ < aint;) {
-			items |= *pat++ & 1;
+			items |= *str++ & 1;
 			if (len & 7)
 			    items <<= 1;
 			else {
@@ -4498,7 +4494,7 @@ PP(pp_pack)
 		}
 		else {
 		    for (len = 0; len++ < aint;) {
-			if (*pat++ & 1)
+			if (*str++ & 1)
 			    items |= 128;
 			if (len & 7)
 			    items >>= 1;
@@ -4515,26 +4511,24 @@ PP(pp_pack)
 			items >>= 7 - (aint & 7);
 		    *aptr++ = items & 0xff;
 		}
-		pat = SvPVX(cat) + SvCUR(cat);
-		while (aptr <= pat)
+		str = SvPVX(cat) + SvCUR(cat);
+		while (aptr <= str)
 		    *aptr++ = '\0';
 
-		pat = savepat;
 		items = saveitems;
 	    }
 	    break;
 	case 'H':
 	case 'h':
 	    {
-		char *savepat = pat;
+		register char *str;
 		I32 saveitems;
 
 		fromstr = NEXTFROM;
 		saveitems = items;
-		aptr = SvPV(fromstr, fromlen);
+		str = SvPV(fromstr, fromlen);
 		if (pat[-1] == '*')
 		    len = fromlen;
-		pat = aptr;
 		aint = SvCUR(cat);
 		SvCUR(cat) += (len+1)/2;
 		SvGROW(cat, SvCUR(cat) + 1);
@@ -4545,10 +4539,10 @@ PP(pp_pack)
 		items = 0;
 		if (datumtype == 'H') {
 		    for (len = 0; len++ < aint;) {
-			if (isALPHA(*pat))
-			    items |= ((*pat++ & 15) + 9) & 15;
+			if (isALPHA(*str))
+			    items |= ((*str++ & 15) + 9) & 15;
 			else
-			    items |= *pat++ & 15;
+			    items |= *str++ & 15;
 			if (len & 1)
 			    items <<= 4;
 			else {
@@ -4559,10 +4553,10 @@ PP(pp_pack)
 		}
 		else {
 		    for (len = 0; len++ < aint;) {
-			if (isALPHA(*pat))
-			    items |= (((*pat++ & 15) + 9) & 15) << 4;
+			if (isALPHA(*str))
+			    items |= (((*str++ & 15) + 9) & 15) << 4;
 			else
-			    items |= (*pat++ & 15) << 4;
+			    items |= (*str++ & 15) << 4;
 			if (len & 1)
 			    items >>= 4;
 			else {
@@ -4573,11 +4567,10 @@ PP(pp_pack)
 		}
 		if (aint & 1)
 		    *aptr++ = items & 0xff;
-		pat = SvPVX(cat) + SvCUR(cat);
-		while (aptr <= pat)
+		str = SvPVX(cat) + SvCUR(cat);
+		while (aptr <= str)
 		    *aptr++ = '\0';
 
-		pat = savepat;
 		items = saveitems;
 	    }
 	    break;
@@ -4843,7 +4836,7 @@ PP(pp_pack)
 		sv_catpvn(cat, (char*)&aquad, sizeof(Quad_t));
 	    }
 	    break;
-#endif /* HAS_QUAD */
+#endif
 	case 'P':
 	    len = 1;		/* assume SV is correct length */
 	    /* FALL THROUGH */
@@ -4859,9 +4852,13 @@ PP(pp_pack)
 		     * of pack() (and all copies of the result) are
 		     * gone.
 		     */
-		    if (ckWARN(WARN_UNSAFE) && (SvTEMP(fromstr) || SvPADTMP(fromstr)))
+		    if (ckWARN(WARN_UNSAFE) && (SvTEMP(fromstr)
+						|| (SvPADTMP(fromstr)
+						    && !SvREADONLY(fromstr))))
+		    {
 			Perl_warner(aTHX_ WARN_UNSAFE,
 				"Attempt to pack pointer to temporary value");
+		    }
 		    if (SvPOK(fromstr) || SvNIOK(fromstr))
 			aptr = SvPV(fromstr,n_a);
 		    else
@@ -4938,8 +4935,13 @@ PP(pp_split)
     TAINT_IF((pm->op_pmflags & PMf_LOCALE) &&
 	     (pm->op_pmflags & (PMf_WHITE | PMf_SKIPWHITE)));
 
-    if (pm->op_pmreplroot)
+    if (pm->op_pmreplroot) {
+#ifdef USE_ITHREADS
+	ary = GvAVn((GV*)PL_curpad[(PADOFFSET)pm->op_pmreplroot]);
+#else
 	ary = GvAVn((GV*)pm->op_pmreplroot);
+#endif
+    }
     else if (gimme != G_ARRAY)
 #ifdef USE_THREADS
 	ary = (AV*)PL_curpad[0];
@@ -5185,8 +5187,8 @@ Perl_unlock_condpair(pTHX_ void *svv)
 	Perl_croak(aTHX_ "panic: unlock_condpair unlocking mutex that we don't own");
     MgOWNER(mg) = 0;
     COND_SIGNAL(MgOWNERCONDP(mg));
-    DEBUG_S(PerlIO_printf(Perl_debug_log, "0x%lx: unlock 0x%lx\n",
-			  (unsigned long)thr, (unsigned long)svv);)
+    DEBUG_S(PerlIO_printf(Perl_debug_log, "0x%"UVxf": unlock 0x%"UVxf"\n",
+			  PTR2UV(thr), PTR2UV(svv));)
     MUTEX_UNLOCK(MgMUTEXP(mg));
 }
 #endif /* USE_THREADS */
@@ -5210,8 +5212,8 @@ PP(pp_lock)
 	while (MgOWNER(mg))
 	    COND_WAIT(MgOWNERCONDP(mg), MgMUTEXP(mg));
 	MgOWNER(mg) = thr;
-	DEBUG_S(PerlIO_printf(Perl_debug_log, "0x%lx: pp_lock lock 0x%lx\n",
-			      (unsigned long)thr, (unsigned long)sv);)
+	DEBUG_S(PerlIO_printf(Perl_debug_log, "0x%"UVxf": pp_lock lock 0x%"UVxf"\n",
+			      PTR2UV(thr), PTR2UV(sv));)
 	MUTEX_UNLOCK(MgMUTEXP(mg));
 	SAVEDESTRUCTOR_X(Perl_unlock_condpair, sv);
     }

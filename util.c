@@ -95,7 +95,8 @@ Perl_safesysmalloc(MEM_SIZE size)
 	Perl_croak_nocontext("panic: malloc");
 #endif
     ptr = PerlMem_malloc(size?size:1);	/* malloc(0) is NASTY on our system */
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) malloc %ld bytes\n",ptr,PL_an++,(long)size));
+    PERL_ALLOC_CHECK(ptr);
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) malloc %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)size));
     if (ptr != Nullch)
 	return ptr;
     else if (PL_nomemok)
@@ -138,9 +139,10 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 	Perl_croak_nocontext("panic: realloc");
 #endif
     ptr = PerlMem_realloc(where,size);
-
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) rfree\n",where,PL_an++));
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) realloc %ld bytes\n",ptr,PL_an++,(long)size));
+    PERL_ALLOC_CHECK(ptr);
+ 
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) rfree\n",PTR2UV(where),(long)PL_an++));
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) realloc %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)size));
 
     if (ptr != Nullch)
 	return ptr;
@@ -160,7 +162,7 @@ Free_t
 Perl_safesysfree(Malloc_t where)
 {
     dTHX;
-    DEBUG_m( PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) free\n",(char *) where,PL_an++));
+    DEBUG_m( PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) free\n",PTR2UV(where),(long)PL_an++));
     if (where) {
 	/*SUPPRESS 701*/
 	PerlMem_free(where);
@@ -188,7 +190,8 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 #endif
     size *= count;
     ptr = PerlMem_malloc(size?size:1);	/* malloc(0) is NASTY on our system */
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) calloc %ld x %ld bytes\n",ptr,PL_an++,(long)count,(long)size));
+    PERL_ALLOC_CHECK(ptr);
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) calloc %ld x %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)count,(long)size));
     if (ptr != Nullch) {
 	memset((void*)ptr, 0, size);
 	return ptr;
@@ -1416,9 +1419,9 @@ Perl_vmess(pTHX_ const char *pat, va_list *args)
     sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
     if (!SvCUR(sv) || *(SvEND(sv) - 1) != '\n') {
 	dTHR;
-	if (PL_curcop->cop_line)
-	    Perl_sv_catpvf(aTHX_ sv, " at %_ line %"IVdf,
-		      GvSV(PL_curcop->cop_filegv), (IV)PL_curcop->cop_line);
+	if (CopLINE(PL_curcop))
+	    Perl_sv_catpvf(aTHX_ sv, " at %s line %"IVdf,
+			   CopFILE(PL_curcop), (IV)CopLINE(PL_curcop));
 	if (GvIO(PL_last_in_gv) && IoLINES(GvIOp(PL_last_in_gv))) {
 	    bool line_mode = (RsSIMPLE(PL_rs) &&
 			      SvCUR(PL_rs) == 1 && *SvPVX(PL_rs) == '\n');
@@ -1555,8 +1558,8 @@ Perl_vcroak(pTHX_ const char* pat, va_list *args)
     else
 	message = SvPV(msv,msglen);
 
-    DEBUG_S(PerlIO_printf(Perl_debug_log, "croak: 0x%lx %s",
-			  (unsigned long) thr, message));
+    DEBUG_S(PerlIO_printf(Perl_debug_log, "croak: 0x%"UVxf" %s",
+			  PTR2UV(thr), message));
 
     if (PL_diehook) {
 	/* sv_2cv might call Perl_croak() */
@@ -1742,7 +1745,7 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 
     if (ckDEAD(err)) {
 #ifdef USE_THREADS
-        DEBUG_S(PerlIO_printf(Perl_debug_log, "croak: 0x%lx %s", (unsigned long) thr, message));
+        DEBUG_S(PerlIO_printf(Perl_debug_log, "croak: 0x%"UVxf" %s", PTR2UV(thr), message));
 #endif /* USE_THREADS */
         if (PL_diehook) {
             /* sv_2cv might call Perl_croak() */
@@ -2222,7 +2225,7 @@ VTOH(vtohl,long)
 #endif
 
     /* VMS' my_popen() is in VMS.c, same with OS/2. */
-#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(__OPEN_VM) && !defined(EPOC)
+#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(__OPEN_VM) && !defined(EPOC) && !defined(MACOS_TRADITIONAL)
 PerlIO *
 Perl_my_popen(pTHX_ char *cmd, char *mode)
 {
@@ -2299,7 +2302,7 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 #endif	/* defined OS2 */
 	/*SUPPRESS 560*/
 	if (tmpgv = gv_fetchpv("$",TRUE, SVt_PV))
-	    sv_setiv(GvSV(tmpgv), getpid());
+	    sv_setiv(GvSV(tmpgv), PerlProc_getpid());
 	PL_forkprocess = 0;
 	hv_clear(PL_pidstatus);	/* we have no children */
 	return Nullfp;
@@ -2494,7 +2497,7 @@ Perl_rsignal_state(pTHX_ int signo)
     oldsig = PerlProc_signal(signo, sig_trap);
     PerlProc_signal(signo, oldsig);
     if (sig_trapped)
-        PerlProc_kill(getpid(), signo);
+        PerlProc_kill(PerlProc_getpid(), signo);
     return oldsig;
 }
 
@@ -2514,7 +2517,7 @@ Perl_rsignal_restore(pTHX_ int signo, Sigsave_t *save)
 #endif /* !HAS_SIGACTION */
 
     /* VMS' my_pclose() is in VMS.c; same with OS/2 */
-#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(__OPEN_VM) && !defined(EPOC)
+#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(__OPEN_VM) && !defined(EPOC) && !defined(MACOS_TRADITIONAL)
 I32
 Perl_my_pclose(pTHX_ PerlIO *ptr)
 {
@@ -2570,7 +2573,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 }
 #endif /* !DOSISH */
 
-#if  !defined(DOSISH) || defined(OS2) || defined(WIN32)
+#if  (!defined(DOSISH) || defined(OS2) || defined(WIN32)) && !defined(MACOS_TRADITIONAL)
 I32
 Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 {
@@ -2581,7 +2584,7 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
     if (!pid)
 	return -1;
     if (pid > 0) {
-	sprintf(spid, "%d", pid);
+	sprintf(spid, "%"IVdf, (IV)pid);
 	svp = hv_fetch(PL_pidstatus,spid,strlen(spid),FALSE);
 	if (svp && *svp != &PL_sv_undef) {
 	    *statusp = SvIVX(*svp);
@@ -2597,7 +2600,7 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 	    pid = atoi(hv_iterkey(entry,(I32*)statusp));
 	    sv = hv_iterval(PL_pidstatus,entry);
 	    *statusp = SvIVX(sv);
-	    sprintf(spid, "%d", pid);
+	    sprintf(spid, "%"IVdf, (IV)pid);
 	    (void)hv_delete(PL_pidstatus,spid,strlen(spid),G_DISCARD);
 	    return pid;
 	}
@@ -2637,7 +2640,7 @@ Perl_pidgone(pTHX_ Pid_t pid, int status)
     register SV *sv;
     char spid[TYPE_CHARS(int)];
 
-    sprintf(spid, "%d", pid);
+    sprintf(spid, "%"IVdf, (IV)pid);
     sv = *hv_fetch(PL_pidstatus,spid,strlen(spid),TRUE);
     (void)SvUPGRADE(sv,SVt_IV);
     SvIVX(sv) = status;
@@ -3120,15 +3123,26 @@ Perl_find_script(pTHX_ char *scriptname, bool dosearch, char **search_ext, I32 f
     }
 #endif
 
+#ifdef MACOS_TRADITIONAL
+    if (dosearch && !strchr(scriptname, ':') &&
+	(s = PerlEnv_getenv("Commands")))
+#else
     if (dosearch && !strchr(scriptname, '/')
 #ifdef DOSISH
 		 && !strchr(scriptname, '\\')
 #endif
-		 && (s = PerlEnv_getenv("PATH"))) {
+		 && (s = PerlEnv_getenv("PATH")))
+#endif
+    {
 	bool seen_dot = 0;
 	
 	PL_bufend = s + strlen(s);
 	while (s < PL_bufend) {
+#ifdef MACOS_TRADITIONAL
+	    s = delimcpy(tmpbuf, tmpbuf + sizeof tmpbuf, s, PL_bufend,
+			',',
+			&len);
+#else
 #if defined(atarist) || defined(DOSISH)
 	    for (len = 0; *s
 #  ifdef atarist
@@ -3145,10 +3159,15 @@ Perl_find_script(pTHX_ char *scriptname, bool dosearch, char **search_ext, I32 f
 			':',
 			&len);
 #endif /* ! (atarist || DOSISH) */
+#endif /* MACOS_TRADITIONAL */
 	    if (s < PL_bufend)
 		s++;
 	    if (len + 1 + strlen(scriptname) + MAX_EXT_LEN >= sizeof tmpbuf)
 		continue;	/* don't search dir with too-long name */
+#ifdef MACOS_TRADITIONAL
+	    if (len && tmpbuf[len - 1] != ':')
+	    	tmpbuf[len++] = ':';
+#else
 	    if (len
 #if defined(atarist) || defined(__MINT__) || defined(DOSISH)
 		&& tmpbuf[len - 1] != '/'
@@ -3158,6 +3177,7 @@ Perl_find_script(pTHX_ char *scriptname, bool dosearch, char **search_ext, I32 f
 		tmpbuf[len++] = '/';
 	    if (len == 2 && tmpbuf[0] == '.')
 		seen_dot = 1;
+#endif
 	    (void)strcpy(tmpbuf + len, scriptname);
 #endif  /* !VMS */
 
@@ -3182,7 +3202,7 @@ Perl_find_script(pTHX_ char *scriptname, bool dosearch, char **search_ext, I32 f
 		continue;
 	    if (S_ISREG(PL_statbuf.st_mode)
 		&& cando(S_IRUSR,TRUE,&PL_statbuf)
-#ifndef DOSISH
+#if !defined(DOSISH) && !defined(MACOS_TRADITIONAL)
 		&& cando(S_IXUSR,TRUE,&PL_statbuf)
 #endif
 		)
@@ -3376,8 +3396,6 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
     Zero(thr, 1, struct perl_thread);
 #endif
 
-    PL_protect = MEMBER_TO_FPTR(Perl_default_protect);
-
     thr->oursv = sv;
     init_stacks();
 
@@ -3390,18 +3408,7 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
     thr->flags = THRf_R_JOINABLE;
     MUTEX_INIT(&thr->mutex);
 
-    /* top_env needs to be non-zero. It points to an area
-       in which longjmp() stuff is stored, as C callstack
-       info there at least is thread specific this has to
-       be per-thread. Otherwise a 'die' in a thread gives
-       that thread the C stack of last thread to do an eval {}!
-       See comments in scope.h    
-       Initialize top entry (as in perl.c for main thread)
-     */
-    PL_start_env.je_prev = NULL;
-    PL_start_env.je_ret = -1;
-    PL_start_env.je_mustcatch = TRUE;
-    PL_top_env  = &PL_start_env;
+    JMPENV_BOOTSTRAP;
 
     PL_in_eval = EVAL_NULL;	/* ~(EVAL_INEVAL|EVAL_WARNONLY|EVAL_KEEPERR) */
     PL_restartop = 0;
@@ -3441,9 +3448,12 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
     PL_ofs = savepvn(t->Tofs, PL_ofslen);
     PL_defoutgv = (GV*)SvREFCNT_inc(t->Tdefoutgv);
     PL_chopset = t->Tchopset;
-    PL_formtarget = newSVsv(t->Tformtarget);
     PL_bodytarget = newSVsv(t->Tbodytarget);
     PL_toptarget = newSVsv(t->Ttoptarget);
+    if (t->Tformtarget == t->Ttoptarget)
+	PL_formtarget = PL_toptarget;
+    else
+	PL_formtarget = PL_bodytarget;
 
     /* Initialise all per-thread SVs that the template thread used */
     svp = AvARRAY(t->threadsv);
@@ -3453,7 +3463,8 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
 	    av_store(thr->threadsv, i, sv);
 	    sv_magic(sv, 0, 0, &PL_threadsv_names[i], 1);
 	    DEBUG_S(PerlIO_printf(Perl_debug_log,
-		"new_struct_thread: copied threadsv %d %p->%p\n",i, t, thr));
+		"new_struct_thread: copied threadsv %"IVdf" %p->%p\n",
+				  (IV)i, t, thr));
 	}
     } 
     thr->threadsvp = AvARRAY(thr->threadsv);

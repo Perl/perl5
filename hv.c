@@ -15,15 +15,6 @@
 #define PERL_IN_HV_C
 #include "perl.h"
 
-#if defined(STRANGE_MALLOC) || defined(MYMALLOC)
-#  define ARRAY_ALLOC_BYTES(size) ( (size)*sizeof(HE*) )
-#else
-#  define MALLOC_OVERHEAD 16
-#  define ARRAY_ALLOC_BYTES(size) ( ((size) < 64)	\
-				? (size)*sizeof(HE*)	\
-				: (size)*sizeof(HE*)*2 - MALLOC_OVERHEAD )
-#endif
-
 STATIC HE*
 S_new_he(pTHX)
 {
@@ -82,6 +73,35 @@ Perl_unshare_hek(pTHX_ HEK *hek)
     unsharepvn(HEK_KEY(hek),HEK_LEN(hek),HEK_HASH(hek));
 }
 
+#if defined(USE_ITHREADS)
+HE *
+Perl_he_dup(pTHX_ HE *e, bool shared)
+{
+    HE *ret;
+
+    if (!e)
+	return Nullhe;
+    /* look for it in the table first */
+    ret = (HE*)ptr_table_fetch(PL_ptr_table, e);
+    if (ret)
+	return ret;
+
+    /* create anew and remember what it is */
+    ret = new_he();
+    ptr_table_store(PL_ptr_table, e, ret);
+
+    HeNEXT(ret) = he_dup(HeNEXT(e),shared);
+    if (HeKLEN(e) == HEf_SVKEY)
+	HeKEY_sv(ret) = SvREFCNT_inc(sv_dup(HeKEY_sv(e)));
+    else if (shared)
+	HeKEY_hek(ret) = share_hek(HeKEY(e), HeKLEN(e), HeHASH(e));
+    else
+	HeKEY_hek(ret) = save_hek(HeKEY(e), HeKLEN(e), HeHASH(e));
+    HeVAL(ret) = SvREFCNT_inc(sv_dup(HeVAL(e)));
+    return ret;
+}
+#endif	/* USE_ITHREADS */
+
 /* (klen == HEf_SVKEY) is special for MAGICAL hv entries, meaning key slot
  * contains an SV* */
 
@@ -126,7 +146,8 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, U32 klen, I32 lval)
 	         || (HvNAME(hv) && strEQ(HvNAME(hv),ENV_HV_NAME))
 #endif
 	                                                          )
-	    Newz(503,xhv->xhv_array, ARRAY_ALLOC_BYTES(xhv->xhv_max + 1), char);
+	    Newz(503, xhv->xhv_array,
+		 PERL_HV_ARRAY_ALLOC_BYTES(xhv->xhv_max + 1), char);
 	else
 	    return 0;
     }
@@ -214,7 +235,8 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
 	         || (HvNAME(hv) && strEQ(HvNAME(hv),ENV_HV_NAME))
 #endif
 	                                                          )
-	    Newz(503,xhv->xhv_array, ARRAY_ALLOC_BYTES(xhv->xhv_max + 1), char);
+	    Newz(503, xhv->xhv_array,
+		 PERL_HV_ARRAY_ALLOC_BYTES(xhv->xhv_max + 1), char);
 	else
 	    return 0;
     }
@@ -304,7 +326,8 @@ Perl_hv_store(pTHX_ HV *hv, const char *key, U32 klen, SV *val, register U32 has
 	PERL_HASH(hash, key, klen);
 
     if (!xhv->xhv_array)
-	Newz(505, xhv->xhv_array, ARRAY_ALLOC_BYTES(xhv->xhv_max + 1), char);
+	Newz(505, xhv->xhv_array,
+	     PERL_HV_ARRAY_ALLOC_BYTES(xhv->xhv_max + 1), char);
 
     oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
     i = 1;
@@ -385,7 +408,8 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, register U32 hash)
 	PERL_HASH(hash, key, klen);
 
     if (!xhv->xhv_array)
-	Newz(505, xhv->xhv_array, ARRAY_ALLOC_BYTES(xhv->xhv_max + 1), char);
+	Newz(505, xhv->xhv_array,
+	     PERL_HV_ARRAY_ALLOC_BYTES(xhv->xhv_max + 1), char);
 
     oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
     i = 1;
@@ -714,21 +738,21 @@ S_hsplit(pTHX_ HV *hv)
 
     PL_nomemok = TRUE;
 #if defined(STRANGE_MALLOC) || defined(MYMALLOC)
-    Renew(a, ARRAY_ALLOC_BYTES(newsize), char);
+    Renew(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize), char);
     if (!a) {
       PL_nomemok = FALSE;
       return;
     }
 #else
 #define MALLOC_OVERHEAD 16
-    New(2, a, ARRAY_ALLOC_BYTES(newsize), char);
+    New(2, a, PERL_HV_ARRAY_ALLOC_BYTES(newsize), char);
     if (!a) {
       PL_nomemok = FALSE;
       return;
     }
     Copy(xhv->xhv_array, a, oldsize * sizeof(HE*), char);
     if (oldsize >= 64) {
-	offer_nice_chunk(xhv->xhv_array, ARRAY_ALLOC_BYTES(oldsize));
+	offer_nice_chunk(xhv->xhv_array, PERL_HV_ARRAY_ALLOC_BYTES(oldsize));
     }
     else
 	Safefree(xhv->xhv_array);
@@ -789,20 +813,20 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
     if (a) {
 	PL_nomemok = TRUE;
 #if defined(STRANGE_MALLOC) || defined(MYMALLOC)
-	Renew(a, ARRAY_ALLOC_BYTES(newsize), char);
+	Renew(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize), char);
         if (!a) {
 	  PL_nomemok = FALSE;
 	  return;
 	}
 #else
-	New(2, a, ARRAY_ALLOC_BYTES(newsize), char);
+	New(2, a, PERL_HV_ARRAY_ALLOC_BYTES(newsize), char);
         if (!a) {
 	  PL_nomemok = FALSE;
 	  return;
 	}
 	Copy(xhv->xhv_array, a, oldsize * sizeof(HE*), char);
 	if (oldsize >= 64) {
-	    offer_nice_chunk(xhv->xhv_array, ARRAY_ALLOC_BYTES(oldsize));
+	    offer_nice_chunk(xhv->xhv_array, PERL_HV_ARRAY_ALLOC_BYTES(oldsize));
 	}
 	else
 	    Safefree(xhv->xhv_array);
@@ -811,7 +835,7 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 	Zero(&a[oldsize * sizeof(HE*)], (newsize-oldsize) * sizeof(HE*), char); /* zero 2nd half*/
     }
     else {
-	Newz(0, a, ARRAY_ALLOC_BYTES(newsize), char);
+	Newz(0, a, PERL_HV_ARRAY_ALLOC_BYTES(newsize), char);
     }
     xhv->xhv_max = --newsize;
     xhv->xhv_array = a;
@@ -1079,7 +1103,8 @@ Perl_hv_iternext(pTHX_ HV *hv)
 #endif
 
     if (!xhv->xhv_array)
-	Newz(506,xhv->xhv_array, ARRAY_ALLOC_BYTES(xhv->xhv_max + 1), char);
+	Newz(506, xhv->xhv_array,
+	     PERL_HV_ARRAY_ALLOC_BYTES(xhv->xhv_max + 1), char);
     if (entry)
 	entry = HeNEXT(entry);
     while (!entry) {

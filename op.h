@@ -94,6 +94,9 @@ typedef U32 PADOFFSET;
 /* Private for lvalues */
 #define OPpLVAL_INTRO	128	/* Lvalue must be localized or lvalue sub */
 
+/* Private for OP_LEAVE, OP_LEAVESUB, OP_LEAVESUBLV and OP_LEAVEWRITE */
+#define OPpREFCOUNTED		64	/* op_targ carries a refcount */
+
 /* Private for OP_AASSIGN */
 #define OPpASSIGN_COMMON	64	/* Left & right have syms in common. */
 
@@ -155,7 +158,8 @@ typedef U32 PADOFFSET;
 /* Private for OP_DELETE */
 #define OPpSLICE		64	/* Operating on a list of keys */
 
-/* Private for OP_SORT, OP_PRTF, OP_SPRINTF, string cmp'n, and case changers */
+/* Private for OP_SORT, OP_PRTF, OP_SPRINTF, OP_FTTEXT, OP_FTBINARY, */
+/*             string comparisons, and case changers. */
 #define OPpLOCALE		64	/* Use locale */
 
 /* Private for OP_SORT */
@@ -235,9 +239,9 @@ struct svop {
     SV *	op_sv;
 };
 
-struct gvop {
+struct padop {
     BASEOP
-    GV *	op_gv;
+    PADOFFSET	op_padix;
 };
 
 struct pvop {
@@ -255,39 +259,73 @@ struct loop {
     OP *	op_lastop;
 };
 
-#define cUNOP ((UNOP*)PL_op)
-#define cBINOP ((BINOP*)PL_op)
-#define cLISTOP ((LISTOP*)PL_op)
-#define cLOGOP ((LOGOP*)PL_op)
-#define cPMOP ((PMOP*)PL_op)
-#define cSVOP ((SVOP*)PL_op)
-#define cGVOP ((GVOP*)PL_op)
-#define cPVOP ((PVOP*)PL_op)
-#define cCOP ((COP*)PL_op)
-#define cLOOP ((LOOP*)PL_op)
+#define cUNOPx(o)	((UNOP*)o)
+#define cBINOPx(o)	((BINOP*)o)
+#define cLISTOPx(o)	((LISTOP*)o)
+#define cLOGOPx(o)	((LOGOP*)o)
+#define cPMOPx(o)	((PMOP*)o)
+#define cSVOPx(o)	((SVOP*)o)
+#define cPADOPx(o)	((PADOP*)o)
+#define cPVOPx(o)	((PVOP*)o)
+#define cCOPx(o)	((COP*)o)
+#define cLOOPx(o)	((LOOP*)o)
 
-#define cUNOPo ((UNOP*)o)
-#define cBINOPo ((BINOP*)o)
-#define cLISTOPo ((LISTOP*)o)
-#define cLOGOPo ((LOGOP*)o)
-#define cPMOPo ((PMOP*)o)
-#define cSVOPo ((SVOP*)o)
-#define cGVOPo ((GVOP*)o)
-#define cPVOPo ((PVOP*)o)
-#define cCVOPo ((CVOP*)o)
-#define cCOPo ((COP*)o)
-#define cLOOPo ((LOOP*)o)
+#define cUNOP		cUNOPx(PL_op)
+#define cBINOP		cBINOPx(PL_op)
+#define cLISTOP		cLISTOPx(PL_op)
+#define cLOGOP		cLOGOPx(PL_op)
+#define cPMOP		cPMOPx(PL_op)
+#define cSVOP		cSVOPx(PL_op)
+#define cPADOP		cPADOPx(PL_op)
+#define cPVOP		cPVOPx(PL_op)
+#define cCOP		cCOPx(PL_op)
+#define cLOOP		cLOOPx(PL_op)
 
-#define kUNOP ((UNOP*)kid)
-#define kBINOP ((BINOP*)kid)
-#define kLISTOP ((LISTOP*)kid)
-#define kLOGOP ((LOGOP*)kid)
-#define kPMOP ((PMOP*)kid)
-#define kSVOP ((SVOP*)kid)
-#define kGVOP ((GVOP*)kid)
-#define kPVOP ((PVOP*)kid)
-#define kCOP ((COP*)kid)
-#define kLOOP ((LOOP*)kid)
+#define cUNOPo		cUNOPx(o)
+#define cBINOPo		cBINOPx(o)
+#define cLISTOPo	cLISTOPx(o)
+#define cLOGOPo		cLOGOPx(o)
+#define cPMOPo		cPMOPx(o)
+#define cSVOPo		cSVOPx(o)
+#define cPADOPo		cPADOPx(o)
+#define cPVOPo		cPVOPx(o)
+#define cCOPo		cCOPx(o)
+#define cLOOPo		cLOOPx(o)
+
+#define kUNOP		cUNOPx(kid)
+#define kBINOP		cBINOPx(kid)
+#define kLISTOP		cLISTOPx(kid)
+#define kLOGOP		cLOGOPx(kid)
+#define kPMOP		cPMOPx(kid)
+#define kSVOP		cSVOPx(kid)
+#define kPADOP		cPADOPx(kid)
+#define kPVOP		cPVOPx(kid)
+#define kCOP		cCOPx(kid)
+#define kLOOP		cLOOPx(kid)
+
+
+#ifdef USE_ITHREADS
+#  define	cGVOPx_gv(o)	((GV*)PL_curpad[cPADOPx(o)->op_padix])
+#  define	IS_PADGV(v)	(v && SvTYPE(v) == SVt_PVGV && GvIN_PAD(v))
+#  define	IS_PADCONST(v)	(v && SvREADONLY(v))
+#  define	cSVOPx_sv(v)	(cSVOPx(v)->op_sv \
+				 ? cSVOPx(v)->op_sv : PL_curpad[(v)->op_targ])
+#  define	cSVOPx_svp(v)	(cSVOPx(v)->op_sv \
+				 ? &cSVOPx(v)->op_sv : &PL_curpad[(v)->op_targ])
+#else
+#  define	cGVOPx_gv(o)	((GV*)cSVOPx(o)->op_sv)
+#  define	IS_PADGV(v)	FALSE
+#  define	IS_PADCONST(v)	FALSE
+#  define	cSVOPx_sv(v)	(cSVOPx(v)->op_sv)
+#  define	cSVOPx_svp(v)	(&cSVOPx(v)->op_sv)
+#endif
+
+#define	cGVOP_gv		cGVOPx_gv(PL_op)
+#define	cGVOPo_gv		cGVOPx_gv(o)
+#define	kGVOP_gv		cGVOPx_gv(kid)
+#define cSVOP_sv		cSVOPx_sv(PL_op)
+#define cSVOPo_sv		cSVOPx_sv(o)
+#define kSVOP_sv		cSVOPx_sv(kid)
 
 #define Nullop Null(OP*)
 
@@ -314,7 +352,7 @@ struct loop {
 #define OA_LISTOP (4 << OCSHIFT)
 #define OA_PMOP (5 << OCSHIFT)
 #define OA_SVOP (6 << OCSHIFT)
-#define OA_GVOP (7 << OCSHIFT)
+#define OA_PADOP (7 << OCSHIFT)
 #define OA_PVOP_OR_SVOP (8 << OCSHIFT)
 #define OA_LOOP (9 << OCSHIFT)
 #define OA_COP (10 << OCSHIFT)

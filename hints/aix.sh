@@ -61,7 +61,11 @@ case "$osvers" in
 esac
 
 so="a"
-dlext="o"
+# AIX itself uses .o (libc.o) but we prefer compatibility
+# with the rest of the world and with rest of the scripting
+# languages (Tcl, Python) and related systems (SWIG).
+# Stephanie Beals <bealzy@us.ibm.com>
+dlext="so"
 
 # Trying to set this breaks the POSIX.c compilation
 
@@ -72,6 +76,8 @@ dlext="o"
 case "$archname" in
 '') archname="$osname" ;;
 esac
+
+cc=${cc:-cc}
 
 case "$osvers" in
 3*) d_fchmod=undef
@@ -111,10 +117,10 @@ esac
 #			    symbol: boot_$(EXP)	 can it be auto-generated?
 case "$osvers" in
 3*) 
-    lddlflags="$lddlflags -H512 -T512 -bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).exp -e _nostart -lc"
+    lddlflags="$lddlflags -H512 -T512 -bhalt:4 -bM:SRE -bI:\$(PERL_INC)/perl.exp -bE:\$(BASEEXT).exp -e _nostart -lc"
     ;;
 *) 
-    lddlflags="$lddlflags -bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).exp -b noentry -lc"
+    lddlflags="$lddlflags -bhalt:4 -bM:SRE -bI:\$(PERL_INC)/perl.exp -bE:\$(BASEEXT).exp -b noentry -lc"
     ;;
 esac
 
@@ -176,6 +182,39 @@ EOM
 esac
 EOCBU
 
+# This script UU/uselfs.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use large files.
+cat > UU/uselfs.cbu <<'EOCBU'
+case "$uselargefiles" in
+$define|true|[yY]*)
+	lfcflags="`getconf XBS5_ILP32_OFFBIG_CFLAGS 2>/dev/null`"
+	lfldflags="`getconf XBS5_ILP32_OFFBIG_LDFLAGS 2>/dev/null`"
+	# _Somehow_ in AIX 4.3.1.0 the above getconf call manages to
+	# insert(?) *something* to $ldflags so that later (in Configure) evaluating
+	# $ldflags causes a newline after the '-b64' (the result of the getconf).
+	# (nothing strange shows up in $ldflags even in hexdump;
+	#  so it may be something in the shell, instead?)
+	# Try it out: just uncomment the below line and rerun Configure:
+# echo >&4 "AIX 4.3.1.0 $lfldflags mystery" ; exit 1
+	# Just don't ask me how AIX does it, I spent hours wondering.
+	# Therefore the line re-evaluating lfldflags: it seems to fix
+	# the whatever it was that AIX managed to break. --jhi
+	lfldflags="`echo $lfldflags`"
+	lflibs="`getconf XBS5_ILP32_OFFBIG_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
+	case "$lfcflags$lfldflags$lflibs" in
+	'');;
+	*) ccflags="$ccflags $lfcflags"
+	   ldflags="$ldflags $ldldflags"
+	   libswanted="$libswanted $lflibs"
+	   ;;
+	esac
+	lfcflags=''
+	lfldflags=''
+	lflibs=''
+	;;
+esac
+EOCBU
+
 # This script UU/use64bits.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use 64 bits.
 cat > UU/use64bits.cbu <<'EOCBU'
@@ -190,23 +229,10 @@ EOM
 		exit 1
 		;;
 	    esac
-	    ccflags="$ccflags -DUSE_LONG_LONG"
-	    ccflags="$ccflags `getconf XBS5_ILP32_OFFBIG_CFLAGS 2>/dev/null`"
-
-	    ldflags="$ldflags `getconf XBS5_ILP32_OFFBIG_LDFLAGS 2>/dev/null`"
-	    # _Somehow_ in AIX 4.3.1.0 the above getconf call manages to
-	    # insert(?) *something* to $ldflags so that later (in Configure) evaluating
-	    # $ldflags causes a newline after the '-b64' (the result of the getconf).
-	    # (nothing strange shows up in $ldflags even in hexdump;
-	    #  so it may be something in the shell, instead?)
-	    # Try it out: just uncomment the below line and rerun Configure:
-#	    echo >&4 "AIX 4.3.1.0 $ldflags mystery" ; exit 1
-	    # Just don't ask me how AIX does it.
-	    # Therefore the line re-evaluating ldflags: it seems to bypass
-	    # the whatever it was that AIX managed to break. --jhi
-	    ldflags="`echo $ldflags`"
-
-	    libswanted="$libswanted `getconf XBS5_ILP32_OFFBIG_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g'`"
+	    case "$ccflags" in
+	    *-DUSE_LONG_LONG*) ;;
+	    *) ccflags="$ccflags -DUSE_LONG_LONG" ;;
+	    esac
 	    # When a 64-bit cc becomes available $archname64
 	    # may need setting so that $archname gets it attached.
 	    ;;
@@ -230,7 +256,7 @@ EOCBU
 # terminateAndUnload() which work correctly with C++ statics while libc
 # load() and unload() do not.  See ext/DynaLoader/dl_aix.xs.
 # The C-to-C_r switch is done by usethreads.cbu, if needed.
-if test -f /lib/libC.a -a X"$gccversion" = X; then
+if test -f /lib/libC.a -a X"`$cc -v 2>&1 | grep gcc`" = X; then
     # Cify libswanted.
     set `echo X "$libswanted "| sed -e 's/ c / C c /'`
     shift

@@ -1724,7 +1724,7 @@ $!
 $! Ask if they want to build with 64-bit support
 $ if (Archname.eqs."VMS_AXP").and.("''f$extract(1,3, f$getsyi(""version""))'".ges."7.1")
 $ THEN
-$   echo "This version of perl has experimental support for building wtih
+$   echo "This version of perl has experimental support for building with
 $   echo "64 bit integers and 128 bit floating point variables. This gives
 $   echo "a much larger range for perl's mathematical operations. (Note that
 $   echo "does *not* enable 64-bit fileops at the moment, as Dec C doesn't
@@ -1742,26 +1742,6 @@ $     use_64bit="N"
 $   ENDIF
 $ ENDIF
 $!
-$! Ask if they want to build with 64-bit support
-$ if (Archname.eqs."VMS_AXP").and.("''f$extract(1,3, f$getsyi(""version""))'".ges."7.1")
-$ THEN
-$   echo "This version of perl has experimental support for building wtih
-$   echo "64 bit integers and 128 bit floating point variables. This gives
-$   echo "a much larger range for perl's mathematical operations. (Note that
-$   echo "does *not* enable 64-bit fileops at the moment, as Dec C doesn't
-$   echo "do that yet)"
-$   echo ""
-$   dflt = use_64bit
-$   rp = "Build with 64 bits? [''dflt'] "
-$   GOSUB myread
-$     if ans.eqs."" then ans = dflt
-$   if (f$extract(0, 1, "''ans'").eqs."Y").or.(f$extract(0, 1, "''ans'").eqs."y")
-$   THEN
-$     use_64bit="Y"
-$   ELSE
-$     use_64bit="N"
-$   ENDIF
-$ ENDIF
 $! Ask about threads, if appropriate
 $ if (Using_Dec_C.eqs."Yes")
 $ THEN

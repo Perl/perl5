@@ -64,7 +64,7 @@
 #ifndef SIGILL
 #    define SIGILL 6         /* blech */
 #endif
-#define ABORT() kill(getpid(),SIGABRT);
+#define ABORT() kill(PerlProc_getpid(),SIGABRT);
 
 #define BIT_BUCKET "/dev/nul"  /* Will this work? */
 
@@ -231,7 +231,6 @@ void *sys_alloc(int size);
 #  define PerlIO FILE
 #endif 
 
-#define TMPPATH tmppath
 #define TMPPATH1 "plXXXXXX"
 extern char *tmppath;
 PerlIO *my_syspopen(char *cmd, char *mode);

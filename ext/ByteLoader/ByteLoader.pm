@@ -1,12 +1,10 @@
 package ByteLoader;
 
-require DynaLoader;
-
-@ISA = qw(DynaLoader);
+use XSLoader ();
 
 $VERSION = 0.03;
 
-bootstrap ByteLoader $VERSION;
+XSLoader::load 'ByteLoader', $VERSION;
 
 # Preloaded methods go here.
 

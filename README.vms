@@ -1,4 +1,5 @@
-Last Revised 01-March-1999 by Dan Sugalski <sugalskd@ous.edu>
+Last revised 27-October-1999 by Craig Berry <craig.berry@metamor.com>
+Revised 01-March-1999 by Dan Sugalski <dan@sidhe.org>
 Originally by Charles Bailey <bailey@newman.upenn.edu>
 
 * Important safety tip
@@ -143,14 +144,14 @@ confident you are, make a bug report to the VMSPerl mailing list.
 If one or more tests fail, you can get more info on the failure by issuing
 this command sequence:
 
-$ @[.VMS]TEST .typ "-v" [.subdir]test.T
+$ @[.VMS]TEST .typ "" "-v" [.subdir]test.T
 
 where ".typ" is the file type of the Perl images you just built (if you
 didn't do anything special, use .EXE), and "[.subdir]test.T" is the test
 that failed. For example, with a normal Perl build, if the test indicated
 that [.op]time failed, then you'd do this:
 
-$ @[.VMS]TEST .EXE "-v" [.OP]TIME.T
+$ @[.VMS]TEST .EXE "" "-v" [.OP]TIME.T
 
 When you send in a bug report for failed tests, please include the output
 from this command, which is run from the main source directory:
@@ -277,7 +278,7 @@ change these, as they can cause some fairly subtle problems.
 
 On systems that are using perl quite a bit, and particularly those with 
 minimal RAM, you can boost the performance of perl by INSTALLing it as
-a known image.  PERLSHR.EXE is typically larger than 1500 blocks
+a known image.  PERLSHR.EXE is typically larger than 2000 blocks
 and that is a reasonably large amount of IO to load each time perl is 
 invoked. 
 
@@ -358,7 +359,7 @@ before you rebuild.
 * Dec C issues
 
 Note to DECC users: Some early versions (pre-5.2, some pre-4. If you're Dec
-C 5.x or higher, with current patches if anym you're fine) of the DECCRTL
+C 5.x or higher, with current patches if any, you're fine) of the DECCRTL
 contained a few bugs which affect Perl performance:
     - Newlines are lost on I/O through pipes, causing lines to run together.
       This shows up as RMS RTB errors when reading from a pipe.  You can
@@ -380,16 +381,16 @@ specific issues (including both Perl questions and installation problems)
 there is the VMSPERL mailing list. It's usually a low-volume (10-12
 messages a week) mailing list.
 
-The subscription address is VMSPERL-REQUEST@NEWMAN.UPENN.EDU. Send a mail
-message with just the words SUBSCRIBE VMSPERL in the body of the message.
-
-The VMSPERL mailing list address is VMSPERL@NEWMAN.UPENN.EDU. Any mail
-sent there gets echoed to all subscribers of the list.
-
+The subscription address is MAJORDOMO@PERL.ORG. Send a mail message with just
+the words SUBSCRIBE VMSPERL in the body of the message.
+   
+The VMSPERL mailing list address is VMSPERL@PERL.ORG.  Any mail sent there
+gets echoed to all subscribers of the list.  There is a searchable archive of
+the list at <http://www.xray.mpe.mpg.de/mailing-lists/vmsperl/>.
+   
 To unsubscribe from VMSPERL send the message UNSUBSCRIBE VMSPERL to
-VMSPERL-REQUEST@NEWMAN.UPENN.EDU.  Be sure to do so from the subscribed 
-account that you are cancelling.
-
+MAJORDOMO@PERL.ORG.  Be sure to do so from the subscribed account that 
+you are cancelling.
 
 * Acknowledgements
 
@@ -412,7 +413,7 @@ missed someone.  That said, special thanks are due to the following:
   Peter Prymmer <pvhp@forte.com> or <pvhp@lns62.lns.cornell.edu>
      for extensive testing, as well as development work on
      configuration and documentation for VMS Perl,
-  Dan Sugalski <sugalskd@ous.edu>
+  Dan Sugalski <dan@sidhe.org>
      for extensive contributions to recent version support,
      development of VMS-specific extensions, and dissemination
      of information about VMS Perl,

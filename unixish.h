@@ -99,7 +99,7 @@
 #ifndef SIGILL
 #    define SIGILL 6         /* blech */
 #endif
-#define ABORT() kill(getpid(),SIGABRT);
+#define ABORT() kill(PerlProc_getpid(),SIGABRT);
 
 /*
  * fwrite1() should be a routine with the same calling sequence as fwrite(),

@@ -67,7 +67,6 @@ sub install {
     }
     $packlist->read($pack{"read"}) if (-f $pack{"read"});
     my $cwd = cwd();
-    my $umask = umask 0 unless $Is_VMS;
 
     my($source);
     MOD_INSTALL: foreach $source (sort keys %hash) {
@@ -140,7 +139,6 @@ sub install {
 	print "Writing $pack{'write'}\n";
 	$packlist->write($pack{'write'});
     }
-    umask $umask unless $Is_VMS;
 }
 
 sub directory_not_empty ($) {
@@ -259,7 +257,6 @@ sub pm_to_blib {
       close(FROMTO);
      }
 
-    my $umask = umask 0022 unless $Is_VMS;
     mkpath($autodir,0,0755);
     foreach (keys %$fromto) {
 	next if -f $fromto->{$_} && -M $fromto->{$_} < -M $_;
@@ -280,7 +277,6 @@ sub pm_to_blib {
 	next unless /\.pm$/;
 	autosplit($fromto->{$_},$autodir);
     }
-    umask $umask unless $Is_VMS;
 }
 
 package ExtUtils::Install::Warn;

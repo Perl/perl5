@@ -2,7 +2,7 @@ package DB;
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 
-$VERSION = 1.0403;
+$VERSION = 1.04041;
 $header = "perl5db.pl version $VERSION";
 
 # Enhanced by ilya@math.ohio-state.edu (Ilya Zakharevich)
@@ -75,6 +75,8 @@ $header = "perl5db.pl version $VERSION";
 #
 # LineInfo - file or pipe to print line number info to.  If it is a
 # pipe, a short "emacs like" message is used.
+#
+# RemotePort - host:port to connect to on remote host for remote debugging.
 #
 # Example $rcfile: (delete leading hashes!)
 #
@@ -179,7 +181,8 @@ $inhibit_exit = $option{PrintRet} = 1;
 		  TTY noTTY ReadLine NonStop LineInfo maxTraceLen
 		  recallCommand ShellBang pager tkRunning ornaments
 		  signalLevel warnLevel dieLevel inhibit_exit
-		  ImmediateStop bareStringify);
+		  ImmediateStop bareStringify
+		  RemotePort);
 
 %optionVars    = (
 		 hashDepth	=> \$dumpvar::hashDepth,
@@ -197,6 +200,7 @@ $inhibit_exit = $option{PrintRet} = 1;
 		 inhibit_exit   => \$inhibit_exit,
 		 maxTraceLen	=> \$maxtrace,
 		 ImmediateStop	=> \$ImmediateStop,
+		 RemotePort	=> \$remoteport,
 );
 
 %optionAction  = (
@@ -216,6 +220,7 @@ $inhibit_exit = $option{PrintRet} = 1;
 		  dieLevel	=> \&dieLevel,
 		  tkRunning	=> \&tkRunning,
 		  ornaments	=> \&ornaments,
+		  RemotePort	=> \&RemotePort,
 		 );
 
 %optionRequire = (
@@ -322,19 +327,30 @@ if ($notty) {
 
   $console = $tty if defined $tty;
 
-  if (defined $console) {
-    open(IN,"+<$console") || open(IN,"<$console") || open(IN,"<&STDIN");
-    open(OUT,"+>$console") || open(OUT,">$console") || open(OUT,">&STDERR")
-      || open(OUT,">&STDOUT");	# so we don't dongle stdout
-  } else {
-    open(IN,"<&STDIN");
-    open(OUT,">&STDERR") || open(OUT,">&STDOUT"); # so we don't dongle stdout
-    $console = 'STDIN/OUT';
+  if (defined $remoteport) {
+    require IO::Socket;
+    $OUT = new IO::Socket::INET( Timeout  => '10',
+                                 PeerAddr => $remoteport,
+                                 Proto    => 'tcp',
+                               );
+    if (!$OUT) { die "Could not create socket to connect to remote host."; }
+    $IN = $OUT;
   }
-  # so open("|more") can read from STDOUT and so we don't dingle stdin
-  $IN = \*IN;
+  else {
+    if (defined $console) {
+      open(IN,"+<$console") || open(IN,"<$console") || open(IN,"<&STDIN");
+      open(OUT,"+>$console") || open(OUT,">$console") || open(OUT,">&STDERR")
+        || open(OUT,">&STDOUT");	# so we don't dongle stdout
+    } else {
+      open(IN,"<&STDIN");
+      open(OUT,">&STDERR") || open(OUT,">&STDOUT"); # so we don't dongle stdout
+      $console = 'STDIN/OUT';
+    }
+    # so open("|more") can read from STDOUT and so we don't dingle stdin
+    $IN = \*IN;
 
-  $OUT = \*OUT;
+    $OUT = \*OUT;
+  }
   select($OUT);
   $| = 1;			# for DB::OUT
   select(STDOUT);
@@ -434,7 +450,7 @@ Debugged program terminated.  Use B<q> to quit or B<R> to restart,
   B<h q>, B<h R> or B<h O> to get additional info.  
 EOP
 	  $package = 'main';
-	  $usercontext = '($@, $!, $,, $/, $\, $^W) = @saved;' .
+	  $usercontext = '($@, $!, $^E, $,, $/, $\, $^W) = @saved;' .
 	    "package $package;";	# this won't let them modify, alas
 	} else {
 	    $sub =~ s/\'/::/;
@@ -1525,7 +1541,15 @@ sub readline {
   }
   local $frame = 0;
   local $doret = -2;
-  $term->readline(@_);
+  if (ref $OUT and UNIVERSAL::isa($OUT, 'IO::Socket::INET')) {
+    print $OUT @_;
+    my $stuff;
+    $IN->recv( $stuff, 2048 );
+    $stuff;
+  }
+  else {
+    $term->readline(@_);
+  }
 }
 
 sub dump_option {
@@ -1671,6 +1695,14 @@ sub ReadLine {
     }
     $rl = shift if @_;
     $rl;
+}
+
+sub RemotePort {
+    if ($term) {
+        &warn("Too late to set RemotePort, enabled on next 'R'!\n") if @_;
+    }
+    $remoteport = shift if @_;
+    $remoteport;
 }
 
 sub tkRunning {
@@ -1823,6 +1855,7 @@ B<O> [I<opt>[B<=>I<val>]] [I<opt>B<\">I<val>B<\">] [I<opt>B<?>]...
     I<signalLevel> I<warnLevel> I<dieLevel>:	level of verbosity;
     I<inhibit_exit>		Allows stepping off the end of the script.
     I<ImmediateStop>		Debugger should stop as early as possible.
+    I<RemotePort>:		Remote hostname:port for remote debugging
   The following options affect what happens with B<V>, B<X>, and B<x> commands:
     I<arrayDepth>, I<hashDepth>:	print only first N elements ('' for all);
     I<compactDump>, I<veryCompact>:	change style of array and hash dump;
@@ -1839,7 +1872,8 @@ B<O> [I<opt>[B<=>I<val>]] [I<opt>B<\">I<val>B<\">] [I<opt>B<?>]...
 	 I<ornaments> affects screen appearance of the command line.
 		During startup options are initialized from \$ENV{PERLDB_OPTS}.
 		You can put additional initialization options I<TTY>, I<noTTY>,
-		I<ReadLine>, and I<NonStop> there (or use `B<R>' after you set them).
+		I<ReadLine>, I<NonStop>, and I<RemotePort> there (or use
+		`B<R>' after you set them).
 B<<> I<expr>		Define Perl command to run before each prompt.
 B<<<> I<expr>		Add to the list of Perl commands to run before each prompt.
 B<>> I<expr>		Define Perl command to run after each prompt.

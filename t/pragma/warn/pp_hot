@@ -95,7 +95,7 @@ my @b = @$a;
 no warnings 'uninitialized' ;
 my @c = @$a;
 EXPECT
-Use of uninitialized value at - line 4.
+Use of uninitialized value in array dereference at - line 4.
 ########
 # pp_hot.c [pp_rv2hv]
 use warnings 'uninitialized' ;
@@ -104,7 +104,7 @@ my %b = %$a;
 no warnings 'uninitialized' ;
 my %c = %$a;
 EXPECT
-Use of uninitialized value at - line 4.
+Use of uninitialized value in hash dereference at - line 4.
 ########
 # pp_hot.c [pp_aassign]
 use warnings 'unsafe' ;

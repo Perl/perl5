@@ -150,8 +150,8 @@ print WARN <<'EOM' ;
 #define G_WARN_ALL_MASK		(G_WARN_ALL_ON|G_WARN_ALL_OFF)
 
 #define WARN_STD		Nullsv
-#define WARN_ALL		(&PL_sv_yes)	/* use warnings 'all' */
-#define WARN_NONE		(&PL_sv_no)	/* no  warnings 'all' */
+#define WARN_ALL		(Nullsv+1)	/* use warnings 'all' */
+#define WARN_NONE		(Nullsv+2)	/* no  warnings 'all' */
 
 #define specialWARN(x)		((x) == WARN_STD || (x) == WARN_ALL ||	\
 				 (x) == WARN_NONE)

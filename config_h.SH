@@ -376,18 +376,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_mktime HAS_MKTIME		/**/
 
-/* HAS_MSYNC:
- *	This symbol, if defined, indicates that the msync system call is
- *	available to synchronize a mapped file.
- */
-#$d_msync HAS_MSYNC		/**/
-
-/* HAS_MUNMAP:
- *	This symbol, if defined, indicates that the munmap system call is
- *	available to unmap a region, usually mapped by mmap().
- */
-#$d_munmap HAS_MUNMAP		/**/
-
 /* HAS_NICE:
  *	This symbol, if defined, indicates that the nice routine is
  *	available.
@@ -1010,6 +998,22 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define STDCHAR $stdchar	/**/
 
+/* HAS_QUAD:
+ *	This symbol, if defined, tells that there's a 64-bit integer type,
+ *	Quad_t, and its unsigned counterpar, Uquad_t. QUADKIND will be one
+ *	of QUAD_IS_INT, QUAD_IS_LONG, QUAD_IS_LONG_LONG, or QUAD_IS_INT64_T.
+ */
+#$d_quad HAS_QUAD	/**/
+#ifdef HAS_QUAD
+#   define Quad_t $quadtype	/**/
+#   define Uquad_t $uquadtype	/**/
+#   define QUADKIND $quadkind	/**/
+#   define QUAD_IS_INT	1
+#   define QUAD_IS_LONG	2
+#   define QUAD_IS_LONG_LONG	3
+#   define QUAD_IS_INT64_T	4
+#endif
+
 /* HAS_ACCESSX:
  *	This symbol, if defined, indicates that the accessx routine is
  *	available to do extended access checks.
@@ -1476,8 +1480,10 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	execution path, but it should be accessible by the world.  The program
  *	should be prepared to do ~ expansion.
  *	The standard distribution will put nothing in this directory.
- *	Individual sites may place their own extensions and modules in
- *	this directory.
+ *	After perl has been installed, users may install their own local
+ *	architecture-dependent modules in this directory with
+ *		MakeMaker Makefile.PL
+ *	or equivalent.  See INSTALL for details.
  */
 /* SITEARCH_EXP:
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
@@ -1492,8 +1498,10 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	execution path, but it should be accessible by the world.  The program
  *	should be prepared to do ~ expansion.
  *	The standard distribution will put nothing in this directory.
- *	Individual sites may place their own extensions and modules in
- *	this directory.
+ *	After perl has been installed, users may install their own local
+ *	architecture-independent modules in this directory with
+ *		MakeMaker Makefile.PL
+ *	or equivalent.  See INSTALL for details.
  */
 /* SITELIB_EXP:
  *	This symbol contains the ~name expanded version of SITELIB, to be used
@@ -1789,18 +1797,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_memchr HAS_MEMCHR	/**/
 
-/* HAS_MMAP:
- *	This symbol, if defined, indicates that the mmap system call is
- *	available to map a file into memory.
- */
-/* Mmap_t:
- *	This symbol holds the return type of the mmap() system call
- *	(and simultaneously the type of the first argument).
- *	Usually set to 'void *' or 'cadd_t'.
- */
-#$d_mmap HAS_MMAP		/**/
-#define Mmap_t $mmaptype	/**/
-
 /* HAS_MSG:
  *	This symbol, if defined, indicates that the entire msg*(2) library is
  *	supported (IPC mechanism based on message queues).
@@ -1907,26 +1903,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	Checking just with #ifdef might not be enough because this symbol
  *	has been known to be an enum.
  */
-/* HAS_SENDMSG:
- *	This symbol, if defined, indicates that the sendmsg is supported
- *	to send messages between sockets.  You will also need struct
- *	iovec from <sys/uio.h>, HAS_STRUCT_IOVEC and I_SYSUIO.
- */
-/* HAS_RECVMSG:
- *	This symbol, if defined, indicates that the recvmsg is supported
- *	to send messages between sockets.  You will also need struct
- *	iovec from <sys/uio.h>, HAS_STRUCT_IOVEC and I_SYSUIO.
- */
-/* HAS_STRUCT_MSGHDR:
- *	This symbol, if defined, indicates that the struct msghdr
- *	(BSD 4.3 or 4.4) is supported.  You will also need struct
- *	iovec from <sys/uio.h>, HAS_STRUCT_IOVEC and I_SYSUIO.
- */
-/* HAS_STRUCT_CMSGHDR:
- *	This symbol, if defined, indicates that the struct cmsghdr
- *	(BSD 4.4) is supported.  You will also need struct
- *	iovec from <sys/uio.h>, HAS_STRUCT_IOVEC and I_SYSUIO.
- */
 #$d_socket	HAS_SOCKET		/**/
 #$d_sockpair	HAS_SOCKETPAIR	/**/
 #$d_msg_ctrunc	HAS_MSG_CTRUNC	/**/
@@ -1935,16 +1911,14 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_msg_peek	HAS_MSG_PEEK	/**/
 #$d_msg_proxy	HAS_MSG_PROXY	/**/
 #$d_scm_rights	HAS_SCM_RIGHTS	/**/
-#$d_sendmsg	HAS_SENDMSG	/**/
-#$d_recvmsg	HAS_RECVMSG	/**/
-#$d_msghdr_s	HAS_STRUCT_MSGHDR	/**/
-#$d_cmsghdr_s	HAS_STRUCT_CMSGHDR	/**/
 
 /* USE_STAT_BLOCKS:
  *	This symbol is defined if this system has a stat structure declaring
  *	st_blksize and st_blocks.
  */
+#ifndef USE_STAT_BLOCKS
 #$d_statblks USE_STAT_BLOCKS 	/**/
+#endif
 
 /* HAS_STRERROR:
  *	This symbol, if defined, indicates that the strerror routine is
@@ -2080,12 +2054,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol, if defined, indicates that <sys/uio.h> exists and
  *	should be included.
  */
-/* HAS_STRUCT_IOVEC:
- *	This symbol, if defined, indicates that the struct iovec
- *	to do scatter writes/gather reads is supported.
- */
 #$i_sysuio	I_SYSUIO		/**/
-#$d_iovec_s	HAS_STRUCT_IOVEC		/**/
 
 /* Free_t:
  *	This variable contains the return type of free().  It is usually
@@ -2192,21 +2161,38 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_endspent HAS_ENDSPENT		/**/
 
+/* HAS_STRUCT_FS_DATA:
+ *	This symbol, if defined, indicates that the struct fs_data
+ *	to do statfs() is supported.
+ */
+#$d_fs_data_s HAS_STRUCT_FS_DATA	/**/
+
 /* HAS_FSEEKO:
  *	This symbol, if defined, indicates that the fseeko routine is
  *	available to fseek beyond 32 bits (useful for ILP32 hosts).
  */
 #$d_fseeko HAS_FSEEKO		/**/
 
+/* HAS_FSTATFS:
+ *	This symbol, if defined, indicates that the fstatfs routine is
+ *	available to stat filesystems by file descriptors.
+ */
+#$d_fstatfs HAS_FSTATFS		/**/
 /* HAS_FTELLO:
  *	This symbol, if defined, indicates that the ftello routine is
  *	available to ftell beyond 32 bits (useful for ILP32 hosts).
  */
 #$d_ftello HAS_FTELLO		/**/
 
+/* HAS_GETMNT:
+ *	This symbol, if defined, indicates that the getmnt routine is
+ *	available to get filesystem mount info by filename.
+ */
+#$d_getmnt HAS_GETMNT		/**/
+
 /* HAS_GETMNTENT:
  *	This symbol, if defined, indicates that the getmntent routine is
- *	available to iterate through mounted file systems.
+ *	available to iterate through mounted file systems to get their info.
  */
 #$d_getmntent HAS_GETMNTENT		/**/
 
@@ -2228,6 +2214,13 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_hasmntopt HAS_HASMNTOPT		/**/
 
+/* HAS_INT64_T:
+ *     This symbol will defined if the C compiler supports int64_t.
+ *     Usually the <inttypes.h> needs to be included, but sometimes
+ *	<sys/types.h> is enough.
+ */
+#$d_int64t     HAS_INT64_T               /**/
+
 /* HAS_LDBL_DIG:
  *	This symbol, if defined, indicates that this system's <float.h>
  *	or <limits.h> defines the symbol LDBL_DIG, which is the number
@@ -2235,25 +2228,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	for DBL_DIG, there's no good guess for LDBL_DIG if it is undefined.
  */
 #$d_ldbl_dig HAS_LDBL_DIG 	/* */
-
-/* HAS_MADVISE:
- *	This symbol, if defined, indicates that the madvise system call is
- *	available to map a file into memory.
- */
-#$d_madvise HAS_MADVISE		/**/
-
-/* HAS_MPROTECT:
- *	This symbol, if defined, indicates that the mprotect system call is
- *	available to modify the access protection of a memory mapped file.
- */
-#$d_mprotect HAS_MPROTECT		/**/
-
-/* HAS_READV:
- *	This symbol, if defined, indicates that the readv routine is
- *	available to do gather reads.  You will also need <sys/uio.h>
- *	and there I_SYSUIO.
- */
-#$d_readv HAS_READV		/**/
 
 /* HAS_SETSPENT:
  *	This symbol, if defined, indicates that the setspent system call is
@@ -2267,23 +2241,32 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_sfio	USE_SFIO		/**/
 
-/* HAS_FSTATFS:
- *	This symbol, if defined, indicates that the fstatfs routine is
- *	available to stat filesystems of file descriptors.
+/* HAS_SQRTL:
+ *	This symbol, if defined, indicates that the sqrtl routine is
+ *	available to do long double square roots.
  */
-/* HAS_STRUCT_STATFS_FLAGS:
+#$d_sqrtl HAS_SQRTL		/**/
+
+/* HAS_STRUCT_STATFS_F_FLAGS:
  *	This symbol, if defined, indicates that the struct statfs
  *	does have the f_flags member containing the mount flags of
- *	the filesystem holding the file.
- *	This kind of struct statfs is coming from sys/mount.h (BSD),
- *	not from sys/statfs.h (SYSV).
+ *	the filesystem containing the file.
+ *	This kind of struct statfs is coming from <sys/mount.h> (BSD 4.3),
+ *	not from <sys/statfs.h> (SYSV).  Older BSDs (like Ultrix) do not
+ *	have statfs() and struct statfs, they have ustat() and getmnt()
+ *	with struct ustat and struct fs_data.
  */
-#$d_fstatfs HAS_FSTATFS		/**/
-#$d_statfsflags HAS_STRUCT_STATFS_FLAGS		/**/
+#$d_statfs_f_flags HAS_STRUCT_STATFS_F_FLAGS		/**/
+
+/* HAS_STRUCT_STATFS:
+ *	This symbol, if defined, indicates that the struct statfs
+ *	to do statfs() is supported.
+ */
+#$d_statfs_s HAS_STRUCT_STATFS	/**/
 
 /* HAS_FSTATVFS:
  *	This symbol, if defined, indicates that the fstatvfs routine is
- *	available to stat filesystems of file descriptors.
+ *	available to stat filesystems by file descriptors.
  */
 #$d_fstatvfs HAS_FSTATVFS		/**/
 
@@ -2295,11 +2278,11 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_telldirproto	HAS_TELLDIR_PROTO	/**/
 
-/* HAS_WRITEV:
- *	This symbol, if defined, indicates that the writev routine is
- *	available to do scatter writes.
+/* HAS_USTAT:
+ *	This symbol, if defined, indicates that the ustat system call is
+ *	available to query file system statistics by dev_t.
  */
-#$d_writev HAS_WRITEV		/**/
+#$d_ustat HAS_USTAT		/**/
 
 /* USE_DYNAMIC_LOADING:
  *	This symbol, if defined, indicates that dynamic loading of
@@ -2338,13 +2321,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *     This symbol, if defined, indicates to the C program that it should
  *     include <inttypes.h>.
  */
-/* HAS_INT64_T:
- *     This symbol will defined if the C compiler supports int64_t.
- *     Usually the <inttypes.h> needs to be included, but sometimes
- *	<sys/types.h> is enough.
- */
 #$i_inttypes   I_INTTYPES                /**/
-#$d_int64t     HAS_INT64_T               /**/
 
 /* I_MNTENT:
  *	This symbol, if defined, indicates that <mntent.h> exists and
@@ -2376,23 +2353,34 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$i_socks	I_SOCKS		/**/
 
-/* I_SYS_MMAN:
- *	This symbol, if defined, indicates that <sys/mman.h> exists and
- *	should be included.
- */
-#$i_sysmman	I_SYS_MMAN		/**/
-
 /* I_SYS_MOUNT:
  *	This symbol, if defined, indicates that <sys/mount.h> exists and
  *	should be included.
  */
 #$i_sysmount	I_SYS_MOUNT		/**/
 
+/* I_SYS_STATFS:
+ *	This symbol, if defined, indicates that <sys/statfs.h> exists.
+ */
+#$i_sysstatfs	I_SYS_STATFS		/**/
+
 /* I_SYS_STATVFS:
  *	This symbol, if defined, indicates that <sys/statvfs.h> exists and
  *	should be included.
  */
 #$i_sysstatvfs	I_SYS_STATVFS		/**/
+
+/* I_SYS_VFS:
+ *	This symbol, if defined, indicates that <sys/vfs.h> exists and
+ *	should be included.
+ */
+#$i_sysvfs	I_SYS_VFS		/**/
+
+/* I_USTAT:
+ *	This symbol, if defined, indicates that <ustat.h> exists and
+ *	should be included.
+ */
+#$i_ustat	I_USTAT		/**/
 
 /* HAS_OFF64_T:
  *	This symbol will be defined if the C compiler supports off64_t.
@@ -2414,26 +2402,115 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_PRIfldbl PERL_PRIfldbl	$sPRIfldbl	/**/
 #$d_PRIgldbl PERL_PRIgldbl	$sPRIgldbl	/**/
 
-/* PERL_PRId64:
- *	This symbol, if defined, contains the string used by stdio to
- *	format 64-bit decimal numbers (format 'd') for output.
+/* IVTYPE:
+ *	This symbol defines the C type used for Perl's IV.
  */
-/* PERL_PRIu64:
- *	This symbol, if defined, contains the string used by stdio to
- *	format 64-bit unsigned decimal numbers (format 'u') for output.
+/* UVTYPE:
+ *	This symbol defines the C type used for Perl's UV.
  */
-/* PERL_PRIo64:
- *	This symbol, if defined, contains the string used by stdio to
- *	format 64-bit octal numbers (format 'o') for output.
+/* I8TYPE:
+ *	This symbol defines the C type used for Perl's I8.
  */
-/* PERL_PRIx64:
- *	This symbol, if defined, contains the string used by stdio to
- *	format 64-bit hexadecimal numbers (format 'x') for output.
+/* U8TYPE:
+ *	This symbol defines the C type used for Perl's U8.
  */
-#$d_PRId64 PERL_PRId64	$sPRId64	/**/
-#$d_PRIu64 PERL_PRIu64	$sPRIu64	/**/
-#$d_PRIo64 PERL_PRIo64	$sPRIo64	/**/
-#$d_PRIx64 PERL_PRIx64	$sPRIx64	/**/
+/* I16TYPE:
+ *	This symbol defines the C type used for Perl's I16.
+ */
+/* U16TYPE:
+ *	This symbol defines the C type used for Perl's U16.
+ */
+/* I32TYPE:
+ *	This symbol defines the C type used for Perl's I32.
+ */
+/* U32TYPE:
+ *	This symbol defines the C type used for Perl's U32.
+ */
+/* I64TYPE:
+ *	This symbol defines the C type used for Perl's I64.
+ */
+/* U64TYPE:
+ *	This symbol defines the C type used for Perl's U64.
+ */
+/* NVTYPE:
+ *	This symbol defines the C type used for Perl's NV.
+ */
+/* IVSIZE:
+ *	This symbol contains the sizeof(IV).
+ */
+/* UVSIZE:
+ *	This symbol contains the sizeof(UV).
+ */
+/* I8SIZE:
+ *	This symbol contains the sizeof(I8).
+ */
+/* U8SIZE:
+ *	This symbol contains the sizeof(U8).
+ */
+/* I16SIZE:
+ *	This symbol contains the sizeof(I16).
+ */
+/* U16SIZE:
+ *	This symbol contains the sizeof(U16).
+ */
+/* I32SIZE:
+ *	This symbol contains the sizeof(I32).
+ */
+/* U32SIZE:
+ *	This symbol contains the sizeof(U32).
+ */
+/* I64SIZE:
+ *	This symbol contains the sizeof(I64).
+ */
+/* U64SIZE:
+ *	This symbol contains the sizeof(U64).
+ */
+#define	IVTYPE		$ivtype		/**/
+#define	UVTYPE		$uvtype		/**/
+#define	I8TYPE		$i8type		/**/
+#define	U8TYPE		$u8type		/**/
+#define	I16TYPE		$i16type	/**/
+#define	U16TYPE		$u16type	/**/
+#define	I32TYPE		$i32type	/**/
+#define	U32TYPE		$u32type	/**/
+#ifdef HAS_QUAD
+#define	I64TYPE		$i64type	/**/
+#define	U64TYPE		$u64type	/**/
+#endif
+#define	NVTYPE		$nvtype		/**/
+#define	IVSIZE		$ivsize		/**/
+#define	UVSIZE		$uvsize		/**/
+#define	I8SIZE		$i8size		/**/
+#define	U8SIZE		$u8size		/**/
+#define	I16SIZE		$i16size	/**/
+#define	U16SIZE		$u16size	/**/
+#define	I32SIZE		$i32size	/**/
+#define	U32SIZE		$u32size	/**/
+#ifdef HAS_QUAD
+#define	I64SIZE		$i64size	/**/
+#define	U64SIZE		$u64size	/**/
+#endif
+
+/* IVdf:
+ *	This symbol defines the format string used for printing a Perl IV
+ *	as a signed decimal integer.
+ */
+/* UVuf:
+ *	This symbol defines the format string used for printing a Perl UV
+ *	as an unsigned decimal integer.
+ */
+/* UVof:
+ *	This symbol defines the format string used for printing a Perl UV
+ *	as an unsigned octal integer.
+ */
+/* UVxf:
+ *	This symbol defines the format string used for printing a Perl UV
+ *	as an unsigned hexadecimal integer.
+ */
+#define	IVdf		$ivdformat		/**/
+#define	UVuf		$uvuformat		/**/
+#define	UVof		$uvoformat		/**/
+#define	UVxf		$uvxformat		/**/
 
 /* SELECT_MIN_BITS:
  *	This symbol holds the minimum number of bits operated by select.
@@ -2469,43 +2546,67 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_strtoull HAS_STRTOULL		/**/
 
 /* USE_64_BITS:
- *	This symbol, if defined, indicates that 64-bit interfaces should
- *	be used when available.  If not defined, the native default interfaces
+ *	This symbol, if defined, indicates that 64-bit integers should
+ *	be used when available.  If not defined, the native integers
  *	will be used (be they 32 or 64 bits).
  */
+#ifndef USE_64_BITS
 #$use64bits	USE_64_BITS		/**/
+#endif
 
 /* USE_LARGE_FILES:
  *	This symbol, if defined, indicates that large file support
  *	should be used when available.  The USE_64_BITS symbol will
  *	also be turned on if necessary.
  */
+#ifndef USE_LARGE_FILES
 #$uselargefiles	USE_LARGE_FILES		/**/
+#endif
 
 /* USE_LONG_DOUBLE:
  *	This symbol, if defined, indicates that long doubles should
  *	be used when available.
  */
+#ifndef USE_LONG_DOUBLE
 #$uselongdouble	USE_LONG_DOUBLE		/**/
+#endif
+
+/* USE_LONG_LONG:
+ *	This symbol, if defined, indicates that long longs should
+ *	be used when available.
+ */
+#ifndef USE_LONG_LONG
+#$uselonglong	USE_LONG_LONG		/**/
+#endif
+
+#ifndef USE_MORE_BITS
+#$usemorebits	USE_MORE_BITS		/**/
+#endif
 
 /* MULTIPLICITY:
  *	This symbol, if defined, indicates that Perl should
  *	be built to use multiplicity.
  */
+#ifndef MULTIPLICTY
 #$usemultiplicity	MULTIPLICITY		/**/
+#endif
 
 /* USE_PERLIO:
  *	This symbol, if defined, indicates that the PerlIO abstraction should
  *	be used throughout.  If not defined, stdio should be
  *	used in a fully backward compatible manner.
  */
+#ifndef USE_PERLIO
 #$useperlio	USE_PERLIO		/**/
+#endif
 
 /* USE_SOCKS:
  *	This symbol, if defined, indicates that Perl should
  *	be built to use socks.
  */
+#ifndef USE_SOCKS
 #$usesocks	USE_SOCKS		/**/
+#endif
 
 /* PERL_XS_APIVERSION:
  *	This variable contains the version of the oldest perl binary
@@ -2668,7 +2769,9 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol, if defined, indicates that Perl should
  *	be built to use the old draft POSIX threads API.
  */
+#ifndef USE_TTHREADS
 #$usethreads	USE_THREADS		/**/
+#endif
 #$d_oldpthreads	OLD_PTHREADS_API		/**/
 
 /* Time_t:
@@ -2692,6 +2795,16 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define Fpos_t $fpostype		/* File position type */
 
+/* Gid_t_f:
+ *	This symbol defines the format string used for printing a Gid_t.
+ */
+#define	Gid_t_f		$gidformat		/**/
+
+/* Gid_t_size:
+ *	This symbol holds the size of a Gid_t in bytes.
+ */
+#define Gid_t_size $gidsize		/* GID size */
+
 /* Gid_t:
  *	This symbol holds the return type of getgid() and the type of
  *	argument to setrgid() and related functions.  Typically,
@@ -2709,8 +2822,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 /* LSEEKSIZE:
  *	This symbol holds the number of bytes used by the Off_t.
  */
+/* Off_t_size:
+ *	This symbol holds the number of bytes used by the Off_t.
+ */
 #define Off_t $lseektype		/* <offset> type */
 #define LSEEKSIZE $lseeksize		/* <offset> size */
+#define Off_t_size $lseeksize	/* <offset> size */
 
 /* Mode_t:
  *	This symbol holds the type used to declare file modes 
@@ -2735,11 +2852,15 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define Size_t $sizetype	 /* length paramater for string functions */
 
-/* Uid_t_SIGN:
- *	This symbol holds the signedess of a Uid_t.
- *	1 for unsigned, -1 for signed.
+/* Uid_t_f:
+ *	This symbol defines the format string used for printing a Uid_t.
  */
-#define Uid_t_SIGN	$uidsign		/* UID sign */
+#define	Uid_t_f		$uidformat		/**/
+
+/* Uid_t_size:
+ *	This symbol holds the size of a Uid_t in bytes.
+ */
+#define Uid_t_size $uidsize		/* UID size */
 
 /* Uid_t:
  *	This symbol holds the type used to declare user ids in the kernel.

@@ -106,7 +106,6 @@ dprof_times(struct tms *t)
 
 XS(XS_Devel__DProf_END);        /* used by prof_mark() */
 
-static SV * Sub;        /* pointer to $DB::sub */
 static PerlIO *fp;      /* pointer to tmon.out file */
 
 /* Added -JH */
@@ -163,13 +162,13 @@ static void
 prof_dumpa(opcode ptype, U32 id)
 {
     if(ptype == OP_LEAVESUB){
-	PerlIO_printf(fp,"- %lx\n", id );
+	PerlIO_printf(fp,"- %"UVxf"\n", (UV)id );
     } else if(ptype == OP_ENTERSUB) {
-	PerlIO_printf(fp,"+ %lx\n", id );
+	PerlIO_printf(fp,"+ %"UVxf"\n", (UV)id );
     } else if(ptype == OP_GOTO) {
-	PerlIO_printf(fp,"* %lx\n", id );
+	PerlIO_printf(fp,"* %"UVxf"\n", (UV)id );
     } else if(ptype == OP_DIE) {
-	PerlIO_printf(fp,"/ %lx\n", id );
+	PerlIO_printf(fp,"/ %"UVxf"\n", (UV)id );
     } else {
 	PerlIO_printf(fp,"Profiler unknown prof code %d\n", ptype);
     }
@@ -178,7 +177,7 @@ prof_dumpa(opcode ptype, U32 id)
 static void
 prof_dumps(U32 id, char *pname, char *gname)
 {
-    PerlIO_printf(fp,"& %lx %s %s\n", id, pname, gname);
+    PerlIO_printf(fp,"& %"UVxf" %s %s\n", (UV)id, pname, gname);
 }   
 
 static clock_t otms_utime, otms_stime, orealtime;
@@ -231,9 +230,13 @@ prof_dump_until(long ix)
 	wprof_s += t2.tms_stime - t1.tms_stime;
 
 	PerlIO_printf(fp,"+ & Devel::DProf::write\n" );
-	PerlIO_printf(fp,"@ %ld %ld %ld\n", 
-		t2.tms_utime - t1.tms_utime, t2.tms_stime - t1.tms_stime, 
-		realtime2 - realtime1);
+	PerlIO_printf(fp,"@ %"IVdf" %"IVdf" %"IVdf"\n", 
+		      /* The (IV) casts are one possibility:
+		       * the Painfully Correct Way would be to
+		       * have Clock_t_f. */
+		      (IV)(t2.tms_utime - t1.tms_utime),
+		      (IV)(t2.tms_stime - t1.tms_stime), 
+		      (IV)(realtime2 - realtime1));
 	PerlIO_printf(fp,"- & Devel::DProf::write\n" );
 	otms_utime = t2.tms_utime;
 	otms_stime = t2.tms_stime;
@@ -255,6 +258,7 @@ prof_mark( opcode ptype )
         STRLEN len;
         SV *sv;
 	U32 id;
+	SV *Sub = GvSV(DBsub);       /* name of current sub */
 
         if( SAVE_STACK ){
                 if( profstack_ix + 5 > profstack_max ){
@@ -477,12 +481,16 @@ prof_recordheader(void)
 
         /* fp is opened in the BOOT section */
         PerlIO_printf(fp, "#fOrTyTwO\n" );
-        PerlIO_printf(fp, "$hz=%d;\n", DPROF_HZ );
+        PerlIO_printf(fp, "$hz=%"IVdf";\n", (IV)DPROF_HZ );
         PerlIO_printf(fp, "$XS_VERSION='DProf %s';\n", XS_VERSION );
         PerlIO_printf(fp, "# All values are given in HZ\n" );
 	test_time(&r, &u, &s);
-        PerlIO_printf(fp, "$over_utime=%ld; $over_stime=%ld; $over_rtime=%ld;\n",
-                u, s, r);
+        PerlIO_printf(fp,
+		      "$over_utime=%"IVdf"; $over_stime=%"IVdf"; $over_rtime=%"IVdf";\n",
+		      /* The (IV) casts are one possibility:
+		       * the Painfully Correct Way would be to
+		       * have Clock_t_f. */
+		      (IV)u, (IV)s, (IV)r);
         PerlIO_printf(fp, "$over_tests=10000;\n");
 
         TIMES_LOCATION = PerlIO_tell(fp);
@@ -512,11 +520,15 @@ prof_record(void)
         }
         PerlIO_seek(fp, TIMES_LOCATION, SEEK_SET);
 	/* Write into reserved 240 bytes: */
-        PerlIO_printf(fp, "$rrun_utime=%ld; $rrun_stime=%ld; $rrun_rtime=%ld;",
-                prof_end.tms_utime - prof_start.tms_utime - wprof_u,
-                prof_end.tms_stime - prof_start.tms_stime - wprof_s,
-                rprof_end - rprof_start - wprof_r );
-        PerlIO_printf(fp, "\n$total_marks=%ld;", total);
+        PerlIO_printf(fp,
+		      "$rrun_utime=%"IVdf"; $rrun_stime=%"IVdf"; $rrun_rtime=%"IVdf";",
+		      /* The (IV) casts are one possibility:
+		       * the Painfully Correct Way would be to
+		       * have Clock_t_f. */
+		      (IV)(prof_end.tms_utime-prof_start.tms_utime-wprof_u),
+		      (IV)(prof_end.tms_stime-prof_start.tms_stime-wprof_s),
+		      (IV)(rprof_end-rprof_start-wprof_r) );
+        PerlIO_printf(fp, "\n$total_marks=%"IVdf, (IV)total);
 	
         PerlIO_close( fp );
 }
@@ -552,6 +564,7 @@ XS(XS_DB_sub)
         dXSARGS;
         dORIGMARK;
         HV *oldstash = curstash;
+	SV *Sub = GvSV(DBsub);       /* name of current sub */
 
         SP -= items;
 
@@ -605,6 +618,7 @@ XS(XS_DB_goto)
 
                 dORIGMARK;
                 HV *oldstash = curstash;
+		SV *Sub = GvSV(DBsub);       /* name of current sub */
                 /* SP -= items;  added by xsubpp */
                 DBG_SUB_NOTIFY( "XS DBsub(%s)\n", SvPV(Sub, na) );
 
@@ -662,7 +676,6 @@ BOOT:
                 dowarn = warn_tmp;
         }
 
-        Sub = GvSV(DBsub);       /* name of current sub */
         sv_setiv( DBsingle, 0 ); /* disable DB single-stepping */
 
 	{

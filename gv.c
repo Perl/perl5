@@ -59,6 +59,9 @@ Perl_gv_fetchfile(pTHX_ const char *name)
     STRLEN tmplen;
     GV *gv;
 
+    if (!PL_defstash)
+	return Nullgv;
+
     tmplen = strlen(name) + 2;
     if (tmplen < sizeof smallbuf)
 	tmpbuf = smallbuf;
@@ -68,15 +71,14 @@ Perl_gv_fetchfile(pTHX_ const char *name)
     tmpbuf[1] = '<';
     strcpy(tmpbuf + 2, name);
     gv = *(GV**)hv_fetch(PL_defstash, tmpbuf, tmplen, TRUE);
-    if (!isGV(gv))
+    if (!isGV(gv)) {
 	gv_init(gv, PL_defstash, tmpbuf, tmplen, FALSE);
+	sv_setpv(GvSV(gv), name);
+	if (PERLDB_LINE)
+	    hv_magic(GvHVn(gv_AVadd(gv)), gv, 'L');
+    }
     if (tmpbuf != smallbuf)
 	Safefree(tmpbuf);
-    sv_setpv(GvSV(gv), name);
-    if (*name == '/' && (instr(name, "/lib/") || instr(name, ".pm")))
-	GvMULTI_on(gv);
-    if (PERLDB_LINE)
-	hv_magic(GvHVn(gv_AVadd(gv)), gv, 'L');
     return gv;
 }
 
@@ -100,8 +102,8 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
     Newz(602, gp, 1, GP);
     GvGP(gv) = gp_ref(gp);
     GvSV(gv) = NEWSV(72,0);
-    GvLINE(gv) = PL_curcop->cop_line;
-    GvFILEGV(gv) = PL_curcop->cop_filegv;
+    GvLINE(gv) = CopLINE(PL_curcop);
+    GvFILE(gv) = CopFILE(PL_curcop) ? CopFILE(PL_curcop) : "";
     GvCVGEN(gv) = 0;
     GvEGV(gv) = gv;
     sv_magic((SV*)gv, (SV*)gv, '*', name, len);
@@ -120,7 +122,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 
 	PL_sub_generation++;
 	CvGV(GvCV(gv)) = (GV*)SvREFCNT_inc(gv);
-	CvFILEGV(GvCV(gv)) = PL_curcop->cop_filegv;
+	CvFILE(GvCV(gv)) = CopFILE(PL_curcop);
 	CvSTASH(GvCV(gv)) = PL_curstash;
 #ifdef USE_THREADS
 	CvOWNER(GvCV(gv)) = 0;
@@ -301,7 +303,7 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 	if ((nsplit - origname) == 5 && strnEQ(origname, "SUPER", 5)) {
 	    /* ->SUPER::method should really be looked up in original stash */
 	    SV *tmpstr = sv_2mortal(Perl_newSVpvf(aTHX_ "%s::SUPER",
-					     HvNAME(PL_curcop->cop_stash)));
+						  CopSTASHPV(PL_curcop)));
 	    stash = gv_stashpvn(SvPVX(tmpstr), SvCUR(tmpstr), TRUE);
 	    DEBUG_o( Perl_deb(aTHX_ "Treating %s as %s::%s\n",
 			 origname, HvNAME(stash), name) );
@@ -446,8 +448,8 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	name++;
 
     for (namend = name; *namend; namend++) {
-	if ((*namend == '\'' && namend[1]) ||
-	    (*namend == ':' && namend[1] == ':'))
+	if ((*namend == ':' && namend[1] == ':')
+	    || (*namend == '\'' && namend[1]))
 	{
 	    if (!stash)
 		stash = PL_defstash;
@@ -560,7 +562,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 		}
 	    }
 	    else
-		stash = PL_curcop->cop_stash;
+		stash = CopSTASH(PL_curcop);
 	}
 	else
 	    stash = PL_defstash;
@@ -653,15 +655,19 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	if (strEQ(name, "SIG")) {
 	    HV *hv;
 	    I32 i;
-	    PL_siggv = gv;
-	    GvMULTI_on(PL_siggv);
-	    hv = GvHVn(PL_siggv);
-	    hv_magic(hv, PL_siggv, 'S');
-	    for(i=1;PL_sig_name[i];i++) {
+	    if (!PL_psig_ptr) {
+		int sig_num[] = { SIG_NUM };
+		New(73, PL_psig_ptr, sizeof(sig_num)/sizeof(*sig_num), SV*);
+		New(73, PL_psig_name, sizeof(sig_num)/sizeof(*sig_num), SV*);
+	    }
+	    GvMULTI_on(gv);
+	    hv = GvHVn(gv);
+	    hv_magic(hv, gv, 'S');
+	    for (i = 1; PL_sig_name[i]; i++) {
 	    	SV ** init;
-	    	init=hv_fetch(hv,PL_sig_name[i],strlen(PL_sig_name[i]),1);
-	    	if(init)
-	    		sv_setsv(*init,&PL_sv_undef);
+	    	init = hv_fetch(hv, PL_sig_name[i], strlen(PL_sig_name[i]), 1);
+	    	if (init)
+		    sv_setsv(*init, &PL_sv_undef);
 	    	PL_psig_ptr[i] = 0;
 	    	PL_psig_name[i] = 0;
 	    }
@@ -675,21 +681,18 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
     case '&':
 	if (len > 1)
 	    break;
-	PL_ampergv = gv;
 	PL_sawampersand = TRUE;
 	goto ro_magicalize;
 
     case '`':
 	if (len > 1)
 	    break;
-	PL_leftgv = gv;
 	PL_sawampersand = TRUE;
 	goto ro_magicalize;
 
     case '\'':
 	if (len > 1)
 	    break;
-	PL_rightgv = gv;
 	PL_sawampersand = TRUE;
 	goto ro_magicalize;
 
@@ -883,7 +886,6 @@ Perl_gv_check(pTHX_ HV *stash)
     register I32 i;
     register GV *gv;
     HV *hv;
-    GV *filegv;
 
     if (!HvARRAY(stash))
 	return;
@@ -896,14 +898,25 @@ Perl_gv_check(pTHX_ HV *stash)
 		     gv_check(hv);              /* nested package */
 	    }
 	    else if (isALPHA(*HeKEY(entry))) {
+		char *file;
 		gv = (GV*)HeVAL(entry);
 		if (SvTYPE(gv) != SVt_PVGV || GvMULTI(gv))
 		    continue;
-		PL_curcop->cop_line = GvLINE(gv);
-		filegv = GvFILEGV(gv);
-		PL_curcop->cop_filegv = filegv;
-		if (filegv && GvMULTI(filegv))	/* Filename began with slash */
+		file = GvFILE(gv);
+		/* performance hack: if filename is absolute and it's a standard
+		 * module, don't bother warning */
+		if (file
+		    && PERL_FILE_IS_ABSOLUTE(file)
+		    && (instr(file, "/lib/") || instr(file, ".pm")))
+		{
 		    continue;
+		}
+		CopLINE_set(PL_curcop, GvLINE(gv));
+#ifdef USE_ITHREADS
+		CopFILE(PL_curcop) = file;	/* set for warning */
+#else
+		CopFILEGV(PL_curcop) = gv_fetchfile(file);
+#endif
 		Perl_warner(aTHX_ WARN_ONCE,
 			"Name \"%s::%s\" used only once: possible typo",
 			HvNAME(stash), GvNAME(gv));
@@ -924,6 +937,8 @@ Perl_newGVgen(pTHX_ char *pack)
 GP*
 Perl_gp_ref(pTHX_ GP *gp)
 {
+    if (!gp)
+	return (GP*)NULL;
     gp->gp_refcnt++;
     if (gp->gp_cv) {
 	if (gp->gp_cvgen) {

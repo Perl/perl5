@@ -3,7 +3,7 @@ use Config;
 
 sub to_string {
     my ($value) = @_;
-    $value =~ s/\\/\\\\'/g;
+    $value =~ s/\\/\\\\/g;
     $value =~ s/'/\\'/g;
     return "'$value'";
 }
@@ -28,7 +28,7 @@ package DynaLoader;
 #
 # Tim.Bunce@ig.co.uk, August 1994
 
-$VERSION = $VERSION = "1.03";	# avoid typo warning
+$VERSION = "1.03";	# avoid typo warning
 
 require AutoLoader;
 *AUTOLOAD = \&AutoLoader::AUTOLOAD;
@@ -72,6 +72,7 @@ print OUT <<'EOT';
 # See dl_expandspec() for more details. Should be harmless but
 # inefficient to define on systems that don't need it.
 $do_expand = $Is_VMS = $^O eq 'VMS';
+$Is_MacOS  = $^O eq 'MacOS';
 
 @dl_require_symbols = ();       # names of symbols we need
 @dl_resolve_using   = ();       # names of files to link with
@@ -95,13 +96,22 @@ print OUT <<'EOT';
 
 # Add to @dl_library_path any extra directories we can gather
 # from environment variables.
-push(@dl_library_path, split(/:/, $ENV{$Config::Config{ldlibpthname}}))
-    if exists      $Config::Config{ldlibpthname}        &&
-                   $Config::Config{ldlibpthname}  ne '' &&
-       exists $ENV{$Config::Config{ldlibpthname}}       ;;
+if ($Is_MacOS) {
+    push(@dl_library_path, split(/,/, $ENV{LD_LIBRARY_PATH}))
+   	if exists $ENV{LD_LIBRARY_PATH};
+} else {
+    push(@dl_library_path, split(/:/, $ENV{$Config::Config{ldlibpthname}}))
+    	if exists      $Config::Config{ldlibpthname}        &&
+                       $Config::Config{ldlibpthname}  ne '' &&
+                exists $ENV{$Config::Config{ldlibpthname}}       ;;
+    push(@dl_library_path, split(/:/, $ENV{$Config::Config{ldlibpthname}}))
+    	if exists      $Config::Config{ldlibpthname}        &&
+                       $Config::Config{ldlibpthname}  ne '' &&
+                exists $ENV{$Config::Config{ldlibpthname}}       ;;
 # E.g. HP-UX supports both its native SHLIB_PATH *and* LD_LIBRARY_PATH.
 push(@dl_library_path, split(/:/, $ENV{LD_LIBRARY_PATH}))
     if exists $ENV{LD_LIBRARY_PATH};
+}
 
 # No prizes for guessing why we don't say 'bootstrap DynaLoader;' here.
 boot_DynaLoader('DynaLoader') if defined(&boot_DynaLoader) &&
@@ -118,6 +128,14 @@ if ($dl_debug) {
 
 
 sub croak   { require Carp; Carp::croak(@_)   }
+
+sub bootstrap_inherit {
+    my $module = $_[0];
+    local *isa = *{"$module\::ISA"};
+    local @isa = (@isa, 'DynaLoader');
+    # Cannot goto due to delocalization.  Will report errors on a wrong line?
+    bootstrap(@_);
+}
 
 # The bootstrap function cannot be autoloaded (without complications)
 # so we define it here:
@@ -148,18 +166,27 @@ sub bootstrap {
     # It may also edit @modparts if required.
     $modfname = &mod2fname(\@modparts) if defined &mod2fname;
 
-    my $modpname = join('/',@modparts);
+    my $modpname = join(($Is_MacOS ? ':' : '/'),@modparts);
 
     print STDERR "DynaLoader::bootstrap for $module ",
-		"(auto/$modpname/$modfname.$dl_dlext)\n" if $dl_debug;
+		($Is_MacOS
+                      ? "(auto/$modpname/$modfname.$dl_dlext)\n" :
+		 	"(:auto:$modpname:$modfname.$dl_dlext)\n")
+	if $dl_debug;
 
     foreach (@INC) {
 	chop($_ = VMS::Filespec::unixpath($_)) if $Is_VMS;
-	my $dir = "$_/auto/$modpname";
+	my $dir;
+	if ($Is_MacOS) {
+	    chop $_  if /:$/;
+	    $dir = "$_:auto:$modpname";
+	} else {
+	    $dir = "$_/auto/$modpname";
+	}
 	next unless -d $dir; # skip over uninteresting directories
 
 	# check for common cases to avoid autoload of dl_findfile
-	my $try = "$dir/$modfname.$dl_dlext";
+	my $try = $Is_MacOS ? "$dir:$modfname.$dl_dlext" : "$dir/$modfname.$dl_dlext";
 	last if $file = ($do_expand) ? dl_expandspec($try) : (-f $try && $try);
 
 	# no luck here, save dir for possible later dl_findfile search
@@ -254,6 +281,12 @@ print OUT <<'EOT';
 	    last arg unless wantarray;
 	    next;
         }
+	elsif ($Is_MacOS) {
+	    if (m/:/ && -f $_) {
+	    	push(@found,$_);
+	    	last arg unless wantarray;
+	    }
+	}
         elsif (m:/: && -f $_ && !$do_expand) {
 	    push(@found,$_);
 	    last arg unless wantarray;
@@ -264,6 +297,30 @@ print OUT <<'EOT';
         #  Using a -L prefix is the preferred option (faster and more robust)
         if (m:^-L:) { s/^-L//; push(@dirs, $_); next; }
 
+	if ($Is_MacOS) {
+            #  Otherwise we try to try to spot directories by a heuristic
+            #  (this is a more complicated issue than it first appears)
+	    if (m/:/ && -d $_) {   push(@dirs, $_); next; }
+            #  Only files should get this far...
+            my(@names, $name);    # what filenames to look for
+	    s/^-l//;
+	    push(@names, $_);
+            foreach $dir (@dirs, @dl_library_path) {
+            	next unless -d $dir;
+		$dir =~ s/^([^:]+)$/:$1/;
+		$dir =~ s/:$//;
+            	foreach $name (@names) {
+	    	    my($file) = "$dir:$name";
+                    print STDERR " checking in $dir for $name\n" if $dl_debug;
+		    if (-f $file) {
+                    	push(@found, $file);
+                    	next arg; # no need to look any further
+                    }
+                }
+	    }
+	    next;
+	}
+	
         #  Otherwise we try to try to spot directories by a heuristic
         #  (this is a more complicated issue than it first appears)
         if (m:/: && -d $_) {   push(@dirs, $_); next; }

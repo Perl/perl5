@@ -411,7 +411,7 @@ PP(pp_indread)
 
 PP(pp_rcatline)
 {
-    PL_last_in_gv = cGVOP->op_gv;
+    PL_last_in_gv = cGVOP_gv;
     return do_readline();
 }
 
@@ -475,8 +475,8 @@ PP(pp_die)
 		HV *stash = SvSTASH(SvRV(error));
 		GV *gv = gv_fetchmethod(stash, "PROPAGATE");
 		if (gv) {
-		    SV *file = sv_2mortal(newSVsv(GvSV(PL_curcop->cop_filegv)));
-		    SV *line = sv_2mortal(newSViv(PL_curcop->cop_line));
+		    SV *file = sv_2mortal(newSVpv(CopFILE(PL_curcop),0));
+		    SV *line = sv_2mortal(newSViv(CopLINE(PL_curcop)));
 		    EXTEND(SP, 3);
 		    PUSHMARK(SP);
 		    PUSHs(error);
@@ -1138,9 +1138,9 @@ S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
     SAVETMPS;
 
     push_return(retop);
-    PUSHBLOCK(cx, CXt_SUB, PL_stack_sp);
+    PUSHBLOCK(cx, CXt_FORMAT, PL_stack_sp);
     PUSHFORMAT(cx);
-    SAVESPTR(PL_curpad);
+    SAVEVPTR(PL_curpad);
     PL_curpad = AvARRAY((AV*)svp[1]);
 
     setdefout(gv);	    /* locally select filehandle so $% et al work */
@@ -1592,10 +1592,10 @@ PP(pp_send)
     djSP; dMARK; dORIGMARK; dTARGET;
     GV *gv;
     IO *io;
-    int offset;
+    Off_t offset;
     SV *bufsv;
     char *buffer;
-    int length;
+    Off_t length;
     STRLEN blen;
     MAGIC *mg;
 
@@ -1618,7 +1618,11 @@ PP(pp_send)
 	goto say_undef;
     bufsv = *++MARK;
     buffer = SvPV(bufsv, blen);
+#if Off_t_SIZE > IVSIZE
+    length = SvNVx(*++MARK);
+#else
     length = SvIVx(*++MARK);
+#endif
     if (length < 0)
 	DIE(aTHX_ "Negative length");
     SETERRNO(0,0);
@@ -1634,7 +1638,11 @@ PP(pp_send)
     }
     else if (PL_op->op_type == OP_SYSWRITE) {
 	if (MARK < SP) {
+#if Off_t_SIZE > IVSIZE
+	    offset = SvNVx(*++MARK);
+#else
 	    offset = SvIVx(*++MARK);
+#endif
 	    if (offset < 0) {
 		if (-offset > blen)
 		    DIE(aTHX_ "Offset outside string");
@@ -1695,10 +1703,28 @@ PP(pp_eof)
     GV *gv;
     MAGIC *mg;
 
-    if (MAXARG <= 0)
-	gv = PL_last_in_gv;
+    if (MAXARG <= 0) {
+	if (PL_op->op_flags & OPf_SPECIAL) {	/* eof() */
+	    IO *io;
+	    gv = PL_last_in_gv = PL_argvgv;
+	    io = GvIO(gv);
+	    if (io && !IoIFP(io)) {
+		if ((IoFLAGS(io) & IOf_START) && av_len(GvAVn(gv)) < 0) {
+		    IoLINES(io) = 0;
+		    IoFLAGS(io) &= ~IOf_START;
+		    do_open(gv, "-", 1, FALSE, O_RDONLY, 0, Nullfp);
+		    sv_setpvn(GvSV(gv), "-", 1);
+		    SvSETMAGIC(GvSV(gv));
+		}
+		else if (!nextargv(gv))
+		    RETPUSHYES;
+	    }
+	}
+	else
+	    gv = PL_last_in_gv;			/* eof */
+    }
     else
-	gv = PL_last_in_gv = (GV*)POPs;
+	gv = PL_last_in_gv = (GV*)POPs;		/* eof(FH) */
 
     if (gv && (mg = SvTIED_mg((SV*)gv, 'q'))) {
 	PUSHMARK(SP);
@@ -1737,7 +1763,11 @@ PP(pp_tell)
 	RETURN;
     }
 
+#if LSEEKSIZE > IVSIZE
+    PUSHn( do_tell(gv) );
+#else
     PUSHi( do_tell(gv) );
+#endif
     RETURN;
 }
 
@@ -1751,7 +1781,11 @@ PP(pp_sysseek)
     djSP;
     GV *gv;
     int whence = POPi;
+#if LSEEKSIZE > IVSIZE
+    Off_t offset = (Off_t)SvNVx(POPs);
+#else
     Off_t offset = (Off_t)SvIVx(POPs);
+#endif
     MAGIC *mg;
 
     gv = PL_last_in_gv = (GV*)POPs;
@@ -1773,9 +1807,18 @@ PP(pp_sysseek)
 	PUSHs(boolSV(do_seek(gv, offset, whence)));
     else {
 	Off_t n = do_sysseek(gv, offset, whence);
-	PUSHs((n < 0) ? &PL_sv_undef
-	      : sv_2mortal(n ? newSViv((IV)n)
-			   : newSVpvn(zero_but_true, ZBTLEN)));
+        if (n < 0)
+            PUSHs(&PL_sv_undef);
+        else {
+            SV* sv = n ?
+#if LSEEKSIZE > IVSIZE
+                newSVnv((NV)n)
+#else
+                newSViv((IV)n)
+#endif
+                : newSVpvn(zero_but_true, ZBTLEN);
+            PUSHs(sv_2mortal(sv));
+        }
     }
     RETURN;
 }
@@ -2412,7 +2455,7 @@ PP(pp_stat)
     STRLEN n_a;
 
     if (PL_op->op_flags & OPf_REF) {
-	tmpgv = cGVOP->op_gv;
+	tmpgv = cGVOP_gv;
       do_fstat:
 	if (tmpgv != PL_defgv) {
 	    PL_laststype = OP_STAT;
@@ -2463,14 +2506,26 @@ PP(pp_stat)
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_ino)));
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_mode)));
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_nlink)));
+#if Uid_t_size > IVSIZE
+	PUSHs(sv_2mortal(newSVnv(PL_statcache.st_uid)));
+#else
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_uid)));
+#endif
+#if Gid_t_size > IVSIZE 
+	PUSHs(sv_2mortal(newSVnv(PL_statcache.st_gid)));
+#else
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_gid)));
+#endif
 #ifdef USE_STAT_RDEV
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_rdev)));
 #else
 	PUSHs(sv_2mortal(newSVpvn("", 0)));
 #endif
+#if Off_t_size > IVSIZE
+	PUSHs(sv_2mortal(newSVnv(PL_statcache.st_size)));
+#else
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_size)));
+#endif
 #ifdef BIG_TIME
 	PUSHs(sv_2mortal(newSVnv(PL_statcache.st_atime)));
 	PUSHs(sv_2mortal(newSVnv(PL_statcache.st_mtime)));
@@ -2673,7 +2728,8 @@ PP(pp_ftrowned)
     djSP;
     if (result < 0)
 	RETPUSHUNDEF;
-    if (PL_statcache.st_uid == (PL_op->op_type == OP_FTEOWNED ? PL_euid : PL_uid) )
+    if (PL_statcache.st_uid == (PL_op->op_type == OP_FTEOWNED ?
+				PL_euid : PL_uid) )
 	RETPUSHYES;
     RETPUSHNO;
 }
@@ -2684,7 +2740,7 @@ PP(pp_ftzero)
     djSP;
     if (result < 0)
 	RETPUSHUNDEF;
-    if (!PL_statcache.st_size)
+    if (PL_statcache.st_size == 0)
 	RETPUSHYES;
     RETPUSHNO;
 }
@@ -2695,7 +2751,11 @@ PP(pp_ftsize)
     djSP; dTARGET;
     if (result < 0)
 	RETPUSHUNDEF;
+#if Off_t_size > IVSIZE
+    PUSHn(PL_statcache.st_size);
+#else
     PUSHi(PL_statcache.st_size);
+#endif
     RETURN;
 }
 
@@ -2857,7 +2917,7 @@ PP(pp_fttty)
     STRLEN n_a;
 
     if (PL_op->op_flags & OPf_REF)
-	gv = cGVOP->op_gv;
+	gv = cGVOP_gv;
     else if (isGV(TOPs))
 	gv = (GV*)POPs;
     else if (SvROK(TOPs) && isGV(SvRV(TOPs)))
@@ -2896,9 +2956,10 @@ PP(pp_fttext)
     register SV *sv;
     GV *gv;
     STRLEN n_a;
+    PerlIO *fp;
 
     if (PL_op->op_flags & OPf_REF)
-	gv = cGVOP->op_gv;
+	gv = cGVOP_gv;
     else if (isGV(TOPs))
 	gv = (GV*)POPs;
     else if (SvROK(TOPs) && isGV(SvRV(TOPs)))
@@ -2947,9 +3008,11 @@ PP(pp_fttext)
 		len = 512;
 	}
 	else {
-	    if (ckWARN(WARN_UNOPENED))
+	    if (ckWARN(WARN_UNOPENED)) {
+		gv = cGVOP_gv;
 		Perl_warner(aTHX_ WARN_UNOPENED, "Test on unopened file <%s>",
-		  GvENAME(cGVOP->op_gv));
+			    GvENAME(gv));
+	    }
 	    SETERRNO(EBADF,RMS$_IFI);
 	    RETPUSHUNDEF;
 	}
@@ -2960,21 +3023,19 @@ PP(pp_fttext)
 	PL_statgv = Nullgv;
 	PL_laststatval = -1;
 	sv_setpv(PL_statname, SvPV(sv, n_a));
-#ifdef HAS_OPEN3
-	i = PerlLIO_open3(SvPV(sv, n_a), O_RDONLY, 0);
-#else
-	i = PerlLIO_open(SvPV(sv, n_a), 0);
-#endif
-	if (i < 0) {
+	if (!(fp = PerlIO_open(SvPVX(PL_statname), "r"))) {
 	    if (ckWARN(WARN_NEWLINE) && strchr(SvPV(sv, n_a), '\n'))
 		Perl_warner(aTHX_ WARN_NEWLINE, PL_warn_nl, "open");
 	    RETPUSHUNDEF;
 	}
-	PL_laststatval = PerlLIO_fstat(i, &PL_statcache);
-	if (PL_laststatval < 0)
+	PL_laststatval = PerlLIO_fstat(PerlIO_fileno(fp), &PL_statcache);
+	if (PL_laststatval < 0)	{
+	    (void)PerlIO_close(fp);
 	    RETPUSHUNDEF;
-	len = PerlLIO_read(i, tbuf, 512);
-	(void)PerlLIO_close(i);
+	}
+	do_binmode(fp, '<', TRUE);
+	len = PerlIO_read(fp, tbuf, sizeof(tbuf));
+	(void)PerlIO_close(fp);
 	if (len <= 0) {
 	    if (S_ISDIR(PL_statcache.st_mode) && PL_op->op_type == OP_FTTEXT)
 		RETPUSHNO;		/* special case NFS directories */
@@ -2986,6 +3047,12 @@ PP(pp_fttext)
     /* now scan s to look for textiness */
     /*   XXX ASCII dependent code */
 
+#if defined(DOSISH) || defined(USEMYBINMODE)
+    /* ignore trailing ^Z on short files */
+    if (len && len < sizeof(tbuf) && tbuf[len-1] == 26)
+	--len;
+#endif
+
     for (i = 0; i < len; i++, s++) {
 	if (!*s) {			/* null never allowed in text */
 	    odd += len;
@@ -2995,8 +3062,12 @@ PP(pp_fttext)
         else if (!(isPRINT(*s) || isSPACE(*s))) 
             odd++;
 #else
-	else if (*s & 128)
-	    odd++;
+	else if (*s & 128) {
+#ifdef USE_LOCALE
+	    if (!(PL_op->op_private & OPpLOCALE) || !isALPHA_LC(*s))
+#endif
+		odd++;
+	}
 	else if (*s < 32 &&
 	  *s != '\n' && *s != '\r' && *s != '\b' &&
 	  *s != '\t' && *s != '\f' && *s != 27)
@@ -3149,7 +3220,7 @@ PP(pp_link)
     char *tmps2 = POPpx;
     char *tmps = SvPV(TOPs, n_a);
     TAINT_PROPER("link");
-    SETi( link(tmps, tmps2) >= 0 );
+    SETi( PerlLIO_link(tmps, tmps2) >= 0 );
 #else
     DIE(aTHX_ PL_no_func, "Unsupported function link");
 #endif
@@ -3525,19 +3596,30 @@ PP(pp_fork)
     if (!childpid) {
 	/*SUPPRESS 560*/
 	if (tmpgv = gv_fetchpv("$", TRUE, SVt_PV))
-	    sv_setiv(GvSV(tmpgv), (IV)getpid());
+	    sv_setiv(GvSV(tmpgv), (IV)PerlProc_getpid());
 	hv_clear(PL_pidstatus);	/* no kids, so don't wait for 'em */
     }
     PUSHi(childpid);
     RETURN;
 #else
+#  if defined(USE_ITHREADS) && defined(PERL_IMPLICIT_SYS)
+    djSP; dTARGET;
+    Pid_t childpid;
+
+    EXTEND(SP, 1);
+    PERL_FLUSHALL_FOR_CHILD;
+    childpid = PerlProc_fork();
+    PUSHi(childpid);
+    RETURN;
+#  else
     DIE(aTHX_ PL_no_func, "Unsupported function fork");
+#  endif
 #endif
 }
 
 PP(pp_wait)
 {
-#if !defined(DOSISH) || defined(OS2) || defined(WIN32)
+#if (!defined(DOSISH) || defined(OS2) || defined(WIN32)) && !defined(MACOS_TRADITIONAL) 
     djSP; dTARGET;
     Pid_t childpid;
     int argflags;
@@ -3553,7 +3635,7 @@ PP(pp_wait)
 
 PP(pp_waitpid)
 {
-#if !defined(DOSISH) || defined(OS2) || defined(WIN32)
+#if (!defined(DOSISH) || defined(OS2) || defined(WIN32)) && !defined(MACOS_TRADITIONAL) 
     djSP; dTARGET;
     Pid_t childpid;
     int optype;
@@ -3717,6 +3799,12 @@ PP(pp_exec)
 #  endif
 #endif
     }
+
+#if !defined(HAS_FORK) && defined(USE_ITHREADS) && defined(PERL_IMPLICIT_SYS)
+    if (value >= 0)
+	my_exit(value);
+#endif
+
     SP = ORIGMARK;
     PUSHi(value);
     RETURN;
@@ -3761,7 +3849,7 @@ PP(pp_getpgrp)
 #ifdef BSD_GETPGRP
     pgrp = (I32)BSD_GETPGRP(pid);
 #else
-    if (pid != 0 && pid != getpid())
+    if (pid != 0 && pid != PerlProc_getpid())
 	DIE(aTHX_ "POSIX getpgrp can't take an argument");
     pgrp = getpgrp();
 #endif
@@ -3791,8 +3879,11 @@ PP(pp_setpgrp)
 #ifdef BSD_SETPGRP
     SETi( BSD_SETPGRP(pid, pgrp) >= 0 );
 #else
-    if ((pgrp != 0 && pgrp != getpid()) || (pid != 0 && pid != getpid()))
+    if ((pgrp != 0 && pgrp != PerlProc_getpid())
+	|| (pid != 0 && pid != PerlProc_getpid()))
+    {
 	DIE(aTHX_ "setpgrp can't take arguments");
+    }
     SETi( setpgrp() >= 0 );
 #endif /* USE_BSDPGRP */
     RETURN;

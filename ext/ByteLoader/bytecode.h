@@ -137,6 +137,9 @@ typedef IV IV64;
 	PL_comppad = (AV *)arg;			\
 	pad = AvARRAY(arg);			\
     } STMT_END
+#define BSET_cop_file(cop, arg)		CopFILE_set(cop,arg)
+#define BSET_cop_line(cop, arg)		CopLINE_set(cop,arg)
+#define BSET_cop_stashpv(cop, arg)	CopSTASHPV_set(cop,arg)
 
 #define BSET_OBJ_STORE(obj, ix)		\
 	(I32)ix > bytecode_obj_list_fill ?	\

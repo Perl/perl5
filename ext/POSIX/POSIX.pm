@@ -9,10 +9,10 @@ require Config;
 use Symbol;
 
 require Exporter;
-require DynaLoader;
-@ISA = qw(Exporter DynaLoader);
+use XSLoader ();
+@ISA = qw(Exporter);
 
-$VERSION = $VERSION = "1.03" ;
+$VERSION = "1.03" ;
 
 %EXPORT_TAGS = (
 
@@ -195,7 +195,7 @@ sub import {
 }
 
 
-bootstrap POSIX $VERSION;
+XSLoader::load 'POSIX', $VERSION;
 
 my $EINVAL = constant("EINVAL", 0);
 my $EAGAIN = constant("EAGAIN", 0);

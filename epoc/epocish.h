@@ -90,12 +90,6 @@
 /* #define ALTERNATE_SHEBANG "#!" / **/
 
 
-#ifndef SIGABRT
-#    define SIGABRT SIGILL
-#endif
-#ifndef SIGILL
-#    define SIGILL 6         /* blech */
-#endif
 #define ABORT() abort();
 
 /*

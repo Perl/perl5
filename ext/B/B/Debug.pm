@@ -60,17 +60,15 @@ sub B::PMOP::debug {
 sub B::COP::debug {
     my ($op) = @_;
     $op->B::OP::debug();
-    my ($filegv) = $op->filegv;
-    printf <<'EOT', $op->label, ${$op->stash}, $$filegv, $op->seq, $op->arybase, $op->line, ${$op->warnings};
+    printf <<'EOT', $op->label, $op->stashpv, $op->file, $op->seq, $op->arybase, $op->line, ${$op->warnings};
 	cop_label	%s
-	cop_stash	0x%x
-	cop_filegv	0x%x
+	cop_stashpv	%s
+	cop_file	%s
 	cop_seq		%d
 	cop_arybase	%d
 	cop_line	%d
 	cop_warnings	0x%x
 EOT
-    $filegv->debug;
 }
 
 sub B::SVOP::debug {
@@ -86,11 +84,10 @@ sub B::PVOP::debug {
     printf "\top_pv\t\t0x%x\n", $op->pv;
 }
 
-sub B::GVOP::debug {
+sub B::PADOP::debug {
     my ($op) = @_;
     $op->B::OP::debug();
-    printf "\top_gv\t\t0x%x\n", ${$op->gv};
-    $op->gv->debug;
+    printf "\top_padix\t\t%ld\n", $op->padix;
 }
 
 sub B::CVOP::debug {
@@ -178,14 +175,14 @@ sub B::CV::debug {
     my ($start) = $sv->START;
     my ($root) = $sv->ROOT;
     my ($padlist) = $sv->PADLIST;
+    my ($file) = $sv->FILE;
     my ($gv) = $sv->GV;
-    my ($filegv) = $sv->FILEGV;
-    printf <<'EOT', $$stash, $$start, $$root, $$gv, $$filegv, $sv->DEPTH, $padlist, ${$sv->OUTSIDE};
+    printf <<'EOT', $$stash, $$start, $$root, $$gv, $file, $sv->DEPTH, $padlist, ${$sv->OUTSIDE};
 	STASH		0x%x
 	START		0x%x
 	ROOT		0x%x
 	GV		0x%x
-	FILEGV		0x%x
+	FILE		%s
 	DEPTH		%d
 	PADLIST		0x%x			       
 	OUTSIDE		0x%x
@@ -193,7 +190,6 @@ EOT
     $start->debug if $start;
     $root->debug if $root;
     $gv->debug if $gv;
-    $filegv->debug if $filegv;
     $padlist->debug if $padlist;
 }
 
@@ -220,7 +216,7 @@ sub B::GV::debug {
     my ($av) = $gv->AV;
     my ($cv) = $gv->CV;
     $gv->B::SV::debug;
-    printf <<'EOT', $gv->NAME, $gv->STASH->NAME, $gv->STASH, $$sv, $gv->GvREFCNT, $gv->FORM, $$av, ${$gv->HV}, ${$gv->EGV}, $$cv, $gv->CVGEN, $gv->LINE, $gv->FILEGV, $gv->GvFLAGS;
+    printf <<'EOT', $gv->NAME, $gv->STASH->NAME, $gv->STASH, $$sv, $gv->GvREFCNT, $gv->FORM, $$av, ${$gv->HV}, ${$gv->EGV}, $$cv, $gv->CVGEN, $gv->LINE, $gv->FILE, $gv->GvFLAGS;
 	NAME		%s
 	STASH		%s (0x%x)
 	SV		0x%x
@@ -232,7 +228,7 @@ sub B::GV::debug {
 	CV		0x%x
 	CVGEN		%d
 	LINE		%d
-	FILEGV		0x%x
+	FILE		%s
 	GvFLAGS		0x%x
 EOT
     $sv->debug if $sv;

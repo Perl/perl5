@@ -9,11 +9,12 @@
 #undef PERLVARA
 #define PERLVARA(x, n, y)
 #undef PERLVARI
-#define PERLVARI(x, y, z) PL_##x = z;
+#define PERLVARI(x, y, z) interp.x = z;
 #undef PERLVARIC
-#define PERLVARIC(x, y, z) PL_##x = z;
+#define PERLVARIC(x, y, z) interp.x = z;
 
-CPerlObj::CPerlObj(IPerlMem* ipM, IPerlEnv* ipE, IPerlStdIO* ipStd,
+CPerlObj::CPerlObj(IPerlMem* ipM, IPerlMem* ipMS, IPerlMem* ipMP,
+		   IPerlEnv* ipE, IPerlStdIO* ipStd,
 		   IPerlLIO* ipLIO, IPerlDir* ipD, IPerlSock* ipS,
 		   IPerlProc* ipP)
 {
@@ -21,9 +22,10 @@ CPerlObj::CPerlObj(IPerlMem* ipM, IPerlEnv* ipE, IPerlStdIO* ipStd,
 
 #include "thrdvar.h"
 #include "intrpvar.h"
-#include "perlvars.h"
 
     PL_Mem = ipM;
+    PL_MemShared = ipMS;
+    PL_MemParse = ipMP;
     PL_Env = ipE;
     PL_StdIO = ipStd;
     PL_LIO = ipLIO;
@@ -37,8 +39,10 @@ CPerlObj::operator new(size_t nSize, IPerlMem *pvtbl)
 {
     if(pvtbl)
 	return pvtbl->pMalloc(pvtbl, nSize);
-
+#ifndef __MINGW32__
+    /* operator new is supposed to throw std::bad_alloc */
     return NULL;
+#endif
 }
 
 void
@@ -46,11 +50,6 @@ CPerlObj::operator delete(void *pPerl, IPerlMem *pvtbl)
 {
     if(pvtbl)
 	pvtbl->pFree(pvtbl, pPerl);
-}
-
-void
-CPerlObj::Init(void)
-{
 }
 
 #ifdef WIN32		/* XXX why are these needed? */

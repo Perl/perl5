@@ -87,6 +87,24 @@ struct regnode_2 {
     U16 arg2;
 };
 
+#define ANYOF_BITMAP_SIZE	32	/* 256 b/(8 b/B) */
+#define ANYOF_CLASSBITMAP_SIZE	 4
+
+struct regnode_charclass {
+    U8	flags;
+    U8  type;
+    U16 next_off;
+    char bitmap[ANYOF_BITMAP_SIZE];
+};
+
+struct regnode_charclass_class {
+    U8	flags;
+    U8  type;
+    U16 next_off;
+    char bitmap[ANYOF_BITMAP_SIZE];
+    char classflags[ANYOF_CLASSBITMAP_SIZE];
+};
+
 /* XXX fix this description.
    Impose a limit of REG_INFTY on various pattern matching operations
    to limit stack growth and to avoid "infinite" recursions.
@@ -160,14 +178,19 @@ struct regnode_2 {
 
 #define SIZE_ONLY (PL_regcode == &PL_regdummy)
 
-/* Flags for first parameter byte [0] of ANYOF */
+/* Flags for node->flags of ANYOF */
 
 #define ANYOF_CLASS	0x08
 #define ANYOF_INVERT	0x04
 #define ANYOF_FOLD	0x02
 #define ANYOF_LOCALE	0x01
 
-/* Character classes for bytes [1..4] of ANYOF */
+/* Used for regstclass only */
+#define ANYOF_EOS	0x10		/* Can match an empty string too */
+
+/* Character classes for node->classflags of ANYOF */
+/* Should be synchronized with a table in regprop() */
+/* 2n should pair with 2n+1 */
 
 #define ANYOF_ALNUM	 0	/* \w, utf8::IsWord, isALNUM() */
 #define ANYOF_NALNUM	 1
@@ -207,29 +230,31 @@ struct regnode_2 {
 
 /* Utility macros for the bitmap and classes of ANYOF */
 
-#define ANYOF_OPND_SIZE	  	 1
-#define ANYOF_CLASS_SIZE	 4
-#define ANYOF_BITMAP_SIZE	32	/* 256 b/(8 b/B) */
-#define ANYOF_SIZE	(ANYOF_OPND_SIZE+ANYOF_CLASS_SIZE+ANYOF_BITMAP_SIZE)
+#define ANYOF_SIZE		(sizeof(struct regnode_charclass))
+#define ANYOF_CLASS_SIZE	(sizeof(struct regnode_charclass_class))
 
-#define ANYOF_FLAGS(p)		((p)[0])
+#define ANYOF_FLAGS(p)		((p)->flags)
 #define ANYOF_FLAGS_ALL		0xff
 
 #define ANYOF_BIT(c)		(1 << ((c) & 7))
 
-#define ANYOF_CLASS_OFFSET	ANYOF_OPND_SIZE
-#define ANYOF_CLASS_BYTE(p, c)	((p)[ANYOF_CLASS_OFFSET + (((c) >> 3) & 3)])
+#define ANYOF_CLASS_BYTE(p, c)	(((struct regnode_charclass_class*)(p))->classflags[((c) >> 3) & 3])
 #define ANYOF_CLASS_SET(p, c)	(ANYOF_CLASS_BYTE(p, c) |=  ANYOF_BIT(c))
 #define ANYOF_CLASS_CLEAR(p, c)	(ANYOF_CLASS_BYTE(p, c) &= ~ANYOF_BIT(c))
 #define ANYOF_CLASS_TEST(p, c)	(ANYOF_CLASS_BYTE(p, c) &   ANYOF_BIT(c))
 
-#define ANYOF_BITMAP_OFFSET	(ANYOF_CLASS_OFFSET+ANYOF_CLASS_SIZE)
-#define ANYOF_BITMAP_BYTE(p, c)	((p)[ANYOF_BITMAP_OFFSET + (((c) >> 3) & 31)])
+#define ANYOF_CLASS_ZERO(ret)	Zero(((struct regnode_charclass_class*)(ret))->classflags, ANYOF_CLASSBITMAP_SIZE, char)
+#define ANYOF_BITMAP_ZERO(ret)	Zero(((struct regnode_charclass*)(ret))->bitmap, ANYOF_BITMAP_SIZE, char)
+
+#define ANYOF_BITMAP(p)		(((struct regnode_charclass*)(p))->bitmap)
+#define ANYOF_BITMAP_BYTE(p, c)	(ANYOF_BITMAP(p)[((c) >> 3) & 31])
 #define ANYOF_BITMAP_SET(p, c)	(ANYOF_BITMAP_BYTE(p, c) |=  ANYOF_BIT(c))
 #define ANYOF_BITMAP_CLEAR(p,c)	(ANYOF_BITMAP_BYTE(p, c) &= ~ANYOF_BIT(c))
 #define ANYOF_BITMAP_TEST(p, c)	(ANYOF_BITMAP_BYTE(p, c) &   ANYOF_BIT(c))
 
-#define ANY_SKIP ((ANYOF_SIZE - 1)/sizeof(regnode) + 1)
+#define ANYOF_SKIP		((ANYOF_SIZE - 1)/sizeof(regnode))
+#define ANYOF_CLASS_SKIP	((ANYOF_CLASS_SIZE - 1)/sizeof(regnode))
+#define ANYOF_CLASS_ADD_SKIP	(ANYOF_CLASS_SKIP - ANYOF_SKIP)
 
 /*
  * Utility definitions.

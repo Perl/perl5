@@ -46,7 +46,9 @@ sub remove
 sub exists
 {
  my $vec = shift;
- $vec->[$vec->_fileno(shift) + FIRST_FD];
+ my $fno = $vec->_fileno(shift);
+ return undef unless defined $fno;
+ $vec->[$fno + FIRST_FD];
 }
 
 

@@ -45,11 +45,12 @@ TOP:
     }
     if (isIDFIRST(*s)) {
 	while (*++s)
-	    if (!isALNUM(*s))
+	    if (!isALNUM(*s)) {
 		if (*s == ':')
 		    goto TOP;
 		else
 		    return 1;
+	    }
     }
     else 
 	return 1;
@@ -384,7 +385,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		
 		ilen = inamelen;
 		sv_setiv(ixsv, ix);
-                (void) sprintf(iname+ilen, "%ld", ix);
+                (void) sprintf(iname+ilen, "%"IVdf, (IV)ix);
 		ilen = strlen(iname);
 		iname[ilen++] = ']'; iname[ilen] = '\0';
 		if (indent >= 3) {
@@ -584,7 +585,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	if (SvIOK(val)) {
             STRLEN len;
 	    i = SvIV(val);
-            (void) sprintf(tmpbuf, "%d", i);
+            (void) sprintf(tmpbuf, "%"IVdf, (IV)i);
             len = strlen(tmpbuf);
 	    sv_catpvn(retval, tmpbuf, len);
 	}
@@ -705,7 +706,7 @@ Data_Dumper_Dumpxs(href, ...)
 	    SV **svp;
 	    SV *val, *name, *pad, *xpad, *apad, *sep, *tmp, *varname;
 	    SV *freezer, *toaster, *bless;
-	    I32 purity, deepcopy, quotekeys, maxdepth;
+	    I32 purity, deepcopy, quotekeys, maxdepth = 0;
 	    char tmpbuf[1024];
 	    I32 gimme = GIMME;
 
@@ -838,7 +839,7 @@ Data_Dumper_Dumpxs(href, ...)
 			STRLEN nchars = 0;
 			sv_setpvn(name, "$", 1);
 			sv_catsv(name, varname);
-			(void) sprintf(tmpbuf, "%ld", i+1);
+			(void) sprintf(tmpbuf, "%"IVdf, (IV)(i+1));
 			nchars = strlen(tmpbuf);
 			sv_catpvn(name, tmpbuf, nchars);
 		    }

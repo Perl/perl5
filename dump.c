@@ -30,7 +30,7 @@ void
 Perl_dump_vindent(pTHX_ I32 level, PerlIO *file, const char* pat, va_list *args)
 {
     dTHR;
-    PerlIO_printf(file, "%*s", level*PL_dumpindent, "");
+    PerlIO_printf(file, "%*s", (int)(level*PL_dumpindent), "");
     PerlIO_vprintf(file, pat, *args);
 }
 
@@ -377,7 +377,9 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
 	PerlIO_printf(file, "%-4d", o->op_seq);
     else
 	PerlIO_printf(file, "    ");
-    PerlIO_printf(file, "%*sTYPE = %s  ===> ", PL_dumpindent*level-4, "", PL_op_name[o->op_type]);
+    PerlIO_printf(file,
+		  "%*sTYPE = %s  ===> ",
+		  (int)(PL_dumpindent*level-4), "", PL_op_name[o->op_type]);
     if (o->op_next) {
 	if (o->op_seq)
 	    PerlIO_printf(file, "%d\n", o->op_next->op_seq);
@@ -510,30 +512,41 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
     }
 
     switch (o->op_type) {
+    case OP_AELEMFAST:
     case OP_GVSV:
     case OP_GV:
-	if (cGVOPo->op_gv) {
+#ifdef USE_ITHREADS
+	Perl_dump_indent(aTHX_ level, file, "PADIX = %d\n", cPADOPo->op_padix);
+#else
+	if (cSVOPo->op_sv) {
 	    SV *tmpsv = NEWSV(0,0);
 	    ENTER;
 	    SAVEFREESV(tmpsv);
-	    gv_fullname3(tmpsv, cGVOPo->op_gv, Nullch);
+	    gv_fullname3(tmpsv, (GV*)cSVOPo->op_sv, Nullch);
 	    Perl_dump_indent(aTHX_ level, file, "GV = %s\n", SvPV(tmpsv, n_a));
 	    LEAVE;
 	}
 	else
 	    Perl_dump_indent(aTHX_ level, file, "GV = NULL\n");
+#endif
 	break;
     case OP_CONST:
+	Perl_dump_indent(aTHX_ level, file, "SV = %s\n", SvPEEK(cSVOPo_sv));
+	break;
     case OP_METHOD_NAMED:
 	Perl_dump_indent(aTHX_ level, file, "SV = %s\n", SvPEEK(cSVOPo->op_sv));
 	break;
     case OP_SETSTATE:
     case OP_NEXTSTATE:
     case OP_DBSTATE:
-	if (cCOPo->cop_line)
-	    Perl_dump_indent(aTHX_ level, file, "LINE = %d\n",cCOPo->cop_line);
+	if (CopLINE(cCOPo))
+	    Perl_dump_indent(aTHX_ level, file, "LINE = %d\n",CopLINE(cCOPo));
+	if (CopSTASHPV(cCOPo))
+	    Perl_dump_indent(aTHX_ level, file, "PACKAGE = \"%s\"\n",
+			     CopSTASHPV(cCOPo));
 	if (cCOPo->cop_label)
-	    Perl_dump_indent(aTHX_ level, file, "LABEL = \"%s\"\n",cCOPo->cop_label);
+	    Perl_dump_indent(aTHX_ level, file, "LABEL = \"%s\"\n",
+			     cCOPo->cop_label);
 	break;
     case OP_ENTERLOOP:
 	Perl_dump_indent(aTHX_ level, file, "REDO ===> ");
@@ -569,6 +582,15 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
     case OP_QR:
     case OP_SUBST:
 	do_pmop_dump(level, file, cPMOPo);
+	break;
+    case OP_LEAVE:
+    case OP_LEAVEEVAL:
+    case OP_LEAVESUB:
+    case OP_LEAVESUBLV:
+    case OP_LEAVEWRITE:
+    case OP_SCOPE:
+	if (o->op_private & OPpREFCOUNTED)
+	    Perl_dump_indent(aTHX_ level, file, "REFCNT = %"UVuf"\n", (UV)o->op_targ);
 	break;
     default:
 	break;
@@ -612,7 +634,8 @@ void
 Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, MAGIC *mg, I32 nest, I32 maxnest, bool dumpops, STRLEN pvlim)
 {
     for (; mg; mg = mg->mg_moremagic) {
- 	Perl_dump_indent(aTHX_ level, file, "  MAGIC = 0x%lx\n", (long)mg);
+ 	Perl_dump_indent(aTHX_ level, file,
+			 "  MAGIC = 0x%"UVxf"\n", PTR2UV(mg));
  	if (mg->mg_virtual) {
             MGVTBL *v = mg->mg_virtual;
  	    char *s = 0;
@@ -646,7 +669,7 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, MAGIC *mg, I32 nest, I32 maxne
 	    if (s)
 	        Perl_dump_indent(aTHX_ level, file, "    MG_VIRTUAL = &PL_vtbl_%s\n", s);
 	    else
-	        Perl_dump_indent(aTHX_ level, file, "    MG_VIRTUAL = 0x%lx\n", (long)v);
+	        Perl_dump_indent(aTHX_ level, file, "    MG_VIRTUAL = 0x%"UVxf"\n", PTR2UV(v));
         }
 	else
 	    Perl_dump_indent(aTHX_ level, file, "    MG_VIRTUAL = 0\n");
@@ -671,14 +694,14 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, MAGIC *mg, I32 nest, I32 maxne
 	        Perl_dump_indent(aTHX_ level, file, "      MINMATCH\n");
         }
 	if (mg->mg_obj) {
-	    Perl_dump_indent(aTHX_ level, file, "    MG_OBJ = 0x%lx\n", (long)mg->mg_obj);
+	    Perl_dump_indent(aTHX_ level, file, "    MG_OBJ = 0x%"UVxf"\n", PTR2UV(mg->mg_obj));
 	    if (mg->mg_flags & MGf_REFCOUNTED)
 		do_sv_dump(level+2, file, mg->mg_obj, nest+1, maxnest, dumpops, pvlim); /* MG is already +1 */
 	}
         if (mg->mg_len)
 	    Perl_dump_indent(aTHX_ level, file, "    MG_LEN = %d\n", mg->mg_len);
         if (mg->mg_ptr) {
-	    Perl_dump_indent(aTHX_ level, file, "    MG_PTR = 0x%lx", (long)mg->mg_ptr);
+	    Perl_dump_indent(aTHX_ level, file, "    MG_PTR = 0x%"UVxf, PTR2UV(mg->mg_ptr));
 	    if (mg->mg_len >= 0) {
 		SV *sv = newSVpvn("", 0);
                 PerlIO_printf(file, " %s", pv_display(sv, mg->mg_ptr, mg->mg_len, 0, pvlim));
@@ -705,7 +728,7 @@ Perl_magic_dump(pTHX_ MAGIC *mg)
 void
 Perl_do_hv_dump(pTHX_ I32 level, PerlIO *file, char *name, HV *sv)
 {
-    Perl_dump_indent(aTHX_ level, file, "%s = 0x%lx", name, (long)sv);
+    Perl_dump_indent(aTHX_ level, file, "%s = 0x%"UVxf, name, PTR2UV(sv));
     if (sv && HvNAME(sv))
 	PerlIO_printf(file, "\t\"%s\"\n", HvNAME(sv));
     else
@@ -715,7 +738,7 @@ Perl_do_hv_dump(pTHX_ I32 level, PerlIO *file, char *name, HV *sv)
 void
 Perl_do_gv_dump(pTHX_ I32 level, PerlIO *file, char *name, GV *sv)
 {
-    Perl_dump_indent(aTHX_ level, file, "%s = 0x%lx", name, (long)sv);
+    Perl_dump_indent(aTHX_ level, file, "%s = 0x%"UVxf, name, PTR2UV(sv));
     if (sv && GvNAME(sv))
 	PerlIO_printf(file, "\t\"%s\"\n", GvNAME(sv));
     else
@@ -725,7 +748,7 @@ Perl_do_gv_dump(pTHX_ I32 level, PerlIO *file, char *name, GV *sv)
 void
 Perl_do_gvgv_dump(pTHX_ I32 level, PerlIO *file, char *name, GV *sv)
 {
-    Perl_dump_indent(aTHX_ level, file, "%s = 0x%lx", name, (long)sv);
+    Perl_dump_indent(aTHX_ level, file, "%s = 0x%"UVxf, name, PTR2UV(sv));
     if (sv && GvNAME(sv)) {
 	PerlIO_printf(file, "\t\"");
 	if (GvSTASH(sv) && HvNAME(GvSTASH(sv)))
@@ -884,7 +907,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	PerlIO_printf(file, "PVIO%s\n", s);
 	break;
     default:
-	PerlIO_printf(file, "UNKNOWN(0x%x) %s\n", type, s);
+	PerlIO_printf(file, "UNKNOWN(0x%"UVxf") %s\n", (UV)type, s);
 	return;
     }
     if (type >= SVt_PVIV || type == SVt_IV) {
@@ -1058,7 +1081,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	Perl_dump_indent(aTHX_ level, file, "  XSUB = 0x%"UVxf"\n", PTR2UV(CvXSUB(sv)));
 	Perl_dump_indent(aTHX_ level, file, "  XSUBANY = %"IVdf"\n", (IV)CvXSUBANY(sv).any_i32);
  	do_gvgv_dump(level, file, "  GVGV::GV", CvGV(sv));
-	do_gv_dump(level, file, "  FILEGV", CvFILEGV(sv));
+	Perl_dump_indent(aTHX_ level, file, "  FILE = \"%s\"\n", CvFILE(sv));
 	Perl_dump_indent(aTHX_ level, file, "  DEPTH = %"IVdf"\n", (IV)CvDEPTH(sv));
 #ifdef USE_THREADS
 	Perl_dump_indent(aTHX_ level, file, "  MUTEXP = 0x%"UVxf"\n", PTR2UV(CvMUTEXP(sv)));
@@ -1115,10 +1138,10 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	Perl_dump_indent(aTHX_ level, file, "    HV = 0x%"UVxf"\n", PTR2UV(GvHV(sv)));
 	Perl_dump_indent(aTHX_ level, file, "    CV = 0x%"UVxf"\n", PTR2UV(GvCV(sv)));
 	Perl_dump_indent(aTHX_ level, file, "    CVGEN = 0x%"UVxf"\n", (UV)GvCVGEN(sv));
-	Perl_dump_indent(aTHX_ level, file, "    LASTEXPR = %"IVdf"\n", (IV)GvLASTEXPR(sv));
+	Perl_dump_indent(aTHX_ level, file, "    GPFLAGS = 0x%"UVxf"\n", (UV)GvGPFLAGS(sv));
 	Perl_dump_indent(aTHX_ level, file, "    LINE = %"IVdf"\n", (IV)GvLINE(sv));
+	Perl_dump_indent(aTHX_ level, file, "    FILE = \"%s\"\n", GvFILE(sv));
 	Perl_dump_indent(aTHX_ level, file, "    FLAGS = 0x%"UVxf"\n", (UV)GvFLAGS(sv));
-	do_gv_dump (level, file, "    FILEGV", GvFILEGV(sv));
 	do_gv_dump (level, file, "    EGV", GvEGV(sv));
 	break;
     case SVt_PVIO:

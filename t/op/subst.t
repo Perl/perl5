@@ -6,7 +6,7 @@ BEGIN {
     require Config; import Config;
 }
 
-print "1..83\n";
+print "1..84\n";
 
 $x = 'foo';
 $_ = "x";
@@ -375,4 +375,7 @@ $x = $x = 'interp';
 eval q% ($_ = "x") =~ s/x(($x)*)/"$1"/e %;
 print +($_ eq '' and !length $@) ? "ok 83\n" : "not ok 83\n# \$_ eq $_, $@\n";
 
+$_ = "C:/";
+s/^([a-z]:)/\u$1/ and print "not ";
+print "ok 84\n";
 

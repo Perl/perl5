@@ -515,12 +515,12 @@ to go back before the current one.
     ($package, $filename, $line, $subroutine, $hasargs,
     $wantarray, $evaltext, $is_require, $hints) = caller($i);
 
-Here $subroutine may be C<"(eval)"> if the frame is not a subroutine
+Here $subroutine may be C<(eval)> if the frame is not a subroutine
 call, but an C<eval>.  In such a case additional elements $evaltext and
 C<$is_require> are set: C<$is_require> is true if the frame is created by a
 C<require> or C<use> statement, $evaltext contains the text of the
 C<eval EXPR> statement.  In particular, for a C<eval BLOCK> statement,
-$filename is C<"(eval)">, but $evaltext is undefined.  (Note also that
+$filename is C<(eval)>, but $evaltext is undefined.  (Note also that
 each C<use> statement creates a C<require> frame inside an C<eval EXPR>)
 frame.  C<$hints> contains pragmatic hints that the caller was
 compiled with.  It currently only reflects the hint corresponding to
@@ -669,7 +669,7 @@ If NUMBER is omitted, uses C<$_>.
 
 This function works like the system call by the same name: it makes the
 named directory the new root directory for all further pathnames that
-begin with a C<"/"> by your process and all its children.  (It doesn't
+begin with a C</> by your process and all its children.  (It doesn't
 change your current working directory, which is unaffected.)  For security
 reasons, this call is restricted to the superuser.  If FILENAME is
 omitted, does a C<chroot> to C<$_>.
@@ -1199,8 +1199,8 @@ C<eof> without the parentheses to test I<each> file in a while
     }
 
 Practical hint: you almost never need to use C<eof> in Perl, because the
-input operators return false values when they run out of data, or if there
-was an error.
+input operators typically return C<undef> when they run out of data, or if
+there was an error.
 
 =item eval EXPR
 
@@ -1462,8 +1462,8 @@ For example:
 	or die "can't fcntl F_GETFL: $!";
 
 You don't have to check for C<defined> on the return from C<fnctl>.
-Like C<ioctl>, it maps a C<0> return from the system call into C<"0
-but true"> in Perl.  This string is true in boolean context and C<0>
+Like C<ioctl>, it maps a C<0> return from the system call into
+C<"0 but true"> in Perl.  This string is true in boolean context and C<0>
 in numeric context.  It is also exempt from the normal B<-w> warnings
 on improper numeric conversions.
 
@@ -1929,13 +1929,20 @@ necessarily recommended if you're optimizing for maintainability:
 
     goto ("FOO", "BAR", "GLARCH")[$i];
 
-The C<goto-&NAME> form is highly magical, and substitutes a call to the
-named subroutine for the currently running subroutine.  This is used by
-C<AUTOLOAD> subroutines that wish to load another subroutine and then
-pretend that the other subroutine had been called in the first place
-(except that any modifications to C<@_> in the current subroutine are
-propagated to the other subroutine.)  After the C<goto>, not even C<caller>
-will be able to tell that this routine was called first.
+The C<goto-&NAME> form is quite different from the other forms of C<goto>.
+In fact, it isn't a goto in the normal sense at all, and doesn't have
+the stigma associated with other gotos.  Instead, it
+substitutes a call to the named subroutine for the currently running
+subroutine.  This is used by C<AUTOLOAD> subroutines that wish to load
+another subroutine and then pretend that the other subroutine had been
+called in the first place (except that any modifications to C<@_>
+in the current subroutine are propagated to the other subroutine.)
+After the C<goto>, not even C<caller> will be able to tell that this
+routine was called first.
+
+NAME needn't be the name of a subroutine; it can be a scalar variable
+containing a code reference, or a block which evaluates to a code
+reference.
 
 =item grep BLOCK LIST
 
@@ -2349,8 +2356,8 @@ Calls the System V IPC function msgctl(2).  You'll probably have to say
 
 first to get the correct constant definitions.  If CMD is C<IPC_STAT>,
 then ARG must be a variable which will hold the returned C<msqid_ds>
-structure.  Returns like C<ioctl>: the undefined value for error, C<"0 but
-true"> for zero, or the actual return value otherwise.  See also
+structure.  Returns like C<ioctl>: the undefined value for error,
+C<"0 but true"> for zero, or the actual return value otherwise.  See also
 C<IPC::SysV> and C<IPC::Semaphore> documentation.
 
 =item msgget KEY,FLAGS
@@ -2602,6 +2609,12 @@ parsimonious of file descriptors.  For example:
 
     open(FILEHANDLE, "<&=$fd")
 
+Note that this feature depends on the fdopen() C library function.
+On many UNIX systems, fdopen() is known to fail when file descriptors
+exceed a certain value, typically 255. If you need more file
+descriptors than that, consider rebuilding Perl to use the C<sfio>
+library.
+
 If you open a pipe on the command C<'-'>, i.e., either C<'|-'> or C<'-|'>
 with 2-arguments (or 1-argument) form of open(), then
 there is an implicit fork done, and the return value of open is the pid
@@ -2769,10 +2782,10 @@ follows:
 	   what a local C compiler calls 'long'.  If you want
 	   native-length longs, use the '!' suffix.)
 
-    n	A short in "network" (big-endian) order.
-    N	A long in "network" (big-endian) order.
-    v	A short in "VAX" (little-endian) order.
-    V	A long in "VAX" (little-endian) order.
+    n	An unsigned short in "network" (big-endian) order.
+    N	An unsigned long in "network" (big-endian) order.
+    v	An unsigned short in "VAX" (little-endian) order.
+    V	An unsigned long in "VAX" (little-endian) order.
 	  (These 'shorts' and 'longs' are _exactly_ 16 bits and
 	   _exactly_ 32 bits, respectively.)
 
@@ -2808,75 +2821,105 @@ The following rules apply:
 =item *
 
 Each letter may optionally be followed by a number giving a repeat
-count.  With all types except C<"a">, C<"A">, C<"Z">, C<"b">, C<"B">, C<"h">,
-C<"H">, and C<"P"> the pack function will gobble up that many values from
+count.  With all types except C<a>, C<A>, C<Z>, C<b>, C<B>, C<h>,
+C<H>, and C<P> the pack function will gobble up that many values from
 the LIST.  A C<*> for the repeat count means to use however many items are
-left, except for C<"@">, C<"x">, C<"X">, where it is equivalent
-to C<"0">, and C<"u">, where it is equivalent to 1 (or 45, what is the
+left, except for C<@>, C<x>, C<X>, where it is equivalent
+to C<0>, and C<u>, where it is equivalent to 1 (or 45, what is the
 same).
 
-When used with C<"Z">, C<*> results in the addition of a trailing null
+When used with C<Z>, C<*> results in the addition of a trailing null
 byte (so the packed result will be one longer than the byte C<length>
 of the item).
 
-The repeat count for C<"u"> is interpreted as the maximal number of bytes
+The repeat count for C<u> is interpreted as the maximal number of bytes
 to encode per line of output, with 0 and 1 replaced by 45.
 
 =item *
 
-The C<"a">, C<"A">, and C<"Z"> types gobble just one value, but pack it as a
+The C<a>, C<A>, and C<Z> types gobble just one value, but pack it as a
 string of length count, padding with nulls or spaces as necessary.  When
-unpacking, C<"A"> strips trailing spaces and nulls, C<"Z"> strips everything
-after the first null, and C<"a"> returns data verbatim.  When packing,
-C<"a">, and C<"Z"> are equivalent.
+unpacking, C<A> strips trailing spaces and nulls, C<Z> strips everything
+after the first null, and C<a> returns data verbatim.  When packing,
+C<a>, and C<Z> are equivalent.
 
 If the value-to-pack is too long, it is truncated.  If too long and an
-explicit count is provided, C<"Z"> packs only C<$count-1> bytes, followed
-by a null byte.  Thus C<"Z"> always packs a trailing null byte under
+explicit count is provided, C<Z> packs only C<$count-1> bytes, followed
+by a null byte.  Thus C<Z> always packs a trailing null byte under
 all circumstances.
 
 =item *
 
-Likewise, the C<"b"> and C<"B"> fields pack a string that many bits long.
-Each byte of the input field generates 1 bit of the result basing on
-the least-signifant bit of each input byte, i.e., on C<ord($byte)%2>.
-In particular, bytes C<"0"> and C<"1"> generate bits 0 and 1.
+Likewise, the C<b> and C<B> fields pack a string that many bits long.
+Each byte of the input field of pack() generates 1 bit of the result.
+Each result bit is based on the least-significant bit of the corresponding
+input byte, i.e., on C<ord($byte)%2>.  In particular, bytes C<"0"> and
+C<"1"> generate bits 0 and 1, as do bytes C<"\0"> and C<"\1">.
 
-Starting from the beginning of the input string, each 8-tuple of bytes
-is converted to 1 byte of output.  If the length of the input string
-is not divisible by 8, the remainder is packed as if padded by 0s.
-Similarly, during unpack()ing the "extra" bits are ignored.
+Starting from the beginning of the input string of pack(), each 8-tuple
+of bytes is converted to 1 byte of output.  With format C<b>
+the first byte of the 8-tuple determines the least-significant bit of a
+byte, and with format C<B> it determines the most-significant bit of
+a byte.
 
-If the input string is longer than needed, extra bytes are ignored.
+If the length of the input string is not exactly divisible by 8, the
+remainder is packed as if the input string were padded by null bytes
+at the end.  Similarly, during unpack()ing the "extra" bits are ignored.
+
+If the input string of pack() is longer than needed, extra bytes are ignored.
 A C<*> for the repeat count of pack() means to use all the bytes of
 the input field.  On unpack()ing the bits are converted to a string
 of C<"0">s and C<"1">s.
 
 =item *
 
-The C<"h"> and C<"H"> fields pack a string that many nybbles (4-bit groups,
+The C<h> and C<H> fields pack a string that many nybbles (4-bit groups,
 representable as hexadecimal digits, 0-9a-f) long.
 
+Each byte of the input field of pack() generates 4 bits of the result.
+For non-alphabetical bytes the result is based on the 4 least-significant
+bits of the input byte, i.e., on C<ord($byte)%16>.  In particular,
+bytes C<"0"> and C<"1"> generate nybbles 0 and 1, as do bytes
+C<"\0"> and C<"\1">.  For bytes C<"a".."f"> and C<"A".."F"> the result
+is compatible with the usual hexadecimal digits, so that C<"a"> and
+C<"A"> both generate the nybble C<0xa==10>.  The result for bytes
+C<"g".."z"> and C<"G".."Z"> is not well-defined.
+
+Starting from the beginning of the input string of pack(), each pair
+of bytes is converted to 1 byte of output.  With format C<h> the
+first byte of the pair determines the least-significant nybble of the
+output byte, and with format C<H> it determines the most-significant
+nybble.
+
+If the length of the input string is not even, it behaves as if padded
+by a null byte at the end.  Similarly, during unpack()ing the "extra"
+nybbles are ignored.
+
+If the input string of pack() is longer than needed, extra bytes are ignored.
+A C<*> for the repeat count of pack() means to use all the bytes of
+the input field.  On unpack()ing the bits are converted to a string
+of hexadecimal digits.
+
 =item *
 
-The C<"p"> type packs a pointer to a null-terminated string.  You are
+The C<p> type packs a pointer to a null-terminated string.  You are
 responsible for ensuring the string is not a temporary value (which can
 potentially get deallocated before you get around to using the packed result).
-The C<"P"> type packs a pointer to a structure of the size indicated by the
-length.  A NULL pointer is created if the corresponding value for C<"p"> or
-C<"P"> is C<undef>, similarly for unpack().
+The C<P> type packs a pointer to a structure of the size indicated by the
+length.  A NULL pointer is created if the corresponding value for C<p> or
+C<P> is C<undef>, similarly for unpack().
 
 =item *
 
-The C<"/"> character allows packing and unpacking of strings where the
-packed structure contains a byte count followed by the string itself.
+The C</> template character allows packing and unpacking of strings where
+the packed structure contains a byte count followed by the string itself.
 You write I<length-item>C</>I<string-item>.
 
 The I<length-item> can be any C<pack> template letter,
 and describes how the length value is packed.
 The ones likely to be of most use are integer-packing ones like
-C<"n"> (for Java strings), C<"w"> (for ASN.1 or SNMP)
-and C<"N"> (for Sun XDR).
+C<n> (for Java strings), C<w> (for ASN.1 or SNMP)
+and C<N> (for Sun XDR).
 
 The I<string-item> must, at present, be C<"A*">, C<"a*"> or C<"Z*">.
 For C<unpack> the length of the string is obtained from the I<length-item>,
@@ -2888,27 +2931,25 @@ but if you put in the '*' it will be ignored.
 
 The I<length-item> is not returned explicitly from C<unpack>.
 
-Adding a count to the I<length-item> letter
-is unlikely to do anything useful,
-unless that letter is C<"A">, C<"a"> or C<"Z">.
-Packing with a I<length-item> of C<"a"> or C<"Z">
-may introduce C<"\000"> characters,
+Adding a count to the I<length-item> letter is unlikely to do anything
+useful, unless that letter is C<A>, C<a> or C<Z>.  Packing with a
+I<length-item> of C<a> or C<Z> may introduce C<"\000"> characters,
 which Perl does not regard as legal in numeric strings.
 
 =item *
 
-The integer types C<"s">, C<"S">, C<"l">, and C<"L"> may be
-immediately followed by a C<"!"> suffix to signify native shorts or
-longs--as you can see from above for example a bare C<"l"> does mean
+The integer types C<s>, C<S>, C<l>, and C<L> may be
+immediately followed by a C<!> suffix to signify native shorts or
+longs--as you can see from above for example a bare C<l> does mean
 exactly 32 bits, the native C<long> (as seen by the local C compiler)
 may be larger.  This is an issue mainly in 64-bit platforms.  You can
-see whether using C<"!"> makes any difference by
+see whether using C<!> makes any difference by
 
 	print length(pack("s")), " ", length(pack("s!")), "\n";
 	print length(pack("l")), " ", length(pack("l!")), "\n";
 
-C<"i!"> and C<"I!"> also work but only because of completeness;
-they are identical to C<"i"> and C<"I">.
+C<i!> and C<I!> also work but only because of completeness;
+they are identical to C<i> and C<I>.
 
 The actual sizes (in bytes) of native shorts, ints, longs, and long
 longs on the platform where Perl was built are also available via
@@ -2925,7 +2966,7 @@ not support long longs.)
 
 =item *
 
-The integer formats C<"s">, C<"S">, C<"i">, C<"I">, C<"l">, and C<"L">
+The integer formats C<s>, C<S>, C<i>, C<I>, C<l>, and C<L>
 are inherently non-portable between processors and operating systems
 because they obey the native byteorder and endianness.  For example a
 4-byte integer 0x12345678 (305419896 decimal) be ordered natively
@@ -2934,7 +2975,7 @@ because they obey the native byteorder and endianness.  For example a
  	0x12 0x34 0x56 0x78	# little-endian
  	0x78 0x56 0x34 0x12	# big-endian
  
-Basically, the Intel, Alpha, and VAX CPUs and little-endian, while
+Basically, the Intel, Alpha, and VAX CPUs are little-endian, while
 everybody else, for example Motorola m68k/88k, PPC, Sparc, HP PA,
 Power, and Cray are big-endian.  MIPS can be either: Digital used it
 in little-endian mode; SGI uses it in big-endian mode.
@@ -2963,8 +3004,8 @@ via L<Config>:
 Byteorders C<'1234'> and C<'12345678'> are little-endian, C<'4321'>
 and C<'87654321'> are big-endian.
 
-If you want portable packed integers use the formats C<"n">, C<"N">,
-C<"v">, and C<"V">, their byte endianness and size is known.
+If you want portable packed integers use the formats C<n>, C<N>,
+C<v>, and C<V>, their byte endianness and size is known.
 See also L<perlport>.
 
 =item *
@@ -3411,15 +3452,16 @@ subroutine:
 	    foreach $prefix (@INC) {
 		$realfilename = "$prefix/$filename";
 		if (-f $realfilename) {
+		    $INC{$filename} = $realfilename;
 		    $result = do $realfilename;
 		    last ITER;
 		}
 	    }
 	    die "Can't find $filename in \@INC";
 	}
+	delete $INC{$filename} if $@ || !$result;
 	die $@ if $@;
 	die "$filename did not return true value" unless $result;
-	$INC{$filename} = $realfilename;
 	return $result;
     }
 
@@ -3767,7 +3809,9 @@ array by 1 and moving everything down.  If there are no elements in the
 array, returns the undefined value.  If ARRAY is omitted, shifts the
 C<@_> array within the lexical scope of subroutines and formats, and the
 C<@ARGV> array at file scopes or within the lexical scopes established by
-the C<eval ''>, C<BEGIN {}>, C<END {}>, and C<INIT {}> constructs.
+the C<eval ''>, C<BEGIN {}>, C<INIT {}>, C<STOP {}>, and C<END {}>
+constructs.
+
 See also C<unshift>, C<push>, and C<pop>.  C<Shift()> and C<unshift> do the
 same thing to the left end of an array that C<pop> and C<push> do to the
 right end.
@@ -3895,12 +3939,16 @@ the name of (or a reference to) the actual subroutine to use.  In place
 of a SUBNAME, you can provide a BLOCK as an anonymous, in-line sort
 subroutine.
 
-In the interests of efficiency the normal calling code for subroutines is
-bypassed, with the following effects: the subroutine may not be a
-recursive subroutine, and the two elements to be compared are passed into
-the subroutine not via C<@_> but as the package global variables $a and
-$b (see example below).  They are passed by reference, so don't
-modify $a and $b.  And don't try to declare them as lexicals either.
+If the subroutine's prototype is C<($$)>, the elements to be compared
+are passed by reference in C<@_>, as for a normal subroutine.  If not,
+the normal calling code for subroutines is bypassed in the interests of
+efficiency, and the elements to be compared are passed into the subroutine
+as the package global variables $a and $b (see example below).  Note that
+in the latter case, it is usually counter-productive to declare $a and
+$b as lexicals.
+
+In either case, the subroutine may not be recursive.  The values to be
+compared are always passed by reference, so don't modify them.
 
 You also cannot exit out of the sort block or subroutine using any of the
 loop control operators described in L<perlsyn> or with C<goto>.
@@ -3980,6 +4028,14 @@ Examples:
                            ||
                   $a->[2] cmp $b->[2]
            } map { [$_, /=(\d+)/, uc($_)] } @old;
+    
+    # using a prototype allows you to use any comparison subroutine
+    # as a sort subroutine (including other package's subroutines)
+    package other;
+    sub backwards ($$) { $_[1] cmp $_[0]; }	# $a and $b are not set here
+
+    package main;
+    @new = sort other::backwards @old;
 
 If you're using strict, you I<must not> declare $a
 and $b as lexicals.  They are package globals.  That means
@@ -4195,13 +4251,6 @@ If C<use locale> is in effect, the character used for the decimal
 point in formatted real numbers is affected by the LC_NUMERIC locale.
 See L<perllocale>.
 
-To cope with broken systems that allow the standard locales to be
-overridden by malicious users, the return value may be tainted
-if any of the floating point formats are used and the conversion
-yields something that doesn't look like a normal C-locale floating
-point number.  This happens regardless of whether C<use locale> is
-in effect or not.
-
 If Perl understands "quads" (64-bit integers) (this requires
 either that the platform natively supports quads or that Perl
 has been specifically compiled to support quads), the characters
@@ -4390,8 +4439,8 @@ before any line containing a certain pattern:
 	print;
     }
 
-In searching for C</\bfoo\b/>, only those locations in C<$_> that contain C<"f">
-will be looked at, because C<"f"> is rarer than C<"o">.  In general, this is
+In searching for C</\bfoo\b/>, only those locations in C<$_> that contain C<f>
+will be looked at, because C<f> is rarer than C<o>.  In general, this is
 a big win except in pathological cases.  The only question is whether
 it saves you more time than it took to build the linked list in the
 first place.
@@ -4533,8 +4582,7 @@ For historical reasons, some values work on almost every system
 supported by perl: zero means read-only, one means write-only, and two
 means read/write.  We know that these values do I<not> work under
 OS/390 & VM/ESA Unix and on the Macintosh; you probably don't want to
-se them in new code, use thhe constants discussed in the preceding
-paragraph.
+use them in new code.
 
 If the file named by FILENAME does not exist and the C<open> call creates
 it (typically because MODE includes the C<O_CREAT> flag), then the value of
@@ -4554,6 +4602,12 @@ You should seldom if ever use C<0644> as argument to C<sysopen>, because
 that takes away the user's option to have a more permissive umask.
 Better to omit it.  See the perlfunc(1) entry on C<umask> for more
 on this.
+
+Note that C<sysopen> depends on the fdopen() C library function.
+On many UNIX systems, fdopen() is known to fail when file descriptors
+exceed a certain value, typically 255. If you need more file
+descriptors than that, consider rebuilding Perl to use the C<sfio>
+library, or perhaps using the POSIX::open() function.
 
 See L<perlopentut> for a kinder, gentler explanation of opening files.
 
@@ -4951,7 +5005,7 @@ The following efficiently counts the number of set bits in a bit vector:
 
     $setbits = unpack("%32b*", $selectmask);
 
-The C<"p"> and C<"P"> formats should be used with care.  Since Perl
+The C<p> and C<P> formats should be used with care.  Since Perl
 has no way of checking whether the value passed to C<unpack()>
 corresponds to a valid memory location, passing a pointer value that's
 not known to be valid is likely to have disastrous consequences.
@@ -5094,6 +5148,20 @@ as an unsigned integer.  BITS therefore specifies the number of bits
 that are reserved for each element in the bit vector.  This must
 be a power of two from 1 to 32 (or 64, if your platform supports
 that).
+
+If BITS is 8, "elements" coincide with bytes of the input string.  
+
+If BITS is 16 or more, bytes of the input string are grouped into chunks
+of size BITS/8, and each group is converted to a number as with
+pack()/unpack() with big-endian formats C<n>/C<N> (and analoguously
+for BITS==64).  See L<"pack"> for details.
+
+If bits is 4 or less, the string is broken into bytes, then the bits
+of each byte are broken into 8/BITS groups.  Bits of a byte are
+numbered in a little-endian-ish way, as in C<0x01>, C<0x02>,
+C<0x04>, C<0x08>, C<0x10>, C<0x20>, C<0x40>, C<0x80>.  For example,
+breaking the single input byte C<chr(0x36)> into two groups gives a list
+C<(0x6, 0x3)>; breaking it into 4 groups gives C<(0x2, 0x1, 0x3, 0x0)>.
 
 C<vec> may also be assigned to, in which case parentheses are needed
 to give the expression the correct precedence as in

@@ -374,7 +374,7 @@ sub dopoptolabel {
 
 sub error {
     my $format = shift;
-    my $file = $curcop->[0]->filegv->SV->PV;
+    my $file = $curcop->[0]->file;
     my $line = $curcop->[0]->line;
     $errors++;
     if (@_) {
@@ -598,7 +598,7 @@ sub pp_nextstate {
     my $op = shift;
     $curcop->load($op);
     @stack = ();
-    debug(sprintf("%s:%d\n", $op->filegv->SV->PV, $op->line)) if $debug_lineno;
+    debug(sprintf("%s:%d\n", $op->file, $op->line)) if $debug_lineno;
     runtime("TAINT_NOT;") unless $omit_taint;
     runtime("sp = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;");
     if ($freetmps_each_bblock || $freetmps_each_loop) {
@@ -1644,8 +1644,8 @@ XS(boot_$cmodule)
     perl_init();
     ENTER;
     SAVETMPS;
-    SAVESPTR(PL_curpad);
-    SAVESPTR(PL_op);
+    SAVEVPTR(PL_curpad);
+    SAVEVPTR(PL_op);
     PL_curpad = AvARRAY($curpad_sym);
     PL_op = $start;
     pp_main(aTHX);
