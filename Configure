@@ -2218,7 +2218,7 @@ $define|true|[yY]*)
 		exit 1
 		;;
 	*)	case "$lns:$issymlink" in
-		*"ln -s:-"?)
+		*"ln -s:"*"test -"?)
 			echo "Creating the symbolic links..." >&4
 			echo "(First creating the subdirectories...)" >&4
 			cd ..
@@ -2248,7 +2248,7 @@ $define|true|[yY]*)
 				fi
 			done
 			# Sanity check 2.
-			if test ! -f t/base/commonsense.t; then
+			if test ! -f t/base/cond.t; then
 				echo "Failed to create the symlinks.  Aborting." >&4
 				exit 1
 			fi
