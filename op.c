@@ -4191,7 +4191,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	if (*s != 'B' && *s != 'E' && *s != 'C' && *s != 'I')
 	    goto done;
 
-	if (strEQ(s, "BEGIN")) {
+	if (strEQ(s, "BEGIN") && !PL_error_count) {
 	    I32 oldscope = PL_scopestack_ix;
 	    ENTER;
 	    SAVECOPFILE(&PL_compiling);

@@ -198,11 +198,11 @@ is( $Eval1::VERSION, 1.01 );
 is( $Eval2::VERSION, 1.02 );
 
 
-eval q{use base reallyReAlLyNotexists;};
+eval q{use base 'reallyReAlLyNotexists'};
 like( $@, qr/^Base class package "reallyReAlLyNotexists" is empty./,
                                           'base with empty package');
 
-eval q{use base reallyReAlLyNotexists;};
+eval q{use base 'reallyReAlLyNotexists'};
 like( $@, qr/^Base class package "reallyReAlLyNotexists" is empty./,
                                           '  still empty on 2nd load');
 
