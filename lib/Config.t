@@ -208,14 +208,21 @@ is($Config{sig_name_init} =~ tr/,/,/, $Config{sig_size}, "sig_name_init size");
 my @virtual = qw(byteorder ccflags_nolargefiles ldflags_nolargefiles
 		 libs_nolargefiles libswanted_nolargefiles);
 
-foreach my $pain (@virtual) {
+# Also test that the first entry in config.sh is found correctly. Currently
+# there is special casing code for this
+my ($first) = Config::config_sh() =~ /^(\S+)=/m;
+die "Can't find first entry in Config::config_sh()" unless defined $first;
+print "# First entry is '$first'\n";
+
+foreach my $pain ($first, @virtual) {
   # No config var is named with anything that is a regexp metachar
   my @result = $Config{$pain};
   is (scalar @result, 1, "single result for \$config('$pain')");
 
  TODO: {
     local $TODO;
-    $TODO = "No regexp lookup for $pain yet" unless $pain eq 'byteorder';
+    $TODO = "No regexp lookup for $pain yet"
+      unless $pain eq 'byteorder' or $pain eq $first;
 
     @result = Config::config_re($pain);
     is (scalar @result, 1, "single result for config_re('$pain')");
@@ -223,3 +230,4 @@ foreach my $pain (@virtual) {
 	  "which is the expected result for $pain");
   }
 }
+
