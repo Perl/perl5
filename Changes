@@ -32,6 +32,186 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  8505] By: jhi                                   on 2001/01/21  19:39:59
+        Log: Subject: Minor typos in perlfaq2.pod
+             From: "Stephen P. Potter" <spp@spotter.yi.org>
+             Message-Id: <200101192101.QAA11911@spotter.yi.org>
+             Date: Fri, 19 Jan 2001 16:01:13 -0500
+             
+             with a nit from Philip Netwon.
+     Branch: perl
+	   ! pod/perlfaq2.pod
+____________________________________________________________________________
+[  8504] By: jhi                                   on 2001/01/21  19:33:05
+        Log: Metaconfig change for #8503.
+     Branch: metaconfig
+	   ! U/threads/usethreads.U
+____________________________________________________________________________
+[  8503] By: jhi                                   on 2001/01/21  19:32:21
+        Log: Sanity check for confliiting thread flavours.
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  8502] By: jhi                                   on 2001/01/21  19:23:00
+        Log: Metaconfig change for #8501.
+     Branch: metaconfig
+	   ! U/modified/sig_name.U
+____________________________________________________________________________
+[  8501] By: jhi                                   on 2001/01/21  19:22:26
+        Log: The SIG_SIZE is the number of the elements *excluding*
+             the terminating NULL.
+     Branch: perl
+	   ! Configure config_h.SH uconfig.h uconfig.sh vos/config.alpha.h
+	   ! vos/config.ga.h win32/config_H.bc win32/config_H.gc
+	   ! win32/config_H.vc
+____________________________________________________________________________
+[  8500] By: jhi                                   on 2001/01/21  18:31:31
+        Log: Integrate perlio.
+     Branch: perl
+	  !> doio.c embed.h embed.pl ext/Encode/Encode.xs
+	  !> ext/Encode/Makefile.PL ext/Encode/compile global.sym objXSUB.h
+	  !> opcode.h opcode.pl opnames.h perlapi.c pp.sym pp_proto.h
+	  !> pp_sys.c proto.h sv.c
+____________________________________________________________________________
+[  8499] By: jhi                                   on 2001/01/21  17:43:57
+        Log: Subject: Re: 8482 busted for $^V sprintf()s on OS/390 
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Sun, 21 Jan 2001 13:34:05 +0000
+             Message-Id: <200101211334.NAA18121@crypt.compulink.co.uk>
+             
+             In sprintf UTF8ize only if necessary.
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  8498] By: nick                                  on 2001/01/21  16:25:32
+        Log: Encode cleanup.
+             Add command line control over "compile" so that Makefile.PL
+             needs can be combined with other uses.
+             Use command line options in Makefile.PL.
+             Fix multi-byte parsing in .ucm files.
+     Branch: perlio
+	   ! ext/Encode/Makefile.PL ext/Encode/compile
+____________________________________________________________________________
+[  8497] By: nick                                  on 2001/01/21  12:56:27
+        Log: Warn and set errno when open(...,":encoding(xxxxx)",...) cannot find xxxxx.
+     Branch: perlio
+	   ! ext/Encode/Encode.xs
+____________________________________________________________________________
+[  8496] By: nick                                  on 2001/01/21  12:18:45
+        Log: Fixup after integrate:
+             missed the .sym files that are changed by regen_headers
+             sv.c and proto.h disagreed about pTHX_ ness of EXPECT_NUMBER.
+     Branch: perlio
+	   ! global.sym pp.sym sv.c
+____________________________________________________________________________
+[  8495] By: nick                                  on 2001/01/21  11:51:07
+        Log: Integrate mainline.
+     Branch: perlio
+	  +> ext/DynaLoader/dl_dllload.xs t/op/qu.t
+	  !> MANIFEST Makefile.SH README.os390 README.posix-bc README.vms
+	  !> embed.h embed.pl ext/DynaLoader/dl_aix.xs
+	  !> ext/DynaLoader/dl_dlopen.xs hints/os390.sh pod/perlfunc.pod
+	  !> pod/perlguts.pod pod/perlop.pod pod/perlre.pod
+	  !> pod/perlretut.pod pod/perlunicode.pod proto.h sv.c
+	  !> win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  8494] By: jhi                                   on 2001/01/20  23:12:11
+        Log: Forgot the expect_number() prototype.
+     Branch: perl
+	   ! embed.h embed.pl proto.h
+____________________________________________________________________________
+[  8493] By: jhi                                   on 2001/01/20  22:56:39
+        Log: Subject: [PATCH: perl@8482] README.vms URL updates
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Fri, 19 Jan 2001 18:59:02 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10101191856510.61572-100000@aspara.forte.com>
+             
+             Plus Craig A. Berry's suggestion to use compaq.com instead
+             of digital.com.
+     Branch: perl
+	   ! README.vms
+____________________________________________________________________________
+[  8492] By: jhi                                   on 2001/01/20  22:50:05
+        Log: Memory management calls documentation.
+     Branch: perl
+	   ! pod/perlguts.pod
+____________________________________________________________________________
+[  8491] By: jhi                                   on 2001/01/20  22:38:33
+        Log: Signedness nit plus few memcpy/Copy nits.
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  8490] By: jhi                                   on 2001/01/20  22:25:53
+        Log: Subject: [PATCH: perl@8482] minor typos in some dl_$foo.xs files
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Fri, 19 Jan 2001 18:43:14 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10101191841080.61505-100000@aspara.forte.com>
+     Branch: perl
+	   ! ext/DynaLoader/dl_aix.xs ext/DynaLoader/dl_dlopen.xs
+____________________________________________________________________________
+[  8489] By: jhi                                   on 2001/01/20  22:24:41
+        Log: Subject: [PATCH: perl@8482] win32 Makefile(s) handle podified READMEs
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Fri, 19 Jan 2001 18:33:43 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10101191828050.61158-100000@aspara.forte.com>
+     Branch: perl
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  8488] By: jhi                                   on 2001/01/20  22:22:27
+        Log: Subject: [PATCH: perl@8482] remove redundant dependencies that are unneeded
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Fri, 19 Jan 2001 18:25:38 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10101191816550.61158-100000@aspara.forte.com>
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  8487] By: jhi                                   on 2001/01/20  22:21:18
+        Log: Subject: [PATCH: perl@8482] partial support for dynaloading on OS/390
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Fri, 19 Jan 2001 18:12:05 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10101191646420.61158-100000@aspara.forte.com>
+     Branch: perl
+	   + ext/DynaLoader/dl_dllload.xs
+	   ! MANIFEST Makefile.SH hints/os390.sh
+____________________________________________________________________________
+[  8486] By: jhi                                   on 2001/01/20  22:17:53
+        Log: Subject: [PATCH: perl@8482] floating point mangling warnings for README.os390 and README.posix-bc
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Fri, 19 Jan 2001 13:48:15 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10101191347140.59299-100000@aspara.forte.com>
+     Branch: perl
+	   ! README.os390 README.posix-bc
+____________________________________________________________________________
+[  8485] By: jhi                                   on 2001/01/20  20:15:30
+        Log: Document and test the new qu operator.
+     Branch: perl
+	   + t/op/qu.t
+	   ! MANIFEST pod/perlfunc.pod pod/perlop.pod pod/perlre.pod
+	   ! pod/perlretut.pod pod/perlunicode.pod
+____________________________________________________________________________
+[  8484] By: nick                                  on 2001/01/20  19:42:30
+        Log: Infrastructure to allow:
+             open($fh,"|-",@array);
+             to be implemented
+             i.e. mark pp_open as needing a stack mark, and make pp_open
+             process its args in that style (and pass them _all_ to tied handles OPEN).
+             Invent do_openn() which takes SV ** at allow it to see multiple args.
+             Note this does not _do_ anything yet.
+     Branch: perlio
+	   ! doio.c embed.h embed.pl objXSUB.h opcode.h opcode.pl opnames.h
+	   ! perlapi.c pp_proto.h pp_sys.c proto.h
+____________________________________________________________________________
+[  8483] By: nick                                  on 2001/01/20  17:23:14
+        Log: Integrate mainline.
+     Branch: perlio
+	  !> Changes configure.com patchlevel.h sv.c t/lib/1_compile.t
+	  !> t/op/sprintf.t t/op/ver.t t/pragma/locale.t
+____________________________________________________________________________
+[  8482] By: jhi                                   on 2001/01/19  15:37:49
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  8481] By: jhi                                   on 2001/01/19  14:41:24
         Log: Subject: Re: new feature: s?printf parameter reordering 
              From: Hugo <hv@crypt.compulink.co.uk>
