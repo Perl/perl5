@@ -12,6 +12,7 @@
 INST_DRV=c:
 INST_TOP=$(INST_DRV)\perl
 BUILDOPT=-DUSE_THREADS -TP
+CORECCOPT=
 
 #
 # uncomment next line if you are using Visual C++ 2.x
@@ -19,7 +20,7 @@ BUILDOPT=-DUSE_THREADS -TP
 
 #
 # uncomment next line if you want debug version of perl (big,slow)
-CFG=Debug
+#CFG=Debug
 
 #
 # set the install locations of the compiler include/libraries
@@ -51,7 +52,7 @@ RUNTIME  = -MD
 INCLUDES = -I.\include -I. -I..
 #PCHFLAGS = -Fp"$(INTDIR)/modules.pch" -YX 
 DEFINES  = -DWIN32 -D_CONSOLE $(BUILDOPT)
-LOCDEFS  = -DPERLDLL
+LOCDEFS  = -DPERLDLL $(CORECCOPT)
 SUBSYS   = console
 
 !IF "$(RUNTIME)" == "-MD"
