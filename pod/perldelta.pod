@@ -1073,6 +1073,12 @@ There is a make target "test.deparse" for trying this out.
 
 =item *
 
+Carp has now better interface documentation, and the @CARP_NOT
+interface has been added to get optional control over where errors
+are reported independently of @ISA.
+
+=item *
+
 Class::Struct can now define the classes in compile time.
 
 =item *
