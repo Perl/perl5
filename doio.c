@@ -214,7 +214,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	namesv = sv_2mortal(newSVpvn(name,strlen(name)));
 	num_svs = 1;
 	svp = &namesv;
-	fp = PerlIO_openn(aTHX_ S_layers(aTHX_ mode),mode, -1, rawmode, rawperm, saveifp, num_svs, svp);
+	fp = PerlIO_openn(aTHX_ S_layers(aTHX_ mode),mode, -1, rawmode, rawperm, NULL, num_svs, svp);
     }
     else {
 	/* Regular (non-sys) open */
@@ -417,7 +417,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 			svp = &namesv;
 		        type = S_layers(aTHX_ mode);
 		    }
-		    fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,saveifp,num_svs,svp);
+		    fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,num_svs,svp);
 		}
 	    } /* !& */
 	}
@@ -449,7 +449,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		    svp = &namesv;
 		    type = S_layers(aTHX_ mode);
 		}
-		fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,saveifp,num_svs,svp);
+		fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,num_svs,svp);
 	    }
 	}
 	else if ((num_svs && type[0] == IoTYPE_STD && type[1] == IoTYPE_PIPE) ||
@@ -512,7 +512,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		    svp = &namesv;
 		    type = S_layers(aTHX_ mode);
 		}
-		fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,saveifp,num_svs,svp);
+		fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,num_svs,svp);
 	    }
 	}
     }
@@ -564,32 +564,32 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
         /* If fd is less that PL_maxsysfd i.e. STDIN..STDERR
            then dup the new fileno down
          */
+        fd = PerlIO_fileno(fp);
 	if (saveofp) {
 	    PerlIO_flush(saveofp);	/* emulate PerlIO_close() */
 	    if (saveofp != saveifp) {	/* was a socket? */
 		PerlIO_close(saveofp);
 	    }
 	}
-	if (savefd != PerlIO_fileno(fp)) {
+	if (savefd != fd) {
 	    Pid_t pid;
 	    SV *sv;
-
-	    PerlLIO_dup2(PerlIO_fileno(fp), fd);
+	    PerlLIO_dup2(fd, savefd);
 #ifdef VMS
-	    if (fd != PerlIO_fileno(PerlIO_stdin())) {
+	    if (savefd != PerlIO_fileno(PerlIO_stdin())) {
 	      char newname[FILENAME_MAX+1];
 	      if (fgetname(fp, newname)) {
-	        if (fd == PerlIO_fileno(PerlIO_stdout())) Perl_vmssetuserlnm("SYS$OUTPUT", newname);
-	        if (fd == PerlIO_fileno(PerlIO_stderr())) Perl_vmssetuserlnm("SYS$ERROR",  newname);
+	        if (savefd == PerlIO_fileno(PerlIO_stdout())) Perl_vmssetuserlnm("SYS$OUTPUT", newname);
+	        if (savefd == PerlIO_fileno(PerlIO_stderr())) Perl_vmssetuserlnm("SYS$ERROR",  newname);
 	      }
 	    }
 #endif
 	    LOCK_FDPID_MUTEX;
-	    sv = *av_fetch(PL_fdpid,PerlIO_fileno(fp),TRUE);
+	    sv = *av_fetch(PL_fdpid,fd,TRUE);
 	    (void)SvUPGRADE(sv, SVt_IV);
 	    pid = SvIVX(sv);
 	    SvIVX(sv) = 0;
-	    sv = *av_fetch(PL_fdpid,fd,TRUE);
+	    sv = *av_fetch(PL_fdpid,savefd,TRUE);
 	    UNLOCK_FDPID_MUTEX;
 	    (void)SvUPGRADE(sv, SVt_IV);
 	    SvIVX(sv) = pid;
@@ -614,7 +614,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	if (IoTYPE(io) == IoTYPE_SOCKET
 	    || (IoTYPE(io) == IoTYPE_WRONLY && S_ISCHR(PL_statbuf.st_mode)) ) {
 	    mode[0] = 'w';
-	    if (!(IoOFP(io) = PerlIO_openn(aTHX_ S_layers(aTHX_ mode),mode,PerlIO_fileno(fp),0,0,saveofp,num_svs,svp))) {
+	    if (!(IoOFP(io) = PerlIO_openn(aTHX_ S_layers(aTHX_ mode),mode,PerlIO_fileno(fp),0,0,NULL,num_svs,svp))) {
 		PerlIO_close(fp);
 		IoIFP(io) = Nullfp;
 		goto say_false;
