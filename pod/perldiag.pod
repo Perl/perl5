@@ -65,26 +65,26 @@ no useful value.  See L<perlmod>.
 (F) The '!' is allowed in pack() and unpack() only after certain types.
 See L<perlfunc/pack>.
 
-=item # cannot take a count
+=item / cannot take a count
 
 (F) You had an unpack template indicating a counted-length string,
 but you have also specified an explicit size for the string.
 See L<perlfunc/pack>.
 
-=item # must be followed by a, A or Z
+=item / must be followed by a, A or Z
 
 (F) You had an unpack template indicating a counted-length string,
 which must be followed by one of the letters a, A or Z
 to indicate what sort of string is to be unpacked.
 See L<perlfunc/pack>.
 
-=item # must be followed by a*, A* or Z*
+=item / must be followed by a*, A* or Z*
 
 (F) You had an pack template indicating a counted-length string,
 Currently the only things that can have their length counted are a*, A* or Z*.
 See L<perlfunc/pack>.
 
-=item # must follow a numeric type
+=item / must follow a numeric type
 
 (F) You had an unpack template that contained a '#',
 but this did not follow some numeric unpack specification.
