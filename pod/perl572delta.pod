@@ -437,7 +437,22 @@ Note that unlike other sections in this document (which describe
 changes since 5.7.0) this section is cumulative containing known
 problems for all the 5.7 releases.
 
-=head2 AIX vac 5.0.0.0 May Produce Buggy Code For Perl
+=head2 AIX
+
+=over 4
+
+=item *
+
+If Perl is configured to use long doubles the op/int subtests 13 and
+14 and the ext/POSIX subtest 14 may fail.
+
+=item *
+
+If Perl is configured to use threads the op/magic subtest 28 may fail.
+
+=item *
+
+vac 5.0.0.0 May Produce Buggy Code For Perl
 
 The AIX C compiler vac version 5.0.0.0 may produce buggy code,
 resulting in few random tests failing, but when the failing tests
@@ -445,11 +460,17 @@ are run by hand, they succeed.  We suggest upgrading to at least
 vac version 5.0.1.0, that has been known to compile Perl correctly.
 "lslpp -L|grep vac.C" will tell you the vac version.
 
+=back
+
 =head2 lib/ftmp-security tests warn 'system possibly insecure'
 
 Don't panic.  Read INSTALL 'make test' section instead.
 
-=head2 lib/io_multihomed Fails In LP64-Configured HP-UX
+=head Cygwin intermittent failures of lib/Memoize/t/expire_file 11 and 12
+
+The subtests 11 and 12 sometimes fail and sometimes work.
+
+=head2 HP-UX lib/io_multihomed Fails When LP64-Configur
 
 The lib/io_multihomed test may hang in HP-UX if Perl has been
 configured to be 64-bit. Because other 64-bit platforms do not hang in
@@ -457,7 +478,7 @@ this test, HP-UX is suspect. All other tests pass in 64-bit HP-UX. The
 test attempts to create and connect to "multihomed" sockets (sockets
 which have multiple IP addresses).
 
-=head2 Test lib/posix Subtest 9 Fails In LP64-Configured HP-UX
+=head2  HP-UX lib/posix Subtest 9 Fails When LP64-Configured
 
 If perl is configured with -Duse64bitall, the successful result of the
 subtest 10 of lib/posix may arrive before the successful result of the
@@ -467,11 +488,6 @@ subtest 9 failed.
 =head2 Linux With Sfio Fails op/misc Test 48
 
 No known fix.
-
-=head2 ext/POSIX/sigaction test 13 on VMS
-
-The test is known to fail; whether it's because of VMS of because
-of faulty test is not known.
 
 =head2 op/sprintf tests 129 and 130
 
@@ -493,18 +509,48 @@ the 5.005 threading implementation. These are not new failures--Perl
   lib/autouse.t                 4
   t/lib/thr5005.t               19-20
 
-=head2 Numerous numerical test failures on UNICOS
+=head2 UNICOS
+
+=over 4
+
+=item *
+
+ext/POSIX/sigaction subtests 6 and 13 may fail.
+
+=item *
+
+lib/ExtUtils may spuriously claim that subtest 28 failed,
+which is interesting since the test only has 27 tests.
+
+=item *
+
+Numerous numerical test failures
 
   op/numconvert                 209,210,217,218
+  op/override                   7
   ext/Time/HiRes/HiRes          9
   lib/Math/BigInt/t/bigintpm    1145
   lib/Math/Trig                 25
 
 These tests fail because of yet unresolved floating point inaccuracies.
 
-=head2 ext/IPC/SysV/t/sem test 8 on UNICOS/mk
+=back
+
+=head2 UNICOS/mk ext/IPC/SysV/t/sem test 8
 
 No known fix.
+
+=head2 UTS
+
+Many floating point inaccuracies:
+
+  op/numconvert            511,657,658,659,665-667,831,991,1151
+  op/pack                  10,22,149,156
+  op/sprintf               8,10,13,102-107,134-135,146-153,159-162
+  lib/Math/BigInt/bigintpm 1145,1183
+  lib/Math/Complex         250,257,514,521,722-724,
+                           934,935,945,949,955,956,975,976
+  ext/POSIX/POSIX          14
 
 =head2 Localising a Tied Variable Leaks Memory
 
@@ -550,6 +596,18 @@ platform-dependent.
 
 The compiler suite is slowly getting better but is nowhere near
 working order yet.
+
+=head2 The Long Double Support is Still Experimental
+
+The ability to configure Perl's numbers to use "long doubles",
+floating point numbers of hopefully better accuracy, is still
+experimental.  The implementations of long doubles are not yet
+widespread and the existing implementations are not quite mature
+or standardised, therefore trying to support them is a rare
+and moving target.  The gain of more precision may also be offset
+by slowdown in computations (more bits to move around, and the
+operations are more likely to be executed by less optimised
+libraries).
 
 =head1 Reporting Bugs
 
