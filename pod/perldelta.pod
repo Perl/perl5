@@ -243,6 +243,12 @@ to be removed in a future release.
 
 =item *
 
+The 5.005 threads model (module C<Thread>) is deprecated and expected
+to be removed in Perl 5.10.  Multithreaded code should be migrated to
+the new ithreads model (see L<threads> and L<threads::shared>).
+
+=item *
+
 The long deprecated uppercase aliases for the string comparison
 operators (EQ, NE, LT, LE, GE, GT) have now been removed.
 
@@ -2807,8 +2813,9 @@ The suggested cure is to upgrade your Solaris.
 
 =head2 Failure of Thread (5.005-style) tests
 
-B<Note that support for 5.005-style threading remains experimental
-and practically unsupported.>
+B<Note that support for 5.005-style threading is deprecated,
+experimental and practically unsupported.  In 5.10 it is expected
+to be removed.>
 
 The following tests are known to fail due to fundamental problems in
 the 5.005 threading implementation. These are not new failures--Perl
