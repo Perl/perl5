@@ -169,6 +169,39 @@ content where HTML comments are not allowed:
 Note: In this respect warningsToBrowser() differs fundamentally from
 fatalsToBrowser(), which you should never call yourself!
 
+=head1 OVERRIDING THE NAME OF THE PROGRAM
+
+CGI::Carp includes the name of the program that generated the error or
+warning in the messages written to the log and the browser window.
+Sometimes, Perl can get confused about what the actual name of the
+executed program was.  In these cases, you can override the program
+name that CGI::Carp will use for all messages.
+
+The quick way to do that is to tell CGI::Carp the name of the program
+in its use statement.  You can do that by adding
+"name=cgi_carp_log_name" to your "use" statement.  For example:
+
+    use CGI::Carp qw(name=cgi_carp_log_name);
+
+.  If you want to change the program name partway through the program,
+you can use the C<set_progname()> function instead.  It is not
+exported by default, you must import it explicitly by saying
+
+    use CGI::Carp qw(set_progname);
+
+Once you've done that, you can change the logged name of the program
+at any time by calling
+
+    set_progname(new_program_name);
+
+You can set the program back to the default by calling
+
+    set_progname(undef);
+
+Note that this override doesn't happen until after the program has
+compiled, so any compile-time errors will still show up with the
+non-overridden program name
+  
 =head1 CHANGE LOG
 
 1.05 carpout() added and minor corrections by Marc Hedlund
@@ -203,6 +236,9 @@ fatalsToBrowser(), which you should never call yourself!
      (hack alert!) in order to accomodate various combinations of Perl and
      mod_perl.
 
+1.24 Patch from Scott Gifford (sgifford@suspectclass.com): Add support
+     for overriding program name.
+
 =head1 AUTHORS
 
 Copyright 1995-2002, Lincoln D. Stein.  All rights reserved.  
@@ -216,6 +252,10 @@ Address bug reports and comments to: lstein@cshl.org
 
 Carp, CGI::Base, CGI::BasePlus, CGI::Request, CGI::MiniSvr, CGI::Form,
 CGI::Response
+    if (defined($CGI::Carp::PROGNAME)) 
+    {
+      $file = $CGI::Carp::PROGNAME;
+    }
 
 =cut
 
@@ -227,17 +267,26 @@ use File::Spec;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(confess croak carp);
-@EXPORT_OK = qw(carpout fatalsToBrowser warningsToBrowser wrap set_message cluck);
+@EXPORT_OK = qw(carpout fatalsToBrowser warningsToBrowser wrap set_message set_progname cluck ^name=);
 
 $main::SIG{__WARN__}=\&CGI::Carp::warn;
-$main::SIG{__DIE__}=\&CGI::Carp::die;
-$CGI::Carp::VERSION = '1.23';
+*CORE::GLOBAL::die = \&CGI::Carp::die;
+$CGI::Carp::VERSION = '1.24';
 $CGI::Carp::CUSTOM_MSG = undef;
 
 # fancy import routine detects and handles 'errorWrap' specially.
 sub import {
     my $pkg = shift;
     my(%routines);
+    my(@name);
+  
+    if (@name=grep(/^name=/,@_))
+      {
+        my($n) = (split(/=/,$name[0]))[1];
+        set_progname($n);
+        @_=grep(!/^name=/,@_);
+      }
+
     grep($routines{$_}++,@_,@EXPORT);
     $WRAP++ if $routines{'fatalsToBrowser'} || $routines{'wrap'};
     $WARN++ if $routines{'warningsToBrowser'};
@@ -262,13 +311,23 @@ sub stamp {
     my $time = scalar(localtime);
     my $frame = 0;
     my ($id,$pack,$file,$dev,$dirs);
-    do {
-	$id = $file;
-	($pack,$file) = caller($frame++);
-    } until !$file;
+    if (defined($CGI::Carp::PROGNAME)) {
+        $id = $CGI::Carp::PROGNAME;
+    } else {
+        do {
+  	  $id = $file;
+	  ($pack,$file) = caller($frame++);
+        } until !$file;
+    }
     ($dev,$dirs,$id) = File::Spec->splitpath($id);
     return "[$time] $id: ";
 }
+
+sub set_progname {
+    $CGI::Carp::PROGNAME = shift;
+    return $CGI::Carp::PROGNAME;
+}
+
 
 sub warn {
     my $message = shift;
@@ -294,7 +353,10 @@ sub _warn {
     }
 }
 
-sub ineval { $^S || _longmess() =~ /eval [\{\']/m }
+sub ineval { 
+  (exists $ENV{MOD_PERL} ? 0 : $^S) || _longmess() =~ /eval [\{\']/m 
+}
+
 
 # The mod_perl package Apache::Registry loads CGI programs by calling
 # eval.  These evals don't count when looking at the stack backtrace.
