@@ -890,7 +890,7 @@ _mopup:
 	-rm -f perl.third lib*.so.perl.third perl.3log t/perl.third t/perl.3log
 	-rm -f perl.pixie lib*.so.perl.pixie lib*.so.Addrs
 	-rm -f perl.Addrs perl.Counts t/perl.Addrs t/perl.Counts *perl.xok
-	-rm -f perlld cygwin.c ld2 libperl*.def libperl*.dll
+	-rm -f perlld cygwin.c ld2 cygperl*.dll
 	rm -f perl$(EXE_EXT) suidperl$(EXE_EXT) miniperl$(EXE_EXT) $(LIBPERL) libperl.* microperl
 
 # Do not 'make _tidy' directly.
