@@ -21,6 +21,8 @@ WriteMakefile(
 		  DIST_DEFAULT => 'all tardist',
 	      },
 	      MAN3PODS	=> {},
+	      # OS 390 winges about line numbers > 64K ???
+	      XSOPT => '-nolinenumbers',
 	      );
 
 package MY;
