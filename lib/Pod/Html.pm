@@ -697,7 +697,9 @@ sub parse_command_line {
 	if $opt_verbose && defined $opt_flush;
     $dircache = "$cachedir/pod2htmd$cache_ext";
     $itemcache = "$cachedir/pod2htmi$cache_ext";
-    unlink($dircache, $itemcache) if defined $opt_flush;
+    if (defined $opt_flush) {
+	1 while unlink($dircache, $itemcache);
+    }
 }
 
 
