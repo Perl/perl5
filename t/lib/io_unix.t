@@ -5,6 +5,10 @@ BEGIN {
         chdir 't' if -d 't';
         unshift @INC, '../lib' if -d '../lib';
     }
+    # ``use IO::Socket'' executes too early below in the os2 block
+    if ($^O eq 'dos') {
+        print "1..0 # Skip: no fork\n";
+    }
 }
 
 use Config;
