@@ -128,7 +128,6 @@ $ extractsh=""
 $ override=""
 $ knowitall=""
 $ Using_Dec_C = ""
-$ Using_Vax_C = ""
 $ Using_Gnu_C = ""
 $ Dec_C_Version = ""
 $ use_threads = "F"
@@ -339,11 +338,19 @@ $!
 $ GOTO Check_silence
 $!
 $Shut_up:
-$ STDOUT = F$TRNLNM("SYS$OUTPUT")
+$ IF F$Mode() .eqs. "BATCH"
+$ THEN
+$   STDOUT = F$GetQuI("DISPLAY_JOB","LOG_SPECIFICATION",,"THIS_JOB")
+$   WRITE SYS$OUTPUT "Warning: Executing in batch mode.  To avoid file locking conflicts,"
+$   WRITE SYS$OUTPUT "output intended for SYS$OUTPUT will be sent to a new version"
+$   WRITE SYS$OUTPUT STDOUT
+$ ELSE
+$   STDOUT = F$TRNLNM("SYS$OUTPUT")
+$ ENDIF
 $ DEFINE SYS$OUTPUT "_NLA0:"
 $ echo4 = "write STDOUT "
 $ cat4 = "TYPE/OUTPUT=''STDOUT'"
-$ open/write STDOUT 'STDOUT'
+$ open/write/share=read STDOUT 'STDOUT'
 $ RETURN
 $!
 $Check_silence:
@@ -1142,7 +1149,7 @@ $!
 $ ENDIF !%Config-I-VMS, skip "where install" questions
 $!
 $!: see if we need a special compiler
-$! cc_list = "cc/vaxc|cc/decc|gcc" !%Config-I-VMS, compiler symbols/commands
+$! cc_list = "cc/decc|gcc" !%Config-I-VMS, compiler symbols/commands
 $!
 $ nocc = "f"
 $ vms_cc_dflt = ""
@@ -1184,8 +1191,6 @@ $ IF .NOT.silent THEN echo ""
 $ echo "%Config-I-VMS, Default ""cc"" is ''line' ''archsufx' ''F$GETSYI("VERSION")'" 
 $ IF F$LOCATE("VAX",line).NE.F$LENGTH(line) 
 $ THEN 
-$   vms_cc_dflt = "/vaxc"
-$   vms_cc_available = vms_cc_available + "cc/vaxc "
 $   IF .NOT.silent
 $   THEN 
 $     echo "%Config-I-VMS, Will try cc/decc..."
@@ -1212,24 +1217,6 @@ $   IF (F$LOCATE("DEC",line).NE.F$LENGTH(line)).or.(F$LOCATE("Compaq",line).NE.F
 $   THEN 
 $     vms_cc_dflt = "/decc"
 $     vms_cc_available = vms_cc_available + "cc/decc "
-$     echo "%Config-I-VMS, Will try cc/vaxc..."
-$     DEFINE SYS$ERROR _NLA0:
-$     DEFINE SYS$OUTPUT _NLA0:
-$     SET NOON
-$     cc/vaxc/NoObj/list=ccvms.lis ccvms.c
-$     tmp = $status
-$     DEASSIGN SYS$OUTPUT
-$     DEASSIGN SYS$ERROR
-$     SET ON
-$     IF (silent) THEN GOSUB Shut_up
-$     IF tmp.NE.%X10B90001
-$     THEN
-$       echo "%Config-I-VMS, Apparently you don't have that one."
-$     ELSE
-$       GOSUB List_parse
-$       echo "%Config-I-VMS, You also have: ''line' ''archsufx' ''F$GETSYI("VERSION")'"
-$       vms_cc_available = vms_cc_available + "cc/vaxc "
-$     ENDIF
 $   ENDIF
 $ ENDIF
 $!
@@ -1284,12 +1271,6 @@ $     Mcc = "cc/decc"
 $     Using_Dec_C = "Yes"
 $     C_COMPILER_Replace = "CC=cc=''Mcc'"
 $   ENDIF
-$   IF F$LOCATE("vax",ans).NE.F$LENGTH(ans)
-$   THEN
-$     Mcc = "cc/vaxc"
-$     Using_Vax_C = "Yes"
-$     C_COMPILER_Replace = "CC=cc=''Mcc'"
-$   ENDIF
 $   IF Mcc.NES.dflt
 $   THEN
 $     IF (F$LOCATE("dec",dflt).NE.F$LENGTH(dflt)).or(F$LOCATE("compaq",dflt).NE.F$LENGTH(dflt))
@@ -1297,10 +1278,6 @@ $     THEN
 $       C_COMPILER_Replace = "CC=cc=''Mcc'"
 $     ELSE
 $       Using_Dec_C = "Yes"
-$       IF F$LOCATE("vax",dflt).NE.F$LENGTH(dflt) 
-$       THEN
-$         C_COMPILER_Replace = "CC=cc=''Mcc'"
-$       ENDIF
 $     ENDIF
 $   ELSE
 $     IF Mcc .EQS. "cc/decc"
@@ -1314,11 +1291,6 @@ $   Mcc = dflt
 $   IF Mcc .EQS. "cc/decc"
 $   THEN
 $     Using_Dec_C = "Yes"
-$     C_COMPILER_Replace = "CC=cc=''Mcc'"
-$   ENDIF
-$   IF Mcc .EQS. "cc/vaxc"
-$   THEN
-$     Using_Vax_C = "Yes"
 $     C_COMPILER_Replace = "CC=cc=''Mcc'"
 $   ENDIF
 $   IF Mcc .EQS. "gcc"
@@ -1378,36 +1350,6 @@ $   echo "You are using Dec C ''line'"
 $   Dec_C_Version = line
 $   Dec_C_Version = Dec_C_Version + 0
 $   if Dec_C_Version.ge.60200000 THEN CC_FLAGS = CC_FLAGS + "/NOANSI_ALIAS"
-$ ENDIF
-$Vaxc_Invoke_check:
-$ IF "''Using_Vax_C'".EQS."Yes"
-$ THEN
-$   echo ""
-$   echo4 "Checking to see how to invoke Vax C..."
-$   OPEN/WRITE CONFIG vaxcchk.c
-$   WRITE CONFIG "#include <stdio.h>"
-$   WRITE CONFIG "int main() {"
-$   WRITE CONFIG "        printf(""%i\n"", ""1"");"
-$   WRITE CONFIG "        exit(0);"
-$   WRITE CONFIG "}"
-$   CLOSE CONFIG
-$   DEFINE SYS$ERROR _NLA0:
-$   DEFINE SYS$OUTPUT _NLA0:
-$   SET NOON
-$   cc/vaxc/NoObj vaxcchk.c
-$   tmp = $status
-$   DEASSIGN SYS$OUTPUT
-$   DEASSIGN SYS$ERROR
-$   SET ON
-$   IF (silent) THEN GOSUB Shut_up
-$   IF tmp.NE.%X10B90001
-$   THEN
-$     Mcc = "cc"
-$   ELSE
-$     Mcc = "cc/vaxc"
-$   ENDIF
-$Vax_c_cleanup:
-$   DELETE/NOLOG/NOCONFIRM vaxcchk.*;
 $ ENDIF
 $Gcc_check:
 $ if "''using_gnu_c'" .eqs. "Yes"
@@ -1912,7 +1854,7 @@ $ echo "This restriction does not apply to the %ENV hash or to implicit"
 $ echo "logical name translation during parsing of file specifications;"
 $ echo "these always use the normal sequence of access modes for logical"
 $ echo "name translation."
-$ dflt = "n"
+$ dflt = "y"
 $ rp = "Use secure logical name translation? [''dflt'] "
 $ GOSUB myread
 $ if ans.eqs."" then ans="''dflt'"
