@@ -8,9 +8,6 @@ BEGIN {
         print "1..0\n";
         exit 0;
     }
-    # test 30 rather naughtily expects English error messages
-    $ENV{'LC_ALL'} = 'C';
-    $ENV{LANGUAGE} = 'C'; # GNU locale extension
 }
 
 # Tests Todo:
@@ -121,12 +118,16 @@ print $@ =~ /foo bar/ ? "ok 29\n" : "not ok 29\n";
 
 # --- rdo
   
+my $nosuch = '/non/existant/file.name';
+open(NOSUCH, $nosuch);
+my $errno  = $! + 0;
+close(NOSUCH);
+
 my $t = 30;
-$cpt->rdo('/non/existant/file.name');
-# The regexp is getting rather baroque.
-print $! =~ /cannot find|No such file|file specification syntax error|A file or directory in the path name does not exist|Invalid argument|Device not configured|file not found|File or directory doesn't exist/i ? "ok $t\n" : "not ok $t # $!\n"; $t++;
+$cpt->rdo($nosuch);
+print $! == $errno ? "ok $t\n" : sprintf "not ok $t # \"$!\" is %d (expected %d)\n", $!, $errno; $t++;
 # test #31 is gone.
-print 1 ? "ok $t\n" : "not ok $t\n#$@/$!\n"; $t++;
+print "ok $t\n"; $t++;
   
 #my $rdo_file = "tmp_rdo.tpl";
 #if (open X,">$rdo_file") {
