@@ -20,6 +20,7 @@
 # Distinguish between MC68020, MC68030, MC68040
 # Don't assume every OS != 10 is < 10, (e.g., 11).
 # From: Chuck Phillips <cdp@fc.hp.com>
+# HP-UX 10 pthreads hints: Matthew T Harden <mthard@mthard1.monsanto.com>
 
 # This version: August 15, 1997
 # Current maintainer: Jeff Okamoto <okamoto@corp.hp.com>
@@ -80,6 +81,16 @@ EOM
 	esac
     else
 	ccflags="$ccflags -Aa"	# The add-on compiler supports ANSI C
+	# cppstdin and cpprun need the -Aa option if you use the unbundled 
+	# ANSI C compiler (*not* the bundled K&R compiler or gcc)
+	# [XXX this should be set automatically by Configure, but isn't yet.]
+	# [XXX This is reported not to work.  You may have to edit config.sh.
+	#  After running Configure, set cpprun and cppstdin in config.sh,
+	#  run "Configure -S" and then "make".]
+	cpprun="${cc:-cc} -E -Aa"
+	cppstdin="$cpprun"
+	cppminus='-'
+	cpplast='-'
     fi
     # For HP's ANSI C compiler, up to "+O3" is safe for everything
     # except shared libraries (PIC code).  Max safe for PIC is "+O2".
@@ -128,6 +139,26 @@ else
 	selecttype='int *'
 fi
 
+# Under 10.X, a threaded perl can be built, but it needs
+# libcma and OLD_PTHREADS_API.  Also <pthread.h> needs to
+# be #included before any other includes (in perl.h)
+if [ "$xxOsRevMajor" -eq 10 -a "X$usethreads" = "X$define" ]; then
+
+    # HP-UX 10.X uses the old pthreads API
+    case "$d_oldpthreads" in
+    '') d_oldpthreads="$define" ;;
+    esac
+
+    # include libcma before all the others
+    libswanted="cma $libswanted"
+
+    # tell perl.h to include <pthread.h> before other include files
+    ccflags="$ccflags -DPTHREAD_H_FIRST"
+
+    # CMA redefines select to cma_select, and cma_select expects int *
+    # instead of fd_set * (just like 9.X)
+    selecttype='int *'
+fi
 
 # Remove bad libraries that will cause problems
 # (This doesn't remove libraries that don't actually exist)
@@ -184,23 +215,27 @@ esac
 #          (warning) Use of GR3 when frame >= 8192 may cause conflict.
 #     These warnings are harmless and can be safely ignored.
 
-#
-# cppstdin and cpprun need the -Aa option if you use the unbundled 
-# ANSI C compiler (*not* the bundled K&R compiler or gcc)
-# [XXX this should be enabled automatically by Configure, but isn't yet.]
-# [XXX This is reported not to work.  You may have to edit config.sh.
-#  After running Configure, set cpprun and cppstdin in config.sh,
-#  run "Configure -S" and then "make".]
-#
-case "$cppstdin" in
-'')
-    case "$ccflags" in
-    *-Aa*)
-	cpprun="${cc:-cc} -E -Aa"
-	cppstdin="$cpprun"
-	cppminus='-'
-	cpplast='-'
-	;;
-    esac
-    ;;
-esac
+# 64-bitness.
+# jhi@iki.fi, inspired by Jeff Okamoto.
+
+if [ X"$use64bits" = X"$define" ]; then
+  if [ "$xxOsRevMajor" -lt 11 ]; then
+     cat <<EOM >&4
+64-bit compilation is not supported on HP-UX $xxOsRevMajor.
+You need at least HP-UX 11.0.
+EOM
+     exit 1
+  fi
+  if [ ! -d /lib/pa20_64 ]; then
+     cat <<EOM >&4
+You do not seem to have the 64-bit libraries, /lib/pa20_64.
+EOM
+    exit 1
+  fi
+  ccflags="$ccflags +DD64 -D_FILE_OFFSET_BITS=64"
+  ldflags="$ldflags +DD64"
+  ld=/usr/bin/ld
+  set `echo " $libswanted " | sed -e 's@ dl @ @'`
+  libswanted="$*"
+  glibpth="/lib/pa20_64"
+fi
