@@ -1674,7 +1674,7 @@ Found in file XSUB.h
 
 The XSUB-writer's interface to the C C<free> function.
 
-	void	Safefree(void* src, void* dest, int nitems, type)
+	void	Safefree(void* ptr)
 
 =for hackers
 Found in file handy.h
