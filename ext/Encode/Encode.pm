@@ -537,6 +537,9 @@ and to convert it back:
 
 	from_to($data, "utf-8", "iso-8859-1");
 
+Note that because the conversion happens in place, the data to be
+converted cannot be a string constant, it must be a scalar variable.
+
 =back
 
 =head2 Handling Malformed Data
