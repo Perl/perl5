@@ -130,7 +130,7 @@ regcppush(I32 parenfloor)
     for (p = regsize; p > parenfloor; p--) {
 	SSPUSHPTR(regendp[p]);
 	SSPUSHPTR(regstartp[p]);
-	SSPUSHINT(reg_start_tmp[p]);
+	SSPUSHPTR(reg_start_tmp[p]);
 	SSPUSHINT(p);
     }
     SSPUSHINT(regsize);

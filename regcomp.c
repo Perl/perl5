@@ -815,6 +815,7 @@ pregcomp(char *exp, char *xend, PMOP *pm)
     if (OP(scan) != BRANCH) {	/* Only one top-level choice. */
 	scan_data_t data;
 	I32 fake;
+	STRLEN longest_float_length, longest_fixed_length;
 
 	StructCopy(&zero_scan_data, &data, scan_data_t);
 	first = scan;
@@ -893,7 +894,8 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 	scan_commit(&data);
 	SvREFCNT_dec(data.last_found);
 
-	if (SvCUR(data.longest_float)
+	longest_float_length = SvCUR(data.longest_float);
+	if (longest_float_length
 	    || (data.flags & SF_FL_BEFORE_EOL
 		&& (!(data.flags & SF_FL_BEFORE_MEOL)
 		    || (regflags & PMf_MULTILINE)))) {
@@ -914,9 +916,11 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 	  remove:
 	    r->float_substr = Nullsv;
 	    SvREFCNT_dec(data.longest_float);
+	    longest_float_length = 0;
 	}
 
-	if (SvCUR(data.longest_fixed)
+	longest_fixed_length = SvCUR(data.longest_fixed);
+	if (longest_fixed_length
 	    || (data.flags & SF_FIX_BEFORE_EOL /* Cannot have SEOL and MULTI */
 		&& (!(data.flags & SF_FIX_BEFORE_MEOL)
 		    || (regflags & PMf_MULTILINE)))) {
@@ -931,10 +935,11 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 	} else {
 	    r->anchored_substr = Nullsv;
 	    SvREFCNT_dec(data.longest_fixed);
+	    longest_fixed_length = 0;
 	}
 
 	/* A temporary algorithm prefers floated substr to fixed one to dig more info. */
-	if (SvCUR(data.longest_fixed) > SvCUR(data.longest_float)) {
+	if (longest_fixed_length > longest_float_length) {
 	    r->check_substr = r->anchored_substr;
 	    r->check_offset_min = r->check_offset_max = r->anchored_offset;
 	    if (r->reganch & ROPT_ANCH_SINGLE)
