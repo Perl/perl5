@@ -125,7 +125,12 @@ B::ShowLex
 B::Stash
 Benchmark
 CGI
+CGI::Apache
+CGI::Carp
+CGI::Cookie
+CGI::Form
 CGI::Pretty
+CGI::Switch
 CGI::Util
 Carp
 Carp::Heavy
@@ -189,6 +194,7 @@ IO::Socket::UNIX
 IPC::Open2
 IPC::Open3
 IPC::SysV
+Lingua::KO::Hangul::Util
 List::Util
 Locale::Constants
 Locale::Country
@@ -230,6 +236,7 @@ Scalar::Util
 Search::Dict
 SelectSaver
 SelfLoader
+Shell
 Socket
 Storable
 Switch
@@ -260,7 +267,9 @@ Time::Local
 Time::gmtime
 Time::localtime
 Time::tm
-UnicodeCD
+Unicode::Collate
+Unicode::Normalize
+Unicode::UCD
 UNIVERSAL
 User::grent
 User::pwent
