@@ -19,8 +19,6 @@
 
 #include "reentr.h"
 
-/* variations on pp_null */
-
 /* XXX I can't imagine anyone who doesn't have this actually _needs_
    it, since pid_t is an integral type.
    --AD  2/20/1998
@@ -28,6 +26,8 @@
 #ifdef NEED_GETPID_PROTO
 extern Pid_t getpid (void);
 #endif
+
+/* variations on pp_null */
 
 PP(pp_stub)
 {
@@ -47,6 +47,7 @@ PP(pp_scalar)
 PP(pp_padav)
 {
     dSP; dTARGET;
+    I32 gimme;
     if (PL_op->op_private & OPpLVAL_INTRO)
 	SAVECLEARSV(PAD_SVl(PL_op->op_targ));
     EXTEND(SP, 1);
@@ -59,7 +60,8 @@ PP(pp_padav)
 	PUSHs(TARG);
 	RETURN;
     }
-    if (GIMME == G_ARRAY) {
+    gimme = GIMME_V;
+    if (gimme == G_ARRAY) {
 	I32 maxarg = AvFILL((AV*)TARG) + 1;
 	EXTEND(SP, maxarg);
 	if (SvMAGICAL(TARG)) {
@@ -74,7 +76,7 @@ PP(pp_padav)
 	}
 	SP += maxarg;
     }
-    else {
+    else if (gimme == G_SCALAR) {
 	SV* sv = sv_newmortal();
 	I32 maxarg = AvFILL((AV*)TARG) + 1;
 	sv_setiv(sv, maxarg);
