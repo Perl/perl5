@@ -1504,6 +1504,7 @@ Perl_vdie(pTHX_ const char* pat, va_list *args)
     }
     else {
 	message = Nullch;
+	msglen = 0;
     }
 
     DEBUG_S(PerlIO_printf(Perl_debug_log,

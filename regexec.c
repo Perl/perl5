@@ -1670,7 +1670,7 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
 	    SAVEDESTRUCTOR_X(restore_pos, 0);
         }
 	if (!PL_reg_curpm)
-	    New(22,PL_reg_curpm, 1, PMOP);
+	    Newz(22,PL_reg_curpm, 1, PMOP);
 	PL_reg_curpm->op_pmregexp = prog;
 	PL_reg_oldcurpm = PL_curpm;
 	PL_curpm = PL_reg_curpm;

@@ -1452,13 +1452,13 @@ Perl_call_method(pTHX_ const char *methname, I32 flags)
 {
     dSP;
     OP myop;
-    if (!PL_op)
+    if (!PL_op) {
+	myop.op_next = Nullop;
 	PL_op = &myop;
+    }
     XPUSHs(sv_2mortal(newSVpv(methname,0)));
     PUTBACK;
     pp_method();
-	if(PL_op == &myop)
-		PL_op = Nullop;
     return call_sv(*PL_stack_sp--, flags);
 }
 

@@ -3105,7 +3105,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
 
     veop = Nullop;
 
-    if(version != Nullop) {
+    if (version != Nullop) {
 	SV *vesv = ((SVOP*)version)->op_sv;
 
 	if (arg == Nullop && !SvNIOK(vesv)) {
@@ -3113,6 +3113,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
 	}
 	else {
 	    OP *pack;
+	    SV *meth;
 
 	    if (version->op_type != OP_CONST || !SvNIOK(vesv))
 		Perl_croak(aTHX_ "Version number must be constant number");
@@ -3121,29 +3122,38 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
 	    pack = newSVOP(OP_CONST, 0, newSVsv(((SVOP*)id)->op_sv));
 
 	    /* Fake up a method call to VERSION */
+	    meth = newSVpvn("VERSION",7);
+	    sv_upgrade(meth, SVt_PVIV);
+	    SvIOK_on(meth);
+	    PERL_HASH(SvUVX(meth), SvPVX(meth), SvCUR(meth));
 	    veop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
 			    append_elem(OP_LIST,
-			    prepend_elem(OP_LIST, pack, list(version)),
-			    newSVOP(OP_METHOD_NAMED, 0,
-				    newSVpvn("VERSION", 7))));
+					prepend_elem(OP_LIST, pack, list(version)),
+					newSVOP(OP_METHOD_NAMED, 0, meth)));
 	}
     }
 
     /* Fake up an import/unimport */
     if (arg && arg->op_type == OP_STUB)
 	imop = arg;		/* no import on explicit () */
-    else if(SvNIOK(((SVOP*)id)->op_sv)) {
+    else if (SvNIOK(((SVOP*)id)->op_sv)) {
 	imop = Nullop;		/* use 5.0; */
     }
     else {
+	SV *meth;
+
 	/* Make copy of id so we don't free it twice */
 	pack = newSVOP(OP_CONST, 0, newSVsv(((SVOP*)id)->op_sv));
+
+	/* Fake up a method call to import/unimport */
+	meth = aver ? newSVpvn("import",6) : newSVpvn("unimport", 8);;
+	sv_upgrade(meth, SVt_PVIV);
+	SvIOK_on(meth);
+	PERL_HASH(SvUVX(meth), SvPVX(meth), SvCUR(meth));
 	imop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
-		    append_elem(OP_LIST,
-			prepend_elem(OP_LIST, pack, list(arg)),
-			newSVOP(OP_METHOD_NAMED, 0,
-				aver ? newSVpvn("import", 6)
-				     : newSVpvn("unimport", 8))));
+		       append_elem(OP_LIST,
+				   prepend_elem(OP_LIST, pack, list(arg)),
+				   newSVOP(OP_METHOD_NAMED, 0, meth)));
     }
 
     /* Fake up a require, handle override, if any */
@@ -4247,10 +4257,10 @@ Perl_op_const_sv(pTHX_ OP *o, CV *cv)
 {
     SV *sv = Nullsv;
 
-    if(!o)
+    if (!o)
 	return Nullsv;
  
-    if(o->op_type == OP_LINESEQ && cLISTOPo->op_first) 
+    if (o->op_type == OP_LINESEQ && cLISTOPo->op_first) 
 	o = cLISTOPo->op_first->op_sibling;
 
     for (; o; o = o->op_next) {
@@ -4370,7 +4380,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 		Perl_croak(aTHX_ "Can't redefine active sort subroutine %s", name);
 	    if (!block)
 		goto withattrs;
-	    if(const_sv = cv_const_sv(cv))
+	    if (const_sv = cv_const_sv(cv))
 		const_changed = sv_cmp(const_sv, op_const_sv(block, Nullcv));
 	    if ((const_sv && const_changed) || ckWARN(WARN_REDEFINE) 
 					&& !(CvGV(cv) && GvSTASH(CvGV(cv))
@@ -5956,7 +5966,7 @@ S_simplify_sort(pTHX_ OP *o)
 	return;
     if (strEQ(GvNAME(gv), "a"))
 	reversed = 0;
-    else if(strEQ(GvNAME(gv), "b"))
+    else if (strEQ(GvNAME(gv), "b"))
 	reversed = 1;
     else
 	return;

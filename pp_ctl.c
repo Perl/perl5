@@ -1526,10 +1526,10 @@ PP(pp_caller)
 	if (cx->blk_eval.old_op_type == OP_ENTEREVAL) {
 	    PUSHs(cx->blk_eval.cur_text);
 	    PUSHs(&PL_sv_no);
-	} 
-	else if (cx->blk_eval.old_name) { /* Try blocks have old_name == 0. */
-	    /* Require, put the name. */
-	    PUSHs(sv_2mortal(newSVpv(cx->blk_eval.old_name, 0)));
+	}
+	/* try blocks have old_namesv == 0 */
+	else if (cx->blk_eval.old_namesv) {
+	    PUSHs(sv_2mortal(newSVsv(cx->blk_eval.old_namesv)));
 	    PUSHs(&PL_sv_yes);
 	}
     }
@@ -1813,9 +1813,9 @@ PP(pp_return)
 	    (MARK == SP || (gimme == G_SCALAR && !SvTRUE(*SP))) )
 	{
 	    /* Unassume the success we assumed earlier. */
-	    char *name = cx->blk_eval.old_name;
-	    (void)hv_delete(GvHVn(PL_incgv), name, strlen(name), G_DISCARD);
-	    DIE(aTHX_ "%s did not return a true value", name);
+	    SV *nsv = cx->blk_eval.old_namesv;
+	    (void)hv_delete(GvHVn(PL_incgv), SvPVX(nsv), SvCUR(nsv), G_DISCARD);
+	    DIE(aTHX_ "%s did not return a true value", SvPVX(nsv));
 	}
 	break;
     case CXt_FORMAT:
@@ -3294,9 +3294,9 @@ PP(pp_leaveeval)
 	!(gimme == G_SCALAR ? SvTRUE(*SP) : SP > newsp))
     {
 	/* Unassume the success we assumed earlier. */
-	char *name = cx->blk_eval.old_name;
-	(void)hv_delete(GvHVn(PL_incgv), name, strlen(name), G_DISCARD);
-	retop = Perl_die(aTHX_ "%s did not return a true value", name);
+	SV *nsv = cx->blk_eval.old_namesv;
+	(void)hv_delete(GvHVn(PL_incgv), SvPVX(nsv), SvCUR(nsv), G_DISCARD);
+	retop = Perl_die(aTHX_ "%s did not return a true value", SvPVX(nsv));
 	/* die_where() did LEAVE, or we won't be here */
     }
     else {
