@@ -248,7 +248,6 @@ PP(pp_or)
 PP(pp_add)
 {
     djSP; dATARGET; tryAMAGICbin(add,opASSIGN); 
-    tryIVIVbin(+);
     {
       dPOPTOPnnrl_ul;
       SETn( left + right );
