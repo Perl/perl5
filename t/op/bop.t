@@ -324,4 +324,4 @@ is($a, "\xFF", "~ works with utf-8");
 
 # [rt.perl.org 33003]
 # This would cause a segfault
-is( runperl(prog => 'eval q($#a>>=1); print 1'), 1 );
+like( runperl(prog => 'eval q($#a>>=1); print 1'), "^1\n?" );
