@@ -97,15 +97,15 @@ then Configure will suggest /opt/perl/lib instead of
 
 By default, Configure will compile perl to use dynamic loading, if
 your system supports it.  If you want to force perl to be compiled
-statically, you can either choose this when Configure prompts you or by
-using the Configure command line option -Uusedl.
+statically, you can either choose this when Configure prompts you or
+you can use the Configure command line option -Uusedl.
 
 =head2 Extensions
 
 By default, Configure will offer to build every extension which appears
 to be supported.  For example, Configure will offer to build GDBM_File
 only if it is able to find the gdbm library.  (See examples below.)
-DynaLoader, Fcntl and FileHandle are always built by default.
+DynaLoader, Fcntl, FileHandle and IO are always built by default.
 Configure does not contain code to test for POSIX compliance, so POSIX
 is always built by default as well.  If you wish to skip POSIX, you can
 set the Configure variable useposix=false either in a hint file or from
@@ -113,11 +113,15 @@ the Configure command line.  Similarly, the Opcode extension is always
 built by default, but you can skip it by setting the Configure variable
 useopcode=false either in a hint file for from the command line.
 
+Even if you do not have dynamic loading, you must still build the
+DynaLoader extension; you should just build the stub dl_none.xs
+version.  (Configure will suggest this as the default.)
+
 In summary, here are the Configure command-line variables you can set
 to turn off each extension:
 
     DB_File		i_db
-    DynaLoader		(Must always be included)
+    DynaLoader		(Must always be included as a static extension)
     Fcntl		(Always included by default)
     FileHandle		(Always included by default)
     GDBM_File		i_gdbm
@@ -419,9 +423,9 @@ the same, including all the installation directories.  How can you
 ensure that your newly built perl will link with your newly built
 libperl.so.4 rather with the installed libperl.so.4?  The answer is
 that you might not be able to.  The installation directory is encoded
-in the perl binary with the LD_RUN_PATH environment variable.  On
-Solaris, you can override that with LD_LIBRARY_PATH; on Linux you
-can't.
+in the perl binary with the LD_RUN_PATH environment variable (or
+equivalent ld command-line option).  On Solaris, you can override that
+with LD_LIBRARY_PATH; on Linux you can't.
 
 The only reliable answer is that you should specify a different
 directory for the architecture-dependent library for your -DDEBUGGING
@@ -478,7 +482,7 @@ abstraction layer.  This configuration can be used to check that perl and
 extension modules have been correctly converted to use the PerlIO
 abstraction.
 
-This configuration should work on all platforms (but currently does not).
+This configuration should work on all platforms (but might not).
 
 You select this option via :
 
@@ -564,7 +568,7 @@ B<gcc>, you should almost always remove your old config.sh.
 
 =item Propagating your changes to config.sh
 
-If you later make any changes to F<config.sh>, you should propagate
+If you make any changes to F<config.sh>, you should propagate
 them to all the .SH files by running  B<sh Configure -S>.  You will
 then have to rebuild by running
 
@@ -772,10 +776,10 @@ with B<make depend; make>.
 
 =item *
 
-If you can't compile successfully, try adding a C<-DCRIPPLED_CC> flag.
-(Just because you get no errors doesn't mean it compiled right!)
-This simplifies some complicated expressions for compilers that
-get indigestion easily.
+If you still can't compile successfully, try adding a C<-DCRIPPLED_CC>
+flag.  (Just because you get no errors doesn't mean it compiled right!)
+This simplifies some complicated expressions for compilers that get
+indigestion easily.
 
 =item Missing functions
 
@@ -837,7 +841,6 @@ If you get syntax errors on '(', try -DCRIPPLED_CC.
 
 Machines with half-implemented dbm routines will need to #undef I_ODBM
 
-
 =back
 
 =head1 make test
@@ -860,15 +863,15 @@ B<Note>: one possible reason for errors is that some external programs
 may be broken due to the combination of your environment and the way
 C<make test> exercises them.  For example, this may happen if you have
 one or more of these environment variables set: C<LC_ALL LC_CTYPE
-LANG>.  In some versions of UNIX, the non-English locales are known to
-cause programs to exhibit mysterious errors.  If you have any of the
-above environment variables set, please try C<setenv LC_ALL C> (for
-C shell) or <LC_ALL=C;export LC_ALL> (for Bourne or Korn shell) from the
-command line and then retry C<make test>. If the tests then succeed,
-you may have a broken program that is confusing the testing. Please run
-the troublesome test by hand as shown above and see whether you can
-locate the program.  Look for things like:
-C<exec, `backquoted command`, system, open("|...")> or C<open("...|")>.
+LC_COLLATE LANG>.  In some versions of UNIX, the non-English locales
+are known to cause programs to exhibit mysterious errors.  If you have
+any of the above environment variables set, please try
+C<setenv LC_ALL C> (for C shell) or <LC_ALL=C;export LC_ALL>
+(for Bourne or Korn shell) from the command line and then retry C<make test>.
+If the tests then succeed, you may have a broken program that is confusing the
+testing. Please run the troublesome test by hand as shown above and
+see whether you can locate the program.  Look for things like: C<exec,
+`backquoted command`, system, open("|...")> or C<open("...|")>.
 All these mean that Perl is trying to run some external program.
 
 =head1 INSTALLING PERL5
@@ -927,16 +930,10 @@ $sitearch listed in config.sh.  Usually, these are something like
 where $archname is something like sun4-sunos.  These directories
 will be used for installing extensions.
 
-Perl's *.h header files and the libperl.a library are also
-installed under $archlib so that any user may later build new
-extensions even if the Perl source is no longer available.
-
-The libperl.a library is only needed for building new
-extensions and linking them statically into a new perl executable.
-If you will not be doing that, then you may safely delete
-$archlib/libperl.a after perl is installed.
-
-make install may also offer to install perl in a "standard" location.
+Perl's *.h header files and the libperl.a library are also installed
+under $archlib so that any user may later build new extensions, run the
+optional Perl compiler, or embed the perl interpreter into another
+program even if the Perl source is no longer available.
 
 Most of the documentation in the pod/ directory is also available
 in HTML and LaTeX format.  Type
@@ -968,10 +965,10 @@ spectacularly on type casting and certain structures.
 =head1 Coexistence with earlier versions of perl5.
 
 You can safely install the current version of perl5 and still run scripts
-under the old binaries for versions 5.002 and later ONLY.  Instead of
+under the old binaries for versions 5.003 and later ONLY.  Instead of
 starting your script with #!/usr/local/bin/perl, just start it with
-#!/usr/local/bin/perl5.001 (or whatever version you want to run.)
-If you want to retain a version of perl5 prior to perl5.002, you'll
+#!/usr/local/bin/perl5.003 (or whatever version you want to run.)
+If you want to retain a version of perl5 prior to perl5.003, you'll
 need to install the current version in a separate directory tree,
 since some of the architecture-independent library files have changed
 in incompatible ways.
@@ -1008,14 +1005,15 @@ scripts can still start with #!/usr/local/bin/perl.
 B<NOTE>: Starting with 5.002_01, all functions in the perl C source
 code are protected by default by the prefix Perl_ (or perl_) so that
 you may link with third-party libraries without fear of namespace
-collisons.  This breaks compatability with the initially released
-version of 5.002, so once you install 5.002_01 (or higher) you will
+collisons.  This breaks compatability with
+version 5.002, so once you install 5.002_01 (or higher) you will
 need to re-build and install all of your dynamically loadable
 extensions.  (The standard extensions supplied with Perl are handled
 automatically).  You can turn off this namespace protection by adding
--DNO_EMBED to your ccflags variable in config.sh.  This is a one-time
-change.  In the future, we certainly hope that most extensions won't
-need to be recompiled for use with a newer version of perl.
+-DNO_EMBED to your ccflags variable in config.sh.
+
+In the future, we certainly hope that most extensions won't need to be
+recompiled for use with a newer version of perl.
 
 =head1 Coexistence with perl4
 
@@ -1047,15 +1045,4 @@ from the original README by Larry Wall.
 
 =head1 LAST MODIFIED
 
-6 September 1996
-
-> > Warning (will try anyway): No library found for -lucb
-> Don't worry about these.  It tried anyway and succeeded.  If you can think
-> of a better way to word the message, please feel free to suggest one.
-
-I figured that Configure should be able to figure out that there are no
--lucb/-lposix/-lcposix libraries so that ExtUtils::Liblist won't have
-to check for them.  Okay, I'll stop worrying. :)
-
-Thank you!
-Dan
+8 October 1996
