@@ -33,7 +33,7 @@ ld='cc'
 # If you want to build for specific architectures, change the line
 # below to something like
 #
-#	archs=(m68k i386)
+#	archs='m68k i386'
 #
 archs=`/bin/lipo -info /usr/lib/libm.a | sed -n 's/^[^:]*:[^:]*: //p'`
 
@@ -83,6 +83,8 @@ i_dbm='define'
 i_utime='undef'
 groupstype='int'
 direntrytype='struct direct'
+netdb_host_type='const char *'
+netdb_hlen_type='int'
 
 usemymalloc='y'
 clocktype='int'
