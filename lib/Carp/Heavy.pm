@@ -48,7 +48,7 @@ sub format_arg {
     $arg = 'undef';
   }
   elsif (ref($arg)) {
-    $arg .= ''; # Make it a string;
+      $arg = defined($overload::VERSION) ? overload::StrVal($arg) : "$arg";
   }
   $arg =~ s/'/\\'/g;
   $arg = str_len_trim($arg, $MaxLenArg);
