@@ -1045,6 +1045,7 @@ lib/IPC/SysV.t			See if IPC::SysV works
 lib/less.pm			For "use less"
 lib/less.t			See if less support works
 lib/lib_pm.PL			For "use lib", produces lib/lib.pm
+lib/lib.t			For "use lib" testing
 lib/locale.pm			For "use locale"
 lib/locale.t			See if locale support works
 lib/Locale/Codes/t/all.t	See if Locale::Codes work
