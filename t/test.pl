@@ -291,6 +291,18 @@ sub skip {
     last SKIP;
 }
 
+sub todo_skip {
+    my $why = shift;
+    my $n   = @_ ? shift : 1;
+
+    for (1..$n) {
+        print STDOUT "ok $test # TODO & SKIP: $why\n";
+        $test++;
+    }
+    local $^W = 0;
+    last TODO;
+}
+
 sub eq_array {
     my ($ra, $rb) = @_;
     return 0 unless $#$ra == $#$rb;
@@ -412,6 +424,12 @@ sub _create_runperl { # Create the string to qx in runperl().
         }
     } elsif (defined $args{progfile}) {
 	$runperl .= qq( "$args{progfile}");
+    } else {
+	# You probaby didn't want to be sucking in from the upstream stdin
+	die "test.pl:runperl(): none of prog, progs, progfile, args, "
+	    . " switches or stdin specified"
+	    unless defined $args{args} or defined $args{switches}
+		or defined $args{stdin};
     }
     if (defined $args{stdin}) {
 	# so we don't try to put literal newlines and crs onto the
@@ -455,6 +473,8 @@ sub _create_runperl { # Create the string to qx in runperl().
 }
 
 sub runperl {
+    die "test.pl:runperl() does not take a hashref"
+	if ref $_[0] and ref $_[0] eq 'HASH';
     my $runperl = &_create_runperl;
     my $result = `$runperl`;
     $result =~ s/\n\n/\n/ if $is_vms; # XXX pipes sometimes double these
