@@ -82,10 +82,6 @@ FUNC:
 	    my $docs = "";
 DOC:
 	    while (defined($doc = <$fh>)) {
-                if ($doc =~ /^=head1 (.*)/) {
-                    $curheader = $1;
-                    next DOC;
-                }
 		$line++;
 		last DOC if $doc =~ /^=\w+/;
 		if ($doc =~ m:^\*/$:) {
@@ -107,7 +103,7 @@ DOC:
 		$docfuncs{$name} = [$flags, $docs, $ret, $file, $curheader, @args];
 	    }
 	    if (defined $doc) {
-		if ($doc =~ /^=for/) {
+		if ($doc =~ /^=(?:for|head)/) {
 		    $in = $doc;
 		    redo FUNC;
 		}
