@@ -50,4 +50,7 @@ case "$osvers" in
 *)	ranlib='ranlib' ;;
 esac
 
+# Settings that don't depend on $osvers:
+
+util_cflags='ccflags="$ccflags -DLOCALE_ENVIRON_REQUIRED"'
 groupstype='int'

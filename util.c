@@ -548,23 +548,59 @@ perl_init_i18nl10n(printwarn)
 
 #ifdef USE_LOCALE
 
-#ifdef LC_ALL
-    char *lc_all     = getenv("LC_ALL");
-#endif /* LC_ALL */
 #ifdef USE_LOCALE_CTYPE
-    char *lc_ctype   = getenv("LC_CTYPE");
     char *curctype   = NULL;
 #endif /* USE_LOCALE_CTYPE */
 #ifdef USE_LOCALE_COLLATE
-    char *lc_collate = getenv("LC_COLLATE");
     char *curcoll    = NULL;
 #endif /* USE_LOCALE_COLLATE */
 #ifdef USE_LOCALE_NUMERIC
-    char *lc_numeric = getenv("LC_NUMERIC");
     char *curnum     = NULL;
 #endif /* USE_LOCALE_NUMERIC */
+    char *lc_all     = getenv("LC_ALL");
     char *lang       = getenv("LANG");
     bool setlocale_failure = FALSE;
+
+#ifdef LOCALE_ENVIRON_REQUIRED
+
+    /*
+     * Ultrix setlocale(..., "") fails if there are no environment
+     * variables from which to get a locale name.
+     */
+
+    bool done = FALSE;
+
+#ifdef LC_ALL
+    if (lang) {
+	if (setlocale(LC_ALL, ""))
+	    done = TRUE;
+	else
+	    setlocale_failure = TRUE;
+    }
+    if (!setlocale_failure)
+#endif /* LC_ALL */
+    {
+#ifdef USE_LOCALE_CTYPE
+	if (! (curctype = setlocale(LC_CTYPE,
+				    (!done && (lang || getenv("LC_CTYPE")))
+				    ? "" : Nullch)))
+	    setlocale_failure = TRUE;
+#endif /* USE_LOCALE_CTYPE */
+#ifdef USE_LOCALE_COLLATE
+	if (! (curcoll = setlocale(LC_COLLATE,
+				   (!done && (lang || getenv("LC_COLLATE")))
+				   ? "" : Nullch)))
+	    setlocale_failure = TRUE;
+#endif /* USE_LOCALE_COLLATE */
+#ifdef USE_LOCALE_NUMERIC
+	if (! (curnum = setlocale(LC_NUMERIC,
+				  (!done && (lang || getenv("LC_NUMERIC")))
+				  ? "" : Nullch)))
+	    setlocale_failure = TRUE;
+#endif /* USE_LOCALE_NUMERIC */
+    }
+
+#else /* !LOCALE_ENVIRON_REQUIRED */
 
 #ifdef LC_ALL
 
@@ -598,6 +634,8 @@ perl_init_i18nl10n(printwarn)
 #endif /* USE_LOCALE_NUMERIC */
 
 #endif /* LC_ALL */
+
+#endif /* !LOCALE_ENVIRON_REQUIRED */
 
     if (setlocale_failure) {
 	char *p;
@@ -634,13 +672,11 @@ perl_init_i18nl10n(printwarn)
 	    PerlIO_printf(PerlIO_stderr(),
 		"perl: warning: Please check that your locale settings:\n");
 
-#ifdef LC_ALL
 	    PerlIO_printf(PerlIO_stderr(),
 			  "\tLC_ALL = %c%s%c,\n",
 			  lc_all ? '"' : '(',
 			  lc_all ? lc_all : "unset",
 			  lc_all ? '"' : ')');
-#endif /* LC_ALL */
 
 	    {
 	      char **e;
