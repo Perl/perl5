@@ -237,6 +237,9 @@ Tie::SubstrHash
 Time::HiRes
 Time::Local
 Time::Piece
+Time::gmtime
+Time::localtime
+Time::tm
 UNIVERSAL
 User::grent
 User::pwent

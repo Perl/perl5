@@ -1656,7 +1656,9 @@ t/lib/tie-stdarray.t	Test for Tie::StdArray
 t/lib/tie-stdhandle.t	Test for Tie::StdHandle
 t/lib/tie-stdpush.t	Test for Tie::StdArray
 t/lib/tie-substrhash.t	Test for Tie::SubstrHash
+t/lib/time-gmtime.t	Test for Time::gmtime
 t/lib/time-hires.t	Test for Time::HiRes
+t/lib/time-localtime.t	Test for Time::localtime
 t/lib/time-piece.t	Test for Time::Piece
 t/lib/timelocal.t	See if Time::Local works
 t/lib/trig.t		See if Math::Trig works
