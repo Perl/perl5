@@ -2,8 +2,9 @@
 /*
  * gcc long pointer support code for HPPA.
  * Copyright 1998, DIS International, Ltd.
- * Permission is granted to use this code under the GNU LIBRARY GENERAL
- * PUBLIC LICENSE, Version 2, June 1991.
+ * This code is free software; you may redistribute it and/or modify
+ * it under the same terms as Perl itself.  (Relicensed for Perl in
+ * in April 2002 by Mark Klein.)
  */
 typedef struct {
   int           spaceid;
@@ -13,8 +14,9 @@ typedef struct {
 /*
  * gcc long pointer support code for HPPA.
  * Copyright 1998, DIS International, Ltd.
- * Permission is granted to use this code under the GNU LIBRARY GENERAL
- * PUBLIC LICENSE, Version 2, June 1991.
+ * This code is free software; you may redistribute it and/or modify
+ * it under the same terms as Perl itself.  (Relicensed for Perl in
+ * in April 2002 by Mark Klein.)
  */
 
 int __perl_mpe_getspaceid(void *source)
@@ -185,6 +187,11 @@ void __perl_mpe_move_fast(int len,                 // %r26 == byte length
  * uses some undocumented locking call. It is known to work on SCO unix,
  * other vendors should try.
  * The #error directive prevents unsupported OSes
+ *
+ * ftruncate/truncate code by Mark Bixby.
+ * This code is free software; you may redistribute it and/or modify
+ * it under the same terms as Perl itself.
+ *
  */
 
 #include <unistd.h>
@@ -336,8 +343,6 @@ truncate(const char *pathname, off_t length)
       gettimeofday() is UNIX, not POSIX.
       gettimeofday() is a BSD function.
 
-
-
    NAME
       gettimeofday -
 
@@ -379,7 +384,11 @@ truncate(const char *pathname, off_t length)
 
 extern int TIMER();
 
-
+/*
+ * gettimeofday code by Mark Bixby.
+ * This code is free software; you may redistribute it and/or modify
+ * it under the same terms as Perl itself.
+ */
 
 #ifdef __STDC__
 int gettimeofday( struct timeval *tp, struct timezone *tpz )
