@@ -99,3 +99,7 @@ get_cv
 get_av
 get_hv
 get_sv
+
+grok_hex
+grok_oct
+grok_bin

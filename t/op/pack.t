@@ -160,7 +160,7 @@ sub list_eq ($$) {
 
 
 {
-  # test exceptions
+  print "# test exceptions\n";
   my $x;
   eval { $x = unpack 'w', pack 'C*', 0xff, 0xff};
   like($@, qr/^Unterminated compressed integer/);
@@ -225,8 +225,7 @@ sub list_eq ($$) {
 
 }
 
-#
-# test the "p" template
+print "# test the 'p' template\n";
 
 # literals
 is(unpack("p",pack("p","foo")), "foo");
@@ -255,8 +254,8 @@ like(pack("p", undef), qr/^\0+/);
 #				 see #ifdef __osf__ in pp.c pp_unpack
 is((unpack("i",pack("i",-1))), -1);
 
-# test the pack lengths of s S i I l L
-# test the pack lengths of n N v V
+print "# test the pack lengths of s S i I l L n N v V\n";
+
 my @lengths = qw(s 2 S 2 i -4 I -4 l 4 L 4 n 2 N 4 v 2 V 4);
 while (my ($format, $expect) = splice @lengths, 0, 2) {
   my $len = length(pack($format, 0));
@@ -270,7 +269,8 @@ while (my ($format, $expect) = splice @lengths, 0, 2) {
 }
 
 
-# test unpack-pack lengths
+print "# test unpack-pack lengths\n";
+
 my @templates = qw(c C i I s S l L n N v V f d q Q);
 
 foreach my $t (@templates) {
@@ -367,7 +367,7 @@ foreach (
     }
 }
 
-# packing native shorts/ints/longs
+print "# packing native shorts/ints/longs\n";
 
 is(length(pack("s!", 0)), $Config{shortsize});
 is(length(pack("i!", 0)), $Config{intsize});
@@ -389,6 +389,7 @@ sub numbers_with_total {
       $total += $_;
     }
   }
+  print "# numbers test for $format\n";
   foreach (@_) {
     SKIP: {
         my $out = eval {unpack($format, pack($format, $_))};
@@ -445,7 +446,7 @@ sub numbers_with_total {
         } else {
             $calc_sum = $total;
             # Shift into range by some multiple of the total
-            my $mult = int ($total / $max_p1);
+            my $mult = $max_p1 ? int ($total / $max_p1) : undef;
             # Need this to make sure that -1 + (~0+1) is ~0 (ie still integer)
             $calc_sum = $total - $mult;
             $calc_sum -= $mult * $max;
@@ -522,7 +523,7 @@ numbers_with_total ('Q', sub {
                     0, 1,9223372036854775807, 9223372036854775808,
                     18446744073709551615);
 
-# pack nvNV byteorders
+print "# pack nvNV byteorders\n";
 
 is(pack("n", 0xdead), "\xde\xad");
 is(pack("v", 0xdead), "\xad\xde");
