@@ -138,9 +138,12 @@ esac
 # NCR MP-RAS.  Thanks to Doug Hendricks for this info.
 # The output of uname -a looks like this
 #	foo foo 4.0 3.0 3441 Pentium III(TM)-ISA/PCI
+# Similar errors reported for
+#       foo foo 4.0 3.0 4400 pentium ii(tm)-isapci '
+
 # Configure sets osname=svr4.0, osvers=3.0, archname='3441-svr4.0'
 case "$myuname" in
-*3441*)
+*3441*|*4400*isapci)
     # With the NCR High Performance C Compiler R3.0c, miniperl fails 
     # t/op/regexp.t test 461 unless we compile with optimizie=-g.
     # The whole O/S is being phased out, so more detailed probing
