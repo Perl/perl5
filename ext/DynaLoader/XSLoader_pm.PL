@@ -14,19 +14,7 @@ print OUT <<'EOT';
 
 package XSLoader;
 
-#   And Gandalf said: 'Many folk like to know beforehand what is to
-#   be set on the table; but those who have laboured to prepare the
-#   feast like to keep their secret; for wonder makes the words of
-#   praise louder.'
-
-#   (Quote from Tolkien sugested by Anno Siegel.)
-#
-# See pod text at end of file for documentation.
-# See also ext/DynaLoader/README in source tree for other information.
-#
-# Tim.Bunce@ig.co.uk, August 1994
-
-$VERSION = "0.01";	# avoid typo warning
+$VERSION = "0.02";
 
 # enable debug/trace messages from DynaLoader perl code
 # $dl_debug = $ENV{PERL_DL_DEBUG} || 0 unless defined $dl_debug;
@@ -45,13 +33,10 @@ boot_DynaLoader('DynaLoader') if defined(&boot_DynaLoader) &&
                                 !defined(&dl_error);
 package XSLoader;
 
-1; # End of main code
-
-# The bootstrap function cannot be autoloaded (without complications)
-# so we define it here:
-
 sub load {
     package DynaLoader;
+
+    die q{XSLoader::load('Your::Module', $Your::Module::VERSION)} unless @_;
 
     my($module) = $_[0];
 
@@ -137,6 +122,8 @@ print OUT <<'EOT';
     goto &DynaLoader::bootstrap_inherit;
 }
 
+1;
+
 __END__
 
 =head1 NAME
@@ -148,7 +135,7 @@ XSLoader - Dynamically load C libraries into Perl code
     package YourPackage;
     use XSLoader;
 
-    XSLoader::load 'YourPackage', @args;
+    XSLoader::load 'YourPackage', $YourPackage::VERSION;
 
 =head1 DESCRIPTION
 

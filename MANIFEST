@@ -214,6 +214,7 @@ ext/DynaLoader/hints/netbsd.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/hints/openbsd.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
+ext/DynaLoader/t/XSLoader.t     See if XSLoader works
 ext/DynaLoader/XSLoader_pm.PL	Simple XS Loader perl module
 ext/Encode/AUTHORS		List of authors
 ext/Encode/bin/enc2xs		Encode module generator
