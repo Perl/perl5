@@ -8339,7 +8339,7 @@ END
 extern int errno;
 #endif
 #$d_union_semun HAS_UNION_SEMUN
-int int main() {
+int main() {
     union semun
 #ifndef HAS_UNION_SEMUN
     {
