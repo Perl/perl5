@@ -250,6 +250,10 @@ EOF
     $me = $Is_MSWin32 ? $ENV{'USERNAME'}
 	    : $^O eq 'os2' ? $ENV{'USER'} || $ENV{'LOGNAME'}
 	    : eval { getpwuid($<) };	# May be missing
+
+    $from = $::Config{'cf_email'}
+       if !$from && $::Config{'cf_email'} && $::Config{'cf_by'} && $me &&
+               ($me eq $::Config{'cf_by'});
 } # sub Init
 
 sub Query {
