@@ -1775,23 +1775,25 @@ isa(CLASS), can(METHOD), VERSION( [NEED] )
 
 =item Tying Scalars
 
-TIESCALAR classname, LIST, FETCH this, STORE this, value, DESTROY this
+TIESCALAR classname, LIST, FETCH this, STORE this, value, UNTIE this,
+DESTROY this
 
 =item Tying Arrays
 
 TIEARRAY classname, LIST, FETCH this, index, STORE this, index, value,
-DESTROY this
+UNTIE this, DESTROY this
 
 =item Tying Hashes
 
 USER, HOME, CLOBBER, LIST, TIEHASH classname, LIST, FETCH this, key, STORE
 this, key, value, DELETE this, key, CLEAR this, EXISTS this, key, FIRSTKEY
-this, NEXTKEY this, lastkey, DESTROY this
+this, NEXTKEY this, lastkey, UNTIE this, DESTROY this
 
 =item Tying FileHandles
 
 TIEHANDLE classname, LIST, WRITE this, LIST, PRINT this, LIST, PRINTF this,
-LIST, READ this, LIST, READLINE this, GETC this, CLOSE this, DESTROY this
+LIST, READ this, LIST, READLINE this, GETC this, CLOSE this, UNTIE this,
+DESTROY this
 
 =item UNTIE this
 
@@ -4670,9 +4672,15 @@ accidentally using the context of the sort() itself)
 
 =item Building Extensions Can Fail Because Of Largefiles
 
-=item ftmp-posix subtest 6 fails in VMS
+=item ftmp-security tests warn 'system possibly insecure'
+
+=item Long Doubles Still Don't Work In Solaris
 
 =item Storable tests fail in some platforms
+
+=item Threads Are Still Experimental
+
+=item The Compiler Suite Is Still Experimental
 
 =back
 
@@ -6187,18 +6195,6 @@ FETCH_I<type>_ATTRIBUTES, MODIFY_I<type>_ATTRIBUTES
 
 =back
 
-=head2 attrs - set/get attributes of a subroutine (deprecated)
-
-=over
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-method, locked
-
-=back
-
 =head2 autouse - postpone load of modules until a function is used
 
 =over
@@ -6418,18 +6414,6 @@ operations
 
 =back
 
-=head2 ops - Perl pragma to restrict unsafe operations when compiling
-
-=over
-
-=item SYNOPSIS	
-
-=item DESCRIPTION
-
-=item SEE ALSO
-
-=back
-
 =head2 overload - Package for overloading perl operations
 
 =over
@@ -6521,6 +6505,9 @@ integer, float, binary, q, qr
 =item AUTHOR
 
 =item DIAGNOSTICS
+
+Odd number of arguments for overload::constant, `%s' is not an overloadable
+type, `%s' is not a code reference
 
 =item BUGS
 
@@ -7690,7 +7677,7 @@ optionE<gt> [shift|pop]>, C<o conf E<lt>list optionE<gt>
 
 http firewall, ftp firewall, One way visibility, SOCKS, IP Masquerade
 
-=item Configuring lynx or ncftp for going through the firewall
+=item Configuring lynx or ncftp for going through a firewall
 
 =back
 
@@ -7699,7 +7686,11 @@ http firewall, ftp firewall, One way visibility, SOCKS, IP Masquerade
 I installed a new version of module X but CPAN keeps saying, I	     have
 the old version installed, So why is UNINST=1 not the default?, When I
 install bundles or multiple modules with one command	   there is too
-much output to keep track of
+much output to keep track of, I am not root, how can I install a module in
+a personal directory?, How to get a package, unwrap it, and make a change
+before building it?, I installed a Bundle and had a couple of fails. When I
+retried,       everything resolved nicely. Can this be fixed to work on
+first	    try?
 
 =item BUGS
 
@@ -7825,9 +7816,9 @@ C<byacc>, C<byteorder>
 =item c
 
 C<c>, C<castflags>, C<cat>, C<cc>, C<cccdlflags>, C<ccdlflags>, C<ccflags>,
-C<ccflags_uselargefiles>, C<ccsymbols>, C<cf_by>, C<cf_email>, C<cf_time>,
-C<charsize>, C<chgrp>, C<chmod>, C<chown>, C<clocktype>, C<comm>,
-C<compress>
+C<ccflags_uselargefiles>, C<ccname>, C<ccsymbols>, C<ccversion>, C<cf_by>,
+C<cf_email>, C<cf_time>, C<charsize>, C<chgrp>, C<chmod>, C<chown>,
+C<clocktype>, C<comm>, C<compress>
 
 =item C
 
@@ -7872,37 +7863,37 @@ C<d_msync>, C<d_munmap>, C<d_mymalloc>, C<d_nice>, C<d_nv_preserves_uv>,
 C<d_nv_preserves_uv_bits>, C<d_off64_t>, C<d_old_pthread_create_joinable>,
 C<d_oldpthreads>, C<d_oldsock>, C<d_open3>, C<d_pathconf>, C<d_pause>,
 C<d_perl_otherlibdirs>, C<d_phostname>, C<d_pipe>, C<d_poll>,
-C<d_portable>, C<d_PRId64>, C<d_PRIeldbl>, C<d_PRIEldbl>, C<d_PRIfldbl>,
-C<d_PRIFldbl>, C<d_PRIgldbl>, C<d_PRIGldbl>, C<d_PRIi64>, C<d_PRIo64>,
-C<d_PRIu64>, C<d_PRIx64>, C<d_PRIX64>, C<d_pthread_yield>, C<d_pwage>,
+C<d_portable>, C<d_PRId64>, C<d_PRIeldbl>, C<d_PRIEUldbl>, C<d_PRIfldbl>,
+C<d_PRIFUldbl>, C<d_PRIgldbl>, C<d_PRIGUldbl>, C<d_PRIi64>, C<d_PRIo64>,
+C<d_PRIu64>, C<d_PRIx64>, C<d_PRIXU64>, C<d_pthread_yield>, C<d_pwage>,
 C<d_pwchange>, C<d_pwclass>, C<d_pwcomment>, C<d_pwexpire>, C<d_pwgecos>,
 C<d_pwpasswd>, C<d_pwquota>, C<d_qgcvt>, C<d_quad>, C<d_readdir>,
 C<d_readlink>, C<d_rename>, C<d_rewinddir>, C<d_rmdir>, C<d_safebcpy>,
 C<d_safemcpy>, C<d_sanemcmp>, C<d_sched_yield>, C<d_scm_rights>,
-C<d_seekdir>, C<d_select>, C<d_sem>, C<d_semctl>, C<d_semctl_semid_ds>,
-C<d_semctl_semun>, C<d_semget>, C<d_semop>, C<d_setegid>, C<d_seteuid>,
-C<d_setgrent>, C<d_setgrps>, C<d_sethent>, C<d_setlinebuf>, C<d_setlocale>,
-C<d_setnent>, C<d_setpent>, C<d_setpgid>, C<d_setpgrp2>, C<d_setpgrp>,
-C<d_setprior>, C<d_setproctitle>, C<d_setpwent>, C<d_setregid>,
-C<d_setresgid>, C<d_setresuid>, C<d_setreuid>, C<d_setrgid>, C<d_setruid>,
-C<d_setsent>, C<d_setsid>, C<d_setvbuf>, C<d_sfio>, C<d_shm>, C<d_shmat>,
-C<d_shmatprototype>, C<d_shmctl>, C<d_shmdt>, C<d_shmget>, C<d_sigaction>,
-C<d_sigsetjmp>, C<d_socket>, C<d_socklen_t>, C<d_sockpair>,
-C<d_socks5_init>, C<d_sqrtl>, C<d_statblks>, C<d_statfs_f_flags>,
-C<d_statfs_s>, C<d_statvfs>, C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>,
-C<d_stdio_stream_array>, C<d_stdiobase>, C<d_stdstdio>, C<d_strchr>,
-C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>, C<d_strerror>, C<d_strtod>,
-C<d_strtol>, C<d_strtold>, C<d_strtoll>, C<d_strtoul>, C<d_strtoull>,
-C<d_strtouq>, C<d_strxfrm>, C<d_suidsafe>, C<d_symlink>, C<d_syscall>,
-C<d_sysconf>, C<d_sysernlst>, C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>,
-C<d_tcsetpgrp>, C<d_telldir>, C<d_telldirproto>, C<d_time>, C<d_times>,
-C<d_truncate>, C<d_tzname>, C<d_umask>, C<d_uname>, C<d_union_semun>,
-C<d_ustat>, C<d_vendorarch>, C<d_vendorbin>, C<d_vendorlib>, C<d_vfork>,
-C<d_void_closedir>, C<d_voidsig>, C<d_voidtty>, C<d_volatile>,
-C<d_vprintf>, C<d_wait4>, C<d_waitpid>, C<d_wcstombs>, C<d_wctomb>,
-C<d_xenix>, C<date>, C<db_hashtype>, C<db_prefixtype>, C<defvoidused>,
-C<direntrytype>, C<dlext>, C<dlsrc>, C<doublesize>, C<drand01>,
-C<dynamic_ext>
+C<d_SCNfldbl>, C<d_seekdir>, C<d_select>, C<d_sem>, C<d_semctl>,
+C<d_semctl_semid_ds>, C<d_semctl_semun>, C<d_semget>, C<d_semop>,
+C<d_setegid>, C<d_seteuid>, C<d_setgrent>, C<d_setgrps>, C<d_sethent>,
+C<d_setlinebuf>, C<d_setlocale>, C<d_setnent>, C<d_setpent>, C<d_setpgid>,
+C<d_setpgrp2>, C<d_setpgrp>, C<d_setprior>, C<d_setproctitle>,
+C<d_setpwent>, C<d_setregid>, C<d_setresgid>, C<d_setresuid>,
+C<d_setreuid>, C<d_setrgid>, C<d_setruid>, C<d_setsent>, C<d_setsid>,
+C<d_setvbuf>, C<d_sfio>, C<d_shm>, C<d_shmat>, C<d_shmatprototype>,
+C<d_shmctl>, C<d_shmdt>, C<d_shmget>, C<d_sigaction>, C<d_sigsetjmp>,
+C<d_socket>, C<d_socklen_t>, C<d_sockpair>, C<d_socks5_init>, C<d_sqrtl>,
+C<d_statblks>, C<d_statfs_f_flags>, C<d_statfs_s>, C<d_statvfs>,
+C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>, C<d_stdio_stream_array>,
+C<d_stdiobase>, C<d_stdstdio>, C<d_strchr>, C<d_strcoll>, C<d_strctcpy>,
+C<d_strerrm>, C<d_strerror>, C<d_strtod>, C<d_strtol>, C<d_strtold>,
+C<d_strtoll>, C<d_strtoul>, C<d_strtoull>, C<d_strtouq>, C<d_strxfrm>,
+C<d_suidsafe>, C<d_symlink>, C<d_syscall>, C<d_sysconf>, C<d_sysernlst>,
+C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>, C<d_tcsetpgrp>, C<d_telldir>,
+C<d_telldirproto>, C<d_time>, C<d_times>, C<d_truncate>, C<d_tzname>,
+C<d_umask>, C<d_uname>, C<d_union_semun>, C<d_ustat>, C<d_vendorarch>,
+C<d_vendorbin>, C<d_vendorlib>, C<d_vfork>, C<d_void_closedir>,
+C<d_voidsig>, C<d_voidtty>, C<d_volatile>, C<d_vprintf>, C<d_wait4>,
+C<d_waitpid>, C<d_wcstombs>, C<d_wctomb>, C<d_xenix>, C<date>,
+C<db_hashtype>, C<db_prefixtype>, C<defvoidused>, C<direntrytype>,
+C<dlext>, C<dlsrc>, C<doublesize>, C<drand01>, C<dynamic_ext>
 
 =item e
 
@@ -7978,8 +7969,8 @@ C<myhostname>, C<myuname>
 
 C<n>, C<netdb_hlen_type>, C<netdb_host_type>, C<netdb_name_type>,
 C<netdb_net_type>, C<nm>, C<nm_opt>, C<nm_so_opt>, C<nonxs_ext>, C<nroff>,
-C<nveformat>, C<nvEformat>, C<nvfformat>, C<nvFformat>, C<nvgformat>,
-C<nvGformat>, C<nvsize>, C<nvtype>
+C<nveformat>, C<nvEUformat>, C<nvfformat>, C<nvFUformat>, C<nvgformat>,
+C<nvGUformat>, C<nvsize>, C<nvtype>
 
 =item o
 
@@ -8017,12 +8008,13 @@ C<sitearch>, C<sitearchexp>, C<sitebin>, C<sitebinexp>, C<sitelib>,
 C<sitelib_stem>, C<sitelibexp>, C<siteprefix>, C<siteprefixexp>,
 C<sizesize>, C<sizetype>, C<sleep>, C<smail>, C<small>, C<so>,
 C<sockethdr>, C<socketlib>, C<socksizetype>, C<sort>, C<spackage>,
-C<spitshell>, C<split>, C<sPRId64>, C<sPRIeldbl>, C<sPRIEldbl>,
-C<sPRIfldbl>, C<sPRIFldbl>, C<sPRIgldbl>, C<sPRIGldbl>, C<sPRIi64>,
-C<sPRIo64>, C<sPRIu64>, C<sPRIx64>, C<sPRIX64>, C<src>, C<ssizetype>,
-C<startperl>, C<startsh>, C<static_ext>, C<stdchar>, C<stdio_base>,
-C<stdio_bufsiz>, C<stdio_cnt>, C<stdio_filbuf>, C<stdio_ptr>,
-C<stdio_stream_array>, C<strings>, C<submit>, C<subversion>, C<sysman>
+C<spitshell>, C<split>, C<sPRId64>, C<sPRIeldbl>, C<sPRIEUldbl>,
+C<sPRIfldbl>, C<sPRIFUldbl>, C<sPRIgldbl>, C<sPRIGUldbl>, C<sPRIi64>,
+C<sPRIo64>, C<sPRIu64>, C<sPRIx64>, C<sPRIXU64>, C<src>, C<sSCNfldbl>,
+C<ssizetype>, C<startperl>, C<startsh>, C<static_ext>, C<stdchar>,
+C<stdio_base>, C<stdio_bufsiz>, C<stdio_cnt>, C<stdio_filbuf>,
+C<stdio_ptr>, C<stdio_stream_array>, C<strings>, C<submit>, C<subversion>,
+C<sysman>
 
 =item t
 
@@ -8039,7 +8031,7 @@ C<uselongdouble>, C<usemorebits>, C<usemultiplicity>, C<usemymalloc>,
 C<usenm>, C<useopcode>, C<useperlio>, C<useposix>, C<usesfio>,
 C<useshrplib>, C<usesocks>, C<usethreads>, C<usevendorprefix>, C<usevfork>,
 C<usrinc>, C<uuname>, C<uvoformat>, C<uvsize>, C<uvtype>, C<uvuformat>,
-C<uvxformat>, C<uvXformat>
+C<uvxformat>, C<uvXUformat>
 
 =item v
 
@@ -8462,22 +8454,6 @@ arrays
 =item LIMITATIONS
 
 =item AUTHOR
-
-=back
-
-=head2 Errno - System errno constants
-
-=over
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item CAVEATS
-
-=item AUTHOR
-
-=item COPYRIGHT
 
 =back
 
@@ -10358,28 +10334,6 @@ hostpath(), peerpath()
 
 =back
 
-=head2 IPC::Msg - SysV Msg IPC object class
-
-=over
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item METHODS
-
-new ( KEY , FLAGS ), id, rcv ( BUF, LEN [, TYPE [, FLAGS ]] ), remove, set
-( STAT ), set ( NAME => VALUE [, NAME => VALUE ...] ), snd ( TYPE, MSG [,
-FLAGS ] ), stat
-
-=item SEE ALSO
-
-=item AUTHOR
-
-=item COPYRIGHT
-
-=back
-
 =head2 IPC::Open2, open2 - open a process for both reading and writing
 
 =over
@@ -10404,29 +10358,6 @@ handling
 =item DESCRIPTION
 
 =item WARNING
-
-=back
-
-=head2 IPC::Semaphore - SysV Semaphore IPC object class
-
-=over
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item METHODS
-
-new ( KEY , NSEMS , FLAGS ), getall, getncnt ( SEM ), getpid ( SEM ),
-getval ( SEM ), getzcnt ( SEM ), id, op ( OPLIST ), remove, set ( STAT ),
-set ( NAME => VALUE [, NAME => VALUE ...] ), setall ( VALUES ), setval ( N
-, VALUE ), stat
-
-=item SEE ALSO
-
-=item AUTHOR
-
-=item COPYRIGHT
 
 =back
 
@@ -11011,7 +10942,7 @@ after =back
 
 =item Warnings
 
-multiple occurrence of link target I<name>, line containing nothing but
+multiple occurence of link target I<name>, line containing nothing but
 whitespace in paragraph, file does not start with =head, No numeric
 argument for =over, previous =item has no contents, preceding non-item
 paragraph(s), =item type mismatch (I<one> vs. I<two>), I<N> unescaped
@@ -12081,39 +12012,6 @@ C<O_RDONLY>, C<O_WRONLY>, C<O_RDWR>
 
 =back
 
-=head2 Safe - Compile and execute code in restricted compartments
-
-=over
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-a new namespace, an operator mask
-
-=item WARNING
-
-=over
-
-=item RECENT CHANGES
-
-=item Methods in class Safe
-
-permit (OP, ...), permit_only (OP, ...), deny (OP, ...), deny_only (OP,
-...), trap (OP, ...), untrap (OP, ...), share (NAME, ...), share_from
-(PACKAGE, ARRAYREF), varglob (VARNAME), reval (STRING), rdo (FILENAME),
-root (NAMESPACE), mask (MASK)
-
-=item Some Safety Issues
-
-Memory, CPU, Snooping, Signals, State Changes
-
-=item AUTHOR
-
-=back
-
-=back
-
 =head2 Search::Dict, look - search for key in dictionary file
 
 =over
@@ -12266,27 +12164,6 @@ C<Storable::is_retrieving>
 =item SYNOPSIS
 
 =item DESCRIPTION
-
-=item AUTHOR
-
-=back
-
-=head2 Syslog, Sys::Syslog, openlog, closelog, setlogmask, syslog - Perl
-interface to the UNIX syslog(3) calls
-
-=over
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-openlog $ident, $logopt, $facility, syslog $priority, $format, @args,
-setlogmask $mask_priority, setlogsock $sock_type (added in 5.004_02),
-closelog
-
-=item EXAMPLES
-
-=item SEE ALSO
 
 =item AUTHOR
 
