@@ -1336,24 +1336,11 @@ Be sure not to use a bareword as the name of a signal handler,
 lest you inadvertently call it. 
 
 If your system has the sigaction() function then signal handlers are
-installed using it.  This means you get reliable signal handling.  If
-your system has the SA_RESTART flag it is used when signals handlers are
-installed.  This means that system calls for which restarting is supported
-continue rather than returning when a signal arrives.  If you want your
-system calls to be interrupted by signal delivery then do something like
-this:
+installed using it.  This means you get reliable signal handling.
 
-    use POSIX ':signal_h';
-
-    my $alarm = 0;
-    sigaction SIGALRM, new POSIX::SigAction sub { $alarm = 1 }
-    	or die "Error setting SIGALRM handler: $!\n";
-
-See L<POSIX>.
-
-The delivery policy of signals changed in Perl 5.8.0 from immediate
-(also known as "unsafe") to deferred, also known as "safe signals".
-See L<perlipc> for more information.
+The default delivery policy of signals changed in Perl 5.8.0 from 
+immediate (also known as "unsafe") to deferred, also known as 
+"safe signals".  See L<perlipc> for more information.
 
 Certain internal hooks can be also set using the %SIG hash.  The
 routine indicated by C<$SIG{__WARN__}> is called when a warning message is

@@ -352,6 +352,20 @@ C<$SIG{ALRM}> try something like the following:
     sigaction SIGALRM, new POSIX::SigAction sub { die "alarm\n" }
         or die "Error setting SIGALRM handler: $!\n";
 
+=item Restartable system calls
+
+On systems that supported it, older versions of Perl used the
+SA_RESTART flag when installing %SIG handlers.  This meant that
+restartable system calls would continue rather than returning when
+a signal arrived.  In order to deliver deferred signals promptly,
+Perl 5.7.3 and later do I<not> use SA_RESTART.  Consequently, 
+restartable system calls can fail (with $! set to C<EINTR>) in places
+where they previously would have succeeded.
+
+Note that the default C<:perlio> layer will retry C<read>, C<write>
+and C<close> as described above and that interrupted C<wait> and 
+C<waitpid> calls will always be retried.
+
 =item Signals as "faults"
 
 Certain signals e.g. SEGV, ILL, BUS are generated as a result of
