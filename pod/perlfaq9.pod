@@ -209,18 +209,27 @@ the content appropriately.
 
 =head2 How do I decode or create those %-encodings on the web?
 
-Here's an example of decoding:
 
-    $string = "http://altavista.digital.com/cgi-bin/query?pg=q&what=news&fmt=.&q=%2Bcgi-bin+%2Bperl.exe";
-    $string =~ s/%([a-fA-F0-9]{2})/chr(hex($1))/ge;
+If you are writing a CGI script, you should be using the CGI.pm module
+that comes with perl, or some other equivalent module.  The CGI module
+automatically decodes queries for you, and provides an escape()
+function to handle encoding.
 
-Encoding is a bit harder, because you can't just blindly change
-all characters that are not letters, digits or underscores (C<\W>)
-into their hex escapes.
-It's important that characters with special meaning like C</> and C<?>
-I<not> be translated.  Probably the easiest way to get this right is
-to avoid reinventing the wheel and just use the URI::Escape module,
-available from CPAN.
+
+The best source of detailed information on URI encoding is RFC 2396.
+Basically, the following substitutions do it:
+
+    s/([^\w()'*~!.-])/sprintf '%%%02x', $1/eg;   # encode
+
+    s/%([A-Fa-f\d]{2})/chr hex $1/eg;            # decode
+
+However, you should only apply them to individual URI components, not
+the entire URI, otherwise you'll lose information and generally mess
+things up.  If that didn't explain it, don't worry.  Just go read
+section 2 of the RFC, it's probably the best explanation there is.
+
+RFC 2396 also contains a lot of other useful information, including a
+regexp for breaking any arbitrary URI into components (Appendix B).
 
 =head2 How do I redirect to another page?
 
@@ -458,6 +467,40 @@ The Mail::Internet module uses Net::SMTP which is less Unix-centric than
 Mail::Mailer, but less reliable.  Avoid raw SMTP commands.  There
 are many reasons to use a mail transport agent like sendmail.  These
 include queueing, MX records, and security.
+
+=head2 How do I use MIME to make an attachment to a mail message?
+
+This answer is extracted directly from the MIME::Lite documentation.
+Create a multipart message (i.e., one with attachments).
+
+    use MIME::Lite;
+
+    ### Create a new multipart message:
+    $msg = MIME::Lite->new(
+                 From    =>'me@myhost.com',
+                 To      =>'you@yourhost.com',
+                 Cc      =>'some@other.com, some@more.com',
+                 Subject =>'A message with 2 parts...',
+                 Type    =>'multipart/mixed'
+                 );
+
+    ### Add parts (each "attach" has same arguments as "new"):
+    $msg->attach(Type     =>'TEXT',
+                 Data     =>"Here's the GIF file you wanted"
+                 );
+    $msg->attach(Type     =>'image/gif',
+                 Path     =>'aaa000123.gif',
+                 Filename =>'logo.gif'
+                 );
+
+    $text = $msg->as_string;
+
+MIME::Lite also includes a method for sending these things.
+
+    $msg->send;
+
+This defaults to using L<sendmail(1)> but can be customized to use
+SMTP via L<Net::SMTP>.
 
 =head2 How do I read mail?
 

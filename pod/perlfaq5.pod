@@ -466,11 +466,11 @@ whatever:
 
 =head2 How can I translate tildes (~) in a filename?
 
-Use the <> (glob()) operator, documented in L<perlfunc>.  This
-requires that you have a shell installed that groks tildes, meaning
-csh or tcsh or (some versions of) ksh, and thus your code may have portability
-problems.  The Glob::KGlob module (available from CPAN) gives more
-portable glob functionality.
+Use the <> (glob()) operator, documented in L<perlfunc>.  Older
+versions of Perl require that you have a shell installed that groks
+tildes.  Recent perl versions have this feature built in. The
+Glob::KGlob module (available from CPAN) gives more portable glob
+functionality.
 
 Within Perl, you may use this directly:
 
