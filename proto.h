@@ -267,7 +267,7 @@ VIRTUAL U32	magic_len	_((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_mutexfree	_((SV* sv, MAGIC* mg));
 #endif /* USE_THREADS */
 VIRTUAL int	magic_nextpack	_((SV* sv, MAGIC* mg, SV* key));
-VIRTUAL int	magic_regdata_cnt	_((SV* sv, MAGIC* mg));
+VIRTUAL U32	magic_regdata_cnt	_((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_regdatum_get	_((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_set	_((SV* sv, MAGIC* mg));
 #ifdef OVERLOAD
@@ -735,7 +735,7 @@ void visit _((SVFUNC f));
 typedef I32 (CPerlObj::*SVCOMPARE) _((SV*, SV*));
 void qsortsv _((SV ** array, size_t num_elts, SVCOMPARE f));
 I32 sortcv _((SV *a, SV *b));
-void save_magic _((MGS *mgs, SV *sv));
+void save_magic _((I32 mgs_ix, SV *sv));
 int magic_methpack _((SV *sv, MAGIC *mg, char *meth));
 int magic_methcall _((MAGIC *mg, char *meth, I32 flags, int n, SV *val));
 OP * doform _((CV *cv, GV *gv, OP *retop));
@@ -863,6 +863,8 @@ bool reginclass _((char *p, I32 c));
 bool reginclassutf8 _((regnode *f, U8* p));
 CHECKPOINT regcppush _((I32 parenfloor));
 char * regcppop _((void));
+char * regcp_set_to _((I32 ss));
+void cache_re _((regexp *prog));
 U8 * reghop _((U8 *pos, I32 off));
 U8 * reghopmaybe _((U8 *pos, I32 off));
 void dump _((char *pat,...));
@@ -877,6 +879,17 @@ void debprof _((OP *o));
 
 void *bset_obj_store _((void *obj, I32 ix));
 OP *new_logop _((I32 type, I32 flags, OP **firstp, OP **otherp));
+
+I32 do_trans_CC_simple _((SV *sv));
+I32 do_trans_CC_count _((SV *sv));
+I32 do_trans_CC_complex _((SV *sv));
+I32 do_trans_UU_simple _((SV *sv));
+I32 do_trans_UU_count _((SV *sv));
+I32 do_trans_UU_complex _((SV *sv));
+I32 do_trans_UC_simple _((SV *sv));
+I32 do_trans_CU_simple _((SV *sv));
+I32 do_trans_UC_trivial _((SV *sv));
+I32 do_trans_CU_trivial _((SV *sv));
 
 #define PPDEF(s) OP* CPerlObj::s _((ARGSproto));
 public:

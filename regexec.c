@@ -107,6 +107,8 @@ static bool reginclass _((char *p, I32 c));
 static bool reginclassutf8 _((regnode *f, U8* p));
 static CHECKPOINT regcppush _((I32 parenfloor));
 static char * regcppop _((void));
+static char * regcp_set_to _((I32 ss));
+static void cache_re _((regexp *prog));
 #endif
 
 #define REGINCLASS(p,c)  (*(p) ? reginclass(p,c) : ANYOF_TEST(p,c))
@@ -211,6 +213,7 @@ regcp_set_to(I32 ss)
     PL_savestack_ix = ss;
     regcppop();
     PL_savestack_ix = tmp;
+    return Nullch;
 }
 
 typedef struct re_cc_state

@@ -18,7 +18,20 @@
 #include <signal.h>
 #endif
 
-static I32
+#ifndef PERL_OBJECT
+static I32 do_trans_CC_simple _((SV *sv));
+static I32 do_trans_CC_count _((SV *sv));
+static I32 do_trans_CC_complex _((SV *sv));
+static I32 do_trans_UU_simple _((SV *sv));
+static I32 do_trans_UU_count _((SV *sv));
+static I32 do_trans_UU_complex _((SV *sv));
+static I32 do_trans_UC_simple _((SV *sv));
+static I32 do_trans_CU_simple _((SV *sv));
+static I32 do_trans_UC_trivial _((SV *sv));
+static I32 do_trans_CU_trivial _((SV *sv));
+#endif
+
+STATIC I32
 do_trans_CC_simple(SV *sv)
 {
     dTHR;
@@ -48,7 +61,7 @@ do_trans_CC_simple(SV *sv)
     return matches;
 }
 
-static I32
+STATIC I32
 do_trans_CC_count(SV *sv)
 {
     dTHR;
@@ -74,7 +87,7 @@ do_trans_CC_count(SV *sv)
     return matches;
 }
 
-static I32
+STATIC I32
 do_trans_CC_complex(SV *sv)
 {
     dTHR;
@@ -131,7 +144,7 @@ do_trans_CC_complex(SV *sv)
     return matches;
 }
 
-static I32
+STATIC I32
 do_trans_UU_simple(SV *sv)
 {
     dTHR;
@@ -183,7 +196,7 @@ do_trans_UU_simple(SV *sv)
     return matches;
 }
 
-static I32
+STATIC I32
 do_trans_UU_count(SV *sv)
 {
     dTHR;
@@ -211,7 +224,7 @@ do_trans_UU_count(SV *sv)
     return matches;
 }
 
-static I32
+STATIC I32
 do_trans_UC_simple(SV *sv)
 {
     dTHR;
@@ -264,7 +277,7 @@ do_trans_UC_simple(SV *sv)
     return matches;
 }
 
-static I32
+STATIC I32
 do_trans_CU_simple(SV *sv)
 {
     dTHR;
@@ -327,7 +340,7 @@ do_trans_CU_simple(SV *sv)
 
 /* utf-8 to latin-1 */
 
-static I32
+STATIC I32
 do_trans_UC_trivial(SV *sv)
 {
     dTHR;
@@ -359,7 +372,7 @@ do_trans_UC_trivial(SV *sv)
 
 /* latin-1 to utf-8 */
 
-static I32
+STATIC I32
 do_trans_CU_trivial(SV *sv)
 {
     dTHR;
@@ -393,7 +406,7 @@ do_trans_CU_trivial(SV *sv)
     return matches;
 }
 
-static I32
+STATIC I32
 do_trans_UU_complex(SV *sv)
 {
     dTHR;

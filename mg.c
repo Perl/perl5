@@ -307,7 +307,7 @@ mg_free(SV *sv)
 #include <signal.h>
 #endif
 
-int
+U32
 magic_regdata_cnt(SV *sv, MAGIC *mg)
 {
     dTHR;
@@ -318,7 +318,7 @@ magic_regdata_cnt(SV *sv, MAGIC *mg)
 
     if (PL_curpm && (rx = PL_curpm->op_pmregexp))
 	return rx->lastparen;
-    return -1;
+    return (U32)-1;
 }
 
 int

@@ -78,6 +78,46 @@ Version 5.005_52        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  1876] By: gsar                                  on 1998/09/24  09:04:43
+        Log: From: Colin Kuskie <ckuskie@cadence.com>
+             Date: Wed, 26 Aug 1998 14:53:01 -0700 (PDT)
+             Message-ID: <Pine.GSO.3.96.980826143507.3258K-100000@pdxmail.cadence.com>
+             Subject: [PATCH 5.005_51] perlform.pod
+     Branch: perl
+           ! pod/perlform.pod
+____________________________________________________________________________
+[  1875] By: gsar                                  on 1998/09/24  08:47:47
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 25 Aug 1998 15:35:58 -0400 (EDT)
+             Message-Id: <199808251935.PAA11384@monk.mps.ohio-state.edu>
+             Subject: Re: problem with (?p{}) [PATCH 5.005_5*]
+     Branch: perl
+           ! regexec.c
+____________________________________________________________________________
+[  1874] By: gsar                                  on 1998/09/24  08:44:55
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 25 Aug 1998 14:56:06 -0400 (EDT)
+             Message-Id: <199808251856.OAA10825@monk.mps.ohio-state.edu>
+             Subject: Re: your Regexp.patch dated 21.8 [PATCH]
+     Branch: perl
+           ! toke.c
+____________________________________________________________________________
+[  1873] By: gsar                                  on 1998/09/24  08:39:41
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 25 Aug 1998 04:29:49 -0400 (EDT)
+             Message-Id: <199808250829.EAA02470@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.005_*] Extraneous warning for (?()A|B)
+     Branch: perl
+           ! Changes regcomp.c
+____________________________________________________________________________
+[  1872] By: gsar                                  on 1998/09/24  08:37:00
+        Log: From: Krishna Sethuraman <krishpl@shamu.engr.sgi.com>
+             Date: Sun, 23 Aug 1998 23:18:38 PDT
+             Message-Id: <199808240618.XAA05329@shamu.engr.sgi.com>
+             Subject: new irix_6.sh hints file
+     Branch: perl
+           ! hints/irix_6.sh
+____________________________________________________________________________
 [  1871] By: gsar                                  on 1998/09/24  07:26:37
         Log: correct FSF address in various places
      Branch: perl
