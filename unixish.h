@@ -115,7 +115,7 @@
 #define Mkdir(path,mode)   mkdir((path),(mode))
 
 #ifndef PERL_SYS_INIT
-#ifdef PERL_SCO
+#ifdef PERL_SCO5
 /* this should be set in a hint file, not here */
 #  define PERL_SYS_INIT(c,v)	fpsetmask(0); MALLOC_INIT
 #else
