@@ -8,11 +8,12 @@ my %tables = (EUC_JP   => ['euc-jp.ucm'],
               SHIFTJIS => ['shiftjis.enc'],
              );
 
+my $name = 'Japanese';
 
 WriteMakefile(
               INC		=> "-I..",
-	      NAME		=> "Encode::Japanese",
-	      VERSION_FROM	=> 'Japanese.pm',
+	      NAME		=> 'Encode::'.$name,
+	      VERSION_FROM	=> "$name.pm",
 	      OBJECT		=> '$(O_FILES)',
 	      'dist'		=> {
 		  COMPRESS	=> 'gzip -9f',
@@ -26,7 +27,6 @@ WriteMakefile(
 
 package MY;
 
-
 sub post_initialize
 {
     my ($self) = @_;
@@ -37,18 +37,23 @@ sub post_initialize
     {
 	$o{$e.$x} = 1;
     }
-    $o{"Japanese$x"} = 1;
+    $o{"$name$x"} = 1;
     $self->{'O_FILES'} = [sort keys %o];
-    my @files = ('Japanese.xs');
+    my @files = ("$name.xs");
+    $self->{'C'} = ["$name.c"];
+    $self->{'H'} = [$self->catfile($self->updir,'encode.h')];
     my %xs;
     foreach my $table (keys %tables) {
+	push (@{$self->{'C'}},"$table.c");
+	# Do NOT add $table.h etc. to H_FILES unless we own up as to how they
+	# get built.
 	foreach my $ext (qw($(OBJ_EXT) .c .h _def.h .fnm)) {
 	    push (@files,$table.$ext);
 	}
     }
-    $self->{'XS_FILES'} = { 'Japanese.xs' => 'Japanese.c' };
+    $self->{'XS'} = { "$name.xs" => "$name.c" };
     $self->{'clean'}{'FILES'} .= join(' ',@files);
-    open(XS,">Japanese.xs") || die "Cannot open Japanese.xs:$!";
+    open(XS,">$name.xs") || die "Cannot open $name.xs:$!";
     print XS <<'END';
 #include <EXTERN.h>
 #include <perl.h>
@@ -59,7 +64,7 @@ END
     foreach my $table (keys %tables) {
 	print XS qq[#include "${table}.h"\n];
     }
-    print XS <<'END';
+    print XS <<"END";
 
 static void
 Encode_XSEncoding(pTHX_ encode_t *enc)
@@ -80,7 +85,7 @@ Encode_XSEncoding(pTHX_ encode_t *enc)
  SvREFCNT_dec(sv);
 }
 
-MODULE = Encode::Japanese	PACKAGE = Encode::Japanese
+MODULE = Encode::$name	PACKAGE = Encode::$name
 BOOT:
 {
 END
@@ -89,21 +94,22 @@ END
     }
     print XS "}\n";
     close(XS);
-    return '';
+    return "# Built $name.xs\n\n";
 }
 
 sub postamble
 {
     my $self = shift;
     my $dir  = $self->catdir($self->updir,'Encode');
-    my $str  = "# Japanese\$(OBJ_EXT) depends on .h and _def.h files not .c files - but all written by compile\n";
-    $str  .= 'Japanese$(OBJ_EXT) :';
-    $str  .= ' Japanese.xs';
+    my $str  = "# $name\$(OBJ_EXT) depends on .h and _def.h files not .c files - but all written by compile\n";
+    $str    .= "$name.c : $name.xs ";
     foreach my $table (keys %tables)
     {
 	$str .= " $table.c";
     }
     $str .= "\n\n";
+    $str .= "$name\$(OBJ_EXT) : $name.c\n\n";
+
     my $compile = $self->catfile($self->updir,'compile');
     foreach my $table (keys %tables)
     {
