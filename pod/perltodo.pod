@@ -68,6 +68,11 @@ They have some tricks Perl doesn't yet implement.
 Artur Bergman's C<iThreads> module is a start on this, but needs to
 be more mature.
 
+=head2 make perl_clone optionally clone ops
+
+So that pseudoforking, mod_perl, iThreads and nvi will work properly
+(but not as efficiently) until the regex engine is fixed to be threadsafe.
+
 =head2 Work out exit/die semantics for threads
 
 =head2 Typed lexicals for compiler
