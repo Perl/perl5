@@ -13,6 +13,8 @@ require "./test.pl";
 
 plan(tests => 26);
 
+use Config;
+
 # due to a bug in VMS's piping which makes it impossible for runperl()
 # to emulate echo -n (ie. stdin always winds up with a newline), these 
 # tests almost totally fail.
@@ -218,7 +220,6 @@ SWTESTPM
     local $TODO = '';   # these ones should work on VMS
 
     my $v = sprintf "%vd", $^V;
-    use Config;
     like( runperl( switches => ['-v'] ),
 	  qr/This is perl, v$v built for $Config{archname}.+Copyright.+Larry Wall.+Artistic License.+GNU General Public License/s,
           '-v looks okay' );
@@ -231,7 +232,7 @@ SWTESTPM
     local $TODO = '';   # these ones should work on VMS
 
     like( runperl( switches => ['-h'] ),
-	  qr/Usage: .+(?i:perl(\.exe)?).+switches.+programfile.+arguments/,
+	  qr/Usage: .+(?i:perl(?:$Config{_exe})?).+switches.+programfile.+arguments/,
           '-h looks okay' );
 
 }
