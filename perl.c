@@ -941,6 +941,31 @@ perl_free(pTHXx)
 #endif
 }
 
+#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
+/* provide destructors to clean up the thread key when libperl is unloaded */
+#ifndef WIN32 /* handled during DLL_PROCESS_DETACH in win32/perllib.c */
+
+#if defined(__hpux) && !defined(__GNUC__)
+#pragma fini "perl_fini"
+#endif
+
+#if defined(__GNUC__) && defined(__attribute__) 
+/* want to make sure __attribute__ works here even
+ * for -Dd_attribut=undef builds.
+ */
+#undef __attribute__
+#endif
+
+static void __attribute__((destructor))
+perl_fini()
+{
+    if (PL_curinterp)
+	FREE_THREAD_KEY;
+}
+
+#endif /* WIN32 */
+#endif /* THREADS */
+
 void
 Perl_call_atexit(pTHX_ ATEXIT_t fn, void *ptr)
 {
