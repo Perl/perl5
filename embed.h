@@ -853,6 +853,8 @@
 #define ptr_table_fetch		Perl_ptr_table_fetch
 #define ptr_table_store		Perl_ptr_table_store
 #define ptr_table_split		Perl_ptr_table_split
+#define ptr_table_clear		Perl_ptr_table_clear
+#define ptr_table_free		Perl_ptr_table_free
 #endif
 #if defined(HAVE_INTERP_INTERN)
 #define sys_intern_clear	Perl_sys_intern_clear
@@ -2325,6 +2327,8 @@
 #define ptr_table_fetch(a,b)	Perl_ptr_table_fetch(aTHX_ a,b)
 #define ptr_table_store(a,b,c)	Perl_ptr_table_store(aTHX_ a,b,c)
 #define ptr_table_split(a)	Perl_ptr_table_split(aTHX_ a)
+#define ptr_table_clear(a)	Perl_ptr_table_clear(aTHX_ a)
+#define ptr_table_free(a)	Perl_ptr_table_free(aTHX_ a)
 #endif
 #if defined(HAVE_INTERP_INTERN)
 #define sys_intern_clear()	Perl_sys_intern_clear(aTHX)
@@ -4561,6 +4565,10 @@
 #define ptr_table_store		Perl_ptr_table_store
 #define Perl_ptr_table_split	CPerlObj::Perl_ptr_table_split
 #define ptr_table_split		Perl_ptr_table_split
+#define Perl_ptr_table_clear	CPerlObj::Perl_ptr_table_clear
+#define ptr_table_clear		Perl_ptr_table_clear
+#define Perl_ptr_table_free	CPerlObj::Perl_ptr_table_free
+#define ptr_table_free		Perl_ptr_table_free
 #endif
 #if defined(HAVE_INTERP_INTERN)
 #define Perl_sys_intern_clear	CPerlObj::Perl_sys_intern_clear

@@ -954,6 +954,8 @@ PERL_CALLCONV PTR_TBL_t*	Perl_ptr_table_new(pTHX);
 PERL_CALLCONV void*	Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *tbl, void *sv);
 PERL_CALLCONV void	Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, void *oldsv, void *newsv);
 PERL_CALLCONV void	Perl_ptr_table_split(pTHX_ PTR_TBL_t *tbl);
+PERL_CALLCONV void	Perl_ptr_table_clear(pTHX_ PTR_TBL_t *tbl);
+PERL_CALLCONV void	Perl_ptr_table_free(pTHX_ PTR_TBL_t *tbl);
 #endif
 #if defined(HAVE_INTERP_INTERN)
 PERL_CALLCONV void	Perl_sys_intern_clear(pTHX);
