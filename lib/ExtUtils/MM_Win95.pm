@@ -209,11 +209,11 @@ sub os_flavor {
 
 =head1 AUTHOR
 
-Code originally inside MM_Win32.  Original author unknown.  
+Code originally inside MM_Win32.  Original author unknown.
 
-Currently maintained by Michael G Schwern <schwern@pobox.com>.
+Currently maintained by Michael G Schwern C<schwern@pobox.com>.
 
-Send patches and ideas to <F<makemaker@perl.org>>.
+Send patches and ideas to C<makemaker@perl.org>.
 
 See http://www.makemaker.org.
 
