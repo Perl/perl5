@@ -1285,7 +1285,7 @@ to the hash is by Perl_to_utf8_case().
  */
 
 UV
-Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp,char *normal, char *special)
+Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *normal, char *special)
 {
     UV uv;
 
@@ -1305,6 +1305,7 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp,char *normal
 	      SV *val = HeVAL(he);
 	      char *s = SvPV(val, *lenp);
 	      U8 c = *(U8*)s;
+
 	      if (*lenp > 1 || UNI_IS_INVARIANT(c))
 		   Copy(s, ustrp, *lenp, U8);
 	      else {
@@ -1806,6 +1807,9 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const
 
      if ((e1 == 0 && f1 == 0) || (e2 == 0 && f2 == 0) || (f1 == 0 && f2 == 0))
 	  return 1; /* mismatch; possible infinite loop or false positive */
+
+     if (!u1 || !u2)
+	  natbuf[1] = 0; /* Need to terminate the buffer. */
 
      while ((e1 == 0 || p1 < e1) &&
 	    (f1 == 0 || p1 < f1) &&
