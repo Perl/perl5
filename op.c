@@ -4019,6 +4019,7 @@ newXS(char *name, void (*subaddr) (CV * _CPERLproto), char *filename)
 	    if (!PL_initav)
 		PL_initav = newAV();
 	    av_push(PL_initav, (SV *)cv);
+	    GvCV(gv) = 0;
 	}
     }
     else
