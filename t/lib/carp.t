@@ -9,17 +9,23 @@ print "1..7\n";
 
 print "ok 1\n";
 
-carp  "ok 2\n";
+$SIG{__WARN__} = sub {
+    print "ok $1\n"
+	if $_[0] =~ m!ok (\d+)$! };
 
-$SIG{__WARN__} = sub { print "ok $1\n"
-		      if $_[0] =~ m!(\d+) at .+\b(?i:carp\.t) line \d+$! };
+carp  "ok 2\n";
+	
+$SIG{__WARN__} = sub {
+    print "ok $1\n"
+	if $_[0] =~ m!(\d+) at .+\b(?i:carp\.t) line \d+$! };
 
 carp 3;
 
 sub sub_4 {
 
-$SIG{__WARN__} = sub { print "ok $1\n"
-			   if $_[0] =~ m!^(\d+) at .+\b(?i:carp\.t) line \d+\n\tmain::sub_4\(\) called at .+\b(?i:carp\.t) line \d+$! };
+$SIG{__WARN__} = sub {
+    print "ok $1\n"
+	if $_[0] =~ m!^(\d+) at .+\b(?i:carp\.t) line \d+\n\tmain::sub_4\(\) called at .+\b(?i:carp\.t) line \d+$! };
 
 cluck 4;
 
@@ -27,14 +33,16 @@ cluck 4;
 
 sub_4;
 
-$SIG{__DIE__} = sub { print "ok $1\n"
-			   if $_[0] =~ m!^(\d+) at .+\b(?i:carp\.t) line \d+\n\teval \Q{...}\E called at .+\b(?i:carp\.t) line \d+$! };
+$SIG{__DIE__} = sub {
+    print "ok $1\n"
+	if $_[0] =~ m!^(\d+) at .+\b(?i:carp\.t) line \d+\n\teval \Q{...}\E called at .+\b(?i:carp\.t) line \d+$! };
 
 eval { croak 5 };
 
 sub sub_6 {
-    $SIG{__DIE__} = sub { print "ok $1\n"
-			      if $_[0] =~ m!^(\d+) at .+\b(?i:carp\.t) line \d+\n\teval \Q{...}\E called at .+\b(?i:carp\.t) line \d+\n\tmain::sub_6\(\) called at .+\b(?i:carp\.t) line \d+$! };
+    $SIG{__DIE__} = sub {
+	print "ok $1\n"
+	    if $_[0] =~ m!^(\d+) at .+\b(?i:carp\.t) line \d+\n\teval \Q{...}\E called at .+\b(?i:carp\.t) line \d+\n\tmain::sub_6\(\) called at .+\b(?i:carp\.t) line \d+$! };
 
     eval { confess 6 };
 }
