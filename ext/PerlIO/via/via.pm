@@ -23,7 +23,7 @@ The PerlIO::via module allows you to develop PerlIO layers in Perl, without
 having to go into the nitty gritty of programming C with XS as the interface
 to Perl.
 
-One example module, L<PerlIO::via::QuotedPrint>, is include with Perl
+One example module, L<PerlIO::via::QuotedPrint>, is included with Perl
 5.8.0, and more example modules are available from CPAN, such as
 L<PerlIO::via::StripHTML> and L<PerlIO::via::Base64>.  The
 PerlIO::via::StripHTML for instance, allows you to say:

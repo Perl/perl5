@@ -1023,7 +1023,7 @@ C<PerlIO::via::QuotedPrint>, by Elizabeth Mattijsen, is an example
 of a C<PerlIO::via> class:
 
     use PerlIO::via::QuotedPrint;
-    open($fh,">Via(PerlIO::via::QuotedPrint)",$path);
+    open($fh,">:via(QuotedPrint)",$path);
 
 This will automatically convert everything output to C<$fh> to
 Quoted-Printable.  See L<PerlIO::via> and L<PerlIO::via::QuotedPrint>.
