@@ -5476,7 +5476,45 @@ B<-V>
 
 =back
 
-=head2 perldelta - what is new for perl v5.8.1
+=head2 perldelta - what is new for perl v5.8.2
+
+=over 4
+
+=item DESCRIPTION
+
+=item Incompatible Changes
+
+=item Core Enhancements
+
+=item Modules and Pragmata
+
+=item Utility Changes
+
+=item New Documentation
+
+=item Performance Enhancements
+
+=item Installation and Configuration Improvements
+
+=item Selected Bug Fixes
+
+=item New or Changed Diagnostics
+
+=item Changed Internals
+
+=item New Tests
+
+=item Known Problems
+
+=item Platform Specific Problems
+
+=item Reporting Bugs
+
+=item SEE ALSO
+
+=back
+
+=head2 perl581delta, perldelta - what is new for perl v5.8.1
 
 =over 4
 
