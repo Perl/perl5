@@ -3333,6 +3333,7 @@ S_init_ids(pTHX)
 bool
 Perl_doing_taint(int argc, char *argv[], char *envp[])
 {
+    dTHX;
     int uid  = PerlProc_getuid();
     int euid = PerlProc_geteuid();
     int gid  = PerlProc_getgid();
