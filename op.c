@@ -56,9 +56,10 @@ static OP *new_logop _((I32 type, I32 flags, OP **firstp, OP **otherp));
 STATIC char*
 gv_ename(GV *gv)
 {
+    STRLEN n_a;
     SV* tmpsv = sv_newmortal();
     gv_efullname3(tmpsv, gv, Nullch);
-    return SvPV(tmpsv,PL_na);
+    return SvPV(tmpsv,n_a);
 }
 
 STATIC OP *
@@ -549,11 +550,15 @@ find_threadsv(char *name)
     if (!p)
 	return NOT_IN_PAD;
     key = p - PL_threadsv_names;
+    MUTEX_LOCK(&thr->mutex);
     svp = av_fetch(thr->threadsv, key, FALSE);
-    if (!svp) {
+    if (svp)
+	MUTEX_UNLOCK(&thr->mutex);
+    else {
 	SV *sv = NEWSV(0, 0);
 	av_store(thr->threadsv, key, sv);
 	thr->threadsvp = AvARRAY(thr->threadsv);
+	MUTEX_UNLOCK(&thr->mutex);
 	/*
 	 * Some magic variables used to be automagically initialised
 	 * in gv_fetchpv. Those which are now per-thread magicals get
@@ -1130,6 +1135,7 @@ mod(OP *o, I32 type)
     dTHR;
     OP *kid;
     SV *sv;
+    STRLEN n_a;
 
     if (!o || PL_error_count)
 	return o;
@@ -1257,7 +1263,7 @@ mod(OP *o, I32 type)
 	PL_modcount++;
 	if (!type)
 	    croak("Can't localize lexical variable %s",
-		SvPV(*av_fetch(PL_comppad_name, o->op_targ, 4), PL_na));
+		SvPV(*av_fetch(PL_comppad_name, o->op_targ, 4), n_a));
 	break;
 
 #ifdef USE_THREADS
@@ -3430,13 +3436,15 @@ newLOOPEX(I32 type, OP *label)
 {
     dTHR;
     OP *o;
+    STRLEN n_a;
+
     if (type != OP_GOTO || label->op_type == OP_CONST) {
 	/* "last()" means "last" */
 	if (label->op_type == OP_STUB && (label->op_flags & OPf_PARENS))
 	    o = newOP(type, OPf_SPECIAL);
 	else {
 	    o = newPVOP(type, 0, savepv(label->op_type == OP_CONST
-					? SvPVx(((SVOP*)label)->op_sv, PL_na)
+					? SvPVx(((SVOP*)label)->op_sv, n_a)
 					: ""));
 	}
 	op_free(label);
@@ -3770,10 +3778,11 @@ CV *
 newSUB(I32 floor, OP *o, OP *proto, OP *block)
 {
     dTHR;
-    char *name = o ? SvPVx(cSVOPo->op_sv, PL_na) : Nullch;
+    STRLEN n_a;
+    char *name = o ? SvPVx(cSVOPo->op_sv, n_a) : Nullch;
     GV *gv = gv_fetchpv(name ? name : "__ANON__",
 			GV_ADDMULTI | (block ? 0 : GV_NOINIT), SVt_PVCV);
-    char *ps = proto ? SvPVx(((SVOP*)proto)->op_sv, PL_na) : Nullch;
+    char *ps = proto ? SvPVx(((SVOP*)proto)->op_sv, n_a) : Nullch;
     register CV *cv=0;
     I32 ix;
 
@@ -3880,7 +3889,7 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 		else {
 		    /* force display of errors found but not reported */
 		    sv_catpv(ERRSV, not_safe);
-		    croak("%s", SvPVx(ERRSV, PL_na));
+		    croak("%s", SvPVx(ERRSV, n_a));
 		}
 	    }
 	}
@@ -4123,9 +4132,10 @@ newFORM(I32 floor, OP *o, OP *block)
     char *name;
     GV *gv;
     I32 ix;
+    STRLEN n_a;
 
     if (o)
-	name = SvPVx(cSVOPo->op_sv, PL_na);
+	name = SvPVx(cSVOPo->op_sv, n_a);
     else
 	name = "STDOUT";
     gv = gv_fetchpv(name,TRUE, SVt_PVFM);
@@ -4474,6 +4484,7 @@ ck_rvconst(register OP *o)
 	int iscv;
 	GV *gv;
 	SV *kidsv = kid->op_sv;
+	STRLEN n_a;
 
 	/* Is it a constant from cv_const_sv()? */
 	if (SvROK(kidsv) && SvREADONLY(kidsv)) {
@@ -4512,7 +4523,7 @@ ck_rvconst(register OP *o)
 		croak("Constant is not %s reference", badtype);
 	    return o;
 	}
-	name = SvPV(kidsv, PL_na);
+	name = SvPV(kidsv, n_a);
 	if ((PL_hints & HINT_STRICT_REFS) && (kid->op_private & OPpCONST_BARE)) {
 	    char *badthing = Nullch;
 	    switch (o->op_type) {
@@ -4575,8 +4586,9 @@ ck_ftst(OP *o)
 	SVOP *kid = (SVOP*)cUNOPo->op_first;
 
 	if (kid->op_type == OP_CONST && (kid->op_private & OPpCONST_BARE)) {
+	    STRLEN n_a;
 	    OP *newop = newGVOP(type, OPf_REF,
-		gv_fetchpv(SvPVx(kid->op_sv, PL_na), TRUE, SVt_PVIO));
+		gv_fetchpv(SvPVx(kid->op_sv, n_a), TRUE, SVt_PVIO));
 	    op_free(o);
 	    return newop;
 	}
@@ -4611,6 +4623,7 @@ ck_fun(OP *o)
     }
 
     if (o->op_flags & OPf_KIDS) {
+	STRLEN n_a;
 	tokid = &cLISTOPo->op_first;
 	kid = cLISTOPo->op_first;
 	if (kid->op_type == OP_PUSHMARK ||
@@ -4640,7 +4653,7 @@ ck_fun(OP *o)
 	    case OA_AVREF:
 		if (kid->op_type == OP_CONST &&
 		  (kid->op_private & OPpCONST_BARE)) {
-		    char *name = SvPVx(((SVOP*)kid)->op_sv, PL_na);
+		    char *name = SvPVx(((SVOP*)kid)->op_sv, n_a);
 		    OP *newop = newAVREF(newGVOP(OP_GV, 0,
 			gv_fetchpv(name, TRUE, SVt_PVAV) ));
 		    if (ckWARN(WARN_SYNTAX))
@@ -4659,7 +4672,7 @@ ck_fun(OP *o)
 	    case OA_HVREF:
 		if (kid->op_type == OP_CONST &&
 		  (kid->op_private & OPpCONST_BARE)) {
-		    char *name = SvPVx(((SVOP*)kid)->op_sv, PL_na);
+		    char *name = SvPVx(((SVOP*)kid)->op_sv, n_a);
 		    OP *newop = newHVREF(newGVOP(OP_GV, 0,
 			gv_fetchpv(name, TRUE, SVt_PVHV) ));
 		    if (ckWARN(WARN_SYNTAX))
@@ -4691,7 +4704,7 @@ ck_fun(OP *o)
 		    if (kid->op_type == OP_CONST &&
 		      (kid->op_private & OPpCONST_BARE)) {
 			OP *newop = newGVOP(OP_GV, 0,
-			    gv_fetchpv(SvPVx(((SVOP*)kid)->op_sv, PL_na), TRUE,
+			    gv_fetchpv(SvPVx(((SVOP*)kid)->op_sv, n_a), TRUE,
 					SVt_PVIO) );
 			op_free(kid);
 			kid = newop;
@@ -5140,6 +5153,7 @@ ck_subr(OP *o)
     GV *namegv = 0;
     int optional = 0;
     I32 arg = 0;
+    STRLEN n_a;
 
     for (cvop = o2; cvop->op_sibling; cvop = cvop->op_sibling) ;
     if (cvop->op_type == OP_RV2CV) {
@@ -5151,7 +5165,7 @@ ck_subr(OP *o)
 	    cv = GvCVu(tmpop->op_sv);
 	    if (cv && SvPOK(cv) && !(o->op_private & OPpENTERSUB_AMPER)) {
 		namegv = CvANON(cv) ? (GV*)tmpop->op_sv : CvGV(cv);
-		proto = SvPV((SV*)cv, PL_na);
+		proto = SvPV((SV*)cv, n_a);
 	    }
 	}
     }
@@ -5243,7 +5257,7 @@ ck_subr(OP *o)
 	    default:
 	      oops:
 		croak("Malformed prototype for %s: %s",
-			gv_ename(namegv), SvPV((SV*)cv, PL_na));
+			gv_ename(namegv), SvPV((SV*)cv, n_a));
 	    }
 	}
 	else
@@ -5287,6 +5301,8 @@ peep(register OP *o)
 {
     dTHR;
     register OP* oldop = 0;
+    STRLEN n_a;
+
     if (!o || o->op_seq)
 	return;
     ENTER;
@@ -5449,7 +5465,7 @@ peep(register OP *o)
 	    indsvp = hv_fetch(GvHV(*fields), key, keylen, FALSE);
 	    if (!indsvp) {
 		croak("No such field \"%s\" in variable %s of type %s",
-		      key, SvPV(lexname, PL_na), HvNAME(SvSTASH(lexname)));
+		      key, SvPV(lexname, n_a), HvNAME(SvSTASH(lexname)));
 	    }
 	    ind = SvIV(*indsvp);
 	    if (ind < 1)

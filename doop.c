@@ -921,7 +921,8 @@ do_vop(I32 optype, SV *sv, SV *left, SV *right)
     len = leftlen < rightlen ? leftlen : rightlen;
     lensave = len;
     if (SvOK(sv) || SvTYPE(sv) > SVt_PVMG) {
-	dc = SvPV_force(sv, PL_na);
+	STRLEN n_a;
+	dc = SvPV_force(sv, n_a);
 	if (SvCUR(sv) < len) {
 	    dc = SvGROW(sv, len + 1);
 	    (void)memzero(dc + SvCUR(sv), len - SvCUR(sv) + 1);

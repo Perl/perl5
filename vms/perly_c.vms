@@ -1775,7 +1775,7 @@ case 56:
 break;
 case 57:
 #line 302 "perly.y"
-{ char *name = SvPV(((SVOP*)yyvsp[0].opval)->op_sv, PL_na);
+{ STRLEN n_a; char *name = SvPV(((SVOP*)yyvsp[0].opval)->op_sv, n_a);
 			  if (strEQ(name, "BEGIN") || strEQ(name, "END")
 			      || strEQ(name, "INIT"))
 			      CvUNIQUE_on(PL_compcv);

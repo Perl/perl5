@@ -373,7 +373,8 @@ join(t)
 	    for (i = 1; i <= AvFILL(av); i++)
 		XPUSHs(sv_2mortal(*av_fetch(av, i, FALSE)));
 	} else {
-	    char *mess = SvPV(*av_fetch(av, 1, FALSE), PL_na);
+	    STRLEN n_a;
+	    char *mess = SvPV(*av_fetch(av, 1, FALSE), n_a);
 	    DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 				  "%p: join propagating die message: %s\n",
 				  thr, mess));

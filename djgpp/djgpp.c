@@ -134,6 +134,7 @@ do_aspawn (SV *really,SV **mark,SV **sp)
     dTHR;
     int  rc;
     char **a,*tmps,**argv; 
+    STRLEN n_a;
 
     if (sp<=mark)
         return -1;
@@ -141,7 +142,7 @@ do_aspawn (SV *really,SV **mark,SV **sp)
 
     while (++mark <= sp)
         if (*mark)
-            *a++ = SvPVx(*mark, PL_na);
+            *a++ = SvPVx(*mark, n_a);
         else
             *a++ = "";
     *a = Nullch;
@@ -152,7 +153,7 @@ do_aspawn (SV *really,SV **mark,SV **sp)
      ) /* will swawnvp use PATH? */
          TAINT_ENV();	/* testing IFS here is overkill, probably */
 
-    if (really && *(tmps = SvPV(really, PL_na)))
+    if (really && *(tmps = SvPV(really, n_a)))
         rc=spawnvp (P_WAIT,tmps,argv);
     else
         rc=spawnvp (P_WAIT,argv[0],argv);

@@ -2848,6 +2848,7 @@ setup_argstr(SV *really, SV **mark, SV **sp)
   register size_t cmdlen = 0;
   size_t rlen;
   register SV **idx;
+  STRLEN n_a;
 
   idx = mark;
   if (really) {
@@ -2874,7 +2875,7 @@ setup_argstr(SV *really, SV **mark, SV **sp)
   while (++mark <= sp) {
     if (*mark) {
       strcat(PL_Cmd," ");
-      strcat(PL_Cmd,SvPVx(*mark,PL_na));
+      strcat(PL_Cmd,SvPVx(*mark,n_a));
     }
   }
   return PL_Cmd;
@@ -4407,12 +4408,13 @@ rmsexpand_fromperl(CV *cv)
 {
   dXSARGS;
   char *fspec, *defspec = NULL, *rslt;
+  STRLEN n_a;
 
   if (!items || items > 2)
     croak("Usage: VMS::Filespec::rmsexpand(spec[,defspec])");
-  fspec = SvPV(ST(0),PL_na);
+  fspec = SvPV(ST(0),n_a);
   if (!fspec || !*fspec) XSRETURN_UNDEF;
-  if (items == 2) defspec = SvPV(ST(1),PL_na);
+  if (items == 2) defspec = SvPV(ST(1),n_a);
 
   rslt = do_rmsexpand(fspec,NULL,1,defspec,0);
   ST(0) = sv_newmortal();
@@ -4425,9 +4427,10 @@ vmsify_fromperl(CV *cv)
 {
   dXSARGS;
   char *vmsified;
+  STRLEN n_a;
 
   if (items != 1) croak("Usage: VMS::Filespec::vmsify(spec)");
-  vmsified = do_tovmsspec(SvPV(ST(0),PL_na),NULL,1);
+  vmsified = do_tovmsspec(SvPV(ST(0),n_a),NULL,1);
   ST(0) = sv_newmortal();
   if (vmsified != NULL) sv_usepvn(ST(0),vmsified,strlen(vmsified));
   XSRETURN(1);
@@ -4438,9 +4441,10 @@ unixify_fromperl(CV *cv)
 {
   dXSARGS;
   char *unixified;
+  STRLEN n_a;
 
   if (items != 1) croak("Usage: VMS::Filespec::unixify(spec)");
-  unixified = do_tounixspec(SvPV(ST(0),PL_na),NULL,1);
+  unixified = do_tounixspec(SvPV(ST(0),n_a),NULL,1);
   ST(0) = sv_newmortal();
   if (unixified != NULL) sv_usepvn(ST(0),unixified,strlen(unixified));
   XSRETURN(1);
@@ -4451,9 +4455,10 @@ fileify_fromperl(CV *cv)
 {
   dXSARGS;
   char *fileified;
+  STRLEN n_a;
 
   if (items != 1) croak("Usage: VMS::Filespec::fileify(spec)");
-  fileified = do_fileify_dirspec(SvPV(ST(0),PL_na),NULL,1);
+  fileified = do_fileify_dirspec(SvPV(ST(0),n_a),NULL,1);
   ST(0) = sv_newmortal();
   if (fileified != NULL) sv_usepvn(ST(0),fileified,strlen(fileified));
   XSRETURN(1);
@@ -4464,9 +4469,10 @@ pathify_fromperl(CV *cv)
 {
   dXSARGS;
   char *pathified;
+  STRLEN n_a;
 
   if (items != 1) croak("Usage: VMS::Filespec::pathify(spec)");
-  pathified = do_pathify_dirspec(SvPV(ST(0),PL_na),NULL,1);
+  pathified = do_pathify_dirspec(SvPV(ST(0),n_a),NULL,1);
   ST(0) = sv_newmortal();
   if (pathified != NULL) sv_usepvn(ST(0),pathified,strlen(pathified));
   XSRETURN(1);
@@ -4477,9 +4483,10 @@ vmspath_fromperl(CV *cv)
 {
   dXSARGS;
   char *vmspath;
+  STRLEN n_a;
 
   if (items != 1) croak("Usage: VMS::Filespec::vmspath(spec)");
-  vmspath = do_tovmspath(SvPV(ST(0),PL_na),NULL,1);
+  vmspath = do_tovmspath(SvPV(ST(0),n_a),NULL,1);
   ST(0) = sv_newmortal();
   if (vmspath != NULL) sv_usepvn(ST(0),vmspath,strlen(vmspath));
   XSRETURN(1);
@@ -4490,9 +4497,10 @@ unixpath_fromperl(CV *cv)
 {
   dXSARGS;
   char *unixpath;
+  STRLEN n_a;
 
   if (items != 1) croak("Usage: VMS::Filespec::unixpath(spec)");
-  unixpath = do_tounixpath(SvPV(ST(0),PL_na),NULL,1);
+  unixpath = do_tounixpath(SvPV(ST(0),n_a),NULL,1);
   ST(0) = sv_newmortal();
   if (unixpath != NULL) sv_usepvn(ST(0),unixpath,strlen(unixpath));
   XSRETURN(1);
@@ -4505,6 +4513,7 @@ candelete_fromperl(CV *cv)
   char fspec[NAM$C_MAXRSS+1], *fsp;
   SV *mysv;
   IO *io;
+  STRLEN n_a;
 
   if (items != 1) croak("Usage: VMS::Filespec::candelete(spec)");
 
@@ -4518,7 +4527,7 @@ candelete_fromperl(CV *cv)
     fsp = fspec;
   }
   else {
-    if (mysv != ST(0) || !(fsp = SvPV(mysv,PL_na)) || !*fsp) {
+    if (mysv != ST(0) || !(fsp = SvPV(mysv,n_a)) || !*fsp) {
       set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
       ST(0) = &PL_sv_no;
       XSRETURN(1);
@@ -4540,6 +4549,7 @@ rmscopy_fromperl(CV *cv)
   unsigned long int sts;
   SV *mysv;
   IO *io;
+  STRLEN n_a;
 
   if (items < 2 || items > 3)
     croak("Usage: File::Copy::rmscopy(from,to[,date_flag])");
@@ -4554,7 +4564,7 @@ rmscopy_fromperl(CV *cv)
     inp = inspec;
   }
   else {
-    if (mysv != ST(0) || !(inp = SvPV(mysv,PL_na)) || !*inp) {
+    if (mysv != ST(0) || !(inp = SvPV(mysv,n_a)) || !*inp) {
       set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
       ST(0) = &PL_sv_no;
       XSRETURN(1);
@@ -4570,7 +4580,7 @@ rmscopy_fromperl(CV *cv)
     outp = outspec;
   }
   else {
-    if (mysv != ST(1) || !(outp = SvPV(mysv,PL_na)) || !*outp) {
+    if (mysv != ST(1) || !(outp = SvPV(mysv,n_a)) || !*outp) {
       set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
       ST(0) = &PL_sv_no;
       XSRETURN(1);

@@ -57,8 +57,8 @@
 #ifdef XS_VERSION
 #  define XS_VERSION_BOOTCHECK \
     STMT_START {							\
-	SV *tmpsv;							\
-	char *vn = Nullch, *module = SvPV(ST(0),PL_na);			\
+	SV *tmpsv; STRLEN n_a;						\
+	char *vn = Nullch, *module = SvPV(ST(0),n_a);			\
 	if (items >= 2)	 /* version supplied as bootstrap arg */	\
 	    tmpsv = ST(1);						\
 	else {								\
@@ -69,7 +69,7 @@
 		tmpsv = perl_get_sv(form("%s::%s", module,		\
 				      vn = "VERSION"), FALSE);		\
 	}								\
-	if (tmpsv && (!SvOK(tmpsv) || strNE(XS_VERSION, SvPV(tmpsv, PL_na))))	\
+	if (tmpsv && (!SvOK(tmpsv) || strNE(XS_VERSION, SvPV(tmpsv, n_a))))	\
 	    croak("%s object version %s does not match %s%s%s%s %_",	\
 		  module, XS_VERSION,					\
 		  vn ? "$" : "", vn ? module : "", vn ? "::" : "",	\

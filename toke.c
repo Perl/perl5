@@ -1452,8 +1452,10 @@ filter_add(filter_t funcp, SV *datasv)
     if (!SvUPGRADE(datasv, SVt_PVIO))
         die("Can't upgrade filter_add data to SVt_PVIO");
     IoDIRP(datasv) = (DIR*)funcp; /* stash funcp into spare field */
-    if (filter_debug)
-	warn("filter_add func %p (%s)", funcp, SvPV(datasv,PL_na));
+    if (filter_debug) {
+	STRLEN n_a;
+	warn("filter_add func %p (%s)", funcp, SvPV(datasv, n_a));
+    }
     av_unshift(PL_rsfp_filters, 1);
     av_store(PL_rsfp_filters, 0, datasv) ;
     return(datasv);
@@ -1529,9 +1531,11 @@ filter_read(int idx, SV *buf_sv, int maxlen)
     }
     /* Get function pointer hidden within datasv	*/
     funcp = (filter_t)IoDIRP(datasv);
-    if (filter_debug)
+    if (filter_debug) {
+	STRLEN n_a;
 	warn("filter_read %d: via function %p (%s)\n",
-		idx, funcp, SvPV(datasv,PL_na));
+		idx, funcp, SvPV(datasv,n_a));
+    }
     /* Call function. The function is expected to 	*/
     /* call "FILTER_READ(idx+1, buf_sv)" first.		*/
     /* Return: <0:error, =0:eof, >0:not eof 		*/
@@ -2965,6 +2969,7 @@ int yylex(PERL_YYLEX_PARAM_DECL)
     case 'z': case 'Z':
 
       keylookup: {
+	STRLEN n_a;
 	gv = Nullgv;
 	gvp = 0;
 
@@ -3161,7 +3166,7 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 		    if (gv && GvCVu(gv)) {
 			CV *cv;
 			if ((cv = GvCV(gv)) && SvPOK(cv))
-			    PL_last_proto = SvPV((SV*)cv, PL_na);
+			    PL_last_proto = SvPV((SV*)cv, n_a);
 			for (d = s + 1; *d == ' ' || *d == '\t'; d++) ;
 			if (*d == ')' && (sv = cv_const_sv(cv))) {
 			    s = d + 1;
@@ -4119,7 +4124,7 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 		PL_lex_stuff = Nullsv;
 	    }
 
-	    if (*SvPV(PL_subname,PL_na) == '?') {
+	    if (*SvPV(PL_subname,n_a) == '?') {
 		sv_setpv(PL_subname,"__ANON__");
 		TOKEN(ANONSUB);
 	    }

@@ -322,6 +322,7 @@ PP(pp_print)
     IO *io;
     register PerlIO *fp;
     MAGIC *mg;
+    STRLEN n_a;
 
     if (PL_op->op_flags & OPf_STACKED)
 	gv = (GV*)*++MARK;
@@ -353,7 +354,7 @@ PP(pp_print)
 	if (ckWARN(WARN_UNOPENED)) {
 	    SV* sv = sv_newmortal();
             gv_fullname3(sv, gv, Nullch);
-            warner(WARN_UNOPENED, "Filehandle %s never opened", SvPV(sv,PL_na));
+            warner(WARN_UNOPENED, "Filehandle %s never opened", SvPV(sv,n_a));
         }
 
 	SETERRNO(EBADF,RMS$_IFI);
@@ -365,10 +366,10 @@ PP(pp_print)
             gv_fullname3(sv, gv, Nullch);
 	    if (IoIFP(io))
 		warner(WARN_IO, "Filehandle %s opened only for input", 
-				SvPV(sv,PL_na));
+				SvPV(sv,n_a));
 	    else if (ckWARN(WARN_CLOSED))
 		warner(WARN_CLOSED, "print on closed filehandle %s", 
-				SvPV(sv,PL_na));
+				SvPV(sv,n_a));
 	}
 	SETERRNO(EBADF,IoIFP(io)?RMS$_FAC:RMS$_IFI);
 	goto just_say_no;
@@ -447,6 +448,7 @@ PP(pp_rv2av)
 	    
 	    if (SvTYPE(sv) != SVt_PVGV) {
 		char *sym;
+		STRLEN n_a;
 
 		if (SvGMAGICAL(sv)) {
 		    mg_get(sv);
@@ -465,7 +467,7 @@ PP(pp_rv2av)
 		    }
 		    RETSETUNDEF;
 		}
-		sym = SvPV(sv,PL_na);
+		sym = SvPV(sv,n_a);
 		if (PL_op->op_private & HINT_STRICT_REFS)
 		    DIE(PL_no_symref, sym, "an ARRAY");
 		gv = (GV*)gv_fetchpv(sym, TRUE, SVt_PVAV);
@@ -536,6 +538,7 @@ PP(pp_rv2hv)
 	    
 	    if (SvTYPE(sv) != SVt_PVGV) {
 		char *sym;
+		STRLEN n_a;
 
 		if (SvGMAGICAL(sv)) {
 		    mg_get(sv);
@@ -554,7 +557,7 @@ PP(pp_rv2hv)
 		    }
 		    RETSETUNDEF;
 		}
-		sym = SvPV(sv,PL_na);
+		sym = SvPV(sv,n_a);
 		if (PL_op->op_private & HINT_STRICT_REFS)
 		    DIE(PL_no_symref, sym, "a HASH");
 		gv = (GV*)gv_fetchpv(sym, TRUE, SVt_PVHV);
@@ -1389,8 +1392,10 @@ PP(pp_helem)
 	if (!svp || *svp == &PL_sv_undef) {
 	    SV* lv;
 	    SV* key2;
-	    if (!defer)
-		DIE(PL_no_helem, SvPV(keysv, PL_na));
+	    if (!defer) {
+		STRLEN n_a;
+		DIE(PL_no_helem, SvPV(keysv, n_a));
+	    }
 	    lv = sv_newmortal();
 	    sv_upgrade(lv, SVt_PVLV);
 	    LvTYPE(lv) = 'y';
@@ -2018,6 +2023,7 @@ PP(pp_entersub)
     default:
 	if (!SvROK(sv)) {
 	    char *sym;
+	    STRLEN n_a;
 
 	    if (sv == &PL_sv_yes) {		/* unfound import, ignore */
 		if (hasargs)
@@ -2029,7 +2035,7 @@ PP(pp_entersub)
 		sym = SvPOKp(sv) ? SvPVX(sv) : Nullch;
 	    }
 	    else
-		sym = SvPV(sv, PL_na);
+		sym = SvPV(sv, n_a);
 	    if (!sym)
 		DIE(PL_no_usym, "a subroutine");
 	    if (PL_op->op_private & HINT_STRICT_REFS)
@@ -2524,7 +2530,7 @@ PP(pp_method)
 	}
     }
 
-    name = SvPV(TOPs, PL_na);
+    name = SvPV(TOPs, packlen);
     sv = *(PL_stack_base + TOPMARK + 1);
     
     if (SvGMAGICAL(sv))

@@ -267,7 +267,8 @@ static SV *
 cchar(SV *sv)
 {
     SV *sstr = newSVpv("'", 0);
-    char *s = SvPV(sv, PL_na);
+    STRLEN n_a;
+    char *s = SvPV(sv, n_a);
 
     if (*s == '\'')
 	sv_catpv(sstr, "\\'");

@@ -304,7 +304,7 @@ startformsub:	/* NULL */	/* start a format subroutine scope */
 			{ $$ = start_subparse(TRUE, 0); }
 	;
 
-subname	:	WORD	{ char *name = SvPV(((SVOP*)$1)->op_sv, PL_na);
+subname	:	WORD	{ STRLEN n_a; char *name = SvPV(((SVOP*)$1)->op_sv,n_a);
 			  if (strEQ(name, "BEGIN") || strEQ(name, "END")
 			      || strEQ(name, "INIT"))
 			      CvUNIQUE_on(PL_compcv);
