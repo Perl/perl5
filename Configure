@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Apr  2 15:40:35 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Sat Apr  3 16:20:23 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -108,6 +108,12 @@ if test -d /usr/lpp -a -f /usr/bin/bsh -a -f /usr/bin/uname; then
 		newsh=/usr/bin/bsh
 	fi
 fi
+case "`uname -s`" in
+OSF1)
+        avoidksh="to avoid Digital UNIX' ksh"
+        newsh=/bin/sh
+        unset BIN_SH # if this is 'xpg4' sh will start up ksh
+esac
 case "$inksh/$needksh" in
 /[a-z]*)
 		ENV=''
@@ -7275,7 +7281,7 @@ if $test X"$use64bits" = X"$define"; then
 	echo $n "Checking to see if your system supports off64_t...$c" >&4
 	$cat >try.c <<EOCP
 #include <sys/types.h>
-#include <stdio.h>
+#include <unistd.h>
 off64_t foo() { off64_t x; x = 7; return x; }'
 EOCP
 	if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
@@ -7294,7 +7300,7 @@ EOCP
 	echo $n "Checking to see if your system supports offset_t...$c" >&4
 	$cat >try.c <<EOCP
 #include <sys/types.h>
-#include <stdio.h>
+#include <unistd.h>
 offset_t foo() { offset_t x; x = 7; return x; }'
 EOCP
 	if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
