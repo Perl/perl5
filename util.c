@@ -4404,8 +4404,11 @@ Perl_get_hash_seed(pTHX)
 	  myseed +=
 	       (UV)(Drand01() * (NV)((1 << ((UVSIZE * 8 - RANDBITS))) - 1));
 #endif /* RANDBITS < (UVSIZE * 8) */
-	  while (myseed == 0) /* Superparanoia. */
-	      myseed += (UV)(Drand01() * (NV)UV_MAX);
+	  if (myseed == 0) { /* Superparanoia. */
+	      myseed = (UV)(Drand01() * (NV)UV_MAX); /* One more chance. */
+	      if (myseed == 0)
+		  Perl_croak(aTHX_ "Your random numbers are not that random");
+	  }
      }
      PL_hash_seed_set = TRUE;
 
