@@ -1667,6 +1667,7 @@ PP(pp_send)
 	else
 #endif
 	{
+	    /* See the note at doio.c:do_print about filesize limits. --jhi */
 	    length = PerlLIO_write(PerlIO_fileno(IoIFP(io)),
 				   buffer+offset, length);
 	}

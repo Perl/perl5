@@ -1022,6 +1022,11 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 	tmps = SvPV(sv, len);
 	break;
     }
+    /* To detect whether the process is about to overstep its
+     * filesize limit we would need getrlimit().  We could then
+     * also transparently raise the limit with setrlimit() --
+     * but only until the system hard limit/the filesystem limit,
+     * at which we would get EPERM. --jhi */
     if (len && (PerlIO_write(fp,tmps,len) == 0 || PerlIO_error(fp)))
 	return FALSE;
     return !PerlIO_error(fp);
