@@ -3202,7 +3202,7 @@ my_fflush_all(void)
     return fflush(NULL);
 #else
     long open_max = -1;
-# if defined(FFLUSH_ALL) && defined(STDIO_STREAM_ARRAY)
+# if defined(FFLUSH_ALL) && defined(HAS_STDIO_STREAM_ARRAY)
 #  if defined(HAS_SYSCONF) && defined(_SC_OPEN_MAX)
     open_max = sysconf(_SC_OPEN_MAX);
 #  else

@@ -2469,10 +2469,15 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_ftello64    HAS_FTELLO64		/**/
 #$d_tmpfile64   HAS_TMPFILE64	/**/
 
-/* STDIO_STREAM_ARRAY:
- *	This symbol tells the name of the array holding the stdio stream_array,
- *	if any. Usual values include _iob, __iob, and __sF.
+/* HAS_STDIO_STREAM_ARRAY:
+ *	This symbol, if defined, tells that there is an array
+ *	holding the stdio streams.
  */
+/* STDIO_STREAM_ARRAY:
+ *	This symbol tells the name of the array holding the stdio streams.
+ *	Usual values include _iob, __iob, and __sF.
+ */
+#$d_stdio_stream_array	HAS_STDIO_STREAM_ARRAY	/**/
 #define STDIO_STREAM_ARRAY	$stdio_stream_array
 
 /* USE_64_BITS:

@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri May 14 00:11:18 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Fri May 14 10:24:50 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -799,6 +799,7 @@ d_fsetpos64=''
 d_ftell64=''
 d_ftello64=''
 d_tmpfile64=''
+d_stdio_stream_array=''
 stdio_stream_array=''
 sysman=''
 trnl=''
@@ -9960,6 +9961,41 @@ esac
 set d_stdiobase
 eval $setvar
 
+$cat >&4 <<EOM
+Checking how to access stdio streams by file descriptor number...
+EOM
+case "$stdio_stream_array" in
+'') 	$cat >try.c <<EOCP
+#include <stdio.h>
+int main() {
+  if (&STDIO_STREAM_ARRAY[fileno(stdin)] == stdin)
+    printf("yes\n");
+}
+EOCP
+	for s in _iob __iob __sF
+	do
+	        set try -DSTDIO_STREAM_ARRAY=$s
+		if eval $compile; then
+		    	case "`./try$exe_ext`" in
+			yes)	stdio_stream_array=$s; break ;;
+			esac
+		fi
+	done
+	$rm -f try.* try$exe_ext
+esac
+case "$stdio_stream_array" in
+'')	$cat >&4 <<EOM
+I can't figure out how to access stdio streams by file descriptor number.
+EOM
+	d_stdio_stream_array="$undef"
+	;;
+*)	$cat >&4 <<EOM
+You can access stdio streams by file descriptor number by the $stdio_stream_array array.
+EOM
+	d_stdio_stream_array="$define"
+	;;
+esac
+
 : see if strcoll exists
 set strcoll d_strcoll
 eval $inlibc
@@ -10926,39 +10962,6 @@ $rm -f tebcdic.c tebcdic
 set ebcdic
 eval $setvar
 
-$cat >&4 <<EOM
-Checking how to access stdio streams by file descriptor number...
-EOM
-case "$stdio_stream_array" in
-'') 	$cat >try.c <<EOCP
-#include <stdio.h>
-int main() {
-  if (&STDIO_STREAM_ARRAY[fileno(stdin)] == stdin)
-    printf("yes\n");
-}
-EOCP
-	for s in _iob __iob __sF
-	do
-	        set try -DSTDIO_STREAM_ARRAY=$s
-		if eval $compile_ok; then
-		    	case "`./try$exe_ext`" in
-			yes)	stdio_stream_array=$s; break ;;
-			esac
-		fi
-	done
-	$rm -f try.* try$exe_ext
-esac
-case "$stdio_stream_array" in
-'')	$cat >&4 <<EOM
-I can't figure out how to access stdio streams by file descriptor number.
-EOM
-	;;
-*)	$cat >&4 <<EOM
-You can access stdio streams by file descriptor number by using $stdio_stream_array.
-EOM
-	;;
-esac
-
 # SunOS has a <unistd.h> which we generally avoid, but need for this test.
 # For everyone else, we'll trust i_unistd.
 t_unistd=$i_unistd
@@ -10975,6 +10978,7 @@ $cat >try.c <<EOCP
 #include <unistd.h>
 #endif
 #$d_sysconf HAS_SYSCONF
+#$stdio_stream_array
 int main() {
   FILE* p = fopen("try.out", "w");
 #ifdef TRY_FPUTC
@@ -11005,12 +11009,14 @@ int main() {
 #   endif
 #  endif
 # endif
+# ifdef HAS_STDIO_STREAM_ARRAY
     if (open_max > 0) {
       long i;
       for (i = 0; i < open_max; i++)
          fflush(&$stdio_stream_array[i]);
     }	
   }
+# endif
 #endif
   _exit(42);
 }
@@ -11054,26 +11060,26 @@ case "$fflushNULL" in
 	x)	$cat >&4 <<EOM
 Your fflush(NULL) works okay.
 EOM
-		fflushNULL=define
+		fflushNULL="$define"
 		;;
 	'')	$cat >&4 <<EOM
 Your fflush(NULL) isn't working (contrary to ANSI C).
 EOM
-		fflushNULL=undef
+		fflushNULL="$undef"
 		;;
 	*)	$cat >&4 <<EOM
 Cannot figure out whether your fflush(NULL) works or not.
 I'm assuming it doesn't (contrary to ANSI C).
 EOM
-		fflushNULL=undef
+		fflushNULL="$undef"
 		;;
 	esac
 	;;
 $define|true|[yY]*)
-	fflushNULL=define
+	fflushNULL="$define"
 	;;
 *)
-	fflushNULL=undef
+	fflushNULL="$undef"
 	;;
 esac
 : check for fflush all behaviour
@@ -11091,18 +11097,18 @@ case "$fflushall" in
 	x)	$cat >&4 <<EOM
 Flushing explicitly all the stdio streams works.
 EOM
-		fflushall=define
+		fflushall="$define"
 		;;
 	'')	$cat >&4 <<EOM
 Flushing explicitly all the stdio streams doesn't work.
 EOM
-		fflushall=undef
+		fflushall="$undef"
 		;;
 	*)	$cat >&4 <<EOM
 Cannot figure out whether flushing stdio streams explicitly works or not.
 I'm assuming it doesn't.
 EOM
-		fflushall=undef
+		fflushall="$undef"
 		;;
 	esac
 	case "$fflushall$fflushNULL" in
@@ -11114,10 +11120,10 @@ EOM
 	esac
 	;;
 $define|true|[yY]*)
-	fflushall=define
+	fflushall="$define"
 	;;
 *)
-	fflushall=undef
+	fflushall="$undef"
 	;;
 esac
 case "$fflushNULL$fflushall" in
@@ -13153,6 +13159,7 @@ d_statfsflags='$d_statfsflags'
 d_statvfs='$d_statvfs'
 d_stdio_cnt_lval='$d_stdio_cnt_lval'
 d_stdio_ptr_lval='$d_stdio_ptr_lval'
+d_stdio_stream_array='$d_stdio_stream_array'
 d_stdiobase='$d_stdiobase'
 d_stdstdio='$d_stdstdio'
 d_store64='$d_store64'
