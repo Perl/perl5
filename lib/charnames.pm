@@ -55,7 +55,10 @@ sub charnames
   }
 
   ## If we don't have it by now, give up.
-  die "Unknown charname '$name'" unless @off;
+  unless (@off) {
+      carp "Unknown charname '$name'";
+      return "\x{FFFD}";
+  }
 
   ##
   ## Now know where in the string the name starts.
@@ -78,10 +81,11 @@ sub charnames
   if ($^H & $bytes::hint_bits) {	# "use bytes" in effect?
     use bytes;
     return chr $ord if $ord <= 255;
-    my $hex = sprintf '%X=0%o', $ord, $ord;
+    my $hex = sprintf "%04x", $ord;
     my $fname = substr $txt, $off[0] + 2, $off[1] - $off[0] - 2;
-    die "Character 0x$hex with name '$fname' is above 0xFF";
+    croak "Character 0x$hex with name '$fname' is above 0xFF";
   }
+
   return pack "U", $ord;
 }
 
@@ -123,6 +127,8 @@ sub import
   }
 }
 
+require Unicode::UCD; # for Unicode::UCD::_getcode()
+
 my %viacode;
 
 sub viacode
@@ -131,14 +137,22 @@ sub viacode
         carp "charnames::viacode() expects one numeric argument";
         return ()
     }
+
     my $arg = shift;
+    my $code = Unicode::UCD::_getcode($arg);
 
     my $hex;
-    if ($arg =~ m/^[0-9]+$/) {
+
+    if (defined $code) {
         $hex = sprintf "%04X", $arg;
     } else {
         carp("unexpected arg \"$arg\" to charnames::viacode()");
         return;
+    }
+
+    if ($code > 0x10FFFF) {
+	carp "Unicode characters only allocated up to 0x10FFFF (you asked for $hex)";
+	return "\x{FFFD}";
     }
 
     return $viacode{$hex} if exists $viacode{$hex};
@@ -281,6 +295,11 @@ Returns undef if no name is known for the name.
 
 This works only for the standard names, and does not yet aply 
 to custom translators.
+
+=head1 ILLEGAL CHARACTERS
+
+If you ask for a character that does not exist, a warning is given
+and the special Unicode I<replacement character> "\x{FFFD}" is returned.
 
 =head1 BUGS
 
