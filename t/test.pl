@@ -129,7 +129,8 @@ sub skip {
     my $why = shift;
     my $n    = @_ ? shift : 1;
     for (1..$n) {
-	ok(1, "# skip:", $why);
+	print "ok $test # skip: $why\n";
+        $test++;
     }
     local $^W = 0;
     last SKIP;

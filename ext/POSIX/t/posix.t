@@ -10,150 +10,160 @@ BEGIN {
     }
 }
 
+require "./test.pl";
+plan(tests => 31);
+
+
 use POSIX qw(fcntl_h signal_h limits_h _exit getcwd open read strftime write
 	     errno);
-use strict subs;
+use strict 'subs';
 
 $| = 1;
-print "1..29\n";
 
-$Is_W32 = $^O eq 'MSWin32';
-$Is_NetWare = $^O eq 'NetWare';
-$Is_Dos = $^O eq 'dos';
-$Is_MPE = $^O eq 'mpeix';
-$Is_MacOS = $^O eq 'MacOS';
+$Is_W32     = $^O eq 'MSWin32';
+$Is_Dos     = $^O eq 'dos';
+$Is_MPE     = $^O eq 'mpeix';
+$Is_MacOS   = $^O eq 'MacOS';
+$Is_VMS     = $^O eq 'VMS';
+$Is_OS2     = $^O eq 'os2';
+$Is_UWin    = $^O eq 'uwin';
+$Is_OS390   = $^O eq 'os390';
 
-$testfd = open("TEST", O_RDONLY, 0) and print "ok 1\n";
+ok( $testfd = open("TEST", O_RDONLY, 0),        'O_RDONLY with open' );
 read($testfd, $buffer, 9) if $testfd > 2;
-print $buffer eq "#!./perl\n" ? "ok 2\n" : "not ok 2\n";
+is( $buffer, "#!./perl\n",                      '    with read' );
 
 write(1,"ok 3\nnot ok 3\n", 5);
+next_test();
 
-if ($Is_Dos) {
-    for (4..5) {
-        print "ok $_ # skipped, no pipe() support on dos\n";
-    }
-} else {
+SKIP: {
+    skip("no pipe() support on DOS", 2) if $Is_Dos;
+
     @fds = POSIX::pipe();
-    print $fds[0] > $testfd ? "ok 4\n" : "not ok 4\n";
+    ok( $fds[0] > $testfd,      'POSIX::pipe' );
+
     CORE::open($reader = \*READER, "<&=".$fds[0]);
     CORE::open($writer = \*WRITER, ">&=".$fds[1]);
     print $writer "ok 5\n";
     close $writer;
     print <$reader>;
     close $reader;
+    next_test();
 }
 
-if ($Is_W32 || $Is_Dos) {
-    for (6..11) {
-	print "ok $_ # skipped, no sigaction support on win32/dos\n";
-    }
-}
-else {
-    $sigset = new POSIX::SigSet 1, 3;
-    delset $sigset 1;
-    if (!ismember $sigset 1) { print "ok 6\n" }
-    if ( ismember $sigset 3) { print "ok 7\n" }
+SKIP: {
+    skip("no sigaction support on win32/dos", 6) if $Is_W32 || $Is_Dos;
+
+    my $sigset = new POSIX::SigSet 1, 3;
+    $sigset->delset(1);
+    ok(! $sigset->ismember(1),  'POSIX::SigSet->delset' );
+    ok(  $sigset->ismember(3),  'POSIX::SigSet->ismember' );
     
-    if ($Is_MacOS) {
-	for (8..11) {
-	    print "ok $_ # skipped, no kill() support on Mac OS\n";
-	}
-    }
-    else {
-	$mask = new POSIX::SigSet &SIGINT;
-	$action = new POSIX::SigAction 'main::SigHUP', $mask, 0;
+    SKIP: {
+        skip("no kill() support on Mac OS", 4) if $Is_MacOS;
+
+	my $mask   = new POSIX::SigSet &SIGINT;
+	my $action = new POSIX::SigAction 'main::SigHUP', $mask, 0;
 	sigaction(&SIGHUP, $action);
 	$SIG{'INT'} = 'SigINT';
 	kill 'HUP', $$;
 	sleep 1;
-	print "ok 11\n";
+	print "ok 11 - signal masks successful\n";
 	
 	sub SigHUP {
-	    print "ok 8\n";
+	    print "ok 8 - sigaction SIGHUP\n";
 	    kill 'INT', $$;
 	    sleep 2;
-	    print "ok 9\n";
+	    print "ok 9 - sig mask delayed SIGINT\n";
 	}
 
         sub SigINT {
-	    print "ok 10\n";
+	    print "ok 10 -   masked SIGINT received\n";
 	}
+
+        # The order of the above tests is very important, so
+        # we use literal prints and hard coded numbers.
+        next_test() for 1..4;
     }
 }
 
-if ($Is_MPE) {
-    print "ok 12 # skipped, _POSIX_OPEN_MAX is inaccurate on MPE\n"
-} else {
-    if (&_POSIX_OPEN_MAX) {
-	print &_POSIX_OPEN_MAX > $fds[1] ? "ok 12\n" : "not ok 12\n";
-    } else {
-	print "ok 12 # _POSIX_OPEN_MAX undefined ($fds[1])\n";
-    }
+SKIP: {
+    skip("_POSIX_OPEN_MAX is inaccurate on MPE", 1) if $Is_MPE;
+    skip("_POSIX_OPEN_MAX undefined ($fds[1])",  1) unless &_POSIX_OPEN_MAX;
+
+    ok( &_POSIX_OPEN_MAX > $fds[1], '_POSIX_OPEN_MAX' );
 }
 
 my $pat;
 if ($Is_MacOS) {
     $pat = qr/:t:$/;
-} else {
+} 
+elsif ( $Is_VMS ) {
+    $pat = qr/\.T]/i;
+}
+else {
     $pat = qr#[\\/]t$#i;
 }
-print getcwd() =~ $pat ? "ok 13\n" : "not ok 13\n";
+like( getcwd(), qr/$pat/, 'getcwd' );
 
 # Check string conversion functions.
 
-if ($Config{d_strtod}) {
+SKIP: { 
+    skip("strtod() not present", 1) unless $Config{d_strtod};
+
     $lc = &POSIX::setlocale(&POSIX::LC_NUMERIC, 'C') if $Config{d_setlocale};
+
+    # we're just checking that strtod works, not how accurate it is
     ($n, $x) = &POSIX::strtod('3.14159_OR_SO');
-# we're just checking that strtod works, not how accurate it is
-    print ((abs("3.14159" - $n) < 1e-6) && ($x == 6) ?
-          "ok 14\n" : "not ok 14\n");
+    ok((abs("3.14159" - $n) < 1e-6) && ($x == 6), 'strtod works');
+
     &POSIX::setlocale(&POSIX::LC_NUMERIC, $lc) if $Config{d_setlocale};
-} else { print "# strtod not present\n", "ok 14\n"; }
+}
 
-if ($Config{d_strtol}) {
+SKIP: {
+    skip("strtol() not present", 2) unless $Config{d_strtol};
+
     ($n, $x) = &POSIX::strtol('21_PENGUINS');
-    print (($n == 21) && ($x == 9) ? "ok 15\n" : "not ok 15\n");
-} else { print "# strtol not present\n", "ok 15\n"; }
+    is($n, 21, 'strtol() number');
+    is($x, 9,  '         unparsed chars');
+}
 
-if ($Config{d_strtoul}) {
+SKIP: {
+    skip("strtoul() not present", 2) unless $Config{d_strtoul};
+
     ($n, $x) = &POSIX::strtoul('88_TEARS');
-    print (($n == 88) && ($x == 6) ? "ok 16\n" : "not ok 16\n");
-} else { print "# strtoul not present\n", "ok 16\n"; }
+    is($n, 88, 'strtoul() number');
+    is($x, 6,  '          unparsed chars');
+}
 
 # Pick up whether we're really able to dynamically load everything.
-print &POSIX::acos(1.0) == 0.0 ? "ok 17\n" : "not ok 17\n";
+ok( &POSIX::acos(1.0) == 0.0,   'dynamic loading' );
 
 # This can coredump if struct tm has a timezone field and we
 # didn't detect it.  If this fails, try adding
 # -DSTRUCT_TM_HASZONE to your cflags when compiling ext/POSIX/POSIX.c.
 # See ext/POSIX/hints/sunos_4.pl and ext/POSIX/hints/linux.pl 
 print POSIX::strftime("ok 18 # %H:%M, on %D\n", localtime());
+next_test();
 
 # If that worked, validate the mini_mktime() routine's normalisation of
 # input fields to strftime().
 sub try_strftime {
-    my $num = shift;
     my $expect = shift;
     my $got = POSIX::strftime("%a %b %d %H:%M:%S %Y %j", @_);
-    if ($got eq $expect) {
-	print "ok $num\n";
-    }
-    else {
-	print "# expected: $expect\n# got: $got\nnot ok $num\n";
-    }
+    is($got, $expect, 'validating mini_mktime() and strftime()');
 }
 
 $lc = &POSIX::setlocale(&POSIX::LC_TIME, 'C') if $Config{d_setlocale};
-try_strftime(19, "Wed Feb 28 00:00:00 1996 059", 0,0,0, 28,1,96);
-try_strftime(20, "Thu Feb 29 00:00:60 1996 060", 60,0,-24, 30,1,96);
-try_strftime(21, "Fri Mar 01 00:00:00 1996 061", 0,0,-24, 31,1,96);
-try_strftime(22, "Sun Feb 28 00:00:00 1999 059", 0,0,0, 28,1,99);
-try_strftime(23, "Mon Mar 01 00:00:00 1999 060", 0,0,24, 28,1,99);
-try_strftime(24, "Mon Feb 28 00:00:00 2000 059", 0,0,0, 28,1,100);
-try_strftime(25, "Tue Feb 29 00:00:00 2000 060", 0,0,0, 0,2,100);
-try_strftime(26, "Wed Mar 01 00:00:00 2000 061", 0,0,0, 1,2,100);
-try_strftime(27, "Fri Mar 31 00:00:00 2000 091", 0,0,0, 31,2,100);
+try_strftime("Wed Feb 28 00:00:00 1996 059", 0,0,0, 28,1,96);
+try_strftime("Thu Feb 29 00:00:60 1996 060", 60,0,-24, 30,1,96);
+try_strftime("Fri Mar 01 00:00:00 1996 061", 0,0,-24, 31,1,96);
+try_strftime("Sun Feb 28 00:00:00 1999 059", 0,0,0, 28,1,99);
+try_strftime("Mon Mar 01 00:00:00 1999 060", 0,0,24, 28,1,99);
+try_strftime("Mon Feb 28 00:00:00 2000 059", 0,0,0, 28,1,100);
+try_strftime("Tue Feb 29 00:00:00 2000 060", 0,0,0, 0,2,100);
+try_strftime("Wed Mar 01 00:00:00 2000 061", 0,0,0, 1,2,100);
+try_strftime("Fri Mar 31 00:00:00 2000 091", 0,0,0, 31,2,100);
 &POSIX::setlocale(&POSIX::LC_TIME, $lc) if $Config{d_setlocale};
 
 {
@@ -165,15 +175,20 @@ try_strftime(27, "Fri Mar 31 00:00:00 2000 091", 0,0,0, 31,2,100);
 	# Autoloading should not munge the value.
 	my $foo  = $!;
 	my $errno = POSIX::errno();
-	print "not " unless $errno == $foo;
-	print "ok ", 28 + $test, "\n";
+
+        local $TODO;
+        $TODO = 'POSIX::errno() munged by autoloading on VMS' 
+            if $Is_VMS && $test == 0;
+
+        # Force numeric context.
+	is( $errno + 0, $foo + 0,     'autoloading and errno() mix' );
     }
 }
 
 $| = 0;
 # The following line assumes buffered output, which may be not true:
-print '@#!*$@(!@#$' unless ($Is_MacOS || $^O eq 'os2' ||
-                            $^O eq 'uwin' || $^O eq 'os390' ||
+print '@#!*$@(!@#$' unless ($Is_MacOS || $Is_OS2 || $Is_UWin || $Is_OS390 ||
+                            $Is_VMS ||
 			    (defined $ENV{PERLIO} &&
 			     $ENV{PERLIO} eq 'unix' &&
 			     $Config::Config{useperlio}));
