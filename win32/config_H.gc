@@ -13,7 +13,7 @@
 /*
  * Package name      : perl5
  * Source directory  : 
- * Configuration time: Fri Apr  6 21:55:32 2001
+ * Configuration time: Wed May  9 16:33:12 2001
  * Configured by     : nick
  * Target system     : 
  */
@@ -3321,6 +3321,12 @@
  *	available to test whether a socket is at the out-of-band mark.
  */
 /*#define HAS_SOCKATMARK		/**/
+
+/* HAS_STRFTIME:
+ *	This symbol, if defined, indicates that the strftime routine is
+ *	available to do time formatting.
+ */
+#define HAS_STRFTIME		/**/
 
 /* U32_ALIGNMENT_REQUIRED:
  *	This symbol, if defined, indicates that you must access
