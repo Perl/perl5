@@ -216,6 +216,13 @@ people to work on those issues.
 
 See L<perlfunc/prototype>.
 
+=head2 Extended support for exception handling
+
+C<die()> now accepts a reference value, and C<$@> gets set to that
+value in exception traps.  This makes it possible to propagate
+exception objects.  See L<perlfunc/eval>.  [XXX there's nothing
+about this in perlfunc/eval yet.]
+
 =head2 Re-blessing in DESTROY() supported for chaining DESTROY() methods
 
 See L<perlobj/Destructors>.

@@ -575,6 +575,15 @@ currently be considered unsupported.
 
 =item *
 
+C<kill()> is implemented, but doesn't have the semantics of
+C<raise()>, i.e. it doesn't send a signal to the identified process
+like it does on Unix platforms.  Instead it immediately calls
+C<TerminateProcess(process,signal)>.  Thus the signal argument is
+used to set the exit-status of the terminated process.  This behavior
+may change in future.
+
+=item *
+
 File globbing may not behave as on Unix platforms.  In particular,
 if you don't use perlglob.bat for globbing, it will understand
 wildcards only in the filename component (and not in the pathname).

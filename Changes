@@ -69,6 +69,13 @@ Version 5.004_73        Developer release working toward 5.005
 ----------------
 
 ____________________________________________________________________________
+[  1464] By: gsar                                  on 1998/07/13  04:41:07
+        Log: up patchlevel to 73, update Changes &c.
+     Branch: perl
+	   ! Changes patchlevel.h pod/perlhist.pod t/op/array.t
+	   ! win32/Makefile win32/config_H.bc win32/config_H.gc
+           ! win32/config_H.vc win32/makefile.mk
+____________________________________________________________________________
 [  1463] By: gsar                                  on 1998/07/13  02:58:51
         Log: avoid empty rm -f in MM_Unix.pm
      Branch: perl
