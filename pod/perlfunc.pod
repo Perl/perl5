@@ -2519,36 +2519,44 @@ for details, including issues with tied arrays and hashes.
 
 =item localtime EXPR
 
+=item localtime
+
 Converts a time as returned by the time function to a 9-element list
 with the time analyzed for the local time zone.  Typically used as
 follows:
 
     #  0    1    2     3     4    5     6     7     8
     ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
-						localtime(time);
+                                                localtime(time);
 
 All list elements are numeric, and come straight out of the C `struct
-tm'.  $sec, $min, and $hour are the seconds, minutes, and hours of the
-specified time.  $mday is the day of the month, and $mon is the month
-itself, in the range C<0..11> with 0 indicating January and 11
-indicating December.  $year is the number of years since 1900.  That
-is, $year is C<123> in year 2023.  $wday is the day of the week, with
-0 indicating Sunday and 3 indicating Wednesday.  $yday is the day of
-the year, in the range C<0..364> (or C<0..365> in leap years.)  $isdst
-is true if the specified time occurs during daylight savings time,
-false otherwise.
+tm'.  C<$sec>, C<$min>, and C<$hour> are the seconds, minutes, and hours
+of the specified time.
 
-Note that the $year element is I<not> simply the last two digits of
-the year.  If you assume it is, then you create non-Y2K-compliant
-programs--and you wouldn't want to do that, would you?
+C<$mday> is the day of the month, and C<$mon> is the month itself, in
+the range C<0..11> with 0 indicating January and 11 indicating December.
+This makes it easy to get a month name from a list:
 
-The proper way to get a complete 4-digit year is simply:
+    my @abbr = qw( Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec );
+    print "$abbr[$mon] $mday";
+    # $mon=9, $mday=18 gives "Oct 18"
 
-	$year += 1900;
+C<$year> is the number of years since 1900, not just the last two digits
+of the year.  That is, C<$year> is C<123> in year 2023.  The proper way
+to get a complete 4-digit year is simply:
 
-And to get the last two digits of the year (e.g., '01' in 2001) do:
+    $year += 1900;
 
-	$year = sprintf("%02d", $year % 100);
+To get the last two digits of the year (e.g., '01' in 2001) do:
+
+    $year = sprintf("%02d", $year % 100);
+
+C<$wday> is the day of the week, with 0 indicating Sunday and 3 indicating
+Wednesday.  C<$yday> is the day of the year, in the range C<0..364>
+(or C<0..365> in leap years.)
+
+C<$isdst> is true if the specified time occurs during Daylight Saving
+Time, false otherwise.
 
 If EXPR is omitted, C<localtime()> uses the current time (C<localtime(time)>).
 
