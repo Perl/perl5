@@ -42,25 +42,14 @@ case $PERL_CONFIG_SH in
 	;;
 esac
 
+: syntax: cflags [optimize=XXX] [file[.suffix]]
+: displays the compiler command line for file
+
 case "X$1" in
 Xoptimize=*|X"optimize=*")
 	eval "$1"
 	shift
 	;;
-esac
-
-perltype=''
-optdebug=''	# ensure -g used if building a -DDEBUGGING libperl
-case $# in
-2) case $1 in
-    *perl.*)    perltype='';;
-    *perld.*)   perltype='-DDEBUGGING'; optdebug='-g' ;;
-    *perle.*)   perltype='-DEMBED';;
-    *perlde.*)  perltype='-DDEBUGGING -DEMBED'; optdebug='-g' ;;
-    *perlm.*)   perltype='-DEMBED -DMULTIPLICITY';;
-    *perldm.*)  perltype='-DDEBUGGING -DEMBED -DMULTIPLICITY'; optdebug='-g' ;;
-    esac
-    shift ;;
 esac
 
 also=': '
@@ -134,10 +123,6 @@ for file do
     *) ;;
     esac
 
-	if test "X$optdebug" != "X"; then
-		optimize="$optdebug $optimize"
-	fi
-
 # Add -Wall for the core and core modules iff gcc and not already -Wall
 warn=''
 case "$gccversion" in
@@ -155,8 +140,8 @@ case "$gccversion" in
 esac
 
     : Can we perhaps use $ansi2knr here
-    echo "$cc -c -DPERL_CORE $ccflags $optimize $warn $perltype"
-    eval "$also "'"$cc -DPERL_CORE -c $ccflags $optimize $warn $perltype"'
+    echo "$cc -c -DPERL_CORE $ccflags $optimize $warn"
+    eval "$also "'"$cc -DPERL_CORE -c $ccflags $optimize $warn"'
 
     . $TOP/config.sh
 
