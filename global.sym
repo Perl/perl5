@@ -354,6 +354,7 @@ Perl_save_item
 Perl_save_iv
 Perl_save_list
 Perl_save_long
+Perl_save_mortalizesv
 Perl_save_nogv
 Perl_save_scalar
 Perl_save_pptr

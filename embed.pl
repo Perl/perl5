@@ -1940,6 +1940,7 @@ Ap	|void	|save_item	|SV* item
 Ap	|void	|save_iv	|IV* iv
 Ap	|void	|save_list	|SV** sarg|I32 maxsarg
 Ap	|void	|save_long	|long* longp
+Ap	|void	|save_mortalizesv|SV* sv
 Ap	|void	|save_nogv	|GV* gv
 p	|void	|save_op
 Ap	|SV*	|save_scalar	|GV* gv

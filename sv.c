@@ -7548,6 +7548,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl)
 	    TOPIV(nss,ix) = iv;
             break;
 	case SAVEt_FREESV:
+	case SAVEt_MORTALIZESV:
 	    sv = (SV*)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = sv_dup_inc(sv);
 	    break;

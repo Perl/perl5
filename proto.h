@@ -668,6 +668,7 @@ PERL_CALLCONV void	Perl_save_item(pTHX_ SV* item);
 PERL_CALLCONV void	Perl_save_iv(pTHX_ IV* iv);
 PERL_CALLCONV void	Perl_save_list(pTHX_ SV** sarg, I32 maxsarg);
 PERL_CALLCONV void	Perl_save_long(pTHX_ long* longp);
+PERL_CALLCONV void	Perl_save_mortalizesv(pTHX_ SV* sv);
 PERL_CALLCONV void	Perl_save_nogv(pTHX_ GV* gv);
 PERL_CALLCONV void	Perl_save_op(pTHX);
 PERL_CALLCONV SV*	Perl_save_scalar(pTHX_ GV* gv);

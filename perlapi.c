@@ -2582,6 +2582,13 @@ Perl_save_long(pTHXo_ long* longp)
     ((CPerlObj*)pPerl)->Perl_save_long(longp);
 }
 
+#undef  Perl_save_mortalizesv
+void
+Perl_save_mortalizesv(pTHXo_ SV* sv)
+{
+    ((CPerlObj*)pPerl)->Perl_save_mortalizesv(sv);
+}
+
 #undef  Perl_save_nogv
 void
 Perl_save_nogv(pTHXo_ GV* gv)

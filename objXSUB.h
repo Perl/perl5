@@ -1417,6 +1417,10 @@
 #define Perl_save_long		pPerl->Perl_save_long
 #undef  save_long
 #define save_long		Perl_save_long
+#undef  Perl_save_mortalizesv
+#define Perl_save_mortalizesv	pPerl->Perl_save_mortalizesv
+#undef  save_mortalizesv
+#define save_mortalizesv	Perl_save_mortalizesv
 #undef  Perl_save_nogv
 #define Perl_save_nogv		pPerl->Perl_save_nogv
 #undef  save_nogv

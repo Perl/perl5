@@ -1126,8 +1126,20 @@ and back.
 =item C<SAVEFREESV(SV *sv)>
 
 The refcount of C<sv> would be decremented at the end of
-I<pseudo-block>. This is similar to C<sv_2mortal>, which should (?) be
-used instead.
+I<pseudo-block>.  This is similar to C<sv_2mortal> in that it is also a
+mechanism for doing a delayed C<SvREFCNT_dec>.  However, while C<sv_2mortal>
+extends the lifetime of C<sv> until the beginning of the next statement,
+C<SAVEFREESV> extends it until the end of the enclosing scope.  These
+lifetimes can be wildly different.
+
+Also compare C<SAVEMORTALIZESV>.
+
+=item C<SAVEMORTALIZESV(SV *sv)>
+
+Just like C<SAVEFREESV>, but mortalizes C<sv> at the end of the current
+scope instead of decrementing its reference count.  This usually has the
+effect of keeping C<sv> alive until the statement that called the currently
+live scope has finished executing.
 
 =item C<SAVEFREEOP(OP *op)>
 

@@ -592,6 +592,7 @@
 #define save_iv			Perl_save_iv
 #define save_list		Perl_save_list
 #define save_long		Perl_save_long
+#define save_mortalizesv	Perl_save_mortalizesv
 #define save_nogv		Perl_save_nogv
 #define save_op			Perl_save_op
 #define save_scalar		Perl_save_scalar
@@ -2059,6 +2060,7 @@
 #define save_iv(a)		Perl_save_iv(aTHX_ a)
 #define save_list(a,b)		Perl_save_list(aTHX_ a,b)
 #define save_long(a)		Perl_save_long(aTHX_ a)
+#define save_mortalizesv(a)	Perl_save_mortalizesv(aTHX_ a)
 #define save_nogv(a)		Perl_save_nogv(aTHX_ a)
 #define save_op()		Perl_save_op(aTHX)
 #define save_scalar(a)		Perl_save_scalar(aTHX_ a)
@@ -4035,6 +4037,8 @@
 #define save_list		Perl_save_list
 #define Perl_save_long		CPerlObj::Perl_save_long
 #define save_long		Perl_save_long
+#define Perl_save_mortalizesv	CPerlObj::Perl_save_mortalizesv
+#define save_mortalizesv	Perl_save_mortalizesv
 #define Perl_save_nogv		CPerlObj::Perl_save_nogv
 #define save_nogv		Perl_save_nogv
 #define Perl_save_op		CPerlObj::Perl_save_op
