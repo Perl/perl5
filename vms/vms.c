@@ -6378,6 +6378,7 @@ Perl_flex_stat(pTHX_ const char *fspec, Stat_t *statbufp)
     char temp_fspec[NAM$C_MAXRSS+300];
     int retval = -1;
 
+    if (!fspec) return retval;
     strcpy(temp_fspec, fspec);
     if (statbufp == (Stat_t *) &PL_statcache)
       do_tovmsspec(temp_fspec,namecache,0);
