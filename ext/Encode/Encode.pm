@@ -378,7 +378,7 @@ sub loadEncoding
      last unless $type eq '#';
     }
    $class .= ('::'.(($type eq 'E') ? 'Escape' : 'Table'));
-   warn "Loading $file";
+   # warn "Loading $file";
    return $class->read($fh,$name,$type);
   }
  else
