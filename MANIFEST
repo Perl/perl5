@@ -1331,7 +1331,7 @@ sv.c			Scalar value code
 sv.h			Scalar value header
 t/README		Instructions for regression tests
 t/TEST			The regression tester
-t/UTEST			Run regression tests with -Mutf8
+t/TestInit.pm		Preamble library for core tests
 t/base/commonsense.t	See if configuration meets basic needs
 t/base/cond.t		See if conditionals work
 t/base/if.t		See if if works
@@ -1716,6 +1716,7 @@ t/pragma/warn/universal	Tests for universal.c for warnings.t
 t/pragma/warn/utf8	Tests for utf8.c for warnings.t
 t/pragma/warn/util	Tests for util.c for warnings.t
 t/pragma/warnings.t	See if warning controls work
+t/run/runenv.t		Test if perl honors its environment variables.
 taint.c			Tainting code
 thrdvar.h		Per-thread variables
 thread.h		Threading header

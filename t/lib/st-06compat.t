@@ -1,6 +1,6 @@
 #!./perl
 
-# $Id: compat-0.6.t,v 1.0 2000/09/01 19:40:41 ram Exp $
+# $Id: compat-0.6.t,v 1.0.1.1 2001/02/17 12:26:21 ram Exp $
 #
 #  Copyright (c) 1995-2000, Raphael Manfredi
 #  
@@ -8,6 +8,9 @@
 #  in the README file that comes with the distribution.
 #
 # $Log: compat-0.6.t,v $
+# Revision 1.0.1.1  2001/02/17 12:26:21  ram
+# patch8: added EBCDIC version of the test, from Peter Prymmer
+#
 # Revision 1.0  2000/09/01 19:40:41  ram
 # Baseline for first official release.
 #
@@ -86,30 +89,29 @@ sub obj { $_[0]->{obj} }
 
 package main;
 
-my $Is_EBCDIC = (ord('A') == 193) ? 1 : 0;
-
+my $is_EBCDIC = (ord('A') == 193) ? 1 : 0;
+ 
 my $r = ROOT->make;
 
 my $data = '';
-if (!$Is_EBCDIC) {
+if (!$is_EBCDIC) {			# ASCII machine
 	while (<DATA>) {
-	    next if /^#/;
+		next if /^#/;
 	    $data .= unpack("u", $_);
 	}
-}
-else {
+} else {
 	while (<DATA>) {
-	    next if /^#$/;    # skip comments
-	    next if /^#\s+/;  # skip comments
-	    next if /^[^#]/;  # skip uuencoding for ASCII machines
-	    s/^#//;           # prepare uuencoded data for EBCDIC machines
-	    $data .= unpack("u", $_);
+		next if /^#$/;		# skip comments
+		next if /^#\s+/;	# skip comments
+		next if /^[^#]/;	# skip uuencoding for ASCII machines
+		s/^#//;				# prepare uuencoded data for EBCDIC machines
+		$data .= unpack("u", $_);
 	}
 }
 
-my $expected_length = $Is_EBCDIC ? 217 : 278;
+my $expected_length = $is_EBCDIC ? 217 : 278;
 ok 1, length $data == $expected_length;
-
+  
 my $y = thaw($data);
 ok 2, 1;
 ok 3, ref $y eq 'ROOT';
@@ -144,6 +146,15 @@ M6%A8`````6$$`@````4$`@````$(@%AB!E-)35!,15A8!`(````!"(%88@93
 M24U03$586`0"`````0B"6&(&4TE-4$Q%6%@$`@````$(@UAB!E-)35!,15A8
 M!`(````!"(188@9324U03$586%A8`````V]B:@0,!``````*6%A8`````W)E
 (9F($4D]/5%@`
+#
+# using Storable-0.6@11, output of: print '#' . pack("u", nfreeze(ROOT->make));
+# on OS/390 (cp 1047) original size: 217 bytes
+#
+#M!0,1!-G6UN,#````!00,!!$)X\G%Q&W(P>+(`P````(*!*6!D_$````$DH6H
+#M\0H$I8&3\@````22A:CR`````YF%A@0"````!@B!"(`(?0H(8/-+\?3Q]?D)
+#M```!R`H#]$OU`````Y6DE`0"````!001!N+)U-?3Q0(````!"(`$$@("````
+#M`0B!!!("`@````$(@@02`@(````!"(,$$@("`````0B$`````Y:"D00`````
+#E!`````&(!`(````#"@:BHYF)E8<$``````0$```````````!@0``
 #
 # using Storable-0.6@11, output of: print '#' . pack("u", nfreeze(ROOT->make));
 # on OS/390 (cp 1047) original size: 217 bytes

@@ -318,37 +318,47 @@ sub _parse_test_line {
     if ($line =~ /^(not\s+)?ok\b/i) {
         my $this = $test->{next} || 1;
         # "not ok 23"
-        if ($line =~ /^not ok\s*(\d*)/){         # test failed
-            $this = $1 if length $1 and $1 > 0;
-            print "$test->{ml}NOK $this" if $test->{ml};
-            if (!$test->{todo}{$this}) {
-                push @{$test->{failed}}, $this;
-            } else {
-                $test->{ok}++;
-                $tot->{ok}++;
-            }
-        }
-        # "ok 23 # skip (you're not cleared for that)"
-        elsif ($line =~ /^ok\s*(\d*)\ *
-                         (\s*\#\s*[Ss]kip\S*(?:(?>\s+)(.+))?)?
-                        /x)        # test skipped
-        {
-            $this = $1 if length $1 and $1 > 0;
-            print "$test->{ml}ok $this/$test->{max}" if $test->{ml};
-            $test->{ok}++;
-            $tot->{ok}++;
-            $test->{skipped}++ if defined $2;
-            my $reason;
-            $reason = 'unknown reason' if defined $2;
-            $reason = $3 if defined $3;
-            if (defined $reason and defined $test->{skip_reason}) {
-                # print "was: '$skip_reason' new '$reason'\n";
-                $test->{skip_reason} = 'various reasons'
-                  if $test->{skip_reason} ne $reason;
-            } elsif (defined $reason) {
-                $test->{skip_reason} = $reason;
-            }
-            $test->{bonus}++, $tot->{bonus}++ if $test->{todo}{$this};
+        if ($line =~ /^(not )?ok\s*(\d*)(\s*#.*)?/) {
+	    my($not, $tnum, $extra) = ($1, $2, $3);
+
+	    $this = $tnum if $tnum;
+
+	    my($type, $reason) = $extra =~ /^\s*#\s*([Ss]kip\S*|TODO)(\s+.+)?/
+	      if defined $extra;
+
+	    my($istodo, $isskip);
+	    if( defined $type ) {
+		$istodo = $type =~ /TODO/;
+		$isskip = $type =~ /skip/i;
+	    }
+
+	    $test->{todo}{$tnum} = 1 if $istodo;
+
+	    if( $not ) {
+		print "$test->{ml}NOK $this" if $test->{ml};
+		if (!$test->{todo}{$this}) {
+		    push @{$test->{failed}}, $this;
+		} else {
+		    $test->{ok}++;
+		    $tot->{ok}++;
+		}
+	    }
+	    else {
+		print "$test->{ml}ok $this/$test->{max}" if $test->{ml};
+		$test->{ok}++;
+		$tot->{ok}++;
+		$test->{skipped}++ if $isskip;
+
+		if (defined $reason and defined $test->{skip_reason}) {
+		    # print "was: '$skip_reason' new '$reason'\n";
+		    $test->{skip_reason} = 'various reasons'
+		      if $test->{skip_reason} ne $reason;
+		} elsif (defined $reason) {
+		    $test->{skip_reason} = $reason;
+		}
+
+		$test->{bonus}++, $tot->{bonus}++ if $test->{todo}{$this};
+	    }
         }
         # XXX ummm... dunno
         elsif ($line =~ /^ok\s*(\d*)\s*\#([^\r]*)$/) { # XXX multiline ok?
@@ -612,9 +622,9 @@ Test::Harness - run perl standard test scripts with statistics
 
 =head1 SYNOPSIS
 
-use Test::Harness;
+  use Test::Harness;
 
-runtests(@tests);
+  runtests(@test_files);
 
 =head1 DESCRIPTION
 
@@ -634,6 +644,9 @@ After all tests have been performed, runtests() prints some
 performance statistics that are computed by the Benchmark module.
 
 =head2 The test script output
+
+The following explains how Test::Harness interprets the output of your
+test program.
 
 =over 4
 
@@ -700,16 +713,35 @@ script(s). The default value is C<-w>.
 
 =item B<Skipping tests>
 
-If the standard output line contains substring C< # Skip> (with
+If the standard output line contains the substring C< # Skip> (with
 variations in spacing and case) after C<ok> or C<ok NUMBER>, it is
 counted as a skipped test.  If the whole testscript succeeds, the
 count of skipped tests is included in the generated output.
-
 C<Test::Harness> reports the text after C< # Skip\S*\s+> as a reason
-for skipping.  Similarly, one can include a similar explanation in a
-C<1..0> line emitted if the test script is skipped completely:
+for skipping.  
+
+  ok 23 # skip Insufficient flogiston pressure.
+
+Similarly, one can include a similar explanation in a C<1..0> line
+emitted if the test script is skipped completely:
 
   1..0 # Skipped: no leverage found
+
+=item B<Todo tests>
+
+If the standard output line contains the substring C< # TODO> after
+C<not ok> or C<not ok NUMBER>, it is counted as a todo test.  The text
+afterwards is the thing that has to be done before this test will
+succeed.
+
+  not ok 13 # TODO harness the power of the atom
+
+These tests represent a feature to be implemented or a bug to be fixed
+and act as something of an executable "thing to do" list.  They are
+B<not> expected to succeed.  Should a todo test begin succeeding,
+Test::Harness will report it as a bonus.  This indicates that whatever
+you were supposed to do has been done and you should promote this to a
+normal test.
 
 =item B<Bail out!>
 
@@ -776,21 +808,29 @@ the script dies with this message.
 
 =head1 ENVIRONMENT
 
-Setting C<HARNESS_IGNORE_EXITCODE> makes harness ignore the exit status
-of child processes.
+=over 4
 
-Setting C<HARNESS_NOTTY> to a true value forces it to behave as though
-STDOUT were not a console.  You may need to set this if you don't want
-harness to output more frequent progress messages using carriage returns.
-Some consoles may not handle carriage returns properly (which results
-in a somewhat messy output).
+=item C<HARNESS_IGNORE_EXITCODE> 
 
-Setting C<HARNESS_COMPILE_TEST> to a true value will make harness attempt
-to compile the test using C<perlcc> before running it.
+Makes harness ignore the exit status of child processes when defined.
 
-If C<HARNESS_FILELEAK_IN_DIR> is set to the name of a directory, harness
-will check after each test whether new files appeared in that directory,
-and report them as
+=item C<HARNESS_NOTTY> 
+
+When set to a true value, forces it to behave as though STDOUT were
+not a console.  You may need to set this if you don't want harness to
+output more frequent progress messages using carriage returns.  Some
+consoles may not handle carriage returns properly (which results in a
+somewhat messy output).
+
+=item C<HARNESS_COMPILE_TEST> 
+
+When true it will make harness attempt to compile the test using
+C<perlcc> before running it.
+
+=item C<HARNESS_FILELEAK_IN_DIR> 
+
+When set to the name of a directory, harness will check after each
+test whether new files appeared in that directory, and report them as
 
   LEAKED FILES: scr.tmp 0 my.db
 
@@ -798,32 +838,42 @@ If relative, directory name is with respect to the current directory at
 the moment runtests() was called.  Putting absolute path into 
 C<HARNESS_FILELEAK_IN_DIR> may give more predicatable results.
 
-The value of C<HARNESS_PERL_SWITCHES> will be prepended to the
-switches used to invoke perl on each test.  For example, setting
-C<HARNESS_PERL_SWITCHES> to "-W" will run all tests with all
-warnings enabled.
+=item C<HARNESS_PERL_SWITCHES> 
 
-If C<HARNESS_COLUMNS> is set, then this value will be used for the
-width of the terminal. If it is not set then it will default to
-C<COLUMNS>. If this is not set, it will default to 80. Note that users
-of Bourne-sh based shells will need to C<export COLUMNS> for this
-module to use that variable.
+Its value will be prepended to the switches used to invoke perl on
+each test.  For example, setting C<HARNESS_PERL_SWITCHES> to "-W" will
+run all tests with all warnings enabled.
 
-Harness sets C<HARNESS_ACTIVE> before executing the individual tests.
-This allows the tests to determine if they are being executed through the
-harness or by any other means.
+=item C<HARNESS_COLUMNS> 
+
+This value will be used for the width of the terminal. If it is not
+set then it will default to C<COLUMNS>. If this is not set, it will
+default to 80. Note that users of Bourne-sh based shells will need to
+C<export COLUMNS> for this module to use that variable.
+
+=item C<HARNESS_ACTIVE> 
+
+Harness sets this before executing the individual tests.  This allows
+the tests to determine if they are being executed through the harness
+or by any other means.
+
+=back
+
 
 =head1 SEE ALSO
 
-L<Test> for writing test scripts and also L<Benchmark> for the
-underlying timing routines.
+L<Test> for writing test scripts, L<Benchmark> for the underlying
+timing routines and L<Devel::Coverage> for test coverage analysis.
 
 =head1 AUTHORS
 
 Either Tim Bunce or Andreas Koenig, we don't know. What we know for
 sure is, that it was inspired by Larry Wall's TEST script that came
 with perl distributions for ages. Numerous anonymous contributors
-exist. Current maintainer is Andreas Koenig.
+exist. 
+
+Current maintainers are Andreas Koenig <andreas.koenig@anima.de> and
+Michael G Schwern <schwern@pobox.com>
 
 =head1 BUGS
 

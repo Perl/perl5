@@ -953,7 +953,7 @@ ordered and whether you wish to preserve the ordering.
 If @in is sorted, and you want @out to be sorted:
 (this assumes all true values in the array)
 
-    $prev = 'nonesuch';
+    $prev = "not equal to $in[0]";
     @out = grep($_ ne $prev && ($prev = $_, 1), @in);
 
 This is nice in that it doesn't use much extra memory, simulating

@@ -1,3 +1,34 @@
+Sat Feb 17 13:35:00 MET 2001   Raphael Manfredi <Raphael_Manfredi@pobox.com>
+
+. Description:
+
+	Version 1.0.8, binary format 2.4.
+
+	Fixed incorrect error message.
+
+	Now bless objects ASAP at retrieve time, which is meant to fix
+	two bugs:
+
+	* Indirect references to overloaded object were not able to
+	  restore overloading if the object was not blessed yet,
+	  which was possible since blessing occurred only after the
+	  recursive retrieval.
+
+	* Storable hooks asking for serialization of blessed ref could
+	  get un-blessed refs at retrieval time, for the very same
+	  reason.
+
+	The fix implemented here was suggested by Nick Ing-Simmons.
+
+	Added support for blessed ref to tied structures.  This is the
+	cause for the binary format change.
+
+	Added EBCDIC version of the compatibility test with 0.6.11,
+	from Peter Prymmer
+
+	Added tests for the new features, and to make sure the bugs they
+	are meant to fix are indeed fixed.
+
 Wed Jan  3 10:43:18 MET 2001   Raphael Manfredi <Raphael_Manfredi@pobox.com>
 
 . Description:

@@ -1173,6 +1173,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 	    PL_tainting = TRUE;
 	else {
 	    while (s && *s) {
+	        char *d;
 		while (isSPACE(*s))
 		    s++;
 		if (*s == '-') {
@@ -1180,11 +1181,18 @@ print \"  \\@INC:\\n    @INC\\n\";");
 		    if (isSPACE(*s))
 			continue;
 		}
+		d = s;
 		if (!*s)
 		    break;
 		if (!strchr("DIMUdmw", *s))
 		    Perl_croak(aTHX_ "Illegal switch in PERL5OPT: -%c", *s);
-		s = moreswitches(s);
+		while (++s && *s) {
+		    if (isSPACE(*s)) {
+		        *s++ = '\0';
+			break;
+		    }
+		}
+		moreswitches(d);
 	    }
 	}
     }

@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..33\n";
+print "1..34\n";
 
 # optimized
 
@@ -103,3 +103,7 @@ print $_ eq "abc\x{1234}" ? "ok 32\n" : "not ok 32\n";
 $_ = "\x{1234}\x{2345}";
 chop;
 print $_ eq "\x{1234}" ? "ok 33\n" : "not ok 33\n";
+
+# TODO!  Make sure chop(LIST) returns the right value.
+my @stuff = qw(this that);
+print chop(@stuff[0,1]) eq 't' ? "ok 34 # TODO\n" : "not ok 34 # TODO\n";

@@ -625,10 +625,11 @@ Perl_bytes_from_utf8(pTHX_ U8* s, STRLEN *len, bool *is_utf8)
     s = start; start = d;
     while (s < send) {
 	U8 c = *s++;
+
 	if (UTF8_IS_ASCII(c))
 	    *d++ = c;
 	else
-	    *d++ = UTF8_ACCUMULATE(c&3, *s++);
+	    *d++ = UTF8_ACCUMULATE(c, *s++);
     }
     *d = '\0';
     *len = d - start;
@@ -657,12 +658,13 @@ Perl_bytes_to_utf8(pTHX_ U8* s, STRLEN *len)
     dst = d;
 
     while (s < send) {
-        if (*s < 0x80)
+        if (UTF8_IS_ASCII(*s))
             *d++ = *s++;
         else {
             UV uv = *s++;
-            *d++ = (( uv >>  6)         | 0xc0);
-            *d++ = (( uv        & 0x3f) | 0x80);
+
+            *d++ = UTF8_EIGHT_BIT_HI(uv);
+            *d++ = UTF8_EIGHT_BIT_LO(uv);
         }
     }
     *d = '\0';
