@@ -61,50 +61,43 @@ Larry Wall <larry@wall.org>
 
 =cut
 
-use strict;
-use warnings;
-
-my %keyword = ();
-
 while (<DATA>) {
-    chomp;
+    chop;
     $keyword{$_} = 1;
 }
 
-local $/;
-
+undef $/;
+$* = 1;
 while (<>) {
-    my $newname = $ARGV;
+    $newname = $ARGV;
     $newname =~ s/\.pl$/.pm/ || next;
     $newname =~ s#(.*/)?(\w+)#$1\u$2#;
     if (-f $newname) {
 	warn "Won't overwrite existing $newname\n";
 	next;
     }
-    my $oldpack = $2;
-    my $newpack = "\u$2";
-    my @export = ();
+    $oldpack = $2;
+    $newpack = "\u$2";
+    @export = ();
+    print "$oldpack => $newpack\n" if $verbose;
 
     s/\bstd(in|out|err)\b/\U$&/g;
     s/(sub\s+)(\w+)(\s*\{[ \t]*\n)\s*package\s+$oldpack\s*;[ \t]*\n+/${1}main'$2$3/ig;
-    if (/sub\s+\w+'/) {
-	@export = m/sub\s+\w+'(\w+)/g;
+    if (/sub\s+main'/) {
+	@export = m/sub\s+main'(\w+)/g;
 	s/(sub\s+)main'(\w+)/$1$2/g;
     }
     else {
 	@export = m/sub\s+([A-Za-z]\w*)/g;
     }
-    my @export_ok = grep($keyword{$_}, @export);
+    @export_ok = grep($keyword{$_}, @export);
     @export = grep(!$keyword{$_}, @export);
-
-    my %export = ();
     @export{@export} = (1) x @export;
-
     s/(^\s*);#/$1#/g;
     s/(#.*)require ['"]$oldpack\.pl['"]/$1use $newpack/;
     s/(package\s*)($oldpack)\s*;[ \t]*\n+//ig;
-    s/([\$\@%&*])'(\w+)/&xlate($1,"",$2,$newpack,$oldpack,\%export)/eg;
-    s/([\$\@%&*]?)(\w+)'(\w+)/&xlate($1,$2,$3,$newpack,$oldpack,\%export)/eg;
+    s/([\$\@%&*])'(\w+)/&xlate($1,"",$2)/eg;
+    s/([\$\@%&*]?)(\w+)'(\w+)/&xlate($1,$2,$3)/eg;
     if (!/\$\[\s*\)?\s*=\s*[^0\s]/) {
 	s/^\s*(local\s*\()?\s*\$\[\s*\)?\s*=\s*0\s*;[ \t]*\n//g;
 	s/\$\[\s*\+\s*//g;
@@ -113,22 +106,24 @@ while (<>) {
     }
     s/open\s+(\w+)/open($1)/g;
  
-    my $export_ok = '';
-    my $carp      ='';
-
     if (s/\bdie\b/croak/g) {
 	$carp = "use Carp;\n";
 	s/croak "([^"]*)\\n"/croak "$1"/g;
     }
-
+    else {
+	$carp = "";
+    }
     if (@export_ok) {
 	$export_ok = "\@EXPORT_OK = qw(@export_ok);\n";
     }
+    else {
+	$export_ok = "";
+    }
 
-    if ( open(PM, ">$newname") ) {
-       print PM <<"END";
+    open(PM, ">$newname") || warn "Can't create $newname: $!\n";
+    print PM <<"END";
 package $newpack;
-require 5.6.0;
+require 5.000;
 require Exporter;
 $carp
 \@ISA = qw(Exporter);
@@ -136,35 +131,27 @@ $carp
 $export_ok
 $_
 END
-    }
-    else {
-      warn "Can't create $newname: $!\n";
-    }
 }
 
 sub xlate {
-    my ($prefix, $pack, $ident,$newpack,$oldpack,$export) = @_;
-
-    my $xlated ;
+    local($prefix, $pack, $ident) = @_;
     if ($prefix eq '' && $ident =~ /^(t|s|m|d|ing|ll|ed|ve|re)$/) {
-	$xlated = "${pack}'$ident";
+	"${pack}'$ident";
     }
-    elsif ($pack eq '' || $pack eq 'main') {
-	if ($export->{$ident}) {
-	    $xlated = "$prefix$ident";
+    elsif ($pack eq "" || $pack eq "main") {
+	if ($export{$ident}) {
+	    "$prefix$ident";
 	}
 	else {
-	    $xlated = "$prefix${pack}::$ident";
+	    "$prefix${pack}::$ident";
 	}
     }
     elsif ($pack eq $oldpack) {
-	$xlated = "$prefix${newpack}::$ident";
+	"$prefix${newpack}::$ident";
     }
     else {
-	$xlated = "$prefix${pack}::$ident";
+	"$prefix${pack}::$ident";
     }
-
-    return $xlated;
 }
 __END__
 AUTOLOAD
@@ -172,8 +159,6 @@ BEGIN
 CORE
 DESTROY
 END
-INIT
-CHECK
 abs
 accept
 alarm
@@ -185,7 +170,6 @@ bless
 caller
 chdir
 chmod
-chomp
 chop
 chown
 chr
@@ -217,7 +201,6 @@ eof
 eq
 eval
 exec
-exists
 exit
 exp
 fcntl
@@ -277,12 +260,10 @@ link
 listen
 local
 localtime
-lock
 log
 lstat
 lt
 m
-map
 mkdir
 msgctl
 msgget
@@ -298,21 +279,16 @@ open
 opendir
 or
 ord
-our
 pack
 package
 pipe
 pop
-pos
 print
 printf
-prototype
 push
 q
 qq
-qr
 quotemeta
-qu
 qw
 qx
 rand
@@ -372,15 +348,12 @@ sub
 substr
 symlink
 syscall
-sysopen
 sysread
-sysseek
 system
 syswrite
 tell
 telldir
 tie
-tied
 time
 times
 tr
