@@ -44,7 +44,4 @@ $diff = time - $start_time;
 # alarm time might be one second less than you said.
 is( $@, "ALARM!\n",             'alarm w/$SIG{ALRM} vs system()' );
 
-TODO: {
-    local $TODO = "alarm() can't stop a system call with \$SIG{ALRM} set";
-    ok( $diff == 3 || $diff == 2,   '   right time' );
-}
+ok( $diff == 3 || $diff == 2,   '   right time' );
