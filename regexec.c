@@ -358,6 +358,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     }
 
   restart:
+    if (end_shift < 0)
+	end_shift = 0; /* can happen when strend == strpos */
     if (flags & REXEC_SCREAM) {
 	SV *c = prog->check_substr;
 	char *strbeg = SvPVX(sv);	/* XXXX Assume PV_force() on SCREAM! */
