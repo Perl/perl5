@@ -4,68 +4,53 @@ require Exporter;
 
 @ISA = (Exporter);
 @EXPORT = qw(wrap);
-@EXPORT_OK = qw($columns);
+@EXPORT_OK = qw($columns $tabstop);
 
-$VERSION = 97.011701;
+$VERSION = "97.02";	# not a date
 
 use vars qw($VERSION $columns $debug);
 use strict;
 
 BEGIN	{
-	$columns = 76;  # <= screen width
-	$debug = 0;
+    $columns = 76;  # <= screen width
+    $debug = 0;
 }
 
-use Text::Tabs qw(expand unexpand);
+use Text::Tabs qw(expand unexpand $tabstop);
 
 sub wrap
 {
-	my ($ip, $xp, @t) = @_;
+    my ($ip, $xp, @t) = @_;
 
-	my $r = "";
-	my $t = expand(join(" ",@t));
-	my $lead = $ip;
-	my $ll = $columns - length(expand($lead)) - 1;
-	my $nl = "";
+    my @rv;
+    my $t = expand(join(" ",@t));
 
-	# remove up to a line length of things that aren't
-	# new lines and tabs.
+    my $lead = $ip;
+    my $ll = $columns - length(expand($lead)) - 1;
+    my $nl = "";
 
-	if ($t =~ s/^([^\n]{0,$ll})(\s|\Z(?!\n))//xm) {
-
-		# accept it.
-		$r .= unexpand($lead . $1);
-
-		# recompute the leader
-		$lead = $xp;
-		$ll = $columns - length(expand($lead)) - 1;
-		$nl = $2;
-
-		# repeat the above until there's none left
-		while ($t) {
-			if ( $t =~ s/^([^\n]{0,$ll})(\s|\Z(?!\n))//xm ) {
-				print "\$2 is '$2'\n" if $debug;
-				$nl = $2;
-				$r .= unexpand("\n" . $lead . $1);
-			} elsif ($t =~ s/^([^\n]{$ll})//) {
-				$nl = "\n";
-				$r .= unexpand("\n" . $lead . $1);
-			}
-		}
-		$r .= $nl;
-	} 
-
-	die "couldn't wrap '$t'" 
-		if length($t) > $ll;
-
-	print "-----------$r---------\n" if $debug;
-
-	print "Finish up with '$lead', '$t'\n" if $debug;
-
-	$r .= $lead . $t if $t ne "";
-
-	print "-----------$r---------\n" if $debug;;
-	return $r;
+    $t =~ s/^\s+//;
+    while(length($t) > $ll) {
+	# remove up to a line length of things that
+	# aren't new lines and tabs.
+	if ($t =~ s/^([^\n]{0,$ll})(\s|\Z(?!\n))//) {
+	    my ($l,$r) = ($1,$2);
+	    $l =~ s/\s+$//;
+	    print "WRAP  $lead$l..($r)\n" if $debug;
+	    push @rv, unexpand($lead . $l), "\n";
+		
+	} elsif ($t =~ s/^([^\n]{$ll})//) {
+	    print "SPLIT $lead$1..\n" if $debug;
+	    push @rv, unexpand($lead . $1),"\n";
+	}
+	# recompute the leader
+	$lead = $xp;
+	$ll = $columns - length(expand($lead)) - 1;
+	$t =~ s/^\s+//;
+    } 
+    print "TAIL  $lead$t\n" if $debug;
+    push @rv, $lead.$t if $t ne "";
+    return join '', @rv;
 }
 
 1;
@@ -81,9 +66,10 @@ Text::Wrap - line wrapping to form simple paragraphs
 
 	print wrap($initial_tab, $subsequent_tab, @text);
 
-	use Text::Wrap qw(wrap $columns);
+	use Text::Wrap qw(wrap $columns $tabstop);
 
 	$columns = 132;
+	$tabstop = 4;
 
 =head1 DESCRIPTION
 
@@ -102,7 +88,7 @@ should be set to the full width of your output device.
 
 It's not clear what the correct behavior should be when Wrap() is
 presented with a word that is longer than a line.  The previous 
-behavior was to die.  Now the word is split at line-length.
+behavior was to die.  Now the word is now split at line-length.
 
 =head1 AUTHOR
 
