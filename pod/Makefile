@@ -5,6 +5,7 @@ PERL = ../miniperl
 
 POD = 	\
 	perl.pod	\
+	perlapio.pod	\
 	perlbook.pod	\
 	perlbot.pod	\
 	perlcall.pod	\
@@ -16,6 +17,7 @@ POD = 	\
 	perlform.pod	\
 	perlfunc.pod	\
 	perlguts.pod	\
+	perli18n.pod	\
 	perlipc.pod	\
 	perllol.pod	\
 	perlmod.pod	\
@@ -39,6 +41,7 @@ POD = 	\
 
 MAN = 	\
 	perl.man	\
+	perlapio.man	\
 	perlbook.man	\
 	perlbot.man	\
 	perlcall.man	\
@@ -50,6 +53,7 @@ MAN = 	\
 	perlform.man	\
 	perlfunc.man	\
 	perlguts.man	\
+	perli18n.man	\
 	perlipc.man	\
 	perllol.man	\
 	perlmod.man	\
@@ -73,6 +77,7 @@ MAN = 	\
 
 HTML = 	\
 	perl.html	\
+	perlapio.html	\
 	perlbook.html	\
 	perlbot.html	\
 	perlcall.html	\
@@ -84,6 +89,7 @@ HTML = 	\
 	perlform.html	\
 	perlfunc.html	\
 	perlguts.html	\
+	perli18n.html	\
 	perlipc.html	\
 	perllol.html	\
 	perlmod.html	\
@@ -107,6 +113,7 @@ HTML = 	\
 
 TEX = 	\
 	perl.tex	\
+	perlapio.tex	\
 	perlbook.tex	\
 	perlbot.tex	\
 	perlcall.tex	\
@@ -118,6 +125,7 @@ TEX = 	\
 	perlform.tex	\
 	perlfunc.tex	\
 	perlguts.tex	\
+	perli18n.tex	\
 	perlipc.tex	\
 	perllol.tex	\
 	perlmod.tex	\
