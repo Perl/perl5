@@ -1,5 +1,37 @@
 Revision history for Perl extension Test::Harness
 
+2.30        Thu Aug 14 20:04:00 CDT 2003
+    No functional changes in this version.  It's only to make some doc
+    tweaks, and bump up the version number in T:H:Straps.
+
+    [DOCUMENTATION]
+    - Changed Schwern to Andy as the maintainer.
+    - Incorporated the TODO file into Harness.pm proper.
+    - Cleaned up formatting in Test::Harness::Straps.
+
+2.29	    Wed Jul 17 14:08:00 CDT 2003
+    - Released as 2.29.
+
+2.28_91	    Sun Jul 13 00:10:00 CDT 2003
+    [ENHANCEMENTS]
+    - Added support for HARNESS_OK_SLOW.  This will make a significant
+      speedup for slower connections.
+    - Folded in some changes from bleadperl that spiff up the
+      failure reports.
+
+    [INTERNALS]
+    - Added some isa_ok() checks to the tests.
+    - All Test::Harness* modules are used by use_ok()
+    - Fixed the prototype for the canonfailed() function, not that
+      it matters since it's never called without parens.
+
+2.28_90	    Sat Jul 05 20:21:00 CDT 2003
+    [ENHANCEMENTS]
+    - Now, when you run a test harnessed, the numbers don't fly by one
+      at a time, one update per second.  This significantly speeds
+      up the run time for running thousands of tests.  *COUGH*
+      Regexp::Common *COUGH*
+
 2.28     Thu Apr 24 14:39:00 CDT 2003
     - No functional changes.
 
