@@ -1417,15 +1417,25 @@ Perl_magic_getsubstr(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
 {
-    STRLEN len;
-    char *tmps = SvPV(sv,len);
+    STRLEN littlelen;
+    char *tmps = SvPV(sv, littlelen);
+
     if (DO_UTF8(sv)) {
+	I32 bigoff = LvTARGOFF(sv);
+	I32 biglen = LvTARGLEN(sv);
+	U8 *s, *a, *b;
+
 	sv_utf8_upgrade(LvTARG(sv));
-	sv_insert(LvTARG(sv),LvTARGOFF(sv),LvTARGLEN(sv), tmps, len);
+	/* sv_utf8_upgrade() might have moved and/or resized
+	 * the string to be replaced, we must rediscover it. --jhi */
+	s = (U8*)SvPVX(LvTARG(sv));
+	a = utf8_hop(s, bigoff);
+	b = utf8_hop(a, biglen);
+	sv_insert(LvTARG(sv), a - s, b - a, tmps, littlelen);
 	SvUTF8_on(LvTARG(sv));
     }
     else
-        sv_insert(LvTARG(sv),LvTARGOFF(sv),LvTARGLEN(sv), tmps, len);
+        sv_insert(LvTARG(sv), LvTARGOFF(sv), LvTARGLEN(sv), tmps, littlelen);
 
     return 0;
 }
