@@ -799,7 +799,7 @@ Most importantly, CPAN includes around a thousand unbundled modules,
 some of which require a C compiler to build.  Major categories of
 modules are:
 
-=over
+=over 4
 
 =item *
 
@@ -890,7 +890,7 @@ Miscellaneous Modules
 Registered CPAN sites as of this writing include the following.
 You should try to choose one close to you:
 
-=over
+=over 4
 
 =item Africa
 

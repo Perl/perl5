@@ -451,8 +451,7 @@ specified in the extension then it will skip that file and continue on
 with the next one (if it exists).
 
 For a discussion of issues surrounding file permissions and B<-i>,
-see L<perlfaq5/Why does Perl let me delete read-only files?  Why
-does -i clobber protected files?  Isn't this a bug in Perl?>.
+see L<perlfaq5/Why does Perl let me delete read-only files?  Why does -i clobber protected files?  Isn't this a bug in Perl?>.
 
 You cannot use B<-i> to create directories or to strip extensions from
 files.

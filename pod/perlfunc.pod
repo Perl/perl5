@@ -2118,7 +2118,7 @@ integer overflow trigger a warning.
 There is no builtin C<import> function.  It is just an ordinary
 method (subroutine) defined (or inherited) by modules that wish to export
 names to another module.  The C<use> function calls the C<import> method
-for the package used.  See also L</use()>, L<perlmod>, and L<Exporter>.
+for the package used.  See also L</use>, L<perlmod>, and L<Exporter>.
 
 =item index STR,SUBSTR,POSITION
 
@@ -2337,7 +2337,8 @@ success, false otherwise.
 =item listen SOCKET,QUEUESIZE
 
 Does the same thing that the listen system call does.  Returns true if
-it succeeded, false otherwise.  See the example in L<perlipc/"Sockets: Client/Server Communication">.
+it succeeded, false otherwise.  See the example in 
+L<perlipc/"Sockets: Client/Server Communication">.
 
 =item local EXPR
 
@@ -2491,7 +2492,7 @@ such as using a unary C<+> to give perl some help:
     %hash = map { ("\L$_", 1) } @array  # this also works
     %hash = map {  lc($_), 1  } @array  # as does this.
     %hash = map +( lc($_), 1 ), @array  # this is EXPR and works!
-      
+
     %hash = map  ( lc($_), 1 ), @array  # evaluates to (1, @array)
 
 or to force an anon hash constructor use C<+{>
