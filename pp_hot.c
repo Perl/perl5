@@ -1886,19 +1886,39 @@ PP(pp_iter)
     }
 
     /* iterate array */
-    if (cx->blk_loop.iterix >= (av == PL_curstack ? cx->blk_oldsp : AvFILL(av)))
-	RETPUSHNO;
+    if (PL_op->op_private & OPpITER_REVERSED) {
+	/* In reverse, use itermax as the min :-)  */
+	if (cx->blk_loop.iterix <= 0)
+	    RETPUSHNO;
 
-    if (SvMAGICAL(av) || AvREIFY(av)) {
-	SV **svp = av_fetch(av, ++cx->blk_loop.iterix, FALSE);
-	if (svp)
-	    sv = *svp;
-	else
-	    sv = Nullsv;
+	if (SvMAGICAL(av) || AvREIFY(av)) {
+	    SV **svp = av_fetch(av, cx->blk_loop.iterix--, FALSE);
+	    if (svp)
+		sv = *svp;
+	    else
+		sv = Nullsv;
+	}
+	else {
+	    sv = AvARRAY(av)[cx->blk_loop.iterix--];
+	}
     }
     else {
-	sv = AvARRAY(av)[++cx->blk_loop.iterix];
+	if (cx->blk_loop.iterix >= (av == PL_curstack ? cx->blk_oldsp :
+				    AvFILL(av)))
+	    RETPUSHNO;
+
+	if (SvMAGICAL(av) || AvREIFY(av)) {
+	    SV **svp = av_fetch(av, ++cx->blk_loop.iterix, FALSE);
+	    if (svp)
+		sv = *svp;
+	    else
+		sv = Nullsv;
+	}
+	else {
+	    sv = AvARRAY(av)[++cx->blk_loop.iterix];
+	}
     }
+
     if (sv && SvREFCNT(sv) == 0) {
 	*itersvp = Nullsv;
 	Perl_croak(aTHX_ "Use of freed value in iteration");

@@ -546,6 +546,7 @@ $priv{$_}{16} = "TARGMY"
        "link", "symlink", "mkdir", "rmdir", "wait", "waitpid", "system",
        "exec", "kill", "getppid", "getpgrp", "setpgrp", "getpriority",
        "setpriority", "time", "sleep");
+$priv{$_}{4} = "REVERSED" for ("enteriter", "iter");
 @{$priv{"const"}}{8,16,32,64,128} = ("STRICT","ENTERED", '$[', "BARE", "WARN");
 $priv{"flip"}{64} = $priv{"flop"}{64} = "LINENUM";
 $priv{"list"}{64} = "GUESSED";

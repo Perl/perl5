@@ -6717,6 +6717,67 @@ Perl_peep(pTHX_ register OP *o)
 
 	    break;
 	}
+
+	case OP_REVERSE: {
+	    OP *ourmark, *theirmark, *ourlast, *iter;
+	    LISTOP *enter, *exlist;
+	    o->op_opt = 1;
+
+	    enter = (LISTOP *) o->op_next;
+	    if (!enter)
+		break;
+	    if (enter->op_type == OP_NULL) {
+		enter = (LISTOP *) enter->op_next;
+		if (!enter)
+		    break;
+	    }
+	    if (enter->op_type != OP_ENTERITER)
+		break;
+
+	    iter = enter->op_next;
+	    if (!iter || iter->op_type != OP_ITER)
+		break;
+	    
+	    exlist = (LISTOP *) enter->op_last;
+	    if (!exlist || exlist->op_type != OP_NULL
+		|| exlist->op_targ != OP_LIST)
+		break;
+
+	    if (exlist->op_last != o) {
+		/* Mmm. Was expecting to point back to this op.  */
+		break;
+	    }
+	    theirmark = exlist->op_first;
+	    if (!theirmark || theirmark->op_type != OP_PUSHMARK)
+		break;
+
+	    ourmark = ((LISTOP *)o)->op_first;
+	    if (!ourmark || ourmark->op_type != OP_PUSHMARK)
+		break;
+
+	    if (ourmark->op_next != o) {
+		/* There's something between the mark and the reverse, eg
+		   for (1, reverse (...))
+		   so no go.  */
+		break;
+	    }
+
+	    ourlast = ((LISTOP *)o)->op_last;
+	    if (!ourlast || ourlast->op_next != o)
+		break;
+
+	    /* We don't have control over who points to theirmark, so sacrifice
+	       ours.  */
+	    theirmark->op_next = ourmark->op_next;
+	    theirmark->op_flags = ourmark->op_flags;
+	    ourlast->op_next = (OP *) enter;
+	    op_null(ourmark);
+	    op_null(o);
+	    enter->op_private |= OPpITER_REVERSED;
+	    iter->op_private |= OPpITER_REVERSED;
+	    
+	    break;
+	}
 	
 	default:
 	    o->op_opt = 1;

@@ -180,6 +180,9 @@ Deprecated.  Use C<GIMME_V> instead.
   /* (lower bits may carry MAXARG) */
 #define OPpTARGET_MY		16	/* Target is PADMY. */
 
+/* Private for OP_ENTERITER and OP_ITER */
+#define OPpITER_REVERSED	4	/* for (reverse ...) */
+
 /* Private for OP_CONST */
 #define	OPpCONST_SHORTCIRCUIT	4	/* eg the constant 5 in (5 || foo) */
 #define	OPpCONST_STRICT		8	/* bearword subject to strict 'subs' */
