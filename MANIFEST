@@ -842,9 +842,11 @@ ext/Thread/README.threads		Notes about multithreading
 ext/threads/Changes		ithreads
 ext/Thread/Semaphore.pmx	Threadsafe semaphore
 ext/threads/Makefile.PL		ithreads
+ext/threads/hints/linux.pl	thread shared variables
 ext/Thread/specific.tx		Test thread-specific user data
 ext/threads/README		ithreads
 ext/threads/shared/Makefile.PL	thread shared variables
+ext/threads/shared/hints/linux.pl	thread shared variables
 ext/threads/shared/README	thread shared variables
 ext/threads/shared/shared.pm	thread shared variables
 ext/threads/shared/shared.xs	thread shared variables
