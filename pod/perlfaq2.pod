@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.24 $, $Date: 1998/07/20 23:40:28 $)
+perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.25 $, $Date: 1998/08/05 11:47:25 $)
 
 =head1 DESCRIPTION
 
@@ -11,22 +11,25 @@ related matters.
 =head2 What machines support Perl?  Where do I get it?
 
 The standard release of Perl (the one maintained by the perl
-development team) is distributed only in source code form.  You can
-find this at http://www.perl.com/CPAN/src/latest.tar.gz, which is a
-gzipped archive in POSIX tar format.  This source builds with no
-porting whatsoever on most Unix systems (Perl's native environment),
-as well as Plan 9, VMS, QNX, OS/2, and the Amiga.
+development team) is distributed only in source code form.  You
+can find this at http://www.perl.com/CPAN/src/latest.tar.gz, which
+in standard Internet format (a gzipped archive in POSIX tar format).
 
-Although it's rumored that the (imminent) 5.004 release may build
-on Windows NT, this is yet to be proven.  Binary distributions
-for 32-bit Microsoft systems and for Apple systems can be found
-http://www.perl.com/CPAN/ports/ directory.  Because these are not part of
-the standard distribution, they may and in fact do differ from the base
-Perl port in a variety of ways.  You'll have to check their respective
-release notes to see just what the differences are.  These differences
-can be either positive (e.g. extensions for the features of the particular
-platform that are not supported in the source release of perl) or negative
-(e.g. might be based upon a less current source release of perl).
+Perl builds and runs on a bewildering number of platforms.  Virtually
+all known and current Unix derivatives are supported (Perl's native
+platform), as are proprietary systems like VMS, DOS, OS/2, Windows,
+QNX, BeOS, and the Amiga.  There are also the beginnings of support
+for MPE/iX.
+
+Binary distributions for some proprietary platforms, including
+Apple systems can be found http://www.perl.com/CPAN/ports/ directory.
+Because these are not part of the standard distribution, they may
+and in fact do differ from the base Perl port in a variety of ways.
+You'll have to check their respective release notes to see just
+what the differences are.  These differences can be either positive
+(e.g. extensions for the features of the particular platform that
+are not supported in the source release of perl) or negative (e.g.
+might be based upon a less current source release of perl).
 
 A useful FAQ for Win32 Perl users is
 http://www.endcontsw.com/people/evangelo/Perl_for_Win32_FAQ.html
@@ -177,25 +180,41 @@ these are good, some are ok, but many aren't worth your money.  Tom
 Christiansen maintains a list of these books, some with extensive
 reviews, at http://www.perl.com/perl/critiques/index.html.
 
-The incontestably definitive reference book on Perl, written by the
-creator of Perl and his apostles, is now in its second edition and
-fourth printing.
+The incontestably definitive reference book on Perl, written by
+the creator of Perl, is now in its second edition:
 
     Programming Perl (the "Camel Book"):
 	Authors: Larry Wall, Tom Christiansen, and Randal Schwartz
         ISBN 1-56592-149-6      (English)
         ISBN 4-89052-384-7      (Japanese)
-	(French, German, and Italian translations also available)
+	URL: http://www.oreilly.com/catalog/pperl2/
+    (French, German, Italian, and Hungarian translations also
+    available)
 
-Note that O'Reilly books are color-coded: turquoise (some would call
-it teal) covers indicate perl5 coverage, while magenta (some would
-call it pink) covers indicate perl4 only.  Check the cover color
-before you buy!
+The companion volume to the Camel containing thousands
+of real-world examples, mini-tutorials, and complete programs
+(first premiering at the 1998 Perl Conference), is:
+
+    The Perl Cookbook (the "Ram Book"):
+	Authors: Tom Christiansen and Nathan Torkington, 
+		    with Foreword by Larry Wall
+	ISBN: 1-56592-243-3
+	URL:  http://perl.oreilly.com/cookbook/
 
 If you're already a hard-core systems programmer, then the Camel Book
 might suffice for you to learn Perl from.  But if you're not, check
-out I<Learning Perl> by Randal and Tom.  The second edition of "Llama
-Book" has a blue cover, and is updated for the 5.004 release of Perl.
+out:
+
+    Learning Perl (the "Llama Book"):
+	Authors: Randal Schwartz and Tom Christiansen 
+		    with Foreword by Larry Wall
+	ISBN: 1-56592-284-0
+	URL:  http://www.oreilly.com/catalog/lperl2/
+
+Despite the picture at the URL above, the second edition of "Llama
+Book" really has a blue cover, and is updated for the 5.004 release
+of Perl.  Various foreign language editions are available, including
+I<Learning Perl on Win32 Systems> (the Gecko Book).
 
 If you're not an accidental programmer, but a more serious and possibly
 even degreed computer scientist who doesn't need as much hand-holding as
@@ -211,8 +230,8 @@ See http://www.ora.com/ on the Web.
 What follows is a list of the books that the FAQ authors found personally
 useful.  Your mileage may (but, we hope, probably won't) vary.
 
-Recommended books on (or muchly on) Perl are the following.  
-Those marked with a star may be ordered from O'Reilly.
+Recommended books on (or muchly on) Perl follow; those marked with
+a star may be ordered from O'Reilly.
 
 =over
 
@@ -228,6 +247,7 @@ Those marked with a star may be ordered from O'Reilly.
 		
     *Learning Perl [2nd edition]
 	by Randal L. Schwartz and Tom Christiansen
+	    with foreword by Larry Wall
 
     *Learning Perl on Win32 Systems
 	by Randal L. Schwartz, Erik Olson, and Tom Christiansen,
@@ -273,9 +293,10 @@ The first and only periodical devoted to All Things Perl, I<The
 Perl Journal> contains tutorials, demonstrations, case studies,
 announcements, contests, and much more.  TPJ has columns on web
 development, databases, Win32 Perl, graphical programming, regular
-expressions, and networking, and sponsors the Obfuscated Perl Contest.
-It is published quarterly by Jon Orwant.  See http://www.tpj.com/ or
-send mail to subscriptions@tpj.com.
+expressions, and networking, and sponsors the Obfuscated Perl
+Contest.  It is published quarterly under the gentle hand of its
+editor, Jon Orwant.  See http://www.tpj.com/ or send mail to
+subscriptions@tpj.com.
 
 Beyond this, magazines that frequently carry high-quality articles
 on Perl are I<Web Techniques> (see http://www.webtechniques.com/),
@@ -296,9 +317,6 @@ following list is I<not> the complete list of CPAN mirrors.
   ftp://ftp.funet.fi/pub/languages/perl/CPAN/
   http://www.cs.ruu.nl/pub/PERL/CPAN/
   ftp://ftp.cs.colorado.edu/pub/perl/CPAN/
-
-http:/www.oasis.leo.org/perl/ has, amongst other things, source to
-versions 1 through 5 of Perl.
 
 =head2 What mailing lists are there for perl?
 
@@ -427,6 +445,8 @@ For more information, contact the The Perl Clinic:
     Web:    http://www.perl.co.uk/
     Email:  perl-support-info@perl.co.uk or Tim.Bunce@ig.co.uk
 
+See also www.perl.com for updates on training and support.
+
 =head2 Where do I send bug reports?
 
 If you are reporting a bug in the perl interpreter or the modules
@@ -443,7 +463,7 @@ Read the perlbug(1) man page (perl5.004 or later) for more information.
 
 =head2 What is perl.com?  perl.org?  The Perl Institute?
 
-The perl.com domain is Tom Christiansen's domain.  He created it as a
+The perl.com domain is managed by Tom Christiansen, who created it as a
 public service long before perl.org came about.  Despite the name, it's a
 pretty non-commercial site meant to be a clearinghouse for information
 about all things Perlian, accepting no paid advertisements, bouncy
@@ -454,9 +474,7 @@ Systems, a software-oriented subsidiary of O'Reilly and Associates.
 perl.org is the official vehicle for The Perl Institute.  The motto of
 TPI is "helping people help Perl help people" (or something like
 that).  It's a non-profit organization supporting development,
-documentation, and dissemination of perl.  Current directors of TPI
-include Larry Wall, Tom Christiansen, and Randal Schwartz, whom you
-may have heard of somewhere else around here.
+documentation, and dissemination of perl.  
 
 =head2 How do I learn about object-oriented Perl programming?
 

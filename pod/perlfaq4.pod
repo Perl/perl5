@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 1.25 $, $Date: 1998/07/16 22:49:55 $)
+perlfaq4 - Data Manipulation ($Revision: 1.26 $, $Date: 1998/08/05 12:04:00 $)
 
 =head1 DESCRIPTION
 
@@ -177,7 +177,11 @@ You can find the week of the year by dividing this by 7:
 
 Of course, this believes that weeks start at zero.  The Date::Calc
 module from CPAN has a lot of date calculation functions, including
-day of the year, week of the year, and so on. 
+day of the year, week of the year, and so on.   Note that not
+all business consider ``week 1'' to be the same; for example,
+American business often consider the first week with a Monday
+in it to be Work Week #1, despite ISO 8601, which consider 
+WW1 to be the frist week with a Thursday in it.
 
 =head2 How can I compare two dates and find the difference?
 
@@ -202,8 +206,9 @@ http://www.perl.com/CPAN/authors/David_Muir_Sharnoff/modules/Time/JulianDay.pm.g
 
 =head2 Does Perl have a year 2000 problem?  Is Perl Y2K compliant?
 
-Short answer: No, Perl does not have a Year 2000 problem.  Yes, Perl
-is Y2K compliant.
+Short answer: No, Perl does not have a Year 2000 problem.  Yes,
+Perl is Y2K compliant.  The programmers you're hired to use it,
+however, probably are not.
 
 Long answer: Perl is just as Y2K compliant as your pencil--no more,
 and no less.  The date and time functions supplied with perl (gmtime
@@ -471,7 +476,7 @@ Or more nicely written as:
 	s/\s+$//;
     }
 
-This idiom takes advantage of the C<for(each)> loop's aliasing
+This idiom takes advantage of the C<foreach> loop's aliasing
 behavior to factor out common code.  You can do this
 on several strings at once, or arrays, or even the 
 values of a hash if you use a slide:
