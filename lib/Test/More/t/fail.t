@@ -9,10 +9,12 @@ my $test_num = 1;
 # Utility testing functions.
 sub ok ($;$) {
     my($test, $name) = @_;
-    print "not " unless $test;
-    print "ok $test_num";
-    print " - $name" if defined $name;
-    print "\n";
+    my $ok = '';
+    $ok .= "not " unless $test;
+    $ok .= "ok $test_num";
+    $ok .= " - $name" if defined $name;
+    $ok .= "\n";
+    print $ok;
     $test_num++;
 }
 
@@ -20,7 +22,7 @@ sub ok ($;$) {
 package main;
 require Test::More;
 
-push @INC, 'lib/Test/More/';
+push @INC, 't', '.';
 require Catch;
 my($out, $err) = Catch::caught();
 
@@ -52,28 +54,29 @@ not ok 8 - require ALL::YOUR::BASE::ARE::BELONG::TO::US::wibble;
 OUT
 
     my $err_re = <<ERR;
-#     Failed test ($0 at line 29)
-#     Failed test ($0 at line 30)
+#     Failed test ($0 at line 31)
+#     Failed test ($0 at line 32)
 #          got: 'foo'
 #     expected: 'bar'
-#     Failed test ($0 at line 31)
-#     it should not be 'foo'
-#     but it is.
-#     Failed test ($0 at line 32)
+#     Failed test ($0 at line 33)
 #     it should not be 'foo'
 #     but it is.
 #     Failed test ($0 at line 34)
+#     it should not be 'foo'
+#     but it is.
+#     Failed test ($0 at line 36)
 #                   'foo'
 #     doesn't match '/that/'
-#     Failed test ($0 at line 36)
+#     Failed test ($0 at line 38)
 ERR
 
+   my $filename = quotemeta $0;
    my $more_err_re = <<ERR;
-#     Failed test \\($0 at line 38\\)
+#     Failed test \\($filename at line 40\\)
 #     Tried to use 'Hooble::mooble::yooble'.
 #     Error:  Can't locate Hooble.* in \\\@INC .*
 
-#     Failed test \\($0 at line 39\\)
+#     Failed test \\($filename at line 41\\)
 #     Tried to require 'ALL::YOUR::BASE::ARE::BELONG::TO::US::wibble'.
 #     Error:  Can't locate ALL.* in \\\@INC .*
 

@@ -1,0 +1,32 @@
+Revision history for Perl extension Test::More.
+
+0.07  Wed Jun 27 03:06:56 EDT 2001
+    - VMS and Win32 fixes.  Nothing was actually wrong, but the tests
+      had little problems.
+    - like()'s failure report wasn't always accurate
+
+0.06  Fri Jun 15 14:39:50 EDT 2001
+    - Guarding against $/ and -l
+    - Reformatted the way failed tests are reported to make them stand out
+      a bit better.
+    - Fixed tests without names
+
+0.05  Tue Jun 12 16:16:55 EDT 2001
+    * use Test::More no_plan; implemented
+
+0.04  Thu Jun  7 11:26:18 BST 2001
+    - minor bug in eq_set() with complex data structures
+      Thanks to Tatsuhiko Miyagawa for finding this.
+
+0.03  Tue Jun  5 19:59:59 BST 2001
+    - Fixed export problem in 5.004.
+    - prototyped the functions properly
+    * fixed bug with like() involving qr//
+
+0.02  Thu Apr  5 12:48:48 BST 2001
+    - Fixed Makefile.PL to work around MakeMaker bug that 'use's Test::Simple
+      instead of 'require'ing.
+
+0.01  Fri Mar 30 07:49:14 GMT 2001
+    - First working version
+

@@ -22,7 +22,7 @@ BEGIN {
 
 require Exporter;
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '0.06';
+$VERSION = '0.07';
 @ISA    = qw(Exporter);
 @EXPORT = qw(ok use_ok require_ok
              is isnt like
@@ -501,12 +501,8 @@ The $if condition is optional, but $why is not.
 
 =cut
 
-sub skip (&$$;$) {
-    my($tests, $how_many, $why, $if) = @_;
-
-    if( $if ) {
-
-    }
+sub skip {
+    die "skip() is UNIMPLEMENTED!";
 }
 
 =item B<todo>  * UNIMPLEMENTED *
@@ -533,8 +529,8 @@ whole suite dependent on that new feature.
 
 =cut
 
-sub todo (&$$;$) {
-    my($tests, $how_many, $name, $if) = @_;
+sub todo {
+    die "todo() is UNIMPLEMENTED!";
 }
 
 =head2 Comparision functions

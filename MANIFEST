@@ -1094,6 +1094,7 @@ lib/Test.pm			A simple framework for writing test scripts
 lib/Test/Harness.pm		A test harness
 lib/Test/Harness.t		See if Test::Harness works
 lib/Test/More.pm                More utilities for writing tests
+lib/Test/More/Changes		Test::More changes
 lib/Test/More/t/More.t          Test::More test, basic operation
 lib/Test/More/t/fail-like.t     Test::More test, like() and qr// bug
 lib/Test/More/t/fail.t          Test::More test, failing tests

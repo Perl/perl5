@@ -22,10 +22,12 @@ my $test_num = 1;
 # Utility testing functions.
 sub ok ($;$) {
     my($test, $name) = @_;
-    print "not " unless $test;
-    print "ok $test_num";
-    print " - $name" if defined $name;
-    print "\n";
+    my $ok = '';
+    $ok .= "not " unless $test;
+    $ok .= "ok $test_num";
+    $ok .= " - $name" if defined $name;
+    $ok .= "\n";
+    print $ok;
     $test_num++;
 }
 
@@ -33,7 +35,7 @@ sub ok ($;$) {
 package main;
 require Test::More;
 
-push @INC, 'lib/Test/More/';
+push @INC, 't', '.';
 require Catch;
 my($out, $err) = Catch::caught();
 
