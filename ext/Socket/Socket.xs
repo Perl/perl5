@@ -87,7 +87,7 @@ my_inet_aton(register const char *cp, struct in_addr *addr)
 	unsigned int parts[4];
 	register unsigned int *pp = parts;
 
-	if (!cp)
+       if (!cp || !*cp)
 		return 0;
 	for (;;) {
 		/*
