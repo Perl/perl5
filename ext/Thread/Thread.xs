@@ -114,6 +114,7 @@ threadstart(void *arg)
 			  thr, SvPEEK(TOPs)));
 
     sv = POPs;
+    SAVETMPS;
     PUTBACK;
     perl_call_sv(sv, G_ARRAY|G_EVAL);
     SPAGAIN;
@@ -138,6 +139,7 @@ threadstart(void *arg)
 	for (i = 1; i <= retval; i++, SP++)
 	    sv_setsv(*av_fetch(av, i, TRUE), SvREFCNT_inc(*SP));
     }
+    FREETMPS;
 
   finishoff:
 #if 0    

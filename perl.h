@@ -1939,9 +1939,10 @@ enum {		/* pass one of these to get_vtbl */
     want_vtbl_regexp,
     want_vtbl_collxfrm,
     want_vtbl_amagic,
-    want_vtbl_amagicelem,
+    want_vtbl_amagicelem
 #ifdef USE_THREADS
-    want_vtbl_mutex,
+    ,
+    want_vtbl_mutex
 #endif
 };
 

@@ -2365,6 +2365,7 @@ package(OP *o)
 	sv_setpv(PL_curstname,"<none>");
 	PL_curstash = Nullhv;
     }
+    PL_hints |= HINT_BLOCK_SCOPE;
     PL_copline = NOLINE;
     PL_expect = XSTATE;
 }
@@ -4395,6 +4396,10 @@ ck_fun(OP *o)
 					SVt_PVIO) );
 			op_free(kid);
 			kid = newop;
+		    }
+		    else if (kid->op_type == OP_READLINE) {
+			/* neophyte patrol: open(<FH>), close(<FH>) etc. */
+			bad_type(numargs, "HANDLE", op_desc[o->op_type], kid);
 		    }
 		    else {
 			kid->op_sibling = 0;
