@@ -121,6 +121,10 @@ C<pack('U0a*', ...)> can now be used to force a string to UTF8.
 
 prototype(\&) is now available.
 
+=item *
+
+There is now an UNTIE method.
+
 =back
 
 =head1 Modules and Pragmata
