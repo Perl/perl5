@@ -894,11 +894,13 @@ used.
 
 =item PERL5LIB
 
-A colon-separated list of directories in which to look for Perl library
+A list of directories in which to look for Perl library
 files before looking in the standard library and the current
 directory.  Any architecture-specific directories under the specified
 locations are automatically included if they exist.  If PERL5LIB is not
-defined, PERLLIB is used.
+defined, PERLLIB is used.  Directories are separated (like in PATH) by
+a colon on unixish platforms and by a semicolon on Windows (the proper
+path separator being given by the command C<perl -V:path_sep>).
 
 When running taint checks (either because the program was running setuid
 or setgid, or the B<-T> switch was used), neither variable is used.
@@ -1062,7 +1064,7 @@ and Win32 approximate equivalent:
 
 =item PERLLIB
 
-A colon-separated list of directories in which to look for Perl library
+A list of directories in which to look for Perl library
 files before looking in the standard library and the current directory.
 If PERL5LIB is defined, PERLLIB is not used.
 
