@@ -5224,6 +5224,8 @@ Perl_sv_bless(pTHX_ SV *sv, HV *stash)
 STATIC void
 S_sv_unglob(pTHX_ SV *sv)
 {
+    void *xpvmg;
+
     assert(SvTYPE(sv) == SVt_PVGV);
     SvFAKE_off(sv);
     if (GvGP(sv))
@@ -5235,6 +5237,13 @@ S_sv_unglob(pTHX_ SV *sv)
     sv_unmagic(sv, '*');
     Safefree(GvNAME(sv));
     GvMULTI_off(sv);
+
+    /* need to keep SvANY(sv) in the right arena */
+    xpvmg = new_XPVMG();
+    StructCopy(SvANY(sv), xpvmg, XPVMG);
+    del_XPVGV(SvANY(sv));
+    SvANY(sv) = xpvmg;
+
     SvFLAGS(sv) &= ~SVTYPEMASK;
     SvFLAGS(sv) |= SVt_PVMG;
 }
