@@ -123,7 +123,7 @@ endpwent();
 
 print "# max = $max, n = $n, perfect = ", scalar keys %perfect, "\n";
 
-if (keys %perfect == 0) {
+if (keys %perfect == 0 && $n) {
     $max++;
     print <<EOEX;
 #
