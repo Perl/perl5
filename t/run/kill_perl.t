@@ -22,9 +22,12 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+    require './test.pl';
 }
 
 use strict;
+
+my $Perl = which_perl;
 
 $|=1;
 
@@ -70,10 +73,10 @@ foreach my $prog (@prgs) {
 
     my $results;
     if ($^O eq 'MacOS') {
-        $results = `$^X -I::lib -MMac::err=unix $switch $tmpfile`;
+        $results = `$Perl -I::lib -MMac::err=unix $switch $tmpfile`;
     }
     else {
-        $results = `$^X "-I../lib" $switch $tmpfile 2>&1`;
+        $results = `$Perl "-I../lib" $switch $tmpfile 2>&1`;
     }
     my $status = $?;
 

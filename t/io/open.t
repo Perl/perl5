@@ -12,6 +12,8 @@ $Is_VMS = $^O eq 'VMS';
 
 plan tests => 95;
 
+my $Perl = which_perl();
+
 {
     unlink("afile") if -f "afile";
 
@@ -76,7 +78,7 @@ SKIP: {
     skip "open -| busted and noisy on VMS", 3 if $Is_VMS;
 
     ok( open(my $f, '-|', <<EOC),     'open -|' );
-    $^X -e "print qq(a row\n); print qq(another row\n)"
+    $Perl -e "print qq(a row\n); print qq(another row\n)"
 EOC
 
     my @rows = <$f>;
@@ -86,7 +88,7 @@ EOC
 
 {
     ok( open(my $f, '|-', <<EOC),     'open |-' );
-    $^X -pe "s/^not //"
+    $Perl -pe "s/^not //"
 EOC
 
     my @rows = <$f>;
@@ -169,7 +171,7 @@ SKIP: {
     skip "open -| busted and noisy on VMS", 3 if $Is_VMS;
 
     ok( open(local $f, '-|', <<EOC),  'open local $f, "-|", ...' );
-    $^X -e "print qq(a row\n); print qq(another row\n)"
+    $Perl -e "print qq(a row\n); print qq(another row\n)"
 EOC
     my @rows = <$f>;
 
@@ -179,7 +181,7 @@ EOC
 
 {
     ok( open(local $f, '|-', <<EOC),  'open local $f, "|-", ...' );
-    $^X -pe "s/^not //"
+    $Perl -pe "s/^not //"
 EOC
 
     my @rows = <$f>;
@@ -203,13 +205,13 @@ like( $@, qr/Bad filehandle:\s+afile/,          '       right error' );
 {
     local *F;
     for (1..2) {
-        ok( open(F, qq{$^X -le "print 'ok'"|}), 'open to pipe' );
+        ok( open(F, qq{$Perl -le "print 'ok'"|}), 'open to pipe' );
 	is(scalar <F>, "ok\n",  '       readline');
         ok( close F,            '       close' );
     }
 
     for (1..2) {
-        ok( open(F, "-|", qq{$^X -le "print 'ok'"}), 'open -|');
+        ok( open(F, "-|", qq{$Perl -le "print 'ok'"}), 'open -|');
         is( scalar <F>, "ok\n", '       readline');
 	ok( close F,            '       close' );
     }

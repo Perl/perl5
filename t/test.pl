@@ -263,4 +263,28 @@ sub BAILOUT {
 }
 
 
+# A somewhat safer version of the sometimes wrong $^X.
+BEGIN: {
+    eval {
+        require File::Spec;
+        require Config;
+        Config->import;
+    };
+    warn "test.pl had problems loading other modules: $@" if $@;
+}
+
+# We do this at compile time before the test might have chdir'd around
+# and make sure its absolute in case they do later.
+my $Perl = $^X;
+$Perl = File::Spec->rel2abs(File::Spec->catfile(File::Spec->curdir(), $Perl))
+               if $^X eq "perl$Config{_exe}";
+warn "Can't generate which_perl from $^X" unless -f $Perl;
+
+# For subcommands to use.
+$ENV{PERLEXE} = $Perl;
+
+sub which_perl {
+    return $Perl;
+}
+
 1;

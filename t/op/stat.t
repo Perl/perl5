@@ -11,6 +11,8 @@ use File::Spec;
 
 plan tests => 69;
 
+my $Perl = which_perl;
+
 $Is_Amiga   = $^O eq 'amigaos';
 $Is_Cygwin  = $^O eq 'cygwin';
 $Is_Dos     = $^O eq 'dos';
@@ -294,8 +296,8 @@ SKIP: {
 ok(-T 'op/stat.t',      '-T');
 ok(! -B 'op/stat.t',    '!-B');
 
-ok(-B $^X,      '-B');
-ok(! -T $^X,    '!-T');
+ok(-B $Perl,      '-B');
+ok(! -T $Perl,    '!-T');
 
 open(FOO,'op/stat.t');
 SKIP: {

@@ -1,8 +1,16 @@
 #!./perl
 
+BEGIN {
+    chdir 't';
+    @INC = '../lib';
+    require './test.pl';
+}
+
+my $Perl = which_perl;
+
 print "1..3\n";
 
-$x = `$^X -le "print 'ok';"`;
+$x = `$Perl -le "print 'ok';"`;
 
 if ($x eq "ok\n") {print "ok 1\n";} else {print "not ok 1\n";}
 
@@ -10,11 +18,11 @@ open(try,">Comp.script") || (die "Can't open temp file.");
 print try 'print "ok\n";'; print try "\n";
 close try;
 
-$x = `$^X Comp.script`;
+$x = `$Perl Comp.script`;
 
 if ($x eq "ok\n") {print "ok 2\n";} else {print "not ok 2\n";}
 
-$x = `$^X <Comp.script`;
+$x = `$Perl <Comp.script`;
 
 if ($x eq "ok\n") {print "ok 3\n";} else {print "not ok 3\n";}
 

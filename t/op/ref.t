@@ -2,7 +2,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = qw(.);
+    @INC = qw(. ../lib);
 }
 
 print "1..62\n";
