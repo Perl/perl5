@@ -1553,7 +1553,6 @@ sub finish_list {
 #
 sub htmlify {
     my($compact, $heading) = @_;
-    my($compact, $heading) = @_;
 
     if ($compact) {
       $heading =~ /^(\w+)/;
