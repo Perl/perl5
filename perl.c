@@ -908,6 +908,9 @@ S_parse_body(pTHX_ va_list args)
 #  ifdef USE_LONG_DOUBLE
 		sv_catpv(PL_Sv," USE_LONG_DOUBLE");
 #  endif
+#  ifdef USE_LARGE_FILES
+		sv_catpv(PL_Sv," USE_LARGE_FILES");
+#  endif
 #  ifdef USE_SOCKS
 		sv_catpv(PL_Sv," USE_SOCKS");
 #  endif
