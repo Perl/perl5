@@ -158,6 +158,7 @@ char *class;
     Thread savethread;
     int i;
     SV *sv;
+    sigset_t fullmask, oldmask;
     
     savethread = thr;
     sv = newSVpv("", 0);
@@ -203,14 +204,27 @@ char *class;
     MUTEX_LOCK(&nthreads_mutex);
     nthreads++;
     MUTEX_UNLOCK(&nthreads_mutex);
+    sigfillset(&fullmask);
+    if (sigprocmask(SIG_SETMASK, &fullmask, &oldmask) == -1)
+	croak("panic: sigprocmask");
     if (pthread_create(&self, NULL, threadstart, (void*) thr))
 	return NULL;	/* XXX should clean up first */
     /* Go */
     MUTEX_UNLOCK(threadstart_mutexp);
+    if (sigprocmask(SIG_SETMASK, &oldmask, 0))
+	croak("panic: sigprocmask");
 #endif
     sv = newSViv(++threadnum);
     sv_magic(sv, oursv, '~', 0, 0);
     return sv_bless(newRV(sv), gv_stashpv(class, TRUE));
+}
+
+static Signal_t
+handle_thread_signal(sig)
+int sig;
+{
+    char c = (char) sig;
+    write(sig_pipe[0], &c, 1);
 }
 
 MODULE = Thread		PACKAGE = Thread
@@ -345,3 +359,36 @@ CODE:
 	}
 	COND_BROADCAST(MgCONDP(mg));
 	MUTEX_UNLOCK(MgMUTEXP(mg));
+
+MODULE = Thread		PACKAGE = Thread::Signal
+
+void
+kill_sighandler_thread()
+    PPCODE:
+	write(sig_pipe[0], "\0", 1);
+	PUSHs(&sv_yes);
+
+void
+init_thread_signals()
+    PPCODE:
+	sighandlerp = handle_thread_signal;
+	if (pipe(sig_pipe) == -1)
+	    XSRETURN_UNDEF;
+	PUSHs(&sv_yes);
+
+SV *
+await_signal()
+    PREINIT:
+	char c;
+	ssize_t ret;
+    CODE:
+	do {
+	    ret = read(sig_pipe[1], &c, 1);
+	} while (ret == -1 && errno == EINTR);
+	if (ret == -1)
+	    croak("panic: await_signal");
+	if (ret == 0)
+	    XSRETURN_UNDEF;
+	RETVAL = c ? psig_ptr[c] : &sv_no;
+    OUTPUT:
+	RETVAL
