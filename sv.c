@@ -2646,37 +2646,37 @@ sv_clear(register SV *sv)
 	if (defstash) {		/* Still have a symbol table? */
 	    djSP;
 	    GV* destructor;
+	    HV* stash;
+	    SV ref;
 
-	    ENTER;
-	    SAVEFREESV(SvSTASH(sv));
+	    Zero(&ref, 1, SV);
+	    sv_upgrade(&ref, SVt_RV);
+	    SvROK_on(&ref);
+	    SvREADONLY_on(&ref);	/* DESTROY() could be naughty */
+	    SvREFCNT(&ref) = 1;
 
-	    destructor = gv_fetchmethod(SvSTASH(sv), "DESTROY");
-	    if (destructor) {
-		SV ref;
+	    do {
+		stash = SvSTASH(sv);
+		destructor = gv_fetchmethod(SvSTASH(sv), "DESTROY");
+		if (destructor) {
+		    ENTER;
+		    SvRV(&ref) = SvREFCNT_inc(sv);
+		    EXTEND(SP, 2);
+		    PUSHMARK(SP);
+		    PUSHs(&ref);
+		    PUTBACK;
+		    perl_call_sv((SV*)GvCV(destructor),
+				 G_DISCARD|G_EVAL|G_KEEPERR);
+		    SvREFCNT(sv)--;
+		    LEAVE;
+		}
+	    } while (SvOBJECT(sv) && SvSTASH(sv) != stash);
 
-		Zero(&ref, 1, SV);
-		sv_upgrade(&ref, SVt_RV);
-		SvRV(&ref) = SvREFCNT_inc(sv);
-		SvROK_on(&ref);
-		SvREFCNT(&ref) = 1;	/* Fake, but otherwise
-					   creating+destructing a ref
-					   leads to disaster. */
-
-		EXTEND(SP, 2);
-		PUSHMARK(SP);
-		PUSHs(&ref);
-		PUTBACK;
-		perl_call_sv((SV*)GvCV(destructor),
-			     G_DISCARD|G_EVAL|G_KEEPERR);
-		del_XRV(SvANY(&ref));
-		SvREFCNT(sv)--;
-	    }
-
-	    LEAVE;
+	    del_XRV(SvANY(&ref));
 	}
-	else
-	    SvREFCNT_dec(SvSTASH(sv));
+
 	if (SvOBJECT(sv)) {
+	    SvREFCNT_dec(SvSTASH(sv));	/* possibly of changed persuasion */
 	    SvOBJECT_off(sv);	/* Curse the object. */
 	    if (SvTYPE(sv) != SVt_PVIO)
 		--sv_objcount;	/* XXX Might want something more general */
