@@ -129,15 +129,6 @@ case "$osname" in
 	;;
 esac
 
-case "$usedl" in
-define) testreqext="$testreqext \$(DYNALOADER)" ;;
-esac
-
-case "$DPERL_EXTERNAL_GLOB" in
-"") ;;
-*) testreqext="$testreqext \$(EXTGLOB)" ;;
-esac
-
 echo "Extracting Makefile (with variable substitutions)"
 $spitshell >Makefile <<!GROK!THIS!
 # Makefile.SH
@@ -196,9 +187,6 @@ static_ext = $static_list
 nonxs_ext = $nonxs_list
 ext = \$(dynamic_ext) \$(static_ext) \$(nonxs_ext)
 DYNALOADER = lib/auto/DynaLoader/DynaLoader\$(LIB_EXT)
-EXTGLOB = lib/auto/File/Glob/Glob\$(DLSUFFIX)
-
-TESTREQEXT = $testreqext
 
 libs = $perllibs $cryptlib
 
@@ -905,16 +893,16 @@ _test:
 	fi
 	@echo "Ran tests" > t/rantests
 
-test check: test_prep $(TESTREQEXT)
+test check: test_prep
 	PERL=./perl $(MAKE) _test
 
-test_tty: test_prep $(TESTREQEXT)
+test_tty: test_prep
 	PERL=./perl $(MAKE) _test_tty
 
-test_notty: test_prep $(TESTREQEXT)
+test_notty: test_prep
 	PERL=./perl $(MAKE) _test_notty
 
-utest ucheck: test_prep $(TESTREQEXT)
+utest ucheck: test_prep
 	PERL=./perl UTF8=-utf8 $(MAKE) _test
 
 test-prep:	test_prep
@@ -928,13 +916,13 @@ test-notty:	test_notty
 test_prep.third: test_prep perl.third
 	PERL=./perl.third $(MAKE) _test_prep
 
-test.third check.third:	test_prep.third perl.third $(TESTREQEXT)
+test.third check.third:	test_prep.third perl.third
 	PERL=./perl.third PERL_DEBUG=PERL_3LOG=1 $(MAKE) _test
 
-utest.third ucheck.third: test_prep.third perl.third $(TESTREQEXT)
+utest.third ucheck.third: test_prep.third perl.third
 	PERL=./perl.third PERL_DEBUG=PERL_3LOG=1UTF=-utf8 $(MAKE) _test
 
-test_notty.third: test_prep.third perl.third $(TESTREQEXT)
+test_notty.third: test_prep.third perl.third
 	PERL=./perl.third $(MAKE) PERL_DEBUG=PERL_3LOG=1 _test_notty
 
 # Can't depend on lib/Config.pm because that might be where miniperl
