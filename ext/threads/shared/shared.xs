@@ -329,6 +329,13 @@ Perl_sharedsv_associate(pTHX_ SV **psv, SV *ssv, shared_sv *data)
 		mg->mg_flags |= (MGf_COPY|MGf_DUP);
 		SvREFCNT_inc(ssv);
 		SvREFCNT_dec(obj);
+		if(SvOBJECT(ssv)) {
+		  STRLEN len;
+		  char* stash_ptr = SvPV((SV*) SvSTASH(ssv), len);
+		  HV* stash = gv_stashpvn(stash_ptr, len, TRUE);
+		  SvOBJECT_on(sv);
+		  SvSTASH(sv) = (HV*)SvREFCNT_inc(stash);
+		}
 	    }
 	    break;
 
@@ -400,6 +407,7 @@ sharedsv_scalar_mg_get(pTHX_ SV *sv, MAGIC *mg)
 	    sv_setsv_nomg(sv, &PL_sv_undef);
 	    SvRV(sv) = obj;
 	    SvROK_on(sv);
+	    
 	}
 	else {
 	    sv_setsv_nomg(sv, SHAREDSvPTR(shared));
@@ -422,6 +430,11 @@ sharedsv_scalar_store(pTHX_ SV *sv, shared_sv *shared)
 	    tmp = newRV(SHAREDSvPTR(target));
 	    sv_setsv_nomg(SHAREDSvPTR(shared), tmp);
 	    SvREFCNT_dec(tmp);
+	    if(SvOBJECT(SvRV(sv))) {
+	      SV* fake_stash = newSVpv(HvNAME(SvSTASH(SvRV(sv))),0);
+	      SvOBJECT_on(SHAREDSvPTR(target));
+	      SvSTASH(SHAREDSvPTR(target)) = (HV*)fake_stash;
+	    }
 	    CALLER_CONTEXT;
 	}
 	else {
@@ -429,9 +442,14 @@ sharedsv_scalar_store(pTHX_ SV *sv, shared_sv *shared)
 	}
     }
     else {
-		SvTEMP_off(sv);
+        SvTEMP_off(sv);
 	SHARED_CONTEXT;
 	sv_setsv_nomg(SHAREDSvPTR(shared), sv);
+	if(SvOBJECT(sv)) {
+	  SV* fake_stash = newSVpv(HvNAME(SvSTASH(sv)),0);
+	  SvOBJECT_on(SHAREDSvPTR(shared));
+	  SvSTASH(SHAREDSvPTR(shared)) = (HV*)fake_stash;
+	}
 	CALLER_CONTEXT;
     }
     if (!allowed) {
@@ -1058,6 +1076,48 @@ cond_broadcast_enabled(SV *ref)
 	    Perl_warner(aTHX_ packWARN(WARN_THREADS),
 			    "cond_broadcast() called on unlocked variable");
 	COND_BROADCAST(&shared->user_cond);
+
+
+SV*
+bless(SV* ref, ...);
+	PROTOTYPE: $;$
+	CODE:
+        {
+	  HV* stash;
+	  shared_sv* shared;
+	  if (items == 1)
+	    stash = CopSTASH(PL_curcop);
+	  else {
+	    SV* ssv = ST(1);
+	    STRLEN len;
+	    char *ptr;
+	    
+	    if (ssv && !SvGMAGICAL(ssv) && !SvAMAGIC(ssv) && SvROK(ssv))
+	      Perl_croak(aTHX_ "Attempt to bless into a reference");
+	    ptr = SvPV(ssv,len);
+	    if (ckWARN(WARN_MISC) && len == 0)
+	      Perl_warner(aTHX_ packWARN(WARN_MISC),
+			  "Explicit blessing to '' (assuming package main)");
+	    stash = gv_stashpvn(ptr, len, TRUE);
+	  }
+	  SvREFCNT_inc(ref);
+	  (void)sv_bless(ref, stash);
+	  RETVAL = ref;
+	  shared = Perl_sharedsv_find(aTHX_ ref);
+	  if(shared) {
+	    dTHXc;
+	    ENTER_LOCK;
+	    SHARED_CONTEXT;
+	    {
+	      SV* fake_stash = newSVpv(HvNAME(stash),0);
+	      (void)sv_bless(SHAREDSvPTR(shared),(HV*)fake_stash);
+	    }
+	    CALLER_CONTEXT;
+	    LEAVE_LOCK;
+	  }
+	}
+    	OUTPUT:
+	RETVAL		
 
 #endif /* USE_ITHREADS */
 
