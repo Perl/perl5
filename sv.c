@@ -355,8 +355,6 @@ do_clean_named_objs(SV *sv)
 	    DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning named glob object:\n "), sv_dump(sv));)
 	    SvREFCNT_dec(sv);
 	}
-	else if (GvSV(sv))
-	    do_clean_objs(GvSV(sv));
     }
 }
 #endif
@@ -365,10 +363,11 @@ void
 sv_clean_objs(void)
 {
     in_clean_objs = TRUE;
+    visit(FUNC_NAME_TO_PTR(do_clean_objs));
 #ifndef DISABLE_DESTRUCTOR_KLUDGE
+    /* some barnacles may yet remain, clinging to typeglobs */
     visit(FUNC_NAME_TO_PTR(do_clean_named_objs));
 #endif
-    visit(FUNC_NAME_TO_PTR(do_clean_objs));
     in_clean_objs = FALSE;
 }
 
