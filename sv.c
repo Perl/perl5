@@ -5973,7 +5973,27 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
     (void)SvUPGRADE(sv, SVt_PV);
 
     SvSCREAM_off(sv);
-    SvPOK_only(sv);    /* Validate pointer */
+
+    if (append) {
+	if (PerlIO_isutf8(fp)) {
+	    if (!SvUTF8(sv)) {
+		sv_utf8_upgrade_nomg(sv);
+		sv_pos_u2b(sv,&append,0);
+	    }
+	} else if (SvUTF8(sv)) {
+	    SV *tsv = NEWSV(0,0);
+	    sv_gets(tsv, fp, 0);
+	    sv_utf8_upgrade_nomg(tsv);
+	    SvCUR_set(sv,append);
+	    sv_catsv(sv,tsv);
+	    sv_free(tsv);
+	    goto return_string_or_null;
+	}
+    }
+
+    SvPOK_only(sv);
+    if (PerlIO_isutf8(fp))
+	SvUTF8_on(sv);
 
     if (PL_curcop == &PL_compiling) {
 	/* we always read code in line mode */
@@ -6016,7 +6036,7 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
 #endif
       SvCUR_set(sv, bytesread += append);
       buffer[bytesread] = '\0';
-      goto check_utf8_and_return;
+      goto return_string_or_null;
     }
     else if (RsPARA(PL_rs)) {
 	rsptr = "\n\n";
@@ -6269,12 +6289,7 @@ screamer2:
 	}
     }
 
-check_utf8_and_return:
-    if (PerlIO_isutf8(fp))
-	SvUTF8_on(sv);
-    else
-	SvUTF8_off(sv);
-
+return_string_or_null:
     return (SvCUR(sv) - append) ? SvPVX(sv) : Nullch;
 }
 

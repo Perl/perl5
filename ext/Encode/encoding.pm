@@ -1,5 +1,5 @@
 package encoding;
-our $VERSION = do { my @r = (q$Revision: 1.41 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.42 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use strict;
@@ -62,19 +62,19 @@ sub import {
 			   $status ;
 		       });
 	};
-    }	$DEBUG and  warn "Filter installed";
+    }	$DEBUG and warn "Filter installed";
     for my $h (qw(STDIN STDOUT)){
 	if ($arg{$h}){
 	    unless (defined find_encoding($arg{$h})) {
 		require Carp;
 		Carp::croak("Unknown encoding for $h, '$arg{$h}'");
 	    }
-	    eval { binmode($h, ":encoding($arg{$h})") };
+	    eval { binmode($h, ":raw :encoding($arg{$h})") };
 	}else{
 	    unless (exists $arg{$h}){
 		eval { 
 		    no warnings 'uninitialized';
-		    binmode($h, ":encoding($name)");
+		    binmode($h, ":raw :encoding($name)");
 		};
 	    }
 	}
@@ -93,8 +93,8 @@ sub unimport{
 	binmode(STDIN,  ":raw");
 	binmode(STDOUT, ":raw");
     }else{
-    binmode(STDIN);
-    binmode(STDOUT);
+	binmode(STDIN);
+	binmode(STDOUT);
     }
     if ($INC{"Filter/Util/Call.pm"}){
 	eval { filter_del() };

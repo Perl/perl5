@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 1.54 2003/02/20 14:42:34 dankogai Exp dankogai $
+ $Id: Encode.xs,v 1.55 2003/02/28 01:40:27 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -78,11 +78,15 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 
     if (offset) {
       s += *offset;
-      slen -= *offset;
+      if (slen > *offset){ /* safeguard against slen overflow */
+	  slen -= *offset;
+      }else{
+	  slen = 0;
+      }
       tlen = slen;
     }
 
-    if (slen <= 0){
+    if (slen == 0){
 	SvCUR_set(dst, 0);
 	SvPOK_only(dst);
 	goto ENCODE_END;

@@ -375,6 +375,18 @@ Perl_op_clear(pTHX_ OP *o)
     case OP_CONST:
 	SvREFCNT_dec(cSVOPo->op_sv);
 	cSVOPo->op_sv = Nullsv;
+#ifdef USE_ITHREADS
+	/** Bug #15654
+	  Even if op_clear does a pad_free for the target of the op,
+	  pad_free doesn't actually remove the sv that exists in the bad
+	  instead it lives on. This results in that it could be reused as 
+	  a target later on when the pad was reallocated.
+	**/
+        if(o->op_targ) {
+          pad_swipe(o->op_targ,1);
+          o->op_targ = 0;
+        }
+#endif
 	break;
     case OP_GOTO:
     case OP_NEXT:

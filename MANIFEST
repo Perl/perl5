@@ -251,6 +251,7 @@ ext/Encode/README		Encode extension
 ext/Encode/Symbol/Makefile.PL	Encode extension
 ext/Encode/Symbol/Symbol.pm	Encode extension
 ext/Encode/t/Aliases.t		test script
+ext/Encode/t/Mod_EUCJP.pm	module that t/enc_module.enc uses
 ext/Encode/t/at-cn.t		test script
 ext/Encode/t/at-tw.t		test script
 ext/Encode/t/big5-eten.enc	test data
@@ -261,6 +262,8 @@ ext/Encode/t/CJKT.t		test script
 ext/Encode/t/Encode.t		test script
 ext/Encode/t/Encoder.t		test script
 ext/Encode/t/enc_eucjp.t	test script
+ext/Encode/t/enc_module.enc	test data for t/enc_module.t
+ext/Encode/t/enc_module.t	test script
 ext/Encode/t/enc_utf8.t		test script
 ext/Encode/t/encoding.t		test script
 ext/Encode/t/fallback.t		test script
