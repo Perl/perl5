@@ -3,6 +3,7 @@ print "1..19\n";
 BEGIN {
     if (ord("A") == 193) {
 	print "1..0 # encoding pragma does not support EBCDIC platforms\n";
+	exit(0);
     }
 }
 
