@@ -49,7 +49,7 @@ for (@prgs){
                   `MCR $^X $switch $tmpfile` :
 		  $Is_MSWin32 ?
                   `.\\perl -I../lib $switch $tmpfile 2>&1` :
-                  `sh -c './perl $switch $tmpfile' 2>&1`;
+                  `./perl $switch $tmpfile 2>&1`;
     my $status = $?;
     $results =~ s/\n+$//;
     # allow expected output to be written as if $prog is on STDIN

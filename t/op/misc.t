@@ -25,17 +25,20 @@ for (@prgs){
 	$switch = $1;
     }
     my($prog,$expected) = split(/\nEXPECT\n/, $_);
+    open TEST, ">$tmpfile" or die "Cannot open $tmpfile: $!";
+    print TEST $prog, "\n";
+    close TEST or die "Cannot close $tmpfile: $!";
+
     if ($^O eq 'MSWin32') {
-      open TEST, "| .\\perl -I../lib $switch >$tmpfile 2>&1";
+      $results = `.\\perl -I../lib $switch $tmpfile 2>&1`;
     }
     else {
-      open TEST, "| sh -c './perl $switch' >$tmpfile 2>&1";
+      $results = `./perl $switch $tmpfile 2>&1`;
     }
-    print TEST $prog, "\n";
-    close TEST;
     $status = $?;
-    $results = `$CAT $tmpfile`;
     $results =~ s/\n+$//;
+    $results =~ s/at\s+misctmp\d+\s+line/at - line/g;
+    $results =~ s/of\s+misctmp\d+\s+aborted/of - aborted/g;
 # bison says 'parse error' instead of 'syntax error',
 # various yaccs may or may not capitalize 'syntax'.
     $results =~ s/^(syntax|parse) error/syntax error/mig;
@@ -77,7 +80,7 @@ $x=0x0eabcd; print $x->ref;
 EXPECT
 Can't call method "ref" without a package or object reference at - line 1.
 ########
-chop ($str .= <STDIN>);
+chop ($str .= <DATA>);
 ########
 close ($banana);
 ########
@@ -89,7 +92,7 @@ eval {sub bar {print "In bar";}}
 ########
 system './perl -ne "print if eof" /dev/null'
 ########
-chop($file = <>);
+chop($file = <DATA>);
 ########
 package N;
 sub new {my ($obj,$n)=@_; bless \$n}  
