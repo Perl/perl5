@@ -2276,12 +2276,12 @@ win32_open(const char *path, int flag, ...)
 {
     va_list ap;
     int pmode;
+    WCHAR wBuffer[MAX_PATH];
 
     va_start(ap, flag);
     pmode = va_arg(ap, int);
     va_end(ap);
 
-    WCHAR wBuffer[MAX_PATH];
     if (stricmp(path, "/dev/null")==0)
 	path = "NUL";
 

@@ -102,6 +102,7 @@ dl_load_file(filename,flags=0)
     int			flags
     PREINIT:
     CODE:
+  {
     WCHAR wfilename[MAX_PATH];
     DLDEBUG(1,PerlIO_printf(PerlIO_stderr(),"dl_load_file(%s):\n", filename));
     if (dl_static_linked(filename) == 0) {
@@ -122,7 +123,7 @@ dl_load_file(filename,flags=0)
 		  OS_Error_String(PERL_OBJECT_THIS)) ;
     else
 	sv_setiv( ST(0), (IV)RETVAL);
-
+  }
 
 void *
 dl_find_symbol(libhandle, symbolname)
