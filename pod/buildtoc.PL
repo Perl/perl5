@@ -160,6 +160,7 @@ if (-d "pod") {
     perlepoc             
     perlhpux            
     perlmachten         
+    perlmacos
     perlmpeix         
     perlos2             
     perlos390           
@@ -179,6 +180,7 @@ if (-d "pod") {
     perlepoc             
     perlhpux            
     perlmachten         
+    perlmacos
     perlmpeix
     perlos2             
     perlos390           

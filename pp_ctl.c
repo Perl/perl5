@@ -2866,7 +2866,7 @@ S_doeval(pTHX_ int gimme, OP** startop)
 	CvOUTSIDE(PL_compcv) = (CV*)SvREFCNT_inc(caller);
     }
 
-    SAVEFREESV(PL_compcv);
+    SAVEMORTALIZESV(PL_compcv);	/* must remain until end of current statement */
 
     /* make sure we compile in the right package */
 

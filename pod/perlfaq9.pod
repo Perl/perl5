@@ -394,7 +394,7 @@ the MIME/QP encoding.  Decoding BASE64 becomes as simple as:
     use MIME::Base64;
     $decoded = decode_base64($encoded);
 
-The MIME-Tools package (available from CPAN) support exctraction with
+The MIME-Tools package (available from CPAN) supports extraction with
 decoding of BASE64 encoded attachments and content directly from email
 messages.
 
