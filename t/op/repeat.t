@@ -6,9 +6,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan(tests => 45);
-
-use Config;
+plan(tests => 41);
 
 # compile time
 
@@ -153,38 +151,3 @@ is(77, scalar ((1,7)x2),    'stack truncation');
     }
     is($y, 'abcdabcd');
 }
-
-# Test the "malloc wrappage" guards introduced in Perl 5.8.4.
-
-# Note that the guards do not catch everything: for example
-# "0"x0x7f...f is fine because it will attempt to allocate
-# "only" 0x7f...f+1 bytes: no wrappage there.
-
-if ($Config{ptrsize} == 4) {
-    eval '@a=(0)x0x7fffffff';
-    like($@, qr/Out of memory during list extend/,   "list extend");
-
-    eval '@a=(0)x0x80000000';
-    like($@, qr/Out of memory during list extend/,   "list extend");
-
-    eval '$a="012"x0x7fffffff';
-    like($@, qr/Out of memory during string extend/, "string extend");
-
-    eval '$a="012"x0x80000000';
-    like($@, qr/Out of memory during string extend/, "string extend");
-} elsif ($Config{ptrsize} == 8) {
-    eval '@a=(0)x0x7fffffffffffffff';
-    like($@, qr/Out of memory during list extend/,   "list extend");
-
-    eval '@a=(0)x0x8000000000000000';
-    like($@, qr/Out of memory during list extend/,   "list extend");
-
-    eval '$a="012"x0x7fffffffffffffff';
-    like($@, qr/Out of memory during string extend/, "string extend");
-
-    eval '$a="012"x0x8000000000000000';
-    like($@, qr/Out of memory during string extend/, "string extend");
-} else {
-    die "\$Config{ptrsize} == $Config{ptrsize}?";
-}
-

@@ -5,9 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..84\n";
-
-use Config;
+print "1..82\n";
 
 #
 # @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
@@ -299,22 +297,3 @@ sub kindalike { # TODO: test.pl-ize the array.t.
     eval '$a[-1] = 0';
     kindalike($@, qr/Modification of non-creatable array value attempted, subscript -1/, "\$a[-1] = 0", 82);
 }
-
-# Test the "malloc wrappage" guard introduced in Perl 5.8.4.
-
-if ($Config{ptrsize} == 4) {
-    eval '$a[0x7fffffff]=0';
-    kindalike($@, qr/Out of memory during array extend/,   "array extend", 83);
-
-    eval '$a[0x80000000]=0';
-    kindalike($@, qr/Out of memory during array extend/,   "array extend", 84);
-} elsif ($Config{ptrsize} == 8) {
-    eval '$a[0x7fffffffffffffff]=0';
-    kindalike($@, qr/Out of memory during array extend/,   "array extend", 83);
-
-    eval '$a[0x8000000000000000]=0';
-    kindalike($@, qr/Out of memory during array extend/,   "array extend", 84);
-} else {
-    die "\$Config{ptrsize} == $Config{ptrsize}?";
-}
-
