@@ -1422,7 +1422,14 @@ Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
 {
     STRLEN len;
     char *tmps = SvPV(sv,len);
-    sv_insert(LvTARG(sv),LvTARGOFF(sv),LvTARGLEN(sv), tmps, len);
+    if (DO_UTF8(sv)) {
+	sv_utf8_upgrade(LvTARG(sv));
+	sv_insert(LvTARG(sv),LvTARGOFF(sv),LvTARGLEN(sv), tmps, len);
+	SvUTF8_on(LvTARG(sv));
+    }
+    else
+        sv_insert(LvTARG(sv),LvTARGOFF(sv),LvTARGLEN(sv), tmps, len);
+
     return 0;
 }
 

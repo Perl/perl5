@@ -2268,6 +2268,9 @@ PP(pp_chr)
 	XPUSHs(TARG);
 	RETURN;
     }
+    else {
+	SvUTF8_off(TARG);
+    }
 
     SvGROW(TARG,2);
     SvCUR_set(TARG, 1);
@@ -3266,20 +3269,17 @@ PP(pp_reverse)
 		U8* s = (U8*)SvPVX(TARG);
 		U8* send = (U8*)(s + len);
 		while (s < send) {
-		    if (*s < 0x80) {
+		    if (UTF8_IS_ASCII(*s)) {
 			s++;
 			continue;
 		    }
 		    else {
+			if (!utf8_to_uv_simple(s, 0))
+			    break;
 			up = (char*)s;
 			s += UTF8SKIP(s);
 			down = (char*)(s - 1);
-			if (s > send || !((*down & 0xc0) == 0x80)) {
-			    if (ckWARN_d(WARN_UTF8))
-				Perl_warner(aTHX_ WARN_UTF8,
-					    "Malformed UTF-8 character");
-			    break;
-			}
+			/* reverse this character */
 			while (down > up) {
 			    tmp = *up;
 			    *up++ = *down;
@@ -5026,9 +5026,9 @@ PP(pp_split)
     AV *ary;
     register IV limit = POPi;			/* note, negative is forever */
     SV *sv = POPs;
-    bool do_utf8 = DO_UTF8(sv);
     STRLEN len;
     register char *s = SvPV(sv, len);
+    bool do_utf8 = DO_UTF8(sv);
     char *strend = s + len;
     register PMOP *pm;
     register REGEXP *rx;
@@ -5165,7 +5165,7 @@ PP(pp_split)
 	SV *csv = CALLREG_INTUIT_STRING(aTHX_ rx);
 
 	len = rx->minlen;
-	if (len == 1 && !tail) {
+	if (len == 1 && !(rx->reganch & ROPT_UTF8) && !tail) {
 	    STRLEN n_a;
 	    char c = *SvPV(csv, n_a);
 	    while (--limit) {
@@ -5182,7 +5182,10 @@ PP(pp_split)
 		XPUSHs(dstr);
 		/* The rx->minlen is in characters but we want to step
 		 * s ahead by bytes. */
-		s = m + (do_utf8 ? SvCUR(csv) : len);
+ 		if (do_utf8)
+		    s = (char*)utf8_hop((U8*)m, len);
+ 		else
+		    s = m + len; /* Fake \n at the end */
 	    }
 	}
 	else {
@@ -5201,7 +5204,10 @@ PP(pp_split)
 		XPUSHs(dstr);
 		/* The rx->minlen is in characters but we want to step
 		 * s ahead by bytes. */
-		s = m + (do_utf8 ? SvCUR(csv) : len); /* Fake \n at the end */
+ 		if (do_utf8)
+		    s = (char*)utf8_hop((U8*)m, len);
+ 		else
+		    s = m + len; /* Fake \n at the end */
 	    }
 	}
     }

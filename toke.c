@@ -1303,31 +1303,10 @@ S_scan_const(pTHX_ char *start)
 		break;		/* in regexp, $ might be tail anchor */
 	}
 
-	/* (now in tr/// code again) */
-
-	if (*s & 0x80 && (this_utf8 || has_utf8)) {
-	    STRLEN len = (STRLEN) -1;
-	    UV uv;
-	    if (this_utf8) {
-		uv = utf8_to_uv((U8*)s, send - s, &len, UTF8_CHECK_ONLY);
-	    }
-	    if (len == (STRLEN)-1) {
-		/* Illegal UTF8 (a high-bit byte), make it valid. */
-		char *old_pvx = SvPVX(sv);
-		/* need space for one extra char (NOTE: SvCUR() not set here) */
-		d = SvGROW(sv, SvLEN(sv) + 1) + (d - old_pvx);
-		d = (char*)uv_to_utf8((U8*)d, (U8)*s++);
-	    }
-	    else {
-		while (len--)
-		    *d++ = *s++;
-	    }
-	    has_utf8 = TRUE;
-	    continue;
-	}
-
 	/* backslashes */
 	if (*s == '\\' && s+1 < send) {
+	    bool to_be_utf8 = FALSE;
+
 	    s++;
 
 	    /* some backslashes we leave behind */
@@ -1398,7 +1377,7 @@ S_scan_const(pTHX_ char *start)
 		    else {
 			STRLEN len = 1;		/* allow underscores */
 			uv = (UV)scan_hex(s + 1, e - s - 1, &len);
-			has_utf8 = TRUE;
+			to_be_utf8 = TRUE;
 		    }
 		    s = e + 1;
 		}
@@ -1415,8 +1394,8 @@ S_scan_const(pTHX_ char *start)
 		 * There will always enough room in sv since such escapes will
 		 * be longer than any utf8 sequence they can end up as
 		 */
-		if (uv > 127 || has_utf8) {
-		    if (!this_utf8 && !has_utf8 && uv > 255) {
+		if (uv > 127) {
+		    if (!has_utf8 && (to_be_utf8 || uv > 255)) {
 		        /* might need to recode whatever we have accumulated so far
 			 * if it contains any hibit chars
 			 */
@@ -1448,7 +1427,7 @@ S_scan_const(pTHX_ char *start)
                         }
                     }
 
-                    if (has_utf8 || uv > 255) {
+                    if (to_be_utf8 || uv > 255) {
 		        d = (char*)uv_to_utf8((U8*)d, uv);
 			has_utf8 = TRUE;
                     }
@@ -1559,6 +1538,29 @@ S_scan_const(pTHX_ char *start)
 	    s++;
 	    continue;
 	} /* end if (backslash) */
+
+       /* (now in tr/// code again) */
+
+       if (*s & 0x80 && (this_utf8 || has_utf8)) {
+           STRLEN len = (STRLEN) -1;
+           UV uv;
+           if (this_utf8) {
+               uv = utf8_to_uv((U8*)s, send - s, &len, 0);
+           }
+           if (len == (STRLEN)-1) {
+               /* Illegal UTF8 (a high-bit byte), make it valid. */
+               char *old_pvx = SvPVX(sv);
+               /* need space for one extra char (NOTE: SvCUR() not set here) */
+               d = SvGROW(sv, SvLEN(sv) + 1) + (d - old_pvx);
+               d = (char*)uv_to_utf8((U8*)d, (U8)*s++);
+           }
+           else {
+               while (len--)
+                   *d++ = *s++;
+           }
+           has_utf8 = TRUE;
+           continue;
+       }
 
 	*d++ = *s++;
     } /* while loop to process each character */
@@ -3116,6 +3118,9 @@ Perl_yylex(pTHX)
 		if (*d == '}') {
 		    char minus = (PL_tokenbuf[0] == '-');
 		    s = force_word(s + minus, WORD, FALSE, TRUE, FALSE);
+		    if (UTF && !IN_BYTE && is_utf8_string((U8*)PL_tokenbuf, 0) &&
+			PL_nextval[PL_nexttoke-1].opval)
+		      SvUTF8_on(((SVOP*)PL_nextval[PL_nexttoke-1].opval)->op_sv);
 		    if (minus)
 			force_next('-');
 		}
@@ -3770,6 +3775,8 @@ Perl_yylex(pTHX)
 	    CLINE;
 	    yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpv(PL_tokenbuf,0));
 	    yylval.opval->op_private = OPpCONST_BARE;
+	    if (UTF && !IN_BYTE && is_utf8_string((U8*)PL_tokenbuf, len))
+	      SvUTF8_on(((SVOP*)yylval.opval)->op_sv);
 	    TERM(WORD);
 	}
 
@@ -3929,6 +3936,8 @@ Perl_yylex(pTHX)
 		if (*s == '=' && s[1] == '>') {
 		    CLINE;
 		    sv_setpv(((SVOP*)yylval.opval)->op_sv, PL_tokenbuf);
+		    if (UTF && !IN_BYTE && is_utf8_string((U8*)PL_tokenbuf, len))
+		      SvUTF8_on(((SVOP*)yylval.opval)->op_sv);
 		    TERM(WORD);
 		}
 
@@ -4630,6 +4639,7 @@ Perl_yylex(pTHX)
 		int warned = 0;
 		d = SvPV_force(PL_lex_stuff, len);
 		while (len) {
+		    SV *sv;
 		    for (; isSPACE(*d) && len; --len, ++d) ;
 		    if (len) {
 			char *b = d;
@@ -4650,8 +4660,11 @@ Perl_yylex(pTHX)
 			else {
 			    for (; !isSPACE(*d) && len; --len, ++d) ;
 			}
+			sv = newSVpvn(b, d-b);
+			if (DO_UTF8(PL_lex_stuff))
+			    SvUTF8_on(sv);
 			words = append_elem(OP_LIST, words,
-					    newSVOP(OP_CONST, 0, tokeq(newSVpvn(b, d-b))));
+					    newSVOP(OP_CONST, 0, tokeq(sv)));
 		    }
 		}
 		if (words) {
@@ -6263,7 +6276,9 @@ S_scan_trans(pTHX_ char *start)
 	    squash = OPpTRANS_SQUASH;
 	s++;
     }
-    o->op_private = del|squash|complement;
+    o->op_private = del|squash|complement|
+      (DO_UTF8(PL_lex_stuff)? OPpTRANS_FROM_UTF : 0)|
+      (DO_UTF8(PL_lex_repl) ? OPpTRANS_TO_UTF   : 0);
 
     PL_lex_op = o;
     yylval.ival = OP_TRANS;
@@ -6458,6 +6473,8 @@ retval:
 	Renew(SvPVX(tmpstr), SvLEN(tmpstr), char);
     }
     SvREFCNT_dec(herewas);
+    if (UTF && !IN_BYTE && is_utf8_string((U8*)SvPVX(tmpstr), SvCUR(tmpstr)))
+	SvUTF8_on(tmpstr);
     PL_lex_stuff = tmpstr;
     yylval.ival = op_type;
     return s;
@@ -7228,7 +7245,8 @@ vstring:
 		SvREADONLY_on(sv);
 		if (utf8) {
 		    SvUTF8_on(sv);
-		    sv_utf8_downgrade(sv, TRUE);
+		    if (!UTF||IN_BYTE)
+		      sv_utf8_downgrade(sv, TRUE);
 		}
 	    }
 	}
