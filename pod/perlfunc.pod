@@ -1872,6 +1872,11 @@ follows:
 
     u	A uuencoded string.
 
+    w A BER compressed integer. Bytes give an unsigned integer base
+      128, most significant digit first, with as few digits as
+      possible, and with the bit 8 of each byte except the last set
+      to "1."
+
     x	A null byte.
     X	Back up a byte.
     @	Null fill to absolute position.

@@ -2788,6 +2788,51 @@ PP(pp_unpack)
 		PUSHs(sv_2mortal(sv));
 	    }
 	    break;
+	case 'w':
+	    along = (strend - s) / sizeof(char);
+	    if (len > along)
+		len = along;
+	    EXTEND(SP, len);
+            { 
+              I8  bytes = 0;
+
+              auint = 0;
+              while  (len > 0) {
+                if (s >= strend) {
+                  if (auint) {
+                    DIE("Unterminated compressed integer");
+                  } else {
+                    break;
+                  }
+                }
+                auint = (auint << 7) | (*s & 0x7f);
+                if (!(*s & 0x80)) {
+                  sv = NEWSV(40, 0);
+                  sv_setiv(sv, (I32) auint);
+                  PUSHs(sv_2mortal(sv));
+                  len--;
+                  auint = 0;
+                  bytes = 0;
+                } else if (++bytes >= sizeof(auint)) {         /* promote to double */
+                  adouble = auint;
+
+                  while (*s &  0x80) {
+                    adouble = (adouble * 128) + (*(++s) & 0x7f);
+                    if (s >= strend) {
+                      DIE("Unterminated compressed integer");
+                    }
+                  }
+                  sv = NEWSV(40, 0);
+                  sv_setnv(sv, adouble);
+                  PUSHs(sv_2mortal(sv));
+                  len--;
+                  auint = 0;
+                  bytes = 0;
+                }
+                s++;
+              }
+            }
+	    break;
 	case 'P':
 	    EXTEND(SP, 1);
 	    if (sizeof(char*) > strend - s)
@@ -3263,6 +3308,42 @@ PP(pp_pack)
 		sv_catpvn(cat, (char*)&auint, sizeof(unsigned int));
 	    }
 	    break;
+	case 'w':
+            while (len-- > 0) {
+              fromstr = NEXTFROM;
+              adouble = floor((double)SvNV(fromstr));
+
+              if (adouble < 268435456) {           /* we can use integers */
+                unsigned char buf[4];              /* buffer for compressed int */
+                unsigned char *in = buf + 3;
+                auint = U_I(adouble);
+                do {
+                  *(in--) = (unsigned char) ((auint & 0x7f) |  0x80); 
+                  auint >>= 7;
+                } while (auint);
+                buf[3]  &= 0x7f;                   /* clear continue bit */
+                sv_catpvn(cat, (char*) in+1, buf+3-in);
+              } else {
+                unsigned char buf[sizeof(double)*2]; /* buffer for compressed int */
+                I8       msize = sizeof(double)*2; /* 8/7 would be enough */
+                unsigned char *in = buf + msize -1;
+                if (adouble<0) {
+                  croak("Cannot compress negative numbers");
+                }
+                do  {
+                  double next = adouble/128;
+                  *in = (unsigned char) (adouble - floor(next)*128);
+                  *in |= 0x80;                     /* set continue bit */
+                  if (--in < buf) {                /* this cannot happen ;-) */
+                    croak ("Cannot compress integer");
+                  }
+                  adouble = next;
+                } while (floor(adouble)>0);        /* floor() not necessary? */
+                buf[msize-1] &= 0x7f;              /* clear continue bit */
+                sv_catpvn(cat, (char*) in+1, buf+msize-in-1);
+              }
+            }
+            break;
 	case 'i':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
