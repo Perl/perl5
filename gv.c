@@ -616,12 +616,6 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 	    IoFLAGS(GvIOn(gv)) |= IOf_ARGV|IOf_START;
 	}
 	break;
-
-    case 'a':
-    case 'b':
-	if (len == 1)
-	    GvMULTI_on(gv);
-	break;
     case 'E':
 	if (strnEQ(name, "EXPORT", 6))
 	    GvMULTI_on(gv);

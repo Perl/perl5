@@ -4809,6 +4809,11 @@ ck_sort(OP *o)
     if (o->op_flags & OPf_STACKED) {
 	OP *kid = cLISTOPo->op_first->op_sibling;	/* get past pushmark */
 	OP *k;
+
+	if (o->op_type == OP_SORT) {
+	    GvMULTI_on(gv_fetchpv("a", TRUE, SVt_PV));
+	    GvMULTI_on(gv_fetchpv("b", TRUE, SVt_PV));
+	}
 	kid = kUNOP->op_first;				/* get past rv2gv */
 
 	if (kid->op_type == OP_SCOPE || kid->op_type == OP_LEAVE) {
