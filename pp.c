@@ -3545,7 +3545,7 @@ PP(pp_hslice)
 		    else {
 			STRLEN keylen;
 			char *key = SvPV(keysv, keylen);
-			save_delete(hv, key, keylen);
+			SAVEDELETE(hv, savepvn(key,keylen), keylen);
 		    }
                 }
 	    }
