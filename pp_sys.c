@@ -4793,11 +4793,6 @@ PP(pp_gpwent)
 	break;
     }
 
-#   ifdef HAS_GETSPNAM
-    if (GIMME != G_ARRAY && pwent)
-	spwent = getspnam(pwent->pw_name);
-#   endif
-
     EXTEND(SP, 10);
     if (GIMME != G_ARRAY) {
 	PUSHs(sv = sv_newmortal());
@@ -4820,12 +4815,13 @@ PP(pp_gpwent)
 
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #   ifdef HAS_GETSPNAM
-      if (spwent)
-	  sv_setpv(sv, spwent->sp_pwdp);
-      else
-	  sv_setpv(sv, pwent->pw_passwd);
+	spwent = getspnam(pwent->pw_name);
+	if (spwent)
+	    sv_setpv(sv, spwent->sp_pwdp);
+	else
+	    sv_setpv(sv, pwent->pw_passwd);
 #   else
-      sv_setpv(sv, pwent->pw_passwd);
+	sv_setpv(sv, pwent->pw_passwd);
 #   endif
 #   ifndef INCOMPLETE_TAINTS
 	/* passwd is tainted because user himself can diddle with it. */
