@@ -1241,13 +1241,15 @@ perl_destruct
 perl_free
 perl_parse
 perl_run
-# Oddities
+# Oddities from PerlIO 
+PerlIO_open
 PerlIO_binmode
 PerlIO_getpos
 PerlIO_init
 PerlIO_perlio
 PerlIO_setpos
 PerlIO_sprintf
+PerlIO_printf
 PerlIO_sv_dup
 PerlIO_tmpfile
 PerlIO_vsprintf
