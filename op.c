@@ -1241,6 +1241,7 @@ mod(OP *o, I32 type)
     else if (!type) {
 	o->op_private |= OPpLVAL_INTRO;
 	o->op_flags &= ~OPf_SPECIAL;
+	hints |= HINT_BLOCK_SCOPE;
     }
     else if (type != OP_GREPSTART && type != OP_ENTERSUB)
 	o->op_flags |= OPf_REF;
