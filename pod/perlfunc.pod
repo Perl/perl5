@@ -3236,7 +3236,7 @@ fork() emulation on Windows platforms, or by embedding perl in a
 multi-threaded application.  The C<unique> attribute does nothing in
 all other environments.
 
-Warning: the current implementaion of this attribute operates on the
+Warning: the current implementation of this attribute operates on the
 typeglob associated with the variable; this means that C<our $x : unique>
 also has the effect of C<our @x : unique; our %x : unique>. This may be
 subject to change.
