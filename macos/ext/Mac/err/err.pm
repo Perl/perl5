@@ -6,9 +6,6 @@ use vars qw($VERSION @ISA);
 require DynaLoader;
 
 @ISA = qw(Exporter DynaLoader);
-# Items to export into callers namespace by default. Note: do not export
-# names by default without a very good reason. Use EXPORT_OK instead.
-# Do not simply export all your public functions/methods/constants.
 $VERSION = '0.01';
 
 sub import {
@@ -22,39 +19,44 @@ sub import {
 	}
 }
 
+*format = *import{CODE};
+
 bootstrap Mac::err $VERSION;
 
-# Preloaded methods go here.
-
-# Autoload methods go after =cut, and are processed by the autosplit program.
-
 1;
+
 __END__
-# Below is the stub of documentation for your module. You better edit it!
 
 =head1 NAME
 
-Mac::err - Perl extension for blah blah blah
+Mac::err - Extension for formatting error messages
 
 =head1 SYNOPSIS
 
-  use Mac::err;
-  blah blah blah
+  use Mac::err 'perl';
+  warn "foo";
+  Mac::err->format('MPW');
+  warn "bar";
+
+Results:
+
+  foo at Dev:Pseudo line 2.
+  # bar.
+  File 'Dev:Pseudo'; Line 4
+
 
 =head1 DESCRIPTION
 
-Stub documentation for Mac::err was created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
+By default, MacPerl produces error messages that are formatted for
+use with MPW.  This module allows switching the formatting behavior.
 
-Blah blah blah.
+Normal usage is simply C<use Mac::err 'type'>, where the format type
+string is C<MPW> or C<perl>.  If the format type is C<perl>, then the
+formatting will be the same as under Unix perl.
 
-=head1 AUTHOR
+Formatting may be changed on the fly as well, with the C<format> method.
 
-A. U. Thor, a.u.thor@a.galaxy.far.far.away
-
-=head1 SEE ALSO
-
-perl(1).
+The error messages are formatted on output; so when looking at the error
+message in a variable (such as in $@) it will remain unformatted.
 
 =cut
