@@ -609,12 +609,27 @@ do_spawn2(char *cmd, int exectype)
 	strcpy(cmd2, cmd);
 	a = argv;
 	for (s = cmd2; *s;) {
+	    bool in_quotes = FALSE;
 	    while (*s && isSPACE(*s))
 		s++;
 	    if (*s)
 		*(a++) = s;
-	    while (*s && !isSPACE(*s))
-		s++;
+	    while (*s) {
+		/* ignore doubled backslashes, or backslash+quote */
+		if (*s == '\\' && (s[1] == '\\' || s[1] == '"')) {
+		    s += 2;
+		}
+		/* keep track of when we're within quotes */
+		else if (*s == '"') {
+		    s++;
+		    in_quotes = !in_quotes;
+		}
+		/* break it up only at spaces that aren't in quotes */
+		else if (!in_quotes && isSPACE(*s))
+		    break;
+		else
+		    s++;
+	    }
 	    if (*s)
 		*s++ = '\0';
 	}
@@ -3012,25 +3027,93 @@ win32_chmod(const char *path, int mode)
 
 
 static char *
-create_command_line(const char* command, const char * const *args)
+create_command_line(const char * const *args)
 {
     dTHXo;
-    int index;
-    char *cmd, *ptr, *arg;
-    STRLEN len = strlen(command) + 1;
+    int index, argc;
+    char *cmd, *ptr;
+    const char *arg;
+    STRLEN len = 0;
+    bool cmd_shell = FALSE;
+    bool extra_quotes = FALSE;
 
-    for (index = 0; (ptr = (char*)args[index]) != NULL; ++index)
-	len += strlen(ptr) + 1;
+    /* The NT cmd.exe shell has the following peculiarity that needs to be
+     * worked around.  It strips a leading and trailing dquote when any
+     * of the following is true:
+     *    1. the /S switch was used
+     *    2. there are more than two dquotes
+     *    3. there is a special character from this set: &<>()@^|
+     *    4. no whitespace characters within the two dquotes
+     *    5. string between two dquotes isn't an executable file
+     * To work around this, we always add a leading and trailing dquote
+     * to the string, if the first argument is either "cmd.exe" or "cmd",
+     * and there were at least two or more arguments passed to cmd.exe
+     * (not including switches).
+     */
+    if (args[0]
+	&& (stricmp(args[0], "cmd.exe") == 0
+	    || stricmp(args[0], "cmd") == 0))
+    {
+	cmd_shell = TRUE;
+	len += 3;
+    }
 
+    DEBUG_p(PerlIO_printf(Perl_debug_log, "Args "));
+    for (index = 0; (arg = (char*)args[index]) != NULL; ++index) {
+	STRLEN curlen = strlen(arg);
+	if (!(arg[0] == '"' && arg[curlen-1] == '"'))
+	    len += 2;	/* assume quoting needed (worst case) */
+	len += curlen + 1;
+	DEBUG_p(PerlIO_printf(Perl_debug_log, "[%s]",arg));
+    }
+    DEBUG_p(PerlIO_printf(Perl_debug_log, "\n"));
+
+    argc = index;
     New(1310, cmd, len, char);
     ptr = cmd;
-    strcpy(ptr, command);
 
     for (index = 0; (arg = (char*)args[index]) != NULL; ++index) {
-	ptr += strlen(ptr);
-	*ptr++ = ' ';
+	bool do_quote = 0;
+	STRLEN curlen = strlen(arg);
+
+	/* we want to protect arguments with spaces with dquotes,
+	 * but only if they aren't already there */
+	if (!(arg[0] == '"' && arg[curlen-1] == '"')) {
+	    STRLEN i = 0;
+	    while (i < curlen) {
+		if (isSPACE(arg[i])) {
+		    do_quote = 1;
+		    break;
+		}
+		i++;
+	    }
+	}
+
+	if (do_quote)
+	    *ptr++ = '"';
+
 	strcpy(ptr, arg);
+	ptr += curlen;
+
+	if (do_quote)
+	    *ptr++ = '"';
+
+	if (args[index+1])
+	    *ptr++ = ' ';
+
+    	if (cmd_shell && !extra_quotes
+	    && (stricmp(arg, "/x/c") == 0 || stricmp(arg, "/c") == 0)
+	    && (argc-1 > index+1))   /* two or more arguments to cmd.exe? */
+	{
+	    *ptr++ = '"';
+	    extra_quotes = TRUE;
+	}
     }
+
+    if (extra_quotes)
+	*ptr++ = '"';
+
+    *ptr = '\0';
 
     return cmd;
 }
@@ -3194,8 +3277,7 @@ win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
     PROCESS_INFORMATION ProcessInformation;
     DWORD create = 0;
 
-    char *cmd = create_command_line(cmdname, strcmp(cmdname, argv[0]) == 0
-			     	             ? &argv[1] : argv);
+    char *cmd = create_command_line(argv);
     char *fullcmd = Nullch;
 
     env = PerlEnv_get_childenv();
@@ -3242,6 +3324,8 @@ win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
 	create |= CREATE_NEW_CONSOLE;
     }
 
+    DEBUG_p(PerlIO_printf(Perl_debug_log, "Spawning [%s] with [%s]\n",
+			  cmdname,cmd));
 RETRY:
     if (!CreateProcess(cmdname,		/* search PATH to find executable */
 		       cmd,		/* executable, and its arguments */
@@ -3264,6 +3348,9 @@ RETRY:
 	    fullcmd = qualified_path(cmdname);
 	    if (fullcmd) {
 		cmdname = fullcmd;
+		DEBUG_p(PerlIO_printf(Perl_debug_log,
+				      "Retrying [%s] with same args\n",
+				      cmdname));
 		goto RETRY;
 	    }
 	}
