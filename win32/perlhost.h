@@ -98,6 +98,10 @@ public:
     {
 	return g_win32_get_sitelib(pl);
     };
+    virtual int Uname(struct utsname *name, int &err)
+    {
+	return win32_uname(name);
+    };
 };
 
 class CPerlSock : public IPerlSock

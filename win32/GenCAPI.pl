@@ -990,6 +990,11 @@ int          _win32_utime(const char *f, struct utimbuf *t)
     return pPerl->PL_piLIO->Utime((char*)f, t, ErrorNo());
 }
 
+int          _win32_uname(struct utsname *name)
+{
+    return pPerl->PL_piENV->Uname(name, ErrorNo());
+}
+
 char*   _win32_getenv(const char *name)
 {
     return pPerl->PL_piENV->Getenv(name, ErrorNo());

@@ -1133,6 +1133,91 @@ win32_utime(const char *filename, struct utimbuf *times)
 }
 
 DllExport int
+win32_uname(struct utsname *name)
+{
+    struct hostent *hep;
+    STRLEN nodemax = sizeof(name->nodename)-1;
+    OSVERSIONINFO osver;
+
+    memset(&osver, 0, sizeof(OSVERSIONINFO));
+    osver.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+    if (GetVersionEx(&osver)) {
+	/* sysname */
+	switch (osver.dwPlatformId) {
+	case VER_PLATFORM_WIN32_WINDOWS:
+	    strcpy(name->sysname, "Windows");
+	    break;
+	case VER_PLATFORM_WIN32_NT:
+	    strcpy(name->sysname, "Windows NT");
+	    break;
+	case VER_PLATFORM_WIN32s:
+	    strcpy(name->sysname, "Win32s");
+	    break;
+	default:
+	    strcpy(name->sysname, "Win32 Unknown");
+	    break;
+	}
+
+	/* version */
+	sprintf(name->version, "%d.%d",
+		osver.dwMajorVersion, osver.dwMinorVersion);
+
+	/* release */
+	sprintf(name->release, "Build %d",
+		osver.dwPlatformId == VER_PLATFORM_WIN32_NT
+		? osver.dwBuildNumber : (osver.dwBuildNumber & 0xffff));
+	if (osver.szCSDVersion[0]) {
+	    char *buf = name->release + strlen(name->release);
+	    sprintf(buf, " (%s)", osver.szCSDVersion);
+	}
+    }
+    else {
+	*name->sysname = '\0';
+	*name->version = '\0';
+	*name->release = '\0';
+    }
+
+    /* nodename */
+    hep = win32_gethostbyname("localhost");
+    if (hep) {
+	STRLEN len = strlen(hep->h_name);
+	if (len <= nodemax) {
+	    strcpy(name->nodename, hep->h_name);
+	}
+	else {
+	    strncpy(name->nodename, hep->h_name, nodemax);
+	    name->nodename[nodemax] = '\0';
+	}
+    }
+    else {
+	DWORD sz = nodemax;
+	if (!GetComputerName(name->nodename, &sz))
+	    *name->nodename = '\0';
+    }
+
+    /* machine (architecture) */
+    {
+	SYSTEM_INFO info;
+	char *arch;
+	GetSystemInfo(&info);
+	switch (info.wProcessorArchitecture) {
+	case PROCESSOR_ARCHITECTURE_INTEL:
+	    arch = "x86"; break;
+	case PROCESSOR_ARCHITECTURE_MIPS:
+	    arch = "mips"; break;
+	case PROCESSOR_ARCHITECTURE_ALPHA:
+	    arch = "alpha"; break;
+	case PROCESSOR_ARCHITECTURE_PPC:
+	    arch = "ppc"; break;
+	default:
+	    arch = "unknown"; break;
+	}
+	strcpy(name->machine, arch);
+    }
+    return 0;
+}
+
+DllExport int
 win32_waitpid(int pid, int *status, int flags)
 {
     int retval = -1;

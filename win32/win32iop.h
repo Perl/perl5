@@ -124,6 +124,7 @@ DllExport  unsigned 	win32_alarm(unsigned int sec);
 DllExport  int		win32_stat(const char *path, struct stat *buf);
 DllExport  int		win32_ioctl(int i, unsigned int u, char *data);
 DllExport  int		win32_utime(const char *f, struct utimbuf *t);
+DllExport  int		win32_uname(struct utsname *n);
 DllExport  int		win32_wait(int *status);
 DllExport  int		win32_waitpid(int pid, int *status, int flags);
 DllExport  int		win32_kill(int pid, int sig);
@@ -153,6 +154,7 @@ END_EXTERN_C
 #undef alarm
 #undef ioctl
 #undef utime
+#undef uname
 #undef wait
 
 #ifdef __BORLANDC__
@@ -261,6 +263,7 @@ END_EXTERN_C
 #define alarm			win32_alarm
 #define ioctl			win32_ioctl
 #define utime			win32_utime
+#define uname			win32_uname
 #define wait			win32_wait
 #define waitpid			win32_waitpid
 #define kill			win32_kill
