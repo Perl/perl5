@@ -183,6 +183,7 @@ sub B::Stackobj::Padsv::load_int {
 
 sub B::Stackobj::Padsv::load_double {
     my $obj = shift;
+    $obj->write_back;
     runtime("$obj->{nv} = SvNV($obj->{sv});");
     $obj->{flags} |= VALID_DOUBLE;
 }

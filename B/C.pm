@@ -582,27 +582,27 @@ sub B::CV::save {
 	warn "No definition for sub %s::%s (unable to autoload)\n",
 	    $cvstashname, $cvname; # debug
     }
-    $symsect->add(sprintf("xpvcvix%d\t%s, %u, 0, %d, %s, 0, Nullhv, Nullhv, %s, s\\_%lx, $xsub, $xsubany, Nullgv, Nullgv, %d, s\\_%lx, (CV*)s\\_%lx, 0",
+    $symsect->add(sprintf("xpvcvix%d\t%s, %u, 0, %d, %s, 0, Nullhv, Nullhv, %s, s\\_%x, $xsub, $xsubany, Nullgv, Nullgv, %d, s\\_%x, (CV*)s\\_%x, 0",
 			  $xpvcv_ix, cstring($pv), length($pv), $cv->IVX,
 			  $cv->NVX, $startfield, ${$cv->ROOT}, $cv->DEPTH,
 			  $$padlist, ${$cv->OUTSIDE}));
     if ($$gv) {
 	$gv->save;
-	$init->add(sprintf("CvGV(s\\_%lx) = s\\_%lx;",$$cv,$$gv));
+	$init->add(sprintf("CvGV(s\\_%x) = s\\_%x;",$$cv,$$gv));
 	warn sprintf("done saving GV 0x%x for CV 0x%x\n",
 		     $$gv, $$cv) if $debug_cv;
     }
     my $filegv = $cv->FILEGV;
     if ($$filegv) {
 	$filegv->save;
-	$init->add(sprintf("CvFILEGV(s\\_%lx) = s\\_%lx;", $$cv, $$filegv));
+	$init->add(sprintf("CvFILEGV(s\\_%x) = s\\_%x;", $$cv, $$filegv));
 	warn sprintf("done saving FILEGV 0x%x for CV 0x%x\n",
 		     $$filegv, $$cv) if $debug_cv;
     }
     my $stash = $cv->STASH;
     if ($$stash) {
 	$stash->save;
-	$init->add(sprintf("CvSTASH(s\\_%lx) = s\\_%lx;", $$cv, $$stash));
+	$init->add(sprintf("CvSTASH(s\\_%x) = s\\_%x;", $$cv, $$stash));
 	warn sprintf("done saving STASH 0x%x for CV 0x%x\n",
 		     $$stash, $$cv) if $debug_cv;
     }
