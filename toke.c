@@ -2821,14 +2821,28 @@ yylex(void)
 	}
 
 	if (tmp < 0) {			/* second-class keyword? */
-	    if (expect != XOPERATOR && (*s != ':' || s[1] != ':') &&
-		(((gv = gv_fetchpv(tokenbuf, FALSE, SVt_PVCV)) &&
-		  GvCVu(gv) && GvIMPORTED_CV(gv)) ||
-		 ((gvp = (GV**)hv_fetch(globalstash,tokenbuf,len,FALSE)) &&
-		  (gv = *gvp) != (GV*)&sv_undef &&
-		  GvCVu(gv) && GvIMPORTED_CV(gv))))
-	    {
-		tmp = 0;		/* overridden by importation */
+	    GV *ogv = Nullgv;	/* override (winner) */
+	    GV *hgv = Nullgv;	/* hidden (loser) */
+	    if (expect != XOPERATOR && (*s != ':' || s[1] != ':')) {
+		CV *cv;
+		if ((gv = gv_fetchpv(tokenbuf, FALSE, SVt_PVCV)) &&
+		    (cv = GvCVu(gv)))
+		{
+		    if (GvIMPORTED_CV(gv))
+			ogv = gv;
+		    else if (! CvMETHOD(cv))
+			hgv = gv;
+		}
+		if (!ogv &&
+		    (gvp = (GV**)hv_fetch(globalstash,tokenbuf,len,FALSE)) &&
+		    (gv = *gvp) != (GV*)&sv_undef &&
+		    GvCVu(gv) && GvIMPORTED_CV(gv))
+		{
+		    ogv = gv;
+		}
+	    }
+	    if (ogv) {
+		tmp = 0;		/* overridden by import or by GLOBAL */
 	    }
 	    else if (gv && !gvp
 		     && -tmp==KEY_lock	/* XXX generalizable kludge */
@@ -2836,8 +2850,13 @@ yylex(void)
 	    {
 		tmp = 0;		/* any sub overrides "weak" keyword */
 	    }
-	    else {
-		tmp = -tmp; gv = Nullgv; gvp = 0;
+	    else {			/* no override */
+		tmp = -tmp;
+		gv = Nullgv;
+		gvp = 0;
+		if (dowarn && hgv)
+		    warn("Subroutine %s::%s hidden by keyword; use ampersand",
+			 HvNAME(GvESTASH(hgv)), GvENAME(hgv));
 	    }
 	}
 
