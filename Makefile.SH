@@ -550,13 +550,6 @@ perly.c: $(src)/perly.y
 perly.h: $(src)/perly.y
 	-@sh -c true
 
-# Both the above and below are needed for an out-of-source experience.
-$(src)/perly.c: $(src)/perly.y
-	-@sh -c true
-
-$(src)/perly.h: $(src)/perly.y
-	-@sh -c true
-
 # No compat3.sym here since and including the 5.004_50.
 # No interp.sym since 5.005_03.
 SYM  = global.sym globvar.sym perlio.sym pp.sym
