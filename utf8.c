@@ -1665,7 +1665,7 @@ length len, the displayable version being at most pvlim bytes long
 (if longer, the rest is truncated and "..." will be appended).
 
 The flags argument can have UNI_DISPLAY_ISPRINT set to display
-isprint()able characters as themselves, UNI_DISPLAY_BACKSLASH
+isPRINT()able characters as themselves, UNI_DISPLAY_BACKSLASH
 to display the \\[nrfta\\] as the backslashed versions (like '\n')
 (UNI_DISPLAY_BACKSLASH is preferred over UNI_DISPLAY_ISPRINT for \\).
 UNI_DISPLAY_QQ (and its alias UNI_DISPLAY_REGEX) have both
@@ -1708,7 +1708,8 @@ Perl_pv_uni_display(pTHX_ SV *dsv, U8 *spv, STRLEN len, STRLEN pvlim, UV flags)
 		 default: break;
 		 }
 	     }
-	     if (!ok && (flags & UNI_DISPLAY_ISPRINT) && isprint(u & 0xFF)) {
+	     /* isPRINT() is the locale-blind version. */
+	     if (!ok && (flags & UNI_DISPLAY_ISPRINT) && isPRINT(u & 0xFF)) {
 	         Perl_sv_catpvf(aTHX_ dsv, "%c", u);
 		 ok = TRUE;
 	     }
