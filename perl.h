@@ -3745,6 +3745,14 @@ int flock(int fd, int op);
 
 #define GROK_NUMERIC_RADIX(sp, send) grok_numeric_radix(sp, send)
 
+/* to let user control profiling */
+#ifdef PERL_GPROF_CONTROL
+extern void moncontrol(int);
+#define PERL_GPROF_MONCONTROL(x) moncontrol(x)
+#else
+#define PERL_GPROF_MONCONTROL(x)
+#endif
+
 /* and finally... */
 #define PERL_PATCHLEVEL_H_IMPLICIT
 #include "patchlevel.h"

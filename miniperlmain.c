@@ -42,6 +42,10 @@ main(int argc, char **argv, char **env)
 #undef PERLVARIC
 #endif
 
+    /* if user wants control of gprof profiling off by default */
+    /* noop unless Configure is given -Accflags=-DPERL_GPROF_CONTROL */
+    PERL_GPROF_MONCONTROL(0);
+
     PERL_SYS_INIT3(&argc,&argv,&env);
 
     if (!PL_do_undump) {
