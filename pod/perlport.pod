@@ -1440,6 +1440,9 @@ Only good for changing "owner" and "other" read-write access. (S<RISC OS>)
 
 Access permissions are mapped onto VOS access-control list changes. (VOS)
 
+The actual permissions set depend on the value of the C<CYGWIN>
+environment variable. (Cygwin)
+
 =item chown LIST
 
 Not implemented. (S<Mac OS>, Win32, Plan9, S<RISC OS>, VOS)

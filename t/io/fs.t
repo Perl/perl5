@@ -41,6 +41,9 @@ my $needs_fh_reopen =
 
 $needs_fh_reopen = 1 if (defined &Win32::IsWin95 && Win32::IsWin95());
 
+my $skip_mode_checks =
+    $^O eq 'cygwin' && $ENV{CYGWIN} !~ /ntsec/;
+
 plan tests => 36;
 
 
@@ -93,8 +96,13 @@ SKIP: {
 
     SKIP: {
         skip "hard links not that hard in $^O", 1 if $^O eq 'amigaos';
+	skip "no mode checks", 1 if $skip_mode_checks;
 
-        is($mode & 0777, 0666, "mode of triply-linked file");
+	if ($^O eq 'cygwin') { # new files on cygwin get rwx instead of rw-
+	    is($mode & 0777, 0777, "mode of triply-linked file");
+	} else {
+            is($mode & 0777, 0666, "mode of triply-linked file");
+	}
     }
 }
 
@@ -108,7 +116,11 @@ SKIP: {
     ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
      $blksize,$blocks) = stat('c');
 
-    is($mode & 0777, $newmode, "chmod going through");
+    SKIP: {
+	skip "no mode checks", 1 if $skip_mode_checks;
+
+        is($mode & 0777, $newmode, "chmod going through");
+    }
 
     $newmode = 0700;
     chmod 0444, 'x';
@@ -119,12 +131,20 @@ SKIP: {
     ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
      $blksize,$blocks) = stat('c');
 
-    is($mode & 0777, $newmode, "chmod going through to c");
+    SKIP: {
+	skip "no mode checks", 1 if $skip_mode_checks;
+
+        is($mode & 0777, $newmode, "chmod going through to c");
+    }
 
     ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
      $blksize,$blocks) = stat('x');
 
-    is($mode & 0777, $newmode, "chmod going through to x");
+    SKIP: {
+	skip "no mode checks", 1 if $skip_mode_checks;
+
+        is($mode & 0777, $newmode, "chmod going through to x");
+    }
 
     is(unlink('b','x'), 2, "unlink two files");
 
