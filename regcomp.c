@@ -3024,7 +3024,7 @@ tryagain:
 
     default: {
 	    register STRLEN len;
-	    register UV ender;
+	    register UV ender = 0;
 	    register char *p;
 	    char *oldp, *s;
 	    STRLEN numlen;
