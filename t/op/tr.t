@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..51\n";
+print "1..55\n";
 
 $_ = "abcdefghijklmnopqrstuvwxyz";
 
@@ -84,7 +84,7 @@ if (ord("\t") == 9) { # ASCII
     use utf8;
 }
 # 11 - changing UTF8 characters in a UTF8 string, same length.
-$l = chr(300); $r = chr(400);
+my $l = chr(300); my $r = chr(400);
 $x = 200.300.400;
 $x =~ tr/\x{12c}/\x{190}/;
 printf "not (%vd) ", $x if $x ne 200.400.400 or length $x != 3;
@@ -287,7 +287,7 @@ print "ok 48\n";
 print "not " unless sprintf("%vd", $a) eq '196.172.200';
 print "ok 49\n";
 
-# UTF8 range
+# UTF8 range tests from Inaba Hiroto
 
 ($a = v300.196.172.302.197.172) =~ tr/\x{12c}-\x{130}/\xc0-\xc4/;
 print "not " unless $a eq v192.196.172.194.197.172;
@@ -296,3 +296,22 @@ print "ok 50\n";
 ($a = v300.196.172.302.197.172) =~ tr/\xc4-\xc8/\x{12c}-\x{130}/;
 print "not " unless $a eq v300.300.172.302.301.172;
 print "ok 51\n";
+
+# UTF8 range tests from Karsten Sperling (patch #9008 required)
+
+($a = "\x{0100}") =~ tr/\x00-\x{100}/X/;
+print "not " unless $a eq "X";
+print "ok 52\n";
+
+($a = "\x{0100}") =~ tr/\x{0000}-\x{00ff}/X/c;
+print "not " unless $a eq "X";
+print "ok 53\n";
+
+($a = "\x{0100}") =~ tr/\x{0000}-\x{00ff}\x{0101}/X/c;
+print "not " unless $a eq "X";
+print "ok 54\n";
+ 
+($a = v256) =~ tr/\x{0000}-\x{00ff}\x{0101}/X/c;
+print "not " unless $a eq "X";
+print "ok 55\n"; 
+
