@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed May 12 00:58:20 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Wed May 12 01:15:37 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -4344,10 +4344,13 @@ $cat >findhdr <<EOF
 $startsh
 wanted=\$1
 name=''
-if test -f $usrinc/\$wanted; then
-	echo "$usrinc/\$wanted"
-	exit 0
-fi
+for usrincdir in $usrinc
+do
+	if test -f \$usrincdir/\$wanted; then
+		echo "\$usrincdir/\$wanted"
+		exit 0
+	fi
+done
 awkprg='{ print \$$fieldn }'
 echo "#include <\$wanted>" > foo\$\$.c
 $cppstdin $cppminus $cppflags < foo\$\$.c 2>/dev/null | \
@@ -4355,7 +4358,7 @@ $grep "^[ 	]*#.*\$wanted" | \
 while read cline; do
 	name=\`echo \$cline | $awk "\$awkprg" | $tr -d '"'\`
 	case "\$name" in
-	*/\$wanted) echo "\$name"; exit 0;;
+	*[/\\\\]\$wanted) echo "\$name"; exit 0;;
 	*) name='';;
 	esac;
 done;
@@ -5448,6 +5451,10 @@ if "$useshrplib"; then
 		;;
 	beos)
 		# beos doesn't like the default, either.
+		;;
+	hpux*)
+		# hpux doesn't like the default, either.
+		tmp_shrpenv="env LDOPTS=\"+s +b${shrpdir}\""
 		;;
 	*)
 		tmp_shrpenv="env LD_RUN_PATH=$shrpdir"
