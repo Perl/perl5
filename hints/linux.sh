@@ -148,16 +148,4 @@ EOM
 
 fi
 
-# Avoid some troublesome gcvt() functions.  With some libc versions, 
-# perl -e '$x=1e5; print "$x\n";' prints 1e+5.  We'd like it
-# to print 100000 instead, consistent with the integer value given
-# on other platforms.  This isn't a bug in gcvt, really; more in our
-# expectations for it.  We'd like it to behave exactly as
-# sprintf %.16g, but it isn't documented to do that.
-#
-# We'll use sprintf() instead, since we can control the output more
-# precisely.
-# 
-# The next version of Configure will check for this automatically.
-d_Gconvert='sprintf((b),"%.*g",(n),(x))'
 
