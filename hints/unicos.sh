@@ -2,7 +2,7 @@ case `uname -r` in
 6.1*) shellflags="-m+65536" ;;
 esac
 case "$optimize" in
-# If we used fastmd (the default) integer values would be limited to 43 bits.
+# If we used fastmd (the default) integer values would be limited to 46 bits.
 # --Mark P. Lutz
 '') optimize="$optimize -h nofastmd" ;;
 esac

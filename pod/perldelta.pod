@@ -717,7 +717,7 @@ no longer dying on math errors in runtime.
 =item *
 
 Now using full quad integers (64 bits), previously was using 
-only 43 bit integers for speed.
+only 46 bit integers for speed.
 
 =back
 

@@ -3156,10 +3156,10 @@ because they obey the native byteorder and endianness.  For example a
  	0x12 0x34 0x56 0x78	# big-endian
  	0x78 0x56 0x34 0x12	# little-endian
 
-Basically, the Intel, Alpha, and VAX CPUs are little-endian, while
-everybody else, for example Motorola m68k/88k, PPC, Sparc, HP PA,
-Power, and Cray are big-endian.  MIPS can be either: Digital used it
-in little-endian mode; SGI uses it in big-endian mode.
+Basically, the Intel and VAX CPUs are little-endian, while everybody
+else, for example Motorola m68k/88k, PPC, Sparc, HP PA, Power, and
+Cray are big-endian.  Alpha and MIPS can be either: Digital/Compaq
+used/uses them in little-endian mode; SGI/Cray uses them in big-endian mode.
 
 The names `big-endian' and `little-endian' are comic references to
 the classic "Gulliver's Travels" (via the paper "On Holy Wars and a
