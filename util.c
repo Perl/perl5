@@ -3499,14 +3499,14 @@ Perl_report_evil_fh(pTHX_ GV *gv, IO *io, I32 op)
 
     if (op == OP_phoney_OUTPUT_ONLY || op == OP_phoney_INPUT_ONLY) {
 	if (ckWARN(WARN_IO)) {
+	    const char *direction = (op == OP_phoney_INPUT_ONLY) ? "in" : "out";
 	    if (name && *name)
 		Perl_warner(aTHX_ packWARN(WARN_IO),
 			    "Filehandle %s opened only for %sput",
-			    name, (op == OP_phoney_INPUT_ONLY ? "in" : "out"));
+			    name, direction);
 	    else
 		Perl_warner(aTHX_ packWARN(WARN_IO),
-			    "Filehandle opened only for %sput",
-			    (op == OP_phoney_INPUT_ONLY ? "in" : "out"));
+			    "Filehandle opened only for %sput", direction);
 	}
     }
     else {
