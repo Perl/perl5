@@ -181,11 +181,11 @@ START_MY_CXT
 #undef gettimeofday
 #define gettimeofday(tp, not_used) _gettimeofday(aTHX_ tp, not_used)
 
-/* If the performance counter delta drifts more than 2 seconds from the
- * system time then we recalibrate to system time.  This means we may
+/* If the performance counter delta drifts more than 0.5 seconds from the
+ * system time then we recalibrate to the system time.  This means we may
  * move *backwards* in time! */
 
-#define MAX_DIFF Const64(20000000)
+#define MAX_DIFF Const64(5000000)
 
 static int
 _gettimeofday(pTHX_ struct timeval *tp, void *not_used)
