@@ -143,7 +143,14 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	if (num_svs != 0) {
 	     Perl_croak(aTHX_ "panic: sysopen with multiple args");
 	}
-	if (rawmode & (O_WRONLY|O_RDWR|O_APPEND|O_CREAT|O_TRUNC))
+	if (rawmode & (O_WRONLY|O_RDWR|O_CREAT
+#ifdef O_APPEND	/* Not fully portable. */
+		       |O_APPEND
+#endif
+#ifdef O_TRUNC	/* Not fully portable. */
+		       |O_TRUNC
+#endif
+		       ))
 	    TAINT_PROPER("sysopen");
 	mode[ix++] = '#'; /* Marker to openn to use numeric "sysopen" */
 
