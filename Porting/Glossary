@@ -296,7 +296,7 @@ cpp (Loc.U):
 	the value is reset to a plain "cpp" and is not useful.
 
 cpp_stuff (cpp_stuff.U):
-	This variable contains an identification of the catenation mechanism
+	This variable contains an identification of the concatenation mechanism
 	used by the C preprocessor.
 
 cppccsymbols (Cppsym.U):
@@ -1478,6 +1478,11 @@ d_pthread_atfork (d_pthread_atfork.U):
 	This variable conditionally defines the HAS_PTHREAD_ATFORK symbol,
 	which indicates to the C program that the pthread_atfork()
 	routine is available.
+
+d_pthread_attr_setscope (d_pthread_attr_ss.U):
+	This variable conditionally defines HAS_PTHREAD_ATTR_SETSCOPE if
+	pthread_attr_setscope() is available to set the contention scope
+	attribute of a thread attribute object.
 
 d_pthread_yield (d_pthread_y.U):
 	This variable conditionally defines the HAS_PTHREAD_YIELD
@@ -3446,7 +3451,7 @@ make_set_make (make.U):
 	make_set_make="MAKE=$make"	# if it doesn't.
 
 	This uses a comment character to distinguish a
-	'set' value (from a previous config.sh or Configure '-D' option)
+	'set' value (from a previous config.sh or Configure -D option)
 	from an uncomputed value.
 
 mallocobj (mallocsrc.U):
@@ -3555,7 +3560,7 @@ myuname (Oldconfig.U):
 	whole thing is then lower-cased.
 
 n (n.U):
-	This variable contains the '-n' flag if that is what causes the echo
+	This variable contains the -n flag if that is what causes the echo
 	command to suppress newline.  Otherwise it is null.  Correct usage is
 	$echo $n "prompt for a question: $c".
 
@@ -4018,9 +4023,9 @@ sh (sh.U):
 	/bin/sh, though it's possible that some systems will have /bin/ksh,
 	/bin/pdksh, /bin/ash, /bin/bash, or even something such as
 	D:/bin/sh.exe.
-	This unit comes before Options.U, so you can't set sh with a '-D'
+	This unit comes before Options.U, so you can't set sh with a -D
 	option, though you can override this (and startsh)
-	with '-O -Dsh=/bin/whatever -Dstartsh=whatever'
+	with -O -Dsh=/bin/whatever -Dstartsh=whatever
 
 shar (Loc.U):
 	This variable is defined but not used by Configure.
@@ -4271,7 +4276,7 @@ spackage (package.U):
 
 spitshell (spitshell.U):
 	This variable contains the command necessary to spit out a runnable
-	shell on this system.  It is either cat or a grep '-v' for # comments.
+	shell on this system.  It is either cat or a grep -v for # comments.
 
 sPRId64 (quadfio.U):
 	This variable, if defined, contains the string used by stdio to

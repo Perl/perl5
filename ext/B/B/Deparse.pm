@@ -921,6 +921,10 @@ sub maybe_local {
     if ($op->private & (OPpLVAL_INTRO|$our_intro)
 	and not $self->{'avoid_local'}{$$op}) {
 	my $our_local = ($op->private & OPpLVAL_INTRO) ? "local" : "our";
+	if( $our_local eq 'our' ) {
+	    die "Unexpected our($text)\n" unless $text =~ /^\W(\w+::)*\w+\z/;
+	    $text =~ s/(\w+::)+//; 
+	}
         if (want_scalar($op)) {
 	    return "$our_local $text";
 	} else {
@@ -2316,7 +2320,7 @@ sub loop_common {
     my $body;
     my $cond = undef;
     if ($kid->name eq "lineseq") { # bare or infinite loop 
-	if (is_state $kid->last) { # infinite
+	if ($kid->last->name eq "unstack") { # infinite
 	    $head = "while (1) "; # Can't use for(;;) if there's a continue
 	    $cond = "";
 	} else {
@@ -2339,17 +2343,14 @@ sub loop_common {
 		$var = $self->pp_threadsv($enter, 1);
 	    } else { # regular my() variable
 		$var = $self->pp_padsv($enter, 1);
-		if ($self->padname_sv($enter->targ)->IVX ==
-		    $kid->first->first->sibling->last->cop_seq)
-		{
-		    # If the scope of this variable closes at the last
-		    # statement of the loop, it must have been
-		    # declared here.
-		    $var = "my " . $var;
-		}
 	    }
 	} elsif ($var->name eq "rv2gv") {
 	    $var = $self->pp_rv2sv($var, 1);
+	    if ($enter->private & OPpOUR_INTRO) {
+		# our declarations don't have package names
+		$var =~ s/^(.).*::/$1/;
+		$var = "our $var";
+	    }
 	} elsif ($var->name eq "gv") {
 	    $var = "\$" . $self->deparse($var, 1);
 	}
@@ -2365,18 +2366,18 @@ sub loop_common {
 	return "{;}"; # {} could be a hashref
     }
     # If there isn't a continue block, then the next pointer for the loop
-    # will point to the unstack, which is kid's penultimate child, except
+    # will point to the unstack, which is kid's last child, except
     # in a bare loop, when it will point to the leaveloop. When neither of
-    # these conditions hold, then the third-to-last child in the continue
+    # these conditions hold, then the second-to-last child is the continue
     # block (or the last in a bare loop).
     my $cont_start = $enter->nextop;
     my $cont;
-    if ($$cont_start != $$op && ${$cont_start->sibling} != ${$body->last}) {
+    if ($$cont_start != $$op && ${$cont_start} != ${$body->last}) {
 	if ($bare) {
 	    $cont = $body->last;
 	} else {
 	    $cont = $body->first;
-	    while (!null($cont->sibling->sibling->sibling)) {
+	    while (!null($cont->sibling->sibling)) {
 		$cont = $cont->sibling;
 	    }
 	}

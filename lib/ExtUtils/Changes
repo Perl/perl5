@@ -1,4 +1,82 @@
-6.06_05
+6.10_04 Fri May 23 01:13:04 PDT 2003
+    - Working around BSD threaading bug in version check. [from bleadperl]
+    - Added the Makefile to the dist dependencies. (Slaven Rezic)
+    - Reversing the find_perl() version check failure warning introced in
+      6.10_03.  Too talkative, warned when nothing was wrong.
+    * Fixing META.yml auto-addition when there's no newline at the end 
+      of the MANIFEST [rt.cpan.org 2444]
+    * Making it a bit more obvious in the MANIFEST where META.yml comes from.
+    - Fixed $_ clobbering in ExtUtils::Manifest functions.
+    - [rt.cpan.org 2591] some LD_RUN_PATH thing (Marek Rouchal)
+    - Added core.\d+ files to 'make clean' [rt.cpan.org 2543] (Slaven Rezic)
+    - INST_* targets were expanded too early (Stas Bekman)
+    - Adding ExtUtils::MakeMaker::bytes (bytes.pm backwards compat wrapper)
+    - Fixing MM_MacOS so it will compile on 5.5.x machines (use bytes wrapper)
+    * Reducing perldepend set of CORE/*.h dependencies to what 5.5.3 has.
+      5.5.3 should be able to compile XS again.
+    * Eliminating fakethr.h and perlsfio.h from VMS's perldepend as they
+      sometimes don't get installed.
+    - ExtUtils::Install was making a few directories even with the
+      "don't really do it" switch on (Slaven Rezic)
+    * can build static linked perl binaries again.  Probably damaged in
+      6.06_01 when $self->{MAKEFILE} became FIRST_MAKEFILE. (Nick Clark)
+
+6.10_03 Fri Apr 11 00:21:25 PDT 2003
+    * Added NO_META WriteMakefile() option to suppress generation of
+      META.yml. (Spoon, rt.cpan.org 2359)
+    - Spurious linebreak in uninstall_from_sitedirs on VMS (Craig Berry)
+    * A bit after 6.05 man page names would come out as lib::Foo::Bar
+      if the module name didn't contain a ::.  Found with podulators.
+      Fixed.
+    * Skipping installation of RCS ,v files.
+    * 'make ci' was busted between 6.05 and 6.06_01.  Fixed. (Andreas)
+    - 'make test' was broken when there's no tests.  Introduced in 6.06_03.
+      (Stas Bekman)
+    - Solving some directory depth problems in tests on oldish VMS systems.
+      (Craig Berry)
+    - Fixing MM_MacOS so it compiles on UTF-8 systems. (Jarkko)
+    - Making find_perl() more talkative when the version check fails
+      miserably.
+    - Fixing PERL_ARCHIVE on VMS so XS can compile again (Craig Berry)
+
+6.10_02 Mon Apr  7 00:57:15 PDT 2003
+    * Removed 2>&1 experiment introduced in 6.10_01 for all non-Unixen
+      except for OS/2.  Thought Perl might emulate `... 2>&1`.  It doesn't.
+      Just on OS/2.
+
+6.10_01 Sun Apr  6 19:31:42 PDT 2003
+    - Making install "Skip ... (unchanged)" message happen consistently
+    - Checking file sizes as well as modification times when deciding
+      to skip installing a file.
+    - OS/2 was using $(RM) instead of $(RM_F) (Ilya)
+    - OS/2 needs .dll removed on failed build (Ilya)
+    - fixin() was assuming that rename() can overwrite the target (Ilya)
+    - manifypods target was empty if there are no pods to manify.  Put in
+      at least $(NOECHO) $(NOOP)
+    - Cygwin test to check for finding pod2man when building the perl core
+      removed.  No longer relevent.
+    - Small fixes for dmake (Mattia Barbon)
+    * Added "Reporting bugs" section to the PATCHING doc.
+    - Minor bug in compile test missed ExtUtils::Liblist::Kid
+    - Removing $(VERSION_FROM) from Makefile dependency.  It was too
+      annoying to rebuild the Makefile every time the module changed.
+      Mentioned it in the FAQ instead.
+    - Fixing PERL_ARCHIVE macro on VMS.  Apparently it never appeared
+      properly before. (Craig Berry)
+    - Fixing ECHO on dmake.
+    - Adding os_flavor() and os_flavor_is()
+    - Making basic.t error output combine STDOUT & STDERR for easier 
+      reading.
+    * ExtUtils::Manifest will now work case insensitively.
+    - Fixed 'subroutine redefined' warnings in 00compile.t
+    - Fixed it so typemaps are only looked for in the perl core library.
+    * Hacking around VMS filesystem problems reconstructing package names
+      from filenames in ExtUtils::Installed.  (Jesper Naur)
+
+# There was no 6.06, I jumped straight to 6.10_XX because there's been
+# so much change between 6.05 and now.
+
+6.06_05 Mon Mar 31 02:44:11 PST 2003
     - Syncing into bleadperl.  Minor nits revealed...
     - AutoSplit open filehandle bug was fixed in bleadperl.  Averted a
       warning because of this.

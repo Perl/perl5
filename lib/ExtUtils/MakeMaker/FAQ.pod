@@ -1,6 +1,6 @@
 package ExtUtils::MakeMaker::FAQ;
 
-our $VERSION = '0.02';
+(our $VERSION) = sprintf "%03d", q$Revision: 1.6 $ =~ /Revision:\s+(\S+)/;
 
 1;
 __END__
@@ -54,6 +54,47 @@ Its primary advantages are:
 Module::Build is the official heir apparent to MakeMaker and we
 encourage people to work on M::B rather than spending time improving
 MakeMaker.
+
+=back
+
+=head2 Module Writing
+
+=over 4
+
+=item How do I keep my $VERSION up to date without resetting it manually?
+
+Often you want to manually set the $VERSION in the main module
+distribution because this is the version that everybody sees on CPAN
+and maybe you want to customize it a bit.  But for all the other
+modules in your dist, $VERSION is really just bookkeeping and all that's
+important is it goes up every time the module is changed.  Doing this
+by hand is a pain and you often forget.
+
+Simplest way to do it automatically is to use your version control
+system's revision number (you are using version control, right?).
+
+In CVS and RCS you use $Revision: 1.6 $ writing it like so:
+
+    $VERSION = sprintf "%d.%03d", q$Revision: 1.6 $ =~ /(\d+)/g;
+
+On your next check in, $Revision: 1.6 $ will magically be expanded to contain
+the current revision #.
+
+    $VERSION = sprintf "%d.%03d", q$Revision: 1.6 $ =~ /(\d+)/g;
+
+Every time the file is checked in the $Revision: 1.6 $ will be updated,
+updating your $VERSION.
+
+In CVS version 1.9 is followed by 1.10.  Since CPAN compares version
+numbers numerically we use a sprintf() to convert 1.9 to 1.009 and
+1.10 to 1.010 which compare properly.
+
+If branches are involved (ie. $Revision: 1.5.3.4) its a little more
+complicated.
+
+    # must be all on one line or MakeMaker will get confused.
+    $VERSION = do { my @r = (q$Revision: 1.6 $ =~ /\d+/g); sprintf "%d."."%03d" x $#r, @r };
+
 
 =back
 

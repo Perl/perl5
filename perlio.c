@@ -434,10 +434,7 @@ PerlIO_findFILE(PerlIO *pio)
  * Why is this here - not in perlio.h?  RMB
  */
 void PerlIO_debug(const char *fmt, ...)
-#ifdef CHECK_FORMAT
-    __attribute__ ((__format__(__printf__, 1, 2)))
-#endif
-;
+    __attribute__format__(__printf__, 1, 2);
 
 void
 PerlIO_debug(const char *fmt, ...)

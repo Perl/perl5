@@ -32,7 +32,6 @@ use Storable qw(store nstore retrieve thaw freeze);
 # point Test::More tidily prints up 1..79 as if I meant to finish there.
 use Test::More tests=>148;
 use bytes ();
-use Encode qw(is_utf8);
 my %utf8hash;
 
 $Storable::canonical = $Storable::canonical; # Shut up a used only once warning.

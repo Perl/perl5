@@ -126,7 +126,6 @@ if (!$have_usleep || !$have_gettimeofday) {
 }
 else {
     my $r = [gettimeofday()];
-    #jTime::HiRes::sleep 0.5;
     Time::HiRes::sleep( 0.5 );
     my $f = tv_interval $r;
     ok 11, $f > 0.4 && $f < 0.9, "slept $f instead of 0.5 secs.";

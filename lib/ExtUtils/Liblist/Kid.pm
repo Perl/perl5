@@ -148,9 +148,6 @@ sub _unix_os2_ext {
 		next;
 	    }
 	    warn "'-l$thislib' found at $fullname\n" if $verbose;
-	    my($fullnamedir) = dirname($fullname);
-	    push @ld_run_path, $fullnamedir 
-              unless $ld_run_path_seen{$fullnamedir}++;
 	    push @libs, $fullname unless $libs_seen{$fullname}++;
 	    $found++;
 	    $found_lib++;
@@ -160,6 +157,13 @@ sub _unix_os2_ext {
 	    # what do we know about this library...
 	    my $is_dyna = ($fullname !~ /\Q$Config_libext\E\z/);
 	    my $in_perl = ($libs =~ /\B-l\Q${thislib}\E\b/s);
+
+            # include the path to the lib once in the dynamic linker path
+            # but only if it is a dynamic lib and not in Perl itself
+            my($fullnamedir) = dirname($fullname);
+            push @ld_run_path, $fullnamedir
+                 if $is_dyna && !$in_perl &&
+                    !$ld_run_path_seen{$fullnamedir}++;
 
 	    # Do not add it into the list if it is already linked in
 	    # with the main perl executable.

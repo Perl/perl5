@@ -4582,6 +4582,11 @@ $   d_sched_yield="undef"
 $   sched_yield = " "
 $ ENDIF
 $!
+$! Check for pthread_attr_setscope and PTHREAD_SCOPE_SYSTEM.
+$! (The actual test is to be written.)
+$!
+$ d_pthread_attr_setscope="undef"
+$!
 $! Check for generic pointer size
 $!
 $ echo4 "Checking to see how big your pointers are..." 
@@ -5388,6 +5393,7 @@ $ WC "d_pipe='define'"
 $ WC "d_poll='" + d_poll + "'"
 $ WC "d_procselfexe='undef'"
 $ WC "d_pthread_atfork='undef'"
+$ WC "d_pthread_attr_setscope='" + d_pthread_attr_setscope + "'"
 $ WC "d_pthread_yield='" + d_pthread_yield + "'"
 $ WC "d_pthreads_created_joinable='" + d_pthreads_created_joinable + "'"
 $ WC "d_pwage='undef'"
