@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..71\n";
+print "1..72\n";
 
 #
 # @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
