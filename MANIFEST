@@ -2788,6 +2788,7 @@ t/op/vec.t			See if vectors work
 t/op/ver.t			See if v-strings and the %v format flag work
 t/op/wantarray.t		See if wantarray works
 t/op/write.t			See if write works (formats work)
+t/perl.supp			Perl valgrind suppressions
 t/pod/emptycmd.t		Test empty pod directives
 t/pod/emptycmd.xr		Expected results for emptycmd.t
 t/pod/find.t			See if Pod::Find works

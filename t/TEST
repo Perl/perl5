@@ -112,7 +112,7 @@ unless (@ARGV) {
         warn "$0: cannot open $mani: $!\n";
     }
     unless ($core) {
-	_find_tests('pod');  
+	_find_tests('pod');
 	_find_tests('x2p');
 	_find_tests('japh') if $torture;
     }
@@ -265,7 +265,9 @@ EOT
 	    my $perl = $ENV{PERL} || './perl';
 	    my $redir = ($^O eq 'VMS' || $ENV{PERL_VALGRIND} ? '2>&1' : '');
 	    if ($ENV{PERL_VALGRIND}) {
-		$perl = "valgrind --num-callers=50 --leak-check=yes $perl";
+		$perl = "valgrind --suppressions=perl.supp --leak-check=yes "
+                               . "--leak-resolution=high --show-reachable=yes "
+                               . "--num-callers=50 $perl";
 	    }
 	    my $run = "$perl" . _quote_args("$testswitch $switch $utf") . " $test $redir|";
 	    open(RESULTS,$run) or print "can't run '$run': $!.\n";
@@ -364,30 +366,30 @@ EOT
 	close RESULTS;
 	if ($ENV{PERL_VALGRIND}) {
 	    if (@valgrind) {
-		my $skip_pthread_mutex_unlock;
+		my $leaks = 0;
+		my $errors = 0;
 		for my $i (0..$#valgrind) {
 		    local $_ = $valgrind[$i];
-		    my $pid;
-		    if (/^==(\d+)== pthread_mutex_unlock: mutex is not locked/ &&
-			($pid = $1) &&
-			$valgrind[$i+2] =~ m{\(in .+/libc.+\.so\)}) {
-			$skip_pthread_mutex_unlock++;
-		    } elsif (/^==\d+== ERROR SUMMARY: (\d+) errors? /) {
-			$errors = $1;
+		    if (/^==\d+== ERROR SUMMARY: (\d+) errors? /) {
+			$errors += $1;   # there may be multiple error summaries
+		    } elsif (/^==\d+== LEAK SUMMARY:/) {
+			for my $off (1 .. 4) {
+			    if ($valgrind[$i+$off] =~
+				/(?:lost|reachable):\s+\d+ bytes in (\d+) blocks/) {
+				$leaks += $1;
+			    }
+			}
 		    }
 		}
-		if (defined $errors) {
-		    $errors -= $skip_pthread_mutex_unlock;
-		    if ($errors) {
-			if (open(V, ">$test.valgrind")) {
-			    for (@valgrind) {
-				print V $_;
-			    }
-			    close V;
-			    $valgrind++;
-			} else {
-			    warn "$0: Failed to create '$test.valgrind': $!\n";
+		if ($errors or $leaks) {
+		    if (open(V, ">$test.valgrind")) {
+			for (@valgrind) {
+			    print V $_;
 			}
+			close V;
+			$valgrind++;
+		    } else {
+			warn "$0: Failed to create '$test.valgrind': $!\n";
 		    }
 		}
 	    } else {

@@ -112,7 +112,13 @@ is("\U\x{587}" , "\x{535}\x{552}", "ligature uppercase");
 
 # mktables had problems where many-to-one case mappings didn't work right.
 # The lib/unifold.t should give the fourth folding, "casefolding", a good
-# workout.
+# workout. 
+# \x{01C4} is LATIN CAPITAL LETTER DZ WITH CARON
+# \x{01C5} is LATIN CAPITAL LETTER D WITH SMALL LETTER Z WITH CARON
+# \x{01C6} is LATIN SMALL LETTER DZ WITH CARON
+# \x{03A3} is GREEK CAPITAL LETTER SIGMA
+# \x{03C2} is GREEK SMALL LETTER FINAL SIGMA
+# \x{03C3} is GREEK SMALL LETTER SIGMA
 
 is(lc("\x{1C4}") , "\x{1C6}",      "U+01C4 lc is U+01C6");
 is(lc("\x{1C5}") , "\x{1C6}",      "U+01C5 lc is U+01C6, too");
