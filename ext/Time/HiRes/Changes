@@ -1,5 +1,11 @@
 Revision history for Perl extension Time::HiRes.
 
+1.57
+	- Window/Cygwin: if the performance counter drifts by more than
+	  two seconds from the system clock (due to ntp adjustments,
+	  for example), recalibrate our internal counter: from Jan Dubois,
+	  based on [cpan #5933] by Jerry D. Hedden.
+
 1.56
 	- Give a clearer message if the tests timeout (perl change #22253)
 	- Don't use /tmp or its moral equivalents (perl bug #15036,

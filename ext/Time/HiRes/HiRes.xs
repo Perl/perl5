@@ -181,6 +181,12 @@ START_MY_CXT
 #undef gettimeofday
 #define gettimeofday(tp, not_used) _gettimeofday(aTHX_ tp, not_used)
 
+/* If the performance counter delta drifts more than 2 seconds from the
+ * system time then we recalibrate to system time.  This means we may
+ * move *backwards* in time! */
+
+#define MAX_DIFF Const64(20000000)
+
 static int
 _gettimeofday(pTHX_ struct timeval *tp, void *not_used)
 {
@@ -190,11 +196,19 @@ _gettimeofday(pTHX_ struct timeval *tp, void *not_used)
     FT_t ft;
 
     if (MY_CXT.run_count++) {
+	__int64 diff;
+	FT_t filtim;
+	GetSystemTimeAsFileTime(&filtim.ft_val);
         QueryPerformanceCounter((LARGE_INTEGER*)&ticks);
         ticks -= MY_CXT.base_ticks;
         ft.ft_i64 = MY_CXT.base_systime_as_filetime.ft_i64
                     + Const64(10000000) * (ticks / MY_CXT.tick_frequency)
                     +(Const64(10000000) * (ticks % MY_CXT.tick_frequency)) / MY_CXT.tick_frequency;
+	diff = ft.ft_i64 - MY_CXT.base_systime_as_filetime.ft_i64;
+	if (diff < -MAX_DIFF || diff > MAX_DIFF) {
+	     MY_CXT.base_ticks = ticks;
+	     ft.ft_i64 = filtim.ft_i64;
+	}
     }
     else {
         QueryPerformanceFrequency((LARGE_INTEGER*)&MY_CXT.tick_frequency);
