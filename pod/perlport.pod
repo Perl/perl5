@@ -1784,11 +1784,14 @@ distribution available at http://www.perl.com/CPAN/src/index.html
 	NetBSD
 	OpenBSD
 	OS/2
+	QNX
 	Rhapsody/Darwin 2)
 	Solaris
+	SVR4
 	Tru64 UNIX      3)
 	UNICOS
 	UNICOS/mk
+	Unixware
 	VMS
 	VOS
 	Windows 3.1     1)
@@ -1817,10 +1820,8 @@ just fine with 5.6.0.
 	NextSTEP
 	OpenSTEP
 	PowerMAX
-	QNX
 	SCO ODT/OSR	
 	SunOS
-	SVR4
 	Ultrix
 
 The following platform worked for the previous major release (5.005_03
@@ -1845,7 +1846,7 @@ as OS390.  Contact the mailing list perl-mvs@perl.org for more details.
 MacOS (Classic, pre-X) is almost 5.6.0-ready; building from the source
 does work with 5.6.0, but additional MacOS specific source code is needed
 for a complete port.  Contact the mailing list macperl-porters@macperl.org
-for more more information.
+for more information.
 
 The following platforms have been known to build Perl from source in
 the past, but we haven't been able to verify their status for the

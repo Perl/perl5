@@ -858,7 +858,7 @@ it's equivalent to calling fflush() and fsync() from C.
 
 =head2 SDBM_File
 
-SDBM_File works peroperly on VMS. It has, however, one minor
+SDBM_File works properly on VMS. It has, however, one minor
 difference. The database directory file created has a F<.sdbm_dir>
 extension rather than a F<.dir> extension. F<.dir> files are VMS filesystem
 directory files, and using them for other purposes could cause unacceptable
