@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Aug 30 16:44:38 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Thu Aug 31 07:18:29 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -735,12 +735,14 @@ d_PRIGldbl=''
 d_PRIeldbl=''
 d_PRIfldbl=''
 d_PRIgldbl=''
+d_SCNfldbl=''
 sPRIEldbl=''
 sPRIFldbl=''
 sPRIGldbl=''
 sPRIeldbl=''
 sPRIfldbl=''
 sPRIgldbl=''
+sSCNfldbl=''
 lseeksize=''
 lseektype=''
 make_set_make=''
@@ -7710,6 +7712,8 @@ fi
 
 if $test X"$sPRIfldbl" = X; then
 	echo "Cannot figure out how to print long doubles." >&4
+else
+	sSCNfldbl=$sPRIfldbl	# expect consistency
 fi
 
 $rm -f try try.*
@@ -7719,9 +7723,11 @@ fi # d_longdbl
 case "$sPRIfldbl" in
 '')	d_PRIfldbl="$undef"; d_PRIgldbl="$undef"; d_PRIeldbl="$undef"; 
 	d_PRIFldbl="$undef"; d_PRIGldbl="$undef"; d_PRIEldbl="$undef"; 
+	d_SCNfldbl="$undef";
 	;;
 *)	d_PRIfldbl="$define"; d_PRIgldbl="$define"; d_PRIeldbl="$define"; 
 	d_PRIFldbl="$define"; d_PRIGldbl="$define"; d_PRIEldbl="$define"; 
+	d_SCNfldbl="$define";
 	;;
 esac
 
@@ -15450,6 +15456,7 @@ d_PRIi64='$d_PRIi64'
 d_PRIo64='$d_PRIo64'
 d_PRIu64='$d_PRIu64'
 d_PRIx64='$d_PRIx64'
+d_SCNfldbl='$d_SCNfldbl'
 d_access='$d_access'
 d_accessx='$d_accessx'
 d_alarm='$d_alarm'
@@ -16026,6 +16033,7 @@ sPRIi64='$sPRIi64'
 sPRIo64='$sPRIo64'
 sPRIu64='$sPRIu64'
 sPRIx64='$sPRIx64'
+sSCNfldbl='$sSCNfldbl'
 sched_yield='$sched_yield'
 scriptdir='$scriptdir'
 scriptdirexp='$scriptdirexp'

@@ -3875,23 +3875,24 @@ Perl_my_fflush_all(pTHX)
 NV
 Perl_my_atof(pTHX_ const char* s)
 {
+    NV x = 0.0;
 #ifdef USE_LOCALE_NUMERIC
     if ((PL_hints & HINT_LOCALE) && PL_numeric_local) {
-	NV x, y;
+	NV y;
 
-	x = Perl_atof(s);
+	Perl_atof2(s, x);
 	SET_NUMERIC_STANDARD();
-	y = Perl_atof(s);
+	Perl_atof2(s, y);
 	SET_NUMERIC_LOCAL();
 	if ((y < 0.0 && y < x) || (y > 0.0 && y > x))
 	    return y;
-	return x;
     }
     else
-	return Perl_atof(s);
+	Perl_atof2(s, x);
 #else
-    return Perl_atof(s);
+    Perl_atof2(s, x);
 #endif
+    return x;
 }
 
 void
