@@ -827,9 +827,8 @@ Perl_leave_scope(pTHX_ I32 base)
 		 * if a my variable that was made readonly is going out of
 		 * scope, we want to remove the readonlyness so that it can
 		 * go out of scope quietly
-		 * Disabled as I don't see need yet NI-S 2001/12/18
 		 */
-		if (0 && SvPADMY(sv) && ! SvFAKE(sv))
+		if (SvPADMY(sv) && !SvFAKE(sv))
 		    SvREADONLY_off(sv);
 
 		if (SvTHINKFIRST(sv))
