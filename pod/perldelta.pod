@@ -2596,11 +2596,8 @@ The following tests are known to fail:
  ../ext/POSIX/t/posix.t                    31    1   3.23%  10
 
 If you are building on a UFS partition, you will also probably see
-this failure:
-
- ext/POSIX/t/posix...................FAILED at test 10
-
-This is caused by Darwin's UFS not supporting inode change time.
+t/op/stat.t subtest #9 fail.  This is caused by Darwin's UFS not
+supporting inode change time.
 
 =head2 OS/390
 
