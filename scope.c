@@ -824,7 +824,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 	case SAVEt_DESTRUCTOR:
 	    ptr = SSPOPPTR;
-	    CALLDESTRUCTOR(aTHX_ ptr);
+	    CALLDESTRUCTOR(aTHXo_ ptr);
 	    break;
 	case SAVEt_REGCONTEXT:
 	case SAVEt_ALLOC:

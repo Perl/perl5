@@ -546,7 +546,7 @@ Perl_new_collate(pTHX_ const char *newcoll)
 }
 
 void
-perl_set_numeric_radix(void)
+Perl_set_numeric_radix(pTHX)
 {
 #ifdef USE_LOCALE_NUMERIC
 # ifdef HAS_LOCALECONV
@@ -589,7 +589,7 @@ Perl_new_numeric(pTHX_ const char *newnum)
 	PL_numeric_name = savepv(newnum);
 	PL_numeric_standard = (strEQ(newnum, "C") || strEQ(newnum, "POSIX"));
 	PL_numeric_local = TRUE;
-	perl_set_numeric_radix();
+	set_numeric_radix();
     }
 
 #endif /* USE_LOCALE_NUMERIC */
@@ -618,7 +618,7 @@ Perl_set_numeric_local(pTHX)
 	setlocale(LC_NUMERIC, PL_numeric_name);
 	PL_numeric_standard = FALSE;
 	PL_numeric_local = TRUE;
-	perl_set_numeric_radix();
+	set_numeric_radix();
     }
 
 #endif /* USE_LOCALE_NUMERIC */

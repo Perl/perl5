@@ -169,11 +169,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 #define CHR_SVLEN(sv) (UTF ? sv_len_utf8(sv) : SvCUR(sv))
 #define CHR_DIST(a,b) (UTF ? utf8_distance(a,b) : a - b)
 
-STATIC void
-S_clear_re(pTHX_ void *r)
-{
-    ReREFCNT_dec((regexp *)r);
-}
+static void clear_re(pTHXo_ void *r);
 
 STATIC void
 S_scan_commit(pTHX_ scan_data_t *data)
@@ -3390,3 +3386,17 @@ Perl_save_re_context(pTHX)
     SAVEPPTR(PL_reg_starttry);		/* from regexec.c */    
 #endif
 }
+
+#ifdef PERL_OBJECT
+#define NO_XSLOCKS
+#include "XSUB.h"
+#undef this
+#define this pPerl
+#endif
+
+static void
+clear_re(pTHXo_ void *r)
+{
+    ReREFCNT_dec((regexp *)r);
+}
+

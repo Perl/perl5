@@ -511,13 +511,13 @@ statusvalue_vms
 sublex_info
 thrsv
 threadnum
-PL_piMem
-PL_piENV
-PL_piStdIO
-PL_piLIO
-PL_piDir
-PL_piSock
-PL_piProc
+PL_Mem
+PL_Env
+PL_StdIO
+PL_LIO
+PL_Dir
+PL_Sock
+PL_Proc
 cshname
 threadsv_names
 thread
@@ -544,7 +544,7 @@ sub readvars(\%$$) {
 	or die "$0: Can't open $file: $!\n";
     while (<FILE>) {
 	s/[ \t]*#.*//;		# Delete comments.
-	if (/PERLVARI?C?\($pre(\w+),\s*([^,)]+)/) {
+	if (/PERLVARA?I?C?\($pre(\w+),\s*([^,)]+)/) {
 	    $$syms{$1} = $2;
 	}
     }
@@ -675,13 +675,13 @@ void Perl_deb(const char pat, ...)
 {
 }
 
-#undef PL_piMem
-#undef PL_piENV
-#undef PL_piStdIO
-#undef PL_piLIO
-#undef PL_piDir
-#undef PL_piSock
-#undef PL_piProc
+#undef PL_Mem
+#undef PL_Env
+#undef PL_StdIO
+#undef PL_LIO
+#undef PL_Dir
+#undef PL_Sock
+#undef PL_Proc
 
 int *        _win32_errno(void)
 {
@@ -690,27 +690,27 @@ int *        _win32_errno(void)
 
 FILE*        _win32_stdin(void)
 {
-    return (FILE*)pPerl->PL_piStdIO->Stdin();
+    return (FILE*)pPerl->PL_StdIO->Stdin();
 }
 
 FILE*        _win32_stdout(void)
 {
-    return (FILE*)pPerl->PL_piStdIO->Stdout();
+    return (FILE*)pPerl->PL_StdIO->Stdout();
 }
 
 FILE*        _win32_stderr(void)
 {
-    return (FILE*)pPerl->PL_piStdIO->Stderr();
+    return (FILE*)pPerl->PL_StdIO->Stderr();
 }
 
 int          _win32_ferror(FILE *fp)
 {
-    return pPerl->PL_piStdIO->Error((PerlIO*)fp, ErrorNo());
+    return pPerl->PL_StdIO->Error((PerlIO*)fp, ErrorNo());
 }
 
 int          _win32_feof(FILE *fp)
 {
-    return pPerl->PL_piStdIO->Eof((PerlIO*)fp, ErrorNo());
+    return pPerl->PL_StdIO->Eof((PerlIO*)fp, ErrorNo());
 }
 
 char*	     _win32_strerror(int e)
@@ -725,12 +725,12 @@ void	     _win32_perror(const char *str)
 
 int          _win32_vfprintf(FILE *pf, const char *format, va_list arg)
 {
-    return pPerl->PL_piStdIO->Vprintf((PerlIO*)pf, ErrorNo(), format, arg);
+    return pPerl->PL_StdIO->Vprintf((PerlIO*)pf, ErrorNo(), format, arg);
 }
 
 int          _win32_vprintf(const char *format, va_list arg)
 {
-    return pPerl->PL_piStdIO->Vprintf(pPerl->PL_piStdIO->Stdout(), ErrorNo(), format, arg);
+    return pPerl->PL_StdIO->Vprintf(pPerl->PL_StdIO->Stdout(), ErrorNo(), format, arg);
 }
 
 int          _win32_fprintf(FILE *pf, const char *format, ...)
@@ -755,532 +755,532 @@ int          _win32_printf(const char *format, ...)
 
 size_t       _win32_fread(void *buf, size_t size, size_t count, FILE *pf)
 {
-    return pPerl->PL_piStdIO->Read((PerlIO*)pf, buf, (size*count), ErrorNo());
+    return pPerl->PL_StdIO->Read((PerlIO*)pf, buf, (size*count), ErrorNo());
 }
 
 size_t       _win32_fwrite(const void *buf, size_t size, size_t count, FILE *pf)
 {
-    return pPerl->PL_piStdIO->Write((PerlIO*)pf, buf, (size*count), ErrorNo());
+    return pPerl->PL_StdIO->Write((PerlIO*)pf, buf, (size*count), ErrorNo());
 }
 
 FILE*        _win32_fopen(const char *path, const char *mode)
 {
-    return (FILE*)pPerl->PL_piStdIO->Open(path, mode, ErrorNo());
+    return (FILE*)pPerl->PL_StdIO->Open(path, mode, ErrorNo());
 }
 
 FILE*        _win32_fdopen(int fh, const char *mode)
 {
-    return (FILE*)pPerl->PL_piStdIO->Fdopen(fh, mode, ErrorNo());
+    return (FILE*)pPerl->PL_StdIO->Fdopen(fh, mode, ErrorNo());
 }
 
 FILE*        _win32_freopen(const char *path, const char *mode, FILE *pf)
 {
-    return (FILE*)pPerl->PL_piStdIO->Reopen(path, mode, (PerlIO*)pf, ErrorNo());
+    return (FILE*)pPerl->PL_StdIO->Reopen(path, mode, (PerlIO*)pf, ErrorNo());
 }
 
 int          _win32_fclose(FILE *pf)
 {
-    return pPerl->PL_piStdIO->Close((PerlIO*)pf, ErrorNo());
+    return pPerl->PL_StdIO->Close((PerlIO*)pf, ErrorNo());
 }
 
 int          _win32_fputs(const char *s,FILE *pf)
 {
-    return pPerl->PL_piStdIO->Puts((PerlIO*)pf, s, ErrorNo());
+    return pPerl->PL_StdIO->Puts((PerlIO*)pf, s, ErrorNo());
 }
 
 int          _win32_fputc(int c,FILE *pf)
 {
-    return pPerl->PL_piStdIO->Putc((PerlIO*)pf, c, ErrorNo());
+    return pPerl->PL_StdIO->Putc((PerlIO*)pf, c, ErrorNo());
 }
 
 int          _win32_ungetc(int c,FILE *pf)
 {
-    return pPerl->PL_piStdIO->Ungetc((PerlIO*)pf, c, ErrorNo());
+    return pPerl->PL_StdIO->Ungetc((PerlIO*)pf, c, ErrorNo());
 }
 
 int          _win32_getc(FILE *pf)
 {
-    return pPerl->PL_piStdIO->Getc((PerlIO*)pf, ErrorNo());
+    return pPerl->PL_StdIO->Getc((PerlIO*)pf, ErrorNo());
 }
 
 int          _win32_fileno(FILE *pf)
 {
-    return pPerl->PL_piStdIO->Fileno((PerlIO*)pf, ErrorNo());
+    return pPerl->PL_StdIO->Fileno((PerlIO*)pf, ErrorNo());
 }
 
 void         _win32_clearerr(FILE *pf)
 {
-    pPerl->PL_piStdIO->Clearerr((PerlIO*)pf, ErrorNo());
+    pPerl->PL_StdIO->Clearerr((PerlIO*)pf, ErrorNo());
 }
 
 int          _win32_fflush(FILE *pf)
 {
-    return pPerl->PL_piStdIO->Flush((PerlIO*)pf, ErrorNo());
+    return pPerl->PL_StdIO->Flush((PerlIO*)pf, ErrorNo());
 }
 
 long         _win32_ftell(FILE *pf)
 {
-    return pPerl->PL_piStdIO->Tell((PerlIO*)pf, ErrorNo());
+    return pPerl->PL_StdIO->Tell((PerlIO*)pf, ErrorNo());
 }
 
 int          _win32_fseek(FILE *pf,long offset,int origin)
 {
-    return pPerl->PL_piStdIO->Seek((PerlIO*)pf, offset, origin, ErrorNo());
+    return pPerl->PL_StdIO->Seek((PerlIO*)pf, offset, origin, ErrorNo());
 }
 
 int          _win32_fgetpos(FILE *pf,fpos_t *p)
 {
-    return pPerl->PL_piStdIO->Getpos((PerlIO*)pf, p, ErrorNo());
+    return pPerl->PL_StdIO->Getpos((PerlIO*)pf, p, ErrorNo());
 }
 
 int          _win32_fsetpos(FILE *pf,const fpos_t *p)
 {
-    return pPerl->PL_piStdIO->Setpos((PerlIO*)pf, p, ErrorNo());
+    return pPerl->PL_StdIO->Setpos((PerlIO*)pf, p, ErrorNo());
 }
 
 void         _win32_rewind(FILE *pf)
 {
-    pPerl->PL_piStdIO->Rewind((PerlIO*)pf, ErrorNo());
+    pPerl->PL_StdIO->Rewind((PerlIO*)pf, ErrorNo());
 }
 
 FILE*        _win32_tmpfile(void)
 {
-    return (FILE*)pPerl->PL_piStdIO->Tmpfile(ErrorNo());
+    return (FILE*)pPerl->PL_StdIO->Tmpfile(ErrorNo());
 }
 
 void         _win32_setbuf(FILE *pf, char *buf)
 {
-    pPerl->PL_piStdIO->SetBuf((PerlIO*)pf, buf, ErrorNo());
+    pPerl->PL_StdIO->SetBuf((PerlIO*)pf, buf, ErrorNo());
 }
 
 int          _win32_setvbuf(FILE *pf, char *buf, int type, size_t size)
 {
-    return pPerl->PL_piStdIO->SetVBuf((PerlIO*)pf, buf, type, size, ErrorNo());
+    return pPerl->PL_StdIO->SetVBuf((PerlIO*)pf, buf, type, size, ErrorNo());
 }
 
 char*		_win32_fgets(char *s, int n, FILE *pf)
 {
-    return pPerl->PL_piStdIO->Gets((PerlIO*)pf, s, n, ErrorNo());
+    return pPerl->PL_StdIO->Gets((PerlIO*)pf, s, n, ErrorNo());
 }
 
 char*		_win32_gets(char *s)
 {
-    return _win32_fgets(s, 80, (FILE*)pPerl->PL_piStdIO->Stdin());
+    return _win32_fgets(s, 80, (FILE*)pPerl->PL_StdIO->Stdin());
 }
 
 int          _win32_fgetc(FILE *pf)
 {
-    return pPerl->PL_piStdIO->Getc((PerlIO*)pf, ErrorNo());
+    return pPerl->PL_StdIO->Getc((PerlIO*)pf, ErrorNo());
 }
 
 int          _win32_putc(int c, FILE *pf)
 {
-    return pPerl->PL_piStdIO->Putc((PerlIO*)pf, c, ErrorNo());
+    return pPerl->PL_StdIO->Putc((PerlIO*)pf, c, ErrorNo());
 }
 
 int          _win32_puts(const char *s)
 {
-    return pPerl->PL_piStdIO->Puts(pPerl->PL_piStdIO->Stdout(), s, ErrorNo());
+    return pPerl->PL_StdIO->Puts(pPerl->PL_StdIO->Stdout(), s, ErrorNo());
 }
 
 int          _win32_getchar(void)
 {
-    return pPerl->PL_piStdIO->Getc(pPerl->PL_piStdIO->Stdin(), ErrorNo());
+    return pPerl->PL_StdIO->Getc(pPerl->PL_StdIO->Stdin(), ErrorNo());
 }
 
 int          _win32_putchar(int c)
 {
-    return pPerl->PL_piStdIO->Putc(pPerl->PL_piStdIO->Stdout(), c, ErrorNo());
+    return pPerl->PL_StdIO->Putc(pPerl->PL_StdIO->Stdout(), c, ErrorNo());
 }
 
 void*        _win32_malloc(size_t size)
 {
-    return pPerl->PL_piMem->Malloc(size);
+    return pPerl->PL_Mem->Malloc(size);
 }
 
 void*        _win32_calloc(size_t numitems, size_t size)
 {
-    return pPerl->PL_piMem->Malloc(numitems*size);
+    return pPerl->PL_Mem->Malloc(numitems*size);
 }
 
 void*        _win32_realloc(void *block, size_t size)
 {
-    return pPerl->PL_piMem->Realloc(block, size);
+    return pPerl->PL_Mem->Realloc(block, size);
 }
 
 void         _win32_free(void *block)
 {
-    pPerl->PL_piMem->Free(block);
+    pPerl->PL_Mem->Free(block);
 }
 
 void         _win32_abort(void)
 {
-    pPerl->PL_piProc->Abort();
+    pPerl->PL_Proc->Abort();
 }
 
 int          _win32_pipe(int *phandles, unsigned int psize, int textmode)
 {
-    return pPerl->PL_piProc->Pipe(phandles);
+    return pPerl->PL_Proc->Pipe(phandles);
 }
 
 FILE*        _win32_popen(const char *command, const char *mode)
 {
-    return (FILE*)pPerl->PL_piProc->Popen(command, mode);
+    return (FILE*)pPerl->PL_Proc->Popen(command, mode);
 }
 
 int          _win32_pclose(FILE *pf)
 {
-    return pPerl->PL_piProc->Pclose((PerlIO*)pf);
+    return pPerl->PL_Proc->Pclose((PerlIO*)pf);
 }
 
 unsigned     _win32_sleep(unsigned int t)
 {
-    return pPerl->PL_piProc->Sleep(t);
+    return pPerl->PL_Proc->Sleep(t);
 }
 
 int	_win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
 {
-    return pPerl->PL_piProc->Spawnvp(mode, cmdname, argv);
+    return pPerl->PL_Proc->Spawnvp(mode, cmdname, argv);
 }
 
 int          _win32_mkdir(const char *dir, int mode)
 {
-    return pPerl->PL_piDir->Makedir(dir, mode, ErrorNo());
+    return pPerl->PL_Dir->Makedir(dir, mode, ErrorNo());
 }
 
 int          _win32_rmdir(const char *dir)
 {
-    return pPerl->PL_piDir->Rmdir(dir, ErrorNo());
+    return pPerl->PL_Dir->Rmdir(dir, ErrorNo());
 }
 
 int          _win32_chdir(const char *dir)
 {
-    return pPerl->PL_piDir->Chdir(dir, ErrorNo());
+    return pPerl->PL_Dir->Chdir(dir, ErrorNo());
 }
 
 #undef stat
 int          _win32_fstat(int fd,struct stat *sbufptr)
 {
-    return pPerl->PL_piLIO->FileStat(fd, sbufptr, ErrorNo());
+    return pPerl->PL_LIO->FileStat(fd, sbufptr, ErrorNo());
 }
 
 int          _win32_stat(const char *name,struct stat *sbufptr)
 {
-    return pPerl->PL_piLIO->NameStat(name, sbufptr, ErrorNo());
+    return pPerl->PL_LIO->NameStat(name, sbufptr, ErrorNo());
 }
 
 int          _win32_rename(const char *oname, const char *newname)
 {
-    return pPerl->PL_piLIO->Rename(oname, newname, ErrorNo());
+    return pPerl->PL_LIO->Rename(oname, newname, ErrorNo());
 }
 
 int          _win32_setmode(int fd, int mode)
 {
-    return pPerl->PL_piLIO->Setmode(fd, mode, ErrorNo());
+    return pPerl->PL_LIO->Setmode(fd, mode, ErrorNo());
 }
 
 long         _win32_lseek(int fd, long offset, int origin)
 {
-    return pPerl->PL_piLIO->Lseek(fd, offset, origin, ErrorNo());
+    return pPerl->PL_LIO->Lseek(fd, offset, origin, ErrorNo());
 }
 
 long         _win32_tell(int fd)
 {
-    return pPerl->PL_piStdIO->Tell((PerlIO*)fd, ErrorNo());
+    return pPerl->PL_StdIO->Tell((PerlIO*)fd, ErrorNo());
 }
 
 int          _win32_dup(int fd)
 {
-    return pPerl->PL_piLIO->Dup(fd, ErrorNo());
+    return pPerl->PL_LIO->Dup(fd, ErrorNo());
 }
 
 int          _win32_dup2(int h1, int h2)
 {
-    return pPerl->PL_piLIO->Dup2(h1, h2, ErrorNo());
+    return pPerl->PL_LIO->Dup2(h1, h2, ErrorNo());
 }
 
 int          _win32_open(const char *path, int oflag,...)
 {
-    return pPerl->PL_piLIO->Open(path, oflag, ErrorNo());
+    return pPerl->PL_LIO->Open(path, oflag, ErrorNo());
 }
 
 int          _win32_close(int fd)
 {
-    return pPerl->PL_piLIO->Close(fd, ErrorNo());
+    return pPerl->PL_LIO->Close(fd, ErrorNo());
 }
 
 int          _win32_read(int fd, void *buf, unsigned int cnt)
 {
-    return pPerl->PL_piLIO->Read(fd, buf, cnt, ErrorNo());
+    return pPerl->PL_LIO->Read(fd, buf, cnt, ErrorNo());
 }
 
 int          _win32_write(int fd, const void *buf, unsigned int cnt)
 {
-    return pPerl->PL_piLIO->Write(fd, buf, cnt, ErrorNo());
+    return pPerl->PL_LIO->Write(fd, buf, cnt, ErrorNo());
 }
 
 int          _win32_times(struct tms *timebuf)
 {
-    return pPerl->PL_piProc->Times(timebuf);
+    return pPerl->PL_Proc->Times(timebuf);
 }
 
 int          _win32_ioctl(int i, unsigned int u, char *data)
 {
-    return pPerl->PL_piLIO->IOCtl(i, u, data, ErrorNo());
+    return pPerl->PL_LIO->IOCtl(i, u, data, ErrorNo());
 }
 
 int          _win32_utime(const char *f, struct utimbuf *t)
 {
-    return pPerl->PL_piLIO->Utime((char*)f, t, ErrorNo());
+    return pPerl->PL_LIO->Utime((char*)f, t, ErrorNo());
 }
 
 int          _win32_uname(struct utsname *name)
 {
-    return pPerl->PL_piENV->Uname(name, ErrorNo());
+    return pPerl->PL_Env->Uname(name, ErrorNo());
 }
 
 unsigned long _win32_os_id(void)
 {
-    return pPerl->PL_piENV->OsID();
+    return pPerl->PL_Env->OsID();
 }
 
 char*   _win32_getenv(const char *name)
 {
-    return pPerl->PL_piENV->Getenv(name, ErrorNo());
+    return pPerl->PL_Env->Getenv(name, ErrorNo());
 }
 
 int   _win32_putenv(const char *name)
 {
-    return pPerl->PL_piENV->Putenv(name, ErrorNo());
+    return pPerl->PL_Env->Putenv(name, ErrorNo());
 }
 
 int          _win32_open_osfhandle(long handle, int flags)
 {
-    return pPerl->PL_piStdIO->OpenOSfhandle(handle, flags);
+    return pPerl->PL_StdIO->OpenOSfhandle(handle, flags);
 }
 
 long         _win32_get_osfhandle(int fd)
 {
-    return pPerl->PL_piStdIO->GetOSfhandle(fd);
+    return pPerl->PL_StdIO->GetOSfhandle(fd);
 }
 
 u_long _win32_htonl (u_long hostlong)
 {
-    return pPerl->PL_piSock->Htonl(hostlong);
+    return pPerl->PL_Sock->Htonl(hostlong);
 }
 
 u_short _win32_htons (u_short hostshort)
 {
-    return pPerl->PL_piSock->Htons(hostshort);
+    return pPerl->PL_Sock->Htons(hostshort);
 }
 
 u_long _win32_ntohl (u_long netlong)
 {
-    return pPerl->PL_piSock->Ntohl(netlong);
+    return pPerl->PL_Sock->Ntohl(netlong);
 }
 
 u_short _win32_ntohs (u_short netshort)
 {
-    return pPerl->PL_piSock->Ntohs(netshort);
+    return pPerl->PL_Sock->Ntohs(netshort);
 }
 
 unsigned long _win32_inet_addr (const char * cp)
 {
-    return pPerl->PL_piSock->InetAddr(cp, ErrorNo());
+    return pPerl->PL_Sock->InetAddr(cp, ErrorNo());
 }
 
 char * _win32_inet_ntoa (struct in_addr in)
 {
-    return pPerl->PL_piSock->InetNtoa(in, ErrorNo());
+    return pPerl->PL_Sock->InetNtoa(in, ErrorNo());
 }
 
 SOCKET _win32_socket (int af, int type, int protocol)
 {
-    return pPerl->PL_piSock->Socket(af, type, protocol, ErrorNo());
+    return pPerl->PL_Sock->Socket(af, type, protocol, ErrorNo());
 }
 
 int _win32_bind (SOCKET s, const struct sockaddr *addr, int namelen)
 {
-    return pPerl->PL_piSock->Bind(s, addr, namelen, ErrorNo());
+    return pPerl->PL_Sock->Bind(s, addr, namelen, ErrorNo());
 }
 
 int _win32_listen (SOCKET s, int backlog)
 {
-    return pPerl->PL_piSock->Listen(s, backlog, ErrorNo());
+    return pPerl->PL_Sock->Listen(s, backlog, ErrorNo());
 }
 
 SOCKET _win32_accept (SOCKET s, struct sockaddr *addr, int *addrlen)
 {
-    return pPerl->PL_piSock->Accept(s, addr, addrlen, ErrorNo());
+    return pPerl->PL_Sock->Accept(s, addr, addrlen, ErrorNo());
 }
 
 int _win32_connect (SOCKET s, const struct sockaddr *name, int namelen)
 {
-    return pPerl->PL_piSock->Connect(s, name, namelen, ErrorNo());
+    return pPerl->PL_Sock->Connect(s, name, namelen, ErrorNo());
 }
 
 int _win32_send (SOCKET s, const char * buf, int len, int flags)
 {
-    return pPerl->PL_piSock->Send(s, buf, len, flags, ErrorNo());
+    return pPerl->PL_Sock->Send(s, buf, len, flags, ErrorNo());
 }
 
 int _win32_sendto (SOCKET s, const char * buf, int len, int flags,
                        const struct sockaddr *to, int tolen)
 {
-    return pPerl->PL_piSock->Sendto(s, buf, len, flags, to, tolen, ErrorNo());
+    return pPerl->PL_Sock->Sendto(s, buf, len, flags, to, tolen, ErrorNo());
 }
 
 int _win32_recv (SOCKET s, char * buf, int len, int flags)
 {
-    return pPerl->PL_piSock->Recv(s, buf, len, flags, ErrorNo());
+    return pPerl->PL_Sock->Recv(s, buf, len, flags, ErrorNo());
 }
 
 int _win32_recvfrom (SOCKET s, char * buf, int len, int flags,
                          struct sockaddr *from, int * fromlen)
 {
-    return pPerl->PL_piSock->Recvfrom(s, buf, len, flags, from, fromlen, ErrorNo());
+    return pPerl->PL_Sock->Recvfrom(s, buf, len, flags, from, fromlen, ErrorNo());
 }
 
 int _win32_shutdown (SOCKET s, int how)
 {
-    return pPerl->PL_piSock->Shutdown(s, how, ErrorNo());
+    return pPerl->PL_Sock->Shutdown(s, how, ErrorNo());
 }
 
 int _win32_closesocket (SOCKET s)
 {
-    return pPerl->PL_piSock->Closesocket(s, ErrorNo());
+    return pPerl->PL_Sock->Closesocket(s, ErrorNo());
 }
 
 int _win32_ioctlsocket (SOCKET s, long cmd, u_long *argp)
 {
-    return pPerl->PL_piSock->Ioctlsocket(s, cmd, argp, ErrorNo());
+    return pPerl->PL_Sock->Ioctlsocket(s, cmd, argp, ErrorNo());
 }
 
 int _win32_setsockopt (SOCKET s, int level, int optname,
                            const char * optval, int optlen)
 {
-    return pPerl->PL_piSock->Setsockopt(s, level, optname, optval, optlen, ErrorNo());
+    return pPerl->PL_Sock->Setsockopt(s, level, optname, optval, optlen, ErrorNo());
 }
 
 int _win32_getsockopt (SOCKET s, int level, int optname, char * optval, int *optlen)
 {
-    return pPerl->PL_piSock->Getsockopt(s, level, optname, optval, optlen, ErrorNo());
+    return pPerl->PL_Sock->Getsockopt(s, level, optname, optval, optlen, ErrorNo());
 }
 
 int _win32_getpeername (SOCKET s, struct sockaddr *name, int * namelen)
 {
-    return pPerl->PL_piSock->Getpeername(s, name, namelen, ErrorNo());
+    return pPerl->PL_Sock->Getpeername(s, name, namelen, ErrorNo());
 }
 
 int _win32_getsockname (SOCKET s, struct sockaddr *name, int * namelen)
 {
-    return pPerl->PL_piSock->Getsockname(s, name, namelen, ErrorNo());
+    return pPerl->PL_Sock->Getsockname(s, name, namelen, ErrorNo());
 }
 
 int _win32_gethostname (char * name, int namelen)
 {
-    return pPerl->PL_piSock->Gethostname(name, namelen, ErrorNo());
+    return pPerl->PL_Sock->Gethostname(name, namelen, ErrorNo());
 }
 
 struct hostent * _win32_gethostbyname(const char * name)
 {
-    return pPerl->PL_piSock->Gethostbyname(name, ErrorNo());
+    return pPerl->PL_Sock->Gethostbyname(name, ErrorNo());
 }
 
 struct hostent * _win32_gethostbyaddr(const char * addr, int len, int type)
 {
-    return pPerl->PL_piSock->Gethostbyaddr(addr, len, type, ErrorNo());
+    return pPerl->PL_Sock->Gethostbyaddr(addr, len, type, ErrorNo());
 }
 
 struct protoent * _win32_getprotobyname(const char * name)
 {
-    return pPerl->PL_piSock->Getprotobyname(name, ErrorNo());
+    return pPerl->PL_Sock->Getprotobyname(name, ErrorNo());
 }
 
 struct protoent * _win32_getprotobynumber(int proto)
 {
-    return pPerl->PL_piSock->Getprotobynumber(proto, ErrorNo());
+    return pPerl->PL_Sock->Getprotobynumber(proto, ErrorNo());
 }
 
 struct servent * _win32_getservbyname(const char * name, const char * proto)
 {
-    return pPerl->PL_piSock->Getservbyname(name, proto, ErrorNo());
+    return pPerl->PL_Sock->Getservbyname(name, proto, ErrorNo());
 }
 
 struct servent * _win32_getservbyport(int port, const char * proto)
 {
-    return pPerl->PL_piSock->Getservbyport(port, proto, ErrorNo());
+    return pPerl->PL_Sock->Getservbyport(port, proto, ErrorNo());
 }
 
 int _win32_select (int nfds, Perl_fd_set *rfds, Perl_fd_set *wfds, Perl_fd_set *xfds,
 		  const struct timeval *timeout)
 {
-    return pPerl->PL_piSock->Select(nfds, (char*)rfds, (char*)wfds, (char*)xfds, timeout, ErrorNo());
+    return pPerl->PL_Sock->Select(nfds, (char*)rfds, (char*)wfds, (char*)xfds, timeout, ErrorNo());
 }
 
 void _win32_endnetent(void)
 {
-    pPerl->PL_piSock->Endnetent(ErrorNo());
+    pPerl->PL_Sock->Endnetent(ErrorNo());
 }
 
 void _win32_endhostent(void)
 {
-    pPerl->PL_piSock->Endhostent(ErrorNo());
+    pPerl->PL_Sock->Endhostent(ErrorNo());
 }
 
 void _win32_endprotoent(void)
 {
-    pPerl->PL_piSock->Endprotoent(ErrorNo());
+    pPerl->PL_Sock->Endprotoent(ErrorNo());
 }
 
 void _win32_endservent(void)
 {
-    pPerl->PL_piSock->Endservent(ErrorNo());
+    pPerl->PL_Sock->Endservent(ErrorNo());
 }
 
 struct netent * _win32_getnetent(void)
 {
-    return pPerl->PL_piSock->Getnetent(ErrorNo());
+    return pPerl->PL_Sock->Getnetent(ErrorNo());
 }
 
 struct netent * _win32_getnetbyname(char *name)
 {
-    return pPerl->PL_piSock->Getnetbyname(name, ErrorNo());
+    return pPerl->PL_Sock->Getnetbyname(name, ErrorNo());
 }
 
 struct netent * _win32_getnetbyaddr(long net, int type)
 {
-    return pPerl->PL_piSock->Getnetbyaddr(net, type, ErrorNo());
+    return pPerl->PL_Sock->Getnetbyaddr(net, type, ErrorNo());
 }
 
 struct protoent *_win32_getprotoent(void)
 {
-    return pPerl->PL_piSock->Getprotoent(ErrorNo());
+    return pPerl->PL_Sock->Getprotoent(ErrorNo());
 }
 
 struct servent *_win32_getservent(void)
 {
-    return pPerl->PL_piSock->Getservent(ErrorNo());
+    return pPerl->PL_Sock->Getservent(ErrorNo());
 }
 
 void _win32_sethostent(int stayopen)
 {
-    pPerl->PL_piSock->Sethostent(stayopen, ErrorNo());
+    pPerl->PL_Sock->Sethostent(stayopen, ErrorNo());
 }
 
 void _win32_setnetent(int stayopen)
 {
-    pPerl->PL_piSock->Setnetent(stayopen, ErrorNo());
+    pPerl->PL_Sock->Setnetent(stayopen, ErrorNo());
 }
 
 void _win32_setprotoent(int stayopen)
 {
-    pPerl->PL_piSock->Setprotoent(stayopen, ErrorNo());
+    pPerl->PL_Sock->Setprotoent(stayopen, ErrorNo());
 }
 
 void _win32_setservent(int stayopen)
 {
-    pPerl->PL_piSock->Setservent(stayopen, ErrorNo());
+    pPerl->PL_Sock->Setservent(stayopen, ErrorNo());
 }
 } /* extern "C" */
 EOCODE

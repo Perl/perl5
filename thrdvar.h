@@ -138,7 +138,7 @@ PERLVAR(Tseen_evals,	I32)		/* from regcomp.c */
 PERLVAR(Tregcomp_rx,	regexp *)	/* from regcomp.c */
 PERLVAR(Textralen,	I32)		/* from regcomp.c */
 PERLVAR(Tcolorset,	int)		/* from regcomp.c */
-PERLVAR(Tcolors[6],	char *)		/* from regcomp.c */
+PERLVARA(Tcolors,6,	char *)		/* from regcomp.c */
 PERLVAR(Treginput,	char *)		/* String-input pointer. */
 PERLVAR(Tregbol,	char *)		/* Beginning of input, for ^ check. */
 PERLVAR(Tregeol,	char *)		/* End of input, for $ check. */

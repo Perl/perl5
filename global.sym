@@ -613,11 +613,8 @@ Perl_safexcalloc
 Perl_safexrealloc
 Perl_safexfree
 Perl_GetVars
-Perl_yydestruct
 Perl_runops_standard
 Perl_runops_debug
-Perl_ErrorNo
-Perl_ErrorNo
 Perl_sv_catpvf_mg
 Perl_sv_catpv_mg
 Perl_sv_catpvn_mg

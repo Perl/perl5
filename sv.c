@@ -38,14 +38,21 @@
 #endif
 
 #ifdef PERL_OBJECT
-#define FCALL this->*f
 #define VTBL this->*vtbl
 #else /* !PERL_OBJECT */
 #define VTBL *vtbl
-#define FCALL *f
 #endif /* PERL_OBJECT */
 
+#define FCALL *f
 #define SV_CHECK_THINKFIRST(sv) if (SvTHINKFIRST(sv)) sv_force_normal(sv)
+
+static void do_report_used(pTHXo_ SV *sv);
+static void do_clean_objs(pTHXo_ SV *sv);
+#ifndef DISABLE_DESTRUCTOR_KLUDGE
+static void do_clean_named_objs(pTHXo_ SV *sv);
+#endif
+static void do_clean_all(pTHXo_ SV *sv);
+
 
 #ifdef PURIFY
 
@@ -277,87 +284,36 @@ S_visit(pTHX_ SVFUNC_t f)
 	svend = &sva[SvREFCNT(sva)];
 	for (sv = sva + 1; sv < svend; ++sv) {
 	    if (SvTYPE(sv) != SVTYPEMASK)
-		(FCALL)(aTHX_ sv);
+		(FCALL)(aTHXo_ sv);
 	}
     }
 }
 
 #endif /* PURIFY */
 
-STATIC void
-S_do_report_used(pTHX_ SV *sv)
-{
-    if (SvTYPE(sv) != SVTYPEMASK) {
-	/* XXX Perhaps this ought to go to Perl_debug_log, if DEBUGGING. */
-	PerlIO_printf(PerlIO_stderr(), "****\n");
-	sv_dump(sv);
-    }
-}
-
 void
 Perl_sv_report_used(pTHX)
 {
-    visit(FUNC_NAME_TO_PTR(S_do_report_used));
+    visit(FUNC_NAME_TO_PTR(do_report_used));
 }
-
-STATIC void
-S_do_clean_objs(pTHX_ SV *sv)
-{
-    SV* rv;
-
-    if (SvROK(sv) && SvOBJECT(rv = SvRV(sv))) {
-	DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning object ref:\n "), sv_dump(sv));)
-	SvROK_off(sv);
-	SvRV(sv) = 0;
-	SvREFCNT_dec(rv);
-    }
-
-    /* XXX Might want to check arrays, etc. */
-}
-
-#ifndef DISABLE_DESTRUCTOR_KLUDGE
-STATIC void
-S_do_clean_named_objs(pTHX_ SV *sv)
-{
-    if (SvTYPE(sv) == SVt_PVGV) {
-	if ( SvOBJECT(GvSV(sv)) ||
-	     GvAV(sv) && SvOBJECT(GvAV(sv)) ||
-	     GvHV(sv) && SvOBJECT(GvHV(sv)) ||
-	     GvIO(sv) && SvOBJECT(GvIO(sv)) ||
-	     GvCV(sv) && SvOBJECT(GvCV(sv)) )
-	{
-	    DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning named glob object:\n "), sv_dump(sv));)
-	    SvREFCNT_dec(sv);
-	}
-    }
-}
-#endif
 
 void
 Perl_sv_clean_objs(pTHX)
 {
     PL_in_clean_objs = TRUE;
-    visit(FUNC_NAME_TO_PTR(S_do_clean_objs));
+    visit(FUNC_NAME_TO_PTR(do_clean_objs));
 #ifndef DISABLE_DESTRUCTOR_KLUDGE
     /* some barnacles may yet remain, clinging to typeglobs */
-    visit(FUNC_NAME_TO_PTR(S_do_clean_named_objs));
+    visit(FUNC_NAME_TO_PTR(do_clean_named_objs));
 #endif
     PL_in_clean_objs = FALSE;
-}
-
-STATIC void
-S_do_clean_all(pTHX_ SV *sv)
-{
-    DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning loops: SV at 0x%lx\n", sv) );)
-    SvFLAGS(sv) |= SVf_BREAK;
-    SvREFCNT_dec(sv);
 }
 
 void
 Perl_sv_clean_all(pTHX)
 {
     PL_in_clean_all = TRUE;
-    visit(FUNC_NAME_TO_PTR(S_do_clean_all));
+    visit(FUNC_NAME_TO_PTR(do_clean_all));
     PL_in_clean_all = FALSE;
 }
 
@@ -5241,3 +5197,61 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	SvCUR(sv) = p - SvPVX(sv);
     }
 }
+
+
+#ifdef PERL_OBJECT
+#define NO_XSLOCKS
+#include "XSUB.h"
+#endif
+
+static void
+do_report_used(pTHXo_ SV *sv)
+{
+    if (SvTYPE(sv) != SVTYPEMASK) {
+	/* XXX Perhaps this ought to go to Perl_debug_log, if DEBUGGING. */
+	PerlIO_printf(PerlIO_stderr(), "****\n");
+	sv_dump(sv);
+    }
+}
+
+static void
+do_clean_objs(pTHXo_ SV *sv)
+{
+    SV* rv;
+
+    if (SvROK(sv) && SvOBJECT(rv = SvRV(sv))) {
+	DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning object ref:\n "), sv_dump(sv));)
+	SvROK_off(sv);
+	SvRV(sv) = 0;
+	SvREFCNT_dec(rv);
+    }
+
+    /* XXX Might want to check arrays, etc. */
+}
+
+#ifndef DISABLE_DESTRUCTOR_KLUDGE
+static void
+do_clean_named_objs(pTHXo_ SV *sv)
+{
+    if (SvTYPE(sv) == SVt_PVGV) {
+	if ( SvOBJECT(GvSV(sv)) ||
+	     GvAV(sv) && SvOBJECT(GvAV(sv)) ||
+	     GvHV(sv) && SvOBJECT(GvHV(sv)) ||
+	     GvIO(sv) && SvOBJECT(GvIO(sv)) ||
+	     GvCV(sv) && SvOBJECT(GvCV(sv)) )
+	{
+	    DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning named glob object:\n "), sv_dump(sv));)
+	    SvREFCNT_dec(sv);
+	}
+    }
+}
+#endif
+
+static void
+do_clean_all(pTHXo_ SV *sv)
+{
+    DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning loops: SV at 0x%lx\n", sv) );)
+    SvFLAGS(sv) |= SVf_BREAK;
+    SvREFCNT_dec(sv);
+}
+

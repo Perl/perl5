@@ -26,7 +26,7 @@ PERLVAR(Iwarnhook,	SV *)
 PERLVAR(Iparsehook,	SV *)
 PERLVAR(Icddir,		char *)		/* switches */
 PERLVAR(Iminus_c,	bool)
-PERLVAR(Ipatchlevel[10],char)
+PERLVARA(Ipatchlevel,10,char)
 PERLVAR(Ilocalpatches,	char **)
 PERLVARI(Isplitstr,	char *,	" ")
 PERLVAR(Ipreprocess,	bool)
@@ -228,7 +228,7 @@ PERLVAR(Inice_chunk_size,	U32)	/* how nice the chunk of memory is */
 
 PERLVARI(Irunops,	runops_proc_t,	FUNC_NAME_TO_PTR(RUNOPS_DEFAULT))
 
-PERLVAR(Itokenbuf[256],	char)
+PERLVARA(Itokenbuf,256,	char)
 
 PERLVAR(Isv_undef,	SV)
 PERLVAR(Isv_no,		SV)
@@ -257,8 +257,8 @@ PERLVAR(Ilex_brackstack,char *)		/* what kind of brackets to pop */
 PERLVAR(Ilex_casestack,	char *)		/* what kind of case mods in effect */
 
 /* What we know when we're in LEX_KNOWNEXT state. */
-PERLVAR(Inextval[5],	YYSTYPE)	/* value of next token, if any */
-PERLVAR(Inexttype[5],	I32)		/* type of next token */
+PERLVARA(Inextval,5,	YYSTYPE)	/* value of next token, if any */
+PERLVARA(Inexttype,5,	I32)		/* type of next token */
 PERLVAR(Inexttoke,	I32)
 
 PERLVAR(Ilinestr,	SV *)
@@ -340,7 +340,7 @@ PERLVAR(Iutf8_totitle,	SV *)
 PERLVAR(Iutf8_tolower,	SV *)
 PERLVAR(Ilast_swash_hv,	HV *)
 PERLVAR(Ilast_swash_klen,	U32)
-PERLVAR(Ilast_swash_key[10],	U8)
+PERLVARA(Ilast_swash_key,10,	U8)
 PERLVAR(Ilast_swash_tmps,	U8 *)
 PERLVAR(Ilast_swash_slen,	STRLEN)
 
@@ -356,7 +356,7 @@ PERLVAR(Iglob_index,	int)
 PERLVAR(Iefloatbuf,	char*)
 PERLVAR(Iefloatsize,	STRLEN)
 PERLVAR(Isrand_called,	bool)
-PERLVAR(Iuudmap[256],	char)
+PERLVARA(Iuudmap,256,	char)
 PERLVAR(Ibitcount,	char *)
 PERLVAR(Ifilter_debug,	int)
 
@@ -383,11 +383,11 @@ PERLVAR(Icred_mutex,	perl_mutex)	/* altered credentials in effect */
 #endif /* USE_THREADS */
 
 #ifdef PERL_OBJECT
-PERLVARI(piMem,		IPerlMem*,  NULL)
-PERLVARI(piENV,		IPerlEnv*,  NULL)
-PERLVARI(piStdIO,	IPerlStdIO*, NULL)
-PERLVARI(piLIO,		IPerlLIO*,  NULL)
-PERLVARI(piDir,		IPerlDir*,  NULL)
-PERLVARI(piSock,	IPerlSock*, NULL)
-PERLVARI(piProc,	IPerlProc*, NULL)
+PERLVARI(IMem,		IPerlMem*,  NULL)
+PERLVARI(IEnv,		IPerlEnv*,  NULL)
+PERLVARI(IStdIO,	IPerlStdIO*, NULL)
+PERLVARI(ILIO,		IPerlLIO*,  NULL)
+PERLVARI(IDir,		IPerlDir*,  NULL)
+PERLVARI(ISock,		IPerlSock*, NULL)
+PERLVARI(IProc,		IPerlProc*, NULL)
 #endif

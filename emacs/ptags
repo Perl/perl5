@@ -61,7 +61,7 @@ etags -o TAGS.tmp -a \
 etags -o TAGS.tmp -a "$@" $topfiles
 
 # Now add these PL_:
-perl -w014pe 'if (s/^( .* PERLVAR I?	# 1:   TAG group
+perl -w014pe 'if (s/^( .* PERLVAR A?I?	# 1:   TAG group
 		       \s* \( \s* [GIT] #
 		       .*		#
 		     \x7F		#      End of description

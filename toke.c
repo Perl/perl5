@@ -20,6 +20,10 @@
 
 static char ident_too_long[] = "Identifier too long";
 
+static void restore_rsfp(pTHXo_ void *f);
+static void restore_expect(pTHXo_ void *e);
+static void restore_lex_expect(pTHXo_ void *e);
+
 #define UTF (PL_hints & HINT_UTF8)
 /*
  * Note: we try to be careful never to call the isXXX_utf8() functions
@@ -282,12 +286,12 @@ Perl_lex_start(pTHX_ SV *line)
     SAVESPTR(PL_linestr);
     SAVEPPTR(PL_lex_brackstack);
     SAVEPPTR(PL_lex_casestack);
-    SAVEDESTRUCTOR(S_restore_rsfp, PL_rsfp);
+    SAVEDESTRUCTOR(restore_rsfp, PL_rsfp);
     SAVESPTR(PL_lex_stuff);
     SAVEI32(PL_lex_defer);
     SAVESPTR(PL_lex_repl);
-    SAVEDESTRUCTOR(S_restore_expect, PL_tokenbuf + PL_expect); /* encode as pointer */
-    SAVEDESTRUCTOR(S_restore_lex_expect, PL_tokenbuf + PL_expect);
+    SAVEDESTRUCTOR(restore_expect, PL_tokenbuf + PL_expect); /* encode as pointer */
+    SAVEDESTRUCTOR(restore_lex_expect, PL_tokenbuf + PL_expect);
 
     PL_lex_state = LEX_NORMAL;
     PL_lex_defer = 0;
@@ -327,32 +331,6 @@ void
 Perl_lex_end(pTHX)
 {
     PL_doextract = FALSE;
-}
-
-STATIC void
-S_restore_rsfp(pTHX_ void *f)
-{
-    PerlIO *fp = (PerlIO*)f;
-
-    if (PL_rsfp == PerlIO_stdin())
-	PerlIO_clearerr(PL_rsfp);
-    else if (PL_rsfp && (PL_rsfp != fp))
-	PerlIO_close(PL_rsfp);
-    PL_rsfp = fp;
-}
-
-STATIC void
-S_restore_expect(pTHX_ void *e)
-{
-    /* a safe way to store a small integer in a pointer */
-    PL_expect = (expectation)((char *)e - PL_tokenbuf);
-}
-
-STATIC void
-S_restore_lex_expect(pTHX_ void *e)
-{
-    /* a safe way to store a small integer in a pointer */
-    PL_lex_expect = (expectation)((char *)e - PL_tokenbuf);
 }
 
 STATIC void
@@ -6431,4 +6409,35 @@ Perl_yyerror(pTHX_ char *s)
     return 0;
 }
 
+
+#ifdef PERL_OBJECT
+#define NO_XSLOCKS
+#include "XSUB.h"
+#endif
+
+static void
+restore_rsfp(pTHXo_ void *f)
+{
+    PerlIO *fp = (PerlIO*)f;
+
+    if (PL_rsfp == PerlIO_stdin())
+	PerlIO_clearerr(PL_rsfp);
+    else if (PL_rsfp && (PL_rsfp != fp))
+	PerlIO_close(PL_rsfp);
+    PL_rsfp = fp;
+}
+
+static void
+restore_expect(pTHXo_ void *e)
+{
+    /* a safe way to store a small integer in a pointer */
+    PL_expect = (expectation)((char *)e - PL_tokenbuf);
+}
+
+static void
+restore_lex_expect(pTHXo_ void *e)
+{
+    /* a safe way to store a small integer in a pointer */
+    PL_lex_expect = (expectation)((char *)e - PL_tokenbuf);
+}
 

@@ -110,6 +110,9 @@
 #define HOPc(pos,off) ((char*)HOP(pos,off))
 #define HOPMAYBEc(pos,off) ((char*)HOPMAYBE(pos,off))
 
+static void restore_pos(pTHXo_ void *arg);
+
+
 STATIC CHECKPOINT
 S_regcppush(pTHX_ I32 parenfloor)
 {
@@ -241,22 +244,6 @@ S_cache_re(pTHX_ regexp *prog)
     PL_regnpar = prog->nparens;
     PL_regdata = prog->data;    
     PL_reg_re = prog;    
-}
-
-STATIC void
-S_restore_pos(pTHX_ void *arg)
-{
-    dTHR;
-    if (PL_reg_eval_set) {
-	if (PL_reg_oldsaved) {
-	    PL_reg_re->subbeg = PL_reg_oldsaved;
-	    PL_reg_re->sublen = PL_reg_oldsavedlen;
-	    RX_MATCH_COPIED_on(PL_reg_re);
-	}
-	PL_reg_magic->mg_len = PL_reg_oldpos;
-	PL_reg_eval_set = 0;
-	PL_curpm = PL_reg_oldcurpm;
-    }	
 }
 
 /* 
@@ -2022,7 +2009,7 @@ got_it:
 	    sv_setsv(oreplsv, GvSV(PL_replgv));/* So that when GvSV(replgv) is
 						  restored, the value remains
 						  the same. */
-	restore_pos(0);
+	restore_pos(aTHXo_ 0);
     }
 
     /* make sure $`, $&, $', and $digit will work later */
@@ -2049,7 +2036,7 @@ got_it:
 
 phooey:
     if (PL_reg_eval_set)
-	restore_pos(0);
+	restore_pos(aTHXo_ 0);
     return 0;
 }
 
@@ -2098,7 +2085,7 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
 	    }
 	    PL_reg_magic    = mg;
 	    PL_reg_oldpos   = mg->mg_len;
-	    SAVEDESTRUCTOR(S_restore_pos, 0);
+	    SAVEDESTRUCTOR(restore_pos, 0);
         }
 	if (!PL_reg_curpm)
 	    New(22,PL_reg_curpm, 1, PMOP);
@@ -4455,3 +4442,25 @@ S_reghopmaybe(pTHX_ U8* s, I32 off)
     }
     return s;
 }
+
+#ifdef PERL_OBJECT
+#define NO_XSLOCKS
+#include "XSUB.h"
+#endif
+
+static void
+restore_pos(pTHXo_ void *arg)
+{
+    dTHR;
+    if (PL_reg_eval_set) {
+	if (PL_reg_oldsaved) {
+	    PL_reg_re->subbeg = PL_reg_oldsaved;
+	    PL_reg_re->sublen = PL_reg_oldsavedlen;
+	    RX_MATCH_COPIED_on(PL_reg_re);
+	}
+	PL_reg_magic->mg_len = PL_reg_oldpos;
+	PL_reg_eval_set = 0;
+	PL_curpm = PL_reg_oldcurpm;
+    }	
+}
+

@@ -33,6 +33,9 @@
 #  define VTBL			*vtbl
 #endif
 
+static void restore_magic(pTHXo_ void *p);
+static void unwind_handler_stack(pTHXo_ void *p);
+
 /*
  * Use the "DESTRUCTOR" scope cleanup to reinstate magic.
  */
@@ -51,7 +54,7 @@ S_save_magic(pTHX_ I32 mgs_ix, SV *sv)
     MGS* mgs;
     assert(SvMAGICAL(sv));
 
-    SAVEDESTRUCTOR(S_restore_magic, (void*)mgs_ix);
+    SAVEDESTRUCTOR(restore_magic, (void*)mgs_ix);
 
     mgs = SSPTR(mgs_ix, MGS*);
     mgs->mgs_sv = sv;
@@ -61,48 +64,6 @@ S_save_magic(pTHX_ I32 mgs_ix, SV *sv)
     SvMAGICAL_off(sv);
     SvREADONLY_off(sv);
     SvFLAGS(sv) |= (SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
-}
-
-STATIC void
-S_restore_magic(pTHX_ void *p)
-{
-    dTHR;
-    MGS* mgs = SSPTR((I32)p, MGS*);
-    SV* sv = mgs->mgs_sv;
-
-    if (!sv)
-        return;
-
-    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv))
-    {
-	if (mgs->mgs_flags)
-	    SvFLAGS(sv) |= mgs->mgs_flags;
-	else
-	    mg_magical(sv);
-	if (SvGMAGICAL(sv))
-	    SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
-    }
-
-    mgs->mgs_sv = NULL;  /* mark the MGS structure as restored */
-
-    /* If we're still on top of the stack, pop us off.  (That condition
-     * will be satisfied if restore_magic was called explicitly, but *not*
-     * if it's being called via leave_scope.)
-     * The reason for doing this is that otherwise, things like sv_2cv()
-     * may leave alloc gunk on the savestack, and some code
-     * (e.g. sighandler) doesn't expect that...
-     */
-    if (PL_savestack_ix == mgs->mgs_ss_ix)
-    {
-	I32 popval = SSPOPINT;
-        assert(popval == SAVEt_DESTRUCTOR);
-        PL_savestack_ix -= 2;
-	popval = SSPOPINT;
-        assert(popval == SAVEt_ALLOC);
-	popval = SSPOPINT;
-        PL_savestack_ix -= popval;
-    }
-
 }
 
 void
@@ -153,7 +114,7 @@ Perl_mg_get(pTHX_ SV *sv)
 	    mgp = &SvMAGIC(sv);	/* Re-establish pointer after sv_upgrade */
     }
 
-    restore_magic((void*)mgs_ix);
+    restore_magic(aTHXo_ (void*)mgs_ix);
     return 0;
 }
 
@@ -179,7 +140,7 @@ Perl_mg_set(pTHX_ SV *sv)
 	    (VTBL->svt_set)(aTHX_ sv, mg);
     }
 
-    restore_magic((void*)mgs_ix);
+    restore_magic(aTHXo_ (void*)mgs_ix);
     return 0;
 }
 
@@ -199,7 +160,7 @@ Perl_mg_length(pTHX_ SV *sv)
 	    save_magic(mgs_ix, sv);
 	    /* omit MGf_GSKIP -- not changed here */
 	    len = (VTBL->svt_len)(aTHX_ sv, mg);
-	    restore_magic((void*)mgs_ix);
+	    restore_magic(aTHXo_ (void*)mgs_ix);
 	    return len;
 	}
     }
@@ -223,7 +184,7 @@ Perl_mg_size(pTHX_ SV *sv)
 	    save_magic(mgs_ix, sv);
 	    /* omit MGf_GSKIP -- not changed here */
 	    len = (VTBL->svt_len)(aTHX_ sv, mg);
-	    restore_magic((void*)mgs_ix);
+	    restore_magic(aTHXo_ (void*)mgs_ix);
 	    return len;
 	}
     }
@@ -258,7 +219,7 @@ Perl_mg_clear(pTHX_ SV *sv)
 	    (VTBL->svt_clear)(aTHX_ sv, mg);
     }
 
-    restore_magic((void*)mgs_ix);
+    restore_magic(aTHXo_ (void*)mgs_ix);
     return 0;
 }
 
@@ -2061,19 +2022,6 @@ Perl_whichsig(pTHX_ char *sig)
 
 static SV* sig_sv;
 
-STATIC void
-S_unwind_handler_stack(pTHX_ void *p)
-{
-    dTHR;
-    U32 flags = *(U32*)p;
-
-    if (flags & 1)
-	PL_savestack_ix -= 5; /* Unprotect save in progress. */
-    /* cxstack_ix-- Not needed, die already unwound it. */
-    if (flags & 64)
-	SvREFCNT_dec(sig_sv);
-}
-
 Signal_t
 Perl_sighandler(int sig)
 {
@@ -2106,7 +2054,7 @@ Perl_sighandler(int sig)
     if (flags & 1) {
 	PL_savestack_ix += 5;		/* Protect save in progress. */
 	o_save_i = PL_savestack_ix;
-	SAVEDESTRUCTOR(S_unwind_handler_stack, (void*)&flags);
+	SAVEDESTRUCTOR(unwind_handler_stack, (void*)&flags);
     }
     if (flags & 4) 
 	PL_markstack_ptr++;		/* Protect mark. */
@@ -2167,3 +2115,62 @@ cleanup:
 }
 
 
+#ifdef PERL_OBJECT
+#define NO_XSLOCKS
+#include "XSUB.h"
+#endif
+
+static void
+restore_magic(pTHXo_ void *p)
+{
+    dTHR;
+    MGS* mgs = SSPTR((I32)p, MGS*);
+    SV* sv = mgs->mgs_sv;
+
+    if (!sv)
+        return;
+
+    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv))
+    {
+	if (mgs->mgs_flags)
+	    SvFLAGS(sv) |= mgs->mgs_flags;
+	else
+	    mg_magical(sv);
+	if (SvGMAGICAL(sv))
+	    SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
+    }
+
+    mgs->mgs_sv = NULL;  /* mark the MGS structure as restored */
+
+    /* If we're still on top of the stack, pop us off.  (That condition
+     * will be satisfied if restore_magic was called explicitly, but *not*
+     * if it's being called via leave_scope.)
+     * The reason for doing this is that otherwise, things like sv_2cv()
+     * may leave alloc gunk on the savestack, and some code
+     * (e.g. sighandler) doesn't expect that...
+     */
+    if (PL_savestack_ix == mgs->mgs_ss_ix)
+    {
+	I32 popval = SSPOPINT;
+        assert(popval == SAVEt_DESTRUCTOR);
+        PL_savestack_ix -= 2;
+	popval = SSPOPINT;
+        assert(popval == SAVEt_ALLOC);
+	popval = SSPOPINT;
+        PL_savestack_ix -= popval;
+    }
+
+}
+
+static void
+unwind_handler_stack(pTHXo_ void *p)
+{
+    dTHR;
+    U32 flags = *(U32*)p;
+
+    if (flags & 1)
+	PL_savestack_ix -= 5; /* Unprotect save in progress. */
+    /* cxstack_ix-- Not needed, die already unwound it. */
+    if (flags & 64)
+	SvREFCNT_dec(sig_sv);
+}

@@ -1902,6 +1902,7 @@ S_init_interp(pTHX)
 #else
 #  ifdef MULTIPLICITY
 #    define PERLVAR(var,type)
+#    define PERLVARA(var,n,type)
 #    if defined(PERL_IMPLICIT_CONTEXT)
 #      define PERLVARI(var,type,init)	my_perl->var = init;
 #      define PERLVARIC(var,type,init)	my_perl->var = init;
@@ -1914,10 +1915,12 @@ S_init_interp(pTHX)
 #      include "thrdvar.h"
 #    endif
 #    undef PERLVAR
+#    undef PERLVARA
 #    undef PERLVARI
 #    undef PERLVARIC
 #  else
 #    define PERLVAR(var,type)
+#    define PERLVARA(var,n,type)
 #    define PERLVARI(var,type,init)	PL_##var = init;
 #    define PERLVARIC(var,type,init)	PL_##var = init;
 #    include "intrpvar.h"
@@ -1925,6 +1928,7 @@ S_init_interp(pTHX)
 #      include "thrdvar.h"
 #    endif
 #    undef PERLVAR
+#    undef PERLVARA
 #    undef PERLVARI
 #    undef PERLVARIC
 #  endif
@@ -3119,9 +3123,8 @@ S_my_exit_jump(pTHX)
 
 #ifdef PERL_OBJECT
 #define NO_XSLOCKS
-#endif  /* PERL_OBJECT */
-
 #include "XSUB.h"
+#endif
 
 static I32
 read_e_script(pTHXo_ int idx, SV *buf_sv, int maxlen)
