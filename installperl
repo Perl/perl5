@@ -414,11 +414,23 @@ sub script_alias {
     }
 }
 
-if (! $versiononly) {
-    # Install scripts.
+# Install scripts.
+mkpath($installscript, $verbose, 0777);
+if ($versiononly) {
+    for (@scripts) {
+	(my $base = $_) =~ s#.*/##;
+	$base .= $ver;
+	copy($_,    "$installscript/$base");
+	chmod(0755, "$installscript/$base");
+    }
 
-    mkpath($installscript, $verbose, 0777);
-
+    for (@tolink) { 
+        my ($from, $to) = map { "$_$ver" } @$_;
+        (my $frbase = $from) =~ s#.*/##;
+        (my $tobase = $to) =~ s#.*/##;
+        script_alias($installscript, $frbase, $tobase, $scr_ext);
+    }
+} else {
     for (@scripts) {
 	(my $base = $_) =~ s#.*/##;
 	copy($_, "$installscript/$base");
@@ -426,7 +438,7 @@ if (! $versiononly) {
     }
 
     for (@tolink) { 
-        my ($from, $to)= @$_;
+        my ($from, $to) = @$_;
         (my $frbase = $from) =~ s#.*/##;
         (my $tobase = $to) =~ s#.*/##;
         script_alias($installscript, $frbase, $tobase, $scr_ext);
