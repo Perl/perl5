@@ -451,20 +451,20 @@ as:
 This allows you to add a prefix to the backup file, instead of (or in
 addition to) a suffix:
 
-    $ perl -pi 'orig_*' -e 's/bar/baz/' fileA	# backup to 'orig_fileA'
+    $ perl -pi'orig_*' -e 's/bar/baz/' fileA	# backup to 'orig_fileA'
 
 Or even to place backup copies of the original files into another
 directory (provided the directory already exists):
 
-    $ perl -pi 'old/*.orig' -e 's/bar/baz/' fileA # backup to 'old/fileA.orig'
+    $ perl -pi'old/*.orig' -e 's/bar/baz/' fileA # backup to 'old/fileA.orig'
 
 These sets of one-liners are equivalent:
 
     $ perl -pi -e 's/bar/baz/' fileA		# overwrite current file
-    $ perl -pi '*' -e 's/bar/baz/' fileA	# overwrite current file
+    $ perl -pi'*' -e 's/bar/baz/' fileA		# overwrite current file
 
-    $ perl -pi '.orig' -e 's/bar/baz/' fileA	# backup to 'fileA.orig'
-    $ perl -pi '*.orig' -e 's/bar/baz/' fileA	# backup to 'fileA.orig'
+    $ perl -pi'.orig' -e 's/bar/baz/' fileA	# backup to 'fileA.orig'
+    $ perl -pi'*.orig' -e 's/bar/baz/' fileA	# backup to 'fileA.orig'
 
 From the shell, saying
 
