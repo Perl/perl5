@@ -35,7 +35,7 @@ my $Files_In_Dir = $ENV{HARNESS_FILELEAK_IN_DIR};
 $Verbose  = 0;
 $Switches = "-w";
 $Columns  = $ENV{HARNESS_COLUMNS} || $ENV{COLUMNS} || 80;
-
+$Columns--; # Do no write into the last column
 
 sub globdir { opendir DIRH, shift; my @f = readdir DIRH; closedir DIRH; @f }
 
@@ -506,7 +506,7 @@ sub _garbled_output {
 sub _create_fmts {
     my($failedtests) = @_;
 
-    my $failed_str = "Failed Test";
+    my $failed_str = "Failed Test   "; # Borrow up to 3 chars from Status
     my $middle_str = " Status Wstat Total Fail  Failed  ";
     my $list_str = "List of Failed";
 
@@ -527,8 +527,9 @@ sub _create_fmts {
         }
     }
 
+    my $failed_len = $max_namelen - 3;
     my $fmt_top = "format STDOUT_TOP =\n"
-                  . sprintf("%-${max_namelen}s", $failed_str)
+                  . sprintf("%-${failed_len}s", "Failed Test")
                   . $middle_str
 		  . $list_str . "\n"
 		  . "-" x $Columns
@@ -536,7 +537,7 @@ sub _create_fmts {
 
     my $fmt = "format STDOUT =\n"
 	      . "@" . "<" x ($max_namelen - 1)
-              . "	 @>> @>>>> @>>>> @>>> ^##.##%  "
+	      . " @>> @>>>> @>>>> @>>> ^##.##%  "
 	      . "^" . "<" x ($list_len - 1) . "\n"
 	      . '{ $Curtest->{name}, $Curtest->{estat},'
 	      . '  $Curtest->{wstat}, $Curtest->{max},'
