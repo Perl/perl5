@@ -527,6 +527,7 @@ readvars %globvar, '..\perlvars.h','G';
 open(HDRFILE, ">$hdrfile") or die "$0: Can't open $hdrfile: $!\n";
 print HDRFILE <<ENDCODE;
 void SetCPerlObj(void* pP);
+void boot_CAPI_handler(CV *cv, void (*subaddr)(CV *c), void *pP);
 CV* Perl_newXS(char* name, void (*subaddr)(CV* cv), char* filename);
 
 ENDCODE
@@ -596,6 +597,14 @@ char *	_Perl_no_modify(void)
 U32 *	_Perl_opargs(void)
 {
     return pPerl->Perl_get_opargs();
+}
+
+void boot_CAPI_handler(CV *cv, void (*subaddr)(CV *c), void *pP)
+{
+#ifndef NO_XSLOCKS
+    XSLock localLock((CPerlObj*)pP);
+#endif
+    subaddr(cv);
 }
 
 void xs_handler(CV* cv, CPerlObj* p)

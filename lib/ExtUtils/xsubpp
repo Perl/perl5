@@ -1327,8 +1327,7 @@ print Q<<"EOF";
 ##endif
 #XSCAPI(boot_$Module_cname)
 #[[
-#    SetCPerlObj(pPerl);
-#    boot__CAPI_entry(cv);
+#    boot_CAPI_handler(cv, boot__CAPI_entry, pPerl);
 #]]
 ##endif	/* PERL_CAPI */
 EOF
