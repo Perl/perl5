@@ -608,10 +608,15 @@ d_getlogin (d_getlogin.U):
 	indicates to the C program that the getlogin() routine is available
 	to get the login name.
 
+d_getmnt (d_getmnt.U):
+	This variable conditionally defines the HAS_GETMNT symbol, which
+	indicates to the C program that the getmnt() routine is available
+	to retrieve one or more mount info blocks by filename.
+
 d_getmntent (d_getmntent.U):
 	This variable conditionally defines the HAS_GETMNTENT symbol, which
 	indicates to the C program that the getmntent() routine is available
-	to iterate through mounted files.
+	to iterate through mounted files to get their mount info.
 
 d_getnbyaddr (d_getnbyad.U):
 	This variable conditionally defines the HAS_GETNETBYADDR symbol, which
@@ -1487,6 +1492,9 @@ d_union_semun (d_union_semun.U):
 	This variable conditionally defines HAS_UNION_SEMUN if the
 	union semun is defined by including <sys/sem.h>.
 
+d_vendorbin (vendorbin.U):
+	This variable conditionally defines PERL_VENDORBIN.
+
 d_vendorlib (vendorlib.U):
 	This variable conditionally defines PERL_VENDORLIB.
 
@@ -2106,6 +2114,11 @@ installsitearch (sitearch.U):
 	those systems using AFS. For extra portability, only this variable
 	should be used in makefiles.
 
+installsitebin (sitebin.U):
+	This variable is usually the same as sitebinexp, unless you are on
+	a system running AFS, in which case they may differ slightly. You
+	should always use this variable within your makefiles for portability.
+
 installsitelib (sitelib.U):
 	This variable is really the same as sitelibexp but may differ on
 	those systems using AFS. For extra portability, only this variable
@@ -2133,6 +2146,11 @@ installusrbinperl (instubperl.U):
 	This variable tells whether Perl should be installed also as
 	/usr/bin/perl in addition to
 	$installbin/perl
+
+installvendorbin (vendorbin.U):
+	This variable is really the same as vendorbinexp but may differ on
+	those systems using AFS. For extra portability, only this variable
+	should be used in makefiles.
 
 installvendorlib (vendorlib.U):
 	This variable is really the same as vendorlibexp but may differ on
@@ -2783,6 +2801,16 @@ sitearchexp (sitearch.U):
 	This variable is the ~name expanded version of sitearch, so that you
 	may use it directly in Makefiles or shell scripts.
 
+sitebin (sitebin.U):
+	This variable holds the name of the directory in which the user wants
+	to put add-on publicly executable files for the package in question.  It
+	is most often a local directory such as /usr/local/bin. Programs using
+	this variable must be prepared to deal with ~name substitution.
+
+sitebinexp (sitebin.U):
+	This is the same as the sitebin variable, but is filename expanded at
+	configuration time, for use in your makefiles.
+
 sitelib (sitelib.U):
 	This variable contains the eventual value of the SITELIB symbol,
 	which is the name of the private library for this package.  It may
@@ -3139,6 +3167,18 @@ usrinc (usrinc.U):
 uuname (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is a plain '' and is not useful.
+
+vendorbin (vendorbin.U):
+	This variable contains the eventual value of the VENDORBIN symbol,
+	which is the name of the private directory for exuctables for this package.
+	It may have a ~ on the front. It is up to the makefile to eventually create
+	this directory while performing installation (with ~ substitution).
+	Vendors who distribute perl binaries may place their own
+	extensions and modules in this directory.
+
+vendorbinexp (vendorbin.U):
+	This variable is the ~name expanded version of vendorbin, so that you
+	may use it directly in Makefiles or shell scripts.
 
 vendorlib (vendorlib.U):
 	This variable contains the eventual value of the VENDORLIB symbol,
