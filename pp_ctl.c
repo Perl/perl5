@@ -2561,26 +2561,14 @@ S_docatch_body(pTHX)
     return NULL;
 }
 
-/* In Unicos 10.0.0.6 (T90) the cc seems to botch optimization so that
- * if cursi is an auto variable inside S_docatch() cursi doesn't get
- * properly saved/restored across longjmps. &/
-#ifdef UNICOS_BROKEN_VOLATILE
-volatile PERL_SI *cursi;
-#endif
-
 STATIC OP *
 S_docatch(pTHX_ OP *o)
 {
     dTHR;
     int ret;
     OP *oldop = PL_op;
-#ifdef UNICOS_BROKEN_VOLATILE
-    dJMPENV;
-    cursi = PL_curstackinfo;
-#else
     volatile PERL_SI *cursi = PL_curstackinfo;
     dJMPENV;
-#endif
 
 #ifdef DEBUGGING
     assert(CATCH_GET == TRUE);

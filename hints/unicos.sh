@@ -2,10 +2,10 @@ case `uname -r` in
 6.1*) shellflags="-m+65536" ;;
 esac
 case "$optimize" in
-'') optimize="-O1 -h nofastmd" ;;
+'') optimize="-h nofastmd" ;; # fastmd: integer values limited to 46 bits
 esac
 case `uname -r` in
-10.*) pp_ctl_cflags='ccflags="$ccflags -DUNICOS_BROKEN_VOLATILE' ;;
+10.*) pp_ctl_cflags='optimize="$optimize -h scalar 0 -h vector 0"' ;;
 esac
 d_setregid='undef'
 d_setreuid='undef'
