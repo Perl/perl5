@@ -9808,12 +9808,18 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     {
 	I32 len = av_len((AV*)proto_perl->Iregex_padav);
 	SV** regexen = AvARRAY((AV*)proto_perl->Iregex_padav);
-	for(i = 0; i <= len; i++) {                             
-	    av_push(PL_regex_padav,
-            SvREFCNT_inc(
+	av_push(PL_regex_padav,
+		sv_dup_inc(regexen[0],param));
+	for(i = 1; i <= len; i++) {
+            if(SvREPADTMP(regexen[i])) {
+	      av_push(PL_regex_padav, sv_dup_inc(regexen[i], param));
+            } else { 
+	        av_push(PL_regex_padav,
+                    SvREFCNT_inc(
                         newSViv(PTR2IV(re_dup(INT2PTR(REGEXP *, 
                              SvIVX(regexen[i])), param)))
-                    ));
+                       ));
+	    }
 	}
     }
     PL_regex_pad = AvARRAY(PL_regex_padav);
