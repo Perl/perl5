@@ -103,10 +103,6 @@ PerlIO_stdout()
  return (PerlIO *) stdout;
 }
 
-#ifdef HAS_SETLINEBUF
-extern void setlinebuf _((FILE *iop));
-#endif
-
 #undef PerlIO_fast_gets
 int 
 PerlIO_fast_gets(f)
@@ -528,6 +524,17 @@ const Fpos_t *pos;
 {
  return PerlIO_seek(f,*pos,0); 
 }
+#else
+#ifndef PERLIO_IS_STDIO
+#undef PerlIO_setpos
+int
+PerlIO_setpos(f,pos)
+PerlIO *f;
+const Fpos_t *pos;
+{
+ return fsetpos(f, pos);
+}
+#endif
 #endif
 
 #ifndef HAS_FGETPOS
@@ -540,6 +547,17 @@ Fpos_t *pos;
  *pos = PerlIO_tell(f);
  return 0;
 }
+#else
+#ifndef PERLIO_IS_STDIO
+#undef PerlIO_getpos
+int
+PerlIO_getpos(f,pos)
+PerlIO *f;
+Fpos_t *pos;
+{
+ return fgetpos(f, pos);
+}
+#endif
 #endif
 
 #if (defined(PERLIO_IS_STDIO) || !defined(USE_SFIO)) && !defined(HAS_VPRINTF)
