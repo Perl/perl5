@@ -4005,6 +4005,11 @@ Perl_sys_intern_dup(pTHX_ struct interp_intern *src, struct interp_intern *dst)
 }
 #endif
 
+#ifdef PERL_OBJECT
+#  undef this
+#  define this pPerl
+#endif
+
 static void
 win32_free_argvw(pTHXo_ void *ptr)
 {
@@ -4016,8 +4021,9 @@ win32_free_argvw(pTHXo_ void *ptr)
 }
 
 void
-win32_argv2utf8(pTHX_ int argc, char** argv)
+win32_argv2utf8(int argc, char** argv)
 {
+    dTHXo;
     char* psz;
     int length, wargc;
     LPWSTR* lpwStr = CommandLineToArgvW(GetCommandLineW(), &wargc);
