@@ -4613,6 +4613,11 @@ The following efficiently counts the number of set bits in a bit vector:
 
     $setbits = unpack("%32b*", $selectmask);
 
+The C<"p"> and C<"P"> formats should be used with care.  Since Perl
+has no way of checking whether the value passed to C<unpack()>
+corresponds to a valid memory location, passing a pointer value that's
+not known to be valid is likely to have disastrous consequences.
+
 See L</pack> for more examples.
 
 =item untie VARIABLE
