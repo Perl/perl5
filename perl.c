@@ -2695,13 +2695,13 @@ Perl_moreswitches(pTHX_ char *s)
 		(void *)upg_version(PL_patchlevel);
 #if !defined(DGUX)
 	PerlIO_printf(PerlIO_stdout(),
-		Perl_form(aTHX_ "\nThis is perl, v%_ built for %s",
+		Perl_form(aTHX_ "\nThis is perl, v%"SVf" built for %s",
 		    vstringify(PL_patchlevel),
 		    ARCHNAME));
 #else /* DGUX */
 /* Adjust verbose output as in the perl that ships with the DG/UX OS from EMC */
 	PerlIO_printf(PerlIO_stdout(),
-		Perl_form(aTHX_ "\nThis is perl, v%_\n",
+		Perl_form(aTHX_ "\nThis is perl, v%"SVf"\n",
 		    vstringify(PL_patchlevel)));
 	PerlIO_printf(PerlIO_stdout(),
 			Perl_form(aTHX_ "        built under %s at %s %s\n",

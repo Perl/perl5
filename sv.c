@@ -9390,11 +9390,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		fill = *q++;
 	    EXPECT_NUMBER(q, width);
 
-#ifdef CHECK_FORMAT
-	if ((*q == 'p') && left) {
-	     vectorize = (width == 1);
-	}
-#endif
 	if (vectorize) {
 	    if (vectorarg) {
 		if (args)
@@ -9615,10 +9610,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		left = FALSE;
 	        if (!width)
 		    goto format_sv;	/* %-p	-> %_	*/
-		if (vectorize) {
-		    width = 0;
-		    goto format_d;	/* %-1p	-> %vd	*/	
-		}
 		precis = width;
 		has_precis = TRUE;
 		width = 0;
@@ -9636,9 +9627,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    intsize = 'q';
 #else
 	    intsize = 'l';
-#endif
-#ifdef CHECK_FORMAT
-	format_d:
 #endif
 	    /* FALL THROUGH */
 	case 'd':

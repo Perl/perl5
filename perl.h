@@ -2389,32 +2389,29 @@ typedef pthread_key_t	perl_key;
 #ifndef SVf
 #  ifdef CHECK_FORMAT
 #    define SVf "-p"
-#    ifndef SVf256
-#      define SVf256 "-256p" 
-#    endif
 #  else
 #    define SVf "_"
 #  endif
 #endif
 
+#ifndef SVf_precision
+#  ifdef CHECK_FORMAT
+#    define SVf_precision(n) "-" n "p"
+#  else
+#    define SVf_precision(n) "." n "_"
+#  endif
+#endif
+
+#ifndef SVf32
+#  define SVf32 SVf_precision("32")
+#endif
+
 #ifndef SVf256
-#  define SVf256 ".256"SVf
+#  define SVf256 SVf_precision("256")
 #endif
-
+ 
 #ifndef UVf
-#  ifdef CHECK_FORMAT
-#    define UVf UVuf
-#  else
-#    define UVf "Vu"
-#  endif
-#endif
-
-#ifndef VDf
-#  ifdef CHECK_FORMAT
-#    define VDf "-1p"
-#  else
-#    define VDf "vd"
-#  endif
+#  define UVf UVuf
 #endif
 
 #ifndef DieNull
@@ -3236,7 +3233,7 @@ EXTCONST char PL_no_wrongref[]
 EXTCONST char PL_no_symref[]
   INIT("Can't use string (\"%.32s\") as %s ref while \"strict refs\" in use");
 EXTCONST char PL_no_symref_sv[]
-  INIT("Can't use string (\"%.32" SVf "\") as %s ref while \"strict refs\" in use");
+  INIT("Can't use string (\"%" SVf32 "\") as %s ref while \"strict refs\" in use");
 EXTCONST char PL_no_usym[]
   INIT("Can't use an undefined value as %s reference");
 EXTCONST char PL_no_aelem[]

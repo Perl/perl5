@@ -673,7 +673,6 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     register const char *namend;
     HV *stash = 0;
     I32 add = flags & ~SVf_UTF8;
-    I32 utf8 = flags & SVf_UTF8;
 
     if (*name == '*' && isALPHA(name[1])) /* accidental stringify on a GV? */
 	name++;

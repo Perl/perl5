@@ -244,7 +244,7 @@ C<xsubpp>.  See L<perlxs/"The VERSIONCHECK: Keyword">.
 	    if ( !sv_derived_from(_sv, "version") )			\
 		_sv = new_version(_sv);				\
 	    if ( vcmp(_sv,xssv) )					\
-		Perl_croak(aTHX_ "%s object version %_ does not match %s%s%s%s %_",\
+		Perl_croak(aTHX_ "%s object version %"SVf" does not match %s%s%s%s %"SVf,\
 		      module, vstringify(xssv),				\
 		      vn ? "$" : "", vn ? module : "", vn ? "::" : "",	\
 		      vn ? vn : "bootstrap parameter", vstringify(_sv));\
