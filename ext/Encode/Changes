@@ -1,9 +1,30 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.1 2004/05/25 16:27:14 dankogai Exp dankogai $
+# $Id: Changes,v 2.2 2004/08/31 10:55:34 dankogai Exp dankogai $
 #
 
-$Revision: 2.1 $ $Date: 2004/05/25 16:27:14 $
+$Revision: 2.2 $ $Date: 2004/08/31 10:55:34 $
+  ucm/big5-hkscs.ucm AUTHORS t/big5-hkscs.enc t/big5-hkscs.utf
+  New map submitted by Deng Liu and Autrijus.  Test data needed
+  to be upgrade as well, done by dankogai
+  Message-Id: <20040824204828.GB6999@aut.dyndns.org>
+  bin/ucmsort
+  Now works for characters U+10000 and above.  This fix was needed
+  to "tidy" the original map that was submitted.
+  bin/enc2xs
+  "ucmsort" now mentioned in pod
+
+2.01 2004/05/25 16:27:14
+! bin/enc2xs AUTHORS
+  From:   domo@computer.org
+  Subject: [PATCH] Correct statistics from enc2xs
+  <4AF60A4A-B8BB-11D8-BF99-000A27839BD6@computer.org>
+  <CDEBBD45-B91D-11D8-BF99-000A27839BD6@computer.org>
+! lib/Encode/Alias.pm
+  Addressed "False [] range "\s-" in regex;" in Encode::Alias.pm
+  <200405271148.i4RBm4KY026529@mail.mvnet.de>
+
+2.01 2004/05/25 16:27:14
 ! lib/Encode/CN/HZ.pm lib/Encode/Unicode/UTF7.pm
   "If someone thinks utf8::upgrade($1) should be croaked like 
   chom?p($1),please try the following patch for Encode.pm."
