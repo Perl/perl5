@@ -34,7 +34,7 @@ INST_TOP	*= $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-INST_VER	*= \5.9.2
+#INST_VER	*= \5.9.2
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -45,7 +45,7 @@ INST_VER	*= \5.9.2
 # the same location.  Commenting it out gives you a simpler
 # installation that is easier to understand for beginners.
 #
-INST_ARCH	*= \$(ARCHNAME)
+#INST_ARCH	*= \$(ARCHNAME)
 
 #
 # uncomment to enable multiple interpreters.  This is need for fork()
@@ -413,8 +413,8 @@ LIBFILES	= $(CRYPT_LIB) $(LIBC) \
 OPTIMIZE	= -g -O2 -DDEBUGGING
 LINK_DBG	= -g
 .ELSE
-OPTIMIZE	= -g -O2
-LINK_DBG	= -g
+OPTIMIZE	= -s -O2
+LINK_DBG	= -s
 .ENDIF
 
 CFLAGS		= $(INCLUDES) $(DEFINES) $(LOCDEFS) $(OPTIMIZE)
@@ -458,8 +458,15 @@ OPTIMIZE	= -O1 -MD -Zi -DDEBUGGING
 .ENDIF
 LINK_DBG	= -debug
 .ELSE
-OPTIMIZE	= -MD -DNDEBUG
-LINK_DBG	= -release
+OPTIMIZE	= -MD -Zi -DNDEBUG
+# we enable debug symbols in release builds also
+LINK_DBG	= -debug -opt:ref,icf
+# you may want to enable this if you want COFF symbols in the executables
+# in addition to the PDB symbols.  The default Dr. Watson that ships with
+# Windows can use the the former but not latter.  The free WinDbg can be
+# installed to get better stack traces from just the PDB symbols, so we
+# avoid the bloat of COFF symbols by default.
+#LINK_DBG	= $(LINK_DBG) -debugtype:both
 .IF "$(WIN64)" == "define"
 # enable Whole Program Optimizations (WPO) and Link Time Code Generation (LTCG)
 OPTIMIZE	+= -Ox -GL
@@ -1245,7 +1252,7 @@ distclean: realclean
 	-del /f ..\config.sh ..\splittree.pl perlmain.c dlutils.c config.h.new
 	-del /f $(CONFIGPM)
 	-del /f bin\*.bat
-	-del /f $(PERLEXE_ICO)
+	-del /f $(PERLEXE_ICO) perl.base
 	-cd .. && del /s *$(a) *.map *.pdb *.ilk *.bs *$(o) .exists pm_to_blib
 	-cd $(EXTDIR) && del /s *.def Makefile Makefile.old
 	-if exist $(AUTODIR) rmdir /s /q $(AUTODIR)
@@ -1259,6 +1266,8 @@ installbare : $(RIGHTMAKE) utils
 	$(PERLEXE) ..\installperl
 	if exist $(WPERLEXE) $(XCOPY) $(WPERLEXE) $(INST_BIN)\*.*
 	$(XCOPY) $(GLOBEXE) $(INST_BIN)\*.*
+	if exist ..\perl*.pdb $(XCOPY) ..\perl*.pdb $(INST_BIN)\*.*
+	if exist ..\x2p\a2p.pdb $(XCOPY) ..\x2p\a2p.pdb $(INST_BIN)\*.*
 	$(XCOPY) bin\*.bat $(INST_SCRIPT)\*.*
 
 installhtml : doc
