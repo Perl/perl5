@@ -334,10 +334,15 @@ Win32::GetOSVersion - now returns extra information
 
 =head1 Utility Changes
 
+The C<h2xs> utility now produces a more modern layout:
+F<Foo-Bar/lib/Foo/Bar.pm> instead of F<Foo/Bar/Bar.pm>.
+Also, the boilerplate test is now called F<t/Foo-Bar.t>
+instead of F<t/1.t>.
+
 The Perl debugger (F<lib/perl5db.pl>) has now been extensively
 documented and bugs found while documenting have been fixed.
 
-perldoc has been rewritten from scratch to be more robust and
+C<perldoc> has been rewritten from scratch to be more robust and
 featureful.
 
 =head1 New Documentation
