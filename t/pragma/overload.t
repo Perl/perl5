@@ -939,7 +939,7 @@ unless ($aaa) {
 {
     # check the Odd number of arguments for overload::constant warning
     my $a = "" ;
-    $SIG{__WARN__} = sub {$a = @_[0]} ;
+    local $SIG{__WARN__} = sub {$a = @_[0]} ;
     $x = eval ' overload::constant "integer" ; ' ;
     test($a eq "") ; # 210
     use warnings 'overload' ;
@@ -950,7 +950,7 @@ unless ($aaa) {
 {
     # check the `$_[0]' is not an overloadable type warning
     my $a = "" ;
-    $SIG{__WARN__} = sub {$a = @_[0]} ;
+    local $SIG{__WARN__} = sub {$a = @_[0]} ;
     $x = eval ' overload::constant "fred" => sub {} ; ' ;
     test($a eq "") ; # 212
     use warnings 'overload' ;
@@ -961,7 +961,7 @@ unless ($aaa) {
 {
     # check the `$_[1]' is not a code reference warning
     my $a = "" ;
-    $SIG{__WARN__} = sub {$a = @_[0]} ;
+    local $SIG{__WARN__} = sub {$a = @_[0]} ;
     $x = eval ' overload::constant "integer" => 1; ' ;
     test($a eq "") ; # 214
     use warnings 'overload' ;
