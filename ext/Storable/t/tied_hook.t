@@ -7,13 +7,6 @@
 #  You may redistribute only under the same terms as Perl 5, as specified
 #  in the README file that comes with the distribution.
 #
-# $Log: tied_hook.t,v $
-# Revision 1.0.1.1  2001/02/17 12:29:01  ram
-# patch8: added test for blessed ref to tied hash
-#
-# Revision 1.0  2000/09/01 19:40:42  ram
-# Baseline for first official release.
-#
 
 sub BEGIN {
     if ($ENV{PERL_CORE}){
@@ -254,4 +247,3 @@ ok 24, ref $bx eq 'TIED_HASH_REF';
 $old_hash_fetch = $hash_fetch;
 $v = $bx->{attribute};
 ok 25, $hash_fetch == $old_hash_fetch + 1;	# Still tied
-

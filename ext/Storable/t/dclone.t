@@ -7,10 +7,6 @@
 #  You may redistribute only under the same terms as Perl 5, as specified
 #  in the README file that comes with the distribution.
 #
-# $Log: dclone.t,v $
-# Revision 1.0  2000/09/01 19:40:41  ram
-# Baseline for first official release.
-#
 
 sub BEGIN {
     if ($ENV{PERL_CORE}){
@@ -96,4 +92,3 @@ my $clone = dclone($empty_string_obj);
 print ref $clone eq ref $empty_string_obj &&
       $$clone eq $$empty_string_obj &&
       $$clone eq '' ? "ok 10\n" : "not ok 10\n";
-

@@ -7,14 +7,6 @@
 #  You may redistribute only under the same terms as Perl 5, as specified
 #  in the README file that comes with the distribution.
 #
-# $Log: utf8.t,v $
-# Revision 1.0.1.2  2000/09/28 21:44:17  ram
-# patch2: fixed stupid typo
-#
-# Revision 1.0.1.1  2000/09/17 16:48:12  ram
-# patch1: created.
-#
-#
 
 sub BEGIN {
     if ($] < 5.006) {

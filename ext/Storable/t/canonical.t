@@ -7,10 +7,6 @@
 #  You may redistribute only under the same terms as Perl 5, as specified
 #  in the README file that comes with the distribution.
 #  
-# $Log: canonical.t,v $
-# Revision 1.0  2000/09/01 19:40:41  ram
-# Baseline for first official release.
-#
 
 sub BEGIN {
     if ($ENV{PERL_CORE}){
@@ -153,4 +149,3 @@ ok 7, $$cloned{''}[0] == \$$cloned{a};
 
 $$cloned{a} = "blah";
 ok 8, $$cloned{''}[0] == \$$cloned{a};
-
