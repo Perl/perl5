@@ -11620,19 +11620,23 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     SvANY(&PL_sv_no)		= new_XPVNV();
     SvREFCNT(&PL_sv_no)		= (~(U32)0)/2;
-    SvFLAGS(&PL_sv_no)		= SVp_NOK|SVf_NOK|SVp_POK|SVf_POK|SVf_READONLY|SVt_PVNV;
+    SvFLAGS(&PL_sv_no)		= SVp_IOK|SVf_IOK|SVp_NOK|SVf_NOK
+				  |SVp_POK|SVf_POK|SVf_READONLY|SVt_PVNV;
     SvPVX(&PL_sv_no)		= SAVEPVN(PL_No, 0);
     SvCUR(&PL_sv_no)		= 0;
     SvLEN(&PL_sv_no)		= 1;
+    SvIVX(&PL_sv_no)		= 0;
     SvNVX(&PL_sv_no)		= 0;
     ptr_table_store(PL_ptr_table, &proto_perl->Isv_no, &PL_sv_no);
 
     SvANY(&PL_sv_yes)		= new_XPVNV();
     SvREFCNT(&PL_sv_yes)	= (~(U32)0)/2;
-    SvFLAGS(&PL_sv_yes)		= SVp_NOK|SVf_NOK|SVp_POK|SVf_POK|SVf_READONLY|SVt_PVNV;
+    SvFLAGS(&PL_sv_yes)		= SVp_IOK|SVf_IOK|SVp_NOK|SVf_NOK
+				  |SVp_POK|SVf_POK|SVf_READONLY|SVt_PVNV;
     SvPVX(&PL_sv_yes)		= SAVEPVN(PL_Yes, 1);
     SvCUR(&PL_sv_yes)		= 1;
     SvLEN(&PL_sv_yes)		= 2;
+    SvIVX(&PL_sv_yes)		= 1;
     SvNVX(&PL_sv_yes)		= 1;
     ptr_table_store(PL_ptr_table, &proto_perl->Isv_yes, &PL_sv_yes);
 

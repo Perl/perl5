@@ -237,11 +237,15 @@ perl_construct(pTHXx)
 	    SvREFCNT(&PL_sv_undef) = (~(U32)0)/2;
 
 	    sv_setpv(&PL_sv_no,PL_No);
+	    /* value lookup in void context - happens to have the side effect
+	       of caching the numeric forms.  */
+	    SvIV(&PL_sv_no);
 	    SvNV(&PL_sv_no);
 	    SvREADONLY_on(&PL_sv_no);
 	    SvREFCNT(&PL_sv_no) = (~(U32)0)/2;
 
 	    sv_setpv(&PL_sv_yes,PL_Yes);
+	    SvIV(&PL_sv_yes);
 	    SvNV(&PL_sv_yes);
 	    SvREADONLY_on(&PL_sv_yes);
 	    SvREFCNT(&PL_sv_yes) = (~(U32)0)/2;
