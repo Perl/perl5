@@ -16,6 +16,8 @@ if ($#ARGV >= 0) {
 	$core    = 1 if $1 eq 'core';
 	$verbose = 1 if $1 eq 'v';
 	$with_utf= 1 if $1 eq 'utf8';
+        $byte_compile = 1 if $1 eq 'bytecompile';
+        $compile = 1 if $1 eq 'compile';
 	if ($1 =~ /^deparse(,.+)?$/) {
 	    $deparse = 1;
 	    $deparse_opts = $1;
@@ -97,14 +99,20 @@ unless (@ARGV) {
 %infinite = ();
 
 if ($deparse) {
-    _testprogs('deparse', @ARGV);
-} else {
-    _testprogs('perl', @ARGV);
-    _testprogs('compile', @ARGV) if (-e "../testcompile");
+    _testprogs('deparse', '',   @ARGV);
+}
+elsif( $compile || $byte_compile ) { 
+    _testprogs('compile', '',   @ARGV) if $compile;
+    _testprogs('compile', '-B', @ARGV) if $byte_compile;
+}
+else {
+    _testprogs('compile', '',   @ARGV) if -e "../testcompile";
+    _testprogs('perl',    '',   @ARGV);
 }
 
 sub _testprogs {
     $type = shift @_;
+    $args = shift;
     @tests = @_;
 
     print <<'EOT' if ($type eq 'compile');
@@ -201,7 +209,7 @@ EOT
 	}
 	else {
 	    my $compile =
-		"./perl $testswitch -I../lib ../utils/perlcc -o ".
+		"./perl $testswitch -I../lib ../utils/perlcc -I .. $args -o ".
                 "$test.plc $utf $test ".
 		" && $test.plc |";
 	    open(RESULTS, $compile)
