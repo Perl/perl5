@@ -161,7 +161,7 @@ mkdir "To", 0777;
 
 # Number
 
-    ['Number', 	'$num',			'$num'],
+    ['Number', 	'$num ne ""',		'$num'],
 
 # Mirrored
 
