@@ -174,11 +174,7 @@ of course, removes the warning.
 Perl 5.8.0 also supports Unicode on EBCDIC platforms.  There,
 the Unicode support is somewhat more complex to implement since
 additional conversions are needed at every step.  Some problems
-remain, but they all seem to be related to the combination of
-the extra mapping just described and case-insensitive matching:
-for example, C<< /[\x{131}]/ >> (LATIN SMALL LETTER DOTLESS I)
-does not match "I" case-insensitively, as it should under Unicode.
-(The match succeeds in ASCII-derived platforms.)
+remain, see L<perlebcdic> for details.
 
 In any case, the Unicode support on EBCDIC platforms is better than
 in the 5.6 series, which didn't work much at all for EBCDIC platform.
