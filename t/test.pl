@@ -272,7 +272,7 @@ sub _quote_args {
     foreach (@$args) {
 	# In VMS protect with doublequotes because otherwise
 	# DCL will lowercase -- unless already doublequoted.
-	$_ = q(").$_.q(") if $is_vms && !/^\"/;
+       $_ = q(").$_.q(") if $is_vms && !/^\"/ && length($_) > 0;
 	$$runperl .= ' ' . $_;
     }
 }
