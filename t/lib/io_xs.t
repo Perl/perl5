@@ -21,7 +21,7 @@ BEGIN {
 use IO::File;
 use IO::Seekable;
 
-print "1..4\n";
+print "1..6\n";
 
 $x = new_tmpfile IO::File or print "not ";
 print "ok 1\n";
@@ -40,3 +40,23 @@ print scalar <$x>;
 $! = 0;
 $x->setpos(undef);
 print $! ? "ok 4 # $!\n" : "not ok 4\n";
+
+# These shenanigans are intended to make a perl IO pointing to C FILE *
+# (or equivalent) on a closed file handle. Something that will fail fgetops()
+# Might be easier to use STDIN if (-t STDIN || -P STDIN) if ttys/pipes on
+# all platforms fail to fgetpos()
+$fn = $x->fileno();
+$y = new IO::File;
+if ($y->fdopen ($fn, "r")) {
+  print "ok 5\n";
+  $x->close() or die $!;
+  $!=0;
+  $p = $y->getpos;
+  if (defined $p) {
+    print "not ok 6 # closed handle returned defined position, \$!='$!'\n";
+  } else {
+    print "ok 6 # $!\n";
+  }
+} else {
+  print "not ok 5 # failed to duplicated file number $fd\n", "not ok 6\n";
+}
