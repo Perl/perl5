@@ -179,8 +179,8 @@ values are ignored.  For example
 
 =head1 AUTHOR
 
-Lionel.Cons@cern.ch
+Lionel Cons (CERN).
 
-prototype updates by Ilya Zakharevich ilya@math.ohio-state.edu
+Prototype updates by Ilya Zakharevich <ilya@math.ohio-state.edu>.
 
 =cut
