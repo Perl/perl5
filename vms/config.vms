@@ -44,13 +44,6 @@
 #define STRINGIFY(a)"a"
 #endif
 
-/* Default value for version token in ARCHLIB_EXP;
- * updated during build by FndVers.Com -- do not edit
- */
-#ifndef _PVERS
-#  define _PVERS "5_00201"  /**/
-#endif
-
 /* config-start */
 
 /* MEM_ALIGNBYTES:
@@ -74,11 +67,12 @@
  *	same as PRIVLIB_EXP, it is not defined, since presumably the
  *	program already searches PRIVLIB_EXP.
  */
-#ifdef __ALPHA
-#define ARCHLIB_EXP CAT2("/perl_root/lib/VMS_AXP/",_PVERS)  /* config-skip */
-#else
-#define ARCHLIB_EXP CAT2("/perl_root/lib/VMS_VAX/",_PVERS)  /* config-skip */
-#endif
+/*     ==> NOTE <==
+ * This value is automatically updated by FndVers.Com
+ * when Perl is built.  Please do not change it by hand; make
+ * any changes to FndVers.Com instead.
+ */
+#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX/5_003"    /**/
 
 /* CPPSTDIN:
  *	This symbol contains the first part of the string which will invoke
@@ -1318,11 +1312,12 @@
  *	used in programs that are not prepared to deal with ~ expansion at 
  *	run-time.
  */
-#ifdef __ALPHA
-#define OLDARCHLIB_EXP "/perl_root/lib/VMS_AXP"  /* config-skip */
-#else
-#define OLDARCHLIB_EXP "/perl_root/lib/VMS_VAX" /* config-skip */
-#endif
+/*     ==> NOTE <==
+ * This value is automatically updated by FndVers.Com
+ * when Perl is built.  Please do not change it by hand; make
+ * any changes to FndVers.Com instead.
+ */
+#define OLDARCHLIB_EXP "/perl_root/lib/VMS_VAX"  /**/
 
 /* PRIVLIB_EXP:
  *	This symbol contains the name of the private library for this package.
@@ -1342,11 +1337,12 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#ifdef __ALPHA
-#define SITEARCH_EXP "/perl_root/lib/site_perl/VMS_AXP"  /* config-skip */
-#else
-#define SITEARCH_EXP "/perl_root/lib/site_perl/VMS_VAX" /* config-skip */
-#endif
+/*     ==> NOTE <==
+ * This value is automatically updated by FndVers.Com
+ * when Perl is built.  Please do not change it by hand; make
+ * any changes to FndVers.Com instead.
+ */
+#define SITEARCH_EXP "/perl_root/lib/site_perl/VMS_VAX"  /**/
 
 /* SCRIPTDIR:
  *	This symbol holds the name of the directory in which the user wants
