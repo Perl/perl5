@@ -492,5 +492,9 @@ struct interp_intern {
  */
 #include "win32iop.h"
 
+#ifndef WNOHANG
+#  define WNOHANG 1
+#endif
+
 #endif /* _INC_WIN32_PERL5 */
 
