@@ -3650,7 +3650,7 @@ Perl_yylex(pTHX)
     case '5': case '6': case '7': case '8': case '9':
 	s = scan_num(s, &yylval);
         DEBUG_T( { PerlIO_printf(Perl_debug_log,
-                    "### Saw number in '%s'\n", s);
+                    "### Saw number before '%s'\n", s);
         } );
 	if (PL_expect == XOPERATOR)
 	    no_op("Number",s);
@@ -7551,7 +7551,10 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
     case 'v':
 vstring:
 		sv = NEWSV(92,5); /* preallocate storage space */
-		s = new_vstring(s,sv);
+		s = scan_vstring(s,sv);
+		DEBUG_T( { PerlIO_printf(Perl_debug_log,
+		  "### Saw v-string before '%s'\n", s);
+		} ); 
 	break;
     }
 

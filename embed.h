@@ -752,7 +752,7 @@
 #define newUNOP			Perl_newUNOP
 #define newWHILEOP		Perl_newWHILEOP
 #define new_stackinfo		Perl_new_stackinfo
-#define new_vstring		Perl_new_vstring
+#define scan_vstring		Perl_scan_vstring
 #ifdef PERL_CORE
 #define nextargv		Perl_nextargv
 #endif
@@ -3263,7 +3263,7 @@
 #define newUNOP(a,b,c)		Perl_newUNOP(aTHX_ a,b,c)
 #define newWHILEOP(a,b,c,d,e,f,g)	Perl_newWHILEOP(aTHX_ a,b,c,d,e,f,g)
 #define new_stackinfo(a,b)	Perl_new_stackinfo(aTHX_ a,b)
-#define new_vstring(a,b)	Perl_new_vstring(aTHX_ a,b)
+#define scan_vstring(a,b)	Perl_scan_vstring(aTHX_ a,b)
 #ifdef PERL_CORE
 #define nextargv(a)		Perl_nextargv(aTHX_ a)
 #endif

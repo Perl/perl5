@@ -3926,7 +3926,7 @@ Perl_getcwd_sv(pTHX_ register SV *sv)
 /*
 =head1 SV Manipulation Functions
 
-=for apidoc new_vstring
+=for apidoc scan_vstring
 
 Returns a pointer to the next character after the parsed
 vstring, as well as updating the passed in sv.
@@ -3934,7 +3934,7 @@ vstring, as well as updating the passed in sv.
 Function must be called like
 
         sv = NEWSV(92,5);
-	s = new_vstring(s,sv);
+	s = scan_vstring(s,sv);
 
 The sv must already be large enough to store the vstring
 passed in.
@@ -3943,7 +3943,7 @@ passed in.
 */
 
 char *
-Perl_new_vstring(pTHX_ char *s, SV *sv)
+Perl_scan_vstring(pTHX_ char *s, SV *sv)
 {
     char *pos = s;
     char *start = s;
