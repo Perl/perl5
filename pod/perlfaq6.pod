@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq6 - Regular Expressions ($Revision: 1.11 $, $Date: 2002/05/23 15:47:37 $)
+perlfaq6 - Regular Expressions ($Revision: 1.12 $, $Date: 2002/06/01 22:31:09 $)
 
 =head1 DESCRIPTION
 
@@ -70,9 +70,9 @@ delimiter within the pattern:
 
 =head2 I'm having trouble matching over more than one line.  What's wrong?
 
-Either you don't have more than one line in the string you're looking at
-(probably), or else you aren't using the correct modifier(s) on your
-pattern (possibly).
+Either you don't have more than one line in the string you're looking
+at (probably), or else you aren't using the correct modifier(s) on
+your pattern (possibly).
 
 There are many ways to get multiline data into a string.  If you want
 it to happen automatically while reading input, you'll want to set $/
