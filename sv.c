@@ -7656,6 +7656,14 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl)
 	    av = (AV*)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = av_dup(av);
 	    break;
+	case SAVEt_PADSV:
+	    longval = (long)POPLONG(ss,ix);
+	    TOPLONG(nss,ix) = longval;
+	    ptr = POPPTR(ss,ix);
+	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
+	    sv = (SV*)POPPTR(ss,ix);
+	    TOPPTR(nss,ix) = sv_dup(sv);
+	    break;
 	default:
 	    Perl_croak(aTHX_ "panic: ss_dup inconsistency");
 	}

@@ -1933,6 +1933,7 @@ Ap	|SV*	|save_scalar	|GV* gv
 Ap	|void	|save_pptr	|char** pptr
 Ap	|void	|save_vptr	|void* pptr
 Ap	|void	|save_re_context
+Ap	|void	|save_padsv	|PADOFFSET off
 Ap	|void	|save_sptr	|SV** sptr
 Ap	|SV*	|save_svref	|SV** sptr
 Ap	|SV**	|save_threadsv	|PADOFFSET i

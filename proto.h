@@ -669,6 +669,7 @@ PERL_CALLCONV SV*	Perl_save_scalar(pTHX_ GV* gv);
 PERL_CALLCONV void	Perl_save_pptr(pTHX_ char** pptr);
 PERL_CALLCONV void	Perl_save_vptr(pTHX_ void* pptr);
 PERL_CALLCONV void	Perl_save_re_context(pTHX);
+PERL_CALLCONV void	Perl_save_padsv(pTHX_ PADOFFSET off);
 PERL_CALLCONV void	Perl_save_sptr(pTHX_ SV** sptr);
 PERL_CALLCONV SV*	Perl_save_svref(pTHX_ SV** sptr);
 PERL_CALLCONV SV**	Perl_save_threadsv(pTHX_ PADOFFSET i);
