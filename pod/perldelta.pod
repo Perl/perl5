@@ -40,13 +40,19 @@ maintenance versions.
 
 =head1 Core Changes
 
+=head2 Binary numbers supported
+
 Binary numbers are now supported as literals, in s?printf formats, and
 C<oct()>:
 
 	$answer = 0b101010;
 	printf "The answer is: %b\n", oct("0b101010");
 
+=head2 syswrite() ease-of-use
+
 The length argument of C<syswrite()> is now optional.
+
+=head2 64-bit support
 
 Better 64-bit support -- but full support still a distant goal.  One
 must Configure with -Duse64bits to get Configure to probe for the
@@ -58,11 +64,21 @@ UNIX and UNICOS also have 64-bit support.
 
 =head1 Supported Platforms
 
+=over 4
+
+=item *
+
 VM/ESA is now supported.
+
+=item *
 
 Siemens BS200 is now supported.
 
+=item *
+
 The Mach CThreads (NeXTstep) are now supported by the Thread extension.
+
+=back
 
 =head1 New tests
 
@@ -94,7 +110,7 @@ File test operators.
 
 =item	op/lex_assign
 
-Guard against lexicals leaking (internal stuff).
+Verify operations that access pad objects (lexicals and temporaries).
 
 =back
 
@@ -115,17 +131,23 @@ permissions instead of using stat(2) as usual.  This matters
 in filesystems where there are ACLs (access control lists), the
 stat(2) might lie, while access(2) knows better.
 
-Todo.
-
 =head1 Utility Changes
 
 Todo.
 
 =head1 Documentation Changes
 
-perlopentut, tutorial on opening things in Perl, was added.
+=over 4
 
-perlreftut, tutorial on references, was added.
+=item perlopentut.pod
+
+A tutorial on using open() effectively.
+
+=item perlreftut.pod
+
+A tutorial that introduces the essentials of references.
+
+=back
 
 =head1 New Diagnostics
 
