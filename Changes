@@ -95,6 +95,44 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6607] By: jhi                                   on 2000/08/13  05:32:01
+        Log: Put back the \z changes of #5406 to CPAN.pm.
+     Branch: perl
+	   ! lib/CPAN.pm
+____________________________________________________________________________
+[  6606] By: jhi                                   on 2000/08/13  05:20:16
+        Log: Fix-n-skip the tests under 5005threads.
+     Branch: perl
+	   ! t/lib/b.t
+____________________________________________________________________________
+[  6605] By: jhi                                   on 2000/08/13  05:07:48
+        Log: Fix the test for 5005threads.
+     Branch: perl
+	   ! t/lib/peek.t
+____________________________________________________________________________
+[  6604] By: jhi                                   on 2000/08/13  03:35:37
+        Log: Should have deleted this in #6603.
+     Branch: perl
+	   - vms/subconfigure.com
+____________________________________________________________________________
+[  6603] By: jhi                                   on 2000/08/12  18:29:32
+        Log: Rewrite of vms/subconfigure.com as configure.com,
+             from Peter Prymmer and the vmsperl crew.
+     Branch: perl
+	   + vms/configure.com
+	   ! MANIFEST
+____________________________________________________________________________
+[  6602] By: jhi                                   on 2000/08/11  13:00:01
+        Log: PlainText.pm is dead.
+     Branch: perl
+	   - lib/Pod/PlainText.pm
+	   ! MANIFEST
+____________________________________________________________________________
+[  6601] By: jhi                                   on 2000/08/11  04:06:45
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
 [  6600] By: jhi                                   on 2000/08/11  04:06:10
         Log: Add a few missing files, update MANIFEST.
      Branch: perl
