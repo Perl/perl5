@@ -45,9 +45,12 @@ while (<$in>)
        next;
     }
     else {
-       seek ($out, -3, 2);      # no recipe, so back up and undo grouping
+       if (!/^\t/) {
+           seek ($out, -4, 2);      # no recipe, so back up and undo grouping
+                                    # should be -3, but MS has its CR/LF thing...
+           $inrec = 0;
+       }
        print $out "$_\n";
-       $inrec = 0;
        next;
     }
  }

@@ -404,7 +404,7 @@ DllMain(HANDLE hModule,		/* DLL module handle */
 	_fmode = O_BINARY;
 #endif
 	g_TlsAllocIndex = TlsAlloc();
-	DisableThreadLibraryCalls(hModule);
+	DisableThreadLibraryCalls((HMODULE)hModule);
 	w32_perldll_handle = hModule;
 	break;
 

@@ -2,10 +2,6 @@
 #include "perl.h"
 
 #ifdef __GNUC__
-/*
- * GNU C does not do __declspec()
- */
-#define __declspec(foo) 
 
 /* Mingw32 defaults to globing command line 
  * This is inconsistent with other Win32 ports and 

@@ -344,7 +344,7 @@ struct _PerlIO;
 
 #ifndef PerlIO_stdoutf
 extern int	PerlIO_stdoutf		(const char *,...)
-					__attribute__((format (printf, 1, 2)));
+					__attribute__((__format__ (__printf__, 1, 2)));
 #endif
 #ifndef PerlIO_puts
 extern int	PerlIO_puts		(PerlIO *,const char *);
@@ -405,11 +405,11 @@ extern void	PerlIO_setlinebuf	(PerlIO *);
 #endif
 #ifndef PerlIO_printf
 extern int	PerlIO_printf		(PerlIO *, const char *,...)
-					__attribute__((format (printf, 2, 3)));
+					__attribute__((__format__ (__printf__, 2, 3)));
 #endif
 #ifndef PerlIO_sprintf
 extern int	PerlIO_sprintf		(char *, int, const char *,...)
-					__attribute__((format (printf, 3, 4)));
+					__attribute__((__format__ (__printf__, 3, 4)));
 #endif
 #ifndef PerlIO_vprintf
 extern int	PerlIO_vprintf		(PerlIO *, const char *, va_list);

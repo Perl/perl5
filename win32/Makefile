@@ -76,6 +76,7 @@ INST_ARCH	= \$(ARCHNAME)
 #
 # uncomment to enable the implicit "host" layer for all system calls
 # made by perl.  This is needed and auto-enabled by USE_OBJECT above.
+# This is also needed to get fork().
 #
 #USE_IMP_SYS	= define
 
@@ -93,7 +94,7 @@ INST_ARCH	= \$(ARCHNAME)
 
 #
 # uncomment to enable use of PerlCRT.DLL when using the Visual C compiler.
-# Highly recommended.  It has patches that fix known bugs in MSVCRT.DLL.
+# It has patches that fix known bugs in older versions of MSVCRT.DLL.
 # This currently requires VC 5.0 with Service Pack 3 or later.
 # Get it from CPAN at http://www.perl.com/CPAN/authors/id/D/DO/DOUGL/
 # and follow the directions in the package to install.
@@ -161,7 +162,11 @@ CCLIBDIR	= $(CCHOME)\lib
 #
 #BUILDOPT	= $(BUILDOPT) -DPERL_EXTERNAL_GLOB
 
-# Enabling this runs a cloned toplevel interpreter (fails tests)
+# Enabling this causes perl to do its own CR/LF conversions, and is required
+# if you want to be able to use the bytecode compiler and ByteLoader
+BUILDOPT	= $(BUILDOPT) -DUSE_BINMODE_SCRIPTS
+
+# Enabling this runs a cloned toplevel interpreter (*EXPERIMENTAL*, fails tests)
 #BUILDOPT	= $(BUILDOPT) -DTOP_CLONE
 
 # specify semicolon-separated list of extra directories that modules will

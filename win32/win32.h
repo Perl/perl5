@@ -9,7 +9,9 @@
 #ifndef  _INC_WIN32_PERL5
 #define  _INC_WIN32_PERL5
 
-#define _WIN32_WINNT 0x0400	/* needed for TryEnterCriticalSection() etc. */
+#ifndef _WIN32_WINNT
+#  define _WIN32_WINNT 0x0400     /* needed for TryEnterCriticalSection() etc. */
+#endif
 
 #if defined(PERL_OBJECT) || defined(PERL_IMPLICIT_SYS) || defined(PERL_CAPI)
 #  define DYNAMIC_ENV_FETCH
@@ -35,18 +37,6 @@
 #    define __int64 long long
 #  endif
 #  define Win32_Winsock
-/* GCC does not do __declspec() - render it a nop 
- * and turn on options to avoid importing data 
- */
-#ifndef __declspec
-#  define __declspec(x)
-#endif
-#  ifndef PERL_OBJECT
-#    define PERL_GLOBAL_STRUCT
-#    ifndef MULTIPLICITY
-#      define MULTIPLICITY
-#    endif
-#  endif
 #endif
 
 /* Define DllExport akin to perl's EXT, 
@@ -54,6 +44,8 @@
  * then Export the symbol, 
  * otherwise import it.
  */
+
+/* now even GCC supports __declspec() */
 
 #if defined(PERL_OBJECT)
 #define DllExport
@@ -250,9 +242,6 @@ typedef long		gid_t;
 #endif
 #define flushall	_flushall
 #define fcloseall	_fcloseall
-
-#undef __attribute__
-#define __attribute__(x)
 
 #ifndef CP_UTF8
 #  define CP_UTF8	65001

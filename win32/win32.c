@@ -15,6 +15,8 @@
 #define Win32_Winsock
 #endif
 #include <windows.h>
+#include <winnt.h>
+#include <io.h>
 
 /* #include "config.h" */
 
