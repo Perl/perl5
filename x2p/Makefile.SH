@@ -1,4 +1,4 @@
-case $CONFIGDOTSH in
+case $PERL_CONFIG_TSH in
 '')
 	if test -f config.sh; then TOP=.;
 	elif test -f ../config.sh; then TOP=..;
