@@ -512,18 +512,23 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
     }
 
     switch (o->op_type) {
+    case OP_AELEMFAST:
     case OP_GVSV:
     case OP_GV:
-	if (cGVOPo) {
+#ifdef USE_ITHREADS
+	Perl_dump_indent(aTHX_ level, file, "PADIX = %d\n", cPADOPo->op_padix);
+#else
+	if (cSVOPo->op_sv) {
 	    SV *tmpsv = NEWSV(0,0);
 	    ENTER;
 	    SAVEFREESV(tmpsv);
-	    gv_fullname3(tmpsv, (GV*)cGVOPo, Nullch);
+	    gv_fullname3(tmpsv, (GV*)cSVOPo->op_sv, Nullch);
 	    Perl_dump_indent(aTHX_ level, file, "GV = %s\n", SvPV(tmpsv, n_a));
 	    LEAVE;
 	}
 	else
 	    Perl_dump_indent(aTHX_ level, file, "GV = NULL\n");
+#endif
 	break;
     case OP_CONST:
     case OP_METHOD_NAMED:

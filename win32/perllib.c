@@ -1556,12 +1556,14 @@ RunPerl(int argc, char **argv, char **env)
 
     exitstatus = perl_parse(my_perl, xs_init, argc, argv, env);
     if (!exitstatus) {
-#if 0 /* def USE_ITHREADS */		/* XXXXXX testing */
+#ifdef USE_ITHREADS		/* XXXXXX testing */
 extern PerlInterpreter * perl_clone(pTHXx_ IV flags);
 
 	PerlInterpreter *new_perl = perl_clone(my_perl, 0);
+	Perl_push_scope(new_perl); /* ENTER; (hack in lieu of perl_destruct()) */
 	exitstatus = perl_run( new_perl );
-	/* perl_destruct(new_perl); perl_free(new_perl); */
+	perl_destruct(new_perl); perl_free(new_perl);
+	SetPerlInterpreter(my_perl);
 #else
 	exitstatus = perl_run( my_perl );
 #endif

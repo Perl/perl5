@@ -145,7 +145,11 @@ CCLIBDIR	= $(CCHOME)\lib
 #
 #BUILDOPT	= $(BUILDOPT) -DPERL_INTERNAL_GLOB
 
+# Beginnings of interpreter cloning/threads: still rather rough, fails
+# many tests.  Do not enable unless you know what you're doing!
 #
+#BUILDOPT	= $(BUILDOPT) -DUSE_ITHREADS
+
 # specify semicolon-separated list of extra directories that modules will
 # look for libraries (spaces in path names need not be quoted)
 #

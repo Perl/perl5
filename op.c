@@ -26,7 +26,7 @@
 #define OP_REFCNT_LOCK		NOOP
 #define OP_REFCNT_UNLOCK	NOOP
 #define OpREFCNT_set(o,n)	NOOP
-#define OpREFCNT_dec(o)		0
+#define OpREFCNT_dec(o)		((o)->op_targ--)
 
 #ifdef PL_OP_SLAB_ALLOC 
 #define SLAB_SIZE 8192
@@ -659,6 +659,7 @@ Perl_op_free(pTHX_ OP *o)
 		OP_REFCNT_UNLOCK;
 		return;
 	    }
+	    o->op_targ = 0;		/* XXXXXX */
 	    OP_REFCNT_UNLOCK;
 	    break;
 	default:
@@ -718,16 +719,18 @@ S_op_clear(pTHX_ OP *o)
     case OP_GV:
     case OP_AELEMFAST:
 #ifdef USE_ITHREADS
-	if (PL_curpad) {
-	    GV *gv = cGVOPo;
-	    pad_swipe(cPADOPo->op_padix);
-	    /* No GvIN_PAD_off(gv) here, because other references may still
-	     * exist on the pad */
-	    SvREFCNT_dec(gv);
+	if (cPADOPo->op_padix > 0) {
+	    if (PL_curpad) {
+		GV *gv = cGVOPo;
+		pad_swipe(cPADOPo->op_padix);
+		/* No GvIN_PAD_off(gv) here, because other references may still
+		 * exist on the pad */
+		SvREFCNT_dec(gv);
+	    }
+	    cPADOPo->op_padix = 0;
 	}
-	cPADOPo->op_padix = 0;
 #else
-	SvREFCNT_dec(cGVOPo);
+	SvREFCNT_dec(cSVOPo->op_sv);
 	cSVOPo->op_sv = Nullsv;
 #endif
 	break;
@@ -754,11 +757,26 @@ S_op_clear(pTHX_ OP *o)
 	break;
     case OP_SUBST:
 	op_free(cPMOPo->op_pmreplroot);
-	cPMOPo->op_pmreplroot = Nullop;
-	/* FALL THROUGH */
+	goto clear_pmop;
     case OP_PUSHRE:
+#ifdef USE_ITHREADS
+	if ((PADOFFSET)cPMOPo->op_pmreplroot) {
+	    if (PL_curpad) {
+		GV *gv = (GV*)PL_curpad[(PADOFFSET)cPMOPo->op_pmreplroot];
+		pad_swipe((PADOFFSET)cPMOPo->op_pmreplroot);
+		/* No GvIN_PAD_off(gv) here, because other references may still
+		 * exist on the pad */
+		SvREFCNT_dec(gv);
+	    }
+	}
+#else
+	SvREFCNT_dec((SV*)cPMOPo->op_pmreplroot);
+#endif
+	/* FALL THROUGH */
     case OP_MATCH:
     case OP_QR:
+clear_pmop:
+	cPMOPo->op_pmreplroot = Nullop;
 	ReREFCNT_dec(cPMOPo->op_pmregexp);
 	cPMOPo->op_pmregexp = (REGEXP*)NULL;
 	break;
@@ -3240,7 +3258,13 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 		{
 		    tmpop = ((UNOP*)left)->op_first;
 		    if (tmpop->op_type == OP_GV && !pm->op_pmreplroot) {
-			pm->op_pmreplroot = (OP*)cGVOPx(tmpop);
+#ifdef USE_ITHREADS
+			pm->op_pmreplroot = (OP*)cPADOPx(tmpop)->op_padix;
+			cPADOPx(tmpop)->op_padix = 0;	/* steal it */
+#else
+			pm->op_pmreplroot = (OP*)cSVOPx(tmpop)->op_sv;
+			cSVOPx(tmpop)->op_sv = Nullsv;	/* steal it */
+#endif
 			pm->op_pmflags |= PMf_ONCE;
 			tmpop = cUNOPo->op_first;	/* to list (nulled) */
 			tmpop = ((UNOP*)tmpop)->op_first; /* to pushmark */
@@ -3339,7 +3363,12 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 	if (svp && *svp != &PL_sv_undef && !SvIOK(*svp)) {
 	    (void)SvIOK_on(*svp);
 	    SvIVX(*svp) = 1;
+#ifndef USE_ITHREADS
+	    /* XXX This nameless kludge interferes with cloning SVs. :-(
+	     * What's more, it seems entirely redundant when considering
+	     * PL_DBsingle exists to do the same thing */
 	    SvSTASH(*svp) = (HV*)cop;
+#endif
 	}
     }
 

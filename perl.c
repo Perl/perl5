@@ -512,7 +512,8 @@ perl_destruct(pTHXx)
     PL_utf8_totitle	= Nullsv;
     PL_utf8_tolower	= Nullsv;
 
-    SvREFCNT_dec(PL_compiling.cop_warnings);
+    if (!specialWARN(PL_compiling.cop_warnings))
+	SvREFCNT_dec(PL_compiling.cop_warnings);
     PL_compiling.cop_warnings = Nullsv;
 
     /* Prepare to destruct main symbol table.  */
@@ -3121,7 +3122,7 @@ void
 Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 {
     dTHR;
-    SV *atsv = ERRSV;
+    SV *atsv;
     line_t oldline = CopLINE(PL_curcop);
     CV *cv;
     STRLEN len;
@@ -3134,8 +3135,10 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 	CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_call_list_body), cv);
 	switch (ret) {
 	case 0:
+	    atsv = ERRSV;
 	    (void)SvPV(atsv, len);
 	    if (len) {
+		STRLEN n_a;
 		PL_curcop = &PL_compiling;
 		CopLINE_set(PL_curcop, oldline);
 		if (paramList == PL_beginav)
@@ -3148,7 +3151,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 				   : "END");
 		while (PL_scopestack_ix > oldscope)
 		    LEAVE;
-		Perl_croak(aTHX_ "%s", SvPVX(atsv));
+		Perl_croak(aTHX_ "%s", SvPVx(atsv, n_a));
 	    }
 	    break;
 	case 1:
