@@ -2184,6 +2184,12 @@
 #undef  ptr_table_split
 #define ptr_table_split		Perl_ptr_table_split
 #endif
+#if defined(HAVE_INTERP_INTERN)
+#undef  Perl_sys_intern_init
+#define Perl_sys_intern_init	pPerl->Perl_sys_intern_init
+#undef  sys_intern_init
+#define sys_intern_init		Perl_sys_intern_init
+#endif
 #if defined(PERL_OBJECT)
 #else
 #endif

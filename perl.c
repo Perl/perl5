@@ -272,6 +272,10 @@ perl_construct(pTHXx)
     PL_localpatches = local_patches;	/* For possible -v */
 #endif
 
+#ifdef HAVE_INTERP_INTERN
+    sys_intern_init();
+#endif
+
     PerlIO_init();			/* Hook to IO system */
 
     PL_fdpid = newAV();			/* for remembering popen pids by fd */
@@ -2505,7 +2509,7 @@ S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv, int *fdscript)
 	sv_catpvn(sv, "-I", 2);
 	sv_catpv(sv,PRIVLIB_EXP);
 
-#ifdef MSDOS
+#if defined(MSDOS) || defined(WIN32)
 	Perl_sv_setpvf(aTHX_ cmd, "\
 sed %s -e \"/^[^#]/b\" \
  -e \"/^#[ 	]*include[ 	]/b\" \

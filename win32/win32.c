@@ -3968,18 +3968,6 @@ Perl_init_os_extras(void)
     char *file = __FILE__;
     dXSUB_SYS;
 
-    w32_perlshell_tokens = Nullch;
-    w32_perlshell_items = -1;
-    w32_fdpid = newAV();		/* XXX needs to be in Perl_win32_init()? */
-    New(1313, w32_children, 1, child_tab);
-    w32_num_children = 0;
-    w32_init_socktype = 0;
-#ifdef USE_ITHREADS
-    w32_pseudo_id = 0;
-    New(1313, w32_pseudo_children, 1, child_tab);
-    w32_num_pseudo_children = 0;
-#endif
-
     /* these names are Activeware compatible */
     newXS("Win32::GetCwd", w32_GetCwd, file);
     newXS("Win32::SetCwd", w32_SetCwd, file);
@@ -4037,14 +4025,34 @@ win32_get_child_IO(child_IO_table* ptbl)
     ptbl->childStdErr	= GetStdHandle(STD_ERROR_HANDLE);
 }
 
-
-#ifdef USE_ITHREADS
+#ifdef HAVE_INTERP_INTERN
 
 #  ifdef PERL_OBJECT
+#    undef Perl_sys_intern_init
+#    define Perl_sys_intern_init CPerlObj::Perl_sys_intern_init
 #    undef Perl_sys_intern_dup
 #    define Perl_sys_intern_dup CPerlObj::Perl_sys_intern_dup
 #    define pPerl this
 #  endif
+
+void
+Perl_sys_intern_init(pTHX)
+{
+    w32_perlshell_tokens	= Nullch;
+    w32_perlshell_vec		= (char**)NULL;
+    w32_perlshell_items		= 0;
+    w32_fdpid			= newAV();
+    New(1313, w32_children, 1, child_tab);
+    w32_num_children		= 0;
+#  ifdef USE_ITHREADS
+    w32_pseudo_id		= 0;
+    New(1313, w32_pseudo_children, 1, child_tab);
+    w32_num_pseudo_children	= 0;
+#  endif
+    w32_init_socktype		= 0;
+}
+
+#  ifdef USE_ITHREADS
 
 void
 Perl_sys_intern_dup(pTHX_ struct interp_intern *src, struct interp_intern *dst)
@@ -4054,12 +4062,12 @@ Perl_sys_intern_dup(pTHX_ struct interp_intern *src, struct interp_intern *dst)
     dst->perlshell_items	= 0;
     dst->fdpid			= newAV();
     Newz(1313, dst->children, 1, child_tab);
-    Newz(1313, dst->pseudo_children, 1, child_tab);
     dst->pseudo_id		= 0;
-    dst->children->num		= 0;
+    Newz(1313, dst->pseudo_children, 1, child_tab);
     dst->thr_intern.Winit_socktype = src->thr_intern.Winit_socktype;
 }
-#endif
+#  endif /* USE_ITHREADS */
+#endif /* HAVE_INTERP_INTERN */
 
 #ifdef PERL_OBJECT
 #  undef this

@@ -242,6 +242,7 @@ struct perl_thread;
 #  define aTHXo		aTHX
 #  define aTHXo_	aTHX_
 #  define dTHXo		dTHX
+#  define dTHXoa(x)	dTHXa(x)
 #endif
 
 #ifndef pTHXx

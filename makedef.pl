@@ -260,6 +260,7 @@ elsif ($PLATFORM eq 'aix') {
 		     Perl_same_dirent
 		     Perl_unlnk
 		     Perl_sys_intern_dup
+		     Perl_sys_intern_init
 		     PL_cryptseen
 		     PL_opsave
 		     PL_statusvalue_vms

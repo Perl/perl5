@@ -938,6 +938,9 @@ PERL_CALLCONV void*	Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *tbl, void *sv);
 PERL_CALLCONV void	Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, void *oldsv, void *newsv);
 PERL_CALLCONV void	Perl_ptr_table_split(pTHX_ PTR_TBL_t *tbl);
 #endif
+#if defined(HAVE_INTERP_INTERN)
+PERL_CALLCONV void	Perl_sys_intern_init(pTHX);
+#endif
 
 #if defined(PERL_OBJECT)
 protected:
