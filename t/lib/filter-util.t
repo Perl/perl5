@@ -3,11 +3,11 @@ BEGIN {
     @INC = '.'; 
     push @INC, '../lib';
     require Config; import Config;
-    if ($Config{'extensions'} !~ m{\bFilter/Util\b}) {
-        print "1..0 # Skip: Filter::Util was not built\n";
+    if ($Config{'extensions'} !~ m{\bFilter/Util/Call\b}) {
+        print "1..0 # Skip: Filter::Util::Call was not built\n";
         exit 0;
     }
-    require 'lib/filt-util.pl';
+    require 'lib/filter-util.pl';
 }
 
 print "1..28\n" ;

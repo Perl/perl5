@@ -614,7 +614,7 @@ SETARGV_OBJ	= setargv$(o)
 
 DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
 		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob \
-		Sys/Hostname Storable Filter/Util
+		Sys/Hostname Storable Filter/Util/Call
 STATIC_EXT	= DynaLoader
 NONXS_EXT	= Errno
 
@@ -637,7 +637,7 @@ DPROF		= $(EXTDIR)\Devel\DProf\DProf
 GLOB		= $(EXTDIR)\File\Glob\Glob
 HOSTNAME	= $(EXTDIR)\Sys\Hostname\Hostname
 STORABLE	= $(EXTDIR)\Storable\Storable
-FILTER		= $(EXTDIR)\Filter\Util\Call
+FILTER		= $(EXTDIR)\Filter\Util\Call\Call
 
 SOCKET_DLL	= $(AUTODIR)\Socket\Socket.dll
 FCNTL_DLL	= $(AUTODIR)\Fcntl\Fcntl.dll
@@ -656,7 +656,7 @@ DPROF_DLL	= $(AUTODIR)\Devel\DProf\DProf.dll
 GLOB_DLL	= $(AUTODIR)\File\Glob\Glob.dll
 HOSTNAME_DLL	= $(AUTODIR)\Sys\Hostname\Hostname.dll
 STORABLE_DLL	= $(AUTODIR)\Storable\Storable.dll
-FILTER_DLL	= $(EXTDIR)\Filter\Util\Call.dll
+FILTER_DLL	= $(EXTDIR)\Filter\Util\Call\Call.dll
 
 ERRNO_PM	= $(LIBDIR)\Errno.pm
 
@@ -988,7 +988,7 @@ $(STORABLE_DLL): $(PERLEXE) $(STORABLE).xs
 	cd ..\..\win32
 
 $(FILTER_DLL): $(PERLEXE) $(FILTER).xs
-	cd $(EXTDIR)\Filter\Util
+	cd $(EXTDIR)\Filter\Util\Call
 	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\..\win32
@@ -1039,7 +1039,7 @@ distclean: clean
 	-del /f $(LIBDIR)\Devel\Peek.pm $(LIBDIR)\Devel\DProf.pm
 	-del /f $(LIBDIR)\File\Glob.pm
 	-del /f $(LIBDIR)\Storable.pm
-	-del /f $(LIBDIR)\Filter\Util\Call.pm
+	-del /f $(LIBDIR)\Filter\Util\Call\Call.pm
 	-if exist $(LIBDIR)\IO rmdir /s /q $(LIBDIR)\IO 
 	-rmdir /s $(LIBDIR)\IO
 	-if exist $(LIBDIR)\Thread rmdir /s /q $(LIBDIR)\Thread 
@@ -1048,8 +1048,8 @@ distclean: clean
 	-rmdir /s $(LIBDIR)\B
 	-if exist $(LIBDIR)\Data rmdir /s /q $(LIBDIR)\Data 
 	-rmdir /s $(LIBDIR)\Data
-	-if exist $(LIBDIR)\Filter rmdir /s /q $(LIBDIR)\Filter
-	-rmdir /s $(LIBDIR)\Filter
+	-if exist $(LIBDIR)\Filter\Util\Call rmdir /s /q $(LIBDIR)\Filter\Util\Call
+	-if exist $(LIBDIR)\Filter\Util rmdir /s /q $(LIBDIR)\Filter\Util
 	-del /f $(PODDIR)\*.html
 	-del /f $(PODDIR)\*.bat
 	cd ..\utils
