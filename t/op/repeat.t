@@ -6,15 +6,19 @@ BEGIN {
 }
 
 require './test.pl';
-plan(tests => 33);
+plan(tests => 41);
 
 # compile time
 
 is('-' x 5, '-----',    'compile time x');
+is('-' x 3.1, '---',    'compile time 3.1');
+is('-' x 3.9, '---',    'compile time 3.9');
 is('-' x 1, '-',        '  x 1');
 is('-' x 0, '',         '  x 0');
 is('-' x -1, '',        '  x -1');
 is('-' x undef, '',     '  x undef');
+is('-' x "foo", '',     '  x "foo"');
+is('-' x "3rd", '---',  '  x "3rd"');
 
 is('ab' x 3, 'ababab',  '  more than one char');
 
@@ -22,10 +26,14 @@ is('ab' x 3, 'ababab',  '  more than one char');
 
 $a = '-';
 is($a x 5, '-----',     'run time x');
+is($a x 3.1, '---',     '  x 3.1');
+is($a x 3.9, '---',     '  x 3.9');
 is($a x 1, '-',         '  x 1');
 is($a x 0, '',          '  x 0');
 is($a x -3, '',         '  x -3');
 is($a x undef, '',      '  x undef');
+is($a x "foo", '',      '  x "foo"');
+is($a x "3rd", '---',   '  x "3rd"');
 
 $a = 'ab';
 is($a x 3, 'ababab',    '  more than one char');
@@ -143,4 +151,3 @@ is(77, scalar ((1,7)x2),    'stack truncation');
     }
     is($y, 'abcdabcd');
 }
-
