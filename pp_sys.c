@@ -503,6 +503,7 @@ PP(pp_binmode)
 
 }
 
+
 PP(pp_tie)
 {
     djSP;
@@ -556,7 +557,7 @@ PP(pp_tie)
     CATCH_SET(oldcatch);
 #else
     ENTER;
-    perl_call_sv((SV*)gv, G_SCALAR);
+    perl_call_sv((SV*)GvCV(gv), G_SCALAR);
     SPAGAIN;
 #endif	
     sv = TOPs;
