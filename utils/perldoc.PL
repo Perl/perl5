@@ -45,8 +45,10 @@ print OUT <<'!NO!SUBS!';
 # the perl manuals, though it too is written in perl.
 
 if(@ARGV<1) {
+        $0 =~ s,.*/,,;
 	die <<EOF;
 Usage: $0 [-h] [-v] [-t] [-u] [-m] [-l] PageName|ModuleName|ProgramName
+       $0 -f PerlFunc
 
 We suggest you use "perldoc perldoc" to get aquainted 
 with the system.
@@ -62,19 +64,27 @@ sub usage{
     # display error messages left over from startup.
     ($! = 0, $^E = 1) if $^O eq 'VMS';
     die <<EOF;
-perldoc [-h] [-v] [-u] PageName|ModuleName|ProgramName...
+perldoc [options] PageName|ModuleName|ProgramName...
+perldoc [options] -f BuiltinFunction
+
+Options:
     -h   Display this help message.
     -t   Display pod using pod2text instead of pod2man and nroff.
     -u	 Display unformatted pod text
     -m   Display modules file in its entirety
     -l   Display the modules file name
     -v	 Verbosely describe what's going on.
+
 PageName|ModuleName...
          is the name of a piece of documentation that you want to look at. You 
          may either give a descriptive name of the page (as in the case of
          `perlfunc') the name of a module, either like `Term::Info', 
          `Term/Info', the partial name of a module, like `info', or 
          `makemaker', or the name of a program, like `perldoc'.
+
+BuiltinFunction
+         is the name of a perl function.  Will extract documentation from
+         `perlfunc'.
          
 Any switches in the PERLDOC environment variable will be used before the 
 command line arguments.
@@ -87,7 +97,7 @@ use Text::ParseWords;
 
 unshift(@ARGV,shellwords($ENV{"PERLDOC"}));
 
-getopts("mhtluv") || usage;
+getopts("mhtluvf:") || usage;
 
 usage if $opt_h || $opt_h; # avoid -w warning
 
@@ -95,7 +105,13 @@ usage("only one of -t, -u, -m or -l") if $opt_t + $opt_u + $opt_m + $opt_l > 1;
 
 if ($opt_t) { require Pod::Text; import Pod::Text; }
 
-@pages = @ARGV;
+if ($opt_f) {
+   @pages = ("perlfunc");
+} else {
+   @pages = @ARGV;
+}
+
+
 
 sub containspod {
 	my($file) = @_;
@@ -224,7 +240,7 @@ if ($opt_l) {
     exit;
 }
 
-if( ! -t STDOUT ) { $opt_f = 1 }
+if( ! -t STDOUT ) { $no_tty = 1 }
 
 unless($Is_VMS) {
 	$tmp = "/tmp/perldoc1.$$";
@@ -243,6 +259,41 @@ if ($opt_m) {
     }
     exit $Is_VMS ? $sts : 1;
 } 
+
+if ($opt_f) {
+   my $perlfunc = shift @found;
+   open(PFUNC, $perlfunc) or die "Can't open $perlfunc: $!";
+
+   # Skip introduction
+   while (<PFUNC>) {
+       last if /^=head2 Alphabetical Listing of Perl Functions/;
+   }
+
+   # Look for our function
+   my $found = 0;
+   while (<PFUNC>) {
+       if (/^=item\s+\Q$opt_f\E\b/o)  {
+	   $found++;
+       } elsif (/^=item/) {
+	   last if $found;
+       }
+       push(@pod, $_) if $found;
+   }
+   if (@pod) {
+       if ($opt_t) {
+	   open(FORMATTER, "| pod2text") || die "Can't start filter";
+	   print FORMATTER "=over 8\n\n";
+	   print FORMATTER @pod;
+	   print FORMATTER "=back\n";
+	   close(FORMATTER);
+       } else {
+	   print @pod;
+       }
+   } else {
+       die "No documentation for perl function `$func' found\n";
+   }
+   exit;
+}
 
 foreach (@found) {
 
@@ -277,7 +328,7 @@ foreach (@found) {
 	}
 }
 
-if( $opt_f ) {
+if( $no_tty ) {
 	open(TMP,"<$tmp");
 	print while <TMP>;
 	close(TMP);
@@ -302,6 +353,8 @@ perldoc - Look up Perl documentation in pod format.
 =head1 SYNOPSIS
 
 B<perldoc> [B<-h>] [B<-v>] [B<-t>] [B<-u>] [B<-m>] [B<-l>] PageName|ModuleName|ProgramName
+
+B<perldoc> B<-f> BuiltinFunction
 
 =head1 DESCRIPTION
 
@@ -345,6 +398,11 @@ the file for you and simply hand it off for display.
 =item B<-l> file name only
 
 Display the file name of the module found.
+
+=item B<-f> perlfunc
+
+The B<-f> option followed by the name of a perl built in function will
+extract the documentation of this function from L<perlfunc>.
 
 =item B<PageName|ModuleName|ProgramName>
 
