@@ -5314,18 +5314,18 @@ Perl_newSV(pTHX_ STRLEN len)
 =for apidoc sv_magicext
 
 Adds magic to an SV, upgrading it if necessary. Applies the
-supplied vtable and returns pointer to the magic added.
+supplied vtable and returns a pointer to the magic added.
 
-Note that sv_magicext will allow things that sv_magic will not.
-In particular you can add magic to SvREADONLY SVs and and more than
-one instance of the same 'how'
+Note that C<sv_magicext> will allow things that C<sv_magic> will not.
+In particular, you can add magic to SvREADONLY SVs, and add more than
+one instance of the same 'how'.
 
-I C<namelen> is greater then zero then a savepvn() I<copy> of C<name> is stored,
-if C<namelen> is zero then C<name> is stored as-is and - as another special
-case - if C<(name && namelen == HEf_SVKEY)> then C<name> is assumed to contain
-an C<SV*> and has its REFCNT incremented
+If C<namlen> is greater than zero then a C<savepvn> I<copy> of C<name> is
+stored, if C<namlen> is zero then C<name> is stored as-is and - as another
+special case - if C<(name && namlen == HEf_SVKEY)> then C<name> is assumed
+to contain an C<SV*> and is stored as-is with its REFCNT incremented.
 
-(This is now used as a subroutine by sv_magic.)
+(This is now used as a subroutine by C<sv_magic>.)
 
 =cut
 */
@@ -5403,6 +5403,9 @@ Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, MGVTBL *vtable,
 
 Adds magic to an SV. First upgrades C<sv> to type C<SVt_PVMG> if necessary,
 then adds a new magic item of type C<how> to the head of the magic list.
+
+See C<sv_magicext> (which C<sv_magic> now calls) for a description of the
+handling of the C<name> and C<namlen> arguments.
 
 =cut
 */
