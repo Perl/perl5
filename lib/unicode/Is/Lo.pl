@@ -1,10 +1,6 @@
 return <<'END';
-01aa	
 01bb	
-01be	
 01c0	01c3
-03f3	
-04c0	
 05d0	05ea
 05f0	05f2
 0621	063a
@@ -165,11 +161,6 @@ return <<'END';
 3400	4db5
 4e00	9fa5
 a000	a48c
-a490	a4a1
-a4a4	a4b3
-a4b5	a4c0
-a4c2	a4c4
-a4c6	
 ac00	d7a3
 f900	fa2d
 fb1d	

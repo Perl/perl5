@@ -106,6 +106,11 @@ return <<'END';
 3300	3376
 337b	33dd
 33e0	33fe
+a490	a4a1
+a4a4	a4b3
+a4b5	a4c0
+a4c2	a4c4
+a4c6	
 fb29	
 fe62	
 fe64	fe66

@@ -1,7 +1,4 @@
 return <<'END';
-005e		<compat> 0020 0302
-005f		<compat> 0020 0332
-0060		<compat> 0020 0300
 00a0		<noBreak> 0020
 00a8		<compat> 0020 0308
 00aa		<super> 0061
@@ -455,8 +452,8 @@ return <<'END';
 0ddc		0DD9 0DCF
 0ddd		0DDC 0DCA
 0dde		0DD9 0DDF
-0e33		0E4D 0E32
-0eb3		0ECD 0EB2
+0e33		<compat> 0E4D 0E32
+0eb3		<compat> 0ECD 0EB2
 0edc		<compat> 0EAB 0E99
 0edd		<compat> 0EAB 0EA1
 0f0c		<noBreak> 0F0B

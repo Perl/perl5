@@ -1,5 +1,4 @@
 return <<'END';
-005e	0060
 00a0	
 00a8	
 00aa	
@@ -23,6 +22,8 @@ return <<'END';
 03f0	03f2
 0587	
 0675	0678
+0e33	
+0eb3	
 0edc	0edd
 0f0c	
 0f77	

@@ -242,11 +242,6 @@ return <<'END';
 3400	4db5
 4e00	9fa5
 a000	a48c
-a490	a4a1
-a4a4	a4b3
-a4b5	a4c0
-a4c2	a4c4
-a4c6	
 ac00	d7a3
 f900	fa2d
 fb00	fb06
