@@ -448,10 +448,12 @@ PP(pp_prototype)
 		    else if (n && str[0] == ';' && seen_question)
 			goto set;	/* XXXX system, exec */
 		    if ((oa & (OA_OPTIONAL - 1)) >= OA_AVREF
-			&& (oa & (OA_OPTIONAL - 1)) <= OA_HVREF) {
+			&& (oa & (OA_OPTIONAL - 1)) <= OA_SCALARREF
+			/* But globs are already references (kinda) */
+			&& (oa & (OA_OPTIONAL - 1)) != OA_FILEREF
+		    ) {
 			str[n++] = '\\';
 		    }
-		    /* What to do with R ((un)tie, tied, (sys)read, recv)? */
 		    str[n++] = ("?$@@%&*$")[oa & (OA_OPTIONAL - 1)];
 		    oa = oa >> 4;
 		}

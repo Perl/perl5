@@ -16,7 +16,7 @@ BEGIN {
 
 use strict;
 
-print "1..124\n";
+print "1..125\n";
 
 my $i = 1;
 
@@ -501,4 +501,8 @@ for my $p ( "", qw{ () ($) ($@) ($%) ($;$) (&) (&\@) (&@) (%) (\%) (\@) } ) {
 
 # Not $$;$;$
 print "not " unless prototype "CORE::substr" eq '$$;$$';
+print "ok ", $i++, "\n";
+
+# recv takes a scalar reference for its second argument
+print "not " unless prototype "CORE::recv" eq '*\\$$$';
 print "ok ", $i++, "\n";
