@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+use strict;
 
 BEGIN {
     if( $ENV{PERL_CORE} ) {
@@ -125,19 +126,19 @@ SKIP: {
     # Flesh out some necessary keys in the MM object.
     foreach my $key (qw(XS C O_FILES H HTMLLIBPODS HTMLSCRIPTPODS
                         MAN1PODS MAN3PODS PARENT_NAME)) {
-        $mm_w32{$key} = '';
+        $mm_w32->{$key} = '';
     }
     my $s_PM = join( " \\\n\t", sort keys %{$mm_w32->{PM}} );
     my $k_PM = join( " \\\n\t", %{$mm_w32->{PM}} );
 
     like( $mm_w32->constants(),
-          qr/^NAME\ =\ TestMM_Win32\s+VERSION\ =\ 1\.00.+
-             MAKEMAKER\ =\ $INC{'ExtUtils/MakeMaker.pm'}\s+
-             MM_VERSION\ =\ $ExtUtils::MakeMaker::VERSION.+
+         qr!^NAME\ =\ TestMM_Win32\s+VERSION\ =\ 1\.00.+
+             MAKEMAKER\ =\ \Q$INC{'ExtUtils/MakeMaker.pm'}\E\s+
+             MM_VERSION\ =\ \Q$ExtUtils::MakeMaker::VERSION\E.+
              VERSION_FROM\ =\ TestMM_Win32.+
              TO_INST_PM\ =\ \Q$s_PM\E\s+
              PM_TO_BLIB\ =\ \Q$k_PM\E
-          /xs, 'constants()' );
+         !xs, 'constants()' );
 
 }
 
