@@ -281,7 +281,7 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
  */
 
 /* define this once if either system, instead of cluttering up the src */
-#if defined(MSDOS) || defined(atarist) || defined(WIN32) || defined(CYGWIN32)
+#if defined(MSDOS) || defined(atarist) || defined(WIN32)
 #define DOSISH 1
 #endif
 
@@ -1575,6 +1575,18 @@ union any {
 #else
 #define ARGSproto
 #endif /* USE_THREADS */
+
+#if defined(CYGWIN32)
+/* USEMYBINMODE
+ *   This symbol, if defined, indicates that the program should
+ *   use the routine my_binmode(FILE *fp, char iotype) to insure
+ *   that a file is in "binary" mode -- that is, that no translation
+ *   of bytes occurs on read or write operations.
+ */
+#define USEMYBINMODE / **/
+#define my_binmode(fp, iotype) \
+        (PerlLIO_setmode(PerlIO_fileno(fp), O_BINARY) != -1 ? TRUE : FALSE)
+#endif
 
 typedef I32 (*filter_t) (pTHXo_ int, SV *, int);
 

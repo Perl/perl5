@@ -819,7 +819,7 @@ Perl_do_binmode(pTHX_ PerlIO *fp, int iotype, int flag)
 #endif
 #else
 #if defined(USEMYBINMODE)
-    if (my_binmode(fp,iotype) != NULL)
+    if (my_binmode(fp,iotype) != FALSE)
 	return 1;
     else
 	return 0;

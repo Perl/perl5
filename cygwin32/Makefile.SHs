@@ -29,6 +29,24 @@ $spitshell >>Makefile <<!GROK!THIS!
 ld2: $& Makefile perlld ${src}/cygwin32/ld2.in
 	@echo "extracting ld2 (with variable substitutions)"
 	@$sed s,@buildpath@,$addtopath,g <${src}/cygwin32/ld2.in >ld2
+	@echo "installing ld2 into $installbin"
+# install is included in Cygwin distributions, and we make a note of th
+# requirement in the README.cygwin32 file. However, let's give them
+# a warning.
+	@if test -n "`type $1 2>&1 | sed -n -e '/'$1'$/p'`" ; then \
+		install -c -m 755 ld2 ${installbin}/ld2 ; \
+	else \
+		echo "*************************************************" ; \
+		echo "Oh, no! You didn't read the README.cygwin32" ; \
+		echo "file, which stated that \"install\" was required." ; \
+		echo "Make will probably fail in a few more steps." ; \
+		echo "When it does, copy \"ld2\" to a directory in" ; \
+		echo "your path, other than \".\"." ; \
+		echo "\"/usr/local/bin\" or something similar will do." ; \
+		echo "Then restart make." ; \
+		echo "*************************************************" ; \
+	fi
+
 !GROK!THIS!
 
 $spitshell >>Makefile <<!GROK!THIS!
@@ -74,7 +92,6 @@ linklibperl=-l`echo $libperl|sed -e s,^lib,,`
 $spitshell >>Makefile <<!GROK!THIS!
 LIBPERL = $libperl
 LLIBPERL= $linklibperl
-LDLIBPTH= PATH=$addtopath:\${PATH}
 CLDFLAGS= -L$addtopath $ldflags
 CAT = $cat
 AWK = $awk
@@ -87,7 +104,7 @@ cwobj = $(obj)
 
 # override default rule (NB: make croaks!) to force dll usage
 perlmain$(OBJ_EXT): perlmain.c
-	$(CCCMD) $(PLDLFLAGS) -DUSEIMPORTLIB=\"$(LIBPERL)$(LIB_EXT)\" $*.c
+	$(CCCMD) $(PLDLFLAGS) -DUSEIMPORTLIB $*.c
 
 # library used to make statically linked executables
 # miniperl is linked against it to avoid libperl.dll locking

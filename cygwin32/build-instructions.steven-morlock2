@@ -1,4 +1,8 @@
-This is an addendum to Steven Morlock's original post. The patch, perl5.005_02.patch, contains the USEMYBINMODE correction described below.
+This document is obsolete. Refer to README.cygwin32.
+
+This is an addendum to Steven Morlock's original post.  
+perl5.005_03-static-patch, contains the USEMYBINMODE correction described 
+below.
 
 *****************************
 Subject:  Re: HOWTO: Builiding Perl under Win95/98 using Cygwin32  
@@ -12,9 +16,9 @@ details.  I'd like to correct that here.
 There is a need to address the issue of end of lines being CR/NL or
 NL on the Windows platform.  Cygwin32 by default converts NL to CR/NL
 during file I/O by non Cygwin32-savvy applications.  This means that
-Perl, since it does not support 'binmode' for the Cygwin32 platform, will
-not be able to read & write untranslated/binary files.  There are two
-methods of over coming this.  The first is to mount the Cygwin32
+Perl, since it does not support 'binmode' for the Cygwin32 platform, 
+will not be able to read & write untranslated/binary files.  There are
+two methods of over coming this.  The first is to mount the Cygwin32
 partitions in binary mode.  The second is to enable binmode support
 in Perl.  In the original post I had mounted the partition as binary
 and neglected to include that fact in the post.
@@ -32,10 +36,10 @@ and neglected to include that fact in the post.
     umount /
     mount -b c:\\ /
 
-  You must also get and install the gzip'd version of the Perl source code
-  archive. The zip'd version of the archive has all NL converted to CR/NL
-  pairs in all text files.  So you should be downloading the files ending in
-  '.gz', not '.zip'.
+  You must also get and install the gzip'd version of the Perl source 
+  code archive. The zip'd version of the archive has all NL converted 
+  to CR/NL pairs in all text files.  So you should be downloading the 
+  files ending in '.gz', not '.zip'.
 
 * Patching Perl to add Cygwin32 binmode support:
 
@@ -60,7 +64,8 @@ and neglected to include that fact in the post.
 +    */
 +   #define USEMYBINMODE / **/
 +   #define my_binmode(fp, iotype) \
-+             (PerlLIO_setmode(PerlIO_fileno(fp), O_BINARY) != -1 ? TRUE : NULL)
++             (PerlLIO_setmode(PerlIO_fileno(fp), O_BINARY) != -1 ? 
+TRUE : NULL)
 + #endif
 +
   #include "regexp.h"

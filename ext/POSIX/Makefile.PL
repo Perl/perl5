@@ -1,7 +1,7 @@
 use ExtUtils::MakeMaker;
 WriteMakefile(
     NAME	=> 'POSIX',
-    ($^O eq 'MSWin32' ? () : ($^O =~ /cygwin/ ? (LIBS	=> ["-lmsvcrt"]) : 
+    ($^O eq 'MSWin32' ? () : ($^O =~ /cygwin/ ? () : 
       (LIBS	=> ["-lm -lposix -lcposix"])
     )),
     MAN3PODS 	=> {}, 	# Pods will be built by installman.

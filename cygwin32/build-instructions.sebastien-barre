@@ -1,4 +1,8 @@
-The included patch, perl5.005_02.patch, implements all of the suggestions below. Results in a static build, 93.85% successful test on NT.
+This document is obsolete. Refer to README.cygwin32.
+
+perl5.005_03-static-patch implements all of the 
+suggestions below. Results in a static build, 93.85%
+successful test on NT. 
 
 
 **********************************
@@ -23,7 +27,8 @@ Basically,
 
 *) Edit the hints/cygwin32.sh file to reflect your paths.
 
-Here are also a couple of settings I found useful when performing automatic
+Here are also a couple of settings I found useful when performing 
+automatic
 build (copy hints/cygwin32.sh to config.sh, and do sh Configure -d)
 
 usedl='n'

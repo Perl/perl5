@@ -209,8 +209,6 @@ sub abs_path
     my $start = @_ ? shift : '.';
     my($dotdots, $cwd, @pst, @cst, $dir, @tst);
 
-    return cwd() if ( $^O =~ /cygwin/ );
-
     unless (@cst = stat( $start ))
     {
 	carp "stat($start): $!";
@@ -373,6 +371,12 @@ sub _qnx_abs_path {
         *fastcwd	= \&_qnx_cwd;
         *abs_path	= \&_qnx_abs_path;
         *fast_abs_path	= \&_qnx_abs_path;
+    }
+    elsif ($^O =~ /cygwin/) {
+        *getcwd	= \&cwd;
+        *fastgetcwd	= \&cwd;
+        *fastcwd	= \&cwd;
+        *abs_path	= \&fast_abs_path;
     }
 }
 

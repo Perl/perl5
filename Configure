@@ -4368,17 +4368,25 @@ $grep "^[ 	]*#.*\$wanted" | \
 while read cline; do
 	name=\`echo \$cline | $awk "\$awkprg" | $tr -d '"'\`
 	case "\$name" in
-	*[/\\\\]\$wanted) echo "\$name"; exit 0;;
-	*[\\\\/]\$wanted) echo "\$name"; exit 0;;
-	*) name='';;
+	*[/\\\\]\$wanted) echo "\$name"; exit 1;;
+	*[\\\\/]\$wanted) echo "\$name"; exit 1;;
+	*) exit 2;;
 	esac;
 done;
+#
+#status=0: grep returned 0 lines, case statement not executed
+#status=1: headerfile found
+#status=2: while loop executed, no headerfile found
+#
+status=\$?
 $rm -f foo\$\$.c;
-case "\$name" in
-'') exit 1;;
-esac
+if test \$status -eq 1; then
+	exit 0;
+fi
+exit 1
 EOF
 chmod +x findhdr
+
 
 : define an alternate in-header-list? function
 inhdr='echo " "; td=$define; tu=$undef; yyy=$@;
