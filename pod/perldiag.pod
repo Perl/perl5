@@ -4282,6 +4282,22 @@ old way has bad side effects.
 it already went past any symlink you are presumably trying to look for.
 The operation returned C<undef>.  Use a filename instead.
 
+=item Deprecated use of my() in false conditional
+
+(D deprecated) You used a declaration similar to C<my $x if 0>.
+There has been a long-standing bug in Perl that causes a lexical variable
+not to be cleared at scope exit when its declaration includes a false
+conditional. Some people have exploited this bug to achieve a kind of
+static variable. Since we intend to fix this bug, we don't want people
+relying on this behavior. You can achieve a similar static effect by
+declaring the variable in a separate block outside the function, eg
+    
+    sub f { my $x if 0; return $x++ }
+
+becomes
+
+    { my $x; sub f { return $x++ } }
+
 =item Use of "package" with no arguments is deprecated
 
 (D deprecated) You used the C<package> keyword without specifying a package
