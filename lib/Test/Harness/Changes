@@ -1,5 +1,9 @@
 Revision history for Perl extension Test::Harness
 
+2.26  Wed Jun 19 16:58:02 EDT 2002
+    - Workaround for MacPerl's lack of a working putenv.  It will never 
+      see the PERL5LIB environment variable (perl@16942).
+
 2.25  Sun Jun 16 03:00:33 EDT 2002
     - $Strap is now a global to allow Test::Harness::Straps
       experimentation.
