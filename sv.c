@@ -2412,7 +2412,8 @@ Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
     if (hibit) {
 	STRLEN len = SvCUR(sv) + 1; /* Plus the \0 */
 	SvPVX(sv) = (char*)bytes_to_utf8((U8*)s, &len);
-	SvCUR(sv) = len; /* No longer know the real size. */
+	SvCUR(sv) = len - 1;
+	SvLEN(sv) = len; /* No longer know the real size. */
 	SvUTF8_on(sv);
 	Safefree(s); /* No longer using what was there before. */
     }
