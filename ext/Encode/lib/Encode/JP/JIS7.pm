@@ -1,7 +1,7 @@
 package Encode::JP::JIS7;
 use strict;
 
-our $VERSION = do { my @r = (q$Revision: 1.10 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.11 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode qw(:fallbacks);
 
@@ -35,8 +35,7 @@ sub decode($$;$)
     my ($obj, $str, $chk) = @_;
     my $residue = '';
     if ($chk){
-	$str =~ s/([^\x00-\x7f].*)$//so;
-	$1 and $residue = $1;
+	$str =~ s/([^\x00-\x7f].*)$//so and $residue = $1;
     }
     $residue .= jis_euc(\$str);
     $_[1] = $residue if $chk;

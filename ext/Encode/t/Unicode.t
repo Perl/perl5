@@ -1,5 +1,5 @@
 #
-# $Id: Unicode.t,v 1.12 2003/05/21 08:41:11 dankogai Exp $
+# $Id: Unicode.t,v 1.13 2003/06/18 09:29:02 dankogai Exp $
 #
 # This script is written entirely in ASCII, even though quoted literals
 # do include non-BMP unicode characters -- Are you happy, jhi?
