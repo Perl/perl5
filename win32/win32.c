@@ -3868,6 +3868,8 @@ XS(w32_Spawn)
 {
     dXSARGS;
     char *cmd, *args;
+    void *env;
+    char *dir;
     PROCESS_INFORMATION stProcInfo;
     STARTUPINFO stStartInfo;
     BOOL bSuccess = FALSE;
@@ -3877,6 +3879,9 @@ XS(w32_Spawn)
 
     cmd = SvPV_nolen(ST(0));
     args = SvPV_nolen(ST(1));
+
+    env = PerlEnv_get_childenv();
+    dir = PerlEnv_get_childdir();
 
     memset(&stStartInfo, 0, sizeof(stStartInfo));   /* Clear the block */
     stStartInfo.cb = sizeof(stStartInfo);	    /* Set the structure size */
@@ -3890,8 +3895,8 @@ XS(w32_Spawn)
 		NULL,			/* Default thread security */
 		FALSE,			/* Must be TRUE to use std handles */
 		NORMAL_PRIORITY_CLASS,	/* No special scheduling */
-		NULL,			/* Inherit our environment block */
-		NULL,			/* Inherit our currrent directory */
+		env,			/* Inherit our environment block */
+		dir,			/* Inherit our currrent directory */
 		&stStartInfo,		/* -> Startup info */
 		&stProcInfo))		/* <- Process info (if OK) */
     {
@@ -3902,6 +3907,8 @@ XS(w32_Spawn)
 	CloseHandle(stProcInfo.hThread);/* library source code does this. */
 	bSuccess = TRUE;
     }
+    PerlEnv_free_childenv(env);
+    PerlEnv_free_childdir(dir);
     XSRETURN_IV(bSuccess);
 }
 

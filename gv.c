@@ -1259,9 +1259,12 @@ CV*
 Perl_gv_handler(pTHX_ HV *stash, I32 id)
 {
     dTHR;
-    MAGIC *mg = mg_find((SV*)stash,'c');
+    MAGIC *mg;
     AMT *amtp;
 
+    if (!stash)
+        return Nullcv;
+    mg = mg_find((SV*)stash,'c');
     if (!mg) {
       do_update:
 	Gv_AMupdate(stash);

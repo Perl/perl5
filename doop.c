@@ -48,7 +48,7 @@ S_do_trans_simple(pTHX_ SV *sv)
 
     tbl = (short*)cPVOP->op_pv;
     if (!tbl)
-	Perl_croak(aTHX_ "panic: do_trans");
+	Perl_croak(aTHX_ "panic: do_trans_simple");
 
     s = (U8*)SvPV(sv, len);
     send = s + len;
@@ -107,7 +107,7 @@ S_do_trans_count(pTHX_ SV *sv)/* SPC - OK */
 
     tbl = (short*)cPVOP->op_pv;
     if (!tbl)
-	Perl_croak(aTHX_ "panic: do_trans");
+	Perl_croak(aTHX_ "panic: do_trans_count");
 
     s = (U8*)SvPV(sv, len);
     send = s + len;
@@ -147,7 +147,7 @@ S_do_trans_complex(pTHX_ SV *sv)/* SPC - NOT OK */
 
     tbl = (short*)cPVOP->op_pv;
     if (!tbl)
-	Perl_croak(aTHX_ "panic: do_trans");
+	Perl_croak(aTHX_ "panic: do_trans_complex");
 
     s = (U8*)SvPV(sv, len);
     send = s + len;
@@ -504,8 +504,6 @@ Perl_do_join(pTHX_ register SV *sv, SV *del, register SV **mark, register SV **s
     }
 
     if (items-- > 0) {
-	char *s;
-
 	sv_setpv(sv, "");
 	if (*mark)
 	    sv_catsv(sv, *mark);
@@ -513,10 +511,9 @@ Perl_do_join(pTHX_ register SV *sv, SV *del, register SV **mark, register SV **s
     }
     else
 	sv_setpv(sv,"");
-    len = delimlen;
-    if (len) {
+    if (delimlen) {
 	for (; items > 0; items--,mark++) {
-	    sv_catpvn(sv,delim,len);
+	    sv_catsv(sv,del);
 	    sv_catsv(sv,*mark);
 	}
     }

@@ -241,6 +241,17 @@ the latest applied patch level, creating files that are new (to your
 distribution) and setting date/time stamps of existing files to
 reflect the bleadperl status.
 
+Note that this will not delete any files that were in '.' before
+the rsync. Once you are sure that the rsync is running correctly,
+run it with the --delete and the --dry-run options like this:
+
+ # rsync -avz --delete --dry-run rsync://ftp.linux.activestate.com/perl-current/ .
+
+This will I<simulate> an rsync run that also deletes files not
+present in the bleadperl master copy. Observe the results from
+this run closely. If you are sure that the actual run would delete
+no files precious to you, you could remove the '--dry-run' option.
+
 You can than check what patch was the latest that was applied by
 looking in the file B<.patch>, which will show the number of the
 latest patch.

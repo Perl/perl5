@@ -1184,7 +1184,7 @@ PP(pp_match)
     s = SvPV(TARG, len);
     strend = s + len;
     if (!s)
-	DIE(aTHX_ "panic: do_match");
+	DIE(aTHX_ "panic: pp_match");
     rxtainted = ((pm->op_pmdynflags & PMdf_TAINTED) ||
 		 (PL_tainted && (pm->op_pmflags & PMf_RETAINT)));
     TAINT_NOT;
@@ -1821,6 +1821,8 @@ PP(pp_subst)
     STRLEN len;
     int force_on_match = 0;
     I32 oldsave = PL_savestack_ix;
+    bool do_utf8;
+    STRLEN slen;
 
     /* known replacement string? */
     dstr = (pm->op_pmflags & PMf_CONST) ? POPs : Nullsv;
@@ -1831,6 +1833,7 @@ PP(pp_subst)
 	EXTEND(SP,1);
     }
     PL_reg_sv = TARG;
+    do_utf8 = DO_UTF8(PL_reg_sv);
     if (SvFAKE(TARG) && SvREADONLY(TARG))
 	sv_force_normal(TARG);
     if (SvREADONLY(TARG)
@@ -1850,12 +1853,13 @@ PP(pp_subst)
     
   force_it:
     if (!pm || !s)
-	DIE(aTHX_ "panic: do_subst");
+	DIE(aTHX_ "panic: pp_subst");
 
     strend = s + len;
-    maxiters = 2*(strend - s) + 10;	/* We can match twice at each
-					   position, once with zero-length,
-					   second time with non-zero. */
+    slen = do_utf8 ? utf8_length((U8*)s, (U8*)strend) : len;
+    maxiters = 2 * slen + 10;	/* We can match twice at each
+				   position, once with zero-length,
+				   second time with non-zero. */
 
     if (!rx->prelen && PL_curpm) {
 	pm = PL_curpm;
@@ -2815,12 +2819,15 @@ PP(pp_aelem)
 {
     djSP;
     SV** svp;
-    IV elem = POPi;
+    SV* elemsv = POPs;
+    IV elem = SvIV(elemsv);
     AV* av = (AV*)POPs;
     U32 lval = PL_op->op_flags & OPf_MOD;
     U32 defer = (PL_op->op_private & OPpLVAL_DEFER) && (elem > AvFILL(av));
     SV *sv;
 
+    if (SvROK(elemsv) && ckWARN(WARN_MISC))
+	Perl_warner(aTHX_ WARN_MISC, "Use of reference \"%s\" as array index", SvPV_nolen(elemsv));
     if (elem > 0)
 	elem -= PL_curcop->cop_arybase;
     if (SvTYPE(av) != SVt_PVAV)

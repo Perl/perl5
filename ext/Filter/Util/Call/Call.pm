@@ -56,6 +56,10 @@ __END__
 
 Filter::Util::Call - Perl Source Filter Utility Module
 
+=head1 SYNOPSIS
+ 
+    use Filter::Util::Call ;
+
 =head1 DESCRIPTION
 
 This module provides you with the framework to write I<Source Filters>

@@ -2421,6 +2421,8 @@ Perl_prepend_elem(pTHX_ I32 type, OP *first, OP *last)
 	if (type == OP_LIST) {	/* already a PUSHMARK there */
 	    first->op_sibling = ((LISTOP*)last)->op_first->op_sibling;
 	    ((LISTOP*)last)->op_first->op_sibling = first;
+            if (!(first->op_flags & OPf_PARENS))
+                last->op_flags &= ~OPf_PARENS;
 	}
 	else {
 	    if (!(last->op_flags & OPf_KIDS)) {

@@ -10,7 +10,7 @@ BEGIN {
     }
 }
 
-print "1..105\n";
+print "1..109\n";
 
 my $test = 1;
 
@@ -554,3 +554,48 @@ sub nok_bytes {
     print "ok $test\n";
     $test++;					# 105
 }
+
+{
+    use utf8;
+    my @a = map ord, split(/\x{123}/,
+			   join("", map chr, (1234, 0x123,
+					            0x123,
+					      23,   0x123,
+					      123,  0x123,
+					      128,  0x123,
+					      255,  0x123,
+					      2345)));
+    ok "@a", "1234 0 23 123 128 255 2345";
+    $test++;           				   # 106
+}
+
+{
+    use utf8;
+    my @a = map ord, split(/(\x{123})/,
+			   join("", map chr, (1234, 0x123,
+					            0x123,
+					      23,   0x123,
+					      123,  0x123,
+					      128,  0x123,
+					      255,  0x123,
+					      2345)));
+    # 291 is 0x123
+    ok "@a", "1234 291 0 291 23 291 123 291 128 291 255 291 2345";
+    $test++;           				   # 107 (variant of test 106)
+}
+
+{
+    use utf8;
+    my @a = map ord, split(//, join("", map chr, (1234, 0xff, 2345)));
+    ok "@a", "1234 255 2345";
+    $test++;                # 108 (variant of test 66)
+}
+
+{
+    use utf8;
+    my $x = chr(0xff);
+    my @a = map ord, split(/$x/, join("", map chr, (1234, 0xff, 2345)));
+    ok "@a", "1234 2345";
+    $test++;                # 109 (variant of test 67)
+}
+

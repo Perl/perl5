@@ -3915,10 +3915,10 @@ Perl_yylex(pTHX)
 		    /* If not a declared subroutine, it's an indirect object. */
 		    /* (But it's an indir obj regardless for sort.) */
 
-		    if ((PL_last_lop_op == OP_SORT ||
-                         (!immediate_paren && (!gv || !GvCVu(gv)))) &&
+		    if ( !immediate_paren && (PL_last_lop_op == OP_SORT || 
+                         ((!gv || !GvCVu(gv)) &&
                         (PL_last_lop_op != OP_MAPSTART &&
-			 PL_last_lop_op != OP_GREPSTART))
+			 PL_last_lop_op != OP_GREPSTART))))
 		    {
 			PL_expect = (PL_last_lop == PL_oldoldbufptr) ? XTERM : XOPERATOR;
 			goto bareword;

@@ -989,9 +989,9 @@ $(STORABLE_DLL): $(PERLEXE) $(STORABLE).xs
 
 $(FILTER_DLL): $(PERLEXE) $(FILTER).xs
 	cd $(EXTDIR)\Filter\Util\Call
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\..\..\miniperl -I..\..\..\..\lib Makefile.PL INSTALLDIRS=perl
 	$(MAKE)
-	cd ..\..\..\win32
+	cd ..\..\..\..\win32
 
 $(ERRNO_PM): $(PERLEXE) $(ERRNO)_pm.PL
 	cd $(EXTDIR)\$(*B)
