@@ -1,4 +1,6 @@
 use ExtUtils::MakeMaker;
+my @tables = qw(iso8859 EBCDIC Symbols);
+
 WriteMakefile(
 	NAME		=> "Encode",
 	VERSION_FROM	=> 'Encode.pm',
@@ -12,6 +14,22 @@ WriteMakefile(
 );
 
 package MY;
+
+
+sub post_initialize
+{
+ my ($self) = @_;
+ push(@{$self->{'O_FILES'}},map("$_\$(OBJ_EXT)",@tables));
+ $self->{'clean'}{'FILES'} .= join(' ',map("$_.*",@tables));
+ return '';
+}
+
+sub clean
+{
+ my ($self) = @_;
+ return $self->SUPER::clean . qq[
+	\$(RM_F) ].join(' ',map("$_.*",@tables))."\n"
+}
 
 sub postamble
 {
