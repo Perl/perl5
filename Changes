@@ -79,6 +79,32 @@ Version 5.005_62        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  4352] By: gsar                                  on 1999/10/12  05:24:39
+        Log: allow any unpack specifier to take a count via '/'
+             (from Ilya Zakharevich)
+     Branch: perl
+	   ! pp.c t/op/pack.t
+____________________________________________________________________________
+[  4351] By: gsar                                  on 1999/10/12  05:02:35
+        Log: avoid warnings
+     Branch: perl
+	   ! malloc.c
+____________________________________________________________________________
+[  4350] By: gsar                                  on 1999/10/12  04:50:52
+        Log: various cleanups
+     Branch: perl
+	   ! ext/Devel/DProf/DProf.xs op.c perl.c perly.c perly.y
+	   ! perly_c.diff pp_hot.c toke.c vms/perly_c.vms win32/config.bc
+	   ! win32/config.gc win32/config.vc win32/config_H.bc
+	   ! win32/config_H.gc win32/config_H.vc win32/config_sh.PL
+____________________________________________________________________________
+[  4349] By: gsar                                  on 1999/10/12  00:23:11
+        Log: update Changes, patchlevel etc.
+     Branch: perl
+	   ! Changes Porting/findvars patchlevel.h win32/Makefile
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+	   ! win32/makefile.mk
+____________________________________________________________________________
 [  4348] By: gsar                                  on 1999/10/11  23:11:57
         Log: add vec() example from Chaim Frenkel <chaimf@pobox.com>
      Branch: perl
@@ -252,7 +278,7 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [  4323] By: gsar                                  on 1999/10/09  18:48:31
         Log: don't run END blocks when running under -c switch (older,
-             rarely useful, behavior may still be obtained by putting
+             rarely useful behavior may still be obtained by putting
              BEGIN { $^C = 0; exit; } at the end of the script)
      Branch: perl
 	   ! perl.c

@@ -921,6 +921,9 @@ return values from system(1,...).
 
 The C<Shell> module is supported.
 
+Rudimentary support for building under command.com in Windows 95
+has been added.
+
 [TODO - GSAR]
 
 =head1 New tests
@@ -1121,6 +1124,11 @@ from ever returning the correct value has been corrected.
 Java Perl Lingo is now distributed with Perl.  See jpl/README
 for more information.
 
+=item lib
+
+C<use lib> now weeds out any trailing duplicate entries.
+C<no lib> removes all named entries.
+
 =item Math::BigInt
 
 The logical operations C<E<lt>E<lt>>, C<E<gt>E<gt>>, C<&>, C<|>,
@@ -1245,6 +1253,14 @@ change#4232
 
 =over 4
 
+=item perlcompile.pod
+
+An introduction to using the Perl Compiler suite.
+
+=item perlhack.pod
+
+Some guidelines for hacking the Perl source code.
+
 =item perlopentut.pod
 
 A tutorial on using open() effectively.
@@ -1256,10 +1272,6 @@ A tutorial that introduces the essentials of references.
 =item perltootc.pod
 
 A tutorial on managing class data for object modules.
-
-=item perlcompile.pod
-
-An introduction to using the Perl Compiler suite.
 
 =back
 
