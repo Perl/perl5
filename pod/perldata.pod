@@ -259,7 +259,7 @@ of sixteen buckets has been touched, and presumably contains all
 10,000 of your items.  This isn't supposed to happen.
 
 You can preallocate space for a hash by assigning to the keys() function.
-This rounds up the allocated bucked to the next power of two:
+This rounds up the allocated buckets to the next power of two:
 
     keys(%users) = 1000;		# allocate 1024 buckets
 
