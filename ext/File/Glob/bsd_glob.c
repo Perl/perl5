@@ -73,7 +73,7 @@ static char sscsid[]=  "$OpenBSD: glob.c,v 1.8.10.1 2001/04/10 jason Exp $";
 #ifdef I_PWD
 #	include <pwd.h>
 #else
-#ifdef HAS_PASSWD
+#if defined(HAS_PASSWD) && !defined(VMS)
 	struct passwd *getpwnam(char *);
 	struct passwd *getpwuid(Uid_t);
 #endif

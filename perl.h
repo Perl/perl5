@@ -2357,7 +2357,7 @@ END_EXTERN_C
 #  if defined(NeXT) || defined(__NeXT__) /* or whatever catches all NeXTs */
 char *crypt ();       /* Maybe more hosts will need the unprototyped version */
 #  else
-#    if !defined(WIN32)
+#    if !defined(WIN32) && !defined(VMS)
 char *crypt (const char*, const char*);
 #    endif /* !WIN32 */
 #  endif /* !NeXT && !__NeXT__ */

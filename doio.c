@@ -565,8 +565,8 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    if (savefd != PerlIO_fileno(PerlIO_stdin())) {
 	      char newname[FILENAME_MAX+1];
 	      if (fgetname(fp, newname)) {
-	        if (savefd == PerlIO_fileno(PerlIO_stdout())) Perl_vmssetuserlnm("SYS$OUTPUT", newname);
-	        if (savefd == PerlIO_fileno(PerlIO_stderr())) Perl_vmssetuserlnm("SYS$ERROR",  newname);
+ 	        if (fd == PerlIO_fileno(PerlIO_stdout())) Perl_vmssetuserlnm(aTHX_ "SYS$OUTPUT", newname);
+ 	        if (fd == PerlIO_fileno(PerlIO_stderr())) Perl_vmssetuserlnm(aTHX_ "SYS$ERROR",  newname);
 	      }
 	    }
 #endif
