@@ -245,6 +245,9 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
     if (!hv)
 	return 0;
 
+    if (SvUTF8((SV*)hv) && !SvUTF8(keysv))
+        sv_utf8_upgrade(keysv);
+
     if (SvRMAGICAL(hv)) {
 	if (mg_find((SV*)hv,'P')) {
 	    dTHR;
@@ -463,6 +466,20 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, register U32 hash)
 	return 0;
 
     xhv = (XPVHV*)SvANY(hv);
+
+    if (SvUTF8((SV*)hv) && !SvUTF8(keysv))
+	sv_utf8_upgrade(keysv);
+    else if (SvUTF8(keysv) && !SvUTF8((SV*)hv)) { /* Upgrade hash */
+	SvUTF8_on((SV*)hv);
+	/* XXX Need to save iterator to prevent weird things during "each" */
+	(void)hv_iterinit(hv);
+	while (entry = hv_iternext(hv)) {
+	    if (HeKLEN(entry) != HEf_SVKEY) /* Upgrade to SV key */
+		HeSVKEY_set(entry, newSVpvn(HeKEY(entry), HeKLEN(entry)));
+	    sv_utf8_upgrade(HeKEY_sv(entry));
+	}
+    }
+
     if (SvMAGICAL(hv)) {
 	dTHR;
  	bool needs_copy;

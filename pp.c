@@ -2693,6 +2693,8 @@ PP(pp_each)
     EXTEND(SP, 2);
     if (entry) {
 	PUSHs(hv_iterkeysv(entry));	/* won't clobber stack_sp */
+	if (SvUTF8((SV*)hash))
+	    SvUTF8_on(TOPs);
 	if (gimme == G_ARRAY) {
 	    SV *val;
 	    PUTBACK;

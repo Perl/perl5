@@ -227,7 +227,7 @@ perform the upgrade if necessary.  See C<svtype>.
 
 #define SVrepl_EVAL	0x40000000	/* Replacement part of s///e */
 
-#define SVphv_SHAREKEYS 0x20000000	/* keys live on shared string table */
+#define SVphv_SHAREKEYS 0x80000000	/* keys live on shared string table */
 #define SVphv_LAZYDEL	0x40000000	/* entry in xhv_eiter must be deleted */
 
 #define SVprv_WEAKREF   0x80000000      /* Weak reference */
