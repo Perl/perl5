@@ -1470,6 +1470,8 @@ PerlIOBase_pushed(PerlIO *f, const char *mode, SV *arg)
   l->flags |= PERLIO_F_FASTGETS;
  if (mode)
   {
+   if (*mode == '#' || *mode == 'I')
+    mode++;
    switch (*mode++)
     {
      case 'r':

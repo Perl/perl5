@@ -800,8 +800,6 @@ CFG_VARS	=					\
 		_o=$(o)	obj_ext=$(o)		~	\
 		_a=$(a)	lib_ext=$(a)		~	\
 		static_ext=$(STATIC_EXT)	~	\
-		dynamic_ext=$(DYNAMIC_EXT)	~	\
-		nonxs_ext=$(NONXS_EXT)		~	\
 		use5005threads=$(USE_5005THREADS)	~	\
 		useithreads=$(USE_ITHREADS)	~	\
 		usethreads=$(USE_5005THREADS)	~	\
@@ -902,7 +900,7 @@ config.w32 : $(CFGSH_TMPL)
 	-del /f config.h
 	copy $(CFGH_TMPL) config.h
 
-..\config.sh : config.w32 $(MINIPERL) config_sh.PL
+..\config.sh : config.w32 $(MINIPERL) config_sh.PL FindExt.pm
 	$(MINIPERL) -I..\lib config_sh.PL --cfgsh-option-file \
 	    $(mktmp $(CFG_VARS)) config.w32 > ..\config.sh
 

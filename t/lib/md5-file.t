@@ -126,7 +126,9 @@ sub digest_file
     #print "$file $method\n";
 
     open(FILE, $file) or die "Can't open $file: $!";
-    binmode(FILE);
+# Digests avove are generated on UNIX without CRLF
+# so leave handles in text mode
+#    binmode(FILE);
     my $digest = Digest::MD5->new->addfile(*FILE)->$method();
     close(FILE);
 
@@ -138,7 +140,9 @@ sub cat_file
     my($file) = @_;
     local $/;  # slurp
     open(FILE, $file) or die "Can't open $file: $!";
-    binmode(FILE);
+# Digests avove are generated on UNIX without CRLF
+# so leave handles in text mode
+#    binmode(FILE);
     my $tmp = <FILE>;
     close(FILE);
     $tmp;
