@@ -1082,7 +1082,7 @@ or it may indicate that a logical name table has been corrupted.
 
 (F) A carriage return character was found in the input.  This is an
 error, and not a warning, because carriage return characters can break
-here documents (e.g. C<print E<LT>E<LT>EOF;>).  Note that Perl always
+here documents (e.g. C<print E<lt>E<lt>EOF;>).  Note that Perl always
 opens scripts in text mode, so this error should only occur in C<eval>.
 
 =item Illegal division by zero
@@ -2194,14 +2194,14 @@ system call to call, silly dilly.
 
 =item Too late for "B<-T>" option (try putting it first)
 
-(X) The #! line in a Perl script contains the "-T" option, but Perl
-was not invoked with "-T" in its argument list.  Due to the way Perl
-handles tainting, by the time Perl discovers a "-T" in a script, it's
+(X) The #! line in a Perl script contains the B<-T> option, but Perl
+was not invoked with B<-T> in its argument list.  Due to the way Perl
+handles tainting, by the time Perl discovers a B<-T> in a script, it's
 too late to properly taint everything from the environment.  So Perl
 gives up.
 
 This error can usually be fixed by editing the "#!" line so that the
-"-T" option is in the Perl program's first argument.  (Many operating
+B<-T> option is in the Perl program's first argument.  (Many operating
 systems that implement the "#!" feature only pick up one argument from
 it, so Perl has to get the rest on its own.)
 
