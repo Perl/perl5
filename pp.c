@@ -1316,7 +1316,7 @@ PP(pp_negate)
 		sv_setsv(TARG, sv);
 		*SvPV_force(TARG, len) = *s == '-' ? '+' : '-';
 	    }
-	    else if (IN_UTF8 && *(U8*)s >= 0xc0 && isIDFIRST_utf8(s)) {
+	    else if (IN_UTF8 && *(U8*)s >= 0xc0 && isIDFIRST_utf8((U8*)s)) {
 		sv_setpvn(TARG, "-", 1);
 		sv_catsv(TARG, sv);
 	    }

@@ -31,6 +31,7 @@
 #else
 #  define VTBL			*vtbl
 static void restore_magic _((void *p));
+static int magic_methcall(SV *sv, MAGIC *mg, char *meth, I32 f, int n, SV *val);
 #endif
 
 /*

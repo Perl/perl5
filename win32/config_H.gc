@@ -2278,7 +2278,7 @@
  *	This symbol, if defined, indicates that Perl should
  *	be built to use multiplicity.
  */
-/*#define	MULTIPLICITY		/**/
+#define	MULTIPLICITY		/**/
 
 /* USE_THREADS:
  *	This symbol, if defined, indicates that Perl should

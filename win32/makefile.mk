@@ -37,6 +37,11 @@ INST_VER	*= \5.00552
 #USE_THREADS	*= define
 
 #
+# uncomment to enable multiple interpreters
+#
+#USE_MULTI	*= define
+
+#
 # uncomment one
 #
 #CCTYPE		*= MSVC20
@@ -153,14 +158,15 @@ CRYPT_FLAG	= -DHAVE_DES_FCRYPT
 .IF "$(OBJECT)" != ""
 PERL_MALLOC	!= undef
 USE_THREADS	!= undef
+USE_MULTI	!= undef
 .ENDIF
 
 PERL_MALLOC	*= undef
 
 USE_THREADS	*= undef
+USE_MULTI	*= undef
 
-#BUILDOPT	*= -DMULTIPLICITY 
-#BUILDOPT	*= -DPERL_GLOBAL_STRUCT -DMULTIPLICITY 
+#BUILDOPT	*= -DPERL_GLOBAL_STRUCT
 # -DUSE_PERLIO -D__STDC__=1 -DUSE_SFIO -DI_SFIO -I\sfio97\include
 
 .IMPORT .IGNORE : PROCESSOR_ARCHITECTURE
@@ -693,6 +699,7 @@ CFG_VARS	=					\
 		"dynamic_ext=$(DYNAMIC_EXT)"		\
 		"nonxs_ext=$(NONXS_EXT)"		\
 		"usethreads=$(USE_THREADS)"		\
+		"usemultiplicity=$(USE_MULTI)"		\
 		"LINK_FLAGS=$(LINK_FLAGS)"		\
 		"optimize=$(OPTIMIZE)"
 

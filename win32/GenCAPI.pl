@@ -40,6 +40,7 @@ sub skip_these {
 }
 
 skip_these [qw(
+yylex
 cando
 cast_ulong
 my_chsize

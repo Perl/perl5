@@ -743,6 +743,7 @@ void qsortsv _((SV ** array, size_t num_elts, SVCOMPARE f));
 I32 sortcv _((SV *a, SV *b));
 void save_magic _((I32 mgs_ix, SV *sv));
 int magic_methpack _((SV *sv, MAGIC *mg, char *meth));
+int magic_methcall _((SV *sv, MAGIC *mg, char *meth, I32 f, int n, SV *val));
 int magic_methcall _((MAGIC *mg, char *meth, I32 flags, int n, SV *val));
 OP * doform _((CV *cv, GV *gv, OP *retop));
 void doencodes _((SV* sv, char* s, I32 len));

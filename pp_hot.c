@@ -2518,7 +2518,7 @@ PP(pp_method)
 	{
 	    if (!packname || 
 		((*(U8*)packname >= 0xc0 && IN_UTF8)
-		    ? !isIDFIRST_utf8(packname)
+		    ? !isIDFIRST_utf8((U8*)packname)
 		    : !isIDFIRST(*packname)
 		))
 	    {

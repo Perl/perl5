@@ -28,6 +28,7 @@ while (<CFG>)
  {
   $define{$1} = 1 if /^\s*#\s*define\s+(MYMALLOC)\b/;
   $define{$1} = 1 if /^\s*#\s*define\s+(USE_THREADS)\b/;
+  $define{$1} = 1 if /^\s*#\s*define\s+(MULTIPLICITY)\b/;
  }
 close(CFG);
 

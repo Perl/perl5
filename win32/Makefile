@@ -33,6 +33,11 @@ INST_VER	= \5.00552
 #USE_THREADS	= define
 
 #
+# uncomment to enable multiple interpreters
+#
+#USE_MULTI	= define
+
+#
 # uncomment next line if you are using Visual C++ 2.x
 #
 #CCTYPE		= MSVC20
@@ -135,6 +140,7 @@ CRYPT_FLAG	= -DHAVE_DES_FCRYPT
 !IF "$(OBJECT)" != ""
 PERL_MALLOC	= undef
 USE_THREADS	= undef
+USE_MULTI	= undef
 !ENDIF
 
 !IF "$(PERL_MALLOC)" == ""
@@ -145,8 +151,11 @@ PERL_MALLOC	= undef
 USE_THREADS	= undef
 !ENDIF
 
-#BUILDOPT	= -DMULTIPLICITY 
-#BUILDOPT	= -DPERL_GLOBAL_STRUCT -DMULTIPLICITY
+!IF "$(USE_MULTI)" == ""
+USE_MULTI	= undef
+!ENDIF
+
+#BUILDOPT	= -DPERL_GLOBAL_STRUCT
 # -DUSE_PERLIO -D__STDC__=1 -DUSE_SFIO -DI_SFIO -I\sfio97\include
 
 !IF "$(PROCESSOR_ARCHITECTURE)" == ""
@@ -573,6 +582,7 @@ CFG_VARS	=					\
 		"dynamic_ext=$(DYNAMIC_EXT)"		\
 		"nonxs_ext=$(NONXS_EXT)"		\
 		"usethreads=$(USE_THREADS)"		\
+		"usemultiplicity=$(USE_MULTI)"		\
 		"LINK_FLAGS=$(LINK_FLAGS)"		\
 		"optimize=$(OPTIMIZE)"
 
