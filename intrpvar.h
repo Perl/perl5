@@ -4,6 +4,10 @@
 
 /* Don't forget to re-run embed.pl to propagate changes! */
 
+/* New variables must be added to the very end for binary compatibility.
+ * XSUB.h provides wrapper functions via perlapi.h that make this
+ * irrelevant, but not all code may be expected to #include XSUB.h. */
+
 /* The 'I' prefix is only needed for vars that need appropriate #defines
  * generated when built with or without MULTIPLICITY.  It is also used
  * to generate the appropriate export list for win32.
@@ -504,8 +508,9 @@ PERLVARI(Iencoding,	SV*, Nullsv)		/* character encoding */
 
 PERLVAR(Idebug_pad,	struct perl_debug_pad)	/* always needed because of the re extension */
 
+PERLVAR(Itaint_warn, bool)      /* taint warns instead of dying */
+
 /* New variables must be added to the very end for binary compatibility.
  * XSUB.h provides wrapper functions via perlapi.h that make this
  * irrelevant, but not all code may be expected to #include XSUB.h. */
-
 

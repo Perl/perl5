@@ -399,6 +399,7 @@
 #define PL_sv_yes		(PERL_GET_INTERP->Isv_yes)
 #define PL_svref_mutex		(PERL_GET_INTERP->Isvref_mutex)
 #define PL_sys_intern		(PERL_GET_INTERP->Isys_intern)
+#define PL_taint_warn		(PERL_GET_INTERP->Itaint_warn)
 #define PL_tainting		(PERL_GET_INTERP->Itainting)
 #define PL_threadnum		(PERL_GET_INTERP->Ithreadnum)
 #define PL_threads_mutex	(PERL_GET_INTERP->Ithreads_mutex)
@@ -693,6 +694,7 @@
 #define PL_sv_yes		(vTHX->Isv_yes)
 #define PL_svref_mutex		(vTHX->Isvref_mutex)
 #define PL_sys_intern		(vTHX->Isys_intern)
+#define PL_taint_warn		(vTHX->Itaint_warn)
 #define PL_tainting		(vTHX->Itainting)
 #define PL_threadnum		(vTHX->Ithreadnum)
 #define PL_threads_mutex	(vTHX->Ithreads_mutex)
@@ -990,6 +992,7 @@
 #define PL_Isv_yes		PL_sv_yes
 #define PL_Isvref_mutex		PL_svref_mutex
 #define PL_Isys_intern		PL_sys_intern
+#define PL_Itaint_warn		PL_taint_warn
 #define PL_Itainting		PL_tainting
 #define PL_Ithreadnum		PL_threadnum
 #define PL_Ithreads_mutex	PL_threads_mutex

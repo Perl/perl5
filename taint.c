@@ -25,12 +25,17 @@ Perl_taint_proper(pTHX_ const char *f, const char *s)
 	    ug = " while running setuid";
 	else if (PL_egid != PL_gid)
 	    ug = " while running setgid";
-	else
+	else if (PL_taint_warn)
+            ug = " while running with -t switch";
+        else
 	    ug = " while running with -T switch";
-	if (!PL_unsafe)
-	    Perl_croak(aTHX_ f, s, ug);
-	else if (ckWARN(WARN_TAINT))
-	    Perl_warner(aTHX_ WARN_TAINT, f, s, ug);
+	if (PL_unsafe || PL_taint_warn) {
+            if(ckWARN(WARN_TAINT))
+                Perl_warner(aTHX_ WARN_TAINT, f, s, ug);
+        }
+        else {
+            Perl_croak(aTHX_ f, s, ug);
+        }
     }
 }
 

@@ -535,6 +535,8 @@ END_EXTERN_C
 #define PL_svref_mutex		(*Perl_Isvref_mutex_ptr(aTHX))
 #undef  PL_sys_intern
 #define PL_sys_intern		(*Perl_Isys_intern_ptr(aTHX))
+#undef  PL_taint_warn
+#define PL_taint_warn		(*Perl_Itaint_warn_ptr(aTHX))
 #undef  PL_tainting
 #define PL_tainting		(*Perl_Itainting_ptr(aTHX))
 #undef  PL_threadnum
