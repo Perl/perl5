@@ -1056,7 +1056,7 @@ scan_const(char *start)
 	    s++;
 
 	    /* some backslashes we leave behind */
-	    if (*s && strchr(leaveit, *s)) {
+	    if (*leaveit && *s && strchr(leaveit, *s)) {
 		*d++ = '\\';
 		*d++ = *s++;
 		continue;
@@ -1091,6 +1091,10 @@ scan_const(char *start)
 		/* FALL THROUGH */
 	    /* default action is to copy the quoted character */
 	    default:
+		if (ckWARN(WARN_UNSAFE) && isALPHA(*s))
+		    warner(WARN_UNSAFE, 
+			   "Unrecognized escape \\%c passed through",
+			   *s);
 		*d++ = *s++;
 		continue;
 

@@ -1878,6 +1878,8 @@ tryagain:
 		FAIL("trailing \\ in regexp");
 	    /* FALL THROUGH */
 	default:
+	    /* Do not generate `unrecognized' warnings here, we fall
+	       back into the quick-grab loop below */
 	    goto defchar;
 	}
 	break;
@@ -2008,6 +2010,11 @@ tryagain:
 			    FAIL("trailing \\ in regexp");
 			/* FALL THROUGH */
 		    default:
+			if (!SIZE_ONLY && ckWARN(WARN_UNSAFE) && isALPHA(*p))
+			    warner(WARN_UNSAFE, 
+				   "/%.127s/: Unrecognized escape \\%c passed through",
+				   PL_regprecomp,
+				   *p);
 			goto normal_default;
 		    }
 		    break;
