@@ -3124,6 +3124,7 @@ PP(pp_leaveeval)
 	    MEXTEND(mark,0);
 	    *MARK = &PL_sv_undef;
 	}
+	SP = MARK;
     }
     else {
 	/* in case LEAVE wipes old return values */

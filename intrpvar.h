@@ -369,7 +369,6 @@ PERLVAR(Ifilter_debug,	int)
 #ifdef USE_THREADS
 PERLVAR(Ithr_key,	perl_key)	/* For per-thread struct perl_thread* */
 PERLVAR(Isv_mutex,	perl_mutex)	/* Mutex for allocating SVs in sv.c */
-PERLVAR(Imalloc_mutex,	perl_mutex)	/* Mutex for malloc */
 PERLVAR(Ieval_mutex,	perl_mutex)	/* Mutex for doeval */
 PERLVAR(Ieval_cond,	perl_cond)	/* Condition variable for doeval */
 PERLVAR(Ieval_owner,	struct perl_thread *)
@@ -389,11 +388,11 @@ PERLVAR(Icred_mutex,	perl_mutex)	/* altered credentials in effect */
 #endif /* USE_THREADS */
 
 #if defined(PERL_IMPLICIT_SYS)
-PERLVARI(IMem,		struct IPerlMem*,  NULL)
-PERLVARI(IEnv,		struct IPerlEnv*,  NULL)
-PERLVARI(IStdIO,	struct IPerlStdIO*, NULL)
-PERLVARI(ILIO,		struct IPerlLIO*,  NULL)
-PERLVARI(IDir,		struct IPerlDir*,  NULL)
-PERLVARI(ISock,		struct IPerlSock*, NULL)
-PERLVARI(IProc,		struct IPerlProc*, NULL)
+PERLVAR(IMem,		struct IPerlMem*)
+PERLVAR(IEnv,		struct IPerlEnv*)
+PERLVAR(IStdIO,		struct IPerlStdIO*)
+PERLVAR(ILIO,		struct IPerlLIO*)
+PERLVAR(IDir,		struct IPerlDir*)
+PERLVAR(ISock,		struct IPerlSock*)
+PERLVAR(IProc,		struct IPerlProc*)
 #endif

@@ -75,19 +75,22 @@ int _CRT_glob = 0;
 #define EXECF_SPAWN 2
 #define EXECF_SPAWN_NOWAIT 3
 
+#if defined(PERL_IMPLICIT_SYS)
+#  undef win32_get_privlib
+#  define win32_get_privlib g_win32_get_privlib
+#  undef win32_get_sitelib
+#  define win32_get_sitelib g_win32_get_sitelib
+#  undef do_spawn
+#  define do_spawn g_do_spawn
+#  undef getlogin
+#  define getlogin g_getlogin
+#endif
+
 #if defined(PERL_OBJECT)
-#undef win32_get_privlib
-#define win32_get_privlib g_win32_get_privlib
-#undef win32_get_sitelib
-#define win32_get_sitelib g_win32_get_sitelib
-#undef do_aspawn
-#define do_aspawn g_do_aspawn
-#undef do_spawn
-#define do_spawn g_do_spawn
-#undef Perl_do_exec
-#define Perl_do_exec g_do_exec
-#undef getlogin
-#define getlogin g_getlogin
+#  undef do_aspawn
+#  define do_aspawn g_do_aspawn
+#  undef Perl_do_exec
+#  define Perl_do_exec g_do_exec
 #endif
 
 static void		get_shell(void);
@@ -369,7 +372,7 @@ has_shell_metachars(char *ptr)
     return FALSE;
 }
 
-#if !defined(PERL_OBJECT)
+#if !defined(PERL_IMPLICIT_SYS)
 /* since the current process environment is being updated in util.c
  * the library functions will get the correct environment
  */
@@ -1293,14 +1296,13 @@ win32_times(struct tms *timebuf)
     return 0;
 }
 
-/* fix utime() so it works on directories in NT
- * thanks to Jan Dubois <jan.dubois@ibm.net>
- */
+/* fix utime() so it works on directories in NT */
 static BOOL
 filetime_from_time(PFILETIME pFileTime, time_t Time)
 {
-    struct tm *pTM = gmtime(&Time);
+    struct tm *pTM = localtime(&Time);
     SYSTEMTIME SystemTime;
+    FILETIME LocalTime;
 
     if (pTM == NULL)
 	return FALSE;
@@ -1313,7 +1315,8 @@ filetime_from_time(PFILETIME pFileTime, time_t Time)
     SystemTime.wSecond = pTM->tm_sec;
     SystemTime.wMilliseconds = 0;
 
-    return SystemTimeToFileTime(&SystemTime, pFileTime);
+    return SystemTimeToFileTime(&SystemTime, &LocalTime) &&
+           LocalFileTimeToFileTime(&LocalTime, pFileTime);
 }
 
 DllExport int

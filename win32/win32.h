@@ -9,7 +9,7 @@
 #ifndef  _INC_WIN32_PERL5
 #define  _INC_WIN32_PERL5
 
-#if defined(PERL_OBJECT) || defined(PERL_CAPI)
+#if defined(PERL_OBJECT) || defined(PERL_IMPLICIT_SYS) || defined(PERL_CAPI)
 #  define DYNAMIC_ENV_FETCH
 #  define ENV_HV_NAME "___ENV_HV_NAME___"
 #  define HAS_GETENV_LEN
@@ -17,7 +17,7 @@
 #  define WIN32IO_IS_STDIO		/* don't pull in custom stdio layer */
 #  define WIN32SCK_IS_STDSCK		/* don't pull in custom wsock layer */
 #  ifdef PERL_GLOBAL_STRUCT
-#    error PERL_GLOBAL_STRUCT cannot be defined with PERL_OBJECT
+#    error PERL_GLOBAL_STRUCT cannot be defined with PERL_IMPLICIT_SYS
 #  endif
 #  define win32_get_privlib PerlEnv_lib_path
 #  define win32_get_sitelib PerlEnv_sitelib_path

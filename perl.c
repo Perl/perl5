@@ -47,14 +47,41 @@ static I32 read_e_script(pTHXo_ int idx, SV *buf_sv, int maxlen);
 #endif
 
 #ifdef PERL_OBJECT
-CPerlObj* perl_alloc(IPerlMem* ipM, IPerlEnv* ipE, IPerlStdIO* ipStd,
-		     IPerlLIO* ipLIO, IPerlDir* ipD, IPerlSock* ipS, IPerlProc* ipP)
+CPerlObj*
+perl_alloc(struct IPerlMem* ipM, struct IPerlEnv* ipE,
+		 struct IPerlStdIO* ipStd, struct IPerlLIO* ipLIO,
+		 struct IPerlDir* ipD, struct IPerlSock* ipS,
+		 struct IPerlProc* ipP)
 {
     CPerlObj* pPerl = new(ipM) CPerlObj(ipM, ipE, ipStd, ipLIO, ipD, ipS, ipP);
-    if(pPerl != NULL)
+    if (pPerl != NULL)
 	pPerl->Init();
 
     return pPerl;
+}
+#else
+
+#ifdef PERL_IMPLICIT_SYS
+PerlInterpreter *
+perl_alloc_using(struct IPerlMem* ipM, struct IPerlEnv* ipE,
+		 struct IPerlStdIO* ipStd, struct IPerlLIO* ipLIO,
+		 struct IPerlDir* ipD, struct IPerlSock* ipS,
+		 struct IPerlProc* ipP)
+{
+    PerlInterpreter *my_perl;
+
+    /* New() needs interpreter, so call malloc() instead */
+    my_perl = (PerlInterpreter*)(*ipM->pMalloc)(ipM, sizeof(PerlInterpreter));
+    PERL_SET_INTERP(my_perl);
+    Zero(my_perl, 1, PerlInterpreter);
+    PL_Mem = ipM;
+    PL_Env = ipE;
+    PL_StdIO = ipStd;
+    PL_LIO = ipLIO;
+    PL_Dir = ipD;
+    PL_Sock = ipS;
+    PL_Proc = ipP;
+    return my_perl;
 }
 #else
 PerlInterpreter *
@@ -67,6 +94,7 @@ perl_alloc(void)
     PERL_SET_INTERP(my_perl);
     return my_perl;
 }
+#endif /* PERL_IMPLICIT_SYS */
 #endif /* PERL_OBJECT */
 
 void
@@ -79,10 +107,6 @@ perl_construct(pTHXx)
 #endif /* FAKE_THREADS */
 #endif /* USE_THREADS */
     
-#ifdef MULTIPLICITY
-    Zero(my_perl, 1, PerlInterpreter);
-#endif
-
 #ifdef MULTIPLICITY
     init_interp();
     PL_perl_destruct_level = 1; 
@@ -787,7 +811,6 @@ S_parse_body(pTHX_ va_list args)
 #else
 		sv_catpv(PL_Sv,"print \"\\nCharacteristics of this binary (from libperl): \\n\",");
 #endif
-#if defined(DEBUGGING) || defined(MULTIPLICITY)
 		sv_catpv(PL_Sv,"\"  Compile-time options:");
 #  ifdef DEBUGGING
 		sv_catpv(PL_Sv," DEBUGGING");
@@ -795,8 +818,20 @@ S_parse_body(pTHX_ va_list args)
 #  ifdef MULTIPLICITY
 		sv_catpv(PL_Sv," MULTIPLICITY");
 #  endif
+#  ifdef USE_THREADS
+		sv_catpv(PL_Sv," USE_THREADS");
+#  endif
+#  ifdef PERL_OBJECT
+		sv_catpv(PL_Sv," PERL_OBJECT");
+#  endif
+#  ifdef PERL_IMPLICIT_CONTEXT
+		sv_catpv(PL_Sv," PERL_IMPLICIT_CONTEXT");
+#  endif
+#  ifdef PERL_IMPLICIT_SYS
+		sv_catpv(PL_Sv," PERL_IMPLICIT_SYS");
+#  endif
 		sv_catpv(PL_Sv,"\\n\",");
-#endif
+
 #if defined(LOCAL_PATCH_COUNT)
 		if (LOCAL_PATCH_COUNT > 0) {
 		    int i;

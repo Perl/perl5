@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..37\n";
+print "1..38\n";
 
 eval 'print "ok 1\n";';
 
@@ -176,3 +176,9 @@ $SIG{__DIE__} = sub { eval {1}; die shift };
 eval { die "ok ".$x++,"\n" }; 
 print $@;
 
+# does scalar eval"" pop stack correctly?
+{
+    my $c = eval "(1,2)x10";
+    print $c eq '2222222222' ? "ok $x\n" : "# $c\nnot ok $x\n";
+    $x++;
+}

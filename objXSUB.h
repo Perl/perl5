@@ -274,8 +274,6 @@
 #define PL_main_root		(*Perl_Imain_root_ptr(aTHXo))
 #undef  PL_main_start
 #define PL_main_start		(*Perl_Imain_start_ptr(aTHXo))
-#undef  PL_malloc_mutex
-#define PL_malloc_mutex		(*Perl_Imalloc_mutex_ptr(aTHXo))
 #undef  PL_max_intro_pending
 #define PL_max_intro_pending	(*Perl_Imax_intro_pending_ptr(aTHXo))
 #undef  PL_maxo
@@ -830,6 +828,8 @@
 #define PL_do_undump		(*Perl_Gdo_undump_ptr(NULL))
 #undef  PL_hexdigit
 #define PL_hexdigit		(*Perl_Ghexdigit_ptr(NULL))
+#undef  PL_malloc_mutex
+#define PL_malloc_mutex		(*Perl_Gmalloc_mutex_ptr(NULL))
 #undef  PL_patleave
 #define PL_patleave		(*Perl_Gpatleave_ptr(NULL))
 

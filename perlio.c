@@ -7,7 +7,6 @@
  *
  */
 
-#if !defined(PERL_IMPLICIT_SYS)
 
 #define VOIDUSED 1
 #include "config.h"
@@ -25,6 +24,8 @@
 #include "EXTERN.h"
 #define PERL_IN_PERLIO_C
 #include "perl.h"
+
+#if !defined(PERL_IMPLICIT_SYS)
 
 #ifdef PERLIO_IS_STDIO 
 

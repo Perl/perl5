@@ -1490,8 +1490,8 @@ EXT U32 PL_opargs[] = {
 	0x00003014,	/* trans */
 	0x00000004,	/* sassign */
 	0x00044408,	/* aassign */
-	0x0000570d,	/* chop */
-	0x0001378c,	/* schop */
+	0x0000560d,	/* chop */
+	0x0001368c,	/* schop */
 	0x0000570d,	/* chomp */
 	0x0001378c,	/* schomp */
 	0x00013694,	/* defined */
@@ -1502,9 +1502,9 @@ EXT U32 PL_opargs[] = {
 	0x00002254,	/* i_preinc */
 	0x00002264,	/* predec */
 	0x00002254,	/* i_predec */
-	0x0000236c,	/* postinc */
+	0x0000226c,	/* postinc */
 	0x0000235c,	/* i_postinc */
-	0x0000236c,	/* postdec */
+	0x0000226c,	/* postdec */
 	0x0000235c,	/* i_postdec */
 	0x0002250e,	/* pow */
 	0x0002252e,	/* multiply */
@@ -1543,13 +1543,13 @@ EXT U32 PL_opargs[] = {
 	0x00022416,	/* seq */
 	0x00022416,	/* sne */
 	0x0002241e,	/* scmp */
-	0x0002250e,	/* bit_and */
-	0x0002250e,	/* bit_xor */
-	0x0002250e,	/* bit_or */
-	0x0000232e,	/* negate */
+	0x0002240e,	/* bit_and */
+	0x0002240e,	/* bit_xor */
+	0x0002240e,	/* bit_or */
+	0x0000222e,	/* negate */
 	0x0000231e,	/* i_negate */
 	0x00002216,	/* not */
-	0x0000230e,	/* complement */
+	0x0000220e,	/* complement */
 	0x0002290e,	/* atan2 */
 	0x0001378e,	/* sin */
 	0x0001378e,	/* cos */

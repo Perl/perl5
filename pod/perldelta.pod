@@ -450,7 +450,7 @@ command before running Perl.  The BSD::Resource extension (not
 included with the standard Perl distribution) may also be of use, it
 offers the getrlimit/setrlimit interface that can be used to adjust
 process resource usage limits, including the maximum filesize limit.
- 
+
 =head2 Long doubles
 
 In some systems you may be able to use long doubles to enhance the
@@ -1027,7 +1027,8 @@ to Perl's debugging API.
 
 =item Devel::DProf
 
-Devel::DProf, a Perl source code profiler has been added.  See L<DProf>.
+Devel::DProf, a Perl source code profiler has been added.  See
+L<Devel::DProf> and L<dprofpp>.
 
 =item Dumpvalue
 
@@ -1341,6 +1342,10 @@ change#4232
 =item perlcompile.pod
 
 An introduction to using the Perl Compiler suite.
+
+=item perlfilter.pod
+
+An introduction to writing Perl source filters.
 
 =item perlhack.pod
 

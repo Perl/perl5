@@ -304,7 +304,6 @@
 #define PL_main_cv		(PERL_GET_INTERP->Imain_cv)
 #define PL_main_root		(PERL_GET_INTERP->Imain_root)
 #define PL_main_start		(PERL_GET_INTERP->Imain_start)
-#define PL_malloc_mutex		(PERL_GET_INTERP->Imalloc_mutex)
 #define PL_max_intro_pending	(PERL_GET_INTERP->Imax_intro_pending)
 #define PL_maxo			(PERL_GET_INTERP->Imaxo)
 #define PL_maxsysfd		(PERL_GET_INTERP->Imaxsysfd)
@@ -581,7 +580,6 @@
 #define PL_main_cv		(vTHX->Imain_cv)
 #define PL_main_root		(vTHX->Imain_root)
 #define PL_main_start		(vTHX->Imain_start)
-#define PL_malloc_mutex		(vTHX->Imalloc_mutex)
 #define PL_max_intro_pending	(vTHX->Imax_intro_pending)
 #define PL_maxo			(vTHX->Imaxo)
 #define PL_maxsysfd		(vTHX->Imaxsysfd)
@@ -860,7 +858,6 @@
 #define PL_Imain_cv		PL_main_cv
 #define PL_Imain_root		PL_main_root
 #define PL_Imain_start		PL_main_start
-#define PL_Imalloc_mutex	PL_malloc_mutex
 #define PL_Imax_intro_pending	PL_max_intro_pending
 #define PL_Imaxo		PL_maxo
 #define PL_Imaxsysfd		PL_maxsysfd
@@ -1285,6 +1282,7 @@
 #define PL_curinterp		(PL_Vars.Gcurinterp)
 #define PL_do_undump		(PL_Vars.Gdo_undump)
 #define PL_hexdigit		(PL_Vars.Ghexdigit)
+#define PL_malloc_mutex		(PL_Vars.Gmalloc_mutex)
 #define PL_patleave		(PL_Vars.Gpatleave)
 
 #else /* !PERL_GLOBAL_STRUCT */
@@ -1294,6 +1292,7 @@
 #define PL_Gcurinterp		PL_curinterp
 #define PL_Gdo_undump		PL_do_undump
 #define PL_Ghexdigit		PL_hexdigit
+#define PL_Gmalloc_mutex	PL_malloc_mutex
 #define PL_Gpatleave		PL_patleave
 
 #endif /* PERL_GLOBAL_STRUCT */
