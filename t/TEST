@@ -80,8 +80,13 @@ while ($test = shift) {
     }
     $next = $next - 1;
     if ($ok && $next == $max) {
-	print "ok\n";
-	$good = $good + 1;
+	if ($max) {
+	    print "ok\n";
+	    $good = $good + 1;
+	} else {
+	    print "skipping test on this platform\n";
+	    $files -= 1;
+	}
     } else {
 	$next += 1;
 	print "FAILED on test $next\n";
