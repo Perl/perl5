@@ -1,9 +1,11 @@
 package File::Spec::VMS;
 
 use strict;
-use vars qw(@ISA);
+use vars qw(@ISA $VERSION);
 require File::Spec::Unix;
 @ISA = qw(File::Spec::Unix);
+
+$VERSION = 1.0;
 
 use Cwd;
 use File::Basename;

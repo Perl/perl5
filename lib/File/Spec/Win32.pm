@@ -2,7 +2,7 @@ package File::Spec::Win32;
 
 use strict;
 use Cwd;
-use vars qw(@ISA);
+use vars qw(@ISA $VERSION);
 require File::Spec::Unix;
 
 $VERSION = '1.2';
