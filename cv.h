@@ -85,6 +85,8 @@ Returns the stash of the CV.
 #define CVf_LOCKED	0x0080	/* CV locks itself or first arg on entry */
 #define CVf_LVALUE	0x0100  /* CV return value can be used as lvalue */
 #define CVf_CONST	0x0200  /* inlinable sub */
+/* This symbol for optimised communication between toke.c and op.c: */
+#define CVf_BUILTIN_ATTRS	(CVf_METHOD|CVf_LOCKED|CVf_LVALUE)
 
 #define CvCLONE(cv)		(CvFLAGS(cv) & CVf_CLONE)
 #define CvCLONE_on(cv)		(CvFLAGS(cv) |= CVf_CLONE)
