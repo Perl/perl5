@@ -607,12 +607,17 @@ if( $opt_b ){
           .  "(i.e. 5.5.0)\n";
     my ($maj,$min,$sub) = split(/\./,$opt_b,3);
     if ($maj < 5 || ($maj == 5 && $min < 6)) {
-        $compat_version = sprintf("%d.%03d%02d",$maj,$min,$sub);
+        $compat_version =
+	    $sub ? sprintf("%d.%03d%02d",$maj,$min,$sub) :
+	           sprintf("%d.%03d",    $maj,$min);
     } else {
-        $compat_version = sprintf("%d.%03d%03d",$maj,$min,$sub);
+        $compat_version =
+	    $sub ? sprintf("%d.%03d%03d",$maj,$min,$sub) :
+		   sprintf("%d.%03d",    $maj,$min);
     }
 } else {
-    my ($maj,$min,$sub) = $compat_version =~ /(\d+)\.(\d\d\d)(\d\d\d?)/;
+    my ($maj,$min,$sub) = $compat_version =~ /(\d+)\.(\d\d\d)(\d*)/;
+    $sub ||= 0;
     warn sprintf <<'EOF', $maj,$min,$sub;
 Defaulting to backwards compatibility with perl %d.%d.%d
 If you intend this module to be compatible with earlier perl versions, please
