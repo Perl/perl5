@@ -7386,8 +7386,8 @@ S_swallow_bom(pTHX_ U8 *s)
 
 		filter_add(utf16rev_textfilter, NULL);
 		New(898, news, (PL_bufend - (char*)s) * 3 / 2 + 1, U8);
-		PL_bufend = (char*)utf16_to_utf8(s, news,
-						 PL_bufend - (char*)s,
+		PL_bufend = (char*)utf16_to_utf8_reversed(s, news,
+						 PL_bufend - (char*)s - 1,
 						 &newlen);
 		Copy(news, s, newlen, U8);
 		SvCUR_set(PL_linestr, newlen);
@@ -7472,6 +7472,10 @@ utf16_textfilter(pTHXo_ int idx, SV *sv, int maxlen)
 	U8* tend;
 	I32 newlen;
 	New(898, tmps, SvCUR(sv) * 3 / 2 + 1, U8);
+	if (!*SvPV_nolen(sv))
+	/* Game over, but don't feed an odd-length string to utf16_to_utf8 */
+	return count;
+       
 	tend = utf16_to_utf8((U8*)SvPVX(sv), tmps, SvCUR(sv), &newlen);
 	sv_usepvn(sv, (char*)tmps, tend - tmps);
     }
@@ -7486,6 +7490,10 @@ utf16rev_textfilter(pTHXo_ int idx, SV *sv, int maxlen)
 	U8* tmps;
 	U8* tend;
 	I32 newlen;
+	if (!*SvPV_nolen(sv))
+	/* Game over, but don't feed an odd-length string to utf16_to_utf8 */
+	return count;
+
 	New(898, tmps, SvCUR(sv) * 3 / 2 + 1, U8);
 	tend = utf16_to_utf8_reversed((U8*)SvPVX(sv), tmps, SvCUR(sv), &newlen);
 	sv_usepvn(sv, (char*)tmps, tend - tmps);
