@@ -6,15 +6,6 @@ It is not meant to be installed.
 
 Currently tests that printf formatting works correctly.
 
-INSTALLATION
-
-To install this module type the following:
-
-   perl Makefile.PL
-   make
-   make test
-   make install
-
 DEPENDENCIES
 
 None.
