@@ -1,7 +1,6 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-#include <stdio.h>
 
 typedef int SysRet;
 typedef FILE * InputStream;
@@ -137,7 +136,7 @@ fflush(handle)
 	OutputStream	handle
     CODE:
 	if (handle)
-	    RETVAL = fflush(handle);
+	    RETVAL = Fflush(handle);
 	else {
 	    RETVAL = -1;
 	    errno = EINVAL;
