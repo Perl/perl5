@@ -15,8 +15,7 @@
 			 return (y)0; /* fool picky compilers */ \
                          }
 UNIMPLEMENTED(_encoded_utf8_to_bytes, I32)
-UNIMPLEMENTED(_encoded_bytes_to_utf8, I32)
-
+    UNIMPLEMENTED(_encoded_bytes_to_utf8, I32)
 #if defined(USE_PERLIO) && !defined(USE_SFIO)
 /* Define an encoding "layer" in the perliol.h sense.
    The layer defined here "inherits" in an object-oriented sense from the
@@ -40,443 +39,423 @@ UNIMPLEMENTED(_encoded_bytes_to_utf8, I32)
    issue - particularly with all-perl encode engine.)
 
 */
-
-
 #include "perliol.h"
-
-typedef struct
-{
- PerlIOBuf	base;         /* PerlIOBuf stuff */
- SV *		bufsv;
- SV *		enc;
+typedef struct {
+    PerlIOBuf base;		/* PerlIOBuf stuff */
+    SV *bufsv;
+    SV *enc;
 } PerlIOEncode;
 
 SV *
-PerlIOEncode_getarg(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags)
+PerlIOEncode_getarg(pTHX_ PerlIO * f, CLONE_PARAMS * param, int flags)
 {
- PerlIOEncode *e = PerlIOSelf(f,PerlIOEncode);
- SV *sv = &PL_sv_undef;
- if (e->enc)
-  {
-   dSP;
-   ENTER;
-   SAVETMPS;
-   PUSHMARK(sp);
-   XPUSHs(e->enc);
-   PUTBACK;
-   if (perl_call_method("name",G_SCALAR) == 1)
-    {
-     SPAGAIN;
-     sv = newSVsv(POPs);
-     PUTBACK;
+    PerlIOEncode *e = PerlIOSelf(f, PerlIOEncode);
+    SV *sv = &PL_sv_undef;
+    if (e->enc) {
+	dSP;
+	ENTER;
+	SAVETMPS;
+	PUSHMARK(sp);
+	XPUSHs(e->enc);
+	PUTBACK;
+	if (perl_call_method("name", G_SCALAR) == 1) {
+	    SPAGAIN;
+	    sv = newSVsv(POPs);
+	    PUTBACK;
+	}
     }
-  }
- return sv;
+    return sv;
 }
 
 IV
-PerlIOEncode_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg)
+PerlIOEncode_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg)
 {
- PerlIOEncode *e = PerlIOSelf(f,PerlIOEncode);
- dSP;
- IV code;
- code = PerlIOBuf_pushed(aTHX_ f,mode,Nullsv);
- ENTER;
- SAVETMPS;
- PUSHMARK(sp);
- XPUSHs(arg);
- PUTBACK;
- if (perl_call_pv("Encode::find_encoding",G_SCALAR) != 1)
-  {
-   /* should never happen */
-   Perl_die(aTHX_ "Encode::find_encoding did not return a value");
-   return -1;
-  }
- SPAGAIN;
- e->enc = POPs;
- PUTBACK;
- if (!SvROK(e->enc))
-  {
-   e->enc = Nullsv;
-   errno  = EINVAL;
-   Perl_warner(aTHX_ WARN_IO, "Cannot find encoding \"%"SVf"\"", arg);
-   code = -1;
-  }
- else
-  {
-   SvREFCNT_inc(e->enc);
-   PerlIOBase(f)->flags |= PERLIO_F_UTF8;
-  }
- FREETMPS;
- LEAVE;
- return code;
+    PerlIOEncode *e = PerlIOSelf(f, PerlIOEncode);
+    dSP;
+    IV code;
+    code = PerlIOBuf_pushed(aTHX_ f, mode, Nullsv);
+    ENTER;
+    SAVETMPS;
+    PUSHMARK(sp);
+    XPUSHs(arg);
+    PUTBACK;
+    if (perl_call_pv("Encode::find_encoding", G_SCALAR) != 1) {
+	/* should never happen */
+	Perl_die(aTHX_ "Encode::find_encoding did not return a value");
+	return -1;
+    }
+    SPAGAIN;
+    e->enc = POPs;
+    PUTBACK;
+    if (!SvROK(e->enc)) {
+	e->enc = Nullsv;
+	errno = EINVAL;
+	Perl_warner(aTHX_ WARN_IO, "Cannot find encoding \"%" SVf "\"",
+		    arg);
+	code = -1;
+    }
+    else {
+	SvREFCNT_inc(e->enc);
+	PerlIOBase(f)->flags |= PERLIO_F_UTF8;
+    }
+    FREETMPS;
+    LEAVE;
+    return code;
 }
 
 IV
-PerlIOEncode_popped(pTHX_ PerlIO *f)
+PerlIOEncode_popped(pTHX_ PerlIO * f)
 {
- PerlIOEncode *e = PerlIOSelf(f,PerlIOEncode);
- if (e->enc)
-  {
-   SvREFCNT_dec(e->enc);
-   e->enc = Nullsv;
-  }
- if (e->bufsv)
-  {
-   SvREFCNT_dec(e->bufsv);
-   e->bufsv = Nullsv;
-  }
- return 0;
+    PerlIOEncode *e = PerlIOSelf(f, PerlIOEncode);
+    if (e->enc) {
+	SvREFCNT_dec(e->enc);
+	e->enc = Nullsv;
+    }
+    if (e->bufsv) {
+	SvREFCNT_dec(e->bufsv);
+	e->bufsv = Nullsv;
+    }
+    return 0;
 }
 
 STDCHAR *
-PerlIOEncode_get_base(pTHX_ PerlIO *f)
+PerlIOEncode_get_base(pTHX_ PerlIO * f)
 {
- PerlIOEncode *e = PerlIOSelf(f,PerlIOEncode);
- if (!e->base.bufsiz)
-  e->base.bufsiz = 1024;
- if (!e->bufsv)
-  {
-   e->bufsv = newSV(e->base.bufsiz);
-   sv_setpvn(e->bufsv,"",0);
-  }
- e->base.buf = (STDCHAR *)SvPVX(e->bufsv);
- if (!e->base.ptr)
-  e->base.ptr = e->base.buf;
- if (!e->base.end)
-  e->base.end = e->base.buf;
- if (e->base.ptr < e->base.buf || e->base.ptr > e->base.buf+SvLEN(e->bufsv))
-  {
-   Perl_warn(aTHX_ " ptr %p(%p)%p",
-             e->base.buf,e->base.ptr,e->base.buf+SvLEN(e->bufsv));
-   abort();
-  }
- if (SvLEN(e->bufsv) < e->base.bufsiz)
-  {
-   SSize_t poff = e->base.ptr - e->base.buf;
-   SSize_t eoff = e->base.end - e->base.buf;
-   e->base.buf  = (STDCHAR *)SvGROW(e->bufsv,e->base.bufsiz);
-   e->base.ptr  = e->base.buf + poff;
-   e->base.end  = e->base.buf + eoff;
-  }
- if (e->base.ptr < e->base.buf || e->base.ptr > e->base.buf+SvLEN(e->bufsv))
-  {
-   Perl_warn(aTHX_ " ptr %p(%p)%p",
-             e->base.buf,e->base.ptr,e->base.buf+SvLEN(e->bufsv));
-   abort();
-  }
- return e->base.buf;
+    PerlIOEncode *e = PerlIOSelf(f, PerlIOEncode);
+    if (!e->base.bufsiz)
+	e->base.bufsiz = 1024;
+    if (!e->bufsv) {
+	e->bufsv = newSV(e->base.bufsiz);
+	sv_setpvn(e->bufsv, "", 0);
+    }
+    e->base.buf = (STDCHAR *) SvPVX(e->bufsv);
+    if (!e->base.ptr)
+	e->base.ptr = e->base.buf;
+    if (!e->base.end)
+	e->base.end = e->base.buf;
+    if (e->base.ptr < e->base.buf
+	|| e->base.ptr > e->base.buf + SvLEN(e->bufsv)) {
+	Perl_warn(aTHX_ " ptr %p(%p)%p", e->base.buf, e->base.ptr,
+		  e->base.buf + SvLEN(e->bufsv));
+	abort();
+    }
+    if (SvLEN(e->bufsv) < e->base.bufsiz) {
+	SSize_t poff = e->base.ptr - e->base.buf;
+	SSize_t eoff = e->base.end - e->base.buf;
+	e->base.buf = (STDCHAR *) SvGROW(e->bufsv, e->base.bufsiz);
+	e->base.ptr = e->base.buf + poff;
+	e->base.end = e->base.buf + eoff;
+    }
+    if (e->base.ptr < e->base.buf
+	|| e->base.ptr > e->base.buf + SvLEN(e->bufsv)) {
+	Perl_warn(aTHX_ " ptr %p(%p)%p", e->base.buf, e->base.ptr,
+		  e->base.buf + SvLEN(e->bufsv));
+	abort();
+    }
+    return e->base.buf;
 }
 
 IV
-PerlIOEncode_fill(pTHX_ PerlIO *f)
+PerlIOEncode_fill(pTHX_ PerlIO * f)
 {
- PerlIOEncode *e = PerlIOSelf(f,PerlIOEncode);
- dSP;
- IV code;
- code = PerlIOBuf_fill(aTHX_ f);
- if (code == 0)
-  {
-   SV *uni;
-   STRLEN len;
-   char *s;
-   /* Set SV that is the buffer to be buf..ptr */
-   SvCUR_set(e->bufsv, e->base.end - e->base.buf);
-   SvUTF8_off(e->bufsv);
-   ENTER;
-   SAVETMPS;
-   PUSHMARK(sp);
-   XPUSHs(e->enc);
-   XPUSHs(e->bufsv);
-   XPUSHs(&PL_sv_yes);
-   PUTBACK;
-   if (perl_call_method("decode",G_SCALAR) != 1)
-    code = -1;
-   SPAGAIN;
-   uni = POPs;
-   PUTBACK;
-   /* Now get translated string (forced to UTF-8) and copy back to buffer
-      don't use sv_setsv as that may "steal" PV from returned temp
-      and so free() our known-large-enough buffer.
-      sv_setpvn() should do but let us do it long hand.
-    */
-   s = SvPVutf8(uni,len);
-   if (s != SvPVX(e->bufsv))
-    {
-     e->base.buf = (STDCHAR *)SvGROW(e->bufsv,len);
-     Move(s,e->base.buf,len,char);
-     SvCUR_set(e->bufsv,len);
+    PerlIOEncode *e = PerlIOSelf(f, PerlIOEncode);
+    dSP;
+    IV code;
+    code = PerlIOBuf_fill(aTHX_ f);
+    if (code == 0) {
+	SV *uni;
+	STRLEN len;
+	char *s;
+	/* Set SV that is the buffer to be buf..ptr */
+	SvCUR_set(e->bufsv, e->base.end - e->base.buf);
+	SvUTF8_off(e->bufsv);
+	ENTER;
+	SAVETMPS;
+	PUSHMARK(sp);
+	XPUSHs(e->enc);
+	XPUSHs(e->bufsv);
+	XPUSHs(&PL_sv_yes);
+	PUTBACK;
+	if (perl_call_method("decode", G_SCALAR) != 1)
+	    code = -1;
+	SPAGAIN;
+	uni = POPs;
+	PUTBACK;
+	/* Now get translated string (forced to UTF-8) and copy back to buffer
+	   don't use sv_setsv as that may "steal" PV from returned temp
+	   and so free() our known-large-enough buffer.
+	   sv_setpvn() should do but let us do it long hand.
+	 */
+	s = SvPVutf8(uni, len);
+	if (s != SvPVX(e->bufsv)) {
+	    e->base.buf = (STDCHAR *) SvGROW(e->bufsv, len);
+	    Move(s, e->base.buf, len, char);
+	    SvCUR_set(e->bufsv, len);
+	}
+	SvUTF8_on(e->bufsv);
+	e->base.end = e->base.buf + len;
+	e->base.ptr = e->base.buf;
+	FREETMPS;
+	LEAVE;
     }
-   SvUTF8_on(e->bufsv);
-   e->base.end    = e->base.buf+len;
-   e->base.ptr    = e->base.buf;
-   FREETMPS;
-   LEAVE;
-  }
- return code;
+    return code;
 }
 
 IV
-PerlIOEncode_flush(pTHX_ PerlIO *f)
+PerlIOEncode_flush(pTHX_ PerlIO * f)
 {
- PerlIOEncode *e = PerlIOSelf(f,PerlIOEncode);
- IV code = 0;
- if (e->bufsv && (PerlIOBase(f)->flags & (PERLIO_F_RDBUF|PERLIO_F_WRBUF))
-     &&(e->base.ptr > e->base.buf)
-    )
-  {
-   dSP;
-   SV *str;
-   char *s;
-   STRLEN len;
-   SSize_t left = 0;
-   if (PerlIOBase(f)->flags & PERLIO_F_RDBUF)
-    {
-     /* This is really just a flag to see if we took all the data, if
-        we did PerlIOBase_flush avoids a seek to lower layer.
-        Need to revisit if we start getting clever with unreads or seeks-in-buffer
-      */
-     left = e->base.end - e->base.ptr;
+    PerlIOEncode *e = PerlIOSelf(f, PerlIOEncode);
+    IV code = 0;
+    if (e->bufsv
+	&& (PerlIOBase(f)->flags & (PERLIO_F_RDBUF | PERLIO_F_WRBUF))
+	&& (e->base.ptr > e->base.buf)
+	) {
+	dSP;
+	SV *str;
+	char *s;
+	STRLEN len;
+	SSize_t left = 0;
+	if (PerlIOBase(f)->flags & PERLIO_F_RDBUF) {
+	    /* This is really just a flag to see if we took all the data, if
+	       we did PerlIOBase_flush avoids a seek to lower layer.
+	       Need to revisit if we start getting clever with unreads or seeks-in-buffer
+	     */
+	    left = e->base.end - e->base.ptr;
+	}
+	ENTER;
+	SAVETMPS;
+	PUSHMARK(sp);
+	XPUSHs(e->enc);
+	SvCUR_set(e->bufsv, e->base.ptr - e->base.buf);
+	SvUTF8_on(e->bufsv);
+	XPUSHs(e->bufsv);
+	XPUSHs(&PL_sv_yes);
+	PUTBACK;
+	if (perl_call_method("encode", G_SCALAR) != 1)
+	    code = -1;
+	SPAGAIN;
+	str = POPs;
+	PUTBACK;
+	s = SvPV(str, len);
+	if (s != SvPVX(e->bufsv)) {
+	    e->base.buf = (STDCHAR *) SvGROW(e->bufsv, len);
+	    Move(s, e->base.buf, len, char);
+	    SvCUR_set(e->bufsv, len);
+	}
+	SvUTF8_off(e->bufsv);
+	e->base.ptr = e->base.buf + len;
+	/* restore end != ptr as inequality is used by PerlIOBuf_flush in read case */
+	e->base.end = e->base.ptr + left;
+	FREETMPS;
+	LEAVE;
+	if (PerlIOBuf_flush(aTHX_ f) != 0)
+	    code = -1;
     }
-   ENTER;
-   SAVETMPS;
-   PUSHMARK(sp);
-   XPUSHs(e->enc);
-   SvCUR_set(e->bufsv, e->base.ptr - e->base.buf);
-   SvUTF8_on(e->bufsv);
-   XPUSHs(e->bufsv);
-   XPUSHs(&PL_sv_yes);
-   PUTBACK;
-   if (perl_call_method("encode",G_SCALAR) != 1)
-    code = -1;
-   SPAGAIN;
-   str = POPs;
-   PUTBACK;
-   s = SvPV(str,len);
-   if (s != SvPVX(e->bufsv))
-    {
-     e->base.buf = (STDCHAR *)SvGROW(e->bufsv,len);
-     Move(s,e->base.buf,len,char);
-     SvCUR_set(e->bufsv,len);
-    }
-   SvUTF8_off(e->bufsv);
-   e->base.ptr = e->base.buf+len;
-   /* restore end != ptr as inequality is used by PerlIOBuf_flush in read case */
-   e->base.end = e->base.ptr + left;
-   FREETMPS;
-   LEAVE;
-   if (PerlIOBuf_flush(aTHX_ f) != 0)
-    code = -1;
-  }
- return code;
+    return code;
 }
 
 IV
-PerlIOEncode_close(pTHX_ PerlIO *f)
+PerlIOEncode_close(pTHX_ PerlIO * f)
 {
- PerlIOEncode *e = PerlIOSelf(f,PerlIOEncode);
- IV code = PerlIOBase_close(aTHX_ f);
- if (e->bufsv)
-  {
-   SvREFCNT_dec(e->bufsv);
-   e->bufsv = Nullsv;
-  }
- e->base.buf = NULL;
- e->base.ptr = NULL;
- e->base.end = NULL;
- PerlIOBase(f)->flags &= ~(PERLIO_F_RDBUF|PERLIO_F_WRBUF);
- return code;
+    PerlIOEncode *e = PerlIOSelf(f, PerlIOEncode);
+    IV code = PerlIOBase_close(aTHX_ f);
+    if (e->bufsv) {
+	SvREFCNT_dec(e->bufsv);
+	e->bufsv = Nullsv;
+    }
+    e->base.buf = NULL;
+    e->base.ptr = NULL;
+    e->base.end = NULL;
+    PerlIOBase(f)->flags &= ~(PERLIO_F_RDBUF | PERLIO_F_WRBUF);
+    return code;
 }
 
 Off_t
-PerlIOEncode_tell(pTHX_ PerlIO *f)
+PerlIOEncode_tell(pTHX_ PerlIO * f)
 {
- PerlIOBuf *b = PerlIOSelf(f,PerlIOBuf);
- /* Unfortunately the only way to get a postion is to back-translate,
-    the UTF8-bytes we have buf..ptr and adjust accordingly.
-    But we will try and save any unread data in case stream
-    is un-seekable.
-  */
- if ((PerlIOBase(f)->flags & PERLIO_F_RDBUF) && b->ptr < b->end)
-  {
-   Size_t count = b->end - b->ptr;
-   PerlIO_push(aTHX_ f,&PerlIO_pending,"r",Nullsv);
-   /* Save what we have left to read */
-   PerlIOSelf(f,PerlIOBuf)->bufsiz = count;
-   PerlIO_unread(f,b->ptr,count);
-   /* There isn't any unread data - we just saved it - so avoid the lower seek */
-   b->end = b->ptr;
-   /* Flush ourselves - now one layer down,
-      this does the back translate and adjusts position
-    */
-   PerlIO_flush(PerlIONext(f));
-   /* Set position of the saved data */
-   PerlIOSelf(f,PerlIOBuf)->posn = b->posn;
-  }
- else
-  {
-   PerlIO_flush(f);
-  }
- return b->posn;
+    PerlIOBuf *b = PerlIOSelf(f, PerlIOBuf);
+    /* Unfortunately the only way to get a postion is to back-translate,
+       the UTF8-bytes we have buf..ptr and adjust accordingly.
+       But we will try and save any unread data in case stream
+       is un-seekable.
+     */
+    if ((PerlIOBase(f)->flags & PERLIO_F_RDBUF) && b->ptr < b->end) {
+	Size_t count = b->end - b->ptr;
+	PerlIO_push(aTHX_ f, &PerlIO_pending, "r", Nullsv);
+	/* Save what we have left to read */
+	PerlIOSelf(f, PerlIOBuf)->bufsiz = count;
+	PerlIO_unread(f, b->ptr, count);
+	/* There isn't any unread data - we just saved it - so avoid the lower seek */
+	b->end = b->ptr;
+	/* Flush ourselves - now one layer down,
+	   this does the back translate and adjusts position
+	 */
+	PerlIO_flush(PerlIONext(f));
+	/* Set position of the saved data */
+	PerlIOSelf(f, PerlIOBuf)->posn = b->posn;
+    }
+    else {
+	PerlIO_flush(f);
+    }
+    return b->posn;
 }
 
 PerlIO *
-PerlIOEncode_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *params, int flags)
+PerlIOEncode_dup(pTHX_ PerlIO * f, PerlIO * o,
+		 CLONE_PARAMS * params, int flags)
 {
- if ((f = PerlIOBase_dup(aTHX_ f, o, params, flags)))
-  {
-   PerlIOEncode *fe = PerlIOSelf(f,PerlIOEncode);
-   PerlIOEncode *oe = PerlIOSelf(o,PerlIOEncode);
-   if (oe->enc)
-    {
-     fe->enc = PerlIO_sv_dup(aTHX_ oe->enc, params);
+    if ((f = PerlIOBase_dup(aTHX_ f, o, params, flags))) {
+	PerlIOEncode *fe = PerlIOSelf(f, PerlIOEncode);
+	PerlIOEncode *oe = PerlIOSelf(o, PerlIOEncode);
+	if (oe->enc) {
+	    fe->enc = PerlIO_sv_dup(aTHX_ oe->enc, params);
+	}
     }
-  }
- return f;
+    return f;
 }
 
 PerlIO_funcs PerlIO_encode = {
- "encoding",
- sizeof(PerlIOEncode),
- PERLIO_K_BUFFERED,
- PerlIOEncode_pushed,
- PerlIOEncode_popped,
- PerlIOBuf_open,
- PerlIOEncode_getarg,
- PerlIOBase_fileno,
- PerlIOEncode_dup,
- PerlIOBuf_read,
- PerlIOBuf_unread,
- PerlIOBuf_write,
- PerlIOBuf_seek,
- PerlIOEncode_tell,
- PerlIOEncode_close,
- PerlIOEncode_flush,
- PerlIOEncode_fill,
- PerlIOBase_eof,
- PerlIOBase_error,
- PerlIOBase_clearerr,
- PerlIOBase_setlinebuf,
- PerlIOEncode_get_base,
- PerlIOBuf_bufsiz,
- PerlIOBuf_get_ptr,
- PerlIOBuf_get_cnt,
- PerlIOBuf_set_ptrcnt,
+    "encoding",
+    sizeof(PerlIOEncode),
+    PERLIO_K_BUFFERED,
+    PerlIOEncode_pushed,
+    PerlIOEncode_popped,
+    PerlIOBuf_open,
+    PerlIOEncode_getarg,
+    PerlIOBase_fileno,
+    PerlIOEncode_dup,
+    PerlIOBuf_read,
+    PerlIOBuf_unread,
+    PerlIOBuf_write,
+    PerlIOBuf_seek,
+    PerlIOEncode_tell,
+    PerlIOEncode_close,
+    PerlIOEncode_flush,
+    PerlIOEncode_fill,
+    PerlIOBase_eof,
+    PerlIOBase_error,
+    PerlIOBase_clearerr,
+    PerlIOBase_setlinebuf,
+    PerlIOEncode_get_base,
+    PerlIOBuf_bufsiz,
+    PerlIOBuf_get_ptr,
+    PerlIOBuf_get_cnt,
+    PerlIOBuf_set_ptrcnt,
 };
-#endif /* encode layer */
+#endif				/* encode layer */
 
 void
-Encode_XSEncoding(pTHX_ encode_t *enc)
+Encode_XSEncoding(pTHX_ encode_t * enc)
 {
- dSP;
- HV *stash = gv_stashpv("Encode::XS", TRUE);
- SV *sv    = sv_bless(newRV_noinc(newSViv(PTR2IV(enc))),stash);
- int i = 0;
- PUSHMARK(sp);
- XPUSHs(sv);
- while (enc->name[i])
-  {
-   const char *name = enc->name[i++];
-   XPUSHs(sv_2mortal(newSVpvn(name,strlen(name))));
-  }
- PUTBACK;
- call_pv("Encode::define_encoding",G_DISCARD);
- SvREFCNT_dec(sv);
+    dSP;
+    HV *stash = gv_stashpv("Encode::XS", TRUE);
+    SV *sv = sv_bless(newRV_noinc(newSViv(PTR2IV(enc))), stash);
+    int i = 0;
+    PUSHMARK(sp);
+    XPUSHs(sv);
+    while (enc->name[i]) {
+	const char *name = enc->name[i++];
+	XPUSHs(sv_2mortal(newSVpvn(name, strlen(name))));
+    }
+    PUTBACK;
+    call_pv("Encode::define_encoding", G_DISCARD);
+    SvREFCNT_dec(sv);
 }
 
-void call_failure (SV *routine, U8* done, U8* dest, U8* orig) {}
+void
+call_failure(SV * routine, U8 * done, U8 * dest, U8 * orig)
+{
+}
 
 static SV *
-encode_method(pTHX_ encode_t *enc, encpage_t *dir, SV *src, int check)
+encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
+			 int check)
 {
- STRLEN slen;
- U8 *s = (U8 *) SvPV(src,slen);
- SV *dst = sv_2mortal(newSV(2*slen+1));
- if (slen)
-  {
-   U8 *d = (U8 *) SvGROW(dst, 2*slen+1);
-   STRLEN dlen = SvLEN(dst);
-   int code;
-   while ((code = do_encode(dir,s,&slen,d,dlen,&dlen,!check)))
-    {
-     SvCUR_set(dst,dlen);
-     SvPOK_on(dst);
+    STRLEN slen;
+    U8 *s = (U8 *) SvPV(src, slen);
+    SV *dst = sv_2mortal(newSV(2 * slen + 1));
+    if (slen) {
+	U8 *d = (U8 *) SvGROW(dst, 2 * slen + 1);
+	STRLEN dlen = SvLEN(dst);
+	int code;
+	while ((code = do_encode(dir, s, &slen, d, dlen, &dlen, !check))) {
+	    SvCUR_set(dst, dlen);
+	    SvPOK_on(dst);
 
-     if (code == ENCODE_FALLBACK)
-      break;
+	    if (code == ENCODE_FALLBACK)
+		break;
 
-     switch(code)
-      {
-       case ENCODE_NOSPACE:
-        {
-         STRLEN need = dlen + UTF8_MAXLEN * 128; /* 128 is too big or small? */
-         d = (U8 *) SvGROW(dst, need);
-         if (dlen >= SvLEN(dst))
-          {
-           Perl_croak(aTHX_ "Destination couldn't be grown (the need may be miscalculated).");
-          }
-         dlen = SvLEN(dst);
-         slen = SvCUR(src);
-         break;
-        }
+	    switch (code) {
+	    case ENCODE_NOSPACE:
+		{
+		    STRLEN need = dlen + UTF8_MAXLEN * 128;	/* 128 is too big or small? */
+		    d = (U8 *) SvGROW(dst, need);
+		    if (dlen >= SvLEN(dst)) {
+			Perl_croak(aTHX_
+				   "Destination couldn't be grown (the need may be miscalculated).");
+		    }
+		    dlen = SvLEN(dst);
+		    slen = SvCUR(src);
+		    break;
+		}
 
-       case ENCODE_NOREP:
-        if (dir == enc->f_utf8)
-         {
-          if (!check && ckWARN_d(WARN_UTF8))
-           {
-            STRLEN clen;
-            UV ch = utf8n_to_uvuni(s+slen,(SvCUR(src)-slen),&clen,0);
-            Perl_warner(aTHX_ WARN_UTF8, "\"\\N{U+%"UVxf"}\" does not map to %s", ch, enc->name[0]);
-            /* FIXME: Skip over the character, copy in replacement and continue
-             * but that is messy so for now just fail.
-             */
-            return &PL_sv_undef;
-           }
-          else
-           {
-            return &PL_sv_undef;
-           }
-         }
-        else
-         {
-          /* UTF-8 is supposed to be "Universal" so should not happen */
-          Perl_croak(aTHX_ "%s '%.*s' does not map to UTF-8",
-                 enc->name[0], (int)(SvCUR(src)-slen),s+slen);
-         }
-        break;
+	    case ENCODE_NOREP:
+		if (dir == enc->f_utf8) {
+		    if (!check && ckWARN_d(WARN_UTF8)) {
+			STRLEN clen;
+			UV ch =
+			    utf8n_to_uvuni(s + slen, (SvCUR(src) - slen),
+					   &clen, 0);
+			Perl_warner(aTHX_ WARN_UTF8,
+				    "\"\\N{U+%" UVxf
+				    "}\" does not map to %s", ch,
+				    enc->name[0]);
+			/* FIXME: Skip over the character, copy in replacement and continue
+			 * but that is messy so for now just fail.
+			 */
+			return &PL_sv_undef;
+		    }
+		    else {
+			return &PL_sv_undef;
+		    }
+		}
+		else {
+		    /* UTF-8 is supposed to be "Universal" so should not happen */
+		    Perl_croak(aTHX_ "%s '%.*s' does not map to UTF-8",
+			       enc->name[0], (int) (SvCUR(src) - slen),
+			       s + slen);
+		}
+		break;
 
-       case ENCODE_PARTIAL:
-         if (!check && ckWARN_d(WARN_UTF8))
-          {
-           Perl_warner(aTHX_ WARN_UTF8, "Partial %s character",
-                       (dir == enc->f_utf8) ? "UTF-8" : enc->name[0]);
-          }
-         return &PL_sv_undef;
+	    case ENCODE_PARTIAL:
+		if (!check && ckWARN_d(WARN_UTF8)) {
+		    Perl_warner(aTHX_ WARN_UTF8, "Partial %s character",
+				(dir ==
+				 enc->f_utf8) ? "UTF-8" : enc->name[0]);
+		}
+		return &PL_sv_undef;
 
-       default:
-        Perl_croak(aTHX_ "Unexpected code %d converting %s %s",
-                 code, (dir == enc->f_utf8) ? "to" : "from",enc->name[0]);
-        return &PL_sv_undef;
-      }
+	    default:
+		Perl_croak(aTHX_ "Unexpected code %d converting %s %s",
+			   code, (dir == enc->f_utf8) ? "to" : "from",
+			   enc->name[0]);
+		return &PL_sv_undef;
+	    }
+	}
+	SvCUR_set(dst, dlen);
+	SvPOK_on(dst);
+	if (check) {
+	    if (slen < SvCUR(src)) {
+		Move(s + slen, s, SvCUR(src) - slen, U8);
+	    }
+	    SvCUR_set(src, SvCUR(src) - slen);
+	}
     }
-   SvCUR_set(dst,dlen);
-   SvPOK_on(dst);
-   if (check)
-    {
-     if (slen < SvCUR(src))
-      {
-       Move(s+slen,s,SvCUR(src)-slen,U8);
-      }
-     SvCUR_set(src,SvCUR(src)-slen);
+    else {
+	SvCUR_set(dst, slen);
+	SvPOK_on(dst);
     }
-  }
- else
-  {
-   SvCUR_set(dst,slen);
-   SvPOK_on(dst);
-  }
- return dst;
+    return dst;
 }
 
 MODULE = Encode		PACKAGE = Encode::XS	PREFIX = Method_
