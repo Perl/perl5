@@ -1575,6 +1575,7 @@ lib/vars.t			See if "use vars" work
 lib/warnings.pm			For "use warnings"
 lib/warnings.t			See if warning controls work
 lib/warnings/register.pm	For "use warnings::register"
+lib/warnings/register.t		See if "use warnings::register" works
 lib/Win32.pod			Documentation for Win32 extras
 locale.c			locale-specific utility functions
 macos/MacPerlTests.cmd	MacOS ports
