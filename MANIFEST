@@ -1,3 +1,5 @@
+lib/Class/ISA.pm	Class::ISA
+t/lib/class-isa.t	See if Class::ISA works
 AUTHORS			Contact info for contributors
 Artistic		The "Artistic License"
 Changes			Differences from previous version
