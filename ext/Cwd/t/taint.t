@@ -7,11 +7,12 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 10;
+use Test::More tests => 16;
 use Scalar::Util qw/tainted/;
 
-my @Functions = qw(getcwd cwd fastcwd
+my @Functions = qw(getcwd cwd fastcwd fastgetcwd
                    abs_path fast_abs_path
+                   realpath fast_realpath
                   );
 
 foreach my $func (@Functions) {

@@ -89,9 +89,8 @@ SKIP: {
     }
 }
 
-my $Top_Test_Dir = '_ptrslt_';
-my $Test_Dir     = File::Spec->catdir($Top_Test_Dir, qw/_path_ _to_ _a_ _dir_/);
-my $want = quotemeta File::Spec->catdir('t', $Test_Dir);
+my @test_dirs = qw{_ptrslt_ _path_ _to_ _a_ _dir_};
+my $Test_Dir     = File::Spec->catdir(@test_dirs);
 
 mkpath([$Test_Dir], 0, 0777);
 Cwd::chdir $Test_Dir;
@@ -99,11 +98,11 @@ Cwd::chdir $Test_Dir;
 foreach my $func (qw(cwd getcwd fastcwd fastgetcwd)) {
   my $result = eval "$func()";
   is $@, '';
-  like( File::Spec->canonpath($result), qr|$want$|, "$func()" );
+  dir_ends_with( $result, $Test_Dir, "$func()" );
 }
 
 # Cwd::chdir should also update $ENV{PWD}
-like(File::Spec->canonpath($ENV{PWD}), qr|$want$|,      'Cwd::chdir() updates $ENV{PWD}');
+dir_ends_with( $ENV{PWD}, $Test_Dir, 'Cwd::chdir() updates $ENV{PWD}' );
 my $updir = File::Spec->updir;
 Cwd::chdir $updir;
 print "#$ENV{PWD}\n";
@@ -116,7 +115,7 @@ print "#$ENV{PWD}\n";
 Cwd::chdir $updir;
 print "#$ENV{PWD}\n";
 
-rmtree([$Top_Test_Dir], 0, 0);
+rmtree($test_dirs[0], 0, 0);
 
 {
   my $check = ($IsVMS   ? qr|\b((?i)t)\]$| :
@@ -139,6 +138,22 @@ SKIP: {
     like($abs_path,      qr|$want$|);
     like($fast_abs_path, qr|$want$|);
 
-    rmtree([$Top_Test_Dir], 0, 0);
+    rmtree($test_dirs[0], 0, 0);
     unlink "linktest";
 }
+
+#############################################
+# These two routines give us sort of a poor-man's cross-platform
+# directory comparison routine.
+
+sub bracketed_form {
+  return join '', map "[$_]", 
+    grep length, File::Spec->splitdir(File::Spec->canonpath( shift() ));
+}
+
+sub dir_ends_with {
+  my ($dir, $expect) = (shift, shift);
+  my $bracketed_expect = quotemeta bracketed_form($expect);
+  like( bracketed_form($dir), qr|$bracketed_expect$|i, (@_ ? shift : ()) );
+}
+
