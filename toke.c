@@ -2848,7 +2848,7 @@ Perl_yylex(pTHX)
 	    if (s < d)
 		s++;
 	    else if (s > d) /* Found by Ilya: feed random input to Perl. */
-	        croak("panic: input overflow");
+	      Perl_croak(aTHX_ "panic: input overflow");
 	    incline(s);
 	    if (PL_lex_formbrack && PL_lex_brackets <= PL_lex_formbrack) {
 		PL_bufptr = s;
