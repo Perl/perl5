@@ -188,6 +188,10 @@ C<5.005 threads are deprecated>.  If you really want to continue using
 
 =head2 Updated Modules
 
+B::Concise
+
+B::Deparse
+
 Benchmark - An optional feature, C<:hireswallclock>, now allows
 for high resolution wall clock times (uses Time::HiRes).
 
@@ -297,6 +301,10 @@ during Perl compilation: C<gcc -Ialreadyknowndirectory (warning:
 changing search order)>.  This warning has now been avoided by
 Configure weeding out such directories before the compilation.
 
+One can now build subsets of Perl core modules by using the
+Configure flags C<-Dnoextensions=> and C<-Donlyextensions=>,
+see F<INSTALL>
+
 The Perl malloc has been enhanced: for example in FreeBSD Perl
 now builds with that by default, operation on 64-bit platforms
 should now also be better, and there are more debugging options
@@ -330,7 +338,7 @@ possible that some existing code will break that happens to rely on
 the faulty behaviour.  In practice this is unlikely unless your code
 contains a very complex nesting of anonymous subs, evals and lexicals.
 
-=head2 Miscellaneous fixes
+=head2 Generic fixes
 
 binmode(SOCKET, ":utf8") only worked on the input side, not
 on the output side of the socket.  Now it works both ways.
@@ -455,6 +463,13 @@ the warning.
 
 It is not illegal to clear a restricted hash, so the warning
 was removed.
+
+=head2 New "Can't provide tied hash usage; use keys(%hash) to test if empty"
+
+Use of C<%hash> in scalar context (like for example as the test of C<if>)
+is not available for tied hashes.  Currently any tied hash, elements or not,
+returns a true value in scalar context.  This is probably not what you
+had in mind, so Perl aborts.
 
 =head2 New "Illegal declaration of anonymous subroutine"
 
