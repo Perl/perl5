@@ -558,6 +558,13 @@ perl.gprof: /usr/bin/gprof perl.gprof.config
 	$(MAKE) PERL_SUFFIX=.gprof PERL_PROFILING=-pg perl
 	@echo "Now you may run perl.gprof and then run gprof perl.gprof."
 
+# Microperl.  This is just a convenience thing if one happens to
+# build also the full Perl and therefore the real big Makefile:
+# usually one should manually explicitly issue the below command. 
+
+microperl:
+	$(MAKE) -f Makefile.micro
+
 # This version, if specified in Configure, does ONLY those scripts which need
 # set-id emulation.  Suidperl must be setuid root.  It contains the "taint"
 # checks as well as the special code to validate that the script in question
