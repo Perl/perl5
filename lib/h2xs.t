@@ -48,6 +48,7 @@ Defaulting to backwards compatibility with perl $thisversion
 If you intend this module to be compatible with earlier perl versions, please
 specify a minimum perl version with the -b option.
 
+Writing $name/compat.h
 Writing $name/$name.pm
 Writing $name/$name.xs
 Writing $name/fallback.c
@@ -60,6 +61,7 @@ Writing $name/MANIFEST
 EOXSFILES
 
 "-f -n $name -b $thisversion", $], <<"EOXSFILES",
+Writing $name/compat.h
 Writing $name/$name.pm
 Writing $name/$name.xs
 Writing $name/fallback.c
@@ -72,6 +74,7 @@ Writing $name/MANIFEST
 EOXSFILES
 
 "-f -n $name -b 5.6.1", "5.006001", <<"EOXSFILES",
+Writing $name/compat.h
 Writing $name/$name.pm
 Writing $name/$name.xs
 Writing $name/fallback.c
@@ -84,6 +87,7 @@ Writing $name/MANIFEST
 EOXSFILES
 
 "-f -n $name -b 5.5.3", "5.00503", <<"EOXSFILES",
+Writing $name/compat.h
 Writing $name/$name.pm
 Writing $name/$name.xs
 Writing $name/fallback.c
@@ -105,6 +109,7 @@ Writing $name/MANIFEST
 EONOXSFILES
 
 "-f -n $name $header -b $thisversion", $], <<"EOXSFILES",
+Writing $name/compat.h
 Writing $name/$name.pm
 Writing $name/$name.xs
 Writing $name/fallback.c
