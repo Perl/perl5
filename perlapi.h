@@ -937,6 +937,10 @@ END_EXTERN_C
 #define PL_op_mutex		(*Perl_Gop_mutex_ptr(NULL))
 #undef  PL_patleave
 #define PL_patleave		(*Perl_Gpatleave_ptr(NULL))
+#undef  PL_runops_dbg
+#define PL_runops_dbg		(*Perl_Grunops_dbg_ptr(NULL))
+#undef  PL_runops_std
+#define PL_runops_std		(*Perl_Grunops_std_ptr(NULL))
 #undef  PL_sharedsv_space
 #define PL_sharedsv_space	(*Perl_Gsharedsv_space_ptr(NULL))
 #undef  PL_sharedsv_space_mutex
