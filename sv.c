@@ -3708,10 +3708,7 @@ newRV_noinc(SV *tmpRef)
 SV *
 newRV(SV *tmpRef)
 {
-    register SV *sv;
-    sv = newRV_noinc(tmpRef);
-    SvREFCNT_inc(tmpRef);
-    return sv;
+    return newRV_noinc(SvREFCNT_inc(tmpRef));
 }
 
 /* make an exact duplicate of old */
