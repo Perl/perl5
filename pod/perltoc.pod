@@ -2412,7 +2412,7 @@ C<basename>, C<dirname>
 =item DESCRIPTION
 
 
-$fh->print, $fh->printf, $fh->getline, $fh->getlines
+  $fh->print, $fh->printf, $fh->getline, $fh->getlines
 
 =item SEE ALSO
 
