@@ -633,7 +633,7 @@ their own password:
 	print "ok\n";
     }
 
-Of course, typing in your own password to whomever asks you
+Of course, typing in your own password to whoever asks you
 for it is unwise.
 
 =item dbmclose HASH
