@@ -22,7 +22,7 @@ use Net::Config;
 use Fcntl qw(O_WRONLY O_RDONLY O_APPEND O_CREAT O_TRUNC);
 # use AutoLoader qw(AUTOLOAD);
 
-$VERSION = "2.69"; # $Id: //depot/libnet/Net/FTP.pm#75 $
+$VERSION = "2.70"; # $Id: //depot/libnet/Net/FTP.pm#76 $
 @ISA     = qw(Exporter Net::Cmd IO::Socket::INET);
 
 # Someday I will "use constant", when I am not bothered to much about
@@ -392,6 +392,9 @@ sub type
 
  ${*$ftp}{'net_ftp_type'} = join(" ",$type,@_);
 
+ $oldval;
+}
+
 sub alloc
 {
  my $ftp = shift;
@@ -405,9 +408,6 @@ sub alloc
 	unless ($ftp->_ALLO($size,@_));
 
  ${*$ftp}{'net_ftp_allo'} = join(" ",$size,@_);
-
- $oldval;
-}
 
  $oldval;
 }
@@ -1766,6 +1766,6 @@ under the same terms as Perl itself.
 
 =for html <hr>
 
-I<$Id: //depot/libnet/Net/FTP.pm#75 $>
+I<$Id: //depot/libnet/Net/FTP.pm#76 $>
 
 =cut
