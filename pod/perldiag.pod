@@ -1856,13 +1856,13 @@ catches that.  But an easy way to do the same thing is:
 
 Another way is to assign to a substr() that's off the end of the string.
 
-=item Modification of non-creatable array value attempted, subscript %d
+=item Modification of non-creatable array value attempted, %s
 
 (F) You tried to make an array value spring into existence, and the
 subscript was probably negative, even counting from end of the array
 backwards.
 
-=item Modification of non-creatable hash value attempted, subscript "%s"
+=item Modification of non-creatable hash value attempted, %s
 
 (P) You tried to make a hash value spring into existence, and it
 couldn't be created for some peculiar reason.
@@ -2680,7 +2680,7 @@ which is why it's currently left out of your copy.
 (F) More than 100 levels of inheritance were used.  Probably indicates
 an unintended loop in your inheritance hierarchy.
 
-=item Recursive inheritance detected while looking for method '%s' in package '%s'
+=item Recursive inheritance detected while looking for method %s
 
 (F) More than 100 levels of inheritance were encountered while invoking
 a method.  Probably indicates an unintended loop in your inheritance
@@ -2976,7 +2976,7 @@ quantifier inside the assertion instead.  For example, the way to match
 "abc" provided that it is followed by three repetitions of "xyz" is
 C</abc(?=(?:xyz){3})/>, not C</abc(?=xyz){3}/>.
 
-=item Stub found while resolving method `%s' overloading `%s' in package `%s'
+=item Stub found while resolving method `%s' overloading %s
 
 (P) Overloading resolution over @ISA tree may be broken by importation
 stubs.  Stubs should never be implicitly created, but explicit calls to

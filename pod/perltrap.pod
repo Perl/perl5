@@ -172,12 +172,6 @@ Variables begin with "$", "@" or "%" in Perl.
 
 =item *
 
-C<printf()> does not implement the "*" format for interpolating
-field widths, but it's trivial to use interpolation of double-quoted
-strings to achieve the same effect.
-
-=item *
-
 Comments begin with "#", not "/*".
 
 =item *

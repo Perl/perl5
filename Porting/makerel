@@ -78,8 +78,8 @@ print "\n";
 chdir "$relroot/$reldir" or die $!;
 
 print "Setting file permissions...\n";
-system("find . -type f -print     | xargs chmod -w");
-system("find . -type d -print     | xargs chmod g-s");
+system("find . -type f -print     | xargs chmod 0444");
+system("find . -type d -print     | xargs chmod 0755");
 system("find t -name '*.t' -print | xargs chmod +x");
 my @exe = qw(
     Configure

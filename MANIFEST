@@ -567,6 +567,7 @@ lib/CGI/Fast.pm		Support for FastCGI (persistent server process)
 lib/CGI/Pretty.pm	Output nicely formatted HTML
 lib/CGI/Push.pm		Support for server push
 lib/CGI/Switch.pm	Simple interface for multiple server types
+lib/CGI/Util.pm		Utility functions
 lib/CPAN.pm		Interface to Comprehensive Perl Archive Network
 lib/CPAN/FirstTime.pm	Utility for creating CPAN config files
 lib/CPAN/Nox.pm		Runs CPAN while avoiding compiled extensions
@@ -869,6 +870,35 @@ lib/unicode/Is/DecoCompat.pl			Unicode character database
 lib/unicode/Is/Digit.pl				Unicode character database
 lib/unicode/Is/Graph.pl				Unicode character database
 lib/unicode/Is/L.pl				Unicode character database
+lib/unicode/Is/LbrkAI.pl			Unicode character database
+lib/unicode/Is/LbrkAL.pl			Unicode character database
+lib/unicode/Is/LbrkB2.pl			Unicode character database
+lib/unicode/Is/LbrkBA.pl			Unicode character database
+lib/unicode/Is/LbrkBB.pl			Unicode character database
+lib/unicode/Is/LbrkBK.pl			Unicode character database
+lib/unicode/Is/LbrkCB.pl			Unicode character database
+lib/unicode/Is/LbrkCL.pl			Unicode character database
+lib/unicode/Is/LbrkCM.pl			Unicode character database
+lib/unicode/Is/LbrkCR.pl			Unicode character database
+lib/unicode/Is/LbrkEX.pl			Unicode character database
+lib/unicode/Is/LbrkGL.pl			Unicode character database
+lib/unicode/Is/LbrkHY.pl			Unicode character database
+lib/unicode/Is/LbrkID.pl			Unicode character database
+lib/unicode/Is/LbrkIN.pl			Unicode character database
+lib/unicode/Is/LbrkIS.pl			Unicode character database
+lib/unicode/Is/LbrkLF.pl			Unicode character database
+lib/unicode/Is/LbrkNS.pl			Unicode character database
+lib/unicode/Is/LbrkNU.pl			Unicode character database
+lib/unicode/Is/LbrkOP.pl			Unicode character database
+lib/unicode/Is/LbrkPO.pl			Unicode character database
+lib/unicode/Is/LbrkPR.pl			Unicode character database
+lib/unicode/Is/LbrkQU.pl			Unicode character database
+lib/unicode/Is/LbrkSA.pl			Unicode character database
+lib/unicode/Is/LbrkSG.pl			Unicode character database
+lib/unicode/Is/LbrkSP.pl			Unicode character database
+lib/unicode/Is/LbrkSY.pl			Unicode character database
+lib/unicode/Is/LbrkXX.pl			Unicode character database
+lib/unicode/Is/LbrkZW.pl			Unicode character database
 lib/unicode/Is/Ll.pl				Unicode character database
 lib/unicode/Is/Lm.pl				Unicode character database
 lib/unicode/Is/Lo.pl				Unicode character database
@@ -1213,6 +1243,7 @@ t/lib/bigintpm.t	See if BigInt.pm works
 t/lib/cgi-form.t	See if CGI.pm works
 t/lib/cgi-function.t	See if CGI.pm works
 t/lib/cgi-html.t	See if CGI.pm works
+t/lib/cgi-pretty.t	See if CGI.pm works
 t/lib/cgi-request.t	See if CGI.pm works
 t/lib/charnames.t	See if character names work
 t/lib/checktree.t	See if File::CheckTree works
