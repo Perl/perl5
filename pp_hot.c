@@ -2024,8 +2024,14 @@ PP(pp_entersub)
 		/* Need to copy @_ to stack. Alternative may be to
 		 * switch stack to @_, and copy return values
 		 * back. This would allow popping @_ in XSUB, e.g.. XXXX */
-		AV* av = GvAV(defgv);
-		I32 items = AvFILL(av) + 1;
+		AV* av;
+		I32 items;
+#ifdef USE_THREADS
+		av = (AV*)curpad[0];
+#else
+		av = GvAV(defgv);
+#endif /* USE_THREADS */		
+		items = AvFILL(av) + 1;
 
 		if (items) {
 		    /* Mark is at the end of the stack. */
@@ -2110,19 +2116,39 @@ PP(pp_entersub)
 		svp = AvARRAY(padlist);
 	    }
 	}
-	SAVESPTR(curpad);
-	curpad = AvARRAY((AV*)svp[CvDEPTH(cv)]);
-	if (hasargs) {
+#ifdef USE_THREADS
+	if (!hasargs) {
 	    AV* av = (AV*)curpad[0];
+
+	    items = AvFILL(av) + 1;
+	    if (items) {
+		/* Mark is at the end of the stack. */
+		EXTEND(sp, items);
+		Copy(AvARRAY(av), sp + 1, items, SV*);
+		sp += items;
+		PUTBACK ;		    
+	    }
+	}
+#endif /* USE_THREADS */		
+	SAVESPTR(curpad);
+    	curpad = AvARRAY((AV*)svp[CvDEPTH(cv)]);
+#ifndef USE_THREADS
+	if (hasargs)
+#endif /* USE_THREADS */
+	{
+	    AV* av;
 	    SV** ary;
 
+	    av = (AV*)curpad[0];
 	    if (AvREAL(av)) {
 		av_clear(av);
 		AvREAL_off(av);
 	    }
+#ifndef USE_THREADS
 	    cx->blk_sub.savearray = GvAV(defgv);
-	    cx->blk_sub.argarray = av;
 	    GvAV(defgv) = (AV*)SvREFCNT_inc(av);
+#endif /* USE_THREADS */
+	    cx->blk_sub.argarray = av;
 	    ++MARK;
 
 	    if (items > AvMAX(av) + 1) {

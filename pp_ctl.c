@@ -1742,8 +1742,10 @@ PP(pp_goto)
 		EXTEND(stack_sp, items); /* @_ could have been extended. */
 		Copy(AvARRAY(av), stack_sp, items, SV*);
 		stack_sp += items;
+#ifndef USE_THREADS
 		SvREFCNT_dec(GvAV(defgv));
 		GvAV(defgv) = cx->blk_sub.savearray;
+#endif /* USE_THREADS */
 		AvREAL_off(av);
 		av_clear(av);
 	    }
@@ -1826,15 +1828,34 @@ PP(pp_goto)
 			svp = AvARRAY(padlist);
 		    }
 		}
+#ifdef USE_THREADS
+		if (!cx->blk_sub.hasargs) {
+		    AV* av = (AV*)curpad[0];
+		    
+		    items = AvFILL(av) + 1;
+		    if (items) {
+			/* Mark is at the end of the stack. */
+			EXTEND(sp, items);
+			Copy(AvARRAY(av), sp + 1, items, SV*);
+			sp += items;
+			PUTBACK ;		    
+		    }
+		}
+#endif /* USE_THREADS */		
 		SAVESPTR(curpad);
 		curpad = AvARRAY((AV*)svp[CvDEPTH(cv)]);
-		if (cx->blk_sub.hasargs) {
+#ifndef USE_THREADS
+		if (cx->blk_sub.hasargs)
+#endif /* USE_THREADS */
+		{
 		    AV* av = (AV*)curpad[0];
 		    SV** ary;
 
+#ifndef USE_THREADS
 		    cx->blk_sub.savearray = GvAV(defgv);
-		    cx->blk_sub.argarray = av;
 		    GvAV(defgv) = (AV*)SvREFCNT_inc(av);
+#endif /* USE_THREADS */
+		    cx->blk_sub.argarray = av;
 		    ++mark;
 
 		    if (items >= AvMAX(av) + 1) {
@@ -2149,15 +2170,17 @@ int gimme;
 #endif /* USE_THREADS */
 
     comppad = newAV();
-    comppad_name = newAV();
-    comppad_name_fill = 0;
-#ifdef USE_THREADS
-    av_store(comppad_name, 0, newSVpv("@_", 2));
-#endif /* USE_THREADS */
-    min_intro_pending = 0;
     av_push(comppad, Nullsv);
     curpad = AvARRAY(comppad);
+    comppad_name = newAV();
+    comppad_name_fill = 0;
+    min_intro_pending = 0;
     padix = 0;
+#ifdef USE_THREADS
+    av_store(comppad_name, 0, newSVpv("@_", 2));
+    curpad[0] = (SV*)newAV();
+    SvPADMY_on(curpad[0]);	/* XXX Needed? */
+#endif /* USE_THREADS */
 
     comppadlist = newAV();
     AvREAL_off(comppadlist);

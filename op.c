@@ -4488,12 +4488,25 @@ OP *o;
     I32 type = o->op_type;
 
     if (!(o->op_flags & OPf_KIDS)) {
+	OP *argop;
+	
 	op_free(o);
-	return newUNOP(type, 0,
-	    scalar(newUNOP(OP_RV2AV, 0,
-		scalar(newGVOP(OP_GV, 0, subline 
-			       ? defgv 
-			       : gv_fetchpv("ARGV", TRUE, SVt_PVAV) )))));
+#ifdef USE_THREADS
+	if (subline) {
+	    argop = newOP(OP_PADAV, OPf_REF);
+	    argop->op_targ = 0;		/* curpad[0] is @_ */
+	}
+	else {
+	    argop = newUNOP(OP_RV2AV, 0,
+		scalar(newGVOP(OP_GV, 0,
+		    gv_fetchpv("ARGV", TRUE, SVt_PVAV))));
+	}
+#else
+	argop = newUNOP(OP_RV2AV, 0,
+	    scalar(newGVOP(OP_GV, 0, subline ?
+			   defgv : gv_fetchpv("ARGV", TRUE, SVt_PVAV))));
+#endif /* USE_THREADS */
+	return newUNOP(type, 0, scalar(argop));
     }
     return scalar(modkids(ck_fun(o), type));
 }

@@ -841,6 +841,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 #ifdef USE_THREADS
     av_store(comppad_name, 0, newSVpv("@_", 2));
     curpad[0] = (SV*)newAV();
+    SvPADMY_on(curpad[0]);	/* XXX Needed? */
     CvOWNER(compcv) = 0;
     New(666, CvMUTEXP(compcv), 1, pthread_mutex_t);
     MUTEX_INIT(CvMUTEXP(compcv));
@@ -2279,6 +2280,7 @@ dARGS
     cxstack_ix	= -1;
 
     New(50,tmps_stack,128,SV*);
+    tmps_floor = -1;
     tmps_ix = -1;
     tmps_max = 128;
 

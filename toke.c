@@ -5225,16 +5225,23 @@ U32 flags;
     CvFLAGS(compcv) |= flags;
 
     comppad = newAV();
-    comppad_name = newAV();
-    comppad_name_fill = 0;
-#ifdef USE_THREADS
-    av_store(comppad_name, 0, newSVpv("@_", 2));
-#endif /* USE_THREADS */
-    min_intro_pending = 0;
     av_push(comppad, Nullsv);
     curpad = AvARRAY(comppad);
+    comppad_name = newAV();
+    comppad_name_fill = 0;
+    min_intro_pending = 0;
     padix = 0;
     subline = curcop->cop_line;
+#ifdef USE_THREADS
+    av_store(comppad_name, 0, newSVpv("@_", 2));
+    curpad[0] = (SV*)newAV();
+    SvPADMY_on(curpad[0]);	/* XXX Needed? */
+    CvOWNER(compcv) = 0;
+    New(666, CvMUTEXP(compcv), 1, pthread_mutex_t);
+    MUTEX_INIT(CvMUTEXP(compcv));
+    New(666, CvCONDP(compcv), 1, pthread_cond_t);
+    COND_INIT(CvCONDP(compcv));
+#endif /* USE_THREADS */
 
     comppadlist = newAV();
     AvREAL_off(comppadlist);

@@ -28,7 +28,9 @@ struct block_sub {
     CV *	cv;
     GV *	gv;
     GV *	dfoutgv;
+#ifndef USE_THREADS
     AV *	savearray;
+#endif /* USE_THREADS */
     AV *	argarray;
     U16		olddepth;
     U8		hasargs;
@@ -54,11 +56,19 @@ struct block_sub {
 #define POPSUB1(cx)							\
 	cxsub = cx->blk_sub;	/* because DESTROY may clobber *cx */
 
+#ifdef USE_THREADS
+#define POPSAVEARRAY() NOOP
+#else
+#define POPSAVEARRAY()							\
+    STMT_START {							\
+	SvREFCNT_dec(GvAV(defgv));					\
+	GvAV(defgv) = cxsub.savearray;					\
+    } STMT_END
+#endif /* USE_THREADS */
+
 #define POPSUB2()							\
 	if (cxsub.hasargs) {						\
-	    /* put back old @_ */					\
-	    SvREFCNT_dec(GvAV(defgv));					\
-	    GvAV(defgv) = cxsub.savearray;				\
+	    POPSAVEARRAY();						\
 	    /* destroy arg array */					\
 	    av_clear(cxsub.argarray);					\
 	    AvREAL_off(cxsub.argarray);					\

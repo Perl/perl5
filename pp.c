@@ -3930,7 +3930,11 @@ PP(pp_split)
     if (pm->op_pmreplroot)
 	ary = GvAVn((GV*)pm->op_pmreplroot);
     else if (gimme != G_ARRAY)
+#ifdef USE_THREADS
+	ary = (AV*)curpad[0];
+#else
 	ary = GvAVn(defgv);
+#endif /* USE_THREADS */
     else
 	ary = Nullav;
     if (ary && (gimme != G_ARRAY || (pm->op_pmflags & PMf_ONCE))) {

@@ -177,6 +177,10 @@ typedef struct condpair {
 #undef	cxstack
 #undef	cxstack_ix
 #undef	cxstack_max
+#undef	tmps_stack
+#undef	tmps_floor
+#undef	tmps_ix
+#undef	tmps_max
 #undef	curpad
 #undef	Sv
 #undef	Xpv
