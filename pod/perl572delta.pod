@@ -678,15 +678,7 @@ These tests fail because of yet unresolved floating point inaccuracies.
 
 =head2 UTS
 
-Many floating point inaccuracies:
-
-  op/numconvert              511,657,658,659,665-667,831,991,1151
-  op/pack                    10,22,149,156
-  op/sprintf                 8,10,13,102-107,134-135,146-153,159-162
-  lib/Math/BigInt/bigintpm   1145,1183
-  lib/Math/Complex           250,257,514,521,722-724,
-                             934,935,945,949,955,956,975,976
-  ext/POSIX/POSIX            14
+There are a few known test failures, see L<perluts>.
 
 =head2 VMS
 

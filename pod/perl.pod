@@ -131,6 +131,7 @@ For ease of access, the Perl manual has been split up into several sections:
     perlqnx		Perl notes for QNX
     perlsolaris 	Perl notes for Solaris
     perltru64		Perl notes for Tru64
+    perluts             Perl notes for UTS
     perlvmesa		Perl notes for VM/ESA
     perlvms		Perl notes for VMS
     perlvos		Perl notes for Stratus VOS

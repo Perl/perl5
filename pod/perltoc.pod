@@ -2241,8 +2241,8 @@ Term::Complete, Term::ReadLine, Test, Test::Harness, Test::More,
 Test::Simple, Text::Abbrev, Text::Balanced, Text::ParseWords,
 Text::Soundex, Text::Tabs, Text::Wrap, Tie::Array, Tie::Handle, Tie::Hash,
 Tie::RefHash, Tie::Scalar, Tie::SubstrHash, Time::Local, Time::gmtime,
-Time::localtime, Time::tm, UNIVERSAL, Unicode::UCD, User::grent,
-User::pwent, Win32
+Time::localtime, Time::tm, UNIVERSAL, UnicodeCD, User::grent, User::pwent,
+Win32
 
 =item Extension Modules
 
@@ -6670,6 +6670,22 @@ Digital UNIX formerly known as DEC OSF/1) systems
 
 =back
 
+=head2 perluts - Perl under UTS
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item BUILDING PERL ON UTS
+
+=item Installing the built perl on UTS
+
+=item AUTHOR
+
+=back
+
 =head2 perlvmesa, README.vmesa - building and installing Perl for VM/ESA.
 
 =over 4
@@ -8917,7 +8933,8 @@ C<uvsize>, C<uvtype>, C<uvuformat>, C<uvxformat>, C<uvXUformat>
 
 C<vendorarch>, C<vendorarchexp>, C<vendorbin>, C<vendorbinexp>,
 C<vendorlib>, C<vendorlib_stem>, C<vendorlibexp>, C<vendorprefix>,
-C<vendorprefixexp>, C<version>, C<versiononly>, C<vi>, C<voidflags>
+C<vendorprefixexp>, C<version>, C<version_patchlevel_string>,
+C<versiononly>, C<vi>, C<voidflags>
 
 =item x
 
