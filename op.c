@@ -5999,6 +5999,12 @@ Perl_ck_sort(pTHX_ OP *o)
 		    for (k = kLISTOP->op_first->op_next; k; k = k->op_next) {
 			if (k->op_next == kid)
 			    k->op_next = 0;
+			/* don't descend into loops */
+			else if (k->op_type == OP_ENTERLOOP
+				 || k->op_type == OP_ENTERITER)
+			{
+			    k = cLOOPx(k)->op_lastop;
+			}
 		    }
 		}
 		else
