@@ -235,7 +235,6 @@ if ($PLATFORM eq 'win32') {
 		     Perl_my_chsize
 		     Perl_same_dirent
 		     Perl_setenv_getix
-		     Perl_sortsv
 		     Perl_unlnk
 		     Perl_watch
 		     Perl_safexcalloc
