@@ -4,6 +4,13 @@ $ENV{PATH} ="/bin:/usr/bin:/usr/xpg4/bin:/usr/ucb" .
     exists $ENV{PATH} ? ":$ENV{PATH}" : "";
 $ENV{LC_ALL} = "C"; # so that external utilities speak English
 
+sub quit {
+    print "1..0\n";
+    exit 0;
+}
+
+quit() if $^O eq 'MSWin32';
+
 # We have to find a command that prints all (effective
 # and real) group names (not ids).  The known commands are:
 # groups
@@ -54,8 +61,7 @@ EOM
 	last GROUPS;
     }
     # Okay, not today.
-    print "1..0\n";
-    exit 0;
+    quit();
 }
 
 # Remember that group names can contain whitespace, '-', et cetera.
