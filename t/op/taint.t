@@ -205,7 +205,7 @@ my $TEST = catfile(curdir(), 'TEST');
 	test $@ =~ /^Insecure \$ENV{DCL\$PATH}/, $@;
 	SKIP: {
             skip q[can't find world-writeable directory to test DCL$PATH], 2
-              if $tmp;
+              unless $tmp;
 
 	    $ENV{'DCL$PATH'} = $tmp;
 	    test eval { `$echo 1` } eq '';
