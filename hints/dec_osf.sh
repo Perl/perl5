@@ -281,12 +281,27 @@ cat > UU/uselongdouble.cbu <<'EOCBU'
 # This script UU/uselongdouble.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use long doubles.
 case "$uselongdouble" in
-$define|true|[yY]*) d_Gconvert='sprintf((b),"%.*Lg",(n),(x))' ;;
+$define|true|[yY]*)
+	case "`/usr/sbin/sizer -v`" in
+	*[1-4].0*)	cat >&4 <<EOF
+
+***
+*** Sorry, you cannot use long doubles in pre-V5.0 releases of Tru64.
+***
+
+Cannot continue, aborting.
+
+EOF
+		exit 1
+		;;
+	esac
+	d_Gconvert='sprintf((b),"%.*Lg",(n),(x))'
+	;;
 esac
 EOCBU
 
 case "`/usr/sbin/sizer -v`" in
-*4.0*) d_modfl=undef ;; # must wait till 5.0
+*[1-4].0*) d_modfl=undef ;; # must wait till 5.0
 esac
 
 #
