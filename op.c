@@ -133,10 +133,11 @@ pad_allocmy(char *name)
 	for (off = AvFILLp(PL_comppad_name); off > PL_comppad_name_floor; off--) {
 	    if ((sv = svp[off])
 		&& sv != &PL_sv_undef
-		&& SvIVX(sv) == PAD_MAX       /* var is in open scope */
+		&& (SvIVX(sv) == PAD_MAX || SvIVX(sv) == 0)
 		&& strEQ(name, SvPVX(sv)))
 	    {
-		warn("\"my\" variable %s masks earlier declaration in same scope", name);
+		warn("\"my\" variable %s masks earlier declaration in same %s",
+			name, (SvIVX(sv) == PAD_MAX ? "scope" : "statement"));
 		break;
 	    }
 	}

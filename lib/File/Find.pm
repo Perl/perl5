@@ -177,6 +177,8 @@ sub finddir {
 
 		    --$subcount;
 		    next if $prune;
+		    # Untaint $_, so that we can do a chdir
+		    $_ = $1 if /^(.*)/;
 		    if (chdir $_) {
 			$name =~ s/\.dir$// if $Is_VMS;
 			&finddir($wanted,$name,$nlink, $bydepth);
