@@ -1,7 +1,7 @@
 
 Name:		Memoize
 What:		Transparently speed up functions by caching return values.
-Version:	0.66
+Version:	1.00
 Author:		Mark-Jason Dominus (mjd-perl-memoize+@plover.com)
 
 ################################################################
@@ -23,6 +23,11 @@ If the tests work,
 
 If not, please send me a report that mentions which tests failed.
 The address is: mjd-perl-memoize+@plover.com.
+
+################################################################
+What's new since 0.66:
+
+Minor documentation and test changes only.
 
 ################################################################
 What's new since 0.65:

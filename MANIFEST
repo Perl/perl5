@@ -1168,9 +1168,9 @@ lib/Memoize/t/array_confusion.t		Memoize
 lib/Memoize/t/correctness.t	Memoize
 lib/Memoize/t/errors.t		Memoize
 lib/Memoize/t/expire.t		Memoize
-lib/Memoize/t/expire_file.t	Memoize
-lib/Memoize/t/expire_module_n.t	Memoize
-lib/Memoize/t/expire_module_t.t	Memoize
+lib/Memoize/t/expfile.t		Memoize
+lib/Memoize/t/expmod_n.t	Memoize
+lib/Memoize/t/expmod_t.t	Memoize
 lib/Memoize/t/flush.t		Memoize
 lib/Memoize/t/normalize.t	Memoize
 lib/Memoize/t/prototype.t	Memoize
