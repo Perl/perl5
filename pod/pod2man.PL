@@ -69,7 +69,7 @@ if ($options{official} && !defined $options{center}) {
 }
 
 # Initialize and run the formatter.
-my $parser = Pod::Man->new (\%options);
+my $parser = Pod::Man->new (%options);
 $parser->parse_from_file (@ARGV);
 
 __END__
