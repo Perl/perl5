@@ -511,7 +511,7 @@ int syscall(int, ...);
 #endif
 
 #ifndef HAS_USLEEP_PROTO
-int usleep(useconds_t);
+int usleep(unsigned);
 #endif
 
 #ifdef PERL_MICRO /* Last chance to export Perl_my_swap */

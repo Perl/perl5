@@ -4636,7 +4636,7 @@ Perl_sv_getcwd(pTHX_ register SV *sv)
 #else
 
     if (PerlLIO_lstat(".", &statbuf) < 0) {
-        CWDXS_RETURN_SVUNDEF(sv);
+        SV_CWD_RETURN_UNDEF;
     }
 
     orig_cdev = statbuf.st_dev;
@@ -4672,7 +4672,7 @@ Perl_sv_getcwd(pTHX_ register SV *sv)
             namelen = strlen(dp->d_name);
 #endif
             /* skip . and .. */
-            if (SV_CWD_ISDOT(dp)) {dp->d_name[0] == '.'
+            if (SV_CWD_ISDOT(dp)) {
                 continue;
             }
 
