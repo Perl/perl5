@@ -134,6 +134,30 @@ Perl_is_utf8_char(pTHX_ U8 *s)
     return len;
 }
 
+/*
+=for apidoc Am|bool_utf8_string|U8 *s|STRLEN len
+
+Returns true if first C<len> bytes of the given string form valid a UTF8
+string, false otherwise.
+
+=cut
+*/
+
+bool 
+Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len)
+{
+    U8* x=s;
+    U8* send=s+len;
+    int c;
+    while (x < send) {
+        c = is_utf8_char(x);
+        x += c;
+        if (!c || x > send)
+            return 0;
+    }
+    return 1;
+}
+
 UV
 Perl_utf8_to_uv(pTHX_ U8* s, I32* retlen)
 {

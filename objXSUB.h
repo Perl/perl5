@@ -707,6 +707,10 @@
 #define Perl_is_utf8_char	pPerl->Perl_is_utf8_char
 #undef  is_utf8_char
 #define is_utf8_char		Perl_is_utf8_char
+#undef  Perl_is_utf8_string
+#define Perl_is_utf8_string	pPerl->Perl_is_utf8_string
+#undef  is_utf8_string
+#define is_utf8_string		Perl_is_utf8_string
 #undef  Perl_is_utf8_alnum
 #define Perl_is_utf8_alnum	pPerl->Perl_is_utf8_alnum
 #undef  is_utf8_alnum

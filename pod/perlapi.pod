@@ -2282,19 +2282,19 @@ false, defined or undefined.  Does not handle 'get' magic.
 =for hackers
 Found in file sv.h
 
-=item svtype
-
-An enum of flags for Perl types.  These are found in the file B<sv.h> 
-in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
-
-=for hackers
-Found in file sv.h
-
 =item SvTYPE
 
 Returns the type of the SV.  See C<svtype>.
 
 	svtype	SvTYPE(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item svtype
+
+An enum of flags for Perl types.  These are found in the file B<sv.h> 
+in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 
 =for hackers
 Found in file sv.h
@@ -2938,6 +2938,16 @@ Converts the specified character to uppercase.
 
 =for hackers
 Found in file handy.h
+
+=item U8 *s
+
+Returns true if first C<len> bytes of the given string form valid a UTF8
+string, false otherwise.
+
+	bool_utf8_string	U8 *s(STRLEN len)
+
+=for hackers
+Found in file utf8.c
 
 =item utf8_to_bytes
 

@@ -1326,6 +1326,13 @@ Perl_is_utf8_char(pTHXo_ U8 *p)
     return ((CPerlObj*)pPerl)->Perl_is_utf8_char(p);
 }
 
+#undef  Perl_is_utf8_string
+bool
+Perl_is_utf8_string(pTHXo_ U8 *s, STRLEN len)
+{
+    return ((CPerlObj*)pPerl)->Perl_is_utf8_string(s, len);
+}
+
 #undef  Perl_is_utf8_alnum
 bool
 Perl_is_utf8_alnum(pTHXo_ U8 *p)
