@@ -4178,7 +4178,7 @@ sv_setref_nv(SV *rv, const char *classname, double nv)
 }
 
 SV*
-sv_setref_pvn(SV *rv, const char *classname, char *pv, I32 n)
+sv_setref_pvn(SV *rv, const char *classname, char *pv, STRLEN n)
 {
     sv_setpvn(newSVrv(rv,classname), pv, n);
     return rv;

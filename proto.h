@@ -617,7 +617,7 @@ VIRTUAL void	sv_setnv _((SV* sv, double num));
 VIRTUAL SV*	sv_setref_iv _((SV* rv, const char* classname, IV iv));
 VIRTUAL SV*	sv_setref_nv _((SV* rv, const char* classname, double nv));
 VIRTUAL SV*	sv_setref_pv _((SV* rv, const char* classname, void* pv));
-VIRTUAL SV*	sv_setref_pvn _((SV* rv, const char* classname, char* pv, I32 n));
+VIRTUAL SV*	sv_setref_pvn _((SV* rv, const char* classname, char* pv, STRLEN n));
 VIRTUAL void	sv_setpv _((SV* sv, const char* ptr));
 VIRTUAL void	sv_setpvn _((SV* sv, const char* ptr, STRLEN len));
 VIRTUAL void	sv_setsv _((SV* dsv, SV* ssv));
