@@ -2039,7 +2039,10 @@ vmspipe_tempfile(pTHX)
     fprintf(fp,"$ perl_del/symbol/global perl_popen_in\n");
     fprintf(fp,"$ perl_del/symbol/global perl_popen_err\n");
     fprintf(fp,"$ perl_del/symbol/global perl_popen_out\n");
-    fprintf(fp,"$ perl_del/symbol/global perl_popen_cmd\n");
+    fprintf(fp,"$ perl_del/symbol/global perl_popen_cmd0\n");
+    fprintf(fp,"$ perl_del/symbol/global perl_popen_cmd1\n");
+    fprintf(fp,"$ perl_del/symbol/global perl_popen_cmd2\n");
+    fprintf(fp,"$ perl_del/symbol/global perl_popen_cmd3\n");
     fprintf(fp,"$ perl_on\n");
     fprintf(fp,"$ 'c\n");
     fprintf(fp,"$ perl_status = $STATUS\n");
@@ -2091,6 +2094,8 @@ safe_popen(pTHX_ char *cmd, char *in_mode, int *psts)
     $DESCRIPTOR(d_sym_out,"PERL_POPEN_OUT");
     $DESCRIPTOR(d_sym_err,"PERL_POPEN_ERR");
                             
+    if (!head_PLOC) store_pipelocs(aTHX);   /* at least TRY to use a static vmspipe file */
+
     /* once-per-program initialization...
        note that the SETAST calls and the dual test of pipe_ef
        makes sure that only the FIRST thread through here does
@@ -4206,7 +4211,6 @@ pipe_and_fork(pTHX_ char **cmargv)
     }
     *p = '\0';
 
-    store_pipelocs();                   /* gets redone later */
     fp = safe_popen(subcmd,"wbF",&sts);
     if (fp == Nullfp) {
         PerlIO_printf(Perl_debug_log,"Can't open output pipe (status %d)",sts);
@@ -7145,7 +7149,7 @@ init_os_extras()
   newXS("File::Copy::rmscopy",rmscopy_fromperl,file);
   newXSproto("vmsish::hushed",hushexit_fromperl,file,";$");
 
-  store_pipelocs(aTHX);
+  store_pipelocs(aTHX);         /* will redo any earlier attempts */
 
   return;
 }
