@@ -3,25 +3,26 @@ use Carp;
 require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(AUTOLOAD);
-$VERSION = 1.06; sub Version {$VERSION}
+$VERSION = 1.07; sub Version {$VERSION}
 $DEBUG = 0;
 
 my %Cache;      # private cache for all SelfLoader's client packages
 
 AUTOLOAD {
     print STDERR "SelfLoader::AUTOLOAD for $AUTOLOAD\n" if $DEBUG;
-    my $code = $Cache{$AUTOLOAD};
-    unless ($code) {
+    my $SL_code = $Cache{$AUTOLOAD};
+    unless ($SL_code) {
         # Maybe this pack had stubs before __DATA__, and never initialized.
         # Or, this maybe an automatic DESTROY method call when none exists.
         $AUTOLOAD =~ m/^(.*)::/;
         SelfLoader->_load_stubs($1) unless exists $Cache{"${1}::<DATA"};
-        $code = $Cache{$AUTOLOAD};
-        $code = "sub $AUTOLOAD { }" if (!$code and $AUTOLOAD =~ m/::DESTROY$/);
-        croak "Undefined subroutine $AUTOLOAD" unless $code;
+        $SL_code = $Cache{$AUTOLOAD};
+        $SL_code = "sub $AUTOLOAD { }"
+            if (!$SL_code and $AUTOLOAD =~ m/::DESTROY$/);
+        croak "Undefined subroutine $AUTOLOAD" unless $SL_code;
     }
-    print STDERR "SelfLoader::AUTOLOAD eval: $code\n" if $DEBUG;
-    eval $code;
+    print STDERR "SelfLoader::AUTOLOAD eval: $SL_code\n" if $DEBUG;
+    eval $SL_code;
     if ($@) {
         $@ =~ s/ at .*\n//;
         croak $@;
@@ -45,7 +46,7 @@ sub _load_stubs {
     $Cache{"${currpack}::<DATA"} = 1;   # indicate package is cached
 
     while(defined($line = <$fh>) and $line !~ m/^__END__/) {
-        if ($line =~ m/^sub\s+([\w:]+)\s*(\([\$\@\;\%\\]*\))?/) {       # A sub declared
+        if ($line =~ m/^sub\s+([\w:]+)\s*(\([\\\$\@\%\&\*\;]*\))?/) {
             push(@stubs, $self->_add_to_cache($name, $currpack, \@lines, $protoype));
             $protoype = $2;
             @lines = ($line);
