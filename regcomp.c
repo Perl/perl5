@@ -140,7 +140,6 @@ static I32 extralen;
 
 #ifdef DEBUGGING
 static int colorset;
-char *colors[4];
 #endif 
 
 /* Length of a variant. */
@@ -171,8 +170,13 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 #define SF_FIX_BEFORE_EOL	(SF_FIX_BEFORE_SEOL|SF_FIX_BEFORE_MEOL)
 #define SF_FL_BEFORE_EOL	(SF_FL_BEFORE_SEOL|SF_FL_BEFORE_MEOL)
 
-#define SF_FIX_SHIFT_EOL	(+2)
-#define SF_FL_SHIFT_EOL		(+4)
+#ifdef NO_UNARY_PLUS
+#  define SF_FIX_SHIFT_EOL	(0+2)
+#  define SF_FL_SHIFT_EOL		(0+4)
+#else
+#  define SF_FIX_SHIFT_EOL	(+2)
+#  define SF_FL_SHIFT_EOL		(+4)
+#endif
 
 #define SF_FIX_BEFORE_SEOL	(SF_BEFORE_SEOL << SF_FIX_SHIFT_EOL)
 #define SF_FIX_BEFORE_MEOL	(SF_BEFORE_MEOL << SF_FIX_SHIFT_EOL)

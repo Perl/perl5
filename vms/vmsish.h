@@ -56,6 +56,11 @@
 #  include <unistd.h> /* DECC has this; VAXC and gcc don't */
 #endif
 
+/* VAXC doesn't have a unary plus operator, so we need to get there indirectly */
+#if defined(VAXC) && !defined(__DECC)
+#  define NO_UNARY_PLUS
+#endif
+
 #ifdef NO_PERL_TYPEDEFS /* a2p; we don't want Perl's special routines */
 #  define DONT_MASK_RTL_CALLS
 #endif
@@ -166,12 +171,6 @@
  *	This symbol is defined if Time_t is an unsigned type on this system.
  */
 #define BIG_TIME
-
-/* USE_STAT_RDEV:
- *	This symbol is defined if this system has a stat structure declaring
- *	st_rdev
- */
-#define USE_STAT_RDEV 	/**/
 
 /* ACME_MESS:
  *	This symbol, if defined, indicates that error messages should be 
@@ -381,7 +380,9 @@ struct utimbuf {
 #  define sigdelset(t, u) my_sigdelset(t, u)
 #  define sigismember(t, u) my_sigismember(t, u)
 #  define sigprocmask(t, u, v) my_sigprocmask(t, u, v)
+#  ifndef _SIGSET_T
    typedef int sigset_t;
+#  endif
    /* The tools for sigprocmask() are there, just not the routine itself */
 #  ifndef SIG_UNBLOCK
 #    define SIG_UNBLOCK 1

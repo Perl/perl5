@@ -8,11 +8,11 @@
  * GenConfig.pl when producing Config.pm.
  *
  * config.h for VMS
- * Version: 5.004
+ * Version: 5.005
  */                 
 
-/* Configuration time: 19-Nov-1996 23:34
- * Configured by: Charles Bailey  bailey@genetics.upenn.edu
+/* Configuration time:  7-Mar-1998 16:30
+ * Configured by: Charles Bailey  bailey@newman.upenn.edu
  * Target system: VMS
  */
 
@@ -76,7 +76,7 @@
  * when Perl is built.  Please do not change it by hand; make
  * any changes to FndVers.Com instead.
  */
-#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX/5_00456"  /**/
+#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX/5_00462"  /**/
 
 
 #define ARCHLIB ARCHLIB_EXP	/*config-skip*/
@@ -88,12 +88,6 @@
  *	instance.
  */
 #define ARCHNAME "VMS_VAX"  /**/
-
-/* BINCOMPAT3:
- *	This symbol, if defined, indicates that Perl 5.004 should be
- *	binary-compatible with Perl 5.003.
- */
-#undef BINCOMPAT3
 
 /* CPPSTDIN:
  *	This symbol contains the first part of the string which will invoke
@@ -240,7 +234,7 @@
  *	The type "Timeval" should be used to refer to "struct timeval".    
  */
 #if ((__VMS_VER >= 70000000) && (__DECC_VER >= 50200000)) || (__CRTL_VER >= 70000000)
-#define HAS_GETTIMEOFDAY /**/
+#define HAS_GETTIMEOFDAY /*config-skip*/
 #else
 #undef HAS_GETTIMEOFDAY /*config-skip*/
 #endif
@@ -267,7 +261,7 @@
  *	and PHOSTNAME.
  */
 #if ((__VMS_VER >= 70000000) && (__DECC_VER >= 50200000)) || (__CRTL_VER >= 70000000)
-#define HAS_UNAME /**/
+#define HAS_UNAME /*config-skip*/
 #else
 #undef HAS_UNAME		/*config-skip*/
 #endif
@@ -377,16 +371,16 @@
 /* HAS_PTHREAD_YIELD:
  *	This symbol, if defined, indicates that the pthread_yield routine is
  *	available to yield the execution of the current thread.
- *	VMS: pthread_yield_np is there, but we won't worry for now since it's
- *	set up already as sched_yield.
+ *	VMS: pthread_yield_np is there, so just set up the alias
  */
-#undef HAS_PTHREAD_YIELD	/**/
+#define HAS_PTHREAD_YIELD	/**/
+#define pthread_yield pthread_yield_np	/*config-skip*/
 
-/* HAS_SCHED_YIELD:
- *	This symbol, if defined, indicates that the sched_yield routine is
- *	available to yield the execution of the current thread.
+/* OLD_PTHREADS_API:
+ *	This symbol, if defined, indicates that Perl should
+ *	be built to use the old draft POSIX threads API.
  */
-#define HAS_SCHED_YIELD	/**/
+#undef	OLD_PTHREADS_API		/**/
 
 /* HAS_READDIR:
  *	This symbol, if defined, indicates that the readdir routine is
@@ -655,7 +649,7 @@
  *	available to truncate files.
  */
 #if ((__VMS_VER >= 70000000) && (__DECC_VER >= 50200000)) || (__CRTL_VER >= 70000000)
-#define HAS_TRUNCATE /**/
+#define HAS_TRUNCATE /*config-skip*/
 #else
 #undef HAS_TRUNCATE	/*config-skip*/
 #endif
@@ -701,7 +695,7 @@
  *	This symbol, if defined, indicates that wait4() exists.
  */
 #if ((__VMS_VER >= 70000000) && (__DECC_VER >= 50200000)) || (__CRTL_VER >= 70000000)
-#define HAS_WAIT4 /**/
+#define HAS_WAIT4 /*config-skip*/
 #else
 #undef HAS_WAIT4	/*config-skip*/
 #endif
@@ -971,6 +965,17 @@
  */
 #undef I_VFORK	/**/
 
+/* Pid_t:
+ *	This symbol holds the type used to declare process ids in the kernel.
+ *	It can be int, uint, pid_t, etc... It may be necessary to include
+ *	<sys/types.h> to get any typedef'ed information.
+ */
+#if defined(__DECC) && defined(__DECC_VER) && (__DECC_VER >= 500000)
+#  define Pid_t pid_t		/* config-skip */
+#else
+#  define Pid_t int	/* config-skip */
+#endif
+
 /* CAN_PROTOTYPE:
  *	If defined, this macro indicates that the C compiler can handle
  *	function prototypes.
@@ -1202,7 +1207,7 @@
  */
 #define HAS_STRCHR	/**/
 #if ((__VMS_VER >= 70000000) && (__DECC_VER >= 50200000)) || (__CRTL_VER >= 70000000)
-#define HAS_INDEX /**/
+#define HAS_INDEX /*config-skip*/
 #else
 #undef HAS_INDEX	/*config-skip*/
 #endif
@@ -1325,6 +1330,10 @@
  */
 #define I_MATH		/**/
 
+/* DOUBLESIZE:
+ *	This symbol contains the size of a double, so that the C preprocessor
+ *	can make decisions based on it.
+ */
 /* INTSIZE:
  *	This symbol contains the size of an int, so that the C preprocessor
  *	can make decisions based on it.
@@ -1337,9 +1346,18 @@
  *	This symbol contains the value of sizeof(short) so that the C
  *	preprocessor can make decisions based on it.
  */
+/* PTRSIZE:
+ *	This symbol contains the size of a pointer, so that the C preprocessor
+ *	can make decisions based on it.  It will be sizeof(void *) if
+ *	the compiler supports (void *); otherwise it will be
+ *	sizeof(char *).
+ *	VMS: Use 32-bit pointers everywhere for now  7-Mar-1998
+ */
+#define DOUBLESIZE 8		/**/
 #define INTSIZE 4		/**/
 #define LONGSIZE 4		/**/
 #define SHORTSIZE 2		/**/
+#define PTRSIZE 4		/**/
 
 /* Off_t:
  *	This symbol holds the type used to declare offsets in the kernel.
@@ -1467,26 +1485,6 @@
 #undef RD_NODATA
 #undef EOF_NONBLOCK
 
-/* OLDARCHLIB:
- *	This variable, if defined, holds the name of the directory in
- *	which the user has perl5.000 or perl5.001 architecture-dependent
- *	public library files for $package.  For the most part, these
- *	files will work with 5.002 (and later), but that is not
- *	guaranteed.
- */
-/* OLDARCHLIB_EXP:
- *	This symbol contains the ~name expanded version of OLDARCHLIB, to be
- *	used in programs that are not prepared to deal with ~ expansion at 
- *	run-time.
- */
-/*     ==> NOTE <==
- * This value is automatically updated by FndVers.Com
- * when Perl is built.  Please do not change it by hand; make
- * any changes to FndVers.Com instead.
- */
-#define OLDARCHLIB_EXP "/perl_root/lib/VMS_VAX"  /**/
-#define OLDARCHLIB OLDARCHLIB_EXP  /*config-skip*/
-
 /* PRIVLIB:
  *	This symbol contains the name of the private library for this package.
  *	The library is private in the sense that it needn't be in anyone's
@@ -1610,6 +1608,12 @@
  */
 #undef HAS_INET_ATON		/**/
 
+/* HAS_GNULIBC:
+ *	This symbol, if defined, indicates to the C program that 
+ *	the GNU C library is being used.
+ */
+#undef HAS_GNULIBC  	/**/
+
 /* HAS_ISASCII:
  *	This manifest constant lets the C program know that the
  *	isascii is available.
@@ -1655,8 +1659,8 @@
  *	with a given open file descriptor.
  */
 #if ((__VMS_VER >= 70000000) && (__DECC_VER >= 50200000)) || (__CRTL_VER >= 70000000)
-#define HAS_PATHCONF /**/
-#define HAS_FPATHCONF /**/
+#define HAS_PATHCONF /*config-skip*/
+#define HAS_FPATHCONF /*config-skip*/
 #else
 #undef HAS_PATHCONF       /*config-skip*/
 #undef HAS_FPATHCONF     /*config-skip*/
@@ -1694,14 +1698,8 @@
  *	arguments whereas USG one needs none.  See also HAS_SETPGID
  *	for a POSIX interface.
  */
-/* USE_BSDPGRP:
- *	This symbol, if defined, indicates that the BSD notion of process
- *	group is to be used. For instance, you have to say setpgrp(pid, pgrp)
- *	instead of the USG setpgrp().
- */
 #undef HAS_SETPGRP		/**/
 #undef USE_BSD_SETPGRP	/**/
-#undef USE_BSDPGRP		/**/
 
 /* HAS_SETPGID:
  *	This symbol, if defined, indicates that the setpgid routine is
@@ -1720,7 +1718,7 @@
  *	to determine system related limits and options.
  */
 #if ((__VMS_VER >= 70000000) && (__DECC_VER >= 50200000)) || (__CRTL_VER >= 70000000)
-#define HAS_SYSCONF /**/
+#define HAS_SYSCONF /*config-skip*/
 #else
 #undef HAS_SYSCONF     /*config-skip*/
 #endif
@@ -1790,7 +1788,7 @@
  * traditional longjmp() if siglongjmp isn't available.
  */
 #if ((__VMS_VER >= 70000000) && (__DECC_VER >= 50200000)) || (__CRTL_VER >= 70000000)
-#define HAS_SIGSETJMP /**/
+#define HAS_SIGSETJMP /*config-skip*/
 #else
 #undef HAS_SIGSETJMP	/*config-skip*/
 #endif
@@ -1894,21 +1892,21 @@
 
 /* HAS_GETHOSTBYADDR:
  *	This symbol, if defined, indicates that the gethostbyaddr routine is
- *	available to lookup hosts by their IP addresses.
+ *	available to lookup host names by their IP addresses.
  */
-#define HAS_GETHOSTBYADDR		/**/
+#define HAS_GETHOSTBYADDR		/**/      /* config-skip */
 
 /* Netdb_host_t:
  *	This symbol holds the type used for the 1st argument
  *	to gethostbyaddr().
  */
-#define Netdb_host_t		char * /**/
+#define Netdb_host_t		char * /**/ /* config-skip */
 
 /* Netdb_hlen_t:
  *	This symbol holds the type used for the 2nd argument
  *	to gethostbyaddr().
  */
-#define Netdb_hlen_t		int
+#define Netdb_hlen_t		int	/**/  /* config-skip */
 
 /* HAS_GETPROTOBYNAME:
  *	This symbol, if defined, indicates that the getprotobyname()
@@ -1925,7 +1923,7 @@
  *	This symbol, if defined, indicates that the gethostbyname routine is
  *	available to lookup hosts by their DNS names.
  */
-#define HAS_GETHOSTBYNAME		/**/
+#define HAS_GETHOSTBYNAME		/*config-skip*/
 
 /* Netdb_name_t:
  *	This symbol holds the type used for the 1st argument
@@ -1934,37 +1932,7 @@
  *	getservbyname(), the 2nd argument to getservbyname(),
  *	and the 2nd argument to getservbyport().
  */
-#define Netdb_name_t	long    /**/
-
-/* HAS_GETNETBYADD:
- *	This symbol, if defined, indicates that the getnetbyaddr routine is
- *	available to lookup networks by their IP addresses.
- */
-#define HAS_GETNETBYADD		/**/
-
-/* Netdb_net_t:
- *	This symbol holds the type used for the 1st argument
- *	to getnetbyaddr().
- */
-#define Netdb_net_t		long
-
-/* HAS_GETHOSTBYADDR:
- *	This symbol, if defined, indicates that the gethostbyaddr routine is
- *	available to lookup host names by their IP addresses.
- */
-#define HAS_GETHBYADDR		/**/      /* config-skip */
-
-/* Gethbadd_addr_t:
- *	This symbol holds the type used for the 1st argument
- *	to gethostbyaddr().
- */
-#define Gethbadd_addr_t		char *	/**/ /* config-skip */
-
-/* Gethbadd_alen_t:
- *	This symbol holds the type used for the 2nd argument
- *	to gethostbyaddr().
- */
-#define Gethbadd_alen_t		int	/**/  /* config-skip */
+#define Netdb_name_t	char *
 
 #ifdef DECCRTL_SOCKETS
 /* HAS_GETNETBYADDR:
@@ -1973,15 +1941,49 @@
  */
 #define HAS_GETNETBYADDR		/**/      /* config-skip */
 
-/* Gethbadd_net_t:
+/* Netdb_net_t:
  *	This symbol holds the type used for the 1st argument
  *	to getnetbyaddr().
  */
-#define Getnbadd_net_t		long	/**/ /* config-skip */
+#define Netdb_net_t		long	/**/ /* config-skip */
+
+/* HAS_GETNETBYNAME:
+ *	This symbol, if defined, indicates that the getnetbyname routine is
+ *	available to lookup networks by their names.
+ */
+#define HAS_GETNETBYNAME		/*config-skip*/
 #else
-#undef HAS_GETNETBYADDR		/**/          /* config-skip */
-#undef Getnbadd_net_t		long	/**/ /* config-skip */
+#undef HAS_GETNETBYADDR			/*config-skip*/
+#undef HAS_GETNETBYNAME		/*config-skip*/
 #endif
+
+/* HAS_GETPROTOBYNAME:
+ *	This symbol, if defined, indicates that the getprotobyname routine is
+ *	available to lookup protocols by their names.
+ */
+/* HAS_GETPROTOBYNUMBER:
+ *	This symbol, if defined, indicates that the getprotobynumber()
+ *	routine is available to look up protocols by their number.
+ */
+#define HAS_GETPROTOBYNAME		/*config-skip*/
+#define HAS_GETPROTOBYNUMBER		/*config-skip*/
+
+/* HAS_GETSERVBYNAME:
+ *	This symbol, if defined, indicates that the getservbyname()
+ *	routine is available to look up services by their name.
+ */
+/* HAS_GETSERVBYPORT:
+ *	This symbol, if defined, indicates that the getservbyport()
+ *	routine is available to look up services by their port.
+ */
+#define HAS_GETSERVBYNAME		/*config-skip*/
+#define HAS_GETSERVBYPORT		/*config-skip*/
+
+/* HAS_SETHOSTENT:
+ *	This symbol, if defined, indicates that the sethostent() routine is
+ *	available.
+ */
+#define HAS_SETHOSTENT		/*config-skip*/
 
 /* VMS: In general, TCP/IP header files should be included from
  * sockadapt.h, instead of here, in order to keep the TCP/IP code
@@ -2014,15 +2016,22 @@
 
 #else /* VMS_DO_SOCKETS */
 
-#undef HAS_SOCKET		/**/          /* config-skip */
-#undef HAS_SOCKETPAIR	/**/          /* config-skip */
-#undef HAS_GETHOSTENT		/**/      /* config-skip */
-#undef I_NETINET_IN	/**/              /* config-skip */
-#undef I_NETDB	/**/                  /* config-skip */
-#undef I_NET_ERRNO		/**/          /* config-skip */
-#undef HAS_SELECT	/**/              /* config-skip */
-#undef HAS_GETHOSTBYADDR		/**/          /* config-skip */
-#undef HAS_GETNETBYADDR		/**/          /* config-skip */
+#undef HAS_SOCKET				/*config-skip*/
+#undef HAS_SOCKETPAIR			/*config-skip*/
+#undef HAS_GETHOSTENT			/*config-skip*/
+#undef HAS_SETHOSTENT			/*config-skip*/
+#undef I_NETINET_IN				/*config-skip*/
+#undef I_NETDB					/*config-skip*/
+#undef I_NET_ERRNO				/*config-skip*/
+#undef HAS_SELECT				/*config-skip*/
+#undef HAS_GETHOSTBYADDR		/*config-skip*/
+#undef HAS_GETNETBYADDR			/*config-skip*/
+#undef HAS_GETHOSTBYNAME		/*config-skip*/
+#undef HAS_GETNETBYNAME			/*config-skip*/
+#undef HAS_GETPROTOBYNAME		/*config-skip*/
+#undef HAS_GETPROTOBYNUMBER		/*config-skip*/
+#undef HAS_GETSERVBYNAME		/*config-skip*/
+#undef HAS_GETSERVBYPORT		/*config-skip*/
 
 #endif /* !VMS_DO_SOCKETS */
 

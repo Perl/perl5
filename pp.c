@@ -2834,11 +2834,11 @@ mul128(SV *sv, U8 m)
   U32             i = 0;
 
   if (!strnEQ(s, "0000", 4)) {  /* need to grow sv */
-    SV             *New = newSVpv("0000000000", 10);
+    SV             *tmpNew = newSVpv("0000000000", 10);
 
-    sv_catsv(New, sv);
+    sv_catsv(tmpNew, sv);
     SvREFCNT_dec(sv);		/* free old sv */
-    sv = New;
+    sv = tmpNew;
     s = SvPV(sv, len);
   }
   t = s + len - 1;
