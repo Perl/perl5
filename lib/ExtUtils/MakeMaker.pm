@@ -2,7 +2,7 @@ BEGIN {require 5.002;} # MakeMaker 5.17 was the last MakeMaker that was compatib
 
 package ExtUtils::MakeMaker;
 
-$VERSION = "5.46";
+$VERSION = "5.47";
 $Version_OK = "5.17";	# Makefiles older than $Version_OK will die
 			# (Will be checked from MakeMaker version 4.13 onwards)
 ($Revision = substr(q$Revision: 1.222 $, 10)) =~ s/\s+$//;
@@ -345,7 +345,8 @@ sub ExtUtils::MakeMaker::new {
 	eval $eval;
 
 	if ($@) {
-	    warn "Warning: prerequisite $prereq failed to load: $@";
+       warn "Warning: prerequisite $prereq $self->{PREREQ_PM}->{$prereq} not found. We have "
+               . ($prereq->VERSION || 'unknown version');
 	}
 	elsif ($prereq->VERSION < $self->{PREREQ_PM}->{$prereq} ){
 	    warn "Warning: prerequisite $prereq $self->{PREREQ_PM}->{$prereq} not found";
