@@ -41,7 +41,10 @@ T_RECORDOBJ
 	else
 	    croak(\"$var is not of type ${ntype}\")
 T_FSSPEC
-	GUSIPath2FSp((char *) SvPV_nolen($arg), &$var)
+	if (GUSIPath2FSp((char *) SvPV_nolen($arg), &$var))
+		croak(\"$var is not a valid file specification\");
+	else
+		0
 T_FIXED
 	$var = X2Fix(SvNV($arg))
 OUTPUT

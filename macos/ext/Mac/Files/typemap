@@ -8,7 +8,10 @@ RealFSSpec		T_REALFSSPEC
 
 INPUT
 T_REALFSSPEC
-	GUSIPath2FSp((char *) SvPV_nolen($arg), &$var);
+	if (GUSIPath2FSp((char *) SvPV_nolen($arg), &$var))
+		croak(\"$var is not a valid file specification\");
+	else
+		0
 OUTPUT
 T_REALFSSPEC
 	sv_setpv($arg, GUSIFSp2Encoding(&$var));
