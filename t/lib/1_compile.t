@@ -79,6 +79,9 @@ unless (has_extension('NDBM_File')) {
     delete_by_name('Memoize::NDBM_File');
 }
 
+# An odd dependency.
+delete_by_name('open') unless has_extension('I18N/Langinfo');
+
 delete_by_prefix('unicode::');
 add_by_name('unicode::distinct');	# put this back
 
