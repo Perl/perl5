@@ -3304,7 +3304,7 @@
  *	Defaults to define in Perls 5.8 and earlier, to undef later.
  */
 #ifndef USE_FAST_STDIO
-#define	USE_FAST_STDIO		/ **/
+#define	USE_FAST_STDIO		/**/
 #endif
 
 /* USE_FAST_STDIO:
@@ -3313,7 +3313,7 @@
  *	Defaults to define in Perls 5.8 and earlier, to undef later.
  */
 #ifndef USE_FAST_STDIO
-#define	USE_FAST_STDIO		/ **/
+#define	USE_FAST_STDIO		/**/
 #endif
 
 /* USE_LARGE_FILES:
