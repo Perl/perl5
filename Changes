@@ -31,6 +31,173 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 11545] By: jhi                                   on 2001/08/02  00:48:55
+        Log: Subject: Re: [PATCH pp_ctl.c] proposed Windows safe-guard
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Wed, 1 Aug 2001 18:34:44 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0108011830080.8991-100000@mako.covalent.net>
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[ 11544] By: jhi                                   on 2001/08/01  23:08:41
+        Log: The #11541 didn't work under threads.
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[ 11543] By: jhi                                   on 2001/08/01  22:46:41
+        Log: Subject: Re: [ID 20010621.002] UnixWare 7.1.1 and Perl-5.6.1 problems
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Fri, 22 Jun 2001 01:19:08 +0100 
+             Message-Id: <200106220019.BAA03365@crypt.compulink.co.uk>
+             
+             (Skip tests if accept() failed)
+     Branch: perl
+	   ! ext/IO/lib/IO/t/io_unix.t
+____________________________________________________________________________
+[ 11542] By: jhi                                   on 2001/08/01  22:40:09
+        Log: Subject: [ID 20010730.003] IRIX 6.5 already has struct sv in <sys/sema.h> (defined in perl.h)
+             From: "Stian Seeberg" <sseeberg@nimsoft.no>
+             Date: Mon, 30 Jul 2001 12:28:07 +0200
+             Message-Id: <68236D3FC2D92347B466639324391D1A0432AB@PONDUS.nimsoft.no>
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[ 11541] By: jhi                                   on 2001/08/01  22:38:31
+        Log: Subject: Pluggable optimizer
+             From: Simon Cozens <simon@netthink.co.uk>
+             Date: Wed, 1 Aug 2001 13:57:02 -0700
+             Message-ID: <20010801135702.I10442@netthink.co.uk>
+     Branch: perl
+	   ! embedvar.h op.c perl.c perl.h perlapi.h sv.c thrdvar.h util.c
+____________________________________________________________________________
+[ 11540] By: jhi                                   on 2001/08/01  22:29:54
+        Log: Subject: [ID 20010801.039] perlre.pod message typo
+             From: Autrijus Tang <autrijus@geb.elixus.org>
+             Date: Thu, 2 Aug 2001 04:48:02 +0800 (CST)
+             Message-Id: <200108012048.f71Km2r79890@geb.elixus.org>                         
+     Branch: perl
+	   ! pod/perlre.pod
+____________________________________________________________________________
+[ 11539] By: jhi                                   on 2001/08/01  16:32:52
+        Log: Test for change #11536.
+     Branch: perl
+	   ! t/op/tiehandle.t
+____________________________________________________________________________
+[ 11538] By: jhi                                   on 2001/08/01  16:27:19
+        Log: More test fixups for #11537.
+     Branch: perl
+	   ! t/lib/warnings/4lint t/lib/warnings/9enabled
+____________________________________________________________________________
+[ 11537] By: jhi                                   on 2001/08/01  16:26:25
+        Log: Subject: Re: [PATCH pp_ctl.c] proposed Windows safe-guard
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Mon, 30 Jul 2001 17:38:50 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0107301720310.25941-100000@mako.covalent.net>
+     Branch: perl
+	   ! op.c t/TestInit.pm
+____________________________________________________________________________
+[ 11536] By: jhi                                   on 2001/08/01  16:08:08
+        Log: Subject: [patch] ithreads + refto bug
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Wed, 1 Aug 2001 09:47:28 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0108010937240.7498-100000@mako.covalent.net>
+             
+             (Test in change #11539)
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[ 11535] By: jhi                                   on 2001/08/01  16:05:56
+        Log: Subject: [PATCH: perl@11523] fixups for t/harness
+             From: Prymmer/Kahn <pvhp@best.com>
+             Date: Wed, 1 Aug 2001 09:24:23 -0700 (PDT)
+             Message-ID: <Pine.BSF.4.21.0108010910310.17655-100000@shell8.ba.best.com>
+     Branch: perl
+	   ! t/harness
+____________________________________________________________________________
+[ 11534] By: jhi                                   on 2001/08/01  16:00:45
+        Log: Subject: [PATCH: perl@11523] add xsubpp and libnetcfg to installed *.bat files for win32 builds
+             From: Prymmer/Kahn <pvhp@best.com>
+             Date: Wed, 1 Aug 2001 09:07:13 -0700 (PDT)
+             Message-ID: <Pine.BSF.4.21.0108010859230.17655-100000@shell8.ba.best.com>
+     Branch: perl
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 11533] By: jhi                                   on 2001/08/01  13:38:29
+        Log: Need to know the number of tests.
+     Branch: perl
+	   ! t/run/exit.t
+____________________________________________________________________________
+[ 11532] By: jhi                                   on 2001/08/01  13:04:31
+        Log: Subject: Re: new exit tests on VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Tue, 31 Jul 2001 12:19:29 -0500
+             Message-Id: <5.1.0.14.0.20010731114845.03743008@mail.telocity.com>
+     Branch: perl
+	   ! t/run/exit.t
+____________________________________________________________________________
+[ 11531] By: jhi                                   on 2001/08/01  12:46:43
+        Log: Retract #11530 (the dTHX is needed under threads)
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[ 11530] By: jhi                                   on 2001/08/01  12:39:35
+        Log: (Retracted by #11531)
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[ 11529] By: jhi                                   on 2001/08/01  12:32:22
+        Log: Subject: [PATCH 1/4] -Wall cleanups: unixish.h
+             From: Richard Soderberg <rs@crystalflame.net>
+             Date: Tue, 31 Jul 2001 23:16:22 -0700 (PDT) 
+             Message-ID: <Pine.LNX.4.21.0107312313490.24341-100000@oregonnet.com>
+     Branch: perl
+	   ! unixish.h
+____________________________________________________________________________
+[ 11528] By: jhi                                   on 2001/08/01  12:18:59
+        Log: Subject: [PATCH 5.7.2] Allow for long long in h2xs 
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 31 Jul 2001 05:39:09 -0400
+             Message-ID: <20010731053909.A1810@math.ohio-state.edu>
+             
+             (with a note about the case of UV being equal to long long)
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[ 11527] By: jhi                                   on 2001/07/31  23:49:04
+        Log: Subject: [PATCH perl@11487] fix fs.t for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Tue, 31 Jul 2001 14:57:43 -0500
+             Message-Id: <5.1.0.14.0.20010731145015.03743008@exchi01>
+     Branch: perl
+	   ! t/io/fs.t
+____________________________________________________________________________
+[ 11526] By: jhi                                   on 2001/07/31  23:47:57
+        Log: Fix for
+             
+             Subject: [ID 20010116.001] File::Copy truncates orig file 
+             From: arbor@al37al08.telecel.pt
+             Date: Tue, 16 Jan 2001 11:43:02 GMT
+             Message-Id: <200101161143.AA11184@al37al08.telecel.pt>
+             
+             (copy($foo, $foo) would truncate $foo)
+     Branch: perl
+	   ! lib/File/Copy.pm lib/File/Copy.t
+____________________________________________________________________________
+[ 11525] By: jhi                                   on 2001/07/31  23:01:01
+        Log: Metaconfig unit change for #11524.
+     Branch: metaconfig/U/perl
+	   ! Extras.U
+____________________________________________________________________________
+[ 11524] By: jhi                                   on 2001/07/31  23:00:36
+        Log: Multiple modules didn't work; plus typo fixes.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 11523] By: jhi                                   on 2001/07/31  15:29:58
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 11522] By: jhi                                   on 2001/07/31  15:25:35
         Log: Regen perlapi.
      Branch: perl
