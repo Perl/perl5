@@ -52,7 +52,7 @@ PERLVAR(Iperldb,	U32)
 
 /* This value may be set when embedding for full cleanup  */
 /* 0=none, 1=full, 2=full with checks */
-PERLVARI(Iperl_destruct_level,	int,	0)
+PERLVARI(Iperl_destruct_level,	VOL int,	0)
 
 /* magical thingies */
 PERLVAR(Ibasetime,	Time_t)		/* $^T */
