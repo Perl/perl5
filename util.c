@@ -3502,11 +3502,9 @@ Perl_sv_lock(pTHX_ SV *osv)
     MAGIC *mg;
     SV *sv = osv;
 
-    SvLOCK(osv);
+    LOCK_SV_LOCK_MUTEX;
     if (SvROK(sv)) {
 	sv = SvRV(sv);
-	SvUNLOCK(osv);
-	SvLOCK(sv);
     }
 
     mg = condpair_magic(sv);
@@ -3523,7 +3521,7 @@ Perl_sv_lock(pTHX_ SV *osv)
 	MUTEX_UNLOCK(MgMUTEXP(mg));
 	SAVEDESTRUCTOR_X(Perl_unlock_condpair, sv);
     }
-    SvUNLOCK(sv);
+    UNLOCK_SV_LOCK_MUTEX;
     return sv;
 }
 

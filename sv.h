@@ -1022,13 +1022,6 @@ indicated number of bytes (remember to reserve space for an extra trailing
 NUL character).  Calls C<sv_grow> to perform the expansion if necessary. 
 Returns a pointer to the character buffer.
 
-=for apidoc Am|void|SvLOCK|SV* sv
-Aquires an internal mutex for a SV. Used to make sure multiple threads
-don't stomp on the guts of an SV at the same time
-
-=for apidoc Am|void|SvUNLOCK|SV* sv
-Release the internal mutex for an SV.
-
 =cut
 */
 
@@ -1064,9 +1057,6 @@ Release the internal mutex for an SV.
 		SvSetSV_nosteal_and(dst,src,SvSETMAGIC(dst))
 
 #ifdef DEBUGGING
-
-#define SvLOCK(sv)	MUTEX_LOCK(&PL_sv_lock_mutex)
-#define SvUNLOCK(sv)	MUTEX_UNLOCK(&PL_sv_lock_mutex)
 #define SvPEEK(sv) sv_peek(sv)
 #else
 #define SvPEEK(sv) ""
