@@ -2,7 +2,7 @@ package DB;
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 
-$VERSION = 1.04;
+$VERSION = 1.0401;
 $header = "perl5db.pl version $VERSION";
 
 # Enhanced by ilya@math.ohio-state.edu (Ilya Zakharevich)
@@ -391,6 +391,7 @@ sub DB {
     if ($trace & 2) {
       for (my $n = 0; $n <= $#to_watch; $n++) {
 	$evalarg = $to_watch[$n];
+	local $onetimeDump;	# Do not output results
 	my ($val) = &eval;	# Fix context (&eval is doing array)?
 	$val = ( (defined $val) ? "'$val'" : 'undef' );
 	if ($val ne $old_watch[$n]) {
