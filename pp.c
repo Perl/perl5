@@ -2281,8 +2281,11 @@ PP(pp_uc)
 	U8 *send;
 
 	s = SvPV(sv,len);
-	if (!len)
+	if (!len) {
+	    sv_setpvn(TARG, "", 0);
+	    SETs(TARG);
 	    RETURN;
+	}
 
 	(void)SvUPGRADE(TARG, SVt_PV);
 	SvGROW(TARG, (len * 2) + 1);
@@ -2348,8 +2351,11 @@ PP(pp_lc)
 	U8 *send;
 
 	s = SvPV(sv,len);
-	if (!len)
+	if (!len) {
+	    sv_setpvn(TARG, "", 0);
+	    SETs(TARG);
 	    RETURN;
+	}
 
 	(void)SvUPGRADE(TARG, SVt_PV);
 	SvGROW(TARG, (len * 2) + 1);
