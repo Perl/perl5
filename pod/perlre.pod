@@ -787,7 +787,7 @@ start and end.
 Alternatives are tried from left to right, so the first
 alternative found for which the entire expression matches, is the one that
 is chosen. This means that alternatives are not necessarily greedy. For
-example: when mathing C<foo|foot> against "barefoot", only the "foo"
+example: when matching C<foo|foot> against "barefoot", only the "foo"
 part will match, as that is the first alternative tried, and it successfully
 matches the target string. (This might not seem important, but it is
 important when you are capturing matched text using parentheses.)
@@ -840,7 +840,7 @@ with most other power tools, power comes together with the ability
 to wreak havoc.
 
 A common abuse of this power stems from the ability to make infinite
-loops using regular expressions, with something as innocous as:
+loops using regular expressions, with something as innocuous as:
 
     'foo' =~ m{ ( o? )* }x;
 
