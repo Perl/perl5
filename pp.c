@@ -727,11 +727,11 @@ PP(pp_defined)
 	RETPUSHNO;
     switch (SvTYPE(sv)) {
     case SVt_PVAV:
-	if (AvMAX(sv) >= 0 || SvGMAGICAL(sv))
+	if (AvMAX(sv) >= 0 || SvRMAGICAL(sv))
 	    RETPUSHYES;
 	break;
     case SVt_PVHV:
-	if (HvARRAY(sv) || SvGMAGICAL(sv))
+	if (HvARRAY(sv) || SvRMAGICAL(sv))
 	    RETPUSHYES;
 	break;
     case SVt_PVCV:
