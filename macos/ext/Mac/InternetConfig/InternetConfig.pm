@@ -583,45 +583,51 @@ BEGIN {
 	kICFTPProxyAccount() 	=> 'STR ',
 );
 
+# should accept only one item for tied interface
 sub _PackICFontRecord {
 	my($size,$face,$font) = @_;
 	return pack("sCx", $size, $face) . MacPack('STR ', $font);
 }
 
+# should return only one item for tied interface
 sub _UnpackICFontRecord {
 	my($blob) = @_;
 
 	return (unpack("sC", $blob), MacUnpack('STR ', substr($blob, 4)));
 }
 
+# should accept only one item for tied interface
 sub _PackICAppSpec {
 	my($type,$name) = @_;
 	return MacPack('type', $type) . MacPack('STR ', $name);
 }
 
+# should return only one item for tied interface
 sub _UnpackICAppSpec {
-	my($blob) = @_;
-
+	my $blob = shift or return;
 	return (MacUnpack('type', $blob), MacUnpack('STR ', substr($blob, 4)));
 }
 
+# should accept only one item for tied interface
 sub _PackICFileInfo {
 	my($type,$creator,$name) = @_;
 	return MacPack('type', $type) . MacPack('type', $creator) . MacPack('STR ', $name);
 }
 
+# should return only one item for tied interface
 sub _UnpackICFileInfo {
-	my($blob) = @_;
-
+	my $blob = shift or return;
 	return (MacUnpack('type', $blob), MacUnpack('type', substr($blob, 4, 4)), MacUnpack('STR ', substr($blob, 8)));
 }
 
+# should accept only one item for tied interface
 sub _PackICFileSpec {
 	my($vol, $creation, $spec, $alias) = @_;
 	$vol = substr(MacPack('STR ', $vol) . ('\0' x 32), 0, 32);
 	return $vol . MacPack('long', $creation) . $spec . $alias->get;
 }
 
+# should return only one item for tied interface
 sub _UnpackICFileSpec {
 	my($blob) = @_;
 
@@ -667,8 +673,9 @@ sub FETCH {
 	my($me, $key) = @_;
 	
 	my($data) = $RawInternetConfig{$key};
-	if ($ictypes{$key}) {
-		return MacUnpack(\%ICUnpack, $ictypes{$key}, $data);
+	my $type = $ictypes{$key};
+	if ($type && (exists $ICUnpack{$type} || exists $MacUnpack{$type})) {
+		return MacUnpack(\%ICUnpack, $type, $data);
 	} else {
 		return $data;
 	}
@@ -676,9 +683,9 @@ sub FETCH {
 
 sub STORE {
 	my($me, $key, @value) = @_;
-	
-	if ($ictypes{$key}) {
-		$RawInternetConfig{$key} = MacPack(\%ICPack, $ictypes{$key}, @value);
+	my $type = $ictypes{$key};
+	if ($type && (exists $ICPack{$type} || exists $MacPack{$type})) {
+		$RawInternetConfig{$key} = MacPack(\%ICPack, $type, @value);
 	} else {
 		$RawInternetConfig{$key} = $value[0];
 	}

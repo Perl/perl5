@@ -91,7 +91,8 @@ SetFractEnable(fractEnable)
 
 =item GetDefFontSize()
 
-Get the default size of a font.
+Get the current size of the system font if not set to 0. If the value is
+set to 0 this function will return 12 as the font size.
 
 =cut
 short
