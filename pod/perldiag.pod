@@ -1031,23 +1031,23 @@ Perhaps you need to copy the value to a temporary, and repeat that.
 I<inside> character classes, the [] are part of the construct, for
 example: /[012[:alpha:]345]/.  Note that [= =] and [. .] are not
 currently implemented; they are simply placeholders for future
-extensions.
+extensions and will cause fatal errors.
 
 =item Character class syntax [. .] is reserved for future extensions
 
-(W regexp) Within regular expression character classes ([]) the syntax
+(F regexp) Within regular expression character classes ([]) the syntax
 beginning with "[." and ending with ".]" is reserved for future
-extensions.  If you need to represent those character sequences inside a
-regular expression character class, just quote the square brackets with
-the backslash: "\[." and ".\]".
+extensions.  If you need to represent those character sequences inside
+a regular expression character class, just quote the square brackets
+with the backslash: "\[." and ".\]".
 
 =item Character class syntax [= =] is reserved for future extensions
 
-(W regexp) Within regular expression character classes ([]) the syntax
+(F) Within regular expression character classes ([]) the syntax
 beginning with "[=" and ending with "=]" is reserved for future
-extensions.  If you need to represent those character sequences inside a
-regular expression character class, just quote the square brackets with
-the backslash: "\[=" and "=\]".
+extensions.  If you need to represent those character sequences inside
+a regular expression character class, just quote the square brackets
+with the backslash: "\[=" and "=\]".
 
 =item Character class [:%s:] unknown
 
