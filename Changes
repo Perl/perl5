@@ -78,6 +78,24 @@ Version 5.005_04-tobe        Fourth maintenance release of 5.005
 ----------------
 
 ____________________________________________________________________________
+[ 22157] By: acme                                  on 2004/01/15  17:04:55
+        Log: Integrate stat.t from blead (suggested by Abe Timmerman),
+             slightly modified
+     Branch: maint-5.005/perl
+           + t/test.pl
+           ! MANIFEST t/op/stat.t
+____________________________________________________________________________
+[ 22156] By: acme                                  on 2004/01/15  16:59:52
+        Log: Integrate the OpenBSD hints from blead
+     Branch: maint-5.005/perl
+           ! hints/openbsd.sh
+____________________________________________________________________________
+[ 22130] By: acme                                  on 2004/01/13  20:13:10
+        Log: 
+             Remove ext/DB_File/Makefile.old as spotted by Abe Timmerman
+     Branch: maint-5.005/perl
+           - ext/DB_File/Makefile.old
+____________________________________________________________________________
 [ 22065] By: acme                                  on 2004/01/05  21:33:04
         Log: Work around bug where Linux libc's have Berekeley DB 2 in them
              Patch by Paul Marquess <Paul.Marquess@btinternet.com>,
