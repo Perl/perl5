@@ -1,13 +1,16 @@
 package if;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 sub work {
   my $method = shift() ? 'import' : 'unimport';
   return unless shift;		# CONDITION
-  my $p = shift;		# PACKAGE
+
+  my $p = $_[0];		# PACKAGE
   eval "require $p" or die;	# Adds .pm etc if needed
-  $p->$method(@_) if $p->can($method);
+
+  my $m = $p->can($method);
+  goto &$m if $m;
 }
 
 sub import   { shift; unshift @_, 1; goto &work }
