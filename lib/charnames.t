@@ -173,14 +173,28 @@ print "ok 24\n";
 print "not " unless "\N{NULL}" eq "\c@";
 print "ok 25\n";
 
-print "not " unless "\N{LINE FEED (LF)}" eq "\n";
-print "ok 26\n";
+if ($^O eq 'MacOS')
+{
+	print "not " unless "\N{CARRIAGE RETURN (CR)}" eq "\n";
+	print "ok 26\n";
 
-print "not " unless "\N{LINE FEED}" eq "\n";
-print "ok 27\n";
+	print "not " unless "\N{CARRIAGE RETURN}" eq "\n";
+	print "ok 27\n";
 
-print "not " unless "\N{LF}" eq "\n";
-print "ok 28\n";
+	print "not " unless "\N{CR}" eq "\n";
+	print "ok 28\n";
+}
+else
+{
+	print "not " unless "\N{LINE FEED (LF)}" eq "\n";
+	print "ok 26\n";
+
+	print "not " unless "\N{LINE FEED}" eq "\n";
+	print "ok 27\n";
+
+	print "not " unless "\N{LF}" eq "\n";
+	print "ok 28\n";
+}
 
 my $nel = ord("A") == 193 ? qr/^(?:\x15|\x25)$/ : qr/^\x85$/;
 
