@@ -570,7 +570,7 @@ at run time, at the moment this subexpression may match.  The result
 of evaluation is considered as a regular expression and matched as
 if it were inserted instead of this construct.
 
-C<code> is not interpolated.  As before, the rules to determine
+The C<code> is not interpolated.  As before, the rules to determine
 where the C<code> ends are currently somewhat convoluted.
 
 The following pattern matches a parenthesized group:
