@@ -476,6 +476,14 @@ $x = $class->new('1_000_000_000_000');
 ($x,$y) = $x->length();
 ok ($x,13); ok ($y,0);
 
+# test <<=, >>=
+$x = $class->new('2');
+my $y = $class->new('18');
+ok ($x <<= $y, 2 << 18);
+ok ($x, 2 << 18);
+ok ($x >>= $y, 2);
+ok ($x, 2);
+
 # I am afraid the following is not yet possible due to slowness
 # Also, testing for 2 meg output is a bit hard ;)
 #$x = $class->new(2); $x **= 6972593; $x--;
@@ -936,6 +944,8 @@ NaN:-inf:
 0x200000001:8589934593
 0x400000001:17179869185
 0x800000001:34359738369
+# bug found by Mark Lakata in Calc.pm creating too big one-element numbers in _from_hex()
+0x2dd59e18a125dbed30a6ab1d93e9c855569f44f75806f0645dc9a2e98b808c3:1295719234436071846486578237372801883390756472611551858964079371952886122691
 # inf input
 inf:inf
 +inf:inf
@@ -999,6 +1009,32 @@ E23:NaN
 012345678912:12345678912
 0123456789123:123456789123
 01234567891234:1234567891234
+# some inputs that result in zero
+0e0:0
++0e0:0
++0e+0:0
+-0e+0:0
+0e-0:0
+-0e-0:0
++0e-0:0
+000:0
+00e2:0
+00e02:0
+000e002:0
+000e1230:0
+00e-3:0
+00e+3:0
+00e-03:0
+00e+03:0
+-000:0
+-00e2:0
+-00e02:0
+-000e002:0
+-000e1230:0
+-00e-3:0
+-00e+3:0
+-00e-03:0
+-00e+03:0
 # normal input
 0:0
 +0:0
@@ -1976,14 +2012,40 @@ abc:12:NaN
 2:2:4
 2:3:8
 3:3:27
+-2:2:4
+-2:3:-8
+-2:4:16
+-2:5:-32
 2:-1:NaN
 -2:-1:NaN
 2:-2:NaN
 -2:-2:NaN
+# inf tests
 +inf:1234500012:inf
--inf:1234500012:-inf
+-inf:1234500012:inf
+-inf:1234500013:-inf
 +inf:-12345000123:inf
 -inf:-12345000123:-inf
+#  -inf * -inf = inf
+-inf:2:inf
+-inf:0:NaN
+-inf:-1:0
+-inf:inf:NaN
+2:inf:inf
+2:-inf:0
+0:inf:0
+0:-inf:inf
+-1:-inf:NaN
+-1:inf:NaN
+-2:inf:NaN
+-2:-inf:0
+NaN:inf:NaN
+NaN:-inf:NaN
+-inf:NaN:NaN
+inf:NaN:NaN
+inf:-inf:NaN
+1:inf:1
+1:-inf:1
 # 1 ** -x => 1 / (1 ** x)
 -1:0:1
 -2:0:1
