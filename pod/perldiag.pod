@@ -3848,6 +3848,11 @@ returns no useful value.  See L<perlmod>.
 (D deprecated) You are now encouraged to use the explicitly quoted form
 if you wish to use an empty line as the terminator of the here-document.
 
+=item Use of *glob{FILEHANDLE} is deprecated
+
+(D deprecated) You are now encouraged to use the shorter *glob{IO} form
+to access the filehandle slot within a typeglob.
+
 =item Use of implicit split to @_ is deprecated
 
 (D deprecated) It makes a lot of work for the compiler when you clobber
