@@ -79,6 +79,168 @@ Version 5.005_62        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  4161] By: gsar                                  on 1999/09/15  04:08:25
+        Log: missing perlhist dates from Jeff Okamoto
+     Branch: perl
+	   ! pod/perlhist.pod
+____________________________________________________________________________
+[  4160] By: gsar                                  on 1999/09/15  03:13:08
+        Log: jpl tweak
+     Branch: perl
+	   ! MANIFEST jpl/JNI/Makefile.PL
+____________________________________________________________________________
+[  4159] By: gsar                                  on 1999/09/15  02:57:08
+        Log: update to JPL snapshot v09141999, with minor tweaks (from Brian
+             Jepson <bjepson@home.com>)
+     Branch: perl
+	   + jpl/JNI/Closer.java jpl/JNI/JNIConfig jpl/JNI/JNIConfig.Win32
+	   + jpl/JNI/JNIConfig.kaffe jpl/JNI/JNIConfig.noembed
+	   + jpl/JNI/JNIConfig.standard jpl/JNI/typemap.gcc
+	   + jpl/JNI/typemap.win32 jpl/SETVARS.PL
+	   ! jpl/JNI/JNI.pm jpl/JNI/JNI.xs jpl/JNI/Makefile.PL
+	   ! jpl/JNI/test.pl jpl/JNI/typemap jpl/JPL/Makefile.PL
+	   ! jpl/PerlInterpreter/Makefile.PL
+	   ! jpl/PerlInterpreter/PerlInterpreter.c
+	   ! jpl/PerlInterpreter/PerlInterpreter.h jpl/README
+	   ! jpl/Sample/Makefile.PL jpl/install-jpl
+____________________________________________________________________________
+[  4158] By: gsar                                  on 1999/09/15  01:27:14
+        Log: From:    Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date:    Tue, 14 Sep 1999 21:26:15 EDT
+             Message-Id: <199909150126.VAA24720@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.005_58+] Re: [ID 19990914.001] Perl_re_intuit_start() hangs in a loop
+     Branch: perl
+	   ! regexec.c t/op/pat.t
+____________________________________________________________________________
+[  4157] By: jhi                                   on 1999/09/14  21:18:09
+        Log: config.h will define USE_64_BITS if need be.
+     Branch: cfgperl
+	   ! hints/irix_6.sh
+____________________________________________________________________________
+[  4156] By: jhi                                   on 1999/09/14  20:30:00
+        Log: Change #4149 necessitates also a small code change.
+     Branch: cfgperl
+	   ! ext/B/defsubs_h.PL
+____________________________________________________________________________
+[  4155] By: jhi                                   on 1999/09/14  20:15:53
+        Log: Update EPOC libdir names.
+     Branch: cfgperl
+	   ! epoc/config.h
+____________________________________________________________________________
+[  4154] By: jhi                                   on 1999/09/14  20:13:41
+        Log: Obsolete epoc/config.h caused #4153 to re-introduce already
+             deceased HAS.*DBM.*64 mumblings.
+     Branch: cfgperl
+	   ! Configure config_h.SH epoc/config.h
+____________________________________________________________________________
+[  4153] By: jhi                                   on 1999/09/14  20:04:53
+        Log: Configure nits.
+     Branch: cfgperl
+	   ! Configure config_h.SH
+     Branch: metaconfig
+	   ! U/compline/d_sigaction.U U/threads/i_pthread.U
+____________________________________________________________________________
+[  4152] By: jhi                                   on 1999/09/14  19:30:22
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  +> ext/B/defsubs_h.PL t/lib/bigfltpm.t
+	   - ext/B/defsubs.h.PL t/lib/bigfloatpm.t
+	  !> INSTALL MANIFEST ext/B/Makefile.PL pod/perldiag.pod
+	  !> win32/config_sh.PL
+____________________________________________________________________________
+[  4151] By: jhi                                   on 1999/09/14  10:25:01
+        Log: Update Unicode database and recompute the tables.
+             Rename the .txt files to be more Unicode 3.0-like.
+             Unihan-3.0.txt not included because it is 16 MB.
+             syllables.txt is manually maintained.
+             See ReadMe.txt for description of the .txt files.
+             (not all of them are used yet)
+     Branch: cfgperl
+	   + lib/unicode/ArabShap.txt lib/unicode/Blocks.txt
+	   + lib/unicode/CompExcl.txt lib/unicode/EAWidth.txt
+	   + lib/unicode/Index.txt lib/unicode/Jamo-2.txt
+	   + lib/unicode/LineBrk.txt lib/unicode/Names.txt
+	   + lib/unicode/Props.txt lib/unicode/ReadMe.txt
+	   + lib/unicode/SpecCase.txt
+	   - lib/unicode/arabshp.txt lib/unicode/blocks.txt
+	   - lib/unicode/index2.txt lib/unicode/jamo2.txt
+	   - lib/unicode/names2.txt lib/unicode/props2.txt
+	   - lib/unicode/readme.txt
+	   ! MANIFEST lib/unicode/ArabLink.pl lib/unicode/ArabLnkGrp.pl
+	   ! lib/unicode/Bidirectional.pl lib/unicode/Block.pl
+	   ! lib/unicode/Category.pl lib/unicode/CombiningClass.pl
+	   ! lib/unicode/Decomposition.pl
+	   ! lib/unicode/In/ArabicPresentationForms-B.pl
+	   ! lib/unicode/In/Specials.pl lib/unicode/In/Tibetan.pl
+	   ! lib/unicode/Is/Alnum.pl lib/unicode/Is/Alpha.pl
+	   ! lib/unicode/Is/BidiCS.pl lib/unicode/Is/BidiL.pl
+	   ! lib/unicode/Is/BidiON.pl lib/unicode/Is/BidiWS.pl
+	   ! lib/unicode/Is/DCcompat.pl lib/unicode/Is/DecoCanon.pl
+	   ! lib/unicode/Is/DecoCompat.pl lib/unicode/Is/L.pl
+	   ! lib/unicode/Is/Ll.pl lib/unicode/Is/Lo.pl
+	   ! lib/unicode/Is/Lower.pl lib/unicode/Is/Lu.pl
+	   ! lib/unicode/Is/Pd.pl lib/unicode/Is/Po.pl lib/unicode/Is/S.pl
+	   ! lib/unicode/Is/Sm.pl lib/unicode/Is/So.pl
+	   ! lib/unicode/Is/Upper.pl lib/unicode/Is/Word.pl
+	   ! lib/unicode/JamoShort.pl lib/unicode/UnicodeData-Latest.txt
+	   ! lib/unicode/mktables.PL
+____________________________________________________________________________
+[  4150] By: gsar                                  on 1999/09/14  09:31:57
+        Log: INSTALL tweak
+     Branch: perl
+	   ! INSTALL
+____________________________________________________________________________
+[  4149] By: gsar                                  on 1999/09/14  09:00:45
+        Log: change some filenames to be 8.3-friendly
+     Branch: perl
+	  +> ext/B/defsubs_h.PL t/lib/bigfltpm.t
+	   - ext/B/defsubs.h.PL t/lib/bigfloatpm.t
+	   ! MANIFEST ext/B/Makefile.PL pod/perldiag.pod
+____________________________________________________________________________
+[  4148] By: gsar                                  on 1999/09/14  08:35:00
+        Log: win32 config tweak (suggested by Greg Chapman <glc@well.com>)
+     Branch: perl
+	   ! win32/config_sh.PL
+____________________________________________________________________________
+[  4147] By: jhi                                   on 1999/09/14  08:07:49
+        Log: Not that UVSIZE normally differs that much from IVSIZE...
+     Branch: cfgperl
+	   ! perl.h
+____________________________________________________________________________
+[  4146] By: jhi                                   on 1999/09/14  08:04:40
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> Changes ext/DB_File/DB_File.xs
+____________________________________________________________________________
+[  4145] By: jhi                                   on 1999/09/14  07:10:02
+        Log: I_PTHREAD was PTHREADEAD.
+     Branch: cfgperl
+	   ! Configure config_h.SH
+     Branch: metaconfig
+	   ! U/threads/i_pthread.U
+____________________________________________________________________________
+[  4144] By: gsar                                  on 1999/09/14  06:46:47
+        Log: change#4113 was missing DB_File.xs changes
+     Branch: perl
+	   ! ext/DB_File/DB_File.xs
+____________________________________________________________________________
+[  4143] By: jhi                                   on 1999/09/13  20:16:20
+        Log: Small doc and whitespace edits.
+     Branch: cfgperl
+	   ! ext/DynaLoader/dl_aix.xs ext/DynaLoader/dl_beos.xs
+	   ! ext/DynaLoader/dl_cygwin.xs ext/DynaLoader/dl_dld.xs
+	   ! ext/DynaLoader/dl_hpux.xs ext/DynaLoader/dl_mpeix.xs
+	   ! ext/DynaLoader/dl_next.xs ext/DynaLoader/dl_rhapsody.xs
+	   ! ext/DynaLoader/dl_vmesa.xs ext/DynaLoader/dl_vms.xs
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  4142] By: gsar                                  on 1999/09/13  19:32:31
+        Log: integrate cfgperl contents into mainline, update Changes
+     Branch: perl
+	  +> ext/DB_File/version.c
+	   ! Changes
+	  !> (integrate 44 files)
+____________________________________________________________________________
 [  4141] By: jhi                                   on 1999/09/13  16:16:56
         Log: Scan for <pthread.h> always.
      Branch: cfgperl
