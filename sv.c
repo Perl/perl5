@@ -9373,6 +9373,18 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		vecsv = svargs[efix ? efix-1 : svix++];
 		vecstr = (U8*)SvPVx(vecsv,veclen);
 		vec_utf8 = DO_UTF8(vecsv);
+		/* if this is a version object, we need to return the
+		 * stringified representation (which the SvPVX has
+		 * already done for us), but not vectorize the args
+		 */
+		if ( *q == 'd' && sv_derived_from(vecsv,"version") )
+		{
+			q++; /* skip past the rest of the %vd format */
+			eptr = vecstr;
+			elen = strlen(eptr);
+			vectorize=FALSE;
+			goto string;
+		}
 	    }
 	    else {
 		vecstr = (U8*)"";

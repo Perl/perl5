@@ -222,7 +222,7 @@ ok( $v eq "$]", qq{\$^V eq "\$]"});
 
 $v = $revision + $version/1000 + $subversion/1000000;
 
-ok( $v == $], "\$^V == \$] (numeric)" );
+ok( abs($v - $]) < 10**-8 , "\$^V == \$] (numeric)" );
 
 SKIP: {
   skip("In EBCDIC the v-string components cannot exceed 2147483647", 6)

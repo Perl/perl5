@@ -1061,25 +1061,19 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
     case ']':
 	if (len == 1) {
 	    SV *sv = GvSV(gv);
-	    (void)SvUPGRADE(sv, SVt_PVNV);
-	    Perl_sv_setpvf(aTHX_ sv,
-#if defined(PERL_SUBVERSION) && (PERL_SUBVERSION > 0)
-			    "%8.6"
-#else
-			    "%5.3"
-#endif
-			    NVff,
-			    SvNVX(PL_patchlevel));
-	    SvNVX(sv) = SvNVX(PL_patchlevel);
-	    SvNOK_on(sv);
+	    if (!sv_derived_from(PL_patchlevel, "version"))
+		(void *)upg_version(PL_patchlevel);
+	    sv = vnumify(PL_patchlevel);
 	    SvREADONLY_on(sv);
+	    GvSV(gv) = sv;
 	}
 	break;
     case '\026':	/* $^V */
 	if (len == 1) {
 	    SV *sv = GvSV(gv);
-	    GvSV(gv) = SvREFCNT_inc(PL_patchlevel);
-	    SvREFCNT_dec(sv);
+	    sv = new_version(PL_patchlevel);
+	    SvREADONLY_on(sv);
+	    GvSV(gv) = sv;
 	}
 	break;
     }

@@ -267,28 +267,6 @@ perl_construct(pTHXx)
     init_i18nl10n(1);
     SET_NUMERIC_STANDARD();
 
-    {
-	U8 *s;
-	PL_patchlevel = NEWSV(0,4);
-	(void)SvUPGRADE(PL_patchlevel, SVt_PVNV);
-	if (PERL_REVISION > 127 || PERL_VERSION > 127 || PERL_SUBVERSION > 127)
-	    SvGROW(PL_patchlevel, UTF8_MAXLEN*3+1);
-	s = (U8*)SvPVX(PL_patchlevel);
-	/* Build version strings using "native" characters */
-	s = uvchr_to_utf8(s, (UV)PERL_REVISION);
-	s = uvchr_to_utf8(s, (UV)PERL_VERSION);
-	s = uvchr_to_utf8(s, (UV)PERL_SUBVERSION);
-	*s = '\0';
-	SvCUR_set(PL_patchlevel, s - (U8*)SvPVX(PL_patchlevel));
-	SvPOK_on(PL_patchlevel);
-	SvNVX(PL_patchlevel) = (NV)PERL_REVISION +
-			      ((NV)PERL_VERSION / (NV)1000) +
-			      ((NV)PERL_SUBVERSION / (NV)1000000);
-	SvNOK_on(PL_patchlevel);	/* dual valued */
-	SvUTF8_on(PL_patchlevel);
-	SvREADONLY_on(PL_patchlevel);
-    }
-
 #if defined(LOCAL_PATCH_COUNT)
     PL_localpatches = local_patches;	/* For possible -v */
 #endif
@@ -342,6 +320,13 @@ perl_construct(pTHXx)
 	 PL_clocktick = HZ;
 
     PL_stashcache = newHV();
+
+    PL_patchlevel = newSVpv(
+	    Perl_form(aTHX_ "%d.%d.%d",
+	    (int)PERL_REVISION,
+	    (int)PERL_VERSION,
+	    (int)PERL_SUBVERSION ), 0
+    );
 
     ENTER;
 }
@@ -2714,14 +2699,18 @@ Perl_moreswitches(pTHX_ char *s)
 	s++;
 	return s;
     case 'v':
+	if (!sv_derived_from(PL_patchlevel, "version"))
+		(void *)upg_version(PL_patchlevel);
 #if !defined(DGUX)
 	PerlIO_printf(PerlIO_stdout(),
-		      Perl_form(aTHX_ "\nThis is perl, v%"VDf" built for %s",
-				PL_patchlevel, ARCHNAME));
+		Perl_form(aTHX_ "\nThis is perl, v%_ built for %s",
+		    vstringify(PL_patchlevel),
+		    ARCHNAME));
 #else /* DGUX */
 /* Adjust verbose output as in the perl that ships with the DG/UX OS from EMC */
 	PerlIO_printf(PerlIO_stdout(),
-			Perl_form(aTHX_ "\nThis is perl, version %vd\n", PL_patchlevel));
+		Perl_form(aTHX_ "\nThis is perl, v%_\n",
+		    vstringify(PL_patchlevel)));
 	PerlIO_printf(PerlIO_stdout(),
 			Perl_form(aTHX_ "        built under %s at %s %s\n",
 					OSNAME, __DATE__, __TIME__));

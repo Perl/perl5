@@ -3047,66 +3047,19 @@ PP(pp_require)
     OP *op;
 
     sv = POPs;
-    if (SvNIOKp(sv) && PL_op->op_type != OP_DOFILE) {
-	if (SvPOK(sv) && SvNOK(sv) && SvNV(sv)) {		/* require v5.6.1 */
-	    UV rev = 0, ver = 0, sver = 0;
-	    STRLEN len;
-	    U8 *s = (U8*)SvPVX(sv);
-	    U8 *end = (U8*)SvPVX(sv) + SvCUR(sv);
-	    if (s < end) {
-		rev = utf8n_to_uvchr(s, end - s, &len, 0);
-		s += len;
-		if (s < end) {
-		    ver = utf8n_to_uvchr(s, end - s, &len, 0);
-		    s += len;
-		    if (s < end)
-			sver = utf8n_to_uvchr(s, end - s, &len, 0);
-		}
-	    }
-	    if (PERL_REVISION < rev
-		|| (PERL_REVISION == rev
-		    && (PERL_VERSION < ver
-			|| (PERL_VERSION == ver
-			    && PERL_SUBVERSION < sver))))
-	    {
-		DIE(aTHX_ "Perl v%"UVuf".%"UVuf".%"UVuf" required--this is only "
-		    "v%d.%d.%d, stopped", rev, ver, sver, PERL_REVISION,
-		    PERL_VERSION, PERL_SUBVERSION);
-	    }
-	    if (ckWARN(WARN_PORTABLE))
+    if ( (SvNIOKp(sv) || SvVOK(sv)) && PL_op->op_type != OP_DOFILE) {
+	if ( SvVOK(sv) && ckWARN(WARN_PORTABLE) )	/* require v5.6.1 */
 		Perl_warner(aTHX_ packWARN(WARN_PORTABLE),
                         "v-string in use/require non-portable");
-	    RETPUSHYES;
-	}
-	else if (!SvPOKp(sv)) {			/* require 5.005_03 */
-	    if ((NV)PERL_REVISION + ((NV)PERL_VERSION/(NV)1000)
-		+ ((NV)PERL_SUBVERSION/(NV)1000000)
-		+ 0.00000099 < SvNV(sv))
-	    {
-		NV nrev = SvNV(sv);
-		UV rev = (UV)nrev;
-		NV nver = (nrev - rev) * 1000;
-		UV ver = (UV)(nver + 0.0009);
-		NV nsver = (nver - ver) * 1000;
-		UV sver = (UV)(nsver + 0.0009);
 
-		/* help out with the "use 5.6" confusion */
-		if (sver == 0 && (rev > 5 || (rev == 5 && ver >= 100))) {
-		    DIE(aTHX_ "Perl v%"UVuf".%"UVuf".%"UVuf" required"
-			" (did you mean v%"UVuf".%03"UVuf"?)--"
-			"this is only v%d.%d.%d, stopped",
-			rev, ver, sver, rev, ver/100,
-			PERL_REVISION, PERL_VERSION, PERL_SUBVERSION);
-		}
-		else {
-		    DIE(aTHX_ "Perl v%"UVuf".%"UVuf".%"UVuf" required--"
-			"this is only v%d.%d.%d, stopped",
-			rev, ver, sver, PERL_REVISION, PERL_VERSION,
-			PERL_SUBVERSION);
-		}
-	    }
+	sv = new_version(sv);
+	if (!sv_derived_from(PL_patchlevel, "version"))
+	    (void *)upg_version(PL_patchlevel);
+	if ( vcmp(sv,PL_patchlevel) > 0 )
+	    DIE(aTHX_ "Perl v%_ required--this is only v%_, stopped",
+		vstringify(sv), vstringify(PL_patchlevel));
+
 	    RETPUSHYES;
-	}
     }
     name = SvPV(sv, len);
     if (!(name && len > 0 && *name))

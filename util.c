@@ -4004,6 +4004,19 @@ SV *
 Perl_new_version(pTHX_ SV *ver)
 {
     SV *rv = newSV(0);
+    if ( sv_derived_from(ver,"version") ) /* can just copy directly */
+    {
+	I32 key;
+	AV *av = (AV *)SvRV(ver);
+	SV* sv = newSVrv(rv, "version"); /* create an SV and upgrade the RV */
+	(void)sv_upgrade(sv, SVt_PVAV); /* needs to be an AV type */
+	for ( key = 0; key <= av_len(av); key++ )
+	{
+	    I32 rev = SvIV(*av_fetch(av, key, FALSE));
+	    av_push((AV *)sv, newSViv(rev));
+	}
+	return rv;
+    }
 #ifdef SvVOK
     if ( SvVOK(ver) ) { /* already a v-string */
 	char *version;
