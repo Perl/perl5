@@ -699,8 +699,6 @@ As of release 5 of Perl, assignment to C<$[> is treated as a compiler
 directive, and cannot influence the behavior of any other file.
 Its use is highly discouraged.
 
-=item $PERL_VERSION
-
 =item $]
 
 The version + patchlevel / 1000 of the Perl interpreter.  This variable
@@ -713,7 +711,10 @@ of perl in the right bracket?)  Example:
 See also the documentation of C<use VERSION> and C<require VERSION>
 for a convenient way to fail if the running Perl interpreter is too old.
 
-See C<$^V> for a more modern representation of the Perl version.
+The use of this variable is deprecated.  The floating point representation
+can sometimes lead to inaccurate numeric comparisons.  See C<$^V> for a
+more modern representation of the Perl version that allows accurate string
+comparisons.
 
 =item $COMPILING
 
@@ -905,24 +906,23 @@ The time at which the program began running, in seconds since the
 epoch (beginning of 1970).  The values returned by the B<-M>, B<-A>,
 and B<-C> filetests are based on this value.
 
-=item $PERL_VERSION_TUPLE
+=item $PERL_VERSION
 
 =item $^V
 
 The revision, version, and subversion of the Perl interpreter, represented
-as a "version tuple".  Version tuples have both a numeric value and a
-string value.  The numeric value is a floating point number that amounts
-to revision + version/1000 + subversion/1000000, and the string value
-is made of characters possibly in the UTF-8 range:
-C<chr($revision) . chr($version) . chr($subversion)>.
+as a string composed of characters with those ordinals.  Thus in Perl v5.6.0
+it equals C<chr(5) . chr(6) . chr(0)> and will return true for
+C<$^V eq v5.6.0>.  Note that the characters in this string value can
+potentially be in Unicode range.
 
 This can be used to determine whether the Perl interpreter executing a
 script is in the right range of versions.  (Mnemonic: use ^V for Version
-control.)  Example:
+Control.)  Example:
 
-    warn "No "our" declarations!\n" if $^V and $^V lt v5.6;
+    warn "No "our" declarations!\n" if $^V and $^V lt v5.6.0;
 
-See also the documentation of C<use VERSION> and C<require VERSION>
+See the documentation of C<use VERSION> and C<require VERSION>
 for a convenient way to fail if the running Perl interpreter is too old.
 
 See also C<$]> for an older representation of the Perl version.

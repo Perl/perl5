@@ -1576,7 +1576,11 @@ sub generate_init {
 	      eval qq/print "\\t$var;\\n"/;
 	      warn $@   if  $@;
 	    }
-	    $deferred .= eval qq/"\\n\\tif (items < $num)\\n\\t    $var = $defaults{$var};\\n\\telse {\\n$expr;\\n\\t}\\n"/;
+	    if ($defaults{$var} eq 'NO_INIT') {
+		$deferred .= eval qq/"\\n\\tif (items >= $num) {\\n$expr;\\n\\t}\\n"/;
+	    } else {
+		$deferred .= eval qq/"\\n\\tif (items < $num)\\n\\t    $var = $defaults{$var};\\n\\telse {\\n$expr;\\n\\t}\\n"/;
+	    }
 	    warn $@   if  $@;
     } elsif ($ScopeThisXSUB or $expr !~ /^\t\$var =/) {
 	    if ($name_printed) {

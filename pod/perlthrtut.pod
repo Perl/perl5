@@ -722,8 +722,7 @@ subroutine's behavior while your program is actually running.
 
 The basic subroutine lock looks like this:
 
-    sub test_sub { 
-        use attrs qw(locked); 
+    sub test_sub :locked { 
     }
 
 This ensures that only one thread will be executing this subroutine at
@@ -738,8 +737,7 @@ it.  A more elaborate example looks like this:
     new Thread \&thread_sub, 3; 
     new Thread \&thread_sub, 4;
 
-    sub sync_sub { 
-        use attrs qw(locked); 
+    sub sync_sub :locked { 
         my $CallingThread = shift @_; 
         print "In sync_sub for thread $CallingThread\n";
         yield; 
@@ -754,8 +752,8 @@ it.  A more elaborate example looks like this:
         print "$ThreadID is done with sync_sub\n"; 
     }
 
-The use attrs qw(locked) locks sync_sub(), and if you run this, you
-can see that only one thread is in it at any one time.
+The C<locked> attribute tells perl to lock sync_sub(), and if you run
+this, you can see that only one thread is in it at any one time.
 
 =head2 Methods
 
@@ -793,8 +791,7 @@ method attribute indicates whether the subroutine is really a method.
         return bless [@_], $class; 
     }
 
-    sub per_object { 
-        use attrs qw(locked method); 
+    sub per_object :locked :method { 
         my ($class, $thrnum) = @_; 
         print "In per_object for thread $thrnum\n"; 
         yield; 
@@ -802,8 +799,7 @@ method attribute indicates whether the subroutine is really a method.
         print "Exiting per_object for thread $thrnum\n"; 
     }
 
-    sub one_at_a_time { 
-        use attrs qw(locked); 
+    sub one_at_a_time :locked { 
         my ($class, $thrnum) = @_; 
         print "In one_at_a_time for thread $thrnum\n";     
         yield; 
@@ -817,8 +813,8 @@ thread is ever in one_at_a_time() at once.
 
 =head2 Locking A Subroutine
 
-You can lock a subroutine as you would lock a variable.  Subroutine
-locks work the same as a C<use attrs qw(locked)> in the subroutine,
+You can lock a subroutine as you would lock a variable.  Subroutine locks
+work the same as specifying a C<locked> attribute for the subroutine,
 and block all access to the subroutine for other threads until the
 lock goes out of scope.  When the subroutine isn't locked, any number
 of threads can be in it at once, and getting a lock on a subroutine
@@ -827,10 +823,10 @@ subroutine looks like this:
 
     lock(\&sub_to_lock);
 
-Simple enough.  Unlike use attrs, which is a compile time option,
-locking and unlocking a subroutine can be done at runtime at your
+Simple enough.  Unlike the C<locked> attribute, which is a compile time
+option, locking and unlocking a subroutine can be done at runtime at your
 discretion.  There is some runtime penalty to using lock(\&sub) instead
-of use attrs qw(locked), so make sure you're choosing the proper
+of the C<locked> attribute, so make sure you're choosing the proper
 method to do the locking.
 
 You'd choose lock(\&sub) when writing modules and code to run on both

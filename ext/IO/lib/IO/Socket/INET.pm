@@ -12,10 +12,12 @@ use IO::Socket;
 use Socket;
 use Carp;
 use Exporter;
-use Errno qw(EINVAL);	# EINVAL appears portable
+use Errno;
 
 @ISA = qw(IO::Socket);
 $VERSION = "1.25";
+
+my $EINVAL = exists(&Errno::EINVAL) ? Errno::EINVAL() : 1;
 
 IO::Socket::INET->register_domain( AF_INET );
 
@@ -117,7 +119,7 @@ sub configure {
     $laddr = defined $laddr ? inet_aton($laddr)
 			    : INADDR_ANY;
 
-    return _error($sock, EINVAL, "Bad hostname '",$arg->{LocalAddr},"'")
+    return _error($sock, $EINVAL, "Bad hostname '",$arg->{LocalAddr},"'")
 	unless(defined $laddr);
 
     $arg->{PeerAddr} = $arg->{PeerHost}
@@ -139,7 +141,7 @@ sub configure {
 
     if(defined $raddr) {
 	@raddr = $sock->_get_addr($raddr, $arg->{MultiHomed});
-	return _error($sock, EINVAL, "Bad hostname '",$arg->{PeerAddr},"'")
+	return _error($sock, $EINVAL, "Bad hostname '",$arg->{PeerAddr},"'")
 	    unless @raddr;
     }
 
@@ -169,13 +171,13 @@ sub configure {
  
         $raddr = shift @raddr;
 
-	return _error($sock, EINVAL, 'Cannot determine remote port')
+	return _error($sock, $EINVAL, 'Cannot determine remote port')
 		unless($rport || $type == SOCK_DGRAM || $type == SOCK_RAW);
 
 	last
 	    unless($type == SOCK_STREAM || defined $raddr);
 
-	return _error($sock, EINVAL, "Bad hostname '",$arg->{PeerAddr},"'")
+	return _error($sock, $EINVAL, "Bad hostname '",$arg->{PeerAddr},"'")
 	    unless defined $raddr;
 
 #        my $timeout = ${*$sock}{'io_socket_timeout'};
@@ -192,7 +194,7 @@ sub configure {
 #	if ($timeout) {
 #	    my $new_timeout = $timeout - (time() - $before);
 #	    return _error($sock,
-#                         (exists(&Errno::ETIMEDOUT) ? &Errno::ETIMEDOUT : EINVAL),
+#                         (exists(&Errno::ETIMEDOUT) ? Errno::ETIMEDOUT() : $EINVAL),
 #                         "Timeout") if $new_timeout <= 0;
 #	    ${*$sock}{'io_socket_timeout'} = $new_timeout;
 #        }

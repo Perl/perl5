@@ -2122,7 +2122,7 @@ Perl_moreswitches(pTHX_ char *s)
 	s++;
 	return s;
     case 'v':
-	printf(Perl_form(aTHX_ "\nThis is perl, v%v built for %s",
+	printf(Perl_form(aTHX_ "\nThis is perl, v%vd built for %s",
 			 PL_patchlevel, ARCHNAME));
 #if defined(LOCAL_PATCH_COUNT)
 	if (LOCAL_PATCH_COUNT > 0)
@@ -2165,6 +2165,9 @@ Perl_moreswitches(pTHX_ char *s)
 #endif
 #ifdef __MINT__
 	printf("MiNT port by Guido Flohr, 1997-1999\n");
+#endif
+#ifdef EPOC
+	printf("EPOC port by Olaf Flebbe, 1999-2000\n");
 #endif
 #ifdef BINARY_BUILD_NOTICE
 	BINARY_BUILD_NOTICE;

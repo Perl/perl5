@@ -57,6 +57,33 @@ cases remains unchanged:
 
 See L<perldata>.
 
+=head2 Perl's version numbering has changed
+
+Beginning with Perl version 5.6, the version number convention has been
+changed to a "dotted integer" scheme that is more commonly found in open
+source projects.
+
+Maintenance versions of v5.6.0 will be released as v5.6.1, v5.6.2 etc.
+The next development series following v5.6 will be numbered v5.7.x,
+beginning with v5.7.0, and the next major production release following
+v5.6 will be v5.8.
+
+The English module now sets $PERL_VERSION to $^V (a string value) rather
+than C<$]> (a numeric value).  (This is a potential incompatibility.
+Send us a report via perlbug if you are affected by this.)
+
+The v1.2.3 syntax is also now legal in Perl.
+See L<Support for strings represented as a vector of ordinals> for more on that.
+
+To cope with the new versioning system's use of at least three significant
+digits for each version component, the method used for incrementing the
+subversion number has also changed slightly.  We assume that versions older
+than v5.6 have been incrementing the subversion component in multiples of
+10.  Versions after v5.6.0 will increment them by 1.  Thus, using the new
+notation, 5.005_03 is the same as v5.5.30, and the first maintenance
+version following v5.6.0 will be v5.6.1, which amounts to a floating point
+value of 5.006_001).
+
 =item Possibly changed pseudo-random number generator
 
 In 5.005_0x and earlier, perl's rand() function used the C library
@@ -286,29 +313,6 @@ create new threads from Perl (i.e., C<use Thread;> will not work with
 interpreter threads).  C<use Thread;> continues to be available when you
 ask for -Duse5005threads, bugs and all.
 
-=head2 Perl's version numbering has changed
-
-Beginning with Perl version 5.6, the version number convention has been
-changed to a "dotted tuple" scheme that is more commonly found in open
-source projects.
-
-Maintenance versions of v5.6.0 will be released as v5.6.1, v5.6.2 etc.
-The next development series following v5.6 will be numbered v5.7.x,
-beginning with v5.7.0, and the next major production release following
-v5.6 will be v5.8.
-
-The v1.2.3 syntax is also now legal in Perl.  See L<Support for version tuples>
-for more on that.
-
-To cope with the new versioning system's use of at least three significant
-digits for each version component, the method used for incrementing the
-subversion number has also changed slightly.  We assume that versions older
-than v5.6 have been incrementing the subversion component in multiples of
-10.  Versions after v5.6 will increment them by 1.  Thus, using the new
-notation, 5.005_03 is the same as v5.5.30, and the first maintenance
-version following v5.6 will be v5.6.1, which amounts to a floating point
-value of 5.006_001).
-
 =head2 New Configure flags
 
 The following new flags may be enabled on the Configure command line
@@ -455,36 +459,42 @@ mostly useful as an alternative to the C<vars> pragma, but also provides
 the opportunity to introduce typing and other attributes for such
 variables.  See L<perlfunc/our>.
 
-=head2 Support for version tuples
+=head2 Support for strings represented as a vector of ordinals
 
-Literals of the form v1.2.3.4 are now parsed as the utf8 string
-C<"\x{1}\x{2}\x{3}\x{4}">.  This allows comparing version numbers using
-regular string comparison operators C<eq>, C<ne>, C<lt>, C<gt> etc.
+Literals of the form v1.2.3.4 are now parsed as a string composed of
+of characters with the specified ordinals.  This is an alternative, more
+readable way to construct (possibly unicode) strings instead of
+interpolating characters, as in C<"\x{1}\x{2}\x{3}\x{4}">.
 
-These "dotted tuples" are dual-valued.  They are both strings of utf8
-characters, and floating point numbers.  Thus v1.2.3.4 has the string
-value C<"\x{1}\x{2}\x{3}\x{4}"> and the numeric value 1.002_003_004.
-As another example, v5.5.640 has the string value C<"\x{5}\x{5}\x{280}">
-(remember 280 hexadecimal is 640 decimal) and the numeric value
-5.005_64.
+Strings written in this form are also useful to represent version "numbers".
+It is easy to compare such version "numbers" (which are really just plain
+strings) using any of the usual string comparison operators C<eq>, C<ne>,
+C<lt>, C<gt>, etc., or perform bitwise string operations on them using C<|>,
+C<&>, etc.
 
 In conjunction with the new C<$^V> magic variable (which contains
-the perl version in this format), such literals can be used to
-check if you're running a particular version of Perl.
+the perl version as a string), such literals can be used as a readable way
+to check if you're running a particular version of Perl:
 
+    # this will parse in older versions of Perl also
     if ($^V and $^V gt v5.5.640) {
-        # new style version numbers are supported
+        # new features supported
     }
 
-C<require> and C<use> also support such literals:
+C<require> and C<use> also have some special magic to support such literals.
+They will be interpreted as a version rather than as a module name:
 
-    require v5.6.0;	# croak if $^V lt v5.6.0
-    use v5.6.0;		# same, but croaks at compile-time
+    require v5.6.0;		# croak if $^V lt v5.6.0
+    use v5.6.0;			# same, but croaks at compile-time
 
-C<sprintf> and C<printf> support the Perl-specific format type C<%v>
-to print arbitrary strings as dotted tuples.
+Also, C<sprintf> and C<printf> support the Perl-specific format flag C<%v>
+to print ordinals of characters in arbitrary strings:
 
-    printf "v%v", $^V;	# prints current version, such as "v5.5.650"
+    printf "v%vd", $^V;		# prints current version, such as "v5.5.650"
+    printf "%*vX", ":", $addr;	# formats IPv6 address
+    printf "%*vb", "", $bits;	# displays bitstring as contiguous 0's and 1's
+
+See L<perlop/"Strings of Character"> for additional information.
 
 =head2 Weak references
 
@@ -851,9 +861,12 @@ only during normal running are warranted.  See L<perlvar>.
 
 =head2 New variable $^V contains Perl version in v5.6.0 format
 
-C<$^V> contains the Perl version number as a version tuple that
-can be used in string or numeric comparisons.  See
-C<Support for version tuples> for an example.
+C<$^V> contains the Perl version number as a string composed of
+characters whose ordinals match the version numbers, so that it may
+be used in string comparisons.
+
+See C<Support for strings represented as a vector of ordinals> for an
+example.
 
 =head2 Optional Y2K warnings
 
@@ -1387,6 +1400,11 @@ For other details, see L<Benchmark>.
 
 The Devel::Peek module provides access to the internal representation
 of Perl variables and data.  It is a data debugging tool for the XS programmer.
+
+=item English
+
+$PERL_VERSION now stands for C<$^V> (a string value) rather than for C<$]>
+(a numeric value).
 
 =item ExtUtils::MakeMaker
 

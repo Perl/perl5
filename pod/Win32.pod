@@ -132,8 +132,8 @@ same value.
 
 =item Win32::GetLongPathName(PATHNAME)
 
-[CORE] Returns a representaion of PATHNAME comprised of longname
-compnents (if any).  The result may not necessarily be longer
+[CORE] Returns a representaion of PATHNAME composed of longname
+components (if any).  The result may not necessarily be longer
 than PATHNAME.  No attempt is made to convert PATHNAME to the
 absolute path.  Compare with Win32::GetShortPathName and
 Win32::GetFullPathName.
@@ -156,7 +156,7 @@ for Windows NT. In scalar context it returns just the ID.
 
 =item Win32::GetShortPathName(PATHNAME)
 
-[CORE] Returns a representation of PATHNAME comprised only of
+[CORE] Returns a representation of PATHNAME composed only of
 short (8.3) path components.  The result may not necessarily be
 shorter than PATHNAME.  Compare with Win32::GetFullPathName and
 Win32::GetLongPathName.

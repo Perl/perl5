@@ -36,6 +36,11 @@ Camps is very,
 entertaining.
 And they say we'll have some fun if it stops raining!
 
+Okay, now use a non-empty blank line to terminate a paragraph and make
+sure we get a warning.
+	                                     	
+The above blank line contains tabs and spaces only
+
 =head1 Additional tests
 
 =head2 item without over

@@ -29,6 +29,7 @@ repair()
      -e 's/byteload/ByteLoader/'\
      -e 's=devel/peek=Devel/Peek='\
      -e 's=devel/dprof=Devel/DProf='\
+     -e 's=sys/sys=Sys/Sys='\
      -e 's=file/=='\
      -e 's=File/=='\
      -e 's=glob=='\

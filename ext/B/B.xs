@@ -95,6 +95,11 @@ cc_opclass(pTHX_ OP *o)
     if (o->op_type == OP_SASSIGN)
 	return ((o->op_private & OPpASSIGN_BACKWARDS) ? OPc_UNOP : OPc_BINOP);
 
+#ifdef USE_ITHREADS
+    if (o->op_type == OP_GV || o->op_type == OP_GVSV || o->op_type == OP_AELEMFAST)
+	return OPc_PADOP;
+#endif
+
     switch (PL_opargs[o->op_type] & OA_CLASS_MASK) {
     case OA_BASEOP:
 	return OPc_BASEOP;
@@ -685,8 +690,8 @@ PMOP_precomp(o)
 	if (rx)
 	    sv_setpvn(ST(0), rx->precomp, rx->prelen);
 
-#define SVOP_sv(o)	cSVOPx_sv(o)
-#define SVOP_gv(o)	cGVOPx_gv(o)
+#define SVOP_sv(o)	cSVOPo->op_sv
+#define SVOP_gv(o)	((GV*)cSVOPo->op_sv)
 
 MODULE = B	PACKAGE = B::SVOP		PREFIX = SVOP_
 

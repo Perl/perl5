@@ -57,7 +57,7 @@ print "Extracting $file (with variable substitutions)\n";
 # In this section, perl variables will be expanded during extraction.
 # You can use $Config{...} to use Configure variables.
 
-my $extract_version = sprintf("v%v", $^V);
+my $extract_version = sprintf("v%vd", $^V);
 
 print OUT <<"!GROK!THIS!";
 $Config{startperl}
@@ -133,7 +133,7 @@ my( $file, $usefile, $cc, $address, $perlbug, $testaddress, $filename,
     $subject, $from, $verbose, $ed, $outfile, $Is_MacOS,
     $fh, $me, $Is_MSWin32, $Is_VMS, $msg, $body, $andcc, %REP, $ok);
 
-my $perl_version = $^V ? sprintf("v%v", $^V) : $];
+my $perl_version = $^V ? sprintf("v%vd", $^V) : $];
 
 my $config_tag2 = "$perl_version - $Config{cf_time}";
 

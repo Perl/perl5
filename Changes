@@ -95,6 +95,193 @@ Version v5.5.660        Development release working toward v5.6
 ----------------
 
 ____________________________________________________________________________
+[  5198] By: gsar                                  on 2000/02/22  10:45:54
+        Log: PodParser-1.093 update (from Brad Appleton's site)
+     Branch: perl
+	   ! lib/Pod/Checker.pm lib/Pod/Find.pm lib/Pod/InputObjects.pm
+	   ! lib/Pod/ParseUtils.pm lib/Pod/Parser.pm lib/Pod/Select.pm
+	   ! lib/Pod/Usage.pm t/pod/poderrs.t t/pod/poderrs.xr
+	   ! t/pod/special_seqs.t t/pod/special_seqs.xr
+____________________________________________________________________________
+[  5197] By: gsar                                  on 2000/02/22  10:24:13
+        Log: integrate cfgperl contents into mainline, update Changes
+     Branch: perl
+	   ! Changes pod/perlhist.pod
+	  !> Configure Porting/Glossary Porting/config.sh Porting/config_H
+	  !> config_h.SH hints/solaris_2.sh malloc.c perl.h
+	  !> pod/perldelta.pod
+____________________________________________________________________________
+[  5196] By: gsar                                  on 2000/02/22  10:10:36
+        Log: dos-djgpp updates (from Laszlo Molnar <laszlo.molnar@eth.ericsson.se>)
+     Branch: perl
+	   ! djgpp/config.over djgpp/configure.bat djgpp/djgppsed.sh
+	   ! t/lib/glob-basic.t t/lib/glob-case.t t/lib/glob-global.t
+	   ! t/lib/glob-taint.t t/lib/io_unix.t
+____________________________________________________________________________
+[  5195] By: gsar                                  on 2000/02/22  10:01:49
+        Log: s/undef/NO_INIT/g in change#5183
+     Branch: perl
+	   ! lib/ExtUtils/xsubpp pod/perlxs.pod
+____________________________________________________________________________
+[  5194] By: gsar                                  on 2000/02/22  09:44:07
+        Log: perlipc bug (spotted by Ben Low)
+     Branch: perl
+	   ! pod/perlipc.pod
+____________________________________________________________________________
+[  5193] By: gsar                                  on 2000/02/22  09:38:58
+        Log: EPOC port update (from Olaf Flebbe <O.Flebbe@science-computing.de>)
+     Branch: perl
+	   ! README.epoc epoc/config.sh epoc/createpkg.pl perl.c
+____________________________________________________________________________
+[  5192] By: gsar                                  on 2000/02/22  09:26:06
+        Log: improvements for high-bit text literals (from Gisle Aas)
+     Branch: perl
+	   ! t/pragma/warn/doop t/pragma/warn/pp t/pragma/warn/sv
+	   ! t/pragma/warn/toke t/pragma/warn/utf8 toke.c
+____________________________________________________________________________
+[  5191] By: gsar                                  on 2000/02/22  07:35:47
+        Log: allow C<print v10>, $h{v13.10} etc.
+     Branch: perl
+	   ! t/op/ver.t toke.c
+____________________________________________________________________________
+[  5190] By: gsar                                  on 2000/02/22  05:35:27
+        Log: adjust for lost fp precision in require version check
+     Branch: perl
+	   ! pp_ctl.c t/comp/require.t
+____________________________________________________________________________
+[  5189] By: jhi                                   on 2000/02/22  05:14:35
+        Log: Check the alignment of long doubles if they are to be used;
+             regen Configure.
+     Branch: cfgperl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH
+     Branch: metaconfig
+	   ! U/compline/alignbytes.U
+____________________________________________________________________________
+[  5188] By: gsar                                  on 2000/02/22  04:45:57
+        Log: use same treatment for EINVAL as for ETIMEDOUT
+     Branch: perl
+	   ! ext/IO/lib/IO/Socket/INET.pm
+____________________________________________________________________________
+[  5187] By: gsar                                  on 2000/02/21  23:15:12
+        Log: type mismatch
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  5186] By: gsar                                  on 2000/02/21  21:10:26
+        Log: remove dual-valueness of v-strings (i.e., they are pure strings
+             now); avoid the word "tuple" to describe strings represented as
+             character ordinals; usurp $PERL_VERSION for $^V as suggested by
+             Larry, deprecate $] ; adjust the documentation and testsuite
+             accordingly
+     Branch: perl
+	   ! MANIFEST lib/English.pm op.c pod/perldelta.pod
+	   ! pod/perlfunc.pod pod/perlop.pod pod/perlvar.pod
+	   ! t/comp/require.t t/op/ver.t toke.c
+____________________________________________________________________________
+[  5185] By: jhi                                   on 2000/02/21  20:36:05
+        Log: detypo
+     Branch: cfgperl
+	   ! perl.h
+____________________________________________________________________________
+[  5184] By: gsar                                  on 2000/02/21  18:37:38
+        Log: clarify "use Module VERSION LIST" (from Robin Barker)
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  5183] By: gsar                                  on 2000/02/21  18:31:42
+        Log: allow optional XSUB parameters without being forced to use a
+             default (from Hugo van der Sanden)
+     Branch: perl
+	   ! lib/ExtUtils/xsubpp pod/perlfunc.pod pod/perlxs.pod
+____________________________________________________________________________
+[  5182] By: jhi                                   on 2000/02/21  18:22:47
+        Log: Add Solaris LP64 notes. 
+     Branch: cfgperl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[  5181] By: gsar                                  on 2000/02/21  16:53:39
+        Log: generalize "%v" format into a flag for any integral format type:
+             "%vd", "%v#o", "%*vX", etc are allowed
+     Branch: perl
+	   ! perl.c pod/perldelta.pod pod/perlfunc.pod sv.c t/op/ver.t
+	   ! utils/perlbug.PL
+____________________________________________________________________________
+[  5180] By: gsar                                  on 2000/02/21  07:11:00
+        Log: detypo
+     Branch: perl
+	   ! ext/B/B.xs
+____________________________________________________________________________
+[  5179] By: gsar                                  on 2000/02/21  07:08:38
+        Log: undo accidental delete
+     Branch: perl
+	   ! ext/B/B.pm ext/B/B.xs
+____________________________________________________________________________
+[  5178] By: gsar                                  on 2000/02/21  07:02:16
+        Log: get Compiler "working" under useithreads
+     Branch: perl
+	   ! ext/B/B.pm ext/B/B.xs ext/B/B/C.pm ext/B/B/CC.pm
+	   ! ext/B/B/Deparse.pm ext/B/B/Xref.pm
+____________________________________________________________________________
+[  5177] By: jhi                                   on 2000/02/21  03:16:24
+        Log: Thou shalt not printf longs with %d.
+     Branch: cfgperl
+	   ! malloc.c
+____________________________________________________________________________
+[  5176] By: jhi                                   on 2000/02/21  01:37:35
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  +> t/pragma/warn/9enabled
+	  !> (integrate 63 files)
+____________________________________________________________________________
+[  5175] By: gsar                                  on 2000/02/21  00:25:00
+        Log: misplaced braces
+     Branch: perl
+	   ! malloc.c
+____________________________________________________________________________
+[  5174] By: gsar                                  on 2000/02/21  00:09:16
+        Log: more malloc.c tweaks for change#5070
+     Branch: perl
+	   ! malloc.c
+____________________________________________________________________________
+[  5173] By: gsar                                  on 2000/02/21  00:01:17
+        Log: malloc.c fixups in change#5170 need to fetch thx pointer
+     Branch: perl
+	   ! malloc.c
+____________________________________________________________________________
+[  5172] By: gsar                                  on 2000/02/20  23:52:39
+        Log: missing file in change#5170
+     Branch: perl
+	   + t/pragma/warn/9enabled
+____________________________________________________________________________
+[  5171] By: gsar                                  on 2000/02/20  23:49:17
+        Log: skip conditionally defined symbols in change#5162
+     Branch: perl
+	   ! makedef.pl
+____________________________________________________________________________
+[  5170] By: gsar                                  on 2000/02/20  22:58:09
+        Log: lexical warnings update, ability to inspect bitmask in calling
+             scope, among other things (from Paul Marquess)
+     Branch: perl
+	   ! MANIFEST lib/warnings.pm malloc.c mg.c op.c pod/perldiag.pod
+	   ! pod/perlfunc.pod pod/perllexwarn.pod pp.c pp_ctl.c pp_hot.c
+	   ! regcomp.c regexec.c sv.c t/op/substr.t t/pragma/warn/op
+	   ! t/pragma/warn/pp t/pragma/warn/pp_ctl t/pragma/warn/pp_hot
+	   ! t/pragma/warn/regcomp t/pragma/warn/regexec t/pragma/warn/sv
+	   ! t/pragma/warn/toke toke.c warnings.h warnings.pl
+____________________________________________________________________________
+[  5169] By: gsar                                  on 2000/02/20  22:22:28
+        Log: windows fixes for virtualizing child std{in,out,err} handles,
+             attempts to lock uninitialized critical section in files that
+             were never explicitly opened (from Doug Lankshear)
+     Branch: perl
+	   ! iperlsys.h win32/perlhost.h win32/win32.c win32/win32.h
+____________________________________________________________________________
+[  5168] By: gsar                                  on 2000/02/20  20:19:11
+        Log: update Changes, credits
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
 [  5167] By: gsar                                  on 2000/02/20  18:54:27
         Log: avoid reading out-of-bounds memory when matching against reference
      Branch: perl

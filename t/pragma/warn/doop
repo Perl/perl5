@@ -1,29 +1,6 @@
-  doop.c	AOK
-
-  \x%s will produce malformed UTF-8 character; use \x{%s} for that
-
-
-__END__
 # doop.c
 use utf8 ;
 $_ = "\x80  \xff" ;
 chop ;
 EXPECT
 ########
-# doop.c
-BEGIN {
-    if (ord("\t") == 5) {
-        print "SKIPPED\n# Character codes differ on ebcdic machines.";
-        exit 0;
-    }
-}
-use warnings 'utf8'  ;
-use utf8 ;
-$_ = "\x80  \xff" ;
-chop ;
-no warnings 'utf8'  ;
-$_ = "\x80  \xff" ;
-chop ;
-EXPECT
-\x80 will produce malformed UTF-8 character; use \x{80} for that at - line 10.
-\xff will produce malformed UTF-8 character; use \x{ff} for that at - line 10.
