@@ -184,10 +184,13 @@ foreach $expect (@left) {
 }
 
 ok (shutdown(LEFT, 1), "shutdown left for writing");
+
 # eof uses buffering. eof is indicated by a sysread of zero.
 # but for a datagram socket there's no way it can know nothing will ever be
 # sent
-{
+SKIP: {
+  skip "$^O does length 0 udp reads", 2 if ($^O eq 'os390');
+
   my $alarmed = 0;
   local $SIG{ALRM} = sub { $alarmed = 1; };
   print "# Approximate forever as 3 seconds. Wait 'forever'...\n";
@@ -197,6 +200,7 @@ ok (shutdown(LEFT, 1), "shutdown left for writing");
       "read on right should be interrupted");
   is ($alarmed, 1, "alarm should have fired");
 }
+
 alarm 30;
 
 #ok (eof RIGHT, "right is at EOF");
