@@ -551,7 +551,7 @@ MAGIC *mg;
 	}
 #endif
 	sv_setpv(sv,buf);
-	SvNOK_on(sv);	/* what a wonderful hack! */
+	SvIOK_on(sv);	/* what a wonderful hack! */
 	break;
     case '*':
 	break;
