@@ -6,7 +6,7 @@ perlhist - the Perl history records
 
 =for RCS
 #
-# $Id: perlhist.pod,v 1.46 1998/08/03 08:43:36 jhi Exp $
+# $Id: perlhist.pod,v 1.48 1998/08/03 08:50:12 jhi Exp $
 #
 =end RCS
 
@@ -32,7 +32,7 @@ Perl history in brief, by Larry Wall:
 
 Larry Wall, Andy Dougherty, Tom Christiansen, Charles Bailey, Nick
 Ing-Simmons, Chip Salzenberg, Tim Bunce, Malcolm Beattie, Gurusamy
-Sarathy.
+Sarathy, Graham Barr.
 
 =head2 PUMPKIN?
 
@@ -285,7 +285,6 @@ the strings?).
           5.004_66      1998-May-29
  Sarathy  5.004_67      1998-Jun-15
           5.004_68      1998-Jun-23
-          5.004_68      1998-Jun-23
           5.004_69      1998-Jun-29
           5.004_70      1998-Jul-06
           5.004_71      1998-Jul-09
@@ -293,10 +292,16 @@ the strings?).
           5.004_73      1998-Jul-13
           5.004_74      1998-Jul-14     5.005 beta candidate.
           5.004_75      1998-Jul-15     5.005 beta1.
-          5.004_76      1998-Jul-21
-          5.005         1998-Jul-22
-          5.005_01      1998-Jul-27
-          5.005_012-T1  1998-Aug-02
+          5.004_76      1998-Jul-21     5.005 beta2.
+          5.005         1998-Jul-22     Oneperl.
+
+ Sarathy  5.005_01      1998-Jul-27     The 5.005 maintenance track.
+          5.005_02-T1   1998-Aug-02
+          5.005_02-T2   1998-Aug-05
+          5.005_02      1998-Aug-08
+ Graham   5.005_03      1998-           
+
+ Sarathy  5.005_50      1998-Jul-26     The 5.006 development track.
 
 =head2 SELECTED RELEASE SIZES
 
@@ -339,7 +344,7 @@ explained below.
  5.004_70       1863  75   1456 154    675  92    494 194   1809  60
  5.004_73       1874  76   1467 152    762 102    506 196   1883  61
  5.004_75       1877  76   1467 152    770 103    508 196   1896  62
- 5.005		1896  76   1469 152    795 103    509 197   1945  63
+ 5.005          1896  76   1469 152    795 103    509 197   1945  63
 
 The "core"..."doc" mean the following files from the Perl source code
 distribution.  The glob notation ** means recursively, (.) means
@@ -506,7 +511,7 @@ context diff output format.
 Jarkko Hietaniemi <F<jhi@iki.fi>>.
 
 Thanks to the collective memory of the Perlfolk.  In addition to the
-Keepers of the Pumpkin also Alan Champion, Andreas Knig, John
+Keepers of the Pumpkin also Alan Champion, Andreas König, John
 Macdonald, Matthias Neeracher, Michael Peppler, Randal Schwartz, and
 Paul D. Smith sent corrections and additions.
 
