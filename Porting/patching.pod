@@ -272,11 +272,15 @@ This should work for most patches:
 =item Mailers
 
 Please, please, please (get the point? 8-) don't use a mailer that
-word wraps your patch or that MIME encodes it.  Both of these leave
-the patch essentially worthless to the maintainer.
+word wraps your patch.  This leaves the patch essentially worthless
+to the maintainers.
 
-If you have no choice in mailers and no way to get your hands on a
-better one there is, of course, a perl solution.  Just do this:
+Unfortunately many mailers word wrap the main text of messages, but
+luckily you can usually send your patches as email attachments without
+them getting "helpfully" word wrapped.
+
+If you have no choice in mailers and no way to get your hands on
+a better one, there is, of course, a Perl solution.  Just do this:
 
       perl -ne 'print pack("u*",$_)' patch > patch.uue
 
