@@ -396,7 +396,6 @@
 #define PL_sv_count		(vTHX->Isv_count)
 #define PL_sv_no		(vTHX->Isv_no)
 #define PL_sv_objcount		(vTHX->Isv_objcount)
-#define PL_sv_placeholder	(vTHX->Isv_placeholder)
 #define PL_sv_root		(vTHX->Isv_root)
 #define PL_sv_undef		(vTHX->Isv_undef)
 #define PL_sv_yes		(vTHX->Isv_yes)
@@ -701,7 +700,6 @@
 #define PL_Isv_count		PL_sv_count
 #define PL_Isv_no		PL_sv_no
 #define PL_Isv_objcount		PL_sv_objcount
-#define PL_Isv_placeholder	PL_sv_placeholder
 #define PL_Isv_root		PL_sv_root
 #define PL_Isv_undef		PL_sv_undef
 #define PL_Isv_yes		PL_sv_yes
@@ -907,6 +905,7 @@
 #define PL_patleave		(PL_Vars.Gpatleave)
 #define PL_sh_path		(PL_Vars.Gsh_path)
 #define PL_sigfpe_saved		(PL_Vars.Gsigfpe_saved)
+#define PL_sv_placeholder	(PL_Vars.Gsv_placeholder)
 #define PL_thr_key		(PL_Vars.Gthr_key)
 
 #else /* !PERL_GLOBAL_STRUCT */
@@ -922,6 +921,7 @@
 #define PL_Gpatleave		PL_patleave
 #define PL_Gsh_path		PL_sh_path
 #define PL_Gsigfpe_saved	PL_sigfpe_saved
+#define PL_Gsv_placeholder	PL_sv_placeholder
 #define PL_Gthr_key		PL_thr_key
 
 #endif /* PERL_GLOBAL_STRUCT */

@@ -2208,11 +2208,7 @@ static int store_hash(stcxt_t *cxt, HV *hv)
                             = (((hash_flags & SHV_RESTRICTED)
                                 && SvREADONLY(val))
                                ? SHV_K_LOCKED : 0);
-#ifdef PL_sv_placeholder
                         if (val == &PL_sv_placeholder)
-#else
-                        if (val == &PL_sv_undef)
-#endif
                             flags |= SHV_K_PLACEHOLDER;
 
 			keyval = SvPV(key, keylen_tmp);
@@ -2308,11 +2304,7 @@ static int store_hash(stcxt_t *cxt, HV *hv)
                             = (((hash_flags & SHV_RESTRICTED)
                                 && SvREADONLY(val))
                                              ? SHV_K_LOCKED : 0);
-#ifdef PL_sv_placeholder
                         if (val == &PL_sv_placeholder)
-#else
-                        if (val == &PL_sv_undef)
-#endif
                             flags |= SHV_K_PLACEHOLDER;
 
                         hek = HeKEY_hek(he);
