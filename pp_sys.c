@@ -1493,16 +1493,16 @@ PP(pp_sysread)
 	if (bufsize >= 256)
 	    bufsize = 255;
 #endif
-#ifdef OS2	/* At least Warp3+IAK: only the first byte of bufsize set */
-	if (bufsize >= 256)
-	    bufsize = 255;
-#endif
 	buffer = SvGROW(bufsv, length+1);
 	/* 'offset' means 'flags' here */
 	length = PerlSock_recvfrom(PerlIO_fileno(IoIFP(io)), buffer, length, offset,
 			  (struct sockaddr *)namebuf, &bufsize);
 	if (length < 0)
 	    RETPUSHUNDEF;
+#ifdef EPOC
+	/* Bogus return without padding */
+	bufsize = sizeof (struct sockaddr_in);
+#endif
 	SvCUR_set(bufsv, length);
 	*SvEND(bufsv) = '\0';
 	(void)SvPOK_only(bufsv);
