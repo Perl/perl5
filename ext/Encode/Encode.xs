@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 1.53 2003/02/06 01:52:11 dankogai Exp dankogai $
+ $Id: Encode.xs,v 1.54 2003/02/20 14:42:34 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -74,7 +74,7 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
     STRLEN dlen = SvLEN(dst)-1;
     int code = 0;
     STRLEN trmlen = 0;
-    U8 *trm = term ? SvPV(term, trmlen) : NULL;
+    U8 *trm = term ? (U8*) SvPV(term, trmlen) : NULL;
 
     if (offset) {
       s += *offset;

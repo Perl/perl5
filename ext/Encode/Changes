@@ -1,9 +1,27 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.87 2003/02/06 01:52:11 dankogai Exp dankogai $
+# $Id: Changes,v 1.88 2003/02/20 14:42:34 dankogai Exp dankogai $
 #
+$Revision: 1.88 $ $Date: 2003/02/20 14:42:34 $
+! Encode.xs
+  one signedness nit for Encode by jhi
+  <200302161933.h1GJX876018710@kosh.hut.fi>
+! ucm/viscii.ucm
+  VISCII map was incorrect; fixed by Sadahiro-san
+  Message-Id: <20030216120828.47D3.BQW10602@nifty.com>
+! t/enc_eucjp.t t/enc_utf8.t AUTHORS
+  You can't unlink files that are opened in cygwin but the last
+  file handle opened in t/enc_*.t left open.  Patch submitted
+  by Yitzchak and he was added to AUTHORS.
+  Message-Id: <iN0Q+gzkgmZN092yn@efn.org>
+! t/CJKT.t
+  now works with 'LC_ALL=en_US.UTF-8 PERL_UTF8_LOCALE=1'
+  Message-Id: <20030206104513.GA11081@kosh.hut.fi>  
+! Unicode/Unicode.xs
+  For 1.88: Unicode.xs =~ s/regog/recog/ -- jhi
+  Message-Id: <20030206045153.GA6826@kosh.hut.fi>
 
-$Revision: 1.87 $ $Date: 2003/02/06 01:52:11 $
+1.87 2003/02/06 01:52:11
 ! AUTHORS
   * Inaba "Sensei" Hirohito added (I thought I have done so a long 
   ago but apparently I did not).
