@@ -21,7 +21,7 @@
 #include <unistd.h>
 #endif
 
-#if !defined(STANDARD_C) && !defined(HAS_GETENV_PROTOTYPE)
+#if !defined(STANDARD_C) && !defined(HAS_GETENV_PROTOTYPE) && !defined(PERL_MICRO)
 char *getenv (char *); /* Usually in <stdlib.h> */
 #endif
 

@@ -413,11 +413,11 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #   include <unistd.h>
 #endif
 
-#if defined(HAS_SYSCALL) && !defined(HAS_SYSCALL_PROTO)
+#if defined(HAS_SYSCALL) && !defined(HAS_SYSCALL_PROTO) && !defined(PERL_MICRO)
 int syscall(int, ...);
 #endif
 
-#if defined(HAS_USLEEP) && !defined(HAS_USLEEP_PROTO)
+#if defined(HAS_USLEEP) && !defined(HAS_USLEEP_PROTO) && !defined(PERL_MICRO)
 int usleep(unsigned int);
 #endif
 
@@ -803,7 +803,7 @@ int sockatmark(int);
  * in the face of half-implementations.)
  */
 
-#ifdef I_SYSMODE
+#if defined(I_SYSMODE) && !defined(PERL_MICRO)
 #include <sys/mode.h>
 #endif
 
@@ -1285,7 +1285,7 @@ typedef NVTYPE NV;
 #    define Perl_fp_class_zero(x)	(Perl_fp_class(x)==FP_CLASS_NZERO||Perl_fp_class(x)==FP_CLASS_PZERO)
 #endif
 
-#if !defined(Perl_fp_class) && defined(HAS_FP_CLASS)
+#if !defined(Perl_fp_class) && defined(HAS_FP_CLASS) && !defined(PERL_MICRO)
 #    include <math.h>
 #    if !defined(FP_SNAN) && defined(I_FP_CLASS)
 #        include <fp_class.h>

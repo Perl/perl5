@@ -495,6 +495,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    (void)PerlIO_close(fp);
 	    goto say_false;
 	}
+#ifndef PERL_MICRO
 	if (S_ISSOCK(PL_statbuf.st_mode))
 	    IoTYPE(io) = IoTYPE_SOCKET;	/* in case a socket was passed in to us */
 #ifdef HAS_SOCKET
@@ -515,6 +516,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		IoTYPE(io) = IoTYPE_SOCKET; /* some OS's return 0 on fstat()ed socket */
 				/* but some return 0 for streams too, sigh */
 	}
+#endif /* !PERL_MICRO */
 #endif
     }
     if (saveifp) {		/* must use old fp? */
