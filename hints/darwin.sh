@@ -58,11 +58,14 @@ usenm='true';
 # pace with CPU speed over time (on any platform), this is probably a
 # reasonable assertion.
 if [ -z "${optimize}" ]; then
-  case "$osvers" in
-    [12345].*) optimize='-O3' ;;
-    *) optimize='-Os' ;;
+  case "`${cc:-gcc} -v 2>&1`" in
+    *"gcc version 3."*) optimize='-Os' ;;
+    *) optimize='-O3' ;;
   esac
+else
+  optimize='-O3'
 fi
+
 
 # -pipe: makes compilation go faster.
 # -fno-common because common symbols are not allowed in MH_DYLIB
