@@ -734,6 +734,7 @@ PP(pp_binmode)
     if (!(io = GvIO(gv)) || !(fp = IoIFP(io))) {
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 	    report_evil_fh(gv, io, PL_op->op_type);
+	SETERRNO(EBADF,RMS_IFI);
         RETPUSHUNDEF;
     }
 
@@ -1177,6 +1178,7 @@ PP(pp_getc)
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED)
 		&& (!io || (!IoIFP(io) && IoTYPE(io) != IoTYPE_WRONLY)))
 	    report_evil_fh(gv, io, PL_op->op_type);
+	SETERRNO(EBADF,RMS_IFI);
 	RETPUSHUNDEF;
     }
     TAINT;
@@ -1574,8 +1576,12 @@ PP(pp_sysread)
     else
 	offset = 0;
     io = GvIO(gv);
-    if (!io || !IoIFP(io))
+    if (!io || !IoIFP(io)) {
+	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+	    report_evil_fh(gv, io, PL_op->op_type);
+	SETERRNO(EBADF,RMS_IFI);
 	goto say_undef;
+    }
     if ((fp_utf8 = PerlIO_isutf8(IoIFP(io))) && !IN_BYTES) {
 	buffer = SvPVutf8_force(bufsv, blen);
 	/* UTF8 may not have been set if they are all low bytes */
@@ -1816,6 +1822,7 @@ PP(pp_send)
 	retval = -1;
 	if (ckWARN(WARN_CLOSED))
 	    report_evil_fh(gv, io, PL_op->op_type);
+	SETERRNO(EBADF,RMS_IFI);
 	goto say_undef;
     }
 

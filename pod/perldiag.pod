@@ -3099,6 +3099,14 @@ are outside the range which can be represented by integers internally.
 One possible workaround is to force Perl to use magical string increment
 by prepending "0" to your numbers.
 
+=item read() on closed filehandle %s
+
+(W closed) You tried to read from a closed filehandle.
+
+=item read() on unopened filehandle %s
+
+(W unopened) You tried to read from a filehandle that was never opened.
+
 =item readline() on closed filehandle %s
 
 (W closed) The filehandle you're reading from got itself closed sometime
@@ -3572,6 +3580,14 @@ or "my $var" or "our $var".
 =item %s syntax OK
 
 (F) The final summary message when a C<perl -c> succeeds.
+
+=item sysread() on closed filehandle %s
+
+(W closed) You tried to read from a closed filehandle.
+
+=item sysread() on unopened filehandle %s
+
+(W unopened) You tried to read from a filehandle that was never opened.
 
 =item System V %s is not implemented on this machine
 
