@@ -3677,7 +3677,25 @@ PP(pp_unpack)
 #ifdef __osf__
                     /* Without the dummy below unpack("i", pack("i",-1))
                      * return 0xFFffFFff instead of -1 for Digital Unix V4.0
-                     * cc with optimization turned on */
+                     * cc with optimization turned on.
+		     *
+		     * The bug was detected in
+		     * DEC C V5.8-009 on Digital UNIX V4.0 (Rev. 1091) (V4.0E)
+		     * with optimization (-O4) turned on.
+		     * DEC C V5.2-040 on Digital UNIX V4.0 (Rev. 564) (V4.0B)
+		     * does not have this problem even with -O4.
+		     *
+		     * This bug was reported as DECC_BUGS 1431
+		     * and tracked internally as GEM_BUGS 7775.
+		     *
+		     * The bug is fixed in
+		     * Tru64 UNIX V5.0:      Compaq C V6.1-006 or later
+		     * UNIX V4.0F support:   DEC C V5.9-006 or later
+		     * UNIX V4.0E support:   DEC C V5.8-011 or later
+		     * and also in DTK.
+		     *
+		     * See also few lines later for the same bug.
+		     */
                     (aint) ?
 		    	sv_setiv(sv, (IV)aint) :
 #endif
@@ -3709,12 +3727,8 @@ PP(pp_unpack)
 		    sv = NEWSV(41, 0);
 #ifdef __osf__
                     /* Without the dummy below unpack("I", pack("I",0xFFFFFFFF))
-                     * returns 1.84467440737096e+19 instead of 0xFFFFFFFF for
-		     * DEC C V5.8-009 on Digital UNIX V4.0 (Rev. 1091) (aka V4.0D)
-		     * with optimization turned on.
-		     * (DEC C V5.2-040 on Digital UNIX V4.0 (Rev. 564) (aka V4.0B)
-		     * does not have this problem even with -O4)
-		     */
+                     * returns 1.84467440737096e+19 instead of 0xFFFFFFFF.
+		     * See details few lines earlier. */
                     (auint) ?
 		        sv_setuv(sv, (UV)auint) :
 #endif
