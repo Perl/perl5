@@ -222,6 +222,8 @@ OPTIMIZE = $optimize
 
 EXTRAS = $extras
 
+INSTALLPREFIXEXP = $prefix
+
 !GROK!THIS!
 # not used by Makefile but by installperl;
 # mentioned here so that metaconfig picks these up
@@ -303,7 +305,7 @@ lintflags = -hbvxac
 
 .PHONY: all compile translators utilities
 
-all: $(FIRSTMAKEFILE) miniperl extra.pods $(private) $(public) $(dynamic_ext) $(nonxs_ext)
+all: $(FIRSTMAKEFILE) miniperl extra.pods $(private) $(public) $(dynamic_ext) $(nonxs_ext) extras.make
 	@echo " ";
 	@echo "	Everything is up to date. 'make test' to run test suite."
 
@@ -662,7 +664,23 @@ extra.pods: miniperl
 	    cd pod ; $(LNS) ../$$x "perl"$$nx".pod" ; cd .. ; \
 	    echo "pod/perl"$$nx".pod" >> extra.pods ; \
 	done
+	-@rm -f pod/perlvms.pod
 	-@test -f vms/perlvms.pod && cd pod && $(LNS) ../vms/perlvms.pod perlvms.pod && cd .. && echo "pod/perlvms.pod" >> extra.pods
+
+extras.prep: perl
+	@echo "CPAN needs to be configured..."
+	@echo
+	-@test -f extras.lst || touch extras.lst
+
+extras.make: extras.prep
+	$(LDLIBPTH) PATH=`pwd`:`pwd`/pod:${PATH} ./perl -Ilib -MCPAN -e 'make(@ARGV)' `cat extras.lst`
+
+extras.test: extras.prep
+	$(LDLIBPTH) PATH=`pwd`:`pwd`/pod:${PATH} ./perl -Ilib -MCPAN -e 'test(@ARGV)' `cat extras.lst`
+
+extras.install: extras.prep
+	-@test -f extras.lst || touch extras.lst
+	$(LDLIBPTH) PATH=`pwd`:`pwd`/pod:${PATH} ./perl -Ilib -MCPAN -e 'install(@ARGV)' `cat extras.lst`
 
 .PHONY: install install-strip install-all install-verbose install-silent \
 	no-install install.perl install.man installman install.html installhtml
@@ -682,7 +700,7 @@ install-silent:
 no-install:
 	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS) INSTALLFLAGS=-n
 
-install.perl:	all installperl extras.lst
+install.perl:	all installperl
 	if [ -n "$(COMPILE)" ]; \
 	then \
 		cd utils; $(MAKE) compile; \
@@ -691,6 +709,7 @@ install.perl:	all installperl extras.lst
 	else :; \
 	fi
 	$(LDLIBPTH) ./perl installperl $(INSTALLFLAGS) $(STRIPFLAGS)
+	$(MAKE) extras.install
 
 install.man:	all installman
 	$(LDLIBPTH) ./perl installman $(INSTALLFLAGS)
@@ -856,7 +875,7 @@ realclean:	_realcleaner _mopup
 
 _clobber:
 	-@rm -f Cross/run-* Cross/to-* Cross/from-*
-	rm -f config.sh cppstdin Policy.sh
+	rm -f config.sh cppstdin Policy.sh extras.lst
 
 clobber:	_realcleaner _mopup _clobber
 

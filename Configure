@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Jul 30 05:36:10 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Mon Jul 30 06:47:25 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -6766,10 +6766,9 @@ else
 fi
 
 echo " "
-echo "Any extra modules..." >&4
 case "$extras" in
-'') dflt='y';;
-*) dflt='n';;
+'') dflt='n';;
+*) dflt='y';;
 esac
 cat <<EOM
 Perl can be built with extra modules or bundles of modules which
