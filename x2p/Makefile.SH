@@ -120,6 +120,8 @@ run_byacc:	FORCE
 	rm -f a2p.c
 	mv y.tab.c a2p.c
 
+FORCE:
+
 # We don't want to regenerate a2p.c, but it might appear out-of-date
 # after a patch is applied or a new distribution is made.
 a2p.c: a2p.y
