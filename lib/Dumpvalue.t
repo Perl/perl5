@@ -3,6 +3,7 @@
 BEGIN {
 	chdir 't' if -d 't';
 	@INC = '../lib';
+	print "1..0 # skip: EBCDIC\n" if ord('A') == 193;
 }
 
 use vars qw( $foo @bar %baz );
