@@ -4799,8 +4799,6 @@ int ch;
 	*pmfl |= PMf_MULTILINE;
     else if (ch == 's')
 	*pmfl |= PMf_SINGLELINE;
-    else if (ch == 't')
-	*pmfl |= PMf_TAINTMEM;
     else if (ch == 'x')
 	*pmfl |= PMf_EXTENDED;
 }
@@ -4823,7 +4821,7 @@ char *start;
     pm = (PMOP*)newPMOP(OP_MATCH, 0);
     if (multi_open == '?')
 	pm->op_pmflags |= PMf_ONCE;
-    while (*s && strchr("iogcmstx", *s))
+    while (*s && strchr("iogcmsx", *s))
 	pmflag(&pm->op_pmflags,*s++);
     pm->op_pmpermflags = pm->op_pmflags;
 

@@ -1664,6 +1664,7 @@ EXT U32		hints;		/* various compilation flags */
 #define HINT_STRICT_SUBS	0x00000200
 #define HINT_STRICT_VARS	0x00000400
 #define HINT_LOCALE		0x00000800
+#define HINT_RE_TAINT		0x00001000
 
 /**************************************************************************/
 /* This regexp stuff is global since it always happens within 1 expr eval */
