@@ -3,10 +3,9 @@
 
 use lib qw(. ..);
 use Memoize 0.45 qw(memoize unmemoize);
-use Memoize::Storable;
 # $Memoize::Storable::Verbose = 0;
 
-eval {require GDBM_File};
+eval {require Memoize::Storable};
 if ($@) {
   print "1..0\n";
   exit 0;
