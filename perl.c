@@ -560,9 +560,9 @@ void
 perl_free(pTHXx)
 {
 #if defined(PERL_OBJECT)
-    Safefree(this);
+    PerlMem_free(this);
 #else
-    Safefree(aTHXx);
+    PerlMem_free(aTHXx);
 #endif
 }
 
