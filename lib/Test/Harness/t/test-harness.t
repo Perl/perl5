@@ -453,7 +453,9 @@ while (my($test, $expect) = each %samples) {
         is_deeply( {map { $_=>$totals->{$_} } keys %{$expect->{total}}},
                    $expect->{total},
                                                   "$test - totals" );
-        is_deeply( {map { $_=>$failed->{catfile($SAMPLE_TESTS, $test)}{$_} }
+        is_deeply( {map { $_=>$failed->{$^O eq 'macos' ?
+                                        catfile($SAMPLE_TESTS, $test) :
+                                        "$SAMPLE_TESTS/$test"}{$_} }
                     keys %{$expect->{failed}}},
                    $expect->{failed},
                                                   "$test - failed" );
