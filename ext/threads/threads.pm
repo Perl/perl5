@@ -217,7 +217,7 @@ exit from the main thread.
 
 =back
 
-=head1 BUGS / TODO
+=head1 TODO
 
 The current implementation of threads has been an attempt to get
 a correct threading system working that could be built on, 
@@ -228,6 +228,8 @@ also the cost of returning values can be large. These are areas
 were there most likely will be work done to optimize what data
 that needs to be cloned.
 
+=head1 BUGS
+
 =over
 
 =item Parent-Child threads.
@@ -235,8 +237,8 @@ that needs to be cloned.
 On some platforms it might not be possible to destroy "parent"
 threads while there are still existing child "threads".
 
-This will be possibly be fixed in later versions of perl.
-
+This will possibly be fixed in later versions of perl.
+  
 =item tid is I32
 
 The thread id is a 32 bit integer, it can potentially overflow.
