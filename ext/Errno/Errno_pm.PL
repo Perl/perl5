@@ -212,6 +212,40 @@ sub write_errno_pm {
 	close(CPPO);
     }
 
+    # Many of the E constants (including ENOENT, which is being
+    # used in the Perl test suite a lot), are available only as
+    # enums in BeOS, so compiling and executing some code is about
+    # only way to find out what the numeric Evalues are.
+
+    if ($^O eq 'beos') {
+	if (open(C, ">errno.c")) {
+	    my @zero = grep { !$err{$_} } keys %err;
+	    print C <<EOF;
+#include <errno.h>
+#include <stdio.h>
+int main() {
+EOF
+            for (@zero) {
+		print C qq[printf("$_ %d\n", $_);]
+	    }
+            print C "}\n";
+            close C;
+            system("cc -o errno errno.c");
+            unlink("errno.c");
+            if (open(C, "./errno|")) {
+		while (<C>) {
+		    if (/^(\w+) (-?\d+)$/) { $err{$1} = $2 }
+		}
+		close(C);
+	    } else {
+		die "failed to execute ./errno: $!\n";
+	    }
+            unlink("errno");
+        } else {
+	    die "failed to create errno.c: $!\n";
+	}
+    }
+
     # Write Errno.pm
 
     print <<"EDQ";
