@@ -13,7 +13,7 @@ BEGIN {
 }
 
 $| = 1;
-print "1..8\n";
+print "1..10\n";
 
 open(PIPE, "|-") || (exec 'tr', 'YX', 'ko');
 print PIPE "Xk 1\n";
@@ -64,3 +64,46 @@ print WRITER "not ok 7\n";
 close WRITER;
 
 print "ok 8\n";
+
+# VMS doesn't like spawning subprocesses that are still connected to
+# STDOUT.  Someone should modify tests #9 and #10 to work with VMS.
+
+if ($^O eq 'VMS') {
+    print "ok 9\n";
+    print "ok 10\n";
+    exit;
+}
+
+if ($Config{d_sfio}) {
+    # Sfio doesn't report failure when closing a broken pipe
+    # that has pending output.  Go figure.
+    print "ok 9\n";
+}
+else {
+    local $SIG{PIPE} = 'IGNORE';
+    open NIL, '|true'	or die "open failed: $!";
+    sleep 2;
+    print NIL 'foo'	or die "print failed: $!";
+    if (close NIL) {
+	print "not ok 9\n";
+    }
+    else {
+	print "ok 9\n";
+    }
+}
+
+# check that errno gets forced to 0 if the piped program exited non-zero
+open NIL, '|exit 23;' or die "fork failed: $!";
+$! = 1;
+if (close NIL) {
+    print "not ok 10\n# successful close\n";
+}
+elsif ($! != 0) {
+    print "not ok 10\n# errno $!\n";
+}
+elsif ($? == 0) {
+    print "not ok 10\n# status 0\n";
+}
+else {
+    print "ok 10\n";
+}

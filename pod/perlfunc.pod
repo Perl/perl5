@@ -551,7 +551,11 @@ omitted, does chroot to $_.
 
 Closes the file or pipe associated with the file handle, returning TRUE
 only if stdio successfully flushes buffers and closes the system file
-descriptor.  You don't have to close FILEHANDLE if you are immediately
+descriptor.  If the file handle came from a piped open C<close> will
+additionally return FALSE if one of the other system calls involved
+fails or if the program exits with non-zero status.  (If the problem was
+that the program exited non-zero $! will be set to 0.)
+You don't have to close FILEHANDLE if you are immediately
 going to do another open() on it, because open() will close it for you.  (See
 open().)  However, an explicit close on an input file resets the line
 counter ($.), while the implicit close done by open() does not.  Also,

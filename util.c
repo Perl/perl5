@@ -1964,6 +1964,11 @@ PerlIO *ptr;
     int status;
     SV **svp;
     int pid;
+    bool close_failed;
+    int saved_errno;
+#ifdef VMS
+    int saved_vaxc_errno;
+#endif
 
     svp = av_fetch(fdpid,PerlIO_fileno(ptr),TRUE);
     pid = (int)SvIVX(*svp);
@@ -1974,7 +1979,12 @@ PerlIO *ptr;
 	return my_syspclose(ptr);
     }
 #endif 
-    PerlIO_close(ptr);
+    if ((close_failed = (PerlIO_close(ptr) == EOF))) {
+	saved_errno = errno;
+#ifdef VMS
+	saved_vaxc_errno = vaxc$errno;
+#endif
+    }
 #ifdef UTS
     if(kill(pid, 0) < 0) { return(pid); }   /* HOM 12/23/91 */
 #endif
@@ -1987,7 +1997,11 @@ PerlIO *ptr;
     rsignal_restore(SIGHUP, &hstat);
     rsignal_restore(SIGINT, &istat);
     rsignal_restore(SIGQUIT, &qstat);
-    return(pid < 0 ? pid : status);
+    if (close_failed) {
+	SETERRNO(saved_errno, saved_vaxc_errno);
+	return -1;
+    }
+    return(pid < 0 ? pid : status == 0 ? 0 : (errno = 0, status));
 }
 #endif /* !DOSISH */
 
