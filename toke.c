@@ -4953,8 +4953,8 @@ char *start;
 	    for (; s < bufend; s++,to++) {
 		if (*s == '\n' && !rsfp)
 		    curcop->cop_line++;
-		if (*s == '\\' && s+1 < bufend && term != '\\') {
-		    if (s[1] == term)
+		if (*s == '\\' && s+1 < bufend) {
+		    if ((s[1] == multi_open) || (s[1] == term))
 			s++;
 		    else
 			*to++ = *s++;
