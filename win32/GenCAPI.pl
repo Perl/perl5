@@ -81,10 +81,25 @@ if (!open(OUTFILE, ">PerlCAPI.cpp")) {
     return 1;
 }
 
-print OUTFILE "#include \"EXTERN.h\"\n#include \"perl.h\"\n#include \"XSUB.h\"\n\n";
-print OUTFILE "#define DESTRUCTORFUNC (void (*)(void*))\n\n";
-print OUTFILE "#ifdef SetCPerlObj_defined\n" unless ($separateObj == 0); 
-print OUTFILE "extern \"C\" void SetCPerlObj(CPerlObj* pP)\n{\n\tpPerl = pP;\n}\n";
+print OUTFILE <<ENDCODE;
+#include "EXTERN.h"
+#include "perl.h"
+#include "XSUB.h"
+  
+#define DESTRUCTORFUNC (void (*)(void*))
+  
+ENDCODE
+
+print OUTFILE "#ifdef SetCPerlObj_defined\n" unless ($separateObj == 0);
+
+print OUTFILE <<ENDCODE;
+extern "C" void SetCPerlObj(CPerlObj* pP)
+{
+    pPerl = pP;
+}
+  
+ENDCODE
+
 print OUTFILE "#endif\n" unless ($separateObj == 0); 
 
 while () {
@@ -123,59 +138,103 @@ while () {
                 if(($name eq "croak") or ($name eq "deb") or ($name eq "die")
 		        or ($name eq "form") or ($name eq "warn")) {
                     print OUTFILE "\n#ifdef $name" . "_defined" unless ($separateObj == 0);
-                    print OUTFILE "\n#undef $name\nextern \"C\" $type $funcName ($args)\n{\n";
                     $args[0] =~ /(\w+)\W*$/; 
                     $arg = $1;
-                    print OUTFILE "\tva_list args;\n\tva_start(args, $arg);\n";
-                    print OUTFILE "$return pPerl->Perl_$name(pPerl->Perl_mess($arg, &args));\n";
-                    print OUTFILE "\tva_end(args);\n}\n";
+                    print OUTFILE <<ENDCODE;
+
+#undef $name
+extern "C" $type $funcName ($args)
+{
+    char *pstr;
+    char *pmsg;
+    va_list args;
+    va_start(args, $arg);
+    pmsg = pPerl->Perl_mess($arg, &args);
+    New(0, pstr, strlen(pmsg)+1, char);
+    strcpy(pstr, pmsg);
+$return pPerl->Perl_$name(pstr);
+    va_end(args);
+}
+ENDCODE
                     print OUTFILE "#endif\n" unless ($separateObj == 0);
                 }
                 elsif($name eq "newSVpvf") {
                     print OUTFILE "\n#ifdef $name" . "_defined" unless ($separateObj == 0);
-                    print OUTFILE "\n#undef $name\nextern \"C\" $type $funcName ($args)\n{\n";
                     $args[0] =~ /(\w+)\W*$/; 
                     $arg = $1;
-                    print OUTFILE "\tSV *sv;\n\tva_list args;\n\tva_start(args, $arg);\n";
-                    print OUTFILE "\tsv = pPerl->Perl_newSV(0);\n";
-                    print OUTFILE "\tpPerl->Perl_sv_vcatpvfn(sv, $arg, strlen($arg), &args, NULL, 0, NULL);\n";
-                    print OUTFILE "\tva_end(args);\n\treturn sv;\n}\n";
+                    print OUTFILE <<ENDCODE;
+
+#undef $name
+extern "C" $type $funcName ($args)
+{
+    SV *sv;
+    va_list args;
+    va_start(args, $arg);
+    sv = pPerl->Perl_newSV(0);
+    pPerl->Perl_sv_vcatpvfn(sv, $arg, strlen($arg), &args, NULL, 0, NULL);
+    va_end(args);
+    return sv;
+}
+ENDCODE
                     print OUTFILE "#endif\n" unless ($separateObj == 0);
                 }
                 elsif($name eq "sv_catpvf") {
                     print OUTFILE "\n#ifdef $name" . "_defined" unless ($separateObj == 0);
-                    print OUTFILE "\n#undef $name\nextern \"C\" $type $funcName ($args)\n{\n";
                     $args[0] =~ /(\w+)\W*$/; 
                     $arg0 = $1;
                     $args[1] =~ /(\w+)\W*$/; 
                     $arg1 = $1;
-                    print OUTFILE "\tva_list args;\n\tva_start(args, $arg1);\n";
-                    print OUTFILE "\tpPerl->Perl_sv_vcatpvfn($arg0, $arg1, strlen($arg1), &args, NULL, 0, NULL);\n";
-                    print OUTFILE "\tva_end(args);\n}\n";
+                    print OUTFILE <<ENDCODE;
+
+#undef $name
+extern "C" $type $funcName ($args)
+{
+    va_list args;
+    va_start(args, $arg1);
+    pPerl->Perl_sv_vcatpvfn($arg0, $arg1, strlen($arg1), &args, NULL, 0, NULL);
+    va_end(args);
+}
+ENDCODE
                     print OUTFILE "#endif\n" unless ($separateObj == 0);
                 }
                 elsif($name eq "sv_setpvf") {
                     print OUTFILE "\n#ifdef $name" . "_defined" unless ($separateObj == 0);
-                    print OUTFILE "\n#undef $name\nextern \"C\" $type $funcName ($args)\n{\n";
                     $args[0] =~ /(\w+)\W*$/; 
                     $arg0 = $1;
                     $args[1] =~ /(\w+)\W*$/; 
                     $arg1 = $1;
-                    print OUTFILE "\tva_list args;\n\tva_start(args, $arg1);\n";
-                    print OUTFILE "\tpPerl->Perl_sv_vsetpvfn($arg0, $arg1, strlen($arg1), &args, NULL, 0, NULL);\n";
-                    print OUTFILE "\tva_end(args);\n}\n";
+                    print OUTFILE <<ENDCODE;
+
+#undef $name
+extern "C" $type $funcName ($args)
+{
+    va_list args;
+    va_start(args, $arg1);
+    pPerl->Perl_sv_vsetpvfn($arg0, $arg1, strlen($arg1), &args, NULL, 0, NULL);
+    va_end(args);
+}
+ENDCODE
                     print OUTFILE "#endif\n" unless ($separateObj == 0);
                 }
                 elsif($name eq "fprintf") {
                     print OUTFILE "\n#ifdef $name" . "_defined" unless ($separateObj == 0);
-                    print OUTFILE "\n#undef $name\nextern \"C\" $type $name ($args)\n{\n";
                     $args[0] =~ /(\w+)\W*$/; 
                     $arg0 = $1;
                     $args[1] =~ /(\w+)\W*$/; 
                     $arg1 = $1;
-                    print OUTFILE "\tint nRet;\n\tva_list args;\n\tva_start(args, $arg1);\n";
-                    print OUTFILE "\tnRet = PerlIO_vprintf($arg0, $arg1, args);\n";
-                    print OUTFILE "\tva_end(args);\n\treturn nRet;\n}\n";
+                    print OUTFILE <<ENDCODE;
+
+#undef $name
+extern "C" $type $name ($args)
+{
+    int nRet;
+    va_list args;
+    va_start(args, $arg1);
+    nRet = PerlIO_vprintf($arg0, $arg1, args);
+    va_end(args);
+    return nRet;
+}
+ENDCODE
                     print OUTFILE "#endif\n" unless ($separateObj == 0);
                 } else {
                     print "Warning: can't handle varargs function '$name'\n";
@@ -208,21 +267,42 @@ while () {
 	    }
 	    # handle special case for perl_parse
 	    if ($name eq "perl_parse") {
-		print OUTFILE "\n#undef $name\nextern \"C\" $type $name ($args)\n{\n";
-		print OUTFILE "\treturn pPerl->perl_parse(xsinit, argc, argv, env);\n}\n";
+		print OUTFILE <<ENDCODE;
+
+#undef $name
+extern "C" $type $name ($args)
+{
+    return pPerl->perl_parse(xsinit, argc, argv, env);
+}
+ENDCODE
                 print OUTFILE "#endif\n" unless ($separateObj == 0);
 		next;
 	    }
 
             # foo(void);
             if ($args eq "void") {
-                print OUTFILE "\n#undef $name\nextern \"C\" $type $funcName ()\n{\n$return pPerl->$funcName();\n}\n";
+                print OUTFILE <<ENDCODE;
+
+#undef $name
+extern "C" $type $funcName ()
+{
+$return pPerl->$funcName();
+}
+
+ENDCODE
                 print OUTFILE "#endif\n" unless ($separateObj == 0);
                 next;
             }
 
             # foo(char *s, const int bar);
-            print OUTFILE "\n#undef $name\nextern \"C\" $type $funcName ($args)\n{\n$return pPerl->$funcName";
+            print OUTFILE <<ENDCODE;
+
+#undef $name
+extern "C" $type $funcName ($args)
+{
+$return pPerl->$funcName
+ENDCODE
+
             $doneone = 0;
             foreach $arg (@args) {
                 if ($arg =~ /(\w+)\W*$/) {
@@ -371,8 +451,11 @@ readvars %thread, '..\thrdvar.h','T';
 readvars %globvar, '..\perlvars.h','G';
 
 open(HDRFILE, ">$hdrfile") or die "$0: Can't open $hdrfile: $!\n";
-print HDRFILE "\nvoid SetCPerlObj(void* pP);";
-print HDRFILE "\nCV* Perl_newXS(char* name, void (*subaddr)(CV* cv), char* filename);\n";
+print HDRFILE <<ENDCODE;
+void SetCPerlObj(void* pP);
+CV* Perl_newXS(char* name, void (*subaddr)(CV* cv), char* filename);
+
+ENDCODE
 
 sub DoVariable($$) {
     my $name = shift;
@@ -382,12 +465,24 @@ sub DoVariable($$) {
     return if ($type eq 'struct perl_thread *');
 
     print OUTFILE "\n#ifdef $name" . "_defined" unless ($separateObj == 0);
-    print OUTFILE "\nextern \"C\" $type * _Perl_$name ()\n{\n";
-    print OUTFILE "\treturn (($type *)&pPerl->Perl_$name);\n}\n";
+    print OUTFILE <<ENDCODE;
+extern "C" $type * _Perl_$name ()
+{
+    return (($type *)&pPerl->Perl_$name);
+}
+
+ENDCODE
+
     print OUTFILE "#endif\n" unless ($separateObj == 0);
 
-    print HDRFILE "\n#undef Perl_$name\n$type * _Perl_$name ();";
-    print HDRFILE "\n#define Perl_$name (*_Perl_$name())\n\n";
+    print HDRFILE <<ENDCODE;
+
+#undef Perl_$name
+$type * _Perl_$name ();
+#define Perl_$name (*_Perl_$name())
+
+ENDCODE
+
 }
 
 foreach $key (keys %intrp) {
@@ -406,7 +501,7 @@ print OUTFILE <<EOCODE;
 
 
 extern "C" {
-void xs_handler(CV* cv, CPerlObj* pPerl)
+void xs_handler(CV* cv, CPerlObj* p)
 {
     void(*func)(CV*);
     SV* sv;
@@ -422,7 +517,6 @@ void xs_handler(CV* cv, CPerlObj* pPerl)
 	{
 	    func = (void(*)(CV*))pPerl->Perl_sv_2iv(sv);
 	}
-	SetCPerlObj(pPerl);
 	func(cv);
     }
 }
@@ -432,6 +526,11 @@ CV* Perl_newXS(char* name, void (*subaddr)(CV* cv), char* filename)
     CV* cv = pPerl->Perl_newXS(name, xs_handler, filename);
     pPerl->Perl_sv_magic((SV*)cv, pPerl->Perl_sv_2mortal(pPerl->Perl_newSViv((IV)subaddr)), '~', "CAPI", 4);
     return cv;
+}
+
+
+void Perl_deb(const char pat, ...)
+{
 }
 
 #undef piMem

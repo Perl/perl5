@@ -3246,7 +3246,7 @@ sub tool_xsubpp {
 	}
     }
 
-    $xsubpp = $self->{CAPI} ? "xsubpp -perlobject" : "xsubpp";
+    $xsubpp = $self->{CAPI} ? "xsubpp -object_capi" : "xsubpp";
 
     return qq{
 XSUBPPDIR = $xsdir

@@ -6,7 +6,7 @@ xsubpp - compiler to convert Perl XS code into C code
 
 =head1 SYNOPSIS
 
-B<xsubpp> [B<-v>] [B<-C++>] [B<-except>] [B<-s pattern>] [B<-prototypes>] [B<-noversioncheck>] [B<-nolinenumbers>] [B<-typemap typemap>] [B<-perlobject>]... file.xs
+B<xsubpp> [B<-v>] [B<-C++>] [B<-except>] [B<-s pattern>] [B<-prototypes>] [B<-noversioncheck>] [B<-nolinenumbers>] [B<-typemap typemap>] [B<-object_capi>]... file.xs
 
 =head1 DESCRIPTION
 
@@ -59,7 +59,7 @@ number.
 
 Prevents the inclusion of `#line' directives in the output.
 
-=item B<-perlobject>
+=item B<-object_capi>
 
 Compile code as C in a PERL_OBJECT environment.
 
@@ -126,7 +126,7 @@ SWITCH: while (@ARGV and $ARGV[0] =~ /^-./) {
     $WantPrototypes = 1, next SWITCH	if $flag eq 'prototypes';
     $WantVersionChk = 0, next SWITCH	if $flag eq 'noversioncheck';
     $WantVersionChk = 1, next SWITCH	if $flag eq 'versioncheck';
-    $WantCAPI = 1, next SWITCH    if $flag eq 'perlobject';
+    $WantCAPI = 1, next SWITCH    if $flag eq 'object_capi';
     $except = " TRY",	next SWITCH	if $flag eq 'except';
     push(@tm,shift),	next SWITCH	if $flag eq 'typemap';
     $WantLineNumbers = 0, next SWITCH	if $flag eq 'nolinenumbers';
@@ -1240,7 +1240,8 @@ EOF
 if ($WantCAPI) { 
 print Q<<"EOF";
 #
-##define XSCAPI(name) void name(void* pPerl, CV* cv)
+##define XSCAPI(name) void name(CV* cv, void* pPerl)
+#
 ##ifdef __cplusplus
 #extern "C"
 ##endif
