@@ -4055,6 +4055,18 @@ Perl_sys_intern_init(pTHX)
     w32_init_socktype		= 0;
 }
 
+void
+Perl_sys_intern_clear(pTHX)
+{
+    Safefree(w32_perlshell_tokens);
+    Safefree(w32_perlshell_vec);
+    /* NOTE: w32_fdpid is freed by sv_clean_all() */
+    Safefree(w32_children);
+#  ifdef USE_ITHREADS
+    Safefree(w32_pseudo_children);
+#  endif
+}
+
 #  ifdef USE_ITHREADS
 
 void
@@ -4068,18 +4080,6 @@ Perl_sys_intern_dup(pTHX_ struct interp_intern *src, struct interp_intern *dst)
     dst->pseudo_id		= 0;
     Newz(1313, dst->pseudo_children, 1, child_tab);
     dst->thr_intern.Winit_socktype = src->thr_intern.Winit_socktype;
-}
-
-void
-Perl_sys_intern_clear(pTHX)
-{
-    Safefree(w32_perlshell_tokens);
-    Safefree(w32_perlshell_vec);
-    /* NOTE: w32_fdpid is freed by sv_clean_all() */
-    Safefree(w32_children);
-#  ifdef USE_ITHREADS
-    Safefree(w32_pseudo_children);
-#  endif
 }
 #  endif /* USE_ITHREADS */
 #endif /* HAVE_INTERP_INTERN */

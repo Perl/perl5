@@ -3425,6 +3425,12 @@ an attribute list, but the matching closing (right) parenthesis
 character was not found.  You may need to add (or remove) a backslash
 character to get your parentheses to balance.  See L<attributes>.
 
+=item Unterminated compressed integer
+
+(F) An argument to unpack("w",...) was incompatible with the BER
+compressed integer format and could not be converted to an integer.
+See L<perlfunc/pack>.
+
 =item Unterminated <> operator
 
 (F) The lexer saw a left angle bracket in a place where it was expecting

@@ -829,14 +829,16 @@
 #define mg_dup			Perl_mg_dup
 #define sv_dup			Perl_sv_dup
 #if defined(HAVE_INTERP_INTERN)
-#define sys_intern_clear	Perl_sys_intern_clear
 #define sys_intern_dup		Perl_sys_intern_dup
-#define sys_intern_init		Perl_sys_intern_init
 #endif
 #define ptr_table_new		Perl_ptr_table_new
 #define ptr_table_fetch		Perl_ptr_table_fetch
 #define ptr_table_store		Perl_ptr_table_store
 #define ptr_table_split		Perl_ptr_table_split
+#endif
+#if defined(HAVE_INTERP_INTERN)
+#define sys_intern_clear	Perl_sys_intern_clear
+#define sys_intern_init		Perl_sys_intern_init
 #endif
 #if defined(PERL_OBJECT)
 #else
@@ -2273,14 +2275,16 @@
 #define mg_dup(a)		Perl_mg_dup(aTHX_ a)
 #define sv_dup(a)		Perl_sv_dup(aTHX_ a)
 #if defined(HAVE_INTERP_INTERN)
-#define sys_intern_clear()	Perl_sys_intern_clear(aTHX)
 #define sys_intern_dup(a,b)	Perl_sys_intern_dup(aTHX_ a,b)
-#define sys_intern_init()	Perl_sys_intern_init(aTHX)
 #endif
 #define ptr_table_new()		Perl_ptr_table_new(aTHX)
 #define ptr_table_fetch(a,b)	Perl_ptr_table_fetch(aTHX_ a,b)
 #define ptr_table_store(a,b,c)	Perl_ptr_table_store(aTHX_ a,b,c)
 #define ptr_table_split(a)	Perl_ptr_table_split(aTHX_ a)
+#endif
+#if defined(HAVE_INTERP_INTERN)
+#define sys_intern_clear()	Perl_sys_intern_clear(aTHX)
+#define sys_intern_init()	Perl_sys_intern_init(aTHX)
 #endif
 #if defined(PERL_OBJECT)
 #else
@@ -4457,12 +4461,8 @@
 #define Perl_sv_dup		CPerlObj::Perl_sv_dup
 #define sv_dup			Perl_sv_dup
 #if defined(HAVE_INTERP_INTERN)
-#define Perl_sys_intern_clear	CPerlObj::Perl_sys_intern_clear
-#define sys_intern_clear	Perl_sys_intern_clear
 #define Perl_sys_intern_dup	CPerlObj::Perl_sys_intern_dup
 #define sys_intern_dup		Perl_sys_intern_dup
-#define Perl_sys_intern_init	CPerlObj::Perl_sys_intern_init
-#define sys_intern_init		Perl_sys_intern_init
 #endif
 #define Perl_ptr_table_new	CPerlObj::Perl_ptr_table_new
 #define ptr_table_new		Perl_ptr_table_new
@@ -4472,6 +4472,12 @@
 #define ptr_table_store		Perl_ptr_table_store
 #define Perl_ptr_table_split	CPerlObj::Perl_ptr_table_split
 #define ptr_table_split		Perl_ptr_table_split
+#endif
+#if defined(HAVE_INTERP_INTERN)
+#define Perl_sys_intern_clear	CPerlObj::Perl_sys_intern_clear
+#define sys_intern_clear	Perl_sys_intern_clear
+#define Perl_sys_intern_init	CPerlObj::Perl_sys_intern_init
+#define sys_intern_init		Perl_sys_intern_init
 #endif
 #if defined(PERL_OBJECT)
 #else

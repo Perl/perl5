@@ -43,7 +43,6 @@ from the following list:
     $ENV{TMPDIR}
     $ENV{TEMP}
     $ENV{TMP}
-    C:/temp
     /tmp
     /
 
@@ -53,7 +52,7 @@ my $tmpdir;
 sub tmpdir {
     return $tmpdir if defined $tmpdir;
     my $self = shift;
-    foreach (@ENV{qw(TMPDIR TEMP TMP)}, qw(C:/temp /tmp /)) {
+    foreach (@ENV{qw(TMPDIR TEMP TMP)}, qw(/tmp /)) {
 	next unless defined && -d;
 	$tmpdir = $_;
 	last;
@@ -313,7 +312,7 @@ sub abs2rel {
 }
 
 
-sub rel2abs($$;$;) {
+sub rel2abs {
     my ($self,$path,$base ) = @_;
 
     if ( ! $self->file_name_is_absolute( $path ) ) {

@@ -2182,18 +2182,10 @@
 #undef  sv_dup
 #define sv_dup			Perl_sv_dup
 #if defined(HAVE_INTERP_INTERN)
-#undef  Perl_sys_intern_clear
-#define Perl_sys_intern_clear	pPerl->Perl_sys_intern_clear
-#undef  sys_intern_clear
-#define sys_intern_clear	Perl_sys_intern_clear
 #undef  Perl_sys_intern_dup
 #define Perl_sys_intern_dup	pPerl->Perl_sys_intern_dup
 #undef  sys_intern_dup
 #define sys_intern_dup		Perl_sys_intern_dup
-#undef  Perl_sys_intern_init
-#define Perl_sys_intern_init	pPerl->Perl_sys_intern_init
-#undef  sys_intern_init
-#define sys_intern_init		Perl_sys_intern_init
 #endif
 #undef  Perl_ptr_table_new
 #define Perl_ptr_table_new	pPerl->Perl_ptr_table_new
@@ -2211,6 +2203,16 @@
 #define Perl_ptr_table_split	pPerl->Perl_ptr_table_split
 #undef  ptr_table_split
 #define ptr_table_split		Perl_ptr_table_split
+#endif
+#if defined(HAVE_INTERP_INTERN)
+#undef  Perl_sys_intern_clear
+#define Perl_sys_intern_clear	pPerl->Perl_sys_intern_clear
+#undef  sys_intern_clear
+#define sys_intern_clear	Perl_sys_intern_clear
+#undef  Perl_sys_intern_init
+#define Perl_sys_intern_init	pPerl->Perl_sys_intern_init
+#undef  sys_intern_init
+#define sys_intern_init		Perl_sys_intern_init
 #endif
 #if defined(PERL_OBJECT)
 #else
