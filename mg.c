@@ -496,8 +496,11 @@ magic_get(SV *sv, MAGIC *mg)
 	    sv_setnv(sv, (double)errno);
 	    sv_setpv(sv, errno ? Strerror(errno) : "");
 	} else {
-	    if (errno != errno_isOS2)
-		Perl_rc = _syserrno();
+	    if (errno != errno_isOS2) {
+		int tmp = _syserrno();
+		if (tmp)	/* 2nd call to _syserrno() makes it 0 */
+		    Perl_rc = tmp;
+	    }
 	    sv_setnv(sv, (double)Perl_rc);
 	    sv_setpv(sv, os2error(Perl_rc));
 	}

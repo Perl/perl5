@@ -113,10 +113,11 @@ aout_lib_ext='.a'
 aout_ar='ar'
 aout_plibext='.a'
 aout_lddlflags="-Zdll $ld_dll_optimize"
+# Cannot have 32000K stack: get SYS0170  ?!
 if [ $emxcrtrev -ge 50 ]; then 
-    aout_ldflags='-Zexe -Zsmall-conv -Zstack 32000'
+    aout_ldflags='-Zexe -Zsmall-conv -Zstack 16000'
 else
-    aout_ldflags='-Zexe -Zstack 32000'
+    aout_ldflags='-Zexe -Zstack 16000'
 fi
 
 # To get into config.sh:

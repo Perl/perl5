@@ -99,6 +99,9 @@ perl_call_sv
 perl_eval_pv
 perl_eval_sv
 perl_require_pv
+cast_i32
+cast_iv
+cast_uv
 END
 
 case "$ccflags" in

@@ -2570,7 +2570,8 @@ find_script(char *scriptname, bool dosearch, char **search_ext, I32 flags)
 #endif
 	    DEBUG_p(PerlIO_printf(Perl_debug_log,
 				  "Looking for %s\n",cur));
-	    if (PerlLIO_stat(cur,&PL_statbuf) >= 0) {
+	    if (PerlLIO_stat(cur,&PL_statbuf) >= 0
+		&& !S_ISDIR(PL_statbuf.st_mode)) {
 		dosearch = 0;
 		scriptname = cur;
 #ifdef SEARCH_EXTS
@@ -2639,6 +2640,9 @@ find_script(char *scriptname, bool dosearch, char **search_ext, I32 flags)
 #endif
 	    	DEBUG_p(PerlIO_printf(Perl_debug_log, "Looking for %s\n",tmpbuf));
 		retval = PerlLIO_stat(tmpbuf,&PL_statbuf);
+		if (S_ISDIR(PL_statbuf.st_mode)) {
+		    retval = -1;
+		}
 #ifdef SEARCH_EXTS
 	    } while (  retval < 0		/* not there */
 		    && extidx>=0 && ext[extidx]	/* try an extension? */
@@ -2661,7 +2665,9 @@ find_script(char *scriptname, bool dosearch, char **search_ext, I32 flags)
 		xfailed = savepv(tmpbuf);
 	}
 #ifndef DOSISH
-	if (!xfound && !seen_dot && !xfailed && (PerlLIO_stat(scriptname,&PL_statbuf) < 0))
+	if (!xfound && !seen_dot && !xfailed &&
+	    (PerlLIO_stat(scriptname,&PL_statbuf) < 0 
+	     || S_ISDIR(PL_statbuf.st_mode)))
 #endif
 	    seen_dot = 1;			/* Disable message. */
 	if (!xfound) {
