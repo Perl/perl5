@@ -60,7 +60,7 @@ sub import {
 	    $DEFAULT_FLAGS &= ~GLOB_NOCASE() if $1 eq 'case';
 	    $DEFAULT_FLAGS |= GLOB_NOCASE() if $1 eq 'nocase';
 	    if ($1 eq 'globally') {
-		local $^W;
+		no warnings;
 		*CORE::GLOBAL::glob = \&File::Glob::csh_glob;
 	    }
 	    next;
@@ -111,9 +111,6 @@ if ($^O =~ /^(?:MSWin32|VMS|os2|dos|riscos|MacOS)$/) {
 sub glob {
     my ($pat,$flags) = @_;
     $flags = $DEFAULT_FLAGS if @_ < 2;
-    if ($^O =~ /^(?:MSWin32|VMS|os2|dos|riscos|MacOS)$/) {
-        $flags |= GLOB_NOCASE();
-    }
     return doglob($pat,$flags);
 }
 
