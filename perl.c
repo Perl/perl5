@@ -2504,6 +2504,13 @@ Perl_moreswitches(pTHX_ char *s)
     case 'd':
 	forbid_setid("-d");
 	s++;
+
+        /* -dt indicates to the debugger that threads will be used */
+	if (*s == 't' && !isALNUM(s[1])) {
+	    ++s;
+	    my_setenv("PERL5DB_THREADED", "1");
+	}
+
 	/* The following permits -d:Mod to accepts arguments following an =
 	   in the fashion that -MSome::Mod does. */
 	if (*s == ':' || *s == '=') {
