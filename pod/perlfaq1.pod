@@ -36,7 +36,7 @@ In particular, the core development team (known as the Perl Porters)
 are a rag-tag band of highly altruistic individuals committed
 to producing better software for free than you could hope to
 purchase for money.  You may snoop on pending developments via
-news://news.perl.com/perl.porters-gw/ and the Deja archive at
+nntp://news.perl.com/perl.porters-gw/ and the Deja archive at
 http://www.deja.com/ using the perl.porters-gw newsgroup, or you can
 subscribe to the mailing list by sending perl5-porters-request@perl.org
 a subscription request.
