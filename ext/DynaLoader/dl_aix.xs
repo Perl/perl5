@@ -33,10 +33,12 @@
  * of load() and unload() from libC and libC_r need to be used,
  * otherwise statics in the extensions won't get initialized right.
  * -- Stephanie Beals <bealzy@us.ibm.com> */
-#ifdef USE_xlC /* The define comes, when it comes, from hints/aix.pl. */
-#   define LOAD   loadAndInitialize
+#ifdef USE_libC /* The define comes, when it comes, from hints/aix.pl. */
+#   define LOAD   loadAndInit
 #   define UNLOAD terminateAndUnload
-#   include <load.h>
+#   ifdef USE_load_h
+#       include <load.h>
+#   endif
 #else
 #   define LOAD   load
 #   define UNLOAD unload

@@ -154,29 +154,24 @@ EOM
 	    ;;
 	esac
 
-	# The libC_r is to be preferred over the libc_r because otherwise
-	# extensions written in C++ using statics won't be initialized right;
-	# see ext/DynaLoader/dl_aix.xs.
-	if test -f /lib/libC_r.a; then
-	    # C_rify libwanted.
-	    set `echo X "$libswanted "| sed -e 's/ C / pthreads C_r /'`
-	    shift
-	    libswanted="$*"
-	    # C_rify lddlflags.
-	    set `echo X "$lddlflags"| sed -e 's/ -lc$/ -lpthreads -lC_r/'`
-	    shift
-	    lddlflags="$*"
-	else
-	    # The POSIX threads library and the re-entrant libc to libswanted.
-	    set `echo X "$libswanted "| sed -e 's/ c / pthreads c_r /'`
-	    shift
-	    libswanted="$*"
+	# c_rify libswanted.
+	set `echo X "$libswanted "| sed -e 's/ \([cC]\) / \1_r /g'`
+	shift
+	libswanted="$*"
+	# c_rify lddlflags.
+	set `echo X "$lddlflags "| sed -e 's/ \(-l[cC]\) / \1_r /g'`
+	shift
+	lddlflags="$*"
 
-	    # The POSIX threads library and the re-entrant libc to lddflags.
-	    set `echo X "$lddlflags"| sed -e 's/ -lc$/ -lpthreads -lc_r/'`
-	    shift
-	    lddlflags="$*"
-	fi
+	# Insert pthreads to libswanted, before any libc or libC.
+	set `echo X "$libswanted "| sed -e 's/ \([cC]\) / pthreads \1 /'`
+	shift
+	libswanted="$*"
+	# Insert pthreads to lddlflags, before any libc or libC.
+	set `echo X "$lddlflags " | sed -e 's/ \(-l[cC]\) / -lpthreads \1 /'`
+	shift
+	lddlflags="$*"
+
 	;;
 esac
 EOCBU
@@ -205,7 +200,7 @@ EOM
 	    # (nothing strange shows up in $ldflags even in hexdump;
 	    #  so it may be something in the shell, instead?)
 	    # Try it out: just uncomment the below line and rerun Configure:
-#	    echo >&4 "AIX $ldflags mystery" ; exit 1
+#	    echo >&4 "AIX 4.3.1.0 $ldflags mystery" ; exit 1
 	    # Just don't ask me how AIX does it.
 	    # Therefore the line re-evaluating ldflags: it seems to bypass
 	    # the whatever it was that AIX managed to break. --jhi
@@ -230,11 +225,34 @@ $define|true|[yY]*)
 esac
 EOCBU
 
-# If the C++ libraries, libC, are available we will prefer them over
-# the vanilla libc, because the libC contain loadAndInitialize() and
+# If the C++ libraries, libC and libC_r, are available we will prefer them
+# over the vanilla libc, because the libC contain loadAndInit() and
 # terminateAndUnload() which work correctly with C++ statics while libc
 # load() and unload() do not.  See ext/DynaLoader/dl_aix.xs.
-# The c_r-to-C_r switch is done by usethreads.cbu.
-test -f /lib/libC.a && libswanted=`$echo " $libswanted "|sed -e 's/ c / C /'`
+# The C-to-C_r switch is done by usethreads.cbu, if needed.
+if test -f /lib/libC.a; then
+    case "$cc" in
+    xlC*)
+	# Cify libswanted for xlC.
+	set `echo X "$libswanted "| sed -e 's/ c / C /'`
+	shift
+	libswanted="$*"
+	# Cify lddlflags for xlC.
+	set `echo X "$lddlflags "| sed -e 's/ -lc / -lC /'`
+	shift
+	lddlflags="$*"
+	;;
+    *)
+	# Cify libswanted for non-xlC.
+	set `echo X "$libswanted "| sed -e 's/ c / c C /'`
+	shift
+	libswanted="$*"
+	# Cify lddlflags for non-xlC.
+	set `echo X "$lddlflags "| sed -e 's/ -lc / -lc -lC /'`
+	shift
+	lddlflags="$*"
+	;;
+   esac
+fi
 
 # EOF
