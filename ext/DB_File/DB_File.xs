@@ -586,11 +586,11 @@ const DBT * key2 ;
 
 static DB_Hash_t
 #ifdef CAN_PROTOTYPE
-hash_cb(const void *data, size_t size)
+hash_cb(const void *data, u_int32_t size)
 #else
 hash_cb(data, size)
 const void * data ;
-size_t size ;
+u_int32_t size ;
 #endif
 {
 #ifdef dTHX
