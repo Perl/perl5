@@ -596,9 +596,13 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	   was put in to give the semantics Andreas was expecting.)  */
 	flags |= HVhek_REHASH;
     } else if (!hash) {
+	/* Not enough shared hash key scalars around to make this worthwhile
+	   (about 4% slowdown in perlbench with this in)
         if (keysv && (SvIsCOW_shared_hash(keysv))) {
             hash = SvUVX(keysv);
-        } else {
+        } else
+	*/
+	{
             PERL_HASH(hash, key, klen);
         }
     }
@@ -917,12 +921,15 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     if (HvREHASH(hv)) {
 	PERL_HASH_INTERNAL(hash, key, klen);
     } else if (!hash) {
+	/* Not enough shared hash key scalars around to make this worthwhile
+	   (about 4% slowdown in perlbench with this in)
         if (keysv && (SvIsCOW_shared_hash(keysv))) {
             hash = SvUVX(keysv);
-        } else {
+        } else
+	*/
+	{
             PERL_HASH(hash, key, klen);
         }
-	PERL_HASH(hash, key, klen);
     }
 
     masked_flags = (k_flags & HVhek_MASK);
