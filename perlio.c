@@ -342,7 +342,7 @@ PerlIO_importFILE(FILE *stdio, const char *mode)
 {
     int fd = fileno(stdio);
     if (!mode || !*mode) {
-	mmode = "r+";
+	mode = "r+";
     }
     return PerlIO_fdopen(fd, mode);
 }
@@ -1818,34 +1818,37 @@ PerlIOBase_fileno(pTHX_ PerlIO *f)
 }
 
 char *
-PerlIO_modestr(PerlIO *f, char *buf)
+PerlIO_modestr(PerlIO * f, char *buf)
 {
     char *s = buf;
-    IV flags = PerlIOBase(f)->flags;
-    if (flags & PERLIO_F_APPEND) {
-	*s++ = 'a';
-	if (flags & PERLIO_F_CANREAD) {
-	    *s++ = '+';
+    if (PerlIOValid(f)) {
+	IV flags = PerlIOBase(f)->flags;
+	if (flags & PERLIO_F_APPEND) {
+	    *s++ = 'a';
+	    if (flags & PERLIO_F_CANREAD) {
+		*s++ = '+';
+	    }
 	}
-    }
-    else if (flags & PERLIO_F_CANREAD) {
-	*s++ = 'r';
-	if (flags & PERLIO_F_CANWRITE)
-	    *s++ = '+';
-    }
-    else if (flags & PERLIO_F_CANWRITE) {
-	*s++ = 'w';
-	if (flags & PERLIO_F_CANREAD) {
-	    *s++ = '+';
+	else if (flags & PERLIO_F_CANREAD) {
+	    *s++ = 'r';
+	    if (flags & PERLIO_F_CANWRITE)
+		*s++ = '+';
 	}
-    }
+	else if (flags & PERLIO_F_CANWRITE) {
+	    *s++ = 'w';
+	    if (flags & PERLIO_F_CANREAD) {
+		*s++ = '+';
+	    }
+	}
 #ifdef PERLIO_USING_CRLF
-    if (!(flags & PERLIO_F_CRLF))
-	*s++ = 'b';
+	if (!(flags & PERLIO_F_CRLF))
+	    *s++ = 'b';
 #endif
+    }
     *s = '\0';
     return buf;
 }
+
 
 IV
 PerlIOBase_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
@@ -2307,7 +2310,7 @@ SSize_t
 PerlIOUnix_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 {
     int fd = PerlIOSelf(f, PerlIOUnix)->fd;
-    if (!(PerlIOBase(f)->flags & PERLIO_F_CANREAD) || 
+    if (!(PerlIOBase(f)->flags & PERLIO_F_CANREAD) ||
          PerlIOBase(f)->flags & (PERLIO_F_EOF|PERLIO_F_ERROR)) {
 	return 0;
     }
@@ -2436,7 +2439,7 @@ IV
 PerlIOStdio_fileno(pTHX_ PerlIO *f)
 {
     FILE *s;
-    if (PerlIOValid(f) && (s = PerlIOSelf(f, PerlIOStdio)->stdio)) {    
+    if (PerlIOValid(f) && (s = PerlIOSelf(f, PerlIOStdio)->stdio)) {
 	return PerlSIO_fileno(s);
     }
     errno = EBADF;
@@ -2471,12 +2474,12 @@ PerlIOStdio_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab
 	    int fd = PerlIO_fileno(n);
 	    char tmode[8];
 	    FILE *stdio;
-	    if (fd >= 0 && (stdio  = PerlSIO_fdopen(fd, 
+	    if (fd >= 0 && (stdio  = PerlSIO_fdopen(fd,
 			    mode = PerlIOStdio_mode(mode, tmode)))) {
 		PerlIOSelf(f, PerlIOStdio)->stdio = stdio;
 	    	/* We never call down so do any pending stuff now */
 	    	PerlIO_flush(PerlIONext(f));
-	    } 
+	    }
 	    else {
 		return -1;
 	    }
@@ -3006,24 +3009,36 @@ PerlIO_funcs PerlIO_stdio = {
 };
 
 FILE *
-PerlIO_exportFILE(PerlIO *f, const char *mode)
+PerlIO_exportFILE(PerlIO * f, const char *mode)
 {
     dTHX;
-    FILE *stdio;
-    char buf[8];
-    PerlIO_flush(f);
-    if (!mode || !*mode) {
-	mode = PerlIO_modestr(f,buf);
-    }
-    stdio = PerlSIO_fdopen(PerlIO_fileno(f), mode);
-    if (stdio) {
-	if ((f = PerlIO_push(aTHX_ f, &PerlIO_stdio, buf, Nullsv))) {
-	    PerlIOStdio *s = PerlIOSelf(f,PerlIOStdio);
-	    s->stdio = stdio;
+    FILE *stdio = NULL;
+    if (PerlIOValid(f)) {
+	char buf[8];
+	PerlIO_flush(f);
+	if (!mode || !*mode) {
+	    mode = PerlIO_modestr(f, buf);
+	}
+	stdio = PerlSIO_fdopen(PerlIO_fileno(f), mode);
+	if (stdio) {
+	    PerlIOl *l = *f;
+	    /* De-link any lower layers so new :stdio sticks */
+	    *f = NULL;
+	    if ((f = PerlIO_push(aTHX_ f, &PerlIO_stdio, buf, Nullsv))) {
+		PerlIOStdio *s = PerlIOSelf(f, PerlIOStdio);
+		s->stdio = stdio;
+		/* Link previous lower layers under new one */
+		*PerlIONext(f) = l;
+	    }
+	    else {
+		/* restore layers list */
+		*f = l;
+	    }
 	}
     }
     return stdio;
 }
+
 
 FILE *
 PerlIO_findFILE(PerlIO *f)
