@@ -5075,12 +5075,9 @@ scan_ident(register char *s, register char *send, char *dest, STRLEN destlen, I3
 	return s;
     }
     if (*s == '$' && s[1] &&
-      (isALNUM(s[1]) || strchr("${", s[1]) || strnEQ(s+1,"::",2)) )
+	(isALNUM(s[1]) || strchr("${", s[1]) || strnEQ(s+1,"::",2)) )
     {
-	if (isDIGIT(s[1]) && PL_lex_state == LEX_INTERPNORMAL)
-	    deprecate("\"$$<digit>\" to mean \"${$}<digit>\"");
-	else
-	    return s;
+	return s;
     }
     if (*s == '{') {
 	bracket = s;

@@ -2778,18 +2778,6 @@ a term, so it's looking for the corresponding right angle bracket, and not
 finding it.  Chances are you left some needed parentheses out earlier in
 the line, and you really meant a "less than".
 
-=item Use of "$$<digit>" to mean "${$}<digit>" is deprecated
-
-(D) Perl versions before 5.004 misinterpreted any type marker followed
-by "$" and a digit.  For example, "$$0" was incorrectly taken to mean
-"${$}0" instead of "${$0}".  This bug is (mostly) fixed in Perl 5.004.
-
-However, the developers of Perl 5.004 could not fix this bug completely,
-because at least two widely-used modules depend on the old meaning of
-"$$0" in a string.  So Perl 5.004 still interprets "$$<digit>" in the
-old (broken) way inside strings; but it generates this message as a
-warning.  And in Perl 5.005, this special treatment will cease.
-
 =item Use of $# is deprecated
 
 (D) This was an ill-advised attempt to emulate a poorly defined B<awk> feature.
