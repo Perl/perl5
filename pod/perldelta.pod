@@ -3398,12 +3398,17 @@ case-insensitively.  Apparently this problem has been fixed in
 the latest FreeBSD releases.
 ( http://www.freebsd.org/cgi/query-pr.cgi?pr=34308 )
 
-=head2 IRIX fails ext/List/Util/t/shuffle.t
+=head2 IRIX fails ext/List/Util/t/shuffle.t or Digest::MD5
 
-IRIX with MIPSpro 7.3.1.3m compiler may fail the said List::Util test
-by dumping core.  This seems to be a compiler error since if compiled
-with gcc no core dump ensues, and no failures on the said test on any
-other platform.
+IRIX with MIPSpro 7.3.1.2m or 7.3.1.3m compiler may fail the List::Util
+test ext/List/Util/t/shuffle.t by dumping core.  This seems to be
+a compiler error since if compiled with gcc no core dump ensues, and
+no failures have been seen on the said test on any other platform.
+
+Similarly, building the Digest::MD5 extension has been
+known to fail with "*** Termination code 139 (bu21)".
+
+The cure is to drop optimization level (Configure -Doptimize=-O2).
 
 =head2 HP-UX lib/posix Subtest 9 Fails When LP64-Configured
 
