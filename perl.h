@@ -9,6 +9,7 @@
 #ifndef H_PERL
 #define H_PERL 1
 #define OVERLOAD
+#define STRANGE_MALLOC
 
 #include "embed.h"
 
@@ -854,6 +855,7 @@ EXT U32		sub_generation;	/* inc to force methods to be looked up again */
 EXT char **	origenviron;
 EXT U32		origalen;
 EXT U32 *	profiledata;
+EXT int		maxo INIT(MAXO);/* Number of ops */
 
 EXT XPV*	xiv_arenaroot;	/* list of allocated xiv areas */
 EXT IV **	xiv_root;	/* free xiv list--shared by interpreters */
