@@ -106,7 +106,7 @@ package DB_File::RECNOINFO ;
 
 use strict ;
 
-@DB_File::RECNOINFO::ISA = qw(DB_File::HASHINFO) ;
+@DB_File::RECNOINFO::ISA = qw(DB_File::HASHINFO) ;  
 
 sub TIEHASH
 {
@@ -189,7 +189,9 @@ require DynaLoader;
 	R_SNAPSHOT
 	__R_UNUSED
 
-);
+);  
+
+*FETCHSIZE = \&length;
 
 sub AUTOLOAD {
     my($constname);

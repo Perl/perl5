@@ -416,6 +416,7 @@ magic_settaint
 magic_setuvar
 magic_setvec
 magic_set_all_env
+magic_sizepack
 magic_wipepack
 magicname
 markstack_grow
@@ -429,6 +430,7 @@ mg_get
 mg_len
 mg_magical
 mg_set
+mg_size
 mod
 modkids
 moreswitches

@@ -76,7 +76,7 @@
 #endif
 
 bool
-do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawperm, FILE *supplied_fp)
+do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO *supplied_fp)
 {
     register IO *io = GvIOn(gv);
     PerlIO *saveifp = Nullfp;
@@ -760,7 +760,7 @@ Off_t length;		/* length to set file to */
 #endif /* F_FREESP */
 
 bool
-do_print(register SV *sv, FILE *fp)
+do_print(register SV *sv, PerlIO *fp)
 {
     register char *tmps;
     STRLEN len;

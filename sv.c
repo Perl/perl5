@@ -785,7 +785,7 @@ sv_upgrade(register SV *sv, U32 mt)
 	    Safefree(pv);
 	SvPVX(sv)	= 0;
 	AvMAX(sv)	= -1;
-	AvFILL(sv)	= -1;
+	AvFILLp(sv)	= -1;
 	SvIVX(sv)	= 0;
 	SvNVX(sv)	= 0.0;
 	SvMAGIC(sv)	= magic;
@@ -2983,7 +2983,7 @@ sv_collxfrm(SV *sv, STRLEN *nxp)
 #endif /* USE_LOCALE_COLLATE */
 
 char *
-sv_gets(register SV *sv, register FILE *fp, I32 append)
+sv_gets(register SV *sv, register PerlIO *fp, I32 append)
 {
     dTHR;
     char *rsptr;
@@ -3703,8 +3703,6 @@ sv_true(register SV *sv)
     dTHR;
     if (!sv)
 	return 0;
-    if (SvGMAGICAL(sv))
-	mg_get(sv);
     if (SvPOK(sv)) {
 	register XPV* tXpv;
 	if ((tXpv = (XPV*)SvANY(sv)) &&
@@ -4774,7 +4772,7 @@ sv_dump(SV *sv)
     case SVt_PVAV:
 	PerlIO_printf(Perl_debug_log, "  ARRAY = 0x%lx\n", (long)AvARRAY(sv));
 	PerlIO_printf(Perl_debug_log, "  ALLOC = 0x%lx\n", (long)AvALLOC(sv));
-	PerlIO_printf(Perl_debug_log, "  FILL = %ld\n", (long)AvFILL(sv));
+	PerlIO_printf(Perl_debug_log, "  FILL = %ld\n", (long)AvFILLp(sv));
 	PerlIO_printf(Perl_debug_log, "  MAX = %ld\n", (long)AvMAX(sv));
 	PerlIO_printf(Perl_debug_log, "  ARYLEN = 0x%lx\n", (long)AvARYLEN(sv));
 	flags = AvFLAGS(sv);

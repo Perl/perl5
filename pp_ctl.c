@@ -1214,10 +1214,10 @@ PP(pp_caller)
 	    AvREAL_off(dbargs);		/* XXX Should be REIFY */
 	}
 
-	if (AvMAX(dbargs) < AvFILL(ary) + off)
-	    av_extend(dbargs, AvFILL(ary) + off);
-	Copy(AvALLOC(ary), AvARRAY(dbargs), AvFILL(ary) + 1 + off, SV*);
-	AvFILL(dbargs) = AvFILL(ary) + off;
+	if (AvMAX(dbargs) < AvFILLp(ary) + off)
+	    av_extend(dbargs, AvFILLp(ary) + off);
+	Copy(AvALLOC(ary), AvARRAY(dbargs), AvFILLp(ary) + 1 + off, SV*);
+	AvFILLp(dbargs) = AvFILLp(ary) + off;
     }
     RETURN;
 }
@@ -1348,7 +1348,7 @@ PP(pp_enteriter)
 	cx->blk_loop.iterary = (AV*)SvREFCNT_inc(POPs);
     else {
 	cx->blk_loop.iterary = curstack;
-	AvFILL(curstack) = sp - stack_base;
+	AvFILLp(curstack) = sp - stack_base;
 	cx->blk_loop.iterix = MARK - stack_base;
     }
 
@@ -1714,7 +1714,7 @@ PP(pp_goto)
 	    if (cx->blk_sub.hasargs) {   /* put @_ back onto stack */
 		AV* av = cx->blk_sub.argarray;
 		
-		items = AvFILL(av) + 1;
+		items = AvFILLp(av) + 1;
 		stack_sp++;
 		EXTEND(stack_sp, items); /* @_ could have been extended. */
 		Copy(AvARRAY(av), stack_sp, items, SV*);
@@ -1764,10 +1764,10 @@ PP(pp_goto)
 		else {	/* save temporaries on recursion? */
 		    if (CvDEPTH(cv) == 100 && dowarn)
 			sub_crush_depth(cv);
-		    if (CvDEPTH(cv) > AvFILL(padlist)) {
+		    if (CvDEPTH(cv) > AvFILLp(padlist)) {
 			AV *newpad = newAV();
 			SV **oldpad = AvARRAY(svp[CvDEPTH(cv)-1]);
-			I32 ix = AvFILL((AV*)svp[1]);
+			I32 ix = AvFILLp((AV*)svp[1]);
 			svp = AvARRAY(svp[0]);
 			for ( ;ix > 0; ix--) {
 			    if (svp[ix] != &sv_undef) {
@@ -1801,7 +1801,7 @@ PP(pp_goto)
 			    AvFLAGS(av) = AVf_REIFY;
 			}
 			av_store(padlist, CvDEPTH(cv), (SV*)newpad);
-			AvFILL(padlist) = CvDEPTH(cv);
+			AvFILLp(padlist) = CvDEPTH(cv);
 			svp = AvARRAY(padlist);
 		    }
 		}
@@ -1809,7 +1809,7 @@ PP(pp_goto)
 		if (!cx->blk_sub.hasargs) {
 		    AV* av = (AV*)curpad[0];
 		    
-		    items = AvFILL(av) + 1;
+		    items = AvFILLp(av) + 1;
 		    if (items) {
 			/* Mark is at the end of the stack. */
 			EXTEND(sp, items);
@@ -1849,7 +1849,7 @@ PP(pp_goto)
 			}
 		    }
 		    Copy(mark,AvARRAY(av),items,SV*);
-		    AvFILL(av) = items - 1;
+		    AvFILLp(av) = items - 1;
 		    
 		    while (items--) {
 			if (*mark)
@@ -2578,10 +2578,10 @@ PP(pp_leaveeval)
      * (Note that the fact that compcv and friends are still set here
      * is, AFAIK, an accident.)  --Chip
      */
-    if (AvFILL(comppad_name) >= 0) {
+    if (AvFILLp(comppad_name) >= 0) {
 	SV **svp = AvARRAY(comppad_name);
 	I32 ix;
-	for (ix = AvFILL(comppad_name); ix >= 0; ix--) {
+	for (ix = AvFILLp(comppad_name); ix >= 0; ix--) {
 	    SV *sv = svp[ix];
 	    if (sv && sv != &sv_undef && *SvPVX(sv) == '&') {
 		SvREFCNT_dec(sv);
