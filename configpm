@@ -159,7 +159,8 @@ while (<CONFIG_SH>) {
     next if m:^#!/bin/sh:;
 
     # Catch PERL_CONFIG_SH=true and PERL_VERSION=n line from Configure.
-    my($k, $v) = s/^(\w+)=(true|\d+)\s*$/$1='$2'\n/;
+    s/^(\w+)=(true|\d+)\s*$/$1='$2'\n/;
+    my($k, $v) = ($1, $2);
 
     # grandfather PATCHLEVEL and SUBVERSION and CONFIG
     if ($k) {
