@@ -462,7 +462,7 @@ XS(XS_utf8_unicode_to_native)
  XSRETURN(1);
 }
 
-XS(XS_Internals_SvREADONLY)
+XS(XS_Internals_SvREADONLY)	/* This is dangerous stuff. */
 {
     dXSARGS;
     SV *sv = SvRV(ST(0));
@@ -478,23 +478,25 @@ XS(XS_Internals_SvREADONLY)
 	    XSRETURN_YES;
 	}
 	else {
+	    /* I hope you really know what you are doing. */
 	    SvREADONLY_off(sv);
 	    XSRETURN_NO;
 	}
     }
-    XSRETURN_UNDEF;
+    XSRETURN_UNDEF; /* Can't happen. */
 }
 
-XS(XS_Internals_SvREFCNT)
+XS(XS_Internals_SvREFCNT)	/* This is dangerous stuff. */
 {
     dXSARGS;
     SV *sv = SvRV(ST(0));
     if (items == 1)
-	 XSRETURN_IV(SvREFCNT(sv) - 1); /* minus the SvRV above */
+	 XSRETURN_IV(SvREFCNT(sv) - 1); /* Minus the ref created for us. */
     else if (items == 2) {
+         /* I hope you really know what you are doing. */
 	 SvREFCNT(sv) = SvIV(ST(1));
 	 XSRETURN_IV(SvREFCNT(sv));
     }
-    XSRETURN_UNDEF;
+    XSRETURN_UNDEF; /* Can't happen. */
 }
 

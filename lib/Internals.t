@@ -7,9 +7,11 @@ BEGIN {
     }
 }
 
-use Test::More tests => 29;
+use Test::More tests => 33;
 
 my $foo;
+my @foo;
+my %foo;
 
 ok( !Internals::SvREADONLY $foo );
 ok(  Internals::SvREADONLY $foo, 1 );
@@ -48,4 +50,9 @@ is(  Internals::SvREFCNT($foo), 1 );
     is(  Internals::SvREFCNT($bar), 1 );
 }
 is(  Internals::SvREFCNT($foo), 1 );
+
+is(  Internals::SvREFCNT(@foo), 1 );
+is(  Internals::SvREFCNT($foo[2]), 1 );
+is(  Internals::SvREFCNT(%foo), 1 );
+is(  Internals::SvREFCNT($foo{foo}), 1 );
 
