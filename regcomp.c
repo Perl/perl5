@@ -1866,6 +1866,30 @@ regclass(void)
     while (regparse < regxend && *regparse != ']') {
        skipcond:
 	Class = UCHARAT(regparse++);
+	if (Class == '[' && regparse + 1 < regxend &&
+	    /* I smell either [: or [= or [. -- POSIX has been here, right? */
+	    (*regparse == ':' || *regparse == '=' || *regparse == '.')) {
+	    char  posixccc = *regparse;
+	    char* posixccs = regparse++;
+	    
+	    while (regparse < regxend && *regparse != posixccc)
+		regparse++;
+	    if (regparse == regxend)
+		/* Grandfather lone [:, [=, [. */
+		regparse = posixccs;
+	    else {
+		regparse++; /* skip over the posixccc */
+		if (*regparse == ']') {
+		    /* Not Implemented Yet.
+		     * (POSIX Extended Character Classes, that is)
+		     * The text between e.g. [: and :] would start
+		     * at posixccs + 1 and stop at regparse - 2. */
+		    if (dowarn && !SIZE_ONLY)
+			warn("Character class syntax [%c %c] is reserved for future extensions", posixccc, posixccc);
+		    regparse++; /* skip over the ending ] */
+		}
+	    }
+	}
 	if (Class == '\\') {
 	    Class = UCHARAT(regparse++);
 	    switch (Class) {
@@ -2662,6 +2686,3 @@ re_croak2(const char* pat1,const char* pat2, va_alist)
     buf[l1] = '\0';			/* Overwrite \n */
     croak("%s", buf);
 }
-
-
-
