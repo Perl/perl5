@@ -3899,14 +3899,6 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 	    return first;
 	}
     }
-    else if (first->op_type == OP_WANTARRAY) {
-	/* XXX true only if this result will be returned, else should
-	   propagate outer context */
-	if (type == OP_AND)
-	    list(other);
-	else
-	    scalar(other);
-    }
     else if (ckWARN(WARN_MISC) && (first->op_flags & OPf_KIDS)) {
 	OP *k1 = ((UNOP*)first)->op_first;
 	OP *k2 = k1->op_sibling;
@@ -3995,12 +3987,6 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
 	    op_free(trueop);
 	    return falseop;
 	}
-    }
-    else if (first->op_type == OP_WANTARRAY) {
-	/* XXX true only if this result will be returned, else should
-	   propagate outer context */
-	list(trueop);
-	scalar(falseop);
     }
     NewOp(1101, logop, 1, LOGOP);
     logop->op_type = OP_COND_EXPR;
