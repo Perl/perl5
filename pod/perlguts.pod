@@ -810,7 +810,7 @@ the mg_type field is changed to be the lower-case letter.
 
 =head1 Subroutines
 
-=head2 XSUB's and the Argument Stack
+=head2 XSUBs and the Argument Stack
 
 The XSUB mechanism is a simple way for Perl programs to access C subroutines.
 An XSUB routine will have a stack that contains the arguments from the Perl
@@ -954,7 +954,7 @@ The most recent development releases of Perl has been experimenting with
 removing Perl's dependency on the "normal" standard I/O suite and allowing
 other stdio implementations to be used.  This involves creating a new
 abstraction layer that then calls whichever implementation of stdio Perl
-was compiled with.  All XSUB's should now use the functions in the PerlIO
+was compiled with.  All XSUBs should now use the functions in the PerlIO
 abstraction layer and not make any assumptions about what kind of stdio
 is being used.
 

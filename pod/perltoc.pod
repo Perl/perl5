@@ -1471,7 +1471,7 @@ B<PerlIO_get_base(f)>, B<PerlIO_get_bufsiz(f)>
 
 =over
 
-=item XSUB's and the Argument Stack
+=item XSUBs and the Argument Stack
 
 =item Calling Perl Routines from within C Programs
 
