@@ -575,8 +575,9 @@ matter how complicated.  To find something between two single
 characters, a pattern like C</x([^x]*)x/> will get the intervening
 bits in $1. For multiple ones, then something more like
 C</alpha(.*?)omega/> would be needed.  But none of these deals with
-nested patterns, nor can they.  For that you'll have to write a
-parser.
+nested patterns.  For balanced expressions using C<(>, C<{>, C<[>
+or C<< < >> as delimiters, use the CPAN module Regexp::Common, or see
+L<perlre/(??{ code })>.  For other cases, you'll have to write a parser.
 
 If you are serious about writing a parser, there are a number of
 modules or oddities that will make your life a lot easier.  There are
@@ -1926,7 +1927,9 @@ Assuming that you don't care about IEEE notations like "NaN" or
 
 You can also use the L<Data::Types|Data::Types> module on
 the CPAN, which exports functions that validate data types
-using these and other regular expressions.
+using these and other regular expressions, or you can use
+the C<Regexp::Common> module from CPAN which has regular
+expressions to match various types of numbers.
 
 If you're on a POSIX system, Perl's supports the C<POSIX::strtod>
 function.  Its semantics are somewhat cumbersome, so here's a C<getnum>
