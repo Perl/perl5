@@ -470,15 +470,17 @@ case "$uselongdouble-$uselongdouble_done" in
 	case "$ccisworkshop" in
 	'')	cat <<EOM
 
-I do not see the Sun Workshop compiler; therefore there is no libsunmath.so;
-therefore I cannot do long doubles, sorry.  Cannot continue, aborting.
+I do not see the Sun Workshop compiler; therefore there is no
+libsunmath.so; therefore I cannot do long doubles, sorry.
+I'm disabling the use of long doubles.
 
 EOM
-		exit 1
+		uselongdouble="$undef"
+		;;
+	*)	libswanted="$libswanted sunmath"
+		loclibpth="$loclibpth /opt/SUNWspro/lib"
 		;;
 	esac
-	libswanted="$libswanted sunmath"
-	loclibpth="$loclibpth /opt/SUNWspro/lib"
 	uselongdouble_done=yes
 	;;
 esac
