@@ -779,7 +779,7 @@ do_chop(register SV *astr, register SV *sv)
 	}
         return;
     }
-    if (SvTYPE(sv) == SVt_PVHV) {
+    else if (SvTYPE(sv) == SVt_PVHV) {
         HV* hv = (HV*)sv;
 	HE* entry;
         (void)hv_iterinit(hv);
@@ -788,6 +788,8 @@ do_chop(register SV *astr, register SV *sv)
             do_chop(astr,hv_iterval(hv,entry));
         return;
     }
+    else if (SvREADONLY(sv))
+	croak(no_modify);
     s = SvPV(sv, len);
     if (len && !SvPOK(sv))
 	s = SvPV_force(sv, len);
@@ -846,7 +848,7 @@ do_chomp(register SV *sv)
 	}
         return count;
     }
-    if (SvTYPE(sv) == SVt_PVHV) {
+    else if (SvTYPE(sv) == SVt_PVHV) {
         HV* hv = (HV*)sv;
 	HE* entry;
         (void)hv_iterinit(hv);
@@ -855,6 +857,8 @@ do_chomp(register SV *sv)
             count += do_chomp(hv_iterval(hv,entry));
         return count;
     }
+    else if (SvREADONLY(sv))
+	croak(no_modify);
     s = SvPV(sv, len);
     if (len && !SvPOKp(sv))
 	s = SvPV_force(sv, len);
