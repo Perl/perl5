@@ -2979,7 +2979,8 @@ yylex(void)
 		tmp = -tmp;
 		gv = Nullgv;
 		gvp = 0;
-		if (ckWARN(WARN_AMBIGUOUS) && hgv)
+		if (ckWARN(WARN_AMBIGUOUS) && hgv
+		    && tmp != KEY_x && tmp != KEY_CORE)	/* never ambiguous */
 		    warner(WARN_AMBIGUOUS,
 		    	"Ambiguous call resolved as CORE::%s(), %s",
 			 GvENAME(hgv), "qualify as such or use &");
