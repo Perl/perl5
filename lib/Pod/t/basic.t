@@ -49,7 +49,7 @@ print "ok 1\n";
 
 # Hard-code a few values to try to get reproducible results.
 $ENV{COLUMNS} = 80;
-$ENV{TERM} = 'xterm';
+$ENV{TERM}    = 'xterm';
 $ENV{TERMCAP} = 'xterm:co=80:do=^J:md=\E[1m:us=\E[4m:me=\E[m';
 
 # Map of translators to file extensions to find the formatted output to
@@ -77,6 +77,7 @@ for (sort keys %translators) {
         open (TMP, 'out.tmp') or die "Cannot open out.tmp: $!\n";
         open (OUTPUT, "> out.$translators{$_}")
             or die "Cannot create out.$translators{$_}: $!\n";
+        binmode OUTPUT;
         local $_;
         while (<TMP>) { last if /^\.TH/ }
         print OUTPUT while <TMP>;
@@ -101,8 +102,12 @@ for (sort keys %translators) {
             print "ok $n\n";
             unlink "out.$translators{$_}";
         } else {
+            my @master = split m/[\r\n]+/, $master;
+            my @output = split m/[\r\n]+/, $output;
             print "not ok $n\n";
             print "# Non-matching output left in out.$translators{$_}\n";
+            "@master" eq "@output" and
+		print "# But the line-end stripped versions are equal\n";
         }
     }
     $n++;
