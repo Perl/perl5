@@ -654,6 +654,25 @@ MAGIC* mg;
 }
 
 int
+magic_clear_all_env()
+{
+#if defined(VMS) || defined(WIN32)
+    DIE("'%ENV = @list;' is not implemented on this machine");
+#else
+    I32 i;
+
+    if (environ == origenviron)
+	New(901, environ, 1, char*);
+    else
+	for (i = 0; environ[i]; i++)
+	    Safefree(environ[i]);
+    environ[0] = Nullch;
+
+    return 0;
+#endif
+}
+
+int
 magic_getsig(sv,mg)
 SV* sv;
 MAGIC* mg;
@@ -1574,7 +1593,7 @@ MAGIC* mg;
 	    }
 	    /* can grab env area too? */
 	    if (origenviron && origenviron[0] == s + 1) {
-		my_setenv("NoNeSuCh", Nullch);
+		my_setenv("NoNe  SuCh", Nullch);
 					    /* force copy of environment */
 		for (i = 0; origenviron[i]; i++)
 		    if (origenviron[i] == s + 1)

@@ -22,7 +22,7 @@ sub ok {
 $Is_MSWin32 = ($^O eq 'MSWin32');
 $PERL = ($Is_MSWin32 ? '.\perl' : './perl');
 
-print "1..28\n";
+print "1..30\n";
 
 eval '$ENV{"foo"} = "hi there";';	# check that ENV is inited inside eval
 if ($Is_MSWin32) { ok 1, `cmd /x /c set foo` eq "foo=hi there\n"; }
@@ -142,3 +142,16 @@ EOF
 ok 26, $] >= 5.00319, $];
 ok 27, $^O;
 ok 28, $^T > 850000000, $^T;
+
+if ($Is_MSWin32) {
+    ok 29, 1;
+    ok 30, 1;
+}
+else {
+    %ENV = ();
+    ok 29, `echo \$foo` eq "\n";
+
+    $ENV{NoNeSuCh} = "foo";
+    $0 = "bar";
+    ok 30, `echo \$NoNeSuCh` eq "foo\n";
+}
