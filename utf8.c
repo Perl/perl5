@@ -257,6 +257,55 @@ Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len)
 }
 
 /*
+=for apidoc A|bool|is_utf8_string_loc|U8 *s|STRLEN len|U8 **p
+
+Like is_ut8_string but store the location of the failure in
+the last argument.
+
+=cut
+*/
+
+bool
+Perl_is_utf8_string_loc(pTHX_ U8 *s, STRLEN len, U8 **p)
+{
+    U8* x = s;
+    U8* send;
+    STRLEN c;
+
+    if (!len)
+	len = strlen((char *)s);
+    send = s + len;
+
+    while (x < send) {
+	 /* Inline the easy bits of is_utf8_char() here for speed... */
+	 if (UTF8_IS_INVARIANT(*x))
+	      c = 1;
+	 else if (!UTF8_IS_START(*x)) {
+	      if (p)
+		  *p = x;
+	      return FALSE;
+	 }
+	 else {
+	      /* ... and call is_utf8_char() only if really needed. */
+	      c = is_utf8_char(x);
+	      if (!c) {
+		   if (p)
+		      *p = x;
+		   return FALSE;
+	      }
+	 }
+        x += c;
+    }
+    if (x != send) {
+       if (p)
+	   *p = x;
+	return FALSE;
+    }
+
+    return TRUE;
+}
+
+/*
 =for apidoc A|UV|utf8n_to_uvuni|U8 *s|STRLEN curlen|STRLEN *retlen|U32 flags
 
 Bottom level UTF-8 decode routine.

@@ -337,6 +337,7 @@ Ap	|bool	|is_uni_punct_lc|UV c
 Ap	|bool	|is_uni_xdigit_lc|UV c
 Apd	|STRLEN	|is_utf8_char	|U8 *p
 Apd	|bool	|is_utf8_string	|U8 *s|STRLEN len
+Apd	|bool	|is_utf8_string_loc|U8 *s|STRLEN len|U8 **p
 Ap	|bool	|is_utf8_alnum	|U8 *p
 Ap	|bool	|is_utf8_alnumc	|U8 *p
 Ap	|bool	|is_utf8_idfirst|U8 *p
