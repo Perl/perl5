@@ -55,6 +55,15 @@ Edit those files and run 'make regen_headers' to effect changes.
 
 EOW
 
+    $warning .= <<EOW if $file eq 'perlapi.c';
+
+Up to the threshold of the door there mounted a flight of twenty-seven
+broad stairs, hewn by some unknown art of the same black stone.  This
+was the only entrance to the tower.
+
+
+EOW
+
     if ($file =~ m:\.[ch]$:) {
 	$warning =~ s:^: * :gm;
 	$warning =~ s: +$::gm;

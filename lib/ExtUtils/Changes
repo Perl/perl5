@@ -1,3 +1,9 @@
+6.13 Thu Jul 31 16:48:01 PDT 2003
+    - Generated META.yml now has the prereqs in sorted order (Andy Lester)
+    - Arguments to child Makefile.PLs were still having .. prepended.  This
+      was exposed by the earlier fix of rt.perl.org 4345.
+    - extralibs.ld (for static builds) wasn't being cleaned up.
+
 6.12 Tue Jul 29 22:19:38 PDT 2003
     - Should any of your prefixes be /, MakeMaker might lose this and
       prepend your prefix as "prefixyour/directory" rather than

@@ -20,8 +20,8 @@ BEGIN {
 
 use File::Basename;
 use vars qw($Revision @ISA $VERSION);
-($VERSION) = '5.69';
-($Revision) = q$Revision: 1.107 $ =~ /Revision:\s+(\S+)/;
+($VERSION) = '5.70';
+($Revision) = q$Revision: 1.109 $ =~ /Revision:\s+(\S+)/;
 
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
@@ -1229,9 +1229,10 @@ clean :: clean_subdirs
 	    else { push(@otherfiles, $word); }
 	}
     }
-    push(@otherfiles, qw[ blib $(MAKE_APERL_FILE) extralibs.ld 
+    push(@otherfiles, qw[ blib $(MAKE_APERL_FILE) 
                           perlmain.c pm_to_blib pm_to_blib.ts ]);
     push(@otherfiles, $self->catfile('$(INST_ARCHAUTODIR)','extralibs.all'));
+    push(@otherfiles, $self->catfile('$(INST_ARCHAUTODIR)','extralibs.ld'));
 
     # Occasionally files are repeated several times from different sources
     { my(%of) = map { ($_ => 1) } @otherfiles; @otherfiles = keys %of; }
