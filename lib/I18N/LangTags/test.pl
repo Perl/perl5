@@ -3,12 +3,14 @@
 
 ######################### We start with some black magic to print on failure.
 require 5;
- # Time-stamp: "2001-06-20 01:43:31 MDT"
+ # Time-stamp: "2001-06-21 22:59:38 MDT"
 use strict;
 use Test;
 BEGIN { plan tests => 46 };
 BEGIN { ok 1 }
 use I18N::LangTags (':ALL');
+
+print "# Perl v$], I18N::LangTags v$I18N::LangTags::VERSION\n";
 
 ok !is_language_tag('');
 ok  is_language_tag('fr');

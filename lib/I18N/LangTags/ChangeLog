@@ -1,6 +1,11 @@
 Revision history for Perl module I18N::LangTags.
-                                        Time-stamp: "2001-06-20 15:05:23 MDT"
+                                        Time-stamp: "2001-06-21 23:04:08 MDT"
 
+2001-06-21  Sean M. Burke  sburke@cpan.org
+	
+	* Release 0.26 -- just making cosmetic changes
+	to test.pl, at Jarkko's request.
+	
 2001-06-20  Sean M. Burke  sburke@cpan.org
 
 	* Release 0.25 -- just tweaking panic_languages behavior
