@@ -222,16 +222,20 @@ Consider using the latest STABLE release.
 EOM
 		 exit 1
 	      fi
-	      ldflags="-pthread $ldflags"
 	      case "$osvers" in
 	      # Both in 4.x and 5.x gethostbyaddr_r exists but
 	      # it is "Temporary function, not threadsafe"...
 	      4.*)	d_gethostbyaddr_r="undef"
 			d_gethostbyaddr_r_proto="0"
+			ldflags="-pthread $ldflags"
 			;;
 	      5.*)	d_gethostbyaddr_r="undef"
 			d_gethostbyaddr_r_proto="0"
-
+                        if [ `/sbin/sysctl -n kern.osreldate` -lt 500016 ]; then
+                                ldflags="-pthread $ldflags"
+                        fi
+			;;
+	      *)	ldflags="-pthread $ldflags"
 			;;
 	      esac
 	      ;;
