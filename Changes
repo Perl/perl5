@@ -28,6 +28,77 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 21115] By: jhi                                   on 2003/09/08  21:20:04
+        Log: Integrate:
+             [ 21112]
+             Retract #21096, mostly: I had misexplained the situation
+             to Scott A. Crosby.  What would be really bad would be
+             being able to see the hash values of hash keys; but seeing
+             the seed value while not good for the ultimate paranoia
+             viewpoint is not that bad, as long as the users are fully
+             aware of the dangers of disclosing the hash seed.
+             So hash_seed() is okay.
+             
+             [ 21113]
+             Subject: [PATCH] silence 1 compiler warning
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Mon, 8 Sep 2003 23:04:45 +0100
+             Message-ID: <20030908230445.E30881@plum.flirble.org>
+     Branch: maint-5.8/perl
+	  !> lib/Hash/Util.pm lib/Hash/Util.t pod/perlrun.pod universal.c
+____________________________________________________________________________
+[ 21114] By: jhi                                   on 2003/09/08  21:17:45
+        Log: Integrate:
+             [ 21062]
+             Subject: [PATCH] honoring void context for map()
+             From: Tassilo von Parseval <tassilo.parseval@post.rwth-aachen.de>
+             Date: Thu, 04 Sep 2003 11:13:41 +0200
+             Message-id: <20030904091341.GA30655@ethan>
+     Branch: maint-5.8/perl
+	  !> pp_ctl.c
+____________________________________________________________________________
+[ 21111] By: jhi                                   on 2003/09/08  21:01:25
+        Log: Integrate:
+             [ 21109]
+             Subject: [PATCH] configpm: about 1.5K less per thread
+             From: Elizabeth Mattijsen <liz@dijkmat.nl>
+             Date: Mon, 8 Sep 2003 23:58:34 +0200
+             Message-Id: <p05111b21bb829c68b496@[192.168.56.4]>
+             
+             [ 21110]
+             Urk.  unique, not shared.
+     Branch: maint-5.8/perl
+	  !> configpm
+____________________________________________________________________________
+[ 21108] By: jhi                                   on 2003/09/08  20:51:14
+        Log: Integrate:
+             [ 21105]
+             Regen perlapi.
+             
+             [ 21106]
+             A version of change #21073 that works.
+             
+             [ 21107]
+             Subject: [PATCH] warnings.pl: each thread 10K smaller
+             From: Elizabeth Mattijsen <liz@dijkmat.nl>
+             Date: Mon, 8 Sep 2003 22:22:38 +0200
+             Message-Id: <p05111b16bb827ce551da@[192.168.56.4]>
+     Branch: maint-5.8/perl
+	  !> ext/PerlIO/scalar/scalar.xs ext/PerlIO/t/scalar.t
+	  !> lib/warnings.pm pod/perlapi.pod warnings.pl
+____________________________________________________________________________
+[ 21104] By: jhi                                   on 2003/09/08  20:22:21
+        Log: Integrate:
+             [ 21103]
+             Radu Greab is my hero.
+     Branch: maint-5.8/perl
+	  !> pp_sys.c
+____________________________________________________________________________
+[ 21102] By: jhi                                   on 2003/09/08  19:43:33
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 21101] By: jhi                                   on 2003/09/08  19:39:43
         Log: Integrate:
              [ 21100]
