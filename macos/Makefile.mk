@@ -4,88 +4,6 @@
 #	Author		:	Matthias Neeracher
 #	Language	:	MPW Shell/Make
 #
-#  $Log: Makefile.mk,v $
-#  Revision 1.18  2001/07/08 05:06:48  pudge
-#  Fix makefile for building and installing bundled libs
-#
-#  Revision 1.17  2001/05/05 20:32:41  pudge
-#  Prepare for 5.6.1a2, mostly updates to tests, and File::Find, and latest changes from main repository
-#
-#  Revision 1.16  2001/03/22 04:30:36  pudge
-#  Fix MrC resouce thing
-#
-#  Revision 1.15  2001/03/22 04:23:58  pudge
-#  Misc. updates
-#
-#  Revision 1.14  2001/03/20 02:34:06  pudge
-#  Add in missing extensions
-#
-#  Revision 1.13  2001/01/30 13:21:12  pudge
-#  Re-add
-#
-#  Revision 1.11  2001/01/30 13:13:29  pudge
-#  Do translators only for 68K (for now)
-#
-#  Revision 1.10  2001/01/24 07:45:04  neeri
-#  Optimize some build rules to avoid rebuilds
-#
-#  Revision 1.9  2001/01/23 07:42:15  neeri
-#  Support fat builds involving SC (Task 24871)
-#
-#  Revision 1.8  2001/01/16 21:12:21  pudge
-#  Misc. makefile changes
-#
-#  Revision 1.7  2001/01/09 21:57:18  pudge
-#  Change AutoInit to full paths
-#
-#  Revision 1.6  2000/12/29 00:28:23  pudge
-#  Add additional standard extensions
-#
-#  Revision 1.5  2000/12/25 09:49:19  neeri
-#  Tweak makefile
-#
-#  Revision 1.4  2000/12/22 08:31:47  neeri
-#  Some build tweaks
-#
-#  Revision 1.3  2000/09/09 22:18:25  neeri
-#  Dynamic libraries compile under 5.6
-#
-#  Revision 1.2  2000/08/21 08:22:04  neeri
-#  Build tweaks & forgotten files
-#
-#  Revision 1.1  2000/08/14 01:48:17  neeri
-#  Checked into Sourceforge
-#
-#  Revision 1.2  2000/01/10 02:55:12  neeri
-#  Adapt to CW5.3 compilers, start MPW libraries
-#
-#  Revision 1.1  1999/12/13 01:28:35  neeri
-#  Added to new MacPerl build
-#
-#  Revision 1.8  1999/01/24 05:14:02  neeri
-#  Various tweaks made in 1998
-#
-#  Revision 1.7  1998/04/21 22:27:07  neeri
-#  MacPerl 5.2.0r4
-#
-#  Revision 1.6  1998/04/07 01:47:00  neeri
-#  MacPerl 5.2.0r4b1
-#
-#  Revision 1.5  1997/11/18 00:51:41  neeri
-#  MacPerl 5.1.5
-#
-#  Revision 1.4  1997/08/08 16:38:45  neeri
-#  MacPerl 5.1.4b1 + time() fix
-#
-#  Revision 1.3  1997/06/04 22:55:12  neeri
-#  Compiles fine.
-#
-#  Revision 1.2  1997/05/17 21:14:31  neeri
-#  Last tweaks before 5.004 merge
-#
-#  Revision 1.1  1997/04/07 20:46:25  neeri
-#  Synchronized with MacPerl 5.1.4a1
-#
 
 MACPERL_SRC	= {$(PWD)}:
 
@@ -209,6 +127,7 @@ Dynamic_Ext_Mac	=	Mac
 Dynamic_Ext_Std	=	
 Dynamic_Ext_Xtr =	
 Static_Ext_Xtr =	\
+	Time:HiRes:HiRes \
 	Compress:Zlib:Zlib Digest:MD5:MD5 HTML:Parser:Parser \
 	MIME:Base64:Base64 Storable:Storable List:Util:Util
 Static_Ext_Mac	= 	\
@@ -355,7 +274,7 @@ runperl: runperl.c
 # to prevent further builds until it is deleted.
 #
 preplibrary: miniperl
-	For i in :ext:{$(Static_Ext_Mac:d)} ::ext:{$(Static_Ext_Std:d)} :bundled_ext:{$(Static_Ext_Xtr:d)}
+	For i in :bundled_ext:{$(Static_Ext_Xtr:d)} :ext:{$(Static_Ext_Mac:d)} ::ext:{$(Static_Ext_Std:d)}
 		directory {{i}}
 		Set Echo 0
 		If `Newer Makefile.PL Makefile.mk` == "Makefile.PL"

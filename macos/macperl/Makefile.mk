@@ -4,86 +4,22 @@
 # Author	: Matthias Neeracher
 # Language	: MPW Shell/Make
 #
-#  $Log: Makefile.mk,v $
-#  Revision 1.16  2001/07/08 17:48:52  pudge
-#  Enable MacPerl help
-#
-#  Revision 1.15  2001/07/08 05:08:13  pudge
-#  Fix makefile for building and installing bundled libs
-#
-#  Revision 1.14  2001/04/17 03:59:58  pudge
-#  Minor version/config changes
-#
-#  Revision 1.13  2001/03/22 04:28:42  pudge
-#  Misc. updates
-#
-#  Revision 1.12  2001/03/20 02:26:13  pudge
-#  Add in missing extensions
-#
-#  Revision 1.11  2001/01/30 05:17:05  pudge
-#  Minor change
-#
-#  Revision 1.10  2001/01/24 07:06:42  neeri
-#  Export symbols from PowerPC applications so dynamic extensions work
-#
-#  Revision 1.9  2001/01/23 07:35:16  neeri
-#  Support fat builds involving SC (Task 24871)
-#
-#  Revision 1.8  2001/01/23 05:31:47  neeri
-#  Make Droplet and Font LDEF buildable with SC (Tasks 24870, 24872)
-#
-#  Revision 1.7  2001/01/16 21:01:42  pudge
-#  Minor changes
-#
-#  Revision 1.6  2001/01/13 05:58:43  neeri
-#  Automatically create Obj folder, fix libraries for MPDroplet.code
-#
-#  Revision 1.5  2001/01/09 21:44:59  pudge
-#  Add more extensions
-#
-#  Revision 1.4  2000/12/29 00:30:16  pudge
-#  Temporary change for my setup
-#
-#  Revision 1.3  2000/12/25 09:47:39  neeri
-#  Fix libraries for 68K build
-#
-#  Revision 1.2  2000/12/22 08:35:45  neeri
-#  PPC, MrC, and SC builds work
-#
-#  Revision 1.1  2000/12/07 08:52:13  neeri
-#  PPC app compiles and sort of runs
-#
-#  Revision 1.5  1998/04/21 22:27:03  neeri
-#  MacPerl 5.2.0r4
-#
-#  Revision 1.4  1998/04/07 01:46:54  neeri
-#  MacPerl 5.2.0r4b1
-#
-#  Revision 1.3  1997/11/18 00:54:05  neeri
-#  MacPerl 5.1.5
-#
-#  Revision 1.2  1997/08/08 16:58:16  neeri
-#  MacPerl 5.1.4b1
-#
-#  Revision 1.1  1997/06/23 17:11:14  neeri
-#  Checked into CVS
-#
 
 PERL_SRC 	= ::perl:
 MACPERL_SRC	= $(PERL_SRC)macos:
 
 .INCLUDE : $(MACPERL_SRC)BuildRules.mk
 
-DB		= ::db:
-XL		= ::XL:
+DB		= $(PERL_SRC):db:
+XL		= $(PERL_SRC):XL:
 GD		= :perl:macos:ext:GD:libgd:
-AEGizmos	= ::AEGizmos:
-IC 		= ::IC:
+AEGizmos	= ::::AEGizmos:
+IC 		= $(PERL_SRC):IC:
 SFIO		= "{{SFIO}}"
 GUSI		= "{{GUSI}}"
-MoreFiles	= ::MoreFiles:
+MoreFiles	= $(PERL_SRC):MoreFiles:
 
-COpt += -i $(MACPERL_SRC) -i $(PERL_SRC) -i $(DB)include: -i ::IC: -i $(AEGizmos)include:
+COpt += -i $(MACPERL_SRC) -i $(PERL_SRC) -i $(DB)include: -i $(IC) -i $(AEGizmos)include:
 ApplRez 		= 	Rez -a -t APPL -c McPL -i $(MACPERL_SRC)
 ApplMWLOpt		=	${LOpt} -xm application -d -warn
 ApplLink68K		=	MWLink68K ${ApplMWLOpt} -model far
@@ -126,6 +62,7 @@ ObjectsSC 		= {$(MacPerlSources) $(PerlSources)}.SC.o
 ObjectsMrC 		= {$(MacPerlSources) $(PerlSources)}.MrC.o
 
 Static_Ext_Xtr =	\
+	Time:HiRes:HiRes \
 	Compress:Zlib:Zlib Digest:MD5:MD5 HTML:Parser:Parser \
 	MIME:Base64:Base64 Storable:Storable List:Util:Util
 Static_Ext_Mac	= 	\

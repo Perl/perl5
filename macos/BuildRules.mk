@@ -17,6 +17,13 @@ MAKE	 	= BuildProgram
 #
 # We try to support both CodeWarrior MPW Include models
 #
+MWCOptimize    *= 
+MWCPPCOptimize *= ${MWCOptimize}
+MWCPPCOptimize *= ${MWCOptimize}
+MPWOptimize    *= 
+MRCOptimize    *= ${MPWOptimize}
+SCOptimize     *= ${MPWOptimize}
+
 CInc		=	
 MWCInc		= 	-nosyspath -convertpaths -nodefaults -i : -i :: -i {{SFIO}}include: -i {{GUSI}}include: -i "$(CWANSIInc)" -i "{{CIncludes}}"
 MPWInc		= 	-i : -i :: -i {{SFIO}}include: -i {{GUSI}}include: -i "{{CIncludes}}"
@@ -26,11 +33,11 @@ OptPPC		=	-tb on
 MWCOpt		=	${COpt} ${MWCInc} ${CInc} -w off
 # -w 2,3,6,7,35,29
 MPWOpt		=	${COpt} ${MPWInc} ${CInc} -includes unix -w off
-MPWCpOpt	=	-i "{{STLport}}stl:" -ER -bool on 
-C68K		=	MWC68K ${MWCOpt} ${Opt68K}
-CPPC		=	MWCPPC ${MWCOpt} ${OptPPC}
-CSC			=	SC ${MPWOpt} ${Opt68K}
-CMRC		=	MrC ${SFIOInc} ${MPWOpt} ${OptPPC}
+MPWCpOpt	=	-i "{{STLport}}stl:" -ER -bool on
+C68K		=	MWC68K ${MWCOpt} ${Opt68K} ${MWC68KOptimize}
+CPPC		=	MWCPPC ${MWCOpt} ${OptPPC} ${MWCPPCOptimize}
+CSC			=	SC ${MPWOpt} ${Opt68K} ${SCOptimize}
+CMRC		=	MrC ${SFIOInc} ${MPWOpt} ${OptPPC} ${MRCOptimize}
 CpSC		=	SCpp ${MPWOpt} ${MPWCpOpt} ${Opt68K}
 CpMRC		=	MrCpp ${SFIOInc} ${MPWOpt} ${MPWCpOpt} ${OptPPC}
 ROptions 	= 	-i : -i "{{GUSI}}src:" -i "{{GUSI}}include:"

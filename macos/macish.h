@@ -3,38 +3,6 @@ Project	:	Perl5				-
 File		:	macish.h			-	Mac specific things
 Author	:	Matthias Neeracher
 
-$Log: macish.h,v $
-Revision 1.9  2001/05/05 20:32:41  pudge
-Prepare for 5.6.1a2, mostly updates to tests, and File::Find, and latest changes from main repository
-
-Revision 1.8  2001/04/17 03:53:44  pudge
-Minor version/config changes, plus sync with maint-5.6/perl
-
-Revision 1.7  2001/03/30 21:59:38  pudge
-Add basic support for kill, which does nothing
-
-Revision 1.6  2001/03/20 02:40:25  pudge
-Add times() and struct tms
-
-Revision 1.5  2001/02/23 23:34:04  pudge
-Add xsubpp.patch; update versions; fix missing fp.h for SC/MrC
-
-Revision 1.4  2000/12/22 08:31:47  neeri
-Some build tweaks
-
-Revision 1.3  2000/09/09 22:18:25  neeri
-Dynamic libraries compile under 5.6
-
-Revision 1.2  2000/08/21 08:22:04  neeri
-Build tweaks & forgotten files
-
-Revision 1.1  2000/08/14 01:48:17  neeri
-Checked into Sourceforge
-
-Revision 1.1  2000/05/14 21:45:04  neeri
-First build released to public
-
-
 *********************************************************************/
 
 #include <Types.h>
@@ -106,6 +74,11 @@ char * MacPerl_MPWFileName(char * file);
 char * GetSysErrText(short, char *);
 unsigned char * MacPerl_CopyC2P(const char * c, unsigned char * p);
 const char * MacPerl_CanonDir(const char * dir, char * buf);
+
+/* These defined following should be defined in 5.8 in config.h */
+#define HAS_USLEEP
+#define HAS_UALARM
+
 
 /* HAS_IOCTL:
  *	This symbol, if defined, indicates that the ioctl() routine is
