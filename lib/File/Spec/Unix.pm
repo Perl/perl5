@@ -37,9 +37,13 @@ path. On UNIX eliminates successive slashes and successive "/.".
 sub canonpath {
     my ($self,$path) = @_;
     
-    # Handle POSIX-style node names beginning with double slash
+    # Handle POSIX-style node names beginning with double slash (qnx, nto)
+    # Handle network path names beginning with double slash (cygwin)
+    # (POSIX says: "a pathname that begins with two successive slashes
+    # may be interpreted in an implementation-defined manner, although
+    # more than two leading slashes shall be treated as a single slash.")
     my $node = '';
-    if ( $^O =~ m/^(?:qnx|nto)$/ && $path =~ s:^(//[^/]+)(/|\z):/:s ) {
+    if ( $^O =~ m/^(?:qnx|nto|cygwin)$/ && $path =~ s:^(//[^/]+)(/|\z):/:s ) {
       $node = $1;
     }
     # This used to be

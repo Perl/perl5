@@ -140,22 +140,24 @@ typedef double NV;			/* Older perls lack the NV type */
  * TRACEME() will only output things when the $Storable::DEBUGME is true.
  */
 
-#define TRACEME(x)	do {									\
+#define TRACEME(x)										\
+  STMT_START {											\
 	if (SvTRUE(perl_get_sv("Storable::DEBUGME", TRUE)))	\
-		{ PerlIO_stdoutf x; PerlIO_stdoutf("\n"); }			\
-} while (0)
+		{ PerlIO_stdoutf x; PerlIO_stdoutf("\n"); }		\
+  } STMT_END
 #else
 #define TRACEME(x)
 #endif	/* DEBUGME */
 
 #ifdef DASSERT
-#define ASSERT(x,y)	do {									\
+#define ASSERT(x,y)										\
+  STMT_START {											\
 	if (!(x)) {												\
 		PerlIO_stdoutf("ASSERT FAILED (\"%s\", line %d): ",	\
 			__FILE__, __LINE__);							\
 		PerlIO_stdoutf y; PerlIO_stdoutf("\n");				\
 	}														\
-} while (0)
+  } STMT_END
 #else
 #define ASSERT(x,y)
 #endif
@@ -349,8 +351,19 @@ typedef struct stcxt {
 	int ver_major;		/* major of version for retrieved object */
 	int ver_minor;		/* minor of version for retrieved object */
 	SV *(**retrieve_vtbl)();	/* retrieve dispatch table */
-	struct stcxt *prev;	/* contexts chained backwards in real recursion */
+	SV *prev;		/* contexts chained backwards in real recursion */
+	SV *my_sv;		/* the blessed scalar who's SvPVX() I am */
 } stcxt_t;
+
+#define NEW_STORABLE_CXT_OBJ(cxt)					\
+  STMT_START {										\
+	SV *self = newSV(sizeof(stcxt_t) - 1);			\
+	SV *my_sv = newRV_noinc(self);					\
+	sv_bless(my_sv, gv_stashpv("Storable::Cxt", TRUE));	\
+	cxt = (stcxt_t *)SvPVX(self);					\
+	Zero(cxt, 1, stcxt_t);							\
+	cxt->my_sv = my_sv;								\
+  } STMT_END
 
 #if defined(MULTIPLICITY) || defined(PERL_OBJECT) || defined(PERL_CAPI)
 
@@ -364,29 +377,33 @@ typedef struct stcxt {
 #endif	/* < perl5.004_68 */
 
 #define dSTCXT_PTR(T,name)							\
-	T name = ((perinterp_sv && SvIOK(perinterp_sv)	\
-				? INT2PTR(T, SvIVX(perinterp_sv)) : (T) 0))
+	T name = ((perinterp_sv && SvIOK(perinterp_sv) && SvIVX(perinterp_sv)	\
+				? (T)SvPVX(SvRV((SV*)SvIVX(perinterp_sv))) : (T) 0))
 #define dSTCXT										\
 	dSTCXT_SV;										\
 	dSTCXT_PTR(stcxt_t *, cxt)
 
-#define INIT_STCXT									\
-      dSTCXT;										\
-      Newz(0, cxt, 1, stcxt_t);						\
-      sv_setiv(perinterp_sv, PTR2IV(cxt))
+#define INIT_STCXT							\
+	dSTCXT;									\
+	NEW_STORABLE_CXT_OBJ(cxt);				\
+	sv_setiv(perinterp_sv, PTR2IV(cxt->my_sv))
 
-#define SET_STCXT(x) do {							\
+#define SET_STCXT(x)								\
+  STMT_START {										\
 	dSTCXT_SV;										\
-	sv_setiv(perinterp_sv, PTR2IV(x));				\
-} while (0)
+	sv_setiv(perinterp_sv, PTR2IV(x->my_sv));		\
+  } STMT_END
 
 #else /* !MULTIPLICITY && !PERL_OBJECT && !PERL_CAPI */
 
 static stcxt_t Context;
 static stcxt_t *Context_ptr = &Context;
 #define dSTCXT			stcxt_t *cxt = Context_ptr
-#define INIT_STCXT		dSTCXT
-#define SET_STCXT(x)	Context_ptr = x
+#define INIT_STCXT						\
+	dSTCXT;								\
+	NEW_STORABLE_CXT_OBJ(cxt)
+
+#define SET_STCXT(x)		Context_ptr = x
 
 #endif /* MULTIPLICITY || PERL_OBJECT || PERL_CAPI */
 
@@ -407,7 +424,7 @@ static stcxt_t *Context_ptr = &Context;
  * but the topmost context stacked.
  */
 
-#define CROAK(x)	do { cxt->s_dirty = 1; croak x; } while (0)
+#define CROAK(x)	STMT_START { cxt->s_dirty = 1; croak x; } STMT_END
 
 /*
  * End of "thread-safe" related definitions.
@@ -449,20 +466,22 @@ static stcxt_t *Context_ptr = &Context;
  */
 #define kbuf	(cxt->keybuf).arena
 #define ksiz	(cxt->keybuf).asiz
-#define KBUFINIT() do {					\
+#define KBUFINIT()						\
+  STMT_START {							\
 	if (!kbuf) {						\
 		TRACEME(("** allocating kbuf of 128 bytes")); \
 		New(10003, kbuf, 128, char);	\
 		ksiz = 128;						\
 	}									\
-} while (0)
-#define KBUFCHK(x) do {			\
+  } STMT_END
+#define KBUFCHK(x)				\
+  STMT_START {					\
 	if (x >= ksiz) {			\
 		TRACEME(("** extending kbuf to %d bytes (had %d)", x+1, ksiz)); \
 		Renew(kbuf, x+1, char);	\
 		ksiz = x+1;				\
 	}							\
-} while (0)
+  } STMT_END
 
 /*
  * memory buffer handling
@@ -482,7 +501,8 @@ static stcxt_t *Context_ptr = &Context;
 #define int_aligned(x)	\
 	((unsigned long) (x) == trunc_int(x))
 
-#define MBUF_INIT(x) do {				\
+#define MBUF_INIT(x)					\
+  STMT_START {							\
 	if (!mbase) {						\
 		TRACEME(("** allocating mbase of %d bytes", MGROW)); \
 		New(10003, mbase, MGROW, char);	\
@@ -493,7 +513,7 @@ static stcxt_t *Context_ptr = &Context;
 		mend = mbase + x;				\
 	else								\
 		mend = mbase + msiz;			\
-} while (0)
+  } STMT_END
 
 #define MBUF_TRUNC(x)	mptr = mbase + x
 #define MBUF_SIZE()		(mptr - mbase)
@@ -506,34 +526,38 @@ static stcxt_t *Context_ptr = &Context;
  * buffer into cxt->msaved, before MBUF_LOAD() can be used to retrieve
  * data from a string.
  */
-#define MBUF_SAVE_AND_LOAD(in) do {		\
+#define MBUF_SAVE_AND_LOAD(in)			\
+  STMT_START {							\
 	ASSERT(!cxt->membuf_ro, ("mbase not already saved")); \
 	cxt->membuf_ro = 1;					\
 	TRACEME(("saving mbuf"));			\
 	StructCopy(&cxt->membuf, &cxt->msaved, struct extendable); \
 	MBUF_LOAD(in);						\
-} while (0)
+  } STMT_END
 
-#define MBUF_RESTORE() do {				\
+#define MBUF_RESTORE() 					\
+  STMT_START {							\
 	ASSERT(cxt->membuf_ro, ("mbase is read-only")); \
 	cxt->membuf_ro = 0;					\
 	TRACEME(("restoring mbuf"));		\
 	StructCopy(&cxt->msaved, &cxt->membuf, struct extendable); \
-} while (0)
+  } STMT_END
 
 /*
  * Use SvPOKp(), because SvPOK() fails on tainted scalars.
  * See store_scalar() for other usage of this workaround.
  */
-#define MBUF_LOAD(v) do {				\
+#define MBUF_LOAD(v) 					\
+  STMT_START {							\
 	ASSERT(cxt->membuf_ro, ("mbase is read-only")); \
 	if (!SvPOKp(v))						\
 		CROAK(("Not a scalar string"));	\
 	mptr = mbase = SvPV(v, msiz);		\
 	mend = mbase + msiz;				\
-} while (0)
+  } STMT_END
 
-#define MBUF_XTEND(x) do {			\
+#define MBUF_XTEND(x) 				\
+  STMT_START {						\
 	int nsz = (int) round_mgrow((x)+msiz);	\
 	int offset = mptr - mbase;		\
 	ASSERT(!cxt->membuf_ro, ("mbase is not read-only")); \
@@ -543,31 +567,35 @@ static stcxt_t *Context_ptr = &Context;
 	msiz = nsz;						\
 	mptr = mbase + offset;			\
 	mend = mbase + nsz;				\
-} while (0)
+  } STMT_END
 
-#define MBUF_CHK(x) do {			\
+#define MBUF_CHK(x) 				\
+  STMT_START {						\
 	if ((mptr + (x)) > mend)		\
 		MBUF_XTEND(x);				\
-} while (0)
+  } STMT_END
 
-#define MBUF_GETC(x) do {			\
+#define MBUF_GETC(x) 				\
+  STMT_START {						\
 	if (mptr < mend)				\
 		x = (int) (unsigned char) *mptr++;	\
 	else							\
 		return (SV *) 0;			\
-} while (0)
+  } STMT_END
 
 #ifdef CRAY_HACK
-#define MBUF_GETINT(x) do {				\
+#define MBUF_GETINT(x) 					\
+  STMT_START {							\
 	oC(x);								\
 	if ((mptr + 4) <= mend) {			\
 		memcpy(oI(&x), mptr, 4);		\
 		mptr += 4;						\
 	} else								\
 		return (SV *) 0;				\
-} while (0)
+  } STMT_END
 #else
-#define MBUF_GETINT(x) do {				\
+#define MBUF_GETINT(x) 					\
+  STMT_START {							\
 	if ((mptr + sizeof(int)) <= mend) {	\
 		if (int_aligned(mptr))			\
 			x = *(int *) mptr;			\
@@ -576,18 +604,20 @@ static stcxt_t *Context_ptr = &Context;
 		mptr += sizeof(int);			\
 	} else								\
 		return (SV *) 0;				\
-} while (0)
+  } STMT_END
 #endif
 
-#define MBUF_READ(x,s) do {			\
+#define MBUF_READ(x,s) 				\
+  STMT_START {						\
 	if ((mptr + (s)) <= mend) {		\
 		memcpy(x, mptr, s);			\
 		mptr += s;					\
 	} else							\
 		return (SV *) 0;			\
-} while (0)
+  } STMT_END
 
-#define MBUF_SAFEREAD(x,s,z) do {	\
+#define MBUF_SAFEREAD(x,s,z) 		\
+  STMT_START {						\
 	if ((mptr + (s)) <= mend) {		\
 		memcpy(x, mptr, s);			\
 		mptr += s;					\
@@ -595,39 +625,43 @@ static stcxt_t *Context_ptr = &Context;
 		sv_free(z);					\
 		return (SV *) 0;			\
 	}								\
-} while (0)
+  } STMT_END
 
-#define MBUF_PUTC(c) do {			\
+#define MBUF_PUTC(c) 				\
+  STMT_START {						\
 	if (mptr < mend)				\
 		*mptr++ = (char) c;			\
 	else {							\
 		MBUF_XTEND(1);				\
 		*mptr++ = (char) c;			\
 	}								\
-} while (0)
+  } STMT_END
 
 #ifdef CRAY_HACK
-#define MBUF_PUTINT(i) do {			\
+#define MBUF_PUTINT(i) 				\
+  STMT_START {						\
 	MBUF_CHK(4);					\
 	memcpy(mptr, oI(&i), 4);		\
 	mptr += 4;						\
-} while (0)
+  } STMT_END
 #else
-#define MBUF_PUTINT(i) do {			\
+#define MBUF_PUTINT(i) 				\
+  STMT_START {						\
 	MBUF_CHK(sizeof(int));			\
 	if (int_aligned(mptr))			\
 		*(int *) mptr = i;			\
 	else							\
 		memcpy(mptr, &i, sizeof(int));	\
 	mptr += sizeof(int);			\
-} while (0)
+  } STMT_END
 #endif
 
-#define MBUF_WRITE(x,s) do {		\
+#define MBUF_WRITE(x,s) 			\
+  STMT_START {						\
 	MBUF_CHK(s);					\
 	memcpy(mptr, x, s);				\
 	mptr += s;						\
-} while (0)
+  } STMT_END
 
 /*
  * Possible return values for sv_type().
@@ -728,23 +762,26 @@ static char magicstr[] = "pst0";			/* Used as a magic number */
  * Useful store shortcuts...
  */
 
-#define PUTMARK(x) do {						\
+#define PUTMARK(x) 							\
+  STMT_START {								\
 	if (!cxt->fio)							\
 		MBUF_PUTC(x);						\
 	else if (PerlIO_putc(cxt->fio, x) == EOF)	\
 		return -1;							\
-} while (0)
+  } STMT_END
 
-#define WRITE_I32(x)	do {			\
+#define WRITE_I32(x)					\
+  STMT_START {							\
 	ASSERT(sizeof(x) == sizeof(I32), ("writing an I32"));	\
 	if (!cxt->fio)						\
 		MBUF_PUTINT(x);					\
 	else if (PerlIO_write(cxt->fio, oI(&x), oS(sizeof(x))) != oS(sizeof(x))) \
 		return -1;					\
-	} while (0)
+  } STMT_END
 
 #ifdef HAS_HTONL
-#define WLEN(x)	do {				\
+#define WLEN(x)						\
+  STMT_START {						\
 	if (cxt->netorder) {			\
 		int y = (int) htonl(x);		\
 		if (!cxt->fio)				\
@@ -757,19 +794,21 @@ static char magicstr[] = "pst0";			/* Used as a magic number */
 		else if (PerlIO_write(cxt->fio,oI(&x),oS(sizeof(x))) != oS(sizeof(x))) \
 			return -1;				\
 	}								\
-} while (0)
+  } STMT_END
 #else
 #define WLEN(x)	WRITE_I32(x)
 #endif
 
-#define WRITE(x,y) do {						\
+#define WRITE(x,y) 							\
+  STMT_START {								\
 	if (!cxt->fio)							\
 		MBUF_WRITE(x,y);					\
 	else if (PerlIO_write(cxt->fio, x, y) != y)	\
 		return -1;							\
-	} while (0)
+  } STMT_END
 
-#define STORE_PV_LEN(pv, len, small, large) do {	\
+#define STORE_PV_LEN(pv, len, small, large)			\
+  STMT_START {							\
 	if (len <= LG_SCALAR) {				\
 		unsigned char clen = (unsigned char) len;	\
 		PUTMARK(small);					\
@@ -781,17 +820,18 @@ static char magicstr[] = "pst0";			/* Used as a magic number */
 		WLEN(len);						\
 		WRITE(pv, len);					\
 	}									\
-} while (0)
+  } STMT_END
 
 #define STORE_SCALAR(pv, len)	STORE_PV_LEN(pv, len, SX_SCALAR, SX_LSCALAR)
 
 /*
  * Store undef in arrays and hashes without recursing through store().
  */
-#define STORE_UNDEF() do {				\
+#define STORE_UNDEF() 					\
+  STMT_START {							\
 	cxt->tagnum++;						\
 	PUTMARK(SX_UNDEF);					\
-} while (0)
+  } STMT_END
 
 /*
  * Useful retrieve shortcuts...
@@ -800,24 +840,27 @@ static char magicstr[] = "pst0";			/* Used as a magic number */
 #define GETCHAR() \
 	(cxt->fio ? PerlIO_getc(cxt->fio) : (mptr >= mend ? EOF : (int) *mptr++))
 
-#define GETMARK(x) do {							\
+#define GETMARK(x) 								\
+  STMT_START {									\
 	if (!cxt->fio)								\
 		MBUF_GETC(x);							\
 	else if ((int) (x = PerlIO_getc(cxt->fio)) == EOF)	\
 		return (SV *) 0;						\
-} while (0)
+  } STMT_END
 
-#define READ_I32(x)	do {				\
+#define READ_I32(x)						\
+  STMT_START {							\
 	ASSERT(sizeof(x) == sizeof(I32), ("reading an I32"));	\
 	oC(x);								\
 	if (!cxt->fio)						\
 		MBUF_GETINT(x);					\
 	else if (PerlIO_read(cxt->fio, oI(&x), oS(sizeof(x))) != oS(sizeof(x)))	\
 		return (SV *) 0;				\
-} while (0)
+  } STMT_END
 
 #ifdef HAS_NTOHL
-#define RLEN(x)	do {					\
+#define RLEN(x)							\
+  STMT_START {							\
 	oC(x);								\
 	if (!cxt->fio)						\
 		MBUF_GETINT(x);					\
@@ -825,26 +868,28 @@ static char magicstr[] = "pst0";			/* Used as a magic number */
 		return (SV *) 0;				\
 	if (cxt->netorder)					\
 		x = (int) ntohl(x);				\
-} while (0)
+  } STMT_END
 #else
 #define RLEN(x) READ_I32(x)
 #endif
 
-#define READ(x,y) do {						\
+#define READ(x,y) 							\
+  STMT_START {								\
 	if (!cxt->fio)							\
 		MBUF_READ(x, y);					\
 	else if (PerlIO_read(cxt->fio, x, y) != y)	\
 		return (SV *) 0;					\
-} while (0)
+  } STMT_END
 
-#define SAFEREAD(x,y,z) do { 					\
+#define SAFEREAD(x,y,z)		 					\
+  STMT_START {									\
 	if (!cxt->fio)								\
 		MBUF_SAFEREAD(x,y,z);					\
 	else if (PerlIO_read(cxt->fio, x, y) != y)	 {	\
 		sv_free(z);								\
 		return (SV *) 0;						\
 	}											\
-} while (0)
+  } STMT_END
 
 /*
  * This macro is used at retrieve time, to remember where object 'y', bearing a
@@ -864,7 +909,8 @@ static char magicstr[] = "pst0";			/* Used as a magic number */
  * recursively, and the first SEEN() call for which the class name is not NULL
  * will bless the object.
  */
-#define SEEN(y,c) do {						\
+#define SEEN(y,c) 							\
+  STMT_START {								\
 	if (!y)									\
 		return (SV *) 0;					\
 	if (av_store(cxt->aseen, cxt->tagnum++, SvREFCNT_inc(y)) == 0) \
@@ -873,12 +919,13 @@ static char magicstr[] = "pst0";			/* Used as a magic number */
 		 PTR2UV(y), SvREFCNT(y)-1));		\
 	if (c)									\
 		BLESS((SV *) (y), c);				\
-} while (0)
+  } STMT_END
 
 /*
  * Bless `s' in `p', via a temporary reference, required by sv_bless().
  */
-#define BLESS(s,p) do {					\
+#define BLESS(s,p) 							\
+  STMT_START {								\
 	SV *ref;								\
 	HV *stash;								\
 	TRACEME(("blessing 0x%"UVxf" in %s", PTR2UV(s), (p))); \
@@ -887,7 +934,7 @@ static char magicstr[] = "pst0";			/* Used as a magic number */
 	(void) sv_bless(ref, stash);			\
 	SvRV(ref) = 0;							\
 	SvREFCNT_dec(ref);						\
-} while (0)
+  } STMT_END
 
 static int store();
 static SV *retrieve(stcxt_t *cxt, char *cname);
@@ -1348,8 +1395,8 @@ stcxt_t *parent_cxt;
 
 	ASSERT(!parent_cxt->s_dirty, ("parent context clean"));
 
-	Newz(0, cxt, 1, stcxt_t);
-	cxt->prev = parent_cxt;
+	NEW_STORABLE_CXT_OBJ(cxt);
+	cxt->prev = parent_cxt->my_sv;
 	SET_STCXT(cxt);
 
 	ASSERT(!cxt->s_dirty, ("clean context"));
@@ -1366,19 +1413,14 @@ stcxt_t *parent_cxt;
 static void free_context(cxt)
 stcxt_t *cxt;
 {
-	stcxt_t *prev = cxt->prev;
+	stcxt_t *prev = (stcxt_t *)(cxt->prev ? SvPVX(SvRV(cxt->prev)) : 0);
 
 	TRACEME(("free_context"));
 
 	ASSERT(!cxt->s_dirty, ("clean context"));
 	ASSERT(prev, ("not freeing root context"));
 
-	if (kbuf)
-		Safefree(kbuf);
-	if (mbase)
-		Safefree(mbase);
-
-	Safefree(cxt);
+	SvREFCNT_dec(cxt->my_sv);
 	SET_STCXT(prev);
 
 	ASSERT(cxt, ("context not void"));
@@ -5418,6 +5460,22 @@ SV *dclone(SV *sv)
 #define OutputStream	PerlIO *
 #define InputStream		PerlIO *
 #endif	/* !OutputStream */
+
+MODULE = Storable	PACKAGE = Storable::Cxt
+
+void
+DESTROY(self)
+    SV *self
+PREINIT:
+	stcxt_t *cxt = (stcxt_t *)SvPVX(SvRV(self));
+PPCODE:
+	if (kbuf)
+		Safefree(kbuf);
+	if (!cxt->membuf_ro && mbase)
+		Safefree(mbase);
+	if (cxt->membuf_ro && (cxt->msaved).arena)
+		Safefree((cxt->msaved).arena);
+
 
 MODULE = Storable	PACKAGE = Storable
 

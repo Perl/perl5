@@ -1,11 +1,11 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 package CPAN;
-$VERSION = '1.60';
-# $Id: CPAN.pm,v 1.389 2002/04/19 09:37:07 k Exp $
+$VERSION = '1.61';
+# $Id: CPAN.pm,v 1.390 2002/05/07 10:04:58 k Exp $
 
 # only used during development:
 $Revision = "";
-# $Revision = "[".substr(q$Revision: 1.389 $, 10)."]";
+# $Revision = "[".substr(q$Revision: 1.390 $, 10)."]";
 
 use Carp ();
 use Config ();
@@ -798,6 +798,7 @@ sub is_installed {
 
 sub set_perl5lib {
     my($self) = @_;
+    $self->{is_tested} ||= {};
     return unless %{$self->{is_tested}};
     my $env = $ENV{PERL5LIB};
     $env = $ENV{PERLLIB} unless defined $env;
@@ -4655,7 +4656,7 @@ sub test {
         return;
     }
 
-    local $ENV{PERL5LIB} = $ENV{PERL5LIB};
+    local $ENV{PERL5LIB} = $ENV{PERL5LIB} || "";
     $CPAN::META->set_perl5lib;
     my $system = join " ", $CPAN::Config->{'make'}, "test";
     if (system($system) == 0) {
