@@ -70,6 +70,7 @@ Version 5.004_05        Maintenance release 5 for 5.004
 
     Better security
       - Tainting bugs fixed.
+      - Mount options that disallow set[ug]id honored.
       - Temporary file not created for "perl -e".
     Better documentation
       - Many significant updates and clarifications.
@@ -93,6 +94,42 @@ Version 5.004_05        Maintenance release 5 for 5.004
       - Almost all known run-time memory leaks fixed.
       - Many other bugs fixed.
 
+
+Change 3295 by chip@perlsupport.com on 1999/04/29 18:53:45
+
+	Final release:  Update patchlevel.h and Changes.
+
+Change 3294 by chip@perlsupport.com on 1999/04/29 18:52:16
+
+	Refresh emacs/*.
+
+Change 3293 by chip@perlsupport.com on 1999/04/29 18:50:49
+
+	Fix shebang lines.
+
+Change 3290 by chip@perlsupport.com on 1999/04/29 18:16:45
+
+	Eliminate SysV IPC tests that don't work reliably.
+	Maybe the next patch will include IPC::SysV.
+
+Change 3288 by chip@perlsupport.com on 1999/04/27 17:12:38
+
+	Fix non-core-XS bug in MM_VMS.pm.
+	(from Dan Sugalski <sugalskd@osshe.edu>)
+
+Change 3287 by chip@perlsupport.com on 1999/04/27 13:36:27
+
+	Fix SysV IPC tests to allow for ids of zero.
+
+Change 3286 by chip@perlsupport.com on 1999/04/27 13:16:07
+
+	Update Solaris 2.x hints.
+	(from Andy Dougherty <doughera@lafayette.edu>)
+
+Change 3285 by chip@perlsupport.com on 1999/04/27 13:02:43
+
+	Add 'okfile' target to makefile.
+	(from Hugo van der Sanden <hv@crypt.compulink.co.uk>)
 
 Change 3283 by chip@perlsupport.com on 1999/04/26 23:20:47
 
