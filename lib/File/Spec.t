@@ -1,9 +1,43 @@
 #!./perl
 
 BEGIN {
-    $^O = '';
     chdir 't' if -d 't';
     @INC = '../lib';
+}
+# Grab all of the plain routines from File::Spec
+use File::Spec @File::Spec::EXPORT_OK ;
+
+require File::Spec::Unix ;
+require File::Spec::Win32 ;
+
+eval {
+   require VMS::Filespec ;
+} ;
+
+my $skip_exception = "Install VMS::Filespec (from vms/ext)" ;
+
+if ( $@ ) {
+   # Not pretty, but it allows testing of things not implemented soley
+   # on VMS.  It might be better to change File::Spec::VMS to do this,
+   # making it more usable when running on (say) Unix but working with
+   # VMS paths.
+   eval qq-
+      sub File::Spec::VMS::vmsify  { die "$skip_exception" }
+      sub File::Spec::VMS::unixify { die "$skip_exception" }
+      sub File::Spec::VMS::vmspath { die "$skip_exception" }
+   - ;
+   $INC{"VMS/Filespec.pm"} = 1 ;
+}
+require File::Spec::VMS ;
+
+require File::Spec::OS2 ;
+require File::Spec::Mac ;
+
+# $root is only needed by Mac OS tests; these particular
+# tests are skipped on other OSs
+my $root;
+if  ($^O eq 'MacOS') {
+	$root = File::Spec::Mac->rootdir();
 }
 
 # Each element in this array is a single test. Storing them this way makes
@@ -11,7 +45,8 @@ BEGIN {
 # before these tests are run.
 
 @tests = (
-# Function                      Expected
+# [ Function          ,            Expected          ,         Platform ]
+
 [ "Unix->catfile('a','b','c')", 'a/b/c'  ],
 
 [ "Unix->splitpath('file')",            ',,file'            ],
@@ -313,93 +348,99 @@ BEGIN {
 [ "Mac->splitpath('hd::d1:d2:file')", 'hd:,::d1:d2:,file' ], # invalid path
 [ "Mac->splitpath('hd:file')",        'hd:,,file'         ],
 
+[ "Mac->splitdir()",                   ''            ],
 [ "Mac->splitdir('')",                 ''            ],
 [ "Mac->splitdir(':')",                ':'           ],
 [ "Mac->splitdir('::')",               '::'          ],
-[ "Mac->splitdir(':::')",              ':::'         ],
-[ "Mac->splitdir(':::d1:d2')",         ',,,d1,d2'    ],
+[ "Mac->splitdir(':::')",              '::,::'       ],
+[ "Mac->splitdir(':::d1:d2')",         '::,::,d1,d2' ],
 
-[ "Mac->splitdir(':d1:d2:d3::')",      ',d1,d2,d3,'  ],
-[ "Mac->splitdir(':d1:d2:d3:')",       ',d1,d2,d3'   ],
-[ "Mac->splitdir(':d1:d2:d3')",        ',d1,d2,d3'   ],
+[ "Mac->splitdir(':d1:d2:d3::')",      'd1,d2,d3,::'],
+[ "Mac->splitdir(':d1:d2:d3:')",       'd1,d2,d3'   ],
+[ "Mac->splitdir(':d1:d2:d3')",        'd1,d2,d3'   ],
 
-[ "Mac->splitdir('hd:d1:d2:::')",      'hd,d1,d2,,'  ],
-[ "Mac->splitdir('hd:d1:d2::')",       'hd,d1,d2,'   ],
-[ "Mac->splitdir('hd:d1:d2:')",        'hd,d1,d2'    ],
-[ "Mac->splitdir('hd:d1:d2')",         'hd,d1,d2'    ],
-[ "Mac->splitdir('hd:d1::d2::')",      'hd,d1,,d2,'  ],
+# absolute paths in splitdir() work, but you'd better use splitpath()
+[ "Mac->splitdir('hd:')",              'hd:'              ],
+[ "Mac->splitdir('hd::')",             'hd:,::'           ], # invalid path, but it works
+[ "Mac->splitdir('hd::d1:')",          'hd:,::,d1'        ], # invalid path, but it works
+[ "Mac->splitdir('hd:d1:d2:::')",      'hd:,d1,d2,::,::'  ],
+[ "Mac->splitdir('hd:d1:d2::')",       'hd:,d1,d2,::'     ],
+[ "Mac->splitdir('hd:d1:d2:')",        'hd:,d1,d2'        ],
+[ "Mac->splitdir('hd:d1:d2')",         'hd:,d1,d2'        ],
+[ "Mac->splitdir('hd:d1::d2::')",      'hd:,d1,::,d2,::'  ],
 
-[ "Mac->catdir()",                 ''            ],
-[ "Mac->catdir('')",               ':'           ],
-[ "Mac->catdir(':')",              ':'           ],
+[ "Mac->catdir()",                 ''             ],
+[ "Mac->catdir('')",               $root, 'MacOS' ], # skipped on other OS
+[ "Mac->catdir(':')",              ':'            ],
 
-[ "Mac->catdir('', '')",           '::'          ], # Hmm... ":" ? 
-[ "Mac->catdir('', ':')",          '::'          ], # Hmm... ":" ? 
-[ "Mac->catdir(':', ':')",         '::'          ], # Hmm... ":" ? 
-[ "Mac->catdir(':', '')",          '::'          ], # Hmm... ":" ? 
+[ "Mac->catdir('', '')",           $root, 'MacOS' ], # skipped on other OS
+[ "Mac->catdir('', ':')",          $root, 'MacOS' ], # skipped on other OS 
+[ "Mac->catdir(':', ':')",         ':'            ],  
+[ "Mac->catdir(':', '')",          ':'            ], 
 
-[ "Mac->catdir('', '::')",         '::'          ],
-[ "Mac->catdir(':', '::')",        '::'          ], # but catdir('::', ':') is ':::'
+[ "Mac->catdir('', '::')",         $root, 'MacOS' ], # skipped on other OS
+[ "Mac->catdir(':', '::')",        '::'           ], 
 
-[ "Mac->catdir('::', '')",         ':::'         ], # Hmm... "::" ? 
-[ "Mac->catdir('::', ':')",        ':::'         ], # Hmm... "::" ? 
+[ "Mac->catdir('::', '')",         '::'           ],  
+[ "Mac->catdir('::', ':')",        '::'           ], 
 
-[ "Mac->catdir('::', '::')",       ':::'         ], # ok
+[ "Mac->catdir('::', '::')",       ':::'          ], 
 
-#
-# Unix counterparts:
-#
+[ "Mac->catdir(':d1')",                    ':d1:'        ],
+[ "Mac->catdir(':d1:')",                   ':d1:'        ],
+[ "Mac->catdir(':d1','d2')",               ':d1:d2:'     ],
+[ "Mac->catdir(':d1',':d2')",              ':d1:d2:'     ],
+[ "Mac->catdir(':d1',':d2:')",             ':d1:d2:'     ],
+[ "Mac->catdir(':d1',':d2::')",            ':d1:d2::'     ],
+[ "Mac->catdir(':',':d1',':d2')",          ':d1:d2:'     ],
+[ "Mac->catdir('::',':d1',':d2')",         '::d1:d2:'    ],
+[ "Mac->catdir('::','::',':d1',':d2')",    ':::d1:d2:'   ],
+[ "Mac->catdir(':',':',':d1',':d2')",      ':d1:d2:'     ],
+[ "Mac->catdir('::',':',':d1',':d2')",     '::d1:d2:'    ],
 
-# Unix catdir('.') =        "."
+[ "Mac->catdir('d1')",                    ':d1:'         ],
+[ "Mac->catdir('d1','d2','d3')",          ':d1:d2:d3:'   ],
+[ "Mac->catdir('d1','d2/','d3')",         ':d1:d2/:d3:'  ],
+[ "Mac->catdir('d1','',':d2')",           ':d1:d2:'      ],
+[ "Mac->catdir('d1',':',':d2')",          ':d1:d2:'      ],
+[ "Mac->catdir('d1','::',':d2')",         ':d1::d2:'     ],
+[ "Mac->catdir('d1',':::',':d2')",        ':d1:::d2:'    ],
+[ "Mac->catdir('d1','::','::',':d2')",    ':d1:::d2:'    ],
+[ "Mac->catdir('d1','d2')",               ':d1:d2:'      ],
+[ "Mac->catdir('d1','d2', '')",           ':d1:d2:'      ],
+[ "Mac->catdir('d1','d2', ':')",          ':d1:d2:'      ],
+[ "Mac->catdir('d1','d2', '::')",         ':d1:d2::'     ],
+[ "Mac->catdir('d1','d2','','')",         ':d1:d2:'      ],
+[ "Mac->catdir('d1','d2',':','::')",      ':d1:d2::'     ],
+[ "Mac->catdir('d1','d2','::','::')",     ':d1:d2:::'    ],
+[ "Mac->catdir('d1',':d2')",              ':d1:d2:'      ],
+[ "Mac->catdir('d1',':d2:')",             ':d1:d2:'      ],
 
-# Unix catdir('','') =      "/"
-# Unix catdir('','.') =     "/"
-# Unix catdir('.','.') =    "."
-# Unix catdir('.','') =     "."
+[ "Mac->catdir('','d1','d2','d3')",        $root . 'd1:d2:d3:', 'MacOS' ], # skipped on other OS
+[ "Mac->catdir('',':','d1','d2')",         $root . 'd1:d2:'   , 'MacOS' ], # skipped on other OS
+[ "Mac->catdir('','::','d1','d2')",        $root . 'd1:d2:'   , 'MacOS' ], # skipped on other OS
+[ "Mac->catdir('',':','','d1')",           $root . 'd1:'      , 'MacOS' ], # skipped on other OS
+[ "Mac->catdir('', ':d1',':d2')",          $root . 'd1:d2:'   , 'MacOS' ], # skipped on other OS
+[ "Mac->catdir('','',':d1',':d2')",        $root . 'd1:d2:'   , 'MacOS' ], # skipped on other OS
 
-# Unix catdir('','..') =    "/"
-# Unix catdir('.','..') =   ".."
-
-# Unix catdir('..','') =    ".."
-# Unix catdir('..','.') =   ".."
-# Unix catdir('..','..') =  "../.."
-
-[ "Mac->catdir(':d1','d2')",        ':d1:d2:'     ],
-[ "Mac->catdir('','d1','d2','d3')", ':d1:d2:d3:'  ],
-[ "Mac->catdir('','','d2','d3')",   '::d2:d3:'    ],
-[ "Mac->catdir('','','','d3')",     ':::d3:'      ],
-[ "Mac->catdir(':d1')",             ':d1:'        ],
-[ "Mac->catdir(':d1',':d2')",       ':d1:d2:'     ],
-[ "Mac->catdir('', ':d1',':d2')",   ':d1:d2:'     ],
-[ "Mac->catdir('','',':d1',':d2')", '::d1:d2:'    ],
-
-[ "Mac->catdir('hd')",              'hd:'         ],
-[ "Mac->catdir('hd','d1','d2')",    'hd:d1:d2:'   ],
-[ "Mac->catdir('hd','d1/','d2')",   'hd:d1/:d2:'  ],
-[ "Mac->catdir('hd','',':d1')",     'hd::d1:'     ],
-[ "Mac->catdir('hd','d1')",         'hd:d1:'      ],
-[ "Mac->catdir('hd','d1', '')",     'hd:d1::'     ],
-[ "Mac->catdir('hd','d1','','')",   'hd:d1:::'    ],
 [ "Mac->catdir('hd:',':d1')",       'hd:d1:'      ],
 [ "Mac->catdir('hd:d1:',':d2')",    'hd:d1:d2:'   ],
 [ "Mac->catdir('hd:','d1')",        'hd:d1:'      ],
-[ "Mac->catdir('hd',':d1')",        'hd:d1:'      ],
 [ "Mac->catdir('hd:d1:',':d2')",    'hd:d1:d2:'   ],
 [ "Mac->catdir('hd:d1:',':d2:')",   'hd:d1:d2:'   ],
 
+[ "Mac->catfile()",                      ''                      ], 
+[ "Mac->catfile('')",                    ''                      ],
+[ "Mac->catfile('', '')",                $root         , 'MacOS' ], # skipped on other OS 
+[ "Mac->catfile('', 'file')",            $root . 'file', 'MacOS' ], # skipped on other OS
+[ "Mac->catfile(':')",                   ':'                     ],
+[ "Mac->catfile(':', '')",               ':'                     ],
 
-[ "Mac->catfile()",                      ''            ], 
-[ "Mac->catfile('')",                    ''            ],
-[ "Mac->catfile(':')",                   ':'           ],
-[ "Mac->catfile(':', '')",               ':'           ],
-
-[ "Mac->catfile('hd','d1','file')",      'hd:d1:file'  ],
-[ "Mac->catfile('hd','d1',':file')",     'hd:d1:file'  ],
+[ "Mac->catfile('d1','d2','file')",      ':d1:d2:file' ],
+[ "Mac->catfile('d1','d2',':file')",     ':d1:d2:file' ],
 [ "Mac->catfile('file')",                'file'        ], 
 [ "Mac->catfile(':', 'file')",           ':file'       ], 
-[ "Mac->catfile('', 'file')",            ':file'       ], 
-
-
+ 
 [ "Mac->canonpath('')",                   ''     ],
 [ "Mac->canonpath(':')",                  ':'    ],
 [ "Mac->canonpath('::')",                 '::'   ],
@@ -419,7 +460,7 @@ BEGIN {
 [ "Mac->abs2rel('hd:d3:','hd:d1:d2:')",               ':::d3:'       ], # same as above
 [ "Mac->abs2rel('hd:d1:d2:d3:','hd:d1:d2:')",         ':d3:'         ],
 [ "Mac->abs2rel('hd:d1:d2:d3::','hd:d1:d2:')",        ':d3::'        ],
-[ "Mac->abs2rel('v1:d3:d4:d5:','v2:d1:d2:')",         ':::d3:d4:d5:' ], # ignore base's volume
+[ "Mac->abs2rel('hd1:d3:d4:d5:','hd2:d1:d2:')",       ':::d3:d4:d5:' ], # ignore base's volume
 [ "Mac->abs2rel('hd:','hd:d1:d2:')",                  ':::'          ],
 
 [ "Mac->rel2abs(':d3:','hd:d1:d2:')",          'hd:d1:d2:d3:'     ], 
@@ -435,34 +476,6 @@ BEGIN {
 [ "Mac->rel2abs('hd:d3:','hd:d1:file')",       'hd:d3:'           ],
 ) ;
 
-# Grab all of the plain routines from File::Spec
-use File::Spec @File::Spec::EXPORT_OK ;
-
-require File::Spec::Unix ;
-require File::Spec::Win32 ;
-
-eval {
-   require VMS::Filespec ;
-} ;
-
-my $skip_exception = "Install VMS::Filespec (from vms/ext)" ;
-
-if ( $@ ) {
-   # Not pretty, but it allows testing of things not implemented soley
-   # on VMS.  It might be better to change File::Spec::VMS to do this,
-   # making it more usable when running on (say) Unix but working with
-   # VMS paths.
-   eval qq-
-      sub File::Spec::VMS::vmsify  { die "$skip_exception" }
-      sub File::Spec::VMS::unixify { die "$skip_exception" }
-      sub File::Spec::VMS::vmspath { die "$skip_exception" }
-   - ;
-   $INC{"VMS/Filespec.pm"} = 1 ;
-}
-require File::Spec::VMS ;
-
-require File::Spec::OS2 ;
-require File::Spec::Mac ;
 
 print "1..", scalar( @tests ), "\n" ;
 
@@ -472,7 +485,6 @@ my $current_test= 1 ;
 for ( @tests ) {
    tryfunc( @$_ ) ;
 }
-
 
 
 #

@@ -175,9 +175,8 @@ sub case_tolerant {
 
 Takes as argument a path and returns true if it is an absolute path.
 
-This does not consult the local filesystem on Unix, Win32, or OS/2.  It
-does sometimes on MacOS (see L<File::Spec::MacOS/file_name_is_absolute>).
-It does consult the working environment for VMS (see
+This does not consult the local filesystem on Unix, Win32, OS/2 or Mac 
+OS (Classic).  It does consult the working environment for VMS (see
 L<File::Spec::VMS/file_name_is_absolute>).
 
 =cut
@@ -260,7 +259,7 @@ files from directories.
 
 Unlike just splitting the directories on the separator, empty
 directory names (C<''>) can be returned, because these are significant
-on some OSs (e.g. MacOS).
+on some OSs.
 
 On Unix,
 
@@ -341,9 +340,7 @@ directories.
 If $path is relative, it is converted to absolute form using L</rel2abs()>.
 This means that it is taken to be relative to L<cwd()|Cwd>.
 
-No checks against the filesystem are made on most systems.  On MacOS,
-the filesystem may be consulted (see
-L<File::Spec::MacOS/file_name_is_absolute>).  On VMS, there is
+No checks against the filesystem are made.  On VMS, there is
 interaction with the working environment, as logicals and
 macros are expanded.
 
@@ -421,9 +418,7 @@ directories.
 
 If $path is absolute, it is cleaned up and returned using L</canonpath()>.
 
-No checks against the filesystem are made on most systems.  On MacOS,
-the filesystem may be consulted (see
-L<File::Spec::MacOS/file_name_is_absolute>).  On VMS, there is
+No checks against the filesystem are made.  On VMS, there is
 interaction with the working environment, as logicals and
 macros are expanded.
 
