@@ -2,7 +2,7 @@ package DB;
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 
-$VERSION = 0.9908;
+$VERSION = 0.9909;
 $header = "perl5db.pl patch level $VERSION";
 
 # Enhanced by ilya@math.ohio-state.edu (Ilya Zakharevich)
@@ -411,7 +411,9 @@ sub DB {
     $evalarg = $action, &eval if $action;
     if ($single || $was_signal) {
 	local $level = $level + 1;
-	map {$evalarg = $_, &eval} @$pre;
+	foreach $evalarg (@$pre) {
+	  &eval;
+	}
 	print $OUT $#stack . " levels deep in subroutine calls!\n"
 	  if $single & 4;
 	$start = $line;
@@ -1074,7 +1076,9 @@ sub DB {
 	    }
 	}			# CMD:
 	$exiting = 1 unless defined $cmd;
-        map {$evalarg = $_; &eval} @$post;
+	foreach $evalarg (@$post) {
+	  &eval;
+	}
     }				# if ($single || $signal)
     ($@, $!, $,, $/, $\, $^W) = @saved;
     ();
