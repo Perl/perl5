@@ -1853,6 +1853,7 @@ pod/perl.pod			Top level perl documentation
 pod/perl5004delta.pod		Changes from 5.003 to 5.004
 pod/perl5005delta.pod		Changes from 5.004 to 5.005
 pod/perl56delta.pod		Changes from 5.005 to 5.6
+pod/perl561delta.pod		Changes from 5.6.0 to 5.6.1
 pod/perl570delta.pod		Changes from 5.6 to 5.7.0
 pod/perl571delta.pod		Changes from 5.7.0 to 5.7.1
 pod/perl572delta.pod		Changes from 5.7.1 to 5.7.2

@@ -192,6 +192,7 @@ if (-d "pod") {
     perl572delta         
     perl571delta         
     perl570delta         
+    perl561delta         
     perl56delta         
     perl5005delta       
     perl5004delta       
