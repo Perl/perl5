@@ -6,8 +6,6 @@ av.c			Array value code
 av.h			Array value header
 beos/beos.c		BeOS port
 beos/beosish.h		BeOS port
-beos/beos_flock_server.cpp	BeOS port
-beos/beos_flock_server.h	BeOS port
 beos/nm.c		BeOS port
 bytecode.pl		Produces ext/ByteLoader/byterun.h, ext/ByteLoader/byterun.c and ext/B/Asmdata.pm
 cc_runtime.h		Macros need by runtime of compiler-generated code
