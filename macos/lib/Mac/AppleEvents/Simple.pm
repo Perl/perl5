@@ -460,6 +460,7 @@ BEGIN {
 	);
 
 	%AE_GET = (%AE_GET,
+		utxt => $AE_GET{STXT},
 		itxt => $AE_GET{STXT},
 		tTXT => $AE_GET{STXT},
 #		  UREC => sub {
@@ -469,7 +470,10 @@ BEGIN {
 
 }
 
-sub _get_coerce { AECoerceDesc(@_)->get }
+sub _get_coerce {
+	my $data = AECoerceDesc(@_) or die $^E;
+	return $data->get;
+}
 
 #=============================================================================#
 
@@ -704,6 +708,10 @@ C<all> export tag.
 =head1 HISTORY
 
 =over 4
+
+=item v1.01, 
+
+Added utxt coercion to text.  Catch errors in coercion.
 
 =item v1.00, Monday, September 11, 2000
 
