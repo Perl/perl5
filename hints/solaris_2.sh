@@ -77,7 +77,7 @@ case "$ccisworkshop" in
 int main() { return(0); }
 EOF
 	workshoplibs=`cc -### try.c -lsunmath -o try 2>&1|grep " -Y "|sed 's%.* -Y "P,\(.*\)".*%\1%'|tr ':' '\n'|grep '/SUNWspro/'`
-	. ./UU/workshoplibpth.cbu
+	. ./workshoplibpth.cbu
 	;;
 esac
 

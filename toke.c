@@ -7025,7 +7025,9 @@ Perl_scan_num(pTHX_ char *start)
 	   Strtol() and Strtoul() are used above.
 
 	   [1] XXX Configure test needed to check for atol()
-	           (and atoll() overflow behaviour) XXX --jhi
+	           (and atoll()) overflow behaviour XXX
+
+	   --jhi
 
 	   We need to do this the hard way.  */
 
@@ -7039,14 +7041,16 @@ Perl_scan_num(pTHX_ char *start)
 	   don't need to do the conversion at all. 
 
 	   [1] Note that this is lossy if our NVs cannot preserve our
-	   UVs.  There is a metaconfig define, NV_PRESERVES_UV, but we
-	   really do hope all such platforms have strtou?ll? to do a
-	   lossless IV/UV conversion.
-	   XXX Configure test needed to check how many UV bits
-	       do our NVs preserve, really (the current test checks
-	       for the roundtrip of ~0) XXX --jhi
-	       Maybe do some tricks with DBL_MANT_DIG and LDBL_MANT_DIG,
-	       and DBL_DIG, LDBL_DIG (this is already available as NV_DIG)?
+	   UVs.  There are metaconfig defines NV_PRESERVES_UV (a boolean)
+	   and NV_PRESERVES_UV_BITS (a number), but in general we really
+	   do hope all such potentially lossy platforms have strtou?ll?
+	   to do a lossless IV/UV conversion.
+
+	   Maybe could do some tricks with DBL_DIG, LDBL_DIG and
+	   DBL_MANT_DIG and LDBL_MANT_DIG (these are already available
+	   as NV_DIG and NV_MANT_DIG)?
+	   
+	   --jhi
 	   */
 	{
 	    UV uv = U_V(nv);

@@ -1331,12 +1331,6 @@
  */
 /*#define HAS_ENDSERVENT		/**/
 
-/* HAS_ENDSPENT:
- *	This symbol, if defined, indicates that the endspent system call is
- *	available to finalize the scan of SysV shadow password entries.
- */
-/*#define HAS_ENDSPENT		/**/
-
 /* HAS_FD_SET:
  *	This symbol, when defined, indicates presence of the fd_set typedef
  *	in <sys/types.h>
@@ -1546,17 +1540,29 @@
  */
 #define	HAS_GETSERV_PROTOS	/**/
 
-/* HAS_GETSPENT:
- *	This symbol, if defined, indicates that the getspent system call is
- *	available to retrieve SysV shadow password entries sequentially.
- */
-/*#define HAS_GETSPENT		/**/
-
 /* HAS_GETSPNAM:
  *	This symbol, if defined, indicates that the getspnam system call is
  *	available to retrieve SysV shadow password entries by name.
  */
 /*#define HAS_GETSPNAM		/**/
+
+/* HAS_GETESPWNAM:
+ *	This symbol, if defined, indicates that the getespwnam system call is
+ *	available to retrieve enchanced (shadow) password entries by name.
+ */
+/*#define HAS_GETESPWNAM		/**/
+
+/* HAS_GETPRPWNAM:
+ *	This symbol, if defined, indicates that the getprpwnam system call is
+ *	available to retrieve protected (shadow) password entries by name.
+ */
+/*#define HAS_GETPRPWNAM		/**/
+
+/* I_PROT:
+ *	This symbol, if defined, indicates that <prot.h> exists and
+ *	should be included.
+ */
+/*#define	I_PROT		/**/
 
 /* HAS_GETSERVBYNAME:
  *	This symbol, if defined, indicates that the getservbyname()
@@ -1856,12 +1862,6 @@
  *	available.
  */
 /*#define HAS_SETSERVENT		/**/
-
-/* HAS_SETSPENT:
- *	This symbol, if defined, indicates that the setspent system call is
- *	available to initialize the scan of SysV shadow password entries.
- */
-/*#define HAS_SETSPENT		/**/
 
 /* HAS_SETVBUF:
  *	This symbol, if defined, indicates that the setvbuf routine is
@@ -2647,7 +2647,11 @@
  */
 /* NV_PRESERVES_UV:
  *	This symbol, if defined, indicates that a variable of type NVTYPE
- *	can preserve all the bit of a variable of type UVSIZE.
+ *	can preserve all the bit of a variable of type UVTYPE.
+ */
+/* NV_PRESERVES_UV_BITS:
+ *	This symbol contains the number of bits a variable of type NVTYPE
+ *	can preserve of a variable of type UVTYPE.
  */
 #define	IVTYPE		long		/**/
 #define	UVTYPE		unsigned long		/**/
@@ -2675,6 +2679,7 @@
 #define	U64SIZE		8	/**/
 #endif
 #define	NV_PRESERVES_UV
+#define	NV_PRESERVES_UV_BITS	32
 
 /* IVdf:
  *	This symbol defines the format string used for printing a Perl IV

@@ -27,7 +27,7 @@ my @script = (
 my $eps = 1e-13;
 
 if ($^O eq 'unicos') { 	# For some reason root() produces very inaccurate
-    $eps = 1e-11;	# results in Cray UNICOS, and occasionally also
+    $eps = 1e-10;	# results in Cray UNICOS, and occasionally also
 }			# cos(), sin(), cosh(), sinh().  The division
 			# of doubles is the current suspect.
 
@@ -262,7 +262,7 @@ EOS
     $test++;
     push @script, <<EOS;
     print "# j = \$j\n";
-    print "not " unless "\$j" =~ /^-0\\.5\\+0.86602540\\d+i\$/;
+    print "not " unless "\$j" =~ /^-0(?:\\.5(?:0000\\d+)?|\\.49999\\d+)\\+0.86602540\\d+i\$/;
     print "ok $test\n";
 
     \$j->display_format('style' => 'polar', 'polar_pretty_print' => 0);

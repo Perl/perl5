@@ -92,6 +92,10 @@ use File::Path qw/ rmtree /;
 use Fcntl 1.03;
 use Errno qw( EEXIST ENOENT ENOTDIR EINVAL );
 
+# Need the Symbol package if we are running older perl 
+require Symbol if $] < 5.006;
+
+
 # use 'our' on v5.6.0
 use vars qw($VERSION @EXPORT_OK %EXPORT_TAGS $DEBUG);
 
@@ -99,8 +103,6 @@ $DEBUG = 0;
 
 # We are exporting functions
 
-#require Exporter;
-#@ISA = qw/Exporter/;
 use base qw/Exporter/;
 
 # Export list - to allow fine tuning of export table
@@ -129,7 +131,7 @@ Exporter::export_tags('POSIX','mktemp');
 
 # Version number 
 
-$VERSION = '0.07';
+$VERSION = '0.08';
 
 # This is a list of characters that can be used in random filenames
 
@@ -154,6 +156,19 @@ use constant TEMPXXX => 'X' x 10;
 use constant STANDARD => 0;
 use constant MEDIUM   => 1;
 use constant HIGH     => 2;
+
+# OPENFLAGS. If we defined the flag to use with Sysopen here this gives
+# us an optimisation when many temporary files are requested
+
+my $OPENFLAGS = O_CREAT | O_EXCL | O_RDWR;
+
+for my $oflag (qw/FOLLOW BINARY LARGEFILE EXLOCK NOINHERIT TEMPORARY/) {
+  my ($bit, $func) = (0, "Fcntl::O_" . $oflag);
+  no strict 'refs';
+  $OPENFLAGS |= $bit if eval { $bit = &$func(); 1 };
+}
+
+
 
 # INTERNAL ROUTINES - not to be used outside of package
 
@@ -320,18 +335,18 @@ sub _gettemp {
 
   # Calculate the flags that we wish to use for the sysopen
   # Some of these are not always available
-  my $openflags;
-  if ($options{"open"}) {
+#  my $openflags;
+#  if ($options{"open"}) {
     # Default set
-    $openflags = O_CREAT | O_EXCL | O_RDWR;
+#    $openflags = O_CREAT | O_EXCL | O_RDWR;
 
-    for my $oflag (qw/FOLLOW BINARY LARGEFILE EXLOCK NOINHERIT TEMPORARY/) {
-        my ($bit, $func) = (0, "Fcntl::O_" . $oflag);
-        no strict 'refs';
-        $openflags |= $bit if eval { $bit = &$func(); 1 };
-    }
+#    for my $oflag (qw/FOLLOW BINARY LARGEFILE EXLOCK NOINHERIT TEMPORARY/) {
+#        my ($bit, $func) = (0, "Fcntl::O_" . $oflag);
+#        no strict 'refs';
+#        $openflags |= $bit if eval { $bit = &$func(); 1 };
+#    }
 
-  }
+#  }
   
 
   # Now try MAX_TRIES time to open the file
@@ -343,7 +358,6 @@ sub _gettemp {
 
       # If we are running before perl5.6.0 we can not auto-vivify
       if ($] < 5.006) {
-	require Symbol;
 	$fh = &Symbol::gensym;
       }
 
@@ -359,7 +373,7 @@ sub _gettemp {
       umask(066);
 
       # Attempt to open the file
-      if ( sysopen($fh, $path, $openflags, 0600) ) {
+      if ( sysopen($fh, $path, $OPENFLAGS, 0600) ) {
 
 	# Reset umask
 	umask($umask);
@@ -449,7 +463,7 @@ sub _gettemp {
 
     # Check for out of control looping
     if ($counter > $MAX_GUESS) {
-      carp "Tried to get a new temp name different to the previous value$MAX_GUESS times.\nSomething wrong with template?? ($template)";
+      carp "Tried to get a new temp name different to the previous value $MAX_GUESS times.\nSomething wrong with template?? ($template)";
       return ();
     }
 
@@ -468,6 +482,10 @@ sub _gettemp {
 # will do one automatically
 
 # No arguments. Return value is the random character
+
+# No longer called since _replace_XX runs a few percent faster if
+# I inline the code. This is important if we are creating thousands of
+# temporary files.
 
 sub _randchar {
 
@@ -497,9 +515,9 @@ sub _replace_XX {
   # Don't want to always use substr when not required though.
 
   if ($ignore) {
-    substr($path, 0, - $ignore) =~ s/X(?=X*\z)/_randchar()/ge;
+    substr($path, 0, - $ignore) =~ s/X(?=X*\z)/$CHARS[ int( rand( $#CHARS ) ) ]/ge;
   } else {
-    $path =~ s/X(?=X*\z)/_randchar()/ge;
+    $path =~ s/X(?=X*\z)/$CHARS[ int( rand( $#CHARS ) ) ]/ge;
   }
 
   return $path;
@@ -626,15 +644,41 @@ sub _is_verysafe {
 # platform for files that are currently open.
 # Returns true if we can, false otherwise.
 
-# Currently WinNT can not unlink an opened file
+# Currently WinNT and OS/2 can not unlink an opened file
 
 sub _can_unlink_opened_file {
 
-  
-  $^O ne 'MSWin32' ? 1 : 0;
+  if ($^O eq 'MSWin32' || $^O eq 'os2') {
+    return 0;
+  } else {
+    return 1;
+  }
 
 }
 
+# internal routine to decide which security levels are allowed
+# see safe_level() for more information on this
+
+# Controls whether the supplied security level is allowed
+
+#   $cando = _can_do_level( $level )
+
+sub _can_do_level {
+
+  # Get security level
+  my $level = shift;
+
+  # Always have to be able to do STANDARD
+  return 1 if $level == STANDARD;
+
+  # Currently, the systems that can do HIGH or MEDIUM are identical
+  if ( $^O eq 'MSWin32' ) {
+    return 0;
+  } else {
+    return 1;
+  }
+
+}
 
 # This routine sets up a deferred unlinking of a specified
 # filename and filehandle. It is used in the following cases:
@@ -650,71 +694,85 @@ sub _can_unlink_opened_file {
 #   - isdir      (flag to indicate that we are being given a directory)
 #                 [and hence no filehandle]
 
-# Status is not referred since all the magic is done with END blocks
+# Status is not referred to since all the magic is done with and END block
 
-sub _deferred_unlink {
+{
+  # Will set up two lexical variables to contain all the files to be
+  # removed. One array for files, another for directories
+  # They will only exist in this block
+  # This means we only have to set up a single END block to remove all files
+  # @files_to_unlink contains an array ref with the filehandle and filename
+  my (@files_to_unlink, @dirs_to_unlink);
 
-  croak 'Usage:  _deferred_unlink($fh, $fname, $isdir)'
-    unless scalar(@_) == 3;
+  # Set up an end block to use these arrays
+  END {
+    # Files
+    foreach my $file (@files_to_unlink) {
+      # close the filehandle without checking its state
+      # in order to make real sure that this is closed
+      # if its already closed then I dont care about the answer
+      # probably a better way to do this
+      close($file->[0]);  # file handle is [0]
 
-  my ($fh, $fname, $isdir) = @_;
-
-  warn "Setting up deferred removal of $fname\n"
-    if $DEBUG;
-
-  # If we have a directory, check that it is a directory
-  if ($isdir) {
-
-    if (-d $fname) {
-
-      # Directory exists so set up END block
-      # (quoted to preserve lexical variables)
-      eval q{
-	END {
-	  if (-d $fname) {
-	    rmtree($fname, $DEBUG, 1);
-	  }
-	}
-	1;
-      }  || die;
-
-    } else {
-      carp "Request to remove directory $fname could not be completed since it does not exists!\n";
+      if (-f $file->[1]) {  # file name is [1]
+	unlink $file->[1] or warn "Error removing ".$file->[1];
+      }
+    }
+    # Dirs
+    foreach my $dir (@dirs_to_unlink) {
+      if (-d $dir) {
+	rmtree($dir, $DEBUG, 1);
+      }
     }
 
 
-  } else {
-
-    if (-f $fname) {
-
-      # dile exists so set up END block
-      # (quoted to preserve lexical variables)
-      eval q{
-	END {
-	  # close the filehandle without checking its state
-	  # in order to make real sure that this is closed
-	  # if its already closed then I dont care about the answer
-	  # probably a better way to do this
-	  close($fh);
-
-	  if (-f $fname) {
-	    unlink $fname
-	      || warn "Error removing $fname";
-	  }
-	}
-	1;
-      } || die;
-
-    } else {
-      carp "Request to remove file $fname could not be completed since it is not there!\n";
-    }
-
-
-    
   }
 
-}
+  # This is the sub called to register a file for deferred unlinking
+  # This could simply store the input parameters and defer everything
+  # until the END block. For now we do a bit of checking at this
+  # point in order to make sure that (1) we have a file/dir to delete
+  # and (2) we have been called with the correct arguments.
+  sub _deferred_unlink {
 
+    croak 'Usage:  _deferred_unlink($fh, $fname, $isdir)'
+      unless scalar(@_) == 3;
+    
+    my ($fh, $fname, $isdir) = @_;
+
+    warn "Setting up deferred removal of $fname\n"
+      if $DEBUG;
+    
+    # If we have a directory, check that it is a directory
+    if ($isdir) {
+
+      if (-d $fname) {
+
+	# Directory exists so store it
+	push (@dirs_to_unlink, $fname);
+
+      } else {
+	carp "Request to remove directory $fname could not be completed since it does not exists!\n";
+      }
+
+      
+    } else {
+
+      if (-f $fname) {
+
+	# file exists so store handle and name for later removal
+	push(@files_to_unlink, [$fh, $fname]);
+
+      } else {
+	carp "Request to remove file $fname could not be completed since it is not there!\n";
+      }
+
+    }
+
+  }
+
+
+}
 
 =head1 FUNCTIONS
 
@@ -1320,11 +1378,11 @@ occasions this is not required.
 
 On some platforms, for example Windows NT, it is not possible to
 unlink an open file (the file must be closed first). On those
-platforms, the actual unlinking is deferred until the program ends
-and good status is returned. A check is still performed to make sure that
-the filehandle and filename are pointing to the same thing (but not at the time 
-the end block is executed since the deferred removal may not have access to
-the filehandle). 
+platforms, the actual unlinking is deferred until the program ends and
+good status is returned. A check is still performed to make sure that
+the filehandle and filename are pointing to the same thing (but not at
+the time the end block is executed since the deferred removal may not
+have access to the filehandle).
 
 Additionally, on Windows NT not all the fields returned by stat() can
 be compared. For example, the C<dev> and C<rdev> fields seem to be different
@@ -1333,6 +1391,10 @@ does not always agree, with C<stat(FH)> being more accurate than
 C<stat(filename)>, presumably because of caching issues even when
 using autoflush (this is usually overcome by waiting a while after
 writing to the tempfile before attempting to C<unlink0> it).
+
+Finally, on NFS file systems the link count of the file handle does
+not always go to zero immediately after unlinking. Currently, this
+command is expected to fail on NFS disks.
 
 =cut
 
@@ -1468,7 +1530,21 @@ run with MEDIUM or HIGH security. This is simply because the
 safety tests use functions from L<Fcntl|Fcntl> that are not
 available in older versions of perl. The problem is that the version
 number for Fcntl is the same in perl 5.6.0 and in 5.005_03 even though
-they are different versions.....
+they are different versions.
+
+On systems that do not support the HIGH or MEDIUM safety levels
+(for example Win NT or OS/2) any attempt to change the level will
+be ignored. The decision to ignore rather than raise an exception
+allows portable programs to be written with high security in mind
+for the systems that can support this without those programs failing
+on systems where the extra tests are irrelevant.
+
+If you really need to see whether the change has been accepted
+simply examine the return value of C<safe_level>.
+
+  $newlevel = File::Temp->safe_level( File::Temp::HIGH );
+  die "Could not change to high security" 
+      if $newlevel != File::Temp::HIGH;
 
 =cut
 
@@ -1482,11 +1558,14 @@ they are different versions.....
       if (($level != STANDARD) && ($level != MEDIUM) && ($level != HIGH)) {
 	carp "safe_level: Specified level ($level) not STANDARD, MEDIUM or HIGH - ignoring\n";
       } else {
+	# Dont allow this on perl 5.005 or earlier
 	if ($] < 5.006 && $level != STANDARD) {
 	  # Cant do MEDIUM or HIGH checks
 	  croak "Currently requires perl 5.006 or newer to do the safe checks";
 	}
-        $LEVEL = $level; 
+	# Check that we are allowed to change level
+	# Silently ignore if we can not.
+        $LEVEL = $level if _can_do_level($level);
       }
     }
     return $LEVEL;

@@ -588,7 +588,9 @@ pod/perllocale.pod		locale
 pod/perllol.pod			tchrist
 pod/perlmod.pod	
 pod/perlmodinstall.pod		jon
-pod/perlmodlib.pod	
+pod/perlmodlib.pod		simon
+pod/perlmodlib.PL		simon
+pod/perlnewmod.pod		simon
 pod/perlobj.pod	
 pod/perlop.pod	
 pod/perlpod.pod			lwall

@@ -83,10 +83,14 @@ ok;
 chomp($a = `$^X -I../lib -MB::Stash -Mwarnings -e1`);
 $a = join ',', sort split /,/, $a;
 $a =~ s/-uWin32,//;
-$b = '-uCarp,-uCarp::Heavy,-uDB,-uExporter,-uExporter::Heavy,-uattributes,'
-   . '-umain,-uwarnings';
-print "# [$a] vs [$b]\nnot " if $a ne $b;
-ok;
+if ($Config{static_ext} eq ' ') {
+  $b = '-uCarp,-uCarp::Heavy,-uDB,-uExporter,-uExporter::Heavy,-uattributes,'
+     . '-umain,-uwarnings';
+  print "# [$a] vs [$b]\nnot " if $a ne $b;
+  ok;
+} else {
+  print "ok $test # skipped: one or more static extensions\n"; $test++;
+}
 
 $a = `$^X -I../lib -MO=Showlex -e "my %one" 2>&1`;
 print "# [$a]\nnot " unless $a =~ /sv_undef.*PVNV.*%one.*sv_undef.*HV/s;

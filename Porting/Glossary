@@ -506,10 +506,6 @@ d_endsent (d_endsent.U):
 	This variable conditionally defines HAS_ENDSERVENT if endservent() is
 	available to close whatever was being used for service queries.
 
-d_endspent (d_endspent.U):
-	This variable conditionally defines HAS_ENDSPENT if endspent() is
-	available to finalize the scan of SysV shadow password entries.
-
 d_eofnblk (nblock_io.U):
 	This variable conditionally defines EOF_NONBLOCK if EOF can be seen
 	when reading from a non-blocking I/O source.
@@ -619,6 +615,10 @@ d_getcwd (d_getcwd.U):
 	This variable conditionally defines the HAS_GETCWD symbol, which
 	indicates to the C program that the getcwd() routine is available
 	to get the current working directory.
+
+d_getespwnam (d_getespwnam.U):
+	This variable conditionally defines HAS_GETESPWNAM if getespwnam() is
+	available to retrieve enchanced (shadow) password entries by name.
 
 d_getfsstat (d_getfsstat.U):
 	This variable conditionally defines the HAS_GETFSSTAT symbol, which
@@ -739,6 +739,10 @@ d_getprotoprotos (d_getprotoprotos.U):
 	prototypes for the various getproto*() functions.  
 	See also netdbtype.U for probing for various netdb types.
 
+d_getprpwnam (d_getprpwnam.U):
+	This variable conditionally defines HAS_GETPRPWNAM if getprpwnam() is
+	available to retrieve protected (shadow) password entries by name.
+
 d_getpwent (d_getpwent.U):
 	This variable conditionally defines the HAS_GETPWENT symbol, which
 	indicates to the C program that the getpwent() routine is available
@@ -765,10 +769,6 @@ d_getservprotos (d_getservprotos.U):
 	which indicates to the C program that <netdb.h> supplies
 	prototypes for the various getserv*() functions.  
 	See also netdbtype.U for probing for various netdb types.
-
-d_getspent (d_getspent.U):
-	This variable conditionally defines HAS_GETSPENT if getspent() is
-	available to retrieve SysV shadow password entries sequentially.
 
 d_getspnam (d_getspnam.U):
 	This variable conditionally defines HAS_GETSPNAM if getspnam() is
@@ -1018,6 +1018,10 @@ d_nice (d_nice.U):
 d_nv_preserves_uv (perlxv.U):
 	This variable indicates whether a variable of type nvtype
 	can preserve all the bits a variable of type uvtype.
+
+d_nv_preserves_uv_bits (perlxv.U):
+	This variable indicates how many of bits type uvtype
+	a variable nvtype can preserve.
 
 d_off64_t (d_off64_t.U):
 	This symbol will be defined if the C compiler supports off64_t.
@@ -1350,10 +1354,6 @@ d_setsent (d_setsent.U):
 d_setsid (d_setsid.U):
 	This variable conditionally defines HAS_SETSID if setsid() is
 	available to set the process group ID.
-
-d_setspent (d_setspent.U):
-	This variable conditionally defines HAS_SETSPENT if setspent() is
-	available to initialize the scan of SysV shadow password entries.
 
 d_setvbuf (d_setvbuf.U):
 	This variable conditionally defines the HAS_SETVBUF symbol, which
@@ -2017,6 +2017,10 @@ i_niin (i_niin.U):
 i_poll (i_poll.U):
 	This variable conditionally defines the I_POLL symbol, and indicates
 	whether a C program should include <poll.h>.
+
+i_prot (i_prot.U):
+	This variable conditionally defines the I_PROT symbol, and indicates
+	whether a C program should include <prot.h>.
 
 i_pthread (i_pthread.U):
 	This variable conditionally defines the I_PTHREAD symbol,
