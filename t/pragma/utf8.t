@@ -10,7 +10,7 @@ BEGIN {
     }
 }
 
-print "1..70\n";
+print "1..72\n";
 
 my $test = 1;
 
@@ -322,10 +322,25 @@ sub nok_bytes {
     ok "@a", "1234 2345";
     $test++;                # 68
 }
+
 {
   my($a,$b);
   { use bytes; $a = "\xc3\xa4"; }  
   { use utf8;  $b = "\xe4"; }
   { use bytes; ok_bytes $a, $b; $test++; } # 69
   { use utf8;  nok      $a, $b; $test++; } # 70
+}
+
+{
+    my @x = ("stra\337e 138","stra\337e 138");
+    for (@x) {
+	s/(\d+)\s*([\w\-]+)/$1 . uc $2/e;
+	my($latin) = /^(.+)(?:\s+\d)/;
+	print $latin eq "stra\337e" ? "ok $test\n" :
+	    "#latin[$latin]\nnot ok $test\n";
+	$test++;
+	$latin =~ s/stra\337e/straße/; # \303\237 after the 2nd a
+	use utf8;
+	$latin =~ s!(s)tr(?:aß|s+e)!$1tr.!; # \303\237 after the a
+    }
 }
