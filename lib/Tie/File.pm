@@ -670,7 +670,7 @@ sub _upcopy {
       
     my $fh = $self->{fh};
     $self->_seekb($spos);
-    my $bytes_read = read $fh, my $data, $readsize;
+    my $bytes_read = read $fh, my($data), $readsize;
     $self->_seekb($dpos);
     if ($data eq "") { 
       $self->_chop_file;
@@ -696,7 +696,7 @@ sub _downcopy {
     my $readsize = ! defined($len) ? $blocksize 
       : $len > $blocksize? $blocksize : $len;
     $self->_seekb($pos);
-    read $fh, my $old, $readsize;
+    read $fh, my($old), $readsize;
     $data .= $old;
     $self->_seekb($pos);
     my $writable = substr($data, 0, $readsize, "");
