@@ -28,6 +28,140 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7502] By: jhi                                   on 2000/10/31  14:25:02
+        Log: AUTHORS tweaks.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[  7501] By: jhi                                   on 2000/10/31  14:23:59
+        Log: Subject: perlfaq style changes
+             From: John Borwick <jhborwic@unity.ncsu.edu>
+             Date: Tue, 31 Oct 2000 03:15:11 -0500 (EST)
+             Message-ID: <Pine.GSO.4.21.0010310307500.5819-100000@eos00du.eos.ncsu.edu>
+     Branch: perl
+	   ! pod/perlfaq.pod pod/perlfaq1.pod pod/perlfaq2.pod
+	   ! pod/perlfaq3.pod pod/perlfaq4.pod pod/perlfaq5.pod
+	   ! pod/perlfaq6.pod pod/perlfaq7.pod pod/perlfaq8.pod
+	   ! pod/perlfaq9.pod
+____________________________________________________________________________
+[  7500] By: jhi                                   on 2000/10/31  14:22:15
+        Log: Be more lenient on bad UTF-8 when doing bit arithmetics.
+             
+             Subject: Re: [ID 20000918.005] ~ on wide chars
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Mon, 30 Oct 2000 21:09:55 -0800
+             Message-ID: <jQl/5gzkgWYL092yn@efn.org>
+             
+             (The ord() part of the patch skipped.)
+     Branch: perl
+	   ! doop.c
+____________________________________________________________________________
+[  7499] By: jhi                                   on 2000/10/31  14:20:08
+        Log: Subject: [ID 20001030.001] 5.7.0-7489: Null-Pointer reference in mg.c
+             From: Jens Hamisch <jens@Strawberry.COM>
+             Date: Mon, 30 Oct 2000 15:17:07 +0100
+             Message-Id: <20001030151707.A9597@Strawberry.COM>
+     Branch: perl
+	   ! av.c
+____________________________________________________________________________
+[  7498] By: jhi                                   on 2000/10/31  14:16:29
+        Log: Subject: [PATCH: perl@7483] add three new EBCDIC Encode-ings && many tests
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Mon, 30 Oct 2000 16:59:11 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10010301643590.67363-100000@aspara.forte.com>
+     Branch: perl
+	   + ext/Encode/Encode/cp1047.enc ext/Encode/Encode/cp37.enc
+	   + ext/Encode/Encode/posix-bc.enc
+	   ! MANIFEST t/lib/encode.t
+____________________________________________________________________________
+[  7497] By: jhi                                   on 2000/10/31  14:13:22
+        Log: Subject: [PATCH: perl@7483] fix coded control chars in cgi-html.t
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Mon, 30 Oct 2000 17:48:11 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10010301746350.69159-100000@aspara.forte.com>
+     Branch: perl
+	   ! t/lib/cgi-html.t
+____________________________________________________________________________
+[  7496] By: jhi                                   on 2000/10/31  14:12:05
+        Log: Subject: [PATCH: perl@7483] CRLF fix for cgi-function.t tests
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Mon, 30 Oct 2000 17:46:33 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10010301745120.69159-100000@aspara.forte.com>
+     Branch: perl
+	   ! t/lib/cgi-function.t
+____________________________________________________________________________
+[  7495] By: jhi                                   on 2000/10/31  14:11:08
+        Log: Subject: [PATCH: perl@7483] generalize AIX ccversion hack for re extension
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Mon, 30 Oct 2000 16:41:21 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10010301634500.67363-100000@aspara.forte.com>
+     Branch: perl
+	   + ext/re/hints/aix.pl
+	   ! MANIFEST ext/re/Makefile.PL
+____________________________________________________________________________
+[  7494] By: jhi                                   on 2000/10/31  14:08:32
+        Log: Use Errno magic.
+             
+             Subject: [ID 20001030.009] [PATCH] ftmp-mktemp failing
+             From: Casey Tweten <perl@ctweten.amsite.com>
+             Date: Mon, 30 Oct 2000 15:51:17 -0500
+             Message-Id: <200010302051.e9UKpHd02194@ctweten.amsite.com>
+     Branch: perl
+	   ! lib/File/Temp.pm
+____________________________________________________________________________
+[  7493] By: jhi                                   on 2000/10/31  14:05:07
+        Log: Add a perlbug flag, -A, to avoid acknowledgement messages.
+             
+             Subject: PATCH (Re: [ID 20001030.008] OK: perl v5.7.0 +DEVEL7445 on i586-linux 2.2.16 (UNINSTALLED))
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Mon, 30 Oct 2000 17:38:45 +0000
+             Message-ID: <20001030173845.O60355@plum.flirble.org>
+     Branch: perl
+	   ! Makefile.SH utils/perlbug.PL
+____________________________________________________________________________
+[  7489] By: jhi                                   on 2000/10/29  21:11:08
+        Log: Subject: [Chris Winters <cwinters@intes.net>] patch to ExtUtils::Manifest
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 29 Oct 2000 22:05:59 +0100
+             Message-ID: <m3snpfqrwo.fsf@ak-71.mind.de>
+     Branch: perl
+	   ! lib/ExtUtils/Manifest.pm
+____________________________________________________________________________
+[  7488] By: jhi                                   on 2000/10/29  21:07:47
+        Log: Tests for #7487.
+             
+             Subject: Re: [ID 20001029.002] Not OK: perl v5.7.0 +DEVEL7462 on i686-linux 2.2.16a (UNINSTALLED)
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 29 Oct 2000 19:37:09 +0100
+             Message-ID: <m34s1vsdd6.fsf@ak-71.mind.de>
+     Branch: perl
+	   ! t/comp/proto.t
+____________________________________________________________________________
+[  7487] By: jhi                                   on 2000/10/29  21:06:27
+        Log: constsub spillage.
+             
+             Subject: Re: [ID 20001029.002] Not OK: perl v5.7.0 +DEVEL7462 on i686-linux 2.2.16a (UNINSTALLED)
+             From: John Tobey <jtobey@john-edwin-tobey.org>
+             Date: Sun, 29 Oct 2000 11:37:45 -0500 (EST)
+             Message-Id: <m13pvSr-000FObC@feynman.localnet>
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[  7485] By: jhi                                   on 2000/10/29  21:00:47
+        Log: Make \x{...} consistently produce UTF-8.
+             
+             Subject: Re: \x{...} is confused 
+             From: Simon Cozens <simon@cozens.net>
+             Date: Sun, 29 Oct 2000 19:36:48 +0000
+             Message-ID: <20001029193648.A6287@pembro4.pmb.ox.ac.uk>
+     Branch: perl
+	   ! t/pragma/utf8.t toke.c
+____________________________________________________________________________
+[  7483] By: jhi                                   on 2000/10/29  18:06:55
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  7481] By: jhi                                   on 2000/10/29  17:02:37
         Log: UTF-8 decoder tweak.
      Branch: perl
