@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Jun  8 02:03:31 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Fri Jun  8 18:06:31 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -450,6 +450,7 @@ d_mktime=''
 d_mmap=''
 mmaptype=''
 d_modfl=''
+d_modfl_pow32_bug=''
 d_mprotect=''
 d_msg=''
 d_msgctl=''
@@ -10476,6 +10477,8 @@ esac
 set modfl d_modfl
 eval $inlibc
 
+d_modfl_pow32_bug="$undef"
+
 case "$d_longdbl$d_modfl" in
 $define$define)
 	$cat <<EOM
@@ -10505,7 +10508,7 @@ EOCP
 		case "$foo" in
 		*" 4294967303.150000 1.150000 4294967302.000000")
 			echo >&4 "Your modfl() is broken for large values."
-			d_modfl="$undef"
+			d_modfl_pow32_bug="$define"
 			case "$foo" in
 			glibc)	echo >&4 "You should upgrade your glibc to at least 2.2.2 to get a fixed modfl()."
 			;;
@@ -16444,6 +16447,7 @@ d_mkstemps='$d_mkstemps'
 d_mktime='$d_mktime'
 d_mmap='$d_mmap'
 d_modfl='$d_modfl'
+d_modfl_pow32_bug='$d_modfl_pow32_bug'
 d_mprotect='$d_mprotect'
 d_msg='$d_msg'
 d_msg_ctrunc='$d_msg_ctrunc'

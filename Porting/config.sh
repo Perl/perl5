@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Fri Jun  8 04:49:05 EET DST 2001
+# Configuration time: Fri Jun  8 18:08:58 EET DST 2001
 # Configured by     : jhi
 # Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
 
@@ -63,7 +63,7 @@ ccsymbols='__alpha=1 __LANGUAGE_C__=1 __osf__=1 __unix__=1 _LONGLONG=1 _SYSTYPE_
 ccversion='V5.6-082'
 cf_by='jhi'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Fri Jun  8 04:49:05 EET DST 2001'
+cf_time='Fri Jun  8 18:08:58 EET DST 2001'
 charsize='1'
 chgrp=''
 chmod=''
@@ -243,6 +243,7 @@ d_mkstemps='undef'
 d_mktime='define'
 d_mmap='define'
 d_modfl='undef'
+d_modfl_pow32_bug='undef'
 d_mprotect='define'
 d_msg='define'
 d_msg_ctrunc='define'
@@ -669,7 +670,7 @@ patchlevel='7'
 path_sep=':'
 perl5='/u/vieraat/vieraat/jhi/Perl/bin/perl'
 perl=''
-perl_patchlevel='10438'
+perl_patchlevel='10475'
 perladmin='yourname@yourhost.yourplace.com'
 perllibs='-lm -liconv -lutil -lpthread -lexc'
 perlpath='/opt/perl/bin/perl'
@@ -864,7 +865,7 @@ PERL_SUBVERSION=1
 PERL_API_REVISION=5
 PERL_API_VERSION=5
 PERL_API_SUBVERSION=0
-PERL_PATCHLEVEL=10438
+PERL_PATCHLEVEL=10475
 PERL_CONFIG_SH=true
 # Variables propagated from previous config.sh file.
 pp_sys_cflags='ccflags="$ccflags -DNO_EFF_ONLY_OK"'

@@ -1005,6 +1005,13 @@ d_modfl (d_modfl.U):
 	This variable conditionally defines the HAS_MODFL symbol, which
 	indicates to the C program that the modfl() routine is available.
 
+d_modfl_pow32_bug (d_modfl.U):
+	This variable conditionally defines the HAS_MODFL_POW32_BUG symbol,
+	which indicates that modfl() is broken for long doubles >= pow(2, 32).
+	For example from 4294967303.150000 one would get 4294967302.000000
+	and 1.150000.  The bug has been seen in certain versions of glibc,
+	release 2.2.2 is known to be okay.
+
 d_mprotect (d_mprotect.U):
 	This variable conditionally defines HAS_MPROTECT if mprotect() is
 	available to modify the access protection of a memory mapped file.

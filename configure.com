@@ -5124,6 +5124,7 @@ $ WC "d_mkstemps='" + d_mkstemps + "'"
 $ WC "d_mktime='" + d_mktime + "'"
 $ WC "d_mmap='undef'"
 $ WC "d_modfl='" + d_modfl + "'"
+$ WC "d_modfl_pow32_bug = "undef"'
 $ WC "d_mprotect='undef'"
 $ WC "d_msg='undef'"
 $ WC "d_msg_ctrunc='undef'"
