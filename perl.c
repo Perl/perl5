@@ -1641,7 +1641,7 @@ moreswitches(char *s)
 #endif
 #ifdef DJGPP
 	printf("djgpp v2 port (jpl5003c) by Hirofumi Watanabe, 1996\n");
-	printf("djgpp v2 port (perl5004) by Laszlo Molnar, 1997\n");
+	printf("djgpp v2 port (perl5004+) by Laszlo Molnar, 1997-1998\n");
 #endif
 #ifdef OS2
 	printf("\n\nOS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"

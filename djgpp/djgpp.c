@@ -15,24 +15,12 @@
 #include "perl.h"
 #include "XSUB.h"
 
-#if DJGPP==2 && DJGPP_MINOR<2
-
-/* XXX I should rewrite this stuff someday. ML */
-
-/* This is from popen.c */
-
-/* Copyright (C) 1997 DJ Delorie, see COPYING.DJ for details */
-/* Copyright (C) 1996 DJ Delorie, see COPYING.DJ for details */
-/* Copyright (C) 1995 DJ Delorie, see COPYING.DJ for details */
-
-/* hold file pointer, descriptor, command, mode, temporary file name,
-   and the status of the command  */
+/* hold file pointer, command, mode, and the status of the command */
 struct pipe_list {
   FILE *fp;
-  int fd;
   int exit_status;
-  char *command, mode[10], temp_name[L_tmpnam];
   struct pipe_list *next;
+  char *command, mode;
 };
 
 /* static, global list pointer */
@@ -42,130 +30,86 @@ FILE *
 popen (const char *cm, const char *md) /* program name, pipe mode */
 {
   struct pipe_list *l1;
+  int fd;
+  char *temp_name=NULL;
 
   /* make new node */
-  if ((l1 = (struct pipe_list *) malloc (sizeof (struct pipe_list))) == NULL)
-    return NULL;
-
-  /* zero out elements to we'll get here */
-  l1->fp = NULL;
-  l1->next = pl;
-  pl = l1;
-
-  /* stick in elements we know already */
-  l1->exit_status = -1;
-  strcpy (l1->mode, md);
-  if (tmpnam (l1->temp_name) == NULL)
-    return NULL;
-
-  /* if can save the program name, build temp file */
-  if ((l1->command = malloc(strlen(cm)+1)))
+  if ((l1 = (struct pipe_list *) malloc (sizeof (*l1)))
+     && (temp_name = malloc (L_tmpnam)) && tmpnam (temp_name))
   {
-    strcpy(l1->command, cm);
+    l1->fp = NULL;
+    l1->command = NULL;
+    l1->next = pl;
+    l1->exit_status = -1;
+    l1->mode = md[0];
+
     /* if caller wants to read */
-    if (l1->mode[0] == 'r')
+    if (md[0] == 'r' && (fd = dup (fileno (stdout))) >= 0)
     {
-      /* dup stdout */
-      if ((l1->fd = dup (fileno (stdout))) == EOF)
-	l1->fp = NULL;
-      else if (!(l1->fp = freopen (l1->temp_name, "wb", stdout)))
-	l1->fp = NULL;
-      else
-	/* exec cmd */
+      if ((l1->fp = freopen (temp_name, "wb", stdout)))
       {
-        if ((l1->exit_status = system (cm)) == EOF)
-          l1->fp = NULL;
+        l1->exit_status = system (cm);
+        if (dup2 (fd, fileno (stdout)) >= 0)
+          l1->fp = fopen (temp_name, md);
       }
-      /* reopen real stdout */
-      if (dup2 (l1->fd, fileno (stdout)) == EOF)
-	l1->fp = NULL;
-      else
-	/* open file for reader */
-	l1->fp = fopen (l1->temp_name, l1->mode);
-      close(l1->fd);
+      close (fd);
     }
-    else
-      /* if caller wants to write */
-      if (l1->mode[0] == 'w')
-        /* open temp file */
-        l1->fp = fopen (l1->temp_name, l1->mode);
-      else
-        /* unknown mode */
-        l1->fp = NULL;
+    /* if caller wants to write */
+    else if (md[0] == 'w' && (l1->command = malloc (1 + strlen (cm))))
+    {
+      strcpy (l1->command, cm);
+      l1->fp = fopen (temp_name, md);
+    }
+
+    if (l1->fp)
+    {
+      l1->fp->_flag |= _IORMONCL; /* remove on close */
+      l1->fp->_name_to_remove = temp_name;
+      return (pl = l1)->fp;
+    }
+    free (l1->command);
   }
-  return l1->fp;              /* return == NULL ? ERROR : OK */
+  free (temp_name);
+  free (l1);
+  return NULL;
 }
 
 int
 pclose (FILE *pp)
 {
-  struct pipe_list *l1, *l2;    /* list pointers */
-  int retval=0;			/* function return value */
+  struct pipe_list *l1, **l2;   /* list pointers */
+  int retval=-1;		/* function return value */
 
-  /* if pointer is first node */
-  if (pl->fp == pp)
+  for (l2 = &pl; *l2 && (*l2)->fp != pp; l2 = &((*l2)->next))
+    ;
+  if (!(l1 = *l2))
+    return retval;
+  *l2 = l1->next;
+
+  /* if pipe was opened to write */
+  if (l1->mode == 'w')
   {
-    /* save node and take it out the list */
-    l1 = pl;
-    pl = l1->next;
+    int fd;
+    fflush (l1->fp);
+    close (fileno (l1->fp)); 
+
+    if ((fd = dup (fileno (stdin))) >= 0
+       && (freopen (l1->fp->_name_to_remove, "rb", stdin)))
+    {
+      retval = system (l1->command);
+      dup2 (fd, fileno (stdin));
+    }
+    close (fd);
+    free (l1->command);
   }
   else
-    /* if more than one node in list */
-    if (pl->next)
-    {
-      /* find right node */
-      for (l2 = pl, l1 = pl->next; l1; l2 = l1, l1 = l2->next)
-        if (l1->fp == pp)
-          break;
+    /* if pipe was opened to read, return the exit status we saved */
+    retval = l1->exit_status;
 
-      /* take node out of list */
-      l2->next = l1->next;
-    }
-    else
-      return -1;
-
-  /* if FILE not in list - return error */
-  if (l1->fp == pp)
-  {
-    /* close the (hopefully) popen()ed file */
-    fclose (l1->fp);
-
-    /* if pipe was opened to write */
-    if (l1->mode[0] == 'w')
-    {
-      /* dup stdin */
-      if ((l1->fd = dup (fileno (stdin))) == EOF)
-	retval = -1;
-      else
-	/* open temp stdin */
-	if (!(l1->fp = freopen (l1->temp_name, "rb", stdin)))
-	  retval = -1;
-	else
-	  /* exec cmd */
-          if ((retval = system (l1->command)) != EOF)
-	  {
-            /* reopen stdin */
-	    if (dup2 (l1->fd, fileno (stdin)) == EOF)
-	      retval = -1;
-	  }
-      close(l1->fd);
-    }
-    else
-      /* if pipe was opened to read, return the exit status we saved */
-      if (l1->mode[0] == 'r')
-        retval = l1->exit_status;
-      else
-        /* invalid mode */
-        retval = -1;
-  }
-  remove (l1->temp_name);       /* remove temporary file */
-  free (l1->command);           /* dealloc memory */
-  free (l1);                    /* dealloc memory */
-
-  return retval;              /* retval==0 ? OK : ERROR */
+  fclose (l1->fp);              /* this removes the temp file */
+  free (l1);
+  return retval;                /* retval==0 ? OK : ERROR */
 }
-
-#endif
 
 /**/
 
