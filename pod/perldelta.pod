@@ -491,6 +491,11 @@ If C<$/> is a referenence to an integer, or a scalar that holds an integer,
 E<lt>E<gt> will read in records instead of lines. For more info, see
 L<perlvar/$/>.
 
+=head2 pack() format 'Z' supported
+
+The new format type 'Z' is useful for packing and unpacking null-terminated
+strings.  See L<perlfunc/"pack">.
+
 =head1 Significant bug fixes
 
 =head2 E<lt>HANDLEE<gt> on empty files
