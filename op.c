@@ -4399,7 +4399,6 @@ OP *op;
 	}
 	else
 	    list(o);
-	mod(o, OP_ENTERSUB);
 	prev = o;
 	o = o->op_sibling;
     }
