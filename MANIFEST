@@ -89,7 +89,6 @@ doio.c			I/O operations
 doop.c			Support code for various operations
 dosish.h		Some defines for MS/DOSish machines
 dump.c			Debugging output
-ebcdic.c		EBCDIC support routines
 emacs/cperl-mode.el	An alternate perl-mode
 emacs/e2ctags.pl	etags to ctags converter
 emacs/ptags		Creates smart TAGS file

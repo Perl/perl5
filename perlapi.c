@@ -4153,6 +4153,8 @@ Perl_sys_intern_init(pTHXo)
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 #  if defined(LEAKTEST)
 #  endif
+#  if defined(EBCDIC)
+#  endif
 #endif
 #if defined(PERL_OBJECT)
 #endif
