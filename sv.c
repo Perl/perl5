@@ -3494,7 +3494,8 @@ Perl_sv_utf8_upgrade_flags(pTHX_ register SV *sv, I32 flags)
 	 }
 	 if (hibit) {
 	      STRLEN len;
-	
+	      SvOOK_off(sv);
+	      s = (U8*)SvPVX(sv);
 	      len = SvCUR(sv) + 1; /* Plus the \0 */
 	      SvPVX(sv) = (char*)bytes_to_utf8((U8*)s, &len);
 	      SvCUR(sv) = len - 1;
