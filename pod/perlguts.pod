@@ -2347,10 +2347,9 @@ define your own ops. This is primarily to allow the building of
 interpreters for other languages in the Perl core, but it also allows
 optimizations through the creation of "macro-ops" (ops which perform the
 functions of multiple ops which are usually executed together, such as
-C<gvsv, gvsv, add>.) Currently, this feature must be enabled with the C
-flag C<-DPERL_CUSTOM_OPS>.
+C<gvsv, gvsv, add>.) 
 
-Enabling the feature will create a new op type, C<OP_CUSTOM>. The Perl
+This feature is implmented as a new op type, C<OP_CUSTOM>. The Perl
 core does not "know" anything special about this op type, and so it will
 not be involved in any optimizations. This also means that you can
 define your custom ops to be any op structure - unary, binary, list and
