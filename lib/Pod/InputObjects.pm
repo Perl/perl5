@@ -523,7 +523,9 @@ sub _set_child2parent_links {
    ## Make sure any sequences know who their parent is
    for (@children) {
       next if (!ref || ref eq 'SCALAR');
-      if ($_->isa('Pod::InteriorSequence') or $_->can('nested')) {
+      if (UNIVERSAL::isa($_, 'Pod::InteriorSequence') or
+          UNIVERSAL::can($_, 'nested'))
+      {
           $_->nested($self);
       }
    }
@@ -537,7 +539,8 @@ sub _unset_child2parent_links {
    my $ptree = $self->{'-ptree'};
    for (@$ptree) {
       next  unless (length  and  ref  and  ref ne 'SCALAR');
-      $_->_unset_child2parent_links()  if $_->isa('Pod::InteriorSequence');
+      $_->_unset_child2parent_links()
+          if UNIVERSAL::isa($_, 'Pod::InteriorSequence');
    }
 }
 
@@ -890,7 +893,8 @@ sub _unset_child2parent_links {
    local *ptree = $self;
    for (@ptree) {
        next  unless (length  and  ref  and  ref ne 'SCALAR');
-       $_->_unset_child2parent_links()  if $_->isa('Pod::InteriorSequence');
+       $_->_unset_child2parent_links()
+           if UNIVERSAL::isa($_, 'Pod::InteriorSequence');
    }
 }
 
