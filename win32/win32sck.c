@@ -426,15 +426,24 @@ my_fclose (FILE *pf)
     if (!wsock_started)		/* No WinSock? */
 	return(fclose(pf));	/* Then not a socket. */
     osf = TO_SOCKET(fileno(pf));/* Get it now before it's gone! */
-    if (osf != -1
-	&& closesocket(osf) == SOCKET_ERROR
-	&& WSAGetLastError() != WSAENOTSOCK)
-    {
-	(void)fclose(pf);
-	return EOF;
+    if (osf != -1) {
+	int err;
+	win32_fflush(pf);
+	err = closesocket(osf);
+	if (err == 0) {
+	    (void)fclose(pf);	/* handle already closed, ignore error */
+	    return 0;
+	}
+	else if (err == SOCKET_ERROR) {
+	    err = WSAGetLastError();
+	    if (err != WSAENOTSOCK) {
+		(void)fclose(pf);
+		errno = err;
+		return EOF;
+	    }
+	}
     }
-    else
-	return fclose(pf);
+    return fclose(pf);
 }
 
 struct hostent *
