@@ -40,6 +40,8 @@ $Quotekeys = 1 unless defined $Quotekeys;
 $Bless = "bless" unless defined $Bless;
 #$Expdepth = 0 unless defined $Expdepth;
 $Maxdepth = 0 unless defined $Maxdepth;
+$Useperl = 0 unless defined $Useperl;
+$Sortkeys = 0 unless defined $Sortkeys;
 
 #
 # expects an arrayref of values to be dumped.
@@ -75,6 +77,8 @@ sub new {
              'bless'	=> $Bless,	# keyword to use for "bless"
 #	     expdepth   => $Expdepth,   # cutoff depth for explicit dumping
 	     maxdepth	=> $Maxdepth,   # depth beyond which we give up
+	     useperl    => $Useperl,    # use the pure Perl implementation
+	     sortkeys   => $Sortkeys,   # flag or filter for sorting hash keys
 	   };
 
   if ($Indent > 0) {
@@ -148,7 +152,8 @@ sub DESTROY {}
 
 sub Dump {
     return &Dumpxs
-	unless $Data::Dumper::Useqq || (ref($_[0]) && $_[0]->{useqq});
+	unless $Data::Dumper::Useperl || (ref($_[0]) && $_[0]->{useperl}) ||
+	       $Data::Dumper::Useqq || (ref($_[0]) && $_[0]->{useqq});
     return &Dumpperl;
 }
 
@@ -208,6 +213,8 @@ sub Dumpperl {
 #
 # twist, toil and turn;
 # and recurse, of course.
+# sometimes sordidly;
+# and curse if no recourse.
 #
 sub _dump {
   my($s, $val, $name) = @_;
@@ -331,7 +338,23 @@ sub _dump {
 	($name =~ /^\\?[\%\@\*\$][^{].*[]}]$/) ? ($mname = $name) :
 	  ($mname = $name . '->');
       $mname .= '->' if $mname =~ /^\*.+\{[A-Z]+\}$/;
-      while (($k, $v) = each %$val) {
+      my ($sortkeys, $keys, $key) = ("$s->{sortkeys}");
+      if ($sortkeys) {
+	if (ref($s->{sortkeys}) eq 'CODE') {
+	  $keys = $s->{sortkeys}($val);
+	  unless (ref($keys) eq 'ARRAY') {
+	    carp "Sortkeys subroutine did not return ARRAYREF";
+	    $keys = [];
+	  }
+	}
+	else {
+	  $keys = [ sort keys %$val ];
+	}
+      }
+      while (($k, $v) = ! $sortkeys ? (each %$val) :
+	     @$keys ? ($key = shift(@$keys), $val->{$key}) :
+	     () ) 
+      {
 	my $nk = $s->_dump($k, "");
 	$nk = $1 if !$s->{quotekeys} and $nk =~ /^[\"\']([A-Za-z_]\w*)[\"\']$/;
 	$sname = $mname . '{' . $nk . '}';
@@ -535,6 +558,16 @@ sub Bless {
 sub Maxdepth {
   my($s, $v) = @_;
   defined($v) ? (($s->{'maxdepth'} = $v), return $s) : $s->{'maxdepth'};
+}
+
+sub Useperl {
+  my($s, $v) = @_;
+  defined($v) ? (($s->{'useperl'} = $v), return $s) : $s->{'useperl'};
+}
+
+sub Sortkeys {
+  my($s, $v) = @_;
+  defined($v) ? (($s->{'sortkeys'} = $v), return $s) : $s->{'sortkeys'};
 }
 
 
@@ -848,6 +881,31 @@ C<Data::Dumper::Purity> is set.  (Useful in debugger when we often don't
 want to see more than enough).  Default is 0, which means there is 
 no maximum depth. 
 
+=item $Data::Dumper::Useperl  I<or>  $I<OBJ>->Useperl(I<[NEWVAL]>)
+
+Can be set to a boolean value which controls whether the pure Perl
+implementation of C<Data::Dumper> is used. The C<Data::Dumper> module is
+a dual implementation, with almost all functionality written in both
+pure Perl and also in XS ('C'). Since the XS version is much faster, it
+will always be used if possible. This option lets you override the
+default behavior, usually for testing purposes only. Default is 0, which
+means the XS implementation will be used if possible.
+
+=item $Data::Dumper::Sortkeys  I<or>  $I<OBJ>->Sortkeys(I<[NEWVAL]>)
+
+Can be set to a boolean value to control whether hash keys are dumped in
+sorted order. A true value will cause the keys of all hashes to be
+dumped in Perl's default sort order. Can also be set to a subroutine
+reference which will be called for each hash that is dumped. In this
+case C<Data::Dumper> will call the subroutine once for each hash,
+passing it the reference of the hash. The purpose of the subroutine is
+to return a reference to an array of the keys that will be dumped, in
+the order that they should be dumped. Using this feature, you can
+control both the order of the keys, and which keys are actually used. In
+other words, this subroutine acts as a filter by which you can exclude
+certain keys from being dumped. Default is 0, which means that hash keys
+are not sorted.
+
 =back
 
 =head2 Exports
@@ -1002,6 +1060,30 @@ distribution for more examples.)
     $d->Seen({ '*foo' => \&foo });
     print $d->Dump;
 
+
+    ########
+    # sorting and filtering hash keys
+    ########
+
+    $Data::Dumper::Sortkeys = \&my_filter;
+    my $foo = { map { (ord, "$_$_$_") } 'I'..'Q' };
+    my $bar = { %$foo };
+    my $baz = { reverse %$foo };
+    print Dumper [ $foo, $bar, $baz ];
+
+    sub my_filter {
+        my ($hash) = @_;
+        # return an array ref containing the hash keys to dump
+        # in the order that you want them to be dumped
+        return [
+          # Sort the keys of %$foo in reverse numeric order
+            $hash eq $foo ? (sort {$b <=> $a} keys %$hash) :
+          # Only dump the odd number keys of %$bar
+            $hash eq $bar ? (grep {$_ % 2} keys %$hash) :
+          # Sort keys in default order for all other hashes
+            (sort keys %$hash)
+        ];
+    }
 
 =head1 BUGS
 

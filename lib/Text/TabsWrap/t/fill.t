@@ -75,8 +75,8 @@ while (@tests) {
 		print "ok $tn\n";
 	} elsif ($rerun) {
 		my $oi = $in;
-		open(F,">#o") and do { print F $back; close(F) };
-		open(F,">#e") and do { print F $out;  close(F) };
+ 		write_file("#o", $back);
+ 		write_file("#e", $out);
 		foreach ($in, $back, $out) {
 			s/\t/^I\t/gs;
 			s/\n/\$\n/gs;
@@ -95,4 +95,16 @@ while (@tests) {
 		print "not ok $tn\n";
 	}
 	$tn++;
+}
+
+sub write_file
+{
+	my ($f, @data) = @_;
+
+	local(*F);
+
+	open(F, ">$f") || die "open >$f: $!";
+	(print F @data) || die "write $f: $!";
+	close(F) || die "close $f: $!";
+	return 1;
 }

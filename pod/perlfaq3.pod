@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq3 - Programming Tools ($Revision: 1.1 $, $Date: 2001/09/20 03:03:00 $)
+perlfaq3 - Programming Tools ($Revision: 1.2 $, $Date: 2001/09/29 03:13:13 $)
 
 =head1 DESCRIPTION
 
@@ -473,6 +473,56 @@ is, try using the other one and see whether this makes a difference.
 Information about malloc is in the F<INSTALL> file in the source
 distribution.  You can find out whether you are using perl's malloc by
 typing C<perl -V:usemymalloc>.
+
+Of course, the best way to save memory is to not do anything to waste
+it in the first place. Good programming practices can go a long way
+toward this:
+
+=over 4
+
+=item * Don't slurp!
+
+Don't read an entire file into memory if you can process it line
+by line. Or more concretely, use a loop like this:
+
+	#
+	# Good Idea
+	#
+	while (<FILE>) {
+	   # ...
+	}
+
+instead of this:
+
+	#
+	# Bad Idea
+	#
+	@data = <FILE>;
+	foreach (@data) {
+	    # ...
+	}
+
+When the files you're processing are small, it doesn't much matter which
+way you do it, but it makes a huge difference when they start getting
+larger. 
+
+=item * Pass by reference
+
+Pass arrays and hashes by reference, not by value. For one thing, it's
+the only way to pass multiple lists or hashes (or both) in a single
+call/return. It also avoids creating a copy of all the contents. This
+requires some judgment, however, because any changes will be propagated
+back to the original data. If you really want to mangle (er, modify) a
+copy, you'll have to sacrifice the memory needed to make one.
+
+=item * Tie large variables to disk.
+
+For "big" data stores (i.e. ones that exceed available memory) consider
+using one of the DB modules to store it on disk instead of in RAM. This
+will incur a penalty in access time, but that's probably better that
+causing your hard disk to thrash due to massive swapping.
+
+=back
 
 =head2 Is it unsafe to return a pointer to local data?
 

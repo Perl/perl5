@@ -29,7 +29,7 @@ static I32 DD_dump (pTHX_ SV *val, char *name, STRLEN namelen, SV *retval,
 		    SV *pad, SV *xpad, SV *apad, SV *sep,
 		    SV *freezer, SV *toaster,
 		    I32 purity, I32 deepcopy, I32 quotekeys, SV *bless,
-		    I32 maxdepth);
+		    I32 maxdepth, SV *sortkeys);
 
 /* does a string need to be protected? */
 static I32
@@ -179,7 +179,7 @@ static I32
 DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	AV *postav, I32 *levelp, I32 indent, SV *pad, SV *xpad,
 	SV *apad, SV *sep, SV *freezer, SV *toaster, I32 purity,
-	I32 deepcopy, I32 quotekeys, SV *bless, I32 maxdepth)
+	I32 deepcopy, I32 quotekeys, SV *bless, I32 maxdepth, SV *sortkeys)
 {
     char tmpbuf[128];
     U32 i;
@@ -354,7 +354,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		DD_dump(aTHX_ ival, SvPVX(namesv), SvCUR(namesv), retval, seenhv,
 			postav, levelp,	indent, pad, xpad, apad, sep,
 			freezer, toaster, purity, deepcopy, quotekeys, bless,
-			maxdepth);
+			maxdepth, sortkeys);
 		sv_catpvn(retval, ")}", 2);
 	    }						     /* plain */
 	    else {
@@ -362,7 +362,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		DD_dump(aTHX_ ival, SvPVX(namesv), SvCUR(namesv), retval, seenhv,
 			postav, levelp,	indent, pad, xpad, apad, sep,
 			freezer, toaster, purity, deepcopy, quotekeys, bless,
-			maxdepth);
+			maxdepth, sortkeys);
 	    }
 	    SvREFCNT_dec(namesv);
 	}
@@ -374,7 +374,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    DD_dump(aTHX_ ival, SvPVX(namesv), SvCUR(namesv), retval, seenhv,
 		    postav, levelp,	indent, pad, xpad, apad, sep,
 		    freezer, toaster, purity, deepcopy, quotekeys, bless,
-		    maxdepth);
+		    maxdepth, sortkeys);
 	    SvREFCNT_dec(namesv);
 	}
 	else if (realtype == SVt_PVAV) {
@@ -443,7 +443,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		DD_dump(aTHX_ elem, iname, ilen, retval, seenhv, postav,
 			levelp,	indent, pad, xpad, apad, sep,
 			freezer, toaster, purity, deepcopy, quotekeys, bless,
-			maxdepth);
+			maxdepth, sortkeys);
 		if (ix < ixmax)
 		    sv_catpvn(retval, ",", 1);
 	    }
@@ -468,6 +468,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    char *key;
 	    I32 klen;
 	    SV *hval;
+	    AV *keys = Nullav;
 	
 	    iname = newSVpvn(name, namelen);
 	    if (name[0] == '%') {
@@ -497,9 +498,42 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    sv_catsv(totpad, pad);
 	    sv_catsv(totpad, apad);
 	
-	    (void)hv_iterinit((HV*)ival);
+	    /* If requested, get a sorted/filtered array of hash keys */
+	    if (sortkeys) {
+		if (sortkeys == &PL_sv_yes) {
+		    keys = newAV();
+		    (void)hv_iterinit((HV*)ival);
+		    while (entry = hv_iternext((HV*)ival)) {
+			sv = hv_iterkeysv(entry);
+			SvREFCNT_inc(sv);
+			av_push(keys, sv);
+		    }
+		    sortsv(AvARRAY(keys), 
+			   av_len(keys)+1, 
+			   Perl_sv_cmp_locale);
+		}
+		else {
+		    dSP; ENTER; SAVETMPS; PUSHMARK(sp);
+		    XPUSHs(sv_2mortal(newRV_inc(ival))); PUTBACK;
+		    i = perl_call_sv(sortkeys, G_SCALAR | G_EVAL);
+		    SPAGAIN;
+		    if (i) {
+			sv = POPs;
+			if (SvROK(sv) && (SvTYPE(SvRV(sv)) == SVt_PVAV))
+			    keys = (AV*)SvREFCNT_inc(SvRV(sv));
+		    }
+		    if (! keys)
+			warn("Sortkeys subroutine did not return ARRAYREF\n");
+		    PUTBACK; FREETMPS; LEAVE;
+		}
+		if (keys)
+		    sv_2mortal((SV*)keys);
+	    }
+	    else
+		(void)hv_iterinit((HV*)ival);
 	    i = 0;
-	    while ((entry = hv_iternext((HV*)ival)))  {
+	    while (sortkeys ? (void*)(keys && (i <= av_len(keys))) : 
+			      (void*)((entry = hv_iternext((HV*)ival))) )		    {
 		char *nkey = NULL;
 		I32 nticks = 0;
 		SV* keysv;
@@ -508,9 +542,21 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		
 		if (i)
 		    sv_catpvn(retval, ",", 1);
+
+		if (sortkeys) {
+		    char *key;
+		    svp = av_fetch(keys, i, FALSE);
+		    keysv = svp ? *svp : sv_mortalcopy(&PL_sv_undef);
+		    key = SvPV(keysv, keylen);
+		    svp = hv_fetch((HV*)ival, key, keylen, 0);
+		    hval = svp ? *svp : sv_mortalcopy(&PL_sv_undef);
+		}
+		else {
+		    keysv = hv_iterkeysv(entry);
+		    hval = hv_iterval((HV*)ival, entry);
+		}
+
 		i++;
-		keysv = hv_iterkeysv(entry);
-		hval  = hv_iterval((HV*)ival, entry);
 
 		do_utf8 = DO_UTF8(keysv);
 		key = SvPV(keysv, keylen);
@@ -571,7 +617,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		DD_dump(aTHX_ hval, SvPVX(sname), SvCUR(sname), retval, seenhv,
 			postav, levelp,	indent, pad, xpad, newapad, sep,
 			freezer, toaster, purity, deepcopy, quotekeys, bless,
-			maxdepth);
+			maxdepth, sortkeys);
 		SvREFCNT_dec(sname);
 		Safefree(nkey);
 		if (indent >= 2)
@@ -713,7 +759,8 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 			DD_dump(aTHX_ e, SvPVX(nname), SvCUR(nname), postentry,
 				seenhv, postav, &nlevel, indent, pad, xpad,
 				newapad, sep, freezer, toaster, purity,
-				deepcopy, quotekeys, bless, maxdepth);
+				deepcopy, quotekeys, bless, maxdepth, 
+				sortkeys);
 			SvREFCNT_dec(e);
 		    }
 		}
@@ -776,7 +823,7 @@ Data_Dumper_Dumpxs(href, ...)
 	    I32 indent, terse, i, imax, postlen;
 	    SV **svp;
 	    SV *val, *name, *pad, *xpad, *apad, *sep, *varname;
-	    SV *freezer, *toaster, *bless;
+	    SV *freezer, *toaster, *bless, *sortkeys;
 	    I32 purity, deepcopy, quotekeys, maxdepth = 0;
 	    char tmpbuf[1024];
 	    I32 gimme = GIMME;
@@ -858,6 +905,17 @@ Data_Dumper_Dumpxs(href, ...)
 		    bless = *svp;
 		if ((svp = hv_fetch(hv, "maxdepth", 8, FALSE)))
 		    maxdepth = SvIV(*svp);
+		if ((svp = hv_fetch(hv, "sortkeys", 8, FALSE))) {
+		    sortkeys = *svp;
+		    if (! SvTRUE(sortkeys))
+			sortkeys = NULL;
+		    else if (! (SvROK(sortkeys) &&
+				SvTYPE(SvRV(sortkeys)) == SVt_PVCV) )
+		    {
+			/* flag to use qsortsv() for sorting hash keys */	
+			sortkeys = &PL_sv_yes; 
+		    }
+		}
 		postav = newAV();
 
 		if (todumpav)
@@ -923,7 +981,7 @@ Data_Dumper_Dumpxs(href, ...)
 		    DD_dump(aTHX_ val, SvPVX(name), SvCUR(name), valstr, seenhv,
 			    postav, &level, indent, pad, xpad, newapad, sep,
 			    freezer, toaster, purity, deepcopy, quotekeys,
-			    bless, maxdepth);
+			    bless, maxdepth, sortkeys);
 		
 		    if (indent >= 2)
 			SvREFCNT_dec(newapad);

@@ -67,8 +67,9 @@ sub AUTOLOAD {
     ($constname = $AUTOLOAD) =~ s/.*:://;
     my ($error, $val) = constant($constname);
     Carp::croak $error if $error;
-    eval "sub $AUTOLOAD { $val }";
-    goto &$AUTOLOAD;
+    no strict 'refs';
+    *{$AUTOLOAD} = sub { $val };
+    goto &{$AUTOLOAD};
 }
 
 XSLoader::load 'GDBM_File', $VERSION;

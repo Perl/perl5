@@ -1018,8 +1018,8 @@ PP(pp_sort)
 		cx->blk_sub.oldcurpad = PL_curpad;
 		cx->blk_sub.argarray = av;
 	    }
-	    qsortsv((myorigmark+1), max,
-		    is_xsub ? sortcv_xsub : hasargs ? sortcv_stacked : sortcv);
+           sortsv((myorigmark+1), max,
+                  is_xsub ? sortcv_xsub : hasargs ? sortcv_stacked : sortcv);
 
 	    POPBLOCK(cx,PL_curpm);
 	    PL_stack_sp = newsp;
@@ -1030,8 +1030,8 @@ PP(pp_sort)
     else {
 	if (max > 1) {
 	    MEXTEND(SP, 20);	/* Can't afford stack realloc on signal. */
-	    qsortsv(ORIGMARK+1, max,
- 		    (PL_op->op_private & OPpSORT_NUMERIC)
+           sortsv(ORIGMARK+1, max,
+                  (PL_op->op_private & OPpSORT_NUMERIC)
 			? ( (PL_op->op_private & OPpSORT_INTEGER)
 			    ? ( overloading ? amagic_i_ncmp : sv_i_ncmp)
 			    : ( overloading ? amagic_ncmp : sv_ncmp))
@@ -4036,8 +4036,18 @@ dynprep(pTHX_ gptr *list1, gptr *list2, size_t nmemb, SVCOMPARE_t cmp)
 ** They make convenient temporary pointers in other places.
 */
 
-STATIC void
-S_qsortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp)
+/* 
+=for apidoc sortsv
+   
+Sort an array in place. Here is an example:
+
+    sortsv(AvARRAY(av), av_len(av)+1, Perl_sv_cmp_locale); 
+
+=cut
+*/
+    
+void
+Perl_sortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp)
 {
     int i, run;
     int sense;

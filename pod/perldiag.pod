@@ -1294,6 +1294,10 @@ Your code will be interpreted as an attempt to call a method named
 "elseif" for the class returned by the following block.  This is
 unlikely to be what you want.
 
+=item Empty %s
+
+(F) Empty C<\p{}> or C<\P{}>.
+
 =item entering effective %s failed
 
 (F) While under the C<use filetest> pragma, switching the real and
@@ -1939,6 +1943,10 @@ can vary from one line to the next.
 
 (S) This is an educated guess made in conjunction with the message "%s
 found where operator expected".  Often the missing operator is a comma.
+
+=item Missing right brace on %s
+
+(F) Missing right brace in C<\p{...}> or C<\P{...}>.
 
 =item Missing right curly or square bracket
 

@@ -10,7 +10,7 @@ BEGIN {
 use File::Spec;
 
 require "test.pl";
-plan(tests => 39);
+plan(tests => 43);
 
 my @tempfiles = ();
 
@@ -132,5 +132,23 @@ ok( exists $INC{'Quux2.pm'},       '  %INC sees it' );
 is( ref $INC{'Quux2.pm'}, 'FooLoader',
 				   '  key is an object in %INC' );
 is( $INC{'Quux2.pm'}, $sref,       '  key is correct in %INC' );
+
+pop @INC;
+
+push @INC, sub {
+    my ($self, $filename) = @_;
+    if (substr($filename,0,4) eq 'Toto') {
+	$INC{$filename} = 'xyz';
+	return get_temp_fh($filename);
+    }
+    else {
+        return undef;
+    }
+};
+
+ok( eval { require Toto; 1 },      'require() magic via anonymous code ref'  );
+ok( exists $INC{'Toto.pm'},        '  %INC sees it' );
+ok( ! ref $INC{'Toto.pm'},         q/  key isn't a ref in %INC/ );
+is( $INC{'Toto.pm'}, 'xyz',	   '  key is correct in %INC' );
 
 pop @INC;

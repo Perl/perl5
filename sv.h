@@ -983,11 +983,17 @@ otherwise.
 #define sv_utf8_upgrade_macro(sv) sv_utf8_upgrade_flags(sv, SV_GMAGIC)
 
 /* function style also available for sourcecompat */
+#undef sv_setsv
 #define sv_setsv(dsv, ssv) sv_setsv_macro(dsv, ssv)
+#undef sv_catsv
 #define sv_catsv(dsv, ssv) sv_catsv_macro(dsv, ssv)
+#undef sv_catpvn
 #define sv_catpvn(dsv, sstr, slen) sv_catpvn_macro(dsv, sstr, slen)
+#undef sv_2pv
 #define sv_2pv(sv, lp) sv_2pv_macro(sv, lp)
+#undef sv_pvn_force
 #define sv_pvn_force(sv, lp) sv_pvn_force_macro(sv, lp)
+#undef sv_utf8_upgrade
 #define sv_utf8_upgrade(sv) sv_utf8_upgrade_macro(sv)
 
 #undef SvPV

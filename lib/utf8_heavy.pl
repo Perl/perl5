@@ -1,7 +1,6 @@
 package utf8;
 
-my $DEBUG = 0;
-my $seq = "AAA0000";
+sub DEBUG () { 0 }
 
 sub DESTROY {}
 
@@ -10,53 +9,57 @@ sub croak { require Carp; Carp::croak(@_) }
 sub SWASHNEW {
     my ($class, $type, $list, $minbits, $none) = @_;
     local $^D = 0 if $^D;
-    print STDERR "SWASHNEW @_\n" if $DEBUG;
-    my $extras;
-    my $bits;
- 
+
+    print STDERR "SWASHNEW @_\n" if DEBUG;
+
+    my $file;
+
     if ($type and ref ${"${class}::{$type}"} eq $class) {
-	warn qq/Found \${"${class}::{$type}"}\n/ if $DEBUG;
+	warn qq/Found \${"${class}::{$type}"}\n/ if DEBUG;
 	return ${"${class}::{$type}"};	# Already there...
     }
 
-    $type ||= $seq++;
+    if ($type) {
 
-    my $caller;
-    my $i = 0;
-    while (($caller = caller($i)) eq __PACKAGE__) { $i++ }
-    my $encoding = $enc{$caller} || "unicore";
-    (my $file = $type) =~ s!::!/!g;
-    if ($file =~ /^In[- ]?(.+)/i) {
-	my $In = $1;
-	defined %utf8::In || do "$encoding/In.pl";
-	my $prefix = substr(lc($In), 0, 3);
-	if (exists $utf8::InPat{$prefix}) {
-	    for my $k (keys %{$utf8::InPat{$prefix}}) {
+	defined %utf8::In || do "unicore/In.pl";
+
+	$type =~ s/^In(?:[-_]|\s+)?//i;
+	$type =~ s/\s+$//;
+
+	my $inprefix = substr(lc($type), 0, 3);
+	if (exists $utf8::InPat{$inprefix}) {
+	    my $In = $type;
+	    for my $k (keys %{$utf8::InPat{$inprefix}}) {
 		if ($In =~ /^$k$/i) {
-		    $In = $utf8::InPat{$prefix}->{$k};
+		    $In = $utf8::InPat{$inprefix}->{$k};
 		    if (exists $utf8::In{$In}) {
-			$file = "$encoding/In/$utf8::In{$In}";
+			$file = "unicore/In/$utf8::In{$In}";
+			print "inprefix = $inprefix, In = $In, k = $k, file = $file\n" if DEBUG;
 			last;
 		    }
 		}
 	    }
 	}
-    } else {
-	$file =~ s#^(Is|To)([A-Z].*)#$1/$2#;
+
+	# This is separate from 'To' in preparation of Is.pl (a la In.pl).
+	if ((not defined $file) && $type =~ /^Is([A-Z][A-Za-z]*)$/) {
+	    $file = "unicore/Is/$1";
+	}
+
+	if ((not defined $file) && $type =~ /^To([A-Z][A-Za-z]*)$/) {
+	    $file = "unicore/To/$1";
+	}
     }
 
     {
-        $list ||=
-	    ( exists &{"${caller}::${type}"} &&
-	      eval { $caller->$type() } )
-	    || do "$file.pl"
-	    || do "$encoding/$file.pl"
-	    || do "$encoding/Is/${type}.pl"
-	    || croak("Can't find Unicode character property \"$type\"");
+        $list ||= do "$file.pl"
+	      ||  do "unicore/Is/$type.pl"
+	      ||  croak("Can't find Unicode character property \"$type\"");
     }
 
-    $| = 1;
-
+    my $extras;
+    my $bits;
+ 
     if ($list) {
 	my @tmp = split(/^/m, $list);
 	my %seen;
@@ -94,7 +97,7 @@ sub SWASHNEW {
 	while ($x =~ /^([^0-9a-fA-F\n])(.*)/mg) {
 	    my $char = $1;
 	    my $name = $2;
-	    # print STDERR "$1 => $2\n" if $DEBUG;
+#	    print STDERR "$1 => $2\n" if DEBUG;
 	    if ($char =~ /[-+!]/) {
 		my ($c,$t) = split(/::/, $name, 2);	# bogus use of ::, really
 		my $subobj = $c->SWASHNEW($t, "", 0, 0, 0);
@@ -104,7 +107,7 @@ sub SWASHNEW {
 	}
     }
 
-    print STDERR "CLASS = $class, TYPE => $type, BITS => $bits, NONE => $none\nEXTRAS =>\n$extras\nLIST =>\n$list\n" if $DEBUG;
+    print STDERR "CLASS = $class, TYPE => $type, BITS => $bits, NONE => $none\nEXTRAS =>\n$extras\nLIST =>\n$list\n" if DEBUG;
 
     ${"${class}::{$type}"} = bless {
 	TYPE => $type,
@@ -124,7 +127,7 @@ sub SWASHGET {
     my $type = $self->{TYPE};
     my $bits = $self->{BITS};
     my $none = $self->{NONE};
-    print STDERR "SWASHGET @_ [$type/$bits/$none]\n" if $DEBUG;
+    print STDERR "SWASHGET @_ [$type/$bits/$none]\n" if DEBUG;
     my $end = $start + $len;
     my $swatch = "";
     my $key;
@@ -150,7 +153,7 @@ sub SWASHGET {
 		    }
 		    for ($key = $min; $key <= $max; $key++) {
 			last LINE if $key >= $end;
-#			print STDERR "$key => $val\n" if $DEBUG;
+#			print STDERR "$key => $val\n" if DEBUG;
 			vec($swatch, $key - $start, $bits) = $val;
 			++$val if $val < $none;
 		    }
@@ -162,7 +165,7 @@ sub SWASHGET {
 		    }
 		    for ($key = $min; $key <= $max; $key++, $val++) {
 			last LINE if $key >= $end;
-#			print STDERR "$key => $val\n" if $DEBUG;
+#			print STDERR "$key => $val\n" if DEBUG;
 			vec($swatch, $key - $start, $bits) = $val;
 		    }
 		}
@@ -179,7 +182,7 @@ sub SWASHGET {
 		}
 		for ($key = $min; $key <= $max; $key++) {
 		    last LINE if $key >= $end;
-#		    print STDERR "$key => 1\n" if $DEBUG;
+#		    print STDERR "$key => 1\n" if DEBUG;
 		    vec($swatch, $key - $start, 1) = 1;
 		}
 	    }
@@ -190,7 +193,7 @@ sub SWASHGET {
 	while ($x =~ /^([-+!])(.*)/mg) {
 	    my $char = $1;
 	    my $name = $2;
-	    print STDERR "INDIRECT $1 $2\n" if $DEBUG;
+	    print STDERR "INDIRECT $1 $2\n" if DEBUG;
 	    my $otherbits = $self->{$name}->{BITS};
 	    croak("SWASHGET size mismatch") if $bits < $otherbits;
 	    my $other = $self->{$name}->SWASHGET($start, $len);
@@ -230,7 +233,7 @@ sub SWASHGET {
 	    }
 	}
     }
-    if ($DEBUG) {
+    if (DEBUG) {
 	print STDERR "CELLS ";
 	for ($key = 0; $key < $len; $key++) {
 	    print STDERR vec($swatch, $key, $bits), " ";

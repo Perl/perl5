@@ -61,11 +61,11 @@ sub TEST {
 
 if (defined &Data::Dumper::Dumpxs) {
   print "### XS extension loaded, will run XS tests\n";
-  $TMAX = 192; $XS = 1;
+  $TMAX = 210; $XS = 1;
 }
 else {
   print "### XS extensions not loaded, will NOT run XS tests\n";
-  $TMAX = 96; $XS = 0;
+  $TMAX = 105; $XS = 0;
 }
 
 print "1..$TMAX\n";
@@ -820,4 +820,107 @@ EOT
   TEST q(Data::Dumper->Dump([$a], ['a']));
   TEST q(Data::Dumper->Dumpxs([$a], ['a']));
 
+}
+
+{
+  $i = 0;
+  $a = { map { ("$_$_$_", ++$i) } 'I'..'Q' };
+  local $Data::Dumper::Sortkeys = 1;
+
+############# 193
+##
+  $WANT = <<'EOT';
+#$VAR1 = {
+#  III => 1,
+#  JJJ => 2,
+#  KKK => 3,
+#  LLL => 4,
+#  MMM => 5,
+#  NNN => 6,
+#  OOO => 7,
+#  PPP => 8,
+#  QQQ => 9
+#};
+EOT
+
+TEST q(Data::Dumper->new([$a])->Dump;);
+TEST q(Data::Dumper->new([$a])->Dumpxs;)
+	if $XS;
+}
+
+{
+  $i = 5;
+  $c = { map { (++$i, "$_$_$_") } 'I'..'Q' };
+  local $Data::Dumper::Sortkeys = \&sort199;
+  sub sort199 {
+    my $hash = shift;
+    return [ sort { $b <=> $a } keys %$hash ];
+  }
+
+############# 199
+##
+  $WANT = <<'EOT';
+#$VAR1 = {
+#  '14' => 'QQQ',
+#  '13' => 'PPP',
+#  '12' => 'OOO',
+#  '11' => 'NNN',
+#  '10' => 'MMM',
+#  '9' => 'LLL',
+#  '8' => 'KKK',
+#  '7' => 'JJJ',
+#  '6' => 'III'
+#};
+EOT
+
+TEST q(Data::Dumper->new([$c])->Dump;);
+TEST q(Data::Dumper->new([$c])->Dumpxs;)
+	if $XS;
+}
+
+{
+  $i = 5;
+  $c = { map { (++$i, "$_$_$_") } 'I'..'Q' };
+  $d = { reverse %$c };
+  local $Data::Dumper::Sortkeys = \&sort205;
+  sub sort205 {
+    my $hash = shift;
+    return [ 
+      $hash eq $c ? (sort { $a <=> $b } keys %$hash)
+		  : (reverse sort keys %$hash)
+    ];
+  }
+
+############# 205
+##
+  $WANT = <<'EOT';
+#$VAR1 = [
+#  {
+#    '6' => 'III',
+#    '7' => 'JJJ',
+#    '8' => 'KKK',
+#    '9' => 'LLL',
+#    '10' => 'MMM',
+#    '11' => 'NNN',
+#    '12' => 'OOO',
+#    '13' => 'PPP',
+#    '14' => 'QQQ'
+#  },
+#  {
+#    QQQ => '14',
+#    PPP => '13',
+#    OOO => '12',
+#    NNN => '11',
+#    MMM => '10',
+#    LLL => '9',
+#    KKK => '8',
+#    JJJ => '7',
+#    III => '6'
+#  }
+#];
+EOT
+
+TEST q(Data::Dumper->new([[$c, $d]])->Dump;);
+TEST q(Data::Dumper->new([[$c, $d]])->Dumpxs;)
+	if $XS;
 }

@@ -2881,7 +2881,7 @@ tryagain:
 		    if (!RExC_end) {
 			RExC_parse += 2;
 			RExC_end = oldregxend;
-			vFAIL("Missing right brace on \\p{}");
+			vFAIL2("Missing right brace on \\%c{}", UCHARAT(RExC_parse - 2));
 		    }
 		    RExC_end++;
 		}
@@ -3085,7 +3085,7 @@ tryagain:
 			/* FALL THROUGH */
 		    default:
 			if (!SIZE_ONLY && ckWARN(WARN_REGEXP) && isALPHA(*p))
-			    vWARN2(p +1, "Unrecognized escape \\%c passed through", *p);
+			    vWARN2(p + 1, "Unrecognized escape \\%c passed through", UCHARAT(p));
 			goto normal_default;
 		    }
 		    break;
@@ -3423,20 +3423,35 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 		if (*RExC_parse == '{') {
 		    e = strchr(RExC_parse++, '}');
                     if (!e)
-                        vFAIL("Missing right brace on \\p{}");
+                        vFAIL2("Missing right brace on \\%c{}", value);
+		    while (isSPACE(UCHARAT(RExC_parse)))
+		        RExC_parse++;
+                    if (e == RExC_parse)
+                        vFAIL2("Empty \\%c{}", value);
 		    n = e - RExC_parse;
+		    while (isSPACE(UCHARAT(RExC_parse + n - 1)))
+		        n--;
 		}
 		else {
 		    e = RExC_parse;
 		    n = 1;
 		}
 		if (!SIZE_ONLY) {
+		    if (UCHARAT(RExC_parse) == '^') {
+			 RExC_parse++;
+			 n--;
+			 value = value == 'p' ? 'P' : 'p'; /* toggle */
+			 while (isSPACE(UCHARAT(RExC_parse))) {
+			      RExC_parse++;
+			      n--;
+			 }
+		    }
 		    if (value == 'p')
-			Perl_sv_catpvf(aTHX_ listsv,
-				       "+utf8::%.*s\n", (int)n, RExC_parse);
+			 Perl_sv_catpvf(aTHX_ listsv,
+					"+utf8::%.*s\n", (int)n, RExC_parse);
 		    else
-			Perl_sv_catpvf(aTHX_ listsv,
-				       "!utf8::%.*s\n", (int)n, RExC_parse);
+			 Perl_sv_catpvf(aTHX_ listsv,
+					"!utf8::%.*s\n", (int)n, RExC_parse);
 		}
 		RExC_parse = e + 1;
 		ANYOF_FLAGS(ret) |= ANYOF_UNICODE;
