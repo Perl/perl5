@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Mar 21 20:56:19 EET 2002 [metaconfig 3.0 PL70]
+# Generated on Fri Mar 22 17:58:57 EET 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -10009,7 +10009,7 @@ set ctermid_r d_ctermid_r
 eval $inlibc
 case "$d_ctermid_r" in
 "$define")
-	hdrs="$i_systypes sys/types.h define stdio.h $i_stdio stdio.h"
+	hdrs="$i_systypes sys/types.h define stdio.h "
 	case "stdio" in
 	time)
 		hdrs="$hdrs $i_systime sys/time.h"
@@ -10595,11 +10595,11 @@ case "$d_endhostent_r" in
 	define)
 	case "$endhostent_r_proto" in
 	''|0) try='int endhostent_r(struct hostent_data*);'
-	./protochk "extern $try" $hdrs && endhostent_r_proto=I_S ;;
+	./protochk "extern $try" $hdrs && endhostent_r_proto=I_D ;;
 	esac
 	case "$endhostent_r_proto" in
 	''|0) try='void endhostent_r(struct hostent_data*);'
-	./protochk "extern $try" $hdrs && endhostent_r_proto=V_S ;;
+	./protochk "extern $try" $hdrs && endhostent_r_proto=V_D ;;
 	esac
 	case "$endhostent_r_proto" in
 	''|0)	d_endhostent_r=undef
@@ -10649,11 +10649,11 @@ case "$d_endnetent_r" in
 	define)
 	case "$endnetent_r_proto" in
 	''|0) try='int endnetent_r(struct netent_data*);'
-	./protochk "extern $try" $hdrs && endnetent_r_proto=I_S ;;
+	./protochk "extern $try" $hdrs && endnetent_r_proto=I_D ;;
 	esac
 	case "$endnetent_r_proto" in
 	''|0) try='void endnetent_r(struct netent_data*);'
-	./protochk "extern $try" $hdrs && endnetent_r_proto=V_S ;;
+	./protochk "extern $try" $hdrs && endnetent_r_proto=V_D ;;
 	esac
 	case "$endnetent_r_proto" in
 	''|0)	d_endnetent_r=undef
@@ -10703,11 +10703,11 @@ case "$d_endprotoent_r" in
 	define)
 	case "$endprotoent_r_proto" in
 	''|0) try='int endprotoent_r(struct protoent_data*);'
-	./protochk "extern $try" $hdrs && endprotoent_r_proto=I_S ;;
+	./protochk "extern $try" $hdrs && endprotoent_r_proto=I_D ;;
 	esac
 	case "$endprotoent_r_proto" in
 	''|0) try='void endprotoent_r(struct protoent_data*);'
-	./protochk "extern $try" $hdrs && endprotoent_r_proto=V_S ;;
+	./protochk "extern $try" $hdrs && endprotoent_r_proto=V_D ;;
 	esac
 	case "$endprotoent_r_proto" in
 	''|0)	d_endprotoent_r=undef
@@ -10899,11 +10899,11 @@ case "$d_endservent_r" in
 	define)
 	case "$endservent_r_proto" in
 	''|0) try='int endservent_r(struct servent_data*);'
-	./protochk "extern $try" $hdrs && endservent_r_proto=I_S ;;
+	./protochk "extern $try" $hdrs && endservent_r_proto=I_D ;;
 	esac
 	case "$endservent_r_proto" in
 	''|0) try='void endservent_r(struct servent_data*);'
-	./protochk "extern $try" $hdrs && endservent_r_proto=V_S ;;
+	./protochk "extern $try" $hdrs && endservent_r_proto=V_D ;;
 	esac
 	case "$endservent_r_proto" in
 	''|0)	d_endservent_r=undef
@@ -16211,7 +16211,7 @@ set tmpnam_r d_tmpnam_r
 eval $inlibc
 case "$d_tmpnam_r" in
 "$define")
-	hdrs="$i_systypes sys/types.h define stdio.h $i_stdio stdio.h"
+	hdrs="$i_systypes sys/types.h define stdio.h "
 	case "stdio" in
 	time)
 		hdrs="$hdrs $i_systime sys/time.h"

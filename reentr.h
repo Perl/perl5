@@ -108,20 +108,20 @@
 #define REENTRANT_PROTO_I_CSD	20
 #define REENTRANT_PROTO_I_CWISBWRE	21
 #define REENTRANT_PROTO_I_CWISD	22
-#define REENTRANT_PROTO_I_H	23
-#define REENTRANT_PROTO_I_IBI	24
-#define REENTRANT_PROTO_I_IBW	25
-#define REENTRANT_PROTO_I_ICBI	26
-#define REENTRANT_PROTO_I_ICSBWR	27
-#define REENTRANT_PROTO_I_ICSD	28
-#define REENTRANT_PROTO_I_ID	29
-#define REENTRANT_PROTO_I_IISD	30
-#define REENTRANT_PROTO_I_ISBWR	31
-#define REENTRANT_PROTO_I_ISD	32
-#define REENTRANT_PROTO_I_LISBI	33
-#define REENTRANT_PROTO_I_LISD	34
-#define REENTRANT_PROTO_I_LS	35
-#define REENTRANT_PROTO_I_S	36
+#define REENTRANT_PROTO_I_D	23
+#define REENTRANT_PROTO_I_H	24
+#define REENTRANT_PROTO_I_IBI	25
+#define REENTRANT_PROTO_I_IBW	26
+#define REENTRANT_PROTO_I_ICBI	27
+#define REENTRANT_PROTO_I_ICSBWR	28
+#define REENTRANT_PROTO_I_ICSD	29
+#define REENTRANT_PROTO_I_ID	30
+#define REENTRANT_PROTO_I_IISD	31
+#define REENTRANT_PROTO_I_ISBWR	32
+#define REENTRANT_PROTO_I_ISD	33
+#define REENTRANT_PROTO_I_LISBI	34
+#define REENTRANT_PROTO_I_LISD	35
+#define REENTRANT_PROTO_I_LS	36
 #define REENTRANT_PROTO_I_SB	37
 #define REENTRANT_PROTO_I_SBI	38
 #define REENTRANT_PROTO_I_SBIE	39
@@ -156,9 +156,9 @@
 #define REENTRANT_PROTO_S_TSBI	68
 #define REENTRANT_PROTO_S_TSBIE	69
 #define REENTRANT_PROTO_S_TWISBIE	70
-#define REENTRANT_PROTO_V_H	71
-#define REENTRANT_PROTO_V_ID	72
-#define REENTRANT_PROTO_V_S	73
+#define REENTRANT_PROTO_V_D	71
+#define REENTRANT_PROTO_V_H	72
+#define REENTRANT_PROTO_V_ID	73
 
 /* Defines for indicating which special features are supported. */
 
@@ -604,7 +604,7 @@ typedef struct {
 #ifdef HAS_GETHOSTBYNAME_R
 	struct hostent	_gethostent_struct;
 #   if GETHOSTBYNAME_R_PROTO == REENTRANT_PROTO_I_CSD
-	struct hostent_data*	_gethostent_data;
+	struct hostent_data	_gethostent_data;
 #   else
 	char*	_gethostent_buffer;
 	size_t	_gethostent_size;
@@ -623,7 +623,7 @@ typedef struct {
 #ifdef HAS_GETNETBYNAME_R
 	struct netent	_getnetent_struct;
 #   if GETNETBYNAME_R_PROTO == REENTRANT_PROTO_I_CSD
-	struct netent_data*	_getnetent_data;
+	struct netent_data	_getnetent_data;
 #   else
 	char*	_getnetent_buffer;
 	size_t	_getnetent_size;
@@ -638,7 +638,7 @@ typedef struct {
 #ifdef HAS_GETPROTOBYNAME_R
 	struct protoent	_getprotoent_struct;
 #   if GETPROTOBYNAME_R_PROTO == REENTRANT_PROTO_I_CSD
-	struct protoent_data*	_getprotoent_data;
+	struct protoent_data	_getprotoent_data;
 #   else
 	char*	_getprotoent_buffer;
 	size_t	_getprotoent_size;
@@ -664,7 +664,7 @@ typedef struct {
 #ifdef HAS_GETSERVBYNAME_R
 	struct servent	_getservent_struct;
 #   if GETSERVBYNAME_R_PROTO == REENTRANT_PROTO_I_CCSD
-	struct servent_data*	_getservent_data;
+	struct servent_data	_getservent_data;
 #   else
 	char*	_getservent_buffer;
 	size_t	_getservent_size;
@@ -792,31 +792,31 @@ typedef struct {
 
 #ifdef HAS_ENDHOSTENT_R
 #   undef endhostent
-#   if !defined(endhostent) && ENDHOSTENT_R_PROTO == REENTRANT_PROTO_I_S
-#       define endhostent() (((errno = endhostent_r(&PL_reentrant_buffer->_gethostent_struct))) == 0 ? &PL_reentrant_buffer->_gethostent_struct : 0)
+#   if !defined(endhostent) && ENDHOSTENT_R_PROTO == REENTRANT_PROTO_I_D
+#       define endhostent() (((errno = endhostent_r(&PL_reentrant_buffer->_gethostent_data))) == 0 ? 1 : 0)
 #   endif
-#   if !defined(endhostent) && ENDHOSTENT_R_PROTO == REENTRANT_PROTO_V_S
-#       define endhostent() endhostent_r(&PL_reentrant_buffer->_gethostent_struct)
+#   if !defined(endhostent) && ENDHOSTENT_R_PROTO == REENTRANT_PROTO_V_D
+#       define endhostent() endhostent_r(&PL_reentrant_buffer->_gethostent_data)
 #   endif
 #endif /* HAS_ENDHOSTENT_R */
 
 #ifdef HAS_ENDNETENT_R
 #   undef endnetent
-#   if !defined(endnetent) && ENDNETENT_R_PROTO == REENTRANT_PROTO_I_S
-#       define endnetent() (((errno = endnetent_r(&PL_reentrant_buffer->_getnetent_struct))) == 0 ? &PL_reentrant_buffer->_getnetent_struct : 0)
+#   if !defined(endnetent) && ENDNETENT_R_PROTO == REENTRANT_PROTO_I_D
+#       define endnetent() (((errno = endnetent_r(&PL_reentrant_buffer->_getnetent_data))) == 0 ? 1 : 0)
 #   endif
-#   if !defined(endnetent) && ENDNETENT_R_PROTO == REENTRANT_PROTO_V_S
-#       define endnetent() endnetent_r(&PL_reentrant_buffer->_getnetent_struct)
+#   if !defined(endnetent) && ENDNETENT_R_PROTO == REENTRANT_PROTO_V_D
+#       define endnetent() endnetent_r(&PL_reentrant_buffer->_getnetent_data)
 #   endif
 #endif /* HAS_ENDNETENT_R */
 
 #ifdef HAS_ENDPROTOENT_R
 #   undef endprotoent
-#   if !defined(endprotoent) && ENDPROTOENT_R_PROTO == REENTRANT_PROTO_I_S
-#       define endprotoent() (((errno = endprotoent_r(&PL_reentrant_buffer->_getprotoent_struct))) == 0 ? &PL_reentrant_buffer->_getprotoent_struct : 0)
+#   if !defined(endprotoent) && ENDPROTOENT_R_PROTO == REENTRANT_PROTO_I_D
+#       define endprotoent() (((errno = endprotoent_r(&PL_reentrant_buffer->_getprotoent_data))) == 0 ? 1 : 0)
 #   endif
-#   if !defined(endprotoent) && ENDPROTOENT_R_PROTO == REENTRANT_PROTO_V_S
-#       define endprotoent() endprotoent_r(&PL_reentrant_buffer->_getprotoent_struct)
+#   if !defined(endprotoent) && ENDPROTOENT_R_PROTO == REENTRANT_PROTO_V_D
+#       define endprotoent() endprotoent_r(&PL_reentrant_buffer->_getprotoent_data)
 #   endif
 #endif /* HAS_ENDPROTOENT_R */
 
@@ -832,11 +832,11 @@ typedef struct {
 
 #ifdef HAS_ENDSERVENT_R
 #   undef endservent
-#   if !defined(endservent) && ENDSERVENT_R_PROTO == REENTRANT_PROTO_I_S
-#       define endservent() (((errno = endservent_r(&PL_reentrant_buffer->_getservent_struct))) == 0 ? &PL_reentrant_buffer->_getservent_struct : 0)
+#   if !defined(endservent) && ENDSERVENT_R_PROTO == REENTRANT_PROTO_I_D
+#       define endservent() (((errno = endservent_r(&PL_reentrant_buffer->_getservent_data))) == 0 ? 1 : 0)
 #   endif
-#   if !defined(endservent) && ENDSERVENT_R_PROTO == REENTRANT_PROTO_V_S
-#       define endservent() endservent_r(&PL_reentrant_buffer->_getservent_struct)
+#   if !defined(endservent) && ENDSERVENT_R_PROTO == REENTRANT_PROTO_V_D
+#       define endservent() endservent_r(&PL_reentrant_buffer->_getservent_data)
 #   endif
 #endif /* HAS_ENDSERVENT_R */
 
