@@ -213,7 +213,7 @@ LINE: while (<CPP>) {
   }
   if ($ckfunc) {
     print "$scanname>> $_" if $debug > 2;
-    if (/\s*^EXT/) { &scan_var($_);  }
+    if (/^\s*EXT/) { &scan_var($_);  }
     else           { &scan_func($_); }
   }
   else {
