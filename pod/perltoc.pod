@@ -54,7 +54,9 @@ expression enhancements, Innumerable Unbundled Modules, Compilability
 
 =item Fixed Parsing of $$<digit>, &$<digit>, etc.
 
-=item Internal Change: FileHandle Deprecated
+=item Changes to Tainting Checks
+
+=item Internal Change: FileHandle Class Based on IO::* Classes
 
 =item Internal Change: PerlIO internal IO abstraction interface
 
@@ -66,9 +68,9 @@ $^E, $^H, $^M
 
 delete on slices, flock, printf and sprintf, keys as an lvalue, my() in
 Control Structures, unpack() and pack(), use VERSION, use Module VERSION
-LIST, prototype(FUNCTION), $_ as Default, C<m//g> does not trigger a pos()
-reset on failure, nested C<sub{}> closures work now, formats work right on
-changing lexicals
+LIST, prototype(FUNCTION), srand, $_ as Default, C<m//g> does not trigger a
+pos() reset on failure, nested C<sub{}> closures work now, formats work
+right on changing lexicals
 
 =item New Built-in Methods
 
@@ -547,7 +549,8 @@ World Wide Web, HTML, HTTP, CGI, MIME, Server and Daemon Utilities,
 Archiving and Compression, Images, Pixmap and Bitmap Manipulation, Drawing,
 and Graphing, Mail and Usenet News, Control Flow Utilities (callbacks and
 exceptions etc), File Handle and Input/Output Stream Utilities,
-Miscellaneous Modules
+Miscellaneous Modules, Africa, Asia, Australasia, Europe, North America,
+South America
 
 =item Modules: Creation, Use, and Abuse
 
@@ -2582,12 +2585,16 @@ E<lt>noneE<gt>, !, =s, :s, =i, :i, =f, :f
 
 =item EXAMPLES
 
-=item CONFIGURATION VARIABLES
+=item CONFIGURATION OPTIONS
 
-$Getopt::Long::autoabbrev, $Getopt::Long::getopt_compat,
-$Getopt::Long::order, $Getopt::Long::bundling, $Getopt::Long::ignorecase,
-$Getopt::Long::passthrough, $Getopt::Long::VERSION, $Getopt::Long::error,
-$Getopt::Long::debug
+default, auto_abbrev, getopt_compat, require_order, permute, bundling
+(default: reset), bundling_override (default: reset), ignore_case 
+(default: set), ignore_case_always (default: reset), pass_through (default:
+reset), debug (default: reset)
+
+=item OTHER USEFUL VARIABLES
+
+$Getopt::Long::VERSION, $Getopt::Long::error
 
 =head2 Getopt::Std, getopt - Process single-character switches with switch
 clustering
@@ -2617,7 +2624,7 @@ locale
 
 =item CONSTRUCTOR
 
-new ([ ARGS ] )
+new ([ ARGS ] ), new_tmpfile
 
 =item METHODS
 
@@ -2750,7 +2757,7 @@ hostpath(), peerpath()
 
 =item CONSTRUCTOR
 
-new ([ ARGS ] )
+new ([ ARGS ] ), new_tmpfile
 
 =item METHODS
 
@@ -3393,9 +3400,13 @@ no real package is found, substitutes stubs instead of basic functions.
 =item Minimal set of supported functions
 
 C<ReadLine>, C<new>, C<readline>, C<addhistory>, C<IN>, $C<OUT>,
-C<MinLine>, C<findConsole>, C<Features>
+C<MinLine>, C<findConsole>, Attribs, C<Features>
+
+=item Additional supported functions
 
 =item EXPORTS
+
+=item ENVIRONMENT
 
 =head2 Test::Harness - run perl standard test scripts with statistics
 

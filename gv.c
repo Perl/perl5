@@ -1,6 +1,6 @@
 /*    gv.c
  *
- *    Copyright (c) 1991-1994, Larry Wall
+ *    Copyright (c) 1991-1997, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -131,7 +131,6 @@ I32 level;
     GV* topgv;
     GV* gv;
     GV** gvp;
-    HV* lastchance;
     CV* cv;
 
     if (!stash)
@@ -159,8 +158,33 @@ I32 level;
 	}
     }
 
-    gvp = (GV**)hv_fetch(stash,"ISA",3,FALSE);
-    if (gvp && (gv = *gvp) != (GV*)&sv_undef && (av = GvAV(gv))) {
+    gvp = (GV**)hv_fetch(stash, "ISA", 3, FALSE);
+    av = (gvp && (gv = *gvp) && gv != (GV*)&sv_undef) ? GvAV(gv) : Nullav;
+
+    /* create @.*::SUPER::ISA on demand */
+    if (!av) {
+	char* packname = HvNAME(stash);
+	STRLEN packlen = strlen(packname);
+
+	if (packlen >= 7 && strEQ(packname + packlen - 7, "::SUPER")) {
+	    HV* basestash;
+
+	    packlen -= 7;
+	    basestash = gv_stashpvn(packname, packlen, TRUE);
+	    gvp = (GV**)hv_fetch(basestash, "ISA", 3, FALSE);
+	    if (gvp && (gv = *gvp) != (GV*)&sv_undef && (av = GvAV(gv))) {
+		gvp = (GV**)hv_fetch(stash, "ISA", 3, TRUE);
+		if (!gvp || !(gv = *gvp))
+		    croak("Cannot create %s::ISA", HvNAME(stash));
+		if (SvTYPE(gv) != SVt_PVGV)
+		    gv_init(gv, stash, "ISA", 3, TRUE);
+		SvREFCNT_dec(GvAV(gv));
+		GvAV(gv) = (AV*)SvREFCNT_inc(av);
+	    }
+	}
+    }
+
+    if (av) {
 	SV** svp = AvARRAY(av);
 	I32 items = AvFILL(av) + 1;
 	while (items--) {
@@ -179,7 +203,11 @@ I32 level;
 	}
     }
 
+    /* if at top level, try UNIVERSAL */
+
     if (level == 0 || level == -1) {
+	HV* lastchance;
+
 	if (lastchance = gv_stashpvn("UNIVERSAL", 9, FALSE)) {
 	    if (gv = gv_fetchmeth(lastchance, name, len,
 				  (level >= 0) ? level + 1 : level - 1)) {
@@ -209,67 +237,29 @@ char* name;
     GV* gv;
     
     for (nend = name; *nend; nend++) {
-	if (*nend == ':' || *nend == '\'')
+	if (*nend == '\'')
 	    nsplit = nend;
+	else if (*nend == ':' && *(nend + 1) == ':')
+	    nsplit = ++nend;
     }
     if (nsplit) {
-	char ch;
 	char *origname = name;
 	name = nsplit + 1;
-	ch = *nsplit;
 	if (*nsplit == ':')
 	    --nsplit;
-	*nsplit = '\0';
-	if (strEQ(origname,"SUPER")) {
-	    /* Degenerate case ->SUPER::method should really lookup in original stash */
-	    SV *tmpstr = sv_2mortal(newSVpv(HvNAME(curcop->cop_stash),0));
+	if ((nsplit - origname) == 5 && strnEQ(origname, "SUPER", 5)) {
+	    /* ->SUPER::method should really be looked up in original stash */
+	    SV *tmpstr = sv_2mortal(newSVpv(HvNAME(curcop->cop_stash), 0));
 	    sv_catpvn(tmpstr, "::SUPER", 7);
-	    stash = gv_stashpvn(SvPVX(tmpstr),SvCUR(tmpstr),TRUE);
-	    *nsplit = ch;
-	    DEBUG_o( deb("Treating %s as %s::%s\n",origname,HvNAME(stash),name) );
-	} else {
-	    stash = gv_stashpvn(origname, nsplit - origname, TRUE);
-	    *nsplit = ch;
+	    stash = gv_stashpvn(SvPVX(tmpstr), SvCUR(tmpstr), TRUE);
+	    DEBUG_o( deb("Treating %s as %s::%s\n",
+			 origname, HvNAME(stash), name) );
 	}
+	else
+	    stash = gv_stashpvn(origname, nsplit - origname, TRUE);
     }
+
     gv = gv_fetchmeth(stash, name, nend - name, 0);
-
-    if (!gv) {
-	/* Failed obvious case - look for SUPER as last element of stash's name */
-	char *packname = HvNAME(stash);
-	STRLEN len     = strlen(packname);
-	if (len >= 7 && strEQ(packname+len-7,"::SUPER")) {
-	    /* Now look for @.*::SUPER::ISA */
-	    GV** gvp = (GV**)hv_fetch(stash,"ISA",3,FALSE);
-	    len -= 7;
-	    if (!gvp || (gv = *gvp) == (GV*)&sv_undef || !GvAV(gv)) {
-		/* No @ISA in package ending in ::SUPER - drop suffix
-		   and see if there is an @ISA there
-		 */
-		HV *basestash;
-		char ch = packname[len];
-		AV *av;
-		packname[len] = '\0';
-		basestash = gv_stashpvn(packname, len, TRUE);
-		packname[len] = ch;
-		gvp = (GV**)hv_fetch(basestash,"ISA",3,FALSE);
-		if (gvp && (gv = *gvp) != (GV*)&sv_undef && (av = GvAV(gv))) {
-		     /* Okay found @ISA after dropping the SUPER, alias it */
-	             SV *tmpstr = sv_2mortal(newSVpv(HvNAME(stash),0));
-	             sv_catpvn(tmpstr, "::ISA", 5);
-		     gv  = gv_fetchpv(SvPV(tmpstr,na),TRUE,SVt_PVGV);
-                     if (gv) {
-			GvAV(gv) = (AV*)SvREFCNT_inc(av);
-			/* ... and re-try lookup */
-			gv = gv_fetchmeth(stash, name, nend - name, 0);
-		     } else {
-			croak("Cannot create %s::ISA",HvNAME(stash));
-		     }
-		}
-	    }
-	}     
-    }
-
     if (!gv) {
 	if (strEQ(name,"import"))
 	    gv = (GV*)&sv_yes;
@@ -383,7 +373,7 @@ I32 sv_type;
     I32 len;
     register char *namend;
     HV *stash = 0;
-    bool global = FALSE;
+    U32 add_gvflags = 0;
     char *tmpbuf;
 
     if (*name == '*' && isALPHA(name[1])) /* accidental stringify on a GV? */
@@ -441,6 +431,8 @@ I32 sv_type;
 
     if (!stash) {
 	if (isIDFIRST(*name)) {
+	    bool global = FALSE;
+
 	    if (isUPPER(*name)) {
 		if (*name > 'I') {
 		    if (*name == 'S' && (
@@ -465,6 +457,7 @@ I32 sv_type;
 	    }
 	    else if (*name == '_' && !name[1])
 		global = TRUE;
+
 	    if (global)
 		stash = defstash;
 	    else if ((COP*)curcop == &compiling) {
@@ -511,6 +504,10 @@ I32 sv_type;
 	    warn("Global symbol \"%s\" requires explicit package name", name);
 	    ++error_count;
 	    stash = curstash ? curstash : defstash;	/* avoid core dumps */
+	    add_gvflags = ((sv_type == SVt_PV) ? GVf_IMPORTED_SV
+			   : (sv_type == SVt_PVAV) ? GVf_IMPORTED_AV
+			   : (sv_type == SVt_PVHV) ? GVf_IMPORTED_HV
+			   : 0);
 	}
 	else
 	    return Nullgv;
@@ -537,6 +534,7 @@ I32 sv_type;
 	warn("Had to create %s unexpectedly", nambeg);
     gv_init(gv, stash, name, len, add & 2);
     gv_init_sv(gv, sv_type);
+    GvFLAGS(gv) |= add_gvflags;
 
     /* set up magic where warranted */
     switch (*name) {
@@ -997,13 +995,13 @@ HV* stash;
   {
     int filled = 0;
     int i;
-    char *cp;
+    const char *cp;
     SV* sv = NULL;
     SV** svp;
 
     /* Work with "fallback" key, which we assume to be first in AMG_names */
 
-    if ( cp = (char *)AMG_names[0] ) {
+    if ( cp = AMG_names[0] ) {
 	/* Try to find via inheritance. */
 	gv = gv_fetchmeth(stash, "()", 2, -1); /* A cookie: "()". */
 	if (gv) sv = GvSV(gv);
@@ -1015,7 +1013,7 @@ HV* stash;
 
     for (i = 1; i < NofAMmeth; i++) {
         cv = 0;
-        cp = (char *)AMG_names[i];
+        cp = AMG_names[i];
       
 	*buf = '(';			/* A cookie: "(". */
 	strcpy(buf + 1, cp);

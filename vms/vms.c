@@ -2343,7 +2343,6 @@ trim_unixpath(char *fspec, char *wildspec, int opts)
 /*
  *  VMS readdir() routines.
  *  Written by Rich $alz, <rsalz@bbn.com> in August, 1990.
- *  This code has no copyright.
  *
  *  21-Jul-1994  Charles Bailey  bailey@genetics.upenn.edu
  *  Minor modifications to original routines.

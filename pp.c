@@ -1,6 +1,6 @@
 /*    pp.c
  *
- *    Copyright (c) 1991-1994, Larry Wall
+ *    Copyright (c) 1991-1997, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -92,7 +92,8 @@ PP(pp_padhv)
     else {
 	SV* sv = sv_newmortal();
 	if (HvFILL((HV*)TARG)) {
-	    sprintf(buf, "%d/%d", HvFILL((HV*)TARG), HvMAX((HV*)TARG)+1);
+	    sprintf(buf, "%ld/%ld",
+		    (long)HvFILL((HV*)TARG), (long)HvMAX((HV*)TARG)+1);
 	    sv_setpv(sv, buf);
 	}
 	else
@@ -545,6 +546,11 @@ PP(pp_undef)
 	hv_undef((HV*)sv);
 	break;
     case SVt_PVCV:
+	if (!CvANON((CV*)sv) && cv_const_sv((CV*)sv))
+	    warn("Constant subroutine %s undefined",
+		 GvENAME(CvGV((CV*)sv)));
+	/* FALL THROUGH */
+    case SVt_PVFM:
 	cv_undef((CV*)sv);
 	break;
     case SVt_PVGV:
@@ -2990,7 +2996,8 @@ PP(pp_unpack)
 			char decn[sizeof(UV) * 3 + 1];
 			char *t;
 
-			(void) sprintf(decn, "%0*ld", sizeof(decn) - 1, auv);
+			(void) sprintf(decn, "%0*ld",
+				       (int)sizeof(decn) - 1, auv);
 			sv = newSVpv(decn, 0);
 			while (s < strend) {
 			    sv = mul128(sv, *s & 0x7f);

@@ -6,14 +6,17 @@
 #   Author:  Charles Bailey  bailey@genetics.upenn.edu
 
 package ExtUtils::MM_VMS;
-$ExtUtils::MM_VMS::Revision=$ExtUtils::MM_VMS::Revision = '5.39 (31-Jan-1997)';
-unshift @MM::ISA, 'ExtUtils::MM_VMS';
 
 use Carp qw( &carp );
 use Config;
 require Exporter;
 use VMS::Filespec;
 use File::Basename;
+
+use vars qw($Revision);
+$Revision = '5.3901 (6-Mar-1997)';
+
+unshift @MM::ISA, 'ExtUtils::MM_VMS';
 
 Exporter::import('ExtUtils::MakeMaker', '$Verbose', '&neatvalue');
 
@@ -1303,12 +1306,12 @@ $(BASEEXT).opt : Makefile.PL
 	foreach $lib (split ' ', $self->{LDLOADLIBS}) {
 	    $lib =~ s%\$%\\\$%g;  # Escape '$' in VMS filespecs
 	    if (length($line) + length($lib) > 160) {
-		push @m, "\t\$(PERL) -e \"print qq[$line]\" >>\$(MMS\$TARGET)\n";
+		push @m, "\t\$(PERL) -e \"print qq{$line}\" >>\$(MMS\$TARGET)\n";
 		$line = $lib . '\n';
 	    }
 	    else { $line .= $lib . '\n'; }
 	}
-	push @m, "\t\$(PERL) -e \"print qq[$line]\" >>\$(MMS\$TARGET)\n" if $line;
+	push @m, "\t\$(PERL) -e \"print qq{$line}\" >>\$(MMS\$TARGET)\n" if $line;
     }
 
     join('',@m);
@@ -1405,7 +1408,7 @@ $(INST_STATIC) : $(OBJECT) $(MYEXTLIB)
     push(@m,'
 	If F$Search("$(MMS$TARGET)").eqs."" Then Library/Object/Create $(MMS$TARGET)
 	Library/Object/Replace $(MMS$TARGET) $(MMS$SOURCE_LIST)
-	$(NOECHO) $(PERL) -e "open F,\'>>$(INST_ARCHAUTODIR)extralibs.ld\';print F qq[$(EXTRALIBS)\n];close F;"
+	$(NOECHO) $(PERL) -e "open F,\'>>$(INST_ARCHAUTODIR)extralibs.ld\';print F qq{$(EXTRALIBS)\n};close F;"
 ');
     push @m, $self->dir_target('$(INST_ARCHAUTODIR)');
     join('',@m);
@@ -1581,7 +1584,7 @@ sub subdir_x {
 subdirs ::
 	olddef = F$Environment("Default")
 	Set Default ',$subdir,'
-	- $(MMS) all $(USEMACROS)$(PASTHRU)$(MACROEND)
+	- $(MMS)$(MMSQUALIFIERS) all $(USEMACROS)$(PASTHRU)$(MACROEND)
 	Set Default \'olddef\'
 ';
     join('',@m);
@@ -1606,7 +1609,7 @@ clean ::
     foreach $dir (@{$self->{DIR}}) { # clean subdirectories first
 	my($vmsdir) = $self->fixpath($dir,1);
 	push( @m, '	If F$Search("'.$vmsdir.'$(MAKEFILE)").nes."" Then \\',"\n\t",
-	      '$(PERL) -e "chdir ',"'$vmsdir'",'; print `$(MMS) clean`;"',"\n");
+	      '$(PERL) -e "chdir ',"'$vmsdir'",'; print `$(MMS)$(MMSQUALIFIERS) clean`;"',"\n");
     }
     push @m, '	$(RM_F) *.Map *.Dmp *.Lis *.cpp *.$(DLEXT) *$(OBJ_EXT) *$(LIB_EXT) *.Opt $(BOOTSTRAP) $(BASEEXT).bso .MM_Tmp
 ';
@@ -1658,7 +1661,7 @@ realclean :: clean
     foreach(@{$self->{DIR}}){
 	my($vmsdir) = $self->fixpath($_,1);
 	push(@m, '	If F$Search("'."$vmsdir".'$(MAKEFILE)").nes."" Then \\',"\n\t",
-	      '$(PERL) -e "chdir ',"'$vmsdir'",'; print `$(MMS) realclean`;"',"\n");
+	      '$(PERL) -e "chdir ',"'$vmsdir'",'; print `$(MMS)$(MMSQUALIFIERS) realclean`;"',"\n");
     }
     push @m,'	$(RM_RF) $(INST_AUTODIR) $(INST_ARCHAUTODIR)
 ';
@@ -1799,8 +1802,8 @@ disttest : distdir
 	startdir = F$Environment("Default")
 	Set Default [.$(DISTVNAME)]
 	$(PERL) "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" Makefile.PL
-	$(MMS)
-	$(MMS) test
+	$(MMS)$(MMSQUALIFIERS)
+	$(MMS)$(MMSQUALIFIERS) test
 	Set Default 'startdir'
 };
 }
@@ -2019,7 +2022,7 @@ $(MAKEFILE) : Makefile.PL $(CONFIGDEP)
 	$(NOECHO) $(SAY) "$(MAKEFILE) out-of-date with respect to $(MMS$SOURCE_LIST)"
 	$(NOECHO) $(SAY) "Cleaning current config before rebuilding $(MAKEFILE) ..."
 	- $(MV) $(MAKEFILE) $(MAKEFILE)_old
-	- $(MMS) $(USEMAKEFILE)$(MAKEFILE)_old clean
+	- $(MMS)$(MMSQUALIFIERS) $(USEMAKEFILE)$(MAKEFILE)_old clean
 	$(PERL) "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" Makefile.PL ],join(' ',map(qq["$_"],@ARGV)),q[
 	$(NOECHO) $(SAY) "$(MAKEFILE) has been rebuilt."
 	$(NOECHO) $(SAY) "Please run $(MMS) to build the extension."
@@ -2054,7 +2057,7 @@ testdb :: testdb_\$(LINKTYPE)
     foreach(@{$self->{DIR}}){
       my($vmsdir) = $self->fixpath($_,1);
       push(@m, '	If F$Search("',$vmsdir,'$(MAKEFILE)").nes."" Then $(PERL) -e "chdir ',"'$vmsdir'",
-           '; print `$(MMS) $(PASTHRU2) test`'."\n");
+           '; print `$(MMS)$(MMSQUALIFIERS) $(PASTHRU2) test`'."\n");
     }
     push(@m, "\t\$(NOECHO) \$(SAY) \"No tests defined for \$(NAME) extension.\"\n")
         unless $tests or -f "test.pl" or @{$self->{DIR}};
@@ -2146,7 +2149,7 @@ $(MAKE_APERL_FILE) : $(FIRST_MAKEFILE)
 		MAKEAPERL=1 NORECURS=1
 
 $(MAP_TARGET) :: $(MAKE_APERL_FILE)
-	$(MMS)$(USEMAKEFILE)$(MAKE_APERL_FILE) static $(MMS$TARGET)
+	$(MMS)$(MMSQUALIFIERS)$(USEMAKEFILE)$(MAKE_APERL_FILE) static $(MMS$TARGET)
 };
 	push @m, map( " \\\n\t\t$_", @ARGV );
 	push @m, "\n";
@@ -2292,9 +2295,9 @@ $(MAP_SHRTARGET) : $(MAP_LIBPERL) $(MAP_STATIC) ',"${libperldir}Perlshr_Attr.Opt
 $(MAP_TARGET) : $(MAP_SHRTARGET) ',"${tmp}perlmain\$(OBJ_EXT) ${tmp}PerlShr.Opt",'
 	$(MAP_LINKCMD) ',"${tmp}perlmain\$(OBJ_EXT)",', PerlShr.Opt/Option
 	$(NOECHO) $(SAY) "To install the new ""$(MAP_TARGET)"" binary, say"
-	$(NOECHO) $(SAY) "    $(MMS)$(USEMAKEFILE)$(MAKEFILE) inst_perl $(USEMACROS)MAP_TARGET=$(MAP_TARGET)$(ENDMACRO)"
+	$(NOECHO) $(SAY) "    $(MMS)$(MMSQUALIFIERS)$(USEMAKEFILE)$(MAKEFILE) inst_perl $(USEMACROS)MAP_TARGET=$(MAP_TARGET)$(ENDMACRO)"
 	$(NOECHO) $(SAY) "To remove the intermediate files, say
-	$(NOECHO) $(SAY) "    $(MMS)$(USEMAKEFILE)$(MAKEFILE) map_clean"
+	$(NOECHO) $(SAY) "    $(MMS)$(MMSQUALIFIERS)$(USEMAKEFILE)$(MAKEFILE) map_clean"
 ';
     push @m,'
 ',"${tmp}perlmain.c",' : $(MAKEFILE)

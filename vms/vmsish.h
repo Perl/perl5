@@ -360,7 +360,6 @@ struct utimbuf {
  * opendir(), closedir(), readdir(), seekdir(), telldir(), and
  * vmsreaddirversions(), and preprocessor stuff on which these depend:
  *    Written by Rich $alz, <rsalz@bbn.com> in August, 1990.
- *    This code has no copyright.
  */
     /* Data structure returned by READDIR(). */
 struct dirent {

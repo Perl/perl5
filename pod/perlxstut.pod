@@ -729,7 +729,7 @@ and L<perlpod>.
 
 =head2 Author
 
-Jeff Okamoto E<lt>F<okamoto@corp.hp.com>E<gt>
+Jeff Okamoto <F<okamoto@corp.hp.com>>
 
 Reviewed and assisted by Dean Roehrich, Ilya Zakharevich, Andreas Koenig,
 and Tim Bunce.

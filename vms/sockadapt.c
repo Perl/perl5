@@ -1,27 +1,75 @@
 /*  sockadapt.c
  *
  *  Author: Charles Bailey  bailey@genetics.upenn.edu
- *  Last Revised: 29-Jan-1996
+ *  Last Revised:  4-Mar-1997
  *
  *  This file should contain stubs for any of the TCP/IP functions perl5
  *  requires which are not supported by your TCP/IP stack.  These stubs
  *  can attempt to emulate the routine in question, or can just return
  *  an error status or cause perl to die.
  *
- *  This version is set up for perl5 with socketshr 0.9D TCP/IP support.
+ *  This version is set up for perl5 with UCX (or emulation) via
+ *  the DECCRTL or SOCKETSHR 0.9D.
  */
 
 #include "EXTERN.h"
 #include "perl.h"
+
 #if defined(__DECC) && defined(__DECC_VER) && (__DECC_VER >= 50200000)
+#  define __sockadapt_my_hostent_t __struct_hostent_ptr32
 #  define __sockadapt_my_netent_t __struct_netent_ptr32
+#  define __sockadapt_my_servent_t __struct_servent_ptr32
 #  define __sockadapt_my_addr_t   __in_addr_t
 #  define __sockadapt_my_name_t   const char *
 #else
+#  define __sockadapt_my_hostent_t struct hostent *
 #  define __sockadapt_my_netent_t struct netent *
+#  define __sockadapt_my_servent_t struct servent *
 #  define __sockadapt_my_addr_t   long
 #  define __sockadapt_my_name_t   char *
 #endif
+
+void setnetent(int stayopen) {
+  croak("Function \"setnetent\" not implemented in this version of perl");
+}
+void endnetent() {
+  croak("Function \"endnetent\" not implemented in this version of perl");
+}
+
+#if defined(DECCRTL_SOCKETS)
+   /* Use builtin socket interface in DECCRTL and
+    * UCX emulation in whatever TCP/IP stack is present.
+    */
+
+  void sethostent(int stayopen) {
+    croak("Function \"sethostent\" not implemented in this version of perl");
+  }
+  void endhostent() {
+    croak("Function \"endhostent\" not implemented in this version of perl");
+  }
+  void setprotoent(int stayopen) {
+    croak("Function \"setprotoent\" not implemented in this version of perl");
+  }
+  void endprotoent() {
+    croak("Function \"endprotoent\" not implemented in this version of perl");
+  }
+  void setservent(int stayopen) {
+    croak("Function \"setservent\" not implemented in this version of perl");
+  }
+  void endservent() {
+    croak("Function \"endservent\" not implemented in this version of perl");
+  }
+  __sockadapt_my_hostent_t gethostent() {
+    croak("Function \"gethostent\" not implemented in this version of perl");
+    return (__sockadapt_my_hostent_t )NULL; /* Avoid MISSINGRETURN warning, not reached */
+  }
+  __sockadapt_my_servent_t getservent() {
+    croak("Function \"getservent\" not implemented in this version of perl");
+    return (__sockadapt_my_servent_t )NULL; /* Avoid MISSINGRETURN warning, not reached */
+  }
+
+#else
+    /* Work around things missing/broken in SOCKETSHR. */
 
 __sockadapt_my_netent_t getnetbyaddr( __sockadapt_my_addr_t net, int type) {
   croak("Function \"getnetbyaddr\" not implemented in this version of perl");
@@ -33,13 +81,7 @@ __sockadapt_my_netent_t getnetbyname( __sockadapt_my_name_t name) {
 }
 __sockadapt_my_netent_t getnetent() {
   croak("Function \"getnetent\" not implemented in this version of perl");
-  return (struct netent *)NULL; /* Avoid MISSINGRETURN warning, not reached */
-}
-void setnetent() {
-  croak("Function \"setnetent\" not implemented in this version of perl");
-}
-void endnetent() {
-  croak("Function \"endnetent\" not implemented in this version of perl");
+  return (__sockadapt_my_netent_t )NULL; /* Avoid MISSINGRETURN warning, not reached */
 }
 
 /* Some TCP/IP implementations seem to return success, when getpeername()
@@ -64,3 +106,4 @@ int my_getpeername(int sock, struct sockaddr *addr, int *addrlen) {
   }
   return rslt;
 }
+#endif /* SOCKETSHR stuff */

@@ -16,7 +16,8 @@
 
 chdir 't' if -d 't';
 @INC = "../lib";
-$ENV{PERL5LIB} = "../lib";
+$Is_VMS = $^O eq 'VMS';
+$ENV{PERL5LIB} = "../lib" unless $Is_VMS;
 
 $|=1;
 
@@ -26,22 +27,27 @@ print "1..", scalar @prgs, "\n";
 
 $tmpfile = "runltmp000";
 1 while -f ++$tmpfile;
-END { unlink $tmpfile if $tmpfile; }
+END { if ($tmpfile) { 1 while unlink $tmpfile; } }
 
 for (@prgs){
     my $switch;
-    if (s/^\s*-\w+//){
-       $switch = $&;
+    if (s/^\s*(-\w+)//){
+       $switch = $1;
     }
     my($prog,$expected) = split(/\nEXPECT\n/, $_);
-    open TEST, "| sh -c './perl $switch' >$tmpfile 2>&1";
-    print TEST $prog, "\n";
+    open TEST, ">$tmpfile";
+    print TEST "$prog\n";
     close TEST;
-    $status = $?;
-    $results = `cat $tmpfile`;
+    my $results = $Is_VMS ?
+		  `MCR $^X "-I[-.lib]" $switch $tmpfile` :
+		  `sh -c './perl $switch $tmpfile' 2>&1`;
+    my $status = $?;
     $results =~ s/\n+$//;
+    # allow expected output to be written as if $prog is on STDIN
+    $results =~ s/runltmp\d+/-/g;
+    $results =~ s/\n%[A-Z]+-[SIWEF]-.*$// if $Is_VMS;  # clip off DCL status msg
     $expected =~ s/\n+$//;
-    if ( $results ne $expected){
+    if ($results ne $expected) {
        print STDERR "PROG: $switch\n$prog\n";
        print STDERR "EXPECTED:\n$expected\n";
        print STDERR "GOT:\n$results\n";

@@ -1,6 +1,6 @@
 /*    sv.c
  *
- *    Copyright (c) 1991-1994, Larry Wall
+ *    Copyright (c) 1991-1997, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -1973,11 +1973,16 @@ register SV *sstr;
 			CV* cv = GvCV(dstr);
 			if (cv) {
 			    dref = (SV*)cv;
-			    if (dowarn && sref != dref &&
-				    !GvCVGEN((GV*)dstr) &&
-				    (CvROOT(cv) || CvXSUB(cv)) )
-				warn("Subroutine %s redefined",
-				    GvENAME((GV*)dstr));
+			    if (sref != dref &&
+				  !GvCVGEN((GV*)dstr) &&
+				  (CvROOT(cv) || CvXSUB(cv)) ) {
+				if (cv_const_sv(cv))
+				    warn("Constant subroutine %s redefined",
+					 GvENAME((GV*)dstr));
+				else if (dowarn)
+				    warn("Subroutine %s redefined",
+					 GvENAME((GV*)dstr));
+			    }
 			}
 		    }
 		    if (GvCV(dstr) != (CV*)sref) {
@@ -3168,7 +3173,7 @@ thats_really_all_folks:
     SvCUR_set(sv, bp - (STDCHAR*)SvPVX(sv));	/* set length */
     DEBUG_P(PerlIO_printf(Perl_debug_log,
 	"Screamer: done, len=%d, string=|%.*s|\n",
-	SvCUR(sv),SvCUR(sv),SvPVX(sv)));
+	SvCUR(sv),(int)SvCUR(sv),SvPVX(sv)));
     }
    else
     {

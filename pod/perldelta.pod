@@ -42,13 +42,26 @@ fixed.  As a result, the string "$$0" is no longer equivalent to
 C<$$."0">, but rather to C<${$0}>.  To get the old behavior, change
 "$$" followed by a digit to "${$}".
 
-=head2 Internal Change: FileHandle Deprecated
+=head2 Changes to Tainting Checks
 
-Filehandles are now stored internally as type IO::Handle.
-Although C<use FileHandle> and C<*STDOUT{FILEHANDLE}>
-are still supported for backwards compatibility,
-C<use IO::Handle> (or C<IO::Seekable> or C<IO::File>) and
-C<*STDOUT{IO}> are the way of the future.
+A bug in previous versions may have failed to detect some insecure
+conditions when taint checks are turned on. (Taint checks are used
+in setuid or setgid scripts, or when explicitly turned on with the
+C<-T> invocation option.) Although it's unlikely, this may cause a
+previously-working script to now fail -- which should be construed
+as a blessing, since that indicates a potentially-serious security
+hole was just plugged.
+
+=head2 Internal Change: FileHandle Class Based on IO::* Classes
+
+File handles are now stored internally as type IO::Handle.  The
+FileHandle module is still supported for backwards compatibility, but
+it is now merely a front end to the IO::* modules -- specifically,
+IO::Handle, IO::Seekable, and IO::File.  We suggest, but do not
+require, that you use the IO::* modules in new code.
+
+In harmony with this change, C<*GLOB{FILEHANDLE}> is now a
+backward-compatible synonym for C<*STDOUT{IO}>.
 
 =head2 Internal Change: PerlIO internal IO abstraction interface
 
@@ -197,6 +210,19 @@ Returns the prototype of a function as a string (or C<undef> if the
 function has no prototype).  FUNCTION is a reference to or the name of the
 function whose prototype you want to retrieve.
 (Not actually new; just never documented before.)
+
+=item srand
+
+The default seed for C<srand>, which used to be C<time>, has been changed.
+Now it's a heady mix of difficult-to-predict system-dependent values,
+which should be sufficient for most everyday purposes.
+
+Previous to version 5.004, calling C<rand> without first calling C<srand>
+would yield the same sequence of random numbers on most or all machines.
+Now, when perl sees that you're calling C<rand> and haven't yet called
+C<srand>, it calls C<srand> with the default seed. You should still call
+C<srand> manually if your code might ever be run on a pre-5.004 system,
+of course, or if you want a seed other than the default. 
 
 =item $_ as Default
 
@@ -1028,10 +1054,10 @@ There may also be information at http://www.perl.com/perl/, the Perl
 Home Page.
 
 If you believe you have an unreported bug, please run the B<perlbug>
-program included with your release.  Make sure you trim your bug
-down to a tiny but sufficient test case.  Your bug report, along
-with the output of C<perl -V>, will be sent off to F<perlbug@perl.com>
-to be analysed by the Perl porting team.
+program included with your release.  Make sure you trim your bug down
+to a tiny but sufficient test case.  Your bug report, along with the
+output of C<perl -V>, will be sent off to <F<perlbug@perl.com>> to be
+analysed by the Perl porting team.
 
 =head1 SEE ALSO
 

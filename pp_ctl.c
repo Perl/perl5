@@ -1,6 +1,6 @@
 /*    pp_ctl.c
  *
- *    Copyright (c) 1991-1994, Larry Wall
+ *    Copyright (c) 1991-1997, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -1127,8 +1127,8 @@ sortcv(a, b)
 const void *a;
 const void *b;
 {
-    SV **str1 = (SV **) a;
-    SV **str2 = (SV **) b;
+    SV * const *str1 = (SV * const *)a;
+    SV * const *str2 = (SV * const *)b;
     I32 oldsaveix = savestack_ix;
     I32 oldscopeix = scopestack_ix;
     I32 result;
@@ -1154,7 +1154,7 @@ sortcmp(a, b)
 const void *a;
 const void *b;
 {
-    return sv_cmp(*(SV **)a, *(SV **)b);
+    return sv_cmp(*(SV * const *)a, *(SV * const *)b);
 }
 
 static int
@@ -1162,7 +1162,7 @@ sortcmp_locale(a, b)
 const void *a;
 const void *b;
 {
-    return sv_cmp_locale(*(SV **)a, *(SV **)b);
+    return sv_cmp_locale(*(SV * const *)a, *(SV * const *)b);
 }
 
 PP(pp_reset)

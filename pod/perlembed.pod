@@ -56,8 +56,7 @@ L<Maintaining multiple interpreter instances>
 L<Using Perl modules, which themselves use C libraries, from your C program>
 
 This documentation is Unix specific; if you have information about how
-to embed Perl on other platforms, please send e-mail to
-orwant@tpj.com.
+to embed Perl on other platforms, please send e-mail to <F<orwant@tpj.com>>.
 
 =head2 Compiling your C program
 
@@ -955,9 +954,9 @@ each from the other, combine them as you wish.
 
 =head1 AUTHOR
 
-Jon Orwant and F<E<lt>orwant@media.mit.eduE<gt>> and Doug MacEachern
-F<E<lt>dougm@osf.orgE<gt>>, with small contributions from Tim Bunce,
-Tom Christiansen, Hallvard Furuseth, Dov Grobgeld, and Ilya Zakharevich.
+Jon Orwant and <F<orwant@tpj.com>> and Doug MacEachern <F<dougm@osf.org>>,
+with small contributions from Tim Bunce, Tom Christiansen, Hallvard Furuseth,
+Dov Grobgeld, and Ilya Zakharevich.
 
 Check out Doug's article on embedding in Volume 1, Issue 4 of The Perl
 Journal.  Info about TPJ is available from http://tpj.com.

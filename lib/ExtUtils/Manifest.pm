@@ -7,20 +7,20 @@ use File::Copy 'copy';
 use Carp;
 use strict;
 
-use vars qw(@ISA @EXPORT_OK $VERSION $Debug $Verbose $Is_VMS $Quiet $MANIFEST $found);
+use vars qw($VERSION @ISA @EXPORT_OK
+	    $Is_VMS $Debug $Verbose $Quiet $MANIFEST $found);
 
+$VERSION = '1.2801';
 @ISA=('Exporter');
 @EXPORT_OK = ('mkmanifest', 'manicheck', 'fullcheck', 'filecheck', 
 	      'skipcheck', 'maniread', 'manicopy');
 
+$Is_VMS = $^O eq 'VMS';
+if ($Is_VMS) { require File::Basename }
+
 $Debug = 0;
 $Verbose = 1;
-$Is_VMS = $^O eq 'VMS';
-
-$VERSION = "1.28";
-
 $Quiet = 0;
-
 $MANIFEST = 'MANIFEST';
 
 # Really cool fix from Ilya :)
@@ -128,8 +128,19 @@ sub maniread {
     }
     while (<M>){
 	chomp;
-	if ($Is_VMS) { /^(\S+)/ and $read->{"\L$1"}=$_; }
-	else         { /^(\S+)\s*(.*)/ and $read->{$1}=$2; }
+	if ($Is_VMS) {
+	    my($file)= /^(\S+)/;
+	    next unless $file;
+	    my($base,$dir) = File::Basename::fileparse($file);
+	    # Resolve illegal file specifications in the same way as tar
+	    $dir =~ tr/./_/;
+	    my(@pieces) = split(/\./,$base);
+	    if (@pieces > 2) { $base = shift(@pieces) . '.' . join('_',@pieces); }
+	    my $okfile = "$dir$base";
+	    warn "Debug: Illegal name $file changed to $okfile\n" if $Debug;
+	    $read->{"\L$okfile"}=$_;
+	}
+	else { /^(\S+)\s*(.*)/ and $read->{$1}=$2; }
     }
     close M;
     $read;
@@ -177,8 +188,7 @@ sub manicopy {
 	    $dir = VMS::Filespec::unixify($dir) if $Is_VMS;
 	    File::Path::mkpath(["$target/$dir"],1,$Is_VMS ? undef : 0755);
 	}
-	if ($Is_VMS) { vms_cp_if_diff($file,"$target/$file"); }
-	else         { cp_if_diff($file, "$target/$file", $how); }
+	cp_if_diff($file, "$target/$file", $how);
     }
 }
 
@@ -207,36 +217,18 @@ sub cp_if_diff {
     }
 }
 
-# Do the comparisons here rather than spawning off another process
-sub vms_cp_if_diff {
-    my($from,$to) = @_;
-    my($diff) = 0;
-    local(*F,*T);
-    open(F,$from) or croak "Can't read $from: $!\n";
-    if (open(T,$to)) {
-	while (<F>) { $diff++,last if $_ ne <T>; }
-	$diff++ unless eof(T);
-	close T;
-    }
-    else { $diff++; }
-    close F;
-    if ($diff) {
-	system('copy',VMS::Filespec::vmsify($from),VMS::Filespec::vmsify($to)) & 1
-	    or confess "Copy failed: $!";
-    }
-}
-
 sub cp {
     my ($srcFile, $dstFile) = @_;
     my ($perm,$access,$mod) = (stat $srcFile)[2,8,9];
     copy($srcFile,$dstFile);
-    utime $access, $mod, $dstFile;
+    utime $access, $mod + ($Is_VMS ? 1 : 0), $dstFile;
     # chmod a+rX-w,go-w
     chmod(  0444 | ( $perm & 0111 ? 0111 : 0 ),  $dstFile );
 }
 
 sub ln {
     my ($srcFile, $dstFile) = @_;
+    return &cp if $Is_VMS;
     link($srcFile, $dstFile);
     local($_) = $dstFile; # chmod a+r,go-w+X (except "X" only applies to u=x)
     my $mode= 0444 | (stat)[2] & 0700;

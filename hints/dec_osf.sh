@@ -86,7 +86,7 @@ esac
 
 # be nauseatingly ANSI
 case "$cc" in
-gcc)	ccflags="$ccflags -ansi"
+*gcc*)	ccflags="$ccflags -ansi"
 	;;
 *)	ccflags="$ccflags -std"
 	;;

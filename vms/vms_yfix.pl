@@ -23,6 +23,10 @@ while (<C>) {
   # "y.tab.c" is illegal as a VMS filename; DECC 5.2/VAX preprocessor
   # doesn't like this.
   if ( s/^#line\s+(\d+)\s+"y.tab.c"/#line $1 "y_tab.c"/ ) { 1; }
+  elsif (/char \*getenv/) {
+    # accomodate old VAXC's macro susbstitution pecularities
+    $_ = "#   ifndef getenv\n$_#   endif\n";
+  }
   else {
     # add the dEXT tag to definitions of global vars, so we'll insert
     # a globaldef when perly.c is compiled

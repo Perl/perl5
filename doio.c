@@ -1,6 +1,6 @@
 /*    doio.c
  *
- *    Copyright (c) 1991-1994, Larry Wall
+ *    Copyright (c) 1991-1997, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -1370,8 +1370,8 @@ SV **sp;
 	{
 	    a = SvPV(astr, len);
 	    if (len != infosize)
-		croak("Bad arg length for %s, is %d, should be %ld",
-			op_desc[optype], len, (long)infosize);
+		croak("Bad arg length for %s, is %lu, should be %ld",
+			op_desc[optype], (unsigned long)len, (long)infosize);
 	}
     }
     else

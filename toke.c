@@ -1,6 +1,6 @@
 /*    toke.c
  *
- *    Copyright (c) 1991-1994, Larry Wall
+ *    Copyright (c) 1991-1997, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -1263,7 +1263,8 @@ yylex()
 	    GV *gv = gv_fetchpv(tokenbuf+1, FALSE, SVt_PVAV);
 	    if (!gv || ((tokenbuf[0] == '@') ? !GvAV(gv) : !GvHV(gv))) {
 		char tmpbuf[1024];
-		sprintf(tmpbuf, "Literal %s now requires backslash", tokenbuf);
+		sprintf(tmpbuf, "In string, %s now must be written as \\%s",
+			tokenbuf, tokenbuf);
 		yyerror(tmpbuf);
 	    }
 	}
@@ -1604,8 +1605,10 @@ yylex()
 		     */
 		    SV *x = GvSV(gv_fetchpv("\030", TRUE, SVt_PV));
 		    assert(SvPOK(x) || SvGMAGICAL(x));
-		    if (sv_eq(x, GvSV(curcop->cop_filegv)))
+		    if (sv_eq(x, GvSV(curcop->cop_filegv))) {
 			sv_setpvn(x, ipath, ipathend - ipath);
+			SvSETMAGIC(x);
+		    }
 		    TAINT_NOT;	/* $^X is always tainted, but that's OK */
 		}
 #endif /* ARG_ZERO_IS_SCRIPT */

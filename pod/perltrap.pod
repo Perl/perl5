@@ -391,8 +391,8 @@ Everything else.
 =back
 
 If you find an example of a conversion trap that is not listed here,
-please submit it to Bill Middleton F<wjm@best.com> for inclusion.
-Also note that at least some of these can be caught with C<-w>.
+please submit it to Bill Middleton <F<wjm@best.com>> for inclusion.
+Also note that at least some of these can be caught with B<-w>.
 
 =head2 Discontinuance, Deprecation, and BugFix traps
 
@@ -550,9 +550,9 @@ behave like C<split /\s+/> (which does).
 
 =item * BugFix
 
-Perl 4 would ignore any text which was attached to an C<-e> switch,
+Perl 4 would ignore any text which was attached to an B<-e> switch,
 always taking the code snippet from the following arg.  Additionally, it
-would silently accept an C<-e> switch without a following arg.  Both of
+would silently accept an B<-e> switch without a following arg.  Both of
 these behaviors have been fixed.
 
     perl -e'print "attached to -e"' 'print "separate arg"'
@@ -740,7 +740,7 @@ variable is localized subsequent to the assignment
     print "@fred";  # should print "1, 2, 4"
  
     # perl4 prints: 1 2 4
-    # perl5 prints: Literal @fred now requires backslash 
+    # perl5 prints: In string, @fred now must be written as \@fred
 
 =item * (Scalar String)
 
@@ -1261,7 +1261,7 @@ within certain expressions, statements, contexts, or whatever.
     print "To: someone@somewhere.com\n"; 
  
     # perl4 prints: To:someone@somewhere.com
-    # perl5 errors : Literal @somewhere now requires backslash
+    # perl5 errors : In string, @somewhere now must be written as \@somewhere
 
 =item * Interpolation
 

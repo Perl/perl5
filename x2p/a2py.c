@@ -1,6 +1,6 @@
 /* $RCSfile: a2py.c,v $$Revision: 4.1 $$Date: 92/08/07 18:29:14 $
  *
- *    Copyright (c) 1991, Larry Wall
+ *    Copyright (c) 1991-1997, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -27,6 +27,7 @@ int oper5();
 STR *walk();
 
 #ifdef OS2
+static void
 usage()
 {
     printf("\nThis is the AWK to PERL translator, version 5.0, patchlevel %d\n", PATCHLEVEL);
@@ -41,6 +42,8 @@ usage()
     exit(1);
 }
 #endif
+
+int
 main(argc,argv,env)
 register int argc;
 register char **argv;

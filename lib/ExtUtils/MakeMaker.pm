@@ -2,7 +2,7 @@ BEGIN {require 5.002;} # MakeMaker 5.17 was the last MakeMaker that was compatib
 
 package ExtUtils::MakeMaker;
 
-$Version = $VERSION = "5.4001";
+$Version = $VERSION = "5.4002";
 $Version_OK = "5.17";	# Makefiles older than $Version_OK will die
 			# (Will be checked from MakeMaker version 4.13 onwards)
 ($Revision = substr(q$Revision: 1.211 $, 10)) =~ s/\s+$//;
@@ -244,9 +244,12 @@ sub full_setup {
     XS_VERSION clean depend dist dynamic_lib linkext macro realclean
     tool_autosplit
 
-    installpm
+    IMPORTS
 
+    installpm
 	/;
+
+    # IMPORTS is used under OS/2
 
     # ^^^ installpm is deprecated, will go about Summer 96
 

@@ -828,7 +828,7 @@ perlref(1), perllol(1), perldata(1), perlobj(1)
 
 =head1 AUTHOR
 
-Tom Christiansen E<lt>F<tchrist@perl.com>E<gt>
+Tom Christiansen <F<tchrist@perl.com>>
 
 Last update:
 Wed Oct 23 04:57:50 MET DST 1996

@@ -1,6 +1,6 @@
 /*    pp_hot.c
  *
- *    Copyright (c) 1991-1994, Larry Wall
+ *    Copyright (c) 1991-1997, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -557,7 +557,7 @@ PP(pp_rv2hv)
     else {
 	dTARGET;
 	if (HvFILL(hv)) {
-	    sprintf(buf, "%d/%d", HvFILL(hv), HvMAX(hv)+1);
+	    sprintf(buf, "%ld/%ld", (long)HvFILL(hv), (long)HvMAX(hv)+1);
 	    sv_setpv(TARG, buf);
 	}
 	else
@@ -1137,6 +1137,8 @@ do_readline()
     }
     else {
 	sv = TARG;
+	if (SvROK(sv))
+	    sv_unref(sv);
 	(void)SvUPGRADE(sv, SVt_PV);
 	tmplen = SvLEN(sv);	/* remember if already alloced */
 	if (!tmplen)

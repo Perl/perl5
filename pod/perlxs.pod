@@ -1177,5 +1177,5 @@ This document covers features supported by C<xsubpp> 1.935.
 
 =head1 AUTHOR
 
-Dean Roehrich F<E<lt>roehrich@cray.comE<gt>>
+Dean Roehrich <F<roehrich@cray.com>>
 Jul 8, 1996

@@ -1,6 +1,6 @@
 /*    perl.c
  *
- *    Copyright (c) 1987-1996 Larry Wall
+ *    Copyright (c) 1987-1997 Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -1400,7 +1400,7 @@ char *s;
 	return s;
     case 'T':
 	if (!tainting)
-	    croak("Too late for \"-T\" option (try putting it first)");
+	    croak("Too late for \"-T\" option");
 	s++;
 	return s;
     case 'u':
@@ -1427,7 +1427,7 @@ char *s;
 #endif
 #ifdef OS2
 	printf("\n\nOS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"
-	    "Version 5 port Copyright (c) 1994-1996, Andreas Kaiser, Ilya Zakharevich\n");
+	    "Version 5 port Copyright (c) 1994-1997, Andreas Kaiser, Ilya Zakharevich\n");
 #endif
 #ifdef atarist
 	printf("atariST series port, ++jrb  bammi@cadence.com\n");

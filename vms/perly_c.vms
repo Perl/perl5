@@ -1286,7 +1286,9 @@ yyparse()
     int retval = 0;
 #if YYDEBUG
     register char *yys;
+#   ifndef getenv
     extern char *getenv();
+#   endif
 #endif
 
     struct ysv *ysave = (struct ysv*)safemalloc(sizeof(struct ysv));

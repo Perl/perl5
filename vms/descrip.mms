@@ -65,7 +65,7 @@ OBJVAL = $(MMS$TARGET_NAME)$(O)
 .endif
 
 # Updated by fndvers.com -- do not edit by hand
-PERL_VERSION = 5_00391#
+PERL_VERSION = 5_00392#
 
 
 ARCHDIR =  [.lib.$(ARCH).$(PERL_VERSION)]
@@ -799,8 +799,8 @@ test : all [.t.lib]vmsfspec.t
 archify : all
 	@ Write Sys$Output "Moving files to architecture-specific locations for $(ARCH)"
 	archroot = "$(ARCHAUTO)" - "]" + "...]"
-	Backup/Log/Verify [.lib.auto...]*.*;/Exclude=(*.al,*.ix) 'archroot'
-	Delete/Log/NoConfirm [.lib.auto...]*.*;*/exclude=(*.al,*.ix)
+	Backup/Log/Verify [.lib.auto...]*.*;/Exclude=(*.al,*.ix) 'archroot'/New_Version
+	Delete/Log/NoConfirm [.lib.auto...]*.*;*/exclude=(*.al,*.ix,*.dir)
 	Delete/Log/NoConfirm [.lib]Config.pm;*
 	Copy/Log/NoConfirm *$(E);,[.x2p]a2p$(E); $(ARCHDIR)
 	Delete/Log/NoConfirm Perl*$(E);*,[.x2p]a2p$(E);*

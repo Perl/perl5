@@ -308,6 +308,6 @@ perldata(1), perlref(1), perldsc(1)
 
 =head1 AUTHOR
 
-Tom Christiansen E<lt>F<tchrist@perl.com>E<gt>
+Tom Christiansen <F<tchrist@perl.com>>
 
 Last udpate: Sat Oct  7 19:35:26 MDT 1995

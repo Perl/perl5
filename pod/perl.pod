@@ -227,7 +227,7 @@ See L<perlrun>.
 
 =head1 AUTHOR
 
-Larry Wall E<lt>F<larry@wall.org>E<gt>, with the help of oodles of other folks.
+Larry Wall <F<larry@wall.org>>, with the help of oodles of other folks.
 
 =head1 FILES
 
@@ -277,7 +277,7 @@ expression may not compile to more than 32767 bytes internally.
 
 You may mail your bug reports (be sure to include full configuration
 information as output by the myconfig program in the perl source tree,
-or by C<perl -V>) to F<perlbug@perl.com>.
+or by C<perl -V>) to <F<perlbug@perl.com>>.
 If you've succeeded in compiling perl, the perlbug script in the utils/
 subdirectory can be used to help mail in a bug report.
 

@@ -9,6 +9,216 @@ releases.)
 
 
 ----------------
+Version 5.003_92
+----------------
+
+This release will be the public beta of 5.004, or my name isn't
+Larson T. Pettifogger.
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Strictly follow lexical context of C<eval ''> and nested subs"
+   From:  Chip Salzenberg
+  Files:  op.c
+
+  Title:  "Make ::SUPER and UNIVERSAL work together"
+   From:  Chip Salzenberg
+  Files:  gv.c pod/perlguts.pod
+
+ CORE PORTABILITY
+
+  Title:  "HP-UX hint update"
+   From:  Raphael Manfredi <Raphael_Manfredi@grenoble.hp.com>
+ Msg-ID:  <1479.857653838@lyon.grenoble.hp.com>
+   Date:  Thu, 06 Mar 97 14:10:38 +0100
+  Files:  hints/hpux.sh
+
+  Title:  "Re: The continuing MachTen saga"
+   From:  Tom Phoenix <rootbeer@teleport.com>
+ Msg-ID:  <Pine.GSO.3.95q.970305091611.3572E-100000@kelly.teleport.com>
+   Date:  Wed, 5 Mar 1997 09:47:22 -0800 (PST)
+  Files:  hints/machten_2.sh
+
+  Title:  "OS/2 patches"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199703060308.WAA22211@monk.mps.ohio-state.edu>
+   Date:  Wed, 5 Mar 1997 22:08:43 -0500 (EST)
+  Files:  hints/os2.sh lib/ExtUtils/MakeMaker.pm t/op/taint.t
+
+  Title:  "VMS patches"
+   From:  Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+ Msg-ID:  <01IG5SQE4A6U00661G@hmivax.humgen.upenn.edu>
+   Date:  Wed, 05 Mar 1997 23:10:24 -0500 (EST)
+  Files:  lib/ExtUtils/MM_VMS.pm lib/ExtUtils/Manifest.pm perlsdio.h
+          t/op/runlevel.t t/op/taint.t vms/descrip.mms vms/perly_c.vms
+          vms/sockadapt.c vms/sockadapt.h vms/vms_yfix.pl
+
+ OTHER CORE CHANGES
+
+  Title:  "Make sure $^X is tainted when ARG_ZERO_IS_SCRIPT"
+   From:  Chip Salzenberg
+  Files:  toke.c
+
+  Title:  "Clarify '-T too late' error"
+   From:  Chip Salzenberg
+  Files:  perl.c pod/perldiag.pod
+
+  Title:  "Warn when redefining or undefining a constant sub"
+   From:  Chip Salzenberg
+  Files:  pod/perldiag.pod pp.c sv.c
+
+  Title:  "Don't generate spurious 'not imported' warning"
+   From:  Chip Salzenberg
+  Files:  gv.c t/pragma/strict-vars pod/perldiag.pod
+
+  Title:  "Clarify message re: @host in string"
+   From:  Chip Salzenberg
+  Files:  pod/perldiag.pod pod/perltrap.pod toke.c
+
+  Title:  "Disconnect refs that are targets of pp_readline"
+   From:  Chip Salzenberg
+  Files:  pp_hot.c
+
+  Title:  "Fix typo in test of HvFILL()"
+   From:  Chip Salzenberg
+  Files:  op.c
+
+  Title:  "Allow for pad name array to be shorter than pad array"
+   From:  Chip Salzenberg
+  Files:  op.c
+
+  Title:  "Eliminate format-string type warnings"
+   From:  Hallvard B Furuseth <h.b.furuseth@usit.uio.no>
+ Msg-ID:  <199703030915.KAA11634@bombur2.uio.no>
+   Date:  Mon, 3 Mar 1997 10:15:11 +0100 (MET)
+  Files:  doio.c ext/POSIX/POSIX.xs gv.c hints/dec_osf.sh pp.c pp_ctl.c
+          pp_hot.c run.c sv.c x2p/a2py.c
+
+  Title:  "Update copyright dates"
+   From:  Chip Salzenberg
+  Files:  *.[hc] x2p/*.[hc] win32/EXTERN.h vms/vmsish.h vms/vms.c
+
+ BUILD PROCESS
+
+  Title:  "near-harmless bug in _91's Configure"
+   From:  Roderick Schertler <roderick@argon.org>
+ Msg-ID:  <pzg1yfuiza.fsf@eeyore.ibcinc.com>
+   Date:  01 Mar 1997 21:26:49 -0500
+  Files:  Configure
+
+  Title:  "Change 'continuing anyway' to 'probably harmless'"
+   From:  Chip Salzenberg
+  Files:  INSTALL lib/ExtUtils/Liblist.pm
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "Newer ReadLine"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199703040634.BAA19919@monk.mps.ohio-state.edu>
+   Date:  Tue, 4 Mar 1997 01:34:28 -0500 (EST)
+  Files:  lib/Term/ReadLine.pm lib/perl5db.pl
+
+  Title:  "Refresh Getopt::Long to 2.9"
+   From:  Johan Vromans <jvromans@squirrel.nl>
+  Files:  lib/Getopt/Long.pm
+
+  Title:  "Benchmark: using code refs"
+   From:  Hugo van der Sanden <hv@iii.co.uk>
+ Msg-ID:  <199703041132.LAA07613@tyree.iii.co.uk>
+   Date:  Tue, 04 Mar 1997 11:32:11 +0000
+  Files:  lib/Benchmark.pm
+
+  Title:  "Fix quotewords"
+   From:  Hugo van der Sanden <hv@crypt.compulink.co.uk>
+ Msg-ID:  <199703060755.HAA15060@crypt.compulink.co.uk>
+   Date:  Thu, 06 Mar 1997 07:55:25 +0000
+  Files:  lib/Text/ParseWords.pm
+
+  Title:  "Use IV instead of double for tms structure members"
+   From:  Chip Salzenberg
+  Files:  ext/POSIX/POSIX.xs
+
+  Title:  "Document IO::File::new_tmpfile"
+   From:  Chip Salzenberg
+  Files:  ext/IO/lib/IO/File.pm
+
+ TESTS
+
+  Title:  "Make op/TEST silent under -w"
+   From:  d-lewart@uiuc.edu (Daniel S. Lewart)
+ Msg-ID:  <199703011821.NAA13037@sinistar.idle.com>
+   Date:  Sat, 1 Mar 97 12:04:09 CST
+  Files:  t/TEST
+
+  Title:  "Smarter t/op/taint.t"
+   From:  Tom Phoenix <rootbeer@teleport.com>
+ Msg-ID:  <Pine.GSO.3.95q.970303103047.24000A-100000@kelly.teleport.com
+   Date:  Mon, 3 Mar 1997 10:31:54 -0800 (PST)
+  Files:  t/op/taint.t
+
+  Title:  "Fix taint test for systems without csh"
+   From:  Chip Salzenberg
+  Files:  t/op/taint.t
+
+  Title:  "Don't test locales if there is no setlocale()"
+   From:  Chip Salzenberg
+  Files:  t/pragma/locale.t
+
+ UTILITIES
+
+  Title:  "Update pod2html"
+   From:  wmiddlet@Adobe.COM (William Middleton)
+ Msg-ID:  <199703030025.QAA08106@ducks>
+   Date:  Sun, 2 Mar 1997 16:25:03 -0800 (PST)
+  Files:  pod/pod2html.PL
+
+  Title:  "Support 'long long' in h2ph"
+   From:  (name lost)
+  Files:  utils/h2ph.PL
+
+ DOCUMENTATION
+
+  Title:  "Add taint checks and srand to perldelta"
+   From:  Tom Phoenix <rootbeer@teleport.com>
+ Msg-ID:  <Pine.GSO.3.95q.970302115355.23058D-100000@kelly.teleport.com
+   Date:  Sun, 2 Mar 1997 11:56:08 -0800 (PST)
+  Files:  pod/perldelta.pod
+
+  Title:  "Don't call FileHandle 'deprecated'"
+   From:  Chip Salzenberg
+  Files:  pod/perldelta.pod
+
+  Title:  "Improve sample module header"
+   From:  Tom Christiansen <tchrist@jhereg.perl.com>,
+          Graham Barr <gbarr@ti.com>
+ Msg-ID:  <199703011732.KAA14693@jhereg.perl.com>
+   Date:  Sat, 01 Mar 1997 10:32:31 -0700
+  Files:  pod/perlmod.pod
+
+  Title:  "Clarify C<crypt> documentation"
+   From:  Tom Phoenix <rootbeer@teleport.com>
+ Msg-ID:  <Pine.GSO.3.95q.970228131112.12357D-100000@kelly.teleport.com
+   Date:  Fri, 28 Feb 1997 13:18:25 -0800 (PST)
+  Files:  pod/perlfunc.pod
+
+  Title:  "Update list of CPAN sites"
+   From:  Jarkko Hietaniemi <jhi@iki.fi>
+ Msg-ID:  <199703021454.QAA07446@alpha.hut.fi>
+   Date:  Sun, 2 Mar 1997 16:54:22 +0200 (EET)
+  Files:  pod/perlmod.pod
+
+  Title:  "Enhance description of 'server error'"
+   From:  Jarkko Hietaniemi <jhi@cc.hut.fi>
+ Msg-ID:  <199702041903.VAA16070@alpha.hut.fi>
+   Date:  Tue, 4 Feb 1997 21:03:23 +0200 (EET)
+  Files:  pod/perldiag.pod
+
+  Title:  "Regularize format of E-Mail addresses in *.pod"
+   From:  Chip Salzenberg
+  Files:  pod/*.pod
+
+
+----------------
 Version 5.003_91
 ----------------
 

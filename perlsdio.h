@@ -16,7 +16,6 @@
 #define PerlIO_printf			fprintf
 #define PerlIO_stdoutf			printf
 #define PerlIO_vprintf(f,fmt,a)		vfprintf(f,fmt,a)          
-#define PerlIO_read(f,buf,count)	fread(buf,1,count,f)
 #define PerlIO_write(f,buf,count)	fwrite1(buf,1,count,f)
 #define PerlIO_open			fopen
 #define PerlIO_fdopen			fdopen
@@ -24,21 +23,28 @@
 #define PerlIO_close(f)			fclose(f)
 #define PerlIO_puts(f,s)		fputs(s,f)
 #define PerlIO_putc(f,c)		fputc(c,f)
-#if defined(VMS) && defined(__DECC)
-   /* Unusual definition of ungetc() here to accomodate fast_sv_gets()'
-    * belief that it can mix getc/ungetc with reads from stdio buffer */
-   int decc$ungetc(int __c, FILE *__stream);
-#  define PerlIO_ungetc(f,c) ((c) == EOF ? EOF : \
-          ((*(f) && !((*(f))->_flag & _IONBF) && \
-          ((*(f))->_ptr > (*(f))->_base)) ? \
-          ((*(f))->_cnt++, *(--(*(f))->_ptr) = (c)) : decc$ungetc(c,f)))
-   /* Work around bug in DECCRTL/AXP (DECC v5.x) which causes read
-    * from a pipe after EOF has been returned once to hang.
+#if defined(VMS)
+#  if defined(__DECC)
+     /* Unusual definition of ungetc() here to accomodate fast_sv_gets()'
+      * belief that it can mix getc/ungetc with reads from stdio buffer */
+     int decc$ungetc(int __c, FILE *__stream);
+#    define PerlIO_ungetc(f,c) ((c) == EOF ? EOF : \
+            ((*(f) && !((*(f))->_flag & _IONBF) && \
+            ((*(f))->_ptr > (*(f))->_base)) ? \
+            ((*(f))->_cnt++, *(--(*(f))->_ptr) = (c)) : decc$ungetc(c,f)))
+#  else
+#    define PerlIO_ungetc(f,c)		ungetc(c,f)
+#  endif
+   /* Work around bug in DECCRTL/AXP (DECC v5.x) and some versions of old
+    * VAXCRTL which causes read from a pipe after EOF has been returned
+    * once to hang.
     */
 #  define PerlIO_getc(f)		(feof(f) ? EOF : getc(f))
+#  define PerlIO_read(f,buf,count)	(feof(f) ? 0 : fread(buf,1,count,f))
 #else
 #  define PerlIO_ungetc(f,c)		ungetc(c,f)
 #  define PerlIO_getc(f)		getc(f)
+#  define PerlIO_read(f,buf,count)	fread(buf,1,count,f)
 #endif
 #define PerlIO_eof(f)			feof(f)
 #define PerlIO_getname(f,b)		fgetname(f,b)

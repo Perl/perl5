@@ -658,7 +658,7 @@ Here's a sample Unix-domain client:
 
     $rendezvous = shift || '/tmp/catsock';
     socket(SOCK, PF_UNIX, SOCK_STREAM, 0)	|| die "socket: $!";
-    connect(SOCK, sockaddr_un($remote))		|| die "connect: $!";
+    connect(SOCK, sockaddr_un($rendezvous))	|| die "connect: $!";
     while ($line = <SOCK>) {
 	print $line;
     } 

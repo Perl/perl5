@@ -1,6 +1,6 @@
 /*    run.c
  *
- *    Copyright (c) 1991-1994, Larry Wall
+ *    Copyright (c) 1991-1997, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -111,12 +111,13 @@ OP* op;
 void
 debprofdump()
 {
-    U32 i;
+    unsigned i;
     if (!profiledata)
 	return;
     for (i = 0; i < MAXO; i++) {
 	if (profiledata[i])
-	    PerlIO_printf(Perl_debug_log, "%d\t%lu\n", i, profiledata[i]);
+	    PerlIO_printf(Perl_debug_log,
+			  "%u\t%lu\n", i, (unsigned long)profiledata[i]);
     }
 }
 

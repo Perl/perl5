@@ -838,6 +838,12 @@ the return value of your socket() call?  See L<perlfunc/connect>.
 inlining.  See L<perlsub/"Constant Functions"> for commentary and
 workarounds.
 
+=item Constant subroutine %s undefined
+
+(S) You undefined a subroutine which had previously been eligible for
+inlining.  See L<perlsub/"Constant Functions"> for commentary and
+workarounds.
+
 =item Copy method did not return a reference
 
 (F) The method which overloads "=" is buggy. See L<overload/Copy Constructor>.
@@ -1106,6 +1112,16 @@ don't take to this kindly.
 (W) You may have tried to use an 8 or 9 in a octal number.  Interpretation
 of the octal number stopped before the 8 or 9.
 
+=item In string, @%s now must be written as \@%s
+
+(F) It used to be that Perl would try to guess whether you wanted an
+array interpolated or a literal @.  It did this when the string was first
+used at runtime.  Now strings are parsed at compile time, and ambiguous
+instances of @ must be disambiguated, either by prepending a backslash to
+indicate a literal, or by declaring (or using) the array within the
+program before the string (lexically).  (Someday it will simply assume
+that an unbackslashed @ interpolates an array.)
+
 =item Insecure dependency in %s
 
 (F) You tried to do something that the tainting mechanism didn't like.
@@ -1195,16 +1211,6 @@ L<perlfunc/last>.
 
 (W) You tried to do a listen on a closed socket.  Did you forget to check
 the return value of your socket() call?  See L<perlfunc/listen>.
-
-=item Literal @%s now requires backslash
-
-(F) It used to be that Perl would try to guess whether you wanted an
-array interpolated or a literal @.  It did this when the string was
-first used at runtime.  Now strings are parsed at compile time, and
-ambiguous instances of @ must be disambiguated, either by putting a
-backslash to indicate a literal, or by declaring (or using) the array
-within the program before the string (lexically).  (Someday it will simply
-assume that an unbackslashed @ interpolates an array.)
 
 =item Method for operation %s not found in package %s during blessing
 
@@ -1976,12 +1982,22 @@ See L<perlre>.
 
 =item Server error
 
-Also known as "500 Server error".  This is a CGI error, not a Perl
-error.  You need to make sure your script is executable, is accessible
-by the user CGI is running the script under (which is probably not
-the user account you tested it under), does not rely on any environment
-variables (like PATH) from the user it isn't running under, and isn't
-in a location where the CGI server can't find it, basically, more or less.
+Also known as "500 Server error".
+
+B<This is a CGI error, not a Perl error>.
+
+You need to make sure your script is executable, is accessible by the user
+CGI is running the script under (which is probably not the user account you
+tested it under), does not rely on any environment variables (like PATH)
+from the user it isn't running under, and isn't in a location where the CGI
+server can't find it, basically, more or less.  Please see the following
+for more information:
+
+	http://www.perl.com/perl/faq/idiots-guide.html
+	http://www.perl.com/perl/faq/perl-cgi-faq.html
+	ftp://rtfm.mit.edu/pub/usenet/news.answers/www/cgi-faq
+	http://hoohoo.ncsa.uiuc.edu/cgi/interface.html
+	http://www-genome.wi.mit.edu/WWW/faqs/www-security-faq.html
 
 =item setegid() not implemented
 
@@ -2194,18 +2210,21 @@ you're not running on Unix.
 (F) There has to be at least one argument to syscall() to specify the
 system call to call, silly dilly.
 
-=item Too late for "B<-T>" option (try putting it first)
+=item Too late for "B<-T>" option
 
-(X) The #! line in a Perl script contains the B<-T> option, but Perl
-was not invoked with B<-T> in its argument list.  Due to the way Perl
-handles tainting, by the time Perl discovers a B<-T> in a script, it's
-too late to properly taint everything from the environment.  So Perl
-gives up.
+(X) The #! line (or local equivalent) in a Perl script contains the
+B<-T> option, but Perl was not invoked with B<-T> in its argument
+list.  This is an error because, by the time Perl discovers a B<-T> in
+a script, it's too late to properly taint everything from the
+environment.  So Perl gives up.
 
-This error can usually be fixed by editing the #! line so that the
-B<-T> option is in the Perl program's first argument.  (Many operating
-systems that implement the #! feature only pick up one argument from
-it, so Perl has to get the rest on its own.)
+If the Perl script is being executed as a command using the #!
+mechanism (or its local equivalent), this error can usually be fixed
+by editing the #! line so that the B<-T> option is a part of Perl's
+first argument: e.g. change C<perl -n -T> to C<perl -T -n>.
+
+If the Perl script is being executed as C<perl scriptname>, then the
+B<-T> option must appear on the command line: C<perl -T scriptname>.
 
 =item Too many ('s
 
@@ -2470,7 +2489,7 @@ value of "0"; that would make the conditional expression false, which
 is probably not what you intended.  When using these constructs in
 conditional expressions, test their values with the C<defined> operator.
 
-=item Variable "%s" is not exported
+=item Variable "%s" is not imported%s
 
 (F) While "use strict" in effect, you referred to a global variable
 that you apparently thought was imported from another module, because

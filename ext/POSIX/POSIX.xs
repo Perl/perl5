@@ -3533,11 +3533,11 @@ times()
 	clock_t realtime;
 	realtime = times( &tms );
 	EXTEND(sp,5);
-	PUSHs( sv_2mortal( newSVnv( realtime ) ) );
-	PUSHs( sv_2mortal( newSVnv( tms.tms_utime ) ) );
-	PUSHs( sv_2mortal( newSVnv( tms.tms_stime ) ) );
-	PUSHs( sv_2mortal( newSVnv( tms.tms_cutime ) ) );
-	PUSHs( sv_2mortal( newSVnv( tms.tms_cstime ) ) );
+	PUSHs( sv_2mortal( newSViv( (IV) realtime ) ) );
+	PUSHs( sv_2mortal( newSViv( (IV) tms.tms_utime ) ) );
+	PUSHs( sv_2mortal( newSViv( (IV) tms.tms_stime ) ) );
+	PUSHs( sv_2mortal( newSViv( (IV) tms.tms_cutime ) ) );
+	PUSHs( sv_2mortal( newSViv( (IV) tms.tms_cstime ) ) );
 
 double
 difftime(time1, time2)

@@ -1370,14 +1370,16 @@ Used to indicate scalar context.  See C<GIMME> and L<perlcall>.
 =item gv_fetchmeth
 
 Returns the glob with the given C<name> and a defined subroutine or
-C<NULL>. The glob lives in the given C<stash>, or in the stashes accessable
-via @ISA and @<UNIVERSAL>.
+C<NULL>.  The glob lives in the given C<stash>, or in the stashes
+accessable via @ISA and @<UNIVERSAL>.
 
-The argument C<level> should be either 0 or -1. If C<level==0>, as a
+The argument C<level> should be either 0 or -1.  If C<level==0>, as a
 side-effect creates a glob with the given C<name> in the given
 C<stash> which in the case of success contains an alias for the
 subroutine, and sets up caching info for this glob.  Similarly for all
 the searched stashes.
+
+This function grants C<"SUPER"> token as a postfix of the stash name.
 
 The GV returned from C<gv_fetchmeth> may be a method cache entry,
 which is not visible to Perl code.  So when calling C<perl_call_sv>,
@@ -1398,8 +1400,7 @@ check for it being "AUTOLOAD", since at the later time the the call
 may load a different subroutine due to $AUTOLOAD changing its value.
 Use the glob created via a side effect to do this.
 
-This function grants C<"SUPER"> token as prefix of name or postfix of
-the stash name.
+This function grants C<"SUPER"> token as a prefix of the method name.
 
 Has the same side-effects and as C<gv_fetchmeth> with C<level==0>.
 C<name> should be writable if contains C<':'> or C<'\''>.
@@ -2898,14 +2899,14 @@ destination, C<n> is the number of items, and C<t> is the type.
 
 =head1 EDITOR
 
-Jeff Okamoto <okamoto@corp.hp.com>
+Jeff Okamoto <F<okamoto@corp.hp.com>>
 
 With lots of help and suggestions from Dean Roehrich, Malcolm Beattie,
 Andreas Koenig, Paul Hudson, Ilya Zakharevich, Paul Marquess, Neil
 Bowers, Matthew Green, Tim Bunce, Spider Boardman, and Ulrich Pfeifer.
 
-API Listing by Dean Roehrich <roehrich@cray.com>.
+API Listing by Dean Roehrich <F<roehrich@cray.com>>.
 
 =head1 DATE
 
-Version 31.1: 1997/2/25
+Version 31.2: 1997/3/5

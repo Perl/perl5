@@ -1,6 +1,6 @@
 /*    op.c
  *
- *    Copyright (c) 1991-1994, Larry Wall
+ *    Copyright (c) 1991-1997, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -188,7 +188,6 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
 	for (off = AvFILL(curname); off > 0; off--) {
 	    if ((sv = svp[off]) &&
 		sv != &sv_undef &&
-		!SvFAKE(sv) &&
 		seq <= SvIVX(sv) &&
 		seq > I_32(SvNVX(sv)) &&
 		strEQ(SvPVX(sv), name))
@@ -199,21 +198,24 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
 
 		depth = CvDEPTH(cv);
 		if (!depth) {
-		    if (newoff)
+		    if (newoff) {
+			if (SvFAKE(sv))
+			    continue;
 			return 0; /* don't clone from inactive stack frame */
+		    }
 		    depth = 1;
 		}
 		oldpad = (AV*)*av_fetch(curlist, depth, FALSE);
 		oldsv = *av_fetch(oldpad, off, TRUE);
 		if (!newoff) {		/* Not a mere clone operation. */
-		    SV *sv = NEWSV(1103,0);
+		    SV *namesv = NEWSV(1103,0);
 		    newoff = pad_alloc(OP_PADSV, SVs_PADMY);
-		    sv_upgrade(sv, SVt_PVNV);
-		    sv_setpv(sv, name);
-		    av_store(comppad_name, newoff, sv);
-		    SvNVX(sv) = (double)curcop->cop_seq;
-		    SvIVX(sv) = 999999999;	/* A ref, intro immediately */
-		    SvFAKE_on(sv);		/* A ref, not a real var */
+		    sv_upgrade(namesv, SVt_PVNV);
+		    sv_setpv(namesv, name);
+		    av_store(comppad_name, newoff, namesv);
+		    SvNVX(namesv) = (double)curcop->cop_seq;
+		    SvIVX(namesv) = 999999999;	/* A ref, intro immediately */
+		    SvFAKE_on(namesv);		/* A ref, not a real var */
 		    if (CvANON(compcv) || SvTYPE(compcv) == SVt_PVFM) {
 			/* "It's closures all the way down." */
 			CvCLONE_on(compcv);
@@ -235,7 +237,7 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
 			}
 		    }
 		    else if (!CvUNIQUE(compcv)) {
-			if (dowarn && !CvUNIQUE(cv))
+			if (dowarn && !SvFAKE(sv) && !CvUNIQUE(cv))
 			    warn("Variable \"%s\" will not stay shared", name);
 		    }
 		}
@@ -2885,7 +2887,7 @@ CV* cv;
     pname = AvARRAY(pad_name);
     ppad = AvARRAY(pad);
 
-    for (ix = 1; ix <= AvFILL(pad); ix++) {
+    for (ix = 1; ix <= AvFILL(pad_name); ix++) {
 	if (SvPOK(pname[ix]))
 	    PerlIO_printf(Perl_debug_log, "\t%4d. 0x%p (%s\"%s\" %ld-%ld)\n",
 			  ix, ppad[ix],
@@ -2909,6 +2911,8 @@ CV* outside;
     AV* protopad = (AV*)*av_fetch(protopadlist, 1, FALSE);
     SV** pname = AvARRAY(protopad_name);
     SV** ppad = AvARRAY(protopad);
+    I32 fname = AvFILL(protopad_name);
+    I32 fpad = AvFILL(protopad);
     AV* comppadlist;
     CV* cv;
 
@@ -2948,8 +2952,8 @@ CV* outside;
     av_store(comppad, 0, (SV*)av);
     AvFLAGS(av) = AVf_REIFY;
 
-    for (ix = AvFILL(protopad); ix > 0; ix--) {
-	SV* namesv = pname[ix];
+    for (ix = fpad; ix > 0; ix--) {
+	SV* namesv = (ix <= fname) ? pname[ix] : Nullsv;
 	if (namesv && namesv != &sv_undef) {
 	    char *name = SvPVX(namesv);    /* XXX */
 	    if (SvFLAGS(namesv) & SVf_FAKE) {   /* lexical from outside? */
@@ -2986,8 +2990,8 @@ CV* outside;
 
     /* Now that vars are all in place, clone nested closures. */
 
-    for (ix = AvFILL(protopad); ix > 0; ix--) {
-	SV* namesv = pname[ix];
+    for (ix = fpad; ix > 0; ix--) {
+	SV* namesv = (ix <= fname) ? pname[ix] : Nullsv;
 	if (namesv
 	    && namesv != &sv_undef
 	    && !(SvFLAGS(namesv) & SVf_FAKE)
@@ -3173,8 +3177,8 @@ OP *block;
 		db_postponed = gv_fetchpv("DB::postponed", GV_ADDMULTI, SVt_PVHV);
 	    }
 	    hv = GvHVn(db_postponed);
-	    if (HvFILL(hv) >= 0 && hv_exists(hv, SvPVX(tmpstr), SvCUR(tmpstr))
-		&& (cv = GvCV(db_postponed))) {
+	    if (HvFILL(hv) > 0 && hv_exists(hv, SvPVX(tmpstr), SvCUR(tmpstr))
+		  && (cv = GvCV(db_postponed))) {
 		dSP;
 		PUSHMARK(sp);
 		XPUSHs(tmpstr);
