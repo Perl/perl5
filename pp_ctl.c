@@ -90,15 +90,6 @@ PP(pp_regcomp)
     else {
 	t = SvPV(tmpstr, len);
 
-#ifndef INCOMPLETE_TAINTS
-	if (tainting) {
-	    if (tainted)
-		pm->op_pmdynflags |= PMdf_TAINTED;
-	    else
-		pm->op_pmdynflags &= ~PMdf_TAINTED;
-	}
-#endif
-
 	/* Check against the last compiled regexp. */
 	if (!pm->op_pmregexp || !pm->op_pmregexp->precomp ||
 	    pm->op_pmregexp->prelen != len ||
@@ -113,6 +104,15 @@ PP(pp_regcomp)
 	    pm->op_pmregexp = pregcomp(t, t + len, pm);
 	}
     }
+
+#ifndef INCOMPLETE_TAINTS
+    if (tainting) {
+	if (tainted)
+	    pm->op_pmdynflags |= PMdf_TAINTED;
+	else
+	    pm->op_pmdynflags &= ~PMdf_TAINTED;
+    }
+#endif
 
     if (!pm->op_pmregexp->prelen && curpm)
 	pm = curpm;
@@ -155,7 +155,6 @@ PP(pp_substcont)
 	    SV *targ = cx->sb_targ;
 	    sv_catpvn(dstr, s, cx->sb_strend - s);
 
-	    TAINT_IF(cx->sb_rxtainted || RX_MATCH_TAINTED(rx));
 	    cx->sb_rxtainted |= RX_MATCH_TAINTED(rx);
 
 	    (void)SvOOK_off(targ);

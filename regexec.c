@@ -610,7 +610,7 @@ got_it:
     strend += dontbother;	/* uncheat */
     prog->subbeg = strbeg;
     prog->subend = strend;
-    RX_MATCH_TAINTED_SET(prog, reg_flags & RF_tainted);
+    RX_MATCH_TAINTED_set(prog, reg_flags & RF_tainted);
 
     /* make sure $`, $&, $', and $digit will work later */
     if (strbeg != prog->subbase) {	/* second+ //g match.  */

@@ -660,7 +660,7 @@ void del_xrv _((XRV* p));
 void sv_mortalgrow _((void));
 void sv_unglob _((SV* sv));
 void sv_check_thinkfirst _((SV *sv));
-
+I32 avhv_index_sv _((SV* sv));
 
 void sv_catpv_mg _((SV *sv, char *ptr));
 void sv_catpvf_mg _((SV *sv, const char* pat, ...));

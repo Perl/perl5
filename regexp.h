@@ -90,9 +90,11 @@ typedef struct regexp {
 #define ROPT_TAINTED_SEEN	0x8000
 
 #define RX_MATCH_TAINTED(prog)	((prog)->reganch & ROPT_TAINTED_SEEN)
-#define RX_MATCH_TAINTED_SET(prog, t) ((t) \
-				       ? ((prog)->reganch |= ROPT_TAINTED_SEEN) \
-				       : ((prog)->reganch &= ~ROPT_TAINTED_SEEN))
+#define RX_MATCH_TAINTED_on(prog) ((prog)->reganch |= ROPT_TAINTED_SEEN)
+#define RX_MATCH_TAINTED_off(prog) ((prog)->reganch &= ~ROPT_TAINTED_SEEN)
+#define RX_MATCH_TAINTED_set(prog, t) ((t) \
+				       ? RX_MATCH_TAINTED_on(prog) \
+				       : RX_MATCH_TAINTED_off(prog))
 
 #define REXEC_COPY_STR	1		/* Need to copy the string. */
 #define REXEC_CHECKED	2		/* check_substr already checked. */

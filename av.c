@@ -596,7 +596,7 @@ av_fill(register AV *av, I32 fill)
  * hash keys to array indices.
  */
 
-static I32
+STATIC I32
 avhv_index_sv(SV* sv)
 {
     I32 index = SvIV(sv);
@@ -620,6 +620,7 @@ avhv_keys(AV *av)
 	}
     }
     croak("Can't coerce array into hash");
+    return Nullhv;
 }
 
 SV**

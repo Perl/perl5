@@ -4399,7 +4399,7 @@ keyword(register char *d, I32 len)
 	case 3:
 	    if (strEQ(d,"ord"))			return -KEY_ord;
 	    if (strEQ(d,"oct"))			return -KEY_oct;
-	    if (strEQ(d,"our")) { deprecate("reserved keyword \"our\"");
+	    if (strEQ(d,"our")) { deprecate("reserved word \"our\"");
 						return 0;}
 	    break;
 	case 4:

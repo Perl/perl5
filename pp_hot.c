@@ -917,7 +917,9 @@ play_it_again:
     /*NOTREACHED*/
 
   gotcha:
-    RX_MATCH_TAINTED_SET(rx, rxtainted);
+    if (rxtainted)
+	RX_MATCH_TAINTED_on(rx);
+    TAINT_IF(RX_MATCH_TAINTED(rx));
     if (gimme == G_ARRAY) {
 	I32 iters, i, len;
 
@@ -970,7 +972,9 @@ play_it_again:
     }
 
 yup:					/* Confirmed by check_substr */
-    RX_MATCH_TAINTED_SET(rx, rxtainted);
+    if (rxtainted)
+	RX_MATCH_TAINTED_on(rx);
+    TAINT_IF(RX_MATCH_TAINTED(rx));
     ++BmUSEFUL(rx->check_substr);
     curpm = pm;
     if (pm->op_pmflags & PMf_ONCE)

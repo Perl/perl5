@@ -55,6 +55,8 @@
 #define avhv_fetch_ent    CPerlObj::Perl_avhv_fetch_ent
 #undef  avhv_exists_ent
 #define avhv_exists_ent   CPerlObj::Perl_avhv_exists_ent
+#undef  avhv_index_sv
+#define avhv_index_sv     CPerlObj::avhv_index_sv
 #undef  avhv_iternext
 #define avhv_iternext     CPerlObj::Perl_avhv_iternext
 #undef  avhv_iterval
