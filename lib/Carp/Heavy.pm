@@ -1,5 +1,8 @@
 package Carp;
 
+our $MaxEvalLen;
+our $MaxLenArg;
+our $Verbose;
 
 sub caller_info {
   my $i = shift(@_) + 1;
@@ -46,8 +49,7 @@ sub format_arg {
   # The following handling of "control chars" is direct from
   # the original code - I think it is broken on Unicode though.
   # Suggestions?
-  $arg =~ s/([\200-\377])/sprintf("M-%c",ord($1)&0177)/eg;
-  $arg =~ s/([\0-\37\177])/sprintf("^%c",ord($1)^64)/eg;
+  $arg =~ s/([[:cntrl:]]|[[^:ascii:]])/sprintf("\\x{%x}",ord($1))/eg;
   return $arg;
 }
 
@@ -137,6 +139,7 @@ sub ret_backtrace {
 
   while (my %i = caller_info(++$i)) {
       $mess .= "\t$i{sub_name} called at $i{file} line $i{line}$tid_msg\n";
+  }
   
   return $mess || $err;
 }
