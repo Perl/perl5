@@ -161,11 +161,6 @@ charblock() returns the block the character belongs to, e.g.
 C<Basic Latin>.  Note that not all the character positions within all
 blocks are defined.
 
-The name is the same name that is used in the C<\p{In...}> construct,
-for example C<\p{InBasicLatin}> (spaces and dashes ('-') are squished
-away from the names for the C<\p{In...}>, for example C<LatinExtendedA>
-instead of C<Latin Extended-A>.
-
 =cut
 
 my @BLOCKS;
@@ -196,9 +191,6 @@ sub charblock {
 charscript() returns the script the character belongs to, e.g.
 C<Latin>, C<Greek>, C<Han>.
 
-Unfortunately, currently (Perl 5.8.0) there is no regular expression
-notation for matching scripts as there is for blocks (C<\p{In...}>.
-
 =cut
 
 my @SCRIPTS;
@@ -226,56 +218,33 @@ sub charscript {
 The difference between a character block and a script is that scripts
 are closer to the linguistic notion of a set of characters required to
 present languages, while block is more of an artifact of the Unicode
-character numbering.  For example the Latin B<script> is spread over
-several B<blocks>, such as C<Basic Latin>, C<Latin 1 Supplement>,
-C<Latin Extended-A>, and C<Latin Extended-B>.  On the other hand, the
-Latin script does not contain all the characters of the C<Basic Latin>
-block (also known as the ASCII): it includes only the letters, not for
-example the digits or the punctuation.
+character numbering and separation into blocks of 256 characters.
 
-For block see http://www.unicode.org/Public/UNIDATA/Blocks.txt
+For example the Latin B<script> is spread over several B<blocks>, such
+as C<Basic Latin>, C<Latin 1 Supplement>, C<Latin Extended-A>, and
+C<Latin Extended-B>.  On the other hand, the Latin script does not
+contain all the characters of the C<Basic Latin> block (also known as
+the ASCII): it includes only the letters, not for example the digits
+or the punctuation.
+
+For blocks see http://www.unicode.org/Public/UNIDATA/Blocks.txt
 
 For scripts see UTR #24: http://www.unicode.org/unicode/reports/tr24/
 
-Note also that the script names are all in uppercase, e.g. C<HEBREW>,
-while the block names are Capitalized and with intermixed spaces,
-e.g. C<Yi Syllables>.
+=head2 Matching Scripts and Blocks
 
-Greek
-Cyrillic
-Armenian
-Hebrew
-Arabic
-Syriac
-Thaana
-Devanagari
-Bengali
-Gurmukhi
-Gujarati
-Oriya
-Tamil
-Telugu
-Kannada
-Malayalam
-Sinhala
-Thai
-Lao
-Tibetan
-Myanmar
-Georgian
-Ethiopic
-Cherokee
-Ogham
-Runic
-Khmer
-Hiragana
-Katakana
-Bopomofo
-OldItalic
-Gothic
-Deseret
+Both scripts and blocks can be matched using the regular expression
+construct C<\p{In...}> and its negation C<\P{In...}>.
 
-=head1 IMPLEMENTATION NOTE
+The name of the script or the block comes after the C<In>, for example
+C<\p{InCyrillic}>, C<\P{InBasicLatin}>.  Spaces and dashes ('-') are
+squished away from the names for the C<\p{In...}>, for example
+C<LatinExtendedA> instead of C<Latin Extended-A>.  There are a few
+cases where there exists both a script and a block by the same name,
+in these cases the block version has C<Block> appended: C<\p{InKatakana}>
+is the script, C<\p{InKatakanaBlock}> is the block.
+
+=head2 Implementation Note
 
 The first use of charinfo() opens a read-only filehandle to the Unicode
 Character Database (the database is included in the Perl distribution).
