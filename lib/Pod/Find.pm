@@ -3,7 +3,8 @@
 #
 # Author: Marek Rouchal <marek@saftsack.fs.uni-bayreuth.de>
 # 
-# borrowing code from Nick Ing-Simmon's PodToHtml
+# Copyright (C) 1999-2000 by Marek Rouchal (and borrowing code
+# from Nick Ing-Simmon's PodToHtml). All rights reserved.
 # This file is part of "PodParser". Pod::Find is free software;
 # you can redistribute it and/or modify it under the same terms
 # as Perl itself.
@@ -12,8 +13,8 @@
 package Pod::Find;
 
 use vars qw($VERSION);
-$VERSION = 0.10;   ## Current version of this package
-require  5.005;    ## requires this Perl version or later
+$VERSION = 0.11;   ## Current version of this package
+require  5.004;    ## requires this Perl version or later
 
 #############################################################################
 
@@ -113,7 +114,9 @@ use vars qw(@ISA @EXPORT_OK $VERSION);
 # package global variables
 my $SIMPLIFY_RX;
 
-# return a hash of the 
+# return a hash of the POD files found
+# first argument may be a hashref (options),
+# rest is a list of directories to search recursively
 sub pod_find
 {
     my %opts;
@@ -145,7 +148,8 @@ sub pod_find
         # * remove e.g. 5.00503
         # * remove pod/ if followed by *.pod (e.g. in pod/perlfunc.pod)
         $SIMPLIFY_RX =
-          qr!^(?i:site_perl/|$Config::Config{archname}/|\d+\.\d+([_.]?\d+)?/|pod/(?=.*?\.pod$))*!o;
+          qq!^(?i:site_perl/|\Q$Config::Config{archname}\E/|\\d+\\.\\d+([_.]?\\d+)?/|pod/(?=.*?\\.pod\$))*!;
+
     }
 
     my %dirs_visited;
@@ -166,7 +170,7 @@ sub pod_find
             }
             next;
         }
-	my $root_rx = qr!^\Q$try\E/!;
+	my $root_rx = qq!^\Q$try\E/!;
         File::Find::find( sub {
 	    my $item = $File::Find::name;
 	    if(-d) {

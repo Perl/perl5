@@ -10,7 +10,7 @@
 package Pod::Checker;
 
 use vars qw($VERSION);
-$VERSION = 1.096;  ## Current version of this package
+$VERSION = 1.097;  ## Current version of this package
 require  5.004;    ## requires this Perl version or later
 
 use Pod::ParseUtils; ## for hyperlinks and lists
@@ -111,6 +111,11 @@ very robust conversions.
 
 =over 4
 
+=item * empty =headn
+
+A heading (C<=head1> or C<=head2>) without any text? That ain't no
+heading!
+
 =item * =over on line I<N> without closing =back
 
 The C<=over> command does not have a corresponding C<=back> before the
@@ -134,7 +139,7 @@ A standalone C<=end> command was found.
 
 =item * Nested =begin's
 
-There were at least two concecutive C<=begin> commands without
+There were at least two consecutive C<=begin> commands without
 the corresponding C<=end>. Only one C<=begin> may be active at
 a time.
 
@@ -168,12 +173,28 @@ does not make sense.
 
 =item * garbled entity I<STRING>
 
-The I<STRING> found cannot be interpreted as an character entity.
+The I<STRING> found cannot be interpreted as a character entity.
+
+=item * Entity number out of range
+
+An entity specified by number (dec, hex, oct) is out of range (1-255).
 
 =item * malformed link LE<lt>E<gt>
 
 The link found cannot be parsed because it does not conform to the
 syntax described in L<perlpod>.
+
+=item * nonempty ZE<lt>E<gt>
+
+The C<ZE<lt>E<gt>> sequence is supposed to be empty.
+
+=item * Spurious text after =pod / =cut
+
+The commands C<=pod> and C<=cut> do not take any arguments.
+
+=item * Spurious character(s) after =back
+
+The C<=back> command does not take any arguments.
 
 =back
 
@@ -183,14 +204,43 @@ These may not necessarily cause trouble, but indicate mediocre style.
 
 =over 4
 
+=item * multiple occurence of link target I<name>
+
+The POD file has some C<=item> and/or C<=head> commands that have
+the same text. Potential hyperlinks to such a text cannot be unique then.
+
+=item * line containing nothing but whitespace in paragraph
+
+There is some whitespace on a seemingly empty line. POD is very sensitive
+to such things, so this is flagged. B<vi> users switch on the B<list>
+option to avoid this problem.
+
+=item * file does not start with =head
+
+The file starts with a different POD directive than head.
+This is most probably something you do not want.
+
 =item * No numeric argument for =over
 
 The C<=over> command is supposed to have a numeric argument (the
 indentation).
 
-=item * Spurious character(s) after =back
+=item * previous =item has no contents
 
-The C<=back> command does not take any arguments.
+There is a list C<=item> right above the flagged line that has no
+text contents. You probably want to delete empty items.
+
+=item * preceding non-item paragraph(s)
+
+A list introduced by C<=over> starts with a text or verbatim paragraph,
+but continues with C<=item>s. Move the non-item paragraph out of the
+C<=over>/C<=back> block.
+
+=item * =item type mismatch (I<one> vs. I<two>)
+
+A list started with e.g. a bulletted C<=item> and continued with a
+numbered one. This is obviously inconsistent. For most translators the
+type of the I<first> C<=item> determines the type of the list.
 
 =item * I<N> unescaped C<E<lt>E<gt>> in paragraph
 
@@ -198,14 +248,14 @@ Angle brackets not written as C<E<lt>ltE<gt>> and C<E<lt>gtE<gt>>
 can potentially cause errors as they could be misinterpreted as
 markup commands.
 
-=item * Non-standard entity
+=item * Unknown entity
 
 A character entity was found that does not belong to the standard
-ISO set.
+ISO set or the POD specials C<verbar> and C<sol>.
 
 =item * No items in =over
 
-The list does not contain any items.
+The list opened with C<=over> does not contain any items.
 
 =item * No argument for =item
 
@@ -213,6 +263,12 @@ C<=item> without any parameters is deprecated. It should either be followed
 by C<*> to indicate an unordered list, by a number (optionally followed
 by a dot) to indicate an ordered (numbered) list or simple text for a
 definition list.
+
+=item * empty section in previous paragraph
+
+The previous section (introduced by a C<=head> command) does not contain
+any text. This usually indicates that something is missing. Note: A 
+C<=head1> followed immediately by C<=head2> does not trigger this warning.
 
 =item * Verbatim paragraph in NAME section
 
@@ -395,6 +451,10 @@ my %ENTITIES = (
  iquest => '¿',
 'times' => '×',    # times is a keyword in perl
  divide => '÷',
+
+# some POD special entities
+ verbar => '|',
+ sol => '/'
 );
 
 ##---------------------------------------------------------------------------
@@ -413,6 +473,7 @@ sub podchecker( $ ; $ % ) {
 
     ## Now create a pod checker
     my $checker = new Pod::Checker(%options);
+    $checker->parseopts(-process_cut_cmd => 1);
 
     ## Now check the pod document for errors
     $checker->parse_from_file($infile, $outfile);
@@ -427,15 +488,15 @@ sub podchecker( $ ; $ % ) {
 ## Method definitions begin here
 ##-------------------------------
 
-sub new {
-    my $this = shift;
-    my $class = ref($this) || $this;
-    my %params = @_;
-    my $self = {%params};
-    bless $self, $class;
-    $self->initialize();
-    return $self;
-}
+## sub new {
+##     my $this = shift;
+##     my $class = ref($this) || $this;
+##     my %params = @_;
+##     my $self = {%params};
+##     bless $self, $class;
+##     $self->initialize();
+##     return $self;
+## }
 
 sub initialize {
     my $self = shift;
@@ -462,6 +523,10 @@ sub poderror {
     chomp( my $msg  = ($opts{-msg} || "")."@_" );
     my $line = (exists $opts{-line}) ? " at line $opts{-line}" : "";
     my $file = (exists $opts{-file}) ? " in file $opts{-file}" : "";
+    unless (exists $opts{-severity}) {
+       ## See if can find severity in message prefix
+       $opts{-severity} = $1  if ( $msg =~ s/^\**\s*([A-Z]{3,}):\s+// );
+    }
     my $severity = (exists $opts{-severity}) ? "*** $opts{-severity}: " : "";
 
     ## Increment error count and print message "
@@ -487,9 +552,12 @@ sub name {
 sub node {
     my ($self,$text) = @_;
     if(defined $text) {
-        $text =~ s/[\s\n]+$//; # strip trailing whitespace
-        # add node
+        $text =~ s/\s+$//s; # strip trailing whitespace
+        $text =~ s/\s+/ /gs; # collapse whitespace
+        # add node, order important!
         push(@{$self->{_nodes}}, $text);
+        # keep also a uniqueness counter
+        $self->{_unique_nodes}->{$text}++;
         return $text;
     }
     @{$self->{_nodes}};
@@ -508,56 +576,63 @@ sub hyperlink {
 ## overrides for Pod::Parser
 
 sub end_pod {
-   ## Do some final checks and
-   ## print the number of errors found
-   my $self   = shift;
-   my $infile = $self->input_file();
-   my $out_fh = $self->output_handle();
+    ## Do some final checks and
+    ## print the number of errors found
+    my $self   = shift;
+    my $infile = $self->input_file();
+    my $out_fh = $self->output_handle();
 
-   if(@{$self->{_list_stack}}) {
-       # _TODO_ display, but don't count them for now
-       my $list;
-       while($list = shift(@{$self->{_list_stack}})) {
-           $self->poderror({ -line => 'EOF', -file => $infile,
-               -severity => 'ERROR', -msg => "=over on line " .
-               $list->start() . " without closing =back" }); #"
-       }
-   }
+    if(@{$self->{_list_stack}}) {
+        # _TODO_ display, but don't count them for now
+        my $list;
+        while(($list = $self->_close_list('EOF',$infile)) &&
+          $list->indent() ne 'auto') {
+            $self->poderror({ -line => 'EOF', -file => $infile,
+                -severity => 'ERROR', -msg => "=over on line " .
+                $list->start() . " without closing =back" }); #"
+        }
+    }
 
-   # check validity of document internal hyperlinks
-   # first build the node names from the paragraph text
-   my %nodes;
-   foreach($self->node()) {
-       $nodes{$_} = 1;
-       if(/^(\S+)\s+/) {
-           # we have more than one word. Use the first as a node, too.
-           # This is used heavily in perlfunc.pod
-           $nodes{$1} ||= 2; # derived node
-       }
-   }
-   foreach($self->hyperlink()) {
-       my $line = '';
-       s/^(\d+):// && ($line = $1);
-       if($_ && !$nodes{$_}) {
-           $self->poderror({ -line => $line, -file => $infile,
-               -severity => 'ERROR',
-               -msg => "unresolved internal link `$_'"});
-       }
-   }
+    # check validity of document internal hyperlinks
+    # first build the node names from the paragraph text
+    my %nodes;
+    foreach($self->node()) {
+        $nodes{$_} = 1;
+        if(/^(\S+)\s+/) {
+            # we have more than one word. Use the first as a node, too.
+            # This is used heavily in perlfunc.pod
+            $nodes{$1} ||= 2; # derived node
+        }
+    }
+    foreach($self->hyperlink()) {
+        my $line = '';
+        s/^(\d+):// && ($line = $1);
+        if($_ && !$nodes{$_}) {
+            $self->poderror({ -line => $line, -file => $infile,
+                -severity => 'ERROR',
+                -msg => "unresolved internal link '$_'"});
+        }
+    }
+    foreach(grep($self->{_unique_nodes}->{$_} > 1,
+      keys %{$self->{_unique_nodes}})) {
+        $self->poderror({ -line => '-', -file => $infile,
+            -severity => 'WARNING',
+            -msg => "multiple occurence of link target '$_'"});
+    }
 
-   ## Print the number of errors found
-   my $num_errors = $self->num_errors();
-   if ($num_errors > 0) {
-      printf $out_fh ("$infile has $num_errors pod syntax %s.\n",
+    ## Print the number of errors found
+    my $num_errors = $self->num_errors();
+    if ($num_errors > 0) {
+        printf $out_fh ("$infile has $num_errors pod syntax %s.\n",
                       ($num_errors == 1) ? "error" : "errors");
-   }
-   elsif($self->{_commands} == 0) {
-      print $out_fh "$infile does not contain any pod commands.\n";
-      $self->num_errors(-1);
-   }
-   else {
-      print $out_fh "$infile pod syntax OK.\n";
-   }
+    }
+    elsif($self->{_commands} == 0) {
+        print $out_fh "$infile does not contain any pod commands.\n";
+        $self->num_errors(-1);
+    }
+    else {
+        print $out_fh "$infile pod syntax OK.\n";
+    }
 }
 
 # check a POD command directive
@@ -568,10 +643,15 @@ sub command {
     my $arg; # this will hold the command argument
     if (! $VALID_COMMANDS{$cmd}) {
        $self->poderror({ -line => $line, -file => $file, -severity => 'ERROR',
-                         -msg => "Unknown command \"$cmd\"" });
+                         -msg => "Unknown command '$cmd'" });
     }
     else {
-        $self->{_commands}++; # found a valid command
+        # found a valid command
+        if(!$self->{_commands}++ && $cmd !~ /^head/) {
+            $self->poderror({ -line => $line, -file => $file,
+                 -severity => 'WARNING', 
+                 -msg => "file does not start with =head" });
+        }
         ## check syntax of particular command
         if($cmd eq 'over') {
             # check for argument
@@ -585,10 +665,7 @@ sub command {
                      -msg => "No numeric argument for =over"});
             }
             # start a new list
-            unshift(@{$self->{_list_stack}}, Pod::List->new(
-                    -indent => $indent,
-                    -start => $line,
-                    -file => $file));
+            $self->_open_list($indent,$line,$file);
         }
         elsif($cmd eq 'item') {
             # are we in a list?
@@ -597,22 +674,60 @@ sub command {
                      -severity => 'ERROR', 
                      -msg => "=item without previous =over" });
                 # auto-open in case we encounter many more
-                unshift(@{$self->{_list_stack}}, 
-                    Pod::List->new(
-                        -indent => 'auto',
-                        -start => $line,
-                        -file => $file));
+                $self->_open_list('auto',$line,$file);
+            }
+            my $list = $self->{_list_stack}->[0];
+            # check whether the previous item had some contents
+            if(defined $self->{_list_item_contents} &&
+              $self->{_list_item_contents} == 0) {
+                $self->poderror({ -line => $line, -file => $file,
+                     -severity => 'WARNING', 
+                     -msg => "previous =item has no contents" });
+            }
+            if($list->{_has_par}) {
+                $self->poderror({ -line => $line, -file => $file,
+                     -severity => 'WARNING', 
+                     -msg => "preceding non-item paragraph(s)" });
+                delete $list->{_has_par};
             }
             # check for argument
             $arg = $self->interpolate_and_check($paragraph, $line, $file);
-            unless($arg && $arg =~ /(\S+)/) {
+            if($arg && $arg =~ /(\S+)/) {
+                $arg =~ s/[\s\n]+$//;
+                my $type;
+                if($arg =~ /^[*]\s*(\S*.*)/) {
+                  $type = 'bullet';
+                  $self->{_list_item_contents} = $1 ? 1 : 0;
+                  $arg = $1;
+                }
+                elsif($arg =~ /^\d+\.?\s*(\S*)/) {
+                  $type = 'number';
+                  $self->{_list_item_contents} = $1 ? 1 : 0;
+                  $arg = $1;
+                }
+                else {
+                  $type = 'definition';
+                  $self->{_list_item_contents} = 1;
+                }
+                my $first = $list->type();
+                if($first && $first ne $type) {
+                    $self->poderror({ -line => $line, -file => $file,
+                       -severity => 'WARNING', 
+                       -msg => "=item type mismatch ('$first' vs. '$type')"});
+                }
+                else { # first item
+                    $list->type($type);
+                }
+            }
+            else {
                 $self->poderror({ -line => $line, -file => $file,
                      -severity => 'WARNING', 
                      -msg => "No argument for =item" });
 		$arg = ' '; # empty
+                $self->{_list_item_contents} = 0;
             }
             # add this item
-            $self->{_list_stack}[0]->item($arg);
+            $list->item($arg);
             # remember this node
             $self->node($arg);
         }
@@ -628,11 +743,11 @@ sub command {
                 $arg = $self->interpolate_and_check($paragraph, $line,$file);
                 if($arg && $arg =~ /\S/) {
                     $self->poderror({ -line => $line, -file => $file,
-                         -severity => 'WARNING', 
+                         -severity => 'ERROR', 
                          -msg => "Spurious character(s) after =back" });
                 }
                 # close list
-                my $list = shift @{$self->{_list_stack}};
+                my $list = $self->_close_list($line,$file);
                 # check for empty lists
                 if(!$list->item() && $self->{-warnings}) {
                     $self->poderror({ -line => $line, -file => $file,
@@ -642,11 +757,22 @@ sub command {
                 }
             }
         }
-        elsif($cmd =~ /^head/) {
+        elsif($cmd =~ /^head(\d+)/) {
+            if(defined $self->{_commands_in_head} &&
+              $self->{_commands_in_head} == 0 &&
+              defined $self->{_last_head} &&
+              $self->{_last_head} >= $1) {
+                $self->poderror({ -line => $line, -file => $file,
+                     -severity => 'WARNING', 
+                     -msg => "empty section in previous paragraph"});
+            }
+            $self->{_commands_in_head} = -1;
+            $self->{_last_head} = $1;
             # check if there is an open list
             if(@{$self->{_list_stack}}) {
                 my $list;
-                while($list = shift(@{$self->{_list_stack}})) {
+                while(($list = $self->_close_list($line,$file)) &&
+                  $list->indent() ne 'auto') {
                     $self->poderror({ -line => $line, -file => $file,
                          -severity => 'ERROR', 
                          -msg => "=over on line ". $list->start() .
@@ -655,9 +781,14 @@ sub command {
             }
             # remember this node
             $arg = $self->interpolate_and_check($paragraph, $line,$file);
-            $self->node($arg) if($arg);
+            $arg =~ s/[\s\n]+$//s;
+            $self->node($arg);
+            unless(length($arg)) {
+                $self->poderror({ -line => $line, -file => $file,
+                     -severity => 'ERROR', 
+                     -msg => "empty =$cmd"});
+            }
             if($cmd eq 'head1') {
-                $arg =~ s/[\s\n]+$//;
                 $self->{_current_head1} = $arg;
             } else {
                 $self->{_current_head1} = '';
@@ -711,10 +842,46 @@ sub command {
             }
             $arg = ''; # do not expand paragraph below
         }
+        elsif($cmd =~ /^(pod|cut)$/) {
+            # check for argument
+            $arg = $self->interpolate_and_check($paragraph, $line,$file);
+            if($arg && $arg =~ /(\S+)/) {
+                $self->poderror({ -line => $line, -file => $file,
+                      -severity => 'ERROR', 
+                      -msg => "Spurious text after =$cmd"});
+            }
+        }
+    $self->{_commands_in_head}++;
     ## Check the interior sequences in the command-text
     $self->interpolate_and_check($paragraph, $line,$file)
         unless(defined $arg);
     }
+}
+
+sub _open_list
+{
+    my ($self,$indent,$line,$file) = @_;
+    my $list = Pod::List->new(
+           -indent => $indent,
+           -start => $line,
+           -file => $file);
+    unshift(@{$self->{_list_stack}}, $list);
+    undef $self->{_list_item_contents};
+    $list;
+}
+
+sub _close_list
+{
+    my ($self,$line,$file) = @_;
+    my $list = shift(@{$self->{_list_stack}});
+    if(defined $self->{_list_item_contents} &&
+      $self->{_list_item_contents} == 0) {
+        $self->poderror({ -line => $line, -file => $file,
+            -severity => 'WARNING', 
+            -msg => "previous =item has no contents" });
+    }
+    undef $self->{_list_item_contents};
+    $list;
 }
 
 # process a block of some text
@@ -754,7 +921,7 @@ sub _check_ptree {
         if (! $VALID_SEQUENCES{$cmd}) {
             $self->poderror({ -line => $line, -file => $file,
                  -severity => 'ERROR', 
-                 -msg => qq(Unknown interior-sequence "$cmd")});
+                 -msg => qq(Unknown interior-sequence '$cmd')});
             # expand it anyway
             $text .= $self->_check_ptree($contents, $line, $file, "$nestlist$cmd");
             next;
@@ -775,9 +942,28 @@ sub _check_ptree {
                 next;
             }
             my $ent = $$contents[0];
-            if($ent =~ /^\d+$/) {
+            my $val;
+            if($ent =~ /^0x[0-9a-f]+$/i) {
+                # hexadec entity
+                $val = hex($ent);
+            }
+            elsif($ent =~ /^0\d+$/) {
+                # octal
+                $val = oct($ent);
+            }
+            elsif($ent =~ /^\d+$/) {
                 # numeric entity
-                $text .= chr($ent);
+                $val = $ent;
+            }
+            if(defined $val) {
+                if($val>0 && $val<256) {
+                    $text .= chr($val);
+                }
+                else {
+                    $self->poderror({ -line => $line, -file => $file,
+                        -severity => 'ERROR', 
+                        -msg => "Entity number out of range " . $_->raw_text()});
+                }
             }
             elsif($ENTITIES{$ent}) {
                 # known ISO entity
@@ -786,7 +972,7 @@ sub _check_ptree {
             else {
                 $self->poderror({ -line => $line, -file => $file,
                     -severity => 'WARNING', 
-                    -msg => "Non-standard entity " . $_->raw_text()});
+                    -msg => "Unknown entity " . $_->raw_text()});
                 $text .= "E<$ent>";
             }
         }
@@ -824,8 +1010,15 @@ sub _check_ptree {
             # add the guts
             $text .= $self->_check_ptree($contents, $line, $file, "$nestlist$cmd");
         }
-        else {
-            # check, but add nothing to $text (X<>, Z<>)
+        elsif($cmd eq 'Z') {
+            if(length($contents->raw_text())) {
+                $self->poderror({ -line => $line, -file => $file,
+                    -severity => 'ERROR', 
+                    -msg => "Nonempty Z<>"});
+            }
+        }
+        else { # X<>
+            # check, but add nothing to $text
             $self->_check_ptree($contents, $line, $file, "$nestlist$cmd");
         }
     }
@@ -836,8 +1029,11 @@ sub _check_ptree {
 
 # process a block of verbatim text
 sub verbatim { 
-    ## Nothing to check
+    ## Nothing particular to check
     my ($self, $paragraph, $line_num, $pod_para) = @_;
+
+    $self->_preproc_par($paragraph);
+
     if($self->{_current_head1} eq 'NAME') {
         my ($file, $line) = $pod_para->file_line;
         $self->poderror({ -line => $line, -file => $file,
@@ -851,6 +1047,8 @@ sub textblock {
     my ($self, $paragraph, $line_num, $pod_para) = @_;
     my ($file, $line) = $pod_para->file_line;
 
+    $self->_preproc_par($paragraph);
+
     # skip this paragraph if in a =begin block
     unless($self->{_have_begin}) {
         my $block = $self->interpolate_and_check($paragraph, $line,$file);
@@ -863,4 +1061,18 @@ sub textblock {
     }
 }
 
+sub _preproc_par
+{
+    my $self = shift;
+    $_[0] =~ s/[\s\n]+$//;
+    if($_[0]) {
+        $self->{_commands_in_head}++;
+        $self->{_list_item_contents}++ if(defined $self->{_list_item_contents});
+        if(@{$self->{_list_stack}} && !$self->{_list_stack}->[0]->item()) {
+            $self->{_list_stack}->[0]->{_has_par} = 1;
+        }
+    }
+}
+
 1;
+
