@@ -62,10 +62,6 @@ bin (bin.U):
 	is most often a local directory such as /usr/local/bin. Programs using
 	this variable must be prepared to deal with ~name substitution.
 
-bincompat3 (bincompat3.U):
-	This variable contains y if Perl 5.004 should be binary-compatible
-	with Perl 5.003.
-
 binexp (bin.U):
 	This is the same as the bin variable, but is filename expanded at
 	configuration time, for use in your makefiles.
@@ -196,12 +192,6 @@ d_bcopy (d_bcopy.U):
 	This variable conditionally defines the HAS_BCOPY symbol if
 	the bcopy() routine is available to copy strings.
 
-d_bincompat3 (bincompat3.U):
-	This variable conditionally defines BINCOMPAT3 so that embed.h
-	can take special action if Perl 5.004 should be binary-compatible
-	with Perl 5.003.  This is impossible for 5.004_50 and later, so
-	it is always $undef for those versions.
-
 d_bsd (Guess.U):
 	This symbol conditionally defines the symbol BSD when running on a
 	BSD system.
@@ -298,6 +288,22 @@ d_dosuid (d_dosuid.U):
 d_dup2 (d_dup2.U):
 	This variable conditionally defines HAS_DUP2 if dup2() is
 	available to duplicate file descriptors.
+
+d_endhent (d_endhent.U):
+	This variable conditionally defines HAS_ENDHOSTENT if endhostent() is
+	available to close whatever was being used for host queries.
+
+d_endnent (d_endnent.U):
+	This variable conditionally defines HAS_ENDNETENT if endnetent() is
+	available to close whatever was being used for network queries.
+
+d_endpent (d_endpent.U):
+	This variable conditionally defines HAS_ENDPROTOENT if endprotoent() is
+	available to close whatever was being used for protocol queries.
+
+d_endsent (d_endsent.U):
+	This variable conditionally defines HAS_ENDSERVENT if endservent() is
+	available to close whatever was being used for service queries.
 
 d_eofnblk (nblock_io.U):
 	This variable conditionally defines EOF_NONBLOCK if EOF can be seen
@@ -402,6 +408,10 @@ d_getnbyname (d_getnbynm.U):
 	indicates to the C program that the getnetbyname() routine is available
 	to look up networks by their names.
 
+d_getnent (d_getnent.U):
+	This variable conditionally defines HAS_GETNETENT if getnetent() is
+	available to look up network names in some data base or another.
+
 d_getpbyname (d_getprotby.U):
 	This variable conditionally defines the HAS_GETPROTOBYNAME 
 	symbol, which indicates to the C program that the 
@@ -413,6 +423,10 @@ d_getpbynumber (d_getprotby.U):
 	symbol, which indicates to the C program that the 
 	getprotobynumber() routine is available to look up protocols
 	by their number.
+
+d_getpent (d_getpent.U):
+	This variable conditionally defines HAS_GETPROTOENT if getprotoent() is
+	available to look up protocols in some data base or another.
 
 d_getpgid (d_getpgid.U):
 	This variable conditionally defines the HAS_GETPGID symbol, which
@@ -448,6 +462,10 @@ d_getsbyport (d_getsrvby.U):
 	symbol, which indicates to the C program that the 
 	getservbyport() routine is available to look up services
 	by their port.
+
+d_getsent (d_getsent.U):
+	This variable conditionally defines HAS_GETSERVENT if getservent() is
+	available to look up network services in some data base or another.
 
 d_gettimeod (d_ftime.U):
 	This variable conditionally defines the HAS_GETTIMEOFDAY symbol, which
@@ -490,6 +508,10 @@ d_locconv (d_locconv.U):
 d_lockf (d_lockf.U):
 	This variable conditionally defines HAS_LOCKF if lockf() is
 	available to do file locking.
+
+d_longdbl (d_longdbl.U):
+	This variable conditionally defines HAS_LONG_DOUBLE if 
+	the long double type is supported.
 
 d_lstat (d_lstat.U):
 	This variable conditionally defines HAS_LSTAT if lstat() is
@@ -538,6 +560,11 @@ d_mkdir (d_mkdir.U):
 d_mkfifo (d_mkfifo.U):
 	This variable conditionally defines the HAS_MKFIFO symbol, which
 	indicates to the C program that the mkfifo() routine is available.
+
+d_mkstemp (d_mkstemp.U):
+	This variable conditionally defines the HAS_MKSTEMP symbol, which
+	indicates to the C program that the mkstemp() routine is available
+	to create and open a unique tempporary file.
 
 d_mktime (d_mktime.U):
 	This variable conditionally defines the HAS_MKTIME symbol, which
@@ -746,6 +773,14 @@ d_setlocale (d_setlocale.U):
 	This variable conditionally defines HAS_SETLOCALE if setlocale() is
 	available to handle locale-specific ctype implementations.
 
+d_setnent (d_setnent.U):
+	This variable conditionally defines HAS_SETNETENT if setnetent() is
+	available.
+
+d_setpent (d_setpent.U):
+	This variable conditionally defines HAS_SETPROTOENT if setprotoent() is
+	available.
+
 d_setpgid (d_setpgid.U):
 	This variable conditionally defines the HAS_SETPGID symbol if the
 	setpgid(pid, gpid) function is available to set process group ID.
@@ -793,9 +828,18 @@ d_setruid (d_setruid.U):
 	indicates to the C program that the setruid() routine is available
 	to change the real uid of the current program.
 
+d_setsent (d_setsent.U):
+	This variable conditionally defines HAS_SETSERVENT if setservent() is
+	available.
+
 d_setsid (d_setsid.U):
 	This variable conditionally defines HAS_SETSID if setsid() is
 	available to set the process group ID.
+
+d_setvbuf (d_setvbuf.U):
+	This variable conditionally defines the HAS_SETVBUF symbol, which
+	indicates to the C program that the setvbuf() routine is available
+	to change buffering on an open stdio stream.
 
 d_sfio (d_sfio.U):
 	This variable conditionally defines the USE_SFIO symbol,
@@ -1497,6 +1541,11 @@ loclibpth (libpth.U):
 	This variable holds the paths used to find local libraries.  It is
 	prepended to libpth, and is intended to be easily set from the
 	command line.
+
+longdblsize (d_longdbl.U):
+	This variable contains the value of the LONG_DOUBLESIZE symbol, which
+	indicates to the C program how many bytes there are in a long double,
+	if this system supports long doubles.
 
 longsize (intsize.U):
 	This variable contains the value of the LONGSIZE symbol, which

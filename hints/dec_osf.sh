@@ -180,7 +180,7 @@ case "$optimize" in
     	;;
 esac
 
-if [ "X$usethreads" != "X" ]; then
+if [ "X$usethreads" = "X$define" ]; then
     # Threads interfaces changed with V4.0.
     case "$_DEC_uname_r" in
     *[123].*)	libswanted="$libswanted pthreads mach exc c_r"

@@ -3795,11 +3795,23 @@ PP(pp_gprotoent)
     struct protoent *pent;
 
     if (which == OP_GPBYNAME)
+#ifdef HAS_GETPROTOBYNAME
 	pent = PerlSock_getprotobyname(POPp);
+#else
+	DIE(no_sock_func, "getprotobyname");
+#endif
     else if (which == OP_GPBYNUMBER)
+#ifdef HAS_GETPROTOBYNUMBER
 	pent = PerlSock_getprotobynumber(POPi);
+#else
+    DIE(no_sock_func, "getprotobynumber");
+#endif
     else
+#ifdef HAS_GETPROTOENT
 	pent = PerlSock_getprotoent();
+#else
+	DIE(no_sock_func, "getprotoent");
+#endif
 
     EXTEND(SP, 3);
     if (GIMME != G_ARRAY) {
@@ -3885,7 +3897,11 @@ PP(pp_gservent)
 	sent = PerlSock_getservbyport(port, proto);
     }
     else
+#ifdef HAS_GETSERVENT
 	sent = PerlSock_getservent();
+#else
+	DIE(no_sock_func, "getservent");
+#endif
 
     EXTEND(SP, 4);
     if (GIMME != G_ARRAY) {

@@ -14,6 +14,7 @@
 #define PerlLIO_lseek(fd, offset, mode) lseek((fd), (offset), (mode))
 #define PerlLIO_lstat(name, buf) lstat((name), (buf))
 #define PerlLIO_mktemp(file) mktemp((file))
+#define PerlLIO_mkstemp(file) mkstemp((file))
 #define PerlLIO_open(file, flag) open((file), (flag))
 #define PerlLIO_open3(file, flag, perm) open((file), (flag), (perm))
 #define PerlLIO_read(fd, buf, count) read((fd), (buf), (count))

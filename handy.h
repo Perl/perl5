@@ -102,7 +102,8 @@
 
    Further, we need to know about PTRSIZE == sizeof(void *) and
    DOUBLESIZE == sizeof(double) if we really want to try to handle
-   32/64-bit combinations.
+   32/64-bit combinations.  Finally, we might also need to know
+   HAS_LONG_DOUBLE and LONG_DOUBLESIZE.
 
    For the moment, these are only mentioned here so metaconfig will
    construct Configure to figure out the various sizes.

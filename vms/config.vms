@@ -1937,11 +1937,11 @@
  */
 #define Netdb_net_t		long
 
-/* HAS_GETHBADD:
+/* HAS_GETHOSTBYADDR:
  *	This symbol, if defined, indicates that the gethostbyaddr routine is
  *	available to lookup host names by their IP addresses.
  */
-#define HAS_GETHBADD		/**/      /* config-skip */
+#define HAS_GETHBYADDR		/**/      /* config-skip */
 
 /* Gethbadd_addr_t:
  *	This symbol holds the type used for the 1st argument
@@ -1956,11 +1956,11 @@
 #define Gethbadd_alen_t		int	/**/  /* config-skip */
 
 #ifdef DECCRTL_SOCKETS
-/* HAS_GETNBADD:
+/* HAS_GETNETBYADDR:
  *	This symbol, if defined, indicates that the getnetbyaddr routine is
  *	available to lookup networks by their IP addresses.
  */
-#define HAS_GETNBADD		/**/      /* config-skip */
+#define HAS_GETNETBYADDR		/**/      /* config-skip */
 
 /* Gethbadd_net_t:
  *	This symbol holds the type used for the 1st argument
@@ -1968,7 +1968,7 @@
  */
 #define Getnbadd_net_t		long	/**/ /* config-skip */
 #else
-#undef HAS_GETNBADD		/**/          /* config-skip */
+#undef HAS_GETNETBYADDR		/**/          /* config-skip */
 #undef Getnbadd_net_t		long	/**/ /* config-skip */
 #endif
 
@@ -2010,8 +2010,8 @@
 #undef I_NETDB	/**/                  /* config-skip */
 #undef I_NET_ERRNO		/**/          /* config-skip */
 #undef HAS_SELECT	/**/              /* config-skip */
-#undef HAS_GETHBADD		/**/          /* config-skip */
-#undef HAS_GETNBADD		/**/          /* config-skip */
+#undef HAS_GETHOSTBYADDR		/**/          /* config-skip */
+#undef HAS_GETNETBYADDR		/**/          /* config-skip */
 
 #endif /* !VMS_DO_SOCKETS */
 

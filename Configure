@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Mar  3 11:16:26 EST 1998 [metaconfig 3.0 PL70]
+# Generated on Mon Mar  9 14:02:25 EST 1998 [metaconfig 3.0 PL70]
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -260,8 +260,6 @@ baserev=''
 bin=''
 binexp=''
 installbin=''
-bincompat3=''
-d_bincompat3=''
 byteorder=''
 cc=''
 gccversion=''
@@ -308,6 +306,10 @@ d_dlsymun=''
 d_dosuid=''
 d_suidsafe=''
 d_dup2=''
+d_endhent=''
+d_endnent=''
+d_endpent=''
+d_endsent=''
 d_fchmod=''
 d_fchown=''
 d_fcntl=''
@@ -333,6 +335,8 @@ d_uname=''
 d_getlogin=''
 d_getnbyaddr=''
 d_getnbyname=''
+d_getnent=''
+d_getpent=''
 d_getpgid=''
 d_getpgrp2=''
 d_bsdgetpgrp=''
@@ -341,6 +345,7 @@ d_getppid=''
 d_getprior=''
 d_getpbyname=''
 d_getpbynumber=''
+d_getsent=''
 d_getsbyname=''
 d_getsbyport=''
 d_gnulibc=''
@@ -351,6 +356,8 @@ d_killpg=''
 d_link=''
 d_locconv=''
 d_lockf=''
+d_longdbl=''
+longdblsize=''
 d_lstat=''
 d_mblen=''
 d_mbstowcs=''
@@ -361,6 +368,7 @@ d_memmove=''
 d_memset=''
 d_mkdir=''
 d_mkfifo=''
+d_mkstemp=''
 d_mktime=''
 d_msg=''
 d_msgctl=''
@@ -399,6 +407,8 @@ d_setgrps=''
 d_sethent=''
 d_setlinebuf=''
 d_setlocale=''
+d_setnent=''
+d_setpent=''
 d_setpgid=''
 d_setpgrp2=''
 d_bsdsetpgrp=''
@@ -410,7 +420,9 @@ d_setresuid=''
 d_setreuid=''
 d_setrgid=''
 d_setruid=''
+d_setsent=''
 d_setsid=''
+d_setvbuf=''
 d_sfio=''
 usesfio=''
 d_shm=''
@@ -2703,8 +2715,8 @@ baserev=5.0
 echo " "
 echo "Getting the current patchlevel..." >&4
 if $test -r $rsrc/patchlevel.h;then
-	patchlevel=`awk '/PATCHLEVEL/ {print $3}' $rsrc/patchlevel.h`
-	subversion=`awk '/SUBVERSION/ {print $3}' $rsrc/patchlevel.h`
+	patchlevel=`awk '/define[ 	]+PATCHLEVEL/ {print $3}' $rsrc/patchlevel.h`
+	subversion=`awk '/define[ 	]+SUBVERSION/ {print $3}' $rsrc/patchlevel.h`
 else
 	patchlevel=0
 	subversion=0
@@ -3023,39 +3035,6 @@ EOM
 	installbin="$ans"
 else
 	installbin="$binexp"
-fi
-
-
-: Binary compatibility with 5.003 is not possible with 5.004_50 and later.
-if test $patchlevel -gt 4 -o $subversion -ge 50; then
-    d_bincompat3=$undef
-else
-	$cat <<EOM
-
-Perl 5.004 can be compiled for binary compatibility with 5.003.
-If you decide to do so, you will be able to continue using any
-extensions that were compiled for Perl 5.003.  However, binary
-compatibility forces Perl to expose some of its internal symbols
-in the same way that 5.003 did.  So you may have symbol conflicts
-if you embed a binary-compatible Perl in other programs.
-
-EOM
-	case "$d_bincompat3" in
-	"$undef") dflt=n ;;
-	*) dflt=y ;;
-	esac
-	rp='Binary compatibility with Perl 5.003?'
-	. ./myread
-	case "$ans" in
-	y*) val="$define" ;;
-	*)  val="$undef" ;;
-	esac
-	set d_bincompat3
-	eval $setvar
-	case "$d_bincompat3" in
-	"$define") bincompat3=y ;;
-	*) bincompat3=n ;;
-	esac
 fi
 
 : determine where manual pages are on this system
@@ -4685,23 +4664,23 @@ else
 		eval $xrun
 	else
 		echo " "
-		echo "$nm didn't seem to work right. Trying ar instead..." >&4
+		echo "$nm didn't seem to work right. Trying $ar instead..." >&4
 		com=''
-		if ar t $libc > libc.tmp; then
+		if $ar t $libc > libc.tmp; then
 			for thisname in $libnames; do
-				ar t $thisname >>libc.tmp
+				$ar t $thisname >>libc.tmp
 			done
 			$sed -e "s/\\$_o\$//" < libc.tmp > libc.list
 			echo "Ok." >&4
 		else
-			echo "ar didn't seem to work right." >&4
+			echo "$ar didn't seem to work right." >&4
 			echo "Maybe this is a Cray...trying bld instead..." >&4
 			if bld t $libc | $sed -e 's/.*\///' -e "s/\\$_o:.*\$//" > libc.list
 			then
 				for thisname in $libnames; do
 					bld t $libnames | \
 					$sed -e 's/.*\///' -e "s/\\$_o:.*\$//" >>libc.list
-					ar t $thisname >>libc.tmp
+					$ar t $thisname >>libc.tmp
 				done
 				echo "Ok." >&4
 			else
@@ -6105,26 +6084,33 @@ $rm -f $$.tmp
 : check for ability to cast large floats to 32-bit ints.
 echo " "
 echo 'Checking whether your C compiler can cast large floats to int32.' >&4
-if $test "$intsize" -eq 4; then
+if $test "$intsize" -ge 4; then
 	xxx=int
 else
 	xxx=long
 fi
 $cat >try.c <<EOCP
+#include <stdio.h>
 #include <sys/types.h>
 #include <signal.h>
 $signal_t blech() { exit(3); }
 main()
 {
 	$xxx i32;
-	double f;
+	double f, g;
 	int result = 0;
 	signal(SIGFPE, blech);
 
-	f = (double) 0x7fffffff;
-	f = 10 * f;
-	i32  = ($xxx) f;
+	/* Don't let compiler optimize the test away */
+	sscanf("2147483647", "%lf", &f); /* f = (double) 0x7fffffff; */
+	g = 10 * f;
+	i32  = ($xxx) g;
 
+	/* x86 processors will probably give 0x8000 0000, which is a
+       sign change.  We don't want that.  We want to mimic SPARC
+	   behavior here, which is to preserve the sign and give
+	   back 0x7fff ffff.
+	*/
 	if (i32 != ($xxx) f)
 		result |= 1;
 	exit(result);
@@ -6154,6 +6140,7 @@ $rm -f try try.*
 echo " "
 echo 'Checking whether your C compiler can cast negative float to unsigned.' >&4
 $cat >try.c <<EOCP
+#include <stdio.h>
 #include <sys/types.h>
 #include <signal.h>
 $signal_t blech() { exit(7); }
@@ -6163,11 +6150,16 @@ unsigned int dummy_int(p) unsigned int p; { return p; }
 unsigned short dummy_short(p) unsigned short p; { return p; }
 main()
 {
-	double f = -123.;
+	double f;
 	unsigned long along;
 	unsigned int aint;
 	unsigned short ashort;
 	int result = 0;
+	/* Frustrate gcc-2.7.2's optimizer which failed this test with
+	   a direct f = -123. assignment.  gcc-2.8.0 reportedly
+	   optimized the whole file away
+	*/
+	sscanf("-123.", "%lf", &f);  /* f = -123.; */
 
 	signal(SIGFPE, blech);
 	along = (unsigned long)f;
@@ -6179,7 +6171,7 @@ main()
 		result |= 1;
 	if (ashort != (unsigned short)-123)
 		result |= 1;
-	f = (double)0x40000000;
+	sscanf("1073741824.", "%lf", &f); /* f = (double)0x40000000; */
 	f = f + f;
 	along = 0;
 	along = (unsigned long)f;
@@ -6198,7 +6190,7 @@ main()
 	if (result)
 		exit(result);
 	signal(SIGFPE, blech_in_list);
-	f = 123.;
+	sscanf("123.", "%lf", &f);  /* f = 123.; */
 	along = dummy_long((unsigned long)f);
 	aint = dummy_int((unsigned int)f);
 	ashort = dummy_short((unsigned short)f);
@@ -6336,18 +6328,6 @@ else
 fi
 set d_crypt
 eval $setvar
-
-: get csh whereabouts
-case "$csh" in
-'csh') val="$undef" ;;
-*) val="$define" ;;
-esac
-set d_csh
-eval $setvar
-: Respect a hint or command line value for full_csh.
-case "$full_csh" in
-'') full_csh=$csh ;;
-esac
 
 : see if cuserid exists
 set cuserid d_cuserid
@@ -6578,6 +6558,22 @@ eval $setvar
 
 : see if dup2 exists
 set dup2 d_dup2
+eval $inlibc
+
+: see if endhostent exists
+set endhostent d_endhent
+eval $inlibc
+
+: see if endnetent exists
+set endnetent d_endnent
+eval $inlibc
+
+: see if endprotoent exists
+set endprotoent d_endpent
+eval $inlibc
+
+: see if endservent exists
+set endservent d_endsent
 eval $inlibc
 
 : Locate the flags for 'open()'
@@ -6865,6 +6861,10 @@ eval $inlibc
 set getnetbyname d_getnbyname
 eval $inlibc
 
+: see if getnetent exists
+set getnetent d_getnent
+eval $inlibc
+
 
 : see if getprotobyname exists
 set getprotobyname d_getpbyname
@@ -6873,6 +6873,11 @@ eval $inlibc
 : see if getprotobynumber exists
 set getprotobynumber d_getpbynumber
 eval $inlibc
+
+: see if getprotoent exists
+set getprotoent d_getpent
+eval $inlibc
+
 : see if getpgid exists
 set getpgid d_getpgid
 eval $inlibc
@@ -6897,6 +6902,11 @@ eval $inlibc
 : see if getservbyport exists
 set getservbyport d_getsbyport
 eval $inlibc
+
+: see if getservent exists
+set getservent d_getsent
+eval $inlibc
+
 : see if gettimeofday or ftime exists
 set gettimeofday d_gettimeod
 eval $inlibc
@@ -7054,6 +7064,49 @@ eval $inlibc
 set lockf d_lockf
 eval $inlibc
 
+: check for long doubles
+echo " "
+echo $n "Checking to see if your system supports long doubles...$c" >&4
+echo 'long double foo() { long double x; x = 7.0; return x; }' > try.c
+if $cc $optimize $ccflags -c try.c; then
+	val="$define"
+	echo " Yup, it does." >&4
+else
+	val="$undef"
+	echo " Nope, it doesn't." >&4
+fi
+$rm try.*
+set d_longdbl
+eval $setvar
+
+: check for length of long double
+echo " "
+
+case "${d_longdbl}${longdblsize}" in
+$define)
+	$echo $n "Checking to see how big your long doubles are...$c" >&4
+	$cat >try.c <<'EOCP'
+#include <stdio.h>
+main()
+{
+	printf("%d\n", sizeof(long double));
+}
+EOCP
+	set try
+	if eval $compile; then
+		longdblsize=`./try`
+	else
+		dflt='8'
+		echo "(I can't seem to compile the test program.  Guessing...)"
+		rp="What is the size of a long double (in bytes)?"
+		. ./myread
+		longdblsize="$ans"
+	fi
+	$echo " $longdblsize bytes."
+	;;
+esac
+$rm -f try.c try
+
 : see if lstat exists
 set lstat d_lstat
 eval $inlibc
@@ -7092,6 +7145,10 @@ eval $inlibc
 
 : see if mkfifo exists
 set mkfifo d_mkfifo
+eval $inlibc
+
+: see if mkstemp exists
+set mkstemp d_mkstemp
 eval $inlibc
 
 : see if mktime exists
@@ -7269,8 +7326,8 @@ eval $setvar
 $rm -f try try.*
 
 : test whether pthreads are created in joinable -- aka undetached -- state
-if test "X$usethreads" != X; then
-	echo >&4 "Checking whether pthreads are created joinable."
+if test "X$usethreads" = "X$define"; then
+	echo $n "Checking whether pthreads are created joinable. $c" >&4 
 	$cat >try.c <<'EOCP'
 #include <pthread.h>
 #include <stdio.h>
@@ -7289,11 +7346,12 @@ EOCP
 	if eval $compile; then
 		yyy=`./try`
 		case "$yyy" in
-			detached) echo "Nope, they aren't." ;;
-			*) echo "Yup, they are." ;;
+			detached) echo "Nope, they aren't." >&4 ;;
+			*) echo "Yup, they are." >&4 ;;
 		esac
 	else
-		echo "(I can't execute the test program--assuming they are.)"
+		echo " "
+		echo "(I can't execute the test program--assuming they are.)" >&4
 		yyy=joinable
 	fi
 	$rm -f try try.*
@@ -7684,6 +7742,14 @@ eval $inlibc
 set setlocale d_setlocale
 eval $inlibc
 
+: see if setnetent exists
+set setnetent d_setnent
+eval $inlibc
+
+: see if setprotoent exists
+set setprotoent d_setpent
+eval $inlibc
+
 : see if setpgid exists
 set setpgid d_setpgid
 eval $inlibc
@@ -7716,8 +7782,16 @@ eval $inlibc
 set setruid d_setruid
 eval $inlibc
 
+: see if setservent exists
+set setservent d_setsent
+eval $inlibc
+
 : see if setsid exists
 set setsid d_setsid
+eval $inlibc
+
+: see if setvbuf exists
+set setvbuf d_setvbuf
 eval $inlibc
 
 : see if sfio.h is available
@@ -8860,7 +8934,7 @@ $rm -f try.* .out
 echo " "
 case "$doublesize" in
 '')
-	echo "Checking to see how big your double precision numbers are..." >&4
+	$echo $n "Checking to see how big your double precision numbers are...$c" >&4
 	$cat >try.c <<'EOCP'
 #include <stdio.h>
 main()
@@ -8871,6 +8945,7 @@ EOCP
 	set try
 	if eval $compile; then
 		doublesize=`./try`
+		$echo $doublesize >&4
 	else
 		dflt='8'
 		echo "(I can't seem to compile the test program.  Guessing...)"
@@ -8890,6 +8965,18 @@ dflt="$fpostype"
 rp="What is the type for file position used by fsetpos()?"
 . ./myread
 fpostype="$ans"
+
+: get csh whereabouts
+case "$csh" in
+'csh') val="$undef" ;;
+*) val="$define" ;;
+esac
+set d_csh
+eval $setvar
+: Respect a hint or command line value for full_csh.
+case "$full_csh" in
+'') full_csh=$csh ;;
+esac
 
 : Store the full pathname to the sed program for use in the C program
 full_sed=$sed
@@ -9175,7 +9262,7 @@ EOM
 		esac
 		;;
 	*)	: no getnetbyaddr, so pick harmless default
-		netdb_name_type='long'
+		netdb_net_type='long'
 		;;
 	esac
 fi
@@ -10603,7 +10690,6 @@ awk='$awk'
 baserev='$baserev'
 bash='$bash'
 bin='$bin'
-bincompat3='$bincompat3'
 binexp='$binexp'
 bison='$bison'
 byacc='$byacc'
@@ -10643,7 +10729,6 @@ d_archlib='$d_archlib'
 d_attribut='$d_attribut'
 d_bcmp='$d_bcmp'
 d_bcopy='$d_bcopy'
-d_bincompat3='$d_bincompat3'
 d_bsd='$d_bsd'
 d_bsdgetpgrp='$d_bsdgetpgrp'
 d_bsdsetpgrp='$d_bsdsetpgrp'
@@ -10667,6 +10752,10 @@ d_dlopen='$d_dlopen'
 d_dlsymun='$d_dlsymun'
 d_dosuid='$d_dosuid'
 d_dup2='$d_dup2'
+d_endhent='$d_endhent'
+d_endnent='$d_endnent'
+d_endpent='$d_endpent'
+d_endsent='$d_endsent'
 d_eofnblk='$d_eofnblk'
 d_eunice='$d_eunice'
 d_fchmod='$d_fchmod'
@@ -10690,8 +10779,10 @@ d_gethname='$d_gethname'
 d_getlogin='$d_getlogin'
 d_getnbyaddr='$d_getnbyaddr'
 d_getnbyname='$d_getnbyname'
+d_getnent='$d_getnent'
 d_getpbyname='$d_getpbyname'
 d_getpbynumber='$d_getpbynumber'
+d_getpent='$d_getpent'
 d_getpgid='$d_getpgid'
 d_getpgrp2='$d_getpgrp2'
 d_getpgrp='$d_getpgrp'
@@ -10699,6 +10790,7 @@ d_getppid='$d_getppid'
 d_getprior='$d_getprior'
 d_getsbyname='$d_getsbyname'
 d_getsbyport='$d_getsbyport'
+d_getsent='$d_getsent'
 d_gettimeod='$d_gettimeod'
 d_gnulibc='$d_gnulibc'
 d_htonl='$d_htonl'
@@ -10709,6 +10801,7 @@ d_killpg='$d_killpg'
 d_link='$d_link'
 d_locconv='$d_locconv'
 d_lockf='$d_lockf'
+d_longdbl='$d_longdbl'
 d_lstat='$d_lstat'
 d_mblen='$d_mblen'
 d_mbstowcs='$d_mbstowcs'
@@ -10719,6 +10812,7 @@ d_memmove='$d_memmove'
 d_memset='$d_memset'
 d_mkdir='$d_mkdir'
 d_mkfifo='$d_mkfifo'
+d_mkstemp='$d_mkstemp'
 d_mktime='$d_mktime'
 d_msg='$d_msg'
 d_msgctl='$d_msgctl'
@@ -10765,6 +10859,8 @@ d_setgrps='$d_setgrps'
 d_sethent='$d_sethent'
 d_setlinebuf='$d_setlinebuf'
 d_setlocale='$d_setlocale'
+d_setnent='$d_setnent'
+d_setpent='$d_setpent'
 d_setpgid='$d_setpgid'
 d_setpgrp2='$d_setpgrp2'
 d_setpgrp='$d_setpgrp'
@@ -10775,7 +10871,9 @@ d_setresuid='$d_setresuid'
 d_setreuid='$d_setreuid'
 d_setrgid='$d_setrgid'
 d_setruid='$d_setruid'
+d_setsent='$d_setsent'
 d_setsid='$d_setsid'
+d_setvbuf='$d_setvbuf'
 d_sfio='$d_sfio'
 d_shm='$d_shm'
 d_shmat='$d_shmat'
@@ -10949,6 +11047,7 @@ ln='$ln'
 lns='$lns'
 locincpth='$locincpth'
 loclibpth='$loclibpth'
+longdblsize='$longdblsize'
 longsize='$longsize'
 lp='$lp'
 lpr='$lpr'

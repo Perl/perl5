@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Tue Mar  3 11:39:44 EST 1998
+ * Configuration time: Mon Mar  9 14:20:14 EST 1998
  * Configured by     : doughera
  * Target system     : linux fractal 2.0.33 #1 tue feb 3 10:11:46 est 1998 i686 unknown 
  */
@@ -1282,7 +1282,7 @@
  *	This symbol is defined if the C compiler can cast negative
  *	or large floating point numbers to 32-bit ints.
  */
-#define	CASTI32		/**/
+/*#define	CASTI32		/ **/
 
 /* CASTNEGFLOAT:
  *	This symbol is defined if the C compiler can cast negative
@@ -1296,8 +1296,8 @@
  *		2 = couldn't cast >= 0x80000000
  *		4 = couldn't cast in argument expression list
  */
-/*#define	CASTNEGFLOAT		/ **/
-#define CASTFLAGS 1		/**/
+#define	CASTNEGFLOAT		/**/
+#define CASTFLAGS 0		/**/
 
 /* VOID_CLOSEDIR:
  *	This symbol, if defined, indicates that the closedir() routine
@@ -1574,8 +1574,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "/opt/perl/lib/i686-linux-thread/5.00461"		/**/
-#define ARCHLIB_EXP "/opt/perl/lib/i686-linux-thread/5.00461"		/**/
+#define ARCHLIB "/opt/perl/lib/i686-linux-thread/5.00462"		/**/
+#define ARCHLIB_EXP "/opt/perl/lib/i686-linux-thread/5.00462"		/**/
 
 /* CAT2:
  *	This macro catenates 2 tokens together.
@@ -1598,10 +1598,36 @@
 #endif
 
 /* CSH:
- *	This symbol, if defined, indicates that the C-shell exists.
- *	If defined, contains the full pathname of csh.
+ *	This symbol, if defined, contains the full pathname of csh.
  */
-#define CSH "/bin/csh"		/**/
+#define HAS_CSH		/**/
+#ifdef HAS_CSH
+#define CSH "/bin/csh"	/**/
+#endif
+
+/* HAS_ENDHOSTENT:
+ *	This symbol, if defined, indicates that the endhostent() routine is
+ *	available to close whatever was being used for host queries.
+ */
+#define HAS_ENDHOSTENT		/**/
+
+/* HAS_ENDNETENT:
+ *	This symbol, if defined, indicates that the endnetent() routine is
+ *	available to close whatever was being used for network queries.
+ */
+#define HAS_ENDNETENT		/**/
+
+/* HAS_ENDPROTOENT:
+ *	This symbol, if defined, indicates that the endprotoent() routine is
+ *	available to close whatever was being used for protocol queries.
+ */
+#define HAS_ENDPROTOENT		/**/
+
+/* HAS_ENDSERVENT:
+ *	This symbol, if defined, indicates that the endservent() routine is
+ *	available to close whatever was being used for service queries.
+ */
+#define HAS_ENDSERVENT		/**/
 
 /* HAS_GETHOSTBYADDR:
  *	This symbol, if defined, indicates that the gethostbyaddr() routine is
@@ -1633,6 +1659,18 @@
  */
 #define HAS_GETNETBYNAME		/**/
 
+/* HAS_GETNETENT:
+ *	This symbol, if defined, indicates that the getnetent() routine is
+ *	available to look up network names in some data base or another.
+ */
+#define HAS_GETNETENT		/**/
+
+/* HAS_GETPROTOENT:
+ *	This symbol, if defined, indicates that the getprotoent() routine is
+ *	available to look up protocols in some data base or another.
+ */
+#define HAS_GETPROTOENT		/**/
+
 /* HAS_GETPROTOBYNAME:
  *	This symbol, if defined, indicates that the getprotobyname()
  *	routine is available to look up protocols by their name.
@@ -1644,6 +1682,12 @@
 #define HAS_GETPROTOBYNAME		/**/
 #define HAS_GETPROTOBYNUMBER		/**/
 
+/* HAS_GETSERVENT:
+ *	This symbol, if defined, indicates that the getservent() routine is
+ *	available to look up network services in some data base or another.
+ */
+#define HAS_GETSERVENT		/**/
+
 /* HAS_GETSERVBYNAME:
  *	This symbol, if defined, indicates that the getservbyname()
  *	routine is available to look up services by their name.
@@ -1654,6 +1698,26 @@
  */
 #define HAS_GETSERVBYNAME		/**/
 #define HAS_GETSERVBYPORT		/**/
+
+/* HAS_LONG_DOUBLE:
+ *	This symbol will be defined if the C compiler supports long
+ *	doubles.
+ */
+/* LONG_DOUBLESIZE:
+ *	This symbol contains the size of a long double, so that the 
+ *	C preprocessor can make decisions based on it.  It is only
+ *	defined if the system supports long doubles.
+ */
+#define HAS_LONG_DOUBLE		/**/
+#ifdef HAS_LONG_DOUBLE
+#define LONG_DOUBLESIZE 12		/**/
+#endif
+
+/* HAS_MKSTEMP:
+ *	This symbol, if defined, indicates that the mkstemp routine is
+ *	available to create and open a unique temporary file.
+ */
+#define HAS_MKSTEMP		/**/
 
 /* HAS_SETGROUPS:
  *	This symbol, if defined, indicates that the setgroups() routine is
@@ -1667,6 +1731,31 @@
  *	available.
  */
 #define HAS_SETHOSTENT		/**/
+
+/* HAS_SETNETENT:
+ *	This symbol, if defined, indicates that the setnetent() routine is
+ *	available.
+ */
+#define HAS_SETNETENT		/**/
+
+/* HAS_SETPROTOENT:
+ *	This symbol, if defined, indicates that the setprotoent() routine is
+ *	available.
+ */
+#define HAS_SETPROTOENT		/**/
+
+/* HAS_SETSERVENT:
+ *	This symbol, if defined, indicates that the setservent() routine is
+ *	available.
+ */
+#define HAS_SETSERVENT		/**/
+
+/* HAS_SETVBUF:
+ *	This symbol, if defined, indicates that the setvbuf routine is
+ *	available to change buffering on an open stdio stream.
+ *	to a line-buffered mode.
+ */
+#define HAS_SETVBUF		/**/
 
 /* Signal_t:
  *	This symbol's value is either "void" or "int", corresponding to the

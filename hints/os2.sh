@@ -245,7 +245,7 @@ case "X$optimize" in
 	;;
 esac
 
-if [ "X$usethreads" != "X" ]; then
+if [ "X$usethreads" = "X$define" ]; then
     ccflags="-Zmt $ccflags"
     cppflags="-Zmt $cppflags"  # Do we really need to set this?
     aout_ccflags="-DUSE_THREADS $aout_ccflags"

@@ -2042,7 +2042,7 @@ enum {
 
 #endif /* !USE_LOCALE_NUMERIC */
 
-#if !defined(PERLIO_IS_STDIO) && defined(HAS_ATTRIBUTE)
+#if !defined(PERLIO_IS_STDIO) && defined(HASATTRIBUTE)
 /* 
  * Now we have __attribute__ out of the way 
  * Remap printf 

@@ -559,6 +559,7 @@ perl_parse(PerlInterpreter *sv_interp, void (*xsinit) (void), int argc, char **a
     char *validarg = "";
     I32 oldscope;
     AV* comppadlist;
+    int e_tmpfd = -1;
     dJMPENV;
     int ret;
 
@@ -679,12 +680,20 @@ setuid perl scripts securely.\n");
 		croak("No -e allowed in setuid scripts");
 	    if (!e_fp) {
 	        e_tmpname = savepv(TMPPATH);
+#ifdef HAS_MKSTEMP
+		e_tmpfd = PerlLIO_mkstemp(e_tmpname);
+
+		if (e_tmpfd < 0)
+		    croak("Can't mkstemp() temporary file \"%s\"", e_tmpname);
+		e_fp = PerlIO_fdopen(e_tmpfd,"w");
+#else /* use mktemp() */
 		(void)PerlLIO_mktemp(e_tmpname);
 		if (!*e_tmpname)
-		    croak("Can't mktemp()");
+		    croak("Can't mktemp() temporary file \"%s\"", e_tmpname);
 		e_fp = PerlIO_open(e_tmpname,"w");
-		if (!e_fp)
-		    croak("Cannot open temporary file");
+#endif /* HAS_MKSTEMP */
+  		if (!e_fp)
+ 		    croak("Cannot open temporary file \"%s\"", e_tmpname);
 	    }
 	    if (*++s)
 		PerlIO_puts(e_fp,s);
@@ -916,6 +925,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 	(void)UNLINK(e_tmpname);
 	Safefree(e_tmpname);
 	e_tmpname = Nullch;
+	e_tmpfd = -1;
     }
 
     /* now that script is parsed, we can modify record separator */

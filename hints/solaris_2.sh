@@ -230,7 +230,7 @@ rm -f core
 # XXX
 EOSH
 
-if [ "X$usethreads" != "X" ]; then
+if [ "X$usethreads" = "X$define" ]; then
     ccflags="-D_REENTRANT $ccflags"
     # -lpthread needs to come before -lc but after other libraries such
     # as -lgdbm and such like. We assume here that -lc is present in

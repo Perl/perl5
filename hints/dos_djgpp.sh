@@ -66,7 +66,7 @@ esac
 exec tr.exe "\$@"
 EOSC
 
-if [ "X$usethreads" != "X" ]; then
+if [ "X$usethreads" = "X$define" ]; then
     set `echo X "$libswanted "| sed -e 's/ c / gthreads c /'`
     shift
     libswanted="$*"
