@@ -1,6 +1,9 @@
-/* $Header: walk.c,v 1.0.1.2 88/02/01 17:34:05 root Exp $
+/* $Header: walk.c,v 1.0.1.3 88/02/02 11:54:58 root Exp $
  *
  * $Log:	walk.c,v $
+ * Revision 1.0.1.3  88/02/02  11:54:58  root
+ * patch14: got return value of each() backwards in translating 'for (a in b)'.
+ * 
  * Revision 1.0.1.2  88/02/01  17:34:05  root
  * patch12: made a2p take advantage of new awk-compatible split in perl.
  * 
@@ -962,10 +965,10 @@ sub Pick {\n\
 	    str_free(fstr);
 	}
 	else {
-	    str_set(str,"while (($junkkey,$");
+	    str_set(str,"while (($");
 	    str_scat(str,fstr=walk(1,level,ops[node+1].ival,&numarg));
 	    str_free(fstr);
-	    str_cat(str,") = each(");
+	    str_cat(str,",$junkval) = each(");
 	    str_scat(str,tmpstr);
 	    str_cat(str,")) ");
 	    str_scat(str,fstr=walk(0,level,ops[node+3].ival,&numarg));
