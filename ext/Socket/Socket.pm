@@ -61,17 +61,22 @@ In addition, some structure manipulation functions are available:
 =item inet_aton HOSTNAME
 
 Takes a string giving the name of a host, and translates that
-to the 4-byte string (structure). Takes arguments of both
+to an opaque string (struct in_adrr). Takes arguments of both
 the 'rtfm.mit.edu' type and '18.181.0.24'. If the host name
 cannot be resolved, returns undef. For multi-homed hosts (hosts
 with more than one address), the first address found is returned.
 
+For portability do not assume that the result of inet_aton() is 32
+bits wide, that it would contain only the IPv4 address in network
+order.
+
 =item inet_ntoa IP_ADDRESS
 
-Takes a four byte ip address (as returned by inet_aton())
-and translates it into a string of the form 'd.d.d.d'
-where the 'd's are numbers less than 256 (the normal
-readable four dotted number notation for internet addresses).
+Takes a string (an opaque string as returned by inet_aton(), or
+a v-string representing the four octets of the IPv4 address in
+network order) and translates it into a string of the form 'd.d.d.d'
+where the 'd's are numbers less than 256 (the normal readable four
+dotted number notation for internet addresses).
 
 =item INADDR_ANY
 
