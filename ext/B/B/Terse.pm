@@ -79,7 +79,7 @@ sub B::COP::terse {
     if ($label) {
 	$label = " label ".cstring($label);
     }
-    print indent($level), peekop($op), $label, "\n";
+    print indent($level), peekop($op), $label || "", "\n";
 }
 
 sub B::PV::terse {
