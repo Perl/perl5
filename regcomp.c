@@ -3450,8 +3450,7 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value)
 STATIC void
 S_checkposixcc(pTHX_ RExC_state_t *pRExC_state)
 {
-    if (!SIZE_ONLY && ckWARN(WARN_REGEXP) &&
-	POSIXCC(UCHARAT(RExC_parse))) {
+    if (!SIZE_ONLY && POSIXCC(UCHARAT(RExC_parse))) {
 	char *s = RExC_parse;
  	char  c = *s++;
 
@@ -3516,7 +3515,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 
     nextvalue = RExC_parse < RExC_end ? UCHARAT(RExC_parse) : 0;
 
-    if (!SIZE_ONLY && ckWARN(WARN_REGEXP) && POSIXCC(nextvalue))
+    if (!SIZE_ONLY && POSIXCC(nextvalue))
 	checkposixcc(pRExC_state);
 
     /* allow 1st char to be ] (allowing it to be - is dealt with later) */
