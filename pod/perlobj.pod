@@ -361,12 +361,12 @@ are inherited by all other classes:
 
 C<isa> returns I<true> if its object is blessed into a subclass of C<CLASS>
 
-C<isa> is also exportable and can be called as a sub with two arguments. This
-allows the ability to check what a reference points to. Example
+You can also call C<UNIVERSAL::isa> as a sub with two arguments.  The
+first does not need to be an object or even a reference.  This
+allows the ability to check what a reference points to, or whether
+something is a reference of a given type. Example
 
-    use UNIVERSAL qw(isa);
-
-    if(isa($ref, 'ARRAY')) {
+    if(UNIVERSAL::isa($ref, 'ARRAY')) {
     	#...
     }
 
@@ -397,8 +397,7 @@ strange effects if the Perl code dynamically changes @ISA in any package.
 
 You may add other methods to the UNIVERSAL class via Perl or XS code.
 You do not need to C<use UNIVERSAL> to make these methods
-available to your program.  This is necessary only if you wish to
-have C<isa> available as a plain subroutine in the current package.
+available to your program (and you should not do so).
 
 =head2 Destructors
 
