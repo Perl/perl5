@@ -1853,7 +1853,7 @@ usually solves this kind of problem.
 	push @defpath, $component if defined $component;
     }
     $self->{PERL} ||=
-        $self->find_perl(5.0, [ $^X, 'miniperl','perl','perl5',"perl$]" ],
+        $self->find_perl(5.0, [ $self->canonpath($^X), 'miniperl','perl','perl5',"perl$]" ],
 	    \@defpath, $Verbose );
     # don't check if perl is executable, maybe they have decided to
     # supply switches with perl
