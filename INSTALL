@@ -662,7 +662,7 @@ negligible.
 =head2 Building a debugging perl
 
 You can run perl scripts under the perl debugger at any time with
-B<perl -d>.  If, however, you want to debug perl itself,
+B<perl -d your_script>.  If, however, you want to debug perl itself,
 you probably want to do
 
 	sh Configure -Doptimize='-g'
@@ -671,7 +671,11 @@ This will do two things:  First, it will force compilation to use
 B<cc -g> so that you can use your system's debugger on the executable.
 Second, it will add a C<-DDEBUGGING> to your ccflags variable in
 F<config.sh> so that you can use B<perl -D> to access perl's internal
-state.
+state.  Note, however, that Configure will only add -DDEBUGGING by
+default if you are not reusing your old F<config.sh>.  If you want to
+reuse your old F<config.sh>, then you can just edit it and change the
+optimize and ccflags variables by hand and then propagate your changes
+as shown in L<"Propagating your changes to config.sh"> below.
 
 If you are using a shared libperl, see the warnings about multiple
 versions of perl under L<Building a shared libperl.so Perl library>.
@@ -963,6 +967,13 @@ d_vprintf in config.sh.  If your system has vprintf, it should be:
 If Configure guessed wrong, it is likely that Configure guessed wrong
 on a number of other common functions too.  You are probably better off
 re-running Configure without using nm extraction (see previous item).
+
+=item do_aspawn
+
+If you run into problems relating to do_aspawn or do_spawn, the
+problem is probably that Configure failed to detect your system's
+fork() function.  Follow the procedure in the previous items
+on L<"vsprintf"> and L<"nm extraction">.
 
 =item Optimizer
 
@@ -1302,4 +1313,4 @@ from the original README by Larry Wall.
 
 =head1 LAST MODIFIED
 
-$Id: INSTALL,v 1.8 1997/03/21 16:21:53 doughera Released $
+$Id: INSTALL,v 1.9 1997/03/25 18:50:19 doughera Released $
