@@ -3648,8 +3648,16 @@ thats_really_all_folks:
     }
    else
     {
+#ifndef EPOC
        /*The big, slow, and stupid way */
 	STDCHAR buf[8192];
+#else
+	/* Need to work around EPOC SDK features          */
+	/* On WINS: MS VC5 generates calls to _chkstk,    */
+	/* if a `large' stack frame is allocated          */
+	/* gcc on MARM does not generate calls like these */
+	STDCHAR buf[1024];
+#endif
 
 screamer2:
 	if (rslen) {

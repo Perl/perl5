@@ -1056,7 +1056,7 @@ Perl_do_execfree(pTHX)
     }
 }
 
-#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP)
+#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP) && !defined(EPOC)
 
 bool
 Perl_do_exec(pTHX_ char *cmd)

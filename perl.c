@@ -2681,7 +2681,7 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	GvMULTI_on(PL_envgv);
 	hv = GvHVn(PL_envgv);
 	hv_magic(hv, PL_envgv, 'E');
-#ifndef VMS  /* VMS doesn't have environ array */
+#if !defined( VMS) && !defined(EPOC)  /* VMS doesn't have environ array */
 	/* Note that if the supplied env parameter is actually a copy
 	   of the global environ then it may now point to free'd memory
 	   if the environment has been modified since. To avoid this
