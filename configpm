@@ -329,7 +329,7 @@ sub config_sh {
 
 sub config_re {
     my $re = shift;
-    return map { chomp; $_ } grep /^$re=/, split /^/, $Config_SH;
+    return map { chomp; $_ } grep eval{ /^(?:$re)=/ }, split /^/, $Config_SH;
 }
 
 sub config_vars {
