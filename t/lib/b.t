@@ -10,7 +10,7 @@ use warnings;
 use strict;
 use Config;
 
-print "1..10\n";
+print "1..13\n";
 
 my $test = 1;
 
@@ -30,6 +30,28 @@ ok;
 print "not " if "{\n    \$test /= 2 if ++\$test;\n}" ne
                     $deparse->coderef2text(sub {++$test and $test/=2;});
 ok;
+{
+my $a = <<'EOF';
+{
+    $test = sub : lvalue {
+        1;
+    }
+    ;
+}
+EOF
+chomp $a;
+print "not " if $deparse->coderef2text(sub{$test = sub : lvalue { 1 }}) ne $a;
+ok;
+
+$a =~ s/lvalue/method/;
+print "not " if $deparse->coderef2text(sub{$test = sub : method { 1 }}) ne $a;
+ok;
+
+$a =~ s/method/locked method/;
+print "not " if $deparse->coderef2text(sub{$test = sub : method locked { 1 }})
+                                     ne $a;
+ok;
+}
 
 my $a;
 my $Is_VMS = $^O eq 'VMS';
