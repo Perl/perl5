@@ -360,6 +360,19 @@ sub _dos_cwd {
     return $ENV{'PWD'};
 }
 
+sub _qnx_cwd {
+    $ENV{'PWD'} = `/usr/bin/fullpath -t`;
+    chop $ENV{'PWD'};
+    return $ENV{'PWD'};
+}
+
+sub _qnx_abs_path {
+    my $path = shift || '.';
+    my $realpath=`/usr/bin/fullpath -t $path`;
+    chop $realpath;
+    return $realpath;
+}
+
 {
     local $^W = 0;	# assignments trigger 'subroutine redefined' warning
 
@@ -393,6 +406,14 @@ sub _dos_cwd {
         *fastgetcwd	= \&_dos_cwd;
         *fastcwd	= \&_dos_cwd;
         *abs_path	= \&fast_abs_path;
+    }
+    elsif ($^O eq 'qnx') {
+        *cwd		= \&_qnx_cwd;
+        *getcwd		= \&_qnx_cwd;
+        *fastgetcwd	= \&_qnx_cwd;
+        *fastcwd	= \&_qnx_cwd;
+        *abs_path	= \&_qnx_abs_path;
+        *fast_abs_path	= \&_qnx_abs_path;
     }
 }
 

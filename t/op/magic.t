@@ -109,7 +109,7 @@ ok 18, $$ > 0, $$;
 # $^X and $0
 {
     if ($^O eq 'qnx') {
-	chomp($wd = `pwd`);
+	chomp($wd = `/usr/bin/fullpath -t`);
     }
     else {
 	$wd = '.';
