@@ -1925,7 +1925,7 @@ Ap	|char*	|rninstr	|const char* big|const char* bigend \
 Ap	|Sighandler_t|rsignal	|int i|Sighandler_t t
 p	|int	|rsignal_restore|int i|Sigsave_t* t
 p	|int	|rsignal_save	|int i|Sighandler_t t1|Sigsave_t* t2
-p	|Sighandler_t|rsignal_state|int i
+Ap	|Sighandler_t|rsignal_state|int i
 p	|void	|rxres_free	|void** rsp
 p	|void	|rxres_restore	|void** rsp|REGEXP* prx
 p	|void	|rxres_save	|void** rsp|REGEXP* prx
