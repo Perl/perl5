@@ -440,7 +440,7 @@ WARNING: This is an experimental feature.
 
 change#4081
 [TODO - Ilya Zakharevich <ilya@math.ohio-state.edu>,
-Tuomas Lukka <lukka@fas.harvard.edu>)]
+Tuomas Lukka <lukka@iki.fi>)]
 
 =head2 "our" declarations
 
@@ -481,9 +481,28 @@ C<require> and C<use> also support such literals:
 
 WARNING: This is an experimental feature.
 
-change#3385, also need perlguts documentation
+In previous versions of Perl, you couldn't cache objects so as
+to allow them to be deleted if the last reference from outside 
+the cache is deleted.  The reference in the cache would hold a
+reference count on the object and the objects would never be
+destroyed.
 
-[TODO - Tuomas Lukka <lukka@fas.harvard.edu>]
+Another familiar problem is with circular references.  When an
+object references itself, its reference count would never go
+down to zero, and it would not get destroyed until the program
+is about to exit.
+
+Weak references solve this by allowing you to "weaken" any
+reference, that is, make it not count towards the reference count.
+When the last non-weak reference to an object is deleted, the object
+is destroyed and all the weak references to the object are
+automatically undef-ed.
+
+To use this feature, you need the WeakRef package from CPAN, which
+contains additional documentation.
+
+change#3385, also need perlguts documentation
+[TODO - Tuomas Lukka <lukka@iki.fi>]
 
 =head2 File globbing implemented internally
 
@@ -1516,9 +1535,93 @@ act as mutators (accessor $z->Re(), mutator $z->Re(3)).
 A little bit of radial trigonometry (cylindrical and spherical),
 radial coordinate conversions, and the great circle distance were added.
 
-=item Pod::Parser
+=item Pod::Parser, Pod::InputObjects, Pod::ParseUtils, and Pod::Select
 
-[TODO - Brad Appleton <bradapp@enteract.com>]
+Pod::Parser is a new module that provides a base class for parsing and
+selecting sections of POD documentation from an input stream.  This
+module takes care of identifying POD paragraphs and commands in the
+input and hands off the parsed paragraphs and commands to user-defined
+methods which are free to interpret or translate them as they see fit.
+
+Pod::InputObjects defines some input objects needed by Pod::Parser, and
+for advanced users of Pod::Parser that need more about a command besides
+its name and text.  Pod::ParseUtils provides several object-oriented
+helpers for POD parsing and processing. Probably the most important is
+Pod::Hyperlink for parsing and expanding POD hyperlinks.  Pod::Select is
+a subclass of Pod::Parser which provides a function named "podselect()"
+to filter out user-specified sections of raw pod documentation from an
+input stream.
+
+As of release 5.6 of Perl, Pod::Parser is now the officially sanctioned
+"base parser code" recommended for use by all pod2xxx translators.
+Pod::Text (pod2text) and Pod::Man (pod2man) have already been converted
+to use Pod::Parser and efforts to convert Pod::Html (pod2html) are
+already underway.  For any questions or comments about POD parsing and
+translating issues and utilities, please use the pod-people@perl.org
+mailing list.
+
+For further information, please see L<Pod::Parser>, L<Pod::InputObjects>,
+L<Pod::ParseUtils> and L<Pod::Select>.
+
+=item Pod::Usage
+
+Pod::Usage provides the function "pod2usage()" to print usage messages for
+a Perl script based on its embedded pod documentation.  The pod2usage()
+function is generally useful to all script authors since it lets them
+write and maintain a single source (the PODs) for documentation, thus
+removing the need to create and maintain redundant usage message text
+consisting of information already in the PODs.
+
+Script authors are encouraged to use Pod::Usage with their favorite Perl
+option-parser to provide both terse and verbose formatted usage messages
+for their users.  Here is a simple example using Getopt::Long that prints
+only a synopsis for syntax errors, a synopsis and description of arguments
+when C<-help> is used, and the full manual page when C<-man> is used.
+
+    use Getopt::Long;
+    use Pod::Usage;
+    my $man = 0;
+    my $help = 0;
+    GetOptions('help|?' => \$help, man => \$man) or pod2usage(2);
+    pod2usage(1) if $help;
+    pod2usage(-exitstatus => 0, -verbose => 2) if $man;
+
+    __END__
+
+    =head1 NAME
+
+    sample - Using GetOpt::Long and Pod::Usage
+
+    =head1 SYNOPSIS
+
+    sample [options] [file ...]
+
+     Options:
+       -help            brief help message
+       -man             full documentation
+
+    =head1 OPTIONS
+
+    =over 8
+
+    =item B<-help>
+
+    Print a brief help message and exits.
+
+    =item B<-man>
+
+    Prints the manual page and exits.
+
+    =back
+
+    =head1 DESCRIPTION
+
+    B<This program> will read the given input file(s) and do something
+    useful with the contents thereof.
+
+    =cut
+
+For details, please see L<Pod::Usage>.
 
 =item Pod::Text and Pod::Man
 

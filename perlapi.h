@@ -58,7 +58,7 @@ EXT void *PL_force_link_funcs[] = {
 #undef PERLVARA
 #undef PERLVARI
 #undef PERLVARIC
-#define PERLVAR(v,t)	Perl_##v##_ptr,
+#define PERLVAR(v,t)	(void*)Perl_##v##_ptr,
 #define PERLVARA(v,n,t)	PERLVAR(v,t)
 #define PERLVARI(v,t,i)	PERLVAR(v,t)
 #define PERLVARIC(v,t,i) PERLVAR(v,t)

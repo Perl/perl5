@@ -1,6 +1,4 @@
 *** ERROR: Unknown command "unknown1" at line 21 in file pod/poderrs.t
-*** ERROR: Unknown interior-sequence "N" at line 21 in file pod/poderrs.t
-*** ERROR: Unknown interior-sequence "D" at line 22 in file pod/poderrs.t
 *** ERROR: Unknown interior-sequence "Q" at line 25 in file pod/poderrs.t
 *** ERROR: Unknown interior-sequence "A" at line 26 in file pod/poderrs.t
 *** ERROR: Unknown interior-sequence "Y" at line 27 in file pod/poderrs.t
@@ -9,27 +7,26 @@
 ** Unterminated I<...> at pod/poderrs.t line 30
 ** Unterminated C<...> at pod/poderrs.t line 33
 *** ERROR: =item without previous =over at line 43 in file pod/poderrs.t
+*** ERROR: =over on line 43 without closing =back (at head2) at line 45 in file pod/poderrs.t
 *** ERROR: =back without previous =over at line 47 in file pod/poderrs.t
-*** ERROR: unclosed =over (line 51) at head2 at line 55 in file pod/poderrs.t
-*** WARNING: =end without =begin at line 57 in file pod/poderrs.t
+*** ERROR: =over on line 51 without closing =back (at head2) at line 55 in file pod/poderrs.t
+*** ERROR: =end without =begin at line 57 in file pod/poderrs.t
 *** ERROR: Nested =begin's (first at line 61:html) at line 63 in file pod/poderrs.t
-*** WARNING: =end without =begin at line 67 in file pod/poderrs.t
+*** ERROR: =end without =begin at line 67 in file pod/poderrs.t
 *** ERROR: nested commands C<...C<...>...> at line 71 in file pod/poderrs.t
 *** ERROR: garbled entity E<alea iacta est> at line 75 in file pod/poderrs.t
 *** ERROR: garbled entity E<C<auml>> at line 76 in file pod/poderrs.t
 *** ERROR: garbled entity E<abcI<bla>> at line 77 in file pod/poderrs.t
-*** ERROR: malformed link L<>: garbled entry (spurious characters `s s / s s / ss') at line 87 in file pod/poderrs.t
-*** ERROR: malformed link L<>: garbled entry (spurious characters `".".":"') at line 88 in file pod/poderrs.t
-*** ERROR: malformed link L<>: garbled entry (spurious characters `"h"/"hh"') at line 89 in file pod/poderrs.t
-*** WARNING: brackets in `passwd(5)' at line 94 in file pod/poderrs.t
+*** WARNING: collapsing newlines to blanks at line 87 in file pod/poderrs.t
+*** ERROR: malformed link L<> : empty link at line 89 in file pod/poderrs.t
+*** WARNING: section in `passwd(5)' deprecated at line 94 in file pod/poderrs.t
 *** WARNING: ignoring leading whitespace in link at line 95 in file pod/poderrs.t
 *** WARNING: ignoring trailing whitespace in link at line 95 in file pod/poderrs.t
 *** WARNING: Spurious character(s) after =back at line 101 in file pod/poderrs.t
-*** WARNING: Spurious character(s) after =end at line 107 in file pod/poderrs.t
 *** WARNING: No items in =over (at line 109) / =back list at line 111 in file pod/poderrs.t
-*** WARNING: 2 unescaped <> at line 113 in file pod/poderrs.t
+*** WARNING: 2 unescaped <> in paragraph at line 113 in file pod/poderrs.t
 *** ERROR: unresolved internal link `begin or begin' at line 81 in file pod/poderrs.t
 *** ERROR: unresolved internal link `end with begin' at line 82 in file pod/poderrs.t
 *** ERROR: unresolved internal link `OoPs' at line 83 in file pod/poderrs.t
-*** ERROR: unresolved internal link `b|c' at line 90 in file pod/poderrs.t
-pod/poderrs.t has 25 pod syntax errors.
+*** ERROR: unresolved internal link `abc def' at line 87 in file pod/poderrs.t
+pod/poderrs.t has 24 pod syntax errors.

@@ -607,6 +607,8 @@ EOP
 			$subrange = pop @pieces;
 			$file = join(':', @pieces);
 			if ($file ne $filename) {
+			    print $OUT "Switching to file '$file'.\n"
+				unless $emacs;
 			    *dbline = $main::{'_<' . $file};
 			    $max = $#dbline;
 			    $filename = $file;
@@ -793,8 +795,8 @@ EOP
 			($file,$i) = (find_sub($subname) =~ /^(.*):(.*)$/);
 			$i += 0;
 			if ($i) {
-			    $filename = $file;
-			    *dbline = $main::{'_<' . $filename};
+			    local $filename = $file;
+			    local *dbline = $main::{'_<' . $filename};
 			    $had_breakpoints{$filename} = 1;
 			    $max = $#dbline;
 			    ++$i while $dbline[$i] == 0 && $i < $max;
@@ -884,6 +886,10 @@ EOP
 		    $cmd =~ /^c\b\s*([\w:]*)\s*$/ && do {
 		        end_report(), next CMD if $finished and $level <= 1;
 			$subname = $i = $1;
+			#  Probably not needed, since we finish an interactive
+			#  sub-session anyway...
+			# local $filename = $filename;
+			# local *dbline = *dbline;	# XXX Would this work?!
 			if ($i =~ /\D/) { # subroutine name
 			    $subname = $package."::".$subname 
 			        unless $subname =~ /::/;
@@ -1811,7 +1817,13 @@ B<l>		List next window of lines.
 B<->		List previous window of lines.
 B<w> [I<line>]	List window around I<line>.
 B<.>		Return to the executed line.
-B<f> I<filename>	Switch to viewing I<filename>. Must be loaded.
+B<f> I<filename>	Switch to viewing I<filename>. File must be already loaded.
+		I<filename> may be either the full name of the file, or a regular
+		expression matching the full file name:
+		B<f> I</home/me/foo.pl> and B<f> I<oo\\.> may access the same file.
+		Evals (with saved bodies) are considered to be filenames:
+		B<f> I<(eval 7)> and B<f> I<eval 7\\b> access the body of the 7th eval
+		(in the order of execution).
 B</>I<pattern>B</>	Search forwards for I<pattern>; final B</> is optional.
 B<?>I<pattern>B<?>	Search backwards for I<pattern>; final B<?> is optional.
 B<L>		List all breakpoints and actions.

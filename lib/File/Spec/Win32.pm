@@ -81,7 +81,6 @@ sub catfile {
 }
 
 sub path {
-    local $^W = 1;
     my $path = $ENV{'PATH'} || $ENV{'Path'} || $ENV{'path'};
     my @path = split(';',$path);
     foreach (@path) { $_ = '.' if $_ eq '' }

@@ -626,10 +626,12 @@ lib/Net/netent.pm	By-name interface to Perl's builtin getnet*
 lib/Net/protoent.pm	By-name interface to Perl's builtin getproto*
 lib/Net/servent.pm	By-name interface to Perl's builtin getserv*
 lib/Pod/Checker.pm	Pod-Parser - check POD documents for syntax errors
+lib/Pod/Find.pm		used by pod/splitpod
 lib/Pod/Functions.pm	used by pod/splitpod
 lib/Pod/Html.pm		Convert POD data to HTML
 lib/Pod/InputObjects.pm	Pod-Parser - define objects for input streams
 lib/Pod/Man.pm		Convert POD data to *roff
+lib/Pod/ParseUtils.pm	Pod-Parser - pod utility functions
 lib/Pod/Parser.pm	Pod-Parser - define base class for parsing POD
 lib/Pod/Select.pm	Pod-Parser - select portions of POD docs
 lib/Pod/Text.pm		Pod-Parser - convert POD data to formatted ASCII text

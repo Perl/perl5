@@ -82,12 +82,12 @@ L</"begin or begin">
 L<"end with begin">
 L</OoPs>
 
-=head2 Garbled (almost) links
+=head2 Some links with problems
 
-L<s s / s s / ss>
-L<".".":">
-L<"h"/"hh">
-L<a|b|c>
+L<abc
+def>
+L<>
+L<"Warnings"> this one is ok
 
 =head2 Warnings
 

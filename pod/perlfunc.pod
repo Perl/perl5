@@ -1559,11 +1559,11 @@ in the way of your getting your job done.)
 
 OPERATION is one of LOCK_SH, LOCK_EX, or LOCK_UN, possibly combined with
 LOCK_NB.  These constants are traditionally valued 1, 2, 8 and 4, but
-you can use the symbolic names if import them from the Fcntl module,
+you can use the symbolic names if you import them from the Fcntl module,
 either individually, or as a group using the ':flock' tag.  LOCK_SH
 requests a shared lock, LOCK_EX requests an exclusive lock, and LOCK_UN
-releases a previously requested lock.  If LOCK_NB is added to LOCK_SH or
-LOCK_EX then C<flock> will return immediately rather than blocking
+releases a previously requested lock.  If LOCK_NB is bitwise-or'ed with
+LOCK_SH or LOCK_EX then C<flock> will return immediately rather than blocking
 waiting for the lock (check the return status to see if you got it).
 
 To avoid the possibility of miscoordination, Perl now flushes FILEHANDLE
@@ -5166,8 +5166,7 @@ features back into the current package.  The module can implement its
 C<import> method any way it likes, though most modules just choose to
 derive their C<import> method via inheritance from the C<Exporter> class that
 is defined in the C<Exporter> module.  See L<Exporter>.  If no C<import>
-method can be found then the error is currently silently ignored.  This
-may change to a fatal error in a future version.
+method can be found then the call is skipped.
 
 If you don't want your namespace altered, explicitly supply an empty list:
 

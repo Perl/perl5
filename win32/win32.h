@@ -163,6 +163,7 @@ struct utsname {
 #define _access access
 #define _chdir chdir
 #define _getpid getpid
+#define wcsicmp _wcsicmp
 #include <sys/types.h>
 
 #ifndef DllMain
