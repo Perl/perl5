@@ -230,6 +230,12 @@ PP(pp_readline)
 PP(pp_eq)
 {
     dSP; tryAMAGICbinSET(eq,0);
+#ifndef NV_PRESERVES_UV
+    if (SvROK(TOPs) && SvROK(TOPm1s)) {
+	SETs(boolSV(SvRV(TOPs) == SvRV(TOPm1s)));
+	RETURN;
+    }
+#endif
     {
       dPOPnv;
       SETs(boolSV(TOPn == value));

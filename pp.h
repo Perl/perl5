@@ -127,6 +127,8 @@ Pops a long off the stack.
 #endif
 
 #define TOPs		(*sp)
+#define TOPm1s		(*(sp-1))
+#define TOPp1s		(*(sp+1))
 #define TOPp		(SvPV(TOPs, PL_na))		/* deprecated */
 #define TOPpx		(SvPV(TOPs, n_a))
 #define TOPn		(SvNV(TOPs))
