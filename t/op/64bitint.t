@@ -16,7 +16,7 @@ BEGIN {
 # 32+ bit integers don't cause noise
 no warnings qw(overflow portable);
 
-print "1.52\n";
+print "1..52\n";
 
 my $q = 12345678901;
 my $r = 23456789012;
