@@ -6,7 +6,7 @@ BEGIN {
     @INC = '../lib' if -d '../lib';
 }
 
-print "1..70\n";
+print "1..71\n";
 
 $x = 'foo';
 $_ = "x";
@@ -302,3 +302,7 @@ s{  \d+          \b [,.;]? (?{ 'digits' })
 }{$^R}xg;
 print ($_ eq $foo ? "ok 70\n" : "not ok 70\n#'$_'\n#'$foo'\n");
 
+$_ = 'x' x 20; 
+s/\d*|x/<$&>/g; 
+$foo = '<>' . ('<x><>' x 20) ;
+print ($_ eq $foo ? "ok 71\n" : "not ok 71\n#'$_'\n#'$foo'\n");

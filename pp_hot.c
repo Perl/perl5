@@ -1590,7 +1590,9 @@ PP(pp_subst)
 	DIE("panic: do_subst");
 
     strend = s + len;
-    maxiters = (strend - s) + 10;
+    maxiters = 2*(strend - s) + 10;	/* We can match twice at each 
+					   position, once with zero-length,
+					   second time with non-zero. */
 
     if (!rx->prelen && curpm) {
 	pm = curpm;
