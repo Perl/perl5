@@ -134,6 +134,30 @@ regcppop()
     return input;
 }
 
+static void
+regcppartblow()
+{
+    I32 i = SSPOPINT;
+    U32 paren = 0;
+    char *input;
+    char *startp;
+    char *endp;
+    int lastparen;
+    int size;
+    assert(i == SAVEt_REGCONTEXT);
+    i = SSPOPINT;
+    input = (char *) SSPOPPTR;
+    lastparen = SSPOPINT;
+    size = SSPOPINT;
+    for (i -= 3; i > 0; i -= 3) {
+	paren = (U32)SSPOPINT;
+	startp = (char *) SSPOPPTR;
+	endp = (char *) SSPOPPTR;
+	if (paren <= *reglastparen && regendp[paren] == endp)
+	    regstartp[paren] = startp;
+    }
+}
+
 #define regcpblow(cp) leave_scope(cp)
 
 /*
@@ -864,6 +888,7 @@ char *prog;
 	case OPEN:
 	    n = ARG1(scan);  /* which paren pair */
 	    regstartp[n] = locinput;
+	    regendp[n] = 0;
 	    if (n > regsize)
 		regsize = n;
 	    break;
@@ -944,7 +969,7 @@ char *prog;
 		    ln = regcc->cur;
 		    cp = regcppush(cc->parenfloor);
 		    if (regmatch(cc->next)) {
-			regcpblow(cp);
+			regcppartblow(cp);
 			sayYES;	/* All done. */
 		    }
 		    regcppop();
@@ -960,7 +985,7 @@ char *prog;
 		    cc->lastloc = locinput;
 		    cp = regcppush(cc->parenfloor);
 		    if (regmatch(cc->scan)) {
-			regcpblow(cp);
+			regcppartblow(cp);
 			sayYES;
 		    }
 		    regcppop();
@@ -975,7 +1000,7 @@ char *prog;
 		    cc->cur = n;
 		    cc->lastloc = locinput;
 		    if (regmatch(cc->scan)) {
-			regcpblow(cp);
+			regcppartblow(cp);
 			sayYES;
 		    }
 		    regcppop();		/* Restore some previous $<digit>s? */
