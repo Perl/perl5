@@ -9590,13 +9590,19 @@ Perl_ptr_table_new(pTHX)
     return tbl;
 }
 
+#if (PTRSIZE == 8)
+#  define PTR_TABLE_HASH(ptr) (PTR2UV(ptr) >> 3)
+#else
+#  define PTR_TABLE_HASH(ptr) (PTR2UV(ptr) >> 2)
+#endif
+
 /* map an existing pointer using a table */
 
 void *
 Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *tbl, void *sv)
 {
     PTR_TBL_ENT_t *tblent;
-    UV hash = PTR2UV(sv);
+    UV hash = PTR_TABLE_HASH(sv);
     assert(tbl);
     tblent = tbl->tbl_ary[hash & tbl->tbl_max];
     for (; tblent; tblent = tblent->next) {
@@ -9615,12 +9621,12 @@ Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, void *oldv, void *newv)
     /* XXX this may be pessimal on platforms where pointers aren't good
      * hash values e.g. if they grow faster in the most significant
      * bits */
-    UV hash = PTR2UV(oldv);
-    bool i = 1;
+    UV hash = PTR_TABLE_HASH(oldv);
+    bool empty = 1;
 
     assert(tbl);
     otblent = &tbl->tbl_ary[hash & tbl->tbl_max];
-    for (tblent = *otblent; tblent; i=0, tblent = tblent->next) {
+    for (tblent = *otblent; tblent; empty=0, tblent = tblent->next) {
 	if (tblent->oldval == oldv) {
 	    tblent->newval = newv;
 	    return;
@@ -9632,7 +9638,7 @@ Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, void *oldv, void *newv)
     tblent->next = *otblent;
     *otblent = tblent;
     tbl->tbl_items++;
-    if (i && tbl->tbl_items > tbl->tbl_max)
+    if (!empty && tbl->tbl_items > tbl->tbl_max)
 	ptr_table_split(tbl);
 }
 
@@ -9656,7 +9662,7 @@ Perl_ptr_table_split(pTHX_ PTR_TBL_t *tbl)
 	    continue;
 	curentp = ary + oldsize;
 	for (entp = ary, ent = *ary; ent; ent = *entp) {
-	    if ((newsize & PTR2UV(ent->oldval)) != i) {
+	    if ((newsize & PTR_TABLE_HASH(ent->oldval)) != i) {
 		*entp = ent->next;
 		ent->next = *curentp;
 		*curentp = ent;
