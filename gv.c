@@ -1301,7 +1301,7 @@ int flags;
     EXTEND(sp, notfound + 5);
     PUSHs(lr>0? right: left);
     PUSHs(lr>0? left: right);
-    PUSHs( assign ? &sv_undef : (lr>0? &sv_yes: &sv_no));
+    PUSHs( lr > 0 ? &sv_yes : ( assign ? &sv_undef : &sv_no ));
     if (notfound) {
       PUSHs( sv_2mortal(newSVpv((char *)AMG_names[method + assignshift],0)) );
     }
