@@ -1316,7 +1316,7 @@ architecture. On a 32-bit architecture the largest octal literal is
 (S) A warning peculiar to VMS.  Perl keeps track of the number
 of times you've called C<fork> and C<exec>, to determine
 whether the current call to C<exec> should affect the current
-script or a subprocess (see L<perlvms/exec>).  Somehow, this count
+script or a subprocess (see L<perlvms/"exec LIST">).  Somehow, this count
 has become scrambled, so Perl is making a guess and treating
 this C<exec> as a request to terminate the Perl script
 and execute the specified command.

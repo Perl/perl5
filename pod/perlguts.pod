@@ -1022,13 +1022,13 @@ There is a way to achieve a similar task from C via Perl API: create a
 I<pseudo-block>, and arrange for some changes to be automatically
 undone at the end of it, either explicit, or via a non-local exit (via
 die()). A I<block>-like construct is created by a pair of
-C<ENTER>/C<LEAVE> macros (see L<perlcall/EXAMPLE/"Returning a
-Scalar">).  Such a construct may be created specially for some
-important localized task, or an existing one (like boundaries of
-enclosing Perl subroutine/block, or an existing pair for freeing TMPs)
-may be used. (In the second case the overhead of additional
-localization must be almost negligible.) Note that any XSUB is
-automatically enclosed in an C<ENTER>/C<LEAVE> pair.
+C<ENTER>/C<LEAVE> macros (see L<perlcall/"Returning a Scalar">).
+Such a construct may be created specially for some important localized
+task, or an existing one (like boundaries of enclosing Perl
+subroutine/block, or an existing pair for freeing TMPs) may be
+used. (In the second case the overhead of additional localization must
+be almost negligible.) Note that any XSUB is automatically enclosed in
+an C<ENTER>/C<LEAVE> pair.
 
 Inside such a I<pseudo-block> the following service is available:
 

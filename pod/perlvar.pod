@@ -761,12 +761,16 @@ specified, and the value is the location of the file actually found.
 The C<require> command uses this array to determine whether a given file
 has already been included.
 
-=item %ENV  $ENV{expr}
+=item %ENV
+
+=item $ENV{expr}
 
 The hash %ENV contains your current environment.  Setting a
 value in C<ENV> changes the environment for child processes.
 
-=item %SIG  $SIG{expr}
+=item %SIG
+
+=item $SIG{expr}
 
 The hash %SIG is used to set signal handlers for various
 signals.  Example:
