@@ -39,9 +39,14 @@ INST_TOP	*= $(INST_DRV)\perl
 CCTYPE		*= GCC
 
 #
-# uncomment this if your Borland compiler is older than v5.5.
+# uncomment this if your Borland compiler is older than v5.4.
 #
-#BCCVER		= 5.2
+#BCCOLD		= define
+
+#
+# uncomment this if you want to use Borland's VCL as your CRT.
+#
+#BCCVCL		= define
 
 #
 # set the install locations of the compiler include/libraries. Running
@@ -270,8 +275,6 @@ PERL_MALLOC	*= undef
 
 USE_5005THREADS	*= undef
 
-BCCVER		*= 5.5
-
 .IF "$(USE_5005THREADS)" == "define"
 USE_ITHREADS	!= undef
 .ENDIF
@@ -359,7 +362,7 @@ INST_HTML	= $(INST_TOP)$(INST_VER)\html
 .IF "$(CCTYPE)" == "BORLAND"
 
 CC		= bcc32
-.IF $(BCCVER) > 5.2
+.IF "$(BCCOLD)" != "define"
 LINK32		= ilink32
 .ELSE
 LINK32		= tlink32
@@ -395,8 +398,12 @@ LINK_FLAGS	= $(LINK_DBG) -L"$(INST_COREDIR)" -L"$(CCLIBDIR)"
 OBJOUT_FLAG	= -o
 EXEOUT_FLAG	= -e
 LIBOUT_FLAG	= 
-.IF $(BCCVER) > 5.2
-LINK_FLAGS     += -Gn
+.IF "$(BCCOLD)" != "define"
+LINK_FLAGS	+= -Gn
+.IF "$(BCCVCL)" == "define"
+LIBC		!= cp32mti.lib vcl.lib vcl50.lib vclx50.lib vcle50.lib
+LINK_FLAGS	+= -L"$(CCLIBDIR)\Release"
+.END
 .END
 
 .ELIF "$(CCTYPE)" == "GCC"
