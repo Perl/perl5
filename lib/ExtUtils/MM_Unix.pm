@@ -2895,7 +2895,8 @@ Helper method to write the test targets
 
 sub test_via_harness {
     my($self, $perl, $tests) = @_;
-    "\tPERL_DL_NONLAZY=1 $perl".q! -I$(INST_ARCHLIB) -I$(INST_LIB) -I$(PERL_ARCHLIB) -I$(PERL_LIB) -e 'use Test::Harness qw(&runtests $$verbose); $$verbose=$(TEST_VERBOSE); runtests @ARGV;' !."$tests\n";
+    $perl = "PERL_DL_NONLAZY=1 $perl" unless $Is_Win32;
+    "\t$perl".q! -I$(INST_ARCHLIB) -I$(INST_LIB) -I$(PERL_ARCHLIB) -I$(PERL_LIB) -e 'use Test::Harness qw(&runtests $$verbose); $$verbose=$(TEST_VERBOSE); runtests @ARGV;' !."$tests\n";
 }
 
 =item test_via_script (o)
@@ -2906,7 +2907,8 @@ Other helper method for test.
 
 sub test_via_script {
     my($self, $perl, $script) = @_;
-    qq{\tPERL_DL_NONLAZY=1 $perl}.q{ -I$(INST_ARCHLIB) -I$(INST_LIB) -I$(PERL_ARCHLIB) -I$(PERL_LIB) }.qq{$script
+    $perl = "PERL_DL_NONLAZY=1 $perl" unless $Is_Win32;
+    qq{\t$perl}.q{ -I$(INST_ARCHLIB) -I$(INST_LIB) -I$(PERL_ARCHLIB) -I$(PERL_LIB) }.qq{$script
 };
 }
 

@@ -198,7 +198,7 @@ sub autosplit_file{
 
     die "Package $package ($modpname.pm) does not match filename $filename"
 	    unless ($filename =~ m/\Q$modpname.pm\E$/ or
-		    ($^O eq "msdos") or
+		    ($^O eq "msdos") or ($^O eq 'MSWin32') or
 	            $Is_VMS && $filename =~ m/$modpname.pm/i);
 
     my($al_idx_file) = "$autodir/$modpname/$IndexFile";

@@ -207,7 +207,9 @@ perl_call_argv
 perl_call_pv
 perl_call_method
 perl_call_sv
-perl_requirepv
+perl_require_pv
+perl_eval_pv
+perl_eval_sv
 win32_errno
 win32_environ
 win32_stdin
