@@ -1629,10 +1629,6 @@ register SV *sstr;
     else {
 	(void)SvOK_off(dstr);
     }
-    if (SvOBJECT(sstr)) {
-	SvOBJECT_on(dstr);
-	SvSTASH(dstr) = (HV*)SvREFCNT_inc(SvSTASH(sstr));
-    }
     SvTAINT(dstr);
 }
 
