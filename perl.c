@@ -1911,7 +1911,7 @@ open_script(char *scriptname, bool dosearch, SV *sv, int *fdscript)
     }
     else if (preprocess) {
 	char *cpp_cfg = CPPSTDIN;
-	SV *cpp = NEWSV(0,0);
+	SV *cpp = newSVpv("",0);
 	SV *cmd = NEWSV(0,0);
 
 	if (strEQ(cpp_cfg, "cppstdin"))
