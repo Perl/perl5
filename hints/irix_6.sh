@@ -32,11 +32,13 @@
 # Don't bother with -n32 unless you have the 7.1 or later compilers.
 #     But there's no quick and light-weight way to check in 6.2.
 
-# NOTE: some IRIX cc versions, e.g. 7.3.1.1m (try cc -version)
-# have been known to have issues (coredumps) when compiling perl.c.
-# Dropping optimization to -O2 and removing -LNO,-INLINE, etc,
-# and most importantly removing -OPT:fast_IO=ON, has been known
-# to help. -- Allen Smith <easmith@beatrice.rutgers.edu>
+# NOTE: some IRIX cc versions, e.g. 7.3.1.1m (try cc -version) have
+# been known to have issues (coredumps) when compiling perl.c.
+# If you've used -OPT:fast_io=ON and this happens, try removing it.
+# If that fails, or you didn't use that, then try adjusting other
+# optimization options (-LNO, -INLINE, -O3 to -O2, etcetera).
+# The compiler bug has been reported to SGI.
+# -- Allen Smith <easmith@beatrice.rutgers.edu>
 
 # Let's assume we want to use 'cc -n32' by default, unless the
 # necessary libm is missing (which has happened at least twice)
@@ -232,8 +234,9 @@ esac
 # Don't groan about unused libraries.
 ldflags="$ldflags -Wl,-woff,84"
 
+# workaround for an optimizer bug
 case "`$cc -version 2>&1`" in
-*7.2.*) op_cflags='optimize=-O1' ;; # workaround for an optimizer bug
+*7.2.*|*7.3.1.*) op_cflags='optimize=-O1' ;;
 esac
 
 # We don't want these libraries.
