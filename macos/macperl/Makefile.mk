@@ -102,7 +102,7 @@ Static_Ext_Std	= 	\
 	Digest:MD5:MD5 DynaLoader:DynaLoader Fcntl:Fcntl File:Glob:Glob \
 	Filter:Util:Call:Call I18N:Langinfo:Langinfo IO:IO List:Util:Util \
 	MIME:Base64:Base64 NDBM_File:NDBM_File Opcode:Opcode POSIX:POSIX \
-	PerlIO:Scalar:Scalar PerlIO:Via:Via PerlIO:encoding:encoding \
+	PerlIO:scalar:scalar PerlIO:via:via PerlIO:encoding:encoding \
 	Socket:Socket Storable:Storable	Sys:Hostname:Hostname \
 	Time:HiRes:HiRes Unicode:Normalize:Normalize XS:Typemap:Typemap \
 	attrs:attrs re:re
