@@ -1126,6 +1126,12 @@ The Shell module now has an OO interface.
 
 =item *
 
+In Sys::Syslog there is now a failover mechanism that will go
+through alternative connection mechanisms until the message
+is successfully logged.
+
+=item *
+
 The Test module has been significantly enhanced.
 
 =item *
