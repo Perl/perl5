@@ -648,7 +648,6 @@ ext/Storable/hints/linux.pl	Hint for Storable for named architecture
 ext/Storable/Makefile.PL	Storable extension
 ext/Storable/MANIFEST		Storable extension
 ext/Storable/README		Storable extension
-ext/Storable/ppport.h		Storable extension
 ext/Storable/Storable.pm	Storable extension
 ext/Storable/Storable.xs	Storable extension
 ext/Storable/t/blessed.t	See if Storable works

@@ -5,7 +5,7 @@ Storable.pm		    The perl side of Storable
 Storable.xs		    The C side of Storable
 ChangeLog		    Changes since baseline
 hints/linux.pl		    Hint file to drop gcc to -O2
-ppport.h		    Compatibility header
+# ppport.h		    Compatibility header
 t/HAS_HOOK.pm		    For auto-requiring of modules for STORABLE_thaw
 t/HAS_OVERLOAD.pm	    For auto-requiring of mdoules for overload
 t/blessed.t		    See if Storable works
