@@ -894,6 +894,9 @@ sequence of commands indicated by BLOCK.  When modified by a loop
 modifier, executes the BLOCK once before testing the loop condition.
 (On other statements the loop modifiers test the conditional first.)
 
+C<do BLOCK> does I<not> count as a loop, so the loop control statements
+C<next>, C<last> or C<redo> cannot be used to leave or restart the block.
+
 =item do SUBROUTINE(LIST)
 
 A deprecated form of subroutine call.  See L<perlsub>.
@@ -1151,6 +1154,10 @@ compile-time instead of at run-time.)  Case 5 is a place where
 normally you I<WOULD> like to use double quotes, except that in this
 particular situation, you can just use symbolic references instead, as
 in case 6.
+
+C<eval BLOCK> does I<not> count as a loop, so the loop control statements
+C<next>, C<last> or C<redo> cannot be used to leave or restart the block.
+
 
 =item exec LIST
 
@@ -1938,6 +1945,9 @@ C<continue> block, if any, is not executed:
 	#...
     }
 
+C<last> cannot be used to exit a block which returns a value such as
+C<eval {}>, C<sub {}> or C<do {}>.
+
 See also L</continue> for an illustration of how C<last>, C<next>, and
 C<redo> work.
 
@@ -2138,6 +2148,9 @@ the next iteration of the loop:
 Note that if there were a C<continue> block on the above, it would get
 executed even on discarded lines.  If the LABEL is omitted, the command
 refers to the innermost enclosing loop.
+
+C<next> cannot be used to exit a block which returns a value such as
+C<eval {}>, C<sub {}> or C<do {}>.
 
 See also L</continue> for an illustration of how C<last>, C<next>, and
 C<redo> work.
@@ -2768,6 +2781,9 @@ themselves about what was just input:
 	}
 	print;
     }
+
+C<redo> cannot be used to retry a block which returns a value such as
+C<eval {}>, C<sub {}> or C<do {}>.
 
 See also L</continue> for an illustration of how C<last>, C<next>, and
 C<redo> work.
