@@ -97,7 +97,6 @@
 #endif
 
 #define REGINCLASS(p,c)  (ANYOF_FLAGS(p) ? reginclass(p,c,0,0) : ANYOF_BITMAP_TEST(p,*(c)))
-#define REGINCLASS_utf8(p,c)  (ANYOF_FLAGS(p) ? reginclass(p,c,0,1) : ANYOF_BITMAP_TEST(p,*(c)))
 
 /*
  * Forwards.
@@ -4078,9 +4077,8 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
     case ANYOF:
 	if (do_utf8) {
 	    loceol = PL_regeol;
-	    while (hardcount < max && scan < loceol) {
-		if (!REGINCLASS_utf8(p, (U8*)scan))
-			break;
+	    while (hardcount < max && scan < loceol &&
+		   reginclass(p, (U8*)scan, 0, do_utf8)) {
 		scan += UTF8SKIP(scan);
 		hardcount++;
 	    }
