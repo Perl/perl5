@@ -45,10 +45,11 @@ print OUT <<'!NO!SUBS!';
 # the perl manuals, though it too is written in perl.
 
 if(@ARGV<1) {
-        $0 =~ s,.*/,,;
+	$me = $0;		# Editing $0 is unportable
+        $me =~ s,.*/,,;
 	die <<EOF;
-Usage: $0 [-h] [-v] [-t] [-u] [-m] [-l] PageName|ModuleName|ProgramName
-       $0 -f PerlFunc
+Usage: $me [-h] [-v] [-t] [-u] [-m] [-l] PageName|ModuleName|ProgramName
+       $me -f PerlFunc
 
 We suggest you use "perldoc perldoc" to get aquainted 
 with the system.
