@@ -31,7 +31,7 @@ $dl_debug = $ENV{PERL_DL_DEBUG} || 0 unless defined $dl_debug;
 # (VMS support by Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>)
 # See dl_expandspec() for more details. Should be harmless but
 # inefficient to define on systems that don't need it.
-$do_expand = ($osname eq 'VMS');
+$do_expand = $Is_VMS = $osname eq 'VMS';
 
 @dl_require_symbols = ();       # names of symbols we need
 @dl_resolve_using   = ();       # names of files to link with
@@ -52,7 +52,7 @@ push(@dl_library_path, split(/:/, $ENV{LD_LIBRARY_PATH}))
 
 
 # No prizes for guessing why we don't say 'bootstrap DynaLoader;' here.
-boot_DynaLoader() if defined(&boot_DynaLoader);
+boot_DynaLoader('DynaLoader') if defined(&boot_DynaLoader);
 
 
 if ($dl_debug) {
@@ -96,6 +96,7 @@ sub bootstrap {
 		"(auto/$modpname/$modfname.$dl_dlext)\n" if $dl_debug;
 
     foreach (@INC) {
+	chop($_ = VMS::Filespec::unixpath($_)) if $Is_VMS;
 	my $dir = "$_/auto/$modpname";
 	next unless -d $dir; # skip over uninteresting directories
 
@@ -169,7 +170,6 @@ sub dl_findfile {
     my (@args) = @_;
     my (@dirs,  $dir);   # which directories to search
     my (@found);         # full paths to real files we have found
-    my $vms = ($osname eq 'VMS');
     my $dl_so = $Config::Config{'so'};	# suffix for shared libraries
 
     print STDERR "dl_findfile(@args)\n" if $dl_debug;
@@ -177,7 +177,12 @@ sub dl_findfile {
     # accumulate directories but process files as they appear
     arg: foreach(@args) {
         #  Special fast case: full filepath requires no search
-        if (m:/: && -f $_ && !$do_expand) {
+        if ($Is_VMS && m%[:>/\]]% && -f $_) {
+	    push(@found,dl_expandspec(VMS::Filespec::vmsify($_)));
+	    last arg unless wantarray;
+	    next;
+        }
+        elsif (m:/: && -f $_ && !$do_expand) {
 	    push(@found,$_);
 	    last arg unless wantarray;
 	    next;
@@ -193,7 +198,7 @@ sub dl_findfile {
 
         # VMS: we may be using native VMS directry syntax instead of
         # Unix emulation, so check this as well
-        if ($vms && /[:>\]]/ && -d $_) {   push(@dirs, $_); next; }
+        if ($Is_VMS && /[:>\]]/ && -d $_) {   push(@dirs, $_); next; }
 
         #  Only files should get this far...
         my(@names, $name);    # what filenames to look for
@@ -211,6 +216,7 @@ sub dl_findfile {
         }
         foreach $dir (@dirs, @dl_library_path) {
             next unless -d $dir;
+            chop($dir = VMS::Filespec::unixpath($dir)) if $Is_VMS;
             foreach $name (@names) {
 		my($file) = "$dir/$name";
                 print STDERR " checking in $dir for $name\n" if $dl_debug;
