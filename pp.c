@@ -3249,6 +3249,7 @@ PP(pp_unpack)
     I32 datumtype;
     register I32 len;
     register I32 bits;
+    register char *str;
 
     /* These must not be in registers: */
     I16 ashort;
@@ -3444,8 +3445,7 @@ PP(pp_unpack)
 	    sv = NEWSV(35, len + 1);
 	    SvCUR_set(sv, len);
 	    SvPOK_on(sv);
-	    aptr = pat;			/* borrow register */
-	    pat = SvPVX(sv);
+	    str = SvPVX(sv);
 	    if (datumtype == 'b') {
 		aint = len;
 		for (len = 0; len < aint; len++) {
@@ -3453,7 +3453,7 @@ PP(pp_unpack)
 			bits >>= 1;
 		    else
 			bits = *s++;
-		    *pat++ = '0' + (bits & 1);
+		    *str++ = '0' + (bits & 1);
 		}
 	    }
 	    else {
@@ -3463,11 +3463,10 @@ PP(pp_unpack)
 			bits <<= 1;
 		    else
 			bits = *s++;
-		    *pat++ = '0' + ((bits & 128) != 0);
+		    *str++ = '0' + ((bits & 128) != 0);
 		}
 	    }
-	    *pat = '\0';
-	    pat = aptr;			/* unborrow register */
+	    *str = '\0';
 	    XPUSHs(sv_2mortal(sv));
 	    break;
 	case 'H':
@@ -3477,8 +3476,7 @@ PP(pp_unpack)
 	    sv = NEWSV(35, len + 1);
 	    SvCUR_set(sv, len);
 	    SvPOK_on(sv);
-	    aptr = pat;			/* borrow register */
-	    pat = SvPVX(sv);
+	    str = SvPVX(sv);
 	    if (datumtype == 'h') {
 		aint = len;
 		for (len = 0; len < aint; len++) {
@@ -3486,7 +3484,7 @@ PP(pp_unpack)
 			bits >>= 4;
 		    else
 			bits = *s++;
-		    *pat++ = PL_hexdigit[bits & 15];
+		    *str++ = PL_hexdigit[bits & 15];
 		}
 	    }
 	    else {
@@ -3496,11 +3494,10 @@ PP(pp_unpack)
 			bits <<= 4;
 		    else
 			bits = *s++;
-		    *pat++ = PL_hexdigit[(bits >> 4) & 15];
+		    *str++ = PL_hexdigit[(bits >> 4) & 15];
 		}
 	    }
-	    *pat = '\0';
-	    pat = aptr;			/* unborrow register */
+	    *str = '\0';
 	    XPUSHs(sv_2mortal(sv));
 	    break;
 	case 'c':
@@ -4468,15 +4465,14 @@ PP(pp_pack)
 	case 'B':
 	case 'b':
 	    {
-		char *savepat = pat;
+		register char *str;
 		I32 saveitems;
 
 		fromstr = NEXTFROM;
 		saveitems = items;
-		aptr = SvPV(fromstr, fromlen);
+		str = SvPV(fromstr, fromlen);
 		if (pat[-1] == '*')
 		    len = fromlen;
-		pat = aptr;
 		aint = SvCUR(cat);
 		SvCUR(cat) += (len+7)/8;
 		SvGROW(cat, SvCUR(cat) + 1);
@@ -4487,7 +4483,7 @@ PP(pp_pack)
 		items = 0;
 		if (datumtype == 'B') {
 		    for (len = 0; len++ < aint;) {
-			items |= *pat++ & 1;
+			items |= *str++ & 1;
 			if (len & 7)
 			    items <<= 1;
 			else {
@@ -4498,7 +4494,7 @@ PP(pp_pack)
 		}
 		else {
 		    for (len = 0; len++ < aint;) {
-			if (*pat++ & 1)
+			if (*str++ & 1)
 			    items |= 128;
 			if (len & 7)
 			    items >>= 1;
@@ -4515,26 +4511,24 @@ PP(pp_pack)
 			items >>= 7 - (aint & 7);
 		    *aptr++ = items & 0xff;
 		}
-		pat = SvPVX(cat) + SvCUR(cat);
-		while (aptr <= pat)
+		str = SvPVX(cat) + SvCUR(cat);
+		while (aptr <= str)
 		    *aptr++ = '\0';
 
-		pat = savepat;
 		items = saveitems;
 	    }
 	    break;
 	case 'H':
 	case 'h':
 	    {
-		char *savepat = pat;
+		register char *str;
 		I32 saveitems;
 
 		fromstr = NEXTFROM;
 		saveitems = items;
-		aptr = SvPV(fromstr, fromlen);
+		str = SvPV(fromstr, fromlen);
 		if (pat[-1] == '*')
 		    len = fromlen;
-		pat = aptr;
 		aint = SvCUR(cat);
 		SvCUR(cat) += (len+1)/2;
 		SvGROW(cat, SvCUR(cat) + 1);
@@ -4545,10 +4539,10 @@ PP(pp_pack)
 		items = 0;
 		if (datumtype == 'H') {
 		    for (len = 0; len++ < aint;) {
-			if (isALPHA(*pat))
-			    items |= ((*pat++ & 15) + 9) & 15;
+			if (isALPHA(*str))
+			    items |= ((*str++ & 15) + 9) & 15;
 			else
-			    items |= *pat++ & 15;
+			    items |= *str++ & 15;
 			if (len & 1)
 			    items <<= 4;
 			else {
@@ -4559,10 +4553,10 @@ PP(pp_pack)
 		}
 		else {
 		    for (len = 0; len++ < aint;) {
-			if (isALPHA(*pat))
-			    items |= (((*pat++ & 15) + 9) & 15) << 4;
+			if (isALPHA(*str))
+			    items |= (((*str++ & 15) + 9) & 15) << 4;
 			else
-			    items |= (*pat++ & 15) << 4;
+			    items |= (*str++ & 15) << 4;
 			if (len & 1)
 			    items >>= 4;
 			else {
@@ -4573,11 +4567,10 @@ PP(pp_pack)
 		}
 		if (aint & 1)
 		    *aptr++ = items & 0xff;
-		pat = SvPVX(cat) + SvCUR(cat);
-		while (aptr <= pat)
+		str = SvPVX(cat) + SvCUR(cat);
+		while (aptr <= str)
 		    *aptr++ = '\0';
 
-		pat = savepat;
 		items = saveitems;
 	    }
 	    break;
