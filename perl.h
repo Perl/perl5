@@ -1476,6 +1476,7 @@ struct perl_mstats {
     UV *bucket_available_size;
     UV nbuckets;
 };
+struct RExC_state_t;
 
 typedef MEM_SIZE STRLEN;
 

@@ -176,7 +176,7 @@ struct regnode_charclass_class {
 
 #define REG_MAGIC 0234
 
-#define SIZE_ONLY (PL_regcode == &PL_regdummy)
+#define SIZE_ONLY (RExC_emit == &PL_regdummy)
 
 /* Flags for node->flags of ANYOF */
 

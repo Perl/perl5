@@ -111,6 +111,44 @@
 #define	STATIC	static
 #endif
 
+typedef struct RExC_state_t {
+    U16		flags16;		/* are we folding, multilining? */
+    char	*precomp;		/* uncompiled string. */
+    regexp	*rx;
+    char	*end;			/* End of input for compile */
+    char	*parse;			/* Input-scan pointer. */
+    I32		whilem_seen;		/* number of WHILEM in this expr */
+    regnode	*emit;			/* Code-emit pointer; &regdummy = don't */
+    I32		naughty;		/* How bad is this pattern? */
+    I32		sawback;		/* Did we see \1, ...? */
+    U32		seen;
+    I32		size;			/* Code size. */
+    I32		npar;			/* () count. */
+    I32		extralen;
+    I32		seen_zerolen;
+    I32		seen_evals;
+#if ADD_TO_REGEXEC
+    char 	*starttry;		/* -Dr: where regtry was called. */
+#define RExC_starttry	(pRExC_state->starttry)
+#endif
+} RExC_state_t;
+
+#define RExC_flags16	(pRExC_state->flags16)
+#define RExC_precomp	(pRExC_state->precomp)
+#define RExC_rx		(pRExC_state->rx)
+#define RExC_end	(pRExC_state->end)
+#define RExC_parse	(pRExC_state->parse)
+#define RExC_whilem_seen	(pRExC_state->whilem_seen)
+#define RExC_emit	(pRExC_state->emit)
+#define RExC_naughty	(pRExC_state->naughty)
+#define RExC_sawback	(pRExC_state->sawback)
+#define RExC_seen	(pRExC_state->seen)
+#define RExC_size	(pRExC_state->size)
+#define RExC_npar	(pRExC_state->npar)
+#define RExC_extralen	(pRExC_state->extralen)
+#define RExC_seen_zerolen	(pRExC_state->seen_zerolen)
+#define RExC_seen_evals	(pRExC_state->seen_evals)
+
 #define	ISMULT1(c)	((c) == '*' || (c) == '+' || (c) == '?')
 #define	ISMULT2(s)	((*s) == '*' || (*s) == '+' || (*s) == '?' || \
 	((*s) == '{' && regcurly(s)))
@@ -192,8 +230,8 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 
 #define RF_utf8		8
 #define UTF (PL_reg_flags & RF_utf8)
-#define LOC (PL_regflags & PMf_LOCALE)
-#define FOLD (PL_regflags & PMf_FOLD)
+#define LOC (RExC_flags16 & PMf_LOCALE)
+#define FOLD (RExC_flags16 & PMf_FOLD)
 
 #define OOB_CHAR8		1234
 #define OOB_UTF8		123456
@@ -224,10 +262,10 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 #define	FAIL(msg)                                                             \
     STMT_START {                                                             \
         char *ellipses = "";                                                 \
-        unsigned len = strlen(PL_regprecomp);                                \
+        unsigned len = strlen(RExC_precomp);                                \
                                                                              \
 	if (!SIZE_ONLY)                                                      \
-	    SAVEDESTRUCTOR_X(clear_re,(void*)PL_regcomp_rx);                 \
+	    SAVEDESTRUCTOR_X(clear_re,(void*)RExC_rx);                 \
                                                                              \
 	if (len > RegexLengthToShowInErrorMessages) {                        \
             /* chop 10 shorter than the max, to ensure meaning of "..." */   \
@@ -235,7 +273,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	    ellipses = "...";                                                \
 	}                                                                    \
 	Perl_croak(aTHX_ "%s in regex m/%.*s%s/",                            \
-		   msg, (int)len, PL_regprecomp, ellipses);                  \
+		   msg, (int)len, RExC_precomp, ellipses);                  \
     } STMT_END
 
 /*
@@ -246,10 +284,10 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 #define	FAIL2(pat,msg)                                                        \
     STMT_START {                                                             \
         char *ellipses = "";                                                 \
-        unsigned len = strlen(PL_regprecomp);                                \
+        unsigned len = strlen(RExC_precomp);                                \
                                                                              \
 	if (!SIZE_ONLY)                                                      \
-	    SAVEDESTRUCTOR_X(clear_re,(void*)PL_regcomp_rx);                 \
+	    SAVEDESTRUCTOR_X(clear_re,(void*)RExC_rx);                 \
                                                                              \
 	if (len > RegexLengthToShowInErrorMessages) {                        \
             /* chop 10 shorter than the max, to ensure meaning of "..." */   \
@@ -257,7 +295,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	    ellipses = "...";                                                \
 	}                                                                    \
 	S_re_croak2(aTHX_ pat, " in regex m/%.*s%s/",                        \
-		    msg, (int)len, PL_regprecomp, ellipses);                \
+		    msg, (int)len, RExC_precomp, ellipses);                \
     } STMT_END
 
 
@@ -266,10 +304,10 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
  */
 #define	Simple_vFAIL(m)                                                      \
     STMT_START {                                                             \
-      unsigned offset = strlen(PL_regprecomp)-(PL_regxend-PL_regcomp_parse); \
+      unsigned offset = strlen(RExC_precomp)-(RExC_end-RExC_parse); \
                                                                              \
       Perl_croak(aTHX_ "%s" REPORT_LOCATION,               \
-		 m, (int)offset, PL_regprecomp, PL_regprecomp + offset);     \
+		 m, (int)offset, RExC_precomp, RExC_precomp + offset);     \
     } STMT_END
 
 /*
@@ -278,7 +316,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 #define	vFAIL(m)                                                             \
     STMT_START {                                                             \
       if (!SIZE_ONLY)                                                        \
-	    SAVEDESTRUCTOR_X(clear_re,(void*)PL_regcomp_rx);                 \
+	    SAVEDESTRUCTOR_X(clear_re,(void*)RExC_rx);                 \
       Simple_vFAIL(m);                                                       \
     } STMT_END
 
@@ -287,10 +325,10 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
  */
 #define	Simple_vFAIL2(m,a1)                                                  \
     STMT_START {                                                             \
-      unsigned offset = strlen(PL_regprecomp)-(PL_regxend-PL_regcomp_parse); \
+      unsigned offset = strlen(RExC_precomp)-(RExC_end-RExC_parse); \
                                                                              \
       S_re_croak2(aTHX_ m, REPORT_LOCATION, a1,       \
-		  (int)offset, PL_regprecomp, PL_regprecomp + offset);       \
+		  (int)offset, RExC_precomp, RExC_precomp + offset);       \
     } STMT_END
 
 /*
@@ -299,7 +337,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 #define	vFAIL2(m,a1)                                                         \
     STMT_START {                                                             \
       if (!SIZE_ONLY)                                                        \
-	    SAVEDESTRUCTOR_X(clear_re,(void*)PL_regcomp_rx);                 \
+	    SAVEDESTRUCTOR_X(clear_re,(void*)RExC_rx);                 \
       Simple_vFAIL2(m, a1);                                                  \
     } STMT_END
 
@@ -309,10 +347,10 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
  */
 #define	Simple_vFAIL3(m, a1, a2)                                             \
     STMT_START {                                                             \
-      unsigned offset = strlen(PL_regprecomp)-(PL_regxend-PL_regcomp_parse); \
+      unsigned offset = strlen(RExC_precomp)-(RExC_end-RExC_parse); \
                                                                              \
       S_re_croak2(aTHX_ m, REPORT_LOCATION, a1, a2,   \
-		  (int)offset, PL_regprecomp, PL_regprecomp + offset);       \
+		  (int)offset, RExC_precomp, RExC_precomp + offset);       \
     } STMT_END
 
 /*
@@ -321,7 +359,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 #define	vFAIL3(m,a1,a2)                                                      \
     STMT_START {                                                             \
       if (!SIZE_ONLY)                                                        \
-	    SAVEDESTRUCTOR_X(clear_re,(void*)PL_regcomp_rx);                 \
+	    SAVEDESTRUCTOR_X(clear_re,(void*)RExC_rx);                 \
       Simple_vFAIL3(m, a1, a2);                                              \
     } STMT_END
 
@@ -330,10 +368,10 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
  */
 #define	Simple_vFAIL4(m, a1, a2, a3)                                         \
     STMT_START {                                                             \
-      unsigned offset = strlen(PL_regprecomp)-(PL_regxend-PL_regcomp_parse); \
+      unsigned offset = strlen(RExC_precomp)-(RExC_end-RExC_parse); \
                                                                              \
       S_re_croak2(aTHX_ m, REPORT_LOCATION, a1, a2, a3,\
-		  (int)offset, PL_regprecomp, PL_regprecomp + offset);       \
+		  (int)offset, RExC_precomp, RExC_precomp + offset);       \
     } STMT_END
 
 /*
@@ -341,44 +379,43 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
  */
 #define	Simple_vFAIL5(m, a1, a2, a3, a4)                                     \
     STMT_START {                                                             \
-      unsigned offset = strlen(PL_regprecomp)-(PL_regxend-PL_regcomp_parse); \
+      unsigned offset = strlen(RExC_precomp)-(RExC_end-RExC_parse); \
       S_re_croak2(aTHX_ m, REPORT_LOCATION, a1, a2, a3, a4,\
-		  (int)offset, PL_regprecomp, PL_regprecomp + offset);       \
+		  (int)offset, RExC_precomp, RExC_precomp + offset);       \
     } STMT_END
 
 
 #define	vWARN(loc,m)                                                         \
     STMT_START {                                                             \
-        unsigned offset = strlen(PL_regprecomp)-(PL_regxend-(loc));          \
+        unsigned offset = strlen(RExC_precomp)-(RExC_end-(loc));          \
 	Perl_warner(aTHX_ WARN_REGEXP, "%s" REPORT_LOCATION,\
-		 m, (int)offset, PL_regprecomp, PL_regprecomp + offset);          \
+		 m, (int)offset, RExC_precomp, RExC_precomp + offset);          \
     } STMT_END                                                               \
 
 
 #define	vWARN2(loc, m, a1)                                                   \
     STMT_START {                                                             \
-        unsigned offset = strlen(PL_regprecomp)-(PL_regxend-(loc));          \
+        unsigned offset = strlen(RExC_precomp)-(RExC_end-(loc));          \
 	Perl_warner(aTHX_ WARN_REGEXP, m REPORT_LOCATION,\
                  a1,                                                         \
-		 (int)offset, PL_regprecomp, PL_regprecomp + offset);        \
+		 (int)offset, RExC_precomp, RExC_precomp + offset);        \
     } STMT_END
 
 #define	vWARN3(loc, m, a1, a2)                                               \
     STMT_START {                                                             \
-      unsigned offset = strlen(PL_regprecomp) - (PL_regxend - (loc));        \
+      unsigned offset = strlen(RExC_precomp) - (RExC_end - (loc));        \
 	Perl_warner(aTHX_ WARN_REGEXP, m REPORT_LOCATION,                    \
                  a1, a2,                                                     \
-		 (int)offset, PL_regprecomp, PL_regprecomp + offset);        \
+		 (int)offset, RExC_precomp, RExC_precomp + offset);        \
     } STMT_END
 
 #define	vWARN4(loc, m, a1, a2, a3)                                           \
     STMT_START {                                                             \
-      unsigned offset = strlen(PL_regprecomp)-(PL_regxend-(loc));            \
+      unsigned offset = strlen(RExC_precomp)-(RExC_end-(loc));            \
 	Perl_warner(aTHX_ WARN_REGEXP, m REPORT_LOCATION,\
                  a1, a2, a3,                                                 \
-		 (int)offset, PL_regprecomp, PL_regprecomp + offset);        \
+		 (int)offset, RExC_precomp, RExC_precomp + offset);        \
     } STMT_END
-
 
 
 /* Allow for side effects in s */
@@ -391,7 +428,7 @@ static void clear_re(pTHXo_ void *r);
    floating substrings if needed. */
 
 STATIC void
-S_scan_commit(pTHX_ scan_data_t *data)
+S_scan_commit(pTHX_ RExC_state_t *pRExC_state, scan_data_t *data)
 {
     dTHR;
     STRLEN l = CHR_SVLEN(data->last_found);
@@ -426,7 +463,7 @@ S_scan_commit(pTHX_ scan_data_t *data)
 
 /* Can match anything (initialization) */
 STATIC void
-S_cl_anything(pTHX_ struct regnode_charclass_class *cl)
+S_cl_anything(pTHX_ RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
 {
     int value;
 
@@ -455,19 +492,19 @@ S_cl_is_anything(pTHX_ struct regnode_charclass_class *cl)
 
 /* Can match anything (initialization) */
 STATIC void
-S_cl_init(pTHX_ struct regnode_charclass_class *cl)
+S_cl_init(pTHX_ RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
 {
     Zero(cl, 1, struct regnode_charclass_class);
     cl->type = ANYOF;
-    cl_anything(cl);
+    cl_anything(pRExC_state, cl);
 }
 
 STATIC void
-S_cl_init_zero(pTHX_ struct regnode_charclass_class *cl)
+S_cl_init_zero(pTHX_ RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
 {
     Zero(cl, 1, struct regnode_charclass_class);
     cl->type = ANYOF;
-    cl_anything(cl);
+    cl_anything(pRExC_state, cl);
     if (LOC)
 	cl->flags |= ANYOF_LOCALE;
 }
@@ -499,7 +536,7 @@ S_cl_and(pTHX_ struct regnode_charclass_class *cl,
 /* 'OR' a given class with another one.  Can create false positives */
 /* We assume that cl is not inverted */
 STATIC void
-S_cl_or(pTHX_ struct regnode_charclass_class *cl, struct regnode_charclass_class *or_with)
+S_cl_or(pTHX_ RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, struct regnode_charclass_class *or_with)
 {
     if (or_with->flags & ANYOF_INVERT) {
 	/* We do not use
@@ -520,7 +557,7 @@ S_cl_or(pTHX_ struct regnode_charclass_class *cl, struct regnode_charclass_class
 		cl->bitmap[i] |= ~or_with->bitmap[i];
 	} /* XXXX: logic is complicated otherwise */
 	else {
-	    cl_anything(cl);
+	    cl_anything(pRExC_state, cl);
 	}
     } else {
 	/* (B1 | CL1) | (B2 | CL2) = (B1 | B2) | (CL1 | CL2)) */
@@ -539,7 +576,7 @@ S_cl_or(pTHX_ struct regnode_charclass_class *cl, struct regnode_charclass_class
 	    }
 	}
 	else { /* XXXX: logic is complicated, leave it along for a moment. */
-	    cl_anything(cl);
+	    cl_anything(pRExC_state, cl);
 	}
     }
     if (or_with->flags & ANYOF_EOS)
@@ -553,7 +590,7 @@ S_cl_or(pTHX_ struct regnode_charclass_class *cl, struct regnode_charclass_class
    to the position after last scanned or to NULL. */
 
 STATIC I32
-S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 flags)
+S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 flags)
 			/* scanp: Start here (read-write). */
 			/* deltap: Write maxlen-minlen here. */
 			/* last: Stop before this one. */
@@ -662,11 +699,11 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		struct regnode_charclass_class accum;
 		
 		if (flags & SCF_DO_SUBSTR) /* XXXX Add !SUSPEND? */
-		    scan_commit(data);	/* Cannot merge strings after this. */
+		    scan_commit(pRExC_state, data); /* Cannot merge strings after this. */
 		if (flags & SCF_DO_STCLASS)
-		    cl_init_zero(&accum);
+		    cl_init_zero(pRExC_state, &accum);
 		while (OP(scan) == code) {
-		    I32 deltanext, minnext, f = 0, fake = 0;
+		    I32 deltanext, minnext, f = 0, fake;
 		    struct regnode_charclass_class this_class;
 
 		    num++;
@@ -682,13 +719,13 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		    if (code != BRANCH)
 			scan = NEXTOPER(scan);
 		    if (flags & SCF_DO_STCLASS) {
-			cl_init(&this_class);
+			cl_init(pRExC_state, &this_class);
 			data_fake.start_class = &this_class;
 			f = SCF_DO_STCLASS_AND;
 		    }		    
 		    /* we suppose the run is continuous, last=next...*/
-		    minnext = study_chunk(&scan, &deltanext, next,
-					  &data_fake, f);
+		    minnext = study_chunk(pRExC_state, &scan, &deltanext,
+					  next, &data_fake, f);
 		    if (min1 > minnext) 
 			min1 = minnext;
 		    if (max1 < minnext + deltanext)
@@ -703,7 +740,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		    if (data)
 			data->whilem_c = data_fake.whilem_c;
 		    if (flags & SCF_DO_STCLASS)
-			cl_or(&accum, &this_class);
+			cl_or(pRExC_state, &accum, &this_class);
 		    if (code == SUSPEND) 
 			break;
 		}
@@ -718,7 +755,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		min += min1;
 		delta += max1 - min1;
 		if (flags & SCF_DO_STCLASS_OR) {
-		    cl_or(data->start_class, &accum);
+		    cl_or(pRExC_state, data->start_class, &accum);
 		    if (min1) {
 			cl_and(data->start_class, &and_with);
 			flags &= ~SCF_DO_STCLASS;
@@ -803,7 +840,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 
 	    /* Search for fixed substrings supports EXACT only. */
 	    if (flags & SCF_DO_SUBSTR) 
-		scan_commit(data);
+		scan_commit(pRExC_state, data);
 	    if (UTF) {
 		unsigned char *s = (unsigned char *)STRING(scan);
 		unsigned char *e = s + l;
@@ -884,7 +921,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		is_inf = is_inf_internal = 1; 
 		scan = regnext(scan);
 		if (flags & SCF_DO_SUBSTR) {
-		    scan_commit(data);	/* Cannot extend fixed substrings */
+		    scan_commit(pRExC_state, data); /* Cannot extend fixed substrings */
 		    data->longest = &(data->longest_float);
 		}
 		goto optimize_curly_tail;
@@ -900,7 +937,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		scan = NEXTOPER(scan) + EXTRA_STEP_2ARGS;
 	      do_curly:
 		if (flags & SCF_DO_SUBSTR) {
-		    if (mincount == 0) scan_commit(data); /* Cannot extend fixed substrings */
+		    if (mincount == 0) scan_commit(pRExC_state,data); /* Cannot extend fixed substrings */
 		    pos_before = data->pos_min;
 		}
 		if (data) {
@@ -910,7 +947,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 			data->flags |= SF_IS_INF;
 		}
 		if (flags & SCF_DO_STCLASS) {
-		    cl_init(&this_class);
+		    cl_init(pRExC_state, &this_class);
 		    oclass = data->start_class;
 		    data->start_class = &this_class;
 		    f |= SCF_DO_STCLASS_AND;
@@ -918,7 +955,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		}
 
 		/* This will finish on WHILEM, setting scan, or on NULL: */
-		minnext = study_chunk(&scan, &deltanext, last, data, 
+		minnext = study_chunk(pRExC_state, &scan, &deltanext, last, data, 
 				      mincount == 0 
 					? (f & ~SCF_DO_SUBSTR) : f);
 
@@ -926,7 +963,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		    data->start_class = oclass;
 		if (mincount == 0 || minnext == 0) {
 		    if (flags & SCF_DO_STCLASS_OR) {
-			cl_or(data->start_class, &this_class);
+			cl_or(pRExC_state, data->start_class, &this_class);
 		    }
 		    else if (flags & SCF_DO_STCLASS_AND) {
 			/* Switch to OR mode: cache the old value of 
@@ -941,7 +978,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		    }
 		} else {		/* Non-zero len */
 		    if (flags & SCF_DO_STCLASS_OR) {
-			cl_or(data->start_class, &this_class);
+			cl_or(pRExC_state, data->start_class, &this_class);
 			cl_and(data->start_class, &and_with);
 		    }
 		    else if (flags & SCF_DO_STCLASS_AND)
@@ -954,7 +991,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		    && !(data->flags & (SF_HAS_PAR|SF_IN_PAR))
 		    && maxcount <= REG_INFTY/3) /* Complement check for big count */
 		{
-		    vWARN(PL_regcomp_parse,
+		    vWARN(RExC_parse,
 			  "Quantifier unexpected on zero-length expression");
 		}
 
@@ -1046,7 +1083,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 			}
 #endif
 			/* Optimize again: */
-			study_chunk(&nxt1, &deltanext, nxt, NULL, 0);
+			study_chunk(pRExC_state, &nxt1, &deltanext, nxt, NULL, 0);
 		    }
 		    else
 			oscan->flags = 0;
@@ -1059,7 +1096,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		    if (OP(PREVOPER(nxt)) == NOTHING) /* LONGJMP */
 			nxt += ARG(nxt);
 		    PREVOPER(nxt)->flags = data->whilem_c
-			| (PL_reg_whilem_seen << 4); /* On WHILEM */
+			| (RExC_whilem_seen << 4); /* On WHILEM */
 		}
 		if (data && fl & (SF_HAS_PAR|SF_IN_PAR)) 
 		    pars++;
@@ -1107,7 +1144,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		    if (mincount != maxcount) {
 			 /* Cannot extend fixed substrings found inside
 			    the group.  */
-			scan_commit(data);
+			scan_commit(pRExC_state,data);
 			if (mincount && last_str) {
 			    sv_setsv(data->last_found, last_str);
 			    data->last_end = data->pos_min;
@@ -1133,12 +1170,12 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		continue;
 	    default:			/* REF and CLUMP only? */
 		if (flags & SCF_DO_SUBSTR) {
-		    scan_commit(data);	/* Cannot expect anything... */
+		    scan_commit(pRExC_state,data);	/* Cannot expect anything... */
 		    data->longest = &(data->longest_float);
 		}
 		is_inf = is_inf_internal = 1;
 		if (flags & SCF_DO_STCLASS_OR)
-		    cl_anything(data->start_class);
+		    cl_anything(pRExC_state, data->start_class);
 		flags &= ~SCF_DO_STCLASS;
 		break;
 	    }
@@ -1147,7 +1184,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 	    int value;
 
 	    if (flags & SCF_DO_SUBSTR) {
-		scan_commit(data);
+		scan_commit(pRExC_state,data);
 		data->pos_min++;
 	    }
 	    min++;
@@ -1175,7 +1212,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		  do_default:
 		    /* Perl_croak(aTHX_ "panic: unexpected simple REx opcode %d", OP(scan)); */
 		    if (flags & SCF_DO_STCLASS_OR) /* Allow everything */
-			cl_anything(data->start_class);
+			cl_anything(pRExC_state, data->start_class);
 		    break;
 		case REG_ANY:
 		    if (OP(scan) == SANY)
@@ -1183,7 +1220,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		    if (flags & SCF_DO_STCLASS_OR) { /* Everything but \n */
 			value = (ANYOF_BITMAP_TEST(data->start_class,'\n')
 				 || (data->start_class->flags & ANYOF_CLASS));
-			cl_anything(data->start_class);
+			cl_anything(pRExC_state, data->start_class);
 		    }
 		    if (flags & SCF_DO_STCLASS_AND || !value)
 			ANYOF_BITMAP_CLEAR(data->start_class,'\n');
@@ -1193,7 +1230,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 			cl_and(data->start_class,
 			       (struct regnode_charclass_class*)scan);
 		    else
-			cl_or(data->start_class,
+			cl_or(pRExC_state, data->start_class,
 			      (struct regnode_charclass_class*)scan);
 		    break;
 		case ALNUM:
@@ -1380,13 +1417,13 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		data_fake.last_closep = &fake;
 	    if ( flags & SCF_DO_STCLASS && !scan->flags
 		 && OP(scan) == IFMATCH ) { /* Lookahead */
-		cl_init(&intrnl);
+		cl_init(pRExC_state, &intrnl);
 		data_fake.start_class = &intrnl;
 		f = SCF_DO_STCLASS_AND;
 	    }
 	    next = regnext(scan);
 	    nscan = NEXTOPER(NEXTOPER(scan));
-	    minnext = study_chunk(&nscan, &deltanext, last, &data_fake, f);
+	    minnext = study_chunk(pRExC_state, &nscan, &deltanext, last, &data_fake, f);
 	    if (scan->flags) {
 		if (deltanext) {
 		    vFAIL("Variable length lookbehind not implemented");
@@ -1429,12 +1466,12 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 	}
 	else if (OP(scan) == LOGICAL && scan->flags == 2) { /* Embedded follows */
 		if (flags & SCF_DO_SUBSTR) {
-		    scan_commit(data);
+		    scan_commit(pRExC_state,data);
 		    data->longest = &(data->longest_float);
 		}
 		is_inf = is_inf_internal = 1;
 		if (flags & SCF_DO_STCLASS_OR) /* Allow everything */
-		    cl_anything(data->start_class);
+		    cl_anything(pRExC_state, data->start_class);
 		flags &= ~SCF_DO_STCLASS;
 	}
 	/* Else: zero-length, ignore. */
@@ -1462,24 +1499,24 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 }
 
 STATIC I32
-S_add_data(pTHX_ I32 n, char *s)
+S_add_data(pTHX_ RExC_state_t *pRExC_state, I32 n, char *s)
 {
     dTHR;
-    if (PL_regcomp_rx->data) {
-	Renewc(PL_regcomp_rx->data, 
-	       sizeof(*PL_regcomp_rx->data) + sizeof(void*) * (PL_regcomp_rx->data->count + n - 1), 
+    if (RExC_rx->data) {
+	Renewc(RExC_rx->data, 
+	       sizeof(*RExC_rx->data) + sizeof(void*) * (RExC_rx->data->count + n - 1), 
 	       char, struct reg_data);
-	Renew(PL_regcomp_rx->data->what, PL_regcomp_rx->data->count + n, U8);
-	PL_regcomp_rx->data->count += n;
+	Renew(RExC_rx->data->what, RExC_rx->data->count + n, U8);
+	RExC_rx->data->count += n;
     }
     else {
-	Newc(1207, PL_regcomp_rx->data, sizeof(*PL_regcomp_rx->data) + sizeof(void*) * (n - 1),
+	Newc(1207, RExC_rx->data, sizeof(*RExC_rx->data) + sizeof(void*) * (n - 1),
 	     char, struct reg_data);
-	New(1208, PL_regcomp_rx->data->what, n, U8);
-	PL_regcomp_rx->data->count = n;
+	New(1208, RExC_rx->data->what, n, U8);
+	RExC_rx->data->count = n;
     }
-    Copy(s, PL_regcomp_rx->data->what + PL_regcomp_rx->data->count - n, n, U8);
-    return PL_regcomp_rx->data->count - n;
+    Copy(s, RExC_rx->data->what + RExC_rx->data->count - n, n, U8);
+    return RExC_rx->data->count - n;
 }
 
 void
@@ -1535,100 +1572,103 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     I32 sawplus = 0;
     I32 sawopen = 0;
     scan_data_t data;
+    RExC_state_t RExC_state;
+    RExC_state_t *pRExC_state = &RExC_state;
 
     if (exp == NULL)
 	FAIL("NULL regexp argument");
 
+    /* XXXX This looks very suspicious... */
     if (pm->op_pmdynflags & PMdf_UTF8) {
 	PL_reg_flags |= RF_utf8;
     }
     else
 	PL_reg_flags = 0;
 
-    PL_regprecomp = savepvn(exp, xend - exp);
+    RExC_precomp = savepvn(exp, xend - exp);
     DEBUG_r(if (!PL_colorset) reginitcolors());
     DEBUG_r(PerlIO_printf(Perl_debug_log, "%sCompiling REx%s `%s%*s%s'\n",
 		      PL_colors[4],PL_colors[5],PL_colors[0],
-		      (int)(xend - exp), PL_regprecomp, PL_colors[1]));
-    PL_regflags = pm->op_pmflags;
-    PL_regsawback = 0;
+		      (int)(xend - exp), RExC_precomp, PL_colors[1]));
+    RExC_flags16 = pm->op_pmflags;
+    RExC_sawback = 0;
 
-    PL_regseen = 0;
-    PL_seen_zerolen = *exp == '^' ? -1 : 0;
-    PL_seen_evals = 0;
-    PL_extralen = 0;
+    RExC_seen = 0;
+    RExC_seen_zerolen = *exp == '^' ? -1 : 0;
+    RExC_seen_evals = 0;
+    RExC_extralen = 0;
 
     /* First pass: determine size, legality. */
-    PL_regcomp_parse = exp;
-    PL_regxend = xend;
-    PL_regnaughty = 0;
-    PL_regnpar = 1;
-    PL_regsize = 0L;
-    PL_regcode = &PL_regdummy;
-    PL_reg_whilem_seen = 0;
+    RExC_parse = exp;
+    RExC_end = xend;
+    RExC_naughty = 0;
+    RExC_npar = 1;
+    RExC_size = 0L;
+    RExC_emit = &PL_regdummy;
+    RExC_whilem_seen = 0;
 #if 0 /* REGC() is (currently) a NOP at the first pass.
        * Clever compilers notice this and complain. --jhi */
-    REGC((U8)REG_MAGIC, (char*)PL_regcode);
+    REGC((U8)REG_MAGIC, (char*)RExC_emit);
 #endif
-    if (reg(0, &flags) == NULL) {
-	Safefree(PL_regprecomp);
-	PL_regprecomp = Nullch;
+    if (reg(pRExC_state, 0, &flags) == NULL) {
+	Safefree(RExC_precomp);
+	RExC_precomp = Nullch;
 	return(NULL);
     }
-    DEBUG_r(PerlIO_printf(Perl_debug_log, "size %"IVdf" ", (IV)PL_regsize));
+    DEBUG_r(PerlIO_printf(Perl_debug_log, "size %"IVdf" ", (IV)RExC_size));
 
     /* Small enough for pointer-storage convention?
        If extralen==0, this means that we will not need long jumps. */
-    if (PL_regsize >= 0x10000L && PL_extralen)
-        PL_regsize += PL_extralen;
+    if (RExC_size >= 0x10000L && RExC_extralen)
+        RExC_size += RExC_extralen;
     else
-	PL_extralen = 0;
-    if (PL_reg_whilem_seen > 15)
-	PL_reg_whilem_seen = 15;
+	RExC_extralen = 0;
+    if (RExC_whilem_seen > 15)
+	RExC_whilem_seen = 15;
 
     /* Allocate space and initialize. */
-    Newc(1001, r, sizeof(regexp) + (unsigned)PL_regsize * sizeof(regnode),
+    Newc(1001, r, sizeof(regexp) + (unsigned)RExC_size * sizeof(regnode),
 	 char, regexp);
     if (r == NULL)
 	FAIL("Regexp out of space");
 
 #ifdef DEBUGGING
     /* avoid reading uninitialized memory in DEBUGGING code in study_chunk() */
-    Zero(r, sizeof(regexp) + (unsigned)PL_regsize * sizeof(regnode), char);
+    Zero(r, sizeof(regexp) + (unsigned)RExC_size * sizeof(regnode), char);
 #endif
     r->refcnt = 1;
     r->prelen = xend - exp;
-    r->precomp = PL_regprecomp;
+    r->precomp = RExC_precomp;
     r->subbeg = NULL;
     r->reganch = pm->op_pmflags & PMf_COMPILETIME;
-    r->nparens = PL_regnpar - 1;	/* set early to validate backrefs */
+    r->nparens = RExC_npar - 1;	/* set early to validate backrefs */
 
     r->substrs = 0;			/* Useful during FAIL. */
     r->startp = 0;			/* Useful during FAIL. */
     r->endp = 0;			/* Useful during FAIL. */
 
-    PL_regcomp_rx = r;
+    RExC_rx = r;
 
     /* Second pass: emit code. */
-    PL_regcomp_parse = exp;
-    PL_regxend = xend;
-    PL_regnaughty = 0;
-    PL_regnpar = 1;
-    PL_regcode = r->program;
+    RExC_parse = exp;
+    RExC_end = xend;
+    RExC_naughty = 0;
+    RExC_npar = 1;
+    RExC_emit = r->program;
     /* Store the count of eval-groups for security checks: */
-    PL_regcode->next_off = ((PL_seen_evals > U16_MAX) ? U16_MAX : PL_seen_evals);
-    REGC((U8)REG_MAGIC, (char*) PL_regcode++);
+    RExC_emit->next_off = ((RExC_seen_evals > U16_MAX) ? U16_MAX : RExC_seen_evals);
+    REGC((U8)REG_MAGIC, (char*) RExC_emit++);
     r->data = 0;
-    if (reg(0, &flags) == NULL)
+    if (reg(pRExC_state, 0, &flags) == NULL)
 	return(NULL);
 
     /* Dig out information for optimizations. */
     r->reganch = pm->op_pmflags & PMf_COMPILETIME; /* Again? */
-    pm->op_pmflags = PL_regflags;
+    pm->op_pmflags = RExC_flags16;
     if (UTF)
 	r->reganch |= ROPT_UTF8;
     r->regstclass = NULL;
-    if (PL_regnaughty >= 10)	/* Probably an expensive pattern. */
+    if (RExC_naughty >= 10)	/* Probably an expensive pattern. */
 	r->reganch |= ROPT_NAUGHTY;
     scan = r->program + 1;		/* First BRANCH. */
 
@@ -1704,8 +1744,8 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	    first = NEXTOPER(first);
 	    goto again;
 	}
-	if (sawplus && (!sawopen || !PL_regsawback) 
-	    && !(PL_regseen & REG_SEEN_EVAL)) /* May examine pos and $& */
+	if (sawplus && (!sawopen || !RExC_sawback) 
+	    && !(RExC_seen & REG_SEEN_EVAL)) /* May examine pos and $& */
 	    /* x+ must match at the 1st pos of run of x's */
 	    r->reganch |= ROPT_SKIP;
 
@@ -1731,28 +1771,28 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	data.longest = &(data.longest_fixed);
 	first = scan;
 	if (!r->regstclass) {
-	    cl_init(&ch_class);
+	    cl_init(pRExC_state, &ch_class);
 	    data.start_class = &ch_class;
 	    stclass_flag = SCF_DO_STCLASS_AND;
 	} else				/* XXXX Check for BOUND? */
 	    stclass_flag = 0;
 	data.last_closep = &last_close;
 
-	minlen = study_chunk(&first, &fake, scan + PL_regsize, /* Up to end */
+	minlen = study_chunk(pRExC_state, &first, &fake, scan + RExC_size, /* Up to end */
 			     &data, SCF_DO_SUBSTR | stclass_flag);
-	if ( PL_regnpar == 1 && data.longest == &(data.longest_fixed)
+	if ( RExC_npar == 1 && data.longest == &(data.longest_fixed)
 	     && data.last_start_min == 0 && data.last_end > 0 
-	     && !PL_seen_zerolen
-	     && (!(PL_regseen & REG_SEEN_GPOS) || (r->reganch & ROPT_ANCH_GPOS)))
+	     && !RExC_seen_zerolen
+	     && (!(RExC_seen & REG_SEEN_GPOS) || (r->reganch & ROPT_ANCH_GPOS)))
 	    r->reganch |= ROPT_CHECK_ALL;
-	scan_commit(&data);
+	scan_commit(pRExC_state, &data);
 	SvREFCNT_dec(data.last_found);
 
 	longest_float_length = CHR_SVLEN(data.longest_float);
 	if (longest_float_length
 	    || (data.flags & SF_FL_BEFORE_EOL
 		&& (!(data.flags & SF_FL_BEFORE_MEOL)
-		    || (PL_regflags & PMf_MULTILINE)))) {
+		    || (RExC_flags16 & PMf_MULTILINE)))) {
 	    int t;
 
 	    if (SvCUR(data.longest_fixed) 			/* ok to leave SvCUR */
@@ -1765,7 +1805,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	    r->float_max_offset = data.offset_float_max;
 	    t = (data.flags & SF_FL_BEFORE_EOL /* Can't have SEOL and MULTI */
 		       && (!(data.flags & SF_FL_BEFORE_MEOL)
-			   || (PL_regflags & PMf_MULTILINE)));
+			   || (RExC_flags16 & PMf_MULTILINE)));
 	    fbm_compile(r->float_substr, t ? FBMcf_TAIL : 0);
 	}
 	else {
@@ -1779,14 +1819,14 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	if (longest_fixed_length
 	    || (data.flags & SF_FIX_BEFORE_EOL /* Cannot have SEOL and MULTI */
 		&& (!(data.flags & SF_FIX_BEFORE_MEOL)
-		    || (PL_regflags & PMf_MULTILINE)))) {
+		    || (RExC_flags16 & PMf_MULTILINE)))) {
 	    int t;
 
 	    r->anchored_substr = data.longest_fixed;
 	    r->anchored_offset = data.offset_fixed;
 	    t = (data.flags & SF_FIX_BEFORE_EOL /* Can't have SEOL and MULTI */
 		 && (!(data.flags & SF_FIX_BEFORE_MEOL)
-		     || (PL_regflags & PMf_MULTILINE)));
+		     || (RExC_flags16 & PMf_MULTILINE)));
 	    fbm_compile(r->anchored_substr, t ? FBMcf_TAIL : 0);
 	}
 	else {
@@ -1802,14 +1842,14 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	    && !(data.start_class->flags & ANYOF_EOS)
 	    && !cl_is_anything(data.start_class)) {
 	    SV *sv;
-	    I32 n = add_data(1, "f");
+	    I32 n = add_data(pRExC_state, 1, "f");
 
-	    New(1006, PL_regcomp_rx->data->data[n], 1, 
+	    New(1006, RExC_rx->data->data[n], 1, 
 		struct regnode_charclass_class);
 	    StructCopy(data.start_class,
-		       (struct regnode_charclass_class*)PL_regcomp_rx->data->data[n],
+		       (struct regnode_charclass_class*)RExC_rx->data->data[n],
 		       struct regnode_charclass_class);
-	    r->regstclass = (regnode*)PL_regcomp_rx->data->data[n];
+	    r->regstclass = (regnode*)RExC_rx->data->data[n];
 	    r->reganch &= ~ROPT_SKIP;	/* Used in find_byclass(). */
 	    DEBUG_r((sv = sv_newmortal(),
 		     regprop(sv, (regnode*)data.start_class),
@@ -1845,22 +1885,22 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	
 	DEBUG_r(PerlIO_printf(Perl_debug_log, "\n"));
 	scan = r->program + 1;
-	cl_init(&ch_class);
+	cl_init(pRExC_state, &ch_class);
 	data.start_class = &ch_class;
 	data.last_closep = &last_close;
-	minlen = study_chunk(&scan, &fake, scan + PL_regsize, &data, SCF_DO_STCLASS_AND);
+	minlen = study_chunk(pRExC_state, &scan, &fake, scan + RExC_size, &data, SCF_DO_STCLASS_AND);
 	r->check_substr = r->anchored_substr = r->float_substr = Nullsv;
 	if (!(data.start_class->flags & ANYOF_EOS)
 	    && !cl_is_anything(data.start_class)) {
 	    SV *sv;
-	    I32 n = add_data(1, "f");
+	    I32 n = add_data(pRExC_state, 1, "f");
 
-	    New(1006, PL_regcomp_rx->data->data[n], 1, 
+	    New(1006, RExC_rx->data->data[n], 1, 
 		struct regnode_charclass_class);
 	    StructCopy(data.start_class,
-		       (struct regnode_charclass_class*)PL_regcomp_rx->data->data[n],
+		       (struct regnode_charclass_class*)RExC_rx->data->data[n],
 		       struct regnode_charclass_class);
-	    r->regstclass = (regnode*)PL_regcomp_rx->data->data[n];
+	    r->regstclass = (regnode*)RExC_rx->data->data[n];
 	    r->reganch &= ~ROPT_SKIP;	/* Used in find_byclass(). */
 	    DEBUG_r((sv = sv_newmortal(),
 		     regprop(sv, (regnode*)data.start_class),
@@ -1870,14 +1910,14 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     }
 
     r->minlen = minlen;
-    if (PL_regseen & REG_SEEN_GPOS) 
+    if (RExC_seen & REG_SEEN_GPOS) 
 	r->reganch |= ROPT_GPOS_SEEN;
-    if (PL_regseen & REG_SEEN_LOOKBEHIND)
+    if (RExC_seen & REG_SEEN_LOOKBEHIND)
 	r->reganch |= ROPT_LOOKBEHIND_SEEN;
-    if (PL_regseen & REG_SEEN_EVAL)
+    if (RExC_seen & REG_SEEN_EVAL)
 	r->reganch |= ROPT_EVAL_SEEN;
-    Newz(1002, r->startp, PL_regnpar, I32);
-    Newz(1002, r->endp, PL_regnpar, I32);
+    Newz(1002, r->startp, RExC_npar, I32);
+    Newz(1002, r->endp, RExC_npar, I32);
     DEBUG_r(regdump(r));
     return(r);
 }
@@ -1892,7 +1932,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
  * follows makes it hard to avoid.
  */
 STATIC regnode *
-S_reg(pTHX_ I32 paren, I32 *flagp)
+S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
     /* paren: Parenthesized? 0=top, 1=(, inside: changed to letter. */
 {
     dTHR;
@@ -1901,34 +1941,34 @@ S_reg(pTHX_ I32 paren, I32 *flagp)
     register regnode *lastbr;
     register regnode *ender = 0;
     register I32 parno = 0;
-    I32 flags, oregflags = PL_regflags, have_branch = 0, open = 0;
-    char *oregcomp_parse = PL_regcomp_parse;
+    I32 flags, oregflags = RExC_flags16, have_branch = 0, open = 0;
+    char *oregcomp_parse = RExC_parse;
     char c;
 
     *flagp = 0;				/* Tentatively. */
 
     /* Make an OPEN node, if parenthesized. */
     if (paren) {
-	if (*PL_regcomp_parse == '?') {
+	if (*RExC_parse == '?') {
 	    U16 posflags = 0, negflags = 0;
 	    U16 *flagsp = &posflags;
 	    int logical = 0;
-	    char *seqstart = PL_regcomp_parse;
+	    char *seqstart = RExC_parse;
 
-	    PL_regcomp_parse++;
-	    paren = *PL_regcomp_parse++;
+	    RExC_parse++;
+	    paren = *RExC_parse++;
 	    ret = NULL;			/* For look-ahead/behind. */
 	    switch (paren) {
 	    case '<':
-		PL_regseen |= REG_SEEN_LOOKBEHIND;
-		if (*PL_regcomp_parse == '!') 
+		RExC_seen |= REG_SEEN_LOOKBEHIND;
+		if (*RExC_parse == '!') 
 		    paren = ',';
-		if (*PL_regcomp_parse != '=' && *PL_regcomp_parse != '!') 
+		if (*RExC_parse != '=' && *RExC_parse != '!') 
 		    goto unknown;
-		PL_regcomp_parse++;
+		RExC_parse++;
 	    case '=':
 	    case '!':
-		PL_seen_zerolen++;
+		RExC_seen_zerolen++;
 	    case ':':
 	    case '>':
 		break;
@@ -1937,51 +1977,51 @@ S_reg(pTHX_ I32 paren, I32 *flagp)
 		vFAIL2("Sequence (?%c...) not implemented", (int)paren);
 		break;
 	    case '#':
-		while (*PL_regcomp_parse && *PL_regcomp_parse != ')')
-		    PL_regcomp_parse++;
-		if (*PL_regcomp_parse != ')')
+		while (*RExC_parse && *RExC_parse != ')')
+		    RExC_parse++;
+		if (*RExC_parse != ')')
 		    FAIL("Sequence (?#... not terminated");
-		nextchar();
+		nextchar(pRExC_state);
 		*flagp = TRYAGAIN;
 		return NULL;
 	    case 'p':
 		if (SIZE_ONLY)
-		    vWARN(PL_regcomp_parse, "(?p{}) is deprecated - use (??{})");
+		    vWARN(RExC_parse, "(?p{}) is deprecated - use (??{})");
 		/* FALL THROUGH*/
 	    case '?':
 		logical = 1;
-		paren = *PL_regcomp_parse++;
+		paren = *RExC_parse++;
 		/* FALL THROUGH */
 	    case '{':
 	    {
 		dTHR;
 		I32 count = 1, n = 0;
 		char c;
-		char *s = PL_regcomp_parse;
+		char *s = RExC_parse;
 		SV *sv;
 		OP_4tree *sop, *rop;
 
-		PL_seen_zerolen++;
-		PL_regseen |= REG_SEEN_EVAL;
-		while (count && (c = *PL_regcomp_parse)) {
-		    if (c == '\\' && PL_regcomp_parse[1])
-			PL_regcomp_parse++;
+		RExC_seen_zerolen++;
+		RExC_seen |= REG_SEEN_EVAL;
+		while (count && (c = *RExC_parse)) {
+		    if (c == '\\' && RExC_parse[1])
+			RExC_parse++;
 		    else if (c == '{') 
 			count++;
 		    else if (c == '}') 
 			count--;
-		    PL_regcomp_parse++;
+		    RExC_parse++;
 		}
-		if (*PL_regcomp_parse != ')')
+		if (*RExC_parse != ')')
 		{
-		    PL_regcomp_parse = s;		    
+		    RExC_parse = s;		    
 		    vFAIL("Sequence (?{...}) not terminated or not {}-balanced");
 		}
 		if (!SIZE_ONLY) {
 		    AV *av;
 		    
-		    if (PL_regcomp_parse - 1 - s) 
-			sv = newSVpvn(s, PL_regcomp_parse - 1 - s);
+		    if (RExC_parse - 1 - s) 
+			sv = newSVpvn(s, RExC_parse - 1 - s);
 		    else
 			sv = newSVpvn("", 0);
 
@@ -1990,14 +2030,14 @@ S_reg(pTHX_ I32 paren, I32 *flagp)
 		    rop = sv_compile_2op(sv, &sop, "re", &av);
 		    LEAVE;
 
-		    n = add_data(3, "nop");
-		    PL_regcomp_rx->data->data[n] = (void*)rop;
-		    PL_regcomp_rx->data->data[n+1] = (void*)sop;
-		    PL_regcomp_rx->data->data[n+2] = (void*)av;
+		    n = add_data(pRExC_state, 3, "nop");
+		    RExC_rx->data->data[n] = (void*)rop;
+		    RExC_rx->data->data[n+1] = (void*)sop;
+		    RExC_rx->data->data[n+2] = (void*)av;
 		    SvREFCNT_dec(sv);
 		}
 		else {						/* First pass */
-		    if (PL_reginterp_cnt < ++PL_seen_evals
+		    if (PL_reginterp_cnt < ++RExC_seen_evals
 			&& PL_curcop != &PL_compiling)
 			/* No compiled RE interpolated, has runtime
 			   components ===> unsafe.  */
@@ -2006,113 +2046,113 @@ S_reg(pTHX_ I32 paren, I32 *flagp)
 			FAIL("Eval-group in insecure regular expression");
 		}
 		
-		nextchar();
+		nextchar(pRExC_state);
 		if (logical) {
-		    ret = reg_node(LOGICAL);
+		    ret = reg_node(pRExC_state, LOGICAL);
 		    if (!SIZE_ONLY)
 			ret->flags = 2;
-		    regtail(ret, reganode(EVAL, n));
+		    regtail(pRExC_state, ret, reganode(pRExC_state, EVAL, n));
 		    return ret;
 		}
-		return reganode(EVAL, n);
+		return reganode(pRExC_state, EVAL, n);
 	    }
 	    case '(':
 	    {
-		if (PL_regcomp_parse[0] == '?') {
-		    if (PL_regcomp_parse[1] == '=' || PL_regcomp_parse[1] == '!' 
-			|| PL_regcomp_parse[1] == '<' 
-			|| PL_regcomp_parse[1] == '{') { /* Lookahead or eval. */
+		if (RExC_parse[0] == '?') {
+		    if (RExC_parse[1] == '=' || RExC_parse[1] == '!' 
+			|| RExC_parse[1] == '<' 
+			|| RExC_parse[1] == '{') { /* Lookahead or eval. */
 			I32 flag;
 			
-			ret = reg_node(LOGICAL);
+			ret = reg_node(pRExC_state, LOGICAL);
 			if (!SIZE_ONLY)
 			    ret->flags = 1;
-			regtail(ret, reg(1, &flag));
+			regtail(pRExC_state, ret, reg(pRExC_state, 1, &flag));
 			goto insert_if;
 		    } 
 		}
-		else if (PL_regcomp_parse[0] >= '1' && PL_regcomp_parse[0] <= '9' ) {
-		    parno = atoi(PL_regcomp_parse++);
+		else if (RExC_parse[0] >= '1' && RExC_parse[0] <= '9' ) {
+		    parno = atoi(RExC_parse++);
 
-		    while (isDIGIT(*PL_regcomp_parse))
-			PL_regcomp_parse++;
-		    ret = reganode(GROUPP, parno);
-		    if ((c = *nextchar()) != ')')
+		    while (isDIGIT(*RExC_parse))
+			RExC_parse++;
+		    ret = reganode(pRExC_state, GROUPP, parno);
+		    if ((c = *nextchar(pRExC_state)) != ')')
 			vFAIL("Switch condition not recognized");
 		  insert_if:
-		    regtail(ret, reganode(IFTHEN, 0));
-		    br = regbranch(&flags, 1);
+		    regtail(pRExC_state, ret, reganode(pRExC_state, IFTHEN, 0));
+		    br = regbranch(pRExC_state, &flags, 1);
 		    if (br == NULL)
-			br = reganode(LONGJMP, 0);
+			br = reganode(pRExC_state, LONGJMP, 0);
 		    else
-			regtail(br, reganode(LONGJMP, 0));
-		    c = *nextchar();
+			regtail(pRExC_state, br, reganode(pRExC_state, LONGJMP, 0));
+		    c = *nextchar(pRExC_state);
 		    if (flags&HASWIDTH)
 			*flagp |= HASWIDTH;
 		    if (c == '|') {
-			lastbr = reganode(IFTHEN, 0); /* Fake one for optimizer. */
-			regbranch(&flags, 1);
-			regtail(ret, lastbr);
+			lastbr = reganode(pRExC_state, IFTHEN, 0); /* Fake one for optimizer. */
+			regbranch(pRExC_state, &flags, 1);
+			regtail(pRExC_state, ret, lastbr);
 		 	if (flags&HASWIDTH)
 			    *flagp |= HASWIDTH;
-			c = *nextchar();
+			c = *nextchar(pRExC_state);
 		    }
 		    else
 			lastbr = NULL;
 		    if (c != ')')
 			vFAIL("Switch (?(condition)... contains too many branches");
-		    ender = reg_node(TAIL);
-		    regtail(br, ender);
+		    ender = reg_node(pRExC_state, TAIL);
+		    regtail(pRExC_state, br, ender);
 		    if (lastbr) {
-			regtail(lastbr, ender);
-			regtail(NEXTOPER(NEXTOPER(lastbr)), ender);
+			regtail(pRExC_state, lastbr, ender);
+			regtail(pRExC_state, NEXTOPER(NEXTOPER(lastbr)), ender);
 		    }
 		    else
-			regtail(ret, ender);
+			regtail(pRExC_state, ret, ender);
 		    return ret;
 		}
 		else {
-		    vFAIL2("Unknown switch condition (?(%.2s", PL_regcomp_parse);
+		    vFAIL2("Unknown switch condition (?(%.2s", RExC_parse);
 		}
 	    }
             case 0:
-		PL_regcomp_parse--; /* for vFAIL to print correctly */
+		RExC_parse--; /* for vFAIL to print correctly */
                 vFAIL("Sequence (? incomplete");
                 break;
 	    default:
-		--PL_regcomp_parse;
+		--RExC_parse;
 	      parse_flags:
-		while (*PL_regcomp_parse && strchr("iogcmsx", *PL_regcomp_parse)) {
-		    if (*PL_regcomp_parse != 'o')
-			pmflag(flagsp, *PL_regcomp_parse);
-		    ++PL_regcomp_parse;
+		while (*RExC_parse && strchr("iogcmsx", *RExC_parse)) {
+		    if (*RExC_parse != 'o')
+			pmflag(flagsp, *RExC_parse);
+		    ++RExC_parse;
 		}
-		if (*PL_regcomp_parse == '-') {
+		if (*RExC_parse == '-') {
 		    flagsp = &negflags;
-		    ++PL_regcomp_parse;
+		    ++RExC_parse;
 		    goto parse_flags;
 		}
-		PL_regflags |= posflags;
-		PL_regflags &= ~negflags;
-		if (*PL_regcomp_parse == ':') {
-		    PL_regcomp_parse++;
+		RExC_flags16 |= posflags;
+		RExC_flags16 &= ~negflags;
+		if (*RExC_parse == ':') {
+		    RExC_parse++;
 		    paren = ':';
 		    break;
 		}		
 	      unknown:
-		if (*PL_regcomp_parse != ')') {
-		    PL_regcomp_parse++;
-		    vFAIL3("Sequence (%.*s...) not recognized", PL_regcomp_parse-seqstart, seqstart);
+		if (*RExC_parse != ')') {
+		    RExC_parse++;
+		    vFAIL3("Sequence (%.*s...) not recognized", RExC_parse-seqstart, seqstart);
 		}
-		nextchar();
+		nextchar(pRExC_state);
 		*flagp = TRYAGAIN;
 		return NULL;
 	    }
 	}
 	else {
-	    parno = PL_regnpar;
-	    PL_regnpar++;
-	    ret = reganode(OPEN, parno);
+	    parno = RExC_npar;
+	    RExC_npar++;
+	    ret = reganode(pRExC_state, OPEN, parno);
 	    open = 1;
 	}
     }
@@ -2120,24 +2160,24 @@ S_reg(pTHX_ I32 paren, I32 *flagp)
 	ret = NULL;
 
     /* Pick up the branches, linking them together. */
-    br = regbranch(&flags, 1);
+    br = regbranch(pRExC_state, &flags, 1);
     if (br == NULL)
 	return(NULL);
-    if (*PL_regcomp_parse == '|') {
-	if (!SIZE_ONLY && PL_extralen) {
-	    reginsert(BRANCHJ, br);
+    if (*RExC_parse == '|') {
+	if (!SIZE_ONLY && RExC_extralen) {
+	    reginsert(pRExC_state, BRANCHJ, br);
 	}
 	else
-	    reginsert(BRANCH, br);
+	    reginsert(pRExC_state, BRANCH, br);
 	have_branch = 1;
 	if (SIZE_ONLY)
-	    PL_extralen += 1;		/* For BRANCHJ-BRANCH. */
+	    RExC_extralen += 1;		/* For BRANCHJ-BRANCH. */
     }
     else if (paren == ':') {
 	*flagp |= flags&SIMPLE;
     }
     if (open) {				/* Starts with OPEN. */
-	regtail(ret, br);		/* OPEN -> first. */
+	regtail(pRExC_state, ret, br);		/* OPEN -> first. */
     }
     else if (paren != '?')		/* Not Conditional */
 	ret = br;
@@ -2145,18 +2185,18 @@ S_reg(pTHX_ I32 paren, I32 *flagp)
 	*flagp |= HASWIDTH;
     *flagp |= flags&SPSTART;
     lastbr = br;
-    while (*PL_regcomp_parse == '|') {
-	if (!SIZE_ONLY && PL_extralen) {
-	    ender = reganode(LONGJMP,0);
-	    regtail(NEXTOPER(NEXTOPER(lastbr)), ender); /* Append to the previous. */
+    while (*RExC_parse == '|') {
+	if (!SIZE_ONLY && RExC_extralen) {
+	    ender = reganode(pRExC_state, LONGJMP,0);
+	    regtail(pRExC_state, NEXTOPER(NEXTOPER(lastbr)), ender); /* Append to the previous. */
 	}
 	if (SIZE_ONLY)
-	    PL_extralen += 2;		/* Account for LONGJMP. */
-	nextchar();
-	br = regbranch(&flags, 0);
+	    RExC_extralen += 2;		/* Account for LONGJMP. */
+	nextchar(pRExC_state);
+	br = regbranch(pRExC_state, &flags, 0);
 	if (br == NULL)
 	    return(NULL);
-	regtail(lastbr, br);		/* BRANCH -> BRANCH. */
+	regtail(pRExC_state, lastbr, br);		/* BRANCH -> BRANCH. */
 	lastbr = br;
 	if (flags&HASWIDTH)
 	    *flagp |= HASWIDTH;
@@ -2167,10 +2207,10 @@ S_reg(pTHX_ I32 paren, I32 *flagp)
 	/* Make a closing node, and hook it on the end. */
 	switch (paren) {
 	case ':':
-	    ender = reg_node(TAIL);
+	    ender = reg_node(pRExC_state, TAIL);
 	    break;
 	case 1:
-	    ender = reganode(CLOSE, parno);
+	    ender = reganode(pRExC_state, CLOSE, parno);
 	    break;
 	case '<':
 	case ',':
@@ -2179,18 +2219,18 @@ S_reg(pTHX_ I32 paren, I32 *flagp)
 	    *flagp &= ~HASWIDTH;
 	    /* FALL THROUGH */
 	case '>':
-	    ender = reg_node(SUCCEED);
+	    ender = reg_node(pRExC_state, SUCCEED);
 	    break;
 	case 0:
-	    ender = reg_node(END);
+	    ender = reg_node(pRExC_state, END);
 	    break;
 	}
-	regtail(lastbr, ender);
+	regtail(pRExC_state, lastbr, ender);
 
 	if (have_branch) {
 	    /* Hook the tails of the branches to the closing node. */
 	    for (br = ret; br != NULL; br = regnext(br)) {
-		regoptail(br, ender);
+		regoptail(pRExC_state, br, ender);
 	    }
 	}
     }
@@ -2205,23 +2245,23 @@ S_reg(pTHX_ I32 paren, I32 *flagp)
 
 	    if (paren == '>')
 		node = SUSPEND, flag = 0;
-	    reginsert(node,ret);
+	    reginsert(pRExC_state, node,ret);
 	    ret->flags = flag;
-	    regtail(ret, reg_node(TAIL));
+	    regtail(pRExC_state, ret, reg_node(pRExC_state, TAIL));
 	}
     }
 
     /* Check for proper termination. */
     if (paren) {
-	PL_regflags = oregflags;
-	if (PL_regcomp_parse >= PL_regxend || *nextchar() != ')') {
-	    PL_regcomp_parse = oregcomp_parse;
+	RExC_flags16 = oregflags;
+	if (RExC_parse >= RExC_end || *nextchar(pRExC_state) != ')') {
+	    RExC_parse = oregcomp_parse;
 	    vFAIL("Unmatched (");
 	}
     }
-    else if (!paren && PL_regcomp_parse < PL_regxend) {
-	if (*PL_regcomp_parse == ')') {
-	    PL_regcomp_parse++;
+    else if (!paren && RExC_parse < RExC_end) {
+	if (*RExC_parse == ')') {
+	    RExC_parse++;
 	    vFAIL("Unmatched )");
 	}
 	else
@@ -2238,7 +2278,7 @@ S_reg(pTHX_ I32 paren, I32 *flagp)
  * Implements the concatenation operator.
  */
 STATIC regnode *
-S_regbranch(pTHX_ I32 *flagp, I32 first)
+S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first)
 {
     dTHR;
     register regnode *ret;
@@ -2249,22 +2289,22 @@ S_regbranch(pTHX_ I32 *flagp, I32 first)
     if (first) 
 	ret = NULL;
     else {
-	if (!SIZE_ONLY && PL_extralen) 
-	    ret = reganode(BRANCHJ,0);
+	if (!SIZE_ONLY && RExC_extralen) 
+	    ret = reganode(pRExC_state, BRANCHJ,0);
 	else
-	    ret = reg_node(BRANCH);
+	    ret = reg_node(pRExC_state, BRANCH);
     }
 	
     if (!first && SIZE_ONLY) 
-	PL_extralen += 1;			/* BRANCHJ */
+	RExC_extralen += 1;			/* BRANCHJ */
     
     *flagp = WORST;			/* Tentatively. */
 
-    PL_regcomp_parse--;
-    nextchar();
-    while (PL_regcomp_parse < PL_regxend && *PL_regcomp_parse != '|' && *PL_regcomp_parse != ')') {
+    RExC_parse--;
+    nextchar(pRExC_state);
+    while (RExC_parse < RExC_end && *RExC_parse != '|' && *RExC_parse != ')') {
 	flags &= ~TRYAGAIN;
-	latest = regpiece(&flags);
+	latest = regpiece(pRExC_state, &flags);
 	if (latest == NULL) {
 	    if (flags & TRYAGAIN)
 		continue;
@@ -2276,14 +2316,14 @@ S_regbranch(pTHX_ I32 *flagp, I32 first)
 	if (chain == NULL) 	/* First piece. */
 	    *flagp |= flags&SPSTART;
 	else {
-	    PL_regnaughty++;
-	    regtail(chain, latest);
+	    RExC_naughty++;
+	    regtail(pRExC_state, chain, latest);
 	}
 	chain = latest;
 	c++;
     }
     if (chain == NULL) {	/* Loop ran zero times. */
-	chain = reg_node(NOTHING);
+	chain = reg_node(pRExC_state, NOTHING);
 	if (ret == NULL)
 	    ret = chain;
     }
@@ -2304,29 +2344,29 @@ S_regbranch(pTHX_ I32 *flagp, I32 first)
  * endmarker role is not redundant.
  */
 STATIC regnode *
-S_regpiece(pTHX_ I32 *flagp)
+S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp)
 {
     dTHR;
     register regnode *ret;
     register char op;
     register char *next;
     I32 flags;
-    char *origparse = PL_regcomp_parse;
+    char *origparse = RExC_parse;
     char *maxpos;
     I32 min;
     I32 max = REG_INFTY;
 
-    ret = regatom(&flags);
+    ret = regatom(pRExC_state, &flags);
     if (ret == NULL) {
 	if (flags & TRYAGAIN)
 	    *flagp |= TRYAGAIN;
 	return(NULL);
     }
 
-    op = *PL_regcomp_parse;
+    op = *RExC_parse;
 
-    if (op == '{' && regcurly(PL_regcomp_parse)) {
-	next = PL_regcomp_parse + 1;
+    if (op == '{' && regcurly(RExC_parse)) {
+	next = RExC_parse + 1;
 	maxpos = Nullch;
 	while (isDIGIT(*next) || *next == ',') {
 	    if (*next == ',') {
@@ -2340,42 +2380,42 @@ S_regpiece(pTHX_ I32 *flagp)
 	if (*next == '}') {		/* got one */
 	    if (!maxpos)
 		maxpos = next;
-	    PL_regcomp_parse++;
-	    min = atoi(PL_regcomp_parse);
+	    RExC_parse++;
+	    min = atoi(RExC_parse);
 	    if (*maxpos == ',')
 		maxpos++;
 	    else
-		maxpos = PL_regcomp_parse;
+		maxpos = RExC_parse;
 	    max = atoi(maxpos);
 	    if (!max && *maxpos != '0')
 		max = REG_INFTY;		/* meaning "infinity" */
 	    else if (max >= REG_INFTY)
 		vFAIL2("Quantifier in {,} bigger than %d", REG_INFTY - 1);
-	    PL_regcomp_parse = next;
-	    nextchar();
+	    RExC_parse = next;
+	    nextchar(pRExC_state);
 
 	do_curly:
 	    if ((flags&SIMPLE)) {
-		PL_regnaughty += 2 + PL_regnaughty / 2;
-		reginsert(CURLY, ret);
+		RExC_naughty += 2 + RExC_naughty / 2;
+		reginsert(pRExC_state, CURLY, ret);
 	    }
 	    else {
-		regnode *w = reg_node(WHILEM);
+		regnode *w = reg_node(pRExC_state, WHILEM);
 
 		w->flags = 0;
-		regtail(ret, w);
-		if (!SIZE_ONLY && PL_extralen) {
-		    reginsert(LONGJMP,ret);
-		    reginsert(NOTHING,ret);
+		regtail(pRExC_state, ret, w);
+		if (!SIZE_ONLY && RExC_extralen) {
+		    reginsert(pRExC_state, LONGJMP,ret);
+		    reginsert(pRExC_state, NOTHING,ret);
 		    NEXT_OFF(ret) = 3;	/* Go over LONGJMP. */
 		}
-		reginsert(CURLYX,ret);
-		if (!SIZE_ONLY && PL_extralen)
+		reginsert(pRExC_state, CURLYX,ret);
+		if (!SIZE_ONLY && RExC_extralen)
 		    NEXT_OFF(ret) = 3;	/* Go over NOTHING to LONGJMP. */
-		regtail(ret, reg_node(NOTHING));
+		regtail(pRExC_state, ret, reg_node(pRExC_state, NOTHING));
 		if (SIZE_ONLY)
-		    PL_reg_whilem_seen++, PL_extralen += 3;
-		PL_regnaughty += 4 + PL_regnaughty;	/* compound interest */
+		    RExC_whilem_seen++, RExC_extralen += 3;
+		RExC_naughty += 4 + RExC_naughty;	/* compound interest */
 	    }
 	    ret->flags = 0;
 
@@ -2415,23 +2455,23 @@ S_regpiece(pTHX_ I32 *flagp)
       vFAIL("Regexp *+ operand could be empty");
 #endif 
 
-    nextchar();
+    nextchar(pRExC_state);
 
     *flagp = (op != '+') ? (WORST|SPSTART|HASWIDTH) : (WORST|HASWIDTH);
 
     if (op == '*' && (flags&SIMPLE)) {
-	reginsert(STAR, ret);
+	reginsert(pRExC_state, STAR, ret);
 	ret->flags = 0;
-	PL_regnaughty += 4;
+	RExC_naughty += 4;
     }
     else if (op == '*') {
 	min = 0;
 	goto do_curly;
     }
     else if (op == '+' && (flags&SIMPLE)) {
-	reginsert(PLUS, ret);
+	reginsert(pRExC_state, PLUS, ret);
 	ret->flags = 0;
-	PL_regnaughty += 3;
+	RExC_naughty += 3;
     }
     else if (op == '+') {
 	min = 1;
@@ -2443,19 +2483,19 @@ S_regpiece(pTHX_ I32 *flagp)
     }
   nest_check:
     if (ckWARN(WARN_REGEXP) && !SIZE_ONLY && !(flags&HASWIDTH) && max > REG_INFTY/3) {
-	vWARN3(PL_regcomp_parse,
+	vWARN3(RExC_parse,
 	       "%.*s matches null string many times",
-	       PL_regcomp_parse - origparse,
+	       RExC_parse - origparse,
 	       origparse);
     }
 
-    if (*PL_regcomp_parse == '?') {
-	nextchar();
-	reginsert(MINMOD, ret);
-	regtail(ret, ret + NODE_STEP_REGNODE);
+    if (*RExC_parse == '?') {
+	nextchar(pRExC_state);
+	reginsert(pRExC_state, MINMOD, ret);
+	regtail(pRExC_state, ret, ret + NODE_STEP_REGNODE);
     }
-    if (ISMULT2(PL_regcomp_parse)) {
-	PL_regcomp_parse++;
+    if (ISMULT2(RExC_parse)) {
+	RExC_parse++;
 	vFAIL("Nested quantifiers");
     }
 
@@ -2472,7 +2512,7 @@ S_regpiece(pTHX_ I32 *flagp)
  *
  * [Yes, it is worth fixing, some scripts can run twice the speed.] */
 STATIC regnode *
-S_regatom(pTHX_ I32 *flagp)
+S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp)
 {
     dTHR;
     register regnode *ret = 0;
@@ -2481,64 +2521,64 @@ S_regatom(pTHX_ I32 *flagp)
     *flagp = WORST;		/* Tentatively. */
 
 tryagain:
-    switch (*PL_regcomp_parse) {
+    switch (*RExC_parse) {
     case '^':
-	PL_seen_zerolen++;
-	nextchar();
-	if (PL_regflags & PMf_MULTILINE)
-	    ret = reg_node(MBOL);
-	else if (PL_regflags & PMf_SINGLELINE)
-	    ret = reg_node(SBOL);
+	RExC_seen_zerolen++;
+	nextchar(pRExC_state);
+	if (RExC_flags16 & PMf_MULTILINE)
+	    ret = reg_node(pRExC_state, MBOL);
+	else if (RExC_flags16 & PMf_SINGLELINE)
+	    ret = reg_node(pRExC_state, SBOL);
 	else
-	    ret = reg_node(BOL);
+	    ret = reg_node(pRExC_state, BOL);
 	break;
     case '$':
-	nextchar();
-	if (*PL_regcomp_parse) 
-	    PL_seen_zerolen++;
-	if (PL_regflags & PMf_MULTILINE)
-	    ret = reg_node(MEOL);
-	else if (PL_regflags & PMf_SINGLELINE)
-	    ret = reg_node(SEOL);
+	nextchar(pRExC_state);
+	if (*RExC_parse) 
+	    RExC_seen_zerolen++;
+	if (RExC_flags16 & PMf_MULTILINE)
+	    ret = reg_node(pRExC_state, MEOL);
+	else if (RExC_flags16 & PMf_SINGLELINE)
+	    ret = reg_node(pRExC_state, SEOL);
 	else
-	    ret = reg_node(EOL);
+	    ret = reg_node(pRExC_state, EOL);
 	break;
     case '.':
-	nextchar();
+	nextchar(pRExC_state);
 	if (UTF) {
-	    if (PL_regflags & PMf_SINGLELINE)
-		ret = reg_node(SANYUTF8);
+	    if (RExC_flags16 & PMf_SINGLELINE)
+		ret = reg_node(pRExC_state, SANYUTF8);
 	    else
-		ret = reg_node(ANYUTF8);
+		ret = reg_node(pRExC_state, ANYUTF8);
 	    *flagp |= HASWIDTH;
 	}
 	else {
-	    if (PL_regflags & PMf_SINGLELINE)
-		ret = reg_node(SANY);
+	    if (RExC_flags16 & PMf_SINGLELINE)
+		ret = reg_node(pRExC_state, SANY);
 	    else
-		ret = reg_node(REG_ANY);
+		ret = reg_node(pRExC_state, REG_ANY);
 	    *flagp |= HASWIDTH|SIMPLE;
 	}
-	PL_regnaughty++;
+	RExC_naughty++;
 	break;
     case '[':
     {
-	char *oregcomp_parse = ++PL_regcomp_parse;
-	ret = (UTF ? regclassutf8() : regclass());
-	if (*PL_regcomp_parse != ']') {
-	    PL_regcomp_parse = oregcomp_parse;
+	char *oregcomp_parse = ++RExC_parse;
+	ret = (UTF ? regclassutf8(pRExC_state) : regclass(pRExC_state));
+	if (*RExC_parse != ']') {
+	    RExC_parse = oregcomp_parse;
 	    vFAIL("Unmatched [");
 	}
-	nextchar();
+	nextchar(pRExC_state);
 	*flagp |= HASWIDTH|SIMPLE;
 	break;
     }
     case '(':
-	nextchar();
-	ret = reg(1, &flags);
+	nextchar(pRExC_state);
+	ret = reg(pRExC_state, 1, &flags);
 	if (ret == NULL) {
 		if (flags & TRYAGAIN) {
-		    if (PL_regcomp_parse == PL_regxend) {
+		    if (RExC_parse == RExC_end) {
 			 /* Make parent create an empty node if needed. */
 			*flagp |= TRYAGAIN;
 			return(NULL);
@@ -2559,155 +2599,155 @@ tryagain:
 				/* Supposed to be caught earlier. */
 	break;
     case '{':
-	if (!regcurly(PL_regcomp_parse)) {
-	    PL_regcomp_parse++;
+	if (!regcurly(RExC_parse)) {
+	    RExC_parse++;
 	    goto defchar;
 	}
 	/* FALL THROUGH */
     case '?':
     case '+':
     case '*':
-	PL_regcomp_parse++;
+	RExC_parse++;
 	vFAIL("Quantifier follows nothing");
 	break;
     case '\\':
-	switch (*++PL_regcomp_parse) {
+	switch (*++RExC_parse) {
 	case 'A':
-	    PL_seen_zerolen++;
-	    ret = reg_node(SBOL);
+	    RExC_seen_zerolen++;
+	    ret = reg_node(pRExC_state, SBOL);
 	    *flagp |= SIMPLE;
-	    nextchar();
+	    nextchar(pRExC_state);
 	    break;
 	case 'G':
-	    ret = reg_node(GPOS);
-	    PL_regseen |= REG_SEEN_GPOS;
+	    ret = reg_node(pRExC_state, GPOS);
+	    RExC_seen |= REG_SEEN_GPOS;
 	    *flagp |= SIMPLE;
-	    nextchar();
+	    nextchar(pRExC_state);
 	    break;
 	case 'Z':
-	    ret = reg_node(SEOL);
+	    ret = reg_node(pRExC_state, SEOL);
 	    *flagp |= SIMPLE;
-	    nextchar();
+	    nextchar(pRExC_state);
 	    break;
 	case 'z':
-	    ret = reg_node(EOS);
+	    ret = reg_node(pRExC_state, EOS);
 	    *flagp |= SIMPLE;
-	    PL_seen_zerolen++;		/* Do not optimize RE away */
-	    nextchar();
+	    RExC_seen_zerolen++;		/* Do not optimize RE away */
+	    nextchar(pRExC_state);
 	    break;
 	case 'C':
-	    ret = reg_node(SANY);
+	    ret = reg_node(pRExC_state, SANY);
 	    *flagp |= HASWIDTH|SIMPLE;
-	    nextchar();
+	    nextchar(pRExC_state);
 	    break;
 	case 'X':
-	    ret = reg_node(CLUMP);
+	    ret = reg_node(pRExC_state, CLUMP);
 	    *flagp |= HASWIDTH;
-	    nextchar();
+	    nextchar(pRExC_state);
 	    if (UTF && !PL_utf8_mark)
 		is_utf8_mark((U8*)"~");		/* preload table */
 	    break;
 	case 'w':
-	    ret = reg_node(
+	    ret = reg_node(pRExC_state, 
 		UTF
 		    ? (LOC ? ALNUMLUTF8 : ALNUMUTF8)
 		    : (LOC ? ALNUML     : ALNUM));
 	    *flagp |= HASWIDTH|SIMPLE;
-	    nextchar();
+	    nextchar(pRExC_state);
 	    if (UTF && !PL_utf8_alnum)
 		is_utf8_alnum((U8*)"a");	/* preload table */
 	    break;
 	case 'W':
-	    ret = reg_node(
+	    ret = reg_node(pRExC_state, 
 		UTF
 		    ? (LOC ? NALNUMLUTF8 : NALNUMUTF8)
 		    : (LOC ? NALNUML     : NALNUM));
 	    *flagp |= HASWIDTH|SIMPLE;
-	    nextchar();
+	    nextchar(pRExC_state);
 	    if (UTF && !PL_utf8_alnum)
 		is_utf8_alnum((U8*)"a");	/* preload table */
 	    break;
 	case 'b':
-	    PL_seen_zerolen++;
-	    PL_regseen |= REG_SEEN_LOOKBEHIND;
-	    ret = reg_node(
+	    RExC_seen_zerolen++;
+	    RExC_seen |= REG_SEEN_LOOKBEHIND;
+	    ret = reg_node(pRExC_state, 
 		UTF
 		    ? (LOC ? BOUNDLUTF8 : BOUNDUTF8)
 		    : (LOC ? BOUNDL     : BOUND));
 	    *flagp |= SIMPLE;
-	    nextchar();
+	    nextchar(pRExC_state);
 	    if (UTF && !PL_utf8_alnum)
 		is_utf8_alnum((U8*)"a");	/* preload table */
 	    break;
 	case 'B':
-	    PL_seen_zerolen++;
-	    PL_regseen |= REG_SEEN_LOOKBEHIND;
-	    ret = reg_node(
+	    RExC_seen_zerolen++;
+	    RExC_seen |= REG_SEEN_LOOKBEHIND;
+	    ret = reg_node(pRExC_state, 
 		UTF
 		    ? (LOC ? NBOUNDLUTF8 : NBOUNDUTF8)
 		    : (LOC ? NBOUNDL     : NBOUND));
 	    *flagp |= SIMPLE;
-	    nextchar();
+	    nextchar(pRExC_state);
 	    if (UTF && !PL_utf8_alnum)
 		is_utf8_alnum((U8*)"a");	/* preload table */
 	    break;
 	case 's':
-	    ret = reg_node(
+	    ret = reg_node(pRExC_state, 
 		UTF
 		    ? (LOC ? SPACELUTF8 : SPACEUTF8)
 		    : (LOC ? SPACEL     : SPACE));
 	    *flagp |= HASWIDTH|SIMPLE;
-	    nextchar();
+	    nextchar(pRExC_state);
 	    if (UTF && !PL_utf8_space)
 		is_utf8_space((U8*)" ");	/* preload table */
 	    break;
 	case 'S':
-	    ret = reg_node(
+	    ret = reg_node(pRExC_state, 
 		UTF
 		    ? (LOC ? NSPACELUTF8 : NSPACEUTF8)
 		    : (LOC ? NSPACEL     : NSPACE));
 	    *flagp |= HASWIDTH|SIMPLE;
-	    nextchar();
+	    nextchar(pRExC_state);
 	    if (UTF && !PL_utf8_space)
 		is_utf8_space((U8*)" ");	/* preload table */
 	    break;
 	case 'd':
-	    ret = reg_node(UTF ? DIGITUTF8 : DIGIT);
+	    ret = reg_node(pRExC_state, UTF ? DIGITUTF8 : DIGIT);
 	    *flagp |= HASWIDTH|SIMPLE;
-	    nextchar();
+	    nextchar(pRExC_state);
 	    if (UTF && !PL_utf8_digit)
 		is_utf8_digit((U8*)"1");	/* preload table */
 	    break;
 	case 'D':
-	    ret = reg_node(UTF ? NDIGITUTF8 : NDIGIT);
+	    ret = reg_node(pRExC_state, UTF ? NDIGITUTF8 : NDIGIT);
 	    *flagp |= HASWIDTH|SIMPLE;
-	    nextchar();
+	    nextchar(pRExC_state);
 	    if (UTF && !PL_utf8_digit)
 		is_utf8_digit((U8*)"1");	/* preload table */
 	    break;
 	case 'p':
 	case 'P':
 	    {	/* a lovely hack--pretend we saw [\pX] instead */
-		char* oldregxend = PL_regxend;
+		char* oldregxend = RExC_end;
 
-		if (PL_regcomp_parse[1] == '{') {
-		    PL_regxend = strchr(PL_regcomp_parse, '}');
-		    if (!PL_regxend) {
-			PL_regcomp_parse += 2;
-			PL_regxend = oldregxend;
+		if (RExC_parse[1] == '{') {
+		    RExC_end = strchr(RExC_parse, '}');
+		    if (!RExC_end) {
+			RExC_parse += 2;
+			RExC_end = oldregxend;
 			vFAIL("Missing right brace on \\p{}");
 		    }
-		    PL_regxend++;
+		    RExC_end++;
 		}
 		else
-		    PL_regxend = PL_regcomp_parse + 2;
-		PL_regcomp_parse--;
+		    RExC_end = RExC_parse + 2;
+		RExC_parse--;
 
-		ret = regclassutf8();
+		ret = regclassutf8(pRExC_state);
 
-		PL_regxend = oldregxend;
-		PL_regcomp_parse--;
-		nextchar();
+		RExC_end = oldregxend;
+		RExC_parse--;
+		nextchar(pRExC_state);
 		*flagp |= HASWIDTH|SIMPLE;
 	    }
 	    break;
@@ -2724,28 +2764,28 @@ tryagain:
 	case '1': case '2': case '3': case '4':
 	case '5': case '6': case '7': case '8': case '9':
 	    {
-		I32 num = atoi(PL_regcomp_parse);
+		I32 num = atoi(RExC_parse);
 
-		if (num > 9 && num >= PL_regnpar)
+		if (num > 9 && num >= RExC_npar)
 		    goto defchar;
 		else {
-		    while (isDIGIT(*PL_regcomp_parse))
-			PL_regcomp_parse++;
+		    while (isDIGIT(*RExC_parse))
+			RExC_parse++;
 
-		    if (!SIZE_ONLY && num > PL_regcomp_rx->nparens)
+		    if (!SIZE_ONLY && num > RExC_rx->nparens)
 			vFAIL("Reference to nonexistent group");
-		    PL_regsawback = 1;
-		    ret = reganode(FOLD
+		    RExC_sawback = 1;
+		    ret = reganode(pRExC_state, FOLD
 				   ? (LOC ? REFFL : REFF)
 				   : REF, num);
 		    *flagp |= HASWIDTH;
-		    PL_regcomp_parse--;
-		    nextchar();
+		    RExC_parse--;
+		    nextchar(pRExC_state);
 		}
 	    }
 	    break;
 	case '\0':
-	    if (PL_regcomp_parse >= PL_regxend)
+	    if (RExC_parse >= RExC_end)
 		FAIL("Trailing \\");
 	    /* FALL THROUGH */
 	default:
@@ -2756,9 +2796,9 @@ tryagain:
 	break;
 
     case '#':
-	if (PL_regflags & PMf_EXTENDED) {
-	    while (PL_regcomp_parse < PL_regxend && *PL_regcomp_parse != '\n') PL_regcomp_parse++;
-	    if (PL_regcomp_parse < PL_regxend)
+	if (RExC_flags16 & PMf_EXTENDED) {
+	    while (RExC_parse < RExC_end && *RExC_parse != '\n') RExC_parse++;
+	    if (RExC_parse < RExC_end)
 		goto tryagain;
 	}
 	/* FALL THROUGH */
@@ -2770,21 +2810,21 @@ tryagain:
 	    char *oldp, *s;
 	    STRLEN numlen;
 
-	    PL_regcomp_parse++;
+	    RExC_parse++;
 
 	defchar:
-	    ret = reg_node(FOLD
+	    ret = reg_node(pRExC_state, FOLD
 			  ? (LOC ? EXACTFL : EXACTF)
 			  : EXACT);
 	    s = STRING(ret);
-	    for (len = 0, p = PL_regcomp_parse - 1;
-	      len < 127 && p < PL_regxend;
+	    for (len = 0, p = RExC_parse - 1;
+	      len < 127 && p < RExC_end;
 	      len++)
 	    {
 		oldp = p;
 
-		if (PL_regflags & PMf_EXTENDED)
-		    p = regwhite(p, PL_regxend);
+		if (RExC_flags16 & PMf_EXTENDED)
+		    p = regwhite(p, RExC_end);
 		switch (*p) {
 		case '^':
 		case '$':
@@ -2849,7 +2889,7 @@ tryagain:
 			    char* e = strchr(p, '}');
 	 
 			    if (!e) {
-				PL_regcomp_parse = p + 1;
+				RExC_parse = p + 1;
 				vFAIL("Missing right brace on \\x{}");
 			    }
 			    else if (UTF) {
@@ -2864,7 +2904,7 @@ tryagain:
 			    }
 			    else
 			    {
-				PL_regcomp_parse = e + 1;
+				RExC_parse = e + 1;
 				vFAIL("Can't use \\x{} without 'use utf8' declaration");
 			    }
 
@@ -2883,7 +2923,7 @@ tryagain:
 		    case '0': case '1': case '2': case '3':case '4':
 		    case '5': case '6': case '7': case '8':case '9':
 			if (*p == '0' ||
-			  (isDIGIT(p[1]) && atoi(p) >= PL_regnpar) ) {
+			  (isDIGIT(p[1]) && atoi(p) >= RExC_npar) ) {
 			    numlen = 0;		/* disallow underscores */
 			    ender = (UV)scan_oct(p, 3, &numlen);
 			    p += numlen;
@@ -2894,7 +2934,7 @@ tryagain:
 			}
 			break;
 		    case '\0':
-			if (p >= PL_regxend)
+			if (p >= RExC_end)
 			    FAIL("Trailing \\");
 			/* FALL THROUGH */
 		    default:
@@ -2906,7 +2946,7 @@ tryagain:
 		default:
 		  normal_default:
 		    if ((*p & 0xc0) == 0xc0 && UTF) {
-			ender = utf8_to_uv((U8*)p, PL_regxend - p,
+			ender = utf8_to_uv((U8*)p, RExC_end - p,
 					       &numlen, 0);
 			p += numlen;
 		    }
@@ -2914,8 +2954,8 @@ tryagain:
 			ender = *p++;
 		    break;
 		}
-		if (PL_regflags & PMf_EXTENDED)
-		    p = regwhite(p, PL_regxend);
+		if (RExC_flags16 & PMf_EXTENDED)
+		    p = regwhite(p, RExC_end);
 		if (UTF && FOLD) {
 		    if (LOC)
 			ender = toLOWER_LC_uni(ender);
@@ -2926,7 +2966,7 @@ tryagain:
 		    if (len)
 			p = oldp;
 		    else if (ender >= 0x80 && UTF) {
-			reguni(ender, s, &numlen);
+			reguni(pRExC_state, ender, s, &numlen);
 			s += numlen;
 			len += numlen;
 		    }
@@ -2937,7 +2977,7 @@ tryagain:
 		    break;
 		}
 		if (ender >= 0x80 && UTF) {
-		    reguni(ender, s, &numlen);
+		    reguni(pRExC_state, ender, s, &numlen);
 		    s += numlen;
 		    len += numlen - 1;
 		}
@@ -2945,8 +2985,8 @@ tryagain:
 		    REGC(ender, s++);
 	    }
 	loopdone:
-	    PL_regcomp_parse = p - 1;
-	    nextchar();
+	    RExC_parse = p - 1;
+	    nextchar(pRExC_state);
 	    if (len < 0)
 		vFAIL("Internal disaster");
 	    if (len > 0)
@@ -2956,9 +2996,9 @@ tryagain:
 	    if (!SIZE_ONLY)
 		STR_LEN(ret) = len;
 	    if (SIZE_ONLY)
-		PL_regsize += STR_SZ(len);
+		RExC_size += STR_SZ(len);
 	    else
-		PL_regcode += STR_SZ(len);
+		RExC_emit += STR_SZ(len);
 	}
 	break;
     }
@@ -2989,30 +3029,30 @@ S_regwhite(pTHX_ char *p, char *e)
    Equivalence classes ([=foo=]) and composites ([.foo.]) are parsed,
    but trigger warnings because they are currently unimplemented. */
 STATIC I32
-S_regpposixcc(pTHX_ I32 value)
+S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value)
 {
     dTHR;
     char *posixcc = 0;
     I32 namedclass = OOB_NAMEDCLASS;
 
-    if (value == '[' && PL_regcomp_parse + 1 < PL_regxend &&
+    if (value == '[' && RExC_parse + 1 < RExC_end &&
 	/* I smell either [: or [= or [. -- POSIX has been here, right? */
-	(*PL_regcomp_parse == ':' ||
-	 *PL_regcomp_parse == '=' ||
-	 *PL_regcomp_parse == '.')) {
-	char  c = *PL_regcomp_parse;
-	char* s = PL_regcomp_parse++;
+	(*RExC_parse == ':' ||
+	 *RExC_parse == '=' ||
+	 *RExC_parse == '.')) {
+	char  c = *RExC_parse;
+	char* s = RExC_parse++;
 	    
-	while (PL_regcomp_parse < PL_regxend && *PL_regcomp_parse != c)
-	    PL_regcomp_parse++;
-	if (PL_regcomp_parse == PL_regxend)
+	while (RExC_parse < RExC_end && *RExC_parse != c)
+	    RExC_parse++;
+	if (RExC_parse == RExC_end)
 	    /* Grandfather lone [:, [=, [. */
-	    PL_regcomp_parse = s;
+	    RExC_parse = s;
 	else {
-	    char* t = PL_regcomp_parse++; /* skip over the c */
+	    char* t = RExC_parse++; /* skip over the c */
 
-  	    if (*PL_regcomp_parse == ']') {
-  		PL_regcomp_parse++; /* skip over the ending ] */
+  	    if (*RExC_parse == ']') {
+  		RExC_parse++; /* skip over the ending ] */
   		posixcc = s + 1;
 		if (*s == ':') {
 		    I32 complement = *posixcc == '^' ? *posixcc++ : 0;
@@ -3098,16 +3138,16 @@ S_regpposixcc(pTHX_ I32 value)
 		} else if (!SIZE_ONLY) {
 		    /* [[=foo=]] and [[.foo.]] are still future. */
 
-		    /* adjust PL_regcomp_parse so the warning shows after
+		    /* adjust RExC_parse so the warning shows after
 		       the class closes */
-		    while (*PL_regcomp_parse && *PL_regcomp_parse != ']')
-			PL_regcomp_parse++;
+		    while (*RExC_parse && *RExC_parse != ']')
+			RExC_parse++;
 		    Simple_vFAIL3("POSIX syntax [%c %c] is reserved for future extensions", c, c);
 		}
 	    } else {
 		/* Maternal grandfather:
 		 * "[:" ending in ":" but not in ":]" */
-		PL_regcomp_parse = s;
+		RExC_parse = s;
 	    }
 	}
     }
@@ -3116,13 +3156,13 @@ S_regpposixcc(pTHX_ I32 value)
 }
 
 STATIC void
-S_checkposixcc(pTHX)
+S_checkposixcc(pTHX_ RExC_state_t *pRExC_state)
 {
     if (!SIZE_ONLY && ckWARN(WARN_REGEXP) &&
-	(*PL_regcomp_parse == ':' ||
-	 *PL_regcomp_parse == '=' ||
-	 *PL_regcomp_parse == '.')) {
-	char *s = PL_regcomp_parse;
+	(*RExC_parse == ':' ||
+	 *RExC_parse == '=' ||
+	 *RExC_parse == '.')) {
+	char *s = RExC_parse;
  	char  c = *s++;
 
 	while(*s && isALNUM(*s))
@@ -3133,9 +3173,9 @@ S_checkposixcc(pTHX)
 	    /* [[=foo=]] and [[.foo.]] are still future. */
 	    if (c == '=' || c == '.')
 	    {
-		/* adjust PL_regcomp_parse so the error shows after
+		/* adjust RExC_parse so the error shows after
 		   the class closes */
-		while (*PL_regcomp_parse && *PL_regcomp_parse++ != ']')
+		while (*RExC_parse && *RExC_parse++ != ']')
 		    ;
 		Simple_vFAIL3("POSIX syntax [%c %c] is reserved for future extensions", c, c);
 	    }
@@ -3144,7 +3184,7 @@ S_checkposixcc(pTHX)
 }
 
 STATIC regnode *
-S_regclass(pTHX)
+S_regclass(pTHX_ RExC_state_t *pRExC_state)
 {
     dTHR;
     register U32 value;
@@ -3156,40 +3196,40 @@ S_regclass(pTHX)
     char *rangebegin;
     bool need_class = 0;
 
-    ret = reg_node(ANYOF);
+    ret = reg_node(pRExC_state, ANYOF);
     if (SIZE_ONLY)
-	PL_regsize += ANYOF_SKIP;
+	RExC_size += ANYOF_SKIP;
     else {
 	ret->flags = 0;
 	ANYOF_BITMAP_ZERO(ret);
- 	PL_regcode += ANYOF_SKIP;
+ 	RExC_emit += ANYOF_SKIP;
 	if (FOLD)
 	    ANYOF_FLAGS(ret) |= ANYOF_FOLD;
 	if (LOC)
 	    ANYOF_FLAGS(ret) |= ANYOF_LOCALE;
     }
-    if (*PL_regcomp_parse == '^') {	/* Complement of range. */
-	PL_regnaughty++;
-	PL_regcomp_parse++;
+    if (*RExC_parse == '^') {	/* Complement of range. */
+	RExC_naughty++;
+	RExC_parse++;
 	if (!SIZE_ONLY)
 	    ANYOF_FLAGS(ret) |= ANYOF_INVERT;
     }
 
     if (!SIZE_ONLY && ckWARN(WARN_REGEXP))
-	checkposixcc();
+	checkposixcc(pRExC_state);
 
-    if (*PL_regcomp_parse == ']' || *PL_regcomp_parse == '-')
+    if (*RExC_parse == ']' || *RExC_parse == '-')
 	goto skipcond;		/* allow 1st char to be ] or - */
-    while (PL_regcomp_parse < PL_regxend && *PL_regcomp_parse != ']') {
+    while (RExC_parse < RExC_end && *RExC_parse != ']') {
        skipcond:
 	namedclass = OOB_NAMEDCLASS;
 	if (!range)
-	    rangebegin = PL_regcomp_parse;
-	value = UCHARAT(PL_regcomp_parse++);
+	    rangebegin = RExC_parse;
+	value = UCHARAT(RExC_parse++);
 	if (value == '[')
-	    namedclass = regpposixcc(value);
+	    namedclass = regpposixcc(pRExC_state, value);
 	else if (value == '\\') {
-	    value = UCHARAT(PL_regcomp_parse++);
+	    value = UCHARAT(RExC_parse++);
 	    /* Some compilers cannot handle switching on 64-bit integer
 	     * values, therefore the 'value' cannot be an UV. --jhi */
 	    switch (value) {
@@ -3213,23 +3253,23 @@ S_regclass(pTHX)
 #endif
 	    case 'x':
 		numlen = 0;		/* disallow underscores */
-		value = (UV)scan_hex(PL_regcomp_parse, 2, &numlen);
-		PL_regcomp_parse += numlen;
+		value = (UV)scan_hex(RExC_parse, 2, &numlen);
+		RExC_parse += numlen;
 		break;
 	    case 'c':
-		value = UCHARAT(PL_regcomp_parse++);
+		value = UCHARAT(RExC_parse++);
 		value = toCTRL(value);
 		break;
 	    case '0': case '1': case '2': case '3': case '4':
 	    case '5': case '6': case '7': case '8': case '9':
 		numlen = 0;		/* disallow underscores */
-		value = (UV)scan_oct(--PL_regcomp_parse, 3, &numlen);
-		PL_regcomp_parse += numlen;
+		value = (UV)scan_oct(--RExC_parse, 3, &numlen);
+		RExC_parse += numlen;
 		break;
 	    default:
 		if (!SIZE_ONLY && ckWARN(WARN_REGEXP) && isALPHA(value))
 
-		    vWARN2(PL_regcomp_parse, "Unrecognized escape \\%c in character class passed through", (int)value);
+		    vWARN2(RExC_parse, "Unrecognized escape \\%c in character class passed through", (int)value);
 		break;
 	    }
 	}
@@ -3240,10 +3280,10 @@ S_regclass(pTHX)
 	    if (range) { /* a-\d, a-[:digit:] */
 		if (!SIZE_ONLY) {
 		    if (ckWARN(WARN_REGEXP))
-			vWARN4(PL_regcomp_parse,
+			vWARN4(RExC_parse,
 			       "False [] range \"%*.*s\"",
-			       PL_regcomp_parse - rangebegin,
-			       PL_regcomp_parse - rangebegin,
+			       RExC_parse - rangebegin,
+			       RExC_parse - rangebegin,
 			       rangebegin);
 		    ANYOF_BITMAP_SET(ret, lastvalue);
 		    ANYOF_BITMAP_SET(ret, '-');
@@ -3545,23 +3585,23 @@ S_regclass(pTHX)
 	if (range) {
 	    if (lastvalue > value) /* b-a */ {
 		Simple_vFAIL4("Invalid [] range \"%*.*s\"",
-			      PL_regcomp_parse - rangebegin,
-			      PL_regcomp_parse - rangebegin,
+			      RExC_parse - rangebegin,
+			      RExC_parse - rangebegin,
 			      rangebegin);
 	    }
 	    range = 0;
 	}
 	else {
 	    lastvalue = value;
-	    if (*PL_regcomp_parse == '-' && PL_regcomp_parse+1 < PL_regxend &&
-		PL_regcomp_parse[1] != ']') {
-		PL_regcomp_parse++;
+	    if (*RExC_parse == '-' && RExC_parse+1 < RExC_end &&
+		RExC_parse[1] != ']') {
+		RExC_parse++;
 		if (namedclass > OOB_NAMEDCLASS) { /* \w-, [:word:]- */
 		    if (ckWARN(WARN_REGEXP))
-			vWARN4(PL_regcomp_parse,
+			vWARN4(RExC_parse,
 			       "False [] range \"%*.*s\"",
-			       PL_regcomp_parse - rangebegin,
-			       PL_regcomp_parse - rangebegin,
+			       RExC_parse - rangebegin,
+			       RExC_parse - rangebegin,
 			       rangebegin);
 		    if (!SIZE_ONLY)
 			ANYOF_BITMAP_SET(ret, '-');
@@ -3596,9 +3636,9 @@ S_regclass(pTHX)
     }
     if (need_class) {
 	if (SIZE_ONLY)
-	    PL_regsize += ANYOF_CLASS_ADD_SKIP;
+	    RExC_size += ANYOF_CLASS_ADD_SKIP;
 	else
-	    PL_regcode += ANYOF_CLASS_ADD_SKIP;
+	    RExC_emit += ANYOF_CLASS_ADD_SKIP;
     }
     /* optimize case-insensitive simple patterns (e.g. /[a-z]/i) */
     if (!SIZE_ONLY &&
@@ -3621,7 +3661,7 @@ S_regclass(pTHX)
 }
 
 STATIC regnode *
-S_regclassutf8(pTHX)
+S_regclassutf8(pTHX_ RExC_state_t *pRExC_state)
 {
     dTHR;
     register char *e;
@@ -3636,9 +3676,9 @@ S_regclassutf8(pTHX)
     I32 namedclass;
     char *rangebegin;
 
-    if (*PL_regcomp_parse == '^') {	/* Complement of range. */
-	PL_regnaughty++;
-	PL_regcomp_parse++;
+    if (*RExC_parse == '^') {	/* Complement of range. */
+	RExC_naughty++;
+	RExC_parse++;
 	if (!SIZE_ONLY)
 	    flags |= ANYOF_INVERT;
     }
@@ -3651,27 +3691,27 @@ S_regclassutf8(pTHX)
     }
 
     if (!SIZE_ONLY && ckWARN(WARN_REGEXP))
-	checkposixcc();
+	checkposixcc(pRExC_state);
 
-    if (*PL_regcomp_parse == ']' || *PL_regcomp_parse == '-')
+    if (*RExC_parse == ']' || *RExC_parse == '-')
 	goto skipcond;		/* allow 1st char to be ] or - */
 
-    while (PL_regcomp_parse < PL_regxend && *PL_regcomp_parse != ']') {
+    while (RExC_parse < RExC_end && *RExC_parse != ']') {
        skipcond:
 	namedclass = OOB_NAMEDCLASS;
 	if (!range)
-	    rangebegin = PL_regcomp_parse;
-	value = utf8_to_uv((U8*)PL_regcomp_parse,
-			       PL_regxend - PL_regcomp_parse,
+	    rangebegin = RExC_parse;
+	value = utf8_to_uv((U8*)RExC_parse,
+			       RExC_end - RExC_parse,
 			       &numlen, 0);
-	PL_regcomp_parse += numlen;
+	RExC_parse += numlen;
 	if (value == '[')
-	    namedclass = regpposixcc(value);
+	    namedclass = regpposixcc(pRExC_state, value);
 	else if (value == '\\') {
-	    value = (U32)utf8_to_uv((U8*)PL_regcomp_parse,
-					PL_regxend - PL_regcomp_parse,
+	    value = (U32)utf8_to_uv((U8*)RExC_parse,
+					RExC_end - RExC_parse,
 					&numlen, 0);
-	    PL_regcomp_parse += numlen;
+	    RExC_parse += numlen;
 	    /* Some compilers cannot handle switching on 64-bit integer
 	     * values, therefore value cannot be an UV.  Yes, this will
 	     * be a problem later if we want switch on Unicode.  --jhi */
@@ -3684,25 +3724,25 @@ S_regclassutf8(pTHX)
 	    case 'D':		namedclass = ANYOF_NDIGIT;		break;
 	    case 'p':
 	    case 'P':
-		if (*PL_regcomp_parse == '{') {
-		    e = strchr(PL_regcomp_parse++, '}');
+		if (*RExC_parse == '{') {
+		    e = strchr(RExC_parse++, '}');
                     if (!e)
                         vFAIL("Missing right brace on \\p{}");
-		    n = e - PL_regcomp_parse;
+		    n = e - RExC_parse;
 		}
 		else {
-		    e = PL_regcomp_parse;
+		    e = RExC_parse;
 		    n = 1;
 		}
 		if (!SIZE_ONLY) {
 		    if (value == 'p')
 			Perl_sv_catpvf(aTHX_ listsv,
-				       "+utf8::%.*s\n", (int)n, PL_regcomp_parse);
+				       "+utf8::%.*s\n", (int)n, RExC_parse);
 		    else
 			Perl_sv_catpvf(aTHX_ listsv,
-				       "!utf8::%.*s\n", (int)n, PL_regcomp_parse);
+				       "!utf8::%.*s\n", (int)n, RExC_parse);
 		}
-		PL_regcomp_parse = e + 1;
+		RExC_parse = e + 1;
 		lastvalue = OOB_UTF8;
 		continue;
 	    case 'n':		value = '\n';		break;
@@ -3718,35 +3758,35 @@ S_regclassutf8(pTHX)
 	    case 'a':		value = '\057';		break;
 #endif
 	    case 'x':
-		if (*PL_regcomp_parse == '{') {
-		    e = strchr(PL_regcomp_parse++, '}');
+		if (*RExC_parse == '{') {
+		    e = strchr(RExC_parse++, '}');
                     if (!e) 
                         vFAIL("Missing right brace on \\x{}");
 		    numlen = 1;		/* allow underscores */
-		    value = (UV)scan_hex(PL_regcomp_parse,
-				     e - PL_regcomp_parse,
+		    value = (UV)scan_hex(RExC_parse,
+				     e - RExC_parse,
 				     &numlen);
-		    PL_regcomp_parse = e + 1;
+		    RExC_parse = e + 1;
 		}
 		else {
 		    numlen = 0;		/* disallow underscores */
-		    value = (UV)scan_hex(PL_regcomp_parse, 2, &numlen);
-		    PL_regcomp_parse += numlen;
+		    value = (UV)scan_hex(RExC_parse, 2, &numlen);
+		    RExC_parse += numlen;
 		}
 		break;
 	    case 'c':
-		value = UCHARAT(PL_regcomp_parse++);
+		value = UCHARAT(RExC_parse++);
 		value = toCTRL(value);
 		break;
 	    case '0': case '1': case '2': case '3': case '4':
 	    case '5': case '6': case '7': case '8': case '9':
 		numlen = 0;		/* disallow underscores */
-		value = (UV)scan_oct(--PL_regcomp_parse, 3, &numlen);
-		PL_regcomp_parse += numlen;
+		value = (UV)scan_oct(--RExC_parse, 3, &numlen);
+		RExC_parse += numlen;
 		break;
 	    default:
 		if (!SIZE_ONLY && ckWARN(WARN_REGEXP) && isALPHA(value))
-		    vWARN2(PL_regcomp_parse,
+		    vWARN2(RExC_parse,
 			   "Unrecognized escape \\%c in character class passed through",
 			   (int)value);
 		break;
@@ -3756,10 +3796,10 @@ S_regclassutf8(pTHX)
 	    if (range) { /* a-\d, a-[:digit:] */
 		if (!SIZE_ONLY) {
 		    if (ckWARN(WARN_REGEXP))
-			vWARN4(PL_regcomp_parse,
+			vWARN4(RExC_parse,
 			       "False [] range \"%*.*s\"",
-			       PL_regcomp_parse - rangebegin,
-			       PL_regcomp_parse - rangebegin,
+			       RExC_parse - rangebegin,
+			       RExC_parse - rangebegin,
 			       rangebegin);
 		    Perl_sv_catpvf(aTHX_ listsv,
 				   /* 0x002D is Unicode for '-' */
@@ -3832,23 +3872,23 @@ S_regclassutf8(pTHX)
         if (range) {
 	    if (lastvalue > value) { /* b-a */
 		Simple_vFAIL4("invalid [] range \"%*.*s\"",
-			      PL_regcomp_parse - rangebegin,
-			      PL_regcomp_parse - rangebegin,
+			      RExC_parse - rangebegin,
+			      RExC_parse - rangebegin,
 			      rangebegin);
 	    }
 	    range = 0;
 	}
 	else {
 	    lastvalue = value;
-	    if (*PL_regcomp_parse == '-' && PL_regcomp_parse+1 < PL_regxend &&
-		PL_regcomp_parse[1] != ']') {
-		PL_regcomp_parse++;
+	    if (*RExC_parse == '-' && RExC_parse+1 < RExC_end &&
+		RExC_parse[1] != ']') {
+		RExC_parse++;
 		if (namedclass > OOB_NAMEDCLASS) { /* \w-, [:word:]- */
 		    if (ckWARN(WARN_REGEXP))
-			vWARN4(PL_regcomp_parse,
+			vWARN4(RExC_parse,
 			       "False [] range \"%*.*s\"",
-			       PL_regcomp_parse - rangebegin,
-			       PL_regcomp_parse - rangebegin,
+			       RExC_parse - rangebegin,
+			       RExC_parse - rangebegin,
 			       rangebegin);
 		    if (!SIZE_ONLY)
 			Perl_sv_catpvf(aTHX_ listsv,
@@ -3866,13 +3906,13 @@ S_regclassutf8(pTHX)
 	range = 0;
     }
 
-    ret = reganode(ANYOFUTF8, 0);
+    ret = reganode(pRExC_state, ANYOFUTF8, 0);
 
     if (!SIZE_ONLY) {
 	SV *rv = swash_init("utf8", "", listsv, 1, 0);
 	SvREFCNT_dec(listsv);
-	n = add_data(1,"s");
-	PL_regcomp_rx->data->data[n] = (void*)rv;
+	n = add_data(pRExC_state, 1,"s");
+	RExC_rx->data->data[n] = (void*)rv;
 	ARG1_SET(ret, flags);
 	ARG2_SET(ret, n);
     }
@@ -3881,28 +3921,28 @@ S_regclassutf8(pTHX)
 }
 
 STATIC char*
-S_nextchar(pTHX)
+S_nextchar(pTHX_ RExC_state_t *pRExC_state)
 {
     dTHR;
-    char* retval = PL_regcomp_parse++;
+    char* retval = RExC_parse++;
 
     for (;;) {
-	if (*PL_regcomp_parse == '(' && PL_regcomp_parse[1] == '?' &&
-		PL_regcomp_parse[2] == '#') {
-	    while (*PL_regcomp_parse && *PL_regcomp_parse != ')')
-		PL_regcomp_parse++;
-	    PL_regcomp_parse++;
+	if (*RExC_parse == '(' && RExC_parse[1] == '?' &&
+		RExC_parse[2] == '#') {
+	    while (*RExC_parse && *RExC_parse != ')')
+		RExC_parse++;
+	    RExC_parse++;
 	    continue;
 	}
-	if (PL_regflags & PMf_EXTENDED) {
-	    if (isSPACE(*PL_regcomp_parse)) {
-		PL_regcomp_parse++;
+	if (RExC_flags16 & PMf_EXTENDED) {
+	    if (isSPACE(*RExC_parse)) {
+		RExC_parse++;
 		continue;
 	    }
-	    else if (*PL_regcomp_parse == '#') {
-		while (*PL_regcomp_parse && *PL_regcomp_parse != '\n')
-		    PL_regcomp_parse++;
-		PL_regcomp_parse++;
+	    else if (*RExC_parse == '#') {
+		while (*RExC_parse && *RExC_parse != '\n')
+		    RExC_parse++;
+		RExC_parse++;
 		continue;
 	    }
 	}
@@ -3914,23 +3954,23 @@ S_nextchar(pTHX)
 - reg_node - emit a node
 */
 STATIC regnode *			/* Location. */
-S_reg_node(pTHX_ U8 op)
+S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
 {
     dTHR;
     register regnode *ret;
     register regnode *ptr;
 
-    ret = PL_regcode;
+    ret = RExC_emit;
     if (SIZE_ONLY) {
-	SIZE_ALIGN(PL_regsize);
-	PL_regsize += 1;
+	SIZE_ALIGN(RExC_size);
+	RExC_size += 1;
 	return(ret);
     }
 
     NODE_ALIGN_FILL(ret);
     ptr = ret;
     FILL_ADVANCE_NODE(ptr, op);
-    PL_regcode = ptr;
+    RExC_emit = ptr;
 
     return(ret);
 }
@@ -3939,23 +3979,23 @@ S_reg_node(pTHX_ U8 op)
 - reganode - emit a node with an argument
 */
 STATIC regnode *			/* Location. */
-S_reganode(pTHX_ U8 op, U32 arg)
+S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
 {
     dTHR;
     register regnode *ret;
     register regnode *ptr;
 
-    ret = PL_regcode;
+    ret = RExC_emit;
     if (SIZE_ONLY) {
-	SIZE_ALIGN(PL_regsize);
-	PL_regsize += 2;
+	SIZE_ALIGN(RExC_size);
+	RExC_size += 2;
 	return(ret);
     }
 
     NODE_ALIGN_FILL(ret);
     ptr = ret;
     FILL_ADVANCE_NODE_ARG(ptr, op, arg);
-    PL_regcode = ptr;
+    RExC_emit = ptr;
 
     return(ret);
 }
@@ -3964,7 +4004,7 @@ S_reganode(pTHX_ U8 op, U32 arg)
 - reguni - emit (if appropriate) a Unicode character
 */
 STATIC void
-S_reguni(pTHX_ UV uv, char* s, STRLEN* lenp)
+S_reguni(pTHX_ RExC_state_t *pRExC_state, UV uv, char* s, STRLEN* lenp)
 {
     dTHR;
     if (SIZE_ONLY) {
@@ -3982,7 +4022,7 @@ S_reguni(pTHX_ UV uv, char* s, STRLEN* lenp)
 * Means relocating the operand.
 */
 STATIC void
-S_reginsert(pTHX_ U8 op, regnode *opnd)
+S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd)
 {
     dTHR;
     register regnode *src;
@@ -3993,13 +4033,13 @@ S_reginsert(pTHX_ U8 op, regnode *opnd)
 /* (PL_regkind[(U8)op] == CURLY ? EXTRA_STEP_2ARGS : 0); */
 
     if (SIZE_ONLY) {
-	PL_regsize += NODE_STEP_REGNODE + offset;
+	RExC_size += NODE_STEP_REGNODE + offset;
 	return;
     }
 
-    src = PL_regcode;
-    PL_regcode += NODE_STEP_REGNODE + offset;
-    dst = PL_regcode;
+    src = RExC_emit;
+    RExC_emit += NODE_STEP_REGNODE + offset;
+    dst = RExC_emit;
     while (src > opnd)
 	StructCopy(--src, --dst, regnode);
 
@@ -4013,7 +4053,7 @@ S_reginsert(pTHX_ U8 op, regnode *opnd)
 - regtail - set the next-pointer at the end of a node chain of p to val.
 */
 STATIC void
-S_regtail(pTHX_ regnode *p, regnode *val)
+S_regtail(pTHX_ RExC_state_t *pRExC_state, regnode *p, regnode *val)
 {
     dTHR;
     register regnode *scan;
@@ -4043,17 +4083,17 @@ S_regtail(pTHX_ regnode *p, regnode *val)
 - regoptail - regtail on operand of first argument; nop if operandless
 */
 STATIC void
-S_regoptail(pTHX_ regnode *p, regnode *val)
+S_regoptail(pTHX_ RExC_state_t *pRExC_state, regnode *p, regnode *val)
 {
     dTHR;
     /* "Operandless" and "op != BRANCH" are synonymous in practice. */
     if (p == NULL || SIZE_ONLY)
 	return;
     if (PL_regkind[(U8)OP(p)] == BRANCH) {
-	regtail(NEXTOPER(p), val);
+	regtail(pRExC_state, NEXTOPER(p), val);
     }
     else if ( PL_regkind[(U8)OP(p)] == BRANCHJ) {
-	regtail(NEXTOPER(NEXTOPER(p)), val);
+	regtail(pRExC_state, NEXTOPER(NEXTOPER(p)), val);
     }
     else
 	return;
@@ -4246,7 +4286,9 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 
     sv_setpvn(sv, "", 0);
     if (OP(o) >= reg_num)		/* regnode.type is unsigned */
-	FAIL("Corrupted regexp opcode");
+	/* It would be nice to FAIL() here, but this may be called from
+	   regexec.c, and it would be hard to supply pRExC_state. */
+	Perl_croak(aTHX_ "Corrupted regexp opcode");
     sv_catpv(sv, (char*)reg_name[OP(o)]); /* Take off const! */
 
     k = PL_regkind[(U8)OP(o)];
@@ -4418,7 +4460,7 @@ Perl_pregfree(pTHX_ struct regexp *r)
 	    case 'n':
 		break;
 	    default:
-		FAIL2("panic: regfree data code '%c'", r->data->what[n]);
+		Perl_croak(aTHX_ "panic: regfree data code '%c'", r->data->what[n]);
 	    }
 	}
 	Safefree(r->data->what);
@@ -4491,11 +4533,23 @@ void
 Perl_save_re_context(pTHX)
 {                   
     dTHR;
+
+#if 0
+    SAVEPPTR(RExC_precomp);		/* uncompiled string. */
+    SAVEI32(RExC_npar);		/* () count. */
+    SAVEI32(RExC_size);		/* Code size. */
+    SAVEI16(RExC_flags16);		/* are we folding, multilining? */
+    SAVEVPTR(RExC_rx);		/* from regcomp.c */
+    SAVEI32(RExC_seen);		/* from regcomp.c */
+    SAVEI32(RExC_sawback);		/* Did we see \1, ...? */
+    SAVEI32(RExC_naughty);		/* How bad is this pattern? */
+    SAVEVPTR(RExC_emit);		/* Code-emit pointer; &regdummy = don't */
+    SAVEPPTR(RExC_end);		/* End of input for compile */
+    SAVEPPTR(RExC_parse);		/* Input-scan pointer. */
+#endif
+
+    SAVEI32(PL_reg_flags);		/* from regexec.c */
     SAVEPPTR(PL_bostr);
-    SAVEPPTR(PL_regprecomp);		/* uncompiled string. */
-    SAVEI32(PL_regnpar);		/* () count. */
-    SAVEI32(PL_regsize);		/* Code size. */
-    SAVEI16(PL_regflags);		/* are we folding, multilining? */
     SAVEPPTR(PL_reginput);		/* String-input pointer. */
     SAVEPPTR(PL_regbol);		/* Beginning of input, for ^ check. */
     SAVEPPTR(PL_regeol);		/* End of input, for $ check. */
@@ -4510,20 +4564,12 @@ Perl_save_re_context(pTHX)
     SAVEI32(PL_reg_start_tmpl);		/* from regexec.c */
     PL_reg_start_tmpl = 0;
     SAVEVPTR(PL_regdata);
-    SAVEI32(PL_reg_flags);		/* from regexec.c */
     SAVEI32(PL_reg_eval_set);		/* from regexec.c */
     SAVEI32(PL_regnarrate);		/* from regexec.c */
     SAVEVPTR(PL_regprogram);		/* from regexec.c */
     SAVEINT(PL_regindent);		/* from regexec.c */
     SAVEVPTR(PL_regcc);			/* from regexec.c */
     SAVEVPTR(PL_curcop);
-    SAVEVPTR(PL_regcomp_rx);		/* from regcomp.c */
-    SAVEI32(PL_regseen);		/* from regcomp.c */
-    SAVEI32(PL_regsawback);		/* Did we see \1, ...? */
-    SAVEI32(PL_regnaughty);		/* How bad is this pattern? */
-    SAVEVPTR(PL_regcode);		/* Code-emit pointer; &regdummy = don't */
-    SAVEPPTR(PL_regxend);		/* End of input for compile */
-    SAVEPPTR(PL_regcomp_parse);		/* Input-scan pointer. */
     SAVEVPTR(PL_reg_call_cc);		/* from regexec.c */
     SAVEVPTR(PL_reg_re);		/* from regexec.c */
     SAVEPPTR(PL_reg_ganch);		/* from regexec.c */

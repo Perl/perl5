@@ -1,3 +1,4 @@
+# -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 package CPAN::Mirrored::By;
 
 sub new { 
@@ -16,7 +17,7 @@ use FileHandle ();
 use File::Basename ();
 use File::Path ();
 use vars qw($VERSION);
-$VERSION = substr q$Revision: 1.48 $, 10;
+$VERSION = substr q$Revision: 1.50 $, 10;
 
 =head1 NAME
 
@@ -314,9 +315,9 @@ by ENTER.
     print qq{
 
 Every Makefile.PL is run by perl in a separate process. Likewise we
-run \'make\' and \'make install\' in processes. If you have any parameters
-\(e.g. PREFIX, INSTALLPRIVLIB, UNINST or the like\) you want to pass to
-the calls, please specify them here.
+run \'make\' and \'make install\' in processes. If you have any
+parameters \(e.g. PREFIX, LIB, UNINST or the like\) you want to pass
+to the calls, please specify them here.
 
 If you don\'t understand this question, just press ENTER.
 
@@ -324,13 +325,29 @@ If you don\'t understand this question, just press ENTER.
 
     $default = $CPAN::Config->{makepl_arg} || "";
     $CPAN::Config->{makepl_arg} =
-	prompt("Parameters for the 'perl Makefile.PL' command?",$default);
+	prompt("Parameters for the 'perl Makefile.PL' command?
+Typical frequently used settings:
+
+    POLLUTE=1        increasing backwards compatibility
+    LIB=~/perl       non-root users (please see manual for more hints)
+
+Your choice: ",$default);
     $default = $CPAN::Config->{make_arg} || "";
-    $CPAN::Config->{make_arg} = prompt("Parameters for the 'make' command?",$default);
+    $CPAN::Config->{make_arg} = prompt("Parameters for the 'make' command?
+Typical frequently used setting:
+
+    -j3              dual processor system
+
+Your choice: ",$default);
 
     $default = $CPAN::Config->{make_install_arg} || $CPAN::Config->{make_arg} || "";
     $CPAN::Config->{make_install_arg} =
-	prompt("Parameters for the 'make install' command?",$default);
+	prompt("Parameters for the 'make install' command?
+Typical frequently used setting:
+
+    UNINST=1         to always uninstall potentially conflicting files
+
+Your choice: ",$default);
 
     #
     # Alarm period
@@ -547,7 +564,8 @@ http: -- that host a CPAN mirror.
         }
     }
     push (@urls, map ("$_ (previous pick)", @previous_urls));
-    my $prompt = "Select as many URLs as you like";
+    my $prompt = "Select as many URLs as you like,
+put them on one line, separated by blanks";
     if (@previous_urls) {
        $default = join (' ', ((scalar @urls) - (scalar @previous_urls) + 1) ..
                              (scalar @urls));
@@ -575,11 +593,15 @@ Please enter your CPAN site:};
             $ans =~ s|/?\z|/|; # has to end with one slash
             $ans = "file:$ans" unless $ans =~ /:/; # without a scheme is a file:
             if ($ans =~ /^\w+:\/./) {
-               push @urls, $ans unless $seen{$ans}++;
+                push @urls, $ans unless $seen{$ans}++;
             } else {
-                print qq{"$ans" doesn\'t look like an URL at first sight.
-I\'ll ignore it for now.  You can add it to $INC{'CPAN/MyConfig.pm'}
-later if you\'re sure it\'s right.\n};
+                printf(qq{"%s" doesn\'t look like an URL at first sight.
+I\'ll ignore it for now.
+You can add it to your %s
+later if you\'re sure it\'s right.\n},
+                       $ans,
+                       $INC{'CPAN/MyConfig.pm'} || $INC{'CPAN/Config.pm'} || "configuration file",
+                      );
             }
         }
     } while $ans || !%seen;

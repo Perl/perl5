@@ -2354,40 +2354,40 @@ s	|int	|dooneliner	|char *cmd|char *filename
 #endif
 
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_DECL_PROT)
-s	|regnode*|reg		|I32|I32 *
-s	|regnode*|reganode	|U8|U32
-s	|regnode*|regatom	|I32 *
-s	|regnode*|regbranch	|I32 *|I32
-s	|void	|reguni		|UV|char *|STRLEN*
-s	|regnode*|regclass
-s	|regnode*|regclassutf8
+s	|regnode*|reg		|struct RExC_state_t*|I32|I32 *
+s	|regnode*|reganode	|struct RExC_state_t*|U8|U32
+s	|regnode*|regatom	|struct RExC_state_t*|I32 *
+s	|regnode*|regbranch	|struct RExC_state_t*|I32 *|I32
+s	|void	|reguni		|struct RExC_state_t*|UV|char *|STRLEN*
+s	|regnode*|regclass	|struct RExC_state_t*
+s	|regnode*|regclassutf8	|struct RExC_state_t*
 s	|I32	|regcurly	|char *
-s	|regnode*|reg_node	|U8
-s	|regnode*|regpiece	|I32 *
-s	|void	|reginsert	|U8|regnode *
-s	|void	|regoptail	|regnode *|regnode *
-s	|void	|regtail	|regnode *|regnode *
+s	|regnode*|reg_node	|struct RExC_state_t*|U8
+s	|regnode*|regpiece	|struct RExC_state_t*|I32 *
+s	|void	|reginsert	|struct RExC_state_t*|U8|regnode *
+s	|void	|regoptail	|struct RExC_state_t*|regnode *|regnode *
+s	|void	|regtail	|struct RExC_state_t*|regnode *|regnode *
 s	|char*|regwhite	|char *|char *
-s	|char*|nextchar
+s	|char*|nextchar	|struct RExC_state_t*
 s	|regnode*|dumpuntil	|regnode *start|regnode *node \
 				|regnode *last|SV* sv|I32 l
 s	|void	|put_byte	|SV* sv|int c
-s	|void	|scan_commit	|struct scan_data_t *data
-s	|void	|cl_anything	|struct regnode_charclass_class *cl
+s	|void	|scan_commit	|struct RExC_state_t*|struct scan_data_t *data
+s	|void	|cl_anything	|struct RExC_state_t*|struct regnode_charclass_class *cl
 s	|int	|cl_is_anything	|struct regnode_charclass_class *cl
-s	|void	|cl_init	|struct regnode_charclass_class *cl
-s	|void	|cl_init_zero	|struct regnode_charclass_class *cl
+s	|void	|cl_init	|struct RExC_state_t*|struct regnode_charclass_class *cl
+s	|void	|cl_init_zero	|struct RExC_state_t*|struct regnode_charclass_class *cl
 s	|void	|cl_and		|struct regnode_charclass_class *cl \
 				|struct regnode_charclass_class *and_with
-s	|void	|cl_or		|struct regnode_charclass_class *cl \
+s	|void	|cl_or		|struct RExC_state_t*|struct regnode_charclass_class *cl \
 				|struct regnode_charclass_class *or_with
-s	|I32	|study_chunk	|regnode **scanp|I32 *deltap \
+s	|I32	|study_chunk	|struct RExC_state_t*|regnode **scanp|I32 *deltap \
 				|regnode *last|struct scan_data_t *data \
 				|U32 flags
-s	|I32	|add_data	|I32 n|char *s
+s	|I32	|add_data	|struct RExC_state_t*|I32 n|char *s
 rs	|void|re_croak2	|const char* pat1|const char* pat2|...
-s	|I32	|regpposixcc	|I32 value
-s	|void	|checkposixcc
+s	|I32	|regpposixcc	|struct RExC_state_t*|I32 value
+s	|void	|checkposixcc	|struct RExC_state_t*
 #endif
 
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_DECL_PROT)
