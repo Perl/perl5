@@ -247,6 +247,7 @@ ext/Encode/Encode/iso8859-10.enc	Encoding tables
 ext/Encode/Encode/iso8859-13.enc	Encoding tables
 ext/Encode/Encode/iso8859-14.enc	Encoding tables
 ext/Encode/Encode/iso8859-15.enc	Encoding tables
+ext/Encode/Encode/iso8859-16.enc	Encoding tables
 ext/Encode/Encode/iso8859-2.enc		Encoding tables
 ext/Encode/Encode/iso8859-3.enc		Encoding tables
 ext/Encode/Encode/iso8859-4.enc		Encoding tables
