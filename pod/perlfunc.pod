@@ -6152,7 +6152,7 @@ The status is returned in C<$?>.  If you say
     #...
     do {
 	$kid = waitpid(-1, WNOHANG);
-    } until $kid == -1;
+    } until $kid > 0;
 
 then you can do a non-blocking wait for all pending zombie processes.
 Non-blocking wait is available on machines supporting either the
