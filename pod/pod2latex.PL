@@ -500,9 +500,8 @@ sub noremap {
 }
 
 sub init_noremap {
-    if ( /[\200-\377]/ ) {
-	warn "hit bit char in input stream";
-    }
+	# escape high bit characters in input stream
+	s/([\200-\377])/"E<".ord($1).">"/ge;
 }
 
 sub clear_noremap {
@@ -513,11 +512,14 @@ sub clear_noremap {
 
 sub expand_HTML_escapes {
     local($s) = $_[0];
-    $s =~ s { E<([A-Za-z]+)> }
+    $s =~ s { E<((\d+)|([A-Za-z]+))> }
     {
 	do {
-	    exists $HTML_Escapes{$1}
-	    ? do { $HTML_Escapes{$1} }
+		defined($2) 
+		? do { chr($2) }
+		: 
+	    exists $HTML_Escapes{$3}
+	    ? do { $HTML_Escapes{$3} }
 	    : do {
 		warn "Unknown escape: $& in $_";
 		"E<$1>";
