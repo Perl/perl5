@@ -36,14 +36,14 @@ sub encode {
     require Carp;
     my $obj = shift;
     my $class = ref($obj) ? ref($obj) : $obj;
-    Carp::croak($class, "->encode() not defined!");
+    Carp::croak $class, "->encode() not defined!";
 }
 
 sub decode{
     require Carp;
     my $obj = shift;
     my $class = ref($obj) ? ref($obj) : $obj;
-    Carp::croak($class, "->encode() not defined!");
+    Carp::croak $class, "->encode() not defined!";
 }
 
 sub DESTROY {}

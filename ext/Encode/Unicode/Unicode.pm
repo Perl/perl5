@@ -60,7 +60,7 @@ sub set_transcoder{
 	*encode = \&encode_classic;
     }else{
 	require Carp; 
-	Carp::croak(__PACKAGE__, "::set_transcoder(modern|classic|xs)");
+	Carp::croak __PACKAGE__, "::set_transcoder(modern|classic|xs)";
     }
 }
 
@@ -258,7 +258,7 @@ sub poisoned2death{
     my $msg = shift;
     my $pair = join(", ", map {sprintf "\\x%x", $_} @_);
     require Carp;
-    Carp::croak($obj->name, ":", $msg, "<$pair>.", caller);
+    Carp::croak $obj->name, ":", $msg, "<$pair>.", caller;
 }
 
 1;

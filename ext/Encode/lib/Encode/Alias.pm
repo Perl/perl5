@@ -1,7 +1,7 @@
 package Encode::Alias;
 use strict;
 use Encode;
-our $VERSION = do { my @r = (q$Revision: 1.33 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.34 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 
 use base qw(Exporter);
@@ -219,7 +219,7 @@ sub init_aliases
         define_alias( qr/\bks_c_5601-1987$/i      => '"cp949"' );
         # for Encode::TW
 	define_alias( qr/\bbig-?5$/i		  => '"big5-eten"' );
-	define_alias( qr/\bbig5-?et(?:en)$/i	  => '"big5-eten"' );
+	define_alias( qr/\bbig5-?et(?:en)?$/i	  => '"big5-eten"' );
 	define_alias( qr/\btca[-_]?big5$/i	  => '"big5-eten"' );
 	define_alias( qr/\bbig5-?hk(?:scs)?$/i	  => '"big5-hkscs"' );
 	define_alias( qr/\bhk(?:scs)?[-_]?big5$/i  => '"big5-hkscs"' );
