@@ -242,8 +242,7 @@ struct xpvfm {
     AV *	xcv_padlist;
     CV *	xcv_outside;
 #ifdef USE_THREADS
-    perl_mutex *xcv_mutexp;
-    perl_cond *	xcv_condp;	/* signalled when owner leaves CV */
+    perl_mutex *xcv_mutexp;	/* protects xcv_owner */
     struct thread *xcv_owner;	/* current owner thread */
 #endif /* USE_THREADS */
     cv_flags_t	xcv_flags;
