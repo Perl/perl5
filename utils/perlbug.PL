@@ -618,7 +618,7 @@ EOF
     my @env =
         qw(PATH LD_LIBRARY_PATH LANG PERL_BADLANG SHELL HOME LOGDIR LANGUAGE);
     push @env, $Config{ldlibpthname} if $Config{ldlibpthname} ne '';
-    push @env, grep /^(?:PERL|LC_|LANG)/, keys %ENV;
+    push @env, grep /^(?:PERL|LC_|LANG|CYGWIN)/, keys %ENV;
     my %env;
     @env{@env} = @env;
     for my $env (sort keys %env) {
