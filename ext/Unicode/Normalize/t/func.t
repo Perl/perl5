@@ -3,8 +3,8 @@
 
 BEGIN {
     if (ord("A") == 193) {
-	print "1..0 # Unicode::Normalize not ported to EBCDIC\n";
-	exit 0;
+       print "1..0 # Unicode::Normalize not ported to EBCDIC\n";
+       exit 0;
     }
 }
 
@@ -13,7 +13,7 @@ BEGIN {
 use Test;
 use strict;
 use warnings;
-BEGIN { plan tests => 6 };
+BEGIN { plan tests => 10 };
 use Unicode::Normalize qw(:all);
 ok(1); # If we made it this far, we're ok.
 
@@ -22,7 +22,7 @@ ok(1); # If we made it this far, we're ok.
 print getCombinClass(   0) == 0
    && getCombinClass( 768) == 230
    && getCombinClass(1809) == 36
-#  && getCombinClass(119143) == 1
+#  && getCombinClass(119143) == 1 # U+1D167, a Unicode 3.1 character
   ? "ok" : "not ok", " 2\n";
 
 print ! defined getCanon( 0)
@@ -68,13 +68,60 @@ print ! defined getComposite( 0,  0)
    && 0xADF8 == getComposite(0x1100, 0x1173)
    && ! defined getComposite(0x1100, 0x11AF)
    && ! defined getComposite(0x1173, 0x11AF)
+   && ! defined getComposite(0xAC00, 0x11A7)
+   && 0xAC01 == getComposite(0xAC00, 0x11A8)
    && 0xAE00 == getComposite(0xADF8, 0x11AF)
   ? "ok" : "not ok", " 5\n";
 
 print ! isExclusion( 0)
    && ! isExclusion(41)
-   && isExclusion(2392)
-   && isExclusion(3907)
-   && isExclusion(64334)
+   && isExclusion(2392)  # DEVANAGARI LETTER QA
+   && isExclusion(3907)  # TIBETAN LETTER GHA
+   && isExclusion(64334) # HEBREW LETTER PE WITH RAFE
   ? "ok" : "not ok", " 6\n";
 
+print ! isSingleton( 0)
+   && isSingleton(0x212B) # ANGSTROM SIGN
+  ? "ok" : "not ok", " 7\n";
+
+print reorder("") eq ""
+   && reorder(pack("U*", 0x0041, 0x0300, 0x0315, 0x0313, 0x031b, 0x0061))
+      eq pack("U*", 0x0041, 0x031b, 0x0300, 0x0313, 0x0315, 0x0061)
+   && reorder(pack("U*", 0x00C1, 0x0300, 0x0315, 0x0313, 0x031b,
+	0x0061, 0x309A, 0x3099))
+      eq pack("U*", 0x00C1, 0x031b, 0x0300, 0x0313, 0x0315,
+	0x0061, 0x309A, 0x3099)
+  ? "ok" : "not ok", " 8\n";
+
+sub answer { defined $_[0] ? $_[0] ? "YES" : "NO" : "MAYBE" }
+
+print answer(checkNFD(""))  eq "YES"
+  &&  answer(checkNFC(""))  eq "YES"
+  &&  answer(checkNFKD("")) eq "YES"
+  &&  answer(checkNFKC("")) eq "YES"
+  &&  answer(check("NFD", "")) eq "YES"
+  &&  answer(check("NFC", "")) eq "YES"
+  &&  answer(check("NFKD","")) eq "YES"
+  &&  answer(check("NFKC","")) eq "YES"
+# U+0000 to U+007F are prenormalized in all the normalization forms.
+  && answer(checkNFD("AZaz\t12!#`"))  eq "YES"
+  && answer(checkNFC("AZaz\t12!#`"))  eq "YES"
+  && answer(checkNFKD("AZaz\t12!#`")) eq "YES"
+  && answer(checkNFKC("AZaz\t12!#`")) eq "YES"
+  && answer(check("D", "AZaz\t12!#`")) eq "YES"
+  && answer(check("C", "AZaz\t12!#`")) eq "YES"
+  && answer(check("KD","AZaz\t12!#`")) eq "YES"
+  && answer(check("KC","AZaz\t12!#`")) eq "YES"
+  ? "ok" : "not ok", " 9\n";
+
+print 1
+  && answer(checkNFD(NFD(pack('U*', 0xC1, 0x1100, 0x1173, 0x11AF)))) eq "YES"
+  && answer(checkNFD(pack('U*', 0x20, 0xC1, 0x1100, 0x1173, 0x11AF))) eq "NO"
+  && answer(checkNFC(pack('U*', 0x20, 0xC1, 0x1173, 0x11AF))) eq "MAYBE"
+  && answer(checkNFC(pack('U*', 0x20, 0xC1, 0xAE00, 0x1100))) eq "YES"
+  && answer(checkNFC(pack('U*', 0x20, 0xC1, 0xAE00, 0x1100, 0x300))) eq "MAYBE"
+  && answer(checkNFC(pack('U*', 0x20, 0xC1, 0xFF71, 0x2025))) eq "YES"
+  && answer(check("NFC", pack('U*', 0x20, 0xC1, 0x212B, 0x300))) eq "NO"
+  && answer(checkNFKD(pack('U*', 0x20, 0xC1, 0xFF71, 0x2025))) eq "NO"
+  && answer(checkNFKC(pack('U*', 0x20, 0xC1, 0xAE00, 0x2025))) eq "NO"
+  ? "ok" : "not ok", " 10\n";

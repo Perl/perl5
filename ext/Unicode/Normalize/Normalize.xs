@@ -62,16 +62,19 @@ int compare_cc(const void *a, const void *b)
 {
     int ret_cc;
     ret_cc = (*(UNF_cc*)a).cc - (*(UNF_cc*)b).cc;
-    if(ret_cc) return ret_cc;
+    if (ret_cc)
+	return ret_cc;
     return (*(UNF_cc*)a).pos - (*(UNF_cc*)b).pos;
 }
 
 U8* dec_canonical (UV uv)
 {
     U8 ***plane, **row;
-    if(OVER_UTF_MAX(uv)) return NULL;
+    if (OVER_UTF_MAX(uv))
+	return NULL;
     plane = (U8***)UNF_canon[uv >> 16];
-    if(! plane) return NULL;
+    if (! plane)
+	return NULL;
     row = plane[(uv >> 8) & 0xff];
     return row ? row[uv & 0xff] : NULL;
 }
@@ -79,9 +82,11 @@ U8* dec_canonical (UV uv)
 U8* dec_compat (UV uv)
 {
     U8 ***plane, **row;
-    if(OVER_UTF_MAX(uv)) return NULL;
+    if (OVER_UTF_MAX(uv))
+	return NULL;
     plane = (U8***)UNF_compat[uv >> 16];
-    if(! plane) return NULL;
+    if (! plane)
+	return NULL;
     row = plane[(uv >> 8) & 0xff];
     return row ? row[uv & 0xff] : NULL;
 }
@@ -90,25 +95,30 @@ UV composite_uv (UV uv, UV uv2)
 {
     UNF_complist ***plane, **row, *cell, *i;
 
-    if(! uv2 || OVER_UTF_MAX(uv) || OVER_UTF_MAX(uv2)) return 0;
+    if (! uv2 || OVER_UTF_MAX(uv) || OVER_UTF_MAX(uv2))
+	return 0;
 
-    if(Hangul_IsL(uv) && Hangul_IsV(uv2)) {
+    if (Hangul_IsL(uv) && Hangul_IsV(uv2)) {
 	uv  -= Hangul_LBase; /* lindex */
 	uv2 -= Hangul_VBase; /* vindex */
 	return(Hangul_SBase + (uv * Hangul_VCount + uv2) * Hangul_TCount);
     }
-    if(Hangul_IsLV(uv) && Hangul_IsT(uv2)) {
+    if (Hangul_IsLV(uv) && Hangul_IsT(uv2)) {
 	uv2 -= Hangul_TBase; /* tindex */
 	return(uv + uv2);
     }
     plane = UNF_compos[uv >> 16];
-    if(! plane) return 0;
+    if (! plane)
+	return 0;
     row = plane[(uv >> 8) & 0xff];
-    if(! row)   return 0;
+    if (! row)
+	return 0;
     cell = row[uv & 0xff];
-    if(! cell)  return 0;
-    for(i = cell; i->nextchar; i++) {
-	if(uv2 == i->nextchar) return i->composite;
+    if (! cell)
+	return 0;
+    for (i = cell; i->nextchar; i++) {
+	if (uv2 == i->nextchar)
+	    return i->composite;
     }
     return 0;
 }
@@ -116,9 +126,11 @@ UV composite_uv (UV uv, UV uv2)
 U8 getCombinClass (UV uv)
 {
     U8 **plane, *row;
-    if(OVER_UTF_MAX(uv)) return 0;
+    if (OVER_UTF_MAX(uv))
+	return 0;
     plane = (U8**)UNF_combin[uv >> 16];
-    if(! plane) return 0;
+    if (! plane)
+	return 0;
     row = plane[(uv >> 8) & 0xff];
     return row ? row[uv & 0xff] : 0;
 }
@@ -128,7 +140,8 @@ void sv_cat_decompHangul (SV* sv, UV uv)
     UV sindex, lindex, vindex, tindex;
     U8 *t, tmp[3 * UTF8_MAXLEN + 1];
 
-    if(! Hangul_IsS(uv)) return;
+    if (! Hangul_IsS(uv))
+	return;
 
     sindex =  uv - Hangul_SBase;
     lindex =  sindex / Hangul_NCount;
@@ -138,7 +151,8 @@ void sv_cat_decompHangul (SV* sv, UV uv)
     t = tmp;
     t = uvuni_to_utf8(t, (lindex + Hangul_LBase));
     t = uvuni_to_utf8(t, (vindex + Hangul_VBase));
-    if (tindex) t = uvuni_to_utf8(t, (tindex + Hangul_TBase));
+    if (tindex)
+	t = uvuni_to_utf8(t, (tindex + Hangul_TBase));
     *t = '\0';
     sv_catpvn(sv, (char *)tmp, strlen((char *)tmp));
 }
@@ -157,7 +171,7 @@ decompose(arg, compat = &PL_sv_no)
     U8 *s, *e, *p, *r;
     bool iscompat;
   CODE:
-    if(SvUTF8(arg)) {
+    if (SvUTF8(arg)) {
 	src = arg;
     } else {
 	src = sv_mortalcopy(arg);
@@ -171,14 +185,17 @@ decompose(arg, compat = &PL_sv_no)
 
     s = (U8*)SvPV(src,srclen);
     e = s + srclen;
-    for(p = s; p < e;){
+    for (p = s; p < e;) {
 	uv = utf8n_to_uvuni(p, e - p, &retlen, 0);
 	p += retlen;
-	if(Hangul_IsS(uv)) sv_cat_decompHangul(dst, uv);
+	if (Hangul_IsS(uv))
+	    sv_cat_decompHangul(dst, uv);
 	else {
 	    r = iscompat ? dec_compat(uv) : dec_canonical(uv);
-	    if(r) sv_catpv(dst, (char *)r);
-	    else  sv_catpvn(dst, (char *)p - retlen, retlen);
+	    if (r)
+		sv_catpv(dst, (char *)r);
+	    else
+		sv_catpvn(dst, (char *)p - retlen, retlen);
 	}
     }
     RETVAL = dst;
@@ -192,22 +209,33 @@ reorder(arg)
     SV * arg
   PROTOTYPE: $
   PREINIT:
-    SV *src;
-    STRLEN srclen, retlen, stk_cc_max;
-    U8 *s, *e, *p, curCC;
+    SV *src, *dst;
+    STRLEN srclen, dstlen, retlen, stk_cc_max;
+    U8 *s, *e, *p, *d, curCC;
     UV uv;
     UNF_cc * stk_cc;
   CODE:
-    src = newSVsv(arg);
-    if(! SvUTF8(arg)) sv_utf8_upgrade(src);
+    if (SvUTF8(arg)) {
+	src = arg;
+    } else {
+	src = sv_mortalcopy(arg);
+	sv_utf8_upgrade(src);
+    }
+
+    s = (U8*)SvPV(src, srclen);
+
+    dstlen = srclen + 1;
+    dst = newSV(dstlen);
+    sv_setpvn(dst,s,srclen);
+    SvUTF8_on(dst);
 
     stk_cc_max = 10; /* enough as an initial value? */
     New(0, stk_cc, stk_cc_max, UNF_cc);
 
-    s = (U8*)SvPV(src,srclen);
-    e = s + srclen;
+    d = (U8*)SvPV(dst,dstlen);
+    e = d + dstlen;
 
-    for(p = s; p < e;){
+    for (p = d; p < e;) {
 	U8 *cc_in;
 	STRLEN cc_len, cc_iter, cc_pos;
 
@@ -215,20 +243,24 @@ reorder(arg)
 	curCC = getCombinClass(uv);
 	p += retlen;
 
-	if(! (curCC && p < e)) continue; else cc_in = p - retlen;
+	if (! (curCC && p < e))
+	    continue;
+	else
+	    cc_in = p - retlen;
 
 	cc_pos = 0;
 	stk_cc[cc_pos].cc  = curCC;
 	stk_cc[cc_pos].uv  = uv;
 	stk_cc[cc_pos].pos = cc_pos;
 
-	while(p < e) {
+	while (p < e) {
 	    uv = utf8n_to_uvuni(p, e - p, &retlen, 0);
 	    curCC = getCombinClass(uv);
-	    if(!curCC) break;
+	    if (!curCC)
+		break;
 	    p += retlen;
 	    cc_pos++;
-	    if(stk_cc_max <= cc_pos) { /* extend if need */
+	    if (stk_cc_max <= cc_pos) { /* extend if need */
 		stk_cc_max = cc_pos + 1;
 		Renew(stk_cc, stk_cc_max, UNF_cc);
 	    }
@@ -238,18 +270,19 @@ reorder(arg)
 	}
 
 	 /* only one c.c. in cc_len from cc_in, no need of reordering */
-	if(!cc_pos) continue;
+	if (!cc_pos)
+	    continue;
 
 	qsort((void*)stk_cc, cc_pos + 1, sizeof(UNF_cc), compare_cc);
 
 	cc_len = p - cc_in;
 	p = cc_in;
-	for(cc_iter = 0; cc_iter <= cc_pos; cc_iter++) {
+	for (cc_iter = 0; cc_iter <= cc_pos; cc_iter++) {
 	    p = uvuni_to_utf8(p, stk_cc[cc_iter].uv);
 	}
     }
     Safefree(stk_cc);
-    RETVAL = src;
+    RETVAL = dst;
   OUTPUT:
     RETVAL
 
@@ -266,7 +299,7 @@ compose(arg)
     STRLEN srclen, dstlen, tmplen, retlen;
     bool beginning = TRUE;
   CODE:
-    if(SvUTF8(arg)) {
+    if (SvUTF8(arg)) {
 	src = arg;
     } else {
 	src = sv_mortalcopy(arg);
@@ -286,12 +319,12 @@ compose(arg)
     (void)SvPOK_only(tmp);
     SvUTF8_on(tmp);
 
-    for(p = s; p < e;){
-	if(beginning) {
+    for (p = s; p < e;) {
+	if (beginning) {
 	    uvS = utf8n_to_uvuni(p, e - p, &retlen, 0);
 	    p += retlen;
 
-            if (getCombinClass(uvS)){ /* no Starter found yet */
+            if (getCombinClass(uvS)) { /* no Starter found yet */
 		d = uvuni_to_utf8(d, uvS);
 		continue;
 	    }
@@ -303,20 +336,18 @@ compose(arg)
 	preCC = 0;
 
     /* to the next Starter */
-	while(p < e) {
+	while (p < e) {
 	    uv = utf8n_to_uvuni(p, e - p, &retlen, 0);
 	    p += retlen;
 	    curCC = getCombinClass(uv);
 
-	    if(preCC && preCC == curCC) {
+	    if (preCC && preCC == curCC) {
 		preCC = curCC;
 		t = uvuni_to_utf8(t, uv);
 	    } else {
 		uvComp = composite_uv(uvS, uv);
 
-	/* S + C + S => S-S + C would be also blocked. */
-		if( uvComp && ! isExclusion(uvComp) && preCC <= curCC)
-		{
+		if (uvComp && ! isExclusion(uvComp) && preCC <= curCC) {
 		    STRLEN leftcur, rightcur, dstcur;
 		    leftcur  = UNISKIP(uvComp);
 		    rightcur = UNISKIP(uvS) + UNISKIP(uv);
@@ -326,7 +357,6 @@ compose(arg)
 			dstlen += leftcur - rightcur;
 			d = (U8*)SvGROW(dst,dstlen) + dstcur;
 		    }
-
 		    /* preCC not changed to curCC */
 		    uvS = uvComp;
 	        } else if (! curCC && p < e) { /* blocked */
@@ -341,7 +371,8 @@ compose(arg)
 	tmplen = t - tmp_start;
 	if (tmplen) { /* uncomposed combining char */
 	    t = (U8*)SvPVX(tmp);
-	    while(tmplen--) *d++ = *t++;
+	    while (tmplen--)
+		*d++ = *t++;
 	}
 	uvS = uv;
     } /* for */
@@ -352,13 +383,169 @@ compose(arg)
 
 
 
+void
+checkNFD(arg)
+    SV * arg
+  PROTOTYPE: $
+  ALIAS:
+    checkNFKD = 1
+  PREINIT:
+    UV uv;
+    SV *src;
+    STRLEN srclen, retlen;
+    U8 *s, *e, *p, curCC, preCC;
+  PPCODE:
+    if (SvUTF8(arg)) {
+	src = arg;
+    } else {
+	src = sv_mortalcopy(arg);
+	sv_utf8_upgrade(src);
+    }
+    
+    s = (U8*)SvPV(src,srclen);
+    e = s + srclen;
+
+    preCC = 0;
+    for (p = s; p < e; p += retlen) {
+	uv = utf8n_to_uvuni(p, e - p, &retlen, 0);
+	curCC = getCombinClass(uv);
+	if (preCC > curCC && curCC != 0) /* canonical ordering violated */
+	    XSRETURN_NO;
+	if (Hangul_IsS(uv) || (ix ? dec_compat(uv) : dec_canonical(uv)))
+	    XSRETURN_NO;
+	preCC = curCC;
+    }
+    XSRETURN_YES;
+
+
+
+void
+checkNFC(arg)
+    SV * arg
+  PROTOTYPE: $
+  ALIAS:
+    checkNFKC = 1
+  PREINIT:
+    UV uv;
+    SV *src;
+    STRLEN srclen, retlen;
+    U8 *s, *e, *p, curCC, preCC;
+    bool isMAYBE;
+  PPCODE:
+    if (SvUTF8(arg)) {
+	src = arg;
+    } else {
+	src = sv_mortalcopy(arg);
+	sv_utf8_upgrade(src);
+    }
+    
+    s = (U8*)SvPV(src,srclen);
+    e = s + srclen;
+
+    preCC = 0;
+    isMAYBE = FALSE;
+    for (p = s; p < e; p += retlen) {
+	uv = utf8n_to_uvuni(p, e - p, &retlen, 0);
+	curCC = getCombinClass(uv);
+
+	if (preCC > curCC && curCC != 0) /* canonical ordering violated */
+	    XSRETURN_NO;
+
+	/* get NFC/NFKC property */
+	if (Hangul_IsS(uv)) /* Hangul syllables are canonical composites */
+	    ; /* YES */
+	else if (isExclusion(uv) || isSingleton(uv) || isNonStDecomp(uv))
+	    XSRETURN_NO;
+	else if (isComp2nd(uv))
+	    isMAYBE = TRUE;
+	else if (ix) {
+	    char *canon, *compat;
+	 /*
+	  * NFKC_NO when having compatibility mapping;
+	  * i.e. dec_compat(uv) defined & different with dec_canonical(uv).
+	  */
+	    canon  = (char *) dec_canonical(uv);
+	    compat = (char *) dec_compat(uv);
+	    if (compat && (!canon || strNE(canon, compat)))
+		XSRETURN_NO;
+	} /* end of get NFC/NFKC property */
+
+	preCC = curCC;
+    }
+    if (isMAYBE)
+	XSRETURN_UNDEF;
+    else
+	XSRETURN_YES;
+
+
+
 U8
 getCombinClass(uv)
     UV uv
+  PROTOTYPE: $
 
 bool
 isExclusion(uv)
     UV uv
+  PROTOTYPE: $
+
+bool
+isSingleton(uv)
+    UV uv
+  PROTOTYPE: $
+
+bool
+isNonStDecomp(uv)
+    UV uv
+  PROTOTYPE: $
+
+bool
+isComp2nd(uv)
+    UV uv
+  PROTOTYPE: $
+  ALIAS:
+    isNFC_MAYBE  = 1
+    isNFKC_MAYBE = 2
+
+
+
+void
+isNFD_NO(uv)
+    UV uv
+  PROTOTYPE: $
+  ALIAS:
+    isNFKD_NO = 1
+  PPCODE:
+    if (Hangul_IsS(uv) || (ix ? dec_compat(uv) : dec_canonical(uv)))
+	XSRETURN_YES; /* NFD_NO or NFKD_NO */
+    else
+	XSRETURN_NO;
+
+
+
+void
+isComp_Ex(uv)
+    UV uv
+  PROTOTYPE: $
+  ALIAS:
+    isNFC_NO  = 0
+    isNFKC_NO = 1
+  PPCODE:
+    if (isExclusion(uv) || isSingleton(uv) || isNonStDecomp(uv))
+	XSRETURN_YES; /* NFC_NO or NFKC_NO */
+    else if (ix) {
+	char *canon, *compat;
+	canon  = (char *) dec_canonical(uv);
+	compat = (char *) dec_compat(uv);
+	if (compat && (!canon || strNE(canon, compat)))
+	    XSRETURN_YES; /* NFC_NO or NFKC_NO */
+	else
+	    XSRETURN_NO;
+    }
+    else
+	XSRETURN_NO;
+
+
 
 SV*
 getComposite(uv, uv2)
@@ -373,6 +560,8 @@ getComposite(uv, uv2)
   OUTPUT:
     RETVAL
 
+
+
 SV*
 getCanon(uv)
     UV uv
@@ -382,7 +571,7 @@ getCanon(uv)
   PREINIT:
     U8 * rstr;
   CODE:
-    if(Hangul_IsS(uv)) {
+    if (Hangul_IsS(uv)) {
 	SV * dst;
 	dst = newSV(1);
 	(void)SvPOK_only(dst);
@@ -390,7 +579,8 @@ getCanon(uv)
 	RETVAL = dst;
     } else {
 	rstr = ix ? dec_compat(uv) : dec_canonical(uv);
-	if(!rstr) XSRETURN_UNDEF;
+	if (!rstr)
+	    XSRETURN_UNDEF;
 	RETVAL = newSVpvn((char *)rstr, strlen((char *)rstr));
     }
     SvUTF8_on(RETVAL);
