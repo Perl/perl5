@@ -71,6 +71,7 @@ require Exporter;
 
 $VERSION = sprintf("%d.%02d", q$Revision: 2.3 $ =~ /(\d+)\.(\d+)/);
 
+use re 'asciirange'; # ranges in regular expressions refer to ASCII
 
 sub encode_qp ($)
 {

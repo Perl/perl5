@@ -165,14 +165,16 @@ print "ok 24\n";
 
 use bytes ();
 
-$d = pack("U*", 0xe3, 0x81, 0x82);
+# on EBCDIC chars are mapped differently so pick something that needs encoding
+# there too.
+$d = pack("U*", 0xe3, 0x81, 0xAF);
 $ol = bytes::length($d);
 print "not " unless $ol > 3;
 print "ok 25\n";
 %u = ($d => "downgrade");
 for (keys %u) {
     use bytes;
-    print "not " if length ne 3 or $_ ne "\xe3\x81\x82";
+    print "not " if length ne 3 or $_ ne "\xe3\x81\xAF";
     print "ok 26\n";
 }
 {

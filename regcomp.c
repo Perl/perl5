@@ -3402,9 +3402,16 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			for (value = 0; value < 128; value++)
 			    ANYOF_BITMAP_SET(ret, value);
 #else  /* EBCDIC */
-			for (value = 0; value < 256; value++)
-			    if (isASCII(value))
-				ANYOF_BITMAP_SET(ret, value);
+			for (value = 0; value < 256; value++) {
+			    if (PL_hints & HINT_RE_ASCIIR) {
+				if (NATIVE_TO_ASCII(value) < 128)
+				    ANYOF_BITMAP_SET(ret, value);
+			    }
+			    else {
+				if (isASCII(value))
+				    ANYOF_BITMAP_SET(ret, value);
+			    }
+			}
 #endif /* EBCDIC */
 		    }
 		    dont_optimize_invert = TRUE;
@@ -3418,9 +3425,16 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			for (value = 128; value < 256; value++)
 			    ANYOF_BITMAP_SET(ret, value);
 #else  /* EBCDIC */
-			for (value = 0; value < 256; value++)
-			    if (!isASCII(value))
-				ANYOF_BITMAP_SET(ret, value);
+			for (value = 0; value < 256; value++) {
+			    if (PL_hints & HINT_RE_ASCIIR) {
+				if (NATIVE_TO_ASCII(value) >= 128)
+				    ANYOF_BITMAP_SET(ret, value);
+			    }
+			    else {
+				if (!isASCII(value))
+				    ANYOF_BITMAP_SET(ret, value);
+			    }
+			}
 #endif /* EBCDIC */
 		    }
 		    dont_optimize_invert = TRUE;
@@ -3681,7 +3695,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	} /* end of namedclass \blah */
 
 	if (range) {
-	    if (lastvalue > value) /* b-a */ {
+	    if (((lastvalue > value) && !(PL_hints & HINT_RE_ASCIIR)) ||
+                ((NATIVE_TO_UNI(lastvalue) > NATIVE_TO_UNI(value)) && (PL_hints & HINT_RE_ASCIIR))) /* b-a */ {
 		Simple_vFAIL4("Invalid [] range \"%*.*s\"",
 			      RExC_parse - rangebegin,
 			      RExC_parse - rangebegin,
@@ -3715,7 +3730,17 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	if (!SIZE_ONLY) {
 	    if (lastvalue < 256 && value < 256) {
 #ifdef EBCDIC /* EBCDIC, for example. */
-		if ((isLOWER(lastvalue) && isLOWER(value)) ||
+		if (PL_hints & HINT_RE_ASCIIR) {
+		    IV i;
+		    /* New style scheme for ranges:
+		     * after :
+		     * use re 'asciir';
+		     * do ranges in ASCII/Unicode space
+		     */
+		    for (i = NATIVE_TO_ASCII(lastvalue) ; i <= NATIVE_TO_ASCII(value); i++)
+			ANYOF_BITMAP_SET(ret, ASCII_TO_NATIVE(i));
+		}
+		else if ((isLOWER(lastvalue) && isLOWER(value)) ||
 		    (isUPPER(lastvalue) && isUPPER(value)))
 		{
 		    IV i;
@@ -4519,3 +4544,4 @@ clear_re(pTHXo_ void *r)
 {
     ReREFCNT_dec((regexp *)r);
 }
+

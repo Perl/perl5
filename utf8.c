@@ -1342,7 +1342,8 @@ Perl_swash_fetch(pTHX_ SV *sv, U8 *ptr)
 	    PUSHMARK(SP);
 	    EXTEND(SP,3);
 	    PUSHs((SV*)sv);
-	    PUSHs(sv_2mortal(newSViv(code_point & ~(needents - 1))));
+	    /* On EBCDIC & ~(0xA0-1) isn't a useful thing to do */
+	    PUSHs(sv_2mortal(newSViv((klen) ? (code_point & ~(needents - 1)) : 0)));
 	    PUSHs(sv_2mortal(newSViv(needents)));
 	    PUTBACK;
 	    if (call_method("SWASHGET", G_SCALAR))

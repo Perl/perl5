@@ -11,6 +11,9 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
 }
+
+use re 'asciirange'; # Compute ranges in ASCII space
+
 eval 'use Config';          #  Defaults assumed if this fails
 
 $x = "abc\ndef\n";
