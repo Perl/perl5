@@ -26,7 +26,7 @@ Each of these is explained in further detail below.
 
 B<NOTE>: starting from the release 5.6.0, Perl uses a version
 scheme where even-numbered subreleases (like 5.6 and 5.8) are stable
-maintenance releases and odd-numbered subreleases (like 5.7) are
+maintenance releases and odd-numbered subreleases (like 5.7 and 5.9) are
 unstable development releases.  Development releases should not be
 used in production environments.  Fixes and new features are first
 carefully tested in development releases and only if they prove
@@ -102,7 +102,7 @@ building perl itself with:
 pod/perl56delta.pod contains more details about this.
 
 =head1 WARNING:  This version is not binary compatible with releases of
-Perl prior to 5.8.0.
+Perl prior to 5.9.0.
 
 If you have built extensions (i.e. modules that include C code)
 using an earlier version of Perl, you will need to rebuild and reinstall
@@ -166,11 +166,12 @@ does not work with some C++ compilers.
 
 =head1 Space Requirements
 
-The complete perl5 source tree takes up about 50 MB of disk space.
+The complete perl5 source tree takes up about 60 MB of disk space.
 After completing make, it takes up roughly 100 MB, though the actual
 total is likely to be quite system-dependent.  The installation
 directories need something on the order of 45 MB, though again that
-value is system-dependent.
+value is system-dependent.  A perl build with debug symbols and
+-DDEBUGGING will require something on the order of 10 MB extra.
 
 =head1 Start with a Fresh Distribution
 
@@ -413,9 +414,9 @@ The directories set up by Configure fall into three broad categories.
 
 =item Directories for the perl distribution
 
-By default, Configure will use the following directories for 5.8.0.
+By default, Configure will use the following directories for 5.9.0.
 $version is the full perl version number, including subversion, e.g.
-5.8.0 or 5.8.1, and $archname is a string like sun4-sunos,
+5.9.0 or 5.9.1, and $archname is a string like sun4-sunos,
 determined by Configure.  The full definitions of all Configure
 variables are in the file Porting/Glossary.
 
@@ -534,7 +535,7 @@ version-specific subdirectories) for add-on modules and extensions.
 For example, if you have a bundle of perl libraries from a previous 
 installation, perhaps in a strange place:
 
-	Configure -Dotherlibdirs=/usr/lib/perl5/site_perl/5.6.1
+	Configure -Dotherlibdirs=/usr/lib/perl5/site_perl/5.8.1
 
 =item APPLLIB_EXP
 
@@ -563,7 +564,7 @@ without resetting MANPATH.
 
 You can continue to use the old default from the command line with
 
-	sh Configure -Dman3dir=/usr/local/lib/perl5/5.8.0/man/man3
+	sh Configure -Dman3dir=/usr/local/lib/perl5/5.9.0/man/man3
 
 Some users also prefer to use a .3pm suffix.  You can do that with
 
@@ -600,13 +601,13 @@ library directory structure is slightly simplified.  Instead of
 suggesting $prefix/lib/perl5/, Configure will suggest $prefix/lib.
 
 Thus, for example, if you Configure with
--Dprefix=/opt/perl, then the default library directories for 5.8.0 are
+-Dprefix=/opt/perl, then the default library directories for 5.9.0 are
 
     Configure variable	Default value
-	$privlib	/opt/perl/lib/5.8.0
-	$archlib	/opt/perl/lib/5.8.0/$archname
-	$sitelib	/opt/perl/lib/site_perl/5.8.0
-	$sitearch	/opt/perl/lib/site_perl/5.8.0/$archname
+	$privlib	/opt/perl/lib/5.9.0
+	$archlib	/opt/perl/lib/5.9.0/$archname
+	$sitelib	/opt/perl/lib/site_perl/5.9.0
+	$sitearch	/opt/perl/lib/site_perl/5.9.0/$archname
 
 =head2 Changing the installation directory
 
@@ -809,7 +810,7 @@ and the long double support.
 
 =head2 Selecting File IO mechanisms
 
-Executive summary: in Perl 5.8, you should use the default "PerlIO"
+Executive summary: as of Perl 5.8, you should use the default "PerlIO"
 as the IO mechanism unless you have a good reason not to.
 
 In more detail: previous versions of perl used the standard IO
@@ -2188,17 +2189,17 @@ approach.
 
 =head1 Coexistence with earlier versions of perl5
 
-Perl 5.8 is not binary compatible with earlier versions of Perl.
+Perl 5.9 is not binary compatible with earlier versions of Perl.
 In other words, you will have to recompile your XS modules.
 
 In general, you can usually safely upgrade from one version of Perl (e.g.
-5.004_04) to another similar version (e.g. 5.004_05) without re-compiling
+5.8.0) to another similar version (e.g. 5.8.2) without re-compiling
 all of your add-on extensions.  You can also safely leave the old version
 around in case the new version causes you problems for some reason.
 For example, if you want to be sure that your script continues to run
-with 5.004_04, simply replace the '#!/usr/local/bin/perl' line at the
+with 5.8.2, simply replace the '#!/usr/local/bin/perl' line at the
 top of the script with the particular version you want to run, e.g.
-#!/usr/local/bin/perl5.00404.
+#!/usr/local/bin/perl5.8.2.
 
 Usually, most extensions will probably not need to be recompiled to
 use with a newer version of Perl (the Perl 5.6 to Perl 5.8 transition
@@ -2280,9 +2281,9 @@ won't interfere with another version.  (The defaults guarantee this for
 libraries after 5.6.0, but not for executables. TODO?)  One convenient
 way to do this is by using a separate prefix for each version, such as
 
-	sh Configure -Dprefix=/opt/perl5.004
+	sh Configure -Dprefix=/opt/perl5.8.2
 
-and adding /opt/perl5.004/bin to the shell PATH variable.  Such users
+and adding /opt/perl5.8.2/bin to the shell PATH variable.  Such users
 may also wish to add a symbolic link /usr/local/bin/perl so that
 scripts can still start with #!/usr/local/bin/perl.
 
@@ -2297,11 +2298,11 @@ yet.
 
 =head2 Upgrading from 5.005 or 5.6 to 5.8.0
 
-B<Perl 5.8.0 is binary incompatible with Perl 5.6.1, 5.6.0, 5.005,
+B<Perl 5.9.0 is binary incompatible with Perl 5.8.x, Perl 5.6.x, 5.005,
 and any earlier Perl release.>  Perl modules having binary parts
 (meaning that a C compiler is used) will have to be recompiled to be
-used with 5.8.0.  If you find you do need to rebuild an extension with
-5.8.0, you may safely do so without disturbing the 5.005 or 5.6.0
+used with 5.9.0.  If you find you do need to rebuild an extension with
+5.9.0, you may safely do so without disturbing the older
 installations.  (See L<"Coexistence with earlier versions of perl5">
 above.)
 
