@@ -140,6 +140,10 @@ if ('a' lt 'A') { # EBCDIC char sets sort lower case before UPPER
     @f_names = sort(@f_names);
     @f_alpha = qw(aY.pl Ax.pl bY.pl Bx.pl cY.pl Cx.pl);
 }
+if ($^O eq 'VMS') {
+    @f_alpha = qw(ax.pl ay.pl bx.pl by.pl cx.pl cy.pl);
+    @f_names = @f_alpha;
+}
 
 for (@f_names) {
     open T, "> $_";
