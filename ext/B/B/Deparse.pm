@@ -13,7 +13,8 @@ use B qw(class main_root main_start main_cv svref_2object opnumber cstring
 	 OPf_KIDS OPf_REF OPf_STACKED OPf_SPECIAL
 	 OPpLVAL_INTRO OPpENTERSUB_AMPER OPpSLICE OPpCONST_BARE
 	 OPpTRANS_SQUASH OPpTRANS_DELETE OPpTRANS_COMPLEMENT OPpTARGET_MY
-	 OPpCONST_ARYBASE OPpEXISTS_SUB
+	 OPpCONST_ARYBASE OPpEXISTS_SUB OPpSORT_NUMERIC OPpSORT_INTEGER
+	 OPpSORT_REVERSE
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK
          CVf_METHOD CVf_LOCKED CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE PMf_SKIPWHITE
@@ -2094,6 +2095,13 @@ sub indirop {
 	}
 	$indir = $indir . " ";
 	$kid = $kid->sibling;
+    }
+    if ($name eq "sort" && $op->private & (OPpSORT_NUMERIC | OPpSORT_INTEGER)) {
+	$indir = ($op->private & OPpSORT_REVERSE) ? '{$b <=> $a} '
+						  : '{$a <=> $b} ';
+    }
+    elsif ($name eq "sort" && $op->private & OPpSORT_REVERSE) {
+	$indir = '{$b cmp $a} ';
     }
     for (; !null($kid); $kid = $kid->sibling) {
 	$expr = $self->deparse($kid, 6);
