@@ -479,7 +479,7 @@ is_utf8_mark(U8 *p)
     return swash_fetch(PL_utf8_mark, p);
 }
 
-U32
+UV
 to_utf8_upper(U8 *p)
 {
     UV uv;
@@ -490,7 +490,7 @@ to_utf8_upper(U8 *p)
     return uv ? uv : utf8_to_uv(p,0);
 }
 
-U32
+UV
 to_utf8_title(U8 *p)
 {
     UV uv;
@@ -501,7 +501,7 @@ to_utf8_title(U8 *p)
     return uv ? uv : utf8_to_uv(p,0);
 }
 
-U32
+UV
 to_utf8_lower(U8 *p)
 {
     UV uv;
