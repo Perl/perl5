@@ -4993,7 +4993,7 @@ OP *
 Perl_ck_defined(pTHX_ OP *o)		/* 19990527 MJD */
 {
     dTHR;
-    if (ckWARN(WARN_DEPRECATED)) {
+    if (ckWARN(WARN_DEPRECATED) && (o->op_flags & OPf_KIDS)) {
       switch (cUNOPo->op_first->op_type) {
       case OP_RV2AV:
       case OP_PADAV:
