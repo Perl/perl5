@@ -1255,15 +1255,12 @@ workarounds.
 inlining.  See L<perlsub/"Constant Functions"> for commentary and
 workarounds.
 
-=item constant(%s): %%^H is not localized
-
-(F) When setting compile-time-lexicalized hash %^H one should set the 
-corresponding bit of $^H as well.
-
 =item constant(%s): %s
 
-(F) Compile-time-substitutions (such as overloaded constants and
-character names) were not correctly set up.
+(F) The parser found inconsistencies either while attempting to define an
+overloaded constant, or when trying to find the character name specified
+in the C<\N{...}> escape.  Perhaps you forgot to load the corresponding
+C<overload> or C<charnames> pragma?  See L<charnames> and L<overload>.
 
 =item Copy method did not return a reference
 
