@@ -1535,7 +1535,7 @@ PP(pp_sysread)
     io = GvIO(gv);
     if (!io || !IoIFP(io))
 	goto say_undef;
-    if ((fp_utf8 = PerlIO_isutf8(IoIFP(io))) && !IN_BYTE) {
+    if ((fp_utf8 = PerlIO_isutf8(IoIFP(io))) && !IN_BYTES) {
 	buffer = SvPVutf8_force(bufsv, blen);
 	/* UTF8 may not have been set if they are all low bytes */
 	SvUTF8_on(bufsv);
@@ -1663,7 +1663,7 @@ PP(pp_sysread)
     SvCUR_set(bufsv, count+(buffer - SvPVX(bufsv)));
     *SvEND(bufsv) = '\0';
     (void)SvPOK_only(bufsv);
-    if (fp_utf8 && !IN_BYTE) {
+    if (fp_utf8 && !IN_BYTES) {
 	/* Look at utf8 we got back and count the characters */
 	char *bend = buffer + count;
 	while (buffer < bend) {

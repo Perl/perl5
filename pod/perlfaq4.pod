@@ -42,17 +42,7 @@ are consequently slower.
 If precision is important, such as when dealing with money, it's good
 to work with integers and then divide at the last possible moment.
 For example, work in pennies (1995) instead of dollars and cents
-(19.95) and divide by 100 at the end.  In fact, if you are dividing by
-100, you don't even need to really divide-- just split of the
-fractional parts and insert the '.'  (or whichever is your decimal
-separator) in between, e.g.
-
-    sub d100 {
-        $_[0] =~ /(.*?)(.(?:.)?)$/;
-        sprintf("%d.%02d", $1||0, $2);
-    }
-
-and then display all your numbers like this: C<d100($number)>
+(19.95) and divide by 100 at the end.
 
 To get rid of the superfluous digits, just use a format (eg,
 C<printf("%.2f", 19.95)>) to get the required precision.

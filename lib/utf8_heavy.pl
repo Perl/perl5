@@ -36,7 +36,9 @@ sub SWASHNEW {
     }
 
     {
-	$list ||= ($caller ne 'main' && eval { $caller->$type(); })
+        $list ||=
+	    ( exists &{"${caller}::${type}"} &&
+	      eval { $caller->$type() } )
 	    || do "$file.pl"
 	    || do "$encoding/$file.pl"
 	    || do "$encoding/Is/${type}.pl"

@@ -111,10 +111,10 @@ END_EXTERN_C
  * (that is, the two high bits are set).  Otherwise we risk loading in the
  * heavy-duty SWASHINIT and SWASHGET routines unnecessarily.
  */
-#define isIDFIRST_lazy_if(p,c) ((IN_BYTE || (!c || (*((U8*)p) < 0xc0))) \
+#define isIDFIRST_lazy_if(p,c) ((IN_BYTES || (!c || (*((U8*)p) < 0xc0))) \
 				? isIDFIRST(*(p)) \
 				: isIDFIRST_utf8((U8*)p))
-#define isALNUM_lazy_if(p,c)   ((IN_BYTE || (!c || (*((U8*)p) < 0xc0))) \
+#define isALNUM_lazy_if(p,c)   ((IN_BYTES || (!c || (*((U8*)p) < 0xc0))) \
 				? isALNUM(*(p)) \
 				: isALNUM_utf8((U8*)p))
 
@@ -129,8 +129,8 @@ END_EXTERN_C
 #define UTF8_MAXLEN 13 /* how wide can a single UTF8 encoded character become */
 
 /* #define IN_UTF8 (PL_curcop->op_private & HINT_UTF8) */
-#define IN_BYTE (PL_curcop->op_private & HINT_BYTE)
-#define DO_UTF8(sv) (SvUTF8(sv) && !IN_BYTE)
+#define IN_BYTES (PL_curcop->op_private & HINT_BYTES)
+#define DO_UTF8(sv) (SvUTF8(sv) && !IN_BYTES)
 
 #define UTF8_ALLOW_EMPTY		0x0001
 #define UTF8_ALLOW_CONTINUATION		0x0002

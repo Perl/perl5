@@ -408,7 +408,6 @@ perlio_mg_set(pTHX_ SV *sv, MAGIC *mg)
    IO *io = GvIOn((GV *)SvRV(sv));
    PerlIO *ifp = IoIFP(io);
    PerlIO *ofp = IoOFP(io);
-   AV *av = (AV *) mg->mg_obj;
    Perl_warn(aTHX_ "set %"SVf" %p %p %p",sv,io,ifp,ofp);
   }
  return 0;
@@ -422,7 +421,6 @@ perlio_mg_get(pTHX_ SV *sv, MAGIC *mg)
    IO *io = GvIOn((GV *)SvRV(sv));
    PerlIO *ifp = IoIFP(io);
    PerlIO *ofp = IoOFP(io);
-   AV *av = (AV *) mg->mg_obj;
    Perl_warn(aTHX_ "get %"SVf" %p %p %p",sv,io,ifp,ofp);
   }
  return 0;
@@ -739,7 +737,6 @@ PerlIORaw_pushed(PerlIO *f, const char *mode, SV *arg)
  /* Pop back to bottom layer */
  if (f && *f)
   {
-   int code = 0;
    PerlIO_flush(f);
    while (!(PerlIOBase(f)->tab->kind & PERLIO_K_RAW))
     {
@@ -814,7 +811,7 @@ PerlIO_binmode(pTHX_ PerlIO *f, int iotype, int mode, const char *names)
   {
    PerlIO *top = f;
    PerlIOl *l;
-   while (l = *top)
+   while ((l = *top))
     {
      if (PerlIOBase(top)->tab == &PerlIO_crlf)
       {
@@ -1016,7 +1013,7 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd, int imode, int 
   {
    AV *layera;
    IV n;
-   PerlIO_funcs *tab;
+   PerlIO_funcs *tab = NULL;
    if (f && *f)
     {
      /* This is "reopen" - it is not tested as perl does not use it yet */
@@ -1563,8 +1560,10 @@ IV
 PerlIOBase_pushed(PerlIO *f, const char *mode, SV *arg)
 {
  PerlIOl *l = PerlIOBase(f);
+#if 0
  const char *omode = mode;
  char temp[8];
+#endif
  PerlIO_funcs *tab = PerlIOBase(f)->tab;
  l->flags  &= ~(PERLIO_F_CANREAD|PERLIO_F_CANWRITE|
                 PERLIO_F_TRUNCATE|PERLIO_F_APPEND);
@@ -1933,7 +1932,6 @@ Off_t
 PerlIOUnix_tell(PerlIO *f)
 {
  dTHX;
- Off_t posn = PerlLIO_lseek(PerlIOSelf(f,PerlIOUnix)->fd,0,SEEK_CUR);
  return PerlLIO_lseek(PerlIOSelf(f,PerlIOUnix)->fd,0,SEEK_CUR);
 }
 
@@ -2491,7 +2489,7 @@ PerlIOBuf_open(pTHX_ PerlIO_funcs *self, AV *layers, IV n, const char *mode, int
    f = (*tab->Open)(aTHX_ tab, layers, n-2, mode,fd,imode,perm,NULL,narg,args);
    if (f)
     {
-     PerlIOBuf *b = PerlIOSelf(PerlIO_push(aTHX_ f,self,mode,PerlIOArg),PerlIOBuf);
+     PerlIO_push(aTHX_ f,self,mode,PerlIOArg);
      fd = PerlIO_fileno(f);
 #if O_BINARY != O_TEXT
      /* do something about failing setmode()? --jhi */
@@ -3312,7 +3310,6 @@ PerlIOMmap_map(PerlIO *f)
 {
  dTHX;
  PerlIOMmap *m = PerlIOSelf(f,PerlIOMmap);
- PerlIOBuf  *b = &m->base;
  IV flags = PerlIOBase(f)->flags;
  IV code  = 0;
  if (m->len)

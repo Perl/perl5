@@ -130,7 +130,7 @@ _cwdxs_abs_path(char *start)
   char dotdots[MAXPATHLEN] = { 0 };
   char name[MAXPATHLEN]    = { 0 };
   char *cwd;
-  int namelen;
+  int namelen = 0;
   struct stat cst, pst, tst;
 
   if (PerlLIO_stat(start, &cst) < 0) {

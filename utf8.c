@@ -243,7 +243,7 @@ Most code should use utf8_to_uvchr() rather than call this directly.
 UV
 Perl_utf8n_to_uvuni(pTHX_ U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 {
-    UV uv = *s, ouv;
+    UV uv = *s, ouv = 0;
     STRLEN len = 1;
     bool dowarn = ckWARN_d(WARN_UTF8);
     STRLEN expectlen = 0;
@@ -507,7 +507,7 @@ Perl_utf8_length(pTHX_ U8 *s, U8 *e)
 	U8 t = UTF8SKIP(s);
 
 	if (e - s < t)
-	    Perl_croak(aTHX_ "panic: utf8_length: s=%p (%02X) e=%p l=%d - unaligned end",s,*s,e,t);
+	    Perl_croak(aTHX_ "panic: utf8_length: unaligned end");
 	s += t;
 	len++;
     }

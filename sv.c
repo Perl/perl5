@@ -3067,7 +3067,7 @@ Perl_sv_utf8_downgrade(pTHX_ register SV* sv, bool fail_ok)
 	        if (fail_ok)
 		    return FALSE;
 #ifdef USE_BYTES_DOWNGRADES
-		else if (IN_BYTE) {
+		else if (IN_BYTES) {
 		    U8 *d = s;
 		    U8 *e = (U8 *) SvEND(sv);
 		    int first = 1;
@@ -3677,7 +3677,8 @@ Perl_sv_setpvn(pTHX_ register SV *sv, register const char *ptr, register STRLEN 
     else {
         /* len is STRLEN which is unsigned, need to copy to signed */
 	IV iv = len;
-	assert(iv >= 0);
+	if (iv < 0)
+	    Perl_croak(aTHX_ "panic: sv_setpvn called with negative strlen");
     }
     (void)SvUPGRADE(sv, SVt_PV);
 
@@ -4892,7 +4893,7 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
 	pv2 = SvPV(sv2, cur2);
 
     /* do not utf8ize the comparands as a side-effect */
-    if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTE) {
+    if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTES) {
 	bool is_utf8 = TRUE;
         /* UTF-8ness differs */
 	if (PL_hints & HINT_UTF8_DISTINCT)
@@ -4959,7 +4960,7 @@ Perl_sv_cmp(pTHX_ register SV *sv1, register SV *sv2)
 	pv2 = SvPV(sv2, cur2);
 
     /* do not utf8ize the comparands as a side-effect */
-    if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTE) {
+    if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTES) {
 	if (PL_hints & HINT_UTF8_DISTINCT)
 	    return SvUTF8(sv1) ? 1 : -1;
 
@@ -5124,7 +5125,7 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
     register STDCHAR rslast;
     register STDCHAR *bp;
     register I32 cnt;
-    I32 i;
+    I32 i = 0;
 
     SV_CHECK_THINKFIRST(sv);
     (void)SvUPGRADE(sv, SVt_PV);
@@ -6990,7 +6991,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
     STRLEN origlen;
     I32 svix = 0;
     static char nullstr[] = "(null)";
-    SV *argsv;
+    SV *argsv = Nullsv;
 
     /* no matter what, this is a string now */
     (void)SvPV_force(sv, origlen);
@@ -7058,7 +7059,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	STRLEN veclen = 0;
 	char c;
 	int i;
-	unsigned base;
+	unsigned base = 0;
 	IV iv;
 	UV uv;
 	NV nv;
@@ -7264,7 +7265,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    uv = args ? va_arg(*args, int) : SvIVx(argsv);
 	    if ((uv > 255 ||
 		 (!UNI_IS_INVARIANT(uv) && SvUTF8(sv)))
-		&& !IN_BYTE) {
+		&& !IN_BYTES) {
 		eptr = (char*)utf8buf;
 		elen = uvchr_to_utf8((U8*)eptr, uv) - utf8buf;
 		is_utf = TRUE;

@@ -52,7 +52,7 @@ walk(int useval, int level, register int node, int *numericptr, int minprec)
     STR *tmp2str;
     STR *tmp3str;
     char *t;
-    char *d, *s;
+    char *d, *s = 0;
     int numarg;
     int numeric = FALSE;
     STR *fstr;
@@ -750,7 +750,7 @@ sub Pick {\n\
 	subretnum |= numarg;
 	s = Nullch;
 	t = tmp2str->str_ptr;
-	while (t = instr(t,"return "))
+	while ((t = instr(t,"return ")))
 	    s = t++;
 	if (s) {
 	    i = 0;
@@ -1463,7 +1463,7 @@ sub Pick {\n\
 	if (!s)
 	    fatal("Illegal for loop: %s",d);
 	*s++ = '\0';
-	for (t = s; i = *t; t++) {
+	for (t = s; (i = *t); t++) {
 	    i &= 127;
 	    if (i == '}' || i == ']')
 		break;

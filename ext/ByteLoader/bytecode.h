@@ -74,7 +74,6 @@ typedef IV IV64;
 
 #define BGET_op_tr_array(arg) do {			\
 	unsigned short *ary;				\
-	int i;						\
 	New(666, ary, 256, unsigned short);		\
 	BGET_FREAD(ary, sizeof(unsigned short), 256);	\
 	arg = (char *) ary;				\

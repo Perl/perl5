@@ -2345,8 +2345,6 @@ Perl_my_popen_list(pTHX_ char *mode, int n, SV **args)
     }
     if (pid == 0) {
 	/* Child */
-	GV* tmpgv;
-	int fd;
 #undef THIS
 #undef THAT
 #define THIS that
@@ -2368,10 +2366,10 @@ Perl_my_popen_list(pTHX_ char *mode, int n, SV **args)
 	}
 #if !defined(HAS_FCNTL) || !defined(F_SETFD)
 	/* No automatic close - do it by hand */
-#ifndef NOFILE
-#define NOFILE 20
-#endif
-	for (fd = PL_maxsysfd + 1; fd < NOFILE; fd++) {
+#  ifndef NOFILE
+#  define NOFILE 20
+#  endif
+	for (int fd = PL_maxsysfd + 1; fd < NOFILE; fd++) {
 	    if (fd != pp[1])
 		PerlLIO_close(fd);
 	}
@@ -2750,7 +2748,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
     Pid_t pid;
     Pid_t pid2;
     bool close_failed;
-    int saved_errno;
+    int saved_errno = 0;
 #ifdef VMS
     int saved_vaxc_errno;
 #endif
@@ -2806,13 +2804,14 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 I32
 Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 {
+    if (!pid)
+	return -1;
+#if !defined(HAS_WAITPID) && !defined(HAS_WAIT4) || defined(HAS_WAITPID_RUNTIME)
+    {
     SV *sv;
     SV** svp;
     char spid[TYPE_CHARS(int)];
 
-    if (!pid)
-	return -1;
-#if !defined(HAS_WAITPID) && !defined(HAS_WAIT4) || defined(HAS_WAITPID_RUNTIME)
     if (pid > 0) {
 	sprintf(spid, "%"IVdf, (IV)pid);
 	svp = hv_fetch(PL_pidstatus,spid,strlen(spid),FALSE);
@@ -2834,6 +2833,7 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 	    (void)hv_delete(PL_pidstatus,spid,strlen(spid),G_DISCARD);
 	    return pid;
 	}
+        }
     }
 #endif
 #ifdef HAS_WAITPID

@@ -1230,7 +1230,6 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
   MAGIC* mg=mg_find((SV*)stash, PERL_MAGIC_overload_table);
   AMT *amtp = (mg) ? (AMT*)mg->mg_ptr: (AMT *) NULL;
   AMT amt;
-  STRLEN n_a;
 
   if (mg && amtp->was_ok_am == PL_amagic_generation
       && amtp->was_ok_sub == PL_sub_generation)
@@ -1284,7 +1283,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 		GV *ngv;
 		
 		DEBUG_o( Perl_deb(aTHX_ "Resolving method `%.256s' for overloaded `%s' in package `%.256s'\n",
-			     SvPV(GvSV(gv), n_a), cp, HvNAME(stash)) );
+			     SvPV_nolen(GvSV(gv)), cp, HvNAME(stash)) );
 		if (!SvPOK(GvSV(gv))
 		    || !(ngv = gv_fetchmethod_autoload(stash, SvPVX(GvSV(gv)),
 						       FALSE)))
@@ -1356,10 +1355,10 @@ SV*
 Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 {
   MAGIC *mg;
-  CV *cv;
+  CV *cv=NULL;
   CV **cvp=NULL, **ocvp=NULL;
-  AMT *amtp, *oamtp;
-  int fl=0, off, off1, lr=0, assign=AMGf_assign & flags, notfound=0;
+  AMT *amtp=NULL, *oamtp=NULL;
+  int fl=0, off=0, off1, lr=0, assign=AMGf_assign & flags, notfound=0;
   int postpr = 0, force_cpy = 0, assignshift = assign ? 1 : 0;
   HV* stash;
   if (!(AMGf_noleft & flags) && SvAMAGIC(left)
@@ -1647,7 +1646,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
     CATCH_SET(oldcatch);
 
     if (postpr) {
-      int ans;
+      int ans=0;
       switch (method) {
       case le_amg:
       case sle_amg:

@@ -37,7 +37,7 @@ $uv_bigi |= 0x0;
 $expect = 6 * ($#FOO+2) * ($#FOO+1);
 print "1..$expect\n";
 
-sub nok {
+sub nok ($$$$$$$$) {
   my ($test, $left, $threeway, $right, $result, $i, $j, $boolean) = @_;
   $result = defined $result ? "'$result'" : 'undef';
   print "not ok $test # ($left <=> $right) gives: $result \$i=$i \$j=$j, $boolean disagrees\n";
@@ -79,7 +79,7 @@ for my $i (0..$#FOO) {
 	    print "ok $ok\n";
 	}
 	else {
-	    nok ($ok, $i3. '<=>', $j3, $cmp, $i, $j, '==');
+	    nok ($ok, $i3, '<=>', $j3, $cmp, $i, $j, '==');
 	}
 	$ok++;
 	if (!defined($cmp) ? !($i5 > $j5)
@@ -90,7 +90,7 @@ for my $i (0..$#FOO) {
 	    print "ok $ok\n";
 	}
 	else {
-	    nok ($ok, $i3. '<=>', $j3, $cmp, $i, $j, '>');
+	    nok ($ok, $i3, '<=>', $j3, $cmp, $i, $j, '>');
 	}
 	$ok++;
 	if (!defined($cmp) ? !($i6 >= $j6)
@@ -101,7 +101,7 @@ for my $i (0..$#FOO) {
 	    print "ok $ok\n";
 	}
 	else {
-	    nok ($ok, $i3. '<=>', $j3, $cmp, $i, $j, '>=');
+	    nok ($ok, $i3, '<=>', $j3, $cmp, $i, $j, '>=');
 	}
 	$ok++;
 	# OK, so the docs are wrong it seems. NaN != NaN
@@ -113,7 +113,7 @@ for my $i (0..$#FOO) {
 	    print "ok $ok\n";
 	}
 	else {
-	    nok ($ok, $i3. '<=>', $j3, $cmp, $i, $j, '!=');
+	    nok ($ok, $i3, '<=>', $j3, $cmp, $i, $j, '!=');
 	}
 	$ok++;
 	if (!defined($cmp) ? !($i8 <= $j8)
@@ -124,7 +124,7 @@ for my $i (0..$#FOO) {
 	    print "ok $ok\n";
 	}
 	else {
-	    nok ($ok, $i3. '<=>', $j3, $cmp, $i, $j, '<=');
+	    nok ($ok, $i3, '<=>', $j3, $cmp, $i, $j, '<=');
 	}
 	$ok++;
 	$cmp = $i9 cmp $j9;

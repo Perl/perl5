@@ -234,10 +234,10 @@ END_EXTERN_C
  * unnecessarily.
  */
 
-#define isIDFIRST_lazy_if(p,c) ((IN_BYTE || (!c || UTF8_IS_INVARIANT(*p))) \
+#define isIDFIRST_lazy_if(p,c) ((IN_BYTES || (!c || UTF8_IS_INVARIANT(*p))) \
 				? isIDFIRST(*(p)) \
 				: isIDFIRST_utf8((U8*)p))
-#define isALNUM_lazy_if(p,c)   ((IN_BYTE || (!c || UTF8_IS_INVARIANT(*p))) \
+#define isALNUM_lazy_if(p,c)   ((IN_BYTES || (!c || UTF8_IS_INVARIANT(*p))) \
 				? isALNUM(*(p)) \
 				: isALNUM_utf8((U8*)p))
 

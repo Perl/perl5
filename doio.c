@@ -1011,7 +1011,7 @@ Perl_do_eof(pTHX_ GV *gv)
 Off_t
 Perl_do_tell(pTHX_ GV *gv)
 {
-    register IO *io;
+    register IO *io = 0;
     register PerlIO *fp;
 
     if (gv && (io = GvIO(gv)) && (fp = IoIFP(io))) {
@@ -1030,7 +1030,7 @@ Perl_do_tell(pTHX_ GV *gv)
 bool
 Perl_do_seek(pTHX_ GV *gv, Off_t pos, int whence)
 {
-    register IO *io;
+    register IO *io = 0;
     register PerlIO *fp;
 
     if (gv && (io = GvIO(gv)) && (fp = IoIFP(io))) {
@@ -1049,7 +1049,7 @@ Perl_do_seek(pTHX_ GV *gv, Off_t pos, int whence)
 Off_t
 Perl_do_sysseek(pTHX_ GV *gv, Off_t pos, int whence)
 {
-    register IO *io;
+    register IO *io = 0;
     register PerlIO *fp;
 
     if (gv && (io = GvIO(gv)) && (fp = IoIFP(io)))
@@ -1332,7 +1332,7 @@ Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
     Perl_croak(aTHX_ "exec? I'm not *that* kind of operating system");
 #else
     register char **a;
-    char *tmps;
+    char *tmps = Nullch;
     STRLEN n_a;
 
     if (sp > mark) {

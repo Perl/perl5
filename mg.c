@@ -20,6 +20,9 @@
 #  ifndef NGROUPS
 #    define NGROUPS 32
 #  endif
+#  ifdef I_GRP
+#    include <grp.h>
+#  endif
 #endif
 
 static void restore_magic(pTHXo_ void *p);
@@ -372,9 +375,11 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
 		
 		if (i > 0 && DO_UTF8(PL_reg_sv)) {
 		    char *b = rx->subbeg;
-		    i = Perl_utf8_length(aTHX_ (U8*)b, (U8*)(b+i));
+		    if (b)
+		        i = Perl_utf8_length(aTHX_ (U8*)b, (U8*)(b+i));
 		}
-		sv_setiv(sv,i);
+
+		sv_setiv(sv, i);
 	    }
     }
     return 0;
@@ -627,7 +632,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 
 	      getrx:
 		if (i >= 0) {
-		    bool was_tainted;
+		    bool was_tainted = FALSE;
 		    if (PL_tainting) {
 			was_tainted = PL_tainted;
 			PL_tainted = FALSE;
@@ -1038,7 +1043,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 {
     register char *s;
     I32 i;
-    SV** svp;
+    SV** svp = 0;
     STRLEN len;
 
     s = MgPV(mg,len);
@@ -2195,7 +2200,7 @@ Perl_sighandler(int sig)
     dSP;
     GV *gv = Nullgv;
     HV *st;
-    SV *sv, *tSv = PL_Sv;
+    SV *sv = Nullsv, *tSv = PL_Sv;
     CV *cv = Nullcv;
     OP *myop = PL_op;
     U32 flags = 0;

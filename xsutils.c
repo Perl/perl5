@@ -127,6 +127,9 @@ XS(XS_attributes_bootstrap)
     dXSARGS;
     char *file = __FILE__;
 
+    if( items > 0 )
+        Perl_croak(aTHX_ "Usage: bootstrap");
+
     newXSproto("attributes::_warn_reserved", XS_attributes__warn_reserved, file, "");
     newXS("attributes::_modify_attrs",	XS_attributes__modify_attrs,	file);
     newXSproto("attributes::_guess_stash", XS_attributes__guess_stash, file, "$");

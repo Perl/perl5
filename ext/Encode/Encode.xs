@@ -534,6 +534,7 @@ _utf8_to_bytes(sv, ...)
             STRLEN len;
             U8 *s = (U8*)SvPV(sv, len);
 
+	    RETVAL = 0;
             if (SvTRUE(check)) {
               /* Must do things the slow way */
               U8 *dest;

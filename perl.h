@@ -2891,7 +2891,7 @@ enum {		/* pass one of these to get_vtbl */
 #define HINT_INTEGER		0x00000001
 #define HINT_STRICT_REFS	0x00000002
 /* #define HINT_notused4	0x00000004 */
-#define HINT_BYTE		0x00000008
+#define HINT_BYTES		0x00000008
 /* #define HINT_notused10	0x00000010 */
 				/* Note: 20,40,80 used for NATIVE_HINTS */
 

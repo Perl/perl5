@@ -221,7 +221,7 @@ str_replace(register STR *str, register STR *nstr)
     str->str_len = nstr->str_len;
     str->str_cur = nstr->str_cur;
     str->str_pok = nstr->str_pok;
-    if (str->str_nok = nstr->str_nok)
+    if ((str->str_nok = nstr->str_nok))
 	str->str_nval = nstr->str_nval;
     safefree((char*)nstr);
 }

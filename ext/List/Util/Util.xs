@@ -89,7 +89,6 @@ PROTOTYPE: @
 CODE:
 {
     int index;
-    NV ret;
     if(!items) {
 	XSRETURN_UNDEF;
     }
@@ -193,7 +192,6 @@ first(block,...)
 PROTOTYPE: &@
 CODE:
 {
-    SV *ret;
     int index;
     I32 markix;
     GV *gv;
@@ -237,7 +235,7 @@ CODE:
     STRLEN len;
     char *ptr = SvPV(str,len);
     ST(0) = sv_newmortal();
-    SvUPGRADE(ST(0),SVt_PVNV);
+    (void)SvUPGRADE(ST(0),SVt_PVNV);
     sv_setpvn(ST(0),ptr,len);
     if(SvNOKp(num) || !SvIOKp(num)) {
 	SvNVX(ST(0)) = SvNV(num);

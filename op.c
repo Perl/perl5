@@ -2660,7 +2660,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	U32 max = 0;
 	I32 bits;
 	I32 havefinal = 0;
-	U32 final;
+	U32 final = 0;
 	I32 from_utf	= o->op_private & OPpTRANS_FROM_UTF;
 	I32 to_utf	= o->op_private & OPpTRANS_TO_UTF;
 	U8* tsave = NULL;
@@ -6295,7 +6295,7 @@ Perl_ck_sort(pTHX_ OP *o)
 	simplify_sort(o);
     firstkid = cLISTOPo->op_first->op_sibling;		/* get past pushmark */
     if (o->op_flags & OPf_STACKED) {			/* may have been cleared */
-	OP *k;
+	OP *k = NULL;
 	OP *kid = cUNOPx(firstkid)->op_first;		/* get past null */
 
 	if (kid->op_type == OP_SCOPE || kid->op_type == OP_LEAVE) {

@@ -965,7 +965,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     AV* comppadlist;
     register SV *sv;
     register char *s;
-    char *cddir = Nullch;
+    char *popts, *cddir = Nullch;
 
     sv_setpvn(PL_linestr,"",0);
     sv = newSVpvn("",0);		/* first used for -I flags */
@@ -1190,8 +1190,9 @@ print \"  \\@INC:\\n    @INC\\n\";");
 #ifndef SECURE_INTERNAL_GETENV
         !PL_tainting &&
 #endif
-	(s = PerlEnv_getenv("PERL5OPT")))
+	(popts = PerlEnv_getenv("PERL5OPT")))
     {
+    	s = savepv(popts);
 	while (isSPACE(*s))
 	    s++;
 	if (*s == '-' && *(s+1) == 'T')
@@ -1680,7 +1681,7 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
     LOGOP myop;		/* fake syntax tree node */
     UNOP method_op;
     I32 oldmark;
-    I32 retval;
+    I32 retval = 0;
     I32 oldscope;
     bool oldcatch = CATCH_GET;
     int ret;
@@ -1868,7 +1869,7 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
     dSP;
     UNOP myop;		/* fake syntax tree node */
     I32 oldmark = SP - PL_stack_base;
-    I32 retval;
+    I32 retval = 0;
     I32 oldscope;
     int ret;
     OP* oldop = PL_op;

@@ -130,7 +130,9 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
 		    Safefree(AvALLOC(av));
 		AvALLOC(av) = ary;
 #endif
+#if defined(MYMALLOC) && !defined(LEAKTEST)
 	      resized:
+#endif
 		ary = AvALLOC(av) + AvMAX(av) + 1;
 		tmp = newmax - AvMAX(av);
 		if (av == PL_curstack) {	/* Oops, grew stack (via av_store()?) */
