@@ -143,3 +143,6 @@ double epoc_atof( const char *ptr);
 #define init_os_extras Perl_init_os_extras
 
 #define NO_ENVIRON_ARRAY
+
+#define ARG_MAX 4096
+
