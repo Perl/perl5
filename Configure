@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Jun  5 05:41:33 EET DST 2002 [metaconfig 3.0 PL70]
+# Generated on Wed Jun  5 17:21:19 EET DST 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -7350,7 +7350,7 @@ esac
 case "$dflt" in
 5.005) dflt=none ;;
 esac
-$cat <<'EOM'
+$cat <<EOM
 
 In order to ease the process of upgrading, this version of perl 
 can be configured to use modules built and installed with earlier 
