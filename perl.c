@@ -891,19 +891,25 @@ print \"  \\@INC:\\n    @INC\\n\";");
   switch_end:
 
     if (!PL_tainting && (s = PerlEnv_getenv("PERL5OPT"))) {
-	while (s && *s) {
-	    while (isSPACE(*s))
-		s++;
-	    if (*s == '-') {
-		s++;
-		if (isSPACE(*s))
-		    continue;
+	while (isSPACE(*s))
+	    s++;
+	if (*s == '-' && *(s+1) == 'T')
+	    PL_tainting = TRUE;
+	else {
+	    while (s && *s) {
+		while (isSPACE(*s))
+		    s++;
+		if (*s == '-') {
+		    s++;
+		    if (isSPACE(*s))
+			continue;
+		}
+		if (!*s)
+		    break;
+		if (!strchr("DIMUdmw", *s))
+		    croak("Illegal switch in PERL5OPT: -%c", *s);
+		s = moreswitches(s);
 	    }
-	    if (!*s)
-		break;
-	    if (!strchr("DIMUdmw", *s))
-		croak("Illegal switch in PERL5OPT: -%c", *s);
-	    s = moreswitches(s);
 	}
     }
 
