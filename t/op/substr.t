@@ -1,10 +1,12 @@
+#!./perl
 
-print "1..130\n";
+print "1..132\n";
 
 #P = start of string  Q = start of substr  R = end of substr  S = end of string
 
 BEGIN {
-    unshift @INC, '../lib' if -d '../lib' ;
+    chdir 't' if -d 't';
+    unshift @INC, '../lib';
 }
 use warnings ;
 
@@ -272,12 +274,15 @@ ok 125, $a eq 'xxxxefgh';
 # utf8 sanity
 {
     my $x = substr("a\x{263a}b",0);
-    ok 126, length($x) eq 3;
+    ok 126, length($x) == 3;
     $x = substr($x,1,1);
     ok 127, $x eq "\x{263a}";
     $x = $x x 2;
-    ok 128, length($x) eq 2;
+    ok 128, length($x) == 2;
     substr($x,0,1) = "abcd";
     ok 129, $x eq "abcd\x{263a}";
-    ok 130, length($x) eq 5;
+    ok 130, length($x) == 5;
+    $x = reverse $x;
+    ok 131, length($x) == 5;
+    ok 132, $x eq "\x{263a}dcba";
 }

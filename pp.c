@@ -1078,7 +1078,7 @@ PP(pp_repeat)
     else {	/* Note: mark already snarfed by pp_list */
 	SV *tmpstr = POPs;
 	STRLEN len;
-	bool isutf = SvUTF8(tmpstr) ? TRUE : FALSE;
+	bool isutf = DO_UTF8(tmpstr);
 
 	SvSetSV(TARG, tmpstr);
 	SvPV_force(TARG, len);
@@ -2212,7 +2212,6 @@ PP(pp_chr)
     tmps = SvPVX(TARG);
     *tmps++ = value;
     *tmps = '\0';
-    SvUTF8_off(TARG);				/* decontaminate */
     (void)SvPOK_only(TARG);
     XPUSHs(TARG);
     RETURN;
@@ -2545,7 +2544,7 @@ PP(pp_quotemeta)
 	}
 	*d = '\0';
 	SvCUR_set(TARG, d - SvPVX(TARG));
-	(void)SvPOK_only(TARG);
+	(void)SvPOK_only_UTF8(TARG);
     }
     else
 	sv_setpvn(TARG, s, len);
@@ -3234,7 +3233,7 @@ PP(pp_reverse)
 		*up++ = *down;
 		*down-- = tmp;
 	    }
-	    (void)SvPOK_only(TARG);
+	    (void)SvPOK_only_UTF8(TARG);
 	}
 	SP = MARK + 1;
 	SETTARG;
