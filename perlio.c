@@ -1776,11 +1776,12 @@ SSize_t
 PerlIOBase_unread(PerlIO *f, const void *vbuf, Size_t count)
 {
  dTHX;
+ /* Save the position as current head considers it */
  Off_t old = PerlIO_tell(f);
  SSize_t done;
  PerlIO_push(aTHX_ f,&PerlIO_pending,"r",Nullsv);
+ PerlIOSelf(f,PerlIOBuf)->posn = old;
  done = PerlIOBuf_unread(f,vbuf,count);
- PerlIOSelf(f,PerlIOBuf)->posn = old - done;
  return done;
 }
 
@@ -2799,29 +2800,31 @@ PerlIOBuf_unread(PerlIO *f, const void *vbuf, Size_t count)
   {
    if (PerlIOBase(f)->flags & PERLIO_F_RDBUF)
     {
+     /* Buffer is already a read buffer, we can overwrite any chars
+        which have been read back to buffer start
+      */
      avail = (b->ptr - b->buf);
-     if (avail > (SSize_t) count)
-      avail = count;
     }
    else
     {
-     avail = b->bufsiz;
-     /* Adjust this here to keep a subsequent tell() correct.
-      * (b->ptr - b->buf) *MUST* be an accurate reflection of the amount
-      * unread in this buffer. (See previous part of the if for an example,
-      * or try PERLIO=unix on t/io/tell.t.)
-      */
-     if (avail > (SSize_t) count)
-      avail = count;
+     /* Buffer is idle, set it up so whole buffer is available for unread */
+     avail  = b->bufsiz;
      b->end = b->buf + avail;
      b->ptr = b->end;
      PerlIOBase(f)->flags |= PERLIO_F_RDBUF;
-     b->posn -= avail;
+     /* Buffer extends _back_ from where we are now */
+     b->posn -= b->bufsiz;
+    }
+   if (avail > (SSize_t) count)
+    {
+     /* If we have space for more than count, just move count */
+     avail = count;
     }
    if (avail > 0)
     {
      b->ptr -= avail;
      buf    -= avail;
+     /* In simple stdio-like ungetc() case chars will be already there */
      if (buf != b->ptr)
       {
        Copy(buf,b->ptr,avail,STDCHAR);
@@ -2906,9 +2909,13 @@ Off_t
 PerlIOBuf_tell(PerlIO *f)
 {
  PerlIOBuf *b = PerlIOSelf(f,PerlIOBuf);
+ /* b->posn is file position where b->buf was read, or will be written */
  Off_t posn = b->posn;
  if (b->buf)
-  posn += (b->ptr - b->buf);
+  {
+   /* If buffer is valid adjust position by amount in buffer */
+   posn += (b->ptr - b->buf);
+  }
  return posn;
 }
 
