@@ -1034,7 +1034,7 @@ makedepend: makedepend.SH config.sh
 	test_tty test-tty _test_tty test_notty test-notty _test_notty \
 	utest ucheck test.utf8 check.utf8 test.torture torturetest \
 	test.third check.third utest.third ucheck.third test_notty.third \
-	test.deparse test_notty.deparse test_harness \
+	test.deparse test_notty.deparse test_harness test_harness_notty \
 	minitest coretest
 
 # Cannot delegate rebuilding of t/perl to make
@@ -1132,6 +1132,9 @@ minitest: miniperl$(EXE_EXT) lib/re.pm
 
 test_harness: test_prep
 	PERL=./perl $(MAKE) TESTFILE=harness _test
+
+test_harness_notty: test_prep
+	PERL=./perl HARNESS_NOTTY=1 $(MAKE) TESTFILE=harness _test
 
 # Handy way to run perlbug -ok without having to install and run the
 # installed perlbug. We don't re-run the tests here - we trust the user.
