@@ -539,7 +539,7 @@ to print ordinals of characters in arbitrary strings:
     printf "%*vX", ":", $addr;	# formats IPv6 address
     printf "%*vb", " ", $bits;	# displays bitstring
 
-See L<perlop/"Strings of Character"> for additional information.
+See L<perldata/"Scalar value constructors"> for additional information.
 
 =head2 Weak references
 
