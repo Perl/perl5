@@ -169,6 +169,8 @@ sub accept {
     	}
     	$peer = accept($new,$sock) || undef;
     };
+    croak "$@"
+        if ($@ and $fh);
 
     return wantarray ? defined $peer ? ($new, $peer)
     	    	    	    	     : () 
