@@ -49,27 +49,7 @@ case "$osvers" in
 	'')	cc='gcc2' ;;
 	esac
 	;;
-2.*)
-	case "$osvers" in
-	2.1*)	# dlopen() is supported in 2.1
-		usedl='true'
-		d_dlopen='define'
-		cccdlflags='none'
-		# pre-link against the shared C library
-		lddlflags='-r -lc_s.2.1.0'
-
-		# BSD/OS 2.1 doesn't (yet) support `true' dynamic linking
-		# so we `preload' the shared libraries by linking
-		# against them; even though we don't pull in any symbols.
-		libswanted="Xpm Xaw Xmu Xt SM ICE Xext X11 $libswanted"
-		libswanted="rpc curses termcap $libswanted"
-
-		# Use the system malloc or else you'll have dualing mallocs!
-		d_mymalloc='undef'
-		usemymalloc='n'
-		;;
-	esac
-
+2.0*)
 	# default to GCC 2.X w/shared libraries
 	case "$cc" in
 	'')	cc='shlicc2' ;;
@@ -83,6 +63,34 @@ case "$osvers" in
 	# setre?[ug]id() have been replaced by the _POSIX_SAVED_IDS stuff
 	# in 4.4BSD-based systems (including BSD/OS 2.0 and later).
 	# See http://www.bsdi.com/bsdi-man?setuid(2)
+	d_setregid='undef'
+	d_setreuid='undef'
+	d_setrgid='undef'
+	d_setruid='undef'
+	;;
+2.1*)
+	# Use 2.1's shlicc2 for dynamic linking
+	# Since cc -o is linking, use it for compiling too.
+	# I'm not sure whether Configure is careful about
+	# distinguishing between the two.
+
+	case "$cc" in
+	'')	cc='shlicc2'
+		cccdlflags=' ' ;; # Avoid the dreaded -fpic
+	esac
+
+	# Link with shared libraries in 2.1
+	# Turns out that shlicc2 will automatically use the
+	# shared libs, so don't explicitly specify -lc_s.2.1.*
+	case "$ld" in
+	'')	ld='shlicc2'
+		lddlflags='-r' ;; # this one is necessary
+	esac
+
+	# setre?[ug]id() have been replaced by the _POSIX_SAVED_IDS  stuff
+	# in 4.4BSD-based systems (including BSD/OS 2.0 and later).
+	# See http://www.bsdi.com/bsdi-man?setuid(2)
+	# This stuff may or may not be right, but it works.
 	d_setregid='undef'
 	d_setreuid='undef'
 	d_setrgid='undef'
