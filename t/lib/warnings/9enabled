@@ -151,6 +151,7 @@ print "ok1\n" if ! warnings::enabled('all') ;
 print "ok2\n" if ! warnings::enabled("io") ;
 1;
 --FILE-- def.pm
+package def;
 no warnings;
 use abc ;
 1;
