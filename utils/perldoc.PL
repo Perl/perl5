@@ -371,9 +371,13 @@ sub page {
 	close TMP		or die "Can't close while $tmp: $!";
     }
     else {
-	foreach my $pager (@pagers) {
+        # On VMS, quoting prevents logical expansion, and temp files with no
+        # extension get the wrong default extension (such as .LIS for TYPE)
+
+        $tmp = VMS::Filespec::rmsexpand($tmp, '.') if ($Is_VMS);
+        foreach my $pager (@pagers) {
           if ($Is_VMS) {
-           last if system("$pager $tmp") == 0; # quoting prevents logical expansion
+            last if system("$pager $tmp") == 0;
           } else {
 	    last if system("$pager \"$tmp\"") == 0;
           }
