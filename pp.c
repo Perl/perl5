@@ -999,29 +999,111 @@ PP(pp_multiply)
 PP(pp_divide)
 {
     dSP; dATARGET; tryAMAGICbin(div,opASSIGN);
-    {
-      dPOPPOPnnrl;
-      NV value;
-      if (right == 0.0)
-	DIE(aTHX_ "Illegal division by zero");
+    /* Only try to do UV divide first
+       if ((SLOPPYDIVIDE is true) or 
+           (PERL_PRESERVE_IVUV is true and one or both SV is a UV too large
+            to preserve))
+       The assumption is that it is better to use floating point divide
+       whenever possible, only doing integer divide first if we can't be sure.
+       If NV_PRESERVES_UV is true then we know at compile time that no UV
+       can be too large to preserve, so don't need to compile the code to
+       test the size of UVs.  */
+
 #ifdef SLOPPYDIVIDE
-      /* insure that 20./5. == 4. */
-      {
-	IV k;
-	if ((NV)I_V(left)  == left &&
-	    (NV)I_V(right) == right &&
-	    (k = I_V(left)/I_V(right))*I_V(right) == I_V(left)) {
-	    value = k;
-	}
-	else {
-	    value = left / right;
-	}
-      }
+#  define PERL_TRY_UV_DIVIDE
+    /* ensure that 20./5. == 4. */
 #else
-      value = left / right;
+#  ifdef PERL_PRESERVE_IVUV
+#    ifndef NV_PRESERVES_UV
+#      define PERL_TRY_UV_DIVIDE
+#    endif
+#  endif
 #endif
-      PUSHn( value );
-      RETURN;
+
+#ifdef PERL_TRY_UV_DIVIDE
+    SvIV_please(TOPs);
+    if (SvIOK(TOPs)) {
+        SvIV_please(TOPm1s);
+        if (SvIOK(TOPm1s)) {
+            bool left_non_neg = SvUOK(TOPm1s);
+            bool right_non_neg = SvUOK(TOPs);
+            UV left;
+            UV right;
+
+            if (right_non_neg) {
+                right = SvUVX(TOPs);
+            }
+	    else {
+                IV biv = SvIVX(TOPs);
+                if (biv >= 0) {
+                    right = biv;
+                    right_non_neg = TRUE; /* effectively it's a UV now */
+                }
+		else {
+                    right = -biv;
+                }
+            }
+            /* historically undef()/0 gives a "Use of uninitialized value"
+               warning before dieing, hence this test goes here.
+               If it were immediately before the second SvIV_please, then
+               DIE() would be invoked before left was even inspected, so
+               no inpsection would give no warning.  */
+            if (right == 0)
+                DIE(aTHX_ "Illegal division by zero");
+
+            if (left_non_neg) {
+                left = SvUVX(TOPm1s);
+            }
+	    else {
+                IV aiv = SvIVX(TOPm1s);
+                if (aiv >= 0) {
+                    left = aiv;
+                    left_non_neg = TRUE; /* effectively it's a UV now */
+                }
+		else {
+                    left = -aiv;
+                }
+            }
+
+            if (left >= right
+#ifdef SLOPPYDIVIDE
+                /* For sloppy divide we always attempt integer division.  */
+#else
+                /* Otherwise we only attempt it if either or both operands
+                   would not be preserved by an NV.  If both fit in NVs
+                   we fall through to the NV divide code below.  */
+                && ((left > ((UV)1 << NV_PRESERVES_UV_BITS))
+                    || (right > ((UV)1 << NV_PRESERVES_UV_BITS)))
+#endif
+                ) {
+                /* Integer division can't overflow, but it can be imprecise.  */
+                UV result = left / right;
+                if (result * right == left) {
+                    SP--; /* result is valid */
+                    if (left_non_neg == right_non_neg) {
+                        /* signs identical, result is positive.  */
+                        SETu( result );
+                        RETURN;
+                    }
+                    /* 2s complement assumption */
+                    if (result <= (UV)IV_MIN)
+                        SETi( -result );
+                    else {
+                        /* It's exact but too negative for IV. */
+                        SETn( -(NV)result );
+                    }
+                    RETURN;
+                } /* tried integer divide but it was not an integer result */
+            } /* else (abs(result) < 1.0) or (both UVs in range for NV) */
+        } /* left wasn't SvIOK */
+    } /* right wasn't SvIOK */
+#endif /* PERL_TRY_UV_DIVIDE */
+    {
+	dPOPPOPnnrl;
+	if (right == 0.0)
+	    DIE(aTHX_ "Illegal division by zero");
+	PUSHn( left / right );
+	RETURN;
     }
 }
 
