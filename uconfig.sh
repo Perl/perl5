@@ -2,6 +2,7 @@
 _a='.a'
 _o='.o'
 afs='false'
+afsroot='/afs'
 alignbytes='4'
 apiversion='5.005'
 archlib='/usr/local/lib/perl5/5.7/unknown'

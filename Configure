@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue May 29 17:16:31 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Wed May 30 17:55:32 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -273,6 +273,7 @@ lib_ext=''
 obj_ext=''
 path_sep=''
 afs=''
+afsroot=''
 alignbytes=''
 ansi2knr=''
 archlib=''
@@ -5914,12 +5915,17 @@ esac
 prefix="$ans"
 prefixexp="$ansexp"
 
+case "$afsroot" in
+'')	afsroot=/afs ;;
+*)	afsroot=$afsroot ;;
+esac
+
 : is AFS running?
 echo " "
 case "$afs" in
 $define|true)	afs=true ;;
 $undef|false)	afs=false ;;
-*)	if test -d /afs; then
+*)	if test -d $afsroot; then
 		afs=true
 	else
 		afs=false
@@ -16096,6 +16102,7 @@ _a='$_a'
 _exe='$_exe'
 _o='$_o'
 afs='$afs'
+afsroot='$afsroot'
 alignbytes='$alignbytes'
 ansi2knr='$ansi2knr'
 aphostname='$aphostname'
