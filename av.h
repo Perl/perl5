@@ -10,7 +10,7 @@
 struct xpvav {
     char*	xav_array;      /* pointer to first array element */
     SSize_t	xav_fill;       /* Index of last element present */
-    SSize_t	xav_max;        /* Number of elements for which array has space */
+    SSize_t	xav_max;        /* max index for which array has space */
     IV		xof_off;	/* ptr is incremented by offset */
     NV		xnv_nv;		/* numeric value, if any */
     MAGIC*	xmg_magic;	/* magic for scalar array */

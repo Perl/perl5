@@ -359,6 +359,26 @@ Perl_unlock_condpair
 Perl_magic_mutexfree
 )];
  }
+
+unless ($define{'USE_ITHREADS'})
+ {
+  skip_symbols [qw(
+PL_sv_table
+Perl_dirp_dup
+Perl_fp_dup
+Perl_gp_dup
+Perl_he_dup
+Perl_mg_dup
+Perl_re_dup
+Perl_sv_dup
+Perl_sys_intern_dup
+Perl_sv_table_fetch
+Perl_sv_table_new
+Perl_sv_table_split
+Perl_sv_table_store
+)];
+ }
+
 unless ($define{'USE_THREADS'} or $define{'PERL_IMPLICIT_CONTEXT'}
 	or $define{'PERL_OBJECT'})
 {

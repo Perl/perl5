@@ -418,6 +418,8 @@
 #define PL_sv_objcount		(*Perl_Isv_objcount_ptr(aTHXo))
 #undef  PL_sv_root
 #define PL_sv_root		(*Perl_Isv_root_ptr(aTHXo))
+#undef  PL_sv_table
+#define PL_sv_table		(*Perl_Isv_table_ptr(aTHXo))
 #undef  PL_sv_undef
 #define PL_sv_undef		(*Perl_Isv_undef_ptr(aTHXo))
 #undef  PL_sv_yes
@@ -3527,6 +3529,58 @@
 #define Perl_boot_core_xsutils	pPerl->Perl_boot_core_xsutils
 #undef  boot_core_xsutils
 #define boot_core_xsutils	Perl_boot_core_xsutils
+#if defined(USE_ITHREADS)
+#undef  Perl_he_dup
+#define Perl_he_dup		pPerl->Perl_he_dup
+#undef  he_dup
+#define he_dup			Perl_he_dup
+#undef  Perl_re_dup
+#define Perl_re_dup		pPerl->Perl_re_dup
+#undef  re_dup
+#define re_dup			Perl_re_dup
+#undef  Perl_fp_dup
+#define Perl_fp_dup		pPerl->Perl_fp_dup
+#undef  fp_dup
+#define fp_dup			Perl_fp_dup
+#undef  Perl_dirp_dup
+#define Perl_dirp_dup		pPerl->Perl_dirp_dup
+#undef  dirp_dup
+#define dirp_dup		Perl_dirp_dup
+#undef  Perl_gp_dup
+#define Perl_gp_dup		pPerl->Perl_gp_dup
+#undef  gp_dup
+#define gp_dup			Perl_gp_dup
+#undef  Perl_mg_dup
+#define Perl_mg_dup		pPerl->Perl_mg_dup
+#undef  mg_dup
+#define mg_dup			Perl_mg_dup
+#undef  Perl_sv_dup
+#define Perl_sv_dup		pPerl->Perl_sv_dup
+#undef  sv_dup
+#define sv_dup			Perl_sv_dup
+#if defined(HAVE_INTERP_INTERN)
+#undef  Perl_sys_intern_dup
+#define Perl_sys_intern_dup	pPerl->Perl_sys_intern_dup
+#undef  sys_intern_dup
+#define sys_intern_dup		Perl_sys_intern_dup
+#endif
+#undef  Perl_sv_table_new
+#define Perl_sv_table_new	pPerl->Perl_sv_table_new
+#undef  sv_table_new
+#define sv_table_new		Perl_sv_table_new
+#undef  Perl_sv_table_fetch
+#define Perl_sv_table_fetch	pPerl->Perl_sv_table_fetch
+#undef  sv_table_fetch
+#define sv_table_fetch		Perl_sv_table_fetch
+#undef  Perl_sv_table_store
+#define Perl_sv_table_store	pPerl->Perl_sv_table_store
+#undef  sv_table_store
+#define sv_table_store		Perl_sv_table_store
+#undef  Perl_sv_table_split
+#define Perl_sv_table_split	pPerl->Perl_sv_table_split
+#undef  sv_table_split
+#define sv_table_split		Perl_sv_table_split
+#endif
 #if defined(PERL_OBJECT)
 #endif
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)

@@ -762,6 +762,22 @@
 #define newMYSUB		Perl_newMYSUB
 #define my_attrs		Perl_my_attrs
 #define boot_core_xsutils	Perl_boot_core_xsutils
+#if defined(USE_ITHREADS)
+#define he_dup			Perl_he_dup
+#define re_dup			Perl_re_dup
+#define fp_dup			Perl_fp_dup
+#define dirp_dup		Perl_dirp_dup
+#define gp_dup			Perl_gp_dup
+#define mg_dup			Perl_mg_dup
+#define sv_dup			Perl_sv_dup
+#if defined(HAVE_INTERP_INTERN)
+#define sys_intern_dup		Perl_sys_intern_dup
+#endif
+#define sv_table_new		Perl_sv_table_new
+#define sv_table_fetch		Perl_sv_table_fetch
+#define sv_table_store		Perl_sv_table_store
+#define sv_table_split		Perl_sv_table_split
+#endif
 #if defined(PERL_OBJECT)
 #endif
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
@@ -2113,6 +2129,22 @@
 #define newMYSUB(a,b,c,d,e)	Perl_newMYSUB(aTHX_ a,b,c,d,e)
 #define my_attrs(a,b)		Perl_my_attrs(aTHX_ a,b)
 #define boot_core_xsutils()	Perl_boot_core_xsutils(aTHX)
+#if defined(USE_ITHREADS)
+#define he_dup(a,b)		Perl_he_dup(aTHX_ a,b)
+#define re_dup(a)		Perl_re_dup(aTHX_ a)
+#define fp_dup(a,b)		Perl_fp_dup(aTHX_ a,b)
+#define dirp_dup(a)		Perl_dirp_dup(aTHX_ a)
+#define gp_dup(a)		Perl_gp_dup(aTHX_ a)
+#define mg_dup(a)		Perl_mg_dup(aTHX_ a)
+#define sv_dup(a)		Perl_sv_dup(aTHX_ a)
+#if defined(HAVE_INTERP_INTERN)
+#define sys_intern_dup(a,b)	Perl_sys_intern_dup(aTHX_ a,b)
+#endif
+#define sv_table_new()		Perl_sv_table_new(aTHX)
+#define sv_table_fetch(a,b)	Perl_sv_table_fetch(aTHX_ a,b)
+#define sv_table_store(a,b,c)	Perl_sv_table_store(aTHX_ a,b,c)
+#define sv_table_split(a)	Perl_sv_table_split(aTHX_ a)
+#endif
 #if defined(PERL_OBJECT)
 #endif
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
@@ -4165,6 +4197,34 @@
 #define my_attrs		Perl_my_attrs
 #define Perl_boot_core_xsutils	CPerlObj::Perl_boot_core_xsutils
 #define boot_core_xsutils	Perl_boot_core_xsutils
+#if defined(USE_ITHREADS)
+#define Perl_he_dup		CPerlObj::Perl_he_dup
+#define he_dup			Perl_he_dup
+#define Perl_re_dup		CPerlObj::Perl_re_dup
+#define re_dup			Perl_re_dup
+#define Perl_fp_dup		CPerlObj::Perl_fp_dup
+#define fp_dup			Perl_fp_dup
+#define Perl_dirp_dup		CPerlObj::Perl_dirp_dup
+#define dirp_dup		Perl_dirp_dup
+#define Perl_gp_dup		CPerlObj::Perl_gp_dup
+#define gp_dup			Perl_gp_dup
+#define Perl_mg_dup		CPerlObj::Perl_mg_dup
+#define mg_dup			Perl_mg_dup
+#define Perl_sv_dup		CPerlObj::Perl_sv_dup
+#define sv_dup			Perl_sv_dup
+#if defined(HAVE_INTERP_INTERN)
+#define Perl_sys_intern_dup	CPerlObj::Perl_sys_intern_dup
+#define sys_intern_dup		Perl_sys_intern_dup
+#endif
+#define Perl_sv_table_new	CPerlObj::Perl_sv_table_new
+#define sv_table_new		Perl_sv_table_new
+#define Perl_sv_table_fetch	CPerlObj::Perl_sv_table_fetch
+#define sv_table_fetch		Perl_sv_table_fetch
+#define Perl_sv_table_store	CPerlObj::Perl_sv_table_store
+#define sv_table_store		Perl_sv_table_store
+#define Perl_sv_table_split	CPerlObj::Perl_sv_table_split
+#define sv_table_split		Perl_sv_table_split
+#endif
 #if defined(PERL_OBJECT)
 #endif
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)

@@ -3331,6 +3331,21 @@ Perl_win32_init(int *argcp, char ***argvp)
     MALLOC_INIT;
 }
 
+#ifdef USE_ITHREADS
+void
+Perl_sys_intern_dup(pTHX_ struct interp_intern *src, struct interp_intern *dst)
+{
+    dst->perlshell_tokens	= Nullch;
+    dst->perlshell_vec		= (char**)NULL;
+    dst->perlshell_items	= 0;
+    dst->fdpid			= newAV();
+    New(1313, dst->children, 1, child_tab);
+    dst->children->num		= 0;
+    dst->hostlist		= src->hostlist;	/* XXX */
+    dst->thr_intern.Winit_socktype = src->thr_intern.Winit_socktype;
+}
+#endif
+
 #ifdef USE_BINMODE_SCRIPTS
 
 void
@@ -3355,4 +3370,3 @@ win32_strip_return(SV *sv)
 }
 
 #endif
-

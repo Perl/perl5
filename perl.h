@@ -470,7 +470,7 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #   include <stdlib.h>
 #endif
 
-#if !defined(PERL_FOR_X2P) && !defined(PERL_OBJECT)
+#if !defined(PERL_FOR_X2P) && !defined(WIN32)
 #  include "embed.h"
 #endif
 
@@ -1326,6 +1326,8 @@ typedef struct xpvfm XPVFM;
 typedef struct xpvio XPVIO;
 typedef struct mgvtbl MGVTBL;
 typedef union any ANY;
+typedef struct svtblent SVTBLENT;
+typedef struct svtbl SVTBL;
 
 #include "handy.h"
 
@@ -1744,6 +1746,18 @@ typedef struct magic_state MGS;	/* struct magic_state defined in mg.c */
 struct scan_data_t;		/* Used in S_* functions in regcomp.c */
 
 typedef I32 CHECKPOINT;
+
+struct svtblent {
+    struct svtblent*	next;
+    SV*			oldval;
+    SV*			newval;
+};
+
+struct svtbl {
+    struct svtblent**	tbl_ary;
+    UV			tbl_max;
+    UV			tbl_items;
+};
 
 #if defined(iAPX286) || defined(M_I286) || defined(I80286)
 #   define I286
@@ -2658,6 +2672,10 @@ PERLVARA(object_compatibility,30,	char)
 /* this has structure inits, so it cannot be included before here */
 #  include "opcode.h"
 
+#else
+#  if defined(WIN32)
+#    include "embed.h"
+#  endif
 #endif  /* PERL_OBJECT */
 
 #ifndef PERL_GLOBAL_STRUCT

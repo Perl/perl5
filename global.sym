@@ -674,3 +674,15 @@ Perl_newATTRSUB
 Perl_newMYSUB
 Perl_my_attrs
 Perl_boot_core_xsutils
+Perl_he_dup
+Perl_re_dup
+Perl_fp_dup
+Perl_dirp_dup
+Perl_gp_dup
+Perl_mg_dup
+Perl_sv_dup
+Perl_sys_intern_dup
+Perl_sv_table_new
+Perl_sv_table_fetch
+Perl_sv_table_store
+Perl_sv_table_split
