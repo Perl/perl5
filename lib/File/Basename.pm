@@ -19,7 +19,7 @@ dirname - extract just the directory from a path
 
     ($name,$path,$suffix) = fileparse("lib/File/Basename.pm",qr{\.pm});
     fileparse_set_fstype("VMS");
-    $basename = basename("lib/File/Basename.pm",qr{\.pm});
+    $basename = basename("lib/File/Basename.pm",".pm");
     $dirname = dirname("lib/File/Basename.pm");
 
 =head1 DESCRIPTION
@@ -130,7 +130,7 @@ directory name to be F<.>).
 # not be available.
 BEGIN {
   unless (eval { require re; })
-    { eval ' sub re::import { $^H |= 0x00100000; } ' }
+    { eval ' sub re::import { $^H |= 0x00100000; } ' } # HINT_RE_TAINT
   import re 'taint';
 }
 

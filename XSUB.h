@@ -1,6 +1,6 @@
 /*    XSUB.h
  *
- *    Copyright (c) 1997-2002, Larry Wall
+ *    Copyright (c) 1997-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -382,35 +382,35 @@ C<xsubpp>.  See L<perlxs/"The VERSIONCHECK: Keyword">.
 #    define putenv		PerlEnv_putenv
 #    define getenv		PerlEnv_getenv
 #    define uname		PerlEnv_uname
-#    define stdin		PerlSIO_stdin()
-#    define stdout		PerlSIO_stdout()
-#    define stderr		PerlSIO_stderr()
-#    define fopen		PerlIO_open
-#    define fclose		PerlIO_close
-#    define feof		PerlIO_eof
-#    define ferror		PerlIO_error
-#    define fclearerr		PerlIO_clearerr
-#    define getc		PerlIO_getc
-#    define fputc(c, f)		PerlIO_putc(f,c)
-#    define fputs(s, f)		PerlIO_puts(f,s)
-#    define fflush		PerlIO_flush
-#    define ungetc(c, f)	PerlIO_ungetc((f),(c))
-#    define fileno		PerlIO_fileno
-#    define fdopen		PerlIO_fdopen
-#    define freopen		PerlIO_reopen
-#    define fread(b,s,c,f)	PerlIO_read((f),(b),(s*c))
-#    define fwrite(b,s,c,f)	PerlIO_write((f),(b),(s*c))
+#    define stdin		PerlSIO_stdin
+#    define stdout		PerlSIO_stdout
+#    define stderr		PerlSIO_stderr
+#    define fopen		PerlSIO_fopen
+#    define fclose		PerlSIO_fclose
+#    define feof		PerlSIO_feof
+#    define ferror		PerlSIO_ferror
+#    define clearerr		PerlSIO_clearerr
+#    define getc		PerlSIO_getc
+#    define fputc		PerlSIO_fputc
+#    define fputs		PerlSIO_fputs
+#    define fflush		PerlSIO_fflush
+#    define ungetc		PerlSIO_ungetc
+#    define fileno		PerlSIO_fileno
+#    define fdopen		PerlSIO_fdopen
+#    define freopen		PerlSIO_freopen
+#    define fread		PerlSIO_fread
+#    define fwrite		PerlSIO_fwrite
 #    define setbuf		PerlSIO_setbuf
 #    define setvbuf		PerlSIO_setvbuf
 #    define setlinebuf		PerlSIO_setlinebuf
-#    define stdoutf		PerlIO_stdoutf
-#    define vfprintf		PerlIO_vprintf
-#    define ftell		PerlIO_tell
-#    define fseek		PerlIO_seek
-#    define fgetpos		PerlIO_getpos
-#    define fsetpos		PerlIO_setpos
-#    define frewind		PerlIO_rewind
-#    define tmpfile		PerlIO_tmpfile
+#    define stdoutf		PerlSIO_stdoutf
+#    define vfprintf		PerlSIO_vprintf
+#    define ftell		PerlSIO_ftell
+#    define fseek		PerlSIO_fseek
+#    define fgetpos		PerlSIO_fgetpos
+#    define fsetpos		PerlSIO_fsetpos
+#    define frewind		PerlSIO_rewind
+#    define tmpfile		PerlSIO_tmpfile
 #    define access		PerlLIO_access
 #    define chmod		PerlLIO_chmod
 #    define chsize		PerlLIO_chsize

@@ -1,4 +1,4 @@
-/* $Id: MD5.xs,v 1.34 2002/05/01 23:30:28 gisle Exp $ */
+/* $Id: MD5.xs,v 1.35 2003/01/05 00:54:17 gisle Exp $ */
 
 /* 
  * This library is free software; you can redistribute it and/or
@@ -44,7 +44,13 @@ extern "C" {
 }
 #endif
 
-#include "patchlevel.h"
+#ifndef PATCHLEVEL
+#    include <patchlevel.h>
+#    if !(defined(PERL_VERSION) || (SUBVERSION > 0 && defined(PATCHLEVEL)))
+#        include <could_not_find_Perl_patchlevel.h>
+#    endif
+#endif
+
 #if PATCHLEVEL <= 4 && !defined(PL_dowarn)
    #define PL_dowarn dowarn
 #endif
@@ -559,6 +565,22 @@ new(xclass)
 	    context = get_md5_ctx(xclass);
 	}
         MD5Init(context);
+	XSRETURN(1);
+
+void
+clone(self)
+	SV* self
+    PREINIT:
+	MD5_CTX* cont = get_md5_ctx(self);
+	char *myname = sv_reftype(SvRV(self),TRUE);
+	MD5_CTX* context;
+    PPCODE:
+	STRLEN my_na;
+	New(55, context, 1, MD5_CTX);
+	ST(0) = sv_newmortal();
+	sv_setref_pv(ST(0), myname , (void*)context);
+	SvREADONLY_on(SvRV(ST(0)));
+	memcpy(context,cont,sizeof(MD5_CTX));
 	XSRETURN(1);
 
 void

@@ -1374,11 +1374,17 @@ dup2(fd1, fd2)
 	int		fd1
 	int		fd2
 
-SysRetLong
+SV *
 lseek(fd, offset, whence)
 	int		fd
 	Off_t		offset
 	int		whence
+    CODE:
+	Off_t pos = PerlLIO_lseek(fd, offset, whence);
+	RETVAL = sizeof(Off_t) > sizeof(IV)
+		 ? newSVnv((NV)pos) : newSViv((IV)pos);
+    OUTPUT:
+	RETVAL
 
 SysRet
 nice(incr)

@@ -1,7 +1,7 @@
 /*
  *    perlapi.h
  *
- *    Copyright (c) 1997-2002, Larry Wall
+ *    Copyright (c) 1997-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -512,6 +512,8 @@ END_EXTERN_C
 #define PL_sig_pending		(*Perl_Isig_pending_ptr(aTHX))
 #undef  PL_sighandlerp
 #define PL_sighandlerp		(*Perl_Isighandlerp_ptr(aTHX))
+#undef  PL_signals
+#define PL_signals		(*Perl_Isignals_ptr(aTHX))
 #undef  PL_sort_RealCmp
 #define PL_sort_RealCmp		(*Perl_Isort_RealCmp_ptr(aTHX))
 #undef  PL_splitstr
@@ -576,6 +578,8 @@ END_EXTERN_C
 #define PL_tokenbuf		(*Perl_Itokenbuf_ptr(aTHX))
 #undef  PL_uid
 #define PL_uid			(*Perl_Iuid_ptr(aTHX))
+#undef  PL_unicode
+#define PL_unicode		(*Perl_Iunicode_ptr(aTHX))
 #undef  PL_unsafe
 #define PL_unsafe		(*Perl_Iunsafe_ptr(aTHX))
 #undef  PL_utf8_alnum
@@ -618,10 +622,10 @@ END_EXTERN_C
 #define PL_utf8_upper		(*Perl_Iutf8_upper_ptr(aTHX))
 #undef  PL_utf8_xdigit
 #define PL_utf8_xdigit		(*Perl_Iutf8_xdigit_ptr(aTHX))
+#undef  PL_utf8locale
+#define PL_utf8locale		(*Perl_Iutf8locale_ptr(aTHX))
 #undef  PL_uudmap
 #define PL_uudmap		(*Perl_Iuudmap_ptr(aTHX))
-#undef  PL_wantutf8
-#define PL_wantutf8		(*Perl_Iwantutf8_ptr(aTHX))
 #undef  PL_warnhook
 #define PL_warnhook		(*Perl_Iwarnhook_ptr(aTHX))
 #undef  PL_widesyscalls
@@ -964,6 +968,8 @@ END_EXTERN_C
 #define PL_curinterp		(*Perl_Gcurinterp_ptr(NULL))
 #undef  PL_do_undump
 #define PL_do_undump		(*Perl_Gdo_undump_ptr(NULL))
+#undef  PL_dollarzero_mutex
+#define PL_dollarzero_mutex	(*Perl_Gdollarzero_mutex_ptr(NULL))
 #undef  PL_hexdigit
 #define PL_hexdigit		(*Perl_Ghexdigit_ptr(NULL))
 #undef  PL_lockhook

@@ -1,6 +1,6 @@
 /*    perl.h
  *
- *    Copyright (c) 1987-2002, Larry Wall
+ *    Copyright (c) 1987-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -2221,6 +2221,7 @@ union any {
     I32		any_i32;
     IV		any_iv;
     long	any_long;
+    bool	any_bool;
     void	(*any_dptr) (void*);
     void	(*any_dxptr) (pTHX_ void*);
 };
@@ -2262,6 +2263,7 @@ typedef        struct crypt_data {     /* straight from /usr/include/crypt.h */
 #include "util.h"
 #include "form.h"
 #include "gv.h"
+#include "pad.h"
 #include "cv.h"
 #include "opnames.h"
 #include "op.h"
@@ -2474,7 +2476,6 @@ Gid_t getegid (void);
 #define DEBUG_r_FLAG		0x00000200 /*    512 */
 #define DEBUG_x_FLAG		0x00000400 /*   1024 */
 #define DEBUG_u_FLAG		0x00000800 /*   2048 */
-#define DEBUG_L_FLAG		0x00001000 /*   4096 */
 #define DEBUG_H_FLAG		0x00002000 /*   8192 */
 #define DEBUG_X_FLAG		0x00004000 /*  16384 */
 #define DEBUG_D_FLAG		0x00008000 /*  32768 */
@@ -2482,7 +2483,8 @@ Gid_t getegid (void);
 #define DEBUG_T_FLAG		0x00020000 /* 131072 */
 #define DEBUG_R_FLAG		0x00040000 /* 262144 */
 #define DEBUG_J_FLAG		0x00080000 /* 524288 */
-#define DEBUG_MASK		0x000FFFFF /* mask of all the standard flags */
+#define DEBUG_v_FLAG		0x00100000 /*1048576 */
+#define DEBUG_MASK		0x001FEFFF /* mask of all the standard flags */
 
 #define DEBUG_DB_RECURSE_FLAG	0x40000000
 #define DEBUG_TOP_FLAG		0x80000000 /* XXX what's this for ??? Signal
@@ -2500,7 +2502,6 @@ Gid_t getegid (void);
 #  define DEBUG_r_TEST_ (PL_debug & DEBUG_r_FLAG)
 #  define DEBUG_x_TEST_ (PL_debug & DEBUG_x_FLAG)
 #  define DEBUG_u_TEST_ (PL_debug & DEBUG_u_FLAG)
-#  define DEBUG_L_TEST_ (PL_debug & DEBUG_L_FLAG)
 #  define DEBUG_H_TEST_ (PL_debug & DEBUG_H_FLAG)
 #  define DEBUG_X_TEST_ (PL_debug & DEBUG_X_FLAG)
 #  define DEBUG_D_TEST_ (PL_debug & DEBUG_D_FLAG)
@@ -2508,6 +2509,9 @@ Gid_t getegid (void);
 #  define DEBUG_T_TEST_ (PL_debug & DEBUG_T_FLAG)
 #  define DEBUG_R_TEST_ (PL_debug & DEBUG_R_FLAG)
 #  define DEBUG_J_TEST_ (PL_debug & DEBUG_J_FLAG)
+#  define DEBUG_v_TEST_ (PL_debug & DEBUG_v_FLAG)
+#  define DEBUG_Xv_TEST_ (DEBUG_X_TEST_ && DEBUG_v_TEST_)
+
 
 #ifdef DEBUGGING
 
@@ -2526,14 +2530,15 @@ Gid_t getegid (void);
 #  define DEBUG_r_TEST DEBUG_r_TEST_
 #  define DEBUG_x_TEST DEBUG_x_TEST_
 #  define DEBUG_u_TEST DEBUG_u_TEST_
-#  define DEBUG_L_TEST DEBUG_L_TEST_
 #  define DEBUG_H_TEST DEBUG_H_TEST_
 #  define DEBUG_X_TEST DEBUG_X_TEST_
+#  define DEBUG_Xv_TEST DEBUG_Xv_TEST_
 #  define DEBUG_D_TEST DEBUG_D_TEST_
 #  define DEBUG_S_TEST DEBUG_S_TEST_
 #  define DEBUG_T_TEST DEBUG_T_TEST_
 #  define DEBUG_R_TEST DEBUG_R_TEST_
 #  define DEBUG_J_TEST DEBUG_J_TEST_
+#  define DEBUG_v_TEST DEBUG_v_TEST_
 
 #  define DEB(a)     a
 #  define DEBUG(a)   if (PL_debug)   a
@@ -2561,9 +2566,9 @@ Gid_t getegid (void);
 #  define DEBUG_r(a) DEBUG__(DEBUG_r_TEST, a)
 #  define DEBUG_x(a) DEBUG__(DEBUG_x_TEST, a)
 #  define DEBUG_u(a) DEBUG__(DEBUG_u_TEST, a)
-#  define DEBUG_L(a) DEBUG__(DEBUG_L_TEST, a)
 #  define DEBUG_H(a) DEBUG__(DEBUG_H_TEST, a)
 #  define DEBUG_X(a) DEBUG__(DEBUG_X_TEST, a)
+#  define DEBUG_Xv(a) DEBUG__(DEBUG_Xv_TEST, a)
 #  define DEBUG_D(a) DEBUG__(DEBUG_D_TEST, a)
 
 #  ifdef USE_5005THREADS
@@ -2574,6 +2579,7 @@ Gid_t getegid (void);
 
 #  define DEBUG_T(a) DEBUG__(DEBUG_T_TEST, a)
 #  define DEBUG_R(a) DEBUG__(DEBUG_R_TEST, a)
+#  define DEBUG_v(a) DEBUG__(DEBUG_v_TEST, a)
 
 #else /* DEBUGGING */
 
@@ -2589,14 +2595,15 @@ Gid_t getegid (void);
 #  define DEBUG_r_TEST (0)
 #  define DEBUG_x_TEST (0)
 #  define DEBUG_u_TEST (0)
-#  define DEBUG_L_TEST (0)
 #  define DEBUG_H_TEST (0)
 #  define DEBUG_X_TEST (0)
+#  define DEBUG_Xv_TEST (0)
 #  define DEBUG_D_TEST (0)
 #  define DEBUG_S_TEST (0)
 #  define DEBUG_T_TEST (0)
 #  define DEBUG_R_TEST (0)
 #  define DEBUG_J_TEST (0)
+#  define DEBUG_v_TEST (0)
 
 #  define DEB(a)
 #  define DEBUG(a)
@@ -2612,13 +2619,14 @@ Gid_t getegid (void);
 #  define DEBUG_r(a)
 #  define DEBUG_x(a)
 #  define DEBUG_u(a)
-#  define DEBUG_L(a)
 #  define DEBUG_H(a)
 #  define DEBUG_X(a)
+#  define DEBUG_Xv(a)
 #  define DEBUG_D(a)
 #  define DEBUG_S(a)
 #  define DEBUG_T(a)
 #  define DEBUG_R(a)
+#  define DEBUG_v(a)
 #endif /* DEBUGGING */
 
 
@@ -2660,7 +2668,9 @@ Gid_t getegid (void);
 #define PERL_MAGIC_taint	  't' /* Taintedness */
 #define PERL_MAGIC_uvar		  'U' /* Available for use by extensions */
 #define PERL_MAGIC_uvar_elem	  'u' /* Reserved for use by extensions */
+#define PERL_MAGIC_vstring	  'V' /* SV was vstring literal */
 #define PERL_MAGIC_vec		  'v' /* vec() lvalue */
+#define PERL_MAGIC_utf8		  'w' /* Cached UTF-8 information */
 #define PERL_MAGIC_substr	  'x' /* substr() lvalue */
 #define PERL_MAGIC_defelem	  'y' /* Shadow "foreach" iterator variable /
 					smart parameter vivification */
@@ -2880,10 +2890,8 @@ typedef Sighandler_t Sigsave_t;
 # ifndef register
 #  define register
 # endif
-# define PAD_SV(po) pad_sv(po)
 # define RUNOPS_DEFAULT Perl_runops_debug
 #else
-# define PAD_SV(po) PL_curpad[po]
 # define RUNOPS_DEFAULT Perl_runops_standard
 #endif
 
@@ -2978,6 +2986,8 @@ EXTCONST char PL_no_func[]
   INIT("The %s function is unimplemented");
 EXTCONST char PL_no_myglob[]
   INIT("\"my\" variable %s can't be in a package");
+EXTCONST char PL_no_localize_ref[]
+  INIT("Can't localize through a reference");
 
 EXTCONST char PL_uuemap[65]
   INIT("`!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_");
@@ -3253,23 +3263,26 @@ enum {		/* pass one of these to get_vtbl */
 #endif
     want_vtbl_regdata,
     want_vtbl_regdatum,
-    want_vtbl_backref
+    want_vtbl_backref,
+    want_vtbl_utf8
 };
 
 				/* Note: the lowest 8 bits are reserved for
 				   stuffing into op->op_private */
 #define HINT_PRIVATE_MASK	0x000000ff
-#define HINT_INTEGER		0x00000001
-#define HINT_STRICT_REFS	0x00000002
-#define HINT_LOCALE		0x00000004
-#define HINT_BYTES		0x00000008
+#define HINT_INTEGER		0x00000001 /* integer pragma */
+#define HINT_STRICT_REFS	0x00000002 /* strict pragma */
+#define HINT_LOCALE		0x00000004 /* locale pragma */
+#define HINT_BYTES		0x00000008 /* bytes pragma */
 /* #define HINT_notused10	0x00000010 */
 				/* Note: 20,40,80 used for NATIVE_HINTS */
+				/* currently defined by vms/vmsish.h */
 
 #define HINT_BLOCK_SCOPE	0x00000100
-#define HINT_STRICT_SUBS	0x00000200
-#define HINT_STRICT_VARS	0x00000400
+#define HINT_STRICT_SUBS	0x00000200 /* strict pragma */
+#define HINT_STRICT_VARS	0x00000400 /* strict pragma */
 
+/* The HINT_NEW_* constants are used by the overload pragma */
 #define HINT_NEW_INTEGER	0x00001000
 #define HINT_NEW_FLOAT		0x00002000
 #define HINT_NEW_BINARY		0x00004000
@@ -3277,12 +3290,13 @@ enum {		/* pass one of these to get_vtbl */
 #define HINT_NEW_RE		0x00010000
 #define HINT_LOCALIZE_HH	0x00020000 /* %^H needs to be copied */
 
-#define HINT_RE_TAINT		0x00100000
-#define HINT_RE_EVAL		0x00200000
+#define HINT_RE_TAINT		0x00100000 /* re pragma */
+#define HINT_RE_EVAL		0x00200000 /* re pragma */
 
-#define HINT_FILETEST_ACCESS	0x00400000
-#define HINT_UTF8		0x00800000
+#define HINT_FILETEST_ACCESS	0x00400000 /* filetest pragma */
+#define HINT_UTF8		0x00800000 /* utf8 pragma */
 
+/* The following are stored in $sort::hints, not in PL_hints */
 #define HINT_SORT_SORT_BITS	0x000000FF /* allow 256 different ones */
 #define HINT_SORT_QUICKSORT	0x00000001
 #define HINT_SORT_MERGESORT	0x00000002
@@ -3548,7 +3562,7 @@ EXT MGVTBL PL_vtbl_defelem = {MEMBER_TO_FPTR(Perl_magic_getdefelem),
     					MEMBER_TO_FPTR(Perl_magic_setdefelem),
 					0,	0,	0};
 
-EXT MGVTBL PL_vtbl_regexp = {0,0,0,0, MEMBER_TO_FPTR(Perl_magic_freeregexp)};
+EXT MGVTBL PL_vtbl_regexp = {0, MEMBER_TO_FPTR(Perl_magic_setregexp),0,0, MEMBER_TO_FPTR(Perl_magic_freeregexp)};
 EXT MGVTBL PL_vtbl_regdata = {0, 0, MEMBER_TO_FPTR(Perl_magic_regdata_cnt), 0, 0};
 EXT MGVTBL PL_vtbl_regdatum = {MEMBER_TO_FPTR(Perl_magic_regdatum_get),
 			       MEMBER_TO_FPTR(Perl_magic_regdatum_set), 0, 0, 0};
@@ -3569,6 +3583,10 @@ EXT MGVTBL PL_vtbl_backref = 	  {0,	0,
 
 EXT MGVTBL PL_vtbl_ovrld   = 	  {0,	0,
 					0,	0,	MEMBER_TO_FPTR(Perl_magic_freeovrld)};
+
+EXT MGVTBL PL_vtbl_utf8 = {0,
+				MEMBER_TO_FPTR(Perl_magic_setutf8),
+					0,	0,	0};
 
 #else /* !DOINIT */
 
@@ -3612,6 +3630,7 @@ EXT MGVTBL PL_vtbl_amagic;
 EXT MGVTBL PL_vtbl_amagicelem;
 
 EXT MGVTBL PL_vtbl_backref;
+EXT MGVTBL PL_vtbl_utf8;
 
 #endif /* !DOINIT */
 
@@ -3891,17 +3910,6 @@ typedef struct am_table_short AMTS;
 #   define Atoul(s)	Strtoul(s, (char **)NULL, 10)
 #endif
 
-#if !defined(PERLIO_IS_STDIO)
-/*
- * Remap printf
- */
-#undef printf
-#if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
-#define printf(fmt,args...) PerlIO_stdoutf(fmt,##args)
-#else
-#define printf PerlIO_stdoutf
-#endif
-#endif
 
 /* if these never got defined, they need defaults */
 #ifndef PERL_SET_CONTEXT
@@ -3940,11 +3948,9 @@ typedef struct am_table_short AMTS;
  */
 
 #ifndef PERL_MICRO
-#   ifndef PERL_OLD_SIGNALS
-#		ifndef PERL_ASYNC_CHECK
-#			define PERL_ASYNC_CHECK() if (PL_sig_pending) despatch_signals()
-#		endif
-#   endif
+#	ifndef PERL_ASYNC_CHECK
+#		define PERL_ASYNC_CHECK() if (PL_sig_pending) despatch_signals()
+#	endif
 #endif
 
 #ifndef PERL_ASYNC_CHECK
@@ -4241,6 +4247,80 @@ extern void moncontrol(int);
 #ifndef PIPESOCK_MODE
 #  define PIPESOCK_MODE
 #endif
+
+#define PERL_MAGIC_UTF8_CACHESIZE	2
+
+#define PERL_UNICODE_STDIN_FLAG			0x0001
+#define PERL_UNICODE_STDOUT_FLAG		0x0002
+#define PERL_UNICODE_STDERR_FLAG		0x0004
+#define PERL_UNICODE_IN_FLAG			0x0008
+#define PERL_UNICODE_OUT_FLAG			0x0010
+#define PERL_UNICODE_ARGV_FLAG			0x0020
+#define PERL_UNICODE_LOCALE_FLAG		0x0040
+#define PERL_UNICODE_WIDESYSCALLS_FLAG		0x0080 /* for Sarathy */
+
+#define PERL_UNICODE_STD_FLAG		\
+	(PERL_UNICODE_STDIN_FLAG	| \
+	 PERL_UNICODE_STDOUT_FLAG	| \
+	 PERL_UNICODE_STDERR_FLAG)
+
+#define PERL_UNICODE_INOUT_FLAG		\
+	(PERL_UNICODE_IN_FLAG	| \
+	 PERL_UNICODE_OUT_FLAG)
+
+#define PERL_UNICODE_DEFAULT_FLAGS	\
+	(PERL_UNICODE_STD_FLAG		| \
+	 PERL_UNICODE_INOUT_FLAG	| \
+	 PERL_UNICODE_LOCALE_FLAG)
+
+#define PERL_UNICODE_ALL_FLAGS			0x00ff
+
+#define PERL_UNICODE_STDIN			'I'
+#define PERL_UNICODE_STDOUT			'O'
+#define PERL_UNICODE_STDERR			'E'
+#define PERL_UNICODE_STD			'S'
+#define PERL_UNICODE_IN				'i'
+#define PERL_UNICODE_OUT			'o'
+#define PERL_UNICODE_INOUT			'D'
+#define PERL_UNICODE_ARGV			'A'
+#define PERL_UNICODE_LOCALE			'L'
+#define PERL_UNICODE_WIDESYSCALLS		'W'
+
+#define PERL_SIGNALS_UNSAFE_FLAG	0x0001
+
+/* From sigaction(2) (FreeBSD man page):
+ * | Signal routines normally execute with the signal that
+ * | caused their invocation blocked, but other signals may
+ * | yet occur.
+ * Emulation of this behavior (from within Perl) is enabled
+ * by defining PERL_BLOCK_SIGNALS.
+ */
+#define PERL_BLOCK_SIGNALS
+
+#if defined(HAS_SIGPROCMASK) && defined(PERL_BLOCK_SIGNALS)
+#   define PERL_BLOCKSIG_ADD(set,sig) \
+	sigset_t set; sigemptyset(&(set)); sigaddset(&(set), sig)
+#   define PERL_BLOCKSIG_BLOCK(set) \
+	sigprocmask(SIG_BLOCK, &(set), NULL)
+#   define PERL_BLOCKSIG_UNBLOCK(set) \
+	sigprocmask(SIG_UNBLOCK, &(set), NULL)
+#endif /* HAS_SIGPROCMASK && PERL_BLOCK_SIGNALS */
+
+/* How about the old style of sigblock()? */
+
+#ifndef PERL_BLOCKSIG_ADD
+#   define PERL_BLOCKSIG_ADD(set, sig)	NOOP
+#endif
+#ifndef PERL_BLOCKSIG_BLOCK
+#   define PERL_BLOCKSIG_BLOCK(set)	NOOP
+#endif
+#ifndef PERL_BLOCKSIG_UNBLOCK
+#   define PERL_BLOCKSIG_UNBLOCK(set)	NOOP
+#endif
+
+/* Use instead of abs() since abs() forces its argument to be an int,
+ * but also beware since this evaluates its argument twice, so no x++. */
+#define PERL_ABS(x) ((x) < 0 ? -(x) : (x))
 
 /* and finally... */
 #define PERL_PATCHLEVEL_H_IMPLICIT

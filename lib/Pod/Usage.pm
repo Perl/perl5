@@ -506,7 +506,7 @@ sub pod2usage {
              and  $opts{"-output"} == \*STDOUT )
     {
        ## spit out the entire PODs. Might as well invoke perldoc
-       my $progpath = File::Spec->catfile($Config{scriptdir}, "perldoc");
+       my $progpath = File::Spec->catfile($Config{bin}, "perldoc");
        system($progpath, $opts{"-input"});
     }
     else {

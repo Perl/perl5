@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq9 - Networking ($Revision: 1.13 $, $Date: 2002/11/13 06:07:58 $)
+perlfaq9 - Networking ($Revision: 1.14 $, $Date: 2002/12/06 07:40:11 $)
 
 =head1 DESCRIPTION
 
@@ -11,10 +11,10 @@ and a few on the web.
 
 (Alan Flavell <flavell+www@a5.ph.gla.ac.uk> answers...)
 
-The Common Gateway Interface (CGI) specifies a software interface between 
-a program ("CGI script") and a web server (HTTPD). It is not specific 
-to Perl, and has its own FAQs and tutorials, and usenet group, 
-comp.infosystems.www.authoring.cgi 
+The Common Gateway Interface (CGI) specifies a software interface between
+a program ("CGI script") and a web server (HTTPD). It is not specific
+to Perl, and has its own FAQs and tutorials, and usenet group,
+comp.infosystems.www.authoring.cgi
 
 The original CGI specification is at: http://hoohoo.ncsa.uiuc.edu/cgi/
 
@@ -22,9 +22,9 @@ Current best-practice RFC draft at: http://CGI-Spec.Golux.Com/
 
 Other relevant documentation listed in: http://www.perl.org/CGI_MetaFAQ.html
 
-These Perl FAQs very selectively cover some CGI issues. However, Perl 
+These Perl FAQs very selectively cover some CGI issues. However, Perl
 programmers are strongly advised to use the CGI.pm module, to take care
-of the details for them. 
+of the details for them.
 
 The similarity between CGI response headers (defined in the CGI
 specification) and HTTP response headers (defined in the HTTP
@@ -53,7 +53,7 @@ Perl CGI scripts" guide at
 
 	http://www.perl.org/troubleshooting_CGI.html
 
-If, after that, you can demonstrate that you've read the FAQs and that 
+If, after that, you can demonstrate that you've read the FAQs and that
 your problem isn't something simple that can be easily answered, you'll
 probably receive a courteous and useful reply to your question if you
 post it on comp.infosystems.www.authoring.cgi (if it's something to do
@@ -61,7 +61,7 @@ with HTTP or the CGI protocols).  Questions that appear to be Perl
 questions but are really CGI ones that are posted to comp.lang.perl.misc
 are not so well received.
 
-The useful FAQs, related documents, and troubleshooting guides are 
+The useful FAQs, related documents, and troubleshooting guides are
 listed in the CGI Meta FAQ:
 
 	http://www.perl.org/CGI_MetaFAQ.html
@@ -150,19 +150,19 @@ on text like this:
 
 You can easily extract all sorts of URLs from HTML with
 C<HTML::SimpleLinkExtor> which handles anchors, images, objects,
-frames, and many other tags that can contain a URL.  If you need 
-anything more complex, you can create your own subclass of 
-C<HTML::LinkExtor> or C<HTML::Parser>.  You might even use 
+frames, and many other tags that can contain a URL.  If you need
+anything more complex, you can create your own subclass of
+C<HTML::LinkExtor> or C<HTML::Parser>.  You might even use
 C<HTML::SimpleLinkExtor> as an example for something specifically
 suited to your needs.
 
 You can use URI::Find to extract URLs from an arbitrary text document.
 
-Less complete solutions involving regular expressions can save 
+Less complete solutions involving regular expressions can save
 you a lot of processing time if you know that the input is simple.  One
 solution from Tom Christiansen runs 100 times faster than most
 module based approaches but only extracts URLs from anchors where the first
-attribute is HREF and there are no other attributes. 
+attribute is HREF and there are no other attributes.
 
         #!/usr/bin/perl -n00
         # qxurl - tchrist@perl.com
@@ -297,9 +297,9 @@ redirection is handled by the local web server.
       print redirect($url);
 
 
-But if coded directly, it could be as follows (the final "\n" is 
+But if coded directly, it could be as follows (the final "\n" is
 shown separately, for clarity), using either a complete URL or
-an absolute URLpath. 
+an absolute URLpath.
 
       print "Location: $url\n";   # CGI response header
       print "\n";                 # end of headers
@@ -551,7 +551,7 @@ MIME::Lite also includes a method for sending these things.
 
     $msg->send;
 
-This defaults to using L<sendmail(1)> but can be customized to use
+This defaults to using L<sendmail> but can be customized to use
 SMTP via L<Net::SMTP>.
 
 =head2 How do I read mail?

@@ -1,7 +1,7 @@
 package open;
 use warnings;
 use Carp;
-$open::hint_bits = 0x20000;
+$open::hint_bits = 0x20000; # HINT_LOCALIZE_HH
 
 our $VERSION = '1.01';
 
@@ -95,8 +95,8 @@ sub import {
 		my $target = $layer;		# the layer name itself
 		$target =~ s/^(\w+)\(.+\)$/$1/;	# strip parameters
 
-		unless(PerlIO::Layer::->find($target)) {
-		    warnings::warnif("layer", "Unknown PerlIO layer '$layer'");
+		unless(PerlIO::Layer::->find($target,1)) {
+		    warnings::warnif("layer", "Unknown PerlIO layer '$target'");
 		}
 	    }
 	    push(@val,":$layer");

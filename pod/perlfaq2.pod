@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.17 $, $Date: 2002/11/16 23:33:08 $)
+perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.20 $, $Date: 2003/01/26 17:50:56 $)
 
 =head1 DESCRIPTION
 
@@ -171,24 +171,33 @@ assistance:
 
 =head2 What are the Perl newsgroups on Usenet?  Where do I post questions?
 
-The now defunct comp.lang.perl newsgroup has been superseded by the
-following groups:
+Several groups devoted to the Perl language are on Usenet:
 
     comp.lang.perl.announce 		Moderated announcement group
-    comp.lang.perl.misc     		Very busy group about Perl in general
-    comp.lang.perl.moderated            Moderated discussion group
+    comp.lang.perl.misc     		High traffic general Perl discussion
+    comp.lang.perl.moderated        Moderated discussion group
     comp.lang.perl.modules  		Use and development of Perl modules
     comp.lang.perl.tk           	Using Tk (and X) from Perl
 
     comp.infosystems.www.authoring.cgi 	Writing CGI scripts for the Web.
 
-There is also a Usenet gateway to Perl mailing lists sponsored by perl.org at
-nntp://nntp.perl.org , a web interface to the same lists at
-http://nntp.perl.org/group/ and these lists are also available under the
-C<perl.*> hierarchy at http://groups.google.com . Other groups are listed at
-http://lists.perl.org/ ( also known as http://lists.cpan.org/ ).
+Some years ago, comp.lang.perl was divided into those groups, and
+comp.lang.perl itself officially removed.  While that group may still
+be found on some news servers, it is unwise to use it, because
+postings there will not appear on news servers which honour the
+official list of group names.  Use comp.lang.perl.misc for topics
+which do not have a more-appropriate specific group.
 
-A nice place to ask questions is the PerlMonks site, http://www.perlmonks.org/
+There is also a Usenet gateway to Perl mailing lists sponsored by
+perl.org at nntp://nntp.perl.org , a web interface to the same lists
+at http://nntp.perl.org/group/ and these lists are also available
+under the C<perl.*> hierarchy at http://groups.google.com . Other
+groups are listed at http://lists.perl.org/ ( also known as
+http://lists.cpan.org/ ).
+
+A nice place to ask questions is the PerlMonks site, 
+http://www.perlmonks.org/ , or the Perl Beginners mailing list
+http://lists.perl.org/showlist.cgi?name=beginners .
 
 Note that none of the above are supposed to write your code for you:
 asking questions about particular problems or general advice is fine,
@@ -204,7 +213,7 @@ see their FAQ ( http://www.faqs.org/faqs/alt-sources-intro/ ) for details.
 
 If you're just looking for software, first use Google
 ( http://www.google.com ), Google's usenet search interface
-( http://groups.google.com ),  and CPAN Search ( http://search.cpan.org ).  
+( http://groups.google.com ),  and CPAN Search ( http://search.cpan.org ).
 This is faster and more productive than just posting a request.
 
 =head2 Perl Books
@@ -230,7 +239,7 @@ of real-world examples, mini-tutorials, and complete programs is:
 	by Tom Christiansen and Nathan Torkington,
 	    with Foreword by Larry Wall
 	ISBN 1-56592-243-3 [1st Edition August 1998]
-	http://perl.oreilly.com/cookbook/
+	http://perl.oreilly.com/catalog/cookbook/
 
 If you're already a seasoned programmer, then the Camel Book might
 suffice for you to learn Perl from.  If you're not, check out the
@@ -419,7 +428,7 @@ A comprehensive list of Perl related mailing lists can be found at:
 =head2 Archives of comp.lang.perl.misc
 
 The Google search engine now carries archived and searchable newsgroup
-content. 
+content.
 
 http://groups.google.com/groups?group=comp.lang.perl.misc
 

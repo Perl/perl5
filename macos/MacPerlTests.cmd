@@ -6,8 +6,6 @@ echo ""
 
 perl -le 'symlink "::macos:perl", ":perl" unless -e ":perl"'
 
-# weird bug in GUSI for opening file instead of directory
-perl -e 'chmod 0666, "TEST"; `rename TEST TEST-OLD`'
 # set up environment
 set -e MACPERL ""
 set -e PERL5LIB ""
@@ -45,13 +43,9 @@ save ::macos:MacPerlTests.out
 echo ":perl -I::lib    :cmd:for.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    :cmd:for.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
-
-perl -e 'chmod 0666, "TEST-OLD"; `rename TEST-OLD TEST`'
 echo ":perl -I::lib    :cmd:mod.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    :cmd:mod.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
-perl -e 'chmod 0666, "TEST"; `rename TEST TEST-OLD`'
-
 echo ":perl -I::lib    :cmd:subval.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    :cmd:subval.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
@@ -267,13 +261,9 @@ save ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:fh.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:fh.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
-
-perl -e 'chmod 0666, "TEST-OLD"; `rename TEST-OLD TEST`'
 echo ":perl -I::lib    :op:filetest.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:filetest.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
-perl -e 'chmod 0666, "TEST"; `rename TEST TEST-OLD`'
-
 echo ":perl -I::lib    :op:flip.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:flip.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
@@ -484,13 +474,9 @@ save ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:sysio.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:sysio.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
-
-perl -e 'chmod 0666, "TEST-OLD"; `rename TEST-OLD TEST`'
 echo ":perl -I::lib -T :op:taint.t" >> ::macos:MacPerlTests.out
 :perl -I::lib -T :op:taint.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
-perl -e 'chmod 0666, "TEST"; `rename TEST TEST-OLD`'
-
 echo ":perl -I::lib    :op:tie.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:tie.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
@@ -650,8 +636,6 @@ save ::macos:MacPerlTests.out
 echo ":perl -I::lib    ::ext:attrs.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::ext:attrs.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
-
-perl -e 'chmod 0666, "TEST"; `rename TEST TEST-OLD`'
 echo ":perl -I::lib -T ::ext:B:t:asmdata.t" >> ::macos:MacPerlTests.out
 :perl -I::lib -T ::ext:B:t:asmdata.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
@@ -787,13 +771,9 @@ save ::macos:MacPerlTests.out
 echo ":perl -I::lib -T ::ext:Fcntl:t:syslfs.t" >> ::macos:MacPerlTests.out
 :perl -I::lib -T ::ext:Fcntl:t:syslfs.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
-
-perl -e 'chmod 0666, "TEST-OLD"; `rename TEST-OLD TEST`'
 echo ":perl -I::lib    ::ext:File:Glob:t:basic.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::ext:File:Glob:t:basic.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
-perl -e 'chmod 0666, "TEST"; `rename TEST TEST-OLD`'
-
 echo ":perl -I::lib    ::ext:File:Glob:t:case.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::ext:File:Glob:t:case.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
@@ -824,48 +804,32 @@ save ::macos:MacPerlTests.out
 echo ":perl -I::lib    ::ext:IO:lib:IO:t:io_linenum.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::ext:IO:lib:IO:t:io_linenum.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
-
-perl -e 'chmod 0666, "TEST-OLD"; `rename TEST-OLD TEST`'
 echo ":perl -I::lib    ::ext:IO:lib:IO:t:io_multihomed.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::ext:IO:lib:IO:t:io_multihomed.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
 echo ":perl -I::lib    ::ext:IO:lib:IO:t:io_pipe.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::ext:IO:lib:IO:t:io_pipe.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
-perl -e 'chmod 0666, "TEST"; `rename TEST TEST-OLD`'
-
 echo ":perl -I::lib    ::ext:IO:lib:IO:t:io_poll.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::ext:IO:lib:IO:t:io_poll.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
 echo ":perl -I::lib    ::ext:IO:lib:IO:t:io_sel.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::ext:IO:lib:IO:t:io_sel.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
-
-perl -e 'chmod 0666, "TEST-OLD"; `rename TEST-OLD TEST`'
 echo ":perl -I::lib    ::ext:IO:lib:IO:t:io_sock.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::ext:IO:lib:IO:t:io_sock.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
-perl -e 'chmod 0666, "TEST"; `rename TEST TEST-OLD`'
-
 echo ":perl -I::lib -T ::ext:IO:lib:IO:t:io_taint.t" >> ::macos:MacPerlTests.out
 :perl -I::lib -T ::ext:IO:lib:IO:t:io_taint.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
-
-perl -e 'chmod 0666, "TEST-OLD"; `rename TEST-OLD TEST`'
 echo ":perl -I::lib    ::ext:IO:lib:IO:t:io_tell.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::ext:IO:lib:IO:t:io_tell.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
-perl -e 'chmod 0666, "TEST"; `rename TEST TEST-OLD`'
-
 echo ":perl -I::lib    ::ext:IO:lib:IO:t:io_udp.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::ext:IO:lib:IO:t:io_udp.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
-
-perl -e 'chmod 0666, "TEST-OLD"; `rename TEST-OLD TEST`'
 echo ":perl -I::lib    ::ext:IO:lib:IO:t:io_unix.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::ext:IO:lib:IO:t:io_unix.t >> ::macos:MacPerlTests.out
-perl -e 'chmod 0666, "TEST"; `rename TEST TEST-OLD`'
-
 save ::macos:MacPerlTests.out
 echo ":perl -I::lib    ::ext:IO:lib:IO:t:io_xs.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::ext:IO:lib:IO:t:io_xs.t >> ::macos:MacPerlTests.out
@@ -963,13 +927,9 @@ save ::macos:MacPerlTests.out
 echo ":perl -I::lib    ::ext:PerlIO:t:via.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::ext:PerlIO:t:via.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
-
-perl -e 'chmod 0666, "TEST-OLD"; `rename TEST-OLD TEST`'
 echo ":perl -I::lib    ::ext:POSIX:t:posix.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::ext:POSIX:t:posix.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
-perl -e 'chmod 0666, "TEST"; `rename TEST TEST-OLD`'
-
 echo ":perl -I::lib    ::ext:POSIX:t:sigaction.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::ext:POSIX:t:sigaction.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
@@ -1395,13 +1355,9 @@ save ::macos:MacPerlTests.out
 echo ":perl -I::lib    ::lib:File:CheckTree.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::lib:File:CheckTree.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
-
-perl -e 'chmod 0666, "TEST-OLD"; `rename TEST-OLD TEST`'
 echo ":perl -I::lib    ::lib:File:Compare.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::lib:File:Compare.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
-perl -e 'chmod 0666, "TEST"; `rename TEST TEST-OLD`'
-
 echo ":perl -I::lib    ::lib:File:Copy.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::lib:File:Copy.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
@@ -1444,13 +1400,9 @@ save ::macos:MacPerlTests.out
 echo ":perl -I::lib    ::lib:FileCache.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::lib:FileCache.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
-
-perl -e 'chmod 0666, "TEST-OLD"; `rename TEST-OLD TEST`'
 echo ":perl -I::lib    ::lib:FileHandle.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::lib:FileHandle.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
-perl -e 'chmod 0666, "TEST"; `rename TEST TEST-OLD`'
-
 echo ":perl -I::lib    ::lib:filetest.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::lib:filetest.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out

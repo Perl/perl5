@@ -442,7 +442,7 @@ sub path {
     ($volume,$directories,$file) = File::Spec->splitpath( $path );
     ($volume,$directories,$file) = File::Spec->splitpath( $path, $no_file );
 
-Splits a path in to volume, directory, and filename portions.
+Splits a path into volume, directory, and filename portions.
 
 On Mac OS, assumes that the last part of the path is a filename unless
 $no_file is true or a trailing separator ":" is present.

@@ -129,7 +129,7 @@ Perl_taint_env(pTHX)
 	PL_tainted = was_tainted;
 	if (t < e && isALNUM(*t))
 	    t++;
-	while (t < e && (isALNUM(*t) || *t == '-' || *t == ':'))
+	while (t < e && (isALNUM(*t) || strchr("-_.+", *t)))
 	    t++;
 	if (t < e) {
 	    TAINT;

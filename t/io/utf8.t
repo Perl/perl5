@@ -12,7 +12,7 @@ BEGIN {
 no utf8; # needed for use utf8 not griping about the raw octets
 
 $| = 1;
-print "1..31\n";
+print "1..49\n";
 
 open(F,"+>:utf8",'a');
 print F chr(0x100).'£';
@@ -271,6 +271,58 @@ print "ok 26\n";
     close(F);
 
     print $@ =~ /Wide character in print/ ? "ok 31\n" : "not ok 31\n";
+}
+
+{
+    open F, ">:bytes","a"; print F "\xde"; close F;
+
+    open F, "<:bytes", "a";
+    my $b = chr 0x100;
+    $b .= <F>;
+    print $b eq chr(0x100).chr(0xde) ? "ok 32" : "not ok 32";
+    print " \#21395 '.= <>' utf8 vs. bytes\n";
+    close F;
+}
+
+{
+    open F, ">:utf8","a"; print F chr 0x100; close F;
+
+    open F, "<:utf8", "a";
+    my $b = "\xde";
+    $b .= <F>;
+    print $b eq chr(0xde).chr(0x100) ? "ok 33" : "not ok 33";
+    print " \#21395 '.= <>' bytes vs. utf8\n";
+    close F;
+}
+
+{
+    my @a = ( [ 0x007F, "bytes" ],
+	      [ 0x0080, "bytes" ],
+	      [ 0x0080, "utf8"  ],
+	      [ 0x0100, "utf8"  ] );
+    my $t = 34;
+    for my $u (@a) {
+	for my $v (@a) {
+	    # print "# @$u - @$v\n";
+	    open F, ">a";
+	    binmode(F, ":" . $u->[1]);
+	    print F chr($u->[0]);
+	    close F;
+
+	    open F, "<a";
+	    binmode(F, ":" . $u->[1]);
+
+	    my $s = chr($v->[0]);
+	    utf8::upgrade($s) if $v->[1] eq "utf8";
+
+	    $s .= <F>;
+	    print $s eq chr($v->[0]) . chr($u->[0]) ?
+		"ok $t # rcatline utf8\n" : "not ok $t # rcatline utf8\n";
+	    close F;
+	    $t++;
+	}
+    }
+    # last test here 49
 }
 
 # sysread() and syswrite() tested in lib/open.t since Fnctl is used

@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 BEGIN {
     # Get function prototypes
-    require 'regen.pl';
+    require 'regen_lib.pl';
 }
 
 $opcode_new = 'opcode.h-new';
@@ -38,7 +38,7 @@ print <<"END";
 /*
  *    opcode.h
  *
- *    Copyright (c) 1997-2002, Larry Wall
+ *    Copyright (c) 1997-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -59,7 +59,7 @@ print ON <<"END";
 /*
  *    opnames.h
  *
- *    Copyright (c) 1997-2002, Larry Wall
+ *    Copyright (c) 1997-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -335,6 +335,12 @@ foreach ('pp_proto.h', 'pp.sym') {
 }
 safer_rename $pp_proto_new, 'pp_proto.h';
 safer_rename $pp_sym_new, 'pp.sym';
+
+END {
+  foreach ('opcode.h', 'opnames.h', 'pp_proto.h', 'pp.sym') {
+    1 while unlink "$_-old";
+  }
+}
 
 ###########################################################################
 sub tab {
@@ -913,7 +919,7 @@ getlogin	getlogin		ck_null		st0
 syscall		syscall			ck_fun		imst@	S L
 
 # For multi-threading
-lock		lock			ck_rfun		s%	S
+lock		lock			ck_rfun		s%	R
 threadsv	per-thread value	ck_null		ds0
 
 # Control (contd.)

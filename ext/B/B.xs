@@ -95,7 +95,8 @@ cc_opclass(pTHX_ OP *o)
 	return ((o->op_private & OPpASSIGN_BACKWARDS) ? OPc_UNOP : OPc_BINOP);
 
 #ifdef USE_ITHREADS
-    if (o->op_type == OP_GV || o->op_type == OP_GVSV || o->op_type == OP_AELEMFAST)
+    if (o->op_type == OP_GV || o->op_type == OP_GVSV ||
+	o->op_type == OP_AELEMFAST || o->op_type == OP_RCATLINE)
 	return OPc_PADOP;
 #endif
 
@@ -826,10 +827,10 @@ SVOP_gv(o)
 	B::SVOP	o
 
 #define PADOP_padix(o)	o->op_padix
-#define PADOP_sv(o)	(o->op_padix ? PL_curpad[o->op_padix] : Nullsv)
+#define PADOP_sv(o)	(o->op_padix ? PAD_SVl(o->op_padix) : Nullsv)
 #define PADOP_gv(o)	((o->op_padix \
-			  && SvTYPE(PL_curpad[o->op_padix]) == SVt_PVGV) \
-			 ? (GV*)PL_curpad[o->op_padix] : Nullgv)
+			  && SvTYPE(PAD_SVl(o->op_padix)) == SVt_PVGV) \
+			 ? (GV*)PAD_SVl(o->op_padix) : Nullgv)
 
 MODULE = B	PACKAGE = B::PADOP		PREFIX = PADOP_
 
@@ -896,6 +897,7 @@ LOOP_lastop(o)
 #define COP_arybase(o)	o->cop_arybase
 #define COP_line(o)	CopLINE(o)
 #define COP_warnings(o)	o->cop_warnings
+#define COP_io(o)	o->cop_io
 
 MODULE = B	PACKAGE = B::COP		PREFIX = COP_
 
@@ -929,6 +931,10 @@ COP_line(o)
 
 B::SV
 COP_warnings(o)
+	B::COP	o
+
+B::SV
+COP_io(o)
 	B::COP	o
 
 MODULE = B	PACKAGE = B::SV		PREFIX = Sv
@@ -1418,6 +1424,10 @@ CvPADLIST(cv)
 
 B::CV
 CvOUTSIDE(cv)
+	B::CV	cv
+
+U32
+CvOUTSIDE_SEQ(cv)
 	B::CV	cv
 
 void

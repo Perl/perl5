@@ -6225,7 +6225,7 @@ $ if f$search("extra.pods") .eqs. "" .or. P1 .eqs. "FORCE" then -
 $ open/read/error=extra_close EXTRA extra.pods
 $extra_loop:
 $ read/error=extra_close/END_OF_FILE=extra_close EXTRA file
-$ file_type = f$parse(file,,,"TYPE",) - "."
+$ file_type = f$edit(f$parse(file,,,"TYPE",),"LOWERCASE") - "."
 $ if file_type .nes. "VMS" .and. file_type .nes. "vms"
 $ then
 $   pod_file = "[.pod]perl''file_type'.pod"
@@ -6241,7 +6241,8 @@ $       file_rdt = f$cvtime(f$file_attributes(file,"RDT"))
 $       pod_file_rdt = f$cvtime(f$file_attributes(pod_file,"RDT"))
 $       if file_rdt .GTS. pod_file_rdt then do_copy := true
 $     endif
-$     if do_copy then copy/log/noconfirm 'file' 'pod_file'
+$     ! wacky method to preserve case on ODS-5 even when parse style is traditional
+$     if do_copy then mcr sys$disk:[]miniperl.exe -e "exit 0+$^E unless File::Copy::rmscopy(q{''file'}, q{''pod_file'});"
 $   endif
 $ endif
 $ goto extra_loop
@@ -6296,6 +6297,7 @@ $ EXIT
 $ ENDSUBROUTINE ! Bad_environment
 $ echo ""
 $ echo4 "Checking for dangerous pre-existing global symbols and logical names."
+$ CALL Bad_environment "COMP"
 $ CALL Bad_environment "EXT"
 $ CALL Bad_environment "FOO"
 $ CALL Bad_environment "LIB"

@@ -172,14 +172,15 @@ To output UTF-8, use the C<:utf8> output layer.  Prepending
 to this sample program ensures that the output is completely UTF-8,
 and removes the program's warning.
 
-If your locale environment variables (C<LANGUAGE>, C<LC_ALL>,
-C<LC_CTYPE>, C<LANG>) contain the strings 'UTF-8' or 'UTF8',
-regardless of case, then the default encoding of your STDIN, STDOUT,
-and STDERR and of B<any subsequent file open>, is UTF-8.  Note that
-this means that Perl expects other software to work, too: if Perl has
-been led to believe that STDIN should be UTF-8, but then STDIN coming
-in from another command is not UTF-8, Perl will complain about the
-malformed UTF-8.
+You can enable automatic UTF-8-ification of your standard file
+handles, default C<open()> layer, and C<@ARGV> by using either
+the C<-C> command line switch or the C<PERL_UNICODE> environment
+variable, see L<perlrun> for the documentation of the C<-C> switch.
+
+Note that this means that Perl expects other software to work, too:
+if Perl has been led to believe that STDIN should be UTF-8, but then
+STDIN coming in from another command is not UTF-8, Perl will complain
+about the malformed UTF-8.
 
 All features that combine Unicode and I/O also require using the new
 PerlIO feature.  Almost all Perl 5.8 platforms do use PerlIO, though:
@@ -361,7 +362,7 @@ the C<open> pragma.  See L<open>, or look at the following example.
 
 With the C<open> pragma you can use the C<:locale> layer
 
-    $ENV{LC_ALL} = $ENV{LANG} = 'ru_RU.KOI8-R';
+    BEGIN { $ENV{LC_ALL} = $ENV{LANG} = 'ru_RU.KOI8-R' }
     # the :locale will probe the locale environment variables like LC_ALL
     use open OUT => ':locale'; # russki parusski
     open(O, ">koi8");
@@ -433,7 +434,8 @@ UTF-8 encoded.  A C<use open ':utf8'> would have avoided the bug, or
 explicitly opening also the F<file> for input as UTF-8.
 
 B<NOTE>: the C<:utf8> and C<:encoding> features work only if your
-Perl has been built with the new PerlIO feature.
+Perl has been built with the new PerlIO feature (which is the default
+on most systems).
 
 =head2 Displaying Unicode As Text
 

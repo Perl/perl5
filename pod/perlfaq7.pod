@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq7 - General Perl Language Issues ($Revision: 1.11 $, $Date: 2002/11/10 17:35:47 $)
+perlfaq7 - General Perl Language Issues ($Revision: 1.13 $, $Date: 2003/01/26 17:45:46 $)
 
 =head1 DESCRIPTION
 
@@ -38,7 +38,7 @@ really type specifiers:
 Note that <FILE> is I<neither> the type specifier for files
 nor the name of the handle.  It is the C<< <> >> operator applied
 to the handle FILE.  It reads one line (well, record--see
-L<perlvar/$/>) from the handle FILE in scalar context, or I<all> lines
+L<perlvar/$E<sol>>) from the handle FILE in scalar context, or I<all> lines
 in list context.  When performing open, close, or any other operation
 besides C<< <> >> on files, or even when talking about the handle, do
 I<not> use the brackets.  These are correct: C<eof(FH)>, C<seek(FH, 0,
@@ -81,7 +81,7 @@ One way is to treat the return values as a list and index into it:
 Another way is to use undef as an element on the left-hand-side:
 
     ($dev, $ino, undef, undef, $uid, $gid) = stat($file);
-    
+
 You can also use a list slice to select only the elements that
 you need:
 
@@ -308,13 +308,13 @@ which you treat as any other scalar.
 
 	open my $fh, $filename or die "Cannot open $filename! $!";
 	func( $fh );
-	
+
 	sub func {
 		my $passed_fh = shift;
-		
+
 		my $line = <$fh>;
 		}
-	
+
 Before Perl 5.6, you had to use the C<*FH> or C<\*FH> notations.
 These are "typeglobs"--see L<perldata/"Typeglobs and Filehandles">
 and especially L<perlsub/"Pass by Reference"> for more information.
@@ -475,7 +475,7 @@ In summary, local() doesn't make what you think of as private, local
 variables.  It gives a global variable a temporary value.  my() is
 what you're looking for if you want private variables.
 
-See L<perlsub/"Private Variables via my()"> and 
+See L<perlsub/"Private Variables via my()"> and
 L<perlsub/"Temporary Values via local()"> for excruciating details.
 
 =head2 How can I access a dynamic variable while a similarly named lexical is in scope?
@@ -519,7 +519,7 @@ However, dynamic variables (aka global, local, or package variables)
 are effectively shallowly bound.  Consider this just one more reason
 not to use them.  See the answer to L<"What's a closure?">.
 
-=head2 Why doesn't "my($foo) = <FILE>;" work right?
+=head2 Why doesn't "my($foo) = E<lt>FILEE<gt>;" work right?
 
 C<my()> and C<local()> give list context to the right hand side
 of C<=>.  The <FH> read operation, like so many of Perl's
@@ -603,7 +603,7 @@ construct like this:
 	elsif (/pat2/)  { }     # do something else
 	elsif (/pat3/)  { }     # do something else
 	else            { }     # default
-    } 
+    }
 
 Here's a simple example of a switch based on pattern matching, this
 time lined up in a way to make it look more like a switch statement.
@@ -640,7 +640,7 @@ in $whatchamacallit:
 
     }
 
-See C<perlsyn/"Basic BLOCKs and Switch Statements"> for many other 
+See C<perlsyn/"Basic BLOCKs and Switch Statements"> for many other
 examples in this style.
 
 Sometimes you should change the positions of the constant and the variable.
@@ -658,7 +658,7 @@ C<"STOP"> here:
     elsif ("LIST"  =~ /^\Q$answer/i) { print "Action is list\n"  }
     elsif ("EDIT"  =~ /^\Q$answer/i) { print "Action is edit\n"  }
 
-A totally different approach is to create a hash of function references.  
+A totally different approach is to create a hash of function references.
 
     my %commands = (
         "happy" => \&joy,
@@ -673,7 +673,7 @@ A totally different approach is to create a hash of function references.
         $commands{$string}->();
     } else {
         print "No such command: $string\n";
-    } 
+    }
 
 =head2 How can I catch accesses to undefined variables, functions, or methods?
 
@@ -761,7 +761,7 @@ Use this code, provided by Mark-Jason Dominus:
     sub scrub_package {
 	no strict 'refs';
 	my $pack = shift;
-	die "Shouldn't delete main package" 
+	die "Shouldn't delete main package"
 	    if $pack eq "" || $pack eq "main";
 	my $stash = *{$pack . '::'}{HASH};
 	my $name;
@@ -776,7 +776,7 @@ Use this code, provided by Mark-Jason Dominus:
 	}
     }
 
-Or, if you're using a recent release of Perl, you can 
+Or, if you're using a recent release of Perl, you can
 just use the Symbol::delete_package() function instead.
 
 =head2 How can I use a variable as a variable name?
@@ -844,7 +844,7 @@ wanted to use another scalar variable to refer to those by name.
     $name = "fred";
     $$name{WIFE} = "wilma";     # set %fred
 
-    $name = "barney";           
+    $name = "barney";
     $$name{WIFE} = "betty";	# set %barney
 
 This is still a symbolic reference, and is still saddled with the
@@ -868,7 +868,7 @@ can play around with the symbol table.  For example:
     for my $name (@colors) {
         no strict 'refs';  # renege for the block
         *$name = sub { "<FONT COLOR='$name'>@_</FONT>" };
-    } 
+    }
 
 All those functions (red(), blue(), green(), etc.) appear to be separate,
 but the real code in the closure actually was compiled only once.

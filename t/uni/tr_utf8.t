@@ -23,12 +23,17 @@ BEGIN {
         print "1..0 # Skip: PerlIO required\n";
         exit 0;
     }
+    eval 'use Encode';
+    if ($@ =~ /dynamic loading not available/) {
+        print "1..0 # Skip: no dynamic loading, no Encode\n";
+        exit 0;
+    }
     $| = 1;
 }
 
 use strict;
 #use Test::More qw(no_plan);
-use Test::More tests => 6;
+use Test::More tests => 7;
 
 use encoding 'utf8';
 
@@ -57,4 +62,11 @@ $str = $hiragana; $str =~ s/([ぁ-ん])/$h2k{$1}/go;
 is($str, $katakana, "s/// # hiragana -> katakana");
 $str = $katakana; $str =~ s/([ァ-ン])/$k2h{$1}/go;
 is($str, $hiragana, "s/// # hiragana -> katakana");
+
+{
+  # [perl 16843]
+  my $line = 'abcdefghijklmnopqrstuvwxyz$0123456789';
+  $line =~ tr/bcdeghijklmnprstvwxyz$02578/בצדעגהיײקלמנפּרסטװשכיזשױתײחא/;
+  is($line, "aבצדעfגהיײקלמנoפqּרסuטװשכיזש1ױ34ת6ײח9", "[perl #16843]");
+}
 __END__

@@ -4,7 +4,7 @@
 # Ilya Zakharevich <ilya@math.ohio-state.edu>
 #
 # Trimmed and comments added by 
-#     Andy Dougherty  <doughera@lafcol.lafayette.edu>
+#     Andy Dougherty  <doughera@lafayette.edu>
 #     Exactly what is required beyond a standard OS/2 installation?
 #     (see in README.os2)
 

@@ -1,3 +1,47 @@
+Change 772 on 2003/03/03 by <gbarr@pobox.com> (Graham Barr)
+
+	Release 1.13
+
+Change 755 on 2002/11/03 by <gbarr@pobox.com> (Graham Barr)
+
+	Fix typo
+
+Change 749 on 2002/09/23 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::POP3
+	- Make more compilant. +OK and -ERR responses do not have to be followed
+	by a space.
+
+Change 748 on 2002/09/23 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::FTP
+	- Fix unique name extraction to pick up name on initial
+	response, not just the final response
+
+Change 737 on 2002/07/18 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::Cmd
+	- Compatability fix for 5.004
+
+Change 736 on 2002/07/16 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::Cmd
+	- Ensure all debug output is via ->debug_print
+
+Change 735 on 2002/07/15 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::FTP
+	- Allow the user to specify a local address to use for sockets
+
+Change 734 on 2002/07/15 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::SMTP
+	- Avoid extra spaces on the end of the AUTH command
+
+Change 728 on 2002/05/28 by <gbarr@pobox.com> (Graham Barr)
+
+	Release 1.12
+
 Change 727 on 2002/05/28 by <gbarr@pobox.com> (Graham Barr)
 
 	Net::SMTP

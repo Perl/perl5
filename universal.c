@@ -1,6 +1,6 @@
 /*    universal.c
  *
- *    Copyright (c) 1997-2002, Larry Wall
+ *    Copyright (c) 1997-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -94,8 +94,8 @@ S_isa_lookup(pTHX_ HV *stash, const char *name, HV* name_stash,
 		if (!basestash) {
 		    if (ckWARN(WARN_MISC))
 			Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-		             "Can't locate package %s for @%s::ISA",
-			    SvPVX(sv), HvNAME(stash));
+		             "Can't locate package %"SVf" for @%s::ISA",
+			    sv, HvNAME(stash));
 		    continue;
 		}
 		if (&PL_sv_yes == isa_lookup(basestash, name, name_stash, 
@@ -208,7 +208,8 @@ XS(XS_UNIVERSAL_isa)
     if (SvGMAGICAL(sv))
 	mg_get(sv);
 
-    if (!SvOK(sv) || !(SvROK(sv) || (SvPOK(sv) && SvCUR(sv))))
+    if (!SvOK(sv) || !(SvROK(sv) || (SvPOK(sv) && SvCUR(sv))
+		|| (SvGMAGICAL(sv) && SvPOKp(sv) && SvCUR(sv))))
 	XSRETURN_UNDEF;
 
     name = (char *)SvPV(ST(1),n_a);
@@ -234,7 +235,8 @@ XS(XS_UNIVERSAL_can)
     if (SvGMAGICAL(sv))
 	mg_get(sv);
 
-    if (!SvOK(sv) || !(SvROK(sv) || (SvPOK(sv) && SvCUR(sv))))
+    if (!SvOK(sv) || !(SvROK(sv) || (SvPOK(sv) && SvCUR(sv))
+		|| (SvGMAGICAL(sv) && SvPOKp(sv) && SvCUR(sv))))
 	XSRETURN_UNDEF;
 
     name = (char *)SvPV(ST(1),n_a);

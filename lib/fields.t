@@ -10,7 +10,7 @@ BEGIN {
            $w++;
            return;
        }
-       print $_[0];
+       print STDERR $_[0];
    };
 }
 
@@ -70,6 +70,7 @@ package main;
 sub fstr {
    my $h = shift;
    my @tmp;
+   no warnings 'deprecated';
    for my $k (sort {$h->{$a} <=> $h->{$b}} keys %$h) {
 	my $v = $h->{$k};
         push(@tmp, "$k:$v");
@@ -133,9 +134,12 @@ $ph = fields::phash([qw/a b c/], [1, 2, 3]);
 print "not " unless fstr($ph) eq 'a:1,b:2,c:3';
 print "ok ", ++$testno, "\n";
 
-$ph = fields::phash([qw/a b c/], [1]);
-print "not " if exists $ph->{b} or exists $ph->{c} or !exists $ph->{a};
-print "ok ", ++$testno, "\n";
+{
+    no warnings 'deprecated';
+    $ph = fields::phash([qw/a b c/], [1]);
+    print "not " if exists $ph->{b} or exists $ph->{c} or !exists $ph->{a};
+    print "ok ", ++$testno, "\n";
+}
 
 eval '$ph = fields::phash("odd")';
 print "not " unless $@ && $@ =~ /^Odd number of/;

@@ -1,6 +1,6 @@
 /*    pp_hot.c
  *
- *    Copyright (c) 1991-2002, Larry Wall
+ *    Copyright (c) 1991-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -140,11 +140,12 @@ PP(pp_concat)
     bool lbyte;
     STRLEN rlen;
     char* rpv = SvPV(right, rlen);	/* mg_get(right) happens here */
-    bool rbyte = !SvUTF8(right);
+    bool rbyte = !SvUTF8(right), rcopied = FALSE;
 
     if (TARG == right && right != left) {
 	right = sv_2mortal(newSVpvn(rpv, rlen));
 	rpv = SvPV(right, rlen);	/* no point setting UTF8 here */
+	rcopied = TRUE;
     }
 
     if (TARG != left) {
@@ -180,6 +181,8 @@ PP(pp_concat)
 	if (lbyte)
 	    sv_utf8_upgrade_nomg(TARG);
 	else {
+	    if (!rcopied)
+		right = sv_2mortal(newSVpvn(rpv, rlen));
 	    sv_utf8_upgrade_nomg(right);
 	    rpv = SvPV(right, rlen);
 	}
@@ -197,10 +200,10 @@ PP(pp_padsv)
     XPUSHs(TARG);
     if (PL_op->op_flags & OPf_MOD) {
 	if (PL_op->op_private & OPpLVAL_INTRO)
-	    SAVECLEARSV(PL_curpad[PL_op->op_targ]);
+	    SAVECLEARSV(PAD_SVl(PL_op->op_targ));
         else if (PL_op->op_private & OPpDEREF) {
 	    PUTBACK;
-	    vivify_ref(PL_curpad[PL_op->op_targ], PL_op->op_private & OPpDEREF);
+	    vivify_ref(PAD_SVl(PL_op->op_targ), PL_op->op_private & OPpDEREF);
 	    SPAGAIN;
 	}
     }
@@ -650,6 +653,9 @@ PP(pp_rv2av)
 	    SETs((SV*)av);
 	    RETURN;
 	}
+	else if (PL_op->op_flags & OPf_MOD
+		&& PL_op->op_private & OPpLVAL_INTRO)
+	    Perl_croak(aTHX_ PL_no_localize_ref);
     }
     else {
 	if (SvTYPE(sv) == SVt_PVAV) {
@@ -774,6 +780,9 @@ PP(pp_rv2hv)
 	    SETs((SV*)hv);
 	    RETURN;
 	}
+	else if (PL_op->op_flags & OPf_MOD
+		&& PL_op->op_private & OPpLVAL_INTRO)
+	    Perl_croak(aTHX_ PL_no_localize_ref);
     }
     else {
 	if (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV) {
@@ -1216,7 +1225,7 @@ PP(pp_match)
 		 (PL_tainted && (pm->op_pmflags & PMf_RETAINT)));
     TAINT_NOT;
 
-    PL_reg_match_utf8 = DO_UTF8(TARG);
+    RX_MATCH_UTF8_set(rx, DO_UTF8(TARG));
 
     /* PMdf_USED is set after a ?? matches once */
     if (pm->op_pmdynflags & PMdf_USED) {
@@ -1391,7 +1400,7 @@ yup:					/* Confirmed by INTUIT */
     if (global) {
 	rx->subbeg = truebase;
 	rx->startp[0] = s - truebase;
-	if (PL_reg_match_utf8) {
+	if (RX_MATCH_UTF8(rx)) {
 	    char *t = (char*)utf8_hop((U8*)s, rx->minlen);
 	    rx->endp[0] = t - truebase;
 	}
@@ -1502,6 +1511,8 @@ Perl_do_readline(pTHX)
 		report_evil_fh(PL_last_in_gv, io, PL_op->op_type);
 	}
 	if (gimme == G_SCALAR) {
+	    /* undef TARG, and push that undefined value */
+	    SV_CHECK_THINKFIRST(TARG);
 	    (void)SvOK_off(TARG);
 	    PUSHTARG;
 	}
@@ -1563,6 +1574,7 @@ Perl_do_readline(pTHX)
 		}
 	    }
 	    if (gimme == G_SCALAR) {
+		SV_CHECK_THINKFIRST(TARG);
 		(void)SvOK_off(TARG);
 		SPAGAIN;
 		PUSHTARG;
@@ -1917,6 +1929,7 @@ PP(pp_subst)
     I32 oldsave = PL_savestack_ix;
     STRLEN slen;
     bool doutf8 = FALSE;
+    SV *nsv = Nullsv;
 
     /* known replacement string? */
     dstr = (pm->op_pmflags & PMf_CONST) ? POPs : Nullsv;
@@ -1944,14 +1957,14 @@ PP(pp_subst)
 	rxtainted |= 2;
     TAINT_NOT;
 
-    PL_reg_match_utf8 = DO_UTF8(TARG);
+    RX_MATCH_UTF8_set(rx, DO_UTF8(TARG));
 
   force_it:
     if (!pm || !s)
 	DIE(aTHX_ "panic: pp_subst");
 
     strend = s + len;
-    slen = PL_reg_match_utf8 ? utf8_length((U8*)s, (U8*)strend) : len;
+    slen = RX_MATCH_UTF8(rx) ? utf8_length((U8*)s, (U8*)strend) : len;
     maxiters = 2 * slen + 10;	/* We can match twice at each
 				   position, once with zero-length,
 				   second time with non-zero. */
@@ -1992,7 +2005,7 @@ PP(pp_subst)
     if (dstr) {
 	/* replacement needing upgrading? */
 	if (DO_UTF8(TARG) && !doutf8) {
-	     SV *nsv = sv_newmortal();
+	     nsv = sv_newmortal();
 	     SvSetSV(nsv, dstr);
 	     if (PL_encoding)
 		  sv_recode_to_utf8(nsv, PL_encoding);
@@ -2013,7 +2026,8 @@ PP(pp_subst)
     
     /* can do inplace substitution? */
     if (c && (I32)clen <= rx->minlen && (once || !(r_flags & REXEC_COPY_STR))
-	&& !(rx->reganch & ROPT_LOOKBEHIND_SEEN)) {
+	&& !(rx->reganch & ROPT_LOOKBEHIND_SEEN)
+	&& (!doutf8 || SvUTF8(TARG))) {
 	if (!CALLREGEXEC(aTHX_ rx, s, strend, orig, 0, TARG, NULL,
 			 r_flags | REXEC_CHECKED))
 	{
@@ -2148,7 +2162,10 @@ PP(pp_subst)
 		strend = s + (strend - m);
 	    }
 	    m = rx->startp[0] + orig;
-	    sv_catpvn(dstr, s, m-s);
+	    if (doutf8 && !SvUTF8(dstr))
+		sv_catpvn_utf8_upgrade(dstr, s, m - s, nsv);
+            else
+		sv_catpvn(dstr, s, m-s);
 	    s = rx->endp[0] + orig;
 	    if (clen)
 		sv_catpvn(dstr, c, clen);
@@ -2156,17 +2173,14 @@ PP(pp_subst)
 		break;
 	} while (CALLREGEXEC(aTHX_ rx, s, strend, orig, s == m,
 			     TARG, NULL, r_flags));
-	if (doutf8 && !DO_UTF8(dstr)) {
-	    SV* nsv = sv_2mortal(newSVpvn(s, strend - s));
-	    
-	    sv_utf8_upgrade(nsv);
-	    sv_catpvn(dstr, SvPVX(nsv), SvCUR(nsv));
-	}
+	if (doutf8 && !DO_UTF8(TARG))
+	    sv_catpvn_utf8_upgrade(dstr, s, strend - s, nsv);
 	else
 	    sv_catpvn(dstr, s, strend - s);
 
 	(void)SvOOK_off(TARG);
-	Safefree(SvPVX(TARG));
+	if (SvLEN(TARG))
+	    Safefree(SvPVX(TARG));
 	SvPVX(TARG) = SvPVX(dstr);
 	SvCUR_set(TARG, SvCUR(dstr));
 	SvLEN_set(TARG, SvLEN(dstr));
@@ -2576,7 +2590,7 @@ try_autoload:
 	    else {
 		sub_name = sv_newmortal();
 		gv_efullname3(sub_name, gv, Nullch);
-		DIE(aTHX_ "Undefined subroutine &%s called", SvPVX(sub_name));
+		DIE(aTHX_ "Undefined subroutine &%"SVf" called", sub_name);
 	    }
 	}
 	if (!cv)
@@ -2606,7 +2620,7 @@ try_autoload:
 	    if (SP > PL_stack_base + TOPMARK)
 		sv = *(PL_stack_base + TOPMARK + 1);
 	    else {
-		AV *av = (AV*)PL_curpad[0];
+		AV *av = (AV*)PAD_SVl(0);
 		if (hasargs || !av || AvFILLp(av) < 0
 		    || !(sv = AvARRAY(av)[0]))
 		{
@@ -2757,7 +2771,7 @@ try_autoload:
 		AV* av;
 		I32 items;
 #ifdef USE_5005THREADS
-		av = (AV*)PL_curpad[0];
+		av = (AV*)PAD_SVl(0);
 #else
 		av = GvAV(PL_defgv);
 #endif /* USE_5005THREADS */		
@@ -2796,65 +2810,24 @@ try_autoload:
 	dMARK;
 	register I32 items = SP - MARK;
 	AV* padlist = CvPADLIST(cv);
-	SV** svp = AvARRAY(padlist);
 	push_return(PL_op->op_next);
 	PUSHBLOCK(cx, CXt_SUB, MARK);
 	PUSHSUB(cx);
 	CvDEPTH(cv)++;
 	/* XXX This would be a natural place to set C<PL_compcv = cv> so
 	 * that eval'' ops within this sub know the correct lexical space.
-	 * Owing the speed considerations, we choose to search for the cv
-	 * in doeval() instead.
+	 * Owing the speed considerations, we choose instead to search for
+	 * the cv using find_runcv() when calling doeval().
 	 */
 	if (CvDEPTH(cv) < 2)
 	    (void)SvREFCNT_inc(cv);
-	else {	/* save temporaries on recursion? */
+	else {
 	    PERL_STACK_OVERFLOW_CHECK();
-	    if (CvDEPTH(cv) > AvFILLp(padlist)) {
-		AV *av;
-		AV *newpad = newAV();
-		SV **oldpad = AvARRAY(svp[CvDEPTH(cv)-1]);
-		I32 ix = AvFILLp((AV*)svp[1]);
-		I32 names_fill = AvFILLp((AV*)svp[0]);
-		svp = AvARRAY(svp[0]);
-		for ( ;ix > 0; ix--) {
-		    if (names_fill >= ix && svp[ix] != &PL_sv_undef) {
-			char *name = SvPVX(svp[ix]);
-			if ((SvFLAGS(svp[ix]) & SVf_FAKE) /* outer lexical? */
-			    || *name == '&')		  /* anonymous code? */
-			{
-			    av_store(newpad, ix, SvREFCNT_inc(oldpad[ix]));
-			}
-			else {				/* our own lexical */
-			    if (*name == '@')
-				av_store(newpad, ix, sv = (SV*)newAV());
-			    else if (*name == '%')
-				av_store(newpad, ix, sv = (SV*)newHV());
-			    else
-				av_store(newpad, ix, sv = NEWSV(0,0));
-			    SvPADMY_on(sv);
-			}
-		    }
-		    else if (IS_PADGV(oldpad[ix]) || IS_PADCONST(oldpad[ix])) {
-			av_store(newpad, ix, sv = SvREFCNT_inc(oldpad[ix]));
-		    }
-		    else {
-			av_store(newpad, ix, sv = NEWSV(0,0));
-			SvPADTMP_on(sv);
-		    }
-		}
-		av = newAV();		/* will be @_ */
-		av_extend(av, 0);
-		av_store(newpad, 0, (SV*)av);
-		AvFLAGS(av) = AVf_REIFY;
-		av_store(padlist, CvDEPTH(cv), (SV*)newpad);
-		AvFILLp(padlist) = CvDEPTH(cv);
-		svp = AvARRAY(padlist);
-	    }
+	    pad_push(padlist, CvDEPTH(cv), 1);
 	}
 #ifdef USE_5005THREADS
 	if (!hasargs) {
-	    AV* av = (AV*)PL_curpad[0];
+	    AV* av = (AV*)PAD_SVl(0);
 
 	    items = AvFILLp(av) + 1;
 	    if (items) {
@@ -2866,8 +2839,7 @@ try_autoload:
 	    }
 	}
 #endif /* USE_5005THREADS */		
-	SAVEVPTR(PL_curpad);
-    	PL_curpad = AvARRAY((AV*)svp[CvDEPTH(cv)]);
+	PAD_SET_CUR(padlist, CvDEPTH(cv));
 #ifndef USE_5005THREADS
 	if (hasargs)
 #endif /* USE_5005THREADS */
@@ -2879,7 +2851,7 @@ try_autoload:
 	    DEBUG_S(PerlIO_printf(Perl_debug_log,
 	    			  "%p entersub preparing @_\n", thr));
 #endif
-	    av = (AV*)PL_curpad[0];
+	    av = (AV*)PAD_SVl(0);
 	    if (AvREAL(av)) {
 		/* @_ is normally not REAL--this should only ever
 		 * happen when DB::sub() calls things that modify @_ */
@@ -2891,7 +2863,7 @@ try_autoload:
 	    cx->blk_sub.savearray = GvAV(PL_defgv);
 	    GvAV(PL_defgv) = (AV*)SvREFCNT_inc(av);
 #endif /* USE_5005THREADS */
-	    cx->blk_sub.oldcurpad = PL_curpad;
+	    CX_CURPAD_SAVE(cx->blk_sub);
 	    cx->blk_sub.argarray = av;
 	    ++MARK;
 
@@ -2940,8 +2912,8 @@ Perl_sub_crush_depth(pTHX_ CV *cv)
     else {
 	SV* tmpstr = sv_newmortal();
 	gv_efullname3(tmpstr, CvGV(cv), Nullch);
-	Perl_warner(aTHX_ packWARN(WARN_RECURSION), "Deep recursion on subroutine \"%s\"",
-		SvPVX(tmpstr));
+	Perl_warner(aTHX_ packWARN(WARN_RECURSION), "Deep recursion on subroutine \"%"SVf"\"",
+		tmpstr);
     }
 }
 
@@ -2957,7 +2929,7 @@ PP(pp_aelem)
     SV *sv;
 
     if (SvROK(elemsv) && !SvGAMAGIC(elemsv) && ckWARN(WARN_MISC))
-	Perl_warner(aTHX_ packWARN(WARN_MISC), "Use of reference \"%s\" as array index", SvPV_nolen(elemsv));
+	Perl_warner(aTHX_ packWARN(WARN_MISC), "Use of reference \"%"SVf"\" as array index", elemsv);
     if (elem > 0)
 	elem -= PL_curcop->cop_arybase;
     if (SvTYPE(av) != SVt_PVAV)
@@ -3041,7 +3013,7 @@ PP(pp_method)
 PP(pp_method_named)
 {
     dSP;
-    SV* sv = cSVOP->op_sv;
+    SV* sv = cSVOP_sv;
     U32 hash = SvUVX(sv);
 
     XPUSHs(method_common(sv, &hash));

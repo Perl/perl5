@@ -413,7 +413,7 @@ struct interp_intern {
 				       lpw, wlen, (LPSTR)lpa, nChars,NULL,NULL))
 #define W2AHELPER(lpw, lpa, nChars)	W2AHELPER_LEN(lpw, -1, lpa, nChars)
 
-#define USING_WIDE() (PL_widesyscalls && PerlEnv_os_id() == VER_PLATFORM_WIN32_NT)
+#define USING_WIDE() (0)
 
 #ifdef USE_ITHREADS
 #  define PERL_WAIT_FOR_CHILDREN \

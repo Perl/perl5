@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..174\n";
+print "1..175\n";
 
 #P = start of string  Q = start of substr  R = end of substr  S = end of string
 
@@ -585,3 +585,10 @@ ok 173, $x eq "\xFFb\x{100}\x{200}";
 substr($x = "\x{100}\x{200}", 2, 0, "\xFFb");
 ok 174, $x eq "\x{100}\x{200}\xFFb";
 
+# [perl #20933]
+{ 
+    my $s = "ab";
+    my @r; 
+    $r[$_] = \ substr $s, $_, 1 for (0, 1);
+    ok 175, join("", map { $$_ } @r) eq "ab";
+}

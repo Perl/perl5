@@ -52,13 +52,20 @@ archname='darwin';
 # nm works.
 usenm='true';
 
-# Optimize.
+#    Optimizing for size also mean less resident memory usage on the part
+# of Perl.  Apple asserts that this is a more important optimization than
+# saving on CPU cycles.  Given that memory speed has not increased at
+# pace with CPU speed over time (on any platform), this is probably a
+# reasonable assertion.
 if [ -z "${optimize}" ]; then
-  case "$osvers" in
-    [12345].*) optimize='-O3' ;;
-    *) optimize='-Os' ;;
+  case "`${cc:-gcc} -v 2>&1`" in
+    *"gcc version 3."*) optimize='-Os' ;;
+    *) optimize='-O3' ;;
   esac
+else
+  optimize='-O3'
 fi
+
 
 # -pipe: makes compilation go faster.
 # -fno-common because common symbols are not allowed in MH_DYLIB
@@ -147,7 +154,10 @@ firstmakefile=GNUmakefile;
 #
 case "$usethreads$useithreads$use5005threads" in
   *define*)
-    cat <<EOM >&4
+  case "$osvers" in
+    [12345].*)     cat <<EOM >&4
+
+
 
 *** Warning, there might be problems with your libraries with
 *** regards to threading.  The test ext/threads/t/libc.t is likely
@@ -155,4 +165,7 @@ case "$usethreads$useithreads$use5005threads" in
 
 EOM
     ;;
+    *) usereentrant='define';;
+  esac
+
 esac

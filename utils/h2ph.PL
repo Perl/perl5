@@ -42,6 +42,11 @@ use Config;
 use File::Path qw(mkpath);
 use Getopt::Std;
 
+# Make sure read permissions for all are set:
+if (defined umask && (umask() & 0444)) {
+    umask (umask() & ~0444);
+}
+
 getopts('Dd:rlhaQe');
 use vars qw($opt_D $opt_d $opt_r $opt_l $opt_h $opt_a $opt_Q $opt_e);
 die "-r and -a options are mutually exclusive\n" if ($opt_r and $opt_a);

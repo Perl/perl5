@@ -1,11 +1,11 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 package CPAN;
-$VERSION = '1.61';
-# $Id: CPAN.pm,v 1.390 2002/05/07 10:04:58 k Exp $
+$VERSION = '1.64';
+# $Id: CPAN.pm,v 1.397 2003/02/06 09:44:40 k Exp $
 
 # only used during development:
 $Revision = "";
-# $Revision = "[".substr(q$Revision: 1.390 $, 10)."]";
+# $Revision = "[".substr(q$Revision: 1.397 $, 10)."]";
 
 use Carp ();
 use Config ();
@@ -112,6 +112,20 @@ sub shell {
 	    $readline::rl_completion_function =
 		$readline::rl_completion_function = 'CPAN::Complete::cpl';
 	}
+        if (my $histfile = $CPAN::Config->{'histfile'}) {{
+            unless ($term->can("AddHistory")) {
+                $CPAN::Frontend->mywarn("Terminal does not support AddHistory.\n");
+                last;
+            }
+            my($fh) = FileHandle->new;
+            open $fh, "<$histfile" or last;
+            local $/ = "\n";
+            while (<$fh>) {
+                chomp;
+                $term->AddHistory($_);
+            }
+            close $fh;
+        }}
 	# $term->OUT is autoflushed anyway
 	my $odef = select STDERR;
 	$| = 1;
@@ -765,25 +779,41 @@ sub cleanup {
   my($message) = @_;
   my $i = 0;
   my $ineval = 0;
-  if (
-      0 &&           # disabled, try reload cpan with it
-      $] > 5.004_60  # thereabouts
-     ) {
-    $ineval = $^S;
-  } else {
-    my($subroutine);
-    while ((undef,undef,undef,$subroutine) = caller(++$i)) {
+  my($subroutine);
+  while ((undef,undef,undef,$subroutine) = caller(++$i)) {
       $ineval = 1, last if
 	  $subroutine eq '(eval)';
-    }
   }
   return if $ineval && !$End;
-  return unless defined $META->{LOCK}; # unsafe meta access, ok
-  return unless -f $META->{LOCK}; # unsafe meta access, ok
-  unlink $META->{LOCK}; # unsafe meta access, ok
+  return unless defined $META->{LOCK};
+  return unless -f $META->{LOCK};
+  $META->savehist;
+  unlink $META->{LOCK};
   # require Carp;
   # Carp::cluck("DEBUGGING");
   $CPAN::Frontend->mywarn("Lockfile removed.\n");
+}
+
+#-> sub CPAN::savehist
+sub savehist {
+    my($self) = @_;
+    my($histfile,$histsize);
+    unless ($histfile = $CPAN::Config->{'histfile'}){
+        $CPAN::Frontend->mywarn("No history written (no histfile specified).\n");
+        return;
+    }
+    $histsize = $CPAN::Config->{'histsize'} || 100;
+    unless ($CPAN::term->can("GetHistory")) {
+        $CPAN::Frontend->mywarn("Terminal does not support GetHistory.\n");
+        return;
+    }
+    my @h = $CPAN::term->GetHistory;
+    splice @h, 0, @h-$histsize if @h>$histsize;
+    my($fh) = FileHandle->new;
+    open $fh, ">$histfile" or mydie("Couldn't open >$histfile: $!");
+    local $\ = local $, = "\n";
+    print $fh @h;
+    close $fh;
 }
 
 sub is_tested {
@@ -1340,7 +1370,7 @@ sub ls      {
     my @accept;
     for (@arg) {
         unless (/^[A-Z\-]+$/i) {
-            $CPAN::Frontend->mywarn("ls command rejects argument $_: not an author");
+            $CPAN::Frontend->mywarn("ls command rejects argument $_: not an author\n");
             next;
         }
         push @accept, uc $_;
@@ -1510,7 +1540,7 @@ Known options:
 sub paintdots_onreload {
     my($ref) = shift;
     sub {
-	if ( $_[0] =~ /[Ss]ubroutine (\w+) redefined/ ) {
+	if ( $_[0] =~ /[Ss]ubroutine ([\w:]+) redefined/ ) {
 	    my($subr) = $1;
 	    ++$$ref;
 	    local($|) = 1;
@@ -1528,14 +1558,17 @@ sub reload {
     $command ||= "";
     $self->debug("self[$self]command[$command]arg[@arg]") if $CPAN::DEBUG;
     if ($command =~ /cpan/i) {
-	CPAN->debug("reloading the whole CPAN.pm") if $CPAN::DEBUG;
-	my $fh = FileHandle->new($INC{'CPAN.pm'});
-	local($/);
-	my $redef = 0;
-	local($SIG{__WARN__}) = paintdots_onreload(\$redef);
-	eval <$fh>;
-	warn $@ if $@;
-	$CPAN::Frontend->myprint("\n$redef subroutines redefined\n");
+        for my $f (qw(CPAN.pm CPAN/FirstTime.pm)) {
+            next unless $INC{$f};
+            CPAN->debug("reloading the whole $f") if $CPAN::DEBUG;
+            my $fh = FileHandle->new($INC{$f});
+            local($/);
+            my $redef = 0;
+            local($SIG{__WARN__}) = paintdots_onreload(\$redef);
+            eval <$fh>;
+            warn $@ if $@;
+            $CPAN::Frontend->myprint("\n$redef subroutines redefined\n");
+        }
     } elsif ($command =~ /index/) {
       CPAN::Index->force_reload;
     } else {
@@ -1929,6 +1962,8 @@ sub print_ornamented {
 	    print color($ornament), sprintf($sprintf,$line), color("reset"), $nl;
 	}
     } else {
+        # chomp $what;
+        # $what .= "\n"; # newlines unless $PRINT_ORNAMENTING
 	print $what;
     }
 }
@@ -2020,8 +2055,8 @@ sub rematein {
             push @qcopy, $obj;
 	} elsif ($CPAN::META->exists('CPAN::Author',$s)) {
 	    $obj = $CPAN::META->instance('CPAN::Author',$s);
-            if ($meth eq "dump") {
-                $obj->dump;
+            if ($meth =~ /^(dump|ls)$/) {
+                $obj->$meth();
             } else {
                 $CPAN::Frontend->myprint(
                                          join "",
@@ -2273,7 +2308,7 @@ sub localize {
             CPAN::LWP::UserAgent->config;
 	    eval {$Ua = CPAN::LWP::UserAgent->new;}; # Why is has_usable still not fit enough?
             if ($@) {
-                $CPAN::Frontend->mywarn("CPAN::LWP::UserAgent->new dies with $@")
+                $CPAN::Frontend->mywarn("CPAN::LWP::UserAgent->new dies with $@\n")
                     if $CPAN::DEBUG;
             } else {
                 my($var);
@@ -2424,7 +2459,7 @@ sub hosteasy {
               CPAN::LWP::UserAgent->config;
               eval { $Ua = CPAN::LWP::UserAgent->new; };
               if ($@) {
-                  $CPAN::Frontend->mywarn("CPAN::LWP::UserAgent->new dies with $@");
+                  $CPAN::Frontend->mywarn("CPAN::LWP::UserAgent->new dies with $@\n");
               }
 	  }
 	  my $res = $Ua->mirror($url, $aslocal);
@@ -2655,7 +2690,7 @@ sub hosthardest {
 	     @dialog,
 	     "lcd $aslocal_dir",
 	     "cd /",
-	     map("cd $_", split "/", $dir), # RFC 1738
+	     map("cd $_", split /\//, $dir), # RFC 1738
 	     "bin",
 	     "get $getfile $targetfile",
 	     "quit"
@@ -3351,7 +3386,7 @@ sub write_metadata_cache {
     $cache->{PROTOCOL} = PROTOCOL;
     $CPAN::Frontend->myprint("Going to write $metadata_file\n");
     eval { Storable::nstore($cache, $metadata_file) };
-    $CPAN::Frontend->mywarn($@) if $@;
+    $CPAN::Frontend->mywarn($@) if $@; # ?? missing "\n" after $@ in mywarn ??
 }
 
 #-> sub CPAN::Index::read_metadata_cache ;
@@ -3364,7 +3399,7 @@ sub read_metadata_cache {
     $CPAN::Frontend->myprint("Going to read $metadata_file\n");
     my $cache;
     eval { $cache = Storable::retrieve($metadata_file) };
-    $CPAN::Frontend->mywarn($@) if $@;
+    $CPAN::Frontend->mywarn($@) if $@; # ?? missing "\n" after $@ in mywarn ??
     if (!$cache || ref $cache ne 'HASH'){
         $LAST_TIME = 0;
         return;
@@ -3372,7 +3407,7 @@ sub read_metadata_cache {
     if (exists $cache->{PROTOCOL}) {
         if (PROTOCOL > $cache->{PROTOCOL}) {
             $CPAN::Frontend->mywarn(sprintf("Ignoring Metadata cache written ".
-                                            "with protocol v%s, requiring v%s",
+                                            "with protocol v%s, requiring v%s\n",
                                             $cache->{PROTOCOL},
                                             PROTOCOL)
                                    );
@@ -3380,7 +3415,7 @@ sub read_metadata_cache {
         }
     } else {
         $CPAN::Frontend->mywarn("Ignoring Metadata cache written ".
-                                "with protocol v1.0");
+                                "with protocol v1.0\n");
         return;
     }
     my $clcnt = 0;
@@ -3676,7 +3711,7 @@ sub normalize {
        ) {
         return $s if $s =~ m:^N/A|^Contact Author: ;
         $s =~ s|^(.)(.)([^/]*/)(.+)$|$1/$1$2/$1$2$3$4| or
-            $CPAN::Frontend->mywarn("Strange distribution name [$s]");
+            $CPAN::Frontend->mywarn("Strange distribution name [$s]\n");
         CPAN->debug("s[$s]") if $CPAN::DEBUG;
     }
     $s;
@@ -3789,7 +3824,7 @@ sub get {
 			    $CPAN::Config->{keep_source_where},
 			    "authors",
 			    "id",
-			    split("/",$self->id)
+			    split(/\//,$self->id)
 			   );
 
     $self->debug("Doing localize") if $CPAN::DEBUG;
@@ -4059,7 +4094,7 @@ sub cvs_import {
 
     my $userid = $self->cpan_userid;
 
-    my $cvs_dir = (split '/', $dir)[-1];
+    my $cvs_dir = (split /\//, $dir)[-1];
     $cvs_dir =~ s/-\d+[^-]+(?!\n)\Z//;
     my $cvs_root = 
       $CPAN::Config->{cvsroot} || $ENV{CVSROOT};
@@ -4096,7 +4131,7 @@ sub readme {
 			     $CPAN::Config->{keep_source_where},
 			     "authors",
 			     "id",
-			     split("/","$sans.readme"),
+			     split(/\//,"$sans.readme"),
 			    );
     $self->debug("Doing localize") if $CPAN::DEBUG;
     $local_file = CPAN::FTP->localize("authors/id/$sans.readme",
@@ -4134,7 +4169,7 @@ sub verifyMD5 {
 	$CPAN::Frontend->myprint(join "", map {"  $_\n"} @e) and return if @e;
     }
     my($lc_want,$lc_file,@local,$basename);
-    @local = split("/",$self->id);
+    @local = split(/\//,$self->id);
     pop @local;
     push @local, "CHECKSUMS";
     $lc_want =
@@ -5894,7 +5929,7 @@ sub readable {
 
     # And if they say v1.2, then the old perl takes it as "v12"
 
-    $CPAN::Frontend->mywarn("Suspicious version string seen [$n]");
+    $CPAN::Frontend->mywarn("Suspicious version string seen [$n]\n");
     return $n;
   }
   my $better = sprintf "v%vd", $n;
@@ -5923,6 +5958,16 @@ Batch mode:
   use CPAN;
 
   autobundle, clean, install, make, recompile, test
+
+=head1 STATUS
+
+This module will eventually be replaced by CPANPLUS. CPANPLUS is kind
+of a modern rewrite from ground up with greater extensibility and more
+features but no full compatibility. If you're new to CPAN.pm, you
+probably should investigate if CPANPLUS is the better choice for you.
+If you're already used to CPAN.pm you're welcome to continue using it,
+if you accept that its development is mostly (though not completely)
+stalled.
 
 =head1 DESCRIPTION
 
@@ -6666,6 +6711,8 @@ defined:
   dontload_hash      anonymous hash: modules in the keys will not be
                      loaded by the CPAN::has_inst() routine
   gzip		     location of external program gzip
+  histfile           file to maintain history between sessions
+  histsize           maximum number of lines to keep in histfile
   inactivity_timeout breaks interactive Makefile.PLs after this
                      many seconds inactivity. Set to 0 to never break.
   inhibit_startup_message
@@ -6857,6 +6904,16 @@ the firewall as if it is not there.
 This is the firewall implemented in the Linux kernel, it allows you to
 hide a complete network behind one IP address. With this firewall no
 special compiling is needed as you can access hosts directly.
+
+For accessing ftp servers behind such firewalls you may need to set
+the environment variable C<FTP_PASSIVE> to a true value, e.g.
+
+    env FTP_PASSIVE=1 perl -MCPAN -eshell
+
+or
+
+    perl -MCPAN -e '$ENV{FTP_PASSIVE} = 1; shell'
+
 
 =back
 

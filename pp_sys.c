@@ -1,6 +1,6 @@
 /*    pp_sys.c
  *
- *    Copyright (c) 1991-2002, Larry Wall
+ *    Copyright (c) 1991-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -762,7 +762,6 @@ PP(pp_tie)
     char *methname;
     int how = PERL_MAGIC_tied;
     U32 items;
-    STRLEN n_a;
 
     varsv = *++MARK;
     switch(SvTYPE(varsv)) {
@@ -809,8 +808,8 @@ PP(pp_tie)
 	 */
 	stash = gv_stashsv(*MARK, FALSE);
 	if (!stash || !(gv = gv_fetchmethod(stash, methname))) {
-	    DIE(aTHX_ "Can't locate object method \"%s\" via package \"%s\"",
-		 methname, SvPV(*MARK,n_a));
+	    DIE(aTHX_ "Can't locate object method \"%s\" via package \"%"SVf"\"",
+		 methname, *MARK);
 	}
 	ENTER;
 	PUSHSTACKi(PERLSI_MAGIC);
@@ -1208,8 +1207,6 @@ S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
 {
     register PERL_CONTEXT *cx;
     I32 gimme = GIMME_V;
-    AV* padlist = CvPADLIST(cv);
-    SV** svp = AvARRAY(padlist);
 
     ENTER;
     SAVETMPS;
@@ -1217,8 +1214,7 @@ S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
     push_return(retop);
     PUSHBLOCK(cx, CXt_FORMAT, PL_stack_sp);
     PUSHFORMAT(cx);
-    SAVEVPTR(PL_curpad);
-    PL_curpad = AvARRAY((AV*)svp[1]);
+    PAD_SET_CUR(CvPADLIST(cv), 1);
 
     setdefout(gv);	    /* locally select filehandle so $% et al work */
     return CvSTART(cv);
@@ -1367,21 +1363,8 @@ PP(pp_leavewrite)
     fp = IoOFP(io);
     if (!fp) {
 	if (ckWARN2(WARN_CLOSED,WARN_IO)) {
-	    if (IoIFP(io)) {
-		/* integrate with report_evil_fh()? */
-	        char *name = NULL;
-		if (isGV(gv)) {
-		    SV* sv = sv_newmortal();
-		    gv_efullname4(sv, gv, Nullch, FALSE);
-		    name = SvPV_nolen(sv);
-		}
-		if (name && *name)
-		    Perl_warner(aTHX_ packWARN(WARN_IO),
-				"Filehandle %s opened only for input", name);
-		else
-		    Perl_warner(aTHX_ packWARN(WARN_IO),
-				"Filehandle opened only for input");
-	    }
+	    if (IoIFP(io))
+		report_evil_fh(gv, io, OP_phoney_INPUT_ONLY);
 	    else if (ckWARN(WARN_CLOSED))
 		report_evil_fh(gv, io, PL_op->op_type);
 	}
@@ -1454,20 +1437,8 @@ PP(pp_prtf)
     }
     else if (!(fp = IoOFP(io))) {
 	if (ckWARN2(WARN_CLOSED,WARN_IO))  {
-	    /* integrate with report_evil_fh()? */
-	    if (IoIFP(io)) {
-	        char *name = NULL;
-		if (isGV(gv)) {
-		    gv_efullname4(sv, gv, Nullch, FALSE);
-		    name = SvPV_nolen(sv);
-		}
-		if (name && *name)
-		    Perl_warner(aTHX_ packWARN(WARN_IO),
-				"Filehandle %s opened only for input", name);
-		else
-		    Perl_warner(aTHX_ packWARN(WARN_IO),
-				"Filehandle opened only for input");
-	    }
+	    if (IoIFP(io))
+		report_evil_fh(gv, io, OP_phoney_INPUT_ONLY);
 	    else if (ckWARN(WARN_CLOSED))
 		report_evil_fh(gv, io, PL_op->op_type);
 	}
@@ -1694,21 +1665,7 @@ PP(pp_sysread)
     }
     if (count < 0) {
 	if ((IoTYPE(io) == IoTYPE_WRONLY) && ckWARN(WARN_IO))
-	{
-	    /* integrate with report_evil_fh()? */
-	    char *name = NULL;
-	    if (isGV(gv)) {
-		SV* sv = sv_newmortal();
-		gv_efullname4(sv, gv, Nullch, FALSE);
-		name = SvPV_nolen(sv);
-	    }
-	    if (name && *name)
-		Perl_warner(aTHX_ packWARN(WARN_IO),
-			    "Filehandle %s opened only for output", name);
-	    else
-		Perl_warner(aTHX_ packWARN(WARN_IO),
-			    "Filehandle opened only for output");
-	}
+		report_evil_fh(gv, io, OP_phoney_OUTPUT_ONLY);
 	goto say_undef;
     }
     SvCUR_set(bufsv, count+(buffer - SvPVX(bufsv)));
@@ -2074,22 +2031,31 @@ PP(pp_truncate)
         STRLEN n_a;
 	int result = 1;
 	GV *tmpgv;
-	
+	IO *io;
+
 	if (PL_op->op_flags & OPf_SPECIAL) {
 	    tmpgv = gv_fetchpv(POPpx, FALSE, SVt_PVIO);
 
-	do_ftruncate:
-	    TAINT_PROPER("truncate");
-	    if (!GvIO(tmpgv) || !IoIFP(GvIOp(tmpgv)))
-	        result = 0;
+	do_ftruncate_gv:
+	    if (!GvIO(tmpgv))
+		result = 0;
 	    else {
-	        PerlIO_flush(IoIFP(GvIOp(tmpgv)));
-#ifdef HAS_TRUNCATE
-		if (ftruncate(PerlIO_fileno(IoIFP(GvIOn(tmpgv))), len) < 0)
-#else
-		if (my_chsize(PerlIO_fileno(IoIFP(GvIOn(tmpgv))), len) < 0)
-#endif
+		PerlIO *fp;
+		io = GvIOp(tmpgv);
+	    do_ftruncate_io:
+		TAINT_PROPER("truncate");
+		if (!(fp = IoIFP(io))) {
 		    result = 0;
+		}
+		else {
+		    PerlIO_flush(fp);
+#ifdef HAS_TRUNCATE
+		    if (ftruncate(PerlIO_fileno(fp), len) < 0)
+#else
+		    if (my_chsize(PerlIO_fileno(fp), len) < 0)
+#endif
+			result = 0;
+		}
 	    }
 	}
 	else {
@@ -2098,11 +2064,15 @@ PP(pp_truncate)
 	
 	    if (SvTYPE(sv) == SVt_PVGV) {
 	        tmpgv = (GV*)sv;		/* *main::FRED for example */
-		goto do_ftruncate;
+		goto do_ftruncate_gv;
 	    }
 	    else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVGV) {
 	        tmpgv = (GV*) SvRV(sv);	/* \*main::FRED for example */
-		goto do_ftruncate;
+		goto do_ftruncate_gv;
+	    }
+	    else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVIO) {
+		io = (IO*) SvRV(sv); /* *main::FRED{IO} for example */
+		goto do_ftruncate_io;
 	    }
 
 	    name = SvPV(sv, n_a);
@@ -2498,7 +2468,6 @@ PP(pp_accept)
     struct sockaddr saddr;	/* use a struct to avoid alignment problems */
     Sock_size_t len = sizeof saddr;
     int fd;
-    int fd2;
 
     ggv = (GV*)POPs;
     ngv = (GV*)POPs;
@@ -2519,11 +2488,7 @@ PP(pp_accept)
     if (IoIFP(nstio))
 	do_close(ngv, FALSE);
     IoIFP(nstio) = PerlIO_fdopen(fd, "r"PIPESOCK_MODE);
-    /* FIXME: we dup(fd) here so that refcounting of fd's does not inhibit
-       fclose of IoOFP's FILE * - and hence leak memory.
-       Special treatment of _this_ case of IoIFP != IoOFP seems wrong.
-     */
-    IoOFP(nstio) = PerlIO_fdopen(fd2 = PerlLIO_dup(fd), "w"PIPESOCK_MODE);
+    IoOFP(nstio) = PerlIO_fdopen(fd, "w"PIPESOCK_MODE);
     IoTYPE(nstio) = IoTYPE_SOCKET;
     if (!IoIFP(nstio) || !IoOFP(nstio)) {
 	if (IoIFP(nstio)) PerlIO_close(IoIFP(nstio));
@@ -2533,7 +2498,6 @@ PP(pp_accept)
     }
 #if defined(HAS_FCNTL) && defined(F_SETFD)
     fcntl(fd, F_SETFD, fd > PL_maxsysfd);	/* ensure close-on-exec */
-    fcntl(fd2, F_SETFD, fd2 > PL_maxsysfd);	/* ensure close-on-exec */
 #endif
 
 #ifdef EPOC
@@ -2841,7 +2805,7 @@ PP(pp_stat)
 	PUSHs(sv_2mortal(newSVpvn("", 0)));
 #endif
 #if Off_t_size > IVSIZE
-	PUSHs(sv_2mortal(newSVnv(PL_statcache.st_size)));
+	PUSHs(sv_2mortal(newSVnv((NV)PL_statcache.st_size)));
 #else
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_size)));
 #endif
@@ -3999,13 +3963,14 @@ PP(pp_wait)
     Pid_t childpid;
     int argflags;
 
-#ifdef PERL_OLD_SIGNALS
-    childpid = wait4pid(-1, &argflags, 0);
-#else
-    while ((childpid = wait4pid(-1, &argflags, 0)) == -1 && errno == EINTR) {
-	PERL_ASYNC_CHECK();
+    if (PL_signals & PERL_SIGNALS_UNSAFE_FLAG)
+        childpid = wait4pid(-1, &argflags, 0);
+    else {
+        while ((childpid = wait4pid(-1, &argflags, 0)) == -1 &&
+	       errno == EINTR) {
+	  PERL_ASYNC_CHECK();
+	}
     }
-#endif
 #  if defined(USE_ITHREADS) && defined(PERL_IMPLICIT_SYS)
     /* 0 and -1 are both error returns (the former applies to WNOHANG case) */
     STATUS_NATIVE_SET((childpid && childpid != -1) ? argflags : -1);
@@ -4029,13 +3994,14 @@ PP(pp_waitpid)
 
     optype = POPi;
     childpid = TOPi;
-#ifdef PERL_OLD_SIGNALS
-    childpid = wait4pid(childpid, &argflags, optype);
-#else
-    while ((childpid = wait4pid(childpid, &argflags, optype)) == -1 && errno == EINTR) {
-	PERL_ASYNC_CHECK();
+    if (PL_signals & PERL_SIGNALS_UNSAFE_FLAG)
+        childpid = wait4pid(childpid, &argflags, optype);
+    else {
+        while ((childpid = wait4pid(childpid, &argflags, optype)) == -1 &&
+	       errno == EINTR) {
+	  PERL_ASYNC_CHECK();
+	}
     }
-#endif
 #  if defined(USE_ITHREADS) && defined(PERL_IMPLICIT_SYS)
     /* 0 and -1 are both error returns (the former applies to WNOHANG case) */
     STATUS_NATIVE_SET((childpid && childpid != -1) ? argflags : -1);
@@ -4954,6 +4920,9 @@ PP(pp_gservent)
 #ifdef HAS_GETSERVBYPORT
 	char *proto = POPpbytex;
 	unsigned short port = (unsigned short)POPu;
+
+	if (proto && !*proto)
+	    proto = Nullch;
 
 #ifdef HAS_HTONS
 	port = PerlSock_htons(port);

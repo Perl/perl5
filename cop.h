@@ -1,10 +1,15 @@
 /*    cop.h
  *
- *    Copyright (c) 1991-2002, Larry Wall
+ *    Copyright (c) 1991-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
  *
+ * Control ops (cops) are one of the three ops OP_NEXTSTATE, OP_DBSTATE,
+ * and OP_SETSTATE that (loosely speaking) are separate statements.
+ * They hold information important for lexical state and error reporting.
+ * At run time, PL_curcop is set to point to the most recently executed cop,
+ * and thus can be used to determine our current state.
  */
 
 struct cop {
@@ -114,15 +119,25 @@ struct block_sub {
     long	olddepth;
     U8		hasargs;
     U8		lval;		/* XXX merge lval and hasargs? */
-    SV **	oldcurpad;
+    PAD		*oldcomppad;
 };
 
-#define PUSHSUB(cx)							\
+/* base for the next two macros. Don't use directly */
+#define PUSHSUB_BASE(cx)						\
 	cx->blk_sub.cv = cv;						\
 	cx->blk_sub.olddepth = CvDEPTH(cv);				\
-	cx->blk_sub.hasargs = hasargs;					\
+	cx->blk_sub.hasargs = hasargs;
+
+#define PUSHSUB(cx)							\
+	PUSHSUB_BASE(cx)						\
 	cx->blk_sub.lval = PL_op->op_private &                          \
 	                      (OPpLVAL_INTRO|OPpENTERSUB_INARGS);
+
+/* variant for use by OP_DBSTATE, where op_private holds hint bits */
+#define PUSHSUB_DB(cx)							\
+	PUSHSUB_BASE(cx)						\
+	cx->blk_sub.lval = 0;
+
 
 #define PUSHFORMAT(cx)							\
 	cx->blk_sub.cv = cv;						\
@@ -161,7 +176,7 @@ struct block_sub {
 		cx->blk_sub.argarray = newAV();				\
 		av_extend(cx->blk_sub.argarray, fill);			\
 		AvFLAGS(cx->blk_sub.argarray) = AVf_REIFY;		\
-		cx->blk_sub.oldcurpad[0] = (SV*)cx->blk_sub.argarray;	\
+		CX_CURPAD_SV(cx->blk_sub, 0) = (SV*)cx->blk_sub.argarray;	\
 	    }								\
 	    else {							\
 		CLEAR_ARGARRAY(cx->blk_sub.argarray);			\
@@ -220,7 +235,7 @@ struct block_loop {
     OP *	last_op;
 #ifdef USE_ITHREADS
     void *	iterdata;
-    SV **	oldcurpad;
+    PAD		*oldcomppad;
 #else
     SV **	itervar;
 #endif
@@ -235,11 +250,12 @@ struct block_loop {
 #  define CxITERVAR(c)							\
 	((c)->blk_loop.iterdata						\
 	 ? (CxPADLOOP(cx) 						\
-	    ? &((c)->blk_loop.oldcurpad)[INT2PTR(PADOFFSET, (c)->blk_loop.iterdata)] \
+	    ? &CX_CURPAD_SV( (c)->blk_loop, 				\
+		    INT2PTR(PADOFFSET, (c)->blk_loop.iterdata))		\
 	    : &GvSV((GV*)(c)->blk_loop.iterdata))			\
 	 : (SV**)NULL)
 #  define CX_ITERDATA_SET(cx,idata)					\
-	cx->blk_loop.oldcurpad = PL_curpad;				\
+	CX_CURPAD_SAVE(cx->blk_loop);					\
 	if ((cx->blk_loop.iterdata = (idata)))				\
 	    cx->blk_loop.itersave = SvREFCNT_inc(*CxITERVAR(cx));	\
 	else								\

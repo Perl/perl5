@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Nov 28 06:52:33 EET 2002 [metaconfig 3.0 PL70]
+# Generated on Fri Mar  7 23:32:54 EET 2003 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -46,6 +46,18 @@ true || exec sh $0 $argv:q
 (exit $?0) || cat c2$$
 (exit $?0) || exec sh $0 $argv:q
 rm -f c1$$ c2$$
+
+if test -f /dev/cputype -a -f /dev/drivers -a -f /dev/osversion; then
+	cat >&4 <<EOF
+***
+*** I'm sorry but this system looks like Plan 9 and Plan 9 doesn't do
+*** Configure that well.  (Plan 9 is close to UNIX but not close enough.)
+*** Please read the README.plan9 for further instructions.
+*** Cannot continue, aborting.
+***
+EOF
+	exit 1
+fi
 
 : compute my invocation name
 me=$0
@@ -164,7 +176,6 @@ esac
 : Configure runs within the UU subdirectory
 test -d UU || mkdir UU
 cd UU && rm -f ./*
-
 
 ccname=''
 ccversion=''
@@ -1251,7 +1262,7 @@ usereentrant='undef'
 libswanted='sfio socket bind inet nsl nm ndbm gdbm dbm db malloc dl'
 libswanted="$libswanted dld ld sun m c cposix posix"
 libswanted="$libswanted ndir dir crypt sec"
-libswanted="$libswanted ucb bsd BSD PW x util"
+libswanted="$libswanted ucb bsd BSD PW x util rt posix4"
 : We probably want to search /usr/shlib before most other libraries.
 : This is only used by the lib/ExtUtils/MakeMaker.pm routine extliblist.
 glibpth=`echo " $glibpth " | sed -e 's! /usr/shlib ! !'`
@@ -3164,7 +3175,7 @@ EOM
 		osf1|mls+)	case "$5" in
 				alpha)
 					osname=dec_osf
-					osvers=`sizer -v | awk '{print $3}' |  tr '[A-Z]' '[a-z]' | sed 's/^[xvt]//'`
+					osvers=`sizer -v | awk -FUNIX '{print $2}' | awk '{print $1}' |  tr '[A-Z]' '[a-z]' | sed 's/^[xvt]//'`
 					case "$osvers" in
 					[1-9].[0-9]*) ;;
 					*) osvers=`echo "$3" | sed 's/^[xvt]//'` ;;
@@ -6445,9 +6456,9 @@ else
 $cat <<EOM
 
 In some special cases, particularly when building $package for distribution,
-it is convenient to distinguish between the directory in which files should 
-be installed from the directory ($prefix) in which they 
-will eventually reside.  For most users, these two directories are the same.
+it is convenient to distinguish the directory in which files should be
+installed from the directory ($prefix) in which they will
+eventually reside.  For most users, these two directories are the same.
 
 EOM
 	case "$installprefix" in
@@ -6743,8 +6754,25 @@ set d_dosuid
 eval $setvar
 
 : see if this is a malloc.h system
-set malloc.h i_malloc
-eval $inhdr
+: we want a real compile instead of Inhdr because some systems have a
+: malloc.h that just gives a compile error saying to use stdlib.h instead
+echo " "
+$cat >try.c <<EOCP
+#include <stdlib.h>
+#include <malloc.h>
+int main () { return 0; }
+EOCP
+set try
+if eval $compile; then
+    echo "<malloc.h> found." >&4
+    val="$define"
+else
+    echo "<malloc.h> NOT found." >&4
+    val="$undef"
+fi
+$rm -f try.c try
+set i_malloc
+eval $setvar
 
 : see if stdlib is available
 set stdlib.h i_stdlib
@@ -7958,7 +7986,7 @@ if "$useshrplib"; then
 	solaris)
 		xxx="-R $shrpdir"
 		;;
-	freebsd|netbsd)
+	freebsd|netbsd|openbsd)
 		xxx="-Wl,-R$shrpdir"
 		;;
 	bsdos|linux|irix*|dec_osf)
@@ -12271,6 +12299,10 @@ case "$d_gethostbyaddr_r" in
 	./protochk "extern $try" $hdrs && gethostbyaddr_r_proto=I_CII ;;
 	esac
 	case "$gethostbyaddr_r_proto" in
+	''|0) try='int gethostbyaddr_r(const void*, socklen_t, int, struct hostent*, char*, size_t, struct hostent**, int*);'
+	./protochk "extern $try" $hdrs && gethostbyaddr_r_proto=I_TsISBWRE ;;
+	esac
+	case "$gethostbyaddr_r_proto" in
 	''|0)	d_gethostbyaddr_r=undef
  	        gethostbyaddr_r_proto=0
 		echo "Disabling gethostbyaddr_r, cannot determine prototype." >&4 ;;
@@ -12530,6 +12562,10 @@ case "$d_getnetbyaddr_r" in
 	case "$getnetbyaddr_r_proto" in
 	''|0) try='int getnetbyaddr_r(int, int, struct netent*, struct netent_data*);'
 	./protochk "extern $try" $hdrs && getnetbyaddr_r_proto=I_IISD ;;
+	esac
+	case "$getnetbyaddr_r_proto" in
+	''|0) try='int getnetbyaddr_r(uint32_t, int, struct netent*, char*, size_t, struct netent**, int*);'
+	./protochk "extern $try" $hdrs && getnetbyaddr_r_proto=I_uISBWRE ;;
 	esac
 	case "$getnetbyaddr_r_proto" in
 	''|0)	d_getnetbyaddr_r=undef
@@ -14298,7 +14334,15 @@ case "$d_random_r" in
 	define)
 	case "$random_r_proto" in
 	''|0) try='int random_r(int*, struct random_data*);'
-	./protochk "extern $try" $hdrs && random_r_proto=I_TS ;;
+	./protochk "extern $try" $hdrs && random_r_proto=I_iS ;;
+	esac
+	case "$random_r_proto" in
+	''|0) try='int random_r(long*, struct random_data*);'
+	./protochk "extern $try" $hdrs && random_r_proto=I_lS ;;
+	esac
+	case "$random_r_proto" in
+	''|0) try='int random_r(struct random_data*, int32_t*);'
+	./protochk "extern $try" $hdrs && random_r_proto=I_St ;;
 	esac
 	case "$random_r_proto" in
 	''|0)	d_random_r=undef

@@ -1,13 +1,13 @@
 #
-# $Id: CJKConstants.pm,v 1.0 2002/03/28 23:26:28 dankogai Exp $
+# $Id: CJKConstants.pm,v 1.1 2003/02/06 01:52:11 dankogai Exp $
 #
 
 package Encode::CJKConstants;
 
 use strict;
 
-our $RCSID = q$Id: CJKConstants.pm,v 1.0 2002/03/28 23:26:28 dankogai Exp $;
-our $VERSION = do { my @r = (q$Revision: 1.0 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $RCSID = q$Id: CJKConstants.pm,v 1.1 2003/02/06 01:52:11 dankogai Exp $;
+our $VERSION = do { my @r = (q$Revision: 1.1 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Carp;
 
@@ -60,6 +60,6 @@ our %RE =
 
 =head1 NAME
 
-  Encode::CJKConstants.pm -- Internally used by Encode::??::ISO_2022_*
+Encode::CJKConstants.pm -- Internally used by Encode::??::ISO_2022_*
 
 =cut

@@ -38,6 +38,9 @@
  */
 #define HASATTRIBUTE 	/**/
 #ifndef HASATTRIBUTE
+#ifdef __attribute__
+#undef __attribute__
+#endif
 #define __attribute__(_arg_)
 #endif
 
@@ -2950,9 +2953,9 @@
 /* Off_t_size:
  *	This symbol holds the number of bytes used by the Off_t.
  */
-#define Off_t off_t		/* <offset> type */
-#define LSEEKSIZE 4		/* <offset> size */
-#define Off_t_size 4	/* <offset> size */
+#define Off_t long long		/* <offset> type */
+#define LSEEKSIZE 8		/* <offset> size */
+#define Off_t_size 8	/* <offset> size */
 
 /* Free_t:
  *	This variable contains the return type of free().  It is usually
@@ -3445,7 +3448,7 @@
  *	should be used when available.
  */
 #ifndef USE_LARGE_FILES
-/*#define	USE_LARGE_FILES		/**/
+#define	USE_LARGE_FILES		/**/
 #endif
 
 /* USE_LONG_DOUBLE:

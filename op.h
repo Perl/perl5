@@ -1,6 +1,6 @@
 /*    op.h
  *
- *    Copyright (c) 1991-2002, Larry Wall
+ *    Copyright (c) 1991-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -22,15 +22,6 @@
  *			the operation is privatized by a check routine,
  *			which may or may not check number of children).
  */
-
-#if PTRSIZE == 4
-typedef U32TYPE PADOFFSET;
-#else
-#   if PTRSIZE == 8
-typedef U64TYPE PADOFFSET;
-#   endif
-#endif
-#define NOT_IN_PAD ((PADOFFSET) -1)
 
 #ifdef DEBUGGING_OPS
 #define OPCODE opcode
@@ -106,6 +97,8 @@ Deprecated.  Use C<GIMME_V> instead.
 				/*  On regcomp, "use re 'eval'" was in scope */
 				/*  On OP_READLINE, was <$filehandle> */
 				/*  On RV2[SG]V, don't create GV--in defined()*/
+				/*  On OP_DBSTATE, indicates breakpoint
+				 *    (runtime property) */
 
 /* old names; don't use in new code, but don't break them, either */
 #define OPf_LIST	OPf_WANT_LIST
@@ -388,13 +381,13 @@ struct loop {
 
 
 #ifdef USE_ITHREADS
-#  define	cGVOPx_gv(o)	((GV*)PL_curpad[cPADOPx(o)->op_padix])
+#  define	cGVOPx_gv(o)	((GV*)PAD_SVl(cPADOPx(o)->op_padix))
 #  define	IS_PADGV(v)	(v && SvTYPE(v) == SVt_PVGV && GvIN_PAD(v))
 #  define	IS_PADCONST(v)	(v && SvREADONLY(v))
 #  define	cSVOPx_sv(v)	(cSVOPx(v)->op_sv \
-				 ? cSVOPx(v)->op_sv : PL_curpad[(v)->op_targ])
+				 ? cSVOPx(v)->op_sv : PAD_SVl((v)->op_targ))
 #  define	cSVOPx_svp(v)	(cSVOPx(v)->op_sv \
-				 ? &cSVOPx(v)->op_sv : &PL_curpad[(v)->op_targ])
+				 ? &cSVOPx(v)->op_sv : &PAD_SVl((v)->op_targ))
 #else
 #  define	cGVOPx_gv(o)	((GV*)cSVOPx(o)->op_sv)
 #  define	IS_PADGV(v)	FALSE

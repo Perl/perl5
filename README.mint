@@ -123,16 +123,16 @@ This will fix the problem.
 
 This version (5.00402) of perl has passed most of the tests on my system:
 
-Failed Test  Status Wstat Total Fail  Failed  List of failed
-------------------------------------------------------------------------------
-io/pipe.t                    10    2  20.00%  7, 9
-io/tell.t                    13    1   7.69%  12
-lib/complex.t               762   13   1.71%  84-85, 248-251, 257, 272-273,
-                                              371, 380, 419-420
-lib/io_pipe.t                10    1  10.00%  9
-lib/io_tell.t                13    1   7.69%  12
-op/magic.t                   30    2   6.67%  29-30
-Failed 6/152 test scripts, 96.05% okay. 20/4359 subtests failed, 99.54% okay.
+ Failed Test  Status Wstat Total Fail  Failed  List of failed
+ ------------------------------------------------------------------------------
+ io/pipe.t                    10    2  20.00%  7, 9
+ io/tell.t                    13    1   7.69%  12
+ lib/complex.t               762   13   1.71%  84-85, 248-251, 257, 272-273,
+                                               371, 380, 419-420
+ lib/io_pipe.t                10    1  10.00%  9
+ lib/io_tell.t                13    1   7.69%  12
+ op/magic.t                   30    2   6.67%  29-30
+ Failed 6/152 test scripts, 96.05% okay. 20/4359 subtests failed, 99.54% okay.
 
 Pipes always cause problems with MiNT, it's actually a surprise that
 most of the tests did work.  I've got no idea why the "tell" test failed,

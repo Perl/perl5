@@ -1,6 +1,6 @@
 /*    gv.c
  *
- *    Copyright (c) 1991-2002, Larry Wall
+ *    Copyright (c) 1991-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -261,8 +261,8 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 	    HV* basestash = gv_stashsv(sv, FALSE);
 	    if (!basestash) {
 		if (ckWARN(WARN_MISC))
-		    Perl_warner(aTHX_ packWARN(WARN_MISC), "Can't locate package %s for @%s::ISA",
-			SvPVX(sv), HvNAME(stash));
+		    Perl_warner(aTHX_ packWARN(WARN_MISC), "Can't locate package %"SVf" for @%s::ISA",
+			sv, HvNAME(stash));
 		continue;
 	    }
 	    gv = gv_fetchmeth(basestash, name, len,
@@ -991,9 +991,15 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
             goto ro_magicalize;
         else
             break;
+    case '\025':
+        if (len > 1 && strNE(name, "\025NICODE")) 
+	    break;
+	goto ro_magicalize;
+
     case '\027':	/* $^W & $^WARNING_BITS */
-	if (len > 1 && strNE(name, "\027ARNING_BITS")
-	    && strNE(name, "\027IDE_SYSTEM_CALLS"))
+	if (len > 1
+	    && strNE(name, "\027ARNING_BITS")
+	    )
 	    break;
 	goto magicalize;
 
@@ -1345,21 +1351,19 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 		/* GvSV contains the name of the method. */
 		GV *ngv = Nullgv;
 		
-		DEBUG_o( Perl_deb(aTHX_ "Resolving method `%.256s' for overloaded `%s' in package `%.256s'\n",
-			     SvPV_nolen(GvSV(gv)), cp, HvNAME(stash)) );
+		DEBUG_o( Perl_deb(aTHX_ "Resolving method `%.256"SVf"' for overloaded `%s' in package `%.256s'\n",
+			     GvSV(gv), cp, HvNAME(stash)) );
 		if (!SvPOK(GvSV(gv))
 		    || !(ngv = gv_fetchmethod_autoload(stash, SvPVX(GvSV(gv)),
 						       FALSE)))
 		{
 		    /* Can be an import stub (created by `can'). */
-		    if (GvCVGEN(gv)) {
-			Perl_croak(aTHX_ "Stub found while resolving method `%.256s' overloading `%s' in package `%.256s'",
-			      (SvPOK(GvSV(gv)) ?  SvPVX(GvSV(gv)) : "???" ),
-			      cp, HvNAME(stash));
-		    } else
-			Perl_croak(aTHX_ "Can't resolve method `%.256s' overloading `%s' in package `%.256s'",
-			      (SvPOK(GvSV(gv)) ?  SvPVX(GvSV(gv)) : "???" ),
-			      cp, HvNAME(stash));
+		    SV *gvsv = GvSV(gv);
+		    const char *name = SvPOK(gvsv) ?  SvPVX(gvsv) : "???";
+		    Perl_croak(aTHX_ "%s method `%.256s' overloading `%s' in package `%.256s'",
+			       (GvCVGEN(gv) ? "Stub found while resolving"
+				: "Can't resolve"),
+			       name, cp, HvNAME(stash));
 		}
 		cv = GvCV(gv = ngv);
 	    }
@@ -1812,10 +1816,13 @@ Perl_is_gv_magical(pTHX_ char *name, STRLEN len, U32 flags)
 	    goto yes;
 	}
 	break;
+    case '\025':
+        if (len > 1 && strEQ(name, "\025NICODE"))
+	    goto yes;
     case '\027':   /* $^W & $^WARNING_BITS */
 	if (len == 1
 	    || (len == 12 && strEQ(name, "\027ARNING_BITS"))
-	    || (len == 17 && strEQ(name, "\027IDE_SYSTEM_CALLS")))
+	    )
 	{
 	    goto yes;
 	}

@@ -672,7 +672,9 @@ sharedsv_array_mg_copy(pTHX_ SV *sv, MAGIC* mg,
     MAGIC *nmg = sv_magicext(nsv,mg->mg_obj,
 			    toLOWER(mg->mg_type),&sharedsv_elem_vtbl,
 			    name, namlen);
+    ENTER_LOCK;
     SvREFCNT_inc(SHAREDSvPTR(shared));
+    LEAVE_LOCK;
     nmg->mg_flags |= MGf_DUP;
     return 1;
 }
@@ -813,8 +815,9 @@ CODE:
 	SHARED_CONTEXT;
 	sv = av_pop((AV*)SHAREDSvPTR(shared));
 	CALLER_CONTEXT;
-	ST(0) = Nullsv;
+	ST(0) = sv_newmortal();
 	Perl_sharedsv_associate(aTHX_ &ST(0), sv, 0);
+	SvREFCNT_dec(sv);
 	LEAVE_LOCK;
 	XSRETURN(1);
 
@@ -827,8 +830,9 @@ CODE:
 	SHARED_CONTEXT;
 	sv = av_shift((AV*)SHAREDSvPTR(shared));
 	CALLER_CONTEXT;
-	ST(0) = Nullsv;
+	ST(0) = sv_newmortal();
 	Perl_sharedsv_associate(aTHX_ &ST(0), sv, 0);
+	SvREFCNT_dec(sv);
 	LEAVE_LOCK;
 	XSRETURN(1);
 

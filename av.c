@@ -1,6 +1,6 @@
 /*    av.c
  *
- *    Copyright (c) 1991-2002, Larry Wall
+ *    Copyright (c) 1991-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -105,7 +105,7 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
 		IV itmp;
 #endif
 
-#if defined(MYMALLOC) && !defined(LEAKTEST)
+#ifdef MYMALLOC
 		newmax = malloced_size((void*)AvALLOC(av))/sizeof(SV*) - 1;
 
 		if (key <= newmax) 
@@ -134,7 +134,7 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
 		    Safefree(AvALLOC(av));
 		AvALLOC(av) = ary;
 #endif
-#if defined(MYMALLOC) && !defined(LEAKTEST)
+#ifdef MYMALLOC
 	      resized:
 #endif
 		ary = AvALLOC(av) + AvMAX(av) + 1;
@@ -453,8 +453,11 @@ Perl_av_clear(pTHX_ register AV *av)
 	ary = AvARRAY(av);
 	key = AvFILLp(av) + 1;
 	while (key) {
-	    SvREFCNT_dec(ary[--key]);
+	    SV * sv = ary[--key];
+	    /* undef the slot before freeing the value, because a
+	     * destructor might try to modify this arrray */
 	    ary[key] = &PL_sv_undef;
+	    SvREFCNT_dec(sv);
 	}
     }
     if ((key = AvARRAY(av) - AvALLOC(av))) {

@@ -30,7 +30,7 @@ sub skip {
 
 use ExtUtils::testlib;
 use strict;
-BEGIN { print "1..13\n" };
+BEGIN { print "1..14\n" };
 use threads;
 use threads::shared;
 ok(1,1,"loaded");
@@ -74,4 +74,17 @@ ok(10, keys %foo == 0, "And make sure we realy have deleted the values");
     threads->create(sub { my (%hash3); share(%hash3); $hash2{hash} = \%hash3; $hash3{"thread"} = "yes"})->join();
     ok(13, $hash1{hash}->{hash}->{thread} eq "yes", "Check hash created in another thread");
 }
+
+{
+  my $h = {a=>14};
+  my $r = \$h->{a};
+  share($r);
+  lock($r);
+  lock($h->{a});
+  ok(14, 1, "lock on helems now work, this was bug 10045");
+
+}
+
+
+
 

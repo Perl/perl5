@@ -1,6 +1,6 @@
 /*    doio.c
  *
- *    Copyright (c) 1991-2002, Larry Wall
+ *    Copyright (c) 1991-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -323,13 +323,13 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		    if (num_svs > 1) {
 			Perl_croak(aTHX_ "More than one argument to '%c&' open",IoTYPE(io));
 		    }
+		    /*SUPPRESS 530*/
+		    for (; isSPACE(*type); type++) ;
 		    if (num_svs && (SvIOK(*svp) || (SvPOK(*svp) && looks_like_number(*svp)))) {
 			fd = SvUV(*svp);
 			num_svs = 0;
 		    }
 		    else if (isDIGIT(*type)) {
-			/*SUPPRESS 530*/
-			for (; isSPACE(*type); type++) ;
 			fd = atoi(type);
 		    }
 		    else {
@@ -339,8 +339,6 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 			}
 			else {
 			    GV *thatgv;
-			    /*SUPPRESS 530*/
-			    for (; isSPACE(*type); type++) ;
 			    thatgv = gv_fetchpv(type,FALSE,SVt_PVIO);
 			    thatio = GvIO(thatgv);
 			}
@@ -775,8 +773,8 @@ Perl_nextargv(pTHX_ register GV *gv)
 		    {
 			if (ckWARN_d(WARN_INPLACE))	
 			    Perl_warner(aTHX_ packWARN(WARN_INPLACE),
-			      "Can't do inplace edit: %s would not be unique",
-			      SvPVX(sv));
+			      "Can't do inplace edit: %"SVf" would not be unique",
+			      sv);
 			do_close(gv,FALSE);
 			continue;
 		    }
@@ -786,8 +784,8 @@ Perl_nextargv(pTHX_ register GV *gv)
 		    if (PerlLIO_rename(PL_oldname,SvPVX(sv)) < 0) {
 		        if (ckWARN_d(WARN_INPLACE))	
 			    Perl_warner(aTHX_ packWARN(WARN_INPLACE),
-			      "Can't rename %s to %s: %s, skipping file",
-			      PL_oldname, SvPVX(sv), Strerror(errno) );
+			      "Can't rename %s to %"SVf": %s, skipping file",
+			      PL_oldname, sv, Strerror(errno) );
 			do_close(gv,FALSE);
 			continue;
 		    }
@@ -802,8 +800,8 @@ Perl_nextargv(pTHX_ register GV *gv)
 		    if (link(PL_oldname,SvPVX(sv)) < 0) {
 		        if (ckWARN_d(WARN_INPLACE))	
 			    Perl_warner(aTHX_ packWARN(WARN_INPLACE),
-			      "Can't rename %s to %s: %s, skipping file",
-			      PL_oldname, SvPVX(sv), Strerror(errno) );
+			      "Can't rename %s to %"SVf": %s, skipping file",
+			      PL_oldname, sv, Strerror(errno) );
 			do_close(gv,FALSE);
 			continue;
 		    }
@@ -1268,7 +1266,8 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
     default:
 	if (PerlIO_isutf8(fp)) {
 	    if (!SvUTF8(sv))
-		sv_utf8_upgrade(sv = sv_mortalcopy(sv));
+		sv_utf8_upgrade_flags(sv = sv_mortalcopy(sv),
+				      SV_GMAGIC|SV_UTF8_NO_ENCODING);
 	}
 	else if (DO_UTF8(sv)) {
 	    if (!sv_utf8_downgrade((sv = sv_mortalcopy(sv)), TRUE)
@@ -1745,22 +1744,23 @@ nothing in the core.
            SV* modified = *++mark;
            void * utbufp = &utbuf;
 
-           /* be like C, and if both times are undefined, let the C
-              library figure out what to do.  This usually means
-              "current time" */
+           /* Be like C, and if both times are undefined, let the C
+            * library figure out what to do.  This usually means
+            * "current time". */
 
            if ( accessed == &PL_sv_undef && modified == &PL_sv_undef )
-             utbufp = NULL;
-
-	    Zero(&utbuf, sizeof utbuf, char);
+                utbufp = NULL;
+           else {
+                Zero(&utbuf, sizeof utbuf, char);
 #ifdef BIG_TIME
-           utbuf.actime = (Time_t)SvNVx(accessed);     /* time accessed */
-           utbuf.modtime = (Time_t)SvNVx(modified);    /* time modified */
+                utbuf.actime = (Time_t)SvNVx(accessed);  /* time accessed */
+                utbuf.modtime = (Time_t)SvNVx(modified); /* time modified */
 #else
-           utbuf.actime = (Time_t)SvIVx(accessed);     /* time accessed */
-           utbuf.modtime = (Time_t)SvIVx(modified);    /* time modified */
+                utbuf.actime = (Time_t)SvIVx(accessed);  /* time accessed */
+                utbuf.modtime = (Time_t)SvIVx(modified); /* time modified */
 #endif
-	    APPLY_TAINT_PROPER();
+            }
+            APPLY_TAINT_PROPER();
 	    tot = sp - mark;
 	    while (++mark <= sp) {
 		char *name = SvPVx(*mark, n_a);

@@ -79,7 +79,8 @@ something broke (even though the DB stayed at release 1.85) and
 the DB_File extension test db-hash.t may fail by dumping core after
 the subtest 21.  There really is no good cure as of Tru64 V5.1A expect
 installing a newer Berkeley DB and supplying the right directories for
--Dlocincpth=/some/include and -Dloclibpth=/some/lib when running Configure.
+-Dlocincpth=/some/include and -Dloclibpth=/some/lib when running Configure
+B<and> before running "make test" setting your LD_LIBRARY_PATH to /some/lib.
 
 You can also work around the problem by disabling the DB_File by
 specifying -Ui_db to Configure, and then using the BerkeleyFile module

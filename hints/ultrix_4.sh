@@ -1,5 +1,5 @@
 # hints/ultrix_4.sh
-# Last updated by Andy Dougherty  <doughera@lafcol.lafayette.edu>
+# Last updated by Andy Dougherty  <doughera@lafayette.edu>
 # Fri Feb 10 10:04:51 EST 1995
 #
 # Use   Configure -Dcc=gcc   to use gcc.

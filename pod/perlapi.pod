@@ -512,6 +512,35 @@ Found in file handy.h
 
 Create and return a new interpreter by cloning the current one.
 
+perl_clone takes these flags as paramters:
+
+CLONEf_COPY_STACKS - is used to, well, copy the stacks also, 
+without it we only clone the data and zero the stacks, 
+with it we copy the stacks and the new perl interpreter is 
+ready to run at the exact same point as the previous one. 
+The pseudo-fork code uses COPY_STACKS while the 
+threads->new doesn't.
+
+CLONEf_KEEP_PTR_TABLE
+perl_clone keeps a ptr_table with the pointer of the old 
+variable as a key and the new variable as a value, 
+this allows it to check if something has been cloned and not 
+clone it again but rather just use the value and increase the 
+refcount. If KEEP_PTR_TABLE is not set then perl_clone will kill 
+the ptr_table using the function 
+C<ptr_table_free(PL_ptr_table); PL_ptr_table = NULL;>, 
+reason to keep it around is if you want to dup some of your own 
+variable who are outside the graph perl scans, example of this 
+code is in threads.xs create
+
+CLONEf_CLONE_HOST
+This is a win32 thing, it is ignored on unix, it tells perls 
+win32host code (which is c++) to clone itself, this is needed on 
+win32 if you want to run two threads at the same time, 
+if you just want to do some stuff in a separate perl interpreter 
+and then throw it away and return to the original one, 
+you don't need to do anything.
+
 	PerlInterpreter*	perl_clone(PerlInterpreter* interp, UV flags)
 
 =for hackers
@@ -561,6 +590,18 @@ Found in file cv.h
 =head1 Embedding Functions
 
 =over 8
+
+=item cv_undef
+
+Clear out all the active components of a CV. This can happen either
+by an explicit C<undef &foo>, or by the reference count going to zero.
+In the former case, we keep the CvOUTSIDE pointer, so that any anonymous
+children can still follow the full lexical scope chain.
+
+	void	cv_undef(CV* cv)
+
+=for hackers
+Found in file op.c
 
 =item load_module
 
@@ -646,7 +687,7 @@ Found in file perl.c
 
 Tells Perl to C<require> the file named by the string argument.  It is
 analogous to the Perl code C<eval "require '$file'">.  It's even
-implemented that way; consider using Perl_load_module instead.
+implemented that way; consider using load_module instead.
 
 NOTE: the perl_ form of this function is deprecated.
 
@@ -874,6 +915,7 @@ Found in file hv.h
 =item Nullch
 
 Null character pointer.
+
 =for hackers
 Found in file handy.h
 
@@ -1202,7 +1244,15 @@ NULL if the operation failed or if the value did not need to be actually
 stored within the hash (as in the case of tied hashes).  Otherwise it can
 be dereferenced to get the original C<SV*>.  Note that the caller is
 responsible for suitably incrementing the reference count of C<val> before
-the call, and decrementing it if the function returned NULL.
+the call, and decrementing it if the function returned NULL.  Effectively
+a successful hv_store takes ownership of one reference to C<val>.  This is
+usually what you want; a newly created SV has a reference count of one, so
+if all your code does is create SVs then store them in a hash, hv_store
+will own the only reference to the new SV, and your code doesn't need to do
+anything further to tidy up.  hv_store is not implemented as a call to
+hv_store_ent, and does not create a temporary SV for the key, so if your
+key data is not already in SV form then use hv_store in preference to
+hv_store_ent.
 
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
@@ -1222,7 +1272,17 @@ stored within the hash (as in the case of tied hashes).  Otherwise the
 contents of the return value can be accessed using the C<He?> macros
 described here.  Note that the caller is responsible for suitably
 incrementing the reference count of C<val> before the call, and
-decrementing it if the function returned NULL.
+decrementing it if the function returned NULL.  Effectively a successful
+hv_store_ent takes ownership of one reference to C<val>.  This is
+usually what you want; a newly created SV has a reference count of one, so
+if all your code does is create SVs then store them in a hash, hv_store
+will own the only reference to the new SV, and your code doesn't need to do
+anything further to tidy up.  Note that hv_store_ent only reads the C<key>;
+unlike C<val> it does not take ownership of it, so maintaining the correct
+reference count on C<key> is entirely the caller's responsibility.  hv_store
+is not implemented as a call to hv_store_ent, and does not create a temporary
+SV for the key, so if your key data is not already in SV form then use
+hv_store in preference to hv_store_ent.
 
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
@@ -1881,6 +1941,23 @@ Used by C<xsubpp> to hook up XSUBs as Perl subs.
 
 =for hackers
 Found in file op.c
+
+
+=back
+
+=head1 Pad Data Structures
+
+=over 8
+
+=item pad_sv
+
+Get the value at offset po in the current pad.
+Use macro PAD_SV instead of calling this function directly.
+
+	SV*	pad_sv(PADOFFSET po)
+
+=for hackers
+Found in file pad.c
 
 
 =back
@@ -4112,6 +4189,25 @@ Like C<sv_setpvf>, but also handles 'set' magic.
 =for hackers
 Found in file sv.c
 
+=item sv_setpviv
+
+Copies an integer into the given SV, also updating its string value.
+Does not handle 'set' magic.  See C<sv_setpviv_mg>.
+
+	void	sv_setpviv(SV* sv, IV num)
+
+=for hackers
+Found in file sv.c
+
+=item sv_setpviv_mg
+
+Like C<sv_setpviv>, but also handles 'set' magic.
+
+	void	sv_setpviv_mg(SV *sv, IV iv)
+
+=for hackers
+Found in file sv.c
+
 =item sv_setpvn
 
 Copies a string into an SV.  The C<len> parameter indicates the number of
@@ -4530,6 +4626,9 @@ Converts a string C<s> of length C<len> from ASCII into UTF8 encoding.
 Returns a pointer to the newly-created string, and sets C<len> to
 reflect the new length.
 
+If you want to convert to UTF8 from other encodings than ASCII,
+see sv_recode_to_utf8().
+
 NOTE: this function is experimental and may change or be
 removed without notice.
 
@@ -4580,10 +4679,10 @@ Found in file utf8.c
 
 =item is_utf8_string
 
-Returns true if first C<len> bytes of the given string form a valid UTF8
-string, false otherwise.  Note that 'a valid UTF8 string' does not mean
-'a string that contains UTF8' because a valid ASCII string is a valid
-UTF8 string.
+Returns true if first C<len> bytes of the given string form a valid
+UTF8 string, false otherwise.  Note that 'a valid UTF8 string' does
+not mean 'a string that contains code points above 0x7F encoded in
+UTF8' because a valid ASCII string is a valid UTF8 string.
 
 	bool	is_utf8_string(U8 *s, STRLEN len)
 
@@ -4609,6 +4708,23 @@ The pointer to the PV of the dsv is returned.
 
 =for hackers
 Found in file utf8.c
+
+=item sv_cat_decode
+
+The encoding is assumed to be an Encode object, the PV of the ssv is
+assumed to be octets in that encoding and decoding the input starts
+from the position which (PV + *offset) pointed to.  The dsv will be
+concatenated the decoded UTF-8 string from ssv.  Decoding will terminate
+when the string tstr appears in decoding output or the input ends on
+the PV of the ssv. The value which the offset points will be modified
+to the last input position on the ssv.
+
+Returns TRUE if the terminator was found, else returns FALSE.
+
+	bool	sv_cat_decode(SV* dsv, SV *encoding, SV *ssv, int *offset, char* tstr, int tlen)
+
+=for hackers
+Found in file sv.c
 
 =item sv_recode_to_utf8
 

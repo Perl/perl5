@@ -869,6 +869,10 @@ from the ps(1) output.  For example, setting C<$0> to C<"foobar"> will
 result in C<"perl: foobar (perl)">.  This is an operating system
 feature.
 
+In multithreaded scripts Perl coordinates the threads so that any
+thread may modify its copy of the C<$0> and the change becomes visible
+to ps(1) (assuming the operating system plays along).
+
 =item $[
 
 The index of the first element in an array, and of the first character
@@ -1087,9 +1091,15 @@ regular expression assertion (see L<perlre>).  May be written to.
 
 =item $^S
 
-Current state of the interpreter.  Undefined if parsing of the current
-module/eval is not finished (may happen in $SIG{__DIE__} and
-$SIG{__WARN__} handlers).  True if inside an eval(), otherwise false.
+Current state of the interpreter.
+
+    $^S         State
+    ---------   -------------------
+    undef       Parsing module/eval
+    true (1)    Executing an eval
+    false (0)   Otherwise
+
+The first state may happen in $SIG{__DIE__} and $SIG{__WARN__} handlers.
 
 =item $BASETIME
 
@@ -1101,8 +1111,16 @@ and B<-C> filetests are based on this value.
 
 =item ${^TAINT}
 
-Reflects if taint mode is on or off (i.e. if the program was run with
-B<-T> or not).  True for on, false for off.
+Reflects if taint mode is on or off.  1 for on (the program was run with
+B<-T>), 0 for off, -1 when only taint warnings are enabled (i.e. with
+B<-t> or B<-TU>).
+
+=item ${^UNICODE}
+
+Reflects certain Unicode settings of Perl.  See L<perlrun>
+documentation for the C<-C> switch for more information about
+the possible values. This variable is set during Perl startup
+and is thereafter read-only.
 
 =item $PERL_VERSION
 
@@ -1142,21 +1160,6 @@ related to the B<-w> switch.)  See also L<warnings>.
 
 The current set of warning checks enabled by the C<use warnings> pragma.
 See the documentation of C<warnings> for more details.
-
-=item ${^WIDE_SYSTEM_CALLS}
-
-Global flag that enables system calls made by Perl to use wide character
-APIs native to the system, if available.  This is currently only implemented
-on the Windows platform.
-
-This can also be enabled from the command line using the C<-C> switch.
-
-The initial value is typically C<0> for compatibility with Perl versions
-earlier than 5.6, but may be automatically set to C<1> by Perl if the system
-provides a user-settable default (e.g., C<$ENV{LC_CTYPE}>).
-
-The C<bytes> pragma always overrides the effect of this flag in the current
-lexical scope.  See L<bytes>.
 
 =item $EXECUTABLE_NAME
 
@@ -1480,7 +1483,7 @@ exempt in these ways:
 	ENV		STDIN
 	INC		STDOUT
 	ARGV		STDERR
-	ARGVOUT
+	ARGVOUT		_
 	SIG
 
 In particular, the new special C<${^_XYZ}> variables are always taken

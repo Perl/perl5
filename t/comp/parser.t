@@ -8,8 +8,83 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..1\n";
+require "./test.pl";
+plan( tests => 20 );
+
+eval '%@x=0;';
+like( $@, qr/^Can't modify hash dereference in repeat \(x\)/, '%@x=0' );
+
+# Bug 20010422.005
+eval q{{s//${}/; //}};
+like( $@, qr/syntax error/, 'syntax error, used to dump core' );
+
+# Bug 20010528.007
+eval q/"\x{"/;
+like( $@, qr/^Missing right brace on \\x/,
+    'syntax error in string, used to dump core' );
+
+eval "a.b.c.d.e.f;sub";
+like( $@, qr/^Illegal declaration of anonymous subroutine/,
+    'found by Markov chain stress testing' );
+
+# Bug 20010831.001
+eval '($a, b) = (1, 2);';
+like( $@, qr/^Can't modify constant item in list assignment/,
+    'bareword in list assignment' );
+
+eval 'tie FOO, "Foo";';
+like( $@, qr/^Can't modify constant item in tie /,
+    'tying a bareword causes a segfault in 5.6.1' );
+
+eval 'undef foo';
+like( $@, qr/^Can't modify constant item in undef operator /,
+    'undefing constant causes a segfault in 5.6.1 [ID 20010906.019]' );
+
+eval 'read($bla, FILE, 1);';
+like( $@, qr/^Can't modify constant item in read /,
+    'read($var, FILE, 1) segfaults on 5.6.1 [ID 20011025.054]' );
 
 # This used to dump core (bug #17920)
 eval q{ sub { sub { f1(f2();); my($a,$b,$c) } } };
-print $@ && $@ =~ /error/ ? "ok 1\n" : "not ok 1\n";
+like( $@, qr/error/, 'lexical block discarded by yacc' );
+
+# bug #18573, used to corrupt memory
+eval q{ "\c" };
+like( $@, qr/^Missing control char name in \\c/, q("\c" string) );
+
+# two tests for memory corruption problems in the said variables
+# (used to dump core or produce strange results)
+
+is( "\Q\Q\Q\Q\Q\Q\Q\Q\Q\Q\Q\Q\Qa", "a", "PL_lex_casestack" );
+
+eval {
+{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+};
+is( $@, '', 'PL_lex_brackstack' );
+
+{
+    # tests for bug #20716
+    undef $a;
+    undef @b;
+    my $a="A";
+    is("${a}{", "A{", "interpolation, qq//");
+    is("${a}[", "A[", "interpolation, qq//");
+    my @b=("B");
+    is("@{b}{", "B{", "interpolation, qq//");
+    is(qr/${a}{/, '(?-xism:A{)', "interpolation, qr//");
+    my $c = "A{";
+    $c =~ /${a}{/;
+    is($&, 'A{', "interpolation, m//");
+    $c =~ s/${a}{/foo/;
+    is($c, 'foo', "interpolation, s/...//");
+    $c =~ s/foo/${a}{/;
+    is($c, 'A{', "interpolation, s//.../");
+    is(<<"${a}{", "A{ A[ B{\n", "interpolation, here doc");
+${a}{ ${a}[ @{b}{
+${a}{
+}

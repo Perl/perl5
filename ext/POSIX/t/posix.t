@@ -13,7 +13,6 @@ BEGIN {
 require "./test.pl";
 plan(tests => 61);
 
-
 use POSIX qw(fcntl_h signal_h limits_h _exit getcwd open read strftime write
 	     errno);
 use strict 'subs';

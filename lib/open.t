@@ -171,12 +171,13 @@ EOE
        "checking syswrite() output on :utf8 streams by reading it back in");
 }
 
-{
+SKIP: {
+    skip("no perlio", 1) unless (find PerlIO::Layer 'perlio');
     use open IN => ':non-existent';
     eval {
-	require Anything;
+	require Symbol; # Anything that exists but we havn't loaded
     };
-    like($@, qr/Recursive call/i,
+    like($@, qr/Can't locate Symbol|Recursive call/i,
 	 "test for an endless loop in PerlIO_find_layer");
 }
 

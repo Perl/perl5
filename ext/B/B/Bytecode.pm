@@ -652,7 +652,8 @@ sub B::CV::bytecode {
     for ($i = 0; $i < @ixes; $i++) {
 	asmf "xcv_%s %d\n", lc($subfield_names[$i]), $ixes[$i];
     }
-    asmf "xcv_depth %d\nxcv_flags 0x%x\n", $cv->DEPTH, $cv->CvFLAGS;
+    asmf "xcv_depth %d\nxcv_flags 0x%x\nxcv_outside_seq 0x%x",
+	$cv->DEPTH, $cv->CvFLAGS, $cv->OUTSIDE_SEQ;
     asmf "xcv_file %d\n", $fileix;
     # Now save all the subfields (except for CvROOT which was handled
     # above) and CvSTART (now the initial element of @subfields).

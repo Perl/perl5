@@ -1,7 +1,7 @@
 /*
  *    embedvar.h
  *
- *    Copyright (c) 1997-2002, Larry Wall
+ *    Copyright (c) 1997-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -393,6 +393,7 @@
 #define PL_sh_path		(PERL_GET_INTERP->Ish_path)
 #define PL_sig_pending		(PERL_GET_INTERP->Isig_pending)
 #define PL_sighandlerp		(PERL_GET_INTERP->Isighandlerp)
+#define PL_signals		(PERL_GET_INTERP->Isignals)
 #define PL_sort_RealCmp		(PERL_GET_INTERP->Isort_RealCmp)
 #define PL_splitstr		(PERL_GET_INTERP->Isplitstr)
 #define PL_srand_called		(PERL_GET_INTERP->Isrand_called)
@@ -425,6 +426,7 @@
 #define PL_thrsv		(PERL_GET_INTERP->Ithrsv)
 #define PL_tokenbuf		(PERL_GET_INTERP->Itokenbuf)
 #define PL_uid			(PERL_GET_INTERP->Iuid)
+#define PL_unicode		(PERL_GET_INTERP->Iunicode)
 #define PL_unsafe		(PERL_GET_INTERP->Iunsafe)
 #define PL_utf8_alnum		(PERL_GET_INTERP->Iutf8_alnum)
 #define PL_utf8_alnumc		(PERL_GET_INTERP->Iutf8_alnumc)
@@ -446,8 +448,8 @@
 #define PL_utf8_toupper		(PERL_GET_INTERP->Iutf8_toupper)
 #define PL_utf8_upper		(PERL_GET_INTERP->Iutf8_upper)
 #define PL_utf8_xdigit		(PERL_GET_INTERP->Iutf8_xdigit)
+#define PL_utf8locale		(PERL_GET_INTERP->Iutf8locale)
 #define PL_uudmap		(PERL_GET_INTERP->Iuudmap)
-#define PL_wantutf8		(PERL_GET_INTERP->Iwantutf8)
 #define PL_warnhook		(PERL_GET_INTERP->Iwarnhook)
 #define PL_widesyscalls		(PERL_GET_INTERP->Iwidesyscalls)
 #define PL_xiv_arenaroot	(PERL_GET_INTERP->Ixiv_arenaroot)
@@ -698,6 +700,7 @@
 #define PL_sh_path		(vTHX->Ish_path)
 #define PL_sig_pending		(vTHX->Isig_pending)
 #define PL_sighandlerp		(vTHX->Isighandlerp)
+#define PL_signals		(vTHX->Isignals)
 #define PL_sort_RealCmp		(vTHX->Isort_RealCmp)
 #define PL_splitstr		(vTHX->Isplitstr)
 #define PL_srand_called		(vTHX->Isrand_called)
@@ -730,6 +733,7 @@
 #define PL_thrsv		(vTHX->Ithrsv)
 #define PL_tokenbuf		(vTHX->Itokenbuf)
 #define PL_uid			(vTHX->Iuid)
+#define PL_unicode		(vTHX->Iunicode)
 #define PL_unsafe		(vTHX->Iunsafe)
 #define PL_utf8_alnum		(vTHX->Iutf8_alnum)
 #define PL_utf8_alnumc		(vTHX->Iutf8_alnumc)
@@ -751,8 +755,8 @@
 #define PL_utf8_toupper		(vTHX->Iutf8_toupper)
 #define PL_utf8_upper		(vTHX->Iutf8_upper)
 #define PL_utf8_xdigit		(vTHX->Iutf8_xdigit)
+#define PL_utf8locale		(vTHX->Iutf8locale)
 #define PL_uudmap		(vTHX->Iuudmap)
-#define PL_wantutf8		(vTHX->Iwantutf8)
 #define PL_warnhook		(vTHX->Iwarnhook)
 #define PL_widesyscalls		(vTHX->Iwidesyscalls)
 #define PL_xiv_arenaroot	(vTHX->Ixiv_arenaroot)
@@ -1006,6 +1010,7 @@
 #define PL_Ish_path		PL_sh_path
 #define PL_Isig_pending		PL_sig_pending
 #define PL_Isighandlerp		PL_sighandlerp
+#define PL_Isignals		PL_signals
 #define PL_Isort_RealCmp	PL_sort_RealCmp
 #define PL_Isplitstr		PL_splitstr
 #define PL_Isrand_called	PL_srand_called
@@ -1038,6 +1043,7 @@
 #define PL_Ithrsv		PL_thrsv
 #define PL_Itokenbuf		PL_tokenbuf
 #define PL_Iuid			PL_uid
+#define PL_Iunicode		PL_unicode
 #define PL_Iunsafe		PL_unsafe
 #define PL_Iutf8_alnum		PL_utf8_alnum
 #define PL_Iutf8_alnumc		PL_utf8_alnumc
@@ -1059,8 +1065,8 @@
 #define PL_Iutf8_toupper	PL_utf8_toupper
 #define PL_Iutf8_upper		PL_utf8_upper
 #define PL_Iutf8_xdigit		PL_utf8_xdigit
+#define PL_Iutf8locale		PL_utf8locale
 #define PL_Iuudmap		PL_uudmap
-#define PL_Iwantutf8		PL_wantutf8
 #define PL_Iwarnhook		PL_warnhook
 #define PL_Iwidesyscalls	PL_widesyscalls
 #define PL_Ixiv_arenaroot	PL_xiv_arenaroot
@@ -1381,6 +1387,7 @@
 #define PL_Yes			(PL_Vars.GYes)
 #define PL_curinterp		(PL_Vars.Gcurinterp)
 #define PL_do_undump		(PL_Vars.Gdo_undump)
+#define PL_dollarzero_mutex	(PL_Vars.Gdollarzero_mutex)
 #define PL_hexdigit		(PL_Vars.Ghexdigit)
 #define PL_lockhook		(PL_Vars.Glockhook)
 #define PL_malloc_mutex		(PL_Vars.Gmalloc_mutex)
@@ -1400,6 +1407,7 @@
 #define PL_GYes			PL_Yes
 #define PL_Gcurinterp		PL_curinterp
 #define PL_Gdo_undump		PL_do_undump
+#define PL_Gdollarzero_mutex	PL_dollarzero_mutex
 #define PL_Ghexdigit		PL_hexdigit
 #define PL_Glockhook		PL_lockhook
 #define PL_Gmalloc_mutex	PL_malloc_mutex

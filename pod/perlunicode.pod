@@ -67,13 +67,6 @@ character data.  Such data may come from filehandles, from calls to
 external programs, from information provided by the system (such as %ENV),
 or from literals and constants in the source text.
 
-On Windows platforms, if the C<-C> command line switch is used or the
-${^WIDE_SYSTEM_CALLS} global flag is set to C<1>, all system calls
-will use the corresponding wide-character APIs.  This feature is
-available only on Windows to conform to the API standard already
-established for that platform--and there are very few non-Windows
-platforms that have Unicode-aware APIs.
-
 The C<bytes> pragma will always, regardless of platform, force byte
 semantics in a particular lexical scope.  See L<bytes>.
 
@@ -185,7 +178,7 @@ You can also use negation in both C<\p{}> and C<\P{}> by introducing a caret
 equal to C<\P{Tamil}>.
 
 Here are the basic Unicode General Category properties, followed by their
-long form.  You can use either; C<\p{Lu}> and C<\p{LowercaseLetter}>,
+long form.  You can use either; C<\p{Lu}> and C<\p{UppercaseLetter}>,
 for instance, are identical.
 
     Short       Long
@@ -616,10 +609,10 @@ And finally, C<scalar reverse()> reverses by character rather than by byte.
 =head2 User-Defined Character Properties
 
 You can define your own character properties by defining subroutines
-whose names begin with "In" or "Is".  The subroutines must be
-visible in the package that uses the properties.  The user-defined
-properties can be used in the regular expression C<\p> and C<\P>
-constructs.
+whose names begin with "In" or "Is".  The subroutines must be defined
+in the C<main> package.  The user-defined properties can be used in the
+regular expression C<\p> and C<\P> constructs.  Note that the effect
+is compile-time and immutable once defined.
 
 The subroutines must return a specially-formatted string, with one
 or more newline-separated lines.  Each line must be one of the following:
@@ -697,6 +690,56 @@ The negation is useful for defining (surprise!) negated classes.
     +utf8::IsCn
     END
     }
+
+You can also define your own mappings to be used in the lc(),
+lcfirst(), uc(), and ucfirst() (or their string-inlined versions).
+The principle is the same: define subroutines in the C<main> package
+with names like C<ToLower> (for lc() and lcfirst()), C<ToTitle> (for
+the first character in ucfirst()), and C<ToUpper> (for uc(), and the
+rest of the characters in ucfirst()).
+
+The string returned by the subroutines needs now to be three
+hexadecimal numbers separated by tabulators: start of the source
+range, end of the source range, and start of the destination range.
+For example:
+
+    sub ToUpper {
+	return <<END;
+    0061\t0063\t0041
+    END
+    }
+
+defines an uc() mapping that causes only the characters "a", "b", and
+"c" to be mapped to "A", "B", "C", all other characters will remain
+unchanged.
+
+If there is no source range to speak of, that is, the mapping is from
+a single character to another single character, leave the end of the
+source range empty, but the two tabulator characters are still needed.
+For example:
+
+    sub ToLower {
+	return <<END;
+    0041\t\t0061
+    END
+    }
+
+defines a lc() mapping that causes only "A" to be mapped to "a", all
+other characters will remain unchanged.
+
+(For serious hackers only)  If you want to introspect the default
+mappings, you can find the data in the directory
+C<$Config{privlib}>/F<unicore/To/>.  The mapping data is returned as
+the here-document, and the C<utf8::ToSpecFoo> are special exception
+mappings derived from <$Config{privlib}>/F<unicore/SpecialCasing.txt>.
+The C<Digit> and C<Fold> mappings that one can see in the directory
+are not directly user-accessible, one can use either the
+C<Unicode::UCD> module, or just match case-insensitively (that's when
+the C<Fold> mapping is used).
+
+A final note on the user-defined property tests and mappings: they
+will be used only if the scalar has been marked as having Unicode
+characters.  Old byte-style strings will not be affected.
 
 =head2 Character Encodings for Input and Output
 
@@ -1000,10 +1043,10 @@ there are a couple of exceptions:
 
 =item *
 
-If your locale environment variables (LANGUAGE, LC_ALL, LC_CTYPE, LANG)
-contain the strings 'UTF-8' or 'UTF8' (case-insensitive matching),
-the default encodings of your STDIN, STDOUT, and STDERR, and of
-B<any subsequent file open>, are considered to be UTF-8.
+You can enable automatic UTF-8-ification of your standard file
+handles, default C<open()> layer, and C<@ARGV> by using either
+the C<-C> command line switch or the C<PERL_UNICODE> environment
+variable, see L<perlrun> for the documentation of the C<-C> switch.
 
 =item *
 
@@ -1015,8 +1058,10 @@ straddling of the proverbial fence causes problems.
 
 =head2 Using Unicode in XS
 
-If you want to handle Perl Unicode in XS extensions, you may find
-the following C APIs useful.  See L<perlapi> for details.
+If you want to handle Perl Unicode in XS extensions, you may find the
+following C APIs useful.  See also L<perlguts/"Unicode Support"> for an
+explanation about Unicode at the XS level, and L<perlapi> for the API
+details.
 
 =over 4
 
@@ -1358,6 +1403,6 @@ the UTF-8 flag:
 =head1 SEE ALSO
 
 L<perluniintro>, L<encoding>, L<Encode>, L<open>, L<utf8>, L<bytes>,
-L<perlretut>, L<perlvar/"${^WIDE_SYSTEM_CALLS}">
+L<perlretut>, L<perlvar/"${^UNICODE}">
 
 =cut

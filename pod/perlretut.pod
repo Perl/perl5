@@ -1707,7 +1707,7 @@ it matches I<any> byte 0-255.  So
 The last regexp matches, but is dangerous because the string
 I<character> position is no longer synchronized to the string I<byte>
 position.  This generates the warning 'Malformed UTF-8
-character'.  C<\C> is best used for matching the binary data in strings
+character'.  The C<\C> is best used for matching the binary data in strings
 with binary data intermixed with Unicode characters.
 
 Let us now discuss the rest of the character classes.  Just as with
@@ -2003,6 +2003,10 @@ They evaluate true if the regexps do I<not> match:
     $x =~ /foo(?!bar)/;  # doesn't match, 'bar' follows 'foo'
     $x =~ /foo(?!baz)/;  # matches, 'baz' doesn't follow 'foo'
     $x =~ /(?<!\s)foo/;  # matches, there is no \s before 'foo'
+
+The C<\C> is unsupported in lookbehind, because the already
+treacherous definition of C<\C> would become even more so
+when going backwards.
 
 =head2 Using independent subexpressions to prevent backtracking
 

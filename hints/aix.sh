@@ -5,7 +5,7 @@
 #	  Jarkko Hietaniemi <jhi@iki.fi>.
 # AIX 4.3.x LP64 build by Steven Hirsch <hirschs@btv.ibm.com>
 # Merged on Mon Feb  6 10:22:35 EST 1995 by
-#   Andy Dougherty  <doughera@lafcol.lafayette.edu>
+#   Andy Dougherty  <doughera@lafayette.edu>
 
 #
 # Contact dfavor@corridor.com for any of the following:
@@ -275,7 +275,8 @@ $define|true|[yY]*)
 	ccflags="$ccflags -DNEED_PTHREAD_INIT"
 	case "$cc" in
 	*gcc*)
-echo "GCC $gccversion disabling some _r functions" >&4
+	    ccflags="-D_THREAD_SAFE $ccflags"
+	    echo "GCC $gccversion disabling some _r functions" >&4
 	    case "$gccversion" in
 		3*) d_drand48_r='undef'
 		    d_endgrent_r='undef'

@@ -3,7 +3,7 @@
 # original from Krishna Sethuraman, krishna@sgi.com
 #
 # Modified Mon Jul 22 14:52:25 EDT 1996
-# 	Andy Dougherty <doughera@lafcol.lafayette.edu>
+# 	Andy Dougherty <doughera@lafayette.edu>
 # 	with help from Dean Roehrich <roehrich@cray.com>.
 #   cc -n32 update info from Krishna Sethuraman, krishna@sgi.com.
 #       additional update from Scott Henry, scotth@sgi.com
@@ -170,7 +170,7 @@ esac'
        test -z "$plibpth" && plibpth='/usr/lib64 /lib64 /usr/ccs/lib'
 	;;
 *gcc*)
-	ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -D_POSIX_C_SOURCE"
+	ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME"
        test -z "$optimize" && optimize="-O3"
 	usenm='undef'
 	case "`uname -s`" in

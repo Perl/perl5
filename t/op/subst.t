@@ -7,7 +7,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan( tests => 122 );
+plan( tests => 129 );
 
 $x = 'foo';
 $_ = "x";
@@ -491,3 +491,43 @@ SKIP: {
     is($b, "$na--$na--$nb", "s///: replace long non-utf8 into non-utf8 (utf8 pattern)");
 }
 
+$_ = 'aaaa';
+$r = 'x';
+$s = s/a(?{})/$r/g;
+is("<$_> <$s>", "<xxxx> <4>", "[perl #7806]");
+
+$_ = 'aaaa';
+$s = s/a(?{})//g;
+is("<$_> <$s>", "<> <4>", "[perl #7806]");
+
+# [perl #19048] Coredump in silly replacement
+{
+    local $^W = 0;
+    $_="abcdef\n";
+    s!.!!eg;
+    is($_, "\n", "[perl #19048]");
+}
+
+# [perl #17757] interaction between saw_ampersand and study
+{
+    my $f = eval q{ $& };
+    $f = "xx";
+    study $f;
+    $f =~ s/x/y/g;
+    is($f, "yy", "[perl #17757]");
+}
+
+# [perl #20684] returned a zero count
+$_ = "1111";
+is(s/(??{1})/2/eg, 4, '#20684 s/// with (??{..}) inside');
+
+# [perl #20682] @- not visible in replacement
+$_ = "123";
+/(2)/;	# seed @- with something else
+s/(1)(2)(3)/$#- (@-)/;
+is($_, "3 (0 0 1 2)", '#20682 @- not visible in replacement');
+
+# [perl #20682] $^N not visible in replacement
+$_ = "abc";
+/(a)/; s/(b)|(c)/-$^N/g;
+is($_,'a-b-c','#20682 $^N not visible in replacement');

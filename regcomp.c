@@ -69,7 +69,7 @@
  *
  ****    Alterations to Henry's code are...
  ****
- ****    Copyright (c) 1991-2002, Larry Wall
+ ****    Copyright (c) 1991-2003, Larry Wall
  ****
  ****    You may distribute under the terms of either the GNU General Public
  ****    License or the Artistic License, as specified in the README file.
@@ -2200,7 +2200,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 		    vFAIL("Sequence (?{...}) not terminated or not {}-balanced");
 		}
 		if (!SIZE_ONLY) {
-		    AV *av;
+		    PAD *pad;
 		
 		    if (RExC_parse - 1 - s)
 			sv = newSVpvn(s, RExC_parse - 1 - s);
@@ -2209,7 +2209,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 
 		    ENTER;
 		    Perl_save_re_context(aTHX);
-		    rop = sv_compile_2op(sv, &sop, "re", &av);
+		    rop = sv_compile_2op(sv, &sop, "re", &pad);
 		    sop->op_private |= OPpREFCOUNTED;
 		    /* re_dup will OpREFCNT_inc */
 		    OpREFCNT_set(sop, 1);
@@ -2218,7 +2218,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 		    n = add_data(pRExC_state, 3, "nop");
 		    RExC_rx->data->data[n] = (void*)rop;
 		    RExC_rx->data->data[n+1] = (void*)sop;
-		    RExC_rx->data->data[n+2] = (void*)av;
+		    RExC_rx->data->data[n+2] = (void*)pad;
 		    SvREFCNT_dec(sv);
 		}
 		else {						/* First pass */
@@ -4915,9 +4915,8 @@ Perl_pregfree(pTHX_ struct regexp *r)
     }
     if (r->data) {
 	int n = r->data->count;
-	AV* new_comppad = NULL;
-	AV* old_comppad;
-	SV** old_curpad;
+	PAD* new_comppad = NULL;
+	PAD* old_comppad;
 
 	while (--n >= 0) {
           /* If you add a ->what type here, update the comment in regcomp.h */
@@ -4934,22 +4933,16 @@ Perl_pregfree(pTHX_ struct regexp *r)
 	    case 'o':
 		if (new_comppad == NULL)
 		    Perl_croak(aTHX_ "panic: pregfree comppad");
-		old_comppad = PL_comppad;
-		old_curpad = PL_curpad;
-		/* Watch out for global destruction's random ordering. */
-		if (SvTYPE(new_comppad) == SVt_PVAV) {
-		    PL_comppad = new_comppad;
-		    PL_curpad = AvARRAY(new_comppad);
-		}
-		else
-		    PL_curpad = NULL;
-
+		PAD_SAVE_LOCAL(old_comppad,
+		    /* Watch out for global destruction's random ordering. */
+		    (SvTYPE(new_comppad) == SVt_PVAV) ?
+		    		new_comppad : Null(PAD *)
+		);
 		if (!OpREFCNT_dec((OP_4tree*)r->data->data[n])) {
                     op_free((OP_4tree*)r->data->data[n]);
 		}
 
-		PL_comppad = old_comppad;
-		PL_curpad = old_curpad;
+		PAD_RESTORE_LOCAL(old_comppad);
 		SvREFCNT_dec((SV*)new_comppad);
 		new_comppad = NULL;
 		break;
@@ -5027,20 +5020,6 @@ S_re_croak2(pTHX_ const char* pat1,const char* pat2,...)
 void
 Perl_save_re_context(pTHX)
 {
-#if 0
-    SAVEPPTR(RExC_precomp);		/* uncompiled string. */
-    SAVEI32(RExC_npar);		/* () count. */
-    SAVEI32(RExC_size);		/* Code size. */
-    SAVEI32(RExC_flags);		/* are we folding, multilining? */
-    SAVEVPTR(RExC_rx);		/* from regcomp.c */
-    SAVEI32(RExC_seen);		/* from regcomp.c */
-    SAVEI32(RExC_sawback);		/* Did we see \1, ...? */
-    SAVEI32(RExC_naughty);		/* How bad is this pattern? */
-    SAVEVPTR(RExC_emit);		/* Code-emit pointer; &regdummy = don't */
-    SAVEPPTR(RExC_end);		/* End of input for compile */
-    SAVEPPTR(RExC_parse);		/* Input-scan pointer. */
-#endif
-
     SAVEI32(PL_reg_flags);		/* from regexec.c */
     SAVEPPTR(PL_bostr);
     SAVEPPTR(PL_reginput);		/* String-input pointer. */
@@ -5049,6 +5028,7 @@ Perl_save_re_context(pTHX)
     SAVEVPTR(PL_regstartp);		/* Pointer to startp array. */
     SAVEVPTR(PL_regendp);		/* Ditto for endp. */
     SAVEVPTR(PL_reglastparen);		/* Similarly for lastparen. */
+    SAVEVPTR(PL_reglastcloseparen);	/* Similarly for lastcloseparen. */
     SAVEPPTR(PL_regtill);		/* How far we are required to go. */
     SAVEGENERICPV(PL_reg_start_tmp);		/* from regexec.c */
     PL_reg_start_tmp = 0;
@@ -5065,13 +5045,43 @@ Perl_save_re_context(pTHX)
     SAVEVPTR(PL_reg_re);		/* from regexec.c */
     SAVEPPTR(PL_reg_ganch);		/* from regexec.c */
     SAVESPTR(PL_reg_sv);		/* from regexec.c */
-    SAVEI8(PL_reg_match_utf8);		/* from regexec.c */
+    SAVEBOOL(PL_reg_match_utf8);	/* from regexec.c */
     SAVEVPTR(PL_reg_magic);		/* from regexec.c */
     SAVEI32(PL_reg_oldpos);			/* from regexec.c */
     SAVEVPTR(PL_reg_oldcurpm);		/* from regexec.c */
     SAVEVPTR(PL_reg_curpm);		/* from regexec.c */
+    SAVEPPTR(PL_reg_oldsaved);		/* old saved substr during match */
+    PL_reg_oldsaved = Nullch;
+    SAVEI32(PL_reg_oldsavedlen);	/* old length of saved substr during match */
+    PL_reg_oldsavedlen = 0;
+    SAVEI32(PL_reg_maxiter);		/* max wait until caching pos */
+    PL_reg_maxiter = 0;
+    SAVEI32(PL_reg_leftiter);		/* wait until caching pos */
+    PL_reg_leftiter = 0;
+    SAVEGENERICPV(PL_reg_poscache);	/* cache of pos of WHILEM */
+    PL_reg_poscache = Nullch;
+    SAVEI32(PL_reg_poscache_size);	/* size of pos cache of WHILEM */
+    PL_reg_poscache_size = 0;
+    SAVEPPTR(PL_regprecomp);		/* uncompiled string. */
     SAVEI32(PL_regnpar);		/* () count. */
     SAVEI32(PL_regsize);		/* from regexec.c */
+
+    {
+	/* Save $1..$n (#18107: UTF-8 s/(\w+)/uc($1)/e); AMS 20021106. */
+	U32 i;
+	GV *mgv;
+	REGEXP *rx;
+	char digits[16];
+
+	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
+	    for (i = 1; i <= rx->nparens; i++) {
+		sprintf(digits, "%lu", (long)i);
+		if ((mgv = gv_fetchpv(digits, FALSE, SVt_PV)))
+		    save_scalar(mgv);
+	    }
+	}
+    }
+
 #ifdef DEBUGGING
     SAVEPPTR(PL_reg_starttry);		/* from regexec.c */
 #endif

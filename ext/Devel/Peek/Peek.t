@@ -206,7 +206,7 @@ do_test(13,
   RV = $ADDR
   SV = PVCV\\($ADDR\\) at $ADDR
     REFCNT = 2
-    FLAGS = \\(PADBUSY,PADMY,POK,pPOK,ANON\\)
+    FLAGS = \\(PADBUSY,PADMY,POK,pPOK,ANON,WEAKOUTSIDE\\)
     IV = 0
     NV = 0
     PROTOTYPE = ""
@@ -220,8 +220,10 @@ do_test(13,
     DEPTH = 0
 (?:    MUTEXP = $ADDR
     OWNER = $ADDR
-)?    FLAGS = 0x4
+)?    FLAGS = 0x404
+    OUTSIDE_SEQ = \\d+
     PADLIST = $ADDR
+    PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
     OUTSIDE = $ADDR \\(MAIN\\)');
 
 do_test(14,
@@ -246,10 +248,12 @@ do_test(14,
 (?:    MUTEXP = $ADDR
     OWNER = $ADDR
 )?    FLAGS = 0x0
+    OUTSIDE_SEQ = \\d+
     PADLIST = $ADDR
-      \\d+\\. $ADDR \\("\\$pattern" \\d+-\\d+\\)
-     \\d+\\. $ADDR \\(FAKE "\\$DEBUG" 0-\\d+\\)
-     \\d+\\. $ADDR \\("\\$dump" \\d+-\\d+\\)
+    PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
+       \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$pattern"
+      \\d+\\. $ADDR<\\d+> FAKE "\\$DEBUG"
+      \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$dump"
     OUTSIDE = $ADDR \\(MAIN\\)');
 
 do_test(15,
@@ -260,7 +264,7 @@ do_test(15,
   RV = $ADDR
   SV = PVMG\\($ADDR\\) at $ADDR
     REFCNT = 1
-    FLAGS = \\(OBJECT,RMG\\)
+    FLAGS = \\(OBJECT,SMG\\)
     IV = 0
     NV = 0
     PV = 0
@@ -413,6 +417,7 @@ do_test(20,
 #
 # TAINTEDDIR is not set on: OS2, AMIGAOS, WIN32, MSDOS
 # environment variables may be invisibly case-forced, hence the (?i:PATH)
+# C<scalar(@ARGV)> is turned into an IV on VMS hence the (?:IV)?
 #
 do_test(21,
         $ENV{PATH}=@ARGV,  # scalar(@ARGV) is a handy known tainted value
@@ -429,8 +434,15 @@ do_test(21,
     MG_TYPE = PERL_MAGIC_envelem\\(e\\)
 (?:    MG_FLAGS = 0x01
       TAINTEDDIR
-)?    MG_LEN = 4
-    MG_PTR = $ADDR "(?i:PATH)"
+)?    MG_LEN = -?\d+
+    MG_PTR = $ADDR (?:"(?i:PATH)"|=> HEf_SVKEY
+    SV = PV(?:IV)?\\($ADDR\\) at $ADDR
+      REFCNT = \d+
+      FLAGS = \\(TEMP,POK,pPOK\\)
+(?:      IV = 0
+)?      PV = $ADDR "(?i:PATH)"\\\0
+      CUR = \d+
+      LEN = \d+)
   MAGIC = $ADDR
     MG_VIRTUAL = &PL_vtbl_taint
     MG_TYPE = PERL_MAGIC_taint\\(t\\)');
@@ -449,8 +461,8 @@ do_test(22,
   SV = PVMG\\($ADDR\\) at $ADDR
     REFCNT = 2
     FLAGS = \\(OBJECT,ROK\\)
-    IV = \d+
-    NV = \d+
+    IV = -?\d+
+    NV = $FLOAT
     RV = $ADDR
     SV = NULL\\(0x0\\) at $ADDR
       REFCNT = \d+

@@ -8,7 +8,10 @@
 #include <XSUB.h>
 
 #ifndef PERL_VERSION
-#    include "patchlevel.h"
+#    include <patchlevel.h>
+#    if !(defined(PERL_VERSION) || (SUBVERSION > 0 && defined(PATCHLEVEL)))
+#        include <could_not_find_Perl_patchlevel.h>
+#    endif
 #    define PERL_REVISION	5
 #    define PERL_VERSION	PATCHLEVEL
 #    define PERL_SUBVERSION	SUBVERSION
@@ -96,8 +99,8 @@ sv_tainted(SV *sv)
 #  endif
 #endif
 
-#ifndef PTR2IV
-#  define PTR2IV(ptr) (IV)(ptr)
+#ifndef PTR2UV
+#  define PTR2UV(ptr) (UV)(ptr)
 #endif
 
 MODULE=List::Util	PACKAGE=List::Util
@@ -226,8 +229,12 @@ CODE:
     reducecop = CvSTART(cv);
     SAVESPTR(CvROOT(cv)->op_ppaddr);
     CvROOT(cv)->op_ppaddr = PL_ppaddr[OP_NULL];
+#ifdef PAD_SET_CUR
+    PAD_SET_CUR(CvPADLIST(cv),1);
+#else
     SAVESPTR(PL_curpad);
     PL_curpad = AvARRAY((AV*)AvARRAY(CvPADLIST(cv))[1]);
+#endif
     SAVETMPS;
     SAVESPTR(PL_op);
     ret = ST(1);
@@ -274,8 +281,12 @@ CODE:
     reducecop = CvSTART(cv);
     SAVESPTR(CvROOT(cv)->op_ppaddr);
     CvROOT(cv)->op_ppaddr = PL_ppaddr[OP_NULL];
+#ifdef PAD_SET_CUR
+    PAD_SET_CUR(CvPADLIST(cv),1);
+#else
     SAVESPTR(PL_curpad);
     PL_curpad = AvARRAY((AV*)AvARRAY(CvPADLIST(cv))[1]);
+#endif
     SAVETMPS;
     SAVESPTR(PL_op);
     CATCH_SET(TRUE);
@@ -308,20 +319,16 @@ CODE:
     int index;
     struct op dmy_op;
     struct op *old_op = PL_op;
-    SV *my_pad[2];
-    SV **old_curpad = PL_curpad;
 
     /* We call pp_rand here so that Drand01 get initialized if rand()
        or srand() has not already been called
     */
-    my_pad[1] = sv_newmortal();
     memzero((char*)(&dmy_op), sizeof(struct op));
-    dmy_op.op_targ = 1;
+    /* we let pp_rand() borrow the TARG allocated for this XS sub */
+    dmy_op.op_targ = PL_op->op_targ;
     PL_op = &dmy_op;
-    PL_curpad = (SV **)&my_pad;
     (void)*(PL_ppaddr[OP_RAND])(aTHX);
     PL_op = old_op;
-    PL_curpad = old_curpad;
     for (index = items ; index > 1 ; ) {
 	int swap = (int)(Drand01() * (double)(index--));
 	SV *tmp = ST(swap);
@@ -398,7 +405,7 @@ CODE:
 OUTPUT:
     RETVAL
 
-IV
+UV
 refaddr(sv)
     SV * sv
 PROTOTYPE: $
@@ -407,7 +414,7 @@ CODE:
     if(!SvROK(sv)) {
 	XSRETURN_UNDEF;
     }
-    RETVAL = PTR2IV(SvRV(sv));
+    RETVAL = PTR2UV(SvRV(sv));
 }
 OUTPUT:
     RETVAL
@@ -465,6 +472,44 @@ CODE:
 	croak("vstrings are not implemented in this release of perl");
 #endif
 
+int
+looks_like_number(sv)
+	SV *sv
+PROTOTYPE: $
+CODE:
+  RETVAL = looks_like_number(sv);
+OUTPUT:
+  RETVAL
+
+SV*
+set_prototype(subref, proto)
+    SV *subref
+    SV *proto
+PROTOTYPE: &$
+CODE:
+{
+    if (SvROK(subref)) {
+	SV *sv = SvRV(subref);
+	if (SvTYPE(sv) != SVt_PVCV) {
+	    /* not a subroutine reference */
+	    croak("set_prototype: not a subroutine reference");
+	}
+	if (SvPOK(proto)) {
+	    /* set the prototype */
+	    STRLEN len;
+	    char *ptr = SvPV(proto, len);
+	    sv_setpvn(sv, ptr, len);
+	}
+	else {
+	    /* delete the prototype */
+	    SvPOK_off(sv);
+	}
+    }
+    else {
+	croak("set_prototype: not a reference");
+    }
+    XSRETURN(1);
+}
 
 BOOT:
 {

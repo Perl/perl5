@@ -1980,6 +1980,11 @@
  *	available to split a long double x into a fractional part f and
  *	an integer part i such that |f| < 1.0 and (f + i) = x.
  */
+/* HAS_MODFL_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the modfl() function.  Otherwise, it is up
+ *	to the program to supply one.
+ */
 /* HAS_MODFL_POW32_BUG:
  *	This symbol, if defined, indicates that the modfl routine is
  *	broken for long doubles >= pow(2, 32).
@@ -1988,6 +1993,7 @@
  *	release 2.2.2 is known to be okay.
  */
 /*#define HAS_MODFL		/ **/
+/*#define HAS_MODFL_PROTO		/ **/
 /*#define HAS_MODFL_POW32_BUG		/ **/
 
 /* HAS_MPROTECT:
@@ -2007,6 +2013,12 @@
  *	is supported.
  */
 /*#define HAS_STRUCT_MSGHDR	/ **/
+
+/* HAS_NANOSLEEP:
+ *	This symbol, if defined, indicates that the nanosleep
+ *	system call is available to sleep with 1E-9 sec accuracy.
+ */
+/*#define HAS_NANOSLEEP		/ **/
 
 /* HAS_OFF64_T:
  *	This symbol will be defined if the C compiler supports off64_t.
@@ -2958,10 +2970,15 @@
  *	This symbol, if defined, indicates to the C program that
  *	the struct tm has a tm_zone field.
  */
+/* HAS_TM_TM_GMTOFF:
+ *	This symbol, if defined, indicates to the C program that
+ *	the struct tm has a tm_gmtoff field.
+ */
 #define I_TIME		/**/
 /*#define I_SYS_TIME		/ **/
 /*#define I_SYS_TIME_KERNEL		/ **/
 /*#define HAS_TM_TM_ZONE		/ **/
+/*#define HAS_TM_TM_GMTOFF	/ **/
 
 /* I_USTAT:
  *	This symbol, if defined, indicates that <ustat.h> exists and

@@ -1,4 +1,4 @@
-#!/bin/env perl -w
+#!/usr/bin/perl -w
 
 # A first attempt at some automated support for making a perl release.
 # Very basic but functional - if you're on a unix system.

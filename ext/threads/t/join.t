@@ -1,4 +1,3 @@
-
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
@@ -11,7 +10,7 @@ BEGIN {
 
 use ExtUtils::testlib;
 use strict;
-BEGIN { print "1..10\n" };
+BEGIN { print "1..11\n" };
 use threads;
 use threads::shared;
 
@@ -28,6 +27,10 @@ sub ok {
     printf "# Failed test at line %d\n", (caller)[2] unless $ok;
     $test_id++;
     return $ok;
+}
+
+sub skip {
+    ok(1, "# Skipped: @_");
 }
 
 ok(1,"");
@@ -86,4 +89,32 @@ ok(1,"");
 	return $foo{bar} = \$foo;
     })->join();
     ok(1,"");
+}
+
+if ($^O eq 'linux') { # We parse ps output so this is OS-dependent.
+  # First modify $0 in a subthread.
+  print "# mainthread: \$0 = $0\n";
+  threads->new( sub {
+		  print "# subthread: \$0 = $0\n";
+		  $0 = "foobar";
+		  print "# subthread: \$0 = $0\n" } )->join;
+  print "# mainthread: \$0 = $0\n";
+  print "# pid = $$\n";
+  if (open PS, "ps -f |") { # Note: must work in (all) Linux(es).
+    my $ok;
+    while (<PS>) {
+      s/\s+$//; # there seems to be extra whitespace at the end by ps(1)?
+      print "# $_\n";
+      if (/\b$$\b.+\bfoobar\b/) {
+	$ok++;
+	last;
+      }
+    }
+    close PS;
+    ok($ok, 'altering $0 is effective');
+  } else {
+    skip("\$0 check: opening 'ps -f |' failed: $!");
+  }
+} else {
+  skip("\$0 check: only on Linux");
 }

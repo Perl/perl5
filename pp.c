@@ -1,6 +1,6 @@
 /*    pp.c
  *
- *    Copyright (c) 1991-2002, Larry Wall
+ *    Copyright (c) 1991-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -49,7 +49,7 @@ PP(pp_padav)
     dSP; dTARGET;
     I32 gimme;
     if (PL_op->op_private & OPpLVAL_INTRO)
-	SAVECLEARSV(PL_curpad[PL_op->op_targ]);
+	SAVECLEARSV(PAD_SVl(PL_op->op_targ));
     EXTEND(SP, 1);
     if (PL_op->op_flags & OPf_REF) {
 	PUSHs(TARG);
@@ -92,7 +92,7 @@ PP(pp_padhv)
 
     XPUSHs(TARG);
     if (PL_op->op_private & OPpLVAL_INTRO)
-	SAVECLEARSV(PL_curpad[PL_op->op_targ]);
+	SAVECLEARSV(PAD_SVl(PL_op->op_targ));
     if (PL_op->op_flags & OPf_REF)
 	RETURN;
     else if (LVRET) {
@@ -161,7 +161,7 @@ PP(pp_rv2gv)
 		    GV *gv;
 		    if (cUNOP->op_targ) {
 			STRLEN len;
-			SV *namesv = PL_curpad[cUNOP->op_targ];
+			SV *namesv = PAD_SV(cUNOP->op_targ);
 			name = SvPV(namesv, len);
 			gv = (GV*)NEWSV(0,0);
 			gv_init(gv, CopSTASH(PL_curcop), name, len, 0);
@@ -211,6 +211,7 @@ PP(pp_rv2gv)
 
 PP(pp_rv2sv)
 {
+    GV *gv = Nullgv;
     dSP; dTOPss;
 
     if (SvROK(sv)) {
@@ -226,9 +227,9 @@ PP(pp_rv2sv)
 	}
     }
     else {
-	GV *gv = (GV*)sv;
 	char *sym;
 	STRLEN len;
+	gv = (GV*)sv;
 
 	if (SvTYPE(gv) != SVt_PVGV) {
 	    if (SvGMAGICAL(sv)) {
@@ -265,8 +266,14 @@ PP(pp_rv2sv)
 	sv = GvSV(gv);
     }
     if (PL_op->op_flags & OPf_MOD) {
-	if (PL_op->op_private & OPpLVAL_INTRO)
-	    sv = save_scalar((GV*)TOPs);
+	if (PL_op->op_private & OPpLVAL_INTRO) {
+	    if (cUNOP->op_first->op_type == OP_NULL)
+		sv = save_scalar((GV*)TOPs);
+	    else if (gv)
+		sv = save_scalar(gv);
+	    else
+		Perl_croak(aTHX_ PL_no_localize_ref);
+	}
 	else if (PL_op->op_private & OPpDEREF)
 	    vivify_ref(sv, PL_op->op_private & OPpDEREF);
     }
@@ -422,7 +429,7 @@ PP(pp_prototype)
 PP(pp_anoncode)
 {
     dSP;
-    CV* cv = (CV*)PL_curpad[PL_op->op_targ];
+    CV* cv = (CV*)PAD_SV(PL_op->op_targ);
     if (CvCLONE(cv))
 	cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
     EXTEND(SP,1);
@@ -880,16 +887,15 @@ PP(pp_postdec)
 
 PP(pp_pow)
 {
-    dSP; dATARGET; tryAMAGICbin(pow,opASSIGN);
+    dSP; dATARGET;
 #ifdef PERL_PRESERVE_IVUV
-    /* ** is implemented with pow. pow is floating point. Perl programmers
-       write 2 ** 31 and expect it to be 2147483648
-       pow never made any guarantee to deliver a result to 53 (or whatever)
-       bits of accuracy. Which is unfortunate, as perl programmers expect it
-       to, and on some platforms (eg Irix with long doubles) it doesn't in
-       a very visible case. (2 ** 31, which a regression test uses)
-       So we'll implement power-of-2 ** +ve integer with multiplies, to avoid
-       these problems.  */
+    bool is_int = 0;
+#endif
+    tryAMAGICbin(pow,opASSIGN);
+#ifdef PERL_PRESERVE_IVUV
+    /* For integer to integer power, we do the calculation by hand wherever
+       we're sure it is safe; otherwise we call pow() and try to convert to
+       integer afterwards. */
     {
         SvIV_please(TOPm1s);
         if (SvIOK(TOPm1s)) {
@@ -921,10 +927,12 @@ PP(pp_pow)
                         goto float_it; /* Can't do negative powers this way.  */
                     }
                 }
-                /* now we have integer ** positive integer.
-                   foo & (foo - 1) is zero only for a power of 2.  */
+                /* now we have integer ** positive integer. */
+                is_int = 1;
+
+                /* foo & (foo - 1) is zero only for a power of 2.  */
                 if (!(baseuv & (baseuv - 1))) {
-                    /* We are raising power-of-2 to postive integer.
+                    /* We are raising power-of-2 to a positive integer.
                        The logic here will work for any base (even non-integer
                        bases) but it can be less accurate than
                        pow (base,power) or exp (power * log (base)) when the
@@ -936,20 +944,6 @@ PP(pp_pow)
                     NV base = baseuok ? baseuv : -(NV)baseuv;
                     int n = 0;
 
-                    /* The logic is this.
-                       x ** n === x ** m1 * x ** m2 where n = m1 + m2
-                       so as 42 is 32 + 8 + 2
-                       x ** 42 can be written as
-                       x ** 32 * x ** 8 * x ** 2
-                       I can calculate x ** 2, x ** 4, x ** 8 etc trivially:
-                       x ** 2n is x ** n * x ** n
-                       So I loop round, squaring x each time
-                       (x, x ** 2, x ** 4, x ** 8) and multiply the result
-                       by the x-value whenever that bit is set in the power.
-                       To finish as soon as possible I zero bits in the power
-                       when I've done them, so that power becomes zero when
-                       I clear the last bit (no more to do), and the loop
-                       terminates.  */
                     for (; power; base *= base, n++) {
                         /* Do I look like I trust gcc with long longs here?
                            Do I hell.  */
@@ -957,24 +951,69 @@ PP(pp_pow)
                         if (power & bit) {
                             result *= base;
                             /* Only bother to clear the bit if it is set.  */
-                            power &= ~bit;
+                            power -= bit;
                            /* Avoid squaring base again if we're done. */
                            if (power == 0) break;
                         }
                     }
                     SP--;
                     SETn( result );
+                    SvIV_please(TOPs);
                     RETURN;
-                }
-            }
-        }
+		} else {
+		    register unsigned int highbit = 8 * sizeof(UV);
+		    register unsigned int lowbit = 0;
+		    register unsigned int diff;
+		    while ((diff = (highbit - lowbit) >> 1)) {
+			if (baseuv & ~((1 << (lowbit + diff)) - 1))
+			    lowbit += diff;
+			else 
+			    highbit -= diff;
+		    }
+		    /* we now have baseuv < 2 ** highbit */
+		    if (power * highbit <= 8 * sizeof(UV)) {
+			/* result will definitely fit in UV, so use UV math
+			   on same algorithm as above */
+			register UV result = 1;
+			register UV base = baseuv;
+			register int n = 0;
+			for (; power; base *= base, n++) {
+			    register UV bit = (UV)1 << (UV)n;
+			    if (power & bit) {
+				result *= base;
+				power -= bit;
+				if (power == 0) break;
+			    }
+			}
+			SP--;
+			if (baseuok || !(power & 1))
+			    /* answer is positive */
+			    SETu( result );
+			else if (result <= (UV)IV_MAX)
+			    /* answer negative, fits in IV */
+			    SETi( -(IV)result );
+			else if (result == (UV)IV_MIN) 
+			    /* 2's complement assumption: special case IV_MIN */
+			    SETi( IV_MIN );
+			else
+			    /* answer negative, doesn't fit */
+			    SETn( -(NV)result );
+			RETURN;
+		    } 
+		}
+	    }
+	}
     }
-      float_it:
+  float_it:
 #endif    
     {
-        dPOPTOPnnrl;
-        SETn( Perl_pow( left, right) );
-        RETURN;
+	dPOPTOPnnrl;
+	SETn( Perl_pow( left, right) );
+#ifdef PERL_PRESERVE_IVUV
+	if (is_int)
+	    SvIV_please(TOPs);
+#endif
+	RETURN;
     }
 }
 
@@ -1198,7 +1237,7 @@ PP(pp_divide)
                     }
                     RETURN;
                 } /* tried integer divide but it was not an integer result */
-            } /* else (abs(result) < 1.0) or (both UVs in range for NV) */
+            } /* else (PERL_ABS(result) < 1.0) or (both UVs in range for NV) */
         } /* left wasn't SvIOK */
     } /* right wasn't SvIOK */
 #endif /* PERL_TRY_UV_DIVIDE */
@@ -2419,16 +2458,76 @@ PP(pp_i_divide)
     }
 }
 
+STATIC
+PP(pp_i_modulo_0)
+{
+     /* This is the vanilla old i_modulo. */
+     dSP; dATARGET; tryAMAGICbin(modulo,opASSIGN);
+     {
+	  dPOPTOPiirl;
+	  if (!right)
+	       DIE(aTHX_ "Illegal modulus zero");
+	  SETi( left % right );
+	  RETURN;
+     }
+}
+
+#ifdef __GLIBC__
+STATIC
+PP(pp_i_modulo_1)
+{
+     /* This is the i_modulo with the workaround for the _moddi3 bug
+      * in (at least) glibc 2.2.5 (the PERL_ABS() the workaround).
+      * See below for pp_i_modulo. */
+     dSP; dATARGET; tryAMAGICbin(modulo,opASSIGN);
+     {
+	  dPOPTOPiirl;
+	  if (!right)
+	       DIE(aTHX_ "Illegal modulus zero");
+	  SETi( left % PERL_ABS(right) );
+	  RETURN;
+     }
+}
+#endif
+
 PP(pp_i_modulo)
 {
-    dSP; dATARGET; tryAMAGICbin(modulo,opASSIGN);
-    {
-      dPOPTOPiirl;
-      if (!right)
-	DIE(aTHX_ "Illegal modulus zero");
-      SETi( left % right );
-      RETURN;
-    }
+     dSP; dATARGET; tryAMAGICbin(modulo,opASSIGN);
+     {
+	  dPOPTOPiirl;
+	  if (!right)
+	       DIE(aTHX_ "Illegal modulus zero");
+	  /* The assumption is to use hereafter the old vanilla version... */
+	  PL_op->op_ppaddr =
+	       PL_ppaddr[OP_I_MODULO] =
+	           &Perl_pp_i_modulo_0;
+	  /* .. but if we have glibc, we might have a buggy _moddi3
+	   * (at least glicb 2.2.5 is known to have this bug), in other
+	   * words our integer modulus with negative quad as the second
+	   * argument might be broken.  Test for this and re-patch the
+	   * opcode dispatch table if that is the case, remembering to
+	   * also apply the workaround so that this first round works
+	   * right, too.  See [perl #9402] for more information. */
+#if defined(__GLIBC__) && IVSIZE == 8
+	  {
+	       IV l =   3;
+	       IV r = -10;
+	       /* Cannot do this check with inlined IV constants since
+		* that seems to work correctly even with the buggy glibc. */
+	       if (l % r == -3) {
+		    /* Yikes, we have the bug.
+		     * Patch in the workaround version. */
+		    PL_op->op_ppaddr =
+			 PL_ppaddr[OP_I_MODULO] =
+			     &Perl_pp_i_modulo_1;
+		    /* Make certain we work right this time, too. */
+		    right = PERL_ABS(right);
+	       }
+	  }
+#endif
+	  SETi( left % right );
+	  RETURN;
+     }
 }
 
 PP(pp_i_add)
@@ -3095,6 +3194,8 @@ PP(pp_substr)
 		    sv_setpvn(sv,"",0);	/* avoid lexical reincarnation */
 	    }
 
+	    if (SvREFCNT(TARG) > 1)	/* don't share the TARG (#20933) */
+		TARG = sv_newmortal();
 	    if (SvTYPE(TARG) < SVt_PVLV) {
 		sv_upgrade(TARG, SVt_PVLV);
 		sv_magic(TARG, Nullsv, PERL_MAGIC_substr, Nullch, 0);
@@ -3125,6 +3226,8 @@ PP(pp_vec)
 
     SvTAINTED_off(TARG);		/* decontaminate */
     if (lvalue) {			/* it's an lvalue! */
+	if (SvREFCNT(TARG) > 1)	/* don't share the TARG (#20933) */
+	    TARG = sv_newmortal();
 	if (SvTYPE(TARG) < SVt_PVLV) {
 	    sv_upgrade(TARG, SVt_PVLV);
 	    sv_magic(TARG, Nullsv, PERL_MAGIC_vec, Nullch, 0);
@@ -3279,8 +3382,19 @@ PP(pp_chr)
     *tmps++ = (char)value;
     *tmps = '\0';
     (void)SvPOK_only(TARG);
-    if (PL_encoding)
+    if (PL_encoding && !IN_BYTES) {
         sv_recode_to_utf8(TARG, PL_encoding);
+	tmps = SvPVX(TARG);
+	if (SvCUR(TARG) == 0 || !is_utf8_string((U8*)tmps, SvCUR(TARG)) ||
+	    memEQ(tmps, "\xef\xbf\xbd\0", 4)) {
+	    SvGROW(TARG,3);
+	    SvCUR_set(TARG, 2);
+	    *tmps++ = (U8)UTF8_EIGHT_BIT_HI(value);
+	    *tmps++ = (U8)UTF8_EIGHT_BIT_LO(value);
+	    *tmps = '\0';
+	    SvUTF8_on(TARG);
+	}
+    }
     XPUSHs(TARG);
     RETURN;
 }
@@ -3325,7 +3439,9 @@ PP(pp_ucfirst)
     STRLEN slen;
 
     SvGETMAGIC(sv);
-    if (DO_UTF8(sv) && (s = (U8*)SvPV_nomg(sv, slen)) && slen && UTF8_IS_START(*s)) {
+    if (DO_UTF8(sv) &&
+	(s = (U8*)SvPV_nomg(sv, slen)) && slen &&
+	UTF8_IS_START(*s)) {
 	U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
 	STRLEN ulen;
 	STRLEN tculen;
@@ -3336,8 +3452,16 @@ PP(pp_ucfirst)
 
 	if (!SvPADTMP(sv) || SvREADONLY(sv)) {
 	    dTARGET;
+	    /* slen is the byte length of the whole SV.
+	     * ulen is the byte length of the original Unicode character
+	     * stored as UTF-8 at s.
+	     * tculen is the byte length of the freshly titlecased
+	     * Unicode character stored as UTF-8 at tmpbuf.
+	     * We first set the result to be the titlecased character,
+	     * and then append the rest of the SV data. */
 	    sv_setpvn(TARG, (char*)tmpbuf, tculen);
-	    sv_catpvn(TARG, (char*)(s + ulen), slen - ulen);
+	    if (slen > ulen)
+	        sv_catpvn(TARG, (char*)(s + ulen), slen - ulen);
 	    SvUTF8_on(TARG);
 	    SETs(TARG);
 	}
@@ -3377,7 +3501,9 @@ PP(pp_lcfirst)
     STRLEN slen;
 
     SvGETMAGIC(sv);
-    if (DO_UTF8(sv) && (s = (U8*)SvPV_nomg(sv, slen)) && slen && UTF8_IS_START(*s)) {
+    if (DO_UTF8(sv) &&
+	(s = (U8*)SvPV_nomg(sv, slen)) && slen &&
+	UTF8_IS_START(*s)) {
 	STRLEN ulen;
 	U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
 	U8 *tend;
@@ -3390,7 +3516,8 @@ PP(pp_lcfirst)
 	if (!SvPADTMP(sv) || (STRLEN)(tend - tmpbuf) != ulen || SvREADONLY(sv)) {
 	    dTARGET;
 	    sv_setpvn(TARG, (char*)tmpbuf, tend - tmpbuf);
-	    sv_catpvn(TARG, (char*)(s + ulen), slen - ulen);
+	    if (slen > ulen)
+	        sv_catpvn(TARG, (char*)(s + ulen), slen - ulen);
 	    SvUTF8_on(TARG);
 	    SETs(TARG);
 	}
@@ -4388,18 +4515,18 @@ PP(pp_split)
     TAINT_IF((pm->op_pmflags & PMf_LOCALE) &&
 	     (pm->op_pmflags & (PMf_WHITE | PMf_SKIPWHITE)));
 
-    PL_reg_match_utf8 = do_utf8;
+    RX_MATCH_UTF8_set(rx, do_utf8);
 
     if (pm->op_pmreplroot) {
 #ifdef USE_ITHREADS
-	ary = GvAVn((GV*)PL_curpad[INT2PTR(PADOFFSET, pm->op_pmreplroot)]);
+	ary = GvAVn((GV*)PAD_SVl(INT2PTR(PADOFFSET, pm->op_pmreplroot)));
 #else
 	ary = GvAVn((GV*)pm->op_pmreplroot);
 #endif
     }
     else if (gimme != G_ARRAY)
 #ifdef USE_5005THREADS
-	ary = (AV*)PL_curpad[0];
+	ary = (AV*)PAD_SVl(0);
 #else
 	ary = GvAVn(PL_defgv);
 #endif /* USE_5005THREADS */
@@ -4424,6 +4551,7 @@ PP(pp_split)
 	    }
 	    /* temporarily switch stacks */
 	    SWITCHSTACK(PL_curstack, ary);
+	    PL_curstackinfo->si_stack = ary;
 	    make_mortal = 0;
 	}
     }
@@ -4589,6 +4717,7 @@ PP(pp_split)
 		}
 	    }
 	    s = rx->endp[0] + orig;
+	    PUTBACK;
 	}
     }
 
@@ -4621,6 +4750,7 @@ PP(pp_split)
     if (realarray) {
 	if (!mg) {
 	    SWITCHSTACK(ary, oldstack);
+	    PL_curstackinfo->si_stack = oldstack;
 	    if (SvSMAGICAL(ary)) {
 		PUTBACK;
 		mg_set((SV*)ary);

@@ -1,6 +1,6 @@
 /*    utf8.c
  *
- *    Copyright (c) 1998-2002, Larry Wall
+ *    Copyright (c) 1998-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -217,10 +217,10 @@ Perl_is_utf8_char(pTHX_ U8 *s)
 /*
 =for apidoc A|bool|is_utf8_string|U8 *s|STRLEN len
 
-Returns true if first C<len> bytes of the given string form a valid UTF8
-string, false otherwise.  Note that 'a valid UTF8 string' does not mean
-'a string that contains UTF8' because a valid ASCII string is a valid
-UTF8 string.
+Returns true if first C<len> bytes of the given string form a valid
+UTF8 string, false otherwise.  Note that 'a valid UTF8 string' does
+not mean 'a string that contains code points above 0x7F encoded in
+UTF8' because a valid ASCII string is a valid UTF8 string.
 
 =cut
 */
@@ -769,6 +769,9 @@ Perl_bytes_from_utf8(pTHX_ U8 *s, STRLEN *len, bool *is_utf8)
 Converts a string C<s> of length C<len> from ASCII into UTF8 encoding.
 Returns a pointer to the newly-created string, and sets C<len> to
 reflect the new length.
+
+If you want to convert to UTF8 from other encodings than ASCII,
+see sv_recode_to_utf8().
 
 =cut
 */
@@ -1564,8 +1567,8 @@ Perl_swash_init(pTHX_ char* pkg, char* name, SV *listsv, I32 minbits, I32 none)
     }
     if (!SvROK(retval) || SvTYPE(SvRV(retval)) != SVt_PVHV) {
         if (SvPOK(retval))
-	    Perl_croak(aTHX_ "Can't find Unicode property definition \"%s\"",
-		       SvPV_nolen(retval));
+	    Perl_croak(aTHX_ "Can't find Unicode property definition \"%"SVf"\"",
+		       retval);
 	Perl_croak(aTHX_ "SWASHNEW didn't return an HV ref");
     }
     return retval;

@@ -18,8 +18,8 @@ use Carp 'croak';
 # The most recent version and complete docs are available at:
 #   http://stein.cshl.org/WWW/software/CGI/
 
-$CGI::revision = '$Id: CGI.pm,v 1.62 2002/04/10 19:36:01 lstein Exp $';
-$CGI::VERSION='2.81';
+$CGI::revision = '$Id: CGI.pm,v 1.75 2002/10/16 17:48:37 lstein Exp $';
+$CGI::VERSION='2.89';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -31,6 +31,10 @@ use CGI::Util qw(rearrange make_attributes unescape escape expires);
 
 use constant XHTML_DTD => ['-//W3C//DTD XHTML 1.0 Transitional//EN',
                            'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'];
+
+$TAINTED = substr("$0$^X",0,0);
+
+my @SAVED_SYMBOLS;
 
 # >>>>> Here are some globals that you might want to adjust <<<<<<
 sub initialize_globals {
@@ -127,12 +131,14 @@ if ($OS =~ /^MSWin/i) {
     $OS = 'OS2';
 } elsif ($OS =~ /^epoc/i) {
     $OS = 'EPOC';
+} elsif ($OS =~ /^cygwin/i) {
+    $OS = 'CYGWIN';
 } else {
     $OS = 'UNIX';
 }
 
 # Some OS logic.  Binary mode enabled on DOS, NT and VMS
-$needs_binmode = $OS=~/^(WINDOWS|DOS|OS2|MSWin)/;
+$needs_binmode = $OS=~/^(WINDOWS|DOS|OS2|MSWin|CYGWIN)/;
 
 # This is the default class for the CGI object to use when all else fails.
 $DefaultClass = 'CGI' unless defined $CGI::DefaultClass;
@@ -143,8 +149,8 @@ $AutoloadClass = $DefaultClass unless defined $CGI::AutoloadClass;
 # The path separator is a slash, backslash or semicolon, depending
 # on the paltform.
 $SL = {
-       UNIX=>'/', OS2=>'\\', EPOC=>'/',
-       WINDOWS=>'\\', DOS=>'\\', MACINTOSH=>':', VMS=>'/'
+    UNIX    => '/',  OS2 => '\\', EPOC      => '/', CYGWIN => '/',
+    WINDOWS => '\\', DOS => '\\', MACINTOSH => ':', VMS    => '/'
     }->{$OS};
 
 # This no longer seems to be necessary
@@ -153,13 +159,19 @@ $SL = {
 $IIS++ if defined($ENV{'SERVER_SOFTWARE'}) && $ENV{'SERVER_SOFTWARE'}=~/IIS/;
 
 # Turn on special checking for Doug MacEachern's modperl
-if (exists $ENV{'GATEWAY_INTERFACE'} 
-    && 
+if (exists $ENV{'GATEWAY_INTERFACE'}
+    &&
     ($MOD_PERL = $ENV{'GATEWAY_INTERFACE'} =~ /^CGI-Perl\//))
-{
+  {
     $| = 1;
-    require Apache;
-}
+    require mod_perl;
+    if ($mod_perl::VERSION >= 1.99) {
+      require Apache::compat;
+    } else {
+      require Apache;
+    }
+  }
+
 # Turn on special checking for ActiveState's PerlEx
 $PERLEX++ if defined($ENV{'GATEWAY_INTERFACE'}) && $ENV{'GATEWAY_INTERFACE'} =~ /^CGI-PerlEx/;
 
@@ -219,7 +231,7 @@ if ($needs_binmode) {
 sub import {
     my $self = shift;
 
-# This causes modules to clash.  
+    # This causes modules to clash.
     undef %EXPORT_OK;
     undef %EXPORT;
 
@@ -380,6 +392,9 @@ sub init {
 
     # set charset to the safe ISO-8859-1
     $self->charset('ISO-8859-1');
+
+    # set autoescaping to on
+    $self->{'escape'} = 1;
 
   METHOD: {
 
@@ -714,6 +729,7 @@ sub _setup_symbols {
 	}
     }
     _compile_all(keys %EXPORT) if $compile;
+    @SAVED_SYMBOLS = @_;
 }
 
 sub charset {
@@ -766,11 +782,12 @@ END_OF_FUNC
 ####
 sub delete {
     my($self,@p) = self_or_default(@_);
-    my($name) = rearrange([NAME],@p);
-    CORE::delete $self->{$name};
-    CORE::delete $self->{'.fieldnames'}->{$name};
-    @{$self->{'.parameters'}}=grep($_ ne $name,$self->param());
-    return wantarray ? () : undef;
+    my(@names) = rearrange([NAME],@p);
+    for my $name (@names) {
+      CORE::delete $self->{$name};
+      CORE::delete $self->{'.fieldnames'}->{$name};
+      @{$self->{'.parameters'}}=grep($_ ne $name,$self->param());
+    }
 }
 END_OF_FUNC
 
@@ -992,7 +1009,9 @@ EOF
 'autoEscape' => <<'END_OF_FUNC',
 sub autoEscape {
     my($self,$escape) = self_or_default(@_);
-    $self->{'dontescape'}=!$escape;
+    my $d = $self->{'escape'};
+    $self->{'escape'} = $escape;
+    $d;
 }
 END_OF_FUNC
 
@@ -1363,7 +1382,7 @@ sub start_html {
     } else {
         push(@result,qq(<!DOCTYPE html\n\tPUBLIC "$dtd">));
     }
-    push(@result,$XHTML ? qq(<html xmlns="http://www.w3.org/1999/xhtml" lang="$lang"><head><title>$title</title>)
+    push(@result,$XHTML ? qq(<html xmlns="http://www.w3.org/1999/xhtml" lang="$lang" xml:lang="$lang"><head><title>$title</title>)
                         : qq(<html lang="$lang"><head><title>$title</title>));
 	if (defined $author) {
     push(@result,$XHTML ? "<link rev=\"made\" href=\"mailto:$author\" />"
@@ -1504,14 +1523,14 @@ END_OF_FUNC
 # Parameters:
 #  $action -> optional URL of script to run
 # Returns:
-#   A string containing a <ISINDEX> tag
+#   A string containing a <isindex> tag
 'isindex' => <<'END_OF_FUNC',
 sub isindex {
     my($self,@p) = self_or_default(@_);
     my($action,@other) = rearrange([ACTION],@p);
-    $action = qq/action="$action"/ if $action;
+    $action = qq/ action="$action"/ if $action;
     my($other) = @other ? " @other" : '';
-    return $XHTML ? "<isindex $action$other />" : "<isindex $action$other>";
+    return $XHTML ? "<isindex$action$other />" : "<isindex$action$other>";
 }
 END_OF_FUNC
 
@@ -1533,7 +1552,9 @@ sub startform {
     $enctype = $enctype || &URL_ENCODED;
     unless (defined $action) {
        $action = $self->url(-absolute=>1,-path=>1);
-       $action .= "?$ENV{QUERY_STRING}" if $ENV{QUERY_STRING};
+       if (length($ENV{QUERY_STRING})>0) {
+           $action .= "?$ENV{QUERY_STRING}";
+       }
     }
     $action = qq(action="$action");
     my($other) = @other ? " @other" : '';
@@ -1629,7 +1650,7 @@ END_OF_FUNC
 #   $size ->  Optional width of field in characaters.
 #   $maxlength -> Optional maximum number of characters.
 # Returns:
-#   A string containing a <INPUT TYPE="text"> field
+#   A string containing a <input type="text"> field
 #
 'textfield' => <<'END_OF_FUNC',
 sub textfield {
@@ -1645,7 +1666,7 @@ END_OF_FUNC
 #   $size ->  Optional width of field in characaters.
 #   $maxlength -> Optional maximum number of characters.
 # Returns:
-#   A string containing a <INPUT TYPE="text"> field
+#   A string containing a <input type="file"> field
 #
 'filefield' => <<'END_OF_FUNC',
 sub filefield {
@@ -1664,7 +1685,7 @@ END_OF_FUNC
 #   $size ->  Optional width of field in characters.
 #   $maxlength -> Optional maximum characters that can be entered.
 # Returns:
-#   A string containing a <INPUT TYPE="password"> field
+#   A string containing a <input type="password"> field
 #
 'password_field' => <<'END_OF_FUNC',
 sub password_field {
@@ -1711,7 +1732,7 @@ END_OF_FUNC
 #   $onclick -> (optional) Text of the JavaScript to run when the button is
 #                clicked.
 # Returns:
-#   A string containing a <INPUT TYPE="button"> tag
+#   A string containing a <input type="button"> tag
 ####
 'button' => <<'END_OF_FUNC',
 sub button {
@@ -1744,7 +1765,7 @@ END_OF_FUNC
 #   $value -> (optional) Value of the button when selected (also doubles as label).
 #   $label -> (optional) Label printed on the button(also doubles as the value).
 # Returns:
-#   A string containing a <INPUT TYPE="submit"> tag
+#   A string containing a <input type="submit"> tag
 ####
 'submit' => <<'END_OF_FUNC',
 sub submit {
@@ -1772,7 +1793,7 @@ END_OF_FUNC
 # Parameters:
 #   $name -> (optional) Name for the button.
 # Returns:
-#   A string containing a <INPUT TYPE="reset"> tag
+#   A string containing a <input type="reset"> tag
 ####
 'reset' => <<'END_OF_FUNC',
 sub reset {
@@ -1792,7 +1813,7 @@ END_OF_FUNC
 # Parameters:
 #   $name -> (optional) Name for the button.
 # Returns:
-#   A string containing a <INPUT TYPE="submit" NAME=".defaults"> tag
+#   A string containing a <input type="submit" name=".defaults"> tag
 #
 # Note: this button has a special meaning to the initialization script,
 # and tells it to ERASE the current query string so that your defaults
@@ -1834,7 +1855,7 @@ END_OF_FUNC
 #   $label -> (optional) a user-readable label printed next to the box.
 #             Otherwise the checkbox name is used.
 # Returns:
-#   A string containing a <INPUT TYPE="checkbox"> field
+#   A string containing a <input type="checkbox"> field
 ####
 'checkbox' => <<'END_OF_FUNC',
 sub checkbox {
@@ -1882,16 +1903,16 @@ END_OF_FUNC
 #             in the form $label{'value'}="Long explanatory label".
 #             Otherwise the provided values are used as the labels.
 # Returns:
-#   An ARRAY containing a series of <INPUT TYPE="checkbox"> fields
+#   An ARRAY containing a series of <input type="checkbox"> fields
 ####
 'checkbox_group' => <<'END_OF_FUNC',
 sub checkbox_group {
     my($self,@p) = self_or_default(@_);
 
-    my($name,$values,$defaults,$linebreak,$labels,$rows,$columns,
+    my($name,$values,$defaults,$linebreak,$labels,$attributes,$rows,$columns,
        $rowheaders,$colheaders,$override,$nolabels,@other) =
 	rearrange([NAME,[VALUES,VALUE],[DEFAULTS,DEFAULT],
-			  LINEBREAK,LABELS,ROWS,[COLUMNS,COLS],
+            LINEBREAK,LABELS,ATTRIBUTES,ROWS,[COLUMNS,COLS],
 			  ROWHEADERS,COLHEADERS,
 			  [OVERRIDE,FORCE],NOLABELS],@p);
 
@@ -1921,9 +1942,10 @@ sub checkbox_group {
 	    $label = $labels->{$_} if defined($labels) && defined($labels->{$_});
 	    $label = $self->escapeHTML($label);
 	}
+        my $attribs = $self->_set_attributes($_, $attributes);
 	$_ = $self->escapeHTML($_,1);
-	push(@elements,$XHTML ? qq(<input type="checkbox" name="$name" value="$_"$checked$other />${label}${break})
-                              : qq/<input type="checkbox" name="$name" value="$_"$checked$other>${label}${break}/);
+        push(@elements,$XHTML ? qq(<input type="checkbox" name="$name" value="$_"$checked$other$attribs />${label}${break})
+                              : qq/<input type="checkbox" name="$name" value="$_"$checked$other$attribs>${label}${break}/);
     }
     $self->register_parameter($name);
     return wantarray ? @elements : join(' ',@elements)            
@@ -1939,7 +1961,7 @@ sub escapeHTML {
          push @_,$_[0] if @_==1 && $_[0] eq 'CGI';
          my ($self,$toencode,$newlinestoo) = CGI::self_or_default(@_);
          return undef unless defined($toencode);
-         return $toencode if ref($self) && $self->{'dontescape'};
+         return $toencode if ref($self) && !$self->{'escape'};
          $toencode =~ s{&}{&amp;}gso;
          $toencode =~ s{<}{&lt;}gso;
          $toencode =~ s{>}{&gt;}gso;
@@ -1948,8 +1970,8 @@ sub escapeHTML {
                      uc $self->{'.charset'} eq 'WINDOWS-1252';
          if ($latin) {  # bug in some browsers
                 $toencode =~ s{'}{&#39;}gso;
-                $toencode =~ s{\x8b}{&#139;}gso;
-                $toencode =~ s{\x9b}{&#155;}gso;
+                $toencode =~ s{\x8b}{&#8249;}gso;
+                $toencode =~ s{\x9b}{&#8250;}gso;
                 if (defined $newlinestoo && $newlinestoo) {
                      $toencode =~ s{\012}{&#10;}gso;
                      $toencode =~ s{\015}{&#13;}gso;
@@ -2034,15 +2056,15 @@ END_OF_FUNC
 #             in the form $label{'value'}="Long explanatory label".
 #             Otherwise the provided values are used as the labels.
 # Returns:
-#   An ARRAY containing a series of <INPUT TYPE="radio"> fields
+#   An ARRAY containing a series of <input type="radio"> fields
 ####
 'radio_group' => <<'END_OF_FUNC',
 sub radio_group {
     my($self,@p) = self_or_default(@_);
 
-    my($name,$values,$default,$linebreak,$labels,
+    my($name,$values,$default,$linebreak,$labels,$attributes,
        $rows,$columns,$rowheaders,$colheaders,$override,$nolabels,@other) =
-	rearrange([NAME,[VALUES,VALUE],DEFAULT,LINEBREAK,LABELS,
+  rearrange([NAME,[VALUES,VALUE],DEFAULT,LINEBREAK,LABELS,ATTRIBUTES,
 			  ROWS,[COLUMNS,COLS],
 			  ROWHEADERS,COLHEADERS,
 			  [OVERRIDE,FORCE],NOLABELS],@p);
@@ -2076,9 +2098,10 @@ sub radio_group {
 	    $label = $labels->{$_} if defined($labels) && defined($labels->{$_});
 	    $label = $self->escapeHTML($label,1);
 	}
+  my $attribs = $self->_set_attributes($_, $attributes);
 	$_=$self->escapeHTML($_);
-	push(@elements,$XHTML ? qq(<input type="radio" name="$name" value="$_"$checkit$other />${label}${break})
-                              : qq/<input type="radio" name="$name" value="$_"$checkit$other>${label}${break}/);
+  push(@elements,$XHTML ? qq(<input type="radio" name="$name" value="$_"$checkit$other$attribs />${label}${break})
+                              : qq/<input type="radio" name="$name" value="$_"$checkit$other$attribs>${label}${break}/);
     }
     $self->register_parameter($name);
     return wantarray ? @elements : join(' ',@elements) 
@@ -2106,8 +2129,9 @@ END_OF_FUNC
 sub popup_menu {
     my($self,@p) = self_or_default(@_);
 
-    my($name,$values,$default,$labels,$override,@other) =
-	rearrange([NAME,[VALUES,VALUE],[DEFAULT,DEFAULTS],LABELS,[OVERRIDE,FORCE]],@p);
+    my($name,$values,$default,$labels,$attributes,$override,@other) =
+       rearrange([NAME,[VALUES,VALUE],[DEFAULT,DEFAULTS],LABELS,
+       ATTRIBUTES,[OVERRIDE,FORCE]],@p);
     my($result,$selected);
 
     if (!$override && defined($self->param($name))) {
@@ -2123,15 +2147,85 @@ sub popup_menu {
 
     $result = qq/<select name="$name"$other>\n/;
     foreach (@values) {
+        if (/<optgroup/) {
+            foreach (split(/\n/)) {
+                my $selectit = $XHTML ? 'selected="selected"' : 'selected';
+                s/(value="$selected")/$selectit $1/ if defined $selected;
+                $result .= "$_\n";
+            }
+        }
+        else {
+            my $attribs = $self->_set_attributes($_, $attributes);
 	my($selectit) = defined($selected) ? $self->_selected($selected eq $_) : '';
 	my($label) = $_;
 	$label = $labels->{$_} if defined($labels) && defined($labels->{$_});
 	my($value) = $self->escapeHTML($_);
 	$label=$self->escapeHTML($label,1);
-	$result .= "<option$selectit value=\"$value\">$label</option>\n";
+            $result .= "<option$selectit$attribs value=\"$value\">$label</option>\n";
+        }
     }
 
     $result .= "</select>";
+    return $result;
+}
+END_OF_FUNC
+
+
+#### Method: optgroup
+# Create a optgroup.
+# Parameters:
+#   $name -> Label for the group
+#   $values -> A pointer to a regular array containing the
+#              values for each option line in the group.
+#   $labels -> (optional)
+#              A pointer to an associative array of labels to print next to each item
+#              in the form $label{'value'}="Long explanatory label".
+#              Otherwise the provided values are used as the labels.
+#   $labeled -> (optional)
+#               A true value indicates the value should be used as the label attribute
+#               in the option elements.
+#               The label attribute specifies the option label presented to the user.
+#               This defaults to the content of the <option> element, but the label
+#               attribute allows authors to more easily use optgroup without sacrificing
+#               compatibility with browsers that do not support option groups.
+#   $novals -> (optional)
+#              A true value indicates to suppress the val attribute in the option elements
+# Returns:
+#   A string containing the definition of an option group.
+####
+'optgroup' => <<'END_OF_FUNC',
+sub optgroup {
+    my($self,@p) = self_or_default(@_);
+    my($name,$values,$attributes,$labeled,$noval,$labels,@other)
+        = rearrange([NAME,[VALUES,VALUE],ATTRIBUTES,LABELED,NOVALS,LABELS],@p);
+
+    my($result,@values);
+    @values = $self->_set_values_and_labels($values,\$labels,$name,$labeled,$novals);
+    my($other) = @other ? " @other" : '';
+
+    $name=$self->escapeHTML($name);
+    $result = qq/<optgroup label="$name"$other>\n/;
+    foreach (@values) {
+        if (/<optgroup/) {
+            foreach (split(/\n/)) {
+                my $selectit = $XHTML ? 'selected="selected"' : 'selected';
+                s/(value="$selected")/$selectit $1/ if defined $selected;
+                $result .= "$_\n";
+            }
+        }
+        else {
+            my $attribs = $self->_set_attributes($_, $attributes);
+            my($label) = $_;
+            $label = $labels->{$_} if defined($labels) && defined($labels->{$_});
+            $label=$self->escapeHTML($label);
+            my($value)=$self->escapeHTML($_,1);
+            $result .= $labeled ? $novals ? "<option$attribs label=\"$value\">$label</option>\n"
+                                          : "<option$attribs label=\"$value\" value=\"$value\">$label</option>\n"
+                                : $novals ? "<option$attribs>$label</option>\n"
+                                          : "<option$attribs value=\"$value\">$label</option>\n";
+        }
+    }
+    $result .= "</optgroup>";
     return $result;
 }
 END_OF_FUNC
@@ -2160,9 +2254,9 @@ END_OF_FUNC
 'scrolling_list' => <<'END_OF_FUNC',
 sub scrolling_list {
     my($self,@p) = self_or_default(@_);
-    my($name,$values,$defaults,$size,$multiple,$labels,$override,@other)
+    my($name,$values,$defaults,$size,$multiple,$labels,$attributes,$override,@other)
 	= rearrange([NAME,[VALUES,VALUE],[DEFAULTS,DEFAULT],
-			    SIZE,MULTIPLE,LABELS,[OVERRIDE,FORCE]],@p);
+          SIZE,MULTIPLE,LABELS,ATTRIBUTES,[OVERRIDE,FORCE]],@p);
 
     my($result,@values);
     @values = $self->_set_values_and_labels($values,\$labels,$name);
@@ -2182,7 +2276,8 @@ sub scrolling_list {
 	$label = $labels->{$_} if defined($labels) && defined($labels->{$_});
 	$label=$self->escapeHTML($label);
 	my($value)=$self->escapeHTML($_,1);
-	$result .= "<option$selectit value=\"$value\">$label</option>\n";
+        my $attribs = $self->_set_attributes($_, $attributes);
+        $result .= "<option$selectit$attribs value=\"$value\">$label</option>\n";
     }
     $result .= "</select>";
     $self->register_parameter($name);
@@ -2198,7 +2293,7 @@ END_OF_FUNC
 #      or
 #   $default->[initial values of field]
 # Returns:
-#   A string containing a <INPUT TYPE="hidden" NAME="name" VALUE="value">
+#   A string containing a <input type="hidden" name="name" value="value">
 ####
 'hidden' => <<'END_OF_FUNC',
 sub hidden {
@@ -2241,7 +2336,7 @@ END_OF_FUNC
 #   $src ->  URL of the image source
 #   $align -> Alignment style (TOP, BOTTOM or MIDDLE)
 # Returns:
-#   A string containing a <INPUT TYPE="image" NAME="name" SRC="url" ALIGN="alignment">
+#   A string containing a <input type="image" name="name" src="url" align="alignment">
 ####
 'image_button' => <<'END_OF_FUNC',
 sub image_button {
@@ -2908,6 +3003,7 @@ sub read_multipart {
 	}
 
 	my($param)= $header{'Content-Disposition'}=~/ name="?([^\";]*)"?/;
+        $param .= $TAINTED;
 
 	# Bug:  Netscape doesn't escape quotation marks in file names!!!
 	my($filename) = $header{'Content-Disposition'}=~/ filename="?([^\"]*)"?/;
@@ -2919,6 +3015,7 @@ sub read_multipart {
 	# to our parameter list.
 	if ( !defined($filename) || $filename eq '' ) {
 	    my($value) = $buffer->readBody;
+            $value .= $TAINTED;
 	    push(@{$self->{$param}},$value);
 	    next;
 	}
@@ -3005,6 +3102,22 @@ sub _set_values_and_labels {
 }
 END_OF_FUNC
 
+# internal routine, don't use
+'_set_attributes' => <<'END_OF_FUNC',
+sub _set_attributes {
+    my $self = shift;
+    my($element, $attributes) = @_;
+    return '' unless defined($attributes->{$element});
+    $attribs = ' ';
+    foreach my $attrib (keys %{$attributes->{$element}}) {
+        $attrib =~ s/^-//;
+        $attribs .= "@{[lc($attrib)]}=\"$attributes->{$element}{$attrib}\" ";
+    }
+    $attribs =~ s/ $//;
+    return $attribs;
+}
+END_OF_FUNC
+
 '_compile_all' => <<'END_OF_FUNC',
 sub _compile_all {
     foreach (@_) {
@@ -3043,7 +3156,7 @@ sub asString {
     # get rid of package name
     (my $i = $$self) =~ s/^\*(\w+::fh\d{5})+//; 
     $i =~ s/%(..)/ chr(hex($1)) /eg;
-    return $i;
+    return $i.$CGI::TAINTED;
 # BEGIN DEAD CODE
 # This was an extremely clever patch that allowed "use strict refs".
 # Unfortunately it relied on another bug that caused leaky file descriptors.
@@ -3066,12 +3179,15 @@ END_OF_FUNC
 'new'  => <<'END_OF_FUNC',
 sub new {
     my($pack,$name,$file,$delete) = @_;
+    _setup_symbols(@SAVED_SYMBOLS) if @SAVED_SYMBOLS;
     require Fcntl unless defined &Fcntl::O_RDWR;
     (my $safename = $name) =~ s/([':%])/ sprintf '%%%02X', ord $1 /eg;
     my $fv = ++$FH . $safename;
     my $ref = \*{"Fh::$fv"};
-    sysopen($ref,$file,Fcntl::O_RDWR()|Fcntl::O_CREAT()|Fcntl::O_EXCL(),0600) || return;
-    unlink($file) if $delete;
+    $file =~ m!^([a-zA-Z0-9_ \'\":/.\$\\-]+)$! || return;
+    my $safe = $1;
+    sysopen($ref,$safe,Fcntl::O_RDWR()|Fcntl::O_CREAT()|Fcntl::O_EXCL(),0600) || return;
+    unlink($safe) if $delete;
     CORE::delete $Fh::{$fv};
     return bless $ref,$pack;
 }
@@ -3197,15 +3313,15 @@ sub readHeader {
     substr($self->{BUFFER},0,$end+4) = '';
     my %return;
 
-    
     # See RFC 2045 Appendix A and RFC 822 sections 3.4.8
     #   (Folding Long Header Fields), 3.4.3 (Comments)
     #   and 3.4.5 (Quoted-Strings).
 
     my $token = '[-\w!\#$%&\'*+.^_\`|{}~]';
     $header=~s/$CRLF\s+/ /og;		# merge continuation lines
+
     while ($header=~/($token+):\s+([^$CRLF]*)/mgox) {
-	my ($field_name,$field_value) = ($1,$2); # avoid taintedness
+        my ($field_name,$field_value) = ($1,$2);
 	$field_name =~ s/\b(\w)/uc($1)/eg; #canonicalize
 	$return{$field_name}=$field_value;
     }
@@ -3345,7 +3461,7 @@ unless ($TMPDIRECTORY) {
 	   "${vol}${SL}Temporary Items",
            "${SL}WWW_ROOT", "${SL}SYS\$SCRATCH",
 	   "C:${SL}system${SL}temp");
-    unshift(@TEMP,$ENV{'TMPDIR'}) if exists $ENV{'TMPDIR'};
+    unshift(@TEMP,$ENV{'TMPDIR'}) if defined $ENV{'TMPDIR'};
 
     # this feature was supposed to provide per-user tmpfiles, but
     # it is problematic.
@@ -3370,7 +3486,9 @@ $MAXTRIES = 5000;
 
 sub DESTROY {
     my($self) = @_;
-    unlink $$self;              # get rid of the file
+    $$self =~ m!^([a-zA-Z0-9_ \'\":/.\$\\-]+)$! || return;
+    my $safe = $1;             # untaint operation
+    unlink $safe;              # get rid of the file
 }
 
 ###############################################################################
@@ -3387,9 +3505,10 @@ sub new {
     for (my $i = 0; $i < $MAXTRIES; $i++) {
 	last if ! -f ($filename = sprintf("${TMPDIRECTORY}${SL}CGItemp%d",$sequence++));
     }
-    # untaint the darn thing
-    return unless $filename =~ m!^([a-zA-Z0-9_ '":/.\$\\-]+)$!;
-    $filename = $1;
+    # check that it is a more-or-less valid filename
+    return unless $filename =~ m!^([a-zA-Z0-9_ \'\":/.\$\\-]+)$!;
+    # this used to untaint, now it doesn't
+    # $filename = $1;
     return bless \$filename;
 }
 END_OF_FUNC
@@ -3574,10 +3693,10 @@ this:
    ----                           --------------
    h1()                           <h1>
    h1('some','contents');         <h1>some contents</h1>
-   h1({-align=>left});            <h1 ALIGN="LEFT">
-   h1({-align=>left},'contents'); <h1 ALIGN="LEFT">contents</h1>
+   h1({-align=>left});            <h1 align="LEFT">
+   h1({-align=>left},'contents'); <h1 align="LEFT">contents</h1>
 
-HTML tags are described in more detail later.  
+HTML tags are described in more detail later.
 
 Many newcomers to CGI.pm are puzzled by the difference between the
 calling conventions for the HTML shortcuts, which require curly braces
@@ -3785,11 +3904,11 @@ Perl module B<import> operator.
 
 =head2 DELETING A PARAMETER COMPLETELY:
 
-    $query->delete('foo');
+    $query->delete('foo','bar','baz');
 
-This completely clears a parameter.  It sometimes useful for
-resetting parameters that you don't want passed down between
-script invocations.
+This completely clears a list of parameters.  It sometimes useful for
+resetting parameters that you don't want passed down between script
+invocations.
 
 If you are using the function call interface, use "Delete()" instead
 to avoid conflicts with Perl's built-in delete operator.
@@ -4090,7 +4209,14 @@ or even
 Note that using the -compile pragma in this way will always have
 the effect of importing the compiled functions into the current
 namespace.  If you want to compile without importing use the
-compile() method instead (see below).
+compile() method instead:
+
+   use CGI();
+   CGI->compile();
+
+This is particularly useful in a mod_perl environment, in which you
+might want to precompile all CGI routines in a startup script, and
+then import the functions individually in each mod_perl script.
 
 =item -nosticky
 
@@ -4590,9 +4716,9 @@ internal anchors but you don't want to disrupt the current contents
 of the form(s).  Something like this will do the trick.
 
      $myself = $query->self_url;
-     print "<a href=$myself#table1>See table 1</a>";
-     print "<a href=$myself#table2>See table 2</a>";
-     print "<a href=$myself#yourself>See for yourself</a>";
+     print "<a href=\"$myself#table1\">See table 1</a>";
+     print "<a href=\"$myself#table2\">See table 2</a>";
+     print "<a href=\"$myself#yourself\">See for yourself</a>";
 
 If you want more control over what's returned, using the B<url()>
 method instead.
@@ -4863,9 +4989,9 @@ Provided that you have specified a character set of ISO-8859-1 (the
 default), the standard HTML escaping rules will be used.  The "<"
 character becomes "&lt;", ">" becomes "&gt;", "&" becomes "&amp;", and
 the quote character becomes "&quot;".  In addition, the hexadecimal
-0x8b and 0x9b characters, which many windows-based browsers interpret
+0x8b and 0x9b characters, which some browsers incorrectly interpret
 as the left and right angle-bracket characters, are replaced by their
-numeric HTML entities ("&#139" and "&#155;").  If you manually change
+numeric character entities ("&#8249" and "&#8250;").  If you manually change
 the charset, either by calling the charset() method explicitly or by
 passing a -charset argument to header(), then B<all> characters will
 be replaced by their numeric entities, since CGI.pm has no lookup
@@ -4875,7 +5001,7 @@ The automatic escaping does not apply to other shortcuts, such as
 h1().  You should call escapeHTML() yourself on untrusted data in
 order to protect your pages against nasty tricks that people may enter
 into guestbooks, etc..  To change the character set, use charset().
-To turn autoescaping off completely, use autoescape():
+To turn autoescaping off completely, use autoEscape(0):
 
 =over 4
 
@@ -5278,16 +5404,18 @@ recognized.  See textfield() for details.
    %labels = ('eenie'=>'your first choice',
 	      'meenie'=>'your second choice',
 	      'minie'=>'your third choice');
+   %attributes = ('eenie'=>{'class'=>'class of first choice'});
    print $query->popup_menu('menu_name',
 			    ['eenie','meenie','minie'],
-			    'meenie',\%labels);
+          'meenie',\%labels,\%attributes);
 
 	-or (named parameter style)-
 
    print $query->popup_menu(-name=>'menu_name',
 			    -values=>['eenie','meenie','minie'],
 			    -default=>'meenie',
-			    -labels=>\%labels);
+          -labels=>\%labels,
+          -attributes=>\%attributes);
 
 popup_menu() creates a menu.
 
@@ -5314,10 +5442,18 @@ The values of the previous choice will be maintained across queries.
 
 The optional fourth parameter (-labels) is provided for people who
 want to use different values for the user-visible label inside the
-popup menu nd the value returned to your script.  It's a pointer to an
+popup menu and the value returned to your script.  It's a pointer to an
 associative array relating menu values to user-visible labels.  If you
 leave this parameter blank, the menu values will be displayed by
 default.  (You can also leave a label undefined if you want to).
+
+=item 5.
+
+The optional fifth parameter (-attributes) is provided to assign
+any of the common HTML attributes to an individual menu item. It's
+a pointer to an associative array relating menu values to another
+associative array with the attribute's name as the key and the
+attribute's value as the value.
 
 =back
 
@@ -5331,17 +5467,90 @@ B<-onChange>, B<-onFocus>, B<-onMouseOver>, B<-onMouseOut>, and
 B<-onBlur>.  See the textfield() section for details on when these
 handlers are called.
 
+=head2 CREATING AN OPTION GROUP
+
+Named parameter style
+
+  print $query->popup_menu(-name=>'menu_name',
+                  -values=>[qw/eenie meenie minie/,
+                            $q->optgroup(-name=>'optgroup_name',
+                                         -values ['moe','catch'],
+                                         -attributes=>{'catch'=>{'class'=>'red'}}),
+                  -labels=>{'eenie'=>'one',
+                            'meenie'=>'two',
+                            'minie'=>'three'},
+                  -default=>'meenie');
+
+  Old style
+  print $query->popup_menu('menu_name',
+                  ['eenie','meenie','minie',
+                   $q->optgroup('optgroup_name', ['moe', 'catch'],
+                         {'catch'=>{'class'=>'red'}})],'meenie',
+                  {'eenie'=>'one','meenie'=>'two','minie'=>'three'});
+
+optgroup creates an option group within a popup menu.
+
+=over 4
+
+=item 1.
+
+The required first argument (B<-name>) is the label attribute of the
+optgroup and is B<not> inserted in the parameter list of the query.
+
+=item 2.
+
+The required second argument (B<-values>)  is an array reference
+containing the list of menu items in the menu.  You can pass the
+method an anonymous array, as shown in the example, or a reference
+to a named array, such as \@foo.  If you pass a HASH reference,
+the keys will be used for the menu values, and the values will be
+used for the menu labels (see -labels below).
+
+=item 3.
+
+The optional third parameter (B<-labels>) allows you to pass a reference
+to an associative array containing user-visible labels for one or more
+of the menu items.  You can use this when you want the user to see one
+menu string, but have the browser return your program a different one.
+If you don't specify this, the value string will be used instead
+("eenie", "meenie" and "minie" in this example).  This is equivalent
+to using a hash reference for the -values parameter.
+
+=item 4.
+
+An optional fourth parameter (B<-labeled>) can be set to a true value
+and indicates that the values should be used as the label attribute
+for each option element within the optgroup.
+
+=item 5.
+
+An optional fifth parameter (-novals) can be set to a true value and
+indicates to suppress the val attribut in each option element within
+the optgroup.
+
+See the discussion on optgroup at W3C
+(http://www.w3.org/TR/REC-html40/interact/forms.html#edef-OPTGROUP)
+for details.
+
+=item 6.
+
+An optional sixth parameter (-attributes) is provided to assign
+any of the common HTML attributes to an individual menu item. It's
+a pointer to an associative array relating menu values to another
+associative array with the attribute's name as the key and the
+attribute's value as the value.
+
 =head2 CREATING A SCROLLING LIST
 
    print $query->scrolling_list('list_name',
 				['eenie','meenie','minie','moe'],
-				['eenie','moe'],5,'true');
+        ['eenie','moe'],5,'true',{'moe'=>{'class'=>'red'}});
       -or-
 
    print $query->scrolling_list('list_name',
 				['eenie','meenie','minie','moe'],
 				['eenie','moe'],5,'true',
-				\%labels);
+        \%labels,%attributes);
 
 	-or-
 
@@ -5350,7 +5559,8 @@ handlers are called.
 				-default=>['eenie','moe'],
 				-size=>5,
 				-multiple=>'true',
-				-labels=>\%labels);
+        -labels=>\%labels,
+        -attributes=>\%attributes);
 
 scrolling_list() creates a scrolling list.  
 
@@ -5389,6 +5599,14 @@ The optional sixth argument is a pointer to an associative array
 containing long user-visible labels for the list items (-labels).
 If not provided, the values will be displayed.
 
+=item 6.
+
+The optional sixth parameter (-attributes) is provided to assign
+any of the common HTML attributes to an individual menu item. It's
+a pointer to an associative array relating menu values to another
+associative array with the attribute's name as the key and the
+attribute's value as the value.
+
 When this form is processed, all selected list items will be returned as
 a list under the parameter name 'list_name'.  The values of the
 selected items can be retrieved with:
@@ -5408,11 +5626,13 @@ handlers are called.
 				-values=>['eenie','meenie','minie','moe'],
 				-default=>['eenie','moe'],
 				-linebreak=>'true',
-				-labels=>\%labels);
+        -labels=>\%labels,
+        -attributes=>\%attributes);
 
    print $query->checkbox_group('group_name',
 				['eenie','meenie','minie','moe'],
-				['eenie','moe'],'true',\%labels);
+        ['eenie','moe'],'true',\%labels,
+        {'moe'=>{'class'=>'red'}});
 
    HTML3-COMPATIBLE BROWSERS ONLY:
 
@@ -5464,6 +5684,14 @@ cause checkbox_group() to return an HTML3 compatible table containing
 the checkbox group formatted with the specified number of rows and
 columns.  You can provide just the -columns parameter if you wish;
 checkbox_group will calculate the correct number of rows for you.
+
+=item 6.
+
+The optional sixth parameter (-attributes) is provided to assign
+any of the common HTML attributes to an individual menu item. It's
+a pointer to an associative array relating menu values to another
+associative array with the attribute's name as the key and the
+attribute's value as the value.
 
 To include row and column headings in the returned table, you
 can use the B<-rowheaders> and B<-colheaders> parameters.  Both
@@ -5549,12 +5777,13 @@ parameter.  See checkbox_group() for further details.
 			     -values=>['eenie','meenie','minie'],
 			     -default=>'meenie',
 			     -linebreak=>'true',
-			     -labels=>\%labels);
+           -labels=>\%labels,
+           -attributes=>\%attributes);
 
 	-or-
 
    print $query->radio_group('group_name',['eenie','meenie','minie'],
-					  'meenie','true',\%labels);
+            'meenie','true',\%labels,\%attributes);
 
 
    HTML3-COMPATIBLE BROWSERS ONLY:
@@ -5611,6 +5840,14 @@ the radio group formatted with the specified number of rows
 and columns.  You can provide just the -columns parameter if you
 wish; radio_group will calculate the correct number of rows
 for you.
+
+=item 6.
+
+The optional sixth parameter (-attributes) is provided to assign
+any of the common HTML attributes to an individual menu item. It's
+a pointer to an associative array relating menu values to another
+associative array with the attribute's name as the key and the
+attribute's value as the value.
 
 To include row and column headings in the returned table, you
 can use the B<-rowheader> and B<-colheader> parameters.  Both
@@ -6679,13 +6916,7 @@ for suggestions and bug fixes.
 
 =head1 BUGS
 
-This module has grown large and monolithic.  Furthermore it's doing many
-things, such as handling URLs, parsing CGI input, writing HTML, etc., that
-are also done in the LWP modules. It should be discarded in favor of
-the CGI::* modules, but somehow I continue to work on it.
-
-Note that the code is truly contorted in order to avoid spurious
-warnings when programs are run with the B<-w> switch.
+Please report them.
 
 =head1 SEE ALSO
 

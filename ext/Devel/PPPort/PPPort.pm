@@ -355,7 +355,10 @@ __DATA__
 
 #ifndef PERL_REVISION
 #   ifndef __PATCHLEVEL_H_INCLUDED__
-#       include "patchlevel.h"
+#       include <patchlevel.h>
+#   endif
+#   if !(defined(PERL_VERSION) || (SUBVERSION > 0 && defined(PATCHLEVEL)))
+#       include <could_not_find_Perl_patchlevel.h>
 #   endif
 #   ifndef PERL_REVISION
 #	define PERL_REVISION	(5)

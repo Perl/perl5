@@ -3,7 +3,7 @@ package Digest::MD5;
 use strict;
 use vars qw($VERSION @ISA @EXPORT_OK);
 
-$VERSION = '2.20';  # $Date: 2002/05/06 05:15:09 $
+$VERSION = '2.23';  # $Date: 2003/01/19 04:42:15 $
 
 require Exporter;
 *import = \&Exporter::import;
@@ -117,6 +117,14 @@ If called as an instance method (i.e. $md5->new) it will just reset the
 state the object to the state of a newly created object.  No new
 object is created in this case.
 
+=item $md5->clone
+
+This is a copy constructor returning a clone of the $md5 object. It is
+useful when you do not want to destroy the digests state, but need an
+intermediate value of the digest, e.g. when calculating digests
+iteratively on a continuous data stream in order to obtain a copy which
+may be destroyed.
+
 =item $md5->reset
 
 This is just an alias for $md5->new.
@@ -142,7 +150,8 @@ Return the binary digest for the message.
 Note that the C<digest> operation is effectively a destructive,
 read-once operation. Once it has been performed, the C<Digest::MD5>
 object is automatically C<reset> and can be used to calculate another
-digest value.
+digest value.  Call $md5->clone->digest if you want to calculate the
+digest without reseting the digest state.
 
 =item $md5->hexdigest
 
@@ -214,6 +223,29 @@ the file:
 
     print Digest::MD5->new->addfile(*FILE)->hexdigest, " $file\n";
 
+Perl 5.8 support Unicode characters in strings.  Since the MD5
+algorithm is only defined for strings of bytes, it can not be used on
+strings that contains chars with ordinal number above 255.  The MD5
+functions and methods will croak if you try to feed them such input
+data:
+
+    use Digest::MD5 qw(md5_hex);
+
+    my $str = "abc\x{300}";
+    print md5_hex($str), "\n";  # croaks
+    # Wide character in subroutine entry
+
+What you can do is calculate the MD5 checksum of the UTF-8
+representation of such strings.  This is achieved by filtering the
+string through encode_utf8() function:
+
+    use Digest::MD5 qw(md5_hex);
+    use Encode qw(encode_utf8);
+
+    my $str = "abc\x{300}";
+    print md5_hex(encode_utf8($str)), "\n";
+    # 8c2d46911f3f5a326455f0ed7a8ed3b3
+
 =head1 SEE ALSO
 
 L<Digest>,
@@ -230,7 +262,7 @@ RFC 1321
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
- Copyright 1998-2002 Gisle Aas.
+ Copyright 1998-2003 Gisle Aas.
  Copyright 1995-1996 Neil Winton.
  Copyright 1991-1992 RSA Data Security, Inc.
 

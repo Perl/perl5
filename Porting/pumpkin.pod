@@ -1558,7 +1558,7 @@ in recent config.sh files though.
 
 =head1 AUTHORS
 
-Original author:  Andy Dougherty doughera@lafcol.lafayette.edu .
+Original author:  Andy Dougherty doughera@lafayette.edu .
 Additions by Chip Salzenberg chip@perl.com and 
 Tim Bunce Tim.Bunce@ig.co.uk .
 

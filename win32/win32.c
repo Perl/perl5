@@ -1912,6 +1912,8 @@ win32_async_check(pTHX)
     return ours;
 }
 
+/* This function will not return until the timeout has elapsed, or until
+ * one of the handles is ready. */
 DllExport DWORD
 win32_msgwait(pTHX_ DWORD count, LPHANDLE handles, DWORD timeout, LPDWORD resultp)
 {
@@ -1936,10 +1938,7 @@ win32_msgwait(pTHX_ DWORD count, LPHANDLE handles, DWORD timeout, LPDWORD result
         }
 	if (result == WAIT_OBJECT_0 + count) {
 	    /* Message has arrived - check it */
-	    if (win32_async_check(aTHX)) {
-		/* was one of ours */
-		break;
-	    }
+	    (void)win32_async_check(aTHX);
 	}
 	else {
 	   /* Not timeout or message - one of handles is ready */
@@ -2750,6 +2749,12 @@ win32_popen(const char *command, const char *mode)
     if ((oldfd = win32_dup(stdfd)) == -1)
         goto cleanup;
 
+    /* save the old std handle (this needs to happen before the
+     * dup2(), since that might call SetStdHandle() too) */
+    OP_REFCNT_LOCK;
+    lock_held = 1;
+    old_h = GetStdHandle(nhandle);
+
     /* make stdfd go to child end of pipe (implicitly closes stdfd) */
     /* stdfd will be inherited by the child */
     if (win32_dup2(p[child], stdfd) == -1)
@@ -2758,10 +2763,7 @@ win32_popen(const char *command, const char *mode)
     /* close the child end in parent */
     win32_close(p[child]);
 
-    /* save the old std handle, and set the std handle */
-    OP_REFCNT_LOCK;
-    lock_held = 1;
-    old_h = GetStdHandle(nhandle);
+    /* set the new std handle (in case dup2() above didn't) */
     SetStdHandle(nhandle, (HANDLE)_get_osfhandle(stdfd));
 
     /* start the child */
@@ -2770,16 +2772,17 @@ win32_popen(const char *command, const char *mode)
 	if ((childpid = do_spawn_nowait((char*)command)) == -1)
 	    goto cleanup;
 
-	/* restore the old std handle */
+	/* revert stdfd to whatever it was before */
+	if (win32_dup2(oldfd, stdfd) == -1)
+	    goto cleanup;
+
+	/* restore the old std handle (this needs to happen after the
+	 * dup2(), since that might call SetStdHandle() too */
 	if (lock_held) {
 	    SetStdHandle(nhandle, old_h);
 	    OP_REFCNT_UNLOCK;
 	    lock_held = 0;
 	}
-
-	/* revert stdfd to whatever it was before */
-	if (win32_dup2(oldfd, stdfd) == -1)
-	    goto cleanup;
 
 	/* close saved handle */
 	win32_close(oldfd);
@@ -3071,6 +3074,55 @@ DllExport int
 win32_setmode(int fd, int mode)
 {
     return setmode(fd, mode);
+}
+
+DllExport int
+win32_chsize(int fd, Off_t size)
+{
+#if defined(WIN64) || defined(USE_LARGE_FILES)
+    int retval = 0;
+    Off_t cur, end, extend;
+
+    cur = win32_tell(fd);
+    if (cur < 0)
+	return -1;
+    end = win32_lseek(fd, 0, SEEK_END);
+    if (end < 0)
+	return -1;
+    extend = size - end;
+    if (extend == 0) {
+	/* do nothing */
+    }
+    else if (extend > 0) {
+	/* must grow the file, padding with nulls */
+	char b[4096];
+	int oldmode = win32_setmode(fd, O_BINARY);
+	size_t count;
+	memset(b, '\0', sizeof(b));
+	do {
+	    count = extend >= sizeof(b) ? sizeof(b) : (size_t)extend;
+	    count = win32_write(fd, b, count);
+	    if (count < 0) {
+		retval = -1;
+		break;
+	    }
+	} while ((extend -= count) > 0);
+	win32_setmode(fd, oldmode);
+    }
+    else {
+	/* shrink the file */
+	win32_lseek(fd, size, SEEK_SET);
+	if (!SetEndOfFile((HANDLE)_get_osfhandle(fd))) {
+	    errno = EACCES;
+	    retval = -1;
+	}
+    }
+finish:
+    win32_lseek(fd, cur, SEEK_SET);
+    return retval;
+#else
+    return chsize(fd, size);
+#endif
 }
 
 DllExport Off_t
@@ -4628,8 +4680,13 @@ XS(w32_GetFullPathName)
     if (len) {
 	if (GIMME_V == G_ARRAY) {
 	    EXTEND(SP,1);
-	    XST_mPV(1,filepart);
-	    len = filepart - SvPVX(fullpath);
+	    if (filepart) {
+		XST_mPV(1,filepart);
+		len = filepart - SvPVX(fullpath);
+	    }
+	    else {
+		XST_mPVN(1,"",0);
+	    }
 	    items = 2;
 	}
 	SvCUR_set(fullpath,len);

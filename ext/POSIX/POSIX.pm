@@ -282,6 +282,10 @@ sub fseek {
     redef "IO::Seekable::seek()";
 }
 
+sub fsync {
+    redef "IO::Handle::sync()";
+}
+
 sub ferror {
     redef "IO::Handle::error()";
 }
@@ -878,7 +882,7 @@ sub load_imports {
 		_SC_STREAM_MAX _SC_TZNAME_MAX _SC_VERSION
 		_exit access ctermid cuserid
 		dup2 dup execl execle execlp execv execve execvp
-		fpathconf getcwd getegid geteuid getgid getgroups
+		fpathconf fsync getcwd getegid geteuid getgid getgroups
 		getpid getuid isatty lseek pathconf pause setgid setpgid
 		setsid setuid sysconf tcgetpgrp tcsetpgrp ttyname)],
 

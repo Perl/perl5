@@ -37,7 +37,7 @@ no utf8; # Ironic, no?
 #
 #
 
-plan tests => 95;
+plan tests => 99;
 
 {
     # bug id 20001009.001
@@ -272,7 +272,7 @@ BANG
 # before the patch, the eval died with an error like:
 #   "my" variable $strict::VERSION can't be in a package
 #
-ok('' eq runperl(prog => <<'CODE'));
+ok('' eq runperl(prog => <<'CODE'), "change #17928");
     my $code = qq{ my \$\xe3\x83\x95\xe3\x83\xbc = 5; };
     {
 	use utf8;
@@ -280,3 +280,51 @@ ok('' eq runperl(prog => <<'CODE'));
 	print $@ if $@;
     }
 CODE
+
+{
+    use utf8;
+    $a = <<'END';
+0 ....... 1 ....... 2 ....... 3 ....... 4 ....... 5 ....... 6 ....... 7 ....... 
+END
+    my (@i, $s);
+
+    @i = ();
+    push @i, $s = index($a, '6');     # 60
+    push @i, $s = index($a, '.', $s); # next . after 60 is 62
+    push @i, $s = index($a, '5');     # 50
+    push @i, $s = index($a, '.', $s); # next . after 52 is 52
+    push @i, $s = index($a, '7');     # 70 
+    push @i, $s = index($a, '.', $s); # next . after 70 is 72
+    push @i, $s = index($a, '4');     # 40
+    push @i, $s = index($a, '.', $s); # next . after 40 is 42
+    is("@i", "60 62 50 52 70 72 40 42", "utf8 heredoc index");
+
+    @i = ();
+    push @i, $s = rindex($a, '6');     # 60
+    push @i, $s = rindex($a, '.', $s); # previous . before 60 is 58
+    push @i, $s = rindex($a, '5');     # 50
+    push @i, $s = rindex($a, '.', $s); # previous . before 52 is 48
+    push @i, $s = rindex($a, '7');     # 70 
+    push @i, $s = rindex($a, '.', $s); # previous . before 70 is 68
+    push @i, $s = rindex($a, '4');     # 40
+    push @i, $s = rindex($a, '.', $s); # previous . before 40 is 38
+    is("@i", "60 58 50 48 70 68 40 38", "utf8 heredoc rindex");
+
+    @i = ();
+    push @i, $s =  index($a, '6');     # 60
+    push @i,  index($a, '.', $s);      # next     . after  60 is 62
+    push @i, rindex($a, '.', $s);      # previous . before 60 is 58
+    push @i, $s = rindex($a, '5');     # 60
+    push @i,  index($a, '.', $s);      # next     . after  50 is 52
+    push @i, rindex($a, '.', $s);      # previous . before 50 is 48
+    push @i, $s =  index($a, '7', $s); # 70
+    push @i,  index($a, '.', $s);      # next     . after  70 is 72
+    push @i, rindex($a, '.', $s);      # previous . before 70 is 68
+    is("@i", "60 62 58 50 52 48 70 72 68", "utf8 heredoc index and rindex");
+}
+
+{
+    use utf8;
+    eval qq{is(q \xc3\xbc test \xc3\xbc, qq\xc2\xb7 test \xc2\xb7,
+	       "utf8 quote delimiters [perl #16823]");};
+}

@@ -4,7 +4,7 @@
 # grep() and map() tests
 #
 
-print "1..32\n";
+print "1..33\n";
 
 $test = 1;
 
@@ -128,4 +128,10 @@ sub ok {
     print "# @x,$y\n";
     print "@x,$y" eq "3 4,1212" ? "ok $test\n" : "not ok $test\n";
     $test++;
+
+    # Add also a sample test from [perl #18153].  (The same bug).
+    $a = 1; map {if ($a){}} (2);
+    print "ok $test\n"; # no core dump is all we need
+    $test++;
 }
+

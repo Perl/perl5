@@ -350,12 +350,20 @@ IV
 PerlIOVia_seek(pTHX_ PerlIO * f, Off_t offset, int whence)
 {
     PerlIOVia *s = PerlIOSelf(f, PerlIOVia);
-    SV *offsv = sv_2mortal(newSViv(offset));
+    SV *offsv = sv_2mortal(sizeof(Off_t) > sizeof(IV)
+			   ? newSVnv((NV)offset) : newSViv((IV)offset));
     SV *whsv = sv_2mortal(newSViv(whence));
     SV *result =
 	PerlIOVia_method(aTHX_ f, MYMethod(SEEK), G_SCALAR, offsv, whsv,
 			 Nullsv);
+#if Off_t_size == 8 && defined(CONDOP_SIZE) && CONDOP_SIZE < Off_t_size
+    if (result)
+	return (Off_t) SvIV(result);
+    else
+	return (Off_t) -1;
+#else
     return (result) ? SvIV(result) : -1;
+#endif
 }
 
 Off_t
@@ -364,7 +372,9 @@ PerlIOVia_tell(pTHX_ PerlIO * f)
     PerlIOVia *s = PerlIOSelf(f, PerlIOVia);
     SV *result =
 	PerlIOVia_method(aTHX_ f, MYMethod(TELL), G_SCALAR, Nullsv);
-    return (result) ? (Off_t) SvIV(result) : (Off_t) - 1;
+    return (result)
+	   ? (SvNOK(result) ? (Off_t)SvNV(result) : (Off_t)SvIV(result))
+	   : (Off_t) - 1;
 }
 
 SSize_t

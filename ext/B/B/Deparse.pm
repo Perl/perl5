@@ -15,7 +15,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPpTRANS_SQUASH OPpTRANS_DELETE OPpTRANS_COMPLEMENT OPpTARGET_MY
 	 OPpCONST_ARYBASE OPpEXISTS_SUB OPpSORT_NUMERIC OPpSORT_INTEGER
 	 OPpSORT_REVERSE
-	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVpad_OUR
+	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVpad_OUR SVf_FAKE
          CVf_METHOD CVf_LOCKED CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE PMf_SKIPWHITE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
@@ -1130,7 +1130,10 @@ sub lex_in_scope {
 sub populate_curcvlex {
     my $self = shift;
     for (my $cv = $self->{'curcv'}; class($cv) eq "CV"; $cv = $cv->OUTSIDE) {
-	my @padlist = $cv->PADLIST->ARRAY;
+	my $padlist = $cv->PADLIST;
+	# an undef CV still in lexical chain
+	next if class($padlist) eq "SPECIAL";
+	my @padlist = $padlist->ARRAY;
 	my @ns = $padlist[0]->ARRAY;
 
 	for (my $i=0; $i<@ns; ++$i) {
@@ -1141,8 +1144,10 @@ sub populate_curcvlex {
 		next;
 	    }
             my $name = $ns[$i]->PVX;
-	    my $seq_st = $ns[$i]->NVX;
-	    my $seq_en = int($ns[$i]->IVX);
+	    my ($seq_st, $seq_en) =
+		($ns[$i]->FLAGS & SVf_FAKE)
+		    ? (0, 999999)
+		    : ($ns[$i]->NVX, $ns[$i]->IVX);
 
 	    push @{$self->{'curcvlex'}{$name}}, [$seq_st, $seq_en];
 	}

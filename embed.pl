@@ -5,7 +5,7 @@ require 5.003;	# keep this compatible, an old perl is all we may have before
 
 BEGIN {
     # Get function prototypes
-    require 'regen.pl';
+    require 'regen_lib.pl';
 }
 
 #
@@ -22,7 +22,7 @@ sub do_not_edit ($)
 
    $file
 
-   Copyright (c) 1997-2002, Larry Wall
+   Copyright (c) 1997-2003, Larry Wall
 
    You may distribute under the terms of either the GNU General Public
    License or the Artistic License, as specified in the README file.
@@ -200,8 +200,9 @@ sub write_global_sym {
     my $ret = "";
     if (@_ > 1) {
 	my ($flags,$retval,$func,@args) = @_;
-	if ($flags =~ /A/ && $flags !~ /[xm]/) { # public API, so export
-	    $func = "Perl_$func" if $flags =~ /p/;
+	if ($flags =~ /[AX]/ && $flags !~ /[xm]/
+	    || $flags =~ /b/) { # public API, so export
+	    $func = "Perl_$func" if $flags =~ /[pbX]/;
 	    $ret = "$func\n";
 	}
     }
@@ -316,7 +317,11 @@ print EM do_not_edit ("embed.h"), <<'END';
 
 /* (Doing namespace management portably in C is really gross.) */
 
-/* NO_EMBED is no longer supported. i.e. EMBED is always active. */
+/* By defining PERL_NO_SHORT_NAMES (not done by default) the short forms
+ * (like warn instead of Perl_warn) for the API are not defined.
+ * Not defining the short forms is a good thing for cleaner embedding. */
+
+#ifndef PERL_NO_SHORT_NAMES
 
 /* Hide global symbols */
 
@@ -340,6 +345,13 @@ walk_table {
 		$ret .= hide($func,"Perl_$func");
 	    }
 	}
+	if ($ret ne '' && $flags !~ /A/) {
+	    if ($flags =~ /E/) {
+		$ret = "#if defined(PERL_CORE) || defined(PERL_EXT)\n$ret#endif\n";
+	    } else {
+		$ret = "#ifdef PERL_CORE\n$ret#endif\n";
+	    }
+        }
     }
     $ret;
 } \*EM, "";
@@ -393,6 +405,13 @@ walk_table {
 		$ret .= $alist . ")\n";
 	    }
 	}
+         unless ($flags =~ /A/) {
+	    if ($flags =~ /E/) {
+		$ret = "#if defined(PERL_CORE) || defined(PERL_EXT)\n$ret#endif\n";
+	    } else {
+		$ret = "#ifdef PERL_CORE\n$ret#endif\n";
+	    }
+        }
     }
     $ret;
 } \*EM, "";
@@ -413,6 +432,8 @@ for $sym (sort keys %ppsym) {
 print EM <<'END';
 
 #endif	/* PERL_IMPLICIT_CONTEXT */
+
+#endif	/* #ifndef PERL_NO_SHORT_NAMES */
 
 END
 
@@ -458,7 +479,7 @@ print EM <<'END';
    an extra argument but grab the context pointer using the macro
    dTHX.
  */
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_NO_SHORT_NAMES)
 #  define croak				Perl_croak_nocontext
 #  define deb				Perl_deb_nocontext
 #  define die				Perl_die_nocontext

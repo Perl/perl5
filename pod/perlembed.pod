@@ -750,6 +750,8 @@ with L<perlfunc/my> whenever possible.
  #define DO_CLEAN 0
  #endif
 
+ #define BUFFER_SIZE 1024
+
  static PerlInterpreter *my_perl = NULL;
 
  int
@@ -757,7 +759,7 @@ with L<perlfunc/my> whenever possible.
  {
      char *embedding[] = { "", "persistent.pl" };
      char *args[] = { "", DO_CLEAN, NULL };
-     char filename [1024];
+     char filename[BUFFER_SIZE];
      int exitstatus = 0;
      STRLEN n_a;
 
@@ -772,8 +774,10 @@ with L<perlfunc/my> whenever possible.
      if(!exitstatus) {
         exitstatus = perl_run(my_perl);
 
-        while(printf("Enter file name: ") && gets(filename)) {
+        while(printf("Enter file name: ") &&
+              fgets(filename, BUFFER_SIZE, stdin)) {
 
+            filename[strlen(filename)-1] = '\0'; /* strip \n */
             /* call the subroutine, passing it the filename as an argument */
             args[0] = filename;
             call_argv("Embed::Persistent::eval_file",
@@ -1037,6 +1041,24 @@ B<CORE> directory relative to C<perl -V:archlib>.  The studio will
 also need this path so it knows where to find Perl include files.
 This path can be added via the Tools -> Options -> Directories menu.
 Finally, select Build -> Build interp.exe and you're ready to go.
+
+=head1 Hiding Perl_
+
+If you completely hide the short forms forms of the Perl public API,
+add -DPERL_NO_SHORT_NAMES to the compilation flags.  This means that
+for example instead of writing
+
+    warn("%d bottles of beer on the wall", bottlecount);
+
+you will have to write the explicit full form
+
+    Perl_warn(aTHX_ "%d bottles of beer on the wall", bottlecount);
+
+(See L<perlguts/Background and PERL_IMPLICIT_CONTEXT for the explanation
+of the C<aTHX_>.> )  Hiding the short forms is very useful for avoiding
+all sorts of nasty (C preprocessor or otherwise) conflicts with other
+software packages (Perl defines about 2400 APIs with these short names,
+take or leave few hundred, so there certainly is room for conflict.)
 
 =head1 MORAL
 

@@ -429,6 +429,8 @@ modulo the caveats given in L<perlipc/"Signals">.
     	# didn't
     }
 
+For more information see L<perlipc>.
+
 =item atan2 Y,X
 
 Returns the arctangent of Y/X in the range -PI to PI.
@@ -1448,6 +1450,11 @@ in case 6.
 
 C<eval BLOCK> does I<not> count as a loop, so the loop control statements
 C<next>, C<last>, or C<redo> cannot be used to leave or restart the block.
+
+Note that as a very special case, an C<eval ''> executed within the C<DB>
+package doesn't see the usual surrounding lexical scope, but rather the
+scope of the first non-DB piece of code that called it. You don't normally
+need to worry about this unless you are writing a Perl debugger.
 
 =item exec LIST
 
@@ -2537,7 +2544,8 @@ See also L</exp> for the inverse operation.
 Does the same thing as the C<stat> function (including setting the
 special C<_> filehandle) but stats a symbolic link instead of the file
 the symbolic link points to.  If symbolic links are unimplemented on
-your system, a normal C<stat> is done.
+your system, a normal C<stat> is done.  For much more detailed
+information, please see the documentation for L</stat>.
 
 If EXPR is omitted, stats C<$_>.
 
@@ -4809,13 +4817,13 @@ The pattern C</PATTERN/> may be replaced with an expression to specify
 patterns that vary at runtime.  (To do runtime compilation only once,
 use C</$variable/o>.)
 
-As a special case, specifying a PATTERN of space (C<' '>) will split on
-white space just as C<split> with no arguments does.  Thus, C<split(' ')> can
-be used to emulate B<awk>'s default behavior, whereas C<split(/ /)>
+As a special case, specifying a PATTERN of space (S<C<' '>>) will split on
+white space just as C<split> with no arguments does.  Thus, S<C<split(' ')>> can
+be used to emulate B<awk>'s default behavior, whereas S<C<split(/ /)>>
 will give you as many null initial fields as there are leading spaces.
-A C<split> on C</\s+/> is like a C<split(' ')> except that any leading
+A C<split> on C</\s+/> is like a S<C<split(' ')>> except that any leading
 whitespace produces a null first field.  A C<split> with no arguments
-really does a C<split(' ', $_)> internally.
+really does a S<C<split(' ', $_)>> internally.
 
 A PATTERN of C</^/> is treated as if it were C</^/m>, since it isn't
 much use otherwise.
@@ -5274,7 +5282,8 @@ The commonly available S_IF* constants are
     S_IRWXG S_IRGRP S_IWGRP S_IXGRP
     S_IRWXO S_IROTH S_IWOTH S_IXOTH
 
-    # Setuid/Setgid/Stickiness.
+    # Setuid/Setgid/Stickiness/SaveText.
+    # Note that the exact meaning of these is system dependent.
 
     S_ISUID S_ISGID S_ISVTX S_ISTXT
 
@@ -5308,6 +5317,9 @@ and the S_IF* functions are
 
 See your native chmod(2) and stat(2) documentation for more details
 about the S_* constants.
+
+To get status info for a symbolic link instead of the target file
+behind the link, use the C<lstat> function, see L</stat>.
 
 =item study SCALAR
 

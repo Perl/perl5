@@ -1,6 +1,6 @@
 /*    hv.c
  *
- *    Copyright (c) 1991-2002, Larry Wall
+ *    Copyright (c) 1991-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -501,7 +501,15 @@ NULL if the operation failed or if the value did not need to be actually
 stored within the hash (as in the case of tied hashes).  Otherwise it can
 be dereferenced to get the original C<SV*>.  Note that the caller is
 responsible for suitably incrementing the reference count of C<val> before
-the call, and decrementing it if the function returned NULL.
+the call, and decrementing it if the function returned NULL.  Effectively
+a successful hv_store takes ownership of one reference to C<val>.  This is
+usually what you want; a newly created SV has a reference count of one, so
+if all your code does is create SVs then store them in a hash, hv_store
+will own the only reference to the new SV, and your code doesn't need to do
+anything further to tidy up.  hv_store is not implemented as a call to
+hv_store_ent, and does not create a temporary SV for the key, so if your
+key data is not already in SV form then use hv_store in preference to
+hv_store_ent.
 
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
@@ -676,7 +684,17 @@ stored within the hash (as in the case of tied hashes).  Otherwise the
 contents of the return value can be accessed using the C<He?> macros
 described here.  Note that the caller is responsible for suitably
 incrementing the reference count of C<val> before the call, and
-decrementing it if the function returned NULL.
+decrementing it if the function returned NULL.  Effectively a successful
+hv_store_ent takes ownership of one reference to C<val>.  This is
+usually what you want; a newly created SV has a reference count of one, so
+if all your code does is create SVs then store them in a hash, hv_store
+will own the only reference to the new SV, and your code doesn't need to do
+anything further to tidy up.  Note that hv_store_ent only reads the C<key>;
+unlike C<val> it does not take ownership of it, so maintaining the correct
+reference count on C<key> is entirely the caller's responsibility.  hv_store
+is not implemented as a call to hv_store_ent, and does not create a temporary
+SV for the key, so if your key data is not already in SV form then use
+hv_store in preference to hv_store_ent.
 
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
@@ -1845,6 +1863,7 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 	Newz(506, xhv->xhv_array /* HvARRAY(hv) */,
 	     PERL_HV_ARRAY_ALLOC_BYTES(xhv->xhv_max+1 /* HvMAX(hv)+1 */),
 	     char);
+    /* At start of hash, entry is NULL.  */
     if (entry)
     {
 	entry = HeNEXT(entry);
@@ -1859,8 +1878,11 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 	}
     }
     while (!entry) {
+	/* OK. Come to the end of the current list.  Grab the next one.  */
+
 	xhv->xhv_riter++; /* HvRITER(hv)++ */
 	if (xhv->xhv_riter > (I32)xhv->xhv_max /* HvRITER(hv) > HvMAX(hv) */) {
+	    /* There is no next one.  End of the hash.  */
 	    xhv->xhv_riter = -1; /* HvRITER(hv) = -1 */
 	    break;
 	}
@@ -1868,10 +1890,14 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 	entry = ((HE**)xhv->xhv_array)[xhv->xhv_riter];
 
         if (!(flags & HV_ITERNEXT_WANTPLACEHOLDERS)) {
-            /* if we have an entry, but it's a placeholder, don't count it */
-            if (entry && HeVAL(entry) == &PL_sv_undef)
-                entry = 0;
-        }
+            /* If we have an entry, but it's a placeholder, don't count it.
+	       Try the next.  */
+	    while (entry && HeVAL(entry) == &PL_sv_undef)
+		entry = HeNEXT(entry);
+	}
+	/* Will loop again if this linked list starts NULL
+	   (for HV_ITERNEXT_WANTPLACEHOLDERS)
+	   or if we run through it and find only placeholders.  */
     }
 
     if (oldentry && HvLAZYDEL(hv)) {		/* was deleted earlier? */

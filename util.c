@@ -1,6 +1,6 @@
 /*    util.c
  *
- *    Copyright (c) 1991-2002, Larry Wall
+ *    Copyright (c) 1991-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -37,15 +37,6 @@
 #endif
 
 #define FLUSH
-
-#ifdef LEAKTEST
-
-long xcount[MAXXCOUNT];
-long lastxcount[MAXXCOUNT];
-long xycount[MAXXCOUNT][MAXYCOUNT];
-long lastxycount[MAXXCOUNT][MAXYCOUNT];
-
-#endif
 
 #if defined(HAS_FCNTL) && defined(F_SETFD) && !defined(FD_CLOEXEC)
 #  define FD_CLOEXEC 1			/* NeXT needs this */
@@ -188,148 +179,6 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
     }
     /*NOTREACHED*/
 }
-
-#ifdef LEAKTEST
-
-struct mem_test_strut {
-    union {
-	long type;
-	char c[2];
-    } u;
-    long size;
-};
-
-#    define ALIGN sizeof(struct mem_test_strut)
-
-#    define sizeof_chunk(ch) (((struct mem_test_strut*) (ch))->size)
-#    define typeof_chunk(ch) \
-	(((struct mem_test_strut*) (ch))->u.c[0] + ((struct mem_test_strut*) (ch))->u.c[1]*100)
-#    define set_typeof_chunk(ch,t) \
-	(((struct mem_test_strut*) (ch))->u.c[0] = t % 100, ((struct mem_test_strut*) (ch))->u.c[1] = t / 100)
-#define SIZE_TO_Y(size) ( (size) > MAXY_SIZE				\
-			  ? MAXYCOUNT - 1 				\
-			  : ( (size) > 40 				\
-			      ? ((size) - 1)/8 + 5			\
-			      : ((size) - 1)/4))
-
-Malloc_t
-Perl_safexmalloc(I32 x, MEM_SIZE size)
-{
-    register char* where = (char*)safemalloc(size + ALIGN);
-
-    xcount[x] += size;
-    xycount[x][SIZE_TO_Y(size)]++;
-    set_typeof_chunk(where, x);
-    sizeof_chunk(where) = size;
-    return (Malloc_t)(where + ALIGN);
-}
-
-Malloc_t
-Perl_safexrealloc(Malloc_t wh, MEM_SIZE size)
-{
-    char *where = (char*)wh;
-
-    if (!wh)
-	return safexmalloc(0,size);
-
-    {
-	MEM_SIZE old = sizeof_chunk(where - ALIGN);
-	int t = typeof_chunk(where - ALIGN);
-	register char* new = (char*)saferealloc(where - ALIGN, size + ALIGN);
-
-	xycount[t][SIZE_TO_Y(old)]--;
-	xycount[t][SIZE_TO_Y(size)]++;
-	xcount[t] += size - old;
-	sizeof_chunk(new) = size;
-	return (Malloc_t)(new + ALIGN);
-    }
-}
-
-void
-Perl_safexfree(Malloc_t wh)
-{
-    I32 x;
-    char *where = (char*)wh;
-    MEM_SIZE size;
-
-    if (!where)
-	return;
-    where -= ALIGN;
-    size = sizeof_chunk(where);
-    x = where[0] + 100 * where[1];
-    xcount[x] -= size;
-    xycount[x][SIZE_TO_Y(size)]--;
-    safefree(where);
-}
-
-Malloc_t
-Perl_safexcalloc(I32 x,MEM_SIZE count, MEM_SIZE size)
-{
-    register char * where = (char*)safexmalloc(x, size * count + ALIGN);
-    xcount[x] += size;
-    xycount[x][SIZE_TO_Y(size)]++;
-    memset((void*)(where + ALIGN), 0, size * count);
-    set_typeof_chunk(where, x);
-    sizeof_chunk(where) = size;
-    return (Malloc_t)(where + ALIGN);
-}
-
-STATIC void
-S_xstat(pTHX_ int flag)
-{
-    register I32 i, j, total = 0;
-    I32 subtot[MAXYCOUNT];
-
-    for (j = 0; j < MAXYCOUNT; j++) {
-	subtot[j] = 0;
-    }
-
-    PerlIO_printf(Perl_debug_log, "   Id  subtot   4   8  12  16  20  24  28  32  36  40  48  56  64  72  80 80+\n", total);
-    for (i = 0; i < MAXXCOUNT; i++) {
-	total += xcount[i];
-	for (j = 0; j < MAXYCOUNT; j++) {
-	    subtot[j] += xycount[i][j];
-	}
-	if (flag == 0
-	    ? xcount[i]			/* Have something */
-	    : (flag == 2
-	       ? xcount[i] != lastxcount[i] /* Changed */
-	       : xcount[i] > lastxcount[i])) { /* Growed */
-	    PerlIO_printf(Perl_debug_log,"%2d %02d %7ld ", i / 100, i % 100,
-			  flag == 2 ? xcount[i] - lastxcount[i] : xcount[i]);
-	    lastxcount[i] = xcount[i];
-	    for (j = 0; j < MAXYCOUNT; j++) {
-		if ( flag == 0
-		     ? xycount[i][j]	/* Have something */
-		     : (flag == 2
-			? xycount[i][j] != lastxycount[i][j] /* Changed */
-			: xycount[i][j] > lastxycount[i][j])) {	/* Growed */
-		    PerlIO_printf(Perl_debug_log,"%3ld ",
-				  flag == 2
-				  ? xycount[i][j] - lastxycount[i][j]
-				  : xycount[i][j]);
-		    lastxycount[i][j] = xycount[i][j];
-		} else {
-		    PerlIO_printf(Perl_debug_log, "  . ", xycount[i][j]);
-		}
-	    }
-	    PerlIO_printf(Perl_debug_log, "\n");
-	}
-    }
-    if (flag != 2) {
-	PerlIO_printf(Perl_debug_log, "Total %7ld ", total);
-	for (j = 0; j < MAXYCOUNT; j++) {
-	    if (subtot[j]) {
-		PerlIO_printf(Perl_debug_log, "%3ld ", subtot[j]);
-	    } else {
-		PerlIO_printf(Perl_debug_log, "  . ");
-	    }
-	}
-	PerlIO_printf(Perl_debug_log, "\n");	
-    }
-}
-
-#endif /* LEAKTEST */
 
 /* These must be defined when not using Perl's malloc for binary
  * compatibility */
@@ -508,8 +357,12 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
     I32 rarest = 0;
     U32 frequency = 256;
 
-    if (flags & FBMcf_TAIL)
+    if (flags & FBMcf_TAIL) {
+	MAGIC *mg = SvUTF8(sv) && SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_utf8) : NULL;
 	sv_catpvn(sv, "\n", 1);		/* Taken into account in fbm_instr() */
+	if (mg && mg->mg_len >= 0)
+	    mg->mg_len++;
+    }
     s = (U8*)SvPV_force(sv, len);
     (void)SvUPGRADE(sv, SVt_PVBM);
     if (len == 0)		/* TAIL might be on a zero-length string. */
@@ -1413,14 +1266,6 @@ Perl_vwarn(pTHX_ const char* pat, va_list *args)
 	PerlIO *serr = Perl_error_log;
 
 	PERL_WRITE_MSG_TO_CONSOLE(serr, message, msglen);
-#ifdef LEAKTEST
-	DEBUG_L(*message == '!'
-		? (xstat(message[1]=='!'
-			 ? (message[2]=='!' ? 2 : 1)
-			 : 0)
-		   , 0)
-		: 0);
-#endif
 	(void)PerlIO_flush(serr);
     }
 }
@@ -1564,14 +1409,6 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 	{
 	    PerlIO *serr = Perl_error_log;
 	    PERL_WRITE_MSG_TO_CONSOLE(serr, message, msglen);
-#ifdef LEAKTEST
-	    DEBUG_L(*message == '!'
-		? (xstat(message[1]=='!'
-			? (message[2]=='!' ? 2 : 1)
-			: 0)
-		    , 0)
-		: 0);
-#endif
 	    (void)PerlIO_flush(serr);
 	}
     }
@@ -2366,9 +2203,8 @@ Perl_rsignal(pTHX_ int signo, Sighandler_t handler)
     sigemptyset(&act.sa_mask);
     act.sa_flags = 0;
 #ifdef SA_RESTART
-#if defined(PERL_OLD_SIGNALS)
-    act.sa_flags |= SA_RESTART;	/* SVR4, 4.3+BSD */
-#endif
+    if (PL_signals & PERL_SIGNALS_UNSAFE_FLAG)
+        act.sa_flags |= SA_RESTART;	/* SVR4, 4.3+BSD */
 #endif
 #ifdef SA_NOCLDWAIT
     if (signo == SIGCHLD && handler == (Sighandler_t)SIG_IGN)
@@ -2406,9 +2242,8 @@ Perl_rsignal_save(pTHX_ int signo, Sighandler_t handler, Sigsave_t *save)
     sigemptyset(&act.sa_mask);
     act.sa_flags = 0;
 #ifdef SA_RESTART
-#if defined(PERL_OLD_SIGNALS)
-    act.sa_flags |= SA_RESTART;	/* SVR4, 4.3+BSD */
-#endif
+    if (PL_signals & PERL_SIGNALS_UNSAFE_FLAG)
+        act.sa_flags |= SA_RESTART;	/* SVR4, 4.3+BSD */
 #endif
 #ifdef SA_NOCLDWAIT
     if (signo == SIGCHLD && handler == (Sighandler_t)SIG_IGN)
@@ -3431,6 +3266,9 @@ Perl_get_vtbl(pTHX_ int vtbl_id)
     case want_vtbl_backref:
 	result = &PL_vtbl_backref;
 	break;
+    case want_vtbl_utf8:
+	result = &PL_vtbl_utf8;
+	break;
     }
     return result;
 }
@@ -3438,7 +3276,7 @@ Perl_get_vtbl(pTHX_ int vtbl_id)
 I32
 Perl_my_fflush_all(pTHX)
 {
-#if defined(FFLUSH_NULL)
+#if defined(USE_PERLIO) || defined(FFLUSH_NULL) || defined(USE_SFIO)
     return PerlIO_flush(NULL);
 #else
 # if defined(HAS__FWALK)
@@ -3841,6 +3679,20 @@ Perl_my_strftime(pTHX_ char *fmt, int sec, int min, int hour, int mday, int mon,
   mytm.tm_yday = yday;
   mytm.tm_isdst = isdst;
   mini_mktime(&mytm);
+  /* use libc to get the values for tm_gmtoff and tm_zone [perl #18238] */
+#if defined(HAS_MKTIME) && (defined(HAS_TM_TM_GMTOFF) || defined(HAS_TM_TM_ZONE))
+  STMT_START {
+    struct tm mytm2;
+    mytm2 = mytm;
+    mktime(&mytm2);
+#ifdef HAS_TM_TM_GMTOFF
+    mytm.tm_gmtoff = mytm2.tm_gmtoff;
+#endif
+#ifdef HAS_TM_TM_ZONE
+    mytm.tm_zone = mytm2.tm_zone;
+#endif
+  } STMT_END;
+#endif
   buflen = 64;
   New(0, buf, buflen, char);
   len = strftime(buf, buflen, fmt, &mytm);
@@ -4083,6 +3935,7 @@ char *
 Perl_new_vstring(pTHX_ char *s, SV *sv)
 {
     char *pos = s;
+    char *start = s;
     if (*pos == 'v') pos++;  /* get past 'v' */
     while (isDIGIT(*pos) || *pos == '_')
     pos++;
@@ -4101,11 +3954,10 @@ Perl_new_vstring(pTHX_ char *s, SV *sv)
 		 /* this is atoi() that tolerates underscores */
 		 char *end = pos;
 		 UV mult = 1;
-		 if ( s > pos && *(s-1) == '_') {
-		      mult = 10;
-		 }
 		 while (--end >= s) {
 		      UV orev;
+		      if (*end == '_' )
+			   continue;
 		      orev = rev;
 		      rev += (*end - '0') * mult;
 		      mult *= 10;
@@ -4123,17 +3975,18 @@ Perl_new_vstring(pTHX_ char *s, SV *sv)
 	    sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);
 	    if (!UNI_IS_INVARIANT(NATIVE_TO_UNI(rev)))
 		 SvUTF8_on(sv);
-	    if ( (*pos == '.' || *pos == '_') && isDIGIT(pos[1]))
+	    if ( *pos == '.' && isDIGIT(pos[1]) )
 		 s = ++pos;
 	    else {
 		 s = pos;
 		 break;
 	    }
-	    while (isDIGIT(*pos) )
+	    while ( isDIGIT(*pos) || *pos == '_' ) 
 		 pos++;
 	}
 	SvPOK_on(sv);
-	SvREADONLY_on(sv);
+	sv_magic(sv,NULL,PERL_MAGIC_vstring,(const char*)start, pos-start);
+	SvRMAGICAL_on(sv);
     }
     return s;
 }
@@ -4437,5 +4290,58 @@ some level of strict-ness.
 void
 Perl_sv_nounlocking(pTHX_ SV *sv)
 {
+}
+
+U32
+Perl_parse_unicode_opts(pTHX_ char **popt)
+{
+  char *p = *popt;
+  U32 opt = 0;
+
+  if (*p) {
+       if (isDIGIT(*p)) {
+	    opt = (U32) atoi(p);
+	    while (isDIGIT(*p)) p++;
+	    if (*p)
+		 Perl_croak(aTHX_ "Unknown Unicode option letter '%c'", *p);
+       }
+       else {
+	    for (; *p; p++) {
+		 switch (*p) {
+		 case PERL_UNICODE_STDIN:
+		      opt |= PERL_UNICODE_STDIN_FLAG;	break;
+		 case PERL_UNICODE_STDOUT:
+		      opt |= PERL_UNICODE_STDOUT_FLAG;	break;
+		 case PERL_UNICODE_STDERR:
+		      opt |= PERL_UNICODE_STDERR_FLAG;	break;
+		 case PERL_UNICODE_STD:
+		      opt |= PERL_UNICODE_STD_FLAG;    	break;
+		 case PERL_UNICODE_IN:
+		      opt |= PERL_UNICODE_IN_FLAG;	break;
+		 case PERL_UNICODE_OUT:
+		      opt |= PERL_UNICODE_OUT_FLAG;	break;
+		 case PERL_UNICODE_INOUT:
+		      opt |= PERL_UNICODE_INOUT_FLAG;	break;
+		 case PERL_UNICODE_LOCALE:
+		      opt |= PERL_UNICODE_LOCALE_FLAG;	break;
+		 case PERL_UNICODE_ARGV:
+		      opt |= PERL_UNICODE_ARGV_FLAG;	break;
+		 default:
+		      Perl_croak(aTHX_
+				 "Unknown Unicode option letter '%c'", *p);
+		 }
+	    }
+       }
+  }
+  else
+       opt = PERL_UNICODE_DEFAULT_FLAGS;
+
+  if (opt & ~PERL_UNICODE_ALL_FLAGS)
+       Perl_croak(aTHX_ "Unknown Unicode option value %"UVuf,
+		  (UV) (opt & ~PERL_UNICODE_ALL_FLAGS));
+
+  *popt = p;
+
+  return opt;
 }
 

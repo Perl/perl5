@@ -22,7 +22,7 @@ use Net::Config;
 use Fcntl qw(O_WRONLY O_RDONLY O_APPEND O_CREAT O_TRUNC);
 # use AutoLoader qw(AUTOLOAD);
 
-$VERSION = "2.65"; # $Id: //depot/libnet/Net/FTP.pm#68 $
+$VERSION = "2.67"; # $Id: //depot/libnet/Net/FTP.pm#70 $
 @ISA     = qw(Exporter Net::Cmd IO::Socket::INET);
 
 # Someday I will "use constant", when I am not bothered to much about
@@ -76,6 +76,7 @@ sub new
 
  my $ftp = $pkg->SUPER::new(PeerAddr => $peer, 
 			    PeerPort => $arg{Port} || 'ftp(21)',
+			    LocalAddr => $arg{'LocalAddr'},
 			    Proto    => 'tcp',
 			    Timeout  => defined $arg{Timeout}
 						? $arg{Timeout}
@@ -85,6 +86,8 @@ sub new
  ${*$ftp}{'net_ftp_host'}     = $host;		# Remote hostname
  ${*$ftp}{'net_ftp_type'}     = 'A';		# ASCII/binary/etc mode
  ${*$ftp}{'net_ftp_blksize'}  = abs($arg{'BlockSize'} || 10240);
+
+ ${*$ftp}{'net_ftp_localaddr'} = $arg{'LocalAddr'};
 
  ${*$ftp}{'net_ftp_firewall'} = $fire
 	if(defined $fire);
@@ -714,6 +717,9 @@ sub _store_cmd
  $sock = $ftp->_data_cmd($cmd, $remote) or 
 	return undef;
 
+ $remote = ($ftp->message =~ /FILE:\s*(.*)/)[0]
+   if 'STOU' eq uc $cmd;
+
  my $blksize = ${*$ftp}{'net_ftp_blksize'};
 
  my($count,$hashh,$hashb,$ref) = (0);
@@ -908,6 +914,7 @@ sub _dataconn
 
    $data = $pkg->new(PeerAddr => join(".",@port[0..3]),
     	    	     PeerPort => $port[4] * 256 + $port[5],
+		     LocalAddr => ${*$ftp}{'net_ftp_localaddr'},
     	    	     Proto    => 'tcp'
     	    	    );
   }
@@ -1276,6 +1283,9 @@ print hash marks (#) on that filehandle every 1024 bytes.  This
 simply invokes the C<hash()> method for you, so that hash marks
 are displayed for all transfers.  You can, of course, call C<hash()>
 explicitly whenever you'd like.
+
+B<LocalAddr> - Local address to use for all socket connections, this
+argument will be passed to L<IO::Socket::INET>
 
 If the constructor fails undef will be returned and an error message will
 be in $@
@@ -1710,6 +1720,6 @@ under the same terms as Perl itself.
 
 =for html <hr>
 
-I<$Id: //depot/libnet/Net/FTP.pm#68 $>
+I<$Id: //depot/libnet/Net/FTP.pm#70 $>
 
 =cut

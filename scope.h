@@ -45,6 +45,7 @@
 #define SAVEt_PADSV		35
 #define SAVEt_MORTALIZESV	36
 #define SAVEt_SHARED_PVREF	37
+#define SAVEt_BOOL		38
 
 #ifndef SCOPE_SAVES_SIGNAL_MASK
 #define SCOPE_SAVES_SIGNAL_MASK 0
@@ -53,12 +54,14 @@
 #define SSCHECK(need) if (PL_savestack_ix + need > PL_savestack_max) savestack_grow()
 #define SSPUSHINT(i) (PL_savestack[PL_savestack_ix++].any_i32 = (I32)(i))
 #define SSPUSHLONG(i) (PL_savestack[PL_savestack_ix++].any_long = (long)(i))
+#define SSPUSHBOOL(p) (PL_savestack[PL_savestack_ix++].any_bool = (p))
 #define SSPUSHIV(i) (PL_savestack[PL_savestack_ix++].any_iv = (IV)(i))
 #define SSPUSHPTR(p) (PL_savestack[PL_savestack_ix++].any_ptr = (void*)(p))
 #define SSPUSHDPTR(p) (PL_savestack[PL_savestack_ix++].any_dptr = (p))
 #define SSPUSHDXPTR(p) (PL_savestack[PL_savestack_ix++].any_dxptr = (p))
 #define SSPOPINT (PL_savestack[--PL_savestack_ix].any_i32)
 #define SSPOPLONG (PL_savestack[--PL_savestack_ix].any_long)
+#define SSPOPBOOL (PL_savestack[--PL_savestack_ix].any_bool)
 #define SSPOPIV (PL_savestack[--PL_savestack_ix].any_iv)
 #define SSPOPPTR (PL_savestack[--PL_savestack_ix].any_ptr)
 #define SSPOPDPTR (PL_savestack[--PL_savestack_ix].any_dptr)
@@ -116,6 +119,7 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 #define SAVEINT(i)	save_int(SOFT_CAST(int*)&(i))
 #define SAVEIV(i)	save_iv(SOFT_CAST(IV*)&(i))
 #define SAVELONG(l)	save_long(SOFT_CAST(long*)&(l))
+#define SAVEBOOL(b)	save_bool(SOFT_CAST(bool*)&(b))
 #define SAVESPTR(s)	save_sptr((SV**)&(s))
 #define SAVEPPTR(s)	save_pptr(SOFT_CAST(char**)&(s))
 #define SAVEVPTR(s)	save_vptr((void*)&(s))
@@ -158,15 +162,9 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 
 #define SAVECOMPPAD() \
     STMT_START {						\
-	if (PL_comppad && PL_curpad == AvARRAY(PL_comppad)) {	\
-	    SSCHECK(2);						\
-	    SSPUSHPTR((SV*)PL_comppad);				\
-	    SSPUSHINT(SAVEt_COMPPAD);				\
-	}							\
-	else {							\
-	    SAVEVPTR(PL_curpad);				\
-	    SAVESPTR(PL_comppad);				\
-	}							\
+	SSCHECK(2);						\
+	SSPUSHPTR((SV*)PL_comppad);				\
+	SSPUSHINT(SAVEt_COMPPAD);				\
     } STMT_END
 
 #ifdef USE_ITHREADS

@@ -1,9 +1,124 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.83 2002/11/18 17:28:49 dankogai Exp dankogai $
+# $Id: Changes,v 1.91 2003/03/09 20:07:37 dankogai Exp dankogai $
 #
+$Revision: 1.91 $ $Date: 2003/03/09 20:07:37 $
+! encoding.pm
+  even more proofread by jhi.
+  Message-Id: <20030309194323.GT20843@kosh.hut.fi>
+! t/enc_module.t
+  -use lib 't';
+  +use lib qw(t ext/Encode/t ../ext/Encode/t);
+  Message-Id: <20030309182057.GR20843@kosh.hut.fi>
+! AUTHORS
+  s/Hirohito/Hiroto/ig;  Sorry, Hiroto-san.
+  Message-Id: <20030309181748.GP20843@kosh.hut.fi>
+! encoding.pm
+  s/logner/longer/
+  Message-Id: <20030309181907.GQ20843@kosh.hut.fi>
 
-$Revision: 1.83 $ $Date: 2002/11/18 17:28:49 $
+1.90 2003/03/09 17:32:43
+! encoding.pm
++ t/enc_data.t
+  Inaba-san has added a patch for perl 5.8.1 or later that makes
+  encoding.pm work for <DATA> filehandle.  t/enc_data.t is to test
+  that.  POD is further revised.
+  Message-Id: <200303091515.h29FF6B03903@smtp3.ActiveState.com>
+! encoding.pm t/enc_module.t
+  encoding vs. ${^UNICODE} resolved.  POD revised accordingly.
+  Message-Id: <20030306112940.GN20652@kosh.hut.fi>
+
+1.89 2003/02/28
+! Encode.xs
+  signed vs. unsigned issue discovered by Craig on OpenVM
+  Message-Id: <a05200f12ba81fe9d6298@[172.16.52.1]>
+! encoding.pm AUTHORS
++ t/Mod_EUCJP.pm t/enc_module.enc t/enc_module.t
+  Because  binmode() stacks layers instead of overwrite, you have to 
+  ":raw :encoding()" in encoding.pm or your are in trouble when you 
+  call encoding.pm multiple times.  There are several workarounds
+  but Inaba-san's idea is in. SUGAWARA Hajime <sugawara@hdt.co.jp>, 
+  who was the first to address this problem was added to AUTHORS.
+  The test suites was added for this, which is a modified version
+  of SUGAWARA-san's scripts
+  Message-Id: <3E5CF695.6AE07852@st.rim.or.jp>
+
+1.88 2003/02/20 14:42:34
+! Encode.xs
+  one signedness nit for Encode by jhi
+  <200302161933.h1GJX876018710@kosh.hut.fi>
+! ucm/viscii.ucm
+  VISCII map was incorrect; fixed by Sadahiro-san
+  Message-Id: <20030216120828.47D3.BQW10602@nifty.com>
+! t/enc_eucjp.t t/enc_utf8.t AUTHORS
+  You can't unlink files that are opened in cygwin but the last
+  file handle opened in t/enc_*.t left open.  Patch submitted
+  by Yitzchak and he was added to AUTHORS.
+  Message-Id: <iN0Q+gzkgmZN092yn@efn.org>
+! t/CJKT.t
+  now works with 'LC_ALL=en_US.UTF-8 PERL_UTF8_LOCALE=1'
+  Message-Id: <20030206104513.GA11081@kosh.hut.fi>  
+! Unicode/Unicode.xs
+  For 1.88: Unicode.xs =~ s/regog/recog/ -- jhi
+  Message-Id: <20030206045153.GA6826@kosh.hut.fi>
+
+1.87 2003/02/06 01:52:11
+! AUTHORS
+  * Inaba "Sensei" Hirohito added (I thought I have done so a long 
+  ago but apparently I did not).
+  * SUZUKI Norio added for verious and useful bug reports.
+! Byte/Byte.pm KR/KR.pm Unicode/Unicode.pm
+  lib/Encode/Encoder.pm lib/Encode/CJKConstants.pm
+  podchecked so all warnings are gone except for L<http://>.
+! encoding.pm t/enc_eucjp.t
+  * t/uni/tr_utf8.t now t ok on maintperl (sorry, jhi)
+  * Filter option overhaul
+  * POD revision	   
+! Encode.pm Encode.xs encengine.c Encode/encode.h 
+  lib/Encode/Encoding.pm lib/Encode/JP/JIS7.pm
+  Merged inaba-san's patch that fixes "use encoding 'shiftjis'"
+  without filter.  podchecked by Dan Kogai.
+  Message-Id: <3E3BC46B.6C687CFD@st.rim.or.jp>
+! lib/Encode/Alias.pm
+  decode('alias', $1) went wild because of local $_ in find_alias()
+  the evil local $_ is eradicated but that changes find_alias()
+  format for coderef aliasing.  See Encode::Alias for details
+  Message-Id: <200302051704.AA00042@kipp0.nifty.com>
+
+1.86 2003/01/22 03:29:07
+! encoding.pm
+  * Don't forget to canonize when you attempt an exact match!
+  Message-Id: <73E7F801-2DAA-11D7-BF9A-000393AE4244@dan.co.jp>
+  * ${^ENCODING} exception is off for $] > 5.008
+  Message-Id: <20030122110617T.inaba.hiroto@toshiba-it.co.jp>
+! t/enc_utf8.t
+  $] check commented out so it runs on 5.8.0
+  
+1.85 2003/01/21 22:19:14
+! encoding.pm
+  ${^ENCODING} exception is now explicit rather than handled by regex.
++ t/enc_eucjp.t t/enc_utf8.t
+  Test suite for the better "encoding" pragma support for bleedperl.
+  On 5.8.0, they will just be skipped.
+
+1.84 2003/01/10 12:00:16
+! encoding.pm
+  ${^ENCODING} is no longer set for utf so encoding is no longer fun :)
+  (That is to prevent duplicate encoding first by IO then ${^ENCODING})
+  Message-Id: <20030108213737.GK331043@lyta.hut.fi>
+! Unicode/Unicode.xs
+  %_ fixes saves the resulting .so .05% smaller, by NC
+  Message-Id: <20021226225709.GF284@Bagpuss.unfortu.net>
+! Encode.pm
+  Silence Encode on undef, by Andreas
+  Message-Id: <m3smwrohd1.fsf@k242.linux.bogus>
+  Message-Id: <m3of7fo7np.fsf@k242.linux.bogus>
+! Unicode/Unicode.xs
+  s/regognised/recognised/ .  British spelling left intact to pay
+  respect to two British Nicks :)
+  Message-Id: <20021203020454.GK2274@kosh.hut.fi>
+
+1.83 2002/11/18 17:28:49
 ! Encode.xs lib/Encode/JIS7.pm
   Even more patches from Inaba-san has been applied.  With this
   patch t/uni/tr_7jis.t and t/uni/t_utf8.t of bleedperl will work.

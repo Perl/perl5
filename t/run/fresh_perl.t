@@ -89,7 +89,7 @@ $x=2;$y=3;$x<$y ? $x : $y += 23;print $x;
 EXPECT
 25
 ########
-eval {sub bar {print "In bar";}}
+eval 'sub bar {print "In bar"}';
 ########
 system './perl -ne "print if eof" /dev/null' unless $^O eq 'MacOS'
 ########
@@ -807,3 +807,21 @@ utf8::upgrade($_); # the original code used a UTF-8 locale (affects STDIN)
 # is what matters.
 /^([[:digit:]]+)/;
 EXPECT
+######## [perl #20667] unicode regex vs non-unicode regex
+$toto = 'Hello';
+$toto =~ /\w/; # this line provokes the problem!
+$name = 'A B';
+# utf8::upgrade($name) if @ARGV;
+if ($name =~ /(\p{IsUpper}) (\p{IsUpper})/){
+    print "It's good! >$1< >$2<\n";
+} else {
+    print "It's not good...\n";
+}
+EXPECT
+It's good! >A< >B<
+######## [perl #8760] strangness with utf8 and warn
+$_="foo";utf8::upgrade($_);/bar/i,warn$_;
+EXPECT
+foo at - line 1.
+
+

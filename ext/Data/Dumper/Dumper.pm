@@ -803,7 +803,9 @@ so that they can be chained together nicely.
 
 =over 4
 
-=item $Data::Dumper::Indent  I<or>  I<$OBJ>->Indent(I<[NEWVAL]>)
+=item *
+
+$Data::Dumper::Indent  I<or>  I<$OBJ>->Indent(I<[NEWVAL]>)
 
 Controls the style of indentation.  It can be set to 0, 1, 2 or 3.  Style 0
 spews output without any newlines, indentation, or spaces between list
@@ -816,24 +818,32 @@ up).  Style 3 is like style 2, but also annotates the elements of arrays
 with their index (but the comment is on its own line, so array output
 consumes twice the number of lines).  Style 2 is the default.
 
-=item $Data::Dumper::Purity  I<or>  I<$OBJ>->Purity(I<[NEWVAL]>)
+=item *
+
+$Data::Dumper::Purity  I<or>  I<$OBJ>->Purity(I<[NEWVAL]>)
 
 Controls the degree to which the output can be C<eval>ed to recreate the
 supplied reference structures.  Setting it to 1 will output additional perl
 statements that will correctly recreate nested references.  The default is
 0.
 
-=item $Data::Dumper::Pad  I<or>  I<$OBJ>->Pad(I<[NEWVAL]>)
+=item *
+
+$Data::Dumper::Pad  I<or>  I<$OBJ>->Pad(I<[NEWVAL]>)
 
 Specifies the string that will be prefixed to every line of the output.
 Empty string by default.
 
-=item $Data::Dumper::Varname  I<or>  I<$OBJ>->Varname(I<[NEWVAL]>)
+=item *
+
+$Data::Dumper::Varname  I<or>  I<$OBJ>->Varname(I<[NEWVAL]>)
 
 Contains the prefix to use for tagging variable names in the output. The
 default is "VAR".
 
-=item $Data::Dumper::Useqq  I<or>  I<$OBJ>->Useqq(I<[NEWVAL]>)
+=item *
+
+$Data::Dumper::Useqq  I<or>  I<$OBJ>->Useqq(I<[NEWVAL]>)
 
 When set, enables the use of double quotes for representing string values.
 Whitespace other than space will be represented as C<[\n\t\r]>, "unsafe"
@@ -842,14 +852,18 @@ quoted octal integers.  Since setting this variable imposes a performance
 penalty, the default is 0.  C<Dump()> will run slower if this flag is set,
 since the fast XSUB implementation doesn't support it yet.
 
-=item $Data::Dumper::Terse  I<or>  I<$OBJ>->Terse(I<[NEWVAL]>)
+=item *
+
+$Data::Dumper::Terse  I<or>  I<$OBJ>->Terse(I<[NEWVAL]>)
 
 When set, Data::Dumper will emit single, non-self-referential values as
 atoms/terms rather than statements.  This means that the C<$VAR>I<n> names
 will be avoided where possible, but be advised that such output may not
 always be parseable by C<eval>.
 
-=item $Data::Dumper::Freezer  I<or>  $I<OBJ>->Freezer(I<[NEWVAL]>)
+=item *
+
+$Data::Dumper::Freezer  I<or>  $I<OBJ>->Freezer(I<[NEWVAL]>)
 
 Can be set to a method name, or to an empty string to disable the feature.
 Data::Dumper will invoke that method via the object before attempting to
@@ -860,7 +874,9 @@ method can be called via the object, and that the object ends up containing
 only perl data types after the method has been called.  Defaults to an empty
 string.
 
-=item $Data::Dumper::Toaster  I<or>  $I<OBJ>->Toaster(I<[NEWVAL]>)
+=item *
+
+$Data::Dumper::Toaster  I<or>  $I<OBJ>->Toaster(I<[NEWVAL]>)
 
 Can be set to a method name, or to an empty string to disable the feature.
 Data::Dumper will emit a method call for any objects that are to be dumped
@@ -871,26 +887,34 @@ different package) and then return it.  The client is responsible for making
 sure the method can be called via the object, and that it returns a valid
 object.  Defaults to an empty string.
 
-=item $Data::Dumper::Deepcopy  I<or>  $I<OBJ>->Deepcopy(I<[NEWVAL]>)
+=item *
+
+$Data::Dumper::Deepcopy  I<or>  $I<OBJ>->Deepcopy(I<[NEWVAL]>)
 
 Can be set to a boolean value to enable deep copies of structures.
 Cross-referencing will then only be done when absolutely essential
 (i.e., to break reference cycles).  Default is 0.
 
-=item $Data::Dumper::Quotekeys  I<or>  $I<OBJ>->Quotekeys(I<[NEWVAL]>)
+=item *
+
+$Data::Dumper::Quotekeys  I<or>  $I<OBJ>->Quotekeys(I<[NEWVAL]>)
 
 Can be set to a boolean value to control whether hash keys are quoted.
 A false value will avoid quoting hash keys when it looks like a simple
 string.  Default is 1, which will always enclose hash keys in quotes.
 
-=item $Data::Dumper::Bless  I<or>  $I<OBJ>->Bless(I<[NEWVAL]>)
+=item *
+
+$Data::Dumper::Bless  I<or>  $I<OBJ>->Bless(I<[NEWVAL]>)
 
 Can be set to a string that specifies an alternative to the C<bless>
 builtin operator used to create objects.  A function with the specified
 name should exist, and should accept the same arguments as the builtin.
 Default is C<bless>.
 
-=item $Data::Dumper::Maxdepth  I<or>  $I<OBJ>->Maxdepth(I<[NEWVAL]>)
+=item *
+
+$Data::Dumper::Maxdepth  I<or>  $I<OBJ>->Maxdepth(I<[NEWVAL]>)
 
 Can be set to a positive integer that specifies the depth beyond which
 which we don't venture into a structure.  Has no effect when
@@ -898,7 +922,9 @@ C<Data::Dumper::Purity> is set.  (Useful in debugger when we often don't
 want to see more than enough).  Default is 0, which means there is 
 no maximum depth. 
 
-=item $Data::Dumper::Useperl  I<or>  $I<OBJ>->Useperl(I<[NEWVAL]>)
+=item *
+
+$Data::Dumper::Useperl  I<or>  $I<OBJ>->Useperl(I<[NEWVAL]>)
 
 Can be set to a boolean value which controls whether the pure Perl
 implementation of C<Data::Dumper> is used. The C<Data::Dumper> module is
@@ -908,7 +934,9 @@ will always be used if possible. This option lets you override the
 default behavior, usually for testing purposes only. Default is 0, which
 means the XS implementation will be used if possible.
 
-=item $Data::Dumper::Sortkeys  I<or>  $I<OBJ>->Sortkeys(I<[NEWVAL]>)
+=item *
+
+$Data::Dumper::Sortkeys  I<or>  $I<OBJ>->Sortkeys(I<[NEWVAL]>)
 
 Can be set to a boolean value to control whether hash keys are dumped in
 sorted order. A true value will cause the keys of all hashes to be
@@ -923,7 +951,9 @@ other words, this subroutine acts as a filter by which you can exclude
 certain keys from being dumped. Default is 0, which means that hash keys
 are not sorted.
 
-=item $Data::Dumper::Deparse  I<or>  $I<OBJ>->Deparse(I<[NEWVAL]>)
+=item *
+
+$Data::Dumper::Deparse  I<or>  $I<OBJ>->Deparse(I<[NEWVAL]>)
 
 Can be set to a boolean value to control whether code references are
 turned into perl source code. If set to a true value, C<B::Deparse>

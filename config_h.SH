@@ -50,6 +50,286 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #define LOC_SED 	"$full_sed"	/**/
 
+/* HAS_ALARM:
+ *	This symbol, if defined, indicates that the alarm routine is
+ *	available.
+ */
+#$d_alarm HAS_ALARM		/**/
+
+/* HAS_BCMP:
+ *	This symbol is defined if the bcmp() routine is available to
+ *	compare blocks of memory.
+ */
+#$d_bcmp HAS_BCMP	/**/
+
+/* HAS_BCOPY:
+ *	This symbol is defined if the bcopy() routine is available to
+ *	copy blocks of memory.
+ */
+#$d_bcopy HAS_BCOPY	/**/
+
+/* HAS_BZERO:
+ *	This symbol is defined if the bzero() routine is available to
+ *	set a memory block to 0.
+ */
+#$d_bzero HAS_BZERO	/**/
+
+/* HAS_CHOWN:
+ *	This symbol, if defined, indicates that the chown routine is
+ *	available.
+ */
+#$d_chown HAS_CHOWN		/**/
+
+/* HAS_CHROOT:
+ *	This symbol, if defined, indicates that the chroot routine is
+ *	available.
+ */
+#$d_chroot HAS_CHROOT		/**/
+
+/* HAS_CHSIZE:
+ *	This symbol, if defined, indicates that the chsize routine is available
+ *	to truncate files.  You might need a -lx to get this routine.
+ */
+#$d_chsize	HAS_CHSIZE		/**/
+
+/* HASCONST:
+ *	This symbol, if defined, indicates that this C compiler knows about
+ *	the const type. There is no need to actually test for that symbol
+ *	within your programs. The mere use of the "const" keyword will
+ *	trigger the necessary tests.
+ */
+#$d_const HASCONST	/**/
+#ifndef HASCONST
+#define const
+#endif
+
+/* HAS_CUSERID:
+ *	This symbol, if defined, indicates that the cuserid routine is
+ *	available to get character login names.
+ */
+#$d_cuserid HAS_CUSERID		/**/
+
+/* HAS_DBL_DIG:
+ *	This symbol, if defined, indicates that this system's <float.h>
+ *	or <limits.h> defines the symbol DBL_DIG, which is the number
+ *	of significant digits in a double precision number.  If this
+ *	symbol is not defined, a guess of 15 is usually pretty good.
+ */
+#$d_dbl_dig HAS_DBL_DIG 	/* */
+
+/* HAS_DIFFTIME:
+ *	This symbol, if defined, indicates that the difftime routine is
+ *	available.
+ */
+#$d_difftime HAS_DIFFTIME		/**/
+
+/* HAS_DLERROR:
+ *	This symbol, if defined, indicates that the dlerror routine is
+ *	available to return a string describing the last error that
+ *	occurred from a call to dlopen(), dlclose() or dlsym().
+ */
+#$d_dlerror HAS_DLERROR	/**/
+
+/* HAS_DUP2:
+ *	This symbol, if defined, indicates that the dup2 routine is
+ *	available to duplicate file descriptors.
+ */
+#$d_dup2 HAS_DUP2	/**/
+
+/* HAS_FCHMOD:
+ *	This symbol, if defined, indicates that the fchmod routine is available
+ *	to change mode of opened files.  If unavailable, use chmod().
+ */
+#$d_fchmod HAS_FCHMOD		/**/
+
+/* HAS_FCHOWN:
+ *	This symbol, if defined, indicates that the fchown routine is available
+ *	to change ownership of opened files.  If unavailable, use chown().
+ */
+#$d_fchown HAS_FCHOWN		/**/
+
+/* HAS_FCNTL:
+ *	This symbol, if defined, indicates to the C program that
+ *	the fcntl() function exists.
+ */
+#$d_fcntl HAS_FCNTL		/**/
+
+/* HAS_FGETPOS:
+ *	This symbol, if defined, indicates that the fgetpos routine is
+ *	available to get the file position indicator, similar to ftell().
+ */
+#$d_fgetpos HAS_FGETPOS	/**/
+
+/* HAS_FLOCK:
+ *	This symbol, if defined, indicates that the flock routine is
+ *	available to do file locking.
+ */
+#$d_flock HAS_FLOCK		/**/
+
+/* HAS_FORK:
+ *	This symbol, if defined, indicates that the fork routine is
+ *	available.
+ */
+#$d_fork HAS_FORK		/**/
+
+/* HAS_FSETPOS:
+ *	This symbol, if defined, indicates that the fsetpos routine is
+ *	available to set the file position indicator, similar to fseek().
+ */
+#$d_fsetpos HAS_FSETPOS	/**/
+
+/* HAS_GETTIMEOFDAY:
+ *	This symbol, if defined, indicates that the gettimeofday() system
+ *	call is available for a sub-second accuracy clock. Usually, the file
+ *	<sys/resource.h> needs to be included (see I_SYS_RESOURCE).
+ *	The type "Timeval" should be used to refer to "struct timeval".
+ */
+#$d_gettimeod HAS_GETTIMEOFDAY	/**/
+#ifdef HAS_GETTIMEOFDAY
+#define Timeval struct timeval	/* Structure used by gettimeofday() */
+#endif
+
+/* HAS_GETGROUPS:
+ *	This symbol, if defined, indicates that the getgroups() routine is
+ *	available to get the list of process groups.  If unavailable, multiple
+ *	groups are probably not supported.
+ */
+#$d_getgrps HAS_GETGROUPS		/**/
+
+/* HAS_GETLOGIN:
+ *	This symbol, if defined, indicates that the getlogin routine is
+ *	available to get the login name.
+ */
+#$d_getlogin HAS_GETLOGIN		/**/
+
+/* HAS_GETPGID:
+ *	This symbol, if defined, indicates to the C program that 
+ *	the getpgid(pid) function is available to get the
+ *	process group id.
+ */
+#$d_getpgid HAS_GETPGID		/**/
+
+/* HAS_GETPGRP2:
+ *	This symbol, if defined, indicates that the getpgrp2() (as in DG/UX)
+ *	routine is available to get the current process group.
+ */
+#$d_getpgrp2 HAS_GETPGRP2		/**/
+
+/* HAS_GETPPID:
+ *	This symbol, if defined, indicates that the getppid routine is
+ *	available to get the parent process ID.
+ */
+#$d_getppid HAS_GETPPID		/**/
+
+/* HAS_GETPRIORITY:
+ *	This symbol, if defined, indicates that the getpriority routine is
+ *	available to get a process's priority.
+ */
+#$d_getprior HAS_GETPRIORITY		/**/
+
+/* HAS_INET_ATON:
+ *	This symbol, if defined, indicates to the C program that the
+ *	inet_aton() function is available to parse IP address "dotted-quad"
+ *	strings.
+ */
+#$d_inetaton HAS_INET_ATON		/**/
+
+/* HAS_KILLPG:
+ *	This symbol, if defined, indicates that the killpg routine is available
+ *	to kill process groups.  If unavailable, you probably should use kill
+ *	with a negative process number.
+ */
+#$d_killpg HAS_KILLPG	/**/
+
+/* HAS_LINK:
+ *	This symbol, if defined, indicates that the link routine is
+ *	available to create hard links.
+ */
+#$d_link HAS_LINK	/**/
+
+/* HAS_LOCALECONV:
+ *	This symbol, if defined, indicates that the localeconv routine is
+ *	available for numeric and monetary formatting conventions.
+ */
+#$d_locconv HAS_LOCALECONV	/**/
+
+/* HAS_LOCKF:
+ *	This symbol, if defined, indicates that the lockf routine is
+ *	available to do file locking.
+ */
+#$d_lockf HAS_LOCKF		/**/
+
+/* HAS_LSTAT:
+ *	This symbol, if defined, indicates that the lstat routine is
+ *	available to do file stats on symbolic links.
+ */
+#$d_lstat HAS_LSTAT		/**/
+
+/* HAS_MBLEN:
+ *	This symbol, if defined, indicates that the mblen routine is available
+ *	to find the number of bytes in a multibye character.
+ */
+#$d_mblen HAS_MBLEN		/**/
+
+/* HAS_MBSTOWCS:
+ *	This symbol, if defined, indicates that the mbstowcs routine is
+ *	available to covert a multibyte string into a wide character string.
+ */
+#$d_mbstowcs	HAS_MBSTOWCS		/**/
+
+/* HAS_MBTOWC:
+ *	This symbol, if defined, indicates that the mbtowc routine is available
+ *	to covert a multibyte to a wide character.
+ */
+#$d_mbtowc HAS_MBTOWC		/**/
+
+/* HAS_MEMCMP:
+ *	This symbol, if defined, indicates that the memcmp routine is available
+ *	to compare blocks of memory.
+ */
+#$d_memcmp HAS_MEMCMP	/**/
+
+/* HAS_MEMCPY:
+ *	This symbol, if defined, indicates that the memcpy routine is available
+ *	to copy blocks of memory.
+ */
+#$d_memcpy HAS_MEMCPY	/**/
+
+/* HAS_MEMMOVE:
+ *	This symbol, if defined, indicates that the memmove routine is available
+ *	to copy potentially overlapping blocks of memory. This should be used
+ *	only when HAS_SAFE_BCOPY is not defined. If neither is there, roll your
+ *	own version.
+ */
+#$d_memmove HAS_MEMMOVE	/**/
+
+/* HAS_MEMSET:
+ *	This symbol, if defined, indicates that the memset routine is available
+ *	to set blocks of memory.
+ */
+#$d_memset HAS_MEMSET	/**/
+
+/* HAS_MKDIR:
+ *	This symbol, if defined, indicates that the mkdir routine is available
+ *	to create directories.  Otherwise you should fork off a new process to
+ *	exec /bin/mkdir.
+ */
+#$d_mkdir HAS_MKDIR		/**/
+
+/* HAS_MKFIFO:
+ *	This symbol, if defined, indicates that the mkfifo routine is
+ *	available to create FIFOs. Otherwise, mknod should be able to
+ *	do it for you. However, if mkfifo is there, mknod might require
+ *	super-user privileges which mkfifo will not.
+ */
+#$d_mkfifo HAS_MKFIFO		/**/
+
+/* HAS_MKTIME:
+ *	This symbol, if defined, indicates that the mktime routine is
+ *	available.
+ */
+#$d_mktime HAS_MKTIME		/**/
+
 /* HAS_MSYNC:
  *	This symbol, if defined, indicates that the msync system call is
  *	available to synchronize a mapped file.
@@ -983,10 +1263,15 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol, if defined, indicates to the C program that
  *	the struct tm has a tm_zone field.
  */
+/* HAS_TM_TM_GMTOFF:
+ *	This symbol, if defined, indicates to the C program that
+ *	the struct tm has a tm_gmtoff field.
+ */
 #$i_time I_TIME		/**/
 #$i_systime I_SYS_TIME		/**/
 #$i_systimek I_SYS_TIME_KERNEL		/**/
 #$d_tm_tm_zone HAS_TM_TM_ZONE		/**/
+#$d_tm_tm_gmtoff HAS_TM_TM_GMTOFF		/**/
 
 /* VAL_O_NONBLOCK:
  *	This symbol is to be used during open() or fcntl(F_SETFL) to turn on
@@ -1057,295 +1342,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	We will pick a type such that sizeof(SSize_t) == sizeof(Size_t).
  */
 #define SSize_t $ssizetype	 /* signed count of bytes */
-
-/* HAS_ALARM:
- *	This symbol, if defined, indicates that the alarm routine is
- *	available.
- */
-#$d_alarm HAS_ALARM		/**/
-
-/* HASATTRIBUTE:
- *	This symbol indicates the C compiler can check for function attributes,
- *	such as printf formats. This is normally only supported by GNU cc.
- */
-#$d_attribut HASATTRIBUTE 	/**/
-#ifndef HASATTRIBUTE
-#define __attribute__(_arg_)
-#endif
-
-/* HAS_BCMP:
- *	This symbol is defined if the bcmp() routine is available to
- *	compare blocks of memory.
- */
-#$d_bcmp HAS_BCMP	/**/
-
-/* HAS_BCOPY:
- *	This symbol is defined if the bcopy() routine is available to
- *	copy blocks of memory.
- */
-#$d_bcopy HAS_BCOPY	/**/
-
-/* HAS_BZERO:
- *	This symbol is defined if the bzero() routine is available to
- *	set a memory block to 0.
- */
-#$d_bzero HAS_BZERO	/**/
-
-/* HAS_CHOWN:
- *	This symbol, if defined, indicates that the chown routine is
- *	available.
- */
-#$d_chown HAS_CHOWN		/**/
-
-/* HAS_CHROOT:
- *	This symbol, if defined, indicates that the chroot routine is
- *	available.
- */
-#$d_chroot HAS_CHROOT		/**/
-
-/* HAS_CHSIZE:
- *	This symbol, if defined, indicates that the chsize routine is available
- *	to truncate files.  You might need a -lx to get this routine.
- */
-#$d_chsize	HAS_CHSIZE		/**/
-
-/* HASCONST:
- *	This symbol, if defined, indicates that this C compiler knows about
- *	the const type. There is no need to actually test for that symbol
- *	within your programs. The mere use of the "const" keyword will
- *	trigger the necessary tests.
- */
-#$d_const HASCONST	/**/
-#ifndef HASCONST
-#define const
-#endif
-
-/* HAS_CUSERID:
- *	This symbol, if defined, indicates that the cuserid routine is
- *	available to get character login names.
- */
-#$d_cuserid HAS_CUSERID		/**/
-
-/* HAS_DBL_DIG:
- *	This symbol, if defined, indicates that this system's <float.h>
- *	or <limits.h> defines the symbol DBL_DIG, which is the number
- *	of significant digits in a double precision number.  If this
- *	symbol is not defined, a guess of 15 is usually pretty good.
- */
-#$d_dbl_dig HAS_DBL_DIG 	/* */
-
-/* HAS_DIFFTIME:
- *	This symbol, if defined, indicates that the difftime routine is
- *	available.
- */
-#$d_difftime HAS_DIFFTIME		/**/
-
-/* HAS_DLERROR:
- *	This symbol, if defined, indicates that the dlerror routine is
- *	available to return a string describing the last error that
- *	occurred from a call to dlopen(), dlclose() or dlsym().
- */
-#$d_dlerror HAS_DLERROR	/**/
-
-/* HAS_DUP2:
- *	This symbol, if defined, indicates that the dup2 routine is
- *	available to duplicate file descriptors.
- */
-#$d_dup2 HAS_DUP2	/**/
-
-/* HAS_FCHMOD:
- *	This symbol, if defined, indicates that the fchmod routine is available
- *	to change mode of opened files.  If unavailable, use chmod().
- */
-#$d_fchmod HAS_FCHMOD		/**/
-
-/* HAS_FCHOWN:
- *	This symbol, if defined, indicates that the fchown routine is available
- *	to change ownership of opened files.  If unavailable, use chown().
- */
-#$d_fchown HAS_FCHOWN		/**/
-
-/* HAS_FCNTL:
- *	This symbol, if defined, indicates to the C program that
- *	the fcntl() function exists.
- */
-#$d_fcntl HAS_FCNTL		/**/
-
-/* HAS_FGETPOS:
- *	This symbol, if defined, indicates that the fgetpos routine is
- *	available to get the file position indicator, similar to ftell().
- */
-#$d_fgetpos HAS_FGETPOS	/**/
-
-/* HAS_FLOCK:
- *	This symbol, if defined, indicates that the flock routine is
- *	available to do file locking.
- */
-#$d_flock HAS_FLOCK		/**/
-
-/* HAS_FORK:
- *	This symbol, if defined, indicates that the fork routine is
- *	available.
- */
-#$d_fork HAS_FORK		/**/
-
-/* HAS_FSETPOS:
- *	This symbol, if defined, indicates that the fsetpos routine is
- *	available to set the file position indicator, similar to fseek().
- */
-#$d_fsetpos HAS_FSETPOS	/**/
-
-/* HAS_GETTIMEOFDAY:
- *	This symbol, if defined, indicates that the gettimeofday() system
- *	call is available for a sub-second accuracy clock. Usually, the file
- *	<sys/resource.h> needs to be included (see I_SYS_RESOURCE).
- *	The type "Timeval" should be used to refer to "struct timeval".
- */
-#$d_gettimeod HAS_GETTIMEOFDAY	/**/
-#ifdef HAS_GETTIMEOFDAY
-#define Timeval struct timeval	/* Structure used by gettimeofday() */
-#endif
-
-/* HAS_GETGROUPS:
- *	This symbol, if defined, indicates that the getgroups() routine is
- *	available to get the list of process groups.  If unavailable, multiple
- *	groups are probably not supported.
- */
-#$d_getgrps HAS_GETGROUPS		/**/
-
-/* HAS_GETLOGIN:
- *	This symbol, if defined, indicates that the getlogin routine is
- *	available to get the login name.
- */
-#$d_getlogin HAS_GETLOGIN		/**/
-
-/* HAS_GETPGID:
- *	This symbol, if defined, indicates to the C program that 
- *	the getpgid(pid) function is available to get the
- *	process group id.
- */
-#$d_getpgid HAS_GETPGID		/**/
-
-/* HAS_GETPGRP2:
- *	This symbol, if defined, indicates that the getpgrp2() (as in DG/UX)
- *	routine is available to get the current process group.
- */
-#$d_getpgrp2 HAS_GETPGRP2		/**/
-
-/* HAS_GETPPID:
- *	This symbol, if defined, indicates that the getppid routine is
- *	available to get the parent process ID.
- */
-#$d_getppid HAS_GETPPID		/**/
-
-/* HAS_GETPRIORITY:
- *	This symbol, if defined, indicates that the getpriority routine is
- *	available to get a process's priority.
- */
-#$d_getprior HAS_GETPRIORITY		/**/
-
-/* HAS_INET_ATON:
- *	This symbol, if defined, indicates to the C program that the
- *	inet_aton() function is available to parse IP address "dotted-quad"
- *	strings.
- */
-#$d_inetaton HAS_INET_ATON		/**/
-
-/* HAS_KILLPG:
- *	This symbol, if defined, indicates that the killpg routine is available
- *	to kill process groups.  If unavailable, you probably should use kill
- *	with a negative process number.
- */
-#$d_killpg HAS_KILLPG	/**/
-
-/* HAS_LINK:
- *	This symbol, if defined, indicates that the link routine is
- *	available to create hard links.
- */
-#$d_link HAS_LINK	/**/
-
-/* HAS_LOCALECONV:
- *	This symbol, if defined, indicates that the localeconv routine is
- *	available for numeric and monetary formatting conventions.
- */
-#$d_locconv HAS_LOCALECONV	/**/
-
-/* HAS_LOCKF:
- *	This symbol, if defined, indicates that the lockf routine is
- *	available to do file locking.
- */
-#$d_lockf HAS_LOCKF		/**/
-
-/* HAS_LSTAT:
- *	This symbol, if defined, indicates that the lstat routine is
- *	available to do file stats on symbolic links.
- */
-#$d_lstat HAS_LSTAT		/**/
-
-/* HAS_MBLEN:
- *	This symbol, if defined, indicates that the mblen routine is available
- *	to find the number of bytes in a multibye character.
- */
-#$d_mblen HAS_MBLEN		/**/
-
-/* HAS_MBSTOWCS:
- *	This symbol, if defined, indicates that the mbstowcs routine is
- *	available to covert a multibyte string into a wide character string.
- */
-#$d_mbstowcs	HAS_MBSTOWCS		/**/
-
-/* HAS_MBTOWC:
- *	This symbol, if defined, indicates that the mbtowc routine is available
- *	to covert a multibyte to a wide character.
- */
-#$d_mbtowc HAS_MBTOWC		/**/
-
-/* HAS_MEMCMP:
- *	This symbol, if defined, indicates that the memcmp routine is available
- *	to compare blocks of memory.
- */
-#$d_memcmp HAS_MEMCMP	/**/
-
-/* HAS_MEMCPY:
- *	This symbol, if defined, indicates that the memcpy routine is available
- *	to copy blocks of memory.
- */
-#$d_memcpy HAS_MEMCPY	/**/
-
-/* HAS_MEMMOVE:
- *	This symbol, if defined, indicates that the memmove routine is available
- *	to copy potentially overlapping blocks of memory. This should be used
- *	only when HAS_SAFE_BCOPY is not defined. If neither is there, roll your
- *	own version.
- */
-#$d_memmove HAS_MEMMOVE	/**/
-
-/* HAS_MEMSET:
- *	This symbol, if defined, indicates that the memset routine is available
- *	to set blocks of memory.
- */
-#$d_memset HAS_MEMSET	/**/
-
-/* HAS_MKDIR:
- *	This symbol, if defined, indicates that the mkdir routine is available
- *	to create directories.  Otherwise you should fork off a new process to
- *	exec /bin/mkdir.
- */
-#$d_mkdir HAS_MKDIR		/**/
-
-/* HAS_MKFIFO:
- *	This symbol, if defined, indicates that the mkfifo routine is
- *	available to create FIFOs. Otherwise, mknod should be able to
- *	do it for you. However, if mkfifo is there, mknod might require
- *	super-user privileges which mkfifo will not.
- */
-#$d_mkfifo HAS_MKFIFO		/**/
-
-/* HAS_MKTIME:
- *	This symbol, if defined, indicates that the mktime routine is
- *	available.
- */
-#$d_mktime HAS_MKTIME		/**/
 
 /* EBCDIC:
  *     This symbol, if defined, indicates that this system uses
@@ -1563,6 +1559,18 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	(always present on UNIX.)
  */
 #$d_access HAS_ACCESS		/**/
+
+/* HASATTRIBUTE:
+ *	This symbol indicates the C compiler can check for function attributes,
+ *	such as printf formats. This is normally only supported by GNU cc.
+ */
+#$d_attribut HASATTRIBUTE 	/**/
+#ifndef HASATTRIBUTE
+#ifdef __attribute__
+#undef __attribute__
+#endif
+#define __attribute__(_arg_)
+#endif
 
 /* HAS_CRYPT:
  *	This symbol, if defined, indicates that the crypt routine is available
@@ -2598,6 +2606,11 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available to split a long double x into a fractional part f and
  *	an integer part i such that |f| < 1.0 and (f + i) = x.
  */
+/* HAS_MODFL_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the modfl() function.  Otherwise, it is up
+ *	to the program to supply one.
+ */
 /* HAS_MODFL_POW32_BUG:
  *	This symbol, if defined, indicates that the modfl routine is
  *	broken for long doubles >= pow(2, 32).
@@ -2606,6 +2619,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	release 2.2.2 is known to be okay.
  */
 #$d_modfl HAS_MODFL		/**/
+#$d_modflproto HAS_MODFL_PROTO		/**/
 #$d_modfl_pow32_bug HAS_MODFL_POW32_BUG		/**/
 
 /* HAS_MPROTECT:

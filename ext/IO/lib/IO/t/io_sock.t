@@ -29,7 +29,7 @@ BEGIN {
 }
 
 $| = 1;
-print "1..20\n";
+print "1..22\n";
 
 eval {
     $SIG{ALRM} = sub { die; };
@@ -220,12 +220,12 @@ if ( $^O eq 'qnx' ) {
 #
 local @data;
 if( !open( SRC, "< $0")) {
-    print "not ok 15 - $!";
+    print "not ok 15 - $!\n";
 } else {
     @data = <SRC>;
     close( SRC);
+    print "ok 15\n";
 }
-print "ok 15\n";
 
 ### TEST 16
 ### Start the server
@@ -336,6 +336,7 @@ if( $server_pid) {
 	$sock = undef;
     }
     $listen->close;
+    exit 0;
 
 } else {
 
@@ -345,3 +346,12 @@ if( $server_pid) {
     die;
 }
 
+# test Blocking option in constructor
+
+$sock = IO::Socket::INET->new(Blocking => 0)
+    or print "not ";
+print "ok 21\n";
+
+my $status = $sock->blocking;
+print "not " unless defined $status && !$status;
+print "ok 22\n";

@@ -4,8 +4,11 @@
 #include "XSUB.h"
 
 #ifndef PERL_VERSION
-#include "patchlevel.h"
-#define PERL_VERSION PATCHLEVEL
+#    include <patchlevel.h>
+#    if !(defined(PERL_VERSION) || (SUBVERSION > 0 && defined(PATCHLEVEL)))
+#        include <could_not_find_Perl_patchlevel.h>
+#    endif
+#    define PERL_VERSION PATCHLEVEL
 #endif
 
 #if PERL_VERSION < 5
@@ -252,8 +255,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    i = perl_call_method(SvPVX(freezer), G_EVAL|G_SCALAR);
 	    SPAGAIN;
 	    if (SvTRUE(ERRSV))
-		warn("WARNING(Freezer method call failed): %s",
-		     SvPVX(ERRSV));
+		warn("WARNING(Freezer method call failed): %"SVf"", ERRSV);
 	    else if (i)
 		val = newSVsv(POPs);
 	    PUTBACK; FREETMPS; LEAVE;
@@ -751,7 +753,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		    return 1;
 		}
 	    }
-	    else {
+	    else if (val != &PL_sv_undef) {
 		SV *namesv;
 		namesv = newSVpvn("\\", 1);
 		sv_catpvn(namesv, name, namelen);

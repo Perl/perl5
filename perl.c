@@ -1,6 +1,6 @@
 /*    perl.c
  *
- *    Copyright (c) 1987-2002 Larry Wall
+ *    Copyright (c) 1987-2003 Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -193,6 +193,10 @@ perl_construct(pTHXx)
 	thr = init_main_thread();
 #endif /* USE_5005THREADS */
 
+#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
+	MUTEX_INIT(&PL_dollarzero_mutex);       /* for $0 modifying */
+#endif
+
 #ifdef PERL_FLEXIBLE_EXCEPTIONS
 	PL_protect = MEMBER_TO_FPTR(Perl_default_protect); /* for exceptions */
 #endif
@@ -251,12 +255,9 @@ perl_construct(pTHXx)
 	*s = '\0';
 	SvCUR_set(PL_patchlevel, s - (U8*)SvPVX(PL_patchlevel));
 	SvPOK_on(PL_patchlevel);
-	SvNVX(PL_patchlevel) = (NV)PERL_REVISION
-				+ ((NV)PERL_VERSION / (NV)1000)
-#if defined(PERL_SUBVERSION) && PERL_SUBVERSION > 0
-				+ ((NV)PERL_SUBVERSION / (NV)1000000)
-#endif
-				;
+	SvNVX(PL_patchlevel) = (NV)PERL_REVISION +
+			      ((NV)PERL_VERSION / (NV)1000) +
+			      ((NV)PERL_SUBVERSION / (NV)1000000);
 	SvNOK_on(PL_patchlevel);	/* dual valued */
 	SvUTF8_on(PL_patchlevel);
 	SvREADONLY_on(PL_patchlevel);
@@ -462,8 +463,6 @@ perl_destruct(pTHXx)
 
     /* Destroy the main CV and syntax tree */
     if (PL_main_root) {
-        /* If running under -d may not have PL_comppad. */
-        PL_curpad = PL_comppad ? AvARRAY(PL_comppad) : NULL;
 	op_free(PL_main_root);
 	PL_main_root = Nullop;
     }
@@ -603,11 +602,6 @@ perl_destruct(pTHXx)
 	SvREFCNT_dec(PL_e_script);
 	PL_e_script = Nullsv;
     }
-
-    while (--PL_origargc >= 0) {
-        Safefree(PL_origargv[PL_origargc]);
-    }
-    Safefree(PL_origargv);
 
     /* magical thingies */
 
@@ -1029,21 +1023,7 @@ setuid perl scripts securely.\n");
 #endif
 
     PL_origargc = argc;
-    {
-        /* we copy rather than point to argv
-         * since perl_clone will copy and perl_destruct
-         * has no way of knowing if we've made a copy or
-         * just point to argv
-         */
-        int i = PL_origargc;
-        New(0, PL_origargv, i+1, char*);
-        PL_origargv[i] = '\0';
-        while (i-- > 0) {
-            PL_origargv[i] = savepv(argv[i]);
-        }
-    }
-
-
+    PL_origargv = argv;
 
     if (PL_do_undump) {
 
@@ -1058,7 +1038,6 @@ setuid perl scripts securely.\n");
     }
 
     if (PL_main_root) {
-	PL_curpad = AvARRAY(PL_comppad);
 	op_free(PL_main_root);
 	PL_main_root = Nullop;
     }
@@ -1126,7 +1105,6 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     int fdscript = -1;
     VOL bool dosearch = FALSE;
     char *validarg = "";
-    AV* comppadlist;
     register SV *sv;
     register char *s;
     char *cddir = Nullch;
@@ -1469,27 +1447,12 @@ print \"  \\@INC:\\n    @INC\\n\";");
     sv_upgrade((SV *)PL_compcv, SVt_PVCV);
     CvUNIQUE_on(PL_compcv);
 
-    PL_comppad = newAV();
-    av_push(PL_comppad, Nullsv);
-    PL_curpad = AvARRAY(PL_comppad);
-    PL_comppad_name = newAV();
-    PL_comppad_name_fill = 0;
-    PL_min_intro_pending = 0;
-    PL_padix = 0;
+    CvPADLIST(PL_compcv) = pad_new(0);
 #ifdef USE_5005THREADS
-    av_store(PL_comppad_name, 0, newSVpvn("@_", 2));
-    PL_curpad[0] = (SV*)newAV();
-    SvPADMY_on(PL_curpad[0]);	/* XXX Needed? */
     CvOWNER(PL_compcv) = 0;
     New(666, CvMUTEXP(PL_compcv), 1, perl_mutex);
     MUTEX_INIT(CvMUTEXP(PL_compcv));
 #endif /* USE_5005THREADS */
-
-    comppadlist = newAV();
-    AvREAL_off(comppadlist);
-    av_store(comppadlist, 0, (SV*)PL_comppad_name);
-    av_store(comppadlist, 1, (SV*)PL_comppad);
-    CvPADLIST(PL_compcv) = comppadlist;
 
     boot_core_PerlIO();
     boot_core_UNIVERSAL();
@@ -1520,25 +1483,55 @@ print \"  \\@INC:\\n    @INC\\n\";");
     if (!PL_do_undump)
 	init_postdump_symbols(argc,argv,env);
 
-    /* PL_wantutf8 is conditionally turned on by
+    /* PL_unicode is turned on by -C or by $ENV{PERL_UNICODE}.
+     * PL_utf8locale is conditionally turned on by
      * locale.c:Perl_init_i18nl10n() if the environment
      * look like the user wants to use UTF-8. */
-    if (PL_wantutf8) { /* Requires init_predump_symbols(). */
-	 IO* io;
-	 PerlIO* fp;
-	 SV* sv;
-	 /* Turn on UTF-8-ness on STDIN, STDOUT, STDERR
-	  *  _and_ the default open discipline. */
-	 if (PL_stdingv  && (io = GvIO(PL_stdingv))  && (fp = IoIFP(io)))
-	      PerlIO_binmode(aTHX_ fp, IoTYPE(io), 0, ":utf8");
-	 if (PL_defoutgv && (io = GvIO(PL_defoutgv)) && (fp = IoOFP(io)))
-	      PerlIO_binmode(aTHX_ fp, IoTYPE(io), 0, ":utf8");
-	 if (PL_stderrgv && (io = GvIO(PL_stderrgv)) && (fp = IoOFP(io)))
-	      PerlIO_binmode(aTHX_ fp, IoTYPE(io), 0, ":utf8");
-	 if ((sv = GvSV(gv_fetchpv("\017PEN", TRUE, SVt_PV)))) {
-	     sv_setpvn(sv, ":utf8\0:utf8", 11);
-	     SvSETMAGIC(sv);
+    if (PL_unicode) {
+	 /* Requires init_predump_symbols(). */
+	 if (!(PL_unicode & PERL_UNICODE_LOCALE_FLAG) || PL_utf8locale) {
+	      IO* io;
+	      PerlIO* fp;
+	      SV* sv;
+
+	      /* Turn on UTF-8-ness on STDIN, STDOUT, STDERR
+	       * and the default open disciplines. */
+	      if ((PL_unicode & PERL_UNICODE_STDIN_FLAG) &&
+		  PL_stdingv  && (io = GvIO(PL_stdingv)) &&
+		  (fp = IoIFP(io)))
+		   PerlIO_binmode(aTHX_ fp, IoTYPE(io), 0, ":utf8");
+	      if ((PL_unicode & PERL_UNICODE_STDOUT_FLAG) &&
+		  PL_defoutgv && (io = GvIO(PL_defoutgv)) &&
+		  (fp = IoOFP(io)))
+		   PerlIO_binmode(aTHX_ fp, IoTYPE(io), 0, ":utf8");
+	      if ((PL_unicode & PERL_UNICODE_STDERR_FLAG) &&
+		  PL_stderrgv && (io = GvIO(PL_stderrgv)) &&
+		  (fp = IoOFP(io)))
+		   PerlIO_binmode(aTHX_ fp, IoTYPE(io), 0, ":utf8");
+	      if ((PL_unicode & PERL_UNICODE_INOUT_FLAG) &&
+		  (sv = GvSV(gv_fetchpv("\017PEN", TRUE, SVt_PV)))) {
+		   U32 in  = PL_unicode & PERL_UNICODE_IN_FLAG;
+		   U32 out = PL_unicode & PERL_UNICODE_OUT_FLAG;
+		   if (in) {
+			if (out)
+			     sv_setpvn(sv, ":utf8\0:utf8", 11);
+			else
+			     sv_setpvn(sv, ":utf8\0", 6);
+		   }
+		   else if (out)
+			sv_setpvn(sv, "\0:utf8", 6);
+		   SvSETMAGIC(sv);
+	      }
 	 }
+    }
+
+    if ((s = PerlEnv_getenv("PERL_SIGNALS"))) {
+	 if (strEQ(s, "unsafe"))
+	      PL_signals |=  PERL_SIGNALS_UNSAFE_FLAG;
+	 else if (strEQ(s, "safe"))
+	      PL_signals &= ~PERL_SIGNALS_UNSAFE_FLAG;
+	 else
+	      Perl_croak(aTHX_ "PERL_SIGNALS illegal: \"%s\"", s);
     }
 
     init_lexer();
@@ -2220,7 +2213,7 @@ Perl_eval_pv(pTHX_ const char *p, I32 croak_on_error)
 
 Tells Perl to C<require> the file named by the string argument.  It is
 analogous to the Perl code C<eval "require '$file'">.  It's even
-implemented that way; consider using Perl_load_module instead.
+implemented that way; consider using load_module instead.
 
 =cut */
 
@@ -2321,8 +2314,8 @@ Perl_moreswitches(pTHX_ char *s)
 	return s + numlen;
     }
     case 'C':
-	PL_widesyscalls = TRUE;
-	s++;
+        s++;
+        PL_unicode = parse_unicode_opts(&s);
 	return s;
     case 'F':
 	PL_minus_F = TRUE;
@@ -2373,7 +2366,7 @@ Perl_moreswitches(pTHX_ char *s)
 	forbid_setid("-D");
 	if (isALPHA(s[1])) {
 	    /* if adding extra options, remember to update DEBUG_MASK */
-	    static char debopts[] = "psltocPmfrxuLHXDSTRJ";
+	    static char debopts[] = "psltocPmfrxu HXDSTRJv";
 	    char *d;
 
 	    for (s++; *s && (d = strchr(debopts,*s)); s++)
@@ -2567,7 +2560,7 @@ Perl_moreswitches(pTHX_ char *s)
 #endif
 
 	PerlIO_printf(PerlIO_stdout(),
-		      "\n\nCopyright 1987-2002, Larry Wall\n");
+		      "\n\nCopyright 1987-2003, Larry Wall\n");
 #ifdef MACOS_TRADITIONAL
 	PerlIO_printf(PerlIO_stdout(),
 		      "\nMac OS port Copyright 1991-2002, Matthias Neeracher;\n"
@@ -3563,8 +3556,12 @@ Perl_init_argv_symbols(pTHX_ register int argc, register char **argv)
 	for (; argc > 0; argc--,argv++) {
 	    SV *sv = newSVpv(argv[0],0);
 	    av_push(GvAVn(PL_argvgv),sv);
-	    if (PL_widesyscalls)
-		(void)sv_utf8_decode(sv);
+	    if (!(PL_unicode & PERL_UNICODE_LOCALE_FLAG) || PL_utf8locale) {
+		 if (PL_unicode & PERL_UNICODE_ARGV_FLAG)
+		      SvUTF8_on(sv);
+	    }
+	    if (PL_unicode & PERL_UNICODE_WIDESYSCALLS_FLAG) /* Sarathy? */
+		 (void)sv_utf8_decode(sv);
 	}
     }
 }
@@ -4074,7 +4071,6 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 	    atsv = ERRSV;
 	    (void)SvPV(atsv, len);
 	    if (len) {
-		STRLEN n_a;
 		PL_curcop = &PL_compiling;
 		CopLINE_set(PL_curcop, oldline);
 		if (paramList == PL_beginav)
@@ -4088,7 +4084,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 		while (PL_scopestack_ix > oldscope)
 		    LEAVE;
 		JMPENV_POP;
-		Perl_croak(aTHX_ "%s", SvPVx(atsv, n_a));
+		Perl_croak(aTHX_ "%"SVf"", atsv);
 	    }
 	    break;
 	case 1:

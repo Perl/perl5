@@ -1,7 +1,7 @@
 /*
  *    opcode.h
  *
- *    Copyright (c) 1997-2002, Larry Wall
+ *    Copyright (c) 1997-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -1816,7 +1816,7 @@ EXT U32 PL_opargs[] = {
 	0x00000014,	/* egrent */
 	0x0000000c,	/* getlogin */
 	0x0004281d,	/* syscall */
-	0x00003604,	/* lock */
+	0x0000f604,	/* lock */
 	0x00000044,	/* threadsv */
 	0x00001404,	/* setstate */
 	0x00000c40,	/* method_named */

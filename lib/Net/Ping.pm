@@ -1,7 +1,5 @@
 package Net::Ping;
 
-# $Id: Ping.pm,v 1.33 2002/10/19 05:02:43 rob Exp $
-
 require 5.002;
 require Exporter;
 
@@ -11,13 +9,13 @@ use vars qw(@ISA @EXPORT $VERSION
 use Fcntl qw( F_GETFL F_SETFL O_NONBLOCK );
 use Socket qw( SOCK_DGRAM SOCK_STREAM SOCK_RAW PF_INET SOL_SOCKET
                inet_aton inet_ntoa sockaddr_in );
-use POSIX qw( ECONNREFUSED EINPROGRESS WNOHANG );
+use POSIX qw( ECONNREFUSED EINPROGRESS EAGAIN WNOHANG );
 use FileHandle;
 use Carp;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(pingecho);
-$VERSION = "2.23";
+$VERSION = "2.28";
 
 # Constants
 
@@ -157,6 +155,8 @@ sub new
       $self->{"fork_wr"} = FileHandle->new();
       pipe($self->{"fork_rd"}, $self->{"fork_wr"});
       $self->{"fh"} = FileHandle->new();
+      $self->{"good"} = {};
+      $self->{"bad"} = {};
     } else {
       $self->{"wbits"} = "";
       $self->{"bad"} = {};
@@ -245,6 +245,26 @@ sub time
   return $hires ? Time::HiRes::time() : CORE::time();
 }
 
+# Description: Sets or clears the O_NONBLOCK flag on a file handle.
+sub socket_blocking_mode
+{
+  my ($self,
+      $fh,              # the file handle whose flags are to be modified
+      $block) = @_;     # if true then set the blocking
+                        # mode (clear O_NONBLOCK), otherwise
+                        # set the non-blocking mode (set O_NONBLOCK)
+
+  my $flags;
+  if ($flags = fcntl($fh, F_GETFL, 0)) {
+    $flags = $block ? ($flags & ~O_NONBLOCK) : ($flags | O_NONBLOCK);
+    if (!fcntl($fh, F_SETFL, $flags)) {
+      croak("fcntl F_SETFL: $!");
+    }
+  } else {
+    croak("fcntl F_GETFL: $!");
+  }
+}
+
 # Description: Ping a host name or IP number with an optional timeout.
 # First lookup the host, and return undef if it is not found.  Otherwise
 # perform the specific ping method based on the protocol.  Return the
@@ -308,7 +328,7 @@ sub ping_external {
 
 use constant ICMP_ECHOREPLY => 0; # ICMP packet types
 use constant ICMP_ECHO      => 8;
-use constant ICMP_STRUCT    => "C2 S3 A";  # Structure of a minimal ICMP packet
+use constant ICMP_STRUCT    => "C2 n3 A";  # Structure of a minimal ICMP packet
 use constant SUBCODE        => 0; # No ICMP subcode for ECHO and ECHOREPLY
 use constant ICMP_FLAGS     => 0; # No special flags for send or recv
 use constant ICMP_PORT      => 0; # No port with ICMP
@@ -350,6 +370,9 @@ sub ping_icmp
               $checksum, $self->{"pid"}, $self->{"seq"}, $self->{"data"});
   $len_msg = length($msg);
   $saddr = sockaddr_in(ICMP_PORT, $ip);
+  $self->{"from_ip"} = undef;
+  $self->{"from_type"} = undef;
+  $self->{"from_subcode"} = undef;
   send($self->{"fh"}, $msg, ICMP_FLAGS, $saddr); # Send the message
 
   $rbits = "";
@@ -371,26 +394,34 @@ sub ping_icmp
       $recv_msg = "";
       $from_saddr = recv($self->{"fh"}, $recv_msg, 1500, ICMP_FLAGS);
       ($from_port, $from_ip) = sockaddr_in($from_saddr);
-      ($from_type, $from_subcode, $from_chk,
-       $from_pid, $from_seq, $from_msg) =
-         unpack(ICMP_STRUCT . $self->{"data_size"},
-                substr($recv_msg, length($recv_msg) - $len_msg,
-                       $len_msg));
-      if (($from_type == ICMP_ECHOREPLY) &&
-          (!$source_verify || $from_ip eq $ip) &&
-          ($from_pid == $self->{"pid"}) && # Does the packet check out?
-          ($from_seq == $self->{"seq"}))
-      {
-        $ret = 1;                   # It's a winner
+      ($from_type, $from_subcode) = unpack("C2", substr($recv_msg, 20, 2));
+      if ($from_type == ICMP_ECHOREPLY){
+        ($from_pid, $from_seq) = unpack("n3", substr($recv_msg, 24, 4));
+      } else {
+        ($from_pid, $from_seq) = unpack("n3", substr($recv_msg, 52, 4));
+      }
+      $self->{"from_ip"} = $from_ip;
+      $self->{"from_type"} = $from_type;
+      $self->{"from_subcode"} = $from_subcode;
+      if (($from_pid == $self->{"pid"}) && # Does the packet check out?
+          ($from_seq == $self->{"seq"})) {
+        if ($from_type == ICMP_ECHOREPLY){
+          $ret = 1;
+        }
         $done = 1;
       }
-    }
-    else                                # Oops, timed out
-    {
+    } else {     # Oops, timed out
       $done = 1;
     }
   }
   return $ret;
+}
+
+sub icmp_result {
+  my ($self) = @_;
+  my $ip = $self->{"from_ip"} || "";
+  $ip = "\0\0\0\0" unless 4 == length $ip;
+  return (inet_ntoa($ip),($self->{"from_type"} || 0), ($self->{"from_subcode"} || 0));
 }
 
 # Description:  Do a checksum on the message.  Basically sum all of
@@ -410,7 +441,7 @@ sub checksum
   $len_msg = length($msg);
   $num_short = int($len_msg / 2);
   $chk = 0;
-  foreach $short (unpack("S$num_short", $msg))
+  foreach $short (unpack("n$num_short", $msg))
   {
     $chk += $short;
   }                                           # Add the odd byte in
@@ -439,7 +470,7 @@ sub ping_tcp
   my ($ret                # The return value
       );
 
-  $@ = ""; $! = 0;
+  $! = 0;
   $ret = $self -> tcp_connect( $ip, $timeout);
   if (!$self->{"tcp_econnrefused"} &&
       $! == ECONNREFUSED) {
@@ -474,32 +505,82 @@ sub tcp_connect
     }
   };
   my $do_connect = sub {
-    eval {
-      die $! unless connect($self->{"fh"}, $saddr);
-      $self->{"ip"} = $ip;
+    $self->{"ip"} = $ip;
+    return ($ret = connect($self->{"fh"}, $saddr));
+  };
+  my $do_connect_nb = sub {
+    # Set O_NONBLOCK property on filehandle
+    $self->socket_blocking_mode($self->{"fh"}, 0);
+
+    # start the connection attempt
+    if (!connect($self->{"fh"}, $saddr)) {
+      if ($! == ECONNREFUSED) {
+        $ret = 1 unless $self->{"tcp_econnrefused"};
+      } else {
+        # EINPROGRESS is the expected error code after a connect()
+        # on a non-blocking socket
+        croak("tcp connect error - $!") if $! != EINPROGRESS;
+
+        # wait for connection completion
+        my ($wbits, $wout);
+        $wout = $wbits = "";
+        vec($wbits, $self->{"fh"}->fileno, 1) = 1;
+
+        my $nfound = select(undef, ($wout = $wbits), undef, $timeout);
+        warn("select: $!") unless defined $nfound;
+
+        if ($nfound && vec($wout, $self->{"fh"}->fileno, 1)) {
+          # the socket is ready for writing so the connection
+          # attempt completed. test whether the connection
+          # attempt was successful or not
+
+          if (getpeername($self->{"fh"})) {
+            # Connection established to remote host
+            $ret = 1;
+          } else {
+            # TCP ACK will never come from this host
+            # because there was an error connecting.
+
+            # This should set $! to the correct error.
+            my $char;
+            sysread($self->{"fh"},$char,1);
+            $! = ECONNREFUSED if ($! == EAGAIN && $^O =~ /cygwin/i);
+
+            $ret = 1 if (!$self->{"tcp_econnrefused"}
+                         && $! == ECONNREFUSED);
+          }
+        } else {
+          # the connection attempt timed out
+        }
+      }
+    } else {
+      # Connection established to remote host
       $ret = 1;
-    };
-    $ret;
+    }
+
+    # Unset O_NONBLOCK property on filehandle
+    $self->socket_blocking_mode($self->{"fh"}, 1);
+    $self->{"ip"} = $ip;
+    return $ret;
   };
 
-  if ($^O =~ /Win32/i) {
-
-    # Buggy Winsock API doesn't allow us to use alarm() calls.
+  if ($syn_forking) {
+    # Buggy Winsock API doesn't allow nonblocking connect.
     # Hence, if our OS is Windows, we need to create a separate
     # process to do the blocking connect attempt.
 
     $| = 1; # Clear buffer prior to fork to prevent duplicate flushing.
-    my $pid = fork;
-    if (!$pid) {
-      if (!defined $pid) {
+    $self->{'tcp_chld'} = fork;
+    if (!$self->{'tcp_chld'}) {
+      if (!defined $self->{'tcp_chld'}) {
         # Fork did not work
-        warn "Win32 Fork error: $!";
+        warn "Fork error: $!";
         return 0;
       }
       &{ $do_socket }();
 
       # Try a slow blocking connect() call
-      # and report the status to the pipe.
+      # and report the status to the parent.
       if ( &{ $do_connect }() ) {
         $self->{"fh"}->close();
         # No error
@@ -514,43 +595,53 @@ sub tcp_connect
 
     my $patience = &time() + $timeout;
 
-    my ($child);
-    $? = 0;
+    my ($child, $child_errno);
+    $? = 0; $child_errno = 0;
     # Wait up to the timeout
     # And clean off the zombie
     do {
-      $child = waitpid($pid, &WNOHANG());
-      $! = $? >> 8;
-      $@ = $!;
+      $child = waitpid($self->{'tcp_chld'}, &WNOHANG());
+      $child_errno = $? >> 8;
       select(undef, undef, undef, 0.1);
-    } while &time() < $patience && $child != $pid;
+    } while &time() < $patience && $child != $self->{'tcp_chld'};
 
-    if ($child == $pid) {
-      # Since she finished within the timeout,
-      # it is probably safe for me to try it too
-      &{ $do_connect }();
+    if ($child == $self->{'tcp_chld'}) {
+      if ($self->{"proto"} eq "stream") {
+        # We need the socket connected here, in parent
+        # Should be safe to connect because the child finished
+        # within the timeout
+        &{ $do_connect }();
+      }
     } else {
       # Time must have run out.
-      $@ = "Timed out!";
       # Put that choking client out of its misery
-      kill "KILL", $pid;
+      kill "KILL", $self->{'tcp_chld'};
       # Clean off the zombie
-      waitpid($pid, 0);
+      waitpid($self->{'tcp_chld'}, 0);
       $ret = 0;
     }
-  } else { # Win32
+    delete $self->{'tcp_chld'};
+    $! = $child_errno;
+  } else {
     # Otherwise don't waste the resources to fork
 
     &{ $do_socket }();
 
-    local $SIG{'ALRM'} = sub { die "Timed out!"; };
-    my $old = alarm($timeout);   # Interrupt connect() if we have to
-
-    &{ $do_connect }();
-    alarm($old);
+    &{ $do_connect_nb }();
   }
 
   return $ret;
+}
+
+sub DESTROY {
+  my $self = shift;
+  if ($self->{'proto'} eq 'tcp' &&
+      $self->{'tcp_chld'}) {
+    # Put that choking client out of its misery
+    kill "KILL", $self->{'tcp_chld'};
+    # Clean off the zombie
+    waitpid($self->{'tcp_chld'}, 0);
+  }
 }
 
 # This writes the given string to the socket and then reads it
@@ -580,7 +671,7 @@ sub tcp_echo
       if(select($rin, $rout, undef, ($time + $timeout) - &time())) {
 
         if($rout && vec($rout,$self->{"fh"}->fileno(),1)) {
-          my $num = syswrite($self->{"fh"}, $wrstr);
+          my $num = syswrite($self->{"fh"}, $wrstr, length $wrstr);
           if($num) {
             # If it was a partial write, update and try again.
             $wrstr = substr($wrstr,$num);
@@ -665,7 +756,8 @@ sub open
 # of time.  Return the result of our efforts.
 
 use constant UDP_FLAGS => 0; # Nothing special on send or recv
-
+# XXX - Use concept by rdw @ perlmonks
+# http://perlmonks.thepen.com/42898.html
 sub ping_udp
 {
   my ($self,
@@ -761,26 +853,24 @@ sub ping_syn
   }
 
   # Set O_NONBLOCK property on filehandle
-  if (my $flags = fcntl($fh, F_GETFL, 0)) {
-    fcntl($fh, F_SETFL, $flags | O_NONBLOCK);
-  } else {
-    croak("fcntl F_GETFL: $!");
-  }
+  $self->socket_blocking_mode($fh, 0);
 
   # Attempt the non-blocking connect
   # by just sending the TCP SYN packet
   if (connect($fh, $saddr)) {
     # Non-blocking, yet still connected?
-    # Must have connected very quickly.
-    # Can this ever really happen?
-  }
-  else {
+    # Must have connected very quickly,
+    # or else it wasn't very non-blocking.
+    #warn "WARNING: Nonblocking connect connected anyway? ($^O)";
+  } else {
     # Error occurred connecting.
-    # Hopefully the connection is just still in progress.
-    if ($! != EINPROGRESS) {
-      # If not, then it really is something bad.
+    if ($! == EINPROGRESS) {
+      # The connection is just still in progress.
+      # This is the expected condition.
+    } else {
+      # Just save the error and continue on.
+      # The ack() can check the status later.
       $self->{"bad"}->{$host} = $!;
-      return undef;
     }
   }
 
@@ -834,9 +924,9 @@ sub ping_syn_fork {
       # Notify parent of connect error status
       my $err = $!+0;
       my $wrstr = "$$ $err";
-      # Force to 10 chars including \n
-      $wrstr .= " "x(9 - length $wrstr). "\n";
-      syswrite($self->{"fork_wr"}, $wrstr);
+      # Force to 16 chars including \n
+      $wrstr .= " "x(15 - length $wrstr). "\n";
+      syswrite($self->{"fork_wr"}, $wrstr, length $wrstr);
       exit;
     }
   } else {
@@ -863,7 +953,16 @@ sub ack
     if (my $host = shift) {
       # Host passed as arg
       if (exists $self->{"bad"}->{$host}) {
-        return ();
+        if (!$self->{"tcp_econnrefused"} &&
+            $self->{"bad"}->{ $host } &&
+            (($! = ECONNREFUSED)>0) &&
+            $self->{"bad"}->{ $host } eq "$!") {
+          # "Connection refused" means reachable
+          # Good, continue
+        } else {
+          # ECONNREFUSED means no good
+          return ();
+        }
       }
       my $host_fd = undef;
       foreach my $fd (keys %{ $self->{"syn"} }) {
@@ -886,49 +985,78 @@ sub ack
       $wbits = $self->{"wbits"};
     }
 
-    while ($wbits !~ /^\0*$/) {
+    while ($wbits !~ /^\0*\z/) {
       my $timeout = $stop_time - &time();
       # Force a minimum of 10 ms timeout.
-      $timeout = 0.01 if $timeout <= .01;
-      if (my $nfound = select(undef, (my $wout=$wbits), undef, $timeout)) {
-        # Done waiting for one of the ACKs
-        my $fd = 0;
-        # Determine which one
-        while (length $wout &&
-               !vec($wout, $fd, 1)) {
-          $fd++;
+      $timeout = 0.01 if $timeout <= 0.01;
+
+      my $winner_fd = undef;
+      my $wout = $wbits;
+      my $fd = 0;
+      # Do "bad" fds from $wbits first
+      while ($wout !~ /^\0*\z/) {
+        if (vec($wout, $fd, 1)) {
+          # Wipe it from future scanning.
+          vec($wout, $fd, 1) = 0;
+          if (my $entry = $self->{"syn"}->{$fd}) {
+            if ($self->{"bad"}->{ $entry->[0] }) {
+              $winner_fd = $fd;
+              last;
+            }
+          }
+        }
+        $fd++;
+      }
+
+      if (defined($winner_fd) or my $nfound = select(undef, ($wout=$wbits), undef, $timeout)) {
+        if (defined $winner_fd) {
+          $fd = $winner_fd;
+        } else {
+          # Done waiting for one of the ACKs
+          $fd = 0;
+          # Determine which one
+          while ($wout !~ /^\0*\z/ &&
+                 !vec($wout, $fd, 1)) {
+            $fd++;
+          }
         }
         if (my $entry = $self->{"syn"}->{$fd}) {
-          if (getpeername($entry->[2])) {
+          # Wipe it from future scanning.
+          delete $self->{"syn"}->{$fd};
+          vec($self->{"wbits"}, $fd, 1) = 0;
+          vec($wbits, $fd, 1) = 0;
+          if (!$self->{"tcp_econnrefused"} &&
+              $self->{"bad"}->{ $entry->[0] } &&
+              (($! = ECONNREFUSED)>0) &&
+              $self->{"bad"}->{ $entry->[0] } eq "$!") {
+            # "Connection refused" means reachable
+            # Good, continue
+          } elsif (getpeername($entry->[2])) {
             # Connection established to remote host
-            delete $self->{"syn"}->{$fd};
-            vec($self->{"wbits"}, $fd, 1) = 0;
-            return wantarray ?
-              ($entry->[0], &time() - $entry->[3], inet_ntoa($entry->[1]))
-              : $entry->[0];
+            # Good, continue
           } else {
             # TCP ACK will never come from this host
             # because there was an error connecting.
 
-            # Wipe it from future scanning.
-            delete $self->{"syn"}->{$fd};
-            vec($self->{"wbits"}, $fd, 1) = 0;
-            vec($wbits, $fd, 1) = 0;
-
             # This should set $! to the correct error.
             my $char;
-            read($entry->[2],$char,1);
+            sysread($entry->[2],$char,1);
             # Store the excuse why the connection failed.
             $self->{"bad"}->{$entry->[0]} = $!;
             if (!$self->{"tcp_econnrefused"} &&
-                $! == ECONNREFUSED) {
+                (($! == ECONNREFUSED) ||
+                 ($! == EAGAIN && $^O =~ /cygwin/i))) {
               # "Connection refused" means reachable
-              return wantarray ?
-                ($entry->[0], &time() - $entry->[3], inet_ntoa($entry->[1]))
-                : $entry->[0];
+              # Good, continue
+            } else {
+              # No good, try the next socket...
+              next;
             }
-            # Try another socket...
           }
+          # Everything passed okay, return the answer
+          return wantarray ?
+            ($entry->[0], &time() - $entry->[3], inet_ntoa($entry->[1]))
+            : $entry->[0];
         } else {
           warn "Corrupted SYN entry: unknown fd [$fd] ready!";
           vec($wbits, $fd, 1) = 0;
@@ -957,28 +1085,36 @@ sub ack
 }
 
 sub ack_unfork {
-  my $self = shift;
+  my ($self,$host) = @_;
   my $stop_time = $self->{"stop_time"};
-  if (my $host = shift) {
+  if ($host) {
     # Host passed as arg
-    warn "Cannot specify host for ack on win32\n";
+    if (my $entry = $self->{"good"}->{$host}) {
+      delete $self->{"good"}->{$host};
+      return ($entry->[0], &time() - $entry->[3], inet_ntoa($entry->[1]));
+    }
   }
 
   my $rbits = "";
   my $timeout;
+
   if (keys %{ $self->{"syn"} }) {
     # Scan all hosts that are left
     vec($rbits, fileno($self->{"fork_rd"}), 1) = 1;
     $timeout = $stop_time - &time();
+    # Force a minimum of 10 ms timeout.
+    $timeout = 0.01 if $timeout < 0.01;
   } else {
     # No hosts left to wait for
     $timeout = 0;
   }
 
   if ($timeout > 0) {
-    if (my $nfound = select((my $rout=$rbits), undef, undef, $timeout)) {
+    my $nfound;
+    while ( keys %{ $self->{"syn"} } and
+           $nfound = select((my $rout=$rbits), undef, undef, $timeout)) {
       # Done waiting for one of the ACKs
-      if (!sysread($self->{"fork_rd"}, $_, 10)) {
+      if (!sysread($self->{"fork_rd"}, $_, 16)) {
         # Socket closed, which means all children are done.
         return ();
       }
@@ -992,6 +1128,13 @@ sub ack_unfork {
           if (!$how || # If there was no error connecting
               (!$self->{"tcp_econnrefused"} &&
                $how == ECONNREFUSED)) {  # "Connection refused" means reachable
+            if ($host && $entry->[0] ne $host) {
+              # A good connection, but not the host we need.
+              # Move it from the "syn" hash to the "good" hash.
+              $self->{"good"}->{$entry->[0]} = $entry;
+              # And wait for the next winner
+              next;
+            }
             return ($entry->[0], &time() - $entry->[3], inet_ntoa($entry->[1]));
           }
         } else {
@@ -1001,7 +1144,8 @@ sub ack_unfork {
       } else {
         die "Empty response from status socket?";
       }
-    } elsif (defined $nfound) {
+    }
+    if (defined $nfound) {
       # Timed out waiting for ACK status
     } else {
       # Weird error occurred with select()
@@ -1051,7 +1195,7 @@ __END__
 
 Net::Ping - check a remote host for reachability
 
-$Id: Ping.pm,v 1.33 2002/10/19 05:02:43 rob Exp $
+$Id: Ping.pm,v 1.69 2003/01/23 17:21:29 rob Exp $
 
 =head1 SYNOPSIS
 
@@ -1120,7 +1264,7 @@ With the "tcp" protocol the ping() method attempts to establish a
 connection to the remote host's echo port.  If the connection is
 successfully established, the remote host is considered reachable.  No
 data is actually echoed.  This protocol does not require any special
-privileges but has higher overhead than the other two protocols.
+privileges but has higher overhead than the "udp" and "icmp" protocols.
 
 Specifying the "udp" protocol causes the ping() method to send a udp
 packet to the remote host's echo port.  If the echoed packet is
@@ -1309,13 +1453,6 @@ version of Net::Ping.
 
 =back
 
-=head1 WARNING
-
-pingecho() or a ping object with the tcp protocol use alarm() to
-implement the timeout.  So, don't use alarm() in your program while
-you are using pingecho() or a ping object with the tcp protocol.  The
-udp and icmp protocols do not use alarm() to implement the timeout.
-
 =head1 NOTES
 
 There will be less network overhead (and some efficiency in your
@@ -1402,7 +1539,7 @@ Or install it RPM Style:
 
 =head1 COPYRIGHT
 
-Copyright (c) 2002, Rob Brown.  All rights reserved.
+Copyright (c) 2002-2003, Rob Brown.  All rights reserved.
 
 Copyright (c) 2001, Colin McMillen.  All rights reserved.
 

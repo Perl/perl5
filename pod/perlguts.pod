@@ -963,6 +963,8 @@ The current kinds of Magic Virtual Tables are:
     t  PERL_MAGIC_taint          vtbl_taint     Taintedness
     U  PERL_MAGIC_uvar           vtbl_uvar      Available for use by extensions
     v  PERL_MAGIC_vec            vtbl_vec       vec() lvalue
+    V  PERL_MAGIC_vstring        (none)         v-string scalars
+    w  PERL_MAGIC_utf8           vtbl_utf8      UTF-8 length+offset cache
     x  PERL_MAGIC_substr         vtbl_substr    substr() lvalue
     y  PERL_MAGIC_defelem        vtbl_defelem   Shadow "foreach" iterator
 						variable / smart parameter
@@ -974,10 +976,10 @@ The current kinds of Magic Virtual Tables are:
     ~  PERL_MAGIC_ext            (none)         Available for use by extensions
 
 When an uppercase and lowercase letter both exist in the table, then the
-uppercase letter is used to represent some kind of composite type (a list
-or a hash), and the lowercase letter is used to represent an element of
-that composite type. Some internals code makes use of this case
-relationship.
+uppercase letter is typically used to represent some kind of composite type
+(a list or a hash), and the lowercase letter is used to represent an element
+of that composite type. Some internals code makes use of this case
+relationship.  However, 'v' and 'V' (vec and v-string) are in no way related.
 
 The C<PERL_MAGIC_ext> and C<PERL_MAGIC_uvar> magic types are defined
 specifically for use by extensions and will not be used by perl itself.
@@ -1797,7 +1799,7 @@ A public function (i.e. part of the internal API, but not necessarily
 sanctioned for use in extensions) begins like this:
 
   void
-  Perl_sv_setsv(pTHX_ SV* dsv, SV* ssv)
+  Perl_sv_setiv(pTHX_ SV* dsv, IV num)
 
 C<pTHX_> is one of a number of macros (in perl.h) that hide the
 details of the interpreter's context.  THX stands for "thread", "this",
@@ -1816,19 +1818,19 @@ macro without the trailing underscore is used when there are no additional
 explicit arguments.
 
 When a core function calls another, it must pass the context.  This
-is normally hidden via macros.  Consider C<sv_setsv>.  It expands into
+is normally hidden via macros.  Consider C<sv_setiv>.  It expands into
 something like this:
 
-    ifdef PERL_IMPLICIT_CONTEXT
-      define sv_setsv(a,b)      Perl_sv_setsv(aTHX_ a, b)
+    #ifdef PERL_IMPLICIT_CONTEXT
+      #define sv_setiv(a,b)      Perl_sv_setiv(aTHX_ a, b)
       /* can't do this for vararg functions, see below */
-    else
-      define sv_setsv           Perl_sv_setsv
-    endif
+    #else
+      #define sv_setiv           Perl_sv_setiv
+    #endif
 
 This works well, and means that XS authors can gleefully write:
 
-    sv_setsv(foo, bar);
+    sv_setiv(foo, bar);
 
 and still have it work under all the modes Perl could have been
 compiled with.
@@ -1872,16 +1874,16 @@ with extensions: whenever XSUB.h is #included, it redefines the aTHX
 and aTHX_ macros to call a function that will return the context.
 Thus, something like:
 
-        sv_setsv(asv, bsv);
+        sv_setiv(sv, num);
 
 in your extension will translate to this when PERL_IMPLICIT_CONTEXT is
 in effect:
 
-        Perl_sv_setsv(Perl_get_context(), asv, bsv);
+        Perl_sv_setiv(Perl_get_context(), sv, num);
 
 or to this otherwise:
 
-        Perl_sv_setsv(asv, bsv);
+        Perl_sv_setiv(sv, num);
 
 You have to do nothing new in your extension to get this; since
 the Perl library provides Perl_get_context(), it will all just
@@ -2230,13 +2232,15 @@ C<utf8_hop>, which takes a string and a number of characters to skip
 over. You're on your own about bounds checking, though, so don't use it
 lightly.
 
-All bytes in a multi-byte UTF8 character will have the high bit set, so
-you can test if you need to do something special with this character
-like this:
+All bytes in a multi-byte UTF8 character will have the high bit set,
+so you can test if you need to do something special with this
+character like this (the UTF8_IS_INVARIANT() is a macro that tests
+whether the byte can be encoded as a single byte even in UTF-8):
 
-    UV uv;
+    U8 *utf;
+    UV uv;	/* Note: a UV, not a U8, not a char */
 
-    if (utf & 0x80)
+    if (!UTF8_IS_INVARIANT(*utf))
         /* Must treat this as UTF8 */
         uv = utf8_to_uv(utf);
     else
@@ -2247,7 +2251,7 @@ You can also see in that example that we use C<utf8_to_uv> to get the
 value of the character; the inverse function C<uv_to_utf8> is available
 for putting a UV into UTF8:
 
-    if (uv > 0x80)
+    if (!UTF8_IS_INVARIANT(uv))
         /* Must treat this as UTF8 */
         utf8 = uv_to_utf8(utf8, uv);
     else
@@ -2309,6 +2313,10 @@ In fact, your C<frobnicate> function should be made aware of whether or
 not it's dealing with UTF8 data, so that it can handle the string
 appropriately.
 
+Since just passing an SV to an XS function and copying the data of
+the SV is not enough to copy the UTF8 flags, even less right is just
+passing a C<char *> to an XS function.
+
 =head2 How do I convert a string to UTF8?
 
 If you're mixing UTF8 and non-UTF8 strings, you might find it necessary
@@ -2349,12 +2357,13 @@ it's not - if you pass on the PV to somewhere, pass on the flag too.
 =item *
 
 If a string is UTF8, B<always> use C<utf8_to_uv> to get at the value,
-unless C<!(*s & 0x80)> in which case you can use C<*s>.
+unless C<UTF8_IS_INVARIANT(*s)> in which case you can use C<*s>.
 
 =item *
 
-When writing to a UTF8 string, B<always> use C<uv_to_utf8>, unless
-C<uv < 0x80> in which case you can use C<*s = uv>.
+When writing a character C<uv> to a UTF8 string, B<always> use
+C<uv_to_utf8>, unless C<UTF8_IS_INVARIANT(uv))> in which case
+you can use C<*s = uv>.
 
 =item *
 

@@ -112,6 +112,63 @@ $ENV{PROCESSOR_ARCHITECTURE}. This might not work on Win9X.
 does not return a UNC path, since the functionality required for such
 a feature is not available under Windows 95.
 
+=item Win32::GetFolderPath(FOLDER [, CREATE])
+
+[EXT] Returns the full pathname of one of the Windows special folders.
+The folder will be created if it doesn't exist and the optional CREATE
+argument is true.  The following FOLDER constants are defined by the
+Win32 module, but only exported on demand:
+
+        CSIDL_ADMINTOOLS
+        CSIDL_APPDATA
+        CSIDL_CDBURN_AREA
+        CSIDL_COMMON_ADMINTOOLS
+        CSIDL_COMMON_APPDATA
+        CSIDL_COMMON_DESKTOPDIRECTORY
+        CSIDL_COMMON_DOCUMENTS
+        CSIDL_COMMON_FAVORITES
+        CSIDL_COMMON_MUSIC
+        CSIDL_COMMON_PICTURES
+        CSIDL_COMMON_PROGRAMS
+        CSIDL_COMMON_STARTMENU
+        CSIDL_COMMON_STARTUP
+        CSIDL_COMMON_TEMPLATES
+        CSIDL_COMMON_VIDEO
+        CSIDL_COOKIES
+        CSIDL_DESKTOP
+        CSIDL_DESKTOPDIRECTORY
+        CSIDL_FAVORITES
+        CSIDL_FONTS
+        CSIDL_HISTORY
+        CSIDL_INTERNET_CACHE
+        CSIDL_LOCAL_APPDATA
+        CSIDL_MYMUSIC
+        CSIDL_MYPICTURES
+        CSIDL_MYVIDEO
+        CSIDL_NETHOOD
+        CSIDL_PERSONAL
+        CSIDL_PRINTHOOD
+        CSIDL_PROFILE
+        CSIDL_PROGRAMS
+        CSIDL_PROGRAM_FILES
+        CSIDL_PROGRAM_FILES_COMMON
+        CSIDL_RECENT
+        CSIDL_RESOURCES
+        CSIDL_RESOURCES_LOCALIZED
+        CSIDL_SENDTO
+        CSIDL_STARTMENU
+        CSIDL_STARTUP
+        CSIDL_SYSTEM
+        CSIDL_TEMPLATES
+        CSIDL_WINDOWS
+
+Note that not all folders are defined on all versions of Windows.
+
+Please refer to the MSDN documentation of the CSIDL constants,
+currently available at:
+
+http://msdn.microsoft.com/library/default.asp?url=/library/en-us/shellcc/platform/shell/reference/enums/csidl.asp
+
 =item Win32::GetFullPathName(FILENAME)
 
 [CORE] GetFullPathName combines the FILENAME with the current drive

@@ -182,10 +182,10 @@ Taking references to the elements of shared arrays and hashes does not
 autovivify the elements, and neither does slicing a shared array/hash
 over non-existent indices/keys autovivify the elements.
 
-share() allows you to C<share $hashref->{key}> without giving any error
-message.  But the C<$hashref->{key}> is B<not> shared, causing the error
+share() allows you to C<< share $hashref->{key} >> without giving any error
+message.  But the C<< $hashref->{key} >> is B<not> shared, causing the error
 "locking can only be used on shared values" to occur when you attempt to
-C<lock $hasref->{key}>.
+C<< lock $hasref->{key} >>.
 
 =head1 AUTHOR
 

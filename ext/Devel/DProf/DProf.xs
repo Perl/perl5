@@ -9,6 +9,12 @@
 /* define DBG_TIMER to cause a warning when the timer is turned on and off. */
 /*#define DBG_TIMER 1  */
 
+#ifdef DEBUGGING
+#define ASSERT(x) assert(x)
+#else
+#define ASSERT(x)
+#endif
+
 #ifdef DBG_SUB
 #  define DBG_SUB_NOTIFY(A) dprof_dbg_sub_notify(A)
 void
@@ -84,7 +90,7 @@ typedef struct {
     U32		dprof_ticks;
     char*	out_file_name;	/* output file (defaults to tmon.out) */
     PerlIO*	fp;		/* pointer to tmon.out file */
-    long	TIMES_LOCATION;	/* Where in the file to store the time totals */
+    Off_t	TIMES_LOCATION;	/* Where in the file to store the time totals */
     int		SAVE_STACK;	/* How much data to buffer until end of run */
     int		prof_pid;	/* pid of profiled process */
     struct tms	prof_start;
@@ -297,7 +303,7 @@ prof_mark(pTHX_ opcode ptype)
     SV *Sub = GvSV(PL_DBsub);	/* name of current sub */
 
     if (g_SAVE_STACK) {
-	if (g_profstack_ix + 5 > g_profstack_max) {
+	if (g_profstack_ix + 10 > g_profstack_max) {
 		g_profstack_max = g_profstack_max * 3 / 2;
 		Renew(g_profstack, g_profstack_max, PROFANY);
 	}
@@ -309,6 +315,7 @@ prof_mark(pTHX_ opcode ptype)
     sdelta = t.tms_stime - g_otms_stime;
     if (rdelta || udelta || sdelta) {
 	if (g_SAVE_STACK) {
+	    ASSERT(g_profstack_ix + 4 <= g_profstack_max);
 	    g_profstack[g_profstack_ix++].ptype = OP_TIME;
 	    g_profstack[g_profstack_ix++].tms_utime = udelta;
 	    g_profstack[g_profstack_ix++].tms_stime = sdelta;
@@ -343,6 +350,7 @@ prof_mark(pTHX_ opcode ptype)
 	    if (CvXSUB(cv) == XS_Devel__DProf_END)
 		return;
 	    if (g_SAVE_STACK) { /* Store it for later recording  -JH */
+		ASSERT(g_profstack_ix + 4 <= g_profstack_max);
 		g_profstack[g_profstack_ix++].ptype = OP_GV;
 		g_profstack[g_profstack_ix++].id = id;
 		g_profstack[g_profstack_ix++].name = pname;
@@ -365,6 +373,7 @@ prof_mark(pTHX_ opcode ptype)
 
     g_total++;
     if (g_SAVE_STACK) { /* Store it for later recording  -JH */
+	ASSERT(g_profstack_ix + 2 <= g_profstack_max);
 	g_profstack[g_profstack_ix++].ptype = ptype;
 	g_profstack[g_profstack_ix++].id = id;
 

@@ -1,6 +1,6 @@
 /*    pp_sort.c
  *
- *    Copyright (c) 1991-2002, Larry Wall
+ *    Copyright (c) 1991-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -1455,8 +1455,8 @@ PP(pp_sort)
 		else if (gv) {
 		    SV *tmpstr = sv_newmortal();
 		    gv_efullname3(tmpstr, gv, Nullch);
-		    DIE(aTHX_ "Undefined sort subroutine \"%s\" called",
-			SvPVX(tmpstr));
+		    DIE(aTHX_ "Undefined sort subroutine \"%"SVf"\" called",
+			tmpstr);
 		}
 		else {
 		    DIE(aTHX_ "Undefined subroutine in sort");
@@ -1470,8 +1470,7 @@ PP(pp_sort)
 		SAVEVPTR(CvROOT(cv)->op_ppaddr);
 		CvROOT(cv)->op_ppaddr = PL_ppaddr[OP_NULL];
 
-		SAVEVPTR(PL_curpad);
-		PL_curpad = AvARRAY((AV*)AvARRAY(CvPADLIST(cv))[1]);
+		PAD_SET_CUR(CvPADLIST(cv), 1);
             }
 	}
     }
@@ -1535,13 +1534,13 @@ PP(pp_sort)
 
 	    if (hasargs && !is_xsub) {
 		/* This is mostly copied from pp_entersub */
-		AV *av = (AV*)PL_curpad[0];
+		AV *av = (AV*)PAD_SVl(0);
 
 #ifndef USE_5005THREADS
 		cx->blk_sub.savearray = GvAV(PL_defgv);
 		GvAV(PL_defgv) = (AV*)SvREFCNT_inc(av);
 #endif /* USE_5005THREADS */
-		cx->blk_sub.oldcurpad = PL_curpad;
+		CX_CURPAD_SAVE(cx->blk_sub);
 		cx->blk_sub.argarray = av;
 	    }
            sortsv((myorigmark+1), max,
@@ -1614,7 +1613,7 @@ sortcv_stacked(pTHX_ SV *a, SV *b)
     AV *av;
 
 #ifdef USE_5005THREADS
-    av = (AV*)PL_curpad[0];
+    av = (AV*)PAD_SVl(0);
 #else
     av = GvAV(PL_defgv);
 #endif

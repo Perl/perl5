@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..942\n";
+print "1..996\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2996,7 +2996,8 @@ print "\x{0712}" =~ /\p{Syriac1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
 print "\x{072F}" =~ /\P{Syriac1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
 
 {
-    # Change #18179: previously failed with "panic: end_shift"
+    print "# Change #18179\n";
+    # previously failed with "panic: end_shift
     my $s = "\x{100}" x 5;
     my $ok = $s =~ /(\x{100}{4})/;
     my($ord, $len) = (ord $1, length $1);
@@ -3005,4 +3006,157 @@ print "\x{072F}" =~ /\P{Syriac1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
     ++$test;
 }
 
-# last test 942
+{
+    print "# [perl #15763]\n";
+
+    $a = "x\x{100}";
+    chop $a; # but leaves the UTF-8 flag
+    $a .= "y"; # 1 byte before "y"
+
+    ok($a =~ /^\C/,      'match one \C on 1-byte UTF-8');
+    ok($a =~ /^\C{1}/,   'match \C{1}');
+
+    ok($a =~ /^\Cy/,      'match \Cy');
+    ok($a =~ /^\C{1}y/,   'match \C{1}y');
+
+    $a = "\x{100}y"; # 2 bytes before "y"
+
+    ok($a =~ /^\C/,       'match one \C on 2-byte UTF-8');
+    ok($a =~ /^\C{1}/,    'match \C{1}');
+    ok($a =~ /^\C\C/,     'match two \C');
+    ok($a =~ /^\C{2}/,    'match \C{2}');
+
+    ok($a =~ /^\C\C\C/,    'match three \C on 2-byte UTF-8 and a byte');
+    ok($a =~ /^\C{3}/,     'match \C{3}');
+
+    ok($a =~ /^\C\Cy/,     'match two \C');
+    ok($a =~ /^\C{2}y/,    'match \C{2}');
+
+    ok($a !~ /^\C\C\Cy/,    q{don't match three \Cy});
+    ok($a !~ /^\C{2}\Cy/,   q{don't match \C{3}y});
+
+    $a = "\x{1000}y"; # 3 bytes before "y"
+
+    ok($a =~ /^\C/,         'match one \C on three-byte UTF-8');
+    ok($a =~ /^\C{1}/,      'match \C{1}');
+    ok($a =~ /^\C\C/,       'match two \C');
+    ok($a =~ /^\C{2}/,      'match \C{2}');
+    ok($a =~ /^\C\C\C/,     'match three \C');
+    ok($a =~ /^\C{3}/,      'match \C{3}');
+
+    ok($a =~ /^\C\C\C\C/,   'match four \C on three-byte UTF-8 and a byte');
+    ok($a =~ /^\C{4}/,      'match \C{4}');
+
+    ok($a =~ /^\C\C\Cy/,    'match three \Cy');
+    ok($a =~ /^\C{3}y/,     'match \C{3}y');
+
+    ok($a !~ /^\C\C\C\C\y/, q{don't match four \Cy});
+    ok($a !~ /^\C{4}y/,     q{don't match \C{4}y});
+}
+
+$_ = 'aaaaaaaaaa';
+utf8::upgrade($_); chop $_; $\="\n";
+ok(/[^\s]+/, "m/[^\s]/ utf8");
+ok(/[^\d]+/, "m/[^\d]/ utf8");
+ok(($a = $_, $_ =~ s/[^\s]+/./g), "s/[^\s]/ utf8");
+ok(($a = $_, $a =~ s/[^\d]+/./g), "s/[^\s]/ utf8");
+
+ok("\x{100}" =~ /\x{100}/, "[perl #15397]");
+ok("\x{100}" =~ /(\x{100})/, "[perl #15397]");
+ok("\x{100}" =~ /(\x{100}){1}/, "[perl #15397]");
+ok("\x{100}\x{100}" =~ /(\x{100}){2}/, "[perl #15397]");
+ok("\x{100}\x{100}" =~ /(\x{100})(\x{100})/, "[perl #15397]");
+
+$x = "CD";
+$x =~ /(AB)*?CD/;
+ok(!defined $1, "[perl #7471]");
+
+$x = "CD";
+$x =~ /(AB)*CD/;
+ok(!defined $1, "[perl #7471]");
+
+$pattern = "^(b+?|a){1,2}c";
+ok("bac"    =~ /$pattern/ && $1 eq 'a', "[perl #3547]");
+ok("bbac"   =~ /$pattern/ && $1 eq 'a', "[perl #3547]");
+ok("bbbac"  =~ /$pattern/ && $1 eq 'a', "[perl #3547]");
+ok("bbbbac" =~ /$pattern/ && $1 eq 'a', "[perl #3547]");
+
+{
+    # [perl #18232]
+    "\x{100}" =~ /(.)/;
+    ok( $1 eq "\x{100}", '$1 is utf-8 [perl #18232]' );
+    { 'a' =~ /./; }
+    ok( $1 eq "\x{100}", '$1 is still utf-8' );
+    ok( $1 ne "\xC4\x80", '$1 is not non-utf-8' );
+}
+
+{
+    use utf8;
+    my $attr = 'Name-1' ;
+
+    my $NormalChar          = qr/[\p{IsDigit}\p{IsLower}\p{IsUpper}]/;
+    my $NormalWord          = qr/${NormalChar}+?/;
+    my $PredNameHyphen      = qr/^${NormalWord}(\-${NormalWord})*?$/;
+
+    $attr =~ /^$/;
+    ok( $attr =~ $PredNameHyphen, "[perl #19767] original test" );
+}
+
+{
+    use utf8;
+    "a" =~ m/[b]/;
+    ok ( "0" =~ /\p{N}+\z/, "[perl #19767] variant test" );
+}
+
+{
+
+    $p = 1;
+    foreach (1,2,3,4) {
+	    $p++ if /(??{ $p })/
+    }
+    ok ($p == 5, "[perl #20683] (??{ }) returns stale values");
+    { package P; $a=1; sub TIESCALAR { bless[] } sub FETCH { $a++ } }
+    tie $p, P;
+    foreach (1,2,3,4) {
+	    /(??{ $p })/
+    }
+    ok ( $p == 5, "(??{ }) returns stale values");
+}
+
+{
+  # Subject: Odd regexp behavior
+  # From: Markus Kuhn <Markus.Kuhn@cl.cam.ac.uk>
+  # Date: Wed, 26 Feb 2003 16:53:12 +0000
+  # Message-Id: <E18o4nw-0008Ly-00@wisbech.cl.cam.ac.uk>
+  # To: perl-unicode@perl.org
+    
+  $x = "\x{2019}\nk"; $x =~ s/(\S)\n(\S)/$1 $2/sg;
+  ok($x eq "\x{2019} k", "Markus Kuhn 2003-02-26");
+
+  $x = "b\nk"; $x =~ s/(\S)\n(\S)/$1 $2/sg;
+  ok($x eq "b k", "Markus Kuhn 2003-02-26");
+
+  ok("\x{2019}" =~ /\S/, "Markus Kuhn 2003-02-26");
+}
+
+{
+    my $i;
+    ok('-1-3-5-' eq join('', split /((??{$i++}))/, '-1-3-5-'),
+	"[perl #21411] (??{ .. }) corrupts split's stack")
+}
+
+{
+    ok("\x{100}\n" =~ /\x{100}\n$/, "UTF8 length cache and fbm_compile");  
+}
+
+{
+    package Str;
+    use overload q/""/ => sub { ${$_[0]}; };
+    sub new { my ($c, $v) = @_; bless \$v, $c; }
+
+    package main;
+    $_ = Str->new("a\x{100}/\x{100}b");
+    ok(join(":", /\b(.)\x{100}/g) eq "a:/", "re_intuit_start and PL_bostr");
+}
+
+# last test 996

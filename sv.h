@@ -1,6 +1,6 @@
 /*    sv.h
  *
- *    Copyright (c) 1991-2002, Larry Wall
+ *    Copyright (c) 1991-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -355,7 +355,9 @@ struct xpvfm {
     struct perl_thread *xcv_owner;	/* current owner thread */
 #endif /* USE_5005THREADS */
     cv_flags_t	xcv_flags;
-
+    U32		xcv_outside_seq; /* the COP sequence (at the point of our
+				  * compilation) in the lexically enclosing
+				  * sub */
     IV		xfm_lines;
 };
 
@@ -546,11 +548,19 @@ Set the length of the string which is in the SV.  See C<SvCUR>.
 #define SvNIOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK| \
 						  SVp_IOK|SVp_NOK|SVf_IVisUV))
 
+#ifdef __GNUC__
+#define assert_not_ROK(sv)	({assert(!SvROK(sv) || !SvRV(sv))})
+#else
+#define assert_not_ROK(sv)	0
+#endif
+
 #define SvOK(sv)		(SvFLAGS(sv) & SVf_OK)
-#define SvOK_off(sv)		(SvFLAGS(sv) &=	~(SVf_OK|SVf_AMAGIC|	\
+#define SvOK_off(sv)		(assert_not_ROK(sv),			\
+				 SvFLAGS(sv) &=	~(SVf_OK|SVf_AMAGIC|	\
 						  SVf_IVisUV|SVf_UTF8),	\
 							SvOOK_off(sv))
-#define SvOK_off_exc_UV(sv)	(SvFLAGS(sv) &=	~(SVf_OK|SVf_AMAGIC|	\
+#define SvOK_off_exc_UV(sv)	(assert_not_ROK(sv),			\
+				 SvFLAGS(sv) &=	~(SVf_OK|SVf_AMAGIC|	\
 						  SVf_UTF8),		\
 							SvOOK_off(sv))
 
@@ -560,7 +570,8 @@ Set the length of the string which is in the SV.  See C<SvCUR>.
 #define SvNOKp(sv)		(SvFLAGS(sv) & SVp_NOK)
 #define SvNOKp_on(sv)		(SvFLAGS(sv) |= SVp_NOK)
 #define SvPOKp(sv)		(SvFLAGS(sv) & SVp_POK)
-#define SvPOKp_on(sv)		(SvFLAGS(sv) |= SVp_POK)
+#define SvPOKp_on(sv)		(assert_not_ROK(sv),			\
+				 SvFLAGS(sv) |= SVp_POK)
 
 #define SvIOK(sv)		(SvFLAGS(sv) & SVf_IOK)
 #define SvIOK_on(sv)		((void)SvOOK_off(sv), \
@@ -577,6 +588,7 @@ Set the length of the string which is in the SV.  See C<SvCUR>.
 #define SvIOK_notUV(sv)		((SvFLAGS(sv) & (SVf_IOK|SVf_IVisUV))	\
 				 == SVf_IOK)
 
+#define SvVOK(sv)		(SvMAGICAL(sv) && mg_find(sv,'V'))
 #define SvIsUV(sv)		(SvFLAGS(sv) & SVf_IVisUV)
 #define SvIsUV_on(sv)		(SvFLAGS(sv) |= SVf_IVisUV)
 #define SvIsUV_off(sv)		(SvFLAGS(sv) &= ~SVf_IVisUV)
@@ -610,12 +622,15 @@ and leaves the UTF8 status as it was.
 #define SvUTF8_off(sv)		(SvFLAGS(sv) &= ~(SVf_UTF8))
 
 #define SvPOK(sv)		(SvFLAGS(sv) & SVf_POK)
-#define SvPOK_on(sv)		(SvFLAGS(sv) |= (SVf_POK|SVp_POK))
+#define SvPOK_on(sv)		(assert_not_ROK(sv),			\
+				 SvFLAGS(sv) |= (SVf_POK|SVp_POK))
 #define SvPOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_POK|SVp_POK))
-#define SvPOK_only(sv)		(SvFLAGS(sv) &= ~(SVf_OK|SVf_AMAGIC|	\
+#define SvPOK_only(sv)		(assert_not_ROK(sv),			\
+				 SvFLAGS(sv) &= ~(SVf_OK|SVf_AMAGIC|	\
 						  SVf_IVisUV|SVf_UTF8),	\
 				    SvFLAGS(sv) |= (SVf_POK|SVp_POK))
-#define SvPOK_only_UTF8(sv)	(SvFLAGS(sv) &= ~(SVf_OK|SVf_AMAGIC|	\
+#define SvPOK_only_UTF8(sv)	(assert_not_ROK(sv),			\
+				 SvFLAGS(sv) &= ~(SVf_OK|SVf_AMAGIC|	\
 						  SVf_IVisUV),		\
 				    SvFLAGS(sv) |= (SVf_POK|SVp_POK))
 
@@ -1067,6 +1082,8 @@ otherwise.
 /* flag values for sv_*_flags functions */
 #define SV_IMMEDIATE_UNREF	1
 #define SV_GMAGIC		2
+#define SV_COW_DROP_PV		4	/* Unused in Perl 5.8.x */
+#define SV_UTF8_NO_ENCODING	8
 
 /* all these 'functions' are now just macros */
 
@@ -1087,6 +1104,17 @@ otherwise.
 #define sv_pvn_force(sv, lp) sv_pvn_force_flags(sv, lp, SV_GMAGIC)
 #define sv_utf8_upgrade(sv) sv_utf8_upgrade_flags(sv, SV_GMAGIC)
 
+/* Should be named SvCatPVN_utf8_upgrade? */
+#define sv_catpvn_utf8_upgrade(dsv, sstr, slen, nsv)	\
+	STMT_START {					\
+	    if (!(nsv))					\
+		nsv = sv_2mortal(newSVpvn(sstr, slen));	\
+	    else					\
+		sv_setpvn(nsv, sstr, slen);		\
+	    SvUTF8_off(nsv);				\
+	    sv_utf8_upgrade(nsv);			\
+	    sv_catsv(dsv, nsv);	\
+	} STMT_END
 
 /*
 =for apidoc Am|SV*|newRV_inc|SV* sv
@@ -1184,6 +1212,7 @@ Returns a pointer to the character buffer.
 #define SvSetMagicSV_nosteal(dst,src) \
 		SvSetSV_nosteal_and(dst,src,SvSETMAGIC(dst))
 
+
 #if !defined(SKIP_DEBUGGING)
 #define SvPEEK(sv) sv_peek(sv)
 #else
@@ -1202,9 +1231,12 @@ Returns a pointer to the character buffer.
 #define CLONEf_COPY_STACKS 1
 #define CLONEf_KEEP_PTR_TABLE 2
 #define CLONEf_CLONE_HOST 4
+#define CLONEf_JOIN_IN 8
 
 struct clone_params {
   AV* stashes;
   UV  flags;
   PerlInterpreter *proto_perl;
 };
+
+#define SV_CHECK_THINKFIRST(sv) if (SvTHINKFIRST(sv)) sv_force_normal(sv)
