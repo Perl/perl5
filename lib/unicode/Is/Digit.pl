@@ -14,5 +14,6 @@ return <<'END';
 0e50	0e59
 0ed0	0ed9
 0f20	0f29
+1369	137c
 ff10	ff19
 END

@@ -762,6 +762,10 @@ return <<'END';
 1100	1159	Lo
 115f	11a2	Lo
 11a8	11f9	Lo
+1200	135a	Lo
+1361	1368	Po
+1369	1371	Nd
+1372	137c	No
 1e00		Lu
 1e01		Ll
 1e02		Lu

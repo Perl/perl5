@@ -509,6 +509,7 @@ lib/syslog.pl
 lib/tainted.pl	
 lib/termcap.pl	
 lib/timelocal.pl	
+lib/unicode/*Ethiopic*		dmulholl
 lib/unicode*			lwall
 lib/utf8*			lwall
 lib/validate.pl	

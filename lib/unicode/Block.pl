@@ -27,6 +27,7 @@ return <<'END';
 1100	11FF	Hangul Jamo
 1E00	1EFF	Latin Extended Additional
 1F00	1FFF	Greek Extended
+1200	137F	Ethiopic
 2000	206F	General Punctuation
 2070	209F	Superscripts and Subscripts
 20A0	20CF	Currency Symbols
