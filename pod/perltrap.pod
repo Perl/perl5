@@ -480,7 +480,7 @@ Double darn.
  
     # perl4 prints: a is foo bar, b is baz
     # perl5 errors: Bare word found where operator expected
-    
+
 =item * Discontinuance
 
 The archaic while/if BLOCK BLOCK syntax is no longer supported.
@@ -536,6 +536,18 @@ to
 Otherwise changing $var will clobber the values of @list.  (This most often
 happens when you use C<$_> for the loop variable, and call subroutines in
 the loop that don't properly localize C<$_>.)
+
+=item * Discontinuance
+
+C<split> with no arguments now behaves like C<split ' '> (which doesn't
+return an initial null field if $_ starts with whitespace), it used to
+behave like C<split /\s+/> (which does).
+
+    $_ = ' hi mom';
+    print join(':', split);
+
+    # perl4 prints: :hi:mom
+    # perl5 prints: hi:mom
 
 =item * Deprecation
 
@@ -610,21 +622,11 @@ Formatted output and significant digits
 
 =item * Numerical
 
-Large integer trap with autoincrement
+This specific item has been deleted.  It demonstrated how the autoincrement
+operator would not catch when a number went over the signed int limit.  Fixed
+in 5.003_04.  But always be wary when using large ints.  If in doubt:
 
-    $a = $b = 2147483647;
-    print "$a   $b\n";
-    $a += 1;
-    $b++;
-    print "$a   $b\n";
- 
-    # perl4 prints:
-    2147483647   2147483647
-    2147483648   2147483648
- 
-    # perl5 prints:
-    2147483647   2147483647
-    2147483648   -2147483648
+   use Math::BigInt;
 
 =item * Numerical  
 
@@ -709,7 +711,7 @@ variable is localized subsequent to the assignment
  
     # perl4 prints: 1 2 4
     # perl5 prints: Literal @fred now requires backslash 
- 
+
 =item * (Scalar String)
 
 Changes in unary negation (of strings)
@@ -827,7 +829,7 @@ being required.
   
     # perl4 errors: There is no caller
     # perl5 prints: Got a 0
- 
+
 =item * (scalar context)
 
 The comma operator in a scalar context is now guaranteed to give a
@@ -870,7 +872,18 @@ Perl4-to-Perl5 traps involving precedence order.
 
 =over 5
 
-=item * 
+=item * Precedence
+
+LHS vs. RHS when both sides are getting an op.
+
+    @arr = ( 'left', 'right' );
+    $a{shift @arr} = shift @arr;
+    print join( ' ', keys %a );
+
+    # perl4 prints: left
+    # perl5 prints: right
+
+=item * Precedence
 
 These are now semantic errors because of precedence:
 
@@ -927,7 +940,7 @@ treats C<$::> as main C<package>
      
     # perl 4 prints: -:a
     # perl 5 prints: x
-    
+
 =item * Precedence
 
 concatenation precedence over filetest operator?  
@@ -1097,6 +1110,13 @@ reverse is no longer allowed as the name of a sort subroutine.
  
     # perl4 prints: yup yup yup yup abc
     # perl5 prints: abc 
+
+=item * warn() specifically implies STDERR
+
+    warn STDERR "Foo!";
+
+    # perl4 prints: Foo!
+    # perl5 prints: String found where operator expected 
 
 =back
 
