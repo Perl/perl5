@@ -103,9 +103,10 @@ ext/ByteLoader/byterun.c	Runtime support for bytecode loader
 ext/ByteLoader/byterun.h	Header for byterun.c
 ext/ByteLoader/hints/sunos.pl	Hints for named architecture
 ext/ByteLoader/Makefile.PL	Bytecode loader makefile writer
-ext/Cwd/Cwd.t		See if Cwd works
-ext/Cwd/Cwd.xs		Cwd extension external subroutines
-ext/Cwd/Makefile.PL	Cwd extension makefile maker
+ext/Cwd/Cwd.xs			Cwd extension external subroutines
+ext/Cwd/t/cwd.t			See if Cwd works
+ext/Cwd/t/taint.t		See if Cwd works with taint
+ext/Cwd/Makefile.PL		Cwd extension makefile maker
 ext/Data/Dumper/Changes		Data pretty printer, changelog
 ext/Data/Dumper/Dumper.pm	Data pretty printer, module
 ext/Data/Dumper/Dumper.xs	Data pretty printer, externals

@@ -3719,6 +3719,10 @@ Perl_getcwd_sv(pTHX_ register SV *sv)
 {
 #ifndef PERL_MICRO
 
+#ifndef INCOMPLETE_TAINTS
+    SvTAINTED_on(sv);
+#endif
+
 #ifdef HAS_GETCWD
     {
 	char buf[MAXPATHLEN];
