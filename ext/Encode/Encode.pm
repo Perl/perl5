@@ -552,7 +552,7 @@ buffer. Here is some sample code that does exactly this:
   while(defined(read $fh, $buffer, 256)){
     # buffer may end in a partial character so we append
     $data .= $buffer;
-    $utf8 .= decode($encoding, $data, ENCODE::FB_QUIET);
+    $utf8 .= decode($encoding, $data, Encode::FB_QUIET);
     # $data now contains the unprocessed partial character
   }
 

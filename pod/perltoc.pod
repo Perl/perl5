@@ -455,24 +455,25 @@ EXPR, sleep, socket SOCKET,DOMAIN,TYPE,PROTOCOL, socketpair
 SOCKET1,SOCKET2,DOMAIN,TYPE,PROTOCOL, sort SUBNAME LIST, sort BLOCK LIST,
 sort LIST, splice ARRAY,OFFSET,LENGTH,LIST, splice ARRAY,OFFSET,LENGTH,
 splice ARRAY,OFFSET, splice ARRAY, split /PATTERN/,EXPR,LIMIT, split
-/PATTERN/,EXPR, split /PATTERN/, split, sprintf FORMAT, LIST, sqrt EXPR,
-sqrt, srand EXPR, srand, stat FILEHANDLE, stat EXPR, stat, study SCALAR,
-study, sub NAME BLOCK, sub NAME (PROTO) BLOCK, sub NAME : ATTRS BLOCK, sub
-NAME (PROTO) : ATTRS BLOCK, substr EXPR,OFFSET,LENGTH,REPLACEMENT, substr
-EXPR,OFFSET,LENGTH, substr EXPR,OFFSET, symlink OLDFILE,NEWFILE, syscall
-LIST, sysopen FILEHANDLE,FILENAME,MODE, sysopen
-FILEHANDLE,FILENAME,MODE,PERMS, sysread FILEHANDLE,SCALAR,LENGTH,OFFSET,
-sysread FILEHANDLE,SCALAR,LENGTH, sysseek FILEHANDLE,POSITION,WHENCE,
-system LIST, system PROGRAM LIST, syswrite FILEHANDLE,SCALAR,LENGTH,OFFSET,
-syswrite FILEHANDLE,SCALAR,LENGTH, syswrite FILEHANDLE,SCALAR, tell
-FILEHANDLE, tell, telldir DIRHANDLE, tie VARIABLE,CLASSNAME,LIST, tied
-VARIABLE, time, times, tr///, truncate FILEHANDLE,LENGTH, truncate
-EXPR,LENGTH, uc EXPR, uc, ucfirst EXPR, ucfirst, umask EXPR, umask, undef
-EXPR, undef, unlink LIST, unlink, unpack TEMPLATE,EXPR, untie VARIABLE,
-unshift ARRAY,LIST, use Module VERSION LIST, use Module VERSION, use Module
-LIST, use Module, use VERSION, utime LIST, values HASH, vec
-EXPR,OFFSET,BITS, wait, waitpid PID,FLAGS, wantarray, warn LIST, write
-FILEHANDLE, write EXPR, write, y///
+/PATTERN/,EXPR, split /PATTERN/, split, sprintf FORMAT, LIST, format
+parameter index, flags, vector flag, (minimum) width, precision, or maximum
+width, size, sqrt EXPR, sqrt, srand EXPR, srand, stat FILEHANDLE, stat
+EXPR, stat, study SCALAR, study, sub NAME BLOCK, sub NAME (PROTO) BLOCK,
+sub NAME : ATTRS BLOCK, sub NAME (PROTO) : ATTRS BLOCK, substr
+EXPR,OFFSET,LENGTH,REPLACEMENT, substr EXPR,OFFSET,LENGTH, substr
+EXPR,OFFSET, symlink OLDFILE,NEWFILE, syscall LIST, sysopen
+FILEHANDLE,FILENAME,MODE, sysopen FILEHANDLE,FILENAME,MODE,PERMS, sysread
+FILEHANDLE,SCALAR,LENGTH,OFFSET, sysread FILEHANDLE,SCALAR,LENGTH, sysseek
+FILEHANDLE,POSITION,WHENCE, system LIST, system PROGRAM LIST, syswrite
+FILEHANDLE,SCALAR,LENGTH,OFFSET, syswrite FILEHANDLE,SCALAR,LENGTH,
+syswrite FILEHANDLE,SCALAR, tell FILEHANDLE, tell, telldir DIRHANDLE, tie
+VARIABLE,CLASSNAME,LIST, tied VARIABLE, time, times, tr///, truncate
+FILEHANDLE,LENGTH, truncate EXPR,LENGTH, uc EXPR, uc, ucfirst EXPR,
+ucfirst, umask EXPR, umask, undef EXPR, undef, unlink LIST, unlink, unpack
+TEMPLATE,EXPR, untie VARIABLE, unshift ARRAY,LIST, use Module VERSION LIST,
+use Module VERSION, use Module LIST, use Module, use VERSION, utime LIST,
+values HASH, vec EXPR,OFFSET,BITS, wait, waitpid PID,FLAGS, wantarray, warn
+LIST, write FILEHANDLE, write EXPR, write, y///
 
 =back
 
@@ -5288,6 +5289,8 @@ I<The Road goes ever on and on, down from the door where it began.>
 =item Socket Extension Dynamic in VMS
 
 =item IEEE-format Floating Point Default on OpenVMS Alpha
+
+=item New Unicode Semantics (no more C<use utf8>)
 
 =item New Unicode Properties
 
@@ -16005,9 +16008,9 @@ MSGNUM ] ), delete ( MSGNUM ), reset (), quit ()
 
 =item Functions
 
-Net::Ping->new([$proto [, $def_timeout [, $bytes]]]);, $p->source_verify( {
-0 | 1 } );, $p->hires( { 0 | 1 } );, $p->bind($local_addr);, $p->ping($host
-[, $timeout]);, $p->open($host);, $p->close();, pingecho($host [,
+Net::Ping->new([$proto [, $def_timeout [, $bytes]]]);, $p->ping($host [,
+$timeout]);, $p->source_verify( { 0 | 1 } );, $p->hires( { 0 | 1 } );,
+$p->bind($local_addr);, $p->open($host);, $p->close();, pingecho($host [,
 $timeout]);
 
 =back
@@ -16015,6 +16018,8 @@ $timeout]);
 =item WARNING
 
 =item NOTES
+
+=item INSTALL
 
 =item AUTHORS
 

@@ -84,9 +84,10 @@ where STDOUT may be redirected to.
 
 =item x [maxdepth] expr
 
-Evaluates its expression in list context and dumps out the result
-in a pretty-printed fashion.  Nested data structures are printed out
-recursively, unlike the real C<print> function in Perl.
+Evaluates its expression in list context and dumps out the result in a
+pretty-printed fashion.  Nested data structures are printed out
+recursively, unlike the real C<print> function in Perl.  When dumping
+hashes, you'll probably prefer 'x \%h' rather than 'x %h'.
 See L<Dumpvalue> if you'd like to do this yourself.
 
 The output format is governed by multiple options described under
