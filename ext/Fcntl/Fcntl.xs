@@ -108,6 +108,12 @@ constant(char *name, int arg)
 #else
 	        goto not_there;
 #endif
+	    if (strEQ(name, "F_SETLK"))
+#ifdef F_SETLK
+	        return F_SETLK;
+#else
+	        goto not_there;
+#endif
 	    if (strEQ(name, "F_SETLK64"))
 #ifdef F_SETLK64
 	        return F_SETLK64;

@@ -124,7 +124,7 @@ directory name to be F<.>).
 
 
 ## use strict;
-# A bit of juggling to insure that C<use re 'taint';> awlays works, since
+# A bit of juggling to insure that C<use re 'taint';> always works, since
 # File::Basename is used during the Perl build, when the re extension may
 # not be available.
 BEGIN {

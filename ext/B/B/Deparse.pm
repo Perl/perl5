@@ -7,7 +7,7 @@
 # but essentially none of his code remains.
 
 package B::Deparse;
-use Carp 'cluck';
+use Carp 'cluck', 'croak';
 use B qw(class main_root main_start main_cv svref_2object opnumber
 	 OPf_WANT OPf_WANT_VOID OPf_WANT_SCALAR OPf_WANT_LIST
 	 OPf_KIDS OPf_REF OPf_STACKED OPf_SPECIAL
@@ -16,7 +16,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
-$VERSION = 0.57;
+$VERSION = 0.58;
 use strict;
 
 # Changes between 0.50 and 0.51:
@@ -66,19 +66,34 @@ use strict;
 # - added unquote option for expanding "" into concats, etc.
 # - split method and proto parts of pp_entersub into separate functions
 # - various minor cleanups
+# Changes after 0.57:
+# - added parens in \&foo (patch by Albert Dvornik)
+# Changes between 0.57 and 0.58:
+# - fixed `0' statements that weren't being printed
+# - added methods for use from other programs
+#   (based on patches from James Duncan and Hugo van der Sanden)
+# - added -si and -sT to control indenting (also based on a patch from Hugo)
+# - added -sv to print something else instead of '???'
+# - preliminary version of utf8 tr/// handling
 
 # Todo:
+# - finish tr/// changes
+# - add option for even more parens (generalize \&foo change)
 # - {} around variables in strings ("${var}letters")
 #   base/lex.t 25-27
 #   comp/term.t 11
 # - left/right context
 # - recognize `use utf8', `use integer', etc
-# - handle swash-based utf8 tr/// (ick, looks hard)
+# - treat top-level block specially for incremental output
+# - interpret in high bit chars in string as utf8 \x{...} (when?)
+# - copy comments (look at real text with $^P) 
 # - avoid semis in one-statement blocks
 # - associativity of &&=, ||=, ?:
 # - ',' => '=>' (auto-unquote?)
 # - break long lines ("\r" as discretionary break?)
-# - ANSI color syntax highlighting?
+# - configurable syntax highlighting: ANSI color, HTML, TeX, etc.
+# - more style options: brace style, hex vs. octal, quotes, ...
+# - print big ints as hex/octal instead of decimal (heuristic?)
 # - include values of variables (e.g. set in BEGIN)
 # - coordinate with Data::Dumper (both directions? see previous)
 # - version using op_next instead of op_first/sibling?
@@ -123,6 +138,9 @@ use strict;
 # linenums: -l
 # unquote: -q
 # cuddle: ` ' or `\n', depending on -sC
+# indent_size: -si
+# use_tabs: -sT
+# ex_const: -sv
 
 # A little explanation of how precedence contexts and associativity
 # work:
@@ -296,45 +314,70 @@ sub style_opts {
     while (length($opt = substr($opts, 0, 1))) {
 	if ($opt eq "C") {
 	    $self->{'cuddle'} = " ";
+	    $opts = substr($opts, 1);
+	} elsif ($opt eq "i") {
+	    $opts =~ s/^i(\d+)//;
+	    $self->{'indent_size'} = $1;
+	} elsif ($opt eq "T") {
+	    $self->{'use_tabs'} = 1;
+	    $opts = substr($opts, 1);
+	} elsif ($opt eq "v") {
+	    $opts =~ s/^v([^.]*)(.|$)//;
+	    $self->{'ex_const'} = $1;
 	}
-	$opts = substr($opts, 1);
     }
+}
+
+sub new {
+    my $class = shift;
+    my $self = bless {}, $class;
+    $self->{'subs_todo'} = [];
+    $self->{'curstash'} = "main";
+    $self->{'cuddle'} = "\n";
+    $self->{'indent_size'} = 4;
+    $self->{'use_tabs'} = 0;
+    $self->{'ex_const'} = "'???'";
+    while (my $arg = shift @_) {
+	if (substr($arg, 0, 2) eq "-u") {
+	    $self->stash_subs(substr($arg, 2));
+	} elsif ($arg eq "-p") {
+	    $self->{'parens'} = 1;
+	} elsif ($arg eq "-l") {
+	    $self->{'linenums'} = 1;
+	} elsif ($arg eq "-q") {
+	    $self->{'unquote'} = 1;
+	} elsif (substr($arg, 0, 2) eq "-s") {
+	    $self->style_opts(substr $arg, 2);
+	}
+    }
+    return $self;
 }
 
 sub compile {
     my(@args) = @_;
     return sub { 
-	my $self = bless {};
-	my $arg;
-	$self->{'subs_todo'} = [];
+	my $self = B::Deparse->new(@args);
 	$self->stash_subs("main");
 	$self->{'curcv'} = main_cv;
-	$self->{'curstash'} = "main";
-	$self->{'cuddle'} = "\n";
-	while ($arg = shift @args) {
-	    if (substr($arg, 0, 2) eq "-u") {
-		$self->stash_subs(substr($arg, 2));
-	    } elsif ($arg eq "-p") {
-		$self->{'parens'} = 1;
-	    } elsif ($arg eq "-l") {
-		$self->{'linenums'} = 1;
-	    } elsif ($arg eq "-q") {
-		$self->{'unquote'} = 1;
-	    } elsif (substr($arg, 0, 2) eq "-s") {
-		$self->style_opts(substr $arg, 2);
-	    }
-	}
 	$self->walk_sub(main_cv, main_start);
 	print $self->print_protos;
 	@{$self->{'subs_todo'}} =
-	    sort {$a->[0] <=> $b->[0]} @{$self->{'subs_todo'}};
-	print indent($self->deparse(main_root, 0)), "\n" unless null main_root;
+	  sort {$a->[0] <=> $b->[0]} @{$self->{'subs_todo'}};
+	print $self->indent($self->deparse(main_root, 0)), "\n"
+	  unless null main_root;
 	my @text;
 	while (scalar(@{$self->{'subs_todo'}})) {
 	    push @text, $self->next_todo;
 	}
 	print indent(join("", @text)), "\n" if @text;
     }
+}
+
+sub coderef2text {
+    my $self = shift;
+    my $sub = shift;
+    croak "Usage: ->coderef2text(CODEREF)" unless ref($sub) eq "CODE";
+    return $self->indent($self->deparse_sub(svref_2object($sub)));
 }
 
 sub deparse {
@@ -347,16 +390,21 @@ sub deparse {
 }
 
 sub indent {
+    my $self = shift;
     my $txt = shift;
     my @lines = split(/\n/, $txt);
     my $leader = "";
+    my $level = 0;
     my $line;
     for $line (@lines) {
-	if (substr($line, 0, 1) eq "\t") {
-	    $leader = $leader . "    ";
-	    $line = substr($line, 1);
-	} elsif (substr($line, 0, 1) eq "\b") {
-	    $leader = substr($leader, 0, length($leader) - 4);
+	my $cmd = substr($line, 0, 1);
+	if ($cmd eq "\t" or $cmd eq "\b") {
+	    $level += ($cmd eq "\t" ? 1 : -1) * $self->{'indent_size'};
+	    if ($self->{'use_tabs'}) {
+		$leader = "\t" x ($level / 8) . " " x ($level % 8);
+	    } else {
+		$leader = " " x $level;
+	    }
 	    $line = substr($line, 1);
 	}
 	if (substr($line, 0, 1) eq "\f") {
@@ -635,7 +683,7 @@ sub pp_leave {
 	    last if null $kid;
 	}
 	$expr .= $self->deparse($kid, 0);
-	push @exprs, $expr if $expr;
+	push @exprs, $expr if length $expr;
     }
     if ($cx > 0) { # inside an expression
 	return "do { " . join(";\n", @exprs) . " }";
@@ -657,7 +705,7 @@ sub pp_scope {
 	    last if null $kid;
 	}
 	$expr .= $self->deparse($kid, 0);
-	push @exprs, $expr if $expr;
+	push @exprs, $expr if length $expr;
     }
     if ($cx > 0) { # inside an expression, (a do {} while for lineseq)
 	return "do { " . join(";\n", @exprs) . " }";
@@ -796,7 +844,7 @@ sub pp_not {
 
 sub unop {
     my $self = shift;
-    my($op, $cx, $name, $prec, $flags) = (@_, 0, 0);
+    my($op, $cx, $name) = @_;
     my $kid;
     if ($op->flags & OPf_KIDS) {
 	$kid = $op->first;
@@ -1320,7 +1368,7 @@ sub logop {
 }
 
 sub pp_and { logop(@_, "and", 3, "&&", 11, "if") }
-sub pp_or {  logop(@_, "or",  2, "||", 10, "unless") }
+sub pp_or  { logop(@_, "or",  2, "||", 10, "unless") }
 sub pp_xor { logop(@_, "xor", 2, "",   0,  "") }
 
 sub logassignop {
@@ -1515,7 +1563,7 @@ sub mapop {
     $kid = $kid->first->sibling; # skip a pushmark
     my $code = $kid->first; # skip a null
     if (is_scope $code) {
-	$code = "{" . $self->deparse($code, 1) . "} ";
+	$code = "{" . $self->deparse($code, 0) . "} ";
     } else {
 	$code = $self->deparse($code, 24) . ", ";
     }
@@ -1732,7 +1780,8 @@ sub pp_null {
     my $self = shift;
     my($op, $cx) = @_;
     if (class($op) eq "OP") {
-	return "'???'" if $op->targ == OP_CONST; # old value is lost
+	# old value is lost
+	return $self->{'ex_const'} if $op->targ == OP_CONST;
     } elsif ($op->first->ppaddr eq "pp_pushmark") {
 	return $self->pp_list($op, $cx);
     } elsif ($op->first->ppaddr eq "pp_enter") {
@@ -2368,7 +2417,8 @@ sub collapse {
 	if ($c <= $#chars - 2 and $chars[$c + 1] == $tr + 1 and
 	    $chars[$c + 2] == $tr + 2)
 	{
-	    for (; $c <= $#chars and $chars[$c + 1] == $chars[$c] + 1; $c++) {}
+	    for (; $c <= $#chars-1 and $chars[$c + 1] == $chars[$c] + 1; $c++)
+	      {}
 	    $str .= "-";
 	    $str .= pchr($chars[$c]);
 	}
@@ -2376,10 +2426,12 @@ sub collapse {
     return $str;
 }
 
-sub pp_trans {
-    my $self = shift;
-    my($op, $cx) = @_;
-    my(@table) = unpack("s256", $op->pv);
+# XXX This has trouble with hyphens in the replacement (tr/bac/-AC/),
+# and backslashes.
+
+sub tr_decode_byte {
+    my($table, $flags) = @_;
+    my(@table) = unpack("s256", $table);
     my($c, $tr, @from, @to, @delfrom, $delhyphen);
     if ($table[ord "-"] != -1 and 
 	$table[ord("-") - 1] == -1 || $table[ord("-") + 1] == -1)
@@ -2401,10 +2453,8 @@ sub pp_trans {
 	    push @delfrom, $c;
 	}
     }
-    my $flags;
     @from = (@from, @delfrom);
-    if ($op->private & OPpTRANS_COMPLEMENT) {
-	$flags .= "c";
+    if ($flags & OPpTRANS_COMPLEMENT) {
 	my @newfrom = ();
 	my %from;
 	@from{@from} = (1) x @from;
@@ -2413,16 +2463,136 @@ sub pp_trans {
 	}
 	@from = @newfrom;
     }
-    if ($op->private & OPpTRANS_DELETE) {
-	$flags .= "d";
-    } else {
+    unless ($flags & OPpTRANS_DELETE) {
 	pop @to while $#to and $to[$#to] == $to[$#to -1];
     }
-    $flags .= "s" if $op->private & OPpTRANS_SQUASH;
     my($from, $to);
     $from = collapse(@from);
     $to = collapse(@to);
     $from .= "-" if $delhyphen;
+    return ($from, $to);
+}
+
+sub tr_chr {
+    my $x = shift;
+    if ($x == ord "-") {
+	return "\\-";
+    } else {
+	return chr $x;
+    }
+}
+
+# XXX This doesn't yet handle all cases correctly either
+
+sub tr_decode_utf8 {
+    my($swash_hv, $flags) = @_;
+    my %swash = $swash_hv->ARRAY;
+    my $final = undef;
+    $final = $swash{'FINAL'}->IV if exists $swash{'FINAL'};
+    my $none = $swash{"NONE"}->IV;
+    my $extra = $none + 1;
+    my(@from, @delfrom, @to);
+    my $line;
+    foreach $line (split /\n/, $swash{'LIST'}->PV) {
+	my($min, $max, $result) = split(/\t/, $line);
+	$min = hex $min;
+	if (length $max) {
+	    $max = hex $max;
+	} else {
+	    $max = $min;
+	}
+	$result = hex $result;
+	if ($result == $extra) {
+	    push @delfrom, [$min, $max];	    
+	} else {
+	    push @from, [$min, $max];
+	    push @to, [$result, $result + $max - $min];
+	}
+    }
+    for my $i (0 .. $#from) {
+	if ($from[$i][0] == ord '-') {
+	    unshift @from, splice(@from, $i, 1);
+	    unshift @to, splice(@to, $i, 1);
+	    last;
+	} elsif ($from[$i][1] == ord '-') {
+	    $from[$i][1]--;
+	    $to[$i][1]--;
+	    unshift @from, ord '-';
+	    unshift @to, ord '-';
+	    last;
+	}
+    }
+    for my $i (0 .. $#delfrom) {
+	if ($delfrom[$i][0] == ord '-') {
+	    push @delfrom, splice(@delfrom, $i, 1);
+	    last;
+	} elsif ($delfrom[$i][1] == ord '-') {
+	    $delfrom[$i][1]--;
+	    push @delfrom, ord '-';
+	    last;
+	}
+    }
+    if (defined $final and $to[$#to][1] != $final) {
+	push @to, [$final, $final];
+    }
+    push @from, @delfrom;
+    if ($flags & OPpTRANS_COMPLEMENT) {
+	my @newfrom;
+	my $next = 0;
+	for my $i (0 .. $#from) {
+	    push @newfrom, [$next, $from[$i][0] - 1];
+	    $next = $from[$i][1] + 1;
+	}
+	@from = ();
+	for my $range (@newfrom) {
+	    if ($range->[0] <= $range->[1]) {
+		push @from, $range;
+	    }
+	}
+    }
+    my($from, $to, $diff);
+    for my $chunk (@from) {
+	$diff = $chunk->[1] - $chunk->[0];
+	if ($diff > 1) {
+	    $from .= tr_chr($chunk->[0]) . "-" . tr_chr($chunk->[1]);
+	} elsif ($diff == 1) {
+	    $from .= tr_chr($chunk->[0]) . tr_chr($chunk->[1]);
+	} else {
+	    $from .= tr_chr($chunk->[0]);
+	}
+    }
+    for my $chunk (@to) {
+	$diff = $chunk->[1] - $chunk->[0];
+	if ($diff > 1) {
+	    $to .= tr_chr($chunk->[0]) . "-" . tr_chr($chunk->[1]);
+	} elsif ($diff == 1) {
+	    $to .= tr_chr($chunk->[0]) . tr_chr($chunk->[1]);
+	} else {
+	    $to .= tr_chr($chunk->[0]);
+	}
+    }
+    #$final = sprintf("%04x", $final) if defined $final;
+    #$none = sprintf("%04x", $none) if defined $none;
+    #$extra = sprintf("%04x", $extra) if defined $extra;    
+    #print STDERR "final: $final\n none: $none\nextra: $extra\n";
+    #print STDERR $swash{'LIST'}->PV;
+    return (escape_str($from), escape_str($to));
+}
+
+sub pp_trans {
+    my $self = shift;
+    my($op, $cx) = @_;
+    my($from, $to);
+    if (class($op) eq "PVOP") {
+	($from, $to) = tr_decode_byte($op->pv, $op->private);
+    } else { # class($op) eq "SVOP"
+	($from, $to) = tr_decode_utf8($op->sv->RV, $op->private);
+    }
+    my $flags = "";
+    $flags .= "c" if $op->private & OPpTRANS_COMPLEMENT;
+    $flags .= "d" if $op->private & OPpTRANS_DELETE;
+    $to = "" if $from eq $to and $flags eq "";
+    $flags .= "s" if $op->private & OPpTRANS_SQUASH;
     return "tr" . double_delim($from, $to) . $flags;
 }
 
@@ -2596,7 +2766,8 @@ B::Deparse - Perl compiler backend to produce perl code
 
 =head1 SYNOPSIS
 
-B<perl> B<-MO=Deparse>[B<,-u>I<PACKAGE>][B<,-p>][B<,-l>][B<,-s>I<LETTERS>] I<prog.pl>
+B<perl> B<-MO=Deparse>[B<,-u>I<PACKAGE>][B<,-p>][B<,-q>][B<,-l>][B<,-s>I<LETTERS>]
+     I<prog.pl>
 
 =head1 DESCRIPTION
 
@@ -2674,8 +2845,8 @@ Normally, B::Deparse deparses the main code of a program, all the subs
 called by the main program (and all the subs called by them,
 recursively), and any other subs in the main:: package. To include
 subs in other packages that aren't called directly, such as AUTOLOAD,
-DESTROY, other subs called automatically by perl, and methods, which
-aren't resolved to subs until runtime, use the B<-u> option. The
+DESTROY, other subs called automatically by perl, and methods (which
+aren't resolved to subs until runtime), use the B<-u> option. The
 argument to B<-u> is the name of a package, and should follow directly
 after the 'u'. Multiple B<-u> options may be given, separated by
 commas.  Note that unlike some other backends, B::Deparse doesn't
@@ -2684,8 +2855,9 @@ invoke it yourself.
 
 =item B<-s>I<LETTERS>
 
-Tweak the style of B::Deparse's output. At the moment, only one style
-option is implemented:
+Tweak the style of B::Deparse's output. The letters should follow
+directly after the 's', with no space or punctuation. The following
+options are available:
 
 =over 4
 
@@ -2710,9 +2882,75 @@ instead of
 
 The default is not to cuddle.
 
+=item B<i>I<NUMBER>
+
+Indent lines by multiples of I<NUMBER> columns. The default is 4 columns.
+
+=item B<T>
+
+Use tabs for each 8 columns of indent. The default is to use only spaces.
+For instance, if the style options are B<-si4T>, a line that's indented
+3 times will be preceded by one tab and four spaces; if the options were
+B<-si8T>, the same line would be preceded by three tabs.
+
+=item B<v>I<STRING>B<.>
+
+Print I<STRING> for the value of a constant that can't be determined
+because it was optimized away (mnemonic: this happens when a constant
+is used in B<v>oid context). The end of the string is marked by a period.
+The string should be a valid perl expression, generally a constant.
+Note that unless it's a number, it probably needs to be quoted, and on
+a command line quotes need to be protected from the shell. Some
+conventional values include 0, 1, 42, '', 'foo', and
+'Useless use of constant omitted' (which may need to be
+B<-sv"'Useless use of constant omitted'.">
+or something similar depending on your shell). The default is '???'.
+If you're using B::Deparse on a module or other file that's require'd,
+you shouldn't use a value that evaluates to false, since the customary
+true constant at the end of a module will be in void context when the
+file is compiled as a main program.
+
 =back
 
 =back
+
+=head1 USING B::Deparse AS A MODULE
+
+=head2 Synopsis
+
+    use B::Deparse;
+    $deparse = B::Deparse->new("-p", "-sC");
+    $body = $deparse->coderef2text(\&func);
+    eval "sub func $body"; # the inverse operation
+
+=head2 Description
+
+B::Deparse can also be used on a sub-by-sub basis from other perl
+programs.
+
+=head2 new
+
+    $deparse = B::Deparse->new(OPTIONS)
+
+Create an object to store the state of a deparsing operation and any
+options. The options are the same as those that can be given on the
+command line (see L</OPTIONS>); options that are separated by commas
+after B<-MO=Deparse> should be given as separate strings. Some
+options, like B<-u>, don't make sense for a single subroutine, so
+don't pass them.
+
+=head2 coderef2text
+
+    $body = $deparse->coderef2text(\&func)
+    $body = $deparse->coderef2text(sub ($$) { ... })
+
+Return source code for the body of a subroutine (a block, optionally
+preceded by a prototype in parens), given a reference to the
+sub. Because a subroutine can have no names, or more than one name,
+this method doesn't return a complete subroutine definition -- if you
+want to eval the result, you should prepend "sub subname ", or "sub "
+for an anonymous function constructor. Unless the sub was defined in
+the main:: package, the code will include a package declaration.
 
 =head1 BUGS
 
@@ -2721,6 +2959,8 @@ See the 'to do' list at the beginning of the module file.
 =head1 AUTHOR
 
 Stephen McCamant <smccam@uclink4.berkeley.edu>, based on an earlier
-version by Malcolm Beattie <mbeattie@sable.ox.ac.uk>.
+version by Malcolm Beattie <mbeattie@sable.ox.ac.uk>, with
+contributions from Gisle Aas, James Duncan, Albert Dvornik, Hugo van
+der Sanden, Gurusamy Sarathy, and Nick Ing-Simmons.
 
 =cut

@@ -35,7 +35,10 @@ eval '$> = 1';		# so switch uid (may not be implemented)
 
 print "# oldeuid = $oldeuid, euid = $>\n";
 
-if ($bad_chmod) {
+if (!$Config{d_seteuid}) {
+    print "ok 6 #skipped, no seteuid\n";
+}
+elsif ($bad_chmod) {
     print "#[$@]\nok 6 #skipped\n";
 }
 else {
