@@ -190,8 +190,8 @@ Unary "-" performs arithmetic negation if the operand is numeric.  If
 the operand is an identifier, a string consisting of a minus sign
 concatenated with the identifier is returned.  Otherwise, if the string
 starts with a plus or minus, a string starting with the opposite sign
-is returned.  One effect of these rules is that C<-bareword> is equivalent
-to C<"-bareword">.
+is returned.  One effect of these rules is that -bareword is equivalent
+to "-bareword".
 
 Unary "~" performs bitwise negation, i.e., 1's complement.  For
 example, C<0666 & ~027> is 0640.  (See also L<Integer Arithmetic> and
