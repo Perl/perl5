@@ -1161,6 +1161,8 @@ lib/Time/localtime.pm		By-name interface to Perl's builtin localtime
 lib/Time/localtime.t		Test for Time::localtime
 lib/Time/tm.pm			Internal object for Time::{gm,local}time
 lib/timelocal.pl		Perl library supporting inverse of localtime, gmtime
+lib/Unicode/UCD.pm			Unicode character database
+lib/Unicode/UCD.t			See if Unicode character database works
 lib/unicode/ArabLink.pl		Unicode character database
 lib/unicode/ArabLnkGrp.pl	Unicode character database
 lib/unicode/ArabShap.txt	Unicode character database
