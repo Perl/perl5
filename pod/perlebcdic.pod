@@ -664,13 +664,13 @@ it in tr/// like so:
     '\060\061\062\063\064\065\066\067\070\071\263\333\334\331\332\237' ;
 
     my $ebcdic_string = $ascii_string;
-    eval '$ebcdic_string =~ tr/\000-\377/' . $cp_037 . '/';
+    eval '$ebcdic_string =~ tr/' . $cp_037 . '/\000-\377/';
 
 To convert from EBCDIC 037 to ASCII just reverse the order of the tr/// 
 arguments like so:
 
     my $ascii_string = $ebcdic_string;
-    eval '$ascii_string = tr/' . $cp_037 . '/\000-\377/';
+    eval '$ascii_string =~ tr/\000-\377/' . $cp_037 . '/';
 
 Similarly one could take the output of the third column from recipe 0 to
 obtain a C<$cp_1047> table.  The fourth column of the output from recipe
