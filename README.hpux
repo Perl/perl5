@@ -115,7 +115,7 @@ HP also ships servers with the 128-bit Itanium processor(s). As of the
 date of this document's last update, the following systems contain
 Itanium chips (this is very likely to be out of date):
 
-    RX4610, RX9610
+    RX2600, RX4610, RX5670, RX9610
 
 A complete list of models at the time the OS was built is in the file
 /opt/langtools/lib/sched.models.  The first column corresponds to the
