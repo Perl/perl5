@@ -3,7 +3,7 @@ our $VERSION = "0.01";
  
 use Encode;
 use XSLoader;
-XSLoader::load('Encode::$_Name_', $VERSION);
+XSLoader::load(__PACKAGE__,$VERSION);
 
 1;
 __END__

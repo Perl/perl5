@@ -4,12 +4,11 @@ BEGIN {
 	die "Encode::CN not supported on EBCDIC\n";
     }
 }
-our $VERSION = do { my @r = (q$Revision: 1.21 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.22 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
-use Encode::CN::HZ;
 use XSLoader;
-XSLoader::load('Encode::CN',$VERSION);
+XSLoader::load(__PACKAGE__,$VERSION);
 
 # Relocated from Encode.pm
 

@@ -1,5 +1,5 @@
 #
-# $Id: Encoder.t,v 1.2 2002/04/10 22:28:40 dankogai Exp $
+# $Id: Encoder.t,v 1.3 2002/04/16 23:35:00 dankogai Exp $
 #
 
 BEGIN {
@@ -8,16 +8,6 @@ BEGIN {
       print "1..0 # Skip: Encode was not built\n";
       exit 0;
     }
-# should work without perlio
-#     unless (find PerlIO::Layer 'perlio') {
-# 	print "1..0 # Skip: PerlIO was not built\n";
-# 	exit 0;
-#     }
-# should work on EBCDIC
-#    if (ord("A") == 193) {
-# 	print "1..0 # Skip: EBCDIC\n";
-# 	exit 0;
-#    }
     $| = 1;
 }
 

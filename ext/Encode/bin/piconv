@@ -1,5 +1,5 @@
 #!./perl
-# $Id: piconv,v 1.21 2002/04/09 20:06:15 dankogai Exp $
+# $Id: piconv,v 1.22 2002/04/16 23:35:00 dankogai Exp $
 #
 use 5.7.3;
 use strict;
@@ -9,7 +9,7 @@ my %Scheme =  map {$_ => 1} qw(from_to decode_encode perlio);
 
 use Getopt::Std;
 
-my %Opt; getopts("hDS:lf:t:s:", \%Opt);
+my %Opt; getopts("pcC:hDS:lf:t:s:", \%Opt);
 $Opt{h} and help();
 $Opt{l} and list_encodings();
 my $locale = $ENV{LC_CTYPE} || $ENV{LC_ALL} || $ENV{LANG};
@@ -18,6 +18,8 @@ my $from = $Opt{f} || $locale or help("from_encoding unspecified");
 my $to   = $Opt{t} || $locale or help("to_encoding unspecified");
 $Opt{s} and Encode::from_to($Opt{s}, $from, $to) and print $Opt{s} and exit;
 my $scheme = exists $Scheme{$Opt{S}} ? $Opt{S} :  'from_to';
+$Opt{C} ||= $Opt{c};
+$Opt{p} and $Opt{C} = -1;
 
 if ($Opt{D}){
     my $cfrom = Encode->getEncoding($from)->name;
@@ -32,12 +34,12 @@ EOT
 # default
 if     ($scheme eq 'from_to'){ 
     while(<>){
-	Encode::from_to($_, $from, $to); print;
+	Encode::from_to($_, $from, $to, $Opt{C}); print;
     };
 # step-by-step
 }elsif ($scheme eq 'decode_encode'){
    while(<>){
-       my $decoded = decode($from, $_);
+       my $decoded = decode($from, $_, $Opt{C});
        my $encoded = encode($to, $decoded);
        print $encoded;
     };
@@ -120,6 +122,19 @@ exist.  For example, the names are case-insensitive, and many standard
 and common aliases work, like "latin1" for "ISO 8859-1", or "ibm850"
 instead of "cp850", or "winlatin1" for "cp1252".  See L<Encode::Supported>
 for the full discussion.
+
+=item -C I<N>
+
+Check the validity of the stream if I<N> = 1.  When I<N> = -1, something
+interesting happens when it encounters an invalid character.
+
+=item -c
+
+Same as C<-C 1>.
+
+=item -p
+
+Same as C<-C -1>.
 
 =item -h
 

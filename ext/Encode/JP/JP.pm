@@ -5,10 +5,10 @@ BEGIN {
     }
 }
 use Encode;
-our $VERSION = do { my @r = (q$Revision: 1.22 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.23 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use XSLoader;
-XSLoader::load('Encode::JP',$VERSION);
+XSLoader::load(__PACKAGE__,$VERSION);
 
 use Encode::JP::JIS7;
 

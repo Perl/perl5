@@ -3,7 +3,7 @@ package Encode::CN::HZ;
 use strict;
 
 use vars qw($VERSION);
-$VERSION = do { my @r = (q$Revision: 1.0 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+$VERSION = do { my @r = (q$Revision: 1.1 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode ();
 use Encode::CN;
@@ -64,8 +64,13 @@ sub encode
 	no warnings 'utf8';
 
 	my $char = substr($str, $index, 1);
-	my $try  = $gb->encode($char);	# try to encode this character
-
+	# try to encode this character
+	# with CHECK on so it stops at proper place.
+	# also note that the assignement was braced in eval
+	#  -- dankogai
+	my $try;
+	eval{ $try = $gb->encode($char, 1) };
+	
 	if (defined($try)) {		# is a GB character:
 	    if ($in_gb) {
 		$out .= $try;		#  in GB mode - just append it
