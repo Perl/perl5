@@ -87,10 +87,14 @@ case "$osvers" in
 	        ;;
 	esac
 	libswanted=`echo $libswanted | sed 's/ malloc / /'`
+	libswanted=`echo $libswanted | sed 's/ bind / /'`
+	# iconv gone in Perl 5.8.1, but if someone compiles 5.8.0 or earlier.
+	libswanted=`echo $libswanted | sed 's/ iconv / /'`
 	d_setregid='define'
 	d_setreuid='define'
-	d_setegid='undef'
-	d_seteuid='undef'
+	d_setegid='define'
+	d_seteuid='define'
+	# d_dosuid='define' # Obsolete.
 	;;
 *)	usevfork='true'
 	case "$usemymalloc" in
@@ -124,7 +128,7 @@ case "$osvers" in
             fi
             lddlflags='-Bshareable'
         fi
-        cccdlflags='-DPIC -fpic'
+        cccdlflags='-DPIC -fPIC'
         ;;
 esac
 
@@ -220,11 +224,14 @@ EOM
 	      fi
 	      ldflags="-pthread $ldflags"
 	      case "$osvers" in
-	      4.*|5.0-release*)	
-			# 4.x and 5.0-release have gethostbyaddr_r but it is
-			# "Temporary function, not threadsafe"...
-			d_gethostbyaddr_r="undef"
+	      # Both in 4.x and 5.x gethostbyaddr_r exists but
+	      # it is "Temporary function, not threadsafe"...
+	      4.*)	d_gethostbyaddr_r="undef"
 			d_gethostbyaddr_r_proto="0"
+			;;
+	      5.*)	d_gethostbyaddr_r="undef"
+			d_gethostbyaddr_r_proto="0"
+
 			;;
 	      esac
 	      ;;

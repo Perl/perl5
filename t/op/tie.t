@@ -405,3 +405,44 @@ Two
 4
 Three
 4
+########
+# [perl #22297] cannot untie scalar from within tied FETCH
+my $counter = 0;
+my $x = 7;
+my $ref = \$x;
+tie $x, 'Overlay', $ref, $x;
+my $y;
+$y = $x;
+$y = $x;
+$y = $x;
+$y = $x;
+#print "WILL EXTERNAL UNTIE $ref\n";
+untie $$ref;
+$y = $x;
+$y = $x;
+$y = $x;
+$y = $x;
+#print "counter = $counter\n";
+
+print (($counter == 1) ? "ok\n" : "not ok\n");
+
+package Overlay;
+
+sub TIESCALAR
+{
+        my $pkg = shift;
+        my ($ref, $val) = @_;
+        return bless [ $ref, $val ], $pkg;
+}
+
+sub FETCH
+{
+        my $self = shift;
+        my ($ref, $val) = @$self;
+        #print "WILL INTERNAL UNITE $ref\n";
+        $counter++;
+        untie $$ref;
+        return $val;
+}
+EXPECT
+ok

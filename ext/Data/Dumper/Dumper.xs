@@ -3,26 +3,6 @@
 #include "perl.h"
 #include "XSUB.h"
 
-#ifndef PERL_VERSION
-#    include <patchlevel.h>
-#    if !(defined(PERL_VERSION) || (SUBVERSION > 0 && defined(PATCHLEVEL)))
-#        include <could_not_find_Perl_patchlevel.h>
-#    endif
-#    define PERL_VERSION PATCHLEVEL
-#endif
-
-#if PERL_VERSION < 5
-#  ifndef PL_sv_undef
-#    define PL_sv_undef	sv_undef
-#  endif
-#  ifndef ERRSV
-#    define ERRSV	GvSV(errgv)
-#  endif
-#  ifndef newSVpvn
-#    define newSVpvn	newSVpv
-#  endif
-#endif
-
 static I32 num_q (char *s, STRLEN slen);
 static I32 esc_q (char *dest, char *src, STRLEN slen);
 static I32 esc_q_utf8 (pTHX_ SV *sv, char *src, STRLEN slen);
@@ -33,6 +13,39 @@ static I32 DD_dump (pTHX_ SV *val, char *name, STRLEN namelen, SV *retval,
 		    SV *freezer, SV *toaster,
 		    I32 purity, I32 deepcopy, I32 quotekeys, SV *bless,
 		    I32 maxdepth, SV *sortkeys);
+
+#if PERL_VERSION <= 6 /* Perl 5.6 and earlier */
+
+# ifdef EBCDIC
+#  define UNI_TO_NATIVE(ch) (((ch) > 255) ? (ch) : ASCII_TO_NATIVE(ch))
+# else
+#  define UNI_TO_NATIVE(ch) (ch)
+# endif
+
+UV
+Perl_utf8_to_uvchr(pTHX_ U8 *s, STRLEN *retlen)
+{
+    UV uv = utf8_to_uv(s, UTF8_MAXLEN, retlen,
+                    ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
+    return UNI_TO_NATIVE(uv);
+}
+
+# if !defined(PERL_IMPLICIT_CONTEXT)
+#  define utf8_to_uvchr	     Perl_utf8_to_uvchr
+# else
+#  define utf8_to_uvchr(a,b) Perl_utf8_to_uvchr(aTHX_ a,b)
+# endif
+
+#endif /* PERL_VERSION <= 6 */
+
+/* Changes in 5.7 series mean that now IOK is only set if scalar is
+   precisely integer but in 5.6 and earlier we need to do a more
+   complex test  */
+#if PERL_VERSION <= 6
+#define DD_is_integer(sv) (SvIOK(sv) && (SvIsUV(val) ? SvUV(sv) == SvNV(sv) : SvIV(sv) == SvNV(sv)))
+#else
+#define DD_is_integer(sv) SvIOK(sv)
+#endif
 
 /* does a string need to be protected? */
 static I32
@@ -339,7 +352,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		(void)SvREFCNT_inc(val);
 		av_push(seenentry, val);
 		(void)hv_store(seenhv, id, strlen(id),
-			       newRV((SV*)seenentry), 0);
+			       newRV_inc((SV*)seenentry), 0);
 		SvREFCNT_dec(seenentry);
 	    }
 	}
@@ -546,6 +559,9 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    /* If requested, get a sorted/filtered array of hash keys */
 	    if (sortkeys) {
 		if (sortkeys == &PL_sv_yes) {
+#if PERL_VERSION < 8
+                    sortkeys = sv_2mortal(newSVpvn("Data::Dumper::_sortkeys", 23));
+#else
 		    keys = newAV();
 		    (void)hv_iterinit((HV*)ival);
 		    while ((entry = hv_iternext((HV*)ival))) {
@@ -553,17 +569,18 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 			SvREFCNT_inc(sv);
 			av_push(keys, sv);
 		    }
-#ifdef USE_LOCALE_NUMERIC
+# ifdef USE_LOCALE_NUMERIC
 		    sortsv(AvARRAY(keys), 
 			   av_len(keys)+1, 
 			   IN_LOCALE ? Perl_sv_cmp_locale : Perl_sv_cmp);
-#else
+# else
 		    sortsv(AvARRAY(keys), 
 			   av_len(keys)+1, 
 			   Perl_sv_cmp);
+# endif
 #endif
 		}
-		else {
+		if (sortkeys != &PL_sv_yes) {
 		    dSP; ENTER; SAVETMPS; PUSHMARK(sp);
 		    XPUSHs(sv_2mortal(newRV_inc(ival))); PUTBACK;
 		    i = perl_call_sv(sortkeys, G_SCALAR | G_EVAL);
@@ -759,24 +776,19 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		sv_catpvn(namesv, name, namelen);
 		seenentry = newAV();
 		av_push(seenentry, namesv);
-		av_push(seenentry, newRV(val));
-		(void)hv_store(seenhv, id, strlen(id), newRV((SV*)seenentry), 0);
+		av_push(seenentry, newRV_inc(val));
+		(void)hv_store(seenhv, id, strlen(id), newRV_inc((SV*)seenentry), 0);
 		SvREFCNT_dec(seenentry);
 	    }
 	}
 
-	if (SvIOK(val)) {
+        if (DD_is_integer(val)) {
             STRLEN len;
 	    if (SvIsUV(val))
 	      (void) sprintf(tmpbuf, "%"UVuf, SvUV(val));
 	    else
 	      (void) sprintf(tmpbuf, "%"IVdf, SvIV(val));
             len = strlen(tmpbuf);
-            /* For 5.6.x and earlier will need to change this test to check
-               NV if NOK, as there NOK trumps IOK, and NV=3.5,IV=3 is valid.
-               Current code will Dump that as $VAR1 = 3;
-               Changes in 5.7 series mean that now IOK is only set if scalar
-               is precisely integer.  */
             if (SvPOK(val)) {
               /* Need to check to see if this is a string such as " 0".
                  I'm assuming from sprintf isn't going to clash with utf8.
@@ -841,7 +853,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 			sv_catpvn(nname, entries[j], sizes[j]);
 			sv_catpvn(postentry, " = ", 3);
 			av_push(postav, postentry);
-			e = newRV(e);
+			e = newRV_inc(e);
 			
 			SvCUR(newapad) = 0;
 			if (indent >= 2)

@@ -1072,6 +1072,21 @@ modules L<Tie::Scalar>, L<Tie::Array>, L<Tie::Hash>, or L<Tie::Handle>.
 
 =head1 BUGS
 
+The bucket usage information provided by C<scalar(%hash)> is not
+available.  What this means is that using %tied_hash in boolean
+context doesn't work right (currently this always tests false,
+regardless of whether the hash is empty or hash elements).
+
+Localizing tied arrays or hashes does not work.  After exiting the
+scope the arrays or the hashes are not restored.
+
+Counting the number of entries in a hash via C<scalar(keys(%hash))>
+or C<scalar(values(%hash)>) is inefficient since it needs to iterate
+through all the entries with FIRSTKEY/NEXTKEY.
+
+Tied hash/array slices cause multiple FETCH/STORE pairs, there are no
+tie methods for slice operations.
+
 You cannot easily tie a multilevel data structure (such as a hash of
 hashes) to a dbm file.  The first problem is that all but GDBM and
 Berkeley DB have size limitations, but beyond that, you also have problems

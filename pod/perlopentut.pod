@@ -625,11 +625,11 @@ just in a different process:
 
     sub head {
         my $lines = shift || 20;
-        return unless $pid = open(STDOUT, "|-");
+        return if $pid = open(STDOUT, "|-");       # return if parent
         die "cannot fork: $!" unless defined $pid;
         while (<STDIN>) {
-            print;
             last if --$lines < 0;
+            print;
         } 
         exit;
     } 
