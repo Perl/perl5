@@ -26,7 +26,7 @@ integer or a pointer.
 Perl also uses two special typedefs, I32 and I16, which will always be at
 least 32-bits and 16-bits long, respectively.
 
-=head2 Working with SV's
+=head2 Working with SVs
 
 An SV can be created and loaded with one command.  There are four types of
 values that can be loaded: an integer value (IV), a double (NV), a string,
@@ -39,7 +39,7 @@ The four routines are:
     SV*  newSVpv(char*, int);
     SV*  newSVsv(SV*);
 
-To change the value of an I<already-existing> SV, there are five routines:
+To change the value of an *already-existing* SV, there are five routines:
 
     void  sv_setiv(SV*, IV);
     void  sv_setnv(SV*, double);
@@ -67,7 +67,7 @@ In the C<SvPV> macro, the length of the string returned is placed into the
 variable C<len> (this is a macro, so you do I<not> use C<&len>).  If you do not
 care what the length of the data is, use the global variable C<na>.  Remember,
 however, that Perl allows arbitrary strings of data that may both contain
-NUL's and not be terminated by a NUL.
+NULs and not be terminated by a NUL.
 
 If you simply want to know if the scalar value is TRUE, you can use:
 
@@ -172,21 +172,21 @@ stored in your SV.  The "p" stands for private.
 
 In general, though, it's best to just use the C<Sv*V> macros.
 
-=head2 Working with AV's
+=head2 Working with AVs
 
 There are two ways to create and load an AV.  The first method just creates
 an empty AV:
 
     AV*  newAV();
 
-The second method both creates the AV and initially populates it with SV's:
+The second method both creates the AV and initially populates it with SVs:
 
     AV*  av_make(I32 num, SV **ptr);
 
-The second argument points to an array containing C<num> C<SV*>'s.  Once the
-AV has been created, the SV's can be destroyed, if so desired.
+The second argument points to an array containing C<num> C<SV*>s.  Once the
+AV has been created, the SVs can be destroyed, if so desired.
 
-Once the AV has been created, the following operations are possible on AV's:
+Once the AV has been created, the following operations are possible on AVs:
 
     void  av_push(AV*, SV*);
     SV*   av_pop(AV*);
@@ -208,7 +208,7 @@ Here are some other functions:
     SV**  av_store(AV*, I32 key, SV* val);
             /* Stores val at offset key */
 
-Take note that C<av_fetch> and C<av_store> return C<SV**>'s, not C<SV*>'s.
+Take note that C<av_fetch> and C<av_store> return C<SV**>s, not C<SV*>s.
 
     void  av_clear(AV*);
             /* Clear out all elements, but leave the array */
@@ -224,13 +224,13 @@ by using the following:
 
 This returns NULL if the variable does not exist.
 
-=head2 Working with HV's
+=head2 Working with HVs
 
 To create an HV, you use the following routine:
 
     HV*  newHV();
 
-Once the HV has been created, the following operations are possible on HV's:
+Once the HV has been created, the following operations are possible on HVs:
 
     SV**  hv_store(HV*, char* key, U32 klen, SV* val, U32 hash);
     SV**  hv_fetch(HV*, char* key, U32 klen, I32 lval);
@@ -241,7 +241,7 @@ the pre-computed hash value (zero if you want C<hv_store> to calculate it
 for you).  The C<lval> parameter indicates whether this fetch is actually a
 part of a store operation.
 
-Remember that C<hv_store> and C<hv_fetch> return C<SV**>'s and not just
+Remember that C<hv_store> and C<hv_fetch> return C<SV**>s and not just
 C<SV*>.  In order to access the scalar value, you must first dereference
 the return value.  However, you should check to make sure that the return
 value is not NULL before dereferencing it.
@@ -345,7 +345,7 @@ A reference can be blessed into a package with the following function:
     SV* sv_bless(SV* sv, HV* stash);
 
 The C<sv> argument must be a reference.  The C<stash> argument specifies
-which class the reference will belong to.  See the section on L<Stashes>
+which class the reference will belong to.  See the L<"Stashes">
 for information on converting class names into stashes.
 
 /* Still under construction */
@@ -393,7 +393,7 @@ There are additional bits that may be OR'ed with the TRUE argument to enable
 certain extra features.  Those bits are:
 
     0x02  Marks the variable as multiply defined, thus preventing the
-	  "Indentifier <varname> used only once: possible typo" warning.
+	  "Identifier <varname> used only once: possible typo" warning.
     0x04  Issues a "Had to create <varname> unexpectedly" warning if
 	  the variable didn't actually exist.  This is useful if
 	  you expected the variable to already exist and want to propagate
@@ -402,7 +402,7 @@ certain extra features.  Those bits are:
 If the C<varname> argument does not contain a package specifier, it is
 created in the current package.
 
-=head1 XSUB's and the Argument Stack
+=head1 XSUBs and the Argument Stack
 
 The XSUB mechanism is a simple way for Perl programs to access C subroutines.
 An XSUB routine will have a stack that contains the arguments from the Perl
@@ -428,7 +428,7 @@ where C<sp> is the stack pointer, and C<num> is the number of elements the
 stack should be extended by.
 
 Now that there is room on the stack, values can be pushed on it using the
-macros to push IV's, doubles, strings, and SV pointers respectively:
+macros to push IVs, doubles, strings, and SV pointers respectively:
 
     PUSHi(IV)
     PUSHn(double)
@@ -463,10 +463,10 @@ Add cruft about reference counts.
 	void SvREFCNT_inc(SV* sv);
 	void SvREFCNT_dec(SV* sv);
 
-In the above example with C<tzname>, we needed to create two new SV's to push
+In the above example with C<tzname>, we needed to create two new SVs to push
 onto the argument stack, that being the two strings.  However, we don't want
-these new SV's to stick around forever because they will eventually be
-copied into the SV's that hold the two scalar variables.
+these new SVs to stick around forever because they will eventually be
+copied into the SVs that hold the two scalar variables.
 
 An SV (or AV or HV) that is "mortal" acts in all ways as a normal "immortal"
 SV, AV, or HV, but is only valid in the "current context".  When the Perl
@@ -483,11 +483,11 @@ To create a mortal variable, use the functions:
 The first call creates a mortal SV, the second converts an existing SV to
 a mortal SV, the third creates a mortal copy of an existing SV.
 
-The mortal routines are not just for SV's -- AV's and HV's can be made mortal
+The mortal routines are not just for SVs -- AVs and HVs can be made mortal
 by passing their address (and casting them to C<SV*>) to the C<sv_2mortal> or
 C<sv_mortalcopy> routines.
 
->From Ilya:
+From Ilya:
 Beware that the sv_2mortal() call is eventually equivalent to
 svREFCNT_dec(). A value can happily be mortal in two different contexts,
 and it will be svREFCNT_dec()ed twice, once on exit from these
@@ -519,7 +519,7 @@ objects of that name, including (but not limited to) the following:
 
 Perl stores various stashes in a separate GV structure (for global
 variable) but represents them with an HV structure.  The keys in this
-larger GV are the various package names; the values are the C<GV*>'s
+larger GV are the various package names; the values are the C<GV*>s
 which are stashes.  It may help to think of a stash purely as an HV,
 and that the term "GV" means the global variable hash.
 
@@ -562,11 +562,9 @@ For more information on references and blessings, consult L<perlref>.
 [This section still under construction.  Ignore everything here.  Post no
 bills.  Everything not permitted is forbidden.]
 
-# Version 6, 1995/1/27
-
 Any SV may be magical, that is, it has special features that a normal
 SV does not have.  These features are stored in the SV structure in a
-linked list of C<struct magic>'s, typedef'ed to C<MAGIC>.
+linked list of C<struct magic>s, typedef'ed to C<MAGIC>.
 
     struct magic {
         MAGIC*      mg_moremagic;
@@ -594,12 +592,12 @@ If C<sv> is not already magical, Perl uses the C<SvUPGRADE> macro to
 set the C<SVt_PVMG> flag for the C<sv>.  Perl then continues by adding
 it to the beginning of the linked list of magical features.  Any prior
 entry of the same type of magic is deleted.  Note that this can be
-overriden, and multiple instances of the same type of magic can be
+overridden, and multiple instances of the same type of magic can be
 associated with an SV.
 
 The C<name> and C<namlem> arguments are used to associate a string with
 the magic, typically the name of a variable. C<namlem> is stored in the
-C<mg_len> field and if C<name> is non-null and C<namlem> >= 0 a malloc'd
+C<mg_len> field and if C<name> is non-null and C<namlem> E<gt>= 0 a malloc'd
 copy of the name is stored in C<mg_ptr> field.
 
 The sv_magic function uses C<how> to determine which, if any, predefined
@@ -712,7 +710,7 @@ This routine checks to see what types of magic C<sv> has.  If the mg_type
 field is an upper-case letter, then the mg_obj is copied to C<nsv>, but
 the mg_type field is changed to be the lower-case letter.
 
-=head1 Double-Typed SV's
+=head1 Double-Typed SVs
 
 Scalar variables normally contain only one type of value, an integer,
 double, pointer, or reference.  Perl will automatically convert the
@@ -876,8 +874,9 @@ Returns the highest index in the array.  Returns -1 if the array is empty.
 
 =item av_make
 
-Creats a new AV and populates it with a list of SVs.  The SVs are copied
-into the array, so they may be freed after the call to av_make.
+Creates a new AV and populates it with a list of SVs.  The SVs are copied
+into the array, so they may be freed after the call to av_make.  The new AV
+will have a refcount of 1.
 
 	AV*	av_make _((I32 size, SV** svp));
 
@@ -890,7 +889,8 @@ empty.
 
 =item av_push
 
-Pushes an SV onto the end of the array.
+Pushes an SV onto the end of the array.  The array will grow automatically
+to accommodate the addition.
 
 	void	av_push _((AV* ar, SV* val));
 
@@ -916,14 +916,16 @@ Undefines the array.
 
 =item av_unshift
 
-Unshift an SV onto the beginning of the array.
+Unshift an SV onto the beginning of the array.  The array will grow
+automatically to accommodate the addition.
 
 	void	av_unshift _((AV* ar, I32 num));
 
 =item CLASS
 
 Variable which is setup by C<xsubpp> to indicate the class name for a C++ XS
-constructor.  This is always a C<char*>.  See C<THIS> and L<perlxs>.
+constructor.  This is always a C<char*>.  See C<THIS> and
+L<perlxs/"Using XS With C++">.
 
 =item Copy
 
@@ -948,33 +950,56 @@ Returns the stash of the CV.
 
 When Perl is run in debugging mode, with the B<-d> switch, this SV is a
 boolean which indicates whether subs are being single-stepped.
-Single-stepping is automatically turned on after every step.  See C<DBsub>.
+Single-stepping is automatically turned on after every step.  This is the C
+variable which corresponds to Perl's $DB::single variable.  See C<DBsub>.
 
 =item DBsub
 
 When Perl is run in debugging mode, with the B<-d> switch, this GV contains
-the SV which holds the name of the sub being debugged.  See C<DBsingle>.
+the SV which holds the name of the sub being debugged.  This is the C
+variable which corresponds to Perl's $DB::sub variable.  See C<DBsingle>.
 The sub name can be found by
 
 	SvPV( GvSV( DBsub ), na )
 
+=item DBtrace
+
+Trace variable used when Perl is run in debugging mode, with the B<-d>
+switch.  This is the C variable which corresponds to Perl's $DB::trace
+variable.  See C<DBsingle>.
+
 =item dMARK
 
-Declare a stack marker for the XSUB.  See C<MARK> and C<dORIGMARK>.
+Declare a stack marker variable, C<mark>, for the XSUB.  See C<MARK> and
+C<dORIGMARK>.
 
 =item dORIGMARK
 
 Saves the original stack mark for the XSUB.  See C<ORIGMARK>.
 
+=item dowarn
+
+The C variable which corresponds to Perl's $^W warning variable.
+
 =item dSP
 
-Declares a stack pointer for the XSUB.  See C<SP>.
+Declares a stack pointer variable, C<sp>, for the XSUB.  See C<SP>.
 
 =item dXSARGS
 
 Sets up stack and mark pointers for an XSUB, calling dSP and dMARK.  This is
 usually handled automatically by C<xsubpp>.  Declares the C<items> variable
 to indicate the number of items on the stack.
+
+=item dXSI32
+
+Sets up the C<ix> variable for an XSUB which has aliases.  This is usually
+handled automatically by C<xsubpp>.
+
+=item dXSI32
+
+Sets up the C<ix> variable for an XSUB which has aliases.  This is usually
+handled automatically by C<xsubpp>.
 
 =item ENTER
 
@@ -1052,7 +1077,7 @@ Clears a hash, making it empty.
 =item hv_delete
 
 Deletes a key/value pair in the hash.  The value SV is removed from the hash
-and returned to the caller.  The C<lken> is the length of the key.  The
+and returned to the caller.  The C<klen> is the length of the key.  The
 C<flags> value will normally be zero; if set to G_DISCARD then null will be
 returned.
 
@@ -1061,14 +1086,14 @@ returned.
 =item hv_exists
 
 Returns a boolean indicating whether the specified hash key exists.  The
-C<lken> is the length of the key.
+C<klen> is the length of the key.
 
 	bool	hv_exists _((HV* tb, char* key, U32 klen));
 
 =item hv_fetch
 
 Returns the SV which corresponds to the specified key in the hash.  The
-C<lken> is the length of the key.  If C<lval> is set then the fetch will be
+C<klen> is the length of the key.  If C<lval> is set then the fetch will be
 part of a store.  Check that the return value is non-null before
 dereferencing it to a C<SV*>.
 
@@ -1138,13 +1163,13 @@ Undefines the hash.
 =item isALNUM
 
 Returns a boolean indicating whether the C C<char> is an ascii alphanumeric
-character or digit.
+character.
 
 	int isALNUM (char c)
 
 =item isALPHA
 
-Returns a boolean indicating whether the C C<char> is an ascii alphanumeric
+Returns a boolean indicating whether the C C<char> is an ascii alphabetic
 character.
 
 	int isALPHA (char c)
@@ -1176,7 +1201,12 @@ Returns a boolean indicating whether the C C<char> is an uppercase character.
 =item items
 
 Variable which is setup by C<xsubpp> to indicate the number of items on the
-stack.  See L<perlxs>.
+stack.  See L<perlxs/"Variable-length Parameter Lists">.
+
+=item ix
+
+Variable which is setup by C<xsubpp> to indicate which of an XSUB's aliases
+was used to invoke it.  See L<perlxs/"The ALIAS: Keyword">.
 
 =item LEAVE
 
@@ -1186,7 +1216,7 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 
 =item MARK
 
-Stack marker for the XSUB.  See C<dMARK>.
+Stack marker variable for the XSUB.  See C<dMARK>.
 
 =item mg_clear
 
@@ -1319,7 +1349,7 @@ set to 1.  If C<len> is zero then Perl will compute the length.
 =item newSVrv
 
 Creates a new SV for the RV, C<rv>, to point to.  If C<rv> is not an RV then
-it will be upgraded one.  If C<classname> is non-null then the new SV will
+it will be upgraded to one.  If C<classname> is non-null then the new SV will
 be blessed in the specified package.  The new SV is returned and its
 refcount is 1.
 
@@ -1327,7 +1357,7 @@ refcount is 1.
 
 =item newSVsv
 
-Creates a new SV which is an exact duplicate of the orignal SV.
+Creates a new SV which is an exact duplicate of the original SV.
 
 	SV*	newSVsv _((SV* old));
 
@@ -1544,7 +1574,8 @@ The XSUB-writer's interface to the C C<realloc> function, with cast.
 =item RETVAL
 
 Variable which is setup by C<xsubpp> to hold the return value for an XSUB.
-This is always the proper type for the XSUB.  See L<perlxs>.
+This is always the proper type for the XSUB.
+See L<perlxs/"The RETVAL Variable">.
 
 =item safefree
 
@@ -1679,10 +1710,26 @@ C<len> indicates number of bytes to copy.
 
 =item sv_catsv
 
-Concatentates the string from SV C<ssv> onto the end of the string in SV
+Concatenates the string from SV C<ssv> onto the end of the string in SV
 C<dsv>.
 
 	void	sv_catsv _((SV* dsv, SV* ssv));
+
+=item sv_cmp
+
+Compares the strings in two SVs.  Returns -1, 0, or 1 indicating whether the
+string in C<sv1> is less than, equal to, or greater than the string in
+C<sv2>.
+
+	I32	sv_cmp _((SV* sv1, SV* sv2));
+
+=item sv_cmp
+
+Compares the strings in two SVs.  Returns -1, 0, or 1 indicating whether the
+string in C<sv1> is less than, equal to, or greater than the string in
+C<sv2>.
+
+	I32	sv_cmp _((SV* sv1, SV* sv2));
 
 =item SvCUR
 
@@ -1696,6 +1743,18 @@ Set the length of the string which is in the SV.  See C<SvCUR>.
 
 	SvCUR_set (SV* sv, int val )
 
+=item sv_dec
+
+Autodecrement of the value in the SV.
+
+	void	sv_dec _((SV* sv));
+
+=item sv_dec
+
+Autodecrement of the value in the SV.
+
+	void	sv_dec _((SV* sv));
+
 =item SvEND
 
 Returns a pointer to the last character in the string which is in the SV.
@@ -1703,11 +1762,31 @@ See C<SvCUR>.  Access the character as
 
 	*SvEND(sv)
 
+=item sv_eq
+
+Returns a boolean indicating whether the strings in the two SVs are
+identical.
+
+	I32	sv_eq _((SV* sv1, SV* sv2));
+
 =item SvGROW
 
-Expands the character buffer in the SV.
+Expands the character buffer in the SV.  Calls C<sv_grow> to perform the
+expansion if necessary.  Returns a pointer to the character buffer.
 
 	char * SvGROW( SV* sv, int len )
+
+=item sv_grow
+
+Expands the character buffer in the SV.  This will use C<sv_unref> and will
+upgrade the SV to C<SVt_PV>.  Returns a pointer to the character buffer.
+Use C<SvGROW>.
+
+=item sv_inc
+
+Autoincrement of the value in the SV.
+
+	void	sv_inc _((SV* sv));
 
 =item SvIOK
 
@@ -1724,6 +1803,18 @@ Unsets the IV status of an SV.
 =item SvIOK_on
 
 Tells an SV that it is an integer.
+
+	SvIOK_on (SV* sv)
+
+=item SvIOK_only
+
+Tells an SV that it is an integer and disables all other OK bits.
+
+	SvIOK_on (SV* sv)
+
+=item SvIOK_only
+
+Tells an SV that it is an integer and disables all other OK bits.
 
 	SvIOK_on (SV* sv)
 
@@ -1767,6 +1858,18 @@ Returns the integer which is stored in the SV.
 Returns the size of the string buffer in the SV.  See C<SvCUR>.
 
 	int SvLEN (SV* sv)
+
+=item sv_len
+
+Returns the length of the string in the SV.  Use C<SvCUR>.
+
+	STRLEN	sv_len _((SV* sv));
+
+=item sv_len
+
+Returns the length of the string in the SV.  Use C<SvCUR>.
+
+	STRLEN	sv_len _((SV* sv));
 
 =item sv_magic
 
@@ -1835,6 +1938,18 @@ Tells an SV that it is a double.
 
 	SvNOK_on (SV* sv)
 
+=item SvNOK_only
+
+Tells an SV that it is a double and disables all other OK bits.
+
+	SvNOK_on (SV* sv)
+
+=item SvNOK_only
+
+Tells an SV that it is a double and disables all other OK bits.
+
+	SvNOK_on (SV* sv)
+
 =item SvNOKp
 
 Returns a boolean indicating whether the SV contains a double.  Checks the
@@ -1869,6 +1984,18 @@ Unsets the PV status of an SV.
 =item SvPOK_on
 
 Tells an SV that it is a string.
+
+	SvPOK_on (SV* sv)
+
+=item SvPOK_only
+
+Tells an SV that it is a string and disables all other OK bits.
+
+	SvPOK_on (SV* sv)
+
+=item SvPOK_only
+
+Tells an SV that it is a string and disables all other OK bits.
 
 	SvPOK_on (SV* sv)
 
@@ -1962,29 +2089,32 @@ bytes to be copied.
 
 =item sv_setref_iv
 
-Copies an integer into an SV, optionally blessing the SV.  The SV must be an
-RV.  The C<classname> argument indicates the package for the blessing.  Set
-C<classname> to C<Nullch> to avoid the blessing.  The new SV will be
-returned and will have a refcount of 1.
+Copies an integer into a new SV, optionally blessing the SV.  The C<rv>
+argument will be upgraded to an RV.  That RV will be modified to point to
+the new SV.  The C<classname> argument indicates the package for the
+blessing.  Set C<classname> to C<Nullch> to avoid the blessing.  The new SV
+will be returned and will have a refcount of 1.
 
 	SV*	sv_setref_iv _((SV *rv, char *classname, IV iv));
 
 =item sv_setref_nv
 
-Copies a double into an SV, optionally blessing the SV.  The SV must be an
-RV.  The C<classname> argument indicates the package for the blessing.  Set
-C<classname> to C<Nullch> to avoid the blessing.  The new SV will be
-returned and will have a refcount of 1.
+Copies a double into a new SV, optionally blessing the SV.  The C<rv>
+argument will be upgraded to an RV.  That RV will be modified to point to
+the new SV.  The C<classname> argument indicates the package for the
+blessing.  Set C<classname> to C<Nullch> to avoid the blessing.  The new SV
+will be returned and will have a refcount of 1.
 
 	SV*	sv_setref_nv _((SV *rv, char *classname, double nv));
 
 =item sv_setref_pv
 
-Copies a pointer into an SV, optionally blessing the SV.  The SV must be an
-RV.  If the C<pv> argument is NULL then C<sv_undef> will be placed into the
-SV.  The C<classname> argument indicates the package for the blessing.  Set
-C<classname> to C<Nullch> to avoid the blessing.  The new SV will be
-returned and will have a refcount of 1.
+Copies a pointer into a new SV, optionally blessing the SV.  The C<rv>
+argument will be upgraded to an RV.  That RV will be modified to point to
+the new SV.  If the C<pv> argument is NULL then C<sv_undef> will be placed
+into the SV.  The C<classname> argument indicates the package for the
+blessing.  Set C<classname> to C<Nullch> to avoid the blessing.  The new SV
+will be returned and will have a refcount of 1.
 
 	SV*	sv_setref_pv _((SV *rv, char *classname, void* pv));
 
@@ -1995,8 +2125,9 @@ Note that C<sv_setref_pvn> copies the string while this copies the pointer.
 
 =item sv_setref_pvn
 
-Copies a string into an SV, optionally blessing the SV.  The lenth of the
-string must be specified with C<n>.  The SV must be an RV.  The C<classname>
+Copies a string into a new SV, optionally blessing the SV.  The length of the
+string must be specified with C<n>.  The C<rv> argument will be upgraded to
+an RV.  That RV will be modified to point to the new SV.  The C<classname>
 argument indicates the package for the blessing.  Set C<classname> to
 C<Nullch> to avoid the blessing.  The new SV will be returned and will have
 a refcount of 1.
@@ -2008,9 +2139,7 @@ Note that C<sv_setref_pv> copies the pointer while this copies the string.
 =item sv_setsv
 
 Copies the contents of the source SV C<ssv> into the destination SV C<dsv>.
-(B<NOTE:> If C<ssv> has the C<SVs_TEMP> bit set, C<sv_setsv> may simply steal
-the string from C<ssv> and give it to C<dsv>, leaving C<ssv> empty.
-Caveat caller.)
+The source SV may be destroyed if it is mortal.
 
 	void	sv_setsv _((SV* dsv, SV* ssv));
 
@@ -2068,16 +2197,32 @@ C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 
 =item SvUPGRADE
 
-Used to upgrade an SV to a more complex form.  See C<svtype>.
+Used to upgrade an SV to a more complex form.  Uses C<sv_upgrade> to perform
+the upgrade if necessary.  See C<svtype>.
+
+	bool    SvUPGRADE _((SV* sv, svtype mt));
+
+=item sv_upgrade
+
+Upgrade an SV to a more complex form.  Use C<SvUPGRADE>.  See C<svtype>.
 
 =item sv_undef
 
 This is the C<undef> SV.  Always refer to this as C<&sv_undef>.
 
+=item sv_unref
+
+Unsets the RV status of the SV, and decrements the refcount of whatever was
+being referenced by the RV.  This can almost be thought of as a reversal of
+C<newSVrv>.  See C<SvROK_off>.
+
+	void    sv_unref _((SV* sv));
+
 =item sv_usepvn
 
 Tells an SV to use C<ptr> to find its string value.  Normally the string is
-stored inside the SV; this allows the SV to use an outside string.  The
+stored inside the SV but sv_usepvn allows the SV to use an outside string.
+The C<ptr> should point to memory that was allocated by C<malloc>.  The
 string length, C<len>, must be supplied.  This function will realloc the
 memory pointed to by C<ptr>, so that pointer should not be freed or used by
 the programmer after giving it to sv_usepvn.
@@ -2092,7 +2237,7 @@ This is the C<true> SV.  See C<sv_no>.  Always refer to this as C<&sv_yes>.
 
 Variable which is setup by C<xsubpp> to designate the object in a C++ XSUB.
 This is always the proper type for the C++ object.  See C<CLASS> and
-L<perlxs>.
+L<perlxs/"Using XS With C++">.
 
 =item toLOWER
 
@@ -2138,36 +2283,109 @@ Push an SV onto the stack, extending the stack if necessary.  See C<PUSHs>.
 
 	XPUSHs(sv)
 
+=item XS
+
+Macro to declare an XSUB and its C parameter list.  This is handled by
+C<xsubpp>.
+
 =item XSRETURN
 
 Return from XSUB, indicating number of items on the stack.  This is usually
 handled by C<xsubpp>.
 
-	XSRETURN(x);
+	XSRETURN(int x);
 
 =item XSRETURN_EMPTY
 
-Return from an XSUB immediately.
+Return an empty list from an XSUB immediately.
 
 	XSRETURN_EMPTY;
 
+=item XSRETURN_IV
+
+Return an integer from an XSUB immediately.  Uses C<XST_mIV>.
+
+	XSRETURN_IV(IV v);
+
 =item XSRETURN_NO
 
-Return C<false> from an XSUB immediately.
+Return C<&sv_no> from an XSUB immediately.  Uses C<XST_mNO>.
 
 	XSRETURN_NO;
 
+=item XSRETURN_NV
+
+Return an double from an XSUB immediately.  Uses C<XST_mNV>.
+
+	XSRETURN_NV(NV v);
+
+=item XSRETURN_PV
+
+Return a copy of a string from an XSUB immediately.  Uses C<XST_mPV>.
+
+	XSRETURN_PV(char *v);
+
 =item XSRETURN_UNDEF
 
-Return C<undef> from an XSUB immediately.
+Return C<&sv_undef> from an XSUB immediately.  Uses C<XST_mUNDEF>.
 
 	XSRETURN_UNDEF;
 
 =item XSRETURN_YES
 
-Return C<true> from an XSUB immediately.
+Return C<&sv_yes> from an XSUB immediately.  Uses C<XST_mYES>.
 
 	XSRETURN_YES;
+
+=item XST_mIV
+
+Place an integer into the specified position C<i> on the stack.  The value is
+stored in a new mortal SV.
+
+	XST_mIV( int i, IV v );
+
+=item XST_mNV
+
+Place a double into the specified position C<i> on the stack.  The value is
+stored in a new mortal SV.
+
+	XST_mNV( int i, NV v );
+
+=item XST_mNO
+
+Place C<&sv_no> into the specified position C<i> on the stack.
+
+	XST_mNO( int i );
+
+=item XST_mPV
+
+Place a copy of a string into the specified position C<i> on the stack.  The
+value is stored in a new mortal SV.
+
+	XST_mPV( int i, char *v );
+
+=item XST_mUNDEF
+
+Place C<&sv_undef> into the specified position C<i> on the stack.
+
+	XST_mUNDEF( int i );
+
+=item XST_mYES
+
+Place C<&sv_yes> into the specified position C<i> on the stack.
+
+	XST_mYES( int i );
+
+=item XS_VERSION
+
+The version identifier for an XS module.  This is usually handled
+automatically by C<ExtUtils::MakeMaker>.  See C<XS_VERSION_BOOTCHECK>.
+
+=item XS_VERSION_BOOTCHECK
+
+Macro to verify that a PM module's $VERSION variable matches the XS module's
+C<XS_VERSION> variable.  This is usually handled automatically by
+C<xsubpp>.  See L<perlxs/"The VERSIONCHECK: Keyword">.
 
 =item Zero
 
@@ -2180,15 +2398,14 @@ destination, C<n> is the number of items, and C<t> is the type.
 
 =head1 AUTHOR
 
-Jeff Okamoto <okamoto@corp.hp.com>
+Jeff Okamoto E<lt>F<okamoto@corp.hp.com>E<gt>
 
 With lots of help and suggestions from Dean Roehrich, Malcolm Beattie,
 Andreas Koenig, Paul Hudson, Ilya Zakharevich, Paul Marquess, Neil
 Bowers, Matthew Green, Tim Bunce, and Spider Boardman.
 
-API Listing by Dean Roehrich <roehrich@cray.com>.
+API Listing by Dean Roehrich E<lt>F<roehrich@cray.com>E<gt>.
 
 =head1 DATE
 
-Version 20: 1995/12/14
-
+Version 22: 1996/9/23
