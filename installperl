@@ -198,7 +198,7 @@ sub chmod {
     local($mode,$name) = @_;
 
     printf STDERR "  chmod %o %s\n", $mode, $name;
-    chmod($mode,$name) || warn "Couldn't chmod $mode $name: $!\n"
+    chmod($mode,$name) || warn sprintf("Couldn't chmod %o %s: $!\n",$mode,$name)
 	unless $nonono;
 }
 

@@ -1,4 +1,4 @@
-/* $RCSfile: toke.c,v $$Revision: 4.0.1.7 $$Date: 92/06/11 21:16:30 $
+/* $RCSfile: toke.c,v $$Revision: 4.0.1.8 $$Date: 92/06/23 12:33:45 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	toke.c,v $
+ * Revision 4.0.1.8  92/06/23  12:33:45  lwall
+ * patch35: bad interaction between backslash and hyphen in tr///
+ * 
  * Revision 4.0.1.7  92/06/11  21:16:30  lwall
  * patch34: expectterm incorrectly set to indicate start of program or block
  * 
@@ -2297,6 +2300,7 @@ int in_what;
 	    STR *tmpstr;
 	    STR *tmpstr2 = Nullstr;
 	    char *tmps;
+	    bool dorange = FALSE;
 
 	    CLINE;
 	    multi_start = curcmd->c_line;
@@ -2394,10 +2398,11 @@ int in_what;
 		s++;
 	    }
 	    s = d = tmpstr->str_ptr;	/* assuming shrinkage only */
-	    while (s < send) {
+	    while (s < send || dorange) {
 		if (in_what & SCAN_TR) {
-		    if (*s != '\\' && s[1] == '-' && s+2 < send) {
+		    if (dorange) {
 			int i;
+			int max;
 			if (!tmpstr2) {	/* oops, have to grow */
 			    tmpstr2 = str_smake(tmpstr);
 			    s = tmpstr2->str_ptr + (s - tmpstr->str_ptr);
@@ -2406,10 +2411,16 @@ int in_what;
 			i = d - tmpstr->str_ptr;
 			STR_GROW(tmpstr, tmpstr->str_len + 256);
 			d = tmpstr->str_ptr + i;
-			for (i = (s[0] & 0377); i <= (s[2] & 0377); i++)
+			d -= 2;
+			max = d[1] & 0377;
+			for (i = (*d & 0377); i <= max; i++)
 			    *d++ = i;
-			s += 3;
+			dorange = FALSE;
 			continue;
+		    }
+		    else if (*s == '-' && s+1 < send  && d != tmpstr->str_ptr) {
+			dorange = TRUE;
+			s++;
 		    }
 		}
 		else {
@@ -2432,6 +2443,12 @@ int in_what;
 		if (*s == '\\' && s+1 < send) {
 		    s++;
 		    switch (*s) {
+		    case '-':
+			if (in_what & SCAN_TR) {
+			    *d++ = *s++;
+			    continue;
+			}
+			/* FALL THROUGH */
 		    default:
 			if (!makesingle && (!leave || (*s && index(leave,*s))))
 			    *d++ = '\\';

@@ -146,6 +146,7 @@ hints/hp9000_800.sh
 hints/hpux.sh
 hints/i386.sh
 hints/isc_3_2_2.sh
+hints/isc_3_2_3.sh
 hints/mc6000.sh
 hints/mips.sh
 hints/mpc.sh	
@@ -264,7 +265,6 @@ perl.man		The manual page(s)
 perlsh			A poor man's perl shell
 perly.fixer		A program to remove yacc stack limitations
 perly.y			Yacc grammar for perl
-pstruct
 regcomp.c		Regular expression compiler
 regcomp.h		Private declarations for above
 regexec.c		Regular expression evaluator
