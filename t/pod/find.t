@@ -1,6 +1,11 @@
 # Testing of Pod::Find
 # Author: Marek Rouchal <marek@saftsack.fs.uni-bayreuth.de>
 
+BEGIN {
+    chdir 't' if -d 't';
+    unshift @INC, '../lib';
+}
+
 $| = 1;
 
 use Test;
@@ -16,7 +21,7 @@ ok(1);
 require Cwd;
 my $THISDIR = Cwd::cwd();
 my $VERBOSE = 0;
-my $lib_dir = File::Spec->catdir($THISDIR,'lib');
+my $lib_dir = File::Spec->catdir($THISDIR,'..','lib','Pod');
 if ($^O eq 'VMS') {
     $lib_dir = VMS::Filespec::unixify(File::Spec->catdir($THISDIR,'-','lib','pod'));
     $Qlib_dir = $lib_dir;
@@ -24,17 +29,24 @@ if ($^O eq 'VMS') {
 }
 print "### searching $lib_dir\n";
 my %pods = pod_find("$lib_dir");
-my $result = join("\n### ", sort values %pods);
+my $result = join(",", sort values %pods);
 print "### found $result\n";
 my $compare = join(',', qw(
-    Pod::Checker
-    Pod::Find
-    Pod::InputObjects
-    Pod::ParseUtils
-    Pod::Parser
-    Pod::PlainText
-    Pod::Select
-    Pod::Usage
+    Checker
+    Find
+    Html
+    InputObjects
+    LaTeX
+    Man
+    ParseUtils
+    Parser
+    Plainer
+    Select
+    Text
+    Text::Color
+    Text::Overstrike
+    Text::Termcap
+    Usage
 ));
 if ($^O eq 'VMS') {
     $compare = lc($compare);
@@ -63,7 +75,6 @@ $result = pod_where({ -inc => 1, -verbose => $VERBOSE }, 'File::Find')
   || 'undef - pod not found!';
 print "### found $result\n";
 
-require Config;
 if ($^O eq 'VMS') { # privlib is perl_root:[lib] OK but not under mms
     $compare = "lib.File]Find.pm";
     $result =~ s/perl_root:\[\-?\.?//i;
@@ -71,13 +82,13 @@ if ($^O eq 'VMS') { # privlib is perl_root:[lib] OK but not under mms
     ok($result,$compare);
 }
 else {
-    $compare = File::Spec->catfile($Config::Config{privlib},"File","Find.pm");
+    $compare = File::Spec->catfile("..","lib","File","Find.pm");
     ok(_canon($result),_canon($compare));
 }
 
 # Search for a documentation pod rather than a module
 print "### searching for perlfunc.pod\n";
-$result = pod_where({ -inc => 1, -verbose => $VERBOSE }, 'perlfunc')
+$result = pod_where({ -dirs => ['../pod'], -verbose => $VERBOSE }, 'perlfunc')
   || 'undef - perlfunc.pod not found!';
 print "### found $result\n";
 
@@ -89,7 +100,7 @@ if ($^O eq 'VMS') { # privlib is perl_root:[lib] unfortunately
     ok($result,$compare);
 }
 else {
-    $compare = File::Spec->catfile($Config::Config{privlib},"perlfunc.pod");
+    $compare = File::Spec->catfile("..","pod","perlfunc.pod");
     ok(_canon($result),_canon($compare));
 }
 
