@@ -509,5 +509,12 @@ EXTERN_C _CRTIMP ioinfo* __pioinfo[];
 
 #define EXEC_ARGV_CAST(x) ((const char *const *) x)
 
+#if !defined(ECONNABORTED) && defined(WSAECONNABORTED)
+#define ECONNABORTED WSAECONNABORTED
+#endif
+#if !defined(EAFNOSUPPORT) && defined(WSAEAFNOSUPPORT)
+#define EAFNOSUPPORT WSAEAFNOSUPPORT
+#endif
+
 #endif /* _INC_WIN32_PERL5 */
 
