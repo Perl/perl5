@@ -686,6 +686,11 @@ lib/File/Spec/t/rel2abs2rel.t	See if File::Spec->rel2abs/abs2rel works
 lib/File/Spec/t/Spec.t		See if File::Spec works
 lib/File/stat.pm	By-name interface to Perl's builtin stat
 lib/File/Temp.pm	create safe temporary files and file handles
+lib/File/Temp/t/mktemp.t	See if File::Temp works
+lib/File/Temp/t/object.t	See if File::Temp works
+lib/File/Temp/t/posix.t		See if File::Temp works
+lib/File/Temp/t/security.t	See if File::Temp works
+lib/File/Temp/t/tempfile.t	See if File::Temp works
 lib/filetest.pm		For "use filetest"
 lib/FindBin.pm		Find name of currently executing program
 lib/finddepth.pl	A depth-first find emulator--used by find2perl
@@ -1480,10 +1485,6 @@ t/lib/filefunc.t	See if File::Spec::Functions works
 t/lib/filehand.t	See if FileHandle works
 t/lib/filepath.t	See if File::Path works
 t/lib/findbin.t		See if FindBin works
-t/lib/ftmp-mktemp.t	See if File::Temp works
-t/lib/ftmp-posix.t	See if File::Temp works
-t/lib/ftmp-security.t	See if File::Temp works
-t/lib/ftmp-tempfile.t	See if File::Temp works
 t/lib/gdbm.t		See if GDBM_File works
 t/lib/getopt.t		See if Getopt::Std and Getopt::Long work
 t/lib/glob-basic.t	See if File::Glob works

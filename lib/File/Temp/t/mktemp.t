@@ -1,21 +1,16 @@
-#!/usr/bin/perl -w
+#!/usr/local/bin/perl -w
 
 # Test for mktemp family of commands in File::Temp
 # Use STANDARD safe level for these tests
 
-BEGIN {
-	chdir 't' if -d 't';
-	@INC = '../lib';
-	require Test; import Test;
-	plan(tests => 9);
-}
-
 use strict;
+use Test;
+BEGIN { plan tests => 9 }
 
 use File::Spec;
 use File::Path;
 use File::Temp qw/ :mktemp unlink0 /;
-use IO::Handle;
+use FileHandle;
 
 ok(1);
 
