@@ -172,8 +172,10 @@ typedef char *pvindex;
 
 #define BSET_newsv(sv, arg)				\
 	STMT_START {					\
-	    sv = NEWSV(0,0));				\
-	    SvUPGRADE(sv, (arg));			\
+	    sv = (arg == SVt_PVAV ? (SV*)newAV() :	\
+		  arg == SVt_PVHV ? (SV*)newHV() :	\
+		  NEWSV(666,0));			\
+	    SvUPGRADE(sv, arg);				\
 	} STMT_END
 #define BSET_newsvx(sv, arg) STMT_START {		\
 	    BSET_newsv(sv, arg &  SVTYPEMASK);		\
