@@ -4128,6 +4128,8 @@ void *svv;
 	croak("panic: unlock_condpair unlocking mutex that we don't own");
     MgOWNER(mg) = 0;
     COND_SIGNAL(MgOWNERCONDP(mg));
+    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "0x%lx: unlock 0x%lx\n",
+			  (unsigned long)thr, (unsigned long)svv);)
     MUTEX_UNLOCK(MgMUTEXP(mg));
 }
 #endif /* USE_THREADS */
@@ -4150,6 +4152,8 @@ PP(pp_lock)
 	while (MgOWNER(mg))
 	    COND_WAIT(MgOWNERCONDP(mg), MgMUTEXP(mg));
 	MgOWNER(mg) = thr;
+	DEBUG_L(PerlIO_printf(PerlIO_stderr(), "0x%lx: pp_lock lock 0x%lx\n",
+			      (unsigned long)thr, (unsigned long)sv);)
 	MUTEX_UNLOCK(MgMUTEXP(mg));
 	save_destructor(unlock_condpair, sv);
     }

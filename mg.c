@@ -1626,6 +1626,8 @@ SV *sv;
 MAGIC *mg;
 {
     dTHR;
+    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "0x%lx: magic_mutexfree 0x%lx\n",
+			  (unsigned long)thr, (unsigned long)sv);)
     if (MgOWNER(mg))
 	croak("panic: magic_mutexfree");
     MUTEX_DESTROY(MgMUTEXP(mg));

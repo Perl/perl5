@@ -1897,6 +1897,9 @@ PP(pp_entersub)
 	    while (MgOWNER(mg))
 		COND_WAIT(MgOWNERCONDP(mg), MgMUTEXP(mg));
 	    MgOWNER(mg) = thr;
+	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+				  "0x%lx: pp_entersub lock 0x%lx\n",
+				  (unsigned long)thr, (unsigned long)sv);)
 	    MUTEX_UNLOCK(MgMUTEXP(mg));
 	    save_destructor(unlock_condpair, sv);
 	}

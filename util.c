@@ -2422,6 +2422,10 @@ SV *sv;
 	    mg->mg_ptr = (char *)cp;
 	    mg->mg_len = sizeof(cp);
 	    MUTEX_UNLOCK(&sv_mutex);
+	    DEBUG_L(WITH_THR(PerlIO_printf(PerlIO_stderr(),
+					   "0x%lx: condpair_magic 0x%lx\n",
+					   (unsigned long)thr,
+					   (unsigned long)sv));)
 	}
     }
     return mg;
