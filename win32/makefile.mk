@@ -99,11 +99,18 @@ USE_PERLIO	= define
 # Visual C++ > 2.x and < 6.x
 #CCTYPE		*= MSVC
 # Visual C++ >= 6.x
-CCTYPE		*= MSVC60
+#CCTYPE		*= MSVC60
 # Borland 5.02 or later
-#CCTYPE		*= BORLAND
+CCTYPE		*= BORLAND
 # mingw32+gcc-2.95.2 or better
 #CCTYPE		*= GCC
+
+#
+# uncomment this if your Borland compiler is older than v5.4.
+BCCVER = 5.2
+#
+# uncomment this if you want to use Borland's VCL as your CRT
+#BCCVCL = define
 
 #
 # uncomment this if you are compiling under Windows 95/98 and command.com
@@ -167,9 +174,9 @@ CFG		*= Debug
 # so you may have to set CCHOME explicitly (spaces in the path name should
 # not be quoted)
 #
-#CCHOME		*= c:\bc5
+CCHOME		*= F:\borland\bc5
 #CCHOME		*= $(MSVCDIR)
-CCHOME		*= c:\gcc-2.95.2
+#CCHOME		*= c:\gcc-2.95.2
 CCINCDIR	*= $(CCHOME)\include
 CCLIBDIR	*= $(CCHOME)\lib
 
@@ -336,7 +343,11 @@ INST_HTML	= $(INST_TOP)$(INST_VER)\html
 .IF "$(CCTYPE)" == "BORLAND"
 
 CC		= bcc32
+.IF $(BCCVER) != 5.2
+LINK32		= ilink32
+.ELSE
 LINK32		= tlink32
+.ENDIF
 LIB32		= tlib /P128
 IMPLIB		= implib -c
 RSC		= rc
@@ -346,13 +357,13 @@ RSC		= rc
 #
 INCLUDES	= -I$(COREDIR) -I.\include -I. -I.. -I"$(CCINCDIR)"
 #PCHFLAGS	= -H -Hc -H=c:\temp\bcmoduls.pch
-DEFINES		= -DWIN32 $(CRYPT_FLAG)
+DEFINES		= -DWIN32 -D_MT $(CRYPT_FLAG)
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 SUBSYS		= console
 CXX_FLAG	= -P
 
 LIBC		= cw32mti.lib
-LIBFILES	= $(CRYPT_LIB) import32.lib $(LIBC) odbc32.lib odbccp32.lib
+LIBFILES	= $(CRYPT_LIB) import32.lib $(LIBC)
 
 .IF  "$(CFG)" == "Debug"
 OPTIMIZE	= -v -D_RTLDLL -DDEBUGGING
@@ -364,10 +375,18 @@ LINK_DBG	=
 
 CFLAGS		= -w -g0 -tWM -tWD $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 		$(PCHFLAGS) $(OPTIMIZE)
-LINK_FLAGS	= $(LINK_DBG) -L"$(INST_COREDIR)" -L"$(CCLIBDIR)"
+LINK_FLAGS	= $(LINK_DBG) -L"$(INST_COREDIR)"  -L"$(CCLIBDIR)"
 OBJOUT_FLAG	= -o
 EXEOUT_FLAG	= -e
 LIBOUT_FLAG	=
+.IF $(BCCVER) != 5.2
+LINK_FLAGS     += -Gn
+.END
+.IF "$(BCCVCL)" == "define"
+LIBC		= cp32mti.lib vcl.lib vcl50.lib vclx50.lib vcle50.lib
+LINK_FLAGS	+= -L"$(CCLIBDIR)\Release"
+.END
+
 
 .ELIF "$(CCTYPE)" == "GCC"
 

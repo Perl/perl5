@@ -508,7 +508,11 @@ my_fstat(int fd, struct stat *sbufptr)
 
 	retval = getsockopt((SOCKET)osf, SOL_SOCKET, SO_TYPE, sockbuf, &optlen);
 	if (retval != SOCKET_ERROR || WSAGetLastError() != WSAENOTSOCK) {
+#if defined(__BORLANDC__)&&(__BORLANDC__<=0x520)
+	    sbufptr->st_mode = S_IFIFO;
+#else
 	    sbufptr->st_mode = _S_IFIFO;
+#endif
 	    sbufptr->st_rdev = sbufptr->st_dev = (dev_t)fd;
 	    sbufptr->st_nlink = 1;
 	    sbufptr->st_uid = sbufptr->st_gid = sbufptr->st_ino = 0;

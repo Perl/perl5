@@ -135,7 +135,8 @@ BEGIN {
 
 
 
-use 5.005_64;
+use 5.6.0;
+use warnings;
 our(@ISA, @EXPORT, $VERSION, $Fileparse_fstype, $Fileparse_igncase);
 require Exporter;
 @ISA = qw(Exporter);

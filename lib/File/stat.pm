@@ -1,7 +1,8 @@
 package File::stat;
 use strict;
+use warnings;
 
-use 5.005_64;
+use 5.6.0;
 our(@EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
 our $VERSION = '1.00';
