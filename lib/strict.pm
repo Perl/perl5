@@ -1,6 +1,6 @@
 package strict;
 
-$strict::VERSION = "1.02";
+$strict::VERSION = "1.03";
 
 my %bitmask = (
 refs => 0x00000002,
@@ -22,14 +22,16 @@ sub bits {
     $bits;
 }
 
+my $default_bits = bits(qw(refs subs vars));
+
 sub import {
     shift;
-    $^H |= bits(@_ ? @_ : qw(refs subs vars));
+    $^H |= @_ ? bits(@_) : $default_bits;
 }
 
 sub unimport {
     shift;
-    $^H &= ~ bits(@_ ? @_ : qw(refs subs vars));
+    $^H &= ~ (@_ ? bits(@_) : $default_bits);
 }
 
 1;
