@@ -11,7 +11,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = '0.22';
+our $VERSION = '0.23';
 our $PACKAGE = __PACKAGE__;
 
 require Exporter;
@@ -102,6 +102,19 @@ Unicode::Normalize - Unicode Normalization Forms
   $NFKC_string = normalize('KC', $string);  # Normalization Form KC
 
 =head1 DESCRIPTION
+
+Parameters:
+
+C<$string> is used as a string under character semantics
+(see F<perlunicode>).
+
+C<$codepoint> should be an unsigned integer
+representing a Unicode code point.
+
+Note: Between XS edition and pure Perl edition,
+interpretation of C<$codepoint> as a decimal number has incompatibility.
+XS converts C<$codepoint> to an unsigned integer, but pure Perl does not.
+Do not use a floating point nor a negative sign in C<$codepoint>.
 
 =head2 Normalization Forms
 
