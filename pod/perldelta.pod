@@ -161,19 +161,20 @@ use "quads" (64-integers) as follows:
 
 =item in basic arithmetics
 
+=item vec() (but see the below note about bit arithmetics)
+    
 =back
 
 Note that unless you have the case (a) you will have to configure
 and compile Perl using the -Duse64bits Configure flag.
 
-Unfortunately, bit operations (&, <<, ...) and vec() do not work,
-they are limited to 32 bits.
+Unfortunately bit arithmetics (&, |, ^, ~, <<, >>) are not 64-bit clean.
 
 Last but not least: note that due to Perl's habit of always using
-floating point numbers the quads are still not true integers.  When
-quads overflow their limits (18446744073709551615 unsigned,
--9223372036854775808...9223372036854775807 signed), they are silently
-promoted to floating point numbers, after which they will 
+floating point numbers the quads are still not true integers.
+When quads overflow their limits (0...18_446_744_073_709_551_615 unsigned,
+-9_223_372_036_854_775_808...9_223_372_036_854_775_807 signed), they
+are silently promoted to floating point numbers, after which they will
 start losing precision (their lower digits).
 
 =head2 Large file support

@@ -10,14 +10,14 @@ BEGIN {
 
 # This could use a lot of more tests.
 #
-# Nota bene: bit operations (&, |, ^, ~, <<, >>, vec) are not 64-bit clean.
+# Nota bene: bit operations (&, |, ^, ~, <<, >>) are not 64-bit clean.
 # See the beginning of pp.c and the explanation next to IBW/UBW.
 
-# so that using > 0xfffffff constants and 32+ bit
-# shifts and vector sizes doesn't cause noise
-no warning 'overflow';
+# so that using > 0xfffffff constants and
+# 32+ bit vector sizes doesn't cause noise
+no warning qw(overflow portable);
 
-print "1..36\n";
+print "1..39\n";
 
 my $q = 12345678901;
 my $r = 23456789012;
@@ -190,3 +190,14 @@ print "not " unless $a == -9223372036854775809;
 print "ok 36\n";
 
 
+$x = '';
+print "not " unless (vec($x, 1, 64) = $q) == $q;
+print "ok 37\n";
+
+print "not " unless vec($x, 1, 64) == $q && vec($x, 1, 64) > $f;
+print "ok 38\n";
+
+print "not " unless vec($x, 0, 64) == 0 && vec($x, 2, 64) == 0;
+print "ok 39\n";
+
+# eof

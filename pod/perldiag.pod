@@ -488,6 +488,10 @@ L<perlport> for more on portability concerns.
 (W) You tried to do a bind on a closed socket.  Did you forget to check
 the return value of your socket() call?  See L<perlfunc/bind>.
 
+=item Bit vector size > 32 non-portable
+
+(W) Using bit vector sizes larger than 32 is non-portable.
+
 =item Bizarre copy of %s in %s
 
 (P) Perl detected an attempt to copy an internal value that is not copiable.
@@ -1522,7 +1526,7 @@ before the illegal character.
 =item Illegal number of bits in vec
 
 (F) The number of bits in vec() (the third argument) must be a power of
-two from 1 to 32.
+two from 1 to 32 (or 64, if your platform supports that).
  
 =item Illegal switch in PERL5OPT: %s
 

@@ -4990,15 +4990,18 @@ See also C<keys>, C<each>, and C<sort>.
 Treats the string in EXPR as a vector of unsigned integers, and
 returns the value of the bit field specified by OFFSET.  BITS
 specifies the number of bits that are reserved for each entry in the
-bit vector.  This must be a power of two from 1 to 32.
+bit vector.  This must be a power of two from 1 to 32 (or 64, if your
+platform supports that).
+
 C<vec> may also be assigned to, in which case parentheses are needed
 to give the expression the correct precedence as in
 
     vec($image, $max_x * $x + $y, 8) = 3;
 
 Vectors created with C<vec> can also be manipulated with the logical
-operators C<|>, C<&>, and C<^>, which will assume a bit vector operation is
-desired when both operands are strings.  See L<perlop/"Bitwise String Operators">.
+operators C<|>, C<&>, and C<^>, which will assume a bit vector
+operation is desired when both operands are strings.
+See L<perlop/"Bitwise String Operators">.
 
 The following code will build up an ASCII string saying C<'PerlPerlPerl'>.
 The comments show the string after each step.  Note that this code works
