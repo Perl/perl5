@@ -1094,7 +1094,10 @@ lib/strict.t			See if strictures work
 lib/subs.pm			Declare overriding subs
 lib/subs.t			See if subroutine pseudo-importation works
 lib/Switch.pm			Switch for Perl
-lib/Switch/test.pl		Test whether switch works
+lib/Switch/Changes	Switch for Perl
+lib/Switch/README	Switch for Perl
+lib/Switch/t/given_when.t	See if Perl 6 given (switch) works
+lib/Switch/t/switch_case.t	See if Perl 5 switch works
 lib/Symbol.pm			Symbol table manipulation routines
 lib/Symbol.t			See if Symbol works
 lib/syslog.pl			Perl library supporting syslogging
