@@ -8,7 +8,7 @@ BEGIN {
 eval 'opendir(NOSUCH, "no/such/directory");';
 if ($@) { print "1..0\n"; exit; }
 
-print "1..3\n";
+print "1..6\n";
 
 for $i (1..2000) {
     local *OP;
@@ -43,3 +43,25 @@ while (@R && @G && "op/".$R[0] eq $G[0]) {
 	shift(@G);
 }
 if (@R == 0 && @G == 0) { print "ok 3\n"; } else { print "not ok 3\n"; }
+
+# Can't really depend on Tru64 UTF-8 filenames being so must just see
+# that things don't crash and that *if* UTF-8 were to be received, it's
+# valid.  (Maybe later add checks that are run if we are on NTFS/HFS+.)
+# (see also ext/File/Glob/t/utf8.t)
+
+opendir(OP, ":utf8", "op");
+
+my $a = readdir(OP);
+
+print utf8::valid($a) ? "ok 4\n" : "not ok 4\n";
+
+my @a = readdir(OP);
+
+print utf8::valid($a[0]) ? "ok 5\n" : "not ok 5\n";
+
+# But we can check for bogus mode arguments.
+
+eval { opendir(OP, ":foo", "op") };
+
+print $@ =~ /Unknown discipline ':foo'/ ? "ok 6\n" : "not ok 6\n";
+

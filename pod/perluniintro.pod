@@ -407,6 +407,11 @@ If you run this code twice, the contents of the F<file> will be twice
 UTF-8 encoded.  A C<use open ':utf8'> would have avoided the bug, or
 explicitly opening also the F<file> for input as UTF-8.
 
+In some filesystems (for example Microsoft NTFS and Apple HFS+) the
+filenames are in UTF-8 .  By using opendir() and File::Glob you can
+make readdir() and glob() to return the filenames as Unicode, see
+L<perlfunc/opendir> and L<File::Glob> for details.
+
 B<NOTE>: the C<:utf8> and C<:encoding> features work only if your
 Perl has been built with the new "perlio" feature.  Almost all 
 Perl 5.8 platforms do use "perlio", though: you can see whether

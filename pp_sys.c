@@ -3747,16 +3747,38 @@ PP(pp_open_dir)
     dSP;
     STRLEN n_a;
     char *dirname = POPpx;
-    GV *gv = (GV*)POPs;
-    register IO *io = GvIOn(gv);
+    char *dscp = NULL;
+    GV *gv;
+    register IO *io;
+    bool want_utf8 = FALSE;
+
+    if (MAXARG == 3)
+	 dscp = POPpx;
+
+    gv = (GV*)POPs;
+    io = GvIOn(gv);
 
     if (!io)
 	goto nope;
+
+    if (dscp) {
+	 if (*dscp == ':') {
+	      if (strnEQ(dscp + 1, "utf8", 4))
+		  want_utf8 = TRUE;
+	      else
+		   Perl_croak(aTHX_ "Unknown discipline '%s'", dscp);
+	 }
+	 else
+	      Perl_croak(aTHX_ "Unknown discipline '%s'", dscp);
+    }
 
     if (IoDIRP(io))
 	PerlDir_close(IoDIRP(io));
     if (!(IoDIRP(io) = PerlDir_open(dirname)))
 	goto nope;
+
+    if (want_utf8)
+        IoFLAGS(io) |= IOf_DIR_UTF8;
 
     RETPUSHYES;
 nope:
@@ -3795,6 +3817,8 @@ PP(pp_readdir)
 	    if (!(IoFLAGS(io) & IOf_UNTAINT))
 		SvTAINTED_on(sv);
 #endif
+	    if (IoFLAGS(io) & IOf_DIR_UTF8)
+	        sv_utf8_upgrade(sv);
 	    XPUSHs(sv_2mortal(sv));
 	}
     }
@@ -3810,6 +3834,8 @@ PP(pp_readdir)
 	if (!(IoFLAGS(io) & IOf_UNTAINT))
 	    SvTAINTED_on(sv);
 #endif
+	if (IoFLAGS(io) & IOf_DIR_UTF8)
+	    sv_utf8_upgrade(sv);
 	XPUSHs(sv_2mortal(sv));
     }
     RETURN;

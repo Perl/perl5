@@ -3024,11 +3024,18 @@ them, and automatically close whenever and however you leave that scope:
 
 See L</seek> for some details about mixing reading and writing.
 
+=item opendir DIRHANDLE,MODE,EXPR
+
 =item opendir DIRHANDLE,EXPR
 
 Opens a directory named EXPR for processing by C<readdir>, C<telldir>,
 C<seekdir>, C<rewinddir>, and C<closedir>.  Returns true if successful.
 DIRHANDLEs have their own namespace separate from FILEHANDLEs.
+
+In three-argument form the middle argument may be C<:utf8> to force
+the filenames returned by readdir() to be in UTF-8 encoding of Unicode.
+This naturally works only if your filesystem returns UTF-8 filenames.
+The encoding pragma affects this feature, see L<encoding>.
 
 =item ord EXPR
 
@@ -3727,6 +3734,10 @@ C<chdir> there, it would have been testing the wrong file.
     opendir(DIR, $some_dir) || die "can't opendir $some_dir: $!";
     @dots = grep { /^\./ && -f "$some_dir/$_" } readdir(DIR);
     closedir DIR;
+
+In some filesystems it is possible to return UTF-8 encoded filenames.
+To get readdir() to return such filenames, you must use C<:utf8> with
+the three-argument form of opendir(), see L</opendir>.
 
 =item readline EXPR
 

@@ -814,7 +814,7 @@ rmdir		rmdir			ck_fun		isTu%	S?
 
 # Directory calls.
 
-open_dir	opendir			ck_fun		is@	F S
+open_dir	opendir			ck_fun		is@	F S S?
 readdir		readdir			ck_fun		%	F
 telldir		telldir			ck_fun		st%	F
 seekdir		seekdir			ck_fun		s@	F S
