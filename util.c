@@ -1350,6 +1350,7 @@ char *nam, *val;
 	environ = tmpenv;		/* tell exec where it is now */
     }
     if (!val) {
+	if (environ[i]) Safefree(environ[i]);
 	while (environ[i]) {
 	    environ[i] = environ[i+1];
 	    i++;
