@@ -141,10 +141,10 @@ if ($^O eq 'linux') {
 }
 
 {
-    # The "use IO" is not actually used for anything; its only purpose is to
-    # incite a lot of calls to newCONSTSUB.  See the p5p archives for
-    # the thread "maint@20974 or before broke mp2 ithreads test".
-    use IO;
+    # The "use IO::File" is not actually used for anything; its only
+    # purpose is to incite a lot of calls to newCONSTSUB.  See the p5p
+    # archives for the thread "maint@20974 or before broke mp2 ithreads test".
+    use IO::File;
     $_->join for map threads->new(sub{ok($_, "stress newCONSTSUB")}), 1..2;
 }
 
