@@ -430,13 +430,15 @@ required for C<foo(10)->('bar')>.
 The exists() and delete() builtins now work on simple arrays as well.
 The behavior is similar to that on hash elements.
 
-exists() can be used to check whether an array element exists without
-autovivifying it.  If the array is tied, the EXISTS() method in the
-corresponding tied package will be invoked.
+exists() can be used to check whether an array element has been
+initialized without autovivifying it.  If the array is tied, the
+EXISTS() method in the corresponding tied package will be invoked.
 
-delete() may now be used to remove an element from the array and return
-it.  If the element happens to be the one at the end, the size of the
-array also shrinks by one.  If the array is tied, the DELETE() method
+delete() may be used to remove an element from the array and return
+it.  The array element at that position returns to its unintialized
+state, so that testing for the same element with exists() will return
+false.  If the element happens to be the one at the end, the size of
+the array also shrinks by one.  If the array is tied, the DELETE() method
 in the corresponding tied package will be invoked.
 
 See L<perlfunc/exists> and L<perlfunc/delete> for examples.

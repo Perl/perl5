@@ -663,8 +663,11 @@ Perl_av_exists(pTHX_ AV *av, I32 key)
 	    return SvTRUE(sv);
 	}
     }
-    if (av_fetch(av, key, 0))
+    if (key <= AvFILLp(av) && AvARRAY(av)[key] != &PL_sv_undef
+	&& AvARRAY(av)[key])
+    {
 	return TRUE;
+    }
     else
 	return FALSE;
 }

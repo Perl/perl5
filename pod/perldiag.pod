@@ -140,23 +140,23 @@ definition ahead of the call to get proper prototype checking.  Alternatively,
 if you are certain that you're calling the function correctly, you may put
 an ampersand before the name to avoid the warning.  See L<perlsub>.
 
-=item %s argument is not a HASH element
+=item %s argument is not a HASH or ARRAY element
 
-(F) The argument to exists() must be a hash element, such as
-
-    $foo{$bar}
-    $ref->[12]->{"susie"}
-
-=item %s argument is not a HASH element or slice
-
-(F) The argument to delete() must be either a hash element, such as
+(F) The argument to exists() must be a hash or array element, such as:
 
     $foo{$bar}
-    $ref->[12]->{"susie"}
+    $ref->[12]->["susie"]
 
-or a hash slice, such as
+=item %s argument is not a HASH or ARRAY element or slice
 
-    @foo{$bar, $baz, $xyzzy}
+(F) The argument to delete() must be either a hash or array element, such as:
+
+    $foo{$bar}
+    $ref->[12]->["susie"]
+
+or a hash or array slice, such as:
+
+    @foo[$bar, $baz, $xyzzy]
     @{$ref->[12]}{"susie", "queue"}
 
 =item %s did not return a true value
