@@ -416,6 +416,23 @@ A correct, but error-prone example.
           timep
           RETVAL
 
+=head2 The SCOPE: Keyword
+
+The SCOPE: keyword allows scoping to be enabled for a particular XSUB. If
+enabled, the XSUB will invoke ENTER and LEAVE automatically.
+
+To support potentially complex type mappings, if a typemap entry used
+by this XSUB contains a comment like C</*scope*/> then scoping will
+automatically be enabled for that XSUB.
+
+To enable scoping:
+
+    SCOPE: ENABLE
+
+To disable scoping:
+
+    SCOPE: DISABLE
+
 =head2 The INPUT: Keyword
 
 The XSUB's parameters are usually evaluated immediately after entering the
