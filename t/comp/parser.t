@@ -9,7 +9,7 @@ BEGIN {
 }
 
 require "./test.pl";
-plan( tests => 41 );
+plan( tests => 42 );
 
 eval '%@x=0;';
 like( $@, qr/^Can't modify hash dereference in repeat \(x\)/, '%@x=0' );
@@ -134,4 +134,10 @@ EOF
 	'-42',
 	'-F calls the F function'
     );
+}
+
+# Bug #24762
+{
+    eval q{ *foo{CODE} ? 1 : 0 };
+    is( $@, '', "glob subscript in conditional" );
 }
