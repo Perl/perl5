@@ -117,6 +117,7 @@
 #define INIT_THREADS		cthread_init()
 #define YIELD			cthread_yield()
 #define ALLOC_THREAD_KEY	NOOP
+#define FREE_THREAD_KEY		NOOP
 #define SET_THREAD_SELF(thr)	(thr->self = cthread_self())
 
 #endif /* I_MACH_CTHREADS */
@@ -254,6 +255,13 @@
 	    PerlIO_printf(PerlIO_stderr(), "panic: pthread_key_create");	\
 	    exit(1);						\
 	}							\
+    } STMT_END
+#endif
+
+#ifndef FREE_THREAD_KEY
+#  define FREE_THREAD_KEY \
+    STMT_START {						\
+	pthread_key_delete(PL_thr_key);				\
     } STMT_END
 #endif
 
