@@ -366,20 +366,27 @@ Recommended books on (or mostly on) Perl follow.
 
 =head2 Perl in Magazines
 
-The first and only periodical devoted to All Things Perl, I<The
-Perl Journal> contains tutorials, demonstrations, case studies,
+The first and only periodical devoted to All Things Perl,
+I<The Perl Journal> contains tutorials, demonstrations, case studies,
 announcements, contests, and much more.  I<TPJ> has columns on web
 development, databases, Win32 Perl, graphical programming, regular
-expressions, and networking, and sponsored the Obfuscated Perl
-Contest. For more details on I<The Perl Journal>, see
-http://www.tpj.com/
+expressions, and networking, and sponsors the Obfuscated Perl Contest
+and the Perl Poetry Contests.  As of mid-2001, the dead tree version
+of TPJ will be published as a quarterly supplement of the SysAdmin
+magazine ( http://www.sysadmin.com/ ) For more details on TPJ,
+see http://www.tpj.com/
 
-Beyond this, magazines that frequently carry high-quality articles
-on Perl are I<Web Techniques> (see http://www.webtechniques.com/),
-I<Performance Computing> (http://www.performance-computing.com/), and Usenix's
-newsletter/magazine to its members, I<login:>, at http://www.usenix.org/.
-Randal's Web Techniques columns are available on the web at
-http://www.stonehenge.com/merlyn/WebTechniques/ .
+Beyond this, magazines that frequently carry quality articles on
+Perl are I<Web Techniques> ( http://www.webtechniques.com/ ),
+I<Unix Review> ( http://www.unixreview.com/ ),
+I<Linux Magazine> ( http://www.linuxmagazine.com/ ),
+and Usenix's newsletter/magazine to its members, I<login:>
+( http://www.usenix.org/ )
+
+The Perl columns of Randal L. Schwarz are available on the web at
+http://www.stonehenge.com/merlyn/WebTechniques/ ,
+http://www.stonehenge.com/merlyn/UnixReview/ , and
+http://www.stonehenge.com/merlyn/LinuxMag/ .
 
 =head2 Perl on the Net: FTP and WWW Access
 
