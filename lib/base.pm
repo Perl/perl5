@@ -44,13 +44,16 @@ L<fields>
 
 package base;
 use vars qw($VERSION);
-$VERSION = "1.00";
+$VERSION = "1.01";
 
 sub import {
     my $class = shift;
     my $fields_base;
+    my $pkg = caller(0);
 
     foreach my $base (@_) {
+	next if $pkg->isa($base);
+	push @{"$pkg\::ISA"}, $base;
 	unless (exists ${"$base\::"}{VERSION}) {
 	    eval "require $base";
 	    # Only ignore "Can't locate" errors from our eval require.
@@ -79,8 +82,6 @@ sub import {
 	    }
 	}
     }
-    my $pkg = caller(0);
-    push @{"$pkg\::ISA"}, @_;
     if ($fields_base) {
 	require fields;
 	fields::inherit($pkg, $fields_base);
