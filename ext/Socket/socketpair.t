@@ -31,7 +31,7 @@ if( !$Config{d_alarm} ) {
     if ($@ =~ /^Your vendor has not defined Socket macro AF_UNIX/) {
       plan skip_all => 'No AF_UNIX';
     } else {
-      plan tests => 44;
+      plan tests => 45;
     }
   }
 }
@@ -71,7 +71,9 @@ ok (shutdown(LEFT, SHUT_WR), "shutdown left for writing");
 {
   local $SIG{ALRM} = sub { warn "EOF on right took over 3 seconds" };
   alarm 3;
+  $! = 0;
   ok (eof RIGHT, "right is at EOF");
+  is ($!, '', 'and $! should report no error');
   alarm 60;
 }
 
