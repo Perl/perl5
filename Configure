@@ -1707,6 +1707,9 @@ EOM
 			*) osvers=$tmp;;
 			esac
 			;;
+		*dc.osx) osname=dcosx
+			osvers="$3"
+			;;
 		dnix) osname=dnix
 			osvers="$3"
 			;;
