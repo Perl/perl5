@@ -1137,6 +1137,7 @@
 #define dofindlabel		CPerlObj::Perl_dofindlabel
 #define dofindlabel		CPerlObj::Perl_dofindlabel
 #define doform			CPerlObj::Perl_doform
+#define doopen			CPerlObj::Perl_doopen
 #define doparseform		CPerlObj::Perl_doparseform
 #define dopoptoeval		CPerlObj::Perl_dopoptoeval
 #define dopoptoeval		CPerlObj::Perl_dopoptoeval

@@ -808,6 +808,7 @@ LOOP_lastop(o)
 #define COP_cop_seq(o)	o->cop_seq
 #define COP_arybase(o)	o->cop_arybase
 #define COP_line(o)	o->cop_line
+#define COP_warnings(o)	o->cop_warnings
 
 MODULE = B	PACKAGE = B::COP		PREFIX = COP_
 
@@ -833,6 +834,10 @@ COP_arybase(o)
 
 U16
 COP_line(o)
+	B::COP	o
+
+B::SV
+COP_warnings(o)
 	B::COP	o
 
 MODULE = B	PACKAGE = B::SV		PREFIX = Sv

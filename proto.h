@@ -752,6 +752,7 @@ I32 dopoptosub _((I32 startingblock));
 I32 dopoptosub_at _((PERL_CONTEXT* cxstk, I32 startingblock));
 void save_lines _((AV *array, SV *sv));
 OP *doeval _((int gimme, OP** startop));
+PerlIO *doopen _((const char *name, const char *mode));
 I32 sv_ncmp _((SV *a, SV *b));
 I32 sv_i_ncmp _((SV *a, SV *b));
 I32 amagic_ncmp _((SV *a, SV *b));

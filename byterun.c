@@ -838,21 +838,28 @@ void byterun(PerlIO *fp)
 		cCOP->cop_line = arg;
 		break;
 	    }
-	  case INSN_MAIN_START:		/* 116 */
+	  case INSN_COP_WARNINGS:		/* 116 */
+	    {
+		svindex arg;
+		BGET_svindex(arg);
+		cCOP->cop_warnings = arg;
+		break;
+	    }
+	  case INSN_MAIN_START:		/* 117 */
 	    {
 		opindex arg;
 		BGET_opindex(arg);
 		PL_main_start = arg;
 		break;
 	    }
-	  case INSN_MAIN_ROOT:		/* 117 */
+	  case INSN_MAIN_ROOT:		/* 118 */
 	    {
 		opindex arg;
 		BGET_opindex(arg);
 		PL_main_root = arg;
 		break;
 	    }
-	  case INSN_CURPAD:		/* 118 */
+	  case INSN_CURPAD:		/* 119 */
 	    {
 		svindex arg;
 		BGET_svindex(arg);

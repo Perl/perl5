@@ -136,9 +136,10 @@ $insn_data{cop_filegv} = [112, \&PUT_svindex, "GET_svindex"];
 $insn_data{cop_seq} = [113, \&PUT_U32, "GET_U32"];
 $insn_data{cop_arybase} = [114, \&PUT_I32, "GET_I32"];
 $insn_data{cop_line} = [115, \&PUT_U16, "GET_U16"];
-$insn_data{main_start} = [116, \&PUT_opindex, "GET_opindex"];
-$insn_data{main_root} = [117, \&PUT_opindex, "GET_opindex"];
-$insn_data{curpad} = [118, \&PUT_svindex, "GET_svindex"];
+$insn_data{cop_warnings} = [116, \&PUT_svindex, "GET_svindex"];
+$insn_data{main_start} = [117, \&PUT_opindex, "GET_opindex"];
+$insn_data{main_root} = [118, \&PUT_opindex, "GET_opindex"];
+$insn_data{curpad} = [119, \&PUT_svindex, "GET_svindex"];
 
 my ($insn_name, $insn_data);
 while (($insn_name, $insn_data) = each %insn_data) {

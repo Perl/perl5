@@ -154,7 +154,10 @@ typedef IV IV64;
 	o->op_ppaddr = PL_ppaddr[arg];		\
     } STMT_END
 #define BSET_op_ppaddr(o, arg) croak("op_ppaddr not yet implemented")
-#define BSET_curpad(pad, arg) pad = AvARRAY(arg)
+#define BSET_curpad(pad, arg) STMT_START {	\
+	PL_comppad = (AV *)arg;			\
+	pad = AvARRAY(arg);			\
+    } STMT_END
 
 #define BSET_OBJ_STORE(obj, ix)		\
 	(I32)ix > PL_bytecode_obj_list_fill ?	\

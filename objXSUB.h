@@ -1137,6 +1137,8 @@
 #define dofindlabel		pPerl->Perl_dofindlabel
 #undef  doform
 #define doform			pPerl->Perl_doform
+#undef  doopen
+#define doopen			pPerl->Perl_doopen
 #undef  doparseform
 #define doparseform		pPerl->Perl_doparseform
 #undef  dopoptoeval

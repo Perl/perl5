@@ -195,6 +195,9 @@ ext/B/ramblings/magic		Compiler ramblings: notes on magic
 ext/B/ramblings/reg.alloc	Compiler ramblings: register allocation
 ext/B/ramblings/runtime.porting	Compiler ramblings: porting PP enging
 ext/B/typemap		Compiler backend interface types
+ext/ByteLoader/ByteLoader.pm	Bytecode loader Perl module
+ext/ByteLoader/ByteLoader.xs	Bytecode loader external subroutines
+ext/ByteLoader/Makefile.PL	Bytecode loader makefile writer
 ext/DB_File/Changes		Berkeley DB extension change log
 ext/DB_File/DB_File.pm		Berkeley DB extension Perl module
 ext/DB_File/DB_File.xs		Berkeley DB extension external subroutines
@@ -1311,6 +1314,7 @@ utils/c2ph.PL		program to translate dbx stabs to perl
 utils/h2ph.PL		A thing to turn C .h files into perl .ph files
 utils/h2xs.PL		Program to make .xs files from C header files
 utils/perlbug.PL	A simple tool to submit a bug report
+utils/perlbc.PL		Front-end for bytecode compiler
 utils/perlcc.PL		Front-end for compiler
 utils/perldoc.PL	A simple tool to find & display perl's documentation
 utils/pl2pm.PL		A pl to pm translator
