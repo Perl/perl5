@@ -3549,7 +3549,6 @@ S_reghopmaybe(pTHX_ U8* s, I32 off)
 }
 
 #ifdef PERL_OBJECT
-#define NO_XSLOCKS
 #include "XSUB.h"
 #endif
 

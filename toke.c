@@ -7005,7 +7005,6 @@ Perl_yyerror(pTHX_ char *s)
 
 
 #ifdef PERL_OBJECT
-#define NO_XSLOCKS
 #include "XSUB.h"
 #endif
 

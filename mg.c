@@ -2068,7 +2068,6 @@ cleanup:
 
 
 #ifdef PERL_OBJECT
-#define NO_XSLOCKS
 #include "XSUB.h"
 #endif
 

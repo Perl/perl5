@@ -4089,7 +4089,6 @@ S_qsortsv(pTHX_ SV ** array, size_t num_elts, SVCOMPARE_t compare)
 
 
 #ifdef PERL_OBJECT
-#define NO_XSLOCKS
 #undef this
 #define this pPerl
 #include "XSUB.h"

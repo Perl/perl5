@@ -1857,10 +1857,6 @@ typedef I32 CHECKPOINT;
 #   define MAXSYSFD 2
 #endif
 
-#ifndef TMPPATH
-#  define TMPPATH "/tmp/perl-eXXXXXX"
-#endif
-
 #ifndef __cplusplus
 Uid_t getuid (void);
 Uid_t geteuid (void);
@@ -2577,13 +2573,6 @@ typedef void *Thread;
 #  define PERL_CALLCONV
 #endif 
 
-#ifdef PERL_OBJECT
-#  define VIRTUAL virtual PERL_CALLCONV
-#else
-#  define VIRTUAL PERL_CALLCONV
-/*START_EXTERN_C*/
-#endif
-
 #ifndef NEXT30_NO_ATTRIBUTE
 #  ifndef HASATTRIBUTE       /* disable GNU-cc attribute checking? */
 #    ifdef  __attribute__      /* Avoid possible redefinition errors */
@@ -2611,10 +2600,8 @@ public:
 #include "pp_proto.h"
 
 #ifdef PERL_OBJECT
-VIRTUAL int CPerlObj::do_aspawn (void *vreally, void **vmark, void **vsp);
+int CPerlObj::do_aspawn (void *vreally, void **vmark, void **vsp);
 #undef PERL_DECL_PROT
-#else
-/*END_EXTERN_C*/
 #endif
 
 #ifndef PERL_OBJECT

@@ -3201,7 +3201,6 @@ S_my_exit_jump(pTHX)
 }
 
 #ifdef PERL_OBJECT
-#define NO_XSLOCKS
 #include "XSUB.h"
 #endif
 
