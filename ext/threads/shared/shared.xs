@@ -588,7 +588,7 @@ DELETE(self, key)
 	tmp = hv_delete((HV*) SHAREDSvGET(shared), ckey, len,0);
 	SHAREDSvRELEASE(shared);
 	if(tmp) {
-		slot = SvIV(tmp);	
+		slot = (shared_sv*) SvIV(tmp);
 		RETVAL = newSVsv(SHAREDSvGET(slot));
 		Perl_sharedsv_thrcnt_dec(aTHX_ slot);
 	} else {
