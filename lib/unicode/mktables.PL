@@ -31,7 +31,8 @@ mkdir "To", 0755;
     ['IsSpacePerl',
                  '$cat  =~ /^Z/ ||
                   $code =~ /^(0009|000A|000C|000D)$/',		''],
-    ['IsBlank',  '$cat  =~ /^Z[^lp]$/ ||  $code eq "0009"',	''],
+    ['IsBlank',  '$code =~ /^(0020|0009)$/ ||
+		  $cat  =~ /^Z[^lp]$/',	''],
     ['IsDigit',  '$cat =~ /^Nd$/',	''],
     ['IsUpper',  '$cat =~ /^L[ut]$/',	''],
     ['IsLower',  '$cat =~ /^Ll$/',	''],

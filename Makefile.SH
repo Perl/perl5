@@ -132,6 +132,15 @@ case "$osname" in
 	;;
 esac
 
+# Handle the usage of different yaccs in posix-bc (During Configure we
+# us yacc for perly.y and byacc for a2p.y.  The makefiles must use the
+# same configuration for run_byacc!):
+case "$osname" in
+    posix-bc)
+	byacc=$yacc
+	;;
+esac
+
 echo "Extracting Makefile (with variable substitutions)"
 $spitshell >Makefile <<!GROK!THIS!
 # Makefile.SH
@@ -319,7 +328,7 @@ FORCE:
 $spitshell >>Makefile <<!GROK!THIS!
 opmini\$(OBJ_EXT): op.c config.h
 	\$(RMS) opmini.c
-	\$(LNS) op.c opmini.c
+	\$(CPS) op.c opmini.c
 	\$(CCCMD) \$(PLDLFLAGS) $DPERL_EXTERNAL_GLOB opmini.c
 	\$(RMS) opmini.c
 
