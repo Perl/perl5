@@ -10,7 +10,7 @@ BEGIN {
     }
 }
 
-print "1..107\n";
+print "1..109\n";
 
 my $test = 1;
 
@@ -577,3 +577,16 @@ sub nok_bytes {
     $test++;					# 107
 }
 
+{
+    # bug id 20001230.002
+
+    use utf8;
+
+    print "not " unless "École" =~ /^\C\C(.)/ && $1 eq 'c';
+    print "ok $test\n";
+    $test++;					# 108
+
+    print "not " unless "École" =~ /^\C\C(c)/;
+    print "ok $test\n";
+    $test++;					# 109
+}

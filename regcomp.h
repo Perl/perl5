@@ -285,10 +285,11 @@ struct regnode_charclass_class {
 
 #define EXTRA_SIZE(guy) ((sizeof(guy)-1)/sizeof(struct regnode))
 
-#define REG_SEEN_ZERO_LEN	1
-#define REG_SEEN_LOOKBEHIND	2
-#define REG_SEEN_GPOS		4
-#define REG_SEEN_EVAL		8
+#define REG_SEEN_ZERO_LEN	 1
+#define REG_SEEN_LOOKBEHIND	 2
+#define REG_SEEN_GPOS		 4
+#define REG_SEEN_EVAL		 8
+#define REG_SEEN_SANY		16
 
 START_EXTERN_C
 
