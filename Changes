@@ -95,6 +95,101 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6668] By: jhi                                   on 2000/08/17  01:16:29
+        Log: Doc nits spotted by Richard Soderberg.
+     Branch: perl
+	   ! README.posix-bc README.vmesa
+____________________________________________________________________________
+[  6667] By: jhi                                   on 2000/08/17  01:12:11
+        Log: Subject: [PATCH(2) @6655] Re: perldebut.pod - spelling
+             From: "Casey R. Tweten" <crt@kiski.net>
+             Date: Wed, 16 Aug 2000 12:39:08 -0400 (EDT)
+             Message-ID: <Pine.OSF.4.21.0008161238250.32058-100000@home.kiski.net>
+     Branch: perl
+	   ! pod/perldebtut.pod
+____________________________________________________________________________
+[  6666] By: jhi                                   on 2000/08/17  01:09:31
+        Log: Subject: Re: [ID 20000816.006] [PATCH @6655] Shell.pm, bug fix, strict and OO Interface
+             From: "Casey R. Tweten" <crt@kiski.net>
+             Date: Wed, 16 Aug 2000 11:35:09 -0400 (EDT)
+             Message-ID: <Pine.OSF.4.21.0008161132270.10885-100000@home.kiski.net>
+     Branch: perl
+	   ! lib/Shell.pm
+____________________________________________________________________________
+[  6665] By: gsar                                  on 2000/08/17  01:03:52
+        Log: add "ok" targets from change#6632 in makefile.mk
+     Branch: perl
+	   ! pod/perlport.pod win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  6664] By: gsar                                  on 2000/08/17  00:56:11
+        Log: avoid warnings from dense compiler
+     Branch: perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[  6663] By: jhi                                   on 2000/08/17  00:51:49
+        Log: Tweak the regex compilation errors once more.
+     Branch: perl
+	   ! pod/perldiag.pod regcomp.c t/op/misc.t t/op/re_tests
+	   ! t/op/regmesg.t t/pragma/warn/regcomp
+____________________________________________________________________________
+[  6662] By: gsar                                  on 2000/08/17  00:28:19
+        Log: trailing new %ENV entries weren't being pushed into the real
+             environment of subprocesses on Windows
+     Branch: perl
+	   ! t/op/magic.t win32/perlhost.h
+____________________________________________________________________________
+[  6661] By: gsar                                  on 2000/08/17  00:19:20
+        Log: waitpid() now handles externally spawned pids correctly;
+             fixes for backtick/wait/waitpid failures on Windows 9x
+             
+             these changes make the pid returned by process functions on
+             Windows 9x always positive by clearing the high bit (which
+             is always set on Win9x); pseudo-process PIDs are likewise
+             always negative now on Win9x (just as on NT/2000)
+     Branch: perl
+	   ! pp_sys.c win32/perlhost.h win32/win32.c
+____________________________________________________________________________
+[  6660] By: jhi                                   on 2000/08/17  00:04:32
+        Log: Retract #6645.
+     Branch: perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH pod/perldelta.pod pod/perlfunc.pod sv.c
+	   ! t/op/sprintf.t
+____________________________________________________________________________
+[  6659] By: gsar                                  on 2000/08/16  23:59:28
+        Log: on windows, the return values from wait() and waitpid() don't
+             match those of pseudo-pids
+     Branch: perl
+	   ! pp_sys.c t/op/fork.t util.c win32/win32.c
+____________________________________________________________________________
+[  6658] By: gsar                                  on 2000/08/16  23:56:14
+        Log: pod nit seen in passing
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  6657] By: gsar                                  on 2000/08/16  23:53:42
+        Log: change#6328 could make close(SOCKET) return false on windows
+             when it shouldn't
+     Branch: perl
+	   ! win32/win32sck.c
+____________________________________________________________________________
+[  6656] By: gsar                                  on 2000/08/16  23:46:57
+        Log: check that the number pseudo children doesn't exceed
+             MAXIMUM_WAIT_OBJECTS, which is currently 64 (avoids overflowing
+             the WaitForMultipleObjects() limit that would cause wait()
+             to crash)
+             
+             wait() and waitpid() could potentially be rewritten to use
+             more than one thread to do the waiting to eliminate this
+             limitation
+     Branch: perl
+	   ! win32/perlhost.h
+____________________________________________________________________________
+[  6655] By: jhi                                   on 2000/08/16  14:11:05
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  6654] By: jhi                                   on 2000/08/16  14:10:12
         Log: Update to perldebtut 1.9, from Richard Foley.
      Branch: perl
@@ -179,7 +274,9 @@ ____________________________________________________________________________
 	   ! vms/descrip_mms.template
 ____________________________________________________________________________
 [  6645] By: jhi                                   on 2000/08/15  23:33:23
-        Log: Subject: [PATCH perl-current] make s?printf() produce two exponent digits where possible
+        Log: (Retracted by #6660)
+             
+             Subject: [PATCH perl-current] make s?printf() produce two exponent digits where possible
              From: Dominic Dunlop <domo@computer.org>
              Date: Tue, 15 Aug 2000 22:20:52 +0200
              Message-Id: <p04320403b5bf4c32d381@[192.168.1.4]>
