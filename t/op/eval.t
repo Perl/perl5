@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..45\n";
+print "1..46\n";
 
 eval 'print "ok 1\n";';
 
@@ -233,4 +233,11 @@ print $@;
   print $@ ? "ok 44\n" : "not ok 44\n";
   eval q{my $$$x};
   print $@ ? "ok 45\n" : "not ok 45\n";
+}
+
+# [ID 20020623.002] eval "" doesn't clear $@
+{
+    $@ = 5;
+    eval q{};
+    print length($@) ? "not ok 46\t# \$\@ = '$@'\n" : "ok 46\n";
 }
