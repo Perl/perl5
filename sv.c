@@ -2258,6 +2258,30 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
     }
 }
 
+char *
+Perl_sv_2pvbyte_nolen(pTHX_ register SV *sv)
+{
+    return sv_2pv_nolen(sv);
+}
+
+char *
+Perl_sv_2pvbyte(pTHX_ register SV *sv, STRLEN *lp)
+{
+    return sv_2pv(sv,lp);
+}
+
+char *
+Perl_sv_2pvutf8_nolen(pTHX_ register SV *sv)
+{
+    return sv_2pv_nolen(sv);
+}
+
+char *
+Perl_sv_2pvutf8(pTHX_ register SV *sv, STRLEN *lp)
+{
+    return sv_2pv(sv,lp);
+}
+ 
 /* This function is only called on magical items */
 bool
 Perl_sv_2bool(pTHX_ register SV *sv)
@@ -4669,6 +4693,42 @@ Perl_sv_pvn_force(pTHX_ SV *sv, STRLEN *lp)
 	}
     }
     return SvPVX(sv);
+}
+
+char *
+Perl_sv_pvbyte(pTHX_ SV *sv)
+{
+    return sv_pv(sv);
+}
+
+char *
+Perl_sv_pvbyten(pTHX_ SV *sv, STRLEN *lp)
+{
+    return sv_pvn(sv,lp);
+}
+
+char *
+Perl_sv_pvbyten_force(pTHX_ SV *sv, STRLEN *lp)
+{
+    return sv_pvn_force(sv,lp);
+}
+
+char *
+Perl_sv_pvutf8(pTHX_ SV *sv)
+{
+    return sv_pv(sv);
+}
+
+char *
+Perl_sv_pvutf8n(pTHX_ SV *sv, STRLEN *lp)
+{
+    return sv_pvn(sv,lp);
+}
+
+char *
+Perl_sv_pvutf8n_force(pTHX_ SV *sv, STRLEN *lp)
+{
+    return sv_pvn_force(sv,lp);
 }
 
 char *
