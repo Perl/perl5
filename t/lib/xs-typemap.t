@@ -127,7 +127,11 @@ ok( ! T_BOOL(undef) );
 print "# T_U_SHORT\n";
 
 ok( T_U_SHORT(32000), 32000);
-ok( T_U_SHORT(65536) != 65536); # probably dont want to test edge cases
+if ($Config{shortsize} == 2) {
+  ok( T_U_SHORT(65536) != 65536); # probably dont want to test edge cases
+} else {
+  ok(1); # e.g. Crays have shortsize 4 (T3X) or 8 (CXX and SVX)
+}
 
 # T_U_LONG aka U32
 
