@@ -216,22 +216,6 @@ contains a package variable named C<$NEGATIVE_INDICES> which is set to
 a true value, negative values will be passed to C<FETCH>, C<STORE>,
 C<EXISTS>, and C<DELETE> unchanged.
 
-=head2 Tied hashes in scalar context
-
-As of perl 5.8.2, tied hashes did not return anything useful in scalar
-context, for example when used as boolean tests:
-
-	if (%tied_hash) { ... }
-
-The old nonsensical behaviour was always to return false,
-regardless of whether the hash is empty or has elements.
-
-There is now an interface for the implementors of tied hashes to implement
-the behaviour of a hash in scalar context, via the SCALAR method (see
-L<perltie>).  Without a SCALAR method, perl will try to guess whether
-the hash is empty, by testing if it's inside an iteration (in this case
-it can't be empty) or by calling FIRSTKEY.
-
 =head2 local ${$x}
 
 The syntaxes
@@ -475,9 +459,6 @@ featureful.
 C<perlcc -B> works now at least somewhat better, while C<perlcc -c>
 is rather more broken.  (The Perl compiler suite as a whole continues
 to be experimental.)
-
-C<find2perl> now assumes C<-print> as a default action. It needed to be
-specified explicitly.
 
 =head1 New Documentation
 
@@ -876,6 +857,19 @@ Classic, IBM z/OS (and other EBCDIC platforms), and NetWare.  The most
 common Perl platforms (Unix and Unix-like, Microsoft platforms, and
 VMS) have large enough testing and expert population that they are
 doing well.
+
+=head2 Tied hashes in scalar context
+
+Tied hashes do not currently return anything useful in scalar context,
+for example when used as boolean tests:
+
+	if (%tied_hash) { ... }
+
+The current nonsensical behaviour is always to return false,
+regardless of whether the hash is empty or has elements.
+
+The root cause is that there is no interface for the implementors of
+tied hashes to implement the behaviour of a hash in scalar context.
 
 =head2 Net::Ping 450_service and 510_ping_udp failures
 

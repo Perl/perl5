@@ -2547,6 +2547,24 @@ C<(?(condition)yes-pattern|no-pattern)>
 
 =over 4
 
+=item Text Fields
+
+=item Numeric Fields
+
+=item The Field @* for Variable Width Multi-Line Text
+
+=item The Field ^* for Variable Width One-line-at-a-time Text
+
+=item Specifying Values
+
+=item Using Fill Mode
+
+=item Suppressing Lines Where All Fields Are Void
+
+=item Repeating Format Lines
+
+=item Top of Form Processing
+
 =item Format Variables
 
 =back
@@ -4712,35 +4730,35 @@ get_sv, looks_like_number, newRV_inc, newRV_noinc, newSV, newSViv, newSVnv,
 newSVpv, newSVpvf, newSVpvn, newSVpvn_share, newSVrv, newSVsv, newSVuv,
 SvCUR, SvCUR_set, SvEND, SvGROW, SvIOK, SvIOKp, SvIOK_notUV, SvIOK_off,
 SvIOK_on, SvIOK_only, SvIOK_only_UV, SvIOK_UV, SvIsCOW,
-SvIsCOW_shared_hash, SvIV, SvIVx, SvIVX, SvLEN, SvNIOK, SvNIOKp,
-SvNIOK_off, SvNOK, SvNOKp, SvNOK_off, SvNOK_on, SvNOK_only, SvNV, SvNVX,
-SvNVx, SvOK, SvOOK, SvPOK, SvPOKp, SvPOK_off, SvPOK_on, SvPOK_only,
+SvIsCOW_shared_hash, SvIV, SvIVx, SvIVX, SvIV_nomg, SvLEN, SvNIOK, SvNIOKp,
+SvNIOK_off, SvNOK, SvNOKp, SvNOK_off, SvNOK_on, SvNOK_only, SvNV, SvNVx,
+SvNVX, SvOK, SvOOK, SvPOK, SvPOKp, SvPOK_off, SvPOK_on, SvPOK_only,
 SvPOK_only_UTF8, SvPV, SvPVbyte, SvPVbytex, SvPVbytex_force,
 SvPVbyte_force, SvPVbyte_nolen, SvPVutf8, SvPVutf8x, SvPVutf8x_force,
-SvPVutf8_force, SvPVutf8_nolen, SvPVx, SvPVX, SvPV_force, SvPV_force_nomg,
-SvPV_nolen, SvREFCNT, SvREFCNT_dec, SvREFCNT_inc, SvROK, SvROK_off,
-SvROK_on, SvRV, SvSTASH, SvTAINT, SvTAINTED, SvTAINTED_off, SvTAINTED_on,
-SvTRUE, SvTYPE, SvUNLOCK, SvUOK, SvUPGRADE, SvUTF8, SvUTF8_off, SvUTF8_on,
-SvUV, SvUVX, SvUVx, SvVOK, sv_2bool, sv_2cv, sv_2io, sv_2iv, sv_2mortal,
-sv_2nv, sv_2pvbyte, sv_2pvbyte_nolen, sv_2pvutf8, sv_2pvutf8_nolen,
-sv_2pv_flags, sv_2pv_nolen, sv_2uv, sv_backoff, sv_bless, sv_catpv,
-sv_catpvf, sv_catpvf_mg, sv_catpvn, sv_catpvn_flags, sv_catpvn_mg,
-sv_catpv_mg, sv_catsv, sv_catsv_flags, sv_catsv_mg, sv_chop, sv_clear,
-sv_cmp, sv_cmp_locale, sv_collxfrm, sv_copypv, sv_dec, sv_derived_from,
-sv_eq, sv_force_normal, sv_force_normal_flags, sv_free, sv_gets, sv_grow,
-sv_inc, sv_insert, sv_isa, sv_isobject, sv_iv, sv_len, sv_len_utf8,
-sv_magic, sv_magicext, sv_mortalcopy, sv_newmortal, sv_newref, sv_nv,
-sv_pos_b2u, sv_pos_u2b, sv_pv, sv_pvbyte, sv_pvbyten, sv_pvbyten_force,
-sv_pvn, sv_pvn_force, sv_pvn_force_flags, sv_pvutf8, sv_pvutf8n,
-sv_pvutf8n_force, sv_reftype, sv_replace, sv_report_used, sv_reset,
-sv_rvweaken, sv_setiv, sv_setiv_mg, sv_setnv, sv_setnv_mg, sv_setpv,
-sv_setpvf, sv_setpvf_mg, sv_setpviv, sv_setpviv_mg, sv_setpvn,
-sv_setpvn_mg, sv_setpv_mg, sv_setref_iv, sv_setref_nv, sv_setref_pv,
-sv_setref_pvn, sv_setref_uv, sv_setsv, sv_setsv_flags, sv_setsv_mg,
-sv_setuv, sv_setuv_mg, sv_taint, sv_tainted, sv_true, sv_unmagic, sv_unref,
-sv_unref_flags, sv_untaint, sv_upgrade, sv_usepvn, sv_usepvn_mg,
-sv_utf8_decode, sv_utf8_downgrade, sv_utf8_encode, sv_utf8_upgrade,
-sv_utf8_upgrade_flags, sv_uv, sv_vcatpvfn, sv_vsetpvfn
+SvPVutf8_force, SvPVutf8_nolen, SvPVX, SvPVx, SvPV_force, SvPV_force_nomg,
+SvPV_nolen, SvPV_nomg, SvREFCNT, SvREFCNT_dec, SvREFCNT_inc, SvROK,
+SvROK_off, SvROK_on, SvRV, SvSTASH, SvTAINT, SvTAINTED, SvTAINTED_off,
+SvTAINTED_on, SvTRUE, SvTYPE, SvUNLOCK, SvUOK, SvUPGRADE, SvUTF8,
+SvUTF8_off, SvUTF8_on, SvUV, SvUVx, SvUVX, SvUV_nomg, SvVOK, sv_2bool,
+sv_2cv, sv_2io, sv_2iv_flags, sv_2mortal, sv_2nv, sv_2pvbyte,
+sv_2pvbyte_nolen, sv_2pvutf8, sv_2pvutf8_nolen, sv_2pv_flags, sv_2pv_nolen,
+sv_2uv_flags, sv_backoff, sv_bless, sv_catpv, sv_catpvf, sv_catpvf_mg,
+sv_catpvn, sv_catpvn_flags, sv_catpvn_mg, sv_catpv_mg, sv_catsv,
+sv_catsv_flags, sv_catsv_mg, sv_chop, sv_clear, sv_cmp, sv_cmp_locale,
+sv_collxfrm, sv_copypv, sv_dec, sv_derived_from, sv_eq, sv_force_normal,
+sv_force_normal_flags, sv_free, sv_gets, sv_grow, sv_inc, sv_insert,
+sv_isa, sv_isobject, sv_iv, sv_len, sv_len_utf8, sv_magic, sv_magicext,
+sv_mortalcopy, sv_newmortal, sv_newref, sv_nv, sv_pos_b2u, sv_pos_u2b,
+sv_pv, sv_pvbyte, sv_pvbyten, sv_pvbyten_force, sv_pvn, sv_pvn_force,
+sv_pvn_force_flags, sv_pvutf8, sv_pvutf8n, sv_pvutf8n_force, sv_reftype,
+sv_replace, sv_report_used, sv_reset, sv_rvweaken, sv_setiv, sv_setiv_mg,
+sv_setnv, sv_setnv_mg, sv_setpv, sv_setpvf, sv_setpvf_mg, sv_setpviv,
+sv_setpviv_mg, sv_setpvn, sv_setpvn_mg, sv_setpv_mg, sv_setref_iv,
+sv_setref_nv, sv_setref_pv, sv_setref_pvn, sv_setref_uv, sv_setsv,
+sv_setsv_flags, sv_setsv_mg, sv_setuv, sv_setuv_mg, sv_taint, sv_tainted,
+sv_true, sv_unmagic, sv_unref, sv_unref_flags, sv_untaint, sv_upgrade,
+sv_usepvn, sv_usepvn_mg, sv_utf8_decode, sv_utf8_downgrade, sv_utf8_encode,
+sv_utf8_upgrade, sv_utf8_upgrade_flags, sv_uv, sv_vcatpvfn, sv_vsetpvfn
 
 =item Unicode Support
 
@@ -5487,7 +5505,51 @@ B<-V>
 
 =back
 
-=head2 perldelta - what is new for perl v5.9.0
+=head2 perl591delta, perldelta - what is new for perl v5.9.1
+
+=over 4
+
+=item DESCRIPTION
+
+=item Incompatible Changes
+
+=item Core Enhancements
+
+=over 4
+
+=item Tied hashes in scalar context
+
+=back
+
+=item Modules and Pragmata
+
+=item Utility Changes
+
+=item New Documentation
+
+=item Performance Enhancements
+
+=item Installation and Configuration Improvements
+
+=item Selected Bug Fixes
+
+=item New or Changed Diagnostics
+
+=item Changed Internals
+
+=item New Tests
+
+=item Known Problems
+
+=item Platform Specific Problems
+
+=item Reporting Bugs
+
+=item SEE ALSO
+
+=back
+
+=head2 perl590delta, perldelta - what is new for perl v5.9.0
 
 =over 4
 
@@ -5524,8 +5586,6 @@ B<-V>
 =item Unsafe signals again available
 
 =item Tied Arrays with Negative Array Indices
-
-=item Tied hashes in scalar context
 
 =item local ${$x}
 
@@ -5614,6 +5674,8 @@ Win32::GetOSVersion
 
 =over 4
 
+=item Tied hashes in scalar context
+
 =item Net::Ping 450_service and 510_ping_udp failures
 
 =item B::C
@@ -5648,7 +5710,7 @@ Win32::GetOSVersion
 
 =back
 
-=head2 perl583delta, perldelta - what is new for perl v5.8.3
+=head2 perl583delta - what is new for perl v5.8.3
 
 =over 4
 
@@ -9091,6 +9153,8 @@ Miscellaneous Things
 
 =item BUGS AND CAVEATS
 
+=item ACKNOWLEDGEMENTS
+
 =item AUTHORS
 
 Gary Ng E<lt>71564.1743@CompuServe.COME<gt>, Gurusamy Sarathy
@@ -9176,8 +9240,7 @@ A thread exited while %d other threads were still running
 =item BUGS
 
 Parent-Child threads, Returning objects, Creating threads inside BEGIN
-blocks, PERL_OLD_SIGNALS are not threadsafe, will not be, Detached threads
-on Windows
+blocks, PERL_OLD_SIGNALS are not threadsafe, will not be
 
 =item AUTHOR and COPYRIGHT
 
@@ -11781,6 +11844,74 @@ CLIENT->output(LIST)
 
 =back
 
+=head2 DBM_Filter -- Filter DBM keys/values 
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item What is a DBM Filter?
+
+=over 4
+
+=item So what's new?
+
+=back
+
+=item METHODS
+
+=over 4
+
+=item $db->Filter_Push()
+
+=item $db->Filter_Key_Push()
+
+=item $db->Filter_Value_Push()
+
+Filter_Push, Filter_Key_Push, Filter_Value_Push
+
+=item $db->Filter_Pop()
+
+=item $db->Filtered()
+
+=back
+
+=item Writing a Filter
+
+=over 4
+
+=item Immediate Filters
+
+=item Canned Filters
+
+"name", params
+
+=back
+
+=item Filters Included
+
+utf8, encode, compress, int32, null
+
+=item NOTES
+
+=over 4
+
+=item Maintain Round Trip Integrity
+
+=item Don't mix filtered & non-filtered data in the same database file. 
+
+=back
+
+=item EXAMPLE
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=back
+
 =head2 DB_File - Perl5 access to Berkeley DB version 1.x
 
 =over 4
@@ -12180,10 +12311,10 @@ compactDump, veryCompact, set, get
 =item DESCRIPTION
 
 @dl_library_path, @dl_resolve_using, @dl_require_symbols, @dl_librefs,
-@dl_modules, dl_error(), $dl_debug, dl_findfile(), dl_expandspec(),
-dl_load_file(), dl_unload_file(), dl_load_flags(), dl_find_symbol(),
-dl_find_symbol_anywhere(), dl_undef_symbols(), dl_install_xsub(),
-bootstrap()
+@dl_modules, @dl_shared_objects, dl_error(), $dl_debug, dl_findfile(),
+dl_expandspec(), dl_load_file(), dl_unload_file(), dl_load_flags(),
+dl_find_symbol(), dl_find_symbol_anywhere(), dl_undef_symbols(),
+dl_install_xsub(), bootstrap()
 
 =item AUTHOR
 
@@ -14530,6 +14661,8 @@ pathname to the file
 $dont_use_nlink, symlinks
 
 =item NOTES
+
+=item BUGS AND CAVEATS
 
 =item HISTORY
 

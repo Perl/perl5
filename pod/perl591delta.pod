@@ -1,0 +1,78 @@
+=head1 NAME
+
+perldelta - what is new for perl v5.9.1
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.9.0 release and
+the 5.9.1 release.
+
+=head1 Incompatible Changes
+
+=head1 Core Enhancements
+
+=head2 Tied hashes in scalar context
+
+As of perl 5.8.2, tied hashes did not return anything useful in scalar
+context, for example when used as boolean tests:
+
+	if (%tied_hash) { ... }
+
+The old nonsensical behaviour was always to return false,
+regardless of whether the hash is empty or has elements.
+
+There is now an interface for the implementors of tied hashes to implement
+the behaviour of a hash in scalar context, via the SCALAR method (see
+L<perltie>).  Without a SCALAR method, perl will try to guess whether
+the hash is empty, by testing if it's inside an iteration (in this case
+it can't be empty) or by calling FIRSTKEY.
+
+=head1 Modules and Pragmata
+
+=head1 Utility Changes
+
+C<find2perl> now assumes C<-print> as a default action. Previously, it
+needed to be specified explicitly.
+
+=head1 New Documentation
+
+=head1 Performance Enhancements
+
+=head1 Installation and Configuration Improvements
+
+=head1 Selected Bug Fixes
+
+=head1 New or Changed Diagnostics
+
+=head1 Changed Internals
+
+=head1 New Tests
+
+=head1 Known Problems
+
+=head1 Platform Specific Problems
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the articles
+recently posted to the comp.lang.perl.misc newsgroup and the perl
+bug database at http://bugs.perl.org/ .  There may also be
+information at http://www.perl.com/ , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the B<perlbug>
+program included with your release.  Be sure to trim your bug down
+to a tiny but sufficient test case.  Your bug report, along with the
+output of C<perl -V>, will be sent off to perlbug@perl.org to be
+analysed by the Perl porting team.
+
+=head1 SEE ALSO
+
+The F<Changes> file for exhaustive details on what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut

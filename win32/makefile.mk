@@ -1150,6 +1150,7 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.vms      ..\pod\perlvms.pod
 	copy ..\README.vos      ..\pod\perlvos.pod
 	copy ..\README.win32    ..\pod\perlwin32.pod
+	copy ..\pod\perl591delta.pod ..\pod\perldelta.pod
 	cd ..\pod && $(MAKE) -f ..\win32\pod.mak converters
 	cd ..\lib && $(PERLEXE) lib_pm.PL
 	$(PERLEXE) $(PL2BAT) $(UTILS)
@@ -1202,13 +1203,14 @@ distclean: clean
 	-cd $(PODDIR) && del /f *.html *.bat checkpods \
 	    perlaix.pod perlamiga.pod perlapollo.pod perlbeos.pod \
 	    perlbs2000.pod perlce.pod perlcn.pod perlcygwin.pod \
-	    perldgux.pod perldos.pod perlepoc.pod perlfreebsd.pod \
-	    perlhpux.pod perlhurd.pod perlirix.pod perljp.pod perlko.pod \
-	    perlmachten.pod perlmacos.pod perlmacosx.pod perlmint.pod \
-	    perlmpeix.pod perlnetware.pod perlos2.pod perlos390.pod \
-	    perlos400.pod perlplan9.pod perlqnx.pod perlsolaris.pod \
-	    perltru64.pod perltw.pod perluts.pod perlvmesa.pod perlvms.pod \
-	    perlvms.pod perlvos.pod perlwin32.pod \
+	    perldelta.pod perldgux.pod perldos.pod perlepoc.pod \
+	    perlfreebsd.pod perlhpux.pod perlhurd.pod perlirix.pod \
+	    perljp.pod perlko.pod perlmachten.pod perlmacos.pod \
+	    perlmacosx.pod perlmint.pod perlmpeix.pod perlnetware.pod \
+	    perlos2.pod perlos390.pod perlos400.pod perlplan9.pod \
+	    perlqnx.pod perlsolaris.pod perltru64.pod perltw.pod \
+	    perluts.pod perlvmesa.pod perlvms.pod perlvms.pod perlvos.pod \
+	    perlwin32.pod \
 	    pod2html pod2latex pod2man pod2text pod2usage \
 	    podchecker podselect
 	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph pstruct h2xs \
