@@ -180,15 +180,15 @@ sub list_eq ($$) {
  SKIP: {
     # Is this a stupid thing to do on VMS, VOS and other unusual platforms?
 
-    skip "-- the IEEE infinity model is unavailable in this configuration."
+    skip("-- the IEEE infinity model is unavailable in this configuration.", 1)
        if (($^O eq 'VMS') && !defined($Config{useieee}));
 
-    skip "-- MPE/iX has serious fp indigestionf on w-packed infinities"
-       if (($^O eq 'mpeix'));
+    skip("-- $^O has serious fp indigestion on w-packed infinities", 1)
+       if (($^O eq 'mpeix') || ($^O eq 'ultrix'));
 
     my $inf = eval '2**10000';
 
-    skip "Couldn't generate infinity - got error '$@'"
+    skip("Couldn't generate infinity - got error '$@'", 1)
       unless defined $inf and $inf == $inf / 2 and $inf + 1 == $inf;
 
     local our $TODO;
@@ -201,13 +201,16 @@ sub list_eq ($$) {
 
  SKIP: {
 
-    skip "-- the full range of an IEEE double may not be available in this configuration."
+    skip("-- the full range of an IEEE double may not be available in this configuration.", 3)
        if (($^O eq 'VMS') && !defined($Config{useieee}));
+
+    skip("-- $^O does not like 2**1023", 3)
+       if (($^O eq 'ultrix'));
 
     # This should be about the biggest thing possible on an IEEE double
     my $big = eval '2**1023';
 
-    skip "Couldn't generate 2**1023 - got error '$@'", 3
+    skip("Couldn't generate 2**1023 - got error '$@'", 3)
       unless defined $big and $big != $big / 2;
 
     eval { $x = pack 'w', $big };
