@@ -12,51 +12,86 @@ sub SWASHNEW {
 
     print STDERR "SWASHNEW @_\n" if DEBUG;
 
-    my $file;
-
     if ($type and ref ${"${class}::{$type}"} eq $class) {
 	warn qq/Found \${"${class}::{$type}"}\n/ if DEBUG;
 	return ${"${class}::{$type}"};	# Already there...
     }
 
     if ($type) {
-
-	defined %utf8::In || do "unicore/In.pl";
-
-	$type =~ s/^In(?:[-_]|\s+)?(?!herited$)//i;
+	$type =~ s/^\s+//;
 	$type =~ s/\s+$//;
 
-        $type = 'Lampersand' if $type =~ /^(?:Is)?L&$/;
+	print "type = $type\n" if DEBUG;
 
-	my $inprefix = substr(lc($type), 0, 2);
-	if (exists $utf8::InPat{$inprefix}) {
-	    my $In = $type;
-	    for my $k (keys %{$utf8::InPat{$inprefix}}) {
-		if ($In =~ /^$k$/i) {
-		    $In = $utf8::InPat{$inprefix}->{$k};
-		    if (exists $utf8::In{$In}) {
-			$file = "unicore/In/$utf8::In{$In}";
-			print "inprefix = $inprefix, In = $In, k = $k, file = $file\n" if DEBUG;
-			last;
+	my $file;
+
+	unless (defined $file) {
+	    defined %utf8::Is || do "unicore/Is.pl";
+	    if ($type =~ /^(?:Is)?[- _]?([A-Z].*)$/i) {
+		my $istype = $1;
+		print "istype = $istype\n" if DEBUG;
+		unless ($list = do "unicore/Is/$istype.pl") {
+		    if (exists $utf8::Is{$istype}) {
+			$file = "unicore/Is/$utf8::Is{$istype}";
+		    } else {
+			my $isprefix = substr(lc($istype), 0, 2);
+			print "isprefix = $isprefix\n" if DEBUG;
+			if (exists $utf8::IsPat{$isprefix}) {
+			    my $Is = $istype;
+			    print "isprefix = $isprefix, Is = $Is\n" if DEBUG;
+			    for my $k (keys %{$utf8::IsPat{$isprefix}}) {
+				print "isprefix = $isprefix, Is = $Is, k = $k\n" if DEBUG;
+				if ($Is =~ /^$k$/i) {
+				    $file = "unicore/Is/$utf8::IsPat{$isprefix}->{$k}";
+				    print "isprefix = $isprefix, Is = $Is, k = $k, file = $file\n" if DEBUG;
+				    last;
+				}
+			    }
+			}
 		    }
+		}
+	    }
+			
+	    unless (defined $file) {
+		defined %utf8::In || do "unicore/In.pl";
+		$type = 'Lampersand' if $type =~ /^(?:Is)?L&$/;
+		if ($type =~ /^(?:In)?[- _]?(?!herited$)(.+)/i) {
+		    my $intype = $1;
+		    print "intype = $intype\n" if DEBUG;
+		    if (exists $utf8::Is{$istype}) {
+			$file = "unicore/In/$utf8::In{$intype}";
+		    } else {
+			my $inprefix = substr(lc($intype), 0, 2);
+			print "inprefix = $inprefix\n" if DEBUG;
+			if (exists $utf8::InPat{$inprefix}) {
+			    my $In = $intype;
+			    print "inprefix = $inprefix, In = $In\n" if DEBUG;
+			    for my $k (keys %{$utf8::InPat{$inprefix}}) {
+				print "inprefix = $inprefix, In = $In, k = $k\n" if DEBUG;
+				if ($In =~ /^$k$/i) {
+				    $file = "unicore/In/$utf8::InPat{$inprefix}->{$k}";
+				    print "inprefix = $inprefix, In = $In, k = $k, file = $file\n" if DEBUG;
+				    last;
+				}
+			    }
+			}
+		    }
+		}
+	    }
+
+	    unless (defined $file) {
+		if ($type =~ /^To([A-Z][A-Za-z]+)$/) {
+		    $file = "unicore/To/$1";
 		}
 	    }
 	}
 
-	unless (defined $file) {
-	    # This is separate from 'To' in preparation of Is.pl (a la In.pl).
-	    if ($type =~ /^Is([A-Z][A-Za-z]*)$/) {
-		$file = "unicore/Is/$1";
-	    } elsif ((not defined $file) && $type =~ /^To([A-Z][A-Za-z]*)$/) {
-		$file = "unicore/To/$1";
-	    }
+	if (defined $file) {
+	    $list = do "$file.pl";
 	}
-    }
 
-    {
-        $list ||= do "$file.pl"
-	      ||  do "unicore/Is/$type.pl"
-	      ||  croak("Can't find Unicode character property \"$type\"");
+	croak("Can't find Unicode character property \"$type\"")
+	    unless $list;
     }
 
     my $extras;

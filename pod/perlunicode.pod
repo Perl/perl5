@@ -190,74 +190,93 @@ equal to C<\P{InTamil}>.
 The C<In> and C<Is> can be left out: C<\p{Greek}> is equal to
 C<\p{InGreek}>, C<\P{Pd}> is equal to C<\P{Pd}>.
 
-Here is the list as of Unicode 3.1.1 (the two-letter classes) and as
-defined by Perl (the one-letter classes).
+    Short       Long
 
-    L  Letter
-    Lu Letter, Uppercase
-    Ll Letter, Lowercase
-    Lt Letter, Titlecase
-    Lm Letter, Modifier
-    Lo Letter, Other
-    M  Mark
-    Mn Mark, Non-Spacing
-    Mc Mark, Spacing Combining
-    Me Mark, Enclosing
-    N  Number
-    Nd Number, Decimal Digit
-    Nl Number, Letter
-    No Number, Other
-    P  Punctuation
-    Pc Punctuation, Connector
-    Pd Punctuation, Dash
-    Ps Punctuation, Open
-    Pe Punctuation, Close
-    Pi Punctuation, Initial quote
-        (may behave like Ps or Pe depending on usage)
-    Pf Punctuation, Final quote
-        (may behave like Ps or Pe depending on usage)
-    Po Punctuation, Other
-    S  Symbol
-    Sm Symbol, Math
-    Sc Symbol, Currency
-    Sk Symbol, Modifier
-    So Symbol, Other
-    Z  Separator
-    Zs Separator, Space
-    Zl Separator, Line
-    Zp Separator, Paragraph
-    C  Other
-    Cc Other, Control
-    Cf Other, Format
-    Cs Other, Surrogate
-    Co Other, Private Use
-    Cn Other, Not Assigned
+    L           Letter
+    Lu          Uppercase Letter
+    Ll          Lowercase Letter
+    Lt          Titlecase Letter
+    Lm          Modifier Letter
+    Lo          Other Letter
+
+    M           Mark
+    Mn          Non-Spacing Mark
+    Mc          Spacing Combining Mark
+    Me          Enclosing Mark
+
+    N           Number
+    Nd          Decimal Digit Number
+    Nl          Letter Number
+    No          Other Number
+
+    P           Punctuation
+    Pc          Connector Punctuation
+    Pd          Dash Punctuation
+    Ps          Open Punctuation
+    Pe          Close Punctuation
+    Pi          Initial Punctuation
+                (may behave like Ps or Pe depending on usage)
+    Pf          Final Punctuation
+                (may behave like Ps or Pe depending on usage)
+    Po          Other Punctuation
+
+    S           Symbol
+    Sm          Math Symbol
+    Sc          Currency Symbol
+    Sk          Modifier Symbol
+    So          Other Symbol
+
+    Z           Separator
+    Zs          Space Separator
+    Zl          Line Separator
+    Zp          Paragraph Separator
+
+    C           Other
+    Cc          (Other) Control
+    Cf          (Other) Format
+    Cs          (Other) Surrogate
+    Co          (Other) Private Use
+    Cn          (Other) Not Assigned
 
 There's also C<L&> which is an alias for C<Ll>, C<Lu>, and C<Lt>.
+
+The following reserved ranges have C<In> tests:
+
+    CJK Ideograph Extension A
+    CJK Ideograph
+    Hangul Syllable
+    Non Private Use High Surrogate
+    Private Use High Surrogate
+    Low Surrogate
+    Private Surrogate
+    CJK Ideograph Extension B
+
+For example C<"\x{AC00}" =~ \p{HangulSyllable}> will test true.
+(Handling of surrogates is not implemented yet.)
 
 Additionally, because scripts differ in their directionality
 (for example Hebrew is written right to left), all characters
 have their directionality defined:
 
-    BidiL   Left-to-Right
-    BidiLRE Left-to-Right Embedding
-    BidiLRO Left-to-Right Override
-    BidiR   Right-to-Left
-    BidiAL  Right-to-Left Arabic
-    BidiRLE Right-to-Left Embedding
-    BidiRLO Right-to-Left Override
-    BidiPDF Pop Directional Format
-    BidiEN  European Number
-    BidiES  European Number Separator
-    BidiET  European Number Terminator
-    BidiAN  Arabic Number
-    BidiCS  Common Number Separator
-    BidiNSM Non-Spacing Mark
-    BidiBN  Boundary Neutral
-    BidiB   Paragraph Separator
-    BidiS   Segment Separator
-    BidiWS  Whitespace
-    BidiON  Other Neutrals
+    BidiL       Left-to-Right
+    BidiLRE     Left-to-Right Embedding
+    BidiLRO     Left-to-Right Override
+    BidiR       Right-to-Left
+    BidiAL      Right-to-Left Arabic
+    BidiRLE     Right-to-Left Embedding
+    BidiRLO     Right-to-Left Override
+    BidiPDF     Pop Directional Format
+    BidiEN      European Number
+    BidiES      European Number Separator
+    BidiET      European Number Terminator
+    BidiAN      Arabic Number
+    BidiCS      Common Number Separator
+    BidiNSM     Non-Spacing Mark
+    BidiBN      Boundary Neutral
+    BidiB       Paragraph Separator
+    BidiS       Segment Separator
+    BidiWS      Whitespace
+    BidiON      Other Neutrals
 
 =head2 Scripts
 

@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..744\n";
+print "1..747\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2229,4 +2229,17 @@ print "# some Unicode properties\n";
 
     print "not " if     "1" =~ /\p{L&}/;
     print "ok 744\n";
+}
+
+{
+    print "not " unless "a" =~ /\p{LowercaseLetter}/;
+    print "ok 745\n";
+
+    print "not " if     "A" =~ /\p{LowercaseLetter}/;
+    print "ok 746\n";
+}
+
+{
+    print "not " unless "\x{AC00}" =~ /\p{HangulSyllable}/;
+    print "ok 747\n";
 }
