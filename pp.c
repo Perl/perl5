@@ -1138,6 +1138,8 @@ PP(pp_i_modulo)
     dSP; dATARGET; tryAMAGICbin(mod,opASSIGN); 
     {
       dPOPTOPiirl;
+      if (!right)
+	DIE("Illegal modulus zero");
       SETi( left % right );
       RETURN;
     }
