@@ -3929,6 +3929,9 @@ typedef struct am_table_short AMTS;
 #if !defined(Strtoul) && defined(HAS_STRTOUL)
 #   define Strtoul	strtoul
 #endif
+#if !defined(Strtoul) && defined(HAS_STRTOL) /* Last resort. */
+#   define Strtoul(s, e, b)	strchr((s), '-') ? ULONG_MAX : (unsigned long)strtol((s), (e), (b))
+#endif
 #ifndef Atoul
 #   define Atoul(s)	Strtoul(s, (char **)NULL, 10)
 #endif
