@@ -245,7 +245,7 @@ sub ftp'login
 	local( $remote_user, $remote_password ) = @_;
 
 	if( $proxy ){
-		&ftp'send( "USER $remote_user@$site" );
+		&ftp'send( "USER $remote_user\@$site" );
 	}
 	else {
 		&ftp'send( "USER $remote_user" );
