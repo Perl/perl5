@@ -57,7 +57,7 @@ for (@prgs){
 
 sub test_invalid_decl {
     my ($code,$todo) = @_;
-    $todo //= '';
+    $todo = '' unless defined $todo;
     eval $code;
     if ($@ =~ /^Illegal declaration of anonymous subroutine at/) {
 	print "ok ", ++$i, " - '$code' is illegal$todo\n";
