@@ -17,6 +17,7 @@ WriteMakefile(
     ($] >= 5.005 ?    ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM => 'threads.pm', # retrieve abstract from module
        AUTHOR     => 'Artur Bergman  <artur@contiller.se>') : ()),
+    'MAN3PODS'		=> {},  # Pods will be built by installman
     'LIBS'		=> [''], # e.g., '-lm'
     'DEFINE'		=> '', # e.g., '-DHAVE_SOMETHING'
 	# Insert -I. if you add *.h files later:

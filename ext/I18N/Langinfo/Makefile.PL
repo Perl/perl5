@@ -12,6 +12,7 @@ WriteMakefile(
     'DEFINE'		=> '', # e.g., '-DHAVE_SOMETHING'
 	# Insert -I. if you add *.h files later:
     'INC'		=> '', # e.g., '-I/usr/include/other'
+    'MAN3PODS'		=> {},  # Pods will be built by installman
     # Without this the constants xs files are spotted, and cause rules to be
     # added to delete the similarly named C files, which isn't what we want.
     XS => {'Langinfo.xs' => 'Langinfo.c'},
