@@ -160,7 +160,7 @@ require DynaLoader;
 use strict;
 use vars qw( $VERSION @ISA @EXPORT @EXPORT_OK $data );
 
-$VERSION = "2.006";
+$VERSION = "2.007";
 
 @ISA = qw(Exporter DynaLoader);
 @EXPORT =  qw();
@@ -902,7 +902,7 @@ Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
     struct lconv *lc = localeconv();
     char *radix = lc->decimal_point;
     if (radix && IN_LOCALE) { 
-        STRLEN len;
+        STRLEN len = strlen(radix);
         if (*sp + len <= send && memEQ(*sp, radix, len)) {
             *sp += len;
             return TRUE; 

@@ -1,3 +1,7 @@
+2.007 - 18th September 2003
+
+    * small fix in grok_numeric_radix: variable was used uninitialized
+
 2.006 - 8th September 2003
 
     * call_(pv|sv|method|argv) added
