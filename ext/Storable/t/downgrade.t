@@ -9,6 +9,13 @@
 # I ought to keep this test easily backwards compatible to 5.004, so no
 # qr//;
 
+BEGIN {
+    if ($] < 5.005) {
+	print "1..0 # Skip: usage of qr//\n";
+	exit 0;
+    }
+}
+
 # This test checks downgrade behaviour on pre-5.8 perls when new 5.8 features
 # are encountered.
 

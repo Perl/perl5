@@ -23,6 +23,10 @@ sub BEGIN {
         print "1..0 # Skip: Storable was not built\n";
         exit 0;
     }
+    if ($] < 5.005) {
+        print "1..0 # Skip: Config{ptrsize} not defined\n";
+        exit 0;
+    }
 }
 
 use strict;
