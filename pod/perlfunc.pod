@@ -393,8 +393,9 @@ blessing (and blessings) of objects.
 =item caller
 
 Returns the context of the current subroutine call.  In a scalar context,
-returns TRUE if there is a caller, that is, if we're in a subroutine or
-eval() or require(), and FALSE otherwise.  In a list context, returns
+returns the caller's package name if there is a caller, that is, if
+we're in a subroutine or eval() or require(), and the undefined value
+otherwise.  In a list context, returns
 
     ($package, $filename, $line) = caller;
 
@@ -403,7 +404,7 @@ print a stack trace.  The value of EXPR indicates how many call frames
 to go back before the current one.
 
     ($package, $filename, $line,
-     $subroutine, $hasargs, $wantargs) = caller($i);
+     $subroutine, $hasargs, $wantarray) = caller($i);
 
 Furthermore, when called from within the DB package, caller returns more
 detailed information: it sets the list variable @DB::args to be the
