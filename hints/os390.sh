@@ -9,7 +9,7 @@
 #     Len Johnson <lenjay@ibm.net>
 #     Bud Huff  <BAHUFF@us.oracle.com>
 #     Peter Prymmer <pvhp@forte.com>
-#     Andy Dougherty  <doughera@lafcol.lafayette.edu>
+#     Andy Dougherty  <doughera@lafayette.edu>
 #     Tim Bunce  <Tim.Bunce@ig.co.uk>
 #
 #  as well as the authors of the aix.sh file

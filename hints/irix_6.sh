@@ -3,7 +3,7 @@
 # original from Krishna Sethuraman, krishna@sgi.com
 #
 # Modified Mon Jul 22 14:52:25 EDT 1996
-# 	Andy Dougherty <doughera@lafcol.lafayette.edu>
+# 	Andy Dougherty <doughera@lafayette.edu>
 # 	with help from Dean Roehrich <roehrich@cray.com>.
 #   cc -n32 update info from Krishna Sethuraman, krishna@sgi.com.
 #       additional update from Scott Henry, scotth@sgi.com
