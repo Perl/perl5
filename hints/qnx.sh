@@ -1,10 +1,10 @@
 #----------------------------------------------------------------
 # QNX hints
 #
-# As of perl5.003_09, perl5 will compile without errors
-# and pass almost all the tests in the test suite. The remaining
-# failures have been identified as bugs in the Watcom libraries
-# which I hope will be fixed in the near future.
+# As of perl5.004_04, all tests pass under:
+#  QNX 4.23A
+#  Watcom 10.6 with Beta/970211.wcc.update.tar.F
+#  socket3r.lib Nov21 1996.
 #
 # As with many unix ports, this one depends on a few "standard"
 # unix utilities which are not necessarily standard for QNX.
@@ -33,11 +33,11 @@
 #----------------------------------------------------------------
 # Outstanding Issues:
 #   lib/posix.t test fails on test 17 because acos(1) != 0.
-#      Watcom promises to fix this in next release.
+#      Resolved in 970211 Beta
 #   lib/io_udp.t test hangs because of a bug in getsockname().
 #      Fixed in latest BETA socket3r.lib
 #   If there is a softlink in your path, Findbin will fail.
-#      This is a documented feature of getpwd().
+#      This is a documented feature of perl's getpwd().
 #   There is currently no support for dynamically linked
 #      libraries.
 #----------------------------------------------------------------
@@ -63,6 +63,16 @@ d_csh='undef'
 full_csh=''
 
 #----------------------------------------------------------------
+# setuid scripts are secure under QNX.
+#  (Basically, the same race conditions apply, but assuming
+#  the scripts are located in a secure directory, the methods
+#  for exploiting the race condition are defeated because
+#  the loader expands the script name fully before executing
+#  the interpreter.)
+#----------------------------------------------------------------
+d_suidsafe='define'
+
+#----------------------------------------------------------------
 # difftime is implemented as a preprocessor macro, so it doesn't show
 # up in the libraries:
 #----------------------------------------------------------------
@@ -73,16 +83,6 @@ d_difftime='define'
 # about the math library or it will confuse the linker
 #----------------------------------------------------------------
 d_strtod='define'
-
-#----------------------------------------------------------------
-# The following exist in the libraries, but there are no
-# prototypes available:
-#----------------------------------------------------------------
-d_setregid='undef'
-d_setreuid='undef'
-d_setlinebuf='undef'
-d_truncate='undef'
-d_getpgid='undef'
 
 lib_ext='3r.lib'
 libc='/usr/lib/clib3r.lib'
@@ -107,7 +107,7 @@ ccflags='-DHIDEMYMALLOC -mf -w4 -Wc,-wcd=202 -Wc,-wcd=203 -Wc,-wcd=302 -Wc,-fi=u
 # link as well as the compile. If optimize != -g, you should
 # remove this.
 #----------------------------------------------------------------
-ldflags="-g"
+ldflags="-g -N1M"
 
 so='none'
 selecttype='fd_set *'
@@ -144,6 +144,7 @@ if [ -z "`which nm 2>/dev/null`" ]; then
 	#%C	<lib> [<lib> ...]
 	#	Designed to mimic Unix's nm utility to list
 	#	defined symbols in a library
+	unset WLIB
 	for i in $*; do wlib $i; done |
 	  awk '
 	    /^  / {
