@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Aug 17 02:52:39 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Thu Aug 17 22:38:49 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -5801,6 +5801,13 @@ $undef) dflt='none' ;;
 esac
 case "$dflt" in
 ''|' ') dflt=none ;;
+esac
+case "$dflt" in
+5.005) case "$bincompat5005" in
+       $define|true|[yY]*) ;;
+       *) dflt=none ;;
+       esac
+       ;;
 esac
 $cat <<'EOM'
 
