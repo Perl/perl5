@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Feb 18 00:56:58 EET 1999 [metaconfig 3.0 PL70]
+# Generated on Thu Feb 18 01:09:27 EET 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -2487,7 +2487,12 @@ cat <<EOM
 
 Perl can be built to take advantage of threads, on some systems.
 To do so, Configure must be run with -Dusethreads.
-(See README.threads for details.)
+
+Note that threading is a highly experimental feature, and
+some known race conditions still remain.  If you choose to try
+it, be very sure to not actually deploy it for production
+purposes.  README.threads has more details, and is required
+reading if you enable threads.
 EOM
 case "$usethreads" in
 $define|true|[yY]*)     dflt='y';;
@@ -3024,8 +3029,8 @@ baserev=5.0
 echo " "
 echo "Getting the current patchlevel..." >&4
 if $test -r $rsrc/patchlevel.h;then
-	patchlevel=`awk '/define[ 	]+PATCHLEVEL/ {print $3}' $rsrc/patchlevel.h`
-	subversion=`awk '/define[ 	]+SUBVERSION/ {print $3}' $rsrc/patchlevel.h`
+	patchlevel=`awk '/define[ 	]+PERL_VERSION/ {print $3}' $rsrc/patchlevel.h`
+	subversion=`awk '/define[ 	]+PERL_SUBVERSION/ {print $3}' $rsrc/patchlevel.h`
 else
 	patchlevel=0
 	subversion=0
@@ -13159,7 +13164,7 @@ $test -f UU/cmdline.opt && $cat UU/cmdline.opt >> config.sh
 
 : add special variables
 $test -f $src/patchlevel.h && \
-awk '/^#define/ {printf "%s=%s\n",$2,$3}' $src/patchlevel.h >>config.sh
+awk '/^#define[ 	]+PERL_/ {printf "%s=%s\n",$2,$3}' $src/patchlevel.h >>config.sh
 echo "CONFIG=true" >>config.sh
 
 : propagate old symbols
