@@ -31,6 +31,344 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 10688] By: jhi                                   on 2001/06/18  13:44:18
+        Log: Subject: [PATCH 5.7.1] sv.c documentation
+             From: davem@fdgroup.co.uk
+             Date: Mon, 18 Jun 2001 00:47:52 +0100 (BST)
+             Message-Id: <200106172347.AAA05475@gizmo.fdgroup.co.uk>
+     Branch: perl
+	   ! embed.pl pod/perlapi.pod pod/perlguts.pod pod/perlintern.pod
+	   ! sv.c sv.h
+____________________________________________________________________________
+[ 10687] By: jhi                                   on 2001/06/18  13:38:03
+        Log: Subject: [PATCH bleadperl DOC] $@ Clarification in pod/perlvar.pod
+             From: "Jon Gunnip" <jongunnip@hotmail.com>
+             Date: Sun, 17 Jun 2001 18:24:29 -0400
+             Message-ID: <F136EXUIEAOeIiGXix40000e3a7@hotmail.com>
+     Branch: perl
+	   ! pod/perlvar.pod
+____________________________________________________________________________
+[ 10686] By: jhi                                   on 2001/06/18  13:32:13
+        Log: Move the locale/strict/warnings helper files back
+             under the t/lib; this way the amount of non-installabled
+             stuff under lib/ stays smaller.
+     Branch: perl
+	   + t/lib/locale/latin1 t/lib/locale/utf8 t/lib/strict/refs
+	   + t/lib/strict/subs t/lib/strict/vars t/lib/warnings/1global
+	   + t/lib/warnings/2use t/lib/warnings/3both t/lib/warnings/4lint
+	   + t/lib/warnings/5nolint t/lib/warnings/6default
+	   + t/lib/warnings/7fatal t/lib/warnings/8signal
+	   + t/lib/warnings/9enabled t/lib/warnings/av t/lib/warnings/doio
+	   + t/lib/warnings/doop t/lib/warnings/gv t/lib/warnings/hv
+	   + t/lib/warnings/malloc t/lib/warnings/mg t/lib/warnings/op
+	   + t/lib/warnings/perl t/lib/warnings/perlio t/lib/warnings/perly
+	   + t/lib/warnings/pp t/lib/warnings/pp_ctl t/lib/warnings/pp_hot
+	   + t/lib/warnings/pp_sys t/lib/warnings/regcomp
+	   + t/lib/warnings/regexec t/lib/warnings/run t/lib/warnings/sv
+	   + t/lib/warnings/taint t/lib/warnings/toke
+	   + t/lib/warnings/universal t/lib/warnings/utf8
+	   + t/lib/warnings/util
+	   - lib/locale/latin1 lib/locale/utf8 lib/strict/refs
+	   - lib/strict/subs lib/strict/vars lib/warnings/1global
+	   - lib/warnings/2use lib/warnings/3both lib/warnings/4lint
+	   - lib/warnings/5nolint lib/warnings/6default lib/warnings/7fatal
+	   - lib/warnings/8signal lib/warnings/9enabled lib/warnings/av
+	   - lib/warnings/doio lib/warnings/doop lib/warnings/gv
+	   - lib/warnings/hv lib/warnings/malloc lib/warnings/mg
+	   - lib/warnings/op lib/warnings/perl lib/warnings/perlio
+	   - lib/warnings/perly lib/warnings/pp lib/warnings/pp_ctl
+	   - lib/warnings/pp_hot lib/warnings/pp_sys lib/warnings/regcomp
+	   - lib/warnings/regexec lib/warnings/run lib/warnings/sv
+	   - lib/warnings/taint lib/warnings/toke lib/warnings/universal
+	   - lib/warnings/utf8 lib/warnings/util
+	   ! MANIFEST installperl lib/locale.t lib/strict.t
+____________________________________________________________________________
+[ 10685] By: jhi                                   on 2001/06/18  13:11:49
+        Log: Split off the pack/unpack code, from Nicholas Clark.
+     Branch: perl
+	   + pp_pack.c
+	   ! MANIFEST Makefile.SH Makefile.micro cflags.SH embed.h embed.pl
+	   ! objXSUB.h perlapi.c pod/perlhack.pod pp.c proto.h
+	   ! vms/descrip_mms.template win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 10684] By: jhi                                   on 2001/06/18  12:25:55
+        Log: Guard the SysV IPC tests against being invoked in
+             SysV-IPC-less places.
+     Branch: perl
+	   ! ext/IPC/SysV/t/msg.t ext/IPC/SysV/t/sem.t
+____________________________________________________________________________
+[ 10683] By: nick                                  on 2001/06/18  12:24:42
+        Log: Integrate mainline (new test scheme now ok on Linux).
+     Branch: perlio
+	  +> lib/warnings.t
+	  !> dump.c sv.c
+____________________________________________________________________________
+[ 10682] By: jhi                                   on 2001/06/18  12:20:50
+        Log: Add the locale.c and numeric.c to the microperl sources.
+     Branch: perl
+	   ! Makefile.micro win32/Makefile
+____________________________________________________________________________
+[ 10681] By: jhi                                   on 2001/06/18  11:57:45
+        Log: Subject: [PATCH dump.c] FLAGS = (...,OUR,TYPED,...)
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Mon, 18 Jun 2001 14:23:44 +0530
+             Message-ID: <20010618142344.A13136@lustre.linux.in>
+     Branch: perl
+	   ! dump.c
+____________________________________________________________________________
+[ 10680] By: jhi                                   on 2001/06/18  11:56:12
+        Log: Subject: Re: [PATCH] more anonymous stash cleanups
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Mon, 18 Jun 2001 15:50:32 +0530
+             Message-ID: <20010618155032.A13223@lustre.linux.in>
+             
+             Plus the comment left in as suggested by NI-S.
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 10679] By: jhi                                   on 2001/06/18  11:49:27
+        Log: One missed file.
+     Branch: perl
+	   + lib/warnings.t
+____________________________________________________________________________
+[ 10678] By: nick                                  on 2001/06/18  08:05:29
+        Log: Integrate mainline (part2 - the deletes)
+     Branch: perlio
+	   - lib/Text/Abbrev/t/abbrev.t t/lib/anydbm.t t/lib/b-stash.t
+	   - t/lib/bigfltpm.t t/lib/bigintpm.t t/lib/cwd.t t/lib/db-btree.t
+	   - t/lib/db-hash.t t/lib/db-recno.t t/lib/extutils.t
+	   - t/lib/filefind.t t/lib/filehand.t t/lib/filter-util.t
+	   - t/lib/findtaint.t t/lib/ftmp-security.t t/lib/gdbm.t
+	   - t/lib/glob-basic.t t/lib/glob-case.t t/lib/io_dup.t
+	   - t/lib/io_poll.t t/lib/io_sel.t t/lib/io_taint.t t/lib/mbimbf.t
+	   - t/lib/ndbm.t t/lib/net-hostent.t t/lib/odbm.t t/lib/open2.t
+	   - t/lib/open3.t t/lib/posix.t t/lib/sdbm.t t/lib/sigaction.t
+	   - t/lib/syslfs.t t/pragma/locale.t t/pragma/strict.t
+	   - t/pragma/subs.t t/pragma/warn/mg t/pragma/warnings.t
+____________________________________________________________________________
+[ 10677] By: nick                                  on 2001/06/18  08:04:44
+        Log: Integrate mainline (part1)
+     Branch: perlio
+	  +> (branch 376 files)
+	   - (delete 219 files)
+	  !> (integrate 151 files)
+____________________________________________________________________________
+[ 10676] By: jhi                                   on 2001/06/18  04:17:15
+        Log: The Grand Trek: move the *.t files from t/ to lib/ and ext/.
+             No doubt I made some mistakes like missed some files or
+             misnamed some files.  The naming rules were more or less:
+             (1) if the module is from CPAN, follows its ways, be it
+             t/*.t or test.pl.
+             (2) otherwise if there are multiple tests for a module
+             put them in a t/
+             (3) otherwise if there's only one test put it in Module.t
+             (4) helper files go to module/ (locale, strict, warnings)
+             (5) use longer filenames now that we can (but e.g. the
+             compat-0.6.t and the Text::Balanced test files still
+             were renamed to be more civil against the 8.3 people)
+             installperl was updated appropriately not to install the
+             *.t files or the help files from under lib.
+             
+             TODO: some helper files still remain under t/ that could
+             follow their 'masters'.  UPDATE: On second thoughts, why
+             should they.  They can continue to live under t/lib, and
+             in fact the locale/strict/warnings helpers that were moved
+             could be moved back.  This way the amount of non-installable
+             stuff under lib/ stays smaller.
+     Branch: perl
+	   + (add 253 files)
+	   - (delete 254 files)
+	   ! MANIFEST installperl lib/Test/Harness.pm t/TEST t/harness
+____________________________________________________________________________
+[ 10675] By: jhi                                   on 2001/06/18  03:15:02
+        Log: The warning no more comes from util.c, it comes from numeric.c.
+     Branch: perl
+	   ! README.tru64
+____________________________________________________________________________
+[ 10674] By: jhi                                   on 2001/06/18  00:56:22
+        Log: Subject: Re: anyone good at casting spells?
+             From: Spider Boardman <spider@Orb.Nashua.NH.US>
+             Date: Sun, 17 Jun 2001 21:21:04 -0400
+             Message-Id: <200106180121.VAA10195@Orb.Nashua.NH.US> 
+     Branch: perl
+	   ! ext/POSIX/POSIX.xs hv.h
+____________________________________________________________________________
+[ 10673] By: jhi                                   on 2001/06/17  22:24:53
+        Log: Protect the (original) thread tests against testing if no 5.005
+             threads have been configured.
+     Branch: perl
+	   ! ext/Thread/create.t ext/Thread/die.t ext/Thread/die2.t
+	   ! ext/Thread/io.t ext/Thread/join.t ext/Thread/join2.t
+	   ! ext/Thread/list.t ext/Thread/lock.t ext/Thread/queue.t
+	   ! ext/Thread/specific.t ext/Thread/sync.t ext/Thread/sync2.t
+	   ! ext/Thread/unsync.t ext/Thread/unsync2.t ext/Thread/unsync3.t
+	   ! ext/Thread/unsync4.t
+____________________________________________________________________________
+[ 10672] By: jhi                                   on 2001/06/17  22:09:28
+        Log: Try the new test scanning scheme on Text::Abbrev.
+     Branch: perl
+	   + lib/Text/Abbrev.t
+	   - lib/Text/Abbrev/t/abbrev.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 10671] By: jhi                                   on 2001/06/17  22:07:08
+        Log: Change the scan policy of the *.t and test.pl files,
+             now the *.t do not need to live in a t/ directory.
+     Branch: perl
+	   ! t/TEST t/harness
+____________________________________________________________________________
+[ 10670] By: jhi                                   on 2001/06/17  20:32:35
+        Log: Subject: [PATCH perlfaq7.pod] fix dangling L<perlobj/"WARNING">
+             From: Ilmari Karonen <iltzu@sci.fi>
+             Date: Mon, 18 Jun 2001 00:30:21 +0300 (EET DST)
+             Message-ID: <Pine.SOL.3.96.1010618002009.6629A-100000@simpukka>
+     Branch: perl
+	   ! pod/perlfaq7.pod
+____________________________________________________________________________
+[ 10669] By: jhi                                   on 2001/06/17  20:30:22
+        Log: Quench the warnings from Tru64; the HP-UX is still
+             broken because it really, REALLY, doesn't like the
+             HvARRAY() being lvalue:
+             
+             cc: "hv.c", line 192: warning 524: Cast (non-lvalue) appears on left-hand side of assignment.
+             cc: "hv.c", line 192: error 1549: Modifiable lvalue required for assignment operator.
+     Branch: perl
+	   ! hv.c
+____________________________________________________________________________
+[ 10668] By: jhi                                   on 2001/06/17  19:13:24
+        Log: Integrate change #10667 from maintperl:
+             
+             change#10449 broke the special-case that makes lexicals inside the
+             eval"" within DB::DB() visible
+     Branch: perl
+	  !> op.c
+____________________________________________________________________________
+[ 10667] By: gsar                                  on 2001/06/17  19:08:27
+        Log: change#10449 broke the special-case that makes lexicals inside the
+             eval"" within DB::DB() visible
+     Branch: maint-5.6/perl
+	   ! op.c
+____________________________________________________________________________
+[ 10666] By: jhi                                   on 2001/06/17  17:50:07
+        Log: Still spurious output; indent the code a bit.
+             
+             TODO1: separate the utility functions like MkDir
+             into a helper script?
+             
+             TODO2: I see a lot of repetition in the filepath()
+             and dirpath() calls.
+     Branch: perl
+	   ! t/lib/filefind.t t/lib/findtaint.t
+____________________________________________________________________________
+[ 10665] By: jhi                                   on 2001/06/17  16:59:42
+        Log: Regen modlib, toc.
+     Branch: perl
+	   ! pod/perlmodlib.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 10664] By: jhi                                   on 2001/06/17  16:55:28
+        Log: Add libnetcfg to perlutil.
+     Branch: perl
+	   ! pod/perlutil.pod
+____________________________________________________________________________
+[ 10663] By: jhi                                   on 2001/06/17  16:53:29
+        Log: Initial integration of libnet-1.0703.
+             The Configure script renamed as libnetcfg, will be
+             installed along other utilities.
+     Branch: perl
+	   + lib/Net/ChangeLog.libnet lib/Net/Cmd.pm lib/Net/Config.eg
+	   + lib/Net/Config.pm lib/Net/Domain.pm lib/Net/DummyInetd.pm
+	   + lib/Net/FTP.pm lib/Net/FTP/A.pm lib/Net/FTP/E.pm
+	   + lib/Net/FTP/I.pm lib/Net/FTP/L.pm lib/Net/FTP/dataconn.pm
+	   + lib/Net/Hostname.eg lib/Net/NNTP.pm lib/Net/Netrc.pm
+	   + lib/Net/PH.pm lib/Net/POP3.pm lib/Net/README.config
+	   + lib/Net/README.libnet lib/Net/SMTP.pm lib/Net/SNPP.pm
+	   + lib/Net/Time.pm lib/Net/demos/ftp lib/Net/demos/inetd
+	   + lib/Net/demos/nntp lib/Net/demos/nntp.mirror
+	   + lib/Net/demos/pop3 lib/Net/demos/smtp.self lib/Net/demos/snpp
+	   + lib/Net/demos/time lib/Net/libnet.ppd lib/Net/libnetFAQ.pod
+	   + lib/Net/t/ftp.t lib/Net/t/hostname.t lib/Net/t/nntp.t
+	   + lib/Net/t/ph.t lib/Net/t/require.t lib/Net/t/smtp.t
+	   + utils/libnetcfg.PL
+	   ! MANIFEST utils.lst utils/Makefile
+____________________________________________________________________________
+[ 10662] By: jhi                                   on 2001/06/17  15:37:32
+        Log: Less potentially test-harness-confusing output.
+     Branch: perl
+	   ! lib/Memoize/t/expire_module_t.t
+____________________________________________________________________________
+[ 10661] By: jhi                                   on 2001/06/17  15:31:04
+        Log: The final print annoys make test.
+     Branch: perl
+	   ! t/lib/filefind.t t/lib/findtaint.t
+____________________________________________________________________________
+[ 10660] By: jhi                                   on 2001/06/17  14:00:21
+        Log: Add an option for handling dangling symbolic links.
+     Branch: perl
+	   ! lib/File/Find.pm t/lib/filefind.t
+____________________________________________________________________________
+[ 10659] By: jhi                                   on 2001/06/17  13:45:48
+        Log: Subject: Re: [MacPerl-Porters] Re: [PATCH] File::Find for bleadperl, Mac OS  etc.
+             From: Thomas Wegner <wegner_thomas@yahoo.com>
+             Date: Sun, 17 Jun 2001 14:43:11 +0200
+             Message-Id: <p04320400b751fb74714a@[149.225.10.45]>
+     Branch: perl
+	   + t/lib/findtaint.t
+	   ! MANIFEST lib/File/Find.pm t/lib/filefind.t
+____________________________________________________________________________
+[ 10658] By: jhi                                   on 2001/06/17  13:13:25
+        Log: Subject: [PATCH ExtUtils/MM_Unix.pm perl@10654] Remove tmon.out in make clean
+             From: Jonathan Stowe <gellyfish@gellyfish.com>
+             Date: Sun, 17 Jun 2001 11:26:21 +0100 (BST)
+             Message-ID: <Pine.LNX.4.33.0106171120540.28753-100000@orpheus.gellyfish.com>
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 10657] By: jhi                                   on 2001/06/17  13:12:25
+        Log: Subject: [PATCH] more anonymous stash cleanups
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Sun, 17 Jun 2001 11:44:06 +0530
+             Message-ID: <20010617114406.A25203@lustre.linux.in>
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[ 10656] By: jhi                                   on 2001/06/17  13:11:11
+        Log: Subject: [PATCH #1/7] xhv_array (was Re: Using xhv_foo instead of HvFOO)
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Sun, 17 Jun 2001 08:02:59 +0530
+             Message-ID: <20010617080259.A28776@lustre.linux.in>
+             
+             Subject: [PATCH #2/7] xhv_eiter
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Sun, 17 Jun 2001 08:13:18 +0530
+             Message-ID: <20010617081318.B28776@lustre.linux.in>
+             
+             Subject: [PATCH #3/7] xhv_fill
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Sun, 17 Jun 2001 08:25:16 +0530
+             Message-ID: <20010617082516.C28776@lustre.linux.in>
+             
+             Subject: [PATCH #4/7] xhv_keys
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Sun, 17 Jun 2001 08:36:17 +0530
+             Message-ID: <20010617083617.D28776@lustre.linux.in>
+             
+             Subject: [PATCH #5/7] xhv_max
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Sun, 17 Jun 2001 08:39:48 +0530
+             Message-ID: <20010617083948.E28776@lustre.linux.in>
+             
+             Subject: [PATCH #6,7/7] xhv_pmroot, xhv_riter
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Sun, 17 Jun 2001 08:51:11 +0530
+             Message-ID: <20010617085111.F28776@lustre.linux.in>
+     Branch: perl
+	   ! hv.c
+____________________________________________________________________________
+[ 10655] By: jhi                                   on 2001/06/16  23:32:03
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 10654] By: jhi                                   on 2001/06/16  23:18:37
         Log: Subject: [PATCH] Re: DYNAMIC_ENV_FETCH HvNAME abuse.
              From: Abhijit Menon-Sen <ams@wiw.org>
