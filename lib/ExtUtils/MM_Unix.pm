@@ -2728,14 +2728,14 @@ END
 
     push @m,
 q{	$(AR) $(AR_STATIC_ARGS) $@ $(OBJECT) && $(RANLIB) $@
-	}.$self->{NOECHO}.q{echo "$(EXTRALIBS)" > $(INST_ARCHAUTODIR)/extralibs.ld
 	$(CHMOD) 755 $@
+	}.$self->{NOECHO}.q{echo "$(EXTRALIBS)" > $(INST_ARCHAUTODIR)/extralibs.ld
 };
-
-# Old mechanism - still available:
-
-    push @m, "\t$self->{NOECHO}".q{echo "$(EXTRALIBS)" >> $(PERL_SRC)/ext.libs}."\n\n"
-	if $self->{PERL_SRC};
+    # Old mechanism - still available:
+    push @m,
+"\t$self->{NOECHO}".q{echo "$(EXTRALIBS)" >> $(PERL_SRC)/ext.libs
+}	if $self->{PERL_SRC} && $self->{EXTRALIBS};
+    push @m, "\n";
 
     push @m, $self->dir_target('$(INST_ARCHAUTODIR)');
     join('', "\n",@m);
