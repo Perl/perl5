@@ -2,7 +2,7 @@
 
 # "This IS structured code.  It's just randomly structured."
 
-print "1..22\n";
+print "1..27\n";
 
 while ($?) {
     $foo = 1;
@@ -143,6 +143,39 @@ $ok = 0;
 $ok = 0 if $@;
 }
 print ($ok ? "ok 22\n" : "not ok 22\n");
+
+{
+    my $false = 0;
+
+    $ok = 0;
+    { goto A; A: $ok = 1 } continue { }
+    print "not " unless $ok;
+    print "ok 23 - #20357 goto inside /{ } continue { }/ loop\n";
+
+    $ok = 0;
+    { do { goto A; A: $ok = 1 } while $false }
+    print "not " unless $ok;
+    print "ok 24 - #20154 goto inside /do { } while ()/ loop\n";
+
+    $ok = 0;
+    foreach(1) { goto A; A: $ok = 1 } continue { };
+    print "not " unless $ok;
+    print "ok 25 - goto inside /foreach () { } continue { }/ loop\n";
+
+    $ok = 0;
+    sub a {
+	A: { if ($false) { redo A; B: $ok = 1; redo A; } }
+	goto B unless $r++
+    }
+    a();
+    print "not " unless $ok;
+    print "ok 26 - #19061 loop label wiped away by goto\n";
+
+    $ok = 0;
+    for ($p=1;$p && goto A;$p=0) { A: $ok = 1 }
+    print "not " unless $ok;
+    print "ok 27 - weird case of goto and for(;;) loop\n";
+}
 
 exit;
 
