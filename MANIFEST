@@ -273,7 +273,6 @@ ext/Thread/Notes	Thread notes
 ext/Thread/README	Thread README
 ext/Thread/Thread.pm	Thread extension Perl module
 ext/Thread/Thread.xs	Thread extension external subroutines
-ext/Thread/Thread/PrioQueue.pm	Thread synchronised priority queue objects
 ext/Thread/Thread/Queue.pm	Thread synchronised queue objects
 ext/Thread/Thread/Semaphore.pm	Thread semaphore objects
 ext/Thread/Thread/Signal.pm	Start a thread to run signal handlers
