@@ -336,28 +336,6 @@ while (<UNICODEDATA>) {
 
     push @base, [ $code, $1 ];
     push @base, [ $code, $1.$2 ] if $2 ne '';
-
-    # Before this "diacritics stripping" phase (and for Arabic, also
-    # "form stripping" phase) all ligatures could be decomposed into
-    # their constituent letters.
-    #
-    # For example the ligature
-    # ARABIC LIGATURE YEH WITH HAMZA ABOVE WITH ALEF ISOLATED FORM
-    # would go first through ligature decomposition producing the two letters
-    # ARABIC LETTER YEH WITH HAMZA ABOVE ISOLATED FORM
-    # ARABIC LETTER ALEF WITH HAMZA ABOVE ISOLATED FORM
-    # and those with diacritics stripping
-    # ARABIC LETTER YEH ISOLATED FORM
-    # ARABIC LETTER ALEF ISOLATED FORM
-    # and those with the Arabic form stripping
-    # ARABIC LETTER YEH
-    # ARABIC LETTER ALEF ISOLATED FORM
-    # ARABIC LETTER YEH
-    # ARABIC LETTER ALEF ISOLATED FORM
-    #
-    # Similarly for ligatures from other scripts.
-    # Effectively this would mean that ligatures turn into categories
-    # (Unicodese for character classes).
 }
 
 foreach my $b (@base) {
