@@ -4,7 +4,7 @@
 # the format supported by op/regexp.t.  If you want to add a test
 # that does fit that format, add it to op/re_tests, not here.
 
-print "1..223\n";
+print "1..224\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -1084,3 +1084,7 @@ print "not " unless "@space2" eq "spc tab";
 print "ok $test\n";
 $test++;
  
+# bugid 20001021.005 - this caused a SEGV
+print "not " unless undef =~ /^([^\/]*)(.*)$/;
+print "ok $test\n";
+$test++;
