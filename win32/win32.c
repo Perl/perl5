@@ -218,7 +218,7 @@ get_emd_part(char *prev_path, char *trailing_path, ...)
 	oldsize = strlen(prev_path) + 1;
 	newsize += oldsize;			/* includes plus 1 for ';' */
 	Renew(prev_path, newsize, char);
-	prev_path[oldsize] = ';';
+	prev_path[oldsize-1] = ';';
 	strcpy(&prev_path[oldsize], mod_name);
     }
     else {
