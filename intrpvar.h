@@ -484,7 +484,7 @@ PERLVAR(Ireentrant_buffer, REBUF*)	/* here we store the _r buffers */
 #endif
 
 PERLVAR(sharedsv_space,		PerlInterpreter*)
-PERLVAR(sharesv_space_mutex,	perl_mutex)
+PERLVAR(sharedsv_space_mutex,	perl_mutex)
 
 #endif
 
