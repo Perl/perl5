@@ -412,7 +412,7 @@ sub thaw {
 
 =head1 NAME
 
-Storable - persistency for perl data structures
+Storable - persistence for Perl data structures
 
 =head1 SYNOPSIS
 
@@ -447,7 +447,7 @@ Storable - persistency for perl data structures
 
 =head1 DESCRIPTION
 
-The Storable package brings persistence to your perl data structures
+The Storable package brings persistence to your Perl data structures
 containing SCALAR, ARRAY, HASH or REF objects, i.e. anything that can be
 conveniently stored to disk and retrieved at a later time.
 
@@ -458,9 +458,9 @@ the image should be written.
 The routine returns C<undef> for I/O problems or other internal error,
 a true value otherwise. Serious errors are propagated as a C<die> exception.
 
-To retrieve data stored to disk, use C<retrieve> with a file name,
-and the objects stored into that file are recreated into memory for you,
-a I<reference> to the root object being returned. In case an I/O error
+To retrieve data stored to disk, use C<retrieve> with a file name.
+The objects stored into that file are recreated into memory for you,
+and a I<reference> to the root object is returned. In case an I/O error
 occurs while reading, C<undef> is returned instead. Other serious
 errors are propagated via C<die>.
 
@@ -523,21 +523,21 @@ internal memory space and then immediately thaws it out.
 
 =head1 ADVISORY LOCKING
 
-The C<lock_store> and C<lock_nstore> routine are equivalent to C<store>
-and C<nstore>, only they get an exclusive lock on the file before
-writing.  Likewise, C<lock_retrieve> performs as C<retrieve>, but also
-gets a shared lock on the file before reading.
+The C<lock_store> and C<lock_nstore> routine are equivalent to
+C<store> and C<nstore>, except that they get an exclusive lock on
+the file before writing.  Likewise, C<lock_retrieve> does the same
+as C<retrieve>, but also gets a shared lock on the file before reading.
 
-Like with any advisory locking scheme, the protection only works if
-you systematically use C<lock_store> and C<lock_retrieve>.  If one
-side of your application uses C<store> whilst the other uses C<lock_retrieve>,
+As with any advisory locking scheme, the protection only works if you
+systematically use C<lock_store> and C<lock_retrieve>.  If one side of
+your application uses C<store> whilst the other uses C<lock_retrieve>,
 you will get no protection at all.
 
-The internal advisory locking is implemented using Perl's flock() routine.
-If your system does not support any form of flock(), or if you share
-your files across NFS, you might wish to use other forms of locking by
-using modules like LockFile::Simple which lock a file using a filesystem
-entry, instead of locking the file descriptor.
+The internal advisory locking is implemented using Perl's flock()
+routine.  If your system does not support any form of flock(), or if
+you share your files across NFS, you might wish to use other forms
+of locking by using modules such as LockFile::Simple which lock a
+file using a filesystem entry, instead of locking the file descriptor.
 
 =head1 SPEED
 
@@ -547,7 +547,7 @@ sacrifice encapsulation for the benefit of greater speed.
 
 =head1 CANONICAL REPRESENTATION
 
-Normally Storable stores elements of hashes in the order they are
+Normally, Storable stores elements of hashes in the order they are
 stored internally by Perl, i.e. pseudo-randomly.  If you set
 C<$Storable::canonical> to some C<TRUE> value, Storable will store
 hashes with the elements sorted by their key.  This allows you to
@@ -555,16 +555,16 @@ compare data structures by comparing their frozen representations (or
 even the compressed frozen representations), which can be useful for
 creating lookup tables for complicated queries.
 
-Canonical order does not imply network order, those are two orthogonal
+Canonical order does not imply network order; those are two orthogonal
 settings.
 
 =head1 FORWARD COMPATIBILITY
 
 This release of Storable can be used on a newer version of Perl to
-serialize data which is not supported by earlier Perls.  By default
+serialize data which is not supported by earlier Perls.  By default,
 Storable will attempt to do the right thing, by C<croak()>ing if it
 encounters data that it cannot deserialize.  However, the defaults
-can be changed as follows
+can be changed as follows:
 
 =over 4
 
@@ -584,13 +584,14 @@ that happen to be valid utf8.
 
 =item restricted hashes
 
-Perl 5.8 adds support for restricted hashes, which have keys restricted to
-a given set, and can have values locked to be read only.  By default
-when Storable encounters a restricted hash on a perl that doesn't support
-them, it will deserialize it as a normal hash, silently discarding any
-placeholder keys and leaving the keys and all values unlocked.  To make
-Storable C<croak()> instead, set C<$Storable::downgrade_restricted> to
-a false value.  To restore the default set it back to some C<TRUE> value.
+Perl 5.8 adds support for restricted hashes, which have keys
+restricted to a given set, and can have values locked to be read only.
+By default, when Storable encounters a restricted hash on a perl
+that doesn't support them, it will deserialize it as a normal hash,
+silently discarding any placeholder keys and leaving the keys and
+all values unlocked.  To make Storable C<croak()> instead, set
+C<$Storable::downgrade_restricted> to a C<FALSE> value.  To restore
+the default set it back to some C<TRUE> value.
 
 =item files from future versions of Storable
 
@@ -599,7 +600,7 @@ a file with a higher internal version number than the reading Storable
 knew about.  Internal version numbers are increased each time new data
 types (such as restricted hashes) are added to the vocabulary of the file
 format.  This meant that a newer Storable module had no way of writing a
-file readable by an older Storable, even if writer didn't store newer
+file readable by an older Storable, even if the writer didn't store newer
 data types.
 
 This version of Storable will defer croaking until it encounters a data
@@ -609,11 +610,11 @@ in what they write out, making it easier to upgrade Storable modules in a
 mixed environment.
 
 The old behaviour of immediate croaking can be re-instated by setting
-C<$Storable::accept_future_minor> to false.
+C<$Storable::accept_future_minor> to some C<FALSE> value.
 
 =back
 
-Both these variables have no effect on a newer Perl which supports the
+All these variables have no effect on a newer Perl which supports the
 relevant feature.
 
 =head1 ERROR REPORTING
@@ -651,7 +652,7 @@ Therefore, when serializing hooks are involved,
 
 Well, you could keep them in sync, but there's no guarantee it will always
 hold on classes somebody else wrote.  Besides, there is little to gain in
-doing so: a serializing hook could only keep one attribute of an object,
+doing so: a serializing hook could keep only one attribute of an object,
 which is probably not what should happen during a deep cloning of that
 same object.
 
@@ -693,7 +694,7 @@ in order to keep reasonable dclone() semantics.
 =item C<STORABLE_thaw> I<obj>, I<cloning>, I<serialized>, ...
 
 The deserializing hook called on the object during deserialization.
-But wait. If we're deserializing, there's no object yet... right?
+But wait: if we're deserializing, there's no object yet... right?
 
 Wrong: the Storable engine creates an empty one for you.  If you know Eiffel,
 you can view C<STORABLE_thaw> as an alternate creation routine.
@@ -715,7 +716,7 @@ time the hook cannot be located, the engine croaks.  Note that this mechanism
 will fail if you define several classes in the same file, but L<perlmod>
 warned you.
 
-It is up to you to use these information to populate I<obj> the way you want.
+It is up to you to use this information to populate I<obj> the way you want.
 
 Returned value: none.
 
@@ -740,25 +741,26 @@ Returns true if within a store operation (via STORABLE_freeze hook).
 
 =item C<Storable::is_retrieving>
 
-Returns true if within a retrieve operation, (via STORABLE_thaw hook).
+Returns true if within a retrieve operation (via STORABLE_thaw hook).
 
 =back
 
 =head2 Recursion
 
-With hooks comes the ability to recurse back to the Storable engine.  Indeed,
-hooks are regular Perl code, and Storable is convenient when it comes to
-serialize and deserialize things, so why not use it to handle the
-serialization string?
+With hooks comes the ability to recurse back to the Storable engine.
+Indeed, hooks are regular Perl code, and Storable is convenient when
+it comes to serializing and deserializing things, so why not use it
+to handle the serialization string?
 
-There are a few things you need to know however:
+There are a few things you need to know, however:
 
 =over 4
 
 =item *
 
 You can create endless loops if the things you serialize via freeze()
-(for instance) point back to the object we're trying to serialize in the hook.
+(for instance) point back to the object we're trying to serialize in
+the hook.
 
 =item *
 
@@ -786,7 +788,7 @@ Therefore, recursion should normally be avoided, but is nonetheless supported.
 
 =head2 Deep Cloning
 
-There is a new Clone module available on CPAN which implements deep cloning
+There is a Clone module available on CPAN which implements deep cloning
 natively, i.e. without freezing to memory and thawing the result.  It is
 aimed to replace Storable's dclone() some day.  However, it does not currently
 support Storable hooks to redefine the way deep cloning is performed.
@@ -798,13 +800,13 @@ there's a utility called C<file>, which recognizes data files based on
 their contents (usually their first few bytes).  For this to work,
 a certain file called F<magic> needs to taught about the I<signature>
 of the data.  Where that configuration file lives depends on the UNIX
-flavour, often it's something like F</usr/share/misc/magic> or
+flavour; often it's something like F</usr/share/misc/magic> or
 F</etc/magic>.  Your system administrator needs to do the updating of
 the F<magic> file.  The necessary signature information is output to
-STDOUT by invoking Storable::show_file_magic().  Note that the open
-source implementation of the C<file> utility 3.38 (or later)
-is expected to contain the support for recognising Storable files,
-in addition to other kinds of Perl files.
+STDOUT by invoking Storable::show_file_magic().  Note that the GNU
+implementation of the C<file> utility, version 3.38 or later,
+is expected to contain support for recognising Storable files
+out-of-the-box, in addition to other kinds of Perl files.
 
 =head1 EXAMPLES
 
@@ -834,18 +836,18 @@ which prints (on my machine):
 =head1 WARNING
 
 If you're using references as keys within your hash tables, you're bound
-to disappointment when retrieving your data. Indeed, Perl stringifies
+to be disappointed when retrieving your data. Indeed, Perl stringifies
 references used as hash table keys. If you later wish to access the
 items via another reference stringification (i.e. using the same
 reference that was used for the key originally to record the value into
 the hash table), it will work because both references stringify to the
 same string.
 
-It won't work across a C<store> and C<retrieve> operations however, because
-the addresses in the retrieved objects, which are part of the stringified
-references, will probably differ from the original addresses. The
-topology of your structure is preserved, but not hidden semantics
-like those.
+It won't work across a C<store> and C<retrieve> operations, however,
+because the addresses in the retrieved objects, which are part of
+the stringified references, will probably differ from the original
+addresses. The topology of your structure is preserved, but not hidden
+semantics like those.
 
 On platforms where it matters, be sure to call C<binmode()> on the
 descriptors that you pass to Storable functions.
@@ -859,7 +861,7 @@ your data.  There is no slowdown on retrieval.
 
 =head1 BUGS
 
-You can't store GLOB, CODE, FORMLINE, etc... If you can define
+You can't store GLOB, CODE, FORMLINE, etc.... If you can define
 semantics for those operations, feel free to enhance Storable so that
 it can deal with them.
 
@@ -870,7 +872,7 @@ meaningless string is stored instead.
 
 Setting C<$Storable::canonical> may not yield frozen strings that
 compare equal due to possible stringification of numbers. When the
-string version of a scalar exists, it is the form stored, therefore
+string version of a scalar exists, it is the form stored; therefore,
 if you happen to use your numbers as strings between two freezing
 operations on the same data structures, you will get different
 results.
@@ -914,13 +916,13 @@ for their bug reports, suggestions and contributions.
 
 Benjamin Holzman contributed the tied variable support, Andrew Ford
 contributed the canonical order for hashes, and Gisle Aas fixed
-a few misunderstandings of mine regarding the Perl internals,
+a few misunderstandings of mine regarding the perl internals,
 and optimized the emission of "tags" in the output streams by
 simply counting the objects instead of tagging them (leading to
 a binary incompatibility for the Storable image starting at version
-0.6--older images are of course still properly understood).
+0.6--older images are, of course, still properly understood).
 Murray Nesbitt made Storable thread-safe.  Marc Lehmann added overloading
-and reference to tied items support.
+and references to tied items support.
 
 =head1 AUTHOR
 
