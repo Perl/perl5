@@ -5166,8 +5166,7 @@ features back into the current package.  The module can implement its
 C<import> method any way it likes, though most modules just choose to
 derive their C<import> method via inheritance from the C<Exporter> class that
 is defined in the C<Exporter> module.  See L<Exporter>.  If no C<import>
-method can be found then the error is currently silently ignored.  This
-may change to a fatal error in a future version.
+method can be found then the call is skipped.
 
 If you don't want your namespace altered, explicitly supply an empty list:
 
