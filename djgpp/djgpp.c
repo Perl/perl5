@@ -123,7 +123,7 @@ convretcode (pTHX_ int rc,char *prog,int fl)
         Perl_warner(aTHX_ WARN_EXEC,"Can't %s \"%s\": %s",
 		    fl ? "exec" : "spawn",prog,Strerror (errno));
     if (rc > 0)
-        return rc <<= 8;
+        return rc << 8;
     if (rc < 0)
         return 255 << 8;
     return 0;
@@ -252,6 +252,7 @@ struct globinfo
     int    fd;
     char   *matches;
     size_t size;
+    fpos_t pos;
 };
 
 #define MAXOPENGLOBS 10
@@ -286,6 +287,7 @@ glob_handler (__FSEXT_Fnumber n,int *rv,va_list args)
             if ((gi=searchfd (-1)) == NULL)
                 break;
 
+            gi->pos=0;
             pattern=alloca (strlen (name+=13)+1);
             strcpy (pattern,name);
             if (!_USE_LFN)
@@ -332,11 +334,10 @@ glob_handler (__FSEXT_Fnumber n,int *rv,va_list args)
             if ((gi=searchfd (fd))==NULL)
                 break;
 
-            ic=tell (fd);
-            if (siz+ic>=gi->size)
-                siz=gi->size-ic;
-            memcpy (buf,ic+gi->matches,siz);
-            lseek (fd,siz,1);
+            if (siz+gi->pos > gi->size)
+                siz = gi->size - gi->pos;
+            memcpy (buf,gi->pos+gi->matches,siz);
+            gi->pos += siz;
             *rv=siz;
             return 1;
         }

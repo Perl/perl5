@@ -8,6 +8,7 @@
 #  define BIT_BUCKET "nul"
 #  define OP_BINARY O_BINARY
 #  define PERL_SYS_INIT(c,v) Perl_DJGPP_init(c,v)
+#  define init_os_extras Perl_init_os_extras
 #  include <signal.h>
 #  define HAS_UTIME
 #  define HAS_KILL

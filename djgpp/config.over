@@ -25,7 +25,10 @@ repair()
      -e 's/posix/POSIX/'\
      -e 's/sdbm_fil/SDBM_File/'\
      -e 's/socket/Socket/'\
-     -e 's/thread/Thread/'
+     -e 's/thread/Thread/'\
+     -e 's/byteload/ByteLoader/'\
+     -e 's=devel/peek=Devel/Peek='\
+     -e 's=devel/dprof=Devel/DProf='
 }
 static_ext=$(repair "$static_ext")
 extensions=$(repair "$extensions")

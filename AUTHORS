@@ -39,7 +39,7 @@ mbiggar		Mark A Biggar		mab@wdl.loral.com
 mbligh		Martin J. Bligh		mbligh@sequent.com
 mike		Mike Stok		mike@stok.co.uk
 millert		Todd Miller		millert@openbsd.org
-molnarl		Laszlo Molnar		molnarl@cdata.tvnet.hu
+laszlo.molnar	Laszlo Molnar		Laszlo.Molnar@eth.ericsson.se
 mpeix		Mark Bixby		markb@cccd.edu
 muir		David Muir Sharnoff	muir@idiom.com
 neale		Neale Ferguson		neale@VMA.TABNSW.COM.AU
@@ -86,7 +86,7 @@ cygwin		win32
 dec_osf		jhi,spider
 dgux		roderick
 doc		tchrist
-dos		lmolnarl
+dos		laszlo.molnar
 dynix/ptx	mbligh
 ebcdic		vms,vmesa,posixbc
 filespec	kjahds
@@ -99,7 +99,6 @@ locale		jhi,domo
 lynxos		lynxos
 machten		domo
 mm		makemaker
-msdos		molnarl
 mvs		pvhp
 netbsd		jhi
 openbsd		millert

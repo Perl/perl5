@@ -1822,28 +1822,13 @@ Perl_my_setenv(pTHX_ char *nam, char *val)
 	safesysfree(environ[i]);
     environ[i] = (char*)safesysmalloc((strlen(nam)+strlen(val)+2) * sizeof(char));
 
-#ifndef MSDOS
     (void)sprintf(environ[i],"%s=%s",nam,val);/* all that work just for this */
-#else
-    /* MS-DOS requires environment variable names to be in uppercase */
-    /* [Tom Dinger, 27 August 1990: Well, it doesn't _require_ it, but
-     * some utilities and applications may break because they only look
-     * for upper case strings. (Fixed strupr() bug here.)]
-     */
-    strcpy(environ[i],nam); strupr(environ[i]);
-    (void)sprintf(environ[i] + strlen(nam),"=%s",val);
-#endif /* MSDOS */
 
 #else   /* PERL_USE_SAFE_PUTENV */
     char *new_env;
 
     new_env = (char*)safesysmalloc((strlen(nam) + strlen(val) + 2) * sizeof(char));
-#ifndef MSDOS
     (void)sprintf(new_env,"%s=%s",nam,val);/* all that work just for this */
-#else
-    strcpy(new_env,nam); strupr(new_env);
-    (void)sprintf(new_env + strlen(nam),"=%s",val);
-#endif
     (void)putenv(new_env);
 #endif  /* PERL_USE_SAFE_PUTENV */
 }
@@ -2635,6 +2620,9 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
     /* Needs work for PerlIO ! */
     FILE *f = PerlIO_findFILE(ptr);
     I32 result = pclose(f);
+#if defined(DJGPP)
+    result = (result << 8) & 0xff00;
+#endif
     PerlIO_releaseFILE(ptr,f);
     return result;
 }
