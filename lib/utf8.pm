@@ -63,6 +63,12 @@ UTF-EBCDIC character.
 
 =back
 
+Note that if you have bytes with the eighth bit on in your script
+(for example embedded Latin-1 in your string literals), C<use utf8>
+will be unhappy since the bytes are most probably not well-formed
+UTF-8.  If you want to have such bytes and use utf8, you can disable
+utf8 until the end the block (or file, if at top level) by C<no utf8;>.
+
 =head2 Utility functions
 
 The following functions are defined in the C<utf8::> package by the perl core.
