@@ -48,6 +48,7 @@ for (@prgs){
 # bison says 'parse error' instead of 'syntax error',
 # various yaccs may or may not capitalize 'syntax'.
     $results =~ s/^(syntax|parse) error/syntax error/mig;
+    $results =~ s/\n\n/\n/ if $^O eq 'VMS'; # pipes double these sometimes
     $expected =~ s/\n+$//;
     if ( $results ne $expected ) {
 	print STDERR "PROG: $switch\n$prog\n";
