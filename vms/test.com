@@ -19,9 +19,11 @@ $           Exit 44
 $       EndIf
 $   EndIf
 $
+$  exe = ".Exe"
+$  If p1.nes."" Then exe = p1
 $!  Pick up a copy of perl to use for the tests
 $   Delete/Log/NoConfirm Perl.;*
-$   Copy/Log/NoConfirm [-]Perl.Exe []Perl.
+$   Copy/Log/NoConfirm [-]Perl'exe' []Perl.
 $
 $!  Make the environment look a little friendlier to tests which assume Unix
 $   cat = "Type"
@@ -65,14 +67,14 @@ $   Macro/NoDebug/Object=Echo.Obj Sys$Input
 		movl	#1,r0
 		ret	
 		.end echo
-$   Link/NoTrace Echo.Obj;
+$   Link/NoTrace/Exe=Echo.Exe Echo.Obj;
 $   Delete/Log/NoConfirm Echo.Obj;*
 $   echo = "$" + F$Parse("Echo.Exe")
 $
 $!  And do it
 $   testdir = "Directory/NoHead/NoTrail/Column=1"
-$   Define/User Perlshr Sys$Disk:[-]PerlShr.Exe
-$   MCR Sys$Disk:[]Perl. "''p1'" "''p2'" "''p3'" "''p4'" "''p5'" "''p6'"
+$   Define/User Perlshr Sys$Disk:[-]PerlShr'exe'
+$   MCR Sys$Disk:[]Perl. "''p2'" "''p3'" "''p4'" "''p5'" "''p6'"
 $   Deck/Dollar=$$END-OF-TEST$$
 # $RCSfile: TEST,v $$Revision: 4.1 $$Date: 92/08/07 18:27:00 $
 # Modified for VMS 30-Sep-1994  Charles Bailey  bailey@genetics.upenn.edu
@@ -81,12 +83,16 @@ $   Deck/Dollar=$$END-OF-TEST$$
 # most of the constructs we'll be testing for.
 
 # skip those tests we know will fail entirely or cause perl to hang bacause
-# of Unixisms
+# of Unixisms in the tests.  (The Perl operators being tested may work fine,
+# but the tests may use other operators which don't.)
 @compexcl=('cpp.t','script.t');
 @ioexcl=('argv.t','dup.t','fs.t','inplace.t','pipe.t');
 @libexcl=('anydbm.t','db-btree.t','db-hash.t','db-recno.t',
-          'gdbm.t','ndbm.t','odbm.t','sdbm.t','posix.t','soundex.t');
-@opexcl=('exec.t','fork.t','glob.t','magic.t','misc.t','stat.t');
+          'gdbm.t','io_dup.t', 'io_pipe.t', 'io_sock.t',
+          'ndbm.t','odbm.t','posix.t','sdbm.t','soundex.t');
+          # Note: POSIX is not part of basic build, but can be built
+          # separately if you're using DECC
+@opexcl=('exec.t','fork.t','glob.t','groups.t','magic.t','misc.t','stat.t');
 @exclist=(@compexcl,@ioexcl,@libexcl,@opexcl);
 foreach $file (@exclist) { $skip{$file}++; }
 
@@ -162,8 +168,13 @@ while ($test = shift) {
     }
     $next = $next - 1;
     if ($ok && $next == $max) {
-	print "${te}ok\n";
-	$good = $good + 1;
+	if ($max) {
+	    print "${te}ok\n";
+	    $good = $good + 1;
+	} else {
+	    print "${te}skipping test on this platform\n";
+	    $files -= 1;
+	}
     } else {
 	$next += 1;
 	print "${te}FAILED on test $next\n";
