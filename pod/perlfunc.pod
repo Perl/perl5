@@ -2861,7 +2861,7 @@ L<Config>:
        print $Config{longsize},     "\n";
        print $Config{longlongsize}, "\n";
 
-(The C<$Config{longlongsize}> will be empty if your system does
+(The C<$Config{longlongsize}> will be undefine if your system does
 not support long longs.) 
 
 =item *
