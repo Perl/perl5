@@ -130,8 +130,6 @@ test {
   &{$foo[4]}() == 0
   };
 
-exit 0 unless $Config{'d_fork'};
-
 # Additional tests by Tom Phoenix <rootbeer@teleport.com>.
 
 {
