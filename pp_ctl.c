@@ -1009,9 +1009,9 @@ PP(pp_flip)
    an exception for .."0" [#18165]). AMS 20021031. */
 
 #define RANGE_IS_NUMERIC(left,right) ( \
-	SvNIOKp(left)  || !SvPOKp(left)  || \
-	SvNIOKp(right) || !SvPOKp(right) || \
-	(looks_like_number(left) && *SvPVX(left) != '0' && \
+	SvNIOKp(left)  || (SvOK(left)  && !SvPOKp(left))  || \
+	SvNIOKp(right) || (SvOK(right) && !SvPOKp(right)) || \
+	(looks_like_number(left) && SvPOKp(left) && *SvPVX(left) != '0' && \
 	 looks_like_number(right)))
 
 PP(pp_flop)
