@@ -876,6 +876,9 @@ if ($define{'USE_PERLIO'}) {
 			 Perl_PerlIO_tell
 			 Perl_PerlIO_unread
 			 Perl_PerlIO_write
+                         PL_def_layerlist
+                         PL_known_layers
+                         PL_perlio
 			 )];
     }
     else {

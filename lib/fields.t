@@ -90,7 +90,7 @@ my %expect = (
     'Foo::Bar::Baz' => 'b1:1,b2:2,b3:3,foo:4,bar:5,baz:6',
 );
 
-print "1..", int(keys %expect)+15, "\n";
+print "1..", int(keys %expect)+21, "\n";
 my $testno = 0;
 while (my($class, $exp) = each %expect) {
    no strict 'refs';
@@ -181,7 +181,7 @@ sub VERSION { 42 }
 package Test::Version;
 
 use base qw(No::Version);
-print "not " unless $No::Version::VERSION =~ /set by base\.pm/;
+print "# $No::Version::VERSION\nnot " unless $No::Version::VERSION =~ /set by base\.pm/;
 print "ok ", ++$testno ,"\n";
 
 # Test Inverse of $VERSION bug base.pm should not clobber existing $VERSION
@@ -193,5 +193,46 @@ package Test::Version2;
 
 use base qw(Has::Version);
 print "#$Has::Version::VERSION\nnot " unless $Has::Version::VERSION eq '42';
-print "ok ", ++$testno ,"\n";
+print "ok ", ++$testno ," # Has::Version\n";
+
+package main;
+
+our $eval1 = q{
+  {
+    package Eval1;
+    {
+      package Eval2;
+      use base 'Eval1';
+      $Eval2::VERSION = "1.02";
+    }
+    $Eval1::VERSION = "1.01";
+  }
+};
+
+eval $eval1;
+printf "# %s\nnot ", $@ if $@;
+print "ok ", ++$testno ," # eval1\n";
+
+print "# $Eval1::VERSION\nnot " unless $Eval1::VERSION == 1.01;
+print "ok ", ++$testno ," # Eval1::VERSION\n";
+
+print "# $Eval2::VERSION\nnot " unless $Eval2::VERSION == 1.02;
+print "ok ", ++$testno ," # Eval2::VERSION\n";
+
+
+eval q{use base reallyReAlLyNotexists;};
+print "not " unless $@;
+print "ok ", ++$testno, " # really not I\n";
+
+eval q{use base reallyReAlLyNotexists;};
+print "not " unless $@;
+print "ok ", ++$testno, " # really not II\n";
+
+BEGIN { $Has::Version_0::VERSION = 0 }
+
+package Test::Version3;
+
+use base qw(Has::Version_0);
+print "#$Has::Version_0::VERSION\nnot " unless $Has::Version_0::VERSION == 0;
+print "ok ", ++$testno ," # Version_0\n";
 

@@ -573,7 +573,7 @@ EOT
 EXPECT
 ok
 ########
-# This test is here instead of pragma/locale.t because
+# This test is here instead of lib/locale.t because
 # the bug depends on in the internal state of the locale
 # settings and pragma/locale messes up that state pretty badly.
 # We need a "fresh run".
@@ -591,7 +591,7 @@ $have_setlocale = 0 if $@;
 $have_setlocale = 0 if (($^O eq 'MSWin32' || $^O eq 'NetWare') && $Config{cc} =~ /^(cl|gcc)/i);
 exit(0) unless $have_setlocale;
 my @locales;
-if (-x "/usr/bin/locale" && open(LOCALES, "/usr/bin/locale -a|")) {
+if (-x "/usr/bin/locale" && open(LOCALES, "/usr/bin/locale -a 2>/dev/null|")) {
     while(<LOCALES>) {
         chomp;
         push(@locales, $_);
