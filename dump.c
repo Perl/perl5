@@ -1100,14 +1100,20 @@ do_sv_dump(I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bool dumpops,
 	dump_indent(level, file, "  PAGE = %ld\n", (long)IoPAGE(sv));
 	dump_indent(level, file, "  PAGE_LEN = %ld\n", (long)IoPAGE_LEN(sv));
 	dump_indent(level, file, "  LINES_LEFT = %ld\n", (long)IoLINES_LEFT(sv));
-	dump_indent(level, file, "  TOP_NAME = \"%s\"\n", IoTOP_NAME(sv));
+        if (IoTOP_NAME(sv))
+            dump_indent(level, file, "  TOP_NAME = \"%s\"\n", IoTOP_NAME(sv));
 	do_gv_dump (level, file, "  TOP_GV", IoTOP_GV(sv));
-	dump_indent(level, file, "  FMT_NAME = \"%s\"\n", IoFMT_NAME(sv));
+        if (IoFMT_NAME(sv))
+            dump_indent(level, file, "  FMT_NAME = \"%s\"\n", IoFMT_NAME(sv));
 	do_gv_dump (level, file, "  FMT_GV", IoFMT_GV(sv));
-	dump_indent(level, file, "  BOTTOM_NAME = \"%s\"\n", IoBOTTOM_NAME(sv));
+        if (IoBOTTOM_NAME(sv))
+            dump_indent(level, file, "  BOTTOM_NAME = \"%s\"\n", IoBOTTOM_NAME(sv));
 	do_gv_dump (level, file, "  BOTTOM_GV", IoBOTTOM_GV(sv));
 	dump_indent(level, file, "  SUBPROCESS = %ld\n", (long)IoSUBPROCESS(sv));
-	dump_indent(level, file, "  TYPE = %c\n", IoTYPE(sv));
+	if (isPRINT(IoTYPE(sv)))
+            dump_indent(level, file, "  TYPE = '%c'\n", IoTYPE(sv));
+	else
+            dump_indent(level, file, "  TYPE = '\\%o'\n", IoTYPE(sv));
 	dump_indent(level, file, "  FLAGS = 0x%lx\n", (long)IoFLAGS(sv));
 	break;
     }
