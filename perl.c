@@ -47,7 +47,9 @@ static void init_predump_symbols _((void));
 static void init_stacks _((void));
 static void open_script _((char *, bool, SV *));
 static void usage _((char *));
-static void validate_suid _((char *));
+static void validate_suid _((char *, char*));
+
+static int fdscript = -1;
 
 PerlInterpreter *
 perl_alloc()
@@ -427,7 +429,7 @@ setuid perl scripts securely.\n");
 
     open_script(scriptname,dosearch,sv);
 
-    validate_suid(validarg);
+    validate_suid(validarg, scriptname);
 
     if (doextract)
 	find_beginning();
@@ -1209,6 +1211,7 @@ char *s;
 	printf(" on %s",__DATE__);
 #  endif
 #endif
+	fputs("\n\t+ suidperl security patch", stdout);
 	fputs("\n\nCopyright 1987-1996, Larry Wall\n",stdout);
 #ifdef MSDOS
 	fputs("MS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n",
@@ -1399,11 +1402,27 @@ SV *sv;
 	scriptname = xfound;
     }
 
+    if (strnEQ(scriptname, "/dev/fd/", 8) && isDIGIT(scriptname[8]) ) {
+	char *s = scriptname + 8;
+	fdscript = atoi(s);
+	while (isDIGIT(*s))
+	    s++;
+	if (*s)
+	    scriptname = s + 1;
+    }
+    else
+	fdscript = -1;
     origfilename = savepv(e_tmpname ? "-e" : scriptname);
     curcop->cop_filegv = gv_fetchfile(origfilename);
     if (strEQ(origfilename,"-"))
 	scriptname = "";
-    if (preprocess) {
+    if (fdscript >= 0) {
+	rsfp = fdopen(fdscript,"r");
+#if defined(HAS_FCNTL) && defined(F_SETFD)
+	fcntl(fileno(rsfp),F_SETFD,1);	/* ensure close-on-exec */
+#endif
+    }
+    else if (preprocess) {
 	char *cpp = CPPSTDIN;
 
 	if (strEQ(cpp,"cppstdin"))
@@ -1475,8 +1494,12 @@ sed %s -e \"/^[^#]/b\" \
 	taint_not("program input from stdin");
 	rsfp = stdin;
     }
-    else
+    else {
 	rsfp = fopen(scriptname,"r");
+#if defined(HAS_FCNTL) && defined(F_SETFD)
+	fcntl(fileno(rsfp),F_SETFD,1);	/* ensure close-on-exec */
+#endif
+    }
     if ((FILE*)rsfp == Nullfp) {
 #ifdef DOSUID
 #ifndef IAMSUID		/* in case script is not readable before setuid */
@@ -1494,9 +1517,12 @@ sed %s -e \"/^[^#]/b\" \
 }
 
 static void
-validate_suid(validarg)
+validate_suid(validarg, scriptname)
 char *validarg;
+char *scriptname;
 {
+    int which;
+
     /* do we need to emulate setuid on scripts? */
 
     /* This code is for those BSD systems that have setuid #! scripts disabled
@@ -1522,7 +1548,7 @@ char *validarg;
 
     if (Fstat(fileno(rsfp),&statbuf) < 0)	/* normal stat is insecure */
 	croak("Can't stat script \"%s\"",origfilename);
-    if (statbuf.st_mode & (S_ISUID|S_ISGID)) {
+    if (fdscript < 0 && statbuf.st_mode & (S_ISUID|S_ISGID)) {
 	I32 len;
 
 #ifdef IAMSUID
@@ -1690,8 +1716,28 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 #ifdef IAMSUID
     else if (preprocess)
 	croak("-P not allowed for setuid/setgid script\n");
+    else if (fdscript >= 0)
+	croak("fd script not allowed in suidperl\n");
     else
 	croak("Script is not setuid/setgid in suidperl\n");
+
+    /* We absolutely must clear out any saved ids here, so we */
+    /* exec the real perl, substituting fd script for scriptname. */
+    /* (We pass script name as "subdir" of fd, which perl will grok.) */
+    rewind(rsfp);
+    for (which = 1; origargv[which] && origargv[which] != scriptname; which++) ;
+    if (!origargv[which])
+	croak("Permission denied");
+    (void)sprintf(buf, "/dev/fd/%d/%.127s", fileno(rsfp), origargv[which]);
+    origargv[which] = buf;
+
+#if defined(HAS_FCNTL) && defined(F_SETFD)
+    fcntl(fileno(rsfp),F_SETFD,0);	/* ensure no close-on-exec */
+#endif
+
+    (void)sprintf(tokenbuf, "%s/perl%s", BIN, patchlevel);
+    execv(tokenbuf, origargv);	/* try again */
+    croak("Can't do setuid\n");
 #endif /* IAMSUID */
 #else /* !DOSUID */
     if (euid != uid || egid != gid) {	/* (suidperl doesn't exist, in fact) */
