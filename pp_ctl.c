@@ -388,8 +388,6 @@ PP(pp_formline)
     char *fmt;
     bool oneline;
 
-
-
     if (!SvMAGICAL(tmpForm) || !SvCOMPILED(tmpForm)) {
 	if (SvREADONLY(tmpForm)) {
 	    SvREADONLY_off(tmpForm);
