@@ -1453,7 +1453,11 @@ EOF
 	$xsreturn = 1 if $ret_type ne "void";
 	my $num = $xsreturn;
 	my $c = @outlist;
-	print "\tXSprePUSH;" if $c and not $prepush_done;
+	# (PP)CODE set different values of SP; reset to PPCODE's with 0 output
+	print "\tXSprePUSH;"    if $c and not $prepush_done;
+	# Take into account stuff already put on stack
+	print "\t++SP;"         if $c and not $prepush_done and $xsreturn;
+	# Now SP corresponds to ST($xsreturn), so one can combine PUSH and ST()
 	print "\tEXTEND(SP,$c);\n" if $c;
 	$xsreturn += $c;
 	generate_output($var_types{$_}, $num++, $_, 0, 1) for @outlist;
