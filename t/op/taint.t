@@ -94,7 +94,7 @@ print PROG 'print "@ARGV\n"', "\n";
 close PROG;
 my $echo = "$Invoke_Perl $ECHO";
 
-print "1..149\n";
+print "1..150\n";
 
 # First, let's make sure that Perl is checking the dangerous
 # environment variables. Maybe they aren't set yet, so we'll
@@ -604,4 +604,37 @@ else {
 
     $why =~ s/e/'-'.$$/ge;
     test 149,     tainted $why;
+}
+
+# test shmread
+{
+    if ($Config{d_shm}) {
+	use IPC::SysV qw(IPC_PRIVATE IPC_RMID S_IRWXU S_IRWXG S_IRWXO);
+
+	my $sent = "foobar";
+	my $rcvd;
+	my $size = 2000;
+	my $key = shmget(IPC_PRIVATE, $size, S_IRWXU|S_IRWXG|S_IRWXO) ||
+	    warn "# shmget failed: $!\n";
+	if ($key >= 0) {
+	    if (shmwrite($key, $sent, 0, 60)) {
+		if (shmread($key, $rcvd, 0, 60)) {
+		    substr($rcvd, index($rcvd, "\0")) = '';
+		} else {
+		    warn "# shmread failed: $!\n";
+		}
+	    } else {
+		warn "# shmwrite failed: $!\n";
+	    }
+	    shmctl($key, IPC_RMID, 0) || warn "# shmctl failed: $!\n";
+	}
+
+	if ($rcvd eq $sent) {
+	    test 150, tainted $rcvd;
+	} else {
+	    print "ok 150 # Skipped: SysV shared memory operation failed\n";
+	}
+    } else {
+	for (150) { print "ok $_ # Skipped: SysV shared memory is not available\n"; }
+    }
 }

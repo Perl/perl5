@@ -4022,8 +4022,8 @@ detaching from it.  When reading, VAR must be a variable that will
 hold the data read.  When writing, if STRING is too long, only SIZE
 bytes are used; if STRING is too short, nulls are written to fill out
 SIZE bytes.  Return true if successful, or false if there is an error.
-See also C<IPC::SysV> documentation and the C<IPC::Shareable> module
-from CPAN.
+shmread() taints the variable. See also C<IPC::SysV> documentation and
+the C<IPC::Shareable> module from CPAN.
 
 =item shutdown SOCKET,HOW
 
