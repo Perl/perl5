@@ -102,11 +102,6 @@
     %s() called too early to check prototype		[Perl_peep]
         fred() ; sub fred ($$) {}
 
-     Non-octal literal mode (%d) specified
-	(Did you mean 0%d instead?)
-	chmod 777, "foo";
-	mkdir "foo", 777;
-	umask 222;
 
      Use of "package" with no arguments is deprecated
 	package;
@@ -934,33 +929,6 @@ unshift(@x);
 EXPECT
 Useless use of push with no values at - line 4.
 Useless use of unshift with no values at - line 5.
-########
-# op.c
-use warnings 'chmod' ;
-chmod 777;
-no warnings 'chmod' ;
-chmod 777;
-EXPECT
-Non-octal literal mode (777) specified at - line 3.
-	(Did you mean 0777 instead?)
-########
-# op.c
-use warnings 'umask' ;
-umask 222;
-no warnings 'umask' ;
-umask 222;
-EXPECT
-Non-octal literal mode (222) specified at - line 3.
-	(Did you mean 0222 instead?)
-########
-# op.c
-use warnings 'mkdir' ;
-mkdir "", 777;
-no warnings 'mkdir' ;
-mkdir "", 777;
-EXPECT
-Non-octal literal mode (777) specified at - line 3.
-	(Did you mean 0777 instead?)
 ########
 # op.c
 use warnings 'deprecated' ;

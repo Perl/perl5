@@ -9589,6 +9589,11 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_debug		= proto_perl->Idebug;
 
+#ifdef USE_REENTRANT_API
+    New(31337, PL_reentrant_buffer,1, REBUF);
+    New(31337, PL_reentrant_buffer->tmbuff,1, struct tm);
+#endif
+
     /* create SV map for pointer relocation */
     PL_ptr_table = ptr_table_new();
 
@@ -10189,13 +10194,16 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	    ENTER;
 	    SAVETMPS;
 	    PUSHMARK(SP);
-	    XPUSHs(newSVpv(HvNAME(stash), 0));
+           XPUSHs(sv_2mortal(newSVpv(HvNAME(stash), 0)));
 	    PUTBACK;
 	    call_sv((SV*)GvCV(cloner), G_DISCARD);
 	    FREETMPS;
 	    LEAVE;
 	}
     }
+
+    SvREFCNT_dec(param->stashes);
+    Safefree(param);
 
 #ifdef PERL_OBJECT
     return (PerlInterpreter*)pPerl;

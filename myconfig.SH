@@ -12,11 +12,6 @@ case $PERL_CONFIG_SH in
 	. $TOP/config.sh
 	;;
 esac
-if $test "$PERL_PATCHLEVEL" -gt 0 ; then
-    patchlevel=" patchlevel $PERL_PATCHLEVEL"
-else
-    patchlevel=""
-fi
 : This forces SH files to create target in same directory as SH file.
 : This is so that make depend always knows where to find SH derivatives.
 case "$0" in
@@ -32,7 +27,7 @@ $startsh
 
 # Note that the text lines /^Summary of/ .. /^\s*$/ are copied into Config.pm.
 cat <<'!NO!SUBS!'
-Summary of my $package (revision $baserev version $PERL_VERSION subversion $PERL_SUBVERSION$patchlevel) configuration:
+Summary of my $package (revision $baserev $version_patchlevel_string) configuration:
   Platform:
     osname=$osname, osvers=$osvers, archname=$archname
     uname='$myuname'

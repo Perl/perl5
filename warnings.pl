@@ -37,11 +37,6 @@ my $tree = {
          			'debugging'	=> DEFAULT_ON,
          			'malloc'	=> DEFAULT_ON,
 	 		   },
-	'octmode'	=> {
-				'chmod'		=> DEFAULT_OFF,
-				'mkdir'		=> DEFAULT_OFF,
-				'umask'		=> DEFAULT_OFF,
-			   },
        	'void'		=> DEFAULT_OFF,
        	'recursion'	=> DEFAULT_OFF,
        	'redefine'	=> DEFAULT_OFF,

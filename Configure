@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun Jul  8 20:08:04 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Thu Jul 12 07:32:38 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -839,6 +839,7 @@ perl_patchlevel=''
 revision=''
 subversion=''
 version=''
+version_patchlevel_string=''
 perl5=''
 perladmin=''
 perlpath=''
@@ -6061,7 +6062,6 @@ prefixit='case "$3" in
 	esac;;
 esac'
 
-
 : get the patchlevel
 echo " "
 echo "Getting the current patchlevel..." >&4
@@ -6088,11 +6088,15 @@ if $test -r $rsrc/.patch ; then
 		perl_patchlevel=`cat $rsrc/.patch`
 	fi
 fi
+: Define a handy string here to avoid duplication in myconfig.SH and configpm.
+version_patchlevel_string="version $patchlevel subversion $subversion"
 case "$perl_patchlevel" in
-0)  ;;
-'') $echo "(You have $package version $patchlevel subversion $subversion.)" ;;
-*)  $echo "(You have $package version $patchlevel subversion $subversion patchlevel $perl_patchlevel.)" ;;
+0|'') ;;
+*) version_patchlevel_string="$version_patchlevel_string patch $perl_patchlevel" ;;
 esac
+
+$echo "(You have $package $version_patchlevel_string.)"
+
 case "$osname" in
 dos|vms)
 	: XXX Should be a Configure test for double-dots in filenames.
@@ -17364,6 +17368,7 @@ vendorlibexp='$vendorlibexp'
 vendorprefix='$vendorprefix'
 vendorprefixexp='$vendorprefixexp'
 version='$version'
+version_patchlevel_string='$version_patchlevel_string'
 versiononly='$versiononly'
 vi='$vi'
 voidflags='$voidflags'

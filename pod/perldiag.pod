@@ -1237,12 +1237,6 @@ it compiled correctly and ran its initialization code correctly.  It's
 traditional to end such a file with a "1;", though any true value would
 do.  See L<perlfunc/require>.
 
-=item (Did you mean 0%d instead?)
-
-(W octmode) The mode argument to chmod, mkdir, and umask is usually
-given in octal (octal constants start with a 0, as in C). Did you really
-mean to use a non-octal number?
-
 =item (Did you mean &%s instead?)
 
 (W) You probably referred to an imported subroutine &FOO as $FOO or some
@@ -2202,12 +2196,6 @@ not know about the field name.  The field names are looked up in the
 (W signal) You specified a signal name as a subscript to %SIG that was
 not recognized.  Say C<kill -l> in your shell to see the valid signal
 names on your system.
-
-=item Non-octal literal mode (%d) specified
-
-(W octmode) The mode argument to chmod, mkdir, and umask is usually
-given in octal (octal constants start with a 0, as in C). Did you really
-mean to use a non-octal number?
 
 =item Not a CODE reference
 

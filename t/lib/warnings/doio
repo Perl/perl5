@@ -172,6 +172,11 @@ EXPECT
 OPTION regex
 Can't exec "lskdjfalksdjfdjfkls(:? abc)?": .+
 ########
+# doio.c [win32_execvp]
+use warnings 'exec' ;
+exec $^X, "-e0" ;
+EXPECT
+########
 # doio.c [Perl_nextargv]
 $^W = 0 ;
 my $filename = "./temp.dir" ;

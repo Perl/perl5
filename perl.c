@@ -59,12 +59,9 @@ static I32 read_e_script(pTHXo_ int idx, SV *buf_sv, int maxlen);
 #else
 #  if defined(USE_ITHREADS)
 
-static void S_atfork_lock(void);
-static void S_atfork_unlock(void);
-
 /* this is called in parent before the fork() */
-static void
-S_atfork_lock(void)
+void
+Perl_atfork_lock(void)
 {
     /* locks must be held in locking order (if any) */
 #ifdef MYMALLOC
@@ -74,8 +71,8 @@ S_atfork_lock(void)
 }
 
 /* this is called in both parent and child after the fork() */
-static void
-S_atfork_unlock(void)
+void
+Perl_atfork_unlock(void)
 {
     /* locks must be released in same order as in S_atfork_lock() */
 #ifdef MYMALLOC
@@ -92,9 +89,6 @@ S_atfork_unlock(void)
 	    ALLOC_THREAD_KEY;			\
 	    PERL_SET_THX(my_perl);		\
 	    OP_REFCNT_INIT;			\
-	    PTHREAD_ATFORK(S_atfork_lock,	\
-			   S_atfork_unlock,	\
-			   S_atfork_unlock);	\
 	}					\
 	else {					\
 	    PERL_SET_THX(my_perl);		\
@@ -314,6 +308,10 @@ perl_construct(pTHXx)
     PL_errors = newSVpvn("",0);
 #ifdef USE_ITHREADS
         PL_regex_padav = newAV();
+#endif
+#ifdef USE_REENTRANT_API
+    New(31337, PL_reentrant_buffer,1, REBUF);
+    New(31337, PL_reentrant_buffer->tmbuff,1, struct tm);
 #endif
     ENTER;
 }
@@ -806,6 +804,11 @@ perl_destruct(pTHXx)
     Safefree(PL_thrsv);
     PL_thrsv = Nullsv;
 #endif /* USE_THREADS */
+
+#ifdef USE_REENTRANT_API
+    Safefree(PL_reentrant_buffer->tmbuff);
+    Safefree(PL_reentrant_buffer);
+#endif
 
     sv_free_arenas();
 

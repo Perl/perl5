@@ -166,7 +166,6 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPpTARGET_MY		16	/* Target is PADMY. */
 
 /* Private for OP_CONST */
-#define	OPpCONST_OCTAL		4	/* Octal constant. */
 #define	OPpCONST_STRICT		8	/* bearword subject to strict 'subs' */
 #define OPpCONST_ENTERED	16	/* Has been entered as symbol. */
 #define OPpCONST_ARYBASE	32	/* Was a $[ translated to constant. */
@@ -456,3 +455,12 @@ struct loop {
 #define PERL_LOADMOD_DENY		0x1
 #define PERL_LOADMOD_NOIMPORT		0x2
 #define PERL_LOADMOD_IMPORT_OPS		0x4
+
+#ifdef USE_REENTRANT_API
+typedef struct {
+  struct tm* tmbuff;
+} REBUF;
+#define localtime(a)       localtime_r(a,PL_reentrant_buffer->tmbuff)
+#define gmtime(a)          gmtime_r(a,PL_reentrant_buffer->tmbuff)
+#endif
+

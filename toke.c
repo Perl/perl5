@@ -6909,8 +6909,7 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
     register char *e;			/* end of temp buffer */
     NV nv;				/* number read, as a double */
     SV *sv = Nullsv;			/* place to put the converted number */
-    bool floatit,			/* boolean: int or float? */
-	octal = 0;			/* Is this an octal number? */
+    bool floatit;			/* boolean: int or float? */
     char *lastub = 0;			/* position of last underbar */
     static char number_too_long[] = "Number too long";
 
@@ -6964,7 +6963,6 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 	    /* so it must be octal */
 	    else {
 		shift = 3;
-		octal = 1;
 		s++;
 	    }
 
@@ -7318,11 +7316,8 @@ vstring:
 
     /* make the op for the constant and return */
 
-    if (sv) {
+    if (sv)
 	lvalp->opval = newSVOP(OP_CONST, 0, sv);
-	if (octal)
-	    ((SVOP *)lvalp->opval)->op_private |= OPpCONST_OCTAL;
-    }
     else
 	lvalp->opval = Nullop;
 

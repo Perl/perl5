@@ -4121,11 +4121,6 @@ PP(pp_exec)
 #endif
     }
 
-#if !defined(HAS_FORK) && defined(USE_ITHREADS) && defined(PERL_IMPLICIT_SYS)
-    if (value >= 0)
-	my_exit(value);
-#endif
-
     SP = ORIGMARK;
     PUSHi(value);
     RETURN;
