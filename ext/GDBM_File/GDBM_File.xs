@@ -18,8 +18,6 @@ typedef GDBM_FILE GDBM_File;
 #define gdbm_NEXTKEY(db,key)			gdbm_nextkey(db,key)
 #define gdbm_EXISTS(db,key)			gdbm_exists(db,key)
 
-typedef datum gdatum;
-
 typedef void (*FATALFUNC)();
 
 static int
@@ -27,6 +25,21 @@ not_here(char *s)
 {
     croak("GDBM_File::%s not implemented on this architecture", s);
     return -1;
+}
+
+/* GDBM allocates the datum with system malloc() and expects the user
+ * to free() it.  So we either have to free() it immediately, or have
+ * perl free() it when it deallocates the SV, depending on whether
+ * perl uses malloc()/free() or not. */
+static void
+output_datum(SV *arg, char *str, int size)
+{
+#if !defined(MYMALLOC) || (defined(MYMALLOC) && defined(PERL_POLLUTE_MALLOC))
+	sv_usepvn(arg, str, size);
+#else
+	sv_setpvn(arg, str, size);
+	safesysfree(str);
+#endif
 }
 
 /* Versions of gdbm prior to 1.7x might not have the gdbm_sync,
@@ -186,7 +199,7 @@ gdbm_DESTROY(db)
 	CODE:
 	gdbm_close(db);
 
-gdatum
+datum
 gdbm_FETCH(db, key)
 	GDBM_File	db
 	datum		key
@@ -211,11 +224,11 @@ gdbm_DELETE(db, key)
 	GDBM_File	db
 	datum		key
 
-gdatum
+datum
 gdbm_FIRSTKEY(db)
 	GDBM_File	db
 
-gdatum
+datum
 gdbm_NEXTKEY(db, key)
 	GDBM_File	db
 	datum		key
