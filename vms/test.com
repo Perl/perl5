@@ -112,7 +112,7 @@ use Config;
 @libexcl=('db-btree.t','db-hash.t','db-recno.t',
           'gdbm.t','io_dup.t', 'io_pipe.t', 'io_poll.t', 'io_sel.t',
           'io_sock.t', 'io_unix.t',
-          'ndbm.t','odbm.t','open2.t','open3.t', 'ph.t', 'posix.t', 'dprof.t');
+          'ndbm.t','odbm.t','open2.t','open3.t', 'ph.t', 'posix.t');
 
 # Note: POSIX is not part of basic build, but can be built
 # separately if you're using DECC
