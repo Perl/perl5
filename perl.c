@@ -1537,8 +1537,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
                 while (SvCUR(PL_Sv) > opts+76) {
                     /* find last space after "options: " and before col 76 */
 
-                    char *space, *pv = SvPV_nolen(PL_Sv);
-                    char c = pv[opts+76];
+                    const char *space;
+                    char *pv = SvPV_nolen(PL_Sv);
+                    const char c = pv[opts+76];
                     pv[opts+76] = '\0';
                     space = strrchr(pv+opts+26, ' ');
                     pv[opts+76] = c;
@@ -1607,11 +1608,11 @@ print \"  \\@INC:\\n    @INC\\n\";");
 	    }
 	    /* catch use of gnu style long options */
 	    if (strEQ(s, "version")) {
-		s = "v";
+		s = (char *)"v";
 		goto reswitch;
 	    }
 	    if (strEQ(s, "help")) {
-		s = "h";
+		s = (char *)"h";
 		goto reswitch;
 	    }
 	    s--;
@@ -1731,7 +1732,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     if (PL_doextract) {
 #endif
 	find_beginning();
-	if (cddir && PerlDir_chdir(cddir) < 0)
+	if (cddir && PerlDir_chdir( (char *)cddir ) < 0)
 	    Perl_croak(aTHX_ "Can't chdir to %s",cddir);
 
     }
@@ -1959,7 +1960,7 @@ S_vrun_body(pTHX_ va_list args)
 #endif
 
 
-STATIC void *
+STATIC void
 S_run_body(pTHX_ I32 oldscope)
 {
     DEBUG_r(PerlIO_printf(Perl_debug_log, "%s $` $& $' support.\n",
@@ -2002,7 +2003,6 @@ S_run_body(pTHX_ I32 oldscope)
 
     my_exit(0);
     /* NOTREACHED */
-    return NULL;
 }
 
 /*
@@ -2352,7 +2352,7 @@ S_vcall_body(pTHX_ va_list args)
 #endif
 
 STATIC void
-S_call_body(pTHX_ const OP *myop, int is_eval)
+S_call_body(pTHX_ const OP *myop, bool is_eval)
 {
     if (PL_op == myop) {
 	if (is_eval)
@@ -2709,7 +2709,7 @@ Perl_moreswitches(pTHX_ char *s)
     }
     case 'C':
         s++;
-        PL_unicode = parse_unicode_opts(&s);
+        PL_unicode = parse_unicode_opts( (const char **)&s );
 	return s;
     case 'F':
 	PL_minus_F = TRUE;
@@ -2766,7 +2766,7 @@ Perl_moreswitches(pTHX_ char *s)
 #ifdef DEBUGGING
 	forbid_setid("-D");
 	s++;
-	PL_debug = get_debug_opts_flags(&s, 1) | DEBUG_TOP_FLAG;
+	PL_debug = get_debug_opts_flags( &s, 1) | DEBUG_TOP_FLAG;
 #else /* !DEBUGGING */
 	if (ckWARN_d(WARN_DEBUGGING))
 	    Perl_warner(aTHX_ packWARN(WARN_DEBUGGING),
@@ -3176,7 +3176,7 @@ S_init_main_stash(pTHX)
 
 /* PSz 18 Nov 03  fdscript now global but do not change prototype */
 STATIC void
-S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv)
+S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv)
 {
 #ifndef IAMSUID
     const char *quote;
@@ -3193,7 +3193,7 @@ S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv)
     }
     else {
 	/* if find_script() returns, it returns a malloc()-ed value */
-	PL_origfilename = scriptname = find_script(scriptname, dosearch, NULL, 1);
+	scriptname = PL_origfilename = find_script(scriptname, dosearch, NULL, 1);
 
 	if (strnEQ(scriptname, "/dev/fd/", 8) && isDIGIT(scriptname[8]) ) {
             const char *s = scriptname + 8;
@@ -3223,7 +3223,7 @@ S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv)
 		}
 		scriptname = savepv(s + 1);
 		Safefree(PL_origfilename);
-		PL_origfilename = scriptname;
+		PL_origfilename = (char *)scriptname;
 	    }
 	}
     }
@@ -3231,7 +3231,7 @@ S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv)
     CopFILE_free(PL_curcop);
     CopFILE_set(PL_curcop, PL_origfilename);
     if (*PL_origfilename == '-' && PL_origfilename[1] == '\0')
-	scriptname = "";
+	scriptname = (char *)"";
     if (PL_fdscript >= 0) {
 	PL_rsfp = PerlIO_fdopen(PL_fdscript,PERL_SCRIPT_MODE);
 #       if defined(HAS_FCNTL) && defined(F_SETFD)
@@ -3258,7 +3258,7 @@ S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv)
     }
 #else /* IAMSUID */
     else if (PL_preprocess) {
-	char *cpp_cfg = CPPSTDIN;
+	const char *cpp_cfg = CPPSTDIN;
 	SV *cpp = newSVpvn("",0);
 	SV *cmd = NEWSV(0,0);
 
@@ -3318,7 +3318,7 @@ S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv)
                               "PL_preprocess: cmd=\"%s\"\n",
                               SvPVX(cmd)));
 
-	PL_rsfp = PerlProc_popen(SvPVX(cmd), "r");
+	PL_rsfp = PerlProc_popen(SvPVX(cmd), (char *)"r");
 	SvREFCNT_dec(cmd);
 	SvREFCNT_dec(cpp);
     }
@@ -3872,12 +3872,15 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 	/* not set-id, must be wrapped */
     }
 #endif /* DOSUID */
+    (void)validarg;
+    (void)scriptname;
 }
 
 STATIC void
 S_find_beginning(pTHX)
 {
-    register char *s, *s2;
+    register char *s;
+    register const char *s2;
 #ifdef MACOS_TRADITIONAL
     int maclines = 0;
 #endif
@@ -4002,6 +4005,7 @@ Perl_doing_taint(int argc, char *argv[], char *envp[])
          && (argv[1][1] == 't' || argv[1][1] == 'T') )
 	return 1;
     return 0;
+    (void)envp;
 }
 
 STATIC void
@@ -4512,9 +4516,10 @@ S_incpush_if_exists(pTHX_ SV *dir)
 }
 
 STATIC void
-S_incpush(pTHX_ const char *p, int addsubdirs, int addoldvers, int usesep)
+S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep)
 {
     SV *subdir = Nullsv;
+    const char *p = dir;
 
     if (!p || !*p)
 	return;
@@ -4713,7 +4718,7 @@ void
 Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 {
     SV *atsv;
-    line_t oldline = CopLINE(PL_curcop);
+    const line_t oldline = CopLINE(PL_curcop);
     CV *cv;
     STRLEN len;
     int ret;
@@ -4895,6 +4900,9 @@ static I32
 read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen)
 {
     char *p, *nl;
+    (void)idx;
+    (void)maxlen;
+
     p  = SvPVX(PL_e_script);
     nl = strchr(p, '\n');
     nl = (nl) ? nl+1 : SvEND(PL_e_script);
