@@ -1,11 +1,4 @@
 
-BEGIN {
-        chdir 't' if -d 't';
-        @INC = '../lib';
-        require Test; import Test;
-        plan(tests => 154);
-}
-
 # Test that Pod::LaTeX works
 # This test relies on the DATA filehandle
 # DATA contains the latex that is used for comparison
@@ -15,12 +8,21 @@ BEGIN {
 # will probably not match what is currently there. You
 # will need to adjust it to match (assuming it is correct).
 
+use Test;
 use strict;
+
+BEGIN { plan tests => 172 }
 
 use Pod::LaTeX;
 
+# The link parsing changed between v0.22 and v0.30 of Pod::ParseUtils
+use Pod::ParseUtils;
+my $linkver = $Pod::ParseUtils::VERSION;
+
 # Set up an END block to remove the test output file
-END { unlink "test.tex" };
+END {
+  unlink "test.tex";
+};
 
 ok(1);
 
@@ -60,6 +62,15 @@ my @output = <INFH>;
 ok(@output, @reference);
 for my $i (0..$#reference) {
   next if $reference[$i] =~ /^%%/; # skip timestamp comments
+
+  # if we are running a new version of Pod::ParseUtils we need
+  # to change the link text. This is a kluge until we drop support
+  # for older versions of Pod::ParseUtils
+  if ($linkver < 0.29 && $output[$i] =~ /manpage/) {
+    # convert our expectations from new to old new format 
+    $reference[$i] =~ s/Standard link: \\emph\{Pod::LaTeX\}/Standard link: the \\emph\{Pod::LaTeX\} manpage/;
+    $reference[$i] =~ s/\\textsf\{sec\} in \\emph\{Pod::LaTeX\}/the section on \\textsf\{sec\} in the \\emph\{Pod::LaTeX\} manpage/;
+  }
   ok($output[$i], $reference[$i]);
 }
 
@@ -68,10 +79,12 @@ close(INFH) or die "Error closing INFH test.tex: $!\n";
 
 __DATA__
 \documentclass{article}
+\usepackage[T1]{fontenc}
+\usepackage{textcomp}
 
-%%  Latex generated from POD in document ...
+%%  Latex generated from POD in document (unknown)
 %%  Using the perl module Pod::LaTeX
-%%  Converted on Tue Nov 20 20:43:05 2001
+%%  Converted on Sat Apr  5 21:16:02 2003
 
 
 \usepackage{makeidx}
@@ -187,12 +200,28 @@ Some more content for the item.
 This is item content.
 
 \end{description}
+
+
+And this should be an enumerated list without any cruft after the numbers or additional numbers at all.
+
+\begin{enumerate}
+
+\item 
+
+item 1
+
+
+\item 
+
+item 2
+
+\end{enumerate}
 \section{Escapes\label{Escapes}\index{Escapes}}
 
 
 Test some normal escapes such as $<$ (lt) and $>$ (gt) and $|$ (verbar) and
 \texttt{\~{}} (tilde) and \& (amp) as well as $<$ (Esc lt) and $|$ (Esc
-verbar) and / (Esc sol) and $>$ (Esc gt) and \& (Esc amp)
+verbar) and \textfractionsolidus{} (Esc sol) and $>$ (Esc gt) and \& (Esc amp)
 and " (Esc quot) and even $\alpha$ (Esc alpha).
 
 \section{For blocks\label{For_blocks}\index{For blocks}}
@@ -310,6 +339,20 @@ Some more content for the item.
 =item this is some text with I<something across> the 40 char boundary
 
 This is item content.
+
+=back
+
+And this should be an enumerated list without any cruft after the numbers or additional numbers at all.
+
+=over 4
+
+=item 1)
+
+item 1
+
+=item 2.
+
+item 2
 
 =back
 
