@@ -405,8 +405,7 @@ if (-x "/usr/bin/locale" && open(LOCALES, "/usr/bin/locale -a|")) {
 
 setlocale(LC_ALL, "C");
 
-# UTF-8 and locales simply do not work yet. --jhi
-@Locale = grep {!/utf-?8/i} @Locale;
+sub utf8locale { $_[0] =~ /utf-?8/i }
 
 @Locale = sort @Locale;
 
@@ -498,7 +497,10 @@ foreach $Locale (@Locale) {
 
 	# Test \w.
     
-	{
+	if (utf8locale($Locale)) {
+	    # Until the polymorphic regexen arrive.
+	    debug "# skipping UTF-8 locale '$Locale'\n";
+	} else {
 	    my $word = join('', @Neoalpha);
 
 	    $word =~ /^(\w+)$/;
@@ -680,7 +682,10 @@ foreach $Locale (@Locale) {
     # Does lc of an UPPER (if different from the UPPER) match
     # case-insensitively the UPPER, and does the UPPER match
     # case-insensitively the lc of the UPPER.  And vice versa.
-    {
+    if (utf8locale($Locale)) {
+        # Until the polymorphic regexen arrive.
+        debug "# skipping UTF-8 locale '$Locale'\n";
+    } else {
 	use locale;
 
 	my @f = ();
