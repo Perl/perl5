@@ -157,7 +157,6 @@ lib/Encode/CN/HZ.pm
 lib/Encode/Tcl/Escape.pm
 lib/Encode/Tcl/Extended.pm
 lib/Encode/Tcl/Table.pm
-lib/Encode/JP/Tr.pm
 lib/Encode/JP/ISO_2022_JP.pm
 lib/Encode/JP/H2Z.pm
 lib/Encode/JP/Constants.pm
