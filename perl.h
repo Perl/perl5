@@ -1932,6 +1932,22 @@ typedef I32 CHECKPOINT;
 #   endif
 #endif
 
+#ifdef IV_IS_QUAD
+#  define UVuf PERL_PRIu64
+#  define IVdf PERL_PRId64
+#  define UVof PERL_PRIo64
+#  define UVxf PERL_PRIx64
+#else
+#   if LONGSIZE == 4
+#       define UVuf "lu"
+#       define IVdf "ld"
+#       define UVof "lo"
+#       define UVxf "lx"
+#   else
+        /* Any good ideas? */
+#   endif
+#endif
+
 /* Used with UV/IV arguments: */
 					/* XXXX: need to speed it up */
 #define CLUMP_2UV(iv)	((iv) < 0 ? 0 : (UV)(iv))

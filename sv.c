@@ -1468,17 +1468,11 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 	    SvUVX(sv) = U_V(SvNVX(sv));
 	    SvIsUV_on(sv);
 	  ret_iv_max:
-#ifdef IV_IS_QUAD
 	    DEBUG_c(PerlIO_printf(Perl_debug_log, 
-				  "0x%" PERL_PRIx64 " 2iv(%" PERL_PRIu64 " => %" PERL_PRId64 ") (as unsigned)\n",
+				  "0x%"UVxf" 2iv(%"UVuf" => %"IVdf") (as unsigned)\n",
 				  PTR2UV(sv),
-				  (UV)SvUVX(sv), (IV)SvUVX(sv)));
-#else
-	    DEBUG_c(PerlIO_printf(Perl_debug_log, 
-				  "0x%lx 2iv(%lu => %ld) (as unsigned)\n",
-				  (unsigned long)sv,
-				  (unsigned long)SvUVX(sv), (long)(IV)SvUVX(sv)));
-#endif
+				  SvUVX(sv),
+				  SvUVX(sv)));
 	    return (IV)SvUVX(sv);
 	}
     }
@@ -1612,17 +1606,11 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	else {
 	    SvIVX(sv) = I_V(SvNVX(sv));
 	  ret_zero:
-#ifdef IV_IS_QUAD
 	    DEBUG_c(PerlIO_printf(Perl_debug_log, 
-				  "0x%" PERL_PRIx64 " 2uv(%" PERL_PRId64 " => %" PERL_PRIu64 ") (as signed)\n",
-				  (unsigned long)sv,(long)SvIVX(sv),
-				  (long)(UV)SvIVX(sv)));
-#else
-	    DEBUG_c(PerlIO_printf(Perl_debug_log, 
-				  "0x%lx 2uv(%ld => %lu) (as signed)\n",
-				  (unsigned long)sv,(long)SvIVX(sv),
-				  (long)(UV)SvIVX(sv)));
-#endif
+				  "0x%"UVxf" 2uv(%"IVdf" => %"UVdf") (as signed)\n",
+				  PTR2UV(sv),
+				  SvIVX(sv),
+				  (IV)(UV)SvIVX(sv)));
 	    return (UV)SvIVX(sv);
 	}
     }
@@ -2026,17 +2014,10 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 	    return SvPVX(sv);
 	}
 	if (SvIOKp(sv)) {
-#ifdef IV_IS_QUAD
 	    if (SvIsUV(sv)) 
-		(void)sprintf(tmpbuf,"%" PERL_PRIu64,(UV)SvUVX(sv));
+		(void)sprintf(tmpbuf,"%"UVuf, (UV)SvUVX(sv));
 	    else
-		(void)sprintf(tmpbuf,"%" PERL_PRId64,(IV)SvIVX(sv));
-#else
-	    if (SvIsUV(sv)) 
-		(void)sprintf(tmpbuf,"%lu",(unsigned long)SvUVX(sv));
-	    else
-		(void)sprintf(tmpbuf,"%ld",(long)SvIVX(sv));
-#endif
+		(void)sprintf(tmpbuf,"%"IVdf, (IV)SvIVX(sv));
 	    tsv = Nullsv;
 	    goto tokensave;
 	}
@@ -2134,11 +2115,7 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 		    Perl_sv_setpvf(aTHX_ tsv, "%s=%s", HvNAME(SvSTASH(sv)), s);
 		else
 		    sv_setpv(tsv, s);
-#ifdef IV_IS_QUAD
-		Perl_sv_catpvf(aTHX_ tsv, "(0x%" PERL_PRIx64")", PTR2UV(sv));
-#else
-		Perl_sv_catpvf(aTHX_ tsv, "(0x%lx)", (unsigned long)sv);
-#endif
+		Perl_sv_catpvf(aTHX_ tsv, "(0x%"UVxf")", PTR2UV(sv));
 		goto tokensaveref;
 	    }
 	    *lp = strlen(s);
@@ -5561,19 +5538,13 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		Perl_sv_setpvf(aTHX_ msg, "Invalid conversion in %s: ",
 			  (PL_op->op_type == OP_PRTF) ? "printf" : "sprintf");
 		if (c) {
-#ifdef UV_IS_QUAD
 		    if (isPRINT(c))
 			Perl_sv_catpvf(aTHX_ msg, 
 				       "\"%%%c\"", c & 0xFF);
 		    else
 			Perl_sv_catpvf(aTHX_ msg,
-				       "\"%%\\%03" PERL_PRIo64 "\"",
+				       "\"%%\\%03"UVof"\"",
 				       (UV)c & 0xFF);
-#else
-		    Perl_sv_catpvf(aTHX_ msg, isPRINT(c) ?
-				   "\"%%%c\"" : "\"%%\\%03o\"",
-				   c & 0xFF);
-#endif
 		} else
 		    sv_catpv(msg, "end of string");
 		Perl_warner(aTHX_ WARN_PRINTF, "%_", msg); /* yes, this is reentrant */

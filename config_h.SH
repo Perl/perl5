@@ -2735,6 +2735,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define Size_t $sizetype	 /* length paramater for string functions */
 
+/* Uid_t_SIGN:
+ *	This symbol holds the signedess of a Uid_t.
+ *	1 for unsigned, -1 for signed.
+ */
+#define Uid_t_SIGN	$uidsign		/* UID sign */
+
 /* Uid_t:
  *	This symbol holds the type used to declare user ids in the kernel.
  *	It can be int, ushort, uid_t, etc... It may be necessary to include

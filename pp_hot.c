@@ -601,15 +601,9 @@ PP(pp_rv2hv)
 	dTARGET;
 	if (SvTYPE(hv) == SVt_PVAV)
 	    hv = avhv_keys((AV*)hv);
-#ifdef IV_IS_QUAD
 	if (HvFILL(hv))
-            Perl_sv_setpvf(aTHX_ TARG, "%" PERL_PRId64 "/%" PERL_PRId64,
-                      (Quad_t)HvFILL(hv), (Quad_t)HvMAX(hv) + 1);
-#else
-	if (HvFILL(hv))
-            Perl_sv_setpvf(aTHX_ TARG, "%ld/%ld",
-                      (long)HvFILL(hv), (long)HvMAX(hv) + 1);
-#endif
+            Perl_sv_setpvf(aTHX_ TARG, "%"IVdf"/%"IVdf,
+			   (IV)HvFILL(hv), (IV)HvMAX(hv) + 1);
 	else
 	    sv_setiv(TARG, 0);
 	
