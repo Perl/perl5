@@ -45,40 +45,112 @@
 #define	NSPACELUTF8	39	/* 0x27 Match any non-whitespace char in locale */
 #define	DIGIT	40	/* 0x28 Match any numeric character */
 #define	DIGITUTF8	41	/* 0x29 Match any numeric character */
-#define	NDIGIT	42	/* 0x2a Match any non-numeric character */
-#define	NDIGITUTF8	43	/* 0x2b Match any non-numeric character */
-#define	CLUMP	44	/* 0x2c Match any combining character sequence */
-#define	BRANCH	45	/* 0x2d Match this alternative, or the next... */
-#define	BACK	46	/* 0x2e Match "", "next" ptr points backward. */
-#define	EXACT	47	/* 0x2f Match this string (preceded by length). */
-#define	EXACTF	48	/* 0x30 Match this string, folded (prec. by length). */
-#define	EXACTFL	49	/* 0x31 Match this string, folded in locale (w/len). */
-#define	NOTHING	50	/* 0x32 Match empty string. */
-#define	TAIL	51	/* 0x33 Match empty string. Can jump here from outside. */
-#define	STAR	52	/* 0x34 Match this (simple) thing 0 or more times. */
-#define	PLUS	53	/* 0x35 Match this (simple) thing 1 or more times. */
-#define	CURLY	54	/* 0x36 Match this simple thing {n,m} times. */
-#define	CURLYN	55	/* 0x37 Match next-after-this simple thing  */
-#define	CURLYM	56	/* 0x38 Match this medium-complex thing {n,m} times. */
-#define	CURLYX	57	/* 0x39 Match this complex thing {n,m} times. */
-#define	WHILEM	58	/* 0x3a Do curly processing and see if rest matches. */
-#define	OPEN	59	/* 0x3b Mark this point in input as start of #n. */
-#define	CLOSE	60	/* 0x3c Analogous to OPEN. */
-#define	REF	61	/* 0x3d Match some already matched string */
-#define	REFF	62	/* 0x3e Match already matched string, folded */
-#define	REFFL	63	/* 0x3f Match already matched string, folded in loc. */
-#define	IFMATCH	64	/* 0x40 Succeeds if the following matches. */
-#define	UNLESSM	65	/* 0x41 Fails if the following matches. */
-#define	SUSPEND	66	/* 0x42 "Independent" sub-RE. */
-#define	IFTHEN	67	/* 0x43 Switch, should be preceeded by switcher . */
-#define	GROUPP	68	/* 0x44 Whether the group matched. */
-#define	LONGJMP	69	/* 0x45 Jump far away. */
-#define	BRANCHJ	70	/* 0x46 BRANCH with long offset. */
-#define	EVAL	71	/* 0x47 Execute some Perl code. */
-#define	MINMOD	72	/* 0x48 Next operator is not greedy. */
-#define	LOGICAL	73	/* 0x49 Next opcode should set the flag only. */
-#define	RENUM	74	/* 0x4a Group with independently numbered parens. */
-#define	OPTIMIZED	75	/* 0x4b Placeholder for dump. */
+#define	DIGITL	42	/* 0x2a Match any numeric character in locale */
+#define	DIGITLUTF8	43	/* 0x2b Match any numeric character in locale */
+#define	NDIGIT	44	/* 0x2c Match any non-numeric character */
+#define	NDIGITUTF8	45	/* 0x2d Match any non-numeric character */
+#define	NDIGITL	46	/* 0x2e Match any non-numeric character in locale */
+#define	NDIGITLUTF8	47	/* 0x2f Match any non-numeric character in locale */
+#define	ALNUMC	48	/* 0x30 Match any alphanumeric character */
+#define	ALNUMCUTF8	49	/* 0x31 Match any alphanumeric character */
+#define	ALNUMCL	50	/* 0x32 Match any alphanumeric character in locale */
+#define	ALNUMCLUTF8	51	/* 0x33 Match any alphanumeric character in locale */
+#define	NALNUMC	52	/* 0x34 Match any non-alphanumeric character */
+#define	NALNUMCUTF8	53	/* 0x35 Match any non-alphanumeric character */
+#define	NALNUMCL	54	/* 0x36 Match any non-alphanumeric character in locale */
+#define	NALNUMCLUTF8	55	/* 0x37 Match any non-alphanumeric character in locale */
+#define	ALPHA	56	/* 0x38 Match any alphabetic character */
+#define	ALPHAUTF8	57	/* 0x39 Match any alphabetic character */
+#define	ALPHAL	58	/* 0x3a Match any alphabetic character in locale */
+#define	ALPHALUTF8	59	/* 0x3b Match any alphabetic character in locale */
+#define	NALPHA	60	/* 0x3c Match any non-alphabetic character */
+#define	NALPHAUTF8	61	/* 0x3d Match any non-alphabetic character */
+#define	NALPHAL	62	/* 0x3e Match any non-alphabetic character in locale */
+#define	NALPHALUTF8	63	/* 0x3f Match any non-alphabetic character in locale */
+#define	ASCII	64	/* 0x40 Match any ASCII character */
+#define	NASCII	65	/* 0x41 Match any non-ASCII character */
+#define	CNTRL	66	/* 0x42 Match any control character */
+#define	CNTRLUTF8	67	/* 0x43 Match any control character */
+#define	CNTRLL	68	/* 0x44 Match any control character in locale */
+#define	CNTRLLUTF8	69	/* 0x45 Match any control character in locale */
+#define	NCNTRL	70	/* 0x46 Match any non-control character */
+#define	NCNTRLUTF8	71	/* 0x47 Match any non-control character */
+#define	NCNTRLL	72	/* 0x48 Match any non-control character in locale */
+#define	NCNTRLLUTF8	73	/* 0x49 Match any non-control character in locale */
+#define	GRAPH	74	/* 0x4a Match any graphical character */
+#define	GRAPHUTF8	75	/* 0x4b Match any graphical character */
+#define	GRAPHL	76	/* 0x4c Match any graphical character in locale */
+#define	GRAPHLUTF8	77	/* 0x4d Match any graphical character in locale */
+#define	NGRAPH	78	/* 0x4e Match any non-graphical character */
+#define	NGRAPHUTF8	79	/* 0x4f Match any non-graphical character */
+#define	NGRAPHL	80	/* 0x50 Match any non-graphical character in locale */
+#define	NGRAPHLUTF8	81	/* 0x51 Match any non-graphical character in locale */
+#define	LOWER	82	/* 0x52 Match any lowercase character */
+#define	LOWERUTF8	83	/* 0x53 Match any lowercase character */
+#define	LOWERL	84	/* 0x54 Match any lowercase character in locale */
+#define	LOWERLUTF8	85	/* 0x55 Match any lowercase character in locale */
+#define	NLOWER	86	/* 0x56 Match any non-lowercase character */
+#define	NLOWERUTF8	87	/* 0x57 Match any non-lowercase character */
+#define	NLOWERL	88	/* 0x58 Match any non-lowercase character in locale */
+#define	NLOWERLUTF8	89	/* 0x59 Match any non-lowercase character in locale */
+#define	PRINT	90	/* 0x5a Match any printable character */
+#define	PRINTUTF8	91	/* 0x5b Match any printable character */
+#define	PRINTL	92	/* 0x5c Match any printable character in locale */
+#define	PRINTLUTF8	93	/* 0x5d Match any printable character in locale */
+#define	NPRINT	94	/* 0x5e Match any non-printable character */
+#define	NPRINTUTF8	95	/* 0x5f Match any non-printable character */
+#define	NPRINTL	96	/* 0x60 Match any non-printable character in locale */
+#define	NPRINTLUTF8	97	/* 0x61 Match any non-printable character in locale */
+#define	PUNCT	98	/* 0x62 Match any punctuation character */
+#define	PUNCTUTF8	99	/* 0x63 Match any punctuation character */
+#define	PUNCTL	100	/* 0x64 Match any punctuation character in locale */
+#define	PUNCTLUTF8	101	/* 0x65 Match any punctuation character in locale */
+#define	NPUNCT	102	/* 0x66 Match any non-punctuation character */
+#define	NPUNCTUTF8	103	/* 0x67 Match any non-punctuation character */
+#define	NPUNCTL	104	/* 0x68 Match any non-punctuation character in locale */
+#define	NPUNCTLUTF8	105	/* 0x69 Match any non-punctuation character in locale */
+#define	UPPER	106	/* 0x6a Match any uppercase character */
+#define	UPPERUTF8	107	/* 0x6b Match any uppercase character */
+#define	UPPERL	108	/* 0x6c Match any uppercase character in locale */
+#define	UPPERLUTF8	109	/* 0x6d Match any uppercase character in locale */
+#define	NUPPER	110	/* 0x6e Match any non-uppercase character */
+#define	NUPPERUTF8	111	/* 0x6f Match any non-uppercase character */
+#define	NUPPERL	112	/* 0x70 Match any non-uppercase character in locale */
+#define	NUPPERLUTF8	113	/* 0x71 Match any non-uppercase character in locale */
+#define	XDIGIT	114	/* 0x72 Match any hexdigit character */
+#define	NXDIGIT	115	/* 0x73 Match any non-hexdigit character */
+#define	CLUMP	116	/* 0x74 Match any combining character sequence */
+#define	BRANCH	117	/* 0x75 Match this alternative, or the next... */
+#define	BACK	118	/* 0x76 Match "", "next" ptr points backward. */
+#define	EXACT	119	/* 0x77 Match this string (preceded by length). */
+#define	EXACTF	120	/* 0x78 Match this string, folded (prec. by length). */
+#define	EXACTFL	121	/* 0x79 Match this string, folded in locale (w/len). */
+#define	NOTHING	122	/* 0x7a Match empty string. */
+#define	TAIL	123	/* 0x7b Match empty string. Can jump here from outside. */
+#define	STAR	124	/* 0x7c Match this (simple) thing 0 or more times. */
+#define	PLUS	125	/* 0x7d Match this (simple) thing 1 or more times. */
+#define	CURLY	126	/* 0x7e Match this simple thing {n,m} times. */
+#define	CURLYN	127	/* 0x7f Match next-after-this simple thing  */
+#define	CURLYM	128	/* 0x80 Match this medium-complex thing {n,m} times. */
+#define	CURLYX	129	/* 0x81 Match this complex thing {n,m} times. */
+#define	WHILEM	130	/* 0x82 Do curly processing and see if rest matches. */
+#define	OPEN	131	/* 0x83 Mark this point in input as start of #n. */
+#define	CLOSE	132	/* 0x84 Analogous to OPEN. */
+#define	REF	133	/* 0x85 Match some already matched string */
+#define	REFF	134	/* 0x86 Match already matched string, folded */
+#define	REFFL	135	/* 0x87 Match already matched string, folded in loc. */
+#define	IFMATCH	136	/* 0x88 Succeeds if the following matches. */
+#define	UNLESSM	137	/* 0x89 Fails if the following matches. */
+#define	SUSPEND	138	/* 0x8a "Independent" sub-RE. */
+#define	IFTHEN	139	/* 0x8b Switch, should be preceeded by switcher . */
+#define	GROUPP	140	/* 0x8c Whether the group matched. */
+#define	LONGJMP	141	/* 0x8d Jump far away. */
+#define	BRANCHJ	142	/* 0x8e BRANCH with long offset. */
+#define	EVAL	143	/* 0x8f Execute some Perl code. */
+#define	MINMOD	144	/* 0x90 Next operator is not greedy. */
+#define	LOGICAL	145	/* 0x91 Next opcode should set the flag only. */
+#define	RENUM	146	/* 0x92 Group with independently numbered parens. */
+#define	OPTIMIZED	147	/* 0x93 Placeholder for dump. */
 
 #ifndef DOINIT
 EXTCONST U8 PL_regkind[];
@@ -126,8 +198,80 @@ EXTCONST U8 PL_regkind[] = {
 	NSPACE,		/* NSPACELUTF8 */
 	DIGIT,		/* DIGIT */
 	DIGIT,		/* DIGITUTF8 */
+	DIGIT,		/* DIGITL */
+	DIGIT,		/* DIGITLUTF8 */
 	NDIGIT,		/* NDIGIT */
 	NDIGIT,		/* NDIGITUTF8 */
+	NDIGIT,		/* NDIGITL */
+	NDIGIT,		/* NDIGITLUTF8 */
+	ALNUMC,		/* ALNUMC */
+	ALNUMC,		/* ALNUMCUTF8 */
+	ALNUMC,		/* ALNUMCL */
+	ALNUMC,		/* ALNUMCLUTF8 */
+	NALNUMC,		/* NALNUMC */
+	NALNUMC,		/* NALNUMCUTF8 */
+	NALNUMC,		/* NALNUMCL */
+	NALNUMC,		/* NALNUMCLUTF8 */
+	ALPHA,		/* ALPHA */
+	ALPHA,		/* ALPHAUTF8 */
+	ALPHA,		/* ALPHAL */
+	ALPHA,		/* ALPHALUTF8 */
+	NALPHA,		/* NALPHA */
+	NALPHA,		/* NALPHAUTF8 */
+	NALPHA,		/* NALPHAL */
+	NALPHA,		/* NALPHALUTF8 */
+	ASCII,		/* ASCII */
+	NASCII,		/* NASCII */
+	CNTRL,		/* CNTRL */
+	CNTRL,		/* CNTRLUTF8 */
+	CNTRL,		/* CNTRLL */
+	CNTRL,		/* CNTRLLUTF8 */
+	NCNTRL,		/* NCNTRL */
+	NCNTRL,		/* NCNTRLUTF8 */
+	NCNTRL,		/* NCNTRLL */
+	NCNTRL,		/* NCNTRLLUTF8 */
+	GRAPH,		/* GRAPH */
+	GRAPH,		/* GRAPHUTF8 */
+	GRAPH,		/* GRAPHL */
+	GRAPH,		/* GRAPHLUTF8 */
+	NGRAPH,		/* NGRAPH */
+	NGRAPH,		/* NGRAPHUTF8 */
+	NGRAPH,		/* NGRAPHL */
+	NGRAPH,		/* NGRAPHLUTF8 */
+	LOWER,		/* LOWER */
+	LOWER,		/* LOWERUTF8 */
+	LOWER,		/* LOWERL */
+	LOWER,		/* LOWERLUTF8 */
+	NLOWER,		/* NLOWER */
+	NLOWER,		/* NLOWERUTF8 */
+	NLOWER,		/* NLOWERL */
+	NLOWER,		/* NLOWERLUTF8 */
+	PRINT,		/* PRINT */
+	PRINT,		/* PRINTUTF8 */
+	PRINT,		/* PRINTL */
+	PRINT,		/* PRINTLUTF8 */
+	NPRINT,		/* NPRINT */
+	NPRINT,		/* NPRINTUTF8 */
+	NPRINT,		/* NPRINTL */
+	NPRINT,		/* NPRINTLUTF8 */
+	PUNCT,		/* PUNCT */
+	PUNCT,		/* PUNCTUTF8 */
+	PUNCT,		/* PUNCTL */
+	PUNCT,		/* PUNCTLUTF8 */
+	NPUNCT,		/* NPUNCT */
+	NPUNCT,		/* NPUNCTUTF8 */
+	NPUNCT,		/* NPUNCTL */
+	NPUNCT,		/* NPUNCTLUTF8 */
+	UPPER,		/* UPPER */
+	UPPER,		/* UPPERUTF8 */
+	UPPER,		/* UPPERL */
+	UPPER,		/* UPPERLUTF8 */
+	NUPPER,		/* NUPPER */
+	NUPPER,		/* NUPPERUTF8 */
+	NUPPER,		/* NUPPERL */
+	NUPPER,		/* NUPPERLUTF8 */
+	XDIGIT,		/* XDIGIT */
+	NXDIGIT,		/* NXDIGIT */
 	CLUMP,		/* CLUMP */
 	BRANCH,		/* BRANCH */
 	BACK,		/* BACK */
@@ -208,8 +352,80 @@ const static U8 regarglen[] = {
 	0,		/* NSPACELUTF8 */
 	0,		/* DIGIT */
 	0,		/* DIGITUTF8 */
+	0,		/* DIGITL */
+	0,		/* DIGITLUTF8 */
 	0,		/* NDIGIT */
 	0,		/* NDIGITUTF8 */
+	0,		/* NDIGITL */
+	0,		/* NDIGITLUTF8 */
+	0,		/* ALNUMC */
+	0,		/* ALNUMCUTF8 */
+	0,		/* ALNUMCL */
+	0,		/* ALNUMCLUTF8 */
+	0,		/* NALNUMC */
+	0,		/* NALNUMCUTF8 */
+	0,		/* NALNUMCL */
+	0,		/* NALNUMCLUTF8 */
+	0,		/* ALPHA */
+	0,		/* ALPHAUTF8 */
+	0,		/* ALPHAL */
+	0,		/* ALPHALUTF8 */
+	0,		/* NALPHA */
+	0,		/* NALPHAUTF8 */
+	0,		/* NALPHAL */
+	0,		/* NALPHALUTF8 */
+	0,		/* ASCII */
+	0,		/* NASCII */
+	0,		/* CNTRL */
+	0,		/* CNTRLUTF8 */
+	0,		/* CNTRLL */
+	0,		/* CNTRLLUTF8 */
+	0,		/* NCNTRL */
+	0,		/* NCNTRLUTF8 */
+	0,		/* NCNTRLL */
+	0,		/* NCNTRLLUTF8 */
+	0,		/* GRAPH */
+	0,		/* GRAPHUTF8 */
+	0,		/* GRAPHL */
+	0,		/* GRAPHLUTF8 */
+	0,		/* NGRAPH */
+	0,		/* NGRAPHUTF8 */
+	0,		/* NGRAPHL */
+	0,		/* NGRAPHLUTF8 */
+	0,		/* LOWER */
+	0,		/* LOWERUTF8 */
+	0,		/* LOWERL */
+	0,		/* LOWERLUTF8 */
+	0,		/* NLOWER */
+	0,		/* NLOWERUTF8 */
+	0,		/* NLOWERL */
+	0,		/* NLOWERLUTF8 */
+	0,		/* PRINT */
+	0,		/* PRINTUTF8 */
+	0,		/* PRINTL */
+	0,		/* PRINTLUTF8 */
+	0,		/* NPRINT */
+	0,		/* NPRINTUTF8 */
+	0,		/* NPRINTL */
+	0,		/* NPRINTLUTF8 */
+	0,		/* PUNCT */
+	0,		/* PUNCTUTF8 */
+	0,		/* PUNCTL */
+	0,		/* PUNCTLUTF8 */
+	0,		/* NPUNCT */
+	0,		/* NPUNCTUTF8 */
+	0,		/* NPUNCTL */
+	0,		/* NPUNCTLUTF8 */
+	0,		/* UPPER */
+	0,		/* UPPERUTF8 */
+	0,		/* UPPERL */
+	0,		/* UPPERLUTF8 */
+	0,		/* NUPPER */
+	0,		/* NUPPERUTF8 */
+	0,		/* NUPPERL */
+	0,		/* NUPPERLUTF8 */
+	0,		/* XDIGIT */
+	0,		/* NXDIGIT */
 	0,		/* CLUMP */
 	0,		/* BRANCH */
 	0,		/* BACK */
@@ -287,8 +503,80 @@ const static char reg_off_by_arg[] = {
 	0,		/* NSPACELUTF8 */
 	0,		/* DIGIT */
 	0,		/* DIGITUTF8 */
+	0,		/* DIGITL */
+	0,		/* DIGITLUTF8 */
 	0,		/* NDIGIT */
 	0,		/* NDIGITUTF8 */
+	0,		/* NDIGITL */
+	0,		/* NDIGITLUTF8 */
+	0,		/* ALNUMC */
+	0,		/* ALNUMCUTF8 */
+	0,		/* ALNUMCL */
+	0,		/* ALNUMCLUTF8 */
+	0,		/* NALNUMC */
+	0,		/* NALNUMCUTF8 */
+	0,		/* NALNUMCL */
+	0,		/* NALNUMCLUTF8 */
+	0,		/* ALPHA */
+	0,		/* ALPHAUTF8 */
+	0,		/* ALPHAL */
+	0,		/* ALPHALUTF8 */
+	0,		/* NALPHA */
+	0,		/* NALPHAUTF8 */
+	0,		/* NALPHAL */
+	0,		/* NALPHALUTF8 */
+	0,		/* ASCII */
+	0,		/* NASCII */
+	0,		/* CNTRL */
+	0,		/* CNTRLUTF8 */
+	0,		/* CNTRLL */
+	0,		/* CNTRLLUTF8 */
+	0,		/* NCNTRL */
+	0,		/* NCNTRLUTF8 */
+	0,		/* NCNTRLL */
+	0,		/* NCNTRLLUTF8 */
+	0,		/* GRAPH */
+	0,		/* GRAPHUTF8 */
+	0,		/* GRAPHL */
+	0,		/* GRAPHLUTF8 */
+	0,		/* NGRAPH */
+	0,		/* NGRAPHUTF8 */
+	0,		/* NGRAPHL */
+	0,		/* NGRAPHLUTF8 */
+	0,		/* LOWER */
+	0,		/* LOWERUTF8 */
+	0,		/* LOWERL */
+	0,		/* LOWERLUTF8 */
+	0,		/* NLOWER */
+	0,		/* NLOWERUTF8 */
+	0,		/* NLOWERL */
+	0,		/* NLOWERLUTF8 */
+	0,		/* PRINT */
+	0,		/* PRINTUTF8 */
+	0,		/* PRINTL */
+	0,		/* PRINTLUTF8 */
+	0,		/* NPRINT */
+	0,		/* NPRINTUTF8 */
+	0,		/* NPRINTL */
+	0,		/* NPRINTLUTF8 */
+	0,		/* PUNCT */
+	0,		/* PUNCTUTF8 */
+	0,		/* PUNCTL */
+	0,		/* PUNCTLUTF8 */
+	0,		/* NPUNCT */
+	0,		/* NPUNCTUTF8 */
+	0,		/* NPUNCTL */
+	0,		/* NPUNCTLUTF8 */
+	0,		/* UPPER */
+	0,		/* UPPERUTF8 */
+	0,		/* UPPERL */
+	0,		/* UPPERLUTF8 */
+	0,		/* NUPPER */
+	0,		/* NUPPERUTF8 */
+	0,		/* NUPPERL */
+	0,		/* NUPPERLUTF8 */
+	0,		/* XDIGIT */
+	0,		/* NXDIGIT */
 	0,		/* CLUMP */
 	0,		/* BRANCH */
 	0,		/* BACK */
@@ -367,43 +655,115 @@ const static char * const reg_name[] = {
 	"NSPACELUTF8",		/* 0x27 */
 	"DIGIT",		/* 0x28 */
 	"DIGITUTF8",		/* 0x29 */
-	"NDIGIT",		/* 0x2a */
-	"NDIGITUTF8",		/* 0x2b */
-	"CLUMP",		/* 0x2c */
-	"BRANCH",		/* 0x2d */
-	"BACK",		/* 0x2e */
-	"EXACT",		/* 0x2f */
-	"EXACTF",		/* 0x30 */
-	"EXACTFL",		/* 0x31 */
-	"NOTHING",		/* 0x32 */
-	"TAIL",		/* 0x33 */
-	"STAR",		/* 0x34 */
-	"PLUS",		/* 0x35 */
-	"CURLY",		/* 0x36 */
-	"CURLYN",		/* 0x37 */
-	"CURLYM",		/* 0x38 */
-	"CURLYX",		/* 0x39 */
-	"WHILEM",		/* 0x3a */
-	"OPEN",		/* 0x3b */
-	"CLOSE",		/* 0x3c */
-	"REF",		/* 0x3d */
-	"REFF",		/* 0x3e */
-	"REFFL",		/* 0x3f */
-	"IFMATCH",		/* 0x40 */
-	"UNLESSM",		/* 0x41 */
-	"SUSPEND",		/* 0x42 */
-	"IFTHEN",		/* 0x43 */
-	"GROUPP",		/* 0x44 */
-	"LONGJMP",		/* 0x45 */
-	"BRANCHJ",		/* 0x46 */
-	"EVAL",		/* 0x47 */
-	"MINMOD",		/* 0x48 */
-	"LOGICAL",		/* 0x49 */
-	"RENUM",		/* 0x4a */
-	"OPTIMIZED",		/* 0x4b */
+	"DIGITL",		/* 0x2a */
+	"DIGITLUTF8",		/* 0x2b */
+	"NDIGIT",		/* 0x2c */
+	"NDIGITUTF8",		/* 0x2d */
+	"NDIGITL",		/* 0x2e */
+	"NDIGITLUTF8",		/* 0x2f */
+	"ALNUMC",		/* 0x30 */
+	"ALNUMCUTF8",		/* 0x31 */
+	"ALNUMCL",		/* 0x32 */
+	"ALNUMCLUTF8",		/* 0x33 */
+	"NALNUMC",		/* 0x34 */
+	"NALNUMCUTF8",		/* 0x35 */
+	"NALNUMCL",		/* 0x36 */
+	"NALNUMCLUTF8",		/* 0x37 */
+	"ALPHA",		/* 0x38 */
+	"ALPHAUTF8",		/* 0x39 */
+	"ALPHAL",		/* 0x3a */
+	"ALPHALUTF8",		/* 0x3b */
+	"NALPHA",		/* 0x3c */
+	"NALPHAUTF8",		/* 0x3d */
+	"NALPHAL",		/* 0x3e */
+	"NALPHALUTF8",		/* 0x3f */
+	"ASCII",		/* 0x40 */
+	"NASCII",		/* 0x41 */
+	"CNTRL",		/* 0x42 */
+	"CNTRLUTF8",		/* 0x43 */
+	"CNTRLL",		/* 0x44 */
+	"CNTRLLUTF8",		/* 0x45 */
+	"NCNTRL",		/* 0x46 */
+	"NCNTRLUTF8",		/* 0x47 */
+	"NCNTRLL",		/* 0x48 */
+	"NCNTRLLUTF8",		/* 0x49 */
+	"GRAPH",		/* 0x4a */
+	"GRAPHUTF8",		/* 0x4b */
+	"GRAPHL",		/* 0x4c */
+	"GRAPHLUTF8",		/* 0x4d */
+	"NGRAPH",		/* 0x4e */
+	"NGRAPHUTF8",		/* 0x4f */
+	"NGRAPHL",		/* 0x50 */
+	"NGRAPHLUTF8",		/* 0x51 */
+	"LOWER",		/* 0x52 */
+	"LOWERUTF8",		/* 0x53 */
+	"LOWERL",		/* 0x54 */
+	"LOWERLUTF8",		/* 0x55 */
+	"NLOWER",		/* 0x56 */
+	"NLOWERUTF8",		/* 0x57 */
+	"NLOWERL",		/* 0x58 */
+	"NLOWERLUTF8",		/* 0x59 */
+	"PRINT",		/* 0x5a */
+	"PRINTUTF8",		/* 0x5b */
+	"PRINTL",		/* 0x5c */
+	"PRINTLUTF8",		/* 0x5d */
+	"NPRINT",		/* 0x5e */
+	"NPRINTUTF8",		/* 0x5f */
+	"NPRINTL",		/* 0x60 */
+	"NPRINTLUTF8",		/* 0x61 */
+	"PUNCT",		/* 0x62 */
+	"PUNCTUTF8",		/* 0x63 */
+	"PUNCTL",		/* 0x64 */
+	"PUNCTLUTF8",		/* 0x65 */
+	"NPUNCT",		/* 0x66 */
+	"NPUNCTUTF8",		/* 0x67 */
+	"NPUNCTL",		/* 0x68 */
+	"NPUNCTLUTF8",		/* 0x69 */
+	"UPPER",		/* 0x6a */
+	"UPPERUTF8",		/* 0x6b */
+	"UPPERL",		/* 0x6c */
+	"UPPERLUTF8",		/* 0x6d */
+	"NUPPER",		/* 0x6e */
+	"NUPPERUTF8",		/* 0x6f */
+	"NUPPERL",		/* 0x70 */
+	"NUPPERLUTF8",		/* 0x71 */
+	"XDIGIT",		/* 0x72 */
+	"NXDIGIT",		/* 0x73 */
+	"CLUMP",		/* 0x74 */
+	"BRANCH",		/* 0x75 */
+	"BACK",		/* 0x76 */
+	"EXACT",		/* 0x77 */
+	"EXACTF",		/* 0x78 */
+	"EXACTFL",		/* 0x79 */
+	"NOTHING",		/* 0x7a */
+	"TAIL",		/* 0x7b */
+	"STAR",		/* 0x7c */
+	"PLUS",		/* 0x7d */
+	"CURLY",		/* 0x7e */
+	"CURLYN",		/* 0x7f */
+	"CURLYM",		/* 0x80 */
+	"CURLYX",		/* 0x81 */
+	"WHILEM",		/* 0x82 */
+	"OPEN",		/* 0x83 */
+	"CLOSE",		/* 0x84 */
+	"REF",		/* 0x85 */
+	"REFF",		/* 0x86 */
+	"REFFL",		/* 0x87 */
+	"IFMATCH",		/* 0x88 */
+	"UNLESSM",		/* 0x89 */
+	"SUSPEND",		/* 0x8a */
+	"IFTHEN",		/* 0x8b */
+	"GROUPP",		/* 0x8c */
+	"LONGJMP",		/* 0x8d */
+	"BRANCHJ",		/* 0x8e */
+	"EVAL",		/* 0x8f */
+	"MINMOD",		/* 0x90 */
+	"LOGICAL",		/* 0x91 */
+	"RENUM",		/* 0x92 */
+	"OPTIMIZED",		/* 0x93 */
 };
 
-const static int reg_num = 76;
+const static int reg_num = 148;
 
 #endif /* DEBUGGING */
 #endif /* REG_COMP_C */

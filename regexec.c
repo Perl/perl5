@@ -97,7 +97,7 @@
  * Forwards.
  */
 
-#define REGINCLASS(p,c)  (*(p) ? reginclass(p,c) : ANYOF_TEST(p,c))
+#define REGINCLASS(p,c)  (ANYOF_FLAGS(p) ? reginclass(p,c) : ANYOF_BITMAP_TEST(p,c))
 #define REGINCLASSUTF8(f,p)  (ARG1(f) ? reginclassutf8(f,p) : swash_fetch((SV*)PL_regdata->data[ARG2(f)],p))
 
 #define CHR_SVLEN(sv) (UTF ? sv_len_utf8(sv) : SvCUR(sv))
@@ -1062,6 +1062,34 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 		s += UTF8SKIP(s);
 	    }
 	    break;
+	case DIGITL:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (isDIGIT_LC(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case DIGITLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (isDIGIT_LC_utf8((U8*)s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
 	case NDIGIT:
 	    while (s < strend) {
 		if (!isDIGIT(*s)) {
@@ -1086,6 +1114,842 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 		else
 		    tmp = 1;
 		s += UTF8SKIP(s);
+	    }
+	    break;
+	case NDIGITL:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (!isDIGIT_LC(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case NDIGITLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (!isDIGIT_LC_utf8((U8*)s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
+	case ALNUMC:
+	    while (s < strend) {
+		if (isALNUMC(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case ALNUMCUTF8:
+	    while (s < strend) {
+		if (swash_fetch(PL_utf8_alnumc, (U8*)s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
+	case ALNUMCL:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (isALNUMC_LC(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case ALNUMCLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (isALNUMC_LC_utf8((U8*)s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
+	case NALNUMC:
+	    while (s < strend) {
+		if (!isALNUMC(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case NALNUMCUTF8:
+	    while (s < strend) {
+		if (!swash_fetch(PL_utf8_alnumc, (U8*)s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
+	case NALNUMCL:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (!isALNUMC_LC(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case NALNUMCLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (!isALNUMC_LC_utf8((U8*)s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
+	case ASCII:
+	    while (s < strend) {
+		if (isASCII(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case NASCII:
+	    while (s < strend) {
+		if (!isASCII(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case CNTRL:
+	    while (s < strend) {
+		if (isCNTRL(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case CNTRLUTF8:
+	    while (s < strend) {
+		if (swash_fetch(PL_utf8_cntrl,(U8*)s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
+	case CNTRLL:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (isCNTRL_LC(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case CNTRLLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (*s == ' ' || isCNTRL_LC_utf8((U8*)s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
+	case NCNTRL:
+	    while (s < strend) {
+		if (!isCNTRL(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case NCNTRLUTF8:
+	    while (s < strend) {
+		if (!swash_fetch(PL_utf8_cntrl,(U8*)s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
+	case NCNTRLL:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (!isCNTRL_LC(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case NCNTRLLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (!isCNTRL_LC_utf8((U8*)s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
+	case GRAPH:
+	    while (s < strend) {
+		if (isGRAPH(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case GRAPHUTF8:
+	    while (s < strend) {
+		if (swash_fetch(PL_utf8_graph,(U8*)s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
+	case GRAPHL:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (isGRAPH_LC(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case GRAPHLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (*s == ' ' || isGRAPH_LC_utf8((U8*)s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
+	case NGRAPH:
+	    while (s < strend) {
+		if (!isGRAPH(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case NGRAPHUTF8:
+	    while (s < strend) {
+		if (!swash_fetch(PL_utf8_graph,(U8*)s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
+	case NGRAPHL:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (!isGRAPH_LC(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case NGRAPHLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (!isGRAPH_LC_utf8((U8*)s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
+	case LOWER:
+	    while (s < strend) {
+		if (isLOWER(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case LOWERUTF8:
+	    while (s < strend) {
+		if (swash_fetch(PL_utf8_lower,(U8*)s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
+	case LOWERL:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (isLOWER_LC(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case LOWERLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (*s == ' ' || isLOWER_LC_utf8((U8*)s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
+	case NLOWER:
+	    while (s < strend) {
+		if (!isLOWER(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case NLOWERUTF8:
+	    while (s < strend) {
+		if (!swash_fetch(PL_utf8_lower,(U8*)s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
+	case NLOWERL:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (!isLOWER_LC(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case NLOWERLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (!isLOWER_LC_utf8((U8*)s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
+	case PRINT:
+	    while (s < strend) {
+		if (isPRINT(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case PRINTUTF8:
+	    while (s < strend) {
+		if (swash_fetch(PL_utf8_print,(U8*)s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
+	case PRINTL:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (isPRINT_LC(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case PRINTLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (*s == ' ' || isPRINT_LC_utf8((U8*)s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
+	case NPRINT:
+	    while (s < strend) {
+		if (!isPRINT(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case NPRINTUTF8:
+	    while (s < strend) {
+		if (!swash_fetch(PL_utf8_print,(U8*)s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
+	case NPRINTL:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (!isPRINT_LC(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case NPRINTLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (!isPRINT_LC_utf8((U8*)s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
+	case PUNCT:
+	    while (s < strend) {
+		if (isPUNCT(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case PUNCTUTF8:
+	    while (s < strend) {
+		if (swash_fetch(PL_utf8_punct,(U8*)s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
+	case PUNCTL:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (isPUNCT_LC(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case PUNCTLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (*s == ' ' || isPUNCT_LC_utf8((U8*)s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
+	case NPUNCT:
+	    while (s < strend) {
+		if (!isPUNCT(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case NPUNCTUTF8:
+	    while (s < strend) {
+		if (!swash_fetch(PL_utf8_punct,(U8*)s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
+	case NPUNCTL:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (!isPUNCT_LC(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case NPUNCTLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (!isPUNCT_LC_utf8((U8*)s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
+	case UPPER:
+	    while (s < strend) {
+		if (isUPPER(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case UPPERUTF8:
+	    while (s < strend) {
+		if (swash_fetch(PL_utf8_upper,(U8*)s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
+	case UPPERL:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (isUPPER_LC(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case UPPERLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (*s == ' ' || isUPPER_LC_utf8((U8*)s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
+	case NUPPER:
+	    while (s < strend) {
+		if (!isUPPER(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case NUPPERUTF8:
+	    while (s < strend) {
+		if (!swash_fetch(PL_utf8_upper,(U8*)s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
+	case NUPPERL:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (!isUPPER_LC(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case NUPPERLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (!isUPPER_LC_utf8((U8*)s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
+	case XDIGIT:
+	    while (s < strend) {
+		if (isXDIGIT(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case NXDIGIT:
+	    while (s < strend) {
+		if (!isXDIGIT(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
 	    }
 	    break;
 	}
@@ -1707,15 +2571,30 @@ S_regmatch(pTHX_ regnode *prog)
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
 	    break;
+	case DIGITL:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
 	case DIGIT:
-	    if (!isDIGIT(nextchr))
+	    if (!nextchr && locinput >= PL_regeol)
+		sayNO;
+	    if (!(OP(scan) == DIGIT
+		  ? isDIGIT(nextchr) : isDIGIT_LC(nextchr)))
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
 	    break;
+	case DIGITLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
 	case DIGITUTF8:
+	    if (!nextchr)
+		sayNO;
 	    if (nextchr & 0x80) {
-		if (!(swash_fetch(PL_utf8_digit,(U8*)locinput)))
+		if (OP(scan) == NDIGITUTF8
+		    ? swash_fetch(PL_utf8_digit,(U8*)locinput)
+		    : isDIGIT_LC_utf8((U8*)locinput))
+		{
 		    sayNO;
+		}
 		locinput += PL_utf8skip[nextchr];
 		nextchr = UCHARAT(locinput);
 		break;
@@ -1724,13 +2603,20 @@ S_regmatch(pTHX_ regnode *prog)
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
 	    break;
+	case NDIGITL:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
 	case NDIGIT:
-	    if (!nextchr && locinput >= PL_regeol)
+	    if (!nextchr)
 		sayNO;
-	    if (isDIGIT(nextchr))
+	    if (OP(scan) == DIGIT
+		? isDIGIT(nextchr) : isDIGIT_LC(nextchr))
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
 	    break;
+	case NDIGITLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
 	case NDIGITUTF8:
 	    if (!nextchr && locinput >= PL_regeol)
 		sayNO;
@@ -1742,6 +2628,522 @@ S_regmatch(pTHX_ regnode *prog)
 		break;
 	    }
 	    if (isDIGIT(nextchr))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case ALNUMCL:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case ALNUMC:
+	    if (!nextchr)
+		sayNO;
+	    if (!(OP(scan) == ALNUMC
+		  ? isALNUMC(nextchr) : isALNUMC_LC(nextchr)))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case ALNUMCLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case ALNUMCUTF8:
+	    if (!nextchr)
+		sayNO;
+	    if (nextchr & 0x80) {
+		if (!(OP(scan) == ALNUMCUTF8
+		      ? swash_fetch(PL_utf8_alnumc, (U8*)locinput)
+		      : isALNUMC_LC_utf8((U8*)locinput)))
+		{
+		    sayNO;
+		}
+		locinput += PL_utf8skip[nextchr];
+		nextchr = UCHARAT(locinput);
+		break;
+	    }
+	    if (!(OP(scan) == ALNUMCUTF8
+		  ? isALNUMC(nextchr) : isALNUMC_LC(nextchr)))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case NALNUMCL:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case NALNUMC:
+	    if (!nextchr)
+		sayNO;
+	    if (OP(scan) == ALNUMC
+		? isALNUMC(nextchr) : isALNUMC_LC(nextchr))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case NALNUMCLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case NALNUMCUTF8:
+	    if (!nextchr && locinput >= PL_regeol)
+		sayNO;
+	    if (nextchr & 0x80) {
+		if (swash_fetch(PL_utf8_alnumc,(U8*)locinput))
+		    sayNO;
+		locinput += PL_utf8skip[nextchr];
+		nextchr = UCHARAT(locinput);
+		break;
+	    }
+	    if (isALNUMC(nextchr))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case ALPHAL:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case ALPHA:
+	    if (!nextchr)
+		sayNO;
+	    if (!(OP(scan) == ALPHA
+		  ? isALPHA(nextchr) : isALPHA_LC(nextchr)))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case ALPHALUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case ALPHAUTF8:
+	    if (!nextchr)
+		sayNO;
+	    if (nextchr & 0x80) {
+		if (!(OP(scan) == ALPHAUTF8
+		      ? swash_fetch(PL_utf8_alpha, (U8*)locinput)
+		      : isALPHA_LC_utf8((U8*)locinput)))
+		{
+		    sayNO;
+		}
+		locinput += PL_utf8skip[nextchr];
+		nextchr = UCHARAT(locinput);
+		break;
+	    }
+	    if (!(OP(scan) == ALPHAUTF8
+		  ? isALPHA(nextchr) : isALPHA_LC(nextchr)))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case NALPHAL:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case NALPHA:
+	    if (!nextchr)
+		sayNO;
+	    if (OP(scan) == ALPHA
+		? isALPHA(nextchr) : isALPHA_LC(nextchr))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case NALPHALUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case NALPHAUTF8:
+	    if (!nextchr && locinput >= PL_regeol)
+		sayNO;
+	    if (nextchr & 0x80) {
+		if (swash_fetch(PL_utf8_alpha,(U8*)locinput))
+		    sayNO;
+		locinput += PL_utf8skip[nextchr];
+		nextchr = UCHARAT(locinput);
+		break;
+	    }
+	    if (isALPHA(nextchr))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case ASCII:
+	    if (!nextchr && locinput >= PL_regeol)
+		sayNO;
+	    if (!isASCII(nextchr))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case NASCII:
+	    if (!nextchr && locinput >= PL_regeol)
+		sayNO;
+	    if (isASCII(nextchr))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case CNTRLL:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case CNTRL:
+	    if (!nextchr)
+		sayNO;
+	    if (!(OP(scan) == CNTRL
+		  ? isCNTRL(nextchr) : isCNTRL_LC(nextchr)))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case CNTRLLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case CNTRLUTF8:
+	    if (!nextchr)
+		sayNO;
+	    if (nextchr & 0x80) {
+		if (!(OP(scan) == CNTRLUTF8
+		      ? swash_fetch(PL_utf8_cntrl, (U8*)locinput)
+		      : isCNTRL_LC_utf8((U8*)locinput)))
+		{
+		    sayNO;
+		}
+		locinput += PL_utf8skip[nextchr];
+		nextchr = UCHARAT(locinput);
+		break;
+	    }
+	    if (!(OP(scan) == CNTRLUTF8
+		  ? isCNTRL(nextchr) : isCNTRL_LC(nextchr)))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case NCNTRLL:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case NCNTRL:
+	    if (!nextchr)
+		sayNO;
+	    if (OP(scan) == CNTRL
+		? isCNTRL(nextchr) : isCNTRL_LC(nextchr))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case NCNTRLLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case NCNTRLUTF8:
+	    if (!nextchr && locinput >= PL_regeol)
+		sayNO;
+	    if (nextchr & 0x80) {
+		if (swash_fetch(PL_utf8_cntrl,(U8*)locinput))
+		    sayNO;
+		locinput += PL_utf8skip[nextchr];
+		nextchr = UCHARAT(locinput);
+		break;
+	    }
+	    if (isCNTRL(nextchr))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case GRAPHL:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case GRAPH:
+	    if (!nextchr)
+		sayNO;
+	    if (!(OP(scan) == GRAPH
+		  ? isGRAPH(nextchr) : isGRAPH_LC(nextchr)))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case GRAPHLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case GRAPHUTF8:
+	    if (!nextchr)
+		sayNO;
+	    if (nextchr & 0x80) {
+		if (!(OP(scan) == GRAPHUTF8
+		      ? swash_fetch(PL_utf8_graph, (U8*)locinput)
+		      : isGRAPH_LC_utf8((U8*)locinput)))
+		{
+		    sayNO;
+		}
+		locinput += PL_utf8skip[nextchr];
+		nextchr = UCHARAT(locinput);
+		break;
+	    }
+	    if (!(OP(scan) == GRAPHUTF8
+		  ? isGRAPH(nextchr) : isGRAPH_LC(nextchr)))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case NGRAPHL:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case NGRAPH:
+	    if (!nextchr)
+		sayNO;
+	    if (OP(scan) == GRAPH
+		? isGRAPH(nextchr) : isGRAPH_LC(nextchr))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case NGRAPHLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case NGRAPHUTF8:
+	    if (!nextchr && locinput >= PL_regeol)
+		sayNO;
+	    if (nextchr & 0x80) {
+		if (swash_fetch(PL_utf8_graph,(U8*)locinput))
+		    sayNO;
+		locinput += PL_utf8skip[nextchr];
+		nextchr = UCHARAT(locinput);
+		break;
+	    }
+	    if (isGRAPH(nextchr))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case LOWERL:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case LOWER:
+	    if (!nextchr)
+		sayNO;
+	    if (!(OP(scan) == LOWER
+		  ? isLOWER(nextchr) : isLOWER_LC(nextchr)))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case LOWERLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case LOWERUTF8:
+	    if (!nextchr)
+		sayNO;
+	    if (nextchr & 0x80) {
+		if (!(OP(scan) == LOWERUTF8
+		      ? swash_fetch(PL_utf8_lower, (U8*)locinput)
+		      : isLOWER_LC_utf8((U8*)locinput)))
+		{
+		    sayNO;
+		}
+		locinput += PL_utf8skip[nextchr];
+		nextchr = UCHARAT(locinput);
+		break;
+	    }
+	    if (!(OP(scan) == LOWERUTF8
+		  ? isLOWER(nextchr) : isLOWER_LC(nextchr)))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case NLOWERL:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case NLOWER:
+	    if (!nextchr)
+		sayNO;
+	    if (OP(scan) == LOWER
+		? isLOWER(nextchr) : isLOWER_LC(nextchr))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case NLOWERLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case NLOWERUTF8:
+	    if (!nextchr && locinput >= PL_regeol)
+		sayNO;
+	    if (nextchr & 0x80) {
+		if (swash_fetch(PL_utf8_lower,(U8*)locinput))
+		    sayNO;
+		locinput += PL_utf8skip[nextchr];
+		nextchr = UCHARAT(locinput);
+		break;
+	    }
+	    if (isLOWER(nextchr))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case PRINTL:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case PRINT:
+	    if (!nextchr)
+		sayNO;
+	    if (!(OP(scan) == PRINT
+		  ? isPRINT(nextchr) : isPRINT_LC(nextchr)))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case PRINTLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case PRINTUTF8:
+	    if (!nextchr)
+		sayNO;
+	    if (nextchr & 0x80) {
+		if (!(OP(scan) == PRINTUTF8
+		      ? swash_fetch(PL_utf8_print, (U8*)locinput)
+		      : isPRINT_LC_utf8((U8*)locinput)))
+		{
+		    sayNO;
+		}
+		locinput += PL_utf8skip[nextchr];
+		nextchr = UCHARAT(locinput);
+		break;
+	    }
+	    if (!(OP(scan) == PRINTUTF8
+		  ? isPRINT(nextchr) : isPRINT_LC(nextchr)))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case NPRINTL:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case NPRINT:
+	    if (!nextchr)
+		sayNO;
+	    if (OP(scan) == PRINT
+		? isPRINT(nextchr) : isPRINT_LC(nextchr))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case NPRINTLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case NPRINTUTF8:
+	    if (!nextchr && locinput >= PL_regeol)
+		sayNO;
+	    if (nextchr & 0x80) {
+		if (swash_fetch(PL_utf8_print,(U8*)locinput))
+		    sayNO;
+		locinput += PL_utf8skip[nextchr];
+		nextchr = UCHARAT(locinput);
+		break;
+	    }
+	    if (isPRINT(nextchr))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case PUNCTL:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case PUNCT:
+	    if (!nextchr)
+		sayNO;
+	    if (!(OP(scan) == PUNCT
+		  ? isPUNCT(nextchr) : isPUNCT_LC(nextchr)))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case PUNCTLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case PUNCTUTF8:
+	    if (!nextchr)
+		sayNO;
+	    if (nextchr & 0x80) {
+		if (!(OP(scan) == PUNCTUTF8
+		      ? swash_fetch(PL_utf8_punct, (U8*)locinput)
+		      : isPUNCT_LC_utf8((U8*)locinput)))
+		{
+		    sayNO;
+		}
+		locinput += PL_utf8skip[nextchr];
+		nextchr = UCHARAT(locinput);
+		break;
+	    }
+	    if (!(OP(scan) == PUNCTUTF8
+		  ? isPUNCT(nextchr) : isPUNCT_LC(nextchr)))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case NPUNCTL:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case NPUNCT:
+	    if (!nextchr)
+		sayNO;
+	    if (OP(scan) == PUNCT
+		? isPUNCT(nextchr) : isPUNCT_LC(nextchr))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case NPUNCTLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case NPUNCTUTF8:
+	    if (!nextchr && locinput >= PL_regeol)
+		sayNO;
+	    if (nextchr & 0x80) {
+		if (swash_fetch(PL_utf8_punct,(U8*)locinput))
+		    sayNO;
+		locinput += PL_utf8skip[nextchr];
+		nextchr = UCHARAT(locinput);
+		break;
+	    }
+	    if (isPUNCT(nextchr))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case UPPERL:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case UPPER:
+	    if (!nextchr)
+		sayNO;
+	    if (!(OP(scan) == UPPER
+		  ? isUPPER(nextchr) : isUPPER_LC(nextchr)))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case UPPERLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case UPPERUTF8:
+	    if (!nextchr)
+		sayNO;
+	    if (nextchr & 0x80) {
+		if (!(OP(scan) == UPPERUTF8
+		      ? swash_fetch(PL_utf8_upper, (U8*)locinput)
+		      : isUPPER_LC_utf8((U8*)locinput)))
+		{
+		    sayNO;
+		}
+		locinput += PL_utf8skip[nextchr];
+		nextchr = UCHARAT(locinput);
+		break;
+	    }
+	    if (!(OP(scan) == UPPERUTF8
+		  ? isUPPER(nextchr) : isUPPER_LC(nextchr)))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case NUPPERL:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case NUPPER:
+	    if (!nextchr)
+		sayNO;
+	    if (OP(scan) == UPPER
+		? isUPPER(nextchr) : isUPPER_LC(nextchr))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case NUPPERLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case NUPPERUTF8:
+	    if (!nextchr && locinput >= PL_regeol)
+		sayNO;
+	    if (nextchr & 0x80) {
+		if (swash_fetch(PL_utf8_upper,(U8*)locinput))
+		    sayNO;
+		locinput += PL_utf8skip[nextchr];
+		nextchr = UCHARAT(locinput);
+		break;
+	    }
+	    if (isUPPER(nextchr))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case XDIGIT:
+	    if (!nextchr && locinput >= PL_regeol)
+		sayNO;
+	    if (!isXDIGIT(nextchr))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case NXDIGIT:
+	    if (!nextchr && locinput >= PL_regeol)
+		sayNO;
+	    if (isXDIGIT(nextchr))
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
 	    break;
@@ -2920,11 +4322,11 @@ STATIC bool
 S_reginclass(pTHX_ register char *p, register I32 c)
 {
     dTHR;
-    char flags = *p;
+    char flags = ANYOF_FLAGS(p);
     bool match = FALSE;
 
     c &= 0xFF;
-    if (ANYOF_TEST(p, c))
+    if (ANYOF_BITMAP_TEST(p, c))
 	match = TRUE;
     else if (flags & ANYOF_FOLD) {
 	I32 cf;
@@ -2934,17 +4336,40 @@ S_reginclass(pTHX_ register char *p, register I32 c)
 	}
 	else
 	    cf = PL_fold[c];
-	if (ANYOF_TEST(p, cf))
+	if (ANYOF_BITMAP_TEST(p, cf))
 	    match = TRUE;
     }
 
-    if (!match && (flags & ANYOF_ISA)) {
+    if (!match && (flags & ANYOF_CLASS)) {
 	PL_reg_flags |= RF_tainted;
-
-	if (((flags & ANYOF_ALNUML)  && isALNUM_LC(c))  ||
-	    ((flags & ANYOF_NALNUML) && !isALNUM_LC(c)) ||
-	    ((flags & ANYOF_SPACEL)  && isSPACE_LC(c))  ||
-	    ((flags & ANYOF_NSPACEL) && !isSPACE_LC(c)))
+	if (
+	    (ANYOF_CLASS_TEST(p, ANYOF_ALNUM)   &&  isALNUM_LC(c))  ||
+	    (ANYOF_CLASS_TEST(p, ANYOF_NALNUM)  && !isALNUM_LC(c))  ||
+	    (ANYOF_CLASS_TEST(p, ANYOF_SPACE)   &&  isSPACE_LC(c))  ||
+	    (ANYOF_CLASS_TEST(p, ANYOF_NSPACE)  && !isSPACE_LC(c))  ||
+	    (ANYOF_CLASS_TEST(p, ANYOF_DIGIT)   &&  isDIGIT_LC(c))  ||
+	    (ANYOF_CLASS_TEST(p, ANYOF_NDIGIT)  && !isDIGIT_LC(c))  ||
+	    (ANYOF_CLASS_TEST(p, ANYOF_ALNUMC)  &&  isALNUMC_LC(c)) ||
+	    (ANYOF_CLASS_TEST(p, ANYOF_NALNUMC) && !isALNUMC_LC(c)) ||
+	    (ANYOF_CLASS_TEST(p, ANYOF_ALPHA)   &&  isALPHA_LC(c))  ||
+	    (ANYOF_CLASS_TEST(p, ANYOF_NALPHA)  && !isALPHA_LC(c))  ||
+	    (ANYOF_CLASS_TEST(p, ANYOF_ASCII)   &&  isASCII(c))     ||
+	    (ANYOF_CLASS_TEST(p, ANYOF_NASCII)  && !isASCII(c))     ||
+	    (ANYOF_CLASS_TEST(p, ANYOF_CNTRL)   &&  isCNTRL_LC(c))  ||
+	    (ANYOF_CLASS_TEST(p, ANYOF_NCNTRL)  && !isCNTRL_LC(c))  ||
+	    (ANYOF_CLASS_TEST(p, ANYOF_GRAPH)   &&  isGRAPH_LC(c))  ||
+	    (ANYOF_CLASS_TEST(p, ANYOF_NGRAPH)  && !isGRAPH_LC(c))  ||
+	    (ANYOF_CLASS_TEST(p, ANYOF_LOWER)   &&  isLOWER_LC(c))  ||
+	    (ANYOF_CLASS_TEST(p, ANYOF_NLOWER)  && !isLOWER_LC(c))  ||
+	    (ANYOF_CLASS_TEST(p, ANYOF_PRINT)   &&  isPRINT_LC(c))  ||
+	    (ANYOF_CLASS_TEST(p, ANYOF_NPRINT)  && !isPRINT_LC(c))  ||
+	    (ANYOF_CLASS_TEST(p, ANYOF_PUNCT)   &&  isPUNCT_LC(c))  ||
+	    (ANYOF_CLASS_TEST(p, ANYOF_NPUNCT)  && !isPUNCT_LC(c))  ||
+	    (ANYOF_CLASS_TEST(p, ANYOF_UPPER)   &&  isUPPER_LC(c))  ||
+	    (ANYOF_CLASS_TEST(p, ANYOF_NUPPER)  && !isUPPER_LC(c))  ||
+	    (ANYOF_CLASS_TEST(p, ANYOF_XDIGIT)  &&  isXDIGIT(c))    ||
+	    (ANYOF_CLASS_TEST(p, ANYOF_NXDIGIT) && !isXDIGIT(c))
+	    ) /* How's that for a conditional? */
 	{
 	    match = TRUE;
 	}
@@ -2976,17 +4401,7 @@ S_reginclassutf8(pTHX_ regnode *f, U8 *p)
 	    match = TRUE;
     }
 
-    if (!match && (flags & ANYOF_ISA)) {
-	PL_reg_flags |= RF_tainted;
-
-	if (((flags & ANYOF_ALNUML)  && isALNUM_LC_utf8(p))  ||
-	    ((flags & ANYOF_NALNUML) && !isALNUM_LC_utf8(p)) ||
-	    ((flags & ANYOF_SPACEL)  && isSPACE_LC_utf8(p))  ||
-	    ((flags & ANYOF_NSPACEL) && !isSPACE_LC_utf8(p)))
-	{
-	    match = TRUE;
-	}
-    }
+    /* UTF8 combined with ANYOF_CLASS is ill-defined. */
 
     return (flags & ANYOF_INVERT) ? !match : match;
 }

@@ -1013,21 +1013,23 @@ there is no builtin with the name C<word>.
 opposed to a subroutine reference): no such method callable via the
 package. If method name is C<???>, this is an internal error.
 
-=item Character class syntax [. .] is reserved for future extensions
+=item Character class [:%s:] unknown
+
+(F) The class in the character class [: :] syntax is unknown.
+
+=item Character class syntax [%s] belongs inside character classes
+
+(W) The character class constructs [: :], [= =], and [. .]  go
+I<inside> character classes, the [] are part of the construct.  For
+example: /[[:alpha:]]/
+
+=item Character class syntax [ .] is reserved for future extensions
 
 (W) Within regular expression character classes ([]) the syntax beginning
 with "[." and ending with ".]" is reserved for future extensions.
 If you need to represent those character sequences inside a regular
 expression character class, just quote the square brackets with the
 backslash: "\[." and ".\]".
-
-=item Character class syntax [: :] is reserved for future extensions
-
-(W) Within regular expression character classes ([]) the syntax beginning
-with "[:" and ending with ":]" is reserved for future extensions.
-If you need to represent those character sequences inside a regular
-expression character class, just quote the square brackets with the
-backslash: "\[:" and ":\]".
 
 =item Character class syntax [= =] is reserved for future extensions
 

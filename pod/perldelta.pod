@@ -143,6 +143,11 @@ behaviour of:
 
 remains unchanged.  See L<perlop>.
 
+=head2 POSIX character class syntax [: :] supported
+
+For example to match alphabetic characters use /[[:alpha:]]/.
+See L<perlre> for details.
+
 =head2 Improved C<qw//> operator
 
 The C<qw//> operator is now evaluated at compile time into a true list
@@ -261,6 +266,10 @@ GNU/Hurd is now supported.
 =item *
 
 Rhapsody is now supported.
+
+=item *
+
+EPOC is is now supported (on Psion 5).
 
 =back
 
@@ -511,10 +520,17 @@ Todo.
 
 =head1 Configuration Changes
 
+=head2 installusrbinperl
+
 You can use "Configure -Uinstallusrbinperl" which causes installperl
 to skip installing perl also as /usr/bin/perl.  This is useful if you
 prefer not to modify /usr/bin for some reason or another but harmful
 because many scripts assume to find Perl in /usr/bin/perl.
+
+=head2 SOCKS support
+
+You can use "Configure -Dusesocks" which causes Perl to probe
+for the SOCKS proxy protocol library, http://www.socks.nec.com/
 
 =head1 BUGS
 

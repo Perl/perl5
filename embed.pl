@@ -947,35 +947,53 @@ p	|char*	|instr		|const char* big|const char* little
 p	|bool	|io_close	|IO* io
 p	|OP*	|invert		|OP* cmd
 p	|bool	|is_uni_alnum	|U32 c
+p	|bool	|is_uni_alnumc	|U32 c
 p	|bool	|is_uni_idfirst	|U32 c
 p	|bool	|is_uni_alpha	|U32 c
+p	|bool	|is_uni_ascii	|U32 c
 p	|bool	|is_uni_space	|U32 c
+p	|bool	|is_uni_cntrl	|U32 c
+p	|bool	|is_uni_graph	|U32 c
 p	|bool	|is_uni_digit	|U32 c
 p	|bool	|is_uni_upper	|U32 c
 p	|bool	|is_uni_lower	|U32 c
 p	|bool	|is_uni_print	|U32 c
+p	|bool	|is_uni_punct	|U32 c
+p	|bool	|is_uni_xdigit	|U32 c
 p	|U32	|to_uni_upper	|U32 c
 p	|U32	|to_uni_title	|U32 c
 p	|U32	|to_uni_lower	|U32 c
 p	|bool	|is_uni_alnum_lc|U32 c
+p	|bool	|is_uni_alnumc_lc|U32 c
 p	|bool	|is_uni_idfirst_lc|U32 c
 p	|bool	|is_uni_alpha_lc|U32 c
+p	|bool	|is_uni_ascii_lc|U32 c
 p	|bool	|is_uni_space_lc|U32 c
+p	|bool	|is_uni_cntrl_lc|U32 c
+p	|bool	|is_uni_graph_lc|U32 c
 p	|bool	|is_uni_digit_lc|U32 c
 p	|bool	|is_uni_upper_lc|U32 c
 p	|bool	|is_uni_lower_lc|U32 c
 p	|bool	|is_uni_print_lc|U32 c
+p	|bool	|is_uni_punct_lc|U32 c
+p	|bool	|is_uni_xdigit_lc|U32 c
 p	|U32	|to_uni_upper_lc|U32 c
 p	|U32	|to_uni_title_lc|U32 c
 p	|U32	|to_uni_lower_lc|U32 c
 p	|bool	|is_utf8_alnum	|U8 *p
+p	|bool	|is_utf8_alnumc	|U8 *p
 p	|bool	|is_utf8_idfirst|U8 *p
 p	|bool	|is_utf8_alpha	|U8 *p
+p	|bool	|is_utf8_ascii	|U8 *p
 p	|bool	|is_utf8_space	|U8 *p
+p	|bool	|is_utf8_cntrl	|U8 *p
 p	|bool	|is_utf8_digit	|U8 *p
+p	|bool	|is_utf8_graph	|U8 *p
 p	|bool	|is_utf8_upper	|U8 *p
 p	|bool	|is_utf8_lower	|U8 *p
 p	|bool	|is_utf8_print	|U8 *p
+p	|bool	|is_utf8_punct	|U8 *p
+p	|bool	|is_utf8_xdigit	|U8 *p
 p	|bool	|is_utf8_mark	|U8 *p
 p	|OP*	|jmaybe		|OP* arg
 p	|I32	|keyword	|char* d|I32 len
@@ -1647,7 +1665,8 @@ s	|I32	|study_chunk	|regnode **scanp|I32 *deltap \
 				|regnode *last|scan_data_t *data|U32 flags
 s	|I32	|add_data	|I32 n|char *s
 rs	|void|re_croak2	|const char* pat1|const char* pat2|...
-s	|char*|regpposixcc	|I32 value
+s	|I32	|regpposixcc	|I32 value
+s	|void	|checkposixcc
 s	|void	|clear_re	|void *r
 #endif
 

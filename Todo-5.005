@@ -36,8 +36,8 @@ Locales
     decimal separator (3,1415927 is Europeanese for an approximation of pi)
 
 Regexen
-   POSIX [:foo:] character classes
-	([=bar=] and [.zap.] would nice too but there's no API for them)
+   POSIX [=bar=] and [.zap.] would nice too but there's no API for them
+   (=bar= could be done with Unicode, though)
    approximate matching
 
 Reliable Signals

@@ -203,35 +203,53 @@
 #define io_close		Perl_io_close
 #define invert			Perl_invert
 #define is_uni_alnum		Perl_is_uni_alnum
+#define is_uni_alnumc		Perl_is_uni_alnumc
 #define is_uni_idfirst		Perl_is_uni_idfirst
 #define is_uni_alpha		Perl_is_uni_alpha
+#define is_uni_ascii		Perl_is_uni_ascii
 #define is_uni_space		Perl_is_uni_space
+#define is_uni_cntrl		Perl_is_uni_cntrl
+#define is_uni_graph		Perl_is_uni_graph
 #define is_uni_digit		Perl_is_uni_digit
 #define is_uni_upper		Perl_is_uni_upper
 #define is_uni_lower		Perl_is_uni_lower
 #define is_uni_print		Perl_is_uni_print
+#define is_uni_punct		Perl_is_uni_punct
+#define is_uni_xdigit		Perl_is_uni_xdigit
 #define to_uni_upper		Perl_to_uni_upper
 #define to_uni_title		Perl_to_uni_title
 #define to_uni_lower		Perl_to_uni_lower
 #define is_uni_alnum_lc		Perl_is_uni_alnum_lc
+#define is_uni_alnumc_lc	Perl_is_uni_alnumc_lc
 #define is_uni_idfirst_lc	Perl_is_uni_idfirst_lc
 #define is_uni_alpha_lc		Perl_is_uni_alpha_lc
+#define is_uni_ascii_lc		Perl_is_uni_ascii_lc
 #define is_uni_space_lc		Perl_is_uni_space_lc
+#define is_uni_cntrl_lc		Perl_is_uni_cntrl_lc
+#define is_uni_graph_lc		Perl_is_uni_graph_lc
 #define is_uni_digit_lc		Perl_is_uni_digit_lc
 #define is_uni_upper_lc		Perl_is_uni_upper_lc
 #define is_uni_lower_lc		Perl_is_uni_lower_lc
 #define is_uni_print_lc		Perl_is_uni_print_lc
+#define is_uni_punct_lc		Perl_is_uni_punct_lc
+#define is_uni_xdigit_lc	Perl_is_uni_xdigit_lc
 #define to_uni_upper_lc		Perl_to_uni_upper_lc
 #define to_uni_title_lc		Perl_to_uni_title_lc
 #define to_uni_lower_lc		Perl_to_uni_lower_lc
 #define is_utf8_alnum		Perl_is_utf8_alnum
+#define is_utf8_alnumc		Perl_is_utf8_alnumc
 #define is_utf8_idfirst		Perl_is_utf8_idfirst
 #define is_utf8_alpha		Perl_is_utf8_alpha
+#define is_utf8_ascii		Perl_is_utf8_ascii
 #define is_utf8_space		Perl_is_utf8_space
+#define is_utf8_cntrl		Perl_is_utf8_cntrl
 #define is_utf8_digit		Perl_is_utf8_digit
+#define is_utf8_graph		Perl_is_utf8_graph
 #define is_utf8_upper		Perl_is_utf8_upper
 #define is_utf8_lower		Perl_is_utf8_lower
 #define is_utf8_print		Perl_is_utf8_print
+#define is_utf8_punct		Perl_is_utf8_punct
+#define is_utf8_xdigit		Perl_is_utf8_xdigit
 #define is_utf8_mark		Perl_is_utf8_mark
 #define jmaybe			Perl_jmaybe
 #define keyword			Perl_keyword
@@ -847,6 +865,7 @@
 #define add_data		S_add_data
 #define re_croak2		S_re_croak2
 #define regpposixcc		S_regpposixcc
+#define checkposixcc		S_checkposixcc
 #define clear_re		S_clear_re
 #endif
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_DECL_PROT)
@@ -1522,35 +1541,53 @@
 #define io_close(a)		Perl_io_close(aTHX_ a)
 #define invert(a)		Perl_invert(aTHX_ a)
 #define is_uni_alnum(a)		Perl_is_uni_alnum(aTHX_ a)
+#define is_uni_alnumc(a)	Perl_is_uni_alnumc(aTHX_ a)
 #define is_uni_idfirst(a)	Perl_is_uni_idfirst(aTHX_ a)
 #define is_uni_alpha(a)		Perl_is_uni_alpha(aTHX_ a)
+#define is_uni_ascii(a)		Perl_is_uni_ascii(aTHX_ a)
 #define is_uni_space(a)		Perl_is_uni_space(aTHX_ a)
+#define is_uni_cntrl(a)		Perl_is_uni_cntrl(aTHX_ a)
+#define is_uni_graph(a)		Perl_is_uni_graph(aTHX_ a)
 #define is_uni_digit(a)		Perl_is_uni_digit(aTHX_ a)
 #define is_uni_upper(a)		Perl_is_uni_upper(aTHX_ a)
 #define is_uni_lower(a)		Perl_is_uni_lower(aTHX_ a)
 #define is_uni_print(a)		Perl_is_uni_print(aTHX_ a)
+#define is_uni_punct(a)		Perl_is_uni_punct(aTHX_ a)
+#define is_uni_xdigit(a)	Perl_is_uni_xdigit(aTHX_ a)
 #define to_uni_upper(a)		Perl_to_uni_upper(aTHX_ a)
 #define to_uni_title(a)		Perl_to_uni_title(aTHX_ a)
 #define to_uni_lower(a)		Perl_to_uni_lower(aTHX_ a)
 #define is_uni_alnum_lc(a)	Perl_is_uni_alnum_lc(aTHX_ a)
+#define is_uni_alnumc_lc(a)	Perl_is_uni_alnumc_lc(aTHX_ a)
 #define is_uni_idfirst_lc(a)	Perl_is_uni_idfirst_lc(aTHX_ a)
 #define is_uni_alpha_lc(a)	Perl_is_uni_alpha_lc(aTHX_ a)
+#define is_uni_ascii_lc(a)	Perl_is_uni_ascii_lc(aTHX_ a)
 #define is_uni_space_lc(a)	Perl_is_uni_space_lc(aTHX_ a)
+#define is_uni_cntrl_lc(a)	Perl_is_uni_cntrl_lc(aTHX_ a)
+#define is_uni_graph_lc(a)	Perl_is_uni_graph_lc(aTHX_ a)
 #define is_uni_digit_lc(a)	Perl_is_uni_digit_lc(aTHX_ a)
 #define is_uni_upper_lc(a)	Perl_is_uni_upper_lc(aTHX_ a)
 #define is_uni_lower_lc(a)	Perl_is_uni_lower_lc(aTHX_ a)
 #define is_uni_print_lc(a)	Perl_is_uni_print_lc(aTHX_ a)
+#define is_uni_punct_lc(a)	Perl_is_uni_punct_lc(aTHX_ a)
+#define is_uni_xdigit_lc(a)	Perl_is_uni_xdigit_lc(aTHX_ a)
 #define to_uni_upper_lc(a)	Perl_to_uni_upper_lc(aTHX_ a)
 #define to_uni_title_lc(a)	Perl_to_uni_title_lc(aTHX_ a)
 #define to_uni_lower_lc(a)	Perl_to_uni_lower_lc(aTHX_ a)
 #define is_utf8_alnum(a)	Perl_is_utf8_alnum(aTHX_ a)
+#define is_utf8_alnumc(a)	Perl_is_utf8_alnumc(aTHX_ a)
 #define is_utf8_idfirst(a)	Perl_is_utf8_idfirst(aTHX_ a)
 #define is_utf8_alpha(a)	Perl_is_utf8_alpha(aTHX_ a)
+#define is_utf8_ascii(a)	Perl_is_utf8_ascii(aTHX_ a)
 #define is_utf8_space(a)	Perl_is_utf8_space(aTHX_ a)
+#define is_utf8_cntrl(a)	Perl_is_utf8_cntrl(aTHX_ a)
 #define is_utf8_digit(a)	Perl_is_utf8_digit(aTHX_ a)
+#define is_utf8_graph(a)	Perl_is_utf8_graph(aTHX_ a)
 #define is_utf8_upper(a)	Perl_is_utf8_upper(aTHX_ a)
 #define is_utf8_lower(a)	Perl_is_utf8_lower(aTHX_ a)
 #define is_utf8_print(a)	Perl_is_utf8_print(aTHX_ a)
+#define is_utf8_punct(a)	Perl_is_utf8_punct(aTHX_ a)
+#define is_utf8_xdigit(a)	Perl_is_utf8_xdigit(aTHX_ a)
 #define is_utf8_mark(a)		Perl_is_utf8_mark(aTHX_ a)
 #define jmaybe(a)		Perl_jmaybe(aTHX_ a)
 #define keyword(a,b)		Perl_keyword(aTHX_ a,b)
@@ -2156,6 +2193,7 @@
 #define study_chunk(a,b,c,d,e)	S_study_chunk(aTHX_ a,b,c,d,e)
 #define add_data(a,b)		S_add_data(aTHX_ a,b)
 #define regpposixcc(a)		S_regpposixcc(aTHX_ a)
+#define checkposixcc()		S_checkposixcc(aTHX)
 #define clear_re(a)		S_clear_re(aTHX_ a)
 #endif
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_DECL_PROT)
@@ -3018,12 +3056,20 @@
 #define invert			Perl_invert
 #define Perl_is_uni_alnum	CPerlObj::Perl_is_uni_alnum
 #define is_uni_alnum		Perl_is_uni_alnum
+#define Perl_is_uni_alnumc	CPerlObj::Perl_is_uni_alnumc
+#define is_uni_alnumc		Perl_is_uni_alnumc
 #define Perl_is_uni_idfirst	CPerlObj::Perl_is_uni_idfirst
 #define is_uni_idfirst		Perl_is_uni_idfirst
 #define Perl_is_uni_alpha	CPerlObj::Perl_is_uni_alpha
 #define is_uni_alpha		Perl_is_uni_alpha
+#define Perl_is_uni_ascii	CPerlObj::Perl_is_uni_ascii
+#define is_uni_ascii		Perl_is_uni_ascii
 #define Perl_is_uni_space	CPerlObj::Perl_is_uni_space
 #define is_uni_space		Perl_is_uni_space
+#define Perl_is_uni_cntrl	CPerlObj::Perl_is_uni_cntrl
+#define is_uni_cntrl		Perl_is_uni_cntrl
+#define Perl_is_uni_graph	CPerlObj::Perl_is_uni_graph
+#define is_uni_graph		Perl_is_uni_graph
 #define Perl_is_uni_digit	CPerlObj::Perl_is_uni_digit
 #define is_uni_digit		Perl_is_uni_digit
 #define Perl_is_uni_upper	CPerlObj::Perl_is_uni_upper
@@ -3032,6 +3078,10 @@
 #define is_uni_lower		Perl_is_uni_lower
 #define Perl_is_uni_print	CPerlObj::Perl_is_uni_print
 #define is_uni_print		Perl_is_uni_print
+#define Perl_is_uni_punct	CPerlObj::Perl_is_uni_punct
+#define is_uni_punct		Perl_is_uni_punct
+#define Perl_is_uni_xdigit	CPerlObj::Perl_is_uni_xdigit
+#define is_uni_xdigit		Perl_is_uni_xdigit
 #define Perl_to_uni_upper	CPerlObj::Perl_to_uni_upper
 #define to_uni_upper		Perl_to_uni_upper
 #define Perl_to_uni_title	CPerlObj::Perl_to_uni_title
@@ -3040,12 +3090,20 @@
 #define to_uni_lower		Perl_to_uni_lower
 #define Perl_is_uni_alnum_lc	CPerlObj::Perl_is_uni_alnum_lc
 #define is_uni_alnum_lc		Perl_is_uni_alnum_lc
+#define Perl_is_uni_alnumc_lc	CPerlObj::Perl_is_uni_alnumc_lc
+#define is_uni_alnumc_lc	Perl_is_uni_alnumc_lc
 #define Perl_is_uni_idfirst_lc	CPerlObj::Perl_is_uni_idfirst_lc
 #define is_uni_idfirst_lc	Perl_is_uni_idfirst_lc
 #define Perl_is_uni_alpha_lc	CPerlObj::Perl_is_uni_alpha_lc
 #define is_uni_alpha_lc		Perl_is_uni_alpha_lc
+#define Perl_is_uni_ascii_lc	CPerlObj::Perl_is_uni_ascii_lc
+#define is_uni_ascii_lc		Perl_is_uni_ascii_lc
 #define Perl_is_uni_space_lc	CPerlObj::Perl_is_uni_space_lc
 #define is_uni_space_lc		Perl_is_uni_space_lc
+#define Perl_is_uni_cntrl_lc	CPerlObj::Perl_is_uni_cntrl_lc
+#define is_uni_cntrl_lc		Perl_is_uni_cntrl_lc
+#define Perl_is_uni_graph_lc	CPerlObj::Perl_is_uni_graph_lc
+#define is_uni_graph_lc		Perl_is_uni_graph_lc
 #define Perl_is_uni_digit_lc	CPerlObj::Perl_is_uni_digit_lc
 #define is_uni_digit_lc		Perl_is_uni_digit_lc
 #define Perl_is_uni_upper_lc	CPerlObj::Perl_is_uni_upper_lc
@@ -3054,6 +3112,10 @@
 #define is_uni_lower_lc		Perl_is_uni_lower_lc
 #define Perl_is_uni_print_lc	CPerlObj::Perl_is_uni_print_lc
 #define is_uni_print_lc		Perl_is_uni_print_lc
+#define Perl_is_uni_punct_lc	CPerlObj::Perl_is_uni_punct_lc
+#define is_uni_punct_lc		Perl_is_uni_punct_lc
+#define Perl_is_uni_xdigit_lc	CPerlObj::Perl_is_uni_xdigit_lc
+#define is_uni_xdigit_lc	Perl_is_uni_xdigit_lc
 #define Perl_to_uni_upper_lc	CPerlObj::Perl_to_uni_upper_lc
 #define to_uni_upper_lc		Perl_to_uni_upper_lc
 #define Perl_to_uni_title_lc	CPerlObj::Perl_to_uni_title_lc
@@ -3062,20 +3124,32 @@
 #define to_uni_lower_lc		Perl_to_uni_lower_lc
 #define Perl_is_utf8_alnum	CPerlObj::Perl_is_utf8_alnum
 #define is_utf8_alnum		Perl_is_utf8_alnum
+#define Perl_is_utf8_alnumc	CPerlObj::Perl_is_utf8_alnumc
+#define is_utf8_alnumc		Perl_is_utf8_alnumc
 #define Perl_is_utf8_idfirst	CPerlObj::Perl_is_utf8_idfirst
 #define is_utf8_idfirst		Perl_is_utf8_idfirst
 #define Perl_is_utf8_alpha	CPerlObj::Perl_is_utf8_alpha
 #define is_utf8_alpha		Perl_is_utf8_alpha
+#define Perl_is_utf8_ascii	CPerlObj::Perl_is_utf8_ascii
+#define is_utf8_ascii		Perl_is_utf8_ascii
 #define Perl_is_utf8_space	CPerlObj::Perl_is_utf8_space
 #define is_utf8_space		Perl_is_utf8_space
+#define Perl_is_utf8_cntrl	CPerlObj::Perl_is_utf8_cntrl
+#define is_utf8_cntrl		Perl_is_utf8_cntrl
 #define Perl_is_utf8_digit	CPerlObj::Perl_is_utf8_digit
 #define is_utf8_digit		Perl_is_utf8_digit
+#define Perl_is_utf8_graph	CPerlObj::Perl_is_utf8_graph
+#define is_utf8_graph		Perl_is_utf8_graph
 #define Perl_is_utf8_upper	CPerlObj::Perl_is_utf8_upper
 #define is_utf8_upper		Perl_is_utf8_upper
 #define Perl_is_utf8_lower	CPerlObj::Perl_is_utf8_lower
 #define is_utf8_lower		Perl_is_utf8_lower
 #define Perl_is_utf8_print	CPerlObj::Perl_is_utf8_print
 #define is_utf8_print		Perl_is_utf8_print
+#define Perl_is_utf8_punct	CPerlObj::Perl_is_utf8_punct
+#define is_utf8_punct		Perl_is_utf8_punct
+#define Perl_is_utf8_xdigit	CPerlObj::Perl_is_utf8_xdigit
+#define is_utf8_xdigit		Perl_is_utf8_xdigit
 #define Perl_is_utf8_mark	CPerlObj::Perl_is_utf8_mark
 #define is_utf8_mark		Perl_is_utf8_mark
 #define Perl_jmaybe		CPerlObj::Perl_jmaybe
@@ -4241,6 +4315,8 @@
 #define re_croak2		S_re_croak2
 #define S_regpposixcc		CPerlObj::S_regpposixcc
 #define regpposixcc		S_regpposixcc
+#define S_checkposixcc		CPerlObj::S_checkposixcc
+#define checkposixcc		S_checkposixcc
 #define S_clear_re		CPerlObj::S_clear_re
 #define clear_re		S_clear_re
 #endif

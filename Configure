@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Jul  5 22:55:23 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Tue Jul  6 18:36:05 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -4403,9 +4403,9 @@ while read cline; do
 	esac;
 done;
 #
-#status=0: grep returned 0 lines, case statement not executed
-#status=1: headerfile found
-#status=2: while loop executed, no headerfile found
+# status = 0: grep returned 0 lines, case statement not executed
+# status = 1: headerfile found
+# status = 2: while loop executed, no headerfile found
 #
 status=\$?
 $rm -f foo\$\$.c;
@@ -12647,8 +12647,6 @@ eval $setvar
 
 echo " "
 echo "Looking for extensions..." >&4
-tdir=`pwd`
-cd $rsrc/ext
 : If we are using the old config.sh, known_extensions may contain
 : old or inaccurate or duplicate values.
 known_extensions=''
@@ -12657,30 +12655,35 @@ nonxs_extensions=''
 : We do not just use MANIFEST because the user may have dropped
 : some additional extensions into the source tree and expect them
 : to be built.
-for xxx in * ; do
-	case "$xxx" in
-	DynaLoader|dynaload) ;;
-	*)	if $test -f $xxx/$xxx.xs; then
-			known_extensions="$known_extensions $xxx"
-		elif $test -f $xxx/Makefile.PL; then
-			nonxs_extensions="$nonxs_extensions $xxx"
-		else
-			if $test -d $xxx; then
-				# Look for nested extensions, eg. Devel/Dprof.
-				cd $xxx
-				for yyy in * ; do
-				if $test -f $yyy/$yyy.xs; then
-					known_extensions="$known_extensions $xxx/$yyy"
-				elif $test -f $yyy/Makefile.PL; then
-					nonxs_extensions="$nonxs_extensions $xxx/$yyy"
-				fi
-				done
-				cd ..
-			fi
-		fi 
-		;;
-	esac
-done
+
+: Function to recursively find available extensions, ignoring DynaLoader
+: NOTE: recursion limit of 10 to prevent runaway in case of symlink madness
+find_extensions='
+    for xxx in *; do
+       case "$xxx" in
+           DynaLoader|dynaload) ;;
+           *)
+           if $test -f $xxx/$xxx.xs; then
+               known_extensions="$known_extensions $1$xxx";
+           elif $test -f $xxx/Makefile.PL; then
+               nonxs_extensions="$nonxs_extensions $1$xxx";
+           else
+               if $test -d $xxx -a $# -lt 10; then
+                   set $1$xxx/ $*;
+                   cd $xxx;
+                   eval $find_extensions;
+                   cd ..;
+                   shift;
+               fi
+           fi
+           ;;
+       esac
+    done'
+tdir=`pwd`
+cd $rsrc/ext
+set
+shift
+eval $find_extensions
 set X $nonxs_extensions
 shift
 nonxs_extensions="$*"

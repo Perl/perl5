@@ -261,6 +261,14 @@ Perl_is_uni_alnum(pTHX_ U32 c)
 }
 
 bool
+Perl_is_uni_alnumc(pTHX_ U32 c)
+{
+    U8 tmpbuf[10];
+    uv_to_utf8(tmpbuf, (UV)c);
+    return is_utf8_alnumc(tmpbuf);
+}
+
+bool
 Perl_is_uni_idfirst(pTHX_ U32 c)
 {
     U8 tmpbuf[10];
@@ -309,11 +317,35 @@ Perl_is_uni_lower(pTHX_ U32 c)
 }
 
 bool
+Perl_is_uni_cntrl(pTHX_ U32 c)
+{
+    U8 tmpbuf[10];
+    uv_to_utf8(tmpbuf, (UV)c);
+    return is_utf8_cntrl(tmpbuf);
+}
+
+bool
+Perl_is_uni_graph(pTHX_ U32 c)
+{
+    U8 tmpbuf[10];
+    uv_to_utf8(tmpbuf, (UV)c);
+    return is_utf8_graph(tmpbuf);
+}
+
+bool
 Perl_is_uni_print(pTHX_ U32 c)
 {
     U8 tmpbuf[10];
     uv_to_utf8(tmpbuf, (UV)c);
     return is_utf8_print(tmpbuf);
+}
+
+bool
+is_uni_punct(U32 c)
+{
+    U8 tmpbuf[10];
+    uv_to_utf8(tmpbuf, (UV)c);
+    return is_utf8_punct(tmpbuf);
 }
 
 U32
@@ -346,6 +378,12 @@ bool
 Perl_is_uni_alnum_lc(pTHX_ U32 c)
 {
     return is_uni_alnum(c);	/* XXX no locale support yet */
+}
+
+bool
+Perl_is_uni_alnumc_lc(pTHX_ U32 c)
+{
+    return is_uni_alnumc(c);	/* XXX no locale support yet */
 }
 
 bool
@@ -385,9 +423,27 @@ Perl_is_uni_lower_lc(pTHX_ U32 c)
 }
 
 bool
+Perl_is_uni_cntrl_lc(pTHX_ U32 c)
+{
+    return is_uni_cntrl(c);	/* XXX no locale support yet */
+}
+
+bool
+Perl_is_uni_graph_lc(pTHX_ U32 c)
+{
+    return is_uni_graph(c);	/* XXX no locale support yet */
+}
+
+bool
 Perl_is_uni_print_lc(pTHX_ U32 c)
 {
     return is_uni_print(c);	/* XXX no locale support yet */
+}
+
+bool
+Perl_is_uni_punct_lc(pTHX_ U32 c)
+{
+    return is_uni_punct(c);	/* XXX no locale support yet */
 }
 
 U32
@@ -408,7 +464,6 @@ Perl_to_uni_lower_lc(pTHX_ U32 c)
     return to_uni_lower(c);	/* XXX no locale support yet */
 }
 
-
 bool
 Perl_is_utf8_alnum(pTHX_ U8 *p)
 {
@@ -416,6 +471,21 @@ Perl_is_utf8_alnum(pTHX_ U8 *p)
 	PL_utf8_alnum = swash_init("utf8", "IsAlnum", &PL_sv_undef, 0, 0);
     return swash_fetch(PL_utf8_alnum, p);
 /*    return *p == '_' || is_utf8_alpha(p) || is_utf8_digit(p); */
+#ifdef SURPRISINGLY_SLOWER  /* probably because alpha is usually true */
+    if (!PL_utf8_alnum)
+	PL_utf8_alnum = swash_init("utf8", "",
+	    sv_2mortal(newSVpv("+utf8::IsAlpha\n+utf8::IsDigit\n005F\n",0)), 0, 0);
+    return swash_fetch(PL_utf8_alnum, p);
+#endif
+}
+
+bool
+Perl_is_utf8_alnumc(pTHX_ U8 *p)
+{
+    if (!PL_utf8_alnum)
+	PL_utf8_alnum = swash_init("utf8", "IsAlnumC", &PL_sv_undef, 0, 0);
+    return swash_fetch(PL_utf8_alnum, p);
+/*    return is_utf8_alpha(p) || is_utf8_digit(p); */
 #ifdef SURPRISINGLY_SLOWER  /* probably because alpha is usually true */
     if (!PL_utf8_alnum)
 	PL_utf8_alnum = swash_init("utf8", "",
@@ -436,6 +506,14 @@ Perl_is_utf8_alpha(pTHX_ U8 *p)
     if (!PL_utf8_alpha)
 	PL_utf8_alpha = swash_init("utf8", "IsAlpha", &PL_sv_undef, 0, 0);
     return swash_fetch(PL_utf8_alpha, p);
+}
+
+bool
+Perl_is_utf8_ascii(pTHX_ U8 *p)
+{
+    if (!PL_utf8_ascii)
+	PL_utf8_ascii = swash_init("utf8", "IsAscii", &PL_sv_undef, 0, 0);
+    return swash_fetch(PL_utf8_ascii, p);
 }
 
 bool
@@ -471,11 +549,43 @@ Perl_is_utf8_lower(pTHX_ U8 *p)
 }
 
 bool
+Perl_is_utf8_cntrl(pTHX_ U8 *p)
+{
+    if (!PL_utf8_cntrl)
+	PL_utf8_cntrl = swash_init("utf8", "IsCntrl", &PL_sv_undef, 0, 0);
+    return swash_fetch(PL_utf8_cntrl, p);
+}
+
+bool
+Perl_is_utf8_graph(pTHX_ U8 *p)
+{
+    if (!PL_utf8_graph)
+	PL_utf8_graph = swash_init("utf8", "IsGraph", &PL_sv_undef, 0, 0);
+    return swash_fetch(PL_utf8_graph, p);
+}
+
+bool
 Perl_is_utf8_print(pTHX_ U8 *p)
 {
     if (!PL_utf8_print)
 	PL_utf8_print = swash_init("utf8", "IsPrint", &PL_sv_undef, 0, 0);
     return swash_fetch(PL_utf8_print, p);
+}
+
+bool
+Perl_is_utf8_punct(pTHX_ U8 *p)
+{
+    if (!PL_utf8_punct)
+	PL_utf8_punct = swash_init("utf8", "IsPunct", &PL_sv_undef, 0, 0);
+    return swash_fetch(PL_utf8_punct, p);
+}
+
+bool
+Perl_is_utf8_xdigit(pTHX_ U8 *p)
+{
+    if (!PL_utf8_xdigit)
+	PL_utf8_xdigit = swash_init("utf8", "IsXDigit", &PL_sv_undef, 0, 0);
+    return swash_fetch(PL_utf8_xdigit, p);
 }
 
 bool

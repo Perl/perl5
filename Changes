@@ -79,6 +79,145 @@ Version 5.005_58        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  3655] By: gsar                                  on 1999/07/07  18:55:45
+        Log: filetest.t and ByteLoader build tweaks from Peter Prymmer
+             <pvhp@forte.com>
+     Branch: perl
+           ! ext/ByteLoader/Makefile.PL t/op/filetest.t
+____________________________________________________________________________
+[  3654] By: gsar                                  on 1999/07/07  18:47:03
+        Log: change#1889 mistakenly removed F_SETLK
+     Branch: perl
+           ! ext/Fcntl/Fcntl.xs
+____________________________________________________________________________
+[  3653] By: gsar                                  on 1999/07/07  18:42:42
+        Log: B::Deparse update
+             From: Stephen McCamant <smccam@uclink4.berkeley.edu>
+             Date: Mon,  5 Jul 1999 17:57:03 -0500 (CDT)
+             Message-ID: <14209.13729.738691.610723@alias-2.pr.mcs.net>
+             Subject: [PATCH _57, long] B::Deparse 0.58
+     Branch: perl
+           ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  3652] By: gsar                                  on 1999/07/07  18:41:07
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 5 Jul 1999 18:24:19 -0400 (EDT)
+             Message-Id: <199907052224.SAA10454@monk.mps.ohio-state.edu>
+             Subject: Re: [ID 19990705.001] Overloading boolean conversion
+     Branch: perl
+           ! gv.c t/pragma/overload.t
+____________________________________________________________________________
+[  3651] By: gsar                                  on 1999/07/07  17:47:30
+        Log: missing PerlIO_reopen() (suggested by sam@daemoninc.com)
+     Branch: perl
+           ! perlsfio.h
+____________________________________________________________________________
+[  3650] By: gsar                                  on 1999/07/07  17:45:52
+        Log: applied new parts of suggested patch
+             From: Charles Bailey <BAILEY@newman.upenn.edu>
+             Date: Fri, 02 Jul 1999 19:18:41 -0400 (EDT)
+             Message-id: <01JD3M8W1VXS000S5G@mail.newman.upenn.edu>
+             Subject: [PATCH 5.005_57] Consolidated VMS patch
+     Branch: perl
+	   ! configure.com ext/IO/lib/IO/File.pm iperlsys.h
+	   ! lib/ExtUtils/MM_VMS.pm lib/File/Basename.pm
+	   ! lib/File/Spec/VMS.pm pod/perldiag.pod t/base/rs.t
+	   ! t/lib/io_multihomed.t t/lib/textfill.t t/lib/textwrap.t
+           ! t/op/filetest.t t/op/mkdir.t thread.h vms/vms.c
+____________________________________________________________________________
+[  3649] By: jhi                                   on 1999/07/07  13:38:02
+        Log: Sync regcomp warn with reality.
+     Branch: cfgperl
+           ! t/pragma/warn/regcomp
+____________________________________________________________________________
+[  3648] By: jhi                                   on 1999/07/07  13:04:55
+        Log: Integrate with Sarathy; one conflict in t/pragma/warn/recgomp
+             resolved manually.
+     Branch: cfgperl
+	  +> pod/perllexwarn.pod t/pragma/warn/6default t/pragma/warn/av
+	  +> t/pragma/warn/doop t/pragma/warn/hv t/pragma/warn/malloc
+          +> t/pragma/warn/perlio t/pragma/warn/run t/pragma/warn/utf8
+           - README.lexwarn
+          !> (integrate 79 files)
+____________________________________________________________________________
+[  3647] By: gsar                                  on 1999/07/07  10:32:03
+        Log: From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Thu, 01 Jul 1999 11:17:53 +0200
+             Message-ID: <377b2ca4.14467042@smtp1.ibm.net>
+             Subject: [PATCH 5.005_57] MakeMaker support for pod2html
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm lib/ExtUtils/MM_Win32.pm
+           ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[  3646] By: gsar                                  on 1999/07/07  10:27:55
+        Log: fix undocumented IO::Handle functions as suggested
+             by cj10@cam.ac.uk
+     Branch: perl
+           ! ext/IO/lib/IO/Handle.pm
+____________________________________________________________________________
+[  3645] By: gsar                                  on 1999/07/07  10:18:55
+        Log: prohibit thread join()ing itself (from Dan Sugalski)
+     Branch: perl
+           ! ext/Thread/Thread.xs
+____________________________________________________________________________
+[  3644] By: gsar                                  on 1999/07/07  10:14:26
+        Log: From: "Vishal Bhatia" <vishalb@my-deja.com>
+             Date: Wed, 30 Jun 1999 14:02:42 -0700
+             Message-ID: <LJHFKBDHMHHJDAAA@my-deja.com>
+             Subject:  [PATCH 5.005_57] Compiler and XSUBS
+     Branch: perl
+           ! ext/B/B/C.pm
+____________________________________________________________________________
+[  3643] By: gsar                                  on 1999/07/07  10:08:38
+        Log: mention C<foreach VAR (LIST) BLOCK continue BLOCK> syntax
+             (from François Désarménien <desar@club-internet.fr>)
+     Branch: perl
+           ! pod/perlsyn.pod
+____________________________________________________________________________
+[  3642] By: gsar                                  on 1999/07/07  10:03:24
+        Log: From: Doug MacEachern <dougm@cp.net>
+             Date: Sun, 27 Jun 1999 22:43:25 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.10.9906272236430.389-100000@mojo.eng.cp.net>
+             Subject: [PATCH 5.005_57] add B::PV::{LEN,CUR}
+     Branch: perl
+           ! ext/B/B.xs
+____________________________________________________________________________
+[  3641] By: gsar                                  on 1999/07/07  10:00:57
+        Log: slightly modified version of suggested patch
+             From: Steven N. Hirsch <hirschs@stargate.btv.ibm.com>
+             Date: Mon, 28 Jun 1999 14:23:59 -0400
+             Message-Id: <199906281823.OAA24912@stargate.btv.ibm.com>
+             Subject: [ID 19990628.007] POSIX::tmpnam() broken for threaded 5.00503
+     Branch: perl
+           ! ext/POSIX/POSIX.xs
+____________________________________________________________________________
+[  3640] By: gsar                                  on 1999/07/07  09:45:43
+        Log: lexical warnings update (warning.t fails one test
+             due to leaked scalar, investigation pending)
+             From: paul.marquess@bt.com
+             Date: Sat, 26 Jun 1999 23:19:52 +0100
+             Message-ID: <5104D4DBC598D211B5FE0000F8FE7EB29C6C8E@mbtlipnt02.btlabs.bt.co.uk>
+             Subject: [PATCH 5.005_57] Lexical Warnings - mandatory warning are now default warnings
+     Branch: perl
+	   + pod/perllexwarn.pod t/pragma/warn/6default t/pragma/warn/av
+	   + t/pragma/warn/doop t/pragma/warn/hv t/pragma/warn/malloc
+           + t/pragma/warn/perlio t/pragma/warn/run t/pragma/warn/utf8
+           - README.lexwarn
+	   ! Changes MANIFEST av.c djgpp/djgpp.c doio.c doop.c
+	   ! ext/B/B/Asmdata.pm ext/ByteLoader/byterun.c
+	   ! ext/ByteLoader/byterun.h gv.c hv.c jpl/JNI/JNI.xs
+	   ! lib/warning.pm mg.c op.c os2/os2.c perl.c perlio.c
+	   ! pod/perldelta.pod pod/perldiag.pod pod/perlfunc.pod
+	   ! pod/perlmodlib.pod pod/perlrun.pod pod/perlvar.pod pp.c
+	   ! pp_ctl.c run.c sv.c t/pragma/warn/3both t/pragma/warn/doio
+	   ! t/pragma/warn/gv t/pragma/warn/mg t/pragma/warn/op
+	   ! t/pragma/warn/perl t/pragma/warn/perly t/pragma/warn/pp
+	   ! t/pragma/warn/pp_ctl t/pragma/warn/pp_hot t/pragma/warn/pp_sys
+	   ! t/pragma/warn/regcomp t/pragma/warn/regexec t/pragma/warn/sv
+	   ! t/pragma/warn/taint t/pragma/warn/toke t/pragma/warn/universal
+	   ! t/pragma/warn/util t/pragma/warning.t toke.c utf8.c util.c
+           ! warning.h warning.pl win32/win32.c
+____________________________________________________________________________
 [  3639] By: gsar                                  on 1999/07/07  08:09:30
         Log: From: Brian Jepson <bjepson@home.com>
              Date: Sat, 26 Jun 1999 10:47:45 -0500 (EST)

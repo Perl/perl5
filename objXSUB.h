@@ -742,16 +742,26 @@
 #define PL_unsafe		pPerl->PL_unsafe
 #undef  PL_utf8_alnum
 #define PL_utf8_alnum		pPerl->PL_utf8_alnum
+#undef  PL_utf8_alnumc
+#define PL_utf8_alnumc		pPerl->PL_utf8_alnumc
 #undef  PL_utf8_alpha
 #define PL_utf8_alpha		pPerl->PL_utf8_alpha
+#undef  PL_utf8_ascii
+#define PL_utf8_ascii		pPerl->PL_utf8_ascii
+#undef  PL_utf8_cntrl
+#define PL_utf8_cntrl		pPerl->PL_utf8_cntrl
 #undef  PL_utf8_digit
 #define PL_utf8_digit		pPerl->PL_utf8_digit
+#undef  PL_utf8_graph
+#define PL_utf8_graph		pPerl->PL_utf8_graph
 #undef  PL_utf8_lower
 #define PL_utf8_lower		pPerl->PL_utf8_lower
 #undef  PL_utf8_mark
 #define PL_utf8_mark		pPerl->PL_utf8_mark
 #undef  PL_utf8_print
 #define PL_utf8_print		pPerl->PL_utf8_print
+#undef  PL_utf8_punct
+#define PL_utf8_punct		pPerl->PL_utf8_punct
 #undef  PL_utf8_space
 #define PL_utf8_space		pPerl->PL_utf8_space
 #undef  PL_utf8_tolower
@@ -762,6 +772,8 @@
 #define PL_utf8_toupper		pPerl->PL_utf8_toupper
 #undef  PL_utf8_upper
 #define PL_utf8_upper		pPerl->PL_utf8_upper
+#undef  PL_utf8_xdigit
+#define PL_utf8_xdigit		pPerl->PL_utf8_xdigit
 #undef  PL_uudmap
 #define PL_uudmap		pPerl->PL_uudmap
 #undef  PL_warnhook
@@ -1505,6 +1517,10 @@
 #define Perl_is_uni_alnum	pPerl->Perl_is_uni_alnum
 #undef  is_uni_alnum
 #define is_uni_alnum		Perl_is_uni_alnum
+#undef  Perl_is_uni_alnumc
+#define Perl_is_uni_alnumc	pPerl->Perl_is_uni_alnumc
+#undef  is_uni_alnumc
+#define is_uni_alnumc		Perl_is_uni_alnumc
 #undef  Perl_is_uni_idfirst
 #define Perl_is_uni_idfirst	pPerl->Perl_is_uni_idfirst
 #undef  is_uni_idfirst
@@ -1513,10 +1529,22 @@
 #define Perl_is_uni_alpha	pPerl->Perl_is_uni_alpha
 #undef  is_uni_alpha
 #define is_uni_alpha		Perl_is_uni_alpha
+#undef  Perl_is_uni_ascii
+#define Perl_is_uni_ascii	pPerl->Perl_is_uni_ascii
+#undef  is_uni_ascii
+#define is_uni_ascii		Perl_is_uni_ascii
 #undef  Perl_is_uni_space
 #define Perl_is_uni_space	pPerl->Perl_is_uni_space
 #undef  is_uni_space
 #define is_uni_space		Perl_is_uni_space
+#undef  Perl_is_uni_cntrl
+#define Perl_is_uni_cntrl	pPerl->Perl_is_uni_cntrl
+#undef  is_uni_cntrl
+#define is_uni_cntrl		Perl_is_uni_cntrl
+#undef  Perl_is_uni_graph
+#define Perl_is_uni_graph	pPerl->Perl_is_uni_graph
+#undef  is_uni_graph
+#define is_uni_graph		Perl_is_uni_graph
 #undef  Perl_is_uni_digit
 #define Perl_is_uni_digit	pPerl->Perl_is_uni_digit
 #undef  is_uni_digit
@@ -1533,6 +1561,14 @@
 #define Perl_is_uni_print	pPerl->Perl_is_uni_print
 #undef  is_uni_print
 #define is_uni_print		Perl_is_uni_print
+#undef  Perl_is_uni_punct
+#define Perl_is_uni_punct	pPerl->Perl_is_uni_punct
+#undef  is_uni_punct
+#define is_uni_punct		Perl_is_uni_punct
+#undef  Perl_is_uni_xdigit
+#define Perl_is_uni_xdigit	pPerl->Perl_is_uni_xdigit
+#undef  is_uni_xdigit
+#define is_uni_xdigit		Perl_is_uni_xdigit
 #undef  Perl_to_uni_upper
 #define Perl_to_uni_upper	pPerl->Perl_to_uni_upper
 #undef  to_uni_upper
@@ -1549,6 +1585,10 @@
 #define Perl_is_uni_alnum_lc	pPerl->Perl_is_uni_alnum_lc
 #undef  is_uni_alnum_lc
 #define is_uni_alnum_lc		Perl_is_uni_alnum_lc
+#undef  Perl_is_uni_alnumc_lc
+#define Perl_is_uni_alnumc_lc	pPerl->Perl_is_uni_alnumc_lc
+#undef  is_uni_alnumc_lc
+#define is_uni_alnumc_lc	Perl_is_uni_alnumc_lc
 #undef  Perl_is_uni_idfirst_lc
 #define Perl_is_uni_idfirst_lc	pPerl->Perl_is_uni_idfirst_lc
 #undef  is_uni_idfirst_lc
@@ -1557,10 +1597,22 @@
 #define Perl_is_uni_alpha_lc	pPerl->Perl_is_uni_alpha_lc
 #undef  is_uni_alpha_lc
 #define is_uni_alpha_lc		Perl_is_uni_alpha_lc
+#undef  Perl_is_uni_ascii_lc
+#define Perl_is_uni_ascii_lc	pPerl->Perl_is_uni_ascii_lc
+#undef  is_uni_ascii_lc
+#define is_uni_ascii_lc		Perl_is_uni_ascii_lc
 #undef  Perl_is_uni_space_lc
 #define Perl_is_uni_space_lc	pPerl->Perl_is_uni_space_lc
 #undef  is_uni_space_lc
 #define is_uni_space_lc		Perl_is_uni_space_lc
+#undef  Perl_is_uni_cntrl_lc
+#define Perl_is_uni_cntrl_lc	pPerl->Perl_is_uni_cntrl_lc
+#undef  is_uni_cntrl_lc
+#define is_uni_cntrl_lc		Perl_is_uni_cntrl_lc
+#undef  Perl_is_uni_graph_lc
+#define Perl_is_uni_graph_lc	pPerl->Perl_is_uni_graph_lc
+#undef  is_uni_graph_lc
+#define is_uni_graph_lc		Perl_is_uni_graph_lc
 #undef  Perl_is_uni_digit_lc
 #define Perl_is_uni_digit_lc	pPerl->Perl_is_uni_digit_lc
 #undef  is_uni_digit_lc
@@ -1577,6 +1629,14 @@
 #define Perl_is_uni_print_lc	pPerl->Perl_is_uni_print_lc
 #undef  is_uni_print_lc
 #define is_uni_print_lc		Perl_is_uni_print_lc
+#undef  Perl_is_uni_punct_lc
+#define Perl_is_uni_punct_lc	pPerl->Perl_is_uni_punct_lc
+#undef  is_uni_punct_lc
+#define is_uni_punct_lc		Perl_is_uni_punct_lc
+#undef  Perl_is_uni_xdigit_lc
+#define Perl_is_uni_xdigit_lc	pPerl->Perl_is_uni_xdigit_lc
+#undef  is_uni_xdigit_lc
+#define is_uni_xdigit_lc	Perl_is_uni_xdigit_lc
 #undef  Perl_to_uni_upper_lc
 #define Perl_to_uni_upper_lc	pPerl->Perl_to_uni_upper_lc
 #undef  to_uni_upper_lc
@@ -1593,6 +1653,10 @@
 #define Perl_is_utf8_alnum	pPerl->Perl_is_utf8_alnum
 #undef  is_utf8_alnum
 #define is_utf8_alnum		Perl_is_utf8_alnum
+#undef  Perl_is_utf8_alnumc
+#define Perl_is_utf8_alnumc	pPerl->Perl_is_utf8_alnumc
+#undef  is_utf8_alnumc
+#define is_utf8_alnumc		Perl_is_utf8_alnumc
 #undef  Perl_is_utf8_idfirst
 #define Perl_is_utf8_idfirst	pPerl->Perl_is_utf8_idfirst
 #undef  is_utf8_idfirst
@@ -1601,14 +1665,26 @@
 #define Perl_is_utf8_alpha	pPerl->Perl_is_utf8_alpha
 #undef  is_utf8_alpha
 #define is_utf8_alpha		Perl_is_utf8_alpha
+#undef  Perl_is_utf8_ascii
+#define Perl_is_utf8_ascii	pPerl->Perl_is_utf8_ascii
+#undef  is_utf8_ascii
+#define is_utf8_ascii		Perl_is_utf8_ascii
 #undef  Perl_is_utf8_space
 #define Perl_is_utf8_space	pPerl->Perl_is_utf8_space
 #undef  is_utf8_space
 #define is_utf8_space		Perl_is_utf8_space
+#undef  Perl_is_utf8_cntrl
+#define Perl_is_utf8_cntrl	pPerl->Perl_is_utf8_cntrl
+#undef  is_utf8_cntrl
+#define is_utf8_cntrl		Perl_is_utf8_cntrl
 #undef  Perl_is_utf8_digit
 #define Perl_is_utf8_digit	pPerl->Perl_is_utf8_digit
 #undef  is_utf8_digit
 #define is_utf8_digit		Perl_is_utf8_digit
+#undef  Perl_is_utf8_graph
+#define Perl_is_utf8_graph	pPerl->Perl_is_utf8_graph
+#undef  is_utf8_graph
+#define is_utf8_graph		Perl_is_utf8_graph
 #undef  Perl_is_utf8_upper
 #define Perl_is_utf8_upper	pPerl->Perl_is_utf8_upper
 #undef  is_utf8_upper
@@ -1621,6 +1697,14 @@
 #define Perl_is_utf8_print	pPerl->Perl_is_utf8_print
 #undef  is_utf8_print
 #define is_utf8_print		Perl_is_utf8_print
+#undef  Perl_is_utf8_punct
+#define Perl_is_utf8_punct	pPerl->Perl_is_utf8_punct
+#undef  is_utf8_punct
+#define is_utf8_punct		Perl_is_utf8_punct
+#undef  Perl_is_utf8_xdigit
+#define Perl_is_utf8_xdigit	pPerl->Perl_is_utf8_xdigit
+#undef  is_utf8_xdigit
+#define is_utf8_xdigit		Perl_is_utf8_xdigit
 #undef  Perl_is_utf8_mark
 #define Perl_is_utf8_mark	pPerl->Perl_is_utf8_mark
 #undef  is_utf8_mark
