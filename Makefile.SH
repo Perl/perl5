@@ -890,6 +890,7 @@ _test:
 	else \
 	  $(MAKE) _test_notty; \
 	fi
+	@echo "Ran tests" > t/rantests
 
 test check: test_prep
 	PERL=./perl $(MAKE) _test
