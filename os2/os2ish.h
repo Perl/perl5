@@ -532,7 +532,7 @@ void init_PMWIN_entries(void);
 
 /* The expressions below return true on error. */
 /* INCL_DOSERRORS needed. rc should be declared outside. */
-#define CheckOSError(expr) (!(rc = (expr)) ? 0 : (FillOSError(rc), 1))
+#define CheckOSError(expr) ((rc = (expr)) ? (FillOSError(rc), rc) : 0)
 /* INCL_WINERRORS needed. */
 #define CheckWinError(expr) ((expr) ? 0: (FillWinError, 1))
 
@@ -681,6 +681,7 @@ enum entries_ordinals {
     ORD_WinFlashWindow,
     ORD_WinLoadPointer,
     ORD_WinQuerySysPointer,
+    ORD_DosReplaceModule,
     ORD_NENTRIES
 };
 
@@ -691,7 +692,11 @@ enum entries_ordinals {
 #define DeclVoidFuncByORD(name,o,at,args)	\
   void name at { CallORD(void,o,at,args); }
 
-/* These functions return false on error, and save the error info in $^E */
+/* This function returns error code on error, and saves the error info in $^E and Perl_rc */
+#define DeclOSFuncByORD_native(ret,name,o,at,args)	\
+  ret name at { unsigned long rc; return CheckOSError(CallORD(ret,o,at,args)); }
+
+/* These functions return false on error, and save the error info in $^E and Perl_rc */
 #define DeclOSFuncByORD(ret,name,o,at,args)	\
   ret name at { unsigned long rc; return !CheckOSError(CallORD(ret,o,at,args)); }
 #define DeclWinFuncByORD(ret,name,o,at,args)	\

@@ -24,7 +24,7 @@ BEGIN {			# Remap I/O to the parent's window
 }
 
 use strict;
-use Test::More tests => 230;
+use Test::More tests => 232;
 use OS2::Process;
 
 sub SWP_flags ($) {
@@ -407,8 +407,13 @@ ok $my_pos, 'got my position';
   ok IsWindowShowing $k_hwnd, 'kid is showing';
   ok IsWindowVisible $k_hwnd, 'kid is flaged as visible';
   ok IsWindowEnabled $k_hwnd, 'kid is flaged as enabled';
+  SKIP: {
+    skip 'if defaultVIO=MAXIMIZED, new windows are shifted, but maximize to UL corner', 1 unless $fl & 0x800;
+    ok hWindowPos_set({x => $ppos[0], y => $ppos[1]}, $k_hwnd), 'x,y-restore for de-minimization of MAXIMIZED';
+  }
   @nkpos = WindowPos $k_hwnd;
   is_deeply([@ppos[0..5]], [@nkpos[0..5]], 'position restored');
+
 
   # Now the other way
   ok hWindowPos_set( {flags => 0x400}, $k_hwnd), 'set to minimized';
@@ -452,6 +457,10 @@ ok $my_pos, 'got my position';
   ok IsWindowShowing $k_hwnd, 'kid is showing';
   ok IsWindowVisible $k_hwnd, 'kid is flaged as visible';
   ok IsWindowEnabled $k_hwnd, 'kid is flaged as enabled';
+  SKIP: {
+    skip 'if defaultVIO=MAXIMIZED, new windows are shifted, but maximize to UL corner', 1 unless $fl & 0x800;
+    ok hWindowPos_set({x => $ppos[0], y => $ppos[1]}, $k_hwnd), 'x,y-restore for de-minimization of MAXIMIZED';
+  }
   @nkpos = WindowPos $k_hwnd;
   is_deeply([@ppos[0..5]], [@nkpos[0..5]], 'position restored');
 
