@@ -32,6 +32,392 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  9072] By: jhi                                   on 2001/03/07  16:32:30
+        Log: Subject: [ID 20010306.004] || != named unary operator
+             From: abela@geneanet.org
+             Date: Tue,  6 Mar 2001 15:57:57 +0100 (CET)
+             Message-Id: <20010306145757.0CB03D183@little-roots.geneanet.org>
+     Branch: perl
+	   ! pod/perlop.pod
+____________________________________________________________________________
+[  9071] By: jhi                                   on 2001/03/07  15:14:11
+        Log: Subject: downgrading to bytes for common functions
+             From: andrew@pimlott.ne.mediaone.net (Andrew Pimlott)
+             Date: Wed, 7 Mar 2001 02:36:55 -0500
+             Message-ID: <20010307023655.J24024@pimlott.ne.mediaone.net>
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[  9070] By: jhi                                   on 2001/03/07  15:04:58
+        Log: Clarify the description differentiating for and while; inspired by
+             
+             Subject: [ID 20010306.002] for/while difference in for definition
+             From: abela@geneanet.org
+             Date: Tue,  6 Mar 2001 09:40:36 +0100 (CET)
+             Message-Id: <20010306084036.7BFD0D17F@little-roots.geneanet.org>
+     Branch: perl
+	   ! pod/perlsyn.pod
+____________________________________________________________________________
+[  9069] By: jhi                                   on 2001/03/07  14:55:30
+        Log: Subject: 'no *POSIX' Patch speeding up make on BS2000 
+             From: Dorner Thomas <Thomas.Dorner@start.de>
+             Date: Wed, 7 Mar 2001 14:13:31 +0100
+             Message-ID: <6727B1DACFCDD311A757009027CA8D69010A88CB@Ex02.inhouse.start.de>
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  9068] By: jhi                                   on 2001/03/07  14:51:17
+        Log: Subject: Re: [ID 20010305.012] chop() against list assignment returns char chopped from el zero
+             From: Radu Greab <radu@netsoft.ro>
+             Date: Tue, 6 Mar 2001 23:04:44 +0200 (EET)
+             Message-ID: <15013.20716.201459.540421@ix.netsoft.ro>
+     Branch: perl
+	   ! pp.c t/op/chop.t
+____________________________________________________________________________
+[  9067] By: jhi                                   on 2001/03/07  14:48:57
+        Log: Subject: Re: [PATCH: 5.6.1 trial2] DynaLoading for OS/390 build option
+             From: Simon Cozens <simon@netthink.co.uk>
+             Date: Wed, 7 Mar 2001 13:59:28 +0000
+             Message-ID: <20010307135928.A21620@pembro26.pmb.ox.ac.uk>
+             
+             In order to allow MakeMaker to build correct Makefiles,
+             you need to change the order of the arguments in MM_Unix.pm
+             as well. (Unless you have C89_CCMODE set, but we're trying
+             to be POSIXly correct)
+             
+             Thanks to Merijn Broeren for tracking this down.
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[  9066] By: jhi                                   on 2001/03/07  14:30:02
+        Log: Floating point too messy.
+     Branch: perl
+	   ! t/camel-III/vstring.t
+____________________________________________________________________________
+[  9065] By: jhi                                   on 2001/03/07  14:17:44
+        Log: Integrate change #9064 from maintperl into mainline.
+             
+             fix memory leak in pack("Bb",...)
+     Branch: perl
+	  !> perl.c
+____________________________________________________________________________
+[  9064] By: gsar                                  on 2001/03/07  06:29:24
+        Log: fix memory leak in pack("Bb",...)
+     Branch: maint-5.6/perl
+	   ! perl.c
+____________________________________________________________________________
+[  9063] By: jhi                                   on 2001/03/07  00:55:04
+        Log: Major utf8 test reorganisation and rewrite.
+             Hopefully no tests were lost in the shuffle.
+             (The beginning of pragma/utf8 was lost intentionally,
+             the tests were rather bogus and incomplete.)
+     Branch: perl
+	   ! t/lib/charnames.t t/op/pack.t t/op/pat.t t/op/split.t
+	   ! t/pragma/utf8.t
+____________________________________________________________________________
+[  9062] By: jhi                                   on 2001/03/07  00:41:16
+        Log: More tweakage on the Unicode character class descriptions.
+     Branch: perl
+	   ! lib/unicode/mktables.PL pod/perlretut.pod
+____________________________________________________________________________
+[  9061] By: jhi                                   on 2001/03/06  23:12:38
+        Log: The perlretut was still talking about the old \p and \P
+             definitions.
+     Branch: perl
+	   ! pod/perlretut.pod
+____________________________________________________________________________
+[  9060] By: nick                                  on 2001/03/06  20:52:37
+        Log: Integrate mainline (make test works again now).
+     Branch: perlio
+	  !> op.c op.h regcomp.c t/camel-III/vstring.t t/op/pat.t
+____________________________________________________________________________
+[  9059] By: jhi                                   on 2001/03/06  15:36:14
+        Log: 0.999... does equal 1.0, doesn't it?
+     Branch: perl
+	   ! t/camel-III/vstring.t
+____________________________________________________________________________
+[  9058] By: jhi                                   on 2001/03/06  15:34:00
+        Log: Make /x{abcd}/ to work without use utf8.
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[  9057] By: jhi                                   on 2001/03/06  03:02:36
+        Log: Easier to outcomment all the three reset() tests for now.
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[  9056] By: jhi                                   on 2001/03/06  02:30:02
+        Log: Comment out the deadly reset; until the 20010301.005
+             is finally fixed.
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[  9055] By: jhi                                   on 2001/03/06  02:21:26
+        Log: Integrate the change #9054 from mainline:
+             retract the PMOP cleanup patch pending further investigation.
+     Branch: maint-5.6/perl
+	  !> op.c op.h
+____________________________________________________________________________
+[  9054] By: jhi                                   on 2001/03/06  02:19:57
+        Log: Retract the PMOP cleanup patch: I'm seeing strange core dumps
+             with oddly familiar stack traces.
+     Branch: perl
+	   ! op.c op.h
+____________________________________________________________________________
+[  9053] By: jhi                                   on 2001/03/05  23:20:28
+        Log: Integrate perlio.
+     Branch: perl
+	  +> ext/Encode/Encode/koi8-r.ucm
+	  !> MANIFEST ext/Encode/Encode.pm ext/Encode/Makefile.PL
+	  !> makedef.pl
+____________________________________________________________________________
+[  9052] By: nick                                  on 2001/03/05  23:08:17
+        Log: skipping USE_PERLIO symbols correction.
+     Branch: perlio
+	   ! makedef.pl
+____________________________________________________________________________
+[  9051] By: nick                                  on 2001/03/05  22:35:07
+        Log: More Encode alias tidying.
+     Branch: perlio
+	   + ext/Encode/Encode/koi8-r.ucm
+	   ! MANIFEST ext/Encode/Encode.pm ext/Encode/Makefile.PL
+____________________________________________________________________________
+[  9050] By: jhi                                   on 2001/03/05  21:44:29
+        Log: Integrate changes #9033 and #9044 from mainline into maintperl,
+             Sarathy's fix for ID 20010301.005.
+     Branch: maint-5.6/perl
+	  !> op.c op.h
+____________________________________________________________________________
+[  9049] By: nick                                  on 2001/03/05  19:54:04
+        Log: Integrate Jarkko's Encode.pm tweak.
+     Branch: perlio
+	  !> ext/Encode/Encode.pm
+____________________________________________________________________________
+[  9048] By: nick                                  on 2001/03/05  19:47:57
+        Log: Integrate mainline (mostly - holding of on Encode.pm for a bit.)
+     Branch: perlio
+	  +> os2/os2add.sym
+	  !> lib/ExtUtils/MM_OS2.pm lib/ExtUtils/MM_Unix.pm makedef.pl op.c
+	  !> op.h os2/Changes os2/Makefile.SHs os2/OS2/REXX/Makefile.PL
+	  !> os2/OS2/REXX/REXX.pm os2/OS2/REXX/REXX.xs
+	  !> os2/OS2/REXX/t/rx_cmprt.t os2/os2.c os2/os2.sym os2/os2ish.h
+	  !> pod/perlapi.pod t/op/pat.t t/op/tr.t
+____________________________________________________________________________
+[  9047] By: jhi                                   on 2001/03/05  19:25:26
+        Log: Regen perlapi.
+     Branch: perl
+	   ! pod/perlapi.pod
+____________________________________________________________________________
+[  9046] By: jhi                                   on 2001/03/05  19:12:14
+        Log: Integrate perlio.
+     Branch: perl
+	  +> t/camel-III/vstring.t
+	  !> MANIFEST pp.h pp_sys.c t/TEST t/harness
+____________________________________________________________________________
+[  9045] By: jhi                                   on 2001/03/05  19:10:36
+        Log: The mapping of ISO Latin X to ISO 8859-Y is tricky.
+     Branch: perl
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[  9044] By: jhi                                   on 2001/03/05  18:49:12
+        Log: Forgot the other half of the PMOP patch (#9033).
+     Branch: perl
+	   ! op.h
+____________________________________________________________________________
+[  9043] By: nick                                  on 2001/03/05  18:14:47
+        Log: Update MANIFEST for new test.
+     Branch: perlio
+	   ! MANIFEST
+____________________________________________________________________________
+[  9042] By: nick                                  on 2001/03/05  18:12:41
+        Log: Some tests for Camel 3rd edition features.
+             Make gethostbyaddr() test in above work.
+     Branch: perlio
+	   + t/camel-III/vstring.t
+	   ! pp.h pp_sys.c t/TEST t/harness
+____________________________________________________________________________
+[  9041] By: jhi                                   on 2001/03/05  17:41:48
+        Log: Add more ISO 8859 encoding aliases.
+     Branch: perl
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[  9040] By: jhi                                   on 2001/03/05  17:30:43
+        Log: Integrate perlio.
+     Branch: perl
+	  !> MANIFEST sv.c
+____________________________________________________________________________
+[  9039] By: nick                                  on 2001/03/05  17:11:36
+        Log: Missed added file.
+     Branch: perlio
+	   ! MANIFEST
+____________________________________________________________________________
+[  9038] By: jhi                                   on 2001/03/05  15:58:01
+        Log: Add tr tests for EBCDIC, from Karsten Sperling.
+     Branch: perl
+	   ! t/op/tr.t
+____________________________________________________________________________
+[  9037] By: nick                                  on 2001/03/05  15:56:35
+        Log: Long-standing "defined but not used" SvPVbyte*() are about to get used
+             for auto-downgrade hooks in gethostbyaddr() etc. (as per Camel-III).
+             
+             Make SvPVbyte*() symetric with respect to SvPVutf8*() in that:
+             - it does a sv_utf8_downgrade (c.f. SvPVutf8's sv_utf8_upgrade())
+             - uses SvPV() rather than sv_2pv() in case it isn't a string.
+     Branch: perlio
+	   ! sv.c
+____________________________________________________________________________
+[  9036] By: jhi                                   on 2001/03/05  15:49:15
+        Log: Add matching tests currently failing in EBCDIC,
+             suggested by Karsten Sperling.
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[  9035] By: jhi                                   on 2001/03/05  15:36:55
+        Log: The #9034 needs a MANIFESTation.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[  9034] By: jhi                                   on 2001/03/05  15:35:14
+        Log: Integrate perlio.
+     Branch: perl
+	  +> ext/Encode/Encode/Tcl.pm
+	  !> ext/Encode/Encode.pm ext/Encode/Encode.xs
+	  !> ext/Encode/Encode/ascii.ucm ext/Encode/Encode/cp1250.ucm
+	  !> ext/Encode/Encode/iso8859-1.ucm
+	  !> ext/Encode/Encode/iso8859-10.ucm
+	  !> ext/Encode/Encode/iso8859-13.ucm
+	  !> ext/Encode/Encode/iso8859-14.ucm
+	  !> ext/Encode/Encode/iso8859-15.ucm
+	  !> ext/Encode/Encode/iso8859-16.ucm
+	  !> ext/Encode/Encode/iso8859-2.ucm
+	  !> ext/Encode/Encode/iso8859-3.ucm
+	  !> ext/Encode/Encode/iso8859-4.ucm
+	  !> ext/Encode/Encode/iso8859-5.ucm
+	  !> ext/Encode/Encode/iso8859-6.ucm
+	  !> ext/Encode/Encode/iso8859-7.ucm
+	  !> ext/Encode/Encode/iso8859-8.ucm
+	  !> ext/Encode/Encode/iso8859-9.ucm ext/Encode/compile
+	  !> t/lib/encode.t
+____________________________________________________________________________
+[  9033] By: jhi                                   on 2001/03/05  15:33:18
+        Log: Subject: Re: [ID 20010301.005] corrupt memory (since @8531, in 5.6.1-T2)
+             From: Gurusamy Sarathy <gsar@ActiveState.com>
+             Date: Sun, 04 Mar 2001 22:33:15 -0800
+             Message-Id: <200103050633.f256XFo06998@smtp3.ActiveState.com>
+             
+             PMOPs need to remember their own stash so that they can
+             gracefully remove themselves from their linked list.
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[  9032] By: nick                                  on 2001/03/05  14:51:50
+        Log: Encode implementation "completion"
+             Implement and document define_encoding()
+             Implement and document encoding aliases including define_alias()
+             Make Encode::XS use define_encoding() rather than back-door.
+             Move run-time *.enc to separate Encode::Tcl module.
+             Make 'compile' honour <codeset_name>
+             Change canonical names of to iso-8859-* and US-ascii.
+     Branch: perlio
+	   + ext/Encode/Encode/Tcl.pm
+	   ! ext/Encode/Encode.pm ext/Encode/Encode.xs
+	   ! ext/Encode/Encode/ascii.ucm ext/Encode/Encode/cp1250.ucm
+	   ! ext/Encode/Encode/iso8859-1.ucm
+	   ! ext/Encode/Encode/iso8859-10.ucm
+	   ! ext/Encode/Encode/iso8859-13.ucm
+	   ! ext/Encode/Encode/iso8859-14.ucm
+	   ! ext/Encode/Encode/iso8859-15.ucm
+	   ! ext/Encode/Encode/iso8859-16.ucm
+	   ! ext/Encode/Encode/iso8859-2.ucm
+	   ! ext/Encode/Encode/iso8859-3.ucm
+	   ! ext/Encode/Encode/iso8859-4.ucm
+	   ! ext/Encode/Encode/iso8859-5.ucm
+	   ! ext/Encode/Encode/iso8859-6.ucm
+	   ! ext/Encode/Encode/iso8859-7.ucm
+	   ! ext/Encode/Encode/iso8859-8.ucm
+	   ! ext/Encode/Encode/iso8859-9.ucm ext/Encode/compile
+	   ! t/lib/encode.t
+____________________________________________________________________________
+[  9031] By: jhi                                   on 2001/03/05  13:51:17
+        Log: Integrate change #9030 from maintperl into mainline.
+             
+             Subject: [PATCH 5.6.1] OS/2 cleanup
+     Branch: perl
+	  +> os2/os2add.sym
+	  !> MANIFEST lib/ExtUtils/MM_OS2.pm lib/ExtUtils/MM_Unix.pm
+	  !> makedef.pl os2/Changes os2/Makefile.SHs
+	  !> os2/OS2/REXX/Makefile.PL os2/OS2/REXX/REXX.pm
+	  !> os2/OS2/REXX/REXX.xs os2/OS2/REXX/t/rx_cmprt.t os2/os2.c
+	  !> os2/os2.sym os2/os2ish.h
+____________________________________________________________________________
+[  9030] By: jhi                                   on 2001/03/05  13:46:49
+        Log: Subject: [PATCH 5.6.1] OS/2 cleanup
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 5 Mar 2001 02:29:44 -0500
+             Message-ID: <20010305022944.A10117@math.ohio-state.edu>
+     Branch: maint-5.6/perl
+	   + os2/os2add.sym
+	   ! MANIFEST lib/ExtUtils/MM_OS2.pm lib/ExtUtils/MM_Unix.pm
+	   ! makedef.pl os2/Changes os2/Makefile.SHs
+	   ! os2/OS2/REXX/Makefile.PL os2/OS2/REXX/REXX.pm
+	   ! os2/OS2/REXX/REXX.xs os2/OS2/REXX/t/rx_cmprt.t os2/os2.c
+	   ! os2/os2.sym os2/os2ish.h
+____________________________________________________________________________
+[  9029] By: jhi                                   on 2001/03/05  13:40:35
+        Log: Integrate change #9028 from maintperl into mainline.
+             
+             various nits in MM_Unix.pm found by disabling SelfLoader
+     Branch: perl
+	  !> lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[  9028] By: gsar                                  on 2001/03/05  09:58:38
+        Log: various nits in MM_Unix.pm found by disabling SelfLoader
+     Branch: maint-5.6/perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[  9027] By: nick                                  on 2001/03/05  08:35:22
+        Log: Integrate mainline
+     Branch: perlio
+	  !> (integrate 28 files)
+____________________________________________________________________________
+[  9026] By: jhi                                   on 2001/03/05  02:14:59
+        Log: Integrate change #9025 from mainline to maintperl,
+             retract \N{U+HHHH}.
+     Branch: maint-5.6/perl
+	  !> lib/charnames.pm pod/perldiag.pod pod/perlretut.pod
+	  !> t/lib/charnames.t toke.c
+____________________________________________________________________________
+[  9025] By: jhi                                   on 2001/03/05  02:13:09
+        Log: Retracting \N{U+HHHH}.
+     Branch: perl
+	   ! lib/charnames.pm pod/perldiag.pod pod/perlretut.pod
+	   ! t/lib/charnames.t toke.c
+____________________________________________________________________________
+[  9024] By: jhi                                   on 2001/03/04  20:51:07
+        Log: Subject: Re: Smoking patch 8898 for perl v5.7.0 on aix 4.3.0.0
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl> 
+             Date: Fri, 02 Mar 2001 18:25:26 +0100
+             Message-Id: <20010302182416.1BF4.H.M.BRAND@hccnet.nl>
+             
+             Casting problem.
+     Branch: perl
+	   ! ext/Storable/Storable.xs
+____________________________________________________________________________
+[  9023] By: jhi                                   on 2001/03/04  19:46:45
+        Log: Subject: [ID 20010303.009] SOCKS5 work around breaks other sockets
+             From: nick@talking.bollo.cx
+             Date: Sat, 03 Mar 2001 21:41:33 +0000
+             Message-Id: <E14ZJmP-0000mE-00@Bagpuss.unfortu.net>
+             
+             Revert the workaround.
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[  9022] By: jhi                                   on 2001/03/04  19:36:28
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  9021] By: jhi                                   on 2001/03/04  18:41:00
         Log: makedef.pl updates suggested by Chris Nandor; double-checking
              the changes in AIX, OS/2 Win32 would be nice.

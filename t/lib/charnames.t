@@ -8,7 +8,7 @@ BEGIN {
 }
 
 $| = 1;
-print "1..15\n";
+print "1..16\n";
 
 use charnames ':full';
 
@@ -103,6 +103,18 @@ sub to_bytes {
   print "not "
       unless to_bytes("\N{DESERET SMALL LETTER ENG}") eq $encoded_deseng;
   print "ok 15\n";
+}
 
+{
+  # 20001114.001	
+
+  if (ord("Ä") == 0xc4) { # Try to do this only on Latin-1.
+      use charnames ':full';
+      my $text = "\N{LATIN CAPITAL LETTER A WITH DIAERESIS}";
+      print "not " unless $text eq "\xc4" && ord($text) == 0xc4;
+      print "ok 16\n";
+  } else {
+      print "ok 16 # Skip: not Latin-1\n";
+  }
 }
 
