@@ -3193,6 +3193,8 @@ tryagain:
 					s       += numlen;
 					len     += numlen;
 					foldbuf += numlen;
+					if (numlen >= foldlen)
+					     break;
 				   }
 				   else
 					break; /* "Can't happen." */
@@ -3221,9 +3223,11 @@ tryagain:
 			       ender = utf8_to_uvchr(foldbuf, &numlen);
 			       if (numlen > 0) {
 				    reguni(pRExC_state, ender, s, &numlen);
-				    s       += numlen;
 				    len     += numlen;
+				    s       += numlen;
 				    foldbuf += numlen;
+				    if (numlen >= foldlen)
+					 break;
 			       }
 			       else
 				    break;

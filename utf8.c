@@ -1289,7 +1289,6 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *norma
 {
     UV uv0, uv1, uv2;
     U8 tmpbuf[UTF8_MAXLEN_FOLD+1];
-    char *s = NULL;
     STRLEN len;
 
     if (!*swashp)
@@ -1305,7 +1304,7 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *norma
 	 /* It was "normal" (a single character mapping). */
          UV uv3 = UNI_TO_NATIVE(uv2);
 	
-         len = uvuni_to_utf8(ustrp, uv2) - ustrp;
+         len = uvuni_to_utf8(ustrp, uv3) - ustrp;
     }
     else {
 	 /* It might be "special" (sometimes, but not always,
@@ -1319,13 +1318,12 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *norma
 	     (keysv = sv_2mortal(Perl_newSVpvf(aTHX_ "%04"UVXf, uv1))) &&
 	     (he    = hv_fetch_ent(hv, keysv, FALSE, 0)) &&
 	     (val   = HeVAL(he))) {
-              U8* d;
-	
+	     char *s;
+	     U8 *d;
+
 	      s = SvPV(val, len);
-	      if (len == 1) {
-		   d = uvuni_to_utf8(ustrp, NATIVE_TO_UNI(*(U8*)s));
-		   len = d - ustrp;
-              }
+	      if (len == 1)
+		   len = uvuni_to_utf8(ustrp, NATIVE_TO_UNI(*(U8*)s)) - ustrp;
 	      else {
 #ifdef EBCDIC
 		   /* If we have EBCDIC we need to remap the characters
@@ -1348,10 +1346,8 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *norma
 			}
 		   }
 		   else {
-			while (t < tend) {
-			     d = uvchr_to_utf8(d, UNI_TO_NATIVE(*t));
-			     t++;
-			}
+			while (t < tend)
+			     d = uvchr_to_utf8(d, UNI_TO_NATIVE(*t++));
 		   }
 		   len = d - tmpbuf;
 		   Copy(tmpbuf, ustrp, len, U8);
