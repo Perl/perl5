@@ -220,12 +220,12 @@ Reversed *= operator at - line 9.
 Reversed %= operator at - line 10.
 Reversed &= operator at - line 11.
 Reversed .= operator at - line 12.
-syntax error at - line 12, near "=."
 Reversed ^= operator at - line 13.
-syntax error at - line 13, near "=^"
 Reversed |= operator at - line 14.
-syntax error at - line 14, near "=|"
 Reversed <= operator at - line 15.
+syntax error at - line 12, near "=."
+syntax error at - line 13, near "=^"
+syntax error at - line 14, near "=|"
 Unterminated <> operator at - line 15.
 ########
 # toke.c

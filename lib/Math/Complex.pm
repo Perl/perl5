@@ -1405,7 +1405,6 @@ sub stringify_polar {
 1;
 __END__
 
-=pod
 =head1 NAME
 
 Math::Complex - complex numbers and associated mathematical functions

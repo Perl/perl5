@@ -603,7 +603,6 @@ my $a ; my @a = () ; my %a = () ; my $b = \@a ; my $c = \%a ;
 EXPECT
 Applying pattern match (m//) to @array will act on scalar(@array) at - line 5.
 Applying substitution (s///) to @array will act on scalar(@array) at - line 6.
-Can't modify private array in substitution (s///) at - line 6, near "s/a/b/ ;"
 Applying transliteration (tr///) to @array will act on scalar(@array) at - line 7.
 Applying pattern match (m//) to @array will act on scalar(@array) at - line 8.
 Applying substitution (s///) to @array will act on scalar(@array) at - line 9.
@@ -614,6 +613,7 @@ Applying transliteration (tr///) to %hash will act on scalar(%hash) at - line 13
 Applying pattern match (m//) to %hash will act on scalar(%hash) at - line 14.
 Applying substitution (s///) to %hash will act on scalar(%hash) at - line 15.
 Applying transliteration (tr///) to %hash will act on scalar(%hash) at - line 16.
+Can't modify private array in substitution (s///) at - line 6, near "s/a/b/ ;"
 BEGIN not safe after errors--compilation aborted at - line 18.
 ########
 # op.c
