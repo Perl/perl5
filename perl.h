@@ -3204,7 +3204,11 @@ typedef struct am_table_short AMTS;
 #       define Semctl(id, num, cmd, semun) semctl(id, num, cmd, semun)
 #   else
 #       ifdef USE_SEMCTL_SEMID_DS
-#           define Semctl(id, num, cmd, semun) semctl(id, num, cmd, semun.buf)
+#           ifdef EXTRA_F_IN_SEMUN_BUF
+#               define Semctl(id, num, cmd, semun) semctl(id, num, cmd, semun.buff)
+#           else
+#               define Semctl(id, num, cmd, semun) semctl(id, num, cmd, semun.buf)
+#           endif
 #       endif
 #   endif
 #endif
