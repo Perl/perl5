@@ -209,7 +209,7 @@ User::pwent - by-name interface to Perl's built-in getpw*() functions
  use User::pwent qw/:DEFAULT pw_has/;
  if (pw_has(qw[gecos expire quota])) { .... }
  if (pw_has("name uid gid passwd"))  { .... }
- print "Your struct pwd has: ", pw_has(), "\n";
+ print "Your struct pwd has: ", scalar pw_has(), "\n";
 
 =head1 DESCRIPTION
 
@@ -220,7 +220,7 @@ similarly named structure field name from the C's passwd structure
 from F<pwd.h>, stripped of their leading "pw_" parts, namely C<name>,
 C<passwd>, C<uid>, C<gid>, C<change>, C<age>, C<quota>, C<comment>,
 C<class>, C<gecos>, C<dir>, C<shell>, and C<expire>.  The C<passwd>,
-C<gecos>, and C<shell> fields should be considered tainted.
+C<gecos>, and C<shell> fields are tainted when running in taint mode.
 
 You may also import all the structure fields directly into your
 namespace as regular variables using the :FIELDS import tag.  (Note
