@@ -31,6 +31,144 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[  9274] By: jhi                                   on 2001/03/21  03:48:24
+        Log: First stab at making Data::Dumper to grok Unicode.
+             
+             TODO: tests, EBCDICify.
+     Branch: perl
+	   ! ext/Data/Dumper/Dumper.pm ext/Data/Dumper/Dumper.xs
+____________________________________________________________________________
+[  9273] By: jhi                                   on 2001/03/21  02:23:00
+        Log: Fix for
+             
+             Subject: Memory leak in unquoted print   
+             From: Benjamin Sugars <bsugars@canoe.ca> 
+             Date: Tue, 20 Mar 2001 10:02:56 -0500 (EST)
+             Message-ID: <Pine.LNX.4.21.0103200958180.1538-100000@marmot.rim.canoe.ca>
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[  9272] By: jhi                                   on 2001/03/21  01:33:17
+        Log: Subject: Re: [PATCH] POSIX::getcwd()
+             From: Benjamin Sugars <bsugars@canoe.ca> 
+             Date: Mon, 19 Mar 2001 15:07:03 -0500 (EST)
+             Message-ID: <Pine.LNX.4.21.0103191454500.1820-100000@marmot.rim.canoe.ca>      
+     Branch: perl
+	   ! ext/POSIX/POSIX.pm ext/POSIX/POSIX.xs
+____________________________________________________________________________
+[  9271] By: jhi                                   on 2001/03/21  01:22:52
+        Log: Subject: [PATCH] Cwd.pm docs
+             From: Benjamin Sugars <bsugars@canoe.ca>
+             Date: Tue, 20 Mar 2001 15:33:32 -0500 (EST)
+             Message-ID: <Pine.LNX.4.21.0103201516550.7893-100000@marmot.rim.canoe.ca>
+     Branch: perl
+	   ! lib/Cwd.pm
+____________________________________________________________________________
+[  9270] By: jhi                                   on 2001/03/21  01:16:29
+        Log: Continue 4-arg substr() UTF-8 fixage.
+     Branch: perl
+	   ! pp.c t/op/substr.t
+____________________________________________________________________________
+[  9269] By: jhi                                   on 2001/03/21  00:46:14
+        Log: Integrate changes #9262,9264,9265,9266 from maintperl to mainline.
+             
+             revert the leak fix in change#9142 (problem needs a more experimental
+             fix unsuitable for 5.6.1)
+             
+             do alphabetical sorting by default (for csh compatibility)
+             
+             cut-n-paste goof in change#9264
+             
+             VMS piping fixes (from Charles Lane)
+     Branch: perl
+	  !> ext/File/Glob/Changes ext/File/Glob/Glob.pm
+	  !> ext/File/Glob/Glob.xs ext/File/Glob/bsd_glob.c
+	  !> ext/File/Glob/bsd_glob.h scope.c vms/vms.c vms/vmspipe.com
+____________________________________________________________________________
+[  9268] By: jhi                                   on 2001/03/21  00:37:04
+        Log: Integrate perlio.
+     Branch: perl
+	  !> embed.pl lib/utf8.pm op.c regcomp.c regexec.c sv.c toke.c
+	  !> utf8.c utf8.h utfebcdic.h
+____________________________________________________________________________
+[  9267] By: nick                                  on 2001/03/20  20:04:39
+        Log: More EBCDIC stuff:
+             - Loose the extra level of function on ASCII.
+             - spotted a chr(0) issue in sv.c
+             - re-work of UTF-X tr/// ranges to work in Unicode
+             space. Still issues with the "0xff is illegal UTF-8" hack.
+             - Yet another ad. hoc. utf8 'upgrade' in op.c recoded
+             (why do it once when you can do it all over the place :-(
+             - Enable HINTS_UTF8 on EBCDIC - then ignore it in toke.c,
+             need utf8.pm for swashes.
+             - Simplified and commented scan_const() in toke.c
+             Still something wrong regexp and tr (swashes?).
+     Branch: perlio
+	   ! embed.pl lib/utf8.pm op.c regcomp.c regexec.c sv.c toke.c
+	   ! utf8.c utf8.h utfebcdic.h
+____________________________________________________________________________
+[  9266] By: gsar                                  on 2001/03/20  19:16:43
+        Log: VMS piping fixes (from Charles Lane)
+     Branch: maint-5.6/perl
+	   ! vms/vms.c vms/vmspipe.com
+____________________________________________________________________________
+[  9265] By: gsar                                  on 2001/03/20  17:53:52
+        Log: cut-n-paste goof in change#9264
+     Branch: maint-5.6/perl
+	   ! ext/File/Glob/Glob.xs
+____________________________________________________________________________
+[  9264] By: gsar                                  on 2001/03/20  17:43:47
+        Log: do alphabetical sorting by default (for csh compatibility);
+             bsd_glob() does ASCII sort by default as usual, unless
+             GLOB_ALPHASORT was specified
+     Branch: maint-5.6/perl
+	   ! ext/File/Glob/Changes ext/File/Glob/Glob.pm
+	   ! ext/File/Glob/Glob.xs ext/File/Glob/bsd_glob.c
+	   ! ext/File/Glob/bsd_glob.h
+____________________________________________________________________________
+[  9263] By: gsar                                  on 2001/03/20  16:40:08
+        Log: integrate change#9255 from mainline (unicode fix)
+             
+             substr($bytestr, i, n, $charstr)
+     Branch: maint-5.6/perl
+	  !> Todo-5.6 pp.c t/op/substr.t
+____________________________________________________________________________
+[  9262] By: gsar                                  on 2001/03/20  15:57:41
+        Log: revert the leak fix in change#9142 (problem needs a more experimental
+             fix unsuitable for 5.6.1)
+     Branch: maint-5.6/perl
+	   ! scope.c
+____________________________________________________________________________
+[  9261] By: jhi                                   on 2001/03/20  14:26:25
+        Log: Integrate changes #9259,9260 from maintperl into mainline.
+             
+             Subject: [MacPerl-Porters] [PATCH] POSIX, File::Path (Mac OS) for 5.6.1 and 5.7
+             
+             Subject: [PATCH perl-5.6.1-TRIAL3/run.c] printf warning
+     Branch: perl
+	  !> ext/POSIX/POSIX.xs lib/File/Path.pm run.c
+____________________________________________________________________________
+[  9260] By: jhi                                   on 2001/03/20  14:05:46
+        Log: Subject: [PATCH perl-5.6.1-TRIAL3/run.c] printf warning
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Tue, 20 Mar 2001 10:12:04 GMT
+             Message-Id: <200103201012.KAA04738@tempest.npl.co.uk>
+     Branch: maint-5.6/perl
+	   ! run.c
+____________________________________________________________________________
+[  9259] By: jhi                                   on 2001/03/20  14:04:39
+        Log: Subject: [MacPerl-Porters] [PATCH] POSIX, File::Path (Mac OS) for 5.6.1 and 5.7
+             From: Chris Nandor <pudge@pobox.com>
+             Date: Tue, 20 Mar 2001 00:40:56 -0500
+             Message-Id: <p05010401b6dc9d57a62d@[10.0.1.107]>
+     Branch: maint-5.6/perl
+	   ! ext/POSIX/POSIX.xs lib/File/Path.pm
+____________________________________________________________________________
+[  9258] By: jhi                                   on 2001/03/20  05:09:34
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  9257] By: jhi                                   on 2001/03/20  05:04:25
         Log: tr/// UTF-8 tests for Inaba Hiroto's latest patches.
      Branch: perl
@@ -46,6 +184,8 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [  9255] By: jhi                                   on 2001/03/19  23:17:17
         Log: substr($bytestr, i, n, $charstr)
+
+             TODO: we are still broken if $bytestr needs UTF-8 upgrading.
      Branch: perl
 	   ! Todo-5.6 pp.c t/op/substr.t
 ____________________________________________________________________________
