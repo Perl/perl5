@@ -173,7 +173,6 @@ ext/Digest/MD5/Changes	Digest::MD5 extension changes
 ext/Digest/MD5/MD5.pm	Digest::MD5 extension
 ext/Digest/MD5/MD5.xs	Digest::MD5 extension
 ext/Digest/MD5/Makefile.PL	Digest::MD5 extension makefile writer
-ext/Digest/MD5/hints/dec_osf.pl	Hints for named architecture
 ext/Digest/MD5/hints/irix_6.pl	Hints for named architecture
 ext/Digest/MD5/typemap	Digest::MD5 extension
 ext/DynaLoader/DynaLoader_pm.PL	Dynamic Loader perl module
