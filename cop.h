@@ -93,6 +93,7 @@ struct block_loop {
     OP *	last_op;
     SV **	itervar;
     SV *	itersave;
+    SV *	iterlval;
     AV *	iterary;
     I32		iterix;
 };
@@ -103,12 +104,14 @@ struct block_loop {
 	cx->blk_loop.redo_op = cLOOP->op_redoop;			\
 	cx->blk_loop.next_op = cLOOP->op_nextop;			\
 	cx->blk_loop.last_op = cLOOP->op_lastop;			\
+	cx->blk_loop.iterlval = Nullsv;					\
 	cx->blk_loop.itervar = ivar;					\
 	if (ivar)							\
 	    cx->blk_loop.itersave = *cx->blk_loop.itervar;
 
 #define POPLOOP(cx)							\
-	newsp		= stack_base + cx->blk_loop.resetsp;
+	newsp		= stack_base + cx->blk_loop.resetsp;		\
+	SvREFCNT_dec(cx->blk_loop.iterlval)
 
 /* context common to subroutines, evals and loops */
 struct block {

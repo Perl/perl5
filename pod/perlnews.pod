@@ -1,0 +1,642 @@
+=head1 NAME
+
+perlnews - what's new for perl5.004
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.003 release (as
+documented in I<Programming Perl>, second edition--the Camel Book) and
+this one.
+
+=head1 Supported Environments
+
+Perl5.004 builds out of the box on Unix, Plan9, LynxOS, VMS, OS/2,
+QNX, and AmigaOS.
+
+=head1 Core Changes
+
+Most importantly, many bugs were fixed.  See the F<Changes>
+file in the distribution for details.
+
+=head2 Compilation Option: Binary Compatibility With 5.003
+
+There is a new Configure question that asks if you want to maintain
+binary compatibility with Perl 5.003.  If you choose binary
+compatibility, you do not have to recompile your extensions, but you
+might have symbol conflicts if you embed Perl in another application.
+
+=head2 Internal Change: FileHandle Deprecated
+
+Filehandles are now stored internally as type IO::Handle.
+Although C<use FileHandle> and C<*STDOUT{FILEHANDLE}>
+are still supported for backwards compatibility
+C<use IO::Handle> (or C<IO::Seekable> or C<IO::File>) and
+C<*STDOUT{IO}> are the way of the future.
+
+=head2 Internal Change: Safe Module Absorbed into Opcode
+
+A new Opcode module subsumes 5.003's Safe module.  The Safe
+interface is still available, so existing scripts should still
+work, but users are encouraged to read the new Opcode documentation.
+
+=head2 Internal Change: PerlIO internal IO abstraction interface.
+
+It is now possible to build Perl with AT&T's sfio IO package
+instead of stdio.  See L<perlapio> for more details, and
+the F<INSTALL> file for how to use it.
+
+=head2 New and Changed Built-in Variables
+
+=over
+
+=item $^E
+
+Extended error message under some platforms ($EXTENDED_OS_ERROR
+if you C<use English>).
+
+=item $^H
+
+The current set of syntax checks enabled by C<use strict>.  See the
+documentation of C<strict> for more details.  Not actually new, but
+newly documented.
+Because it is intended for internal use by Perl core components,
+there is no C<use English> long name for this variable.
+
+=item $^M
+
+By default, running out of memory it is not trappable.  However, if
+compiled for this, Perl may use the contents of C<$^M> as an emergency
+pool after die()ing with this message.  Suppose that your Perl were
+compiled with -DEMERGENCY_SBRK and used Perl's malloc.  Then
+
+    $^M = 'a' x (1<<16);
+
+would allocate 64K buffer for use when in emergency.
+See the F<INSTALL> file for information on how to enable this option.
+As a disincentive to casual use of this advanced feature,
+there is no C<use English> long name for this variable.
+
+=back
+
+=head2 New and Changed Built-in Functions
+
+=over
+
+=item delete on slices
+
+This now works.  (e.g. C<delete @ENV{'PATH', 'MANPATH'}>)
+
+=item flock
+
+is now supported on more platforms, and prefers fcntl
+to lockf when emulating.
+
+=item keys as an lvalue
+
+As an lvalue, C<keys> allows you to increase the number of hash buckets
+allocated for the given associative array.  This can gain you a measure
+of efficiency if you know the hash is going to get big.  (This is
+similar to pre-extending an array by assigning a larger number to
+$#array.)  If you say
+
+    keys %hash = 200;
+
+then C<%hash> will have at least 200 buckets allocated for it.  These
+buckets will be retained even if you do C<%hash = ()>; use C<undef
+%hash> if you want to free the storage while C<%hash> is still in scope.
+You can't shrink the number of buckets allocated for the hash using
+C<keys> in this way (but you needn't worry about doing this by accident,
+as trying has no effect).
+
+=item my() in Control Structures
+
+You can now use my() (with or without the parentheses) in the control
+expressions of control structures such as:
+
+    while (my $line = <>) {
+        $line = lc $line;
+    } continue {
+        print $line;
+    }
+
+    if ((my $answer = <STDIN>) =~ /^yes$/i) {
+        user_agrees();
+    } elsif ($answer =~ /^no$/i) {
+        user_disagrees();
+    } else {
+        chomp $answer;
+        die "'$answer' is neither 'yes' nor 'no'";
+    }
+
+Also, you can declare a foreach loop control variable as lexical by
+preceding it with the word "my".  For example, in:
+
+    foreach my $i (1, 2, 3) {
+        some_function();
+    }
+
+$i is a lexical variable, and the scope of $i extends to the end of
+the loop, but not beyond it.
+
+Note that you still cannot use my() on global punctuation variables
+such as $_ and the like.
+
+=item unpack() and pack()
+
+A new format 'w' represents a BER compressed integer (as defined in
+ASN.1).  Its format is a sequence of one or more bytes, each of which
+provides seven bits of the total value, with the most significant
+first.  Bit eight of each byte is set, except for the last byte, in
+which bit eight is clear.
+
+=item use VERSION
+
+If the first argument to C<use> is a number, it is treated as a version
+number instead of a module name.  If the version of the Perl interpreter
+is less than VERSION, then an error message is printed and Perl exits
+immediately.  This is often useful if you need to check the current
+Perl version before C<use>ing library modules which have changed in
+incompatible ways from older versions of Perl.  (We try not to do
+this more than we have to.)
+
+=item use Module VERSION LIST
+
+If the VERSION argument is present between Module and LIST, then the
+C<use> will fail if the $VERSION variable in package Module is
+less than VERSION.
+
+Note that there is not a comma after the version!
+
+=item prototype(FUNCTION)
+
+Returns the prototype of a function as a string (or C<undef> if the
+function has no prototype).  FUNCTION is a reference to or the name of the
+function whose prototype you want to retrieve.
+(Not actually new; just never documented before.)
+
+=item $_ as Default
+
+Functions documented in the Camel to default to $_ now in
+fact do, and all those that do are so documented in L<perlfunc>.
+
+=back
+
+=head2 New Built-in Methods
+
+The C<UNIVERSAL> package automatically contains the following methods that
+are inherited by all other classes:
+
+=over 4
+
+=item isa(CLASS)
+
+C<isa> returns I<true> if its object is blessed into a sub-class of C<CLASS>
+
+C<isa> is also exportable and can be called as a sub with two arguments. This
+allows the ability to check what a reference points to. Example:
+
+    use UNIVERSAL qw(isa);
+
+    if(isa($ref, 'ARRAY')) {
+       ...
+    }
+
+=item can(METHOD)
+
+C<can> checks to see if its object has a method called C<METHOD>,
+if it does then a reference to the sub is returned; if it does not then
+I<undef> is returned.
+
+=item VERSION( [NEED] )
+
+C<VERSION> returns the version number of the class (package). If the
+NEED argument is given then it will check that the current version is
+not less than NEED and die if this is not the case. This method is
+normally called as a class method. This method is also called when the
+C<VERSION> form of C<use> is used.
+
+    use A 1.2 qw(some imported subs);
+
+    A->VERSION( 1.2 );
+    $ref->is_instance();    # True
+
+=item class()
+
+C<class> returns the class name of its object.
+
+=item is_instance()
+
+C<is_instance> returns true if its object is an instance of some
+class, false if its object is the class (package) itself. Example
+
+    A->is_instance();       # False
+
+    $var = 'A';
+    $var->is_instance();    # False
+
+    $ref = bless [], 'A';
+    $ref->is_instance();    # True
+
+=back
+
+B<NOTE:> C<can> directly uses Perl's internal code for method lookup, and
+C<isa> uses a very similar method and cache-ing strategy. This may cause
+strange effects if the Perl code dynamically changes @ISA in any package.
+
+You may add other methods to the UNIVERSAL class via Perl or XS code.
+You do not need to C<use UNIVERSAL> in order to make these methods
+available to your program.  This is necessary only if you wish to
+have C<isa> available as a plain subroutine in the current package.
+
+=head2 TIEHANDLE Now Supported
+
+=over
+
+=item TIEHANDLE classname, LIST
+
+This is the constructor for the class.  That means it is expected to
+return an object of some sort. The reference can be used to
+hold some internal information.
+
+    sub TIEHANDLE { print "<shout>\n"; my $i; bless \$i, shift }
+
+=item PRINT this, LIST
+
+This method will be triggered every time the tied handle is printed to.
+Beyond its self reference it also expects the list that was passed to
+the print function.
+
+    sub PRINT { $r = shift; $$r++; print join($,,map(uc($_),@_)),$\ }
+
+=item READLINE this
+
+This method will be called when the handle is read from. The method
+should return undef when there is no more data.
+
+    sub READLINE { $r = shift; "PRINT called $$r times\n"; }
+
+=item DESTROY this
+
+As with the other types of ties, this method will be called when the
+tied handle is about to be destroyed. This is useful for debugging and
+possibly for cleaning up.
+
+    sub DESTROY { print "</shout>\n" }
+
+=back
+
+=head1 Pragmata
+
+Three new pragmatic modules exist:
+
+=over
+
+=item use blib
+
+Looks for MakeMaker-like I<'blib'> directory structure starting in
+I<dir> (or current directory) and working back up to five levels of
+parent directories.
+
+Intended for use on command line with B<-M> option as a way of testing
+arbitrary scripts against an uninstalled version of a package.
+
+=item use locale
+
+Tells the compiler to enable (or disable) the use of POSIX locales for
+built-in operations.
+
+When C<use locale> is in effect, the current LC_CTYPE locale is used
+for regular expressions and case mapping; LC_COLLATE for string
+ordering; and LC_NUMERIC for numeric formating in printf and sprintf
+(but B<not> in print).  LC_NUMERIC is always used in write, since
+lexical scoping of formats is problematic at best.
+
+Each C<use locale> or C<no locale> affects statements to the end of
+the enclosing BLOCK or, if not inside a BLOCK, to the end of the
+current file.  Locales can be switched and queried with
+POSIX::setlocale().
+
+See L<perllocale> for more information.
+
+=item use ops
+
+Restricts unsafe operations when compiling.
+
+=back
+
+=head1 Modules
+
+=head2 Module Information Summary
+
+Brand new modules:
+
+    IO.pm                Top-level interface to IO::* classes
+    IO/File.pm           IO::File extension Perl module
+    IO/Handle.pm         IO::Handle extension Perl module
+    IO/Pipe.pm           IO::Pipe extension Perl module
+    IO/Seekable.pm       IO::Seekable extension Perl module
+    IO/Select.pm         IO::Select extension Perl module
+    IO/Socket.pm         IO::Socket extension Perl module
+
+    Opcode.pm            Disable named opcodes when compiling Perl code
+
+    ExtUtils/Embed.pm    Utilities for embedding Perl in C programs
+    ExtUtils/testlib.pm  Fixes up @INC to use just-built extension
+
+    Fatal.pm             Make do-or-die equivalents of functions
+    FindBin.pm           Find path of currently executing program
+
+    Class/Template.pm    Structure/member template builder
+    File/stat.pm         Object-oriented wrapper around CORE::stat
+    Net/hostent.pm       Object-oriented wrapper around CORE::gethost*
+    Net/netent.pm        Object-oriented wrapper around CORE::getnet*
+    Net/protoent.pm      Object-oriented wrapper around CORE::getproto*
+    Net/servent.pm       Object-oriented wrapper around CORE::getserv*
+    Time/gmtime.pm       Object-oriented wrapper around CORE::gmtime
+    Time/localtime.pm    Object-oriented wrapper around CORE::localtime
+    Time/tm.pm           Perl implementation of "struct tm" for {gm,local}time
+    User/grent.pm        Object-oriented wrapper around CORE::getgr*
+    User/pwent.pm        Object-oriented wrapper around CORE::getpw*
+
+    UNIVERSAL.pm         Base class for *ALL* classes
+
+=head2 IO
+
+The IO module provides a simple mechanism to load all of the IO modules at one
+go.  Currently this includes:
+
+     IO::Handle
+     IO::Seekable
+     IO::File
+     IO::Pipe
+     IO::Socket
+
+For more information on any of these modules, please see its
+respective documentation.
+
+=head2 Math::Complex
+
+The Math::Complex module has been totally rewritten, and now supports
+more operations.  These are overloaded:
+
+     + - * / ** <=> neg ~ abs sqrt exp log sin cos atan2 "" (stringify)
+
+And these functions are now exported:
+
+    pi i Re Im arg
+    log10 logn cbrt root
+    tan cotan asin acos atan acotan
+    sinh cosh tanh cotanh asinh acosh atanh acotanh
+    cplx cplxe
+
+=head2 Overridden Built-ins
+
+Many of the Perl built-ins returning lists now have
+object-oriented overrides.  These are:
+
+    File::stat
+    Net::hostent
+    Net::netent
+    Net::protoent
+    Net::servent
+    Time::gmtime
+    Time::localtime
+    User::grent
+    User::pwent
+
+For example, you can now say
+
+    use File::stat;
+    use User::pwent;
+    $his = (stat($filename)->st_uid == pwent($whoever)->pw_uid);
+
+=head1 Efficiency Enhancements
+
+All hash keys with the same string are only allocated once, so
+even if you have 100 copies of the same hash, the immutable keys
+never have to be re-allocated.
+
+Functions that do nothing but return a fixed value are now inlined.
+
+=head1 Documentation Changes
+
+Many of the base and library pods were updated.  These
+new pods are included in section 1:
+
+=over 4
+
+=item L<perli18n>
+
+Internationalization.
+
+=item L<perlapio>
+
+Perl internal IO abstraction interface.
+
+=item L<perltoot>
+
+Tutorial on Perl OO programming.
+
+=item L<perldebug>
+
+Although not new, this has been massively updated.
+
+=item L<perlsec>
+
+Although not new, this has been massively updated.
+
+=back
+
+=head1 New Diagnostics
+
+Several new conditions will trigger warnings that were
+silent before.  Some only affect certain platforms.
+The following new warnings and errors
+outline these:
+
+=over 4
+
+=item "my" variable %s masks earlier declaration in same scope
+
+(S) A lexical variable has been redeclared in the same scope, effectively
+eliminating all access to the previous instance.  This is almost always
+a typographical error.  Note that the earlier variable will still exist
+until the end of the scope or until all closure referents to it are
+destroyed.
+
+=item Allocation too large: %lx
+
+(X) You can't allocate more than 64K on an MSDOS machine.
+
+=item Allocation too large
+
+(F) You can't allocate more than 2^31+"small amount" bytes.
+
+=item Attempt to free non-existent shared string
+
+(P) Perl maintains a reference counted internal table of strings to
+optimize the storage and access of hash keys and other strings.  This
+indicates someone tried to decrement the reference count of a string
+that can no longer be found in the table.
+
+=item Attempt to use reference as lvalue in substr
+
+(W) You supplied a reference as the first argument to substr() used
+as an lvalue, which is pretty strange.  Perhaps you forgot to
+dereference it first.  See L<perlfunc/substr>.
+
+=item Unsupported function fork
+
+(F) Your version of executable does not support forking.
+
+Note that under some systems, like OS/2, there may be different flavors of
+Perl executables, some of which may support fork, some not. Try changing
+the name you call Perl by to C<perl_>, C<perl__>, and so on.
+
+=item Ill-formed logical name |%s| in prime_env_iter
+
+(W) A warning peculiar to VMS.  A logical name was encountered when preparing
+to iterate over %ENV which violates the syntactic rules governing logical
+names.  Since it cannot be translated normally, it is skipped, and will not
+appear in %ENV.  This may be a benign occurrence, as some software packages
+might directly modify logical name tables and introduce non-standard names,
+or it may indicate that a logical name table has been corrupted.
+
+=item Integer overflow in hex number
+
+(S) The literal hex number you have specified is too big for your
+architecture. On a 32-bit architecture the largest hex literal is
+0xFFFFFFFF.
+
+=item Integer overflow in octal number
+
+(S) The literal octal number you have specified is too big for your
+architecture. On a 32-bit architecture the largest octal literal is
+037777777777.
+
+=item Null picture in formline
+
+(F) The first argument to formline must be a valid format picture
+specification.  It was found to be empty, which probably means you
+supplied it an uninitialized value.  See L<perlform>.
+
+=item Offset outside string
+
+(F) You tried to do a read/write/send/recv operation with an offset
+pointing outside the buffer.  This is difficult to imagine.
+The sole exception to this is that C<sysread()>ing past the buffer
+will extend the buffer and zero pad the new area.
+
+=item Out of memory!
+
+(X|F) The malloc() function returned 0, indicating there was insufficient
+remaining memory (or virtual memory) to satisfy the request.
+
+The request was judged to be small, so the possibility to trap it
+depends on the way Perl was compiled.  By default it is not trappable.
+However, if compiled for this, Perl may use the contents of C<$^M> as
+an emergency pool after die()ing with this message.  In this case the
+error is trappable I<once>.
+
+=item Out of memory during request for %s
+
+(F) The malloc() function returned 0, indicating there was insufficient
+remaining memory (or virtual memory) to satisfy the request. However,
+the request was judged large enough (compile-time default is 64K), so
+a possibility to shut down by trapping this error is granted.
+
+=item Possible attempt to put comments in qw() list
+
+(W) You probably wrote something like this:
+
+    qw( a # a comment
+        b # another comment
+      ) ;
+
+when you should have written this:
+
+    qw( a
+        b
+      ) ;
+
+=item Possible attempt to separate words with commas
+
+(W) You probably wrote something like this:
+
+    qw( a, b, c );
+
+when you should have written this:
+
+    qw( a b c );
+
+=item untie attempted while %d inner references still exist
+
+(W) A copy of the object returned from C<tie> (or C<tied>) was still
+valid when C<untie> was called.
+
+=item Got an error from DosAllocMem:
+
+(P) An error peculiar to OS/2. Most probably you use an obsolete version
+of Perl, and should not happen anyway.
+
+=item Malformed PERLLIB_PREFIX
+
+(F) An error peculiar to OS/2. PERLLIB_PREFIX should be of the form
+
+    prefix1;prefix2
+
+or
+
+    prefix1 prefix2
+
+with non-empty prefix1 and prefix2. If C<prefix1> is indeed a prefix of
+a builtin library search path, prefix2 is substituted. The error may appear
+if components are not found, or are too long. See L<perlos2/"PERLLIB_PREFIX">.
+
+=item PERL_SH_DIR too long
+
+(F) An error peculiar to OS/2. PERL_SH_DIR is the directory to find the
+C<sh>-shell in. See L<perlos2/"PERL_SH_DIR">.
+
+=item Process terminated by SIG%s
+
+(W) This is a standard message issued by OS/2 applications, while *nix
+applications die in silence. It is considered a feature of the OS/2
+port. One can easily disable this by appropriate sighandlers, see
+L<perlipc/"Signals">.  See L<perlos2/"Process terminated by SIGTERM/SIGINT">.
+
+=back
+
+=head1 BUGS
+
+If you find what you think is a bug, you might check the headers
+of recently posted articles 
+in the comp.lang.perl.misc newsgroup.  There may also be
+information at http://www.perl.com/perl/, the Perl Home Page.
+
+If you believe you have an unreported bug, please run the B<perlbug>
+program included with your release.  Make sure you trim your bug
+down to a tiny but sufficient test case.  Your bug report, along
+with the output of C<perl -V>, will be sent off to perlbug@perl.com
+to be analysed by the Perl porting team.
+
+=head1 SEE ALSO
+
+The F<Changes> file for exhaustive details on what changed.
+
+The F<INSTALL> file for how to build Perl.  This file has been
+significantly updated for 5.004, so even veteran users should
+look through it.
+
+The F<README> file for general stuff.
+
+The F<Copying> file for copyright information.
+
+=head1 HISTORY
+
+Constructed by Tom Christiansen, grabbing material with permission
+from innumerable contributors, with kibitzing by more than a few Perl
+porters.
+
+Last update:
+Wed Dec 18 16:18:27 EST 1996

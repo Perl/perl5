@@ -524,24 +524,16 @@ got_it:
     prog->subbeg = strbeg;
     prog->subend = strend;
     prog->exec_tainted = regtainted;
-    if (!safebase && (prog->nparens || sawampersand)) {
+
+    /* make sure $`, $&, $', and $digit will work later */
+    if (!safebase && (strbeg != prog->subbase)) {
 	I32 i = strend - startpos + (stringarg - strbeg);
-	if (safebase) {			/* no need for $digit later */
-	    s = strbeg;
-	    prog->subend = s+i;
-	}
-	else if (strbeg != prog->subbase) {
-	    s = savepvn(strbeg,i);	/* so $digit will work later */
-	    if (prog->subbase)
-		Safefree(prog->subbase);
-	    prog->subbeg = prog->subbase = s;
-	    prog->subend = s+i;
-	}
-	else {
-	    prog->subbeg = s = prog->subbase;
-	    prog->subend = s+i;
-	}
-	s += (stringarg - strbeg);
+	s = savepvn(strbeg, i);
+	Safefree(prog->subbase);
+	prog->subbase = s;
+	prog->subbeg = prog->subbase;
+	prog->subend = prog->subbase + i;
+	s = prog->subbase + (stringarg - strbeg);
 	for (i = 0; i <= prog->nparens; i++) {
 	    if (prog->endp[i]) {
 		prog->startp[i] = s + (prog->startp[i] - startpos);
@@ -727,8 +719,9 @@ char *prog;
 		sayNO;
 	    if (regeol - locinput < ln)
 		sayNO;
-	    if (ln > 1 && ((OP(scan) == EXACTF)
-			   ? ibcmp : ibcmp_locale)(s, locinput, ln) != 0)
+	    if (ln > 1 && (OP(scan) == EXACTF
+			   ? ibcmp(s, locinput, ln)
+			   : ibcmp_locale(s, locinput, ln)))
 		sayNO;
 	    locinput += ln;
 	    nextchar = UCHARAT(locinput);
@@ -885,6 +878,7 @@ char *prog;
 		 * that we can try again after backing off.
 		 */
 
+		CHECKPOINT cp;
 		CURCUR* cc = regcc;
 		n = cc->cur + 1;	/* how many we know we matched */
 		reginput = locinput;
@@ -923,8 +917,12 @@ char *prog;
 		if (cc->minmod) {
 		    regcc = cc->oldcc;
 		    ln = regcc->cur;
-		    if (regmatch(cc->next))
+		    cp = regcppush(cc->parenfloor);
+		    if (regmatch(cc->next)) {
+			regcpblow(cp);
 			sayYES;	/* All done. */
+		    }
+		    regcppop();
 		    regcc->cur = ln;
 		    regcc = cc;
 
@@ -935,8 +933,12 @@ char *prog;
 		    reginput = locinput;
 		    cc->cur = n;
 		    cc->lastloc = locinput;
-		    if (regmatch(cc->scan))
+		    cp = regcppush(cc->parenfloor);
+		    if (regmatch(cc->scan)) {
+			regcpblow(cp);
 			sayYES;
+		    }
+		    regcppop();
 		    cc->cur = n - 1;
 		    sayNO;
 		}
@@ -944,11 +946,13 @@ char *prog;
 		/* Prefer scan over next for maximal matching. */
 
 		if (n < cc->max) {	/* More greed allowed? */
-		    regcppush(cc->parenfloor);
+		    cp = regcppush(cc->parenfloor);
 		    cc->cur = n;
 		    cc->lastloc = locinput;
-		    if (regmatch(cc->scan))
+		    if (regmatch(cc->scan)) {
+			regcpblow(cp);
 			sayYES;
+		    }
 		    regcppop();		/* Restore some previous $<digit>s? */
 		    reginput = locinput;
 		}

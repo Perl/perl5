@@ -1,18 +1,4 @@
-#!/usr/local/bin/perl
-eval 'exec perl -S $0  ${1+"$@"}'
-    if 0;
-
-use Config;
-if ($^O eq 'VMS') {
-   $diagnostics::PODFILE = VMS::Filespec::unixify($Config{'privlibexp'}) .
-                           '/pod/perldiag.pod';
-}
-else { $diagnostics::PODFILE= $Config{privlibexp} . "/pod/perldiag.pod"; }
-
 package diagnostics;
-require 5.001;
-use English;
-use Carp;
 
 =head1 NAME
 
@@ -175,6 +161,18 @@ a program named I<splain>, you should expect a bit of whimsy.
 Tom Christiansen F<E<lt>tchrist@mox.perl.comE<gt>>, 25 June 1995.
 
 =cut
+
+require 5.001;
+use English;
+use Carp;
+
+use Config;
+if ($^O eq 'VMS') {
+    $PODFILE = VMS::Filespec::unixify($Config{privlibexp}).'/pod/perldiag.pod';
+}
+else {
+    $PODFILE = $Config{privlibexp} . "/pod/perldiag.pod";
+}
 
 $DEBUG ||= 0;
 my $WHOAMI = ref bless [];  # nobody's business, prolly not even mine

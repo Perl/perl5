@@ -86,8 +86,10 @@ typedef U32 PADOFFSET;
   /* (lower bits carry hints) */
 #define OPpENTERSUB_AMPER	8	/* Used & form to call. */
 #define OPpENTERSUB_DB		16	/* Debug subroutine. */
-#define OPpDEREF_AV		32	/* Want ref to AV. */
-#define OPpDEREF_HV		64	/* Want ref to HV. */
+#define OPpDEREF		(32|64)	/* Want ref to something: */
+#define OPpDEREF_AV		32	/*   Want ref to AV. */
+#define OPpDEREF_HV		64	/*   Want ref to HV. */
+#define OPpDEREF_SV		(32|64)	/*   Want ref to SV. */
 
 /* Private for OP_CONST */
 #define OPpCONST_ENTERED	16	/* Has been entered as symbol. */
@@ -100,8 +102,11 @@ typedef U32 PADOFFSET;
 /* Private for OP_LIST */
 #define OPpLIST_GUESSED		64	/* Guessed that pushmark was needed. */
 
-/* Private for OP_LEAVE and friends */
+/* Private for OP_LEAVE, OP_DELETE, and friends(?) */
 #define OPpLEAVE_VOID		64	/* No need to copy out values. */
+
+/* Private for OP_DELETE */
+#define OPpSLICE		32	/* Operating on a list of keys */
 
 /* Private for OP_SORT, OP_PRTF, OP_SPRINTF, string cmp'n, and case changers */
 #define OPpLOCALE		64	/* Use locale */

@@ -30,7 +30,7 @@ with three dimensions!
 Alas, however simple this may appear, underneath it's a much more
 elaborate construct than meets the eye!
 
-How do you print it out?  Why can't you just say C<print @LoL>?  How do
+How do you print it out?  Why can't you say just C<print @LoL>?  How do
 you sort it?  How can you pass it to a function or get one of these back
 from a function?  Is is an object?  Can you save it to disk to read
 back later?  How do you access whole rows or columns of that matrix?  Do
@@ -41,11 +41,11 @@ of the blame for this can be attributed to the reference-based
 implementation, it's really more due to a lack of existing documentation with
 examples designed for the beginner.
 
-This document is meant to be a detailed but understandable treatment of
-the many different sorts of data structures you might want to develop.  It should
-also serve as a cookbook of examples.  That way, when you need to create one of these
-complex data structures, you can just pinch, pilfer, or purloin
-a drop-in example from here.
+This document is meant to be a detailed but understandable treatment of the
+many different sorts of data structures you might want to develop.  It
+should also serve as a cookbook of examples.  That way, when you need to
+create one of these complex data structures, you can just pinch, pilfer, or
+purloin a drop-in example from here.
 
 Let's look at each of these possible constructs in detail.  There are separate
 documents on each of the following:
@@ -76,15 +76,15 @@ of these types of data structures.
 The most important thing to understand about all data structures in Perl
 -- including multidimensional arrays--is that even though they might
 appear otherwise, Perl C<@ARRAY>s and C<%HASH>es are all internally
-one-dimensional.  They can only hold scalar values (meaning a string,
+one-dimensional.  They can hold only scalar values (meaning a string,
 number, or a reference).  They cannot directly contain other arrays or
 hashes, but instead contain I<references> to other arrays or hashes.
 
-You can't use a reference to a array or hash in quite the same way that
-you would a real array or hash.  For C or C++ programmers unused to distinguishing
-between arrays and pointers to the same, this can be confusing.  If so,
-just think of it as the difference between a structure and a pointer to a
-structure.
+You can't use a reference to a array or hash in quite the same way that you
+would a real array or hash.  For C or C++ programmers unused to
+distinguishing between arrays and pointers to the same, this can be
+confusing.  If so, just think of it as the difference between a structure
+and a pointer to a structure.
 
 You can (and should) read more about references in the perlref(1) man
 page.  Briefly, references are rather like pointers that know what they
@@ -102,7 +102,7 @@ multidimensional arrays work as well.
     $hash{string}[7]			# hash of arrays
     $hash{string}{'another string'}	# hash of hashes
 
-Now, because the top level only contains references, if you try to print
+Now, because the top level contains only references, if you try to print
 out your array in with a simple print() function, you'll get something
 that doesn't look very nice, like this:
 
@@ -149,7 +149,7 @@ again and again:
 	$LoL[$i] = \@list;	# WRONG!
     }
 
-So, just what's the big problem with that?  It looks right, doesn't it?
+So, what's the big problem with that?  It looks right, doesn't it?
 After all, I just told you that you need an array of references, so by
 golly, you've made me one!
 
@@ -218,7 +218,7 @@ something is "interesting", that rather than meaning "intriguing",
 they're disturbingly more apt to mean that it's "annoying",
 "difficult", or both?  :-)
 
-So just remember to always use the array or hash constructors with C<[]>
+So just remember always to use the array or hash constructors with C<[]>
 or C<{}>, and you'll be fine, although it's not always optimally
 efficient.
 
@@ -290,14 +290,14 @@ this:
     my $listref = [
 	[ "fred", "barney", "pebbles", "bambam", "dino", ],
 	[ "homer", "bart", "marge", "maggie", ],
-	[ "george", "jane", "alroy", "judy", ],
+	[ "george", "jane", "elroy", "judy", ],
     ];
 
     print $listref[2][2];
 
 The compiler would immediately flag that as an error I<at compile time>,
 because you were accidentally accessing C<@listref>, an undeclared
-variable, and it would thereby remind you to instead write:
+variable, and it would thereby remind you to write instead:
 
     print $listref->[2][2]
 
@@ -325,7 +325,7 @@ example, given the assignment to $LoL above, here's the debugger output:
        2  ARRAY(0x13b540)
 	  0  'george'
 	  1  'jane'
-	  2  'alroy'
+	  2  'elroy'
 	  3  'judy'
 
 There's also a lower-case B<x> command which is nearly the same.
@@ -449,7 +449,7 @@ types of data structures.
  # print the whole thing with indices
  foreach $family ( keys %HoL ) {
      print "family: ";
-     foreach $i ( 0 .. $#{ $HoL{$family} ) {
+     foreach $i ( 0 .. $#{ $HoL{$family} } ) {
          print " $i = $HoL{$family}[$i]";
      }
      print "\n";
@@ -746,7 +746,7 @@ many different sorts:
      # reading from file
      # this is most easily done by having the file itself be
      # in the raw data format as shown above.  perl is happy
-     # to parse complex datastructures if declared as data, so
+     # to parse complex data structures if declared as data, so
      # sometimes it's easiest to do that
 
      # here's a piece by piece build up
@@ -817,7 +817,7 @@ You cannot easily tie a multilevel data structure (such as a hash of
 hashes) to a dbm file.  The first problem is that all but GDBM and
 Berkeley DB have size limitations, but beyond that, you also have problems
 with how references are to be represented on disk.  One experimental
-module that does attempt to partially address this need is the MLDBM
+module that does partially attempt to address this need is the MLDBM
 module.  Check your nearest CPAN site as described in L<perlmod> for
 source code to MLDBM.
 

@@ -1,6 +1,6 @@
 package FileHandle;
 
-require 5.003;
+use 5.003_11;
 use strict;
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
 
@@ -37,6 +37,24 @@ require IO::File;
 # Everything we're willing to export, we must first import.
 #
 import IO::Handle grep { !defined(&$_) } @EXPORT, @EXPORT_OK;
+
+#
+# Some people call "FileHandle::function", so all the functions
+# that were in the old FileHandle class must be imported, too.
+#
+{
+    no strict 'refs';
+    for my $f (qw(DESTROY new_from_fd fdopen close fileno getc ungetc gets eof
+		  setbuf setvbuf _open_mode_string)) {
+	*{$f} = \&{"IO::Handle::$f"} or die "$f missing";
+    }
+    for my $f (qw(seek tell fgetpos fsetpos fflush ferror clearerr)) {
+	*{$f} = \&{"IO::Seekable::$f"} or die "$f missing";
+    }
+    for my $f (qw(new new_tmpfile open)) {
+	*{$f} = \&{"IO::File::$f"} or die "$f missing";
+    }
+}
 
 #
 # Specialized importer for Fcntl magic.

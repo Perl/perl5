@@ -402,6 +402,7 @@ kill_file(char *name)
           set_errno(ENOENT); break;
         case RMS$_DEV:
           set_errno(ENODEV); break;
+        case RMS$_FNM:
         case RMS$_SYN:
         case SS$_INVFILFOROP:
           set_errno(EINVAL); break;

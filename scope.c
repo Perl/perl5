@@ -143,27 +143,30 @@ GV *gv;
     return sv;
 }
 
-#ifdef INLINED_ELSEWHERE
 void
-save_gp(gv)
+save_gp(gv, empty)
 GV *gv;
+I32 empty;
 {
-    register GP *gp;
-    GP *ogp = GvGP(gv);
-
     SSCHECK(3);
     SSPUSHPTR(SvREFCNT_inc(gv));
-    SSPUSHPTR(ogp);
+    SSPUSHPTR(GvGP(gv));
     SSPUSHINT(SAVEt_GP);
 
-    Newz(602,gp, 1, GP);
-    GvGP(gv) = gp;
-    GvREFCNT(gv) = 1;
-    GvSV(gv) = NEWSV(72,0);
-    GvLINE(gv) = curcop->cop_line;
-    GvEGV(gv) = gv;
+    if (empty) {
+	register GP *gp;
+	Newz(602, gp, 1, GP);
+	GvGP(gv) = gp;
+	GvREFCNT(gv) = 1;
+	GvSV(gv) = NEWSV(72,0);
+	GvLINE(gv) = curcop->cop_line;
+	GvEGV(gv) = gv;
+    }
+    else {
+	GvGP(gv)->gp_refcnt++;
+	GvINTRO_on(gv);
+    }
 }
-#endif
 
 SV*
 save_svref(sptr)

@@ -1,11 +1,11 @@
 # GetOpt::Long.pm -- POSIX compatible options parsing
 
-# RCS Status      : $Id: GetoptLong.pm,v 2.4 1996-10-02 11:16:26+02 jv Exp $
+# RCS Status      : $Id: GetoptLong.pm,v 2.5 1996-10-19 16:47:51+02 jv Exp $
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Wed Oct  2 11:13:12 1996
-# Update Count    : 500
+# Last Modified On: Sat Oct 19 16:46:23 1996
+# Update Count    : 504
 # Status          : Released
 
 package Getopt::Long;
@@ -14,7 +14,7 @@ require Exporter;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(&GetOptions $REQUIRE_ORDER $PERMUTE $RETURN_IN_ORDER);
-$VERSION = sprintf("%d.%02d", '$Revision: 2.4 $ ' =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", '$Revision: 2.5 $ ' =~ /(\d+)\.(\d+)/);
 use vars qw($autoabbrev $getopt_compat $ignorecase $bundling $order
 	    $passthrough $error $debug 
 	    $REQUIRE_ORDER $PERMUTE $RETURN_IN_ORDER
@@ -86,7 +86,7 @@ followed by an argument specifier. Values for argument specifiers are:
 
 =over 8
 
-=item <none>
+=item E<lt>noneE<gt>
 
 Option does not take an argument. 
 The option variable will be set to 1.
@@ -225,7 +225,7 @@ The option name is always the true name, not an abbreviation or alias.
 
 The option name may actually be a list of option names, separated by
 "|"s, e.g. "foo|bar|blech=s". In this example, "foo" is the true name
-op this option. If no linkage is specified, options "foo", "bar" and
+of this option. If no linkage is specified, options "foo", "bar" and
 "blech" all will set $opt_foo.
 
 Option names may be abbreviated to uniqueness, depending on
@@ -233,7 +233,7 @@ configuration variable $Getopt::Long::autoabbrev.
 
 =head2 Non-option call-back routine
 
-A special option specifier, <>, can be used to designate a subroutine
+A special option specifier, E<lt>E<gt>, can be used to designate a subroutine
 to handle non-option arguments. GetOptions will immediately call this
 subroutine for every non-option it encounters in the options list.
 This subroutine gets the name of the non-option passed.
@@ -316,11 +316,11 @@ Example of using variable references:
 With command line options "-foo blech -bar 24 -ar xx -ar yy" 
 this will result in:
 
-   $bar = 'blech'
+   $foo = 'blech'
    $opt_bar = 24
    @ar = ('xx','yy')
 
-Example of using the <> option specifier:
+Example of using the E<lt>E<gt> option specifier:
 
    @ARGV = qw(-foo 1 bar -foo 2 blech);
    &GetOptions("foo=i", \$myfoo, "<>", \&mysub);
@@ -530,7 +530,7 @@ sub GetOptions {
 				# than once in differing environments
     $error = 0;
 
-    print STDERR ('GetOptions $Revision: 2.4 $ ',
+    print STDERR ('GetOptions $Revision: 2.5 $ ',
 		  "[GetOpt::Long $Getopt::Long::VERSION] -- ",
 		  "called from package \"$pkg\".\n",
 		  "  (@ARGV)\n",

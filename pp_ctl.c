@@ -859,7 +859,7 @@ I32 startingblock;
 	switch (cx->cx_type) {
 	case CXt_SUBST:
 	    if (dowarn)
-		warn("Exiting substitition via %s", op_name[op->op_type]);
+		warn("Exiting substitution via %s", op_name[op->op_type]);
 	    break;
 	case CXt_SUB:
 	    if (dowarn)
@@ -1636,8 +1636,10 @@ PP(pp_goto)
 			for ( ;ix > 0; ix--) {
 			    if (svp[ix] != &sv_undef) {
 				char *name = SvPVX(svp[ix]);
-				if (SvFLAGS(svp[ix]) & SVf_FAKE) {
-				    /* outer lexical? */
+				if ((SvFLAGS(svp[ix]) & SVf_FAKE)
+				    || *name == '&')
+				{
+				    /* outer lexical or anon code */
 				    av_store(newpad, ix,
 					SvREFCNT_inc(oldpad[ix]) );
 				}
@@ -2362,13 +2364,12 @@ SV *sv;
 	    skipspaces++;
 	    arg -= skipspaces;
 	    if (arg) {
-		if (postspace) {
+		if (postspace)
 		    *fpc++ = FF_SPACE;
-		    postspace = FALSE;
-		}
 		*fpc++ = FF_LITERAL;
 		*fpc++ = arg;
 	    }
+	    postspace = FALSE;
 	    if (s <= send)
 		skipspaces--;
 	    if (skipspaces) {

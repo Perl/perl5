@@ -217,7 +217,7 @@ PP(pp_padsv)
     if (op->op_flags & OPf_MOD) {
 	if (op->op_private & OPpLVAL_INTRO)
 	    SAVECLEARSV(curpad[op->op_targ]);
-        else if (op->op_private & (OPpDEREF_HV|OPpDEREF_AV))
+        else if (op->op_private & OPpDEREF)
 	    provide_ref(op, curpad[op->op_targ]);
     }
     RETURN;
@@ -725,6 +725,8 @@ PP(pp_aassign)
 	    SP = lastrelem;
 	else
 	    SP = firstrelem + (lastlelem - firstlelem);
+	while (relem <= SP)
+	    *relem++ = &sv_undef;
 	RETURN;
     }
     else {
@@ -786,7 +788,7 @@ PP(pp_match)
     }
     if (!rx->nparens && !global)
 	gimme = G_SCALAR;			/* accidental array context? */
-    safebase = (gimme == G_ARRAY) || global;
+    safebase = (((gimme == G_ARRAY) || global) && !sawampersand);
     if (pm->op_pmflags & (PMf_MULTILINE|PMf_SINGLELINE)) {
 	SAVEINT(multiline);
 	multiline = pm->op_pmflags & PMf_MULTILINE;
@@ -795,7 +797,7 @@ PP(pp_match)
 play_it_again:
     if (global && rx->startp[0]) {
 	t = s = rx->endp[0];
-	if (s > strend)
+	if (s >= strend)
 	    goto nope;
 	minmatch = (s == rx->startp[0]);
     }
@@ -868,6 +870,7 @@ play_it_again:
 	}
 	if (global) {
 	    truebase = rx->subbeg;
+	    strend = rx->subend;
 	    if (rx->startp[0] && rx->startp[0] == rx->endp[0])
 		++rx->endp[0];
 	    goto play_it_again;
@@ -885,7 +888,7 @@ play_it_again:
 		mg = mg_find(TARG, 'g');
 	    }
 	    if (rx->startp[0]) {
-		mg->mg_len = rx->endp[0] - truebase;
+		mg->mg_len = rx->endp[0] - rx->subbeg;
 		if (rx->startp[0] == rx->endp[0])
 		    mg->mg_flags |= MGf_MINMATCH;
 		else
@@ -903,6 +906,8 @@ yup:
     curpm = pm;
     if (pm->op_pmflags & PMf_ONCE)
 	pm->op_pmflags |= PMf_USED;
+    Safefree(rx->subbase);
+    rx->subbase = Nullch;
     if (global) {
 	rx->subbeg = truebase;
 	rx->subend = strend;
@@ -913,8 +918,6 @@ yup:
     if (sawampersand) {
 	char *tmps;
 
-	if (rx->subbase)
-	    Safefree(rx->subbase);
 	tmps = rx->subbase = savepvn(t, strend-t);
 	rx->subbeg = tmps;
 	rx->subend = tmps + (strend-t);
@@ -1234,9 +1237,13 @@ PP(pp_helem)
     if (lval) {
 	if (!he || HeVAL(he) == &sv_undef)
 	    DIE(no_helem, SvPV(keysv, na));
-	if (op->op_private & OPpLVAL_INTRO)
-	    save_svref(&HeVAL(he));
-	else if (op->op_private & (OPpDEREF_HV|OPpDEREF_AV))
+	if (op->op_private & OPpLVAL_INTRO) {
+	    if (HvNAME(hv) && isGV(HeVAL(he)))
+		save_gp((GV*)HeVAL(he), !(op->op_flags & OPf_SPECIAL));
+	    else
+		save_svref(&HeVAL(he));
+	}
+	else if (op->op_private & OPpDEREF)
 	    provide_ref(op, HeVAL(he));
     }
     PUSHs(he ? HeVAL(he) : &sv_undef);
@@ -1300,7 +1307,7 @@ PP(pp_iter)
 {
     dSP;
     register CONTEXT *cx;
-    SV *sv;
+    SV* sv;
     AV* av;
 
     EXTEND(sp, 1);
@@ -1314,13 +1321,26 @@ PP(pp_iter)
     if (cx->blk_loop.iterix >= AvFILL(av))
 	RETPUSHNO;
 
-    if (sv = AvARRAY(av)[++cx->blk_loop.iterix]) {
+    if (sv = AvARRAY(av)[++cx->blk_loop.iterix])
 	SvTEMP_off(sv);
-	*cx->blk_loop.itervar = sv;
-    }
     else
-	*cx->blk_loop.itervar = &sv_undef;
-
+	sv = &sv_undef;
+    if (av != curstack && SvIMMORTAL(sv)) {
+	SV *lv = cx->blk_loop.iterlval;
+	if (lv)
+	    SvREFCNT_dec(LvTARG(lv));
+	else {
+	    lv = cx->blk_loop.iterlval = newSVsv(sv);
+	    sv_upgrade(lv, SVt_PVLV);
+	    sv_magic(lv, Nullsv, 'y', Nullch, 0);
+	    LvTYPE(lv) = 'y';
+	}
+	LvTARG(lv) = SvREFCNT_inc(av);
+	LvTARGOFF(lv) = cx->blk_loop.iterix;
+	LvTARGLEN(lv) = 1;
+	sv = (SV*)lv;
+    }
+    *cx->blk_loop.itervar = sv;
     RETPUSHYES;
 }
 
@@ -1370,7 +1390,7 @@ PP(pp_subst)
 	pm = curpm;
 	rx = pm->op_pmregexp;
     }
-    safebase = ((!rx || !rx->nparens) && !sawampersand);
+    safebase = (!rx->nparens && !sawampersand);
     if (pm->op_pmflags & (PMf_MULTILINE|PMf_SINGLELINE)) {
 	SAVEINT(multiline);
 	multiline = pm->op_pmflags & PMf_MULTILINE;
@@ -1518,7 +1538,7 @@ PP(pp_subst)
     else
 	c = Nullch;
     if (pregexec(rx, s, strend, orig, 0,
-      SvSCREAM(TARG) ? TARG : Nullsv, safebase)) {
+		 SvSCREAM(TARG) ? TARG : Nullsv, safebase)) {
     long_way:
 	if (force_on_match) {
 	    force_on_match = 0;
@@ -1550,8 +1570,7 @@ PP(pp_subst)
 		sv_catpvn(dstr, c, clen);
 	    if (once)
 		break;
-	} while (pregexec(rx, s, strend, orig, s == m, Nullsv,
-	    safebase));
+	} while (pregexec(rx, s, strend, orig, s == m, Nullsv, safebase));
 	sv_catpvn(dstr, s, strend - s);
 
 	(void)SvOOK_off(TARG);
@@ -1831,7 +1850,8 @@ PP(pp_entersub)
 	if (CvDEPTH(cv) < 2)
 	    (void)SvREFCNT_inc(cv);
 	else {	/* save temporaries on recursion? */
-	    if (CvDEPTH(cv) == 100 && dowarn)
+	    if (CvDEPTH(cv) == 100 && dowarn 
+		&& !(perldb && cv == GvCV(DBsub)))
 		warn("Deep recursion on subroutine \"%s\"",GvENAME(CvGV(cv)));
 	    if (CvDEPTH(cv) > AvFILL(padlist)) {
 		AV *av;
@@ -1842,9 +1862,10 @@ PP(pp_entersub)
 		for ( ;ix > 0; ix--) {
 		    if (svp[ix] != &sv_undef) {
 			char *name = SvPVX(svp[ix]);
-			if (SvFLAGS(svp[ix]) & SVf_FAKE) { /* outer lexical? */
-			    av_store(newpad, ix,
-				SvREFCNT_inc(oldpad[ix]) );
+			if ((SvFLAGS(svp[ix]) & SVf_FAKE) /* outer lexical? */
+			    || *name == '&')		  /* anonymous code? */
+			{
+			    av_store(newpad, ix, SvREFCNT_inc(oldpad[ix]));
 			}
 			else {				/* our own lexical */
 			    if (*name == '@')
@@ -1929,7 +1950,7 @@ PP(pp_aelem)
 	    DIE(no_aelem, elem);
 	if (op->op_private & OPpLVAL_INTRO)
 	    save_svref(svp);
-	else if (op->op_private & (OPpDEREF_HV|OPpDEREF_AV))
+	else if (op->op_private & OPpDEREF)
 	    provide_ref(op, *svp);
     }
     PUSHs(svp ? *svp : &sv_undef);
@@ -1946,9 +1967,25 @@ SV* sv;
     if (!SvOK(sv)) {
 	if (SvREADONLY(sv))
 	    croak(no_modify);
-	(void)SvUPGRADE(sv, SVt_RV);
-	SvRV(sv) = (op->op_private & OPpDEREF_HV ?
-		    (SV*)newHV() : (SV*)newAV());
+	if (SvTYPE(sv) < SVt_RV)
+	    sv_upgrade(sv, SVt_RV);
+	else if (SvTYPE(sv) >= SVt_PV) {
+	    (void)SvOOK_off(sv);
+	    Safefree(SvPVX(sv));
+	    SvLEN(sv) = SvCUR(sv) = 0;
+	}
+	switch (op->op_private & OPpDEREF)
+	{
+	case OPpDEREF_SV:
+	    SvRV(sv) = newSV(0);
+	    break;
+	case OPpDEREF_AV:
+	    SvRV(sv) = (SV*)newAV();
+	    break;
+	case OPpDEREF_HV:
+	    SvRV(sv) = (SV*)newHV();
+	    break;
+	}
 	SvROK_on(sv);
 	SvSETMAGIC(sv);
     }

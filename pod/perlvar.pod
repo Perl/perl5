@@ -7,7 +7,7 @@ perlvar - Perl predefined variables
 =head2 Predefined Names
 
 The following names have special meaning to Perl.  Most of the
-punctuational names have reasonable mnemonics, or analogues in one of
+punctuation names have reasonable mnemonics, or analogues in one of
 the shells.  Nevertheless, if you wish to use the long variable names,
 you just need to say
 
@@ -51,7 +51,7 @@ a reference, you'll raise a run-time exception.
 The default input and pattern-searching space.  The following pairs are
 equivalent:
 
-    while (<>) {...}	# only equivalent in while!
+    while (<>) {...}	# equivalent in only while!
     while ($_ = <>) {...}
 
     /^Subject:/
@@ -108,7 +108,7 @@ test.  Note that outside of a C<while> test, this will not happen.
 
 =item $E<lt>I<digit>E<gt>
 
-Contains the subpattern from the corresponding set of parentheses in
+Contains the sub-pattern from the corresponding set of parentheses in
 the last pattern matched, not counting patterns matched in nested
 blocks that have been exited already.  (Mnemonic: like \digit.)
 These variables are all read-only.
@@ -162,15 +162,15 @@ This variable is read-only.
 
 =item $*
 
-Set to 1 to do multiline matching within a string, 0 to tell Perl
+Set to 1 to do multi-line matching within a string, 0 to tell Perl
 that it can assume that strings contain a single line, for the purpose
 of optimizing pattern matches.  Pattern matches on strings containing
 multiple newlines can produce confusing results when "C<$*>" is 0.  Default
 is 0.  (Mnemonic: * matches multiple things.)  Note that this variable
-only influences the interpretation of "C<^>" and "C<$>".  A literal newline can
+influences the interpretation of only "C<^>" and "C<$>".  A literal newline can
 be searched for even when C<$* == 0>.
 
-Use of "C<$*>" is deprecated in Perl 5.
+Use of "C<$*>" is deprecated in modern perls.
 
 =item input_line_number HANDLE EXPR
 
@@ -182,7 +182,7 @@ Use of "C<$*>" is deprecated in Perl 5.
 
 The current input line number for the last file handle from
 which you read (or performed a C<seek> or C<tell> on).  An
-explicit close on a filehandle resets the line number.  Since
+explicit close on a filehandle resets the line number.  Because
 "C<E<lt>E<gt>>" never does an explicit close, line numbers increase
 across ARGV files (but see examples under eof()).  Localizing C<$.> has
 the effect of also localizing Perl's notion of "the last read
@@ -221,8 +221,8 @@ delimit line boundaries when quoting poetry.)
 
 If set to nonzero, forces a flush after every write or print on the
 currently selected output channel.  Default is 0 (regardless of whether
-the channel is actually buffered by the system or not; C<$|> only tells
-you whether you've asked Perl to explicitly flush after each write). 
+the channel is actually buffered by the system or not; C<$|> tells you
+only whether you've asked Perl explicitly to flush after each write). 
 Note that STDOUT will typically be line buffered if output is to the
 terminal and block buffered otherwise.  Setting this variable is useful
 primarily when you are outputting to a pipe, such as when you are running
@@ -239,8 +239,8 @@ has no effect on input buffering.
 =item $,
 
 The output field separator for the print operator.  Ordinarily the
-print operator simply prints out the comma separated fields you
-specify.  In order to get behavior more like B<awk>, set this variable
+print operator simply prints out the comma-separated fields you
+specify.  To get behavior more like B<awk>, set this variable
 as you would set B<awk>'s OFS variable to specify what is printed
 between fields.  (Mnemonic: what is printed when there is a , in your
 print statement.)
@@ -254,9 +254,9 @@ print statement.)
 =item $\
 
 The output record separator for the print operator.  Ordinarily the
-print operator simply prints out the comma separated fields you
-specify, with no trailing newline or record separator assumed.  In
-order to get behavior more like B<awk>, set this variable as you would
+print operator simply prints out the comma-separated fields you
+specify, with no trailing newline or record separator assumed.
+To get behavior more like B<awk>, set this variable as you would
 set B<awk>'s ORS variable to specify what is printed at the end of the
 print.  (Mnemonic: you set "C<$\>" instead of adding \n at the end of the
 print.  Also, it's just like C<$/>, but it's what you get "back" from
@@ -299,7 +299,7 @@ keys contain binary data there might not be any safe value for "C<$;>".
 semi-semicolon.  Yeah, I know, it's pretty lame, but "C<$,>" is already
 taken for something more important.)
 
-Consider using "real" multi-dimensional arrays in Perl 5.
+Consider using "real" multi-dimensional arrays.
 
 =item $OFMT
 
@@ -313,7 +313,7 @@ of the macro DBL_DIG from your system's F<float.h>.  This is different from
 B<awk>'s default OFMT setting of %.6g, so you need to set "C<$#>"
 explicitly to get B<awk>'s value.  (Mnemonic: # is the number sign.)
 
-Use of "C<$#>" is deprecated in Perl 5.
+Use of "C<$#>" is deprecated.
 
 =item format_page_number HANDLE EXPR
 
@@ -379,7 +379,7 @@ poetry is a part of a line.)
 
 =item $^L
 
-What formats output to perform a formfeed.  Default is \f.
+What formats output to perform a form feed.  Default is \f.
 
 =item $ACCUMULATOR
 
@@ -396,7 +396,7 @@ L<perlfunc/formline()>.
 
 =item $?
 
-The status returned by the last pipe close, backtick (C<``>) command,
+The status returned by the last pipe close, back-tick (C<``>) command,
 or system() operator.  Note that this is the status word returned by
 the wait() system call, so the exit value of the subprocess is actually
 (C<$? E<gt>E<gt> 8>).  Thus on many systems, C<$? & 255> gives which signal,
@@ -418,7 +418,7 @@ all the usual caveats.  (This means that you shouldn't depend on the
 value of "C<$!>" to be anything in particular unless you've gotten a
 specific error return indicating a system error.)  If used in a string
 context, yields the corresponding system error string.  You can assign
-to "C<$!>" in order to set I<errno> if, for instance, you want "C<$!>" to return the
+to "C<$!>" to set I<errno> if, for instance, you want "C<$!>" to return the
 string for error I<n>, or you want to set the exit value for the die()
 operator.  (Mnemonic: What just went bang?)
 
@@ -429,7 +429,7 @@ operator.  (Mnemonic: What just went bang?)
 More specific information about the last system error than that
 provided by C<$!>, if available.  (If not, it's just C<$!> again, except under
 OS/2.)
-At the moment, this differs from C<$!> only under VMS and OS/2, where it
+At the moment, this differs from C<$!> under only VMS and OS/2, where it
 provides the VMS status value from the last system error, and OS/2 error
 code of the last call to OS/2 API which was not directed via CRT.  The
 caveats mentioned in the description of C<$!> apply here, too.
@@ -481,7 +481,7 @@ The effective uid of this process.  Example:
     ($<,$>) = ($>,$<);	# swap real and effective uid
 
 (Mnemonic: it's the uid you went I<TO>, if you're running setuid.)  Note:
-"C<$E<lt>>" and "C<$E<gt>>" can only be swapped on machines supporting setreuid().
+"C<$E<lt>>" and "C<$E<gt>>" can be swapped on only machines supporting setreuid().
 
 =item $REAL_GROUP_ID
 
@@ -510,10 +510,11 @@ which may be the same as the first number.  (Mnemonic: parentheses are
 used to I<GROUP> things.  The effective gid is the group that's I<RIGHT> for
 you, if you're running setgid.)
 
-Note: "C<$E<lt>>", "C<$E<gt>>", "C<$(>" and "C<$)>" can only be set on machines
-that support the corresponding I<set[re][ug]id()> routine.  "C<$(>" and "C<$)>" 
-can only be swapped on machines supporting setregid().   Because Perl doesn't
-currently use initgroups(), you can't set your group vector to multiple groups.
+Note: "C<$E<lt>>", "C<$E<gt>>", "C<$(>" and "C<$)>" can be set only on
+machines that support the corresponding I<set[re][ug]id()> routine.  "C<$(>"
+and "C<$)>" can be swapped on only machines supporting setregid().  Because
+Perl doesn't currently use initgroups(), you can't set your group vector to
+multiple groups.
 
 =item $PROGRAM_NAME
 
@@ -612,7 +613,7 @@ it.
 =item $^T
 
 The time at which the script began running, in seconds since the
-epoch (beginning of 1970).  The values returned by the B<-M>, B<-A> 
+epoch (beginning of 1970).  The values returned by the B<-M>, B<-A>,
 and B<-C> filetests are
 based on this value.
 
@@ -637,7 +638,7 @@ contains the name of the current file when reading from E<lt>E<gt>.
 
 The array @ARGV contains the command line arguments intended for the
 script.  Note that C<$#ARGV> is the generally number of arguments minus
-one, since C<$ARGV[0]> is the first argument, I<NOT> the command name.  See
+one, because C<$ARGV[0]> is the first argument, I<NOT> the command name.  See
 "C<$0>" for the command name.
 
 =item @INC
@@ -647,8 +648,8 @@ be evaluated by the C<do EXPR>, C<require>, or C<use> constructs.  It
 initially consists of the arguments to any B<-I> command line switches,
 followed by the default Perl library, probably F</usr/local/lib/perl>,
 followed by ".", to represent the current directory.  If you need to
-modify this at runtime, you should use the C<use lib> pragma in order
-to also get the machine-dependent library properly loaded:
+modify this at runtime, you should use the C<use lib> pragma
+to get the machine-dependent library properly loaded also:
 
     use lib '/mypath/libdir/';
     use SomeMod;
@@ -684,7 +685,7 @@ signals.  Example:
     $SIG{'INT'} = 'DEFAULT';	# restore default action
     $SIG{'QUIT'} = 'IGNORE';	# ignore SIGQUIT
 
-The %SIG array only contains values for the signals actually set within
+The %SIG array contains values for only the signals actually set within
 the Perl script.  Here are some other examples:
 
     $SIG{PIPE} = Plumber;       # SCARY!!

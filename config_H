@@ -255,6 +255,17 @@
  */
 #define HAS_FSETPOS	/**/
 
+/* HAS_GETTIMEOFDAY:
+ *	This symbol, if defined, indicates that the gettimeofday() system
+ *	call is available for a sub-second accuracy clock. Usually, the file
+ *	<sys/resource.h> needs to be included (see I_SYS_RESOURCE).
+ *	The type "Timeval" should be used to refer to "struct timeval".
+ */
+/*#define HAS_GETTIMEOFDAY	/ **/
+#ifdef HAS_GETTIMEOFDAY
+#define Timeval struct timeval	/* Structure used by gettimeofday() */
+#endif
+
 /* HAS_GETGROUPS:
  *	This symbol, if defined, indicates that the getgroups() routine is
  *	available to get the list of process groups.  If unavailable, multiple
@@ -537,10 +548,9 @@
 /*#define HAS_SAFE_MEMCPY	/ **/
 
 /* HAS_SANE_MEMCMP:
- *	This symbol, if defined, indicates that the memcmp() routine is
- *	available to compare memory blocks for relative magnitude. If this
- *	symbol is not defined, and if HAS_MEMCMP is defined, then memcmp()
- *	may be used only to compare memory blocks for equality.
+ *	This symbol, if defined, indicates that the memcmp routine is available
+ *	and can be used to compare relative magnitudes of chars with their high
+ *	bits set.  If it is not defined, roll your own version.
  */
 /*#define HAS_SANE_MEMCMP	/ **/
 
@@ -1361,6 +1371,12 @@
  */
 #define ARCHLIB "/opt/perl/lib/i86pc-solaris/5.00305"		/**/
 #define ARCHLIB_EXP "/opt/perl/lib/i86pc-solaris/5.00305"		/**/
+
+/* BINCOMPAT3:
+ *	This symbol, if defined, indicates that Perl 5.004 should be
+ *	binary-compatible with Perl 5.003.
+ */
+#define BINCOMPAT3		/**/
 
 /* BYTEORDER:
  *	This symbol holds the hexadecimal constant defined in byteorder,

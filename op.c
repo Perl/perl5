@@ -189,9 +189,18 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
 		seq > (I32)SvNVX(sv) &&
 		strEQ(SvPVX(sv), name))
 	    {
-		I32 depth = CvDEPTH(cv) ? CvDEPTH(cv) : 1;
-		AV *oldpad = (AV*)*av_fetch(curlist, depth, FALSE);
-		SV *oldsv = *av_fetch(oldpad, off, TRUE);
+		I32 depth;
+		AV *oldpad;
+		SV *oldsv;
+
+		depth = CvDEPTH(cv);
+		if (!depth) {
+		    if (newoff)
+			return 0; /* don't clone inactive stack frame */
+		    depth = 1;
+		}
+		oldpad = (AV*)*av_fetch(curlist, depth, FALSE);
+		oldsv = *av_fetch(oldpad, off, TRUE);
 		if (!newoff) {		/* Not a mere clone operation. */
 		    SV *sv = NEWSV(1103,0);
 		    newoff = pad_alloc(OP_PADSV, SVs_PADMY);
@@ -201,9 +210,17 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
 		    SvNVX(sv) = (double)curcop->cop_seq;
 		    SvIVX(sv) = 999999999;	/* A ref, intro immediately */
 		    SvFLAGS(sv) |= SVf_FAKE;
+		    /* "It's closures all the way down." */
+		    CvCLONE_on(compcv);
+		    if (cv != startcv) {
+			CV *bcv;
+			for (bcv = startcv;
+			     bcv && bcv != cv && !CvCLONE(bcv);
+			     bcv = CvOUTSIDE(bcv))
+			    CvCLONE_on(bcv);
+		    }
 		}
 		av_store(comppad, newoff, SvREFCNT_inc(oldsv));
-		CvCLONE_on(compcv);
 		return newoff;
 	    }
 	}
@@ -441,9 +458,9 @@ OP *op;
 	break;
     case OP_NEXTSTATE:
     case OP_DBSTATE:
+	Safefree(cCOP->cop_label);
 	SvREFCNT_dec(cCOP->cop_filegv);
 	break;
-    /* case OP_ANONCODE: XXX breaks eval of anon subs in closures (cf. Opcode) */
     case OP_CONST:
 	SvREFCNT_dec(cSVOP->op_sv);
 	break;
@@ -900,7 +917,6 @@ I32 type;
 {
     OP *kid;
     SV *sv;
-    char mtype;
 
     if (!op || error_count)
 	return op;
@@ -922,6 +938,10 @@ I32 type;
 	else
 	    croak("That use of $[ is unsupported");
 	break;
+    case OP_STUB:
+	if (op->op_flags & OPf_PARENS)
+	    break;
+	goto nomod;
     case OP_ENTERSUB:
 	if ((type == OP_UNDEF || type == OP_REFGEN) &&
 	    !(op->op_flags & OPf_STACKED)) {
@@ -1024,23 +1044,13 @@ I32 type;
     case OP_KEYS:
 	if (type != OP_SASSIGN)
 	    goto nomod;
-	mtype = 'k';
-	goto makelv;
+	/* FALL THROUGH */
     case OP_POS:
-	mtype = '.';
-	goto makelv;
     case OP_VEC:
-	mtype = 'v';
-	goto makelv;
     case OP_SUBSTR:
-	mtype = 'x';
-      makelv:
 	pad_free(op->op_targ);
 	op->op_targ = pad_alloc(op->op_type, SVs_PADMY);
-	sv = PAD_SV(op->op_targ);
-	sv_upgrade(sv, SVt_PVLV);
-	sv_magic(sv, Nullsv, mtype, Nullch, 0);
-	curpad[op->op_targ] = sv;
+	assert(SvTYPE(PAD_SV(op->op_targ)) == SVt_NULL);
 	if (op->op_flags & OPf_KIDS)
 	    mod(cBINOP->op_first->op_sibling, type);
 	break;
@@ -1127,8 +1137,10 @@ I32 type;
 	ref(cUNOP->op_first, op->op_type);
 	/* FALL THROUGH */
     case OP_PADSV:
-	if (type == OP_RV2AV || type == OP_RV2HV) {
-	    op->op_private |= (type == OP_RV2AV ? OPpDEREF_AV : OPpDEREF_HV);
+	if (type == OP_RV2SV || type == OP_RV2AV || type == OP_RV2HV) {
+	    op->op_private |= (type == OP_RV2AV ? OPpDEREF_AV
+			       : type == OP_RV2HV ? OPpDEREF_HV
+			       : OPpDEREF_SV);
 	    op->op_flags |= OPf_MOD;
 	}
 	break;
@@ -1155,8 +1167,10 @@ I32 type;
     case OP_AELEM:
     case OP_HELEM:
 	ref(cBINOP->op_first, op->op_type);
-	if (type == OP_RV2AV || type == OP_RV2HV) {
-	    op->op_private |= (type == OP_RV2AV ? OPpDEREF_AV : OPpDEREF_HV);
+	if (type == OP_RV2SV || type == OP_RV2AV || type == OP_RV2HV) {
+	    op->op_private |= (type == OP_RV2AV ? OPpDEREF_AV
+			       : type == OP_RV2HV ? OPpDEREF_HV
+			       : OPpDEREF_SV);
 	    op->op_flags |= OPf_MOD;
 	}
 	break;
@@ -2698,7 +2712,7 @@ newFOROP(I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *block,OP *cont
     else {
 	sv = newGVOP(OP_GV, 0, defgv);
     }
-    if (expr->op_type == OP_RV2AV) {
+    if (expr->op_type == OP_RV2AV || expr->op_type == OP_PADAV) {
 	expr = scalar(ref(expr, OP_ITER));
 	iterflags |= OPf_STACKED;
     }
@@ -2767,16 +2781,43 @@ CV *cv;
     }
 }
 
-CV *
-cv_clone(proto)
+#ifdef DEBUG_CLOSURES
+static void
+cv_dump(cv)
+CV* cv;
+{
+    CV *outside = CvOUTSIDE(cv);
+    AV* padlist = CvPADLIST(cv);
+    AV* pad_name = (AV*)*av_fetch(padlist, 0, FALSE);
+    AV* pad = (AV*)*av_fetch(padlist, 1, FALSE);
+    SV** pname = AvARRAY(pad_name);
+    SV** ppad = AvARRAY(pad);
+    I32 ix;
+
+    PerlIO_printf(Perl_debug_log, "\tCV=0x%p (%s), OUTSIDE=0x%p (%s)\n",
+		  cv, CvANON(cv) ? "ANON" : GvNAME(CvGV(cv)),
+		  outside, CvANON(outside) ? "ANON" : GvNAME(CvGV(outside)));
+
+    for (ix = 1; ix <= AvFILL(pad); ix++) {
+	if (SvPOK(pname[ix]))
+	    PerlIO_printf(Perl_debug_log, "\t%4d. 0x%p (\"%s\")\n",
+			  ix, ppad[ix], SvPVX(pname[ix]))
+    }
+}
+#endif /* DEBUG_CLOSURES */
+
+static CV *
+cv_clone2(proto, outside)
 CV* proto;
+CV* outside;
 {
     AV* av;
     I32 ix;
     AV* protopadlist = CvPADLIST(proto);
     AV* protopad_name = (AV*)*av_fetch(protopadlist, 0, FALSE);
     AV* protopad = (AV*)*av_fetch(protopadlist, 1, FALSE);
-    SV** svp = AvARRAY(protopad);
+    SV** pname = AvARRAY(protopad_name);
+    SV** ppad = AvARRAY(protopad);
     AV* comppadlist;
     CV* cv;
 
@@ -2788,14 +2829,16 @@ CV* proto;
     cv = compcv = (CV*)NEWSV(1104,0);
     sv_upgrade((SV *)cv, SVt_PVCV);
     CvCLONED_on(cv);
+    if (CvANON(proto))
+	CvANON_on(cv);
 
     CvFILEGV(cv)	= CvFILEGV(proto);
     CvGV(cv)		= GvREFCNT_inc(CvGV(proto));
     CvSTASH(cv)		= CvSTASH(proto);
     CvROOT(cv)		= CvROOT(proto);
     CvSTART(cv)		= CvSTART(proto);
-    if (CvOUTSIDE(proto))
-	CvOUTSIDE(cv)	= (CV*)SvREFCNT_inc((SV*)CvOUTSIDE(proto));
+    if (outside)
+	CvOUTSIDE(cv)	= (CV*)SvREFCNT_inc(outside);
 
     comppad = newAV();
 
@@ -2804,7 +2847,7 @@ CV* proto;
     av_store(comppadlist, 0, SvREFCNT_inc((SV*)protopad_name));
     av_store(comppadlist, 1, (SV*)comppad);
     CvPADLIST(cv) = comppadlist;
-    av_extend(comppad, AvFILL(protopad));
+    av_fill(comppad, AvFILL(protopad));
     curpad = AvARRAY(comppad);
 
     av = newAV();           /* will be @_ */
@@ -2812,35 +2855,73 @@ CV* proto;
     av_store(comppad, 0, (SV*)av);
     AvFLAGS(av) = AVf_REIFY;
 
-    svp = AvARRAY(protopad_name);
-    for ( ix = AvFILL(protopad); ix > 0; ix--) {
-	SV *sv;
-	if (svp[ix] != &sv_undef) {
-	    char *name = SvPVX(svp[ix]);    /* XXX */
-	    if (SvFLAGS(svp[ix]) & SVf_FAKE) {	/* lexical from outside? */
-		I32 off = pad_findlex(name,ix,curcop->cop_seq, CvOUTSIDE(proto),
-					cxstack_ix);
-		if (off != ix)
+    for (ix = AvFILL(protopad); ix > 0; ix--) {
+	SV* sv;
+	if (pname[ix] != &sv_undef) {
+	    char *name = SvPVX(pname[ix]);    /* XXX */
+	    if (SvFLAGS(pname[ix]) & SVf_FAKE) {   /* lexical from outside? */
+		I32 off = pad_findlex(name, ix, SvIVX(pname[ix]),
+				      CvOUTSIDE(cv), cxstack_ix);
+		if (!off)
+		    curpad[ix] = SvREFCNT_inc(ppad[ix]);
+		else if (off != ix)
 		    croak("panic: cv_clone: %s", name);
 	    }
 	    else {				/* our own lexical */
-		if (*name == '@')
-		    av_store(comppad, ix, sv = (SV*)newAV());
+		if (*name == '&') {
+		    /* anon code -- we'll come back for it */
+		    sv = SvREFCNT_inc(ppad[ix]);
+		}
+		else if (*name == '@')
+		    sv = (SV*)newAV();
 		else if (*name == '%')
-		    av_store(comppad, ix, sv = (SV*)newHV());
+		    sv = (SV*)newHV();
 		else
-		    av_store(comppad, ix, sv = NEWSV(0,0));
-		SvPADMY_on(sv);
+		    sv = NEWSV(0,0);
+		if (!SvPADBUSY(sv))
+		    SvPADMY_on(sv);
+		curpad[ix] = sv;
 	    }
 	}
 	else {
-	    av_store(comppad, ix, sv = NEWSV(0,0));
+	    sv = NEWSV(0,0);
 	    SvPADTMP_on(sv);
+	    curpad[ix] = sv;
 	}
     }
 
+    /* Now that vars are all in place, clone nested closures. */
+
+    for (ix = AvFILL(protopad); ix > 0; ix--) {
+	if (pname[ix] != &sv_undef
+	    && !(SvFLAGS(pname[ix]) & SVf_FAKE)
+	    && *SvPVX(pname[ix]) == '&'
+	    && CvCLONE(ppad[ix]))
+	{
+	    CV *kid = cv_clone2((CV*)ppad[ix], cv);
+	    SvREFCNT_dec(ppad[ix]);
+	    CvCLONE_on(kid);
+	    SvPADMY_on(kid);
+	    curpad[ix] = (SV*)kid;
+	}
+    }
+
+#ifdef DEBUG_CLOSURES
+    PerlIO_printf(Perl_debug_log, "Cloned from:\n");
+    cv_dump(proto);
+    PerlIO_printf(Perl_debug_log, "  to:\n");
+    cv_dump(cv);
+#endif
+
     LEAVE;
     return cv;
+}
+
+CV *
+cv_clone(proto)
+CV* proto;
+{
+    return cv_clone2(proto, CvOUTSIDE(proto));
 }
 
 SV *
@@ -3300,6 +3381,19 @@ OP *o;
 /* Check routines. */
 
 OP *
+ck_anoncode(op)
+OP *op;
+{
+    PADOFFSET ix = pad_alloc(op->op_type, SVs_PADMY);
+    av_store(comppad_name, ix, newSVpv("&", 1));
+    av_store(comppad, ix, cSVOP->op_sv);
+    SvPADMY_on(cSVOP->op_sv);
+    cSVOP->op_sv = Nullsv;
+    cSVOP->op_targ = ix;
+    return op;
+}
+
+OP *
 ck_bitop(op)
 OP *op;
 {
@@ -3346,10 +3440,14 @@ ck_delete(op)
 OP *op;
 {
     op = ck_fun(op);
+    op->op_private = 0;
     if (op->op_flags & OPf_KIDS) {
 	OP *kid = cUNOP->op_first;
-	if (kid->op_type != OP_HELEM)
-	    croak("%s argument is not a HASH element", op_desc[op->op_type]);
+	if (kid->op_type == OP_HSLICE)
+	    op->op_private |= OPpSLICE;
+	else if (kid->op_type != OP_HELEM)
+	    croak("%s argument is not a HASH element or slice",
+		  op_desc[op->op_type]);
 	null(kid);
     }
     return op;
@@ -3427,6 +3525,20 @@ OP *op;
     }
     else
 	op = listkids(op);
+    return op;
+}
+
+OP *
+ck_exists(op)
+OP *op;
+{
+    op = ck_fun(op);
+    if (op->op_flags & OPf_KIDS) {
+	OP *kid = cUNOP->op_first;
+	if (kid->op_type != OP_HELEM)
+	    croak("%s argument is not a HASH element", op_desc[op->op_type]);
+	null(kid);
+    }
     return op;
 }
 
@@ -4232,7 +4344,7 @@ register OP* o;
 
 	case OP_GV:
 	    if (o->op_next->op_type == OP_RV2SV) {
-		if (!(o->op_next->op_private & (OPpDEREF_HV|OPpDEREF_AV))) {
+		if (!(o->op_next->op_private & OPpDEREF)) {
 		    null(o->op_next);
 		    o->op_private |= o->op_next->op_private & OPpLVAL_INTRO;
 		    o->op_next = o->op_next->op_next;
@@ -4246,8 +4358,7 @@ register OP* o;
 		if (pop->op_type == OP_CONST &&
 		    (op = pop->op_next) &&
 		    pop->op_next->op_type == OP_AELEM &&
-		    !(pop->op_next->op_private &
-			(OPpDEREF_HV|OPpDEREF_AV|OPpLVAL_INTRO)) &&
+		    !(pop->op_next->op_private & (OPpDEREF|OPpLVAL_INTRO)) &&
 		    (i = SvIV(((SVOP*)pop)->op_sv) - compiling.cop_arybase)
 				<= 255 &&
 		    i >= 0)

@@ -13,11 +13,11 @@ Perl.  The package statement declares the compilation unit as being in the
 given namespace.  The scope of the package declaration is from the
 declaration itself through the end of the enclosing block (the same scope
 as the local() operator).  All further unqualified dynamic identifiers
-will be in this namespace.  A package statement only affects dynamic
+will be in this namespace.  A package statement affects only dynamic
 variables--including those you've used local() on--but I<not> lexical
 variables created with my().  Typically it would be the first declaration
 in a file to be included by the C<require> or C<use> operator.  You can
-switch into a package in more than one place; it merely influences which
+switch into a package in more than one place; it influences merely which
 symbol table is used by the compiler for the rest of that block.  You can
 refer to variables and filehandles in other packages by prefixing the
 identifier with the package name and a double colon:
@@ -39,10 +39,10 @@ It would treat package C<INNER> as a totally separate global package.
 Only identifiers starting with letters (or underscore) are stored in a
 package's symbol table.  All other symbols are kept in package C<main>,
 including all of the punctuation variables like $_.  In addition, the
-identifiers STDIN, STDOUT, STDERR, ARGV, ARGVOUT, ENV, INC and SIG are
+identifiers STDIN, STDOUT, STDERR, ARGV, ARGVOUT, ENV, INC, and SIG are
 forced to be in package C<main>, even when used for other purposes than
 their built-in one.  Note also that, if you have a package called C<m>,
-C<s> or C<y>, then you can't use the qualified form of an identifier
+C<s>, or C<y>, then you can't use the qualified form of an identifier
 because it will be interpreted instead as a pattern match, a substitution,
 or a translation.
 
@@ -62,7 +62,7 @@ temporarily switches back to the C<main> package to evaluate various
 expressions in the context of the C<main> package (or wherever you came
 from).  See L<perldebug>.
 
-See L<perlsub> for other scoping issues related to my() and local(), 
+See L<perlsub> for other scoping issues related to my() and local(),
 or L<perlref> regarding closures.
 
 =head2 Symbol Tables
@@ -119,9 +119,9 @@ Assignment to a typeglob performs an aliasing operation, i.e.,
 
     *dick = *richard;
 
-causes variables, subroutines and file handles accessible via the
+causes variables, subroutines, and file handles accessible via the
 identifier C<richard> to also be accessible via the identifier C<dick>.  If
-you only want to alias a particular variable or subroutine, you can
+you want to alias only a particular variable or subroutine, you can
 assign a reference instead:
 
     *dick = \$richard;
@@ -140,10 +140,10 @@ thing.
 	# now use %hashsym normally, and you
 	# will affect the caller's %another_hash
 	my %nhash = (); # do what you want
-	return \%nhash; 
+	return \%nhash;
     }
 
-On return, the reference wil overwrite the hash slot in the
+On return, the reference will overwrite the hash slot in the
 symbol table specified by the *some_hash typeglob.  This
 is a somewhat tricky way of passing around references cheaply
 when you won't want to have to remember to dereference variables
@@ -197,7 +197,7 @@ order of definition; that is: last in, first out (LIFO).
 
 Inside an C<END> subroutine C<$?> contains the value that the script is
 going to pass to C<exit()>.  You can modify C<$?> to change the exit
-value of the script.  Beware of changing C<$?> by accident (eg, by
+value of the script.  Beware of changing C<$?> by accident (e.g.,, by
 running something via C<system>).
 
 Note that when you use the B<-n> and B<-p> switches to Perl, C<BEGIN>
@@ -208,7 +208,7 @@ and C<END> work just as they do in B<awk>, as a degenerate case.
 There is no special class syntax in Perl, but a package may function
 as a class if it provides subroutines that function as methods.  Such a
 package may also derive some of its methods from another class package
-by listing the other package name in its @ISA array.  
+by listing the other package name in its @ISA array.
 
 For more on this, see L<perlobj>.
 
@@ -225,15 +225,18 @@ symbols.  Or it can do a little of both.
 For example, to start a normal module called Fred, create
 a file called Fred.pm and put this at the start of it:
 
-    package Fred;
-    use Exporter ();
+    package      Fred;
+    use          strict;
+    use          Exporter ();
+    use          vars qw(@ISA @EXPORT @EXPORT_OK);
     @ISA       = qw(Exporter);
-    @EXPORT    = qw(func1 func2);
-    @EXPORT_OK = qw($sally @listabob %harry func3);
+    @EXPORT    = qw(&func1 &func2);
+    @EXPORT_OK = qw($sally @listabob %harry &func3);
+    use		 vars qw($sally @listabob %harry);
 
 Then go on to declare and use your variables in functions
 without any qualifications.
-See L<Exporter> and the I<Perl Modules File> for details on 
+See L<Exporter> and the I<Perl Modules File> for details on
 mechanics and style issues in module creation.
 
 Perl modules are included into your program by saying
@@ -278,7 +281,7 @@ instead of C<use>.  With require you can get into this problem:
     require Cwd;		# make Cwd:: accessible
     $here = Cwd::getcwd();	
 
-    use Cwd;			# import names from Cwd:: 
+    use Cwd;			# import names from Cwd::
     $here = getcwd();
 
     require Cwd;	    	# make Cwd:: accessible
@@ -299,7 +302,7 @@ the module.  If so, these will be entirely transparent to the user of
 the module.  It is the responsibility of the F<.pm> file to load (or
 arrange to autoload) any additional functionality.  The POSIX module
 happens to do both dynamic loading and autoloading, but the user can
-just say C<use POSIX> to get it all.
+say just C<use POSIX> to get it all.
 
 For more information on writing extension modules, see L<perlxs>
 and L<perlguts>.
@@ -315,14 +318,14 @@ because it has a shotgun.
 The module and its user have a contract, part of which is common law,
 and part of which is "written".  Part of the common law contract is
 that a module doesn't pollute any namespace it wasn't asked to.  The
-written contract for the module (AKA documentation) may make other
+written contract for the module (A.K.A. documentation) may make other
 provisions.  But then you know when you C<use RedefineTheWorld> that
 you're redefining the world and willing to take the consequences.
 
 =head1 THE PERL MODULE LIBRARY
 
-A number of modules are included the the Perl distribution.  These are
-described below, and all end in F<.pm>.  You may also discover files in 
+A number of modules are included the Perl distribution.  These are
+described below, and all end in F<.pm>.  You may also discover files in
 the library directory that end in either F<.pl> or F<.ph>.  These are old
 libraries supplied so that old programs that use them still run.  The
 F<.pl> files will all eventually be converted into standard modules, and
@@ -334,7 +337,7 @@ conversion, but it's just a mechanical process, so is far from bulletproof.
 =head2 Pragmatic Modules
 
 They work somewhat like pragmas in that they tend to affect the compilation of
-your program, and thus will usually only work well when used within a
+your program, and thus will usually work well only when used within a
 C<use>, or C<no>.  Most of these are locally scoped, so an inner BLOCK
 may countermand any of these by saying:
 
@@ -343,7 +346,7 @@ may countermand any of these by saying:
 
 which lasts until the end of that BLOCK.
 
-Unlike the pragrmas that effect the C<$^H> hints variable, the C<use
+Unlike the pragmas that effect the C<$^H> hints variable, the C<use
 vars> and C<use subs> declarations are not BLOCK-scoped.  They allow
 you to pre-declare a variables or subroutines within a particular
 <I>file</I> rather than just a block.  Such declarations are effective
@@ -353,6 +356,11 @@ them with C<no vars> or C<no subs>.
 The following pragmas are defined (and have their own documentation).
 
 =over 12
+
+=item blib
+
+manipulate @INC at compile time to use MakeMaker's uninstalled version
+of a package
 
 =item diagnostics
 
@@ -370,13 +378,17 @@ request less of something from the compiler
 
 manipulate @INC at compile time
 
+=item locale
+
+use or ignore current locale for built-in operations (see L<perli18n>)
+
 =item ops
 
-restrict unsafe operations when compiling
+restrict named opcodes when compiling or running Perl code
 
 =item overload
 
-package for overloading perl operations
+overload basic Perl operations
 
 =item sigtrap
 
@@ -388,11 +400,11 @@ restrict unsafe constructs
 
 =item subs
 
-predeclare sub names
+pre-declare sub names
 
 =item vars
 
-predeclare global variable names
+pre-declare global variable names
 
 =back
 
@@ -424,6 +436,10 @@ benchmark running times of code
 
 warn of errors (from perspective of caller)
 
+=item Class::Template
+
+struct/member template builder
+
 =item Config
 
 access Perl configuration information
@@ -446,7 +462,7 @@ supply object methods for directory handles
 
 =item DynaLoader
 
-Dynamically load C libraries into Perl code
+dynamically load C libraries into Perl code
 
 =item English
 
@@ -462,7 +478,7 @@ implements default import method for modules
 
 =item ExtUtils::Embed
 
-Utilities for embedding Perl in C/C++ applications
+utilities for embedding Perl in C/C++ applications
 
 =item ExtUtils::Install
 
@@ -471,26 +487,6 @@ install files from here to there
 =item ExtUtils::Liblist
 
 determine libraries to use and how to use them
-
-=item ExtUtils::MakeMaker
-
-create an extension Makefile
-
-=item ExtUtils::Manifest
-
-utilities to write and check a MANIFEST file
-
-=item ExtUtils::Miniperl
-
-write the C code for perlmain.c
-
-=item ExtUtils::Mkbootstrap
-
-make a bootstrap file for use by DynaLoader
-
-=item ExtUtils::Mksymlists
-
-write linker options files for dynamic extension
 
 =item ExtUtils::MM_OS2
 
@@ -504,9 +500,37 @@ methods used by ExtUtils::MakeMaker
 
 methods to override UN*X behaviour in ExtUtils::MakeMaker
 
+=item ExtUtils::MakeMaker
+
+create an extension Makefile
+
+=item ExtUtils::Manifest
+
+utilities to write and check a MANIFEST file
+
+=item ExtUtils::Mkbootstrap
+
+make a bootstrap file for use by DynaLoader
+
+=item ExtUtils::Mksymlists
+
+write linker options files for dynamic extension
+
 =item ExtUtils::testlib
 
 add blib/* directories to @INC
+
+=item CPAN
+
+interface to Comprehensive Perl Archive Network
+
+=item CPAN::FirstTime
+
+create a CPAN configuration file
+
+=item CPAN::Nox
+
+run CPAN while avoiding compiled extensions
 
 =item Fatal
 
@@ -518,31 +542,39 @@ load the C Fcntl.h defines
 
 =item File::Basename
 
-parse file specifications
-
-=item FileCache
-
-keep more files open than the system permits
+split a pathname into pieces
 
 =item File::CheckTree
 
 run many filetest checks on a tree
 
+=item File::Compare
+
+compare files or filehandles
+
 =item File::Copy
 
-Copy files or filehandles
+copy files or filehandles
 
 =item File::Find
 
 traverse a file tree
 
-=item FileHandle
-
-supply object methods for filehandles
-
 =item File::Path
 
 create or remove a series of directories
+
+=item File::stat
+
+by-name interface to Perl's built-in stat() functions
+
+=item FileCache
+
+keep more files open than the system permits
+
+=item FileHandle
+
+supply object methods for filehandles
 
 =item FindBin
 
@@ -550,7 +582,7 @@ locate directory of original perl script
 
 =item GDBM_File
 
-access to the gdbm library.
+access to the gdbm library
 
 =item Getopt::Long
 
@@ -616,13 +648,41 @@ complex numbers and associated mathematical functions
 
 tied access to ndbm files
 
+=item Net::FTP
+
+File Transfer Protocol client
+
 =item Net::Ping
 
 check a host for upness
 
+=item Net::Netrc
+
+parser for ".netrc" files a la Berkeley UNIX
+
+=item Net::Socket
+
+support class for Net::FTP
+
+=item Net::hostent
+
+by-name interface to Perl's built-in gethost*() functions
+
+=item Net::netent
+
+by-name interface to Perl's built-in getnet*() functions
+
+=item Net::protoent
+
+by-name interface to Perl's built-in getproto*() functions
+
+=item Net::servent
+
+by-name interface to Perl's built-in getserv*() functions
+
 =item Opcode
 
-disable named opcodes when compiling perl code
+disable named opcodes when compiling or running perl code
 
 =item Pod::Text
 
@@ -630,15 +690,15 @@ convert POD data to formatted ASCII text
 
 =item POSIX
 
-interface to IEEE Std 1003.1
-
-=item Safe
-
-compile and execute code in restricted compartments
+interface to IEEE Standard 1003.1
 
 =item SDBM_File
 
 tied access to sdbm files
+
+=item Safe
+
+compile and execute code in restricted compartments
 
 =item Search::Dict
 
@@ -674,7 +734,7 @@ interface to the UNIX syslog(3) calls
 
 =item Term::Cap
 
-Perl termcap interface
+termcap interface
 
 =item Term::Complete
 
@@ -682,7 +742,7 @@ word completion module
 
 =item Term::ReadLine
 
-interface to various readline packages. 
+interface to various C<readline> packages
 
 =item Test::Harness
 
@@ -698,7 +758,7 @@ parse text into an array of tokens
 
 =item Text::Soundex
 
-implementation of the Soundex Algorithm as Described by Knuth
+implementation of the Soundex Algorithm as described by Knuth
 
 =item Text::Tabs
 
@@ -712,6 +772,10 @@ line wrapping to form simple paragraphs
 
 base class definitions for tied hashes
 
+=item Tie::RefHash
+
+base class definitions for tied hashes with references as keys
+
 =item Tie::Scalar
 
 base class definitions for tied scalars
@@ -724,9 +788,29 @@ fixed-table-size, fixed-key-length hashing
 
 efficiently compute time from local and GMT time
 
+=item Time::gmtime
+
+by-name interface to Perl's built-in gmtime() function
+
+=item Time::localtime
+
+by-name interface to Perl's built-in localtime() function
+
+=item Time::tm
+
+internal object used by Time::gmtime and Time::localtime
+
 =item UNIVERSAL
 
 base class for ALL classes (blessed references)
+
+=item User::grent
+
+by-name interface to Perl's built-in getgr*() functions
+
+=item User::pwent
+
+by-name interface to Perl's built-in getpw*() functions
 
 =back
 
@@ -745,7 +829,7 @@ dynamically loaded into Perl if and when you need them.  Supported
 extension modules include the Socket, Fcntl, and POSIX modules.
 
 Many popular C extension modules do not come bundled (at least, not
-completely) due to their size, volatility, or simply lack of time for
+completely) due to their sizes, volatility, or simply lack of time for
 adequate testing and configuration across the multitude of platforms on
 which Perl was beta-tested.  You are encouraged to look for them in
 archie(1L), the Perl FAQ or Meta-FAQ, the WWW page, and even with their
@@ -755,13 +839,13 @@ disposition.
 =head1 CPAN
 
 CPAN stands for the Comprehensive Perl Archive Network.  This is a globally
-replicated collection of all known Perl materials, including hundreds 
+replicated collection of all known Perl materials, including hundreds
 of unbundled modules.  Here are the major categories of modules:
 
 =over
 
 =item *
-Language Extensions and Documentation Tools 
+Language Extensions and Documentation Tools
 
 =item *
 Development Support
@@ -788,16 +872,16 @@ Interfaces to / Emulations of Other Programming Languages
 File Names, File Systems and File Locking (see also File Handles)
 
 =item *
-String Processing, Language Text Processing, Parsing and Searching
+String Processing, Language Text Processing, Parsing, and Searching
 
 =item *
-Option, Argument, Parameter and Configuration File Processing
+Option, Argument, Parameter, and Configuration File Processing
 
 =item *
 Internationalization and Locale
 
 =item *
-Authentication, Security and Encryption
+Authentication, Security, and Encryption
 
 =item *
 World Wide Web, HTML, HTTP, CGI, MIME
@@ -809,7 +893,7 @@ Server and Daemon Utilities
 Archiving and Compression
 
 =item *
-Images, Pixmap and Bitmap Manipulation, Drawing and Graphing
+Images, Pixmap and Bitmap Manipulation, Drawing, and Graphing
 
 =item *
 Mail and Usenet News
@@ -898,15 +982,15 @@ ftp://ftp.is.co.za/programming/perl/CPAN/
 
 =back
 
-For an up-to-date listing of CPAN sites, 
+For an up-to-date listing of CPAN sites,
 see F<http://www.perl.com/perl/CPAN> or F<ftp://ftp.perl.com/perl/>.
 
-=head1 Modules: Creation, Use and Abuse
+=head1 Modules: Creation, Use, and Abuse
 
 (The following section is borrowed directly from Tim Bunce's modules
 file, available at your nearest CPAN site.)
 
-Perl 5 implements a class using a package, but the presence of a
+Perl implements a class using a package, but the presence of a
 package doesn't imply the presence of a class.  A package is just a
 namespace.  A class is a package that provides subroutines that can be
 used as methods.  A method is just a subroutine that expects, as its
@@ -944,9 +1028,9 @@ scheme as the original author.
 
 Use blessed references.  Use the two argument form of bless to bless
 into the class name given as the first parameter of the constructor,
-e.g.:
+e.g.,:
 
- sub new { 
+ sub new {
 	my $class = shift;
 	return bless {}, $class;
  }
@@ -954,7 +1038,7 @@ e.g.:
 or even this if you'd like it to be used as either a static
 or a virtual method.
 
- sub new { 
+ sub new {
 	my $self  = shift;
 	my $class = ref($self) || $self;
 	return bless {}, $class;
@@ -1021,7 +1105,7 @@ or nature of a variable. For example:
  $no_caps_here    function scope my() or local() variables
 
 Function and method names seem to work best as all lowercase.
-E.g., C<$obj-E<gt>as_string()>.
+e.g.,, C<$obj-E<gt>as_string()>.
 
 You can use a leading underscore to indicate that a variable or
 function should not be used outside the package that defined it.
@@ -1039,11 +1123,11 @@ short or common names to reduce the risk of name clashes.
 Generally anything not exported is still accessible from outside the
 module using the ModuleName::item_name (or C<$blessed_ref-E<gt>method>)
 syntax.  By convention you can use a leading underscore on names to
-informally indicate that they are 'internal' and not for public use.
+indicate informally that they are 'internal' and not for public use.
 
 (It is actually possible to get private functions by saying:
 C<my $subref = sub { ... };  &$subref;>.  But there's no way to call that
-directly as a method, since a method must have a name in the symbol
+directly as a method, because a method must have a name in the symbol
 table.)
 
 As a general rule, if the module is trying to be object oriented
@@ -1052,12 +1136,12 @@ then export nothing. If it's just a collection of functions then
 
 =item Select a name for the module.
 
-This name should be as descriptive, accurate and complete as
+This name should be as descriptive, accurate, and complete as
 possible.  Avoid any risk of ambiguity. Always try to use two or
 more whole words.  Generally the name should reflect what is special
 about what the module does rather than how it does it.  Please use
-nested module names to informally group or categorise a module.
-A module should have a very good reason not to have a nested name.
+nested module names to group informally or categorize a module.
+There should be a very good reason for a module not to have a nested name.
 Module names should begin with a capital letter.
 
 Having 57 modules all called Sort will not make life easy for anyone
@@ -1137,16 +1221,16 @@ Copying, ToDo etc.
 
 =item Adding a Copyright Notice.
 
-How you choose to licence your work is a personal decision.
+How you choose to license your work is a personal decision.
 The general mechanism is to assert your Copyright and then make
 a declaration of how others may copy/use/modify your work.
 
 Perl, for example, is supplied with two types of license: The GNU
-GPL and The Artistic License (see the files README, Copying and
+GPL and The Artistic License (see the files README, Copying, and
 Artistic).  Larry has good reasons for NOT just using the GNU GPL.
 
-My personal recommendation, out of respect for Larry, Perl and the
-perl community at large is to simply state something like:
+My personal recommendation, out of respect for Larry, Perl, and the
+perl community at large is to state something simply like:
 
  Copyright (c) 1995 Your Name. All rights reserved.
  This program is free software; you can redistribute it and/or
@@ -1160,8 +1244,8 @@ Remember to include the other words in addition to the Copyright.
 
 To be fully compatible with the Exporter and MakeMaker modules you
 should store your module's version number in a non-my package
-variable called $VERSION.  This should be a valid floating point 
-number with at least two digits after the decimal (ie hundredths,
+variable called $VERSION.  This should be a floating point
+number with at least two digits after the decimal (i.e., hundredths,
 e.g, C<$VERSION = "0.01">).  Don't use a "1.3.2" style version.
 See Exporter.pm in Perl5.001m or later for details.
 
@@ -1178,7 +1262,7 @@ Usenet newsgroup.  This will at least ensure very wide once-off
 distribution.
 
 If possible you should place the module into a major ftp archive and
-include details of it's location in your announcement.
+include details of its location in your announcement.
 
 Some notes about ftp archives: Please use a long descriptive file
 name which includes the version number. Most incoming directories
@@ -1195,10 +1279,10 @@ Follow the instructions and links on
 
    http://franz.ww.tu-berlin.de/modulelist
 
-or upload to one of these sites: 
+or upload to one of these sites:
 
    ftp://franz.ww.tu-berlin.de/incoming
-   ftp://ftp.cis.ufl.edu/incoming  
+   ftp://ftp.cis.ufl.edu/incoming
 
 and notify upload@franz.ww.tu-berlin.de.
 
@@ -1289,8 +1373,7 @@ fragment of code built on top of the reusable modules. In these cases
 the application could invoked as:
 
      perl -e 'use Module::Name; method(@ARGV)' ...
-or   
+or
      perl -mModule::Name ...    (in perl5.002)
 
 =back
-

@@ -19,7 +19,7 @@ For ease of access, the Perl manual has been split up into a number
 of sections:
 
     perl	Perl overview (this section)
-    perltoc	Perl documentation table of contents
+    perlnews	Perl news about changes from previous version
 
     perldata	Perl data structures
     perlsyn	Perl syntax
@@ -31,11 +31,12 @@ of sections:
     perlsub	Perl subroutines
     perlmod	Perl modules
     perlform	Perl formats
-    perli18n	Perl internalization
+    perllocale	Perl locale support
 
     perlref	Perl references 
     perldsc	Perl data structures intro
     perllol	Perl data structures: lists of lists
+    perltoot	Perl OO tutorial
     perlobj	Perl objects
     perltie	Perl objects hidden behind simple variables
     perlbot	Perl OO tricks and examples
@@ -69,7 +70,7 @@ in the appropriate start-up files.  To find out where these are, type:
     perl -V:man.dir
 
 If the directories were F</usr/local/man/man1> and F</usr/local/man/man3>,
-you would only need to add F</usr/local/man> to your MANPATH.  If 
+you would need to add only F</usr/local/man> to your MANPATH.  If 
 they are different, you'll have to add both stems.
 
 If that doesn't work for some reason, you can still use the
@@ -82,7 +83,7 @@ will often point out exactly where the trouble is.
 
 =head1 DESCRIPTION
 
-Perl is an interpreted language optimized for scanning arbitrary
+Perl is a language optimized for scanning arbitrary
 text files, extracting information from those text files, and printing
 reports based on that information.  It's also a good language for many
 system management tasks.  The language is intended to be practical
@@ -138,7 +139,8 @@ will continue to work unchanged.
 
 Perl variables may now be declared within a lexical scope, like "auto"
 variables in C.  Not only is this more efficient, but it contributes
-to better privacy for "programming in the large".
+to better privacy for "programming in the large".  Anonymous 
+subroutines exhibit deep binding of lexical variables (closures).
 
 =item * Arbitrarily nested data structures
 
@@ -166,7 +168,7 @@ Perl may now be embedded easily in your C or C++ application, and can
 either call or be called by your routines through a documented
 interface.  The XS preprocessor is provided to make it easy to glue
 your C or C++ routines into Perl.  Dynamic loading of modules is
-supported.
+supported, and Perl itself can be made into a dynamic library.
 
 =item * POSIX compliant
 
@@ -191,7 +193,7 @@ to an object class which defines its access methods.
 =item * Subroutine definitions may now be autoloaded
 
 In fact, the AUTOLOAD mechanism also allows you to define any arbitrary
-semantics for undefined subroutine calls.  It's not just for autoloading.
+semantics for undefined subroutine calls.  It's not for just autoloading.
 
 =item * Regular expression enhancements
 
@@ -200,6 +202,18 @@ without creating a backreference.  You can now write regular expressions
 with embedded whitespace and comments for readability.  A consistent
 extensibility mechanism has been added that is upwardly compatible with
 all old regular expressions.
+
+=item * Innumerable Unbundled Modules
+
+The Comprehensive Perl Archive Network described in L<perlmod>
+contains hundreds of plug-and-play modules full of reusable
+code.  See F<http://www.perl.com/CPAN> for a site near you.
+
+=item * Compilability
+
+While not yet in full production mode, a working perl-to-C compiler
+does exist.  It can generate portable bytecode, simple C, or
+optimized C code.
 
 =back
 
@@ -239,6 +253,12 @@ The command used to get the debugger code.  If unset, uses
 
 	BEGIN { require 'perl5db.pl' }
 
+=item PERL_DESTRUCT_LEVEL
+
+Relevant only if your perl executable was built with B<-DDEBUGGING>,
+this controls the behavior of global destruction of objects and other
+references.
+
 =item PERLLIB
 
 A colon-separated list of directories in which to look for Perl library
@@ -267,7 +287,7 @@ Larry Wall E<lt>F<larry@wall.org>E<gt>, with the help of oodles of other folks.
 =head1 FILES
 
  "/tmp/perl-e$$"	temporary file for -e commands
- "@INC"			locations of perl 5 libraries
+ "@INC"			locations of perl libraries
 
 =head1 SEE ALSO
 
@@ -297,8 +317,8 @@ switch?
 The B<-w> switch is not mandatory.
 
 Perl is at the mercy of your machine's definitions of various
-operations such as type casting, atof() and sprintf().  The latter
-can even trigger a coredump when passed ludicrous input values.
+operations such as type casting, atof(), and sprintf().  The latter
+can even trigger a core dump when passed ludicrous input values.
 
 If your stdio requires a seek or eof between reads and writes on a
 particular stream, so does Perl.  (This doesn't apply to sysread()
@@ -310,7 +330,7 @@ given variable name may not be longer than 255 characters, and no
 component of your PATH may be longer than 255 if you use B<-S>.  A regular
 expression may not compile to more than 32767 bytes internally.
 
-See the perl bugs database at F<http://perl.com/perl/bugs/>.  You may
+See the perl bugs database at F<http://www.perl.com/perl/bugs/>.  You may
 mail your bug reports (be sure to include full configuration information
 as output by the myconfig program in the perl source tree, or by C<perl -V>) to
 F<perlbug@perl.com>.

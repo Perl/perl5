@@ -117,6 +117,7 @@ register PerlInterpreter *sv_interp;
     rsfp	= Nullfp;
     statname	= Nullsv;
     tmps_floor	= -1;
+    perl_destruct_level = 1;
 #endif
 
     init_ids();
@@ -159,10 +160,21 @@ register PerlInterpreter *sv_interp;
 #ifdef DEBUGGING
     {
 	char *s;
-	if (s = getenv("PERL_DESTRUCT_LEVEL"))
-	    destruct_level = atoi(s);
+	if (s = getenv("PERL_DESTRUCT_LEVEL")) {
+	    int i = atoi(s);
+	    if (destruct_level < i)
+		destruct_level = i;
+	}
     }
 #endif
+
+    /* unhook hooks which will soon be, or use, destroyed data */
+    SvREFCNT_dec(warnhook);
+    warnhook = Nullsv;
+    SvREFCNT_dec(diehook);
+    diehook = Nullsv;
+    SvREFCNT_dec(parsehook);
+    parsehook = Nullsv;
 
     LEAVE;
     FREETMPS;
@@ -192,15 +204,23 @@ register PerlInterpreter *sv_interp;
 	return;
     }
 
-    /* unhook hooks which may now point to, or use, broken code	*/
-    if (warnhook && SvREFCNT(warnhook))
-	SvREFCNT_dec(warnhook);
-    if (diehook && SvREFCNT(diehook))
-	SvREFCNT_dec(diehook);
-    if (parsehook && SvREFCNT(parsehook))
-	SvREFCNT_dec(parsehook);
-    
+    /* loosen bonds of global variables */
+
+    setdefout(Nullgv);
+
+    sv_free(nrs);
+    nrs = Nullsv;
+
+    sv_free(lastscream);
+    lastscream = Nullsv;
+
+    sv_free(statname);
+    statname = Nullsv;
+    statgv = Nullgv;
+    laststatval = -1;
+
     /* Prepare to destruct main symbol table.  */
+
     hv = defstash;
     defstash = 0;
     SvREFCNT_dec(hv);
@@ -1943,15 +1963,32 @@ static void
 init_stacks()
 {
     curstack = newAV();
-    mainstack = curstack;			/* remember in case we switch stacks */
-    AvREAL_off(curstack);			/* not a real array */
+    mainstack = curstack;		/* remember in case we switch stacks */
+    AvREAL_off(curstack);		/* not a real array */
     av_extend(curstack,127);
 
     stack_base = AvARRAY(curstack);
     stack_sp = stack_base;
     stack_max = stack_base + 127;
 
-    /* Shouldn't these stacks be per-interpreter? */
+    cxstack_max = 8192 / sizeof(CONTEXT) - 2;	/* Use most of 8K. */
+    New(50,cxstack,cxstack_max + 1,CONTEXT);
+    cxstack_ix	= -1;
+
+    New(50,tmps_stack,128,SV*);
+    tmps_ix = -1;
+    tmps_max = 128;
+
+    DEBUG( {
+	New(51,debname,128,char);
+	New(52,debdelim,128,char);
+    } )
+
+    /*
+     * The following stacks almost certainly should be per-interpreter,
+     * but for now they're not.  XXX
+     */
+
     if (markstack) {
 	markstack_ptr = markstack;
     } else {
@@ -1982,20 +2019,7 @@ init_stacks()
 	New(54,retstack,16,OP*);
 	retstack_ix = 0;
 	retstack_max = 16;
-   }
-
-    cxstack_max = 8192 / sizeof(CONTEXT) - 2;	/* Use most of 8K. */
-    New(50,cxstack,cxstack_max + 1,CONTEXT);
-    cxstack_ix	= -1;
-
-    New(50,tmps_stack,128,SV*);
-    tmps_ix = -1;
-    tmps_max = 128;
-
-    DEBUG( {
-	New(51,debname,128,char);
-	New(52,debdelim,128,char);
-    } )
+    }
 }
 
 static void
@@ -2003,6 +2027,10 @@ nuke_stacks()
 {
     Safefree(cxstack);
     Safefree(tmps_stack);
+    DEBUG( {
+	Safefree(debname);
+	Safefree(debdelim);
+    } )
 }
 
 static PerlIO *tmpfp;  /* moved outside init_lexer() because of UNICOS bug */

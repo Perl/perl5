@@ -154,7 +154,9 @@ register char **env;
 
     tmpstr = walk(0,0,root,&i,P_MIN);
     str = str_make(STARTPERL);
-    str_cat(str, "\neval 'exec perl -S $0 \"$@\"'\n\
+    str_cat(str, "\neval 'exec ");
+    str_cat(str, BIN);
+    str_cat(str, "/perl -S $0 ${1+\"$@\"}'\n\
     if $running_under_some_shell;\n\
 			# this emulates #! processing on NIH machines.\n\
 			# (remove #! line above if indigestible)\n\n");

@@ -13,8 +13,8 @@ perltie - how to hide an object class in a simple variable
 =head1 DESCRIPTION
 
 Prior to release 5.0 of Perl, a programmer could use dbmopen()
-to magically connect an on-disk database in the standard Unix dbm(3x)
-format to a %HASH in their program.  However, their Perl was either
+to connect an on-disk database in the standard Unix dbm(3x)
+format magically to a %HASH in their program.  However, their Perl was either
 built with one particular dbm library or another, but not both, and
 you couldn't extend this mechanism to other packages or types of variables.
 
@@ -33,12 +33,12 @@ In the tie() call, C<VARIABLE> is the name of the variable to be
 enchanted.  C<CLASSNAME> is the name of a class implementing objects of
 the correct type.  Any additional arguments in the C<LIST> are passed to
 the appropriate constructor method for that class--meaning TIESCALAR(),
-TIEARRAY(), TIEHASH() or TIEHANDLE().  (Typically these are arguments
+TIEARRAY(), TIEHASH(), or TIEHANDLE().  (Typically these are arguments
 such as might be passed to the dbminit() function of C.) The object
 returned by the "new" method is also returned by the tie() function,
 which would be useful if you wanted to access other methods in
 C<CLASSNAME>. (You don't actually have to return a reference to a right
-"type" (e.g. HASH or C<CLASSNAME>) so long as it's a properly blessed
+"type" (e.g., HASH or C<CLASSNAME>) so long as it's a properly blessed
 object.)  You can also retrieve a reference to the underlying object
 using the tied() function.
 
@@ -105,8 +105,8 @@ variable C<$^W> to see whether to emit a bit of noise anyway.
 
 This method will be triggered every time the tied variable is accessed
 (read).  It takes no arguments beyond its self reference, which is the
-object representing the scalar we're dealing with.  Since in this case
-we're just using a SCALAR ref for the tied scalar object, a simple $$self
+object representing the scalar we're dealing with.  Because in this case
+we're using just a SCALAR ref for the tied scalar object, a simple $$self
 allows the method to get at the real value stored there.  In our example
 below, that real value is the process ID to which we've tied our variable.
 
@@ -160,7 +160,7 @@ argument--the new value the user is trying to assign.
 =item DESTROY this
 
 This method will be triggered when the tied variable needs to be destructed.
-As with other object classes, such a method is seldom necessary, since Perl
+As with other object classes, such a method is seldom necessary, because Perl
 deallocates its moribund object's memory for you automatically--this isn't
 C++, you know.  We'll use a DESTROY method here for debugging purposes only.
 
@@ -173,7 +173,7 @@ C++, you know.  We'll use a DESTROY method here for debugging purposes only.
 =back
 
 That's about all there is to it.  Actually, it's more than all there
-is to it, since we've done a few nice things here for the sake
+is to it, because we've done a few nice things here for the sake
 of completeness, robustness, and general aesthetics.  Simpler
 TIESCALAR classes are certainly possible.
 
@@ -253,7 +253,7 @@ As you may have noticed, the name of the FETCH method (et al.) is the same
 for all accesses, even though the constructors differ in names (TIESCALAR
 vs TIEARRAY).  While in theory you could have the same class servicing
 several tied types, in practice this becomes cumbersome, and it's easiest
-to simply keep them at one tie type per class.
+to keep them at simply one tie type per class.
 
 =item STORE this, index, value
 
@@ -303,8 +303,8 @@ value pairs.  FIRSTKEY and NEXTKEY implement the keys() and each()
 functions to iterate over all the keys.  And DESTROY is called when the
 tied variable is garbage collected.
 
-If this seems like a lot, then feel free to merely inherit
-from the standard Tie::Hash module for most of your methods, redefining only
+If this seems like a lot, then feel free to inherit from
+merely the standard Tie::Hash module for most of your methods, redefining only
 the interesting ones.  See L<Tie::Hash> for details.
 
 Remember that Perl distinguishes between a key not existing in the hash,
@@ -313,8 +313,8 @@ C<undef>.  The two possibilities can be tested with the C<exists()> and
 C<defined()> functions.
 
 Here's an example of a somewhat interesting tied hash class:  it gives you
-a hash representing a particular user's dotfiles.  You index into the hash
-with the name of the file (minus the dot) and you get back that dotfile's
+a hash representing a particular user's dot files.  You index into the hash
+with the name of the file (minus the dot) and you get back that dot file's
 contents.  For example:
 
     use DotFiles;
@@ -323,7 +323,7 @@ contents.  For example:
          $dot{login}   =~ /MANPATH/ ||
          $dot{cshrc}   =~ /MANPATH/    )
     {
-	print "you seem to set your manpath\n";
+	print "you seem to set your MANPATH\n";
     }
 
 Or here's another sample of using our tied class:
@@ -347,7 +347,7 @@ whose dot files this object represents
 
 =item HOME
 
-where those dotfiles live
+where those dot files live
 
 =item CLOBBER
 
@@ -355,7 +355,7 @@ whether we should try to change or remove those dot files
 
 =item LIST
 
-the hash of dotfile names and content mappings
+the hash of dot file names and content mappings
 
 =back
 
@@ -367,7 +367,7 @@ Here's the start of F<Dotfiles.pm>:
     my $DEBUG = 0;
     sub debug { $DEBUG = @_ ? shift : 1 }
 
-For our example, we want to able to emit debugging info to help in tracing
+For our example, we want to be able to emit debugging info to help in tracing
 during development.  We keep also one convenience function around
 internally to help print out warnings; whowasi() returns the function name
 that calls it.
@@ -413,7 +413,7 @@ Here's the constructor:
 
 It's probably worth mentioning that if you're going to filetest the
 return values out of a readdir, you'd better prepend the directory
-in question.  Otherwise, since we didn't chdir() there, it would
+in question.  Otherwise, because we didn't chdir() there, it would
 have been testing the wrong file.  
 
 =item FETCH this, key
@@ -445,7 +445,7 @@ Here's the fetch for our DotFiles example.
 
 It was easy to write by having it call the Unix cat(1) command, but it
 would probably be more portable to open the file manually (and somewhat
-more efficient).  Of course, since dot files are a Unixy concept, we're
+more efficient).  Of course, because dot files are a Unixy concept, we're
 not that concerned.
 
 =item STORE this, key, value
@@ -526,14 +526,14 @@ the caller whether the file was successfully deleted.
 This method is triggered when the whole hash is to be cleared, usually by
 assigning the empty list to it.
 
-In our example, that would remove all the user's dotfiles!  It's such a
+In our example, that would remove all the user's dot files!  It's such a
 dangerous thing that they'll have to set CLOBBER to something higher than
 1 to make it happen.
 
     sub CLEAR    {
 	carp &whowasi if $DEBUG;
 	my $self = shift;
-	croak "@{[&whowasi]}: won't remove all dotfiles for $self->{USER}"
+	croak "@{[&whowasi]}: won't remove all dot files for $self->{USER}"
 	    unless $self->{CLOBBER} > 1;
 	my $dot;
 	foreach $dot ( keys %{$self->{LIST}}) {
@@ -574,8 +574,8 @@ second argument which is the last key that had been accessed.  This is
 useful if you're carrying about ordering or calling the iterator from more
 than one sequence, or not really storing things in a hash anywhere.
 
-For our example, we're using a real hash so we'll just do the simple
-thing, but we'll have to indirect through the LIST field.
+For our example, we're using a real hash so we'll do just the simple
+thing, but we'll have to go through the LIST field indirectly.
 
     sub NEXTKEY  {
 	carp &whowasi if $DEBUG;
@@ -628,9 +628,9 @@ In our example we're going to create a shouting handle.
 
 This is the constructor for the class.  That means it is expected to
 return a blessed reference of some sort. The reference can be used to
-hold some internal information. We won't use it in out example.
+hold some internal information.
 
-    sub TIEHANDLE { print "<shout>\n"; my $i; bless \$i, shift }
+    sub TIEHANDLE { print "<shout>\n"; my $r; bless \$r, shift }
 
 =item PRINT this, LIST
 
@@ -680,7 +680,7 @@ You cannot easily tie a multilevel data structure (such as a hash of
 hashes) to a dbm file.  The first problem is that all but GDBM and
 Berkeley DB have size limitations, but beyond that, you also have problems
 with how references are to be represented on disk.  One experimental
-module that does attempt to partially address this need is the MLDBM
+module that does attempt to address this need partially is the MLDBM
 module.  Check your nearest CPAN site as described in L<perlmod> for
 source code to MLDBM.
 

@@ -111,10 +111,11 @@ MEM_SIZE size;
 #endif /* !defined(STANDARD_C) && !defined(HAS_REALLOC_PROTOTYPE) */
 
 #ifdef HAS_64K_LIMIT 
-	if (size > 0xffff) {
-		PerlIO_printf(PerlIO_stderr(), "Reallocation too large: %lx\n", size) FLUSH;
-		my_exit(1);
-	}
+    if (size > 0xffff) {
+	PerlIO_printf(PerlIO_stderr(),
+		      "Reallocation too large: %lx\n", size) FLUSH;
+	my_exit(1);
+    }
 #endif /* HAS_64K_LIMIT */
     if (!where)
 	croak("Null realloc");
@@ -174,10 +175,11 @@ MEM_SIZE size;
     Malloc_t ptr;
 
 #ifdef HAS_64K_LIMIT
-	if (size * count > 0xffff) {
-		PerlIO_printf(PerlIO_stderr(), "Allocation too large: %lx\n", size * count) FLUSH;
-		my_exit(1);
-	}
+    if (size * count > 0xffff) {
+	PerlIO_printf(PerlIO_stderr(),
+		      "Allocation too large: %lx\n", size * count) FLUSH;
+	my_exit(1);
+    }
 #endif /* HAS_64K_LIMIT */
 #ifdef DEBUGGING
     if ((long)size < 0 || (long)count < 0)
@@ -501,29 +503,33 @@ perl_new_numeric(newnum)
 #endif /* USE_LOCALE_NUMERIC */
 }
 
-#ifdef USE_LOCALE_NUMERIC
-
 void
 perl_set_numeric_standard()
 {
+#ifdef USE_LOCALE_NUMERIC
+
     if (! numeric_standard) {
 	setlocale(LC_NUMERIC, "C");
 	numeric_standard = TRUE;
 	numeric_local = FALSE;
     }
+
+#endif /* USE_LOCALE_NUMERIC */
 }
 
 void
 perl_set_numeric_local()
 {
+#ifdef USE_LOCALE_NUMERIC
+
     if (! numeric_local) {
 	setlocale(LC_NUMERIC, numeric_name);
 	numeric_standard = FALSE;
 	numeric_local = TRUE;
     }
-}
 
 #endif /* USE_LOCALE_NUMERIC */
+}
 
 
 /*
@@ -542,8 +548,9 @@ perl_init_i18nl10n(printwarn)
 
 #ifdef USE_LOCALE
 
+#ifdef LC_ALL
     char *lc_all     = getenv("LC_ALL");
-    char *lang       = getenv("LANG");
+#endif /* LC_ALL */
 #ifdef USE_LOCALE_CTYPE
     char *lc_ctype   = getenv("LC_CTYPE");
     char *curctype   = NULL;
@@ -556,122 +563,152 @@ perl_init_i18nl10n(printwarn)
     char *lc_numeric = getenv("LC_NUMERIC");
     char *curnum     = NULL;
 #endif /* USE_LOCALE_NUMERIC */
+    char *lang       = getenv("LANG");
     bool setlocale_failure = FALSE;
-    char *subloc;
 
 #ifdef LC_ALL
-    subloc = NULL;
+
     if (! setlocale(LC_ALL, ""))
 	setlocale_failure = TRUE;
-#else
-    subloc = "";
-#endif /* LC_ALL */
+    else {
+#ifdef USE_LOCALE_CTYPE
+	curctype = setlocale(LC_CTYPE, Nullch);
+#endif /* USE_LOCALE_CTYPE */
+#ifdef USE_LOCALE_COLLATE
+	curcoll = setlocale(LC_COLLATE, Nullch);
+#endif /* USE_LOCALE_COLLATE */
+#ifdef USE_LOCALE_NUMERIC
+	curnum = setlocale(LC_NUMERIC, Nullch);
+#endif /* USE_LOCALE_NUMERIC */
+    }
+
+#else /* !LC_ALL */
 
 #ifdef USE_LOCALE_CTYPE
-    if (! (curctype = setlocale(LC_CTYPE, subloc)))
+    if (! (curctype = setlocale(LC_CTYPE, "")))
 	setlocale_failure = TRUE;
 #endif /* USE_LOCALE_CTYPE */
 #ifdef USE_LOCALE_COLLATE
-    if (! (curcoll = setlocale(LC_COLLATE, subloc)))
+    if (! (curcoll = setlocale(LC_COLLATE, "")))
 	setlocale_failure = TRUE;
 #endif /* USE_LOCALE_COLLATE */
 #ifdef USE_LOCALE_NUMERIC
-    if (! (curnum = setlocale(LC_NUMERIC, subloc)))
+    if (! (curnum = setlocale(LC_NUMERIC, "")))
 	setlocale_failure = TRUE;
 #endif /* USE_LOCALE_NUMERIC */
 
-    if (setlocale_failure && (lc_all || lang)) {
-	char *perl_badlang;
+#endif /* LC_ALL */
 
-	if (printwarn > 1 || 
-	    printwarn &&
-	    (!(perl_badlang = getenv("PERL_BADLANG")) || atoi(perl_badlang))) {
-	  
+    if (setlocale_failure) {
+	char *p;
+	bool locwarn = (printwarn > 1 || 
+			printwarn &&
+			(!(p = getenv("PERL_BADLANG")) || atoi(p)));
+
+	if (locwarn) {
+#ifdef LC_ALL
+  
+	    PerlIO_printf(PerlIO_stderr(),
+	       "perl: warning: Setting locale failed.\n");
+
+#else /* !LC_ALL */
+  
 	    PerlIO_printf(PerlIO_stderr(),
 	       "perl: warning: Setting locale failed for the categories:\n\t");
 #ifdef USE_LOCALE_CTYPE
 	    if (! curctype)
-		PerlIO_printf(PerlIO_stderr(), "USE_LOCALE_CTYPE ");
+		PerlIO_printf(PerlIO_stderr(), "LC_CTYPE ");
 #endif /* USE_LOCALE_CTYPE */
 #ifdef USE_LOCALE_COLLATE
 	    if (! curcoll)
-		PerlIO_printf(PerlIO_stderr(), "USE_LOCALE_COLLATE ");
+		PerlIO_printf(PerlIO_stderr(), "LC_COLLATE ");
 #endif /* USE_LOCALE_COLLATE */
 #ifdef USE_LOCALE_NUMERIC
 	    if (! curnum)
-		PerlIO_printf(PerlIO_stderr(), "USE_LOCALE_NUMERIC ");
+		PerlIO_printf(PerlIO_stderr(), "LC_NUMERIC ");
 #endif /* USE_LOCALE_NUMERIC */
 	    PerlIO_printf(PerlIO_stderr(), "\n");
+
+#endif /* LC_ALL */
 
 	    PerlIO_printf(PerlIO_stderr(),
 		"perl: warning: Please check that your locale settings:\n");
 
+#ifdef LC_ALL
 	    PerlIO_printf(PerlIO_stderr(),
 			  "\tLC_ALL = %c%s%c,\n",
 			  lc_all ? '"' : '(',
 			  lc_all ? lc_all : "unset",
 			  lc_all ? '"' : ')');
-#ifdef USE_LOCALE_CTYPE
-	    if (! curctype)
-		PerlIO_printf(PerlIO_stderr(),
-			      "\tLC_CTYPE = %c%s%c,\n",
-			      lc_ctype ? '"' : '(',
-			      lc_ctype ? lc_ctype : "unset",
-			      lc_ctype ? '"' : ')');
-#endif /* USE_LOCALE_CTYPE */
-#ifdef USE_LOCALE_COLLATE
-	    if (! curcoll)
-		PerlIO_printf(PerlIO_stderr(),
-			      "\tLC_COLLATE = %c%s%c,\n",
-			      lc_collate ? '"' : '(',
-			      lc_collate ? lc_collate : "unset",
-			      lc_collate ? '"' : ')');
-#endif /* USE_LOCALE_COLLATE */
-#ifdef USE_LOCALE_NUMERIC
-	    if (! curnum)
-		PerlIO_printf(PerlIO_stderr(),
-			      "\tLC_NUMERIC = %c%s%c,\n",
-			      lc_numeric ? '"' : '(',
-			      lc_numeric ? lc_numeric : "unset",
-			      lc_numeric ? '"' : ')');
-#endif /* USE_LOCALE_NUMERIC */
+#endif /* LC_ALL */
+
+	    {
+	      char **e;
+	      for (e = environ; *e; e++) {
+		  if (strnEQ(*e, "LC_", 3)
+			&& strnNE(*e, "LC_ALL=", 7)
+			&& (p = strchr(*e, '=')))
+		      PerlIO_printf(PerlIO_stderr(), "\t%.*s = \"%s\",\n",
+				    (p - *e), *e, p + 1);
+	      }
+	    }
+
 	    PerlIO_printf(PerlIO_stderr(),
 			  "\tLANG = %c%s%c\n",
-			  lang ? '"' : ')',
+			  lang ? '"' : '(',
 			  lang ? lang : "unset",
 			  lang ? '"' : ')');
 
 	    PerlIO_printf(PerlIO_stderr(),
 			  "    are supported and installed on your system.\n");
-
-	    ok = 0;
 	}
 
 #ifdef LC_ALL
-	if (setlocale_failure) {
-	    PerlIO_printf(PerlIO_stderr(),
-			"perl: warning: Falling back to the \"C\" locale.\n");
-	    if (setlocale(LC_ALL, "C")) {
+
+	if (setlocale(LC_ALL, "C")) {
+	    if (locwarn)
+		PerlIO_printf(PerlIO_stderr(),
+      "perl: warning: Falling back to the standard locale (\"C\").\n");
+	    ok = 0;
+	}
+	else {
+	    if (locwarn)
+		PerlIO_printf(PerlIO_stderr(),
+      "perl: warning: Failed to fall back to the standard locale (\"C\").\n");
+	    ok = -1;
+	}
+
+#else /* ! LC_ALL */
+
+	if (0
 #ifdef USE_LOCALE_CTYPE
-		curctype = "C";
+	    || !(curctype || setlocale(LC_CTYPE, "C"))
 #endif /* USE_LOCALE_CTYPE */
 #ifdef USE_LOCALE_COLLATE
-		curcoll = "C";
+	    || !(curcoll || setlocale(LC_COLLATE, "C"))
 #endif /* USE_LOCALE_COLLATE */
 #ifdef USE_LOCALE_NUMERIC
-		curnum = "C";
+	    || !(curnum || setlocale(LC_NUMERIC, "C"))
 #endif /* USE_LOCALE_NUMERIC */
-	    }
-	    else {
+	    )
+	{
+	    if (locwarn)
 		PerlIO_printf(PerlIO_stderr(),
-		  "perl: warning: Failed to fall back to the \"C\" locale.\n");
-		ok = -1;
-	    }
+      "perl: warning: Cannot fall back to the standard locale (\"C\").\n");
+	    ok = -1;
 	}
-#else /* ! LC_ALL */
-	PerlIO_printf(PerlIO_stderr(),
-		   "perl: warning: Cannot fall back to the \"C\" locale.\n");
+
 #endif /* ! LC_ALL */
+
+#ifdef USE_LOCALE_CTYPE
+	curctype = setlocale(LC_CTYPE, Nullch);
+#endif /* USE_LOCALE_CTYPE */
+#ifdef USE_LOCALE_COLLATE
+	curcoll = setlocale(LC_COLLATE, Nullch);
+#endif /* USE_LOCALE_COLLATE */
+#ifdef USE_LOCALE_NUMERIC
+	curnum = setlocale(LC_NUMERIC, Nullch);
+#endif /* USE_LOCALE_NUMERIC */
     }
 
 #ifdef USE_LOCALE_CTYPE
@@ -696,7 +733,7 @@ int
 perl_init_i18nl14n(printwarn)	
     int printwarn;
 {
-    perl_init_i18nl10n(printwarn);
+    return perl_init_i18nl10n(printwarn);
 }
 
 #ifdef USE_LOCALE_COLLATE
@@ -1034,7 +1071,7 @@ mess(pat, args)
     }
     va_end(*args);
 
-    if (s[-1] != '\n') {
+    if (!(s > s_start && s[-1] == '\n')) {
 	if (dirty)
 	    strcpy(s, " during global destruction.\n");
 	else {
@@ -1551,8 +1588,8 @@ VTOH(vtohs,short)
 VTOH(vtohl,long)
 #endif
 
-#if  (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) \
-     && !defined(VMS)  /* VMS' my_popen() is in VMS.c, same with OS/2. */
+    /* VMS' my_popen() is in VMS.c, same with OS/2. */
+#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS)
 PerlIO *
 my_popen(cmd,mode)
 char	*cmd;
@@ -1809,9 +1846,8 @@ Sigsave_t *save;
 
 #endif /* !HAS_SIGACTION */
 
-
-#if  (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) \
-     && !defined(VMS)  /* VMS' my_popen() is in VMS.c */
+    /* VMS' my_pclose() is in VMS.c; same with OS/2 */
+#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS)
 I32
 my_pclose(ptr)
 PerlIO *ptr;

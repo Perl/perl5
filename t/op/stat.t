@@ -116,8 +116,9 @@ if (! -b '.') {print "ok 34\n";} else {print "not ok 34\n";}
 $cnt = $uid = 0;
 
 die "Can't run op/stat.t test 35 without pwd working" unless $cwd;
-print ("not ok 35\n"), goto tty_test unless -d '/usr/bin';
-chdir '/usr/bin' || die "Can't cd to /usr/bin";
+($bin) = grep {-d} qw(/bin /usr/bin)
+    or print ("not ok 35\n"), goto tty_test;
+chdir $bin || die "Can't cd to $bin: $!";
 while (defined($_ = <*>)) {
     $cnt++;
     $uid++ if -u;

@@ -142,28 +142,8 @@ PP(pp_rv2gv)
 	    sv = (SV*)gv_fetchpv(sym, TRUE, SVt_PVGV);
 	}
     }
-    if (op->op_private & OPpLVAL_INTRO) {
-	GP *ogp = GvGP(sv);
-
-	SSCHECK(3);
-	SSPUSHPTR(SvREFCNT_inc(sv));
-	SSPUSHPTR(ogp);
-	SSPUSHINT(SAVEt_GP);
-
-	if (op->op_flags & OPf_SPECIAL) {
-	    GvGP(sv)->gp_refcnt++;		/* will soon be assigned */
-	    GvINTRO_on(sv);
-	}
-	else {
-	    GP *gp;
-	    Newz(602,gp, 1, GP);
-	    GvGP(sv) = gp;
-	    GvREFCNT(sv) = 1;
-	    GvSV(sv) = NEWSV(72,0);
-	    GvLINE(sv) = curcop->cop_line;
-	    GvEGV(sv) = (GV*)sv;
-	}
-    }
+    if (op->op_private & OPpLVAL_INTRO)
+	save_gp((GV*)sv, !(op->op_flags & OPf_SPECIAL));
     SETs(sv);
     RETURN;
 }
@@ -208,7 +188,7 @@ PP(pp_rv2sv)
     if (op->op_flags & OPf_MOD) {
 	if (op->op_private & OPpLVAL_INTRO)
 	    sv = save_scalar((GV*)TOPs);
-	else if (op->op_private & (OPpDEREF_HV|OPpDEREF_AV))
+	else if (op->op_private & OPpDEREF)
 	    provide_ref(op, sv);
     }
     SETs(sv);
@@ -234,7 +214,12 @@ PP(pp_pos)
     dSP; dTARGET; dPOPss;
     
     if (op->op_flags & OPf_MOD) {
-	LvTYPE(TARG) = '<';
+	if (SvTYPE(TARG) < SVt_PVLV) {
+	    sv_upgrade(TARG, SVt_PVLV);
+	    sv_magic(TARG, Nullsv, '.', Nullch, 0);
+	}
+
+	LvTYPE(TARG) = '.';
 	LvTARG(TARG) = sv;
 	PUSHs(TARG);	/* no SvSETMAGIC */
 	RETURN;
@@ -279,10 +264,8 @@ PP(pp_prototype)
 
     ret = &sv_undef;
     cv = sv_2cv(TOPs, &stash, &gv, FALSE);
-    if (cv && SvPOK(cv)) {
-	char *p = SvPVX(cv);
-	ret = sv_2mortal(newSVpv(p ? p : "", SvLEN(cv)));
-    }
+    if (cv && SvPOK(cv))
+	ret = sv_2mortal(newSVpv(SvPVX(cv), SvCUR(cv)));
     SETs(ret);
     RETURN;
 }
@@ -290,12 +273,10 @@ PP(pp_prototype)
 PP(pp_anoncode)
 {
     dSP;
-    CV* cv = (CV*)cSVOP->op_sv;
-    EXTEND(SP,1);
-
+    CV* cv = (CV*)curpad[op->op_targ];
     if (CvCLONE(cv))
 	cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
-
+    EXTEND(SP,1);
     PUSHs((SV*)cv);
     RETURN;
 }
@@ -1328,7 +1309,7 @@ PP(pp_srand)
 	_ckvmssts(sys$gettim(when));
 	anum = when[0] ^ when[1];
 #else
-#  if defined(I_SYS_TIME) && !defined(PLAN9)
+#  ifdef HAS_GETTIMEOFDAY
 	struct timeval when;
 	gettimeofday(&when,(struct timezone *) 0);
 	anum = when.tv_sec ^ when.tv_usec;
@@ -1516,12 +1497,13 @@ PP(pp_substr)
 		else
 		    sv_setpvn(sv,"",0);	/* avoid lexical reincarnation */
 	    }
+
 	    if (SvTYPE(TARG) < SVt_PVLV) {
 		sv_upgrade(TARG, SVt_PVLV);
 		sv_magic(TARG, Nullsv, 'x', Nullch, 0);
 	    }
 
-	    LvTYPE(TARG) = 's';
+	    LvTYPE(TARG) = 'x';
 	    LvTARG(TARG) = sv;
 	    LvTARGOFF(TARG) = pos;
 	    LvTARGLEN(TARG) = rem; 
@@ -1974,17 +1956,35 @@ PP(pp_delete)
 {
     dSP;
     SV *sv;
-    SV *tmpsv = POPs;
-    HV *hv = (HV*)POPs;
-    STRLEN len;
-    if (SvTYPE(hv) != SVt_PVHV) {
-	DIE("Not a HASH reference");
+    HV *hv;
+
+    if (op->op_private & OPpSLICE) {
+	dMARK; dORIGMARK;
+	hv = (HV*)POPs;
+	if (SvTYPE(hv) != SVt_PVHV)
+	    DIE("Not a HASH reference");
+	while (++MARK <= SP) {
+	    sv = hv_delete_ent(hv, *MARK,
+			(op->op_private & OPpLEAVE_VOID ? G_DISCARD : 0), 0);
+	    *MARK = sv ? sv : &sv_undef;
+	}
+	if (GIMME != G_ARRAY) {
+	    MARK = ORIGMARK;
+	    *++MARK = *SP;
+	    SP = MARK;
+	}
     }
-    sv = hv_delete_ent(hv, tmpsv,
-	(op->op_private & OPpLEAVE_VOID ? G_DISCARD : 0), 0);
-    if (!sv)
-	RETPUSHUNDEF;
-    PUSHs(sv);
+    else {
+	SV *keysv = POPs;
+	hv = (HV*)POPs;
+	if (SvTYPE(hv) != SVt_PVHV)
+	    DIE("Not a HASH reference");
+	sv = hv_delete_ent(hv, keysv,
+			(op->op_private & OPpLEAVE_VOID ? G_DISCARD : 0), 0);
+	if (!sv)
+	    sv = &sv_undef;
+	PUSHs(sv);
+    }
     RETURN;
 }
 
@@ -2116,7 +2116,6 @@ PP(pp_anonlist)
 PP(pp_anonhash)
 {
     dSP; dMARK; dORIGMARK;
-    STRLEN len;
     HV* hv = (HV*)sv_2mortal((SV*)newHV());
 
     while (MARK < SP) {
@@ -3567,6 +3566,7 @@ PP(pp_pack)
 			*--in = div128(norm, &done) | 0x80;
 		    result[len - 1] &= 0x7F; /* clear continue bit */
 		    sv_catpvn(cat, in, (result + len) - in);
+		    Safefree(result);
 		    SvREFCNT_dec(norm);	/* free norm */
                 }
 		else if (SvNOKp(fromstr)) {

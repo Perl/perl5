@@ -125,12 +125,12 @@ you can use the Configure command line option -Uusedl.
 By default, Configure will offer to build every extension which appears
 to be supported.  For example, Configure will offer to build GDBM_File
 only if it is able to find the gdbm library.  (See examples below.)
-DynaLoader, Fcntl, FileHandle and IO are always built by default.
-Configure does not contain code to test for POSIX compliance, so POSIX
-is always built by default as well.  If you wish to skip POSIX, you can
-set the Configure variable useposix=false either in a hint file or from
-the Configure command line.  Similarly, the Opcode extension is always
-built by default, but you can skip it by setting the Configure variable
+DynaLoader, Fcntl, and IO are always built by default.  Configure does
+not contain code to test for POSIX compliance, so POSIX is always built
+by default as well.  If you wish to skip POSIX, you can set the
+Configure variable useposix=false either in a hint file or from the
+Configure command line.  Similarly, the Opcode extension is always built
+by default, but you can skip it by setting the Configure variable
 useopcode=false either in a hint file for from the command line.
 
 Even if you do not have dynamic loading, you must still build the
@@ -143,7 +143,6 @@ to turn off each extension:
     DB_File		i_db
     DynaLoader		(Must always be included as a static extension)
     Fcntl		(Always included by default)
-    FileHandle		(Always included by default)
     GDBM_File		i_gdbm
     IO			(Always included by default)
     NDBM_File		i_ndbm
@@ -884,6 +883,11 @@ UTS may need one or more of B<-DCRIPPLED_CC>, B<-K> or B<-g>, and undef LSTAT.
 If you get syntax errors on '(', try -DCRIPPLED_CC.
 
 Machines with half-implemented dbm routines will need to #undef I_ODBM
+
+db-recno failure on tests 51, 53 and 55:  Old versions of the DB library
+(including the DB library which comes with FreeBSD 2.1) had broken
+handling of recno databases with modified bval settings.  Upgrade your
+DB library or OS.
 
 =back
 

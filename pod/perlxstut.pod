@@ -10,8 +10,8 @@ L<perlxs>.
 
 This tutorial starts with very simple examples and becomes more complex,
 with each new example adding new features.  Certain concepts may not be
-completely explained until later in the tutorial in order to slowly ease
-the reader into building extensions.
+completely explained until later in the tutorial to ease the
+reader slowly into building extensions.
 
 =head2 VERSION CAVEAT
 
@@ -63,7 +63,7 @@ Some systems may have installed Perl version 5 as "perl5".
 =head2 DYNAMIC VERSUS STATIC
 
 It is commonly thought that if a system does not have the capability to
-dynamically load a library, you cannot build XSUBs.  This is incorrect.
+load a library dynamically, you cannot build XSUBs.  This is incorrect.
 You I<can> build them, but you must link the XSUB's subroutines with the
 rest of Perl, creating a new executable.  This situation is similar to
 Perl 4.
@@ -227,7 +227,7 @@ Now re-run make to rebuild our new shared library.
 Now perform the same steps as before, generating a Makefile from the
 Makefile.PL file, and running make.
 
-In order to test that our extension works, we now need to look at the
+To test that our extension works, we now need to look at the
 file test.pl.  This file is set up to imitate the same kind of testing
 structure that Perl itself has.  Within the test script, you perform a
 number of tests to confirm the behavior of the extension, printing "ok"
@@ -446,7 +446,7 @@ section on the argument stack.
 =head2 WARNING
 
 In general, it's not a good idea to write extensions that modify their input
-parameters, as in Example 3.  However, in order to better accommodate calling
+parameters, as in Example 3.  However, to accommodate better calling
 pre-existing C routines, which often do modify their input parameters,
 this behavior is tolerated.  The next example will show how to do this.
 
@@ -577,7 +577,7 @@ and add the following lines to the end of the script:
 	print &Mytest2::foo(1, 2, "0.0") == 7 ? "ok 3\n" : "not ok 3\n";
 	print abs(&Mytest2::foo(0, 0, "-3.4") - 0.6) <= 0.01 ? "ok 4\n" : "not ok 4\n";
 
-(When dealing with floating-point comparisons, it is often useful to not check
+(When dealing with floating-point comparisons, it is often useful not to check
 for equality, but rather the difference being below a certain epsilon factor,
 0.01 in this case)
 
@@ -607,7 +607,7 @@ C<constant> routine.
 
 The .pm file has exported the name TESTVAL in the @EXPORT array.  This
 could lead to name clashes.  A good rule of thumb is that if the #define
-is only going to be used by the C routines themselves, and not by the user,
+is going to be used by only the C routines themselves, and not by the user,
 they should be removed from the @EXPORT array.  Alternately, if you don't
 mind using the "fully qualified name" of a variable, you could remove most
 or all of the items in the @EXPORT array.
@@ -620,12 +620,12 @@ processed at all by h2xs.  There is no good solution to this right now.
 =back
 
 We've also told Perl about the library that we built in the mylib
-subdirectory.  That required only the addition of the MYEXTLIB variable
+subdirectory.  That required the addition of only the MYEXTLIB variable
 to the WriteMakefile call and the replacement of the postamble subroutine
 to cd into the subdirectory and run make.  The Makefile.PL for the
 library is a bit more complicated, but not excessively so.  Again we
 replaced the postamble subroutine to insert our own code.  This code
-simply specified that the library to be created here was a static
+specified simply that the library to be created here was a static
 archive (as opposed to a dynamically loadable library) and provided the
 commands to build it.
 
@@ -696,7 +696,7 @@ Sometimes you might want to provide some extra methods or subroutines
 to assist in making the interface between Perl and your extension simpler
 or easier to understand.  These routines should live in the .pm file.
 Whether they are automatically loaded when the extension itself is loaded
-or only loaded when called depends on where in the .pm file the subroutine
+or loaded only when called depends on where in the .pm file the subroutine
 definition is placed.
 
 =head2 DOCUMENTING YOUR EXTENSION

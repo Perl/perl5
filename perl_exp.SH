@@ -20,13 +20,25 @@ echo "Extracting perl.exp"
 rm -f perl.exp
 echo "#!" > perl.exp
 
-sed -n '/^[A-Za-z]/ s/^/Perl_/p' global.sym >> perl.exp
-
-#
-# also add symbols from interp.sym
-# They are only needed if -DMULTIPLICITY is not set but it
-# doesn't hurt to include them anyway.
-sed -n '/^[A-Za-z]/ s/^/Perl_/p' interp.sym >> perl.exp
+case "$bincompat3" in
+y*)
+	global=/tmp/exp$$g
+	interp=/tmp/exp$$i
+	compat3=/tmp/exp$$c
+	trap 'rm -f $global $interp $compat3' 0
+	trap 'exit 1' 1 2 3 13 15
+	grep '^[A-Za-z]' global.sym | sort >$global
+	grep '^[A-Za-z]' interp.sym | sort >$interp
+	grep '^[A-Za-z]' compat3.sym | sort >$compat3
+	comm -23 $global $compat3 | sed 's/^/Perl_/p' >> perl.exp
+	comm -12 $global $compat3 >> perl.exp
+	comm -12 $interp $compat3 | sed 's/^/Perl_/p' >> perl.exp
+	comm -23 $interp $compat3 >> perl.exp
+	;;
+*)
+	sed -n '/^[A-Za-z]/ s/^/Perl_/p' global.sym interp.sym >> perl.exp
+	;;
+esac
 
 # extra globals not included above.
 cat <<END >> perl.exp

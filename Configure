@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.8 1995/07/25 13:40:02 ram Exp $
 #
-# Generated on Thu Oct 10 15:08:34 EDT 1996 [metaconfig 3.0 PL60]
+# Generated on Tue Dec 17 14:33:33 EST 1996 [metaconfig 3.0 PL60]
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -227,6 +227,8 @@ baserev=''
 bin=''
 binexp=''
 installbin=''
+bincompat3=''
+d_bincompat3=''
 byteorder=''
 cc=''
 gccversion=''
@@ -284,6 +286,8 @@ d_flexfnam=''
 d_flock=''
 d_fork=''
 d_fsetpos=''
+d_ftime=''
+d_gettimeod=''
 d_Gconvert=''
 d_getgrps=''
 d_gethent=''
@@ -773,7 +777,7 @@ case "$sh" in
 '')	cat <<EOM >&2
 $me:  Fatal Error:  I can't find a Bourne Shell anywhere.  
 Usually it's in /bin/sh.  How did you even get this far?
-Please contact me (Andy Dougherty) at doughera@lafcol.lafayette.edu and 
+Please contact me (Chip Salzenberg) at chip@atlantic.net and 
 we'll try to straigten this all out.
 EOM
 	exit 1
@@ -849,11 +853,11 @@ cat >>extract <<'EOS'
 CONFIG=true
 echo "Doing variable substitutions on .SH files..."
 if test -f MANIFEST; then
-	shlist=`awk '!/^old_/ {print $1}' <MANIFEST | grep '\.SH$'`
+	shlist=`awk '{print $1}' <MANIFEST | grep '\.SH'`
 	: Pick up possible extension manifests.
 	for dir in ext/* ; do
 		if test -f $dir/MANIFEST; then
-			xxx=`awk '!/^old_/ {print $1}' < $dir/MANIFEST | 
+			xxx=`awk '{print $1}' < $dir/MANIFEST | 
 				sed -n "/\.SH$/ s@^@$dir/@p"`
 			shlist="$shlist $xxx"
 		fi
@@ -861,7 +865,7 @@ if test -f MANIFEST; then
 	set x $shlist
 else
 	echo "(Looking for .SH files under the current directory.)"
-	set x `find . -name "*.SH" -print | grep -v '/old_'`
+	set x `find . -name "*.SH" -print`
 fi
 shift
 case $# in
@@ -1141,7 +1145,7 @@ THIS PACKAGE SEEMS TO BE INCOMPLETE.
 You have the option of continuing the configuration process, despite the
 distinct possibility that your kit is damaged, by typing 'y'es.  If you
 do, don't blame me if something goes wrong.  I advise you to type 'n'o
-and contact the author (doughera@lafcol.lafayette.edu).
+and contact the author (chip@atlantic.net).
 
 EOM
 		echo $n "Continue? [n] $c" >&4
@@ -1341,7 +1345,7 @@ Much effort has been expended to ensure that this shell script will run on any
 Unix system.  If despite that it blows up on yours, your best bet is to edit
 Configure and run it again.  If you can't run Configure for some reason,
 you'll have to generate a config.sh file by hand.  Whatever problems you
-have, let me (doughera@lafcol.lafayette.edu) know how I blew it.
+have, let me (chip@atlantic.net) know how I blew it.
 
 This installation script affects things in two ways:
 
@@ -1631,13 +1635,14 @@ EOM
 	cd hints; ls -C *.sh | $sed 's/\.sh/   /g' >&4
 	dflt=''
 	: Half the following guesses are probably wrong... If you have better
-	: tests or hints, please send them to doughera@lafcol.lafayette.edu
+	: tests or hints, please send them to chip@atlantic.net
 	: The metaconfig authors would also appreciate a copy...
 	$test -f /irix && osname=irix
 	$test -f /xenix && osname=sco_xenix
 	$test -f /dynix && osname=dynix
 	$test -f /dnix && osname=dnix
- 	$test -f /unicos && osname=unicos && osvers=`$uname -r`
+	$test -f /lynx.os && osname=lynxos
+	$test -f /unicos && osname=unicos && osvers=`$uname -r`
 	$test -f /bin/mips && /bin/mips && osname=mips
 	$test -d /NextApps && set X `hostinfo | grep 'NeXT Mach.*:' | \
 		$sed -e 's/://' -e 's/\./_/'` && osname=next && osvers=$4
@@ -1781,7 +1786,7 @@ EOM
 		$2) case "$osname" in
 			*isc*) ;;
 			*freebsd*) ;;
- 			svr*)
+			svr*)
 				: svr4.x or possibly later
 				case "svr$3" in	
 				${osname}*)
@@ -2020,7 +2025,8 @@ if xxx=`./loc arch blurfl $pth`; $test -f "$xxx"; then
 	tarch=`arch`"-$osname"
 elif xxx=`./loc uname blurfl $pth`; $test -f "$xxx" ; then
 	if uname -m > tmparch 2>&1 ; then
-		tarch=`$sed -e 's/ /_/g' -e 's/_*$//' -e 's/$/'"-$osname/" tmparch`
+		tarch=`$sed -e 's/ *$//' -e 's/ /_/g'
+			-e 's/$/'"-$osname/" tmparch`
 	else
 		tarch="$osname"
 	fi
@@ -2418,7 +2424,7 @@ else
 fi
 
 : set the base revision
-baserev=5.0
+baserev=5
 
 : get the patchlevel
 echo " "
@@ -2430,7 +2436,12 @@ else
 	patchlevel=0
 	subversion=0
 fi
-$echo $n "(You have $package $baserev patchlevel $patchlevel" $c
+$echo $n "(You have $package" $c
+case "$package" in
+"*$baserev")	;;
+*)		$echo $n " $baserev" $c ;;
+esac
+$echo $n " patchlevel $patchlevel" $c
 test 0 -eq "$subversion" || $echo $n " subversion $subversion" $c
 echo ".)"
 
@@ -2522,6 +2533,33 @@ $define$undef) . ./whoa; eval "$var=\$td";;
 $undef$define) . ./whoa; eval "$var=\$tu";;
 *) eval "$var=$val";;
 esac'
+
+$cat <<EOM
+
+Perl 5.004 can be compiled for binary compatibility with 5.003.
+If you decide to do so, you will be able to continue using any
+extensions that were compiled for Perl 5.003.  However, binary
+compatibility forces Perl to expose some of its internal symbols
+in the same way that 5.003 did.  So you may have symbol conflicts
+if you embed a binary-compatible Perl in other programs.
+
+EOM
+case "$d_bincompat3" in
+"$undef") dflt=n ;;
+*) dflt=y ;;
+esac
+rp='Binary compatibility with Perl 5.003?'
+. ./myread
+case "$ans" in
+y*) val="$define" ;;
+*)  val="$undef" ;;
+esac
+set d_bincompat3
+eval $setvar
+case "$d_bincompat3" in
+"$define") bincompat3=y ;;
+*) bincompat3=n ;;
+esac
 
 : make some quick guesses about what we are up against
 echo " "
@@ -3219,6 +3257,25 @@ none) libpth=' ';;
 *) libpth="$ans";;
 esac
 
+: Define several unixisms. Hints files or command line options
+: can be used to override them.
+case "$ar" in
+'') ar='ar';;
+esac
+case "$lib_ext" in
+'') lib_ext='.a';;
+esac
+case "$obj_ext" in
+'') obj_ext='.o';;
+esac
+case "$path_sep" in
+'') path_sep=':';;
+esac
+: Which makefile gets called first.  This is used by make depend.
+case "$firstmakefile" in
+'') firstmakefile='makefile';;
+esac
+
 : compute shared library extension
 case "$so" in
 '')
@@ -3240,11 +3297,6 @@ EOM
 rp='What is the file extension used for shared libraries?'
 . ./myread
 so="$ans"
-
-: If no lib_ext yet, assume '.a'.
-case "$lib_ext" in
-'') lib_ext='.a';;
-esac
 
 : Looking for optional libraries
 echo " "
@@ -3270,25 +3322,25 @@ for thislib in $libswanted; do
 		*"-l$thislib "*);;
 		*) dflt="$dflt -l$thislib";;
 		esac
-	elif xxx=`./loc lib$thislib${lib_ext} X $libpth`; $test -f "$xxx"; then
+	elif xxx=`./loc lib$thislib$lib_ext X $libpth`; $test -f "$xxx"; then
 		echo "Found -l$thislib."
 		case " $dflt " in
 		*"-l$thislib "*);;
 		*) dflt="$dflt -l$thislib";;
 		esac
-	elif xxx=`./loc $thislib${lib_ext} X $libpth`; $test -f "$xxx"; then
+	elif xxx=`./loc $thislib$lib_ext X $libpth`; $test -f "$xxx"; then
 		echo "Found -l$thislib."
 		case " $dflt " in
 		*"-l$thislib "*);;
 		*) dflt="$dflt -l$thislib";;
 		esac
-	elif xxx=`./loc lib${thislib}_s${lib_ext} X $libpth`; $test -f "$xxx"; then
+	elif xxx=`./loc lib${thislib}_s$lib_ext X $libpth`; $test -f "$xxx"; then
 		echo "Found -l${thislib}_s."
 		case " $dflt " in
 		*"-l$thislib "*);;
 		*) dflt="$dflt -l${thislib}_s";;
 		esac
-	elif xxx=`./loc Slib$thislib${lib_ext} X $xlibpth`; $test -f "$xxx"; then
+	elif xxx=`./loc Slib$thislib$lib_ext X $xlibpth`; $test -f "$xxx"; then
 		echo "Found -l$thislib."
 		case " $dflt " in
 		*"-l$thislib "*);;
@@ -3546,7 +3598,6 @@ if ./osf1; then
 else
 	set signal.h LANGUAGE_C; eval $inctest
 fi
-set signal.h NO_PROTOTYPE; eval $inctest
 set signal.h _NO_PROTO; eval $inctest
 
 case "$hint" in
@@ -3839,7 +3890,7 @@ echo " "
 case "$libc" in
 '') libc=unknown
 	case "$libs" in
-	*-lc_s*) libc=`./loc libc_s${lib_ext} $libc $libpth`
+	*-lc_s*) libc=`./loc libc_s$lib_ext $libc $libpth`
 	esac
 	;;
 esac
@@ -3857,15 +3908,13 @@ case "$libs" in
 			:
 		elif try=`./loc lib$thislib.$so X $libpth`; $test -f "$try"; then
 			:
-		elif try=`./loc lib$thislib${lib_ext} X $libpth`; $test -f "$try"; then
-			:
-		elif try=`./loc $thislib${lib_ext} X $libpth`; $test -f "$try"; then
+		elif try=`./loc lib$thislib$lib_ext X $libpth`; $test -f "$try"; then
 			:
 		elif try=`./loc lib$thislib X $libpth`; $test -f "$try"; then
 			:
 		elif try=`./loc $thislib X $libpth`; $test -f "$try"; then
 			:
-		elif try=`./loc Slib$thislib${lib_ext} X $xlibpth`; $test -f "$try"; then
+		elif try=`./loc Slib$thislib$lib_ext X $xlibpth`; $test -f "$try"; then
 			:
 		else
 			try=''
@@ -3896,7 +3945,7 @@ unknown)
 		eval set \$$#
 	done
 	$test -r $1 || set /usr/ccs/lib/libc.$so
-  	$test -r $1 || set /lib/libsys_s.a
+  	$test -r $1 || set /lib/libsys_s$lib_ext
   	;;
 *)
 	set blurfl
@@ -3915,25 +3964,25 @@ elif $test -r /lib/libc && $test -r /lib/clib; then
 	fi
 elif $test -r "$libc" || (test -h "$libc") >/dev/null 2>&1; then
 	echo "Your C library seems to be in $libc, as you said before."
-elif $test -r $incpath/usr/lib/libc${lib_ext}; then
-	libc=$incpath/usr/lib/libc${lib_ext};
+elif $test -r $incpath/usr/lib/libc$lib_ext; then
+	libc=$incpath/usr/lib/libc$lib_ext;
 	echo "Your C library seems to be in $libc.  That's fine."
-elif $test -r /lib/libc${lib_ext}; then
-	libc=/lib/libc${lib_ext};
+elif $test -r /lib/libc$lib_ext; then
+	libc=/lib/libc$lib_ext;
 	echo "Your C library seems to be in $libc.  You're normal."
 else
-	if tans=`./loc libc${lib_ext} blurfl/dyick $libpth`; $test -r "$tans"; then
+	if tans=`./loc libc$lib_ext blurfl/dyick $libpth`; $test -r "$tans"; then
 		:
 	elif tans=`./loc libc blurfl/dyick $libpth`; $test -r "$tans"; then
 		libnames="$libnames "`./loc clib blurfl/dyick $libpth`
 	elif tans=`./loc clib blurfl/dyick $libpth`; $test -r "$tans"; then
 		:
-	elif tans=`./loc Slibc${lib_ext} blurfl/dyick $xlibpth`; $test -r "$tans"; then
+	elif tans=`./loc Slibc$lib_ext blurfl/dyick $xlibpth`; $test -r "$tans"; then
 		:
-	elif tans=`./loc Mlibc${lib_ext} blurfl/dyick $xlibpth`; $test -r "$tans"; then
+	elif tans=`./loc Mlibc$lib_ext blurfl/dyick $xlibpth`; $test -r "$tans"; then
 		:
 	else
-		tans=`./loc Llibc${lib_ext} blurfl/dyick $xlibpth`
+		tans=`./loc Llibc$lib_ext blurfl/dyick $xlibpth`
 	fi
 	if $test -r "$tans"; then
 		echo "Your C library seems to be in $tans, of all places."
@@ -4086,22 +4135,6 @@ fi
 ;;
 esac
 $rm -f libnames libpath
-
-: Define several unixisms. Hints files or command line options
-: can be used to override them.
-case "$ar" in
-'') ar='ar';;
-esac
-case "$obj_ext" in
-'') obj_ext='.o';;
-esac
-case "$path_sep" in
-'') path_sep=':';;
-esac
-: Which makefile gets called first.  This is used by make depend.
-case "$firstmakefile" in
-'') firstmakefile='makefile';;
-esac
 
 : determine filename position in cpp output
 echo " "
@@ -4608,7 +4641,7 @@ case "$shrpdir" in
 *)	$cat >&4 <<EOM
 WARNING:  Use of the shrpdir variable for the installation location of
 the shared $libperl is not supported.  It was never documented and
-will not work in this version.  Let me (doughera@lafcol.lafayette.edu)
+will not work in this version.  Let me (chip@atlantic.net)
 know of any problems this may cause.
 
 EOM
@@ -5216,6 +5249,63 @@ rp='Perl administrator e-mail address'
 . ./myread
 perladmin="$ans"
 
+: figure out how to guarantee perl startup
+case "$startperl" in
+'')
+	case "$sharpbang" in
+	*!)
+		$cat <<EOH
+
+I can use the #! construct to start perl on your system. This will
+make startup of perl scripts faster, but may cause problems if you
+want to share those scripts and perl is not in a standard place
+($binexp/perl) on all your platforms. The alternative is to force
+a shell by starting the script with a single ':' character.
+
+EOH
+		dflt="$binexp/perl"
+		rp='What shall I put after the #! to start up perl ("none" to not use #!)?'
+		. ./myread
+		case "$ans" in
+		none) startperl=": # use perl";;
+		*) startperl="#!$ans";;
+		esac
+		;;
+	*) startperl=": # use perl"
+		;;
+	esac
+	;;
+esac
+echo "I'll use $startperl to start perl scripts."
+
+: figure best path for perl in scripts
+case "$perlpath" in
+'')
+	perlpath="$binexp/perl"
+	case "$startperl" in
+	*!*) ;;
+	*)
+		$cat <<EOH
+
+I will use the "eval 'exec'" idiom to start Perl on your system.
+I can use the full path of your Perl binary for this purpose, but
+doing so may cause problems if you want to share those scripts and
+Perl is not always in a standard place ($binexp/perl).
+
+EOH
+		dflt="$binexp/perl"
+		rp="What path shall I use in \"eval 'exec'\"?"
+		. ./myread
+		perlpath="$ans"
+		;;
+	esac
+	;;
+esac
+case "$startperl" in
+*!*)	;;
+*)	echo "I'll use $perlpath in \"eval 'exec'\"" ;;
+esac
+
 : determine where public executable scripts go
 set scriptdir scriptdir
 eval $prefixit
@@ -5268,40 +5358,6 @@ EOM
 else
 	installscript="$scriptdirexp"
 fi
-
-: determine perl absolute location
-case "$perlpath" in
-'')	perlpath=$binexp/perl ;;
-esac
-
-: figure out how to guarantee perl startup
-case "$startperl" in
-'')
-	case "$sharpbang" in
-	*!)
-		$cat <<EOH
-
-I can use the #! construct to start perl on your system. This will
-make startup of perl scripts faster, but may cause problems if you
-want to share those scripts and perl is not in a standard place
-($perlpath) on all your platforms. The alternative is to force
-a shell by starting the script with a single ':' character.
-
-EOH
-		dflt=$perlpath
-		rp='What shall I put after the #! to start up perl ("none" to not use #!)?'
-		. ./myread
-		case "$ans" in
-		none) startperl=": # use perl";;
-		*) startperl="#!$ans";;
-		esac
-		;;
-	*) startperl=": # use perl"
-		;;
-	esac
-	;;
-esac
-echo "I'll use $startperl to start perl scripts."
 
 cat <<EOM
 
@@ -5911,19 +5967,19 @@ if set crypt val -f d_crypt; eval $csym; $val; then
 	val="$define"
 	cryptlib=''
 else
-	cryptlib=`./loc Slibcrypt${lib_ext} "" $xlibpth`
+	cryptlib=`./loc Slibcrypt$lib_ext "" $xlibpth`
 	if $test -z "$cryptlib"; then
-		cryptlib=`./loc Mlibcrypt${lib_ext} "" $xlibpth`
+		cryptlib=`./loc Mlibcrypt$lib_ext "" $xlibpth`
 	else
 		cryptlib=-lcrypt
 	fi
 	if $test -z "$cryptlib"; then
-		cryptlib=`./loc Llibcrypt${lib_ext} "" $xlibpth`
+		cryptlib=`./loc Llibcrypt$lib_ext "" $xlibpth`
 	else
 		cryptlib=-lcrypt
 	fi
 	if $test -z "$cryptlib"; then
-		cryptlib=`./loc libcrypt${lib_ext} "" $libpth`
+		cryptlib=`./loc libcrypt$lib_ext "" $libpth`
 	else
 		cryptlib=-lcrypt
 	fi
@@ -6126,23 +6182,23 @@ main()
 #endif
     handle = dlopen("./dyna.$dlext", mode) ;
     if (handle == NULL) {
-        printf ("1\n") ;
-        fflush (stdout) ;
-	    exit(0);
+	printf ("1\n") ;
+	fflush (stdout) ;
+	exit(0);
     }
     symbol = dlsym(handle, "fred") ;
     if (symbol == NULL) {
-		/* try putting a leading underscore */
-        symbol = dlsym(handle, "_fred") ;
-        if (symbol == NULL) {
-            printf ("2\n") ;
-            fflush (stdout) ;
-	    	exit(0);
-		}
-        printf ("3\n") ;
+	/* try putting a leading underscore */
+	symbol = dlsym(handle, "_fred") ;
+	if (symbol == NULL) {
+	    printf ("2\n") ;
+	    fflush (stdout) ;
+	    exit(0);
+	}
+	printf ("3\n") ;
     }
     else
-        printf ("4\n") ;
+	printf ("4\n") ;
     fflush (stdout) ;
     exit(0);
 }
@@ -6459,6 +6515,25 @@ eval $inlibc
 : see if getpriority exists
 set getpriority d_getprior
 eval $inlibc
+
+: see if gettimeofday or ftime exists
+set gettimeofday d_gettimeod
+eval $inlibc
+case "$d_gettimeod" in
+"$undef")
+	set ftime d_ftime 
+	eval $inlibc
+	;;
+*)
+	val="$undef"; set d_ftime; eval $setvar
+	;;
+esac
+case "$d_gettimeod$d_ftime" in
+"$undef$undef")
+	echo " "
+	echo 'No ftime() nor gettimeofday() -- timing may be less accurate.' >&4
+	;;
+esac
 
 : see if this is a netinet/in.h or sys/in.h system
 set netinet/in.h i_niin sys/in.h i_sysin
@@ -7048,7 +7123,7 @@ val="$undef"
 case "$d_memcmp" in
 "$define")
 	echo " "
-	echo "Checking to see if memcmp() can compare relative magnitude..." >&4
+	echo "Checking to see if your memcmp() can compare relative magnitude..." >&4
 	$cat >foo.c <<EOCP
 #$i_memory I_MEMORY
 #$i_stdlib I_STDLIB
@@ -7390,10 +7465,10 @@ else
 		: we will have to assume that it supports the 4.2 BSD interface
 		d_oldsock="$undef"
 	else
-		echo "You don't have Berkeley networking in libc${lib_ext}..." >&4
-		if test -f /usr/lib/libnet${lib_ext}; then
-			( (nm $nm_opt /usr/lib/libnet${lib_ext} | eval $nm_extract) ||  \
-			ar t /usr/lib/libnet${lib_ext}) 2>/dev/null >> libc.list
+		echo "You don't have Berkeley networking in libc$lib_ext..." >&4
+		if test -f /usr/lib/libnet$lib_ext; then
+			( (nm $nm_opt /usr/lib/libnet$lib_ext | eval $nm_extract) ||  \
+			ar t /usr/lib/libnet$lib_ext) 2>/dev/null >> libc.list
 			if $contains socket libc.list >/dev/null 2>&1; then
 			echo "...but the Wollongong group seems to have hacked it in." >&4
 				socketlib="-lnet"
@@ -7406,7 +7481,7 @@ else
 					d_oldsock="$define"
 				fi
 			else
-				echo "or even in libnet${lib_ext}, which is peculiar." >&4
+				echo "or even in libnet$lib_ext, which is peculiar." >&4
 				d_socket="$undef"
 				d_oldsock="$undef"
 			fi
@@ -8480,14 +8555,14 @@ EOP
 $cc $ccflags -c bar1.c >/dev/null 2>&1
 $cc $ccflags -c bar2.c >/dev/null 2>&1
 $cc $ccflags -c foo.c >/dev/null 2>&1
-ar rc bar${lib_ext} bar2.o bar1.o >/dev/null 2>&1
-if $cc $ccflags $ldflags -o foobar foo.o bar${lib_ext} $libs > /dev/null 2>&1 &&
+ar rc bar$lib_ext bar2.o bar1.o >/dev/null 2>&1
+if $cc $ccflags $ldflags -o foobar foo.o bar$lib_ext $libs > /dev/null 2>&1 &&
 	./foobar >/dev/null 2>&1; then
 	echo "ar appears to generate random libraries itself."
 	orderlib=false
 	ranlib=":"
-elif ar ts bar${lib_ext} >/dev/null 2>&1 &&
-	$cc $ccflags $ldflags -o foobar foo.o bar${lib_ext} $libs > /dev/null 2>&1 &&
+elif ar ts bar$lib_ext >/dev/null 2>&1 &&
+	$cc $ccflags $ldflags -o foobar foo.o bar$lib_ext $libs > /dev/null 2>&1 &&
 	./foobar >/dev/null 2>&1; then
 		echo "a table of contents needs to be added with 'ar ts'."
 		orderlib=false
@@ -8960,7 +9035,7 @@ main()
 }
 EOM
 echo " "
-if $cc $ccflags $ldflags -o ssize ssize.c > /dev/null 2>&1  &&
+if $cc $ccflags $ldflags -o ssize ssize.c $libs > /dev/null 2>&1  &&
 		./ssize > /dev/null 2>&1 ; then
 	ssizetype=`./ssize`
 	echo "I'll be using $ssizetype for functions returning a byte count." >&4
@@ -9530,23 +9605,22 @@ known_extensions=''
 : some additional extensions into the source tree and expect them
 : to be built.
 for xxx in * ; do
-	case "$xxx" in
-	DynaLoader) ;;
-	*)
-		if $test -f $xxx/$xxx.xs; then
-			known_extensions="$known_extensions $xxx"
-		else
-			if $test -d $xxx; then
-				cd $xxx
-				for yyy in * ; do
-					if $test -f $yyy/$yyy.xs; then
-						known_extensions="$known_extensions $xxx/$yyy"
-					fi
-				done
-				cd ..
-			fi
-		fi ;;
-	esac
+    case "$xxx" in
+    DynaLoader) ;;
+    *)	if $test -f $xxx/$xxx.xs; then
+	    known_extensions="$known_extensions $xxx"
+	else
+	    if $test -d $xxx; then
+		cd $xxx
+		for yyy in * ; do
+		    if $test -f $yyy/$yyy.xs; then
+			known_extensions="$known_extensions $xxx/$yyy"
+		    fi
+		done
+		cd ..
+	    fi
+	fi ;;
+    esac
 done
 set X $known_extensions
 shift
@@ -9759,6 +9833,7 @@ awk='$awk'
 baserev='$baserev'
 bash='$bash'
 bin='$bin'
+bincompat3='$bincompat3'
 binexp='$binexp'
 bison='$bison'
 byacc='$byacc'
@@ -9798,6 +9873,7 @@ d_archlib='$d_archlib'
 d_attribut='$d_attribut'
 d_bcmp='$d_bcmp'
 d_bcopy='$d_bcopy'
+d_bincompat3='$d_bincompat3'
 d_bsd='$d_bsd'
 d_bsdgetpgrp='$d_bsdgetpgrp'
 d_bsdpgrp='$d_bsdpgrp'
@@ -9836,6 +9912,7 @@ d_flock='$d_flock'
 d_fork='$d_fork'
 d_fpathconf='$d_fpathconf'
 d_fsetpos='$d_fsetpos'
+d_ftime='$d_ftime'
 d_getgrps='$d_getgrps'
 d_gethent='$d_gethent'
 d_gethname='$d_gethname'
@@ -9845,6 +9922,7 @@ d_getpgrp2='$d_getpgrp2'
 d_getpgrp='$d_getpgrp'
 d_getppid='$d_getppid'
 d_getprior='$d_getprior'
+d_gettimeod='$d_gettimeod'
 d_gnulibc='$d_gnulibc'
 d_htonl='$d_htonl'
 d_index='$d_index'

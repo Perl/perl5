@@ -560,7 +560,7 @@ the following statement.
 
 =head2 Returning Undef And Empty Lists
 
-Occasionally the programmer will want to simply return
+Occasionally the programmer will want to return simply
 C<undef> or an empty list if a function fails rather than a
 separate status value.  The rpcb_gettime() function offers
 just this situation.  If the function succeeds we would like
@@ -631,7 +631,7 @@ other C<XSRETURN> macros.
 
 The REQUIRE: keyword is used to indicate the minimum version of the
 B<xsubpp> compiler needed to compile the XS module.  An XS module which
-contains the following statement will only compile with B<xsubpp> version
+contains the following statement will compile with only B<xsubpp> version
 1.922 or greater:
 
 	REQUIRE: 1.922
@@ -664,7 +664,7 @@ terminate the code block.
 =head2 The VERSIONCHECK: Keyword
 
 The VERSIONCHECK: keyword corresponds to B<xsubpp>'s C<-versioncheck> and
-C<-noversioncheck> options.  This keyword overrides the commandline
+C<-noversioncheck> options.  This keyword overrides the command line
 options.  Version checking is enabled by default.  When version checking is
 enabled the XS module will attempt to verify that its version matches the
 version of the PM module.
@@ -680,7 +680,7 @@ To disable version checking:
 =head2 The PROTOTYPES: Keyword
 
 The PROTOTYPES: keyword corresponds to B<xsubpp>'s C<-prototypes> and
-C<-noprototypes> options.  This keyword overrides the commandline options.
+C<-noprototypes> options.  This keyword overrides the command-line options.
 Prototypes are enabled by default.  When prototypes are enabled XSUBs will
 be given Perl prototypes.  This keyword may be used multiple times in an XS
 module to enable and disable prototypes for different parts of the module.
@@ -844,7 +844,7 @@ C<&> through, so the function call looks like C<rpcb_gettime(host, &timep)>.
 =head2 Inserting Comments and C Preprocessor Directives
 
 C preprocessor directives are allowed within BOOT:, PREINIT: INIT:,
-CODE:, PPCODE: and CLEANUP: blocks, as well as outside the functions.
+CODE:, PPCODE:, and CLEANUP: blocks, as well as outside the functions.
 Comments are allowed anywhere after the MODULE keyword.  The compiler
 will pass the preprocessor directives through untouched and will remove
 the commented lines.

@@ -189,10 +189,17 @@ register OP *op;
 		(void)strcat(buf,"AMPER,");
 	    if (op->op_private & OPpENTERSUB_DB)
 		(void)strcat(buf,"DB,");
-	    if (op->op_private & OPpDEREF_AV)
-		(void)strcat(buf,"AV,");
-	    if (op->op_private & OPpDEREF_HV)
-		(void)strcat(buf,"HV,");
+	    switch (op->op_private & OPpDEREF) {
+	    case OPpDEREF_SV:
+		(void)strcat(buf, "SV,");
+		break;
+	    case OPpDEREF_AV:
+		(void)strcat(buf, "AV,");
+		break;
+	    case OPpDEREF_HV:
+		(void)strcat(buf, "HV,");
+		break;
+	    }
 	    if (op->op_private & HINT_STRICT_REFS)
 		(void)strcat(buf,"STRICT_REFS,");
 	}

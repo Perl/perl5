@@ -11,7 +11,7 @@ First of all, have you tried using the B<-w> switch?
 If you invoke Perl with the B<-d> switch, your script runs under the
 Perl source debugger.  This works like an interactive Perl
 environment, prompting for debugger commands that let you examine
-source code, set breakpoints, get stack backtraces, change the values of
+source code, set breakpoints, get stack back-traces, change the values of
 variables, etc.  This is so convenient that you often fire up
 the debugger all by itself just to test out Perl constructs 
 interactively to see what they do.  For example:
@@ -63,12 +63,12 @@ it's run through your pager, as in
 =item p expr
 
 Same as C<print {$DB::OUT} expr> in the current package.  In particular,
-since this is just Perl's own B<print> function, this means that nested
+because this is just Perl's own B<print> function, this means that nested
 data structures and objects are not dumped, unlike with the C<x> command.
 
 =item x expr
 
-Evals its expression in list context and dumps out the result 
+Evaluates its expression in list context and dumps out the result 
 in a pretty-printed fashion.  Nested data structures are printed out
 recursively, unlike the C<print> function.
 
@@ -97,7 +97,7 @@ Same as C<V currentpackage [vars]>.
 
 =item T
 
-Produce a stack backtrace.  See below for details on its output.
+Produce a stack back-trace.  See below for details on its output.
 
 =item s [expr]
 
@@ -218,7 +218,7 @@ or, with the C<O>ption C<frame=2> set,
 Set a breakpoint.  If line is omitted, sets a breakpoint on the line
 that is about to be executed.  If a condition is specified, it's
 evaluated each time the statement is reached and a breakpoint is taken
-only if the condition is true.  Breakpoints may only be set on lines
+only if the condition is true.  Breakpoints may be set on only lines
 that begin an executable statement.  Conditions don't use B<if>:
 
     b 237 $x > 30
@@ -332,7 +332,7 @@ affects printing of return value after C<r> command.
 
 affects printing messages on entry and exit from subroutines.  If
 C<frame & 2> is false, messages are printed on entry only. (Printing
-on exit may be useful if interdispersed with other messages.)
+on exit may be useful if inter(di)spersed with other messages.)
 
 If C<frame & 4>, arguments to functions are printed as well as the
 context and caller info.
@@ -455,37 +455,37 @@ See L<"Debugger Internals"> below for more details.
 =item E<lt> [ command ]
 
 Set an action (Perl command) to happen before every debugger prompt.
-A multiline command may be entered by backslashing the newlines.  If
+A multi-line command may be entered by backslashing the newlines.  If
 C<command> is missing, resets the list of actions.
 
 =item E<lt>E<lt> command
 
 Add an action (Perl command) to happen before every debugger prompt.
-A multiline command may be entered by backslashing the newlines.
+A multi-line command may be entered by backslashing the newlines.
 
 =item E<gt> command
 
 Set an action (Perl command) to happen after the prompt when you've
-just given a command to return to executing the script.  A multiline
+just given a command to return to executing the script.  A multi-line
 command may be entered by backslashing the newlines.  If C<command> is
 missing, resets the list of actions.
 
 =item E<gt>E<gt> command
 
 Adds an action (Perl command) to happen after the prompt when you've
-just given a command to return to executing the script.  A multiline
+just given a command to return to executing the script.  A multi-line
 command may be entered by backslashing the newlines.
 
 =item { [ command ]
 
 Set an action (debugger command) to happen before every debugger prompt.
-A multiline command may be entered by backslashing the newlines.  If
+A multi-line command may be entered by backslashing the newlines.  If
 C<command> is missing, resets the list of actions.
 
 =item {{ command
 
 Add an action (debugger command) to happen before every debugger prompt.
-A multiline command may be entered by backslashing the newlines.
+A multi-line command may be entered by backslashing the newlines.
 
 =item ! number
 
@@ -525,9 +525,9 @@ Restart the debugger by B<exec>ing a new session.  It tries to maintain
 your history across this, but internal settings and command line options
 may be lost.
 
-Currently the following setting are preserved: history, breakpoints
-and actions, debugger C<O>ptions and the following command-line
-options: B<-w>, B<-I>, B<-e>.
+Currently the following setting are preserved: history, breakpoints,
+actions, debugger C<O>ptions, and the following command-line
+options: B<-w>, B<-I>, and B<-e>.
 
 =item |dbcmd
 
@@ -566,7 +566,7 @@ or even
     DB<<17>>
 
 where that number is the command number, which you'd use to access with
-the built-in B<csh>-like history mechanism, e.g. C<!17> would repeat
+the built-in B<csh>-like history mechanism, e.g., C<!17> would repeat
 command number 17.  The number of angle brackets indicates the depth of
 the debugger.  You could get more than one set of brackets, for example, if
 you'd already at a breakpoint and then printed out the result of a
@@ -588,7 +588,7 @@ normally end the debugger command with a backslash.  Here's an example:
 Note that this business of escaping a newline is specific to interactive
 commands typed into the debugger.
 
-Here's an example of what a stack backtrace might look like:
+Here's an example of what a stack back-trace might look like:
 
     $ = main::infested called from file `Ambulation.pm' line 10
     @ = Ambulation::legs(1, 2, 3, 4) called from file `camel_flea' line 7
@@ -763,16 +763,16 @@ the form C<(eval 31)> for subroutines defined inside C<eval>s.
 
 =item *
 
-When an exection of the application reaches a place that can have a
-breakpoint, a call to C<DB::DB()> is performed if any one of
-variables $DB::trace, $DB::single, $DB::signal is true. (Note that
+When execution of the application reaches a place that can have
+a breakpoint, a call to C<DB::DB()> is performed if any one of
+variables $DB::trace, $DB::single, or $DB::signal is true. (Note that
 these variables are not C<local>izable.) This feature is disabled when
 the control is inside C<DB::DB()> or functions called from it (unless
 C<$^D & 1 E<lt>E<lt> 30>).
 
 =item *
 
-When an exection of the application reaches a subroutine call, a call
+When execution of the application reaches a subroutine call, a call
 to C<&DB::sub>(I<args>) is performed instead, with C<$DB::sub> being
 the name of the called subroutine. (Unless the subroutine is compiled
 in the package C<DB>.)
@@ -792,7 +792,7 @@ F<~/.perldb> under UNIX), which can set important options.  This file may
 define a subroutine C<&afterinit> to be executed after the debugger is
 initialized.
 
-After the  rc file is read, the debugger reads environment variable
+After the rc file is read, the debugger reads environment variable
 PERLDB_OPTS and parses it as a rest of C<O ...> line in debugger prompt.
 
 It also maintains magical internal variables, such as C<@DB::dbline>,
@@ -807,7 +807,7 @@ function C<DB::dump_trace(skip[, count])> skips the specified number
 of frames, and returns an array containing info about the caller
 frames (all if C<count> is missing). Each entry is a hash with keys
 C<context> (C<$> or C<@>), C<sub> (subroutine name, or info about
-eval), C<args> (C<undef> or a reference to an array), C<file> and
+eval), C<args> (C<undef> or a reference to an array), C<file>, and
 C<line>.
 
 The function C<DB::print_trace(FH, skip[, count[, short]])> prints 
@@ -824,7 +824,4 @@ You cannot get the stack frame information or otherwise debug functions
 that were not compiled by Perl, such as C or C++ extensions.
 
 If you alter your @_ arguments in a subroutine (such as with B<shift>
-or B<pop>, the stack backtrace will not show the original values.
-
-Some subroutines are called without creating a call frame. This may
-confuse backtrace C<T> and output of C<fE<gt>=4>.
+or B<pop>, the stack back-trace will not show the original values.

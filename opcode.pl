@@ -214,7 +214,7 @@ rv2gv		ref-to-glob cast	ck_rvconst	ds
 rv2sv		scalar deref		ck_rvconst	ds	
 av2arylen	array length		ck_null		is	
 rv2cv		subroutine deref	ck_rvconst	d
-anoncode	anonymous subroutine	ck_null		0	
+anoncode	anonymous subroutine	ck_anoncode	0	
 prototype	subroutine prototype	ck_null		s	S
 refgen		reference constructor	ck_spair	m	L
 srefgen		scalar ref constructor	ck_null		fs	S
@@ -362,8 +362,8 @@ aslice		array slice		ck_null		m	A L
 each		each			ck_fun		t	H
 values		values			ck_fun		t	H
 keys		keys			ck_fun		t	H
-delete		delete			ck_delete	s	S
-exists		exists operator		ck_delete	is	S
+delete		delete			ck_delete	0	S
+exists		exists operator		ck_exists	is	S
 rv2hv		associative array deref	ck_rvconst	dt	
 helem		associative array elem	ck_null		s	H S
 hslice		associative array slice	ck_null		m	H L

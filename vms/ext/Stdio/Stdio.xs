@@ -100,7 +100,7 @@ newFH(FILE *fp, char type) {
     gv_init(gv,stash,"__FH__",6,0);
     io = GvIOp(gv) = newIO();
     IoIFP(io) = fp;
-    if (type != '>') IoOFP(io) = fp;
+    if (type != '<') IoOFP(io) = fp;
     IoTYPE(io) = type;
     rv = newRV((SV *)gv);
     SvREFCNT_dec(gv);
@@ -225,7 +225,7 @@ vmsopen(spec,...)
 	        break;
 	    }
 	    if (fp != Nullfp) {
-	      SV *fh = newFH(fp,(mode[1] ? '+' : (mode[0] == 'r' ? '<' : '>')));
+	      SV *fh = newFH(fp,(mode[1] ? '+' : (mode[0] == 'r' ? '<' : (mode[0] == 'a' ? 'a' : '>'))));
 	      ST(0) = (fh ? sv_2mortal(fh) : &sv_undef);
 	    }
 	    else { ST(0) = &sv_undef; }

@@ -4,8 +4,8 @@ Changes5.000		Differences from perl4.
 Changes5.001		Differences from 5.000.
 Changes5.002		Differences from 5.001.
 Changes5.003		Differences from 5.002.
-configure		Crude emulation of GNU configure
 Configure		Portability tool
+configure		Crude emulation of GNU configure
 Copying			The GNU General Public License
 EXTERN.h		Included before foreign .h files
 INSTALL			Detailed installation instructions.
@@ -23,6 +23,7 @@ XSUB.h			Include file for extension subroutines
 av.c			Array value code
 av.h			Array value header
 cflags.SH		A script that emits C compilation flags per file
+compat3.sym		List of symbols for binary-compatibility with 5.003
 config_H		Sample config.h
 config_h.SH		Produces config.h
 configpm		Produces lib/Config.pm
@@ -225,6 +226,7 @@ hints/irix_6_2.sh	Hints for named architecture
 hints/isc.sh		Hints for named architecture
 hints/isc_2.sh		Hints for named architecture
 hints/linux.sh		Hints for named architecture
+hints/lynxos.sh		Hints for named architecture
 hints/machten.sh	Hints for named architecture
 hints/machten_2.sh	Hints for named architecture
 hints/mips.sh		Hints for named architecture
@@ -269,6 +271,9 @@ lib/AnyDBM_File.pm	Perl module to emulate dbmopen
 lib/AutoLoader.pm	Autoloader base class
 lib/AutoSplit.pm	A module to split up autoload functions
 lib/Benchmark.pm	A module to time pieces of code and such
+lib/CPAN.pm		Interface to Comprehensive Perl Archive Network
+lib/CPAN/FirstTime.pm	Utility for creating CPAN config files
+lib/CPAN/Nox.pm		Runs CPAN while avoiding compiled extensions
 lib/Carp.pm		Error message base class
 lib/Class/Template.pm	Structure/member template builder; makes nested types
 lib/Cwd.pm		Various cwd routines (getcwd, fastcwd, chdir)
@@ -293,6 +298,7 @@ lib/ExtUtils/xsubpp		External subroutine preprocessor
 lib/Fatal.pm		Make do-or-die equivalents of functions
 lib/File/Basename.pm	A module to emulate the basename program
 lib/File/CheckTree.pm	Perl module supporting wholesale file mode validation
+lib/File/Compare.pm	Emulation of cmp command
 lib/File/Copy.pm	Emulation of cp command
 lib/File/Find.pm	Routines to do a find
 lib/File/Path.pm	A module to do things like `mkdir -p' and `rm -r'
@@ -308,7 +314,10 @@ lib/IPC/Open3.pm	Open a three-ended pipe!
 lib/Math/BigFloat.pm	An arbitrary precision floating-point arithmetic package
 lib/Math/BigInt.pm	An arbitrary precision integer arithmetic package
 lib/Math/Complex.pm	A Complex package
+lib/Net/FTP.pm		File Transfer Protocol client
+lib/Net/Netrc.pm	Parser for ".netrc" file a la Berkeley UNIX
 lib/Net/Ping.pm		Ping methods
+lib/Net/Socket.pm	Support class for Net::FTP
 lib/Net/hostent.pm	Object-oriented wrapper around CORE::gethost*
 lib/Net/netent.pm	Object-oriented wrapper around CORE::getnet*
 lib/Net/protoent.pm	Object-oriented wrapper around CORE::getproto*
@@ -332,6 +341,7 @@ lib/Text/Soundex.pm	Perl module to implement Soundex
 lib/Text/Tabs.pm	Do expand and unexpand
 lib/Text/Wrap.pm	Paragraph formatter
 lib/Tie/Hash.pm		Base class for tied hashes
+lib/Tie/RefHash.pm	Base class for tied hashes with references as keys
 lib/Tie/Scalar.pm	Base class for tied scalars
 lib/Tie/SubstrHash.pm	Compact hash for known key, value and table size
 lib/Time/Local.pm	Reverse translation of localtime, gmtime
@@ -379,7 +389,6 @@ lib/perl5db.pl		Perl debugging routines
 lib/pwd.pl		Routines to keep track of PWD environment variable
 lib/shellwords.pl	Perl library to split into words with shell quoting
 lib/sigtrap.pm		For trapping an abort and giving traceback
-lib/splain		Standalone program to print verbose diagnostics.
 lib/stat.pl		Perl library supporting stat function
 lib/strict.pm		For "use strict"
 lib/subs.pm		Declare overriding subs
@@ -400,9 +409,6 @@ miniperlmain.c		Basic perl w/o dynamic loading or extensions
 mv-if-diff		Script to mv a file if it changed
 myconfig		Prints summary of the current configuration
 nostdio.h		Cause compile error on stdio calls
-old_embed.pl		Produces embed.h using old_global.sym
-old_global.sym		Old list of symbols to hide when embedded
-old_perl_exp.SH		Creates old list of exported symbols for AIX.
 op.c			Opcode syntax tree code
 op.h			Opcode syntax tree header
 opcode.h		Automatically generated opcode header
@@ -494,10 +500,11 @@ pod/perlembed.pod	Embedding info
 pod/perlform.pod	Format info
 pod/perlfunc.pod	Function info
 pod/perlguts.pod	Internals info
-pod/perli18n.pod	I18N info
 pod/perlipc.pod		IPC info
-pod/perllol.pod		How to use lists of lists.
+pod/perllocale.pod	Locale support info
+pod/perllol.pod		How to use lists of lists
 pod/perlmod.pod		Module info
+pod/perlnews.pod	News of changes since last version
 pod/perlobj.pod		Object info
 pod/perlop.pod		Operator info
 pod/perlovl.pod		Overloading info
@@ -511,6 +518,7 @@ pod/perlsub.pod		Subroutine info
 pod/perlsyn.pod		Syntax info
 pod/perltie.pod		Tieing an object class into a simple variable
 pod/perltoc.pod		Table of Contents info
+pod/perltoot.pod	Tom's object-oriented tutorial
 pod/perltrap.pod	Trap info
 pod/perlvar.pod		Variable info
 pod/perlxs.pod		XS api info
@@ -655,9 +663,10 @@ t/op/push.t		See if push and pop work
 t/op/quotemeta.t	See if quotemeta works
 t/op/rand.t		See if rand works
 t/op/range.t		See if .. works
-t/op/re_tests		Input file for op.regexp
+t/op/re_tests		Regular expressions for regexp.t
 t/op/read.t		See if read() works
 t/op/readdir.t		See if readdir() works
+t/op/recurse.t		See if deep recursion works
 t/op/ref.t		See if refs and objects work
 t/op/regexp.t		See if regular expressions work
 t/op/repeat.t		See if x operator works
@@ -676,7 +685,6 @@ t/op/undef.t		See if undef works
 t/op/unshift.t		See if unshift works
 t/op/vec.t		See if vectors work
 t/op/write.t		See if write works
-t/re_tests		Regular expressions for regexp.t
 taint.c			Tainting code
 toke.c			The tokener
 universal.c		The default UNIVERSAL package methods
@@ -690,9 +698,15 @@ utils/h2xs.PL		Program to make .xs files from C header files
 utils/perlbug.PL	A simple tool to submit a bug report
 utils/perldoc.PL	A simple tool to find & display perl's documentation
 utils/pl2pm.PL		A pl to pm translator
+utils/splain.PL		Stand-alone version of diagnostics.pm
 vms/Makefile		VMS port
 vms/config.vms		default config.h for VMS
 vms/descrip.mms		MM[SK] description file for build
+vms/ext/DCLsym/0README.txt	ReadMe file for VMS::DCLsym
+vms/ext/DCLsym/DCLsym.pm	Perl access to CLI symbols
+vms/ext/DCLsym/DCLsym.xs	Perl access to CLI symbols
+vms/ext/DCLsym/Makefile.PL	MakeMaker driver for VMS::DCLsym
+vms/ext/DCLsym/test.pl	regression tests for VMS::DCLsym
 vms/ext/Filespec.pm	VMS-Unix file syntax interconversion
 vms/ext/Stdio/0README.txt	ReadMe file for VMS::Stdio
 vms/ext/Stdio/Makefile.PL	MakeMaker driver for VMS::Stdio

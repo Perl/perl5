@@ -1,4 +1,4 @@
-#> This file produced from Descrip.MMS by mms2make.pl
+#> This file produced from descrip.mms by mms2make.pl
 #> Lines beginning with "#>" were commented out during the
 #> conversion process.  For more information, see mms2make.pl
 #>
@@ -18,21 +18,33 @@
 #### Start of system configuration section. ####
 
 
+#> .ifdef AXE
 # File type to use for object files
+#> O = .abj
 # File type to use for object libraries
+#> OLB = .alb
 # File type to use for executable images
+#> E = .axe
+#> .else
 # File type to use for object files
 O = .obj
 # File type to use for object libraries
 OLB = .olb
 # File type to use for executable images
 E = .exe
+#> .endif
 
+#> .ifdef __AXP__
+#> DECC = 1
+#> ARCH = VMS_AXP
+#> OBJVAL = $(O)
+#> .else
 ARCH = VMS_VAX
 OBJVAL = $@
+#> .endif
 
 # Updated by fndvers.com -- do not edit by hand
-PERL_VERSION = 5_00307#
+PERL_VERSION = 5_00311#
 
 
 ARCHDIR =  [.lib.$(ARCH).$(PERL_VERSION)]
@@ -40,19 +52,51 @@ ARCHCORE = [.lib.$(ARCH).$(PERL_VERSION).CORE]
 ARCHAUTO = [.lib.$(ARCH).$(PERL_VERSION).auto]
 
 
+#> .ifdef DECC_PIPES_BROKEN
+#> PIPES_BROKEN = 1
+#> .endif
 
 
+#> .ifdef GNUC
+#> .first:
+#> 	@ $$@[.vms]fndvers.com "" "" "[.vms]Makefile"
+#> 	@ If f$$TrnLnm("Sys").eqs."" Then Define/NoLog SYS GNU_CC_Include:[VMS]
+#> CC = gcc
 # -fno-builtin avoids bug in gcc up to version 2.6.2 which can destroy
 # data when memcpy() is called on large (>64 kB) blocks of memory
 # (fixed in gcc 2.6.3)
+#> XTRACCFLAGS = /Obj=$@/NoCase_Hack/Optimize=2/CC1="""""-fno-builtin"""""
+#> DBGSPECFLAGS =
+#> XTRADEF = ,GNUC_ATTRIBUTE_CHECK
+#> XTRAOBJS =
+#> LIBS1 = GNU_CC:[000000]GCCLIB.OLB/Library
+#> LIBS2 = sys$$Share:VAXCRTL/Shareable
+#> POSIX =
+#> .else
 XTRAOBJS = 
 LIBS1 = $(XTRAOBJS)
 DBGSPECFLAGS = /Show=(Source,Include,Expansion)
+#> .ifdef decc
 # Some versions of DECCRTL on AXP have a bug in chdir() which causes the change
 # to persist after the image exits, even when this was not requested, iff
 # SYSNAM is enabled.  This is fixed in CSC Patch # AXPACRT04_061, but turning
 # off SYSNAM for the MM[SK] subprocess doesn't hurt anything, so we do it
 # just in case.
+#> .first:
+#> 	@ Set Process/Privilege=(NoSYSNAM)
+#> 	@ $$@[.vms]fndvers.com "" "" "[.vms]Makefile"
+#> 	@ If f$$TrnLnm("Sys").eqs."" .and. f$$TrnLnm("DECC$System_Include").nes."" Then Define/NoLog SYS DECC$System_Include
+#> .ifdef __AXP__
+#> 	@ If f$$TrnLnm("Sys").eqs."" .and. f$$TrnLnm("DECC$System_Include").eqs."" Then Define/NoLog SYS sys$$Library
+#> .else
+#> 	@ If f$$TrnLnm("Sys").eqs."" .and. f$$TrnLnm("DECC$System_Include").eqs."" Then Define/NoLog SYS DECC$Library_Include
+#> .endif
+#> 
+#> LIBS2 = 
+#> XTRACCFLAGS = /Include=[]/Standard=Relaxed_ANSI/Prefix=All/Obj=$(OBJVAL)
+#> XTRADEF =
+#> POSIX = POSIX
+#> .else # VAXC
 .first:
 	@ $$@[.vms]fndvers.com "" "" "[.vms]Makefile"
 	@ If f$$TrnLnm("Sys").eqs."" .and. f$$TrnLnm("VAXC$Include").eqs."" Then Define/NoLog SYS sys$$Library
@@ -61,15 +105,34 @@ DBGSPECFLAGS = /Show=(Source,Include,Expansion)
 XTRACCFLAGS = /Include=[]/Object=$(O)
 XTRADEF =
 LIBS2 = sys$$Share:VAXCRTL/Shareable
+POSIX =
+#> .endif
+#> .endif
 
 
+#> .ifdef __DEBUG__
+#> DBGCCFLAGS = /List/Debug/NoOpt$(DBGSPECFLAGS)
+#> DBGLINKFLAGS = /Trace/Debug/Map/Full/Cross
+#> DBG = DBG
+#> .else
 DBGCCFLAGS = /NoList
 DBGLINKFLAGS = /NoMap
 DBG = 
+#> .endif
 
+#> .ifdef SOCKET
+#> SOCKDEF = ,VMS_DO_SOCKETS
+#> SOCKLIB = SocketShr/Share
 # N.B. the targets for $(SOCKC) and $(SOCKH) assume that the permanent
 # copies live in [.vms], and the `clean' target will delete copies of
 # these files in the current default directory.
+#> SOCKC = sockadapt.c
+#> SOCKH = sockadapt.h
+#> SOCKCLIS = ,$(SOCKC)
+#> SOCKHLIS = ,$(SOCKH)
+#> SOCKOBJ = ,sockadapt$(O)
+#> SOCKPM = [.lib]Socket.pm
+#> .else
 SOCKDEF =
 SOCKLIB =
 SOCKC =
@@ -78,6 +141,7 @@ SOCKCLIS =
 SOCKHLIS =
 SOCKOBJ =
 SOCKPM =
+#> .endif
 
 # C preprocessor manifest "DEBUGGING" ==> perl -D, not the VMS debugger
 CFLAGS = /Define=(DEBUGGING$(SOCKDEF)$(XTRADEF))$(XTRACCFLAGS)$(DBGCCFLAGS)
@@ -104,8 +168,13 @@ MYEXT = DynaLoader
 # there are any object files specified
 # These must be built separately, or you must add rules below to build them
 myextobj = [.ext.dynaloader]dl_vms$(O),
+#> .ifdef SOCKET
+#> EXT = $(MYEXT) Socket
+#> extobj = $(myextobj) [.ext.socket]socket$(O), 
+#> .else
 EXT = $(MYEXT)
 extobj = $(myextobj)
+#> .endif
 
 
 #### End of system configuration section. ####
@@ -138,13 +207,19 @@ ac6 = $(ARCHCORE)pp.h $(ARCHCORE)proto.h $(ARCHCORE)regcomp.h $(ARCHCORE)perlio.
 ac7 = $(ARCHCORE)regexp.h $(ARCHCORE)scope.h $(ARCHCORE)sv.h $(ARCHCORE)util.h
 ac8 = $(ARCHCORE)vmsish.h $(ARCHCORE)$(DBG)libperl$(OLB) $(ARCHCORE)perlshr_attr.opt
 ac9 = $(ARCHCORE)$(DBG)perlshr_bld.opt
+#> .ifdef SOCKET
+#> acs = $(ARCHCORE)$(SOCKH)
+#> .else
 acs =
+#> .endif
 
 CRTL = []crtl.opt
 CRTLOPTS =,$(CRTL)/Options
 
 .suffixes:
 
+#> .ifdef LINK_ONLY
+#> .else
 .suffixes: $(O) .c .xs
 
 .xs.c :
@@ -157,13 +232,14 @@ CRTLOPTS =,$(CRTL)/Options
 .xs$(O) :
 	$(XSUBPP) $< >$(MMS$SOURCE_NAME).c
 	$(CC) $(CFLAGS) $(MMS$SOURCE_NAME).c
+#> .endif
 
 
 all : base extras libmods utils podxform archcorefiles preplibrary perlpods
 	@ $(NOOP)
 base : miniperl perl
 	@ $(NOOP)
-extras : Fcntl FileHandle IO Opcode libmods utils podxform
+extras : Fcntl IO Opcode $(POSIX) libmods utils podxform
 	@ $(NOOP)
 libmods : [.lib]Config.pm $(ARCHDIR)Config.pm [.lib]DynaLoader.pm [.lib.VMS]Filespec.pm 
 	@ $(NOOP)
@@ -208,7 +284,11 @@ perl : $(DBG)perl$(E)
 	@ Continue
 $(DBG)perl$(E) : perlmain$(O), $(DBG)perlshr$(E), $(MINIPERL_EXE)
 	@ $$@[.vms]genopt "PerlShr.Opt/Write" "|" "''f$$Environment("Default")'$(DBG)PerlShr$(E)/Share"
+#> .ifdef gnuc
+#> 	Link $(LINKFLAGS)/Exe=$@ perlmain$(O), perlshr.opt/Option, perlshr_attr.opt/Option, crtl.opt/Option
+#> .else
 	Link $(LINKFLAGS)/Exe=$@ perlmain$(O), perlshr.opt/Option, perlshr_attr.opt/Option
+#> .endif
 
 $(DBG)perlshr$(E) : $(DBG)libperl$(OLB) $(extobj) $(DBG)perlshr_xtras.ts
 	Link /NoTrace$(LINKFLAGS)/Share=$@ $(extobj) []$(DBG)perlshr_bld.opt/Option, perlshr_attr.opt/Option
@@ -218,8 +298,18 @@ $(DBG)perlshr$(E) : $(DBG)libperl$(OLB) $(extobj) $(DBG)perlshr_xtras.ts
 #  perlshr_gbl*.mar, perlshr_gbl*$(O) - VAX only
 # The song and dance with gen_shrfls.opt accomodates DCL's 255 character
 # line length limit.
+#> .ifdef PIPES_BROKEN
 # This is a backup target used only with older versions of the DECCRTL which
 # can't deal with pipes properly.  See ReadMe.VMS for details.
+#> $(DBG)perlshr_xtras.ts : perl.h config.h vmsish.h proto.h [.vms]gen_shrfls.pl $(MINIPERL_EXE) $(MAKEFILE) $(CRTL)
+#> 	$(CC) $(CFLAGS)/NoObject/NoList/PreProcess=perl.i perl.h
+#> 	@ $(MINIPERL) -e "print join('|',@ARGV),'|';" "~~NOCC~~perl.i~~$(CC)$(CFLAGS)" >gen_shrfls.opt
+#> 	@ $(MINIPERL) -e "print join('|',@ARGV);" "$(O)" "$(DBG)" "$(OLB)" "$(EXT)" "$(CRTL)" >>gen_shrfls.opt
+#> 	$(MINIPERL) [.vms]gen_shrfls.pl -f gen_shrfls.opt
+#> 	@ Delete/NoLog/NoConfirm perl.i;, gen_shrfls.opt;
+#> 	@ If f$$Search("$(DBG)perlshr_xtras.ts").nes."" Then Delete/NoLog/NoConfirm $(DBG)perlshr_xtras.ts;*
+#> 	@ Copy _NLA0: $(DBG)perlshr_xtras.ts
+#> .else
 $(DBG)perlshr_xtras.ts : perl.h config.h vmsish.h proto.h [.vms]gen_shrfls.pl $(MINIPERL_EXE) $(MAKEFILE) $(CRTL)
 	@ $(MINIPERL) -e "print join('|',@ARGV),'|';" "$(CC)$(CFLAGS)" >gen_shrfls.opt
 	@ $(MINIPERL) -e "print join('|',@ARGV);" "$(O)" "$(DBG)" "$(OLB)" "$(EXT)" "$(CRTL)" >>gen_shrfls.opt
@@ -227,6 +317,7 @@ $(DBG)perlshr_xtras.ts : perl.h config.h vmsish.h proto.h [.vms]gen_shrfls.pl $(
 	@ Delete/NoLog/NoConfirm gen_shrfls.opt;
 	@ If f$$Search("$(DBG)perlshr_xtras.ts").nes."" Then Delete/NoLog/NoConfirm $(DBG)perlshr_xtras.ts;*
 	@ Copy _NLA0: $(DBG)perlshr_xtras.ts
+#> .endif
 
 $(ARCHDIR)config.pm : [.lib]config.pm
 	Create/Directory $(ARCHDIR)
@@ -282,25 +373,6 @@ Opcode : [.lib]Opcode.pm [.lib]ops.pm [.lib]Safe.pm [.lib.auto.Opcode]Opcode$(E)
 [.ext.Opcode]Makefile : [.ext.Opcode]Makefile.PL $(ARCHDIR)Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm $(DBG)perlshr$(E)
 	$(MINIPERL) "-I[--.lib]" -e "chdir('[.ext.Opcode]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" "INST_LIB=[--.lib]" "INST_ARCHLIB=[--.lib]"
 
-FileHandle : [.lib]FileHandle.pm [.lib.auto.FileHandle]FileHandle$(E)
-	@ $(NOOP)
-
-[.lib]FileHandle.pm : [.ext.FileHandle]Makefile
-	@ If f$$Search("[.lib]auto.dir").eqs."" Then Create/Directory [.lib.auto]
-	@ Set Default [.ext.FileHandle]
-	$(MMS)
-	@ Set Default [--]
-
-[.lib.auto.FileHandle]FileHandle$(E) : [.ext.FileHandle]Makefile
-	@ Set Default [.ext.FileHandle]
-	$(MMS)
-	@ Set Default [--]
-
-# Add "-I[--.lib]" t $(MINIPERL) so we use this copy of lib after C<chdir>
-# ${@} necessary to distract different versions of MM[SK]/make
-[.ext.FileHandle]Makefile : [.ext.FileHandle]Makefile.PL $(ARCHDIR)Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm $(DBG)perlshr$(E)
-	$(MINIPERL) "-I[--.lib]" -e "chdir('[.ext.FileHandle]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" "INST_LIB=[--.lib]" "INST_ARCHLIB=[--.lib]"
-
 Fcntl : [.lib]Fcntl.pm [.lib.auto.Fcntl]Fcntl$(E)
 	@ $(NOOP)
 
@@ -319,6 +391,25 @@ Fcntl : [.lib]Fcntl.pm [.lib.auto.Fcntl]Fcntl$(E)
 # ${@} necessary to distract different versions of MM[SK]/make
 [.ext.Fcntl]Makefile : [.ext.Fcntl]Makefile.PL $(ARCHDIR)Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm $(DBG)perlshr$(E)
 	$(MINIPERL) "-I[--.lib]" -e "chdir('[.ext.Fcntl]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" "INST_LIB=[--.lib]" "INST_ARCHLIB=[--.lib]"
+
+POSIX : [.lib]POSIX.pm [.lib.auto.POSIX]POSIX$(E)
+	@ $(NOOP)
+
+[.lib]POSIX.pm : [.ext.POSIX]Makefile
+	@ If f$$Search("[.lib]auto.dir").eqs."" Then Create/Directory [.lib.auto]
+	@ Set Default [.ext.POSIX]
+	$(MMS)
+	@ Set Default [--]
+
+[.lib.auto.POSIX]POSIX$(E) : [.ext.POSIX]Makefile
+	@ Set Default [.ext.POSIX]
+	$(MMS)
+	@ Set Default [--]
+
+# Add "-I[--.lib]" t $(MINIPERL) so we use this copy of lib after C<chdir>
+# ${@} necessary to distract different versions of MM[SK]/make
+[.ext.POSIX]Makefile : [.ext.POSIX]Makefile.PL $(ARCHDIR)Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm $(DBG)perlshr$(E)
+	$(MINIPERL) "-I[--.lib]" -e "chdir('[.ext.POSIX]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" "INST_LIB=[--.lib]" "INST_ARCHLIB=[--.lib]"
 
 IO : [.lib]IO.pm [.lib.IO]File.pm [.lib.IO]Handle.pm [.lib.IO]Pipe.pm [.lib.IO]Seekable.pm [.lib.IO]Socket.pm [.lib.auto.IO]IO$(E)
 	@ $(NOOP)
@@ -558,6 +649,30 @@ printconfig :
 	@ $$@[.vms]make_command $(MMS) $(MMSQUALIFIERS) $(MMSTARGETS)
 	@ $$@[.vms]myconfig "$(CC)" "$(CFLAGS)" "$(LINKFLAGS)" "$(LIBS1)" "$(LIBS2)" "$(SOCKLIB)" "$(EXT)" "$(DBG)"
 
+#> .ifdef SOCKET
+#> 
+#> .ifdef LINK_ONLY
+#> .else
+#> $(SOCKOBJ) : $(SOCKC) $(SOCKH)
+#> 
+#> [.ext.Socket]Socket$(O) : [.ext.Socket]Socket.c
+#> 	$(CC) $(CFLAGS) /Object=$@ [.ext.Socket]Socket.c
+#> 
+#> [.ext.Socket]Socket.c : [.ext.Socket]Socket.xs $(MINIPERL_EXE)
+#> 	$(XSUBPP) [.ext.Socket]Socket.xs >$@
+#> .endif # !LINK_ONLY
+#> 
+#> vmsish.h : $(SOCKH)
+#> 
+#> $(SOCKC) : [.vms]$(SOCKC)
+#> 	Copy/Log/NoConfirm [.vms]$(SOCKC) []$(SOCKC)
+#> 
+#> $(SOCKH) : [.vms]$(SOCKH)
+#> 	Copy/Log/NoConfirm [.vms]$(SOCKH) []$(SOCKH)
+#> 
+#> [.lib]Socket.pm : [.ext.Socket]Socket.pm
+#> 	Copy/Log/NoConfirm [.ext.Socket]Socket.pm $@
+#> .endif
 
 # The following three header files are generated automatically
 #	keywords.h :	keywords.pl
@@ -589,8 +704,11 @@ perly.h : [.vms]perly_h.vms
 # 	rename y.tab.h perly.h
 # 	$(INSTPERL) [.vms]vms_yfix.pl perly.c perly.h [.vms]perly_c.vms [.vms]perly_h.vms
 
+#> .ifdef LINK_ONLY
+#> .else
 perly$(O) : perly.c, perly.h, $(h)
 	$(CC) $(CFLAGS) perly.c
+#> .endif
 
 test : all
 	- @[.VMS]Test.Com "$(E)"
@@ -684,6 +802,11 @@ $(ARCHCORE)util.h : util.h
 $(ARCHCORE)vmsish.h : vmsish.h
 	@ If f$$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log vmsish.h $@
+#> .ifdef SOCKET
+#> $(ARCHCORE)$(SOCKH) : $(SOCKH)
+#> 	@ If f$$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
+#> 	Copy/Log $(SOCKH) $@
+#> .endif
 $(ARCHCORE)$(DBG)libperl$(OLB) : $(DBG)libperl$(OLB) $(DBG)perlshr_xtras.ts
 	@ If f$$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(DBG)libperl$(OLB) $@
@@ -697,6 +820,8 @@ $(ARCHAUTO)time.stamp :
 	@ If f$$Search("$(ARCHDIR)auto.dir").eqs."" Then Create/Directory $(ARCHAUTO)
 	@ If f$$Search("$@").eqs."" Then Copy/NoConfirm _NLA0: $(MMS$TARGET)
 
+#> .ifdef LINK_ONLY
+#> .else
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
 av$(O) : EXTERN.h
 av$(O) : av.c
@@ -1369,6 +1494,7 @@ globals$(O) : scope.h
 globals$(O) : sv.h
 globals$(O) : vmsish.h
 globals$(O) : util.h
+#> .endif # !LINK_ONLY
 
 config.h : [.vms]config.vms
 	Copy/Log/NoConfirm [.vms]config.vms []config.h
@@ -1389,9 +1515,9 @@ cleanlis :
 	- If f$$Search("*.Map").nes."" Then Delete/NoConfirm/Log *.Map;*
 
 tidy : cleanlis
-	- If f$$Search("*.Opt;-1").nes."" Then Purge/NoConfirm/Log *.Opt
-	- If f$$Search("*$(O);-1").nes."" Then Purge/NoConfirm/Log *$(O)
-	- If f$$Search("*$(E);-1").nes."" Then Purge/NoConfirm/Log *$(E)
+	- If f$$Search("[...]*.Opt;-1").nes."" Then Purge/NoConfirm/Log [...]*.Opt
+	- If f$$Search("[...]*$(O);-1").nes."" Then Purge/NoConfirm/Log [...]*$(O)
+	- If f$$Search("[...]*$(E);-1").nes."" Then Purge/NoConfirm/Log [...]*$(E)
 	- If f$$Search("Config.H;-1").nes."" Then Purge/NoConfirm/Log Config.H
 	- If f$$Search("Config.SH;-1").nes."" Then Purge/NoConfirm/Log Config.SH
 	- If f$$Search("perly.c;-1").nes."" Then Purge/NoConfirm/Log perly.c
@@ -1415,7 +1541,8 @@ tidy : cleanlis
 	- If f$$Search("[.Lib.VMS]*.*;-1").nes."" Then Purge/NoConfirm/Log [.Lib.VMS]*.*
 	- If f$$Search("[.Lib.Pod]*.Pod;-1").nes."" Then Purge/NoConfirm/Log [.Lib.Pod]*.Pod
 	- If f$$Search("$(ARCHCORE)*.*").nes."" Then Purge/NoConfirm/Log $(ARCHCORE)*.*
-	- If f$$Search("[.utils]*.;-1").nes."" Then Purge/NoConfirm/Log [.utils]*.
+	- If f$$Search("[.utils]*.;-1").nes."" Then Purge/NoConfirm/Log [.utils]*./Exclude=Makefile.
+	- If f$$Search("[.lib]perlbug.;-1").nes."" Then Purge/NoConfirm/Log [.lib]perlbug.
 	- If f$$Search("[.lib.pod]*.;-1").nes."" Then Purge/NoConfirm/Log [.lib.pod]*.
 
 clean : tidy
@@ -1431,6 +1558,11 @@ clean : tidy
 	Set Default [.ext.Opcode]
 	- $(MMS) clean
 	Set Default [--]
+#> .ifdef DECC
+#> 	Set Default [.ext.POSIX]
+#> 	- $(MMS) clean
+#> 	Set Default [--]
+#> .endif
 	- If f$$Search("*.Opt").nes."" Then Delete/NoConfirm/Log *.Opt;*/Exclude=PerlShr_*.Opt
 	- If f$$Search("*$(O);*") .nes."" Then Delete/NoConfirm/Log *$(O);*
 	- If f$$Search("Config.H").nes."" Then Delete/NoConfirm/Log Config.H;*
@@ -1464,6 +1596,11 @@ realclean : clean
 	Set Default [.ext.Opcode]
 	- $(MMS) realclean
 	Set Default [--]
+#> .ifdef DECC
+#> 	Set Default [.ext.POSIX]
+#> 	- $(MMS) realclean
+#> 	Set Default [--]
+#> .endif
 	- If f$$Search("*$(OLB)").nes."" Then Delete/NoConfirm/Log *$(OLB);*
 	- If f$$Search("*.Opt").nes."" Then Delete/NoConfirm/Log *.Opt;*
 	- $(MINIPERL) -e "use File::Path; rmtree(['lib/auto','lib/VMS','lib/$(ARCH)'],1,0);"
@@ -1473,7 +1610,7 @@ realclean : clean
 	- If f$$Search("[.Lib]perlbug.").nes."" Then Delete/NoConfirm/Log [.Lib]perlbug.;*
 	- If f$$Search("$(ARCHDIR)Config.pm").nes."" Then Delete/NoConfirm/Log $(ARCHDIR)Config.pm;*
 	- If f$$Search("[.lib.ExtUtils]Miniperl.pm").nes."" Then Delete/NoConfirm/Log [.lib.ExtUtils]Miniperl.pm;*
-	- If f$$Search("[.utils]*.").nes."" Then Delete/NoConfirm/Log [.utils]*.;*
+	- If f$$Search("[.utils]*.").nes."" Then Delete/NoConfirm/Log [.utils]*.;*/Exclude=Makefile.
 	- If f$$Search("[.lib.pod]*.pod").nes."" Then Delete/NoConfirm/Log [.lib.pod]*.pod;*
 	- If f$$Search("[.lib.pod]perldoc.").nes."" Then Delete/NoConfirm/Log [.lib.pod]perldoc.;*
 	- If f$$Search("[.lib.pod]pod2*.").nes."" Then Delete/NoConfirm/Log [.lib.pod]pod2*.;*

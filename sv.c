@@ -375,6 +375,9 @@ sv_free_arenas()
 	if (!SvFAKE(sva))
 	    Safefree((void *)sva);
     }
+
+    sv_arenaroot = 0;
+    sv_root = 0;
 }
 
 static XPVIV*
@@ -2386,6 +2389,9 @@ I32 namlen;
     case 'x':
 	mg->mg_virtual = &vtbl_substr;
 	break;
+    case 'y':
+	mg->mg_virtual = &vtbl_vivary;
+	break;
     case '*':
 	mg->mg_virtual = &vtbl_glob;
 	break;
@@ -2611,7 +2617,7 @@ register SV *sv;
 		SvROK_off(ret);
 		SvREFCNT(sv) = 0;
 	    } else {
-		croak("panic: dangling references in DESTROY");
+		croak("DESTROY created new reference to dead object");
 	    }
 	}
     }
@@ -2619,7 +2625,10 @@ register SV *sv;
 	mg_free(sv);
     switch (SvTYPE(sv)) {
     case SVt_PVIO:
-	io_close((IO*)sv);
+	if (IoIFP(sv) != PerlIO_stdin() &&
+	    IoIFP(sv) != PerlIO_stdout() &&
+	    IoIFP(sv) != PerlIO_stderr())
+	  io_close((IO*)sv);
 	Safefree(IoTOP_NAME(sv));
 	Safefree(IoFMT_NAME(sv));
 	Safefree(IoBOTTOM_NAME(sv));
@@ -3405,6 +3414,19 @@ SV *ref;
     SvROK_on(sv);
     return sv;
 }
+
+#ifdef CRIPPLED_CC
+SV *
+newRV_noinc(ref)
+SV *ref;
+{
+    register SV *sv;
+
+    sv = newRV(ref);
+    SvREFCNT_dec(ref);
+    return sv;
+}
+#endif /* CRIPPLED_CC */
 
 /* make an exact duplicate of old */
 

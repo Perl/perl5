@@ -1,8 +1,8 @@
 #   VMS::Stdio - VMS extensions to Perl's stdio calls
 #
 #   Author:  Charles Bailey  bailey@genetics.upenn.edu
-#   Version: 2.0
-#   Revised: 28-Feb-1996
+#   Version: 2.01
+#   Revised: 10-Dec-1996
 
 package VMS::Stdio;
 
@@ -12,7 +12,7 @@ use Carp '&croak';
 use DynaLoader ();
 use Exporter ();
  
-$VERSION = '2.0';
+$VERSION = '2.01';
 @ISA = qw( Exporter DynaLoader IO::File );
 @EXPORT = qw( &O_APPEND &O_CREAT &O_EXCL  &O_NDELAY &O_NOWAIT
               &O_RDONLY &O_RDWR  &O_TRUNC &O_WRONLY );
@@ -32,15 +32,14 @@ sub AUTOLOAD {
     if ($constname =~ /^O_/) {
       my($val) = constant($constname);
       defined $val or croak("Unknown VMS::Stdio constant $constname");
+      *$AUTOLOAD = sub { val; }
     }
     else { # We don't know about it; hand off to IO::File
       require IO::File;
-      my($obj) = shift(@_);
 
-      my($val) = eval "\$obj->IO::File::$constname(@_)";
-      croak "Error autoloading $constname: $@" if $@;
+      *$AUTOLOAD = eval "sub { shift->IO::File::$constname(\@_) }";
+      croak "Error autoloading IO::File::$constname: $@" if $@;
     }
-    *$AUTOLOAD = sub { $val };
     goto &$AUTOLOAD;
 }
 
@@ -189,9 +188,9 @@ reason, it is unable to generate a name, it returns C<undef>.
 =item vmsopen
 
 The C<vmsopen> function enables you to specify optional RMS arguments
-to the VMS CRTL when opening a file.  It is similar to the built-in
+to the VMS CRTL when opening a file.  Its operation is similar to the built-in
 Perl C<open> function (see L<perlfunc> for a complete description),
-but will only open normal files; it cannot open pipes or duplicate
+but it will only open normal files; it cannot open pipes or duplicate
 existing I/O handles.  Up to 8 optional arguments may follow the
 file name.  These arguments should be strings which specify
 optional file characteristics as allowed by the CRTL. (See the
@@ -199,7 +198,7 @@ CRTL reference manual description of creat() and fopen() for details.)
 If successful, C<vmsopen> returns a VMS::Stdio file handle; if an
 error occurs, it returns C<undef>.
 
-You can use the file handle returned by C<vmsfopen> just as you
+You can use the file handle returned by C<vmsopen> just as you
 would any other Perl file handle.  The class VMS::Stdio ISA
 IO::File, so you can call IO::File methods using the handle
 returned by C<vmsopen>.  However, C<use>ing VMS::Stdio does not
@@ -232,6 +231,6 @@ task by calling the CRTL routine fwait().
 
 =head1 REVISION
 
-This document was last revised on 28-Jan-1996, for Perl 5.002.
+This document was last revised on 10-Dec-1996, for Perl 5.004.
 
 =cut

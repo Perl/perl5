@@ -130,11 +130,6 @@ static u_short blk_shift[11 - 3] = {256, 128, 64, 32,
 #  define MAX_NONSHIFT 2	/* Shift 64 greater than chunk 32. */
 };
 
-#  ifdef DEBUGGING_MSTATS
-static u_int sbrk_slack;
-static u_int start_slack;
-#  endif
-
 #else  /* !PACK_MALLOC */
 
 #  define OV_MAGIC(block,bucket) (block)->ov_magic
@@ -151,8 +146,12 @@ static u_int start_slack;
 
 #ifdef TWO_POT_OPTIMIZE
 
-#  define PERL_PAGESIZE 4096
-#  define FIRST_BIG_TWO_POT 14		/* 16K */
+#  ifndef PERL_PAGESIZE
+#    define PERL_PAGESIZE 4096
+#  endif 
+#  ifndef FIRST_BIG_TWO_POT
+#    define FIRST_BIG_TWO_POT 14	/* 16K */
+#  endif
 #  define FIRST_BIG_BLOCK (1<<FIRST_BIG_TWO_POT) /* 16K */
 /* If this value or more, check against bigger blocks. */
 #  define FIRST_BIG_BOUND (FIRST_BIG_BLOCK - M_OVERHEAD)
@@ -239,6 +238,9 @@ extern	char *sbrk();
  * for a given block size.
  */
 static	u_int nmalloc[NBUCKETS];
+static	u_int goodsbrk;
+static  u_int sbrk_slack;
+static  u_int start_slack;
 #endif
 
 #ifdef DEBUGGING
@@ -337,9 +339,6 @@ malloc(nbytes)
 #ifndef PACK_MALLOC
 	OV_INDEX(p) = bucket;
 #endif
-#ifdef DEBUGGING_MSTATS
-  	nmalloc[bucket]++;
-#endif
 #ifdef RCHECK
 	/*
 	 * Record allocated size of block and
@@ -386,7 +385,7 @@ morecore(bucket)
   	if ((u_int)op & 0x3ff)
   		(void)sbrk(slack = 1024 - ((u_int)op & 0x3ff));
 #    endif
-#    if defined(DEBUGGING_MSTATS) && defined(PACK_MALLOC)
+#    if defined(DEBUGGING_MSTATS)
 	sbrk_slack += slack;
 #    endif
 #  else
@@ -414,6 +413,9 @@ morecore(bucket)
 	    if (op == (union overhead *)-1)
   		return;
 	}
+#ifdef DEBUGGING_MSTATS
+	goodsbrk += needed;
+#endif	
 	/*
 	 * Round up to minimum allocation size boundary
 	 * and deduct from block count to reflect.
@@ -450,6 +452,9 @@ morecore(bucket)
 	} else op++;		/* One chunk per block. */
 #endif /* !PACK_MALLOC */
   	nextf[bucket] = op;
+#ifdef DEBUGGING_MSTATS
+	nmalloc[bucket] += nblks;
+#endif 
   	while (--nblks > 0) {
 		op->ov_next = (union overhead *)((caddr_t)op + siz);
 		op = (union overhead *)((caddr_t)op + siz);
@@ -518,9 +523,6 @@ free(mp)
   	size = OV_INDEX(op);
 	op->ov_next = nextf[size];
   	nextf[size] = op;
-#ifdef DEBUGGING_MSTATS
-  	nmalloc[size]--;
-#endif
 }
 
 /*
@@ -705,7 +707,7 @@ dump_mstats(s)
 {
   	register int i, j;
   	register union overhead *p;
-  	int topbucket=0, totfree=0, totused=0;
+  	int topbucket=0, totfree=0, total=0;
 	u_int nfree[NBUCKETS];
 
   	for (i=0; i < NBUCKETS; i++) {
@@ -713,28 +715,23 @@ dump_mstats(s)
   			;
 		nfree[i] = j;
   		totfree += nfree[i]   * (1 << (i + 3));
-  		totused += nmalloc[i] * (1 << (i + 3));
-		if (nfree[i] || nmalloc[i])
+  		total += nmalloc[i] * (1 << (i + 3));
+		if (nmalloc[i])
 			topbucket = i;
   	}
   	if (s)
 		PerlIO_printf(PerlIO_stderr(), "Memory allocation statistics %s (buckets 8..%d)\n",
 			s, (1 << (topbucket + 3)) );
-  	PerlIO_printf(PerlIO_stderr(), " %7d free: ", totfree);
+  	PerlIO_printf(PerlIO_stderr(), "%8d free:", totfree);
   	for (i=0; i <= topbucket; i++) {
-  		PerlIO_printf(PerlIO_stderr(), (i<5)?" %5d":" %3d", nfree[i]);
+  		PerlIO_printf(PerlIO_stderr(), (i<5 || i==7)?" %5d": (i<9)?" %3d":" %d", nfree[i]);
   	}
-  	PerlIO_printf(PerlIO_stderr(), "\n %7d used: ", totused);
+  	PerlIO_printf(PerlIO_stderr(), "\n%8d used:", total - totfree);
   	for (i=0; i <= topbucket; i++) {
-  		PerlIO_printf(PerlIO_stderr(), (i<5)?" %5d":" %3d", nmalloc[i]);
+  		PerlIO_printf(PerlIO_stderr(), (i<5 || i==7)?" %5d": (i<9)?" %3d":" %d", nmalloc[i] - nfree[i]);
   	}
-  	PerlIO_printf(PerlIO_stderr(), "\n");
-#ifdef PACK_MALLOC
-	if (sbrk_slack || start_slack) {
-  	    PerlIO_printf(PerlIO_stderr(), "Odd ends: %7d bytes from sbrk(), %7d from malloc.\n",
-		    sbrk_slack, start_slack);
-	}
-#endif
+	PerlIO_printf(PerlIO_stderr(), "\nTotal sbrk(): %8d. Odd ends: sbrk(): %7d, malloc(): %7d bytes.\n",
+		      goodsbrk + sbrk_slack, sbrk_slack, start_slack);
 }
 #else
 void

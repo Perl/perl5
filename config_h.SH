@@ -269,6 +269,17 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_fsetpos HAS_FSETPOS	/**/
 
+/* HAS_GETTIMEOFDAY:
+ *	This symbol, if defined, indicates that the gettimeofday() system
+ *	call is available for a sub-second accuracy clock. Usually, the file
+ *	<sys/resource.h> needs to be included (see I_SYS_RESOURCE).
+ *	The type "Timeval" should be used to refer to "struct timeval".
+ */
+#$d_gettimeod HAS_GETTIMEOFDAY	/**/
+#ifdef HAS_GETTIMEOFDAY
+#define Timeval struct timeval	/* Structure used by gettimeofday() */
+#endif
+
 /* HAS_GETGROUPS:
  *	This symbol, if defined, indicates that the getgroups() routine is
  *	available to get the list of process groups.  If unavailable, multiple
@@ -551,10 +562,9 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_safemcpy HAS_SAFE_MEMCPY	/**/
 
 /* HAS_SANE_MEMCMP:
- *	This symbol, if defined, indicates that the memcmp() routine is
- *	available to compare memory blocks for relative magnitude. If this
- *	symbol is not defined, and if HAS_MEMCMP is defined, then memcmp()
- *	may be used only to compare memory blocks for equality.
+ *	This symbol, if defined, indicates that the memcmp routine is available
+ *	and can be used to compare relative magnitudes of chars with their high
+ *	bits set.  If it is not defined, roll your own version.
  */
 #$d_sanemcmp HAS_SANE_MEMCMP	/**/
 
@@ -810,19 +820,19 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 
 /* HAS_STRTOD:
  *	This symbol, if defined, indicates that the strtod routine is
- *	available to translate strings to doubles.
+ *	available to provide better numeric string conversion than atof().
  */
 #$d_strtod HAS_STRTOD	/**/
 
 /* HAS_STRTOL:
- *	This symbol, if defined, indicates that the strtol routine is
- *	available to translate strings to integers.
+ *	This symbol, if defined, indicates that the strtol routine is available
+ *	to provide better numeric string conversion than atoi() and friends.
  */
 #$d_strtol HAS_STRTOL	/**/
 
 /* HAS_STRTOUL:
  *	This symbol, if defined, indicates that the strtoul routine is
- *	available to translate strings to integers.
+ *	available to provide conversion of strings to unsigned long.
  */
 #$d_strtoul HAS_STRTOUL	/**/
 
@@ -1375,6 +1385,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_archlib ARCHLIB "$archlib"		/**/
 #$d_archlib ARCHLIB_EXP "$archlibexp"		/**/
+
+/* BINCOMPAT3:
+ *	This symbol, if defined, indicates that Perl 5.004 should be
+ *	binary-compatible with Perl 5.003.
+ */
+#$d_bincompat3 BINCOMPAT3			/**/
 
 /* BYTEORDER:
  *	This symbol holds the hexadecimal constant defined in byteorder,

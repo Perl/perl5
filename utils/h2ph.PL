@@ -26,10 +26,9 @@ print "Extracting $file (with variable substitutions)\n";
 # You can use $Config{...} to use Configure variables.
 
 print OUT <<"!GROK!THIS!";
-$Config{'startperl'}
-    eval 'exec perl -S \$0 "\$@"'
-	if 0;
-
+$Config{startperl}
+    eval 'exec $Config{perlpath} -S \$0 \${1+"\$@"}'
+	if \$running_under_some_shell;
 !GROK!THIS!
 
 # In the following, perl variables are not expanded during extraction.
@@ -55,6 +54,10 @@ $inif = 0;
 @ARGV = ('-') unless @ARGV;
 
 foreach $file (@ARGV) {
+    # Recover from header files with unbalanced cpp directives
+    $t = '';
+    $tab = 0;
+
     if ($file eq '-') {
 	open(IN, "-");
 	open(OUT, ">-");
@@ -103,7 +106,7 @@ foreach $file (@ARGV) {
 			$args = "local($args) = \@_;\n$t    ";
 		    }
 		    s/^\s+//;
-		    do expr();
+		    expr();
 		    $new =~ s/(["\\])/\\$1/g;
 		    if ($t ne '') {
 			$new =~ s/(['\\])/\\$1/g;
@@ -117,7 +120,7 @@ foreach $file (@ARGV) {
 		}
 		else {
 		    s/^\s+//;
-		    do expr();
+		    expr();
 		    $new = 1 if $new eq '';
 		    if ($t ne '') {
 			$new =~ s/(['\\])/\\$1/g;
@@ -145,7 +148,7 @@ foreach $file (@ARGV) {
 	    elsif (s/^if\s+//) {
 		$new = '';
 		$inif = 1;
-		do expr();
+		expr();
 		$inif = 0;
 		print OUT $t,"if ($new) {\n";
 		$tab += 4;
@@ -154,7 +157,7 @@ foreach $file (@ARGV) {
 	    elsif (s/^elif\s+//) {
 		$new = '';
 		$inif = 1;
-		do expr();
+		expr();
 		$inif = 0;
 		$tab -= 4;
 		$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
@@ -194,10 +197,31 @@ sub expr {
 	    }
 	    next;
 	};
-	s/^sizeof\s*\(([^)]+)\)/{$1}/ && do {
-	    $new .= '$sizeof';
-	    next;
-	};
+        # replace "sizeof(foo)" with "{foo}"
+        # also, remove * (C dereference operator) to avoid perl syntax
+        # problems.  Where the %sizeof array comes from is anyone's
+        # guess (c2ph?), but this at least avoids fatal syntax errors.
+        # Behavior is undefined if sizeof() delimiters are unbalanced.
+        # This code was modified to able to handle constructs like this:
+        #   sizeof(*(p)), which appear in the HP-UX 10.01 header files.
+        s/^sizeof\s*\(// && do {
+            $new .= '$sizeof';
+            my $lvl = 1;  # already saw one open paren
+            # tack { on the front, and skip it in the loop
+            $_ = "{" . "$_";
+            my $index = 1;
+            # find balanced closing paren
+            while ($index <= length($_) && $lvl > 0) {
+                $lvl++ if substr($_, $index, 1) eq "(";
+                $lvl-- if substr($_, $index, 1) eq ")";
+                $index++;
+            }
+            # tack } on the end, replacing )
+            substr($_, $index - 1, 1) = "}";
+            # remove pesky * operators within the sizeof argument
+            substr($_, 0, $index - 1) =~ s/\*//g;
+            next;
+        };
 	s/^([_a-zA-Z]\w*)//	&& do {
 	    $id = $1;
 	    if ($id eq 'struct') {

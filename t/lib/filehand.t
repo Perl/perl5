@@ -64,12 +64,19 @@ print "ok 10\n";
 
 ($rd,$wr) = FileHandle::pipe;
 
-if (fork) {
- $wr->close;
- print $rd->getline;
+if ($^O eq 'VMS' || $^O eq 'os2') {
+  $wr->autoflush;
+  $wr->printf("ok %d\n",11);
+  print $rd->getline;
 }
 else {
- $rd->close;
- $wr->printf("ok %d\n",11);
- exit(0);
+  if (fork) {
+   $wr->close;
+   print $rd->getline;
+  }
+  else {
+   $rd->close;
+   $wr->printf("ok %d\n",11);
+   exit(0);
+  }
 }

@@ -178,7 +178,8 @@ I32	looks_like_number _((SV* sv));
 int	magic_clearenv	_((SV* sv, MAGIC* mg));
 int	magic_clearpack	_((SV* sv, MAGIC* mg));
 int	magic_clearsig	_((SV* sv, MAGIC* mg));
-int	magic_existspack	_((SV* sv, MAGIC* mg));
+int	magic_existspack _((SV* sv, MAGIC* mg));
+int	magic_freevivary _((SV* sv, MAGIC* mg));
 int	magic_get	_((SV* sv, MAGIC* mg));
 int	magic_getarylen	_((SV* sv, MAGIC* mg));
 int	magic_getpack	_((SV* sv, MAGIC* mg));
@@ -210,11 +211,14 @@ int	magic_setsubstr	_((SV* sv, MAGIC* mg));
 int	magic_settaint	_((SV* sv, MAGIC* mg));
 int	magic_setuvar	_((SV* sv, MAGIC* mg));
 int	magic_setvec	_((SV* sv, MAGIC* mg));
+int	magic_setvivary	_((SV* sv, MAGIC* mg));
 int	magic_wipepack	_((SV* sv, MAGIC* mg));
 void	magicname _((char* sym, char* name, I32 namlen));
 int	main _((int argc, char** argv, char** env));
 void	markstack_grow _((void));
+#ifdef USE_LOCALE_COLLATE
 char*	mem_collxfrm _((const char *s, STRLEN len, STRLEN *xlen));
+#endif
 char*	mess _((char* pat, va_list* args));
 int	mg_clear _((SV* sv));
 int	mg_copy _((SV *, SV *, char *, I32));
@@ -227,13 +231,15 @@ int	mg_set _((SV* sv));
 OP*	mod _((OP* op, I32 type));
 char*	moreswitches _((char* s));
 OP *	my _(( OP *));
+#if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
 char*	my_bcopy _((char* from, char* to, I32 len));
+#endif
 #if !defined(HAS_BZERO) && !defined(HAS_MEMSET)
 char*	my_bzero _((char* loc, I32 len));
 #endif
 void	my_exit _((U32 status)) __attribute__((noreturn));
 I32	my_lstat _((void));
-#ifndef HAS_MEMCMP
+#if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
 I32	my_memcmp _((char* s1, char* s2, I32 len));
 #endif
 I32	my_pclose _((PerlIO* ptr));
@@ -380,6 +386,7 @@ void	save_destructor _((void (*f)(void*), void* p));
 void	save_freesv _((SV* sv));
 void	save_freeop _((OP* op));
 void	save_freepv _((char* pv));
+void	save_gp _((GV* gv, I32 empty));
 HV*	save_hash _((GV* gv));
 void	save_hptr _((HV** hptr));
 void	save_I16 _((I16* intp));
@@ -431,7 +438,9 @@ void	sv_clean_objs _((void));
 void	sv_clear _((SV* sv));
 I32	sv_cmp _((SV* sv1, SV* sv2));
 I32	sv_cmp_locale _((SV* sv1, SV* sv2));
+#ifdef USE_LOCALE_COLLATE
 char*	sv_collxfrm _((SV* sv, STRLEN* nxp));
+#endif
 void	sv_dec _((SV* sv));
 void	sv_dump _((SV* sv));
 bool	sv_derived_from _((SV* sv, char* name));

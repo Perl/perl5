@@ -7,9 +7,9 @@ perlref - Perl references and nested data structures
 Before release 5 of Perl it was difficult to represent complex data
 structures, because all references had to be symbolic, and even that was
 difficult to do when you wanted to refer to a variable rather than a
-symbol table entry.  Perl 5 not only makes it easier to use symbolic
+symbol table entry.  Perl not only makes it easier to use symbolic
 references to variables, but lets you have "hard" references to any piece
-of data.  Any scalar may hold a hard reference.  Since arrays and hashes
+of data.  Any scalar may hold a hard reference.  Because arrays and hashes
 contain scalars, you can now easily build arrays of arrays, arrays of
 hashes, hashes of arrays, arrays of hashes of functions, and so on.
 
@@ -25,7 +25,7 @@ references to objects that have been officially "blessed" into a class package.)
 
 
 A symbolic reference contains the name of a variable, just as a
-symbolic link in the filesystem merely contains the name of a file.  
+symbolic link in the filesystem contains merely the name of a file.  
 The C<*glob> notation is a kind of symbolic reference.  Hard references
 are more like hard links in the file system: merely another way
 at getting at the same underlying object, irrespective of its name.
@@ -44,7 +44,7 @@ References can be constructed several ways.
 
 By using the backslash operator on a variable, subroutine, or value.
 (This works much like the & (address-of) operator works in C.)  Note
-that this typically creates I<ANOTHER> reference to a variable, since
+that this typically creates I<ANOTHER> reference to a variable, because
 there's already a reference to the variable in the symbol table.  But
 the symbol table reference might go away, and you'll still have the
 reference that the backslash returned.  Here are some examples:
@@ -55,9 +55,11 @@ reference that the backslash returned.  Here are some examples:
     $coderef   = \&handler;
     $globref   = \*foo;
 
-It isn't possible to create a reference to an IO handle (filehandle or
+It isn't possible to create a true reference to an IO handle (filehandle or
 dirhandle) using the backslash operator.  See the explanation of the
-*foo{THING} syntax below.
+*foo{THING} syntax below.  (However, you're apt to find Perl code
+out there using globrefs as though they were IO handles, which is 
+grandfathered into continued functioning.)
 
 =item 2.
 
@@ -167,7 +169,7 @@ newprint() I<despite> the fact that the "my $x" has seemingly gone out of
 scope by the time the anonymous subroutine runs.  That's what closure
 is all about.
 
-This only applies to lexical variables, by the way.  Dynamic variables
+This applies to only lexical variables, by the way.  Dynamic variables
 continue to work as they have always worked.  Closure is not something
 that most Perl programmers need trouble themselves about to begin with.
 
@@ -186,7 +188,7 @@ named new(), but don't have to be:
 =item 6.
 
 References of the appropriate type can spring into existence if you
-dereference them in a context that assumes they exist.  Since we haven't
+dereference them in a context that assumes they exist.  Because we haven't
 talked about dereferencing yet, we can't show you any examples yet.
 
 =item 7.
@@ -209,8 +211,13 @@ IO handle, used for file handles (L<perlfunc/open>), sockets
 (L<perlfunc/opendir>).  For compatibility with previous versions of
 Perl, *foo{FILEHANDLE} is a synonym for *foo{IO}.
 
-The use of *foo{IO} is the best way to pass bareword filehandles into
-or out of subroutines, or to store them in larger data structures.
+*foo{THING} returns undef if that particular THING hasn't been used yet,
+except in the case of scalars.  *foo{SCALAR} returns a reference to an
+anonymous scalar if $foo hasn't been used yet.  This might change in a
+future release.
+
+The use of *foo{IO} is the best way to pass bareword filehandles into or
+out of subroutines, or to store them in larger data structures.
 
     splutter(*STDOUT{IO});
     sub splutter {
@@ -224,9 +231,18 @@ or out of subroutines, or to store them in larger data structures.
 	return scalar <$fh>;
     }
 
-The best way to do this used to be to use the entire *foo typeglob (or a
-reference to it), so you'll probably come across old code which does it
-that way.
+Beware, though, that you can't do this with a routine which is going to
+open the filehandle for you, because *HANDLE{IO} will be undef if HANDLE
+hasn't been used yet.  Use \*HANDLE for that sort of thing instead.
+
+Using \*HANDLE (or *HANDLE) is another way to use and store non-bareword
+filehandles (before 5.002 it was the only way).  The two methods are
+largely interchangeable, you can do
+
+    splutter(\*STDOUT);
+    $rec = get_rec(\*STDIN);
+
+with the above subroutine definitions.
 
 =back
 
@@ -282,7 +298,7 @@ subscripted expressions:
 Because of being able to omit the curlies for the simple case of C<$$x>,
 people often make the mistake of viewing the dereferencing symbols as
 proper operators, and wonder about their precedence.  If they were,
-though, you could use parens instead of braces.  That's not the case.
+though, you could use parentheses instead of braces.  That's not the case.
 Consider the difference below; case 0 is a short-hand version of case 1,
 I<NOT> case 2:
 
@@ -348,7 +364,7 @@ reference is pointing to.  See L<perlfunc>.
 The bless() operator may be used to associate a reference with a package
 functioning as an object class.  See L<perlobj>.
 
-A typeglob may be dereferenced the same way a reference can, since
+A typeglob may be dereferenced the same way a reference can, because
 the dereference syntax always indicates the kind of reference desired.
 So C<${*foo}> and C<${\$foo}> both indicate the same scalar variable.
 
@@ -447,7 +463,7 @@ subscripting a hash.  So now, instead of writing
 
     $array{ "aaa" }{ "bbb" }{ "ccc" }
 
-you can just write
+you can write just
 
     $array{ aaa }{ bbb }{ ccc }
 
@@ -464,7 +480,7 @@ makes it more than a bareword:
     $array{ shift @_ }
 
 The B<-w> switch will warn you if it interprets a reserved word as a string.
-But it will no longer warn you about using lowercase words, since the
+But it will no longer warn you about using lowercase words, because the
 string is effectively quoted.
 
 =head1 WARNING

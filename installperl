@@ -1,6 +1,7 @@
 #!./perl
 BEGIN { @INC=('./lib', '../lib') }
 use File::Find;
+use File::Compare;
 use File::Path ();
 use Config;
 use subs qw(unlink rename link chmod);
@@ -23,7 +24,7 @@ while (@ARGV) {
 umask 022;
 
 @scripts = qw(	utils/c2ph utils/h2ph utils/h2xs
-		utils/perlbug utils/perldoc utils/pl2pm
+		utils/perlbug utils/perldoc utils/pl2pm utils/splain
 		x2p/s2p x2p/find2perl
 		pod/pod2man pod/pod2html pod/pod2latex pod/pod2text);
 
@@ -343,8 +344,11 @@ sub installlib {
 
     $name = "$dir/$name" if $dir ne '';
 
+    # ignore Chip-style patch backups.
+    return if grep(/^P\d+$/, split(m{/+}, $name));
+
     my $installlib = $installprivlib;
-    if ((substr($dir, 0, 4) eq 'auto') || ($name eq 'Config.pm')) {
+    if ($dir =~ /^auto/ || $name =~ /^(Config|FileHandle|Safe)\.pm$/) {
         $installlib = $installarchlib;
 	return unless $do_installarchlib;
     } else {
@@ -360,8 +364,7 @@ sub installlib {
 	    #This might not work because $archname might have changed.
 	    &unlink("$installarchlib/$name");
 	}
-	system "cmp", "-s", $_, "$installlib/$name";
-	if ($? || $nonono) {
+	if (compare($_, "$installlib/$name") || $nonono) {
 	    &unlink("$installlib/$name");
 	    mkpath("$installlib/$dir", 1, 0777);
 	    cp_if_diff($_, "$installlib/$name");
@@ -390,8 +393,7 @@ sub installlib {
 sub cp_if_diff {
     my($from,$to)=@_;
     -f $from || die "$0: $from not found";
-    system "cmp", "-s", $from, $to;
-    if ($? || $nonono) {
+    if (compare($from, $to) || $nonono) {
 	my ($atime, $mtime);
 	unlink($to);   # In case we don't have write permissions.
         if ($nonono) {

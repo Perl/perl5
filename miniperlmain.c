@@ -40,6 +40,7 @@ char **env;
 	if (!my_perl)
 	    exit(1);
 	perl_construct( my_perl );
+	perl_destruct_level = 0;
     }
 
     exitstatus = perl_parse( my_perl, xs_init, argc, argv, (char **) NULL );

@@ -1,13 +1,12 @@
 package Safe;
 
-require 5.002;
-
+use 5.003_11;
 use strict;
-use Carp;
-
 use vars qw($VERSION);
 
 $VERSION = "2.06";
+
+use Carp;
 
 use Opcode 1.01, qw(
     opset opset_to_ops opmask_add

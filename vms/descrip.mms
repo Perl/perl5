@@ -65,7 +65,7 @@ OBJVAL = $(MMS$TARGET_NAME)$(O)
 .endif
 
 # Updated by fndvers.com -- do not edit by hand
-PERL_VERSION = 5_00310#
+PERL_VERSION = 5_00311#
 
 
 ARCHDIR =  [.lib.$(ARCH).$(PERL_VERSION)]
@@ -270,7 +270,7 @@ all : base extras libmods utils podxform archcorefiles preplibrary perlpods
 	@ $(NOOP)
 base : miniperl perl
 	@ $(NOOP)
-extras : Fcntl FileHandle IO Opcode $(POSIX) libmods utils podxform
+extras : Fcntl IO Opcode $(POSIX) libmods utils podxform
 	@ $(NOOP)
 libmods : [.lib]Config.pm $(ARCHDIR)Config.pm [.lib]DynaLoader.pm [.lib.VMS]Filespec.pm 
 	@ $(NOOP)
@@ -403,25 +403,6 @@ Opcode : [.lib]Opcode.pm [.lib]ops.pm [.lib]Safe.pm [.lib.auto.Opcode]Opcode$(E)
 # ${@} necessary to distract different versions of MM[SK]/make
 [.ext.Opcode]Descrip.MMS : [.ext.Opcode]Makefile.PL $(ARCHDIR)Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm $(DBG)perlshr$(E)
 	$(MINIPERL) "-I[--.lib]" -e "chdir('[.ext.Opcode]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" "INST_LIB=[--.lib]" "INST_ARCHLIB=[--.lib]"
-
-FileHandle : [.lib]FileHandle.pm [.lib.auto.FileHandle]FileHandle$(E)
-	@ $(NOOP)
-
-[.lib]FileHandle.pm : [.ext.FileHandle]Descrip.MMS
-	@ If F$Search("[.lib]auto.dir").eqs."" Then Create/Directory [.lib.auto]
-	@ Set Default [.ext.FileHandle]
-	$(MMS)
-	@ Set Default [--]
-
-[.lib.auto.FileHandle]FileHandle$(E) : [.ext.FileHandle]Descrip.MMS
-	@ Set Default [.ext.FileHandle]
-	$(MMS)
-	@ Set Default [--]
-
-# Add "-I[--.lib]" t $(MINIPERL) so we use this copy of lib after C<chdir>
-# ${@} necessary to distract different versions of MM[SK]/make
-[.ext.FileHandle]Descrip.MMS : [.ext.FileHandle]Makefile.PL $(ARCHDIR)Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm $(DBG)perlshr$(E)
-	$(MINIPERL) "-I[--.lib]" -e "chdir('[.ext.FileHandle]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" "INST_LIB=[--.lib]" "INST_ARCHLIB=[--.lib]"
 
 Fcntl : [.lib]Fcntl.pm [.lib.auto.Fcntl]Fcntl$(E)
 	@ $(NOOP)
@@ -1591,7 +1572,7 @@ tidy : cleanlis
 	- If F$Search("[.Lib.VMS]*.*;-1").nes."" Then Purge/NoConfirm/Log [.Lib.VMS]*.*
 	- If F$Search("[.Lib.Pod]*.Pod;-1").nes."" Then Purge/NoConfirm/Log [.Lib.Pod]*.Pod
 	- If F$Search("$(ARCHCORE)*.*").nes."" Then Purge/NoConfirm/Log $(ARCHCORE)*.*
-	- If F$Search("[.utils]*.;-1").nes."" Then Purge/NoConfirm/Log [.utils]*.
+	- If F$Search("[.utils]*.;-1").nes."" Then Purge/NoConfirm/Log [.utils]*./Exclude=Makefile.
 	- If F$Search("[.lib]perlbug.;-1").nes."" Then Purge/NoConfirm/Log [.lib]perlbug.
 	- If F$Search("[.lib.pod]*.;-1").nes."" Then Purge/NoConfirm/Log [.lib.pod]*.
 
@@ -1660,7 +1641,7 @@ realclean : clean
 	- If F$Search("[.Lib]perlbug.").nes."" Then Delete/NoConfirm/Log [.Lib]perlbug.;*
 	- If F$Search("$(ARCHDIR)Config.pm").nes."" Then Delete/NoConfirm/Log $(ARCHDIR)Config.pm;*
 	- If F$Search("[.lib.ExtUtils]Miniperl.pm").nes."" Then Delete/NoConfirm/Log [.lib.ExtUtils]Miniperl.pm;*
-	- If F$Search("[.utils]*.").nes."" Then Delete/NoConfirm/Log [.utils]*.;*
+	- If F$Search("[.utils]*.").nes."" Then Delete/NoConfirm/Log [.utils]*.;*/Exclude=Makefile.
 	- If F$Search("[.lib.pod]*.pod").nes."" Then Delete/NoConfirm/Log [.lib.pod]*.pod;*
 	- If F$Search("[.lib.pod]perldoc.").nes."" Then Delete/NoConfirm/Log [.lib.pod]perldoc.;*
 	- If F$Search("[.lib.pod]pod2*.").nes."" Then Delete/NoConfirm/Log [.lib.pod]pod2*.;*

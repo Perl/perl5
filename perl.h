@@ -1285,7 +1285,6 @@ EXT SV **	curpad;
 
 /* temp space */
 EXT SV *	Sv;
-EXT HE		He;
 EXT XPV *	Xpv;
 EXT char	buf[2048];	/* should be longer than PATH_MAX */
 EXT char	tokenbuf[256];
@@ -1664,7 +1663,7 @@ IEXT char *	Ie_tmpname;
 IEXT PerlIO *	Ie_fp;
 IEXT U32	Iperldb;
 	/* This value may be raised by extensions for testing purposes */
-IEXT int	Iperl_destruct_level;	/* 0=none, 1=full, 2=full with checks */
+IEXT int	Iperl_destruct_level IINIT(1);	/* 0=none, 1=full, 2=full with checks */
 
 /* magical thingies */
 IEXT Time_t	Ibasetime;		/* $^T */
@@ -1886,6 +1885,8 @@ EXT MGVTBL vtbl_substr =	{0,	magic_setsubstr,
 					0,	0,	0};
 EXT MGVTBL vtbl_vec =	{0,	magic_setvec,
 					0,	0,	0};
+EXT MGVTBL vtbl_vivary = {0,	magic_setvivary,
+					0,	0,	magic_freevivary};
 EXT MGVTBL vtbl_pos =	{magic_getpos,
 				magic_setpos,
 					0,	0,	0};
@@ -1929,6 +1930,7 @@ EXT MGVTBL vtbl_nkeys;
 EXT MGVTBL vtbl_taint;
 EXT MGVTBL vtbl_substr;
 EXT MGVTBL vtbl_vec;
+EXT MGVTBL vtbl_vivary;
 EXT MGVTBL vtbl_pos;
 EXT MGVTBL vtbl_bm;
 EXT MGVTBL vtbl_fm;

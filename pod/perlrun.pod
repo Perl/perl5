@@ -33,7 +33,7 @@ Contained in the file specified by the first filename on the command line.
 
 =item 3.
 
-Passed in implicitly via standard input.  This only works if there are
+Passed in implicitly via standard input.  This works only if there are
 no filename arguments--to pass arguments to a STDIN script you
 must explicitly specify a "-" for the script name.
 
@@ -46,11 +46,11 @@ scans for the first line starting with #! and containing the word
 embedded in a larger message.  (In this case you would indicate the end
 of the script using the __END__ token.)
 
-As of Perl 5, the #! line is always examined for switches as the line is
-being parsed.  Thus, if you're on a machine that only allows one argument
-with the #! line, or worse, doesn't even recognize the #! line, you still
-can get consistent switch behavior regardless of how Perl was invoked,
-even if B<-x> was used to find the beginning of the script.
+The #! line is always examined for switches as the line is being
+parsed.  Thus, if you're on a machine that allows only one argument
+with the #! line, or worse, doesn't even recognize the #! line, you
+still can get consistent switch behavior regardless of how Perl was
+invoked, even if B<-x> was used to find the beginning of the script.
 
 Because many operating systems silently chop off kernel interpretation of
 the #! line after 32 characters, some switches may be passed in on the
@@ -67,8 +67,8 @@ The sequences "-*" and "- " are specifically ignored so that you could,
 if you were so inclined, say
 
     #!/bin/sh -- # -*- perl -*- -p
-    eval 'exec perl $0 -S ${1+"$@"}'
-	if 0;
+    eval 'exec /usr/bin/perl $0 -S ${1+"$@"}'
+        if $running_under_some_shell;
 
 to let Perl see the B<-p> switch.
 
@@ -109,7 +109,7 @@ can say this:
     find . -name '*.bak' -print0 | perl -n0e unlink
 
 The special value 00 will cause Perl to slurp files in paragraph mode.
-The value 0777 will cause Perl to slurp files whole since there is no
+The value 0777 will cause Perl to slurp files whole because there is no
 legal character with that value.
 
 =item B<-a>
@@ -133,7 +133,7 @@ An alternate delimiter may be specified using B<-F>.
 
 causes Perl to check the syntax of the script and then exit without
 executing it.  Actually, it I<will> execute C<BEGIN>, C<END>, and C<use> blocks,
-since these are considered as occurring outside the execution of 
+because these are considered as occurring outside the execution of 
 your program.
 
 =item B<-d>
@@ -151,10 +151,10 @@ Devel::DProf profiler.  See L<perldebug>.
 =item B<-D>I<list>
 
 sets debugging flags.  To watch how it executes your script, use
-B<-D14>.  (This only works if debugging is compiled into your
+B<-D14>.  (This works only if debugging is compiled into your
 Perl.)  Another nice value is B<-D1024>, which lists your compiled
 syntax tree.  And B<-D512> displays compiled regular expressions. As an
-alternative specify a list of letters instead of numbers (e.g. B<-D14> is
+alternative specify a list of letters instead of numbers (e.g., B<-D14> is
 equivalent to B<-Dtls>):
 
         1  p  Tokenizing and Parsing
@@ -186,7 +186,7 @@ Make sure to use semicolons where you would in a normal program.
 =item B<-F>I<pattern>
 
 specifies the pattern to split on if B<-a> is also in effect.  The
-pattern may be surrounded by C<//>, C<""> or C<''>, otherwise it will be
+pattern may be surrounded by C<//>, C<"">, or C<''>, otherwise it will be
 put in single quotes.
 
 =item B<-h>
@@ -330,9 +330,9 @@ the implicit loop, just as in awk.
 =item B<-P>
 
 causes your script to be run through the C preprocessor before
-compilation by Perl.  (Since both comments and cpp directives begin
+compilation by Perl.  (Because both comments and cpp directives begin
 with the # character, you should avoid starting comments with any words
-recognized by the C preprocessor such as "if", "else" or "define".)
+recognized by the C preprocessor such as "if", "else", or "define".)
 
 =item B<-s>
 
@@ -353,7 +353,7 @@ this is used to emulate #! startup on machines that don't support #!,
 in the following manner:
 
     #!/usr/bin/perl
-    eval "exec /usr/bin/perl -S $0 $*"
+    eval 'exec /usr/bin/perl -S $0 ${1+"$@"}'
 	    if $running_under_some_shell;
 
 The system ignores the first line and feeds the script to /bin/sh,
@@ -365,15 +365,15 @@ script if necessary.  After Perl locates the script, it parses the
 lines and ignores them because the variable $running_under_some_shell
 is never true.  A better construct than C<$*> would be C<${1+"$@"}>, which
 handles embedded spaces and such in the filenames, but doesn't work if
-the script is being interpreted by csh.  In order to start up sh rather
+the script is being interpreted by csh.  To start up sh rather
 than csh, some systems may have to replace the #! line with a line
 containing just a colon, which will be politely ignored by Perl.  Other
 systems can't control that, and need a totally devious construct that
-will work under any of csh, sh or Perl, such as the following:
+will work under any of csh, sh, or Perl, such as the following:
 
 	eval '(exit $?0)' && eval 'exec /usr/bin/perl -S $0 ${1+"$@"}'
 	& eval 'exec /usr/bin/perl -S $0 $argv:q'
-		if 0;
+		if $running_under_some_shell;
 
 =item B<-T>
 
@@ -419,7 +419,7 @@ Prints to STDOUT the value of the named configuration variable.
 prints warnings about variable names that are mentioned only once, and
 scalar variables that are used before being set.  Also warns about
 redefined subroutines, and references to undefined filehandles or
-filehandles opened readonly that you are attempting to write on.  Also
+filehandles opened read-only that you are attempting to write on.  Also
 warns you if you use values as a number that doesn't look like numbers, using
 an array as though it were a scalar, if
 your subroutines recurse more than 100 deep, and innumerable other things.
@@ -432,8 +432,8 @@ garbage will be discarded until the first line that starts with #! and
 contains the string "perl".  Any meaningful switches on that line will
 be applied (but only one group of switches, as with normal #!
 processing).  If a directory name is specified, Perl will switch to
-that directory before running the script.  The B<-x> switch only
-controls the the disposal of leading garbage.  The script must be
+that directory before running the script.  The B<-x> switch controls
+only the disposal of leading garbage.  The script must be
 terminated with C<__END__> if there is trailing garbage to be ignored (the
 script can process any or all of the trailing garbage via the DATA
 filehandle if desired).

@@ -4,7 +4,6 @@
 
 AMG_names
 Error
-He
 No
 Sv
 Xpv
@@ -64,9 +63,6 @@ exp_amg
 expect
 expectterm
 fallback_amg
-filter_add
-filter_del
-filter_read
 fold
 fold_locale
 freq
@@ -124,8 +120,6 @@ ne_amg
 neg_amg
 nexttoke
 nexttype
-nexttype
-nextval
 nextval
 nice_chunk
 nice_chunk_size
@@ -207,8 +201,6 @@ rsfp
 rsfp_filters
 rshift_amg
 rshift_ass_amg
-save_iv
-save_pptr
 savestack
 savestack_ix
 savestack_max
@@ -224,7 +216,6 @@ sgt_amg
 sh_path
 sig_name
 sig_num
-sighandler
 simple
 sin_amg
 sle_amg
@@ -496,6 +487,7 @@ magic_clearenv
 magic_clearpack
 magic_clearsig
 magic_existspack
+magic_freevivary
 magic_get
 magic_getarylen
 magic_getglob
@@ -525,6 +517,7 @@ magic_setsubstr
 magic_settaint
 magic_setuvar
 magic_setvec
+magic_setvivary
 magic_wipepack
 magicname
 markstack_grow
@@ -1008,10 +1001,12 @@ save_destructor
 save_freeop
 save_freepv
 save_freesv
+save_gp
 save_hash
 save_hptr
 save_int
 save_item
+save_iv
 save_list
 save_long
 save_nogv

@@ -198,7 +198,7 @@ Much better!
 
 =head1 NOTES
 
-Since the values line may contain arbitrary expressions (for at fields, 
+Because the values line may contain arbitrary expressions (for at fields, 
 not caret fields), you can farm out more sophisticated processing
 to other functions, like sprintf() or one of your own.  For example:
 

@@ -284,11 +284,13 @@ PP(pp_open)
 
     if (MAXARG > 1)
 	sv = POPs;
-    else if (SvTYPE(TOPs) == SVt_PVGV)
-	sv = GvSV(TOPs);
-    else
+    if (!isGV(TOPs))
 	DIE(no_usym, "filehandle");
+    if (MAXARG <= 1)
+	sv = GvSV(TOPs);
     gv = (GV*)POPs;
+    if (!isGV(gv))
+	DIE(no_usym, "filehandle");
     if (GvIOp(gv))
 	IoFLAGS(GvIOp(gv)) &= ~IOf_UNTAINT;
     tmps = SvPV(sv, len);
@@ -2271,11 +2273,21 @@ PP(pp_fttext)
     STDCHAR tbuf[512];
     register STDCHAR *s;
     register IO *io;
-    SV *sv;
+    register SV *sv;
+    GV *gv;
 
-    if (op->op_flags & OPf_REF) {
+    if (op->op_flags & OPf_REF)
+	gv = cGVOP->op_gv;
+    else if (isGV(TOPs))
+	gv = (GV*)POPs;
+    else if (SvROK(TOPs) && isGV(SvRV(TOPs)))
+	gv = (GV*)SvRV(POPs);
+    else
+	gv = Nullgv;
+
+    if (gv) {
 	EXTEND(SP, 1);
-	if (cGVOP->op_gv == defgv) {
+	if (gv == defgv) {
 	    if (statgv)
 		io = GvIO(statgv);
 	    else {
@@ -2284,13 +2296,17 @@ PP(pp_fttext)
 	    }
 	}
 	else {
-	    statgv = cGVOP->op_gv;
+	    statgv = gv;
+	    laststatval = -1;
 	    sv_setpv(statname, "");
 	    io = GvIO(statgv);
 	}
 	if (io && IoIFP(io)) {
-          if (PerlIO_has_base(IoIFP(io))) {
-	    Fstat(PerlIO_fileno(IoIFP(io)), &statcache);
+	    if (! PerlIO_has_base(IoIFP(io)))
+		DIE("-T and -B not implemented on filehandles");
+	    laststatval = Fstat(PerlIO_fileno(IoIFP(io)), &statcache);
+	    if (laststatval < 0)
+		RETPUSHUNDEF;
 	    if (S_ISDIR(statcache.st_mode))	/* handle NFS glitch */
 		if (op->op_type == OP_FTTEXT)
 		    RETPUSHNO;
@@ -2308,10 +2324,6 @@ PP(pp_fttext)
 	    /* sfio can have large buffers - limit to 512 */
 	    if (len > 512)
 		len = 512;
-	  }
-          else {
-	    DIE("-T and -B not implemented on filehandles");
-	  }
 	}
 	else {
 	    if (dowarn)
@@ -2323,9 +2335,10 @@ PP(pp_fttext)
     }
     else {
 	sv = POPs;
-	statgv = Nullgv;
-	sv_setpv(statname, SvPV(sv, na));
       really_filename:
+	statgv = Nullgv;
+	laststatval = -1;
+	sv_setpv(statname, SvPV(sv, na));
 #ifdef HAS_OPEN3
 	i = open(SvPV(sv, na), O_RDONLY, 0);
 #else
@@ -2336,7 +2349,9 @@ PP(pp_fttext)
 		warn(warn_nl, "open");
 	    RETPUSHUNDEF;
 	}
-	Fstat(i, &statcache);
+	laststatval = Fstat(i, &statcache);
+	if (laststatval < 0)
+	    RETPUSHUNDEF;
 	len = read(i, tbuf, 512);
 	(void)close(i);
 	if (len <= 0) {

@@ -1052,12 +1052,14 @@ EXT char *op_desc[] = {
 };
 #endif
 
+OP *	ck_anoncode	_((OP* op));
 OP *	ck_bitop	_((OP* op));
 OP *	ck_concat	_((OP* op));
 OP *	ck_delete	_((OP* op));
 OP *	ck_eof		_((OP* op));
 OP *	ck_eval		_((OP* op));
 OP *	ck_exec		_((OP* op));
+OP *	ck_exists	_((OP* op));
 OP *	ck_ftst		_((OP* op));
 OP *	ck_fun		_((OP* op));
 OP *	ck_fun_locale	_((OP* op));
@@ -1799,7 +1801,7 @@ EXT OP * (*check[]) _((OP *op)) = {
 	ck_rvconst,	/* rv2sv */
 	ck_null,	/* av2arylen */
 	ck_rvconst,	/* rv2cv */
-	ck_null,	/* anoncode */
+	ck_anoncode,	/* anoncode */
 	ck_null,	/* prototype */
 	ck_spair,	/* refgen */
 	ck_null,	/* srefgen */
@@ -1912,7 +1914,7 @@ EXT OP * (*check[]) _((OP *op)) = {
 	ck_fun,		/* values */
 	ck_fun,		/* keys */
 	ck_delete,	/* delete */
-	ck_delete,	/* exists */
+	ck_exists,	/* exists */
 	ck_rvconst,	/* rv2hv */
 	ck_null,	/* helem */
 	ck_null,	/* hslice */
@@ -2261,7 +2263,7 @@ EXT U32 opargs[] = {
 	0x00000408,	/* each */
 	0x00000408,	/* values */
 	0x00000408,	/* keys */
-	0x00000104,	/* delete */
+	0x00000100,	/* delete */
 	0x00000114,	/* exists */
 	0x00000048,	/* rv2hv */
 	0x00001404,	/* helem */

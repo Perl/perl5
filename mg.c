@@ -1101,6 +1101,37 @@ MAGIC* mg;
 }
 
 int
+magic_setvivary(sv,mg)
+SV* sv;
+MAGIC* mg;
+{
+    if (LvTARGLEN(sv)) {
+	AV* av = (AV*)LvTARG(sv);
+	if (LvTARGOFF(sv) <= AvFILL(av)) {
+	    SV** svp = AvARRAY(av) + LvTARGOFF(sv);
+	    LvTARG(sv) = newSVsv(*svp);
+	    SvREFCNT_dec(*svp);
+	    *svp = SvREFCNT_inc(LvTARG(sv));
+	}
+	else
+	    LvTARG(sv) = Nullsv;
+	LvTARGLEN(sv) = 0;
+	SvREFCNT_dec(av);
+    }
+    if (LvTARG(sv))
+	sv_setsv(LvTARG(sv), sv);
+    return 0;
+}
+
+int
+magic_freevivary(sv,mg)
+SV* sv;
+MAGIC* mg;
+{
+    SvREFCNT_dec(LvTARG(sv));
+}
+
+int
 magic_setmglob(sv,mg)
 SV* sv;
 MAGIC* mg;

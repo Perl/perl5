@@ -80,8 +80,6 @@ struct io {
 				    (Sv && ++SvREFCNT(Sv)), (SV*)Sv)
 #define SvREFCNT_dec(sv)	sv_free((SV*)sv)
 #endif
-#define newRV_noinc(sv) 	((Sv = newRV(sv)), \
-				    (--SvREFCNT(sv)), (SV*)Sv)
 
 #define SVTYPEMASK	0xff
 #define SvTYPE(sv)	((sv)->sv_flags & SVTYPEMASK)
@@ -548,6 +546,13 @@ I32 SvTRUE _((SV *));
 #define SvTRUEx(sv) ((Sv = (sv)), SvTRUE(Sv))
 
 #endif /* CRIPPLED_CC */
+
+#define newRV_inc(sv)	newRV(sv)
+#ifdef CRIPPLED_CC
+SV *newRV_noinc _((SV *));
+#else
+#define newRV_noinc(sv)	((Sv = newRV(sv)), --SvREFCNT(SvRV(Sv)), Sv)
+#endif
 
 /* the following macro updates any magic values this sv is associated with */
 

@@ -6,7 +6,7 @@ perltoc - perl documentation table of contents
 =head1 DESCRIPTION
 
 This page provides a brief table of contents for the rest of the Perl
-documentation set.  It is meant to be be quickly scanned or grepped
+documentation set.  It is meant to be scanned quickly or grepped
 through to locate the proper section you're looking for.
 
 =head1 BASIC DOCUMENTATION
@@ -144,7 +144,7 @@ HOME, LOGDIR, PATH, PERL5LIB, PERL5DB, PERLLIB
 =item The Arrow Operator
 
 
-=item Autoincrement and Autodecrement
+=item Auto-increment and Auto-decrement
 
 
 =item Exponentiation
@@ -215,10 +215,10 @@ HOME, LOGDIR, PATH, PERL5LIB, PERL5DB, PERLLIB
 
 unary &, unary *, (TYPE)
 
-=item Quote and Quotelike Operators
+=item Quote and Quote-like Operators
 
 
-=item Regexp Quotelike Operators
+=item Regexp Quote-like Operators
 
 
 ?PATTERN?, m/PATTERN/gimosx, /PATTERN/gimosx, q/STRING/, C<'STRING'>,
@@ -1748,7 +1748,7 @@ C<overload::Method(obj,op)>
 
 
 
-=head2 sigtrap - Perl pragma to enable stack backtrace on unexpected
+=head2 sigtrap - Perl pragma to enable stack back-trace on unexpected
 signals
 
 =item SYNOPSIS
@@ -1773,7 +1773,7 @@ C<strict refs>, C<strict vars>, C<strict subs>
 
 
 
-=head2 subs - Perl pragma to predeclare sub names
+=head2 subs - Perl pragma to pre-declare sub names
 
 =item SYNOPSIS
 
@@ -1784,7 +1784,7 @@ C<strict refs>, C<strict vars>, C<strict subs>
 
 
 
-=head2 vars - Perl pragma to predeclare global variable names
+=head2 vars - Perl pragma to pre-declare global variable names
 
 =item SYNOPSIS
 
@@ -2167,7 +2167,7 @@ maybe_command_in_dirs, maybe_command, perl_script
 
 guess_name, init_main, init_dirscan, init_others, find_perl
 
-=item Methods to actually produce chunks of text for the Makefile
+=item Methods to produce chunks of text for the Makefile
 
 
 post_initialize, const_config, constants, const_loadlibs, const_cccmd,
@@ -3157,8 +3157,8 @@ TIESCALAR classname, LIST, FETCH this, STORE this, value, DESTROY this
 
 =head1 AUXILIARY DOCUMENTATION
 
-Here should be listed all the extra program's docs, but they don't all
-have man pages yet:
+Here should be listed all the extra program's documentation, but they don't all
+have manual pages yet:
 
 =item a2p
 

@@ -204,13 +204,17 @@ loop	:	label WHILE '(' remember mtexpr ')' mblock cont
 						$5, $7, $8))); }
 	|	label WHILE block block cont
 			{ copline = $2;
-			    $$ = newWHILEOP(0, 1, (LOOP*)Nullop,
-					    scope($3), $4, $5); }
+			    deprecate("while BLOCK BLOCK");
+			    $$ = newSTATEOP(0, $1,
+				   newWHILEOP(0, 1, (LOOP*)Nullop,
+					      scope($3), $4, $5)); }
 	|	label UNTIL block block cont
 			{ copline = $2;
-			    $$ = newWHILEOP(0, 1, (LOOP*)Nullop,
-					    invert(scalar(scope($3))),
-					    $4, $5); }
+			    deprecate("until BLOCK BLOCK");
+			    $$ = newSTATEOP(0, $1,
+				   newWHILEOP(0, 1, (LOOP*)Nullop,
+					      invert(scalar(scope($3))),
+					      $4, $5)); }
 	|	label FOR MY remember my_scalar '(' mexpr ')' mblock cont
 			{ $$ = block_end($4,
 				 newFOROP(0, $1, $2, $5, $7, $9, $10)); }

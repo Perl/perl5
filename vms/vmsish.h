@@ -237,6 +237,11 @@
 /* Assorted fiddling with sigs . . . */
 # include <signal.h>
 #define ABORT() abort()
+    /* VAXC's signal.h doesn't #define SIG_ERR, but provides BADSIG instead. */
+#if !defined(SIG_ERR) && defined(BADSIG)
+#  define SIG_ERR BADSIG
+#endif
+
 
 /* Used with our my_utime() routine in vms.c */
 struct utimbuf {
@@ -258,6 +263,9 @@ struct utimbuf {
     clock_t tms_cutime;   /* user time, children */
     clock_t tms_cstime;   /* system time, children - always 0 on VMS */
   };
+#else
+   /* The new headers change the times() prototype to tms from tbuffer */
+#  define tbuffer_t struct tms
 #endif
 
 /* Prior to VMS 7.0, the CRTL gmtime() routine was a stub which always

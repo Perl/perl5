@@ -43,7 +43,7 @@ sub _make_fatal {
     $code .= "\(\@_\) || croak \"Can't $name\(\@_\): \$!\";\n}\n";
     print $code if $Debug;
     eval($code);
-    die($@) if $@;
+    die if $@;
     local($^W) = 0;   # to avoid: Subroutine foo redefined ...
     no strict 'refs'; # to avoid: Can't use string (...) as a symbol ref ...
     *{$sub} = \&{"Fatal::$name"};

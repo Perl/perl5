@@ -32,7 +32,7 @@
 ;;; Corrections made by Ilya Zakharevich ilya@math.mps.ohio-state.edu
 ;;; XEmacs changes by Peter Arius arius@informatik.uni-erlangen.de
 
-;; $Id: cperl-mode.el,v 1.29 1996/11/18 23:10:26 ilya Exp ilya $
+;; $Id: cperl-mode.el,v 1.31+ 1996/12/09 08:03:14 ilya Exp ilya $
 
 ;;; To use this mode put the following into your .emacs file:
 
@@ -45,6 +45,10 @@
 
 ;;; in your .emacs file. (Emacs rulers do not consider it politically
 ;;; correct to make whistles enabled by default.)
+
+;;; DO NOT FORGET to read micro-docs. (available from `Perl' menu). <<<<<<
+;;; or as help on variables `cperl-tips', `cperl-problems',         <<<<<<
+;;; `cperl-non-problems'.                                           <<<<<<
 
 ;;; Additional useful commands to put into your .emacs file:
 
@@ -328,6 +332,28 @@
 ;;;  Minor updates to `cperl-short-docs'.
 ;;;  Will not consider <<= as start of here-doc.
 
+;;;; After 1.29
+;;;  Added an extra advice to look into Micro-docs. ;-).
+;;;  Enclosing of region when you press a closing parenth is regulated by
+;;;  `cperl-electric-parens-string'.
+;;;  Minor updates to `cperl-short-docs'.
+;;;  `initialize-new-tags-table' called only if present (Does this help
+;;;     with generation of tags under XEmacs?).
+;;;  When creating/updating tag files, new info is written at the old place,
+;;;     or at the end (is this a wanted behaviour? I need this in perl build directory).
+
+;;;; After 1.30
+;;;  All the keywords from keywords.pl included (maybe with dummy explanation).
+;;;  No auto-help inside strings, comment, here-docs, formats, and pods.
+;;;  Shrinkwrapping of info, regulated by `cperl-max-help-size'.
+;;;  Info on variables as well.
+;;;  Recognision of HERE-DOCS improved yet more.
+;;;  Autonewline works on `}' without warnings.
+;;;  Autohelp works again on $_[0].
+
+;;;; After 1.31
+;;;  perl-descr.el found its author - hi, Johan!
+
 (defvar cperl-extra-newline-before-brace nil
   "*Non-nil means that if, elsif, while, until, else, for, foreach
 and do constructs look like:
@@ -388,7 +414,7 @@ Can be overwritten by `cperl-hairy' if nil.")
   "*Non-nil (and non-null) means { after $ in CPerl buffers should be preceeded by ` '.
 Can be overwritten by `cperl-hairy' if nil.")
 
-(defvar cperl-electric-parens-string "({[<"
+(defvar cperl-electric-parens-string "({[]})<"
   "*String of parentheses that should be electric in CPerl.")
 
 (defvar cperl-electric-parens nil
@@ -454,6 +480,12 @@ You can always make lookup from menu or using \\[cperl-find-pods-heres].")
 (defvar cperl-imenu-addback nil
   "*Not-nil means add backreferences to generated `imenu's.
 May require patched `imenu' and `imenu-go'.")
+
+(defvar cperl-max-help-size 66
+  "*Non-nil means shrink-wrapping of info-buffer allowed up to these percents.")
+
+(defvar cperl-shrink-wrap-info-frame t
+  "*Non-nil means shrink-wrapping of info-buffer-frame allowed.")
 
 (defvar cperl-info-page "perl"
   "Name of the info page containing perl docs.
@@ -547,6 +579,10 @@ relies on Emacs parsing to find matching parentheses. And Emacs
 will not break indentation, but
 	1 if ( s#//#/# );
 will.
+
+By similar reasons
+	s\"abc\"def\";
+will confuse CPerl a lot.
 
 If you still get wrong indentation in situation that you think the
 code should be able to parse, try:
@@ -1194,10 +1230,10 @@ char is \"{\", insert extra newline before only if
 		   (if cperl-auto-newline 
 		       (progn (cperl-indent-line) (newline) t) nil)))
 	  (progn
-	    (if cperl-auto-newline
-		(setq insertpos (point)))
 	    (insert last-command-char)
 	    (cperl-indent-line)
+	    (if cperl-auto-newline
+		(setq insertpos (1- (point))))
 	    (if (and cperl-auto-newline (null only-before))
 		(progn
 		  (newline)
@@ -1282,6 +1318,9 @@ If not, or if we are not at the end of marking range, would self-insert."
   (interactive "P")
   (let ((beg (save-excursion (beginning-of-line) (point)))
 	(other-end (if (and cperl-electric-parens-mark
+			    (cperl-val 'cperl-electric-parens)
+			    (memq last-command-char
+				  (append cperl-electric-parens-string nil))
 			    (cperl-mark-active) 
 			    (< (mark) (point)))
 		       (mark) 
@@ -2137,9 +2176,20 @@ the sections using `cperl-pod-head-face', `cperl-pod-face',
 	       "\\(\\`\n?\\|\n\n\\)=" 
 	       "\\|"
 	       ;; One extra () before this:
-	       "<<\\(\\([\"'`]\\)\\([^\"'`\n]*\\)\\3\\|\\(\\([a-zA-Z_][a-zA-Z_0-9]*\\)?\\)[^=]\\)" ; [^=] to avoid <<=.
+	       "<<" 
+	         "\\(" 
+		 ;; First variant "BLAH" or just ``.
+	            "\\([\"'`]\\)"
+		    "\\([^\"'`\n]*\\)"
+		    "\\3"
+		 "\\|"
+		 ;; Second variant: Identifier or empty
+		   "\\(\\([a-zA-Z_][a-zA-Z_0-9]*\\)?\\)"
+		   ;; Check that we do not have <<= or << 30 or << $blah.
+		   "\\([^= \t$@%&]\\|[ \t]+[^ \t\n0-9$@%&]\\)"
+		 "\\)"
 	       "\\|"
-	       ;; 1+5 extra () before this:
+	       ;; 1+6 extra () before this:
 	       "^[ \t]*format[ \t]*\\([a-zA-Z0-9_]+\\)?[ \t]*=[ \t]*$")))
     (unwind-protect
 	(progn
@@ -2240,12 +2290,12 @@ the sections using `cperl-pod-head-face', `cperl-pod-face',
 			(t (message "End of here-document `%s' not found." tag)))))
 	       ;; format
 	       (t
-		;; 1+5=6 extra () before this:
+		;; 1+6=7 extra () before this:
 		;; "^[ \t]*format[ \t]*\\([a-zA-Z0-9_]+\\)?[ \t]*=[ \t]*$")))
 		(setq b (point)
-		      name (if (match-beginning 7) ; 6 + 1
-			       (buffer-substring (match-beginning 7) ; 6 + 1
-						 (match-end 7)) ; 6 + 1
+		      name (if (match-beginning 8) ; 7 + 1
+			       (buffer-substring (match-beginning 8) ; 7 + 1
+						 (match-end 8)) ; 7 + 1
 			     ""))
 		(setq argument nil)
 		(if cperl-pod-here-fontify 
@@ -3295,34 +3345,52 @@ Available styles are GNU, K&R, BSD and Whitesmith."
   (let ((perl-dbg-flags "-wc"))
     (mode-compile)))
 
-(defun cperl-info-buffer ()
-  ;; Returns buffer with documentation. Creates if missing
-  (let ((info (get-buffer "*info-perl*")))
+(defun cperl-info-buffer (type)
+  ;; Returns buffer with documentation. Creates if missing.
+  ;; If TYPE, this vars buffer.
+  ;; Special care is taken to not stomp over an existing info buffer
+  (let* ((bname (if type "*info-perl-var*" "*info-perl*"))
+	 (info (get-buffer bname))
+	 (oldbuf (get-buffer "*info*")))
     (if info info
       (save-window-excursion
 	;; Get Info running
 	(require 'info)
+	(cond (oldbuf
+	       (set-buffer oldbuf)
+	       (rename-buffer "*info-perl-tmp*")))
 	(save-window-excursion
 	  (info))
-	(Info-find-node cperl-info-page "perlfunc")
+	(Info-find-node cperl-info-page (if type "perlvar" "perlfunc"))
 	(set-buffer "*info*")
-	(rename-buffer "*info-perl*")
+	(rename-buffer bname)
+	(cond (oldbuf
+	       (set-buffer "*info-perl-tmp*")
+	       (rename-buffer "*info*")
+	       (set-buffer bname)))
+	(make-variable-buffer-local 'window-min-height)
+	(setq window-min-height 2)
 	(current-buffer)))))
 
 (defun cperl-word-at-point (&optional p)
   ;; Returns the word at point or at P.
   (save-excursion
     (if p (goto-char p))
-    (require 'etags)
-    (funcall (or (and (boundp 'find-tag-default-function)
-		      find-tag-default-function)
-		 (get major-mode 'find-tag-default-function)
-		 ;; XEmacs 19.12 has `find-tag-default-hook'; it is
-		 ;; automatically used within `find-tag-default':
-		 'find-tag-default))))
+    (or (cperl-word-at-point-hard)
+	(progn
+	  (require 'etags)
+	  (funcall (or (and (boundp 'find-tag-default-function)
+			    find-tag-default-function)
+		       (get major-mode 'find-tag-default-function)
+		       ;; XEmacs 19.12 has `find-tag-default-hook'; it is
+		       ;; automatically used within `find-tag-default':
+		       'find-tag-default))))))
 
 (defun cperl-info-on-command (command)
-  "Shows documentation for Perl command in other window."
+  "Shows documentation for Perl command in other window.
+If perl-info buffer is shown in some frame, uses this frame.
+Customized by setting variables `cperl-shrink-wrap-info-frame',
+`cperl-max-help-size'."
   (interactive 
    (let* ((default (cperl-word-at-point))
 	  (read (read-string 
@@ -3334,21 +3402,72 @@ Available styles are GNU, K&R, BSD and Whitesmith."
 
   (let ((buffer (current-buffer))
 	(cmd-desc (concat "^" (regexp-quote command) "[^a-zA-Z_0-9]")) ; "tr///"
-	pos)
+	pos isvar height iniheight frheight buf win fr1 fr2 iniwin not-loner
+	max-height char-height buf-list)
     (if (string-match "^-[a-zA-Z]$" command)
 	(setq cmd-desc "^-X[ \t\n]"))
-    (set-buffer (cperl-info-buffer))
+    (setq isvar (string-match "^[$@%]" command)
+	  buf (cperl-info-buffer isvar)
+	  iniwin (selected-window)
+	  fr1 (window-frame iniwin))
+    (set-buffer buf)
     (beginning-of-buffer)
-    (re-search-forward "^-X[ \t\n]")
-    (forward-line -1)
+    (or isvar 
+	(progn (re-search-forward "^-X[ \t\n]")
+	       (forward-line -1)))
     (if (re-search-forward cmd-desc nil t)
 	(progn
-	  (setq pos (progn (beginning-of-line)
-			   (point)))
-	  (pop-to-buffer (cperl-info-buffer))
+	  ;; Go back to beginning of the group (ex, for qq)
+	  (if (re-search-backward "^[ \t\n\f]")
+	      (forward-line 1))
+	  (beginning-of-line)
+	  ;; Get some of 
+	  (setq pos (point)
+		buf-list (list buf "*info-perl-var*" "*info-perl*"))
+	  (while (and (not win) buf-list)
+	    (setq win (get-buffer-window (car buf-list) t))
+	    (setq buf-list (cdr buf-list)))
+	  (or (not win)
+	      (eq (window-buffer win) buf)
+	      (set-window-buffer win buf))
+	  (and win (setq fr2 (window-frame win)))
+	  (if (or (not fr2) (eq fr1 fr2))
+	      (pop-to-buffer buf)
+	    (special-display-popup-frame buf) ; Make it visible
+	    (select-window win))
+	  (goto-char pos)		; Needed (?!).
+	  ;; Resize
+	  (setq iniheight (window-height)
+		frheight (frame-height)
+		not-loner (< iniheight (1- frheight))) ; Are not alone
+	  (cond ((if not-loner cperl-max-help-size 
+		   cperl-shrink-wrap-info-frame)
+		 (setq height 
+		       (+ 2 
+			  (count-lines 
+			   pos 
+			   (save-excursion
+			     (if (re-search-forward
+				  "^[ \t][^\n]*\n+\\([^ \t\n\f]\\|\\'\\)" nil t)
+				 (match-beginning 0) (point-max)))))
+		       max-height 
+		       (if not-loner
+			   (/ (* (- frheight 3) cperl-max-help-size) 100)
+			 (setq char-height (frame-char-height))
+			 ;; Non-functioning under OS/2:
+			 (if (eq char-height 1) (setq char-height 18))
+			 ;; Title, menubar, + 2 for slack
+			 (- (/ (x-display-pixel-height) char-height) 4)
+			 ))
+		 (if (> height max-height) (setq height max-height))
+		 ;;(message "was %s doing %s" iniheight height)
+		 (if not-loner
+		     (enlarge-window (- height iniheight))
+		   (set-frame-height (window-frame win) (1+ height)))))
 	  (set-window-start (selected-window) pos))
       (message "No entry for %s found." command))
-    (pop-to-buffer buffer)))
+    ;;(pop-to-buffer buffer)
+    (select-window iniwin)))
 
 (defun cperl-info-on-current-command ()
   "Shows documentation for Perl command at point in other window."
@@ -3373,7 +3492,7 @@ Available styles are GNU, K&R, BSD and Whitesmith."
 	 imenu-extract-index-name-function 
 	 (index-item (save-restriction
 		       (save-window-excursion
-			 (set-buffer (cperl-info-buffer))
+			 (set-buffer (cperl-info-buffer nil))
 			 (setq imenu-create-index-function 
 			       'imenu-default-create-index-function
 			       imenu-prev-index-position-function
@@ -3660,7 +3779,7 @@ in subdirectories too."
 	)
        (t
 	(setq xs (string-match "\\.xs$" file))
-	(cond ((eq erase 'ignore) nil)
+	(cond ((eq erase 'ignore) (goto-char (point-max)))
 	      (erase (erase-buffer))
 	      (t
 	       (goto-char 1)
@@ -3671,12 +3790,13 @@ in subdirectories too."
 				    (progn 
 				      (forward-char 1)
 				      (search-forward "\f\n" nil 'toend)
-				      (point)))
-		     (goto-char 1)))))
+				      (point))))
+		 (goto-char (point-max)))))
 	(insert (cperl-find-tags file xs))))
       (if inbuffer nil		; Delegate to the caller
 	(save-buffer 0)		; No backup
-	(initialize-new-tags-table)))))
+	(if (fboundp 'initialize-new-tags-table) ; Do we need something special in XEmacs?
+	    (initialize-new-tags-table))))))
 
 (defvar cperl-tags-hier-regexp-list
   "^\\(\\(package\\)\\>\\|sub\\>[^\n]+::\\|[a-zA-Z_][a-zA-Z_0-9:]*(\C-?[^\n]+::\\|[ \t]*BOOT:\C-?[^\n]+::\\)")
@@ -3971,11 +4091,12 @@ Currently it is tuned to C and Perl syntax."
   ;;(concat "\\("
   (mapconcat
    'identity
-   '("[$@%*&][0-9a-zA-Z_:]+"		; Usual variable
+   '("[$@%*&][0-9a-zA-Z_:]+\\([ \t]*[[{]\\)?"		; Usual variable
      "[$@]\\^[a-zA-Z]"			; Special variable
      "[$@][^ \n\t]"			; Special variable
      "-[a-zA-Z]"			; File test
      "\\\\[a-zA-Z0]"			; Special chars
+     "^=[a-z][a-zA-Z0-9_]*"		; Pod sections
      "[-!&*+,-./<=>?\\\\^|~]+"		; Operator
      "[a-zA-Z_0-9:]+"			; symbol or number
      "x="
@@ -3989,6 +4110,58 @@ Currently it is tuned to C and Perl syntax."
   "Matches places in the buffer we can find help for.")
 
 (defvar cperl-message-on-help-error t)
+(defvar cperl-help-from-timer nil)
+
+(defun cperl-word-at-point-hard ()
+  ;; Does not save-excursion
+  ;; Get to the something meaningful
+  (or (eobp) (eolp) (forward-char 1))
+  (re-search-backward "[-a-zA-Z0-9_:!&*+,-./<=>?\\\\^|~$%@]" 
+		      (save-excursion (beginning-of-line) (point))
+		      'to-beg)
+  ;;  (cond
+  ;;   ((or (eobp) (looking-at "[][ \t\n{}();,]")) ; Not at a symbol
+  ;;    (skip-chars-backward " \n\t\r({[]});,")
+  ;;    (or (bobp) (backward-char 1))))
+  ;; Try to backtrace
+  (cond
+   ((looking-at "[a-zA-Z0-9_:]")	; symbol
+    (skip-chars-backward "[a-zA-Z0-9_:]")
+    (cond 
+     ((and (eq (preceding-char) ?^)	; $^I
+	   (eq (char-after (- (point) 2)) ?\$))
+      (forward-char -2))
+     ((memq (preceding-char) (append "*$@%&\\" nil)) ; *glob
+      (forward-char -1))
+     ((and (eq (preceding-char) ?\=)
+	   (eq (current-column) 1))
+      (forward-char -1)))		; =head1
+    (if (and (eq (preceding-char) ?\<)
+	     (looking-at "\\$?[a-zA-Z0-9_:]+>")) ; <FH>
+	(forward-char -1)))
+   ((and (looking-at "=") (eq (preceding-char) ?x)) ; x=
+    (forward-char -1))
+   ((and (looking-at "\\^") (eq (preceding-char) ?\$)) ; $^I
+    (forward-char -1))
+   ((looking-at "[-!&*+,-./<=>?\\\\^|~]")
+    (skip-chars-backward "[-!&*+,-./<=>?\\\\^|~]")
+    (cond
+     ((and (eq (preceding-char) ?\$)
+	   (not (eq (char-after (- (point) 2)) ?\$))) ; $-
+      (forward-char -1))
+     ((and (eq (following-char) ?\>)
+	   (string-match "[a-zA-Z0-9_]" (char-to-string (preceding-char)))
+	   (save-excursion
+	     (forward-sexp -1)
+	     (and (eq (preceding-char) ?\<)
+		  (looking-at "\\$?[a-zA-Z0-9_:]+>")))) ; <FH>
+      (search-backward "<"))))
+   ((and (eq (following-char) ?\$)
+	 (eq (preceding-char) ?\<)
+	 (looking-at "\\$?[a-zA-Z0-9_:]+>")) ; <$fh>
+    (forward-char -1)))
+  (if (looking-at cperl-have-help-regexp)
+      (buffer-substring (match-beginning 0) (match-end 0))))
 
 (defun cperl-get-help ()
   "Get one-line docs on the symbol at the point.
@@ -3996,56 +4169,19 @@ The data for these docs is a little bit obsolete and may be in fact longer
 than a line. Your contribution to update/shorten it is appreciated."
   (interactive)
   (save-excursion
-    ;; Get to the something meaningful
-    (or (eobp) (eolp) (forward-char 1))
-    (re-search-backward "[-a-zA-Z0-9_:!&*+,-./<=>?\\\\^|~$%@]" 
-			(save-excursion (beginning-of-line) (point))
-			'to-beg)
-    ;;  (cond
-    ;;   ((or (eobp) (looking-at "[][ \t\n{}();,]")) ; Not at a symbol
-    ;;    (skip-chars-backward " \n\t\r({[]});,")
-    ;;    (or (bobp) (backward-char 1))))
-    ;; Try to backtrace
-    (cond
-     ((looking-at "[a-zA-Z0-9_:]")	; symbol
-      (skip-chars-backward "[a-zA-Z0-9_:]")
-      (cond 
-       ((and (eq (preceding-char) ?^)	; $^I
-	     (eq (char-after (- (point) 2)) ?\$))
-	(forward-char -2))
-       ((memq (preceding-char) (append "*$@%&\\" nil)) ; *glob
-	(forward-char -1)))
-      (if (and (eq (preceding-char) ?\<)
-	       (looking-at "\\$?[a-zA-Z0-9_:]+>")) ; <FH>
-	  (forward-char -1)))
-     ((and (looking-at "=") (eq (preceding-char) ?x)) ; x=
-      (forward-char -1))
-     ((and (looking-at "\\^") (eq (preceding-char) ?\$)) ; $^I
-      (forward-char -1))
-     ((looking-at "[-!&*+,-./<=>?\\\\^|~]")
-      (skip-chars-backward "[-!&*+,-./<=>?\\\\^|~]")
-      (cond
-       ((and (eq (preceding-char) ?\$)
-	       (not (eq (char-after (- (point) 2)) ?\$))) ; $-
-	  (forward-char -1))
-       ((and (eq (following-char) ?\>)
-	     (string-match "[a-zA-Z0-9_]" (char-to-string (preceding-char)))
-	     (save-excursion
-	       (forward-sexp -1)
-	       (and (eq (preceding-char) ?\<)
-		    (looking-at "\\$?[a-zA-Z0-9_:]+>")))) ; <FH>
-	(search-backward "<"))))
-     ((and (eq (following-char) ?\$)
-	   (eq (preceding-char) ?\<)
-	   (looking-at "\\$?[a-zA-Z0-9_:]+>")) ; <$fh>
-      (forward-char -1)))
-    ;;(or (eobp) (forward-char 1))
-    (if (looking-at cperl-have-help-regexp)
-	(cperl-describe-perl-symbol 
-	 (buffer-substring (match-beginning 0) (match-end 0)))
-      (if cperl-message-on-help-error
-	  (message "Nothing found for %s..." 
-		   (buffer-substring (point) (+ 5 (point))))))))
+    (let ((word (cperl-word-at-point-hard)))
+      (if word
+	  (if (and cperl-help-from-timer ; Bail out if not in mainland
+		   (not (string-match "^#!\\|\\\\\\|^=" word)) ; Show help even in comments/strings.
+		   (or (memq (get-text-property (point) 'face)
+			     '(font-lock-comment-face font-lock-string-face))
+		       (memq (get-text-property (point) 'syntax-type)
+			     '(pod here-doc format))))
+	      nil
+	    (cperl-describe-perl-symbol word))
+	(if cperl-message-on-help-error
+	    (message "Nothing found for %s..." 
+		     (buffer-substring (point) (+ 5 (point)))))))))
 
 ;;; Stolen from perl-descr.el by Johan Vromans:
 
@@ -4054,46 +4190,27 @@ than a line. Your contribution to update/shorten it is appreciated."
 
 (defun cperl-describe-perl-symbol (val)
   "Display the documentation of symbol at point, a Perl operator."
-  ;; We suppose that the current position is at the start of the symbol
-  ;; when we convert $_[5] to @_
-  (let (;;(fn (perl-symbol-at-point))
-	(enable-recursive-minibuffers t)
-	;;val 
+  (let ((enable-recursive-minibuffers t)
 	args-file regexp)
-    ;;  (interactive
-    ;;    (let ((fn (perl-symbol-at-point))
-    ;;	  (enable-recursive-minibuffers t)
-    ;;	  val args-file regexp)
-    ;;      (setq val (read-from-minibuffer
-    ;;		  (if fn
-    ;;		      (format "Symbol (default %s): " fn)
-    ;;		    "Symbol: ")))
-    ;;      (if (string= val "")
-    ;;	  (setq val fn))
     (cond
 	((string-match "^[&*][a-zA-Z_]" val)
 	 (setq val (concat (substring val 0 1) "NAME")))
-	((looking-at "[$@][a-zA-Z_:0-9]+\\([[{]\\)")
-	 (if (= ?\[ (char-after (match-beginning 1)))
-	      (setq val (concat "@" (substring val 1)))
-	    (setq val (concat "%" (substring val 1)))))
-	((and (string= val "x") (looking-at "x="))
+	((string-match "^[$@]\\([a-zA-Z_:0-9]+\\)[ \t]*\\[" val)
+	 (setq val (concat "@" (substring val 1 (match-end 1)))))
+	((string-match "^[$@]\\([a-zA-Z_:0-9]+\\)[ \t]*{" val)
+	 (setq val (concat "%" (substring val 1 (match-end 1)))))
+	((and (string= val "x") (string-match "^x=" val))
 	 (setq val "x="))
 	((string-match "^\\$[\C-a-\C-z]" val)
 	 (setq val (concat "$^" (char-to-string (+ ?A -1 (aref val 1))))))
-	((and (string= "<" val) (looking-at "<\\$?[a-zA-Z0-9_:]+>"))
+        ((string-match "^CORE::" val)
+	 (setq val "CORE::"))
+        ((string-match "^SUPER::" val)
+	 (setq val "SUPER::"))
+	((and (string= "<" val) (string-match "^<\\$?[a-zA-Z0-9_:]+>" val))
 	 (setq val "<NAME>")))
-;;;    (if (string-match "^[&*][a-zA-Z_]" val)
-;;;	(setq val (concat (substring val 0 1) "NAME"))
-;;;      (if (looking-at "[$@][a-zA-Z_:0-9]+\\([[{]\\)")
-;;;	  (if (= ?\[ (char-after (match-beginning 1)))
-;;;	      (setq val (concat "@" (substring val 1)))
-;;;	    (setq val (concat "%" (substring val 1))))
-;;;	(if (and (string= val "x") (looking-at "x="))
-;;;	    (setq val "x=")
-;;;	  (if (looking-at "[$@][a-zA-Z_:0-9]")
-;;;	      ))))
-    (setq regexp (concat "^" "\\([^a-zA-Z0-9_:]+[ \t]\\)?"
+    (setq regexp (concat "^" 
+			 "\\([^a-zA-Z0-9_:]+[ \t]+\\)?"
 			 (regexp-quote val) 
 			 "\\([ \t([/]\\|$\\)"))
 
@@ -4114,14 +4231,15 @@ than a line. Your contribution to update/shorten it is appreciated."
 	     (message "No definition for %s" val)))))))
 
 (defvar cperl-short-docs "Ignore my value"
+  ;; Perl4 version was written by Johan Vromans (jvromans@squirrel.nl)
   "# based on '@(#)@ perl-descr.el 1.9 - describe-perl-symbol' [Perl 5]
-!	Logical negation.	
-!=	Numeric inequality.
-!~	Search pattern, substitution, or translation (negated).
+! ...	Logical negation.	
+... != ...	Numeric inequality.
+... !~ ...	Search pattern, substitution, or translation (negated).
 $!	In numeric context: errno. In a string context: error string.
 $\"	The separator which joins elements of arrays interpolated in strings.
 $#	The output format for printed numbers. Initial value is %.20g.
-$$	The process number of the perl running this script. Altered (in the child process) by fork().
+$$	Process number of this script. Changes in the fork()ed child process.
 $%	The current page number of the currently selected output channel.
 
 	The following variables are always local to the current block:
@@ -4147,9 +4265,9 @@ $,	The output field separator for the print operator.
 $-	The number of lines left on the page.
 $.	The current input line number of the last filehandle that was read.
 $/	The input record separator, newline by default.
-$0	The name of the file containing the perl script being executed. May be set
-$:	The set of characters after which a string may be broken to fill continuation fields (starting with ^) in a format.
-$;	The subscript separator for multi-dimensional array emulation. Default is \"\\034\".
+$0	Name of the file containing the perl script being executed. May be set.
+$:     String may be broken after these characters to fill ^-lines in a format.
+$;	Subscript separator for multi-dim array emulation. Default \"\\034\".
 $<	The real uid of this process.
 $=	The page length of the current output channel. Default is 60 lines.
 $>	The effective uid of this process.
@@ -4173,28 +4291,28 @@ $^T	The time the script was started. Used by -A/-M/-C file tests.
 $^W	True if warnings are requested (perl -w flag).
 $^X	The name under which perl was invoked (argv[0] in C-speech).
 $_	The default input and pattern-searching space.
-$|	Flag for auto-flush after write/print on the currently selected output channel. Default is 0. 
+$|	Auto-flush after write/print on the current output channel? Default 0. 
 $~	The name of the current report format.
-%	Modulo division.
-%=	Modulo division assignment.
+... % ...	Modulo division.
+... %= ...	Modulo division assignment.
 %ENV	Contains the current environment.
 %INC	List of files that have been require-d or do-ne.
 %SIG	Used to set signal handlers for various signals.
-&	Bitwise and.
-&&	Logical and.
-&&=	Logical and assignment.
-&=	Bitwise and assignment.
-*	Multiplication.
-**	Exponentiation.
-*NAME	Refers to all objects represented by NAME. *NAM1 = *NAM2 makes NAM1 a reference to NAM2.
+... & ...	Bitwise and.
+... && ...	Logical and.
+... &&= ...	Logical and assignment.
+... &= ...	Bitwise and assignment.
+... * ...	Multiplication.
+... ** ...	Exponentiation.
+*NAME	Glob: all objects refered by NAME. *NAM1 = *NAM2 aliases NAM1 to NAM2.
 &NAME(arg0, ...)	Subroutine call. Arguments go to @_.
-+	Addition.
-++	Auto-increment (magical on strings).
-+=	Addition assignment.
+... + ...	Addition.		+EXPR	Makes EXPR into scalar context.
+++	Auto-increment (magical on strings).	++EXPR	EXPR++
+... += ...	Addition assignment.
 ,	Comma operator.
--	Subtraction.
---	Auto-decrement.
--=	Subtraction assignment.
+... - ...	Subtraction.
+--	Auto-decrement (NOT magical on strings).	--EXPR	EXPR--
+... -= ...	Subtraction assignment.
 -A	Access time in days since script started.
 -B	File is a non-text (binary) file.
 -C	Inode change time in days since script started.
@@ -4225,54 +4343,54 @@ $~	The name of the current report format.
 .	Concatenate strings.
 ..	Alternation, also range operator.
 .=	Concatenate assignment strings
-/	Division.	/PATTERN/ioxsmg	Pattern match
-/=	Division assignment.
+... / ...	Division.	/PATTERN/ioxsmg	Pattern match
+... /= ...	Division assignment.
 /PATTERN/ioxsmg	Pattern match.
-<	Numeric less than.	<pattern>	Glob.	See <NAME>, <> as well.
+... < ...	Numeric less than.	<pattern>	Glob.	See <NAME>, <> as well.
 <NAME>	Reads line from filehandle NAME. NAME must be bareword/dollar-bareword.
 <pattern>	Glob. (Unless pattern is bareword/dollar-bareword - see <NAME>)
 <>	Reads line from union of files in @ARGV (= command line) and STDIN.
-<<	Bitwise shift left.	<<	start of HERE-DOCUMENT.
-<=	Numeric less than or equal to.
-<=>	Numeric compare.
-=	Assignment.
-==	Numeric equality.
-=~	Search pattern, substitution, or translation
->	Numeric greater than.
->=	Numeric greater than or equal to.
->>	Bitwise shift right.
->>=	Bitwise shift right assignment.
-? :	Alternation (if-then-else) operator.	?PAT? Backwards pattern match.
-?PATTERN?	Backwards pattern match.
+... << ...	Bitwise shift left.	<<	start of HERE-DOCUMENT.
+... <= ...	Numeric less than or equal to.
+... <=> ...	Numeric compare.
+... = ...	Assignment.
+... == ...	Numeric equality.
+... =~ ...	Search pattern, substitution, or translation
+... > ...	Numeric greater than.
+... >= ...	Numeric greater than or equal to.
+... >> ...	Bitwise shift right.
+... >>= ...	Bitwise shift right assignment.
+... ? ... : ...	Condition=if-then-else operator.   ?PAT? One-time pattern match.
+?PATTERN?	One-time pattern match.
 @ARGV	Command line arguments (not including the command name - see $0).
 @INC	List of places to look for perl scripts during do/include/use.
 @_	Parameter array for subroutines. Also used by split unless in array context.
 \\	Creates a reference to whatever follows, like \$var.
 \\0	Octal char, e.g. \\033.
 \\E	Case modification terminator. See \\Q, \\L, and \\U.
-\\L	Lowercase until \\E .
-\\U	Upcase until \\E .
-\\Q	Quote metacharacters until \\E .
+\\L	Lowercase until \\E . See also \l, lc.
+\\U	Upcase until \\E . See also \u, uc.
+\\Q	Quote metacharacters until \\E . See also quotemeta.
 \\a	Alarm character (octal 007).
 \\b	Backspace character (octal 010).
 \\c	Control character, e.g. \\c[ .
 \\e	Escape character (octal 033).
 \\f	Formfeed character (octal 014).
-\\l	Lowercase of next character. See also \\L and \\u,
+\\l	Lowercase the next character. See also \\L and \\u, lcfirst,
 \\n	Newline character (octal 012).
 \\r	Return character (octal 015).
 \\t	Tab character (octal 011).
-\\u	Upcase  of next character. See also \\U and \\l,
+\\u	Upcase the next character. See also \\U and \\l, ucfirst,
 \\x	Hex character, e.g. \\x1b.
-^	Bitwise exclusive or.
-__END__	End of program source.
-__DATA__	End of program source.
+^ ...	Bitwise exclusive or.
+__END__	Ends program source.
+__DATA__	Ends program source.
 __FILE__	Current (source) filename.
 __LINE__	Current line in current source.
 ARGV	Default multi-file input filehandle. <ARGV> is a synonym for <>.
 ARGVOUT	Output filehandle with -i flag.
-BEGIN { block }	Immediately executed (during compilation) piece of code.
-END { block }	Pseudo-subroutine executed after the script finishes.
+BEGIN { ... }	Immediately executed (during compilation) piece of code.
+END { ... }	Pseudo-subroutine executed after the script finishes.
 DATA	Input filehandle for what follows after __END__	or __DATA__.
 accept(NEWSOCKET,GENERICSOCKET)
 alarm(SECONDS)
@@ -4287,20 +4405,20 @@ chown(LIST)
 chroot(FILENAME)
 close(FILEHANDLE)
 closedir(DIRHANDLE)
-cmp	String compare.
+... cmp ...	String compare.
 connect(SOCKET,NAME)
 continue of { block } continue { block }. Is executed after `next' or at end.
 cos(EXPR)
 crypt(PLAINTEXT,SALT)
-dbmclose(ASSOC_ARRAY)
-dbmopen(ASSOC,DBNAME,MODE)
+dbmclose(%HASH)
+dbmopen(%HASH,DBNAME,MODE)
 defined(EXPR)
-delete($ASSOC{KEY})
+delete($HASH{KEY})
 die(LIST)
 do { ... }|SUBR while|until EXPR	executes at least once
 do(EXPR|SUBR([LIST]))
 dump LABEL
-each(ASSOC_ARRAY)
+each(%HASH)
 endgrent
 endhostent
 endnetent
@@ -4308,7 +4426,7 @@ endprotoent
 endpwent
 endservent
 eof[([FILEHANDLE])]
-eq	String equality.
+... eq ...	String equality.
 eval(EXPR) or eval { BLOCK }
 exec(LIST)
 exit(EXPR)
@@ -4319,7 +4437,7 @@ flock(FILEHANDLE,OPERATION)
 for (EXPR;EXPR;EXPR) { ... }
 foreach [VAR] (@ARRAY) { ... }
 fork
-ge	String greater than or equal.
+... ge ...	String greater than or equal.
 getc[(FILEHANDLE)]
 getgrent
 getgrgid(GID)
@@ -4349,17 +4467,17 @@ getsockopt(SOCKET,LEVEL,OPTNAME)
 gmtime(EXPR)
 goto LABEL
 grep(EXPR,LIST)
-gt	String greater than.
+... gt ...	String greater than.
 hex(EXPR)
 if (EXPR) { ... } [ elsif (EXPR) { ... } ... ] [ else { ... } ] or EXPR if EXPR
 index(STR,SUBSTR[,OFFSET])
 int(EXPR)
 ioctl(FILEHANDLE,FUNCTION,SCALAR)
 join(EXPR,LIST)
-keys(ASSOC_ARRAY)
+keys(%HASH)
 kill(LIST)
 last [LABEL]
-le	String less than or equal.
+... le ...	String less than or equal.
 length(EXPR)
 link(OLDFILE,NEWFILE)
 listen(SOCKET,QUEUESIZE)
@@ -4367,7 +4485,7 @@ local(LIST)
 localtime(EXPR)
 log(EXPR)
 lstat(EXPR|FILEHANDLE|VAR)
-lt	String less than.
+... lt ...	String less than.
 m/PATTERN/iogsmx
 mkdir(FILENAME,MODE)
 msgctl(ID,CMD,ARG)
@@ -4375,14 +4493,14 @@ msgget(KEY,FLAGS)
 msgrcv(ID,VAR,SIZE,TYPE.FLAGS)
 msgsnd(ID,MSG,FLAGS)
 my VAR or my (VAR1,...)	Introduces a lexical variable ($VAR, @ARR, or %HASH).
-ne	String inequality.
+... ne ...	String inequality.
 next [LABEL]
 oct(EXPR)
 open(FILEHANDLE[,EXPR])
 opendir(DIRHANDLE,EXPR)
 ord(EXPR)
 pack(TEMPLATE,LIST)
-package	Introduces package context.
+package NAME	Introduces package context.
 pipe(READHANDLE,WRITEHANDLE)
 pop(ARRAY)
 print [FILEHANDLE] [(LIST)]
@@ -4441,7 +4559,7 @@ sqrt(EXPR)
 srand(EXPR)
 stat(EXPR|FILEHANDLE|VAR)
 study[(SCALAR)]
-sub [NAME [(format)]] { BODY }	or	sub [NAME [(format)]];
+sub [NAME [(format)]] { BODY }	sub NAME [(format)];	sub [(format)] {...}
 substr(EXPR,OFFSET[,LEN])
 symlink(OLDFILE,NEWFILE)
 syscall(LIST)
@@ -4460,23 +4578,73 @@ unless (EXPR) { ... } [ else { ... } ] or EXPR unless EXPR
 unlink(LIST)
 unpack(TEMPLATE,EXPR)
 unshift(ARRAY,LIST)
-until (EXPR) { ... } or EXPR until EXPR
+until (EXPR) { ... }					EXPR until EXPR
 utime(LIST)
-values(ASSOC_ARRAY)
+values(%HASH)
 vec(EXPR,OFFSET,BITS)
 wait
 waitpid(PID,FLAGS)
 wantarray
 warn(LIST)
-while  (EXPR) { ... } or EXPR while EXPR
+while  (EXPR) { ... }					EXPR while EXPR
 write[(EXPR|FILEHANDLE)]
-x	Repeat string or array.
-x=	Repetition assignment.
+... x ...	Repeat string or array.
+x= ...	Repetition assignment.
 y/SEARCHLIST/REPLACEMENTLIST/
-|	Bitwise or.
-||	Logical or.
-~	Unary bitwise complement.
+... | ...	Bitwise or.
+... || ...	Logical or.
+~ ...		Unary bitwise complement.
 #!	OS interpreter indicator. If contains `perl', used for options, and -x.
+AUTOLOAD {...}	Shorthand for `sub AUTOLOAD {...}'.
+CORE::		Prefix to access builtin function if imported sub obscures it.
+SUPER::		Prefix to lookup for a method in @ISA classes.
+DESTROY		Shorthand for `sub DESTROY {...}'.
+... EQ ...	Obsolete synonym of `eq'.
+... GE ...	Obsolete synonym of `ge'.
+... GT ...	Obsolete synonym of `gt'.
+... LE ...	Obsolete synonym of `le'.
+... LT ...	Obsolete synonym of `lt'.
+... NE ...	Obsolete synonym of `ne'.
+abs [ EXPR ]	absolute value
+... and ...		Low-precedence synonym for &&.
+bless REFERENCE [, PACKAGE]	Makes reference into an object of a package.
+chomp		Docs missing
+chr		Docs missing
+else		Part of if/unless {BLOCK} elsif {BLOCK} else {BLOCK}.
+elsif		Part of if/unless {BLOCK} elsif {BLOCK} else {BLOCK}.
+exists	$HASH{KEY}	True if the key exists.
+format		Docs missing
+formline	Docs missing
+glob EXPR	Synonym of <EXPR>.
+lc [ EXPR ]	Returns lowercased EXPR.
+lcfirst [ EXPR ]	Returns EXPR with lower-cased first letter.
+map		Docs missing
+no PACKAGE [SYMBOL1, ...]  Partial reverse for `use'. Runs `unimport' method.
+... not ...		Low-precedence synonym for ! - negation.
+... or ...		Low-precedence synonym for ||.
+pos STRING    Set/Get end-position of the last match over this string, see \\G.
+quotemeta [ EXPR ]	Quote metacharacters.
+qw		Docs missing
+readline FH	Synonym of <FH>.
+readpipe CMD	Synonym of `CMD`.
+ref [ EXPR ]	Type of EXPR when dereferenced.
+sysopen		Docs missing
+tie		Docs missing
+tied		Docs missing
+uc [ EXPR ]	Returns upcased EXPR.
+ucfirst [ EXPR ]	Returns EXPR with upcased first letter.
+untie		Docs missing
+use PACKAGE [SYMBOL1, ...]  Compile-time `require' with consequent `import'.
+... xor ...		Low-precedence synonym for exclusive or.
+prototype \&SUB	Returns prototype of the function given a reference.
+=head1		Top-level heading.
+=head2		Second-level heading.
+=head3		Third-level heading (is there such?).
+=over [ NUMBER ]	Start list.
+=item [ TITLE ]		Start new item in the list.
+=back		End list.
+=cut		Switch from POD to Perl.
+=pod		Switch from Perl to POD.
 ")
 
 (defun cperl-switch-to-doc-buffer ()
@@ -4522,7 +4690,7 @@ y/SEARCHLIST/REPLACEMENTLIST/
 
       (defun cperl-get-help-defer ()
 	(if (not (eq major-mode 'perl-mode)) nil
-	  (let ((cperl-message-on-help-error nil))
+	  (let ((cperl-message-on-help-error nil) (cperl-help-from-timer t))
 	    (cperl-get-help)
 	    (setq cperl-help-shown t))))
       (cperl-lazy-install)))

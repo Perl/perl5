@@ -8,6 +8,281 @@ or in the .../src/5/0/unsupported directory for sub-version
 releases.)
 
 ----------------
+Version 5.003_12
+----------------
+
+This patch is huge.  A multitude of bug fixes, new modules (especially
+CPAN and Net::FTP), a couple of new Configure variables, updated
+docs...  it's a long list.  And speaking of lists, here's a list of
+the more significant changes in 5.003_12:
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Support C<delete @hash{@keys}>"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  op.c op.h opcode.pl pod/perldiag.pod pod/perlfunc.pod pp.c
+          t/op/delete.t
+
+  Title:  "Autovivify scalars"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  dump.c op.c op.h pp.c pp_hot.c
+
+  Title:  "Allow any word, including keyword, as label"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  toke.c
+
+ OTHER CORE CHANGES
+
+  Title:  "Allow assignment to empty array values during foreach()"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  cop.h global.sym mg.c op.c perl.h pp_hot.c proto.h sv.c
+
+  Title:  "Fix nested closures"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  op.c opcode.pl pp.c pp_ctl.c pp_hot.c
+
+  Title:  "Fix core dump on auto-vivification"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pp_hot.c
+
+  Title:  "Fix core dump on C<open $undef_var, "X">"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pp_sys.c
+
+  Title:  "Fix -T/-B on globs and globrefs"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pp_sys.c
+
+  Title:  "Fix memory management of $`, $&, and $'"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pp_hot.c regexec.c
+
+  Title:  "Fix paren matching during backtracking"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  regexec.c
+
+  Title:  "Fix memory leak and std{in,out,err} death in perl_{con,de}str
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  miniperlmain.c perl.c perl.h sv.c
+
+  Title:  "Discard garbage bytes at end of prototype()"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pp.c
+
+  Title:  "Fix local($pack::{foo})"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  global.sym pp.c pp_hot.c proto.h scope.c
+
+  Title:  "Fix for AmigaOS - inplace operation"
+   From:  "Norbert Pueschel" <pueschel@imsdd.meb.uni-bonn.de>
+ Msg-ID:  <77724601@Armageddon.meb.uni-bonn.de>
+   Date:  Sun, 08 Dec 1996 15:33:00 +0100
+  Files:  doio.c
+
+  Title:  "Disable warn, die, and parse hooks _before_ global destruction
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  perl.c
+
+  Title:  "Re: Bug in formline "
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199612081958.OAA26025@aatma.engin.umich.edu>
+   Date:  Sun, 08 Dec 1996 14:58:32 -0500
+  Files:  pp_ctl.c
+
+  Title:  "Fix C<@a = ($a,$b,$c,$d) = (1,2)>"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pp_hot.c
+
+  Title:  "Fix %ENV assignment when environment starts out empty"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  hv.c
+
+  Title:  "Properly support and document newRV{,_inc,_noinc}"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  global.sym pod/perlguts.pod sv.c sv.h
+
+  Title:  "Support SvREADONLY on arrays"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  av.c
+
+  Title:  "Allow lvalue pos inside recursive function"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  op.c pp.c pp_ctl.c pp_hot.c
+
+ PORTABILITY
+
+  Title:  "Eliminate PerlIO warnings when setting cnt to -1"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  perlio.c
+
+  Title:  "Make $privlib contents compatible with 5.003"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  INSTALL ext/Opcode/Safe.pm installperl lib/FileHandle.pm
+          lib/Test/Harness.pm
+
+  Title:  "Support $bincompat3 config variable; update metaconfig units"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  Configure MANIFEST compat3.sym config_h.SH embed.pl global.sym
+          old_embed.pl old_global.sym old_perl_exp.SH perl_exp.SH
+
+  Title:  "Look for gettimeofday() in Configure"
+   From:  John Hughes <john@AtlanTech.COM>
+ Msg-ID:  <01BBE77A.F6F37F80@malvinas.AtlanTech.COM>
+   Date:  Wed, 11 Dec 1996 15:49:57 +0100
+  Files:  Configure config_H config_h.SH pp.c
+
+  Title:  "Make $startperl a relative path if people want portable scrip
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  Configure
+
+  Title:  "Homogenize use of "eval exec" hack"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  Porting/Glossary eg/README eg/nih eg/sysvipc/ipcmsg
+          eg/sysvipc/ipcsem eg/sysvipc/ipcshm lib/diagnostics.pm
+          makeaperl.SH pod/checkpods.PL pod/perlrun.pod
+          pod/pod2html.PL pod/pod2latex.PL pod/pod2man.PL
+          pod/pod2text.PL utils/c2ph.PL utils/h2ph.PL utils/h2xs.PL
+          utils/perlbug.PL utils/perldoc.PL utils/pl2pm.PL x2p/a2py.c
+          x2p/find2perl.PL x2p/s2p.PL
+
+  Title:  "LynxOS support"
+   From:  seibert@Lynx.COM (Greg Seibert)
+ Msg-ID:  <m0vYEsY-0000IZC@kzinti.lynx.com>
+   Date:  Thu, 12 Dec 1996 09:25:00 PST
+  Files:  Configure MANIFEST hints/lynxos.sh t/op/stat.t
+
+  Title:  "In Linux hints, set suidsafe=no and dosuid=yes"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  hints/linux.sh
+
+  Title:  "5.003_11 on UnixWare 2.1.1 - Only one small UnixWare buglet"
+   From:  aburlison@cix.compulink.co.uk (Alan Burlison)
+ Msg-ID:  <memo.453720@cix.compulink.co.uk>
+   Date:  Wed, 11 Dec 96 18:34 GMT0
+  Files:  hints/svr4.sh
+
+  Title:  "Re: db-recno.t failures with _11 on Freebsd 2.1-stable"
+   From:  Roderick Schertler <roderick@gate.net>
+ Msg-ID:  <pzohg0r5tr.fsf@eeyore.ibcinc.com>
+   Date:  11 Dec 1996 18:58:56 -0500
+  Files:  INSTALL hints/freebsd.sh
+
+  Title:  "OS/2 updates from Ilya"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+  Files:  README.os2 os2/Changes os2/Makefile.SHs os2/os2.c os2/os2ish.h
+
+  Title:  "VMS patches to 5.003_11"
+   From:  Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+ Msg-ID:  <01ICTR32LCZG001A1D@hmivax.humgen.upenn.edu>
+   Date:  Mon, 09 Dec 1996 23:16:10 -0500 (EST)
+  Files:  MANIFEST regexec.c t/lib/filehand.t util.c vms/*
+
+ TESTING
+
+  Title:  "recurse recurse recurse ..."
+   From:  Jarkko Hietaniemi <jhi@cc.hut.fi>
+ Msg-ID:  <199612092144.XAA29025@alpha.hut.fi>
+   Date:  Mon, 9 Dec 1996 23:44:27 +0200 (EET)
+  Files:  MANIFEST t/op/recurse.t
+
+ UTILITIES, LIBRARY, AND EXTENSIONS
+
+  Title:  "Add CPAN and Net::FTP"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  MANIFEST lib/CPAN.pm lib/CPAN/FirstTime.pm lib/CPAN/Nox.pm
+          lib/Net/FTP.pm lib/Net/Netrc.pm lib/Net/Socket.pm
+          pod/perlmod.pod
+
+  Title:  "Please update Text::Wrap and Text::Tabs"
+   From:  David Muir Sharnoff <muir@idiom.com>
+ Msg-ID:  <199612180659.WAA24957@idiom.com>
+   Date:  Tue, 17 Dec 1996 22:59:59 -0800 (PST)
+  Files:  lib/Text/Tabs.pm lib/Text/Wrap.pm
+
+  Title:  "Add File::Compare"
+   From:  Nick Ing-Simmons <nik@tiuk.ti.com>
+ Msg-ID:  <199612161844.SAA02152@pluto>
+   Date:  Mon, 16 Dec 1996 18:44:59 GMT
+  Files:  MANIFEST lib/File/Compare.pm pod/perlmod.pod
+
+  Title:  "Add Tie::RefHash"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199612152358.SAA28665@aatma.engin.umich.edu>
+   Date:  Sun, 15 Dec 1996 18:58:08 -0500
+  Files:  MANIFEST lib/Tie/RefHash.pm pod/perlmod.pod
+
+  Title:  "Put "splain" in utils."
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  Makefile.SH installperl utils/Makefile utils/splain.PL
+
+  Title:  "Some h2ph fixes"
+   From:  Jeff Okamoto <okamoto@hpcc123.corp.hp.com>
+ Msg-ID:  <199612131934.AA289845652@hpcc123.corp.hp.com>
+   Date:  Fri, 13 Dec 1996 11:34:12 -0800
+  Files:  utils/h2ph.PL
+
+  Title:  "xsubpp patch to add #line"
+   From:  nick@ni-s.u-net.com (Nick Ing-Simmons)
+ Msg-ID:  <199612162153.VAA03590@ni-s.u-net.com>
+   Date:  Mon, 16 Dec 1996 21:53:56 GMT
+  Files:  lib/ExtUtils/xsubpp
+
+  Title:  "Re: Proposed addition to File::Copy: move"
+   From:  Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+ Msg-ID:  <01ICZBN0LRC8001A1D@hmivax.humgen.upenn.edu>
+   Date:  Sat, 14 Dec 1996 00:27:29 -0500 (EST)
+  Files:  lib/File/Copy.pm t/lib/filecopy.t
+
+  Title:  "DB_File 1.09 patch"
+   From:  pmarquess@bfsec.bt.co.uk (Paul Marquess)
+ Msg-ID:  <9612181037.AA10123@claudius.bfsec.bt.co.uk>
+   Date:  Wed, 18 Dec 96 10:37:58 GMT
+  Files:  ext/DB_File/DB_File.pm ext/DB_File/DB_File.xs
+
+  Title:  "Debugger update"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199612111038.FAA24363@monk.mps.ohio-state.edu>
+   Date:  Wed, 11 Dec 1996 05:38:28 -0500 (EST)
+  Files:  lib/perl5db.pl
+
+ DOCUMENTATION
+
+  Title:  "Update pods: perldelta -> perlnews, perli18n -> perllocale"
+   From:  Tom Christiansen and Dominic Dunlop
+  Files:  MANIFEST pod/perl.pod pod/perldelta.pod pod/perli18n.pod
+          pod/perlnews.pod
+
+  Title:  "perltoot.pod"
+   From:  Tom Christiansen <tchrist@mox.perl.com>
+ Msg-ID:  <199612091444.HAA09947@toy.perl.com>
+   Date:  Mon, 09 Dec 1996 07:44:10 -0700
+  Files:  MANIFEST pod/perltoot.pod
+
+  Title:  "Perlguts, version 25"
+   From:  Jeff Okamoto <okamoto@hpcc123.corp.hp.com>
+ Msg-ID:  <199612061940.AA055461228@hpcc123.corp.hp.com>
+   Date:  Fri, 6 Dec 96 11:40:27 PST
+  Files:  pod/perlguts.pod
+
+  Title:  "pod/perlipc.pod patch"
+   From:  d-lewart@uiuc.edu (Daniel S. Lewart)
+ Msg-ID:  <199612090910.CAA20906@mox.perl.com>
+   Date:  Mon, 9 Dec 96 3:10:02 CST
+  Files:  pod/perlipc.pod
+
+  Title:  "pod patches for English errors"
+   From:  Steve Kelem <steve.kelem@xilinx.com>
+ Msg-ID:  <24616.850167191@castor>
+   Date:  Mon, 09 Dec 1996 13:33:11 -0800
+  Files:  pod/*.pod
+
+  Title:  "Misc doc updates"
+   From:  Tom Christiansen <tchrist@mox.perl.com>
+ Msg-ID:  <199612150156.SAA12506@mox.perl.com>
+   Date:  Sat, 14 Dec 1996 18:56:33 -0700
+  Files:  pod/*
+
+----------------
 Version 5.003_11
 ----------------
 

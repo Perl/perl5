@@ -43,7 +43,7 @@ In the following sections, these operators are covered in precedence order.
 =head2 Terms and List Operators (Leftward)
 
 Any TERM is of highest precedence of Perl.  These includes variables,
-quote and quotelike operators, any expression in parentheses,
+quote and quote-like operators, any expression in parentheses,
 and any function whose arguments are parenthesized.  Actually, there
 aren't really functions in this sense, just list operators and unary
 operators behaving as functions because you put parentheses around
@@ -66,7 +66,7 @@ the commas on the right of the sort are evaluated before the sort, but
 the commas on the left are evaluated after.  In other words, list
 operators tend to gobble up all the arguments that follow them, and
 then act like a simple TERM with regard to the preceding expression.
-Note that you have to be careful with parens:
+Note that you have to be careful with parentheses:
 
     # These evaluate exit before doing the print:
     print($foo, exit);	# Obviously not what you want.
@@ -88,7 +88,7 @@ Also parsed as terms are the C<do {}> and C<eval {}> constructs, as
 well as subroutine and method calls, and the anonymous 
 constructors C<[]> and C<{}>.
 
-See also L<Quote and Quotelike Operators> toward the end of this section,
+See also L<Quote and Quote-Like Operators> toward the end of this section,
 as well as L<"I/O Operators">.
 
 =head2 The Arrow Operator
@@ -104,16 +104,16 @@ containing the method name, and the left side must either be an object
 (a blessed reference) or a class name (that is, a package name).
 See L<perlobj>.
 
-=head2 Autoincrement and Autodecrement
+=head2 Auto-increment and Auto-decrement
 
 "++" and "--" work as in C.  That is, if placed before a variable, they
 increment or decrement the variable before returning the value, and if
 placed after, increment or decrement the variable after returning the value.
 
-The autoincrement operator has a little extra built-in magic to it.  If
+The auto-increment operator has a little extra built-in magic to it.  If
 you increment a variable that is numeric, or that has ever been used in
 a numeric context, you get a normal increment.  If, however, the
-variable has only been used in string contexts since it was set, and
+variable has been used in only string contexts since it was set, and
 has a value that is not null and matches the pattern
 C</^[a-zA-Z]*[0-9]*$/>, the increment is done as a string, preserving each
 character within its range, with carry:
@@ -123,7 +123,7 @@ character within its range, with carry:
     print ++($foo = 'Az');	# prints 'Ba'
     print ++($foo = 'zz');	# prints 'aaa'
 
-The autodecrement operator is not magical.
+The auto-decrement operator is not magical.
 
 =head2 Exponentiation
 
@@ -134,7 +134,7 @@ internally.)
 
 =head2 Symbolic Unary Operators
 
-Unary "!" performs logical negation, i.e. "not".  See also C<not> for a lower
+Unary "!" performs logical negation, i.e., "not".  See also C<not> for a lower
 precedence version of this.
 
 Unary "-" performs arithmetic negation if the operand is numeric.  If
@@ -144,7 +144,7 @@ starts with a plus or minus, a string starting with the opposite sign
 is returned.  One effect of these rules is that C<-bareword> is equivalent
 to C<"-bareword">.
 
-Unary "~" performs bitwise negation, i.e. 1's complement.
+Unary "~" performs bitwise negation, i.e., 1's complement.
 (See also L<Integer Arithmetic>.)
 
 Unary "+" has no effect whatsoever, even on strings.  It is useful
@@ -167,7 +167,7 @@ supposed to be searched, substituted, or translated instead of the default
 $_.  The return value indicates the success of the operation.  (If the
 right argument is an expression rather than a search pattern,
 substitution, or translation, it is interpreted as a search pattern at run
-time.  This is less efficient than an explicit search, since the pattern
+time.  This is less efficient than an explicit search, because the pattern
 must be compiled every time the expression is evaluated--unless you've
 used C</o>.)
 
@@ -185,7 +185,7 @@ Binary "%" computes the modulus of the two numbers.
 Binary "x" is the repetition operator.  In a scalar context, it
 returns a string consisting of the left operand repeated the number of
 times specified by the right operand.  In a list context, if the left
-operand is a list in parens, it repeats the list.
+operand is a list in parentheses, it repeats the list.
 
     print '-' x 80;		# print row of dashes
 
@@ -389,7 +389,7 @@ As a list operator:
     @foo = @foo[$#foo-4 .. $#foo];	# slice last 5 items
 
 The range operator (in a list context) makes use of the magical
-autoincrement algorithm if the operands are strings.  You
+auto-increment algorithm if the operands are strings.  You
 can say
 
     @alphabet = ('A' .. 'Z');
@@ -506,14 +506,14 @@ It's the equivalent of "!" except for the very low precedence.
 
 Binary "and" returns the logical conjunction of the two surrounding
 expressions.  It's equivalent to && except for the very low
-precedence.  This means that it short-circuits: i.e. the right
+precedence.  This means that it short-circuits: i.e., the right
 expression is evaluated only if the left expression is true.
 
 =head2 Logical or and Exclusive Or
 
 Binary "or" returns the logical disjunction of the two surrounding
 expressions.  It's equivalent to || except for the very low
-precedence.  This means that it short-circuits: i.e. the right
+precedence.  This means that it short-circuits: i.e., the right
 expression is evaluated only if the left expression is false.
 
 Binary "xor" returns the exclusive-OR of the two surrounding expressions.
@@ -540,7 +540,7 @@ Type casting operator.
 
 =back
 
-=head2 Quote and Quotelike Operators
+=head2 Quote and Quote-like Operators
 
 While we usually think of quotes as literal values, in Perl they
 function as operators, providing various kinds of interpolating and
@@ -587,13 +587,13 @@ pattern from the variables.  If this is not what you want, use C<\Q> to
 interpolate a variable literally.
 
 Apart from the above, there are no multiple levels of interpolation.  In
-particular, contrary to the expectations of shell programmers, backquotes
+particular, contrary to the expectations of shell programmers, back-quotes
 do I<NOT> interpolate within double quotes, nor do single quotes impede
 evaluation of variables when used within double quotes.
 
-=head2 Regexp Quotelike Operators
+=head2 Regexp Quote-Like Operators
 
-Here are the quotelike operators that apply to pattern
+Here are the quote-like operators that apply to pattern
 matching and related activities.
 
 =over 8
@@ -602,7 +602,7 @@ matching and related activities.
 
 This is just like the C</pattern/> search, except that it matches only
 once between calls to the reset() operator.  This is a useful
-optimization when you only want to see the first occurrence of
+optimization when you want to see only the first occurrence of
 something in each file of a set of files, for instance.  Only C<??>
 patterns local to the current package are reset.
 
@@ -622,10 +622,10 @@ L<perlre>.
 
 Options are:
 
-    g	Match globally, i.e. find all occurrences.
+    g	Match globally, i.e., find all occurrences.
     i	Do case-insensitive pattern matching.
     m	Treat string as multiple lines.
-    o	Only compile pattern once.
+    o	Compile pattern only once.
     s	Treat string as single line.
     x	Use extended regular expressions.
 
@@ -649,7 +649,7 @@ successfully executed regular expression is used instead.
 
 If used in a context that requires a list value, a pattern match returns a
 list consisting of the subexpressions matched by the parentheses in the
-pattern, i.e. (C<$1>, $2, $3...).  (Note that here $1 etc. are also set, and
+pattern, i.e., (C<$1>, $2, $3...).  (Note that here $1 etc. are also set, and
 that this differs from Perl 4's behavior.)  If the match fails, a null
 array is returned.  If the match succeeds, but there were no parentheses,
 a list value of (1) is returned.
@@ -672,8 +672,8 @@ Examples:
     if (($F1, $F2, $Etc) = ($foo =~ /^(\S+)\s+(\S+)\s*(.*)/))
 
 This last example splits $foo into the first two words and the
-remainder of the line, and assigns those three fields to $F1, $F2 and
-$Etc.  The conditional is true if any variables were assigned, i.e. if
+remainder of the line, and assigns those three fields to $F1, $F2, and
+$Etc.  The conditional is true if any variables were assigned, i.e., if
 the pattern matched.
 
 The C</g> modifier specifies global pattern matching--that is, matching
@@ -695,7 +695,7 @@ beginning.  Examples:
     ($one,$five,$fifteen) = (`uptime` =~ /(\d+\.\d+)/g);
 
     # scalar context
-    $/ = ""; $* = 1;  # $* deprecated in Perl 5
+    $/ = ""; $* = 1;  # $* deprecated in modern perls
     while ($paragraph = <>) {
 	while ($paragraph =~ /[a-z]['")]*[.!?]+['")]*\s/g) {
 	    $sentences++;
@@ -759,13 +759,13 @@ made.  Otherwise it returns false (specifically, the empty string).
 If no string is specified via the C<=~> or C<!~> operator, the C<$_>
 variable is searched and modified.  (The string specified with C<=~> must
 be a scalar variable, an array element, a hash element, or an assignment
-to one of those, i.e. an lvalue.)
+to one of those, i.e., an lvalue.)
 
 If the delimiter chosen is single quote, no variable interpolation is
 done on either the PATTERN or the REPLACEMENT.  Otherwise, if the
 PATTERN contains a $ that looks like a variable rather than an
 end-of-string test, the variable will be interpolated into the pattern
-at run-time.  If you only want the pattern compiled once the first time
+at run-time.  If you want the pattern compiled only once the first time
 the variable is interpolated, use the C</o> option.  If the pattern
 evaluates to a null string, the last successfully executed regular
 expression is used instead.  See L<perlre> for further explanation on these.
@@ -773,20 +773,20 @@ expression is used instead.  See L<perlre> for further explanation on these.
 Options are:
 
     e	Evaluate the right side as an expression.
-    g	Replace globally, i.e. all occurrences.
+    g	Replace globally, i.e., all occurrences.
     i	Do case-insensitive pattern matching.
     m	Treat string as multiple lines.
-    o	Only compile pattern once.
+    o	Compile pattern only once.
     s	Treat string as single line.
     x	Use extended regular expressions.
 
 Any non-alphanumeric, non-whitespace delimiter may replace the
 slashes.  If single quotes are used, no interpretation is done on the
 replacement string (the C</e> modifier overrides this, however).  Unlike
-Perl 4, Perl 5 treats backticks as normal delimiters; the replacement
+Perl 4, Perl 5 treats back-ticks as normal delimiters; the replacement
 text is not evaluated as a command.  If the
 PATTERN is delimited by bracketing quotes, the REPLACEMENT has its own
-pair of quotes, which may or may not be bracketing quotes, e.g.
+pair of quotes, which may or may not be bracketing quotes, e.g.,
 C<s(foo)(bar)> or C<sE<lt>fooE<gt>/bar/>.  A C</e> will cause the
 replacement portion to be interpreter as a full-fledged Perl expression
 and eval()ed right then and there.  It is, however, syntax checked at
@@ -829,10 +829,10 @@ Examples:
     s/([^ ]*) *([^ ]*)/$2 $1/;	# reverse 1st two fields
 
 Note the use of $ instead of \ in the last example.  Unlike 
-B<sed>, we only use the \E<lt>I<digit>E<gt> form in the left hand side.
+B<sed>, we use the \E<lt>I<digit>E<gt> form in only the left hand side.
 Anywhere else it's $E<lt>I<digit>E<gt>.
 
-Occasionally, you can't just use a C</g> to get all the changes
+Occasionally, you can't use just a C</g> to get all the changes
 to occur.  Here are two common cases:
 
     # put commas in the right places in an integer
@@ -852,10 +852,10 @@ with the corresponding character in the replacement list.  It returns
 the number of characters replaced or deleted.  If no string is
 specified via the =~ or !~ operator, the $_ string is translated.  (The
 string specified with =~ must be a scalar variable, an array element,
-or an assignment to one of those, i.e. an lvalue.)  For B<sed> devotees,
+or an assignment to one of those, i.e., an lvalue.)  For B<sed> devotees,
 C<y> is provided as a synonym for C<tr>.  If the SEARCHLIST is
 delimited by bracketing quotes, the REPLACEMENTLIST has its own pair of
-quotes, which may or may not be bracketing quotes, e.g. C<tr[A-Z][a-z]>
+quotes, which may or may not be bracketing quotes, e.g., C<tr[A-Z][a-z]>
 or C<tr(+-*/)/ABCD/>.
 
 Options:
@@ -920,7 +920,7 @@ an eval():
 =head2 I/O Operators
 
 There are several I/O operators you should know about.  
-A string is enclosed by backticks (grave accents) first undergoes
+A string is enclosed by back-ticks (grave accents) first undergoes
 variable substitution just like a double quoted string.  It is then
 interpreted as a command, and the output of that command is the value
 of the pseudo-literal, like in a shell.  In a scalar context, a single
@@ -933,7 +933,7 @@ of C<$?>).  Unlike in B<csh>, no translation is done on the return
 data--newlines remain newlines.  Unlike in any of the shells, single
 quotes do not hide variable names in the command from interpretation.
 To pass a $ through to the shell you need to hide it with a backslash.
-The generalized form of backticks is C<qx//>.  (Because backticks
+The generalized form of back-ticks is C<qx//>.  (Because back-ticks
 always undergo shell expansion as well, see L<perlsec> for 
 security concerns.)
 
@@ -954,8 +954,8 @@ write.)  Anyway, the following lines are equivalent to each other:
     print while defined($_ = <STDIN>);
     print while <STDIN>;
 
-The filehandles STDIN, STDOUT and STDERR are predefined.  (The
-filehandles C<stdin>, C<stdout> and C<stderr> will also work except in
+The filehandles STDIN, STDOUT, and STDERR are predefined.  (The
+filehandles C<stdin>, C<stdout>, and C<stderr> will also work except in
 packages, where they would be interpreted as local identifiers rather
 than global.)  Additional filehandles may be created with the open()
 function.  See L<perlfunc/open()> for details on this.
@@ -989,9 +989,9 @@ is equivalent to the following Perl-like pseudo code:
 
 except that it isn't so cumbersome to say, and will actually work.  It
 really does shift array @ARGV and put the current filename into variable
-$ARGV.  It also uses filehandle I<ARGV> internally--E<lt>E<gt> is just a synonym
-for E<lt>ARGVE<gt>, which is magical.  (The pseudo code above doesn't work
-because it treats E<lt>ARGVE<gt> as non-magical.)
+$ARGV.  It also uses filehandle I<ARGV> internally--E<lt>E<gt> is just a
+synonym for E<lt>ARGVE<gt>, which is magical.  (The pseudo code above
+doesn't work because it treats E<lt>ARGVE<gt> as non-magical.)
 
 You can modify @ARGV before the first E<lt>E<gt> as long as the array ends up
 containing the list of filenames you really want.  Line numbers (C<$.>)
@@ -1018,7 +1018,7 @@ this it will assume you are processing another @ARGV list, and if you
 haven't set @ARGV, will input from STDIN.
 
 If the string inside the angle brackets is a reference to a scalar
-variable (e.g. E<lt>$fooE<gt>), then that variable contains the name of the
+variable (e.g., E<lt>$fooE<gt>), then that variable contains the name of the
 filehandle to input from, or a reference to the same.  For example:
 
     $fh = \*STDIN;
@@ -1055,11 +1055,11 @@ machine.)  Of course, the shortest way to do the above is:
     chmod 0644, <*.c>;
 
 Because globbing invokes a shell, it's often faster to call readdir() yourself
-and just do your own grep() on the filenames.  Furthermore, due to its current
+and do your own grep() on the filenames.  Furthermore, due to its current
 implementation of using a shell, the glob() routine may get "Arg list too 
 long" errors (unless you've installed tcsh(1L) as F</bin/csh>).
 
-A glob only evaluates its (embedded) argument when it is starting a new
+A glob evaluates its (embedded) argument only when it is starting a new
 list.  All values must be read before it will start over.  In a list
 context this isn't important, because you automatically get them all
 anyway.  In a scalar context, however, the operator returns the next value
@@ -1126,5 +1126,5 @@ The bitwise operators ("&", "|", "^", "~", "<<", and ">>") always
 produce integral results.  However, C<use integer> still has meaning
 for them.  By default, their results are interpreted as unsigned
 integers.  However, if C<use integer> is in effect, their results are
-interpeted as signed integers.  For example, C<~0> usually evaluates
+interpreted as signed integers.  For example, C<~0> usually evaluates
 to a large integral value.  However, C<use integer; ~0> is -1.

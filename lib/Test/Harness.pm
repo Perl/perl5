@@ -1,6 +1,7 @@
 package Test::Harness;
 
-use 5.002;
+require 5.002;
+
 use Exporter;
 use Benchmark;
 use Config;

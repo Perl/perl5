@@ -38,7 +38,6 @@ Nick Ing-Simmons nik@tiuk.ti.com
 
 use Cwd;
 
-warn __FILE__;
 
 sub import
 {
@@ -60,7 +59,7 @@ sub import
    if (-d $blib && -d "$blib/arch" && -d "$blib/lib")
     {
      unshift(@INC,"$blib/arch","$blib/lib");
-     warn "Using $blib";
+     warn "Using $blib\n";
      return;
     }
    $dir .= "/..";

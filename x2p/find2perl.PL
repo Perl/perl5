@@ -25,10 +25,11 @@ print "Extracting $file (with variable substitutions)\n";
 # You can use $Config{...} to use Configure variables.
 
 print OUT <<"!GROK!THIS!";
-$Config{'startperl'}
-    eval 'exec perl -S \$0 "\$@"'
-	if 0;
+$Config{startperl}
+    eval 'exec $Config{perlpath} -S \$0 \${1+"\$@"}'
+	if \$running_under_some_shell;
 \$startperl = "$Config{startperl}";
+\$perlpath = "$Config{perlpath}";
 !GROK!THIS!
 
 # In the following, perl variables are not expanded during extraction.
@@ -241,8 +242,7 @@ while (@ARGV) {
 
 print <<"END";
 $startperl
-
-eval 'exec perl -S \$0 \${1+"\$@"}'
+    eval 'exec $perlpath -S \$0 \${1+"\$@"}'
 	if \$running_under_some_shell;
 
 END

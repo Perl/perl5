@@ -19,7 +19,7 @@ I<identifier>, that is, a string beginning with a letter or underscore,
 and containing letters, underscores, and digits.  In some cases, it
 may be a chain of identifiers, separated by C<::> (or by C<'>, but
 that's deprecated); all but the last are interpreted as names of
-packages, in order to locate the namespace in which to look
+packages, to locate the namespace in which to look
 up the final identifier (see L<perlmod/Packages> for details).
 It's possible to substitute for a simple identifier an expression
 which produces a reference to the value at runtime; this is
@@ -65,14 +65,14 @@ This means that $foo and @foo are two different variables.  It also
 means that C<$foo[1]> is a part of @foo, not a part of $foo.  This may
 seem a bit weird, but that's okay, because it is weird.
 
-Since variable and array references always start with '$', '@', or '%',
+Because variable and array references always start with '$', '@', or '%',
 the "reserved" words aren't in fact reserved with respect to variable
 names.  (They ARE reserved with respect to labels and filehandles,
 however, which don't have an initial special character.  You can't have
 a filehandle named "log", for instance.  Hint: you could say
 C<open(LOG,'logfile')> rather than C<open(log,'logfile')>.  Using uppercase
 filehandles also improves readability and protects you from conflict
-with future reserved words.)  Case I<IS> significant--"FOO", "Foo" and
+with future reserved words.)  Case I<IS> significant--"FOO", "Foo", and
 "foo" are all different names.  Names that start with a letter or
 underscore may also contain digits and underscores.
 
@@ -80,9 +80,9 @@ It is possible to replace such an alphanumeric name with an expression
 that returns a reference to an object of that type.  For a description
 of this, see L<perlref>.
 
-Names that start with a digit may only contain more digits.  Names
+Names that start with a digit may contain only more digits.  Names
 which do not start with a letter, underscore,  or digit are limited to
-one character, e.g.  C<$%> or C<$$>.  (Most of these one character names
+one character, e.g.,  C<$%> or C<$$>.  (Most of these one character names
 have a predefined significance to Perl.  For instance, C<$$> is the
 current process id.)
 
@@ -135,7 +135,7 @@ Scalar variables may contain various kinds of singular data, such as
 numbers, strings, and references.  In general, conversion from one form to
 another is transparent.  (A scalar may not contain multiple values, but
 may contain a reference to an array or hash containing multiple values.)
-Because of the automatic conversion of scalars, operations and functions
+Because of the automatic conversion of scalars, operations, and functions
 that return scalars don't need to care (and, in fact, can't care) whether
 the context is looking for a string or a number.
 
@@ -183,7 +183,7 @@ for details on regular expressions.
 
 The length of an array is a scalar value.  You may find the length of
 array @days by evaluating C<$#days>, as in B<csh>.  (Actually, it's not
-the length of the array, it's the subscript of the last element, since
+the length of the array, it's the subscript of the last element, because
 there is (ordinarily) a 0th element.)  Assigning to C<$#days> changes the
 length of the array.  Shortening an array by this method destroys
 intervening values.  Lengthening an array that was previously shortened
@@ -207,7 +207,7 @@ last value, like the C comma operator.)  The following is always true:
 Version 5 of Perl changed the semantics of C<$[>: files that don't set
 the value of C<$[> no longer need to worry about whether another
 file changed its value.  (In other words, use of C<$[> is deprecated.)
-So in general you can just assume that
+So in general you can assume that
 
     scalar(@whatever) == $#whatever + 1;
 
@@ -220,7 +220,7 @@ If you evaluate a hash in a scalar context, it returns a value which is
 true if and only if the hash contains any key/value pairs.  (If there
 are any key/value pairs, the value returned is a string consisting of
 the number of used buckets and the number of allocated buckets, separated
-by a slash.  This is pretty much only useful to find out whether Perl's
+by a slash.  This is pretty much useful only to find out whether Perl's
 (compiled in) hashing algorithm is performing poorly on your data set.
 For example, you stick 10,000 things in a hash, but evaluating %HASH in
 scalar context reveals "1/16", which means only one out of sixteen buckets
@@ -247,7 +247,7 @@ The usual Unix backslash rules apply for making characters such as
 newline, tab, etc., as well as some more exotic forms.  See
 L<perlop/Quote and Quotelike Operators> for a list.
 
-You can also embed newlines directly in your strings, i.e. they can end
+You can also embed newlines directly in your strings, i.e., they can end
 on a different line than they begin.  This is nice, but if you forget
 your trailing quote, the error will not be reported until Perl finds
 another line containing the quote character, which may be much further
@@ -276,16 +276,16 @@ in the subscript will be interpreted as an expression.
 
 Note that a
 single-quoted string must be separated from a preceding word by a
-space, since single quote is a valid (though deprecated) character in
+space, because single quote is a valid (though deprecated) character in
 a variable name (see L<perlmod/Packages>).
 
 Two special literals are __LINE__ and __FILE__, which represent the
 current line number and filename at that point in your program.  They
-may only be used as separate tokens; they will not be interpolated into
+may be used only as separate tokens; they will not be interpolated into
 strings.  In addition, the token __END__ may be used to indicate the
 logical end of the script before the actual end of file.  Any following
 text is ignored, but may be read via the DATA filehandle.  (The DATA
-filehandle may read data only from the main script, but not from any
+filehandle may read data from only the main script, but not from any
 required file or evaluated string.)  The two control characters ^D and
 ^Z are synonyms for __END__ (or __DATA__ in a module; see L<SelfLoader> for 
 details on __DATA__).
@@ -432,7 +432,7 @@ put the list in parentheses to avoid ambiguity.  Examples:
     $time = (stat($file))[8];
 
     # SYNTAX ERROR HERE.
-    $time = stat($file)[8];  # OOPS, FORGOT PARENS
+    $time = stat($file)[8];  # OOPS, FORGOT PARENTHESES
 
     # Find a hex digit.
     $hexdigit = ('a','b','c','d','e','f')[$digit-10];
@@ -454,7 +454,7 @@ produced by the expression on the right side of the assignment:
     $x = (($foo,$bar) = f());	        # set $x to f()'s return count
 
 This is very handy when you want to do a list assignment in a Boolean
-context, since most list functions return a null list when finished,
+context, because most list functions return a null list when finished,
 which when assigned produces a 0, which is interpreted as FALSE.
 
 The final element may be an array or a hash:
@@ -513,7 +513,7 @@ Note that just because a hash is initialized in that order doesn't
 mean that it comes out in that order.  See L<perlfunc/sort> for examples
 of how to arrange for an output ordering.
 
-=head2 Typeglobs
+=head2 Typeglobs and Filehandles
 
 Perl uses an internal type called a I<typeglob> to hold an entire
 symbol table entry.  The type prefix of a typeglob is a C<*>, because
@@ -522,7 +522,29 @@ pass arrays and hashes by reference into a function, but now that
 we have real references, this is seldom needed.  It also used to be the
 preferred way to pass filehandles into a function, but now
 that we have the *foo{THING} notation it isn't often needed for that,
-either.
+either.  It is still needed to pass new filehandles into functions
+(*HANDLE{IO} only works if HANDLE has already been used).
+
+If you need to use a typeglob to save away a filehandle, do it this way:
+
+    $fh = *STDOUT;
+
+or perhaps as a real reference, like this:
+
+    $fh = \*STDOUT;
+
+This is also a way to create a local filehandle.  For example:
+
+    sub newopen {
+	my $path = shift;
+	local *FH;  # not my!
+	open (FH, $path) || return undef;
+	return \*FH;
+    }
+    $fh = newopen('/etc/passwd');
+
+Another way to create local filehandles is with IO::Handle and its ilk,
+see the bottom of L<perlfunc/open()>.
 
 See L<perlref>, L<perlsub>, and L<perlmod/"Symbol Tables"> for more
 discussion on typeglobs.
