@@ -2,8 +2,8 @@ package Encode::Alias;
 use strict;
 no warnings 'redefine';
 use Encode;
-our $VERSION = do { my @r = (q$Revision: 1.36 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-our $DEBUG = 0;
+our $VERSION = do { my @r = (q$Revision: 1.37 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+sub DEBUG () { 0 }
 
 use base qw(Exporter);
 
@@ -32,13 +32,13 @@ sub find_alias
 	    my $new;
 	    if (ref($alias) eq 'Regexp' && $find =~ $alias)
 	    {
-		$DEBUG and warn "eval $val";
+		DEBUG and warn "eval $val";
 		$new = eval $val;
-		$DEBUG and $@ and warn "$val, $@";
+		DEBUG and $@ and warn "$val, $@";
 	    }
 	    elsif (ref($alias) eq 'CODE')
 	    {
-		$DEBUG and warn "$alias", "->", "($find)";
+		DEBUG and warn "$alias", "->", "($find)";
 		$new = $alias->($find);
 	    }
 	    elsif (lc($find) eq lc($alias))
@@ -48,7 +48,7 @@ sub find_alias
 	    if (defined($new))
 	    {
 		next if $new eq $find; # avoid (direct) recursion on bugs
-		$DEBUG and warn "$alias, $new";
+		DEBUG and warn "$alias, $new";
 		my $enc = (ref($new)) ? $new : Encode::find_encoding($new);
 		if ($enc)
 		{
@@ -58,7 +58,7 @@ sub find_alias
 	    }
 	}
     }
-    if ($DEBUG){
+    if (DEBUG){
 	my $name;
 	if (my $e = $Alias{$find}){
 	    $name = $e->name;
@@ -82,17 +82,17 @@ sub define_alias
 	    for my $k (@a){
 		if (ref($alias) eq 'Regexp' && $k =~ $alias)
 		{
-		    $DEBUG and warn "delete \$Alias\{$k\}";
+		    DEBUG and warn "delete \$Alias\{$k\}";
 		    delete $Alias{$k};
 		}
 		elsif (ref($alias) eq 'CODE')
 		{
-		    $DEBUG and warn "delete \$Alias\{$k\}";
+		    DEBUG and warn "delete \$Alias\{$k\}";
 		    delete $Alias{$alias->($name)};
 		}
 	    }
 	}else{
-	    $DEBUG and warn "delete \$Alias\{$alias\}";
+	    DEBUG and warn "delete \$Alias\{$alias\}";
 	    delete $Alias{$alias};
 	}
     }

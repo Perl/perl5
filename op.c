@@ -1883,8 +1883,11 @@ Perl_newPROG(pTHX_ OP *o)
 	CALL_PEEP(PL_eval_start);
     }
     else {
-	if (o->op_type == OP_STUB)
+	if (o->op_type == OP_STUB) {
+	    PL_comppad_name = 0;
+	    PL_compcv = 0;
 	    return;
+	}
 	PL_main_root = scope(sawparens(scalarvoid(o)));
 	PL_curcop = &PL_compiling;
 	PL_main_start = LINKLIST(PL_main_root);
@@ -2230,7 +2233,7 @@ Perl_newLISTOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
 	    listop->op_last = pushop;
     }
 
-    return (OP*)listop;
+    return CHECKOP(type, listop);
 }
 
 OP *
@@ -2667,7 +2670,7 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
 	PmopSTASH_set(pmop,PL_curstash);
     }
 
-    return (OP*)pmop;
+    return CHECKOP(type, pmop);
 }
 
 OP *
@@ -3503,6 +3506,8 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
     first->op_next = (OP*)logop;
     first->op_sibling = other;
 
+    CHECKOP(type,logop);
+
     o = newUNOP(OP_NULL, 0, (OP*)logop);
     other->op_next = o;
 
@@ -3547,6 +3552,8 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
     logop->op_other = LINKLIST(trueop);
     logop->op_next = LINKLIST(falseop);
 
+    CHECKOP(OP_COND_EXPR, /* that's logop->op_type */
+	    logop);
 
     /* establish postfix order */
     start = LINKLIST(first);

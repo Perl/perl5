@@ -38,13 +38,6 @@ case "$prefix" in
 
   *)
     # Anything else; use non-system directories
-    # prefix=$prefix; # Built-in perl uses /usr
-    siteprefix=$prefix;
-    vendorprefix='/usr'; usevendorprefix='define';
-
-    # Where to put modules.
-    sitelib=$prefix/lib/perl5/site_perl/${version}
-    vendorlib="/System/Library/Perl/${version}"; # Apple-supplied modules
     ;;
 
 esac

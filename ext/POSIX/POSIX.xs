@@ -1290,16 +1290,34 @@ sigaction(sig, optaction, oldaction = 0)
 		/* Get back the flags. */
 		svp = hv_fetch(oldaction, "FLAGS", 5, TRUE);
 		sv_setiv(*svp, oact.sa_flags);
+
+		/* Get back whether the old handler used safe signals. */
+		svp = hv_fetch(oldaction, "SAFE", 4, TRUE);
+		sv_setiv(*svp, oact.sa_handler == Perl_csighandler);
 	    }
 
 	    if (action) {
-		/* Vector new handler through %SIG.  (We always use sighandler
-		   for the C signal handler, which reads %SIG to dispatch.) */
+		/* Safe signals use "csighandler", which vectors through the
+		   PL_sighandlerp pointer when it's safe to do so.
+		   (BTW, "csighandler" is very different from "sighandler".) */
+		svp = hv_fetch(action, "SAFE", 4, FALSE);
+		act.sa_handler = (*svp && SvTRUE(*svp))
+				 ? Perl_csighandler : PL_sighandlerp;
+
+		/* Vector new Perl handler through %SIG.
+		   (The core signal handlers read %SIG to dispatch.) */
 		svp = hv_fetch(action, "HANDLER", 7, FALSE);
 		if (!svp)
 		    croak("Can't supply an action without a HANDLER");
 		sv_setsv(*sigsvp, *svp);
-		mg_set(*sigsvp);	/* handles DEFAULT and IGNORE */
+
+		/* This call actually calls sigaction() with almost the
+		   right settings, including appropriate interpretation
+		   of DEFAULT and IGNORE.  However, why are we doing
+		   this when we're about to do it again just below?  XXX */
+		mg_set(*sigsvp);
+
+		/* And here again we duplicate -- DEFAULT/IGNORE checking. */
 		if(SvPOK(*svp)) {
 			char *s=SvPVX(*svp);
 			if(strEQ(s,"IGNORE")) {
@@ -1308,12 +1326,6 @@ sigaction(sig, optaction, oldaction = 0)
 			else if(strEQ(s,"DEFAULT")) {
 				act.sa_handler = SIG_DFL;
 			}
-			else {
-				act.sa_handler = PL_sighandlerp;
-			}
-		}
-		else {
-			act.sa_handler = PL_sighandlerp;
 		}
 
 		/* Set up any desired mask. */

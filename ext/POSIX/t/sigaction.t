@@ -21,7 +21,7 @@ use vars qw/$bad7 $ok10 $bad18 $ok/;
 
 $^W=1;
 
-print "1..21\n";
+print "1..25\n";
 
 sub IGNORE {
 	$bad7=1;
@@ -155,3 +155,29 @@ if ($^O eq 'VMS') {
     kill "HUP", $$;
     print $hup21 == 1 ? "ok 21\n" : "not ok 21\n";
 }
+
+# "safe" attribute.
+# for this one, use the accessor instead of the attribute
+
+# standard signal handling via %SIG is safe
+$SIG{HUP} = \&foo;
+$oldaction = POSIX::SigAction->new;
+sigaction(SIGHUP, undef, $oldaction);
+print $oldaction->safe ? "ok 22\n" : "not ok 22\n";
+
+# SigAction handling is not safe ...
+sigaction(SIGHUP, POSIX::SigAction->new(\&foo));
+sigaction(SIGHUP, undef, $oldaction);
+print $oldaction->safe ? "not ok 23\n" : "ok 23\n";
+
+# ... unless we say so!
+$newaction = POSIX::SigAction->new(\&foo);
+$newaction->safe(1);
+sigaction(SIGHUP, $newaction);
+sigaction(SIGHUP, undef, $oldaction);
+print $oldaction->safe ? "ok 24\n" : "not ok 24\n";
+
+# And safe signal delivery must work
+$ok = 0;
+kill 'HUP', $$;
+print $ok ? "ok 25\n" : "not ok 25\n";

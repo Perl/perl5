@@ -1,10 +1,10 @@
 #
-# $Id: Encode.pm,v 1.96 2003/06/18 09:29:02 dankogai Exp $
+# $Id: Encode.pm,v 1.97 2003/07/08 21:52:14 dankogai Exp $
 #
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.96 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-our $DEBUG = 0;
+our $VERSION = do { my @r = (q$Revision: 1.97 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+sub DEBUG () { 0 }
 use XSLoader ();
 XSLoader::load(__PACKAGE__, $VERSION);
 
@@ -60,7 +60,7 @@ sub encodings
     }else{
 	%enc = %Encoding;
 	for my $mod (map {m/::/o ? $_ : "Encode::$_" } @_){
-	    $DEBUG and warn $mod;
+	    DEBUG and warn $mod;
 	    for my $enc (keys %ExtModule){
 		$ExtModule{$enc} eq $mod and $enc{$enc} = $mod;
 	    }
@@ -258,11 +258,11 @@ sub predefine_encodings{
 	push @Encode::utf8::ISA, 'Encode::Encoding';
 	# 
 	if ($use_xs){
-	    $DEBUG and warn __PACKAGE__, " XS on";
+	    Encode::DEBUG and warn __PACKAGE__, " XS on";
 	    *decode = \&decode_xs;
 	    *encode = \&encode_xs;
 	}else{
-	    $DEBUG and warn __PACKAGE__, " XS off";
+	    Encode::DEBUG and warn __PACKAGE__, " XS off";
 	    *decode = sub{
 		my ($obj,$octets,$chk) = @_;
 		my $str = Encode::decode_utf8($octets);

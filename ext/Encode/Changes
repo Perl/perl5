@@ -1,8 +1,18 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.96 2003/06/18 09:29:02 dankogai Exp $
+# $Id: Changes,v 1.97 2003/07/08 21:52:14 dankogai Exp $
 #
-$Revision: 1.96 $ $Date: 2003/06/18 09:29:02 $
+$Revision: 1.97 $ $Date: 2003/07/08 21:52:14 $
+! encoding.pm lib/Encode/Guess.pm lib/Encode/Alias.pm 
+  lib/Encode/JP/JIS7.pm lib/Encode/Encoder.pm Encode.pm
+  $DEBUG replaced with DEBUG() so perl optimizes better,
+   by Rafael with further fixes by dankogai
+  Message-Id: <20030705222023.1f24e041.rgarciasuarez@free.fr>
+! lib/Encode/Aliases.pm
+  Was: define_alias( qr/\bGB[-_ ]?2312(?:\D.*$|$)/i => '"euc-cn"' );
+  Now: define_alias( qr/\bGB[-_ ]?2312(?!-?raw)/i => '"euc-cn"' );
+  So new hash seeding introduced in bleedperl works.
+  Message-Id: <20030629100937.GD20285@vipunen.hut.fi>
 ! lib/Encode/Guess.pm
   $Encode::Guess::NoUTFAutoGuess is added so you can turn off
   automatic  utf(8|16|32) guessing -- originally by Autrijus
