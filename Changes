@@ -1,100 +1,52 @@
-Please note: This file provides a complete, temporally ordered log of
-changes that went into every version of Perl.  If you'd like more
-detailed information, please consult the comments in the individual
-patches posted to the perl5-porters mailing list.  Patches for each
-individual change may also be obtained through ftp and rsync--see
-perlhack.pod for the details.
-
-
-			   ---------------
-			    CAST AND CREW
-			   ---------------
-
-To give due honor to those who have made Perl what is is today,
-here are some of the more common names in the Changes file, and their
-current addresses (as of August 2000):
-
-    Gisle Aas			<gisle@aas.no>
-    Abigail			<abigail@foad.org>
-    Kenneth Albanowski		<kjahds@kjahds.com>
-    Russ Allbery		<rra@stanford.edu>
-    Brad Appleton		<bradapp@enteract.com>
-    Greg Bacon			<gbacon@itsc.uah.edu>
-    Robin Barker		<rmb1@cise.npl.co.uk>
-    Vishal Bhatia       	<vishal@gol.com>
-    Spider Boardman     	<spider@orb.nashua.nh.us>
-    Tom Christiansen    	<tchrist@perl.com>
-    Simon Cozens		<simon@brecon.co.uk>
-    Mark-Jason Dominus  	<mjd@plover.com>
-    Jan Dubois          	<jand@activestate.com>
-    Dominic Dunlop      	<domo@computer.org>
-    Eric Fifer          	<efifer@sanwaint.com>
-    Hallvard B Furuseth 	<h.b.furuseth@usit.uio.no>
-    M. J. T. Guy        	<mjtg@cus.cam.ac.uk>
-    Tom Hughes          	<tom@compton.nu>
-    Nick Ing-Simmons    	<nik@tiuk.ti.com>
-    Andreas Koenig      	<a.koenig@mind.de>
-    Douglas Lankshear   	<dougl@activestate.com>
-    Doug MacEachern     	<dougm@covalent.net>
-    Raphael Manfredi    	<Raphael.Manfredi@st.com>
-    Paul Marquess       	<Paul.Marquess@btinternet.com>
-    Stephen McCamant    	<alias@mcs.com>
-    Laszlo Molnar       	<laszlo.molnar@eth.ericsson.se>
-    Hans Mulder         	<hansmu@xs4all.nl>
-    Chris Nandor        	<pudge@pobox.com>
-    Matthias Neeracher  	<neeri@iis.ee.ethz.ch>
-    Jeff Okamoto        	<okamoto@hpcc123.corp.hp.com>
-    Ulrich Pfeifer      	<pfeifer@charly.informatik.uni-dortmund.de>
-    Tom Phoenix         	<rootbeer@teleport.com>
-    Stephen Potter		<spp@ds.net>
-    Joshua Pritikin     	<joshua.pritikin@db.com>
-    Peter Prymmer       	<pvhp@forte.com>
-    Norbert Pueschel    	<pueschel@imsdd.meb.uni-bonn.de>
-    Dean Roehrich       	<roehrich@cray.com>
-    Hugo van der Sanden 	<hv@crypt.demon.co.uk>
-    Michael G Schwern   	<schwern@pobox.com>
-    Roderick Schertler  	<roderick@argon.org>
-    Yitzchak Scott-Thoennes	<sthoenna@efn.org>
-    Kurt D. Starsinic		<kstar@chapin.edu>
-    Benjamin Stuhl		<sho_pi@hotmail.com>
-    Dan Sugalski		<dan@sidhe.org>
-    Nathan Torkington		<gnat@frii.com>
-    Larry W. Virden		<lvirden@cas.org>
-    Johan Vromans		<jvromans@squirrel.nl>
-    Ilya Zakharevich		<ilya@math.ohio-state.edu>
-
-And the Keepers of the Patch Pumpkin:
-
-    Charles Bailey		<bailey@newman.upenn.edu>
-    Graham Barr			<gbarr@ti.com>
-    Malcolm Beattie		<mbeattie@sable.ox.ac.uk>
-    Tim Bunce			<Tim.Bunce@ig.co.uk>
-    Andy Dougherty		<doughera@lafcol.lafayette.edu>
-    Jarkko Hietaniemi		<jhi@iki.fi>
-    Gurusamy Sarathy		<gsar@activestate.com>
-    Chip Salzenberg		<chip@perl.com>
-
-And, of course, the Author of Perl:
-
-    Larry Wall    	 	<larry@wall.org>
-
-
-NOTE: Each change entry shows the change number; who checked it into the
-repository; when; description of the change; which branch the change
-happened in; and the affected files.  The file lists have a short symbolic
-indicator:
-
-    	    !	    modified
-    	    +	    added
-    	    -	    deleted
-    	    +>	    branched (from elsewhere)
-    	    !>	    merged changes (from elsewhere)
-
-
---------------
-Version v5.7.0		Development release working toward v5.8
---------------
-
+____________________________________________________________________________
+[  6784] By: jhi                                   on 2000/08/23  13:58:41
+        Log: Portability fix from Hugo van der Sanden.
+     Branch: perl
+	   ! ext/re/Makefile.PL
+____________________________________________________________________________
+[  6783] By: jhi                                   on 2000/08/23  13:53:53
+        Log: Storable support, v-version fixes.
+             
+             Subject: CPAN.pm beta for testing available
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 22 Aug 2000 23:31:33 +0200
+             Message-ID: <m3hf8dc79m.fsf@ak-71.mind.de>
+     Branch: perl
+	   ! lib/CPAN.pm lib/CPAN/FirstTime.pm
+____________________________________________________________________________
+[  6782] By: jhi                                   on 2000/08/23  13:51:26
+        Log: Mac and other portability updates from Chris Nandor.
+     Branch: perl
+	   ! pod/perlmodinstall.pod
+____________________________________________________________________________
+[  6781] By: jhi                                   on 2000/08/23  13:47:33
+        Log: Subject: [PATCH: 6778] fix a small typo in Storable.xs
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Tue, 22 Aug 2000 16:20:41 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10008221616430.68568-100000@aspara.forte.com>
+     Branch: perl
+	   ! ext/Storable/Storable.xs
+____________________________________________________________________________
+[  6780] By: jhi                                   on 2000/08/23  13:33:34
+        Log: VMS MMS (make) wants null action.
+     Branch: perl
+	   ! ext/B/Makefile.PL
+____________________________________________________________________________
+[  6779] By: jhi                                   on 2000/08/22  19:44:47
+        Log: Forgot portability nit.
+     Branch: perl
+	   ! t/lib/st-forgive.t
+____________________________________________________________________________
+[  6778] By: jhi                                   on 2000/08/22  19:35:25
+        Log: Be portable.
+     Branch: perl
+	   ! ext/B/Makefile.PL t/lib/st-forgive.t t/lib/st-retrieve.t
+	   ! t/lib/st-store.t
+____________________________________________________________________________
+[  6777] By: jhi                                   on 2000/08/22  18:50:53
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
 ____________________________________________________________________________
 [  6776] By: jhi                                   on 2000/08/22  18:44:46
         Log: cSVOPo_*v things index into the current PL_curpad
@@ -423,6 +375,103 @@ ____________________________________________________________________________
         Log: The correct cleaning order is an art.
      Branch: perl
 	   ! Makefile.SH
+Please note: This file provides a complete, temporally ordered log of
+changes that went into every version of Perl.  If you'd like more
+detailed information, please consult the comments in the individual
+patches posted to the perl5-porters mailing list.  Patches for each
+individual change may also be obtained through ftp and rsync--see
+perlhack.pod for the details.
+
+
+			   ---------------
+			    CAST AND CREW
+			   ---------------
+
+To give due honor to those who have made Perl what is is today,
+here are some of the more common names in the Changes file, and their
+current addresses (as of August 2000):
+
+    Gisle Aas			<gisle@aas.no>
+    Abigail			<abigail@foad.org>
+    Kenneth Albanowski		<kjahds@kjahds.com>
+    Russ Allbery		<rra@stanford.edu>
+    Brad Appleton		<bradapp@enteract.com>
+    Greg Bacon			<gbacon@itsc.uah.edu>
+    Robin Barker		<rmb1@cise.npl.co.uk>
+    Vishal Bhatia       	<vishal@gol.com>
+    Spider Boardman     	<spider@orb.nashua.nh.us>
+    Tom Christiansen    	<tchrist@perl.com>
+    Simon Cozens		<simon@brecon.co.uk>
+    Mark-Jason Dominus  	<mjd@plover.com>
+    Jan Dubois          	<jand@activestate.com>
+    Dominic Dunlop      	<domo@computer.org>
+    Eric Fifer          	<efifer@sanwaint.com>
+    Hallvard B Furuseth 	<h.b.furuseth@usit.uio.no>
+    M. J. T. Guy        	<mjtg@cus.cam.ac.uk>
+    Tom Hughes          	<tom@compton.nu>
+    Nick Ing-Simmons    	<nik@tiuk.ti.com>
+    Andreas Koenig      	<a.koenig@mind.de>
+    Douglas Lankshear   	<dougl@activestate.com>
+    Doug MacEachern     	<dougm@covalent.net>
+    Raphael Manfredi    	<Raphael.Manfredi@st.com>
+    Paul Marquess       	<Paul.Marquess@btinternet.com>
+    Stephen McCamant    	<alias@mcs.com>
+    Laszlo Molnar       	<laszlo.molnar@eth.ericsson.se>
+    Hans Mulder         	<hansmu@xs4all.nl>
+    Chris Nandor        	<pudge@pobox.com>
+    Matthias Neeracher  	<neeri@iis.ee.ethz.ch>
+    Jeff Okamoto        	<okamoto@hpcc123.corp.hp.com>
+    Ulrich Pfeifer      	<pfeifer@charly.informatik.uni-dortmund.de>
+    Tom Phoenix         	<rootbeer@teleport.com>
+    Stephen Potter		<spp@ds.net>
+    Joshua Pritikin     	<joshua.pritikin@db.com>
+    Peter Prymmer       	<pvhp@forte.com>
+    Norbert Pueschel    	<pueschel@imsdd.meb.uni-bonn.de>
+    Dean Roehrich       	<roehrich@cray.com>
+    Hugo van der Sanden 	<hv@crypt.demon.co.uk>
+    Michael G Schwern   	<schwern@pobox.com>
+    Roderick Schertler  	<roderick@argon.org>
+    Yitzchak Scott-Thoennes	<sthoenna@efn.org>
+    Kurt D. Starsinic		<kstar@chapin.edu>
+    Benjamin Stuhl		<sho_pi@hotmail.com>
+    Dan Sugalski		<dan@sidhe.org>
+    Nathan Torkington		<gnat@frii.com>
+    Larry W. Virden		<lvirden@cas.org>
+    Johan Vromans		<jvromans@squirrel.nl>
+    Ilya Zakharevich		<ilya@math.ohio-state.edu>
+
+And the Keepers of the Patch Pumpkin:
+
+    Charles Bailey		<bailey@newman.upenn.edu>
+    Graham Barr			<gbarr@ti.com>
+    Malcolm Beattie		<mbeattie@sable.ox.ac.uk>
+    Tim Bunce			<Tim.Bunce@ig.co.uk>
+    Andy Dougherty		<doughera@lafcol.lafayette.edu>
+    Jarkko Hietaniemi		<jhi@iki.fi>
+    Gurusamy Sarathy		<gsar@activestate.com>
+    Chip Salzenberg		<chip@perl.com>
+
+And, of course, the Author of Perl:
+
+    Larry Wall    	 	<larry@wall.org>
+
+
+NOTE: Each change entry shows the change number; who checked it into the
+repository; when; description of the change; which branch the change
+happened in; and the affected files.  The file lists have a short symbolic
+indicator:
+
+    	    !	    modified
+    	    +	    added
+    	    -	    deleted
+    	    +>	    branched (from elsewhere)
+    	    !>	    merged changes (from elsewhere)
+
+
+--------------
+Version v5.7.0		Development release working toward v5.8
+--------------
+
 ____________________________________________________________________________
 [  6732] By: jhi                                   on 2000/08/21  01:23:39
         Log: The #6724 is here.
