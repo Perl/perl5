@@ -106,11 +106,6 @@ encoding - allows you to write your script in non-ascii or non-utf8
   perl -Mencoding=latin2 -e '...' # Feeling centrally European?
   perl -Mencoding=euc-kr -e '...' # Or Korean?
 
-  # or from the shebang line
-
-  #!/your/path/to/perl -Mencoding="8859-6" # Arabian Nights
-  #!/your/path/to/perl -Mencoding=big5     # Taiwanese
-
   # more control
 
   # A simple euc-cn => utf-8 converter
