@@ -281,12 +281,12 @@ BOOT:
 #else
 		thread->thr = pthread_self();
 #endif
+		SHAREDSvEDIT(threads);
 		thread_tid_ptr = Perl_newSVuv(PL_sharedsv_space, PTR2UV(thread->thr));
 		thread_ptr = Perl_newSVuv(PL_sharedsv_space, PTR2UV(thread));
-		SHAREDSvEDIT(threads);
 		hv_store_ent((HV*) SHAREDSvGET(threads), thread_tid_ptr, thread_ptr,0);
-		SHAREDSvRELEASE(threads);
 	   	SvREFCNT_dec(thread_tid_ptr);
+		SHAREDSvRELEASE(threads);
 	}
 	MUTEX_INIT(&create_mutex);
 
