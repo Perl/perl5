@@ -361,6 +361,13 @@ Unsuccessful open on filename containing newline at - line 3.
 ########
 # pp_sys.c [pp_sysread]
 use warnings 'io' ;
+if ($^O eq 'dos') {
+    print <<EOM ;
+SKIPPED
+# skipped on dos
+EOM
+    exit ;
+}
 my $file = "./xcv" ;
 open(F, ">$file") ; 
 my $a = sysread(F, $a,10) ;
@@ -369,4 +376,4 @@ my $a = sysread(F, $a,10) ;
 close F ;
 unlink $file ;
 EXPECT
-Filehandle F opened only for output at - line 5.
+Filehandle F opened only for output at - line 12.

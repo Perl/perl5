@@ -180,7 +180,7 @@ sub chdir_init {
 }
 
 sub chdir {
-    my $newdir = shift || '';	# allow for no arg (chdir to HOME dir)
+    my $newdir = @? ? shift : '';	# allow for no arg (chdir to HOME dir)
     $newdir =~ s|///*|/|g unless $^O eq 'MSWin32';
     chdir_init() unless $chdir_init;
     return 0 unless CORE::chdir $newdir;
@@ -271,7 +271,7 @@ sub abs_path
 
 sub fast_abs_path {
     my $cwd = getcwd();
-    my $path = shift || '.';
+    my $path = @_ ? shift : '.';
     CORE::chdir($path) || croak "Cannot chdir to $path:$!";
     my $realpath = getcwd();
     CORE::chdir($cwd)  || croak "Cannot chdir back to $cwd:$!";
@@ -340,7 +340,7 @@ sub _qnx_cwd {
 }
 
 sub _qnx_abs_path {
-    my $path = shift || '.';
+    my $path = @_ ? shift : '.';
     my $realpath=`/usr/bin/fullpath -t $path`;
     chop $realpath;
     return $realpath;

@@ -428,16 +428,17 @@ EOM
 	    case "$cc -v 2>/dev/null" in
 	    *gcc*)
 		echo 'main() { return 0; }' > try.c
-		if ${cc:-cc} -mcpu=v9 -m64 -S try.c 2>&1 | grep -e \
-		    '-m64 is not supported by this configuration'; then
+		case "`${cc:-cc} -mcpu=v9 -m64 -S try.c 2>&1 | grep 'm64 is not supported by this configuration'`" in
+		*"m64 is not supported"*)
 		    cat >&4 <<EOM
 
-Full 64-bit build not supported by this configuration.
+Full 64-bit build not supported by this gcc configuration.
 Cannot continue, aborting.
 
 EOM
 		    exit 1
-		fi
+		    ;;
+		esac    
 		ccflags="$ccflags -mcpu=v9 -m64"
 		if test X`getconf XBS5_LP64_OFF64_CFLAGS 2>/dev/null` != X; then
 		    ccflags="$ccflags -Wa,`getconf XBS5_LP64_OFF64_CFLAGS 2>/dev/null`"

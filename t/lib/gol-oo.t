@@ -2,13 +2,13 @@
 
 BEGIN {
     chdir('t') if -d 't';
-    unshift @INC, '../lib';
+    @INC = '../lib';
 }
 
 use Getopt::Long;
-die("Getopt::Long version 2.23_03 required--this is only version ".
+die("Getopt::Long version 2.24 required--this is only version ".
     $Getopt::Long::VERSION)
-  unless $Getopt::Long::VERSION >= 2.23_03;
+  unless $Getopt::Long::VERSION >= 2.24;
 print "1..9\n";
 
 @ARGV = qw(-Foo -baR --foo bar);

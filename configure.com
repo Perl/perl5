@@ -35,6 +35,7 @@ $!
 $! VMS-isms we will need:
 $ echo = "write sys$output "
 $ cat  = "type"
+$ delete := delete ! local symbol overrides globals with qualifiers
 $ gcc_symbol = "gcc"
 $ ld = "Link"
 $ ans = ""
@@ -398,7 +399,7 @@ $ echo ""
 $ echo4 "First let's make sure your kit is complete.  Checking..."
 $ manifestfound = "" 
 $ miss_list = "" 
-$! Here I assume we are in the [foo.PERL5xxx.VMS...] tree
+$! Here I assume we are in the [foo.PERLxxx...] tree
 $! because the search routine simply does set def [-] if necessary.
 $ file_2_find = "MANIFEST" !I hope this one is not in [foo.PERL5xxx.VMS...] 
 $Research_manifest:
@@ -580,13 +581,23 @@ $ If (fastread)
 $ Then
 $   echo4 "''rp'"
 $ Else
-$   If (silent)
-$   Then
+$   If (.NOT. silent) Then echo ""
+$   READ SYS$COMMAND/PROMPT="''rp'" ans
+$   IF (ans .EQS. "&-d")
+$   THEN
+$     echo4 "(OK, I will run with -d after this question.)"
+$     IF (.NOT. silent) THEN echo ""
 $     READ SYS$COMMAND/PROMPT="''rp'" ans
-$   Else
+$     fastread := yes
+$   ENDIF
+$   IF (ans .EQS. "&-s")
+$   THEN
+$     echo4 "(OK, I will run with -s after this question.)"
 $     echo ""
 $     READ SYS$COMMAND/PROMPT="''rp'" ans
-$   Endif
+$     silent := true
+$     GOSUB Shut_up
+$   ENDIF
 $ Endif
 $ RETURN
 $!
@@ -607,6 +618,58 @@ $   WRITE CONFIG -
 $   CLOSE CONFIG
 $ ENDIF
 $!
+$ IF F$TYPE(usedevel) .EQS. "" THEN usedevel := n
+$ patchlevel_h = F$SEARCH("[-]patchlevel.h")
+$ IF (patchlevel_h.NES."")
+$ THEN
+$   SEARCH 'patchlevel_h "define","PERL_VERSION","epoch"/match=and/out=[]ver.out
+$   IF .NOT. usedevel
+$   THEN
+$     OPEN/READ CONFIG []ver.out
+$     READ CONFIG line
+$     CLOSE CONFIG
+$     tmp = F$EDIT(line,"TRIM,COMPRESS")
+$     xpatchlevel = F$INTEGER(F$ELEMENT(2," ",tmp))
+$     line = xpatchlevel / 2
+$     tmp = xpatchlevel - ( line * 2 )
+$     IF tmp .NE. 0
+$     THEN
+$       echo4 "patchlevel is " + F$STRING(xpatchlevel)
+$       cat4 SYS$INPUT:
+*** WHOA THERE!!! ***
+
+    This is an UNSTABLE DEVELOPMENT release.
+    (The patchlevel, is odd--as opposed to even,
+     and that signifies a development release.  If you want a
+     maintenance release, you want an even-numbered release.)
+
+    Do ***NOT*** install this into production use.
+    Data corruption and crashes are possible.
+
+    It is most seriously suggested that you do not continue any further
+    unless you want to help in developing and debugging Perl.
+
+$       dflt="n"
+$       rp="Do you really want to continue? [''dflt'] "
+$       IF (fastread) THEN fastread := FALSE
+$       GOSUB myread
+$       IF ans .EQS. "" THEN ans = dflt
+$       IF ans
+$       THEN
+$         echo4 "Okay, continuing."
+$       ELSE
+$         echo4 "Okay, bye."
+$         DELETE/NOLOG/NOCONFIRM []ver.out;
+$         GOTO Clean_up
+$         STOP
+$         exit 0
+$       ENDIF
+$     ENDIF
+$     DELETE/SYMBOL line
+$     DELETE/SYMBOL tmp
+$   ENDIF
+$   DELETE/NOLOG/NOCONFIRM []ver.out;
+$ ENDIF
 $!: general instructions
 $ needman = "true"
 $ firsttime = "true"
@@ -705,16 +768,18 @@ $   IF (configshfound.NES."") THEN GOTO Config_sh_found
 $ ENDIF
 $ IF (i.LT.max) THEN GOTO Config_sh_look
 $! genconfig.pl has "osname='VMS'"
-$ osname = F$EDIT(F$GETSYI("NODE_SWTYPE"),"COLLAPSE") 
+$ osname = F$EDIT(F$GETSYI("NODE_SWTYPE"),"COLLAPSE")
 $ IF (configshfound.EQS."")
 $ THEN
 $   config_sh = "[-]config.sh" ! the fallback default
 $   GOTO Beyond_config_sh
 $ ENDIF
 $Config_sh_found:
+$ IF F$TYPE(osname) .EQS. "" THEN osname = F$EDIT(F$GETSYI("NODE_SWTYPE"),"COLLAPSE")
 $ IF F$TYPE(config_dflt) .EQS. "" THEN config_dflt = "n"
 $ rp = "Shall I @ ''config_sh' for default answers? [''config_dflt'] "
 $ GOSUB myread
+$ IF ans .EQS. "" THEN ans = config_dflt
 $ IF ans
 $ THEN
 $   echo ""
@@ -2141,7 +2206,7 @@ $ echo ""
 $ echo "If you have no idea what this means, and don't have
 $ echo "any program requiring anything, choose the default.
 $ dflt = be_case_sensitive
-$ rp = "Case-sensitive symbols [''dflt'] "
+$ rp = "Build with case-sensitive symbols? [''dflt'] "
 $ gosub myread
 $ if ans.eqs."" then ans="''dflt'"
 $ be_case_sensitive = "''ans'"
@@ -2152,7 +2217,7 @@ $ echo "Perl normally uses G_FLOAT format floating point numbers
 $ echo "internally, as do most things on VMS. You can, however, build
 $ echo "with IEEE floating point numbers instead if you need to.
 $ dflt = use_ieee_math
-$ rp = "Use IEEE math [''dflt'] "
+$ rp = "Use IEEE math? [''dflt'] "
 $ gosub myread
 $ if ans.eqs."" then ans="''dflt'"
 $ use_ieee_math = "''ans'"
@@ -2160,7 +2225,7 @@ $ endif
 $! CC Flags
 $ echo ""
 $ echo "You can, if you need to, pass extra flags on to the C
-$ echo "compiler. In general you should only do this if you really,
+$ echo "compiler.  In general you should only do this if you really,
 $ echo "really know what you're doing.
 $ dflt = user_c_flags
 $ rp = "Extra C flags [''dflt'] "
@@ -2269,7 +2334,7 @@ $ echo "break badly"
 $ echo "
 $ echo "Which modules do you want to build into perl?"
 $! dflt = "Fcntl Errno File::Glob IO Opcode Byteloader Devel::Peek Devel::DProf Data::Dumper attrs re VMS::Stdio VMS::DCLsym B SDBM_File"
-$ dflt = "re Fcntl Errno File::Glob IO Opcode Devel::Peek Devel::DProf Data::Dumper attrs VMS::Stdio VMS::DCLsym B SDBM_File Thread Sys::Hostname"
+$ dflt = "re Fcntl Errno File::Glob IO Opcode Devel::Peek Devel::DProf Data::Dumper attrs VMS::Stdio VMS::DCLsym B SDBM_File Storable Thread Sys::Hostname"
 $ if Using_Dec_C
 $ THEN
 $   dflt = dflt + " POSIX"
@@ -2372,7 +2437,7 @@ $ IF (ok_builders .NES. "")
 $ THEN
 $   echo "Here is the list of builders you can apparently use:"
 $   echo "(",ok_builders," )"
-$   rp = "Which """"make"""" utility do you wish to use [''dflt']? "
+$   rp = "Which """"make"""" utility do you wish to use? [''dflt'] "
 $   GOSUB myread
 $   ans = F$EDIT(ans,"TRIM, COMPRESS")
 $   ans = F$EXTRACT(0,F$LOCATE(" ",ans),ans) !throw out "-f Makefile." here
@@ -2426,7 +2491,8 @@ $ make = F$EDIT(build,"UPCASE")
 $!
 $!: locate the preferred pager for this system
 $!pagers = "most|more|less|type/page"
-$!rp='What pager is used on your system?'
+$!rp="What pager is used on your system? [''dflt'] "
+$ pager="most"
 $!
 $! update [.vms]config.vms here
 $!
@@ -2482,7 +2548,7 @@ $!
 $ echo ""
 $ echo4 "Checking the C run-time library."
 $!
-$! SUBCONFIGURE.COM
+$! Former SUBCONFIGURE.COM
 $!
 $!  - build a config.sh for VMS Perl.
 $!  - use built config.sh to take config_h.SH -> config.h
@@ -2619,9 +2685,6 @@ $ ENDIF
 $!
 $ usedl="define"
 $ startperl="""$ perl 'f$env(\""procedure\"")' 'p1' 'p2' 'p3' 'p4' 'p5' 'p6' 'p7' 'p8'  !\n$ exit++ + ++$status != 0 and $exit = $status = undef;"""
-$!: locate the preferred pager for this system
-$! rp="What pager is used on your system?"
-$ pager="most"
 $!
 $ IF ((Use_Threads) .AND. (vms_ver .LES. "6.2"))
 $ THEN
@@ -4778,6 +4841,7 @@ $ WC "d_sigsetjmp='" + d_sigsetjmp + "'"
 $ WC "d_socket='" + d_socket + "'"
 $ WC "d_socklen_t='" + d_socklen_t + "'"
 $ WC "d_sockpair='undef'"
+$ WC "d_socks5_init='undef'"
 $ WC "d_sqrtl='define'"
 $ WC "d_statblks='undef'"
 $ WC "d_statfs_f_flags='undef'"
@@ -5152,7 +5216,7 @@ If you'd like to make any changes to the config.sh file before I begin
 to configure things, answer yes to the following question.
 
 $   dflt="n"
-$   rp="Do you wish to edit ''basename_config_sh'? "
+$   rp="Do you wish to edit ''basename_config_sh'? [''dflt'] "
 $   GOSUB myread
 $   IF ans .EQS. "" then ans = dflt
 $   IF ans
@@ -5273,7 +5337,7 @@ $ Deck/Dollar="$EndOfTpl$"
 $!++ Build_Ext.Com
 $!   NOTE: This file is extracted as part of the VMS configuration process.
 $!   Any changes made to it directly will be lost.  If you need to make any
-$!   changes, please edit the template in [.vms]SubConfigure.Com instead.
+$!   changes, please edit the template in Configure.Com instead.
 $    def = F$Environment("Default")
 $    exts1 = F$Edit(p1,"Compress")
 $    p2 = F$Edit(p2,"Upcase,Compress,Trim")

@@ -213,7 +213,7 @@ ldflags_largefiles="`getconf XBS5_ILP32_OFFBIG_LDFLAGS 2>/dev/null`"
 	# insert(?) *something* to $ldflags so that later (in Configure) evaluating
 	# $ldflags causes a newline after the '-b64' (the result of the getconf).
 	# (nothing strange shows up in $ldflags even in hexdump;
-	#  so it may be something in the shell, instead?)
+	#  so it may be something (a bug) in the shell, instead?)
 	# Try it out: just uncomment the below line and rerun Configure:
 # echo >&4 "AIX 4.3.1.0 $ldflags_largefiles mystery" ; exit 1
 	# Just don't ask me how AIX does it, I spent hours wondering.
@@ -229,7 +229,24 @@ libswanted_largefiles="`getconf XBS5_ILP32_OFFBIG_LIBS 2>/dev/null|sed -e 's@^-l
 	   libswanted="$libswanted $libswanted_largefiles"
 	   ;;
 	esac
-	;;
+	case "$gccversion" in
+	'') ;;
+	*)
+	cat >&4 <<EOM
+
+*** Warning: gcc in AIX might not work with the largefile support of Perl
+*** (default since 5.6.0), this combination hasn't been tested.
+*** I will try, though.
+
+EOM
+	# Remove xlc-spefific -qflags.
+        ccflags="`echo $ccflags | sed -e 's@ -q[^ ]*@ @g' -e 's@^-q[^ ]* @@g'`"
+        ldflags="`echo $ldflags | sed -e 's@ -q[^ ]*@ @g' -e 's@^-q[^ ]* @@g'`"
+	echo >&4 "(using ccflags $ccflags)"
+	echo >&4 "(using ldflags $ldflags)"
+        ;; 
+        esac
+        ;;
 esac
 EOCBU
 

@@ -6,7 +6,7 @@ print "1..135\n";
 
 BEGIN {
     chdir 't' if -d 't';
-    unshift @INC, '../lib';
+    @INC = '../lib';
 }
 use warnings ;
 

@@ -6182,16 +6182,19 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	/* SIZE */
 
 	switch (*q) {
-#ifdef HAS_QUAD
+#if defined(HAS_QUAD) || (defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE))
 	case 'L':			/* Ld */
+	    /* FALL THROUGH */
+#endif
+#ifdef HAS_QUAD
 	case 'q':			/* qd */
 	    intsize = 'q';
 	    q++;
 	    break;
 #endif
 	case 'l':
-#ifdef HAS_QUAD
-             if (*(q + 1) == 'l') {	/* lld */
+#if defined(HAS_QUAD) || (defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE))
+             if (*(q + 1) == 'l') {	/* lld, llf */
 		intsize = 'q';
 		q += 2;
 		break;
@@ -6533,11 +6536,14 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    eptr = ebuf + sizeof ebuf;
 	    *--eptr = '\0';
 	    *--eptr = c;
-#ifdef USE_LONG_DOUBLE
+#if defined(USE_LONG_DOUBLE) && defined(PERL_PRIfldbl)
 	    {
-		static char const my_prifldbl[] = PERL_PRIfldbl;
-		char const *p = my_prifldbl + sizeof my_prifldbl - 3;
-		while (p >= my_prifldbl) { *--eptr = *p--; }
+		/* Copy the one or more characters in a long double
+		 * format before the 'base' ([efgEFG]) character to
+		 * the format string. */
+		static char const prifldbl[] = PERL_PRIfldbl;
+		char const *p = prifldbl + sizeof(prifldbl) - 3;
+		while (p >= prifldbl) { *--eptr = *p--; }
 	    }
 #endif
 	    if (has_precis) {
@@ -8319,9 +8325,15 @@ do_clean_objs(pTHXo_ SV *sv)
 
     if (SvROK(sv) && SvOBJECT(rv = SvRV(sv))) {
 	DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning object ref:\n "), sv_dump(sv));)
-	SvROK_off(sv);
-	SvRV(sv) = 0;
-	SvREFCNT_dec(rv);
+	if (SvWEAKREF(sv)) {
+	    sv_del_backref(sv);
+	    SvWEAKREF_off(sv);
+	    SvRV(sv) = 0;
+	} else {
+	    SvROK_off(sv);
+	    SvRV(sv) = 0;
+	    SvREFCNT_dec(rv);
+	}
     }
 
     /* XXX Might want to check arrays, etc. */

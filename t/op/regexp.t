@@ -33,7 +33,7 @@ $ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3;
 
 BEGIN {
     chdir 't' if -d 't';
-    unshift @INC, '../lib' if -d '../lib';
+    @INC = '../lib';
 }
 
 $iters = shift || 1;		# Poor man performance suite, 10000 is OK.

@@ -2468,9 +2468,9 @@ tryagain:
 	    ret = reg_node(BOL);
 	break;
     case '$':
-	if (PL_regcomp_parse[1]) 
-	    PL_seen_zerolen++;
 	nextchar();
+	if (*PL_regcomp_parse) 
+	    PL_seen_zerolen++;
 	if (PL_regflags & PMf_MULTILINE)
 	    ret = reg_node(MEOL);
 	else if (PL_regflags & PMf_SINGLELINE)

@@ -1076,13 +1076,7 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)/.exists 
     }
     $ldfrom = "-all $ldfrom -none" if ($^O eq 'dec_osf');
 
-    # Brain dead solaris linker does not use LD_RUN_PATH?
-    # This fixes dynamic extensions which need shared libs
-    my $ldrun = '';
-    $ldrun = join ' ', map "-R$_", split /:/, $self->{LD_RUN_PATH}
-       if ($^O eq 'solaris');
-
-    # The IRIX linker also doesn't use LD_RUN_PATH
+    # The IRIX linker doesn't use LD_RUN_PATH
     $ldrun = qq{-rpath "$self->{LD_RUN_PATH}"}
 	if ($^O eq 'irix' && $self->{LD_RUN_PATH});
 
@@ -2504,11 +2498,6 @@ MAP_LIBPERL = $libperl
     # SUNOS ld does not take the full path to a shared library
     my $llibperl = ($libperl)?'$(MAP_LIBPERL)':'-lperl';
 
-    # Brain dead solaris linker does not use LD_RUN_PATH?
-    # This fixes dynamic extensions which need shared libs
-    my $ldfrom = ($^O eq 'solaris')?
-           join(' ', map "-R$_", split /:/, $self->{LD_RUN_PATH}):'';
-
 push @m, "
 \$(MAP_TARGET) :: $tmp/perlmain\$(OBJ_EXT) \$(MAP_LIBPERL) \$(MAP_STATIC) \$(INST_ARCHAUTODIR)/extralibs.all
 	\$(MAP_LINKCMD) -o \$\@ \$(OPTIMIZE) $tmp/perlmain\$(OBJ_EXT) $ldfrom \$(MAP_STATIC) $llibperl `cat \$(INST_ARCHAUTODIR)/extralibs.all` \$(MAP_PRELIBS)
@@ -3178,9 +3167,11 @@ form Foo/Bar and replaces the slash with C<::>. Returns the replacement.
 sub replace_manpage_separator {
     my($self,$man) = @_;
 	if ($^O eq 'uwin') {
-		$man =~ s,/+,.,g;
+	    $man =~ s,/+,.,g;
+	} elsif ($Is_Dos) {
+	    $man =~ s,/+,__,g;
 	} else {
-		$man =~ s,/+,::,g;
+	    $man =~ s,/+,::,g;
 	}
     $man;
 }

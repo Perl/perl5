@@ -810,7 +810,7 @@ builtin operations.
 
 When C<use locale> is in effect, the current LC_CTYPE locale is used
 for regular expressions and case mapping; LC_COLLATE for string
-ordering; and LC_NUMERIC for numeric formating in printf and sprintf
+ordering; and LC_NUMERIC for numeric formatting in printf and sprintf
 (but B<not> in print).  LC_NUMERIC is always used in write, since
 lexical scoping of formats is problematic at best.
 

@@ -1,6 +1,6 @@
 #!./perl -w
 
-# This file should really be a extracted from a .PL
+# This file should really be extracted from a .PL file
 
 use lib 'lib';		# use source library if present
 

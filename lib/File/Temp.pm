@@ -4,6 +4,40 @@ package File::Temp;
 
 File::Temp - return name and handle of a temporary file safely
 
+=begin __INTERNALS
+
+=head1 PORTABILITY
+
+This module is designed to be portable across operating systems
+and it currently supports Unix, VMS, DOS, OS/2 and Windows. When
+porting to a new OS there are generally three main issues
+that have to be solved:
+
+=over 4
+
+=item *
+
+Can the OS unlink an open file? If it can't then the
+C<_can_unlink_opened_file> method should be modified.
+
+=item *
+
+Are the return values from C<stat> reliable? By default all the
+return values from C<stat> are compared when unlinking a temporary
+file using the filename and the handle. Operating systems other than
+unix do not always have valid entries in all fields. If C<unlink0> fails
+then the C<stat> comparison should be modified accordingly.
+
+=item *
+
+Security. Systems that can not support a test for the sticky bit
+on a directory can not use the MEDIUM and HIGH security tests.
+The C<_can_do_level> method should be modified accordingly.
+
+=back
+
+=end __INTERNALS
+
 =head1 SYNOPSIS
 
   use File::Temp qw/ tempfile tempdir /; 
@@ -674,7 +708,7 @@ sub _is_verysafe {
 
 sub _can_unlink_opened_file {
 
-  if ($^O eq 'MSWin32' || $^O eq 'os2' || $^O eq 'VMS') {
+  if ($^O eq 'MSWin32' || $^O eq 'os2' || $^O eq 'VMS' || $^O eq 'dos') {
     return 0;
   } else {
     return 1;
@@ -698,7 +732,7 @@ sub _can_do_level {
   return 1 if $level == STANDARD;
 
   # Currently, the systems that can do HIGH or MEDIUM are identical
-  if ( $^O eq 'MSWin32' || $^O eq 'os2' || $^O eq 'cygwin') {
+  if ( $^O eq 'MSWin32' || $^O eq 'os2' || $^O eq 'cygwin' || $^O eq 'dos') {
     return 0;
   } else {
     return 1;
@@ -1494,6 +1528,8 @@ sub unlink0 {
     @okstat = (0, 2..$#fh);
   } elsif ($^O eq 'VMS') { # device and file ID are sufficient
     @okstat = (0, 1);
+  } elsif ($^O eq 'dos') {
+     @okstat = (0,2..7,11..$#fh);
   }
 
   # Now compare each entry explicitly by number
@@ -1693,7 +1729,7 @@ descriptor before passing it to another process.
 =head1 HISTORY
 
 Originally began life in May 1999 as an XS interface to the system
-mkstemp() function. In March 2000, the mkstemp() code was
+mkstemp() function. In March 2000, the OpenBSD mkstemp() code was
 translated to Perl for total control of the code's
 security checking, to ensure the presence of the function regardless of
 operating system and to help with portability.

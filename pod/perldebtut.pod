@@ -327,7 +327,7 @@ our expected output:
 
 While we're here, take a closer look at the 'B<x>' command, it's really useful
 and will merrily dump out nested references, complete objects, partial objects
-- justabout whatever you throw at it:
+- just about whatever you throw at it:
 
 Let's make a quick object and x-plode it, first we'll start the the debugger:
 it wants some form of input from STDIN, so we give it something non-commital,
@@ -452,7 +452,7 @@ expected output.  This is what it does:
 	
 Not very consistent!  We'll set a breakpoint in the code manually and run it
 under the debugger to see what's going on.  A breakpoint is a flag, to which
-the debugger will run without interuption, when it reaches the breakpoint, it
+the debugger will run without interruption, when it reaches the breakpoint, it
 will stop execution and offer a prompt for further interaction.  In normal
 use, these debugger commands are completely ignored, and they are safe - if a
 little messy, to leave in production code.

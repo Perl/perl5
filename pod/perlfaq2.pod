@@ -462,7 +462,7 @@ See also www.perl.com for updates on tutorials, training, and support.
 
 If you are reporting a bug in the perl interpreter or the modules
 shipped with Perl, use the I<perlbug> program in the Perl distribution or
-mail your report to perlbug@perl.com .
+mail your report to perlbug@perl.org .
 
 If you are posting a bug with a non-standard port (see the answer to
 "What platforms is Perl available for?"), a binary distribution, or a

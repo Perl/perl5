@@ -2,7 +2,7 @@
 
 BEGIN {
     chdir('t') if -d 't';
-    unshift @INC, '../lib';
+    @INC = '../lib';
 }
 
 # Test ability to retrieve HTTP request info

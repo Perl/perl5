@@ -1580,7 +1580,6 @@ utils/c2ph.PL		program to translate dbx stabs to perl
 utils/dprofpp.PL	Perl code profile post-processor
 utils/h2ph.PL		A thing to turn C .h files into perl .ph files
 utils/h2xs.PL		Program to make .xs files from C header files
-utils/perlbc.PL		Front-end for byte compiler
 utils/perlbug.PL	A simple tool to submit a bug report
 utils/perlcc.PL		Front-end for compiler
 utils/perldoc.PL	A simple tool to find & display perl's documentation

@@ -130,6 +130,8 @@ START_EXTERN_C
 #define PL_basetime		(*Perl_Ibasetime_ptr(aTHXo))
 #undef  PL_beginav
 #define PL_beginav		(*Perl_Ibeginav_ptr(aTHXo))
+#undef  PL_beginav_save
+#define PL_beginav_save		(*Perl_Ibeginav_save_ptr(aTHXo))
 #undef  PL_bitcount
 #define PL_bitcount		(*Perl_Ibitcount_ptr(aTHXo))
 #undef  PL_bufend

@@ -2821,7 +2821,7 @@ otherwise it's necessary to protect any leading and trailing whitespace:
     $file =~ s#^(\s)#./$1#;
     open(FOO, "< $file\0");
 
-(this may not work on some bizzare filesystems).  One should
+(this may not work on some bizarre filesystems).  One should
 conscientiously choose between the I<magic> and 3-arguments form
 of open():
 
@@ -5499,9 +5499,10 @@ to give the expression the correct precedence as in
 
     vec($image, $max_x * $x + $y, 8) = 3;
 
-If the selected element is off the end of the string, the value 0 is
-returned.  If an element off the end of the string is written to,
-Perl will first extend the string with sufficiently many zero bytes.
+If the selected element is outside the string, the value 0 is returned.
+If an element off the end of the string is written to, Perl will first
+extend the string with sufficiently many zero bytes.   It is an error
+to try to write off the beginning of the string (i.e. negative OFFSET).
 
 Strings created with C<vec> can also be manipulated with the logical
 operators C<|>, C<&>, C<^>, and C<~>.  These operators will assume a bit

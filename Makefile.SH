@@ -533,15 +533,25 @@ extra.pods: miniperl
 	-@rm -f extra.pods
 	-@for x in `grep -l '^=[a-z]' README.* | grep -v README.vms` ; do \
 	    nx=`echo $$x | sed -e "s/README\.//"`; \
-	    $(LNS) ../$$x "pod/perl"$$nx".pod" ; \
+	    cd pod ; $(LNS) ../$$x "perl"$$nx".pod" ; cd .. ; \
 	    echo "pod/perl"$$nx".pod" >> extra.pods ; \
 	done
-	-@test -f vms/perlvms.pod && $(LNS) ../vms/perlvms.pod pod/perlvms.pod && echo "pod/perlvms.pod" >> extra.pods
+	-@test -f vms/perlvms.pod && cd pod && $(LNS) ../vms/perlvms.pod perlvms.pod && cd .. && echo "pod/perlvms.pod" >> extra.pods
 
 install-strip:
 	$(MAKE) STRIPFLAGS=-s install
 
-install: all install.perl install.man
+install:
+	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS)
+
+install-verbose:
+	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS) INSTALLFLAGS=-V
+
+install-silent:
+	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS) INSTALLFLAGS=-S
+
+no-install:
+	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS) INSTALLFLAGS=-n
 
 install.perl:	all installperl
 	if [ -n "$(COMPILE)" ]; \
@@ -551,15 +561,15 @@ install.perl:	all installperl
 		cd ../pod; $(MAKE) compile; \
 	else :; \
 	fi
-	$(LDLIBPTH) ./perl installperl $(STRIPFLAGS)
+	$(LDLIBPTH) ./perl installperl $(INSTALLFLAGS) $(STRIPFLAGS)
 
 install.man:	all installman
-	$(LDLIBPTH) ./perl installman
+	$(LDLIBPTH) ./perl installman $(INSTALLFLAGS)
 
 # XXX Experimental. Hardwired values, but useful for testing.
 # Eventually Configure could ask for some of these values.
 install.html: all installhtml
-	-@test -f README.vms && $(LNS) ../README.vms vms/README_vms.pod
+	-@test -f README.vms && cd vms && $(LNS) ../README.vms README_vms.pod && cd ..
 	$(LDLIBPTH) ./perl installhtml                   \
       --podroot=. --podpath=. --recurse  \
       --htmldir=$(privlib)/html     \
@@ -683,7 +693,7 @@ _mopup:
 	rm -f *$(OBJ_EXT) *$(LIB_EXT) all perlmain.c
 	-@test -f extra.pods && rm -f `cat extra.pods`
 	-@test -f vms/README_vms.pod && rm -f vms/README_vms.pod
-	-rm -f perl.exp ext.libs extra.pods
+	-rm -f perl.exp ext.libs extra.pods opmini.o
 	-rm -f perl.export perl.dll perl.libexp perl.map perl.def
 	-rm -f perl.loadmap miniperl.loadmap perl.prelmap miniperl.prelmap
 	rm -f perl suidperl miniperl $(LIBPERL) libperl.* microperl
@@ -708,7 +718,7 @@ _cleaner1:
 	done
 
 _cleaner2:
-	rm -f core core.*perl.*.? *perl.core t/core t/core.perl.*.? t/*perl.core t/misctmp* t/forktmp* t/tmp* t/c t/perl .?*.c so_locations $(LIBPERL_NONSHR) $(MINIPERL_NONSHR)
+	rm -f core core.*perl.*.? *perl.core t/core t/core.perl.*.? t/*perl.core t/misctmp* t/forktmp* t/tmp* t/c t/perl t/ran_tests .?*.c so_locations $(LIBPERL_NONSHR) $(MINIPERL_NONSHR)
 	rm -rf $(addedbyconf)
 	rm -f $(FIRSTMAKEFILE) $(FIRSTMAKEFILE).old
 	rm -f $(private)
@@ -717,7 +727,7 @@ _cleaner2:
 	rm -f h2ph.man pstruct
 	rm -rf .config
 	rm -f testcompile compilelog
-	-rmdir lib/B lib/Data lib/IO/Socket lib/IO lib/Sys
+	-rmdir lib/B lib/Data lib/IO/Socket lib/IO lib/Sys lib/Thread
 
 _realcleaner: 
 	@$(LDLIBPTH) $(MAKE) _cleaner1 CLEAN=realclean
@@ -771,6 +781,7 @@ test check: test-prep
 	else \
 	  cd t && PERL_SKIP_TTY_TEST=1 $(LDLIBPTH) ./perl TEST; \
 	fi
+	@echo "Ran tests" > t/ran_tests
 
 utest ucheck: test-prep
 	if (true </dev/tty) >/dev/null 2>&1; then \

@@ -30,18 +30,17 @@ Similarly all warnings are disabled in a block by either of these:
 For example, consider the code below:
 
     use warnings ;
-    my $a ;
-    my $b ;
+    my @a ;
     {
         no warnings ;
-	$b = 2 if $a EQ 3 ;
+	my $b = @a[0] ;
     }
-    $b = 1 if $a NE 3 ;
+    my $c = @a[0];
 
 The code in the enclosing block has warnings enabled, but the inner
-block has them disabled. In this case that means that the use of the C<EQ>
-operator won't trip a C<"Use of EQ is deprecated"> warning, but the use of
-C<NE> will produce a C<"Use of NE is deprecated"> warning.
+block has them disabled. In this case that means the assignment to the
+scalar C<$c> will trip the C<"Scalar value @a[0] better written as $a[0]">
+warning, but the assignment to the scalar C<$b> will not.
 
 =head2 Default Warnings and Optional Warnings
 
@@ -100,7 +99,7 @@ disable compile-time warnings you need to rewrite the code like this:
 	 my $b ; chop $b ;
      }
 
-The other big problem with C<$^W> is that way you can inadvertently
+The other big problem with C<$^W> is the way you can inadvertently
 change the warning setting in unexpected places in your code. For example,
 when the code below is run (without the B<-w> flag), the second call
 to C<doit> will trip a C<"Use of uninitialized value"> warning, whereas
@@ -321,21 +320,32 @@ L<perldiag>.
 
 The presence of the word "FATAL" in the category list will escalate any
 warnings detected from the categories specified in the lexical scope
-into fatal errors. In the code below, there are 3 places where a
-deprecated warning will be detected, the middle one will produce a
-fatal error.
-
+into fatal errors. In the code below, the use of C<time>, C<length>
+and C<join> can all produce a C<"Useless use of xxx in void context">
+warning.
 
     use warnings ;
-
-    $a = 1 if $a EQ $b ;
-
+ 
+    time ;
+ 
     {
-        use warnings FATAL => qw(deprecated) ;
-        $a = 1 if $a EQ $b ;
+        use warnings FATAL => qw(void) ;
+        length "abc" ;
     }
+ 
+    join "", 1,2,3 ;
+ 
+    print "done\n" ;     
 
-    $a = 1 if $a EQ $b ;
+When run it produces this output
+
+    Useless use of time in void context at fatal line 3.
+    Useless use of length in void context at fatal line 7.  
+
+The scope where C<length> is used has escalated the C<void> warnings
+category into a fatal error, so the program terminates immediately it
+encounters the warning.
+
 
 =head2 Reporting Warnings from a Module
 

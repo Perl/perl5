@@ -991,7 +991,7 @@ the explanation is much longer than the program.
 
 A complete thread tutorial could fill a book (and has, many times),
 but this should get you well on your way.  The final authority on how
-Perl's threads behave is the documention bundled with the Perl
+Perl's threads behave is the documentation bundled with the Perl
 distribution, but with what we've covered in this article, you should
 be well on your way to becoming a threaded Perl expert.
 

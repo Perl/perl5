@@ -2,7 +2,7 @@
 
 BEGIN {
     chdir('t') if -d 't';
-    unshift @INC, '../lib';
+    @INC = '../lib';
 }
 
 # Test ability to retrieve HTTP request info
@@ -24,6 +24,14 @@ sub test {
     print($true ? "ok $num\n" : "not ok $num $msg\n");
 }
 
+my $CRLF = "\015\012";
+if ($^O eq 'VMS') { 
+    $CRLF = "\n";  # via web server carriage is inserted automatically
+}
+if (ord("\t") != 9) { # EBCDIC?
+    $CRLF = "\r\n";
+}
+
 # all the automatic tags
 test(2,h1() eq '<h1 />',"single tag");
 test(3,h1('fred') eq '<h1>fred</h1>',"open/close tag");
@@ -37,10 +45,10 @@ test(7,h1({-align=>'CENTER'},['fred','agnes']) eq
     local($") = '-'; 
     test(8,h1('fred','agnes','maura') eq '<h1>fred-agnes-maura</h1>',"open/close tag \$\" interpolation");
 }
-test(9,header() eq "Content-Type: text/html; charset=ISO-8859-1\015\012\015\012","header()");
-test(10,header(-type=>'image/gif') eq "Content-Type: image/gif\015\012\015\012","header()");
-test(11,header(-type=>'image/gif',-status=>'500 Sucks') eq "Status: 500 Sucks\015\012Content-Type: image/gif\015\012\015\012","header()");
-test(12,header(-nph=>1) eq "HTTP/1.0 200 OK\015\012Content-Type: text/html; charset=ISO-8859-1\015\012\015\012","header()");
+test(9,header() eq "Content-Type: text/html; charset=ISO-8859-1${CRLF}${CRLF}","header()");
+test(10,header(-type=>'image/gif') eq "Content-Type: image/gif${CRLF}${CRLF}","header()");
+test(11,header(-type=>'image/gif',-status=>'500 Sucks') eq "Status: 500 Sucks${CRLF}Content-Type: image/gif${CRLF}${CRLF}","header()");
+test(12,header(-nph=>1) eq "HTTP/1.0 200 OK${CRLF}Content-Type: text/html; charset=ISO-8859-1${CRLF}${CRLF}","header()");
 test(13,start_html() ."\n" eq <<END,"start_html()");
 <!DOCTYPE HTML
 	PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"

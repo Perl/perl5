@@ -4,7 +4,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    unshift @INC, '../lib';
+    @INC = '../lib';
     require Config; import Config;
     if (($Config{'extensions'} !~ /\bSDBM_File\b/) && ($^O ne 'VMS')){
 	print "1..0\n";

@@ -1,6 +1,6 @@
 BEGIN {
     chdir 't' if -d 't';
-    unshift @INC, '../lib';
+    @INC = '../lib';
 }
 
 # Test suite for the Term::ANSIColor Perl module.  Before `make install' is

@@ -9,12 +9,14 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    unshift @INC, '../lib';
+    @INC = '../lib';
 }
 
 use Math::Complex;
 
-my $VERSION = sprintf("%s", q$Id: complex.t,v 1.9 1998/11/01 00:00:00 dsl Exp $ =~ /(\d+\.d+)/);
+use vars qw($VERSION);
+
+$VERSION = 1.91;
 
 my ($args, $op, $target, $test, $test_set, $try, $val, $zvalue, @set, @val);
 
@@ -194,6 +196,13 @@ EOT
 test_broot(qw(-3 -2.1 0 0.99));
 
 sub test_display_format {
+    $test++;
+    push @script, <<EOS;
+    print "# package display_format cartesian?\n";
+    print "not " unless Math::Complex->display_format eq 'cartesian';
+    print "ok $test\n";
+EOS
+
     push @script, <<EOS;
     my \$j = (root(1,3))[1];
 
@@ -202,7 +211,7 @@ EOS
 
     $test++;
     push @script, <<EOS;
-    print "# display_format polar?\n";
+    print "# j display_format polar?\n";
     print "not " unless \$j->display_format eq 'polar';
     print "ok $test\n";
 EOS
@@ -276,10 +285,18 @@ EOS
 
     \$j->display_format('style' => 'cartesian', 'format' => '(%.5g)');
 EOS
+
     $test++;
     push @script, <<EOS;
     print "# j = \$j\n";
     print "not " unless "\$j" eq "(-0.5)+(0.86603)i";
+    print "ok $test\n";
+EOS
+
+    $test++;
+    push @script, <<EOS;
+    print "# j display_format cartesian?\n";
+    print "not " unless \$j->display_format eq 'cartesian';
     print "ok $test\n";
 EOS
 }

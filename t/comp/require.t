@@ -2,7 +2,8 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    unshift @INC, ('.', '../lib');
+    @INC = '.';
+    push @INC, '../lib';
 }
 
 # don't make this lexical

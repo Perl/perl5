@@ -2,7 +2,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    unshift @INC, '../lib';
+    @INC = '../lib';
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bPeek\b/) {
         print "1..0 # Skip: Devel::Peek was not built\n";
@@ -282,7 +282,7 @@ do_test(17,
 	*a,
 'SV = PVGV\\($ADDR\\) at $ADDR
   REFCNT = 5
-  FLAGS = \\(GMG,SMG,MULTI\\)
+  FLAGS = \\(GMG,SMG,MULTI(?:,IN_PAD)?\\)
   IV = 0
   NV = 0
   MAGIC = $ADDR
@@ -304,7 +304,6 @@ do_test(17,
     GPFLAGS = 0x0
     LINE = \\d+
     FILE = ".*\\b(?i:peek\\.t)"
-    FLAGS = $ADDR
     EGV = $ADDR\\t"a"');
 
 END {

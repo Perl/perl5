@@ -2900,7 +2900,16 @@ vms_image_init(int *argcp, char ***argvp)
        * buffer much larger than $GETJPI wants (rsz is size in bytes that
        * were needed to hold all identifiers at time of last call; we'll
        * allocate that many unsigned long ints), and go back and get 'em.
+       * If it gave us less than it wanted to despite ample buffer space, 
+       * something's broken.  Is your system missing a system identifier?
        */
+      if (rsz <= jpilist[1].buflen) { 
+         /* Perl_croak accvios when used this early in startup. */
+         fprintf(stderr, "vms_image_init: $getjpiw refuses to store RIGHTSLIST of %u bytes in buffer of %u bytes.\n%s", 
+                         rsz, (unsigned long) jpilist[1].buflen,
+                         "Check your rights database for corruption.\n");
+         exit(SS$_ABORT);
+      }
       if (jpilist[1].bufadr != rlst) Safefree(jpilist[1].bufadr);
       jpilist[1].bufadr = New(1320,mask,rsz,unsigned long int);
       jpilist[1].buflen = rsz * sizeof(unsigned long int);

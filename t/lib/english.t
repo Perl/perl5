@@ -2,7 +2,7 @@
 
 print "1..16\n";
 
-BEGIN { unshift @INC, '../lib' }
+BEGIN { @INC = '../lib' }
 use English;
 use Config;
 my $threads = $Config{'use5005threads'} || 0;

@@ -1257,7 +1257,11 @@ print \"  \\@INC:\\n    @INC\\n\";");
 #endif
 
 #ifdef USE_SOCKS
+#   ifdef HAS_SOCKS5_INIT
+    socks5_init(argv[0]);
+#   else
     SOCKSinit(argv[0]);
+#   endif
 #endif    
 
     init_predump_symbols();
@@ -3681,7 +3685,14 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 
     while (AvFILL(paramList) >= 0) {
 	cv = (CV*)av_shift(paramList);
-	SAVEFREESV(cv);
+	if ((PL_minus_c & 0x10) && (paramList == PL_beginav)) {
+		/* save PL_beginav for compiler */
+	    if (! PL_beginav_save)
+		PL_beginav_save = newAV();
+	    av_push(PL_beginav_save, (SV*)cv);
+	} else {
+	    SAVEFREESV(cv);
+	}
 #ifdef PERL_FLEXIBLE_EXCEPTIONS
 	CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_vcall_list_body), cv);
 #else

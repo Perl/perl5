@@ -8,7 +8,9 @@ BEGIN {
 }
 
 use strict;
-use vars qw($Is_VMS $Is_W32 $Is_OS2 $Is_Cygwin $nonono $dostrip $versiononly $depth);
+my ($Is_VMS, $Is_W32, $Is_OS2, $Is_Cygwin, $nonono, $dostrip,
+    $versiononly, $silent, $verbose, $otherperls);
+use vars qw /$depth/;
 
 BEGIN {
     $Is_VMS = $^O eq 'VMS';
@@ -27,7 +29,6 @@ use File::Path ();
 use ExtUtils::Packlist;
 use Config;
 use subs qw(unlink link chmod);
-use vars qw($packlist);
 
 # override the ones in the rest of the script
 sub mkpath {
@@ -48,10 +49,14 @@ my $perl_verbase = defined($ENV{PERLNAME_VERBASE})
 		    ? $ENV{PERLNAME_VERBASE}
 		    : $perl;
 
+$otherperls = 1;
 while (@ARGV) {
     $nonono = 1 if $ARGV[0] eq '-n';
     $dostrip = 1 if $ARGV[0] eq '-s';
     $versiononly = 1 if $ARGV[0] eq '-v';
+    $silent = 1 if $ARGV[0] eq '-S';
+    $otherperls = 0 if $ARGV[0] eq '-o';
+    $verbose = 1 if $ARGV[0] eq '-V' || $ARGV [0] eq '-n';
     shift;
 }
 
@@ -146,7 +151,7 @@ if ($Is_VMS) {  # Hang in there until File::Spec hits the big time
 if ($d_dosuid && $>) { die "You must run as root to install suidperl\n"; }
 
    $installbin		|| die "No installbin directory in config.sh\n";
--d $installbin		|| mkpath($installbin, 1, 0777);
+-d $installbin		|| mkpath($installbin, $verbose, 0777);
 -d $installbin		|| $nonono || die "$installbin is not a directory\n";
 -w $installbin		|| $nonono || die "$installbin is not writable by you\n"
 	unless $installbin =~ m#^/afs/# || $nonono;
@@ -154,36 +159,36 @@ if ($d_dosuid && $>) { die "You must run as root to install suidperl\n"; }
 -x 'perl' . $exe_ext	|| die "perl isn't executable!\n";
 -x 'suidperl' . $exe_ext|| die "suidperl isn't executable!\n" if $d_dosuid;
 
--x 't/TEST'		|| $Is_W32
+-f 't/ran_tests'	|| $Is_W32
 			|| warn "WARNING: You've never run 'make test'!!!",
 				"  (Installing anyway.)\n";
 
 if ($Is_W32 or $Is_Cygwin) {
   my $perldll;
 
-if ($Is_Cygwin) {
-  $perldll = $libperl;
-  $perldll =~ s/(\..*)?$/.$dlext/;
-  if ($Config{useshrplib} eq 'true') {
-    # install ld2 and perlld as well
-    foreach ('ld2', 'perlld') {
-      safe_unlink("$installbin/$_");
-      copy("$_", "$installbin/$_");
-      chmod(0755, "$installbin/$_");
+  if ($Is_Cygwin) {
+    $perldll = $libperl;
+    $perldll =~ s/(\..*)?$/.$dlext/;
+    if ($Config{useshrplib} eq 'true') {
+      # install ld2 and perlld as well
+      foreach ('ld2', 'perlld') {
+        safe_unlink("$installbin/$_");
+        copy("$_", "$installbin/$_");
+        chmod(0755, "$installbin/$_");
+      };
     };
-  };
-} else {
-  $perldll = 'perl56.' . $dlext;
-}
+  } else {
+    $perldll = 'perl56.' . $dlext;
+  }
 
-   if ($dlsrc ne "dl_none.xs") {
-      -f $perldll || die "No perl DLL built\n";
-   }
-# Install the DLL
+  if ($dlsrc ne "dl_none.xs") {
+    -f $perldll || die "No perl DLL built\n";
+  }
+  # Install the DLL
 
-   safe_unlink("$installbin/$perldll");
-   copy("$perldll", "$installbin/$perldll");
-   chmod(0755, "$installbin/$perldll");
+  safe_unlink("$installbin/$perldll");
+  copy("$perldll", "$installbin/$perldll");
+  chmod(0755, "$installbin/$perldll");
    
 } # if ($Is_W32 or $Is_Cygwin)
 
@@ -231,10 +236,10 @@ if ($d_dosuid) {
 
 my ($do_installarchlib, $do_installprivlib) = (0, 0);
     
-mkpath($installprivlib, 1, 0777);
-mkpath($installarchlib, 1, 0777);
-mkpath($installsitelib, 1, 0777) if ($installsitelib);
-mkpath($installsitearch, 1, 0777) if ($installsitearch);
+mkpath($installprivlib, $verbose, 0777);
+mkpath($installarchlib, $verbose, 0777);
+mkpath($installsitelib, $verbose, 0777) if ($installsitelib);
+mkpath($installsitearch, $verbose, 0777) if ($installsitearch);
 
 if (chdir "lib") {
     $do_installarchlib = ! samepath($installarchlib, '.');
@@ -251,7 +256,7 @@ else {
 }
 
 # Install header files and libraries.
-mkpath("$installarchlib/CORE", 1, 0777);
+mkpath("$installarchlib/CORE", $verbose, 0777);
 my @corefiles;
 if ($Is_VMS) {  # We did core file selection during build
     my $coredir = "lib/$Config{archname}/$ver/CORE";
@@ -266,7 +271,7 @@ else {
     push(@corefiles,'perl.exp') if $^O eq 'aix';
     if ($^O eq 'mpeix') {
         # MPE needs mpeixish.h installed as well.
-        mkpath("$installarchlib/CORE/mpeix", 1, 0777);
+        mkpath("$installarchlib/CORE/mpeix", $verbose, 0777);
         push(@corefiles,'mpeix/mpeixish.h');
     }
     # If they have built sperl.o...
@@ -361,7 +366,7 @@ if (! $versiononly && (-f 'cppstdin') && (! samepath($installbin, '.'))) {
 
 # Install scripts.
 
-mkpath($installscript, 1, 0777);
+mkpath($installscript, $verbose, 0777);
 
 if (! $versiononly) {
     for (@scripts) {
@@ -387,7 +392,7 @@ if (! $versiononly) {
 
 my $pod = $Is_Cygwin ? 'pods' : 'pod';
 unless ( $versiononly && !($installprivlib =~ m/\Q$ver/)) {
-    mkpath("${installprivlib}/$pod", 1, 0777);
+    mkpath("${installprivlib}/$pod", $verbose, 0777);
 
     # If Perl 5.003's perldiag.pod is there, rename it.
     if (open POD, "${installprivlib}/$pod/perldiag.pod") {
@@ -418,7 +423,7 @@ unless ( $versiononly && !($installprivlib =~ m/\Q$ver/)) {
 # Also skip $mainperl if the user opted to have it be a link to the
 # installed perl.
 
-if (!$versiononly) {
+if (!$versiononly && $otherperls) {
     my ($path, @path);
     my $dirsep = ($Is_OS2 || $Is_W32) ? ';' : ':' ;
     ($path = $ENV{"PATH"}) =~ s:\\:/:g ;
@@ -444,18 +449,18 @@ if (!$versiononly) {
 	    if (-x $otherperl && ! -d $otherperl);
     }
     if (@otherperls) {
-	print STDERR "\nWarning: $perl appears in your path in the following " .
+	warn "\nWarning: $perl appears in your path in the following " .
 	    "locations beyond where\nwe just installed it:\n";
 	for (@otherperls) {
-	    print STDERR "    ", $_, "\n";
+	    warn "    ", $_, "\n";
 	}
-	print STDERR "\n";
+	warn "\n";
     }
 
 }
 
 $packlist->write() unless $nonono;
-print "  Installation complete\n";
+print "  Installation complete\n" if $verbose;
 
 exit 0;
 
@@ -465,7 +470,7 @@ sub yn {
     my($prompt) = @_;
     my($answer);
     my($default) = $prompt =~ m/\[([yn])\]\s*$/i;
-    print STDERR $prompt;
+    warn $prompt;
     chop($answer = <STDIN>);
     $answer = $default if $answer =~ m/^\s*$/;
     ($answer =~ m/^[yY]/);
@@ -480,7 +485,7 @@ sub unlink {
     foreach my $name (@names) {
 	next unless -e $name;
 	chmod 0777, $name if ($Is_OS2 || $Is_W32 || $Is_Cygwin);
-	print "  unlink $name\n";
+	print "  unlink $name\n" if $verbose;
 	( CORE::unlink($name) and ++$cnt 
 	  or warn "Couldn't unlink $name: $!\n" ) unless $nonono;
     }
@@ -493,11 +498,11 @@ sub safe_unlink {
     foreach my $name (@names) {
 	next unless -e $name;
 	chmod 0777, $name if ($Is_OS2 || $Is_W32);
-	print "  unlink $name\n";
+	print "  unlink $name\n" if $verbose;
 	next if CORE::unlink($name);
 	warn "Couldn't unlink $name: $!\n";
 	if ($! =~ /busy/i) {
-	    print "  mv $name $name.old\n";
+	    print "  mv $name $name.old\n" if $verbose;
 	    safe_rename($name, "$name.old")
 		or warn "Couldn't rename $name: $!\n";
 	}
@@ -522,7 +527,7 @@ sub link {
     my($from,$to) = @_;
     my($success) = 0;
 
-    print "  ln $from $to\n";
+    print $verbose ? "  ln $from $to\n" : "  $to\n" unless $silent;
     eval {
 	CORE::link($from, $to)
 	    ? $success++
@@ -534,8 +539,9 @@ sub link {
     };
     if ($@) {
 	warn $@;
-	print "  cp $from $to\n";
-	print "  creating new version of $to\n" if $Is_VMS and -e $to;
+        print $verbose ? "  cp $from $to\n" : "  $to\n" unless $silent;
+	print "  creating new version of $to\n"
+                 if $Is_VMS and -e $to and !$silent;
 	File::Copy::copy($from, $to)
 	    ? $success++
 	    : warn "Couldn't copy $from to $to: $!\n"
@@ -549,7 +555,7 @@ sub chmod {
     my($mode,$name) = @_;
 
     return if ($^O eq 'dos');
-    printf "  chmod %o %s\n", $mode, $name;
+    printf "  chmod %o %s\n", $mode, $name if $verbose;
     CORE::chmod($mode,$name)
 	|| warn sprintf("Couldn't chmod %o %s: $!\n", $mode, $name)
       unless $nonono;
@@ -558,8 +564,8 @@ sub chmod {
 sub copy {
     my($from,$to) = @_;
 
-    print "  cp $from $to\n";
-    print "  creating new version of $to\n" if $Is_VMS and -e $to;
+    print $verbose ? "  cp $from $to\n" : "  $to\n" unless $silent;
+    print "  creating new version of $to\n" if $Is_VMS and -e $to and !$silent;
     File::Copy::copy($from, $to)
 	|| warn "Couldn't copy $from to $to: $!\n"
       unless $nonono;
@@ -624,7 +630,7 @@ sub installlib {
         $packlist->{"$installlib/$name"} = { type => 'file' };
 	if (compare($_, "$installlib/$name") || $nonono) {
 	    unlink("$installlib/$name");
-	    mkpath("$installlib/$dir", 1, 0777);
+	    mkpath("$installlib/$dir", $verbose, 0777);
 	    # HP-UX (at least) needs to maintain execute permissions
 	    # on dynamically-loaded libraries.
 	    copy_if_diff($_, "$installlib/$name")
@@ -677,10 +683,10 @@ sub strip
 
     foreach my $file (@args) {
         if (-f $file) {
-            print "  strip $file\n";
+            print "  strip $file\n" if $verbose;
             system("strip", @opts, $file);
         } else {
-            print "# file '$file' skipped\n";
+            print "# file '$file' skipped\n" if $verbose;
         }
     }
 }

@@ -2208,7 +2208,7 @@ typedef OP* (CPERLscope(*PPADDR_t)[]) (pTHX);
 #    define environ (*environ_pointer)
 EXT char *** environ_pointer;
 #  else
-#    if defined(__APPLE__)
+#    if defined(__APPLE__) && defined(PERL_CORE)
 #      include <crt_externs.h>	/* for the env array */
 #      define environ (*_NSGetEnviron())
 #    endif

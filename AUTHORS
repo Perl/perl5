@@ -14,22 +14,26 @@ dogcow		Tom Spindler		dogcow@merit.edu
 domo		Dominic Dunlop		domo@slipper.ip.lu
 doug		Doug MacEachern		dougm@pobox.com
 doughera	Andy Dougherty		doughera@lafcol.lafayette.edu
+francois	Francois Desarmenien	desar@club-internet.fr
 gbarr		Graham Barr		gbarr@ti.com
+gerben		Gerben Wierda		Gerben_Wierda@RnA.nl
 gerti		Gerd Knops		gerti@BITart.com
 gibreel		Stephen Zander		gibreel@pobox.com
 gnat		Nathan Torkington	gnat@frii.com
 gsar		Gurusamy Sarathy	gsar@activestate.com
 hansmu		Hans Mulder		hansmu@xs4all.nl
+hops		Mike Hopkirk		hops@sco.com
+hugo		Hugo van der Sanden	hv@crypt.demon.co.uk
 ilya		Ilya Zakharevich	ilya@math.ohio-state.edu
 jbuehler	Joe Buehler		jbuehler@hekimian.com
 jfs		John Stoffel		jfs@fluent.com
 jhi		Jarkko Hietaniemi	jhi@iki.fi
-jon		Jon Orwant		orwant@media.mit.edu
+jon		Jon Orwant		orwant@oreilly.com
 jvromans	Johan Vromans		jvromans@squirrel.nl
-k		Andreas Koenig		andreas.koenig@franz.ww.tu-berlin.de
+k		Andreas König		andreas.koenig@franz.ww.tu-berlin.de
 kjahds		Kenneth Albanowski	kjahds@kjahds.com
 krishna		Krishna Sethuraman	krishna@sgi.com
-kstar		Kurt D. Starsinic	kstar@isinet.com
+kstar		Kurt D. Starsinic	kstar@chapin.edu
 lstein		Lincoln D. Stein	lstein@genome.wi.mit.edu
 lutherh		Luther Huffman		lutherh@stratcom.com
 lutz		Mark P. Lutz		mark.p.lutz@boeing.com
@@ -37,9 +41,10 @@ lwall		Larry Wall		larry@wall.org
 makemaker	MakeMaker list		makemaker@franz.ww.tu-berlin.de
 mbiggar		Mark A Biggar		mab@wdl.loral.com
 mbligh		Martin J. Bligh		mbligh@sequent.com
-mike		Mike Stok		mike@stok.co.uk
+mikestok	Mike Stok		mike@stok.co.uk
 millert		Todd Miller		millert@openbsd.org
 mkvale		Mark Kvale		kvale@phy.ucsf.edu
+mjd		Mark-Jason Dominus	mjd@plover.com
 laszlo.molnar	Laszlo Molnar		Laszlo.Molnar@eth.ericsson.se
 mpeix		Mark Bixby		markb@cccd.edu
 muir		David Muir Sharnoff	muir@idiom.com
@@ -54,6 +59,7 @@ pueschel	Norbert Pueschel	pueschel@imsdd.meb.uni-bonn.de
 pvhp		Peter Prymmer		pvhp@forte.com
 raphael		Raphael Manfredi	Raphael_Manfredi@pobox.com
 rdieter		Rex Dieter		rdieter@math.unl.edu
+richard		Richard Foley		Richard.Foley@m.dasa.de
 rra		Russ Allbery		rra@stanford.edu
 rsanders	Robert Sanders		Robert.Sanders@linux.org	
 roberto		Ollivier Robert		roberto@keltia.freenix.fr
@@ -66,7 +72,7 @@ seibert		Greg Seibert		seibert@Lynx.COM
 simon		Simon Cozens		simon@brecon.co.uk
 spider		Spider Boardman		spider@Orb.Nashua.NH.US
 smccam		Stephen McCamant	smccam@uclink4.berkeley.edu
-sugalskd	Dan Sugalski		sugalskd@osshe.edu
+sugalskd	Dan Sugalski		dan@sidhe.org
 sundstrom	David Sundstrom		sunds@asictest.sc.ti.com
 tchrist		Tom Christiansen	tchrist@perl.com
 thomas.dorner	Dorner Thomas		Thomas.Dorner@start.de
@@ -75,6 +81,7 @@ timb		Tim Bunce		Tim.Bunce@ig.co.uk
 tom.horsley	Tom Horsley		Tom.Horsley@mail.ccur.com
 tye		Tye McQueen		tye@metronet.com
 wayne.thompson	Wayne Thompson		Wayne.Thompson@Ebay.sun.com
+wilfredo	Wilfredo Sánchez	wsanchez@apple.com
 
 PUMPKING	jhi
 aix		jhi
@@ -92,25 +99,28 @@ dgux		roderick
 doc		tchrist
 dos		laszlo.molnar
 dynix/ptx	mbligh
-ebcdic		vms,vmesa,posixbc
+ebcdic		vms,vmesa,posix-bc
 filespec	kjahds
 freebsd		roberto
 hpux		okamoto,jhi
 irix		scotth,krishna,jfs,kstar
 jpl		gibreel
+lexwarn		pmarquess
 linux		kjahds,kstar
 locale		jhi,domo
-lynxos		lynxos
 machten		domo
 mm		makemaker
 mvs		pvhp
 netbsd		jhi
+next		gerben,hansmu
 openbsd		millert
 os2		ilya
 plan9		lutherl
 posix-bc	thomas.dorner
 powerux		tom.horsley
 qnx		allen
+regex		ilya,jfriedl,hugo,mjd
+sco		francois,hops
 solaris		doughera,alan.burlison
 step		gerti,hansmu,rdieter
 sunos4		doughera

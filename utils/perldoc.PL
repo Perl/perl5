@@ -203,7 +203,7 @@ if (-f "Makefile.PL") {
     eval q{ use lib qw(. lib); 1; } or die;
 
     # don't add if superuser
-    if ($< && $>) {   # don't be looking too hard now!
+    if ($< && $> && -f "blib") {   # don't be looking too hard now!
 	eval q{ use blib; 1 };
 	warn $@ if $@ && $opt_v;
     }

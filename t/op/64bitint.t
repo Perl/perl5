@@ -7,7 +7,7 @@ BEGIN {
 		exit(0);
 	}
 	chdir 't' if -d 't';
-	unshift @INC, '../lib';
+	@INC = '../lib';
 }
 
 # This could use many more tests.

@@ -35,7 +35,7 @@ piped through your favourite pager.
 
 =item L<pod2html|pod2html> and L<pod2latex|pod2latex>
 
-As well as these two, there are two other convertors: F<pod2html> will
+As well as these two, there are two other converters: F<pod2html> will
 produce HTML pages from POD, and F<pod2latex>, which produces LaTeX
 files.
 

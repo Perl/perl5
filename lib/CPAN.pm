@@ -6,13 +6,13 @@ use vars qw{$Try_autoload
 	    $Frontend  $Defaultsite
 	   }; #};
 
-$VERSION = '1.57';
+$VERSION = '1.57_51';
 
-# $Id: CPAN.pm,v 1.305 2000/08/16 12:42:32 k Exp $
+# $Id: CPAN.pm,v 1.314 2000/08/21 12:37:43 k Exp $
 
 # only used during development:
 $Revision = "";
-# $Revision = "[".substr(q$Revision: 1.305 $, 10)."]";
+# $Revision = "[".substr(q$Revision: 1.314 $, 10)."]";
 
 use Carp ();
 use Config ();
@@ -49,6 +49,7 @@ END { $End++; &cleanup; }
 		  Eval           2048
 		  Config         4096
 		  Tarzip         8192
+		  Version       16384
 ];
 
 $CPAN::DEBUG ||= 0;
@@ -94,6 +95,8 @@ sub shell {
     my($self) = @_;
     $Suppress_readline = ! -t STDIN unless defined $Suppress_readline;
     CPAN::Config->load unless $CPAN::Config_loaded++;
+
+    CPAN::Index->read_metadata_cache;
 
     my $prompt = "cpan> ";
     local($^W) = 1;
@@ -212,7 +215,6 @@ package CPAN::CacheMgr;
 use File::Find;
 
 package CPAN::Config;
-import ExtUtils::MakeMaker 'neatvalue';
 use vars qw(%can $dot_cpan);
 
 %can = (
@@ -986,13 +988,13 @@ package CPAN::Config;
 #-> sub CPAN::Config::edit ;
 # returns true on successful action
 sub edit {
-    my($class,@args) = @_;
+    my($self,@args) = @_;
     return unless @args;
-    CPAN->debug("class[$class]args[".join(" | ",@args)."]");
+    CPAN->debug("self[$self]args[".join(" | ",@args)."]");
     my($o,$str,$func,$args,$key_exists);
     $o = shift @args;
     if($can{$o}) {
-	$class->$o(@args);
+	$self->$o(@args);
 	return 1;
     } else {
         CPAN->debug("o[$o]") if $CPAN::DEBUG;
@@ -1021,12 +1023,7 @@ sub edit {
 		$CPAN::Config->{$o} = [@args];
                 $changed = 1;
 	    } else {
-		$CPAN::Frontend->myprint(
-					 join "",
-					 "  $o  ",
-					 ExtUtils::MakeMaker::neatvalue($CPAN::Config->{$o}),
-					 "\n"
-		     );
+                $self->prettyprint($o);
 	    }
             if ($o eq "urllist" && $changed) {
                 # reset the cached values
@@ -1036,11 +1033,36 @@ sub edit {
             return $changed;
 	} else {
 	    $CPAN::Config->{$o} = $args[0] if defined $args[0];
-	    $CPAN::Frontend->myprint("    $o    " .
-				     (defined $CPAN::Config->{$o} ?
-				      $CPAN::Config->{$o} : "UNDEFINED"));
+	    $self->prettyprint($o);
 	}
     }
+}
+
+sub prettyprint {
+  my($self,$k) = @_;
+  my $v = $CPAN::Config->{$k};
+  if (ref $v) {
+    my(@report) = ref $v eq "ARRAY" ?
+        @$v :
+            map { sprintf("   %-18s => %s\n",
+                          $_,
+                          defined $v->{$_} ? $v->{$_} : "UNDEFINED"
+                         )} keys %$v;
+    $CPAN::Frontend->myprint(
+                             join(
+                                  "",
+                                  sprintf(
+                                          "    %-18s\n",
+                                          $k
+                                         ),
+                                  map {"\t$_\n"} @report
+                                 )
+                            );
+  } elsif (defined $v) {
+    $CPAN::Frontend->myprint(sprintf "    %-18s %s\n", $k, $v);
+  } else {
+    $CPAN::Frontend->myprint(sprintf "    %-18s %s\n", $k, "UNDEFINED");
+  }
 }
 
 #-> sub CPAN::Config::commit ;
@@ -1204,6 +1226,7 @@ sub not_loaded {
 	    index_expire gzip tar unzip make pager makepl_arg make_arg
 	    make_install_arg urllist inhibit_startup_message
 	    ftp_proxy http_proxy no_proxy prerequisites_policy
+	    cache_metadata
 	   )) {
 	push @miss, $_ unless defined $CPAN::Config->{$_};
     }
@@ -1352,13 +1375,16 @@ sub i {
 }
 
 #-> sub CPAN::Shell::o ;
+
+# CPAN::Shell::o and CPAN::Config::edit are closely related. I suspect
+# some code duplication
 sub o {
     my($self,$o_type,@o_what) = @_;
     $o_type ||= "";
     CPAN->debug("o_type[$o_type] o_what[".join(" | ",@o_what)."]\n");
     if ($o_type eq 'conf') {
 	shift @o_what if @o_what && $o_what[0] eq 'help';
-	if (!@o_what) {
+	if (!@o_what) { # print all things, "o conf"
 	    my($k,$v);
 	    $CPAN::Frontend->myprint("CPAN::Config options");
 	    if (exists $INC{'CPAN/Config.pm'}) {
@@ -1374,22 +1400,7 @@ sub o {
 	    }
 	    $CPAN::Frontend->myprint("\n");
 	    for $k (sort keys %$CPAN::Config) {
-		$v = $CPAN::Config->{$k};
-		if (ref $v) {
-                  my(@report) = ref $v eq "ARRAY" ? @$v : %$v;
-		    $CPAN::Frontend->myprint(
-					     join(
-						  "",
-						  sprintf(
-							  "    %-18s\n",
-							  $k
-							 ),
-						  map {"\t$_\n"} @report
-						 )
-					    );
-		} else {
-		    $CPAN::Frontend->myprint(sprintf "    %-18s %s\n", $k, $v);
-		}
+                CPAN::Config->prettyprint($k);
 	    }
 	    $CPAN::Frontend->myprint("\n");
 	} elsif (!CPAN::Config->edit(@o_what)) {
@@ -1546,22 +1557,22 @@ sub _u_r_common {
     for $module ($self->expand('Module',@args)) {
 	my $file  = $module->cpan_file;
 	next unless defined $file; # ??
-	my($latest) = $module->cpan_version; # %vd
+	my($latest) = $module->cpan_version; # %vd not needed
 	my($inst_file) = $module->inst_file;
 	my($have);
 	return if $CPAN::Signal;
 	if ($inst_file){
 	    if ($what eq "a") {
-		$have = $module->inst_version; # %vd
+		$have = $module->inst_version; # %vd already applied
 	    } elsif ($what eq "r") {
-		$have = $module->inst_version; # %vd
+		$have = $module->inst_version; # %vd already applied
 		local($^W) = 0;
 		if ($have eq "undef"){
 		    $version_undefs++;
 		} elsif ($have == 0){
 		    $version_zeroes++;
 		}
-		next if $have >= $latest;
+		next unless CPAN::Version->vgt($latest, $have);
 # to be pedantic we should probably say:
 #    && !($have eq "undef" && $latest ne "undef" && $latest gt "");
 # to catch the case where CPAN has a version 0 and we have a version undef
@@ -1599,21 +1610,14 @@ sub _u_r_common {
 		   "in CPAN file"
 		   ));
 	}
-        for ($have,$latest) {
-          if ($] >= 5.006) { # people start using v-strings
-            local($^W) = 0;
-            unless (/^([+-]?)([\d_]*)(\.([\d_]*))?([Ee]([+-]?[\d_]+))?$/
-                    && "$2$4" ne ""
-                    ||
-                    /^undef$/
-                    ||
-                    /^-$/ # not installed
-                   ) {
-              $_ = sprintf "%vd", $_;
-            }
-          }
-          $_ = substr($_,0,8) if length($_) > 8;
-        }
+####        for ($have,$latest) {
+####          # $_ = CPAN::Version->readable($_); # %vd already applied
+####          if (length($_) > 8){
+####            my $trunc = substr($_,0,8);
+####            $CPAN::Frontend->mywarn("Truncating VERSION from [$_] to [$trunc]\n");
+####            $_ = $trunc;
+####          }
+####        }
 	$CPAN::Frontend->myprint(sprintf $sprintf,
                                  $module->id,
                                  $have,
@@ -2792,6 +2796,7 @@ sub reload {
 			       File::Spec->catfile('modules', '03mlist.gz') :
 			       File::Spec->catfile('modules', '03modlist.data.gz'),
 			       $force));
+    $cl->write_metadata_cache;
     $t2 = time;
     $debug .= "03[".($t2 - $time)."]";
     $time = $t2;
@@ -2949,11 +2954,13 @@ $index_target, $line_count, scalar(@lines);
 	    $id = $CPAN::META->instance('CPAN::Module',$mod);
 	}
 
-	if ($id->cpan_file ne $dist){
+	if ($id->cpan_file ne $dist){ # update only if file is
+                                      # different. CPAN prohibits same
+                                      # name with different version
 	    $userid = $self->userid($dist);
 	    $id->set(
 		     'CPAN_USERID' => $userid,
-		     'CPAN_VERSION' => $version, # %vd
+		     'CPAN_VERSION' => $version, # %vd not needed
 		     'CPAN_FILE' => $dist,
                      'CPAN_COMMENT' => $comment,
 		    );
@@ -3016,6 +3023,42 @@ sub rd_modlist {
 	$obj->set(%{$ret->{$_}});
 	return if $CPAN::Signal;
     }
+}
+
+#-> sub CPAN::Index::write_metadata_cache ;
+sub write_metadata_cache {
+    my($self) = @_;
+    return unless $CPAN::Config->{'cache_metadata'};
+    return unless $CPAN::META->has_usable("Storable");
+    my $cache;
+    foreach my $k (qw(CPAN::Bundle CPAN::Author CPAN::Module
+		      CPAN::Distribution)) {
+	$cache->{$k} = $CPAN::META->{$k};
+    }
+    my $metadata_file = MM->catfile($CPAN::Config->{cpan_home},"Metadata");
+    $CPAN::Frontend->myprint("Going to write $metadata_file\n");
+    $cache->{last_time} = $last_time;
+    eval { Storable::store($cache, $metadata_file) };
+    $CPAN::Frontent->mywarn($@) if $@;
+}
+
+#-> sub CPAN::Index::read_metadata_cache ;
+sub read_metadata_cache {
+    my($self) = @_;
+    return unless $CPAN::Config->{'cache_metadata'};
+    return unless $CPAN::META->has_usable("Storable");
+    my $metadata_file = MM->catfile($CPAN::Config->{cpan_home},"Metadata");
+    return unless -r $metadata_file and -f $metadata_file;
+    $CPAN::Frontend->myprint("Going to read $metadata_file\n");
+    my $cache;
+    eval { $cache = Storable::retrieve($metadata_file) };
+    $CPAN::Frontend->mywarn($@) if $@;
+    return if (!$cache || ref $cache ne 'HASH');
+    while(my($k,$v) = each %$cache) {
+	next unless $k =~ /^CPAN::/;
+	$CPAN::META->{$k} = $v;
+    }
+    $last_time = $cache->{last_time};
 }
 
 package CPAN::InfoObj;
@@ -3168,6 +3211,7 @@ sub get {
 	CPAN::FTP->localize("authors/id/$self->{ID}", $local_wanted)
 	    or $CPAN::Frontend->mydie("Giving up on '$local_wanted'\n");
     $self->{localfile} = $local_file;
+    $CPAN::META->{cachemgr} ||= CPAN::CacheMgr->new();
     my $builddir = $CPAN::META->{cachemgr}->dir;
     $self->debug("doing chdir $builddir") if $CPAN::DEBUG;
     chdir $builddir or Carp::croak("Couldn't chdir $builddir: $!");
@@ -3317,7 +3361,7 @@ sub pm2dir_me {
 sub new {
     my($class,%att) = @_;
 
-    $CPAN::META->{cachemgr} ||= CPAN::CacheMgr->new();
+    # $CPAN::META->{cachemgr} ||= CPAN::CacheMgr->new();
 
     my $this = { %att };
     return bless $this, $class;
@@ -3363,7 +3407,7 @@ sub cvs_import {
 
     my $package = $self->called_for;
     my $module = $CPAN::META->instance('CPAN::Module', $package);
-    my $version = $module->cpan_version; # %vd
+    my $version = $module->cpan_version; # %vd not needed
 
     my $userid = $self->{CPAN_USERID};
 
@@ -3652,7 +3696,7 @@ or
 			       $CPAN::META->instance(
 						     'CPAN::Module',
 						     $self->called_for
-						    )->cpan_version, # %vd
+						    )->cpan_version, # %vd not needed
 			       $self->called_for,
 			       $self->isa_perl,
 			       $self->called_for,
@@ -3829,10 +3873,14 @@ sub needs_prereq {
     # check, because if 'force' is in effect, nobody else will check.
     {
       local($^W) = 0;
-      if (defined $mo->inst_file &&
-          $mo->inst_version >= $need_version){ # %vd
+      if (
+          defined $mo->inst_file &&
+          ! CPAN::Version->vgt($need_version, $mo->inst_version)
+         ){
         CPAN->debug(sprintf "inst_file[%s]inst_version[%s]need_version[%s]",
-                    $mo->inst_file, $mo->inst_version, $need_version
+                    $mo->inst_file,
+                    $mo->inst_version,
+                    CPAN::Version->readable($need_version)
                    );
         next NEED;
       }
@@ -3987,7 +4035,8 @@ package CPAN::Bundle;
 sub as_string {
     my($self) = @_;
     $self->contains;
-    $self->{INST_VERSION} ||= $self->inst_version; # %vd
+    # following line must be "=", not "||=" because we have a moving target
+    $self->{INST_VERSION} = $self->inst_version; # %vd already applied
     return $self->SUPER::as_string;
 }
 
@@ -4268,8 +4317,8 @@ sub as_string {
 			  );
 	}
     }
-    push @m, sprintf($sprintf, 'CPAN_VERSION', $self->{CPAN_VERSION}) # %vd
-	if $self->{CPAN_VERSION}; # %vd
+    push @m, sprintf($sprintf, 'CPAN_VERSION', $self->{CPAN_VERSION}) # %vd not needed
+	if $self->{CPAN_VERSION}; # %vd not needed
     push @m, sprintf($sprintf, 'CPAN_FILE', $self->{CPAN_FILE})
 	if $self->{CPAN_FILE};
     my $sprintf3 = "    %-12s %1s%1s%1s%1s (%s,%s,%s,%s)\n";
@@ -4309,7 +4358,7 @@ sub as_string {
     push @m, sprintf($sprintf, 'INST_FILE',
 		     $local_file || "(not installed)");
     push @m, sprintf($sprintf, 'INST_VERSION',
-		     $self->inst_version) if $local_file; #%vd
+		     $self->inst_version) if $local_file; #%vd already applied
     join "", @m, "\n";
 }
 
@@ -4378,7 +4427,7 @@ sub cpan_version {
                                                 # and do not want to
                                                 # provoke too many
                                                 # bugreports
-    $self->{'CPAN_VERSION'}; # %vd
+    $self->{'CPAN_VERSION'}; # %vd not needed
 }
 
 #-> sub CPAN::Module::force ;
@@ -4427,17 +4476,17 @@ sub test   { shift->rematein('test') }
 #-> sub CPAN::Module::uptodate ;
 sub uptodate {
     my($self) = @_;
-    my($latest) = $self->cpan_version; # %vd
+    my($latest) = $self->cpan_version; # %vd not needed
     $latest ||= 0;
     my($inst_file) = $self->inst_file;
     my($have) = 0;
     if (defined $inst_file) {
-	$have = $self->inst_version; # %vd?
+	$have = $self->inst_version; # %vd already applied
     }
     local($^W)=0;
     if ($inst_file
 	&&
-	$have >= $latest # %vd
+	! CPAN::Version->vgt($latest, $have)
        ) {
       return 1;
     }
@@ -4496,7 +4545,6 @@ sub inst_version {
     my($self) = @_;
     my $parsefile = $self->inst_file or return;
     local($^W) = 0 if $] < 5.00303 && $ExtUtils::MakeMaker::VERSION < 5.38;
-    # warn "HERE";
     my $have;
     # local($SIG{__WARN__}) =  sub { warn "1. have[$have]"; };
 
@@ -4513,19 +4561,26 @@ sub inst_version {
 
     # local($SIG{__WARN__}) =  sub { warn "2. have[$have]"; };
 
-    if ($] >= 5.006) { # people start using v-strings
-      unless ($have =~ /^([+-]?)([\d_]*)(\.([\d_]*))?([Ee]([+-]?[\d_]+))?$/
-              && "$2$4" ne ""
-              ||
-              /^undef$/
-              ||
-              /^-$/
-             ) {
-        $have = sprintf "%vd", $have;
-      }
-    }
+    # Should %vd hack happen here? Must we not maintain the original
+    # version string until it is used? Do we for printing make it
+    # human readable? Or do we maintain it in a human readable form?
+    # "v1.0.2"?
+
+    # OK, let's discuss the pros and cons:
+    #-maintain it as string with leading v:
+    # read index files     do nothing
+    # compare it           use utility for compare
+    # print it             do nothing
+
+    # maintain it as what is is
+    # read index files     convert
+    # compare it           use utility because there's still a ">" vs "gt" issue
+    # print it             use CPAN::Version for print
+
+    # Seems cleaner to hold it in memory as a string starting with a "v"
+
+    $have = CPAN::Version->readable($have);
     $have =~ s/\s*//g; # stringify to float around floating point issues
-    # local($SIG{__WARN__}) =  sub { warn "3. have[$have]"; };
     $have; # no stringify needed, \s* above matches always
 }
 
@@ -4726,6 +4781,46 @@ sub unzip {
         $status != Archive::Zip::AZ_OK();
   }
   return 1;
+}
+
+package CPAN::Version;
+
+sub vgt {
+  my($self,$l,$r) = @_;
+  local($^W) = 0;
+  CPAN->debug("l[$l] r[$r]") if $CPAN::DEBUG;
+  return 1 if $r eq "undef" && $l ne "undef";
+  return if $l eq "undef" && $r ne "undef";
+  return 1 if $] >= 5.006 && $l =~ /^v/ && $r =~ /^v/ &&
+      $self->vstring($l) gt $self->vstring($r);
+  return 1 if $l > $r;
+  return 1 if $l gt $r;
+  return;
+}
+
+sub vstring {
+  my($self,$n) = @_;
+  $n =~ s/^v// or die "CPAN::Version::vstring() called with invalid argument [$n]";
+  pack "U*", split /\./, $n;
+}
+
+sub readable {
+  my($self,$n) = @_;
+  $n =~ /^([\w\-\+\.]+)/;
+  return $1 if length($1)>0;
+  if ($] < 5.006) { # or whenever v-strings were introduced
+    # we get them wrong anyway, whatever we do, because 5.005 will
+    # have already interpreted 0.2.4 to be "0.24". So even if he
+    # indexer sends us something like "v0.2.4" we compare wrongly.
+
+    # And if they say v1.2, then the old perl takes it as "v12"
+
+    $CPAN::Frontend->mywarn("Suspicious version string seen [$n]");
+    return $n;
+  }
+  my $better = sprintf "v%vd", $n;
+  CPAN->debug("n[$n] better[$better]") if $CPAN::DEBUG;
+  return $better;
 }
 
 package CPAN;
@@ -5176,6 +5271,7 @@ defined:
   build_cache        size of cache for directories to build modules
   build_dir          locally accessible directory to build modules
   index_expire       after this many days refetch index files
+  cache_metadata     use serializer to cache metadata
   cpan_home          local directory reserved for this package
   dontload_hash      anonymous hash: modules in the keys will not be
                      loaded by the CPAN::has_inst() routine

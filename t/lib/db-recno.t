@@ -1,7 +1,7 @@
 #!./perl -w
 
 BEGIN {
-    unshift @INC, '../lib' if -d '../lib' ;
+    @INC = '../lib';
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bDB_File\b/) {
 	print "1..0 # Skip: DB_File was not built\n";

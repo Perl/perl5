@@ -168,7 +168,7 @@ run, you may have to run it on a platform where GCC is available, and move
 the sources back to the platform without GCC.
 
 If you succeed in automatically converting the sources to a K&R compatible
-form, be sure to email perlbug@perl.com to let us know the steps you
+form, be sure to email perlbug@perl.org to let us know the steps you
 followed.  This will enable us to officially support this option.
 
 =back
@@ -763,7 +763,7 @@ extension modules or external libraries may not work.  This
 configuration exists to allow these issues to be worked on.
 
 This option requires the 'sfio' package to have been built and installed.
-A (fairly old) version of sfio is in CPAN.
+The latest sfio is available from http://www.research.att.com/sw/tools/sfio/
 
 You select this option by
 
@@ -779,9 +779,6 @@ this is a problem at least for some versions of Linux and SunOS 4.
 Configure should detect this problem and warn you about problems with
 _exit vs. exit.  If you have this problem, the fix is to go back to
 your sfio sources and correct iffe's guess about atexit.
-
-There also might be a more recent release of Sfio that fixes your
-problem.
 
 =item 2.
 
@@ -800,6 +797,13 @@ If you have already selected -Duseperlio, and if Configure does not
 detect sfio, then this will be the default suggested by Configure.
 
 =back
+
+=head2 SOCKS
+
+Perl can be configured to be 'socksified', that is, to use the SOCKS
+TCP/IP proxy protocol library.  SOCKS is used to give applications
+access to transport layer network proxies.  Perl supports only SOCKS
+Version 5.  You can find more about SOCKS from http://www.socks.nec.com/
 
 =head2 Dynamic Loading
 
@@ -2006,7 +2010,7 @@ available in TeX format.  Type
 If you have difficulty building perl, and none of the advice in this file
 helps, and careful reading of the error message and the relevant manual
 pages on your system doesn't help either, then you should send a message
-to either the comp.lang.perl.misc newsgroup or to perlbug@perl.com with
+to either the comp.lang.perl.misc newsgroup or to perlbug@perl.org with
 an accurate description of your problem.
 
 Please include the output of the ./myconfig shell script that comes with

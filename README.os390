@@ -115,7 +115,7 @@ character sets are different.  Perl builtin functions that may behave
 differently under EBCDIC are mentioned in the perlport.pod document.
 
 OpenEdition (UNIX System Services) does not (yet) support the #! means 
-of script invokation.
+of script invocation.
 See:
 
     head `whence perldoc`

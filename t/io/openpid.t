@@ -9,7 +9,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    unshift @INC, '../lib';
+    @INC = '../lib';
     if ($^O eq 'dos') {
         print "1..0 # Skip: no multitasking\n";
         exit 0;
