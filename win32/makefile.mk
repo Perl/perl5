@@ -13,7 +13,16 @@
 # Set these to wherever you want "nmake install" to put your
 # newly built perl.
 INST_DRV	*= c:
-INST_TOP	*= $(INST_DRV)\perl\5004.5x
+INST_TOP	*= $(INST_DRV)\perl
+
+# Comment this out if you DON'T want your perl installation to be versioned.
+# This means that the new installation will overwrite any files from the
+# old installation at the same INST_TOP location.  Leaving it enabled is
+# the safest route, as perl adds the extra version directory to all the
+# locations it installs files to.  If you disable it, an alternative
+# versioned installation can be obtained by setting INST_TOP above to a
+# path that includes an arbitrary version string.
+INST_VER	*= \5.00466
 
 #
 # uncomment to enable threads-capabilities
@@ -57,8 +66,6 @@ CCTYPE		*= BORLAND
 
 #
 # set the install locations of the compiler include/libraries
-# (you'll need to quote the value if it contains spaces: i.e.
-#     CCHOME    *= "f:\Program Files\vc"
 #
 #CCHOME		*= f:\msdev\vc
 CCHOME		*= C:\bc5
@@ -199,15 +206,8 @@ LIB32		= $(LINK32) -lib
 #
 # Options
 #
-.IF "$(OBJECT)" == "-DPERL_OBJECT"
-RUNTIME		= -MT
-# XXX building with -MD fails many tests, but cannot investigate
-# because building with debug crashes compiler :-( GSAR )-:
-#RUNTIME	= -MD
-.ELSE
-RUNTIME		= -MD
-.ENDIF
 
+RUNTIME		= -MD
 INCLUDES	= -I.\include -I. -I..
 #PCHFLAGS	= -Fpc:\temp\vcmoduls.pch -YX 
 DEFINES		= -DWIN32 -D_CONSOLE $(BUILDOPT) $(CRYPT_FLAG)
@@ -230,9 +230,9 @@ OPTIMIZE	= -Od $(RUNTIME)d -Zi -D_DEBUG -DDEBUGGING
 LINK_DBG	= -debug -pdb:none
 .ELSE
 .IF "$(CCTYPE)" == "MSVC20"
-OPTIMIZE	= -O2 $(RUNTIME) -DNDEBUG
+OPTIMIZE	= -Od $(RUNTIME) -DNDEBUG
 .ELSE
-OPTIMIZE	= -O2 $(RUNTIME) -DNDEBUG
+OPTIMIZE	= -Od $(RUNTIME) -DNDEBUG
 .ENDIF
 LINK_DBG	= -release
 .ENDIF
@@ -291,8 +291,9 @@ $(o).dll:
 .ENDIF
 
 #
-INST_BIN	= $(INST_TOP)\bin
-INST_LIB	= $(INST_TOP)\lib
+INST_BIN	= $(INST_TOP)$(INST_VER)\bin\$(ARCHNAME)
+INST_SCRIPT	= $(INST_TOP)$(INST_VER)\bin
+INST_LIB	= $(INST_TOP)$(INST_VER)\lib
 INST_POD	= $(INST_LIB)\pod
 INST_HTML	= $(INST_POD)\html
 LIBDIR		= ..\lib
@@ -467,7 +468,7 @@ WIN32_OBJ	= $(WIN32_SRC:db:+$(o))
 MINICORE_OBJ	= $(MINIDIR)\{$(CORE_OBJ:f) miniperlmain$(o)}
 MINIWIN32_OBJ	= $(MINIDIR)\{$(WIN32_OBJ:f)}
 MINI_OBJ	= $(MINICORE_OBJ) $(MINIWIN32_OBJ)
-PERL95_OBJ	= $(PERL95_SRC:db:+$(o)) DynaLoadmt$(o)
+PERL95_OBJ	= $(PERL95_SRC:db:+$(o))
 DLL_OBJ		= $(DLL_SRC:db:+$(o))
 X2P_OBJ		= $(X2P_SRC:db:+$(o))
 
@@ -482,6 +483,7 @@ PERLEXE_OBJ	= perlmain$(o)
 PERLDLL_OBJ	+= $(WIN32_OBJ) $(DLL_OBJ)
 .ELSE
 PERLEXE_OBJ	+= $(WIN32_OBJ) $(DLL_OBJ)
+PERL95_OBJ	+= DynaLoadmt$(o)
 .ENDIF
 
 DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B
@@ -526,12 +528,12 @@ EXTENSION_DLL	=		\
 		$(SDBM_FILE_DLL)\
 		$(IO_DLL)	\
 		$(POSIX_DLL)	\
-		$(ATTRS_DLL)
+		$(ATTRS_DLL)	\
+		$(B_DLL)
 
 .IF "$(OBJECT)" == ""
 EXTENSION_DLL	+=		\
-		$(THREAD_DLL)	\
-		$(B_DLL)
+		$(THREAD_DLL)
 .ENDIF
 
 POD2HTML	= $(PODDIR)\pod2html
@@ -542,6 +544,7 @@ POD2TEXT	= $(PODDIR)\pod2text
 CFG_VARS	=					\
 		"INST_DRV=$(INST_DRV)"			\
 		"INST_TOP=$(INST_TOP)"			\
+		"INST_VER=$(INST_VER)"			\
 		"archname=$(ARCHNAME)"			\
 		"cc=$(CC)"				\
 		"ccflags=$(OPTIMIZE) $(DEFINES) $(OBJECT)"	\
@@ -604,7 +607,7 @@ regen_config_h:
 	cd .. && perl configpm
 	-del /f $(CFGH_TMPL)
 	-mkdir ..\lib\CORE
-	-perl -I..\lib config_h.PL
+	-perl -I..\lib config_h.PL "INST_VER=$(INST_VER)"
 	rename config.h $(CFGH_TMPL)
 
 $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
@@ -613,7 +616,8 @@ $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
 	$(XCOPY) *.h $(COREDIR)\*.*
 	$(RCOPY) include $(COREDIR)\*.*
-	$(MINIPERL) -I..\lib config_h.PL || $(MAKE) $(MAKEMACROS) $(CONFIGPM)
+	$(MINIPERL) -I..\lib config_h.PL "INST_VER=$(INST_VER)" \
+	    || $(MAKE) $(MAKEMACROS) $(CONFIGPM)
 
 $(MINIPERL) : $(MINIDIR) $(MINI_OBJ)
 .IF "$(CCTYPE)" == "BORLAND"
@@ -892,8 +896,8 @@ installbare :
 
 installutils : utils
 	$(XCOPY) $(GLOBEXE) $(INST_BIN)\*.*
-	$(XCOPY) bin\*.bat $(INST_BIN)\*.*
-	$(XCOPY) ..\pod\*.bat $(INST_BIN)\*.*
+	$(XCOPY) bin\*.bat $(INST_SCRIPT)\*.*
+	$(XCOPY) ..\pod\*.bat $(INST_SCRIPT)\*.*
 
 installhtml : doc
 	$(RCOPY) html\*.* $(INST_HTML)\*.*
@@ -936,6 +940,7 @@ clean :
 	-@erase $(MINIPERL)
 	-@erase perlglob$(o)
 	-@erase perlmain$(o)
+	-@erase PerlCAPI.cpp
 	-@erase config.w32
 	-@erase /f config.h
 	-@erase $(GLOBEXE)

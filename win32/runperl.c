@@ -23,6 +23,12 @@ CPerlObj *pPerl;
 #include <ipproc.h>
 #include <ipstdio.h>
 
+#define CALLFUNC0RET(x)\
+    int ret = x;\
+    if(ret < 0)\
+	err = errno;\
+    return ret;
+
 extern int g_closedir(DIR *dirp);
 extern DIR *g_opendir(char *filename);
 extern struct direct *g_readdir(DIR *dirp);
@@ -35,15 +41,15 @@ public:
     CPerlDir() {};
     virtual int Makedir(const char *dirname, int mode, int &err)
     {
-	return win32_mkdir(dirname, mode);
+	CALLFUNC0RET(win32_mkdir(dirname, mode));
     };
     virtual int Chdir(const char *dirname, int &err)
     {
-	return win32_chdir(dirname);
+	CALLFUNC0RET(win32_chdir(dirname));
     };
     virtual int Rmdir(const char *dirname, int &err)
     {
-	return win32_rmdir(dirname);
+	CALLFUNC0RET(win32_rmdir(dirname));
     };
     virtual int Close(DIR *dirp, int &err)
     {
@@ -72,7 +78,7 @@ public:
 };
 
 
-extern char * g_win32_get_stdlib(char *pl);
+extern char * g_win32_get_privlib(char *pl);
 extern char * g_win32_get_sitelib(char *pl);
 class CPerlEnv : public IPerlEnv
 {
@@ -88,7 +94,7 @@ public:
     };
     virtual char* LibPath(char *pl)
     {
-	return g_win32_get_stdlib(pl);
+	return g_win32_get_privlib(pl);
     };
     virtual char* SiteLibPath(char *pl)
     {

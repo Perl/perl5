@@ -179,7 +179,6 @@ EXT int optype_size[]
 #endif /* DOINIT */
 ;
 
-EXT SV * specialsv_list[4];
 #define INIT_SPECIALSV_LIST STMT_START { \
 	specialsv_list[0] = Nullsv; \
 	specialsv_list[1] = &sv_undef; \

@@ -386,7 +386,7 @@ perl_destruct(register PerlInterpreter *sv_interp)
 
     /* call exit list functions */
     while (exitlistlen-- > 0)
-	exitlist[exitlistlen].fn(THIS_ exitlist[exitlistlen].ptr);
+	exitlist[exitlistlen].fn(PERL_OBJECT_THIS_ exitlist[exitlistlen].ptr);
 
     Safefree(exitlist);
 
@@ -944,7 +944,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     boot_core_UNIVERSAL();
 
     if (xsinit)
-	(*xsinit)(THIS);	/* in case linked C routines want magical variables */
+	(*xsinit)(PERL_OBJECT_THIS);	/* in case linked C routines want magical variables */
 #if defined(VMS) || defined(WIN32) || defined(DJGPP)
     init_os_extras();
 #endif

@@ -2848,3 +2848,10 @@ get_opargs(void)
 {
  return opargs;
 }
+
+
+SV **
+get_specialsv_list(void)
+{
+ return specialsv_list;
+}

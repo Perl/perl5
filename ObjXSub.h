@@ -315,8 +315,6 @@
 #define maxsysfd		pPerl->Perl_maxsysfd
 #undef  mess_sv
 #define mess_sv			pPerl->Perl_mess_sv
-#undef  mh
-#define mh			pPerl->Perl_mh
 #undef  min_intro_pending
 #define min_intro_pending	pPerl->Perl_min_intro_pending
 #undef  minus_F
@@ -473,8 +471,8 @@
 #define regnaughty		pPerl->Perl_regnaughty
 #undef  regnpar
 #define regnpar			pPerl->Perl_regnpar
-#undef  regparse
-#define regparse		pPerl->Perl_regparse
+#undef  regcomp_parse
+#define regcomp_parse		pPerl->Perl_regcomp_parse
 #undef  regprecomp
 #define regprecomp		pPerl->Perl_regprecomp
 #undef  regprev
@@ -511,8 +509,8 @@
 #define rsfp_filters		pPerl->Perl_rsfp_filters
 #undef  runops
 #define runops			pPerl->Perl_runops
-#undef  rx
-#define rx			pPerl->Perl_rx
+#undef  regcomp_rx
+#define regcomp_rx		pPerl->Perl_regcomp_rx
 #undef  savestack
 #define savestack		pPerl->Perl_savestack
 #undef  savestack_ix
@@ -553,6 +551,8 @@
 #define sortcxix		pPerl->Perl_sortcxix
 #undef  sortstash
 #define sortstash		pPerl->Perl_sortstash
+#undef  specialsv_list
+#define specialsv_list  pPerl->Perl_specialsv_list
 #undef  splitstr
 #define splitstr		pPerl->Perl_splitstr
 #undef  stack_base
@@ -951,7 +951,9 @@
 #undef  get_no_modify
 #define get_no_modify       pPerl->Perl_get_no_modify
 #undef  get_opargs
-#define get_opargs	    pPerl->Perl_get_opargs
+#define get_opargs	        pPerl->Perl_get_opargs
+#undef  get_specialsv_list
+#define get_specialsv_list  pPerl->Perl_get_specialsv_list
 #undef  gp_free
 #define gp_free             pPerl->Perl_gp_free
 #undef  gp_ref
@@ -1999,10 +2001,10 @@
 #define socketpair PerlSock_socketpair
 #endif  /* NO_XSLOCKS */
 
-#undef  THIS
-#define THIS pPerl
-#undef  THIS_
-#define THIS_ pPerl,
+#undef  PERL_OBJECT_THIS
+#define PERL_OBJECT_THIS pPerl
+#undef  PERL_OBJECT_THIS_
+#define PERL_OBJECT_THIS_ pPerl,
 
 #undef  SAVEDESTRUCTOR
 #define SAVEDESTRUCTOR(f,p) \

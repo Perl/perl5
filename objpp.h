@@ -385,6 +385,8 @@
 #define get_no_modify     CPerlObj::Perl_get_no_modify
 #undef  get_opargs
 #define get_opargs        CPerlObj::Perl_get_opargs
+#undef  get_specialsv_list
+#define get_specialsv_list CPerlObj::Perl_get_specialsv_list
 #undef  getlogin
 #define getlogin          CPerlObj::getlogin
 #undef  gp_free

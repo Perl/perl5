@@ -1773,7 +1773,7 @@ PP(pp_goto)
 		}
 		else {
 		    stack_sp--;		/* There is no cv arg. */
-		    (void)(*CvXSUB(cv))(cv _THIS);
+		    (void)(*CvXSUB(cv))(cv _PERL_OBJECT_THIS);
 		}
 		LEAVE;
 		return pop_return();

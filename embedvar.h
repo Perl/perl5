@@ -153,7 +153,6 @@
 #define maxscream		(curinterp->Imaxscream)
 #define maxsysfd		(curinterp->Imaxsysfd)
 #define mess_sv			(curinterp->Imess_sv)
-#define mh			(curinterp->Imh)
 #define minus_F			(curinterp->Iminus_F)
 #define minus_a			(curinterp->Iminus_a)
 #define minus_c			(curinterp->Iminus_c)
@@ -187,6 +186,8 @@
 #define regbol			(curinterp->Iregbol)
 #define regcc			(curinterp->Iregcc)
 #define regcode			(curinterp->Iregcode)
+#define regcomp_parse		(curinterp->Iregcomp_parse)
+#define regcomp_rx		(curinterp->Iregcomp_rx)
 #define regdata			(curinterp->Iregdata)
 #define regdummy		(curinterp->Iregdummy)
 #define regendp			(curinterp->Iregendp)
@@ -198,7 +199,6 @@
 #define regnarrate		(curinterp->Iregnarrate)
 #define regnaughty		(curinterp->Iregnaughty)
 #define regnpar			(curinterp->Iregnpar)
-#define regparse		(curinterp->Iregparse)
 #define regprecomp		(curinterp->Iregprecomp)
 #define regprev			(curinterp->Iregprev)
 #define regprogram		(curinterp->Iregprogram)
@@ -209,7 +209,6 @@
 #define regtill			(curinterp->Iregtill)
 #define regxend			(curinterp->Iregxend)
 #define rightgv			(curinterp->Irightgv)
-#define rx			(curinterp->Irx)
 #define sawampersand		(curinterp->Isawampersand)
 #define sawstudy		(curinterp->Isawstudy)
 #define sawvec			(curinterp->Isawvec)
@@ -221,6 +220,7 @@
 #define sortcop			(curinterp->Isortcop)
 #define sortcxix		(curinterp->Isortcxix)
 #define sortstash		(curinterp->Isortstash)
+#define specialsv_list	(curinterp->Ispecialsv_list)
 #define splitstr		(curinterp->Isplitstr)
 #define statcache		(curinterp->Istatcache)
 #define statgv			(curinterp->Istatgv)
@@ -317,7 +317,6 @@
 #define Imaxscream		maxscream
 #define Imaxsysfd		maxsysfd
 #define Imess_sv		mess_sv
-#define Imh			mh
 #define Iminus_F		minus_F
 #define Iminus_a		minus_a
 #define Iminus_c		minus_c
@@ -351,6 +350,8 @@
 #define Iregbol			regbol
 #define Iregcc			regcc
 #define Iregcode		regcode
+#define Iregcomp_parse		regcomp_parse
+#define Iregcomp_rx		regcomp_rx
 #define Iregdata		regdata
 #define Iregdummy		regdummy
 #define Iregendp		regendp
@@ -362,7 +363,6 @@
 #define Iregnarrate		regnarrate
 #define Iregnaughty		regnaughty
 #define Iregnpar		regnpar
-#define Iregparse		regparse
 #define Iregprecomp		regprecomp
 #define Iregprev		regprev
 #define Iregprogram		regprogram
@@ -373,7 +373,6 @@
 #define Iregtill		regtill
 #define Iregxend		regxend
 #define Irightgv		rightgv
-#define Irx			rx
 #define Isawampersand		sawampersand
 #define Isawstudy		sawstudy
 #define Isawvec			sawvec
@@ -385,6 +384,7 @@
 #define Isortcop		sortcop
 #define Isortcxix		sortcxix
 #define Isortstash		sortstash
+#define Ispecialsv_list	specialsv_list
 #define Isplitstr		splitstr
 #define Istatcache		statcache
 #define Istatgv			statgv
@@ -543,7 +543,6 @@
 #define maxscream		Perl_maxscream
 #define maxsysfd		Perl_maxsysfd
 #define mess_sv			Perl_mess_sv
-#define mh			Perl_mh
 #define minus_F			Perl_minus_F
 #define minus_a			Perl_minus_a
 #define minus_c			Perl_minus_c
@@ -577,6 +576,8 @@
 #define regbol			Perl_regbol
 #define regcc			Perl_regcc
 #define regcode			Perl_regcode
+#define regcomp_parse		Perl_regcomp_parse
+#define regcomp_rx		Perl_regcomp_rx
 #define regdata			Perl_regdata
 #define regdummy		Perl_regdummy
 #define regendp			Perl_regendp
@@ -588,7 +589,6 @@
 #define regnarrate		Perl_regnarrate
 #define regnaughty		Perl_regnaughty
 #define regnpar			Perl_regnpar
-#define regparse		Perl_regparse
 #define regprecomp		Perl_regprecomp
 #define regprev			Perl_regprev
 #define regprogram		Perl_regprogram
@@ -599,7 +599,6 @@
 #define regtill			Perl_regtill
 #define regxend			Perl_regxend
 #define rightgv			Perl_rightgv
-#define rx			Perl_rx
 #define sawampersand		Perl_sawampersand
 #define sawstudy		Perl_sawstudy
 #define sawvec			Perl_sawvec
@@ -611,6 +610,7 @@
 #define sortcop			Perl_sortcop
 #define sortcxix		Perl_sortcxix
 #define sortstash		Perl_sortstash
+#define specialsv_list	Perl_specialsv_list
 #define splitstr		Perl_splitstr
 #define statcache		Perl_statcache
 #define statgv			Perl_statgv
@@ -785,7 +785,6 @@
 #define do_undump		(Perl_Vars.Gdo_undump)
 #define egid			(Perl_Vars.Gegid)
 #define error_count		(Perl_Vars.Gerror_count)
-#define error_no		(Perl_Vars.Gerror_no)
 #define euid			(Perl_Vars.Geuid)
 #define eval_cond		(Perl_Vars.Geval_cond)
 #define eval_mutex		(Perl_Vars.Geval_mutex)
@@ -905,7 +904,6 @@
 #define Gdo_undump		do_undump
 #define Gegid			egid
 #define Gerror_count		error_count
-#define Gerror_no		error_no
 #define Geuid			euid
 #define Geval_cond		eval_cond
 #define Geval_mutex		eval_mutex
@@ -1025,7 +1023,6 @@
 #define do_undump		Perl_do_undump
 #define egid			Perl_egid
 #define error_count		Perl_error_count
-#define error_no		Perl_error_no
 #define euid			Perl_euid
 #define eval_cond		Perl_eval_cond
 #define eval_mutex		Perl_eval_mutex

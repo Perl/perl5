@@ -77,8 +77,8 @@ int _CRT_glob = 0;
 #define EXECF_SPAWN_NOWAIT 3
 
 #if defined(PERL_OBJECT)
-#undef win32_get_stdlib
-#define win32_get_stdlib g_win32_get_stdlib
+#undef win32_get_privlib
+#define win32_get_privlib g_win32_get_privlib
 #undef win32_get_sitelib
 #define win32_get_sitelib g_win32_get_sitelib
 #undef do_aspawn
@@ -110,7 +110,7 @@ static long		tokenize(char *str, char **dest, char ***destv);
 static BOOL		has_redirection(char *ptr);
 static long		filetime_to_clock(PFILETIME ft);
 static BOOL		filetime_from_time(PFILETIME ft, time_t t);
-
+static char *		get_emd_part(char *leading, char *trailing, ...);
 
 HANDLE	w32_perldll_handle = INVALID_HANDLE_VALUE;
 static DWORD	w32_platform = (DWORD)-1;
@@ -168,8 +168,8 @@ GetRegStrFromKey(HKEY hkey, const char *lpszValueName, char** ptr, DWORD* lpData
 	    }
 	    retval = RegQueryValueEx(handle, lpszValueName, 0, NULL, (PBYTE)*ptr, lpDataLen);
 	    if (retval != ERROR_SUCCESS) {
-		Safefree(ptr);
-		ptr = NULL;
+		Safefree(*ptr);
+		*ptr = NULL;
 	    }
 	}
 	RegCloseKey(handle);
@@ -188,174 +188,116 @@ GetRegStr(const char *lpszValueName, char** ptr, DWORD* lpDataLen)
     return *ptr;
 }
 
-char *
-win32_get_stdlib(char *pl)
+static char *
+get_emd_part(char *prev_path, char *trailing_path, ...)
 {
-    static char szStdLib[] = "lib";
-    int len = 0, newSize;
-    char szBuffer[MAX_PATH+1];
-    char szModuleName[MAX_PATH];
-    int result;
-    DWORD dwDataLen;
-    char *lpPath = NULL;
+    va_list ap;
+    char mod_name[MAX_PATH];
     char *ptr;
+    char *optr;
+    char *strip;
+    int oldsize, newsize;
 
-    /* $stdlib = $HKCU{"lib-$]"} || $HKLM{"lib-$]"} || $HKCU{"lib"} || $HKLM{"lib"} || "";  */
-    sprintf(szBuffer, "%s-%s", szStdLib, pl);
-    lpPath = GetRegStr(szBuffer, &lpPath, &dwDataLen);
-    if (lpPath == NULL)
-	lpPath = GetRegStr(szStdLib, &lpPath, &dwDataLen);
+    va_start(ap, trailing_path);
+    strip = va_arg(ap, char *);
 
-    /* $stdlib .= ";$EMD/../../lib" */
-    GetModuleFileName(GetModuleHandle(NULL), szModuleName, sizeof(szModuleName));
-    ptr = strrchr(szModuleName, '\\');
-    if (ptr != NULL)
-    {
+    GetModuleFileName(GetModuleHandle(NULL), mod_name, sizeof(mod_name));
+    ptr = strrchr(mod_name, '\\');
+    while (ptr && strip) {
+        /* look for directories to skip back */
+	optr = ptr;
 	*ptr = '\0';
-	ptr = strrchr(szModuleName, '\\');
-	if (ptr != NULL)
-	{
-	    *ptr = '\0';
-	    ptr = strrchr(szModuleName, '\\');
+	ptr = strrchr(mod_name, '\\');
+	if (!ptr || stricmp(ptr+1, strip) != 0) {
+	    *optr = '\\';
+	    ptr = optr;
 	}
+	strip = va_arg(ap, char *);
     }
-    if (ptr == NULL)
-    {
-	ptr = szModuleName;
+    if (!ptr) {
+	ptr = mod_name;
+	*ptr++ = '.';
 	*ptr = '\\';
     }
-    strcpy(++ptr, szStdLib);
+    va_end(ap);
+    strcpy(++ptr, trailing_path);
 
-    /* check that this path exists */
-    GetCurrentDirectory(sizeof(szBuffer), szBuffer);
-    result = SetCurrentDirectory(szModuleName);
-    SetCurrentDirectory(szBuffer);
-    if (result == 0)
-    {
-	GetModuleFileName(GetModuleHandle(NULL), szModuleName, sizeof(szModuleName));
-	ptr = strrchr(szModuleName, '\\');
-	if (ptr != NULL)
-	    strcpy(++ptr, szStdLib);
+    newsize = strlen(mod_name) + 1;
+    if (prev_path) {
+	oldsize = strlen(prev_path) + 1;
+	newsize += oldsize;			/* includes plus 1 for ';' */
+	Renew(prev_path, newsize, char);
+	prev_path[oldsize] = ';';
+	strcpy(&prev_path[oldsize], mod_name);
+    }
+    else {
+	New(1311, prev_path, newsize, char);
+	strcpy(prev_path, mod_name);
     }
 
-    newSize = strlen(szModuleName) + 1;
-    if (lpPath != NULL)
-    {
-	len = strlen(lpPath);
-	newSize += len + 1; /* plus 1 for ';' */
-	lpPath = Renew(lpPath, newSize, char);
-    }
-    else
-	New(1310, lpPath, newSize, char);
-
-    if (lpPath != NULL)
-    {
-	if (len != 0)
-	    lpPath[len++] = ';';
-	strcpy(&lpPath[len], szModuleName);
-    }
-    return lpPath;
+    return prev_path;
 }
 
 char *
-get_sitelib_part(char* lpRegStr, char* lpPathStr)
+win32_get_privlib(char *pl)
 {
-    char szBuffer[MAX_PATH+1];
-    char szModuleName[MAX_PATH];
-    DWORD dwDataLen;
-    int len = 0;
-    int result;
-    char *lpPath = NULL;
-    char *ptr;
+    char *stdlib = "lib";
+    char buffer[MAX_PATH+1];
+    char *path = Nullch;
+    DWORD datalen;
 
-    lpPath = GetRegStr(lpRegStr, &lpPath, &dwDataLen);
+    /* $stdlib = $HKCU{"lib-$]"} || $HKLM{"lib-$]"} || $HKCU{"lib"} || $HKLM{"lib"} || "";  */
+    sprintf(buffer, "%s-%s", stdlib, pl);
+    path = GetRegStr(buffer, &path, &datalen);
+    if (path == NULL)
+	path = GetRegStr(stdlib, &path, &datalen);
 
-    /* $sitelib .= ";$EMD/../../../<lpPathStr>" */
-    GetModuleFileName(GetModuleHandle(NULL), szModuleName, sizeof(szModuleName));
-    ptr = strrchr(szModuleName, '\\');
-    if (ptr != NULL)
-    {
-	*ptr = '\0';
-	ptr = strrchr(szModuleName, '\\');
-	if (ptr != NULL)
-	{
-	    *ptr = '\0';
-	    ptr = strrchr(szModuleName, '\\');
-	    if (ptr != NULL)
-	    {
-		*ptr = '\0';
-		ptr = strrchr(szModuleName, '\\');
-	    }
-	}
-    }
-    if (ptr == NULL)
-    {
-	ptr = szModuleName;
-	*ptr = '\\';
-    }
-    strcpy(++ptr, lpPathStr);
-
-    /* check that this path exists */
-    GetCurrentDirectory(sizeof(szBuffer), szBuffer);
-    result = SetCurrentDirectory(szModuleName);
-    SetCurrentDirectory(szBuffer);
-
-    if (result)
-    {
-	int newSize = strlen(szModuleName) + 1;
-	if (lpPath != NULL)
-	{
-	    len = strlen(lpPath);
-	    newSize += len + 1; /* plus 1 for ';' */
-	    lpPath = Renew(lpPath, newSize, char);
-	}
-	else
-	    New(1311, lpPath, newSize, char);
-
-	if (lpPath != NULL)
-	{
-	    if (len != 0)
-		lpPath[len++] = ';';
-	    strcpy(&lpPath[len], szModuleName);
-	}
-    }
-    return lpPath;
+    /* $stdlib .= ";$EMD/../../lib" */
+    return get_emd_part(path, stdlib, ARCHNAME, "bin", Nullch);
 }
 
 char *
 win32_get_sitelib(char *pl)
 {
-    static char szSiteLib[] = "sitelib";
-    char szRegStr[40];
-    char szPathStr[MAX_PATH];
-    char *lpPath1;
-    char *lpPath2;
-	int len, newSize;
+    char *sitelib = "sitelib";
+    char regstr[40];
+    char pathstr[MAX_PATH];
+    DWORD datalen;
+    char *path1 = Nullch;
+    char *path2 = Nullch;
+    int len, newsize;
 
     /* $HKCU{"sitelib-$]"} || $HKLM{"sitelib-$]"} . ---; */
-    sprintf(szRegStr, "%s-%s", szSiteLib, pl);
-    sprintf(szPathStr, "site\\%s\\lib", pl);
-    lpPath1 = get_sitelib_part(szRegStr, szPathStr);
+    sprintf(regstr, "%s-%s", sitelib, pl);
+    path1 = GetRegStr(regstr, &path1, &datalen);
+
+    /* $sitelib .=
+     * ";$EMD/" . ((-d $EMD/../../../$]) ? "../../.." : "../.."). "/site/$]/lib";  */
+    sprintf(pathstr, "site\\%s\\lib", pl);
+    path1 = get_emd_part(path1, pathstr, ARCHNAME, "bin", pl, Nullch);
 
     /* $HKCU{'sitelib'} || $HKLM{'sitelib'} . ---; */
-    lpPath2 = get_sitelib_part(szSiteLib, "site\\lib");
-    if (lpPath1 == NULL)
-	return lpPath2;
+    path2 = GetRegStr(sitelib, &path2, &datalen);
 
-    if (lpPath2 == NULL)
-	return lpPath1;
+    /* $sitelib .=
+     * ";$EMD/" . ((-d $EMD/../../../$]) ? "../../.." : "../.."). "/site/lib";  */
+    path2 = get_emd_part(path2, "site\\lib", ARCHNAME, "bin", pl, Nullch);
 
-    len = strlen(lpPath1);
-    newSize = len + strlen(lpPath2) + 2; /* plus one for ';' */
+    if (!path1)
+	return path2;
 
-    lpPath1 = Renew(lpPath1, newSize, char);
-    if (lpPath1 != NULL)
-    {
-	lpPath1[len++] = ';';
-	strcpy(&lpPath1[len], lpPath2);
-    }
-    Safefree(lpPath2);
-    return lpPath1;
+    if (!path2)
+	return path1;
+
+    len = strlen(path1);
+    newsize = len + strlen(path2) + 2; /* plus one for ';' */
+
+    Renew(path1, newsize, char);
+    path1[len++] = ';';
+    strcpy(&path1[len], path2);
+
+    Safefree(path2);
+    return path1;
 }
 
 

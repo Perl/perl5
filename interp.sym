@@ -87,7 +87,6 @@ mainstack
 maxscream
 maxsysfd
 mess_sv
-mh
 minus_F
 minus_a
 minus_c
@@ -136,7 +135,7 @@ reglastparen
 regnarrate
 regnaughty
 regnpar
-regparse
+regcomp_parse
 regprecomp
 regprev
 regprogram
@@ -149,7 +148,7 @@ regxend
 restartop
 rightgv
 rs
-rx
+regcomp_rx
 sawampersand
 sawstudy
 sawvec

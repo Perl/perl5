@@ -211,7 +211,7 @@
 #define get_op_descs		Perl_get_op_descs
 #define get_op_names		Perl_get_op_names
 #define get_opargs		Perl_get_opargs
-#define get_specialsv_list	Perl_get_specialsv_list
+#define get_specialsv_list  Perl_get_specialsv_list
 #define gp_free			Perl_gp_free
 #define gp_ref			Perl_gp_ref
 #define gt_amg			Perl_gt_amg

@@ -112,7 +112,6 @@ Perl_dump_packsubs
 Perl_dump_pm
 Perl_dump_sub
 Perl_expectterm
-Perl_error_no
 Perl_extralen
 Perl_fetch_gv
 Perl_fetch_io
@@ -174,7 +173,7 @@ Perl_regmystartp
 Perl_regnarrate
 Perl_regnaughty
 Perl_regnpar
-Perl_regparse
+Perl_regcomp_parse
 Perl_regprecomp
 Perl_regprev
 Perl_regprogram
@@ -185,7 +184,7 @@ Perl_regsize
 Perl_regstartp
 Perl_regtill
 Perl_regxend
-Perl_rx
+Perl_regcomp_rx
 Perl_same_dirent
 Perl_saw_return
 Perl_scan_const

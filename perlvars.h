@@ -25,11 +25,6 @@ PERLVARI(Gthreadsv_names,	char *,	THREADSV_NAMES)
 PERLVAR(Gcurthr,	struct perl_thread *)	/* Currently executing (fake) thread */
 #endif
 #endif /* USE_THREADS */
-#ifdef PERL_OBJECT
-#ifdef WIN32
-PERLVAR(Gerror_no,    int)	/* errno for each interpreter */
-#endif
-#endif
 
 PERLVAR(Guid,	int)		/* current real user id */
 PERLVAR(Geuid,	int)		/* current effective user id */
