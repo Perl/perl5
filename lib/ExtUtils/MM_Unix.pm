@@ -568,7 +568,8 @@ sub constants {
 	      INSTALLSITEARCH INSTALLBIN INSTALLSCRIPT PERL_LIB
 	      PERL_ARCHLIB SITELIBEXP SITEARCHEXP LIBPERL_A MYEXTLIB
 	      FIRST_MAKEFILE MAKE_APERL_FILE PERLMAINCC PERL_SRC
-	      PERL_INC PERL FULLPERL FULL_AR
+	      PERL_INC PERL FULLPERL PERLRUN PERLRUNINST TEST_LIBS 
+              FULL_AR PERL_CORE
 
 	      / ) {
 	next unless defined $self->{$tmp};
@@ -841,19 +842,19 @@ distclean :: realclean distcheck
 
     push @m, q{
 distcheck :
-	$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) -MExtUtils::Manifest=fullcheck \\
+	$(PERLRUN) -MExtUtils::Manifest=fullcheck \\
 		-e fullcheck
 };
 
     push @m, q{
 skipcheck :
-	$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) -MExtUtils::Manifest=skipcheck \\
+	$(PERLRUN) -MExtUtils::Manifest=skipcheck \\
 		-e skipcheck
 };
 
     push @m, q{
 manifest :
-	$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) -MExtUtils::Manifest=mkmanifest \\
+	$(PERLRUN) -MExtUtils::Manifest=mkmanifest \\
 		-e mkmanifest
 };
 
@@ -875,7 +876,7 @@ sub dist_ci {
     my @m;
     push @m, q{
 ci :
-	$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) -MExtUtils::Manifest=maniread \\
+	$(PERLRUN) -MExtUtils::Manifest=maniread \\
 		-e "@all = keys %{ maniread() };" \\
 		-e 'print("Executing $(CI) @all\n"); system("$(CI) @all");' \\
 		-e 'print("Executing $(RCS_LABEL) ...\n"); system("$(RCS_LABEL) @all");'
@@ -942,7 +943,7 @@ sub dist_dir {
     push @m, q{
 distdir :
 	$(RM_RF) $(DISTVNAME)
-	$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) -MExtUtils::Manifest=manicopy,maniread \\
+	$(PERLRUN) -MExtUtils::Manifest=manicopy,maniread \\
 		-e "manicopy(maniread(),'$(DISTVNAME)', '$(DIST_CP)');"
 };
     join "", @m;
@@ -961,7 +962,7 @@ sub dist_test {
     my @m;
     push @m, q{
 disttest : distdir
-	cd $(DISTVNAME) && $(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) Makefile.PL
+	cd $(DISTVNAME) && $(PERLRUN) Makefile.PL
 	cd $(DISTVNAME) && $(MAKE)
 	cd $(DISTVNAME) && $(MAKE) test
 };
@@ -997,7 +998,7 @@ static :: $self->{BASEEXT}.exp
 
     push(@m,"
 $self->{BASEEXT}.exp: Makefile.PL
-",'	$(PERL) "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" -e \'use ExtUtils::Mksymlists; \\
+",'	$(PERLRUN) -e \'use ExtUtils::Mksymlists; \\
 	Mksymlists("NAME" => "',$self->{NAME},'", "DL_FUNCS" => ',
 	neatvalue($funcs), ', "FUNCLIST" => ', neatvalue($funclist),
 	', "DL_VARS" => ', neatvalue($vars), ');\'
@@ -1045,7 +1046,7 @@ BOOTSTRAP = '."$self->{BASEEXT}.bs".'
 # The DynaLoader only reads a non-empty file.
 $(BOOTSTRAP): '."$self->{MAKEFILE} $self->{BOOTDEP}".' $(INST_ARCHAUTODIR)/.exists
 	'.$self->{NOECHO}.'echo "Running Mkbootstrap for $(NAME) ($(BSLOADLIBS))"
-	'.$self->{NOECHO}.'$(PERL) "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" \
+	'.$self->{NOECHO}.'$(PERLRUN) \
 		-MExtUtils::Mkbootstrap \
 		-e "Mkbootstrap(\'$(BASEEXT)\',\'$(BSLOADLIBS)\');"
 	'.$self->{NOECHO}.'$(TOUCH) $(BOOTSTRAP)
@@ -1400,7 +1401,7 @@ q[-e 'next if -e $$m{$$_} && -M $$m{$$_} < -M $$_ && -M $$m{$$_} < -M "],
  $self->{MAKEFILE}, q[";' \\
 -e 'print "Htmlifying $$m{$$_}\n";' \\
 -e '$$dir = dirname($$m{$$_}); mkpath($$dir) unless -d $$dir;' \\
--e 'system(qq[$$^X ].q["-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" $(POD2HTML_EXE) ].qq[$$_>$$m{$$_}])==0 or warn "Couldn\\047t install $$m{$$_}\n";' \\
+-e 'system(q[$(PERLRUN) $(POD2HTML_EXE) ].qq[$$_>$$m{$$_}])==0 or warn "Couldn\\047t install $$m{$$_}\n";' \\
 -e 'chmod(oct($(PERM_RW))), $$m{$$_} or warn "chmod $(PERM_RW) $$m{$$_}: $$!\n";}'
 ];
     push @m, "\nhtmlifypods : pure_all ";
@@ -2043,6 +2044,25 @@ usually solves this kind of problem.
     # Define 'FULLPERL' to be a non-miniperl (used in test: target)
     ($self->{FULLPERL} = $self->{PERL}) =~ s/miniperl/perl/i
 	unless ($self->{FULLPERL});
+
+    # Are we building the core?
+    $self->{PERL_CORE} = 0 unless exists $self->{PERL_CORE};
+
+    # How do we run perl?
+    $self->{PERLRUN}      = $self->{PERL};
+
+    # How do we run perl when installing libraries?
+    $self->{PERLRUNINST} .= $self->{PERL}. ' -I$(INST_ARCHLIB) -I$(INST_LIB)';
+
+    # What extra library dirs do we need when running the tests?
+    $self->{TEST_LIBS}   .= ' -I$(INST_ARCHLIB) -I$(INST_LIB)';
+
+    # When building the core, we need to add some helper libs since
+    # perl's @INC won't work (we're not installed yet).
+    foreach my $targ (qw(PERLRUN PERLRUNINST TEST_LIBS)) {
+        $self->{$targ} .= ' -I$(PERL_ARCHLIB) -I$(PERL_LIB)'
+          if $self->{PERL_CORE};
+    }
 }
 
 =item init_others
@@ -2238,9 +2258,9 @@ sub installbin {
 EXE_FILES = @{$self->{EXE_FILES}}
 
 } . ($Is_Win32
-  ? q{FIXIN = $(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) \
+  ? q{FIXIN = $(PERLRUN) \
     -e "system qq[pl2bat.bat ].shift"
-} : q{FIXIN = $(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) -MExtUtils::MakeMaker \
+} : q{FIXIN = $(PERLRUN) -MExtUtils::MakeMaker \
     -e "MY->fixin(shift)"
 }).qq{
 pure_all :: @to
@@ -2365,7 +2385,7 @@ $(MAP_TARGET) :: static $(MAKE_APERL_FILE)
 
 $(MAKE_APERL_FILE) : $(FIRST_MAKEFILE)
 	}.$self->{NOECHO}.q{echo Writing \"$(MAKE_APERL_FILE)\" for this $(MAP_TARGET)
-	}.$self->{NOECHO}.q{$(PERL) -I$(INST_ARCHLIB) -I$(INST_LIB) -I$(PERL_ARCHLIB) -I$(PERL_LIB) \
+	}.$self->{NOECHO}.q{$(PERLRUNINST) \
 		Makefile.PL DIR=}, $dir, q{ \
 		MAKEFILE=$(MAKE_APERL_FILE) LINKTYPE=static \
 		MAKEAPERL=1 NORECURS=1 CCCDLFLAGS=};
@@ -2601,7 +2621,7 @@ $(OBJECT) : $(FIRST_MAKEFILE)
 	-}.$self->{NOECHO}.q{$(RM_F) }."$self->{MAKEFILE}.old".q{
 	-}.$self->{NOECHO}.q{$(MV) }."$self->{MAKEFILE} $self->{MAKEFILE}.old".q{
 	-$(MAKE) -f }.$self->{MAKEFILE}.q{.old clean $(DEV_NULL) || $(NOOP)
-	$(PERL) "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" Makefile.PL }.join(" ",map(qq["$_"],@ARGV)).q{
+	$(PERLRUN) Makefile.PL }.join(" ",map(qq["$_"],@ARGV)).q{
 	}.$self->{NOECHO}.q{echo "==> Your Makefile has been rebuilt. <=="
 	}.$self->{NOECHO}.q{echo "==> Please rerun the make command.  <=="
 	false
@@ -2654,7 +2674,7 @@ qq[POD2MAN = \$(PERL) -we '%m=\@ARGV;for (keys %m){' \\\n],
 q[-e 'next if -e $$m{$$_} && -M $$m{$$_} < -M $$_ && -M $$m{$$_} < -M "],
  $self->{MAKEFILE}, q[";' \\
 -e 'print "Manifying $$m{$$_}\n";' \\
--e 'system(qq[$$^X ].q["-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" $(POD2MAN_EXE) ].qq[$$_>$$m{$$_}])==0 or warn "Couldn\\047t install $$m{$$_}\n";' \\
+-e 'system(q[$(PERLRUN) $(POD2MAN_EXE) ].qq[$$_>$$m{$$_}])==0 or warn "Couldn\\047t install $$m{$$_}\n";' \\
 -e 'chmod(oct($(PERM_RW))), $$m{$$_} or warn "chmod $(PERM_RW) $$m{$$_}: $$!\n";}'
 ];
     push @m, "\nmanifypods : pure_all ";
@@ -3061,8 +3081,7 @@ sub pm_to_blib {
     my($autodir) = $self->catdir('$(INST_LIB)','auto');
     return q{
 pm_to_blib: $(TO_INST_PM)
-	}.$self->{NOECHO}.q{$(PERL) "-I$(INST_ARCHLIB)" "-I$(INST_LIB)" \
-	"-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" -MExtUtils::Install \
+	}.$self->{NOECHO}.q{$(PERLRUNINST) -MExtUtils::Install \
         -e "pm_to_blib({qw{$(PM_TO_BLIB)}},'}.$autodir.q{','$(PM_FILTER)')"
 	}.$self->{NOECHO}.q{$(TOUCH) $@
 };
@@ -3142,7 +3161,7 @@ all :: $target
 	$self->{NOECHO}\$(NOOP)
 
 $target :: $plfile
-	\$(PERL) -I\$(INST_ARCHLIB) -I\$(INST_LIB) -I\$(PERL_ARCHLIB) -I\$(PERL_LIB) $plfile $target
+	\$(PERLRUNINST) $plfile $target
 ";
 	}
     }
@@ -3462,7 +3481,7 @@ Helper method to write the test targets
 sub test_via_harness {
     my($self, $perl, $tests) = @_;
     $perl = "PERL_DL_NONLAZY=1 $perl" unless $Is_Win32;
-    "\t$perl".q! -I$(INST_ARCHLIB) -I$(INST_LIB) -I$(PERL_ARCHLIB) -I$(PERL_LIB) -e 'use Test::Harness qw(&runtests $$verbose); $$verbose=$(TEST_VERBOSE); runtests @ARGV;' !."$tests\n";
+    "\t$perl".q! $(TEST_LIBS) -e 'use Test::Harness qw(&runtests $$verbose); $$verbose=$(TEST_VERBOSE); runtests @ARGV;' !."$tests\n";
 }
 
 =item test_via_script (o)
@@ -3474,7 +3493,7 @@ Other helper method for test.
 sub test_via_script {
     my($self, $perl, $script) = @_;
     $perl = "PERL_DL_NONLAZY=1 $perl" unless $Is_Win32;
-    qq{\t$perl}.q{ -I$(INST_ARCHLIB) -I$(INST_LIB) -I$(PERL_ARCHLIB) -I$(PERL_LIB) }.qq{$script
+    qq{\t$perl}.q{ $(TEST_LIBS) }.qq{$script
 };
 }
 
@@ -3493,7 +3512,7 @@ sub tool_autosplit {
     $asl = "\$AutoSplit::Maxlen=$attribs{MAXLEN};" if $attribs{MAXLEN};
     q{
 # Usage: $(AUTOSPLITFILE) FileToSplit AutoDirToSplitInto
-AUTOSPLITFILE = $(PERL) "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" -e 'use AutoSplit;}.$asl.q{autosplit($$ARGV[0], $$ARGV[1], 0, 1, 1) ;'
+AUTOSPLITFILE = $(PERLRUN) -e 'use AutoSplit;}.$asl.q{autosplit($$ARGV[0], $$ARGV[1], 0, 1, 1) ;'
 };
 }
 
@@ -3520,13 +3539,13 @@ SHELL = $bin_sh
     push @m, q{
 # The following is a portable way to say mkdir -p
 # To see which directories are created, change the if 0 to if 1
-MKPATH = $(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) -MExtUtils::Command -e mkpath
+MKPATH = $(PERLRUN) -MExtUtils::Command -e mkpath
 
 # This helps us to minimize the effect of the .exists files A yet
 # better solution would be to have a stable file in the perl
 # distribution with a timestamp of zero. But this solution doesn't
 # need any changes to the core distribution and works with older perls
-EQUALIZE_TIMESTAMP = $(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) -MExtUtils::Command -e eqtime
+EQUALIZE_TIMESTAMP = $(PERLRUN) -MExtUtils::Command -e eqtime
 };
 
 
@@ -3759,7 +3778,7 @@ help:
 
     push @m, q{
 Version_check:
-	}.$self->{NOECHO}.q{$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) \
+	}.$self->{NOECHO}.q{$(PERLRUN) \
 		-MExtUtils::MakeMaker=Version_check \
 		-e "Version_check('$(MM_VERSION)')"
 };
@@ -3793,7 +3812,7 @@ sub xs_c {
     return '' unless $self->needs_linking();
     '
 .xs.c:
-	$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) $(XSUBPP) $(XSPROTOARG) $(XSUBPPARGS) $(XSUBPP_EXTRA_ARGS) $*.xs > $*.xsc && $(MV) $*.xsc $*.c
+	$(PERLRUN) $(XSUBPP) $(XSPROTOARG) $(XSUBPPARGS) $(XSUBPP_EXTRA_ARGS) $*.xs > $*.xsc && $(MV) $*.xsc $*.c
 ';
 }
 
@@ -3808,7 +3827,7 @@ sub xs_cpp {
     return '' unless $self->needs_linking();
     '
 .xs.cpp:
-	$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) $(XSUBPP) $(XSPROTOARG) $(XSUBPPARGS) $*.xs > $*.xsc && $(MV) $*.xsc $*.cpp
+	$(PERLRUN) $(XSUBPP) $(XSPROTOARG) $(XSUBPPARGS) $*.xs > $*.xsc && $(MV) $*.xsc $*.cpp
 ';
 }
 
@@ -3824,7 +3843,7 @@ sub xs_o {	# many makes are too dumb to use xs_c then c_o
     return '' unless $self->needs_linking();
     '
 .xs$(OBJ_EXT):
-	$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) $(XSUBPP) $(XSPROTOARG) $(XSUBPPARGS) $*.xs > $*.xsc && $(MV) $*.xsc $*.c
+	$(PERLRUN) $(XSUBPP) $(XSPROTOARG) $(XSUBPPARGS) $*.xs > $*.xsc && $(MV) $*.xsc $*.c
 	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.c
 ';
 }

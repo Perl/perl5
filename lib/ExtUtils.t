@@ -371,7 +371,7 @@ close FH or die "close $makefilePL: $!\n";
 chdir $dir or die $!; push @INC,  '../../lib';
 END {chdir ".." or warn $!};
 
-my @perlout = `$runperl Makefile.PL`;
+my @perlout = `$runperl Makefile.PL PERL_CORE=1`;
 if ($?) {
   print "not ok 1 # $runperl Makefile.PL failed: $?\n";
   print "# $_" foreach @perlout;
