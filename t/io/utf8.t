@@ -12,7 +12,7 @@ BEGIN {
 no utf8; # needed for use utf8 not griping about the raw octets
 
 $| = 1;
-print "1..33\n";
+print "1..49\n";
 
 open(F,"+>:utf8",'a');
 print F chr(0x100).'£';
@@ -293,6 +293,36 @@ print "ok 26\n";
     print $b eq chr(0xde).chr(0x100) ? "ok 33" : "not ok 33";
     print " \#21395 '.= <>' bytes vs. utf8\n";
     close F;
+}
+
+{
+    my @a = ( [ 0x007F, "bytes" ],
+	      [ 0x0080, "bytes" ],
+	      [ 0x0080, "utf8"  ],
+	      [ 0x0100, "utf8"  ] );
+    my $t = 34;
+    for my $u (@a) {
+	for my $v (@a) {
+	    # print "# @$u - @$v\n";
+	    open F, ">a";
+	    binmode(F, ":" . $u->[1]);
+	    print F chr($u->[0]);
+	    close F;
+
+	    open F, "<a";
+	    binmode(F, ":" . $u->[1]);
+
+	    my $s = chr($v->[0]);
+	    utf8::upgrade($s) if $v->[1] eq "utf8";
+
+	    $s .= <F>;
+	    print $s eq chr($v->[0]) . chr($u->[0]) ?
+		"ok $t # rcatline utf8\n" : "not ok $t # rcatline utf8\n";
+	    close F;
+	    $t++;
+	}
+    }
+    # last test here 47
 }
 
 # sysread() and syswrite() tested in lib/open.t since Fnctl is used
