@@ -1,7 +1,5 @@
 #!./perl
 
-# $RCSfile: pipe.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:31 $
-
 BEGIN {
     chdir 't' if -d 't';
     unshift @INC, '../lib';
@@ -13,7 +11,7 @@ BEGIN {
 }
 
 $| = 1;
-print "1..14\n";
+print "1..15\n";
 
 # External program 'tr' assumed.
 open(PIPE, "|-") || (exec 'tr', 'YX', 'ko');
@@ -158,3 +156,16 @@ if ($? == 37*256 && $wait == $zombie && ! $!) {
   print (((open P, "|    " ) ? "not " : ""), "ok 13\n");
   print (((open P, "     |" ) ? "not " : ""), "ok 14\n");
 }
+
+# check that status is unaffected by implicit close
+{
+    local(*NIL);
+    open NIL, '|exit 23;' or die "fork failed: $!";
+    $? = 42;
+    # NIL implicitly closed here
+}
+if ($? != 42) {
+    print "# status $?, expected 42\nnot ";
+}
+print "ok 15\n";
+$? = 0;

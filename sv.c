@@ -2979,7 +2979,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	    IoIFP(sv) != PerlIO_stdout() &&
 	    IoIFP(sv) != PerlIO_stderr())
 	{
-	  io_close((IO*)sv);
+	    io_close((IO*)sv, FALSE);
 	}
 	if (IoDIRP(sv)) {
 	    PerlDir_close(IoDIRP(sv));

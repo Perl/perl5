@@ -202,7 +202,7 @@ VIRTUAL void	Perl_init_debugger(pTHX);
 VIRTUAL void	Perl_init_stacks(pTHX);
 VIRTUAL U32	Perl_intro_my(pTHX);
 VIRTUAL char*	Perl_instr(pTHX_ const char* big, const char* little);
-VIRTUAL bool	Perl_io_close(pTHX_ IO* io);
+VIRTUAL bool	Perl_io_close(pTHX_ IO* io, bool not_implicit);
 VIRTUAL OP*	Perl_invert(pTHX_ OP* cmd);
 VIRTUAL bool	Perl_is_uni_alnum(pTHX_ U32 c);
 VIRTUAL bool	Perl_is_uni_alnumc(pTHX_ U32 c);

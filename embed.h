@@ -1531,7 +1531,7 @@
 #define init_stacks()		Perl_init_stacks(aTHX)
 #define intro_my()		Perl_intro_my(aTHX)
 #define instr(a,b)		Perl_instr(aTHX_ a,b)
-#define io_close(a)		Perl_io_close(aTHX_ a)
+#define io_close(a,b)		Perl_io_close(aTHX_ a,b)
 #define invert(a)		Perl_invert(aTHX_ a)
 #define is_uni_alnum(a)		Perl_is_uni_alnum(aTHX_ a)
 #define is_uni_alnumc(a)	Perl_is_uni_alnumc(aTHX_ a)

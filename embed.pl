@@ -1196,7 +1196,7 @@ p	|void	|init_debugger
 p	|void	|init_stacks
 p	|U32	|intro_my
 p	|char*	|instr		|const char* big|const char* little
-p	|bool	|io_close	|IO* io
+p	|bool	|io_close	|IO* io|bool not_implicit
 p	|OP*	|invert		|OP* cmd
 p	|bool	|is_uni_alnum	|U32 c
 p	|bool	|is_uni_alnumc	|U32 c
