@@ -40,8 +40,8 @@ startperl='#!perl'
 
 case "X$optimize" in
   X)
-	case "`gcc -v 2>&1|grep "gcc version"` in
-	"gcc version 3.*")
+	case `gcc -v 2>&1|grep "gcc version"` in
+	"gcc version 3."*)
 	  optimize="-O2 -falign-loops=2 -falign-jumps=2 -falign-functions=2" ;;
 	*)
 	  optimize="-O2 -malign-loops=2 -malign-jumps=2 -malign-functions=2" ;;
