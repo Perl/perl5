@@ -1414,6 +1414,26 @@ Study also how other non-UNIX ports have solved problems.
 
 =back
 
+=head1 suidperl
+
+suiperl is an optional component, which is built or installed by default.
+From perlfaq1:
+
+	On some systems, setuid and setgid scripts (scripts written
+        in the C shell, Bourne shell, or Perl, for example, with the
+        set user or group ID permissions enabled) are insecure due to
+        a race condition in the kernel. For those systems, Perl versions
+        5 and 4 attempt to work around this vulnerability with an optional
+        component, a special program named suidperl, also known as sperl.
+        This program attempts to emulate the set-user-ID and set-group-ID
+        features of the kernel.
+
+Because of the buggy history of suidperl, and the difficulty
+of properly security auditing as large and complex piece of
+software as Perl, we cannot recommend using suidperl and the feature
+should be considered deprecated.
+Instead use for example 'sudo': http://www.courtesan.com/sudo/
+
 =head1 make depend
 
 This will look for all the includes.  The output is stored in makefile.

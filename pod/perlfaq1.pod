@@ -306,6 +306,10 @@ In August 2000 in all Linux distributions a new security problem was
 found in the optional 'suidperl' (not built or installed by default)
 in all the Perl branches 5.6, 5.005, and 5.004, see
 http://www.cpan.org/src/5.0/sperl-2000-08-05/
+Perl maintenance releases 5.6.1 and 5.8.0 have this security hole closed.
+Most, if not all, Linux distribution have patches for this
+vulnerability available, see http://www.linuxsecurity.com/advisories/ ,
+but the most recommendable way is to upgrade to at least Perl 5.6.1.
 
 =head1 AUTHOR AND COPYRIGHT
 
