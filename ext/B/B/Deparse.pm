@@ -1581,6 +1581,7 @@ sub pp_ftbinary { ftst(@_, "-B") }
 
 sub SWAP_CHILDREN () { 1 }
 sub ASSIGN () { 2 } # has OP= variant
+sub LIST_CONTEXT () { 4 } # Assignment is in list context
 
 my(%left, %right);
 
@@ -1683,6 +1684,7 @@ sub binop {
 	($left, $right) = ($right, $left);
     }
     $left = $self->deparse_binop_left($op, $left, $prec);
+    $left = "($left)" if $flags & LIST_CONTEXT && $left =~ /^\$/;
     $right = $self->deparse_binop_right($op, $right, $prec);
     return $self->maybe_parens("$left $opname$eq $right", $cx, $prec);
 }
@@ -1729,7 +1731,7 @@ sub pp_sle { binop(@_, "le", 15) }
 sub pp_scmp { binop(@_, "cmp", 14) }
 
 sub pp_sassign { binop(@_, "=", 7, SWAP_CHILDREN) }
-sub pp_aassign { binop(@_, "=", 7, SWAP_CHILDREN) }
+sub pp_aassign { binop(@_, "=", 7, SWAP_CHILDREN | LIST_CONTEXT) }
 
 # `.' is special because concats-of-concats are optimized to save copying
 # by making all but the first concat stacked. The effect is as if the
