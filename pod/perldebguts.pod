@@ -183,7 +183,7 @@ C<"$break_condition\0$action">.
 
 =back
 
-=head3 Debugger customization fucntions
+=head3 Debugger customization functions
 
 Some functions are provided to simplify customization.
 
