@@ -2,14 +2,17 @@
 use strict;
 use vars qw(%Config $Config_SH_expanded);
 
-# commonly used names to put first (and hence lookup fastest)
-my %Common = map {($_,$_)}
-             qw(archname osname osvers prefix libs libpth
-                dynamic_ext static_ext dlsrc so
-                cc ccflags cppflags
-                privlibexp archlibexp installprivlib installarchlib
-                sharpbang startsh shsharp
-               );
+my $how_many_common = 22;
+
+# commonly used names to precache (and hence lookup fastest)
+my %Common;
+
+while ($how_many_common--) {
+    $_ = <DATA>;
+    chomp;
+    /^(\S+):\s*(\d+)$/ or die "Malformed line '$_'";
+    $Common{$1} = $1;
+}
 
 # names of things which may need to have slashes changed to double-colons
 my %Extensions = map {($_,$_)}
@@ -128,7 +131,6 @@ ENDOFBEG
 
 my @non_v    = ();
 my @v_fast   = ();
-my %v_fast   = ();
 my @v_others = ();
 my $in_v     = 0;
 my %Data     = ();
@@ -229,7 +231,6 @@ die if $@;
     }
     else {
         push(@v_fast, $line);
-        $v_fast{$name} = "'$name' => $quote$val$quote";
     }
   }
   close CONFIG_SH;
@@ -451,8 +452,22 @@ sub TIEHASH {
 ENDOFSET
 }
 
+foreach my $key (keys %Common) {
+    my $value = fetch_string ({}, $key);
+    # Is it safe on the LHS of => ?
+    my $qkey = $key =~ /^[A-Za-z_][A-Za-z0-9_]*$/ ? $key : "'$key'";
+    if (defined $value) {
+	# Quote things for a '' string
+	$value =~ s!\\!\\\\!g;
+	$value =~ s!'!\\'!g;
+	$value = "'$value'";
+    } else {
+	$value = "undef";
+    }
+    $Common{$key} = "$qkey => $value";
+}
 my $fast_config = join '', map { "    $_,\n" }
-    sort values (%v_fast), 'byteorder => $byteorder' ;
+    sort (values %Common, 'byteorder => $byteorder');
 
 print CONFIG sprintf <<'ENDOFTIE', $fast_config;
 
@@ -465,8 +480,7 @@ sub AUTOLOAD {
 }
 
 tie %%Config, 'Config', {
-%s
-};
+%s};
 
 1;
 ENDOFTIE
@@ -722,3 +736,106 @@ die "$0: error processing $Config_PM"
 
 
 exit 0;
+# Popularity of various entries in %Config, based on a large build and test
+# run of code in the Fotango build system:
+__DATA__
+path_sep:	8490
+d_readlink:	7101
+d_symlink:	7101
+archlibexp:	4318
+sitearchexp:	4305
+sitelibexp:	4305
+privlibexp:	4163
+ldlibpthname:	4041
+libpth:	2134
+archname:	1591
+exe_ext:	1256
+scriptdir:	1155
+version:	1116
+useithreads:	1002
+osvers:	982
+osname:	851
+inc_version_list:	783
+dont_use_nlink:	779
+intsize:	759
+usevendorprefix:	642
+dlsrc:	624
+cc:	541
+lib_ext:	520
+so:	512
+ld:	501
+ccdlflags:	500
+ldflags:	495
+obj_ext:	495
+cccdlflags:	493
+lddlflags:	493
+ar:	492
+dlext:	492
+libc:	492
+ranlib:	492
+full_ar:	491
+vendorarchexp:	491
+vendorlibexp:	491
+installman1dir:	489
+installman3dir:	489
+installsitebin:	489
+installsiteman1dir:	489
+installsiteman3dir:	489
+installvendorman1dir:	489
+installvendorman3dir:	489
+d_flexfnam:	474
+eunicefix:	360
+d_link:	347
+installsitearch:	344
+installscript:	341
+installprivlib:	337
+binexp:	336
+installarchlib:	336
+installprefixexp:	336
+installsitelib:	336
+installstyle:	336
+installvendorarch:	336
+installvendorbin:	336
+installvendorlib:	336
+man1ext:	336
+man3ext:	336
+sh:	336
+siteprefixexp:	336
+installbin:	335
+usedl:	332
+ccflags:	285
+startperl:	232
+optimize:	231
+usemymalloc:	229
+cpprun:	228
+sharpbang:	228
+perllibs:	225
+usesfio:	224
+usethreads:	220
+perlpath:	218
+extensions:	217
+usesocks:	208
+shellflags:	198
+make:	191
+d_pwage:	189
+d_pwchange:	189
+d_pwclass:	189
+d_pwcomment:	189
+d_pwexpire:	189
+d_pwgecos:	189
+d_pwpasswd:	189
+d_pwquota:	189
+gccversion:	189
+libs:	186
+useshrplib:	186
+cppflags:	185
+ptrsize:	185
+shrpenv:	185
+static_ext:	185
+use5005threads:	185
+uselargefiles:	185
+alignbytes:	184
+byteorder:	184
+ccversion:	184
+config_args:	184
+cppminus:	184

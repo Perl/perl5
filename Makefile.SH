@@ -755,7 +755,7 @@ lib/re.pm: ext/re/re.pm
 
 $(plextract):	miniperl$(EXE_EXT) $(CONFIGPM) x2p/s2p
 	@-rm -f $@
-	$(LDLIBPTH) ./miniperl -Ilib $@.PL
+	$(LDLIBPTH) ./miniperl -I`pwd`/lib $@.PL
 
 x2p/s2p: miniperl$(EXE_EXT) $(CONFIGPM) x2p/s2p.PL
 	cd x2p; $(LDLIBPTH) $(MAKE) s2p
