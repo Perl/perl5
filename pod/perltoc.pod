@@ -882,7 +882,7 @@ listing
 =item Predefined Names
 
 $ARG, $_, $a, $b, $<I<digits>>, $MATCH, $&, $PREMATCH, $`, $POSTMATCH, $',
-$LAST_PAREN_MATCH, $+, @LAST_MATCH_END, @+, $MULTILINE_MATCHING, $*,
+$LAST_PAREN_MATCH, $+, $^N, @LAST_MATCH_END, @+, $MULTILINE_MATCHING, $*,
 input_line_number HANDLE EXPR, $INPUT_LINE_NUMBER, $NR, $,
 input_record_separator HANDLE EXPR, $INPUT_RECORD_SEPARATOR, $RS, $/,
 autoflush HANDLE EXPR, $OUTPUT_AUTOFLUSH, $|, output_field_separator HANDLE
@@ -904,7 +904,7 @@ $CHILD_ERROR, $?, $OS_ERROR, $ERRNO, $!, $EXTENDED_OS_ERROR, $^E,
 $EVAL_ERROR, $@, $PROCESS_ID, $PID, $$, $REAL_USER_ID, $UID, $<,
 $EFFECTIVE_USER_ID, $EUID, $>, $REAL_GROUP_ID, $GID, $(,
 $EFFECTIVE_GROUP_ID, $EGID, $), $PROGRAM_NAME, $0, $[, $], $COMPILING, $^C,
-$DEBUGGING, $^D, $SYSTEM_FD_MAX, $^F, $^H, %^H, $INPLACE_EDIT, $^I, $^M, $^N,
+$DEBUGGING, $^D, $SYSTEM_FD_MAX, $^F, $^H, %^H, $INPLACE_EDIT, $^I, $^M,
 $OSNAME, $^O, $PERLDB, $^P, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80,
 0x100, 0x200, $LAST_REGEXP_CODE_RESULT, $^R, $EXCEPTIONS_BEING_CAUGHT, $^S,
 $BASETIME, $^T, $PERL_VERSION, $^V, $WARNING, $^W, ${^WARNING_BITS},
@@ -3468,7 +3468,7 @@ C<!!!>, C<!!>, C<!>
 
 =item The CLEANUP: Keyword
 
-=item The POST_CALL: Keyword
+=item The POSTCALL: Keyword
 
 =item The BOOT: Keyword
 
@@ -3912,14 +3912,14 @@ strLE, strLT, strNE, strnEQ, strnNE, StructCopy, SvCUR, SvCUR_set, SvEND,
 SvGETMAGIC, SvGROW, SvIOK, SvIOKp, SvIOK_notUV, SvIOK_off, SvIOK_on,
 SvIOK_only, SvIOK_only_UV, SvIOK_UV, SvIV, SvIVX, SvIVx, SvLEN, SvNIOK,
 SvNIOKp, SvNIOK_off, SvNOK, SvNOKp, SvNOK_off, SvNOK_on, SvNOK_only, SvNV,
-SvNVx, SvNVX, SvOK, SvOOK, SvPOK, SvPOKp, SvPOK_off, SvPOK_on, SvPOK_only,
+SvNVX, SvNVx, SvOK, SvOOK, SvPOK, SvPOKp, SvPOK_off, SvPOK_on, SvPOK_only,
 SvPOK_only_UTF8, SvPV, SvPVbyte, SvPVbytex, SvPVbytex_force,
 SvPVbyte_force, SvPVbyte_nolen, SvPVutf8, SvPVutf8x, SvPVutf8x_force,
 SvPVutf8_force, SvPVutf8_nolen, SvPVX, SvPVx, SvPV_force, SvPV_force_nomg,
 SvPV_nolen, SvREFCNT, SvREFCNT_dec, SvREFCNT_inc, SvROK, SvROK_off,
 SvROK_on, SvRV, SvSETMAGIC, SvSetMagicSV, SvSetMagicSV_nosteal, SvSetSV,
 SvSetSV_nosteal, SvSTASH, SvTAINT, SvTAINTED, SvTAINTED_off, SvTAINTED_on,
-SvTRUE, svtype, SvTYPE, SVt_IV, SVt_NV, SVt_PV, SVt_PVAV, SVt_PVCV,
+SvTRUE, SvTYPE, svtype, SVt_IV, SVt_NV, SVt_PV, SVt_PVAV, SVt_PVCV,
 SVt_PVHV, SVt_PVMG, SvUOK, SvUPGRADE, SvUTF8, SvUTF8_off, SvUTF8_on, SvUV,
 SvUVX, SvUVx, sv_2bool, sv_2cv, sv_2io, sv_2iv, sv_2mortal, sv_2nv,
 sv_2pvbyte, sv_2pvbyte_nolen, sv_2pvutf8, sv_2pvutf8_nolen, sv_2pv_flags,
@@ -4625,11 +4625,17 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item New or Changed Diagnostics
 
-=item Changed Internals
+=item Source Code Enhancements
 
 =over 4
 
+=item MAGIC constants
+
+=item Better commented code
+
 =item Regex pre-/post-compilation items matched up
+
+=item gcc -Wall
 
 =back
 
@@ -4662,6 +4668,8 @@ I<The Road goes ever on and on, down from the door where it began.>
 =item UNICOS/mk ext/IPC/SysV/t/sem test 8
 
 =item UTS
+
+=item VMS
 
 =item Localising a Tied Variable Leaks Memory
 
@@ -6395,7 +6403,14 @@ C<HAB>, C<HMQ>
 
 =item Priorities
 
-=item DLL name mangling
+=item DLL name mangling: pre 5.6.2
+
+=item DLL name mangling: 5.6.2 and beyond
+
+Global DLLs, specific DLLs, C<BEGINLIBPATH> and C<ENDLIBPATH>, F<.> from
+C<LIBPATH>
+
+=item DLL forwarder generation
 
 =item Threading
 
@@ -6408,6 +6423,8 @@ C<HAB>, C<HMQ>
 C<COND_WAIT>, F<os2.c>
 
 =back
+
+=item BUGS
 
 =back
 
@@ -6597,9 +6614,9 @@ DATAMODEL_NATIVE specified", sh: ar: not found
 
 =item Proc::ProcessTable on Solaris
 
-=item BSD::Resource on Solairs
+=item BSD::Resource on Solaris
 
-=item Net::SSLeay on Soalris
+=item Net::SSLeay on Solaris
 
 =back
 
@@ -8700,17 +8717,17 @@ C<d_mkstemps>, C<d_mktime>, C<d_mmap>, C<d_modfl>, C<d_modfl_pow32_bug>,
 C<d_mprotect>, C<d_msg>, C<d_msg_ctrunc>, C<d_msg_dontroute>, C<d_msg_oob>,
 C<d_msg_peek>, C<d_msg_proxy>, C<d_msgctl>, C<d_msgget>, C<d_msghdr_s>,
 C<d_msgrcv>, C<d_msgsnd>, C<d_msync>, C<d_munmap>, C<d_mymalloc>,
-C<d_nice>, C<d_nv_preserves_uv>, C<d_nv_preserves_uv_bits>, C<d_off64_t>,
-C<d_old_pthread_create_joinable>, C<d_oldpthreads>, C<d_oldsock>,
-C<d_open3>, C<d_pathconf>, C<d_pause>, C<d_perl_otherlibdirs>,
-C<d_phostname>, C<d_pipe>, C<d_poll>, C<d_portable>, C<d_PRId64>,
-C<d_PRIeldbl>, C<d_PRIEUldbl>, C<d_PRIfldbl>, C<d_PRIFUldbl>,
-C<d_PRIgldbl>, C<d_PRIGUldbl>, C<d_PRIi64>, C<d_PRIo64>, C<d_PRIu64>,
-C<d_PRIx64>, C<d_PRIXU64>, C<d_pthread_yield>, C<d_pwage>, C<d_pwchange>,
-C<d_pwclass>, C<d_pwcomment>, C<d_pwexpire>, C<d_pwgecos>, C<d_pwpasswd>,
-C<d_pwquota>, C<d_qgcvt>, C<d_quad>, C<d_readdir>, C<d_readlink>,
-C<d_readv>, C<d_recvmsg>, C<d_rename>, C<d_rewinddir>, C<d_rmdir>,
-C<d_safebcpy>, C<d_safemcpy>, C<d_sanemcmp>, C<d_sbrkproto>,
+C<d_nice>, C<d_nl_langinfo>, C<d_nv_preserves_uv>,
+C<d_nv_preserves_uv_bits>, C<d_off64_t>, C<d_old_pthread_create_joinable>,
+C<d_oldpthreads>, C<d_oldsock>, C<d_open3>, C<d_pathconf>, C<d_pause>,
+C<d_perl_otherlibdirs>, C<d_phostname>, C<d_pipe>, C<d_poll>,
+C<d_portable>, C<d_PRId64>, C<d_PRIeldbl>, C<d_PRIEUldbl>, C<d_PRIfldbl>,
+C<d_PRIFUldbl>, C<d_PRIgldbl>, C<d_PRIGUldbl>, C<d_PRIi64>, C<d_PRIo64>,
+C<d_PRIu64>, C<d_PRIx64>, C<d_PRIXU64>, C<d_pthread_yield>, C<d_pwage>,
+C<d_pwchange>, C<d_pwclass>, C<d_pwcomment>, C<d_pwexpire>, C<d_pwgecos>,
+C<d_pwpasswd>, C<d_pwquota>, C<d_qgcvt>, C<d_quad>, C<d_readdir>,
+C<d_readlink>, C<d_readv>, C<d_recvmsg>, C<d_rename>, C<d_rewinddir>,
+C<d_rmdir>, C<d_safebcpy>, C<d_safemcpy>, C<d_sanemcmp>, C<d_sbrkproto>,
 C<d_sched_yield>, C<d_scm_rights>, C<d_SCNfldbl>, C<d_seekdir>,
 C<d_select>, C<d_sem>, C<d_semctl>, C<d_semctl_semid_ds>,
 C<d_semctl_semun>, C<d_semget>, C<d_semop>, C<d_sendmsg>, C<d_setegid>,
@@ -8768,9 +8785,9 @@ C<h_fcntl>, C<h_sysfile>, C<hint>, C<hostcat>
 C<i16size>, C<i16type>, C<i32size>, C<i32type>, C<i64size>, C<i64type>,
 C<i8size>, C<i8type>, C<i_arpainet>, C<i_bsdioctl>, C<i_db>, C<i_dbm>,
 C<i_dirent>, C<i_dld>, C<i_dlfcn>, C<i_fcntl>, C<i_float>, C<i_gdbm>,
-C<i_grp>, C<i_iconv>, C<i_ieeefp>, C<i_inttypes>, C<i_libutil>,
-C<i_limits>, C<i_locale>, C<i_machcthr>, C<i_malloc>, C<i_math>,
-C<i_memory>, C<i_mntent>, C<i_ndbm>, C<i_netdb>, C<i_neterrno>,
+C<i_grp>, C<i_iconv>, C<i_ieeefp>, C<i_inttypes>, C<i_langinfo>,
+C<i_libutil>, C<i_limits>, C<i_locale>, C<i_machcthr>, C<i_malloc>,
+C<i_math>, C<i_memory>, C<i_mntent>, C<i_ndbm>, C<i_netdb>, C<i_neterrno>,
 C<i_netinettcp>, C<i_niin>, C<i_poll>, C<i_prot>, C<i_pthread>, C<i_pwd>,
 C<i_rpcsvcdbm>, C<i_sfio>, C<i_sgtty>, C<i_shadow>, C<i_socks>,
 C<i_stdarg>, C<i_stddef>, C<i_stdlib>, C<i_string>, C<i_sunmath>,
@@ -15718,6 +15735,34 @@ function
 
 isa ( TYPE ), can ( METHOD ), VERSION ( [ REQUIRE ] ), UNIVERSAL::isa (
 VAL, TYPE ), UNIVERSAL::can ( VAL, METHOD )
+
+=back
+
+=head2 Unicode::UCD, Unicode - Unicode character database
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+=over 4
+
+=item charinfo
+
+=back
+
+=over 4
+
+=item charblock
+
+=back
+
+=over 4
+
+=item AUTHOR
 
 =back
 

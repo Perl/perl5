@@ -119,7 +119,7 @@ sub charinfo {
     return;
 }
 
-=head2 charbloc
+=head2 charblock
 
     use Unicode::UCD 'charblock';
 
