@@ -1,10 +1,6 @@
 #!/usr/bin/perl
 
-BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
-}
-#use lib qw(. ..);
+use lib qw(. ..);
 use Memoize 0.45 qw(memoize unmemoize);
 use Fcntl;
 # use Memoize::SDBM_File;
@@ -32,25 +28,17 @@ if ($@) {
 
 print "1..4\n";
 
-my $tmpdir;
-my $file;
 if (eval {require File::Spec::Functions}) {
-  File::Spec::Functions->import('tmpdir', 'catfile');
-  $tmpdir = tmpdir();
+ File::Spec::Functions->import('tmpdir', 'catfile');
+ $tmpdir = tmpdir();
 } else {
-  *catfile = sub { join '/', @_ };
+ *catfile = sub { join '/', @_ };
   $tmpdir = $ENV{TMP} || $ENV{TMPDIR} || '/tmp';
 }
 $file = catfile($tmpdir, "md$$");
 1 while unlink $file, "$file.dir", "$file.pag";
-if ($^O eq 'VMS') {
-    1 while unlink "${file}.sdbm_dir";
-}
 tryout('Memoize::SDBM_File', $file, 1);  # Test 1..4
 1 while unlink $file, "$file.dir", "$file.pag";
-if ($^O eq 'VMS') {
-    1 while unlink "${file}.sdbm_dir";
-}
 
 sub tryout {
   my ($tiepack, $file, $testno) = @_;
