@@ -433,6 +433,18 @@ to AUTOLOAD subroutines and you can assign to the AUTOLOAD return value.
 
 =item *
 
+The $Config{byteorder} (and corresponding BYTEORDER in config.h) was
+previously wrong in platforms if sizeof(long) was 4, but sizeof(IV)
+was 8.  The byteorder was only sizeof(long) bytes long (1234 or 4321),
+but now it is correctly sizeof(IV) bytes long, (12345678 or 87654321).
+(This problem didn't affect Windows platforms.)
+
+Also, $Config{byteorder} is now computed dynamically--this is more
+robust with "fat binaries" where an executable image contains binaries
+for more than one binary platform, and when cross-compiling.
+
+=item *
+
 C<perl -d:Module=arg,arg,arg> now works (previously one couldn't pass
 in multiple arguments.)
 
@@ -1617,12 +1629,6 @@ configure.gnu now works with options with whitespace in them.
 =item *
 
 installperl now outputs everything to STDERR.
-
-=item *
-
-$Config{byteorder} is now computed dynamically (this is more robust
-with "fat binaries" where an executable image contains binaries for
-more than one binary platform.)
 
 =item *
 
