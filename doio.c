@@ -211,7 +211,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	if (num_svs) {
 	    /* New style explict name, type is just mode and discipline/layer info */
 	    STRLEN l = 0;
-	    name = SvOK(*svp) && (*svp != &PL_sv_undef) ? SvPV(*svp, l) : "";
+	    name = SvOK(*svp) ? SvPV(*svp, l) : "";
 	    len = (I32)l;
 	    name = savepvn(name, len);
 	    SAVEFREEPV(name);

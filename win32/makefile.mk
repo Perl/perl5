@@ -451,7 +451,7 @@ LINK_DBG	= -debug -pdb:none
 .ELSE
 # -Zi requires .pdb file(s)
 #OPTIMIZE	= -Od -MD -Zi -DDEBUGGING
-#LINK_DBG	= -debug 
+#LINK_DBG	= -debug
 OPTIMIZE	= -O1 -MD -Z7 -DDEBUGGING
 LINK_DBG	= -debug -debugtype:both -pdb:none
 .ENDIF
@@ -522,7 +522,7 @@ LKPOST		= )
 	$(CC) -c $(null,$(<:d) $(NULL) -I$(<:d)) $(CFLAGS_O) $(OBJOUT_FLAG)$@ $<
 
 .c.i:
-	$(CC) -c $(null,$(<:d) $(NULL) -I$(<:d)) $(CFLAGS_O) -E $< >$@ 
+	$(CC) -c $(null,$(<:d) $(NULL) -I$(<:d)) $(CFLAGS_O) -E $< >$@
 
 .y.c:
 	$(NOOP)

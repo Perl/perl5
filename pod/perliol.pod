@@ -82,38 +82,44 @@ member of C<PerlIOl>. The functions (methods of the layer "class") are
 fixed, and are defined by the C<PerlIO_funcs> type. They are broadly the
 same as the public C<PerlIO_xxxxx> functions:
 
-	struct _PerlIO_funcs
-	{
-	 char *		name;
-	 Size_t		size;
-	 IV		kind;
-	 IV		(*Fileno)(PerlIO *f);
-	 PerlIO *	(*Fdopen)(PerlIO_funcs *tab, int fd, const char *mode);
-	 PerlIO *	(*Open)(PerlIO_funcs *tab, const char *path, const char *mode);
-	 int		(*Reopen)(const char *path, const char *mode, PerlIO *f);
-	 IV		(*Pushed)(PerlIO *f,const char *mode,const char *arg,STRLEN len);
-	 IV		(*Popped)(PerlIO *f);
-	 /* Unix-like functions - cf sfio line disciplines */
-	 SSize_t	(*Read)(PerlIO *f, void *vbuf, Size_t count);
-	 SSize_t	(*Unread)(PerlIO *f, const void *vbuf, Size_t count);
-	 SSize_t	(*Write)(PerlIO *f, const void *vbuf, Size_t count);
-	 IV		(*Seek)(PerlIO *f, Off_t offset, int whence);
-	 Off_t		(*Tell)(PerlIO *f);
-	 IV		(*Close)(PerlIO *f);
-	 /* Stdio-like buffered IO functions */
-	 IV		(*Flush)(PerlIO *f);
-	 IV		(*Fill)(PerlIO *f);
-	 IV		(*Eof)(PerlIO *f);
-	 IV		(*Error)(PerlIO *f);
-	 void		(*Clearerr)(PerlIO *f);
-	 void		(*Setlinebuf)(PerlIO *f);
-	 /* Perl's snooping functions */
-	 STDCHAR *	(*Get_base)(PerlIO *f);
-	 Size_t		(*Get_bufsiz)(PerlIO *f);
-	 STDCHAR *	(*Get_ptr)(PerlIO *f);
-	 SSize_t	(*Get_cnt)(PerlIO *f);
-	 void		(*Set_ptrcnt)(PerlIO *f,STDCHAR *ptr,SSize_t cnt);
-	};
+  struct _PerlIO_funcs
+  {
+   char *		name;
+   Size_t		size;
+   IV		kind;
+   IV		(*Pushed)(PerlIO *f,const char *mode,SV *arg);
+   IV		(*Popped)(PerlIO *f);
+   PerlIO *	(*Open)(pTHX_ PerlIO_funcs *tab,
+  			AV *layers, IV n,
+  			const char *mode,
+  			int fd, int imode, int perm,
+  			PerlIO *old,
+  			int narg, SV **args);
+   SV *		(*Getarg)(PerlIO *f);
+   IV		(*Fileno)(PerlIO *f);
+   /* Unix-like functions - cf sfio line disciplines */
+   SSize_t	(*Read)(PerlIO *f, void *vbuf, Size_t count);
+   SSize_t	(*Unread)(PerlIO *f, const void *vbuf, Size_t count);
+   SSize_t	(*Write)(PerlIO *f, const void *vbuf, Size_t count);
+   IV		(*Seek)(PerlIO *f, Off_t offset, int whence);
+   Off_t		(*Tell)(PerlIO *f);
+   IV		(*Close)(PerlIO *f);
+   /* Stdio-like buffered IO functions */
+   IV		(*Flush)(PerlIO *f);
+   IV		(*Fill)(PerlIO *f);
+   IV		(*Eof)(PerlIO *f);
+   IV		(*Error)(PerlIO *f);
+   void		(*Clearerr)(PerlIO *f);
+   void		(*Setlinebuf)(PerlIO *f);
+   /* Perl's snooping functions */
+   STDCHAR *	(*Get_base)(PerlIO *f);
+   Size_t		(*Get_bufsiz)(PerlIO *f);
+   STDCHAR *	(*Get_ptr)(PerlIO *f);
+   SSize_t	(*Get_cnt)(PerlIO *f);
+   void		(*Set_ptrcnt)(PerlIO *f,STDCHAR *ptr,SSize_t cnt);
+  };
+
+
 
 The first few members of the struct give a "name" for the layer, the
 size to C<malloc> for the per-instance data, and some flags which are
@@ -304,37 +310,15 @@ to change during one "get".)
 
 =over 4
 
-=item IV	(*Fileno)(PerlIO *f);
+=item  IV		(*Pushed)(PerlIO *f,const char *mode, SV *arg);
 
-Returns the Unix/Posix numeric file decriptor for the handle. Normally
-C<PerlIOBase_fileno()> (which just asks next layer down) will suffice
-for this.
-
-=item  PerlIO *	(*Fdopen)(PerlIO_funcs *tab, int fd, const char *mode);
-
-Should (perhaps indirectly) call C<PerlIO_allocate()> to allocate a slot
-in the table and associate it with the given numeric file descriptor,
-which will be open in an manner compatible with the supplied mode string.
-
-=item  PerlIO *	(*Open)(PerlIO_funcs *tab, const char *path, const char *mode);
-
-Should attempt to open the given path and if that succeeds then (perhaps
-indirectly) call C<PerlIO_allocate()> to allocate a slot in the table and
-associate it with the layers information for the opened file.
-
-=item  int		(*Reopen)(const char *path, const char *mode, PerlIO *f);
-
-Re-open the supplied C<PerlIO *> to connect it to C<path> in C<mode>.
-Returns as success flag. Perl does not use this and L<perlapio> marks it
-as subject to change.
-
-=item  IV		(*Pushed)(PerlIO *f,const char *mode,const char *arg,STRLEN len);
-
-Called when the layer is pushed onto the stack. The C<mode> argument may
-be NULL if this occurs post-open. The C<arg> and C<len> will be present
+The only absoultely mandatory method. Called when the layer is pushed onto the stack.
+The C<mode> argument may  be NULL if this occurs post-open. The C<arg> will be non-C<NULL>
 if an argument string was passed. In most cases this should call
 C<PerlIOBase_pushed()> to convert C<mode> into the appropriate
 C<PERLIO_F_XXXXX> flags in addition to any actions the layer itself takes.
+If a layer is not expecting an argument it need neither save the one passed to it, nor
+provide C<Getarg()> (it could perhaps C<Perl_warn> that the argument was un-expected).
 
 =item  IV		(*Popped)(PerlIO *f);
 
@@ -343,6 +327,68 @@ popped after C<Close()> is called. But a layer can be popped without being
 closed if the program is dynamically managing layers on the stream. In
 such cases C<Popped()> should free any resources (buffers, translation
 tables, ...) not held directly in the layer's struct.
+It should also C<Unread()> any unconsumed data that has been read and buffered
+from the layer below back to that layer, so that it can be re-provided to what
+ever is now above.
+
+=item  PerlIO *	(*Open)(...);
+
+The C<Open()> method has lots of arguments because it combines the functions
+of perl's C<open>, C<PerlIO_open>, perl's C<sysopen>, C<PerlIO_fdopen> and C<PerlIO_reopen>.
+The full prototype is as follows:
+
+ PerlIO *	(*Open)(pTHX_ PerlIO_funcs *tab,
+			AV *layers, IV n,
+			const char *mode,
+			int fd, int imode, int perm,
+			PerlIO *old,
+			int narg, SV **args);
+
+Open should (perhaps indirectly) call C<PerlIO_allocate()> to allocate a slot in the table and
+associate it with the layers information for the opened file, by calling C<PerlIO_push>.
+The I<layers> AV is an array of all the layers destined for the C<PerlIO *>,
+and any arguments passed to them,  I<n> is the index into that array of the
+layer being called. The macro C<PerlIOArg> will return a (possibly C<NULL>) SV *
+for the argument passed to the layer.
+
+The I<mode> string is an "C<fopen()>-like" string which would match the regular
+expression C</^[I#]?[rwa]\+?[bt]?$/>.
+
+The C<'I'> prefix is used during creation of C<stdin>..C<stderr> via special
+C<PerlIO_fdopen> calls; the C<'#'> prefix means that this is C<sysopen> and that I<imode> and
+I<perm> should be passed to C<PerlLIO_open3>; C<'r'> means B<r>ead, C<'w'> means B<w>rite
+and C<'a'> means B<a>ppend. The C<'+'> suffix means that both reading and writing/appending
+are permited. The C<'b'> suffix means file should be binary, and C<'t'> means it
+is text. (Binary/Text should be ignored by almost all layers and binary IO done,
+with PerlIO. The C<:crlf> layer should be pushed to handle the distinction.)
+
+If I<old> is not C<NULL> then this is a C<PerlIO_reopen>. Perl iteself does not use
+this (yet?) and semantics are a little vague.
+
+If I<fd> not negative then it is the numeric file descriptor I<fd>, which will
+be open in an manner compatible with the supplied mode string, the call is
+thus equivalent to C<PerlIO_fdopen>. In this case I<nargs> will be zero.
+
+If I<nargs> is greater than zero then it gives the number of arguments passed
+to C<open>, otherwise it will be 1 if for example C<PerlIO_open> was called.
+In simple cases SvPV(*args) is the pathname to open.
+
+Having said all that translation-only layers do not need to provide C<Open()> at all,
+but rather leave the opening to a lower level layer and wait to be "pushed".
+If a layer does provide C<Open()> it should normaly call the C<Open()> method
+of next layer down (if any) and then push itself on top if that succeeds.
+
+=item SV *		(*Getarg)(PerlIO *f);
+
+Optional. If present should return an SV * representing the string argument
+passed to the layer when it was pushed. e.g. ":encoding(ascii)" would
+return an SvPV with value "ascii".
+
+=item IV	(*Fileno)(PerlIO *f);
+
+Returns the Unix/Posix numeric file decriptor for the handle. Normally
+C<PerlIOBase_fileno()> (which just asks next layer down) will suffice
+for this.
 
 =item  SSize_t	(*Read)(PerlIO *f, void *vbuf, Size_t count);
 
@@ -384,6 +430,7 @@ structure.
 Should make stream's state consistent with layers below. That is, any
 buffered write data should be written, and file position of lower layers
 adjusted for data read fron below but not actually consumed.
+(Should perhaps C<Unread()> such data to the lower layer.)
 
 =item  IV		(*Fill)(PerlIO *f);
 
@@ -404,7 +451,8 @@ to set the C<PERLIO_F_XXXXX> flags, which may suffice.
 
 =item  void		(*Setlinebuf)(PerlIO *f);
 
-Mark the stream as line buffered.
+Mark the stream as line buffered. C<PerlIOBase_setlinebuf()> sets the
+PERLIO_F_LINEBUF flag and is normally sufficient.
 
 =item  STDCHAR *	(*Get_base)(PerlIO *f);
 
@@ -509,21 +557,46 @@ which do not need to do anything special for a particular method.
 
 =head2 Extension Layers
 
-Layers can made available by extension modules.
+Layers can made available by extension modules. When an unknown layer is encountered
+the PerlIO code will perform the equivalent of :
+
+   use PerlIO 'layer';
+
+Where I<layer> is the unknown layer. F<PerlIO.pm> will then attempt to :
+
+   require PerlIO::layer;
+
+If after that process the layer is still not defined then the C<open> will fail.
+
+The following extension layers are bundled with perl:
 
 =over 4
 
-=item "encoding"
+=item ":encoding"
 
    use Encoding;
 
-makes this layer available. It is an example of a layer which takes an argument.
-as it is called as:
+makes this layer available, although F<PerlIO.pm> "knows" where to find it.
+It is an example of a layer which takes an argument as it is called thus:
 
    open($fh,"<:encoding(iso-8859-7)",$pathname)
 
-=back
+=item ":Scalar"
 
+Provides support for
+
+   open($fh,"...",\$scalar)
+
+When a handle is so opened, then reads get bytes from the string value of I<$scalar>,
+and writes change the value. In both cases the position in I<$scalar> starts as zero
+but can be altered via C<seek>, and determined via C<tell>.
+
+=item ":Object" or ":Perl"
+
+May be provided to allow layers to be implemented as perl code - implementation
+is being investigated.
+
+=back
 
 =cut
 
