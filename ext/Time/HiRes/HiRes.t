@@ -166,7 +166,7 @@ unless (defined &Time::HiRes::gettimeofday
 } else {
     use Time::HiRes qw (time alarm sleep);
 
-    my ($f, $r, $i, $not);
+    my ($f, $r, $i, $not, $ok);
 
     $f = time; 
     print "# time...$f\n";
@@ -185,13 +185,25 @@ unless (defined &Time::HiRes::gettimeofday
 	select (undef, undef, undef, 3);
 	my $ival = Time::HiRes::tv_interval ($r);
 	print "# Select returned! $i $ival\n";
+	print "# ", abs($ival/3 - 1), "\n";
+	# Whether select() gets restarted after signals is
+	# implementation dependent.  If it is restarted, we
+	# will get about 3.3 seconds: 3 from the select, 0.3
+	# from the alarm.  If this happens, let's just skip
+	# this particular test.  --jhi
+	if (abs($ival/3.3 - 1) < $limit) {
+	    $ok = "Skip: your select() seems to get restarted by your SIGALRM";
+	    undef $not;
+	    last;
+	}
 	my $exp = 0.3 * (5 - $i);
 	# This test is more sensitive, so impose a softer limit.
-	if (abs($ival/$exp) - 1 > 3*$limit) {
+	if (abs($ival/$exp - 1) > 3*$limit) {
 	    my $ratio = abs($ival/$exp);
 	    $not = "while: $exp sleep took $ival ratio $ratio";
 	    last;
 	}
+	$ok = $i;
     }
 
     sub tick
@@ -201,7 +213,7 @@ unless (defined &Time::HiRes::gettimeofday
 	print "# Tick! $i $ival\n";
 	my $exp = 0.3 * (5 - $i);
 	# This test is more sensitive, so impose a softer limit.
-	if (abs($ival/$exp) - 1 > 3*$limit) {
+	if (abs($ival/$exp - 1) > 3*$limit) {
 	    my $ratio = abs($ival/$exp);
 	    $not = "tick: $exp sleep took $ival ratio $ratio";
 	    $i = 0;
@@ -210,7 +222,7 @@ unless (defined &Time::HiRes::gettimeofday
 
     alarm(0); # can't cancel usig %SIG
 
-    print $not ? "not ok 17 # $not\n" : "ok 17\n";
+    print $not ? "not ok 17 # $not\n" : "ok 17 # $ok\n";
 }
 
 unless (defined &Time::HiRes::setitimer
