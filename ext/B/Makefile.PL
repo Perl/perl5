@@ -43,6 +43,6 @@ sub MY::postamble {
 B\$(OBJ_EXT) : defsubs.h              
 
 defsubs.h :: $op_h $cop_h                     
-        $noecho \$(NOOP)
+	$noecho \$(NOOP)
 " 
 }
