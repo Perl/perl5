@@ -6824,7 +6824,7 @@ Perl_scan_num(pTHX_ char *start)
 
 		    tmpend = uv_to_utf8(tmpbuf, rev);
 		    *tmpend = '\0';
-		    sv_catpvn(sv, tmpbuf, tmpend - tmpbuf);
+		    sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);
 		    if (rev > 0)
 			SvNVX(sv) += (NV)rev/nshift;
 		    nshift *= 1000;
@@ -6834,7 +6834,7 @@ Perl_scan_num(pTHX_ char *start)
 		s = pos;
 		tmpend = uv_to_utf8(tmpbuf, rev);
 		*tmpend = '\0';
-		sv_catpvn(sv, tmpbuf, tmpend - tmpbuf);
+		sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);
 		if (rev > 0)
 		    SvNVX(sv) += (NV)rev/nshift;
 
