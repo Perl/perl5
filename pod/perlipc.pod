@@ -20,11 +20,11 @@ a child process exiting, your process running out of stack space, or
 hitting file size limit.
 
 For example, to trap an interrupt signal, set up a handler like this.
-Notice how all we do is set a global variable and then raise an
-exception.  That's because on most systems libraries are not
-reentrant, so calling any print() functions (or even anything that needs to
-malloc(3) more memory) could in theory trigger a memory fault
-and subsequent core dump.
+Do as little as you possibly can in your handler; notice how all we do is
+set a global variable and then raise an exception.  That's because on most
+systems, libraries are not re-entrant; particularly, memory allocation and
+I/O routines are not.  That means that doing nearly I<anything> in your
+handler could in theory trigger a memory fault and subsequent core dump.
 
     sub catch_zap {
 	my $signame = shift;
@@ -271,7 +271,7 @@ process cannot outlive the parent.
 
 You can run a command in the background with:
 
-    system("cmd&");
+    system("cmd &");
 
 The command's STDOUT and STDERR (and possibly STDIN, depending on your
 shell) will be the same as the parent's.  You won't need to catch
@@ -396,7 +396,7 @@ correctly implemented on alien systems.  Additionally, these are not true
 multithreading.  If you'd like to learn more about threading, see the
 F<modules> file mentioned below in the SEE ALSO section.
 
-=head2 Bidirectional Communication
+=head2 Bidirectional Communication with Another Process
 
 While this works reasonably well for unidirectional communication, what
 about bidirectional communication?  The obvious thing you'd like to do
@@ -410,7 +410,7 @@ entirely on the diagnostic message:
     Can't do bidirectional pipe at -e line 1.
 
 If you really want to, you can use the standard open2() library function
-to catch both ends.  There's also an open3() for tri-directional I/O so you
+to catch both ends.  There's also an open3() for tridirectional I/O so you
 can also catch your child's STDERR, but doing so would then require an
 awkward select() loop and wouldn't allow you to use normal Perl input
 operations.
@@ -775,7 +775,326 @@ if they go through a CGI interface.  You'd have a small, simple CGI
 program that does whatever checks and logging you feel like, and then acts
 as a Unix-domain client and connects to your private server.
 
-=head2 UDP: Message Passing
+=head1 TCP Clients with IO::Socket
+
+For those preferring a higher-level interface to socket programming, the
+IO::Socket module provides an object-oriented approach.  IO::Socket is
+included as part of the standard Perl distribution as of the 5.004
+release.  If you're running an earlier version of Perl, just fetch
+IO::Socket from CPAN, where you'll also find find modules providing easy
+interfaces to the following systems: DNS, FTP, Ident (RFC 931), NIS and
+NISPlus, NNTP, Ping, POP3, SMTP, SNMP, SSLeay, Telnet, and Time--just
+to name a few.
+
+=head2 A Simple Client
+
+Here's a client that creates a TCP connection to the "daytime"
+service at port 13 of the host name "localhost" and prints out everything
+that the server there cares to provide.
+
+    #!/usr/bin/perl -w
+    use IO::Socket;
+    $remote = IO::Socket::INET->new(
+			Proto    => "tcp",
+			PeerAddr => "localhost",
+			PeerPort => "daytime(13)",
+		    )
+		  or die "cannot connect to daytime port at localhost";
+    while ( <$remote> ) { print }
+
+When you run this program, you should get something back that
+looks like this:
+
+    Wed May 14 08:40:46 MDT 1997
+
+Here are what those parameters to the C<new> constructor mean:
+
+=over
+
+=item C<Proto>
+
+This is which protocol to use.  In this case, the socket handle returned
+will be connected to a TCP socket, because we want a stream-oriented
+connection, that is, one that acts pretty much like a plain old file.
+Not all sockets are this of this type.  For example, the UDP protocol
+can be used to make a datagram socket, used for message-passing.
+
+=item C<PeerAddr>
+
+This is the name or Internet address of the remote host the server is
+running on.  We could have specified a longer name like C<"www.perl.com">,
+or an address like C<"204.148.40.9">.  For demonstration purposes, we've
+used the special hostname C<"localhost">, which should always mean the
+current machine you're running on.  The corresponding Internet address
+for localhost is C<"127.1">, if you'd rather use that.
+
+=item C<PeerPort>
+
+This is the service name or port number we'd like to connect to.
+We could have gotten away with using just C<"daytime"> on systems with a
+well-configured system services file,[FOOTNOTE: The system services file
+is in I</etc/services> under Unix] but just in case, we've specified the
+port number (13) in parentheses.  Using just the number would also have
+worked, but constant numbers make careful programmers nervous.
+
+=back
+
+Notice how the return value from the C<new> constructor is used as
+a filehandle in the C<while> loop?  That's what's called an indirect
+filehandle, a scalar variable containing a filehandle.  You can use
+it the same way you would a normal filehandle.  For example, you
+can read one line from it this way:
+
+    $line = <$handle>;
+
+all remaining lines from is this way:
+
+    @lines = <$handle>;
+
+and send a line of data to it this way:
+
+    print $handle "some data\n";
+
+=head2 A Webget Client
+
+Here's a simple client that takes a remote host to fetch a document
+from, and then a list of documents to get from that host.  This is a
+more interesting client than the previous one because it first sends
+something to the server before fetching the server's response.
+
+    #!/usr/bin/perl -w
+    use IO::Socket;
+    unless (@ARGV > 1) { die "usage: $0 host document ..." }
+    $host = shift(@ARGV);
+    foreach $document ( @ARGV ) {
+	$remote = IO::Socket::INET->new( Proto     => "tcp",
+					 PeerAddr  => $host,
+					 PeerPort  => "http(80)",
+				        );
+	unless ($remote) { die "cannot connect to http daemon on $host" }
+	$remote->autoflush(1);
+	print $remote "GET $document HTTP/1.0\n\n";
+	while ( <$remote> ) { print }
+	close $remote;
+    }
+
+The web server handing the "http" service, which is assumed to be at
+its standard port, number 80.  If your the web server you're trying to
+connect to is at a different port (like 1080 or 8080), you should specify
+as the named-parameter pair, C<PeerPort =E<gt> 8080>.  The C<autoflush>
+method is used on the socket because otherwise the system would buffer
+up the output we sent it.  (If you're on a Mac, you'll also need to
+change every C<"\n"> in your code that sends data over the network to
+be a C<"\015\012"> instead.)
+
+Connecting to the server is only the first part of the process: once you
+have the connection, you have to use the server's language.  Each server
+on the network has its own little command language that it expects as
+input.  The string that we send to the server starting with "GET" is in
+HTTP syntax.  In this case, we simply request each specified document.
+Yes, we really are making a new connection for each document, even though
+it's the same host.  That's the way you always used to have to speak HTTP.
+Recent versions of web browsers may request that the remote server leave
+the connection open a little while, but the server doesn't have to honor
+such a request.
+
+Here's an example of running that program, which we'll call I<webget>:
+
+    shell_prompt$ webget www.perl.com /guanaco.html
+    HTTP/1.1 404 File Not Found
+    Date: Thu, 08 May 1997 18:02:32 GMT
+    Server: Apache/1.2b6
+    Connection: close
+    Content-type: text/html
+
+    <HEAD><TITLE>404 File Not Found</TITLE></HEAD>
+    <BODY><H1>File Not Found</H1>
+    The requested URL /guanaco.html was not found on this server.<P>
+    </BODY>
+
+Ok, so that's not very interesting, because it didn't find that
+particular document.  But a long response wouldn't have fit on this page.
+
+For a more fully-featured version of this program, you should look to
+the I<lwp-request> program included with the LWP modules from CPAN.
+
+=head2 Interactive Client with IO::Socket
+
+Well, that's all fine if you want to send one command and get one answer,
+but what about setting up something fully interactive, somewhat like
+the way I<telnet> works?  That way you can type a line, get the answer,
+type a line, get the answer, etc.
+
+This client is more complicated than the two we've done so far, but if
+you're on a system that supports the powerful C<fork> call, the solution
+isn't that rough.  Once you've made the connection to whatever service
+you'd like to chat with, call C<fork> to clone your process.  Each of
+these two identical process has a very simple job to do: the parent
+copies everything from the socket to standard output, while the child
+simultaneously copies everything from standard input to the socket.
+To accomplish the same thing using just one process would be I<much>
+harder, because it's easier to code two processes to do one thing than it
+is to code one process to do two things.  (This keep-it-simple principle
+is one of the cornerstones of the Unix philosophy, and good software
+engineering as well, which is probably why it's spread to other systems
+as well.)
+
+Here's the code:
+
+    #!/usr/bin/perl -w
+    use strict;
+    use IO::Socket;
+    my ($host, $port, $kidpid, $handle, $line);
+
+    unless (@ARGV == 2) { die "usage: $0 host port" }
+    ($host, $port) = @ARGV;
+
+    # create a tcp connection to the specified host and port
+    $handle = IO::Socket::INET->new(Proto     => "tcp",
+				    PeerAddr  => $host,
+				    PeerPort  => $port)
+	   or die "can't connect to port $port on $host: $!";
+
+    $handle->autoflush(1);		# so output gets there right away
+    print STDERR "[Connected to $host:$port]\n";
+
+    # split the program into two processes, identical twins
+    die "can't fork: $!" unless defined($kidpid = fork());
+
+    # the if{} block runs only in the parent process
+    if ($kidpid) {
+	# copy the socket to standard output
+	while (defined ($line = <$handle>)) {
+	    print STDOUT $line;
+	}
+	kill("TERM", $kidpid);  		# send SIGTERM to child
+    }
+    # the else{} block runs only in the child process
+    else {
+	# copy standard input to the socket
+	while (defined ($line = <STDIN>)) {
+	    print $handle $line;
+	}
+    }
+
+The C<kill> function in the parent's C<if> block is there to send a
+signal to our child process (current running in the C<else> block)
+as soon as the remote server has closed its end of the connection.
+
+The C<kill> at the end of the parent's block is there to eliminate the
+child process as soon as the server we connect to closes its end.
+
+If the remote server sends data a byte at time, and you need that
+data immediately without waiting for a newline (which might not happen),
+you may wish to replace the C<while> loop in the parent with the
+following:
+
+    my $byte;
+    while (sysread($handle, $byte, 1) == 1) {
+	print STDOUT $byte;
+    }
+
+Making a system call for each byte you want to read is not very efficient
+(to put it mildly) but is the simplest to explain and works reasonably
+well.
+
+=head1 TCP Servers with IO::Socket
+
+Setting up server is little bit more involved than running a client.
+The model is that the server creates a special kind of socket that
+does nothing but listen on a particular port for incoming connections.
+It does this by calling the C<IO::Socket::INET-E<gt>new()> method with
+slightly different arguments than the client did.
+
+=over
+
+=item Proto
+
+This is which protocol to use.  Like our clients, we'll
+still specify C<"tcp"> here.
+
+=item LocalPort
+
+We specify a local
+port in the C<LocalPort> argument, which we didn't do for the client.
+This is service name or port number for which you want to be the
+server. (Under Unix, ports under 1024 are restricted to the
+superuser.)  In our sample, we'll use port 9000, but you can use
+any port that's not currently in use on your system.  If you try
+to use one already in used, you'll get an "Address already in use"
+message. Under Unix, the C<netstat -a> command will show
+which services current have servers.
+
+=item Listen
+
+The C<Listen> parameter is set to the maximum number of
+pending connections we can accept until we turn away incoming clients.
+Think of it as a call-waiting queue for your telephone.
+The low-level Socket module has a special symbol for the system maximum, which
+is SOMAXCONN.
+
+=item Reuse
+
+The C<Reuse> parameter is needed so that we restart our server
+manually without waiting a few minutes to allow system buffers to
+clear out.
+
+=back
+
+Once the generic server socket has been created using the parameters
+listed above, the server then waits for a new client to connect
+to it.  The server blocks in the C<accept> method, which eventually an
+bidirectional connection to the remote client.  (Make sure to autoflush
+this handle to circumvent buffering.)
+
+To add to user-friendliness, our server prompts the user for commands.
+Most servers don't do this.  Because of the prompt without a newline,
+you'll have to use the C<sysread> variant of the interactive client above.
+
+This server accepts one of five different commands, sending output
+back to the client.  Note that unlike most network servers, this one
+only handles one incoming client at a time.  Multithreaded servers are
+covered in Chapter 6 of the Camel or in the perlipc(1) manpage.
+
+Here's the code.  We'll
+
+ #!/usr/bin/perl -w
+ use IO::Socket;
+ use Net::hostent;		# for OO version of gethostbyaddr
+
+ $PORT = 9000;			# pick something not in use
+
+ $server = IO::Socket::INET->new( Proto     => 'tcp',
+                                  LocalPort => $PORT,
+                                  Listen    => SOMAXCONN,
+                                  Reuse     => 1);
+
+ die "can't setup server" unless $server;
+ print "[Server $0 accepting clients]\n";
+
+ while ($client = $server->accept()) {
+   $client->autoflush(1);
+   print $client "Welcome to $0; type help for command list.\n";
+   $hostinfo = gethostbyaddr($client->peeraddr);
+   printf "[Connect from %s]\n", $hostinfo->name || $client->peerhost;
+   print $client "Command? ";
+   while ( <$client>) {
+     next unless /\S/;	     # blank line
+     if    (/quit|exit/i)    { last;                                     }
+     elsif (/date|time/i)    { printf $client "%s\n", scalar localtime;  }
+     elsif (/who/i )         { print  $client `who 2>&1`;                }
+     elsif (/cookie/i )      { print  $client `/usr/games/fortune 2>&1`; }
+     elsif (/motd/i )        { print  $client `cat /etc/motd 2>&1`;      }
+     else {
+       print $client "Commands: quit date who cookie motd\n";
+     }
+   } continue {
+      print $client "Command? ";
+   }
+   close $client;
+ }
+
+=head1 UDP: Message Passing
 
 Another kind of client-server setup is one that uses not connections, but
 messages.  UDP communications involve much lower overhead but also provide
@@ -788,7 +1107,7 @@ into your message system, then you probably should use just TCP to start
 with.
 
 Here's a UDP program similar to the sample Internet TCP client given
-above.  However, instead of checking one host at a time, the UDP version
+earlier.  However, instead of checking one host at a time, the UDP version
 will check many of them asynchronously by simulating a multicast and then
 using select() to do a timed-out wait for I/O.  To do something similar
 with TCP, you'd have to use a different socket handle for each host.
@@ -845,7 +1164,6 @@ interesting uses.  You can't, however, effectively use SysV IPC or
 Berkeley mmap() to have shared memory so as to share a variable amongst
 several processes.  That's because Perl would reallocate your string when
 you weren't wanting it to.
-
 
 Here's a small example showing shared memory usage.
 
@@ -917,18 +1235,10 @@ Call this file F<give>:
 
     semop($key,$opstring) || die "$!";
 
-=head1 WARNING
-
-The SysV IPC code above was written long ago, and it's definitely clunky
-looking.  It should at the very least be made to C<use strict> and
-C<require "sys/ipc.ph">.  Better yet, perhaps someone should create an
-C<IPC::SysV> module the way we have the C<Socket> module for normal
-client-server communications.
-
-(... time passes)
-
-Voila!  Check out the IPC::SysV modules written by Jack Shirazi.  You can
-find them at a CPAN store near you.
+The SysV IPC code above was written long ago, and it's definitely
+clunky looking.  It should at the very least be made to C<use strict>
+and C<require "sys/ipc.ph">.  Better yet, check out the IPC::SysV modules
+on CPAN.
 
 =head1 NOTES
 
@@ -961,20 +1271,36 @@ signals and to stick with simple TCP and UDP socket operations; e.g., don't
 try to pass open file descriptors over a local UDP datagram socket if you
 want your code to stand a chance of being portable.
 
-Because few vendors provide C libraries that are safely
-reentrant, the prudent programmer will do little else within
-a handler beyond die() to raise an exception and longjmp(3) out.
+Because few vendors provide C libraries that are safely re-entrant,
+the prudent programmer will do little else within a handler beyond
+setting a numeric variable that already exists; or, if locked into
+a slow (restarting) system call, using die() to raise an exception
+and longjmp(3) out.  In fact, even these may in some cases cause a
+core dump.  It's probably best to avoid signals except where they are
+absolutely inevitable.  This perilous problems will be addressed in a
+future release of Perl.
 
 =head1 AUTHOR
 
 Tom Christiansen, with occasional vestiges of Larry Wall's original
-version.
+version and suggestions from the Perl Porters.
 
 =head1 SEE ALSO
 
-Besides the obvious functions in L<perlfunc>, you should also check out
-the F<modules> file at your nearest CPAN site.  (See L<perlmodlib> or best
-yet, the F<Perl FAQ> for a description of what CPAN is and where to get it.)
+There's a lot more to networking than this, but this should get you
+started.
+
+For intrepid programmers, the classic textbook I<Unix Network Programming>
+by Richard Stevens (published by Addison-Wesley).  Note that most books
+on networking address networking from the perspective of a C programmer;
+translation to Perl is left as an exercise for the reader.
+
+The IO::Socket(3) manpage describes the object library, and the Socket(3)
+manpage describes the low-level interface to sockets.  Besides the obvious
+functions in L<perlfunc>, you should also check out the F<modules> file
+at your nearest CPAN site.  (See L<perlmodlib> or best yet, the F<Perl
+FAQ> for a description of what CPAN is and where to get it.)
+
 Section 5 of the F<modules> file is devoted to "Networking, Device Control
 (modems), and Interprocess Communication", and contains numerous unbundled
 modules numerous networking modules, Chat and Expect operations, CGI
