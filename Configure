@@ -1825,7 +1825,7 @@ EOM
 		osf1|mls+)	case "$5" in
 				alpha)
 					osname=dec_osf
-					osvers=`echo "$3" | sed 's/^[vt]//'`
+					osvers=`echo "$3" | sed 's/^[xvt]//'`
 					;;
 			hp*)	osname=hp_osf1	;;
 			mips)	osname=mips_osf1 ;;
