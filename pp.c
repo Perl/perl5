@@ -3825,17 +3825,38 @@ PP(pp_hslice)
     register HV *hv = (HV*)POPs;
     register I32 lval = (PL_op->op_flags & OPf_MOD || LVRET);
     I32 realhv = (SvTYPE(hv) == SVt_PVHV);
+    bool localizing = PL_op->op_private & OPpLVAL_INTRO ? TRUE : FALSE;
+    bool other_magic = FALSE;
 
-    if (!realhv && PL_op->op_private & OPpLVAL_INTRO)
+    if (localizing) {
+        MAGIC *mg;
+        HV *stash;
+
+        other_magic = mg_find((SV*)hv, PERL_MAGIC_env) ||
+            ((mg = mg_find((SV*)hv, PERL_MAGIC_tied))
+             /* Try to preserve the existenceness of a tied hash
+              * element by using EXISTS and DELETE if possible.
+              * Fallback to FETCH and STORE otherwise */
+             && (stash = SvSTASH(SvRV(SvTIED_obj((SV*)hv, mg))))
+             && gv_fetchmethod_autoload(stash, "EXISTS", TRUE)
+             && gv_fetchmethod_autoload(stash, "DELETE", TRUE));
+    }
+
+    if (!realhv && localizing)
 	DIE(aTHX_ "Can't localize pseudo-hash element");
 
     if (realhv || SvTYPE(hv) == SVt_PVAV) {
 	while (++MARK <= SP) {
 	    SV *keysv = *MARK;
 	    SV **svp;
-	    I32 preeminent = SvRMAGICAL(hv) ? 1 :
-				realhv ? hv_exists_ent(hv, keysv, 0)
-				       : avhv_exists_ent((AV*)hv, keysv, 0);
+	    I32 preeminent;
+
+            if (localizing) {
+                preeminent = SvRMAGICAL(hv) && !other_magic ? 1 :
+                    realhv ? hv_exists_ent(hv, keysv, 0)
+                    : avhv_exists_ent((AV*)hv, keysv, 0);
+            }
+
 	    if (realhv) {
 		HE *he = hv_fetch_ent(hv, keysv, lval, 0);
 		svp = he ? &HeVAL(he) : 0;
@@ -3848,7 +3869,7 @@ PP(pp_hslice)
 		    STRLEN n_a;
 		    DIE(aTHX_ PL_no_helem, SvPV(keysv, n_a));
 		}
-		if (PL_op->op_private & OPpLVAL_INTRO) {
+		if (localizing) {
 		    if (preeminent)
 		        save_helem(hv, keysv, svp);
 		    else {
