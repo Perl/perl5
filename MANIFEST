@@ -26,7 +26,15 @@ configure.gnu		Crude emulation of GNU configure
 config_h.SH		Produces config.h
 cop.h			Control operator header
 Copying			The GNU General Public License
+Cross/Makefile		Cross-compilation
+Cross/Makefile.SH.patch	Cross-compilation
 Cross/README		Cross-compilation
+Cross/TODO		Cross-compilation
+Cross/config		Cross-compilation
+Cross/config.sh-arm-linux	Cross-compilation
+Cross/generate_config_sh	Cross-compilation
+Cross/installperl.patch		Cross-compilation
+Cross/warp		Cross-compilation
 cv.h			Code value header
 cygwin/cygwin.c		Additional code for Cygwin port
 cygwin/ld2.in		ld wrapper template for Cygwin port
