@@ -1011,7 +1011,7 @@ dounwind(I32 cxix)
     while (cxstack_ix > cxix) {
 	cx = &cxstack[cxstack_ix];
 	DEBUG_l(PerlIO_printf(Perl_debug_log, "Unwinding block %ld, type %s\n",
-			      (long) cxstack_ix+1, block_type[cx->cx_type]));
+			      (long) cxstack_ix, block_type[cx->cx_type]));
 	/* Note: we don't need to restore the base context info till the end. */
 	switch (cx->cx_type) {
 	case CXt_SUBST:
@@ -1347,8 +1347,9 @@ PP(pp_enteriter)
 	SAVESPTR(*svp);
     }
     else {
-	svp = &GvSV((GV*)POPs);			/* symbol table variable */
-	SAVESPTR(*svp);
+	GV *gv = (GV*)POPs;
+	(void)save_scalar(gv);
+	svp = &GvSV(gv);			/* symbol table variable */
     }
 
     ENTER;
@@ -2347,6 +2348,7 @@ PP(pp_require)
     register PERL_CONTEXT *cx;
     SV *sv;
     char *name;
+    STRLEN len;
     char *tryname;
     SV *namesv = Nullsv;
     SV** svp;
@@ -2361,12 +2363,12 @@ PP(pp_require)
 		SvPV(sv,na),patchlevel);
 	RETPUSHYES;
     }
-    name = SvPV(sv, na);
-    if (!*name)
+    name = SvPV(sv, len);
+    if (!(name && len > 0 && *name))
 	DIE("Null filename used");
     TAINT_PROPER("require");
     if (op->op_type == OP_REQUIRE &&
-      (svp = hv_fetch(GvHVn(incgv), name, SvCUR(sv), 0)) &&
+      (svp = hv_fetch(GvHVn(incgv), name, len, 0)) &&
       *svp != &sv_undef)
 	RETPUSHYES;
 
@@ -2628,6 +2630,7 @@ PP(pp_leaveeval)
     assert(CvDEPTH(compcv) == 1);
 #endif
     CvDEPTH(compcv) = 0;
+    lex_end();
 
     if (optype == OP_REQUIRE &&
 	!(gimme == G_SCALAR ? SvTRUE(*sp) : sp > newsp))
@@ -2636,13 +2639,13 @@ PP(pp_leaveeval)
 	char *name = cx->blk_eval.old_name;
 	(void)hv_delete(GvHVn(incgv), name, strlen(name), G_DISCARD);
 	retop = die("%s did not return a true value", name);
+	/* die_where() did LEAVE, or we won't be here */
     }
-
-    lex_end();
-    LEAVE;
-
-    if (!(save_flags & OPf_SPECIAL))
-	sv_setpv(ERRSV,"");
+    else {
+	LEAVE;
+	if (!(save_flags & OPf_SPECIAL))
+	    sv_setpv(ERRSV,"");
+    }
 
     RETURNOP(retop);
 }
