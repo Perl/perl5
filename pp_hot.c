@@ -1460,7 +1460,9 @@ PP(pp_iter)
 	    char *max = SvPV((SV*)av, maxlen);
 	    if (!SvNIOK(cur) && SvCUR(cur) <= maxlen) {
 #ifndef USE_THREADS			  /* don't risk potential race */
-		if (SvREFCNT(*cx->blk_loop.itervar) == 1) {
+		if (SvREFCNT(*cx->blk_loop.itervar) == 1
+		    && !SvMAGICAL(*cx->blk_loop.itervar))
+		{
 		    /* safe to reuse old SV */
 		    sv_setsv(*cx->blk_loop.itervar, cur);
 		}
@@ -1486,7 +1488,9 @@ PP(pp_iter)
 	    RETPUSHNO;
 
 #ifndef USE_THREADS			  /* don't risk potential race */
-	if (SvREFCNT(*cx->blk_loop.itervar) == 1) {
+	if (SvREFCNT(*cx->blk_loop.itervar) == 1
+	    && !SvMAGICAL(*cx->blk_loop.itervar))
+	{
 	    /* safe to reuse old SV */
 	    sv_setiv(*cx->blk_loop.itervar, cx->blk_loop.iterix++);
 	}
