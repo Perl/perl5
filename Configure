@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Oct  2 15:53:32 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Sun Oct  3 02:41:02 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -6722,7 +6722,7 @@ eval $setvar
 case "$use64bits" in
 "$define" )
 	echo " "
-	echo $n "Checking to see if your system supports int64_t...$c" >&4
+	$echo $n "Checking to see if your system supports int64_t...$c" >&4
 	$cat >try.c <<EOCP
 #include <sys/types.h>
 #$i_inttypes I_INTTYPES
@@ -6795,7 +6795,7 @@ $rm -f intsize intsize.*
 
 : check for long long
 echo " "
-echo $n "Checking to see if your system supports long long...$c" >&4
+$echo $n "Checking to see if your system supports long long...$c" >&4
 echo 'long long foo() { long long x; x = 7; return x; }' > try.c
 if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
 	val="$define"
@@ -7028,7 +7028,7 @@ $rm -f try.c try
 
 : check for long doubles
 echo " "
-echo $n "Checking to see if your system supports long double...$c" >&4
+$echo $n "Checking to see if your system supports long double...$c" >&4
 echo 'long double foo() { long double x; x = 7.0; return x; }' > try.c
 if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
 	val="$define"
@@ -8582,7 +8582,7 @@ eval $inlibc
 
 : check for off64_t
 echo " "
-echo $n "Checking to see if your system supports off64_t...$c" >&4
+$echo $n "Checking to see if your system supports off64_t...$c" >&4
 $cat >try.c <<EOCP
 #include <sys/types.h>
 #include <unistd.h>
@@ -8601,7 +8601,7 @@ eval $setvar
 
 : check for fpos64_t
 echo " "
-echo $n "Checking to see if your system supports fpos64_t...$c" >&4
+$echo $n "Checking to see if your system supports fpos64_t...$c" >&4
 $cat >try.c <<EOCP
 #include <sys/stdio.h>
 fpos64_t foo() { fpos64_t x; x = 7; return x; }'
@@ -12536,6 +12536,7 @@ int main() {
 		printf("1\n");
 }
 EOCP
+set try
 if eval $compile; then
 	yyy=`./try`
 	case "$yyy" in
