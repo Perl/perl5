@@ -3685,79 +3685,65 @@ XS(w32_NodeName)
 static
 XS(w32_DomainName)
 {
-    /*
-     * HOWTO: Retrieve Current User and Domain Names on Windows NT
-     * http://support.microsoft.com/support/kb/articles/Q111/5/44.ASP
-     *
-     * This information is unfortunately unavailable from 32 bit code on
-     * Win9X.  If anyone wants to write a thunking DLL to make the 16 bit
-     * Lan Manager APIs available to Perl, here are some relevant KB articles:
-     *
-     * HOWTO: Retrieve Current User and Domain Names on Windows 95 and Windows 98
-     * http://support.microsoft.com/support/kb/articles/Q155/6/98.ASP
-     *
-     * HOWTO: Call 16-bit Code from 32-bit Code Under Windows 95
-     * http://support.microsoft.com/support/kb/articles/Q155/7/63.ASP
-     */
-
     dXSARGS;
+    HINSTANCE hNetApi32 = LoadLibrary("netapi32.dll");
+    DWORD (__stdcall *pfnNetApiBufferFree)(LPVOID Buffer);
+    DWORD (__stdcall *pfnNetWkstaGetInfo)(LPWSTR servername, DWORD level,
+					  void *bufptr);
 
-    char szUser[256];
-    DWORD cchUser = sizeof(szUser);
-    char szDomain[256];
-    DWORD cchDomain = sizeof(szDomain);
-
-    HANDLE       hToken   = NULL;
-    PTOKEN_USER  ptiUser  = NULL;
-    DWORD        cbti     = 0;
-    SID_NAME_USE snu;
-
-    EXTEND(SP,1);
-    ST(0) = &PL_sv_undef;
-
-    /* Get the calling thread's access token. */
-    if (!OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, TRUE, &hToken)) {
-        if (GetLastError() != ERROR_NO_TOKEN)
-            goto leave;
-        /* Retry against process token if no thread token exists. */
-        if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken))
-            goto leave;
+    if (hNetApi32) {
+	pfnNetApiBufferFree = (DWORD (__stdcall *)(void *))
+	    GetProcAddress(hNetApi32, "NetApiBufferFree");
+	pfnNetWkstaGetInfo = (DWORD (__stdcall *)(LPWSTR, DWORD, void *))
+	    GetProcAddress(hNetApi32, "NetWkstaGetInfo");
     }
-
-    /* Obtain the size of the user information in the token. */
-    if (GetTokenInformation(hToken, TokenUser, NULL, 0, &cbti)) {
-        /* Call should have failed due to zero-length buffer. */
-        goto leave;
+    EXTEND(SP,1);
+    if (hNetApi32 && pfnNetWkstaGetInfo && pfnNetApiBufferFree) {
+	/* this way is more reliable, in case user has a local account. */
+	char dname[256];
+	DWORD dnamelen = sizeof(dname);
+	struct {
+	    DWORD   wki100_platform_id;
+	    LPWSTR  wki100_computername;
+	    LPWSTR  wki100_langroup;
+	    DWORD   wki100_ver_major;
+	    DWORD   wki100_ver_minor;
+	} *pwi;
+	/* NERR_Success *is* 0*/
+	if (0 == pfnNetWkstaGetInfo(NULL, 100, &pwi)) {
+	    if (pwi->wki100_langroup && *(pwi->wki100_langroup)) {
+		WideCharToMultiByte(CP_ACP, NULL, pwi->wki100_langroup,
+				    -1, (LPSTR)dname, dnamelen, NULL, NULL);
+	    }
+	    else {
+		WideCharToMultiByte(CP_ACP, NULL, pwi->wki100_computername,
+				    -1, (LPSTR)dname, dnamelen, NULL, NULL);
+	    }
+	    pfnNetApiBufferFree(pwi);
+	    FreeLibrary(hNetApi32);
+	    XSRETURN_PV(dname);
+	}
+	FreeLibrary(hNetApi32);
     }
     else {
-        /* Call should have failed due to zero-length buffer. */
-        if (GetLastError() != ERROR_INSUFFICIENT_BUFFER)
-            goto leave;
+	/* Win95 doesn't have NetWksta*(), so do it the old way */
+	char name[256];
+	DWORD size = sizeof(name);
+	if (hNetApi32)
+	    FreeLibrary(hNetApi32);
+	if (GetUserName(name,&size)) {
+	    char sid[ONE_K_BUFSIZE];
+	    DWORD sidlen = sizeof(sid);
+	    char dname[256];
+	    DWORD dnamelen = sizeof(dname);
+	    SID_NAME_USE snu;
+	    if (LookupAccountName(NULL, name, (PSID)&sid, &sidlen,
+				  dname, &dnamelen, &snu)) {
+		XSRETURN_PV(dname);		/* all that for this */
+	    }
+	}
     }
-
-    /* Allocate buffer for user information in the token. */
-    Newc(0, ptiUser, cbti, char, TOKEN_USER);
-    if (!ptiUser)
-        goto leave;
-
-    /* Retrieve the user information from the token. */
-    if (!GetTokenInformation(hToken, TokenUser, ptiUser, cbti, &cbti))
-        goto leave;
-
-    /* Retrieve user name and domain name based on user's SID. */
-    if (!LookupAccountSid(NULL, ptiUser->User.Sid, szUser, &cchUser,
-                          szDomain, &cchDomain, &snu))
-        goto leave;
-
-    ST(0) = sv_2mortal(newSVpvn(szDomain, cchDomain));
-
- leave:
-    if (hToken)
-        CloseHandle(hToken);
-
-    Safefree(ptiUser);
-
-    XSRETURN(1);
+    XSRETURN_UNDEF;
 }
 
 static
@@ -3926,9 +3912,6 @@ XS(w32_GetShortPathName)
 
     shortpath = sv_mortalcopy(ST(0));
     SvUPGRADE(shortpath, SVt_PV);
-    if (!SvPVX(shortpath) || !SvLEN(shortpath))
-        XSRETURN_UNDEF;
-
     /* src == target is allowed */
     do {
 	len = GetShortPathName(SvPVX(shortpath),
@@ -3958,9 +3941,6 @@ XS(w32_GetFullPathName)
     filename = ST(0);
     fullpath = sv_mortalcopy(filename);
     SvUPGRADE(fullpath, SVt_PV);
-    if (!SvPVX(fullpath) || !SvLEN(fullpath))
-        XSRETURN_UNDEF;
-
     do {
 	len = GetFullPathName(SvPVX(filename),
 			      SvLEN(fullpath),
