@@ -1179,7 +1179,6 @@ lib/unicode/Category.pl		Unicode character database
 lib/unicode/CombiningClass.pl	Unicode character database
 lib/unicode/CompExcl.txt	Unicode character database
 lib/unicode/Decomposition.pl	Unicode character database
-lib/unicode/distinct.pm		Perl pragma to strictly distinguish UTF8 data and non-UTF data
 lib/unicode/EAWidth.txt		Unicode character database
 lib/unicode/In.pl		Unicode character database
 lib/unicode/In/0.pl		Unicode character database
@@ -1487,8 +1486,8 @@ lib/unicode/To/Lower.pl		Unicode character database
 lib/unicode/To/Title.pl		Unicode character database
 lib/unicode/To/Upper.pl		Unicode character database
 lib/unicode/UCD.html		Unicode character database
-lib/Unicode/UCD.pm			Unicode character database
-lib/Unicode/UCD.t			See if Unicode character database works
+lib/UnicodeCD.pm		Unicode character database
+lib/UnicodeCD.t			See if Unicode character database works
 lib/unicode/Unicode.html	Unicode character database
 lib/unicode/Unicode.txt		Unicode character database
 lib/unicode/version		The version of the Unicode
@@ -1821,6 +1820,7 @@ README.qnx		Notes about QNX port
 README.solaris		Notes about Solaris port
 README.threads		Notes about multithreading
 README.tru64		Notes about Tru64
+README.uts		Notes about UTS
 README.vmesa		Notes about VM/ESA port
 README.vms		Notes about installing the VMS port
 README.vos		Notes about Stratus VOS port

@@ -1003,17 +1003,60 @@ Perl_mess(pTHX_ const char *pat, ...)
     return retval;
 }
 
+STATIC COP*
+S_closest_cop(pTHX_ COP *cop, OP *o)
+{
+    /* Look for PL_op starting from o.  cop is the last COP we've seen. */
+
+    if (!o || o == PL_op) return cop;
+
+    if (o->op_flags & OPf_KIDS) {
+	OP *kid;
+	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling)
+	{
+	    COP *new_cop;
+
+	    /* If the OP_NEXTSTATE has been optimised away we can still use it
+	     * the get the file and line number. */
+
+	    if (kid->op_type == OP_NULL && kid->op_targ == OP_NEXTSTATE)
+		cop = (COP *)kid;
+
+	    /* Keep searching, and return when we've found something. */
+
+	    new_cop = closest_cop(cop, kid);
+	    if (new_cop) return new_cop;
+	}
+    }
+
+    /* Nothing found. */
+
+    return 0;
+}
+
 SV *
 Perl_vmess(pTHX_ const char *pat, va_list *args)
 {
     SV *sv = mess_alloc();
     static char dgd[] = " during global destruction.\n";
+    COP *cop;
 
     sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
     if (!SvCUR(sv) || *(SvEND(sv) - 1) != '\n') {
-	if (CopLINE(PL_curcop))
+
+	/*
+	 * Try and find the file and line for PL_op.  This will usually be
+	 * PL_curcop, but it might be a cop that has been optimised away.  We
+	 * can try to find such a cop by searching through the optree starting
+	 * from the sibling of PL_curcop.
+	 */
+
+	cop = closest_cop(PL_curcop, PL_curcop->op_sibling);
+	if (!cop) cop = PL_curcop;
+
+	if (CopLINE(cop))
 	    Perl_sv_catpvf(aTHX_ sv, " at %s line %"IVdf,
-			   CopFILE(PL_curcop), (IV)CopLINE(PL_curcop));
+			   CopFILE(cop), (IV)CopLINE(cop));
 	if (GvIO(PL_last_in_gv) && IoLINES(GvIOp(PL_last_in_gv))) {
 	    bool line_mode = (RsSIMPLE(PL_rs) &&
 			      SvCUR(PL_rs) == 1 && *SvPVX(PL_rs) == '\n');

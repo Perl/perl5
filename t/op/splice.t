@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..10\n";
+print "1..12\n";
 
 @a = (1..10);
 
@@ -37,4 +37,18 @@ print "ok 9\n";
 print "not " unless j(splice(@a)) eq j(1,2,7,3) && j(@a) eq '';
 print "ok 10\n";
 
+# Tests 11 and 12:
+# [ID 20010711.005] in Tie::Array, SPLICE ignores context, breaking SHIFT
+
+my $foo;
+
+@a = ('red', 'green', 'blue');
+$foo = splice @a, 1, 2;
+print "not " unless $foo eq 'blue';
+print "ok 11\n";
+
+@a = ('red', 'green', 'blue');
+$foo = shift @a;
+print "not " unless $foo eq 'red';
+print "ok 12\n";
 

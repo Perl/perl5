@@ -2228,7 +2228,7 @@ Ap	|PERL_SI*|si_dup	|PERL_SI* si|clone_params* param
 Ap	|ANY*	|ss_dup		|PerlInterpreter* proto_perl|clone_params* param
 Ap	|void*	|any_dup	|void* v|PerlInterpreter* proto_perl
 Ap	|HE*	|he_dup		|HE* e|bool shared|clone_params* param
-Ap	|REGEXP*|re_dup		|REGEXP* r
+Ap	|REGEXP*|re_dup		|REGEXP* r|clone_params* param
 Ap	|PerlIO*|fp_dup		|PerlIO* fp|char type
 Ap	|DIR*	|dirp_dup	|DIR* dp
 Ap	|GP*	|gp_dup		|GP* gp|clone_params* param
@@ -2593,6 +2593,7 @@ s	|char*	|stdize_locale	|char* locs
 #endif
 
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
+s	|COP*	|closest_cop	|COP *cop|OP *o
 s	|SV*	|mess_alloc
 #  if defined(LEAKTEST)
 s	|void	|xstat		|int

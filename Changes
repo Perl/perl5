@@ -31,6 +31,345 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 11326] By: jhi                                   on 2001/07/12  18:17:18
+        Log: Typo spotted by Philip Newton.
+     Branch: perl
+	   ! pod/perl572delta.pod
+____________________________________________________________________________
+[ 11325] By: jhi                                   on 2001/07/12  18:11:42
+        Log: Subject: [PATCH] fixes perl_clone of perl_clone
+             From: Artur Bergman <artur@contiller.se>
+             Date: Thu, 12 Jul 2001 20:57:09 +0200
+             Message-ID: <B773BFA4.236B%artur@contiller.se>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 11324] By: jhi                                   on 2001/07/12  18:09:17
+        Log: Add README.uts from Hal Morris.
+     Branch: perl
+	   + README.uts
+	   ! MANIFEST pod/buildtoc.PL pod/perl.pod pod/perl572delta.pod
+	   ! pod/perltoc.pod win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 11323] By: jhi                                   on 2001/07/12  17:48:33
+        Log: Subject: Re: AIX 4.3.3 w/ vac 5.0 [ FATAL in B ]
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Thu, 12 Jul 2001 20:32:37 +0200
+             Message-Id: <20010712201743.E108.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[ 11322] By: jhi                                   on 2001/07/12  17:44:29
+        Log: Subject: Patch: document reg_data.what member
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Message-ID: <20010712182532.14821.qmail@plover.com>
+             Date: Thu, 12 Jul 2001 14:25:32 -0400
+     Branch: perl
+	   ! regcomp.c regcomp.h
+____________________________________________________________________________
+[ 11321] By: jhi                                   on 2001/07/12  17:43:18
+        Log: Subject: [PATCH] Perl_re_dup()
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Thu, 12 Jul 2001 23:54:32 +0530
+             Message-ID: <20010712235432.J24707@lustre.dyn.wiw.org>
+     Branch: perl
+	   ! embed.h embed.pl perlapi.c proto.h sv.c
+____________________________________________________________________________
+[ 11320] By: jhi                                   on 2001/07/12  17:18:54
+        Log: Regen Configure, modlib, toc.
+     Branch: perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! pod/perlmodlib.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 11319] By: jhi                                   on 2001/07/12  17:08:15
+        Log: The problem seems to be in PerlIO::Layer::->find() not
+             accepting the ":encoding(blurflur)" arguments.
+     Branch: perl
+	   ! lib/PerlIO.pm lib/open.pm
+____________________________________________________________________________
+[ 11318] By: jhi                                   on 2001/07/12  16:58:11
+        Log: AIX doc update.
+     Branch: perl
+	   ! README.aix pod/perl572delta.pod
+____________________________________________________________________________
+[ 11317] By: jhi                                   on 2001/07/12  16:39:11
+        Log: Subject: AIX README update
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Thu, 12 Jul 2001 19:28:30 +0200
+             Message-Id: <20010712192620.E0F9.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! README.aix
+____________________________________________________________________________
+[ 11316] By: jhi                                   on 2001/07/12  16:37:15
+        Log: Subject: [PATCH ext/IO/lib/IO/t/io_unix.t] for QNX6
+             From: Norton Allen <allen@huarp.harvard.edu>
+             Date: Thu, 12 Jul 2001 11:30:51 -0400 (edt)
+             Message-Id: <200107121530.LAA12631@bottesini.harvard.edu>
+     Branch: perl
+	   ! ext/IO/lib/IO/t/io_unix.t
+____________________________________________________________________________
+[ 11315] By: jhi                                   on 2001/07/12  16:35:53
+        Log: Subject: [PATCH README.qnx hints/qnx.sh]
+             From: Norton Allen <allen@huarp.harvard.edu>
+             Date: Thu, 12 Jul 2001 11:29:19 -0400 (edt)
+             Message-Id: <200107121529.LAA23411@bottesini.harvard.edu>
+     Branch: perl
+	   ! README.qnx hints/qnx.sh
+____________________________________________________________________________
+[ 11314] By: jhi                                   on 2001/07/12  16:13:15
+        Log: Subject: [patch] faster PM_GETRE
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Thu, 12 Jul 2001 10:13:27 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0107121011530.28844-100000@mako.covalent.net>
+     Branch: perl
+	   ! op.h
+____________________________________________________________________________
+[ 11313] By: jhi                                   on 2001/07/12  16:12:23
+        Log: Subject: Re: [PATCH] Threadsafe PMOPs! We might still win this war.
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Thu, 12 Jul 2001 10:11:28 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0107121010160.28844-100000@mako.covalent.net>
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[ 11312] By: jhi                                   on 2001/07/12  16:07:22
+        Log: Tell where the nice Estonian database is.
+     Branch: perl
+	   ! lib/open.pm
+____________________________________________________________________________
+[ 11311] By: jhi                                   on 2001/07/12  16:05:31
+        Log: Retract #11309 since #11310 is a better fix.
+     Branch: perl
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[ 11310] By: gsar                                  on 2001/07/12  15:50:40
+        Log: fix for failing fork.t#12 on windows (win32_execvp() tweak in
+             change#11300 needs to return the status of failed win32_spawnvp())
+             
+             fix various open.pm bugs: '\0' isn't the same as "\0", so it wasn't
+             splitting correctly; remove unused variables; 'require' at run time
+             rather than 'use' at compile time for I18N::Langinfo, since it
+             isn't everyware
+     Branch: perl
+	   ! lib/open.pm win32/win32.c
+____________________________________________________________________________
+[ 11309] By: jhi                                   on 2001/07/12  15:29:55
+        Log: Temporary workaround.
+     Branch: perl
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[ 11308] By: jhi                                   on 2001/07/12  14:44:51
+        Log: UCD typo in #11306 and add also more known-to-be-tested
+             modules to the skip list.
+     Branch: perl
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[ 11307] By: jhi                                   on 2001/07/12  14:38:38
+        Log: Rename Unicode::UCD to UnicodeCD to avoid
+             messups with case-insensitive filesystems.
+     Branch: perl
+	   + lib/UnicodeCD.pm lib/UnicodeCD.t
+	   - lib/Unicode/UCD.pm lib/Unicode/UCD.t
+	   ! MANIFEST pod/perl572delta.pod t/lib/1_compile.t
+____________________________________________________________________________
+[ 11306] By: jhi                                   on 2001/07/12  13:32:05
+        Log: Subject: [ID 20010711.005] in Tie::Array, SPLICE ignores context, breaking SHIFT 
+             From: daniel@biz.bitpusher.com
+             Date: Wed, 11 Jul 2001 23:25:47 -0700
+             Message-Id: <200107120625.f6C6PkJ13065@biz.bitpusher.com>
+     Branch: perl
+	   ! lib/Tie/Array.pm t/op/splice.t
+____________________________________________________________________________
+[ 11305] By: jhi                                   on 2001/07/12  13:05:46
+        Log: Subject: [PATCH] More accurate line numbers in messages
+             From: Paul Johnson <paul@pjcj.net>
+             Date: Thu, 12 Jul 2001 04:14:11 +0200
+             Message-ID: <20010712041411.A3467@pjcj.net>
+             
+             (With prototyping and multiplicity tweaks.)
+     Branch: perl
+	   ! dump.c embed.h embed.pl t/lib/warnings/util util.c
+____________________________________________________________________________
+[ 11304] By: nick                                  on 2001/07/12  12:53:40
+        Log: Integrate mainline
+     Branch: perlio
+	  !> ext/ByteLoader/bytecode.h hints/aix.sh pod/perl572delta.pod
+	  !> regexec.c thread.h
+____________________________________________________________________________
+[ 11303] By: jhi                                   on 2001/07/12  12:46:20
+        Log: Cut-and-pasto in #11298.
+     Branch: perl
+	   ! ext/ByteLoader/bytecode.h
+____________________________________________________________________________
+[ 11302] By: jhi                                   on 2001/07/12  12:42:35
+        Log: Update the AIX known problems section.
+     Branch: perl
+	   ! pod/perl572delta.pod
+____________________________________________________________________________
+[ 11301] By: jhi                                   on 2001/07/12  12:36:46
+        Log: Subject: Re: HiRes on AIX 4.2 in threaded mode
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Thu, 12 Jul 2001 12:16:16 +0200
+             Message-Id: <20010712114215.E0D9.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[ 11300] By: jhi                                   on 2001/07/12  12:35:44
+        Log: Integrate perlio.
+     Branch: perl
+	  !> makedef.pl win32/win32.c
+____________________________________________________________________________
+[ 11299] By: jhi                                   on 2001/07/12  12:33:57
+        Log: Subject: [PATCH] fix for PMOP threadness failures
+             From: Artur Bergman <artur@contiller.se>
+             Date: Thu, 12 Jul 2001 09:48:06 +0200
+             Message-ID: <B77322D6.22DD%artur@contiller.se>
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 11298] By: jhi                                   on 2001/07/12  12:27:47
+        Log: Subject: RE: Win32 Failure, was Re: perl@11278 - LAST CALL FOR 5.7.2
+             From: "Konovalov, Vadim Vladimirovich (Vadim)" <vkonovalov@lucent.com>
+             Date: Thu, 12 Jul 2001 09:09:48 +0200
+             Message-ID: <E3FB32585BF1D411B9E900805FF51A0808CE70@RU0022EXCH001U> 
+             
+             More parentheses to keep bcc happy.
+     Branch: perl
+	   ! ext/ByteLoader/bytecode.h
+____________________________________________________________________________
+[ 11297] By: jhi                                   on 2001/07/12  12:24:50
+        Log: Subject: Re: [patch] pthread_atfork bandaid
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Wed, 11 Jul 2001 23:43:17 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0107112342330.28844-100000@mako.covalent.net>
+     Branch: perl
+	   ! thread.h
+____________________________________________________________________________
+[ 11296] By: nick                                  on 2001/07/12  11:55:48
+        Log: Exclude reentrant_buffer from .def file
+     Branch: perlio
+	   ! makedef.pl
+____________________________________________________________________________
+[ 11295] By: nick                                  on 2001/07/12  11:11:44
+        Log: Honour void-ness of my_exit()
+     Branch: perlio
+	   ! win32/win32.c
+____________________________________________________________________________
+[ 11294] By: nick                                  on 2001/07/12  07:51:04
+        Log: Integrate mainline
+     Branch: perlio
+	  +> uts/sprintf_wrap.c
+	  !> (integrate 35 files)
+____________________________________________________________________________
+[ 11293] By: jhi                                   on 2001/07/12  04:58:08
+        Log: Retract #11289.
+     Branch: perl
+	   ! embed.h embed.pl perl.c proto.h thread.h
+____________________________________________________________________________
+[ 11292] By: jhi                                   on 2001/07/12  04:47:43
+        Log: Now the :locale pseudolayer *almost* works...
+     Branch: perl
+	   ! lib/open.pm
+____________________________________________________________________________
+[ 11291] By: jhi                                   on 2001/07/12  04:36:47
+        Log: Locale encoding tweaks.
+     Branch: perl
+	   ! lib/open.pm
+____________________________________________________________________________
+[ 11290] By: jhi                                   on 2001/07/12  04:25:53
+        Log: Subject: Re: [PATCH: perl@11181] UCD.t fails LATIN|Latin test
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Thu, 12 Jul 2001 00:59:31 -0400
+             Message-ID: <20010712045931.8543.qmail@plover.com>
+             
+             Remove the chmod/umask leading zero warning.
+     Branch: perl
+	   ! lib/warnings.pm pod/perldiag.pod pod/perllexwarn.pod
+	   ! t/lib/warnings/toke toke.c warnings.h warnings.pl
+____________________________________________________________________________
+[ 11289] By: jhi                                   on 2001/07/12  04:16:41
+        Log: (Retracted by #11289.)
+     Branch: perl
+	   ! embed.h embed.pl perl.c proto.h thread.h
+____________________________________________________________________________
+[ 11288] By: jhi                                   on 2001/07/12  03:45:11
+        Log: Needed by #11283.
+     Branch: perl
+	   ! intrpvar.h
+____________________________________________________________________________
+[ 11287] By: jhi                                   on 2001/07/12  03:40:04
+        Log: Metaconfig unit change for #11286.
+     Branch: metaconfig/U/perl
+	   ! patchlevel.U
+____________________________________________________________________________
+[ 11286] By: jhi                                   on 2001/07/12  03:39:18
+        Log: Subject: Re: [PATCH Configure] perl -V broken
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Wed, 11 Jul 2001 13:30:27 -0400 (EDT)
+             Message-ID: <Pine.SOL.4.10.10107111329060.2021-100000@maxwell.phys.lafayette.edu>
+     Branch: perl
+	   ! Configure myconfig.SH
+____________________________________________________________________________
+[ 11285] By: jhi                                   on 2001/07/12  03:27:28
+        Log: Retract #11166 (and #11237).
+     Branch: perl
+	   ! dump.c embed.h lib/warnings.pm op.c op.h opcode.h opcode.pl
+	   ! pod/perldiag.pod pp.sym pp_proto.h t/lib/warnings/op
+	   ! t/lib/warnings/toke toke.c warnings.h warnings.pl
+____________________________________________________________________________
+[ 11284] By: jhi                                   on 2001/07/12  02:36:42
+        Log: UTS tweaks for Hal Morris.
+     Branch: perl
+	   + uts/sprintf_wrap.c
+	   ! MANIFEST hints/uts.sh perl.h
+____________________________________________________________________________
+[ 11283] By: jhi                                   on 2001/07/12  00:52:36
+        Log: Subject: [PATCH] Use reentrant API glibc
+             From: Artur Bergman <artur@contiller.se>
+             Date: Thu, 12 Jul 2001 00:58:21 +0200
+             Message-ID: <B772A6AD.2288%artur@contiller.se>
+     Branch: perl
+	   ! embedvar.h intrpvar.h op.h perl.c perlapi.h pod/perlapi.pod
+	   ! sv.c
+____________________________________________________________________________
+[ 11282] By: jhi                                   on 2001/07/12  00:35:27
+        Log: Subject: Re: ActivePerl 628 + warnings + fork + exec = spurious "Can't exec"?
+             From: barries <barries@slaysys.com>
+             Date: Wed, 11 Jul 2001 15:11:46 -0400
+             Message-ID: <20010711151146.G24560@jester.slaysys.com>
+     Branch: perl
+	   ! pp_sys.c t/lib/warnings/doio win32/win32.c
+____________________________________________________________________________
+[ 11281] By: jhi                                   on 2001/07/12  00:32:17
+        Log: Subject: [patch] pthread_atfork bandaid
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Wed, 11 Jul 2001 08:59:12 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0107110855070.11688-100000@mako.covalent.net>
+     Branch: perl
+	   ! miniperlmain.c perl.c
+____________________________________________________________________________
+[ 11280] By: jhi                                   on 2001/07/12  00:31:34
+        Log: Subject: [patch] perl_clone leaks
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Wed, 11 Jul 2001 08:43:32 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0107110842390.11688-100000@mako.covalent.net>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 11279] By: nick                                  on 2001/07/11  15:49:38
+        Log: Integrate mainline
+     Branch: perlio
+	  +> ext/Encode/Encode/HZ.enc ext/PerlIO/t/encoding.t
+	  +> ext/Time/HiRes/hints/dynixptx.pl lib/Math/BigInt/Calc.pm
+	  +> lib/Math/BigInt/t/bigintc.t lib/Term/ANSIColor/ChangeLog
+	  +> lib/Term/ANSIColor/README
+	  !> (integrate 54 files)
+____________________________________________________________________________
+[ 11278] By: jhi                                   on 2001/07/11  13:52:20
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 11277] By: jhi                                   on 2001/07/11  13:31:43
         Log: Subject: blead kit timestamps && the problem with running perl embed.pl
              From: Peter Prymmer <pvhp@forte.com>

@@ -3363,8 +3363,13 @@ win32_execvp(const char *cmdname, const char *const *argv)
     /* if this is a pseudo-forked child, we just want to spawn
      * the new program, and return */
     if (w32_pseudo_id) {
-	my_exit(win32_spawnvp(P_WAIT, cmdname, (char *const *)argv));
-	return 0;
+	int status = win32_spawnvp(P_WAIT, cmdname, (char *const *)argv);
+	if (status != -1) {
+	    my_exit(status);
+	    return 0;
+	}
+	else
+	    return status;
     }
 #endif
     return execvp(cmdname, (char *const *)argv);

@@ -2951,7 +2951,7 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
  #ifdef USE_ITHREADS
         {
                 SV* repointer = newSViv(0);
-                av_push(PL_regex_padav,repointer);
+                av_push(PL_regex_padav,SvREFCNT_inc(repointer));
                 pmop->op_pmoffset = av_len(PL_regex_padav);
                 PL_regex_pad = AvARRAY(PL_regex_padav);
         }

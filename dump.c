@@ -392,7 +392,20 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
 	PerlIO_printf(file, "DONE\n");
     if (o->op_targ) {
 	if (o->op_type == OP_NULL)
+	{
 	    Perl_dump_indent(aTHX_ level, file, "  (was %s)\n", PL_op_name[o->op_targ]);
+	    if (o->op_targ == OP_NEXTSTATE)
+	    {
+		if (CopLINE(cCOPo))
+		    Perl_dump_indent(aTHX_ level, file, "LINE = %d\n",CopLINE(cCOPo));
+		if (CopSTASHPV(cCOPo))
+		    Perl_dump_indent(aTHX_ level, file, "PACKAGE = \"%s\"\n",
+				     CopSTASHPV(cCOPo));
+		if (cCOPo->cop_label)
+		    Perl_dump_indent(aTHX_ level, file, "LABEL = \"%s\"\n",
+				     cCOPo->cop_label);
+	    }
+	}
 	else
 	    Perl_dump_indent(aTHX_ level, file, "TARG = %ld\n", (long)o->op_targ);
     }

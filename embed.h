@@ -1177,6 +1177,7 @@
 #define stdize_locale		S_stdize_locale
 #endif
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
+#define closest_cop		S_closest_cop
 #define mess_alloc		S_mess_alloc
 #  if defined(LEAKTEST)
 #define xstat			S_xstat
@@ -2351,7 +2352,7 @@
 #define ss_dup(a,b)		Perl_ss_dup(aTHX_ a,b)
 #define any_dup(a,b)		Perl_any_dup(aTHX_ a,b)
 #define he_dup(a,b,c)		Perl_he_dup(aTHX_ a,b,c)
-#define re_dup(a)		Perl_re_dup(aTHX_ a)
+#define re_dup(a,b)		Perl_re_dup(aTHX_ a,b)
 #define fp_dup(a,b)		Perl_fp_dup(aTHX_ a,b)
 #define dirp_dup(a)		Perl_dirp_dup(aTHX_ a)
 #define gp_dup(a,b)		Perl_gp_dup(aTHX_ a,b)
@@ -2677,6 +2678,7 @@
 #define stdize_locale(a)	S_stdize_locale(aTHX_ a)
 #endif
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
+#define closest_cop(a,b)	S_closest_cop(aTHX_ a,b)
 #define mess_alloc()		S_mess_alloc(aTHX)
 #  if defined(LEAKTEST)
 #define xstat(a)		S_xstat(aTHX_ a)
@@ -5201,6 +5203,8 @@
 #define stdize_locale		S_stdize_locale
 #endif
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
+#define S_closest_cop		CPerlObj::S_closest_cop
+#define closest_cop		S_closest_cop
 #define S_mess_alloc		CPerlObj::S_mess_alloc
 #define mess_alloc		S_mess_alloc
 #  if defined(LEAKTEST)

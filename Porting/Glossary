@@ -1209,6 +1209,11 @@ d_PRIXU64 (quadfio.U):
 	The 'U' in the name is to separate this from d_PRIx64 so that even
 	case-blind systems can see the difference.
 
+d_pthread_atfork (d_pthread_atfork.U):
+	This variable conditionally defines the HAS_PTHREAD_ATFORK symbol,
+	which indicates to the C program that the pthread_atfork()
+	routine is available.
+
 d_pthread_yield (d_pthread_y.U):
 	This variable conditionally defines the HAS_PTHREAD_YIELD
 	symbol if the pthread_yield routine is available to yield
@@ -3912,6 +3917,15 @@ version (patchlevel.U):
 	full version number, including any possible subversions.
 	This is suitable for use as a directory name, and hence is
 	filesystem dependent.
+
+version_patchlevel_string (patchlevel.U):
+	This is a string combining version, subversion and
+	perl_patchlevel (if perl_patchlevel is non-zero).  
+	It is typically something like 
+	'version 7 subversion 1'  or
+	'version 7 subversion 1 patchlevel 11224'
+	It is computed here to avoid duplication of code in myconfig.SH
+	and lib/Config.pm. 
 
 versiononly (versiononly.U):
 	If set, this symbol indicates that only the version-specific

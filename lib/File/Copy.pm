@@ -84,24 +84,27 @@ sub copy {
     my $closefrom = 0;
     my $closeto = 0;
     my ($size, $status, $r, $buf);
-    local(*FROM, *TO);
     local($\) = '';
 
+    my $from_h;
     if ($from_a_handle) {
-	*FROM = *$from{FILEHANDLE};
+       $from_h = $from;
     } else {
 	$from = _protect($from) if $from =~ /^\s/s;
-	open(FROM, "< $from\0") or goto fail_open1;
-	binmode FROM or die "($!,$^E)";
+       $from_h = \do { local *FH };
+       open($from_h, "< $from\0") or goto fail_open1;
+       binmode $from_h or die "($!,$^E)";
 	$closefrom = 1;
     }
 
+    my $to_h;
     if ($to_a_handle) {
-	*TO = *$to{FILEHANDLE};
+       $to_h = $to;
     } else {
 	$to = _protect($to) if $to =~ /^\s/s;
-	open(TO,"> $to\0") or goto fail_open2;
-	binmode TO or die "($!,$^E)";
+       $to_h = \do { local *FH };
+       open($to_h,"> $to\0") or goto fail_open2;
+       binmode $to_h or die "($!,$^E)";
 	$closeto = 1;
     }
 
@@ -109,7 +112,8 @@ sub copy {
 	$size = shift(@_) + 0;
 	croak("Bad buffer size for copy: $size\n") unless ($size > 0);
     } else {
-	$size = -s FROM;
+       no warnings 'uninitialized';
+       $size = -s $from_h;
 	$size = 1024 if ($size < 512);
 	$size = $Too_Big if ($size > $Too_Big);
     }
@@ -117,17 +121,17 @@ sub copy {
     $! = 0;
     for (;;) {
 	my ($r, $w, $t);
-	defined($r = sysread(FROM, $buf, $size))
+       defined($r = sysread($from_h, $buf, $size))
 	    or goto fail_inner;
 	last unless $r;
 	for ($w = 0; $w < $r; $w += $t) {
-	    $t = syswrite(TO, $buf, $r - $w, $w)
+           $t = syswrite($to_h, $buf, $r - $w, $w)
 		or goto fail_inner;
 	}
     }
 
-    close(TO) || goto fail_open2 if $closeto;
-    close(FROM) || goto fail_open1 if $closefrom;
+    close($to_h) || goto fail_open2 if $closeto;
+    close($from_h) || goto fail_open1 if $closefrom;
 
     # Use this idiom to avoid uninitialized value warning.
     return 1;
@@ -137,14 +141,14 @@ sub copy {
     if ($closeto) {
 	$status = $!;
 	$! = 0;
-	close TO;
+       close $to_h;
 	$! = $status unless $!;
     }
   fail_open2:
     if ($closefrom) {
 	$status = $!;
 	$! = 0;
-	close FROM;
+       close $from_h;
 	$! = $status unless $!;
     }
   fail_open1:

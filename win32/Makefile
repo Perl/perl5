@@ -958,6 +958,7 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.qnx      .\perlqnx.pod
 	copy ..\README.solaris  .\perlsolaris.pod
 	copy ..\README.tru64    .\perltru64.pod
+	copy ..\README.uts      .\perluts.pod
 	copy ..\README.vmesa    .\perlvmesa.pod
 	copy ..\vms\perlvms.pod .\perlvms.pod
 	copy ..\README.vos      .\perlvos.pod
@@ -1023,7 +1024,8 @@ distclean: clean
 	    perlhpux.pod perlmachten.pod \
 	    perlmacos.pod perlmint.pod perlmpeix.pod perlnetware.pod \
 	    perlos2.pod perlos390.pod perlplan9.pod perlqnx.pod \
-	    perlsolaris.pod perlvmesa.pod perlvms.pod perlvos.pod \
+	    perlsolaris.pod perltru64.pod perluts.pod \
+	    perlvmesa.pod perlvms.pod perlvos.pod \
 	    perlwin32.pod pod2html pod2latex pod2man pod2text pod2usage \
 	    podchecker podselect
 	cd ..\utils

@@ -4082,9 +4082,9 @@ Perl_he_dup(pTHXo_ HE* e, bool shared, clone_params* param)
 
 #undef  Perl_re_dup
 REGEXP*
-Perl_re_dup(pTHXo_ REGEXP* r)
+Perl_re_dup(pTHXo_ REGEXP* r, clone_params* param)
 {
-    return ((CPerlObj*)pPerl)->Perl_re_dup(r);
+    return ((CPerlObj*)pPerl)->Perl_re_dup(r, param);
 }
 
 #undef  Perl_fp_dup

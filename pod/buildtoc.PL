@@ -82,6 +82,7 @@ if (-d "pod") {
     perlplan9
     perlsolaris
     perltru64
+    perluts
     perlvmesa
     perlvms             
     perlvos             

@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Jul 12 07:32:38 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Fri Jul 13 03:14:01 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -477,6 +477,7 @@ d_poll=''
 d_portable=''
 d_old_pthread_create_joinable=''
 old_pthread_create_joinable=''
+d_pthread_atfork=''
 d_pthread_yield=''
 d_sched_yield=''
 sched_yield=''
@@ -11328,6 +11329,10 @@ eval $inlibc
 set poll d_poll
 eval $inlibc
 
+: see if pthread_atfork exists
+set pthread_atfork d_pthread_atfork
+eval $inlibc
+
 
 : see whether the various POSIXish _yields exist
 $cat >try.c <<EOP
@@ -16803,6 +16808,7 @@ d_phostname='$d_phostname'
 d_pipe='$d_pipe'
 d_poll='$d_poll'
 d_portable='$d_portable'
+d_pthread_atfork='$d_pthread_atfork'
 d_pthread_yield='$d_pthread_yield'
 d_pwage='$d_pwage'
 d_pwchange='$d_pwchange'

@@ -132,10 +132,6 @@ Restrict unsafe constructs
 
 Predeclare sub names
 
-=item unicode::distinct
-
-Strictly distinguish UTF8 data and non-UTF data.
-
 =item utf8
 
 Enable/disable UTF-8 (or UTF-EBCDIC) in source code
@@ -894,6 +890,26 @@ Expand and unexpand tabs per the unix expand(1) and unexpand(1)
 
 Line wrapping to form simple paragraphs
 
+=item Thread
+
+Manipulate threads in Perl (EXPERIMENTAL, subject to change)
+
+=item Thread::Queue
+
+Thread-safe queues
+
+=item Thread::Semaphore
+
+Thread-safe semaphores
+
+=item Thread::Signal
+
+Start a thread which runs signal handlers reliably
+
+=item Thread::Specific
+
+Thread-specific keys
+
 =item Tie::Array
 
 Base class for tied arrays
@@ -938,7 +954,7 @@ Internal object used by Time::gmtime and Time::localtime
 
 Base class for ALL classes (blessed references)
 
-=item Unicode::UCD
+=item UnicodeCD
 
 Unicode character database
 

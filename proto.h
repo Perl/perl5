@@ -961,7 +961,7 @@ PERL_CALLCONV PERL_SI*	Perl_si_dup(pTHX_ PERL_SI* si, clone_params* param);
 PERL_CALLCONV ANY*	Perl_ss_dup(pTHX_ PerlInterpreter* proto_perl, clone_params* param);
 PERL_CALLCONV void*	Perl_any_dup(pTHX_ void* v, PerlInterpreter* proto_perl);
 PERL_CALLCONV HE*	Perl_he_dup(pTHX_ HE* e, bool shared, clone_params* param);
-PERL_CALLCONV REGEXP*	Perl_re_dup(pTHX_ REGEXP* r);
+PERL_CALLCONV REGEXP*	Perl_re_dup(pTHX_ REGEXP* r, clone_params* param);
 PERL_CALLCONV PerlIO*	Perl_fp_dup(pTHX_ PerlIO* fp, char type);
 PERL_CALLCONV DIR*	Perl_dirp_dup(pTHX_ DIR* dp);
 PERL_CALLCONV GP*	Perl_gp_dup(pTHX_ GP* gp, clone_params* param);
@@ -1313,6 +1313,7 @@ STATIC char*	S_stdize_locale(pTHX_ char* locs);
 #endif
 
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
+STATIC COP*	S_closest_cop(pTHX_ COP *cop, OP *o);
 STATIC SV*	S_mess_alloc(pTHX);
 #  if defined(LEAKTEST)
 STATIC void	S_xstat(pTHX_ int);

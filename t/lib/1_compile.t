@@ -80,7 +80,6 @@ unless (has_extension('NDBM_File')) {
 }
 
 delete_by_prefix('unicode::');
-add_by_name('unicode::distinct');	# put this back
 
 # Delete all modules which have their own tests.
 # This makes this test a lot faster.
@@ -108,7 +107,9 @@ foreach my $module (@Core_Modules) {
 sub compile_module {
     my ($module) = $_[0];
     
-    return scalar `$^X "-Ilib" t/lib/compmod.pl $module` =~ /^ok/;
+    my $out = scalar `$^X "-Ilib" t/lib/compmod.pl $module`;
+    print "# $out";
+    return $out =~ /^ok/;
 }
 
 # Add here modules that have their own test scripts and therefore
@@ -173,6 +174,7 @@ Getopt::Long
 Getopt::Std
 I18N::Langinfo
 I18N::LangTags
+I18N::LangTags::List
 I18N::Collate
 IO::Dir
 IO::File
@@ -197,8 +199,17 @@ MIME::Base64
 MIME::QuotedPrint
 Math::BigFloat
 Math::BigInt
+Math::BigInt::Calc
 Math::Complex
 Math::Trig
+Memoize
+Memoize::AnyDBM_File
+Memoize::Expire
+Memoize::ExpireFile
+Memoize::ExpireTest
+Memoize::NDBM_File
+Memoize::SDBM_File
+Memoize::Storable
 NDBM_File
 NEXT
 Net::hostent
@@ -228,6 +239,8 @@ Sys::Syslog
 Term::ANSIColor
 Test
 Test::Harness
+Test::More
+Test::Simple
 Test::ParseWords
 Text::Abbrev
 Text::Balanced
@@ -248,7 +261,7 @@ Time::Piece
 Time::gmtime
 Time::localtime
 Time::tm
-Unicode::UCD
+UnicodeCD
 UNIVERSAL
 User::grent
 User::pwent

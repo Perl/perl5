@@ -4586,6 +4586,7 @@ Perl_pregfree(pTHX_ struct regexp *r)
 	SV** old_curpad;
 
 	while (--n >= 0) {
+          /* If you add a ->what type here, update the comment in regcomp.h */
 	    switch (r->data->what[n]) {
 	    case 's':
 		SvREFCNT_dec((SV*)r->data->data[n]);

@@ -10,9 +10,13 @@ sub in_locale { $^H & $locale::hint_bits }
 
 sub _get_locale_encoding {
     unless (defined $locale_encoding) {
-	eval { use I18N::Langinfo qw(langinfo CODESET) };
+	eval {
+	    # I18N::Langinfo isn't available everywhere
+	    require I18N::Langinfo;
+	    I18N::Langinfo->import('langinfo', 'CODESET');
+	};
 	unless ($@) {
-	    $locale_encoding = langinfo(CODESET);
+	    $locale_encoding = langinfo(CODESET());
 	}
 	my $country_language;
         if (not $locale_encoding && in_locale()) {
@@ -26,8 +30,8 @@ sub _get_locale_encoding {
 	    # parts of LC_ALL and LANG (the parts before the dot (if any)),
 	    # since we have Locale::Country and Locale::Language available.
 	    # TODO: get a database of Language -> Encoding mappings
-	    # (the Estonian database would be excellent!)
-	    # --jhi
+	    # (the Estonian database at http://www.eki.ee/letter/
+	    # would be excellent!) --jhi
 	}
 	if (defined $locale_encoding &&
 	    $locale_encoding eq 'euc' &&
@@ -49,9 +53,7 @@ sub import {
     my ($class,@args) = @_;
     croak("`use open' needs explicit list of disciplines") unless @args;
     $^H |= $open::hint_bits;
-    my ($in,$out) = split(/\0/,(${^OPEN} || '\0'));
-    my @in  = split(/\s+/,$in);
-    my @out = split(/\s+/,$out);
+    my ($in,$out) = split(/\0/,(${^OPEN} || "\0"), -1);
     while (@args) {
 	my $type = shift(@args);
 	my $discp = shift(@args);
@@ -67,20 +69,18 @@ sub import {
 		if ($locale_encoding =~ /^utf-?8$/i) {
 		    $layer = "utf8";
 		} else {
-		    $layer = "encoding";
+		    $layer = "encoding($locale_encoding)";
 		}
 	    }
 	    unless(PerlIO::Layer::->find($layer)) {
 		carp("Unknown discipline layer '$layer'");
-	    }
-	    if (defined $locale_encoding) {
-		$layer = "$layer($locale_encoding)";
 	    }
 	    push(@val,":$layer");
 	    if ($layer =~ /^(crlf|raw)$/) {
 		$^H{"open_$type"} = $layer;
 	    }
 	}
+	# print "# type = $type, val = @val\n";
 	if ($type eq 'IN') {
 	    $in  = join(' ',@val);
 	}
