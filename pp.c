@@ -1784,6 +1784,12 @@ PP(pp_ne)
 PP(pp_ncmp)
 {
     dSP; dTARGET; tryAMAGICbin(ncmp,0);
+#ifndef NV_PRESERVES_UV
+    if (SvROK(TOPs) && SvROK(TOPm1s)) {
+	SETs(boolSV(SvRV(TOPs) == SvRV(TOPm1s)));
+	RETURN;
+    }
+#endif
 #ifdef PERL_PRESERVE_IVUV
     /* Fortunately it seems NaN isn't IOK */
     SvIV_please(TOPs);
@@ -1964,6 +1970,12 @@ PP(pp_sne)
 PP(pp_scmp)
 {
     dSP; dTARGET;  tryAMAGICbin(scmp,0);
+#ifndef NV_PRESERVES_UV
+    if (SvROK(TOPs) && SvROK(TOPm1s)) {
+	SETs(boolSV(SvRV(TOPs) == SvRV(TOPm1s)));
+	RETURN;
+    }
+#endif
     {
       dPOPTOPssrl;
       int cmp = ((PL_op->op_private & OPpLOCALE)
