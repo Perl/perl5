@@ -750,7 +750,8 @@ See L<Encode>.
 The following list of Unicode support for regular expressions describes
 all the features currently supported.  The references to "Level N"
 and the section numbers refer to the Unicode Technical Report 18,
-"Unicode Regular Expression Guidelines".
+"Unicode Regular Expression Guidelines", version 6 (Unicode 3.2.0,
+Perl 5.8.0).
 
 =over 4
 
