@@ -644,6 +644,11 @@ call for another.  It can't manufacture one out of whole cloth.  In general
 you should be calling it out of only an AUTOLOAD routine anyway.  See
 L<perlfunc/goto>.
 
+=item Can't goto subroutine from an eval-string
+
+(F) The "goto subroutine" call can't be used to jump out of an eval "string".
+(You can use it to jump out of an eval {BLOCK}, but you probably don't want to.)
+
 =item Can't localize through a reference
 
 (F) You said something like C<local $$ref>, which Perl can't currently
@@ -1271,10 +1276,11 @@ for more information.
 script if C<$ENV{PATH}> contains a directory that is writable by the world.
 See L<perlsec>.
 
-=item Insecure PATH
+=item Insecure $ENV{%s} while running %s
 
 (F) You can't use system(), exec(), or a piped open in a setuid or
-setgid script if C<$ENV{PATH}> is derived from data supplied (or
+setgid script if any of C<$ENV{PATH}>, C<$ENV{IFS}>, C<$ENV{CDPATH}>,
+C<$ENV{ENV}> or C<$ENV{BASH_ENV}> are derived from data supplied (or
 potentially supplied) by the user.  The script must set the path to a
 known value, using trustworthy data.  See L<perlsec>.
 
@@ -2029,6 +2035,18 @@ which is why it's currently left out of your copy.
 
 (F) More than 100 levels of inheritance were used.  Probably indicates
 an unintended loop in your inheritance hierarchy.
+
+=item Reference found where even-sized list expected
+
+(W) You gave a single reference where Perl was expecting a list with
+an even number of elements (for assignment to a hash). This
+usually means that you used the anon hash constructor when you meant 
+to use parens. In any case, a hash requires key/value B<pairs>.
+
+    %hash = { one => 1, two => 2, };	# WRONG
+    %hash = [ qw/ an anon array / ];	# WRONG
+    %hash = ( one => 1, two => 2, );	# right
+    %hash = qw( one 1 two 2 );			# also fine
 
 =item Reference found where even-sized list expected
 

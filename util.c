@@ -1210,7 +1210,7 @@ die(pat, va_alist)
 		SAVEFREESV(msg);
 	    }
 	    else {
-		msg = GvSV(errgv);
+		msg = ERRSV;
 	    }
 	    PUSHMARK(sp);
 	    XPUSHs(msg);
@@ -2556,18 +2556,21 @@ I32 flags;
 	if (!xfound && !seen_dot && !xfailed && (Stat(scriptname,&statbuf) < 0))
 #endif
 	    seen_dot = 1;			/* Disable message. */
-	if (!xfound) 
-	    scriptname = NULL;
-/*	    croak("Can't %s %s%s%s",
-		  (xfailed ? "execute" : "find"),
-		  (xfailed ? xfailed : scriptname),
-		  (xfailed ? "" : " on PATH"),
-		  (xfailed || seen_dot) ? "" : ", '.' not in PATH"); */
+	if (!xfound) {
+	    if (flags & 1) {			/* do or die? */
+	        croak("Can't %s %s%s%s",
+		      (xfailed ? "execute" : "find"),
+		      (xfailed ? xfailed : scriptname),
+		      (xfailed ? "" : " on PATH"),
+		      (xfailed || seen_dot) ? "" : ", '.' not in PATH");
+	    }
+	    scriptname = Nullch;
+	}
 	if (xfailed)
 	    Safefree(xfailed);
 	scriptname = xfound;
     }
-    return scriptname;
+    return (scriptname ? savepv(scriptname) : Nullch);
 }
 
 #ifdef HUGE_VAL

@@ -70,9 +70,9 @@ sub parse_line {
 	}
         else {
 	    $unquoted =~ s/\\(.)/$1/g;
-	    $quoted =~ s/\\(.)/$1/g if ($quote eq '"');
+	    $quoted =~ s/\\(.)/$1/g if (defined $quote and $quote eq '"');
 	}
-        $word .= ($quote) ? $quoted : $unquoted;
+        $word .= defined $quote ? $quoted : $unquoted;
  
         if (length($delim)) {
             push(@pieces, $word);

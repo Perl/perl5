@@ -27,6 +27,11 @@ Symbol - manipulate Perl symbols and their names
     print { qualify_to_ref $fh } "foo!\n";
     $ref = qualify_to_ref $name, $pkg;
 
+    use Symbol qw(delete_package);
+    delete_package('Foo::Bar');
+    print "deleted\n" unless exists $Foo::{'Bar::'};
+
+
 =head1 DESCRIPTION
 
 C<Symbol::gensym> creates an anonymous glob and returns a reference
@@ -52,6 +57,10 @@ C<Symbol::qualify_to_ref> is just like C<Symbol::qualify> except that it
 returns a glob ref rather than a symbol name, so you can use the result
 even if C<use strict 'refs'> is in effect.
 
+C<Symbol::delete_package> wipes out a whole package namespace.  Note
+this routine is not exported by default--you may want to import it
+explicitly.
+
 =cut
 
 BEGIN { require 5.002; }
@@ -59,6 +68,7 @@ BEGIN { require 5.002; }
 require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(gensym ungensym qualify qualify_to_ref);
+@EXPORT_OK = qw(delete_package);
 
 $VERSION = 1.02;
 
@@ -99,6 +109,31 @@ sub qualify ($;$) {
 
 sub qualify_to_ref ($;$) {
     return \*{ qualify $_[0], @_ > 1 ? $_[1] : caller };
+}
+
+#
+# of Safe.pm lineage
+#
+sub delete_package ($) {
+    my $pkg = shift;
+
+    # expand to full symbol table name if needed
+
+    unless ($pkg =~ /^main::.*::$/) {
+        $pkg = "main$pkg"	if	$pkg =~ /^::/;
+        $pkg = "main::$pkg"	unless	$pkg =~ /^main::/;
+        $pkg .= '::'		unless	$pkg =~ /::$/;
+    }
+
+    my($stem, $leaf) = $pkg =~ m/(.*::)(\w+::)$/;
+    my $stem_symtab = *{$stem}{HASH};
+    return unless defined $stem_symtab and exists $stem_symtab->{$leaf};
+
+    my $leaf_glob   = $stem_symtab->{$leaf};
+    my $leaf_symtab = *{$leaf_glob}{HASH};
+
+    %$leaf_symtab = ();
+    delete $stem_symtab->{$leaf};
 }
 
 1;
