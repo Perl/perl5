@@ -668,7 +668,7 @@ VIRTUAL void	watch _((char** addr));
 VIRTUAL I32	whichsig _((char* sig));
 VIRTUAL int	yyerror _((char* s));
 #ifdef USE_PURE_BISON
-# define PERL_YYLEX_PARAM_DECL YYSTYPE *, int *
+# define PERL_YYLEX_PARAM_DECL YYSTYPE *lvalp, int *lcharp
 #else
 # define PERL_YYLEX_PARAM_DECL void
 #endif

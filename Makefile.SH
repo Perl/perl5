@@ -664,6 +664,7 @@ $define)
 case "$osname" in
 os390|posix-bc)
     rm -f y.tab.c y.tab.h
+    # yacc must be a reentrant ("pure") Bison in BS2000 Posix!
     yacc -d perly.y >/dev/null 2>&1
     if cmp -s y.tab.c perly.c; then
         rm -f y.tab.c
@@ -695,42 +696,49 @@ os390|posix-bc)
         mv -f y.tab.h perly.h
         xxx="$xxx perly.h"
     fi
-    cd x2p
-    rm -f y.tab.c
-    case "$osname" in
-    os390)
-	yacc -d a2p.y >/dev/null 2>&1
-        ;;
-    *) # e.g. posix-bc
-	yacc a2p.y >/dev/null 2>&1
-        ;;
-    esac
-    if cmp -s y.tab.c a2p.c
+    if cd x2p
     then
-        rm -f y.tab.c
-    else
-        echo "a2p.y -> a2p.c" >&2
-        mv -f y.tab.c a2p.c
-        chmod u+w a2p.c
-        sed -e 's/fprintf *( *stderr *,/PerlIO_printf(Perl_debug_log,/g' \
-            -e 's/y\.tab/a2p/g' a2p.c >a2p.tmp && mv a2p.tmp a2p.c
-        xxx="$xxx a2p.c"
+        rm -f y.tab.c y.tab.h
+        case "$osname" in
+        posix-bc)
+           # we are using two different yaccs in BS2000 Posix!
+           byacc a2p.y >/dev/null 2>&1
+           ;;
+        *) # e.g. os390
+           yacc  a2p.y >/dev/null 2>&1
+           ;;
+        esac
+        if cmp -s y.tab.c a2p.c
+        then
+            rm -f y.tab.c
+        else
+            echo "a2p.y -> a2p.c" >&2
+            mv -f y.tab.c a2p.c
+            chmod u+w a2p.c
+            sed -e 's/fprintf *( *stderr *,/PerlIO_printf(Perl_debug_log,/g' \
+                -e 's/y\.tab/a2p/g' a2p.c >a2p.tmp && mv a2p.tmp a2p.c
+            xxx="$xxx a2p.c"
+        fi
+        # In case somebody yacc -d:ed the a2p.y.
+        if test -f y.tab.h
+        then
+            if cmp -s y.tab.h a2p.h
+            then
+                rm -f y.tab.h
+            else
+                echo "a2p.h -> a2p.h" >&2
+                mv -f y.tab.h a2p.h
+                xxx="$xxx a2p.h"
+            fi
+        fi
+        cd ..
     fi
-    if cmp -s y.tab.h a2p.h
-    then
-        rm -f y.tab.h
-    else
-        echo "a2p.h -> a2p.h" >&2
-        mv -f y.tab.h a2p.h
-        xxx="$xxx a2p.h"
-    fi
-    cd ..
     ;;
 vmesa)
     # Do nothing in VM/ESA.
     ;;
 *)
-    echo "'$osname' is an EBCDIC system I don't know well." >&4
+    echo "'$osname' is an EBCDIC system I don't know that well." >&4
     ;;
 esac
     case "$xxx" in

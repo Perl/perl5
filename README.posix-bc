@@ -50,18 +50,43 @@ set.
 Configure did everything except the perl parser.
 
 Because of our problems with the native yacc we used GNU bison to
-generate a pure (=reentrant) parser for perly.y:
+generate a pure (=reentrant) parser for perly.y.  So our yacc is
+really the following script:
 
-echo %pure_parser > /tmp/perly.y
-cat perly.y >> /tmp/perly.y
-/usr/local/bin/bison --yacc -d perly.y
-cp y.tab.c perly.c
-cp y.tab.h perly.h
+-----8<-----/usr/local/bin/yacc-----8<-----
+#! /usr/bin/sh
 
-We still used the normal yacc for a2p.y though!!!
+# Bison as a reentrant yacc:
+
+# save parameters:
+params=""
+while [[ $# -gt 1 ]]; do
+    params="$params $1"
+    shift
+done
+
+# add flag %pure_parser:
+
+tmpfile=/tmp/bison.$$.y
+echo %pure_parser > $tmpfile
+cat $1 >> $tmpfile
+
+# call bison:
+
+echo "/usr/local/bin/bison --yacc $params $1\t\t\t(Pure Parser)"
+/usr/local/bin/bison --yacc $params $tmpfile
+
+# cleanup:
+
+rm -f $tmpfile
+-----8<----------8<-----
+
+We still use the normal yacc for a2p.y though!!!  We made a softlink
+called byacc to distinguish between the two versions:
+
+ln -s /usr/bin/yacc /usr/local/bin/byacc
  
-We build perl using GNU make, but it should compile with the native
-make too.
+We build perl using both GNU make and the native make.
 
 
 TESTING:
@@ -74,21 +99,17 @@ op/regexp_noamp) seems a bit critical, the result was an 'Out of
 memory' (core dump with op/regexp_noamp).  The following list shows
 our errors, your results may differ:
 
-comp/require........FAILED test 3
 op/misc.............FAILED tests 45-46
 op/pack.............FAILED tests 58-60
-op/regexp...........FAILED tests 402-485      (Out of memory!)
-op/regexp_noamp.....FAILED tests 402-485      (core dump)
-op/taint............FAILED test 73
+op/regexp...........FAILED tests 405-492      (core dump)
+op/regexp_noamp.....FAILED tests 405-492      (core dump)
 pragma/overload.....FAILED tests 152-153, 170-171
 pragma/subs.........FAILED tests 1-2
+pragma/warning......FAILED tests 121, 127, 130, 142
 lib/cgi-html........dubious, FAILED tests 1-17 (ALL)
 lib/complex.........FAILED tests 264, 484
 lib/dumper..........FAILED tests MANY
-lib/errno...........dubious                   (Errno.pm not found?)
-lib/searchdict......FAILED tests 1-2
-Failed 13/186 test scripts, 93.01% okay. 224/6242 subtests failed, 96.41%
-okay.
+Failed 7/190 test scripts, 96.32% okay. 234/6549 subtests failed, 96.43% okay.
 
 
 INSTALLING:
