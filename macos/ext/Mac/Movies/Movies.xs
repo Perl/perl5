@@ -38,7 +38,7 @@ pascal Boolean ActionFilter(ComponentInstance mc, short *action, void *params)
 {
 	Boolean result;
 	
-	dXSARGS ;
+	dSP ;
 
 	ENTER ;
 	SAVETMPS;

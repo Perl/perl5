@@ -34,7 +34,7 @@ static pascal Boolean CallFileFilter(CatInfo pb, SFProcs * procs)
 {
 	Boolean	res;
 	
-	dXSARGS;
+	dSP;
 	ENTER;
 	SAVETMPS;
 	
@@ -64,7 +64,7 @@ pascal short CallDlgHook(short item, DialogPtr theDialog, SFProcs * procs)
 {
 	short	res;
 	
-	dXSARGS;
+	dSP;
 	ENTER;
 	SAVETMPS;
 	
@@ -91,7 +91,7 @@ pascal Boolean CallModalFilter(DialogPtr theDialog, EventRecord *theEvent, short
 	Boolean	res;
 	int		count;
 	
-	dXSARGS;
+	dSP;
 	ENTER;
 	SAVETMPS;
 	
@@ -121,7 +121,7 @@ pascal Boolean CallModalFilter(DialogPtr theDialog, EventRecord *theEvent, short
 
 pascal void CallActivate(DialogPtr theDialog, short itemNo, Boolean activating, SFProcs * procs)
 {
-	dXSARGS;
+	dSP;
 	
 	PUSHMARK(sp);
 	XS_XPUSH(GrafPtr, theDialog);

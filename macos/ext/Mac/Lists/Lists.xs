@@ -26,7 +26,7 @@ CallLDEF(
 	SV * 	ldef;
 	Handle 	cells;
 	
-	dXSARGS;
+	dSP;
 	
 	ldef = (SV *) lHandle[0]->userHandle;
 	

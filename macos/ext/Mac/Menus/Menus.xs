@@ -1,4 +1,4 @@
-/* $Header: /cvsroot/macperl/perl/macos/ext/Mac/Menus/Menus.xs,v 1.3 2001/04/16 04:45:15 neeri Exp $
+/* $Header: /cvsroot/macperl/perl/macos/ext/Mac/Menus/Menus.xs,v 1.4 2001/12/19 06:50:32 neeri Exp $
  *
  *    Copyright (c) 1996 Matthias Neeracher
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file.
  *
  * $Log: Menus.xs,v $
+ * Revision 1.4  2001/12/19 06:50:32  neeri
+ * Mistakenly used dXSARGS instead of dSP (MacPerl Bug #494482)
+ *
  * Revision 1.3  2001/04/16 04:45:15  neeri
  * Switch from atexit() to Perl_call_atexit (MacPerl bug #232158)
  *
@@ -95,7 +98,7 @@ static Boolean FilterMenu(long menuSelection)
 static pascal void CallMDEF(
 	short message, MenuHandle menu, Rect * menuRect, Point hitPt, short * item)
 {
-	dXSARGS ;
+	dSP ;
 
 	ENTER ;
 	SAVETMPS;

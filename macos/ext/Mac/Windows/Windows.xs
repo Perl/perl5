@@ -1,4 +1,4 @@
-/* $Header: /cvsroot/macperl/perl/macos/ext/Mac/Windows/Windows.xs,v 1.3 2000/12/22 08:31:47 neeri Exp $
+/* $Header: /cvsroot/macperl/perl/macos/ext/Mac/Windows/Windows.xs,v 1.4 2001/12/19 06:50:32 neeri Exp $
  *
  *    Copyright (c) 1996 Matthias Neeracher
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file.
  *
  * $Log: Windows.xs,v $
+ * Revision 1.4  2001/12/19 06:50:32  neeri
+ * Mistakenly used dXSARGS instead of dSP (MacPerl Bug #494482)
+ *
  * Revision 1.3  2000/12/22 08:31:47  neeri
  * Some build tweaks
  *
@@ -52,7 +55,7 @@ CallWDEF(short varCode, WindowPeek win, short message, long param)
 {
 	SV * 	wdef;
 	
-	dXSARGS;
+	dSP;
 	
 	wdef = ((PerlWDEFDataHdl)win->dataHandle)[0]->wdef;
 	

@@ -25,7 +25,7 @@
 static pascal void PerlIntercept(
 	QTVRInstance qtvr, QTVRInterceptRecord msg, SV * proc, Boolean * cancel)
 {
-	dXSARGS;
+	dSP;
 	
 	ENTER;
 	SAVETMPS;
