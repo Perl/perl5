@@ -46,11 +46,17 @@ toke.c	AOK
      warn(warn_reserved	
 	$a = abc;
 
+     chmod() mode argument is missing initial 0 
+	chmod 3;
+
      Possible attempt to separate words with commas 
 	@a = qw(a, b, c) ;
 
      Possible attempt to put comments in qw() list 
 	@a = qw(a b # c) ;
+
+     umask: argument is missing initial 0 
+	umask 3;
 
      %s (...) interpreted as function 
 	print ("")
@@ -256,6 +262,14 @@ EXPECT
 Unquoted string "abc" may clash with future reserved word at - line 3.
 ########
 # toke.c
+use warnings 'chmod' ;
+chmod 3;
+no warnings 'chmod' ;
+chmod 3;
+EXPECT
+chmod() mode argument is missing initial 0 at - line 3.
+########
+# toke.c
 use warnings 'qw' ;
 @a = qw(a, b, c) ;
 no warnings 'qw' ;
@@ -270,6 +284,14 @@ no warnings 'qw' ;
 @a = qw(a b #) ;
 EXPECT
 Possible attempt to put comments in qw() list at - line 3.
+########
+# toke.c
+use warnings 'umask' ;
+umask 3;
+no warnings 'umask' ;
+umask 3;
+EXPECT
+umask: argument is missing initial 0 at - line 3.
 ########
 # toke.c
 use warnings 'syntax' ;

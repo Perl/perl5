@@ -1213,7 +1213,6 @@
 #define ck_match		Perl_ck_match
 #define ck_method		Perl_ck_method
 #define ck_null			Perl_ck_null
-#define ck_octmode		Perl_ck_octmode
 #define ck_open			Perl_ck_open
 #define ck_repeat		Perl_ck_repeat
 #define ck_require		Perl_ck_require
@@ -2714,7 +2713,6 @@
 #define ck_match(a)		Perl_ck_match(aTHX_ a)
 #define ck_method(a)		Perl_ck_method(aTHX_ a)
 #define ck_null(a)		Perl_ck_null(aTHX_ a)
-#define ck_octmode(a)		Perl_ck_octmode(aTHX_ a)
 #define ck_open(a)		Perl_ck_open(aTHX_ a)
 #define ck_repeat(a)		Perl_ck_repeat(aTHX_ a)
 #define ck_require(a)		Perl_ck_require(aTHX_ a)
@@ -5270,8 +5268,6 @@
 #define ck_method		Perl_ck_method
 #define Perl_ck_null		CPerlObj::Perl_ck_null
 #define ck_null			Perl_ck_null
-#define Perl_ck_octmode		CPerlObj::Perl_ck_octmode
-#define ck_octmode		Perl_ck_octmode
 #define Perl_ck_open		CPerlObj::Perl_ck_open
 #define ck_open			Perl_ck_open
 #define Perl_ck_repeat		CPerlObj::Perl_ck_repeat

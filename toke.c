@@ -4175,6 +4175,12 @@ Perl_yylex(pTHX)
 	    LOP(OP_CRYPT,XTERM);
 
 	case KEY_chmod:
+	    if (ckWARN(WARN_CHMOD)) {
+		for (d = s; d < PL_bufend && (isSPACE(*d) || *d == '('); d++) ;
+		if (*d != '0' && isDIGIT(*d))
+		    Perl_warner(aTHX_ WARN_CHMOD,
+		    		"chmod() mode argument is missing initial 0");
+	    }
 	    LOP(OP_CHMOD,XTERM);
 
 	case KEY_chown:
@@ -5032,6 +5038,12 @@ Perl_yylex(pTHX)
 	    LOP(OP_UTIME,XTERM);
 
 	case KEY_umask:
+	    if (ckWARN(WARN_UMASK)) {
+		for (d = s; d < PL_bufend && (isSPACE(*d) || *d == '('); d++) ;
+		if (*d != '0' && isDIGIT(*d))
+		    Perl_warner(aTHX_ WARN_UMASK,
+		    		"umask: argument is missing initial 0");
+	    }
 	    UNI(OP_UMASK);
 
 	case KEY_unshift:
@@ -6909,8 +6921,7 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
     register char *e;			/* end of temp buffer */
     NV nv;				/* number read, as a double */
     SV *sv = Nullsv;			/* place to put the converted number */
-    bool floatit,			/* boolean: int or float? */
-	octal = 0;			/* Is this an octal number? */
+    bool floatit;			/* boolean: int or float? */
     char *lastub = 0;			/* position of last underbar */
     static char number_too_long[] = "Number too long";
 
@@ -6964,7 +6975,6 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 	    /* so it must be octal */
 	    else {
 		shift = 3;
-		octal = 1;
 		s++;
 	    }
 
@@ -7318,11 +7328,8 @@ vstring:
 
     /* make the op for the constant and return */
 
-    if (sv) {
+    if (sv)
 	lvalp->opval = newSVOP(OP_CONST, 0, sv);
-	if (octal)
-	    ((SVOP *)lvalp->opval)->op_private |= OPpCONST_OCTAL;
-    }
     else
 	lvalp->opval = Nullop;
 
