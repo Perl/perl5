@@ -555,7 +555,7 @@ PP(pp_undef)
 	    sv_setsv(sv, &sv_undef);
 	break;
     default:
-	if (SvPOK(sv) && SvLEN(sv)) {
+	if (SvTYPE(sv) >= SVt_PV && SvPVX(sv) && SvLEN(sv)) {
 	    (void)SvOOK_off(sv);
 	    Safefree(SvPVX(sv));
 	    SvPV_set(sv, Nullch);
