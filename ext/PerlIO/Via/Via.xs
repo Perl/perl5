@@ -33,7 +33,7 @@ typedef struct
  CV *FLUSH;
  CV *SETLINEBUF;
  CV *CLEARERR;
- CV *ERROR;
+ CV *mERROR;
  CV *mEOF;
 } PerlIOVia;
 
@@ -459,21 +459,21 @@ PerlIOVia_clearerr(PerlIO *f)
  PerlIOBase_clearerr(f);
 }
 
-IV
-PerlIOVia_error(PerlIO *f)
-{
- dTHX;
- PerlIOVia *s = PerlIOSelf(f,PerlIOVia);
- SV *result = PerlIOVia_method(aTHX_ f,MYMethod(ERROR),G_SCALAR,Nullsv);
- return (result) ? SvIV(result) : PerlIOBase_error(f);
-}
-
 SV *
 PerlIOVia_getarg(PerlIO *f)
 {
  dTHX;
  PerlIOVia *s = PerlIOSelf(f,PerlIOVia);
  return PerlIOVia_method(aTHX_ f,MYMethod(GETARG),G_SCALAR,Nullsv);
+}
+
+IV
+PerlIOVia_error(PerlIO *f)
+{
+ dTHX;
+ PerlIOVia *s = PerlIOSelf(f,PerlIOVia);
+ SV *result = PerlIOVia_method(aTHX_ f,"ERROR",&s->mERROR,G_SCALAR,Nullsv);
+ return (result) ? SvIV(result) : PerlIOBase_error(f);
 }
 
 IV

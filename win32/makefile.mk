@@ -99,9 +99,9 @@ USE_PERLIO	= define
 # Visual C++ > 2.x and < 6.x
 #CCTYPE		*= MSVC
 # Visual C++ >= 6.x
-#CCTYPE		*= MSVC60
+CCTYPE		*= MSVC60
 # Borland 5.02 or later
-CCTYPE		*= BORLAND
+#CCTYPE		*= BORLAND
 # mingw32+gcc-2.95.2 or better
 #CCTYPE		*= GCC
 
@@ -174,8 +174,8 @@ CFG		*= Debug
 # so you may have to set CCHOME explicitly (spaces in the path name should
 # not be quoted)
 #
-CCHOME		*= F:\borland\bc5
-#CCHOME		*= $(MSVCDIR)
+#CCHOME		*= F:\borland\bc5
+CCHOME		*= $(MSVCDIR)
 #CCHOME		*= c:\gcc-2.95.2
 CCINCDIR	*= $(CCHOME)\include
 CCLIBDIR	*= $(CCHOME)\lib
@@ -748,7 +748,6 @@ WIN32_OBJ	= $(WIN32_SRC:db:+$(o))
 MINICORE_OBJ	= $(MINIDIR)\{$(MICROCORE_OBJ:f) miniperlmain$(o) perlio$(o)}
 MINIWIN32_OBJ	= $(MINIDIR)\{$(WIN32_OBJ:f)}
 MINI_OBJ	= $(MINICORE_OBJ) $(MINIWIN32_OBJ)
-DLL_OBJ		= $(DLL_SRC:db:+$(o))
 X2P_OBJ		= $(X2P_SRC:db:+$(o))
 
 PERLDLL_OBJ	= $(CORE_OBJ)
@@ -766,107 +765,6 @@ DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
 		Digest/MD5 PerlIO/Scalar MIME/Base64
 STATIC_EXT	= DynaLoader
 NONXS_EXT	= Errno
-
-DYNALOADER	= $(EXTDIR)\DynaLoader\DynaLoader
-SOCKET		= $(EXTDIR)\Socket\Socket
-FCNTL		= $(EXTDIR)\Fcntl\Fcntl
-OPCODE		= $(EXTDIR)\Opcode\Opcode
-SDBM_FILE	= $(EXTDIR)\SDBM_File\SDBM_File
-IO		= $(EXTDIR)\IO\IO
-POSIX		= $(EXTDIR)\POSIX\POSIX
-ATTRS		= $(EXTDIR)\attrs\attrs
-THREAD		= $(EXTDIR)\Thread\Thread
-B		= $(EXTDIR)\B\B
-RE		= $(EXTDIR)\re\re
-DUMPER		= $(EXTDIR)\Data\Dumper\Dumper
-SCALAR		= $(EXTDIR)\PerlIO\Scalar\Scalar
-ERRNO		= $(EXTDIR)\Errno\Errno
-PEEK		= $(EXTDIR)\Devel\Peek\Peek
-BYTELOADER	= $(EXTDIR)\ByteLoader\ByteLoader
-DPROF		= $(EXTDIR)\Devel\DProf\DProf
-GLOB		= $(EXTDIR)\File\Glob\Glob
-HOSTNAME	= $(EXTDIR)\Sys\Hostname\Hostname
-STORABLE	= $(EXTDIR)\Storable\Storable
-FILTER		= $(EXTDIR)\Filter\Util\Call\Call
-ENCODE          = $(EXTDIR)\Encode\Encode
-MD5		= $(EXTDIR)\Digest\MD5\MD5
-MIMEBASE64	= $(EXTDIR)\MIME\Base64\Base64
-
-SOCKET_DLL	= $(AUTODIR)\Socket\Socket.dll
-FCNTL_DLL	= $(AUTODIR)\Fcntl\Fcntl.dll
-OPCODE_DLL	= $(AUTODIR)\Opcode\Opcode.dll
-SDBM_FILE_DLL	= $(AUTODIR)\SDBM_File\SDBM_File.dll
-IO_DLL		= $(AUTODIR)\IO\IO.dll
-POSIX_DLL	= $(AUTODIR)\POSIX\POSIX.dll
-ATTRS_DLL	= $(AUTODIR)\attrs\attrs.dll
-THREAD_DLL	= $(AUTODIR)\Thread\Thread.dll
-B_DLL		= $(AUTODIR)\B\B.dll
-DUMPER_DLL	= $(AUTODIR)\Data\Dumper\Dumper.dll
-SCALAR_DLL	= $(AUTODIR)\PerlIO\Scalar\Scalar.dll
-PEEK_DLL	= $(AUTODIR)\Devel\Peek\Peek.dll
-RE_DLL		= $(AUTODIR)\re\re.dll
-BYTELOADER_DLL	= $(AUTODIR)\ByteLoader\ByteLoader.dll
-DPROF_DLL	= $(AUTODIR)\Devel\DProf\DProf.dll
-GLOB_DLL	= $(AUTODIR)\File\Glob\Glob.dll
-HOSTNAME_DLL	= $(AUTODIR)\Sys\Hostname\Hostname.dll
-STORABLE_DLL	= $(AUTODIR)\Storable\Storable.dll
-FILTER_DLL	= $(AUTODIR)\Filter\Util\Call\Call.dll
-ENCODE_DLL	= $(AUTODIR)\Encode\Encode.dll
-MD5_DLL		= $(AUTODIR)\Digest\MD5\MD5.dll
-MIMEBASE64_DLL	= $(AUTODIR)\MIME\Base64\Base64.dll
-
-ERRNO_PM	= $(LIBDIR)\Errno.pm
-
-EXTENSION_C	=		\
-		$(SOCKET).c	\
-		$(FCNTL).c	\
-		$(OPCODE).c	\
-		$(SDBM_FILE).c	\
-		$(IO).c		\
-		$(POSIX).c	\
-		$(ATTRS).c	\
-		$(THREAD).c	\
-		$(RE).c		\
-		$(DUMPER).c	\
-		$(SCALAR).c	\
-		$(PEEK).c	\
-		$(B).c		\
-		$(BYTELOADER).c	\
-		$(DPROF).c	\
-		$(GLOB).c	\
-		$(HOSTNAME).c	\
-		$(STORABLE).c	\
-		$(FILTER).c     \
-		$(ENCODE).c     \
-		$(MD5).c	\
-		$(MIMEBASE64).c
-
-EXTENSION_DLL	=		\
-		$(SOCKET_DLL)	\
-		$(FCNTL_DLL)	\
-		$(OPCODE_DLL)	\
-		$(SDBM_FILE_DLL)\
-		$(IO_DLL)	\
-		$(POSIX_DLL)	\
-		$(ATTRS_DLL)	\
-		$(DUMPER_DLL)	\
-		$(SCALAR_DLL)	\
-		$(PEEK_DLL)	\
-		$(B_DLL)	\
-		$(RE_DLL)	\
-		$(THREAD_DLL)	\
-		$(BYTELOADER_DLL)	\
-		$(DPROF_DLL)	\
-		$(GLOB_DLL)	\
-		$(HOSTNAME_DLL)	\
-		$(STORABLE_DLL)	\
-		$(FILTER_DLL)   \
-		$(ENCODE_DLL)   \
-		$(MD5_DLL)	\
-		$(MIMEBASE64_DLL)
-
-EXTENSION_PM	=		\
-		$(ERRNO_PM)
 
 POD2HTML	= $(PODDIR)\pod2html
 POD2MAN		= $(PODDIR)\pod2man
@@ -927,7 +825,7 @@ RIGHTMAKE	=
 
 all : .\config.h $(GLOBEXE) $(MINIPERL) $(MK2)		\
 	$(RIGHTMAKE) $(MINIMOD) $(CONFIGPM) $(PERLEXE)	\
-	$(X2P) $(EXTENSION_DLL) $(EXTENSION_PM)
+	$(X2P) Extensions 
 
 $(DYNALOADER)$(o) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
 
@@ -1066,7 +964,6 @@ $(MINI_OBJ)	: $(CORE_NOCFG_H)
 
 $(WIN32_OBJ)	: $(CORE_H)
 $(CORE_OBJ)	: $(CORE_H)
-$(DLL_OBJ)	: $(CORE_H)
 $(X2P_OBJ)	: $(CORE_H)
 
 perldll.def : $(MINIPERL) $(CONFIGPM) ..\global.sym ..\pp.sym ..\makedef.pl
@@ -1167,120 +1064,12 @@ $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 	copy dl_win32.xs $(EXTDIR)\DynaLoader\dl_win32.xs
 
-$(DUMPER_DLL): $(PERLDEP) $(DUMPER).xs
-	cd $(EXTDIR)\Data\$(*B) && \
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
-	cd $(EXTDIR)\Data\$(*B) && $(MAKE)
+#----------------------------------------------------------------------------------
+Extensions : buildext.pl $(PERLDEP) $(CONFIGPM) 
+	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR)
 
-$(SCALAR_DLL): $(PERLDEP) $(SCALAR).xs
-	cd $(EXTDIR)\PerlIO\$(*B) && \
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
-	cd $(EXTDIR)\PerlIO\$(*B) && $(MAKE)
+#----------------------------------------------------------------------------------
 
-$(DPROF_DLL): $(PERLDEP) $(DPROF).xs
-	cd $(EXTDIR)\Devel\$(*B) && \
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
-	cd $(EXTDIR)\Devel\$(*B) && $(MAKE)
-
-$(GLOB_DLL): $(PERLDEP) $(GLOB).xs
-	cd $(EXTDIR)\File\$(*B) && \
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
-	cd $(EXTDIR)\File\$(*B) && $(MAKE)
-
-$(PEEK_DLL): $(PERLDEP) $(PEEK).xs
-	cd $(EXTDIR)\Devel\$(*B) && \
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
-	cd $(EXTDIR)\Devel\$(*B) && $(MAKE)
-
-$(RE_DLL): $(PERLDEP) $(RE).xs
-	cd $(EXTDIR)\$(*B) && \
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
-	cd $(EXTDIR)\$(*B) && $(MAKE)
-
-$(B_DLL): $(PERLDEP) $(B).xs
-	cd $(EXTDIR)\$(*B) && \
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
-	cd $(EXTDIR)\$(*B) && $(MAKE)
-
-$(THREAD_DLL): $(PERLDEP) $(THREAD).xs
-	cd $(EXTDIR)\$(*B) && \
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
-	cd $(EXTDIR)\$(*B) && $(MAKE)
-
-$(ATTRS_DLL): $(PERLDEP) $(ATTRS).xs
-	cd $(EXTDIR)\$(*B) && \
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
-	cd $(EXTDIR)\$(*B) && $(MAKE)
-
-$(POSIX_DLL): $(PERLDEP) $(POSIX).xs
-	cd $(EXTDIR)\$(*B) && \
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
-	cd $(EXTDIR)\$(*B) && $(MAKE)
-
-$(IO_DLL): $(PERLDEP) $(IO).xs
-	cd $(EXTDIR)\$(*B) && \
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
-	cd $(EXTDIR)\$(*B) && $(MAKE)
-
-$(SDBM_FILE_DLL) : $(PERLDEP) $(SDBM_FILE).xs
-	cd $(EXTDIR)\$(*B) && \
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
-	cd $(EXTDIR)\$(*B) && $(MAKE)
-
-$(FCNTL_DLL): $(PERLDEP) $(FCNTL).xs
-	cd $(EXTDIR)\$(*B) && \
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
-	cd $(EXTDIR)\$(*B) && $(MAKE)
-
-$(OPCODE_DLL): $(PERLDEP) $(OPCODE).xs
-	cd $(EXTDIR)\$(*B) && \
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
-	cd $(EXTDIR)\$(*B) && $(MAKE)
-
-$(SOCKET_DLL): $(PERLDEP) $(SOCKET).xs
-	cd $(EXTDIR)\$(*B) && \
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
-	cd $(EXTDIR)\$(*B) && $(MAKE)
-
-$(HOSTNAME_DLL): $(PERLDEP) $(HOSTNAME).xs
-	cd $(EXTDIR)\Sys\$(*B) && \
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
-	cd $(EXTDIR)\Sys\$(*B) && $(MAKE)
-
-$(BYTELOADER_DLL): $(PERLDEP) $(BYTELOADER).xs
-	cd $(EXTDIR)\$(*B) && \
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
-	cd $(EXTDIR)\$(*B) && $(MAKE)
-
-$(ENCODE_DLL): $(PERLDEP) $(ENCODE).xs
-	cd $(EXTDIR)\$(*B) && \
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
-	cd $(EXTDIR)\$(*B) && $(MAKE)
-
-$(STORABLE_DLL): $(PERLDEP) $(STORABLE).xs
-	cd $(EXTDIR)\$(*B) && \
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
-	cd $(EXTDIR)\$(*B) && $(MAKE)
-
-$(FILTER_DLL): $(PERLDEP) $(FILTER).xs
-	cd $(EXTDIR)\Filter\Util\Call && \
-	..\..\..\..\miniperl -I..\..\..\..\lib Makefile.PL INSTALLDIRS=perl
-	cd $(EXTDIR)\Filter\Util\Call && $(MAKE)
-
-$(MD5_DLL): $(PERLDEP) $(MD5).xs
-	cd $(EXTDIR)\Digest\MD5 && \
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
-	cd $(EXTDIR)\Digest\MD5 && $(MAKE)
-
-$(MIMEBASE64_DLL): $(PERLDEP) $(MIMEBASE64).xs
-	cd $(EXTDIR)\MIME\Base64 && \
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
-	cd $(EXTDIR)\MIME\Base64 && $(MAKE)
-
-$(ERRNO_PM): $(PERLDEP) $(ERRNO)_pm.PL
-	cd $(EXTDIR)\$(*B) && \
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
-	cd $(EXTDIR)\$(*B) && $(MAKE)
 
 doc: $(PERLEXE)
 	$(PERLEXE) -I..\lib ..\installhtml --podroot=.. --htmldir=./html \
@@ -1312,8 +1101,6 @@ distclean: clean
 	-del /f $(MINIPERL) $(PERLEXE) $(PERLDLL) $(GLOBEXE) \
 		$(PERLIMPLIB) ..\miniperl$(a) $(MINIMOD)
 	-del /f *.def *.map
-	-del /f $(EXTENSION_DLL) $(EXTENSION_PM)
-	-del /f $(EXTENSION_C) $(DYNALOADER).c $(ERRNO).pm
 	-del /f $(EXTDIR)\DynaLoader\dl_win32.xs
 	-del /f $(LIBDIR)\.exists $(LIBDIR)\attrs.pm $(LIBDIR)\DynaLoader.pm
 	-del /f $(LIBDIR)\XSLoader.pm
