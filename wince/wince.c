@@ -947,12 +947,11 @@ win32_rename(const char *oname, const char *newname)
 DllExport int
 win32_setmode(int fd, int mode)
 {
-  if(mode != O_BINARY)
-    {
-      Perl_croak(aTHX_ PL_no_func, "setmode");
-      return -1;
-    }
-  return 0;
+    /* currently 'celib' seem to have this function in src, but not
+     * exported. When it will be, we'll uncomment following line.
+     */
+    /* return xcesetmode(fd, mode); */
+    return 0;
 }
 
 DllExport long
