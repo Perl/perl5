@@ -1213,7 +1213,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #  define PeRl_StGiFy(a)	#a
 /* the additional level of indirection enables these macros to be
  * used as arguments to other macros.  See K&R 2nd ed., page 231. */
-#  define CAT2(a,b)	Perl_CaTiFy(a,b)
+#  define CAT2(a,b)	PeRl_CaTiFy(a,b)
 #  define StGiFy(a)	PeRl_StGiFy(a)
 #  define STRINGIFY(a)	PeRl_StGiFy(a)
 #endif
