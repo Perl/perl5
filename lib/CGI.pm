@@ -3765,7 +3765,7 @@ provide for the rapidly-evolving HTML "standard."  For example, say
 Microsoft comes out with a new tag called <GRADIENT> (which causes the
 user's desktop to be flooded with a rotating gradient fill until his
 machine reboots).  You don't need to wait for a new version of CGI.pm
-to start using it immeidately:
+to start using it immediately:
 
    use CGI qw/:standard :html3 gradient/;
    print gradient({-start=>'red',-end=>'blue'});
