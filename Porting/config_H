@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Sun Jul 25 17:08:22 EET DST 1999
+ * Configuration time: Wed Jul 28 20:34:48 EET DST 1999
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -1423,8 +1423,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "/opt/perl/lib/5.00557/alpha-dec_osf-thread"		/**/
-#define ARCHLIB_EXP "/opt/perl/lib/5.00557/alpha-dec_osf-thread"		/**/
+#define ARCHLIB "/opt/perl/lib/5.00558/alpha-dec_osf-thread"		/**/
+#define ARCHLIB_EXP "/opt/perl/lib/5.00558/alpha-dec_osf-thread"		/**/
 
 /* BIN:
  *	This symbol holds the path of the bin directory where the package will
@@ -1453,8 +1453,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "/opt/perl/lib/5.00557"		/**/
-#define PRIVLIB_EXP "/opt/perl/lib/5.00557"		/**/
+#define PRIVLIB "/opt/perl/lib/5.00558"		/**/
+#define PRIVLIB_EXP "/opt/perl/lib/5.00558"		/**/
 
 /* SITEARCH:
  *	This symbol contains the name of the private library for this package.
@@ -1469,8 +1469,8 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH "/opt/perl/lib/site_perl/5.00557/alpha-dec_osf-thread"		/**/
-#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.00557/alpha-dec_osf-thread"		/**/
+#define SITEARCH "/opt/perl/lib/site_perl/5.00558/alpha-dec_osf-thread"		/**/
+#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.00558/alpha-dec_osf-thread"		/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.

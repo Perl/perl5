@@ -3081,6 +3081,10 @@ usethreads (usethreads.U):
 	This variable conditionally defines the USE_THREADS symbol,
 	and indicates that Perl should be built to use threads.
 
+usevendorprefix (vendorprefix.U):
+	This variable tells whether the vendorprefix
+	and consequently other vendor* paths are in use.
+
 usevfork (d_vfork.U):
 	This variable is set to true when the user accepts to use vfork.
 	It is set to false when no vfork is available or when the user
