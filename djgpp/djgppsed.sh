@@ -46,3 +46,4 @@ sed -e $SPACKLIST lib/ExtUtils/Installed.pm >s; mv -f s lib/ExtUtils/Installed.p
 sed -e $SPACKLIST lib/ExtUtils/Packlist.pm >s; mv -f s lib/ExtUtils/Packlist.pm
 sed -e $SPACKLIST lib/ExtUtils/inst >s; mv -f s lib/ExtUtils/inst
 sed -e $SABC t/io/iprefix.t >s; mv -f s t/io/iprefix.t
+sed -e 's=L_ctermid==g' ext/POSIX/Makefile.PL >s; mv -f s ext/POSIX/Makefile.PL

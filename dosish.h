@@ -13,6 +13,7 @@
 #  define HAS_UTIME
 #  define HAS_KILL
    char *djgpp_pathexp (const char*);
+   void Perl_DJGPP_init (int *argcp,char ***argvp);
 #  if (DJGPP==2 && DJGPP_MINOR < 2)
 #    define NO_LOCALECONV_MON_THOUSANDS_SEP
 #  endif
