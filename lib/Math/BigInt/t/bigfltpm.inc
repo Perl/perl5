@@ -1201,7 +1201,7 @@ abc:1:abc:NaN
 &ffac
 Nanfac:NaN
 -1:NaN
-+inf:NaN
++inf:inf
 -inf:NaN
 0:1
 1:1

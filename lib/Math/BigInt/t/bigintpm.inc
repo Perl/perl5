@@ -1891,7 +1891,7 @@ abc:NaN,NaN
 &bfac
 -1:NaN
 NaNfac:NaN
-+inf:NaN
++inf:inf
 -inf:NaN
 0:1
 1:1
