@@ -705,7 +705,7 @@ sub AUTOLOAD {
     # to the AUTOLOAD in AutoLoader.
 
     my \$constname;
-    our $AUTOLOAD;
+    our \$AUTOLOAD;
     (\$constname = \$AUTOLOAD) =~ s/.*:://;
     croak "&$module::constant not defined" if \$constname eq 'constant';
     my \$val = constant(\$constname, \@_ ? \$_[0] : 0);
