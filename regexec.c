@@ -691,6 +691,10 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	char *startpos = sv ? strend - SvCUR(sv) : s;
 
 	t = s;
+	if (prog->reganch & ROPT_UTF8) {	
+	    PL_regdata = prog->data;	/* Used by REGINCLASS UTF logic */
+	    PL_bostr = startpos;
+	}
         s = find_byclass(prog, prog->regstclass, s, endpos, startpos, 1);
 	if (!s) {
 #ifdef DEBUGGING
@@ -872,9 +876,9 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	    /* FALL THROUGH */
 	case BOUNDUTF8:
 	    tmp = (I32)(s != startpos) ? utf8_to_uv(reghop((U8*)s, -1), 0) : '\n';
-	    tmp = ((OP(c) == BOUND ? isALNUM_uni(tmp) : isALNUM_LC_uni(tmp)) != 0);
+	    tmp = ((OP(c) == BOUNDUTF8 ? isALNUM_uni(tmp) : isALNUM_LC_uni(tmp)) != 0);
 	    while (s < strend) {
-		if (tmp == !(OP(c) == BOUND ?
+		if (tmp == !(OP(c) == BOUNDUTF8 ?
 			     swash_fetch(PL_utf8_alnum, (U8*)s) :
 			     isALNUM_LC_utf8((U8*)s)))
 		{
@@ -907,12 +911,10 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case NBOUNDUTF8:
-	    if (prog->minlen)
-		strend = reghop_c(strend, -1);
 	    tmp = (I32)(s != startpos) ? utf8_to_uv(reghop((U8*)s, -1), 0) : '\n';
-	    tmp = ((OP(c) == NBOUND ? isALNUM_uni(tmp) : isALNUM_LC_uni(tmp)) != 0);
+	    tmp = ((OP(c) == NBOUNDUTF8 ? isALNUM_uni(tmp) : isALNUM_LC_uni(tmp)) != 0);
 	    while (s < strend) {
-		if (tmp == !(OP(c) == NBOUND ?
+		if (tmp == !(OP(c) == NBOUNDUTF8 ?
 			     swash_fetch(PL_utf8_alnum, (U8*)s) :
 			     isALNUM_LC_utf8((U8*)s)))
 		    tmp = !tmp;
