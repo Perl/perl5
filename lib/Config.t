@@ -255,6 +255,7 @@ foreach my $lib (qw(applibexp archlibexp privlibexp sitearchexp sitelibexp
 		     vendorarchexp vendorlibexp vendorlib_stem)) {
   my $dir = $Config{$lib};
   SKIP: {
+    skip "lib $lib not in \@INC on Win32" if $^O eq 'MSWin32';
     skip "lib $lib not defined" unless defined $dir;
     skip "lib $lib not set" unless length $dir;
     # So we expect to find it in @INC
