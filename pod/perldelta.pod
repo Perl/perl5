@@ -3125,6 +3125,25 @@ this is not Perl's fault-- the libc of Mac OS X is not threadsafe
 (in this particular test, the localtime() call is found to be
 threadunsafe.)
 
+=head2 OS/2 Test Failures
+
+The following tests are known to fail on OS/2 (for clarity
+only the failures are shown, not the full error messages):
+
+t/io/utf8............................FAILED at test 19
+t/op/grent...........................FAILED at test 2
+t/op/pwent...........................FAILED at test 1
+t/lib/os2_base.......................FAILED at test 13
+t/lib/os2_process....................FAILED at test 10
+t/lib/os2_process_kid................FAILED at test 10
+t/lib/rx_cmprt.......................FAILED at test 16
+ext/DB_File/t/db-btree...............FAILED at test 0
+ext/DB_File/t/db-hash................FAILED at test 0
+ext/DB_File/t/db-recno...............FAILED at test 0
+lib/ExtUtils/t/basic.................FAILED at test 14
+lib/ExtUtils/t/Constant..............FAILED at test 4
+lib/Memoize/t/errors.................FAILED at test 4
+
 =head2 op/sprintf tests 91, 129, and 130
 
 The op/sprintf tests 91, 129, and 130 are known to fail on some platforms.
@@ -3144,6 +3163,14 @@ they produce "0" and "-0".)
 In case you are still using Solaris 2.5 (aka SunOS 5.5), you may
 experience failures (the test core dumping) in lib/locale.t.
 The suggested cure is to upgrade your Solaris.
+
+=head2 Solaris x86 Fails Tests With -Duse64bitint
+
+The following tests are known to fail in Solaris x86 with Perl
+configured to use 64 bit integers:
+
+ ext/Data/Dumper/t/dumper.............FAILED at test 268
+ ext/Devel/Peek/Peek..................FAILED at test 7
 
 =head2 SUPER-UX (NEC SX)
 
@@ -3213,16 +3240,6 @@ problems, for example if the system is heavily loaded.
 In case of failure please try running them manually, for example
 
     ./perl -Ilib ext/Time/HiRes/HiRes.t
-
-=head2 UNICOS
-
- ../lib/Math/Trig.t                          26    1   3.85%  25
- ../lib/warnings.t                          470    1   0.21%  429
-
-The Trig.t failure is caused by the slighly differing (from IEEE)
-floating point implementation of UNICOS.  The warnings.t failure is
-also related: the test assumes a certain floating point output format;
-this assumption fails in UNICOS.
 
 =head2 UNICOS/mk
 
