@@ -14,6 +14,28 @@
 
 #define HAS_KILL
 #define HAS_WAIT
+#define HAS_DLERROR
+
+/* USEMYBINMODE
+ *	This symbol, if defined, indicates that the program should
+ *	use the routine my_binmode(FILE *fp, char iotype) to insure
+ *	that a file is in "binary" mode -- that is, that no translation
+ *	of bytes occurs on read or write operations.
+ */
+#undef USEMYBINMODE
+
+/* USE_STAT_RDEV:
+ *	This symbol is defined if this system has a stat structure declaring
+ *	st_rdev
+ */
+#define USE_STAT_RDEV 	/**/
+
+/* ACME_MESS:
+ *	This symbol, if defined, indicates that error messages should be 
+ *	should be generated in a format that allows the use of the Acme
+ *	GUI/editor's autofind feature.
+ */
+#undef ACME_MESS	/**/
 
 #ifndef SIGABRT
 #    define SIGABRT SIGILL
@@ -34,7 +56,14 @@ void Perl_OS2_init();
 
 #define PERL_SYS_TERM()
 
+/* #define PERL_SYS_TERM() STMT_START {	\
+    if (Perl_HAB_set) WinTerminate(Perl_hab);	} STMT_END */
+
 #define dXSUB_SYS int fake = OS2_XS_init()
+
+#ifdef PERL_IS_AOUT
+#define NO_SYS_ALLOC
+#endif 
 
 #define TMPPATH tmppath
 #define TMPPATH1 "plXXXXXX"
@@ -96,14 +125,213 @@ typedef struct OS2_Perl_data {
   unsigned long flags;
   unsigned long phab;
   int (*xs_init)();
+  unsigned long rc;
+  unsigned long severity;
 } OS2_Perl_data_t;
 
 extern OS2_Perl_data_t OS2_Perl_data;
 
-#define hab		((HAB)OS2_Perl_data->phab)
-#define OS2_Perl_flag	(OS2_Perl_data->flag)
+#define Perl_hab		((HAB)OS2_Perl_data.phab)
+#define Perl_rc			(OS2_Perl_data.rc)
+#define Perl_severity		(OS2_Perl_data.severity)
+#define errno_isOS2		12345678
+#define OS2_Perl_flags	(OS2_Perl_data.flags)
 #define Perl_HAB_set_f	1
-#define Perl_HAB_set	(OS2_Perl_flag & Perl_HAB_set_f)
-#define set_Perl_HAB_f	(OS2_Perl_flag |= Perl_HAB_set_f)
-#define set_Perl_HAB(h) (set_Perl_HAB_f, hab = h)
+#define Perl_HAB_set	(OS2_Perl_flags & Perl_HAB_set_f)
+#define set_Perl_HAB_f	(OS2_Perl_flags |= Perl_HAB_set_f)
+#define set_Perl_HAB(h) (set_Perl_HAB_f, Perl_hab = h)
 #define OS2_XS_init() (*OS2_Perl_data.xs_init)()
+/* The expressions below return true on error. */
+/* INCL_DOSERRORS needed. */
+#define CheckOSError(expr) (!(rc = (expr)) ? 0 : (FillOSError(rc), 1))
+/* INCL_WINERRORS needed. */
+#define SaveWinError(expr) ((expr) ? : (FillWinError, 0))
+#define CheckWinError(expr) ((expr) ? 0: (FillWinError, 1))
+#define FillOSError(rc) (Perl_rc = rc,					\
+			errno = errno_isOS2,				\
+			Perl_severity = SEVERITY_ERROR) 
+#define FillWinError (Perl_rc = WinGetLastError(Perl_hab),		\
+			errno = errno_isOS2,				\
+			Perl_severity = ERRORIDSEV(Perl_rc),		\
+			Perl_rc = ERRORIDERROR(Perl_rc)) 
+#define Acquire_hab() if (!Perl_HAB_set) {				\
+	   Perl_hab = WinInitialize(0);					\
+	   if (!Perl_hab) die("WinInitialize failed");			\
+	   set_Perl_HAB_f;						\
+	}
+
+extern char sh_path[33];
+#define SH_PATH sh_path
+
+char *os2error(int rc);
+
+/* ************************************************************ */
+#define Dos32QuerySysState DosQuerySysState
+#define QuerySysState(flags, pid, buf, bufsz) \
+	Dos32QuerySysState(flags, 0,  pid, 0, buf, bufsz)
+
+#define QSS_PROCESS	1
+#define QSS_MODULE	2
+#define QSS_SEMAPHORES	4
+#define QSS_FILE	8		/* Buggy until fixpack18 */
+#define QSS_SHARED	16
+
+#ifdef _OS2EMX_H
+
+APIRET APIENTRY Dos32QuerySysState(ULONG func,ULONG arg1,ULONG pid,
+			ULONG _res_,PVOID buf,ULONG bufsz);
+typedef struct {
+	ULONG	threadcnt;
+	ULONG	proccnt;
+	ULONG	modulecnt;
+} QGLOBAL, *PQGLOBAL;
+
+typedef struct {
+	ULONG	rectype;
+	USHORT	threadid;
+	USHORT	slotid;
+	ULONG	sleepid;
+	ULONG	priority;
+	ULONG	systime;
+	ULONG	usertime;
+	UCHAR	state;
+	UCHAR	_reserved1_;	/* padding to ULONG */
+	USHORT	_reserved2_;	/* padding to ULONG */
+} QTHREAD, *PQTHREAD;
+
+typedef struct {
+	USHORT	sfn;
+	USHORT	refcnt;
+	USHORT	flags1;
+	USHORT	flags2;
+	USHORT	accmode1;
+	USHORT	accmode2;
+	ULONG	filesize;
+	USHORT  volhnd;
+	USHORT	attrib;
+	USHORT	_reserved_;
+} QFDS, *PQFDS;
+
+typedef struct qfile {
+	ULONG		rectype;
+	struct qfile	*next;
+	ULONG		opencnt;
+	PQFDS		filedata;
+	char		name[1];
+} QFILE, *PQFILE;
+
+typedef struct {
+	ULONG	rectype;
+	PQTHREAD threads;
+	USHORT	pid;
+	USHORT	ppid;
+	ULONG	type;
+	ULONG	state;
+	ULONG	sessid;
+	USHORT	hndmod;
+	USHORT	threadcnt;
+	ULONG	privsem32cnt;
+	ULONG	_reserved2_;
+	USHORT	sem16cnt;
+	USHORT	dllcnt;
+	USHORT	shrmemcnt;
+	USHORT	fdscnt;
+	PUSHORT	sem16s;
+	PUSHORT	dlls;
+	PUSHORT	shrmems;
+	PUSHORT	fds;
+} QPROCESS, *PQPROCESS;
+
+typedef struct sema {
+	struct sema *next;
+	USHORT	refcnt;
+	UCHAR	sysflags;
+	UCHAR	sysproccnt;
+	ULONG	_reserved1_;
+	USHORT	index;
+	CHAR	name[1];
+} QSEMA, *PQSEMA;
+
+typedef struct {
+	ULONG	rectype;
+	ULONG	_reserved1_;
+	USHORT	_reserved2_;
+	USHORT	syssemidx;
+	ULONG	index;
+	QSEMA	sema;
+} QSEMSTRUC, *PQSEMSTRUC;
+
+typedef struct {
+	USHORT	pid;
+	USHORT	opencnt;
+} QSEMOWNER32, *PQSEMOWNER32;
+
+typedef struct {
+	PQSEMOWNER32	own;
+	PCHAR		name;
+	PVOID		semrecs; /* array of associated sema's */
+	USHORT		flags;
+	USHORT		semreccnt;
+	USHORT		waitcnt;
+	USHORT		_reserved_;	/* padding to ULONG */
+} QSEMSMUX32, *PQSEMSMUX32;
+
+typedef struct {
+	PQSEMOWNER32	own;
+	PCHAR		name;
+	PQSEMSMUX32	mux;
+	USHORT		flags;
+	USHORT		postcnt;
+} QSEMEV32, *PQSEMEV32;
+
+typedef struct {
+	PQSEMOWNER32	own;
+	PCHAR		name;
+	PQSEMSMUX32	mux;
+	USHORT		flags;
+	USHORT		refcnt;
+	USHORT		thrdnum;
+	USHORT		_reserved_;	/* padding to ULONG */
+} QSEMMUX32, *PQSEMMUX32;
+
+typedef struct semstr32 {
+	struct semstr *next;
+	QSEMEV32 evsem;
+	QSEMMUX32  muxsem;
+	QSEMSMUX32 smuxsem;
+} QSEMSTRUC32, *PQSEMSTRUC32;
+
+typedef struct shrmem {
+	struct shrmem *next;
+	USHORT	hndshr;
+	USHORT	selshr;
+	USHORT	refcnt;
+	CHAR	name[1];
+} QSHRMEM, *PQSHRMEM;
+
+typedef struct module {
+	struct module *next;
+	USHORT	hndmod;
+	USHORT	type;
+	ULONG	refcnt;
+	ULONG	segcnt;
+	PVOID	_reserved_;
+	PCHAR	name;
+	USHORT	modref[1];
+} QMODULE, *PQMODULE;
+
+typedef struct {
+	PQGLOBAL	gbldata;
+	PQPROCESS	procdata;
+	PQSEMSTRUC	semadata;
+	PQSEMSTRUC32	sem32data;
+	PQSHRMEM	shrmemdata;
+	PQMODULE	moddata;
+	PVOID		_reserved2_;
+	PQFILE		filedata;
+} QTOPLEVEL, *PQTOPLEVEL;
+/* ************************************************************ */
+
+PQTOPLEVEL get_sysinfo(ULONG pid, ULONG flags);
+
+#endif /* _OS2EMX_H */
