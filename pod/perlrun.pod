@@ -533,6 +533,10 @@ folks use it for their backup files:
 
     $ perl -pi~ -e 's/foo/bar/' file1 file2 file3...
 
+Note that because B<-i> renames or deletes the original file before
+creating a new file of the same name, UNIX-style hard links will not be
+preserved.
+
 Finally, the B<-i> switch does not impede execution when no
 files are given on the command line.  In this case, no backup is made
 (the original file cannot, of course, be determined) and processing
