@@ -7955,13 +7955,15 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		if (!veclen)
 		    continue;
 		if (vec_utf)
-		    iv = (IV)utf8n_to_uvchr(vecstr, veclen, &ulen, 0);
+		    uv = utf8n_to_uvchr(vecstr, veclen, &ulen, UTF8_ALLOW_ANYUV);
 		else {
-		    iv = *vecstr;
+		    uv = *vecstr;
 		    ulen = 1;
 		}
 		vecstr += ulen;
 		veclen -= ulen;
+		if (plus)
+		     esignbuf[esignlen++] = plus;
 	    }
 	    else if (args) {
 		switch (intsize) {
@@ -7986,14 +7988,17 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 #endif
 		}
 	    }
-	    if (iv >= 0) {
-		uv = iv;
-		if (plus)
-		    esignbuf[esignlen++] = plus;
-	    }
-	    else {
-		uv = -iv;
-		esignbuf[esignlen++] = '-';
+	    if ( !vectorize )	/* we already set uv above */
+	    {
+		if (iv >= 0) {
+		    uv = iv;
+		    if (plus)
+			esignbuf[esignlen++] = plus;
+		}
+		else {
+		    uv = -iv;
+		    esignbuf[esignlen++] = '-';
+		}
 	    }
 	    base = 10;
 	    goto integer;
@@ -8035,7 +8040,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		if (!veclen)
 		    continue;
 		if (vec_utf)
-		    uv = utf8n_to_uvchr(vecstr, veclen, &ulen, 0);
+		    uv = utf8n_to_uvchr(vecstr, veclen, &ulen, UTF8_ALLOW_ANYUV);
 		else {
 		    uv = *vecstr;
 		    ulen = 1;
