@@ -2,13 +2,14 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    @INC = qw(. ../lib);
     require Config; import Config;
     if ($^O eq 'VMS') {
 	print "1..0 # skip on $^O, no piped open\n";
         exit 0;
     }
     $ENV{PERL5LIB} = '../lib';    # so children will see it too
+    require 'test.pl';
 }
 
 use strict;
@@ -25,26 +26,28 @@ my @prgs;
     close DATA;
 }
 
-use Test::More;
-
 plan tests => scalar @prgs;
 
 require "dumpvar.pl";
 
 $ENV{PERLDB_OPTS} = "TTY=0";
 my($ornament1,$ornament2,$wtrfh,$rdrfh);
-open3 $wtrfh, $rdrfh, 0, $^X, "-de0";
+my $Perl = which_perl();
+open3 $wtrfh, $rdrfh, 0, $Perl, "-de0" or die;
 my $ios = IO::Select->new();
 $ios->add($rdrfh);
 for (@prgs){
     my($prog,$expected) = split(/\nEXPECT\n?/, $_);
     print $wtrfh $prog, "\n";
     my $got;
-    while ($ios->can_read(0.25)) {
-	last unless sysread $rdrfh, $got, 1024, length($got);
+    for my $try (1..3) {
+	if ($ios->can_read(0.25)) {
+	    sysread $rdrfh, $got, 1024, length($got);
+	    select undef, undef, undef, 0.25;
+	}
     }
     SKIP: {
-	skip("failed to read debugger", 1) unless defined $got;
+	skip("failed to read debugger", 1) unless defined $got && length $got;
 	$got =~ s/^\s*Loading.*\r?\n?Editor.*\r?\n?\r?\n?Enter.*\r?\n?\r?\n?main::\(-e:1\):\s+0\r?\n?//;
 	unless (defined $ornament1) {
 	    $got =~ s/^\s*Loading.*\r?\n?Editor.*\r?\n?\r?\n?Enter.*\r?\n?\r?\n?main::\(-e:1\):\s+0\r?\n?//;
