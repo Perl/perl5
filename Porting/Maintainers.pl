@@ -132,7 +132,7 @@ package Maintainers;
 	'Digest' =>
 		{
 		'MAINTAINER'	=> 'gaas',
-		'FILES'		=> q[lib/Digest.{pm,t}],
+		'FILES'		=> q[lib/Digest.pm lib/Digest/base.pm lib/Digest],
 		'CPAN'		=> 1,
 		},
 
