@@ -26,7 +26,8 @@ print "not " unless &{"Errno::$err"} == $num;
 print "ok 2\n";
 
 $! = $num;
-print "not " unless $!{$err};
+# Some systems have ESUCCESS 0, that's why exists instead of boolean.
+print "not " unless exists $!{$err};
 print "ok 3\n";
 
 $! = 0;
