@@ -3597,7 +3597,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	    case 'p':
 	    case 'P':
 		if (RExC_parse >= RExC_end)
-		    vFAIL("Empty \\p{}");
+		    vFAIL2("Empty \\%c{}", value);
 		if (*RExC_parse == '{') {
 		    U8 c = (U8)value;
 		    e = strchr(RExC_parse++, '}');
