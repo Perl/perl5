@@ -9323,6 +9323,9 @@ Perl_re_dup(pTHX_ REGEXP *r, CLONE_PARAMS *param)
 	ret->subbeg  = SAVEPV(r->subbeg);
     else
 	ret->subbeg = Nullch;
+#ifdef PERL_COPY_ON_WRITE
+    ret->saved_copy = Nullsv;
+#endif
 
     ptr_table_store(PL_ptr_table, r, ret);
     return ret;
