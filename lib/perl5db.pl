@@ -2,7 +2,7 @@ package DB;
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 
-$VERSION = 0.9907;
+$VERSION = 0.9908;
 $header = "perl5db.pl patch level $VERSION";
 
 # Enhanced by ilya@math.ohio-state.edu (Ilya Zakharevich)
@@ -261,7 +261,8 @@ if (exists $ENV{PERLDB_RESTART}) {
   %postponed = get_list("PERLDB_POSTPONE");
   my @had_breakpoints= get_list("PERLDB_VISITED");
   for (0 .. $#had_breakpoints) {
-    %{$postponed_file{$had_breakpoints[$_]}} = get_list("PERLDB_FILE_$_");
+    my %pf = get_list("PERLDB_FILE_$_");
+    $postponed_file{$had_breakpoints[$_]} = \%pf if %pf;
   }
   my %opt = get_list("PERLDB_OPT");
   my ($opt,$val);
@@ -649,12 +650,11 @@ sub DB {
 			print $OUT "Postponed breakpoints in files:\n";
 			my ($file, $line);
 			for $file (keys %postponed_file) {
-			  my %db = %{$postponed_file{$file}};
-			  next unless keys %db;
+			  my $db = $postponed_file{$file};
 			  print $OUT " $file:\n";
-			  for $line (sort {$a <=> $b} keys %db) {
+			  for $line (sort {$a <=> $b} keys %$db) {
 				print $OUT "  $line:\n";
-				my ($stop,$action) = split(/\0/, $db{$line});
+				my ($stop,$action) = split(/\0/, $$db{$line});
 				print $OUT "    break if (", $stop, ")\n"
 				  if $stop;
 				print $OUT "    action:  ", $action, "\n"
@@ -855,12 +855,12 @@ sub DB {
 			for (0 .. $#had_breakpoints) {
 			  my $file = $had_breakpoints[$_];
 			  *dbline = $main::{'_<' . $file};
-			  next unless %dbline or %{$postponed_file{$file}};
+			  next unless %dbline or $postponed_file{$file};
 			  (push @hard, $file), next 
 			    if $file =~ /^\(eval \d+\)$/;
 			  my @add;
 			  @add = %{$postponed_file{$file}}
-			    if %{$postponed_file{$file}};
+			    if $postponed_file{$file};
 			  set_list("PERLDB_FILE_$_", %dbline, @add);
 			}
 			for (@hard) { # Yes, really-really...
@@ -1185,14 +1185,14 @@ sub postponed {
   $signal = 1, print $OUT "'$filename' loaded...\n"
     if $break_on_load{$filename};
   print $LINEINFO ' ' x $#stack, "Package $filename.\n" if $frame;
-  return unless %{$postponed_file{$filename}};
+  return unless $postponed_file{$filename};
   $had_breakpoints{$filename}++;
   #%dbline = %{$postponed_file{$filename}}; # Cannot be done: unsufficient magic
   my $key;
   for $key (keys %{$postponed_file{$filename}}) {
     $dbline{$key} = $ {$postponed_file{$filename}}{$key};
   }
-  undef %{$postponed_file{$filename}};
+  delete $postponed_file{$filename};
 }
 
 sub dumpit {
