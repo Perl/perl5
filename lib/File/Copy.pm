@@ -78,7 +78,7 @@ sub copy {
     }
 
     if ((($Config{d_symlink} && $Config{d_readlink}) || $Config{d_link}) &&
-	!($^O eq 'Win32' || $^O eq 'os2' || $^O eq 'vms')) {
+	!($^O eq 'MSWin32' || $^O eq 'os2' || $^O eq 'vms')) {
 	my @fs = stat($from);
 	if (@fs) {
 	    my @ts = stat($to);

@@ -164,15 +164,19 @@ for my $pass (@pass) {
   }
 
   if ($Config{d_link}) {
-    open(F, ">file-$$") or die $!;
-    print F "dummy content\n";
-    close F;
-    link("file-$$", "hardlink-$$") or die $!;
-    eval { copy("file-$$", "hardlink-$$") };
-    print "not " if $@ !~ /are identical/ || -z "file-$$";
-    printf "ok %d\n", (++$test_i)+$loopconst;
-    unlink "hardlink-$$";
-    unlink "file-$$";
+    if ($^O ne 'MSWin32') {
+      open(F, ">file-$$") or die $!;
+      print F "dummy content\n";
+      close F;
+      link("file-$$", "hardlink-$$") or die $!;
+      eval { copy("file-$$", "hardlink-$$") };
+      print "not " if $@ !~ /are identical/ || -z "file-$$";
+      printf "ok %d\n", (++$test_i)+$loopconst;
+      unlink "hardlink-$$";
+      unlink "file-$$";
+    } else {
+      printf "ok %d # Skipped: can't test hardlinks on MSWin32\n", (++$test_i)+$loopconst;
+    }
   } else {
     printf "ok %d # Skipped: no hardlinks on this platform\n", (++$test_i)+$loopconst;
   }
