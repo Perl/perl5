@@ -307,8 +307,7 @@ To catch it, you could use this:
 
 Both the main process and any child processes it forks share the same
 STDIN, STDOUT, and STDERR filehandles.  If both processes try to access
-them at once, strange things can happen.  You'll certainly want to any
-stdio flush output buffers before forking.  You may also want to close
+them at once, strange things can happen.  You may also want to close
 or reopen the filehandles for the child.  You can get around this by
 opening your pipe with open(), but on some systems this means that the
 child process cannot outlive the parent.
@@ -473,7 +472,6 @@ Here's an example of using open2():
     use FileHandle;
     use IPC::Open2;
     $pid = open2(*Reader, *Writer, "cat -u -n" );
-    Writer->autoflush(); # default here, actually
     print Writer "stuff\n";
     $got = <Reader>;
 

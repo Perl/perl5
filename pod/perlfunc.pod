@@ -1311,12 +1311,9 @@ the argument is checked for shell metacharacters, and if there are any,
 the entire argument is passed to the system's command shell for parsing
 (this is C</bin/sh -c> on Unix platforms, but varies on other platforms).
 If there are no shell metacharacters in the argument, it is split into
-words and passed directly to C<execvp()>, which is more efficient.  Note:
-C<exec()> and C<system()> do not flush your output buffer, so you may need to
-set C<$|> to avoid lost output.  Examples:
+words and passed directly to C<execvp()>, which is more efficient.
 
-    exec '/bin/echo', 'Your arguments are: ', @ARGV;
-    exec "sort $outfile | uniq";
+All files opened for output are flushed before attempting the exec().
 
 If you don't really want to execute the first argument, but want to lie
 to the program you are executing about its own name, you can specify
@@ -1542,9 +1539,7 @@ fork(), great care has gone into making it extremely efficient (for
 example, using copy-on-write technology on data pages), making it the
 dominant paradigm for multitasking over the last few decades.
 
-Note: unflushed buffers remain unflushed in both processes, which means
-you may need to set C<$|> ($AUTOFLUSH in English) or call the C<autoflush()>
-method of C<IO::Handle> to avoid duplicate output.
+All files opened for output are flushed before forking the child process.
 
 If you C<fork()> without ever waiting on your children, you will
 accumulate zombies.  On some systems, you can avoid this by setting
@@ -2527,11 +2522,10 @@ The following pairs are more or less equivalent:
 
 See L<perlipc/"Safe Pipe Opens"> for more examples of this.
 
-NOTE: On any operation that may do a fork, any unflushed buffers remain
-unflushed in both processes, which means you may need to set C<$|> to
-avoid duplicate output.  On systems that support a close-on-exec flag on
-files, the flag will be set for the newly opened file descriptor as
-determined by the value of $^F.  See L<perlvar/$^F>.
+NOTE: On any operation that may do a fork, all files opened for output
+are flushed before the fork is attempted.  On systems that support a
+close-on-exec flag on files, the flag will be set for the newly opened
+file descriptor as determined by the value of $^F.  See L<perlvar/$^F>.
 
 Closing any piped filehandle causes the parent process to wait for the
 child to finish, and returns the status value in C<$?>.

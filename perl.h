@@ -1449,6 +1449,14 @@ typedef pthread_key_t	perl_key;
 #   define STATUS_ALL_FAILURE	(PL_statusvalue = 1)
 #endif
 
+/* This defines a way to flush all output buffers.  This may be a
+ * performance issue, so we allow people to disable it.
+ * XXX the default needs a Configure test, as it may not work everywhere.
+ */
+#ifndef PERL_FLUSHALL_FOR_CHILD
+#define PERL_FLUSHALL_FOR_CHILD	PerlIO_flush((PerlIO*)NULL)
+#endif
+
 /* Some unistd.h's give a prototype for pause() even though
    HAS_PAUSE ends up undefined.  This causes the #define
    below to be rejected by the compmiler.  Sigh.

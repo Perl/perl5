@@ -377,8 +377,7 @@ my_popen(char *cmd, char *mode)
 #define fixcmd(x)
 #endif
     fixcmd(cmd);
-    win32_fflush(stdout);
-    win32_fflush(stderr);
+    PERL_FLUSHALL_FOR_CHILD;
     return win32_popen(cmd, mode);
 }
 

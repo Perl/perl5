@@ -957,6 +957,7 @@ my_popen(char *cmd, char *mode)
 {
     TAINT_ENV();
     TAINT_PROPER("popen");
+    PERL_FLUSHALL_FOR_CHILD;
     return safe_popen(cmd,mode);
 }
 

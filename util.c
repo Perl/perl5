@@ -1911,6 +1911,7 @@ my_popen(char *cmd, char *mode)
     SV *sv;
     I32 doexec = strNE(cmd,"-");
 
+    PERL_FLUSHALL_FOR_CHILD;
 #ifdef OS2
     if (doexec) {
 	return my_syspopen(cmd,mode);
@@ -1984,12 +1985,11 @@ my_popen(char *cmd, char *mode)
 #if defined(atarist) || defined(DJGPP)
 FILE *popen();
 PerlIO *
-my_popen(cmd,mode)
-char	*cmd;
-char	*mode;
+my_popen(char *cmd, char *mode)
 {
     /* Needs work for PerlIO ! */
     /* used 0 for 2nd parameter to PerlIO-exportFILE; apparently not used */
+    PERL_FLUSHALL_FOR_CHILD;
     return popen(PerlIO_exportFILE(cmd, 0), mode);
 }
 #endif

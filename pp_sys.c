@@ -3491,6 +3491,7 @@ PP(pp_fork)
     GV *tmpgv;
 
     EXTEND(SP, 1);
+    PERL_FLUSHALL_FOR_CHILD;
     childpid = fork();
     if (childpid < 0)
 	RETSETUNDEF;
@@ -3559,6 +3560,7 @@ PP(pp_system)
 	    TAINT_PROPER("system");
 	}
     }
+    PERL_FLUSHALL_FOR_CHILD;
 #if (defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(OS2)
     while ((childpid = vfork()) == -1) {
 	if (errno != EAGAIN) {
@@ -3617,6 +3619,7 @@ PP(pp_exec)
     I32 value;
     STRLEN n_a;
 
+    PERL_FLUSHALL_FOR_CHILD;
     if (PL_op->op_flags & OPf_STACKED) {
 	SV *really = *++MARK;
 	value = (I32)do_aexec(really, MARK, SP);

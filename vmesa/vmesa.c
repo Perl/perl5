@@ -408,6 +408,7 @@ my_popen(char *cmd, char *mode)
          Perl_stdin_fd = pFd[that];
       if (strNE(cmd,"-"))
       {
+	 PERL_FLUSHALL_FOR_CHILD;
          pid = spawn_cmd(cmd, Perl_stdin_fd, Perl_stdout_fd);
          if (pid >= 0)
          {
