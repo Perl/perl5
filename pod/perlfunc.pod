@@ -3596,13 +3596,12 @@ C<chdir> there, it would have been testing the wrong file.
 
 =item readline EXPR
 
-Reads from the filehandle EXPR.  The EXPR can be either the name of
-the handle or the typeglob for it.  In scalar context, each call reads
-and returns the next line, until end-of-file is reached, whereupon the
-subsequent call returns undef.  In list context, reads until
-end-of-file is reached and returns a list of lines.  Note that the
-notion of "line" used here is however you may have defined it with
-C<$/> or C<$INPUT_RECORD_SEPARATOR>).  See L<perlvar/"$/">.
+Reads from the filehandle whose typeglob is contained in EXPR.  In scalar
+context, each call reads and returns the next line, until end-of-file is
+reached, whereupon the subsequent call returns undef.  In list context,
+reads until end-of-file is reached and returns a list of lines.  Note that
+the notion of "line" used here is however you may have defined it
+with C<$/> or C<$INPUT_RECORD_SEPARATOR>).  See L<perlvar/"$/">.
 
 When C<$/> is set to C<undef>, when readline() is in scalar
 context (i.e. file slurp mode), and when an empty file is read, it
@@ -3613,7 +3612,6 @@ operator, but you can use it directly.  The C<< <EXPR> >>
 operator is discussed in more detail in L<perlop/"I/O Operators">.
 
     $line = <STDIN>;
-    $line = readline(STDIN);		# same thing
     $line = readline(*STDIN);		# same thing
 
 =item readlink EXPR
