@@ -1398,12 +1398,12 @@ vivify_defelem(SV *sv)
     if (mg->mg_obj) {
 	SV *ahv = LvTARG(sv);
 	if (SvTYPE(ahv) == SVt_PVHV) {
-	    HE *he = hv_fetch_ent((HV*)ahv, mg->mg_obj, FALSE, 0);
+	    HE *he = hv_fetch_ent((HV*)ahv, mg->mg_obj, TRUE, 0);
 	    if (he)
 		value = HeVAL(he);
 	}
 	else {
-	    SV **svp = avhv_fetch_ent((AV*)ahv, mg->mg_obj, FALSE, 0);
+	    SV **svp = avhv_fetch_ent((AV*)ahv, mg->mg_obj, TRUE, 0);
 	    if (svp)
 		value = *svp;
 	}
