@@ -128,12 +128,29 @@ sub pod_find
 
     if($opts{-script}) {
         require Config;
-        push(@search, $Config::Config{scriptdir});
+        push(@search, $Config::Config{scriptdir})
+            if -d $Config::Config{scriptdir};
         $opts{-perl} = 1;
     }
 
     if($opts{-inc}) {
-        push(@search, grep($_ ne '.',@INC));
+        if ($^O eq 'MacOS') {
+            # tolerate '.', './some_dir' and '(../)+some_dir' on Mac OS
+            my @new_INC = @INC;
+            for (@new_INC) {
+                if ( $_ eq '.' ) {
+                    $_ = ':';
+                } elsif ( $_ =~ s|^((?:\.\./)+)|':' x (length($1)/3)|e ) {
+                    $_ = ':'. $_;
+                } else {
+                    $_ =~ s|^\./|:|;
+                }
+            }
+            push(@search, grep($_ ne File::Spec->curdir, @new_INC));
+        } else {
+            push(@search, grep($_ ne File::Spec->curdir, @INC));
+        }
+
         $opts{-perl} = 1;
     }
 
@@ -144,9 +161,18 @@ sub pod_find
         # * remove e.g. "i586-linux" (from 'archname')
         # * remove e.g. 5.00503
         # * remove pod/ if followed by *.pod (e.g. in pod/perlfunc.pod)
-        $SIMPLIFY_RX =
-          qq!^(?i:site(_perl)?/|\Q$Config::Config{archname}\E/|\\d+\\.\\d+([_.]?\\d+)?/|pod/(?=.*?\\.pod\\z))*!;
 
+        # Mac OS:
+        # * remove ":?site_perl:"
+        # * remove :?pod: if followed by *.pod (e.g. in :pod:perlfunc.pod)
+
+        if ($^O eq 'MacOS') {
+            $SIMPLIFY_RX =
+              qq!^(?i:\:?site_perl\:|\:?pod\:(?=.*?\\.pod\\z))*!;
+        } else {
+            $SIMPLIFY_RX =
+              qq!^(?i:site(_perl)?/|\Q$Config::Config{archname}\E/|\\d+\\.\\d+([_.]?\\d+)?/|pod/(?=.*?\\.pod\\z))*!;
+        }
     }
 
     my %dirs_visited;
@@ -170,7 +196,7 @@ sub pod_find
             }
             next;
         }
-        my $root_rx = qq!^\Q$try\E/!;
+        my $root_rx = $^O eq 'MacOS' ? qq!^\Q$try\E! : qq!^\Q$try\E/!;
         File::Find::find( sub {
             my $item = $File::Find::name;
             if(-d) {
@@ -231,10 +257,19 @@ sub _check_and_extract_name {
         $name =~ s!$SIMPLIFY_RX!!os if(defined $SIMPLIFY_RX);
     }
     else {
-        $name =~ s:^.*/::s;
+        if ($^O eq 'MacOS') {
+            $name =~ s/^.*://s;
+        } else {
+            $name =~ s:^.*/::s;
+        }
     }
     _simplify($name);
     $name =~ s!/+!::!g; #/
+    if ($^O eq 'MacOS') {
+        $name =~ s!:+!::!g; # : -> ::
+    } else {
+        $name =~ s!/+!::!g; # / -> ::
+    }
     $name;
 }
 
@@ -251,7 +286,11 @@ F<.bat>, F<.cmd> on Win32 and OS/2, or F<.com> on VMS, respectively.
 sub simplify_name {
     my ($str) = @_;
     # remove all path components
-    $str =~ s:^.*/::s;
+    if ($^O eq 'MacOS') {
+        $str =~ s/^.*://s;
+    } else {
+        $str =~ s:^.*/::s;
+    }
     _simplify($str);
     $str;
 }
@@ -319,7 +358,7 @@ sub pod_where {
   my %options = (
          '-inc' => 0,
          '-verbose' => 0,
-         '-dirs' => [ '.' ],
+         '-dirs' => [ File::Spec->curdir ],
         );
 
   # Check for an options hash as first argument
@@ -347,6 +386,22 @@ sub pod_where {
     require Config;
 
     # Add @INC
+    if ($^O eq 'MacOS' && $options{'-inc'}) {
+        # tolerate '.', './some_dir' and '(../)+some_dir' on Mac OS
+        my @new_INC = @INC;
+        for (@new_INC) {
+            if ( $_ eq '.' ) {
+                $_ = ':';
+            } elsif ( $_ =~ s|^((?:\.\./)+)|':' x (length($1)/3)|e ) {
+                $_ = ':'. $_;
+            } else {
+                $_ =~ s|^\./|:|;
+            }
+        }
+        push (@search_dirs, @new_INC);
+    } elsif ($options{'-inc'}) {
+        push (@search_dirs, @INC);
+    }
     push (@search_dirs, @INC) if $options{'-inc'};
 
     # Add location of pod documentation for perl man pages (eg perlfunc)
@@ -364,7 +419,7 @@ sub pod_where {
   # Loop over directories
   Dir: foreach my $dir ( @search_dirs ) {
 
-    # Don't bother if cant find the directory
+    # Don't bother if can't find the directory
     if (-d $dir) {
       warn "Looking in directory $dir\n" 
         if $options{'-verbose'};
