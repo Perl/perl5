@@ -2545,9 +2545,6 @@ Perl_yylex(pTHX)
 		if (PL_minus_l)
 		    sv_catpv(PL_linestr,"chomp;");
 		if (PL_minus_a) {
-		    GV* gv = gv_fetchpv("::F", TRUE, SVt_PVAV);
-		    if (gv)
-			GvIMPORTED_AV_on(gv);
 		    if (PL_minus_F) {
 			if (strchr("/'\"", *PL_splitstr)
 			      && strchr(PL_splitstr + 1, *PL_splitstr))
@@ -2557,7 +2554,7 @@ Perl_yylex(pTHX)
 			    s = "'~#\200\1'"; /* surely one char is unused...*/
 			    while (s[1] && strchr(PL_splitstr, *s))  s++;
 			    delim = *s;
-			    Perl_sv_catpvf(aTHX_ PL_linestr, "@F=split(%s%c",
+			    Perl_sv_catpvf(aTHX_ PL_linestr, "our @F=split(%s%c",
 				      "q" + (delim == '\''), delim);
 			    for (s = PL_splitstr; *s; s++) {
 				if (*s == '\\')
@@ -2568,7 +2565,7 @@ Perl_yylex(pTHX)
 			}
 		    }
 		    else
-		        sv_catpv(PL_linestr,"@F=split(' ');");
+		        sv_catpv(PL_linestr,"our @F=split(' ');");
 		}
 	    }
 	    sv_catpv(PL_linestr, "\n");

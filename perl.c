@@ -2037,7 +2037,7 @@ STATIC void
 S_usage(pTHX_ char *name)		/* XXX move this out into a module ? */
 {
     /* This message really ought to be max 23 lines.
-     * Removed -h because the user already knows that opton. Others? */
+     * Removed -h because the user already knows that option. Others? */
 
     static char *usage_msg[] = {
 "-0[octal]       specify record separator (\\0, if no argument)",
