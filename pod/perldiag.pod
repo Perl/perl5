@@ -688,11 +688,6 @@ to exist.
 
 (F) List assignment to %ENV is not supported on some systems, notably VMS.
 
-=item Can't mktemp()
-
-(F) The mktemp() routine failed for some reason while trying to process
-a B<-e> switch.  Maybe your /tmp partition is full, or clobbered.
-
 =item Can't modify %s in %s
 
 (F) You aren't allowed to assign to the item indicated, or otherwise try to
@@ -878,21 +873,11 @@ weren't.
 subscript.  But to the left of the brackets was an expression that
 didn't look like an array reference, or anything else subscriptable.
 
-=item Can't write to temp file for B<-e>: %s
-
-(F) The write routine failed for some reason while trying to process
-a B<-e> switch.  Maybe your /tmp partition is full, or clobbered.
-
 =item Can't x= to read-only value
 
 (F) You tried to repeat a constant value (often the undefined value) with
 an assignment operator, which implies modifying the value itself.
 Perhaps you need to copy the value to a temporary, and repeat that.
-
-=item Cannot open temporary file
-
-(F) The create routine failed for some reason while trying to process
-a B<-e> switch.  Maybe your /tmp partition is full, or clobbered.
 
 =item Cannot resolve method `%s' overloading `%s' in package `%s'
 

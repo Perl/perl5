@@ -4038,6 +4038,22 @@ Vectors created with vec() can also be manipulated with the logical
 operators |, &, and ^, which will assume a bit vector operation is
 desired when both operands are strings.
 
+The following code will build up an ASCII string saying 'PerlPerlPerl'.
+The comments show the string after each step. Note that this code works
+in the same way on big-endian or little-endian machines.
+
+    my $foo = '';
+    vec($foo,  0, 32) = 0x5065726C;	# 'Perl'
+    vec($foo,  2, 16) = 0x5065;		# 'PerlPe'
+    vec($foo,  3, 16) = 0x726C;		# 'PerlPerl'
+    vec($foo,  8,  8) = 0x50;		# 'PerlPerlP'
+    vec($foo,  9,  8) = 0x65;		# 'PerlPerlPe'
+    vec($foo, 20,  4) = 2;		# 'PerlPerlPe'   . "\x02"
+    vec($foo, 21,  4) = 7;		# 'PerlPerlPer'  # 'r' is "\x72"
+    vec($foo, 45,  2) = 3;		# 'PerlPerlPer'  . "\x0c"
+    vec($foo, 93,  1) = 1;		# 'PerlPerlPer'  . "\x2c"
+    vec($foo, 94,  1) = 1;		# 'PerlPerlPerl' # 'l' is "\x6c"
+
 To transform a bit vector into a string or array of 0's and 1's, use these:
 
     $bits = unpack("b*", $vector);
