@@ -176,9 +176,13 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	type = savepvn(name, len);
 	tend = type+len;
 	SAVEFREEPV(type);
-	/* Loose trailing white space */
-	while (tend > type && isSPACE(tend[-1]))
-	    *tend-- = '\0';
+
+        /* Lose leading and trailing white space */
+        /*SUPPRESS 530*/
+        for (; isSPACE(*type); type++) ;
+        while (tend > type && isSPACE(tend[-1]))
+	    *--tend = '\0';
+
 	if (num_svs) {
 	    /* New style explict name, type is just mode and discipline/layer info */
 	    STRLEN l = 0;
@@ -186,8 +190,6 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    len = (I32)l;
 	    name = savepvn(name, len);
 	    SAVEFREEPV(name);
-	    /*SUPPRESS 530*/
-	    for (; isSPACE(*type); type++) ;
 	}
 	else {
 	    name = type;
