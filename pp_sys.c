@@ -2505,8 +2505,12 @@ PP(pp_stat)
 	    PL_laststatval = (GvIO(tmpgv) && IoIFP(GvIOp(tmpgv))
 		? PerlLIO_fstat(PerlIO_fileno(IoIFP(GvIOn(tmpgv))), &PL_statcache) : -1);
 	}
-	if (PL_laststatval < 0)
+	if (PL_laststatval < 0) {
+	    if (ckWARN(WARN_UNOPENED))
+		Perl_warner(aTHX_ WARN_UNOPENED, "%s() on unopened filehandle %s",
+			    PL_op_desc[PL_op->op_type], GvENAME(tmpgv));
 	    max = 0;
+	}
     }
     else {
 	SV* sv = POPs;
@@ -3059,8 +3063,8 @@ PP(pp_fttext)
 	else {
 	    if (ckWARN(WARN_UNOPENED)) {
 		gv = cGVOP_gv;
-		Perl_warner(aTHX_ WARN_UNOPENED, "Test on unopened file %s",
-			    GvENAME(gv));
+		Perl_warner(aTHX_ WARN_UNOPENED, "%s on unopened filehandle %s",
+			    PL_op_desc[PL_op->op_type], GvENAME(gv));
 	    }
 	    SETERRNO(EBADF,RMS$_IFI);
 	    RETPUSHUNDEF;

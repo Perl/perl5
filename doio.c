@@ -812,7 +812,7 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 	    dTHR;
 	    if (ckWARN(WARN_UNOPENED))
 		Perl_warner(aTHX_ WARN_UNOPENED, 
-		       "Close on unopened file %s",GvENAME(gv));
+		       "close() on unopened filehandle %s",GvENAME(gv));
 	    SETERRNO(EBADF,SS$_IVCHAN);
 	}
 	return FALSE;
@@ -926,7 +926,7 @@ Perl_do_tell(pTHX_ GV *gv)
     {
 	dTHR;
 	if (ckWARN(WARN_UNOPENED))
-	    Perl_warner(aTHX_ WARN_UNOPENED, "tell() on unopened file");
+	    Perl_warner(aTHX_ WARN_UNOPENED, "tell() on unopened filehandle");
     }
     SETERRNO(EBADF,RMS$_IFI);
     return (Off_t)-1;
@@ -948,7 +948,7 @@ Perl_do_seek(pTHX_ GV *gv, Off_t pos, int whence)
     {
 	dTHR;
 	if (ckWARN(WARN_UNOPENED))
-	    Perl_warner(aTHX_ WARN_UNOPENED, "seek() on unopened file");
+	    Perl_warner(aTHX_ WARN_UNOPENED, "seek() on unopened filehandle");
     }
     SETERRNO(EBADF,RMS$_IFI);
     return FALSE;
@@ -965,7 +965,7 @@ Perl_do_sysseek(pTHX_ GV *gv, Off_t pos, int whence)
     {
 	dTHR;
 	if (ckWARN(WARN_UNOPENED))
-	    Perl_warner(aTHX_ WARN_UNOPENED, "sysseek() on unopened file");
+	    Perl_warner(aTHX_ WARN_UNOPENED, "sysseek() on unopened filehandle");
     }
     SETERRNO(EBADF,RMS$_IFI);
     return (Off_t)-1;
@@ -1196,8 +1196,8 @@ Perl_my_stat(pTHX)
 	    if (tmpgv == PL_defgv)
 		return PL_laststatval;
 	    if (ckWARN(WARN_UNOPENED))
-		Perl_warner(aTHX_ WARN_UNOPENED, "Stat on unopened file %s",
-		  GvENAME(tmpgv));
+		Perl_warner(aTHX_ WARN_UNOPENED, "%s on unopened filehandle %s",
+			    PL_op_desc[PL_op->op_type], GvENAME(tmpgv));
 	    PL_statgv = Nullgv;
 	    sv_setpv(PL_statname,"");
 	    return (PL_laststatval = -1);

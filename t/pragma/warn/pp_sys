@@ -74,7 +74,8 @@
 
   warn(warn_nl, "stat");			[pp_stat]
 
-  Test on unopened file <%s>
+  -T on unopened filehandle %s
+  stat() on unopened filehandle %s
 	close STDIN ; -T STDIN ;
 
   warn(warn_nl, "open");			[pp_fttext]
@@ -328,10 +329,13 @@ Unsuccessful stat on filename containing newline at - line 3.
 use warnings 'unopened' ;
 close STDIN ; 
 -T STDIN ;
+stat(STDIN) ;
 no warnings 'unopened' ;
 -T STDIN ;
+stat(STDIN);
 EXPECT
-Test on unopened file STDIN at - line 4.
+-T on unopened filehandle STDIN at - line 4.
+stat() on unopened filehandle STDIN at - line 5.
 ########
 # pp_sys.c [pp_fttext]
 use warnings 'newline' ;
