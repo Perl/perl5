@@ -1,6 +1,6 @@
 #!./perl -w
 
-print "1..132\n";
+print "1..133\n";
 
 sub try ($$) {
    print +($_[1] ? "ok" : "not ok"), " $_[0]\n";
@@ -264,4 +264,8 @@ tryeq 130, 18446744073709551616/9223372036854775808, 2;
   # -167772160. It's actually undefined behaviour, so anything may happen.
   my $int = ($n % 1000) * 167772160;
   tryeq 132, $int, 21307064320;
+
+  my $t = time;
+  my $t1000 = time() * 1000;
+  try 133, abs($t1000 -1000 * $t) <= 2000;
 }
