@@ -4727,14 +4727,20 @@ if "$useshrplib"; then
 	esac
 	case "$xxx" in
 	'') ;;
-	*)	ccdlflags="$ccdlflags $xxx"
-		cat <<EOM >&4
+	*)	
+		# Only add $xxx if it isn't already in ccdlflags.
+		case "$ccdlflags" in
+		*${xxx}*)	;;
+		*)	ccdlflags="$ccdlflags $xxx"
+			cat <<EOM >&4
 
 Adding $xxx to the flags
 passed to $ld so that the perl executable will find the 
 installed shared $libperl.
 
 EOM
+			;;
+		esac
 		;;
 	esac
 fi
