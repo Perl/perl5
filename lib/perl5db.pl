@@ -382,7 +382,7 @@ sub DB {
 	if ($stop eq '1') {
 	    $signal |= 1;
 	} elsif ($stop) {
-	    $evalarg = "\$DB::signal |= do {$stop;}"; &eval;
+	    $evalarg = "\$DB::signal |= 1 if do {$stop}"; &eval;
 	    $dbline{$line} =~ s/;9($|\0)/$1/;
 	}
     }
