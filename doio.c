@@ -1109,7 +1109,7 @@ Perl_do_binmode(pTHX_ PerlIO *fp, int iotype, int mode)
   */
  char *name = ":raw";
 #ifdef PERLIO_USING_CRLF
- if (!(mode & O_BINARY)))
+ if (!(mode & O_BINARY))
      name = ":crlf";
 #endif
  return PerlIO_binmode(aTHX_ fp, iotype, mode, name);
