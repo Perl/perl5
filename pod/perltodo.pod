@@ -179,15 +179,6 @@ Clean these up. Move them to mathom.c, and don't compile for blead?
 The old perltodo notes "This has been done in places, but needs a thorough
 code review. Also fchdir is available in some platforms."
 
-=head2 foreach reverse
-
-The old perltodo notes that we could optimise foreach to iterate in reverse.
-(instead of making a reversed copy on the stack)
-It seems that cx->blk_loop.itermax could be hijacked to act as a go up/go
-down flag, with cx->blk_loop.iterix primed in pp_enteriter for the go down
-case (ie reverse). However, it looks slightly tricky identifying the shape of
-foreach reverse in the optree in Perl_peep.
-
 =head1 Tests
 
 =head2 Make Schwern poorer

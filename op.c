@@ -6719,7 +6719,7 @@ Perl_peep(pTHX_ register OP *o)
 	}
 
 	case OP_REVERSE: {
-	    OP *ourmark, *theirmark, *ourlast, *iter, *expushmark;
+	    OP *ourmark, *theirmark, *ourlast, *iter, *expushmark, *rv2av;
 	    OP *gvop = NULL;
 	    LISTOP *enter, *exlist;
 	    o->op_opt = 1;
@@ -6785,6 +6785,15 @@ Perl_peep(pTHX_ register OP *o)
 	    ourlast = ((LISTOP *)o)->op_last;
 	    if (!ourlast || ourlast->op_next != o)
 		break;
+
+	    rv2av = ourmark->op_sibling;
+	    if (rv2av && rv2av->op_type == OP_RV2AV && rv2av->op_sibling == 0
+		&& rv2av->op_flags == (OPf_WANT_LIST | OPf_KIDS)
+		&& enter->op_flags == (OPf_WANT_LIST | OPf_KIDS)) {
+		/* We're just reversing a single array.  */
+		rv2av->op_flags = OPf_WANT_SCALAR | OPf_KIDS | OPf_REF;
+		enter->op_flags |= OPf_STACKED;
+	    }
 
 	    /* We don't have control over who points to theirmark, so sacrifice
 	       ours.  */
