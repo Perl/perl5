@@ -8,18 +8,6 @@ BEGIN {
 {
     my $wide = v256;
     use bytes;
-    if (ord($wide) == 140) {
-	print "1..0 # Skip: UTF-EBCDIC (not UTF-8) used here\n";
-	exit 0;
-    }
-    elsif (ord($wide) != 196) {
-	warn sprintf("v256 starts with %02X\n",ord($wide));
-    }
-}
-
-{
-    my $wide = v256;
-    use bytes;
     my $ordwide = ord($wide);
     printf "# under use bytes ord(v256) = 0x%02x\n", $ordwide;
     if ($ordwide == 140) {
