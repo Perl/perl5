@@ -9,7 +9,7 @@
 package B::Deparse;
 use Carp 'cluck';
 use B qw(class main_root main_start main_cv svref_2object);
-$VERSION = 0.55;
+$VERSION = 0.56;
 use strict;
 
 # Changes between 0.50 and 0.51:
@@ -36,13 +36,33 @@ use strict;
 # Changes between 0.54 and 0.55
 # - added support for new qr// construct
 # - added support for new pp_regcreset OP
+# Changes between 0.55 and 0.56
+# - tested on base/*.t, cmd/*.t, comp/*.t, io/*.t
+# - fixed $# on non-lexicals broken in last big rewrite
+# - added temporary fix for change in opcode of OP_STRINGIFY
+# - fixed problem in 0.54's for() patch in `for (@ary)'
+# - fixed precedence in conditional of ?:
+# - tweaked list paren elimination in `my($x) = @_'
+# - made continue-block detection trickier wrt. null ops
+# - fixed various prototype problems in pp_entersub
+# - added support for sub prototypes that never get GVs
+# - added unquoting for special filehandle first arg in truncate
+# - print doubled rv2gv (a bug) as `*{*GV}' instead of illegal `**GV'
+# - added semicolons at the ends of blocks
+# - added -l `#line' declaration option -- fixes cmd/subval.t 27,28
 
 # Todo:
 # - {} around variables in strings ("${var}letters")
+#   base/lex.t 25-27
+#   comp/term.t 11
+# - generate symbolic constants directly from core source
 # - left/right context
+# - avoid semis in one-statement blocks
 # - associativity of &&=, ||=, ?:
 # - ',' => '=>' (auto-unquote?)
 # - break long lines ("\r" as discretionary break?)
+# - include values of variables (e.g. set in BEGIN)
+# - coordinate with Data::Dumper (both directions? see previous)
 # - version using op_next instead of op_first/sibling?
 # - avoid string copies (pass arrays, one big join?)
 # - auto-apply `-u'?
@@ -50,6 +70,9 @@ use strict;
 # - -uPackage:: descend recursively?
 # - here-docs?
 # - <DATA>?
+
+# Tests that will always fail:
+# comp/redef.t -- all (redefinition happens at compile time)
 
 # Object fields (were globals):
 #
@@ -71,11 +94,15 @@ use strict;
 # array of [cop_seq, GV, is_format?] for subs and formats we still
 # want to deparse
 #
+# protos_todo:
+# as above, but [name, prototype] for subs that never got a GV
+#
 # subs_done, forms_done:
 # keys are addresses of GVs for subs and formats we've already
 # deparsed (or at least put into subs_todo)
 #
 # parens: -p
+# linenums: -l
 # cuddle: ` ' or `\n', depending on -sC
 
 # A little explanation of how precedence contexts and associativity
@@ -84,7 +111,7 @@ use strict;
 # deparse() calls each per-op subroutine with an argument $cx (short
 # for context, but not the same as the cx* in the perl core), which is
 # a number describing the op's parents in terms of precedence, whether
-# they're inside and expression or at statement level, etc.  (see
+# they're inside an expression or at statement level, etc.  (see
 # chart below). When ops with children call deparse on them, they pass
 # along their precedence. Fractional values are used to implement
 # associativity (`($x + $y) + $z' => `$x + $y + $y') and related
@@ -127,6 +154,7 @@ use strict;
 # \n - newline and indent
 # \t - increase indent
 # \b - decrease indent (`outdent')
+# \f - flush left (no indent)
 # \cK - kill following semicolon, if any
 
 sub null {
@@ -203,20 +231,45 @@ sub stash_subs {
     my $pack = shift;
     my(%stash, @ret);
     { no strict 'refs'; %stash = svref_2object(\%{$pack . "::"})->ARRAY }
+    if ($pack eq "main") {
+	$pack = "";
+    } else {
+	$pack = $pack . "::";
+    }
     my($key, $val);
     while (($key, $val) = each %stash) {
-	next unless class($val) eq "GV";
-	if (class($val->CV) ne "SPECIAL") {
-	    next if $self->{'subs_done'}{$$val}++;
-	    $self->todo($val, $val->CV, 0);
-	    $self->walk_sub($val->CV);
-	}
-	if (class($val->FORM) ne "SPECIAL") {
-	    next if $self->{'forms_done'}{$$val}++;
-	    $self->todo($val, $val->FORM, 1);
-	    $self->walk_sub($val->FORM);
+	my $class = class($val);
+	if ($class eq "PV") {
+	    # Just a prototype
+	    push @{$self->{'protos_todo'}}, [$pack . $key, $val->PV];
+	} elsif ($class eq "IV") {
+	    # Just a name
+	    push @{$self->{'protos_todo'}}, [$pack . $key, undef];	    
+	} elsif ($class eq "GV") {
+	    if (class($val->CV) ne "SPECIAL") {
+		next if $self->{'subs_done'}{$$val}++;
+		$self->todo($val, $val->CV, 0);
+		$self->walk_sub($val->CV);
+	    }
+	    if (class($val->FORM) ne "SPECIAL") {
+		next if $self->{'forms_done'}{$$val}++;
+		$self->todo($val, $val->FORM, 1);
+		$self->walk_sub($val->FORM);
+	    }
 	}
     }
+}
+
+sub print_protos {
+    my $self = shift;
+    my $ar;
+    my @ret;
+    foreach $ar (@{$self->{'protos_todo'}}) {
+	my $proto = (defined $ar->[1] ? " (". $ar->[1] . ")" : "");
+	push @ret, "sub " . $ar->[0] .  "$proto;\n";
+    }
+    delete $self->{'protos_todo'};
+    return @ret;
 }
 
 sub style_opts {
@@ -246,11 +299,14 @@ sub compile {
 		$self->stash_subs(substr($arg, 2));
 	    } elsif ($arg eq "-p") {
 		$self->{'parens'} = 1;
+	    } elsif ($arg eq "-l") {
+		$self->{'linenums'} = 1;
 	    } elsif (substr($arg, 0, 2) eq "-s") {
 		$self->style_opts(substr $arg, 2);
 	    }
 	}
 	$self->walk_sub(main_cv, main_start);
+	print $self->print_protos;
 	@{$self->{'subs_todo'}} =
 	    sort {$a->[0] <=> $b->[0]} @{$self->{'subs_todo'}};
 	print indent($self->deparse(main_root, 0)), "\n" unless null main_root;
@@ -283,8 +339,12 @@ sub indent {
 	    $leader = substr($leader, 0, length($leader) - 4);
 	    $line = substr($line, 1);
 	}
+	if (substr($line, 0, 1) eq "\f") {
+	    $line = substr($line, 1); # no indent
+	} else {
+	    $line = $leader . $line;
+	}
 	$line =~ s/\cK;?//g;
-	$line = $leader . $line;
     }
     return join("\n", @lines);
 }
@@ -573,7 +633,7 @@ sub pp_leave {
     if ($cx > 0) { # inside an expression
 	return "do { " . join(";\n", @exprs) . " }";
     } else {
-	return join(";\n", @exprs);	
+	return join(";\n", @exprs) . ";";
     }
 }
 
@@ -595,7 +655,7 @@ sub pp_scope {
     if ($cx > 0) { # inside an expression, (a do {} while for lineseq)
 	return "do { " . join(";\n", @exprs) . " }";
     } else {
-	return join(";\n", @exprs);	
+	return join(";\n", @exprs) . ";";
     }
 }
 
@@ -640,6 +700,10 @@ sub pp_nextstate {
     if ($stash ne $self->{'curstash'}) {
 	push @text, "package $stash;\n";
 	$self->{'curstash'} = $stash;
+    }
+    if ($self->{'linenums'}) {
+	push @text, "\f#line " . $op->line . 
+	  ' "' . substr($op->filegv->NAME, 2), qq'"\n';
     }
     return join("", @text);
 }
@@ -1309,7 +1373,6 @@ sub pp_syswrite { listop(@_, "syswrite") }
 sub pp_send { listop(@_, "send") }
 sub pp_recv { listop(@_, "recv") }
 sub pp_seek { listop(@_, "seek") }
-sub pp_truncate { listop(@_, "truncate") }
 sub pp_fcntl { listop(@_, "fcntl") }
 sub pp_ioctl { listop(@_, "ioctl") }
 sub pp_flock { listop(@_, "flock") }
@@ -1367,6 +1430,33 @@ sub pp_glob {
     } else {
 	return '<' . $text . '>';
     }
+}
+
+# Truncate is special because OPf_SPECIAL makes a bareword first arg
+# be a filehandle. This could probably be better fixed in the core
+# by moving the GV lookup into ck_truc.
+
+sub pp_truncate {
+    my $self = shift;
+    my($op, $cx) = @_;
+    my(@exprs);
+    my $parens = ($cx >= 5) || $self->{'parens'};
+    my $kid = $op->first->sibling;
+    my($fh, $len);
+    if ($op->flags & OPf_SPECIAL) {
+	# $kid is an OP_CONST
+	$fh = $kid->sv->PV;
+    } else {
+	$fh = $self->deparse($kid, 6);
+        $fh = "+$fh" if not $parens and substr($fh, 0, 1) eq "(";
+    }
+    my $len = $self->deparse($kid->sibling, 6);
+    if ($parens) {
+	return "truncate($fh, $len)";
+    } else {
+	return "truncate $fh, $len";
+    }
+
 }
 
 sub indirop {
@@ -1427,7 +1517,6 @@ sub pp_list {
     my($op, $cx) = @_;
     my($expr, @exprs);
     my $kid = $op->first->sibling; # skip pushmark
-    return $self->deparse($kid, $cx) if null $kid->sibling;
     my $lop;
     my $local = "either"; # could be local(...) or my(...)
     for ($lop = $kid; !null($lop); $lop = $lop->sibling) {
@@ -1448,6 +1537,7 @@ sub pp_list {
 	}
     }
     $local = "" if $local eq "either"; # no point if it's all undefs
+    return $self->deparse($kid, $cx) if null $kid->sibling and not $local;
     for (; !null($kid); $kid = $kid->sibling) {
 	if ($local) {
 	    if (class($kid) eq "UNOP" and $kid->first->ppaddr eq "pp_gvsv") {
@@ -1477,12 +1567,13 @@ sub pp_cond_expr {
     my $true = $cond->sibling;
     my $false = $true->sibling;
     my $cuddle = $self->{'cuddle'};
-    $cond = $self->deparse($cond, 1);
     unless ($cx == 0 and is_scope($true) and is_scope($false)) {
+	$cond = $self->deparse($cond, 8);
 	$true = $self->deparse($true, 8);
 	$false = $self->deparse($false, 8);
 	return $self->maybe_parens("$cond ? $true : $false", $cx, 8);
     } 
+    $cond = $self->deparse($cond, 1);
     $true = $self->deparse($true, 0);    
     if ($false->ppaddr eq "pp_lineseq") { # braces w/o scope => elsif
 	my $head = "if ($cond) {\n\t$true\n\b}";
@@ -1525,7 +1616,9 @@ sub pp_leaveloop {
     } elsif ($enter->ppaddr eq "pp_enteriter") { # foreach
 	my $ary = $enter->first->sibling; # first was pushmark
 	my $var = $ary->sibling;
-	if ($enter->flags & OPf_STACKED) {
+	if ($enter->flags & OPf_STACKED
+	    and not null $ary->first->sibling->sibling)
+	{
 	    $ary = $self->deparse($ary->first->sibling, 9) . " .. " .
 	      $self->deparse($ary->first->sibling->sibling, 9);
 	} else {
@@ -1566,6 +1659,10 @@ sub pp_leaveloop {
     # the op_next of the head of the _previous_ statement. 
     # Unless it's a bare loop, in which case it's last, since there's
     # no unstack or extra nextstate.
+    # Except if the previous head isn't null but the first kid is
+    # (because it's a nulled out nextstate in a scope), in which
+    # case the head's next is advanced past the null but the nextop's
+    # isn't, so we need to try nextop->next.
     my($cont, $precont);
     if ($bare) {
 	$cont = $kid->first;
@@ -1580,24 +1677,25 @@ sub pp_leaveloop {
 	    $cont = $cont->sibling;
 	}
     }
-#    cluck $self->{'curcv'}->GV->NAME unless $precont;
-    if ($precont and $ {$precont->next} == $ {$enter->nextop}) {
-	my $state = $kid->first;
-	my $cuddle = $self->{'cuddle'};
-	my($expr, @exprs);
-	for (; $$state != $$cont; $state = $state->sibling) {
-	    $expr = "";
-	    if (is_state $state) {
-		$expr = $self->deparse($state, 0);
-		$state = $state->sibling;
-		last if null $kid;
-	    }
-	    $expr .= $self->deparse($state, 0);
-	    push @exprs, $expr if $expr;
-	}
-	$kid = join(";\n", @exprs);
-	$cont = $cuddle . "continue {\n\t" .
-	  $self->deparse($cont, 0) . "\n\b}\cK";
+    if ($precont and $ {$precont->next} == $ {$enter->nextop}
+	|| $ {$precont->next} == $ {$enter->nextop->next} )
+    {
+       my $state = $kid->first;
+       my $cuddle = $self->{'cuddle'};
+       my($expr, @exprs);
+       for (; $$state != $$cont; $state = $state->sibling) {
+	   $expr = "";
+	   if (is_state $state) {
+	       $expr = $self->deparse($state, 0);
+	       $state = $state->sibling;
+	       last if null $kid;
+	   }
+	   $expr .= $self->deparse($state, 0);
+	   push @exprs, $expr if $expr;
+       }
+       $kid = join(";\n", @exprs);
+       $cont = $cuddle . "continue {\n\t" .
+	 $self->deparse($cont, 0) . "\n\b}\cK";
     } else {
 	$cont = "\cK";
 	$kid = $self->deparse($kid, 0);
@@ -1611,7 +1709,9 @@ sub pp_leavetry {
 }
 
 sub OP_CONST () { 5 }
-sub OP_STRINGIFY () { 65 }
+
+# XXX need a better way to do this
+sub OP_STRINGIFY () { $] > 5.004_72 ? 67 : 65 }
 
 sub pp_null {
     my $self = shift;
@@ -1701,9 +1801,8 @@ sub rv2x {
     my $self = shift;
     my($op, $cx, $type) = @_;
     my $kid = $op->first;
-    my $scope = is_scope($kid);
-    $kid = $self->deparse($kid, 0);
-    return $type . ($scope ? "{$kid}" : $kid);
+    my $str = $self->deparse($kid, 0);
+    return $type . (is_scalar($kid) ? $str : "{$str}");
 }
 
 sub pp_rv2sv { maybe_local(@_, rv2x(@_, "\$")) }
@@ -1717,7 +1816,8 @@ sub pp_av2arylen {
     if ($op->first->ppaddr eq "pp_padav") {
 	return $self->maybe_local($op, $cx, '$#' . $self->padany($op->first));
     } else {
-	return $self->maybe_local($op, $cx, $self->rv2x($op->first, '$#'));
+	return $self->maybe_local($op, $cx,
+				  $self->rv2x($op->first, $cx, '$#'));
     }
 }
 
@@ -1900,9 +2000,10 @@ sub pp_entersub {
 	my $doneok = 0;
 	my @args = @exprs;
 	my @reals;
-	$proto =~ s/([^\\]|^)([@%])(.*)$/$1$2/;
-	while ($proto) {
-	    $proto =~ s/^ *([\\]?[\$\@&%*]|;)//;
+	my $p = $proto;
+	$p =~ s/([^\\]|^)([@%])(.*)$/$1$2/;
+	while ($p) {
+	    $p =~ s/^ *([\\]?[\$\@&%*]|;)//;
 	    my $chr = $1;
 	    if ($chr eq "") {
 		undef $proto if @args;
@@ -1913,7 +2014,7 @@ sub pp_entersub {
 		@args = ();
 	    } else {
 		$arg = shift @args;
-		undef $proto, last unless $arg;
+		last unless $arg;
 		if ($chr eq "\$") {
 		    if (want_scalar $arg) {
 			push @reals, $self->deparse($arg, 6);
@@ -1962,7 +2063,7 @@ sub pp_entersub {
 		}
 	    }
 	}
-	undef $proto if $proto and !$doneok;
+	undef $proto if $p and !$doneok;
 	undef $proto if @args;
 	$args = join(", ", @reals);
 	$amper = "";
@@ -2458,7 +2559,7 @@ B::Deparse - Perl compiler backend to produce perl code
 
 =head1 SYNOPSIS
 
-B<perl> B<-MO=Deparse>[B<,-u>I<PACKAGE>][B<,-p>][B<,-s>I<LETTERS>] I<prog.pl>
+B<perl> B<-MO=Deparse>[B<,-u>I<PACKAGE>][B<,-p>][B<,-l>][B<,-s>I<LETTERS>] I<prog.pl>
 
 =head1 DESCRIPTION
 
@@ -2519,6 +2620,11 @@ after the 'u'. Multiple B<-u> options may be given, separated by
 commas.  Note that unlike some other backends, B::Deparse doesn't
 (yet) try to guess automatically when B<-u> is needed -- you must
 invoke it yourself.
+
+=item B<-l>
+
+Add '#line' declarations to the output based on the line and file
+locations of the original code.
 
 =item B<-s>I<LETTERS>
 
