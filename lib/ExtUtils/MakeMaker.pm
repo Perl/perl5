@@ -537,6 +537,29 @@ END
     $self;
 }
 
+sub WriteEmptyMakefile {
+  if (-f 'Makefile.old') {
+    chmod 0666, 'Makefile.old';
+    unlink 'Makefile.old' or warn "unlink Makefile.old: $!";
+  }
+  rename 'Makefile', 'Makefile.old' or warn "rename Makefile Makefile.old: $!"
+    if -f 'Makefile';
+  open MF, '> Makefile' or die "open Makefile for write: $!";
+  print MF <<'EOP';
+all:
+
+clean:
+
+install:
+
+makemakerdflt:
+
+test:
+
+EOP
+  close MF or die "close Makefile for write: $!";
+}
+
 sub check_manifest {
     print STDOUT "Checking if your kit is complete...\n";
     require ExtUtils::Manifest;
@@ -1856,6 +1879,23 @@ following parameters are recognized:
 An example:
 
     WriteMakefile( 'dist' => { COMPRESS=>"gzip", SUFFIX=>"gz" })
+
+=head2 Disabling an extension
+
+If some events detected in F<Makefile.PL> imply that there is no way
+to create the Module, but this is a normal state of things, then you
+can create a F<Makefile> which does nothing, but succeeds on all the
+"usual" build targets.  To do so, use
+
+   ExtUtils::MakeMaker::WriteEmptyMakefile();
+
+instead of WriteMakefile().
+
+This may be useful if other modules expect this module to be I<built>
+OK, as opposed to I<work> OK (say, this system-dependent module builds
+in a subdirectory of some other distribution, or is listed as a
+dependency in a CPAN::Bundle, but the functionality is supported by
+different means on the current architecture).
 
 =head1 SEE ALSO
 

@@ -30,7 +30,7 @@ I32
 cxinc()
 {
     cxstack_max = cxstack_max * 3 / 2;
-    Renew(cxstack, cxstack_max + 1, CONTEXT);	/* XXX should fix CXINC macro */
+    Renew(cxstack, cxstack_max + 1, PERL_CONTEXT);	/* XXX should fix CXINC macro */
     return cxstack_ix + 1;
 }
 
@@ -38,6 +38,7 @@ void
 push_return(retop)
 OP *retop;
 {
+    dTHR;
     if (retstack_ix == retstack_max) {
 	retstack_max = retstack_max * 3 / 2;
 	Renew(retstack, retstack_max, OP*);
@@ -48,6 +49,7 @@ OP *retop;
 OP *
 pop_return()
 {
+    dTHR;
     if (retstack_ix > 0)
 	return retstack[--retstack_ix];
     else
@@ -57,6 +59,7 @@ pop_return()
 void
 push_scope()
 {
+    dTHR;
     if (scopestack_ix == scopestack_max) {
 	scopestack_max = scopestack_max * 3 / 2;
 	Renew(scopestack, scopestack_max, I32);
@@ -68,6 +71,7 @@ push_scope()
 void
 pop_scope()
 {
+    dTHR;
     I32 oldsave = scopestack[--scopestack_ix];
     LEAVE_SCOPE(oldsave);
 }
@@ -75,6 +79,7 @@ pop_scope()
 void
 markstack_grow()
 {
+    dTHR;
     I32 oldmax = markstack_max - markstack;
     I32 newmax = oldmax * 3 / 2;
 
@@ -86,6 +91,7 @@ markstack_grow()
 void
 savestack_grow()
 {
+    dTHR;
     savestack_max = savestack_max * 3 / 2;
     Renew(savestack, savestack_max, ANY);
 }
@@ -93,6 +99,7 @@ savestack_grow()
 void
 free_tmps()
 {
+    dTHR;
     /* XXX should tmps_floor live in cxstack? */
     I32 myfloor = tmps_floor;
     while (tmps_ix > myfloor) {      /* clean up after last statement */
@@ -111,6 +118,7 @@ static SV *
 save_scalar_at(sptr)
 SV **sptr;
 {
+    dTHR;
     register SV *sv;
     SV *osv = *sptr;
 
@@ -142,6 +150,7 @@ SV *
 save_scalar(gv)
 GV *gv;
 {
+    dTHR;
     SV **sptr = &GvSV(gv);
     SSCHECK(3);
     SSPUSHPTR(SvREFCNT_inc(gv));
@@ -154,6 +163,7 @@ SV*
 save_svref(sptr)
 SV **sptr;
 {
+    dTHR;
     SSCHECK(3);
     SSPUSHPTR(sptr);
     SSPUSHPTR(SvREFCNT_inc(*sptr));
@@ -166,6 +176,7 @@ save_gp(gv, empty)
 GV *gv;
 I32 empty;
 {
+    dTHR;
     SSCHECK(6);
     SSPUSHIV((IV)SvLEN(gv));
     SvLEN(gv) = 0; /* forget that anything was allocated here */
@@ -194,6 +205,7 @@ AV *
 save_ary(gv)
 GV *gv;
 {
+    dTHR;
     AV *oav = GvAVn(gv);
     AV *av;
 
@@ -222,6 +234,7 @@ HV *
 save_hash(gv)
 GV *gv;
 {
+    dTHR;
     HV *ohv, *hv;
 
     SSCHECK(3);
@@ -247,6 +260,7 @@ void
 save_item(item)
 register SV *item;
 {
+    dTHR;
     register SV *sv = NEWSV(0,0);
 
     sv_setsv(sv,item);
@@ -260,6 +274,7 @@ void
 save_int(intp)
 int *intp;
 {
+    dTHR;
     SSCHECK(3);
     SSPUSHINT(*intp);
     SSPUSHPTR(intp);
@@ -270,6 +285,7 @@ void
 save_long(longp)
 long *longp;
 {
+    dTHR;
     SSCHECK(3);
     SSPUSHLONG(*longp);
     SSPUSHPTR(longp);
@@ -280,6 +296,7 @@ void
 save_I32(intp)
 I32 *intp;
 {
+    dTHR;
     SSCHECK(3);
     SSPUSHINT(*intp);
     SSPUSHPTR(intp);
@@ -290,6 +307,7 @@ void
 save_I16(intp)
 I16 *intp;
 {
+    dTHR;
     SSCHECK(3);
     SSPUSHINT(*intp);
     SSPUSHPTR(intp);
@@ -300,6 +318,7 @@ void
 save_iv(ivp)
 IV *ivp;
 {
+    dTHR;
     SSCHECK(3);
     SSPUSHIV(*ivp);
     SSPUSHPTR(ivp);
@@ -313,6 +332,7 @@ void
 save_pptr(pptr)
 char **pptr;
 {
+    dTHR;
     SSCHECK(3);
     SSPUSHPTR(*pptr);
     SSPUSHPTR(pptr);
@@ -323,6 +343,7 @@ void
 save_sptr(sptr)
 SV **sptr;
 {
+    dTHR;
     SSCHECK(3);
     SSPUSHPTR(*sptr);
     SSPUSHPTR(sptr);
@@ -333,6 +354,7 @@ void
 save_nogv(gv)
 GV *gv;
 {
+    dTHR;
     SSCHECK(2);
     SSPUSHPTR(gv);
     SSPUSHINT(SAVEt_NSTAB);
@@ -342,6 +364,7 @@ void
 save_hptr(hptr)
 HV **hptr;
 {
+    dTHR;
     SSCHECK(3);
     SSPUSHPTR(*hptr);
     SSPUSHPTR(hptr);
@@ -352,6 +375,7 @@ void
 save_aptr(aptr)
 AV **aptr;
 {
+    dTHR;
     SSCHECK(3);
     SSPUSHPTR(*aptr);
     SSPUSHPTR(aptr);
@@ -362,6 +386,7 @@ void
 save_freesv(sv)
 SV *sv;
 {
+    dTHR;
     SSCHECK(2);
     SSPUSHPTR(sv);
     SSPUSHINT(SAVEt_FREESV);
@@ -371,6 +396,7 @@ void
 save_freeop(o)
 OP *o;
 {
+    dTHR;
     SSCHECK(2);
     SSPUSHPTR(o);
     SSPUSHINT(SAVEt_FREEOP);
@@ -380,6 +406,7 @@ void
 save_freepv(pv)
 char *pv;
 {
+    dTHR;
     SSCHECK(2);
     SSPUSHPTR(pv);
     SSPUSHINT(SAVEt_FREEPV);
@@ -389,6 +416,7 @@ void
 save_clearsv(svp)
 SV** svp;
 {
+    dTHR;
     SSCHECK(2);
     SSPUSHLONG((long)(svp-curpad));
     SSPUSHINT(SAVEt_CLEARSV);
@@ -400,6 +428,7 @@ HV *hv;
 char *key;
 I32 klen;
 {
+    dTHR;
     SSCHECK(4);
     SSPUSHINT(klen);
     SSPUSHPTR(key);
@@ -412,6 +441,7 @@ save_list(sarg,maxsarg)
 register SV **sarg;
 I32 maxsarg;
 {
+    dTHR;
     register SV *sv;
     register I32 i;
 
@@ -430,6 +460,7 @@ save_destructor(f,p)
 void (*f) _((void*));
 void* p;
 {
+    dTHR;
     SSCHECK(3);
     SSPUSHDPTR(f);
     SSPUSHPTR(p);
@@ -442,6 +473,7 @@ AV *av;
 I32 idx;
 SV **sptr;
 {
+    dTHR;
     SSCHECK(4);
     SSPUSHPTR(SvREFCNT_inc(av));
     SSPUSHINT(idx);
@@ -456,6 +488,7 @@ HV *hv;
 SV *key;
 SV **sptr;
 {
+    dTHR;
     SSCHECK(4);
     SSPUSHPTR(SvREFCNT_inc(hv));
     SSPUSHPTR(SvREFCNT_inc(key));
@@ -468,6 +501,7 @@ void
 leave_scope(base)
 I32 base;
 {
+    dTHR;
     register SV *sv;
     register SV *value;
     register GV *gv;
@@ -499,6 +533,9 @@ I32 base;
 	    ptr = SSPOPPTR;
 	restore_sv:
 	    sv = *(SV**)ptr;
+	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+				  "restore svref: %p %p:%s -> %p:%s\n",
+			  	  ptr, sv, SvPEEK(sv), value, SvPEEK(value)));
 	    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv) &&
 		SvTYPE(sv) != SVt_PVGV)
 	    {
@@ -740,8 +777,9 @@ I32 base;
 
 void
 cx_dump(cx)
-CONTEXT* cx;
+PERL_CONTEXT *cx;
 {
+    dTHR;
     PerlIO_printf(Perl_debug_log, "CX %ld = %s\n", (long)(cx - cxstack), block_type[cx->cx_type]);
     if (cx->cx_type != CXt_SUBST) {
 	PerlIO_printf(Perl_debug_log, "BLK_OLDSP = %ld\n", (long)cx->blk_oldsp);

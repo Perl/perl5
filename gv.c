@@ -58,6 +58,7 @@ GV *
 gv_fetchfile(name)
 char *name;
 {
+    dTHR;
     char smallbuf[256];
     char *tmpbuf;
     STRLEN tmplen;
@@ -92,6 +93,7 @@ char *name;
 STRLEN len;
 int multi;
 {
+    dTHR;
     register GP *gp;
     bool doproto = SvTYPE(gv) > SVt_NULL;
     char *proto = (doproto && SvPOK(gv)) ? SvPVX(gv) : NULL;
@@ -211,6 +213,7 @@ I32 level;
 	    basestash = gv_stashpvn(packname, packlen, TRUE);
 	    gvp = (GV**)hv_fetch(basestash, "ISA", 3, FALSE);
 	    if (gvp && (gv = *gvp) != (GV*)&sv_undef && (av = GvAV(gv))) {
+		dTHR;		/* just for SvREFCNT_dec */
 		gvp = (GV**)hv_fetch(stash, "ISA", 3, TRUE);
 		if (!gvp || !(gv = *gvp))
 		    croak("Cannot create %s::ISA", HvNAME(stash));
@@ -224,7 +227,7 @@ I32 level;
 
     if (av) {
 	SV** svp = AvARRAY(av);
-	I32 items = AvFILL(av) + 1;
+	I32 items = AvFILLp(av) + 1;
 	while (items--) {
 	    SV* sv = *svp++;
 	    HV* basestash = gv_stashsv(sv, FALSE);
@@ -287,6 +290,7 @@ HV* stash;
 char* name;
 I32 autoload;
 {
+    dTHR;
     register char *nend;
     char *nsplit = 0;
     GV* gv;
@@ -449,6 +453,7 @@ char *nambeg;
 I32 add;
 I32 sv_type;
 {
+    dTHR;
     register char *name = nambeg;
     register GV *gv = 0;
     GV**gvp;
@@ -656,7 +661,9 @@ I32 sv_type;
 	    AV* av = GvAVn(gv);
 	    GvMULTI_on(gv);
 	    sv_magic((SV*)av, (SV*)gv, 'I', Nullch, 0);
-	    if ((add & GV_ADDMULTI) && strEQ(nambeg,"AnyDBM_File::ISA") && AvFILL(av) == -1)
+	    /* NOTE: No support for tied ISA */
+	    if ((add & GV_ADDMULTI) && strEQ(nambeg,"AnyDBM_File::ISA")
+		&& AvFILLp(av) == -1)
 	    {
 		char *pname;
 		av_push(av, newSVpv(pname = "NDBM_File",0));
@@ -677,7 +684,7 @@ I32 sv_type;
         if (strEQ(name, "OVERLOAD")) {
             HV* hv = GvHVn(gv);
             GvMULTI_on(gv);
-            sv_magic((SV*)hv, (SV*)gv, 'A', 0, 0);
+            hv_magic(hv, gv, 'A');
         }
         break;
 #endif /* OVERLOAD */
@@ -881,6 +888,7 @@ GV *gv;
 IO *
 newIO()
 {
+    dTHR;
     IO *io;
     GV *iogv;
 
@@ -899,6 +907,7 @@ void
 gv_check(stash)
 HV* stash;
 {
+    dTHR;
     register HE *entry;
     register I32 i;
     register GV *gv;
@@ -1026,12 +1035,13 @@ bool
 Gv_AMupdate(stash)
 HV* stash;
 {
+  dTHR;  
   GV** gvp;
   HV* hv;
   GV* gv;
   CV* cv;
   MAGIC* mg=mg_find((SV*)stash,'c');
-  AMT *amtp=mg ? (AMT*)mg->mg_ptr: NULL;
+  AMT *amtp = (mg) ? (AMT*)mg->mg_ptr: (AMT *) NULL;
   AMT amt;
 
   if (mg && amtp->was_ok_am == amagic_generation
@@ -1189,6 +1199,7 @@ SV* right;
 int method;
 int flags; 
 {
+  dTHR;
   MAGIC *mg; 
   CV *cv; 
   CV **cvp=NULL, **ocvp=NULL;
@@ -1200,7 +1211,7 @@ int flags;
       && (mg = mg_find((SV*)(stash=SvSTASH(SvRV(left))),'c'))
       && (ocvp = cvp = (AMT_AMAGIC((AMT*)mg->mg_ptr) 
 			? (oamtp = amtp = (AMT*)mg->mg_ptr)->table
-			: NULL))
+			: (CV **) NULL))
       && ((cv = cvp[off=method+assignshift]) 
 	  || (assign && amtp->fallback > AMGfallNEVER && /* fallback to
 						          * usual method */
@@ -1293,7 +1304,7 @@ int flags;
 	       && (mg = mg_find((SV*)(stash=SvSTASH(SvRV(right))),'c'))
 	       && (cvp = (AMT_AMAGIC((AMT*)mg->mg_ptr) 
 			  ? (amtp = (AMT*)mg->mg_ptr)->table
-			  : NULL))
+			  : (CV **) NULL))
 	       && (cv = cvp[off=method])) { /* Method for right
 					     * argument found */
       lr=1;
@@ -1465,3 +1476,4 @@ int flags;
   }
 }
 #endif /* OVERLOAD */
+

@@ -87,7 +87,7 @@ $VERSION = $VERSION = sprintf("%d.%02d", q$Revision: 1.41 $ =~ /(\d+)\.(\d+)/);
 sub is_abs_path
 {
  local $_ = shift if (@_);
- if ($^O eq 'MSWin32')
+ if ($^O eq 'MSWin32' || $^O eq 'dos')
   {
    return m#^[a-z]:[\\/]#i;
   }

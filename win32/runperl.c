@@ -1,3 +1,4 @@
+/* Say NO to CPP! Hallelujah! */
 #ifdef __GNUC__
 /*
  * GNU C does not do __declspec()

@@ -3,7 +3,7 @@
 #include "XSUB.h"
 
 #ifdef NULL
-#undef NULL
+#undef NULL  /* XXX Why? */
 #endif
 #ifdef I_DBM
 #  include <dbm.h>

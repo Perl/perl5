@@ -107,7 +107,7 @@ static bool srand_called = FALSE;
 
 PP(pp_stub)
 {
-    dSP;
+    djSP;
     if (GIMME_V == G_SCALAR)
 	XPUSHs(&sv_undef);
     RETURN;
@@ -122,7 +122,7 @@ PP(pp_scalar)
 
 PP(pp_padav)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     if (op->op_private & OPpLVAL_INTRO)
 	SAVECLEARSV(curpad[op->op_targ]);
     EXTEND(SP, 1);
@@ -147,7 +147,7 @@ PP(pp_padav)
 
 PP(pp_padhv)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     I32 gimme;
 
     XPUSHs(TARG);
@@ -180,8 +180,8 @@ PP(pp_padany)
 
 PP(pp_rv2gv)
 {
-    dSP; dTOPss;
-    
+    djSP; dTOPss;
+
     if (SvROK(sv)) {
       wasref:
 	sv = SvRV(sv);
@@ -225,7 +225,7 @@ PP(pp_rv2gv)
 
 PP(pp_rv2sv)
 {
-    dSP; dTOPss;
+    djSP; dTOPss;
 
     if (SvROK(sv)) {
       wasref:
@@ -274,7 +274,7 @@ PP(pp_rv2sv)
 
 PP(pp_av2arylen)
 {
-    dSP;
+    djSP;
     AV *av = (AV*)TOPs;
     SV *sv = AvARYLEN(av);
     if (!sv) {
@@ -288,8 +288,8 @@ PP(pp_av2arylen)
 
 PP(pp_pos)
 {
-    dSP; dTARGET; dPOPss;
-    
+    djSP; dTARGET; dPOPss;
+
     if (op->op_flags & OPf_MOD) {
 	if (SvTYPE(TARG) < SVt_PVLV) {
 	    sv_upgrade(TARG, SVt_PVLV);
@@ -306,7 +306,7 @@ PP(pp_pos)
 	RETURN;
     }
     else {
-	MAGIC* mg; 
+	MAGIC* mg;
 
 	if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
 	    mg = mg_find(sv, 'g');
@@ -321,7 +321,7 @@ PP(pp_pos)
 
 PP(pp_rv2cv)
 {
-    dSP;
+    djSP;
     GV *gv;
     HV *stash;
 
@@ -340,7 +340,7 @@ PP(pp_rv2cv)
 
 PP(pp_prototype)
 {
-    dSP;
+    djSP;
     CV *cv;
     HV *stash;
     GV *gv;
@@ -356,7 +356,7 @@ PP(pp_prototype)
 
 PP(pp_anoncode)
 {
-    dSP;
+    djSP;
     CV* cv = (CV*)curpad[op->op_targ];
     if (CvCLONE(cv))
 	cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
@@ -367,14 +367,14 @@ PP(pp_anoncode)
 
 PP(pp_srefgen)
 {
-    dSP;
+    djSP;
     *SP = refto(*SP);
     RETURN;
-} 
+}
 
 PP(pp_refgen)
 {
-    dSP; dMARK;
+    djSP; dMARK;
     if (GIMME != G_ARRAY) {
 	if (++MARK <= SP)
 	    *MARK = *SP;
@@ -417,14 +417,14 @@ SV* sv;
 
 PP(pp_ref)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     SV *sv;
     char *pv;
 
     sv = POPs;
 
     if (sv && SvGMAGICAL(sv))
-	mg_get(sv);     
+	mg_get(sv);
 
     if (!sv || !SvROK(sv))
 	RETPUSHNO;
@@ -437,7 +437,7 @@ PP(pp_ref)
 
 PP(pp_bless)
 {
-    dSP;
+    djSP;
     HV *stash;
 
     if (MAXARG == 1)
@@ -461,7 +461,7 @@ PP(pp_gelem)
     SV *sv;
     SV *ref;
     char *elem;
-    dSP;
+    djSP;
 
     sv = POPs;
     elem = SvPV(sv, na);
@@ -521,7 +521,7 @@ PP(pp_gelem)
 
 PP(pp_study)
 {
-    dSP; dPOPss;
+    djSP; dPOPss;
     register unsigned char *s;
     register I32 pos;
     register I32 ch;
@@ -583,13 +583,13 @@ PP(pp_study)
 
 PP(pp_trans)
 {
-    dSP; dTARG;
+    djSP; dTARG;
     SV *sv;
 
     if (op->op_flags & OPf_STACKED)
 	sv = POPs;
     else {
-	sv = GvSV(defgv);
+	sv = DEFSV;
 	EXTEND(SP,1);
     }
     TARG = sv_newmortal();
@@ -601,7 +601,7 @@ PP(pp_trans)
 
 PP(pp_schop)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     do_chop(TARG, TOPs);
     SETTARG;
     RETURN;
@@ -609,7 +609,7 @@ PP(pp_schop)
 
 PP(pp_chop)
 {
-    dSP; dMARK; dTARGET;
+    djSP; dMARK; dTARGET;
     while (SP > MARK)
 	do_chop(TARG, POPs);
     PUSHTARG;
@@ -618,16 +618,16 @@ PP(pp_chop)
 
 PP(pp_schomp)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     SETi(do_chomp(TOPs));
     RETURN;
 }
 
 PP(pp_chomp)
 {
-    dSP; dMARK; dTARGET;
+    djSP; dMARK; dTARGET;
     register I32 count = 0;
-    
+
     while (SP > MARK)
 	count += do_chomp(POPs);
     PUSHi(count);
@@ -636,7 +636,7 @@ PP(pp_chomp)
 
 PP(pp_defined)
 {
-    dSP;
+    djSP;
     register SV* sv;
 
     sv = POPs;
@@ -666,7 +666,7 @@ PP(pp_defined)
 
 PP(pp_undef)
 {
-    dSP;
+    djSP;
     SV *sv;
 
     if (!op->op_private) {
@@ -734,7 +734,7 @@ PP(pp_undef)
 
 PP(pp_predec)
 {
-    dSP;
+    djSP;
     if (SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
 	croak(no_modify);
     if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
@@ -751,7 +751,7 @@ PP(pp_predec)
 
 PP(pp_postinc)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     if (SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
 	croak(no_modify);
     sv_setsv(TARG, TOPs);
@@ -772,7 +772,7 @@ PP(pp_postinc)
 
 PP(pp_postdec)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     if(SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
 	croak(no_modify);
     sv_setsv(TARG, TOPs);
@@ -793,7 +793,7 @@ PP(pp_postdec)
 
 PP(pp_pow)
 {
-    dSP; dATARGET; tryAMAGICbin(pow,opASSIGN); 
+    djSP; dATARGET; tryAMAGICbin(pow,opASSIGN);
     {
       dPOPTOPnnrl;
       SETn( pow( left, right) );
@@ -803,7 +803,7 @@ PP(pp_pow)
 
 PP(pp_multiply)
 {
-    dSP; dATARGET; tryAMAGICbin(mult,opASSIGN); 
+    djSP; dATARGET; tryAMAGICbin(mult,opASSIGN);
     {
       dPOPTOPnnrl;
       SETn( left * right );
@@ -813,7 +813,7 @@ PP(pp_multiply)
 
 PP(pp_divide)
 {
-    dSP; dATARGET; tryAMAGICbin(div,opASSIGN); 
+    djSP; dATARGET; tryAMAGICbin(div,opASSIGN);
     {
       dPOPPOPnnrl;
       double value;
@@ -841,7 +841,7 @@ PP(pp_divide)
 
 PP(pp_modulo)
 {
-    dSP; dATARGET; tryAMAGICbin(mod,opASSIGN);
+    djSP; dATARGET; tryAMAGICbin(mod,opASSIGN);
     {
       UV left;
       UV right;
@@ -876,8 +876,8 @@ PP(pp_modulo)
       if (right_neg) {
 	/* XXX may warn: unary minus operator applied to unsigned type */
 	/* could change -foo to be (~foo)+1 instead	*/
-	if (ans <= -(UV)IV_MAX)
-	  sv_setiv(TARG, (IV) -ans);
+	if (ans <= ~((UV)IV_MAX)+1)
+	  sv_setiv(TARG, ~ans+1);
 	else
 	  sv_setnv(TARG, -(double)ans);
       }
@@ -890,7 +890,7 @@ PP(pp_modulo)
 
 PP(pp_repeat)
 {
-  dSP; dATARGET; tryAMAGICbin(repeat,opASSIGN);
+  djSP; dATARGET; tryAMAGICbin(repeat,opASSIGN);
   {
     register I32 count = POPi;
     if (GIMME == G_ARRAY && op->op_private & OPpREPEAT_DOLIST) {
@@ -946,7 +946,7 @@ PP(pp_repeat)
 
 PP(pp_subtract)
 {
-    dSP; dATARGET; tryAMAGICbin(subtr,opASSIGN); 
+    djSP; dATARGET; tryAMAGICbin(subtr,opASSIGN);
     {
       dPOPTOPnnrl_ul;
       SETn( left - right );
@@ -956,7 +956,7 @@ PP(pp_subtract)
 
 PP(pp_left_shift)
 {
-    dSP; dATARGET; tryAMAGICbin(lshift,opASSIGN); 
+    djSP; dATARGET; tryAMAGICbin(lshift,opASSIGN);
     {
       IBW shift = POPi;
       if (op->op_private & HINT_INTEGER) {
@@ -975,7 +975,7 @@ PP(pp_left_shift)
 
 PP(pp_right_shift)
 {
-    dSP; dATARGET; tryAMAGICbin(rshift,opASSIGN); 
+    djSP; dATARGET; tryAMAGICbin(rshift,opASSIGN);
     {
       IBW shift = POPi;
       if (op->op_private & HINT_INTEGER) {
@@ -994,7 +994,7 @@ PP(pp_right_shift)
 
 PP(pp_lt)
 {
-    dSP; tryAMAGICbinSET(lt,0); 
+    djSP; tryAMAGICbinSET(lt,0);
     {
       dPOPnv;
       SETs(boolSV(TOPn < value));
@@ -1004,7 +1004,7 @@ PP(pp_lt)
 
 PP(pp_gt)
 {
-    dSP; tryAMAGICbinSET(gt,0); 
+    djSP; tryAMAGICbinSET(gt,0);
     {
       dPOPnv;
       SETs(boolSV(TOPn > value));
@@ -1014,7 +1014,7 @@ PP(pp_gt)
 
 PP(pp_le)
 {
-    dSP; tryAMAGICbinSET(le,0); 
+    djSP; tryAMAGICbinSET(le,0);
     {
       dPOPnv;
       SETs(boolSV(TOPn <= value));
@@ -1024,7 +1024,7 @@ PP(pp_le)
 
 PP(pp_ge)
 {
-    dSP; tryAMAGICbinSET(ge,0); 
+    djSP; tryAMAGICbinSET(ge,0);
     {
       dPOPnv;
       SETs(boolSV(TOPn >= value));
@@ -1034,7 +1034,7 @@ PP(pp_ge)
 
 PP(pp_ne)
 {
-    dSP; tryAMAGICbinSET(ne,0); 
+    djSP; tryAMAGICbinSET(ne,0);
     {
       dPOPnv;
       SETs(boolSV(TOPn != value));
@@ -1044,7 +1044,7 @@ PP(pp_ne)
 
 PP(pp_ncmp)
 {
-    dSP; dTARGET; tryAMAGICbin(ncmp,0); 
+    djSP; dTARGET; tryAMAGICbin(ncmp,0);
     {
       dPOPTOPnnrl;
       I32 value;
@@ -1066,7 +1066,7 @@ PP(pp_ncmp)
 
 PP(pp_slt)
 {
-    dSP; tryAMAGICbinSET(slt,0); 
+    djSP; tryAMAGICbinSET(slt,0);
     {
       dPOPTOPssrl;
       int cmp = ((op->op_private & OPpLOCALE)
@@ -1079,7 +1079,7 @@ PP(pp_slt)
 
 PP(pp_sgt)
 {
-    dSP; tryAMAGICbinSET(sgt,0); 
+    djSP; tryAMAGICbinSET(sgt,0);
     {
       dPOPTOPssrl;
       int cmp = ((op->op_private & OPpLOCALE)
@@ -1092,7 +1092,7 @@ PP(pp_sgt)
 
 PP(pp_sle)
 {
-    dSP; tryAMAGICbinSET(sle,0); 
+    djSP; tryAMAGICbinSET(sle,0);
     {
       dPOPTOPssrl;
       int cmp = ((op->op_private & OPpLOCALE)
@@ -1105,7 +1105,7 @@ PP(pp_sle)
 
 PP(pp_sge)
 {
-    dSP; tryAMAGICbinSET(sge,0); 
+    djSP; tryAMAGICbinSET(sge,0);
     {
       dPOPTOPssrl;
       int cmp = ((op->op_private & OPpLOCALE)
@@ -1118,7 +1118,7 @@ PP(pp_sge)
 
 PP(pp_seq)
 {
-    dSP; tryAMAGICbinSET(seq,0); 
+    djSP; tryAMAGICbinSET(seq,0);
     {
       dPOPTOPssrl;
       SETs(boolSV(sv_eq(left, right)));
@@ -1128,7 +1128,7 @@ PP(pp_seq)
 
 PP(pp_sne)
 {
-    dSP; tryAMAGICbinSET(sne,0); 
+    djSP; tryAMAGICbinSET(sne,0);
     {
       dPOPTOPssrl;
       SETs(boolSV(!sv_eq(left, right)));
@@ -1138,7 +1138,7 @@ PP(pp_sne)
 
 PP(pp_scmp)
 {
-    dSP; dTARGET;  tryAMAGICbin(scmp,0);
+    djSP; dTARGET;  tryAMAGICbin(scmp,0);
     {
       dPOPTOPssrl;
       int cmp = ((op->op_private & OPpLOCALE)
@@ -1151,16 +1151,16 @@ PP(pp_scmp)
 
 PP(pp_bit_and)
 {
-    dSP; dATARGET; tryAMAGICbin(band,opASSIGN); 
+    djSP; dATARGET; tryAMAGICbin(band,opASSIGN);
     {
       dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
 	if (op->op_private & HINT_INTEGER) {
-	  IBW value = SvIV(left) & SvIV(right); 
+	  IBW value = SvIV(left) & SvIV(right);
 	  SETi(BWi(value));
 	}
 	else {
-	  UBW value = SvUV(left) & SvUV(right); 
+	  UBW value = SvUV(left) & SvUV(right);
 	  SETu(BWu(value));
 	}
       }
@@ -1174,16 +1174,16 @@ PP(pp_bit_and)
 
 PP(pp_bit_xor)
 {
-    dSP; dATARGET; tryAMAGICbin(bxor,opASSIGN); 
+    djSP; dATARGET; tryAMAGICbin(bxor,opASSIGN);
     {
       dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
 	if (op->op_private & HINT_INTEGER) {
-	  IBW value = (USE_LEFT(left) ? SvIV(left) : 0) ^ SvIV(right); 
+	  IBW value = (USE_LEFT(left) ? SvIV(left) : 0) ^ SvIV(right);
 	  SETi(BWi(value));
 	}
 	else {
-	  UBW value = (USE_LEFT(left) ? SvUV(left) : 0) ^ SvUV(right); 
+	  UBW value = (USE_LEFT(left) ? SvUV(left) : 0) ^ SvUV(right);
 	  SETu(BWu(value));
 	}
       }
@@ -1197,16 +1197,16 @@ PP(pp_bit_xor)
 
 PP(pp_bit_or)
 {
-    dSP; dATARGET; tryAMAGICbin(bor,opASSIGN); 
+    djSP; dATARGET; tryAMAGICbin(bor,opASSIGN);
     {
       dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
 	if (op->op_private & HINT_INTEGER) {
-	  IBW value = (USE_LEFT(left) ? SvIV(left) : 0) | SvIV(right); 
+	  IBW value = (USE_LEFT(left) ? SvIV(left) : 0) | SvIV(right);
 	  SETi(BWi(value));
 	}
 	else {
-	  UBW value = (USE_LEFT(left) ? SvUV(left) : 0) | SvUV(right); 
+	  UBW value = (USE_LEFT(left) ? SvUV(left) : 0) | SvUV(right);
 	  SETu(BWu(value));
 	}
       }
@@ -1220,7 +1220,7 @@ PP(pp_bit_or)
 
 PP(pp_negate)
 {
-    dSP; dTARGET; tryAMAGICun(neg);
+    djSP; dTARGET; tryAMAGICun(neg);
     {
 	dTOPss;
 	if (SvGMAGICAL(sv))
@@ -1253,7 +1253,7 @@ PP(pp_negate)
 PP(pp_not)
 {
 #ifdef OVERLOAD
-    dSP; tryAMAGICunSET(not);
+    djSP; tryAMAGICunSET(not);
 #endif /* OVERLOAD */
     *stack_sp = boolSV(!SvTRUE(*stack_sp));
     return NORMAL;
@@ -1261,7 +1261,7 @@ PP(pp_not)
 
 PP(pp_complement)
 {
-    dSP; dTARGET; tryAMAGICun(compl); 
+    djSP; dTARGET; tryAMAGICun(compl);
     {
       dTOPss;
       if (SvNIOKp(sv)) {
@@ -1304,7 +1304,7 @@ PP(pp_complement)
 
 PP(pp_i_multiply)
 {
-    dSP; dATARGET; tryAMAGICbin(mult,opASSIGN); 
+    djSP; dATARGET; tryAMAGICbin(mult,opASSIGN);
     {
       dPOPTOPiirl;
       SETi( left * right );
@@ -1314,7 +1314,7 @@ PP(pp_i_multiply)
 
 PP(pp_i_divide)
 {
-    dSP; dATARGET; tryAMAGICbin(div,opASSIGN); 
+    djSP; dATARGET; tryAMAGICbin(div,opASSIGN);
     {
       dPOPiv;
       if (value == 0)
@@ -1327,7 +1327,7 @@ PP(pp_i_divide)
 
 PP(pp_i_modulo)
 {
-    dSP; dATARGET; tryAMAGICbin(mod,opASSIGN); 
+    djSP; dATARGET; tryAMAGICbin(mod,opASSIGN);
     {
       dPOPTOPiirl;
       if (!right)
@@ -1339,7 +1339,7 @@ PP(pp_i_modulo)
 
 PP(pp_i_add)
 {
-    dSP; dATARGET; tryAMAGICbin(add,opASSIGN); 
+    djSP; dATARGET; tryAMAGICbin(add,opASSIGN);
     {
       dPOPTOPiirl;
       SETi( left + right );
@@ -1349,7 +1349,7 @@ PP(pp_i_add)
 
 PP(pp_i_subtract)
 {
-    dSP; dATARGET; tryAMAGICbin(subtr,opASSIGN); 
+    djSP; dATARGET; tryAMAGICbin(subtr,opASSIGN);
     {
       dPOPTOPiirl;
       SETi( left - right );
@@ -1359,7 +1359,7 @@ PP(pp_i_subtract)
 
 PP(pp_i_lt)
 {
-    dSP; tryAMAGICbinSET(lt,0); 
+    djSP; tryAMAGICbinSET(lt,0);
     {
       dPOPTOPiirl;
       SETs(boolSV(left < right));
@@ -1369,7 +1369,7 @@ PP(pp_i_lt)
 
 PP(pp_i_gt)
 {
-    dSP; tryAMAGICbinSET(gt,0); 
+    djSP; tryAMAGICbinSET(gt,0);
     {
       dPOPTOPiirl;
       SETs(boolSV(left > right));
@@ -1379,7 +1379,7 @@ PP(pp_i_gt)
 
 PP(pp_i_le)
 {
-    dSP; tryAMAGICbinSET(le,0); 
+    djSP; tryAMAGICbinSET(le,0);
     {
       dPOPTOPiirl;
       SETs(boolSV(left <= right));
@@ -1389,7 +1389,7 @@ PP(pp_i_le)
 
 PP(pp_i_ge)
 {
-    dSP; tryAMAGICbinSET(ge,0); 
+    djSP; tryAMAGICbinSET(ge,0);
     {
       dPOPTOPiirl;
       SETs(boolSV(left >= right));
@@ -1399,7 +1399,7 @@ PP(pp_i_ge)
 
 PP(pp_i_eq)
 {
-    dSP; tryAMAGICbinSET(eq,0); 
+    djSP; tryAMAGICbinSET(eq,0);
     {
       dPOPTOPiirl;
       SETs(boolSV(left == right));
@@ -1409,7 +1409,7 @@ PP(pp_i_eq)
 
 PP(pp_i_ne)
 {
-    dSP; tryAMAGICbinSET(ne,0); 
+    djSP; tryAMAGICbinSET(ne,0);
     {
       dPOPTOPiirl;
       SETs(boolSV(left != right));
@@ -1419,7 +1419,7 @@ PP(pp_i_ne)
 
 PP(pp_i_ncmp)
 {
-    dSP; dTARGET; tryAMAGICbin(ncmp,0); 
+    djSP; dTARGET; tryAMAGICbin(ncmp,0);
     {
       dPOPTOPiirl;
       I32 value;
@@ -1437,7 +1437,7 @@ PP(pp_i_ncmp)
 
 PP(pp_i_negate)
 {
-    dSP; dTARGET; tryAMAGICun(neg);
+    djSP; dTARGET; tryAMAGICun(neg);
     SETi(-TOPi);
     RETURN;
 }
@@ -1446,7 +1446,7 @@ PP(pp_i_negate)
 
 PP(pp_atan2)
 {
-    dSP; dTARGET; tryAMAGICbin(atan2,0); 
+    djSP; dTARGET; tryAMAGICbin(atan2,0);
     {
       dPOPTOPnnrl;
       SETn(atan2(left, right));
@@ -1456,7 +1456,7 @@ PP(pp_atan2)
 
 PP(pp_sin)
 {
-    dSP; dTARGET; tryAMAGICun(sin);
+    djSP; dTARGET; tryAMAGICun(sin);
     {
       double value;
       value = POPn;
@@ -1468,7 +1468,7 @@ PP(pp_sin)
 
 PP(pp_cos)
 {
-    dSP; dTARGET; tryAMAGICun(cos);
+    djSP; dTARGET; tryAMAGICun(cos);
     {
       double value;
       value = POPn;
@@ -1480,7 +1480,7 @@ PP(pp_cos)
 
 PP(pp_rand)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     double value;
     if (MAXARG < 1)
 	value = 1.0;
@@ -1511,7 +1511,7 @@ PP(pp_rand)
 
 PP(pp_srand)
 {
-    dSP;
+    djSP;
     UV anum;
     if (MAXARG < 1)
 	anum = seed();
@@ -1548,6 +1548,7 @@ seed()
 #define   SEED_C3	269
 #define   SEED_C5	26107
 
+    dTHR;
     U32 u;
 #ifdef VMS
 #  include <starlet.h>
@@ -1577,7 +1578,7 @@ seed()
 
 PP(pp_exp)
 {
-    dSP; dTARGET; tryAMAGICun(exp);
+    djSP; dTARGET; tryAMAGICun(exp);
     {
       double value;
       value = POPn;
@@ -1589,7 +1590,7 @@ PP(pp_exp)
 
 PP(pp_log)
 {
-    dSP; dTARGET; tryAMAGICun(log);
+    djSP; dTARGET; tryAMAGICun(log);
     {
       double value;
       value = POPn;
@@ -1605,7 +1606,7 @@ PP(pp_log)
 
 PP(pp_sqrt)
 {
-    dSP; dTARGET; tryAMAGICun(sqrt);
+    djSP; dTARGET; tryAMAGICun(sqrt);
     {
       double value;
       value = POPn;
@@ -1621,7 +1622,7 @@ PP(pp_sqrt)
 
 PP(pp_int)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     {
       double value = TOPn;
       IV iv;
@@ -1649,7 +1650,7 @@ PP(pp_int)
 
 PP(pp_abs)
 {
-    dSP; dTARGET; tryAMAGICun(abs);
+    djSP; dTARGET; tryAMAGICun(abs);
     {
       double value = TOPn;
       IV iv;
@@ -1671,7 +1672,7 @@ PP(pp_abs)
 
 PP(pp_hex)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     char *tmps;
     I32 argtype;
 
@@ -1682,7 +1683,7 @@ PP(pp_hex)
 
 PP(pp_oct)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     UV value;
     I32 argtype;
     char *tmps;
@@ -1704,14 +1705,14 @@ PP(pp_oct)
 
 PP(pp_length)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     SETi( sv_len(TOPs) );
     RETURN;
 }
 
 PP(pp_substr)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     SV *sv;
     I32 len;
     I32 len_ok = 0;
@@ -1779,7 +1780,7 @@ PP(pp_substr)
         rem -= pos;
     }
     if (fail < 0) {
-	if (dowarn || lvalue || repl) 
+	if (dowarn || lvalue || repl)
 	    warn("substr outside of string");
 	RETPUSHUNDEF;
     }
@@ -1811,7 +1812,7 @@ PP(pp_substr)
 		LvTARG(TARG) = SvREFCNT_inc(sv);
 	    }
 	    LvTARGOFF(TARG) = pos;
-	    LvTARGLEN(TARG) = rem; 
+	    LvTARGLEN(TARG) = rem;
 	}
         else if (repl)
 	    sv_insert(sv, pos, rem, repl, repl_len);
@@ -1823,7 +1824,7 @@ PP(pp_substr)
 
 PP(pp_vec)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     register I32 size = POPi;
     register I32 offset = POPi;
     register SV *src = POPs;
@@ -1851,8 +1852,8 @@ PP(pp_vec)
 		    SvREFCNT_dec(LvTARG(TARG));
 		LvTARG(TARG) = SvREFCNT_inc(src);
 	    }
-	    LvTARGOFF(TARG) = offset; 
-	    LvTARGLEN(TARG) = size; 
+	    LvTARGOFF(TARG) = offset;
+	    LvTARGLEN(TARG) = size;
 	}
 	if (len > srclen) {
 	    if (size <= 8)
@@ -1902,7 +1903,7 @@ PP(pp_vec)
 
 PP(pp_index)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     SV *big;
     SV *little;
     I32 offset;
@@ -1934,7 +1935,7 @@ PP(pp_index)
 
 PP(pp_rindex)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     SV *big;
     SV *little;
     STRLEN blen;
@@ -1971,7 +1972,7 @@ PP(pp_rindex)
 
 PP(pp_sprintf)
 {
-    dSP; dMARK; dORIGMARK; dTARGET;
+    djSP; dMARK; dORIGMARK; dTARGET;
 #ifdef USE_LOCALE_NUMERIC
     if (op->op_private & OPpLOCALE)
 	SET_NUMERIC_LOCAL();
@@ -1987,7 +1988,7 @@ PP(pp_sprintf)
 
 PP(pp_ord)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     I32 value;
     char *tmps;
 
@@ -2006,7 +2007,7 @@ PP(pp_ord)
 
 PP(pp_chr)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     char *tmps;
 
     (void)SvUPGRADE(TARG,SVt_PV);
@@ -2022,7 +2023,7 @@ PP(pp_chr)
 
 PP(pp_crypt)
 {
-    dSP; dTARGET; dPOPTOPssrl;
+    djSP; dTARGET; dPOPTOPssrl;
 #ifdef HAS_CRYPT
     char *tmps = SvPV(left, na);
 #ifdef FCRYPT
@@ -2040,7 +2041,7 @@ PP(pp_crypt)
 
 PP(pp_ucfirst)
 {
-    dSP;
+    djSP;
     SV *sv = TOPs;
     register char *s;
 
@@ -2066,7 +2067,7 @@ PP(pp_ucfirst)
 
 PP(pp_lcfirst)
 {
-    dSP;
+    djSP;
     SV *sv = TOPs;
     register char *s;
 
@@ -2093,7 +2094,7 @@ PP(pp_lcfirst)
 
 PP(pp_uc)
 {
-    dSP;
+    djSP;
     SV *sv = TOPs;
     register char *s;
     STRLEN len;
@@ -2125,7 +2126,7 @@ PP(pp_uc)
 
 PP(pp_lc)
 {
-    dSP;
+    djSP;
     SV *sv = TOPs;
     register char *s;
     STRLEN len;
@@ -2157,7 +2158,7 @@ PP(pp_lc)
 
 PP(pp_quotemeta)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     SV *sv = TOPs;
     STRLEN len;
     register char *s = SvPV(sv,len);
@@ -2186,7 +2187,7 @@ PP(pp_quotemeta)
 
 PP(pp_aslice)
 {
-    dSP; dMARK; dORIGMARK;
+    djSP; dMARK; dORIGMARK;
     register SV** svp;
     register AV* av = (AV*)POPs;
     register I32 lval = op->op_flags & OPf_MOD;
@@ -2196,7 +2197,7 @@ PP(pp_aslice)
     if (SvTYPE(av) == SVt_PVAV) {
 	if (lval && op->op_private & OPpLVAL_INTRO) {
 	    I32 max = -1;
-	    for (svp = mark + 1; svp <= sp; svp++) {
+	    for (svp = MARK + 1; svp <= SP; svp++) {
 		elem = SvIVx(*svp);
 		if (elem > max)
 		    max = elem;
@@ -2231,7 +2232,7 @@ PP(pp_aslice)
 
 PP(pp_each)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     HV *hash = (HV*)POPs;
     HE *entry;
     I32 gimme = GIMME_V;
@@ -2268,7 +2269,7 @@ PP(pp_keys)
 
 PP(pp_delete)
 {
-    dSP;
+    djSP;
     I32 gimme = GIMME_V;
     I32 discard = (gimme == G_VOID) ? G_DISCARD : 0;
     SV *sv;
@@ -2307,7 +2308,7 @@ PP(pp_delete)
 
 PP(pp_exists)
 {
-    dSP;
+    djSP;
     SV *tmpsv = POPs;
     HV *hv = (HV*)POPs;
     STRLEN len;
@@ -2321,7 +2322,7 @@ PP(pp_exists)
 
 PP(pp_hslice)
 {
-    dSP; dMARK; dORIGMARK;
+    djSP; dMARK; dORIGMARK;
     register HE *he;
     register HV *hv = (HV*)POPs;
     register I32 lval = op->op_flags & OPf_MOD;
@@ -2352,7 +2353,7 @@ PP(pp_hslice)
 
 PP(pp_list)
 {
-    dSP; dMARK;
+    djSP; dMARK;
     if (GIMME != G_ARRAY) {
 	if (++MARK <= SP)
 	    *MARK = *SP;		/* unwanted list, return last item */
@@ -2365,7 +2366,7 @@ PP(pp_list)
 
 PP(pp_lslice)
 {
-    dSP;
+    djSP;
     SV **lastrelem = stack_sp;
     SV **lastlelem = stack_base + POPMARK;
     SV **firstlelem = stack_base + POPMARK + 1;
@@ -2423,7 +2424,7 @@ PP(pp_lslice)
 
 PP(pp_anonlist)
 {
-    dSP; dMARK; dORIGMARK;
+    djSP; dMARK; dORIGMARK;
     I32 items = SP - MARK;
     SV *av = sv_2mortal((SV*)av_make(items, MARK+1));
     SP = ORIGMARK;		/* av_make() might realloc stack_sp */
@@ -2433,7 +2434,7 @@ PP(pp_anonlist)
 
 PP(pp_anonhash)
 {
-    dSP; dMARK; dORIGMARK;
+    djSP; dMARK; dORIGMARK;
     HV* hv = (HV*)sv_2mortal((SV*)newHV());
 
     while (MARK < SP) {
@@ -2452,7 +2453,7 @@ PP(pp_anonhash)
 
 PP(pp_splice)
 {
-    dSP; dMARK; dORIGMARK;
+    djSP; dMARK; dORIGMARK;
     register AV *ary = (AV*)*++MARK;
     register SV **src;
     register SV **dst;
@@ -2469,7 +2470,7 @@ PP(pp_splice)
     if (++MARK < SP) {
 	offset = i = SvIVx(*MARK);
 	if (offset < 0)
-	    offset += AvFILL(ary) + 1;
+	    offset += AvFILLp(ary) + 1;
 	else
 	    offset -= curcop->cop_arybase;
 	if (offset < 0)
@@ -2486,9 +2487,9 @@ PP(pp_splice)
 	offset = 0;
 	length = AvMAX(ary) + 1;
     }
-    if (offset > AvFILL(ary) + 1)
-	offset = AvFILL(ary) + 1;
-    after = AvFILL(ary) + 1 - (offset + length);
+    if (offset > AvFILLp(ary) + 1)
+	offset = AvFILLp(ary) + 1;
+    after = AvFILLp(ary) + 1 - (offset + length);
     if (after < 0) {				/* not that much array */
 	length += after;			/* offset+length now in array */
 	after = 0;
@@ -2536,7 +2537,7 @@ PP(pp_splice)
 		    SvREFCNT_dec(*dst++);	/* free them now */
 	    }
 	}
-	AvFILL(ary) += diff;
+	AvFILLp(ary) += diff;
 
 	/* pull up or down? */
 
@@ -2557,7 +2558,7 @@ PP(pp_splice)
 		dst = src + diff;		/* diff is negative */
 		Move(src, dst, after, SV*);
 	    }
-	    dst = &AvARRAY(ary)[AvFILL(ary)+1];
+	    dst = &AvARRAY(ary)[AvFILLp(ary)+1];
 						/* avoid later double free */
 	}
 	i = -diff;
@@ -2591,15 +2592,15 @@ PP(pp_splice)
 		}
 		SvPVX(ary) = (char*)(AvARRAY(ary) - diff);/* diff is positive */
 		AvMAX(ary) += diff;
-		AvFILL(ary) += diff;
+		AvFILLp(ary) += diff;
 	    }
 	    else {
-		if (AvFILL(ary) + diff >= AvMAX(ary))	/* oh, well */
-		    av_extend(ary, AvFILL(ary) + diff);
-		AvFILL(ary) += diff;
+		if (AvFILLp(ary) + diff >= AvMAX(ary))	/* oh, well */
+		    av_extend(ary, AvFILLp(ary) + diff);
+		AvFILLp(ary) += diff;
 
 		if (after) {
-		    dst = AvARRAY(ary) + AvFILL(ary);
+		    dst = AvARRAY(ary) + AvFILLp(ary);
 		    src = dst - diff;
 		    for (i = after; i; i--) {
 			*dst-- = *src--;
@@ -2647,7 +2648,7 @@ PP(pp_splice)
 
 PP(pp_push)
 {
-    dSP; dMARK; dORIGMARK; dTARGET;
+    djSP; dMARK; dORIGMARK; dTARGET;
     register AV *ary = (AV*)*++MARK;
     register SV *sv = &sv_undef;
 
@@ -2664,7 +2665,7 @@ PP(pp_push)
 
 PP(pp_pop)
 {
-    dSP;
+    djSP;
     AV *av = (AV*)POPs;
     SV *sv = av_pop(av);
     if (!SvIMMORTAL(sv) && AvREAL(av))
@@ -2675,7 +2676,7 @@ PP(pp_pop)
 
 PP(pp_shift)
 {
-    dSP;
+    djSP;
     AV *av = (AV*)POPs;
     SV *sv = av_shift(av);
     EXTEND(SP, 1);
@@ -2689,7 +2690,7 @@ PP(pp_shift)
 
 PP(pp_unshift)
 {
-    dSP; dMARK; dORIGMARK; dTARGET;
+    djSP; dMARK; dORIGMARK; dTARGET;
     register AV *ary = (AV*)*++MARK;
     register SV *sv;
     register I32 i = 0;
@@ -2708,7 +2709,7 @@ PP(pp_unshift)
 
 PP(pp_reverse)
 {
-    dSP; dMARK;
+    djSP; dMARK;
     register SV *tmp;
     SV **oldsp = SP;
 
@@ -2731,7 +2732,7 @@ PP(pp_reverse)
 	if (SP - MARK > 1)
 	    do_join(TARG, &sv_no, MARK, SP);
 	else
-	    sv_setsv(TARG, (SP > MARK) ? *SP : GvSV(defgv));
+	    sv_setsv(TARG, (SP > MARK) ? *SP : DEFSV);
 	up = SvPV_force(TARG, len);
 	if (len > 1) {
 	    down = SvPVX(TARG) + len - 1;
@@ -2759,11 +2760,11 @@ mul128(sv, m)
   U32             i = 0;
 
   if (!strnEQ(s, "0000", 4)) {  /* need to grow sv */
-    SV             *new = newSVpv("0000000000", 10);
+    SV             *tmpNew = newSVpv("0000000000", 10);
 
-    sv_catsv(new, sv);
+    sv_catsv(tmpNew, sv);
     SvREFCNT_dec(sv);		/* free old sv */
-    sv = new;
+    sv = tmpNew;
     s = SvPV(sv, len);
   }
   t = s + len - 1;
@@ -2781,9 +2782,9 @@ mul128(sv, m)
 
 PP(pp_unpack)
 {
-    dSP;
+    djSP;
     dPOPPOPssrl;
-    SV **oldsp = sp;
+    SV **oldsp = SP;
     I32 gimme = GIMME_V;
     SV *sv;
     STRLEN llen;
@@ -3260,7 +3261,7 @@ PP(pp_unpack)
 	case 'w':
 	    EXTEND(SP, len);
 	    EXTEND_MORTAL(len);
-	    { 
+	    {
 		UV auv = 0;
 		U32 bytes = 0;
 		
@@ -3426,10 +3427,10 @@ PP(pp_unpack)
 			d = (*s++ - ' ') & 077;
 		    else
 			d = 0;
-		    hunk[0] = a << 2 | b >> 4;
-		    hunk[1] = b << 4 | c >> 2;
-		    hunk[2] = c << 6 | d;
-		    sv_catpvn(sv, hunk, len > 3 ? 3 : len);
+		    hunk[0] = (a << 2) | (b >> 4);
+		    hunk[1] = (b << 4) | (c >> 2);
+		    hunk[2] = (c << 6) | d;
+		    sv_catpvn(sv, hunk, (len > 3) ? 3 : len);
 		    len -= 3;
 		}
 		if (*s == '\n')
@@ -3474,7 +3475,7 @@ PP(pp_unpack)
 	    checksum = 0;
 	}
     }
-    if (sp == oldsp && gimme == G_SCALAR)
+    if (SP == oldsp && gimme == G_SCALAR)
 	PUSHs(&sv_undef);
     RETURN;
 }
@@ -3492,8 +3493,8 @@ register I32 len;
     hunk[4] = '\0';
     while (len > 0) {
 	hunk[0] = ' ' + (077 & (*s >> 2));
-	hunk[1] = ' ' + (077 & ((*s << 4) & 060 | (s[1] >> 4) & 017));
-	hunk[2] = ' ' + (077 & ((s[1] << 2) & 074 | (s[2] >> 6) & 03));
+	hunk[1] = ' ' + (077 & (((*s << 4) & 060) | ((s[1] >> 4) & 017)));
+	hunk[2] = ' ' + (077 & (((s[1] << 2) & 074) | ((s[2] >> 6) & 03)));
 	hunk[3] = ' ' + (077 & (s[2] & 077));
 	sv_catpvn(sv, hunk, 4);
 	s += 3;
@@ -3587,7 +3588,7 @@ div128(pnum, done)
 
 PP(pp_pack)
 {
-    dSP; dMARK; dORIGMARK; dTARGET;
+    djSP; dMARK; dORIGMARK; dTARGET;
     register SV *cat = TARG;
     register I32 items;
     STRLEN fromlen;
@@ -3907,7 +3908,7 @@ PP(pp_pack)
 		    SV             *norm;
 		    STRLEN          len;
 		    bool            done;
-            
+
 		    /* Copy string and check for compliance */
 		    from = SvPV(fromstr, len);
 		    if ((norm = is_an_int(from, len)) == NULL)
@@ -4051,9 +4052,10 @@ PP(pp_pack)
 }
 #undef NEXTFROM
 
+
 PP(pp_split)
 {
-    dSP; dTARG;
+    djSP; dTARG;
     AV *ary;
     register I32 limit = POPi;			/* note, negative is forever */
     SV *sv = POPs;
@@ -4233,11 +4235,12 @@ PP(pp_split)
 	    s = rx->endp[0];
 	}
     }
+
     LEAVE_SCOPE(oldsave);
     iters = (SP - stack_base) - base;
     if (iters > maxiters)
 	DIE("Split loop");
-    
+
     /* keep field after final delim? */
     if (s < strend || (iters && origlimit)) {
 	dstr = NEWSV(34, strend-s);

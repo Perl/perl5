@@ -79,7 +79,7 @@ if($termcap and !$setuptermcap) {
 $SCREEN = ($_[0] =~ /^-(\d+)/ && (shift, $1))
        ||  $ENV{COLUMNS}
        || ($ENV{TERMCAP} =~ /co#(\d+)/)[0]
-       || ($^O ne 'MSWin32' && (`stty -a 2>/dev/null` =~ /(\d+) columns/)[0])
+       || ($^O ne 'MSWin32' && $^O ne 'dos' && (`stty -a 2>/dev/null` =~ /(\d+) columns/)[0])
        || 72;
 
 @_ = ("<&STDIN") unless @_;

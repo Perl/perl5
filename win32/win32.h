@@ -119,6 +119,8 @@ struct tms {
 #pragma warn -csu	/* "comparing signed and unsigned values" */
 #pragma warn -pro	/* "call to function with no prototype" */
 
+#define USE_RTL_WAIT	/* Borland has a working wait() */
+
 #endif
 
 #ifdef _MSC_VER			/* Microsoft Visual C++ */
@@ -136,6 +138,13 @@ typedef long		gid_t;
 #define _environ	environ
 #define flushall	_flushall
 #define fcloseall	_fcloseall
+
+#ifndef _O_NOINHERIT
+#  define _O_NOINHERIT	0x0080
+#  ifndef _NO_OLDNAMES
+#    define O_NOINHERIT	_O_NOINHERIT
+#  endif
+#endif
 
 #endif /* __MINGW32__ */
 
@@ -208,5 +217,54 @@ EXT void win32_strip_return(struct sv *sv);
 #define PERL_SCRIPT_MODE "r"
 #define win32_strip_return(sv) NOOP
 #endif
+
+#define HAVE_INTERP_INTERN
+struct interp_intern {
+    char *	w32_perlshell_tokens;
+    char **	w32_perlshell_vec;
+    long	w32_perlshell_items;
+    struct av *	w32_fdpid;
+#ifndef USE_RTL_WAIT
+    long	w32_num_children;
+    HANDLE	w32_child_pids[MAXIMUM_WAIT_OBJECTS];
+#endif
+};
+
+#define w32_perlshell_tokens	(sys_intern.w32_perlshell_tokens)
+#define w32_perlshell_vec	(sys_intern.w32_perlshell_vec)
+#define w32_perlshell_items	(sys_intern.w32_perlshell_items)
+#define w32_fdpid		(sys_intern.w32_fdpid)
+
+#ifndef USE_RTL_WAIT
+#  define w32_num_children	(sys_intern.w32_num_children)
+#  define w32_child_pids	(sys_intern.w32_child_pids)
+#endif
+
+/* 
+ * Now Win32 specific per-thread data stuff 
+ */
+
+#ifdef USE_THREADS
+#  ifndef USE_DECLSPEC_THREAD
+#    define HAVE_THREAD_INTERN
+
+struct thread_intern {
+    /* XXX can probably use one buffer instead of several */
+    char		Wstrerror_buffer[512];
+    struct servent	Wservent;
+    char		Wgetlogin_buffer[128];
+    char		Ww32_perllib_root[MAX_PATH+1];
+#    ifdef USE_SOCKETS_AS_HANDLES
+    int			Winit_socktype;
+#    endif
+#    ifdef HAVE_DES_FCRYPT
+    char		Wcrypt_buffer[30];
+#    endif
+#    ifdef USE_RTL_THREAD_API
+    void *		retv;	/* slot for thread return value */
+#    endif
+};
+#  endif /* !USE_DECLSPEC_THREAD */
+#endif /* USE_THREADS */
 
 #endif /* _INC_WIN32_PERL5 */

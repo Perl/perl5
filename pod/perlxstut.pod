@@ -428,7 +428,7 @@ Let's now take a look at a portion of the .c file created for our extension.
 		} else {
 			arg = 0.0;
 		}
-		sv_setnv(ST(0), (double)arg);	/* XXXXX */
+		sv_setnv(ST(0), (double)arg);		/* XXXXX */
 	    }
 	    XSRETURN(1);
 	}

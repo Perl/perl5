@@ -263,6 +263,7 @@ magic_len(sv, mg)
 SV *sv;
 MAGIC *mg;
 {
+    dTHR;
     register I32 paren;
     register char *s;
     register I32 i;
@@ -328,6 +329,7 @@ magic_get(sv, mg)
 SV *sv;
 MAGIC *mg;
 {
+    dTHR;
     register I32 paren;
     register char *s;
     register I32 i;
@@ -481,11 +483,14 @@ MAGIC *mg;
 #endif
 	break;
     case '?':
-	sv_setiv(sv, (IV)STATUS_CURRENT);
+	{
+	    dTHR;
+	    sv_setiv(sv, (IV)STATUS_CURRENT);
 #ifdef COMPLEX_STATUS
-	LvTARGOFF(sv) = statusvalue;
-	LvTARGLEN(sv) = statusvalue_vms;
+	    LvTARGOFF(sv) = statusvalue;
+	    LvTARGLEN(sv) = statusvalue_vms;
 #endif
+	}
 	break;
     case '^':
 	s = IoTOP_NAME(GvIOp(defoutgv));
@@ -688,6 +693,7 @@ MAGIC* mg;
 #if defined(VMS)
     die("Can't make list assignment to %%ENV on this system");
 #else
+    dTHR;
     if (localizing) {
 	HE* entry;
 	magic_clear_all_env(sv,mg);
@@ -792,6 +798,7 @@ magic_setsig(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
+    dTHR;
     register char *s;
     I32 i;
     SV** svp;
@@ -1051,6 +1058,7 @@ magic_setdbline(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
+    dTHR;
     OP *o;
     I32 i;
     GV* gv;
@@ -1072,6 +1080,7 @@ magic_getarylen(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
+    dTHR;
     sv_setiv(sv, AvFILL((AV*)mg->mg_obj) + curcop->cop_arybase);
     return 0;
 }
@@ -1081,6 +1090,7 @@ magic_setarylen(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
+    dTHR;
     av_fill((AV*)mg->mg_obj, SvIV(sv) - curcop->cop_arybase);
     return 0;
 }
@@ -1095,6 +1105,7 @@ MAGIC* mg;
     if (SvTYPE(lsv) >= SVt_PVMG && SvMAGIC(lsv)) {
 	mg = mg_find(lsv, 'g');
 	if (mg && mg->mg_len >= 0) {
+	    dTHR;
 	    sv_setiv(sv, mg->mg_len + curcop->cop_arybase);
 	    return 0;
 	}
@@ -1214,6 +1225,7 @@ magic_gettaint(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
+    dTHR;
     TAINT_IF((mg->mg_len & 1) ||
 	     (mg->mg_len & 2) && mg->mg_obj == sv);	/* kludge */
     return 0;
@@ -1224,6 +1236,7 @@ magic_settaint(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
+    dTHR;
     if (localizing) {
 	if (localizing == 1)
 	    mg->mg_len <<= 1;
@@ -1333,6 +1346,7 @@ MAGIC* mg;
 		targ = AvARRAY(av)[LvTARGOFF(sv)];
 	}
 	if (targ && targ != &sv_undef) {
+	    dTHR;		/* just for SvREFCNT_dec */
 	    /* somebody else defined it for us */
 	    SvREFCNT_dec(LvTARG(sv));
 	    LvTARG(sv) = SvREFCNT_inc(targ);
@@ -1375,6 +1389,7 @@ void
 vivify_defelem(sv)
 SV* sv;
 {
+    dTHR;			/* just for SvREFCNT_inc and SvREFCNT_dec*/
     MAGIC* mg;
     SV* value;
 
@@ -1471,6 +1486,7 @@ magic_set(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
+    dTHR;
     register char *s;
     I32 i;
     STRLEN len;
@@ -1841,6 +1857,7 @@ static void
 unwind_handler_stack(p)
     void *p;
 {
+    dTHR;
     U32 flags = *(U32*)p;
 
     if (flags & 1)
@@ -1863,7 +1880,7 @@ int sig;
     OP *myop = op;
     U32 flags = 0;
     I32 o_save_i = savestack_ix, type;
-    CONTEXT *cx;
+    PERL_CONTEXT *cx;
     XPV *tXpv = Xpv;
     
     if (savestack_ix + 15 <= savestack_max)

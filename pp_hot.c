@@ -22,7 +22,7 @@
 
 PP(pp_const)
 {
-    dSP;
+    djSP;
     XPUSHs(cSVOP->op_sv);
     RETURN;
 }
@@ -38,8 +38,8 @@ PP(pp_nextstate)
 
 PP(pp_gvsv)
 {
-    dSP;
-    EXTEND(sp,1);
+    djSP;
+    EXTEND(SP,1);
     if (op->op_private & OPpLVAL_INTRO)
 	PUSHs(save_scalar(cGVOP->op_gv));
     else
@@ -60,7 +60,7 @@ PP(pp_pushmark)
 
 PP(pp_stringify)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     STRLEN len;
     char *s;
     s = SvPV(TOPs,len);
@@ -71,14 +71,14 @@ PP(pp_stringify)
 
 PP(pp_gv)
 {
-    dSP;
+    djSP;
     XPUSHs((SV*)cGVOP->op_gv);
     RETURN;
 }
 
 PP(pp_and)
 {
-    dSP;
+    djSP;
     if (!SvTRUE(TOPs))
 	RETURN;
     else {
@@ -89,7 +89,7 @@ PP(pp_and)
 
 PP(pp_sassign)
 {
-    dSP; dPOPTOPssrl;
+    djSP; dPOPTOPssrl;
     MAGIC *mg;
 
     if (op->op_private & OPpASSIGN_BACKWARDS) {
@@ -105,7 +105,7 @@ PP(pp_sassign)
 
 PP(pp_cond_expr)
 {
-    dSP;
+    djSP;
     if (SvTRUEx(POPs))
 	RETURNOP(cCONDOP->op_true);
     else
@@ -125,7 +125,7 @@ PP(pp_unstack)
 
 PP(pp_concat)
 {
-  dSP; dATARGET; tryAMAGICbin(concat,opASSIGN);
+  djSP; dATARGET; tryAMAGICbin(concat,opASSIGN);
   {
     dPOPTOPssrl;
     STRLEN len;
@@ -152,13 +152,16 @@ PP(pp_concat)
 
 PP(pp_padsv)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     XPUSHs(TARG);
     if (op->op_flags & OPf_MOD) {
 	if (op->op_private & OPpLVAL_INTRO)
 	    SAVECLEARSV(curpad[op->op_targ]);
-        else if (op->op_private & OPpDEREF)
+        else if (op->op_private & OPpDEREF) {
+	    PUTBACK;
 	    vivify_ref(curpad[op->op_targ], op->op_private & OPpDEREF);
+	    SPAGAIN;
+	}
     }
     RETURN;
 }
@@ -171,7 +174,7 @@ PP(pp_readline)
 
 PP(pp_eq)
 {
-    dSP; tryAMAGICbinSET(eq,0); 
+    djSP; tryAMAGICbinSET(eq,0); 
     {
       dPOPnv;
       SETs(boolSV(TOPn == value));
@@ -181,7 +184,7 @@ PP(pp_eq)
 
 PP(pp_preinc)
 {
-    dSP;
+    djSP;
     if (SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
 	croak(no_modify);
     if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
@@ -198,7 +201,7 @@ PP(pp_preinc)
 
 PP(pp_or)
 {
-    dSP;
+    djSP;
     if (SvTRUE(TOPs))
 	RETURN;
     else {
@@ -209,7 +212,7 @@ PP(pp_or)
 
 PP(pp_add)
 {
-    dSP; dATARGET; tryAMAGICbin(add,opASSIGN); 
+    djSP; dATARGET; tryAMAGICbin(add,opASSIGN); 
     {
       dPOPTOPnnrl_ul;
       SETn( left + right );
@@ -219,7 +222,7 @@ PP(pp_add)
 
 PP(pp_aelemfast)
 {
-    dSP;
+    djSP;
     AV *av = GvAV((GV*)cSVOP->op_sv);
     SV** svp = av_fetch(av, op->op_private, op->op_flags & OPf_MOD);
     EXTEND(SP, 1);
@@ -229,7 +232,7 @@ PP(pp_aelemfast)
 
 PP(pp_join)
 {
-    dSP; dMARK; dTARGET;
+    djSP; dMARK; dTARGET;
     MARK++;
     do_join(TARG, *MARK, MARK, SP);
     SP = MARK;
@@ -239,7 +242,7 @@ PP(pp_join)
 
 PP(pp_pushre)
 {
-    dSP;
+    djSP;
 #ifdef DEBUGGING
     /*
      * We ass_u_me that LvTARGOFF() comes first, and that two STRLENs
@@ -260,7 +263,7 @@ PP(pp_pushre)
 
 PP(pp_print)
 {
-    dSP; dMARK; dORIGMARK;
+    djSP; dMARK; dORIGMARK;
     GV *gv;
     IO *io;
     register PerlIO *fp;
@@ -272,6 +275,9 @@ PP(pp_print)
 	gv = defoutgv;
     if (SvRMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q'))) {
 	if (MARK == ORIGMARK) {
+	    /* If using default handle then we need to make space to 
+	     * pass object as 1st arg, so move other args up ...
+	     */
 	    MEXTEND(SP, 1);
 	    ++MARK;
 	    Move(MARK, MARK + 1, (SP - MARK) + 1, SV*);
@@ -357,7 +363,7 @@ PP(pp_print)
 
 PP(pp_rv2av)
 {
-    dSP; dPOPss;
+    djSP; dPOPss;
     AV *av;
 
     if (SvROK(sv)) {
@@ -432,7 +438,7 @@ PP(pp_rv2av)
 
 PP(pp_rv2hv)
 {
-    dSP; dTOPss;
+    djSP; dTOPss;
     HV *hv;
 
     if (SvROK(sv)) {
@@ -511,7 +517,7 @@ PP(pp_rv2hv)
 
 PP(pp_aassign)
 {
-    dSP;
+    djSP;
     SV **lastlelem = stack_sp;
     SV **lastrelem = stack_base + POPMARK;
     SV **firstrelem = stack_base + POPMARK + 1;
@@ -720,7 +726,7 @@ PP(pp_aassign)
 
 PP(pp_match)
 {
-    dSP; dTARG;
+    djSP; dTARG;
     register PMOP *pm = cPMOP;
     register char *t;
     register char *s;
@@ -1201,8 +1207,8 @@ do_readline()
 
 PP(pp_enter)
 {
-    dSP;
-    register CONTEXT *cx;
+    djSP;
+    register PERL_CONTEXT *cx;
     I32 gimme = OP_GIMME(op, -1);
 
     if (gimme == -1) {
@@ -1215,14 +1221,14 @@ PP(pp_enter)
     ENTER;
 
     SAVETMPS;
-    PUSHBLOCK(cx, CXt_BLOCK, sp);
+    PUSHBLOCK(cx, CXt_BLOCK, SP);
 
     RETURN;
 }
 
 PP(pp_helem)
 {
-    dSP;
+    djSP;
     HE* he;
     SV *keysv = POPs;
     HV *hv = (HV*)POPs;
@@ -1263,8 +1269,8 @@ PP(pp_helem)
 
 PP(pp_leave)
 {
-    dSP;
-    register CONTEXT *cx;
+    djSP;
+    register PERL_CONTEXT *cx;
     register SV **mark;
     SV **newsp;
     PMOP *newpm;
@@ -1319,12 +1325,12 @@ PP(pp_leave)
 
 PP(pp_iter)
 {
-    dSP;
-    register CONTEXT *cx;
+    djSP;
+    register PERL_CONTEXT *cx;
     SV* sv;
     AV* av;
 
-    EXTEND(sp, 1);
+    EXTEND(SP, 1);
     cx = &cxstack[cxstack_ix];
     if (cx->cx_type != CXt_LOOP)
 	DIE("panic: pp_iter");
@@ -1355,7 +1361,7 @@ PP(pp_iter)
 	}
 	LvTARG(lv) = SvREFCNT_inc(av);
 	LvTARGOFF(lv) = cx->blk_loop.iterix;
-	LvTARGLEN(lv) = -1;
+	LvTARGLEN(lv) = (UV) -1;
 	sv = (SV*)lv;
     }
 
@@ -1365,7 +1371,7 @@ PP(pp_iter)
 
 PP(pp_subst)
 {
-    dSP; dTARG;
+    djSP; dTARG;
     register PMOP *pm = cPMOP;
     PMOP *rpm = pm;
     register SV *dstr;
@@ -1568,7 +1574,7 @@ PP(pp_subst)
 	sv_setpvn(dstr, m, s-m);
 	curpm = pm;
 	if (!c) {
-	    register CONTEXT *cx;
+	    register PERL_CONTEXT *cx;
 	    PUSHSUBST(cx);
 	    RETURNOP(cPMOP->op_pmreplroot);
 	}
@@ -1625,7 +1631,7 @@ ret_no:
 
 PP(pp_grepwhile)
 {
-    dSP;
+    djSP;
 
     if (SvTRUEx(POPs))
 	stack_base[markstack_ptr[-1]++] = stack_base[*markstack_ptr];
@@ -1633,7 +1639,7 @@ PP(pp_grepwhile)
     LEAVE;					/* exit inner scope */
 
     /* All done yet? */
-    if (stack_base + *markstack_ptr > sp) {
+    if (stack_base + *markstack_ptr > SP) {
 	I32 items;
 	I32 gimme = GIMME_V;
 
@@ -1658,7 +1664,7 @@ PP(pp_grepwhile)
 
 	src = stack_base[*markstack_ptr];
 	SvTEMP_off(src);
-	GvSV(defgv) = src;
+	DEFSV = src;
 
 	RETURNOP(cLOGOP->op_other);
     }
@@ -1666,12 +1672,12 @@ PP(pp_grepwhile)
 
 PP(pp_leavesub)
 {
-    dSP;
+    djSP;
     SV **mark;
     SV **newsp;
     PMOP *newpm;
     I32 gimme;
-    register CONTEXT *cx;
+    register PERL_CONTEXT *cx;
     struct block_sub cxsub;
 
     POPBLOCK(cx,newpm);
@@ -1707,11 +1713,11 @@ PP(pp_leavesub)
 
 PP(pp_entersub)
 {
-    dSP; dPOPss;
+    djSP; dPOPss;
     GV *gv;
     HV *stash;
     register CV *cv;
-    register CONTEXT *cx;
+    register PERL_CONTEXT *cx;
     I32 gimme;
     bool hasargs = (op->op_flags & OPf_STACKED) != 0;
 
@@ -1765,7 +1771,7 @@ PP(pp_entersub)
 
     if (!CvROOT(cv) && !CvXSUB(cv)) {
 	GV* autogv;
-	SV* subname;
+	SV* sub_name;
 
 	/* anonymous or undef'd function leaves us no recourse */
 	if (CvANON(cv) || !(gv = CvGV(cv)))
@@ -1783,9 +1789,9 @@ PP(pp_entersub)
 	    goto retry;
 	}
 	/* sorry */
-	subname = sv_newmortal();
-	gv_efullname3(subname, gv, Nullch);
-	DIE("Undefined subroutine &%s called", SvPVX(subname));
+	sub_name = sv_newmortal();
+	gv_efullname3(sub_name, gv, Nullch);
+	DIE("Undefined subroutine &%s called", SvPVX(sub_name));
     }
 
     gimme = GIMME_V;
@@ -1827,9 +1833,9 @@ PP(pp_entersub)
 	    dMARK;
 	    register I32 items = SP - MARK;
 					/* We dont worry to copy from @_. */
-	    while (sp > mark) {
-		sp[1] = sp[0];
-		sp--;
+	    while (SP > mark) {
+		SP[1] = SP[0];
+		SP--;
 	    }
 	    stack_sp = mark + 1;
 	    fp3 = (I32(*)_((int,int,int)))CvXSUB(cv);
@@ -1847,14 +1853,16 @@ PP(pp_entersub)
 		/* Need to copy @_ to stack. Alternative may be to
 		 * switch stack to @_, and copy return values
 		 * back. This would allow popping @_ in XSUB, e.g.. XXXX */
-		AV* av = GvAV(defgv);
-		I32 items = AvFILL(av) + 1;
+		AV* av;
+		I32 items;
+		av = GvAV(defgv);
+		items = AvFILLp(av) + 1;   /* @_ is not tieable */
 
 		if (items) {
 		    /* Mark is at the end of the stack. */
-		    EXTEND(sp, items);
-		    Copy(AvARRAY(av), sp + 1, items, SV*);
-		    sp += items;
+		    EXTEND(SP, items);
+		    Copy(AvARRAY(av), SP + 1, items, SV*);
+		    SP += items;
 		    PUTBACK ;		    
 		}
 	    }
@@ -1895,11 +1903,11 @@ PP(pp_entersub)
 	    if (CvDEPTH(cv) == 100 && dowarn 
 		  && !(PERLDB_SUB && cv == GvCV(DBsub)))
 		sub_crush_depth(cv);
-	    if (CvDEPTH(cv) > AvFILL(padlist)) {
+	    if (CvDEPTH(cv) > AvFILLp(padlist)) {
 		AV *av;
 		AV *newpad = newAV();
 		SV **oldpad = AvARRAY(svp[CvDEPTH(cv)-1]);
-		I32 ix = AvFILL((AV*)svp[1]);
+		I32 ix = AvFILLp((AV*)svp[1]);
 		svp = AvARRAY(svp[0]);
 		for ( ;ix > 0; ix--) {
 		    if (svp[ix] != &sv_undef) {
@@ -1929,7 +1937,7 @@ PP(pp_entersub)
 		av_store(newpad, 0, (SV*)av);
 		AvFLAGS(av) = AVf_REIFY;
 		av_store(padlist, CvDEPTH(cv), (SV*)newpad);
-		AvFILL(padlist) = CvDEPTH(cv);
+		AvFILLp(padlist) = CvDEPTH(cv);
 		svp = AvARRAY(padlist);
 	    }
 	}
@@ -1962,7 +1970,7 @@ PP(pp_entersub)
 		}
 	    }
 	    Copy(MARK,AvARRAY(av),items,SV*);
-	    AvFILL(av) = items - 1;
+	    AvFILLp(av) = items - 1;
 	    
 	    while (items--) {
 		if (*MARK)
@@ -1970,6 +1978,10 @@ PP(pp_entersub)
 		MARK++;
 	    }
 	}
+#if 0
+	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+			      "%p entersub returning %p\n", thr, CvSTART(cv)));
+#endif
 	RETURNOP(CvSTART(cv));
     }
 }
@@ -1989,7 +2001,7 @@ CV* cv;
 
 PP(pp_aelem)
 {
-    dSP;
+    djSP;
     SV** svp;
     I32 elem = POPi;
     AV* av = (AV*)POPs;
@@ -2044,7 +2056,7 @@ U32 to_what;
 	}
 	switch (to_what) {
 	case OPpDEREF_SV:
-	    SvRV(sv) = newSV(0);
+	    SvRV(sv) = NEWSV(355,0);
 	    break;
 	case OPpDEREF_AV:
 	    SvRV(sv) = (SV*)newAV();
@@ -2060,7 +2072,7 @@ U32 to_what;
 
 PP(pp_method)
 {
-    dSP;
+    djSP;
     SV* sv;
     SV* ob;
     GV* gv;

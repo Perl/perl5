@@ -88,7 +88,7 @@ debstackptrs()
 	(long)(stack_max-stack_base));
     PerlIO_printf(Perl_debug_log, "%8lx %8lx %8ld %8ld %8ld\n",
 	(unsigned long)mainstack, (unsigned long)AvARRAY(curstack),
-	(long)mainstack, (long)AvFILL(curstack), (long)AvMAX(curstack));
+	(long)mainstack, (long)AvFILLp(curstack), (long)AvMAX(curstack));
     return 0;
 }
 

@@ -295,6 +295,7 @@ PerlIO *supplied_fp;
     }
     if (IoTYPE(io) &&
       IoTYPE(io) != '|' && IoTYPE(io) != '-') {
+	dTHR;
 	if (Fstat(PerlIO_fileno(fp),&statbuf) < 0) {
 	    (void)PerlIO_close(fp);
 	    goto say_false;
@@ -353,6 +354,7 @@ PerlIO *supplied_fp;
 #endif
     IoIFP(io) = fp;
     if (writing) {
+	dTHR;
 	if (IoTYPE(io) == 's'
 	  || (IoTYPE(io) == '>' && S_ISCHR(statbuf.st_mode)) ) {
 	    if (!(IoOFP(io) = PerlIO_fdopen(PerlIO_fileno(fp),"w"))) {
@@ -397,6 +399,7 @@ register GV *gv;
     }
     filemode = 0;
     while (av_len(GvAV(gv)) >= 0) {
+	dTHR;
 	STRLEN oldlen;
 	sv = av_shift(GvAV(gv));
 	SAVEFREESV(sv);
@@ -643,6 +646,7 @@ bool
 do_eof(gv)
 GV *gv;
 {
+    dTHR;
     register IO *io;
     int ch;
 
@@ -880,7 +884,7 @@ I32
 my_stat(ARGS)
 dARGS
 {
-    dSP;
+    djSP;
     IO *io;
     GV* tmpgv;
 
@@ -934,7 +938,7 @@ I32
 my_lstat(ARGS)
 dARGS
 {
-    dSP;
+    djSP;
     SV *sv;
     if (op->op_flags & OPf_REF) {
 	EXTEND(SP,1);
@@ -971,6 +975,7 @@ register SV **sp;
     char *tmps;
 
     if (sp > mark) {
+	dTHR;
 	New(401,Argv, sp - mark + 1, char*);
 	a = Argv;
 	while (++mark <= sp) {
@@ -1105,6 +1110,7 @@ I32 type;
 register SV **mark;
 register SV **sp;
 {
+    dTHR;
     register I32 val;
     register I32 val2;
     register I32 tot = 0;
@@ -1389,6 +1395,7 @@ I32 optype;
 SV **mark;
 SV **sp;
 {
+    dTHR;
     key_t key;
     I32 n, flags;
 
@@ -1424,6 +1431,7 @@ I32 optype;
 SV **mark;
 SV **sp;
 {
+    dTHR;
     SV *astr;
     char *a;
     I32 id, n, cmd, infosize, getinfo;
@@ -1529,6 +1537,7 @@ SV **mark;
 SV **sp;
 {
 #ifdef HAS_MSG
+    dTHR;
     SV *mstr;
     char *mbuf;
     I32 id, msize, flags;
@@ -1553,6 +1562,7 @@ SV **mark;
 SV **sp;
 {
 #ifdef HAS_MSG
+    dTHR;
     SV *mstr;
     char *mbuf;
     long mtype;
@@ -1591,6 +1601,7 @@ SV **mark;
 SV **sp;
 {
 #ifdef HAS_SEM
+    dTHR;
     SV *opstr;
     char *opbuf;
     I32 id;
@@ -1618,6 +1629,7 @@ SV **mark;
 SV **sp;
 {
 #ifdef HAS_SHM
+    dTHR;
     SV *mstr;
     char *mbuf, *shm;
     I32 id, mpos, msize;

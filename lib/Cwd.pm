@@ -66,8 +66,6 @@ kept up to date if all packages which use chdir import it from Cwd.
 ## use strict;
 
 use Carp;
-use strict;
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
 
 $VERSION = '2.01';
 
@@ -95,7 +93,10 @@ sub _backtick_pwd {
 #
 # Usage: $cwd = getcwd();
 
-sub getcwd { abs_path(".") }
+sub getcwd
+{
+    abs_path('.');
+}
 
 # By John Bazik
 #
@@ -154,7 +155,7 @@ sub fastcwd {
 my $chdir_init = 0;
 
 sub chdir_init {
-    if ($ENV{'PWD'} and $^O ne 'os2' and $^O ne 'msdos') {
+    if ($ENV{'PWD'} and $^O ne 'os2' and $^O ne 'dos') {
 	my($dd,$di) = stat('.');
 	my($pd,$pi) = stat($ENV{'PWD'});
 	if (!defined $dd or !defined $pd or $di != $pi or $dd != $pd) {
@@ -204,7 +205,7 @@ sub chdir {
 
 sub abs_path
 {
-    my $start = shift || '.';
+    my $start = @_ ? shift : '.';
     my($dotdots, $cwd, @pst, @cst, $dir, @tst);
 
     unless (@cst = stat( $start ))
@@ -243,17 +244,7 @@ sub abs_path
 		    closedir(PARENT);
 		    return '';
 		}
-		unless (@tst = lstat("$dotdots/$dir"))
-		{
-		    # warn "lstat($dotdots/$dir): $!";
-		    # Just because you can't lstat this directory
-		    # doesn't mean you'll never find the right one.
-		    # closedir(PARENT);
-		    # return '';
-		    
-		    # this will stop an undef warning below
-		    $tst[0] = $pst[0]+1;
-		}
+		$tst[0] = $pst[0]+1 unless (@tst = lstat("$dotdots/$dir"))
 	    }
 	    while ($dir eq '.' || $dir eq '..' || $tst[0] != $pst[0] ||
 		   $tst[1] != $pst[1]);
@@ -304,20 +295,24 @@ sub _os2_cwd {
 }
 
 sub _win32_cwd {
-    $ENV{'PWD'} = Win32::GetCurrentDirectory();
+    $ENV{'PWD'} = Win32::GetCwd();
     $ENV{'PWD'} =~ s:\\:/:g ;
     return $ENV{'PWD'};
 }
 
 *_NT_cwd = \&_win32_cwd if (!defined &_NT_cwd && 
-                            defined &Win32::GetCurrentDirectory);
+                            defined &Win32::GetCwd);
 
 *_NT_cwd = \&_os2_cwd unless defined &_NT_cwd;
 
-sub _msdos_cwd {
-    $ENV{'PWD'} = `command /c cd`;
-    chop $ENV{'PWD'};
-    $ENV{'PWD'} =~ s:\\:/:g ;
+sub _dos_cwd {
+    if (!defined &Dos::GetCwd) {
+        $ENV{'PWD'} = `command /c cd`;
+        chop $ENV{'PWD'};
+        $ENV{'PWD'} =~ s:\\:/:g ;
+    } else {
+        $ENV{'PWD'} = Dos::GetCwd();
+    }
     return $ENV{'PWD'};
 }
 
@@ -361,11 +356,11 @@ sub _qnx_abs_path {
         *fastcwd	= \&cwd;
         *abs_path	= \&fast_abs_path;
     }
-    elsif ($^O eq 'msdos') {
-        *cwd		= \&_msdos_cwd;
-        *getcwd		= \&_msdos_cwd;
-        *fastgetcwd	= \&_msdos_cwd;
-        *fastcwd	= \&_msdos_cwd;
+    elsif ($^O eq 'dos') {
+        *cwd		= \&_dos_cwd;
+        *getcwd		= \&_dos_cwd;
+        *fastgetcwd	= \&_dos_cwd;
+        *fastcwd	= \&_dos_cwd;
         *abs_path	= \&fast_abs_path;
     }
     elsif ($^O eq 'qnx') {

@@ -412,7 +412,7 @@ been wrapped here):
  
  I32 match(SV *string, char *pattern)
  {
-     SV *command = newSV(0), *retval;
+     SV *command = NEWSV(1099, 0), *retval;
  
      sv_setpvf(command, "my $string = '%s'; $string =~ %s",
  	      SvPV(string,na), pattern);
@@ -433,7 +433,7 @@ been wrapped here):
  
  I32 substitute(SV **string, char *pattern)
  {
-     SV *command = newSV(0), *retval;
+     SV *command = NEWSV(1099, 0), *retval;
  
      sv_setpvf(command, "$string = '%s'; ($string =~ %s)",
  	      SvPV(*string,na), pattern);
@@ -455,7 +455,7 @@ been wrapped here):
  
  I32 matches(SV *string, char *pattern, AV **match_list)
  {
-     SV *command = newSV(0);
+     SV *command = NEWSV(1099, 0);
      I32 num_matches;
  
      sv_setpvf(command, "my $string = '%s'; @array = ($string =~ %s)",
@@ -476,7 +476,7 @@ been wrapped here):
      char *embedding[] = { "", "-e", "0" };
      AV *match_list;
      I32 num_matches, i;
-     SV *text = newSV(0);
+     SV *text = NEWSV(1099,0);
  
      perl_construct(my_perl);
      perl_parse(my_perl, NULL, 3, embedding, NULL);

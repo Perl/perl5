@@ -843,11 +843,14 @@ hv_free_ent(hv, entry)
 HV *hv;
 register HE *entry;
 {
+    SV *val;
+
     if (!entry)
 	return;
-    if (HeVAL(entry) && isGV(HeVAL(entry)) && GvCVu(HeVAL(entry)) && HvNAME(hv))
+    val = HeVAL(entry);
+    if (val && isGV(val) && GvCVu(val) && HvNAME(hv))
 	sub_generation++;	/* may be deletion of method from stash */
-    SvREFCNT_dec(HeVAL(entry));
+    SvREFCNT_dec(val);
     if (HeKLEN(entry) == HEf_SVKEY) {
 	SvREFCNT_dec(HeKEY_sv(entry));
         Safefree(HeKEY_hek(entry));

@@ -1,6 +1,6 @@
 /*    av.h
  *
- *    Copyright (c) 1991-1997, Larry Wall
+ *    Copyright (c) 1991-1998, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -9,8 +9,8 @@
 
 struct xpvav {
     char*	xav_array;      /* pointer to first array element */
-    SSize_t	xav_fill;
-    SSize_t	xav_max;
+    SSize_t	xav_fill;       /* Index of last element present */
+    SSize_t	xav_max;        /* Number of elements for which array has space */
     IV		xof_off;	/* ptr is incremented by offset */
     double	xnv_nv;		/* numeric value, if any */
     MAGIC*	xmg_magic;	/* magic for scalar array */

@@ -31,7 +31,7 @@ calls.
 #include "dlutils.c"	/* SaveError() etc	*/
 
 static void
-dl_private_init()
+dl_private_init(void)
 {
     (void)dl_generic_private_init();
 }
