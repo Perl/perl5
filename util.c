@@ -1516,6 +1516,7 @@ Perl_my_setenv(pTHX_ char *nam,char *val)
 
 #endif /* WIN32 || NETWARE */
 
+#ifndef PERL_MICRO
 I32
 Perl_setenv_getix(pTHX_ char *nam)
 {
@@ -1533,6 +1534,7 @@ Perl_setenv_getix(pTHX_ char *nam)
     }					/* potential SEGV's */
     return i;
 }
+#endif /* !PERL_MICRO */
 
 #endif /* !VMS && !EPOC*/
 

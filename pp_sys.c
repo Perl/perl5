@@ -4384,7 +4384,19 @@ PP(pp_tms)
     }
     RETURN;
 #else
+#   ifdef PERL_MICRO
+    dSP;
+    PUSHs(sv_2mortal(newSVnv((NV)0.0)));
+    EXTEND(SP, 4);
+    if (GIMME == G_ARRAY) {
+	 PUSHs(sv_2mortal(newSVnv((NV)0.0)));
+	 PUSHs(sv_2mortal(newSVnv((NV)0.0)));
+	 PUSHs(sv_2mortal(newSVnv((NV)0.0)));
+    }
+    RETURN;
+#   else
     DIE(aTHX_ "times not implemented");
+#   endif
 #endif /* HAS_TIMES */
 }
 

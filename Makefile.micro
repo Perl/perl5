@@ -1,9 +1,10 @@
 LD = $(CC)
-DEFINES = -DPERL_CORE -DPERL_MICRO
-OPTIMIZE =
+DEFINES = -DPERL_CORE -DPERL_MICRO -DSTANDARD_C -DPERL_USE_SAFE_PUTENV
+OPTIMIZE = 
 CFLAGS = $(DEFINES) $(OPTIMIZE)
 LIBS = -lm
 _O = .o
+ENV = env
 
 all:	microperl
 
@@ -15,7 +16,7 @@ O = uav$(_O) udeb$(_O) udoio$(_O) udoop$(_O) udump$(_O) \
 	uregcomp$(_O) uregexec$(_O) urun$(_O) \
 	uscope$(_O) usv$(_O) utaint$(_O) utoke$(_O) \
 	unumeric$(_O) ulocale$(_O) \
-	uuniversal$(_O) uutf8$(_O) uutil$(_O) uperlapi$(_O)
+	uuniversal$(_O) uutf8$(_O) uutil$(_O) uperlapi$(_O) uxsutils$(_O)
 
 microperl:	$(O)
 	$(LD) -o $@ $(O) $(LIBS)
@@ -37,7 +38,7 @@ distclean:	clean
 # The microconfiguration.
 
 uconfig.h:	uconfig.sh config_h.SH
-	CONFIG_SH=uconfig.sh CONFIG_H=uconfig.h sh ./config_h.SH
+	$(ENV) CONFIG_SH=uconfig.sh CONFIG_H=uconfig.h sh ./config_h.SH
 
 # Do not regenerate perly.c and perly.h.
 
@@ -80,7 +81,7 @@ uperlmain$(_O):	$(HE) miniperlmain.c
 	$(CC) -c -o $@ $(CFLAGS) miniperlmain.c
 
 uop$(_O):	$(HE) op.c keywords.h
-	$(CC) -c -o $@ $(CFLAGS) op.c
+	$(CC) -c -o $@ $(CFLAGS) -DPERL_EXTERNAL_GLOB op.c
 
 ureentr$(_O):	$(HE) reentr.c
 	$(CC) -c -o $@ $(CFLAGS) reentr.c
@@ -154,4 +155,7 @@ uutil$(_O):	$(HE) util.c
 uperlapi$(_O):	$(HE) perlapi.c perlapi.h
 	$(CC) -c -o $@ $(CFLAGS) perlapi.c
 
+uxsutils$(_O):	$(HE) xsutils.c
+	$(CC) -c -o $@ $(CFLAGS) xsutils.c
 
+# That's it, folks!

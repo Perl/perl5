@@ -55,13 +55,17 @@ PERLVAR(Gdollarzero_mutex, perl_mutex)	/* Modifying $0 */
 /* This is constant on most architectures, a global on OS/2 */
 PERLVARI(Gsh_path,	char *,	SH_PATH)/* full path of shell */
 
+#ifndef PERL_MICRO
 /* If Perl has to ignore SIGPFE, this is its saved state.
  * See perl.h macros PERL_FPU_INIT and PERL_FPU_{PRE,POST}_EXEC. */
 PERLVAR(Gsigfpe_saved,	Sighandler_t)
+#endif
 
 /* Restricted hashes placeholder value.
  * The contents are never used, only the address. */
 PERLVAR(Gsv_placeholder, SV)
 
+#ifndef PERL_MICRO
 PERLVARI(Gcsighandlerp,	Sighandler_t, &Perl_csighandler)	/* Pointer to C-level sighandler */
+#endif
 
