@@ -68,6 +68,7 @@ toroff=`
     $mandir/perlxstut.1	\
     $mandir/perlguts.1	\
     $mandir/perlcall.1	\
+    $mandir/perlcompile.1	\
     $mandir/perltodo.1	\
     $mandir/perlhist.1	\
     $mandir/perldelta.1	\

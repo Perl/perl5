@@ -991,6 +991,7 @@ pod/perlapio.pod	IO API info
 pod/perlbook.pod	Book info
 pod/perlbot.pod		Object-oriented Bag o' Tricks
 pod/perlcall.pod	Callback info
+pod/perlcompile.pod	Info on using the Compiler suite
 pod/perldata.pod	Data structure info
 pod/perldbmfilter.pod	Info about DBM Filters
 pod/perldebug.pod	Debugger info
