@@ -1071,11 +1071,11 @@ setuid perl scripts securely.\n");
 #if defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT)
     /* [perl #22371] Algorimic Complexity Attack on Perl 5.6.1, 5.8.0
      * This MUST be done before any hash stores or fetches take place.
-     * If you set PL_hash_seed (and assumedly also PL_hash_seed_set) yourself,
-     * it is your responsibility to provide a good random seed!
+     * If you set PL_rehash_seed (and assumedly also PL_rehash_seed_set)
+     * yourself, it is your responsibility to provide a good random seed!
      * You can also define PERL_HASH_SEED in compile time, see hv.h. */
-    if (!PL_new_hash_seed_set)
-	 PL_new_hash_seed = get_hash_seed();
+    if (!PL_rehash_seed_set)
+	 PL_rehash_seed = get_hash_seed();
     {
 	 char *s = PerlEnv_getenv("PERL_HASH_SEED_DEBUG");
 
@@ -1084,7 +1084,7 @@ setuid perl scripts securely.\n");
 
 	      if (i == 1)
 		   PerlIO_printf(Perl_debug_log, "HASH_SEED = %"UVuf"\n",
-				 PL_new_hash_seed);
+				 PL_rehash_seed);
 	 }
     }
 #endif /* #if defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT) */

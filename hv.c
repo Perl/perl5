@@ -18,6 +18,7 @@
 
 #include "EXTERN.h"
 #define PERL_IN_HV_C
+#define PERL_HASH_INTERNAL_ACCESS
 #include "perl.h"
 
 #define HV_MAX_LENGTH_BEFORE_SPLIT 14

@@ -89,13 +89,14 @@ struct xpvhv {
 	(hash) = (hash_PeRlHaSh + (hash_PeRlHaSh << 15)); \
     } STMT_END
 
-#if defined (PERL_IN_HV_C) || defined (MOD_PERL)
+/* Only hv.c and mod_perl should be doing this.  */
+#ifdef PERL_HASH_INTERNAL_ACCESS
 #define PERL_HASH_INTERNAL(hash,str,len) \
      STMT_START	{ \
 	register const char *s_PeRlHaSh_tmp = str; \
 	register const unsigned char *s_PeRlHaSh = (const unsigned char *)s_PeRlHaSh_tmp; \
 	register I32 i_PeRlHaSh = len; \
-	register U32 hash_PeRlHaSh = PL_new_hash_seed; \
+	register U32 hash_PeRlHaSh = PL_rehash_seed; \
 	while (i_PeRlHaSh--) { \
 	    hash_PeRlHaSh += *s_PeRlHaSh++; \
 	    hash_PeRlHaSh += (hash_PeRlHaSh << 10); \

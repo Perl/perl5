@@ -341,8 +341,6 @@
 #define PL_multi_open		(PERL_GET_INTERP->Imulti_open)
 #define PL_multi_start		(PERL_GET_INTERP->Imulti_start)
 #define PL_multiline		(PERL_GET_INTERP->Imultiline)
-#define PL_new_hash_seed	(PERL_GET_INTERP->Inew_hash_seed)
-#define PL_new_hash_seed_set	(PERL_GET_INTERP->Inew_hash_seed_set)
 #define PL_nexttoke		(PERL_GET_INTERP->Inexttoke)
 #define PL_nexttype		(PERL_GET_INTERP->Inexttype)
 #define PL_nextval		(PERL_GET_INTERP->Inextval)
@@ -392,6 +390,8 @@
 #define PL_reentrant_retint	(PERL_GET_INTERP->Ireentrant_retint)
 #define PL_regex_pad		(PERL_GET_INTERP->Iregex_pad)
 #define PL_regex_padav		(PERL_GET_INTERP->Iregex_padav)
+#define PL_rehash_seed		(PERL_GET_INTERP->Irehash_seed)
+#define PL_rehash_seed_set	(PERL_GET_INTERP->Irehash_seed_set)
 #define PL_replgv		(PERL_GET_INTERP->Ireplgv)
 #define PL_rsfp			(PERL_GET_INTERP->Irsfp)
 #define PL_rsfp_filters		(PERL_GET_INTERP->Irsfp_filters)
@@ -661,8 +661,6 @@
 #define PL_multi_open		(vTHX->Imulti_open)
 #define PL_multi_start		(vTHX->Imulti_start)
 #define PL_multiline		(vTHX->Imultiline)
-#define PL_new_hash_seed	(vTHX->Inew_hash_seed)
-#define PL_new_hash_seed_set	(vTHX->Inew_hash_seed_set)
 #define PL_nexttoke		(vTHX->Inexttoke)
 #define PL_nexttype		(vTHX->Inexttype)
 #define PL_nextval		(vTHX->Inextval)
@@ -712,6 +710,8 @@
 #define PL_reentrant_retint	(vTHX->Ireentrant_retint)
 #define PL_regex_pad		(vTHX->Iregex_pad)
 #define PL_regex_padav		(vTHX->Iregex_padav)
+#define PL_rehash_seed		(vTHX->Irehash_seed)
+#define PL_rehash_seed_set	(vTHX->Irehash_seed_set)
 #define PL_replgv		(vTHX->Ireplgv)
 #define PL_rsfp			(vTHX->Irsfp)
 #define PL_rsfp_filters		(vTHX->Irsfp_filters)
@@ -984,8 +984,6 @@
 #define PL_Imulti_open		PL_multi_open
 #define PL_Imulti_start		PL_multi_start
 #define PL_Imultiline		PL_multiline
-#define PL_Inew_hash_seed	PL_new_hash_seed
-#define PL_Inew_hash_seed_set	PL_new_hash_seed_set
 #define PL_Inexttoke		PL_nexttoke
 #define PL_Inexttype		PL_nexttype
 #define PL_Inextval		PL_nextval
@@ -1035,6 +1033,8 @@
 #define PL_Ireentrant_retint	PL_reentrant_retint
 #define PL_Iregex_pad		PL_regex_pad
 #define PL_Iregex_padav		PL_regex_padav
+#define PL_Irehash_seed		PL_rehash_seed
+#define PL_Irehash_seed_set	PL_rehash_seed_set
 #define PL_Ireplgv		PL_replgv
 #define PL_Irsfp		PL_rsfp
 #define PL_Irsfp_filters	PL_rsfp_filters

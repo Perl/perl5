@@ -181,7 +181,7 @@ XS(XS_Internals_hv_clear_placehold);
 XS(XS_PerlIO_get_layers);
 XS(XS_Regexp_DESTROY);
 XS(XS_Internals_hash_seed);
-XS(XS_Internals_new_hash_seed);
+XS(XS_Internals_rehash_seed);
 XS(XS_Internals_HvREHASH);
 
 void
@@ -208,8 +208,7 @@ Perl_boot_core_UNIVERSAL(pTHX)
                XS_PerlIO_get_layers, file, "*;@");
     newXS("Regexp::DESTROY", XS_Regexp_DESTROY, file);
     newXSproto("Internals::hash_seed",XS_Internals_hash_seed, file, "");
-    newXSproto("Internals::new_hash_seed",XS_Internals_new_hash_seed, file,
-	       "");
+    newXSproto("Internals::rehash_seed",XS_Internals_rehash_seed, file, "");
     newXSproto("Internals::HvREHASH", XS_Internals_HvREHASH, file, "\\%");
 }
 
@@ -731,12 +730,12 @@ XS(XS_Internals_hash_seed)
     XSRETURN_UV(PERL_HASH_SEED);
 }
 
-XS(XS_Internals_new_hash_seed)
+XS(XS_Internals_rehash_seed)
 {
     /* Using dXSARGS would also have dITEM and dSP,
      * which define 2 unused local variables.  */
     dMARK; dAX;
-    XSRETURN_UV(PL_new_hash_seed);
+    XSRETURN_UV(PL_rehash_seed);
 }
 
 XS(XS_Internals_HvREHASH)	/* Subject to change  */
