@@ -65,6 +65,12 @@ EOM
 		opts="$opts $arg"
 		shift
 		;;
+	--prefix)
+		shift
+		arg="-Dprefix=$1"
+		opts="$opts $arg"
+		shift
+		;;
  	--cache-file=*)
  		shift		# Just ignore it.
  		;;
