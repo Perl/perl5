@@ -1,5 +1,5 @@
 name: perl
-version: 5.009001
+version: 5.009002
 abstract: Practical Extraction and Reporting Language
 author: perl5-porters@perl.org
 license: perl
@@ -26,6 +26,7 @@ private:
     - lib/Class/ISA
     - lib/CPAN
     - lib/Digest
+    - lib/encoding/warnings
     - lib/ExtUtils/t
     - lib/File/Spec
     - lib/File/Temp
@@ -37,6 +38,7 @@ private:
     - lib/Math/BigInt
     - lib/Math/BigRat
     - lib/Memoize
+    - lib/Module/CoreList
     - lib/Net/FTP
     - lib/Net/Ping
     - lib/Net/t
@@ -69,6 +71,7 @@ private:
     - lib/CPAN.pm
     - lib/Cwd.pm
     - lib/Digest.pm
+    - lib/encoding/warnings.pm
     - lib/ExtUtils/Command
     - lib/ExtUtils/Command.pm
     - lib/ExtUtils/Install.pm
@@ -78,6 +81,7 @@ private:
     - lib/ExtUtils/MakeMaker
     - lib/ExtUtils/MakeMaker.pm
     - lib/ExtUtils/Manifest.pm
+    - lib/ExtUtils/MANIFEST.SKIP
     - lib/ExtUtils/Mkbootstrap.pm
     - lib/ExtUtils/Mksymlists.pm
     - lib/ExtUtils/MM.pm
@@ -120,6 +124,7 @@ private:
     - lib/Math/BigInt.pm
     - lib/Math/BigRat.pm
     - lib/Memoize.pm
+    - lib/Module/CoreList.pm
     - lib/Net/ChangeLog.libnet
     - lib/Net/Cmd.pm
     - lib/Net/Config.eg
@@ -140,7 +145,6 @@ private:
     - lib/PerlIO/via/t/QuotedPrint.t
     - lib/Pod/Checker.pm
     - lib/Pod/Find.pm
-    - lib/Pod/Html.pm
     - lib/Pod/InputObjects.pm
     - lib/Pod/LaTeX.pm
     - lib/Pod/Man.pm
