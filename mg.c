@@ -2163,7 +2163,7 @@ Perl_magic_mutexfree(pTHX_ SV *sv, MAGIC *mg)
 {
     DEBUG_S(PerlIO_printf(Perl_debug_log,
 			  "0x%"UVxf": magic_mutexfree 0x%"UVxf"\n",
-			  PTR2UV(thr), PTR2UV(sv));)
+			  PTR2UV(thr), PTR2UV(sv)));
     if (MgOWNER(mg))
 	Perl_croak(aTHX_ "panic: magic_mutexfree");
     MUTEX_DESTROY(MgMUTEXP(mg));
