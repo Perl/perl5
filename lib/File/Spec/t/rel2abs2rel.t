@@ -9,6 +9,7 @@ use Test::More (-x $^X
 	       );
 
 BEGIN {                                # Set up a tiny script file
+    local *F;
     open(F, ">rel2abs2rel$$.pl")
       or die "Can't open rel2abs2rel$$.pl file for script -- $!\n";
     print F qq(print "ok\\n"\n);
@@ -43,6 +44,8 @@ sub sayok{
     system($perl, "rel2abs2rel$$.pl");
     open(STDOUT, '>&STDOUTDUP');
     close(STDOUTDUP);
+
+    local *F;
     open(F, "rel2abs2rel$$.tmp");
     local $/ = undef;
     my $output = <F>;

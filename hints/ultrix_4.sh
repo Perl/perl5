@@ -75,3 +75,7 @@ d_mkstemp='undef'
 # There simply isn't dynaloading in Ultrix.
 usedl='undef'
 
+# There are <netinet/in.h> and gettimeofday(),
+# despite of what Configure thinks.
+i_niin='define'
+d_gettimeod='define'
