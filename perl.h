@@ -3178,7 +3178,8 @@ typedef enum {
     XBLOCK,
     XATTRBLOCK,
     XATTRTERM,
-    XTERMBLOCK
+    XTERMBLOCK,
+    XTERMORDORDOR /* evil hack */
 } expectation;
 
 enum {		/* pass one of these to get_vtbl */
