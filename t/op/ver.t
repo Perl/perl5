@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..37\n";
+print "1..39\n";
 
 my $test = 1;
 
@@ -203,37 +203,36 @@ okeq('foo',((chr(193) eq 'A') ? v134.150.150 : v102.111.111),"v-string ne ''");
 
 # See if sane addr and gethostbyaddr() work
 eval { require Socket; gethostbyaddr(v127.0.0.1, Socket::AF_INET) };
-if ($@)
- {
-  # No - so don't test insane fails.
-  $@ =~ s/\n/\n# /g;
-  skip("No Socket::AF_INET # $@");
- }
-else
- {
-  my $ip   = v2004.148.0.1;
-  my $host;
-  eval { $host = gethostbyaddr($ip,Socket::AF_INET) };
-  okeq($@ =~ /Wide character/,1,"Non-bytes leak to gethostbyaddr");
- }
+if ($@) {
+    # No - so don't test insane fails.
+    $@ =~ s/\n/\n# /g;
+    skip("No Socket::AF_INET # $@");
+}
+else {
+    my $ip   = v2004.148.0.1;
+    my $host;
+    eval { $host = gethostbyaddr($ip,Socket::AF_INET) };
+    okeq($@ =~ /Wide character/,1,"Non-bytes leak to gethostbyaddr");
+}
 
 # Chapter 28, pp671
 okeq(v5.6.0 lt v5.7.0,1,"v5.6.0 lt v5.7.0 fails");
 
-# floating point too messy
-# my $v = ord($^V)+ord(substr($^V,1,1))/1000+ord(substr($^V,2,1))/1000000;
-# okeq($v,$],"\$^V and \$] do not match");
-
 # 34..37: part of 20000323.059
-print "not " unless v200 eq chr(200);
-print "ok 34\n";
+okeq(v200,chr(200),"v200 ne chr(200)");
+okeq(v200,+v200,"v200 ne +v200");
+okeq(v200,eval("v200"),'v200 ne "v200"');
+okeq(v200,eval("+v200"),'v200 ne eval("+v200")');
 
-print "not " unless v200 eq +v200;
-print "ok 35\n";
-
-print "not " unless v200 eq eval "v200";
-print "ok 36\n";
-
-print "not " unless v200 eq eval "+v200";
-print "ok 37\n";
-
+# There have been no actual tests for $] itself until now
+my ($REVISION,$VERSION,$SUBVERSION) = split '\.', sprintf("%vd",$^V);
+my $v = sprintf("%d.%.3d%.3d",$REVISION,$VERSION,$SUBVERSION);
+okeq($v,"$]","\$^V and \$] do not match (string)");
+$v = $REVISION+$VERSION/1000+$SUBVERSION/1000000;
+if ( $v == $] ) {
+    print "ok $test";
+}
+else {
+    print "not ok $test \# \$^V and \$] do not match (numerically)";
+}
+$test++; #in case anyone is adding more tests
