@@ -3874,10 +3874,11 @@ B<filter_fetch_value>
 
 AvFILL, av_clear, av_delete, av_exists, av_extend, av_fetch, av_fill,
 av_len, av_make, av_pop, av_push, av_shift, av_store, av_undef, av_unshift,
-bytes_from_utf8, bytes_to_utf8, call_argv, call_method, call_pv, call_sv,
-CLASS, Copy, croak, CvSTASH, cv_const_sv, dMARK, dORIGMARK, dSP, dXSARGS,
-dXSI32, ENTER, eval_pv, eval_sv, EXTEND, fbm_compile, fbm_instr, FREETMPS,
-get_av, get_cv, get_hv, get_sv, GIMME, GIMME_V, GvSV, gv_fetchmeth,
+ax, bytes_from_utf8, bytes_to_utf8, call_argv, call_method, call_pv,
+call_sv, CLASS, Copy, croak, CvSTASH, cv_const_sv, dAX, dITEMS, dMARK,
+dORIGMARK, dSP, dXSARGS, dXSI32, ENTER, eval_pv, eval_sv, EXTEND,
+fbm_compile, fbm_instr, FREETMPS, get_av, get_cv, get_hv, get_sv, GIMME,
+GIMME_V, grok_number, grok_numeric_radix, GvSV, gv_fetchmeth,
 gv_fetchmethod, gv_fetchmethod_autoload, gv_stashpv, gv_stashsv, G_ARRAY,
 G_DISCARD, G_EVAL, G_NOARGS, G_SCALAR, G_VOID, HEf_SVKEY, HeHASH, HeKEY,
 HeKLEN, HePV, HeSVKEY, HeSVKEY_force, HeSVKEY_set, HeVAL, HvNAME, hv_clear,
@@ -5676,11 +5677,6 @@ B<Unix emulation for AmigaOS: ixemul.library>, B<Version of Amiga OS>
 
 =item Shortcomings of Perl under AmigaOS
 
-fork(), some features of the UNIX filesystem regarding link count and file
-dates, inplace operation (the -i switch) without backup file, umask()
-works, but the correct permissions are only set when the file is      
-finally close()d
-
 =back
 
 =item INSTALLATION
@@ -6655,7 +6651,7 @@ LIST, waitpid PID,FLAGS
 
 =item Perl variables
 
-%ENV, CRTL_ENV, CLISYM_[LOCAL], Any other string, $!, $^E, $?, $^S, $|
+%ENV, CRTL_ENV, CLISYM_[LOCAL], Any other string, $!, $^E, $?, $|
 
 =item Standard modules with VMS-specific differences
 
@@ -7297,10 +7293,6 @@ warnings::warnif($object, $message)
 =item EXAMPLES
 
 =item DIAGNOSTICS
-
-C<Bad attribute type: ATTR(%s)>, C<Attribute handler %s doesn't handle %s
-attributes>, C<Declaration of %s attribute in package %s may clash with
-future reserved word>, C<Internal error: %s symbol went missing>
 
 =item AUTHOR
 
@@ -8619,22 +8611,22 @@ C<d_longlong>, C<d_lseekproto>, C<d_lstat>, C<d_madvise>, C<d_mblen>,
 C<d_mbstowcs>, C<d_mbtowc>, C<d_memchr>, C<d_memcmp>, C<d_memcpy>,
 C<d_memmove>, C<d_memset>, C<d_mkdir>, C<d_mkdtemp>, C<d_mkfifo>,
 C<d_mkstemp>, C<d_mkstemps>, C<d_mktime>, C<d_mmap>, C<d_modfl>,
-C<d_mprotect>, C<d_msg>, C<d_msg_ctrunc>, C<d_msg_dontroute>, C<d_msg_oob>,
-C<d_msg_peek>, C<d_msg_proxy>, C<d_msgctl>, C<d_msgget>, C<d_msghdr_s>,
-C<d_msgrcv>, C<d_msgsnd>, C<d_msync>, C<d_munmap>, C<d_mymalloc>,
-C<d_nice>, C<d_nv_preserves_uv>, C<d_nv_preserves_uv_bits>, C<d_off64_t>,
-C<d_old_pthread_create_joinable>, C<d_oldpthreads>, C<d_oldsock>,
-C<d_open3>, C<d_pathconf>, C<d_pause>, C<d_perl_otherlibdirs>,
-C<d_phostname>, C<d_pipe>, C<d_poll>, C<d_portable>, C<d_PRId64>,
-C<d_PRIeldbl>, C<d_PRIEUldbl>, C<d_PRIfldbl>, C<d_PRIFUldbl>,
-C<d_PRIgldbl>, C<d_PRIGUldbl>, C<d_PRIi64>, C<d_PRIo64>, C<d_PRIu64>,
-C<d_PRIx64>, C<d_PRIXU64>, C<d_pthread_yield>, C<d_pwage>, C<d_pwchange>,
-C<d_pwclass>, C<d_pwcomment>, C<d_pwexpire>, C<d_pwgecos>, C<d_pwpasswd>,
-C<d_pwquota>, C<d_qgcvt>, C<d_quad>, C<d_readdir>, C<d_readlink>,
-C<d_readv>, C<d_realpath>, C<d_recvmsg>, C<d_rename>, C<d_rewinddir>,
-C<d_rmdir>, C<d_safebcpy>, C<d_safemcpy>, C<d_sanemcmp>, C<d_sbrkproto>,
-C<d_sched_yield>, C<d_scm_rights>, C<d_SCNfldbl>, C<d_seekdir>,
-C<d_select>, C<d_sem>, C<d_semctl>, C<d_semctl_semid_ds>,
+C<d_modfl_pow32_bug>, C<d_mprotect>, C<d_msg>, C<d_msg_ctrunc>,
+C<d_msg_dontroute>, C<d_msg_oob>, C<d_msg_peek>, C<d_msg_proxy>,
+C<d_msgctl>, C<d_msgget>, C<d_msghdr_s>, C<d_msgrcv>, C<d_msgsnd>,
+C<d_msync>, C<d_munmap>, C<d_mymalloc>, C<d_nice>, C<d_nv_preserves_uv>,
+C<d_nv_preserves_uv_bits>, C<d_off64_t>, C<d_old_pthread_create_joinable>,
+C<d_oldpthreads>, C<d_oldsock>, C<d_open3>, C<d_pathconf>, C<d_pause>,
+C<d_perl_otherlibdirs>, C<d_phostname>, C<d_pipe>, C<d_poll>,
+C<d_portable>, C<d_PRId64>, C<d_PRIeldbl>, C<d_PRIEUldbl>, C<d_PRIfldbl>,
+C<d_PRIFUldbl>, C<d_PRIgldbl>, C<d_PRIGUldbl>, C<d_PRIi64>, C<d_PRIo64>,
+C<d_PRIu64>, C<d_PRIx64>, C<d_PRIXU64>, C<d_pthread_yield>, C<d_pwage>,
+C<d_pwchange>, C<d_pwclass>, C<d_pwcomment>, C<d_pwexpire>, C<d_pwgecos>,
+C<d_pwpasswd>, C<d_pwquota>, C<d_qgcvt>, C<d_quad>, C<d_readdir>,
+C<d_readlink>, C<d_readv>, C<d_realpath>, C<d_recvmsg>, C<d_rename>,
+C<d_rewinddir>, C<d_rmdir>, C<d_safebcpy>, C<d_safemcpy>, C<d_sanemcmp>,
+C<d_sbrkproto>, C<d_sched_yield>, C<d_scm_rights>, C<d_SCNfldbl>,
+C<d_seekdir>, C<d_select>, C<d_sem>, C<d_semctl>, C<d_semctl_semid_ds>,
 C<d_semctl_semun>, C<d_semget>, C<d_semop>, C<d_sendmsg>, C<d_setegid>,
 C<d_seteuid>, C<d_setgrent>, C<d_setgrps>, C<d_sethent>, C<d_setitimer>,
 C<d_setlinebuf>, C<d_setlocale>, C<d_setnent>, C<d_setpent>, C<d_setpgid>,
@@ -9199,6 +9191,8 @@ $md5->addfile($io_handle), $md5->digest, $md5->hexdigest, $md5->b64digest
 
 =item DESCRIPTION
 
+=item NOTES
+
 =back
 
 =head2 Dumpvalue - provides screen dump of Perl data.
@@ -9512,7 +9506,7 @@ test_f file
 
 =item USAGE
 
-IV, UV, NV, PV, PVN
+IV, UV, NV, PV, PVN, YES, NO, UNDEF
 
 =item FUNCTIONS
 
@@ -9528,12 +9522,13 @@ assign INDENT, TYPE, VALUE..
 
 return_clause VALUE, TYPE, INDENT, MACRO, DEFAULT
 
+switch_clause INDENT, NAMELEN, ITEMHASH, ITEM..
+
 params WHAT
 
-dump_names  PACKAGE, SUBNAME, DEFAULT_TYPE, TYPES, INDENT, ITEM..
+dump_names
 
-C_constant PACKAGE, SUBNAME, DEFAULT_TYPE, TYPES, INDENT, NAMELEN, ITEM..,
-name, type, value, macro, default
+C_constant, name, type, value, macro, default
 
 XS_constant PACKAGE, TYPES, SUBNAME, C_SUBNAME
 
@@ -10290,6 +10285,8 @@ rmscopy($from,$to[,$date_flag])
 
 =item RETURN
 
+=item NOTES
+
 =item AUTHOR
 
 =back
@@ -10327,6 +10324,8 @@ C<follow_fast>, C<follow_skip>, C<no_chdir>, C<untaint>,
 C<untaint_pattern>, C<untaint_skip>
 
 =item CAVEAT
+
+=item NOTES
 
 =back
 
@@ -12057,9 +12056,7 @@ http://lcweb.loc.gov/standards/iso639-2/langhome.html
 
 =item Construction Methods
 
-$lh = YourProjClass->get_handle( ...langtags... ) || die "lg-handle?";, $lh
-= YourProjClass->get_handleB<()> || die "lg-handle?";, $lh =
-YourProjClass::langname->new();, $lh->init();,
+$lh = YourProjClass::langname->new();, $lh->init();,
 YourProjClass->fallback_languages(),
 YourProjClass->fallback_language_classes()
 
