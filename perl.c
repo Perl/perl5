@@ -126,7 +126,6 @@ perl_construct(register PerlInterpreter *sv_interp)
 	    croak("panic: pthread_key_create");
 #endif
 	MUTEX_INIT(&PL_sv_mutex);
-	MUTEX_INIT(&PL_cred_mutex);
 	/*
 	 * Safe to use basic SV functions from now on (though
 	 * not things like mortals or tainting yet).
@@ -559,7 +558,6 @@ perl_destruct(register PerlInterpreter *sv_interp)
 #ifdef USE_THREADS
     MUTEX_DESTROY(&PL_strtab_mutex);
     MUTEX_DESTROY(&PL_sv_mutex);
-    MUTEX_DESTROY(&PL_cred_mutex);
     MUTEX_DESTROY(&PL_eval_mutex);
     MUTEX_DESTROY(&PL_cred_mutex);
     COND_DESTROY(&PL_eval_cond);

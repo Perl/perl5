@@ -4,8 +4,6 @@
 
 Gv_AMupdate
 amagic_call
-amagic_cmp
-amagic_cmp_locale
 append_elem
 append_list
 apply
