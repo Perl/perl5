@@ -2154,11 +2154,12 @@ for dir in \$*; do
 	elif test -f \$dir/\$thing.exe; then
 		if test -n "$DJGPP"; then
 			echo \$dir/\$thing.exe
-		else
+			exit 0
+		elif test "$eunicefix" != ":"; then
 			: on Eunice apparently
 			echo \$dir/\$thing
+			exit 0
 		fi
-		exit 0
 	fi
 	;;
 	esac
