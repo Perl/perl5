@@ -2306,7 +2306,6 @@ wince/include/sys/types.h		WinCE port
 wince/include/sys/utime.h		WinCE port
 wince/include/time.h			WinCE port
 wince/Makefile.ce			WinCE port
-wince/perl.ico				WinCE port
 wince/perl.rc				WinCE port
 wince/perldll.def			WinCE port
 wince/perllib.c				WinCE port
