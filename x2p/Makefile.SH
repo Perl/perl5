@@ -111,11 +111,20 @@ a2p: $(obj) a2p$(OBJ_EXT)
 # used only if you force byacc to run by saying
 # make  run_byacc
 
-run_byacc:	FORCE
+check_byacc:
+	@$(BYACC) -V 2>&1 | grep 'version 1\.8\.2'
+
+run_byacc:	FORCE check_byacc
 	@ echo Expect many shift/reduce and reduce/reduce conflicts
 	$(BYACC) a2p.y
 	rm -f a2p.c
-	mv y.tab.c a2p.c
+	sed -e 's/(yyn = yydefred\[yystate\])/((yyn = yydefred[yystate]))/' \
+	    -e 's/^yyerrlab://' \
+	    -e 's/^    goto yyerrlab;//' \
+	    -e 's/^yynewerror://' \
+	    -e 's/^    goto yynewerror;//' \
+	    -e 's|^static char yysccsid\(.*\)|/* static char yysccsid\1 */|' \
+	    < y.tab.c > a2p.c
 
 FORCE:
 
