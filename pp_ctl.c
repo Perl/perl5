@@ -1590,6 +1590,7 @@ PP(pp_goto)
 		EXTEND(stack_sp, items); /* @_ could have been extended. */
 		Copy(AvARRAY(av), stack_sp, items, SV*);
 		stack_sp += items;
+		SvREFCNT_dec(GvAV(defgv));
 		GvAV(defgv) = cx->blk_sub.savearray;
 		AvREAL_off(av);
 		av_clear(av);
@@ -1682,7 +1683,7 @@ PP(pp_goto)
 
 		    cx->blk_sub.savearray = GvAV(defgv);
 		    cx->blk_sub.argarray = av;
-		    GvAV(defgv) = cx->blk_sub.argarray;
+		    GvAV(defgv) = (AV*)SvREFCNT_inc(av);
 		    ++mark;
 
 		    if (items >= AvMAX(av) + 1) {
@@ -1941,7 +1942,9 @@ int gimme;
     av_store(comppadlist, 0, (SV*)comppad_name);
     av_store(comppadlist, 1, (SV*)comppad);
     CvPADLIST(compcv) = comppadlist;
-    CvOUTSIDE(compcv) = (CV*)SvREFCNT_inc(caller);
+
+    if (saveop->op_type != OP_REQUIRE)
+	CvOUTSIDE(compcv) = (CV*)SvREFCNT_inc(caller);
 
     SAVEFREESV(compcv);
 
