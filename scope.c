@@ -30,7 +30,7 @@ I32
 cxinc()
 {
     cxstack_max = cxstack_max * 3 / 2;
-    Renew(cxstack, cxstack_max, CONTEXT);
+    Renew(cxstack, cxstack_max + 1, CONTEXT);	/* XXX should fix CXINC macro */
     return cxstack_ix + 1;
 }
 

@@ -1152,7 +1152,7 @@ char *s;
 	s++;
 	return s;
     case 'v':
-	printf("\nThis is perl, version %s beta3",patchlevel);
+	printf("\nThis is perl, version %s gamma",patchlevel);
 
 #if defined(DEBUGGING) || defined(EMBED) || defined(MULTIPLICITY)
 	fputs(" with", stdout);
@@ -1271,6 +1271,15 @@ SV *sv;
     char *xfailed = Nullch;
     register char *s;
     I32 len;
+    int retval;
+#if defined(DOSISH) && !defined(OS2) && !defined(atarist)
+#define SEARCH_EXTS ".bat", ".cmd", NULL
+#endif
+    /* additional extensions to try in each dir if scriptname not found */
+#ifdef SEARCH_EXTS
+    char *ext[] = { SEARCH_EXTS };
+    int extidx = (strchr(scriptname,'.')) ? -1 : 0; /* has ext already */
+#endif
 
 #ifdef VMS
     if (dosearch && !strpbrk(scriptname,":[</") && (my_getenv("DCL$PATH"))) {
@@ -1308,8 +1317,22 @@ SV *sv;
 		(void)strcat(tokenbuf+len,"/");
 	    (void)strcat(tokenbuf+len,scriptname);
 #endif  /* !VMS */
-	    DEBUG_p(fprintf(stderr,"Looking for %s\n",tokenbuf));
-	    if (Stat(tokenbuf,&statbuf) < 0)		/* not there? */
+
+#ifdef SEARCH_EXTS
+	    len = strlen(tokenbuf);
+	    if (extidx > 0)	/* reset after previous loop */
+		extidx = 0;
+	    do {
+#endif
+		DEBUG_p(fprintf(stderr,"Looking for %s\n",tokenbuf));
+		retval = Stat(tokenbuf,&statbuf);
+#ifdef SEARCH_EXTS
+	    } while (  retval < 0		/* not there */
+		    && extidx>=0 && ext[extidx]	/* try an extension? */
+		    && strcpy(tokenbuf+len, ext[extidx++])
+		);
+#endif
+	    if (retval < 0)
 		continue;
 	    if (S_ISREG(statbuf.st_mode)
 	     && cando(S_IRUSR,TRUE,&statbuf) && cando(S_IXUSR,TRUE,&statbuf)) {
@@ -1722,7 +1745,7 @@ init_stacks()
     retstack_ix = 0;
     retstack_max = 16;
 
-    New(50,cxstack,128,CONTEXT);
+    New(50,cxstack,129,CONTEXT);	/* XXX should fix CXINC macro */
     cxstack_ix	= -1;
     cxstack_max	= 128;
 
