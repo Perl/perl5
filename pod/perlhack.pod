@@ -2022,6 +2022,10 @@ For example, for "third-degreed" Perl:
 
 	env PERL_DESTRUCT_LEVEL=2 ./perl.third -Ilib t/foo/bar.t
 
+(Note: the mod_perl apache module uses also this environment variable
+for its own purposes and extended its semantics. Refer to the mod_perl
+documentation for more information.)
+
 =head2 Profiling
 
 Depending on your platform there are various of profiling Perl.
