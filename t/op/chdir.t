@@ -11,12 +11,13 @@ require "test.pl";
 plan(tests => 31);
 
 my $IsVMS = $^O eq 'VMS';
+
 my ($saved_sys_login);
 BEGIN {
-    $saved_sys_login = $ENV{'SYS$LOGIN'};
+    $saved_sys_login = $ENV{'SYS$LOGIN'} if $^O eq 'VMS'
 }
 END {
-    $ENV{'SYS$LOGIN'} = $saved_sys_login;
+    $ENV{'SYS$LOGIN'} = $saved_sys_login if $^O eq 'VMS';
 }
 
 # Might be a little early in the testing process to start using these,
