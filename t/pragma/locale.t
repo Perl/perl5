@@ -3,6 +3,7 @@
 BEGIN {
     chdir 't' if -d 't';
     unshift @INC, '../lib';
+    unshift @INC, '.';
     require Config; import Config;
     if (!$Config{d_setlocale} || $Config{ccflags} =~ /\bD?NO_LOCALE\b/) {
 	print "1..0\n";
@@ -11,7 +12,6 @@ BEGIN {
 }
 
 use strict;
-no utf8;
 
 my $debug = 1;
 
@@ -242,7 +242,6 @@ Afrikaans:af:za:1 15
 Arabic:ar:dz eg sa:6 arabic8
 Brezhoneg Breton:br:fr:1 15
 Bulgarski Bulgarian:bg:bg:5
-Català Catalan:ca:es:1 15
 Chinese:zh:cn tw:cn.EUC eucCN eucTW euc.CN euc.TW GB2312 tw.EUC
 Hrvatski Croatian:hr:hr:2
 Cymraeg Welsh:cy:cy:1 14 15
@@ -254,24 +253,19 @@ Esperanto:eo:eo:3
 Eesti Estonian:et:ee:4 6 13
 Suomi Finnish:fi:fi:1 15
 Flamish::fl:1 15
-Français French:fr:be ca ch fr lu:1 15
 Deutsch German:de:at be ch de lu:1 15
 Euskaraz Basque:eu:es fr:1 15
-Gáidhlig Gaelic:gd:gb uk:1 14 15
 Galego Galician:gl:es:1 15
 Ellada Greek:el:gr:7 g8
-Føroyskt Faroese:fo:fo:1 15
 Frysk:fy:nl:1 15
 Greenlandic:kl:gl:4 6
 Hebrew:iw:il:8 hebrew8
 Hungarian:hu:hu:2
-Íslensku Icelandic:is:is:1 15
 Indonesian:in:id:1 15
 Gaeilge Irish:ga:IE:1 14 15
 Italiano Italian:it:ch it:1 15
 Nihongo Japanese:ja:jp:euc eucJP jp.EUC sjis
 Korean:ko:kr:
-Sámi Lappish:::4 6 13
 Latine Latin:la:va:1 15
 Latvian:lv:lv:4 6 13
 Lithuanian:lt:lt:4 6 13
@@ -280,19 +274,25 @@ Maltese:mt:mt:3
 Norsk Norwegian:no:no:1 15
 Occitan:oc:es:1 15
 Polski Polish:pl:pl:2
-Português Portuguese:po:po br:1 15
 Rumanian:ro:ro:2
 Russki Russian:ru:ru su ua:5 koi8 koi8r koi8u cp1251
 Serbski Serbian:sr:yu:5
 Slovak:sk:sk:2
 Slovene Slovenian:sl:si:2
-Espanõl Spanish:es:ar bo cl co cr do ec es gt hn mx ni pa pe py sv uy ve:1 15
 Sqhip Albanian:sq:sq:1 15
 Svenska Swedish:sv:fi se:1 15
 Thai:th:th:11 tis620
 Turkish:tr:tr:9 turkish8
 Yiddish:::1 15
 EOF
+
+sub in_utf8 () { $^H & 0x08 }
+
+if (in_utf8) {
+    require "pragma/locale/utf8";
+} else {
+    require "pragma/locale/latin1";
+}
 
 my @Locale;
 my $Locale;
