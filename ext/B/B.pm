@@ -570,6 +570,14 @@ C<REFCNT> (corresponding to the C function C<SvREFCNT>).
 
 =item FLAGS
 
+=item object_2svref
+
+Returns a reference to the regular scalar corresponding to this
+B::SV object. In other words, this method is the inverse operation
+to the svref_2object() subroutine. This scalar and other data it points
+at should be considered read-only: modifying them is neither safe nor
+guaranteed to have a sensible effect.
+
 =back
 
 =head2 B::IV Methods
@@ -819,6 +827,11 @@ IoIFP($io) == PerlIO_stdin() ).
 =item OFF
 
 =item ARRAY
+
+=item ARRAYelt
+
+Like C<ARRAY>, but takes an index as an argument to get only one element,
+rather than a list of all of them.
 
 =item AvFLAGS
 
