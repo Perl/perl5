@@ -6683,7 +6683,6 @@ Perl_scan_num(pTHX_ char *start)
     register char *s = start;		/* current position in buffer */
     register char *d;			/* destination in temp buffer */
     register char *e;			/* end of temp buffer */
-    UV tryuv;				/* used to see if it can be an UV */
     NV value;				/* number read, as a double */
     SV *sv = Nullsv;			/* place to put the converted number */
     bool floatit;			/* boolean: int or float? */
@@ -6941,6 +6940,16 @@ Perl_scan_num(pTHX_ char *start)
 	/* make an sv from the string */
 	sv = NEWSV(92,0);
 
+#if ( defined(USE_64_BIT_INT) && \
+	(!defined(HAS_STRTOLL)|| !defined(HAS_STRTOULL))) || \
+    (!defined(USE_64_BIT_INT) && \
+	(!defined(HAS_STRTOL) || !defined(HAS_STRTOUL)))
+
+	/*
+	   No working strto[u]l[l]. Since atoi() doesn't do range checks,
+	   we need to do this the hard way.
+	 */
+
 	value = Atof(PL_tokenbuf);
 
 	/* 
@@ -6953,22 +6962,69 @@ Perl_scan_num(pTHX_ char *start)
 	   Note: if floatit is true, then we don't need to do the
 	   conversion at all.
 	*/
-	tryuv = U_V(value);
-	if (!floatit && (NV)tryuv == value) {
-	    if (tryuv <= IV_MAX)
-		sv_setiv(sv, (IV)tryuv);
+	{
+	    UV tryuv = U_V(value);
+	    if (!floatit && (NV)tryuv == value) {
+		if (tryuv <= IV_MAX)
+		    sv_setiv(sv, (IV)tryuv);
+		else
+		    sv_setuv(sv, tryuv);
+	    }
 	    else
-		sv_setuv(sv, tryuv);
+		sv_setnv(sv, value);
 	}
-	else
-	    sv_setnv(sv, value);
+#else
+	/*
+	   strtol/strtoll sets errno to ERANGE if the number is too big
+	   for an integer. We try to do an integer conversion first
+	   if no characters indicating "float" have been found.
+	 */
+
+	if (!floatit) {
+	    char *tp;
+    	    IV iv;
+    	    UV uv;
+	    errno = 0;
+#ifdef USE_64_BIT_INT
+	    if (*PL_tokenbuf == '-')
+		iv = strtoll(PL_tokenbuf,&tp,10);
+	    else
+		uv = strtoull(PL_tokenbuf,&tp,10);
+#else
+	    if (*PL_tokenbuf == '-')
+		iv = strtol(PL_tokenbuf,&tp,10);
+	    else
+		uv = strtoul(PL_tokenbuf,&tp,10);
+#endif
+	    if (*tp || errno)
+	    	floatit = TRUE; /* probably just too large */
+	    else if (*PL_tokenbuf == '-')
+	    	sv_setiv(sv, iv);
+	    else
+	    	sv_setuv(sv, uv);
+	}
+	if (floatit) {
+	    char *tp;
+	    errno = 0;
+#ifdef USE_LONG_DOUBLE
+	    value = strtold(PL_tokenbuf,&tp);
+#else
+	    value = strtod(PL_tokenbuf,&tp);
+#endif
+	    if (*tp || errno)
+		Perl_die(aTHX_ "unparseable float");
+	    else
+	    	sv_setnv(sv, value);
+	} 
+#endif
 	if ( floatit ? (PL_hints & HINT_NEW_FLOAT) :
 	               (PL_hints & HINT_NEW_INTEGER) )
 	    sv = new_constant(PL_tokenbuf, d - PL_tokenbuf, 
 			      (floatit ? "float" : "integer"),
 			      sv, Nullsv, NULL);
 	break;
-    /* if it starts with a v, it could be a version number */
+
+    /* if it starts with a v, it could be a v-string */
     case 'v':
 vstring:
 	{

@@ -3076,6 +3076,9 @@ typedef struct am_table_short AMTS;
 #endif /* !USE_LOCALE_NUMERIC */
 
 #if !defined(Atol) && defined(IV_IS_QUAD) && QUADKIND == QUAD_IS_LONG_LONG
+#    ifdef __hpux
+#        define strtoll __strtoll	/* secret handshake */
+#    endif
 #   if !defined(Atol) && defined(HAS_STRTOLL)
 #       define Atol(s) strtoll(s, (char**)NULL, 10)
 #   endif
@@ -3089,6 +3092,9 @@ typedef struct am_table_short AMTS;
 #endif
 
 #if !defined(Strtoul) && defined(UV_IS_QUAD) && QUADKIND == QUAD_IS_LONG_LONG
+#    ifdef __hpux
+#        define strtoull __strtoull	/* secret handshake */
+#    endif
 #    if !defined(Strtoul) && defined(HAS_STRTOULL)
 #       define Strtoul strtoull
 #    endif

@@ -1,3 +1,5 @@
+#./perl
+
 BEGIN {
 	eval { my $q = pack "q", 0 };
 	if ($@) {
@@ -17,7 +19,7 @@ BEGIN {
 # 32+ bit integers don't cause noise
 no warnings qw(overflow portable);
 
-print "1..42\n";
+print "1..48\n";
 
 my $q = 12345678901;
 my $r = 23456789012;
@@ -136,7 +138,7 @@ $x = 98765432109 % 12345678901;
 print "not " unless $x == 901;
 print "ok 25\n";
 
-# The following six adapted from op/inc.
+# The following 12 tests adapted from op/inc.
 
 $a = 9223372036854775807;
 $c = $a++;
@@ -168,40 +170,76 @@ $c = $a - 1;
 print "not " unless $a == -9223372036854775808 && $c == -9223372036854775809;
 print "ok 31\n";
 
+$a = 9223372036854775808;
+$a = -$a;
+$c = $a--;
+print "not " unless $a == -9223372036854775809 && $c == -9223372036854775808;
+print "ok 32\n";
+
+$a = 9223372036854775808;
+$a = -$a;
+$c = --$a;
+print "not " unless $a == -9223372036854775809 && $c == $a;
+print "ok 33\n";
+
+$a = 9223372036854775808;
+$a = -$a;
+$c = $a - 1;
+print "not " unless $a == -9223372036854775808 && $c == -9223372036854775809;
+print "ok 34\n";
+
+$a = 9223372036854775808;
+$b = -$a;
+$c = $b--;
+print "not " unless $b == -$a-1 && $c == -$a;
+print "ok 35\n";
+
+$a = 9223372036854775808;
+$b = -$a;
+$c = --$b;
+print "not " unless $b == -$a-1 && $c == $b;
+print "ok 36\n";
+
+$a = 9223372036854775808;
+$b = -$a;
+$b = $b - 1;
+print "not " unless $b == -(++$a);
+print "ok 37\n";
+
 
 $x = '';
 print "not " unless (vec($x, 1, 64) = $q) == $q;
-print "ok 32\n";
+print "ok 38\n";
 
 print "not " unless vec($x, 1, 64) == $q && vec($x, 1, 64) > $f;
-print "ok 33\n";
+print "ok 39\n";
 
 print "not " unless vec($x, 0, 64) == 0 && vec($x, 2, 64) == 0;
-print "ok 34\n";
+print "ok 40\n";
 
 
 print "not " unless ~0 == 0xffffffffffffffff;
-print "ok 35\n";
-
-print "not " unless (0xffffffff<<32) == 0xffffffff00000000;
-print "ok 36\n";
-
-print "not " unless ((0xffffffff)<<32)>>32 == 0xffffffff;
-print "ok 37\n";
-
-print "not " unless 1<<63 == 0x8000000000000000;
-print "ok 38\n";
-
-print "not " unless (sprintf "%#Vx", 1<<63) eq '0x8000000000000000';
-print "ok 39\n";
-
-print "not " unless (0x8000000000000000 | 1) == 0x8000000000000001;
-print "ok 40\n";
-
-print "not " unless (0xf000000000000000 & 0x8000000000000000) == 0x8000000000000000;
 print "ok 41\n";
 
-print "not " unless (0xf000000000000000 ^ 0xfffffffffffffff0) == 0x0ffffffffffffff0;
+print "not " unless (0xffffffff<<32) == 0xffffffff00000000;
 print "ok 42\n";
+
+print "not " unless ((0xffffffff)<<32)>>32 == 0xffffffff;
+print "ok 43\n";
+
+print "not " unless 1<<63 == 0x8000000000000000;
+print "ok 44\n";
+
+print "not " unless (sprintf "%#Vx", 1<<63) eq '0x8000000000000000';
+print "ok 45\n";
+
+print "not " unless (0x8000000000000000 | 1) == 0x8000000000000001;
+print "ok 46\n";
+
+print "not " unless (0xf000000000000000 & 0x8000000000000000) == 0x8000000000000000;
+print "ok 47\n";
+
+print "not " unless (0xf000000000000000 ^ 0xfffffffffffffff0) == 0x0ffffffffffffff0;
+print "ok 48\n";
 
 # eof
