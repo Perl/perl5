@@ -3736,7 +3736,10 @@ qualified_path(const char *cmd)
 
     /* look in PATH */
     pathstr = PerlEnv_getenv("PATH");
-    New(0, fullcmd, MAX_PATH+1, char);
+
+    /* worst case: PATH is a single directory; we need additional space
+     * to append "/", ".exe" and trailing "\0" */
+    New(0, fullcmd, (pathstr ? strlen(pathstr) : 0) + cmdlen + 6, char);
     curfullcmd = fullcmd;
 
     while (1) {
@@ -3777,17 +3780,13 @@ qualified_path(const char *cmd)
 	    if (*pathstr == '"') {	/* foo;"baz;etc";bar */
 		pathstr++;		/* skip initial '"' */
 		while (*pathstr && *pathstr != '"') {
-		    if ((STRLEN)(curfullcmd-fullcmd) < MAX_PATH-cmdlen-5)
-			*curfullcmd++ = *pathstr;
-		    pathstr++;
+                    *curfullcmd++ = *pathstr++;
 		}
 		if (*pathstr)
 		    pathstr++;		/* skip trailing '"' */
 	    }
 	    else {
-		if ((STRLEN)(curfullcmd-fullcmd) < MAX_PATH-cmdlen-5)
-		    *curfullcmd++ = *pathstr;
-		pathstr++;
+                *curfullcmd++ = *pathstr++;
 	    }
 	}
 	if (*pathstr)
