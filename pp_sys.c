@@ -1591,7 +1591,8 @@ PP(pp_send)
     Off_t offset;
     SV *bufsv;
     char *buffer;
-    Off_t length;
+    Size_t length;
+    SSize_t retval;
     STRLEN blen;
     MAGIC *mg;
 
@@ -1614,7 +1615,7 @@ PP(pp_send)
 	goto say_undef;
     bufsv = *++MARK;
     buffer = SvPV(bufsv, blen);
-#if Off_t_SIZE > IVSIZE
+#if Size_t_size > IVSIZE
     length = SvNVx(*++MARK);
 #else
     length = SvIVx(*++MARK);
@@ -1624,7 +1625,7 @@ PP(pp_send)
     SETERRNO(0,0);
     io = GvIO(gv);
     if (!io || !IoIFP(io)) {
-	length = -1;
+	retval = -1;
 	if (ckWARN(WARN_CLOSED)) {
 	    if (PL_op->op_type == OP_SYSWRITE)
 		report_closed_fh(gv, io, "syswrite", "filehandle");
@@ -1634,7 +1635,7 @@ PP(pp_send)
     }
     else if (PL_op->op_type == OP_SYSWRITE) {
 	if (MARK < SP) {
-#if Off_t_SIZE > IVSIZE
+#if Off_t_size > IVSIZE
 	    offset = SvNVx(*++MARK);
 #else
 	    offset = SvIVx(*++MARK);
@@ -1651,14 +1652,14 @@ PP(pp_send)
 	    length = blen - offset;
 #ifdef PERL_SOCK_SYSWRITE_IS_SEND
 	if (IoTYPE(io) == 's') {
-	    length = PerlSock_send(PerlIO_fileno(IoIFP(io)),
+	    retval = PerlSock_send(PerlIO_fileno(IoIFP(io)),
 				   buffer+offset, length, 0);
 	}
 	else
 #endif
 	{
 	    /* See the note at doio.c:do_print about filesize limits. --jhi */
-	    length = PerlLIO_write(PerlIO_fileno(IoIFP(io)),
+	    retval = PerlLIO_write(PerlIO_fileno(IoIFP(io)),
 				   buffer+offset, length);
 	}
     }
@@ -1667,20 +1668,24 @@ PP(pp_send)
 	char *sockbuf;
 	STRLEN mlen;
 	sockbuf = SvPVx(*++MARK, mlen);
-	length = PerlSock_sendto(PerlIO_fileno(IoIFP(io)), buffer, blen, length,
-				(struct sockaddr *)sockbuf, mlen);
+	retval = PerlSock_sendto(PerlIO_fileno(IoIFP(io)), buffer, blen,
+				 length, (struct sockaddr *)sockbuf, mlen);
     }
     else
-	length = PerlSock_send(PerlIO_fileno(IoIFP(io)), buffer, blen, length);
+	retval = PerlSock_send(PerlIO_fileno(IoIFP(io)), buffer, blen, length);
 
 #else
     else
 	DIE(aTHX_ PL_no_sock_func, "send");
 #endif
-    if (length < 0)
+    if (retval < 0)
 	goto say_undef;
     SP = ORIGMARK;
-    PUSHi(length);
+#if Size_t_size > IVSIZE
+    PUSHn(retval);
+#else
+    PUSHi(retval);
+#endif
     RETURN;
 
   say_undef:
@@ -1826,11 +1831,24 @@ PP(pp_sysseek)
 PP(pp_truncate)
 {
     djSP;
-    Off_t len = (Off_t)POPn;
+    /* There seems to be no consensus on the length type of truncate()
+     * and ftruncate(), both off_t and size_t have supporters. In
+     * general one would think that when using large files, off_t is
+     * at least as wide as size_t, so using an off_t should be okay. */
+    /* XXX Configure probe for the length type of *truncate() needed XXX */
+    Off_t len;
     int result = 1;
     GV *tmpgv;
     STRLEN n_a;
 
+#if Size_t_size > IVSIZE
+    length = (Off_t)POPn;
+#else
+    length = (Off_t)POPi;
+#endif
+    /* Checking for length < 0 is problematic as the type might or
+     * might not be signed: if it is not, clever compilers will moan. */ 
+    /* XXX Configure probe for the signedness of the length type of *truncate() needed? XXX */
     SETERRNO(0,0);
 #if defined(HAS_TRUNCATE) || defined(HAS_CHSIZE) || defined(F_FREESP)
     if (PL_op->op_flags & OPf_SPECIAL) {

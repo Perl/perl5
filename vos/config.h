@@ -2801,6 +2801,11 @@
 #define SITELIB_EXP "/system/ported/perl/lib/site/5.005"		/**/
 #define SITELIB_STEM "/system/ported/perl/lib/site"		/**/
 
+/* Size_t_size:
+ *	This symbol holds the size of a Size_t in bytes.
+ */
+#define Size_t_size 4		/* */
+
 /* Size_t:
  *	This symbol holds the type used to declare length parameters
  *	for string functions.  It is usually size_t, but may be

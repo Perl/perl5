@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Mar 16 00:41:53 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Thu Mar 16 03:04:33 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -868,6 +868,7 @@ sitelib_stem=''
 sitelibexp=''
 siteprefix=''
 siteprefixexp=''
+sizesize=''
 sizetype=''
 so=''
 socksizetype=''
@@ -13788,6 +13789,37 @@ echo $sig_name | $awk \
 }'
 $rm -f signal signal.c signal.awk signal.lst signal_cmd 
 
+echo " "
+case "$sizetype" in
+*_t) zzz="$sizetype"	;;
+*)   zzz="filesize"	;;
+esac
+echo "Checking the size of $zzz..." >&4 
+cat > try.c <<EOCP
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+    printf("%d\n", (int)sizeof($sizetype));
+    exit(0);
+}
+EOCP
+set try
+if eval $compile_ok; then
+	yyy=`./try`
+	case "$yyy" in
+	'')	sizesize=4
+		echo "(I can't execute the test program--guessing $sizesize.)" >&4
+		;;
+	*)	sizesize=$yyy
+		echo "Your $zzz size is $sizesize bytes."
+		;;
+	esac
+else
+	sizesize=4
+	echo "(I can't compile the test program--guessing $sizesize.)" >&4
+fi
+
+
 : check for socklen_t
 echo " "
 echo "Checking to see if you have socklen_t..." >&4
@@ -13807,7 +13839,7 @@ else
 	val="$undef"
 	echo "You do not have socklen_t."
 	case "$sizetype" in
-	size_t) echo "(You do have size_t, that might work.)" ;;
+	size_t) echo "(You do have size_t, that might work. Some people are happy with just an int.)" ;;
 	esac
 fi
 $rm -f try try.*
@@ -15674,6 +15706,7 @@ sitelib_stem='$sitelib_stem'
 sitelibexp='$sitelibexp'
 siteprefix='$siteprefix'
 siteprefixexp='$siteprefixexp'
+sizesize='$sizesize'
 sizetype='$sizetype'
 sleep='$sleep'
 smail='$smail'

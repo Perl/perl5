@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Thu Mar 16 01:18:36 EET 2000
+ * Configuration time: Thu Mar 16 03:30:28 EET 2000
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -2811,6 +2811,11 @@
 #define SITELIB "/opt/perl/lib/site_perl/5.6.0"		/**/
 #define SITELIB_EXP "/opt/perl/lib/site_perl/5.6.0"		/**/
 #define SITELIB_STEM "/opt/perl/lib/site_perl"		/**/
+
+/* Size_t_size:
+ *	This symbol holds the size of a Size_t in bytes.
+ */
+#define Size_t_size 8		/* */
 
 /* Size_t:
  *	This symbol holds the type used to declare length parameters

@@ -3097,6 +3097,9 @@ siteprefixexp (siteprefix.U):
 	This variable holds the full absolute path of the directory below
 	which the user will install add-on packages.  Derived from siteprefix.
 
+sizesize (sizesize.U):
+	This variable contains the size of a sizetype in bytes.
+
 sizetype (sizetype.U):
 	This variable defines sizetype to be something like size_t, 
 	unsigned long, or whatever type is used to declare length 

@@ -1,16 +1,15 @@
 #!/bin/sh
 #
-# This file was produced by running the Configure script. It holds all the
-# definitions figured out by Configure. Should you modify one of these values,
-# do not forget to propagate your changes by running "Configure -der". You may
-# instead choose to run each of the .SH files by yourself, or "Configure -S".
+# This file is manually maintained.
+#
+# It is NOT produced by running the Configure script.
 #
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Sun Oct  3 02:17:38 EET DST 1999
-# Configured by     : jhi
-# Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
+# Configuration time: 
+# Configured by     : Olaf Flebbe
+# Target system     : EPOC
 
 Author=''
 Date='$Date'
@@ -34,8 +33,8 @@ apirevision=''
 apisubversion=''
 apiversion=''
 ar='arm-pe-ar'
-archlib='/perl/lib/5.5.670/epoc'
-archlibexp='/perl/lib/5.5.670/epoc'
+archlib='/perl/lib/5.6.0/epoc'
+archlibexp='/perl/lib/5.6.0/epoc'
 archname64=''
 archname='epoc'
 archobjs='epoc.o epocish.o epoc_stubs.o'
@@ -582,8 +581,8 @@ pmake=''
 pr=''
 prefix=''
 prefixexp=''
-privlib='/perl/lib/5.5.670'
-privlibexp='/perl/lib/5.5.670'
+privlib='/perl/lib/5.6.0'
+privlibexp='/perl/lib/5.6.0'
 prototype='define'
 ptrsize='4'
 randbits='31'
@@ -627,13 +626,14 @@ sig_name_init='"ZERO", 0'
 sig_num='0'
 sig_num_init='0, 0'
 signal_t='void'
-sitearch='/perl/lib/site_perl/5.5.670/epoc'
-sitearchexp='/perl/lib/site_perl/5.5.670/epoc'
-sitelib='/perl/lib/site_perl/5.5.670/'
+sitearch='/perl/lib/site_perl/5.6.0/epoc'
+sitearchexp='/perl/lib/site_perl/5.6.0/epoc'
+sitelib='/perl/lib/site_perl/5.6.0/'
 sitelib_stem='/perl/lib/site_perl'
-sitelibexp='/perl/lib/site_perl/5.5.670/'
+sitelibexp='/perl/lib/site_perl/5.6.0/'
 siteprefix=''
 siteprefixexp=''
+sizesize='4'
 sizetype='size_t'
 sleep=''
 smail=''
@@ -702,7 +702,7 @@ vendorlib_stem=''
 vendorlibexp=''
 vendorprefix=''
 vendorprefixexp=''
-version='5.5.670'
+version='5.6.0'
 vi=''
 voidflags='15'
 xlibpth=''
@@ -724,11 +724,11 @@ config_arg9=''
 config_arg10=''
 config_arg11=''
 PERL_REVISION=5
-PERL_VERSION=5
-PERL_SUBVERSION=670
+PERL_VERSION=6
+PERL_SUBVERSION=0
 PERL_API_REVISION=5
-PERL_API_VERSION=5
-PERL_API_SUBVERSION=670
+PERL_API_VERSION=6
+PERL_API_SUBVERSION=0
 CONFIGDOTSH=true
 # Variables propagated from previous config.sh file.
 pp_sys_cflags=''

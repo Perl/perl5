@@ -2826,6 +2826,11 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #define SITELIB_EXP "$sitelibexp"		/**/
 #define SITELIB_STEM "$sitelib_stem"		/**/
 
+/* Size_t_size:
+ *	This symbol holds the size of a Size_t in bytes.
+ */
+#define Size_t_size $sizesize		/* */
+
 /* Size_t:
  *	This symbol holds the type used to declare length parameters
  *	for string functions.  It is usually size_t, but may be
