@@ -5769,7 +5769,7 @@ case "$PASE" in
 define)
     echo " "
     echo "Since you are compiling for PASE, extracting more symbols from libc.a...">&4
-    nm -Tv /lib/libc.a | grep '^\.[a-z]' | awk '$2 == "T" {print $1}' | sed 's/^.//' >> libc.list
+    dump -Tv /lib/libc.a | awk '$7 == "/unix" {print $5 " " $8}' | grep "^SV" | awk '{print $2}' >> libc.list
     ;;
 *)  if $test -f /lib/syscalls.exp; then
 	echo " "
