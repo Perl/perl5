@@ -5926,6 +5926,11 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    break;
 	}
 
+#ifdef USE_64_BIT_INT
+	if (!intsize)
+	    intsize = 'q';
+#endif
+
 	/* CONVERSION */
 
 	switch (c = *q++) {
