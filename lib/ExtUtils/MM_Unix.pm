@@ -488,6 +488,9 @@ sub constants {
 
 	      / ) {
 	next unless defined $self->{$tmp};
+#	VOS pathnames can have sharp signs in them; escape them so
+#	make doesn't think it is a comment-start character.
+	if ($Is_VOS) {$self->{$tmp} =~ s/#/\\#/g};
 	push @m, "$tmp = $self->{$tmp}\n";
     }
 
