@@ -64,7 +64,7 @@ Without arguments libnetcfg displays the current configuration.
     test_exist           1
     test_hosts           1
     time_hosts           ntp.none.such
-    # ./libnetcfg5.7.1 -h for help
+    # libnetcfg -h for help
     $ 
 
 It tells where the old configuration file was found (if found).

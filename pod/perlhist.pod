@@ -347,6 +347,7 @@ the strings?).
 
  Jarkko   5.7.0         2000-Sep-02 	The 5.7 track: Development.
           5.7.1         2001-Apr-09
+          5.7.2         2001-Jul-13	virtual release candidate 0
 
 =head2 SELECTED RELEASE SIZES
 
