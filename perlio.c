@@ -116,7 +116,10 @@ PerlIO_debug(char *fmt,...)
    char *s;
    STRLEN len;
    va_start(ap,fmt);
-   sv_vcatpvf(sv, fmt, &ap);
+   Perl_sv_catpvf(aTHX_ sv, "%s:%"IVdf" ",
+                  CopFILE(PL_curcop), (IV)CopLINE(PL_curcop));
+   Perl_sv_vcatpvf(aTHX_ sv, fmt, &ap);
+
    s = SvPV(sv,len);
    write(dbg,s,len);
    va_end(ap);
@@ -483,7 +486,8 @@ PerlIO_fast_gets(PerlIO *f)
 {
  if (f && *f)
   {
-   return (PerlIOBase(f)->tab->Set_ptrcnt != NULL);
+   PerlIOl *l = PerlIOBase(f);
+   return (l->tab->Set_ptrcnt != NULL);
   }
  return 0;
 }
@@ -506,9 +510,10 @@ PerlIO_canset_cnt(PerlIO *f)
 {
  if (f && *f)
   {
-   return (PerlIOBase(f)->tab->Set_ptrcnt != NULL);
+   PerlIOl *l = PerlIOBase(f);
+   return (l->tab->Set_ptrcnt != NULL);
   }
- return 1;
+ return 0;
 }
 
 #undef PerlIO_get_base
@@ -574,7 +579,6 @@ PerlIO_push(PerlIO *f,PerlIO_funcs *tab,const char *mode)
    l->tab  = tab;
    *f      = l;
    PerlIOBase_init(f,mode);
-   PerlIO_debug(__FUNCTION__ " f=%p %08lX %s\n",f,PerlIOBase(f)->flags,tab->name);
   }
  return f;
 }
@@ -711,6 +715,8 @@ PerlIO *
 PerlIOUnix_fdopen(int fd,const char *mode)
 {
  PerlIO *f = NULL;
+ if (*mode == 'I')
+  mode++;
  if (fd >= 0)
   {
    int oflags = PerlIOUnix_oflags(mode);
@@ -868,9 +874,32 @@ PerlIO *
 PerlIOStdio_fdopen(int fd,const char *mode)
 {
  PerlIO *f = NULL;
+ int init = 0;
+ if (*mode == 'I')
+  {
+   init = 1;
+   mode++;
+  }
  if (fd >= 0)
   {
-   FILE *stdio = fdopen(fd,mode);
+   FILE *stdio = NULL;
+   if (init)
+    {
+     switch(fd)
+      {
+       case 0:
+        stdio = stdin;
+        break;
+       case 1:
+        stdio = stdout;
+        break;
+       case 2:
+        stdio = stderr;
+        break;
+      }
+    }
+   else
+    stdio = fdopen(fd,mode);
    if (stdio)
     {
      PerlIOStdio *s = PerlIOSelf(PerlIO_push(f = PerlIO_allocate(),&PerlIO_stdio,mode),PerlIOStdio);
@@ -921,6 +950,7 @@ SSize_t
 PerlIOStdio_read(PerlIO *f, void *vbuf, Size_t count)
 {
  FILE *s = PerlIOSelf(f,PerlIOStdio)->stdio;
+ SSize_t got = 0;
  if (count == 1)
   {
    STDCHAR *buf = (STDCHAR *) vbuf;
@@ -931,11 +961,12 @@ PerlIOStdio_read(PerlIO *f, void *vbuf, Size_t count)
    if (ch != EOF)
     {
      *buf = ch;
-     return 1;
+     got = 1;
     }
-   return 0;
   }
- return fread(vbuf,1,count,s);
+ else
+  got = fread(vbuf,1,count,s);
+ return got;
 }
 
 SSize_t
@@ -964,13 +995,15 @@ PerlIOStdio_write(PerlIO *f, const void *vbuf, Size_t count)
 IV
 PerlIOStdio_seek(PerlIO *f, Off_t offset, int whence)
 {
- return fseek(PerlIOSelf(f,PerlIOStdio)->stdio,offset,whence);
+ FILE *stdio = PerlIOSelf(f,PerlIOStdio)->stdio;
+ return fseek(stdio,offset,whence);
 }
 
 Off_t
 PerlIOStdio_tell(PerlIO *f)
 {
- return ftell(PerlIOSelf(f,PerlIOStdio)->stdio);
+ FILE *stdio = PerlIOSelf(f,PerlIOStdio)->stdio;
+ return ftell(stdio);
 }
 
 IV
@@ -1165,11 +1198,22 @@ PerlIO *
 PerlIOBuf_fdopen(int fd, const char *mode)
 {
  PerlIO_funcs *tab = PerlIO_default_btm();
- PerlIO *f = (*tab->Fdopen)(fd,mode);
+ int init = 0;
+ PerlIO *f;
+ if (*mode == 'I')
+  {
+   init = 1;
+   mode++;
+  }
+ f = (*tab->Fdopen)(fd,mode);
  if (f)
   {
-   PerlIOBuf *b = PerlIOSelf(PerlIO_push(f,&PerlIO_perlio,NULL),PerlIOBuf);
-   b->posn = PerlIO_tell(PerlIONext(f));
+   /* Initial stderr is unbuffered */
+   if (!init || fd != 2)
+    {
+     PerlIOBuf *b = PerlIOSelf(PerlIO_push(f,&PerlIO_perlio,NULL),PerlIOBuf);
+     b->posn = PerlIO_tell(PerlIONext(f));
+    }
   }
  return f;
 }
@@ -1544,9 +1588,9 @@ PerlIO_init(void)
  if (!_perlio)
   {
    atexit(&PerlIO_cleanup);
-   PerlIO_fdopen(0,"r");
-   PerlIO_fdopen(1,"w");
-   PerlIO_fdopen(2,"w");
+   PerlIO_fdopen(0,"Ir");
+   PerlIO_fdopen(1,"Iw");
+   PerlIO_fdopen(2,"Iw");
   }
 }
 
