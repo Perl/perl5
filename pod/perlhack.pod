@@ -164,7 +164,7 @@ must include regression tests to verify that everything works as expected.
 Without tests provided by the original author, how can anyone else changing
 perl in the future be sure that they haven't unwittingly broken the behaviour
 the patch implements? And without tests, how can the patch's author be
-confident that his/her hard work put into the patch won't be accidently
+confident that his/her hard work put into the patch won't be accidentally
 thrown away by someone in the future?
 
 =item Is there enough documentation?
