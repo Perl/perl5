@@ -570,6 +570,13 @@ static char bucket_of[] =
 #    define BIG_SIZE (1<<16)		/* 64K */
 #  endif 
 
+#ifdef I_MACH_CTHREADS
+#undef	MUTEX_LOCK
+#define MUTEX_LOCK(m)	STMT_START { if (*m) mutex_lock(*m); } STMT_END
+#undef	MUTEX_UNLOCK
+#define MUTEX_UNLOCK(m)	STMT_START { if (*m) mutex_unlock(*m); } STMT_END
+#endif
+
 static char *emergency_buffer;
 static MEM_SIZE emergency_buffer_size;
 static Malloc_t emergency_sbrk(MEM_SIZE size);
@@ -670,7 +677,8 @@ static  u_int start_slack;
 static	u_int goodsbrk;
 
 #ifdef DEBUGGING
-#define	P_ASSERT(p,diag)   if (!(p)) botch(diag,STRINGIFY(p));  else
+#undef ASSERT
+#define	ASSERT(p,diag)   if (!(p)) botch(diag,STRINGIFY(p));  else
 static void
 botch(char *diag, char *s)
 {
@@ -678,7 +686,7 @@ botch(char *diag, char *s)
 	PerlProc_abort();
 }
 #else
-#define	P_ASSERT(p, diag)
+#define	ASSERT(p, diag)
 #endif
 
 Malloc_t
@@ -1219,7 +1227,7 @@ free(void *mp)
 	    }
 	MUTEX_LOCK(&PL_malloc_mutex);
 #ifdef RCHECK
-  	P_ASSERT(ovp->ov_rmagic == RMAGIC, "chunk's head overwrite");
+  	ASSERT(ovp->ov_rmagic == RMAGIC, "chunk's head overwrite");
 	if (OV_INDEX(ovp) <= MAX_SHORT_BUCKET) {
 	    int i;
 	    MEM_SIZE nbytes = ovp->ov_size + 1;
@@ -1227,16 +1235,16 @@ free(void *mp)
 	    if ((i = nbytes & 3)) {
 		i = 4 - i;
 		while (i--) {
-		    P_ASSERT(*((char *)((caddr_t)ovp + nbytes - RSLOP + i))
+		    ASSERT(*((char *)((caddr_t)ovp + nbytes - RSLOP + i))
 			   == RMAGIC_C, "chunk's tail overwrite");
 		}
 	    }
 	    nbytes = (nbytes + 3) &~ 3; 
-	    P_ASSERT(*(u_int *)((caddr_t)ovp + nbytes - RSLOP) == RMAGIC, "chunk's tail overwrite");	    
+	    ASSERT(*(u_int *)((caddr_t)ovp + nbytes - RSLOP) == RMAGIC, "chunk's tail overwrite");	    
 	}
 	ovp->ov_rmagic = RMAGIC - 1;
 #endif
-  	P_ASSERT(OV_INDEX(ovp) < NBUCKETS, "chunk's head overwrite");
+  	ASSERT(OV_INDEX(ovp) < NBUCKETS, "chunk's head overwrite");
   	size = OV_INDEX(ovp);
 	ovp->ov_next = nextf[size];
   	nextf[size] = ovp;
@@ -1352,11 +1360,11 @@ realloc(void *mp, size_t nbytes)
 		       if ((i = nb & 3)) {
 			   i = 4 - i;
 			   while (i--) {
-			       P_ASSERT(*((char *)((caddr_t)ovp + nb - RSLOP + i)) == RMAGIC_C, "chunk's tail overwrite");
+			       ASSERT(*((char *)((caddr_t)ovp + nb - RSLOP + i)) == RMAGIC_C, "chunk's tail overwrite");
 			   }
 		       }
 		       nb = (nb + 3) &~ 3; 
-		       P_ASSERT(*(u_int *)((caddr_t)ovp + nb - RSLOP) == RMAGIC, "chunk's tail overwrite");
+		       ASSERT(*(u_int *)((caddr_t)ovp + nb - RSLOP) == RMAGIC, "chunk's tail overwrite");
 			/*
 			 * Convert amount of memory requested into
 			 * closest block size stored in hash buckets
