@@ -1066,10 +1066,13 @@ PP(pp_aassign)
     if (PL_delaymagic & ~DM_DELAY) {
 	if (PL_delaymagic & DM_UID) {
 #ifdef HAS_SETRESUID
-	    (void)setresuid(PL_uid,PL_euid,(Uid_t)-1);
+	    (void)setresuid((PL_delaymagic & DM_RUID) ? PL_uid  : (Uid_t)-1,
+			    (PL_delaymagic & DM_EUID) ? PL_euid : (Uid_t)-1,
+			    (Uid_t)-1);
 #else
 #  ifdef HAS_SETREUID
-	    (void)setreuid(PL_uid,PL_euid);
+	    (void)setreuid((PL_delaymagic & DM_RUID) ? PL_uid  : (Uid_t)-1,
+			   (PL_delaymagic & DM_EUID) ? PL_euid : (Uid_t)-1);
 #  else
 #    ifdef HAS_SETRUID
 	    if ((PL_delaymagic & DM_UID) == DM_RUID) {
@@ -1079,7 +1082,7 @@ PP(pp_aassign)
 #    endif /* HAS_SETRUID */
 #    ifdef HAS_SETEUID
 	    if ((PL_delaymagic & DM_UID) == DM_EUID) {
-		(void)seteuid(PL_uid);
+		(void)seteuid(PL_euid);
 		PL_delaymagic &= ~DM_EUID;
 	    }
 #    endif /* HAS_SETEUID */
@@ -1095,10 +1098,13 @@ PP(pp_aassign)
 	}
 	if (PL_delaymagic & DM_GID) {
 #ifdef HAS_SETRESGID
-	    (void)setresgid(PL_gid,PL_egid,(Gid_t)-1);
+	    (void)setresgid((PL_delaymagic & DM_RGID) ? PL_gid  : (Gid_t)-1,
+			    (PL_delaymagic & DM_EGID) ? PL_egid : (Gid_t)-1,
+			    (Gid_t)-1);
 #else
 #  ifdef HAS_SETREGID
-	    (void)setregid(PL_gid,PL_egid);
+	    (void)setregid((PL_delaymagic & DM_RGID) ? PL_gid  : (Gid_t)-1,
+			   (PL_delaymagic & DM_EGID) ? PL_egid : (Gid_t)-1);
 #  else
 #    ifdef HAS_SETRGID
 	    if ((PL_delaymagic & DM_GID) == DM_RGID) {
@@ -1108,7 +1114,7 @@ PP(pp_aassign)
 #    endif /* HAS_SETRGID */
 #    ifdef HAS_SETEGID
 	    if ((PL_delaymagic & DM_GID) == DM_EGID) {
-		(void)setegid(PL_gid);
+		(void)setegid(PL_egid);
 		PL_delaymagic &= ~DM_EGID;
 	    }
 #    endif /* HAS_SETEGID */
