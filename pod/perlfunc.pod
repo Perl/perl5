@@ -1047,9 +1047,13 @@ element in the hash.  (Note: Keys may be C<"0"> or C<"">, which are logically
 false; you may wish to avoid constructs like C<while ($k = each %foo) {}>
 for this reason.)
 
-Entries are returned in an apparently random order.  When the hash is
-entirely read, a null array is returned in list context (which when
-assigned produces a FALSE (C<0>) value), and C<undef> in
+Entries are returned in an apparently random order.  The actual random
+order is subject to change in future versions of perl, but it is guaranteed
+to be in the same order as either the C<keys()> or C<values()> function
+would produce on the same (unmodified) hash.
+
+When the hash is entirely read, a null array is returned in list context
+(which when assigned produces a FALSE (C<0>) value), and C<undef> in
 scalar context.  The next call to C<each()> after that will start iterating
 again.  There is a single iterator for each hash, shared by all C<each()>,
 C<keys()>, and C<values()> function calls in the program; it can be reset by
@@ -1064,7 +1068,7 @@ only in a different order:
 	print "$key=$value\n";
     }
 
-See also C<keys()> and C<values()>.
+See also C<keys()>, C<values()> and C<sort()>.
 
 =item else BLOCK
 
@@ -1985,9 +1989,11 @@ See L</split>.
 
 Returns a list consisting of all the keys of the named hash.  (In a
 scalar context, returns the number of keys.)  The keys are returned in
-an apparently random order, but it is the same order as either the
-C<values()> or C<each()> function produces (given that the hash has not been
-modified).  As a side effect, it resets HASH's iterator.
+an apparently random order.  The actual random order is subject to
+change in future versions of perl, but it is guaranteed to be the same
+order as either the C<values()> or C<each()> function produces (given
+that the hash has not been modified).  As a side effect, it resets
+HASH's iterator.
 
 Here is yet another way to print your environment:
 
@@ -2017,13 +2023,15 @@ an array by assigning a larger number to $#array.)  If you say
 
     keys %hash = 200;
 
-then C<%hash> will have at least 200 buckets allocated for it--256 of them, in fact, since 
-it rounds up to the next power of two.  These
+then C<%hash> will have at least 200 buckets allocated for it--256 of them,
+in fact, since it rounds up to the next power of two.  These
 buckets will be retained even if you do C<%hash = ()>, use C<undef
 %hash> if you want to free the storage while C<%hash> is still in scope.
 You can't shrink the number of buckets allocated for the hash using
 C<keys()> in this way (but you needn't worry about doing this by accident,
 as trying has no effect).
+
+See also C<each()>, C<values()> and C<sort()>.
 
 =item kill LIST
 
@@ -4475,8 +4483,11 @@ command if the files already exist:
 
 Returns a list consisting of all the values of the named hash.  (In a
 scalar context, returns the number of values.)  The values are
-returned in an apparently random order, but it is the same order as
-either the C<keys()> or C<each()> function would produce on the same hash.
+returned in an apparently random order.  The actual random order is
+subject to change in future versions of perl, but it is guaranteed to
+be the same order as either the C<keys()> or C<each()> function would
+produce on the same (unmodified) hash.
+
 As a side effect, it resets HASH's iterator.  See also C<keys()>, C<each()>,
 and C<sort()>.
 
