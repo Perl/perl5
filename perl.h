@@ -1089,7 +1089,7 @@ typedef NVTYPE NV;
 #   define Perl_fmod fmod
 #endif
 
-#if defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE)
+#if !defined(Perl_atof) && defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE)
 #   if !defined(Perl_atof) && defined(HAS_STRTOLD)
 #       define Perl_atof(s) strtold(s, (char*)0)
 #   endif
@@ -2985,9 +2985,13 @@ typedef struct am_table_short AMTS;
 
 #endif /* !USE_LOCALE_NUMERIC */
 
-#if !defined(Atol) && defined(USE_LONG_LONG) && defined(HAS_LONG_LONG) \
-	&& defined(HAS_ATOLL)
-#   define Atol atoll 
+#if !defined(Atol) && defined(USE_LONG_LONG) && defined(HAS_LONG_LONG)
+#   if !defined(Atol) && defined(HAS_STRTOLL)
+#       define Atol(s) strtoll(s, (char*)0)
+#   endif
+#   if !defined(Atol) && defined(HAS_ATOLL)
+#       define Atol atoll
+#   endif
 #endif
 /* is there atoq() anywhere? */
 #if !defined(Atol)
@@ -2998,6 +3002,7 @@ typedef struct am_table_short AMTS;
 	&& defined(HAS_STRTOULL)
 #   define Strtoul strtoull
 #endif
+/* is there atouq() anywhere? */
 #if !defined(Strtoul) && defined(USE_64_BITS) && defined(HAS_STRTOUQ)
 #   define Strtoul strtouq
 #endif

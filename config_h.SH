@@ -1975,6 +1975,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_strtold HAS_STRTOLD		/**/
 
+/* HAS_STRTOLL:
+ *	This symbol, if defined, indicates that the strtoll routine is
+ *	available to convert strings to long longs.
+ */
+#$d_strtoll HAS_STRTOLL		/**/
+
 /* HAS_STRTOULL:
  *	This symbol, if defined, indicates that the strtoull routine is
  *	available to convert strings to unsigned long longs.

@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun Jan 16 18:22:25 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Sun Jan 16 21:08:34 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -530,6 +530,7 @@ d_syserrlst=''
 d_strtod=''
 d_strtol=''
 d_strtold=''
+d_strtoll=''
 d_strtoul=''
 d_strtoull=''
 d_strtouq=''
@@ -10962,6 +10963,10 @@ eval $inlibc
 set strtold d_strtold
 eval $inlibc
 
+: see if strtoll exists
+set strtoll d_strtoll
+eval $inlibc
+
 : see if strtoul exists
 set strtoul d_strtoul
 eval $inlibc
@@ -14637,6 +14642,7 @@ d_strerror='$d_strerror'
 d_strtod='$d_strtod'
 d_strtol='$d_strtol'
 d_strtold='$d_strtold'
+d_strtoll='$d_strtoll'
 d_strtoul='$d_strtoul'
 d_strtoull='$d_strtoull'
 d_strtouq='$d_strtouq'

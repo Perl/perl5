@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Sun Jan 16 18:32:10 EET 2000
+ * Configuration time: Sun Jan 16 21:10:53 EET 2000
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -1960,6 +1960,12 @@
  *	available to convert strings to long doubles.
  */
 /*#define HAS_STRTOLD		/ **/
+
+/* HAS_STRTOLL:
+ *	This symbol, if defined, indicates that the strtoll routine is
+ *	available to convert strings to long longs.
+ */
+/*#define HAS_STRTOLL		/ **/
 
 /* HAS_STRTOULL:
  *	This symbol, if defined, indicates that the strtoull routine is

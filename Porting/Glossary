@@ -1402,6 +1402,10 @@ d_strtold (d_strtold.U):
 	This variable conditionally defines the HAS_STRTOLD symbol, which
 	indicates to the C program that the strtold() routine is available.
 
+d_strtoll (d_strtoll.U):
+	This variable conditionally defines the HAS_STRTOLL symbol, which
+	indicates to the C program that the strtoll() routine is available.
+
 d_strtoul (d_strtoul.U):
 	This variable conditionally defines the HAS_STRTOUL symbol, which
 	indicates to the C program that the strtoul() routine is available
