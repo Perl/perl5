@@ -400,8 +400,7 @@ the file "text.utf8", encoded as UTF-8:
 
     open(my $nihongo, '<:encoding(iso-2022-jp)', 'text.jis');
     open(my $unicode, '>:utf8',                  'text.utf8');
-    select $unicode;
-    while (<$nihongo>) { print }
+    while (<$nihongo>) { print $unicode $_ }
 
 The naming of encodings, both by the C<open()> and by the C<open>
 pragma, is similar to the C<encoding> pragma in that it allows for
