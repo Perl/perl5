@@ -472,7 +472,7 @@ S_scan_commit(pTHX_ RExC_state_t *pRExC_state, scan_data_t *data)
     STRLEN old_l = CHR_SVLEN(*data->longest);
 
     if ((l >= old_l) && ((l > old_l) || (data->flags & SF_BEFORE_EOL))) {
-	sv_setsv(*data->longest, data->last_found);
+	SvSetMagicSV(*data->longest, data->last_found);
 	if (*data->longest == data->longest_fixed) {
 	    data->offset_fixed = l ? data->last_start_min : data->pos_min;
 	    if (data->flags & SF_BEFORE_EOL)

@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..1007\n";
+print "1..1008\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3194,4 +3194,6 @@ $_="abcdef\n";
 @x = m/./g;
 ok("abcde" eq "$`", '# TODO #19049 - global match not setting $`');
 
-# last test 1007
+ok("123\x{100}" =~ /^.*1.*23\x{100}$/, 'uft8 + multiple floating substr');
+
+# last test 1008
