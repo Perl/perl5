@@ -1036,10 +1036,11 @@ win32_kill(int pid, int sig)
 {
     dTHXo;
     HANDLE hProcess;
+    long child;
 #ifdef USE_ITHREADS
     if (pid < 0) {
 	/* it is a pseudo-forked child */
-	long child = find_pseudo_pid(-pid);
+	child = find_pseudo_pid(-pid);
 	if (child >= 0) {
 	    if (!sig)
 		return 0;
@@ -1057,7 +1058,7 @@ win32_kill(int pid, int sig)
     else
 #endif
     {
-	long child = find_pid(pid);
+	child = find_pid(pid);
 	if (child >= 0) {
 	    if (!sig)
 		return 0;
@@ -1659,11 +1660,12 @@ win32_waitpid(int pid, int *status, int flags)
     dTHXo;
     DWORD timeout = (flags & WNOHANG) ? 0 : INFINITE;
     int retval = -1;
+    long child;
     if (pid == -1)				/* XXX threadid == 1 ? */
 	return win32_wait(status);
 #ifdef USE_ITHREADS
     else if (pid < 0) {
-	long child = find_pseudo_pid(-pid);
+	child = find_pseudo_pid(-pid);
 	if (child >= 0) {
 	    HANDLE hThread = w32_pseudo_child_handles[child];
 	    DWORD waitcode = WaitForSingleObject(hThread, timeout);
@@ -1690,7 +1692,7 @@ win32_waitpid(int pid, int *status, int flags)
     else {
 	HANDLE hProcess;
 	DWORD waitcode;
-	long child = find_pid(pid);
+	child = find_pid(pid);
 	if (child >= 0) {
 	    hProcess = w32_child_handles[child];
 	    waitcode = WaitForSingleObject(hProcess, timeout);
