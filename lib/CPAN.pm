@@ -5,7 +5,7 @@ use vars qw{$Try_autoload $Revision
 	    $Frontend  $Defaultsite
 	   };
 
-$VERSION = '1.39';
+$VERSION = '1.3901';
 
 # $Id: CPAN.pm,v 1.226 1998/07/08 22:29:29 k Exp k $
 
@@ -2387,6 +2387,7 @@ sub rd_authindex {
     # no strict 'refs';
     local(*FH);
     tie *FH, CPAN::Tarzip, $index_target;
+    local($/) = "\n";
     while (<FH>) {
 	chomp;
 	my($userid,$fullname,$email) =
@@ -2413,6 +2414,7 @@ sub rd_modpacks {
     return unless defined $index_target;
     $CPAN::Frontend->myprint("Going to read $index_target\n");
     my $fh = CPAN::Tarzip->TIEHANDLE($index_target);
+    local($/) = "\n";
     while ($_ = $fh->READLINE) {
 	last if /^\s*$/;
     }
@@ -2495,6 +2497,7 @@ sub rd_modlist {
     $CPAN::Frontend->myprint("Going to read $index_target\n");
     my $fh = CPAN::Tarzip->TIEHANDLE($index_target);
     my @eval;
+    local($/) = "\n";
     while ($_ = $fh->READLINE) {
 	if (/^Date:\s+(.*)/){
 	    return if $date_of_03 eq $1;
