@@ -103,6 +103,76 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6947] By: jhi                                   on 2000/08/31  15:22:29
+        Log: Document UNTIE in a very minimalistic way.
+     Branch: perl
+	   ! pod/perlfunc.pod pod/perltie.pod
+____________________________________________________________________________
+[  6946] By: jhi                                   on 2000/08/31  15:15:23
+        Log: Document known failures.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  6945] By: jhi                                   on 2000/08/31  15:07:00
+        Log: Don't attach -ld to the archname if pointless.
+     Branch: metaconfig
+	   ! U/threads/archname.U
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  6944] By: jhi                                   on 2000/08/31  14:37:42
+        Log: Wrap the test in eval.
+             
+             Subject: Re: [ID 20000831.009] Not OK: perl v5.7.0 +DEVEL6932 on sun4-solaris2.8 (UNINSTALLED)
+             From: Tim Jenness <timj@jach.hawaii.edu>
+             Date: Thu, 31 Aug 2000 03:39:33 -1000 (HST)
+             Message-ID: <Pine.LNX.4.21.0008310311190.7444-100000@lapaki.jach.hawaii.edu>
+     Branch: perl
+	   ! t/lib/ftmp-security.t
+____________________________________________________________________________
+[  6943] By: jhi                                   on 2000/08/31  14:30:57
+        Log: Make -Dusemorebits find long doubles in Solaris.
+     Branch: perl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[  6942] By: jhi                                   on 2000/08/31  13:48:45
+        Log: Clarify the third case of ftmp-security warnings.
+     Branch: perl
+	   ! INSTALL
+____________________________________________________________________________
+[  6941] By: jhi                                   on 2000/08/31  13:40:31
+        Log: Subject: [PATCH] Re: [ID 20000830.048] Not OK: perl v5.7.0 +DEVEL6938 on i686-linux 2.2.13
+             From: <abigail@foad.org>
+             Date: Thu, 31 Aug 2000 01:35:05 -0400
+             Message-ID: <20000831053505.32120.qmail@foad.org>
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  6940] By: jhi                                   on 2000/08/31  13:38:48
+        Log: Issue useful diagnostic on unknown pod commands.
+             
+             Subject: [PATCH lib/Pod/Man.pm] Re: [ID 20000830.048]
+             From: <abigail@foad.org>
+             Date: Thu, 31 Aug 2000 03:41:18 -0400
+             Message-ID: <20000831074118.24880.qmail@foad.org>
+     Branch: perl
+	   ! lib/Pod/Man.pm
+____________________________________________________________________________
+[  6939] By: jhi                                   on 2000/08/31  13:34:33
+        Log: Reveal Borland's isnan.
+             
+             Subject: build with BC++ tweak
+             From: "Konovalov, Vadim" <vkonovalov@lucent.com>
+             Date: Thu, 31 Aug 2000 13:09:37 +0400
+             Message-ID: <402099F49BEED211999700805FC7359F6FACA6@ru0028exch01.spb.lucent.com>
+     Branch: perl
+	   ! win32/win32.h
+____________________________________________________________________________
+[  6938] By: jhi                                   on 2000/08/31  05:01:20
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  6937] By: jhi                                   on 2000/08/31  04:26:23
         Log: sscanf() may be the only way to read long doubles from strings.
      Branch: metaconfig/U/perl
