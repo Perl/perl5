@@ -2170,6 +2170,12 @@ on portability concerns.
 
 See also L<perlport> for writing portable code.
 
+=item Octal number in vector unsupported
+
+(F) Numbers with a leading C<0> are not currently allowed in vectors.  The
+octal number interpretation of such numbers may be supported in a future
+version.
+
 =item Odd number of elements in hash assignment
 
 (W) You specified an odd number of elements to initialize a hash, which

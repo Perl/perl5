@@ -1388,6 +1388,7 @@ t/op/undef.t		See if undef works
 t/op/universal.t	See if UNIVERSAL class works
 t/op/unshift.t		See if unshift works
 t/op/vec.t		See if vectors work
+t/op/ver.t		See if version tuples work
 t/op/wantarray.t	See if wantarray works
 t/op/write.t		See if write works
 t/pod/emptycmd.t	Test empty pod directives

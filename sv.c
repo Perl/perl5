@@ -5875,6 +5875,60 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    }
 	    goto string;
 
+	case 'v':
+	    if (args)
+		argsv = va_arg(*args, SV*);
+	    else if (svix < svmax)
+		argsv = svargs[svix++];
+	    {
+		STRLEN len;
+		U8 *str = (U8*)SvPVx(argsv,len);
+		I32 vlen = len*3;
+		SV *vsv = NEWSV(73,vlen);
+		I32 ulen;
+		U8 *vptr = (U8*)SvPVX(vsv);
+		STRLEN vcur = 0;
+		bool utf = DO_UTF8(argsv);
+
+		if (utf)
+		    is_utf = TRUE;
+		while (len) {
+		    UV uv;
+
+		    if (utf)
+			uv = utf8_to_uv(str, &ulen);
+		    else {
+			uv = *str;
+			ulen = 1;
+		    }
+		    str += ulen;
+		    len -= ulen;
+		    eptr = ebuf + sizeof ebuf;
+		    if (elen >= vlen-1) {
+			STRLEN off = vptr - (U8*)SvPVX(vsv);
+			vlen *= 2;
+			SvGROW(vsv, vlen);
+			vptr = SvPVX(vsv) + off;
+		    }
+		    do {
+			*--eptr = '0' + uv % 10;
+		    } while (uv /= 10);
+		    elen = (ebuf + sizeof ebuf) - eptr;
+		    memcpy(vptr, eptr, elen);
+		    vptr += elen;
+		    *vptr++ = '.';
+		    vcur += elen + 1;
+		}
+		if (vcur) {
+		    vcur--;
+		    vptr[-1] = '\0';
+		}
+		SvCUR_set(vsv,vcur);
+		eptr = SvPVX(vsv);
+		elen = vcur;
+	    }
+	    goto string;
+
 	case '_':
 	    /*
 	     * The "%_" hack might have to be changed someday,

@@ -2028,8 +2028,8 @@ Perl_moreswitches(pTHX_ char *s)
 	s++;
 	return s;
     case 'v':
-	printf("\nThis is perl, v%"UVuf".%"UVuf".%"UVuf" built for %s",
-	       (UV)PERL_REVISION, (UV)PERL_VERSION, (UV)PERL_SUBVERSION, ARCHNAME);
+	printf(Perl_form(aTHX_ "\nThis is perl, v%v built for %s",
+			 PL_patchlevel, ARCHNAME));
 #if defined(LOCAL_PATCH_COUNT)
 	if (LOCAL_PATCH_COUNT > 0)
 	    printf("\n(with %d registered patch%s, see perl -V for more detail)",

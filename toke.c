@@ -1675,7 +1675,7 @@ S_intuit_more(pTHX_ register char *s)
  * Not a method if it's really "print foo $bar"
  * Method if it's really "foo package::" (interpreted as package->foo)
  * Not a method if bar is known to be a subroutne ("sub bar; foo bar")
- * Not a method if bar is a filehandle or package, but is quotd with
+ * Not a method if bar is a filehandle or package, but is quoted with
  *   =>
  */
 
@@ -6894,6 +6894,8 @@ Perl_scan_num(pTHX_ char *start)
 		sv_setpvn(sv, "", 0);
 
 		do {
+		    if (*s == '0' && isDIGIT(s[1]))
+			yyerror("Octal number in vector unsupported");
 		    rev = atoi(s);
 		    s = ++pos;
 		    while (isDIGIT(*pos))
@@ -6907,6 +6909,8 @@ Perl_scan_num(pTHX_ char *start)
 		    nshift *= 1000;
 		} while (*pos == '.' && isDIGIT(pos[1]));
 
+		if (*s == '0' && isDIGIT(s[1]))
+		    yyerror("Octal number in vector unsupported");
 		rev = atoi(s);
 		s = pos;
 		tmpend = uv_to_utf8(tmpbuf, rev);
