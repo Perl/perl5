@@ -141,12 +141,14 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
         /* sysopen style args, i.e. integer mode and permissions */
 	STRLEN ix = 0;
 	if (num_svs != 0) {
-	     Perl_croak(aTHX_ "panic:sysopen with multiple args");
+	     Perl_croak(aTHX_ "panic: sysopen with multiple args");
 	}
+	if (rawmode & (O_WRONLY|O_RDWR|O_APPEND|O_CREAT|O_TRUNC))
+	    TAINT_PROPER("sysopen");
 	mode[ix++] = '#'; /* Marker to openn to use numeric "sysopen" */
 
 #if defined(USE_64_BIT_RAWIO) && defined(O_LARGEFILE)
-	rawmode |= O_LARGEFILE;
+	rawmode |= O_LARGEFILE;	/* Transparently largefiley. */
 #endif
 
 #ifndef O_ACCMODE
@@ -193,7 +195,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	num_svs = 1;
 	svp = &namesv;
         type = Nullch;
-	fp = PerlIO_openn(aTHX_ type,mode, -1, rawmode, rawperm, NULL, num_svs, svp);
+	fp = PerlIO_openn(aTHX_ type, mode, -1, rawmode, rawperm, NULL, num_svs, svp);
     }
     else {
 	/* Regular (non-sys) open */
