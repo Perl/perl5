@@ -433,7 +433,7 @@ In the case of a shared array, all the array's elements are shared, and for
 a shared hash, all the keys and values are shared. This places
 restrictions on what may be assigned to shared array and hash elements: only
 simple values or references to shared variables are allowed - this is
-so that a private variable can't accidently become shared. A bad
+so that a private variable can't accidentally become shared. A bad
 assignment will cause the thread to die. For example:
 
     use threads;
@@ -508,13 +508,13 @@ by other threads, you must take steps to coordinate access or risk
 data inconsistency and race conditions. Note that Perl will protect its
 internals from your race conditions, but it won't protect you from you.
 
-=head1 Synchonisation and control
+=head1 Synchronization and control
 
 Perl provides a number of mechanisms to coordinate the interactions
 between themselves and their data, to avoid race conditions and the like.
 Some of these are designed to resemble the common techniques used in thread
 libraries such as C<pthreads>; others are Perl-specific. Often, the
-standard techniques are clumsly and difficult to get right (such as
+standard techniques are clumsily and difficult to get right (such as
 condition waits). Where possible, it is usually easier to use Perlish
 techniques such as queues, which remove some of the hard work involved.
 
@@ -525,7 +525,7 @@ No other thread may lock the variable until the the variable is unlocked
 by the thread holding the lock. Unlocking happens automatically
 when the locking thread exists the outermost block that contains
 C<lock()> function.  Using lock() is straightforward: this example has
-several threads doing some calculations in parallel, and occasionaly
+several threads doing some calculations in parallel, and occasionally
 updating a running total:
 
     use threads;
@@ -540,7 +540,7 @@ updating a running total:
 	    {
 		lock($total); # block until we obtain the lock
 		$total += $result
-	    } # lock implicity released at end of scope
+	    } # lock implicitly released at end of scope
 	    last if $result == 0;
 	}
     }
@@ -609,7 +609,7 @@ traditional thread libraries.
 
 Locks are a handy tool to synchronize access to data, and using them
 properly is the key to safe shared data.  Unfortunately, locks aren't
-without their dangers, espacially when multiple locks are involved.
+without their dangers, especially when multiple locks are involved.
 Consider the following code:
 
     use threads; 
@@ -652,7 +652,7 @@ order.  If, for example, you lock variables $a, $b, and $c, always lock
 $a before $b, and $b before $c.  It's also best to hold on to locks for
 as short a period of time to minimize the risks of deadlock.
 
-The other syncronisation primitives described below can suffer from
+The other syncronization primitives described below can suffer from
 similar problems.
 
 =head2 Queues: Passing Data Around

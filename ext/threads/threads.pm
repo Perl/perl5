@@ -161,7 +161,7 @@ to get current thread id if you don't have your thread handy.
 =item threads->yield();
 
 This will tell the OS to let this thread yield CPU time to other threads.
-However this is highly depending on the underlying thread implmentation.
+However this is highly depending on the underlying thread implementation.
 
 =item threads->list();
 
