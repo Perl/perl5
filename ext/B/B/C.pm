@@ -1034,6 +1034,8 @@ sub output_boilerplate {
 /* Workaround for mapstart: the only op which needs a different ppaddr */
 #undef pp_mapstart
 #define pp_mapstart pp_grepstart
+#define XS_DynaLoader_boot_DynaLoader boot_DynaLoader
+EXTERN_C void boot_DynaLoader _((CV* cv));
 
 static void xs_init _((void));
 static PerlInterpreter *my_perl;
@@ -1109,10 +1111,14 @@ main(int argc, char **argv, char **env)
     exit( exitstatus );
 }
 
+/* yanked from perl.c */
 static void
 xs_init()
 {
-}
+    char *file = __FILE__;
+    dXSUB_SYS;
+        newXS("DynaLoader::boot_DynaLoader", boot_DynaLoader, file);
+}                                                                              
 EOT
 }
 
