@@ -205,7 +205,6 @@ hints/convexos.sh	Hints for named architecture
 hints/cxux.sh		Hints for named architecture
 hints/dec_osf.sh	Hints for named architecture
 hints/dgux.sh		Hints for named architecture
-hints/dnix.sh		Hints for named architecture
 hints/dynix.sh		Hints for named architecture
 hints/dynixptx.sh	Hints for named architecture
 hints/epix.sh		Hints for named architecture
@@ -424,7 +423,6 @@ os2/POSIX.mkfifo	POSIX.xs patch.
 os2/diff.configure	Patches to Configure
 os2/dl_os2.c		Addon for dl_open
 os2/dlfcn.h		Addon for dl_open
-os2/notes		Notes for perl maintainer
 os2/os2.c		Additional code for OS/2
 os2/os2ish.h		Header for OS/2
 os2/perl2cmd.pl		Corrects installed binaries under OS/2
@@ -587,6 +585,7 @@ t/op/fork.t		See if fork works
 t/op/glob.t		See if <*> works
 t/op/goto.t		See if goto works
 t/op/groups.t		See if $( works
+t/op/gv.t		See if typeglobs work
 t/op/inc.t		See if inc/dec of integers near 32 bit limit work
 t/op/index.t		See if index works
 t/op/int.t		See if int works
