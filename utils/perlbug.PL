@@ -15,8 +15,7 @@ use File::Basename qw(&basename &dirname);
 chdir(dirname($0));
 ($file = basename($0)) =~ s/\.PL$//;
 $file =~ s/\.pl$//
-	if ($Config{'osname'} eq 'VMS' or
-	    $Config{'osname'} eq 'OS2');  # "case-forgiving"
+	if ($^O eq 'VMS' or $^O eq 'os2');  # "case-forgiving"
 
 open OUT,">$file" or die "Can't create $file: $!";
 
@@ -51,7 +50,7 @@ use strict;
 sub paraprint;
 
 
-my($Version) = "1.12";
+my($Version) = "1.13";
 
 # Changed in 1.06 to skip Mail::Send and Mail::Util if not available.
 # Changed in 1.07 to see more sendmail execs, and added pipe output.
@@ -63,6 +62,8 @@ my($Version) = "1.12";
 # Changed in 1.11 to clean up some text and removed Mail::Send deactivator.
 # Changed in 1.12 to check for editor errors, make save/send distinction
 #                 clearer and add $ENV{REPLYTO}.
+# Changed in 1.13 to hopefully make it more difficult to accidentally
+#                 send mail
 
 # TODO: Allow the user to re-name the file on mail failure, and
 #       make sure failure (transmission-wise) of Mail::Send is 
@@ -75,6 +76,14 @@ my( $file, $cc, $address, $perlbug, $testaddress, $filename,
 Init();
 
 if($::opt_h) { Help(); exit; }
+
+if(!-t STDIN) {
+	paraprint <<EOF;
+Please use perlbug interactively. If you want to 
+include a file, you can use the -f switch.
+EOF
+	die "\n";
+}
 
 if($::opt_d or !-t STDOUT) { Dump(*STDOUT); exit; }
 
@@ -89,7 +98,7 @@ sub Init {
  
 	# -------- Setup --------
 
-	$Is_VMS = $::Config{'osname'} eq 'VMS';
+	$Is_VMS = $^O eq 'VMS';
 
 	getopts("dhva:s:b:f:r:e:SCc:t");
 	
@@ -270,7 +279,7 @@ EOF
 	
 	}
 
-	if($cc =~ /^(none|yourself|myself|ourselves)$/i) { $cc = "" }
+	if($cc =~ /^(none|yourself|me|myself|ourselves)$/i) { $cc = "" }
 
 	$andcc = " and $cc" if $cc;
 
@@ -475,9 +484,16 @@ EOF
 				open(REP,"<$filename");
 				while(<REP>) { print $_ }
 				close(REP);
-			} elsif( $action =~ /^s/i ) { # <S>end
+			} elsif( $action =~ /^se/i ) { # <S>end
 				# Send the message
-				last;
+				print "\
+Are you certain you want to send this message?
+Please type \"yes\" if you are: ";
+				my($reply) = scalar(<STDIN>);
+				chop($reply);
+				if( $reply eq "yes" ) {
+					last;
+				}
 			} elsif( $action =~ /^[er]/i ) { # <E>dit, <R>e-edit
 				# edit the message
 				Edit();
@@ -486,6 +502,11 @@ EOF
 				1 while unlink($filename);  # remove all versions under VMS
 				print "\nCancelling.\n";
 				exit(0);
+			} elsif( $action =~ /^s/ ) {
+				paraprint <<EOF;
+
+I'm sorry, but I didn't understand that. Please type "send" or "save".
+EOF
 			}
 		
 		}
