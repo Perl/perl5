@@ -112,7 +112,11 @@ PerlIO_destruct(pTHX)
 int
 PerlIO_binmode(pTHX_ PerlIO *fp, int iotype, int mode, const char *names)
 {
+#ifdef USE_SFIO
+ return 1;
+#else
  return perlsio_binmode(fp,iotype,mode);
+#endif
 }
 
 /* De-mux PerlIO_openn() into fdopen, freopen and fopen type entries */
@@ -205,6 +209,28 @@ PerlIO_init(void)
   */
  sfset(sfstdout,SF_SHARE,0);
 }
+
+PerlIO *
+PerlIO_importFILE(FILE *stdio, int fl)
+{
+ int fd    = fileno(stdio);
+ PerlIO *r = PerlIO_fdopen(fd,"r+");
+ return r;
+}
+
+FILE *
+PerlIO_findFILE(PerlIO *pio)
+{
+ int fd = PerlIO_fileno(pio);
+ FILE *f = fdopen(fd,"r+");
+ PerlIO_flush(pio);
+ if (!f && errno == EINVAL)
+  f = fdopen(fd,"w");
+ if (!f && errno == EINVAL)
+  f = fdopen(fd,"r");
+ return f;
+}
+
 
 #else /* USE_SFIO */
 /*======================================================================================*/
@@ -1938,7 +1964,7 @@ PerlIOUnix_write(PerlIO *f, const void *vbuf, Size_t count)
 IV
 PerlIOUnix_seek(PerlIO *f, Off_t offset, int whence)
 {
- dSYS; 
+ dSYS;
  Off_t new = PerlLIO_lseek(PerlIOSelf(f,PerlIOUnix)->fd,offset,whence);
  PerlIOBase(f)->flags &= ~PERLIO_F_EOF;
  return (new == (Off_t) -1) ? -1 : 0;
