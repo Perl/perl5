@@ -430,3 +430,10 @@ EXPECT
 Global symbol "@k" requires explicit package name at - line 4.
 Global symbol "$k" requires explicit package name at - line 4.
 Execution of - aborted due to compilation errors.
+########
+# [perl #26910] hints not propagated into (?{...})
+use strict 'vars';
+qr/(?{$foo++})/;
+EXPECT
+Global symbol "$foo" requires explicit package name at (re_eval 1) line 1.
+Compilation failed in regexp at - line 3.
