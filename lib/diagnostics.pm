@@ -334,7 +334,8 @@ EOFUNC
 	    $transmo .= "    m{^\Q$header\E} && return 1;\n";
 	} 
 
-	print STDERR "Already saw $header" if $msg{$header};
+	print STDERR "$WHOAMI: Duplicate entry: \"$header\"\n"
+	    if $msg{$header};
 
 	$msg{$header} = '';
     } 

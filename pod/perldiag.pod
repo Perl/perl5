@@ -1480,9 +1480,12 @@ but realloc() wouldn't give it more memory, virtual or otherwise.
 =item Out of memory!
 
 (X|F) The malloc() function returned 0, indicating there was insufficient
-remaining memory (or virtual memory) to satisfy the request. Depending
-on the way perl was compiled it may use the contents of C<$^M> as an
-emergency pool after die()ing with this message. In this case the
+remaining memory (or virtual memory) to satisfy the request. 
+
+The request was judged to be small, so the possibility to trap it
+depends on the way perl was compiled.  By default it is not trappable.
+However, if compiled for this, Perl may use the contents of C<$^M> as
+an emergency pool after die()ing with this message.  In this case the
 error is trappable I<once>.
 
 =item Out of memory during request for %s
@@ -1491,17 +1494,6 @@ error is trappable I<once>.
 remaining memory (or virtual memory) to satisfy the request. However,
 the request was judged large enough (compile-time default is 64K), so
 a possibility to shut down by trapping this error is granted.
-
-=item Out of memory!
-
-(X|F) The malloc() function returned 0, indicating there was insufficient
-remaining memory (or virtual memory) to satisfy the request. 
-
-The request was judged to be small, so the possibility to trap it
-depends on the way perl was compiled. By default it is not
-trappable. However, if compiled for this, Perl may use the contents of
-C<$^M> as an emergency pool after die()ing with this message. In this
-case the error is trappable I<once>.
 
 =item page overflow
 
