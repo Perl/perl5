@@ -1,4 +1,4 @@
-/* $Header: consarg.c,v 3.0.1.5 90/03/27 15:36:45 lwall Locked $
+/* $Header: consarg.c,v 3.0.1.6 90/08/09 02:38:51 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	consarg.c,v $
+ * Revision 3.0.1.6  90/08/09  02:38:51  lwall
+ * patch19: fixed problem with % of negative number
+ * 
  * Revision 3.0.1.5  90/03/27  15:36:45  lwall
  * patch16: support for machines that can't cast negative floats to unsigned ints
  * 
@@ -60,6 +63,7 @@ ARG *limarg;
 	    arg_free(limarg);
 	}
 	else {
+	    arg[3].arg_flags = 0;
 	    arg[3].arg_type = A_EXPR;
 	    arg[3].arg_ptr.arg_arg = limarg;
 	}
@@ -308,7 +312,6 @@ register ARG *arg;
 		arg->arg_len = 1;
 		arg[1].arg_type = A_ARYSTAB;	/* $abc[123] is hoistable now */
 		arg[1].arg_len = i;
-		arg[1].arg_ptr = arg[1].arg_ptr;	/* get stab pointer */
 		str_free(s2);
 	    }
 	    /* FALL THROUGH */
@@ -351,7 +354,7 @@ register ARG *arg;
 	    if (tmp2 >= 0)
 		str_numset(str,(double)(tmp2 % tmplong));
 	    else
-		str_numset(str,(double)(tmplong - (-tmp2 % tmplong)));
+		str_numset(str,(double)(tmplong - ((-tmp2 - 1) % tmplong))) - 1;
 #else
 	    tmp2 = tmp2;
 #endif
@@ -945,6 +948,7 @@ ARG *arg;
     if (arg->arg_len == 0)
 	arg[1].arg_type = A_NULL;
     arg->arg_len = 2;
+    arg[2].arg_flags = 0;
     arg[2].arg_ptr.arg_hash = curstash;
     arg[2].arg_type = A_NULL;
     return arg;

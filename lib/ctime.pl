@@ -10,7 +10,7 @@
 ;# usage:
 ;#
 ;#     #include <ctime.pl>          # see the -P and -I option in perl.man
-;#     $Date = do ctime(time);
+;#     $Date = &ctime(time);
 
 @DoW = ('Sun','Mon','Tue','Wed','Thu','Fri','Sat');
 @MoY = ('Jan','Feb','Mar','Apr','May','Jun',

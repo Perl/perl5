@@ -1,4 +1,4 @@
-/* $Header: doarg.c,v 3.0.1.5 90/03/27 15:39:03 lwall Locked $
+/* $Header: doarg.c,v 3.0.1.6 90/08/09 02:48:38 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,15 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	doarg.c,v $
+ * Revision 3.0.1.6  90/08/09  02:48:38  lwall
+ * patch19: fixed double include of <signal.h>
+ * patch19: pack/unpack can now do native float and double
+ * patch19: pack/unpack can now have absolute and negative positioning
+ * patch19: pack/unpack can now have use * to specify all the rest of input
+ * patch19: unpack can do checksumming
+ * patch19: $< and $> better supported on machines without setreuid
+ * patch19: Added support for linked-in C subroutines
+ * 
  * Revision 3.0.1.5  90/03/27  15:39:03  lwall
  * patch16: MSDOS support
  * patch16: support for machines that can't cast negative floats to unsigned ints
@@ -40,7 +49,9 @@
 #include "EXTERN.h"
 #include "perl.h"
 
+#ifndef NSIG
 #include <signal.h>
+#endif
 
 extern unsigned char fold[];
 
@@ -83,7 +94,7 @@ int sp;
 	if (spat->spat_regexp)
 	    regfree(spat->spat_regexp);
 	spat->spat_regexp = regcomp(m,m+dstr->str_cur,
-	    spat->spat_flags & SPAT_FOLD,1);
+	    spat->spat_flags & SPAT_FOLD);
 	if (spat->spat_flags & SPAT_KEEP) {
 	    arg_free(spat->spat_runtime);	/* it won't change, so */
 	    spat->spat_runtime = Nullarg;	/* no point compiling again */
@@ -381,6 +392,8 @@ int *arglast;
     long along;
     unsigned long aulong;
     char *aptr;
+    float afloat;
+    double adouble;
 
     items = arglast[2] - sp;
     st += ++sp;
@@ -388,7 +401,11 @@ int *arglast;
     while (pat < patend) {
 #define NEXTFROM (items-- > 0 ? *st++ : &str_no)
 	datumtype = *pat++;
-	if (isdigit(*pat)) {
+	if (*pat == '*') {
+	    len = index("@Xxu",datumtype) ? 0 : items;
+	    pat++;
+	}
+	else if (isdigit(*pat)) {
 	    len = *pat++ - '0';
 	    while (isdigit(*pat))
 		len = (len * 10) + (*pat++ - '0');
@@ -398,7 +415,25 @@ int *arglast;
 	switch(datumtype) {
 	default:
 	    break;
+	case '%':
+	    fatal("% may only be used in unpack");
+	case '@':
+	    len -= str->str_cur;
+	    if (len > 0)
+		goto grow;
+	    len = -len;
+	    if (len > 0)
+		goto shrink;
+	    break;
+	case 'X':
+	  shrink:
+	    str->str_cur -= len;
+	    if (str->str_cur < 0)
+		fatal("X outside of string");
+	    str->str_ptr[str->str_cur] = '\0';
+	    break;
 	case 'x':
+	  grow:
 	    while (len >= 10) {
 		str_ncat(str,null10,10);
 		len -= 10;
@@ -409,6 +444,8 @@ int *arglast;
 	case 'a':
 	    fromstr = NEXTFROM;
 	    aptr = str_get(fromstr);
+	    if (pat[-1] == '*')
+		len = fromstr->str_cur;
 	    if (fromstr->str_cur > len)
 		str_ncat(str,aptr,len);
 	    else {
@@ -437,6 +474,23 @@ int *arglast;
 		aint = (int)str_gnum(fromstr);
 		achar = aint;
 		str_ncat(str,&achar,sizeof(char));
+	    }
+	    break;
+	/* Float and double added by gnb@melba.bby.oz.au  22/11/89 */
+	case 'f':
+	case 'F':
+	    while (len-- > 0) {
+		fromstr = NEXTFROM;
+		afloat = (float)str_gnum(fromstr);
+		str_ncat(str, (char *)&afloat, sizeof (float));
+	    }
+	    break;
+	case 'd':
+	case 'D':
+	    while (len-- > 0) {
+		fromstr = NEXTFROM;
+		adouble = (double)str_gnum(fromstr);
+		str_ncat(str, (char *)&adouble, sizeof (double));
 	    }
 	    break;
 	case 'n':
@@ -502,11 +556,54 @@ int *arglast;
 		str_ncat(str,(char*)&aptr,sizeof(char*));
 	    }
 	    break;
+	case 'u':
+	    fromstr = NEXTFROM;
+	    aptr = str_get(fromstr);
+	    aint = fromstr->str_cur;
+	    STR_GROW(str,aint * 4 / 3);
+	    if (len <= 1)
+		len = 45;
+	    else
+		len = len / 3 * 3;
+	    while (aint > 0) {
+		int todo;
+
+		if (aint > len)
+		    todo = len;
+		else
+		    todo = aint;
+		doencodes(str, aptr, todo);
+		aint -= todo;
+		aptr += todo;
+	    }
+	    break;
 	}
     }
     STABSET(str);
 }
 #undef NEXTFROM
+
+doencodes(str, s, len)
+register STR *str;
+register char *s;
+register int len;
+{
+    char hunk[5];
+
+    *hunk = len + ' ';
+    str_ncat(str, hunk, 1);
+    hunk[4] = '\0';
+    while (len > 0) {
+	hunk[0] = ' ' + (077 & (*s >> 2));
+	hunk[1] = ' ' + (077 & ((*s << 4) & 060 | (s[1] >> 4) & 017));
+	hunk[2] = ' ' + (077 & ((s[1] << 2) & 074 | (s[2] >> 6) & 03));
+	hunk[3] = ' ' + (077 & (s[2] & 077));
+	str_ncat(str, hunk, 4);
+	s += 3;
+	len -= 3;
+    }
+    str_ncat(str, "\n", 1);
+}
 
 void
 do_sprintf(str,len,sarg)
@@ -718,17 +815,23 @@ int *arglast;
     }
     if (!stab)
 	fatal("Undefined subroutine called");
+    saveint(&wantarray);
+    wantarray = gimme;
     sub = stab_sub(stab);
     if (!sub)
 	fatal("Undefined subroutine \"%s\" called", stab_name(stab));
+    if (sub->usersub) {
+	st[sp] = arg->arg_ptr.arg_str;
+	if ((arg[2].arg_type & A_MASK) == A_NULL)
+	    items = 0;
+	return sub->usersub(sub->userindex,sp,items);
+    }
     if ((arg[2].arg_type & A_MASK) != A_NULL) {
 	savearray = stab_xarray(defstab);
 	stab_xarray(defstab) = afake(defstab, items, &st[sp+1]);
     }
     savelong(&sub->depth);
     sub->depth++;
-    saveint(&wantarray);
-    wantarray = gimme;
     if (sub->depth >= 2) {	/* save temporaries on recursion? */
 	if (sub->depth == 100 && dowarn)
 	    warn("Deep recursion on subroutine \"%s\"",stab_name(stab));
@@ -783,9 +886,8 @@ int *arglast;
     }
     if (!stab)
 	fatal("Undefined subroutine called");
-    sub = stab_sub(stab);
-    if (!sub)
-	fatal("Undefined subroutine \"%s\" called", stab_name(stab));
+    saveint(&wantarray);
+    wantarray = gimme;
 /* begin differences */
     str = stab_val(DBsub);
     saveitem(str);
@@ -800,8 +902,6 @@ int *arglast;
     }
     savelong(&sub->depth);
     sub->depth++;
-    saveint(&wantarray);
-    wantarray = gimme;
     if (sub->depth >= 2) {	/* save temporaries on recursion? */
 	if (sub->depth == 100 && dowarn)
 	    warn("Deep recursion on subroutine \"%s\"",stab_name(stab));
@@ -938,14 +1038,22 @@ int *arglast;
 	}
     }
     if (delaymagic > 1) {
+	if (delaymagic & DM_REUID) {
 #ifdef SETREUID
-	if (delaymagic & DM_REUID)
 	    setreuid(uid,euid);
+#else
+	    if (uid != euid || setuid(uid) < 0)
+		fatal("No setreuid available");
 #endif
+	}
+	if (delaymagic & DM_REGID) {
 #ifdef SETREGID
-	if (delaymagic & DM_REGID)
 	    setregid(gid,egid);
+#else
+	    if (gid != egid || setgid(gid) < 0)
+		fatal("No setregid available");
 #endif
+	}
     }
     delaymagic = 0;
     localizing = FALSE;
@@ -1057,12 +1165,12 @@ int *arglast;
 	retval = stab_xarray(arg[1].arg_ptr.arg_stab) != 0;
     else if (type == O_HASH || type == O_LHASH)
 	retval = stab_xhash(arg[1].arg_ptr.arg_stab) != 0;
-    else if (type == O_SUBR || type == O_DBSUBR)
-	retval = stab_sub(arg[1].arg_ptr.arg_stab) != 0;
     else if (type == O_ASLICE || type == O_LASLICE)
 	retval = stab_xarray(arg[1].arg_ptr.arg_stab) != 0;
     else if (type == O_HSLICE || type == O_LHSLICE)
 	retval = stab_xhash(arg[1].arg_ptr.arg_stab) != 0;
+    else if (type == O_SUBR || type == O_DBSUBR)
+	retval = stab_sub(arg[1].arg_ptr.arg_stab) != 0;
     else
 	retval = FALSE;
     str_numset(str,(double)retval);

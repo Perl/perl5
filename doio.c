@@ -1,4 +1,4 @@
-/* $Header: doio.c,v 3.0.1.8 90/03/27 15:44:02 lwall Locked $
+/* $Header: doio.c,v 3.0.1.9 90/08/09 02:56:19 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,14 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	doio.c,v $
+ * Revision 3.0.1.9  90/08/09  02:56:19  lwall
+ * patch19: various MSDOS and OS/2 patches folded in
+ * patch19: prints now check error status better
+ * patch19: printing a list with null elements only printed front of list
+ * patch19: on machines with vfork child would allocate memory in parent
+ * patch19: getsockname and getpeername gave bogus warning on error
+ * patch19: MACH doesn't have seekdir or telldir
+ * 
  * Revision 3.0.1.8  90/03/27  15:44:02  lwall
  * patch16: MSDOS support
  * patch16: support for machines that can't cast negative floats to unsigned ints
@@ -67,6 +75,9 @@
 #endif
 #ifdef I_UTIME
 #include <utime.h>
+#endif
+#ifdef I_FCNTL
+#include <fcntl.h>
 #endif
 
 bool
@@ -261,9 +272,20 @@ register STAB *stab;
 		fileuid = statbuf.st_uid;
 		filegid = statbuf.st_gid;
 		if (*inplace) {
+#ifdef SUFFIX
+		    add_suffix(str,inplace);
+#else
 		    str_cat(str,inplace);
+#endif
 #ifdef RENAME
+#ifndef MSDOS
 		    (void)rename(oldname,str->str_ptr);
+#else
+		    do_close(stab,FALSE);
+		    (void)unlink(str->str_ptr);
+		    (void)rename(oldname,str->str_ptr);
+		    do_open(stab,str->str_ptr,stab_val(stab)->str_cur);
+#endif /* MSDOS */
 #else
 		    (void)UNLINK(str->str_ptr);
 		    (void)link(oldname,str->str_ptr);
@@ -271,7 +293,11 @@ register STAB *stab;
 #endif
 		}
 		else {
+#ifndef MSDOS
 		    (void)UNLINK(oldname);
+#else
+		    fatal("Can't do inplace edit without backup");
+#endif
 		}
 
 		str_nset(str,">",1);
@@ -510,7 +536,7 @@ STR *argstr;
 	retval = 256;			/* otherwise guess at what's safe */
 #endif
 	if (argstr->str_cur < retval) {
-	    str_grow(argstr,retval+1);
+	    Str_Grow(argstr,retval+1);
 	    argstr->str_cur = retval;
 	}
 
@@ -632,6 +658,64 @@ int *arglast;
 }
 
 int
+do_truncate(str,arg,gimme,arglast)
+STR *str;
+register ARG *arg;
+int gimme;
+int *arglast;
+{
+    register ARRAY *ary = stack;
+    register int sp = arglast[0] + 1;
+    off_t len = (off_t)str_gnum(ary->ary_array[sp+1]);
+    int result = 1;
+    STAB *tmpstab;
+
+#if defined(TRUNCATE) || defined(CHSIZE) || defined(F_FREESP)
+#ifdef TRUNCATE
+    if ((arg[1].arg_type & A_MASK) == A_WORD) {
+	tmpstab = arg[1].arg_ptr.arg_stab;
+	if (!stab_io(tmpstab) ||
+	  ftruncate(fileno(stab_io(tmpstab)->ifp), len) < 0)
+	    result = 0;
+    }
+    else if (truncate(str_get(ary->ary_array[sp]), len) < 0)
+	result = 0;
+#else
+#ifndef CHSIZE
+#define chsize(f,l) fcntl(f,F_FREESP,l)
+#endif
+    if ((arg[1].arg_type & A_MASK) == A_WORD) {
+	tmpstab = arg[1].arg_ptr.arg_stab;
+	if (!stab_io(tmpstab) ||
+	  chsize(fileno(stab_io(tmpstab)->ifp), len) < 0)
+	    result = 0;
+    }
+    else {
+	int tmpfd;
+
+	if ((tmpfd = open(str_get(ary->ary_array[sp]), 0)) < 0)
+	    result = 0;
+	else {
+	    if (chsize(tmpfd, len) < 0)
+		result = 0;
+	    close(tmpfd);
+	}
+    }
+#endif
+
+    if (result)
+	str_sset(str,&str_yes);
+    else
+	str_sset(str,&str_undef);
+    STABSET(str);
+    ary->ary_array[sp] = str;
+    return sp;
+#else
+    fatal("truncate not implemented");
+#endif
+}
+
+int
 looks_like_number(str)
 STR *str;
 {
@@ -687,11 +771,13 @@ FILE *fp;
 	return FALSE;
     }
     if (!str)
-	return FALSE;
+	return TRUE;
     if (ofmt &&
       ((str->str_nok && str->str_u.str_nval != 0.0)
-       || (looks_like_number(str) && str_gnum(str) != 0.0) ) )
+       || (looks_like_number(str) && str_gnum(str) != 0.0) ) ) {
 	fprintf(fp, ofmt, str->str_u.str_nval);
+	return !ferror(fp);
+    }
     else {
 	tmps = str_get(str);
 	if (*tmps == 'S' && tmps[1] == 't' && tmps[2] == 'a' && tmps[3] == 'b'
@@ -700,7 +786,7 @@ FILE *fp;
 	    str = ((STAB*)str)->str_magic;
 	    putc('*',fp);
 	}
-	if (str->str_cur && fwrite(tmps,1,str->str_cur,fp) == 0)
+	if (str->str_cur && (fwrite(tmps,1,str->str_cur,fp) == 0 || ferror(fp)))
 	    return FALSE;
     }
     return TRUE;
@@ -731,7 +817,7 @@ int *arglast;
 	retval = (items <= 0);
 	for (; items > 0; items--,st++) {
 	    if (retval && ofslen) {
-		if (fwrite(ofs, 1, ofslen, fp) == 0) {
+		if (fwrite(ofs, 1, ofslen, fp) == 0 || ferror(fp)) {
 		    retval = FALSE;
 		    break;
 		}
@@ -740,7 +826,7 @@ int *arglast;
 		break;
 	}
 	if (retval && orslen)
-	    if (fwrite(ors, 1, orslen, fp) == 0)
+	    if (fwrite(ors, 1, orslen, fp) == 0 || ferror(fp))
 		retval = FALSE;
     }
     return retval;
@@ -898,15 +984,29 @@ int *arglast;
     return FALSE;
 }
 
+static char **Argv = Null(char **);
+static char *Cmd = Nullch;
+
+int
+do_execfree()
+{
+    if (Argv) {
+	Safefree(Argv);
+	Argv = Null(char **);
+    }
+    if (Cmd) {
+	Safefree(Cmd);
+	Cmd = Nullch;
+    }
+}
+
 bool
 do_exec(cmd)
 char *cmd;
 {
     register char **a;
     register char *s;
-    char **argv;
     char flags[10];
-    char *cmd2;
 
 #ifdef TAINT
     taintenv();
@@ -958,10 +1058,10 @@ char *cmd;
 	    return FALSE;
 	}
     }
-    New(402,argv, (s - cmd) / 2 + 2, char*);
-    cmd2 = nsavestr(cmd, s-cmd);
-    a = argv;
-    for (s = cmd2; *s;) {
+    New(402,Argv, (s - cmd) / 2 + 2, char*);
+    Cmd = nsavestr(cmd, s-cmd);
+    a = Argv;
+    for (s = Cmd; *s;) {
 	while (*s && isspace(*s)) s++;
 	if (*s)
 	    *(a++) = s;
@@ -970,16 +1070,14 @@ char *cmd;
 	    *s++ = '\0';
     }
     *a = Nullch;
-    if (argv[0]) {
-	execvp(argv[0],argv);
+    if (Argv[0]) {
+	execvp(Argv[0],Argv);
 	if (errno == ENOEXEC) {		/* for system V NIH syndrome */
-	    Safefree(argv);
-	    Safefree(cmd2);
+	    do_execfree();
 	    goto doshell;
 	}
     }
-    Safefree(cmd2);
-    Safefree(argv);
+    do_execfree();
     return FALSE;
 }
 
@@ -1250,11 +1348,11 @@ int *arglast;
     switch (optype) {
     case O_GETSOCKNAME:
 	if (getsockname(fd, st[sp]->str_ptr, &st[sp]->str_cur) < 0)
-	    goto nuts;
+	    goto nuts2;
 	break;
     case O_GETPEERNAME:
 	if (getpeername(fd, st[sp]->str_ptr, &st[sp]->str_cur) < 0)
-	    goto nuts;
+	    goto nuts2;
 	break;
     }
     
@@ -1263,6 +1361,7 @@ int *arglast;
 nuts:
     if (dowarn)
 	warn("get{sock,peer}name() on closed fd");
+nuts2:
     st[sp] = &str_undef;
     return sp;
 
@@ -1522,6 +1621,9 @@ int *arglast;
     return sp;
 }
 
+#endif /* SOCKET */
+
+#ifdef SELECT
 int
 do_select(gimme,arglast)
 int gimme;
@@ -1581,7 +1683,7 @@ int *arglast;
 	j = str->str_len;
 	if (j < growsize) {
 	    if (str->str_pok) {
-		str_grow(str,growsize);
+		Str_Grow(str,growsize);
 		s = str_get(str) + j;
 		while (++j <= growsize) {
 		    *s++ = '\0';
@@ -1651,7 +1753,9 @@ int *arglast;
     }
     return sp;
 }
+#endif /* SELECT */
 
+#ifdef SOCKET
 int
 do_spair(stab1, stab2, arglast)
 STAB *stab1;
@@ -1711,13 +1815,11 @@ int *arglast;
 #ifdef I_PWD
     register ARRAY *ary = stack;
     register int sp = arglast[0];
-    register char **elem;
     register STR *str;
     struct passwd *getpwnam();
     struct passwd *getpwuid();
     struct passwd *getpwent();
     struct passwd *pwent;
-    unsigned long len;
 
     if (gimme != G_ARRAY) {
 	astore(ary, ++sp, str_static(&str_undef));
@@ -1797,7 +1899,6 @@ int *arglast;
     struct group *getgrgid();
     struct group *getgrent();
     struct group *grent;
-    unsigned long len;
 
     if (gimme != G_ARRAY) {
 	astore(ary, ++sp, str_static(&str_undef));
@@ -1895,6 +1996,11 @@ int *arglast;
 #endif
 	}
 	break;
+#if MACH
+    case O_TELLDIR:
+    case O_SEEKDIR:
+        goto nope;
+#else
     case O_TELLDIR:
 	st[sp] = str_static(&str_undef);
 	str_numset(st[sp], (double)telldir(stio->dirp));
@@ -1904,6 +2010,7 @@ int *arglast;
 	along = (long)str_gnum(st[sp+1]);
 	(void)seekdir(stio->dirp,along);
 	break;
+#endif
     case O_REWINDDIR:
 	st[sp] = str_static(&str_undef);
 	(void)rewinddir(stio->dirp);

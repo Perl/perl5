@@ -1,4 +1,4 @@
-/* $Header: cons.c,v 3.0.1.6 90/03/27 15:35:21 lwall Locked $
+/* $Header: cons.c,v 3.0.1.7 90/08/09 02:35:52 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,12 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	cons.c,v $
+ * Revision 3.0.1.7  90/08/09  02:35:52  lwall
+ * patch19: did preliminary work toward debugging packages and evals
+ * patch19: Added support for linked-in C subroutines
+ * patch19: Numeric literals are now stored only in floating point
+ * patch19: Added -c switch to do compilation only
+ * 
  * Revision 3.0.1.6  90/03/27  15:35:21  lwall
  * patch16: formats didn't work inside eval
  * patch16: $foo++ now optimized to ++$foo where value not required
@@ -57,15 +63,17 @@ CMD *cmd;
     Newz(101,sub,1,SUBR);
     if (stab_sub(stab)) {
 	if (dowarn) {
-	    line_t oldline = line;
+	    CMD *oldcurcmd = curcmd;
 
 	    if (cmd)
-		line = cmd->c_line;
+		curcmd = cmd;
 	    warn("Subroutine %s redefined",name);
-	    line = oldline;
+	    curcmd = oldcurcmd;
 	}
-	cmd_free(stab_sub(stab)->cmd);
-	afree(stab_sub(stab)->tosave);
+	if (stab_sub(stab)->cmd) {
+	    cmd_free(stab_sub(stab)->cmd);
+	    afree(stab_sub(stab)->tosave);
+	}
 	Safefree(stab_sub(stab));
     }
     sub->filename = filename;
@@ -89,13 +97,42 @@ CMD *cmd;
 	STR *str = str_nmake((double)subline);
 
 	str_cat(str,"-");
-	sprintf(buf,"%ld",(long)line);
+	sprintf(buf,"%ld",(long)curcmd->c_line);
 	str_cat(str,buf);
 	name = str_get(subname);
 	hstore(stab_xhash(DBsub),name,strlen(name),str,0);
 	str_set(subname,"main");
     }
     subline = 0;
+    return sub;
+}
+
+SUBR *
+make_usub(name, ix, subaddr, filename)
+char *name;
+int ix;
+int (*subaddr)();
+char *filename;
+{
+    register SUBR *sub;
+    STAB *stab = stabent(name,allstabs);
+
+    if (!stab)				/* unused function */
+	return;
+    Newz(101,sub,1,SUBR);
+    if (stab_sub(stab)) {
+	if (dowarn)
+	    warn("Subroutine %s redefined",name);
+	if (stab_sub(stab)->cmd) {
+	    cmd_free(stab_sub(stab)->cmd);
+	    afree(stab_sub(stab)->tosave);
+	}
+	Safefree(stab_sub(stab));
+    }
+    sub->filename = filename;
+    sub->usersub = subaddr;
+    sub->userindex = ix;
+    stab_sub(stab) = sub;
     return sub;
 }
 
@@ -428,6 +465,7 @@ CMD *cur;
     cmd->c_line = head->c_line;
     cmd->c_label = head->c_label;
     cmd->c_file = filename;
+    cmd->c_pack = curpack;
     return append_line(cmd, cur);
 }
 
@@ -448,12 +486,13 @@ ARG *arg;
     if (cond)
 	cmd->c_flags |= CF_COND;
     if (cmdline == NOLINE)
-	cmd->c_line = line;
+	cmd->c_line = curcmd->c_line;
     else {
 	cmd->c_line = cmdline;
 	cmdline = NOLINE;
     }
     cmd->c_file = filename;
+    cmd->c_pack = curpack;
     if (perldb)
 	cmd = dodb(cmd);
     return cmd;
@@ -475,7 +514,7 @@ struct compcmd cblock;
     if (arg)
 	cmd->c_flags |= CF_COND;
     if (cmdline == NOLINE)
-	cmd->c_line = line;
+	cmd->c_line = curcmd->c_line;
     else {
 	cmd->c_line = cmdline;
 	cmdline = NOLINE;
@@ -506,7 +545,7 @@ struct compcmd cblock;
     if (arg)
 	cmd->c_flags |= CF_COND;
     if (cmdline == NOLINE)
-	cmd->c_line = line;
+	cmd->c_line = curcmd->c_line;
     else {
 	cmd->c_line = cmdline;
 	cmdline = NOLINE;
@@ -701,6 +740,8 @@ int acmd;
 	     arg->arg_type == O_SLT || arg->arg_type == O_SGT) {
 	if (arg[1].arg_type == A_STAB || arg[1].arg_type == A_LVAL) {
 	    if (arg[2].arg_type == A_SINGLE) {
+		char *junk = str_get(arg[2].arg_ptr.arg_str);
+
 		cmd->c_stab  = arg[1].arg_ptr.arg_stab;
 		cmd->c_short = str_smake(arg[2].arg_ptr.arg_str);
 		cmd->c_slen  = cmd->c_short->str_cur+1;
@@ -898,8 +939,8 @@ char *s;
     else
 	(void)sprintf(tname,"next char %c",yychar);
     (void)sprintf(buf, "%s in file %s at line %d, %s\n",
-      s,filename,line,tname);
-    if (line == multi_end && multi_start < multi_end)
+      s,filename,curcmd->c_line,tname);
+    if (curcmd->c_line == multi_end && multi_start < multi_end)
 	sprintf(buf+strlen(buf),
 	  "  (Might be a runaway multi-line %c%c string starting on line %d)\n",
 	  multi_open,multi_close,multi_start);
@@ -908,7 +949,7 @@ char *s;
     else
 	fputs(buf,stderr);
     if (++error_count >= 10)
-	fatal("Too many errors\n");
+	fatal("%s has too many errors.\n", filename);
 }
 
 void
@@ -1118,10 +1159,12 @@ register CMD *cmd;
 	}
 	tofree = cmd;
 	cmd = cmd->c_next;
-	Safefree(tofree);
+	if (tofree != head)		/* to get Saber to shut up */
+	    Safefree(tofree);
 	if (cmd && cmd == head)		/* reached end of while loop */
 	    break;
     }
+    Safefree(head);
 }
 
 arg_free(arg)
