@@ -19,7 +19,7 @@ use Carp 'croak';
 #   http://stein.cshl.org/WWW/software/CGI/
 
 $CGI::revision = '$Id: CGI.pm,v 1.181 2005/05/13 21:45:26 lstein Exp $';
-$CGI::VERSION='3.10';
+$CGI::VERSION='3.10_01';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -7346,13 +7346,15 @@ To make it easier to port existing programs that use cgi-lib.pl the
 compatibility routine "ReadParse" is provided.  Porting is simple:
 
 OLD VERSION
+
     require "cgi-lib.pl";
     &ReadParse;
     print "The value of the antique is $in{antique}.\n";
 
 NEW VERSION
+
     use CGI;
-    CGI::ReadParse;
+    CGI::ReadParse();
     print "The value of the antique is $in{antique}.\n";
 
 CGI.pm's ReadParse() routine creates a tied variable named %in,
