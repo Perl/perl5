@@ -296,3 +296,29 @@ after 5.005_54:
  
  	If the only shell-metachars of a command are ' 2>&1' at the
  	end of a command, it is executed without calling the external shell.
+
+after 5.005_57:
+	Make UDP sockets return correct caller address (OS2 API bug);
+	Enable TCPIPV4 defines (works with Warp 3 IAK too?!);
+	Force Unix-domain sockets to start with "/socket", convert
+	  '/' to '\' in the calls;
+	Make C<system 1, $cmd> to treat $cmd as in C<system $cmd>;
+	Autopatch Configure;
+	Find name and location of g[nu]patch.exe;
+	Autocopy perl????.dll to t/ when testing;
+
+after 5.005_62:
+	Extract a lightweight DLL access module OS2::DLL from OS2::REXX
+	   which would not load REXX runtime system;
+	Allow compile with os2.h which loads os2tk.h instead of os2emx.h;
+	Put the version of EMX CRTL into -D define;
+	Use _setsyserror() to store last error of OS/2 API for $^E;
+	New macro PERL_SYS_INIT3(argvp, argcp, envp);
+	Make Dynaloader return info on the failing module after failed dl_open();
+	OS2::REXX test were done for interactive testing (were writing
+	  "ok" to stderr);
+	system() and friends return -1 on failure (was 0xFF00);
+	Put the full name of executable into $^X
+	  (alas, uppercased - but with /);
+	t/io/fs.t was failing on HPFS386;
+	Remove extra ';' from defines for MQ operations.

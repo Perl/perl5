@@ -1,9 +1,10 @@
 package attributes;
 
-$VERSION = 0.01;
+$VERSION = 0.02;
 
-#@EXPORT_OK = qw(get reftype);
-#@EXPORT = ();
+@EXPORT_OK = qw(get reftype);
+@EXPORT = ();
+%EXPORT_TAGS = (ALL => [@EXPORT, @EXPORT_OK]);
 
 use strict;
 
@@ -29,8 +30,10 @@ sub carp {
 BEGIN { bootstrap }
 
 sub import {
-    @_ > 2 && ref $_[2] or
-	croak 'Usage: use '.__PACKAGE__.' $home_stash, $ref, @attrlist';
+    @_ > 2 && ref $_[2] or do {
+	require Exporter;
+	goto &Exporter::import;
+    };
     my (undef,$home_stash,$svref,@attrs) = @_;
 
     my $svtype = uc reftype($svref);
@@ -82,12 +85,7 @@ sub get ($) {
 	;
 }
 
-#sub export {
-#    require Exporter;
-#    goto &Exporter::import;
-#}
-#
-#sub require_version { goto &UNIVERSAL::VERSION }
+sub require_version { goto &UNIVERSAL::VERSION }
 
 1;
 __END__
@@ -106,13 +104,16 @@ attributes - get/set subroutine or variable attributes
   use attributes ();	# optional, to get subroutine declarations
   my @attrlist = attributes::get(\&foo);
 
+  use attributes 'get'; # import the attributes::get subroutine
+  my @attrlist = get \&foo;
+
 =head1 DESCRIPTION
 
 Subroutine declarations and definitions may optionally have attribute lists
 associated with them.  (Variable C<my> declarations also may, but see the
 warning below.)  Perl handles these declarations by passing some information
 about the call site and the thing being declared along with the attribute
-list to this module.  In particular, first example above is equivalent to
+list to this module.  In particular, the first example above is equivalent to
 the following:
 
     use attributes __PACKAGE__, \&foo, 'method';
@@ -187,7 +188,7 @@ empty.  If passed invalid arguments, it uses die() (via L<Carp::croak|Carp>)
 to raise a fatal exception.  If it can find an appropriate package name
 for a class method lookup, it will include the results from a
 C<FETCH_I<type>_ATTRIBUTES> call in its return list, as described in
-L"Package-specific Attribute Handling"> below.
+L<"Package-specific Attribute Handling"> below.
 Otherwise, only L<built-in attributes|"Built-in Attributes"> will be returned.
 
 =item reftype
@@ -196,13 +197,11 @@ This routine expects a single parameter--a reference to a subroutine or
 variable.  It returns the built-in type of the referenced variable,
 ignoring any package into which it might have been blessed.
 This can be useful for determining the I<type> value which forms part of
-the method names described in L"Package-specific Attribute Handling"> below.
+the method names described in L<"Package-specific Attribute Handling"> below.
 
 =back
 
-Note that these routines are I<not> exported.  This is primarily because
-the C<use> mechanism which would normally import them is already in use
-by Perl itself to implement the C<sub : attributes> syntax.
+Note that these routines are I<not> exported by default.
 
 =head2 Package-specific Attribute Handling
 
@@ -288,6 +287,20 @@ Some examples of syntactically invalid attribute lists (with annotation):
     5x5				# "5x5" not a valid identifier
     Y2::north			# "Y2::north" not a simple identifier
     foo + bar			# "+" neither a comma nor whitespace
+
+=head1 EXPORTS
+
+=head2 Default exports
+
+None.
+
+=head2 Available exports
+
+The routines C<get> and C<reftype> are exportable.
+
+=head2 Export tags defined
+
+The C<:ALL> tag will get all of the above exports.
 
 =head1 EXAMPLES
 

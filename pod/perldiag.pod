@@ -826,6 +826,15 @@ L<perlfunc/goto>.
 (F) The "goto subroutine" call can't be used to jump out of an eval "string".
 (You can use it to jump out of an eval {BLOCK}, but you probably don't want to.)
 
+=item Can't ignore signal CHLD, forcing to default
+
+(W) Perl has detected that it is being run with the SIGCHLD signal
+(sometimes known as SIGCLD) disabled.  Since disabling this signal
+will interfere with proper determination of exit status of child
+processes, Perl has reset the signal to its default value.
+This situation typically indicates that the parent program under
+which Perl may be running (e.g. cron) is being very careless.
+
 =item Can't localize through a reference
 
 (F) You said something like C<local $$ref>, which Perl can't currently

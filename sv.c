@@ -3057,7 +3057,7 @@ Perl_sv_unmagic(pTHX_ SV *sv, int type)
 	if (mg->mg_type == type) {
 	    MGVTBL* vtbl = mg->mg_virtual;
 	    *mgp = mg->mg_moremagic;
-	    if (vtbl && (vtbl->svt_free != NULL))
+	    if (vtbl && vtbl->svt_free)
 		CALL_FPTR(vtbl->svt_free)(aTHX_ sv, mg);
 	    if (mg->mg_ptr && mg->mg_type != 'g')
 		if (mg->mg_len >= 0)
@@ -5355,7 +5355,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    case 16:
 		if (!uv)
 		    alt = FALSE;
-		p = (c == 'X') ? "0123456789ABCDEF" : "0123456789abcdef";
+		p = (char*)((c == 'X')
+			    ? "0123456789ABCDEF" : "0123456789abcdef");
 		do {
 		    dig = uv & 15;
 		    *--eptr = p[dig];
@@ -5485,38 +5486,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	    eptr = PL_efloatbuf;
 	    elen = strlen(PL_efloatbuf);
-
-#ifdef USE_LOCALE_NUMERIC
-	    /*
-	     * User-defined locales may include arbitrary characters.
-	     * And, unfortunately, some (broken) systems may allow the
-	     * "C" locale to be overridden by a malicious user.
-	     * XXX This is an extreme way to cope with broken systems.
-	     */
-	    if (maybe_tainted && PL_tainting) {
-		/* safe if it matches /[-+]?\d*(\.\d*)?([eE][-+]?\d*)?/ */
-		if (*eptr == '-' || *eptr == '+')
-		    ++eptr;
-		while (isDIGIT(*eptr))
-		    ++eptr;
-		if (*eptr == '.') {
-		    ++eptr;
-		    while (isDIGIT(*eptr))
-			++eptr;
-		}
-		if (*eptr == 'e' || *eptr == 'E') {
-		    ++eptr;
-		    if (*eptr == '-' || *eptr == '+')
-			++eptr;
-		    while (isDIGIT(*eptr))
-			++eptr;
-		}
-		if (*eptr)
-		    *maybe_tainted = TRUE;	/* results are suspect */
-		eptr = PL_efloatbuf;
-	    }
-#endif /* USE_LOCALE_NUMERIC */
-
 	    break;
 
 	    /* SPECIAL */

@@ -188,7 +188,6 @@
 #define PL_Sock			(PERL_GET_INTERP->ISock)
 #define PL_StdIO		(PERL_GET_INTERP->IStdIO)
 #define PL_amagic_generation	(PERL_GET_INTERP->Iamagic_generation)
-#define PL_ampergv		(PERL_GET_INTERP->Iampergv)
 #define PL_an			(PERL_GET_INTERP->Ian)
 #define PL_archpat_auto		(PERL_GET_INTERP->Iarchpat_auto)
 #define PL_argvgv		(PERL_GET_INTERP->Iargvgv)
@@ -198,7 +197,6 @@
 #define PL_bitcount		(PERL_GET_INTERP->Ibitcount)
 #define PL_bufend		(PERL_GET_INTERP->Ibufend)
 #define PL_bufptr		(PERL_GET_INTERP->Ibufptr)
-#define PL_cddir		(PERL_GET_INTERP->Icddir)
 #define PL_collation_ix		(PERL_GET_INTERP->Icollation_ix)
 #define PL_collation_name	(PERL_GET_INTERP->Icollation_name)
 #define PL_collation_standard	(PERL_GET_INTERP->Icollation_standard)
@@ -220,14 +218,10 @@
 #define PL_curstname		(PERL_GET_INTERP->Icurstname)
 #define PL_curthr		(PERL_GET_INTERP->Icurthr)
 #define PL_dbargs		(PERL_GET_INTERP->Idbargs)
-#define PL_debdelim		(PERL_GET_INTERP->Idebdelim)
-#define PL_debname		(PERL_GET_INTERP->Idebname)
 #define PL_debstash		(PERL_GET_INTERP->Idebstash)
 #define PL_debug		(PERL_GET_INTERP->Idebug)
 #define PL_defgv		(PERL_GET_INTERP->Idefgv)
 #define PL_diehook		(PERL_GET_INTERP->Idiehook)
-#define PL_dlevel		(PERL_GET_INTERP->Idlevel)
-#define PL_dlmax		(PERL_GET_INTERP->Idlmax)
 #define PL_doextract		(PERL_GET_INTERP->Idoextract)
 #define PL_doswitches		(PERL_GET_INTERP->Idoswitches)
 #define PL_dowarn		(PERL_GET_INTERP->Idowarn)
@@ -249,7 +243,6 @@
 #define PL_expect		(PERL_GET_INTERP->Iexpect)
 #define PL_fdpid		(PERL_GET_INTERP->Ifdpid)
 #define PL_filemode		(PERL_GET_INTERP->Ifilemode)
-#define PL_filter_debug		(PERL_GET_INTERP->Ifilter_debug)
 #define PL_forkprocess		(PERL_GET_INTERP->Iforkprocess)
 #define PL_formfeed		(PERL_GET_INTERP->Iformfeed)
 #define PL_generation		(PERL_GET_INTERP->Igeneration)
@@ -276,11 +269,8 @@
 #define PL_last_swash_tmps	(PERL_GET_INTERP->Ilast_swash_tmps)
 #define PL_last_uni		(PERL_GET_INTERP->Ilast_uni)
 #define PL_lastfd		(PERL_GET_INTERP->Ilastfd)
-#define PL_lastsize		(PERL_GET_INTERP->Ilastsize)
-#define PL_lastspbase		(PERL_GET_INTERP->Ilastspbase)
 #define PL_laststatval		(PERL_GET_INTERP->Ilaststatval)
 #define PL_laststype		(PERL_GET_INTERP->Ilaststype)
-#define PL_leftgv		(PERL_GET_INTERP->Ileftgv)
 #define PL_lex_brackets		(PERL_GET_INTERP->Ilex_brackets)
 #define PL_lex_brackstack	(PERL_GET_INTERP->Ilex_brackstack)
 #define PL_lex_casemods		(PERL_GET_INTERP->Ilex_casemods)
@@ -321,7 +311,6 @@
 #define PL_multi_open		(PERL_GET_INTERP->Imulti_open)
 #define PL_multi_start		(PERL_GET_INTERP->Imulti_start)
 #define PL_multiline		(PERL_GET_INTERP->Imultiline)
-#define PL_mystrk		(PERL_GET_INTERP->Imystrk)
 #define PL_nexttoke		(PERL_GET_INTERP->Inexttoke)
 #define PL_nexttype		(PERL_GET_INTERP->Inexttype)
 #define PL_nextval		(PERL_GET_INTERP->Inextval)
@@ -336,7 +325,6 @@
 #define PL_numeric_standard	(PERL_GET_INTERP->Inumeric_standard)
 #define PL_ofmt			(PERL_GET_INTERP->Iofmt)
 #define PL_oldbufptr		(PERL_GET_INTERP->Ioldbufptr)
-#define PL_oldlastpm		(PERL_GET_INTERP->Ioldlastpm)
 #define PL_oldname		(PERL_GET_INTERP->Ioldname)
 #define PL_oldoldbufptr		(PERL_GET_INTERP->Ioldoldbufptr)
 #define PL_op_mask		(PERL_GET_INTERP->Iop_mask)
@@ -362,15 +350,11 @@
 #define PL_preprocess		(PERL_GET_INTERP->Ipreprocess)
 #define PL_profiledata		(PERL_GET_INTERP->Iprofiledata)
 #define PL_replgv		(PERL_GET_INTERP->Ireplgv)
-#define PL_rightgv		(PERL_GET_INTERP->Irightgv)
 #define PL_rsfp			(PERL_GET_INTERP->Irsfp)
 #define PL_rsfp_filters		(PERL_GET_INTERP->Irsfp_filters)
 #define PL_runops		(PERL_GET_INTERP->Irunops)
 #define PL_sawampersand		(PERL_GET_INTERP->Isawampersand)
-#define PL_sawstudy		(PERL_GET_INTERP->Isawstudy)
-#define PL_sawvec		(PERL_GET_INTERP->Isawvec)
 #define PL_sh_path		(PERL_GET_INTERP->Ish_path)
-#define PL_siggv		(PERL_GET_INTERP->Isiggv)
 #define PL_sighandlerp		(PERL_GET_INTERP->Isighandlerp)
 #define PL_splitstr		(PERL_GET_INTERP->Isplitstr)
 #define PL_srand_called		(PERL_GET_INTERP->Isrand_called)
@@ -378,7 +362,6 @@
 #define PL_statusvalue_vms	(PERL_GET_INTERP->Istatusvalue_vms)
 #define PL_stderrgv		(PERL_GET_INTERP->Istderrgv)
 #define PL_stdingv		(PERL_GET_INTERP->Istdingv)
-#define PL_strchop		(PERL_GET_INTERP->Istrchop)
 #define PL_strtab		(PERL_GET_INTERP->Istrtab)
 #define PL_strtab_mutex		(PERL_GET_INTERP->Istrtab_mutex)
 #define PL_sub_generation	(PERL_GET_INTERP->Isub_generation)
@@ -396,7 +379,6 @@
 #define PL_svref_mutex		(PERL_GET_INTERP->Isvref_mutex)
 #define PL_sys_intern		(PERL_GET_INTERP->Isys_intern)
 #define PL_tainting		(PERL_GET_INTERP->Itainting)
-#define PL_thisexpr		(PERL_GET_INTERP->Ithisexpr)
 #define PL_thr_key		(PERL_GET_INTERP->Ithr_key)
 #define PL_threadnum		(PERL_GET_INTERP->Ithreadnum)
 #define PL_threads_mutex	(PERL_GET_INTERP->Ithreads_mutex)
@@ -464,7 +446,6 @@
 #define PL_Sock			(vTHX->ISock)
 #define PL_StdIO		(vTHX->IStdIO)
 #define PL_amagic_generation	(vTHX->Iamagic_generation)
-#define PL_ampergv		(vTHX->Iampergv)
 #define PL_an			(vTHX->Ian)
 #define PL_archpat_auto		(vTHX->Iarchpat_auto)
 #define PL_argvgv		(vTHX->Iargvgv)
@@ -474,7 +455,6 @@
 #define PL_bitcount		(vTHX->Ibitcount)
 #define PL_bufend		(vTHX->Ibufend)
 #define PL_bufptr		(vTHX->Ibufptr)
-#define PL_cddir		(vTHX->Icddir)
 #define PL_collation_ix		(vTHX->Icollation_ix)
 #define PL_collation_name	(vTHX->Icollation_name)
 #define PL_collation_standard	(vTHX->Icollation_standard)
@@ -496,14 +476,10 @@
 #define PL_curstname		(vTHX->Icurstname)
 #define PL_curthr		(vTHX->Icurthr)
 #define PL_dbargs		(vTHX->Idbargs)
-#define PL_debdelim		(vTHX->Idebdelim)
-#define PL_debname		(vTHX->Idebname)
 #define PL_debstash		(vTHX->Idebstash)
 #define PL_debug		(vTHX->Idebug)
 #define PL_defgv		(vTHX->Idefgv)
 #define PL_diehook		(vTHX->Idiehook)
-#define PL_dlevel		(vTHX->Idlevel)
-#define PL_dlmax		(vTHX->Idlmax)
 #define PL_doextract		(vTHX->Idoextract)
 #define PL_doswitches		(vTHX->Idoswitches)
 #define PL_dowarn		(vTHX->Idowarn)
@@ -525,7 +501,6 @@
 #define PL_expect		(vTHX->Iexpect)
 #define PL_fdpid		(vTHX->Ifdpid)
 #define PL_filemode		(vTHX->Ifilemode)
-#define PL_filter_debug		(vTHX->Ifilter_debug)
 #define PL_forkprocess		(vTHX->Iforkprocess)
 #define PL_formfeed		(vTHX->Iformfeed)
 #define PL_generation		(vTHX->Igeneration)
@@ -552,11 +527,8 @@
 #define PL_last_swash_tmps	(vTHX->Ilast_swash_tmps)
 #define PL_last_uni		(vTHX->Ilast_uni)
 #define PL_lastfd		(vTHX->Ilastfd)
-#define PL_lastsize		(vTHX->Ilastsize)
-#define PL_lastspbase		(vTHX->Ilastspbase)
 #define PL_laststatval		(vTHX->Ilaststatval)
 #define PL_laststype		(vTHX->Ilaststype)
-#define PL_leftgv		(vTHX->Ileftgv)
 #define PL_lex_brackets		(vTHX->Ilex_brackets)
 #define PL_lex_brackstack	(vTHX->Ilex_brackstack)
 #define PL_lex_casemods		(vTHX->Ilex_casemods)
@@ -597,7 +569,6 @@
 #define PL_multi_open		(vTHX->Imulti_open)
 #define PL_multi_start		(vTHX->Imulti_start)
 #define PL_multiline		(vTHX->Imultiline)
-#define PL_mystrk		(vTHX->Imystrk)
 #define PL_nexttoke		(vTHX->Inexttoke)
 #define PL_nexttype		(vTHX->Inexttype)
 #define PL_nextval		(vTHX->Inextval)
@@ -612,7 +583,6 @@
 #define PL_numeric_standard	(vTHX->Inumeric_standard)
 #define PL_ofmt			(vTHX->Iofmt)
 #define PL_oldbufptr		(vTHX->Ioldbufptr)
-#define PL_oldlastpm		(vTHX->Ioldlastpm)
 #define PL_oldname		(vTHX->Ioldname)
 #define PL_oldoldbufptr		(vTHX->Ioldoldbufptr)
 #define PL_op_mask		(vTHX->Iop_mask)
@@ -638,15 +608,11 @@
 #define PL_preprocess		(vTHX->Ipreprocess)
 #define PL_profiledata		(vTHX->Iprofiledata)
 #define PL_replgv		(vTHX->Ireplgv)
-#define PL_rightgv		(vTHX->Irightgv)
 #define PL_rsfp			(vTHX->Irsfp)
 #define PL_rsfp_filters		(vTHX->Irsfp_filters)
 #define PL_runops		(vTHX->Irunops)
 #define PL_sawampersand		(vTHX->Isawampersand)
-#define PL_sawstudy		(vTHX->Isawstudy)
-#define PL_sawvec		(vTHX->Isawvec)
 #define PL_sh_path		(vTHX->Ish_path)
-#define PL_siggv		(vTHX->Isiggv)
 #define PL_sighandlerp		(vTHX->Isighandlerp)
 #define PL_splitstr		(vTHX->Isplitstr)
 #define PL_srand_called		(vTHX->Isrand_called)
@@ -654,7 +620,6 @@
 #define PL_statusvalue_vms	(vTHX->Istatusvalue_vms)
 #define PL_stderrgv		(vTHX->Istderrgv)
 #define PL_stdingv		(vTHX->Istdingv)
-#define PL_strchop		(vTHX->Istrchop)
 #define PL_strtab		(vTHX->Istrtab)
 #define PL_strtab_mutex		(vTHX->Istrtab_mutex)
 #define PL_sub_generation	(vTHX->Isub_generation)
@@ -672,7 +637,6 @@
 #define PL_svref_mutex		(vTHX->Isvref_mutex)
 #define PL_sys_intern		(vTHX->Isys_intern)
 #define PL_tainting		(vTHX->Itainting)
-#define PL_thisexpr		(vTHX->Ithisexpr)
 #define PL_thr_key		(vTHX->Ithr_key)
 #define PL_threadnum		(vTHX->Ithreadnum)
 #define PL_threads_mutex	(vTHX->Ithreads_mutex)
@@ -742,7 +706,6 @@
 #define PL_ISock		PL_Sock
 #define PL_IStdIO		PL_StdIO
 #define PL_Iamagic_generation	PL_amagic_generation
-#define PL_Iampergv		PL_ampergv
 #define PL_Ian			PL_an
 #define PL_Iarchpat_auto	PL_archpat_auto
 #define PL_Iargvgv		PL_argvgv
@@ -752,7 +715,6 @@
 #define PL_Ibitcount		PL_bitcount
 #define PL_Ibufend		PL_bufend
 #define PL_Ibufptr		PL_bufptr
-#define PL_Icddir		PL_cddir
 #define PL_Icollation_ix	PL_collation_ix
 #define PL_Icollation_name	PL_collation_name
 #define PL_Icollation_standard	PL_collation_standard
@@ -774,14 +736,10 @@
 #define PL_Icurstname		PL_curstname
 #define PL_Icurthr		PL_curthr
 #define PL_Idbargs		PL_dbargs
-#define PL_Idebdelim		PL_debdelim
-#define PL_Idebname		PL_debname
 #define PL_Idebstash		PL_debstash
 #define PL_Idebug		PL_debug
 #define PL_Idefgv		PL_defgv
 #define PL_Idiehook		PL_diehook
-#define PL_Idlevel		PL_dlevel
-#define PL_Idlmax		PL_dlmax
 #define PL_Idoextract		PL_doextract
 #define PL_Idoswitches		PL_doswitches
 #define PL_Idowarn		PL_dowarn
@@ -803,7 +761,6 @@
 #define PL_Iexpect		PL_expect
 #define PL_Ifdpid		PL_fdpid
 #define PL_Ifilemode		PL_filemode
-#define PL_Ifilter_debug	PL_filter_debug
 #define PL_Iforkprocess		PL_forkprocess
 #define PL_Iformfeed		PL_formfeed
 #define PL_Igeneration		PL_generation
@@ -830,11 +787,8 @@
 #define PL_Ilast_swash_tmps	PL_last_swash_tmps
 #define PL_Ilast_uni		PL_last_uni
 #define PL_Ilastfd		PL_lastfd
-#define PL_Ilastsize		PL_lastsize
-#define PL_Ilastspbase		PL_lastspbase
 #define PL_Ilaststatval		PL_laststatval
 #define PL_Ilaststype		PL_laststype
-#define PL_Ileftgv		PL_leftgv
 #define PL_Ilex_brackets	PL_lex_brackets
 #define PL_Ilex_brackstack	PL_lex_brackstack
 #define PL_Ilex_casemods	PL_lex_casemods
@@ -875,7 +829,6 @@
 #define PL_Imulti_open		PL_multi_open
 #define PL_Imulti_start		PL_multi_start
 #define PL_Imultiline		PL_multiline
-#define PL_Imystrk		PL_mystrk
 #define PL_Inexttoke		PL_nexttoke
 #define PL_Inexttype		PL_nexttype
 #define PL_Inextval		PL_nextval
@@ -890,7 +843,6 @@
 #define PL_Inumeric_standard	PL_numeric_standard
 #define PL_Iofmt		PL_ofmt
 #define PL_Ioldbufptr		PL_oldbufptr
-#define PL_Ioldlastpm		PL_oldlastpm
 #define PL_Ioldname		PL_oldname
 #define PL_Ioldoldbufptr	PL_oldoldbufptr
 #define PL_Iop_mask		PL_op_mask
@@ -916,15 +868,11 @@
 #define PL_Ipreprocess		PL_preprocess
 #define PL_Iprofiledata		PL_profiledata
 #define PL_Ireplgv		PL_replgv
-#define PL_Irightgv		PL_rightgv
 #define PL_Irsfp		PL_rsfp
 #define PL_Irsfp_filters	PL_rsfp_filters
 #define PL_Irunops		PL_runops
 #define PL_Isawampersand	PL_sawampersand
-#define PL_Isawstudy		PL_sawstudy
-#define PL_Isawvec		PL_sawvec
 #define PL_Ish_path		PL_sh_path
-#define PL_Isiggv		PL_siggv
 #define PL_Isighandlerp		PL_sighandlerp
 #define PL_Isplitstr		PL_splitstr
 #define PL_Isrand_called	PL_srand_called
@@ -932,7 +880,6 @@
 #define PL_Istatusvalue_vms	PL_statusvalue_vms
 #define PL_Istderrgv		PL_stderrgv
 #define PL_Istdingv		PL_stdingv
-#define PL_Istrchop		PL_strchop
 #define PL_Istrtab		PL_strtab
 #define PL_Istrtab_mutex	PL_strtab_mutex
 #define PL_Isub_generation	PL_sub_generation
@@ -950,7 +897,6 @@
 #define PL_Isvref_mutex		PL_svref_mutex
 #define PL_Isys_intern		PL_sys_intern
 #define PL_Itainting		PL_tainting
-#define PL_Ithisexpr		PL_thisexpr
 #define PL_Ithr_key		PL_thr_key
 #define PL_Ithreadnum		PL_threadnum
 #define PL_Ithreads_mutex	PL_threads_mutex

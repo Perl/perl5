@@ -1170,6 +1170,7 @@ PerlProcPauseProc(struct IPerlProc *I)
 PerlIO*
 PerlProcPopen(struct IPerlProc *I, const char *command, const char *mode)
 {
+    dTHXo;
     PERL_FLUSHALL_FOR_CHILD;
     return (PerlIO*)win32_popen(command, mode);
 }

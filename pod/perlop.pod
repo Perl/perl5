@@ -1074,9 +1074,9 @@ this expression:
 
     qw(foo bar baz)
 
-is exactly equivalent to the list:
+is semantically equivalent to the list:
 
-    ('foo', 'bar', 'baz')
+    'foo', 'bar', 'baz'
 
 Some frequently seen examples:
 

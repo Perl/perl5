@@ -1816,9 +1816,9 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
       char *desc = PL_op_desc[(right->op_type == OP_SUBST ||
                             right->op_type == OP_TRANS)
                            ? right->op_type : OP_MATCH];
-      char *sample = ((left->op_type == OP_RV2AV ||
-                       left->op_type == OP_PADAV)
-                      ? "@array" : "%hash");
+      const char *sample = ((left->op_type == OP_RV2AV ||
+			     left->op_type == OP_PADAV)
+			    ? "@array" : "%hash");
       Perl_warner(aTHX_ WARN_UNSAFE,
              "Applying %s to %s will act on scalar(%s)", 
              desc, sample, sample);
@@ -2118,8 +2118,12 @@ Perl_fold_constants(pTHX_ register OP *o)
 	return o;
 
     if (!(PL_hints & HINT_INTEGER)) {
-	if (type == OP_DIVIDE || !(o->op_flags & OPf_KIDS))
+	if (type == OP_MODULO
+	    || type == OP_DIVIDE
+	    || !(o->op_flags & OPf_KIDS))
+	{
 	    return o;
+	}
 
 	for (curop = ((UNOP*)o)->op_first; curop; curop = curop->op_sibling) {
 	    if (curop->op_type == OP_CONST) {

@@ -1078,7 +1078,6 @@ p	|PPADDR_t*|get_ppaddr
 p	|I32	|cxinc
 p	|void	|deb		|const char* pat|...
 p	|void	|vdeb		|const char* pat|va_list* args
-p	|void	|deb_growlevel
 p	|void	|debprofdump
 p	|I32	|debop		|OP* o
 p	|I32	|debstack
@@ -1667,7 +1666,7 @@ p	|SV*	|swash_init	|char* pkg|char* name|SV* listsv \
 				|I32 minbits|I32 none
 p	|UV	|swash_fetch	|SV *sv|U8 *ptr
 p	|void	|taint_env
-p	|void	|taint_proper	|const char* f|char* s
+p	|void	|taint_proper	|const char* f|const char* s
 p	|UV	|to_utf8_lower	|U8 *p
 p	|UV	|to_utf8_upper	|U8 *p
 p	|UV	|to_utf8_title	|U8 *p
@@ -2051,8 +2050,8 @@ s	|I32	|sublex_done
 s	|I32	|sublex_push
 s	|I32	|sublex_start
 s	|char *	|filter_gets	|SV *sv|PerlIO *fp|STRLEN append
-s	|SV*	|new_constant	|char *s|STRLEN len|char *key|SV *sv \
-				|SV *pv|char *type
+s	|SV*	|new_constant	|char *s|STRLEN len|const char *key|SV *sv \
+				|SV *pv|const char *type
 s	|int	|ao		|int toketype
 s	|void	|depcom
 s	|char*	|incl_perldb

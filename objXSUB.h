@@ -42,8 +42,6 @@
 #define PL_StdIO		(*Perl_IStdIO_ptr(aTHXo))
 #undef  PL_amagic_generation
 #define PL_amagic_generation	(*Perl_Iamagic_generation_ptr(aTHXo))
-#undef  PL_ampergv
-#define PL_ampergv		(*Perl_Iampergv_ptr(aTHXo))
 #undef  PL_an
 #define PL_an			(*Perl_Ian_ptr(aTHXo))
 #undef  PL_archpat_auto
@@ -62,8 +60,6 @@
 #define PL_bufend		(*Perl_Ibufend_ptr(aTHXo))
 #undef  PL_bufptr
 #define PL_bufptr		(*Perl_Ibufptr_ptr(aTHXo))
-#undef  PL_cddir
-#define PL_cddir		(*Perl_Icddir_ptr(aTHXo))
 #undef  PL_collation_ix
 #define PL_collation_ix		(*Perl_Icollation_ix_ptr(aTHXo))
 #undef  PL_collation_name
@@ -106,10 +102,6 @@
 #define PL_curthr		(*Perl_Icurthr_ptr(aTHXo))
 #undef  PL_dbargs
 #define PL_dbargs		(*Perl_Idbargs_ptr(aTHXo))
-#undef  PL_debdelim
-#define PL_debdelim		(*Perl_Idebdelim_ptr(aTHXo))
-#undef  PL_debname
-#define PL_debname		(*Perl_Idebname_ptr(aTHXo))
 #undef  PL_debstash
 #define PL_debstash		(*Perl_Idebstash_ptr(aTHXo))
 #undef  PL_debug
@@ -118,10 +110,6 @@
 #define PL_defgv		(*Perl_Idefgv_ptr(aTHXo))
 #undef  PL_diehook
 #define PL_diehook		(*Perl_Idiehook_ptr(aTHXo))
-#undef  PL_dlevel
-#define PL_dlevel		(*Perl_Idlevel_ptr(aTHXo))
-#undef  PL_dlmax
-#define PL_dlmax		(*Perl_Idlmax_ptr(aTHXo))
 #undef  PL_doextract
 #define PL_doextract		(*Perl_Idoextract_ptr(aTHXo))
 #undef  PL_doswitches
@@ -164,8 +152,6 @@
 #define PL_fdpid		(*Perl_Ifdpid_ptr(aTHXo))
 #undef  PL_filemode
 #define PL_filemode		(*Perl_Ifilemode_ptr(aTHXo))
-#undef  PL_filter_debug
-#define PL_filter_debug		(*Perl_Ifilter_debug_ptr(aTHXo))
 #undef  PL_forkprocess
 #define PL_forkprocess		(*Perl_Iforkprocess_ptr(aTHXo))
 #undef  PL_formfeed
@@ -218,16 +204,10 @@
 #define PL_last_uni		(*Perl_Ilast_uni_ptr(aTHXo))
 #undef  PL_lastfd
 #define PL_lastfd		(*Perl_Ilastfd_ptr(aTHXo))
-#undef  PL_lastsize
-#define PL_lastsize		(*Perl_Ilastsize_ptr(aTHXo))
-#undef  PL_lastspbase
-#define PL_lastspbase		(*Perl_Ilastspbase_ptr(aTHXo))
 #undef  PL_laststatval
 #define PL_laststatval		(*Perl_Ilaststatval_ptr(aTHXo))
 #undef  PL_laststype
 #define PL_laststype		(*Perl_Ilaststype_ptr(aTHXo))
-#undef  PL_leftgv
-#define PL_leftgv		(*Perl_Ileftgv_ptr(aTHXo))
 #undef  PL_lex_brackets
 #define PL_lex_brackets		(*Perl_Ilex_brackets_ptr(aTHXo))
 #undef  PL_lex_brackstack
@@ -308,8 +288,6 @@
 #define PL_multi_start		(*Perl_Imulti_start_ptr(aTHXo))
 #undef  PL_multiline
 #define PL_multiline		(*Perl_Imultiline_ptr(aTHXo))
-#undef  PL_mystrk
-#define PL_mystrk		(*Perl_Imystrk_ptr(aTHXo))
 #undef  PL_nexttoke
 #define PL_nexttoke		(*Perl_Inexttoke_ptr(aTHXo))
 #undef  PL_nexttype
@@ -338,8 +316,6 @@
 #define PL_ofmt			(*Perl_Iofmt_ptr(aTHXo))
 #undef  PL_oldbufptr
 #define PL_oldbufptr		(*Perl_Ioldbufptr_ptr(aTHXo))
-#undef  PL_oldlastpm
-#define PL_oldlastpm		(*Perl_Ioldlastpm_ptr(aTHXo))
 #undef  PL_oldname
 #define PL_oldname		(*Perl_Ioldname_ptr(aTHXo))
 #undef  PL_oldoldbufptr
@@ -390,8 +366,6 @@
 #define PL_profiledata		(*Perl_Iprofiledata_ptr(aTHXo))
 #undef  PL_replgv
 #define PL_replgv		(*Perl_Ireplgv_ptr(aTHXo))
-#undef  PL_rightgv
-#define PL_rightgv		(*Perl_Irightgv_ptr(aTHXo))
 #undef  PL_rsfp
 #define PL_rsfp			(*Perl_Irsfp_ptr(aTHXo))
 #undef  PL_rsfp_filters
@@ -400,14 +374,8 @@
 #define PL_runops		(*Perl_Irunops_ptr(aTHXo))
 #undef  PL_sawampersand
 #define PL_sawampersand		(*Perl_Isawampersand_ptr(aTHXo))
-#undef  PL_sawstudy
-#define PL_sawstudy		(*Perl_Isawstudy_ptr(aTHXo))
-#undef  PL_sawvec
-#define PL_sawvec		(*Perl_Isawvec_ptr(aTHXo))
 #undef  PL_sh_path
 #define PL_sh_path		(*Perl_Ish_path_ptr(aTHXo))
-#undef  PL_siggv
-#define PL_siggv		(*Perl_Isiggv_ptr(aTHXo))
 #undef  PL_sighandlerp
 #define PL_sighandlerp		(*Perl_Isighandlerp_ptr(aTHXo))
 #undef  PL_splitstr
@@ -422,8 +390,6 @@
 #define PL_stderrgv		(*Perl_Istderrgv_ptr(aTHXo))
 #undef  PL_stdingv
 #define PL_stdingv		(*Perl_Istdingv_ptr(aTHXo))
-#undef  PL_strchop
-#define PL_strchop		(*Perl_Istrchop_ptr(aTHXo))
 #undef  PL_strtab
 #define PL_strtab		(*Perl_Istrtab_ptr(aTHXo))
 #undef  PL_strtab_mutex
@@ -458,8 +424,6 @@
 #define PL_sys_intern		(*Perl_Isys_intern_ptr(aTHXo))
 #undef  PL_tainting
 #define PL_tainting		(*Perl_Itainting_ptr(aTHXo))
-#undef  PL_thisexpr
-#define PL_thisexpr		(*Perl_Ithisexpr_ptr(aTHXo))
 #undef  PL_thr_key
 #define PL_thr_key		(*Perl_Ithr_key_ptr(aTHXo))
 #undef  PL_threadnum
@@ -1127,10 +1091,6 @@
 #define Perl_vdeb		pPerl->Perl_vdeb
 #undef  vdeb
 #define vdeb			Perl_vdeb
-#undef  Perl_deb_growlevel
-#define Perl_deb_growlevel	pPerl->Perl_deb_growlevel
-#undef  deb_growlevel
-#define deb_growlevel		Perl_deb_growlevel
 #undef  Perl_debprofdump
 #define Perl_debprofdump	pPerl->Perl_debprofdump
 #undef  debprofdump

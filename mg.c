@@ -67,11 +67,11 @@ Perl_mg_magical(pTHX_ SV *sv)
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	MGVTBL* vtbl = mg->mg_virtual;
 	if (vtbl) {
-	    if ((vtbl->svt_get != NULL) && !(mg->mg_flags & MGf_GSKIP))
+	    if (vtbl->svt_get && !(mg->mg_flags & MGf_GSKIP))
 		SvGMAGICAL_on(sv);
 	    if (vtbl->svt_set)
 		SvSMAGICAL_on(sv);
-	    if (!(SvFLAGS(sv) & (SVs_GMG|SVs_SMG)) || (vtbl->svt_clear != NULL))
+	    if (!(SvFLAGS(sv) & (SVs_GMG|SVs_SMG)) || vtbl->svt_clear)
 		SvRMAGICAL_on(sv);
 	}
     }
@@ -92,7 +92,7 @@ Perl_mg_get(pTHX_ SV *sv)
     mgp = &SvMAGIC(sv);
     while ((mg = *mgp) != 0) {
 	MGVTBL* vtbl = mg->mg_virtual;
-	if (!(mg->mg_flags & MGf_GSKIP) && vtbl && (vtbl->svt_get != NULL)) {
+	if (!(mg->mg_flags & MGf_GSKIP) && vtbl && vtbl->svt_get) {
 	    CALL_FPTR(vtbl->svt_get)(aTHX_ sv, mg);
 	    /* Ignore this magic if it's been deleted */
 	    if ((mg == (mgp_valid ? *mgp : SvMAGIC(sv))) &&
@@ -130,7 +130,7 @@ Perl_mg_set(pTHX_ SV *sv)
 	    mg->mg_flags &= ~MGf_GSKIP;	/* setting requires another read */
 	    (SSPTR(mgs_ix, MGS*))->mgs_flags = 0;
 	}
-	if (vtbl && (vtbl->svt_set != NULL))
+	if (vtbl && vtbl->svt_set)
 	    CALL_FPTR(vtbl->svt_set)(aTHX_ sv, mg);
     }
 
@@ -147,7 +147,7 @@ Perl_mg_length(pTHX_ SV *sv)
 
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	MGVTBL* vtbl = mg->mg_virtual;
-	if (vtbl && (vtbl->svt_len != NULL)) {
+	if (vtbl && vtbl->svt_len) {
             I32 mgs_ix;
 
 	    mgs_ix = SSNEW(sizeof(MGS));
@@ -171,7 +171,7 @@ Perl_mg_size(pTHX_ SV *sv)
     
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	MGVTBL* vtbl = mg->mg_virtual;
-	if (vtbl && (vtbl->svt_len != NULL)) {
+	if (vtbl && vtbl->svt_len) {
             I32 mgs_ix;
 
 	    mgs_ix = SSNEW(sizeof(MGS));
@@ -209,7 +209,7 @@ Perl_mg_clear(pTHX_ SV *sv)
 	MGVTBL* vtbl = mg->mg_virtual;
 	/* omit GSKIP -- never set here */
 	
-	if (vtbl && (vtbl->svt_clear != NULL))
+	if (vtbl && vtbl->svt_clear)
 	    CALL_FPTR(vtbl->svt_clear)(aTHX_ sv, mg);
     }
 
@@ -252,7 +252,7 @@ Perl_mg_free(pTHX_ SV *sv)
     for (mg = SvMAGIC(sv); mg; mg = moremagic) {
 	MGVTBL* vtbl = mg->mg_virtual;
 	moremagic = mg->mg_moremagic;
-	if (vtbl && (vtbl->svt_free != NULL))
+	if (vtbl && vtbl->svt_free)
 	    CALL_FPTR(vtbl->svt_free)(aTHX_ sv, mg);
 	if (mg->mg_ptr && mg->mg_type != 'g')
 	    if (mg->mg_len >= 0)
@@ -638,7 +638,8 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	int saveerrno = errno;
 	sv_setnv(sv, (NV)errno);
 #ifdef OS2
-	if (errno == errno_isOS2) sv_setpv(sv, os2error(Perl_rc));
+	if (errno == errno_isOS2 || errno == errno_isOS2_set)
+	    sv_setpv(sv, os2error(Perl_rc));
 	else
 #endif
 	sv_setpv(sv, errno ? Strerror(errno) : "");
@@ -1125,7 +1126,7 @@ int
 Perl_magic_nextpack(pTHX_ SV *sv, MAGIC *mg, SV *key)
 {
     dSP;
-    char *meth = SvOK(key) ? "NEXTKEY" : "FIRSTKEY";
+    const char *meth = SvOK(key) ? "NEXTKEY" : "FIRSTKEY";
 
     ENTER;
     SAVETMPS;

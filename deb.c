@@ -59,19 +59,7 @@ Perl_vdeb(pTHX_ const char *pat, va_list *args)
 	SvTYPE(gv) == SVt_PVGV ? SvPVX(GvSV(gv)) : "<free>",
 	(long)PL_curcop->cop_line);
 #endif /* USE_THREADS */
-    for (i=0; i<PL_dlevel; i++)
-	PerlIO_printf(Perl_debug_log, "%c%c ",PL_debname[i],PL_debdelim[i]);
     (void) PerlIO_vprintf(Perl_debug_log, pat, *args);
-#endif /* DEBUGGING */
-}
-
-void
-Perl_deb_growlevel(pTHX)
-{
-#ifdef DEBUGGING
-    PL_dlmax += 128;
-    Renew(PL_debname, PL_dlmax, char);
-    Renew(PL_debdelim, PL_dlmax, char);
 #endif /* DEBUGGING */
 }
 

@@ -245,8 +245,14 @@ PP(pp_rv2gv)
 		    STRLEN len = 0;
 		    char *name = "";
 		    if (cUNOP->op_first->op_type == OP_PADSV) {
-			SV *padname = *av_fetch(PL_comppad_name, cUNOP->op_first->op_targ, 4);
-			name = SvPV(padname,len);                                                    
+			SV **namep = av_fetch(PL_comppad_name, cUNOP->op_first->op_targ, 4);
+			if (namep && *namep) {
+			    name = SvPV(*namep,len);
+			    if (!name) {
+				name = "";
+				len  = 0;
+			    }
+			}
 		    }
 		    gv_init(gv, PL_curcop->cop_stash, name, len, 0);
 		    sv_upgrade(sv, SVt_RV);

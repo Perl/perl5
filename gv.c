@@ -653,15 +653,14 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	if (strEQ(name, "SIG")) {
 	    HV *hv;
 	    I32 i;
-	    PL_siggv = gv;
-	    GvMULTI_on(PL_siggv);
-	    hv = GvHVn(PL_siggv);
-	    hv_magic(hv, PL_siggv, 'S');
-	    for(i=1;PL_sig_name[i];i++) {
+	    GvMULTI_on(gv);
+	    hv = GvHVn(gv);
+	    hv_magic(hv, gv, 'S');
+	    for(i = 1; PL_sig_name[i]; i++) {
 	    	SV ** init;
-	    	init=hv_fetch(hv,PL_sig_name[i],strlen(PL_sig_name[i]),1);
-	    	if(init)
-	    		sv_setsv(*init,&PL_sv_undef);
+	    	init = hv_fetch(hv, PL_sig_name[i], strlen(PL_sig_name[i]), 1);
+	    	if (init)
+		    sv_setsv(*init, &PL_sv_undef);
 	    	PL_psig_ptr[i] = 0;
 	    	PL_psig_name[i] = 0;
 	    }
@@ -675,21 +674,18 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
     case '&':
 	if (len > 1)
 	    break;
-	PL_ampergv = gv;
 	PL_sawampersand = TRUE;
 	goto ro_magicalize;
 
     case '`':
 	if (len > 1)
 	    break;
-	PL_leftgv = gv;
 	PL_sawampersand = TRUE;
 	goto ro_magicalize;
 
     case '\'':
 	if (len > 1)
 	    break;
-	PL_rightgv = gv;
 	PL_sawampersand = TRUE;
 	goto ro_magicalize;
 

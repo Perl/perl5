@@ -201,6 +201,7 @@ perl_construct(pTHXx)
 
     init_i18nl10n(1);
     SET_NUMERIC_STANDARD();
+
 #if defined(PERL_SUBVERSION) && PERL_SUBVERSION > 0
     sprintf(PL_patchlevel, "%7.5f",   (double) PERL_REVISION
 				+ ((double) PERL_VERSION / (double) 1000)
@@ -218,11 +219,6 @@ perl_construct(pTHXx)
 
     PL_fdpid = newAV();			/* for remembering popen pids by fd */
     PL_modglobal = newHV();		/* pointers to per-interpreter module globals */
-
-    DEBUG( {
-	New(51,PL_debname,128,char);
-	New(52,PL_debdelim,128,char);
-    } )
 
     ENTER;
 }
@@ -389,8 +385,6 @@ perl_destruct(pTHXx)
     PL_dowarn       = G_WARN_OFF;
     PL_doextract    = FALSE;
     PL_sawampersand = FALSE;	/* must save all match strings */
-    PL_sawstudy     = FALSE;	/* do fbm_instr on all strings */
-    PL_sawvec       = FALSE;
     PL_unsafe       = FALSE;
 
     Safefree(PL_inplace);
@@ -446,7 +440,6 @@ perl_destruct(pTHXx)
 
     /* shortcuts just get cleared */
     PL_envgv = Nullgv;
-    PL_siggv = Nullgv;
     PL_incgv = Nullgv;
     PL_hintgv = Nullgv;
     PL_errgv = Nullgv;
@@ -701,6 +694,7 @@ S_parse_body(pTHX_ va_list args)
     AV* comppadlist;
     register SV *sv;
     register char *s;
+    char *cddir = Nullch;
 
     XSINIT_t xsinit = va_arg(args, XSINIT_t);
 
@@ -869,7 +863,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 	    PL_doextract = TRUE;
 	    s++;
 	    if (*s)
-		PL_cddir = savepv(s);
+		cddir = s;
 	    break;
 	case 0:
 	    break;
@@ -942,8 +936,27 @@ print \"  \\@INC:\\n    @INC\\n\";");
 
     validate_suid(validarg, scriptname,fdscript);
 
-    if (PL_doextract)
+#if defined(SIGCHLD) || defined(SIGCLD)
+    {
+#ifndef SIGCHLD
+#  define SIGCHLD SIGCLD
+#endif
+	Sighandler_t sigstate = rsignal_state(SIGCHLD);
+	if (sigstate == SIG_IGN) {
+	    if (ckWARN(WARN_SIGNAL))
+		Perl_warner(aTHX_ WARN_SIGNAL,
+			    "Can't ignore signal CHLD, forcing to default");
+	    (void)rsignal(SIGCHLD, (Sighandler_t)SIG_DFL);
+	}
+    }
+#endif
+
+    if (PL_doextract) {
 	find_beginning();
+	if (cddir && PerlDir_chdir(cddir) < 0)
+	    Perl_croak(aTHX_ "Can't chdir to %s",cddir);
+
+    }
 
     PL_main_cv = PL_compcv = (CV*)NEWSV(1104,0);
     sv_upgrade((SV *)PL_compcv, SVt_PVCV);
@@ -1576,7 +1589,7 @@ Perl_moreswitches(pTHX_ char *s)
     case '0':
     {
 	dTHR;
-	rschar = scan_oct(s, 4, &numlen);
+	rschar = (U32)scan_oct(s, 4, &numlen);
 	SvREFCNT_dec(PL_nrs);
 	if (rschar & ~((U8)~0))
 	    PL_nrs = &PL_sv_undef;
@@ -1678,7 +1691,7 @@ Perl_moreswitches(pTHX_ char *s)
 	if (isDIGIT(*s)) {
 	    PL_ors = savepv("\n");
 	    PL_orslen = 1;
-	    *PL_ors = scan_oct(s, 3 + (*s == '0'), &numlen);
+	    *PL_ors = (char)scan_oct(s, 3 + (*s == '0'), &numlen);
 	    s += numlen;
 	}
 	else {
@@ -1901,7 +1914,6 @@ S_init_interp(pTHX)
     PL_curcop		= &PL_compiling;\
     PL_curcopdb		= NULL;		\
     PL_dbargs		= 0;		\
-    PL_dlmax		= 128;		\
     PL_dumpindent	= 4;		\
     PL_laststatval	= -1;		\
     PL_laststype	= OP_STAT;	\
@@ -1911,7 +1923,6 @@ S_init_interp(pTHX)
     PL_tmps_floor	= -1;		\
     PL_tmps_ix		= -1;		\
     PL_op_mask		= NULL;		\
-    PL_dlmax		= 128;		\
     PL_laststatval	= -1;		\
     PL_laststype	= OP_STAT;	\
     PL_mess_sv		= Nullsv;	\
@@ -2527,8 +2538,6 @@ S_find_beginning(pTHX)
 		    /*SUPPRESS 530*/
 		    while (s = moreswitches(s)) ;
 	    }
-	    if (PL_cddir && PerlDir_chdir(PL_cddir) < 0)
-		Perl_croak(aTHX_ "Can't chdir to %s",PL_cddir);
 	}
     }
 }
@@ -2643,10 +2652,6 @@ S_nuke_stacks(pTHX)
     Safefree(PL_scopestack);
     Safefree(PL_savestack);
     Safefree(PL_retstack);
-    DEBUG( {
-	Safefree(PL_debname);
-	Safefree(PL_debdelim);
-    } )
 }
 
 #ifndef PERL_OBJECT
@@ -2745,7 +2750,11 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	magicname("0", "0", 1);
     }
     if (tmpgv = gv_fetchpv("\030",TRUE, SVt_PV))
+#ifdef OS2
+	sv_setpv(GvSV(tmpgv), os2_execname());
+#else
 	sv_setpv(GvSV(tmpgv),PL_origargv[0]);
+#endif
     if (PL_argvgv = gv_fetchpv("ARGV",TRUE, SVt_PVAV)) {
 	GvMULTI_on(PL_argvgv);
 	(void)gv_AVadd(PL_argvgv);
