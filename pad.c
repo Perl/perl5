@@ -664,7 +664,7 @@ S_pad_findlex(pTHX_ char *name, CV* cv, U32 seq, int warn,
 		*out_name_sv = name_svp[offset]; /* return the namesv */
 		*out_flags = SvIVX(*out_name_sv);
 		DEBUG_Xv(PerlIO_printf(Perl_debug_log,
-		    "Pad findlex cv=0x%"UVxf" matched: offset=%ld flags=0x%x index=%lu\n",
+		    "Pad findlex cv=0x%"UVxf" matched: offset=%ld flags=0x%lx index=%lu\n",
 		    PTR2UV(cv), (long)offset, (unsigned long)*out_flags,
 			(unsigned long)SvNVX(*out_name_sv) 
 		));
@@ -720,7 +720,7 @@ S_pad_findlex(pTHX_ char *name, CV* cv, U32 seq, int warn,
 				    CvDEPTH(cv) ? CvDEPTH(cv) : 1])[offset];
 		    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 			"Pad findlex cv=0x%"UVxf" found lex=0x%"UVxf"\n",
-			PTR2UV(cv), *out_capture));
+			PTR2UV(cv), PTR2UV(*out_capture)));
 
 		    if (SvPADSTALE(*out_capture)) {
 			if (ckWARN(WARN_CLOSURE))
