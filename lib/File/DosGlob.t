@@ -17,9 +17,9 @@ use File::DosGlob 'glob';
 # test if $_ takes as the default
 my $expected;
 if ($^O eq 'MacOS') {
-    $expected = $_ = ":lib:a*.t";
+    $expected = $_ = ":op:a*.t";
 } else {
-    $expected = $_ = "lib/a*.t";
+    $expected = $_ = "op/a*.t";
 }
 $_ = "op/a*.t";
 my @r = glob;
