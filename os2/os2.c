@@ -321,7 +321,7 @@ int execf;
     if (strnEQ(cmd,"/bin/sh",7) && isSPACE(cmd[7])) {
 	STRLEN l = strlen(sh_path);
 	
-	New(1302, news, strlen(cmd) - 7 + l, char);
+	New(1302, news, strlen(cmd) - 7 + l + 1, char);
 	strcpy(news, sh_path);
 	strcpy(news + l, cmd + 7);
 	cmd = news;
