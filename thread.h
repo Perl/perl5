@@ -82,6 +82,7 @@ struct thread *getTHR _((void));
 
 struct thread {
     perl_thread	Tself;
+    SV *	Toursv;
 
     /* The fields that used to be global */
     SV **	Tstack_base;
@@ -166,15 +167,17 @@ struct thread {
 typedef struct thread *Thread;
 
 /* Values and macros for thrflags */
-#define THR_STATE_MASK	3
-#define THR_NORMAL	0
-#define THR_DETACHED	1
-#define THR_JOINED	2
-#define THR_DEAD	3
+#define THRf_STATE_MASK	3
+#define THRf_NORMAL	0
+#define THRf_DETACHED	1
+#define THRf_JOINED	2
+#define THRf_DEAD	3
 
-#define ThrSTATE(t)	(t->Tthrflags & THR_STATE_MASK)
+#define THRf_DIE_FATAL	4
+
+#define ThrSTATE(t)	(t->Tthrflags & THRf_STATE_MASK)
 #define ThrSETSTATE(t, s) STMT_START {		\
-	(t)->Tthrflags &= ~THR_STATE_MASK;	\
+	(t)->Tthrflags &= ~THRf_STATE_MASK;	\
 	(t)->Tthrflags |= (s);			\
 	DEBUG_L(fprintf(stderr, "thread 0x%lx set to state %d\n", \
 			(unsigned long)(t), (s))); \
@@ -231,6 +234,7 @@ typedef struct condpair {
 #undef	localizing
 
 #define self		(thr->Tself)
+#define oursv		(thr->Toursv)
 #define stack_base	(thr->Tstack_base)
 #define stack_sp	(thr->Tstack_sp)
 #define stack_max	(thr->Tstack_max)
