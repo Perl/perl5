@@ -287,7 +287,7 @@ S_visit(pTHX_ SVFUNC_t f)
 	svend = &sva[SvREFCNT(sva)];
 	for (sv = sva + 1; sv < svend; ++sv) {
 	    if (SvTYPE(sv) != SVTYPEMASK && SvREFCNT(sv)) {
-		(FCALL)(aTHXo_ sv);
+		(FCALL)(aTHX_ sv);
 		++visited;
 	    }
 	}
@@ -298,7 +298,7 @@ S_visit(pTHX_ SVFUNC_t f)
 /* called by sv_report_used() for each live SV */
 
 static void
-do_report_used(pTHXo_ SV *sv)
+do_report_used(pTHX_ SV *sv)
 {
     if (SvTYPE(sv) != SVTYPEMASK) {
 	PerlIO_printf(Perl_debug_log, "****\n");
@@ -323,7 +323,7 @@ Perl_sv_report_used(pTHX)
 /* called by sv_clean_objs() for each live SV */
 
 static void
-do_clean_objs(pTHXo_ SV *sv)
+do_clean_objs(pTHX_ SV *sv)
 {
     SV* rv;
 
@@ -347,7 +347,7 @@ do_clean_objs(pTHXo_ SV *sv)
 
 #ifndef DISABLE_DESTRUCTOR_KLUDGE
 static void
-do_clean_named_objs(pTHXo_ SV *sv)
+do_clean_named_objs(pTHX_ SV *sv)
 {
     if (SvTYPE(sv) == SVt_PVGV && GvGP(sv)) {
 	if ( SvOBJECT(GvSV(sv)) ||
@@ -386,7 +386,7 @@ Perl_sv_clean_objs(pTHX)
 /* called by sv_clean_all() for each live SV */
 
 static void
-do_clean_all(pTHXo_ SV *sv)
+do_clean_all(pTHX_ SV *sv)
 {
     DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning loops: SV at 0x%"UVxf"\n", PTR2UV(sv)) ));
     SvFLAGS(sv) |= SVf_BREAK;
@@ -9288,7 +9288,7 @@ Perl_any_dup(pTHX_ void *v, PerlInterpreter *proto_perl)
 
     /* see if it is part of the interpreter structure */
     if (v >= (void*)proto_perl && v < (void*)(proto_perl+1))
-	ret = (void*)(((char*)aTHXo) + (((char*)v) - (char*)proto_perl));
+	ret = (void*)(((char*)aTHX) + (((char*)v) - (char*)proto_perl));
     else
 	ret = v;
 
@@ -9316,7 +9316,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, clone_params* param)
     I32 i;
     char *c = NULL;
     void (*dptr) (void*);
-    void (*dxptr) (pTHXo_ void*);
+    void (*dxptr) (pTHX_ void*);
     OP *o;
 
     Newz(54, nss, max, ANY);
@@ -9489,7 +9489,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, clone_params* param)
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);	/* XXX quite arbitrary */
 	    dxptr = POPDXPTR(ss,ix);
-	    TOPDXPTR(nss,ix) = (void (*)(pTHXo_ void*))any_dup((void *)dxptr, proto_perl);
+	    TOPDXPTR(nss,ix) = (void (*)(pTHX_ void*))any_dup((void *)dxptr, proto_perl);
 	    break;
 	case SAVEt_REGCONTEXT:
 	case SAVEt_ALLOC:
@@ -9545,10 +9545,6 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, clone_params* param)
     return nss;
 }
 
-#ifdef PERL_OBJECT
-#include "XSUB.h"
-#endif
-
 /*
 =for apidoc perl_clone
 
@@ -9564,10 +9560,6 @@ perl_clone_host(PerlInterpreter* proto_perl, UV flags);
 PerlInterpreter *
 perl_clone(PerlInterpreter *proto_perl, UV flags)
 {
-#ifdef PERL_OBJECT
-    CPerlObj *pPerl = (CPerlObj*)proto_perl;
-#endif
-
 #ifdef PERL_IMPLICIT_SYS
 
    /* perlhost.h so we need to call into it
@@ -9603,26 +9595,19 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     IV i;
     clone_params* param = (clone_params*) malloc(sizeof(clone_params));
 
-
-
-#  ifdef PERL_OBJECT
-    CPerlObj *pPerl = new(ipM) CPerlObj(ipM, ipMS, ipMP, ipE, ipStd, ipLIO,
-					ipD, ipS, ipP);
-    PERL_SET_THX(pPerl);
-#  else		/* !PERL_OBJECT */
     PerlInterpreter *my_perl = (PerlInterpreter*)(*ipM->pMalloc)(ipM, sizeof(PerlInterpreter));
     PERL_SET_THX(my_perl);
 
-#    ifdef DEBUGGING
+#  ifdef DEBUGGING
     memset(my_perl, 0xab, sizeof(PerlInterpreter));
     PL_markstack = 0;
     PL_scopestack = 0;
     PL_savestack = 0;
     PL_retstack = 0;
     PL_sig_pending = 0;
-#    else	/* !DEBUGGING */
+#  else	/* !DEBUGGING */
     Zero(my_perl, 1, PerlInterpreter);
-#    endif	/* DEBUGGING */
+#  endif	/* DEBUGGING */
 
     /* host pointers */
     PL_Mem		= ipM;
@@ -9634,7 +9619,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_Dir		= ipD;
     PL_Sock		= ipS;
     PL_Proc		= ipP;
-#  endif	/* PERL_OBJECT */
 #else		/* !PERL_IMPLICIT_SYS */
     IV i;
     clone_params* param = (clone_params*) malloc(sizeof(clone_params));
@@ -9706,11 +9690,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     SvFLAGS(&PL_sv_undef)	= SVf_READONLY|SVt_NULL;
     ptr_table_store(PL_ptr_table, &proto_perl->Isv_undef, &PL_sv_undef);
 
-#ifdef PERL_OBJECT
-    SvUPGRADE(&PL_sv_no, SVt_PVNV);
-#else
     SvANY(&PL_sv_no)		= new_XPVNV();
-#endif
     SvREFCNT(&PL_sv_no)		= (~(U32)0)/2;
     SvFLAGS(&PL_sv_no)		= SVp_NOK|SVf_NOK|SVp_POK|SVf_POK|SVf_READONLY|SVt_PVNV;
     SvPVX(&PL_sv_no)		= SAVEPVN(PL_No, 0);
@@ -9719,11 +9699,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     SvNVX(&PL_sv_no)		= 0;
     ptr_table_store(PL_ptr_table, &proto_perl->Isv_no, &PL_sv_no);
 
-#ifdef PERL_OBJECT
-    SvUPGRADE(&PL_sv_yes, SVt_PVNV);
-#else
     SvANY(&PL_sv_yes)		= new_XPVNV();
-#endif
     SvREFCNT(&PL_sv_yes)	= (~(U32)0)/2;
     SvFLAGS(&PL_sv_yes)		= SVp_NOK|SVf_NOK|SVp_POK|SVf_POK|SVf_READONLY|SVt_PVNV;
     SvPVX(&PL_sv_yes)		= SAVEPVN(PL_Yes, 1);
@@ -10315,17 +10291,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     SvREFCNT_dec(param->stashes);
     Safefree(param);
 
-#ifdef PERL_OBJECT
-    return (PerlInterpreter*)pPerl;
-#else
     return my_perl;
-#endif
 }
-
-#else	/* !USE_ITHREADS */
-
-#ifdef PERL_OBJECT
-#include "XSUB.h"
-#endif
 
 #endif /* USE_ITHREADS */

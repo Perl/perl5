@@ -116,7 +116,7 @@ close(CFG);
 # perl.h logic duplication begins
 
 if ($define{USE_ITHREADS}) {
-    if (!$define{MULTIPLICITY} && !$define{PERL_OBJECT}) {
+    if (!$define{MULTIPLICITY}) {
         $define{MULTIPLICITY} = 1;
     }
 }
@@ -125,18 +125,6 @@ $define{PERL_IMPLICIT_CONTEXT} ||=
     $define{USE_ITHREADS} ||
     $define{USE_5005THREADS}  ||
     $define{MULTIPLICITY} ;
-
-if ($define{PERL_CAPI}) {
-    delete $define{PERL_OBJECT};
-    $define{MULTIPLICITY} = 1;
-    $define{PERL_IMPLICIT_CONTEXT} = 1;
-    $define{PERL_IMPLICIT_SYS}     = 1;
-}
-
-if ($define{PERL_OBJECT}) {
-    $define{PERL_IMPLICIT_CONTEXT} = 1;
-    $define{PERL_IMPLICIT_SYS}     = 1;
-}
 
 # perl.h logic duplication ends
 
@@ -205,7 +193,7 @@ sub emit_symbols {
     foreach my $symbol (@$list) {
 	my $skipsym = $symbol;
 	# XXX hack
-	if ($define{PERL_OBJECT} || $define{MULTIPLICITY}) {
+	if ($define{MULTIPLICITY}) {
 	    $skipsym =~ s/^Perl_[GIT](\w+)_ptr$/PL_$1/;
 	}
 	emit_symbol($symbol) unless exists $skip{$skipsym};
@@ -739,7 +727,7 @@ for my $syms (@syms) {
 
 # variables
 
-if ($define{'PERL_OBJECT'} || $define{'MULTIPLICITY'}) {
+if ($define{'MULTIPLICITY'}) {
     for my $f ($perlvars_h, $intrpvar_h, $thrdvar_h) {
 	my $glob = readvar($f, sub { "Perl_" . $_[1] . $_[2] . "_ptr" });
 	emit_symbols $glob;

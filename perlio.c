@@ -426,7 +426,7 @@ PerlIO_list_push(PerlIO_list_t *list,PerlIO_funcs *funcs,SV *arg)
 
 
 void
-PerlIO_cleanup_layers(pTHXo_ void *data)
+PerlIO_cleanup_layers(pTHX_ void *data)
 {
 #if 0
  PerlIO_known_layers = Nullhv;

@@ -12,15 +12,6 @@
 #include "perl.h"
 #include "XSUB.h"
 
-#ifdef PERL_OBJECT
-#undef PL_op_name
-#undef PL_opargs 
-#undef PL_op_desc
-#define PL_op_name (get_op_names())
-#define PL_opargs (get_opargs())
-#define PL_op_desc (get_op_descs())
-#endif
-
 #ifdef PerlIO
 typedef PerlIO * InputStream;
 #else

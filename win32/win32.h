@@ -13,7 +13,7 @@
 #  define _WIN32_WINNT 0x0400     /* needed for TryEnterCriticalSection() etc. */
 #endif
 
-#if defined(PERL_OBJECT) || defined(PERL_IMPLICIT_SYS) || defined(PERL_CAPI)
+#if defined(PERL_IMPLICIT_SYS)
 #  define DYNAMIC_ENV_FETCH
 #  define HAS_GETENV_LEN
 #  define prime_env_iter()
@@ -42,15 +42,11 @@
 
 /* now even GCC supports __declspec() */
 
-#if defined(PERL_OBJECT)
-#define DllExport
-#else
 #if defined(PERLDLL) || defined(WIN95FIX)
 #define DllExport
 /*#define DllExport __declspec(dllexport)*/	/* noises with VC5+sp3 */
 #else 
 #define DllExport __declspec(dllimport)
-#endif
 #endif
 
 #define  WIN32_LEAN_AND_MEAN
@@ -186,11 +182,6 @@ struct utsname {
 #pragma warn -use	/* "'foo' is declared but never used" */
 #pragma warn -csu	/* "comparing signed and unsigned values" */
 
-/* Borland is picky about a bare member function name used as its ptr */
-#ifdef PERL_OBJECT
-#  define MEMBER_TO_FPTR(name)	&(name)
-#endif
-
 /* Borland C thinks that a pointer to a member variable is 12 bytes in size. */
 #define PERL_MEMBER_PTR_SIZE	12
 
@@ -223,10 +214,6 @@ typedef long		gid_t;
 #define fcloseall	_fcloseall
 #define isnan		_isnan	/* ...same libraries as MSVC */
 
-#ifdef PERL_OBJECT
-#  define MEMBER_TO_FPTR(name)	&(name)
-#endif
-
 #ifndef _O_NOINHERIT
 #  define _O_NOINHERIT	0x0080
 #  ifndef _NO_OLDNAMES
@@ -242,46 +229,6 @@ typedef long		gid_t;
 #endif
 
 /* compatibility stuff for other compilers goes here */
-
-
-#if !defined(PERL_OBJECT) && defined(PERL_CAPI) && defined(PERL_MEMBER_PTR_SIZE)
-#  define STRUCT_MGVTBL_DEFINITION \
-struct mgvtbl {								\
-    union {								\
-	int	    (CPERLscope(*svt_get))(pTHX_ SV *sv, MAGIC* mg);	\
-	char	    handle_VC_problem1[PERL_MEMBER_PTR_SIZE];		\
-    };									\
-    union {								\
-	int	    (CPERLscope(*svt_set))(pTHX_ SV *sv, MAGIC* mg);	\
-	char	    handle_VC_problem2[PERL_MEMBER_PTR_SIZE];		\
-    };									\
-    union {								\
-	U32	    (CPERLscope(*svt_len))(pTHX_ SV *sv, MAGIC* mg);	\
-	char	    handle_VC_problem3[PERL_MEMBER_PTR_SIZE];		\
-    };									\
-    union {								\
-	int	    (CPERLscope(*svt_clear))(pTHX_ SV *sv, MAGIC* mg);	\
-	char	    handle_VC_problem4[PERL_MEMBER_PTR_SIZE];		\
-    };									\
-    union {								\
-	int	    (CPERLscope(*svt_free))(pTHX_ SV *sv, MAGIC* mg);	\
-	char	    handle_VC_problem5[PERL_MEMBER_PTR_SIZE];		\
-    };									\
-}
-
-#  define BASEOP_DEFINITION \
-    OP*		op_next;						\
-    OP*		op_sibling;						\
-    OP*		(CPERLscope(*op_ppaddr))(pTHX);				\
-    char	handle_VC_problem[PERL_MEMBER_PTR_SIZE-sizeof(OP*)];	\
-    PADOFFSET	op_targ;						\
-    OPCODE	op_type;						\
-    U16		op_seq;							\
-    U8		op_flags;						\
-    U8		op_private;
-
-#endif /* !PERL_OBJECT && PERL_CAPI && PERL_MEMBER_PTR_SIZE */
-
 
 START_EXTERN_C
 

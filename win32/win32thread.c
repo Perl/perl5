@@ -1,12 +1,6 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-#if defined(PERL_OBJECT)
-#define NO_XSLOCKS
-extern CPerlObj* pPerl;
-#include "XSUB.h"
-#endif
-
 #ifdef USE_DECLSPEC_THREAD
 __declspec(thread) void *PL_current_context = NULL;
 #endif

@@ -22,7 +22,7 @@
 /* Hot code. */
 
 #ifdef USE_5005THREADS
-static void unset_cvowner(pTHXo_ void *cvarg);
+static void unset_cvowner(pTHX_ void *cvarg);
 #endif /* USE_5005THREADS */
 
 PP(pp_const)
@@ -2734,7 +2734,7 @@ try_autoload:
 		PL_curcopdb = NULL;
 	    }
 	    /* Do we need to open block here? XXXX */
-	    (void)(*CvXSUB(cv))(aTHXo_ cv);
+	    (void)(*CvXSUB(cv))(aTHX_ cv);
 
 	    /* Enforce some sanity in scalar context. */
 	    if (gimme == G_SCALAR && ++markix != PL_stack_sp - PL_stack_base ) {
@@ -3131,7 +3131,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 
 #ifdef USE_5005THREADS
 static void
-unset_cvowner(pTHXo_ void *cvarg)
+unset_cvowner(pTHX_ void *cvarg)
 {
     register CV* cv = (CV *) cvarg;
 

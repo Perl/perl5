@@ -20,11 +20,6 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-#if defined(PERL_OBJECT)
-#define NO_XSLOCKS
-#include "XSUB.h"
-#endif
-
 #include "nw5iop.h"
 #include "nw5sck.h"
 #include <fcntl.h>

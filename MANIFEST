@@ -42,7 +42,7 @@ emacs/cperl-mode.el	An alternate perl-mode
 emacs/e2ctags.pl	etags to ctags converter
 emacs/ptags		Creates smart TAGS file
 embed.h			Maps symbols to safer names
-embed.pl		Produces {embed,embedvar,objXSUB,proto}.h, global.sym
+embed.pl		Produces {embed,embedvar,proto}.h, global.sym
 embedvar.h		C namespace management
 epoc/config.sh		EPOC port config.sh template
 epoc/createpkg.pl	EPOC port generate PKG file
@@ -1606,7 +1606,6 @@ NetWare/testnlm/type/type.c	Netware port
 NetWare/win32ish.h		Netware port
 nostdio.h			Cause compile error on stdio calls
 numeric.c			Miscellaneous numeric conversion routines
-objXSUB.h			Scoping macros for Perl Object in extensions
 op.c				Opcode syntax tree code
 op.h				Opcode syntax tree header
 opcode.h			Automatically generated opcode header

@@ -42,7 +42,7 @@
  * PERL_IMPLICIT_CONTEXT and PERL_IMPLICIT_SYS */
 
 #ifdef USE_ITHREADS
-#  if !defined(MULTIPLICITY) && !defined(PERL_OBJECT)
+#  if !defined(MULTIPLICITY)
 #    define MULTIPLICITY
 #  endif
 #endif
@@ -58,125 +58,6 @@
 #    define PERL_IMPLICIT_CONTEXT
 #  endif
 #endif
-
-#ifdef PERL_CAPI
-#  undef PERL_OBJECT
-#  ifndef MULTIPLICITY
-#    define MULTIPLICITY
-#  endif
-#  ifndef PERL_IMPLICIT_CONTEXT
-#    define PERL_IMPLICIT_CONTEXT
-#  endif
-#  ifndef PERL_IMPLICIT_SYS
-#    define PERL_IMPLICIT_SYS
-#  endif
-#endif
-
-#ifdef PERL_OBJECT
-#  ifndef PERL_IMPLICIT_CONTEXT
-#    define PERL_IMPLICIT_CONTEXT
-#  endif
-#  ifndef PERL_IMPLICIT_SYS
-#    define PERL_IMPLICIT_SYS
-#  endif
-#endif
-
-#ifdef PERL_OBJECT
-
-/* PERL_OBJECT explained  - DickH and DougL @ ActiveState.com
-
-Defining PERL_OBJECT turns on creation of a C++ object that
-contains all writable core perl global variables and functions.
-Stated another way, all necessary global variables and functions
-are members of a big C++ object. This object's class is CPerlObj.
-This allows a Perl Host to have multiple, independent perl
-interpreters in the same process space. This is very important on
-Win32 systems as the overhead of process creation is quite high --
-this could be even higher than the script compile and execute time
-for small scripts.
-
-The perl executable implementation on Win32 is composed of perl.exe
-(the Perl Host) and perlX.dll. (the Perl Core). This allows the
-same Perl Core to easily be embedded in other applications that use
-the perl interpreter.
-
-+-----------+
-| Perl Host |
-+-----------+
-      ^
-      |
-      v
-+-----------+   +-----------+
-| Perl Core |<->| Extension |
-+-----------+   +-----------+ ...
-
-Defining PERL_OBJECT has the following effects:
-
-PERL CORE
-1. CPerlObj is defined (this is the PERL_OBJECT)
-2. all static functions that needed to access either global
-variables or functions needed are made member functions
-3. all writable static variables are made member variables
-4. all global variables and functions are defined as:
-	#define var CPerlObj::PL_var
-	#define func CPerlObj::Perl_func
-	* these are in embed.h
-This necessitated renaming some local variables and functions that
-had the same name as a global variable or function. This was
-probably a _good_ thing anyway.
-
-
-EXTENSIONS
-1. Access to global variables and perl functions is through a
-pointer to the PERL_OBJECT. This pointer type is CPerlObj*. This is
-made transparent to extension developers by the following macros:
-	#define var pPerl->PL_var
-	#define func pPerl->Perl_func
-	* these are done in objXSUB.h
-This requires that the extension be compiled as C++, which means
-that the code must be ANSI C and not K&R C. For K&R extensions,
-please see the C API notes located in Win32/GenCAPI.pl. This script
-creates a perlCAPI.lib that provides a K & R compatible C interface
-to the PERL_OBJECT.
-2. Local variables and functions cannot have the same name as perl's
-variables or functions since the macros will redefine these. Look for
-this if you get some strange error message and it does not look like
-the code that you had written. This often happens with variables that
-are local to a function.
-
-PERL HOST
-1. The perl host is linked with perlX.lib to get perl_alloc. This
-function will return a pointer to CPerlObj (the PERL_OBJECT). It
-takes pointers to the various PerlXXX_YYY interfaces (see iperlsys.h
-for more information on this).
-2. The perl host calls the same functions as normally would be
-called in setting up and running a perl script, except that the
-functions are now member functions of the PERL_OBJECT.
-
-*/
-
-
-class CPerlObj;
-
-#define STATIC
-#define CPERLscope(x)		CPerlObj::x
-#define CALL_FPTR(fptr)		(aTHXo->*fptr)
-
-#define pTHXo			CPerlObj *pPerl
-#define pTHXo_			pTHXo,
-#define aTHXo			this
-#define aTHXo_			this,
-#define PERL_OBJECT_THIS	aTHXo
-#define PERL_OBJECT_THIS_	aTHXo_
-#define dTHXoa(a)		pTHXo = (CPerlObj*)a
-#define dTHXo			pTHXo = PERL_GET_THX
-
-#define pTHXx		void
-#define pTHXx_
-#define aTHXx
-#define aTHXx_
-
-#else /* !PERL_OBJECT */
 
 #ifdef PERL_IMPLICIT_CONTEXT
 #  ifdef USE_5005THREADS
@@ -211,8 +92,6 @@ struct perl_thread;
 #define _PERL_OBJECT_THIS
 #define PERL_OBJECT_THIS_
 #define CALL_FPTR(fptr) (*fptr)
-
-#endif /* PERL_OBJECT */
 
 #define CALLRUNOPS  CALL_FPTR(PL_runops)
 #define CALLREGCOMP CALL_FPTR(PL_regcompp)
@@ -749,7 +628,7 @@ typedef struct perl_mstats perl_mstats_t;
 
 #include <errno.h>
 
-#if defined(WIN32) && (defined(PERL_OBJECT) || defined(PERL_IMPLICIT_SYS) || defined(PERL_CAPI))
+#if defined(WIN32) && defined(PERL_IMPLICIT_SYS)
 #  define WIN32SCK_IS_STDSCK		/* don't pull in custom wsock layer */
 #endif
 
@@ -2111,10 +1990,6 @@ typedef pthread_key_t	perl_key;
 #  else
 #  ifdef MULTIPLICITY
 #    define PERL_GET_THX		((PerlInterpreter *)PERL_GET_CONTEXT)
-#  else
-#  ifdef PERL_OBJECT
-#    define PERL_GET_THX		((CPerlObj *)PERL_GET_CONTEXT)
-#  endif
 #  endif
 #  endif
 #  define PERL_SET_THX(t)		PERL_SET_CONTEXT(t)
@@ -2185,7 +2060,7 @@ union any {
     IV		any_iv;
     long	any_long;
     void	(*any_dptr) (void*);
-    void	(*any_dxptr) (pTHXo_ void*);
+    void	(*any_dxptr) (pTHX_ void*);
 };
 #endif
 
@@ -2195,7 +2070,7 @@ union any {
 #define ARGSproto
 #endif /* USE_5005THREADS */
 
-typedef I32 (*filter_t) (pTHXo_ int, SV *, int);
+typedef I32 (*filter_t) (pTHX_ int, SV *, int);
 
 #define FILTER_READ(idx, sv, len)  filter_read(idx, sv, len)
 #define FILTER_DATA(idx)	   (AvARRAY(PL_rsfp_filters)[idx])
@@ -2463,16 +2338,12 @@ Gid_t getegid (void);
 #  define DEBUG_c(a) if (DEBUG_c_TEST) a
 #  define DEBUG_P(a) if (DEBUG_P_TEST) a
 
-#  if defined(PERL_OBJECT)
-#    define DEBUG_m(a) if (DEBUG_m_TEST) a
-#  else
      /* Temporarily turn off memory debugging in case the a
       * does memory allocation, either directly or indirectly. */
-#    define DEBUG_m(a)  \
+#  define DEBUG_m(a)  \
     STMT_START {							\
         if (PERL_GET_INTERP) { dTHX; if (DEBUG_m_TEST) {PL_debug&=~DEBUG_m_FLAG; a; PL_debug|=DEBUG_m_FLAG;} } \
     } STMT_END
-#  endif
 
 #  define DEBUG__(t, a) \
 	STMT_START { \
@@ -3207,12 +3078,12 @@ typedef SV*	(CPERLscope(*re_intuit_string_t)) (pTHX_ regexp *prog);
 typedef void	(CPERLscope(*regfree_t)) (pTHX_ struct regexp* r);
 
 typedef void (*DESTRUCTORFUNC_NOCONTEXT_t) (void*);
-typedef void (*DESTRUCTORFUNC_t) (pTHXo_ void*);
-typedef void (*SVFUNC_t) (pTHXo_ SV*);
-typedef I32  (*SVCOMPARE_t) (pTHXo_ SV*, SV*);
-typedef void (*XSINIT_t) (pTHXo);
-typedef void (*ATEXIT_t) (pTHXo_ void*);
-typedef void (*XSUBADDR_t) (pTHXo_ CV *);
+typedef void (*DESTRUCTORFUNC_t) (pTHX_ void*);
+typedef void (*SVFUNC_t) (pTHX_ SV*);
+typedef I32  (*SVCOMPARE_t) (pTHX_ SV*, SV*);
+typedef void (*XSINIT_t) (pTHX);
+typedef void (*ATEXIT_t) (pTHX_ void*);
+typedef void (*XSUBADDR_t) (pTHX_ CV *);
 
 /* Set up PERLVAR macros for populating structs */
 #define PERLVAR(var,type) type var;
@@ -3222,7 +3093,7 @@ typedef void (*XSUBADDR_t) (pTHXo_ CV *);
 
 /* Interpreter exitlist entry */
 typedef struct exitlistentry {
-    void (*fn) (pTHXo_ void*);
+    void (*fn) (pTHX_ void*);
     void *ptr;
 } PerlExitListEntry;
 
@@ -3244,7 +3115,7 @@ struct perl_vars *PL_VarsPtr;
 #  endif /* PERL_CORE */
 #endif /* PERL_GLOBAL_STRUCT */
 
-#if defined(MULTIPLICITY) || defined(PERL_OBJECT)
+#if defined(MULTIPLICITY)
 /* If we have multiple interpreters define a struct
    holding variables which must be per-interpreter
    If we don't have threads anything that would have
@@ -3258,7 +3129,7 @@ struct interpreter {
 #  include "intrpvar.h"
 /*
  * The following is a buffer where new variables must
- * be defined to maintain binary compatibility with PERL_OBJECT
+ * be defined to maintain binary compatibility with previous versions
  */
 PERLVARA(object_compatibility,30,	char)
 };
@@ -3267,7 +3138,7 @@ PERLVARA(object_compatibility,30,	char)
 struct interpreter {
     char broiled;
 };
-#endif /* MULTIPLICITY || PERL_OBJECT */
+#endif /* MULTIPLICITY */
 
 #ifdef USE_5005THREADS
 /* If we have threads define a struct with all the variables
@@ -3307,10 +3178,6 @@ typedef void *Thread;
 #  endif
 #endif
 
-#ifdef PERL_OBJECT
-#  define PERL_DECL_PROT
-#endif
-
 #undef PERL_CKDEF
 #undef PERL_PPDEF
 #define PERL_CKDEF(s)	OP *s (pTHX_ OP *o);
@@ -3318,14 +3185,8 @@ typedef void *Thread;
 
 #include "proto.h"
 
-#ifdef PERL_OBJECT
-#  undef PERL_DECL_PROT
-#endif
-
-#ifndef PERL_OBJECT
 /* this has structure inits, so it cannot be included before here */
-#  include "opcode.h"
-#endif
+#include "opcode.h"
 
 /* The following must follow proto.h as #defines mess up syntax */
 
@@ -3343,7 +3204,7 @@ typedef void *Thread;
 #define PERLVARI(var,type,init) EXT type  PL_##var INIT(init);
 #define PERLVARIC(var,type,init) EXTCONST type PL_##var INIT(init);
 
-#if !defined(MULTIPLICITY) && !defined(PERL_OBJECT)
+#if !defined(MULTIPLICITY)
 START_EXTERN_C
 #  include "intrpvar.h"
 #  ifndef USE_5005THREADS
@@ -3352,23 +3213,9 @@ START_EXTERN_C
 END_EXTERN_C
 #endif
 
-#ifdef PERL_OBJECT
+#if defined(WIN32)
 #  include "embed.h"
-
-#  ifdef DOINIT
-#    include "INTERN.h"
-#  else
-#    include "EXTERN.h"
-#  endif
-
-/* this has structure inits, so it cannot be included before here */
-#  include "opcode.h"
-
-#else
-#  if defined(WIN32)
-#    include "embed.h"
-#  endif
-#endif  /* PERL_OBJECT */
+#endif
 
 #ifndef PERL_GLOBAL_STRUCT
 START_EXTERN_C

@@ -463,17 +463,6 @@ USE_IMP_SYS	= define
 #
 #USE_5005THREADS= define
 
-#
-# WARNING! This option is deprecated and will eventually go away (enable
-# USE_MULTI instead).
-#
-# uncomment next line if you want to use the PERL_OBJECT build option.
-# DO NOT ENABLE unless you have legacy code that relies on the C++
-# CPerlObj class that was available in 5.005.  This cannot be enabled
-# if you ask for USE_5005THREADS above.
-#
-#USE_OBJECT	= define
-
 # For now let this be here
 #
 #CRYPT_SRC	= fcrypt.c
@@ -510,13 +499,6 @@ D_CRYPT		= define
 CRYPT_FLAG	= -DHAVE_DES_FCRYPT
 !ENDIF
 
-!IF "$(USE_OBJECT)" == "define"
-PERL_MALLOC	= undef
-USE_5005THREADS	= undef
-USE_MULTI	= undef
-USE_IMP_SYS	= define
-!ENDIF
-
 !IF "$(PERL_MALLOC)" == ""
 PERL_MALLOC	= undef
 !ENDIF
@@ -537,10 +519,6 @@ PERL_MALLOC	= undef
 USE_MULTI	= undef
 !ENDIF
 
-!IF "$(USE_OBJECT)" == ""
-USE_OBJECT	= undef
-!ENDIF
-
 !IF "$(USE_ITHREADS)" == ""
 USE_ITHREADS	= undef
 !ENDIF
@@ -553,16 +531,16 @@ USE_IMP_SYS	= undef
 USE_PERLCRT	= undef
 !ENDIF
 
-!IF "$(USE_IMP_SYS)$(USE_MULTI)$(USE_5005THREADS)$(USE_OBJECT)" == "defineundefundefundef"
+!IF "$(USE_IMP_SYS)$(USE_MULTI)$(USE_5005THREADS)" == "defineundefundef"
 USE_MULTI	= define
 !ENDIF
 
-!IF "$(USE_ITHREADS)$(USE_MULTI)$(USE_OBJECT)" == "defineundefundef"
+!IF "$(USE_ITHREADS)$(USE_MULTI)" == "defineundef"
 USE_MULTI	= define
 USE_5005THREADS	= undef
 !ENDIF
 
-!IF "$(USE_MULTI)$(USE_5005THREADS)$(USE_OBJECT)" != "undefundefundef"
+!IF "$(USE_MULTI)$(USE_5005THREADS)" != "undefundef"
 BUILDOPT	= $(BUILDOPT) -DPERL_IMPLICIT_CONTEXT
 !ENDIF
 
@@ -574,9 +552,6 @@ BUILDOPT	= $(BUILDOPT) -DPERL_IMPLICIT_SYS
 PROCESSOR_ARCHITECTURE	= x86
 !ENDIF
 
-!IF "$(USE_OBJECT)" == "define"
-ARCHNAME	= NetWare-$(PROCESSOR_ARCHITECTURE)-object
-!ELSE
 !IF "$(USE_5005THREADS)" == "define"
 ARCHNAME	= NetWare-$(PROCESSOR_ARCHITECTURE)-thread
 !ELSE
@@ -586,9 +561,8 @@ ARCHNAME	= NetWare-$(PROCESSOR_ARCHITECTURE)-multi
 ARCHNAME	= NetWare-$(PROCESSOR_ARCHITECTURE)
 !ENDIF
 !ENDIF
-!ENDIF
 
-!IF "$(USE_MULTI)$(USE_5005THREADS)$(USE_OBJECT)" != "undefundefundef"
+!IF "$(USE_MULTI)$(USE_5005THREADS)" != "undefundef"
 ADD_BUILDOPT	= $(ADD_BUILDOPT) -DPERL_IMPLICIT_CONTEXT
 !ENDIF
 
@@ -629,11 +603,6 @@ INST_HTML	= $(INST_POD)\html
 #
 # Options
 #
-
-!IF "$(USE_OBJECT)" == "define"
-OPTIMIZE	= $(OPTIMIZE) $(CXX_FLAG)
-BUILDOPT	= $(BUILDOPT) -DPERL_OBJECT
-!ENDIF
 
 OBJOUT_FLAG	= -Fo
 EXEOUT_FLAG	= -Fe
@@ -736,9 +705,7 @@ MICROCORE_SRC	=		\
 EXTRACORE_SRC	= $(EXTRACORE_SRC) ..\malloc.c
 !ENDIF
 
-#!IF "$(USE_OBJECT)" != "define"
 #EXTRACORE_SRC	= $(EXTRACORE_SRC) ..\perlio.c
-#!ENDIF
 
 !IF "$(CRYPT_SRC)" != ""
 NW_SRC	= $(NW_SRC) .\$(CRYPT_SRC)

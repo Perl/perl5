@@ -41,7 +41,7 @@ struct ysv {
     YYSTYPE oldyylval;
 };
 
-static void yydestruct(pTHXo_ void *ptr);
+static void yydestruct(pTHX_ void *ptr);
 
 %}
 

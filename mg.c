@@ -25,8 +25,8 @@
 #  endif
 #endif
 
-static void restore_magic(pTHXo_ void *p);
-static void unwind_handler_stack(pTHXo_ void *p);
+static void restore_magic(pTHX_ void *p);
+static void unwind_handler_stack(pTHX_ void *p);
 
 /*
  * Use the "DESTRUCTOR" scope cleanup to reinstate magic.
@@ -134,7 +134,7 @@ Perl_mg_get(pTHX_ SV *sv)
 	}
     }
 
-    restore_magic(aTHXo_ INT2PTR(void *, (IV)mgs_ix));
+    restore_magic(aTHX_ INT2PTR(void *, (IV)mgs_ix));
     return 0;
 }
 
@@ -167,7 +167,7 @@ Perl_mg_set(pTHX_ SV *sv)
 	    CALL_FPTR(vtbl->svt_set)(aTHX_ sv, mg);
     }
 
-    restore_magic(aTHXo_ INT2PTR(void*, (IV)mgs_ix));
+    restore_magic(aTHX_ INT2PTR(void*, (IV)mgs_ix));
     return 0;
 }
 
@@ -194,7 +194,7 @@ Perl_mg_length(pTHX_ SV *sv)
 	    save_magic(mgs_ix, sv);
 	    /* omit MGf_GSKIP -- not changed here */
 	    len = CALL_FPTR(vtbl->svt_len)(aTHX_ sv, mg);
-	    restore_magic(aTHXo_ INT2PTR(void*, (IV)mgs_ix));
+	    restore_magic(aTHX_ INT2PTR(void*, (IV)mgs_ix));
 	    return len;
 	}
     }
@@ -224,7 +224,7 @@ Perl_mg_size(pTHX_ SV *sv)
 	    save_magic(mgs_ix, sv);
 	    /* omit MGf_GSKIP -- not changed here */
 	    len = CALL_FPTR(vtbl->svt_len)(aTHX_ sv, mg);
-	    restore_magic(aTHXo_ INT2PTR(void*, (IV)mgs_ix));
+	    restore_magic(aTHX_ INT2PTR(void*, (IV)mgs_ix));
 	    return len;
 	}
     }
@@ -267,7 +267,7 @@ Perl_mg_clear(pTHX_ SV *sv)
 	    CALL_FPTR(vtbl->svt_clear)(aTHX_ sv, mg);
     }
 
-    restore_magic(aTHXo_ INT2PTR(void*, (IV)mgs_ix));
+    restore_magic(aTHX_ INT2PTR(void*, (IV)mgs_ix));
     return 0;
 }
 
@@ -2224,7 +2224,7 @@ Signal_t
 Perl_sighandler(int sig)
 {
 #if defined(WIN32) && defined(PERL_IMPLICIT_CONTEXT)
-    dTHXoa(PL_curinterp);	/* fake TLS, because signals don't do TLS */
+    dTHXa(PL_curinterp);	/* fake TLS, because signals don't do TLS */
 #else
     dTHX;
 #endif
@@ -2238,7 +2238,7 @@ Perl_sighandler(int sig)
     XPV *tXpv = PL_Xpv;
 
 #if defined(WIN32) && defined(PERL_IMPLICIT_CONTEXT)
-    PERL_SET_THX(aTHXo);	/* fake TLS, see above */
+    PERL_SET_THX(aTHX);	/* fake TLS, see above */
 #endif
 
     if (PL_savestack_ix + 15 <= PL_savestack_max)
@@ -2338,12 +2338,8 @@ cleanup:
 }
 
 
-#ifdef PERL_OBJECT
-#include "XSUB.h"
-#endif
-
 static void
-restore_magic(pTHXo_ void *p)
+restore_magic(pTHX_ void *p)
 {
     MGS* mgs = SSPTR(PTR2IV(p), MGS*);
     SV* sv = mgs->mgs_sv;
@@ -2384,7 +2380,7 @@ restore_magic(pTHXo_ void *p)
 }
 
 static void
-unwind_handler_stack(pTHXo_ void *p)
+unwind_handler_stack(pTHX_ void *p)
 {
     U32 flags = *(U32*)p;
 

@@ -80,12 +80,6 @@
 #define PERL_IN_REGEXEC_C
 #include "perl.h"
 
-#ifdef PERL_IN_XSUB_RE
-#  if defined(PERL_CAPI) || defined(PERL_OBJECT)
-#    include "XSUB.h"
-#  endif
-#endif
-
 #include "regcomp.h"
 
 #define RF_tainted	1		/* tainted information used? */
@@ -134,7 +128,7 @@
 
 #define LOAD_UTF8_CHARCLASS(a,b) STMT_START { if (!CAT2(PL_utf8_,a)) (void)CAT2(is_utf8_, a)((U8*)b); } STMT_END
 
-static void restore_pos(pTHXo_ void *arg);
+static void restore_pos(pTHX_ void *arg);
 
 STATIC CHECKPOINT
 S_regcppush(pTHX_ I32 parenfloor)
@@ -1775,7 +1769,7 @@ got_it:
 	    sv_setsv(oreplsv, GvSV(PL_replgv));/* So that when GvSV(replgv) is
 						  restored, the value remains
 						  the same. */
-	restore_pos(aTHXo_ 0);
+	restore_pos(aTHX_ 0);
     }
 
     /* make sure $`, $&, $', and $digit will work later */
@@ -1804,7 +1798,7 @@ phooey:
     DEBUG_r(PerlIO_printf(Perl_debug_log, "%sMatch failed%s\n",
 			  PL_colors[4],PL_colors[5]));
     if (PL_reg_eval_set)
-	restore_pos(aTHXo_ 0);
+	restore_pos(aTHX_ 0);
     return 0;
 }
 
@@ -4065,12 +4059,8 @@ S_reghopmaybe3(pTHX_ U8* s, I32 off, U8* lim)
     return s;
 }
 
-#ifdef PERL_OBJECT
-#include "XSUB.h"
-#endif
-
 static void
-restore_pos(pTHXo_ void *arg)
+restore_pos(pTHX_ void *arg)
 {
     if (PL_reg_eval_set) {
 	if (PL_reg_oldsaved) {

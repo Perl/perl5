@@ -27,10 +27,10 @@
 
 static char ident_too_long[] = "Identifier too long";
 
-static void restore_rsfp(pTHXo_ void *f);
+static void restore_rsfp(pTHX_ void *f);
 #ifndef PERL_NO_UTF16_FILTER
-static I32 utf16_textfilter(pTHXo_ int idx, SV *sv, int maxlen);
-static I32 utf16rev_textfilter(pTHXo_ int idx, SV *sv, int maxlen);
+static I32 utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen);
+static I32 utf16rev_textfilter(pTHX_ int idx, SV *sv, int maxlen);
 #endif
 
 #define XFAKEBRACK 128
@@ -2051,7 +2051,7 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
     /* Call function. The function is expected to 	*/
     /* call "FILTER_READ(idx+1, buf_sv)" first.		*/
     /* Return: <0:error, =0:eof, >0:not eof 		*/
-    return (*funcp)(aTHXo_ idx, buf_sv, maxlen);
+    return (*funcp)(aTHX_ idx, buf_sv, maxlen);
 }
 
 STATIC char *
@@ -7647,17 +7647,13 @@ S_swallow_bom(pTHX_ U8 *s)
     return (char*)s;
 }
 
-#ifdef PERL_OBJECT
-#include "XSUB.h"
-#endif
-
 /*
  * restore_rsfp
  * Restore a source filter.
  */
 
 static void
-restore_rsfp(pTHXo_ void *f)
+restore_rsfp(pTHX_ void *f)
 {
     PerlIO *fp = (PerlIO*)f;
 
@@ -7670,7 +7666,7 @@ restore_rsfp(pTHXo_ void *f)
 
 #ifndef PERL_NO_UTF16_FILTER
 static I32
-utf16_textfilter(pTHXo_ int idx, SV *sv, int maxlen)
+utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 {
     I32 count = FILTER_READ(idx+1, sv, maxlen);
     if (count) {
@@ -7689,7 +7685,7 @@ utf16_textfilter(pTHXo_ int idx, SV *sv, int maxlen)
 }
 
 static I32
-utf16rev_textfilter(pTHXo_ int idx, SV *sv, int maxlen)
+utf16rev_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 {
     I32 count = FILTER_READ(idx+1, sv, maxlen);
     if (count) {

@@ -38,23 +38,7 @@ PERL_CALLCONV void	Perl_set_context(void *thx);
 END_EXTERN_C
 
 /* functions with flag 'n' should come before here */
-#if defined(PERL_OBJECT)
-class CPerlObj {
-public:
-	struct interpreter interp;
-	CPerlObj(IPerlMem*, IPerlMem*, IPerlMem*, IPerlEnv*, IPerlStdIO*,
-	    IPerlLIO*, IPerlDir*, IPerlSock*, IPerlProc*);
-	void* operator new(size_t nSize, IPerlMem *pvtbl);
-#ifndef __BORLANDC__
-	static void operator delete(void* pPerl, IPerlMem *pvtbl);
-#endif
-	int do_aspawn (void *vreally, void **vmark, void **vsp);
-#endif
-#if defined(PERL_OBJECT)
-public:
-#else
 START_EXTERN_C
-#endif
 #  include "pp_proto.h"
 PERL_CALLCONV SV*	Perl_amagic_call(pTHX_ SV* left, SV* right, int method, int dir);
 PERL_CALLCONV bool	Perl_Gv_AMupdate(pTHX_ HV* stash);
@@ -506,11 +490,9 @@ PERL_CALLCONV I32	Perl_my_memcmp(const char* s1, const char* s2, I32 len);
 #if !defined(HAS_MEMSET)
 PERL_CALLCONV void*	Perl_my_memset(char* loc, I32 ch, I32 len);
 #endif
-#if !defined(PERL_OBJECT)
 PERL_CALLCONV I32	Perl_my_pclose(pTHX_ PerlIO* ptr);
 PERL_CALLCONV PerlIO*	Perl_my_popen(pTHX_ char* cmd, char* mode);
 PERL_CALLCONV PerlIO*	Perl_my_popen_list(pTHX_ char* mode, int n, SV ** args);
-#endif
 PERL_CALLCONV void	Perl_my_setenv(pTHX_ char* nam, char* val);
 PERL_CALLCONV I32	Perl_my_stat(pTHX);
 PERL_CALLCONV char *	Perl_my_strftime(pTHX_ char *fmt, int sec, int min, int hour, int mday, int mon, int year, int wday, int yday, int isdst);
@@ -594,13 +576,6 @@ PERL_CALLCONV void	Perl_pad_reset(pTHX);
 PERL_CALLCONV void	Perl_pad_swipe(pTHX_ PADOFFSET po);
 PERL_CALLCONV void	Perl_peep(pTHX_ OP* o);
 PERL_CALLCONV PerlIO*	Perl_start_glob(pTHX_ SV* pattern, IO *io);
-#if defined(PERL_OBJECT)
-PERL_CALLCONV void	Perl_construct(pTHX);
-PERL_CALLCONV void	Perl_destruct(pTHX);
-PERL_CALLCONV void	Perl_free(pTHX);
-PERL_CALLCONV int	Perl_run(pTHX);
-PERL_CALLCONV int	Perl_parse(pTHX_ XSINIT_t xsinit, int argc, char** argv, char** env);
-#endif
 #if defined(USE_5005THREADS)
 PERL_CALLCONV struct perl_thread*	Perl_new_struct_thread(pTHX_ struct perl_thread *t);
 #endif
@@ -989,11 +964,7 @@ PERL_CALLCONV char *	Perl_custom_op_name(pTHX_ OP* op);
 PERL_CALLCONV char *	Perl_custom_op_desc(pTHX_ OP* op);
 #endif
 
-#if defined(PERL_OBJECT)
-protected:
-#else
 END_EXTERN_C
-#endif
 
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
 STATIC I32	S_avhv_index_sv(pTHX_ SV* sv);
@@ -1336,10 +1307,6 @@ STATIC SV*	S_mess_alloc(pTHX);
 #  if defined(LEAKTEST)
 STATIC void	S_xstat(pTHX_ int);
 #  endif
-#endif
-
-#if defined(PERL_OBJECT)
-};
 #endif
 
 START_EXTERN_C

@@ -18,7 +18,7 @@
 static int
 do_spawnvp (const char *path, const char * const *argv)
 {
-    dTHXo;
+    dTHX;
     Sigsave_t ihand,qhand;
     int childpid, result, status;
 
@@ -45,7 +45,7 @@ do_spawnvp (const char *path, const char * const *argv)
 int
 do_aspawn (SV *really, void **mark, void **sp)
 {
-    dTHXo;
+    dTHX;
     int  rc;
     char **a,*tmps,**argv; 
     STRLEN n_a; 
@@ -78,7 +78,7 @@ do_aspawn (SV *really, void **mark, void **sp)
 int
 do_spawn (char *cmd)
 {
-    dTHXo;
+    dTHX;
     char **a,*s,*metachars = "$&*(){}[]'\";\\?>|<~`\n";
     const char *command[4];
 

@@ -91,13 +91,6 @@ int _fcloseall();
 #  define getlogin g_getlogin
 #endif
 
-#if defined(PERL_OBJECT)
-#  undef do_aspawn
-#  define do_aspawn g_do_aspawn
-#  undef Perl_do_exec
-#  define Perl_do_exec g_do_exec
-#endif
-
 static void		get_shell(void);
 static long		tokenize(const char *str, char **dest, char ***destv);
 	int		do_spawn2(char *cmd, int exectype);
@@ -179,7 +172,7 @@ get_regstr_from(HKEY hkey, const char *valuename, SV **svp)
 	if (retval == ERROR_SUCCESS
 	    && (type == REG_SZ || type == REG_EXPAND_SZ))
 	{
-	    dTHXo;
+	    dTHX;
 	    if (!*svp)
 		*svp = sv_2mortal(newSVpvn("",0));
 	    SvGROW(*svp, datalen);
@@ -259,7 +252,7 @@ get_emd_part(SV **prev_pathp, char *trailing_path, ...)
     /* only add directory if it exists */
     if (GetFileAttributes(mod_name) != (DWORD) -1) {
 	/* directory exists */
-	dTHXo;
+	dTHX;
 	if (!*prev_pathp)
 	    *prev_pathp = sv_2mortal(newSVpvn("",0));
 	sv_catpvn(*prev_pathp, ";", 1);
@@ -273,7 +266,7 @@ get_emd_part(SV **prev_pathp, char *trailing_path, ...)
 char *
 win32_get_privlib(const char *pl)
 {
-    dTHXo;
+    dTHX;
     char *stdlib = "lib";
     char buffer[MAX_PATH+1];
     SV *sv = Nullsv;
@@ -290,7 +283,7 @@ win32_get_privlib(const char *pl)
 static char *
 win32_get_xlib(const char *pl, const char *xlib, const char *libname)
 {
-    dTHXo;
+    dTHX;
     char regstr[40];
     char pathstr[MAX_PATH+1];
     DWORD datalen;
@@ -438,7 +431,7 @@ win32_getpid(void)
 {
     int pid;
 #ifdef USE_ITHREADS
-    dTHXo;
+    dTHX;
     if (w32_pseudo_id)
 	return -((int)w32_pseudo_id);
 #endif
@@ -464,7 +457,7 @@ tokenize(const char *str, char **dest, char ***destv)
     char **retvstart = 0;
     int items = -1;
     if (str) {
-	dTHXo;
+	dTHX;
 	int slen = strlen(str);
 	register char *ret;
 	register char **retv;
@@ -507,7 +500,7 @@ tokenize(const char *str, char **dest, char ***destv)
 static void
 get_shell(void)
 {
-    dTHXo;
+    dTHX;
     if (!w32_perlshell_tokens) {
 	/* we don't use COMSPEC here for two reasons:
 	 *  1. the same reason perl on UNIX doesn't use SHELL--rampant and
@@ -528,7 +521,7 @@ get_shell(void)
 int
 do_aspawn(void *vreally, void **vmark, void **vsp)
 {
-    dTHXo;
+    dTHX;
     SV *really = (SV*)vreally;
     SV **mark = (SV**)vmark;
     SV **sp = (SV**)vsp;
@@ -596,7 +589,7 @@ do_aspawn(void *vreally, void **vmark, void **vsp)
 int
 do_spawn2(char *cmd, int exectype)
 {
-    dTHXo;
+    dTHX;
     char **a;
     char *s;
     char **argv;
@@ -712,7 +705,7 @@ Perl_do_exec(pTHX_ char *cmd)
 DllExport DIR *
 win32_opendir(char *filename)
 {
-    dTHXo;
+    dTHX;
     DIR			*dirp;
     long		len;
     long		idx;
@@ -824,7 +817,7 @@ win32_readdir(DIR *dirp)
 	/* Now set up for the next call to readdir */
 	dirp->curr += len + 1;
 	if (dirp->curr >= dirp->end) {
-	    dTHXo;
+	    dTHX;
 	    char*		ptr;
 	    BOOL		res;
 	    WIN32_FIND_DATAW	wFindData;
@@ -898,7 +891,7 @@ win32_rewinddir(DIR *dirp)
 DllExport int
 win32_closedir(DIR *dirp)
 {
-    dTHXo;
+    dTHX;
     if (dirp->handle != INVALID_HANDLE_VALUE)
 	FindClose(dirp->handle);
     Safefree(dirp->start);
@@ -960,7 +953,7 @@ setgid(gid_t agid)
 char *
 getlogin(void)
 {
-    dTHXo;
+    dTHX;
     char *buf = w32_getlogin_buffer;
     DWORD size = sizeof(w32_getlogin_buffer);
     if (GetUserName(buf,&size))
@@ -1003,7 +996,7 @@ retry:
 static long
 find_pid(int pid)
 {
-    dTHXo;
+    dTHX;
     long child = w32_num_children;
     while (--child >= 0) {
 	if (w32_child_pids[child] == pid)
@@ -1016,7 +1009,7 @@ static void
 remove_dead_process(long child)
 {
     if (child >= 0) {
-	dTHXo;
+	dTHX;
 	CloseHandle(w32_child_handles[child]);
 	Move(&w32_child_handles[child+1], &w32_child_handles[child],
 	     (w32_num_children-child-1), HANDLE);
@@ -1030,7 +1023,7 @@ remove_dead_process(long child)
 static long
 find_pseudo_pid(int pid)
 {
-    dTHXo;
+    dTHX;
     long child = w32_num_pseudo_children;
     while (--child >= 0) {
 	if (w32_pseudo_child_pids[child] == pid)
@@ -1043,7 +1036,7 @@ static void
 remove_dead_pseudo_process(long child)
 {
     if (child >= 0) {
-	dTHXo;
+	dTHX;
 	CloseHandle(w32_pseudo_child_handles[child]);
 	Move(&w32_pseudo_child_handles[child+1], &w32_pseudo_child_handles[child],
 	     (w32_num_pseudo_children-child-1), HANDLE);
@@ -1057,7 +1050,7 @@ remove_dead_pseudo_process(long child)
 DllExport int
 win32_kill(int pid, int sig)
 {
-    dTHXo;
+    dTHX;
     HANDLE hProcess;
     long child;
 #ifdef USE_ITHREADS
@@ -1123,7 +1116,7 @@ win32_sleep(unsigned int t)
 DllExport int
 win32_stat(const char *path, struct stat *sbuf)
 {
-    dTHXo;
+    dTHX;
     char	buffer[MAX_PATH+1]; 
     int		l = strlen(path);
     int		res;
@@ -1325,7 +1318,7 @@ win32_longpath(char *path)
 DllExport char *
 win32_getenv(const char *name)
 {
-    dTHXo;
+    dTHX;
     WCHAR wBuffer[MAX_PATH+1];
     DWORD needlen;
     SV *curitem = Nullsv;
@@ -1374,7 +1367,7 @@ win32_getenv(const char *name)
 DllExport int
 win32_putenv(const char *name)
 {
-    dTHXo;
+    dTHX;
     char* curitem;
     char* val;
     WCHAR* wCuritem;
@@ -1483,7 +1476,7 @@ filetime_from_time(PFILETIME pFileTime, time_t Time)
 DllExport int
 win32_unlink(const char *filename)
 {
-    dTHXo;
+    dTHX;
     int ret;
     DWORD attrs;
 
@@ -1528,7 +1521,7 @@ fail:
 DllExport int
 win32_utime(const char *filename, struct utimbuf *times)
 {
-    dTHXo;
+    dTHX;
     HANDLE handle;
     FILETIME ftCreate;
     FILETIME ftAccess;
@@ -1677,7 +1670,7 @@ win32_uname(struct utsname *name)
 DllExport int
 win32_waitpid(int pid, int *status, int flags)
 {
-    dTHXo;
+    dTHX;
     DWORD timeout = (flags & WNOHANG) ? 0 : INFINITE;
     int retval = -1;
     long child;
@@ -1761,7 +1754,7 @@ win32_wait(int *status)
     /* XXX this wait emulation only knows about processes
      * spawned via win32_spawnvp(P_NOWAIT, ...).
      */
-    dTHXo;
+    dTHX;
     int i, retval;
     DWORD exitcode, waitcode;
 
@@ -1816,23 +1809,19 @@ FAILED:
     return -1;
 }
 
-#ifndef PERL_OBJECT
-
 static UINT timerid = 0;
 
 static VOID CALLBACK TimerProc(HWND win, UINT msg, UINT id, DWORD time)
 {
-    dTHXo;
+    dTHX;
     KillTimer(NULL,timerid);
     timerid=0;  
     CALL_FPTR(PL_sighandlerp)(14);
 }
-#endif	/* !PERL_OBJECT */
 
 DllExport unsigned int
 win32_alarm(unsigned int sec)
 {
-#ifndef PERL_OBJECT
     /* 
      * the 'obvious' implentation is SetTimer() with a callback
      * which does whatever receiving SIGALRM would do 
@@ -1842,7 +1831,7 @@ win32_alarm(unsigned int sec)
      * Snag is unless something is looking at the message queue
      * nothing happens :-(
      */ 
-    dTHXo;
+    dTHX;
     if (sec)
      {
       timerid = SetTimer(NULL,timerid,sec*1000,(TIMERPROC)TimerProc);
@@ -1857,7 +1846,6 @@ win32_alarm(unsigned int sec)
         timerid=0;  
        }
      }
-#endif	/* !PERL_OBJECT */
     return 0;
 }
 
@@ -1868,7 +1856,7 @@ extern char *	des_fcrypt(const char *txt, const char *salt, char *cbuf);
 DllExport char *
 win32_crypt(const char *txt, const char *salt)
 {
-    dTHXo;
+    dTHX;
 #ifdef HAVE_DES_FCRYPT
     return des_fcrypt(txt, salt, w32_crypt_buffer);
 #else
@@ -1980,7 +1968,7 @@ win32_flock(int fd, int oper)
     HANDLE fh;
 
     if (!IsWinNT()) {
-	dTHXo;
+	dTHX;
 	Perl_croak_nocontext("flock() unimplemented on this platform");
 	return -1;
     }
@@ -2079,7 +2067,7 @@ win32_strerror(int e)
     DWORD source = 0;
 
     if (e < 0 || e > sys_nerr) {
-        dTHXo;
+        dTHX;
 	if (e < 0)
 	    e = GetLastError();
 
@@ -2119,7 +2107,7 @@ win32_str_os_error(void *sv, DWORD dwErr)
 			    dwErr, GetLastError());
     }
     if (sMsg) {
-	dTHXo;
+	dTHX;
 	sv_setpvn((SV*)sv, sMsg, dwLen);
 	LocalFree(sMsg);
     }
@@ -2172,7 +2160,7 @@ win32_fwrite(const void *buf, size_t size, size_t count, FILE *fp)
 DllExport FILE *
 win32_fopen(const char *filename, const char *mode)
 {
-    dTHXo;
+    dTHX;
     WCHAR wMode[MODE_SIZE], wBuffer[MAX_PATH+1];
     FILE *f;
     
@@ -2203,7 +2191,7 @@ win32_fopen(const char *filename, const char *mode)
 DllExport FILE *
 win32_fdopen(int handle, const char *mode)
 {
-    dTHXo;
+    dTHX;
     WCHAR wMode[MODE_SIZE];
     FILE *f;
     if (USING_WIDE()) {
@@ -2221,7 +2209,7 @@ win32_fdopen(int handle, const char *mode)
 DllExport FILE *
 win32_freopen(const char *path, const char *mode, FILE *stream)
 {
-    dTHXo;
+    dTHX;
     WCHAR wMode[MODE_SIZE], wBuffer[MAX_PATH+1];
     if (stricmp(path, "/dev/null")==0)
 	path = "NUL";
@@ -2425,7 +2413,7 @@ win32_popen(const char *command, const char *mode)
 
     /* start the child */
     {
-	dTHXo;
+	dTHX;
 	if ((childpid = do_spawn_nowait((char*)command)) == -1)
 	    goto cleanup;
 
@@ -2470,7 +2458,7 @@ win32_pclose(PerlIO *pf)
 #ifdef USE_RTL_POPEN
     return _pclose(pf);
 #else
-    dTHXo;
+    dTHX;
     int childpid, status;
     SV *sv;
 
@@ -2564,7 +2552,7 @@ Nt4CreateHardLinkW(
 DllExport int
 win32_link(const char *oldname, const char *newname)
 {
-    dTHXo;
+    dTHX;
     BOOL (__stdcall *pfnCreateHardLinkW)(LPCWSTR,LPCWSTR,LPSECURITY_ATTRIBUTES);
     WCHAR wOldName[MAX_PATH+1];
     WCHAR wNewName[MAX_PATH+1];
@@ -2597,7 +2585,7 @@ win32_rename(const char *oname, const char *newname)
     char szOldName[MAX_PATH+1];
     char szNewName[MAX_PATH+1];
     BOOL bResult;
-    dTHXo;
+    dTHX;
 
     /* XXX despite what the documentation says about MoveFileEx(),
      * it doesn't work under Windows95!
@@ -2735,7 +2723,7 @@ win32_tell(int fd)
 DllExport int
 win32_open(const char *path, int flag, ...)
 {
-    dTHXo;
+    dTHX;
     va_list ap;
     int pmode;
     WCHAR wBuffer[MAX_PATH+1];
@@ -2996,7 +2984,7 @@ win32_write(int fd, const void *buf, unsigned int cnt)
 DllExport int
 win32_mkdir(const char *dir, int mode)
 {
-    dTHXo;
+    dTHX;
     if (USING_WIDE()) {
 	WCHAR wBuffer[MAX_PATH+1];
 	A2WHELPER(dir, wBuffer, sizeof(wBuffer));
@@ -3008,7 +2996,7 @@ win32_mkdir(const char *dir, int mode)
 DllExport int
 win32_rmdir(const char *dir)
 {
-    dTHXo;
+    dTHX;
     if (USING_WIDE()) {
 	WCHAR wBuffer[MAX_PATH+1];
 	A2WHELPER(dir, wBuffer, sizeof(wBuffer));
@@ -3020,7 +3008,7 @@ win32_rmdir(const char *dir)
 DllExport int
 win32_chdir(const char *dir)
 {
-    dTHXo;
+    dTHX;
     if (USING_WIDE()) {
 	WCHAR wBuffer[MAX_PATH+1];
 	A2WHELPER(dir, wBuffer, sizeof(wBuffer));
@@ -3032,7 +3020,7 @@ win32_chdir(const char *dir)
 DllExport  int
 win32_access(const char *path, int mode)
 {
-    dTHXo;
+    dTHX;
     if (USING_WIDE()) {
 	WCHAR wBuffer[MAX_PATH+1];
 	A2WHELPER(path, wBuffer, sizeof(wBuffer));
@@ -3044,7 +3032,7 @@ win32_access(const char *path, int mode)
 DllExport  int
 win32_chmod(const char *path, int mode)
 {
-    dTHXo;
+    dTHX;
     if (USING_WIDE()) {
 	WCHAR wBuffer[MAX_PATH+1];
 	A2WHELPER(path, wBuffer, sizeof(wBuffer));
@@ -3057,7 +3045,7 @@ win32_chmod(const char *path, int mode)
 static char *
 create_command_line(const char* command, const char * const *args)
 {
-    dTHXo;
+    dTHX;
     int index;
     char *cmd, *ptr, *arg;
     STRLEN len = strlen(command) + 1;
@@ -3081,7 +3069,7 @@ create_command_line(const char* command, const char * const *args)
 static char *
 qualified_path(const char *cmd)
 {
-    dTHXo;
+    dTHX;
     char *pathstr;
     char *fullcmd, *curfullcmd;
     STRLEN cmdlen = 0;
@@ -3186,7 +3174,7 @@ free_childenv(void* d)
 char*
 get_childdir(void)
 {
-    dTHXo;
+    dTHX;
     char* ptr;
     char szfilename[(MAX_PATH+1)*2];
     if (USING_WIDE()) {
@@ -3206,7 +3194,7 @@ get_childdir(void)
 void
 free_childdir(char* d)
 {
-    dTHXo;
+    dTHX;
     Safefree(d);
 }
 
@@ -3228,7 +3216,7 @@ win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
 #ifdef USE_RTL_SPAWNVP
     return spawnvp(mode, cmdname, (char * const *)argv);
 #else
-    dTHXo;
+    dTHX;
     int ret;
     void* env;
     char* dir;
@@ -3348,7 +3336,7 @@ DllExport int
 win32_execv(const char *cmdname, const char *const *argv)
 {
 #ifdef USE_ITHREADS
-    dTHXo;
+    dTHX;
     /* if this is a pseudo-forked child, we just want to spawn
      * the new program, and return */
     if (w32_pseudo_id)
@@ -3361,7 +3349,7 @@ DllExport int
 win32_execvp(const char *cmdname, const char *const *argv)
 {
 #ifdef USE_ITHREADS
-    dTHXo;
+    dTHX;
     /* if this is a pseudo-forked child, we just want to spawn
      * the new program, and return */
     if (w32_pseudo_id) {
@@ -3572,7 +3560,7 @@ win32_get_osfhandle(int fd)
 DllExport void*
 win32_dynaload(const char* filename)
 {
-    dTHXo;
+    dTHX;
     HMODULE hModule;
     char buf[MAX_PATH+1];
     char *first;
@@ -4065,7 +4053,7 @@ XS(w32_CopyFile)
 void
 Perl_init_os_extras(void)
 {
-    dTHXo;
+    dTHX;
     char *file = __FILE__;
     dXSUB_SYS;
 
@@ -4128,16 +4116,6 @@ win32_get_child_IO(child_IO_table* ptbl)
 
 #ifdef HAVE_INTERP_INTERN
 
-#  ifdef PERL_OBJECT
-#    undef Perl_sys_intern_init
-#    define Perl_sys_intern_init CPerlObj::Perl_sys_intern_init
-#    undef Perl_sys_intern_dup
-#    define Perl_sys_intern_dup CPerlObj::Perl_sys_intern_dup
-#    undef Perl_sys_intern_clear
-#    define Perl_sys_intern_clear CPerlObj::Perl_sys_intern_clear
-#    define pPerl this
-#  endif
-
 void
 Perl_sys_intern_init(pTHX)
 {
@@ -4184,13 +4162,8 @@ Perl_sys_intern_dup(pTHX_ struct interp_intern *src, struct interp_intern *dst)
 #  endif /* USE_ITHREADS */
 #endif /* HAVE_INTERP_INTERN */
 
-#ifdef PERL_OBJECT
-#  undef this
-#  define this pPerl
-#endif
-
 static void
-win32_free_argvw(pTHXo_ void *ptr)
+win32_free_argvw(pTHX_ void *ptr)
 {
     char** argv = (char**)ptr;
     while(*argv) {
@@ -4202,7 +4175,7 @@ win32_free_argvw(pTHXo_ void *ptr)
 void
 win32_argv2utf8(int argc, char** argv)
 {
-    dTHXo;
+    dTHX;
     char* psz;
     int length, wargc;
     LPWSTR* lpwStr = CommandLineToArgvW(GetCommandLineW(), &wargc);

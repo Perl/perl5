@@ -20,12 +20,6 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-#if defined(PERL_OBJECT)
-#define NO_XSLOCKS
-extern CPerlObj* pPerl;
-#include "XSUB.h"
-#endif
-
 //For Thread Local Storage
 #include "win32ish.h"		// For "BOOL", "TRUE" and "FALSE"
 #include "nwtinfo.h"

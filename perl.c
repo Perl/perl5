@@ -25,7 +25,7 @@
 char *getenv (char *); /* Usually in <stdlib.h> */
 #endif
 
-static I32 read_e_script(pTHXo_ int idx, SV *buf_sv, int maxlen);
+static I32 read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen);
 
 #ifdef IAMSUID
 #ifndef DOSUID
@@ -37,14 +37,6 @@ static I32 read_e_script(pTHXo_ int idx, SV *buf_sv, int maxlen);
 #ifdef DOSUID
 #undef DOSUID
 #endif
-#endif
-
-#ifdef PERL_OBJECT
-#define perl_construct	Perl_construct
-#define perl_parse	Perl_parse
-#define perl_run	Perl_run
-#define perl_destruct	Perl_destruct
-#define perl_free	Perl_free
 #endif
 
 #if defined(USE_5005THREADS)
@@ -91,11 +83,6 @@ perl_alloc_using(struct IPerlMem* ipM, struct IPerlMem* ipMS,
 		 struct IPerlProc* ipP)
 {
     PerlInterpreter *my_perl;
-#ifdef PERL_OBJECT
-    my_perl = (PerlInterpreter*)new(ipM) CPerlObj(ipM, ipMS, ipMP, ipE, ipStd,
-						  ipLIO, ipD, ipS, ipP);
-    INIT_TLS_AND_INTERP;
-#else
     /* New() needs interpreter, so call malloc() instead */
     my_perl = (PerlInterpreter*)(*ipM->pMalloc)(ipM, sizeof(PerlInterpreter));
     INIT_TLS_AND_INTERP;
@@ -109,7 +96,6 @@ perl_alloc_using(struct IPerlMem* ipM, struct IPerlMem* ipMS,
     PL_Dir = ipD;
     PL_Sock = ipS;
     PL_Proc = ipP;
-#endif
 
     return my_perl;
 }
@@ -212,12 +198,7 @@ perl_construct(pTHXx)
 	    SvREFCNT(&PL_sv_yes) = (~(U32)0)/2;
 	}
 
-#ifdef PERL_OBJECT
-	/* TODO: */
-	/* PL_sighandlerp = sighandler; */
-#else
 	PL_sighandlerp = Perl_sighandler;
-#endif
 	PL_pidstatus = newHV();
 
 #ifdef MSDOS
@@ -450,7 +431,7 @@ perl_destruct(pTHXx)
 
     /* call exit list functions */
     while (PL_exitlistlen-- > 0)
-	PL_exitlist[PL_exitlistlen].fn(aTHXo_ PL_exitlist[PL_exitlistlen].ptr);
+	PL_exitlist[PL_exitlistlen].fn(aTHX_ PL_exitlist[PL_exitlistlen].ptr);
 
     Safefree(PL_exitlist);
 
@@ -874,34 +855,30 @@ Releases a Perl interpreter.  See L<perlembed>.
 void
 perl_free(pTHXx)
 {
-#if defined(PERL_OBJECT)
-    PerlMem_free(this);
-#else
-#  if defined(WIN32) || defined(NETWARE)
+#if defined(WIN32) || defined(NETWARE)
 #  if defined(PERL_IMPLICIT_SYS)
-    #ifdef NETWARE
-		void *host = nw_internal_host;
-	#else
-		void *host = w32_internal_host;
-	#endif
-	#ifndef NETWARE
-	if (PerlProc_lasthost()) {
+#    ifdef NETWARE
+    void *host = nw_internal_host;
+#    else
+    void *host = w32_internal_host;
+#    endif
+#    ifndef NETWARE
+    if (PerlProc_lasthost()) {
 	PerlIO_cleanup();
-	}
-	#endif
+    }
+#    endif
     PerlMem_free(aTHXx);
-	#ifdef NETWARE
-		nw5_delete_internal_host(host);
-	#else
-		win32_delete_internal_host(host);
-	#endif
-#else
+#    ifdef NETWARE
+    nw5_delete_internal_host(host);
+#    else
+    win32_delete_internal_host(host);
+#    endif
+#  else
     PerlIO_cleanup();
     PerlMem_free(aTHXx);
-#endif
-#  else
-    PerlMem_free(aTHXx);
 #  endif
+#else
+    PerlMem_free(aTHXx);
 #endif
 }
 
@@ -1195,9 +1172,6 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #  ifdef USE_SOCKS
 		sv_catpv(PL_Sv," USE_SOCKS");
 #  endif
-#  ifdef PERL_OBJECT
-		sv_catpv(PL_Sv," PERL_OBJECT");
-#  endif
 #  ifdef PERL_IMPLICIT_CONTEXT
 		sv_catpv(PL_Sv," PERL_IMPLICIT_CONTEXT");
 #  endif
@@ -1398,7 +1372,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 #endif
 
     if (xsinit)
-	(*xsinit)(aTHXo);	/* in case linked C routines want magical variables */
+	(*xsinit)(aTHX);	/* in case linked C routines want magical variables */
 #ifndef PERL_MICRO
 #if defined(VMS) || defined(WIN32) || defined(DJGPP) || defined(__CYGWIN__) || defined(EPOC)
     init_os_extras();
@@ -2561,77 +2535,42 @@ STATIC void
 S_init_interp(pTHX)
 {
 
-#ifdef PERL_OBJECT		/* XXX kludge */
-#define I_REINIT \
-  STMT_START {				\
-    PL_chopset		= " \n-";	\
-    PL_copline		= NOLINE;	\
-    PL_curcop		= &PL_compiling;\
-    PL_curcopdb		= NULL;		\
-    PL_dbargs		= 0;		\
-    PL_dumpindent	= 4;		\
-    PL_laststatval	= -1;		\
-    PL_laststype	= OP_STAT;	\
-    PL_maxscream	= -1;		\
-    PL_maxsysfd		= MAXSYSFD;	\
-    PL_statname		= Nullsv;	\
-    PL_tmps_floor	= -1;		\
-    PL_tmps_ix		= -1;		\
-    PL_op_mask		= NULL;		\
-    PL_laststatval	= -1;		\
-    PL_laststype	= OP_STAT;	\
-    PL_mess_sv		= Nullsv;	\
-    PL_splitstr		= " ";		\
-    PL_generation	= 100;		\
-    PL_exitlist		= NULL;		\
-    PL_exitlistlen	= 0;		\
-    PL_regindent	= 0;		\
-    PL_in_clean_objs	= FALSE;	\
-    PL_in_clean_all	= FALSE;	\
-    PL_profiledata	= NULL;		\
-    PL_rsfp		= Nullfp;	\
-    PL_rsfp_filters	= Nullav;	\
-    PL_dirty		= FALSE;	\
-  } STMT_END
-    I_REINIT;
-#else
-#  ifdef MULTIPLICITY
-#    define PERLVAR(var,type)
-#    define PERLVARA(var,n,type)
-#    if defined(PERL_IMPLICIT_CONTEXT)
-#      if defined(USE_5005THREADS)
-#        define PERLVARI(var,type,init)		PERL_GET_INTERP->var = init;
-#        define PERLVARIC(var,type,init)	PERL_GET_INTERP->var = init;
-#      else /* !USE_5005THREADS */
-#        define PERLVARI(var,type,init)		aTHX->var = init;
-#        define PERLVARIC(var,type,init)	aTHX->var = init;
-#      endif /* USE_5005THREADS */
-#    else
-#      define PERLVARI(var,type,init)	PERL_GET_INTERP->var = init;
+#ifdef MULTIPLICITY
+#  define PERLVAR(var,type)
+#  define PERLVARA(var,n,type)
+#  if defined(PERL_IMPLICIT_CONTEXT)
+#    if defined(USE_5005THREADS)
+#      define PERLVARI(var,type,init)		PERL_GET_INTERP->var = init;
 #      define PERLVARIC(var,type,init)	PERL_GET_INTERP->var = init;
-#    endif
-#    include "intrpvar.h"
-#    ifndef USE_5005THREADS
-#      include "thrdvar.h"
-#    endif
-#    undef PERLVAR
-#    undef PERLVARA
-#    undef PERLVARI
-#    undef PERLVARIC
+#    else /* !USE_5005THREADS */
+#      define PERLVARI(var,type,init)		aTHX->var = init;
+#      define PERLVARIC(var,type,init)	aTHX->var = init;
+#    endif /* USE_5005THREADS */
 #  else
-#    define PERLVAR(var,type)
-#    define PERLVARA(var,n,type)
-#    define PERLVARI(var,type,init)	PL_##var = init;
-#    define PERLVARIC(var,type,init)	PL_##var = init;
-#    include "intrpvar.h"
-#    ifndef USE_5005THREADS
-#      include "thrdvar.h"
-#    endif
-#    undef PERLVAR
-#    undef PERLVARA
-#    undef PERLVARI
-#    undef PERLVARIC
+#    define PERLVARI(var,type,init)	PERL_GET_INTERP->var = init;
+#    define PERLVARIC(var,type,init)	PERL_GET_INTERP->var = init;
 #  endif
+#  include "intrpvar.h"
+#  ifndef USE_5005THREADS
+#    include "thrdvar.h"
+#  endif
+#  undef PERLVAR
+#  undef PERLVARA
+#  undef PERLVARI
+#  undef PERLVARIC
+#else
+#  define PERLVAR(var,type)
+#  define PERLVARA(var,n,type)
+#  define PERLVARI(var,type,init)	PL_##var = init;
+#  define PERLVARIC(var,type,init)	PL_##var = init;
+#  include "intrpvar.h"
+#  ifndef USE_5005THREADS
+#    include "thrdvar.h"
+#  endif
+#  undef PERLVAR
+#  undef PERLVARA
+#  undef PERLVARI
+#  undef PERLVARIC
 #endif
 
 }
@@ -4045,12 +3984,8 @@ S_my_exit_jump(pTHX)
     JMPENV_JUMP(2);
 }
 
-#ifdef PERL_OBJECT
-#include "XSUB.h"
-#endif
-
 static I32
-read_e_script(pTHXo_ int idx, SV *buf_sv, int maxlen)
+read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen)
 {
     char *p, *nl;
     p  = SvPVX(PL_e_script);

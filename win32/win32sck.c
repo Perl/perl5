@@ -19,11 +19,6 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-#if defined(PERL_OBJECT)
-#define NO_XSLOCKS
-#include "XSUB.h"
-#endif
-
 #include "Win32iop.h"
 #include <sys/socket.h>
 #include <fcntl.h>
@@ -82,7 +77,7 @@ EndSockets(void)
 void
 start_sockets(void) 
 {
-    dTHXo;
+    dTHX;
     unsigned short version;
     WSADATA retdata;
     int ret;
@@ -106,7 +101,7 @@ set_socktype(void)
 {
 #ifdef USE_SOCKETS_AS_HANDLES
 #if defined(USE_5005THREADS) || defined(USE_ITHREADS)
-    dTHXo;
+    dTHX;
     if (!w32_init_socktype) {
 #endif
 	int iSockOpt = SO_SYNCHRONOUS_NONALERT;
@@ -572,7 +567,7 @@ win32_getprotobynumber(int num)
 struct servent *
 win32_getservbyname(const char *name, const char *proto)
 {
-    dTHXo;    
+    dTHX;    
     struct servent *r;
 
     SOCKET_TEST(r = getservbyname(name, proto), NULL);
@@ -585,7 +580,7 @@ win32_getservbyname(const char *name, const char *proto)
 struct servent *
 win32_getservbyport(int port, const char *proto)
 {
-    dTHXo; 
+    dTHX; 
     struct servent *r;
 
     SOCKET_TEST(r = getservbyport(port, proto), NULL);
@@ -598,7 +593,7 @@ win32_getservbyport(int port, const char *proto)
 int
 win32_ioctl(int i, unsigned int u, char *data)
 {
-    dTHXo;
+    dTHX;
     u_long argp = (u_long)data;
     int retval;
 
@@ -639,28 +634,28 @@ win32_inet_addr(const char FAR *cp)
 void
 win32_endhostent() 
 {
-    dTHXo;
+    dTHX;
     Perl_croak_nocontext("endhostent not implemented!\n");
 }
 
 void
 win32_endnetent()
 {
-    dTHXo;
+    dTHX;
     Perl_croak_nocontext("endnetent not implemented!\n");
 }
 
 void
 win32_endprotoent()
 {
-    dTHXo;
+    dTHX;
     Perl_croak_nocontext("endprotoent not implemented!\n");
 }
 
 void
 win32_endservent()
 {
-    dTHXo;
+    dTHX;
     Perl_croak_nocontext("endservent not implemented!\n");
 }
 
@@ -668,7 +663,7 @@ win32_endservent()
 struct netent *
 win32_getnetent(void) 
 {
-    dTHXo;
+    dTHX;
     Perl_croak_nocontext("getnetent not implemented!\n");
     return (struct netent *) NULL;
 }
@@ -676,7 +671,7 @@ win32_getnetent(void)
 struct netent *
 win32_getnetbyname(char *name) 
 {
-    dTHXo;
+    dTHX;
     Perl_croak_nocontext("getnetbyname not implemented!\n");
     return (struct netent *)NULL;
 }
@@ -684,7 +679,7 @@ win32_getnetbyname(char *name)
 struct netent *
 win32_getnetbyaddr(long net, int type) 
 {
-    dTHXo;
+    dTHX;
     Perl_croak_nocontext("getnetbyaddr not implemented!\n");
     return (struct netent *)NULL;
 }
@@ -692,7 +687,7 @@ win32_getnetbyaddr(long net, int type)
 struct protoent *
 win32_getprotoent(void) 
 {
-    dTHXo;
+    dTHX;
     Perl_croak_nocontext("getprotoent not implemented!\n");
     return (struct protoent *) NULL;
 }
@@ -700,7 +695,7 @@ win32_getprotoent(void)
 struct servent *
 win32_getservent(void) 
 {
-    dTHXo;
+    dTHX;
     Perl_croak_nocontext("getservent not implemented!\n");
     return (struct servent *) NULL;
 }
@@ -708,7 +703,7 @@ win32_getservent(void)
 void
 win32_sethostent(int stayopen)
 {
-    dTHXo;
+    dTHX;
     Perl_croak_nocontext("sethostent not implemented!\n");
 }
 
@@ -716,7 +711,7 @@ win32_sethostent(int stayopen)
 void
 win32_setnetent(int stayopen)
 {
-    dTHXo;
+    dTHX;
     Perl_croak_nocontext("setnetent not implemented!\n");
 }
 
@@ -724,7 +719,7 @@ win32_setnetent(int stayopen)
 void
 win32_setprotoent(int stayopen)
 {
-    dTHXo;
+    dTHX;
     Perl_croak_nocontext("setprotoent not implemented!\n");
 }
 
@@ -732,7 +727,7 @@ win32_setprotoent(int stayopen)
 void
 win32_setservent(int stayopen)
 {
-    dTHXo;
+    dTHX;
     Perl_croak_nocontext("setservent not implemented!\n");
 }
 

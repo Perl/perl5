@@ -24,7 +24,7 @@ static void xs_init(pTHX);
 
 EXTERN_C int RunPerl(int argc, char **argv, char **env);
 EXTERN_C void Perl_nw5_init(int *argcp, char ***argvp);
-EXTERN_C void boot_DynaLoader (pTHXo_ CV* cv);
+EXTERN_C void boot_DynaLoader (pTHX_ CV* cv);
 
 
 ClsPerlHost::ClsPerlHost()
@@ -141,23 +141,7 @@ int RunPerl(int argc, char **argv, char **env)
 		if(exitstatus == 0)
 		{
 			#if defined(TOP_CLONE) && defined(USE_ITHREADS)		// XXXXXX testing
-				#  ifdef PERL_OBJECT
-					CPerlHost *h = new CPerlHost();
-					new_perl = perl_clone_using(my_perl, 1,
-										h->m_pHostperlMem,
-										h->m_pHostperlMemShared,
-										h->m_pHostperlMemParse,
-										h->m_pHostperlEnv,
-										h->m_pHostperlStdIO,
-										h->m_pHostperlLIO,
-										h->m_pHostperlDir,
-										h->m_pHostperlSock,
-										h->m_pHostperlProc
-										);
-					CPerlObj *pPerl = (CPerlObj*)new_perl;
-				#  else
-					new_perl = perl_clone(my_perl, 1);
-				#  endif
+				new_perl = perl_clone(my_perl, 1);
 
 				exitstatus = perl_run(new_perl);	// Run Perl.
 				PERL_SET_THX(my_perl);

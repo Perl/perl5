@@ -36,7 +36,6 @@ $GCC     = 1 if $Config{'cc'} =~ /^gcc/i;
 $DMAKE = 1 if $Config{'make'} =~ /^dmake/i;
 $NMAKE = 1 if $Config{'make'} =~ /^nmake/i;
 $PERLMAKE = 1 if $Config{'make'} =~ /^pmake/i;
-$OBJ   = 1 if $Config{'ccflags'} =~ /PERL_OBJECT/i;
 
 # a few workarounds for command.com (very basic)
 {

@@ -81,17 +81,6 @@ USE_PERLIO	= define
 #USE_5005THREADS	*= define
 
 #
-# WARNING! This option is deprecated and will eventually go away (enable
-# USE_MULTI instead).
-#
-# uncomment next line if you want to use the PERL_OBJECT build option.
-# DO NOT ENABLE unless you have legacy code that relies on the C++
-# CPerlObj class that was available in 5.005.  This cannot be enabled
-# if you ask for USE_5005THREADS above.
-#
-#USE_OBJECT	*= define
-
-#
 # uncomment exactly one of the following
 #
 # Visual C++ 2.x
@@ -236,13 +225,6 @@ D_CRYPT		= define
 CRYPT_FLAG	= -DHAVE_DES_FCRYPT
 .ENDIF
 
-.IF "$(USE_OBJECT)" == "define"
-PERL_MALLOC	!= undef
-USE_5005THREADS	!= undef
-USE_MULTI	!= undef
-USE_IMP_SYS	!= define
-.ENDIF
-
 PERL_MALLOC	*= undef
 
 USE_5005THREADS	*= undef
@@ -256,22 +238,21 @@ PERL_MALLOC	!= undef
 .ENDIF
 
 USE_MULTI	*= undef
-USE_OBJECT	*= undef
 USE_ITHREADS	*= undef
 USE_IMP_SYS	*= undef
 USE_PERLIO	*= undef
 USE_PERLCRT	*= undef
 
-.IF "$(USE_IMP_SYS)$(USE_MULTI)$(USE_5005THREADS)$(USE_OBJECT)" == "defineundefundefundef"
+.IF "$(USE_IMP_SYS)$(USE_MULTI)$(USE_5005THREADS)" == "defineundefundef"
 USE_MULTI	!= define
 .ENDIF
 
-.IF "$(USE_ITHREADS)$(USE_MULTI)$(USE_OBJECT)" == "defineundefundef"
+.IF "$(USE_ITHREADS)$(USE_MULTI)" == "defineundef"
 USE_MULTI	!= define
 USE_5005THREADS	!= undef
 .ENDIF
 
-.IF "$(USE_MULTI)$(USE_5005THREADS)$(USE_OBJECT)" != "undefundefundef"
+.IF "$(USE_MULTI)$(USE_5005THREADS)" != "undefundef"
 BUILDOPT	+= -DPERL_IMPLICIT_CONTEXT
 .ENDIF
 
@@ -283,9 +264,7 @@ BUILDOPT	+= -DPERL_IMPLICIT_SYS
 
 PROCESSOR_ARCHITECTURE *= x86
 
-.IF "$(USE_OBJECT)" == "define"
-ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-object
-.ELIF "$(USE_5005THREADS)" == "define"
+.IF "$(USE_5005THREADS)" == "define"
 ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-thread
 .ELIF "$(USE_MULTI)" == "define"
 ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-multi
@@ -510,11 +489,6 @@ BUILDOPT	+= -DPERL_MSVCRT_READFIX
 
 .ENDIF
 
-.IF "$(USE_OBJECT)" == "define"
-OPTIMIZE	+= $(CXX_FLAG)
-BUILDOPT	+= -DPERL_OBJECT
-.ENDIF
-
 CFLAGS_O	= $(CFLAGS) $(BUILDOPT)
 
 # used to allow local linking flags that are not propogated into Config.pm,
@@ -686,9 +660,7 @@ EXTRACORE_SRC	+= perllib.c
 EXTRACORE_SRC	+= ..\malloc.c
 .ENDIF
 
-.IF "$(USE_OBJECT)" != "define"
 EXTRACORE_SRC	+= ..\perlio.c
-.ENDIF
 
 WIN32_SRC	=		\
 		.\win32.c	\
@@ -963,7 +935,7 @@ $(MINIWIN32_OBJ) : $(CORE_NOCFG_H)
 # This is the only file that depends on perlhost.h, vmem.h, and vdir.h
 
 perllib$(o)	: perllib.c .\perlhost.h .\vdir.h .\vmem.h
-.IF "$(USE_IMP_SYS)$(USE_OBJECT)" == "defineundef"
+.IF "$(USE_IMP_SYS)" == "define"
 	$(CC) -c -I. $(CFLAGS_O) $(CXX_FLAG) $(OBJOUT_FLAG)$@ perllib.c
 .ELSE
 	$(CC) -c -I. $(CFLAGS_O) $(OBJOUT_FLAG)$@ perllib.c

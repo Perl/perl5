@@ -22,7 +22,7 @@ struct xpvcv {
     HV *	xcv_stash;
     OP *	xcv_start;
     OP *	xcv_root;
-    void	(*xcv_xsub) (pTHXo_ CV*);
+    void	(*xcv_xsub) (pTHX_ CV*);
     ANY		xcv_xsubany;
     GV *	xcv_gv;
     char *	xcv_file;

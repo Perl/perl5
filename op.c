@@ -4515,7 +4515,7 @@ Perl_cv_ckproto(pTHX_ CV *cv, GV *gv, char *p)
     }
 }
 
-static void const_sv_xsub(pTHXo_ CV* cv);
+static void const_sv_xsub(pTHX_ CV* cv);
 
 /*
 =for apidoc cv_const_sv
@@ -7142,7 +7142,7 @@ char* custom_op_desc(pTHX_ OP* o)
 
 /* Efficient sub that returns a constant scalar value. */
 static void
-const_sv_xsub(pTHXo_ CV* cv)
+const_sv_xsub(pTHX_ CV* cv)
 {
     dXSARGS;
     if (items != 0) {

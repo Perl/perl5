@@ -61,9 +61,9 @@ handled automatically by C<xsubpp>.
 #define ST(off) PL_stack_base[ax + (off)]
 
 #if defined(__CYGWIN__) && defined(USE_DYNAMIC_LOADING)
-#  define XS(name) __declspec(dllexport) void name(pTHXo_ CV* cv)
+#  define XS(name) __declspec(dllexport) void name(pTHX_ CV* cv)
 #else
-#  define XS(name) void name(pTHXo_ CV* cv)
+#  define XS(name) void name(pTHX_ CV* cv)
 #endif
 
 #define dAX I32 ax = MARK - PL_stack_base + 1
@@ -92,7 +92,7 @@ handled automatically by C<xsubpp>.
 #define dXSFUNCTION(ret)		XSINTERFACE_CVT(ret,XSFUNCTION)
 #define XSINTERFACE_FUNC(ret,cv,f)     ((XSINTERFACE_CVT(ret,))(f))
 #define XSINTERFACE_FUNC_SET(cv,f)	\
-		CvXSUBANY(cv).any_dptr = (void (*) (pTHXo_ void*))(f)
+		CvXSUBANY(cv).any_dptr = (void (*) (pTHX_ void*))(f)
 
 /* Simple macros to put new mortal values onto the stack.   */
 /* Typically used to return values from XS functions.       */
@@ -247,7 +247,6 @@ C<xsubpp>.  See L<perlxs/"The VERSIONCHECK: Keyword">.
 #endif
 
 #include "perlapi.h"
-#include "objXSUB.h"
 
 #if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_NO_GET_CONTEXT) && !defined(PERL_CORE)
 #  undef aTHX
@@ -256,7 +255,7 @@ C<xsubpp>.  See L<perlxs/"The VERSIONCHECK: Keyword">.
 #  define aTHX_		aTHX,
 #endif
 
-#if (defined(PERL_CAPI) || defined(PERL_IMPLICIT_SYS)) && !defined(PERL_CORE)
+#if defined(PERL_IMPLICIT_SYS) && !defined(PERL_CORE)
 #  ifndef NO_XSLOCKS
 # if defined (NETWARE) && defined (USE_STDIO)
 #    define times		PerlProc_times
@@ -450,6 +449,6 @@ C<xsubpp>.  See L<perlxs/"The VERSIONCHECK: Keyword">.
 #    define socketpair		PerlSock_socketpair
 #	endif	/* NETWARE && USE_STDIO */
 #  endif  /* NO_XSLOCKS */
-#endif  /* PERL_CAPI */
+#endif  /* PERL_IMPLICIT_SYS && !PERL_CORE */
 
 #endif /* _INC_PERL_XSUB_H */		/* include guard */

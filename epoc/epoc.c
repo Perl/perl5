@@ -99,7 +99,7 @@ __fixunsdfsi (a)
 
 int 
 do_spawn( char *cmd) {
-    dTHXo;
+    dTHX;
     char *argv0, *ptr;
     char *cmdptr = cmd;
     int ret;
@@ -125,7 +125,7 @@ do_spawn( char *cmd) {
 int
 do_aspawn ( void *vreally, void **vmark, void **vsp) {
 
-    dTHXo;
+    dTHX;
 
     SV *really = (SV*)vreally;
     SV **mark = (SV**)vmark;
@@ -232,7 +232,7 @@ XS(epoc_getcwd)   /* more or less stolen from win32.c */
 void
 Perl_init_os_extras(void)
 { 
-  dTHXo;
+  dTHX;
   char *file = __FILE__;
   newXS("EPOC::getcwd", epoc_getcwd, file);
 }

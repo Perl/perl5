@@ -20,10 +20,6 @@
 #include "perl.h"
 
 
-#ifdef PERL_OBJECT
-#define NO_XSLOCKS
-#endif
-
 //CHKSGP
 //Including this is giving premature end-of-file error during compilation
 //#include "XSUB.h"
@@ -102,9 +98,6 @@ perl_alloc(void)
 				   &perlSock,
 				   &perlProc);
 	if (my_perl) {
-#ifdef PERL_OBJECT
-	    CPerlObj* pPerl = (CPerlObj*)my_perl;
-#endif
 		//nw5_internal_host = m_allocList;
 	}
     return my_perl;
@@ -188,9 +181,6 @@ perl_alloc_override(struct IPerlMem** ppMem, struct IPerlMem** ppMemShared,
 				   lpProc);
 	
 	if (my_perl) {
-#ifdef PERL_OBJECT
-	    CPerlObj* pPerl = (CPerlObj*)my_perl;
-#endif
 	    //nw5_internal_host = pHost;
 	}
     return my_perl;

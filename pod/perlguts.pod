@@ -1727,24 +1727,22 @@ The Perl interpreter can be regarded as a closed box: it has an API
 for feeding it code or otherwise making it do things, but it also has
 functions for its own use.  This smells a lot like an object, and
 there are ways for you to build Perl so that you can have multiple
-interpreters, with one interpreter represented either as a C++ object,
-a C structure, or inside a thread.  The thread, the C structure, or
-the C++ object will contain all the context, the state of that
-interpreter.
+interpreters, with one interpreter represented either as a C structure,
+or inside a thread-specific structure.  These structures contain all
+the context, the state of that interpreter.
 
-Three macros control the major Perl build flavors: MULTIPLICITY,
-USE_5005THREADS and PERL_OBJECT.  The MULTIPLICITY build has a C structure
-that packages all the interpreter state, there is a similar thread-specific
-data structure under USE_5005THREADS, and the (now deprecated) PERL_OBJECT
-build has a C++ class to maintain interpreter state.  In all three cases,
+Three macros control the major Perl build flavors: MULTIPLICITY, and
+USE_5005THREADS.  The MULTIPLICITY build has a C structure
+that packages all the interpreter state, and there is a similar thread-specific
+data structure under USE_5005THREADS.  In both cases,
 PERL_IMPLICIT_CONTEXT is also normally defined, and enables the
 support for passing in a "hidden" first argument that represents all three
 data structures.
 
 All this obviously requires a way for the Perl internal functions to be
-C++ methods, subroutines taking some kind of structure as the first
+either subroutines taking some kind of structure as the first
 argument, or subroutines taking nothing as the first argument.  To
-enable these three very different ways of building the interpreter,
+enable these two very different ways of building the interpreter,
 the Perl source (as it does in so many other situations) makes heavy
 use of macros and subroutine naming conventions.
 
@@ -1767,7 +1765,8 @@ function used within the Perl guts:
   STATIC void
   S_incline(pTHX_ char *s)
 
-STATIC becomes "static" in C, and is #define'd to nothing in C++.
+STATIC becomes "static" in C, and may be #define'd to nothing in some
+configurations in future.
 
 A public function (i.e. part of the internal API, but not necessarily
 sanctioned for use in extensions) begins like this:
@@ -1809,22 +1808,6 @@ This works well, and means that XS authors can gleefully write:
 and still have it work under all the modes Perl could have been
 compiled with.
 
-Under PERL_OBJECT in the core, that will translate to either:
-
-    CPerlObj::Perl_sv_setsv(foo,bar);  # in CPerlObj functions,
-                                       # C++ takes care of 'this'
-  or
-
-    pPerl->Perl_sv_setsv(foo,bar);     # in truly static functions,
-                                       # see objXSUB.h
-
-Under PERL_OBJECT in extensions (aka PERL_CAPI), or under
-MULTIPLICITY/USE_5005THREADS with PERL_IMPLICIT_CONTEXT in both core
-and extensions, it will become:
-
-    Perl_sv_setsv(aTHX_ foo, bar);     # the canonical Perl "API"
-                                       # for all build flavors
-
 This doesn't work so cleanly for varargs functions, though, as macros
 imply that the number of arguments is known in advance.  Instead we
 either need to spell them out fully, passing C<aTHX_> as the first
@@ -1838,7 +1821,7 @@ C<#define warner Perl_warner_nocontext> so that extensions get source
 compatibility at the expense of performance.  (Passing an arg is
 cheaper than grabbing it from thread-local storage.)
 
-You can ignore [pad]THX[xo] when browsing the Perl headers/sources.
+You can ignore [pad]THXx when browsing the Perl headers/sources.
 Those are strictly for use within the core.  Extensions and embedders
 need only be aware of [pad]THX.
 
@@ -1983,7 +1966,7 @@ Just as PERL_IMPLICIT_CONTEXT provides a way to bundle up everything
 that the interpreter knows about itself and pass it around, so too are
 there plans to allow the interpreter to bundle up everything it knows
 about the environment it's running on.  This is enabled with the
-PERL_IMPLICIT_SYS macro.  Currently it only works with PERL_OBJECT
+PERL_IMPLICIT_SYS macro.  Currently it only works with USE_ITHREADS
 and USE_5005THREADS on Windows (see inside iperlsys.h).
 
 This allows the ability to provide an extra pointer (called the "host"

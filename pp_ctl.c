@@ -26,24 +26,19 @@
 
 #define DOCATCH(o) ((CATCH_GET == TRUE) ? docatch(o) : (o))
 
-static I32 sortcv(pTHXo_ SV *a, SV *b);
-static I32 sortcv_stacked(pTHXo_ SV *a, SV *b);
-static I32 sortcv_xsub(pTHXo_ SV *a, SV *b);
-static I32 sv_ncmp(pTHXo_ SV *a, SV *b);
-static I32 sv_i_ncmp(pTHXo_ SV *a, SV *b);
-static I32 amagic_ncmp(pTHXo_ SV *a, SV *b);
-static I32 amagic_i_ncmp(pTHXo_ SV *a, SV *b);
-static I32 amagic_cmp(pTHXo_ SV *a, SV *b);
-static I32 amagic_cmp_locale(pTHXo_ SV *a, SV *b);
-static I32 run_user_filter(pTHXo_ int idx, SV *buf_sv, int maxlen);
+static I32 sortcv(pTHX_ SV *a, SV *b);
+static I32 sortcv_stacked(pTHX_ SV *a, SV *b);
+static I32 sortcv_xsub(pTHX_ SV *a, SV *b);
+static I32 sv_ncmp(pTHX_ SV *a, SV *b);
+static I32 sv_i_ncmp(pTHX_ SV *a, SV *b);
+static I32 amagic_ncmp(pTHX_ SV *a, SV *b);
+static I32 amagic_i_ncmp(pTHX_ SV *a, SV *b);
+static I32 amagic_cmp(pTHX_ SV *a, SV *b);
+static I32 amagic_cmp_locale(pTHX_ SV *a, SV *b);
+static I32 run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen);
 
-#ifdef PERL_OBJECT
-static I32 sv_cmp_static(pTHXo_ SV *a, SV *b);
-static I32 sv_cmp_locale_static(pTHXo_ SV *a, SV *b);
-#else
 #define sv_cmp_static Perl_sv_cmp
 #define sv_cmp_locale_static Perl_sv_cmp_locale
-#endif
 
 PP(pp_wantarray)
 {
@@ -2309,7 +2304,7 @@ PP(pp_goto)
 		    PL_stack_sp--;		/* There is no cv arg. */
 		    /* Push a mark for the start of arglist */
 		    PUSHMARK(mark);
-		    (void)(*CvXSUB(cv))(aTHXo_ cv);
+		    (void)(*CvXSUB(cv))(aTHX_ cv);
 		    /* Pop the current context like a decent sub should */
 		    POPBLOCK(cx, PL_curpm);
 		    /* Do _not_ use PUTBACK, keep the XSUB's return stack! */
@@ -3815,12 +3810,11 @@ S_doparseform(pTHX_ SV *sv)
 #ifdef	TESTHARNESS
 #include <sys/types.h>
 typedef	void SV;
-#define pTHXo_
 #define pTHX_
 #define STATIC
 #define New(ID,VAR,N,TYPE) VAR=(TYPE *)malloc((N)*sizeof(TYPE))
 #define	Safefree(VAR) free(VAR)
-typedef int  (*SVCOMPARE_t) (pTHXo_ SV*, SV*);
+typedef int  (*SVCOMPARE_t) (pTHX_ SV*, SV*);
 #endif	/* TESTHARNESS */
 
 typedef char * aptr;		/* pointer for arithmetic on sizes */
@@ -4164,16 +4158,8 @@ S_qsortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp)
     return;
 }
 
-
-#ifdef PERL_OBJECT
-#undef this
-#define this pPerl
-#include "XSUB.h"
-#endif
-
-
 static I32
-sortcv(pTHXo_ SV *a, SV *b)
+sortcv(pTHX_ SV *a, SV *b)
 {
     I32 oldsaveix = PL_savestack_ix;
     I32 oldscopeix = PL_scopestack_ix;
@@ -4196,7 +4182,7 @@ sortcv(pTHXo_ SV *a, SV *b)
 }
 
 static I32
-sortcv_stacked(pTHXo_ SV *a, SV *b)
+sortcv_stacked(pTHX_ SV *a, SV *b)
 {
     I32 oldsaveix = PL_savestack_ix;
     I32 oldscopeix = PL_scopestack_ix;
@@ -4241,7 +4227,7 @@ sortcv_stacked(pTHXo_ SV *a, SV *b)
 }
 
 static I32
-sortcv_xsub(pTHXo_ SV *a, SV *b)
+sortcv_xsub(pTHX_ SV *a, SV *b)
 {
     dSP;
     I32 oldsaveix = PL_savestack_ix;
@@ -4255,7 +4241,7 @@ sortcv_xsub(pTHXo_ SV *a, SV *b)
     *++SP = a;
     *++SP = b;
     PUTBACK;
-    (void)(*CvXSUB(cv))(aTHXo_ cv);
+    (void)(*CvXSUB(cv))(aTHX_ cv);
     if (PL_stack_sp != PL_stack_base + 1)
 	Perl_croak(aTHX_ "Sort subroutine didn't return single value");
     if (!SvNIOKp(*PL_stack_sp))
@@ -4270,7 +4256,7 @@ sortcv_xsub(pTHXo_ SV *a, SV *b)
 
 
 static I32
-sv_ncmp(pTHXo_ SV *a, SV *b)
+sv_ncmp(pTHX_ SV *a, SV *b)
 {
     NV nv1 = SvNV(a);
     NV nv2 = SvNV(b);
@@ -4278,7 +4264,7 @@ sv_ncmp(pTHXo_ SV *a, SV *b)
 }
 
 static I32
-sv_i_ncmp(pTHXo_ SV *a, SV *b)
+sv_i_ncmp(pTHX_ SV *a, SV *b)
 {
     IV iv1 = SvIV(a);
     IV iv2 = SvIV(b);
@@ -4296,7 +4282,7 @@ sv_i_ncmp(pTHXo_ SV *a, SV *b)
 	} STMT_END
 
 static I32
-amagic_ncmp(pTHXo_ register SV *a, register SV *b)
+amagic_ncmp(pTHX_ register SV *a, register SV *b)
 {
     SV *tmpsv;
     tryCALL_AMAGICbin(a,b,ncmp,&tmpsv);
@@ -4314,11 +4300,11 @@ amagic_ncmp(pTHXo_ register SV *a, register SV *b)
            return 1;
         return d? -1 : 0;
      }
-     return sv_ncmp(aTHXo_ a, b);
+     return sv_ncmp(aTHX_ a, b);
 }
 
 static I32
-amagic_i_ncmp(pTHXo_ register SV *a, register SV *b)
+amagic_i_ncmp(pTHX_ register SV *a, register SV *b)
 {
     SV *tmpsv;
     tryCALL_AMAGICbin(a,b,ncmp,&tmpsv);
@@ -4336,11 +4322,11 @@ amagic_i_ncmp(pTHXo_ register SV *a, register SV *b)
            return 1;
         return d? -1 : 0;
     }
-    return sv_i_ncmp(aTHXo_ a, b);
+    return sv_i_ncmp(aTHX_ a, b);
 }
 
 static I32
-amagic_cmp(pTHXo_ register SV *str1, register SV *str2)
+amagic_cmp(pTHX_ register SV *str1, register SV *str2)
 {
     SV *tmpsv;
     tryCALL_AMAGICbin(str1,str2,scmp,&tmpsv);
@@ -4362,7 +4348,7 @@ amagic_cmp(pTHXo_ register SV *str1, register SV *str2)
 }
 
 static I32
-amagic_cmp_locale(pTHXo_ register SV *str1, register SV *str2)
+amagic_cmp_locale(pTHX_ register SV *str1, register SV *str2)
 {
     SV *tmpsv;
     tryCALL_AMAGICbin(str1,str2,scmp,&tmpsv);
@@ -4384,7 +4370,7 @@ amagic_cmp_locale(pTHXo_ register SV *str1, register SV *str2)
 }
 
 static I32
-run_user_filter(pTHXo_ int idx, SV *buf_sv, int maxlen)
+run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 {
     SV *datasv = FILTER_DATA(idx);
     int filter_has_file = IoLINES(datasv);
@@ -4452,19 +4438,3 @@ run_user_filter(pTHXo_ int idx, SV *buf_sv, int maxlen)
 
     return len;
 }
-
-#ifdef PERL_OBJECT
-
-static I32
-sv_cmp_locale_static(pTHXo_ register SV *str1, register SV *str2)
-{
-    return sv_cmp_locale(str1, str2);
-}
-
-static I32
-sv_cmp_static(pTHXo_ register SV *str1, register SV *str2)
-{
-    return sv_cmp(str1, str2);
-}
-
-#endif /* PERL_OBJECT */
