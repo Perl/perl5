@@ -177,7 +177,9 @@ get_regstr_from(HKEY hkey, const char *valuename, SV **svp)
     if (retval == ERROR_SUCCESS) {
 	DWORD datalen;
 	retval = RegQueryValueEx(handle, valuename, 0, &type, NULL, &datalen);
-	if (retval == ERROR_SUCCESS && type == REG_SZ) {
+	if (retval == ERROR_SUCCESS
+	    && (type == REG_SZ || type == REG_EXPAND_SZ))
+	{
 	    dTHXo;
 	    if (!*svp)
 		*svp = sv_2mortal(newSVpvn("",0));
