@@ -152,7 +152,7 @@ sub minus_f_nocase {
      # on a case-forgiving file system we can simply use -f $file
      if ($Is_VMS or $Is_MSWin32 or $^O eq 'os2') {
         return $file if -f $file and -r _;
-	warn "Ignored $file: unreadable\n" unless -r _;
+	warn "Ignored $file: unreadable\n" if -f _;
 	return '';
      }
      local *DIR;
