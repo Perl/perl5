@@ -38,8 +38,6 @@ Returns the current working directory.
 
 Re-implements the getcwd(3) (or getwd(3)) functions in Perl.
 
-Taint-safe.
-
 =item cwd
 
     my $cwd = cwd();
@@ -47,8 +45,6 @@ Taint-safe.
 The cwd() is the most natural form for the current architecture. For
 most systems it is identical to `pwd` (but without the trailing line
 terminator).
-
-Taint-safe.
 
 =item fastcwd
 
@@ -77,7 +73,8 @@ The fastgetcwd() function is provided as a synonym for cwd().
 =head2 abs_path and friends
 
 These functions are exported only on request.  They each take a single
-argument and return the absolute pathname for it.
+argument and return the absolute pathname for it.  If no argument is
+given they'll use the current working directory.
 
 =over 4
 
@@ -89,24 +86,17 @@ Uses the same algorithm as getcwd().  Symbolic links and relative-path
 components ("." and "..") are resolved to return the canonical
 pathname, just like realpath(3).
 
-Taint-safe.
-
 =item realpath
 
   my $abs_path = realpath($file);
 
 A synonym for abs_path().
 
-Taint-safe.
-
 =item fast_abs_path
 
   my $abs_path = fast_abs_path($file);
 
 A more dangerous, but potentially faster version of abs_path.
-
-This function is B<Not> taint-safe : you can't use it in programs
-that work under taint mode.
 
 =back
 
@@ -150,7 +140,7 @@ use strict;
 
 use Carp;
 
-our $VERSION = '2.07';
+our $VERSION = '2.08';
 
 use base qw/ Exporter /;
 our @EXPORT = qw(cwd getcwd fastcwd fastgetcwd);
@@ -177,7 +167,7 @@ if ($^O eq 'os2' && defined &sys_cwd && defined &sys_abspath) {
 
 eval {
     require XSLoader;
-    undef *Cwd::fastcwd; # avoid redefinition warning
+    local $^W = 0;
     XSLoader::load('Cwd');
 };
 
@@ -422,10 +412,17 @@ sub _perl_abs_path
 # used to the libc function.  --tchrist 27-Jan-00
 *realpath = \&abs_path;
 
+my $Curdir;
 sub fast_abs_path {
     my $cwd = getcwd();
     require File::Spec;
-    my $path = @_ ? shift : File::Spec->curdir;
+    my $path = @_ ? shift : ($Curdir ||= File::Spec->curdir);
+
+    # Detaint else we'll explode in taint mode.  This is safe because
+    # we're not doing anything dangerous with it.
+    ($path) = $path =~ /(.*)/;
+    ($cwd)  = $cwd  =~ /(.*)/;
+
     CORE::chdir($path) || croak "Cannot chdir to $path: $!";
     my $realpath = getcwd();
     -d $cwd && CORE::chdir($cwd) ||
