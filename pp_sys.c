@@ -2110,7 +2110,6 @@ PP(pp_truncate)
      * might not be signed: if it is not, clever compilers will moan. */
     /* XXX Configure probe for the signedness of the length type of *truncate() needed? XXX */
     SETERRNO(0,0);
-#if defined(HAS_TRUNCATE) || defined(HAS_CHSIZE) || defined(F_FREESP)
     {
 	int result = 1;
 	GV *tmpgv;
@@ -2185,9 +2184,6 @@ PP(pp_truncate)
 	    SETERRNO(EBADF,RMS_IFI);
 	RETPUSHUNDEF;
     }
-#else
-    DIE(aTHX_ "truncate not implemented");
-#endif
 }
 
 PP(pp_fcntl)

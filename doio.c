@@ -1242,14 +1242,15 @@ Perl_do_binmode(pTHX_ PerlIO *fp, int iotype, int mode)
  return PerlIO_binmode(aTHX_ fp, iotype, mode, name);
 }
 
-#if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(F_FREESP)
-	/* code courtesy of William Kucharski */
-#define HAS_CHSIZE
-
+#if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE)
 I32 my_chsize(fd, length)
 I32 fd;			/* file descriptor */
 Off_t length;		/* length to set file to */
 {
+#ifdef F_FREESP
+	/* code courtesy of William Kucharski */
+#define HAS_CHSIZE
+
     struct flock fl;
     Stat_t filebuf;
 
@@ -1290,8 +1291,12 @@ Off_t length;		/* length to set file to */
     }
 
     return 0;
-}
+#else
+    dTHX;
+    DIE(aTHX_ "truncate not implemented");
 #endif /* F_FREESP */
+}
+#endif /* !HAS_TRUNCATE && !HAS_CHSIZE */
 
 bool
 Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
