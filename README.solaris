@@ -438,6 +438,10 @@ Building in /tmp sometimes shows this behavior.  The
 test suite detects if you are building in /tmp, but it may not be able
 to catch all tmpfs situations.
 
+=head2 nss_delete core dump from op/pwent or op/grent
+
+See L<perlhpux/"nss_delete core dump from op/pwent or op/grent">.
+
 =head1 PREBUILT BINARIES OF PERL FOR SOLARIS.
 
 You can pick up prebuilt binaries for Solaris from

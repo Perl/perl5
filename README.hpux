@@ -348,6 +348,33 @@ system.
 In general, a value of 256MB (or "256*1024*1024") is sufficient for
 Perl to compile at maximum optimization.
 
+=head1 nss_delete core dump from op/pwent or op/grent
+
+You may get a bus error core dump from the op/pwent or op/grent
+tests. If compiled with -g you will see a stack trace much like
+the following:
+
+  #0  0xc004216c in  () from /usr/lib/libc.2
+  #1  0xc00d7550 in __nss_src_state_destr () from /usr/lib/libc.2
+  #2  0xc00d7768 in __nss_src_state_destr () from /usr/lib/libc.2
+  #3  0xc00d78a8 in nss_delete () from /usr/lib/libc.2 
+  #4  0xc01126d8 in endpwent () from /usr/lib/libc.2 
+  #5  0xd1950 in Perl_pp_epwent () from ./perl
+  #6  0x94d3c in Perl_runops_standard () from ./perl
+  #7  0x23728 in S_run_body () from ./perl
+  #8  0x23428 in perl_run () from ./perl
+  #9  0x2005c in main () from ./perl
+
+The key here is the C<nss_delete> call.  One workaround for this
+bug seems to be to create add to the file F</etc/nsswitch.conf>
+(at least) the following lines
+
+  group: files 
+  passwd: files
+
+Whether you are using NIS does not matter.  Amazingly enough,
+the same bug affects also Solaris.
+
 =head1 AUTHOR
 
 Jeff Okamoto <okamoto@corp.hp.com>
