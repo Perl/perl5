@@ -28,17 +28,20 @@ such as newline and backspace are output in C<\x> notation, rather than
 octal. This might just confuse non-robust tools which parse the output of
 modules such as Devel::Peek.
 
+You may no longer invoke suidperl directly; any script which uses
+#!/usr/bin/suidperl should be changed to use #!/usr/bin/perl.
+
 =head1 Core Enhancements
 
 =head2 Malloc wrapping
 
-Perl can now be built to detect attempts at pathologically large assignments.
-Previously such assignments would suffer from integer wrap-around during size
-calculations causing a misallocation, which would crash perl, and could
-theoretically be used for "stack smashing" attacks. The wrapping defaults to
-enabled on platforms where we know it works (AIX, BSDi, Darwin, DEC OSF,
-FreeBSD, HP/UX, GNU Linux, OpenBSD, Solaris, VMS and Win32) and defaults to
-disabled on other platforms.
+Perl can now be built to detect attempts to assign pathologically large chunks
+of memory.  Previously such assignments would suffer from integer wrap-around
+during size calculations causing a misallocation, which would crash perl, and
+could theoretically be used for "stack smashing" attacks.  The wrapping
+defaults to enabled on platforms where we know it works (AIX, BSDi, Darwin,
+DEC OSF, FreeBSD, HP/UX, GNU Linux, OpenBSD, Solaris, VMS and Win32) and
+defaults to disabled on other platforms.
 
 =head2 Unicode Character Database 4.0.1
 
@@ -61,7 +64,12 @@ In addition to bug fixes, C<format>'s features have been enhanced. See XXX
 =head1 Modules and Pragmata
 
 The (mis)use of C</tmp> in core modules and documentation has been tidied up.
-Not all modules with dual lives on CPAN have had these changes applied yet.
+Some modules available both within the perl core and independently from CPAN
+("dual-life modules") have not yet had these changes applied; the changes
+will be intergrated into future stable perl releases as the modules are
+updated on CPAN.
+
+=head2 Updated modules
 
 =over 4
 
@@ -109,7 +117,7 @@ There is experimental support for Linux abstract Unix domain sockets.
 
 =item Switch
 
-Synced with the CPAN 2.10 release
+Synced with its CPAN version 2.10
 
 =item Sys::Syslog
 
@@ -202,8 +210,8 @@ but this should not be visible to user code.
 
 =head1 Future Directions
 
-Code freeze for the next maintenance release (5.8.5) is will be on 30th
-June 2004, with release by mid July.
+Code freeze for the next maintenance release (5.8.5) will be on 30th June
+2004, with release by mid July.
 
 =head1 Reporting Bugs
 
