@@ -13,14 +13,15 @@ while (@ARGV) {
 
 umask 022;
 
-@scripts = ('cppstdin', 'c2ph', 'h2ph', 'h2xs', 'pstruct', 
-	    'x2p/s2p', 'x2p/find2perl',
-	    'perldoc',
-	    'pod/pod2man', 'pod/pod2html', 'pod/pod2latex' );
+@scripts = qw(cppstdin
+		utils/c2ph utils/h2ph utils/h2xs utils/pstruct
+		utils/perlbug utils/perldoc
+		x2p/s2p x2p/find2perl
+		pod/pod2man pod/pod2html pod/pod2latex pod/pod2text);
 
 # pod documentation now handled by separate installman script.
 # These two are archaic leftovers.
-@manpages = ('x2p/a2p.man', 'x2p/s2p.man');
+@manpages = qw(x2p/a2p.man x2p/s2p.man);
 
 @pods = (<pod/*.pod>);
 
@@ -374,7 +375,7 @@ sub installlib {
 	if ($?) {
 	    &unlink("$installlib/$name");
 	    &makedir("$installlib/$dir");
-	    cp_if_diff("$_", "$installlib/$dir/$_");
+	    cp_if_diff($_, "$installlib/$name");
 	    # HP-UX (at least) needs to maintain execute permissions
 	    # on dynamically-loaded libraries.
 	    if ($name =~ /\.(so|$dlext)$/o) {
