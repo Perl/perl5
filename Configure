@@ -3080,7 +3080,9 @@ EOM
 		aix) osname=aix
 			tmp=`( (oslevel) 2>/dev/null || echo "not found") 2>&1`
 			case "$tmp" in
-			'not found') osvers="$4"."$3" ;;
+			# oslevel can fail with:
+			# oslevel: Unable to acquire lock.
+			*not\ found) osvers="$4"."$3" ;;
 			'<3240'|'<>3240') osvers=3.2.0 ;;
 			'=3240'|'>3240'|'<3250'|'<>3250') osvers=3.2.4 ;;
 			'=3250'|'>3250') osvers=3.2.5 ;;
