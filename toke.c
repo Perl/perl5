@@ -4888,8 +4888,6 @@ Perl_yylex(pTHX)
 		if (isIDFIRST_lazy_if(s,UTF) || *s == '\'' ||
 		    (*s == ':' && s[1] == ':'))
 		{
-		    bool reserved = FALSE;
-
 		    PL_expect = XBLOCK;
 		    attrful = XATTRBLOCK;
 		    /* remember buffer pos'n for later force_word */
@@ -4904,29 +4902,6 @@ Perl_yylex(pTHX)
 		    }
 		    s = skipspace(d);
 		    have_name = TRUE;
-		    switch (tmpbuf[0]) {
-		    case 'm':
-		    case 's':
-		    case 'y':
-			if (tmpbuf[1] == 0)
-			    reserved = TRUE;
-			break;
-		    case 'q':
-			if (tmpbuf[1] == 0 ||
-			    (strchr("qwxr", tmpbuf[1]) && tmpbuf[2] == 0))
-			    reserved = TRUE;
-			break;
-		    case 't':
-			if (tmpbuf[1] == 'r' && tmpbuf[2] == 0)
-			    reserved = TRUE;
-			break;
-		    default:
-			break;
-		    }
-		    if (reserved)
-			Perl_croak(aTHX_
-				   "Subroutine name \"%s\" reserved for string operators",
-				   tmpbuf);
 		}
 		else {
 		    if (key == KEY_my)

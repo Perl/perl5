@@ -3121,13 +3121,6 @@ C<can> may break this.
 	eval "sub name { ... }";
     }
 
-=item Subroutine name %s reserved for string operators
-
-(F) Certain string operators can be called with a very similar syntax
-to a function call, and therefore to avoid confusion their names are
-reserved and cannot be used as subroutine names.  The reserved names
-are: C<m s tr y q qq qw qx qr>.
-
 =item Substitution loop
 
 (P) The substitution was looping infinitely.  (Obviously, a substitution
