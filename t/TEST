@@ -114,6 +114,9 @@ EOT
 		    $next = $1, $ok = 0, last if /^not ok ([0-9]*)/;
 		    if (/^ok (\d+)(\s*#.*)?$/ && $1 == $next) {
 			$next = $next + 1;
+                    }
+                    elsif (/^Bail out!\s*(.*)/i) { # magic words
+                        die "FAILED--Further testing stopped" . ($1 ? ": $1\n" : ".\n");
 		    }
 		    else {
 			$ok = 0;
