@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..45\n";
+print "1..51\n";
 
 my $test = 1;
 
@@ -105,4 +105,17 @@ $a = "\x{587}";
 ok("\L\x{587}" eq "\x{587}",        "ligature lowercase");
 ok("\u\x{587}" eq "\x{535}\x{582}", "ligature titlecase");
 ok("\U\x{587}" eq "\x{535}\x{552}", "ligature uppercase");
+
+# mktables had problems where many-to-one case mappings didn't work right.
+# The lib/unifold.t should give the fourth folding, "casefolding", a good
+# workout.
+
+ok(lc("\x{1C4}") eq "\x{1C6}",      "U+01C4 lc is U+01C6");
+ok(lc("\x{1C5}") eq "\x{1C6}",      "U+01C5 lc is U+01C6, too");
+
+ok(ucfirst("\x{3C2}") eq "\x{3A3}", "U+03C2 ucfirst is U+03A3");
+ok(ucfirst("\x{3C3}") eq "\x{3A3}", "U+03C3 ucfirst is U+03A3, too");
+
+ok(uc("\x{1C5}") eq "\x{1C4}",      "U+01C5 uc is U+01C4");
+ok(uc("\x{1C6}") eq "\x{1C4}",      "U+01C6 uc is U+01C4, too");
 
