@@ -28,7 +28,7 @@ use Time::Local;
 # use vmsish 'time' makes for oddness around the Unix epoch
 if ($^O eq 'VMS') { $time[0][2]++ }
 
-print "1..", @time * 2 + 5, "\n";
+print "1..", @time * 2 + 6, "\n";
 
 $count = 1;
 for (@time) {
@@ -92,6 +92,20 @@ print "ok ", $count++, "\n";
 timegm(0,0,0, 1, 2, 80) - timegm(0,0,0, 1, 0, 80) == 60 * 24 * 3600
   or print "not ";
 print "ok ", $count++, "\n";
+
+# bugid #19393
+# At a DST transition, the clock skips forward, eg from 01:59:59 to
+# 03:00:00. In this case, 02:00:00 is an invalid time, and should be
+# treated like 03:00:00 rather than 01:00:00 - negative zone offsets used
+# to do the latter
+
+{
+    my $hour = (localtime(timelocal(0, 0, 2, 7, 3, 102)))[2];
+    # testers in US/Pacific should get 3,
+    # other testers should get 2
+    print "not " unless $hour == 2 || $hour == 3;
+    print "ok ", $main::count++, "\n";
+}
 
 
 #print "Testing timelocal.pl module too...\n";
