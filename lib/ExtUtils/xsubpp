@@ -6,7 +6,7 @@ xsubpp - compiler to convert Perl XS code into C code
 
 =head1 SYNOPSIS
 
-B<xsubpp> [B<-v>] [B<-C++>] [B<-except>] [B<-s pattern>] [B<-typemap typemap>]... file.xs
+B<xsubpp> [B<-v>] [B<-C++>] [B<-except>] [B<-s pattern>] [B<-noprototypes>] [B<-typemap typemap>]... file.xs
 
 =head1 DESCRIPTION
 
@@ -44,6 +44,9 @@ typemap having the highest precedence.
 
 Prints the I<xsubpp> version number to standard output, then exits.
 
+=item B<-noprototypes>
+
+
 =back
 
 =head1 ENVIRONMENT
@@ -65,17 +68,22 @@ perl(1), perlapi(1)
 =cut
 
 # Global Constants
-$XSUBPP_version = "1.923";
-require 5.001;
+$XSUBPP_version = "1.924";
+require 5.002;
 
-$usage = "Usage: xsubpp [-v] [-C++] [-except] [-s pattern] [-typemap typemap]... file.xs\n";
+$usage = "Usage: xsubpp [-v] [-C++] [-except] [-noprototypes] [-s pattern] [-typemap typemap]... file.xs\n";
+
+$proto_re = "[" . quotemeta('\$%&*@;') . "]" ;
 
 $except = "";
+$WantPrototypes = 1 ;
 SWITCH: while (@ARGV and $ARGV[0] =~ /^-./) {
     $flag = shift @ARGV;
     $flag =~ s/^-// ;
     $spat = shift,	next SWITCH	if $flag eq 's';
     $cplusplus = 1,	next SWITCH	if $flag eq 'C++';
+    $WantPrototypes = 0, next SWITCH	if $flag eq 'noprototypes';
+    $WantPrototypes = 1, next SWITCH	if $flag eq 'prototypes';
     $except = " TRY",	next SWITCH	if $flag eq 'except';
     push(@tm,shift),	next SWITCH	if $flag eq 'typemap';
     (print "xsubpp version $XSUBPP_version\n"), exit  	
@@ -141,9 +149,15 @@ foreach $typemap (@tm) {
             TrimWhitespace($_) ;
 	    # skip blank lines and comment lines
 	    next if /^$/ or /^#/ ;
-	    my($type,$kind) = /^\s*(.*?\S)\s+(\S+)\s*$/ or
-		warn("Warning: File '$typemap' Line $. '$line' TYPEMAP entry needs 2 columns\n"), next;
-	    $type_kind{TidyType($type)} = $kind ;
+	    my($type,$kind, $proto) = /^\s*(.*?\S)\s+(\S+)\s*($proto_re*)\s*$/ or
+		warn("Warning: File '$typemap' Line $. '$line' TYPEMAP entry needs 2 or 3 columns\n"), next;
+            $type = TidyType($type) ;
+	    $type_kind{$type} = $kind ;
+            # prototype defaults to '$'
+            $proto = '$' unless $proto ;
+            warn("Warning: File '$typemap' Line $. '$line' Invalid prototype '$proto'\n") 
+                unless ValidProtoString($proto) ;
+            $proto_letter{$type} = C_string($proto) ;
 	}
 	elsif (/^\s/) {
 	    $$current .= $_;
@@ -169,7 +183,10 @@ foreach $key (keys %input_expr) {
 $END = "!End!\n\n";		# "impossible" keyword (multiple newline)
 
 # Match an XS keyword
-$BLOCK_re= "\\s*(REQUIRE|BOOT|CASE|PREINIT|INPUT|INIT|CODE|PPCODE|OUTPUT|CLEANUP|ALIAS|$END)\\s*:";
+$BLOCK_re= '\s*(' . join('|', qw(
+	REQUIRE BOOT CASE PREINIT INPUT INIT CODE PPCODE OUTPUT 
+	CLEANUP ALIAS PROTOTYPES PROTOTYPE
+	)) . "|$END)\\s*:";
 
 # Input:  ($_, @line) == unparsed input.
 # Output: ($_, @line) == (rest of line, following lines).
@@ -225,6 +242,8 @@ sub INPUT_handler {
 	$var_types{$var_name} = $var_type;
 	print "\t" . &map_type($var_type);
 	$var_num = $args_match{$var_name};
+
+        $proto_arg[$var_num] = ProtoString($var_type) ;
 	if ($var_addr) {
 	    $var_addr{$var_name} = 1;
 	    $func_args =~ s/\b($var_name)\b/&$1/;
@@ -301,7 +320,7 @@ sub GetAliases
         if $line ;
 }
 
-sub ALIAS_handler
+sub ALIAS_handler ()
 {
     for (;  !/^$BLOCK_re/o;  $_ = shift(@line)) {
 	next unless /\S/;
@@ -310,7 +329,7 @@ sub ALIAS_handler
     }
 }
 
-sub REQUIRE_handler
+sub REQUIRE_handler ()
 {
     # the rest of the current line should contain a version number
     my ($Ver) = $_ ;
@@ -326,6 +345,69 @@ sub REQUIRE_handler
 
     death ("Error: xsubpp $Ver (or better) required--this is only $XSUBPP_version.")
         unless $XSUBPP_version >= $Ver ; 
+}
+
+sub PROTOTYPE_handler ()
+{
+    for (;  !/^$BLOCK_re/o;  $_ = shift(@line)) {
+	next unless /\S/;
+	TrimWhitespace($_) ;
+        if ($_ eq 'DISABLE') {
+	   $ProtoThisXSUB = 0 
+        }
+        elsif ($_ eq 'ENABLE') {
+	   $ProtoThisXSUB = 1 
+        }
+        else {
+            # remove any whitespace
+            s/\s+//g ;
+            death("Error: Invalid prototype '$_'")
+                unless ValidProtoString($_) ;
+            $ProtoThisXSUB = C_string($_) ;
+        }
+    }
+}
+
+sub PROTOTYPES_handler ()
+{
+    # the rest of the current line should contain either ENABLE or
+    # DISABLE 
+
+    TrimWhitespace($_) ;
+
+    # check for ENABLE/DISABLE
+    death ("Error: PROTOTYPES: ENABLE/DISABLE")
+        unless /^(ENABLE|DISABLE)/i ;
+
+    $WantPrototypes = 1 if $1 eq 'ENABLE' ;
+    $WantPrototypes = 0 if $1 eq 'DISABLE' ;
+
+}
+
+sub ValidProtoString ($)
+{
+    my($string) = @_ ;
+
+    if ( $string =~ /^$proto_re+$/ ) {
+        return $string ;
+    }
+
+    return 0 ;
+}
+
+sub C_string ($)
+{
+    my($string) = @_ ;
+
+    $string =~ s[\\][\\\\]g ;
+    $string ;
+}
+
+sub ProtoString ($)
+{
+    my ($type) = @_ ;
+
+    $proto_letter{$type} or '$' ;
 }
 
 sub check_cpp {
@@ -443,10 +525,15 @@ while (fetch_para()) {
     undef($elipsis);
     undef($wantRETVAL) ;
     undef(%arg_list) ;
+    undef(@proto_arg) ;
+    $ProtoThisXSUB = $WantPrototypes ;
 
     $_ = shift(@line);
-    if (check_keyword("REQUIRE")) {
-        REQUIRE_handler() ; 
+    while ($kwd = check_keyword("REQUIRE|PROTOTYPES")) {
+        if ($kwd eq 'REQUIRE') 
+          { REQUIRE_handler() }
+        else
+          { PROTOTYPES_handler() }
         next PARAGRAPH unless @line ;
         $_ = shift(@line);
     }
@@ -507,6 +594,7 @@ while (fetch_para()) {
 		    $defaults{$args[$i]} = $2;
 		    $defaults{$args[$i]} =~ s/"/\\"/g;
 	    }
+	    $proto_arg[$i+1] = '$' ;
     }
     if (defined($class)) {
 	    $func_args = join(", ", @args[1..$#args]);
@@ -608,13 +696,14 @@ EOF
 			$var_types{"RETVAL"} = $ret_type;
 		}
 		print $deferred;
-                while ($kwd = check_keyword("INIT|ALIAS")) {
+                while ($kwd = check_keyword("INIT|ALIAS|PROTOTYPE")) {
                     if ($kwd eq 'INIT') {
                         &print_section
                     }
-                    else {
-                        ALIAS_handler
-                    }
+                    elsif ($kwd eq 'PROTOTYPE') 
+                      {  PROTOTYPE_handler() }
+                    else 
+                      {  ALIAS_handler() }
                 }
 
 		if (check_keyword("PPCODE")) {
@@ -634,7 +723,7 @@ EOF
 			}
 			if (defined($static)) {
 			    if ($func_name =~ /^new/) {
-				$func_name = "$class";
+				$func_name .= " $class";
 			    } else {
 				print "${class}::";
 			    }
@@ -696,6 +785,25 @@ EOF
 #]]
 #
 EOF
+
+    # Build the prototype string for the xsub
+    if ($ProtoThisXSUB) {
+        if ($ProtoThisXSUB != 1) {
+            $ProtoXSUB{$pname} = '"' . $ProtoThisXSUB . '"'
+        }
+        else {
+	    my $s = ';';
+            if ($min_args < $num_args)  {
+                $s = ''; 
+		$proto_arg[$min_args] .= ";" ;
+	    }
+            push @proto_arg, "${s}@" 
+                if $elipsis ;
+    
+            $ProtoXSUB{$pname} = '"' . join ("", @proto_arg) . '"' 
+        }
+    }
+
 }
 
 # print initialization routine
@@ -718,6 +826,13 @@ EOF
 
 for (@Func_name) {
     $pname = shift(@Func_pname);
+    my $newXS = "newXS" ;
+    my $proto = "" ;
+
+    if ($ProtoXSUB{$pname}) {
+        $newXS = "newXSproto" ;
+        $proto = ", $ProtoXSUB{$pname}" ;
+    }
 
     if ($XsubAliases{$pname}) {
         $XsubAliases{$pname}{$pname} = 0 
@@ -727,10 +842,13 @@ for (@Func_name) {
 #        cv = newXS(\"$name\", XS_$_, file);
 #        XSANY.any_i32 = $value ;
 EOF
+            print Q<<"EOF" if $proto ;
+#        sv_setpv(cv, $ProtoXSUB{$pname}) ;
+EOF
         }
     }
     else {
-        print "        newXS(\"$pname\", XS_$_, file);\n";
+        print "        ${newXS}(\"$pname\", XS_$_, file$proto);\n";
     }
 }
 

@@ -33,3 +33,5 @@
 #define XSRETURN_YES   do { XST_mYES(0);   XSRETURN(1); } while (0)
 #define XSRETURN_UNDEF do { XST_mUNDEF(0); XSRETURN(1); } while (0)
 #define XSRETURN_EMPTY do {                XSRETURN(0); } while (0)
+
+#define newXSproto(a,b,c,d)	sv_setpv(newXS(a,b,c), d)
