@@ -836,7 +836,7 @@ Perl_hv_exists(pTHX_ HV *hv, const char *key, I32 klen)
     }
 
     if (SvRMAGICAL(hv)) {
-	if (mg_find((SV*)hv,'P') || SvGMAGICAL((SV*)gv)) {
+	if (mg_find((SV*)hv,'P') || SvGMAGICAL((SV*)hv)) {
 	    sv = sv_newmortal();
 	    mg_copy((SV*)hv, sv, key, klen);
 	    magic_existspack(sv, mg_find(sv, 'p'));
