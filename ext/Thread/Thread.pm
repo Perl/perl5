@@ -18,21 +18,28 @@ Thread - multithreading
 
     my $t = new Thread \&start_sub, @start_args;
 
-    $t->join;
+    $result = $t->join;
+    $result = $t->eval;
+    $t->detach;
+
+    if($t->equal($another_thread)) {
+    	# ...
+    }
 
     my $tid = Thread->self->tid; 
-
     my $tlist = Thread->list;
 
     lock($scalar);
+    yield();
 
     use Thread 'async';
-
-    use Thread 'eval';
 
 =head1 DESCRIPTION
 
 The C<Thread> module provides multithreading support for perl.
+
+WARNING: Threading is an experimental feature.  Both the interface
+and implementation are subject to change drastically.
 
 =head1 FUNCTIONS
 
@@ -122,6 +129,11 @@ The C<cond_broadcast> function works similarly to C<cond_wait>.
 C<cond_broadcast>, though, will unblock B<all> the threads that are blocked
 in a C<cond_wait> on the locked variable, rather than only one.
 
+=item yield
+
+The C<yield> function allows another thread to take control of the
+CPU. The exact results are implementation-dependent.
+
 =back
 
 =head1 METHODS
@@ -144,6 +156,18 @@ C<eval> thread method instead of C<join>.
 The C<eval> method wraps an C<eval> around a C<join>, and so waits for a
 thread to exit, passing along any values the thread might have returned.
 Errors, of course, get placed into C<$@>.
+
+=item detach
+
+C<detach> tells a thread that it is never going to be joined i.e.
+that all traces of its existence can be removed once it stops running.
+Errors in detached threads will not be visible anywhere - if you want
+to catch them, you should use $SIG{__DIE__} or something like that.
+
+=item equal 
+
+C<equal> tests whether two thread objects represent the same thread and
+returns true if they do.
 
 =item tid
 
