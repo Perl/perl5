@@ -31,6 +31,189 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[  9972] By: jhi                                   on 2001/05/03  12:58:33
+        Log: Subject: [PATCH: perl@9945] fix handling of $Config{variables} in io/fflush.t
+             From: Prymmer/Kahn <pvhp@best.com>
+             Date: Wed, 2 May 2001 23:56:13 -0700 (PDT)
+             Message-ID: <Pine.BSF.4.21.0105022353380.24421-100000@shell8.ba.best.com>
+     Branch: perl
+	   ! t/io/fflush.t
+____________________________________________________________________________
+[  9971] By: jhi                                   on 2001/05/03  12:57:26
+        Log: Subject: [PATCH: perl@9945] two fixes for win32/FindExt.pm
+             From: Prymmer/Kahn <pvhp@best.com>
+             Date: Wed, 2 May 2001 23:42:33 -0700 (PDT)
+             Message-ID: <Pine.BSF.4.21.0105022337070.24421-100000@shell8.ba.best.com>
+     Branch: perl
+	   ! win32/FindExt.pm
+____________________________________________________________________________
+[  9970] By: jhi                                   on 2001/05/03  02:42:46
+        Log: Can't croak sans thread context, from Doug MacEachern.
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  9969] By: jhi                                   on 2001/05/03  01:23:48
+        Log: Subject: Random input test and Perl
+             From: Ilya Zakharevich <ilya@math.berkeley.edu>
+             Date: Wed, 2 May 2001 14:35:50 -0700 (PDT)
+             Message-Id: <200105022135.OAA26245@fac-813-1.math.Berkeley.EDU>
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  9968] By: jhi                                   on 2001/05/02  22:17:21
+        Log: Subject: [PATCH: perl@9945] fix some misinformation in perlfunc.pod
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Wed, 2 May 2001 15:58:18 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10105021554040.342459-100000@aspara.forte.com>
+     Branch: perl
+	   ! pod/perlfunc.pod pod/perlport.pod
+____________________________________________________________________________
+[  9967] By: jhi                                   on 2001/05/02  20:12:45
+        Log: Workaround for UTS compiler casting bug from Hal Morris.
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[  9966] By: jhi                                   on 2001/05/02  18:31:37
+        Log: Subject: Re: [PATCH 5.6.1] Multiplicity and thread fixes for VMS 
+             From: Dan Sugalski <dan@sidhe.org>
+             Date: Wed, 02 May 2001 15:23:22 -0400
+             Message-Id: <5.0.2.1.0.20010502152210.01f65550@24.8.96.48>
+     Branch: perl
+	   ! perl.c vms/vms.c
+____________________________________________________________________________
+[  9965] By: jhi                                   on 2001/05/02  18:21:29
+        Log: Minor doc tweaks on endianness, closes bug 20010327.004.
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  9964] By: jhi                                   on 2001/05/02  18:15:01
+        Log: Document large files in INSTALL, document also the %x
+             limitation if not use64bitint, closes bug 20010326.007.
+     Branch: perl
+	   ! INSTALL
+____________________________________________________________________________
+[  9963] By: jhi                                   on 2001/05/02  17:24:47
+        Log: perlmodlib tweaks; regen pods.
+     Branch: perl
+	   ! pod/Makefile.SH pod/perlmodlib.PL pod/perlmodlib.pod
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[  9962] By: jhi                                   on 2001/05/02  17:14:00
+        Log: Fix for a segfault, from Marc Lehmann.
+     Branch: perl
+	   ! ext/POSIX/POSIX.xs ext/Time/Piece/Piece.xs
+____________________________________________________________________________
+[  9961] By: jhi                                   on 2001/05/02  15:55:53
+        Log: Subject: [DOC PATCH bleadperl] minor nits in perlop.pod
+             From: "Philip Newton" <pnewton@gmx.de>
+             Date: Wed, 2 May 2001 18:39:03 +0200
+             Message-ID: <3AF05447.15525.173B588@localhost>
+     Branch: perl
+	   ! pod/perlop.pod
+____________________________________________________________________________
+[  9960] By: jhi                                   on 2001/05/02  15:35:37
+        Log: Subject: [PATCH 5.6.1] Multiplicity and thread fixes for VMS
+             From: Dan Sugalski <dan@sidhe.org>
+             Date: Wed, 02 May 2001 11:37:27 -0400
+             Message-Id: <5.0.2.1.0.20010502112909.01f24e28@24.8.96.48>
+     Branch: perl
+	   ! doio.c ext/File/Glob/bsd_glob.c perl.c perl.h pp_sys.c
+	   ! thread.h vms/vms.c vms/vmsish.h
+____________________________________________________________________________
+[  9959] By: jhi                                   on 2001/05/02  15:21:08
+        Log: Subject: Re: [PATCH] Allow appending on a PerlIO::Scalar
+             From: Benjamin Sugars <bsugars@canoe.ca>
+             Date: Wed, 2 May 2001 10:53:11 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.21.0105021041380.1652-100000@marmot.rim.canoe.ca>
+     Branch: perl
+	   ! ext/PerlIO/Scalar/Scalar.xs
+____________________________________________________________________________
+[  9958] By: jhi                                   on 2001/05/02  15:15:53
+        Log: Bug in #9915, spotted by Mike Guy.
+     Branch: perl
+	   ! installperl
+____________________________________________________________________________
+[  9957] By: jhi                                   on 2001/05/02  13:26:01
+        Log: Add a test for not griping about references as array
+             indices if the reference has magic in it (overloaded
+             methods).
+     Branch: perl
+	   ! pod/perldiag.pod t/pragma/warn/pp_hot
+____________________________________________________________________________
+[  9956] By: jhi                                   on 2001/05/02  13:07:01
+        Log: Retracted a bit too much in #9952.
+     Branch: perl
+	   ! t/pragma/sub_lval.t
+____________________________________________________________________________
+[  9955] By: jhi                                   on 2001/05/02  13:05:38
+        Log: Test for #9952.
+     Branch: perl
+	   ! t/op/tie.t
+____________________________________________________________________________
+[  9954] By: jhi                                   on 2001/05/02  11:48:18
+        Log: Additional note on the encoding example: one cannot
+             convert string constants in-place.
+     Branch: perl
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[  9953] By: jhi                                   on 2001/05/02  11:43:51
+        Log: Note that if you have recent enough Perl you already
+             have Filter::Util::Call.
+     Branch: perl
+	   ! lib/Filter/Simple.pm
+____________________________________________________________________________
+[  9952] By: jhi                                   on 2001/05/02  11:31:53
+        Log: Retract changes #8254 and #8255, causes coredump in
+             'tie FH, "main"', reported by Abigail, culprit found by
+             Benjamin Sugars.  Mirrors maintperl change #9950.
+     Branch: perl
+	   ! op.c t/pragma/sub_lval.t
+____________________________________________________________________________
+[  9951] By: jhi                                   on 2001/05/02  11:14:29
+        Log: Forgot from #9942.  (Needed by t/lib/filter-simple.t.)
+     Branch: perl
+	   + t/lib/MyFilter.pm
+____________________________________________________________________________
+[  9950] By: gsar                                  on 2001/05/02  03:17:11
+        Log: revert integration of changes#8254,8255 in change#8620 (causes
+             a coredump in C<tie FH, 'foo'>; the idea itself may need better
+             rationalization)
+     Branch: maint-5.6/perl
+	   ! op.c t/pragma/sub_lval.t
+____________________________________________________________________________
+[  9949] By: gsar                                  on 2001/05/02  02:56:32
+        Log: integrate changes#9774,9814 from mainline (Unixware fixes)
+             
+             Subject: [ID 20010421.010] Perl 5.6.1 on Unixware 7
+             
+             Subject: Re: [ID 20010421.010] Perl 5.6.1 on Unixware 7
+     Branch: maint-5.6/perl
+	  !> hints/svr5.sh
+____________________________________________________________________________
+[  9948] By: gsar                                  on 2001/05/02  02:49:15
+        Log: pod/find.t breaks on VMS (from Craig Berry)
+     Branch: maint-5.6/perl
+	   ! t/pod/find.t
+____________________________________________________________________________
+[  9947] By: jhi                                   on 2001/05/02  02:43:09
+        Log: Add an encoding conversion example.
+     Branch: perl
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[  9946] By: jhi                                   on 2001/05/02  01:34:22
+        Log: Another coat of paint but still nowhere finished.
+             Need to decide on the semantics of strptime(): should
+             strptime() be a function instead of a method?  To do
+             the week/monthname-strptiming the i18n/l10n bullet needs
+             to be bitten with gusto.
+     Branch: perl
+	   ! ext/Time/Piece/Piece.pm t/lib/time-piece.t
+____________________________________________________________________________
+[  9945] By: jhi                                   on 2001/05/01  23:40:52
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  9944] By: jhi                                   on 2001/05/01  23:33:37
         Log: Add known-to-be-tested modules to the list-to-be-skipped.
      Branch: perl
