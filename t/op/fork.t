@@ -227,19 +227,23 @@ if ($^O eq 'MSWin32') {
 else {
     $getenv = qq[$^X -e 'print \$ENV{TST}'];
 }
+$ENV{TST} = 'foo';
 if (fork) {
     sleep 1;
-    $ENV{TST} = 'foo';
-    print "parent: " . `$getenv`;
+    print "parent before: " . `$getenv`;
+    $ENV{TST} = 'bar';
+    print "parent after: " . `$getenv`;
 }
 else {
-    $ENV{TST} = 'bar';
-    print "child: " . `$getenv`;
-    sleep 1;
+    print "child before: " . `$getenv`;
+    $ENV{TST} = 'baz';
+    print "child after: " . `$getenv`;
 }
 EXPECT
-parent: foo
-child: bar
+child before: foo
+child after: baz
+parent before: foo
+parent after: bar
 ########
 $| = 1;
 $\ = "\n";
