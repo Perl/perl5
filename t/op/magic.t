@@ -36,7 +36,7 @@ sub skip {
     return 1;
 }
 
-print "1..44\n";
+print "1..46\n";
 
 $Is_MSWin32 = $^O eq 'MSWin32';
 $Is_NetWare = $^O eq 'NetWare';
@@ -301,3 +301,14 @@ ok $^S == 0;
 ok ${^TAINT} == 0;
 eval { ${^TAINT} = 1 };
 ok ${^TAINT} == 0;
+
+# 5.6.1 had a bug: @+ and @- were not properly interpolated
+# into double-quoted strings
+# 20020414 mjd-perl-patch+@plover.com
+{
+    no warnings 'ambiguous';
+    "I like pie" =~ /(I) (like) (pie)/;
+    ok "@-" eq  "0 0 2 7";
+    ok "@+" eq "10 1 6 10";
+}
+
