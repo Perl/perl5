@@ -258,3 +258,6 @@ _sffilbuf
 sys_errlist
 _stdopen
 _Sfstderr
+# more symbols, Fri, Aug 31, 2001 20:21:48
+gMacPerl_Perl5DB
+gMacPerl_ErrorFormat

@@ -6,32 +6,33 @@ MACPERL_SRC	=	:::
 COpt += -i :::
 
 dirs = 	\
+	err:err					\
 	AppleEvents:AppleEvents			\
 	Components:Components			\
-	Controls:Controls				\
-	Dialogs:Dialogs					\
-	Events:Events					\
-	Files:Files						\
-	Fonts:Fonts						\
-	Gestalt:Gestalt					\
-	InternetConfig:InternetConfig	\
-	Lists:Lists						\
-	Memory:Memory					\
-	Menus:Menus						\
-	MoreFiles:MoreFiles				\
-	Movies:Movies					\
-	OSA:OSA							\
-	Processes:Processes				\
+	Controls:Controls			\
+	Dialogs:Dialogs				\
+	Events:Events				\
+	Files:Files				\
+	Fonts:Fonts				\
+	Gestalt:Gestalt				\
+	InternetConfig:InternetConfig		\
+	Lists:Lists				\
+	Memory:Memory				\
+	Menus:Menus				\
+	MoreFiles:MoreFiles			\
+	Movies:Movies				\
+	OSA:OSA					\
+	Processes:Processes			\
 	QDOffscreen:QDOffscreen			\
-	QuickDraw:QuickDraw				\
+	QuickDraw:QuickDraw			\
 	QuickTimeVR:QuickTimeVR			\
-	Resources:Resources				\
-	Sound:Sound						\
-	Speech:Speech					\
+	Resources:Resources			\
+	Sound:Sound				\
+	Speech:Speech				\
 	SpeechRecognition:SpeechRecognition	\
 	StandardFile:StandardFile		\
-	TextEdit:TextEdit				\
-	Types:Types						\
+	TextEdit:TextEdit			\
+	Types:Types				\
 	Windows:Windows
 
 all static dynamic install install_static install_dynamic: Obj

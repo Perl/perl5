@@ -831,7 +831,12 @@ void MacPerl_WriteMsg(void * io, const char * msg, size_t len)
 {
 	const char * line= msg;
 	const char * at;
-	
+
+	if (!gMacPerl_ErrorFormat) {
+		PerlIO_write(io, msg, len);
+		return;
+	}
+
 	/* Look for " line \d" */
 	while (line = strnstr(line+1, " line ", msg+len-line-1)) {
 		if (line[6] >= '0' && line[6] <= '9') {

@@ -530,11 +530,23 @@ MP_Pick(prompt, ...)
 		DisposeDialog(dlg);
 	}
 
-void
-MP_Quit(condition)
-	int	condition
+int
+MP_Quit(...)
 	CODE:
-	gMacPerl_Quit = condition;
+		if (items > 0)
+			gMacPerl_Quit = SvIV(ST(0));
+		RETVAL = gMacPerl_Quit;
+	OUTPUT:
+	RETVAL
+
+int
+MP_ErrorFormat(...)
+	CODE:
+		if (items > 0)
+			gMacPerl_ErrorFormat = SvIV(ST(0));
+		RETVAL = gMacPerl_ErrorFormat;
+	OUTPUT:
+	RETVAL
 
 void
 MP_FAccess(file, cmd, ...)

@@ -48,6 +48,7 @@ MP_EXT short	gMacPerl_OSErr;
 MP_EXT char 	gMacPerl_PseudoFileName[256];
 MP_EXT int	gMacPerl_Quit;
 MP_EXT clock_t	gMacPerl_StartClock;
+MP_EXT int	gMacPerl_ErrorFormat		MP_INIT(1);
 
 #ifdef MAC_CONTEXT
 #undef Move
