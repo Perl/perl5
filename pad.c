@@ -253,8 +253,11 @@ Perl_pad_undef(pTHX_ CV* cv)
 		CV *innercv = (CV*)curpad[ix];
 		namepad[ix] = Nullsv;
 		SvREFCNT_dec(namesv);
-		curpad[ix] = Nullsv;
-		SvREFCNT_dec(innercv);
+
+		if (SvREFCNT(comppad) < 2) { /* allow for /(?{ sub{} })/  */
+		    curpad[ix] = Nullsv;
+		    SvREFCNT_dec(innercv);
+		}
 		if (SvREFCNT(innercv) /* in use, not just a prototype */
 		    && CvOUTSIDE(innercv) == cv)
 		{

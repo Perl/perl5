@@ -916,7 +916,7 @@ PP(pp_mapwhile)
 	     * (we use undef here). And so we certainly don't want to do mortal
 	     * copies of meaningless values. */
 	    while (items-- > 0) {
-		POPs;
+		(void)POPs;
 		*dst-- = &PL_sv_undef;
 	    }
 	}
@@ -1014,6 +1014,7 @@ PP(pp_flip)
    an exception for .."0" [#18165]). AMS 20021031. */
 
 #define RANGE_IS_NUMERIC(left,right) ( \
+	(!SvOK(left) && !SvOK(right)) || \
 	SvNIOKp(left)  || (SvOK(left)  && !SvPOKp(left))  || \
 	SvNIOKp(right) || (SvOK(right) && !SvPOKp(right)) || \
 	(looks_like_number(left) && SvPOKp(left) && *SvPVX(left) != '0' && \
@@ -1712,8 +1713,11 @@ PP(pp_enteriter)
 		 cx->blk_loop.iterix = SvIV(sv);
 		 cx->blk_loop.itermax = SvIV((SV*)cx->blk_loop.iterary);
 	    }
-	    else
+	    else {
+		STRLEN n_a;
 		cx->blk_loop.iterlval = newSVsv(sv);
+		SvPV_force(cx->blk_loop.iterlval,n_a);
+	    }
 	}
     }
     else {
@@ -2026,6 +2030,7 @@ PP(pp_redo)
     TOPBLOCK(cx);
     oldsave = PL_scopestack[PL_scopestack_ix - 1];
     LEAVE_SCOPE(oldsave);
+    FREETMPS;
     return cx->blk_loop.redo_op;
 }
 
