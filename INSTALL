@@ -1449,6 +1449,7 @@ make install will install the following:
 	pod2man, and
 	pod2text
 	splain		Describe Perl warnings and errors
+	dprofpp		Perl code profile post-processor
 
 	library files	in $privlib and $archlib specified to
 			Configure, usually under /usr/local/lib/perl5/.

@@ -232,15 +232,6 @@ struct mgvtbl {								\
     U8		op_flags;		\
     U8		op_private;
 
-#define UNION_ANY_DEFINITION union any {		\
-    void*	any_ptr;				\
-    I32		any_i32;				\
-    IV		any_iv;					\
-    long	any_long;				\
-    void	(CPERLscope(*any_dptr)) (pTHX_ void*);	\
-    char	handle_VC_problem[16];			\
-}
-
 #endif /* PERL_OBJECT */
 
 #endif /* _MSC_VER */
