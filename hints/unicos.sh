@@ -14,9 +14,10 @@ ccflags="$ccflags -h matherror=errno"
 # (It gives int((2/3)*3) a chance to be 2, not 1. --jhi)
 # (but IEEE CPUs, IEEE/ieee/CPE1 CPUs should not have -h rounddiv,
 #  since the compiler on those CPUs doesn't even support the option.)
-case "`/etc/cpu -i|grep cfp`" in
-*"cfp")	ccflags="$ccflags -h rounddiv" ;;
-esac
+if /etc/cpu -i | grep -q cfp
+then
+    ccflags="$ccflags -h rounddiv"
+fi
 
 # Avoid an optimizer bug where a volatile variables
 # isn't correctly saved and restored --Mark P. Lutz 
