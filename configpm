@@ -65,31 +65,36 @@ printf CONFIG <<'ENDOFBEG', ($myver) x 3;
 # made to this file will be lost the next time perl is built.
 
 package Config;
-use Exporter ();
 @EXPORT = qw(%%Config);
-@EXPORT_OK = qw(myconfig config_sh config_vars);
+@EXPORT_OK = qw(myconfig config_sh config_vars config_re);
+
+my %%Export_Cache = map {($_ => 1)} (@EXPORT, @EXPORT_OK);
 
 # Define our own import method to avoid pulling in the full Exporter:
 sub import {
-  my $pkg = shift;
-  @_ = @EXPORT unless @_;
+    my $pkg = shift;
+    @_ = @EXPORT unless @_;
 
-  my @func = grep {$_ ne '%%Config'} @_;
-  local $Exporter::ExportLevel = 1;
-  Exporter::import('Config', @func) if @func;
+    my @funcs = grep $_ ne '%%Config', @_;
+    my $export_Config = @funcs < @_ ? 1 : 0;
 
-  return if @func == @_;
+    my $callpkg = caller(0);
+    foreach my $func (@funcs) {
+	die sprintf qq{"%%s" is not exported by the %%s module\n},
+	    $func, __PACKAGE__ unless $Export_Cache{$func};
+	*{$callpkg.'::'.$func} = \&{$func};
+    }
 
-  my $callpkg = caller(0);
-  *{"$callpkg\::Config"} = \%%Config;
+    *{"$callpkg\::Config"} = \%%Config if $export_Config;
+    return;
 }
 
 die "Perl lib version (%s) doesn't match executable version ($])"
     unless $^V;
 
 $^V eq %s
-  or die "Perl lib version (%s) doesn't match executable version (" .
-    (sprintf "v%vd",$^V) . ")";
+    or die "Perl lib version (%s) doesn't match executable version (" .
+	sprintf("v%%vd",$^V) . ")";
 
 ENDOFBEG
 
@@ -218,11 +223,11 @@ print CONFIG "\n!END!\n", <<'EOT';
 my $summary_expanded = 0;
 
 sub myconfig {
-	return $summary if $summary_expanded;
-	$summary =~ s{\$(\w+)}
-		     { my $c = $Config{$1}; defined($c) ? $c : 'undef' }ge;
-	$summary_expanded = 1;
-	$summary;
+    return $summary if $summary_expanded;
+    $summary =~ s{\$(\w+)}
+		 { my $c = $Config{$1}; defined($c) ? $c : 'undef' }ge;
+    $summary_expanded = 1;
+    $summary;
 }
 
 our $Config_SH : unique = <<'!END!';
@@ -321,23 +326,26 @@ sub config_sh {
 
 sub config_re {
     my $re = shift;
-    my @matches = grep /^$re=/, split /^/, $Config_SH;
-    @matches ? (print @matches) : print "$re: not found\n";
+    return map { chomp; $_ } grep /^$re=/, split /^/, $Config_SH;
 }
 
 sub config_vars {
-    foreach(@_){
-	config_re($_), next if /\W/;
-	my $v=(exists $Config{$_}) ? $Config{$_} : 'UNKNOWN';
-	$v='undef' unless defined $v;
-	print "$_='$v';\n";
+    foreach (@_) {
+	if (/\W/) {
+	    my @matches = config_re($_);
+	    print map "$_\n", @matches ? @matches : "$_: not found";
+	} else {
+	    my $v = (exists $Config{$_}) ? $Config{$_} : 'UNKNOWN';
+	    $v = 'undef' unless defined $v;
+	    print "$_='$v';\n";
+	}
     }
 }
 
 ENDOFEND
 
 if ($^O eq 'os2') {
-  print CONFIG <<'ENDOFSET';
+    print CONFIG <<'ENDOFSET';
 my %preconfig;
 if ($OS2::is_aout) {
     my ($value, $v) = $Config_SH =~ m/^used_aout='(.*)'\s*$/m;
@@ -349,19 +357,19 @@ if ($OS2::is_aout) {
 $preconfig{d_fork} = undef unless $OS2::can_fork; # Some funny cases can't
 sub TIEHASH { bless {%preconfig} }
 ENDOFSET
-  # Extract the name of the DLL from the makefile to avoid duplication
-  my ($f) = grep -r, qw(GNUMakefile Makefile);
-  my $dll;
-  if (open my $fh, '<', $f) {
-    while (<$fh>) {
-      $dll = $1, last if /^PERL_DLL_BASE\s*=\s*(\S*)\s*$/;
+    # Extract the name of the DLL from the makefile to avoid duplication
+    my ($f) = grep -r, qw(GNUMakefile Makefile);
+    my $dll;
+    if (open my $fh, '<', $f) {
+	while (<$fh>) {
+	    $dll = $1, last if /^PERL_DLL_BASE\s*=\s*(\S*)\s*$/;
+	}
     }
-  }
-  print CONFIG <<ENDOFSET if $dll;
+    print CONFIG <<ENDOFSET if $dll;
 \$preconfig{dll_name} = '$dll';
 ENDOFSET
 } else {
-  print CONFIG <<'ENDOFSET';
+    print CONFIG <<'ENDOFSET';
 sub TIEHASH {
     bless $_[1], $_[0];
 }
@@ -385,21 +393,20 @@ my $f = $t eq 'long' ? 'L!' : $s == 8 ? 'Q': 'I';
 
 my $byteorder_code;
 if ($s == 4 || $s == 8) {
-
-  my $list = join ',', reverse(2..$s);
-  my $format = 'a'x$s;
-  $byteorder_code = <<"EOT";
+    my $list = join ',', reverse(2..$s);
+    my $format = 'a'x$s;
+    $byteorder_code = <<"EOT";
 my \$i = 0;
 foreach my \$c ($list) { \$i |= ord(\$c); \$i <<= 8 }
 \$i |= ord(1);
 my \$value = join('', unpack('$format', pack('$f', \$i)));
 EOT
 } else {
-  $byteorder_code = "\$value = '?'x$s;\n";
+    $byteorder_code = "\$value = '?'x$s;\n";
 }
 
 my $fast_config = join '', map { "    $_,\n" }
-  values (%v_fast), 'byteorder => $value' ;
+    values (%v_fast), 'byteorder => $value' ;
 
 print CONFIG sprintf <<'ENDOFTIE', $byteorder_code, $fast_config;
 
@@ -429,11 +436,13 @@ Config - access Perl configuration information
 	print "built by gcc\n";
     } 
 
-    use Config qw(myconfig config_sh config_vars);
+    use Config qw(myconfig config_sh config_vars config_re);
 
     print myconfig();
 
     print config_sh();
+
+    print config_re();
 
     config_vars(qw(osname archname));
 
@@ -461,6 +470,11 @@ See also C<-V> in L<perlrun/Switches>.
 
 Returns the entire perl configuration information in the form of the
 original config.sh shell variable assignment script.
+
+=item config_re($regex)
+
+Like config_sh() but returns, as a list, only the config entries who's
+names match the $regex.
 
 =item config_vars(@names)
 

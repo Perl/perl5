@@ -261,7 +261,11 @@ explain() if $fail;
 bye(); # does the necessary cleanup
 
 END {
-   unlink "big"; # be paranoid about leaving 5 gig files lying around
+    # unlink may fail if applied directly to a large file
+    open(BIG, ">big");
+    print BIG "x";
+    close(BIG);
+    unlink "big"; # be paranoid about leaving 5 gig files lying around
 }
 
 # eof

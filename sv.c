@@ -26,7 +26,7 @@
 #ifdef PERL_COPY_ON_WRITE
 #define SV_COW_NEXT_SV(sv)	INT2PTR(SV *,SvUVX(sv))
 #define SV_COW_NEXT_SV_SET(current,next)	SvUVX(current) = PTR2UV(next)
-/* This is a pessamistic view. Scalar must be purely a read-write PV to copy-
+/* This is a pessimistic view. Scalar must be purely a read-write PV to copy-
    on-write.  */
 #define CAN_COW_MASK	(SVs_OBJECT|SVs_GMG|SVs_SMG|SVs_RMG|SVf_IOK|SVf_NOK| \
 			 SVf_POK|SVf_ROK|SVp_IOK|SVp_NOK|SVp_POK|SVf_FAKE| \
@@ -164,7 +164,28 @@ Public API:
 
 /* new_SV(): return a new, empty SV head */
 
-#define new_SV(p) \
+#ifdef DEBUG_LEAKING_SCALARS
+/* provide a real function for a debugger to play with */
+STATIC SV*
+S_new_SV(pTHX)
+{
+    SV* sv;
+
+    LOCK_SV_MUTEX;
+    if (PL_sv_root)
+	uproot_SV(sv);
+    else
+	sv = more_sv();
+    UNLOCK_SV_MUTEX;
+    SvANY(sv) = 0;
+    SvREFCNT(sv) = 1;
+    SvFLAGS(sv) = 0;
+    return sv;
+}
+#  define new_SV(p) (p)=S_new_SV(aTHX)
+
+#else
+#  define new_SV(p) \
     STMT_START {					\
 	LOCK_SV_MUTEX;					\
 	if (PL_sv_root)					\
@@ -176,6 +197,7 @@ Public API:
 	SvREFCNT(p) = 1;				\
 	SvFLAGS(p) = 0;					\
     } STMT_END
+#endif
 
 
 /* del_SV(): return an empty SV head to the free list */
@@ -2026,7 +2048,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 	if (SvROK(sv)) {
 	  SV* tmpstr;
           if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,numer)) &&
-                (SvTYPE(tmpstr) != SVt_RV || (SvRV(tmpstr) != SvRV(sv))))
+                (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv))))
 	      return SvIV(tmpstr);
 	  return PTR2IV(SvRV(sv));
 	}
@@ -2323,7 +2345,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	if (SvROK(sv)) {
 	  SV* tmpstr;
           if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,numer)) &&
-                (SvTYPE(tmpstr) != SVt_RV || (SvRV(tmpstr) != SvRV(sv))))
+                (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv))))
 	      return SvUV(tmpstr);
 	  return PTR2UV(SvRV(sv));
 	}
@@ -2611,7 +2633,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	if (SvROK(sv)) {
 	  SV* tmpstr;
           if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,numer)) &&
-                (SvTYPE(tmpstr) != SVt_RV || (SvRV(tmpstr) != SvRV(sv))))
+                (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv))))
 	      return SvNV(tmpstr);
 	  return PTR2NV(SvRV(sv));
 	}
@@ -2931,7 +2953,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	if (SvROK(sv)) {
 	    SV* tmpstr;
             if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,string)) &&
-                (SvTYPE(tmpstr) != SVt_RV || (SvRV(tmpstr) != SvRV(sv)))) {
+                (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
                 char *pv = SvPV(tmpstr, *lp);
                 if (SvUTF8(tmpstr))
                     SvUTF8_on(sv);
@@ -4631,8 +4653,7 @@ Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, MGVTBL *vtable,
        avoid incrementing the object refcount.
 
        Note we cannot do this to avoid self-tie loops as intervening RV must
-       have its REFCNT incremented to keep it in existence - instead we could
-       special case them in sv_free() -- NI-S
+       have its REFCNT incremented to keep it in existence.
 
     */
     if (!obj || obj == sv ||
@@ -4649,6 +4670,21 @@ Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, MGVTBL *vtable,
 	mg->mg_obj = SvREFCNT_inc(obj);
 	mg->mg_flags |= MGf_REFCOUNTED;
     }
+
+    /* Normal self-ties simply pass a null object, and instead of
+       using mg_obj directly, use the SvTIED_obj macro to produce a
+       new RV as needed.  For glob "self-ties", we are tieing the PVIO
+       with an RV obj pointing to the glob containing the PVIO.  In
+       this case, to avoid a reference loop, we need to weaken the
+       reference.
+    */
+
+    if (how == PERL_MAGIC_tiedscalar && SvTYPE(sv) == SVt_PVIO &&
+        obj && SvROK(obj) && GvIO(SvRV(obj)) == (IO*)sv)
+    {
+      sv_rvweaken(obj);
+    }
+
     mg->mg_type = how;
     mg->mg_len = namlen;
     if (name) {

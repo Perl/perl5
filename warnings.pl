@@ -604,7 +604,7 @@ $All = "" ; vec($All, $Offsets{'all'}, 2) = 3 ;
 sub Croaker
 {
     delete $Carp::CarpInternal{'warnings'};
-    croak @_ ;
+    croak(@_);
 }
 
 sub bits

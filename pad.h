@@ -242,15 +242,17 @@ Clone the state variables associated with running and compiling pads.
     else							\
 	(dstpad) = av_dup_inc((srcpad), param);			
 
-/* note - we set comp/curpad to null rather than duping - otherwise
- * we may dup a pad but not the whole padlist, and be left with
- * leaked pad. We assume that a sub will get called very soon hereafter
- * and comp/curpad will get set to something sensible. DAPM 16-Oct02 */
-/* XXX DAPM -does the same logic appply to comppad_name ? */
+/* NB - we set PL_comppad to null unless it points at a value that
+ * has already been dup'ed, ie it points to part of an active padlist.
+ * Otherwise PL_comppad ends up being a leaked scalar in code like
+ * the following:
+ *     threads->create(sub { threads->create(sub {...} ) } );
+ * where the second thread dups the outer sub's comppad but not the
+ * sub's CV or padlist. */
 
 #define PAD_CLONE_VARS(proto_perl, param)				\
-    PL_comppad			= Null(PAD*);				\
-    PL_curpad			= Null(SV **);				\
+    PL_comppad = ptr_table_fetch(PL_ptr_table, proto_perl->Icomppad);	\
+    PL_curpad = PL_comppad ?  AvARRAY(PL_comppad) : Null(SV**);		\
     PL_comppad_name		= av_dup(proto_perl->Icomppad_name, param); \
     PL_comppad_name_fill	= proto_perl->Icomppad_name_fill;	\
     PL_comppad_name_floor	= proto_perl->Icomppad_name_floor;	\

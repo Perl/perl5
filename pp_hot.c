@@ -2317,8 +2317,9 @@ PP(pp_leavesublv)
 		    PL_curpm = newpm;
 		    LEAVE;
 		    LEAVESUB(sv);
-		    DIE(aTHX_ "Can't return a %s from lvalue subroutine",
-			SvREADONLY(TOPs) ? "readonly value" : "temporary");
+		    DIE(aTHX_ "Can't return %s from lvalue subroutine",
+			SvREADONLY(TOPs) ? (TOPs == &PL_sv_undef) ? "undef"
+			: "a readonly value" : "a temporary");
 		}
 		else {                  /* Can be a localized value
 					 * subject to deletion. */

@@ -70,7 +70,7 @@ POSIX functions:
   $fh = tmpfile();
 
   ($fh, $file) = tmpnam();
-  ($fh, $file) = tmpfile();
+  $fh = tmpfile();
 
 
 Compatibility functions:
@@ -1471,7 +1471,7 @@ sub tmpnam {
 
 =item B<tmpfile>
 
-In scalar context, returns the filehandle of a temporary file.
+Returns the filehandle of a temporary file.
 
   $fh = tmpfile();
 

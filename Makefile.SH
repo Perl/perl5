@@ -937,7 +937,7 @@ _cleaner2:
 	rm -f so_locations $(LIBPERL_NONSHR) $(MINIPERL_NONSHR)
 	rm -rf $(addedbyconf)
 	rm -f $(FIRSTMAKEFILE) $(FIRSTMAKEFILE).old
-	rm -f $(private)
+	rm -f $(private) lib/Config.pod
 	rm -rf lib/auto
 	rm -f lib/.exists lib/*/.exists lib/*/*/.exists
 	rm -f h2ph.man pstruct

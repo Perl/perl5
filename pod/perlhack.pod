@@ -2064,7 +2064,14 @@ For example, for "third-degreed" Perl:
 
 (Note: the mod_perl apache module uses also this environment variable
 for its own purposes and extended its semantics. Refer to the mod_perl
-documentation for more information.)
+documentation for more information. Also, spawned threads do the
+equivalent of setting this variable to the value 1.)
+
+If, at the end of a run you get the message I<N scalars leaked>, you can
+recompile with C<-DDEBUG_LEAKING_SCALARS>, which will cause
+the addresses of all those leaked SVs to be dumped; it also converts
+C<new_SV()> from a macro into a real function, so you can use your
+favourite debugger to discover where those pesky SVs were allocated.
 
 =head2 Profiling
 

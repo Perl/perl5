@@ -477,6 +477,7 @@ ext/List/Util/README		Util extension
 ext/List/Util/t/blessed.t	Scalar::Util
 ext/List/Util/t/dualvar.t	Scalar::Util
 ext/List/Util/t/first.t		List::Util
+ext/List/Util/t/isvstring.t	Scalar::Util
 ext/List/Util/t/max.t		List::Util
 ext/List/Util/t/maxstr.t	List::Util
 ext/List/Util/t/min.t		List::Util
@@ -484,6 +485,7 @@ ext/List/Util/t/minstr.t	List::Util
 ext/List/Util/t/openhan.t	Scalar::Util
 ext/List/Util/t/readonly.t	Scalar::Util
 ext/List/Util/t/reduce.t	List::Util
+ext/List/Util/t/refaddr.t	Scalar::Util
 ext/List/Util/t/reftype.t	Scalar::Util
 ext/List/Util/t/shuffle.t	List::Util
 ext/List/Util/t/sum.t		List::Util
@@ -2656,6 +2658,7 @@ t/run/runenv.t			Test if perl honors its environment variables.
 t/run/switcha.t			Test the -a switch
 t/run/switches.t		Tests for the other switches
 t/run/switchF.t			Test the -F switch
+t/run/switchI.t			Test the -I switch
 t/run/switchn.t			Test the -n switch
 t/run/switchp.t			Test the -p switch
 t/run/switchPx.aux		Data for switchPx.t
@@ -2671,6 +2674,10 @@ t/uni/fold.t			See if Unicode folding works
 t/uni/lower.t			See if Unicode casing works
 t/uni/sprintf.t			See if Unicode sprintf works
 t/uni/title.t			See if Unicode casing works
+t/uni/tr_7jis.t			See if Unicode tr/// works
+t/uni/tr_eucjp.t		See if Unicode tr/// works
+t/uni/tr_sjis.t			See if Unicode tr/// works
+t/uni/tr_utf8.t			See if Unicode tr/// works
 t/uni/upper.t			See if Unicode casing works
 t/win32/longpath.t		Test if Win32::GetLongPathName() works
 t/win32/system.t		See if system works in Win*

@@ -9,7 +9,7 @@ BEGIN
 use strict;
 use File::Path;
 use File::Spec;
-use Test::More tests => 13;
+use Test::More tests => 18;
 
 {
 	local $INC{'XSLoader.pm'} = 1;
@@ -30,7 +30,47 @@ use Test::More tests => 13;
 my @default = map { "IO/$_.pm" } qw( Handle Seekable File Pipe Socket Dir );
 delete @INC{ @default };
 
-IO->import();
+my $warn = '' ;
+local $SIG{__WARN__} = sub { $warn = "@_" } ;
+
+{
+    no warnings ;
+    IO->import();
+    is( $warn, '', "... import default, should not warn");
+    $warn = '' ;
+}
+
+{
+    local $^W = 0;
+    IO->import();
+    is( $warn, '', "... import default, should not warn");
+    $warn = '' ;
+}
+
+{
+    local $^W = 1;
+    IO->import();
+    like( $warn, qr/^parameterless "use IO" deprecated at/, 
+              "... import default, should warn");
+    $warn = '' ;
+}
+
+{
+    use warnings 'deprecated' ;
+    IO->import(); 
+    like( $warn, qr/^parameterless "use IO" deprecated at/, 
+              "... import default, should warn");
+    $warn = '' ;
+}
+
+{
+    use warnings ;
+    IO->import();
+    like( $warn, qr/^parameterless "use IO" deprecated at/, 
+              "... import default, should warn");
+    $warn = '' ;
+}
+
 foreach my $default (@default)
 {
 	ok( exists $INC{ $default }, "... import should default load $default" );

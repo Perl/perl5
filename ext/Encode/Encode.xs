@@ -338,7 +338,7 @@ CODE:
     }
     else {
 	/* Native bytes - can always encode */
-	U8 *d = (U8 *) SvGROW(dst,2*slen);
+	U8 *d = (U8 *) SvGROW(dst,2*slen+1);
 	while (s < e) {
 	    UV uv = NATIVE_TO_UNI((UV) *s++);
 	    if (UNI_IS_INVARIANT(uv))

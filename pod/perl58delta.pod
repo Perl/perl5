@@ -678,10 +678,10 @@ returns the number of slept seconds.
 
 =item *
 
-The printf() and sprintf() now support parameter reordering using the
+printf() and sprintf() now support parameter reordering using the
 C<%\d+\$> and C<*\d+\$> syntaxes.  For example
 
-    print "%2\$s %1\$s\n", "foo", "bar";
+    printf "%2\$s %1\$s\n", "foo", "bar";
 
 will print "bar foo\n".  This feature helps in writing
 internationalised software, and in general when the order

@@ -608,8 +608,8 @@ PP(pp_pipe_op)
     if (PerlProc_pipe(fd) < 0)
 	goto badexit;
 
-    IoIFP(rstio) = PerlIO_fdopen(fd[0], "r");
-    IoOFP(wstio) = PerlIO_fdopen(fd[1], "w");
+    IoIFP(rstio) = PerlIO_fdopen(fd[0], "r"PIPESOCK_MODE);
+    IoOFP(wstio) = PerlIO_fdopen(fd[1], "w"PIPESOCK_MODE);
     IoOFP(rstio) = IoIFP(rstio);
     IoIFP(wstio) = IoOFP(wstio);
     IoTYPE(rstio) = IoTYPE_RDONLY;
@@ -734,6 +734,7 @@ PP(pp_binmode)
     if (!(io = GvIO(gv)) || !(fp = IoIFP(io))) {
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 	    report_evil_fh(gv, io, PL_op->op_type);
+	SETERRNO(EBADF,RMS_IFI);
         RETPUSHUNDEF;
     }
 
@@ -1177,6 +1178,7 @@ PP(pp_getc)
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED)
 		&& (!io || (!IoIFP(io) && IoTYPE(io) != IoTYPE_WRONLY)))
 	    report_evil_fh(gv, io, PL_op->op_type);
+	SETERRNO(EBADF,RMS_IFI);
 	RETPUSHUNDEF;
     }
     TAINT;
@@ -1571,8 +1573,12 @@ PP(pp_sysread)
     else
 	offset = 0;
     io = GvIO(gv);
-    if (!io || !IoIFP(io))
+    if (!io || !IoIFP(io)) {
+	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+	    report_evil_fh(gv, io, PL_op->op_type);
+	SETERRNO(EBADF,RMS_IFI);
 	goto say_undef;
+    }
     if ((fp_utf8 = PerlIO_isutf8(IoIFP(io))) && !IN_BYTES) {
 	buffer = SvPVutf8_force(bufsv, blen);
 	/* UTF8 may not have been set if they are all low bytes */
@@ -1813,6 +1819,7 @@ PP(pp_send)
 	retval = -1;
 	if (ckWARN(WARN_CLOSED))
 	    report_evil_fh(gv, io, PL_op->op_type);
+	SETERRNO(EBADF,RMS_IFI);
 	goto say_undef;
     }
 
@@ -2274,8 +2281,8 @@ PP(pp_socket)
     fd = PerlSock_socket(domain, type, protocol);
     if (fd < 0)
 	RETPUSHUNDEF;
-    IoIFP(io) = PerlIO_fdopen(fd, "r");	/* stdio gets confused about sockets */
-    IoOFP(io) = PerlIO_fdopen(fd, "w");
+    IoIFP(io) = PerlIO_fdopen(fd, "r"PIPESOCK_MODE);	/* stdio gets confused about sockets */
+    IoOFP(io) = PerlIO_fdopen(fd, "w"PIPESOCK_MODE);
     IoTYPE(io) = IoTYPE_SOCKET;
     if (!IoIFP(io) || !IoOFP(io)) {
 	if (IoIFP(io)) PerlIO_close(IoIFP(io));
@@ -2336,11 +2343,11 @@ PP(pp_sockpair)
     TAINT_PROPER("socketpair");
     if (PerlSock_socketpair(domain, type, protocol, fd) < 0)
 	RETPUSHUNDEF;
-    IoIFP(io1) = PerlIO_fdopen(fd[0], "r");
-    IoOFP(io1) = PerlIO_fdopen(fd[0], "w");
+    IoIFP(io1) = PerlIO_fdopen(fd[0], "r"PIPESOCK_MODE);
+    IoOFP(io1) = PerlIO_fdopen(fd[0], "w"PIPESOCK_MODE);
     IoTYPE(io1) = IoTYPE_SOCKET;
-    IoIFP(io2) = PerlIO_fdopen(fd[1], "r");
-    IoOFP(io2) = PerlIO_fdopen(fd[1], "w");
+    IoIFP(io2) = PerlIO_fdopen(fd[1], "r"PIPESOCK_MODE);
+    IoOFP(io2) = PerlIO_fdopen(fd[1], "w"PIPESOCK_MODE);
     IoTYPE(io2) = IoTYPE_SOCKET;
     if (!IoIFP(io1) || !IoOFP(io1) || !IoIFP(io2) || !IoOFP(io2)) {
 	if (IoIFP(io1)) PerlIO_close(IoIFP(io1));
@@ -2508,12 +2515,12 @@ PP(pp_accept)
 	goto badexit;
     if (IoIFP(nstio))
 	do_close(ngv, FALSE);
-    IoIFP(nstio) = PerlIO_fdopen(fd, "r");
+    IoIFP(nstio) = PerlIO_fdopen(fd, "r"PIPESOCK_MODE);
     /* FIXME: we dup(fd) here so that refcounting of fd's does not inhibit
        fclose of IoOFP's FILE * - and hence leak memory.
        Special treatment of _this_ case of IoIFP != IoOFP seems wrong.
      */
-    IoOFP(nstio) = PerlIO_fdopen(fd2 = PerlLIO_dup(fd), "w");
+    IoOFP(nstio) = PerlIO_fdopen(fd2 = PerlLIO_dup(fd), "w"PIPESOCK_MODE);
     IoTYPE(nstio) = IoTYPE_SOCKET;
     if (!IoIFP(nstio) || !IoOFP(nstio)) {
 	if (IoIFP(nstio)) PerlIO_close(IoIFP(nstio));

@@ -3704,6 +3704,7 @@ is a beta version).
 char *
 Perl_scan_version(pTHX_ char *s, SV *rv)
 {
+    const char *start = s;
     char *pos = s;
     I32 saw_period = 0;
     bool saw_under = 0;
@@ -3743,7 +3744,7 @@ Perl_scan_version(pTHX_ char *s, SV *rv)
 		/* this is atoi() that delimits on underscores */
 		char *end = pos;
 		I32 mult = 1;
-		if ( s < pos && *(s-1) == '_' ) {
+		if ( s < pos && s > start && *(s-1) == '_' ) {
 		    if ( *s == '0' && *(s+1) != '0')
 			mult = 10;	/* perl-style */
 		    else

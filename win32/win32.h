@@ -140,6 +140,8 @@ struct utsname {
 #endif
 #define ENV_IS_CASELESS
 
+#define PIPESOCK_MODE	"b"		/* pipes, sockets default to binmode */
+
 #ifndef VER_PLATFORM_WIN32_WINDOWS	/* VC-2.0 headers don't have this */
 #define VER_PLATFORM_WIN32_WINDOWS	1
 #endif
