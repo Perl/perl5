@@ -3,7 +3,6 @@
 BEGIN {
 	chdir 't' if -d 't';
 	@INC = '../lib';
-
 }
 
 use File::Basename;
@@ -55,13 +54,12 @@ SKIP: {
 	my $test_out = do { local $/; <DATA> }; 
 	
 	skip( "Can't fork '$^X': $!", 1) 
-	    unless open my $fh, "$^X $pod_functions |";
+	    unless open my $fh, qq[$^X "-I../lib" $pod_functions |];
 	my $fake_out = do { local $/; <$fh> };
-	while ( <$fh> ) { $fake_out .= $_ }
 	skip( "Pipe error: $!", 1)
 	    unless close $fh;
 
-    is( $fake_out, $test_out, 'run as plain program' );
+	is( $fake_out, $test_out, 'run as plain program' );
 }
 
 =head1 NAME
