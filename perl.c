@@ -284,6 +284,15 @@ perl_construct(pTHXx)
     HvSHAREKEYS_off(PL_strtab);			/* mandatory */
     hv_ksplit(PL_strtab, 512);
 
+#if defined(__DYNAMIC__) && (defined(NeXT) || defined(__NeXT__))
+    _dyld_lookup_and_bind
+	("__environ", (unsigned long *) &environ_pointer, NULL);
+#endif /* environ */
+
+#ifdef  USE_ENVIRON_ARRAY
+    PL_origenviron = environ;
+#endif
+
     ENTER;
 }
 
@@ -462,6 +471,7 @@ perl_destruct(pTHXx)
 
 	for (i = 0; environ[i]; i++)
 	    safesysfree(environ[i]);
+
 	/* Must use safesysfree() when working with environ. */
 	safesysfree(environ);		
 
@@ -931,11 +941,6 @@ setuid perl scripts securely.\n");
 #endif
 #endif
 
-#if defined(__DYNAMIC__) && (defined(NeXT) || defined(__NeXT__))
-    _dyld_lookup_and_bind
-	("__environ", (unsigned long *) &environ_pointer, NULL);
-#endif /* environ */
-
     PL_origargc = argc;
     {
         /* we copy rather than point to argv
@@ -951,9 +956,7 @@ setuid perl scripts securely.\n");
         }
     }
 
-#ifdef  USE_ENVIRON_ARRAY
-    PL_origenviron = environ;
-#endif
+
 
     if (PL_do_undump) {
 
