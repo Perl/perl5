@@ -87,6 +87,13 @@ PP(pp_regcomp)
     STRLEN len;
     MAGIC *mg = Null(MAGIC*);
 
+#if defined(USE_ITHREADS) || defined(USE_THREADS)
+    if ((pm->op_pmflags & PMf_KEEP) && !(pm->op_private & OPpRUNTIME)) {
+	/* no point compiling again */
+	RETURN;
+    }
+#endif
+
     tmpstr = POPs;
     if (SvROK(tmpstr)) {
 	SV *sv = SvRV(tmpstr);
@@ -134,9 +141,13 @@ PP(pp_regcomp)
     else if (strEQ("\\s+", pm->op_pmregexp->precomp))
 	pm->op_pmflags |= PMf_WHITE;
 
+    /* XXX runtime compiled output needs to move to the pad */
     if (pm->op_pmflags & PMf_KEEP) {
 	pm->op_private &= ~OPpRUNTIME;	/* no point compiling again */
+#if !defined(USE_ITHREADS) && !defined(USE_THREADS)
+	/* XXX can't change the optree at runtime either */
 	cLOGOP->op_first->op_next = PL_op->op_next;
+#endif
     }
     RETURN;
 }
