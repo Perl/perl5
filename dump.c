@@ -30,7 +30,7 @@ void
 Perl_dump_vindent(pTHX_ I32 level, PerlIO *file, const char* pat, va_list *args)
 {
     dTHR;
-    PerlIO_printf(file, "%*s", level*PL_dumpindent, "");
+    PerlIO_printf(file, "%*s", (int)(level*PL_dumpindent), "");
     PerlIO_vprintf(file, pat, *args);
 }
 
@@ -377,7 +377,9 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
 	PerlIO_printf(file, "%-4d", o->op_seq);
     else
 	PerlIO_printf(file, "    ");
-    PerlIO_printf(file, "%*sTYPE = %s  ===> ", PL_dumpindent*level-4, "", PL_op_name[o->op_type]);
+    PerlIO_printf(file,
+		  "%*sTYPE = %s  ===> ",
+		  (int)(PL_dumpindent*level-4), "", PL_op_name[o->op_type]);
     if (o->op_next) {
 	if (o->op_seq)
 	    PerlIO_printf(file, "%d\n", o->op_next->op_seq);
