@@ -1,3 +1,37 @@
+# hints/solaris_2.sh
+# Last modified:  Tue Apr 13 13:12:49 EDT 1999
+# Andy Dougherty  <doughera@lafayette.edu>
+# Based on input from lots of folks, especially
+# Dean Roehrich <roehrich@ironwood-fddi.cray.com>
+
+# If perl fails tests that involve dynamic loading of extensions, and
+# you are using gcc, be sure that you are NOT using GNU as and ld.  One
+# way to do that is to invoke Configure with
+# 
+#     sh Configure -Dcc='gcc -B/usr/ccs/bin/'
+#
+#  (Note that the trailing slash is *required*.)
+#  gcc will occasionally emit warnings about "unused prefix", but
+#  these ought to be harmless.  See below for more details.
+ 
+# See man vfork.
+usevfork=false
+
+d_suidsafe=define
+
+# Avoid all libraries in /usr/ucblib.
+set `echo $glibpth | sed -e 's@/usr/ucblib@@'`
+glibpth="$*"
+
+# Remove bad libraries.  -lucb contains incompatible routines.
+# -lld doesn't do anything useful.
+# -lmalloc can cause a problem with GNU CC & Solaris.  Specifically,
+# libmalloc.a may allocate memory that is only 4 byte aligned, but
+# GNU CC on the Sparc assumes that doubles are 8 byte aligned.
+# Thanks to  Hallvard B. Furuseth <h.b.furuseth@usit.uio.no>
+set `echo " $libswanted " | sed -e 's@ ld @ @' -e 's@ malloc @ @' -e 's@ ucb @ @'`
+libswanted="$*"
+
 # Look for architecture name.  We want to suggest a useful default.
 case "$archname" in
 '')
