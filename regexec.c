@@ -917,10 +917,15 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case BOUNDUTF8:
-	    tmp = (I32)(s != startpos) ? utf8_to_uv(reghop((U8*)s, -1),
-							strend - s,
-							0, 0) : '\n';
-	    tmp = ((OP(c) == BOUNDUTF8 ? isALNUM_uni(tmp) : isALNUM_LC_uni(tmp)) != 0);
+	    if (s == startpos)
+		tmp = '\n';
+	    else {
+		U8 *r = reghop((U8*)s, -1);
+
+		tmp = (I32)utf8_to_uv(r, s - (char*)r, 0, 0);
+	    }
+	    tmp = ((OP(c) == BOUNDUTF8 ?
+		    isALNUM_uni(tmp) : isALNUM_LC_uni(tmp)) != 0);
 	    while (s < strend) {
 		if (tmp == !(OP(c) == BOUNDUTF8 ?
 			     swash_fetch(PL_utf8_alnum, (U8*)s) :
@@ -955,10 +960,15 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case NBOUNDUTF8:
-	    tmp = (I32)(s != startpos) ? utf8_to_uv(reghop((U8*)s, -1),
-							strend - s,
-							0, 0) : '\n';
-	    tmp = ((OP(c) == NBOUNDUTF8 ? isALNUM_uni(tmp) : isALNUM_LC_uni(tmp)) != 0);
+	    if (s == startpos)
+		tmp = '\n';
+	    else {
+		U8 *r = reghop((U8*)s, -1);
+
+		tmp = (I32)utf8_to_uv(r, s - (char*)r, 0, 0);
+	    }
+	    tmp = ((OP(c) == NBOUNDUTF8 ?
+		    isALNUM_uni(tmp) : isALNUM_LC_uni(tmp)) != 0);
 	    while (s < strend) {
 		if (tmp == !(OP(c) == NBOUNDUTF8 ?
 			     swash_fetch(PL_utf8_alnum, (U8*)s) :
@@ -2038,9 +2048,10 @@ S_regmatch(pTHX_ regnode *prog)
 		while (s < e) {
 		    if (l >= PL_regeol)
 			sayNO;
-		    if (utf8_to_uv((U8*)s, e - s, 0, 0) != (c1 ?
-						  toLOWER_utf8((U8*)l) :
-						  toLOWER_LC_utf8((U8*)l)))
+		    if (utf8_to_uv((U8*)s, e - s, 0, 0) !=
+			(c1 ?
+			 toLOWER_utf8((U8*)l) :
+			 toLOWER_LC_utf8((U8*)l)))
 		    {
 			sayNO;
 		    }
@@ -2175,9 +2186,13 @@ S_regmatch(pTHX_ regnode *prog)
 	case BOUNDUTF8:
 	case NBOUNDUTF8:
 	    /* was last char in word? */
-	    ln = (locinput != PL_regbol)
-		? utf8_to_uv(reghop((U8*)locinput, -1),
-				 PL_regeol - locinput, 0, 0) : PL_regprev;
+	    if (locinput == PL_regbol)
+		ln = PL_regprev;
+	    else {
+		U8 *r = reghop((U8*)locinput, -1);
+
+		ln = utf8_to_uv(r, s - (char*)r, 0, 0);
+	    }
 	    if (OP(scan) == BOUNDUTF8 || OP(scan) == NBOUNDUTF8) {
 		ln = isALNUM_uni(ln);
 		n = swash_fetch(PL_utf8_alnum, (U8*)locinput);
