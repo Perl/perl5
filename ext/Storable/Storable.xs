@@ -59,7 +59,7 @@
 #include <XSUB.h>
 
 #ifndef NETWARE
-#if 1
+#if 0
 #define DEBUGME /* Debug mode, turns assertions on as well */
 #define DASSERT /* Assertion mode */
 #endif
@@ -339,6 +339,7 @@ typedef struct stcxt {
 #ifndef HAS_UTF8_ALL
         int use_bytes;         /* whether to bytes-ify utf8 */
 #endif
+        int accept_future_minor; /* croak immediately on future minor versions?  */
 	int s_dirty;		/* context is dirty due to CROAK() -- can be cleaned */
 	int membuf_ro;		/* true means membuf is read-only and msaved is rw */
 	struct extendable keybuf;	/* for hash key retrieval */
@@ -1204,6 +1205,9 @@ static void clean_store_context(stcxt_t *cxt)
 		sv_free((SV *) hook_seen);
 	}
 
+	cxt->forgive_me = -1;			/* Fetched from perl if needed */
+	cxt->canonical = -1;			/* Idem */
+
 	reset_context(cxt);
 }
 
@@ -1249,6 +1253,7 @@ static void init_retrieve_context(stcxt_t *cxt, int optype, int is_tainted)
 #ifndef HAS_UTF8_ALL
         cxt->use_bytes = -1;		/* Fetched from perl if needed */
 #endif
+        cxt->accept_future_minor = -1;	/* Fetched from perl if needed */
 }
 
 /*
@@ -1289,6 +1294,14 @@ static void clean_retrieve_context(stcxt_t *cxt)
 		hv_undef(hseen);
 		sv_free((SV *) hseen);		/* optional HV, for backward compat. */
 	}
+
+#ifndef HAS_RESTRICTED_HASHES
+        cxt->derestrict = -1;		/* Fetched from perl if needed */
+#endif
+#ifndef HAS_UTF8_ALL
+        cxt->use_bytes = -1;		/* Fetched from perl if needed */
+#endif
+        cxt->accept_future_minor = -1;	/* Fetched from perl if needed */
 
 	reset_context(cxt);
 }
@@ -4891,12 +4904,26 @@ magic_ok:
 			(version_major == STORABLE_BIN_MAJOR &&
 			version_minor > STORABLE_BIN_MINOR)
             ) {
-            	TRACEME(("but I am version is %d.%d", STORABLE_BIN_MAJOR,
-                         STORABLE_BIN_MINOR));
+            int croak_now = 1;
+            TRACEME(("but I am version is %d.%d", STORABLE_BIN_MAJOR,
+                     STORABLE_BIN_MINOR));
 
+            if (version_major == STORABLE_BIN_MAJOR) {
+                TRACEME(("cxt->accept_future_minor is %d",
+                         cxt->accept_future_minor));
+                if (cxt->accept_future_minor < 0)
+                    cxt->accept_future_minor
+                        = (SvTRUE(perl_get_sv("Storable::accept_future_minor",
+                                              TRUE))
+                           ? 1 : 0);
+                if (cxt->accept_future_minor == 1)
+                    croak_now = 0;  /* Don't croak yet.  */
+            }
+            if (croak_now) {
 		CROAK(("Storable binary image v%d.%d more recent than I am (v%d.%d)",
-			version_major, version_minor,
-			STORABLE_BIN_MAJOR, STORABLE_BIN_MINOR));
+                       version_major, version_minor,
+                       STORABLE_BIN_MAJOR, STORABLE_BIN_MINOR));
+            }
         }
 
 	/*
@@ -5034,7 +5061,19 @@ static SV *retrieve(stcxt_t *cxt, char *cname)
 		TRACEME(("had retrieved #%d at 0x%"UVxf, tag, PTR2UV(sv)));
 		SvREFCNT_inc(sv);	/* One more reference to this same sv */
 		return sv;			/* The SV pointer where object was retrieved */
-	}
+	} else if (type >= SX_ERROR && cxt->ver_minor > STORABLE_BIN_MINOR) {
+            if (cxt->accept_future_minor < 0)
+                cxt->accept_future_minor
+                    = (SvTRUE(perl_get_sv("Storable::accept_future_minor",
+                                          TRUE))
+                       ? 1 : 0);
+            if (cxt->accept_future_minor == 1) {
+                CROAK(("Storable binary image v%d.%d contains data of type %d. "
+                       "This Storable is v%d.%d and can only handle data types up to %d",
+                       cxt->ver_major, cxt->ver_minor, type,
+                       STORABLE_BIN_MAJOR, STORABLE_BIN_MINOR, SX_ERROR - 1));
+            }
+        }
 
 first_time:		/* Will disappear when support for old format is dropped */
 

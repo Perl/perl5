@@ -48,7 +48,7 @@ BEGIN {
   # for network order, and 2 tests per byte on the 'pst0' "magic number" only
   # present in files, but not in things store()ed to memory
   $fancy = ($] > 5.007 ? 2 : 0);
-  plan tests => 334 + length($Config{byteorder}) * 4 + $fancy * 8;
+  plan tests => 378 + length($Config{byteorder}) * 4 + $fancy * 8;
 }
 
 use Storable qw (store retrieve freeze thaw nstore nfreeze);
@@ -174,9 +174,17 @@ sub test_things {
   # )
   my $minor4 = $header->{minor} + 4;
   substr ($copy, $file_magic + 1, 1) = chr $minor4;
-  test_corrupt ($copy, $sub,
-                "/^Storable binary image v$header->{major}\.$minor4 more recent than I am \\(v$header->{major}\.$minor\\)/",
-                "higher minor");
+  {
+    # Now by default newer minor version numbers are not a pain.
+    $clone = &$sub($copy);
+    ok ($@, "", "by default no error on higher minor");
+    test_hash ($clone);
+
+    local $Storable::accept_future_minor = 0;
+    test_corrupt ($copy, $sub,
+                  "/^Storable binary image v$header->{major}\.$minor4 more recent than I am \\(v$header->{major}\.$minor\\)/",
+                  "higher minor");
+  }
 
   $copy = $contents;
   my $major1 = $header->{major} + 1;
@@ -224,6 +232,29 @@ sub test_things {
   test_corrupt ($copy, $sub,
                 "/^Corrupted storable $what \\(binary v$header->{major}.$header->{minor}\\)/",
                 "bogus tag");
+
+  # Now drop the minor version number
+  substr ($copy, $file_magic + 1, 1) = chr $minor1;
+
+  test_corrupt ($copy, $sub,
+                "/^Corrupted storable $what \\(binary v$header->{major}.$minor1\\)/",
+                "bogus tag, minor less 1");
+  # Now increase the minor version number
+  substr ($copy, $file_magic + 1, 1) = chr $minor4;
+
+  # local $Storable::DEBUGME = 1;
+  # This is the delayed croak
+  test_corrupt ($copy, $sub,
+                "/^Storable binary image v$header->{major}.$minor4 contains data of type 255. This Storable is v$header->{major}.$header->{minor} and can only handle data types up to 25/",
+                "bogus tag, minor plus 4");
+  # And check again that this croak is not delayed:
+  {
+    # local $Storable::DEBUGME = 1;
+    local $Storable::accept_future_minor = 0;
+    test_corrupt ($copy, $sub,
+                  "/^Storable binary image v$header->{major}\.$minor4 more recent than I am \\(v$header->{major}\.$minor\\)/",
+                  "higher minor");
+  }
 }
 
 sub slurp {
