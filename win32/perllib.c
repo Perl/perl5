@@ -63,8 +63,9 @@ EXTERN_C void boot_DynaLoader _((CV* cv));
 static void
 xs_init()
 {
-    dXSUB_SYS;
     char *file = __FILE__;
+    dXSUB_SYS;
+
     newXS("DynaLoader::boot_DynaLoader", boot_DynaLoader, file);
 }
 
