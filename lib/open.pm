@@ -10,9 +10,13 @@ sub in_locale { $^H & $locale::hint_bits }
 
 sub _get_locale_encoding {
     unless (defined $locale_encoding) {
-	eval { use I18N::Langinfo qw(langinfo CODESET) };
+	eval {
+	    # I18N::Langinfo isn't available everywhere
+	    require I18N::Langinfo;
+	    I18N::Langinfo->import('langinfo', 'CODESET');
+	};
 	unless ($@) {
-	    $locale_encoding = langinfo(CODESET);
+	    $locale_encoding = langinfo(CODESET());
 	}
 	my $country_language;
         if (not $locale_encoding && in_locale()) {
@@ -49,9 +53,7 @@ sub import {
     my ($class,@args) = @_;
     croak("`use open' needs explicit list of disciplines") unless @args;
     $^H |= $open::hint_bits;
-    my ($in,$out) = split(/\0/,(${^OPEN} || '\0'));
-    my @in  = split(/\s+/,$in);
-    my @out = split(/\s+/,$out);
+    my ($in,$out) = split(/\0/,(${^OPEN} || "\0"), -1);
     while (@args) {
 	my $type = shift(@args);
 	my $discp = shift(@args);
