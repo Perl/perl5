@@ -1,7 +1,6 @@
 package Test::Harness;
 
-require 5.002;
-
+BEGIN {require 5.002;}
 use Exporter;
 use Benchmark;
 use Config;
@@ -12,7 +11,7 @@ use vars qw($VERSION $verbose $switches $have_devel_corestack $curtest
 	    @ISA @EXPORT @EXPORT_OK);
 $have_devel_corestack = 0;
 
-$VERSION = "1.13";
+$VERSION = "1.15";
 
 @ISA=('Exporter');
 @EXPORT= qw(&runtests);
@@ -158,8 +157,7 @@ sub runtests {
     if ($^O eq 'VMS') {
 	if (defined $old5lib) {
 	    $ENV{PERL5LIB} = $old5lib;
-	}
-	else {
+	} else {
 	    delete $ENV{PERL5LIB};
 	}
     }
@@ -179,7 +177,7 @@ sub runtests {
 	  $curtest = $failedtests{$script};
 	  write;
 	}
-	if ($bad > 1) {
+	if ($bad) {
 	    die "Failed $bad/$total test scripts, $pct% okay.$subpct\n";
 	}
     }
@@ -338,8 +336,8 @@ See L<Benchmark> for the underlying timing routines.
 
 Either Tim Bunce or Andreas Koenig, we don't know. What we know for
 sure is, that it was inspired by Larry Wall's TEST script that came
-with perl distributions for ages. Current maintainer is Andreas
-Koenig.
+with perl distributions for ages. Numerous anonymous contributors
+exist. Current maintainer is Andreas Koenig.
 
 =head1 BUGS
 
