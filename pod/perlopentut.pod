@@ -846,12 +846,8 @@ the POSIX documentation.
 
 Copyright 1998 Tom Christiansen.  
 
-When included as part of the Standard Version of Perl, or as part of
-its complete documentation whether printed or otherwise, this work may
-be distributed only under the terms of Perl's Artistic License.  Any
-distribution of this file or derivatives thereof outside of that
-package require that special arrangements be made with copyright
-holder.
+This documentation is free; you can redistribute it and/or modify it
+under the same terms as Perl itself.
 
 Irrespective of its distribution, all code examples in these files are
 hereby placed into the public domain.  You are permitted and
