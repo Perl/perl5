@@ -7799,6 +7799,13 @@ my @pods = qw(
     572delta
     573delta
     58delta
+    581delta
+    582delta
+    583delta
+    584delta
+    590delta
+    591delta
+    592delta
     aix
     amiga
     apio
