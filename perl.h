@@ -1972,18 +1972,21 @@ typedef struct clone_params CLONE_PARAMS;
 #  ifdef PATH_MAX
 #    ifdef _POSIX_PATH_MAX
 #       if PATH_MAX > _POSIX_PATH_MAX
-/* MAXPATHLEN is supposed to include the final null character,
- * as opposed to PATH_MAX and _POSIX_PATH_MAX. */
-#         define MAXPATHLEN (PATH_MAX+1)
+/* POSIX 1990 (and pre) was ambiguous about whether PATH_MAX
+ * included the null byte or not.  Later amendments of POSIX,
+ * XPG4, the Austin Group, and the Single UNIX Specification
+ * all explicitly include the null byte in the PATH_MAX.
+ * Ditto for _POSIX_PATH_MAX. */
+#         define MAXPATHLEN PATH_MAX
 #       else
-#         define MAXPATHLEN (_POSIX_PATH_MAX+1)
+#         define MAXPATHLEN _POSIX_PATH_MAX
 #       endif
 #    else
 #      define MAXPATHLEN (PATH_MAX+1)
 #    endif
 #  else
 #    ifdef _POSIX_PATH_MAX
-#       define MAXPATHLEN (_POSIX_PATH_MAX+1)
+#       define MAXPATHLEN _POSIX_PATH_MAX
 #    else
 #       define MAXPATHLEN 1024	/* Err on the large side. */
 #    endif
