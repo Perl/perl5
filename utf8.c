@@ -1330,6 +1330,7 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp,char *normal
 #endif
 	      return utf8_to_uvchr(ustrp, 0);
 	 }
+	 uv  = NATIVE_TO_UNI(uv);
     }
     if (lenp)
        *lenp = UNISKIP(uv);
