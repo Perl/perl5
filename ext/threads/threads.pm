@@ -180,11 +180,12 @@ returns a thread object.
 
 =over 4
 
-=item Cleanup skipped %d active threads
+=item A thread exited while %d other threads were still running
 
-The main thread exited while there were still other threads running.
-This is not a good sign: you should either explicitly join the threads,
-or somehow be certain that all the non-main threads have finished.
+A thread (not necessarily the main thread) exited while there were
+still other threads running.  Usually it's a good idea to first collect
+the return values of the created threads by joining them, and only then
+exit from then main thread.
 
 =back
 

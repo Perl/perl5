@@ -44,6 +44,14 @@ letter.
 
 =over 4
 
+=item A thread exited while %d other threads were still running
+
+(W) When using threaded Perl, a thread (not necessarily the main
+thread) exited while there were still other threads running.
+Usually it's a good idea to first collect the return values of the
+created threads by joining them, and only then exit from then main
+thread.  See L<threads>.
+
 =item accept() on closed socket %s
 
 (W closed) You tried to do an accept on a closed socket.  Did you forget
@@ -1133,13 +1141,6 @@ and so on) and not for Unicode characters, so Perl behaved as if you meant
 
 If you actually want to pack Unicode codepoints, use the C<"U"> format
 instead.
-
-=item Cleanup skipped %d active threads
-
-(W) When using threaded Perl, the main thread exited while there were
-still other threads running.  This is not a good sign: you should
-either explicitly join the threads, or somehow be certain that all
-the non-main threads have finished.  See L<threads>.
 
 =item close() on unopened filehandle %s
 
