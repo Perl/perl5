@@ -85,30 +85,30 @@ is(checkbox(-name     => 'weather',
 	    -label    => 'forecast',
 	    -checked  => 1,
 	    -override => 1),
-   qq(<input type="checkbox" name="weather" value="nice" checked="1" />forecast),
+   qq(<input type="checkbox" name="weather" value="nice" checked="checked" />forecast),
    "checkbox()");
 
 is(checkbox(-name  => 'weather',
 	    -value => 'dull',
 	    -label => 'forecast'),
-   qq(<input type="checkbox" name="weather" value="dull" checked="1" />forecast),
+   qq(<input type="checkbox" name="weather" value="dull" checked="checked" />forecast),
    "checkbox()");
 
 is(radio_group(-name => 'game'),
-   qq(<input type="radio" name="game" value="chess" checked="1" />chess ).
+   qq(<input type="radio" name="game" value="chess" checked="checked" />chess ).
    qq(<input type="radio" name="game" value="checkers" />checkers),
    'radio_group()');
 
 is(radio_group(-name   => 'game',
 	       -labels => {'chess' => 'ping pong'}),
-   qq(<input type="radio" name="game" value="chess" checked="1" />ping pong ).
+   qq(<input type="radio" name="game" value="chess" checked="checked" />ping pong ).
    qq(<input type="radio" name="game" value="checkers" />checkers),
    'radio_group()');
 
 is(checkbox_group(-name   => 'game',
 		  -Values => [qw/checkers chess cribbage/]),
-   qq(<input type="checkbox" name="game" value="checkers" checked="1" />checkers ).
-   qq(<input type="checkbox" name="game" value="chess" checked="1" />chess ).
+   qq(<input type="checkbox" name="game" value="checkers" checked="checked" />checkers ).
+   qq(<input type="checkbox" name="game" value="chess" checked="checked" />chess ).
    qq(<input type="checkbox" name="game" value="cribbage" />cribbage),
    'checkbox_group()');
 
@@ -117,7 +117,7 @@ is(checkbox_group(-name       => 'game',
 		  '-defaults' => ['cribbage'],-override=>1),
    qq(<input type="checkbox" name="game" value="checkers" />checkers ).
    qq(<input type="checkbox" name="game" value="chess" />chess ).
-   qq(<input type="checkbox" name="game" value="cribbage" checked="1" />cribbage),
+   qq(<input type="checkbox" name="game" value="cribbage" checked="checked" />cribbage),
    'checkbox_group()');
 
 is(popup_menu(-name     => 'game',
@@ -126,9 +126,9 @@ is(popup_menu(-name     => 'game',
 	      -override => 1)."\n",
    <<END, 'checkbox_group()');
 <select name="game">
-<option  value="checkers">checkers</option>
-<option  value="chess">chess</option>
-<option  selected="1" value="cribbage">cribbage</option>
+<option value="checkers">checkers</option>
+<option value="chess">chess</option>
+<option selected="selected" value="cribbage">cribbage</option>
 </select>
 END
 

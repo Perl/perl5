@@ -18,8 +18,8 @@ use Carp 'croak';
 # The most recent version and complete docs are available at:
 #   http://stein.cshl.org/WWW/software/CGI/
 
-$CGI::revision = '$Id: CGI.pm,v 1.56 2001/12/09 21:36:23 lstein Exp $';
-$CGI::VERSION='2.79';
+$CGI::revision = '$Id: CGI.pm,v 1.58 2002/01/12 02:44:56 lstein Exp $';
+$CGI::VERSION='2.80';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -36,7 +36,7 @@ use constant XHTML_DTD => ['-//W3C//DTD XHTML 1.0 Transitional//EN',
 sub initialize_globals {
     # Set this to 1 to enable copious autoloader debugging messages
     $AUTOLOAD_DEBUG = 0;
-    
+
     # Set this to 1 to generate XTML-compatible output
     $XHTML = 1;
 
@@ -85,9 +85,9 @@ sub initialize_globals {
     # separate the name=value pairs by semicolons rather than ampersands
     $USE_PARAM_SEMICOLONS = 1;
 
-	# Do not include undefined params parsed from query string
-	# use CGI qw(-no_undef_params);
-	$NO_UNDEF_PARAMS = 0;
+    # Do not include undefined params parsed from query string
+    # use CGI qw(-no_undef_params);
+    $NO_UNDEF_PARAMS = 0;
 
     # Other globals that you shouldn't worry about.
     undef $Q;
@@ -662,14 +662,14 @@ sub _selected {
   my $self = shift;
   my $value = shift;
   return '' unless $value;
-  return $XHTML ? qq( selected="1") : qq( selected);
+  return $XHTML ? qq( selected="selected") : qq( selected);
 }
 
 sub _checked {
   my $self = shift;
   my $value = shift;
   return '' unless $value;
-  return $XHTML ? qq( checked="1") : qq( checked);
+  return $XHTML ? qq( checked="checked") : qq( checked);
 }
 
 sub _reset_globals { initialize_globals(); }
@@ -2057,7 +2057,7 @@ sub radio_group {
 
     my($other) = @other ? " @other" : '';
     foreach (@values) {
-	my($checkit) = $checked eq $_ ? qq/ checked="1"/ : '';
+	my($checkit) = $checked eq $_ ? qq/ checked="checked"/ : '';
 	my($break);
 	if ($linebreak) {
           $break = $XHTML ? "<br />" : "<br>";
@@ -2123,7 +2123,7 @@ sub popup_menu {
 	$label = $labels->{$_} if defined($labels) && defined($labels->{$_});
 	my($value) = $self->escapeHTML($_);
 	$label=$self->escapeHTML($label,1);
-	$result .= "<option $selectit value=\"$value\">$label</option>\n";
+	$result .= "<option$selectit value=\"$value\">$label</option>\n";
     }
 
     $result .= "</select>";
@@ -2177,7 +2177,7 @@ sub scrolling_list {
 	$label = $labels->{$_} if defined($labels) && defined($labels->{$_});
 	$label=$self->escapeHTML($label);
 	my($value)=$self->escapeHTML($_,1);
-	$result .= "<option $selectit value=\"$value\">$label</option>\n";
+	$result .= "<option$selectit value=\"$value\">$label</option>\n";
     }
     $result .= "</select>";
     $self->register_parameter($name);
@@ -2287,25 +2287,22 @@ sub url {
     my ($relative,$absolute,$full,$path_info,$query,$base) = 
 	rearrange(['RELATIVE','ABSOLUTE','FULL',['PATH','PATH_INFO'],['QUERY','QUERY_STRING'],'BASE'],@p);
     my $url;
-    $full++ if $base || !($relative || $absolute);
+    $full++      if $base || !($relative || $absolute);
 
     my $path = $self->path_info;
     my $script_name = $self->script_name;
 
-# If anybody knows why I ever wrote this please tell me!
-#    if (exists($ENV{REQUEST_URI})) {
-#        my $index;
-#	$script_name = $ENV{REQUEST_URI};
-#        # strip query string
-#        substr($script_name,$index) = '' if ($index = index($script_name,'?')) >= 0;
-#        # and path
-#        if (exists($ENV{PATH_INFO})) {
-#           (my $encoded_path = $ENV{PATH_INFO}) =~ s!([^a-zA-Z0-9_./-])!uc sprintf("%%%02x",ord($1))!eg;;
-#           substr($script_name,$index) = '' if ($index = rindex($script_name,$encoded_path)) >= 0;
-#         }
-#    } else {
-#	$script_name = $self->script_name;
-#    }
+    # for compatibility with Apache's MultiViews
+    if (exists($ENV{REQUEST_URI})) {
+        my $index;
+	$script_name = $ENV{REQUEST_URI};
+        $script_name =~ s/\?.+$//;   # strip query string
+        # and path
+        if (exists($ENV{PATH_INFO})) {
+           (my $encoded_path = $ENV{PATH_INFO}) =~ s/([^a-zA-Z0-9_.%;&?\/\\:+=~-])/sprintf("%%%02X",ord($1))/eg;
+           $script_name      =~ s/$encoded_path$//i;
+         }
+    }
 
     if ($full) {
 	my $protocol = $self->protocol();
@@ -2331,7 +2328,7 @@ sub url {
     $url .= $path if $path_info and defined $path;
     $url .= "?" . $self->query_string if $query and $self->query_string;
     $url = '' unless defined $url;
-    $url =~ s/([^a-zA-Z0-9_.%;&?\/\\:+=~-])/uc sprintf("%%%02x",ord($1))/eg;
+    $url =~ s/([^a-zA-Z0-9_.%;&?\/\\:+=~-])/sprintf("%%%02X",ord($1))/eg;
     return $url;
 }
 
@@ -3366,6 +3363,11 @@ $MAXTRIES = 5000;
 # %OVERLOAD = ('""'=>'as_string');
 *CGITempFile::AUTOLOAD = \&CGI::AUTOLOAD;
 
+sub DESTROY {
+    my($self) = @_;
+    unlink $$self;              # get rid of the file
+}
+
 ###############################################################################
 ################# THESE FUNCTIONS ARE AUTOLOADED ON DEMAND ####################
 ###############################################################################
@@ -3384,13 +3386,6 @@ sub new {
     return unless $filename =~ m!^([a-zA-Z0-9_ '":/.\$\\-]+)$!;
     $filename = $1;
     return bless \$filename;
-}
-END_OF_FUNC
-
-'DESTROY' => <<'END_OF_FUNC',
-sub DESTROY {
-    my($self) = @_;
-    unlink $$self;              # get rid of the file
 }
 END_OF_FUNC
 
