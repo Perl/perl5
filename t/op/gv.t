@@ -11,7 +11,7 @@ BEGIN {
 
 use warnings;
 
-print "1..53\n";
+print "1..52\n";
 
 # type coersion on assignment
 $foo = 'foo';
@@ -241,9 +241,6 @@ print $j[0] == 1 ? "ok 43\n" : "not ok 43\n";
     my $x = readline $ary[0];
     print $x || "not ok 52\n";
 }
-
-# stringified typeglob should escape leading control char
-print *^A eq "*main::^A" ? "ok 53\n" : "not ok 53\n";
 
 __END__
 ok 44

@@ -1096,13 +1096,7 @@ Perl_gv_fullname4(pTHX_ SV *sv, GV *gv, const char *prefix, bool keepmain)
 	sv_catpv(sv,name);
 	sv_catpvn(sv,"::", 2);
     }
-    if (((unsigned int)*GvNAME(gv)) <= 26) { /* handle $^FOO */
-	Perl_sv_catpvf(aTHX_ sv,"^%c", *GvNAME(gv) + 'A' - 1);
-	sv_catpvn(sv,GvNAME(gv)+1,GvNAMELEN(gv)-1);
-    }
-    else
-	sv_catpvn(sv,GvNAME(gv),GvNAMELEN(gv));
-    
+    sv_catpvn(sv,GvNAME(gv),GvNAMELEN(gv));
 }
 
 void
