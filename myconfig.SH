@@ -41,7 +41,7 @@ Summary of my $package (revision $baserev version $PERL_VERSION subversion $PERL
     cppflags='$cppflags'
     ccflags ='$ccflags'
     stdchar='$stdchar', d_stdstdio=$d_stdstdio, usevfork=$usevfork
-    intsize=$intsize, longsize=$longsize, ptrsize=$ptrsize, doublesize=$doublesize
+    intsize=$intsize, longsize=$longsize, ptrsize=$ptrsize, doublesize=$doublesize, byteorder=$byteorder
     d_longlong=$d_longlong, longlongsize=$longlongsize, d_longdbl=$d_longdbl, longdblsize=$longdblsize
     ivtype='$ivtype', ivsize=$ivsize, nvtype='$nvtype', nvsize=$nvsize, Off_t='$lseektype', lseeksize=$lseeksize
     alignbytes=$alignbytes, usemymalloc=$usemymalloc, prototype=$prototype
