@@ -243,7 +243,7 @@ __END__
 
 =head1 NAME
 
-Encode::Alias - alias defintions to encodings
+Encode::Alias - alias definitions to encodings
 
 =head1 SYNOPSIS
 

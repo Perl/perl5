@@ -22,7 +22,7 @@ my $scheme = exists $Scheme{$Opt{S}} ? $Opt{S} :  'from_to';
 if ($Opt{D}){
     my $cfrom = Encode->getEncoding($from)->name;
     my $cto   = Encode->getEncoding($to)->name;
-    print STDERR <<"EOT";
+    print <<"EOT";
 Scheme: $scheme
 From:   $from => $cfrom
 To:     $to => $cto
@@ -51,7 +51,7 @@ if     ($scheme eq 'from_to'){
 }
 
 sub list_encodings{
-    print STDERR join("\n", Encode->encodings(":all")), "\n";
+    print join("\n", Encode->encodings(":all")), "\n";
     exit;
 }
 
@@ -63,7 +63,7 @@ sub help{
     print STDERR <<"EOT";
 $name [-f from_encoding] [-t to_encoding] [-s string] [files...]
 $name -l
-  -l lists all available encodings.
+  -l lists all available encodings (the canonical names, many aliases exist)
   -f from_encoding  When omitted, the current locale will be used.
   -t to_encoding    When omitted, the current locale will be used.
   -s string         "string" will be converted instead of STDIN.
@@ -114,7 +114,12 @@ uses I<string> instead of file for the source of text.  Same as F<iconv>.
 
 =item -l
 
-Lists all available encodings to STDERR.
+Lists all available encodings, one per line, in case-insensitive
+order.  Note that only the canonical names are listed, many aliases
+exist.  For example, the names are case-insensitive, and many standard
+and common aliases work, like "latin1" for "ISO 8859-1", or "ibm850"
+instead of "cp850", or "winlatin1" for "cp1252".  See L<Encode::Supported>
+for the full discussion.
 
 =item -h
 
@@ -155,6 +160,8 @@ Like I<-D> option, this is also for Encode hackers.
 L<iconv(1)>
 L<locale(3)>
 L<Encode>
+L<Encode::Supported>
+L<Encode::Alias>
 L<PerlIO>
 
 =cut

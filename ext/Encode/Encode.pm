@@ -57,7 +57,8 @@ sub encodings
     }
     my %modules = map {$_ => 1} @modules;
     return
-	sort grep {!/^(?:Internal|Unicode)$/o} keys %Encoding;
+	sort { lc $a cmp lc $b }
+             grep {!/^(?:Internal|Unicode)$/o} keys %Encoding;
 }
 
 sub define_encoding
