@@ -2,8 +2,8 @@
  *
  * VMS-specific routines for perl5
  *
- * Last revised: 18-Jan-1996 by Charles Bailey  bailey@genetics.upenn.edu
- * Version: 5.2.0
+ * Last revised: 20-Mar-1996 by Charles Bailey  bailey@genetics.upenn.edu
+ * Version: 5.2.1
  */
 
 #include <acedef.h>
@@ -11,6 +11,7 @@
 #include <armdef.h>
 #include <atrdef.h>
 #include <chpdef.h>
+#include <climsgdef.h>
 #include <descrip.h>
 #include <dvidef.h>
 #include <fibdef.h>
@@ -478,7 +479,7 @@ int my_utime(char *file, struct utimbuf *utimes)
   for (i=0;i<3;i++) myfib.fib$w_fid[i] = mynam.nam$w_fid[i];
   for (i=0;i<3;i++) myfib.fib$w_did[i] = mynam.nam$w_did[i];
   /* This prevents the revision time of the file being reset to the current
-   * time as a reqult of our IO$_MODIFY $QIO. */
+   * time as a result of our IO$_MODIFY $QIO. */
   myfib.fib$l_acctl = FIB$M_NORECORD;
 #else
   for (i=0;i<3;i++) myfib.fib$r_fid_overlay.fib$w_fid[i] = mynam.nam$w_fid[i];
@@ -486,6 +487,7 @@ int my_utime(char *file, struct utimbuf *utimes)
   myfib.fib$r_acctl_overlay.fib$l_acctl = FIB$M_NORECORD;
 #endif
   retsts = sys$qiow(0,chan,IO$_MODIFY,iosb,0,0,&fibdsc,&fnmdsc,0,0,myatr,0);
+  _ckvmssts(sys$dassgn(chan));
   if (retsts & 1) retsts = iosb[0];
   if (!(retsts & 1)) {
     set_vaxc_errno(retsts);
@@ -591,6 +593,13 @@ my_popen(char *cmd, char *mode)
                                       DSC$K_CLASS_S, 0};
                             
 
+    cmddsc.dsc$w_length=strlen(cmd);
+    cmddsc.dsc$a_pointer=cmd;
+    if (cmddsc.dsc$w_length > 255) {
+      set_errno(E2BIG); set_vaxc_errno(CLI$_BUFOVF);
+      return Nullfp;
+    }
+
     New(7001,info,1,struct pipe_details);
 
     /* create mailbox */
@@ -605,9 +614,6 @@ my_popen(char *cmd, char *mode)
     if (!info->fp)
         return Nullfp;
         
-    cmddsc.dsc$w_length=strlen(cmd);
-    cmddsc.dsc$a_pointer=cmd;
-
     info->mode = *mode;
     info->done = FALSE;
     info->completion=0;
@@ -761,7 +767,7 @@ my_gconvert(double val, int ndig, int trail, char *buf)
 **   tounixspec() - convert any file spec into a Unix-style file spec.
 **   tovmsspec() - convert any file spec into a VMS-style spec.
 **
-** Copyright 1995 by Charles Bailey  <bailey@genetics.upenn.edu>
+** Copyright 1996 by Charles Bailey  <bailey@genetics.upenn.edu>
 ** Permission is given for non-commercial use of this code according
 ** to the terms of the GNU General Public License or the Perl
 ** Artistic License.  Copies of each may be found in the Perl
@@ -1840,7 +1846,7 @@ unsigned long int zero = 0, sts;
 	for (c = string; *c; ++c)
 	    if (isupper(*c))
 		*c = tolower(*c);
-	if (isunix) trim_unixpath(item,string);
+	if (isunix) trim_unixpath(string,item);
 	add_item(head, tail, string, count);
 	++expcount;
 	}
@@ -1994,40 +2000,103 @@ unsigned long int flags = 17, one = 1, retsts;
  * full path).  Note that returned filespec is Unix-style, regardless
  * of whether input filespec was VMS-style or Unix-style.
  *
- * Returns !=0 on success, 0 on failure.
+ * fspec is filespec to be trimmed, and wildspec is wildcard spec used to
+ * determine prefix (both may be in VMS or Unix syntax).
+ *
+ * Returns !=0 on success, with trimmed filespec replacing contents of
+ * fspec, and 0 on failure, with contents of fpsec unchanged.
  */
-/*{{{int trim_unixpath(char *template, char *fspec)*/
+/*{{{int trim_unixpath(char *fspec, char *wildspec)*/
 int
-trim_unixpath(char *template, char *fspec)
+trim_unixpath(char *fspec, char *wildspec)
 {
-  char unixified[NAM$C_MAXRSS+1], *base, *cp1, *cp2;
-  register int tmplen;
+  char unixified[NAM$C_MAXRSS+1], unixwild[NAM$C_MAXRSS+1],
+       *template, *base, *cp1, *cp2;
+  register int tmplen, reslen = 0;
 
+  if (!wildspec || !fspec) return 0;
+  if (strpbrk(wildspec,"]>:") != NULL) {
+    if (do_tounixspec(wildspec,unixwild,0) == NULL) return 0;
+    else template = unixified;
+  }
+  else template = wildspec;
   if (strpbrk(fspec,"]>:") != NULL) {
     if (do_tounixspec(fspec,unixified,0) == NULL) return 0;
     else base = unixified;
+    /* reslen != 0 ==> we had to unixify resultant filespec, so we must
+     * check to see that final result fits into (isn't longer than) fspec */
+    reslen = strlen(fspec);
   }
   else base = fspec;
-  for (cp2 = base; *cp2; cp2++) ;  /* Find end of filespec */
+
+  /* No prefix or absolute path on wildcard, so nothing to remove */
+  if (!*template || *template == '/') {
+    if (base == fspec) return 1;
+    tmplen = strlen(unixified);
+    if (tmplen > reslen) return 0;  /* not enough space */
+    /* Copy unixified resultant, including trailing NUL */
+    memmove(fspec,unixified,tmplen+1);
+    return 1;
+  }
 
   /* Find prefix to template consisting of path elements without wildcards */
   if ((cp1 = strpbrk(template,"*%?")) == NULL)
     for (cp1 = template; *cp1; cp1++) ;
-  else while (cp1 >= template && *cp1 != '/') cp1--;
-  if (cp1 == template) return 1;  /* Wildcard was up front - no prefix to clip */
-  tmplen = cp1 - template;
+  else while (cp1 > template && *cp1 != '/') cp1--;
+  for (cp2 = base; *cp2; cp2++) ;  /* Find end of resultant filespec */
 
-  /* Try to find template prefix on filespec */
-  if (!memcmp(base,template,tmplen)) return 1;  /* Nothing before prefix - we're done */
-  for (; cp2 - base > tmplen; base++) {
-     if (*base != '/') continue;
-     if (!memcmp(base + 1,template,tmplen)) break;
+  /* Wildcard was in first element, so we don't have a reliable string to
+   * match against.  Guess where to trim resultant filespec by counting
+   * directory levels in the Unix template.  (We could do this instead of
+   * string matching in all cases, since Unix doesn't have a ... wildcard
+   * that can expand into multiple levels of subdirectory, but we try for
+   * the string match so our caller can interpret foo/.../bar.* as
+   * [.foo...]bar.* if it wants, and only get burned if there was a
+   * wildcard in the first word (in which case, caveat caller). */
+  if (cp1 == template) { 
+    int subdirs = 0;
+    for ( ; *cp1; cp1++) if (*cp1 == '/') subdirs++;
+    /* need to back one more '/' than in template, to pick up leading dirname */
+    subdirs++;
+    while (cp2 > base) {
+      if (*cp2 == '/') subdirs--;
+      if (!subdirs) break;  /* quit without decrement when we hit last '/' */
+      cp2--;
+    }
+    /* ran out of directories on resultant; allow for already trimmed
+     * resultant, which hits start of string looking for leading '/' */
+    if (subdirs && (cp2 != base || subdirs != 1)) return 0;
+    /* Move past leading '/', if there is one */
+    base = cp2 + (*cp2 == '/' ? 1 : 0);
+    tmplen = strlen(base);
+    if (reslen && tmplen > reslen) return 0;  /* not enough space */
+    memmove(fspec,base,tmplen+1);  /* copy result to fspec, with trailing NUL */
+    return 1;
   }
-  if (cp2 - base == tmplen) return 0;  /* Not there - not good */
-  base++;  /* Move past leading '/' */
-  /* Copy down remaining portion of filespec, including trailing NUL */
-  memmove(fspec,base,cp2 - base + 1);
-  return 1;
+  /* We have a prefix string of complete directory names, so we
+   * try to find it on the resultant filespec */
+  else { 
+    tmplen = cp1 - template;
+    if (!memcmp(base,template,tmplen)) { /* Nothing before prefix; we're done */
+      if (reslen) { /* we converted to Unix syntax; copy result over */
+        tmplen = cp2 - base;
+        if (tmplen > reslen) return 0;  /* not enough space */
+        memmove(fspec,base,tmplen+1);  /* Copy trimmed spec + trailing NUL */
+      }
+      return 1; 
+    }
+    for ( ; cp2 - base > tmplen; base++) {
+       if (*base != '/') continue;
+       if (!memcmp(base + 1,template,tmplen)) break;
+    }
+
+    if (cp2 - base == tmplen) return 0;  /* Not there - not good */
+    base++;  /* Move past leading '/' */
+    if (reslen && cp2 - base > reslen) return 0;  /* not enough space */
+    /* Copy down remaining portion of filespec, including trailing NUL */
+    memmove(fspec,base,cp2 - base + 1);
+    return 1;
+  }
 
 }  /* end of trim_unixpath() */
 /*}}}*/
@@ -2406,8 +2475,10 @@ setup_cmddsc(char *cmd, int check_img)
     }
   }
 
-  return SS$_NORMAL;
+  return (VMScmd.dsc$w_length > 255 ? CLI$_BUFOVF : SS$_NORMAL);
+
 }  /* end of setup_cmddsc() */
+
 
 /* {{{ bool vms_do_aexec(SV *really,SV **mark,SV **sp) */
 bool
@@ -2493,7 +2564,7 @@ do_spawn(char *cmd)
     set_errno(EVMSERR);
     set_vaxc_errno(substs);
     if (dowarn)
-      warn("Can't exec \"%s\": %s",
+      warn("Can't spawn \"%s\": %s",
            hadcmd ? VMScmd.dsc$a_pointer : "", Strerror(errno));
   }
   vms_execfree();
@@ -3037,8 +3108,15 @@ cando_by_name(I32 bit, I32 effective, char *fname)
   }
 
   retsts = sys$check_access(&objtyp,&namdsc,&usrdsc,armlst);
-  if (retsts == SS$_NOPRIV || retsts == SS$_NOSUCHOBJ || retsts == RMS$_FNF ||
-      retsts == RMS$_DIR   || retsts == RMS$_DEV) return FALSE;
+#ifndef SS$_NOSUCHOBJECT  /* Older versions of ssdef.h don't have this */
+#  define SS$_NOSUCHOBJECT 2696
+#endif
+  if (retsts == SS$_NOPRIV || retsts == SS$_NOSUCHOBJECT ||
+      retsts == RMS$_FNF   || retsts == RMS$_DIR         ||
+      retsts == RMS$_DEV) {
+    set_errno(retsts == SS$_NOPRIV ? EACCES : ENOENT); set_vaxc_errno(retsts);
+    return FALSE;
+  }
   if (retsts == SS$_NORMAL) {
     if (!privused) return TRUE;
     /* We can get access, but only by using privs.  Do we have the
@@ -3138,8 +3216,18 @@ my_getlogin()
  *
  *  Copies contents and attributes of spec_in to spec_out, except owner
  *  and protection information.  Name and type of spec_in are used as
- *  defaults for spec_out.  Returns 1 on success; returns 0 and sets
- *  errno and vaxc$errno on failure.
+ *  defaults for spec_out.  The third parameter specifies whether rmscopy()
+ *  should try to propagate timestamps from the input file to the output file.
+ *  If it is less than 0, no timestamps are preserved.  If it is 0, then
+ *  rmscopy() will behave similarly to the DCL COPY command: timestamps are
+ *  propagated to the output file at creation iff the output file specification
+ *  did not contain an explicit name or type, and the revision date is always
+ *  updated at the end of the copy operation.  If it is greater than 0, then
+ *  it is interpreted as a bitmask, in which bit 0 indicates that timestamps
+ *  other than the revision date should be propagated, and bit 1 indicates
+ *  that the revision date should be propagated.
+ *
+ *  Returns 1 on success; returns 0 and sets errno and vaxc$errno on failure.
  *
  *  Copyright 1996 by Charles Bailey <bailey@genetics.upenn.edu>.
  *  Incorporates, with permission, some code from EZCOPY by Tim Adye
@@ -3148,9 +3236,9 @@ my_getlogin()
  *  License or the Perl Artistic License supplied as part of the Perl
  *  distribution.)
  */
-/*{{{int rmscopy(char *src, char *dst)*/
+/*{{{int rmscopy(char *src, char *dst, int preserve_dates)*/
 int
-rmscopy(char *spec_in, char *spec_out)
+rmscopy(char *spec_in, char *spec_out, int preserve_dates)
 {
     char vmsin[NAM$C_MAXRSS+1], vmsout[NAM$C_MAXRSS+1], esa[NAM$C_MAXRSS],
          rsa[NAM$C_MAXRSS], ubf[32256];
@@ -3176,7 +3264,7 @@ rmscopy(char *spec_in, char *spec_out)
     fab_in.fab$b_fac = FAB$M_BIO | FAB$M_GET;
     fab_in.fab$l_fop = FAB$M_SQO;
     fab_in.fab$l_nam =  &nam;
-    fab_in.fab$l_xab = (void*) &xabdat;
+    fab_in.fab$l_xab = (void *) &xabdat;
 
     nam = cc$rms_nam;
     nam.nam$l_rsa = rsa;
@@ -3186,10 +3274,10 @@ rmscopy(char *spec_in, char *spec_out)
     nam.nam$b_esl = nam.nam$b_rsl = 0;
 
     xabdat = cc$rms_xabdat;        /* To get creation date */
-    xabdat.xab$l_nxt = (void*) &xabfhc;
+    xabdat.xab$l_nxt = (void *) &xabfhc;
 
     xabfhc = cc$rms_xabfhc;        /* To get record length */
-    xabfhc.xab$l_nxt = (void*) &xabsum;
+    xabfhc.xab$l_nxt = (void *) &xabsum;
 
     xabsum = cc$rms_xabsum;        /* To get key and area information */
 
@@ -3220,6 +3308,23 @@ rmscopy(char *spec_in, char *spec_out)
     fab_out.fab$b_fns = strlen(vmsout);
     fab_out.fab$l_dna = nam.nam$l_name;
     fab_out.fab$b_dns = nam.nam$l_name ? nam.nam$b_name + nam.nam$b_type : 0;
+
+    if (preserve_dates == 0) {  /* Act like DCL COPY */
+      nam.nam$b_nop = NAM$M_SYNCHK;
+      fab_out.fab$l_xab = NULL;  /* Don't disturb data from input file */
+      if (!((sts = sys$parse(&fab_out)) & 1)) {
+        set_errno(sts == RMS$_SYN ? EINVAL : EVMSERR);
+        set_vaxc_errno(sts);
+        return 0;
+      }
+      fab_out.fab$l_xab = (void *) &xabdat;
+      if (nam.nam$l_fnb & (NAM$M_EXP_NAME | NAM$M_EXP_TYPE)) preserve_dates = 1;
+    }
+    fab_out.fab$l_nam = (void *) 0;  /* Done with NAM block */
+    if (preserve_dates < 0)   /* Clear all bits; we'll use it as a */
+      preserve_dates =0;      /* bitmask from this point forward   */
+
+    if (!(preserve_dates & 1)) fab_out.fab$l_xab = (void *) &xabfhc;
     if (!((sts = sys$create(&fab_out)) & 1)) {
       set_vaxc_errno(sts);
       switch (sts) {
@@ -3237,10 +3342,12 @@ rmscopy(char *spec_in, char *spec_out)
       return 0;
     }
     fab_out.fab$l_fop |= FAB$M_DLT;  /* in case we have to bail out */
-    /* sys$close() will process xabrdt, not xabdat */
-    xabrdt = cc$rms_xabrdt;
-    xabrdt.xab$q_rdt = xabdat.xab$q_rdt;
-    fab_out.fab$l_xab = &xabrdt;
+    if (preserve_dates & 2) {
+      /* sys$close() will process xabrdt, not xabdat */
+      xabrdt = cc$rms_xabrdt;
+      xabrdt.xab$q_rdt = xabdat.xab$q_rdt;
+      fab_out.fab$l_xab = (void *) &xabrdt;
+    }
 
     rab_in = cc$rms_rab;
     rab_in.rab$l_fab = &fab_in;
@@ -3409,13 +3516,15 @@ rmscopy_fromperl(CV *cv)
 {
   dXSARGS;
   char inspec[NAM$C_MAXRSS+1], outspec[NAM$C_MAXRSS+1], *inp, *outp;
+  int date_flag;
   struct dsc$descriptor indsc  = { 0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0},
                         outdsc = { 0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
   unsigned long int sts;
   SV *mysv;
   IO *io;
 
-  if (items != 2) croak("Usage: File::Copy::rmscopy(from,to)");
+  if (items < 2 || items > 3)
+    croak("Usage: File::Copy::rmscopy(from,to[,date_flag])");
 
   mysv = SvROK(ST(0)) ? SvRV(ST(0)) : ST(0);
   if (SvTYPE(mysv) == SVt_PVGV) {
@@ -3449,8 +3558,9 @@ rmscopy_fromperl(CV *cv)
       XSRETURN(1);
     }
   }
+  date_flag = (items == 3) ? SvIV(ST(2)) : 0;
 
-  ST(0) = rmscopy(inp,outp) ? &sv_yes : &sv_no;
+  ST(0) = rmscopy(inp,outp,date_flag) ? &sv_yes : &sv_no;
   XSRETURN(1);
 }
 
