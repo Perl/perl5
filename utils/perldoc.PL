@@ -37,7 +37,7 @@ use strict;
 INIT { eval { umask(0077) } }   # doubtless someone has no mask
 
 my \@pagers = ();
-push \@pagers, "$Config{'pager'}" if -x "$Config{'pager'}";
+push \@pagers, q[$Config{'pager'}] if -x q[$Config{'pager'}];
 my \$bindir = '$Config{scriptdir}';
 
 !GROK!THIS!
