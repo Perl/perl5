@@ -748,7 +748,7 @@ PP(pp_select)
     else {
 	GV **gvp = (GV**)hv_fetch(hv, GvNAME(egv), GvNAMELEN(egv), FALSE);
 	if (gvp && *gvp == egv)
-	    gv_efullname(TARG, defoutgv);
+	    gv_efullname(TARG, defoutgv, Nullch);
 	else
 	    sv_setsv(TARG, sv_2mortal(newRV((SV*)egv)));
 	XPUSHTARG;
@@ -842,7 +842,7 @@ PP(pp_enterwrite)
     if (!cv) {
 	if (fgv) {
 	    SV *tmpsv = sv_newmortal();
-	    gv_efullname(tmpsv, gv);
+	    gv_efullname(tmpsv, fgv, Nullch);
 	    DIE("Undefined format \"%s\" called",SvPVX(tmpsv));
 	}
 	DIE("Not a format reference");
@@ -921,7 +921,7 @@ PP(pp_leavewrite)
 	cv = GvFORM(fgv);
 	if (!cv) {
 	    SV *tmpsv = sv_newmortal();
-	    gv_efullname(tmpsv, fgv);
+	    gv_efullname(tmpsv, fgv, Nullch);
 	    DIE("Undefined top format \"%s\" called",SvPVX(tmpsv));
 	}
 	return doform(cv,gv,op);
@@ -978,7 +978,7 @@ PP(pp_prtf)
 	gv = defoutgv;
     if (!(io = GvIO(gv))) {
 	if (dowarn) {
-	    gv_fullname(sv,gv);
+	    gv_fullname(sv, gv, Nullch);
 	    warn("Filehandle %s never opened", SvPV(sv,na));
 	}
 	SETERRNO(EBADF,RMS$_IFI);
@@ -986,7 +986,7 @@ PP(pp_prtf)
     }
     else if (!(fp = IoOFP(io))) {
 	if (dowarn)  {
-	    gv_fullname(sv,gv);
+	    gv_fullname(sv, gv, Nullch);
 	    if (IoIFP(io))
 		warn("Filehandle %s opened only for input", SvPV(sv,na));
 	    else

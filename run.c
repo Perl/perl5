@@ -71,7 +71,7 @@ OP *op;
     case OP_GV:
 	if (cGVOP->op_gv) {
 	    sv = NEWSV(0,0);
-	    gv_fullname(sv, cGVOP->op_gv);
+	    gv_fullname(sv, cGVOP->op_gv, Nullch);
 	    PerlIO_printf(Perl_debug_log, "(%s)", SvPV(sv, na));
 	    SvREFCNT_dec(sv);
 	}

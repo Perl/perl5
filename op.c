@@ -49,7 +49,7 @@ CvNAME(cv)
 CV* cv;
 {
     SV* tmpsv = sv_newmortal();
-    gv_efullname(tmpsv, CvGV(cv));
+    gv_efullname(tmpsv, CvGV(cv), Nullch);
     return SvPV(tmpsv,na);
 }
 
@@ -2975,7 +2975,7 @@ OP *block;
 	sv_catpv(sv,"-");
 	sprintf(buf,"%ld",(long)curcop->cop_line);
 	sv_catpv(sv,buf);
-	gv_efullname(tmpstr,gv);
+	gv_efullname(tmpstr, gv, Nullch);
 	hv_store(GvHV(DBsub), SvPVX(tmpstr), SvCUR(tmpstr), sv, 0);
     }
     op_free(op);

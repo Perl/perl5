@@ -574,7 +574,7 @@ PP(pp_sort)
 	    if (!(cv && CvROOT(cv))) {
 		if (gv) {
 		    SV *tmpstr = sv_newmortal();
-		    gv_efullname(tmpstr, gv);
+		    gv_efullname(tmpstr, gv, Nullch);
 		    if (cv && CvXSUB(cv))
 			DIE("Xsub \"%s\" called in sort", SvPVX(tmpstr));
 		    DIE("Undefined sort subroutine \"%s\" called",
@@ -1114,7 +1114,7 @@ PP(pp_caller)
 	RETURN;
     if (cx->cx_type == CXt_SUB) { /* So is cxstack[dbcxix]. */
 	sv = NEWSV(49, 0);
-	gv_efullname(sv, CvGV(cxstack[cxix].blk_sub.cv));
+	gv_efullname(sv, CvGV(cxstack[cxix].blk_sub.cv), Nullch);
 	PUSHs(sv_2mortal(sv));
 	PUSHs(sv_2mortal(newSViv((I32)cx->blk_sub.hasargs)));
     }
@@ -1623,7 +1623,7 @@ PP(pp_goto)
 	    if (!CvROOT(cv) && !CvXSUB(cv)) {
 		if (CvGV(cv)) {
 		    SV *tmpstr = sv_newmortal();
-		    gv_efullname(tmpstr, CvGV(cv));
+		    gv_efullname(tmpstr, CvGV(cv), Nullch);
 		    DIE("Goto undefined subroutine &%s",SvPVX(tmpstr));
 		}
 		DIE("Goto undefined subroutine");
@@ -1760,12 +1760,13 @@ PP(pp_goto)
 			mark++;
 		    }
 		}
-		if (perldb && curstash != debstash) { /* &xsub is not copying @_ */
+		if (perldb && curstash != debstash) {
+		    /* &xsub is not copying @_ */
 		    SV *sv = GvSV(DBsub);
 		    save_item(sv);
-		    gv_efullname(sv, CvGV(cv)); /* We do not care about
-						 * using sv to call CV,
-						 * just for info. */
+		    gv_efullname(sv, CvGV(cv), Nullch);
+		    /* We do not care about using sv to call CV,
+		     * just for info. */
 		}
 		RETURNOP(CvSTART(cv));
 	    }
