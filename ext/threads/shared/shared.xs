@@ -61,6 +61,12 @@ recursive_lock_init(pTHX_ recursive_lock_t *lock)
     COND_INIT(&lock->cond);
 }
 
+recursive_lock_destroy(pTHX_ recursive_lock_t *lock)
+{
+    MUTEX_DESTROY(&lock->mutex);
+    COND_DESTROY(&lock->cond);
+}
+
 void
 recursive_lock_release(pTHX_ recursive_lock_t *lock)
 {
@@ -157,6 +163,8 @@ sharedsv_shared_mg_free(pTHX_ SV *sv, MAGIC *mg)
     shared_sv *shared = (shared_sv *) mg->mg_ptr;
     assert( aTHX == PL_sharedsv_space );
     if (shared) {
+	recursive_lock_init(aTHX_ &shared->lock);
+	COND_DESTROY(&shared->user_cond);
 	PerlMemShared_free(shared);
 	mg->mg_ptr = NULL;
     }
