@@ -2004,7 +2004,11 @@ EOM
 		[23]100) osname=mips ;;
 		next*) osname=next ;;
 		i386*)
-			if $test -f /etc/kconfig; then
+			tmp=`/bin/uname -X 2>/dev/null|awk -e '/3\.2v[45]/{ print $(NF) }'`
+			if $test "$tmp" != "" -a "$3" = "3.2" -a test -e '/etc/systemid'; then
+				osname='sco'
+				osvers=$tmp
+			elif $test -f /etc/kconfig; then
 				osname=isc
 				if test "$lns" = "ln -s"; then
 					osvers=4
@@ -2014,6 +2018,7 @@ EOM
 					osvers=2
 				fi
 			fi
+			unset tmp
 			;;
 		pc*)
 			if test -n "$DJGPP"; then
