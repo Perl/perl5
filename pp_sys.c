@@ -3986,7 +3986,7 @@ PP(pp_system)
 	}
     }
     PERL_FLUSHALL_FOR_CHILD;
-#if (defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(OS2) && !defined(__CYGWIN__) || defined(PERL_MICRO)
+#if (defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(OS2) || defined(PERL_MICRO)
   {
     Pid_t childpid;
     int status;
