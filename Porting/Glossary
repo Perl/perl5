@@ -1281,11 +1281,13 @@ d_rmdir (d_rmdir.U):
 
 d_safebcpy (d_safebcpy.U):
 	This variable conditionally defines the HAS_SAFE_BCOPY symbol if
-	the bcopy() routine can do overlapping copies.
+	the bcopy() routine can do overlapping copies.  Normally, you
+	should probably use memmove().
 
 d_safemcpy (d_safemcpy.U):
 	This variable conditionally defines the HAS_SAFE_MEMCPY symbol if
 	the memcpy() routine can do overlapping copies.
+	For overlapping copies, memmove() should be used, if available.
 
 d_sanemcmp (d_sanemcmp.U):
 	This variable conditionally defines the HAS_SANE_MEMCMP symbol if

@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Jun 22 05:07:22 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Fri Jun 22 23:55:12 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -11498,12 +11498,14 @@ set i_memory
 eval $setvar
 
 : can bcopy handle overlapping blocks?
+echo " "
 val="$undef"
-case "$d_bcopy" in
-"$define")
-	echo " "
-	echo "Checking to see if your bcopy() can do overlapping copies..." >&4
-	$cat >try.c <<EOCP
+case "$d_memmove" in
+"$define") echo "I'll use memmove() instead of bcopy() for overlapping copies." ;;
+*)	case "$d_bcopy" in
+	"$define")
+		echo "Checking to see if bcopy() can do overlapping copies..." >&4
+		$cat >try.c <<EOCP
 #$i_memory I_MEMORY
 #$i_stdlib I_STDLIB
 #$i_string I_STRING
@@ -11533,6 +11535,8 @@ int len;
 int off;
 int align;
 
+/* Copy "abcde..." string to char abc[] so that gcc doesn't
+   try to store the string in read-only memory. */
 bcopy("abcdefghijklmnopqrstuvwxyz0123456789", abc, 36);
 
 for (align = 7; align >= 0; align--) {
@@ -11550,36 +11554,34 @@ for (align = 7; align >= 0; align--) {
 exit(0);
 }
 EOCP
-	set try
-	if eval $compile_ok; then
-		if $run ./try 2>/dev/null; then
-			echo "Yes, it can."
-			val="$define"
+		set try
+		if eval $compile_ok; then
+			if ./try 2>/dev/null; then
+				echo "Yes, it can."
+				val="$define"
+			else
+				echo "It can't, sorry."
+			fi
 		else
-			echo "It can't, sorry."
-			case "$d_memmove" in
-			"$define") echo "But that's Ok since you have memmove()." ;;
-			esac
+			echo "(I can't compile the test program, so we'll assume not...)"
 		fi
-	else
-		echo "(I can't compile the test program, so we'll assume not...)"
-		case "$d_memmove" in
-		"$define") echo "But that's Ok since you have memmove()." ;;
-		esac
-	fi
+		;;
+	esac
+	$rm -f try.* try core
 	;;
 esac
-$rm -f try.* try core
 set d_safebcpy
 eval $setvar
 
 : can memcpy handle overlapping blocks?
+echo " "
 val="$undef"
-case "$d_memcpy" in
-"$define")
-	echo " "
-	echo "Checking to see if your memcpy() can do overlapping copies..." >&4
-	$cat >try.c <<EOCP
+case "$d_memmove" in
+"$define") echo "I'll use memmove() instead of memcpy() for overlapping copies." ;;
+*)	case "$d_memcpy" in
+	"$define")
+		echo "Checking to see if memcpy() can do overlapping copies..." >&4
+		$cat >try.c <<EOCP
 #$i_memory I_MEMORY
 #$i_stdlib I_STDLIB
 #$i_string I_STRING
@@ -11628,26 +11630,22 @@ for (align = 7; align >= 0; align--) {
 exit(0);
 }
 EOCP
-	set try
-	if eval $compile_ok; then
-		if $run ./try 2>/dev/null; then
-			echo "Yes, it can."
-			val="$define"
+		set try
+		if eval $compile_ok; then
+			if ./try 2>/dev/null; then
+				echo "Yes, it can."
+				val="$define"
+			else
+				echo "It can't, sorry."
+			fi
 		else
-			echo "It can't, sorry."
-			case "$d_memmove" in
-			"$define") echo "But that's Ok since you have memmove()." ;;
-			esac
+			echo "(I can't compile the test program, so we'll assume not...)"
 		fi
-	else
-		echo "(I can't compile the test program, so we'll assume not...)"
-		case "$d_memmove" in
-		"$define") echo "But that's Ok since you have memmove()." ;;
-		esac
-	fi
+		;;
+	esac
+	$rm -f try.* try core
 	;;
 esac
-$rm -f try.* try core
 set d_safemcpy
 eval $setvar
 
