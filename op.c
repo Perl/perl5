@@ -35,6 +35,8 @@
 #define CHECKOP(type,o) (*check[type])(o)
 #endif /* USE_OP_MASK */
 
+#define FINDLEX_NOSEARCH	1	/* don't search outer contexts */
+
 static I32 list_assignment _((OP *o));
 static void bad_type _((I32 n, char *t, char *name, OP *kid));
 static OP *modkids _((OP *o, I32 type));
@@ -45,7 +47,7 @@ static OP *too_few_arguments _((OP *o, char* name));
 static OP *too_many_arguments _((OP *o, char* name));
 static void null _((OP* o));
 static PADOFFSET pad_findlex _((char* name, PADOFFSET newoff, U32 seq,
-	CV* startcv, I32 cx_ix, I32 saweval));
+	CV* startcv, I32 cx_ix, I32 saweval, I32 flags));
 static OP *new_logop _((I32 type, I32 flags, OP **firstp, OP **otherp));
 
 static char*
@@ -169,15 +171,17 @@ char *name;
 
 static PADOFFSET
 #ifndef CAN_PROTOTYPE
-pad_findlex(name, newoff, seq, startcv, cx_ix, saweval)
+pad_findlex(name, newoff, seq, startcv, cx_ix, saweval, flags)
 char *name;
 PADOFFSET newoff;
 U32 seq;
 CV* startcv;
 I32 cx_ix;
 I32 saweval;
+I32 flags;
 #else
-pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix, I32 saweval)
+pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix,
+	    I32 saweval, I32 flags)
 #endif
 {
     dTHR;
@@ -266,6 +270,9 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix, I32 s
 	}
     }
 
+    if (flags & FINDLEX_NOSEARCH)
+	return 0;
+
     /* Nothing in current lexical context--try eval's context, if any.
      * This is necessary to let the perldb get at lexically scoped variables.
      * XXX This will also probably interact badly with eval tree caching.
@@ -277,7 +284,7 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix, I32 s
 	default:
 	    if (i == 0 && saweval) {
 		seq = cxstack[saweval].blk_oldcop->cop_seq;
-		return pad_findlex(name, newoff, seq, main_cv, -1, saweval);
+		return pad_findlex(name, newoff, seq, main_cv, -1, saweval, 0);
 	    }
 	    break;
 	case CXt_EVAL:
@@ -300,7 +307,8 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix, I32 s
 		continue;
 	    }
 	    seq = cxstack[saweval].blk_oldcop->cop_seq;
-	    return pad_findlex(name, newoff, seq, cv, i-1, saweval);
+	    return pad_findlex(name, newoff, seq, cv, i-1, saweval,
+			       FINDLEX_NOSEARCH);
 	}
     }
 
@@ -348,7 +356,7 @@ char *name;
     }
 
     /* See if it's in a nested scope */
-    off = pad_findlex(name, 0, seq, outside, cxstack_ix, 0);
+    off = pad_findlex(name, 0, seq, outside, cxstack_ix, 0, 0);
     if (off) {
 	/* If there is a pending local definition, this new alias must die */
 	if (pendoff)
@@ -3256,7 +3264,7 @@ CV* outside;
 	    char *name = SvPVX(namesv);    /* XXX */
 	    if (SvFLAGS(namesv) & SVf_FAKE) {   /* lexical from outside? */
 		I32 off = pad_findlex(name, ix, SvIVX(namesv),
-				      CvOUTSIDE(cv), cxstack_ix, 0);
+				      CvOUTSIDE(cv), cxstack_ix, 0, 0);
 		if (!off)
 		    curpad[ix] = SvREFCNT_inc(ppad[ix]);
 		else if (off != ix)
