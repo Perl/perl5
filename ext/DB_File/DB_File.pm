@@ -1,8 +1,8 @@
 # DB_File.pm -- Perl 5 interface to Berkeley DB 
 #
 # written by Paul Marquess (pmarquess@bfsec.bt.co.uk)
-# last modified 20th Nov 1997
-# version 1.56
+# last modified 20th Dec 1997
+# version 1.57
 #
 #     Copyright (c) 1995, 1996, 1997 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
@@ -106,7 +106,7 @@ package DB_File::RECNOINFO ;
 
 use strict ;
 
-@DB_File::RECNOINFO::ISA = qw(DB_File::HASHINFO) ;  
+@DB_File::RECNOINFO::ISA = qw(DB_File::HASHINFO) ;
 
 sub TIEHASH
 {
@@ -145,7 +145,7 @@ use vars qw($VERSION @ISA @EXPORT $AUTOLOAD $DB_BTREE $DB_HASH $DB_RECNO $db_ver
 use Carp;
 
 
-$VERSION = "1.56" ;
+$VERSION = "1.58" ;
 
 #typedef enum { DB_BTREE, DB_HASH, DB_RECNO } DBTYPE;
 $DB_BTREE = new DB_File::BTREEINFO ;
@@ -189,9 +189,7 @@ require DynaLoader;
 	R_SNAPSHOT
 	__R_UNUSED
 
-);  
-
-*FETCHSIZE = \&length;
+);
 
 sub AUTOLOAD {
     my($constname);
@@ -267,7 +265,8 @@ sub TIEARRAY
     tie_hash_or_array(@_) ;
 }
 
-sub CLEAR {
+sub CLEAR 
+{
     my $self = shift;
     my $key = "" ;
     my $value = "" ;
@@ -283,6 +282,23 @@ sub CLEAR {
     }
 }
 
+sub EXTEND { }
+
+sub STORESIZE
+{
+    my $self = shift;
+    my $length = shift ;
+    my $current_length = $self->length() ;
+
+    if ($length < $current_length) {
+	my $key ;
+        for ($key = $current_length - 1 ; $key >= $length ; -- $key)
+	  { $self->del($key) }
+    }
+    elsif ($length > $current_length)
+        { $self->put($length-1, "") }
+}
+ 
 sub get_dup
 {
     croak "Usage: \$db->get_dup(key [,flag])\n"
@@ -1022,11 +1038,15 @@ Here is the output from the script:
 
 =head2 Extra Methods
 
-As you can see from the example above, the tied array interface is
-quite limited. To make the interface more useful, a number of methods
-are supplied with B<DB_File> to simulate the standard array operations
-that are not currently implemented in Perl's tied array interface. All
-these methods are accessed via the object returned from the tie call.
+If you are using a version of Perl earlier than 5.004_57, the tied
+array interface is quite limited. The example script above will work,
+but you won't be able to use C<push>, C<pop>, C<shift>, C<unshift>
+etc. with the tied array.
+
+To make the interface more useful for older versions of Perl, a number
+of methods are supplied with B<DB_File> to simulate the missing array
+operations. All these methods are accessed via the object returned from
+the tie call.
 
 Here are the methods:
 

@@ -121,8 +121,11 @@ esac
 # no attempt to figure out the additional location(s) searched by
 # gcc, since not all versions of gcc are easily coerced into
 # revealing that information.
-glibpth="/usr/shlib /usr/ccs/lib /usr/lib/cmplrs/cc"
-glibpth="$glibpth /usr/lib /usr/local/lib /var/shlib"
+#
+# This or the new useshrplib default below breaks the build.
+# Commented out for this snapshot.
+#glibpth="/usr/shlib /usr/ccs/lib /usr/lib/cmplrs/cc"
+#glibpth="$glibpth /usr/lib /usr/local/lib /var/shlib"
 
 # dlopen() is in libc
 libswanted="`echo $libswanted | sed -e 's/ dl / /'`"
@@ -196,9 +199,11 @@ fi
 # "-Uuseshrplib" prevents this default.
 #
 
-case "$_DEC_cc_style.$useshrplib" in
-	new.)	useshrplib="$define"	;;
-esac
+# This or the glibpth change above breaks the build. Commented out
+# for this snapshot.
+#case "$_DEC_cc_style.$useshrplib" in
+#	new.)	useshrplib="$define"	;;
+#esac
 
 #
 # Unset temporary variables no more needed.

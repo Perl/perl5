@@ -1386,7 +1386,7 @@ sub system {
     # We save, change, then restore STDIN and STDOUT to avoid fork() since
     # many non-Unix systems can do system() but have problems with fork().
     open(SAVEIN,"<&STDIN") || &warn("Can't save STDIN");
-    open(SAVEOUT,">&OUT") || &warn("Can't save STDOUT");
+    open(SAVEOUT,">&STDOUT") || &warn("Can't save STDOUT");
     open(STDIN,"<&IN") || &warn("Can't redirect STDIN");
     open(STDOUT,">&OUT") || &warn("Can't redirect STDOUT");
     system(@_);

@@ -331,14 +331,24 @@ automatically destroyed.  (This may even be after you exit, if you've
 stored references in global variables.)  If you want to capture control
 just before the object is freed, you may define a DESTROY method in
 your class.  It will automatically be called at the appropriate moment,
-and you can do any extra cleanup you need to do.
+and you can do any extra cleanup you need to do.  Perl passes a reference
+to the object under destruction as the first (and only) argument.  Beware
+that the reference is a read-only value, and cannot be modified by
+manipulating C<$_[0]> within the destructor.  The object itself (i.e.
+the thingy the reference points to, namely C<${$_[0]}>, C<@{$_[0]}>, 
+C<%{$_[0]}> etc.) is not similarly constrained.
 
-Perl doesn't do nested destruction for you.  If your constructor
-re-blessed a reference from one of your base classes, your DESTROY may
-need to call DESTROY for any base classes that need it.  But this applies
-to only re-blessed objects--an object reference that is merely
-I<CONTAINED> in the current object will be freed and destroyed
-automatically when the current object is freed.
+If you arrange to re-bless the reference before the destructor returns,
+perl will again call the DESTROY method for the re-blessed object after
+the current one returns.  This can be used for clean delegation of
+object destruction, or for ensuring that destructors in the base classes
+of your choosing get called.  Explicitly calling DESTROY is also possible,
+but is usually never needed.
+
+Do not confuse the foregoing with how objects I<CONTAINED> in the current
+one are destroyed.  Such objects will be freed and destroyed automatically
+when the current object is freed, provided no other references to them exist
+elsewhere.
 
 =head2 WARNING
 

@@ -3,12 +3,12 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess (pmarquess@bfsec.bt.co.uk)
- last modified 20th Nov 1997
- version 1.56
+ last modified 2nd Feb 1998
+ version 1.58
 
  All comments/suggestions/problems are welcome
 
-     Copyright (c) 1995, 1996, 1997 Paul Marquess. All rights reserved.
+     Copyright (c) 1995, 1996, 1997, 1998 Paul Marquess. All rights reserved.
      This program is free software; you can redistribute it and/or
      modify it under the same terms as Perl itself.
 
@@ -50,6 +50,10 @@
 	1.54 -  Fixed bug in the fd method
         1.55 -  Fix for AIX from Jarkko Hietaniemi
         1.56 -  No change to DB_File.xs
+        1.57 -  added the #undef op to allow building with Threads support.
+	1.58 -  Fixed a problem with the use of sv_setpvn. When the
+		size is specified as 0, it does a strlen on the data.
+		This was ok for DB 1.x, but isn't for DB 2.x.
 
 
 
@@ -65,6 +69,12 @@
 
 #undef __attribute__
 
+/* If Perl has been compiled with Threads support,the symbol op will
+   be defined here. This clashes with a field name in db.h, so get rid of it.
+ */
+#ifdef op
+#undef op
+#endif
 #include <db.h>
 
 #include <fcntl.h> 
@@ -238,10 +248,11 @@ typedef struct {
 typedef DB_File_type * DB_File ;
 typedef DBT DBTKEY ;
 
+#define my_sv_setpvn(sv, d, s) sv_setpvn(sv, (s ? d : (void*)""), s)
 
 #define OutputValue(arg, name)  				\
 	{ if (RETVAL == 0) {					\
-	      sv_setpvn(arg, name.data, name.size) ;		\
+	      my_sv_setpvn(arg, name.data, name.size) ;		\
 	  }							\
 	}
 
@@ -249,12 +260,13 @@ typedef DBT DBTKEY ;
 	{ if (RETVAL == 0) 					\
 	  { 							\
 		if (db->type != DB_RECNO) {			\
-		    sv_setpvn(arg, name.data, name.size); 	\
+		    my_sv_setpvn(arg, name.data, name.size); 	\
 		}						\
 		else 						\
 		    sv_setiv(arg, (I32)*(I32*)name.data - 1); 	\
 	  } 							\
 	}
+
 
 /* Internal Global Data */
 static recno_t Value ; 
@@ -1158,7 +1170,7 @@ db_FETCH(db, key, flags=0)
 	    RETVAL = db_get(db, key, value, flags) ;
 	    ST(0) = sv_newmortal();
 	    if (RETVAL == 0) 
-	        sv_setpvn(ST(0), value.data, value.size);
+	        my_sv_setpvn(ST(0), value.data, value.size);
 	}
 
 int
@@ -1188,7 +1200,7 @@ db_FIRSTKEY(db)
 	    if (RETVAL == 0)
 	    {
 	        if (db->type != DB_RECNO)
-	            sv_setpvn(ST(0), key.data, key.size);
+	            my_sv_setpvn(ST(0), key.data, key.size);
 	        else
 	            sv_setiv(ST(0), (I32)*(I32*)key.data - 1);
 	    }
@@ -1210,7 +1222,7 @@ db_NEXTKEY(db, key)
 	    if (RETVAL == 0)
 	    {
 	        if (db->type != DB_RECNO)
-	            sv_setpvn(ST(0), key.data, key.size);
+	            my_sv_setpvn(ST(0), key.data, key.size);
 	        else
 	            sv_setiv(ST(0), (I32)*(I32*)key.data - 1);
 	    }
@@ -1223,6 +1235,7 @@ db_NEXTKEY(db, key)
 int
 unshift(db, ...)
 	DB_File		db
+	ALIAS:		UNSHIFT = 1
 	CODE:
 	{
 	    DBTKEY	key ;
@@ -1263,6 +1276,7 @@ unshift(db, ...)
 I32
 pop(db)
 	DB_File		db
+	ALIAS:		POP = 1
 	CODE:
 	{
 	    DBTKEY	key ;
@@ -1280,7 +1294,7 @@ pop(db)
 	    if (RETVAL == 0)
 	    {
 		/* the call to del will trash value, so take a copy now */
-	        sv_setpvn(ST(0), value.data, value.size);
+	        my_sv_setpvn(ST(0), value.data, value.size);
 	        RETVAL = db_del(db, key, R_CURSOR) ;
 	        if (RETVAL != 0) 
 	            sv_setsv(ST(0), &sv_undef); 
@@ -1290,6 +1304,7 @@ pop(db)
 I32
 shift(db)
 	DB_File		db
+	ALIAS:		SHIFT = 1
 	CODE:
 	{
 	    DBT		value ;
@@ -1306,7 +1321,7 @@ shift(db)
 	    if (RETVAL == 0)
 	    {
 		/* the call to del will trash value, so take a copy now */
-	        sv_setpvn(ST(0), value.data, value.size);
+	        my_sv_setpvn(ST(0), value.data, value.size);
 	        RETVAL = db_del(db, key, R_CURSOR) ;
 	        if (RETVAL != 0)
 	            sv_setsv (ST(0), &sv_undef) ;
@@ -1317,6 +1332,7 @@ shift(db)
 I32
 push(db, ...)
 	DB_File		db
+	ALIAS:		PUSH = 1
 	CODE:
 	{
 	    DBTKEY	key ;
@@ -1364,6 +1380,7 @@ push(db, ...)
 I32
 length(db)
 	DB_File		db
+	ALIAS:		FETCHSIZE = 1
 	CODE:
 	    CurrentDB = db ;
 	    RETVAL = GetArrayLength(db) ;

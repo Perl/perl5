@@ -39,8 +39,23 @@
 #define SAVETMPS save_int((int*)&tmps_floor), tmps_floor = tmps_ix
 #define FREETMPS if (tmps_ix > tmps_floor) free_tmps()
 
+#ifdef DEBUGGING
+#define ENTER							\
+    STMT_START {						\
+	push_scope();						\
+	DEBUG_l(WITH_THR(deb("ENTER scope %ld at %s:%d\n",	\
+		    scopestack_ix, __FILE__, __LINE__)));	\
+    } STMT_END
+#define LEAVE							\
+    STMT_START {						\
+	DEBUG_l(WITH_THR(deb("LEAVE scope %ld at %s:%d\n",	\
+		    scopestack_ix, __FILE__, __LINE__)));	\
+	pop_scope();						\
+    } STMT_END
+#else
 #define ENTER push_scope()
 #define LEAVE pop_scope()
+#endif
 #define LEAVE_SCOPE(old) if (savestack_ix > old) leave_scope(old)
 
 /*

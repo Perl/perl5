@@ -13,6 +13,12 @@
 #endif
 #endif
 
+#ifdef _MSC_VER
+#  include <sys/utime.h>
+#else
+#  include <utime.h>
+#endif
+
 /*
  * defines for flock emulation
  */
@@ -114,6 +120,7 @@ DllExport  int		win32_times(struct tms *timebuf);
 DllExport  unsigned 	win32_alarm(unsigned int sec);
 DllExport  int		win32_stat(const char *path, struct stat *buf);
 DllExport  int		win32_ioctl(int i, unsigned int u, char *data);
+DllExport  int		win32_utime(const char *f, struct utimbuf *t);
 DllExport  int		win32_wait(int *status);
 
 #ifdef HAVE_DES_FCRYPT
@@ -140,6 +147,7 @@ END_EXTERN_C
 #undef times
 #undef alarm
 #undef ioctl
+#undef utime
 #undef wait
 
 #ifdef __BORLANDC__
@@ -240,6 +248,7 @@ END_EXTERN_C
 #define times			win32_times
 #define alarm			win32_alarm
 #define ioctl			win32_ioctl
+#define utime			win32_utime
 #define wait			win32_wait
 
 #ifdef HAVE_DES_FCRYPT

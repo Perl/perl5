@@ -329,35 +329,80 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_gethent HAS_GETHOSTENT		/**/
 
-/* HAS_GETHBADD:
+/* HAS_GETHOSTBYADDR:
  *	This symbol, if defined, indicates that the gethostbyaddr routine is
- *	available to lookup host names by their IP addresses.
+ *	available to lookup hosts by their IP addresses.
  */
-#$d_gethbadd HAS_GETHBADD		/**/
+#$d_gethbyaddr HAS_GETHOSTBYADDR		/**/
 
-/* Gethbadd_addr_t:
+/* Netdb_host_t:
  *	This symbol holds the type used for the 1st argument
  *	to gethostbyaddr().
  */
-#define Gethbadd_addr_t		$gethbadd_addr_type
+#define Netdb_host_t		$netdb_host_type
 
-/* Gethbadd_alen_t:
+/* Netdb_hlen_t:
  *	This symbol holds the type used for the 2nd argument
  *	to gethostbyaddr().
  */
-#define Gethbadd_alen_t		$gethbadd_alen_type
+#define Netdb_hlen_t		$netdb_hlen_type
 
-/* HAS_GETNBADD:
+/* HAS_GETHOSTBYNAME:
+ *	This symbol, if defined, indicates that the gethostbyname routine is
+ *	available to lookup hosts by their DNS names.
+ */
+#$d_gethbyname HAS_GETHOSTBYNAME		/**/
+
+/* Netdb_name_t:
+ *	This symbol holds the type used for the 1st argument
+ *	to gethostbyname(), the 1st argument to getnetbyname(),
+ *	the 1st argument to getprotobyname(), the 1st argument to
+ *	getservbyname(), the 2nd argument to getservbyname(),
+ *	and the 2nd argument to getservbyport().
+ */
+#define Netdb_name_t		$netdb_name_type
+
+/* HAS_GETNETBYADD:
  *	This symbol, if defined, indicates that the getnetbyaddr routine is
  *	available to lookup networks by their IP addresses.
  */
-#$d_getnbadd HAS_GETNBADD		/**/
+#$d_getnbyaddr HAS_GETNETBYADD		/**/
 
-/* Gethbadd_net_t:
+/* Netdb_net_t:
  *	This symbol holds the type used for the 1st argument
  *	to getnetbyaddr().
  */
-#define Getnbadd_net_t		$getnbadd_net_type
+#define Netdb_net_t		$netdb_net_type
+
+/* HAS_GETNETBYNAME:
+ *	This symbol, if defined, indicates that the getnetbyname routine is
+ *	available to lookup networks by their names.
+ */
+#$d_getnbyname HAS_GETNETBYNAME		/**/
+
+/* HAS_GETPROTOBYNAME:
+ *	This symbol, if defined, indicates that the getprotobyname routine is
+ *	available to lookup protocols by their names.
+ */
+#$d_getpbyname HAS_GETPROTOBYNAME		/**/
+
+/* HAS_GETPROTOBYNUMBER:
+ *	This symbol, if defined, indicates that the getprotobynumber routine is
+ *	available to lookup protocols by their numbers.
+ */
+#$d_getpbynumber HAS_GETPROTOBYNUMBER		/**/
+
+/* HAS_GETSERVBYNAME:
+ *	This symbol, if defined, indicates that the getservbyname routine is
+ *	available to lookup services by their names.
+ */
+#$d_getsbyname HAS_GETSERVBYNAME		/**/
+
+/* HAS_GETSERVBYPORT:
+ *	This symbol, if defined, indicates that the getservbyport routine is
+ *	available to lookup services by their ports.
+ */
+#$d_getsbyport HAS_GETSERVBYPORT		/**/
 
 /* HAS_UNAME:
  *	This symbol, if defined, indicates that the C program may use the

@@ -979,7 +979,7 @@ regmatch(regnode *prog)
 	    n = ARG(scan);  /* which paren pair */
 	    s = regstartp[n];
 	    if (*reglastparen < n || !s)
-		break;			/* Zero length always matches */
+		sayNO;			/* Do not match unless seen CLOSEn. */
 	    if (s == regendp[n])
 		break;
 	    /* Inline the first character, for speed. */

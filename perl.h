@@ -476,8 +476,8 @@ Free_t   Perl_free _((Malloc_t where));
 #ifdef USE_THREADS
 #  define ERRSV (thr->errsv)
 #  define ERRHV (thr->errhv)
-#  define DEFSV *av_fetch(thr->threadsv, find_threadsv("_"), FALSE)
-#  define SAVE_DEFSV save_threadsv(find_threadsv("_"))
+#  define DEFSV THREADSV(0)
+#  define SAVE_DEFSV save_threadsv(0)
 #else
 #  define ERRSV GvSV(errgv)
 #  define ERRHV GvHV(errgv)
@@ -1384,6 +1384,7 @@ int runops_standard _((void));
 int runops_debug _((void));
 #endif
 
+/* _ (for $_) must be first in the following list (DEFSV requires it) */
 #define THREADSV_NAMES "_123456789&`'+/.,\\\";^-%=|~:\001\005!@"
 
 /* VMS doesn't use environ array and NeXT has problems with crt0.o globals */
@@ -2040,12 +2041,12 @@ enum {
  * and queried under the protection of sv_mutex
  */
 #define offer_nice_chunk(chunk, chunk_size) do {	\
-	MUTEX_LOCK(&sv_mutex);				\
+	LOCK_SV_MUTEX;					\
 	if (!nice_chunk) {				\
 	    nice_chunk = (char*)(chunk);		\
 	    nice_chunk_size = (chunk_size);		\
 	}						\
-	MUTEX_UNLOCK(&sv_mutex);			\
+	UNLOCK_SV_MUTEX;				\
     } while (0)
 
 

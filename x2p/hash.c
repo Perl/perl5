@@ -65,7 +65,7 @@ hstore(register HASH *tb, char *key, STR *val)
 	if (strNE(entry->hent_key,key))	/* is this it? */
 	    continue;
 	/*NOSTRICT*/
-	Safefree(entry->hent_val);
+	safefree(entry->hent_val);
 	entry->hent_val = val;
 	return TRUE;
     }

@@ -20,8 +20,17 @@
 #else
 #  define pthread_mutexattr_default NULL
 #  define pthread_condattr_default NULL
-#  define pthread_attr_default NULL
 #endif /* OLD_PTHREADS_API */
+#endif
+
+#ifdef PTHREADS_CREATED_JOINABLE
+#  define ATTR_JOINABLE PTHREAD_CREATE_JOINABLE
+#else
+#  ifdef PTHREAD_CREATE_UNDETACHED
+#    define ATTR_JOINABLE PTHREAD_CREATE_UNDETACHED
+#  else
+#    define ATTR_JOINABLE PTHREAD_CREATE_JOINABLE
+#  endif
 #endif
 
 #ifndef YIELD
@@ -119,8 +128,16 @@ struct perl_thread *getTHR _((void));
 #  endif /* OLD_PTHREADS_API */
 #endif /* THR */
 
+/*
+ * dTHR is performance-critical. Here, we only do the pthread_get_specific
+ * if there may be more than one thread in existence, otherwise we get thr
+ * from thrsv which is cached in the per-interpreter structure.
+ * Systems with very fast pthread_get_specific (which should be all systems
+ * but unfortunately isn't) may wish to simplify to "...*thr = THR".
+ */
 #ifndef dTHR
-#  define dTHR struct perl_thread *thr = THR
+#  define dTHR \
+    struct perl_thread *thr = threadnum? THR : (struct perl_thread*)SvPVX(thrsv)
 #endif /* dTHR */
 
 #ifndef INIT_THREADS
@@ -131,6 +148,26 @@ struct perl_thread *getTHR _((void));
 #  endif
 #endif
 
+/* Accessor for per-thread SVs */
+#define THREADSV(i) (thr->threadsvp[i])
+
+/*
+ * LOCK_SV_MUTEX and UNLOCK_SV_MUTEX are performance-critical. Here, we
+ * try only locking them if there may be more than one thread in existence.
+ * Systems with very fast mutexes (and/or slow conditionals) may wish to
+ * remove the "if (threadnum) ..." test.
+ */
+#define LOCK_SV_MUTEX			\
+    STMT_START {			\
+	if (threadnum)			\
+	    MUTEX_LOCK(&sv_mutex);	\
+    } STMT_END
+
+#define UNLOCK_SV_MUTEX			\
+    STMT_START {			\
+	if (threadnum)			\
+	    MUTEX_UNLOCK(&sv_mutex);	\
+    } STMT_END
 
 #ifndef THREAD_RET_TYPE
 #  define THREAD_RET_TYPE	void *
@@ -180,6 +217,8 @@ typedef struct condpair {
 #define COND_BROADCAST(c)
 #define COND_WAIT(c, m)
 #define COND_DESTROY(c)
+#define LOCK_SV_MUTEX
+#define UNLOCK_SV_MUTEX
 
 #define THR
 /* Rats: if dTHR is just blank then the subsequent ";" throws an error */

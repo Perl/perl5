@@ -16,6 +16,8 @@
 -4,			4 5 6 7,	0 1 2 3
 EOF
 
+print join("!\n",@tests),"\n";
+
 print "1..", 2 + @tests, "\n";
 die "blech" unless @tests;
 

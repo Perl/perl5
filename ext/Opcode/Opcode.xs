@@ -111,7 +111,7 @@ new_opset(SV *old_opset)
 	opset = newSVsv(old_opset);
     }
     else {
-	opset = newSV(opset_len);
+	opset = NEWSV(1156, opset_len);
 	Zero(SvPVX(opset), opset_len + 1, char);
 	SvCUR_set(opset, opset_len);
 	(void)SvPOK_only(opset);

@@ -502,7 +502,7 @@ config.w32 : $(CFGSH_TMPL)
 	    "libc=$(LIBC)"			\
 	    "static_ext=$(STATIC_EXT)"		\
 	    "dynamic_ext=$(DYNAMIC_EXT)"	\
-	    "ldflags=$(LINK_FLAGS)"		\
+	    "LINK_FLAGS=$(LINK_FLAGS)"		\
 	    "optimize=$(OPTIMIZE)"		\
 	    config.w32				> ..\config.sh
 

@@ -178,7 +178,7 @@ static u_short blk_shift[11 - 3] = {256, 128, 64, 32,
 static char *emergency_buffer;
 static MEM_SIZE emergency_buffer_size;
 
-static char *
+static Malloc_t
 emergency_sbrk(size)
     MEM_SIZE size;
 {
@@ -237,14 +237,14 @@ static	union overhead *nextf[NBUCKETS];
 
 #ifdef USE_PERL_SBRK
 #define sbrk(a) Perl_sbrk(a)
-char *  Perl_sbrk _((int size));
+Malloc_t Perl_sbrk _((int size));
 #else 
 #ifdef DONT_DECLARE_STD
 #ifdef I_UNISTD
 #include <unistd.h>
 #endif
 #else
-extern	char *sbrk(int);
+extern	Malloc_t sbrk(int);
 #endif
 #endif
 

@@ -40,11 +40,17 @@
 #    include <utime.h>
 #  endif
 #endif
+
 #ifdef I_FCNTL
 #include <fcntl.h>
 #endif
 #ifdef I_SYS_FILE
 #include <sys/file.h>
+#endif
+#ifdef O_EXCL
+#  define OPEN_EXCL O_EXCL
+#else
+#  define OPEN_EXCL 0
 #endif
 
 #if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX)
@@ -381,16 +387,16 @@ nextargv(register GV *gv)
     filemode = 0;
     while (av_len(GvAV(gv)) >= 0) {
 	dTHR;
-	STRLEN len;
+	STRLEN oldlen;
 	sv = av_shift(GvAV(gv));
 	SAVEFREESV(sv);
 	sv_setsv(GvSV(gv),sv);
 	SvSETMAGIC(GvSV(gv));
-	oldname = SvPVx(GvSV(gv), len);
-	if (do_open(gv,oldname,len,FALSE,0,0,Nullfp)) {
+	oldname = SvPVx(GvSV(gv), oldlen);
+	if (do_open(gv,oldname,oldlen,inplace!=0,0,0,Nullfp)) {
 	    if (inplace) {
 		TAINT_PROPER("inplace open");
-		if (strEQ(oldname,"-")) {
+		if (oldlen == 1 && *oldname == '-') {
 		    setdefout(gv_fetchpv("STDOUT",TRUE,SVt_PVIO));
 		    return IoIFP(GvIOp(gv));
 		}
@@ -439,7 +445,7 @@ nextargv(register GV *gv)
 		    do_close(gv,FALSE);
 		    (void)PerlLIO_unlink(SvPVX(sv));
 		    (void)PerlLIO_rename(oldname,SvPVX(sv));
-		    do_open(gv,SvPVX(sv),SvCUR(sv),FALSE,0,0,Nullfp);
+		    do_open(gv,SvPVX(sv),SvCUR(sv),inplace!=0,0,0,Nullfp);
 #endif /* DOSISH */
 #else
 		    (void)UNLINK(SvPVX(sv));
@@ -456,8 +462,8 @@ nextargv(register GV *gv)
 #if !defined(DOSISH) && !defined(AMIGAOS)
 #  ifndef VMS  /* Don't delete; use automatic file versioning */
 		    if (UNLINK(oldname) < 0) {
-			warn("Can't rename %s to %s: %s, skipping file",
-			  oldname, SvPVX(sv), Strerror(errno) );
+			warn("Can't remove %s: %s, skipping file",
+			  oldname, Strerror(errno) );
 			do_close(gv,FALSE);
 			continue;
 		    }
@@ -467,10 +473,11 @@ nextargv(register GV *gv)
 #endif
 		}
 
-		sv_setpvn(sv,">",1);
-		sv_catpv(sv,oldname);
+		sv_setpvn(sv,">",!inplace);
+		sv_catpvn(sv,oldname,oldlen);
 		SETERRNO(0,0);		/* in case sprintf set errno */
-		if (!do_open(argvoutgv,SvPVX(sv),SvCUR(sv),FALSE,0,0,Nullfp)) {
+		if (!do_open(argvoutgv,SvPVX(sv),SvCUR(sv),inplace!=0,
+			     O_WRONLY|O_CREAT|OPEN_EXCL,0666,Nullfp)) {
 		    warn("Can't do inplace edit on %s: %s",
 		      oldname, Strerror(errno) );
 		    do_close(gv,FALSE);

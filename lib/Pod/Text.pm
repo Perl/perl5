@@ -165,6 +165,10 @@ sub prepare_for_output {
         s/I<(.*?)>/*$1*/sg;
         # s/[CB]<(.*?)>/bold($1)/ge;
 	s/X<.*?>//sg;
+
+	# LREF: a la HREF L<show this text|man/section>
+	s:L<([^|>]+)\|[^>]+>:$1:g;
+
 	# LREF: a manpage(3f)
 	s:L<([a-zA-Z][^\s\/]+)(\([^\)]+\))?>:the $1$2 manpage:g;
 	# LREF: an =item on another manpage

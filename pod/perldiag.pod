@@ -883,6 +883,11 @@ a B<-e> switch.  Maybe your /tmp partition is full, or clobbered.
 an assignment operator, which implies modifying the value itself.
 Perhaps you need to copy the value to a temporary, and repeat that.
 
+=item Cannot find an opnumber for "%s"
+
+(F) A string of a form C<CORE::word> was given to prototype(), but
+there is no builtin with the name C<word>.
+
 =item Cannot open temporary file
 
 (F) The create routine failed for some reason while trying to process
@@ -893,6 +898,30 @@ a B<-e> switch.  Maybe your /tmp partition is full, or clobbered.
 (F|P) Error resolving overloading specified by a method name (as
 opposed to a subroutine reference): no such method callable via the
 package. If method name is C<???>, this is an internal error.
+
+=item Character class syntax [. .] is reserved for future extensions
+
+(W) Within regular expression character classes ([]) the syntax beginning
+with "[." and ending with ".]" is reserved for future extensions.
+If you need to represent those character sequences inside a regular
+expression character class, just quote the square brackets with the
+backslash: "\[." and ".\]".
+
+=item Character class syntax [: :] is reserved for future extensions
+
+(W) Within regular expression character classes ([]) the syntax beginning
+with "[:" and ending with ":]" is reserved for future extensions.
+If you need to represent those character sequences inside a regular
+expression character class, just quote the square brackets with the
+backslash: "\[:" and ":\]".
+
+=item Character class syntax [= =] is reserved for future extensions
+
+(W) Within regular expression character classes ([]) the syntax
+beginning with "[=" and ending with "=]" is reserved for future extensions.
+If you need to represent those character sequences inside a regular
+expression character class, just quote the square brackets with the
+backslash: "\[=" and "=\]".
 
 =item chmod: mode argument is missing initial 0
 

@@ -120,6 +120,7 @@ emacs/ptags		Creates smart TAGS file
 embed.h			Maps symbols to safer names
 embed.pl		Produces embed.h
 embedvar.h		C namespace management
+ext/DB_File/Changes		Berkeley DB extension change log
 ext/DB_File/DB_File.pm		Berkeley DB extension Perl module
 ext/DB_File/DB_File.xs		Berkeley DB extension external subroutines
 ext/DB_File/DB_File_BS		Berkeley DB extension mkbootstrap fodder
@@ -181,7 +182,9 @@ ext/POSIX/Makefile.PL		POSIX extension makefile writer
 ext/POSIX/POSIX.pm		POSIX extension Perl module
 ext/POSIX/POSIX.pod		POSIX extension documentation
 ext/POSIX/POSIX.xs		POSIX extension external subroutines
+ext/POSIX/hints/linux.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/next_3.pl	Hint for POSIX for named architecture
+ext/POSIX/hints/sunos_4.pl	Hint for POSIX for named architecture
 ext/POSIX/typemap		POSIX extension interface types
 ext/SDBM_File/Makefile.PL	SDBM extension makefile writer
 ext/SDBM_File/SDBM_File.pm	SDBM extension Perl module
@@ -382,6 +385,7 @@ lib/ExtUtils/Mksymlists.pm	Writes a linker options file for extensions
 lib/ExtUtils/testlib.pm		Fixes up @INC to use just-built extension
 lib/ExtUtils/typemap		Extension interface types
 lib/ExtUtils/xsubpp		External subroutine preprocessor
+lib/Fatal.pm		Make errors in functions/builtins fatal
 lib/File/Basename.pm	Emulate the basename program
 lib/File/CheckTree.pm	Perl module supporting wholesale file mode validation
 lib/File/Compare.pm	Emulation of cmp command
@@ -551,12 +555,18 @@ patchlevel.h		The current patch level of perl
 perl.c			main()
 perl.h			Global declarations
 perl_exp.SH		Creates list of exported symbols for AIX
+perldir.h		perldir stuff
+perlenv.h		perlenv stuff
 perlio.c		C code for PerlIO abstraction
 perlio.h		Interface to PerlIO abstraction
 perlio.sym		Symbols for PerlIO abstraction
+perllio.h		perllio stuff
+perlmem.h		perlmem stuff
+perlproc.h		perlproc stuff
 perlsdio.h		Fake stdio using perlio
 perlsfio.h		Prototype sfio mapping for PerlIO
 perlsh			A poor man's perl shell
+perlsock.h		perlsock stuff
 perlvars.h		Global variables
 perly.c			A byacc'ed perly.y
 perly.c.diff		Fixup perly.c to allow recursion
@@ -605,7 +615,7 @@ pod/perlfaq9.pod	Frequently Asked Questions, Part 9
 pod/perlform.pod	Format info
 pod/perlfunc.pod	Function info
 pod/perlguts.pod	Internals info
-pod/perlhist.pod	The Perl history records
+pod/perlhist.pod	Perl history info
 pod/perlipc.pod		IPC info
 pod/perllocale.pod	Locale support info
 pod/perllol.pod		How to use lists of lists
@@ -675,6 +685,7 @@ t/comp/multiline.t	See if multiline strings work
 t/comp/package.t	See if packages work
 t/comp/proto.t		See if function prototypes work
 t/comp/redef.t		See if we get correct warnings on redefined subs
+t/comp/require.t	See if require works
 t/comp/script.t		See if script invokation works
 t/comp/term.t		See if more terms work
 t/comp/use.t		See if pragmas work
@@ -726,6 +737,7 @@ t/lib/open2.t		See if IPC::Open2 works
 t/lib/open3.t		See if IPC::Open3 works
 t/lib/ops.t		See if Opcode works
 t/lib/parsewords.t	See if Text::ParseWords works
+t/lib/ph.t		See if h2ph works
 t/lib/posix.t		See if POSIX works
 t/lib/safe1.t		See if Safe works
 t/lib/safe2.t		See if Safe works
@@ -737,10 +749,11 @@ t/lib/soundex.t		See if Soundex works
 t/lib/symbol.t		See if Symbol works
 t/lib/texttabs.t	See if Text::Tabs works
 t/lib/textwrap.t	See if Text::Wrap works
+t/lib/thread.t		Basic test of threading (skipped if no threads) 
 t/lib/tie-push.t	Test for Tie::Array
 t/lib/tie-stdarray.t	Test for Tie::StdArray
 t/lib/tie-stdpush.t	Test for Tie::StdArray
-t/lib/thread.t		Basic test of threading (skipped if no threads) 
+t/lib/timelocal.t	See if Time::Local works
 t/lib/trig.t		See if Math::Trig works
 t/op/append.t		See if . works
 t/op/arith.t		See if arithmetic works
@@ -804,7 +817,7 @@ t/op/substr.t		See if substr works
 t/op/sysio.t		See if sysread and syswrite work
 t/op/taint.t		See if tainting works
 t/op/tie.t		See if tie/untie functions work
-t/op/tiearray.t		See if tied arrays work
+t/op/tiearray.t		See if tie for arrays works
 t/op/time.t		See if time functions work
 t/op/undef.t		See if undef works
 t/op/universal.t	See if UNIVERSAL class works
@@ -876,7 +889,7 @@ win32/Makefile		Win32 makefile for NMAKE (Visual C++ build)
 win32/TEST		Win32 port
 win32/autosplit.pl	Win32 port
 win32/bin/network.pl	Win32 port
-win32/bin/perlglob.pl	glob() support
+win32/bin/perlglob.pl	Win32 globbing
 win32/bin/pl2bat.pl	wrap perl scripts into batch files
 win32/bin/runperl.pl	run perl script via batch file namesake
 win32/bin/search.pl	Win32 port

@@ -428,7 +428,7 @@ Let's now take a look at a portion of the .c file created for our extension.
 		} else {
 			arg = 0.0;
 		}
-		SvSetMagicNV(ST(0), (double)arg);	/* XXXXX */
+		sv_setnv(ST(0), (double)arg);		/* XXXXX */
 	    }
 	    XSRETURN(1);
 	}
@@ -438,10 +438,10 @@ the typemap file, you'll see that doubles are of type T_DOUBLE.  In the
 INPUT section, an argument that is T_DOUBLE is assigned to the variable
 arg by calling the routine SvNV on something, then casting it to double,
 then assigned to the variable arg.  Similarly, in the OUTPUT section,
-once arg has its final value, it is passed to the SvSetMagicNV() macro
-(which calls the sv_setnv() function) to be passed back to the calling
-subroutine.  These macros/functions are explained in L<perlguts>; we'll talk
-more later about what that "ST(0)" means in the section on the argument stack.
+once arg has its final value, it is passed to the sv_setnv function to
+be passed back to the calling subroutine.  These two functions are explained
+in L<perlguts>; we'll talk more later about what that "ST(0)" means in the
+section on the argument stack.
 
 =head2 WARNING
 

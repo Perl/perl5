@@ -2374,6 +2374,13 @@ Returns the prototype of a function as a string (or C<undef> if the
 function has no prototype).  FUNCTION is a reference to, or the name of,
 the function whose prototype you want to retrieve.
 
+If FUNCTION is a string starting with C<CORE::>, the rest is taken as
+a name for Perl builtin.  If builtin is not I<overridable> (such as
+C<qw>) or its arguments cannot be expressed by a prototype (such as
+C<system>) - in other words, the builtin does not behave like a Perl
+function - returns C<undef>.  Otherwise, the string describing the
+equivalent prototype is returned.
+
 =item push ARRAY,LIST
 
 Treats ARRAY as a stack, and pushes the values of LIST
@@ -3687,6 +3694,8 @@ A class implementing a scalar should have the following methods:
 Unlike dbmopen(), the tie() function will not use or require a module
 for you--you need to do that explicitly yourself.  See L<DB_File>
 or the F<Config> module for interesting tie() implementations.
+
+For further details see L<perltie>, L<tied VARIABLE>.
 
 =item tied VARIABLE
 
