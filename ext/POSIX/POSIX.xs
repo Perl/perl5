@@ -3678,13 +3678,9 @@ tzset()
 void
 tzname()
     PPCODE:
-#ifdef HAS_TZNAME
 	EXTEND(SP,2);
 	PUSHs(sv_2mortal(newSVpvn(tzname[0],strlen(tzname[0]))));
 	PUSHs(sv_2mortal(newSVpvn(tzname[1],strlen(tzname[1]))));
-#else
-	not_here("tzname");
-#endif
 
 SysRet
 access(filename, mode)
