@@ -1949,11 +1949,14 @@ register SV *sstr;
 				    (CvROOT(cv) || CvXSUB(cv)) )
 				warn("Subroutine %s redefined",
 				    GvENAME((GV*)dstr));
-			    SvFAKE_on(cv);
+			    if (SvREFCNT(cv) == 1)
+				SvFAKE_on(cv);
 			}
 		    }
+		    sub_generation++;
 		    if (GvCV(dstr) != (CV*)sref) {
 			GvCV(dstr) = (CV*)sref;
+			GvCVGEN(dstr) = 0; /* Switch off cacheness. */
 			GvASSUMECV_on(dstr);
 		    }
 		    if (curcop->cop_stash != GvSTASH(dstr))

@@ -143,19 +143,20 @@ I32 level;
     if (SvTYPE(topgv) != SVt_PVGV)
 	gv_init(topgv, stash, name, len, TRUE);
 
-    if (cv=GvCV(topgv)) {
-	if (GvCVGEN(topgv) >= sub_generation)
-	    return topgv;	/* valid cached inheritance */
-	if (!GvCVGEN(topgv)) {	/* not an inheritance cache */
-	    return topgv;
+    if (cv = GvCV(topgv)) {
+	if (CvXSUB(cv) || CvROOT(cv) || CvGV(cv)) { /* Not deleted, possibly autoloaded. */
+	    if (GvCVGEN(topgv) >= sub_generation)
+		return topgv;	/* valid cached inheritance */
+	    if (!GvCVGEN(topgv)) {	/* not an inheritance cache */
+		return topgv;
+	    }
 	}
-	else {
-	    /* stale cached entry, just junk it */
-	    GvCV(topgv) = cv = 0;
-	    GvCVGEN(topgv) = 0;
-	}
+	/* stale cached entry, just junk it */
+	SvREFCNT_dec(cv);
+	GvCV(topgv) = cv = 0;
+	GvCVGEN(topgv) = 0;
     }
-    /* if cv is still set, we have to free it if we find something to cache */
+    /* Now cv = 0, and there is no cv in topgv. */
 
     gvp = (GV**)hv_fetch(stash,"ISA",3,FALSE);
     if (gvp && (gv = *gvp) != (GV*)&sv_undef && (av = GvAV(gv))) {
@@ -172,13 +173,9 @@ I32 level;
 	    }
 	    gv = gv_fetchmeth(basestash, name, len, level + 1);
 	    if (gv) {
-		if (cv) {				/* junk old undef */
-		    assert(SvREFCNT(topgv) > 1);
-		    SvREFCNT_dec(topgv);
-		    SvREFCNT_dec(cv);
-		}
 		GvCV(topgv) = GvCV(gv);			/* cache the CV */
 		GvCVGEN(topgv) = sub_generation;	/* valid for now */
+		SvREFCNT_inc(GvCV(gv));
 		return gv;
 	    }
 	}
@@ -187,13 +184,9 @@ I32 level;
     if (!level) {
 	if (lastchance = gv_stashpvn("UNIVERSAL", 9, FALSE)) {
 	    if (gv = gv_fetchmeth(lastchance, name, len, level + 1)) {
-		if (cv) {				/* junk old undef */
-		    assert(SvREFCNT(topgv) > 1);
-		    SvREFCNT_dec(topgv);
-		    SvREFCNT_dec(cv);
-		}
 		GvCV(topgv) = GvCV(gv);			/* cache the CV */
 		GvCVGEN(topgv) = sub_generation;	/* valid for now */
+		SvREFCNT_inc(GvCV(gv));
 		return gv;
 	    }
 	}
