@@ -2727,6 +2727,10 @@ sinh(x)
 	double		x
 
 double
+tan(x)
+	double		x
+
+double
 tanh(x)
 	double		x
 

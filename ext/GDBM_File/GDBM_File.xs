@@ -216,3 +216,20 @@ int
 gdbm_reorganize(db)
 	GDBM_File	db
 
+
+void
+gdbm_sync(db)
+	GDBM_File	db
+
+int
+gdbm_exists(db, key)
+	GDBM_File	db
+	datum		key
+
+int
+gdbm_setopt (db, optflag, optval, optlen)
+	GDBM_File	db
+	int		optflag
+	int		&optval
+	int		optlen
+

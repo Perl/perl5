@@ -3,11 +3,14 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess (pmarquess@bfsec.bt.co.uk)
- last modified 23rd June 1994
- version 0.1
+ last modified 19th May 1995
+ version 0.2
 
  All comments/suggestions/problems are welcome
 
+ Changes:
+	0.1 - Initial Release
+	0.2 - No longer bombs out if dbopen returns an error.
 */
 
 #include "EXTERN.h"  
@@ -414,14 +417,11 @@ char * string ;
 
     RETVAL = dbopen(name, flags, mode, type, openinfo) ; 
 
-    if (RETVAL == 0)
-        croak("DB_File::%s failed, reason: %s", string, Strerror(errno)) ;
-
     /* kludge mode on: RETVAL->type for DB_RECNO is set to DB_BTREE
 		       so remember a DB_RECNO by saving the address
 		       of one of it's internal routines
     */
-    if (type == DB_RECNO)
+    if (RETVAL && type == DB_RECNO)
         DB_recno_close = RETVAL->close ;
 
 

@@ -1,11 +1,11 @@
 Perl 5 DynaLoader
 
-See DynaLoader.doc for detailed specification.
+See DynaLoader.pm for detailed specification.
 
 This module is very similar to the other Perl 5 modules except that
 Configure selects which dl_*.xs file to use.
 
-After Configure has been run the Makefile.SH will generate a Makefile
+After Configure has been run the Makefile.PL will generate a Makefile
 which will run xsubpp on a specific dl_*.xs file and write the output
 to DynaLoader.c
 
@@ -42,11 +42,11 @@ which is a good place to start if porting from scratch. For more complex
 platforms take a look at dl_dld.xs. The dlutils.c file holds some
 common definitions that are #included into the dl_*.xs files.
 
-After the initial implementation of a new DynaLoader dl_*.xs file
-you may need to edit or create ext/MODULE/MODULE.bs files to reflect
-the needs of your platform and linking software.
+After the initial implementation of a new DynaLoader dl_*.xs file you
+may need to edit or create ext/MODULE/MODULE.bs files (library bootstrap
+files) to reflect the needs of your platform and linking software.
 
-Refer to DynaLoader.doc, lib/ExtUtils/MakeMaker.pm and any existing
+Refer to DynaLoader.pm, lib/ExtUtils/MakeMaker.pm and any existing
 ext/MODULE/MODULE.bs files for more information.
 
 Tim Bunce.

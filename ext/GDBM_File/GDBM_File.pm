@@ -3,7 +3,7 @@ package GDBM_File;
 require Carp;
 require TieHash;
 require Exporter;
-require AutoLoader;
+use AutoLoader;
 require DynaLoader;
 @ISA = qw(TieHash Exporter DynaLoader);
 @EXPORT = qw(

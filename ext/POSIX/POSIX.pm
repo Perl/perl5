@@ -1,8 +1,64 @@
 package POSIX;
 
+=head1 NAME
+
+POSIX - Perl interface to IEEE 1003.1 namespace
+
+=head1 SYNOPSIS
+
+    use POSIX;
+    use POSIX 'strftime';
+
+=head1 DESCRIPTION
+
+The POSIX module permits you to access all (or nearly all) the standard
+POSIX 1003.1 identifiers.  Things which are C<#defines> in C, like EINTR
+or O_NDELAY, are automatically exported into your namespace.  All
+functions are only exported if you ask for them explicitly.  Most likely
+people will prefer to use the fully-qualified function names.
+
+To get a list of all the possible identifiers available to you--and
+their semantics--you should pick up a 1003.1 spec, or look in the
+F<POSIX.pm> module.
+
+=head1 EXAMPLES
+
+    printf "EINTR is %d\n", EINTR;
+
+    POSIX::setsid(0);
+
+    $fd = POSIX::open($path, O_CREAT|O_EXCL|O_WRONLY, 0644);
+	# note: that's a filedescriptor, *NOT* a filehandle
+
+=head1 NOTE
+
+The POSIX module is probably the most complex Perl module supplied with
+the standard distribution.  It incorporates autoloading, namespace games,
+and dynamic loading of code that's in Perl, C, or both.  It's a great
+source of wisdom.
+
+=head1 CAVEATS 
+
+A few functions are not implemented because they are C specific.  If you
+attempt to call these, they will print a message telling you that they
+aren't implemented, and suggest using the Perl equivalent should one
+exist.  For example, trying to access the setjmp() call will elicit the
+message "setjmp() is C-specific: use eval {} instead".
+
+Furthermore, some evil vendors will claim 1003.1 compliance, but in fact
+are not so: they will not pass the PCTS (POSIX Compliance Test Suites).
+For example, one vendor may not define EDEADLK, or the semantics of the
+errno values set by open(2) might not be quite right.  Perl does not
+attempt to verify POSIX compliance.  That means you can currently
+successfully say "use POSIX",  and then later in your program you find
+that your vendor has been lax and there's no usable ICANON macro after
+all.  This could be construed to be a bug.
+
+=cut
+
 use Carp;
 require Exporter;
-require AutoLoader;
+use AutoLoader;
 require DynaLoader;
 require Config;
 @ISA = qw(Exporter DynaLoader);
@@ -60,7 +116,7 @@ require Config;
 		LC_TIME NULL localeconv setlocale)],
 
     math_h =>	[qw(HUGE_VAL acos asin atan ceil cosh fabs floor fmod
-		frexp ldexp log10 modf pow sinh tanh)],
+		frexp ldexp log10 modf pow sinh tan tanh)],
 
     pwd_h =>	[qw()],
 
@@ -152,7 +208,7 @@ Exporter::export_tags();
     closedir opendir readdir rewinddir
     fcntl open
     getgrgid getgrnam
-    atan2 cos exp log sin sqrt tan
+    atan2 cos exp log sin sqrt
     getpwnam getpwuid
     kill
     fileno getc printf rename sprintf
@@ -414,11 +470,6 @@ sub sin {
 sub sqrt {
     usage "sqrt(x)" if @_ != 1;
     sqrt($_[0]);
-}
-
-sub tan {
-    usage "tan(x)" if @_ != 1;
-    tan($_[0]);
 }
 
 sub getpwnam {
@@ -808,7 +859,7 @@ sub strtok {
 }
 
 sub chmod {
-    usage "chmod(filename, mode)" if @_ != 2;
+    usage "chmod(mode, filename)" if @_ != 2;
     chmod($_[0], $_[1]);
 }
 
