@@ -10955,6 +10955,11 @@ for xxx in $known_extensions ; do
 		true|$define|y) avail_ext="$avail_ext $xxx" ;;
 		esac
 		;;
+        IPC/SysV|ipc_sysv)
+                case "$d_sem" in 
+                true|$define|y) avail_ext="$avail_ext $xxx" ;;
+                esac
+                ;;
 	*)	avail_ext="$avail_ext $xxx"
 		;;
 	esac

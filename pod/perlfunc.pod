@@ -1254,7 +1254,7 @@ Implements the fcntl(2) function.  You'll probably have to say
 
     use Fcntl;
 
-first to get the correct function definitions.  Argument processing and
+first to get the correct constant definitions.  Argument processing and
 value return works just like ioctl() below.  
 For example:
 
@@ -2046,31 +2046,38 @@ it returns FALSE and sets C<$!> (errno).
 
 =item msgctl ID,CMD,ARG
 
-Calls the System V IPC function msgctl(2).  If CMD is &IPC_STAT, then ARG
-must be a variable that will hold the returned msqid_ds structure.
-Returns like ioctl: the undefined value for error, "0 but true" for
-zero, or the actual return value otherwise.
+Calls the System V IPC function msgctl(2).  You'll probably have to say
+
+    use IPC::SysV;
+
+first to get the correct constant definitions.  If CMD is IPC_STAT,
+then ARG must be a variable which will hold the returned msqid_ds
+structure.  Returns like ioctl: the undefined value for error, "0 but
+true" for zero, or the actual return value otherwise.  See also
+IPC::SysV and IPC::Semaphore::Msg documentation.
 
 =item msgget KEY,FLAGS
 
-Calls the System V IPC function msgget(2).  Returns the message queue id,
-or the undefined value if there is an error.
+Calls the System V IPC function msgget(2).  Returns the message queue
+id, or the undefined value if there is an error.  See also IPC::SysV
+and IPC::SysV::Msg documentation.
 
 =item msgsnd ID,MSG,FLAGS
 
 Calls the System V IPC function msgsnd to send the message MSG to the
 message queue ID.  MSG must begin with the long integer message type,
 which may be created with C<pack("l", $type)>.  Returns TRUE if
-successful, or FALSE if there is an error.
+successful, or FALSE if there is an error.  See also IPC::SysV
+and IPC::SysV::Msg documentation.
 
 =item msgrcv ID,VAR,SIZE,TYPE,FLAGS
 
 Calls the System V IPC function msgrcv to receive a message from
 message queue ID into variable VAR with a maximum message size of
-SIZE.  Note that if a message is received, the message type will be the
-first thing in VAR, and the maximum length of VAR is SIZE plus the size
-of the message type.  Returns TRUE if successful, or FALSE if there is
-an error.
+SIZE.  Note that if a message is received, the message type will be
+the first thing in VAR, and the maximum length of VAR is SIZE plus the
+size of the message type.  Returns TRUE if successful, or FALSE if
+there is an error.  See also IPC::SysV and IPC::SysV::Msg documentation.
 
 =item my EXPR
 
@@ -3037,16 +3044,21 @@ then only on POSIX systems.  You have to use sysread() instead.
 
 =item semctl ID,SEMNUM,CMD,ARG
 
-Calls the System V IPC function semctl.  If CMD is &IPC_STAT or
-&GETALL, then ARG must be a variable that will hold the returned
+Calls the System V IPC function semctl.  You'll probably have to say
+
+    use IPC::SysV;
+
+first to get the correct constant definitions.  If CMD is IPC_STAT or
+GETALL, then ARG must be a variable which will hold the returned
 semid_ds structure or semaphore value array.  Returns like ioctl: the
 undefined value for error, "0 but true" for zero, or the actual return
-value otherwise.
+value otherwise.  See also IPC::SysV and IPC::Semaphore documentation.
 
 =item semget KEY,NSEMS,FLAGS
 
 Calls the System V IPC function semget.  Returns the semaphore id, or
-the undefined value if there is an error.
+the undefined value if there is an error.  See also IPC::SysV and
+IPC::SysV::Semaphore documentation.
 
 =item semop KEY,OPSTRING
 
@@ -3061,7 +3073,8 @@ following code waits on semaphore $semnum of semaphore id $semid:
     $semop = pack("sss", $semnum, -1, 0);
     die "Semaphore trouble: $!\n" unless semop($semid, $semop);
 
-To signal the semaphore, replace "-1" with "1".
+To signal the semaphore, replace "-1" with "1".  See also IPC::SysV
+and IPC::SysV::Semaphore documentation.
 
 =item send SOCKET,MSG,FLAGS,TO
 
@@ -3110,15 +3123,21 @@ right end.
 
 =item shmctl ID,CMD,ARG
 
-Calls the System V IPC function shmctl.  If CMD is &IPC_STAT, then ARG
-must be a variable that will hold the returned shmid_ds structure.
-Returns like ioctl: the undefined value for error, "0 but true" for
-zero, or the actual return value otherwise.
+Calls the System V IPC function shmctl.  You'll probably have to say
+
+    use IPC::SysV;
+
+first to get the correct constant definitions.  If CMD is IPC_STAT,
+then ARG must be a variable which will hold the returned shmid_ds
+structure.  Returns like ioctl: the undefined value for error, "0 but
+true" for zero, or the actual return value otherwise.
+See also IPC::SysV documentation.
 
 =item shmget KEY,SIZE,FLAGS
 
 Calls the System V IPC function shmget.  Returns the shared memory
 segment id, or the undefined value if there is an error.
+See also IPC::SysV documentation.
 
 =item shmread ID,VAR,POS,SIZE
 
@@ -3130,6 +3149,7 @@ detaching from it.  When reading, VAR must be a variable that will
 hold the data read.  When writing, if STRING is too long, only SIZE
 bytes are used; if STRING is too short, nulls are written to fill out
 SIZE bytes.  Return TRUE if successful, or FALSE if there is an error.
+See also IPC::SysV documentation.
 
 =item shutdown SOCKET,HOW
 

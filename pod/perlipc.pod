@@ -1306,29 +1306,33 @@ you weren't wanting it to.
 
 Here's a small example showing shared memory usage.
 
-    $IPC_PRIVATE = 0;
-    $IPC_RMID = 0;
+    use IPC::SysV qw(IPC_PRIVATE IPC_RMID S_IRWXU S_IRWXG S_IRWXO);
+
     $size = 2000;
-    $key = shmget($IPC_PRIVATE, $size , 0777 );
-    die unless defined $key;
+    $key = shmget(IPC_PRIVATE, $size, S_IRWXU|S_IRWXG|S_IRWXO) || die "$!";
+    print "shm key $key\n";
 
     $message = "Message #1";
-    shmwrite($key, $message, 0, 60 ) || die "$!";
-    shmread($key,$buff,0,60) || die "$!";
+    shmwrite($key, $message, 0, 60) || die "$!";
+    print "wrote: '$message'\n";
+    shmread($key, $buff, 0, 60) || die "$!";
+    print "read : '$buff'\n";
 
-    print $buff,"\n";
+    # the buffer of shmread is zero-character end-padded.
+    substr($buff, index($buff, "\0")) = '';
+    print "un" unless $buff eq $message;
+    print "swell\n";
 
-    print "deleting $key\n";
-    shmctl($key ,$IPC_RMID, 0) || die "$!";
+    print "deleting shm $key\n";
+    shmctl($key, IPC_RMID, 0) || die "$!";
 
 Here's an example of a semaphore:
 
+    use IPC::SysV qw(IPC_CREAT);
+
     $IPC_KEY = 1234;
-    $IPC_RMID = 0;
-    $IPC_CREATE = 0001000;
-    $key = semget($IPC_KEY, $nsems , 0666 | $IPC_CREATE );
-    die if !defined($key);
-    print "$key\n";
+    $key = semget($IPC_KEY, 10, 0666 | IPC_CREAT ) || die "$!";
+    print "shm key $key\n";
 
 Put this code in a separate file to be run in more than one process.
 Call the file F<take>:
@@ -1375,9 +1379,8 @@ Call this file F<give>:
     semop($key,$opstring) || die "$!";
 
 The SysV IPC code above was written long ago, and it's definitely
-clunky looking.  It should at the very least be made to C<use strict>
-and C<require "sys/ipc.ph">.  Better yet, check out the IPC::SysV modules
-on CPAN.
+clunky looking.  For a more modern look, see the IPC::SysV module
+which is included with Perl starting from Perl 5.005.
 
 =head1 NOTES
 

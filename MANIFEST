@@ -212,6 +212,16 @@ ext/IO/lib/IO/Pipe.pm		IO::Pipe extension Perl module
 ext/IO/lib/IO/Seekable.pm	IO::Seekable extension Perl module
 ext/IO/lib/IO/Select.pm		IO::Select extension Perl module
 ext/IO/lib/IO/Socket.pm		IO::Socket extension Perl module
+ext/IPC/SysV/ChangeLog		IPC::SysV extension Perl module
+ext/IPC/SysV/MANIFEST		IPC::SysV extension Perl module
+ext/IPC/SysV/Makefile.PL	IPC::SysV extension Perl module
+ext/IPC/SysV/README		IPC::SysV extension Perl module
+ext/IPC/SysV/SysV.pm		IPC::SysV extension Perl module
+ext/IPC/SysV/SysV.xs		IPC::SysV extension Perl module
+ext/IPC/SysV/Msg.pm		IPC::SysV extension Perl module
+ext/IPC/SysV/Semaphore.pm	IPC::SysV extension Perl module
+ext/IPC/SysV/t/msg.t		IPC::SysV extension Perl module
+ext/IPC/SysV/t/sem.t		IPC::SysV extension Perl module
 ext/NDBM_File/Makefile.PL	NDBM extension makefile writer
 ext/NDBM_File/NDBM_File.pm	NDBM extension Perl module
 ext/NDBM_File/NDBM_File.xs	NDBM extension external subroutines
