@@ -1689,7 +1689,7 @@ __END__
 #	 it'll run faster.
 #
 # Version 1.01:	Tue May 30 14:47:34 EDT 1995
-#		Andy Dougherty  <doughera@lafcol.lafayette.edu>
+#		Andy Dougherty  <doughera@lafayette.edu>
 #   -added pod documentation.
 #   -added PATH searching.
 #   -added searching pod/ subdirectory (mainly to pick up perlfunc.pod
