@@ -610,9 +610,9 @@ sub build_preamble_if_necessary
                 print PREAMBLE "# $_=$define{$_}\n";
             }
 
-            if ($define{$_} =~ /^\d+$/) {
+            if ($define{$_} =~ /^(\d+)U?L{0,2}$/i) {
                 print PREAMBLE
-                    "unless (defined &$_) { sub $_() { $define{$_} } }\n\n";
+                    "unless (defined &$_) { sub $_() { $1 } }\n\n";
             } elsif ($define{$_} =~ /^\w+$/) {
                 print PREAMBLE
                     "unless (defined &$_) { sub $_() { &$define{$_} } }\n\n";
