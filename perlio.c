@@ -909,6 +909,8 @@ SSize_t
 PerlIOUnix_read(PerlIO *f, void *vbuf, Size_t count)
 {
  int fd = PerlIOSelf(f,PerlIOUnix)->fd;
+ if (!(PerlIOBase(f)->flags & PERLIO_F_CANREAD))
+  return 0;
  while (1)
   {
    SSize_t len = read(fd,vbuf,count);
