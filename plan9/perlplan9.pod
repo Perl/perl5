@@ -21,7 +21,7 @@ such as "#!/usr/local/bin/perl". This is known as a shebang
 the perl interpreter. In Plan 9 Perl this statement should be 
 "#!/bin/perl" if you wish to be able to directly invoke the 
 script by its name.
-     Alternatively, you may invoke perl with the command "aperl"
+     Alternatively, you may invoke perl with the command "Perl"
 instead of "perl". This will produce Acme-friendly error
 messages of the form "filename:18".
 
@@ -80,7 +80,7 @@ world . . ." - Carl Sagan
 
 =head1 Revision date
 
-This document was revised 06-August-1996 for Perl 5.003_2.
+This document was revised 09-October-1996 for Perl 5.003_7.
 
 =head1 AUTHOR
 

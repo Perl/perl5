@@ -1,5 +1,5 @@
 
-     PLAN9/PERLPLAN9(1)   (perl 5.003, patch 01)    PLAN9/PERLPLAN9(1)
+     PLAN9/PERLPLAN9(1)   (perl 5.003, patch 05)    PLAN9/PERLPLAN9(1)
 
      NNNNAAAAMMMMEEEE
           perlplan9 - Plan 9-specific documentation for Perl
@@ -22,7 +22,7 @@
           should be "#!/bin/perl" if you wish to be able to directly
           invoke the script by its name.
                Alternatively, you may invoke perl with the command
-          "aperl" instead of "perl". This will produce Acme-friendly
+          "Perl" instead of "perl". This will produce Acme-friendly
           error messages of the form "filename:18".
 
           Some scripts, usually identified with a *.PL extension, are
@@ -52,9 +52,9 @@
 
           The functions not currently implemented include:
 
-     Page 1                      6/Aug/96             (printed 8/6/96)
+     Page 1                      9/Oct/96            (printed 10/9/96)
 
-     PLAN9/PERLPLAN9(1)   (perl 5.003, patch 01)    PLAN9/PERLPLAN9(1)
+     PLAN9/PERLPLAN9(1)   (perl 5.003, patch 05)    PLAN9/PERLPLAN9(1)
 
               chown, chroot, dbmclose, dbmopen, getsockopt,
               setsockopt, recvmsg, sendmsg, getnetbyname,
@@ -82,10 +82,10 @@
           the world . . ." - Carl Sagan
 
      RRRReeeevvvviiiissssiiiioooonnnn ddddaaaatttteeee
-          This document was revised 06-August-1996 for Perl 5.003_2.
+          This document was revised 09-October-1996 for Perl 5.003_7.
 
      AAAAUUUUTTTTHHHHOOOORRRR
           Luther Huffman,    lutherh@stratcom.com
 
-     Page 2                      6/Aug/96             (printed 8/6/96)
+     Page 2                      9/Oct/96            (printed 10/9/96)
 

@@ -117,9 +117,9 @@
  *		2 = couldn't cast >= 0x80000000
  *		4 = couldn't cast in argument expression list
  */
-#define	CASTNEGFLOAT		/**/
+#undef	CASTNEGFLOAT		/**/
 #if _P9P_OBJTYPE == 386
-#  define CASTFLAGS 2		/**/ /* config-skip */
+#  define CASTFLAGS 3		/**/ /* config-skip */
 #else
 #  define CASTFLAGS 0		/**/ /* config-skip */
 #endif
@@ -273,7 +273,12 @@
  *	This symbol, if defined, indicates that the getpgrp routine is
  *	available to get the current process group.
  */
+/* USE_BSD_GETPGRP:
+ *	This symbol, if defined, indicates that getpgrp needs one
+ *	arguments whereas USG one needs none.
+ */
 #define HAS_GETPGRP		/**/
+#undef USE_BSD_GETPGRP /**/
 
 /* HAS_GETPGRP2:
  *	This symbol, if defined, indicates that the getpgrp2() (as in DG/UX)
@@ -586,8 +591,14 @@
  *	group is to be used. For instance, you have to say setpgrp(pid, pgrp)
  *	instead of the USG setpgrp().
  */
+/* USE_BSD_SETPGRP:
+ *	This symbol, if defined, indicates that setpgrp needs two
+ *	arguments whereas USG one needs none.  See also HAS_SETPGID
+ *	for a POSIX interface.
+ */
 #undef HAS_SETPGRP		/**/
 #undef USE_BSDPGRP		/**/
+#undef USE_BSD_SETPGRP /**/
 
 /* HAS_SETPGRP2:
  *	This symbol, if defined, indicates that the setpgrp2() (as in DG/UX)
@@ -1340,7 +1351,11 @@
  *	This symbol hold the hexadecimal constant defined in byteorder,
  *	i.e. 0x1234 or 0x4321, etc...
  */
-#define BYTEORDER 0x1234	/* large digits for MSB */
+#if _P9P_OBJTYPE == 386
+#	define BYTEORDER 0x1234	/* little-endian */ /* config-skip */
+#else
+#	define BYTEORDER 0x4321	/* big-endian */  /* config-skip */
+#endif
 
 /* CSH:
  *	This symbol, if defined, indicates that the C-shell exists.
@@ -1580,6 +1595,12 @@
  */
 #undef	USE_SFIO		/**/
 
+/* HAS_GETPGID:
+ *	This symbol, if defined, indicates to the C program that 
+ *	the getpgid(pid) function is available to get the
+ *	process group id.
+ */
+#undef HAS_GETPGID		/**/
 
 /* I_SYS_RESOURCE:
  *	This symbol, if defined, indicates to the C program that it should
