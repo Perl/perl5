@@ -580,7 +580,7 @@ test-notty: test-prep
 
 # Can't depend on lib/Config.pm because that might be where miniperl
 # is crashing.
-minitest: miniperl
+minitest: miniperl lib/re.pm
 	@echo "You may see some irrelevant test failures if you have been unable"
 	@echo "to build lib/Config.pm."
 	- cd t && (rm -f perl$(EXE_EXT); $(LNS) ../miniperl$(EXE_EXT) perl$(EXE_EXT)) \
