@@ -198,7 +198,7 @@ sub AUTOLOAD {
     ($constname = $AUTOLOAD) =~ s/.*:://;
     my $val = constant($constname, @_ ? $_[0] : 0);
     if ($! != 0) {
-	if ($! =~ /Invalid/ || $!{EINVAL}) {
+	if ($! =~ /Invalid/) {
 	    $AutoLoader::AUTOLOAD = $AUTOLOAD;
 	    goto &AutoLoader::AUTOLOAD;
 	}
@@ -317,8 +317,6 @@ JNI - Perl encapsulation of the Java Native Interface
   use JNI;
 
 =head1 DESCRIPTION
-
-This module provides an encapsulation in Perl of the Java Native Interface.
 
 =head1 Exported constants
 
