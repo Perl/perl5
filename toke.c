@@ -3559,9 +3559,7 @@ Perl_yylex(pTHX)
 		    }
 		}
 		else {
-		    GV *gv = gv_fetchpv(tmpbuf, FALSE, SVt_PVCV);
-		    if (gv && GvCVu(gv))
-			PL_expect = XTERM;	/* e.g. print $fh subr() */
+		    PL_expect = XTERM;		/* e.g. print $fh subr() */
 		}
 	    }
 	    else if (isDIGIT(*s))
