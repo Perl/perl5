@@ -19,6 +19,8 @@ sub ok {
     $out .= "ok $test\n";
     print $out;
 
+    printf "# Failed test at line %d\n", (caller)[2] unless $ok;
+
     $test++;
     return $ok;
 }
