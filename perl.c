@@ -279,7 +279,7 @@ perl_construct(pTHXx)
     {
        char *s = NULL;
 
-       if (!PL_tainting)
+       if (!PL_earlytaint)
 	   s = PerlEnv_getenv("PERL_HASH_SEED");
        if (s)
            while (isSPACE(*s)) s++;
@@ -301,7 +301,7 @@ perl_construct(pTHXx)
 #endif /* RANDBITS < (UVSIZE * 8) */
        }
 #endif /* USE_HASH_SEED_EXPLICIT */
-       if (!PL_tainting && (s = PerlEnv_getenv("PERL_HASH_SEED_DEBUG")))
+       if (!PL_earlytaint && (s = PerlEnv_getenv("PERL_HASH_SEED_DEBUG")))
 	   PerlIO_printf(Perl_debug_log, "HASH_SEED = %"UVuf"\n",
 			 PL_hash_seed);
     }
