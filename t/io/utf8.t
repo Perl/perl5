@@ -291,8 +291,7 @@ ok( 1 );
 	    utf8::upgrade($s) if $v->[1] eq "utf8";
 
 	    $s .= <F>;
-	    print $s eq chr($v->[0]) . chr($u->[0]) ?
-		"ok $t # rcatline utf8\n" : "not ok $t # rcatline utf8\n";
+	    ok( $s eq chr($v->[0]) . chr($u->[0]), 'rcatline utf8' );
 	    close F;
 	    $t++;
 	}
