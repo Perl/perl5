@@ -2100,8 +2100,11 @@ newPMOP(I32 type, I32 flags)
     pmop->op_flags = flags;
     pmop->op_private = 0 | (flags >> 8);
 
+    if (hints & HINT_RE_TAINT)
+	pmop->op_pmpermflags |= PMf_RETAINT;
     if (hints & HINT_LOCALE)
-	pmop->op_pmpermflags = (pmop->op_pmflags |= PMf_LOCALE);
+	pmop->op_pmpermflags |= PMf_LOCALE;
+    pmop->op_pmflags = pmop->op_pmpermflags;
 
     /* link into pm list */
     if (type != OP_TRANS && curstash) {

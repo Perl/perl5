@@ -786,6 +786,7 @@ PP(pp_match)
     I32 safebase;
     char *truebase;
     register REGEXP *rx = pm->op_pmregexp;
+    bool rxtainted;
     I32 gimme = GIMME;
     STRLEN len;
     I32 minmatch = 0;
@@ -804,6 +805,8 @@ PP(pp_match)
     strend = s + len;
     if (!s)
 	DIE("panic: do_match");
+    rxtainted = ((pm->op_pmdynflags & PMdf_TAINTED) ||
+		 (tainted && (pm->op_pmflags & PMf_RETAINT)));
     TAINT_NOT;
 
     if (pm->op_pmdynflags & PMdf_USED) {
@@ -910,7 +913,7 @@ play_it_again:
     /*NOTREACHED*/
 
   gotcha:
-    TAINT_IF(RX_MATCH_TAINTED(rx));
+    RX_MATCH_TAINTED_SET(rx, rxtainted);
     if (gimme == G_ARRAY) {
 	I32 iters, i, len;
 
@@ -963,7 +966,7 @@ play_it_again:
     }
 
 yup:					/* Confirmed by check_substr */
-    TAINT_IF(RX_MATCH_TAINTED(rx));
+    RX_MATCH_TAINTED_SET(rx, rxtainted);
     ++BmUSEFUL(rx->check_substr);
     curpm = pm;
     if (pm->op_pmflags & PMf_ONCE)
@@ -1520,7 +1523,10 @@ PP(pp_subst)
     s = SvPV(TARG, len);
     if (!SvPOKp(TARG) || SvTYPE(TARG) == SVt_PVGV)
 	force_on_match = 1;
-    rxtainted = tainted << 1;
+    rxtainted = ((pm->op_pmdynflags & PMdf_TAINTED) ||
+		 (tainted && (pm->op_pmflags & PMf_RETAINT)));
+    if (tainted)
+	rxtainted |= 2;
     TAINT_NOT;
 
   force_it:

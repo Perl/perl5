@@ -67,7 +67,8 @@ PP(pp_regcmaybe)
     return NORMAL;
 }
 
-PP(pp_regcomp) {
+PP(pp_regcomp)
+{
     djSP;
     register PMOP *pm = (PMOP*)cLOGOP->op_other;
     register char *t;
@@ -76,18 +77,27 @@ PP(pp_regcomp) {
     MAGIC *mg = Null(MAGIC*);
 
     tmpstr = POPs;
-    if(SvROK(tmpstr)) {
+    if (SvROK(tmpstr)) {
 	SV *sv = SvRV(tmpstr);
 	if(SvMAGICAL(sv))
 	    mg = mg_find(sv, 'r');
     }
-    if(mg) {
+    if (mg) {
 	regexp *re = (regexp *)mg->mg_obj;
 	ReREFCNT_dec(pm->op_pmregexp);
 	pm->op_pmregexp = ReREFCNT_inc(re);
     }
     else {
 	t = SvPV(tmpstr, len);
+
+#ifndef INCOMPLETE_TAINTS
+	if (tainting) {
+	    if (tainted)
+		pm->op_pmdynflags |= PMdf_TAINTED;
+	    else
+		pm->op_pmdynflags &= ~PMdf_TAINTED;
+	}
+#endif
 
 	/* Check against the last compiled regexp. */
 	if (!pm->op_pmregexp || !pm->op_pmregexp->precomp ||

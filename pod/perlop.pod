@@ -750,7 +750,6 @@ Options are:
     m	Treat string as multiple lines.
     o	Compile pattern only once.
     s	Treat string as single line.
-    t	Taint $1 etc. if target string is tainted.
     x	Use extended regular expressions.
 
 If "/" is the delimiter then the initial C<m> is optional.  With the C<m>

@@ -558,6 +558,7 @@ lib/open3.pl		Open a three-ended pipe (uses IPC::Open3)
 lib/overload.pm		Module for overloading perl operators
 lib/perl5db.pl		Perl debugging routines
 lib/pwd.pl		Routines to keep track of PWD environment variable
+lib/re.pm		Pragmas for regular expressions
 lib/shellwords.pl	Perl library to split into words with shell quoting
 lib/sigtrap.pm		For trapping an abort and giving traceback
 lib/stat.pl		Perl library supporting stat function

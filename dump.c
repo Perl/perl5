@@ -369,6 +369,8 @@ dump_pm(PMOP *pm)
 	SV *tmpsv = newSVpv("", 0);
 	if (pm->op_pmdynflags & PMdf_USED)
 	    sv_catpv(tmpsv, ",USED");
+	if (pm->op_pmdynflags & PMdf_TAINTED)
+	    sv_catpv(tmpsv, ",TAINTED");
 	if (pm->op_pmflags & PMf_ONCE)
 	    sv_catpv(tmpsv, ",ONCE");
 	if (pm->op_pmregexp && pm->op_pmregexp->check_substr
@@ -387,8 +389,8 @@ dump_pm(PMOP *pm)
 	    sv_catpv(tmpsv, ",GLOBAL");
 	if (pm->op_pmflags & PMf_CONTINUE)
 	    sv_catpv(tmpsv, ",CONTINUE");
-	if (pm->op_pmflags & PMf_TAINTMEM)
-	    sv_catpv(tmpsv, ",TAINTMEM");
+	if (pm->op_pmflags & PMf_RETAINT)
+	    sv_catpv(tmpsv, ",RETAINT");
 	if (pm->op_pmflags & PMf_EVAL)
 	    sv_catpv(tmpsv, ",EVAL");
 	dump("PMFLAGS = (%s)\n", SvCUR(tmpsv) ? SvPVX(tmpsv) + 1 : "");

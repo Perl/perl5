@@ -4941,8 +4941,6 @@ void pmflag(U16 *pmfl, int ch)
 	*pmfl |= PMf_MULTILINE;
     else if (ch == 's')
 	*pmfl |= PMf_SINGLELINE;
-    else if (ch == 't')
-	*pmfl |= PMf_TAINTMEM;
     else if (ch == 'x')
 	*pmfl |= PMf_EXTENDED;
 }
@@ -4964,7 +4962,7 @@ scan_pat(char *start)
     pm = (PMOP*)newPMOP(OP_MATCH, 0);
     if (multi_open == '?')
 	pm->op_pmflags |= PMf_ONCE;
-    while (*s && strchr("iogcmstx", *s))
+    while (*s && strchr("iogcmsx", *s))
 	pmflag(&pm->op_pmflags,*s++);
     pm->op_pmpermflags = pm->op_pmflags;
 
@@ -5014,7 +5012,7 @@ scan_subst(char *start)
 	    s++;
 	    es++;
 	}
-	else if (strchr("iogcmstx", *s))
+	else if (strchr("iogcmsx", *s))
 	    pmflag(&pm->op_pmflags,*s++);
 	else
 	    break;

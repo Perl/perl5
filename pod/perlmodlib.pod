@@ -79,6 +79,10 @@ restrict named opcodes when compiling or running Perl code
 
 overload basic Perl operations
 
+=item re
+
+alter behaviour of regular expressions
+
 =item sigtrap
 
 enable simple signal handling

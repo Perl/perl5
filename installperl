@@ -52,7 +52,6 @@ if ($scr_ext) { @scripts = map { "$_$scr_ext" } @scripts; }
 
 %archpms = (
     Config => 1, FileHandle => 1, overload => 1,
-    'File/Basename' => 1,	# uses m//t
 );
 
 if ($^O eq 'dos') {

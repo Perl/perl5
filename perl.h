@@ -1823,6 +1823,8 @@ typedef enum {
 #define HINT_NEW_RE		0x00010000
 #define HINT_LOCALIZE_HH	0x00020000 /* %^H needs to be copied */
 
+#define HINT_RE_TAINT		0x00100000
+
 /* Various states of an input record separator SV (rs, nrs) */
 #define RsSNARF(sv)   (! SvOK(sv))
 #define RsSIMPLE(sv)  (SvOK(sv) && SvCUR(sv))
