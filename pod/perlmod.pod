@@ -165,6 +165,51 @@ This prints
 The C<*foo{THING}> notation can also be used to obtain references to the
 individual elements of *foo, see L<perlref>.
 
+Subroutine definitions (and declarations, for that matter) need
+not necessarily be situated in the package whose symbol table they
+occupy.  You can define a subroutine outside its package by
+explicitly qualifying the name of the subroutine:
+
+    package main;
+    sub Some_package::foo { ... }   # &foo defined in Some_package
+
+This is just a shorthand for a typeglob assignment at compile time:
+
+    BEGIN { *Some_package::foo = sub { ... } }
+
+and is I<not> the same as writing:
+
+    {
+	package Some_package;
+	sub foo { ... }
+    }
+
+In the first two versions, the body of the subroutine is
+lexically in the main package, I<not> in Some_package. So
+something like this:
+
+    package main;
+
+    $Some_package::name = "fred";
+    $main::name = "barney";
+
+    sub Some_package::foo {
+	print "in ", __PACKAGE__, ": \$name is '$name'\n";
+    }
+
+    Some_package::foo();
+
+prints:
+
+    in main: $name is 'barney'
+
+rather than:
+
+    in Some_package: $name is 'fred'
+
+This also has implications for the use of the SUPER:: qualifier
+(see L<perlobj>).
+
 =head2 Package Constructors and Destructors
 
 There are two special subroutine definitions that function as package
