@@ -1438,7 +1438,7 @@ CPerlObj::operator new(size_t nSize, IPerlMem *pvtbl)
 int&
 CPerlObj::ErrorNo(void)
 {
-    return error_no;
+    return errno;
 }
 
 void

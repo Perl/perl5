@@ -112,7 +112,6 @@ Perl_dump_packsubs
 Perl_dump_pm
 Perl_dump_sub
 Perl_expectterm
-Perl_error_no
 Perl_extralen
 Perl_fetch_gv
 Perl_fetch_io
