@@ -37,7 +37,7 @@ See L<perlvar> for a complete list of these.
 
 =cut
 
-local $^W = 0;
+no warnings;
 
 # Grandfather $NAME import
 sub import {

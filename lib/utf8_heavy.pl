@@ -38,7 +38,7 @@ sub SWASHNEW {
     if ($list) {
 	my @tmp = split(/^/m, $list);
 	my %seen;
-	local $^W = 0;
+	no warnings;
 	$extras = join '', grep /^[^0-9a-fA-F]/, @tmp;
 	$list = join '',
 	    sort { hex $a <=> hex $b }

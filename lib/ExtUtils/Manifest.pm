@@ -25,7 +25,7 @@ $MANIFEST = 'MANIFEST';
 
 # Really cool fix from Ilya :)
 unless (defined $Config{d_link}) {
-    local $^W;
+    no warnings;
     *ln = \&cp;
 }
 

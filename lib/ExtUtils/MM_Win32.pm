@@ -388,7 +388,6 @@ PM_TO_BLIB = }.join(" \\\n\t", %{$self->{PM}}).q{
 
 
 sub path {
-    local $^W = 1;
     my($self) = @_;
     my $path = $ENV{'PATH'} || $ENV{'Path'} || $ENV{'path'};
     my @path = split(';',$path);

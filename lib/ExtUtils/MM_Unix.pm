@@ -2766,7 +2766,7 @@ sub parse_version {
 		$_
 	    }; \$$2
 	};
-	local($^W) = 0;
+	no warnings;
 	$result = eval($eval);
 	warn "Could not eval '$eval' in $parsefile: $@" if $@;
 	$result = "undef" unless defined $result;

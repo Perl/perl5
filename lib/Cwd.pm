@@ -342,7 +342,7 @@ sub _qnx_abs_path {
 }
 
 {
-    local $^W = 0;	# assignments trigger 'subroutine redefined' warning
+    no warnings;	# assignments trigger 'subroutine redefined' warning
 
     if ($^O eq 'VMS') {
         *cwd		= \&_vms_cwd;
