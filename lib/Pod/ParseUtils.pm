@@ -320,6 +320,16 @@ sub parse {
         ($alttext, $page, $node) = ($1, $2, $3);
         $type = 'section';
     }
+    # alttext and page
+    elsif(m!^(.+?)\s*[|]\s*($page_rx)$!o) {
+        ($alttext, $page) = ($1, $2);
+        $type = 'page';
+    }
+    # alttext and "section"
+    elsif(m!^(.+?)\s*[|]\s*(?:/\s*|)"(.+)"$!) {
+        ($alttext, $node) = ($1,$2);
+        $type = 'section';
+    }
     # page and "section"
     elsif(m!^($page_rx)\s*/\s*"(.+)"$!o) {
         ($page, $node) = ($1, $2);
@@ -349,16 +359,6 @@ sub parse {
     elsif(m!^(.+?)\s*[|]\s*($page_rx)\s*/\s*(.+)$!o) {
         ($alttext, $page, $node) = ($1, $2, $3);
         $type = 'item';
-    }
-    # alttext and page
-    elsif(m!^(.+?)\s*[|]\s*($page_rx)$!o) {
-        ($alttext, $page) = ($1, $2);
-        $type = 'page';
-    }
-    # alttext and "section"
-    elsif(m!^(.+?)\s*[|]\s*(?:/\s*|)"(.+)"$!) {
-        ($alttext, $node) = ($1,$2);
-        $type = 'section';
     }
     # alttext and item
     elsif(m!^(.+?)\s*[|]\s*/(.+)$!) {
@@ -777,9 +777,9 @@ sub nodes {
 
 =item find_node($name)
 
-Look for a node named C<$name> in the object's node list. Returns the
-unique id of the node (i.e. the second element of the array stored in
-the node arry) or undef if not found.
+Look for a node or index entry named C<$name> in the object.
+Returns the unique id of the node (i.e. the second element of the array
+stored in the node arry) or undef if not found.
 
 =back
 
@@ -787,7 +787,10 @@ the node arry) or undef if not found.
 
 sub find_node {
     my ($self,$node) = @_;
-    foreach(@{$self->{-nodes}}) {
+    my @search;
+    push(@search, @{$self->{-nodes}}) if($self->{-nodes});
+    push(@search, @{$self->{-idx}}) if($self->{-idx});
+    foreach(@search) {
         if($_->[0] eq $node) {
             return $_->[1]; # id
         }
@@ -795,6 +798,28 @@ sub find_node {
     undef;
 }
 
+=item idx()
+
+Add an index entry (or a list of them) to the document's index list. Note that
+the order is kept, i.e. start with the first node and end with the last.
+If no argument is given, the current list of index entries is returned in the
+same order the entries have been added.
+An index entry can be any scalar, but usually is a pair of string and
+unique id.
+
+=cut
+
+# The POD index entries
+sub idx {
+    my ($self,@idx) = @_;
+    if(@idx) {
+        push(@{$self->{-idx}}, @idx);
+        return @idx;
+    }
+    else {
+        return @{$self->{-idx}};
+    }
+}
 
 =head1 AUTHOR
 

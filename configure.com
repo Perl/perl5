@@ -4,12 +4,12 @@ $!
 $! For example, if you unpacked perl into: [USER.PERL5_00n...] then you will 
 $! want to cd into the tree and execute Configure:
 $!
-$! $ SET DEFAULT [USER.PERL5_00n]
+$! $ SET DEFAULT [USER.PERL5_xxx]
 $! $ @Configure 
 $!
 $! or
 $!
-$! $ SET DEFAULT [USER.PERL5_00n]
+$! $ SET DEFAULT [USER.PERL5_xxx]
 $! $ @Configure "-des"
 $!
 $! That's it. If you get into a bind trying to build perl on VMS then 
@@ -19,7 +19,7 @@ $!
 $! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 $!
 $! send suggestions to: 
-$!  Dan Sugalski <sugalskd@ous.edu>
+$!  Dan Sugalski <dan@sidhe.org>
 $! Thank you!!!!
 $!
 $! Adapted and converted from Larry Wall & Andy Dougherty's
@@ -39,7 +39,7 @@ $ cat  = "type"
 $ gcc_symbol = "gcc"
 $ ans = ""
 $ macros = ""
-$ use_vmsdebug_perl = "N"
+$ use_vmsdebug_perl = "n"
 $ use_debugging_perl = "Y"
 $ use_64bitint = "n"
 $ C_Compiler_Replace = "CC="
@@ -167,8 +167,8 @@ $     P'i' = P'i' - "f"
 $     config_sh = P'i'
 $     IF (F$SEARCH(config_sh).NES."")
 $     THEN
-$       test = F$FILE_ATTRIBUTES(config_sh,"PRO")
-$       IF (F$LOCATE("R",test).NE.F$LENGTH(test)) 
+$       test_config_sh = F$FILE_ATTRIBUTES(config_sh,"PRO")
+$       IF (F$LOCATE("R",test_config_sh).NE.F$LENGTH(test_config_sh)) 
 $       THEN
 $         CONTINUE !at this point check UIC && if test allows...
 $                  !to be continued ?
@@ -395,7 +395,7 @@ $ ELSE
 $! MANIFEST. has been found and we have set def'ed there - 
 $! time to bail out before it's too late.
 $ tmp = f$extract(1,3,f$edit(f$getsyi("VERSION"),"TRIM,COLLAPSE"))
-$ IF tmp .GES. "7.2" THEN GOTO Beyond_depth_check
+$ IF (tmp .GES. "7.2") .AND. (F$GETSYI("HW_MODEL") .GE. 1024) THEN GOTO Beyond_depth_check
 $   IF (F$ELEMENT(max_allowed_dir_depth,".",F$ENVIRONMENT("Default")).nes.".")
 $   THEN
 $     TYPE SYS$INPUT:
@@ -590,7 +590,7 @@ $ user = F$EDIT(F$GETJPI("","USERNAME"),"TRIM,COLLAPSE")
 $ IF .NOT.(F$SEARCH("[-.CONFIG]INSTRUCT.").EQS."")
 $ THEN
 $   messages = F$ENVIRONMENT("MESSAGE")
-$   SET MESSAGE/NOFAC/NOSEV/NOIDENT/NOTEXT !sorry :-(
+$   SET MESSAGE/NOFAC/NOSEV/NOIDENT/NOTEXT
 $   contains /NOOUTPUT [-.CONFIG]INSTRUCT. 'user'
 $   IF .NOT.($status.EQ.%X08D78053)
 $   THEN
@@ -600,7 +600,7 @@ $     rp = "Would you like to see the instructions? [''dflt'] "
 $     GOSUB myread
 $     if .NOT.ans THEN needman=""
 $   ENDIF
-$   SET MESSAGE 'messages'                 !hope you made it here :-)
+$   SET MESSAGE 'messages'
 $ ENDIF
 $ if (fastread.AND.silent.AND.(alldone.eqs."cont")) THEN needman=""
 $!
@@ -618,9 +618,9 @@ brackets; typing carriage return will give you the default.
 $   READ SYS$COMMAND/PROMPT="Type carriage return to continue " ans
 $   TYPE SYS$INPUT:
 
-In a hurry? You may run '@Configure -d'.  This will bypass nearly all
+In a hurry? You may run '@Configure "-d"'.  This will bypass nearly all
 the questions and use the computed defaults (or the previous answers provided 
-there was already a config.sh file). Type '@Configure -h' for a list of 
+there was already a config.sh file). Type '@Configure "-h"' for a list of 
 options.
 
 $   READ SYS$COMMAND/PROMPT="Type carriage return to continue " ans
@@ -1925,9 +1925,9 @@ $Build_probe:
 $ build = F$ELEMENT(n,"/",builders)
 $ probe  = F$ELEMENT(n,"!",probers)
 $ echo "Testing whether you have ''build' on your system..."
-$ SET NOON                                        !sorry :-(
-$ ON CONTROL_Y THEN GOTO Reenable_messages_build  !sorry :-(
-$ SET MESSAGE/NOFAC/NOSEV/NOIDENT/NOTEXT          !sorry :-(
+$ SET NOON
+$ ON CONTROL_Y THEN GOTO Reenable_messages_build
+$ SET MESSAGE/NOFAC/NOSEV/NOIDENT/NOTEXT
 $ 'build' 'probe'
 $ IF ($SEVERITY .EQ. 1)
 $ THEN 
@@ -1942,9 +1942,9 @@ $   IF (.NOT. default_set) THEN dflt = build
 $ ELSE 
 $   echo "Nope."
 $ ENDIF
-$Reenable_messages_build:                         !hope you made it here :-)
-$ SET MESSAGE 'messages'                          !hope you made it here :-)
-$ SET ON                                          !hope you made it here :-)
+$Reenable_messages_build:
+$ SET MESSAGE 'messages'
+$ SET ON
 $ n = n + 1
 $ IF (n .LT. max_build) THEN GOTO Build_probe
 $!
@@ -2084,7 +2084,7 @@ $   ENDIF
 $ EXIT
 $ ENDSUBROUTINE ! Bad_environment
 $ echo ""
-$ echo4 "%Config-I-VMS, Checking for dangerous pre extant global symbols and logical names."
+$ echo4 "%Config-I-VMS, Checking for dangerous pre-existing global symbols and logical names."
 $ CALL Bad_environment "TMP"
 $ CALL Bad_environment "LIB"
 $ CALL Bad_environment "T"
@@ -2097,7 +2097,7 @@ $! %Config-I-VMS, write perl_setup.com here
 $!
 $ echo ""
 $ echo4 "%Config-I-VMS, The perl_setup.com file is now being written..."
-$ file_2_find = "[-.vms]perl_setup.com"
+$ file_2_find = "[-]perl_setup.com"
 $ OPEN/WRITE CONFIG 'file_2_find'
 $ WRITE CONFIG "$!"
 $ WRITE CONFIG "$! Perl_Setup.com    ''cf_time'"
@@ -2126,6 +2126,9 @@ $ else
 $   WRITE CONFIG "$ perl :== $Perl_Root:[000000]Perl'ext'"
 $   WRITE CONFIG "$ define PerlShr Perl_Root:[000000]PerlShr'ext'"
 $ endif
+$ WRITE CONFIG "$ define/nolog pod2text Perl_Root:[lib.pod]pod2text.com"
+$ WRITE CONFIG "$ define/nolog pod2html Perl_Root:[lib.pod]pod2html.com"
+$ WRITE CONFIG "$ define/nolog pod2man  Perl_Root:[lib.pod]pod2man.com"
 $!
 $ IF (tzneedset)
 $ THEN
@@ -2136,7 +2139,14 @@ $ ENDIF
 $ WRITE CONFIG "$!"
 $ WRITE CONFIG "$! Symbols for commonly used scripts:"
 $ WRITE CONFIG "$!"
-$ WRITE CONFIG "$ Perldoc == ""'"+"'Perl' Perl_Root:[lib.pod]Perldoc.com -t"""
+$ WRITE CONFIG "$ Perldoc  == ""'"+"'Perl' Perl_Root:[lib.pod]Perldoc.com -t"""
+$ WRITE CONFIG "$ pod2text == ""'"+"'Perl' pod2text"""
+$ WRITE CONFIG "$ pod2html == ""'"+"'Perl' pod2html"""
+$ WRITE CONFIG "$!pod2man  == ""'"+"'Perl' pod2man"""
+$ WRITE CONFIG "$!Perlbug  == ""'"+"'Perl' Perl_Root:[lib]Perlbug.com"""
+$ WRITE CONFIG "$!c2ph == ""'"+"'Perl' c2ph"""
+$ WRITE CONFIG "$!h2ph == ""'"+"'Perl' h2ph"""
+$ WRITE CONFIG "$!h2xs == ""'"+"'Perl' h2xs"""
 $ CLOSE CONFIG
 $!
 $ echo  ""

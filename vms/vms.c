@@ -3971,6 +3971,27 @@ static long int utc_offset_secs;
 #  define RTL_USES_UTC 1
 #endif
 
+/*
+ * DEC C previous to 6.0 corrupts the behavior of the /prefix
+ * qualifier with the extern prefix pragma.  This provisional
+ * hack circumvents this prefix pragma problem in previous 
+ * precompilers.
+ */
+#if defined(__VMS_VER) && __VMS_VER >= 70000000 
+#  if defined(VMS_WE_ARE_CASE_SENSITIVE) && (__DECC_VER < 60000000)
+#    pragma __extern_prefix save
+#    pragma __extern_prefix ""  /* set to empty to prevent prefixing */
+#    define gmtime decc$__utctz_gmtime
+#    define localtime decc$__utctz_localtime
+#    define time decc$__utc_time
+#    pragma __extern_prefix restore
+
+     struct tm *gmtime(), *localtime();   
+
+#  endif
+#endif
+
+
 static time_t toutc_dst(time_t loc) {
   struct tm *rsltmp;
 
@@ -3979,7 +4000,7 @@ static time_t toutc_dst(time_t loc) {
   if (rsltmp->tm_isdst) loc -= 3600;
   return loc;
 }
-#define _toutc(secs)  ((secs) == -1 ? -1 : \
+#define _toutc(secs)  ((secs) == (time_t) -1 ? (time_t) -1 : \
        ((gmtime_emulation_type || my_time(NULL)), \
        (gmtime_emulation_type == 1 ? toutc_dst(secs) : \
        ((secs) - utc_offset_secs))))
@@ -3992,7 +4013,7 @@ static time_t toloc_dst(time_t utc) {
   if (rsltmp->tm_isdst) utc += 3600;
   return utc;
 }
-#define _toloc(secs)  ((secs) == -1 ? -1 : \
+#define _toloc(secs)  ((secs) == (time_t) -1 ? (time_t) -1 : \
        ((gmtime_emulation_type || my_time(NULL)), \
        (gmtime_emulation_type == 1 ? toloc_dst(secs) : \
        ((secs) + utc_offset_secs))))

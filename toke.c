@@ -812,6 +812,31 @@ S_force_ident(pTHX_ register char *s, int kind)
     }
 }
 
+NV
+Perl_str_to_version(pTHX_ SV *sv)
+{
+    NV retval = 0.0;
+    NV nshift = 1.0;
+    STRLEN len;
+    char *start = SvPVx(sv,len);
+    bool utf = SvUTF8(sv);
+    char *end = start + len;
+    while (start < end) {
+	I32 skip;
+	UV n;
+	if (utf)
+	    n = utf8_to_uv((U8*)start, &skip);
+	else {
+	    n = *(U8*)start;
+	    skip = 1;
+	}
+	retval += ((NV)n)/nshift;
+	start += skip;
+	nshift *= 1000;
+    }
+    return retval;
+}
+
 /* 
  * S_force_version
  * Forces the next token to be a version number.
@@ -833,12 +858,12 @@ S_force_version(pTHX_ char *s)
         if (*d == ';' || isSPACE(*d) || *d == '}' || !*d) {
 	    SV *ver;
             s = scan_num(s);
-            /* real VERSION number -- GBARR */
             version = yylval.opval;
 	    ver = cSVOPx(version)->op_sv;
 	    if (SvPOK(ver) && !SvNIOK(ver)) {
-		SvUPGRADE(ver, SVt_PVIV);
-		SvIOKp_on(ver);		/* hint that it is a version */
+		SvUPGRADE(ver, SVt_PVNV);
+		SvNVX(ver) = str_to_version(ver);
+		SvNOK_on(ver);		/* hint that it is a version */
 	    }
         }
     }

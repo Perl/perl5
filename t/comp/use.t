@@ -5,7 +5,7 @@ BEGIN {
     unshift @INC, '../lib';
 }
 
-print "1..15\n";
+print "1..27\n";
 
 my $i = 1;
 eval "use 5.000";	# implicit semicolon
@@ -103,3 +103,68 @@ print "ok ",$i++,"\n";
 
 print "not " if $INC[0] eq "freda";
 print "ok ",$i++,"\n";
+
+{
+    local $lib::VERSION = 35.36;
+    eval "use lib v33.55";
+    print "not " if $@;
+    print "ok ",$i++,"\n";
+
+    eval "use lib v100.105";
+    unless ($@ =~ /lib version 100\.105 required--this is only version 35\.36/) {
+	print "not ";
+    }
+    print "ok ",$i++,"\n";
+
+    eval "use lib 33.55";
+    print "not " if $@;
+    print "ok ",$i++,"\n";
+
+    eval "use lib 100.105";
+    unless ($@ =~ /lib version 100\.105 required--this is only version 35\.36/) {
+	print "not ";
+    }
+    print "ok ",$i++,"\n";
+
+    local $lib::VERSION = '35.36';
+    eval "use lib v33.55";
+    print "not " if $@;
+    print "ok ",$i++,"\n";
+
+    eval "use lib v100.105";
+    unless ($@ =~ /lib version 100\.105 required--this is only version 35\.36/) {
+	print "not ";
+    }
+    print "ok ",$i++,"\n";
+
+    eval "use lib 33.55";
+    print "not " if $@;
+    print "ok ",$i++,"\n";
+
+    eval "use lib 100.105";
+    unless ($@ =~ /lib version 100\.105 required--this is only version 35\.36/) {
+	print "not ";
+    }
+    print "ok ",$i++,"\n";
+
+    local $lib::VERSION = v35.36;
+    eval "use lib v33.55";
+    print "not " if $@;
+    print "ok ",$i++,"\n";
+
+    eval "use lib v100.105";
+    unless ($@ =~ /lib version v100\.105 required--this is only version v35\.36/) {
+	print "not ";
+    }
+    print "ok ",$i++,"\n";
+
+    eval "use lib 33.55";
+    print "not " if $@;
+    print "ok ",$i++,"\n";
+
+    eval "use lib 100.105";
+    unless ($@ =~ /lib version 100\.105 required--this is only version 35\.036/) {
+	print "not ";
+    }
+    print "ok ",$i++,"\n";
+}

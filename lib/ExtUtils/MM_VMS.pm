@@ -717,7 +717,7 @@ sub cflags {
 
     $self->{OPTIMIZE} ||= $flagoptstr || $Config{'optimize'};
     if ($self->{OPTIMIZE} !~ m!/!) {
-	if    ($self->{OPTIMIZE} =~ m!\b-g\b!) { $self->{OPTIMIZE} = '/Debug/NoOptimize' }
+	if    ($self->{OPTIMIZE} =~ m!-g!) { $self->{OPTIMIZE} = '/Debug/NoOptimize' }
 	elsif ($self->{OPTIMIZE} =~ /-O(\d*)/) {
 	    $self->{OPTIMIZE} = '/Optimize' . (defined($1) ? "=$1" : '');
 	}

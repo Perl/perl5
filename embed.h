@@ -686,6 +686,7 @@
 #define sv_usepvn		Perl_sv_usepvn
 #define sv_vcatpvfn		Perl_sv_vcatpvfn
 #define sv_vsetpvfn		Perl_sv_vsetpvfn
+#define str_to_version		Perl_str_to_version
 #define swash_init		Perl_swash_init
 #define swash_fetch		Perl_swash_fetch
 #define taint_env		Perl_taint_env
@@ -2113,6 +2114,7 @@
 #define sv_usepvn(a,b,c)	Perl_sv_usepvn(aTHX_ a,b,c)
 #define sv_vcatpvfn(a,b,c,d,e,f,g)	Perl_sv_vcatpvfn(aTHX_ a,b,c,d,e,f,g)
 #define sv_vsetpvfn(a,b,c,d,e,f,g)	Perl_sv_vsetpvfn(aTHX_ a,b,c,d,e,f,g)
+#define str_to_version(a)	Perl_str_to_version(aTHX_ a)
 #define swash_init(a,b,c,d,e)	Perl_swash_init(aTHX_ a,b,c,d,e)
 #define swash_fetch(a,b)	Perl_swash_fetch(aTHX_ a,b)
 #define taint_env()		Perl_taint_env(aTHX)
@@ -4145,6 +4147,8 @@
 #define sv_vcatpvfn		Perl_sv_vcatpvfn
 #define Perl_sv_vsetpvfn	CPerlObj::Perl_sv_vsetpvfn
 #define sv_vsetpvfn		Perl_sv_vsetpvfn
+#define Perl_str_to_version	CPerlObj::Perl_str_to_version
+#define str_to_version		Perl_str_to_version
 #define Perl_swash_init		CPerlObj::Perl_swash_init
 #define swash_init		Perl_swash_init
 #define Perl_swash_fetch	CPerlObj::Perl_swash_fetch

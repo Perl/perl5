@@ -35,7 +35,7 @@
    void setservent(int);
    void endservent(void);
 #endif
-#  if defined(__DECC) && defined(__DECC_VER) && (__DECC_VER >= 50200000)
+#  if defined(__DECC) && defined(__DECC_VER) && (__DECC_VER >= 50200000) && !defined(Sock_size_t)
 #    define Sock_size_t unsigned int
 #  endif
 

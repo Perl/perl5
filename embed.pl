@@ -2004,6 +2004,7 @@ Apd	|void	|sv_vcatpvfn	|SV* sv|const char* pat|STRLEN patlen \
 Apd	|void	|sv_vsetpvfn	|SV* sv|const char* pat|STRLEN patlen \
 				|va_list* args|SV** svargs|I32 svmax \
 				|bool *maybe_tainted
+Ap	|NV	|str_to_version	|SV *sv
 Ap	|SV*	|swash_init	|char* pkg|char* name|SV* listsv \
 				|I32 minbits|I32 none
 Ap	|UV	|swash_fetch	|SV *sv|U8 *ptr

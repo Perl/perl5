@@ -316,7 +316,7 @@ Perl_save_ary(pTHX_ GV *gv)
     av = GvAVn(gv);
     if (SvMAGIC(oav)) {
 	SvMAGIC(av) = SvMAGIC(oav);
-	SvFLAGS(av) |= SvMAGICAL(oav);
+	SvFLAGS((SV*)av) |= SvMAGICAL(oav);
 	SvMAGICAL_off(oav);
 	SvMAGIC(oav) = 0;
 	PL_localizing = 1;
@@ -341,7 +341,7 @@ Perl_save_hash(pTHX_ GV *gv)
     hv = GvHVn(gv);
     if (SvMAGIC(ohv)) {
 	SvMAGIC(hv) = SvMAGIC(ohv);
-	SvFLAGS(hv) |= SvMAGICAL(ohv);
+	SvFLAGS((SV*)hv) |= SvMAGICAL(ohv);
 	SvMAGICAL_off(ohv);
 	SvMAGIC(ohv) = 0;
 	PL_localizing = 1;
@@ -715,7 +715,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    if (GvAV(gv)) {
 		AV *goner = GvAV(gv);
 		SvMAGIC(av) = SvMAGIC(goner);
-		SvFLAGS(av) |= SvMAGICAL(goner);
+		SvFLAGS((SV*)av) |= SvMAGICAL(goner);
 		SvMAGICAL_off(goner);
 		SvMAGIC(goner) = 0;
 		SvREFCNT_dec(goner);
