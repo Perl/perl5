@@ -387,6 +387,15 @@ blessed object
 
     print "It's still an object\n" if UNIVERSAL::can($val, 'can');
 
+You can also use the C<blessed> function of Scalar::Util:
+
+    use Scalar::Util 'blessed';
+
+    my $blessing = blessed $suspected_object;
+
+C<blessed> returns the name of the package the argument has been
+blessed into, or C<undef>.
+
 =item VERSION( [NEED] )
 
 C<VERSION> returns the version number of the class (package).  If the
