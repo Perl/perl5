@@ -12,13 +12,17 @@
    compatibility to run XS code built with the older version).
    Normally this should not change across maintenance releases.
 
+   Note that this only refers to an out-of-the-box build.  Many non-default
+   options such as usemultiplicity tend to break binary compatibility
+   more often.
+
    This is used by Configure et al to figure out 
    PERL_INC_VERSION_LIST, which lists version libraries
    to include in @INC.  See INSTALL for how this works.
 */
 #define PERL_API_REVISION	5	/* Adjust manually as needed.  */
 #define PERL_API_VERSION	5	/* Adjust manually as needed.  */
-#define PERL_API_SUBVERSION	640	/* Adjust manually as needed.  */
+#define PERL_API_SUBVERSION	0	/* Adjust manually as needed.  */
 /*
    XXX Note:  The selection of non-default Configure options, such
    as -Duselonglong may invalidate these settings.  Currently, Configure

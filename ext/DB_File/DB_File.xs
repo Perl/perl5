@@ -3,12 +3,12 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess <Paul.Marquess@btinternet.com>
- last modified 7th September 1999
- version 1.71
+ last modified 16th January 2000
+ version 1.72
 
  All comments/suggestions/problems are welcome
 
-     Copyright (c) 1995-9 Paul Marquess. All rights reserved.
+     Copyright (c) 1995-2000 Paul Marquess. All rights reserved.
      This program is free software; you can redistribute it and/or
      modify it under the same terms as Perl itself.
 
@@ -81,6 +81,7 @@
         1.71 -  Support for Berkeley DB version 3.
 		Support for Berkeley DB 2/3's backward compatability mode.
 		Rewrote push
+        1.72 -  No change to DB_File.xs
 
 */
 

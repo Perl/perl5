@@ -1,4 +1,6 @@
 package ExtUtils::Installed;
+
+use 5.005_64;
 use strict;
 use Carp qw();
 use ExtUtils::Packlist;
@@ -6,8 +8,7 @@ use ExtUtils::MakeMaker;
 use Config;
 use File::Find;
 use File::Basename;
-use vars qw($VERSION);
-$VERSION = '0.02';
+our $VERSION = '0.02';
 
 sub _is_type($$$)
 {

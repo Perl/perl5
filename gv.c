@@ -1365,7 +1365,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	if (amtp && amtp->fallback >= AMGfallYES) {
 	  DEBUG_o( Perl_deb(aTHX_ "%s", SvPVX(msg)) );
 	} else {
-	  Perl_croak(aTHX_ "%_", msg);
+	  Perl_croak(aTHX_ "%"SVf, msg);
 	}
 	return NULL;
       }

@@ -279,3 +279,15 @@
    * Updated to support Berkeley DB 3.x
 
    * Updated dbinfo for Berkeley DB 3.x file formats.
+
+1.72 16th January 2000
+
+   * Added hints/sco.pl
+
+   * The module will now use XSLoader when it is available. When it
+     isn't it will use DynaLoader.
+
+   * The locking section in DB_File.pm has been discredited. Many thanks
+     to David Harris for spotting the underlying problem, contributing
+     the updates to the documentation and writing DB_File::Lock (available
+     on CPAN).

@@ -44,10 +44,10 @@ Derived from FileHandle.pm by Graham Barr E<lt>gbarr@pobox.comE<gt>
 
 =cut
 
-require 5.000;
+require 5.005_64;
 use Carp;
 use strict;
-use vars qw($VERSION @EXPORT @ISA);
+our($VERSION, @EXPORT, @ISA);
 use IO::Handle qw(SEEK_SET SEEK_CUR SEEK_END);
 require Exporter;
 

@@ -8,9 +8,10 @@
 require Exporter;
 package Math::Complex;
 
+use 5.005_64;
 use strict;
 
-use vars qw($VERSION @ISA @EXPORT %EXPORT_TAGS);
+our($VERSION, @ISA, @EXPORT, %EXPORT_TAGS);
 
 my ( $i, $ip2, %logn );
 

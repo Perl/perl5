@@ -995,7 +995,9 @@ while (fetch_para()) {
     %XsubAliases = %XsubAliasValues = %Interfaces = ();
     $DoSetMagic = 1;
 
-    @args = split(/\s*,\s*/, $orig_args);
+    my $temp_args = $orig_args;
+    $temp_args =~ s/\\\s*//g;
+    @args = split(/\s*,\s*/, $temp_args);
     if (defined($class)) {
 	my $arg0 = ((defined($static) or $func_name eq 'new')
 		    ? "CLASS" : "THIS");

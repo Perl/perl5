@@ -2,8 +2,8 @@ package File::Glob;
 
 use strict;
 use Carp;
-use vars qw($VERSION @ISA @EXPORT_OK @EXPORT_FAIL
-            %EXPORT_TAGS $AUTOLOAD $DEFAULT_FLAGS);
+our($VERSION, @ISA, @EXPORT_OK, @EXPORT_FAIL, %EXPORT_TAGS,
+    $AUTOLOAD, $DEFAULT_FLAGS);
 
 require Exporter;
 use XSLoader ();

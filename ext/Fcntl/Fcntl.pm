@@ -42,7 +42,7 @@ what constants are implemented in your system.
 
 =cut
 
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $AUTOLOAD);
+our($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS, $AUTOLOAD);
 
 require Exporter;
 use XSLoader ();

@@ -1,14 +1,12 @@
 package SDBM_File;
 
 use strict;
-use vars qw($VERSION @ISA);
 
 require Tie::Hash;
 use XSLoader ();
 
-@ISA = qw(Tie::Hash);
-
-$VERSION = "1.02" ;
+our @ISA = qw(Tie::Hash);
+our $VERSION = "1.02" ;
 
 XSLoader::load 'SDBM_File', $VERSION;
 

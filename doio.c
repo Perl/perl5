@@ -217,7 +217,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	if (*type == '|') {
 	    if (num_svs && (tlen != 2 || type[1] != '-')) {
 	      unknown_desr:
-		Perl_croak(aTHX_ "Unknown open() mode '%.*s'", olen, oname);
+		Perl_croak(aTHX_ "Unknown open() mode '%.*s'", (int)olen, oname);
 	    }
 	    /*SUPPRESS 530*/
 	    for (type++, tlen--; isSPACE(*type); type++, tlen--) ;
@@ -1257,7 +1257,7 @@ Perl_do_exec3(pTHX_ char *cmd, int fd, int do_report)
     if (strnEQ(cmd,"exec",4) && isSPACE(cmd[4]))
 	goto doshell;
 
-    for (s = cmd; *s && isALPHA(*s); s++) ;	/* catch VAR=val gizmo */
+    for (s = cmd; *s && isALNUM(*s); s++) ;	/* catch VAR=val gizmo */
     if (*s == '=')
 	goto doshell;
 

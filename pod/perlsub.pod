@@ -928,11 +928,21 @@ Unbackslashed prototype characters have special meanings.  Any
 unbackslashed C<@> or C<%> eats all remaining arguments, and forces
 list context.  An argument represented by C<$> forces scalar context.  An
 C<&> requires an anonymous subroutine, which, if passed as the first
-argument, does not require the C<sub> keyword or a subsequent comma.  A
-C<*> allows the subroutine to accept a bareword, constant, scalar expression,
+argument, does not require the C<sub> keyword or a subsequent comma.
+
+A C<*> allows the subroutine to accept a bareword, constant, scalar expression,
 typeglob, or a reference to a typeglob in that slot.  The value will be
 available to the subroutine either as a simple scalar, or (in the latter
-two cases) as a reference to the typeglob.
+two cases) as a reference to the typeglob.  If you wish to always convert
+such arguments to a typeglob reference, use Symbol::qualify_to_ref() as
+follows:
+
+    use Symbol 'qualify_to_ref';
+
+    sub foo (*) {
+	my $fh = qualify_to_ref(shift, caller);
+	...
+    }
 
 A semicolon separates mandatory arguments from optional arguments.
 It is redundant before C<@> or C<%>, which gobble up everything else.

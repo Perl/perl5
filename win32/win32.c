@@ -2049,6 +2049,7 @@ win32_fopen(const char *filename, const char *mode)
 {
     dTHXo;
     WCHAR wMode[MODE_SIZE], wBuffer[MAX_PATH];
+    FILE *f;
     
     if (!*filename)
 	return NULL;
@@ -2059,9 +2060,14 @@ win32_fopen(const char *filename, const char *mode)
     if (USING_WIDE()) {
 	A2WHELPER(mode, wMode, sizeof(wMode));
 	A2WHELPER(filename, wBuffer, sizeof(wBuffer));
-	return _wfopen(PerlDir_mapW(wBuffer), wMode);
+	f = _wfopen(PerlDir_mapW(wBuffer), wMode);
     }
-    return fopen(PerlDir_mapA(filename), mode);
+    else
+	f = fopen(PerlDir_mapA(filename), mode);
+    /* avoid buffering headaches for child processes */
+    if (f && *mode == 'a')
+	win32_fseek(f, 0, SEEK_END);
+    return f;
 }
 
 #ifndef USE_SOCKETS_AS_HANDLES
@@ -2074,11 +2080,17 @@ win32_fdopen(int handle, const char *mode)
 {
     dTHXo;
     WCHAR wMode[MODE_SIZE];
+    FILE *f;
     if (USING_WIDE()) {
 	A2WHELPER(mode, wMode, sizeof(wMode));
-	return _wfdopen(handle, wMode);
+	f = _wfdopen(handle, wMode);
     }
-    return fdopen(handle, (char *) mode);
+    else
+	f = fdopen(handle, (char *) mode);
+    /* avoid buffering headaches for child processes */
+    if (f && *mode == 'a')
+	win32_fseek(f, 0, SEEK_END);
+    return f;
 }
 
 DllExport FILE *

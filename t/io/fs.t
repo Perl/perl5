@@ -152,11 +152,12 @@ else {
   truncate "Iofs.tmp", 0;
   if (-z "Iofs.tmp") {print "ok 24\n"} else {print "not ok 24\n"}
   open(FH, ">Iofs.tmp") or die "Can't create Iofs.tmp";
+  binmode FH;
   { select FH; $| = 1; select STDOUT }
   {
     use strict;
-    print FH "helloworld\n";
-    truncate FH, 5;
+    print FH "x\n" x 200;
+    truncate(FH, 200) or die "Can't truncate FH: $!";
   }
   if ($^O eq 'dos'
 	# Not needed on HPFS, but needed on HPFS386 ?!
@@ -164,7 +165,7 @@ else {
   {
       close (FH); open (FH, ">>Iofs.tmp") or die "Can't reopen Iofs.tmp";
   }
-  if (-s "Iofs.tmp" == 5) {print "ok 25\n"} else {print "not ok 25\n"}
+  if (-s "Iofs.tmp" == 200) {print "ok 25\n"} else {print "not ok 25\n"}
   truncate FH, 0;
   if ($^O eq 'dos'
 	# Not needed on HPFS, but needed on HPFS386 ?!

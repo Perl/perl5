@@ -137,7 +137,7 @@ typedef U32 PADOFFSET;
 #define OPpEARLY_CV		32	/* foo() called before sub foo was parsed */
   /* OP_?ELEM only */
 #define OPpLVAL_DEFER		16	/* Defer creation of array/hash elem */
-  /* OP_RV2?V only */
+  /* OP_RV2?V, OP_GVSV only */
 #define OPpOUR_INTRO		16	/* Defer creation of array/hash elem */
   /* for OP_RV2?V, lower bits carry hints (currently only HINT_STRICT_REFS) */
 

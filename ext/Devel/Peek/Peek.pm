@@ -3,7 +3,8 @@
 
 package Devel::Peek;
 
-$VERSION = 0.95;
+# Underscore to allow older Perls to access older version from CPAN
+$VERSION = '1.00_00';
 
 require Exporter;
 use XSLoader ();

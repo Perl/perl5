@@ -1,10 +1,12 @@
 package ExtUtils::Mksymlists;
+
+use 5.005_64;
 use strict qw[ subs refs ];
 # no strict 'vars';  # until filehandles are exempted
 
 use Carp;
 use Exporter;
-use vars qw( @ISA @EXPORT $VERSION );
+our(@ISA, @EXPORT, $VERSION);
 @ISA = 'Exporter';
 @EXPORT = '&Mksymlists';
 $VERSION = substr q$Revision: 1.17 $, 10;

@@ -7,13 +7,12 @@
 require Exporter;
 package Math::Trig;
 
+use 5.005_64;
 use strict;
 
 use Math::Complex qw(:trig);
 
-use vars qw($VERSION $PACKAGE
-	    @ISA
-	    @EXPORT @EXPORT_OK %EXPORT_TAGS);
+our($VERSION, $PACKAGE, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
 @ISA = qw(Exporter);
 

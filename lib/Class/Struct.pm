@@ -2,10 +2,10 @@ package Class::Struct;
 
 ## See POD after __END__
 
-require 5.002;
+use 5.005_64;
 
 use strict;
-use vars qw(@ISA @EXPORT $VERSION);
+our(@ISA, @EXPORT, $VERSION);
 
 use Carp;
 

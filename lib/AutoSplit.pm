@@ -1,15 +1,14 @@
 package AutoSplit;
 
+use 5.005_64;
 use Exporter ();
 use Config qw(%Config);
 use Carp qw(carp);
 use File::Basename ();
 use File::Path qw(mkpath);
 use strict;
-use vars qw(
-	    $VERSION @ISA @EXPORT @EXPORT_OK
-	    $Verbose $Keep $Maxlen $CheckForAutoloader $CheckModTime
-	   );
+our($VERSION, @ISA, @EXPORT, @EXPORT_OK, $Verbose, $Keep, $Maxlen,
+    $CheckForAutoloader, $CheckModTime);
 
 $VERSION = "1.0304";
 @ISA = qw(Exporter);

@@ -56,6 +56,14 @@ package Foo::Bar::Baz;
 use base 'Foo::Bar';
 use fields qw(foo bar baz);
 
+# Test repeatability for when modules get reloaded.
+package B1;
+use fields qw(b1 b2 b3);
+
+package D3;
+use base 'B2';
+use fields qw(b1 d1 _b1 _d1);  # hide b1
+
 package main;
 
 sub fstr

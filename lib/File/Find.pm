@@ -1,5 +1,5 @@
 package File::Find;
-require 5.005;
+use 5.005_64;
 require Exporter;
 require Cwd;
 
@@ -270,7 +270,7 @@ sub Follow_SymLink($) {
     return $AbsName;
 }
 
-use vars qw/ $dir $name $fullname $prune /;
+our($dir, $name, $fullname, $prune);
 sub _find_dir_symlnk($$$);
 sub _find_dir($$$);
 

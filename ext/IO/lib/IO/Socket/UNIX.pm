@@ -7,7 +7,7 @@
 package IO::Socket::UNIX;
 
 use strict;
-use vars qw(@ISA $VERSION);
+our(@ISA, $VERSION);
 use IO::Socket;
 use Socket;
 use Carp;

@@ -5617,7 +5617,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 				       (UV)c & 0xFF);
 		} else
 		    sv_catpv(msg, "end of string");
-		Perl_warner(aTHX_ WARN_PRINTF, "%_", msg); /* yes, this is reentrant */
+		Perl_warner(aTHX_ WARN_PRINTF, "%"SVf, msg); /* yes, this is reentrant */
 	    }
 
 	    /* output mangled stuff ... */

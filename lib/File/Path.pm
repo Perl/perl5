@@ -91,13 +91,14 @@ Charles Bailey <F<bailey@newman.upenn.edu>>
 
 =cut
 
+use 5.005_64;
 use Carp;
 use File::Basename ();
 use DirHandle ();
 use Exporter ();
 use strict;
 
-use vars qw( $VERSION @ISA @EXPORT );
+our($VERSION, @ISA, @EXPORT);
 $VERSION = "1.0402";
 @ISA = qw( Exporter );
 @EXPORT = qw( mkpath rmtree );

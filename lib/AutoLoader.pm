@@ -1,6 +1,7 @@
 package AutoLoader;
 
-# use vars qw(@EXPORT @EXPORT_OK $VERSION);
+use 5.005_64;
+our(@EXPORT, @EXPORT_OK, $VERSION);
 
 my $is_dosish;
 my $is_vms;

@@ -1,7 +1,7 @@
 package Thread;
 require Exporter;
 use XSLoader ();
-use vars qw($VERSION @ISA @EXPORT);
+our($VERSION, @ISA, @EXPORT);
 
 $VERSION = "1.0";
 

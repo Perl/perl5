@@ -34,6 +34,11 @@ cccdlflags=' '
 # - perl malloc needs to be unpolluted
 bincompat5005='undef'
 
+# stubs (ENOSYS, not implemented)
+d_chroot='undef'
+d_seteuid='undef'
+d_setegid='undef'
+
 # strip exe's and dll's
 #ldflags="$ldflags -s"
 #ccdlflags="$ccdlflags -s"

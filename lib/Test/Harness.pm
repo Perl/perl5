@@ -1,14 +1,14 @@
 package Test::Harness;
 
-BEGIN {require 5.002;}
+use 5.005_64;
 use Exporter;
 use Benchmark;
 use Config;
 use FileHandle;
 use strict;
 
-use vars qw($VERSION $verbose $switches $have_devel_corestack $curtest
-	    @ISA @EXPORT @EXPORT_OK);
+our($VERSION, $verbose, $switches, $have_devel_corestack, $curtest,
+    @ISA, @EXPORT, @EXPORT_OK);
 $have_devel_corestack = 0;
 
 $VERSION = "1.1604";

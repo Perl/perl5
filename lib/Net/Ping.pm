@@ -10,12 +10,11 @@ package Net::Ping;
 # program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
 
-require 5.002;
+use 5.005_64;
 require Exporter;
 
 use strict;
-use vars qw(@ISA @EXPORT $VERSION
-            $def_timeout $def_proto $max_datasize);
+our(@ISA, @EXPORT, $VERSION, $def_timeout, $def_proto, $max_datasize);
 use FileHandle;
 use Socket qw( SOCK_DGRAM SOCK_STREAM SOCK_RAW PF_INET
                inet_aton sockaddr_in );

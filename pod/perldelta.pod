@@ -149,6 +149,14 @@ needs to be written with additional parentheses now:
 
 The behavior remains unaffected when C<not> is not followed by parentheses.
 
+=item Semantics of bareword prototype C<(*)> have changed
+
+Arguments prototyped as C<*> will now be visible within the subroutine
+as either a simple scalar or as a reference to a typeglob.  Perl 5.005
+always coerced simple scalar arguments to a typeglob, which wasn't useful
+in situations where the subroutine must distinguish between a simple
+scalar and a typeglob.  See L<perlsub/Prototypes>.
+
 =back
 
 =head2 C Source Incompatibilities
@@ -731,9 +739,10 @@ See L<INSTALL> and L<README.Y2K>.
 
 =head2 E<lt>HANDLEE<gt> on empty files
 
-With C<$/> set to C<undef>, slurping an empty file returns a string of
+With C<$/> set to C<undef>, "slurping" an empty file returns a string of
 zero length (instead of C<undef>, as it used to) the first time the
-HANDLE is read.  Further reads yield C<undef>.
+HANDLE is read after C<$/> is set to C<undef>.  Further reads yield
+C<undef>.
 
 This means that the following will append "foo" to an empty file (it used
 to do nothing):

@@ -1305,7 +1305,7 @@ Perl_do_readline(pTHX)
 		if (!do_close(PL_last_in_gv, FALSE) && ckWARN(WARN_CLOSED)) {
 		    Perl_warner(aTHX_ WARN_CLOSED,
 			   "glob failed (child exited with status %d%s)",
-			   STATUS_CURRENT >> 8,
+			   (int)(STATUS_CURRENT >> 8),
 			   (STATUS_CURRENT & 0x80) ? ", core dumped" : "");
 		}
 	    }

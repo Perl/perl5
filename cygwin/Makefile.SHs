@@ -33,12 +33,9 @@ ld2: $& Makefile perlld ${src}/cygwin/ld2.in
 # install is included in Cygwin distributions, and we make a note of th
 # requirement in the README.cygwin file. However, let's give them
 # a warning.
-	@if test -n "`type $1 2>&1 | sed -n -e '/'$1'$/p'`" ; then \
-		install -c -m 755 ld2 ${installbin}/ld2 ; \
-	else \
+	@install -c -m 755 ld2 ${installbin}/ld2
+	@if test ! -f  ${installbin}/ld2; then \
 		echo "*************************************************" ; \
-		echo "Oh, no! You didn't read the README.cygwin" ; \
-		echo "file, which stated that \"install\" was required." ; \
 		echo "Make will probably fail in a few more steps." ; \
 		echo "When it does, copy \"ld2\" to a directory in" ; \
 		echo "your path, other than \".\"." ; \

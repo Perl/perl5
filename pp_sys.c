@@ -442,7 +442,7 @@ PP(pp_warn)
     if (!tmps || !len)
 	tmpsv = sv_2mortal(newSVpvn("Warning: something's wrong", 26));
 
-    Perl_warn(aTHX_ "%_", tmpsv);
+    Perl_warn(aTHX_ "%"SVf, tmpsv);
     RETSETYES;
 }
 
@@ -500,7 +500,7 @@ PP(pp_die)
     if (!tmps || !len)
 	tmpsv = sv_2mortal(newSVpvn("Died", 4));
 
-    DIE(aTHX_ "%_", tmpsv);
+    DIE(aTHX_ "%"SVf, tmpsv);
 }
 
 /* I/O. */
@@ -1835,13 +1835,17 @@ PP(pp_truncate)
 	tmpgv = gv_fetchpv(POPpx, FALSE, SVt_PVIO);
     do_ftruncate:
 	TAINT_PROPER("truncate");
-	if (!GvIO(tmpgv) || !IoIFP(GvIOp(tmpgv)) ||
-#ifdef HAS_TRUNCATE
-	  ftruncate(PerlIO_fileno(IoIFP(GvIOn(tmpgv))), len) < 0)
-#else 
-	  my_chsize(PerlIO_fileno(IoIFP(GvIOn(tmpgv))), len) < 0)
-#endif
+	if (!GvIO(tmpgv) || !IoIFP(GvIOp(tmpgv)))
 	    result = 0;
+	else {
+	    PerlIO_flush(IoIFP(GvIOp(tmpgv)));
+#ifdef HAS_TRUNCATE
+	    if (ftruncate(PerlIO_fileno(IoIFP(GvIOn(tmpgv))), len) < 0)
+#else 
+	    if (my_chsize(PerlIO_fileno(IoIFP(GvIOn(tmpgv))), len) < 0)
+#endif
+		result = 0;
+	}
     }
     else {
 	SV *sv = POPs;

@@ -2194,7 +2194,7 @@ sed %s -e \"/^[^#]/b\" \
  -e \"/^#[ 	]*undef[ 	]/b\" \
  -e \"/^#[ 	]*endif/b\" \
  -e \"s/^#.*//\" \
- %s | %_ -C %_ %s",
+ %s | %"SVf" -C %"SVf" %s",
 	  (PL_doextract ? "-e \"1,/^#/d\n\"" : ""),
 #else
 #  ifdef __OPEN_VM
@@ -2210,7 +2210,7 @@ sed %s -e \"/^[^#]/b\" \
  -e '/^#[ 	]*undef[ 	]/b' \
  -e '/^#[ 	]*endif/b' \
  -e 's/^[ 	]*#.*//' \
- %s | %_ %_ %s",
+ %s | %"SVf" %"SVf" %s",
 #  else
 	Perl_sv_setpvf(aTHX_ cmd, "\
 %s %s -e '/^[^#]/b' \
@@ -2224,7 +2224,7 @@ sed %s -e \"/^[^#]/b\" \
  -e '/^#[ 	]*undef[ 	]/b' \
  -e '/^#[ 	]*endif/b' \
  -e 's/^[ 	]*#.*//' \
- %s | %_ -C %_ %s",
+ %s | %"SVf" -C %"SVf" %s",
 #  endif
 #ifdef LOC_SED
 	  LOC_SED,
@@ -3054,7 +3054,7 @@ S_incpush(pTHX_ char *p, int addsubdirs)
 			      SvPV(libdir,len));
 #endif
 	    /* .../archname/version if -d .../archname/version/auto */
-	    Perl_sv_setpvf(aTHX_ subdir, "%_/%s/"PERL_FS_VER_FMT"/auto", libdir,
+	    Perl_sv_setpvf(aTHX_ subdir, "%"SVf"/%s/"PERL_FS_VER_FMT"/auto", libdir,
 			   ARCHNAME, (int)PERL_REVISION,
 			   (int)PERL_VERSION, (int)PERL_SUBVERSION);
 	    if (PerlLIO_stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&
@@ -3063,7 +3063,7 @@ S_incpush(pTHX_ char *p, int addsubdirs)
 			newSVpvn(SvPVX(subdir), SvCUR(subdir) - sizeof "auto"));
 
 	    /* .../archname if -d .../archname/auto */
-	    Perl_sv_setpvf(aTHX_ subdir, "%_/%s/auto", libdir, ARCHNAME);
+	    Perl_sv_setpvf(aTHX_ subdir, "%"SVf"/%s/auto", libdir, ARCHNAME);
 	    if (PerlLIO_stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&
 		  S_ISDIR(tmpstatbuf.st_mode))
 		av_push(GvAVn(PL_incgv),

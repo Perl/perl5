@@ -6,11 +6,11 @@
 
 package IO::Pipe;
 
-require 5.000;
+require 5.005_64;
 
 use IO::Handle;
 use strict;
-use vars qw($VERSION);
+our($VERSION);
 use Carp;
 use Symbol;
 
@@ -135,7 +135,7 @@ sub writer {
 
 package IO::Pipe::End;
 
-use vars qw(@ISA);
+our(@ISA);
 
 @ISA = qw(IO::Handle);
 

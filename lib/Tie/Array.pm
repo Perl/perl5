@@ -1,8 +1,9 @@
 package Tie::Array;
-use vars qw($VERSION); 
+
+use 5.005_64;
 use strict;
 use Carp;
-$VERSION = '1.01';
+our $VERSION = '1.01';
 
 # Pod documentation after __END__ below.
 
