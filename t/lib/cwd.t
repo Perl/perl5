@@ -104,25 +104,30 @@ else {
     print +($ENV{PWD}  =~ m|\bt$| ? "" : "not "), "ok 12\n";
 }
 
-my @dirs = grep(! -l $_ => (split " " => $Config{libpth}));
-if (@dirs && $Config{d_symlink}) {
-    my $target = pop @dirs;
-    symlink $target => "linktest";
-    mkdir "pteerslt";
-    chdir "pteerslt";
-    my $rel = "../../t/linktest";
-
-    my $abs_path      = Cwd::abs_path($rel);
-    my $fast_abs_path = Cwd::fast_abs_path($rel);
-    print "# abs_path      $abs_path\n";
-    print "# fast_abs_path $fast_abs_path\n";
-    print "# target        $target\n";
-    print +($abs_path      eq $target ? "" : "not "), "ok 13\n";
-    print +($fast_abs_path eq $target ? "" : "not "), "ok 14\n";
-
-    chdir "..";
-    rmdir "pteerslt";
-    unlink "linktest";
+if ($Config{d_symlink}) {
+    my @dirs = grep(! -l $_ => (split " " => $Config{libpth}));
+    if (@dirs) {
+	my $target = pop @dirs;
+	symlink $target => "linktest";
+	mkdir "pteerslt";
+	chdir "pteerslt";
+	my $rel = "../../t/linktest";
+	
+	my $abs_path      = Cwd::abs_path($rel);
+	my $fast_abs_path = Cwd::fast_abs_path($rel);
+	print "# abs_path      $abs_path\n";
+	print "# fast_abs_path $fast_abs_path\n";
+	print "# target        $target\n";
+	print +($abs_path      eq $target ? "" : "not "), "ok 13\n";
+	print +($fast_abs_path eq $target ? "" : "not "), "ok 14\n";
+	
+	chdir "..";
+	rmdir "pteerslt";
+	unlink "linktest";
+    } else {
+	print "ok 13 # skipped\n";
+	print "ok 14 # skipped\n";
+    }
 } else {
     print "ok 13 # skipped\n";
     print "ok 14 # skipped\n";
