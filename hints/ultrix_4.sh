@@ -71,3 +71,7 @@ d_mmap='undef'
 
 # Configure gets fooled somehow into thinking that Ultrix would have mkstemp.
 d_mkstemp='undef'
+
+# There simply isn't dynaloading in Ultrix.
+usedl='undef'
+
