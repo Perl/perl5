@@ -9,7 +9,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..37\n";
+print "1..38\n";
 
 # numerics
 print ((0xdead & 0xbeef) == 0x9ead ? "ok 1\n" : "not ok 1\n");
@@ -101,7 +101,7 @@ print "ok 35\n" if sprintf("%vd", $a) eq '248.444';
 
 my @not36;
 
-for (0, 0x100...0xFFF) {
+for (0x100...0xFFF) {
   $a = ~(chr $_);
   push @not36, sprintf("%#03X", $_)
       if $a ne chr(~$_) or length($a) != 1 or ~$a ne chr($_);
@@ -128,3 +128,6 @@ if (@not37) {
     print "not ";
 }
 print "ok 37\n";
+
+print "not " unless ~chr(~0) eq "\0";
+print "ok 38\n";
