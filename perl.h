@@ -3114,17 +3114,16 @@ enum {		/* pass one of these to get_vtbl */
 #define RsPARA(sv)    (SvPOK(sv) && ! SvCUR(sv))
 #define RsRECORD(sv)  (SvROK(sv) && (SvIV(SvRV(sv)) > 0))
 
-#ifdef DEBUGGING
-/* A struct for keeping various DEBUGGING related stuff
+/* A struct for keeping various DEBUGGING related stuff,
  * neatly packed.  Currently only scratch variables for
- * constructing debug output are included. */
+ * constructing debug output are included.  Needed always,
+ * not just when DEBUGGING, though, because of the re extension. c*/
 struct perl_debug_pad {
   SV pad[3];
 };
 
 #define PERL_DEBUG_PAD(i)	&(PL_debug_pad.pad[i])
 #define PERL_DEBUG_PAD_ZERO(i)	(sv_setpvn(PERL_DEBUG_PAD(i), "", 0), PERL_DEBUG_PAD(i))
-#endif
 
 /* Enable variables which are pointers to functions */
 typedef void (CPERLscope(*peep_t))(pTHX_ OP* o);

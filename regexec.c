@@ -1943,6 +1943,12 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
             New(22,PL_reg_start_tmp, PL_reg_start_tmpl, char*);
     }
 
+#ifdef DEBUGGING
+    sv_setpvn(PERL_DEBUG_PAD(0), "", 0);
+    sv_setpvn(PERL_DEBUG_PAD(1), "", 0);
+    sv_setpvn(PERL_DEBUG_PAD(2), "", 0);
+#endif
+
     /* XXXX What this code is doing here?!!!  There should be no need
        to do this again and again, PL_reglastparen should take care of
        this!  --ilya*/
