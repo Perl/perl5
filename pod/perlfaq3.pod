@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq3 - Programming Tools ($Revision: 1.8 $, $Date: 2001/10/17 14:14:20 $)
+perlfaq3 - Programming Tools ($Revision: 1.9 $, $Date: 2001/11/09 08:06:04 $)
 
 =head1 DESCRIPTION
 
@@ -152,7 +152,7 @@ Put that in your F<.exrc> file (replacing the caret characters
 with control characters) and away you go.  In insert mode, ^T is
 for indenting, ^D is for undenting, and ^O is for blockdenting--
 as it were.  A more complete example, with comments, can be found at
-http://www.perl.com/CPAN-local/authors/id/TOMC/scripts/toms.exrc.gz
+http://www.cpan.org/authors/id/TOMC/scripts/toms.exrc.gz
 
 If you are used to using the I<vgrind> program for printing out nice code
 to a laser printer, you can take a stab at this using
@@ -423,7 +423,7 @@ directory http://www.cpan.org/modules/by-category/08_User_Interfaces/
 Invaluable for Perl/Tk programming are the Perl/Tk FAQ at
 http://w4.lns.cornell.edu/%7Epvhp/ptk/ptkTOC.html , the Perl/Tk Reference
 Guide available at
-http://www.perl.com/CPAN-local/authors/Stephen_O_Lidie/ , and the
+http://www.cpan.org/authors/Stephen_O_Lidie/ , and the
 online manpages at
 http://www-users.cs.umn.edu/%7Eamundson/perl/perltk/toc.html .
 

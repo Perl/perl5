@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq9 - Networking ($Revision: 1.4 $, $Date: 2001/10/31 23:54:56 $)
+perlfaq9 - Networking ($Revision: 1.5 $, $Date: 2001/11/09 08:06:04 $)
 
 =head1 DESCRIPTION
 

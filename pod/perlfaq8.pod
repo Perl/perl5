@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq8 - System Interaction ($Revision: 1.2 $, $Date: 2001/10/16 13:27:22 $)
+perlfaq8 - System Interaction ($Revision: 1.4 $, $Date: 2001/11/09 08:06:04 $)
 
 =head1 DESCRIPTION
 
@@ -954,8 +954,7 @@ in L<perlfunc/fork>.
 
 There are a number of excellent interfaces to SQL databases.  See the
 DBD::* modules available from http://www.cpan.org/modules/DBD .
-A lot of information on this can be found at 
-http://www.symbolstone.org/technology/perl/DBI/
+A lot of information on this can be found at http://dbi.perl.org/
 
 =head2 How do I make a system() exit on control-C?
 
