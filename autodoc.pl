@@ -220,7 +220,8 @@ my $key;
 for $key (sort { uc($a) cmp uc($b) || $a cmp $b } keys %apidocs) {
     my $section = $apidocs{$key}; 
     print DOC "\n=head1 $key\n\n=over 8\n\n";
-    for my $key (sort { uc($a) cmp uc($b); } keys %$section) {
+    # Again, fallback for determinacy
+    for my $key (sort { uc($a) cmp uc($b) || $a cmp $b } keys %$section) {
         docout(\*DOC, $key, $section->{$key});
     }
     print DOC "\n=back\n";
