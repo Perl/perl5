@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Feb 26 00:48:15 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Sat Feb 26 04:42:42 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -883,8 +883,8 @@ uidsign=''
 uidsize=''
 uidtype=''
 archname64=''
-use64bits=''
-usefull64bits=''
+use64bitall=''
+use64bitint=''
 uselargefiles=''
 uselongdouble=''
 usemorebits=''
@@ -4292,6 +4292,18 @@ fi
 
 
 
+# Backward compatibility (uselfs is deprecated).
+case "$uselfs" in
+"$define"|true|[yY]*)
+	cat <<EOM >&4
+
+*** Configure -Duselfs is deprecated, using -Duselargefiles instead.
+
+EOM
+	uselargefiles="$define"
+	;;
+esac                          
+
 case "$lseeksize:$fpossize" in
 8:8) cat <<EOM
 
@@ -4391,7 +4403,7 @@ esac
 
 case "$usemorebits" in
 "$define"|true|[yY]*)
-	use64bits="$define"
+	use64bitint="$define"
 	uselongdouble="$define"
 	usemorebits="$define"
 	;;
@@ -4405,17 +4417,40 @@ case "$uselonglong" in
 "$define"|true|[yY]*)
 	cat <<EOM >&4
 
-*** Configure -Duselonglong is deprecated, using the -Duse64bits instead.
+*** Configure -Duselonglong is deprecated, using -Duse64bitint instead.
 
 EOM
-	use64bits="$define"
+	use64bitint="$define"
 	;;
 esac                          
+# Backward compatibility (use64bits is deprecated).
+case "$use64bits" in
+"$define"|true|[yY]*)
+	cat <<EOM >&4
+
+*** Configure -Duse64bits is deprecated, using -Duse64bitint instead.
+
+EOM
+	use64bitint="$define"
+	;;
+esac                          
+# Thinko compatibility
+case "$use64bitints" in
+"$define"|true|[yY]*)
+	cat <<EOM >&4
+
+*** There is no Configure -Duse64bitints, using -Duse64bitint instead.
+
+EOM
+	use64bitint="$define"
+	;;
+esac                          
+
 case "$ccflags" in
-*-DUSE_LONG_LONG*|*-DUSE_64_BITS*|*-DUSE_FULL_64_BITS*) use64bits="$define";;
+*-DUSE_LONG_LONG*|*-DUSE_64_BIT_INT*|*-DUSE_64_BIT_ALL*) use64bitint="$define";;
 esac
-case "$usefull64bits" in
-"$define"|true|[yY]*) use64bits="$define" ;;
+case "$use64bitall" in
+"$define"|true|[yY]*) use64bitint="$define" ;;
 esac
 
 case "$longsize" in
@@ -4425,14 +4460,14 @@ You have natively 64-bit long integers.
 EOM
    val="$define"
    ;;
-*) case "$use64bits" in
+*) case "$use64bitint" in
    "$define"|true|[yY]*) dflt='y';;
    *) dflt='n';;
    esac
    cat <<EOM
 
 Perl can be built to take advantage of 64-bit integer types
-on some systems.  To do so, Configure can be run with -Duse64bits.
+on some systems.  To do so, Configure can be run with -Duse64bitint.
 Choosing this option will most probably introduce binary incompatibilities.
 
 If this doesn't make any sense to you, just accept the default '$dflt'.
@@ -4445,12 +4480,12 @@ EOM
    esac
    ;;
 esac
-set use64bits
+set use64bitint
 eval $setvar
 
-case "$usefull64bits" in
+case "$use64bitall" in
 "$define"|true|[yY]*) val="$define" ;;
-*)	case "$use64bits" in
+*)	case "$use64bitint" in
 	"$define")	case "$longsize" in
 			4)	dflt='n'
 				cat <<EOM
@@ -4479,47 +4514,47 @@ EOM
 	esac
 	;;
 esac 
-set usefull64bits
+set use64bitall
 eval $setvar
 
-case "$use64bits" in
+case "$use64bitint" in
 "$define"|true|[yY]*)
 : Look for a hint-file generated 'call-back-unit'.  If the
 : user has specified that a 64-bit perl is to be built,
 : we may need to set or change some other defaults.
-	if $test -f use64bits.cbu; then
+	if $test -f use64bitint.cbu; then
 		echo "Your platform has some specific hints for 64-bit builds, using them..."
-		. ./use64bits.cbu
+		. ./use64bitint.cbu
 	fi
 	case "$longsize" in
 	4) case "$ccflags" in
-	   *-DUSE_64_BITS*) ;;
-	   *) ccflags="$ccflags -DUSE_64_BITS";;
+	   *-DUSE_64_BIT_INT*) ;;
+	   *) ccflags="$ccflags -DUSE_64_BIT_INT";;
 	   esac
 	   case "$archname64" in
-	   '') archname64=64 ;;
+	   '') archname64=64int ;;
 	   esac
 	   ;;
 	esac
 	;;
 esac
 
-case "$usefull64bits" in
+case "$use64bitall" in
 "$define"|true|[yY]*)
 : Look for a hint-file generated 'call-back-unit'.  If the
 : user has specified that a full 64-bit perl is to be built,
 : we may need to set or change some other defaults.
-	if $test -f usefull64bits.cbu; then
+	if $test -f use64bitall.cbu; then
 		echo "Your platform has some specific hints for full 64-bit builds, using them..."
-		. ./usefull64bits.cbu
+		. ./use64bitall.cbu
 	fi
 	case "$longsize" in
 	4) case "$ccflags" in
-	   *-DUSE_FULL_64_BITS*) ;;
-      	   *) ccflags="$ccflags -DUSE_FULL_64_BITS";;
+	   *-DUSE_64_BIT_ALL*) ;;
+      	   *) ccflags="$ccflags -DUSE_64_BIT_ALL";;
 	   esac
 	   case "$archname64" in
-	   ''|64) archname64=full64 ;;
+	   ''|64) archname64=64all ;;
 	   esac
 	   ;;
 	esac
@@ -4580,7 +4615,7 @@ $define)
         esac
 	;;
 esac
-case "$use64bits" in
+case "$use64bitint" in
 $define)
 	case "$archname64" in
 	'')
@@ -9760,7 +9795,7 @@ case "$quadtype" in
 '')	echo "Alas, no 64-bit integer types in sight." >&4
 	d_quad="$undef"
 	;;
-*)	if test X"$use64bits" = Xdefine -o X"$longsize" = X8; then
+*)	if test X"$use64bitint" = Xdefine -o X"$longsize" = X8; then
 	    verb="will"
 	else
 	    verb="could"
@@ -9804,7 +9839,7 @@ $rm -f try.c try
 echo " "
 $echo "Choosing the C types to be used for Perl's internal types..." >&4
 
-case "$use64bits:$d_quad:$quadtype" in
+case "$use64bitint:$d_quad:$quadtype" in
 define:define:?*)
 	ivtype="$quadtype"
 	uvtype="$uquadtype"
@@ -13525,7 +13560,7 @@ EOM
 		'')	try="extern int accept(int, struct sockaddr *, $xxx *);"
 			if ./protochk "$try" $hdrs; then
 				echo "Your system accepts '$xxx *' for the last argument of accept()."
-				socksizetype="$xxx *"
+				socksizetype="$xxx"
 			fi
 			;;
 		esac
@@ -13533,13 +13568,13 @@ EOM
 : In case none of those worked, prompt the user.
 	case "$socksizetype" in
 	'')	rp='What is the type for the last argument to accept()?'
-		dflt='int *'
+		dflt='int'
 		. ./myread
 		socksizetype=$ans
 		;;
 	esac
 	;;
-*)	: no gethostbyaddr, so pick relatively harmless defaults
+*)	: no sockets, so pick relatively harmless defaults
 	socksizetype='char *'
 	;;
 esac
@@ -14438,7 +14473,7 @@ for xxx in $known_extensions ; do
 	NDBM_File|ndbm_fil)
 		case "$i_ndbm" in
 		$define)
-		    case "$osname-$use64bits" in
+		    case "$osname-$use64bitint" in
 		    hpux-define)
 			case "$libs" in
 			*-lndbm*) avail_ext="$avail_ext $xxx" ;;
@@ -14452,7 +14487,7 @@ for xxx in $known_extensions ; do
 	ODBM_File|odbm_fil) 
 		case "${i_dbm}${i_rpcsvcdbm}" in
 		*"${define}"*)
-		    case "$osname-$use64bits" in
+		    case "$osname-$use64bitint" in
 		    hpux-define)
 			case "$libs" in
 			*-ldbm*) avail_ext="$avail_ext $xxx" ;;
@@ -15409,9 +15444,9 @@ uname='$uname'
 uniq='$uniq'
 uquadtype='$uquadtype'
 use5005threads='$use5005threads'
-use64bits='$use64bits'
+use64bitall='$use64bitall'
+use64bitint='$use64bitint'
 usedl='$usedl'
-usefull64bits='$usefull64bits'
 useithreads='$useithreads'
 uselargefiles='$uselargefiles'
 uselongdouble='$uselongdouble'

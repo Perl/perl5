@@ -334,17 +334,17 @@ esac
 EOCBU
 
 case "$uselargefiles" in
-$define|true|[yY]*)
+''|$define|true|[yY]*)
     ccflags="$ccflags `getconf LFS_CFLAGS 2>/dev/null`"
     ldflags="$ldflags `getconf LFS_LDFLAGS 2>/dev/null`"
     libswanted="$libswanted `getconf LFS_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
     ;;
 esac
 
-# This script UU/use64bits.cbu will get 'called-back' by Configure 
+# This script UU/use64bitint.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use 64 bits.
-cat > UU/use64bits.cbu <<'EOCBU'
-case "$use64bits" in
+cat > UU/use64bitint.cbu <<'EOCBU'
+case "$use64bitint" in
 $define|true|[yY]*)
 	    case "`uname -r`" in
 	    2.[1-6])
@@ -361,12 +361,8 @@ EOM
 esac
 EOCBU
 
-case "$usefull64bits" in
+case "$use64bitall" in
 $define|true|[yY]*)
-	    case "$ccflags" in
-	    *-DUSE_FULL_64_BITS*) ;;
-	    *) ccflags="$ccflags -DUSE_FULL_64_BITS" ;;
-	    esac
 	    ccflags="$ccflags `getconf XBS5_LP64_OFF64_CFLAGS`"
 	    ldflags="$ccflags `getconf XBS5_LP64_OFF64_LDFLAGS`"
 	    lddlflags="$lddlflags -G `getconf XBS5_LP64_OFF64_LDFLAGS`"

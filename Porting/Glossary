@@ -3358,8 +3358,18 @@ use5005threads (usethreads.U):
 	and indicates that Perl should be built to use the 5.005-based
 	threading implementation.
 
-use64bits (use64bits.U):
-	This variable conditionally defines the USE_64_BITS symbol,
+use64bitall (use64bits.U):
+	This variable conditionally defines the USE_64_BIT_ALL symbol,
+	and indicates that 64-bit integer types should be used
+	when available.  The maximal possible
+	64-bitness is employed: LP64 or ILP64, meaning that you will
+	be able to use more than 2 gigabytes of memory.  This mode is
+	even more binary incompatible than USE_64_BIT_INT. You may not
+	be able to run the resulting executable in a 32-bit CPU at all or
+	you may need at least to reboot your OS to 64-bit mode.
+
+use64bitint (use64bits.U):
+	This variable conditionally defines the USE_64_BIT_INT symbol,
 	and indicates that 64-bit integer types should be used
 	when available.  The minimal possible 64-bitness
 	is employed, just enough to get 64-bit integers into Perl.
@@ -3369,16 +3379,6 @@ use64bits (use64bits.U):
 usedl (dlsrc.U):
 	This variable indicates if the system supports dynamic
 	loading of some sort.  See also dlsrc and dlobj.
-
-usefull64bits (use64bits.U):
-	This variable conditionally defines the USE_FULL_64_BITS symbol,
-	and indicates that 64-bit integer types should be used
-	when available.  The maximal possible
-	64-bitness is employed: LP64 or ILP64, meaning that you will
-	be able to use more than 2 gigabytes of memory.  This mode is
-	even more binary incompatible than USE_64_BITS. You may not
-	be able to run the resulting executable in a 32-bit CPU at all or
-	you may need at least to reboot your OS to 64-bit mode.
 
 useithreads (usethreads.U):
 	This variable conditionally defines the USE_ITHREADS symbol,

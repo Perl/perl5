@@ -985,8 +985,11 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #  ifdef USE_ITHREADS
 		sv_catpv(PL_Sv," USE_ITHREADS");
 #  endif
-#  ifdef USE_64_BITS
-		sv_catpv(PL_Sv," USE_64_BITS");
+#  ifdef USE_64_BIT_INT
+		sv_catpv(PL_Sv," USE_64_BIT_INT");
+#  endif
+#  ifdef USE_64_BIT_ALL
+		sv_catpv(PL_Sv," USE_64_BIT_ALL");
 #  endif
 #  ifdef USE_LONG_DOUBLE
 		sv_catpv(PL_Sv," USE_LONG_DOUBLE");

@@ -4413,7 +4413,7 @@ For example
 You can find out whether your Perl supports quads via L<Config>:
 
 	use Config;
-	($Config{use64bits} eq 'define' || $Config{longsize} == 8) &&
+	($Config{use64bitint} eq 'define' || $Config{longsize} == 8) &&
 		print "quads\n";
 
 If Perl understands "long doubles" (this requires that the platform

@@ -52,8 +52,8 @@ EOM
 	;;
 esac
 
-case "$use64bits" in
-$define|true|[yY]*)
+case " $use64bits $use64bitint $use64bitall " in
+*" $define "*|*" true "*|*" [yY] "*)
 	cat >&4 <<EOM
 IRIX `uname -r` does not support 64-bit types.
 You should upgrade to at least IRIX 6.2.
@@ -61,3 +61,4 @@ Cannot continue, aborting.
 EOM
 	exit 1
 esac
+

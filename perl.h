@@ -985,7 +985,7 @@ struct perl_mstats {
 typedef IVTYPE IV;
 typedef UVTYPE UV;
 
-#if defined(USE_64_BITS) && defined(HAS_QUAD)
+#if defined(USE_64_BIT_INT) && defined(HAS_QUAD)
 #  if QUADKIND == QUAD_IS_INT64_T && defined(INT64_MAX)
 #    define IV_MAX INT64_MAX
 #    define IV_MIN INT64_MIN

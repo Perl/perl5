@@ -129,23 +129,23 @@ $ perl_d_sendmsg = "undef"
 $ perl_d_recvmsg = "undef"
 $ perl_d_msghdr_s = "undef"
 $ perl_d_cmsghdr_s = "undef"
-$ IF use_64bit .eqs. "Y"
+$ IF use_64bitint .eqs. "Y"
 $ THEN
-$   perl_use64bits = "define"
+$   perl_use64bitint = "define"
 $   perl_uselargefiles = "define"
 $   perl_uselongdouble = "define"
 $   perl_usemorebits = "define"
 $ ELSE
-$   perl_use64bits = "undef"
+$   perl_use64bitint = "undef"
 $   perl_uselargefiles = "undef"
 $   perl_uselongdouble = "undef"
 $   perl_usemorebits = "undef"
 $ ENDIF
-$ IF use_full64bit .eqs. "Y"
+$ IF use_64bitall .eqs. "Y"
 $ THEN
-$   perl_usefull64bits = "define"
+$   perl_use64bitall = "define"
 $ ELSE
-$   perl_usefull64bits = "undef"
+$   perl_use64bitall = "undef"
 $ ENDIF
 $ perl_d_drand48proto = "define"
 $ perl_d_lseekproto = "define"
@@ -439,7 +439,7 @@ $ perl_pager="most"
 $!
 $! Are we 64 bit?
 $!
-$ if (use_64bit .eqs. "Y")
+$ if (use_64bitint .eqs. "Y")
 $ THEN
 $   perl_d_PRIfldbl = "define"
 $   perl_d_PRIgldbl = "define"
@@ -4009,8 +4009,8 @@ $ WC "i_poll='" + perl_i_poll + "'"
 $ WC "i_inttypes='" + perl_i_inttypes + "'"
 $ WC "d_off64_t='" + perl_d_off64_t + "'"
 $ WC "d_fpos64_t='" + perl_d_fpos64_t + "'"
-$ WC "use64bits='" + perl_use64bits + "'"
-$ WC "usefull64bits='" + perl_usefull64bits + "'"
+$ WC "use64bitall='" + perl_use64bitall + "'"
+$ WC "use64bitint='" + perl_use64bitint + "'"
 $ WC "d_drand48proto='" + perl_d_drand48proto + "'"
 $ WC "d_lseekproto='" + perl_d_drand48proto + "'"
 $ WC "d_old_pthread_create_joinable='" + perl_d_old_pthread_create_joinable + "'"
@@ -4085,7 +4085,7 @@ $ WC "uselargefiles='" + perl_uselargefiles + "'"
 $ WC "uselongdouble='" + perl_uselongdouble + "'"
 $ WC "usemorebits='" + perl_usemorebits + "'"
 $ WC "d_quad='" + perl_d_quad + "'"
-$ if (use_64bit .eqs. "Y")
+$ if (use_64bitint .eqs. "Y")
 $ THEN
 $   WC "quadtype='" + perl_quadtype + "'" 
 $   WC "uquadtype='" + perl_uquadtype + "'" 
@@ -4204,14 +4204,14 @@ $    WRITE CONFIG "#define ALWAYS_DEFTYPES"
 $ ELSE
 $    WRITE CONFIG "#undef ALWAYS_DEFTYPES"
 $ ENDIF
-$ if use_64bit.eqs."Y"
+$ if use_64bitint.eqs."Y"
 $ THEN
-$    WRITE CONFIG "#define USE_64_BITS"
+$    WRITE CONFIG "#define USE_64_BIT_INT"
 $    WRITE CONFIG "#define USE_LONG_DOUBLE"
 $ ENDIF
-$ if use_full64bit.eqs."Y"
+$ if use_64bitall.eqs."Y"
 $ THEN
-$    WRITE CONFIG "#define USE_FULL_64_BITS"
+$    WRITE CONFIG "#define USE_64_BIT_ALL"
 $ ENDIF
 $ WRITE CONFIG "#define HAS_ENVGETENV"
 $ WRITE CONFIG "#define PERL_EXTERNAL_GLOB"

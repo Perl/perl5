@@ -2850,7 +2850,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define Uid_t $uidtype		/* UID type */
 
-/* USE_64_BITS:
+/* USE_64_BIT_INT:
  *	This symbol, if defined, indicates that 64-bit integers should
  *	be used when available.  If not defined, the native integers
  *	will be employed (be they 32 or 64 bits).  The minimal possible
@@ -2858,12 +2858,22 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This may mean using for example "long longs", while your memory
  *	may still be limited to 2 gigabytes.
  */
-#ifndef USE_64_BITS
-#$use64bits	USE_64_BITS		/**/
+/* USE_64_BIT_ALL:
+ *	This symbol, if defined, indicates that 64-bit integers should
+ *	be used when available.  If not defined, the native integers
+ *	will be used (be they 32 or 64 bits).  The maximal possible
+ *	64-bitness is employed: LP64 or ILP64, meaning that you will
+ *	be able to use more than 2 gigabytes of memory.  This mode is
+ *	even more binary incompatible than USE_64_BIT_INT. You may not
+ *	be able to run the resulting executable in a 32-bit CPU at all or
+ *	you may need at least to reboot your OS to 64-bit mode.
+ */
+#ifndef USE_64_BIT_INT
+#$use64bitint	USE_64_BIT_INT		/**/
 #endif
 
-#ifndef USE_FULL_64_BITS
-#$usefull64bits	USE_FULL_64_BITS		/**/
+#ifndef USE_64_BIT_ALL
+#$use64bitall	USE_64_BIT_ALL		/**/
 #endif
 
 /* USE_LARGE_FILES:
@@ -3015,8 +3025,8 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_lseekproto	HAS_LSEEK_PROTO	/**/
 
 /* Sock_size_t:
- *	This symbol holds the type used for the size argument
- *	of various socket calls.
+ *	This symbol holds the type used for the size argument of
+ *	various socket calls (just the base type, not the pointer-to).
  */
 #define Sock_size_t		$socksizetype /**/
 
