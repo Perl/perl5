@@ -36,7 +36,7 @@ if (open(UTF, "<$utf")) {
     # alpha beta gamma in UTF-8 Unicode (0x3b1 0x3b2 0x3b3)
     print "not " unless <UTF> eq "\xce\xb1\xce\xb2\xce\xb3";
     print "ok 4\n";
-    close $grk;
+    close UTF;
 }
 
 {
@@ -54,7 +54,7 @@ if (open(UTF, "<$utf")) {
 if (open(GRK, "<$grk")) {
     print "not " unless <GRK> eq "\xe1\xe2\xe3";
     print "ok 8\n";
-    close $grk;
+    close GRK;
 }
 
 END {
