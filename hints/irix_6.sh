@@ -117,7 +117,7 @@ esac'
 	libc='/usr/lib32/libc.so'
 	plibpth='/usr/lib32 /lib32 /usr/ccs/lib'
 	;;
-*"cc -64")
+*"cc -64"*)
 
 	loclibpth="$loclibpth /usr/lib64"
 	libscheck='case "`/usr/bin/file $xxx`" in
@@ -162,7 +162,7 @@ esac
 
 # Settings common to both native compiler modes.
 case "$cc" in
-*"cc -n32"|*"cc -64")
+*"cc -n32"*|*"cc -64"*)
 	ld=$cc
 
 	# perl's malloc can return improperly aligned buffer
