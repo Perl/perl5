@@ -369,7 +369,6 @@ PERLVAR(Ifilter_debug,	int)
 #ifdef USE_THREADS
 PERLVAR(Ithr_key,	perl_key)	/* For per-thread struct perl_thread* */
 PERLVAR(Isv_mutex,	perl_mutex)	/* Mutex for allocating SVs in sv.c */
-PERLVAR(Imalloc_mutex,	perl_mutex)	/* Mutex for malloc */
 PERLVAR(Ieval_mutex,	perl_mutex)	/* Mutex for doeval */
 PERLVAR(Ieval_cond,	perl_cond)	/* Condition variable for doeval */
 PERLVAR(Ieval_owner,	struct perl_thread *)

@@ -811,7 +811,6 @@ S_parse_body(pTHX_ va_list args)
 #else
 		sv_catpv(PL_Sv,"print \"\\nCharacteristics of this binary (from libperl): \\n\",");
 #endif
-#if defined(DEBUGGING) || defined(MULTIPLICITY)
 		sv_catpv(PL_Sv,"\"  Compile-time options:");
 #  ifdef DEBUGGING
 		sv_catpv(PL_Sv," DEBUGGING");
@@ -819,8 +818,20 @@ S_parse_body(pTHX_ va_list args)
 #  ifdef MULTIPLICITY
 		sv_catpv(PL_Sv," MULTIPLICITY");
 #  endif
+#  ifdef USE_THREADS
+		sv_catpv(PL_Sv," USE_THREADS");
+#  endif
+#  ifdef PERL_OBJECT
+		sv_catpv(PL_Sv," PERL_OBJECT");
+#  endif
+#  ifdef PERL_IMPLICIT_CONTEXT
+		sv_catpv(PL_Sv," PERL_IMPLICIT_CONTEXT");
+#  endif
+#  ifdef PERL_IMPLICIT_SYS
+		sv_catpv(PL_Sv," PERL_IMPLICIT_SYS");
+#  endif
 		sv_catpv(PL_Sv,"\\n\",");
-#endif
+
 #if defined(LOCAL_PATCH_COUNT)
 		if (LOCAL_PATCH_COUNT > 0) {
 		    int i;
