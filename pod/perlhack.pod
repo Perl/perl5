@@ -1730,9 +1730,9 @@ need to do too, if you don't want to see the "global leaks":
 
 =head2 Pixie Profiling
 
-Pixie is a profiling tool available on Tru64 (aka Digital UNIX aka DEC
-OSF/1) and IRIX platforms.  Pixie does its profiling using
-"basic-block counting".  A basic block is a program region that
+Pixie is a profiling tool available on IRIX and Tru64
+(aka Digital UNIX aka DEC OSF/1) platforms.  Pixie does its profiling
+using "basic-block counting".  A basic block is a program region that
 is entered only at the beginning and exited only at the end.
 
 You can build a profiled version of perl called "perl.pixie" by
@@ -1740,15 +1740,59 @@ invoking the make target "perl.pixie" (in Tru64 a file called
 "perl.Addrs" will also be silently created, this file contains the
 addresses of the basic blocks).  Running the profiled version of Perl
 will create a new file called "Perl.Counts" which contains the basic
-block counts for that particular run.
+block counts for that particular program execution.
 
 To display the results you must use the "prof" utility.  The exact
 incantation depends on your operating system, "prof perl.Counts" in
 IRIX, and "prof -pixie -all -L. perl" in Tru64.
 
-By default prof shows the most executed source code lines in
-descending order of use.  For further information, see your system's
-manual pages for pixie and prof.
+In IRIX the following prof options are available:
+
+=over 4
+
+=item -h
+
+Reports the most heavily used lines in descending order of use.
+
+=item -l
+
+Groups lines by procedure, with procedures sorted in descending order of use.
+Within a procedure, lines are listed in source order.
+
+=back
+
+In Tru64 the following options are available:
+
+=over 4
+
+=item -p
+
+Sorted in descending order by the number of cycles executed in each procedure.
+(This is the default option.)
+
+=item -h
+
+Sorted in descending order by the number of cycles executed in each line.
+
+=item -i
+
+The called procedures are sorted in descending order by number of calls.
+
+=item -l
+
+Grouped by procedure, sorted by cycles executed per procedure.
+
+=item -testcoverage
+
+The compiler emitted code for these lines, but the code was unexecuted.
+
+=item -zero
+
+Unexecuted procedures.
+
+=over4
+
+For further information, see your system's manual pages for pixie and prof.
 
 =head2 CONCLUSION
 

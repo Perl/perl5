@@ -506,14 +506,14 @@ quantperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
 
 # Third Degree Perl (Tru64 only)
 
-perl.config.-g:
+perl.config.dashg:
 	@echo "Checking optimize='-g'..."
 	@grep "^optimize=" config.sh
 	@grep -q "^optimize='-g'" config.sh || exit 1
 
 perl.third.config: config.sh
 	@echo "To build perl.third you must Configure -Doptimize=-g -Uusemymalloc, checking..."
-	$(MAKE) perl.config.-g
+	$(MAKE) perl.config.dashg
 	@echo "Checking usemymalloc='n'..."
 	@grep "^usemymalloc=" config.sh
 	@grep -q "^usemymalloc='n'" config.sh || exit 1
@@ -523,17 +523,17 @@ perl.third: /usr/bin/atom perl.third.config perl
 
 # Pixie Perls (Tru64 and IRIX only)
 
-perl.pixie.atom.config: config.sh
+perl.pixie.config: config.sh
 	@echo "To build perl.pixie you must Configure -Doptimize=-g, checking..."
-	$(MAKE) perl.config.-g
+	$(MAKE) perl.config.dashg
 
-perl.pixie.atom: /usr/bin/atom perl.pixie.atom.config perl
+perl.pixie.atom: /usr/bin/atom perl
 	atom -tool pixie -L. -all -toolargs="-quiet" perl
 
 perl.pixie.irix: perl
 	pixie perl
 
-perl.pixie: perl
+perl.pixie: /usr/bin/pixie perl.pixie.config perl
 	if test -x /usr/bin/atom; then \
 	  $(MAKE) perl.pixie.atom; \
 	else \
@@ -792,7 +792,7 @@ _mopup:
 	-rm -f perl.exp ext.libs extra.pods opmini.o
 	-rm -f perl.export perl.dll perl.libexp perl.map perl.def
 	-rm -f perl.loadmap miniperl.loadmap perl.prelmap miniperl.prelmap
-	-rm -f perl.third lib*.so.perl.third perl.3log t/perl.3log
+	-rm -f perl.third lib*.so.perl.third perl.3log t/perl.third t/perl.3log
 	-rm -f perl.pixie lib*.so.perl.pixie lib*.so.Addrs
 	-rm -f perl.Addrs perl.Counts t/perl.Addrs t/perl.Counts
 	rm -f perl suidperl miniperl $(LIBPERL) libperl.* microperl
@@ -826,7 +826,7 @@ _cleaner2:
 	rm -f h2ph.man pstruct
 	rm -rf .config
 	rm -f testcompile compilelog
-	-rmdir lib/B lib/Data lib/Encode lib/IO/Socket lib/IO lib/Filter/Util lib/Sys lib/Thread
+	-rmdir lib/B lib/Data lib/Digest lib/Encode lib/MIME lib/IO/Socket lib/IO lib/Filter/Util lib/PerlIO lib/Sys lib/Thread
 
 _realcleaner: 
 	@$(LDLIBPTH) $(MAKE) _cleaner1 CLEAN=realclean

@@ -112,4 +112,38 @@ sub decode_qp ($)
 *encode = \&encode_qp;
 *decode = \&decode_qp;
 
+# Methods for use as a PerlIO layer object
+
+sub PUSHED
+{
+ my ($class,$mode) = @_;
+ # When writing we buffer the data
+ my $write = '';
+ return bless \$write,$class;
+}
+
+sub FILL
+{
+ my ($obj,$fh) = @_;
+ my $line = <$fh>;
+ return (defined $line) ? decode_qp($line) : undef;
+ return undef;
+}
+
+sub WRITE
+{
+ my ($obj,$buf,$fh) = @_;
+ $$obj .= encode_qp($buf);
+ return length($buf);
+}
+
+sub FLUSH
+{
+ my ($obj,$fh) = @_;
+ print $fh $$obj or return -1;
+ $$obj = '';
+ return 0;
+}
+
+
 1;

@@ -6,13 +6,13 @@
 
 package IO::Socket;
 
-require 5.005_64;
+require v5.6;
 
 use IO::Handle;
 use Socket 1.3;
 use Carp;
 use strict;
-our(@ISA, $VERSION);
+our(@ISA, $VERSION, @EXPORT_OK);
 use Exporter;
 use Errno;
 
@@ -23,12 +23,18 @@ require IO::Socket::UNIX if ($^O ne 'epoc');
 
 @ISA = qw(IO::Handle);
 
-$VERSION = "1.26";
+$VERSION = "1.27";
+
+@EXPORT_OK = qw(sockatmark);
 
 sub import {
     my $pkg = shift;
-    my $callpkg = caller;
-    Exporter::export 'Socket', $callpkg, @_;
+    if ($_[0] eq 'sockatmark') { # not very extensible but for now, fast
+	Exporter::export_to_level('IO::Socket', 1, $pkg, 'sockatmark');
+    } else {
+	my $callpkg = caller;
+	Exporter::export 'Socket', $callpkg, @_;
+    }
 }
 
 sub new {
@@ -258,6 +264,12 @@ sub sockopt {
 	    : $sock->setsockopt(SOL_SOCKET,@_);
 }
 
+sub atmark {
+    @_ == 1 or croak 'usage: $sock->atmark()';
+    my($sock) = @_;
+    sockatmark($sock);
+}
+
 sub timeout {
     @_ == 1 || @_ == 2 or croak 'usage: $sock->timeout([VALUE])';
     my($sock,$val) = @_;
@@ -376,26 +388,32 @@ Additional methods that are provided are:
 
 =over 4
 
-=item timeout([VAL])
+=item atmark
 
-Set or get the timeout value associated with this socket. If called without
-any arguments then the current setting is returned. If called with an argument
-the current setting is changed and the previous value returned.
+True if the socket is currently positioned at the urgent data mark,
+false otherwise.
 
-=item sockopt(OPT [, VAL])
+    use IO::Socket;
 
-Unified method to both set and get options in the SOL_SOCKET level. If called
-with one argument then getsockopt is called, otherwise setsockopt is called.
+    my $sock = IO::Socket::INET->new('some_server');
+    $sock->read(1024,$data) until $sock->atmark;
 
-=item sockdomain
+Note: this is a reasonably new addition to the family of socket
+functions, so all systems may not support this yet.  If it is
+unsupported by the system, an attempt to use this method will
+abort the program.
 
-Returns the numerical number for the socket domain type. For example, for
-a AF_INET socket the value of &AF_INET will be returned.
+The atmark() functionality is also exportable as sockatmark() function:
 
-=item socktype
+	use IO::Socket 'sockatmark';
 
-Returns the numerical number for the socket type. For example, for
-a SOCK_STREAM socket the value of &SOCK_STREAM will be returned.
+This allows for a more traditional use of sockatmark() as a procedural
+socket function.
+
+=item connected
+
+If the socket is in a connected state the the peer address is returned.
+If the socket is not in a connected state then undef will be returned.
 
 =item protocol
 
@@ -403,10 +421,26 @@ Returns the numerical number for the protocol being used on the socket, if
 known. If the protocol is unknown, as with an AF_UNIX socket, zero
 is returned.
 
-=item connected
+=item sockdomain
 
-If the socket is in a connected state the the peer address is returned.
-If the socket is not in a connected state then undef will be returned.
+Returns the numerical number for the socket domain type. For example, for
+a AF_INET socket the value of &AF_INET will be returned.
+
+=item sockopt(OPT [, VAL])
+
+Unified method to both set and get options in the SOL_SOCKET level. If called
+with one argument then getsockopt is called, otherwise setsockopt is called.
+
+=item socktype
+
+Returns the numerical number for the socket type. For example, for
+a SOCK_STREAM socket the value of &SOCK_STREAM will be returned.
+
+=item timeout([VAL])
+
+Set or get the timeout value associated with this socket. If called without
+any arguments then the current setting is returned. If called with an argument
+the current setting is changed and the previous value returned.
 
 =back
 
@@ -416,13 +450,18 @@ L<Socket>, L<IO::Handle>, L<IO::Socket::INET>, L<IO::Socket::UNIX>
 
 =head1 AUTHOR
 
-Graham Barr. Currently maintained by the Perl Porters.  Please report all
-bugs to <perl5-porters@perl.org>.
+Graham Barr.  atmark() by Lincoln Stein.  Currently maintained by the
+Perl Porters.  Please report all bugs to <perl5-porters@perl.org>.
 
 =head1 COPYRIGHT
 
 Copyright (c) 1997-8 Graham Barr <gbarr@pobox.com>. All rights reserved.
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
+
+The atmark() implementation: Copyright 2001, Lincoln Stein <lstein@cshl.org>.
+This module is distributed under the same terms as Perl itself.
+Feel free to use, modify and redistribute it as long as you retain
+the correct attribution.
 
 =cut
