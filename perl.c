@@ -255,12 +255,9 @@ perl_construct(pTHXx)
 	*s = '\0';
 	SvCUR_set(PL_patchlevel, s - (U8*)SvPVX(PL_patchlevel));
 	SvPOK_on(PL_patchlevel);
-	SvNVX(PL_patchlevel) = (NV)PERL_REVISION
-				+ ((NV)PERL_VERSION / (NV)1000)
-#if defined(PERL_SUBVERSION) && PERL_SUBVERSION > 0
-				+ ((NV)PERL_SUBVERSION / (NV)1000000)
-#endif
-				;
+	SvNVX(PL_patchlevel) = (NV)PERL_REVISION +
+			      ((NV)PERL_VERSION / (NV)1000) +
+			      ((NV)PERL_SUBVERSION / (NV)1000000);
 	SvNOK_on(PL_patchlevel);	/* dual valued */
 	SvUTF8_on(PL_patchlevel);
 	SvREADONLY_on(PL_patchlevel);

@@ -7,7 +7,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan( tests => 125 );
+plan( tests => 126 );
 
 $x = 'foo';
 $_ = "x";
@@ -508,5 +508,11 @@ is("<$_> <$s>", "<> <4>", "[perl #7806]");
     is($_, "\n", "[perl #19048]");
 }
 
-
-    
+# [perl #17757] interaction between saw_ampersand and study
+{
+    my $f = eval q{ $& };
+    $f = "xx";
+    study $f;
+    $f =~ s/x/y/g;
+    is($f, "yy", "[perl #17757]");
+}
