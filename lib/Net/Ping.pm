@@ -1,6 +1,6 @@
 package Net::Ping;
 
-# $Id: Ping.pm,v 1.16 2002/01/05 23:36:54 rob Exp $
+# $Id: Ping.pm,v 1.17 2002/02/18 01:25:11 rob Exp $
 
 require 5.002;
 require Exporter;
@@ -12,10 +12,11 @@ use FileHandle;
 use Socket qw( SOCK_DGRAM SOCK_STREAM SOCK_RAW PF_INET
                inet_aton sockaddr_in );
 use Carp;
+use Errno qw(ECONNREFUSED);
 
 @ISA = qw(Exporter);
 @EXPORT = qw(pingecho);
-$VERSION = "2.11";
+$VERSION = "2.12";
 
 # Constants
 
@@ -333,9 +334,10 @@ sub ping_tcp
     my ($ret                # The return value
         );
 
-    $@ = "";
+    $@ = ""; $! = 0;
     $ret = $self -> tcp_connect( $ip, $timeout);
-    $ret = 1 if $@ =~ /(Connection Refused|Unknown Error)/i;
+    $ret = 1 if $! == ECONNREFUSED  # Connection refused
+      || $@ =~ /Unknown Error/i;    # Special Win32 response?
     $self->{"fh"}->close();
     return($ret);
 }
@@ -634,7 +636,7 @@ __END__
 
 Net::Ping - check a remote host for reachability
 
-$Id: Ping.pm,v 1.16 2002/01/05 23:36:54 rob Exp $
+$Id: Ping.pm,v 1.17 2002/02/18 01:25:11 rob Exp $
 
 =head1 SYNOPSIS
 

@@ -1,6 +1,13 @@
 CHANGES
 -------
 
+2.12  Feb 17 19:00 2002
+	- More general error determination for
+	  better cross platform consistency and
+	  foreign language support.
+	  Spotted by arnaud@romeconcept.com
+	- Test changes for VMS (Craig Berry)
+
 2.11  Feb 02 12:00 2002
 	- Test changes in case echo port is not available.
 	- Fix 110_icmp_inst.t to use icmp protocol
