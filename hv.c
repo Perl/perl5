@@ -217,10 +217,7 @@ hv_fetch_ent(HV *hv, SV *keysv, I32 lval, register U32 hash)
 }
 
 static void
-hv_magic_check (hv, needs_copy, needs_store)
-HV *hv;
-bool *needs_copy;
-bool *needs_store;
+hv_magic_check (HV *hv, bool *needs_copy, bool *needs_store)
 {
     MAGIC *mg = SvMAGIC(hv);
     *needs_copy = FALSE;
@@ -1087,5 +1084,6 @@ share_hek(char *str, I32 len, register U32 hash)
     ++HeVAL(entry);				/* use value slot as REFCNT */
     return HeKEY_hek(entry);
 }
+
 
 

@@ -97,7 +97,6 @@ typedef HANDLE perl_mutex;
 	}							\
     } STMT_END
 
-#define THR ((struct perl_thread *) TlsGetValue(thr_key))
 #define THREAD_CREATE(t, f)	Perl_thread_create(t, f)
 #define THREAD_POST_CREATE(t)	NOOP
 #define THREAD_RET_TYPE		DWORD WINAPI
@@ -109,7 +108,7 @@ typedef THREAD_RET_TYPE thread_func_t(void *);
 START_EXTERN_C
 
 #if defined(PERLDLL) && (!defined(__BORLANDC__) || defined(_DLL))
-extern __declspec(thread) struct thread *Perl_current_thread;
+extern __declspec(thread) struct perl_thread *Perl_current_thread;
 #define SET_THR(t)   		(Perl_current_thread = t)
 #define THR			Perl_current_thread
 #else
