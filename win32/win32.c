@@ -3092,15 +3092,20 @@ win32_chmod(const char *path, int mode)
 
 
 static char *
-create_command_line(const char * const *args)
+create_command_line(const char *cmdname, const char * const *args)
 {
     dTHX;
     int index, argc;
     char *cmd, *ptr;
     const char *arg;
     STRLEN len = 0;
+    bool bat_file = FALSE;
     bool cmd_shell = FALSE;
     bool extra_quotes = FALSE;
+    char *cname = (char*)cmdname;
+
+    if (!cname)
+	cname = (char*)args[0];
 
     /* The NT cmd.exe shell has the following peculiarity that needs to be
      * worked around.  It strips a leading and trailing dquote when any
@@ -3115,12 +3120,21 @@ create_command_line(const char * const *args)
      * and there were at least two or more arguments passed to cmd.exe
      * (not including switches).
      */
-    if (args[0]
-	&& (stricmp(args[0], "cmd.exe") == 0
-	    || stricmp(args[0], "cmd") == 0))
-    {
-	cmd_shell = TRUE;
-	len += 3;
+    if (cname) {
+	STRLEN clen = strlen(cname);
+	if (clen > 4
+	    && (stricmp(&cname[clen-4], ".bat") == 0
+		|| (IsWinNT() && stricmp(&cname[clen-4], ".cmd") == 0)))
+	{
+	    bat_file = TRUE;
+	    len += 3;
+	}
+	else if (stricmp(cname, "cmd.exe") == 0
+		 || stricmp(cname, "cmd") == 0)
+	{
+	    cmd_shell = TRUE;
+	    len += 3;
+	}
     }
 
     DEBUG_p(PerlIO_printf(Perl_debug_log, "Args "));
@@ -3137,13 +3151,21 @@ create_command_line(const char * const *args)
     New(1310, cmd, len, char);
     ptr = cmd;
 
+    if (bat_file) {
+	*ptr++ = '"';
+	extra_quotes = TRUE;
+    }
+
     for (index = 0; (arg = (char*)args[index]) != NULL; ++index) {
 	bool do_quote = 0;
 	STRLEN curlen = strlen(arg);
 
-	/* we want to protect arguments with spaces with dquotes,
-	 * but only if they aren't already there */
-	if (!(arg[0] == '"' && arg[curlen-1] == '"')) {
+	/* we want to protect empty arguments and ones with spaces with
+	 * dquotes, but only if they aren't already there */
+	if (!curlen) {
+	    do_quote = 1;
+	}
+	else if (!(arg[0] == '"' && curlen > 1 && arg[curlen-1] == '"')) {
 	    STRLEN i = 0;
 	    while (i < curlen) {
 		if (isSPACE(arg[i])) {
@@ -3166,7 +3188,8 @@ create_command_line(const char * const *args)
 	if (args[index+1])
 	    *ptr++ = ' ';
 
-    	if (cmd_shell && !extra_quotes
+    	if (!extra_quotes
+	    && cmd_shell
 	    && (stricmp(arg, "/x/c") == 0 || stricmp(arg, "/c") == 0)
 	    && (argc-1 > index+1))   /* two or more arguments to cmd.exe? */
 	{
@@ -3362,7 +3385,7 @@ win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
     PROCESS_INFORMATION ProcessInformation;
     DWORD create = 0;
 
-    char *cmd = create_command_line(argv);
+    char *cmd = create_command_line(cmdname, argv);
     char *fullcmd = Nullch;
 
     env = PerlEnv_get_childenv();
