@@ -31,6 +31,21 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[  9450] By: jhi                                   on 2001/03/29  16:29:17
+        Log: Integrate perlio.
+     Branch: perl
+	  !> win32/buildext.pl
+____________________________________________________________________________
+[  9449] By: jhi                                   on 2001/03/29  15:50:01
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
+[  9448] By: nick                                  on 2001/03/29  15:47:15
+        Log: Make sure buildext.pl finds Errno.pm
+     Branch: perlio
+	   ! win32/buildext.pl
+____________________________________________________________________________
 [  9447] By: jhi                                   on 2001/03/29  15:39:34
         Log: Integrate perlio.
      Branch: perl
