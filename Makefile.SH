@@ -24,10 +24,15 @@ case "$d_dosuid" in
 esac
 
 echo "Extracting Makefile (with variable substitutions)"
+rm -f Makefile
 cat >Makefile <<!GROK!THIS!
-# $RCSfile: Makefile.SH,v $$Revision: 4.0.1.3 $$Date: 91/11/05 15:48:11 $
+# $RCSfile: Makefile.SH,v $$Revision: 4.0.1.4 $$Date: 92/06/08 11:40:43 $
 #
 # $Log:	Makefile.SH,v $
+# Revision 4.0.1.4  92/06/08  11:40:43  lwall
+# patch20: cray didn't give enough memory to /bin/sh
+# patch20: various and sundry fixes
+# 
 # Revision 4.0.1.3  91/11/05  15:48:11  lwall
 # patch11: saberized perl
 # patch11: added support for dbz
@@ -66,6 +71,8 @@ libs = $libs $cryptlib
 
 public = perl taintperl $suidperl
 
+shellflags = $shellflags
+
 # To use an alternate make, set $altmake in config.sh.
 MAKE = ${altmake-make}
 
@@ -73,7 +80,7 @@ MAKE = ${altmake-make}
 
 cat >>Makefile <<'!NO!SUBS!'
 
-CCCMD = `sh cflags $@`
+CCCMD = `sh $(shellflags) cflags $@`
 
 private = 
 
@@ -299,10 +306,13 @@ perly.h: perly.c
 	touch perly.h
 
 perly.c: perly.y perly.fixer
-	@ echo 'Expect either' 29 shift/reduce and 59 reduce/reduce conflicts...
-	@ echo '           or' 27 shift/reduce and 61 reduce/reduce conflicts...
+	@ \
+case "$(YACC)" in \
+    *bison*) echo 'Expect' 25 shift/reduce and 59 reduce/reduce conflicts;; \
+    *) echo 'Expect' 27 shift/reduce and 57 reduce/reduce conflicts;; \
+esac
 	$(YACC) -d perly.y
-	sh ./perly.fixer y.tab.c perly.c
+	sh $(shellflags) ./perly.fixer y.tab.c perly.c
 	mv y.tab.h perly.h
 	echo 'extern YYSTYPE yylval;' >>perly.h
 
@@ -313,7 +323,7 @@ install: all
 	./perl installperl
 
 clean:
-	rm -f *.o all perl taintperl suidperl
+	rm -f *.o all perl taintperl suidperl perly.c
 	cd x2p; $(MAKE) clean
 
 realclean: clean
@@ -339,7 +349,7 @@ depend: makedepend
 
 test: perl
 	- cd t && chmod +x TEST */*.t
-	- cd t && (rm -f perl; $(SLN) ../perl .) && ./perl TEST </dev/tty
+	- cd t && (rm -f perl; $(SLN) ../perl perl) && ./perl TEST </dev/tty
 
 clist:
 	echo $(c) | tr ' ' '\012' >.clist
@@ -354,7 +364,7 @@ shlist:
 $(obj) hash.o:
 	@ echo "You haven't done a "'"make depend" yet!'; exit 1
 makedepend: makedepend.SH
-	/bin/sh makedepend.SH
+	/bin/sh $(shellflags) makedepend.SH
 !NO!SUBS!
 $eunicefix Makefile
 case `pwd` in

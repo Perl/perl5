@@ -7,12 +7,44 @@ MANIFEST		This list of files
 Makefile.SH		Precursor to Makefile
 PACKINGLIST		Which files came from which kits
 README			The Instructions
+README.ncr		Special instructions for NCR
 README.uport		Special instructions for Microports
 README.xenix		Special instructions for Xenix
 Wishlist		Some things that may or may not happen
 arg.h			Public declarations for the above
 array.c			Numerically subscripted arrays
 array.h			Public declarations for the above
+atarist/FILES
+atarist/README.ST
+atarist/RESULTS
+atarist/atarist.c
+atarist/config.h
+atarist/echo.c
+atarist/explain
+atarist/makefile.sm
+atarist/makefile.st
+atarist/osbind.pl
+atarist/perldb.diff
+atarist/perlglob.c
+atarist/test/binhandl
+atarist/test/ccon
+atarist/test/dbm
+atarist/test/err
+atarist/test/gdbm
+atarist/test/gdbm.t
+atarist/test/glob
+atarist/test/osexample.pl
+atarist/test/pi.pl
+atarist/test/printenv
+atarist/test/readme
+atarist/test/sig
+atarist/test/tbinmode
+atarist/usersub.c
+atarist/usub/README.ATARI
+atarist/usub/acurses.mus
+atarist/usub/makefile.st
+atarist/usub/usersub.c
+atarist/wildmat.c
 c2ph.SH			program to translate dbx stabs to perl
 c2ph.doc		documentation for c2ph
 cflags.SH		A script that emits C compilation flags per file
@@ -92,6 +124,7 @@ handy.h			Handy definitions
 hash.c			Associative arrays
 hash.h			Public declarations for the above
 hints/3b1.sh
+hints/3b1cc
 hints/3b2.sh
 hints/aix_rs.sh
 hints/aix_rt.sh
@@ -99,6 +132,8 @@ hints/altos486.sh
 hints/apollo_C6_7.sh
 hints/apollo_C6_8.sh	
 hints/aux.sh
+hints/cray.sh
+hints/dgux.sh
 hints/dnix.sh
 hints/dynix.sh
 hints/fps.sh
@@ -106,22 +141,26 @@ hints/genix.sh
 hints/greenhills.sh	
 hints/hp9000_300.sh
 hints/hp9000_400.sh
+hints/hp9000_700.sh
 hints/hp9000_800.sh	
 hints/hpux.sh
 hints/i386.sh
 hints/isc_3_2_2.sh
+hints/mc6000.sh
 hints/mips.sh
 hints/mpc.sh	
 hints/ncr_tower.sh
 hints/next.sh
 hints/opus.sh	
-hints/osf_1.sh
+hints/osf1.sh
 hints/sco_2_3_0.sh
 hints/sco_2_3_1.sh
 hints/sco_2_3_2.sh
 hints/sco_2_3_3.sh
+hints/sco_2_3_4.sh
 hints/sco_3.sh
 hints/sgi.sh
+hints/solaris_2_0.sh
 hints/stellar.sh	
 hints/sunos_3_4.sh
 hints/sunos_3_5.sh
@@ -129,8 +168,12 @@ hints/sunos_4_0_1.sh
 hints/sunos_4_0_2.sh
 hints/svr4.sh
 hints/ti1500.sh	
+hints/titan.sh
+hints/ultrix_1.sh
 hints/ultrix_3.sh
 hints/ultrix_4.sh
+hints/unisysdynix.sh
+hints/utekv.sh
 hints/uts.sh
 hints/vax.sh
 installperl		Perl script to do "make install" dirty work
@@ -156,6 +199,7 @@ lib/getopts.pl		Perl library supporting option parsing
 lib/importenv.pl	Perl routine to get environment into variables
 lib/look.pl		A "look" equivalent
 lib/newgetopt.pl	A perl library supporting long option parsing
+lib/open2.pl
 lib/perldb.pl		Perl debugging routines
 lib/pwd.pl		Routines to keep track of PWD environment variable
 lib/shellwords.pl	Perl library to split into words with shell quoting
@@ -189,6 +233,7 @@ os2/a2p.def		Linker defs for a2p
 os2/alarm.c		An implementation of alarm()
 os2/alarm.h		Header file for same
 os2/config.h		Configuration file for OS/2
+os2/crypt.c
 os2/dir.h		Directory header
 os2/director.c		Directory routines
 os2/eg/alarm.pl		Example of alarm code
@@ -211,6 +256,7 @@ os2/s2p.cmd		s2p as command file
 os2/selfrun.bat		A self running perl script for DOS
 os2/selfrun.cmd		Example of extproc feature
 os2/suffix.c		Code for creating backup filenames
+os2/tests.dif
 patchlevel.h		The current patch level of perl
 perl.c			main()
 perl.h			Global declarations
@@ -218,6 +264,7 @@ perl.man		The manual page(s)
 perlsh			A poor man's perl shell
 perly.fixer		A program to remove yacc stack limitations
 perly.y			Yacc grammar for perl
+pstruct
 regcomp.c		Regular expression compiler
 regcomp.h		Private declarations for above
 regexec.c		Regular expression evaluator

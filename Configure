@@ -8,7 +8,7 @@
 # and edit it to reflect your system.  Some packages may include samples
 # of config.h for certain machines, so you might look for one of those.)
 #
-# $RCSfile: Configure,v $$Revision: 4.0.1.6 $$Date: 91/11/11 16:26:51 $
+# $RCSfile: Configure,v $$Revision: 4.0.1.7 $$Date: 92/06/08 11:38:16 $
 #
 # Yes, you may rip this off to use in other distribution packages.
 # (Note: this Configure script was generated automatically.  Rather than
@@ -49,6 +49,7 @@ fi
     echo "(I see you are using the Korn shell.  Some ksh's blow up on Configure," && \
     echo "especially on exotic machines.  If yours does, try the Bourne shell instead.)"
 
+unset CDPATH
 if test ! -d ../UU; then
     if test ! -d UU; then
 	mkdir UU
@@ -132,6 +133,7 @@ cppstdin=''
 cppminus=''
 d_bcmp=''
 d_bcopy=''
+d_safebcpy=''
 d_bzero=''
 d_castneg=''
 castflags=''
@@ -154,10 +156,14 @@ d_getpgrp2=''
 d_getprior=''
 d_htonl=''
 d_index=''
+d_isascii=''
 d_killpg=''
 d_lstat=''
 d_memcmp=''
 d_memcpy=''
+d_safemcpy=''
+d_memmove=''
+d_memset=''
 d_mkdir=''
 d_msg=''
 d_msgctl=''
@@ -169,7 +175,9 @@ d_odbm=''
 d_open3=''
 d_readdir=''
 d_rename=''
+d_rewindir=''
 d_rmdir=''
+d_seekdir=''
 d_select=''
 d_sem=''
 d_semctl=''
@@ -202,6 +210,7 @@ d_strctcpy=''
 d_strerror=''
 d_symlink=''
 d_syscall=''
+d_telldir=''
 d_truncate=''
 d_vfork=''
 d_voidsig=''
@@ -340,7 +349,7 @@ attrlist="$attrlist sparc sun tower tower32 tower32_600 tower32_800 tss"
 attrlist="$attrlist u3b2 u3b20 u3b200 u3b5 ultrix unix vax venix xenix"
 attrlist="$attrlist z8000"
 boPATH=""
-eoPATH="/usr/ucb /bin /usr/bin /usr/local /usr/local/bin /usr/lbin /usr/plx /usr/5bin /vol/local/bin /etc /usr/lib /lib /usr/local/lib /sys5.3/bin /sys5.3/usr/bin /bsd4.3/bin /bsd4.3/usr/bin /bsd4.3/usr/ucb /bsd43/usr/bin"
+eoPATH="/usr/ucb /bin /usr/bin /usr/local /usr/local/bin /usr/lbin /usr/plx /usr/5bin /vol/local/bin /etc /usr/lib /lib /usr/local/lib /sys5.3/bin /sys5.3/usr/bin /bsd4.3/bin /bsd4.3/usr/bin /bsd4.3/usr/ucb /bsd43/usr/bin /usr/ccs/lib /opt/SUNWste/bin /usr/opt/SUNWste/bin"
 d_newshome="/usr/NeWS"
 errnolist=errnolist
 h_fcntl=false
@@ -354,22 +363,25 @@ serve_unix_tcp=""
 d_ndir=ndir
 voidwant=1
 voidwant=7
-libswanted="c_s net_s net socket nsl_s nsl nm ndir ndbm dbm PW malloc sun m bsd BSD x posix ucb"
+libswanted="c_s net_s net socket nsl_s nsl nm ndir dir ndbm dbm PW malloc sun m bsd BSD x posix ucb"
 inclwanted='/usr/include /usr/netinclude /usr/include/sun /usr/include/bsd /usr/include/lan /usr/ucbinclude'
 
 : Now test for existence of everything in MANIFEST
 
 echo "First let's make sure your kit is complete.  Checking..."
-awk '$1 !~ /PACKINGLIST/ {print $1}' ../MANIFEST | split -200
+awk '$1 !~ /PACKINGLIST/ {print $1}' ../MANIFEST | split -100
 rm -f missing
 for filelist in x??; do
     (cd ..; ls `cat UU/$filelist` >/dev/null 2>>UU/missing)
 done
 if test -s missing; then
+    echo "WARNING: the following files are missing:"
     cat missing
-    kill $$
+    echo "INTERRUPT NOW, OR HIT RETURN TO PROCEED AT YOUR OWN RISK"
+    read junk
+else
+    echo "Looks good..."
 fi
-echo "Looks good..."
 
 : some greps do not return status, grrr.
 echo "grimblepritz" >contains.txt
@@ -778,7 +790,10 @@ if test -d ../hints && test ! -f ../config.sh; then
 	mips*) dflt="$dflt mips";;
 	[23]100) dflt="$dflt mips";;
 	next*) dflt="$dflt next" ;;
+	6000) dflt="$dflt mc6000";;
 	esac
+
+	test -f "../hints/$1.sh" && dflt="$dflt $1"
 
 	case "$1" in
 	aix) dflt="$dflt aix_rs" ;;
@@ -789,19 +804,21 @@ if test -d ../hints && test ! -f ../config.sh; then
 	    4.0.2) dflt="$dflt sunos_4_0_2" ;;
 	    esac
 	    ;;
-	dnix) dflt="$dflt dnix" ;;
-	genix) dflt="$dflt genix" ;;
-	hp*ux) dflt="$dflt hpux" ;;
-	next) dflt="$dflt next" ;;
+	hp*ux) dflt="$dflt hpux"
+	    extra_hints="hp"`echo $5 | sed -e s#/#_#g -e s/..$/00/`
+	    if test -f ../hints/$extra_hints.sh; then
+		dflt="$dflt $extra_hints"
+	    fi;;
 	irix) dflt="$dflt sgi" ;;
 	ultrix) case "$3" in
+	    1*) dflt="$dflt ultrix_1" ;;
 	    3*) dflt="$dflt ultrix_3" ;;
 	    4*) dflt="$dflt ultrix_4" ;;
 	    esac
 	    ;;
 	uts) dflt="$dflt uts" ;;
 	$2) if test -f /etc/systemid; then
-		set `echo $3 | sed 's/\./ /` $4
+		set `echo $3 | sed 's/\./ /'` $4
 		if test -f ../hints/sco_$1_$2_$3.sh; then
 		    dflt="$dflt sco_$1_$2_$3"
 		elif test -f ../hints/sco_$1_$2.sh; then
@@ -871,7 +888,7 @@ esac
 echo "If you don't want the manual sources installed, answer 'none'."
 case "$mansrc" in
 '')
-    dflt=`./loc . none /usr/man/local/man1 /usr/man/man.L /usr/man/manl /usr/man/mann /usr/man/u_man/man1 /usr/man/man1`
+    dflt=`./loc . none /usr/man/local/man1 /usr/man/man.L /usr/man/manl /usr/man/mann /usr/man/u_man/man1 /usr/man/man1 /usr/local/man/man1`
     ;;
 *)  dflt="$mansrc"
     ;;
@@ -991,26 +1008,28 @@ done
 
 : make some quick guesses about what we are up against
 echo " "
+echo exit 1 >bsd
+echo exit 1 >usg
+echo exit 1 >v7
+echo exit 1 >osf1
+echo exit 1 >eunice
+echo exit 1 >xenix
+echo exit 1 >venix
 cat $usrinclude/signal.h $usrinclude/sys/signal.h >guess.txt 2>/dev/null
 if test "$usrinclude" = "/bsd43/usr/include" ; then
     echo "Looks kind of like a SysV MIPS running BSD, but we'll see..."
     echo exit 0 >bsd
-    echo exit 1 >usg
-    echo exit 1 >v7
+elif test -f /osf_boot || $contains "OSF/1" /usr/include/ctype.h; then
+    echo "Looks like an OSF/1 system, but we'll see..."
+    echo exit 0 >osf1
 elif test `echo abc | tr a-z A-Z` = Abc ; then
     echo "Looks kind of like a USG system, but we'll see..."
-    echo exit 1 >bsd
     echo exit 0 >usg
-    echo exit 1 >v7
 elif $contains SIGTSTP guess.txt >/dev/null 2>&1 ; then
     echo "Looks kind of like a BSD system, but we'll see..."
     echo exit 0 >bsd
-    echo exit 1 >usg
-    echo exit 1 >v7
 else
     echo "Looks kind of like a version 7 system, but we'll see..."
-    echo exit 1 >bsd
-    echo exit 1 >usg
     echo exit 0 >v7
 fi
 case "$eunicefix" in
@@ -1026,7 +1045,6 @@ EOI
     echo " "
     echo "Congratulations.  You aren't running Eunice."
     d_eunice="$undef"
-    echo "exit 1" >eunice
     ;;
 esac
 if test -f /xenix; then
@@ -1035,7 +1053,6 @@ if test -f /xenix; then
 else
     echo " "
     echo "It's not Xenix..."
-    echo "exit 1" >xenix
 fi
 chmod +x xenix
 $eunicefix xenix
@@ -1049,9 +1066,8 @@ else
     else
 	echo "Nor is it Venix..."
     fi
-    echo "exit 1" >venix
 fi
-chmod +x bsd usg v7 eunice venix
+chmod +x bsd usg v7 osf1 eunice venix
 $eunicefix bsd usg v7 eunice venix
 
 : see what memory models we can support
@@ -1261,7 +1277,7 @@ else
     cc="$ans"
 fi
 case "$cc" in
-gcc*) cpp=`./loc gcc-cpp $cpp $pth`
+*gcc*) cpp=`./loc gcc-cpp $cpp $pth`
     case "$nativegcc" in
     '') case "$ccflags" in
 	*-fpcc-struct-return*) dflt=n;;
@@ -1349,12 +1365,18 @@ if $contains 'LANGUAGE_C' $usrinclude/signal.h >/dev/null 2>&1; then
     case "$dflt" in
     *LANGUAGE_C*);;
     *) dflt="$dflt -DLANGUAGE_C";;
+    *) if osf1; then
+          dflt="$dflt -D__LANGUAGE_C__"
+       else
+          dflt="$dflt -DLANGUAGE_C"
+       fi
+       ;;
     esac
 fi
 if $contains '_NO_PROTO' $usrinclude/signal.h >/dev/null 2>&1; then
     case "$dflt" in
     *_NO_PROTO*);;
-    *) dflt="$dflt -D_NO_PROTO";;
+    *) osf1 || dflt="$dflt -D_NO_PROTO";;
     esac
 fi
 case "$dflt" in
@@ -1365,7 +1387,8 @@ cat <<EOH
 Your C compiler may want other flags.  For this question you should
 include -I/whatever and -DWHATEVER flags and any other flags used by
 the C compiler, but you should NOT include libraries or ld flags like
--lwhatever.  To use no flags, specify the word "none".
+-lwhatever.  For instance, this would be a good place to specify
+-DDEBUGGING.  To use no flags, specify the word "none".
   
 EOH
 rp="Any additional cc flags? [$dflt]"
@@ -1434,7 +1457,7 @@ for thislib in $libswanted; do
     if test -f $xxx; then
 	echo "Found -l$thislib."
 	case "$dflt" in
-	*"-l$thislib "*|*"-l$thatlib "*);;
+	*-l$thislib\ *|*-l$thatlib\ *);;
 	*) dflt="$dflt -l$thislib ";;
 	esac
     else
@@ -1450,7 +1473,7 @@ for thislib in $libswanted; do
 	    if test -f $xxx; then
 		echo "Found -l$thislib."
 		case "$dflt" in
-		*"-l$thislib "*|*"-l$thatlib "*);;
+		*-l$thislib\ *|*-l$thatlib\ *);;
 		*) dflt="$dflt -l$thislib ";;
 		esac
 	    else
@@ -1458,7 +1481,7 @@ for thislib in $libswanted; do
 		if test -f $xxx; then
 		    echo "Found -l$thislib as a shared object only."
 		    case "$dflt" in
-		    *"-l$thislib "*|*"-l$thatlib "*);;
+		    *-l$thislib\ *|*-l$thatlib\ *);;
 		    *) dflt="$dflt -l$thislib ";;
 		    esac
 		else
@@ -1572,6 +1595,19 @@ while $test "$cont" ; do
     fi
 done
 
+case "$bin" in
+  ?????????????????????????)
+    cat <<EOF
+
+NOTE: you have a fairly long path name there.  Some systems have trouble
+executing a script if the #! line ends up longer than 32 characters.  If
+you have this trouble you may have to reinstall somewhere else, or make
+a symbolic link from someplace with a shorter name.
+
+EOF
+    ;;
+esac
+
 case "$installbin" in
 '')
     dflt=`echo $bin | sed 's#^/afs/#/afs/.#'`
@@ -1628,9 +1664,9 @@ main()
     } u;
 
     if (sizeof(long) > 4)
-	u.l = (0x08070605 << 32) | 0x04030201;
+	u.l = (0x08070605L << 32) | 0x04030201L;
     else
-	u.l = 0x04030201;
+	u.l = 0x04030201L;
     for (i=0; i < sizeof(long); i++)
 	printf("%c",u.c[i]+'0');
     printf("\n");
@@ -1864,6 +1900,7 @@ case "$libs" in
 esac
 set /usr/ccs/lib/libc.so
 test -f $1 || set /usr/lib/libc.so
+test -f $1 || set /usr/shlib/libc.so
 test -f $1 || set /usr/lib/libc.so.[0-9]*
 test -f $1 || set /lib/libsys_s.a
 eval set \$$#
@@ -1955,6 +1992,10 @@ elif $sed -n -e 's/^.*|FUNC |GLOB .*|//p' -e 's/^.*|FUNC |WEAK .*|//p' \
 	   <libc.tmp >libc.list; \
   $contains '^printf$' libc.list >/dev/null 2>&1; then
     echo done
+elif $sed -n -e 's/^[         ]*[0-9][0-9a-f]*[       ]*Def. Text[    ]*//p' \
+	   < libc.tmp | $sed -e 's/\[.*\]//' > libc.list; \
+  $contains '^printf$' libc.list >/dev/null 2>&1; then
+      echo done
 else
     nm -p $* 2>/dev/null >libc.tmp
     $sed -n -e 's/^.* [AT]  *_[_.]*//p' -e 's/^.* [AT] //p' <libc.tmp >libc.list
@@ -1997,7 +2038,7 @@ inlibc='echo " "; td=$define; tu=$undef;
 if $contains "^$1\$" libc.list >/dev/null 2>&1;
 then echo "$1() found";
   eval "case \"\$$2\" in undef) . whoa; esac"; eval "$2=\$td";
-else echo "$1() not found";
+else echo "$1() NOT found";
   eval "case \"\$$2\" in define) . whoa; esac"; eval "$2=\$tu"; fi'
 
 : see if bcmp exists
@@ -2007,6 +2048,52 @@ eval $inlibc
 : see if bcopy exists
 set bcopy d_bcopy
 eval $inlibc
+
+case "$d_safebcpy" in
+'')
+    : assume the worst
+    d_safebcpy=undef
+    case "$d_bcopy" in
+    define)
+	echo "Checking to see if your bcopy() can do overlapping copies..."
+	$cat >safebcpy.c <<'EOCP'
+main()
+{
+    char buf[128];
+    register char *b;
+    register int len;
+    register int off;
+    register int align;
+
+    for (align = 7; align >= 0; align--) {
+	for (len = 36; len; len--) {
+	    b = buf+align;
+	    bcopy("abcdefghijklmnopqrstuvwxyz0123456789", b, len);
+	    for (off = 1; off <= len; off++) {
+		bcopy(b, b+off, len);
+		bcopy(b+off, b, len);
+		if (bcmp(b, "abcdefghijklmnopqrstuvwxyz0123456789", len))
+		    exit(1);
+	    }
+	}
+    }
+    exit(0);
+}
+EOCP
+	if $cc safebcpy.c -o safebcpy $ccflags >/dev/null 2>&1 ; then
+	    if ./safebcpy; then
+		echo "It can."
+		d_safebcpy=define
+	    else
+		echo "It can't."
+	    fi
+	else
+	    echo "(I can't compile the test program, so we'll assume not...)"
+	fi
+	;;
+    esac
+    ;;
+esac
 
 : see if bzero exists
 set bzero d_bzero
@@ -2061,7 +2148,7 @@ EOF
 	val2="$define"
     fi
 else
-    echo 'vprintf() not found.'
+    echo 'vprintf() NOT found.'
     val="$undef"
     val2="$undef"
 fi
@@ -2099,7 +2186,7 @@ else
 	cryptlib=-lcrypt
     fi
     if $test -z "$cryptlib"; then
-	echo 'crypt() not found.'
+	echo 'crypt() NOT found.'
 	val="$undef"
     else
 	val="$define"
@@ -2294,7 +2381,8 @@ eval $inlibc
 : index or strcpy
 echo " "
 case "$d_index" in
-undef) dflt=n;;
+undef) dflt=y;;
+define) dflt=n;;
 *)  if $test -f /unix; then
 	dflt=n
     else
@@ -2326,6 +2414,10 @@ else
     fi
 fi
 
+: see if isascii exists
+set isascii d_isascii
+eval $inlibc
+
 : see if killpg exists
 set killpg d_killpg
 eval $inlibc
@@ -2340,6 +2432,60 @@ eval $inlibc
 
 : see if memcpy exists
 set memcpy d_memcpy
+eval $inlibc
+
+case "$d_safemcpy" in
+'')
+    : assume the worst
+    d_safemcpy=undef
+    case "$d_memcpy" in
+    define)
+	echo "Checking to see if your memcpy() can do overlapping copies..."
+	$cat >safemcpy.c <<'EOCP'
+main()
+{
+    char buf[128];
+    register char *b;
+    register int len;
+    register int off;
+    register int align;
+
+    for (align = 7; align >= 0; align--) {
+	for (len = 36; len; len--) {
+	    b = buf+align;
+	    memcpy(b,"abcdefghijklmnopqrstuvwxyz0123456789", len);
+	    for (off = 1; off <= len; off++) {
+		memcpy(b+off, b, len);
+		memcpy(b, b+off, len);
+		if (memcmp(b, "abcdefghijklmnopqrstuvwxyz0123456789", len))
+		    exit(1);
+	    }
+	}
+    }
+    exit(0);
+}
+EOCP
+	if $cc safemcpy.c -o safemcpy $ccflags >/dev/null 2>&1 ; then
+	    if ./safemcpy; then
+		echo "It can."
+		d_safemcpy=define
+	    else
+		echo "It can't."
+	    fi
+	else
+	    echo "(I can't compile the test program, so we'll assume not...)"
+	fi
+	;;
+    esac
+    ;;
+esac
+
+: see if memmove exists
+set memmove d_memmove
+eval $inlibc
+
+: see if memset exists
+set memset d_memset
 eval $inlibc
 
 : see if mkdir exists
@@ -2433,7 +2579,7 @@ END
 *)  mallocsrc='';
     mallocobj='';
     mallocptrtype=void
-    val="$define"
+    val="$undef"
     ;;
 esac
 set d_mymalloc
@@ -2447,7 +2593,7 @@ if test -f $xxx; then
     echo "ndbm.h found."
 else
     val="$undef"
-    echo "ndbm.h not found."
+    echo "ndbm.h NOT found."
 fi
 set d_ndbm
 eval $setvar
@@ -2460,7 +2606,7 @@ if test -f $xxx; then
     echo "dbm.h found."
 else
     val="$undef"
-    echo "dbm.h not found."
+    echo "dbm.h NOT found."
 fi
 set d_odbm
 eval $setvar
@@ -2631,8 +2777,16 @@ fi
 set rename d_rename
 eval $inlibc
 
+: see if rewindir exists
+set rewinddir d_rewindir
+eval $inlibc
+
 : see if rmdir exists
 set rmdir d_rmdir
+eval $inlibc
+
+: see if seekdir exists
+set seekdir d_seekdir
 eval $inlibc
 
 : see if select exists
@@ -2968,6 +3122,10 @@ case "$flags$i_sys_time$i_time" in
 undefundef) i_sys_time="$define"; i_time="$define";
     echo "ICK, NOTHING WORKED!!!  You may have to diddle the includes.";;
 esac
+
+: see if telldir exists
+set telldir d_telldir
+eval $inlibc
 
 : see if signal is declared as pointer to function returning int or void
 echo " "
@@ -3470,7 +3628,7 @@ if test -f $xxx; then
     echo "gdbm.h found."
 else
     val="$undef"
-    echo "gdbm.h not found."
+    echo "gdbm.h NOT found."
 fi
 set i_gdbm
 eval $setvar
@@ -3531,7 +3689,7 @@ if $test -r $usrinclude/sys/ioctl.h ; then
     echo "sys/ioctl.h found."
 else
     val="$undef"
-    echo "sys/ioctl.h not found, assuming ioctl args are defined in sgtty.h."
+    echo "sys/ioctl.h NOT found, assuming ioctl args are defined in sgtty.h."
 fi
 set i_sysioctl
 eval $setvar
@@ -3660,6 +3818,7 @@ cppstdin='$cppstdin'
 cppminus='$cppminus'
 d_bcmp='$d_bcmp'
 d_bcopy='$d_bcopy'
+d_safebcpy='$d_safebcpy'
 d_bzero='$d_bzero'
 d_castneg='$d_castneg'
 castflags='$castflags'
@@ -3682,10 +3841,14 @@ d_getpgrp2='$d_getpgrp2'
 d_getprior='$d_getprior'
 d_htonl='$d_htonl'
 d_index='$d_index'
+d_isascii='$d_isascii'
 d_killpg='$d_killpg'
 d_lstat='$d_lstat'
 d_memcmp='$d_memcmp'
 d_memcpy='$d_memcpy'
+d_safemcpy='$d_safemcpy'
+d_memmove='$d_memmove'
+d_memset='$d_memset'
 d_mkdir='$d_mkdir'
 d_msg='$d_msg'
 d_msgctl='$d_msgctl'
@@ -3697,7 +3860,9 @@ d_odbm='$d_odbm'
 d_open3='$d_open3'
 d_readdir='$d_readdir'
 d_rename='$d_rename'
+d_rewindir='$d_rewindir'
 d_rmdir='$d_rmdir'
+d_seekdir='$d_seekdir'
 d_select='$d_select'
 d_sem='$d_sem'
 d_semctl='$d_semctl'
@@ -3730,6 +3895,7 @@ d_strctcpy='$d_strctcpy'
 d_strerror='$d_strerror'
 d_symlink='$d_symlink'
 d_syscall='$d_syscall'
+d_telldir='$d_telldir'
 d_truncate='$d_truncate'
 d_vfork='$d_vfork'
 d_voidsig='$d_voidsig'
