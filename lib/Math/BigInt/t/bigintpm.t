@@ -1,15 +1,25 @@
 #!/usr/bin/perl -w
 
+BEGIN {
+    $| = 1;
+    if ($ENV{PERL_CORE}) {
+	@INC = qw(../lib);
+	chdir 't' if -d 't';
+    } else {
+        # for running manually with the CPAN distribution
+	unshift @INC, '../lib';
+    }
+    print "# INC = @INC\n";
+}
+
 use strict;
 use Test;
 
 BEGIN 
   {
-  $| = 1;
-  # chdir 't' if -d 't';
-  unshift @INC, '../lib'; # for running manually
   plan tests => 1457;
   }
+
 my $version = '1.43';	# for $VERSION tests, match current release (by hand!)
 
 ##############################################################################
