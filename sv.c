@@ -808,6 +808,23 @@ S_more_xpvbm(pTHX)
 
 #ifdef PURIFY
 
+#define new_XSV(p) \
+    STMT_START {				\
+	(p) = my_safemalloc(sizeof(SV));	\
+	++PL_sv_count;				\
+	SvANY(p) = 0;				\
+	SvREFCNT(p) = 1;			\
+	SvFLAGS(p) = 0;				\
+    } STMT_END
+
+#define del_XSV(p) \
+    STMT_START {				\
+	my_safefree(p);				\
+	--PL_sv_count;				\
+    } STMT_END
+#define new_XSV(p)	new_SV(p)
+#define del_XSV(p)	del_SV(p)
+
 #define new_XIV()	my_safemalloc(sizeof(XPVIV))
 #define del_XIV(p)	my_safefree(p)
 
@@ -845,6 +862,9 @@ S_more_xpvbm(pTHX)
 #define del_XPVBM(p)	my_safefree(p)
 
 #else /* !PURIFY */
+
+#define new_XSV(p)	new_SV(p)
+#define del_XSV(p)	del_SV(p)
 
 #define new_XIV()	(void*)new_xiv()
 #define del_XIV(p)	del_xiv((XPVIV*) p)
@@ -3277,7 +3297,7 @@ Perl_newSV(pTHX_ STRLEN len)
 {
     register SV *sv;
     
-    new_SV(sv);
+    new_XSV(sv);
     if (len) {
 	sv_upgrade(sv, SVt_PV);
 	SvGROW(sv, len + 1);
@@ -3681,7 +3701,7 @@ Perl_sv_replace(pTHX_ register SV *sv, register SV *nsv)
     StructCopy(nsv,sv,SV);
     SvREFCNT(sv) = refcnt;
     SvFLAGS(nsv) |= SVTYPEMASK;		/* Mark as freed */
-    del_SV(nsv);
+    del_XSV(nsv);
 }
 
 /*
@@ -3933,7 +3953,7 @@ Perl_sv_free(pTHX_ SV *sv)
     }
     sv_clear(sv);
     if (! SvREFCNT(sv))
-	del_SV(sv);
+	del_XSV(sv);
 }
 
 /*
@@ -4774,7 +4794,7 @@ Perl_sv_mortalcopy(pTHX_ SV *oldstr)
 {
     register SV *sv;
 
-    new_SV(sv);
+    new_XSV(sv);
     sv_setsv(sv,oldstr);
     EXTEND_MORTAL(1);
     PL_tmps_stack[++PL_tmps_ix] = sv;
@@ -4795,7 +4815,7 @@ Perl_sv_newmortal(pTHX)
 {
     register SV *sv;
 
-    new_SV(sv);
+    new_XSV(sv);
     SvFLAGS(sv) = SVs_TEMP;
     EXTEND_MORTAL(1);
     PL_tmps_stack[++PL_tmps_ix] = sv;
@@ -4841,7 +4861,7 @@ Perl_newSVpv(pTHX_ const char *s, STRLEN len)
 {
     register SV *sv;
 
-    new_SV(sv);
+    new_XSV(sv);
     if (!len)
 	len = strlen(s);
     sv_setpvn(sv,s,len);
@@ -4864,7 +4884,7 @@ Perl_newSVpvn(pTHX_ const char *s, STRLEN len)
 {
     register SV *sv;
 
-    new_SV(sv);
+    new_XSV(sv);
     sv_setpvn(sv,s,len);
     return sv;
 }
@@ -4907,7 +4927,7 @@ SV *
 Perl_vnewSVpvf(pTHX_ const char* pat, va_list* args)
 {
     register SV *sv;
-    new_SV(sv);
+    new_XSV(sv);
     sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
     return sv;
 }
@@ -4926,7 +4946,7 @@ Perl_newSVnv(pTHX_ NV n)
 {
     register SV *sv;
 
-    new_SV(sv);
+    new_XSV(sv);
     sv_setnv(sv,n);
     return sv;
 }
@@ -4945,7 +4965,7 @@ Perl_newSViv(pTHX_ IV i)
 {
     register SV *sv;
 
-    new_SV(sv);
+    new_XSV(sv);
     sv_setiv(sv,i);
     return sv;
 }
@@ -4964,7 +4984,7 @@ Perl_newSVuv(pTHX_ UV u)
 {
     register SV *sv;
 
-    new_SV(sv);
+    new_XSV(sv);
     sv_setuv(sv,u);
     return sv;
 }
@@ -4983,7 +5003,7 @@ Perl_newRV_noinc(pTHX_ SV *tmpRef)
 {
     register SV *sv;
 
-    new_SV(sv);
+    new_XSV(sv);
     sv_upgrade(sv, SVt_RV);
     SvTEMP_off(tmpRef);
     SvRV(sv) = tmpRef;
@@ -5020,7 +5040,7 @@ Perl_newSVsv(pTHX_ register SV *old)
 	    Perl_warner(aTHX_ WARN_INTERNAL, "semi-panic: attempt to dup freed string");
 	return Nullsv;
     }
-    new_SV(sv);
+    new_XSV(sv);
     if (SvTEMP(old)) {
 	SvTEMP_off(old);
 	sv_setsv(sv,old);
@@ -5496,7 +5516,7 @@ Perl_newSVrv(pTHX_ SV *rv, const char *classname)
 {
     SV *sv;
 
-    new_SV(sv);
+    new_XSV(sv);
 
     SV_CHECK_THINKFIRST(rv);
     SvAMAGIC_off(rv);
@@ -6901,7 +6921,7 @@ Perl_sv_dup(pTHX_ SV *sstr)
 	return dstr;
 
     /* create anew and remember what it is */
-    new_SV(dstr);
+    new_XSV(dstr);
     ptr_table_store(PL_ptr_table, sstr, dstr);
 
     /* clone */

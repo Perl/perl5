@@ -1866,12 +1866,12 @@ wait, waitpid PID,FLAGS
 
 =item CHANGES
 
-v1.47, 22 March 2000, v1.46, 12 February 2000, v1.45, 20 December 1999,
-v1.44, 19 July 1999, v1.43, 24 May 1999, v1.42, 22 May 1999, v1.41, 19 May
-1999, v1.40, 11 April 1999, v1.39, 11 February 1999, v1.38, 31 December
-1998, v1.37, 19 December 1998, v1.36, 9 September 1998, v1.35, 13 August
-1998, v1.33, 06 August 1998, v1.32, 05 August 1998, v1.30, 03 August 1998,
-v1.23, 10 July 1998
+v1.48, 02 February 2001, v1.47, 22 March 2000, v1.46, 12 February 2000,
+v1.45, 20 December 1999, v1.44, 19 July 1999, v1.43, 24 May 1999, v1.42, 22
+May 1999, v1.41, 19 May 1999, v1.40, 11 April 1999, v1.39, 11 February
+1999, v1.38, 31 December 1998, v1.37, 19 December 1998, v1.36, 9 September
+1998, v1.35, 13 August 1998, v1.33, 06 August 1998, v1.32, 05 August 1998,
+v1.30, 03 August 1998, v1.23, 10 July 1998
 
 =item Supported Platforms
 
@@ -2224,20 +2224,8 @@ UNIVERSAL, User::grent, User::pwent
 
 =item CPAN
 
-Language Extensions and Documentation Tools, Development Support, Operating
-System Interfaces, Networking, Device Control (modems) and InterProcess
-Communication, Data Types and Data Type Utilities, Database Interfaces,
-User Interfaces, Interfaces to / Emulations of Other Programming Languages,
-File Names, File Systems and File Locking (see also File Handles), String
-Processing, Language Text Processing, Parsing, and Searching, Option,
-Argument, Parameter, and Configuration File Processing,
-Internationalization and Locale, Authentication, Security, and Encryption,
-World Wide Web, HTML, HTTP, CGI, MIME, Server and Daemon Utilities,
-Archiving and Compression, Images, Pixmap and Bitmap Manipulation, Drawing,
-and Graphing, Mail and Usenet News, Control Flow Utilities (callbacks and
-exceptions etc), File Handle and Input/Output Stream Utilities,
-Miscellaneous Modules, Africa, Asia, Australasia, Central America, Europe,
-North America, South America
+Africa, Asia, Australasia, Central America, Europe, North America, South
+America
 
 =item Modules: Creation, Use, and Abuse
 
@@ -2265,12 +2253,6 @@ Adds the standard Module prologue lines, Converts package specifiers from '
 to ::, Converts die(...) to croak(...), Several other minor changes
 
 =item Guidelines for Reusing Application Code
-
-Complete applications rarely belong in the Perl Module Library, Many
-applications contain some Perl code that could be reused, Break-out the
-reusable code into one or more separate module files, Take the opportunity
-to reconsider and redesign the interfaces, In some cases the 'application'
-can then be reduced to a small
 
 =back
 
@@ -5225,6 +5207,49 @@ sh Configure -Dprefix=/ade -Dloclibpth=/ade/lib
 
 =back
 
+=head2 perlbs2000, README.posix-bc - building and installing Perl for
+BS2000 POSIX.
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item gzip
+
+=item bison
+
+=item Unpacking
+
+=item Compiling
+
+=item Testing
+
+=item Install
+
+=item Using Perl
+
+=item Floating point anomalies
+
+=back
+
+=item AUTHORS
+
+=item SEE ALSO
+
+=over 4
+
+=item Mailing list
+
+=back
+
+=item HISTORY
+
+=back
+
 =head2 perlcygwin, README.cygwin - Perl for Cygwin
 
 =over 4
@@ -5736,50 +5761,13 @@ C<COND_WAIT>, F<os2.c>
 
 =item testing anomalies
 
+=item installation anomalies
+
 =item Usage Hints
 
+=item Floating point anomalies
+
 =item Modules and Extensions
-
-=back
-
-=item AUTHORS
-
-=item SEE ALSO
-
-=over 4
-
-=item Mailing list
-
-=back
-
-=item HISTORY
-
-=back
-
-=head2 perlposix-bc, README.posix-bc - building and installing Perl for
-BS2000 POSIX.
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over 4
-
-=item gzip
-
-=item bison
-
-=item Unpacking
-
-=item Compiling
-
-=item Testing
-
-=item Install
-
-=item Using Perl
 
 =back
 
@@ -5878,6 +5866,52 @@ DATAMODEL_NATIVE specified", sh: ar: not found
 =item AUTHOR
 
 =item LAST MODIFIED
+
+=back
+
+=head2 perlvmesa, README.vmesa - building and installing Perl for VM/ESA.
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Unpacking
+
+=item Setup and utilities
+
+=item Configure
+
+- Don't turn on the compiler optimization flag "-O".  There's	  a bug in
+the compiler (APAR PQ18812) that generates some bad code       the
+optimizer is on, - As VM/ESA doesn't fully support the fork() API programs
+relying on	 this call will not work. I've replaced fork()/exec() with
+spawn()       and the standalone exec() with spawn(). This has a side
+effect when	opening unnamed pipes in a shell script: there is no child
+process      generated under
+
+=item testing anomalies
+
+=item Usage Hints
+
+When using perl on VM/ESA please keep in mind that the EBCDIC and ASCII
+character sets are different.  Perl builtin functions that may behave
+differently under EBCDIC are mentioned in the perlport.pod document.
+
+=back
+
+=item AUTHORS
+
+=item SEE ALSO
+
+=over 4
+
+=item Mailing list
+
+=back
 
 =back
 
@@ -9071,9 +9105,9 @@ INST_MAN3DIR, INST_SCRIPT, LDFROM, LIB, LIBPERL_A, LIBS, LINKTYPE,
 MAKEAPERL, MAKEFILE, MAN1PODS, MAN3PODS, MAP_TARGET, MYEXTLIB, NAME,
 NEEDS_LINKING, NOECHO, NORECURS, NO_VC, OBJECT, OPTIMIZE, PERL, PERLMAINCC,
 PERL_ARCHLIB, PERL_LIB, PERL_MALLOC_OK, PERL_SRC, PERM_RW, PERM_RWX,
-PL_FILES, PM, PMLIBDIRS, POLLUTE, PPM_INSTALL_EXEC, PPM_INSTALL_SCRIPT,
-PREFIX, PREREQ_PM, SKIP, TYPEMAPS, VERSION, VERSION_FROM, XS, XSOPT,
-XSPROTOARG, XS_VERSION
+PL_FILES, PM, PMLIBDIRS, PM_FILTER, POLLUTE, PPM_INSTALL_EXEC,
+PPM_INSTALL_SCRIPT, PREFIX, PREREQ_PM, SKIP, TYPEMAPS, VERSION,
+VERSION_FROM, XS, XSOPT, XSPROTOARG, XS_VERSION
 
 =item Additional lowercase attributes
 

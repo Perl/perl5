@@ -614,10 +614,10 @@ perl_destruct(pTHXx)
 #endif
 
     /* Prepare to destruct main symbol table.  */
-
     hv = PL_defstash;
     PL_defstash = 0;
-    SvREFCNT_dec(hv);
+    SvREFCNT_dec(hv);   /* Totally ineffective due to circular references */
+
     SvREFCNT_dec(PL_curstname);
     PL_curstname = Nullsv;
 

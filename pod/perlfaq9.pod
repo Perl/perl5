@@ -343,7 +343,7 @@ deliverable which are compliant.
 
 Many are tempted to try to eliminate many frequently-invalid
 mail addresses with a simple regex, such as
-C</^[\w.-]+\@([\w.-]\.)+\w+$/>.  It's a very bad idea.  However,
+C</^[\w.-]+\@([\w.-]+\.)+\w+$/>.  It's a very bad idea.  However,
 this also throws out many valid ones, and says nothing about
 potential deliverability, so is not suggested.  Instead, see
 http://www.perl.com/CPAN/authors/Tom_Christiansen/scripts/ckaddr.gz ,
