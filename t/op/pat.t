@@ -440,7 +440,7 @@ print "ok $test\n";
 $test++;
 
 # This should be changed to qr/\b\v$/ ASAP
-print "not " unless study(/\b\v$/) eq '\bv$';
+print "not " unless study(/\b\v$/) eq '(?:\bv$)';
 print "ok $test\n";
 $test++;
 
