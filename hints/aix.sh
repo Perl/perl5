@@ -314,7 +314,7 @@ $define|true|[yY]*)
 		esac
 	    ;;
 	cc_r) ;;
-	cc|xl[cC]_r) 
+	cc|xl[cC]|xl[cC]_r) 
 	    echo >&4 "Switching cc to cc_r because of POSIX threads."
 	    # xlc_r has been known to produce buggy code in AIX 4.3.2.
 	    # (e.g. pragma/overload core dumps)	 Let's suspect xlC_r, too.
