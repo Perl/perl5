@@ -33,11 +33,6 @@ if ($is_thread) {
     print "# use5005threads: test $test skipped\n";
 } else {
     $a = `$^X $path "-MO=Showlex" -e "my \@one" $redir`;
-    if (ord('A') != 193) { # ASCIIish
-        print "# [$a]\nnot " unless $a =~ /sv_undef.*PVNV.*\@one.*sv_undef.*AV/s;
-    }
-    else { # EBCDICish C<1: PVNV (0x1a7ede34) "@\226\225\205">
-        print "# [$a]\nnot " unless $a =~ /sv_undef.*PVNV.*\@\\[0-9].*sv_undef.*AV/s;
-    }
+    print "# [$a]\nnot " unless $a =~ /sv_undef.*PVNV.*\@one.*sv_undef.*AV/s;
 }
 ok;
