@@ -145,7 +145,7 @@ GetRegStrFromKey(HKEY hkey, const char *lpszValueName, char** ptr, DWORD* lpData
     if (retval == ERROR_SUCCESS){
 	retval = RegQueryValueEx(handle, lpszValueName, 0, &type, NULL, lpDataLen);
 	if (retval == ERROR_SUCCESS && type == REG_SZ) {
-	    if (*ptr != NULL) {
+	    if (*ptr) {
 		Renew(*ptr, *lpDataLen, char);
 	    }
 	    else {
@@ -154,7 +154,7 @@ GetRegStrFromKey(HKEY hkey, const char *lpszValueName, char** ptr, DWORD* lpData
 	    retval = RegQueryValueEx(handle, lpszValueName, 0, NULL, (PBYTE)*ptr, lpDataLen);
 	    if (retval != ERROR_SUCCESS) {
 		Safefree(*ptr);
-		*ptr = NULL;
+		*ptr = Nullch;
 	    }
 	}
 	RegCloseKey(handle);
@@ -166,7 +166,7 @@ char*
 GetRegStr(const char *lpszValueName, char** ptr, DWORD* lpDataLen)
 {
     *ptr = GetRegStrFromKey(HKEY_CURRENT_USER, lpszValueName, ptr, lpDataLen);
-    if (*ptr == NULL)
+    if (*ptr == Nullch)
     {
 	*ptr = GetRegStrFromKey(HKEY_LOCAL_MACHINE, lpszValueName, ptr, lpDataLen);
     }
@@ -236,7 +236,7 @@ win32_get_privlib(char *pl)
     /* $stdlib = $HKCU{"lib-$]"} || $HKLM{"lib-$]"} || $HKCU{"lib"} || $HKLM{"lib"} || "";  */
     sprintf(buffer, "%s-%s", stdlib, pl);
     path = GetRegStr(buffer, &path, &datalen);
-    if (path == NULL)
+    if (!path)
 	path = GetRegStr(stdlib, &path, &datalen);
 
     /* $stdlib .= ";$EMD/../../lib" */
@@ -926,8 +926,8 @@ win32_stat(const char *path, struct stat *buffer)
 DllExport char *
 win32_getenv(const char *name)
 {
-    static char *curitem = Nullch;
-    static DWORD curlen = 512;
+    static char *curitem = Nullch;	/* XXX threadead */
+    static DWORD curlen = 512;		/* XXX threadead */
     DWORD needlen;
     if (!curitem)
 	New(1305,curitem,curlen,char);
@@ -940,23 +940,21 @@ win32_getenv(const char *name)
 	    needlen = GetEnvironmentVariable(name,curitem,curlen);
 	}
     }
-    else
-    {
+    else {
 	/* allow any environment variables that begin with 'PERL'
-	   to be stored in the registry
-	*/
-	if(curitem != NULL)
+	   to be stored in the registry */
+	if (curitem)
 	    *curitem = '\0';
 
 	if (strncmp(name, "PERL", 4) == 0) {
-	    if (curitem != NULL) {
+	    if (curitem) {
 		Safefree(curitem);
-		curitem = NULL;
+		curitem = Nullch;
 	    }
 	    curitem = GetRegStr(name, &curitem, &curlen);
 	}
     }
-    if(curitem != NULL && *curitem == '\0')
+    if (curitem && *curitem == '\0')
 	return Nullch;
 
     return curitem;
