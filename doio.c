@@ -1186,9 +1186,11 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 	}
 	/* FALL THROUGH */
     default:
+#if 0
 	/* XXX Fix this when the I/O disciplines arrive. XXX */
 	if (DO_UTF8(sv))
 	    sv_utf8_downgrade(sv, FALSE);
+#endif
 	tmps = SvPV(sv, len);
 	break;
     }
