@@ -2247,6 +2247,7 @@ README.cygwin		Notes about Cygwin port
 README.dgux		Notes about DG/UX port
 README.dos		Notes about DOS/DJGPP port
 README.epoc		Notes about EPOC port
+README.freebsd		Notes about FreeBSD
 README.hpux		Notes about HP-UX port
 README.hurd		Notes about GNU/Hurd port
 README.jp		About using Perl and Japanese
