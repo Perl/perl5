@@ -3439,7 +3439,7 @@ Perl_whichsig(pTHXo_ char* sig)
 {
     return ((CPerlObj*)pPerl)->Perl_whichsig(sig);
 }
-#if defined(USE_PURE_BISON)
+#ifdef USE_PURE_BISON
 #else
 #endif
 #if defined(MYMALLOC)
