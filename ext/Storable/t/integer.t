@@ -148,7 +148,7 @@ foreach (@processes) {
       # $eq =  && (($copy_s1 <=> 0) == ($copy1 <=> 0));
       # Split this into 2 tests, to cater for 5.005_03
 
-      my $bit =  ok (($copy_s1 ^ $copy1 == 0), "$process $copy1 (bitpattern)");
+      my $bit =  ok (($copy_s1 ^ $copy1) == 0, "$process $copy1 (bitpattern)");
       # This is sick. 5.005_03 survives without the IV/UV flag, and somehow
       # gets it right, providing you don't have side effects of conversion.
 #      local $TODO;
