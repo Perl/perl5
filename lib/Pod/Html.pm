@@ -346,8 +346,7 @@ sub pod2html {
     my $index = scan_headings(\%sections, @poddata);
 
     unless($index) {
-	warn "No pod in $podfile\n" if $verbose;
-	return;
+	warn "No headings in $podfile\n" if $verbose;
     }
 
     # open the output file
@@ -422,7 +421,7 @@ END_OF_HEAD
     print HTML $index;
     print HTML "-->\n" unless $doindex;
     print HTML "<!-- INDEX END -->\n\n";
-    print HTML "<HR>\n" if $doindex;
+    print HTML "<HR>\n" if $doindex and $index;
 
     # now convert this file
     warn "Converting input file\n" if $verbose;
