@@ -1983,17 +1983,14 @@ PP(pp_next)
     if (cxix < cxstack_ix)
 	dounwind(cxix);
 
-    cx = &cxstack[cxstack_ix];
-    {
-	OP *nextop = cx->blk_loop.next_op;
-	/* clean scope, but only if there's no continue block */
-	if (nextop == cUNOPx(cx->blk_loop.last_op)->op_first->op_next) {
-	    TOPBLOCK(cx);
-	    oldsave = PL_scopestack[PL_scopestack_ix - 1];
-	    LEAVE_SCOPE(oldsave);
-	}
-	return nextop;
+    TOPBLOCK(cx);
+
+    /* clean scope, but only if there's no continue block */
+    if (!(cx->blk_loop.last_op->op_private & OPpLOOP_CONTINUE)) {
+	oldsave = PL_scopestack[PL_scopestack_ix - 1];
+	LEAVE_SCOPE(oldsave);
     }
+    return cx->blk_loop.next_op;
 }
 
 PP(pp_redo)

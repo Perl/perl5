@@ -3764,6 +3764,7 @@ Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop, I32 whileline, OP *
     OP *listop;
     OP *o;
     OP *condop;
+    U8 loopflags = 0;
 
     if (expr && (expr->op_type == OP_READLINE || expr->op_type == OP_GLOB
 		 || (expr->op_type == OP_NULL && expr->op_targ == OP_GLOB))) {
@@ -3796,8 +3797,10 @@ Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop, I32 whileline, OP *
 	block = scope(block);
     }
 
-    if (cont)
+    if (cont) {
 	next = LINKLIST(cont);
+	loopflags |= OPpLOOP_CONTINUE;
+    }
     if (expr) {
 	cont = append_elem(OP_LINESEQ, cont, newOP(OP_UNSTACK, 0));
 	if ((line_t)whileline != NOLINE) {
@@ -3840,6 +3843,7 @@ Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop, I32 whileline, OP *
 
     loop->op_redoop = redo;
     loop->op_lastop = o;
+    o->op_private |= loopflags;
 
     if (next)
 	loop->op_nextop = next;
