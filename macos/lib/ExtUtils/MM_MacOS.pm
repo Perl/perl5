@@ -143,6 +143,8 @@ END
     foreach $section ( @ExtUtils::MakeMaker::MM_Sections ){
     	next if ($self->{SKIPHASH}{$section} == 2);
 	print "Processing Makefile '$section' section\n" if ($Verbose >= 2);
+	$self->{ABSTRACT_FROM} = macify($self->{ABSTRACT_FROM})
+		if $self->{ABSTRACT_FROM};
 	my($skipit) = $self->skipcheck($section);
 	if ($skipit){
 	    push @{$self->{RESULT}}, "\n# --- MakeMaker $section section $skipit.";
