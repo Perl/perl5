@@ -747,3 +747,4 @@ tt+$	xxxtt	y	-	-
 '\.c(pp|xx|c)?$'i	Changes	n	-	-
 '\.c(pp|xx|c)?$'i	IO.c	y	-	-
 '(\.c(pp|xx|c)?$)'i	IO.c	y	$1	.c
+^([a-z]:)	C:/	n	-	-

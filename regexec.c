@@ -335,6 +335,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	DEBUG_r(PerlIO_printf(Perl_debug_log, "String too short...\n"));
 	goto fail;
     }
+    check = prog->check_substr;
     if (prog->reganch & ROPT_ANCH) {	/* Match at beg-of-str or after \n */
 	ml_anch = !( (prog->reganch & ROPT_ANCH_SINGLE)
 		     || ( (prog->reganch & ROPT_ANCH_BOL)
@@ -351,8 +352,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	    }
 	    PL_regeol = strend;			/* Used in HOP() */
 	    s = HOPc(strpos, prog->check_offset_min);
-	    if (SvTAIL(prog->check_substr)) {
-		slen = SvCUR(prog->check_substr);	/* >= 1 */
+	    if (SvTAIL(check)) {
+		slen = SvCUR(check);	/* >= 1 */
 
 		if ( strend - s > slen || strend - s < slen - 1 
 		     || (strend - s == slen && strend[-1] != '\n')) {
@@ -361,29 +362,28 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		}
 		/* Now should match s[0..slen-2] */
 		slen--;
-		if (slen && (*SvPVX(prog->check_substr) != *s
+		if (slen && (*SvPVX(check) != *s
 			     || (slen > 1
-				 && memNE(SvPVX(prog->check_substr), s, slen)))) {
+				 && memNE(SvPVX(check), s, slen)))) {
 		  report_neq:
 		    DEBUG_r(PerlIO_printf(Perl_debug_log, "String not equal...\n"));
 		    goto fail_finish;
 		}
 	    }
-	    else if (*SvPVX(prog->check_substr) != *s
-		     || ((slen = SvCUR(prog->check_substr)) > 1
-			 && memNE(SvPVX(prog->check_substr), s, slen)))
+	    else if (*SvPVX(check) != *s
+		     || ((slen = SvCUR(check)) > 1
+			 && memNE(SvPVX(check), s, slen)))
 		goto report_neq;
 	    goto success_at_start;
 	}
 	/* Match is anchored, but substr is not anchored wrt beg-of-str. */
 	s = strpos;
 	start_shift = prog->check_offset_min; /* okay to underestimate on CC */
-	/* Should be nonnegative! */
 	end_shift = prog->minlen - start_shift -
-	    CHR_SVLEN(prog->check_substr) + (SvTAIL(prog->check_substr) != 0);
+	    CHR_SVLEN(check) + (SvTAIL(check) != 0);
 	if (!ml_anch) {
-	    I32 end = prog->check_offset_max + CHR_SVLEN(prog->check_substr)
-					 - (SvTAIL(prog->check_substr) != 0);
+	    I32 end = prog->check_offset_max + CHR_SVLEN(check)
+					 - (SvTAIL(check) != 0);
 	    I32 eshift = strend - s - end;
 
 	    if (end_shift < eshift)
@@ -396,7 +396,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	start_shift = prog->check_offset_min; /* okay to underestimate on CC */
 	/* Should be nonnegative! */
 	end_shift = prog->minlen - start_shift -
-	    CHR_SVLEN(prog->check_substr) + (SvTAIL(prog->check_substr) != 0);
+	    CHR_SVLEN(check) + (SvTAIL(check) != 0);
     }
 
 #ifdef DEBUGGING	/* 7/99: reports of failure (with the older version) */
@@ -404,7 +404,6 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	Perl_croak(aTHX_ "panic: end_shift");
 #endif
 
-    check = prog->check_substr;
   restart:
     /* Find a possible match in the region s..strend by looking for
        the "check" substring in the region corrected by start/end_shift. */
@@ -701,6 +700,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	    }
 	    DEBUG_r( PerlIO_printf(Perl_debug_log,
 				   "This position contradicts STCLASS...\n") );
+	    if ((prog->reganch & ROPT_ANCH) && !ml_anch)
+		goto fail;
 	    /* Contradict one of substrings */
 	    if (prog->anchored_substr) {
 		if (prog->anchored_substr == check) {
