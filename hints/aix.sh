@@ -95,9 +95,10 @@ d_setreuid='undef'
 #
 # Tell perl which symbols to export for dynamic linking.
 case "$cc" in
-*gcc*) ccdlflags='-Xlinker -bE:perl.exp' ;;
-*) ccdlflags='-bE:perl.exp' ;;
+*gcc*) ccdlflags='-Xlinker' ;;
 esac
+# the required -bE:$installarchlib/CORE/perl.exp is added by
+# libperl.U (Configure) later.
 
 # The first 3 options would not be needed if dynamic libs. could be linked
 # with the compiler instead of ld.

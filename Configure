@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Jul  6 18:36:05 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Thu Jul 22 22:55:08 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -5526,6 +5526,9 @@ EOM
 		;;
 	esac
 fi
+case "$osname" in
+aix*) ccdlflags="$ccdlflags -bE:$installarchlib/CORE/perl.exp" ;;
+esac
 # Respect a hint or command-line value.
 case "$shrpenv" in
 '') shrpenv="$tmp_shrpenv" ;;

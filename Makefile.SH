@@ -311,6 +311,10 @@ case "$osname" in
 aix)
 	$spitshell >>Makefile <<!GROK!THIS!
 LIBS			= $libs
+# In AIX we need to change this for building Perl itself from
+# its earlier definition (which is for building external
+# extensions *after* Perl has been built and installed)
+CCDLFLAGS		= `echo $ccdlflags|sed -e 's@-bE:.*/perl\.exp@-bE:perl.exp@'`
 
 !GROK!THIS!
 	case "$useshrplib" in

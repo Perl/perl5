@@ -2108,7 +2108,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 
 /* HAS_FTELLO:
  *	This symbol, if defined, indicates that the ftello routine is
- *	available to ftell from beyond 32 bits (useful for ILP32 hosts).
+ *	available to ftell beyond 32 bits (useful for ILP32 hosts).
  */
 #$d_ftello HAS_FTELLO		/**/
 
