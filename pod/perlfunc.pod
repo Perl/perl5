@@ -3775,7 +3775,8 @@ If EXPR is omitted, uses $_.
 =item umask
 
 Sets the umask for the process to EXPR and returns the previous value.
-If EXPR is omitted, merely returns the current umask.  Remember that a
+If EXPR is omitted, merely returns the current umask.  If umask(2) is
+not implemented on your system, returns C<undef>.  Remember that a
 umask is a number, usually given in octal; it is I<not> a string of octal
 digits.  See also L</oct>, if all you have is a string.
 
