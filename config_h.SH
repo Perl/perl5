@@ -1260,6 +1260,24 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$i_systypes	I_SYS_TYPES		/**/
 
+/* I_MNTENT:
+ *	This symbol, if defined, indicates that <mntent.h> exists and
+ *	should be included.
+ */
+#$i_mntent	I_MNTENT		/**/
+
+/* I_SYS_MOUNT:
+ *	This symbol, if defined, indicates that <sys/mount.h> exists and
+ *	should be included.
+ */
+#$i_sysmount	I_SYS_MOUNT		/**/
+
+/* I_SYS_STATVFS:
+ *	This symbol, if defined, indicates that <sys/statvfs.h> exists and
+ *	should be included.
+ */
+#$i_sysstatvfs	I_SYS_STATVFS		/**/
+
 /* I_SYS_UN:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <sys/un.h> to get UNIX domain socket definitions.
@@ -1622,6 +1640,37 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	be used.
  */
 #$d_sfio	USE_SFIO		/**/
+
+/* HAS_FSTATFS:
+ *	This symbol, if defined, indicates that the fstatfs routine is
+ *	available to do stat filesystems of file descriptors.
+ */
+/* HAS_STRUCT_STATFS_FLAGS:
+ *	This symbol, if defined, indicates that the struct statfs
+ *	does have the f_flags member containing the mount flags of
+ *	the filesystem holding the file.
+ *	This kind of struct statfs is coming from sys/mount.h (BSD)
+ *	and not from sys/statfs.h (SYSV).
+ */
+#$d_fstatfs HAS_FSTATFS		/**/
+#$d_statfsflags HAS_STRUCT_STATFS_FLAGS		/**/
+
+/* HAS_FSTATVFS:
+ *	This symbol, if defined, indicates that the fstatvfs routine is
+ *	available to do stat filesystems of file descriptors.
+ */
+#$d_fstatvfs HAS_FSTATVFS		/**/
+
+/* HAS_GETMNTENT:
+ *	This symbol, if defined, indicates that the getmntent routine is
+ *	available to enumerate mounted filesystems.
+ */
+/* HAS_HASMNTOPT:
+ *	This symbol, if defined, indicates that the hasmntopt routine is
+ *	available to check options on mounted filesystems.
+ */
+#$d_getmntent HAS_GETMNTENT		/**/
+#$d_hasmntopt HAS_HASMNTOPT		/**/
 
 /* Sigjmp_buf:
  *	This is the buffer type to be used with Sigsetjmp and Siglongjmp.

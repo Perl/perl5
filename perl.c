@@ -20,6 +20,20 @@
 #include <unistd.h>
 #endif
 
+#ifdef IAMSUID
+
+#ifdef I_SYS_STATVFS
+#   include <sys/statvfs.h>     /* for f?statvfs() */
+#endif
+#ifdef I_SYS_MOUNT
+#   include <sys/mount.h>       /* for *BSD f?statfs() */
+#endif
+#ifdef I_MNTENT
+#   include <mntent.h>          /* for getmntent() */
+#endif
+
+#endif /* IAMSUID */
+
 #if !defined(STANDARD_C) && !defined(HAS_GETENV_PROTOTYPE)
 char *getenv _((char *)); /* Usually in <stdlib.h> */
 #endif
@@ -79,6 +93,9 @@ static void open_script _((char *, bool, SV *));
 static void perldoc_ref _((void));
 static void usage _((char *));
 static void validate_suid _((char *, char*));
+#ifdef IAMSUID
+static int  fd_on_nosuid_fs _((int));
+#endif
 static I32 read_e_script _((int idx, SV *buf_sv, int maxlen));
 
 static int fdscript = -1;
@@ -1889,6 +1906,10 @@ char *scriptname;
 		croak("Can't swap uid and euid");	/* really paranoid */
 	    if (Stat(SvPVX(GvSV(curcop->cop_filegv)),&tmpstatbuf) < 0)
 		croak("Permission denied");	/* testing full pathname here */
+#if defined(IAMSUID) && !defined(NO_NOSUID_CHECK)
+	    if (fd_on_nosuid_fs(PerlIO_fileno(rsfp)))
+		croak("Permission denied");
+#endif
 #if defined(IAMSUID) && defined(__NetBSD__)
 	    /* XXX Other BSD 4.4-derived BSDs?
 	       FreeBSD, OpenBSD, BSDI, MachTen? */
@@ -2688,3 +2709,74 @@ my_exit_jump()
 
     JMPENV_JUMP(2);
 }
+
+#ifdef IAMSUID
+static int
+fd_on_nosuid_fs(int fd)
+{
+    int on_nosuid  = 0;
+    int check_okay = 0;
+/*
+ * Preferred order: fstatvfs(), fstatfs(), getmntent().
+ * fstatvfs() is UNIX98.
+ * fstatfs() is BSD.
+ * getmntent() is O(number-of-mounted-filesystems) and can hang.
+ */
+
+#   ifdef HAS_FSTATVFS
+    struct statvfs stfs;
+    check_okay = fstatvfs(fd, &stfs) == 0;
+    on_nosuid  = check_okay && (stfs.f_flag  & ST_NOSUID);
+#   else
+#       if defined(HAS_FSTATFS) && defined(HAS_STRUCT_STATFS_FLAGS)
+    struct statfs  stfs;
+    check_okay = fstatfs(fd, &stfs)  == 0;
+#           undef PERL_MOUNT_NOSUID
+#           if !defined(PERL_MOUNT_NOSUID) && defined(MNT_NOSUID)
+#              define PERL_MOUNT_NOSUID MNT_NOSUID
+#           endif
+#           if !defined(PERL_MOUNT_NOSUID) && defined(MS_NOSUID)
+#              define PERL_MOUNT_NOSUID MS_NOSUID
+#           endif
+#           if !defined(PERL_MOUNT_NOSUID) && defined(M_NOSUID)
+#              define PERL_MOUNT_NOSUID M_NOSUID
+#           endif
+#           ifdef PERL_MOUNT_NOSUID
+    on_nosuid  = check_okay && (stfs.f_flags & PERL_MOUNT_NOSUID);
+#           endif
+#       else
+#           if defined(HAS_GETMNTENT) && defined(HAS_HASMNTOPT) && defined(MNTOPT_NOSUID)
+
+		/* perlsdio.h might have disabled these */
+#		undef fopen
+#		undef fclose
+
+    void		*mtab = fopen("/etc/mtab", "r");
+    struct mntent	*entry;
+    struct stat		stb, fsb;
+
+    if (mtab && (fstat(fd, &stb) == 0)) {
+	while (entry = getmntent(mtab)) {
+	    if (stat(entry->mnt_dir, &fsb) == 0
+		&& fsb.st_dev == stb.st_dev)
+	    {
+		/* found the filesystem */
+		check_okay = 1;
+		if (hasmntopt(entry, MNTOPT_NOSUID))
+		    on_nosuid = 1;
+		break;
+	    } /* A single fs may well fail its stat(). */
+	}
+    }
+    if (mtab)
+	fclose(mtab);
+
+#           endif /* mntent */
+#       endif /* statfs */
+#   endif /* statvfs */
+
+    if (!check_okay) 
+	croak("Can't check filesystem of script \"%s\"", origfilename);
+    return on_nosuid;
+}
+#endif /* IAMSUID */
