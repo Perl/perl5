@@ -1,4 +1,4 @@
-/* $Header: arg.h,v 3.0.1.2 89/12/21 19:13:14 lwall Locked $
+/* $Header: arg.h,v 3.0.1.3 90/02/28 16:21:55 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	arg.h,v $
+ * Revision 3.0.1.3  90/02/28  16:21:55  lwall
+ * patch9: added pipe function
+ * 
  * Revision 3.0.1.2  89/12/21  19:13:14  lwall
  * patch7: send() didn't allow a TO argument
  * 
@@ -211,7 +214,7 @@
 #define O_LAELEM 191
 #define O_LHELEM 192
 #define O_LOCAL 193
-#define O_UNUSED 194
+#define O_PIPE 194
 #define O_FILENO 195
 #define O_GHBYNAME 196
 #define O_GHBYADDR 197
@@ -458,7 +461,7 @@ char *opname[] = {
     "LAELEM",
     "LHELEM",
     "LOCAL",
-    "UNUSED",
+    "PIPE",
     "FILENO",
     "GHBYNAME",
     "GHBYADDR",
@@ -832,7 +835,7 @@ char opargs[MAXO+1] = {
 	A(0,1,0),	/* LAELEM */
 	A(0,1,0),	/* LHELEM */
 	A(1,0,0),	/* LOCAL */
-	A(0,0,0),	/* UNUSED */
+	A(0,0,0),	/* PIPE */
 	A(1,0,0),	/* FILENO */
 	A(1,0,0),	/* GHBYNAME */
 	A(1,1,0),	/* GHBYADDR */

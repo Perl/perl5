@@ -25,9 +25,12 @@ esac
 
 echo "Extracting Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 3.0.1.3 89/12/21 19:09:26 lwall Locked $
+# $Header: Makefile.SH,v 3.0.1.4 90/02/28 16:19:43 lwall Locked $
 #
 # $Log:	Makefile.SH,v $
+# Revision 3.0.1.4  90/02/28  16:19:43  lwall
+# patch9: extraneous $ on suidperl in Makefile
+# 
 # Revision 3.0.1.3  89/12/21  19:09:26  lwall
 # patch7: Configure now lets you pick between yacc or bison
 # 
@@ -309,7 +312,7 @@ fi
 	cd x2p; $(MAKE) install
 
 clean:
-	rm -f *.o all perl taintperl $suidperl perl.man
+	rm -f *.o all perl taintperl suidperl perl.man
 	cd x2p; $(MAKE) clean
 
 realclean:

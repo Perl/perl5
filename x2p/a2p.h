@@ -1,4 +1,4 @@
-/* $Header: a2p.h,v 3.0.1.2 89/12/21 20:30:29 lwall Locked $
+/* $Header: a2p.h,v 3.0.1.3 90/03/01 10:29:29 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	a2p.h,v $
+ * Revision 3.0.1.3  90/03/01  10:29:29  lwall
+ * patch9: a2p.h had bzero() definition depending on BCOPY
+ * 
  * Revision 3.0.1.2  89/12/21  20:30:29  lwall
  * patch7: arranged so a2p has a chance of running on a 286
  * 
@@ -21,8 +24,10 @@
 #include "../config.h"
 
 #ifndef BCOPY
-#   define bcopy(s1,s2,l) memcpy(s2,s1,l);
-#   define bzero(s,l) memset(s,0,l);
+#   define bcopy(s1,s2,l) memcpy(s2,s1,l)
+#endif
+#ifndef BZERO
+#   define bzero(s,l) memset(s,0,l)
 #endif
 
 #include "handy.h"

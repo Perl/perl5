@@ -1,5 +1,5 @@
 %{
-/* $Header: a2p.y,v 3.0 89/10/18 15:34:29 lwall Locked $
+/* $Header: a2p.y,v 3.0.1.1 90/03/01 10:30:08 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -7,6 +7,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	a2p.y,v $
+ * Revision 3.0.1.1  90/03/01  10:30:08  lwall
+ * patch9: a2p didn't allow logical expressions everywhere it should
+ * 
  * Revision 3.0  89/10/18  15:34:29  lwall
  * 3.0 baseline
  * 
@@ -87,26 +90,10 @@ arg_list: expr_list
 		{ $$ = rememberargs($$); }
 	;
 
-patpat	: pat
+patpat	: cond
 		{ $$ = oper1(OPAT,$1); }
-	| pat ',' pat
+	| cond ',' cond
 		{ $$ = oper2(ORANGE,$1,$3); }
-	;
-
-pat	: match
-	| rel
-	| compound_pat
-	;
-
-compound_pat
-	: '(' compound_pat ')'
-		{ $$ = oper1(OPPAREN,$2); }
-	| pat ANDAND maybe pat
-		{ $$ = oper3(OPANDAND,$1,$3,$4); }
-	| pat OROR maybe pat
-		{ $$ = oper3(OPOROR,$1,$3,$4); }
-	| NOT pat
-		{ $$ = oper1(OPNOT,$2); }
 	;
 
 cond	: expr
@@ -193,7 +180,7 @@ term	: variable
 		{ $$ = oper1(OUMINUS,$2); }
 	| '+' term %prec UMINUS
 		{ $$ = oper1(OUPLUS,$2); }
-	| '(' expr ')'
+	| '(' cond ')'
 		{ $$ = oper1(OPAREN,$2); }
 	| GETLINE
 		{ $$ = oper0(OGETLINE); }

@@ -8,7 +8,7 @@
 # and edit it to reflect your system.  Some packages may include samples
 # of config.h for certain machines, so you might look for one of those.)
 #
-# $Header: Configure,v 3.0.1.4 89/12/21 18:57:00 lwall Locked $
+# $Header: Configure,v 3.0.1.5 90/02/28 16:17:50 lwall Locked $
 #
 # Yes, you may rip this off to use in other distribution packages.
 # (Note: this Configure script was generated automatically.  Rather than
@@ -154,6 +154,7 @@ d_syscall=''
 d_varargs=''
 d_vfork=''
 d_voidsig=''
+d_volatile=''
 d_vprintf=''
 d_charvspr=''
 d_wait4=''
@@ -256,7 +257,7 @@ attrlist="$attrlist i186 __m88k__ m88k DGUX __DGUX__"
 pth="/usr/ucb /bin /usr/bin /usr/local /usr/local/bin /usr/lbin /usr/plx /usr/5bin /vol/local/bin /etc /usr/lib /lib /usr/local/lib /sys5.3/bin /sys5.3/usr/bin /bsd4.3/bin /bsd4.3/usr/bin /bsd4.3/usr/ucb"
 d_newshome="/usr/NeWS"
 defvoidused=7
-libswanted="net_s net nsl_s nsl socket nm ndir ndbm dbm sun bsd x c_s"
+libswanted="net_s net nsl_s nsl socket nm ndir ndbm dbm sun bsd BSD x c_s PW"
 inclwanted='/usr/netinclude /usr/include/sun /usr/include/bsd /usr/include/lan'
 : some greps do not return status, grrr.
 echo "grimblepritz" >grimble
@@ -291,7 +292,7 @@ if sh -c '#' >/dev/null 2>&1 ; then
     echo "#!/bin/echo hi" > try
     $eunicefix try
     chmod +x try
-    try > today
+    ./try > today
     if $contains hi today >/dev/null 2>&1; then
 	echo "It does."
 	sharpbang='#!'
@@ -299,7 +300,7 @@ if sh -c '#' >/dev/null 2>&1 ; then
 	echo "#! /bin/echo hi" > try
 	$eunicefix try
 	chmod +x try
-	try > today
+	./try > today
 	if test -s today; then
 	    echo "It does."
 	    sharpbang='#! '
@@ -332,7 +333,7 @@ EOSS
 
 chmod +x try
 $eunicefix try
-if try; then
+if ./try; then
     echo "Yup, it does."
 else
     echo "Nope.  You may have to fix up the shell scripts to make sure sh runs them."
@@ -1043,6 +1044,12 @@ case "$optimize" in
     esac
     ;;
 esac
+if $contains 'LANGUAGE_C' /usr/include/signal.h >/dev/null 2>&1; then
+    case "$dflt" in
+    *LANGUAGE_C*);;
+    *) dflt="$dflt -DLANGUAGE_C";;
+    esac
+fi
 case "$dflt" in
 '') dflt=none;;
 esac
@@ -1208,7 +1215,7 @@ main()
 }
 EOCP
     if $cc try.c -o try >/dev/null 2>&1 ; then
-	dflt=`try`
+	dflt=`./try`
 	case "$dflt" in
 	????|????????) echo "(The test program ran ok.)";;
 	*) echo "(The test program didn't run right for some reason.)";;
@@ -1422,7 +1429,7 @@ EOM
     fi
 fi
 echo " "
-set $libc $libnames
+set `echo $libc $libnames | tr ' ' '\012' | sort | uniq`
 $echo $n "Extracting names from $* for later perusal...$c"
 nm $* 2>/dev/null >libc.tmp
 $sed -n -e 's/^.* [AT]  *_[_.]*//p' -e 's/^.* [AT] //p' <libc.tmp >libc.list
@@ -1435,6 +1442,8 @@ else
     $contains '^printf$' libc.list >/dev/null 2>&1 || \
        $sed -n -e 's/^_//' \
 	      -e 's/^\([a-zA-Z_0-9]*\).*xtern.*text.*/\1/p' <libc.tmp >libc.list
+    $contains '^printf$' libc.list >/dev/null 2>&1 || \
+	$sed -n -e 's/^.*|FUNC |GLOB .*|//p' <libc.tmp >libc.list
     if $contains '^printf$' libc.list >/dev/null 2>&1; then
 	echo "done"
     else
@@ -1605,7 +1614,7 @@ until a better solution is devised for the kernel problem.
 
 EOM
 rp="Do you want to do setuid/setgid emulation? [$dflt]"
-echo $n "$rp $c"
+$echo $n "$rp $c"
 . myread
 case "$ans" in
 '') $ans="$dflt";;
@@ -1913,7 +1922,7 @@ fi
 
 : see if stdio is really std
 echo " "
-if $contains 'char.*_ptr;' /usr/include/stdio.h >/dev/null 2>&1 ; then
+if $contains 'char.*_ptr.*;' /usr/include/stdio.h >/dev/null 2>&1 ; then
     if $contains '_cnt;' /usr/include/stdio.h >/dev/null 2>&1 ; then
 	echo "Your stdio is pretty std."
 	d_stdstdio="$define"
@@ -2051,6 +2060,25 @@ else
     d_voidsig="$undef"
 fi
 rm -f $$.tmp
+
+: check for volatile keyword
+echo " "
+echo 'Checking to see if your C compiler knows about "volatile"...'
+$cat >try.c <<'EOCP'
+main()
+{
+	volatile int foo;
+	foo = foo;
+}
+EOCP
+if $cc -c try.c >/dev/null 2>&1 ; then
+    d_volatile="$define"
+    echo "Yup, it does."
+else
+    d_volatile="$undef"
+    echo "Nope, it doesn't."
+fi
+$rm -f try.*
 
 : see if there is a wait4
 set wait4 d_wait4
@@ -2216,7 +2244,7 @@ else
     echo "No sys/ndir.h found."
 fi
 
-: see if this is DG/UX with a funky utime.h
+: see if we should include utime.h
 echo " "
 if $test -r /usr/include/utime.h ; then
     i_utime="$define"
@@ -2259,7 +2287,7 @@ main()
 }
 EOCP
     if $cc try.c -o try >/dev/null 2>&1 ; then
-	dflt=`try`
+	dflt=`./try`
     else
 	dflt='4'
 	echo "(I can't seem to compile the test program.  Guessing...)"
@@ -2317,7 +2345,7 @@ main()
 }
 EOCP
     if $cc try.c -o try >/dev/null 2>&1 ; then
-	dflt=`try`
+	dflt=`./try`
     else
 	dflt='?'
 	echo "(I can't seem to compile the test program...)"
@@ -2376,7 +2404,7 @@ echo "Signals are: $sig_name"
 
 : see what type of char stdio uses.
 echo " "
-if $contains 'unsigned.*char.*_ptr;' /usr/include/stdio.h >/dev/null 2>&1 ; then
+if $contains 'unsigned.*char.*_ptr.*;' /usr/include/stdio.h >/dev/null 2>&1 ; then
     echo "Your stdio uses unsigned chars."
     stdchar="unsigned char"
 else
@@ -2444,7 +2472,7 @@ case "$yacc" in
 esac
 cont=true
     echo " "
-rp="Which compiler compiler (yacc or bison) will you use? [$dflt]"
+rp="Which compiler compiler (yacc or bison -y) will you use? [$dflt]"
 $echo $n "$rp $c"
 . myread
 case "$ans" in
@@ -2583,6 +2611,7 @@ d_syscall='$d_syscall'
 d_varargs='$d_varargs'
 d_vfork='$d_vfork'
 d_voidsig='$d_voidsig'
+d_volatile='$d_volatile'
 d_vprintf='$d_vprintf'
 d_charvspr='$d_charvspr'
 d_wait4='$d_wait4'

@@ -78,8 +78,13 @@ Installation
     AIX/RT may need a -a switch and -DCRIPPLED_CC.
     SGI machines may need -Ddouble="long float".
     Ultrix (2.3) may need to hand assemble teval.s with a -J switch.
+    Ultrix on MIPS machines may need -DLANGUAGE_C.
     SCO Xenix may need -m25000 for yacc.
     Genix needs to use libc rather than libc_s, or #undef VARARGS.
+    NCR Tower 32 (OS 2.01.01) may need -W2,-Sl,2000 and #undef MKDIR.
+    Machines with half-implemented dbm routines will need to #undef ODBM & NDBM.
+    C's that don't try to restore registers on longjmp() may need -DJMPCLOBBER.
+	(Try this if you get random glitches.)
 
 5)  make test
 

@@ -18,9 +18,12 @@ case "$mallocsrc" in
 esac
 echo "Extracting x2p/Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 3.0.1.3 89/12/21 20:29:00 lwall Locked $
+# $Header: Makefile.SH,v 3.0.1.4 90/03/01 10:28:09 lwall Locked $
 #
 # $Log:	Makefile.SH,v $
+# Revision 3.0.1.4  90/03/01  10:28:09  lwall
+# patch9: a2p didn't allow logical expressions everywhere it should
+# 
 # Revision 3.0.1.3  89/12/21  20:29:00  lwall
 # patch7: Configure now lets you pick between yacc or bison
 # 
@@ -95,7 +98,7 @@ a2p: $(obj) a2p.o
 	$(CC) $(LARGE) $(LDFLAGS) $(obj) a2p.o $(libs) -o a2p
 
 a2p.c: a2p.y
-	@ echo Expect 208 shift/reduce conflicts...
+	@ echo Expect 232 shift/reduce conflicts...
 	$(YACC) a2p.y
 	mv y.tab.c a2p.c
 
