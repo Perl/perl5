@@ -3245,7 +3245,7 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
     k = PL_regkind[(U8)OP(o)];
 
     if (k == EXACT)
-	Perl_sv_catpvf(aTHX_ sv, " <%s%*s%s>", PL_colors[0],
+	Perl_sv_catpvf(aTHX_ sv, " <%s%.*s%s>", PL_colors[0],
 		       STR_LEN(o), STRING(o), PL_colors[1]);
     else if (k == CURLY) {
 	if (OP(o) == CURLYM || OP(o) == CURLYN)
@@ -3287,6 +3287,9 @@ Perl_pregfree(pTHX_ struct regexp *r)
 {
     dTHR;
     DEBUG_r(if (!PL_colorset) reginitcolors());
+
+    if (!r || (--r->refcnt > 0))
+	return;
     DEBUG_r(PerlIO_printf(Perl_debug_log,
 		      "%sFreeing REx:%s `%s%.60s%s%s'\n",
 		      PL_colors[4],PL_colors[5],PL_colors[0],
@@ -3294,9 +3297,6 @@ Perl_pregfree(pTHX_ struct regexp *r)
 		      PL_colors[1],
 		      (strlen(r->precomp) > 60 ? "..." : "")));
 
-
-    if (!r || (--r->refcnt > 0))
-	return;
     if (r->precomp)
 	Safefree(r->precomp);
     if (RX_MATCH_COPIED(r))
