@@ -6,6 +6,9 @@ Author	:	Matthias Neeracher
 Language	:	MPW C
 
 $Log: MPEditor.c,v $
+Revision 1.4  2002/01/04 03:34:45  pudge
+Modifications for universal headers 3.4
+
 Revision 1.3  2001/09/26 21:51:15  pudge
 Sync with perforce maint-5.6/macperl/macos/macperl
 
@@ -28,6 +31,8 @@ Revision 1.1  1997/06/23 17:10:42  neeri
 Checked into CVS
 
 *********************************************************************/
+
+#include <stdio.h>
 
 #include "MPGlobals.h"
 #include "MPEditor.h"

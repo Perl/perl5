@@ -272,6 +272,22 @@ The structure passed to your event procedure. Fields are
 	EventRecord 	event;
 
 =cut
+
+#if UNIVERSAL_INTERFACES_VERSION >= 0x0340
+
+STRUCT * NavCBRec
+	U16 			version;
+	NavDialogRef	context;					/* used by customization code to call Navigation Services */
+	GrafPtr 		window;						/* the dialog */
+	Rect 			customRect;					/* local coordinate rectangle of customization area */
+	Rect 			previewRect;				/* local coordinate rectangle of the preview area */
+	EventRecord 	event;
+		READ_ONLY
+		OUTPUT:
+		XS_OUTPUT(ToolboxEvent, &STRUCT->eventData.eventDataParms.event, $arg);
+
+#else
+
 STRUCT * NavCBRec
 	U16 			version;
 	U32		 		context;					/* used by customization code to call Navigation Services */
@@ -282,6 +298,8 @@ STRUCT * NavCBRec
 		READ_ONLY
 		OUTPUT:
 		XS_OUTPUT(ToolboxEvent, &STRUCT->eventData.eventDataParms.event, $arg);
+
+#endif
 
 =item NavDialogOptions
 

@@ -1,4 +1,5 @@
 TYPEMAP
+NavDialogRef		T_PTROBJ
 NavFileInfo			T_PTROBJ
 NavFolderInfo		T_PTROBJ
 NavFileOrFolderInfo	T_PTROBJ

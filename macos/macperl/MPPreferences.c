@@ -9,6 +9,9 @@ Apple Developer Support UK
 Language	:	MPW C
 
 $Log: MPPreferences.c,v $
+Revision 1.9  2002/01/04 03:34:45  pudge
+Modifications for universal headers 3.4
+
 Revision 1.8  2001/04/24 05:11:32  pudge
 Remove extra : at end of TMPDIR in prefs
 
@@ -46,6 +49,8 @@ Revision 0.1  1993/12/08  00:00:00  neeri
 Separated from MPUtils
 
 *********************************************************************/
+
+#include <stdio.h>
 
 #include "MPPreferences.h"
 #include "MPUtils.h"

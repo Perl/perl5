@@ -4,6 +4,9 @@ File		:	MPPseudoFile.cp	-	Pseudo files for GUSI
 Author	:	Matthias Neeracher
 Language	:	MPW C/C++
 $Log: MPPseudoFile.cp,v $
+Revision 1.2  2002/01/04 03:34:45  pudge
+Modifications for universal headers 3.4
+
 Revision 1.1  2000/11/30 08:37:29  neeri
 Sources & Resources
 
@@ -17,6 +20,8 @@ Revision 1.1  1994/02/27  23:05:08  neeri
 Initial revision
 
 *********************************************************************/
+
+#include <stdio.h>
 
 #define GUSI_SOURCE
 #define GUSI_INTERNAL

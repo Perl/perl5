@@ -9,6 +9,9 @@ Apple Developer Support UK
 Language	:	MPW C
 
 $Log: MPAppleEvents.c,v $
+Revision 1.4  2002/01/04 03:34:45  pudge
+Modifications for universal headers 3.4
+
 Revision 1.3  2001/10/22 19:28:01  pudge
 Sync with perforce
 
@@ -53,6 +56,8 @@ Revision 0.1  1993/05/29  00:00:00  neeri
 Compiles correctly
 
 *********************************************************************/
+
+#include <stdio.h>
 
 #include <AppleEvents.h>
 #include <LowMem.h>

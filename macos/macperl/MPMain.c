@@ -9,6 +9,9 @@ Apple Developer Support UK
 Language	:	MPW C
 
 $Log: MPMain.c,v $
+Revision 1.6  2002/01/04 03:34:45  pudge
+Modifications for universal headers 3.4
+
 Revision 1.5  2001/11/08 06:01:40  neeri
 Change ExitToShell() to exit(0) to fix nasty GUSI crash (MacPerl Bug #467732)
 
@@ -70,6 +73,8 @@ Revision 0.1  1993/05/29  00:00:00  neeri
 Compiles correctly
 
 *********************************************************************/
+
+#include <stdio.h>
 
 #define MP_EXT 
 #define MP_INIT(x) = x

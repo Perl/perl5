@@ -5,6 +5,9 @@ Author	:	Matthias Neeracher
 Language	:	MPW C/C++
 
 $Log: MPAEVTStream.cp,v $
+Revision 1.4  2002/01/04 03:34:45  pudge
+Modifications for universal headers 3.4
+
 Revision 1.3  2001/04/28 23:28:01  neeri
 Need to register MPAEVTStreamDevice (MacPerl Bug #418932)
 
@@ -15,6 +18,8 @@ Revision 1.1  1997/06/23 17:10:30  neeri
 Checked into CVS
 
 *********************************************************************/
+
+#include <stdio.h>
 
 #define GUSI_SOURCE
 #define GUSI_INTERNAL

@@ -9,6 +9,9 @@ Apple Developer Support UK
 Language	:	MPW C
 
 $Log: MPSave.c,v $
+Revision 1.3  2002/01/04 03:34:45  pudge
+Modifications for universal headers 3.4
+
 Revision 1.2  2001/10/03 19:23:16  pudge
 Sync with perforce maint-5.6/macperl
 
@@ -31,6 +34,8 @@ Revision 0.1  1993/10/03  00:00:00  neeri
 Compiles correctly
 
 *********************************************************************/
+
+#include <stdio.h>
 
 #include <Errors.h>
 #include <Resources.h>

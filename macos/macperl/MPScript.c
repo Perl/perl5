@@ -5,6 +5,12 @@ Author	:	Matthias Neeracher
 Language	:	MPW C
 
 $Log: MPScript.c,v $
+Revision 1.9  2002/01/04 03:34:45  pudge
+Modifications for universal headers 3.4
+
+Revision 1.8  2001/12/19 22:51:42  pudge
+Reset $^E each script
+
 Revision 1.7  2001/11/13 04:06:35  pudge
 Remov unused AddErrorDescription
 
@@ -48,6 +54,8 @@ Revision 0.1  1993/08/17  00:00:00  neeri
 Set up correct default directory
 
 *********************************************************************/
+
+#include <stdio.h>
 
 #define ORIGINAL_WRAPPER
 

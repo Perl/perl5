@@ -5,6 +5,9 @@ Author	:	Matthias Neeracher
 Language	:	MPW C
 
 $Log: MPHelp.c,v $
+Revision 1.2  2002/01/04 03:34:45  pudge
+Modifications for universal headers 3.4
+
 Revision 1.1  2000/11/30 08:37:29  neeri
 Sources & Resources
 
@@ -30,6 +33,11 @@ Revision 0.1  1993/08/17  00:00:00  neeri
 Use Application directory
 
 *********************************************************************/
+
+#include <stdio.h>
+
+// ignore CGBase.h int types
+#define _STDINT_H_
 
 #include "MPHelp.h"
 #include "MPConsole.h"

@@ -9,6 +9,9 @@ Apple Developer Support UK
 Language	:	MPW C
 
 $Log: MPGlobals.c,v $
+Revision 1.2  2002/01/04 03:34:45  pudge
+Modifications for universal headers 3.4
+
 Revision 1.1  2000/11/30 08:37:29  neeri
 Sources & Resources
 
@@ -36,5 +39,7 @@ Compiles correctly
 *********************************************************************/
 
 #define EXTERN 
+
+#include <stdio.h>
 
 #include "MPGlobals.h"

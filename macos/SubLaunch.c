@@ -9,6 +9,9 @@ Copyright (c) 1991-1995 Matthias Neeracher
 	as specified in the README file.
 
 $Log: SubLaunch.c,v $
+Revision 1.2  2002/01/04 03:40:35  pudge
+Modifications for universal headers 3.4
+
 Revision 1.1  2000/08/14 01:48:17  neeri
 Checked into Sourceforge
 
@@ -17,6 +20,8 @@ First build released to public
 
 
 *********************************************************************/
+
+#include <stdio.h>
 
 /* We need glue for Gestalt, but not for the rest of the stuff */
 
