@@ -47,7 +47,6 @@ print OUT <<EndOfIntro;
 package='perl5'
 CONFIG='true'
 cf_time='$time'
-osname='VMS'
 ld='Link'
 lddlflags='/Share'
 ranlib=''
@@ -231,16 +230,15 @@ else { warn "Can't read ${outdir}crtl.opt - skipping 'libs' & 'libc'"; }
 
 if (open(PL,"${outdir}patchlevel.h")) {
   while (<PL>) {
-    next unless /PATCHLEVEL\s+(\S+)/;
-    print OUT "PATCHLEVEL='$1'\n";
-    last;
+    if    (/^#define PATCHLEVEL\s+(\S+)/) { print OUT "PATCHLEVEL='$1'\n"; }
+    elsif (/^#define SUBVERSION\s+(\S+)/) { print OUT "SUBVERSION='$1'\n"; }
   }
   close PL;
 }
 else { warn "Can't read ${outdir}patchlevel.h - skipping 'PATCHLEVEL'"; }
 
 # simple pager support for perldoc
-if    (`most nl:` =~ /IVVERB/) {
+if    (`most` =~ /IVVERB/) {
   $pager = 'more';
   if (`more nl:` =~ /IVVERB/) { $pager = 'type/page'; }
 }
