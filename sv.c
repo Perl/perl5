@@ -8335,9 +8335,15 @@ do_clean_objs(pTHXo_ SV *sv)
 
     if (SvROK(sv) && SvOBJECT(rv = SvRV(sv))) {
 	DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning object ref:\n "), sv_dump(sv));)
-	SvROK_off(sv);
-	SvRV(sv) = 0;
-	SvREFCNT_dec(rv);
+	if (SvWEAKREF(sv)) {
+	    sv_del_backref(sv);
+	    SvWEAKREF_off(sv);
+	    SvRV(sv) = 0;
+	} else {
+	    SvROK_off(sv);
+	    SvRV(sv) = 0;
+	    SvREFCNT_dec(rv);
+	}
     }
 
     /* XXX Might want to check arrays, etc. */
