@@ -1859,8 +1859,7 @@ init_main_stash(void)
        It is properly deallocated in perl_destruct() */
     strtab = newHV();
     HvSHAREKEYS_off(strtab);			/* mandatory */
-    Newz(506,((XPVHV*)SvANY(strtab))->xhv_array,
-	 sizeof(HE*) * (((XPVHV*)SvANY(strtab))->xhv_max + 1), char);
+    hv_ksplit(strtab, 512);
     
     curstash = defstash = newHV();
     curstname = newSVpv("main",4);
