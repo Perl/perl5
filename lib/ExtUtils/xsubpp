@@ -76,8 +76,9 @@ perl(1), perlxs(1), perlxstut(1), perlapi(1)
 =cut
 
 # Global Constants
-$XSUBPP_version = "1.933";
+$XSUBPP_version = "1.935";
 require 5.002;
+use vars '$cplusplus';
 
 sub Q ;
 
@@ -123,6 +124,9 @@ if (defined(&VMS::Filespec::vmsify)) { $Is_VMS = 1; $pwd = $ENV{DEFAULT}; }
 else                                 { $Is_VMS = 0; chomp($pwd = `pwd`);   }
 
 ++ $IncludedFiles{$ARGV[0]} ;
+
+my(@XSStack) = ({type => 'none'});	# Stack of conditionals and INCLUDEs
+my($XSS_work_idx, $cpp_next_tmp) = (0, "XSubPPtmpAAAA");
 
 sub TrimWhitespace
 {
@@ -346,13 +350,14 @@ sub GetAliases
         
         # check for duplicate alias name & duplicate value
 	Warn("Warning: Ignoring duplicate alias '$orig_alias'")
-	    if defined $XsubAliases{$pname}{$alias} ;
+	    if defined $XsubAliases{$alias} ;
 
-        Warn("Warning: Aliases '$orig_alias' and '$XsubAliasValues{$pname}{$value}' have identical values")
-	    if $XsubAliasValues{$pname}{$value} ;
+	Warn("Warning: Aliases '$orig_alias' and '$XsubAliasValues{$value}' have identical values")
+	    if $XsubAliasValues{$value} ;
 
-        $XsubAliases{$pname}{$alias} = $value ;
-        $XsubAliasValues{$pname}{$value} = $orig_alias ;
+	$XsubAliases = 1;
+	$XsubAliases{$alias} = $value ;
+	$XsubAliasValues{$value} = $orig_alias ;
     }
 
     blurt("Error: Cannot parse ALIAS definitions from '$orig'")
@@ -471,7 +476,8 @@ sub INCLUDE_handler ()
     ++ $IncludedFiles{$_} unless /\|\s*$/ ;
 
     # Save the current file context.
-    push(@FileStack, {
+    push(@XSStack, {
+	type		=> 'file',
         LastLine        => $lastline,
         LastLineNo      => $lastline_no,
         Line            => \@line,
@@ -508,9 +514,9 @@ EOF
  
 sub PopFile()
 {
-    return 0 unless @FileStack ;
- 
-    my $data     = pop @FileStack ;
+    return 0 unless $XSStack[-1]{type} eq 'file' ;
+
+    my $data     = pop @XSStack ;
     my $ThisFile = $filename ;
     my $isPipe   = ($filename =~ /\|\s*$/) ;
  
@@ -525,7 +531,7 @@ sub PopFile()
     $lastline_no = $data->{LastLineNo} ;
     @line       = @{ $data->{Line} } ;
     @line_no    = @{ $data->{LineNo} } ;
- 
+
     if ($isPipe and $? ) {
         -- $lastline_no ;
         print STDERR "Error reading from pipe '$ThisFile': $! in $filename, line $lastline_no\n"  ;
@@ -576,6 +582,8 @@ sub check_cpp {
 		$cpplevel++;
 	    } elsif (!$cpplevel) {
 		Warn("Warning: #else/elif/endif without #if in this function");
+		print STDERR "    (precede it with a blank line if the matching #if is outside the function)\n"
+		    if $XSStack[-1]{type} eq 'if';
 		return;
 	    } elsif ($cpp =~ /^\#\s*endif/) {
 		$cpplevel--;
@@ -623,12 +631,11 @@ $lastline_no = $.;
 # Read next xsub into @line from ($lastline, <$FH>).
 sub fetch_para {
     # parse paragraph
+    death ("Error: Unterminated `#if/#ifdef/#ifndef'")
+	if !defined $lastline && $XSStack[-1]{type} eq 'if';
     @line = ();
     @line_no = () ;
-    if (! defined $lastline) {
-        return 1 if PopFile() ;
-        return 0 ;
-    }
+    return PopFile() if !defined $lastline;
 
     if ($lastline =~
 	/^MODULE\s*=\s*([\w:]+)(?:\s+PACKAGE\s*=\s*([\w:]+))?(?:\s+PREFIX\s*=\s*(\S+))?\s*$/) {
@@ -644,7 +651,13 @@ sub fetch_para {
 
     for(;;) {
 	if ($lastline !~ /^\s*#/ ||
-	    $lastline =~ /^#[ \t]*(?:(?:if|ifn?def|else|elif|endif|define|undef|pragma)\b|include\s*["<].*[>"])/) {
+	    # CPP directives:
+	    #	ANSI:	if ifdef ifndef elif else endif define undef
+	    #		line error pragma
+	    #	gcc:	warning include_next
+	    #   obj-c:	import
+	    #   others:	ident (gcc notes that some cpps have this one)
+	    $lastline =~ /^#[ \t]*(?:(?:if|ifn?def|elif|else|endif|define|undef|pragma|error|warning|line\s+\d+|ident)\b|(?:include(?:_next)?|import)\s*["<].*[>"])/) {
 	    last if $lastline =~ /^\S/ && @line && $line[-1] eq "";
 	    push(@line, $lastline);
 	    push(@line_no, $lastline_no) ;
@@ -667,10 +680,47 @@ sub fetch_para {
 PARAGRAPH:
 while (fetch_para()) {
     # Print initial preprocessor statements and blank lines
-    print shift(@line), "\n"
-	while @line && $line[0] !~ /^[^\#]/;
+    while (@line && $line[0] !~ /^[^\#]/) {
+	my $line = shift(@line);
+	print $line, "\n";
+	next unless $line =~ /^\#\s*((if)(?:n?def)?|elsif|else|endif)\b/;
+	my $statement = $+;
+	if ($statement eq 'if') {
+	    $XSS_work_idx = @XSStack;
+	    push(@XSStack, {type => 'if'});
+	} else {
+	    death ("Error: `$statement' with no matching `if'")
+		if $XSStack[-1]{type} ne 'if';
+	    if ($XSStack[-1]{varname}) {
+		push(@InitFileCode, "#endif\n");
+		push(@BootCode,     "#endif");
+	    }
+
+	    my(@fns) = keys %{$XSStack[-1]{functions}};
+	    if ($statement ne 'endif') {
+		# Hide the functions defined in other #if branches, and reset.
+		@{$XSStack[-1]{other_functions}}{@fns} = (1) x @fns;
+		@{$XSStack[-1]}{qw(varname functions)} = ('', {});
+	    } else {
+		my($tmp) = pop(@XSStack);
+		0 while (--$XSS_work_idx
+			 && $XSStack[$XSS_work_idx]{type} ne 'if');
+		# Keep all new defined functions
+		push(@fns, keys %{$tmp->{other_functions}});
+		@{$XSStack[$XSS_work_idx]{functions}}{@fns} = (1) x @fns;
+	    }
+	}
+    }
 
     next PARAGRAPH unless @line;
+
+    if ($XSS_work_idx && !$XSStack[$XSS_work_idx]{varname}) {
+	# We are inside an #if, but have not yet #defined its xsubpp variable.
+	print "#define $cpp_next_tmp 1\n\n";
+	push(@InitFileCode, "#if $cpp_next_tmp\n");
+	push(@BootCode,     "#if $cpp_next_tmp");
+	$XSStack[$XSS_work_idx]{varname} = $cpp_next_tmp++;
+    }
 
     death ("Code is not inside a function")
 	if $line[0] =~ /^\s/;
@@ -718,16 +768,16 @@ while (fetch_para()) {
 
     ($class, $func_name, $orig_args) =  ($1, $2, $3) ;
     ($pname = $func_name) =~ s/^($Prefix)?/$Packprefix/;
+    $Full_func_name = "${Packid}_$func_name";
 
     # Check for duplicate function definition
-    if (defined $Func_name{"${Packid}_$func_name"} ) {
-       Warn("Warning: duplicate function definition '$func_name' detected") 
+    for $tmp (@XSStack) {
+	next unless defined $tmp->{functions}{$Full_func_name};
+	Warn("Warning: duplicate function definition '$func_name' detected");
+	last;
     }
-    else {
-        push(@Func_name, "${Packid}_$func_name");
-        push(@Func_pname, $pname);
-    }
-    $Func_name{"${Packid}_$func_name"} ++ ;
+    $XSStack[$XSS_work_idx]{functions}{$Full_func_name} ++ ;
+    %XsubAliases = %XsubAliasValues = ();
 
     @args = split(/\s*,\s*/, $orig_args);
     if (defined($class)) {
@@ -938,15 +988,20 @@ EOF
 #
 EOF
 
+    my $newXS = "newXS" ;
+    my $proto = "" ;
+
     # Build the prototype string for the xsub
     if ($ProtoThisXSUB) {
-        if ($ProtoThisXSUB == 2) {
-            # User has specified empty prototype
-            $ProtoXSUB{$pname} = '""'
-        }
+	$newXS = "newXSproto";
+
+	if ($ProtoThisXSUB == 2) {
+	    # User has specified empty prototype
+	    $proto = ', ""' ;
+	}
         elsif ($ProtoThisXSUB != 1) {
             # User has specified a prototype
-            $ProtoXSUB{$pname} = '"' . $ProtoThisXSUB . '"'
+            $proto = ', "' . $ProtoThisXSUB . '"';
         }
         else {
 	    my $s = ';';
@@ -954,13 +1009,30 @@ EOF
                 $s = ''; 
 		$proto_arg[$min_args] .= ";" ;
 	    }
-            push @proto_arg, "${s}@" 
+            push @proto_arg, "$s\@" 
                 if $elipsis ;
     
-            $ProtoXSUB{$pname} = '"' . join ("", @proto_arg) . '"' 
+            $proto = ', "' . join ("", @proto_arg) . '"';
         }
     }
 
+    if (%XsubAliases) {
+	$XsubAliases{$pname} = 0 
+	    unless defined $XsubAliases{$pname} ;
+	while ( ($name, $value) = each %XsubAliases) {
+	    push(@InitFileCode, Q<<"EOF");
+#        cv = newXS(\"$name\", XS_$Full_func_name, file);
+#        XSANY.any_i32 = $value ;
+EOF
+	push(@InitFileCode, Q<<"EOF") if $proto;
+#        sv_setpv((SV*)cv$proto) ;
+EOF
+        }
+    }
+    else {
+	push(@InitFileCode,
+	     "        ${newXS}(\"$pname\", XS_$Full_func_name, file$proto);\n");
+    }
 }
 
 # print initialization routine
@@ -980,41 +1052,15 @@ print Q<<"EOF" if $WantVersionChk ;
 #
 EOF
 
-print Q<<"EOF" if defined %XsubAliases ;
+print Q<<"EOF" if defined $XsubAliases ;
 #    {
 #        CV * cv ;
 #
 EOF
 
-for (@Func_name) {
-    $pname = shift(@Func_pname);
-    my $newXS = "newXS" ;
-    my $proto = "" ;
+print @InitFileCode;
 
-    if ($ProtoXSUB{$pname}) {
-        $newXS = "newXSproto" ;
-        $proto = ", $ProtoXSUB{$pname}" ;
-    }
-
-    if ($XsubAliases{$pname}) {
-        $XsubAliases{$pname}{$pname} = 0 
-		unless defined $XsubAliases{$pname}{$pname} ;
-        while ( ($name, $value) = each %{$XsubAliases{$pname}}) {
-            print Q<<"EOF" ;
-#        cv = newXS(\"$name\", XS_$_, file);
-#        XSANY.any_i32 = $value ;
-EOF
-            print Q<<"EOF" if $proto ;
-#        sv_setpv((SV*)cv, $ProtoXSUB{$pname}) ;
-EOF
-        }
-    }
-    else {
-        print "        ${newXS}(\"$pname\", XS_$_, file$proto);\n";
-    }
-}
-
-print Q<<"EOF" if defined %XsubAliases ;
+print Q<<"EOF" if defined $XsubAliases ;
 #    }
 EOF
 
