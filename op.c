@@ -2851,6 +2851,7 @@ OP *cont;
     redo = LINKLIST(listop);
 
     if (expr) {
+	copline = whileline;
 	scalar(listop);
 	op = new_logop(OP_AND, 0, &expr, &listop);
 	if (op == expr && op->op_type == OP_CONST && !SvTRUE(cSVOP->op_sv)) {
