@@ -29,7 +29,7 @@ if ($@) {
 print "1..4\n";
 
 if (eval {require File::Spec::Functions}) {
- File::Spec::Functions->import('tmpdir');
+ File::Spec::Functions->import(qw(catfile tmpdir));
  $tmpdir = tmpdir();
 } else {
  *catfile = sub { join '/', @_ };
