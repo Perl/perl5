@@ -3075,20 +3075,23 @@ typedef struct am_table_short AMTS;
 
 #endif /* !USE_LOCALE_NUMERIC */
 
-#if !defined(Atol) && defined(USE_64_BIT_INT) && defined(IV_IS_QUAD) && QUADKIND == QUAD_IS_LONG_LONG
+#if !defined(Strtol) && defined(USE_64_BIT_INT) && defined(IV_IS_QUAD) && QUADKIND == QUAD_IS_LONG_LONG
 #    ifdef __hpux
 #        define strtoll __strtoll	/* secret handshake */
 #    endif
-#   if !defined(Atol) && defined(HAS_STRTOLL)
-#       define Atol(s) strtoll(s, (char**)NULL, 10)
-#   endif
-#   if !defined(Atol) && defined(HAS_ATOLL)
-#       define Atol atoll
+#   if !defined(Strtol) && defined(HAS_STRTOLL)
+#       define Strtol	strtoll
 #   endif
 /* is there atoq() anywhere? */
 #endif
-#if !defined(Atol)
-#   define Atol atol /* we assume atol being available anywhere */
+#if !defined(Strtol) && defined(HAS_STRTOL)
+#   define Strtol	strtol
+#endif
+#ifndef Atol
+/* It would be more fashionable to use Strtol() to define atol()
+ * (as is done for Atoul(), see below) but for backward compatibility
+ * we just assume atol(). */
+#   define Atol		atol
 #endif
 
 #if !defined(Strtoul) && defined(USE_64_BIT_INT) && defined(UV_IS_QUAD) && QUADKIND == QUAD_IS_LONG_LONG
@@ -3098,16 +3101,16 @@ typedef struct am_table_short AMTS;
 #    if !defined(Strtoul) && defined(HAS_STRTOULL)
 #       define Strtoul	strtoull
 #    endif
-#endif
+#    if !defined(Strtoul) && defined(HAS_STRTOUQ)
+#       define Strtoul	strtouq
+#    endif
 /* is there atouq() anywhere? */
-#if !defined(Strtoul) && defined(HAS_STRTOUQ)
-#   define Strtoul	strtouq
 #endif
-#if !defined(Strtoul)
-#   define Strtoul strtoul /* we assume strtoul being available anywhere */
+#if !defined(Strtoul) && defined(HAS_STRTOUL)
+#   define Strtoul	strtoul
 #endif
-#ifndef Atoul 
-#   define Atoul(s) Strtoul(s, (char**)NULL, 10)
+#ifndef Atoul
+#   define Atoul(s)	Strtoul(s, (char **)NULL, 10)
 #endif
 
 #if !defined(PERLIO_IS_STDIO) && defined(HASATTRIBUTE)
