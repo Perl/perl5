@@ -358,7 +358,13 @@ sub _INC2PERL5LIB {
 
     $self->{_old5lib} = $ENV{PERL5LIB};
 
-    return join $Config{path_sep}, $self->_filtered_INC;
+    my @filtered_inc = $self->_filtered_INC;
+    my @clean_inc   = grep !/\Q$Config{path_sep}/, @filtered_inc;
+    my @naughty_inc = grep /\Q$Config{path_sep}/, @filtered_inc;
+    warn "Test::Harness can't handle \@INC directories with ".
+	"'$Config{path_sep}': @naughty_inc\n" if @naughty_inc;
+
+    return join $Config{path_sep}, @clean_inc;
 }
 
 =item B<_filtered_INC>
