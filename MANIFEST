@@ -11,7 +11,9 @@ EXTERN.h		Included before foreign .h files
 INSTALL			Detailed installation instructions
 INTERN.h		Included before domestic .h files
 MANIFEST		This list of files
+META.yml		Distribution meta-data in YAML
 Makefile.SH		A script that generates Makefile
+NINJA			Ninja file
 Policy_sh.SH		Hold site-wide preferences between Configure runs.
 Porting/Contract	Social contract for contributed modules in Perl core
 Porting/Glossary	Glossary of config.sh variables
