@@ -5283,7 +5283,7 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item AIX Dynaloading
 
-=item Attributes for C<my> variables now handled at run-time.
+=item Attributes for C<my> variables now handled at run-time
 
 =item Socket Extension Dynamic in VMS
 
@@ -5295,6 +5295,8 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item pack/unpack D/F recycled
 
+=item glob() now returns filenames in alphabetical order
+
 =item Deprecations
 
 =back
@@ -5303,13 +5305,15 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =over 4
 
+=item Unicode Overhaul
+
 =item PerlIO is Now The Default
+
+=item ithreads
 
 =item Restricted Hashes
 
 =item Safe Signals
-
-=item Unicode Overhaul
 
 =item Understanding of Numbers
 
@@ -5377,6 +5381,8 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item Cygwin ndbm tests fail on FAT
 
+=item DJGPP does not build
+
 =item ext/threads/t/libc
 
 =item FreeBSD built with ithreads coredumps reading large directories
@@ -5413,6 +5419,8 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item PDL failing some tests
 
+=item Perl_get_sv
+
 =item Term::ReadKey not working on Win32
 
 =item Failure of Thread (5.005-style) tests
@@ -5446,8 +5454,6 @@ I<The Road goes ever on and on, down from the door where it began.>
 =item Unicode Support on EBCDIC Still Spotty
 
 =item The Compiler Suite Is Still Very Experimental
-
-=item The Long Double Support Is Still Experimental
 
 =item Seen In Perl 5.7 But Gone Now
 
@@ -17142,13 +17148,15 @@ escape EE<lt>%sE<gt>, %s:%d: Unknown formatting code %s, %s:%d: Unmatched
 
 =back
 
-=head2 Pod::ParseLink -- Parse an LE<lt>E<gt> formatting code in POD text
+=head2 Pod::ParseLink - Parse an LE<lt>E<gt> formatting code in POD text
 
 =over 4
 
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=item SEE ALSO
 
 =item AUTHOR
 
@@ -17692,8 +17700,8 @@ text
 
 =back
 
-=head2 Pod::Text::Termcap, Pod::Text::Color - Convert POD data to ASCII
-text with format escapes
+=head2 Pod::Text::Termcap - Convert POD data to ASCII text with format
+escapes
 
 =over 4
 
@@ -18165,7 +18173,7 @@ ANSI_COLORS_DISABLED
 
 =item AUTHORS
 
-=item LICENSE
+=item COPYRIGHT AND LICENSE
 
 =back
 
