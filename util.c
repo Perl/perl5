@@ -1957,6 +1957,10 @@ rsignal(int signo, Sighandler_t handler)
 #ifdef SA_RESTART
     act.sa_flags |= SA_RESTART;	/* SVR4, 4.3+BSD */
 #endif
+#ifdef SA_NOCLDWAIT
+    if (signo == SIGCHLD && handler == (Sighandler_t)SIG_IGN)
+	act.sa_flags |= SA_NOCLDWAIT;
+#endif
     if (sigaction(signo, &act, &oact) == -1)
     	return SIG_ERR;
     else
@@ -1984,6 +1988,10 @@ rsignal_save(int signo, Sighandler_t handler, Sigsave_t *save)
     act.sa_flags = 0;
 #ifdef SA_RESTART
     act.sa_flags |= SA_RESTART;	/* SVR4, 4.3+BSD */
+#endif
+#ifdef SA_NOCLDWAIT
+    if (signo == SIGCHLD && handler == (Sighandler_t)SIG_IGN)
+	act.sa_flags |= SA_NOCLDWAIT;
 #endif
     return sigaction(signo, &act, save);
 }
