@@ -1388,17 +1388,17 @@ Ap	|HE*	|avhv_iternext	|AV *ar
 Ap	|SV*	|avhv_iterval	|AV *ar|HE* entry
 Ap	|HV*	|avhv_keys	|AV *ar
 Apd	|void	|av_clear	|AV* ar
-Ap	|SV*	|av_delete	|AV* ar|I32 key|I32 flags
-Ap	|bool	|av_exists	|AV* ar|I32 key
+Apd	|SV*	|av_delete	|AV* ar|I32 key|I32 flags
+Apd	|bool	|av_exists	|AV* ar|I32 key
 Apd	|void	|av_extend	|AV* ar|I32 key
-Ap	|AV*	|av_fake	|I32 size|SV** svp
+p	|AV*	|av_fake	|I32 size|SV** svp
 Apd	|SV**	|av_fetch	|AV* ar|I32 key|I32 lval
-Ap	|void	|av_fill	|AV* ar|I32 fill
+Apd	|void	|av_fill	|AV* ar|I32 fill
 Apd	|I32	|av_len		|AV* ar
 Apd	|AV*	|av_make	|I32 size|SV** svp
 Apd	|SV*	|av_pop		|AV* ar
 Apd	|void	|av_push	|AV* ar|SV* val
-Ap	|void	|av_reify	|AV* ar
+p	|void	|av_reify	|AV* ar
 Apd	|SV*	|av_shift	|AV* ar
 Apd	|SV**	|av_store	|AV* ar|I32 key|SV* val
 Apd	|void	|av_undef	|AV* ar

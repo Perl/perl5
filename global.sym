@@ -33,14 +33,12 @@ Perl_av_clear
 Perl_av_delete
 Perl_av_exists
 Perl_av_extend
-Perl_av_fake
 Perl_av_fetch
 Perl_av_fill
 Perl_av_len
 Perl_av_make
 Perl_av_pop
 Perl_av_push
-Perl_av_reify
 Perl_av_shift
 Perl_av_store
 Perl_av_undef
