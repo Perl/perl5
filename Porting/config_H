@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Wed Feb 16 01:08:43 EET 2000
+ * Configuration time: Tue Feb 22 07:10:02 EET 2000
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -1076,8 +1076,8 @@
 
 /* MEM_ALIGNBYTES:
  *	This symbol contains the number of bytes required to align a
- *	double. Usual values are 2, 4 and 8. The default is eight,
- *	for safety.
+ *	double, or a long double when applicable. Usual values are 2,
+ *	4 and 8. The default is eight, for safety.
  */
 #if defined(CROSSCOMPILE) || defined(MULTIARCH)
 #  define MEM_ALIGNBYTES 8
@@ -1682,11 +1682,16 @@
  */
 /*#define HAS_MKSTEMPS		/ **/
 
+/* HAS_MMAP:
+ *	This symbol, if defined, indicates that the mmap system call is
+ *	available to map a file into memory.
+ */
 /* Mmap_t:
  *	This symbol holds the return type of the mmap() system call
  *	(and simultaneously the type of the first argument).
  *	Usually set to 'void *' or 'cadd_t'.
  */
+#define HAS_MMAP		/**/
 #define Mmap_t void *	/**/
 
 /* HAS_MPROTECT:
@@ -2960,6 +2965,12 @@
  */
 #define PERL_XS_APIVERSION "5.5.660"
 #define PERL_PM_APIVERSION "5.005"
+
+/* I_SYSMODE:
+ *	This symbol, if defined, indicates that <sys/mode.h> exists and
+ *	should be included.
+ */
+#define	I_SYSMODE		/**/
 
 /* I_SYS_UTSNAME:
  *	This symbol, if defined, indicates that <sys/utsname.h> exists and

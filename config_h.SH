@@ -1090,8 +1090,8 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 
 /* MEM_ALIGNBYTES:
  *	This symbol contains the number of bytes required to align a
- *	double. Usual values are 2, 4 and 8. The default is eight,
- *	for safety.
+ *	double, or a long double when applicable. Usual values are 2,
+ *	4 and 8. The default is eight, for safety.
  */
 #if defined(CROSSCOMPILE) || defined(MULTIARCH)
 #  define MEM_ALIGNBYTES 8
@@ -1696,11 +1696,16 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_mkstemps HAS_MKSTEMPS		/**/
 
+/* HAS_MMAP:
+ *	This symbol, if defined, indicates that the mmap system call is
+ *	available to map a file into memory.
+ */
 /* Mmap_t:
  *	This symbol holds the return type of the mmap() system call
  *	(and simultaneously the type of the first argument).
  *	Usually set to 'void *' or 'cadd_t'.
  */
+#$d_mmap HAS_MMAP		/**/
 #define Mmap_t $mmaptype	/**/
 
 /* HAS_MPROTECT:

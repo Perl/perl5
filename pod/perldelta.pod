@@ -650,7 +650,8 @@ Unfortunately bit arithmetics (&, |, ^, ~, <<, >>) for numbers are not
 64-bit clean, they are explictly forced to be 32-bit because of
 tangled backward compatibility issues.  This limitation is subject to
 change.  Bit arithmetics for bit vector scalars (created by vec()) are
-not limited in their width.
+not limited in their width, you can use the & | ^ ~ operators on such
+scalars.
 
 Last but not least: note that due to Perl's habit of always using
 floating point numbers the quads are still not true integers.
