@@ -1855,7 +1855,10 @@ Perl_pv_uni_display(pTHX_ SV *dsv, U8 *spv, STRLEN len, STRLEN pvlim, UV flags)
     sv_setpvn(dsv, "", 0);
     for (s = (char *)spv, e = s + len; s < e; s += UTF8SKIP(s)) {
 	 UV u;
-	 bool ok = FALSE;
+	  /* This serves double duty as a flag and a character to print after
+	     a \ when flags & UNI_DISPLAY_BACKSLASH is true.
+	  */
+	 char ok = 0;
 
 	 if (pvlim && SvCUR(dsv) >= pvlim) {
 	      truncated++;
@@ -1863,27 +1866,31 @@ Perl_pv_uni_display(pTHX_ SV *dsv, U8 *spv, STRLEN len, STRLEN pvlim, UV flags)
 	 }
 	 u = utf8_to_uvchr((U8*)s, 0);
 	 if (u < 256) {
+	     unsigned char c = u & 0xFF;
 	     if (!ok && (flags & UNI_DISPLAY_BACKSLASH)) {
-	         switch (u & 0xFF) {
+	         switch (c) {
 		 case '\n':
-		     Perl_sv_catpv(aTHX_ dsv, "\\n"); ok = TRUE; break;
+		     ok = 'n'; break;
 		 case '\r':
-		     Perl_sv_catpv(aTHX_ dsv, "\\r"); ok = TRUE; break;
+		     ok = 'r'; break;
 		 case '\t':
-		     Perl_sv_catpv(aTHX_ dsv, "\\t"); ok = TRUE; break;
+		     ok = 't'; break;
 		 case '\f':
-		     Perl_sv_catpv(aTHX_ dsv, "\\f"); ok = TRUE; break;
+		     ok = 'f'; break;
 		 case '\a':
-		     Perl_sv_catpv(aTHX_ dsv, "\\a"); ok = TRUE; break;
+		     ok = 'a'; break;
 		 case '\\':
-		     Perl_sv_catpv(aTHX_ dsv, "\\\\" ); ok = TRUE; break;
+		     ok = '\\'; break;
 		 default: break;
+		 }
+		 if (ok) {
+		     Perl_sv_catpvf(aTHX_ dsv, "\\%c", ok);
 		 }
 	     }
 	     /* isPRINT() is the locale-blind version. */
-	     if (!ok && (flags & UNI_DISPLAY_ISPRINT) && isPRINT(u & 0xFF)) {
-	         Perl_sv_catpvf(aTHX_ dsv, "%c", (char)(u & 0xFF));
-		 ok = TRUE;
+	     if (!ok && (flags & UNI_DISPLAY_ISPRINT) && isPRINT(c)) {
+	         Perl_sv_catpvf(aTHX_ dsv, "%c", c);
+		 ok = 1;
 	     }
 	 }
 	 if (!ok)
@@ -2023,3 +2030,12 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const
      return match ? 0 : 1; /* 0 match, 1 mismatch */
 }
 
+/*
+ * Local variables:
+ * c-indentation-style: bsd
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ *
+ * vim: shiftwidth=4:
+*/
