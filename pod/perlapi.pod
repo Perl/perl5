@@ -1554,6 +1554,16 @@ the type.  May fail on overlapping copies.  See also C<Move>.
 =for hackers
 Found in file handy.h
 
+=item CopyD
+
+Like C<Copy> but returns dest. Useful for encouraging compilers to tail-call
+optimise.
+
+	void *	CopyD(void* src, void* dest, int nitems, type)
+
+=for hackers
+Found in file handy.h
+
 =item Move
 
 The XSUB-writer's interface to the C C<memmove> function.  The C<src> is the
@@ -1561,6 +1571,16 @@ source, C<dest> is the destination, C<nitems> is the number of items, and C<type
 the type.  Can do overlapping moves.  See also C<Copy>.
 
 	void	Move(void* src, void* dest, int nitems, type)
+
+=for hackers
+Found in file handy.h
+
+=item MoveD
+
+Like C<Move> but returns dest. Useful for encouraging compilers to tail-call
+optimise.
+
+	void *	MoveD(void* src, void* dest, int nitems, type)
 
 =for hackers
 Found in file handy.h
@@ -1681,6 +1701,16 @@ The XSUB-writer's interface to the C C<memzero> function.  The C<dest> is the
 destination, C<nitems> is the number of items, and C<type> is the type.
 
 	void	Zero(void* dest, int nitems, type)
+
+=for hackers
+Found in file handy.h
+
+=item ZeroD
+
+Like C<Zero> but returns dest. Useful for encouraging compilers to tail-call
+optimise.
+
+	void *	ZeroD(void* dest, int nitems, type)
 
 =for hackers
 Found in file handy.h

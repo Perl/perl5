@@ -751,12 +751,12 @@ be freed with the C<Safefree()> function.
 char *
 Perl_savepv(pTHX_ const char *pv)
 {
-    register char *newaddr = Nullch;
-    if (pv) {
-	New(902,newaddr,strlen(pv)+1,char);
-	(void)strcpy(newaddr,pv);
-    }
-    return newaddr;
+    register char *newaddr;
+    if (!pv)
+	return Nullch;
+
+    New(902,newaddr,strlen(pv)+1,char);
+    return strcpy(newaddr,pv);
 }
 
 /* same thing but with a known length */
@@ -780,13 +780,13 @@ Perl_savepvn(pTHX_ const char *pv, register I32 len)
     New(903,newaddr,len+1,char);
     /* Give a meaning to NULL pointer mainly for the use in sv_magic() */
     if (pv) {
-    	Copy(pv,newaddr,len,char);	/* might not be null terminated */
-    	newaddr[len] = '\0';		/* is now */
+	/* might not be null terminated */
+    	newaddr[len] = '\0';
+    	return CopyD(pv,newaddr,len,char);
     }
     else {
-	Zero(newaddr,len+1,char);
+	return ZeroD(newaddr,len+1,char);
     }
-    return newaddr;
 }
 
 /*
@@ -800,17 +800,17 @@ which is shared between threads.
 char *
 Perl_savesharedpv(pTHX_ const char *pv)
 {
-    register char *newaddr = Nullch;
-    if (pv) {
-	newaddr = (char*)PerlMemShared_malloc(strlen(pv)+1);
-	if (!newaddr) {
-	    PerlLIO_write(PerlIO_fileno(Perl_error_log),
-			  PL_no_mem, strlen(PL_no_mem));
-	    my_exit(1);
-	}
-    	(void)strcpy(newaddr,pv);
+    register char *newaddr;
+    if (!pv)
+	return Nullch;
+
+    newaddr = (char*)PerlMemShared_malloc(strlen(pv)+1);
+    if (!newaddr) {
+	PerlLIO_write(PerlIO_fileno(Perl_error_log),
+		      PL_no_mem, strlen(PL_no_mem));
+	my_exit(1);
     }
-    return newaddr;
+    return strcpy(newaddr,pv);
 }
 
 
