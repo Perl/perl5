@@ -12,7 +12,10 @@ BEGIN {
 use DB_File; 
 use Fcntl;
 use strict ;
-use vars qw($dbh $Dfile $bad_ones) ;
+use vars qw($dbh $Dfile $bad_ones $FA) ;
+
+# full tied array support started in Perl 5.004_57
+$FA = ($] >= 5.004_57) ;
 
 sub ok
 {
@@ -41,7 +44,7 @@ sub bad_one
 EOM
 }
 
-print "1..66\n";
+print "1..78\n";
 
 my $Dfile = "recno.tmp";
 unlink $Dfile ;
@@ -98,7 +101,7 @@ ok(18, ((stat($Dfile))[2] & 0777) == (($^O eq 'os2' || $^O eq 'MSWin32') ? 0666 
 
 #my $l = @h ;
 my $l = $X->length ;
-ok(19, !$l );
+ok(19, ($FA ? @h == 0 : !$l) );
 
 my @data = qw( a b c d ever f g h  i j k longername m n o p) ;
 
@@ -113,7 +116,7 @@ unshift (@data, 'a') ;
 
 ok(21, defined $h[1] );
 ok(22, ! defined $h[16] );
-ok(23, $X->length == @data );
+ok(23, $FA ? @h == @data : $X->length == @data );
 
 
 # Overwrite an entry & check fetch it
@@ -123,8 +126,7 @@ ok(24, $h[3] eq 'replaced' );
 
 #PUSH
 my @push_data = qw(added to the end) ;
-#my push (@h, @push_data) ;
-$X->push(@push_data) ;
+($FA ? push(@h, @push_data) : $X->push(@push_data)) ;
 push (@data, @push_data) ;
 ok(25, $h[++$i] eq 'added' );
 ok(26, $h[++$i] eq 'to' );
@@ -133,27 +135,24 @@ ok(28, $h[++$i] eq 'end' );
 
 # POP
 my $popped = pop (@data) ;
-#my $value = pop(@h) ;
-my $value = $X->pop ;
+my $value = ($FA ? pop @h : $X->pop) ;
 ok(29, $value eq $popped) ;
 
 # SHIFT
-#$value = shift @h
-$value = $X->shift ;
+$value = ($FA ? shift @h : $X->shift) ;
 my $shifted = shift @data ;
 ok(30, $value eq $shifted );
 
 # UNSHIFT
 
 # empty list
-$X->unshift ;
-ok(31, $X->length == @data );
+($FA ? unshift @h : $X->unshift) ;
+ok(31, ($FA ? @h == @data : $X->length == @data ));
 
 my @new_data = qw(add this to the start of the array) ;
-#unshift @h, @new_data ;
-$X->unshift (@new_data) ;
+$FA ? unshift (@h, @new_data) : $X->unshift (@new_data) ;
 unshift (@data, @new_data) ;
-ok(32, $X->length == @data );
+ok(32, $FA ? @h == @data : $X->length == @data );
 ok(33, $h[0] eq "add") ;
 ok(34, $h[1] eq "this") ;
 ok(35, $h[2] eq "to") ;
@@ -180,15 +179,15 @@ ok(42, $ok );
 
 # get the last element of the array
 ok(43, $h[-1] eq $data[-1] );
-ok(44, $h[-1] eq $h[$X->length -1] );
+ok(44, $h[-1] eq $h[ ($FA ? @h : $X->length) -1] );
 
 # get the first element using a negative subscript
-eval '$h[ - ( $X->length)] = "abcd"' ;
+eval '$h[ - ( $FA ? @h : $X->length)] = "abcd"' ;
 ok(45, $@ eq "" );
 ok(46, $h[0] eq "abcd" );
 
 # now try to read before the start of the array
-eval '$h[ - (1 + $X->length)] = 1234' ;
+eval '$h[ - (1 + ($FA ? @h : $X->length))] = 1234' ;
 ok(47, $@ =~ '^Modification of non-creatable array value attempted' );
 
 # IMPORTANT - $X must be undefined before the untie otherwise the
@@ -350,7 +349,7 @@ EOM
 
     close FILE ;
 
-    BEGIN { push @INC, '.'; }   
+    BEGIN { push @INC, '.'; } 
     eval 'use SubDB ; ';
     main::ok(57, $@ eq "") ;
     my @h ;
@@ -381,6 +380,63 @@ EOM
     undef $X;
     untie(@h);
     unlink "SubDB.pm", "recno.tmp" ;
+
+}
+
+{
+
+    # test $#
+    my $self ;
+    unlink $Dfile;
+    ok(67, $self = tie @h, 'DB_File', $Dfile, O_RDWR|O_CREAT, 0640, $DB_RECNO ) ;
+    $h[0] = "abc" ;
+    $h[1] = "def" ;
+    $h[2] = "ghi" ;
+    $h[3] = "jkl" ;
+    ok(68, $FA ? $#h == 3 : $self->length() == 4) ;
+    undef $self ;
+    untie @h ;
+    my $x = docat($Dfile) ;
+    ok(69, $x eq "abc\ndef\nghi\njkl\n") ;
+
+    # $# sets array to same length
+    ok(70, $self = tie @h, 'DB_File', $Dfile, O_RDWR, 0640, $DB_RECNO ) ;
+    if ($FA)
+      { $#h = 3 }
+    else 
+      { $self->STORESIZE(4) }
+    ok(71, $FA ? $#h == 3 : $self->length() == 4) ;
+    undef $self ;
+    untie @h ;
+    $x = docat($Dfile) ;
+    ok(72, $x eq "abc\ndef\nghi\njkl\n") ;
+
+    # $# sets array to bigger
+    ok(73, $self = tie @h, 'DB_File', $Dfile, O_RDWR, 0640, $DB_RECNO ) ;
+    if ($FA)
+      { $#h = 6 }
+    else 
+      { $self->STORESIZE(7) }
+    ok(74, $FA ? $#h == 6 : $self->length() == 7) ;
+    undef $self ;
+    untie @h ;
+    $x = docat($Dfile) ;
+    ok(75, $x eq "abc\ndef\nghi\njkl\n\n\n\n") ;
+
+    # $# sets array smaller
+    ok(76, $self = tie @h, 'DB_File', $Dfile, O_RDWR, 0640, $DB_RECNO ) ;
+    if ($FA)
+      { $#h = 2 }
+    else 
+      { $self->STORESIZE(3) }
+    ok(77, $FA ? $#h == 2 : $self->length() == 3) ;
+    undef $self ;
+    untie @h ;
+    $x = docat($Dfile) ;
+    ok(78, $x eq "abc\ndef\nghi\n") ;
+
+    unlink $Dfile;
+
 
 }
 

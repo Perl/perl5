@@ -801,6 +801,9 @@ while (<>) {
 	# no break -- usually we want C<> for this
 	s/S<([^<>]*)>/nobreak($1)/eg;
 
+	# LREF: a la HREF L<show this text|man/section>
+	s:L<([^|>]+)\|[^>]+>:$1:g;
+
 	# LREF: a manpage(3f)
 	s:L<([a-zA-Z][^\s\/]+)(\([^\)]+\))?>:the I<$1>$2 manpage:g;
 

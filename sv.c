@@ -1091,6 +1091,10 @@ sv_grow(SV* sv, unsigned long newlen)
 	s = SvPVX(sv);
 	if (newlen > SvLEN(sv))
 	    newlen += 10 * (newlen - SvCUR(sv)); /* avoid copy each time */
+#ifdef HAS_64K_LIMIT
+	if (newlen >= 0x10000)
+	    newlen = 0xFFFF;
+#endif
     }
     else
 	s = SvPVX(sv);
@@ -1175,7 +1179,6 @@ sv_setnv(register SV *sv, double num)
     case SVt_IV:
 	sv_upgrade(sv, SVt_NV);
 	break;
-    case SVt_NV:
     case SVt_RV:
     case SVt_PV:
     case SVt_PVIV:
@@ -1722,8 +1725,7 @@ sv_2pv(register SV *sv, STRLEN *lp)
 	    return "";
 	}
     }
-    if (!SvUPGRADE(sv, SVt_PV))
-	return 0;
+    (void)SvUPGRADE(sv, SVt_PV);
     if (SvNOKp(sv)) {
 	if (SvTYPE(sv) < SVt_PVNV)
 	    sv_upgrade(sv, SVt_PVNV);
@@ -2205,6 +2207,7 @@ sv_setsv_mg(SV *dstr, register SV *sstr)
 void
 sv_setpvn(register SV *sv, register const char *ptr, register STRLEN len)
 {
+    register char *dptr;
     assert(len >= 0);  /* STRLEN is probably unsigned, so this may
 			  elicit a warning, but it won't hurt. */
     sv_check_thinkfirst(sv);
@@ -2216,12 +2219,14 @@ sv_setpvn(register SV *sv, register const char *ptr, register STRLEN len)
 	if (SvFAKE(sv) && SvTYPE(sv) == SVt_PVGV)
 	    sv_unglob(sv);
     }
-    else if (!sv_upgrade(sv, SVt_PV))
-	return;
+    else
+	sv_upgrade(sv, SVt_PV);
+
     SvGROW(sv, len + 1);
-    Move(ptr,SvPVX(sv),len,char);
+    dptr = SvPVX(sv);
+    Move(ptr,dptr,len,char);
+    dptr[len] = '\0';
     SvCUR_set(sv, len);
-    *SvEND(sv) = '\0';
     (void)SvPOK_only(sv);		/* validate pointer */
     SvTAINT(sv);
 }
@@ -2248,8 +2253,9 @@ sv_setpv(register SV *sv, register const char *ptr)
 	if (SvFAKE(sv) && SvTYPE(sv) == SVt_PVGV)
 	    sv_unglob(sv);
     }
-    else if (!sv_upgrade(sv, SVt_PV))
-	return;
+    else 
+	sv_upgrade(sv, SVt_PV);
+
     SvGROW(sv, len + 1);
     Move(ptr,SvPVX(sv),len+1,char);
     SvCUR_set(sv, len);
@@ -2268,8 +2274,7 @@ void
 sv_usepvn(register SV *sv, register char *ptr, register STRLEN len)
 {
     sv_check_thinkfirst(sv);
-    if (!SvUPGRADE(sv, SVt_PV))
-	return;
+    (void)SvUPGRADE(sv, SVt_PV);
     if (!ptr) {
 	(void)SvOK_off(sv);
 	return;
@@ -2440,8 +2445,7 @@ sv_magic(register SV *sv, SV *obj, int how, char *name, I32 namlen)
 	}
     }
     else {
-	if (!SvUPGRADE(sv, SVt_PVMG))
-	    return;
+        (void)SvUPGRADE(sv, SVt_PVMG);
     }
     Newz(702,mg, 1, MAGIC);
     mg->mg_moremagic = SvMAGIC(sv);
@@ -3087,8 +3091,7 @@ sv_gets(register SV *sv, register PerlIO *fp, I32 append)
     I32 i;
 
     sv_check_thinkfirst(sv);
-    if (!SvUPGRADE(sv, SVt_PV))
-	return 0;
+    (void)SvUPGRADE(sv, SVt_PV);
     SvSCREAM_off(sv);
 
     if (RsSNARF(rs)) {

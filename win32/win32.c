@@ -476,7 +476,10 @@ opendir(char *filename)
 
     /* check to see if filename is a directory */
     if (win32_stat(filename, &sbuf) < 0 || (sbuf.st_mode & S_IFDIR) == 0) {
-	return NULL;
+	/* CRT is buggy on sharenames, so make sure it really isn't */
+	DWORD r = GetFileAttributes(filename);
+	if (r == 0xffffffff || !(r & FILE_ATTRIBUTE_DIRECTORY))
+	    return NULL;
     }
 
     /* get the file system characteristics */

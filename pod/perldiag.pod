@@ -899,6 +899,30 @@ a B<-e> switch.  Maybe your /tmp partition is full, or clobbered.
 opposed to a subroutine reference): no such method callable via the
 package. If method name is C<???>, this is an internal error.
 
+=item Character class syntax [. .] is reserved for future extensions
+
+(W) Within regular expression character classes ([]) the syntax beginning
+with "[." and ending with ".]" is reserved for future extensions.
+If you need to represent those character sequences inside a regular
+expression character class, just quote the square brackets with the
+backslash: "\[." and ".\]".
+
+=item Character class syntax [: :] is reserved for future extensions
+
+(W) Within regular expression character classes ([]) the syntax beginning
+with "[:" and ending with ":]" is reserved for future extensions.
+If you need to represent those character sequences inside a regular
+expression character class, just quote the square brackets with the
+backslash: "\[:" and ":\]".
+
+=item Character class syntax [= =] is reserved for future extensions
+
+(W) Within regular expression character classes ([]) the syntax
+beginning with "[=" and ending with "=]" is reserved for future extensions.
+If you need to represent those character sequences inside a regular
+expression character class, just quote the square brackets with the
+backslash: "\[=" and "=\]".
+
 =item chmod: mode argument is missing initial 0
 
 (W) A novice will sometimes say
