@@ -1656,7 +1656,11 @@ SV *sv;
 		continue;	/* don't search dir with too-long name */
 	    strcat(tokenbuf, scriptname);
 #else  /* !VMS */
-    if (dosearch && !strchr(scriptname, '/') && (s = getenv("PATH"))) {
+    if (dosearch && !strchr(scriptname, '/')
+#ifdef DOSISH
+		 && !strchr(scriptname, '\\')
+#endif
+		 && (s = getenv("PATH"))) {
 	bufend = s + strlen(s);
 	while (s < bufend) {
 #ifndef atarist
