@@ -138,7 +138,7 @@ sub write_protos {
 	if( $flags =~ /f/ ) {
 	    my $prefix = $flags =~ /n/ ? '' : 'pTHX_';
 	    my $args = scalar @args;
-	    $ret .= "\n#ifdef CHECK_FORMAT\n";
+ 	    $ret .= "\n#ifdef HASATTRIBUTE\n";
 	    $ret .= sprintf " __attribute__((format(printf,%s%d,%s%d)))",
 				    $prefix, $args - 1, $prefix, $args;
 	    $ret .= "\n#endif\n";
