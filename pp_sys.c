@@ -1129,6 +1129,16 @@ PP(pp_getc)
     TAINT;
     sv_setpv(TARG, " ");
     *SvPVX(TARG) = PerlIO_getc(IoIFP(GvIOp(gv))); /* should never be EOF */
+    if (PerlIO_isutf8(IoIFP(GvIOp(gv)))) {
+	/* Find out how many bytes the char needs */
+	Size_t len = UTF8SKIP(SvPVX(TARG));
+	if (len > 1) {
+	    SvGROW(TARG,len+1);
+	    len = PerlIO_read(IoIFP(GvIOp(gv)),SvPVX(TARG)+1,len-1);
+	    SvCUR_set(TARG,1+len);
+	}
+	SvUTF8_on(TARG);
+    }
     PUSHTARG;
     RETURN;
 }
@@ -1490,10 +1500,7 @@ PP(pp_sysread)
     bufsv = *++MARK;
     if (! SvOK(bufsv))
 	sv_setpvn(bufsv, "", 0);
-    buffer = SvPV_force(bufsv, blen);
     length = SvIVx(*++MARK);
-    if (length < 0)
-	DIE(aTHX_ "Negative length");
     SETERRNO(0,0);
     if (MARK < SP)
 	offset = SvIVx(*++MARK);
@@ -1502,6 +1509,15 @@ PP(pp_sysread)
     io = GvIO(gv);
     if (!io || !IoIFP(io))
 	goto say_undef;
+    if (PerlIO_isutf8(IoIFP(io))) {
+	buffer = SvPVutf8_force(bufsv, blen);
+    }
+    else {
+	buffer = SvPV_force(bufsv, blen);
+    }
+    if (length < 0)
+	DIE(aTHX_ "Negative length");
+
 #ifdef HAS_SOCKET
     if (PL_op->op_type == OP_RECV) {
 	char namebuf[MAXPATHLEN];
@@ -1509,10 +1525,6 @@ PP(pp_sysread)
 	bufsize = sizeof (struct sockaddr_in);
 #else
 	bufsize = sizeof namebuf;
-#endif
-#ifdef OS2	/* At least Warp3+IAK: only the first byte of bufsize set */
-	if (bufsize >= 256)
-	    bufsize = 255;
 #endif
 #ifdef OS2	/* At least Warp3+IAK: only the first byte of bufsize set */
 	if (bufsize >= 256)
@@ -1540,6 +1552,10 @@ PP(pp_sysread)
     if (PL_op->op_type == OP_RECV)
 	DIE(aTHX_ PL_no_sock_func, "recv");
 #endif
+    if (SvUTF8(bufsv) && offset) {
+	/* FIXME ! */
+	Perl_croak(aTHX_ "Non zero offset not supported yet for utf8");
+    }
     if (offset < 0) {
 	if (-offset > blen)
 	    DIE(aTHX_ "Offset outside string");
@@ -1642,7 +1658,6 @@ PP(pp_send)
     char *buffer;
     Size_t length;
     SSize_t retval;
-    IV offset;
     STRLEN blen;
     MAGIC *mg;
 
@@ -1664,7 +1679,6 @@ PP(pp_send)
     if (!gv)
 	goto say_undef;
     bufsv = *++MARK;
-    buffer = SvPV(bufsv, blen);
 #if Size_t_size > IVSIZE
     length = (Size_t)SvNVx(*++MARK);
 #else
@@ -1678,8 +1692,24 @@ PP(pp_send)
 	retval = -1;
 	if (ckWARN(WARN_CLOSED))
 	    report_evil_fh(gv, io, PL_op->op_type);
+	goto say_undef;
     }
-    else if (PL_op->op_type == OP_SYSWRITE) {
+
+    if (PerlIO_isutf8(IoIFP(io))) {
+	buffer = SvPVutf8(bufsv, blen);
+    }
+    else {
+	if (DO_UTF8(bufsv))
+	    sv_utf8_downgrade(bufsv, FALSE);
+	buffer = SvPV(bufsv, blen);
+    }
+
+    if (PL_op->op_type == OP_SYSWRITE) {
+	IV offset;
+	if (DO_UTF8(bufsv)) {
+	    /* length and offset are in chars */
+	    blen   = sv_len_utf8(bufsv);
+	}
 	if (MARK < SP) {
 	    offset = SvIVx(*++MARK);
 	    if (offset < 0) {
@@ -1692,17 +1722,24 @@ PP(pp_send)
 	    offset = 0;
 	if (length > blen - offset)
 	    length = blen - offset;
+	if (DO_UTF8(bufsv)) {
+	    buffer = utf8_hop((U8 *)buffer, offset);
+	    length = utf8_hop((U8 *)buffer, length) - (U8 *)buffer;
+	}
+	else {
+	    buffer = buffer+offset;
+	}
 #ifdef PERL_SOCK_SYSWRITE_IS_SEND
 	if (IoTYPE(io) == IoTYPE_SOCKET) {
 	    retval = PerlSock_send(PerlIO_fileno(IoIFP(io)),
-				   buffer+offset, length, 0);
+				   buffer, length, 0);
 	}
 	else
 #endif
 	{
 	    /* See the note at doio.c:do_print about filesize limits. --jhi */
 	    retval = PerlLIO_write(PerlIO_fileno(IoIFP(io)),
-				   buffer+offset, length);
+				   buffer, length);
 	}
     }
 #ifdef HAS_SOCKET
@@ -1710,12 +1747,13 @@ PP(pp_send)
 	char *sockbuf;
 	STRLEN mlen;
 	sockbuf = SvPVx(*++MARK, mlen);
+	/* length is really flags */
 	retval = PerlSock_sendto(PerlIO_fileno(IoIFP(io)), buffer, blen,
 				 length, (struct sockaddr *)sockbuf, mlen);
     }
     else
+	/* length is really flags */
 	retval = PerlSock_send(PerlIO_fileno(IoIFP(io)), buffer, blen, length);
-
 #else
     else
 	DIE(aTHX_ PL_no_sock_func, "send");
