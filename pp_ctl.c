@@ -2535,6 +2535,7 @@ S_docatch(pTHX_ OP *o)
 {
     int ret;
     OP *oldop = PL_op;
+    OP *retop;
     volatile PERL_SI *cursi = PL_curstackinfo;
     dJMPENV;
 
@@ -2542,6 +2543,15 @@ S_docatch(pTHX_ OP *o)
     assert(CATCH_GET == TRUE);
 #endif
     PL_op = o;
+
+    /* Normally, the leavetry at the end of this block of ops will
+     * pop an op off the return stack and continue there. By setting
+     * the op to Nullop, we force an exit from the inner runops()
+     * loop. DAPM.
+     */
+    retop = pop_return();
+    push_return(Nullop);
+
 #ifdef PERL_FLEXIBLE_EXCEPTIONS
  redo_body:
     CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_docatch_body));
@@ -2556,11 +2566,15 @@ S_docatch(pTHX_ OP *o)
 #endif
 	break;
     case 3:
+	/* die caught by an inner eval - continue inner loop */
 	if (PL_restartop && cursi == PL_curstackinfo) {
 	    PL_op = PL_restartop;
 	    PL_restartop = 0;
 	    goto redo_body;
 	}
+	/* a die in this eval - continue in outer loop */
+	if (!PL_restartop)
+	    break;
 	/* FALL THROUGH */
     default:
 	JMPENV_POP;
@@ -2570,7 +2584,7 @@ S_docatch(pTHX_ OP *o)
     }
     JMPENV_POP;
     PL_op = oldop;
-    return Nullop;
+    return retop;
 }
 
 OP *
@@ -3414,13 +3428,14 @@ PP(pp_leavetry)
     register SV **mark;
     SV **newsp;
     PMOP *newpm;
+    OP* retop;
     I32 gimme;
     register PERL_CONTEXT *cx;
     I32 optype;
 
     POPBLOCK(cx,newpm);
     POPEVAL(cx);
-    pop_return();
+    retop = pop_return();
 
     TAINT_NOT;
     if (gimme == G_VOID)
@@ -3452,7 +3467,7 @@ PP(pp_leavetry)
 
     LEAVE;
     sv_setpv(ERRSV,"");
-    RETURN;
+    RETURNOP(retop);
 }
 
 STATIC void
