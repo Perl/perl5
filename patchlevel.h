@@ -1,5 +1,5 @@
 #define PATCHLEVEL 3
-#define SUBVERSION 0
+#define SUBVERSION 1
 
 /*
 	local_patches -- list of locally applied less-than-subversion patches.
@@ -41,5 +41,6 @@ static	char	*local_patches[] = {
 	,NULL
 };
 
-#define	LOCAL_PATCH_COUNT	\
+/* Initial space prevents this variable from being inserted in config.sh  */
+#  define	LOCAL_PATCH_COUNT	\
 	(sizeof(local_patches)/sizeof(local_patches[0])-2)
