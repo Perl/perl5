@@ -334,6 +334,12 @@ wasn't a symbol table entry.
 of Perl.  Check the #! line, or manually feed your script into
 Perl yourself.
 
+=item Bareword "%s" not allowed while "strict subs" in use
+
+(F) With "strict subs" in use, a bareword is only allowed as a
+subroutine identifier, in curly braces or to the left of the "=>" symbol.
+Perhaps you need to pre-declare a subroutine?
+
 =item BEGIN failed--compilation aborted
 
 (F) An untrapped exception was raised while executing a BEGIN subroutine.
