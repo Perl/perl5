@@ -1548,7 +1548,8 @@ PP(pp_dbstate)
     PL_stack_sp = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;
     FREETMPS;
 
-    if (PL_op->op_private || SvIV(PL_DBsingle) || SvIV(PL_DBsignal) || SvIV(PL_DBtrace))
+    if (PL_op->op_flags & OPf_SPECIAL /* breakpoint */
+	    || SvIV(PL_DBsingle) || SvIV(PL_DBsignal) || SvIV(PL_DBtrace))
     {
 	dSP;
 	register CV *cv;
