@@ -5381,6 +5381,11 @@ ck_subr(OP *o)
     else if (cvop->op_type == OP_METHOD) {
 	if (o2->op_type == OP_CONST)
 	    o2->op_private &= ~OPpCONST_STRICT;
+	else if (o2->op_type == OP_LIST) {
+	    OP *o = ((UNOP*)o2)->op_first->op_sibling;
+	    if (o && o->op_type == OP_CONST)
+		o->op_private &= ~OPpCONST_STRICT;
+	}
     }
     o->op_private |= (PL_hints & HINT_STRICT_REFS);
     if (PERLDB_SUB && PL_curstash != PL_debstash)
