@@ -446,7 +446,7 @@ if (! $versiononly && ! samepath($installbin, '.') && ($^O ne 'dos') && ! $Is_VM
 	link("$installbin/$perl_verbase$ver$exe_ext",
 		"$installbin/$perl$exe_ext");
     }
-    link("$installbin/s$perl_verbase$ver$exe_ext",
+    link("$installbin/$perl_verbase$ver$exe_ext",
 	    "$installbin/suid$perl$exe_ext")
       if $d_dosuid;
 }

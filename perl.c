@@ -3000,7 +3000,10 @@ S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv)
     }
 #ifdef IAMSUID
     else {
-	Perl_croak(aTHX_ "suidperl needs fd script\n");
+	Perl_croak(aTHX_ "sperl needs fd script\n"
+		   "You should not call sperl directly; do you need to "
+		   "change a #! line\nfrom sperl to perl?\n");
+
 /* PSz 11 Nov 03
  * Do not open (or do other fancy stuff) while setuid.
  * Perl does the open, and hands script to suidperl on a fd;
