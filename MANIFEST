@@ -329,8 +329,8 @@ ext/Encode/Encode/symbol.enc		Encode table
 ext/Encode/Encode/symbol.ucm		Encode table
 ext/Encode/Encode/viscii.enc		Encode table
 ext/Encode/Encode/viscii.ucm		Encode table
-ext/Encode/EUC_JP/EUC_JP.pm	Enode module for euc-jp
-ext/Encode/EUC_JP/Makefile.PL	Enode module for euc-jp
+ext/Encode/EUC_JP/EUC_JP.pm		Encode module for euc-jp
+ext/Encode/EUC_JP/Makefile.PL		Encode module for euc-jp
 ext/Encode/lib/Encode/Encoding.pm	Encode extension
 ext/Encode/lib/Encode/Internal.pm	Encode extension
 ext/Encode/lib/Encode/iso10646_1.pm	Encode extension

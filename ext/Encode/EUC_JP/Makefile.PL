@@ -62,6 +62,11 @@ sub postamble
 	$str .= " $table.c";
     }
     $str .= "\n\n";
+    foreach my $table (keys %tables)
+    {
+       $str .= "$table.c : $table.xs\n";
+    }
+    $str .= "\n";
     my $compile = $self->catfile($self->updir,'compile');
     foreach my $table (keys %tables)
     {

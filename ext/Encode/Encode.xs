@@ -244,7 +244,7 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 	/* Now get translated string (forced to UTF-8) and use as buffer */
 	if (SvPOK(uni)) {
 	    s = SvPVutf8(uni, len);
-	    if (len && !is_utf8_string(s,len)) {
+	    if (len && !is_utf8_string((U8*)s,len)) {
 		Perl_warn(aTHX_ "panic: decode did not return UTF-8 '%.*s'",(int) len,s);
 	    }
 	}
