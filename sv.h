@@ -954,6 +954,15 @@ COW)
 Returns a boolean indicating whether the SV is Copy-On-Write shared hash key
 scalar.
 
+=for apidoc Am|void|sv_catpvn_nomg|SV* sv|const char* ptr|STRLEN len
+Like C<sv_catpvn> but doesn't process magic.
+
+=for apidoc Am|void|sv_setsv_nomg|SV* dsv|SV* ssv
+Like C<sv_setsv> but doesn't process magic.
+
+=for apidoc Am|void|sv_catsv_nomg|SV* dsv|SV* ssv
+Like C<sv_catsv> but doesn't process magic.
+
 =cut
 */
 
@@ -1169,7 +1178,7 @@ ssv. May evaluate arguments more than once.
 Like C<SvSetSV>, but does any set magic required afterwards.
 
 =for apidoc Am|void|SvSetMagicSV_nosteal|SV* dsv|SV* ssv
-Like C<SvSetMagicSV>, but does any set magic required afterwards.
+Like C<SvSetSV_nosteal>, but does any set magic required afterwards.
 
 =for apidoc Am|void|SvSHARE|SV* sv
 Arranges for sv to be shared between threads if a suitable module

@@ -17,6 +17,17 @@
  * And whither then?  I cannot say.
  */
 
+/* This file contains control-oriented pp ("push/pop") functions that
+ * execute the opcodes that make up a perl program. A typical pp function
+ * expects to find its arguments on the stack, and usually pushes its
+ * results onto the stack, hence the 'pp' terminology. Each OP structure
+ * contains a pointer to the relevant pp_foo() function.
+ *
+ * Control-oriented means things like pp_enteriter() and pp_next(), which
+ * alter the flow of control of the program.
+ */
+
+
 #include "EXTERN.h"
 #define PERL_IN_PP_CTL_C
 #include "perl.h"

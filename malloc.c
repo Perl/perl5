@@ -6,6 +6,12 @@
  * "'The Chamber of Records,' said Gimli. 'I guess that is where we now stand.'"
  */
 
+/* This file contains Perl's own implementation of the malloc library.
+ * It is used if Configure decides that, on your platform, Perl's
+ * version is better than the OS's, or if you give Configure the
+ * -Dusemymalloc command-line option.
+ */
+
 /*
   Here are some notes on configuring Perl's malloc.  (For non-perl
   usage see below.)

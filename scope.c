@@ -13,6 +13,13 @@
  * levels..."
  */
 
+/* This file contains functions to manipulate several of Perl's stacks;
+ * in particular it contains code to push various types of things onto
+ * the savestack, then to pop them off and perform the correct restorative
+ * action for each one. This corresponds to the cleanup Perl does at
+ * each scope exit.
+ */
+
 #include "EXTERN.h"
 #define PERL_IN_SCOPE_C
 #include "perl.h"

@@ -5,6 +5,11 @@
  * "One Ring to rule them all, One Ring to find them..."
  */
 
+/* This file contains functions for executing a regular expression.  See
+ * also regcomp.c which funnily enough, contains functions for compiling
+ * a regular expression.
+ */
+
 /* NOTE: this is derived from Henry Spencer's regexp code, and should not
  * confused with the original package (see point 3 below).  Thanks, Henry!
  */

@@ -13,6 +13,12 @@
  * not content."  --Gandalf
  */
 
+/* This file contains assorted utility routines.
+ * Which is a polite way of saying any stuff that people couldn't think of
+ * a better place for. Amongst other things, it includes the warning and
+ * dieing stuff, plus wrappers for malloc code.
+ */
+
 #include "EXTERN.h"
 #define PERL_IN_UTIL_C
 #include "perl.h"
