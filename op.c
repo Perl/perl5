@@ -3351,7 +3351,9 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 	    return first;
 	}
     }
-    else if (ckWARN(WARN_MISC) && (first->op_flags & OPf_KIDS)) {
+    else if (ckWARN(WARN_MISC) && (first->op_flags & OPf_KIDS) &&
+             type != OP_DOR) /* [#24076] Don't warn for <FH> err FOO. */
+    {
 	OP *k1 = ((UNOP*)first)->op_first;
 	OP *k2 = k1->op_sibling;
 	OPCODE warnop = 0;
