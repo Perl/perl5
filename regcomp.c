@@ -4372,8 +4372,13 @@ Perl_pregfree(pTHX_ struct regexp *r)
 		    Perl_croak(aTHX_ "panic: pregfree comppad");
 		old_comppad = PL_comppad;
 		old_curpad = PL_curpad;
-		PL_comppad = new_comppad;
-		PL_curpad = AvARRAY(new_comppad);
+		/* Watch out for global destruction's random ordering. */
+		if (SvTYPE(new_comppad) == SVt_PVAV) {
+		    PL_comppad = new_comppad;
+		    PL_curpad = AvARRAY(new_comppad);
+		}
+		else
+		    PL_curpad = NULL;
 		op_free((OP_4tree*)r->data->data[n]);
 		PL_comppad = old_comppad;
 		PL_curpad = old_curpad;
