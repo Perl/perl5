@@ -1,27 +1,30 @@
-case $CONFIG in
-'')
-    if test ! -f config.sh; then
-	ln ../config.sh . || \
-	ln ../../config.sh . || \
-	ln ../../../config.sh . || \
-	(echo "Can't find config.sh."; exit 1)
-	echo "Using config.sh from above..."
-    fi
-    . ./config.sh
-    ;;
-esac
-echo "Extracting config.h (with variable substitutions)"
-sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
 /* config.h
- * This file was produced by running the config.h.SH script, which
- * gets its values from config.sh, which is generally produced by
- * running Configure.
+ * This file was hand tailored for compiling under MS-DOS and MSC 5.1.
+ * Diomidis Spinellis, March 1990.
  *
- * Feel free to modify any of this as the need arises.  Note, however,
- * that running config.h.SH again will wipe out any changes you've made.
- * For a more permanent change edit config.sh and rerun config.h.SH.
+ * Then it got mangled again for compiling under OS/2 and MSC 6.0.
+ * Raymond Chen, June 1990.
  */
+#define OS2		/**/
 
+/* OS/2 supports some additional things MS-DOS doesn't.
+ */
+#ifdef OS2
+#define PIPE
+#define GETPPID
+#define GETPRIORITY
+#define SETPRIORITY
+#define SYSCALL
+#define KILL
+#endif /* OS2 */
+
+/* SUFFIX:
+ *      This symbol, if defined, indicates that the function add_suffix has
+ *      been supplied in a system-dependent .c file.  This function is
+ *      recommended for operating systems whose filenaming conventions
+ *      do not permit arbitrary strings as filenames.
+ */
+#define SUFFIX	/**/
 
 /* EUNICE:
  *	This symbol, if defined, indicates that the program is being compiled
@@ -34,26 +37,27 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  *	This symbol, if defined, indicates that the program is running under
  *	VMS.  It is currently only set in conjunction with the EUNICE symbol.
  */
-#$d_eunice	EUNICE		/**/
-#$d_eunice	VMS		/**/
+/*#undef	EUNICE		/**/
+/*#undef	VMS		/**/
 
 /* BIN:
  *	This symbol holds the name of the directory in which the user wants
  *	to put publicly executable images for the package in question.  It
  *	is most often a local directory such as /usr/local/bin.
  */
-#define BIN "$bin"             /**/
+#define BIN "/usr/local/bin"             /**/
 
 /* BYTEORDER:
  *	This symbol contains an encoding of the order of bytes in a long.
  *	Usual values (in octal) are 01234, 04321, 02143, 03412...
  */
-#define BYTEORDER 0x$byteorder		/**/
+/* CHECK */
+#define BYTEORDER 0x1234		/**/
 
 /* CPPSTDIN:
  *	This symbol contains the first part of the string which will invoke
  *	the C preprocessor on the standard input and produce to standard
- *	output.	 Typical value of "cc -E" or "/lib/cpp".
+ *	output.	 Typical value of "cc -{" or "/lib/cpp".
  */
 /* CPPMINUS:
  *	This symbol contains the second part of the string which will invoke
@@ -61,33 +65,22 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  *	output.  This symbol will have the value "-" if CPPSTDIN needs a minus
  *	to specify standard input, otherwise the value is "".
  */
-#define CPPSTDIN "$cppstdin"
-#define CPPMINUS "$cppminus"
+/* TODO */
+#define CPPSTDIN "cc -{"
+#define CPPMINUS ""
 
 /* BCMP:
  *	This symbol, if defined, indicates that the bcmp routine is available
  *	to compare blocks of memory.  If undefined, use memcmp.  If that's
  *	not available, roll your own.
  */
-#$d_bcmp	BCMP		/**/
+/*#define	BCMP		/**/
 
 /* BCOPY:
  *	This symbol, if defined, indicates that the bcopy routine is available
  *	to copy blocks of memory.  Otherwise you should probably use memcpy().
  */
-#$d_bcopy	BCOPY		/**/
-
-/* BZERO:
- *	This symbol, if defined, indicates that the bzero routine is available
- *	to zero blocks of memory.  Otherwise you should probably use memcpy().
- */
-#$d_bzero	BZERO		/**/
-
-/* CASTNEGFLOAT:
- *	This symbol, if defined, indicates that this C compiler knows how to
- *	cast negative numbers to unsigned longs, ints and shorts.
- */
-#$d_castneg	CASTNEGFLOAT	/**/
+/*#define	BCOPY		/**/
 
 /* CHARSPRINTF:
  *	This symbol is defined if this system declares "char *sprintf()" in
@@ -95,25 +88,14 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  *	is up to the package author to declare sprintf correctly based on the
  *	symbol.
  */
-#$d_charsprf	CHARSPRINTF 	/**/
-
-/* CHSIZE:
- *	This symbol, if defined, indicates that the chsize routine is available
- *	to truncate files.  You might need a -lx to get this routine.
- */
-#$d_chsize	CHSIZE		/**/
+/*#define	CHARSPRINTF 	/**/
 
 /* CRYPT:
  *	This symbol, if defined, indicates that the crypt routine is available
  *	to encrypt passwords and the like.
  */
-#$d_crypt	CRYPT		/**/
-
-/* CSH:
- *	This symbol, if defined, indicates that the C-shell exists.
- *	If defined, contains the full pathname of csh.
- */
-#$d_csh CSH "$csh"		/**/
+/* TODO */
+/*#define	CRYPT		/**/
 
 /* DOSUID:
  *	This symbol, if defined, indicates that the C program should
@@ -128,68 +110,62 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  *	subprocesses to which it must pass the filename rather than the
  *	file descriptor of the script to be executed.
  */
-#$d_dosuid DOSUID		/**/
+/*#define DOSUID		/**/
 
 /* DUP2:
  *	This symbol, if defined, indicates that the dup2 routine is available
  *	to dup file descriptors.  Otherwise you should use dup().
  */
-#$d_dup2	DUP2		/**/
+#define	DUP2		/**/
 
 /* FCHMOD:
  *	This symbol, if defined, indicates that the fchmod routine is available
  *	to change mode of opened files.  If unavailable, use chmod().
  */
-#$d_fchmod	FCHMOD		/**/
+/*#define	FCHMOD		/**/
 
 /* FCHOWN:
  *	This symbol, if defined, indicates that the fchown routine is available
  *	to change ownership of opened files.  If unavailable, use chown().
  */
-#$d_fchown	FCHOWN		/**/
+/*#define	FCHOWN		/**/
 
 /* FCNTL:
  *	This symbol, if defined, indicates to the C program that it should
  *	include fcntl.h.
  */
-#$d_fcntl	FCNTL		/**/
+/*#define	FCNTL		/**/
 
 /* FLOCK:
  *	This symbol, if defined, indicates that the flock() routine is
  *	available to do file locking.
  */
-#$d_flock	FLOCK		/**/
+/*#define	FLOCK		/**/
 
 /* GETGROUPS:
  *	This symbol, if defined, indicates that the getgroups() routine is
  *	available to get the list of process groups.  If unavailable, multiple
  *	groups are probably not supported.
  */
-#$d_getgrps	GETGROUPS		/**/
+/*#define	GETGROUPS		/**/
 
 /* GETHOSTENT:
  *	This symbol, if defined, indicates that the gethostent() routine is
  *	available to lookup host names in some data base or other.
  */
-#$d_gethent	GETHOSTENT		/**/
+/*#define	GETHOSTENT		/**/
 
 /* GETPGRP:
  *	This symbol, if defined, indicates that the getpgrp() routine is
  *	available to get the current process group.
  */
-#$d_getpgrp	GETPGRP		/**/
-
-/* GETPGRP2:
- *	This symbol, if defined, indicates that the getpgrp2() (as in DG/UX)
- *	routine is available to get the current process group.
- */
-#$d_getpgrp2	GETPGRP2		/**/
+/*#define	GETPGRP		/**/
 
 /* GETPRIORITY:
  *	This symbol, if defined, indicates that the getpriority() routine is
  *	available to get a process's priority.
  */
-#$d_getprior	GETPRIORITY		/**/
+/*#define	GETPRIORITY		/**/
 
 /* HTONS:
  *	This symbol, if defined, indicates that the htons routine (and friends)
@@ -207,10 +183,10 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  *	This symbol, if defined, indicates that the ntohl routine (and friends)
  *	are available to do network order byte swapping.
  */
-#$d_htonl	HTONS		/**/
-#$d_htonl	HTONL		/**/
-#$d_htonl	NTOHS		/**/
-#$d_htonl	NTOHL		/**/
+/*#define	HTONS		/**/
+/*#define	HTONL		/**/
+/*#define	NTOHS		/**/
+/*#define	NTOHL		/**/
 
 /* index:
  *	This preprocessor symbol is defined, along with rindex, if the system
@@ -220,223 +196,199 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  *	This preprocessor symbol is defined, along with index, if the system
  *	uses the strchr and strrchr routines instead.
  */
-#$d_index	index strchr	/* cultural */
-#$d_index	rindex strrchr	/*  differences? */
+#define	index strchr	/* cultural */
+#define	rindex strrchr	/*  differences? */
 
 /* IOCTL:
  *	This symbol, if defined, indicates that sys/ioctl.h exists and should
  *	be included.
  */
-#$d_ioctl	IOCTL		/**/
+/*#define	IOCTL		/**/
 
 /* KILLPG:
  *	This symbol, if defined, indicates that the killpg routine is available
  *	to kill process groups.  If unavailable, you probably should use kill
  *	with a negative process number.
  */
-#$d_killpg	KILLPG		/**/
-
-/* LSTAT:
- *	This symbol, if defined, indicates that the lstat() routine is
- *	available to do file locking.
- */
-#$d_lstat	LSTAT		/**/
+/*#define	KILLPG		/**/
 
 /* MEMCMP:
  *	This symbol, if defined, indicates that the memcmp routine is available
  *	to compare blocks of memory.  If undefined, roll your own.
  */
-#$d_memcmp	MEMCMP		/**/
+#define	MEMCMP		/**/
 
 /* MEMCPY:
  *	This symbol, if defined, indicates that the memcpy routine is available
  *	to copy blocks of memory.  Otherwise you should probably use bcopy().
  *	If neither is defined, roll your own.
  */
-#$d_memcpy	MEMCPY		/**/
+#define	MEMCPY		/**/
 
 /* MKDIR:
  *	This symbol, if defined, indicates that the mkdir routine is available
  *	to create directories.  Otherwise you should fork off a new process to
  *	exec /bin/mkdir.
  */
-#$d_mkdir	MKDIR		/**/
+#define	MKDIR		/**/
 
 /* NDBM:
  *	This symbol, if defined, indicates that ndbm.h exists and should
  *	be included.
  */
-#$d_ndbm	NDBM		/**/
+/*#define	NDBM		/**/
 
 /* ODBM:
  *	This symbol, if defined, indicates that dbm.h exists and should
  *	be included.
  */
-#$d_odbm	ODBM		/**/
+/*#define	ODBM		/**/
 
 /* READDIR:
  *	This symbol, if defined, indicates that the readdir routine is available
  *	from the C library to create directories.
  */
-#$d_readdir	READDIR		/**/
+#define	READDIR		/**/
 
 /* RENAME:
  *	This symbol, if defined, indicates that the rename routine is available
  *	to rename files.  Otherwise you should do the unlink(), link(), unlink()
  *	trick.
  */
-#$d_rename	RENAME		/**/
+#define	RENAME		/**/
 
 /* RMDIR:
  *	This symbol, if defined, indicates that the rmdir routine is available
  *	to remove directories.  Otherwise you should fork off a new process to
  *	exec /bin/rmdir.
  */
-#$d_rmdir	RMDIR		/**/
-
-/* SELECT:
- *	This symbol, if defined, indicates that the select routine is available
- *	to select active file descriptors.
- */
-#$d_select	SELECT		/**/
+#define	RMDIR		/**/
 
 /* SETEGID:
  *	This symbol, if defined, indicates that the setegid routine is available
  *	to change the effective gid of the current program.
  */
-#$d_setegid	SETEGID		/**/
+/*#define	SETEGID		/**/
 
 /* SETEUID:
  *	This symbol, if defined, indicates that the seteuid routine is available
  *	to change the effective uid of the current program.
  */
-#$d_seteuid	SETEUID		/**/
+/*#define	SETEUID		/**/
 
 /* SETPGRP:
  *	This symbol, if defined, indicates that the setpgrp() routine is
  *	available to set the current process group.
  */
-#$d_setpgrp	SETPGRP		/**/
-
-/* SETPGRP2:
- *	This symbol, if defined, indicates that the setpgrp2() (as in DG/UX)
- *	routine is available to set the current process group.
- */
-#$d_setpgrp2	SETPGRP2		/**/
+/*#define	SETPGRP		/**/
 
 /* SETPRIORITY:
  *	This symbol, if defined, indicates that the setpriority() routine is
  *	available to set a process's priority.
  */
-#$d_setprior	SETPRIORITY		/**/
+/*#define	SETPRIORITY		/**/
 
 /* SETREGID:
- *	This symbol, if defined, indicates that the setregid routine is
- *	available to change the real and effective gid of the current program.
+ *	This symbol, if defined, indicates that the setregid routine is available
+ *	to change the real and effective gid of the current program.
  */
-/* SETRESGID:
- *	This symbol, if defined, indicates that the setresgid routine is
- *	available to change the real, effective and saved gid of the current
- *	program.
- */
-#$d_setregid	SETREGID		/**/
-#$d_setresgid	SETRESGID		/**/
+/*#define	SETREGID		/**/
 
 /* SETREUID:
- *	This symbol, if defined, indicates that the setreuid routine is
- *	available to change the real and effective uid of the current program.
+ *	This symbol, if defined, indicates that the setreuid routine is available
+ *	to change the real and effective uid of the current program.
  */
-/* SETRESUID:
- *	This symbol, if defined, indicates that the setresuid routine is
- *	available to change the real, effective and saved uid of the current
- *	program.
- */
-#$d_setreuid	SETREUID		/**/
-#$d_setresuid	SETRESUID		/**/
+/*#define	SETREUID		/**/
 
 /* SETRGID:
  *	This symbol, if defined, indicates that the setrgid routine is available
  *	to change the real gid of the current program.
  */
-#$d_setrgid	SETRGID		/**/
+/*#define	SETRGID		/**/
 
 /* SETRUID:
  *	This symbol, if defined, indicates that the setruid routine is available
  *	to change the real uid of the current program.
  */
-#$d_setruid	SETRUID		/**/
+/*#define	SETRUID		/**/
 
 /* SOCKET:
- *	This symbol, if defined, indicates that the BSD socket interface is
- *	supported.
+ *      This symbol, if defined, indicates that the BSD socket interface is
+ *      supported.
  */
 /* SOCKETPAIR:
- *	This symbol, if defined, indicates that the BSD socketpair call is
- *	supported.
+ *      This symbol, if defined, indicates that the BSD socketpair call is
+ *      supported.
  */
 /* OLDSOCKET:
- *	This symbol, if defined, indicates that the 4.1c BSD socket interface
- *	is supported instead of the 4.2/4.3 BSD socket interface.
+ *      This symbol, if defined, indicates that the 4.1c BSD socket interface
+ *      is supported instead of the 4.2/4.3 BSD socket interface.
  */
-#$d_socket	SOCKET		/**/
+/*#undef SOCKET          /**/
 
-#$d_sockpair	SOCKETPAIR	/**/
+/*#undef SOCKETPAIR      /**/
 
-#$d_oldsock	OLDSOCKET	/**/
+/*#undef        OLDSOCKET       /**/
 
 /* STATBLOCKS:
  *	This symbol is defined if this system has a stat structure declaring
  *	st_blksize and st_blocks.
  */
-#$d_statblks	STATBLOCKS 	/**/
+/*#define	STATBLOCKS 	/**/
 
 /* STDSTDIO:
  *	This symbol is defined if this system has a FILE structure declaring
  *	_ptr and _cnt in stdio.h.
  */
-#$d_stdstdio	STDSTDIO 	/**/
+#define	STDSTDIO 	/**/
 
 /* STRUCTCOPY:
  *	This symbol, if defined, indicates that this C compiler knows how
  *	to copy structures.  If undefined, you'll need to use a block copy
  *	routine of some sort instead.
  */
-#$d_strctcpy	STRUCTCOPY	/**/
-
-/* STRERROR:
- *	This symbol, if defined, indicates that the strerror() routine is
- *	available to translate error numbers to strings.
- */
-#$d_strerror	STRERROR		/**/
+#define	STRUCTCOPY	/**/
 
 /* SYMLINK:
  *	This symbol, if defined, indicates that the symlink routine is available
  *	to create symbolic links.
  */
-#$d_symlink	SYMLINK		/**/
+/*#define	SYMLINK		/**/
 
 /* SYSCALL:
  *	This symbol, if defined, indicates that the syscall routine is available
  *	to call arbitrary system calls.  If undefined, that's tough.
  */
-#$d_syscall	SYSCALL		/**/
+/*#define	SYSCALL		/**/
 
-/* TRUNCATE:
- *	This symbol, if defined, indicates that the truncate routine is
- *	available to truncate files.
+/* TMINSYS:
+ *	This symbol is defined if this system declares "struct tm" in
+ *	in <sys/time.h> rather than <time.h>.  We can't just say
+ *	-I/usr/include/sys because some systems have both time files, and
+ *	the -I trick gets the wrong one.
  */
-#$d_truncate	TRUNCATE		/**/
+/* I_SYSTIME:
+ *	This symbol is defined if this system has the file <sys/time.h>.
+ */
+/*
+ * I_TIME:
+ *	This symbol is defined if time this  system has the file <time.h>.
+ */
+/*#undef	TMINSYS 	/**/
+/*#define	I_SYSTIME 	/**/
+#define I_TIME
 
 /* VARARGS:
  *	This symbol, if defined, indicates to the C program that it should
  *	include varargs.h.
  */
-#$d_varargs	VARARGS		/**/
+#define	VARARGS		/**/
 
-/* VFORK:
- *	This symbol, if defined, indicates that vfork() exists.
+/* vfork:
+ *	This symbol, if defined, remaps the vfork routine to fork if the
+ *	vfork() routine isn't supported here.
  */
-#$d_vfork	VFORK	/**/
+/*#undef	vfork fork	/**/
 
 /* VOIDSIG:
  *	This symbol is defined if this system declares "void (*signal())()" in
@@ -444,13 +396,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  *	is up to the package author to declare things correctly based on the
  *	symbol.
  */
-#$d_voidsig	VOIDSIG 	/**/
-
-/* HASVOLATILE:
- *	This symbol, if defined, indicates that this C compiler knows about
- *	the volatile declaration.
- */
-#$d_volatile	HASVOLATILE	/**/
+#define	VOIDSIG 	/**/
 
 /* VPRINTF:
  *	This symbol, if defined, indicates that the vprintf routine is available
@@ -463,19 +409,15 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  *	is up to the package author to declare vsprintf correctly based on the
  *	symbol.
  */
-#$d_vprintf	VPRINTF		/**/
-#$d_charvspr	CHARVSPRINTF 	/**/
-
-/* WAIT4:
- *	This symbol, if defined, indicates that wait4() exists.
- */
-#$d_wait4	WAIT4	/**/
+#define	VPRINTF		/**/
+/*#undef	CHARVSPRINTF 	/**/
 
 /* GIDTYPE:
  *	This symbol has a value like gid_t, int, ushort, or whatever type is
  *	used to declare group ids in the kernel.
  */
-#define GIDTYPE $gidtype		/**/
+/* TODO */
+#define GIDTYPE int		/**/
 
 /* I_DIRENT:
  *	This symbol, if defined, indicates to the C program that it should
@@ -486,26 +428,20 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  *	of directory entry names is provided by a d_namlen field.  Otherwise
  *	you need to do strlen() on the d_name field.
  */
-#$i_dirent	I_DIRENT		/**/
-#$d_dirnamlen	DIRNAMLEN		/**/
+/*#undef	I_DIRENT		/**/
+#define	DIRNAMLEN		/**/
 
 /* I_FCNTL:
  *	This symbol, if defined, indicates to the C program that it should
  *	include fcntl.h.
  */
-#$i_fcntl	I_FCNTL		/**/
+#define	I_FCNTL		/**/
 
 /* I_GRP:
  *	This symbol, if defined, indicates to the C program that it should
  *	include grp.h.
  */
-#$i_grp	I_GRP		/**/
-
-/* I_NETINET_IN:
- *	This symbol, if defined, indicates to the C program that it should
- *	include netinet/in.h.
- */
-#$i_niin	I_NETINET_IN		/**/
+/*#define	I_GRP		/**/
 
 /* I_PWD:
  *	This symbol, if defined, indicates to the C program that it should
@@ -519,110 +455,65 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  *	This symbol, if defined, indicates to the C program that struct passwd
  *	contains pw_age.
  */
-/* PWCHANGE:
- *	This symbol, if defined, indicates to the C program that struct passwd
- *	contains pw_change.
- */
-/* PWCLASS:
- *	This symbol, if defined, indicates to the C program that struct passwd
- *	contains pw_class.
- */
-/* PWEXPIRE:
- *	This symbol, if defined, indicates to the C program that struct passwd
- *	contains pw_expire.
- */
-#$i_pwd	I_PWD		/**/
-#$d_pwquota	PWQUOTA		/**/
-#$d_pwage	PWAGE		/**/
-#$d_pwchange	PWCHANGE	/**/
-#$d_pwclass	PWCLASS		/**/
-#$d_pwexpire	PWEXPIRE	/**/
+/*#define	I_PWD		/**/
+/*#define	PWQUOTA		/**/
+/*#undef	PWAGE		/**/
 
 /* I_SYSDIR:
  *	This symbol, if defined, indicates to the C program that it should
  *	include sys/dir.h.
  */
-#$i_sysdir	I_SYSDIR		/**/
+#define	I_SYSDIR		/**/
 
 /* I_SYSIOCTL:
  *	This symbol, if defined, indicates that sys/ioctl.h exists and should
  *	be included.
  */
-#$i_sysioctl	I_SYSIOCTL		/**/
-
-/* I_SYSNDIR:
- *	This symbol, if defined, indicates to the C program that it should
- *	include sys/ndir.h.
- */
-#$i_sysndir	I_SYSNDIR		/**/
-
-/* I_TIME:
- *	This symbol is defined if the program should include <time.h>.
- */
-/* I_SYSTIME:
- *	This symbol is defined if the program should include <sys/time.h>.
- */
-/* I_SYSTIMEKERNEL:
- *	This symbol is defined if the program should include <sys/time.h>
- *	with KERNEL defined.
- */
-#$i_time		I_TIME	 	/**/
-#$i_systime	I_SYSTIME 	/**/
-#$d_systimekernel	SYSTIMEKERNEL 	/**/
-
-/* I_UTIME:
- *	This symbol, if defined, indicates to the C program that it should
- *	include utime.h.
- */
-#$i_utime	I_UTIME		/**/
+/*#define	I_SYSIOCTL		/**/
 
 /* I_VARARGS:
  *	This symbol, if defined, indicates to the C program that it should
  *	include varargs.h.
  */
-#$i_varargs	I_VARARGS		/**/
-
-/* I_VFORK:
- *	This symbol, if defined, indicates to the C program that it should
- *	include vfork.h.
- */
-#$i_vfork	I_VFORK		/**/
+#define	I_VARARGS		/**/
 
 /* INTSIZE:
  *	This symbol contains the size of an int, so that the C preprocessor
  *	can make decisions based on it.
  */
-#define INTSIZE $intsize		/**/
+#define INTSIZE 2		/**/
 
 /* RANDBITS:
  *	This symbol contains the number of bits of random number the rand()
  *	function produces.  Usual values are 15, 16, and 31.
  */
-#define RANDBITS $randbits		/**/
-
-/* SCRIPTDIR:
- *	This symbol holds the name of the directory in which the user wants
- *	to put publicly executable scripts for the package in question.  It
- *	is often a directory that is mounted across diverse architectures.
- */
-#define SCRIPTDIR "$scriptdir"             /**/
+#define RANDBITS 31		/**/
 
 /* SIG_NAME:
  *	This symbol contains an list of signal names in order.
  */
-#define SIG_NAME "`echo $sig_name | sed 's/ /","/g'`"		/**/
+#ifdef OS2
+#define SIG_NAME "ZERO","HUP","INT","QUIT","ILL","TRAP","IOT","EMT","FPE",\
+	  /*      0      1     2     3      4      5     6     7    8 */\
+   "KILL","BUS","SEGV","SYS","PIPE","ALRM","TERM","USR1","USR2","CLD",\
+  /* 9     10     11    12    13     14     15     16     17    18 */\
+   "PWR","USR3","BREAK","ABRT"
+  /*19     20     21    22   */
+#else
+#define SIG_NAME "ZERO","HUP","INT","QUIT","ILL","TRAP","IOT","EMT","FPE","KILL","BUS","SEGV","SYS","PIPE","ALRM","TERM","URG","STOP","TSTP","CONT","CHLD","TTIN","TTOU","IO","XCPU","XFSZ","VTALRM","PROF","WINCH","USR1","USR2"		/**/
+#endif /* OS2 */
 
 /* STDCHAR:
  *	This symbol is defined to be the type of char used in stdio.h.
  *	It has the values "unsigned char" or "char".
  */
-#define STDCHAR $stdchar	/**/
+#define STDCHAR char	/**/
 
 /* UIDTYPE:
  *	This symbol has a value like uid_t, int, ushort, or whatever type is
  *	used to declare user ids in the kernel.
  */
-#define UIDTYPE $uidtype		/**/
+#define UIDTYPE int		/**/
 
 /* VOIDFLAGS:
  *	This symbol indicates how much support of the void type is given by this
@@ -640,20 +531,38 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  *	level of void support necessary is not present, defines void to int.
  */
 #ifndef VOIDUSED
-#define VOIDUSED $defvoidused
+#define VOIDUSED 7
 #endif
-#define VOIDFLAGS $voidflags
+#define VOIDFLAGS 7
 #if (VOIDFLAGS & VOIDUSED) != VOIDUSED
-#$define void int		/* is void to be avoided? */
-#$define M_VOID		/* Xenix strikes again */
+#define void int		/* is void to be avoided? */
+#define M_VOID		/* Xenix strikes again */
 #endif
 
 /* PRIVLIB:
  *	This symbol contains the name of the private library for this package.
  *	The library is private in the sense that it needn't be in anyone's
  *	execution path, but it should be accessible by the world.  The program
- *	should be prepared to do ~ expansion.
+ *	should be prepared to do ^ expansion.
  */
-#define PRIVLIB "$privlib"		/**/
+#define PRIVLIB "/usr/local/lib/perl"		/**/
 
-!GROK!THIS!
+/*
+ * BUGGY_MSC:
+ *	This symbol is defined if you are the unfortunate owner of a buggy
+ *	Microsoft C compiler and want to use intrinsic functions.  Versions
+ *	up to 5.1 are known conform to this definition.
+ */
+/*#define BUGGY_MSC			/**/
+
+/*
+ * BINARY:
+ *	This symbol is defined if you run under an operating system that
+ *	distinguishes between binary and text files.  If so the function
+ *	setmode will be used to set the file into binary mode.
+ */
+#define BINARY
+
+#define S_ISUID 0
+#define S_ISGID 0
+#define CASTNEGFLOAT

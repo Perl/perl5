@@ -1,4 +1,4 @@
-/* $Header: a2py.c,v 3.0 89/10/18 15:34:35 lwall Locked $
+/* $Header: a2py.c,v 3.0.1.1 90/08/09 05:48:53 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	a2py.c,v $
+ * Revision 3.0.1.1  90/08/09  05:48:53  lwall
+ * patch19: a2p didn't emit a chop when NF was referenced though split needs it
+ * 
  * Revision 3.0  89/10/18  15:34:35  lwall
  * 3.0 baseline
  * 
@@ -578,7 +581,7 @@ yylex()
     case 'n': case 'N':
 	SNARFWORD;
 	if (strEQ(d,"NF"))
-	    do_split = split_to_array = set_array_base = TRUE;
+	    do_chop = do_split = split_to_array = set_array_base = TRUE;
 	if (strEQ(d,"next")) {
 	    saw_line_op = TRUE;
 	    XTERM(NEXT);

@@ -1,6 +1,6 @@
 #!./perl -P
 
-# $Header: comp.cpp,v 3.0 89/10/18 15:25:19 lwall Locked $
+# $Header: comp.cpp,v 3.0.1.1 90/08/09 05:25:34 lwall Locked $
 
 print "1..3\n";
 
@@ -32,4 +32,4 @@ $pwd=`pwd`;
 $pwd =~ s/\n//;
 $x = `./perl -P -I$pwd Comp.cpp.tmp`;
 print $x;
-`/bin/rm -f Comp.cpp.tmp Comp.cpp.inc`;
+unlink "Comp.cpp.tmp", "Comp.cpp.inc";

@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: base.lex,v 3.0 89/10/18 15:24:24 lwall Locked $
+# $Header: base.lex,v 3.0.1.1 90/08/09 05:24:43 lwall Locked $
 
 print "1..18\n";
 
@@ -34,7 +34,7 @@ if (!$@) {print "ok 6\n";} else {print "not ok 6\n";}
 eval '$foo = 123+123.4+123e4+123.4E5+123.4e+5+.12;';
 
 $foo = int($foo * 100 + .5);
-if ($foo eq 2591024652) {print "ok 7\n";} else {print "not ok 7\n";}
+if ($foo eq 2591024652) {print "ok 7\n";} else {print "not ok 7 :$foo:\n";}
 
 print <<'EOF';
 ok 8

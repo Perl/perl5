@@ -1,4 +1,4 @@
-/* $Header: cmd.h,v 3.0.1.2 90/02/28 16:39:36 lwall Locked $
+/* $Header: cmd.h,v 3.0.1.3 90/08/09 02:29:58 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	cmd.h,v $
+ * Revision 3.0.1.3  90/08/09  02:29:58  lwall
+ * patch19: did preliminary work toward debugging packages and evals
+ * 
  * Revision 3.0.1.2  90/02/28  16:39:36  lwall
  * patch9: volatilized some more variables for super-optimizing compilers
  * 
@@ -131,6 +134,7 @@ struct cmd {
     } ucmd;
     short	c_slen;		/* len of c_short, if not null */
     VOLATILE short c_flags;	/* optimization flags--see above */
+    char	*c_pack;	/* package line was compiled in */
     char	*c_file;	/* file the following line # is from */
     line_t      c_line;         /* line # of this command */
     char	c_type;		/* what this command does */
@@ -140,6 +144,9 @@ struct cmd {
 
 EXT CMD * VOLATILE main_root INIT(Nullcmd);
 EXT CMD * VOLATILE eval_root INIT(Nullcmd);
+
+EXT CMD compiling;
+EXT CMD * VOLATILE curcmd INIT(&compiling);
 
 struct compcmd {
     CMD *comp_true;

@@ -1,5 +1,5 @@
 %{
-/* $Header: a2p.y,v 3.0.1.1 90/03/01 10:30:08 lwall Locked $
+/* $Header: a2p.y,v 3.0.1.2 90/08/09 05:47:26 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -7,6 +7,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	a2p.y,v $
+ * Revision 3.0.1.2  90/08/09  05:47:26  lwall
+ * patch19: a2p didn't handle {foo = (bar == 123)}
+ * 
  * Revision 3.0.1.1  90/03/01  10:30:08  lwall
  * patch9: a2p didn't allow logical expressions everywhere it should
  * 
@@ -137,7 +140,7 @@ expr	: term
 		{ $$ = $1; }
 	| expr term
 		{ $$ = oper2(OCONCAT,$1,$2); }
-	| variable ASGNOP expr
+	| variable ASGNOP cond
 		{ $$ = oper3(OASSIGN,$2,$1,$3);
 			if ((ops[$1].ival & 255) == OFLD)
 			    lval_field = TRUE;
@@ -167,7 +170,7 @@ term	: variable
 	| term IN VAR
 		{ $$ = oper2(ODEFINED,aryrefarg($3),$1); }
 	| term '?' term ':' term
-		{ $$ = oper2(OCOND,$1,$3,$5); }
+		{ $$ = oper3(OCOND,$1,$3,$5); }
 	| variable INCR
 		{ $$ = oper1(OPOSTINCR,$1); }
 	| variable DECR

@@ -39,6 +39,21 @@ rest.   In particular directory access, redirection (includ-
 ing pipes, but excluding the pipe function),  system,  ioctl
 and sleep have been provided.
 
+[Files currently can be edited in-place provided you are cre-
+ating  a  backup.   However, if the backup coincidentally has 
+the same name as the original, or  if  the  resulting  backup 
+filename  is invalid, then the file will probably be trashed.
+For example, don't do
+
+	perl -i~ script makefile
+	perl -i.bak script file.dat
+
+because  (1)  MS-DOS treats "makefile~" and "makefile" as the
+same filename, and (2) "file.dat.bak" is an invalid filename.
+The  files  "makefile"  and  "file.dat" will probably be lost 
+forever.  Moral of the story:   Don't  use  in-place  editing 
+under MS-DOS. --rjc]
+
 2.1.  Interface to the MS-DOS ioctl system call.
 
      The function code of the  ioctl  function  (the  second

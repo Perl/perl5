@@ -1,4 +1,4 @@
-/* $Header: arg.h,v 3.0.1.5 90/03/27 15:29:41 lwall Locked $
+/* $Header: arg.h,v 3.0.1.6 90/08/09 02:25:14 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	arg.h,v $
+ * Revision 3.0.1.6  90/08/09  02:25:14  lwall
+ * patch19: added require operator
+ * patch19: added truncate operator
+ * 
  * Revision 3.0.1.5  90/03/27  15:29:41  lwall
  * patch16: MSDOS support
  * 
@@ -210,7 +214,7 @@
 #define O_SEND 180
 #define O_RECV 181
 #define O_SSELECT 182
-#define O_SOCKETPAIR 183
+#define O_SOCKPAIR 183
 #define O_DBSUBR 184
 #define O_DEFINED 185
 #define O_UNDEF 186
@@ -271,7 +275,9 @@
 #define O_LSLICE 241
 #define O_SPLICE 242
 #define O_BINMODE 243
-#define MAXO 244
+#define O_REQUIRE 244
+#define O_TRUNCATE 245
+#define MAXO 246
 
 #ifndef DOINIT
 extern char *opname[];
@@ -460,7 +466,7 @@ char *opname[] = {
     "SEND",
     "RECV",
     "SSELECT",
-    "SOCKETPAIR",
+    "SOCKPAIR",
     "DBSUBR",
     "DEFINED",
     "UNDEF",
@@ -521,7 +527,9 @@ char *opname[] = {
     "LSLICE",
     "SPLICE",
     "BINMODE",
-    "244"
+    "REQUIRE",
+    "TRUNCATE",
+    "245"
 };
 #endif
 
@@ -837,7 +845,7 @@ char opargs[MAXO+1] = {
 	A(1,1,3),	/* SEND */
 	A(1,1,1),	/* RECV */
 	A(1,1,1),	/* SSELECT */
-	A(1,1,1),	/* SOCKETPAIR */
+	A(1,1,1),	/* SOCKPAIR */
 	A(0,3,0),	/* DBSUBR */
 	A(1,0,0),	/* DEFINED */
 	A(1,0,0),	/* UNDEF */
@@ -848,7 +856,7 @@ char opargs[MAXO+1] = {
 	A(0,1,0),	/* LAELEM */
 	A(0,1,0),	/* LHELEM */
 	A(1,0,0),	/* LOCAL */
-	A(0,0,0),	/* PIPE */
+	A(1,1,0),	/* PIPE */
 	A(1,0,0),	/* FILENO */
 	A(1,0,0),	/* GHBYNAME */
 	A(1,1,0),	/* GHBYADDR */
@@ -898,6 +906,8 @@ char opargs[MAXO+1] = {
 	A(0,3,3),	/* LSLICE */
 	A(0,3,1),	/* SPLICE */
 	A(1,0,0),	/* BINMODE */
+	A(1,0,0),	/* REQUIRE */
+	A(1,1,0),	/* TRUNCATE */
 	0
 };
 #undef A

@@ -1,4 +1,4 @@
-/* $Header: cmd.c,v 3.0.1.7 90/03/27 15:32:37 lwall Locked $
+/* $Header: cmd.c,v 3.0.1.8 90/08/09 02:28:49 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	cmd.c,v $
+ * Revision 3.0.1.8  90/08/09  02:28:49  lwall
+ * patch19: did preliminary work toward debugging packages and evals
+ * patch19: conditionals now always supply a scalar context to expression
+ * patch19: switch optimizer was confused by negative fractional values
+ * 
  * Revision 3.0.1.7  90/03/27  15:32:37  lwall
  * patch16: non-terminal blocks should never have arrays requested of them
  * 
@@ -301,7 +306,7 @@ until_loop:
 
     /* Set line number so run-time errors can be located */
 
-    line = cmd->c_line;
+    curcmd = cmd;
 
 #ifdef DEBUGGING
     if (debug) {
@@ -615,7 +620,10 @@ until_loop:
 	    lastretstr = retstr;
 	while (tmps_max > tmps_base)	/* clean up after last eval */
 	    str_free(tmps_list[tmps_max--]);
-	newsp = eval(cmd->c_expr,gimme && (cmdflags & CF_TERM),sp);
+	newsp = eval(cmd->c_expr,
+	  gimme && (cmdflags & CF_TERM) && cmd->c_type == C_EXPR &&
+		!cmd->ucmd.acmd.ac_expr,
+	  sp);
 	st = stack->ary_array;	/* possibly reallocated */
 	retstr = st[newsp];
 	if (newsp > sp && retstr)
@@ -680,7 +688,15 @@ until_loop:
 	}
 	break;
     case C_NSWITCH:
-	match = (int)str_gnum(STAB_STR(cmd->c_stab));
+	{
+	    double value = str_gnum(STAB_STR(cmd->c_stab));
+
+	    match = (int)value;
+	    if (value < 0.0) {
+		if (((double)match) > value)
+		    --match;		/* was fractional--truncate other way */
+	    }
+	}
 	goto doswitch;
     case C_CSWITCH:
 	match = *(str_get(STAB_STR(cmd->c_stab))) & 255;
@@ -901,7 +917,7 @@ char *pat;
 {
     register int i;
 
-    fprintf(stderr,"%-4ld",(long)line);
+    fprintf(stderr,"%-4ld",(long)curcmd->c_line);
     for (i=0; i<dlevel; i++)
 	fprintf(stderr,"%c%c ",debname[i],debdelim[i]);
     fprintf(stderr,pat,a1,a2,a3,a4,a5,a6,a7,a8);
@@ -916,7 +932,7 @@ va_dcl
     register int i;
 
     va_start(args);
-    fprintf(stderr,"%-4ld",(long)line);
+    fprintf(stderr,"%-4ld",(long)curcmd->c_line);
     for (i=0; i<dlevel; i++)
 	fprintf(stderr,"%c%c ",debname[i],debdelim[i]);
 
