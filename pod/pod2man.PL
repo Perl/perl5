@@ -684,18 +684,16 @@ while (<>) {
 	    )
 	} {I<$1>}gx;
 
-	# func(n) is a reference to a man page
+	# func(n) is a reference to a perl function or a man page
 	s{
-	    (\w+)
+	    ([:\w]+)
 	    (
-		\(
-		    [^\s,\051]+
-		\)
+		\( [^\051]+ \)
 	    )
 	} {I<$1>\\|$2}gx;
 
 	# convert simple variable references
-	s/(\s+)([\$\@%][\w:]+)/${1}C<$2>/g;
+	s/(\s+)([\$\@%][\w:]+)(?!\()/${1}C<$2>/g;
 
 	if (m{ (
 		    [\-\w]+
