@@ -16,9 +16,6 @@
 
 /* (Doing namespace management portably in C is really gross.) */
 
-/* NO_EMBED is no longer supported. i.e. EMBED is always active--
- * but you can define PERL_HIDE_SHORT_NAMES to achieve the same. */
-
 #ifndef PERL_HIDE_SHORT_NAMES
 
 /* Hide global symbols */
