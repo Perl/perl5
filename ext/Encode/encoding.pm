@@ -1,6 +1,6 @@
-# $Id: encoding.pm,v 1.47 2003/08/20 11:15:31 dankogai Exp dankogai $
+# $Id: encoding.pm,v 1.48 2003/12/29 02:47:16 dankogai Exp dankogai $
 package encoding;
-our $VERSION = do { my @r = (q$Revision: 1.47 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.48 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use strict;
