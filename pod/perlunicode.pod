@@ -15,10 +15,10 @@ from cover to cover, Perl does support many Unicode features.
 =item Input and Output Disciplines
 
 Perl knows when a filehandle uses Perl's internal Unicode encodings
-(UTF-8 or UTF-EBCDIC) if the filehandle is opened with the ":utf8"
-layer.  Other encodings can be converted to Perl's encoding on input
-or from Perl's encoding on output by use of the ":encoding(...)"
-layer.  See L<open>.
+(UTF-8, or UTF-EBCDIC if in EBCDIC) if the filehandle is opened with
+the ":utf8" layer.  Other encodings can be converted to Perl's
+encoding on input or from Perl's encoding on output by use of the
+":encoding(...)"  layer.  See L<open>.
 
 To indicate that Perl source itself is using a particular encoding,
 see L<encoding>.
@@ -34,7 +34,8 @@ a traditional byte scheme when presented with byte data.
 
 As a compatibility measure, the C<use utf8> pragma must be explicitly
 included to enable recognition of UTF-8 in the Perl scripts themselves
-on ASCII-based machines or to recognize UTF-EBCDIC on EBCDIC-based
+(in string or regular expression literals, or in identifier names) on
+ASCII-based machines or to recognize UTF-EBCDIC on EBCDIC-based
 machines.  B<These are the only times when an explicit C<use utf8>
 is needed.>
 
@@ -70,7 +71,8 @@ On Windows platforms, if the C<-C> command line switch is used or the
 ${^WIDE_SYSTEM_CALLS} global flag is set to C<1>, all system calls
 will use the corresponding wide-character APIs.  This feature is
 available only on Windows to conform to the API standard already
-established for that platform.
+established for that platform--and there are very few non-Windows
+platforms that have Unicode-aware APIs.
 
 The C<bytes> pragma will always, regardless of platform, force byte
 semantics in a particular lexical scope.  See L<bytes>.
@@ -122,8 +124,8 @@ Unicode encodings (UTF-8, UTF-EBCDIC, UCS-2, etc.), but will be recognized
 as such and converted to Perl's internal representation only if the
 appropriate L<encoding> is specified.
 
-Unicode characters can also be added to a string by using the C<\x{...}>
-notation.  The  Unicode code for the desired character, in
+Unicode characters can also be added to a string by using the
+C<\x{...}> notation.  The Unicode code for the desired character, in
 hexadecimal, should be placed in the braces. For instance, a smiley
 face is C<\x{263A}>.  This encoding scheme only works for characters
 with a code of 0x100 or above.
@@ -132,8 +134,8 @@ Additionally, if you
 
    use charnames ':full';
 
-you can use the C<\N{...}> notation and put the official Unicode character
-name within the braces, such as C<\N{WHITE SMILING FACE}>.
+you can use the C<\N{...}> notation and put the official Unicode
+character name within the braces, such as C<\N{WHITE SMILING FACE}>.
 
 
 =item *
@@ -145,15 +147,15 @@ names.
 
 =item *
 
-Regular expressions match characters instead of bytes.
-"." matches a character instead of a byte.  The C<\C> pattern
-is provided to force a match a single byte--a "C<char>" in C, hence C<\C>.
+Regular expressions match characters instead of bytes.  "." matches
+a character instead of a byte.  The C<\C> pattern is provided to force
+a match a single byte--a C<char> in C, hence C<\C>.
 
 =item *
 
 Character classes in regular expressions match characters instead of
 bytes and match against the character properties specified in the
-Unicode properties database.  C<\w> can be used to match an
+Unicode properties database.  C<\w> can be used to match a Japanese
 ideograph, for instance.
 
 =item *
@@ -161,21 +163,22 @@ ideograph, for instance.
 Named Unicode properties, scripts, and block ranges may be used like
 character classes via the C<\p{}> "matches property" construct and
 the  C<\P{}> negation, "doesn't match property".
-For instance, C<\p{Lu}> matches any
-character with the Unicode "Lu" (Letter, uppercase) property, while
-C<\p{M}> matches any character with an "M" (mark--accents and such)
-property.  Brackets are not required for single letter properties, so
-C<\p{M}> is equivalent to C<\pM>. Many predefined properties are
-available, such as C<\p{Mirrored}> and C<\p{Tibetan}>.
+
+For instance, C<\p{Lu}> matches any character with the Unicode "Lu"
+(Letter, uppercase) property, while C<\p{M}> matches any character
+with an "M" (mark--accents and such) property.  Brackets are not
+required for single letter properties, so C<\p{M}> is equivalent to
+C<\pM>. Many predefined properties are available, such as
+C<\p{Mirrored}> and C<\p{Tibetan}>.
 
 The official Unicode script and block names have spaces and dashes as
 separators, but for convenience you can use dashes, spaces, or
-underbars, and case is unimportant. It is
-recommended, however, that for consistency you use the following naming:
-the official Unicode script, property, or block name (see below for the
-additional rules that apply to block names) with whitespace and dashes
-removed, and the words "uppercase-first-lowercase-rest". "C<Latin-1
-Supplement>" thus becomes "C<Latin1Supplement>".
+underbars, and case is unimportant. It is recommended, however, that
+for consistency you use the following naming: the official Unicode
+script, property, or block name (see below for the additional rules
+that apply to block names) with whitespace and dashes removed, and the
+words "uppercase-first-lowercase-rest". C<Latin-1 Supplement> thus
+becomes C<Latin1Supplement>.
 
 You can also use negation in both C<\p{}> and C<\P{}> by introducing a caret
 (^) between the first brace and the property name: C<\p{^Tamil}> is
@@ -238,8 +241,8 @@ two-letter sub-properties starting with the same letter.
 C<L&> is a special case, which is an alias for C<Ll>, C<Lu>, and C<Lt>.
 
 Because Perl hides the need for the user to understand the internal
-representation of Unicode characters, there is no need to implement the
-somewhat messy concept of surrogates. C<Cs> is therefore not
+representation of Unicode characters, there is no need to implement
+the somewhat messy concept of surrogates. C<Cs> is therefore not
 supported.
 
 Because scripts differ in their directionality--Hebrew is
@@ -369,17 +372,18 @@ and there are further derived properties:
     Common          Any character (or unassigned code point)
                     not explicitly assigned to a script
 
-For backward compatibility, all properties mentioned so far may have C<Is>
-prepended to their name, so C<\P{IsLu}>, for example, is equal to C<\P{Lu}>.
+For backward compatibility (with Perl 5.6), all properties mentioned
+so far may have C<Is> prepended to their name, so C<\P{IsLu}>, for
+example, is equal to C<\P{Lu}>.
 
 =head2 Blocks
 
-In addition to B<scripts>, Unicode also defines B<blocks> of characters.
-The difference between scripts and blocks is that the concept of
-scripts is closer to natural languages, while the  concept of blocks
-is more of an artificial grouping based on groups of around 256
+In addition to B<scripts>, Unicode also defines B<blocks> of
+characters.  The difference between scripts and blocks is that the
+concept of scripts is closer to natural languages, while the concept
+of blocks is more of an artificial grouping based on groups of 256
 Unicode characters. For example, the C<Latin> script contains letters
-from many blocks but  does not contain all the characters from those
+from many blocks but does not contain all the characters from those
 blocks. It does not, for example, contain digits, because digits are
 shared across many scripts. Digits and similar groups, like
 punctuation, are in a category called C<Common>.
@@ -396,7 +400,7 @@ Block names are given with the C<In> prefix. For example, the
 Katakana block is referenced via C<\p{InKatakana}>.  The C<In>
 prefix may be omitted if there is no naming conflict with a script
 or any other property, but it is recommended that C<In> always be used
-to avoid confusion.
+for block tests to avoid confusion.
 
 These block names are supported:
 
@@ -548,10 +552,12 @@ and operators dealing with filenames.
 
 =item *
 
-The C<pack()>/C<unpack()> letters "C<c>" and "C<C>" do I<not> change,
+The C<pack()>/C<unpack()> letters C<c> and C<C> do I<not> change,
 since they are often used for byte-oriented formats.  Again, think
-"C<char>" in the C language.  There is a new "C<U>" specifier
-that converts between Unicode characters and integers.
+C<char> in the C language.
+
+There is a new C<U> specifier that converts between Unicode characters
+and code points.
 
 =item *
 
@@ -755,7 +761,7 @@ in Perl can be written as:
 
 But in this particular example, you probably really want
 
-    \p{Greek}
+    \p{GreekAndCoptic}
 
 which will match assigned characters known to be part of the Greek script.
 
@@ -854,12 +860,12 @@ Like UTF-8 but EBCDIC-safe, in the way that UTF-8 is ASCII-safe.
 
 UTF-16, UTF-16BE, UTF16-LE, Surrogates, and BOMs (Byte Order Marks)
 
-The followings items are mostly for reference, Perl doesn't
-use them internally.
+The followings items are mostly for reference and general Unicode
+knowledge, Perl doesn't use these constructs internally.
 
 UTF-16 is a 2 or 4 byte encoding.  The Unicode code points
-C<U+0000..U+FFFF> are stored in a single 16-bit unit, and the code points
-C<U+10000..U+10FFFF> in two 16-bit units.  The latter case is
+C<U+0000..U+FFFF> are stored in a single 16-bit unit, and the code
+points C<U+10000..U+10FFFF> in two 16-bit units.  The latter case is
 using I<surrogates>, the first 16-bit unit being the I<high
 surrogate>, and the second being the I<low surrogate>.
 
@@ -899,7 +905,7 @@ was writing in UTF-8, you will read the bytes C<0xEF 0xBB 0xBF>.)
 The way this trick works is that the character with the code point
 C<U+FFFE> is guaranteed not to be a valid Unicode character, so the
 sequence of bytes C<0xFF 0xFE> is unambiguously "BOM, represented in
-little-endian format" and cannot be "C<U+FFFE>, represented in big-endian
+little-endian format" and cannot be C<U+FFFE>, represented in big-endian
 format".
 
 =item *
@@ -960,22 +966,22 @@ are using a locale (see L<perllocale>), the C<\w> might contain a few
 more letters according to your language and country.
 
 In the second case, the C<\w> set of characters is much, much larger.
-Most importantly, even in the set of the first 256 characters, it
-will probably match different characters: unlike most locales,
-which are specific to a language and country pair, Unicode classifies all
-the characters that are letters as C<\w>.  For example, your locale might
-not think that LATIN SMALL LETTER ETH is a letter (unless you happen
-to speak Icelandic), but Unicode does.
+Most importantly, even in the set of the first 256 characters, it will
+probably match different characters: unlike most locales, which are
+specific to a language and country pair, Unicode classifies all the
+characters that are letters I<somewhere> as C<\w>.  For example, your
+locale might not think that LATIN SMALL LETTER ETH is a letter (unless
+you happen to speak Icelandic), but Unicode does.
 
 As discussed elsewhere, Perl has one foot (two hooves?) planted in
-each of two worlds: the old world of bytes and the new
-world of characters, upgrading from bytes to characters when necessary.
+each of two worlds: the old world of bytes and the new world of
+characters, upgrading from bytes to characters when necessary.
 If your legacy code does not explicitly use Unicode, no automatic
 switch-over to characters should happen.  Characters shouldn't get
-downgraded to bytes, either.  It is possible to accidentally mix
-bytes and characters, however (see L<perluniintro>), in which case
-C<\w> in regular expressions might start behaving differently.  Review
-your code.
+downgraded to bytes, either.  It is possible to accidentally mix bytes
+and characters, however (see L<perluniintro>), in which case C<\w> in
+regular expressions might start behaving differently.  Review your
+code.  Use warnings and the C<strict> pragma.
 
 =back
 
@@ -1021,22 +1027,22 @@ the following C APIs useful.  See L<perlapi> for details.
 
 =item *
 
-C<DO_UTF8(sv)> returns true if the C<UTF8> flag is on and the bytes pragma
-is not in effect.  C<SvUTF8(sv)> returns true is the C<UTF8> flag is on; the
-bytes pragma is ignored.  The C<UTF8> flag being on does B<not> mean that
-there are any characters of code points greater than 255 (or 127) in
-the scalar or that there are even any characters in the scalar.
-What the C<UTF8> flag means is that the sequence of octets in the
-representation of the scalar is the sequence of UTF-8 encoded
-code points of the characters of a string.  The C<UTF8> flag being
-off means that each octet in this representation encodes a single
-character with code point 0..255 within the string.  Perl's Unicode
-model is not to use UTF-8 until it is absolutely necessary.
+C<DO_UTF8(sv)> returns true if the C<UTF8> flag is on and the bytes
+pragma is not in effect.  C<SvUTF8(sv)> returns true is the C<UTF8>
+flag is on; the bytes pragma is ignored.  The C<UTF8> flag being on
+does B<not> mean that there are any characters of code points greater
+than 255 (or 127) in the scalar or that there are even any characters
+in the scalar.  What the C<UTF8> flag means is that the sequence of
+octets in the representation of the scalar is the sequence of UTF-8
+encoded code points of the characters of a string.  The C<UTF8> flag
+being off means that each octet in this representation encodes a
+single character with code point 0..255 within the string.  Perl's
+Unicode model is not to use UTF-8 until it is absolutely necessary.
 
 =item *
 
-C<uvuni_to_utf8(buf, chr>) writes a Unicode character code point into a
-buffer encoding the code point as UTF-8, and returns a pointer
+C<uvuni_to_utf8(buf, chr>) writes a Unicode character code point into
+a buffer encoding the code point as UTF-8, and returns a pointer
 pointing after the UTF-8 bytes.
 
 =item *
@@ -1101,8 +1107,9 @@ C<pv_uni_display(dsv, spv, len, pvlim, flags)> and
 C<sv_uni_display(dsv, ssv, pvlim, flags)> are useful for debugging the
 output of Unicode strings and scalars.  By default they are useful
 only for debugging--they display B<all> characters as hexadecimal code
-points--but with the flags C<UNI_DISPLAY_ISPRINT> and
-C<UNI_DISPLAY_BACKSLASH> you can make the output more readable.
+points--but with the flags C<UNI_DISPLAY_ISPRINT>,
+C<UNI_DISPLAY_BACKSLASH>, and C<UNI_DISPLAY_QQ> you can make the
+output more readable.
 
 =item *
 

@@ -242,10 +242,6 @@ USE_5005THREADS	*= undef
 USE_ITHREADS	!= undef
 .ENDIF
 
-.IF "$(USE_IMP_SYS)" == "define"
-PERL_MALLOC	!= undef
-.ENDIF
-
 USE_MULTI	*= undef
 USE_ITHREADS	*= undef
 USE_IMP_SYS	*= undef

@@ -12,7 +12,7 @@ BEGIN {
 }
 chdir 't';
 
-use Test::More tests => 4;
+use Test::More tests => 5;
 
 BEGIN { 
     # non-core tests will have blib in their path.  We remove it
@@ -32,3 +32,6 @@ use_ok( 'ExtUtils::testlib' );
 is( @blib_paths, 2, 'ExtUtils::testlib added two @INC dirs!' );
 ok( !(grep !File::Spec->file_name_is_absolute($_), @blib_paths),
                     '  and theyre absolute');
+
+eval { eval "# @INC"; };
+is( $@, '',     '@INC is not tainted' );

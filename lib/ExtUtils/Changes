@@ -1,3 +1,11 @@
+5.96_01 Wed May 22 19:11:09 EDT 2002
+    - Fixed ExtUtils::testlib so it doesn't taint @INC.
+    - Fixed ExtUtils::Command so it groks % shell wildcard on VMS.
+      [RT 625]
+    - MM now depends on Test::Harness 2.00 on VMS else tests with -T
+      won't work, command line too long.
+    - Added Craig's patch to fix limited level VMSs in the core.
+
 5.95_01 Sat May 18 14:40:12 EDT 2002
     - Fixed ExtUtils::testlib so it has a reasonable chance of working
       under taint mode.

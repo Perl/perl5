@@ -71,7 +71,7 @@ SKIP: {
 	kill 'HUP', $$;
 	sleep 1;
 
-        printf "%s 10 -   masked SIGNINT received %s\n",
+        printf "%s 10 -   masked SIGINT received %s\n",
           $sigint_called ? "ok" : "not ok",
           $^O eq 'darwin' ? "# TODO Darwin seems to loose blocked signals" 
                           : '';

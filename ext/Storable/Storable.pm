@@ -70,7 +70,7 @@ package Storable; @ISA = qw(Exporter DynaLoader);
 use AutoLoader;
 use vars qw($canonical $forgive_me $VERSION);
 
-$VERSION = '2.00';
+$VERSION = '2.01';
 *AUTOLOAD = \&AutoLoader::AUTOLOAD;		# Grrr...
 
 #

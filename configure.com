@@ -1803,7 +1803,7 @@ $   CLOSE CONFIG
 $   echo "You are using Dec C ''line'"
 $   ccversion = line
 $   Dec_C_Version = F$INTEGER(line)
-$   IF Dec_C_Version .GE. 60200000
+$   IF Dec_C_Version .GE. 60200000 .AND. archname .NES. "VMS_VAX"
 $   THEN
 $     echo4 "adding /NOANSI_ALIAS qualifier to ccflags."
 $     ccflags = ccflags + "/NOANSI_ALIAS"

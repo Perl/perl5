@@ -1,5 +1,5 @@
 # -*- Mode: cperl; cperl-indent-level: 4 -*-
-# $Id: Harness.pm,v 1.29 2002/05/17 23:04:11 schwern Exp $
+# $Id: Harness.pm,v 1.31 2002/05/18 20:19:06 schwern Exp $
 
 package Test::Harness;
 
@@ -22,7 +22,7 @@ use vars qw($VERSION $Verbose $Switches $Have_Devel_Corestack $Curtest
 
 $Have_Devel_Corestack = 0;
 
-$VERSION = '2.22';
+$VERSION = '2.23';
 
 $ENV{HARNESS_ACTIVE} = 1;
 
@@ -468,6 +468,7 @@ sub _run_all_tests {
                     bonus       => $results{bonus},
                     skipped     => $results{skip},
                     skip_reason => $Strap->{_skip_reason},
+                    skip_all    => $Strap->{skip_all},
                     ml          => $ml,
                    );
 
@@ -494,8 +495,8 @@ sub _run_all_tests {
                 print "$test{ml}ok\n        ".join(', ', @msg)."\n";
             } elsif ($test{max}) {
                 print "$test{ml}ok\n";
-            } elsif (defined $test{skip_reason}) {
-                print "skipped\n        all skipped: $test{skip_reason}\n";
+            } elsif (defined $test{skip_all}) {
+                print "skipped\n        all skipped: $test{skip_all}\n";
                 $tot{skipped}++;
             } else {
                 print "\n        skipped test on this platform\n";
