@@ -6055,7 +6055,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		iv = (svix < svmax) ? SvIVx(svargs[svix++]) : 0;
 		switch (intsize) {
 		case 'h':	iv = (short)iv; break;
-		default:	iv = (int)iv; break;
+		default:	break;
 		case 'l':	iv = (long)iv; break;
 		case 'V':	break;
 #ifdef HAS_QUAD
@@ -6137,7 +6137,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		uv = (svix < svmax) ? SvUVx(svargs[svix++]) : 0;
 		switch (intsize) {
 		case 'h':	uv = (unsigned short)uv; break;
-		default:	uv = (unsigned)uv; break;
+		default:	break;
 		case 'l':	uv = (unsigned long)uv; break;
 		case 'V':	break;
 #ifdef HAS_QUAD

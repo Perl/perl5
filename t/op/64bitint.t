@@ -10,13 +10,13 @@ BEGIN {
 	unshift @INC, '../lib';
 }
 
-# This could use a lot of more tests.
+# This could use many more tests.
 
 # so that using > 0xfffffff constants and
 # 32+ bit integers don't cause noise
 no warnings qw(overflow portable);
 
-print "1..48\n";
+print "1..52\n";
 
 my $q = 12345678901;
 my $r = 23456789012;
@@ -238,5 +238,18 @@ print "ok 47\n";
 
 print "not " unless (0xf000000000000000 ^ 0xfffffffffffffff0) == 0x0ffffffffffffff0;
 print "ok 48\n";
+
+
+print "not " unless (sprintf "%b", ~0)   eq '1111111111111111111111111111111111111111111111111111111111111111';
+print "ok 49\n";
+
+print "not " unless (sprintf "%64b", ~0) eq '1111111111111111111111111111111111111111111111111111111111111111';
+print "ok 50\n";
+
+print "not " unless (sprintf "%d", ~0>>1) eq '9223372036854775807';
+print "ok 51\n";
+
+print "not " unless (sprintf "%u", ~0)    eq '18446744073709551615';
+print "ok 52\n";
 
 # eof
