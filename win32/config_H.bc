@@ -2159,7 +2159,7 @@
 /* PERL_MALLOC_WRAP:
  *	This symbol, if defined, indicates that we'd like malloc wrap checks.
  */
-#define PERL_MALLOC_WRAP		/**/
+/*#define PERL_MALLOC_WRAP		/**/
 
 /* CAN_PROTOTYPE:
  *	If defined, this macro indicates that the C compiler can handle
