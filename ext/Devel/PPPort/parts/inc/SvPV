@@ -1,12 +1,12 @@
 ################################################################################
 ##
-##  $Revision: 8 $
+##  $Revision: 10 $
 ##  $Author: mhx $
-##  $Date: 2004/12/29 14:17:20 +0100 $
+##  $Date: 2005/01/31 08:10:54 +0100 $
 ##
 ################################################################################
 ##
-##  Version 3.x, Copyright (C) 2004, Marcus Holland-Moritz.
+##  Version 3.x, Copyright (C) 2004-2005, Marcus Holland-Moritz.
 ##  Version 2.x, Copyright (C) 2001, Paul Marquess.
 ##  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 ##
@@ -129,12 +129,12 @@ SvPV_nolen(sv)
 		const char *str;
 	CODE:
 		str = SvPV_nolen(sv);
-		RETVAL = strEQ(str, "mhx") ? 3 : 0;
+		RETVAL = strEQ(str, "mhx") ? 42 : 0;
 	OUTPUT:
 		RETVAL
 
 =tests plan => 2
 
 ok(&Devel::PPPort::SvPVbyte("mhx"), 3);
-ok(&Devel::PPPort::SvPVbyte("mhx"), 3);
+ok(&Devel::PPPort::SvPV_nolen("mhx"), 42);
 

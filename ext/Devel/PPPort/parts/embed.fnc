@@ -245,7 +245,7 @@ Ap	|GV*	|gv_autoload4	|HV* stash|const char* name|STRLEN len \
 				|I32 method
 Ap	|void	|gv_check	|HV* stash
 Ap	|void	|gv_efullname	|SV* sv|GV* gv
-Ap	|void	|gv_efullname3	|SV* sv|GV* gv|const char* prefix
+Amb	|void	|gv_efullname3	|SV* sv|GV* gv|const char* prefix
 Ap	|void	|gv_efullname4	|SV* sv|GV* gv|const char* prefix|bool keepmain
 Ap	|GV*	|gv_fetchfile	|const char* name
 Apd	|GV*	|gv_fetchmeth	|HV* stash|const char* name|STRLEN len \
@@ -257,12 +257,12 @@ Apd	|GV*	|gv_fetchmethod_autoload|HV* stash|const char* name \
 				|I32 autoload
 Ap	|GV*	|gv_fetchpv	|const char* name|I32 add|I32 sv_type
 Ap	|void	|gv_fullname	|SV* sv|GV* gv
-Ap	|void	|gv_fullname3	|SV* sv|GV* gv|const char* prefix
+Amb	|void	|gv_fullname3	|SV* sv|GV* gv|const char* prefix
 Ap	|void	|gv_fullname4	|SV* sv|GV* gv|const char* prefix|bool keepmain
 Ap	|void	|gv_init	|GV* gv|HV* stash|const char* name \
 				|STRLEN len|int multi
 Apd	|HV*	|gv_stashpv	|const char* name|I32 create
-Ap	|HV*	|gv_stashpvn	|const char* name|U32 namelen|I32 create
+Apd	|HV*	|gv_stashpvn	|const char* name|U32 namelen|I32 create
 Apd	|HV*	|gv_stashsv	|SV* sv|I32 create
 Apd	|void	|hv_clear	|HV* tb
 Ap	|void	|hv_delayfree_ent|HV* hv|HE* entry
@@ -361,8 +361,10 @@ p	|I32	|keyword	|char* d|I32 len
 Ap	|void	|leave_scope	|I32 base
 p	|void	|lex_end
 p	|void	|lex_start	|SV* line
-Ap |void   |op_null    |OP* o
+Ap	|void	|op_null	|OP* o
 p	|void	|op_clear	|OP* o
+Ap	|void	|op_refcnt_lock
+Ap	|void	|op_refcnt_unlock
 p	|OP*	|linklist	|OP* o
 p	|OP*	|list		|OP* o
 p	|OP*	|listkids	|OP* o
@@ -594,7 +596,7 @@ Apd	|void	|pack_cat	|SV *cat|char *pat|char *patend|SV **beglist|SV **endlist|SV
 Apd	|void	|packlist 	|SV *cat|char *pat|char *patend|SV **beglist|SV **endlist
 p	|void	|pidgone	|Pid_t pid|int status
 Ap	|void	|pmflag		|U32* pmfl|int ch
-p	|OP*	|pmruntime	|OP* pm|OP* expr|OP* repl
+p	|OP*	|pmruntime	|OP* pm|OP* expr|bool isreg
 p	|OP*	|pmtrans	|OP* o|OP* expr|OP* repl
 Ap	|void	|pop_scope
 p	|OP*	|prepend_elem	|I32 optype|OP* head|OP* tail
@@ -720,7 +722,7 @@ pd	|void	|sv_add_arena	|char* ptr|U32 size|U32 flags
 Apd	|int	|sv_backoff	|SV* sv
 Apd	|SV*	|sv_bless	|SV* sv|HV* stash
 Afpd	|void	|sv_catpvf	|SV* sv|const char* pat|...
-Ap	|void	|sv_vcatpvf	|SV* sv|const char* pat|va_list* args
+Apd	|void	|sv_vcatpvf	|SV* sv|const char* pat|va_list* args
 Apd	|void	|sv_catpv	|SV* sv|const char* ptr
 Amdb	|void	|sv_catpvn	|SV* sv|const char* ptr|STRLEN len
 Amdb	|void	|sv_catsv	|SV* dsv|SV* ssv
@@ -754,7 +756,7 @@ Apd	|STRLEN	|sv_len_utf8	|SV* sv
 Apd	|void	|sv_magic	|SV* sv|SV* obj|int how|const char* name \
 				|I32 namlen
 Apd	|MAGIC *|sv_magicext	|SV* sv|SV* obj|int how|MGVTBL *vtbl \
-				| const char* name|I32 namlen	
+				|const char* name|I32 namlen
 Apd	|SV*	|sv_mortalcopy	|SV* oldsv
 Apd	|SV*	|sv_newmortal
 Apd	|SV*	|sv_newref	|SV* sv
@@ -772,7 +774,7 @@ Apd	|void	|sv_replace	|SV* sv|SV* nsv
 Apd	|void	|sv_report_used
 Apd	|void	|sv_reset	|char* s|HV* stash
 Afpd	|void	|sv_setpvf	|SV* sv|const char* pat|...
-Ap	|void	|sv_vsetpvf	|SV* sv|const char* pat|va_list* args
+Apd	|void	|sv_vsetpvf	|SV* sv|const char* pat|va_list* args
 Apd	|void	|sv_setiv	|SV* sv|IV num
 Apdb	|void	|sv_setpviv	|SV* sv|IV num
 Apd	|void	|sv_setuv	|SV* sv|UV num
@@ -872,12 +874,12 @@ Ap	|struct perl_vars *|GetVars
 Ap	|int	|runops_standard
 Ap	|int	|runops_debug
 Afpd	|void	|sv_catpvf_mg	|SV *sv|const char* pat|...
-Ap	|void	|sv_vcatpvf_mg	|SV* sv|const char* pat|va_list* args
+Apd	|void	|sv_vcatpvf_mg	|SV* sv|const char* pat|va_list* args
 Apd	|void	|sv_catpv_mg	|SV *sv|const char *ptr
 Apd	|void	|sv_catpvn_mg	|SV *sv|const char *ptr|STRLEN len
 Apd	|void	|sv_catsv_mg	|SV *dstr|SV *sstr
 Afpd	|void	|sv_setpvf_mg	|SV *sv|const char* pat|...
-Ap	|void	|sv_vsetpvf_mg	|SV* sv|const char* pat|va_list* args
+Apd	|void	|sv_vsetpvf_mg	|SV* sv|const char* pat|va_list* args
 Apd	|void	|sv_setiv_mg	|SV *sv|IV i
 Apdb	|void	|sv_setpviv_mg	|SV *sv|IV iv
 Apd	|void	|sv_setuv_mg	|SV *sv|UV u
@@ -902,12 +904,6 @@ Ap	|void	|do_pmop_dump	|I32 level|PerlIO *file|PMOP *pm
 Ap	|void	|do_sv_dump	|I32 level|PerlIO *file|SV *sv|I32 nest \
 				|I32 maxnest|bool dumpops|STRLEN pvlim
 Ap	|void	|magic_dump	|MAGIC *mg
-#if defined(PERL_FLEXIBLE_EXCEPTIONS)
-Ap	|void*	|default_protect|volatile JMPENV *je|int *excpt \
-				|protect_body_t body|...
-Ap	|void*	|vdefault_protect|volatile JMPENV *je|int *excpt \
-				|protect_body_t body|va_list *args
-#endif
 Ap	|void	|reginitcolors
 Apd	|char*	|sv_2pv_nolen	|SV* sv
 Apd	|char*	|sv_2pvutf8_nolen|SV* sv
@@ -1034,7 +1030,7 @@ Ap	|void	|Slab_Free	|void *op
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
 s	|void	|find_beginning
 s	|void	|forbid_setid	|char *
-s	|void	|incpush	|char *|int|int|int
+s	|void	|incpush	|char *|int|int|int|int
 s	|void	|init_interp
 s	|void	|init_ids
 s	|void	|init_lexer
@@ -1054,12 +1050,6 @@ s	|void*	|parse_body	|char **env|XSINIT_t xsinit
 s	|void*	|run_body	|I32 oldscope
 s	|void	|call_body	|OP *myop|int is_eval
 s	|void*	|call_list_body	|CV *cv
-#if defined(PERL_FLEXIBLE_EXCEPTIONS)
-s	|void*	|vparse_body	|va_list args
-s	|void*	|vrun_body	|va_list args
-s	|void*	|vcall_body	|va_list args
-s	|void*	|vcall_list_body|va_list args
-#endif
 #endif
 
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
@@ -1082,9 +1072,6 @@ s	|int	|div128		|SV *pnum|bool *done
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
 s	|OP*	|docatch	|OP *o
 s	|void*	|docatch_body
-#if defined(PERL_FLEXIBLE_EXCEPTIONS)
-s	|void*	|vdocatch_body	|va_list args
-#endif
 s	|OP*	|dofindlabel	|OP *o|char *label|OP **opstack|OP **oplimit
 s	|OP*	|doparseform	|SV *sv
 sn	|bool	|num_overflow	|NV value|I32 fldsize|I32 frcsize
@@ -1282,7 +1269,7 @@ s	|HV *	|find_in_my_stash|char *pkgname|I32 len
 s	|SV*	|new_constant	|char *s|STRLEN len|const char *key|SV *sv \
 				|SV *pv|const char *type
 #  if defined(DEBUGGING)
-s	|void	|tokereport	|char *thing|char *s|I32 rv
+s	|int	|tokereport	|char *s|I32 rv
 #  endif
 s	|int	|ao		|int toketype
 s	|void	|depcom
@@ -1390,7 +1377,7 @@ sd	|void	|cv_dump	|CV *cv|char *title
 pd 	|CV*	|find_runcv	|U32 *db_seqp
 p	|void	|free_tied_hv_pool
 #if defined(DEBUGGING)
-p	|int	|get_debug_opts	|char **s
+p	|int	|get_debug_opts	|char **s|bool givehelp
 #endif
 Ap	|void	|save_set_svflags|SV* sv|U32 mask|U32 val
 Apod	|void	|hv_assert	|HV* tb
@@ -1483,5 +1470,11 @@ np	|long	|my_betohl	|long n
 #endif
 
 np	|void	|my_swabn	|void* ptr|int n
+
+Ap	|GV*	|gv_fetchpvn_flags|const char* name|STRLEN len|I32 flags|I32 sv_type
+Ap	|GV*	|gv_fetchsv|SV *name|I32 flags|I32 sv_type
+dp	|bool	|is_gv_magical_sv|SV *name|U32 flags
+
+Apd	|char*	|savesvpv	|SV* sv
 
 END_EXTERN_C

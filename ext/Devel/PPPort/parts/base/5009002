@@ -8,6 +8,8 @@ XPUSHmortal                    # E
 ZeroD                          # E
 dUNDERBAR                      # E
 find_rundefsvoffset            # U
+gv_fetchpvn_flags              # E
+gv_fetchsv                     # E
 mPUSHi                         # U
 mPUSHn                         # U
 mPUSHp                         # U
@@ -16,6 +18,14 @@ mXPUSHi                        # U
 mXPUSHn                        # U
 mXPUSHp                        # U
 mXPUSHu                        # U
+op_refcnt_lock                 # U
+op_refcnt_unlock               # U
+savesvpv                       # E
 vnormal                        # E
-PERL_BCDVERSION                # added by devel/scanprov
 MY_CXT_CLONE                   # added by devel/scanprov
+PERL_BCDVERSION                # added by devel/scanprov
+XCPT_CATCH                     # added by devel/scanprov
+XCPT_RETHROW                   # added by devel/scanprov
+XCPT_TRY_END                   # added by devel/scanprov
+XCPT_TRY_START                 # added by devel/scanprov
+dXCPT                          # added by devel/scanprov

@@ -4,13 +4,13 @@
 #
 ################################################################################
 #
-#  $Revision: 30 $
+#  $Revision: 33 $
 #  $Author: mhx $
-#  $Date: 2004/08/17 20:01:49 +0200 $
+#  $Date: 2005/01/31 08:10:55 +0100 $
 #
 ################################################################################
 #
-#  Version 3.x, Copyright (C) 2004, Marcus Holland-Moritz.
+#  Version 3.x, Copyright (C) 2004-2005, Marcus Holland-Moritz.
 #  Version 2.x, Copyright (C) 2001, Paul Marquess.
 #  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 #
@@ -309,13 +309,13 @@ __DATA__
 #
 ################################################################################
 #
-#  $Revision: 30 $
+#  $Revision: 33 $
 #  $Author: mhx $
-#  $Date: 2004/08/17 20:01:49 +0200 $
+#  $Date: 2005/01/31 08:10:55 +0100 $
 #
 ################################################################################
 #
-#  Version 3.x, Copyright (C) 2004, Marcus Holland-Moritz.
+#  Version 3.x, Copyright (C) 2004-2005, Marcus Holland-Moritz.
 #  Version 2.x, Copyright (C) 2001, Paul Marquess.
 #  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 #
@@ -379,7 +379,7 @@ that can check your source code. It will suggest hints and portability
 notes, and can even make suggestions on how to change your code. You
 can run it like any other Perl program:
 
-    perl ppport.h
+    perl ppport.h [options] [files]
 
 It also has embedded documentation, so you can use
 
@@ -452,7 +452,7 @@ Version 3.x was ported back to CPAN by Marcus Holland-Moritz.
 
 =head1 COPYRIGHT
 
-Version 3.x, Copyright (C) 2004, Marcus Holland-Moritz.
+Version 3.x, Copyright (C) 2004-2005, Marcus Holland-Moritz.
 
 Version 2.x, Copyright (C) 2001, Paul Marquess.
 
@@ -473,7 +473,7 @@ require DynaLoader;
 use strict;
 use vars qw($VERSION @ISA $data);
 
-$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.04 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
+$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.05 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
 
 @ISA = qw(DynaLoader);
 
@@ -574,6 +574,8 @@ __DATA__
 %include cop
 
 %include grok
+
+%include exception
 
 #endif /* _P_P_PORTABILITY_H_ */
 

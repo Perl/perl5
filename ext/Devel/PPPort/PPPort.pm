@@ -8,13 +8,13 @@
 #
 ################################################################################
 #
-#  $Revision: 30 $
+#  $Revision: 33 $
 #  $Author: mhx $
-#  $Date: 2004/08/17 20:01:49 +0200 $
+#  $Date: 2005/01/31 08:10:55 +0100 $
 #
 ################################################################################
 #
-#  Version 3.x, Copyright (C) 2004, Marcus Holland-Moritz.
+#  Version 3.x, Copyright (C) 2004-2005, Marcus Holland-Moritz.
 #  Version 2.x, Copyright (C) 2001, Paul Marquess.
 #  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 #
@@ -78,7 +78,7 @@ that can check your source code. It will suggest hints and portability
 notes, and can even make suggestions on how to change your code. You
 can run it like any other Perl program:
 
-    perl ppport.h
+    perl ppport.h [options] [files]
 
 It also has embedded documentation, so you can use
 
@@ -143,6 +143,8 @@ in older Perl releases:
     dTHXa
     dTHXoa
     dUNDERBAR
+    dXCPT
+    dXSTARG
     END_EXTERN_C
     ERRSV
     eval_pv
@@ -361,6 +363,10 @@ in older Perl releases:
     UVXf
     UVxf
     vnewSVpvf
+    XCPT_CATCH
+    XCPT_RETHROW
+    XCPT_TRY_END
+    XCPT_TRY_START
     XPUSHmortal
     XPUSHu
     XSRETURN_UV
@@ -382,6 +388,11 @@ Perl below which it is unsupported:
 
   SvPVbyte_force
   find_rundefsvoffset
+  gv_fetchpvn_flags
+  gv_fetchsv
+  op_refcnt_lock
+  op_refcnt_unlock
+  savesvpv
   vnormal
 
 =item perl 5.9.1
@@ -852,7 +863,7 @@ Version 3.x was ported back to CPAN by Marcus Holland-Moritz.
 
 =head1 COPYRIGHT
 
-Version 3.x, Copyright (C) 2004, Marcus Holland-Moritz.
+Version 3.x, Copyright (C) 2004-2005, Marcus Holland-Moritz.
 
 Version 2.x, Copyright (C) 2001, Paul Marquess.
 
@@ -873,7 +884,7 @@ require DynaLoader;
 use strict;
 use vars qw($VERSION @ISA $data);
 
-$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.04 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
+$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.05 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
 
 @ISA = qw(DynaLoader);
 
@@ -1036,7 +1047,8 @@ POD
 POD =head2 --api-info=I<name>
 POD 
 POD Show portability information for API elements matching I<name>.
-POD I<name> is treated as a Perl regular expression.
+POD If I<name> is surrounded by slashes, it is interpreted as a regular
+POD expression.
 POD 
 POD =head1 DESCRIPTION
 POD 
@@ -1152,6 +1164,22 @@ POD     perl ppport.h --diff='diff -C 10'
 POD 
 POD This would output context diffs with 10 lines of context.
 POD 
+POD To display portability information for the C<newSVpvn> function,
+POD use:
+POD 
+POD     perl ppport.h --api-info=newSVpvn
+POD 
+POD Since the argument to C<--api-info> can be a regular expression,
+POD you can use
+POD 
+POD     perl ppport.h --api-info=/_nomg$/
+POD 
+POD to display portability information for all C<_nomg> functions or
+POD 
+POD     perl ppport.h --api-info=/./
+POD 
+POD to display information for all known API elements.
+POD 
 POD =head1 BUGS
 POD 
 POD If this version of F<ppport.h> is causing failure during
@@ -1194,7 +1222,7 @@ POD module from CPAN.
 POD 
 POD =head1 COPYRIGHT
 POD 
-POD Version 3.x, Copyright (c) 2004, Marcus Holland-Moritz.
+POD Version 3.x, Copyright (c) 2004-2005, Marcus Holland-Moritz.
 POD 
 POD Version 2.x, Copyright (C) 2001, Paul Marquess.
 POD 
@@ -1663,6 +1691,10 @@ UVXf|5.007001||p
 UVof|5.006000||p
 UVuf|5.006000||p
 UVxf|5.006000||p
+XCPT_CATCH|5.009002||p
+XCPT_RETHROW|5.009002||p
+XCPT_TRY_END|5.009002||p
+XCPT_TRY_START|5.009002||p
 XPUSHi|||
 XPUSHmortal|5.009002||p
 XPUSHn|||
@@ -1793,8 +1825,10 @@ dTHXa|5.006000||p
 dTHXoa|5.006000||p
 dTHX|5.006000||p
 dUNDERBAR|5.009002||p
+dXCPT|5.009002||p
 dXSARGS|||
 dXSI32|||
+dXSTARG|5.006000||p
 deb_curcv|||
 deb_nocontext|||vn
 deb_stack_all|||
@@ -1805,7 +1839,6 @@ debprof|||
 debstackptrs||5.007003|
 debstack||5.007003|
 deb||5.007003|v
-default_protect|||v
 del_he|||
 del_sv|||
 del_xiv|||
@@ -1984,7 +2017,9 @@ gv_fetchmeth_autoload||5.007003|
 gv_fetchmethod_autoload||5.004000|
 gv_fetchmethod|||
 gv_fetchmeth|||
+gv_fetchpvn_flags||5.009002|
 gv_fetchpv|||
+gv_fetchsv||5.009002|
 gv_fullname3||5.004000|
 gv_fullname4||5.006001|
 gv_fullname|||
@@ -2060,6 +2095,7 @@ isLOWER|||
 isSPACE|||
 isUPPER|||
 is_an_int|||
+is_gv_magical_sv|||
 is_gv_magical|||
 is_handle_constructor|||
 is_lvalue_sub||5.007001|
@@ -2382,6 +2418,8 @@ op_const_sv|||
 op_dump||5.006000|
 op_free|||
 op_null||5.007002|
+op_refcnt_lock||5.009002|
+op_refcnt_unlock||5.009002|
 open_script|||
 pMY_CXT_|5.007003||p
 pMY_CXT|5.007003||p
@@ -2559,6 +2597,7 @@ savepv|||
 savesharedpv||5.007003|
 savestack_grow_cnt||5.008001|
 savestack_grow|||
+savesvpv||5.009002|
 sawparens|||
 scalar_mod_type|||
 scalarboolean|||
@@ -2824,14 +2863,10 @@ uvchr_to_utf8||5.007001|
 uvuni_to_utf8_flags||5.007003|
 uvuni_to_utf8||5.007001|
 validate_suid|||
-vcall_body|||
-vcall_list_body|||
 vcmp||5.009000|
 vcroak||5.006000|
 vdeb||5.007003|
-vdefault_protect|||
 vdie|||
-vdocatch_body|||
 vform||5.006000|
 visit|||
 vivify_defelem|||
@@ -2841,8 +2876,6 @@ vmess||5.006000|
 vnewSVpvf|5.006000|5.004000|p
 vnormal||5.009002|
 vnumify||5.009000|
-vparse_body|||
-vrun_body|||
 vstringify||5.009000|
 vwarner||5.006000|
 vwarn||5.006000|
@@ -2902,18 +2935,19 @@ while (<DATA>) {
 if (exists $opt{'api-info'}) {
   my $f;
   my $count = 0;
+  my $match = $opt{'api-info'} =~ m!^/(.*)/$! ? $1 : "^\Q$opt{'api-info'}\E\$";
   for $f (sort { lc $a cmp lc $b } keys %API) {
-    next unless $f =~ /$opt{'api-info'}/;
+    next unless $f =~ /$match/;
     print "\n=== $f ===\n\n";
     my $info = 0;
     if ($API{$f}{base} || $API{$f}{todo}) {
       my $base = format_version($API{$f}{base} || $API{$f}{todo});
-      print "May not be supported below perl-$base.\n";
+      print "Supported at least starting from perl-$base.\n";
       $info++;
     }
     if ($API{$f}{provided}) {
       my $todo = $API{$f}{todo} ? format_version($API{$f}{todo}) : "5.003";
-      print "Support by $ppport provided down to perl-$todo.\n";
+      print "Support by $ppport provided back to perl-$todo.\n";
       print "Support needs to be explicitly requested by NEED_$f.\n" if exists $need{$f};
       print "Depends on: ", join(', ', @{$depends{$f}}), ".\n" if exists $depends{$f};
       print "$hints{$f}" if exists $hints{$f};
@@ -2928,7 +2962,7 @@ if (exists $opt{'api-info'}) {
     print "\n";
   }
   else {
-    print "Found no API matching $opt{'api-info'}.\n";
+    print "Found no API matching '$opt{'api-info'}'.\n";
   }
   exit 0;
 }
@@ -4112,6 +4146,9 @@ typedef NVTYPE NV;
 
 #ifndef dITEMS
 #  define dITEMS                         I32 items = SP - MARK
+#endif
+#ifndef dXSTARG
+#  define dXSTARG                        SV * targ = sv_newmortal()
 #endif
 #ifndef dTHR
 #  define dTHR                           dNOOP
@@ -5753,6 +5790,26 @@ DPPP_(my_grok_oct)(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result)
     return UV_MAX;
 }
 #endif
+#endif
+
+#ifdef dJMPENV
+
+#  ifndef dXCPT
+#    define dXCPT             dJMPENV; int rEtV = 0
+#    define XCPT_TRY_START    JMPENV_PUSH(rEtV); if (rEtV == 0)
+#    define XCPT_TRY_END      JMPENV_POP;
+#    define XCPT_CATCH        if (rEtV != 0)
+#    define XCPT_RETHROW      JMPENV_JUMP(rEtV)
+#  endif
+
+#else
+
+#  define dXCPT             Sigjmp_buf oldTOP; int rEtV = 0
+#  define XCPT_TRY_START    Copy(top_env, oldTOP, 1, Sigjmp_buf); rEtV = Sigsetjmp(top_env, 1); if (rEtV == 0)
+#  define XCPT_TRY_END      Copy(oldTOP, top_env, 1, Sigjmp_buf);
+#  define XCPT_CATCH        if (rEtV != 0)
+#  define XCPT_RETHROW      Siglongjmp(top_env, rEtV)
+
 #endif
 
 #endif /* _P_P_PORTABILITY_H_ */

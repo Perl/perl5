@@ -1,3 +1,16 @@
+3.05 - 2005-01-31
+
+    * fix a test for SvPV_nolen
+    * add more examples to tht documentation
+    * improve wording baseline information
+    * added support for the following API
+        dXCPT
+        dXSTARG
+        XCPT_CATCH
+        XCPT_RETHROW
+        XCPT_TRY_END
+        XCPT_TRY_START
+
 3.04 - 2004-12-29
 
     * fix a hint for sv_pvn_force
