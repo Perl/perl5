@@ -447,16 +447,17 @@ See L<perlfunc/exists> and L<perlfunc/delete> for examples.
 
 The length argument of C<syswrite()> has become optional.
 
-=head2 Filehandles can be autovivified
+=head2 File and directory handles can be autovivified
 
 Similar to how constructs such as C<$x->[0]> autovivify a reference,
-open() now autovivifies a filehandle if the first argument is an
-uninitialized variable.  This allows the constructs C<open(my $fh, ...)> and
-C<open(local $fh,...)> to be used to create filehandles that will
-conveniently be closed automatically when the scope ends, provided there
-are no other references to them.  This largely eliminates the need for
-typeglobs when opening filehandles that must be passed around, as in the
-following example:
+handle constructors (open(), opendir(), pipe(), socketpair(), sysopen(),
+socket(), and accept()) now autovivify a file or directory handle
+if the handle passed to them is an uninitialized scalar variable.  This
+allows the constructs such as C<open(my $fh, ...)> and C<open(local $fh,...)>
+to be used to create filehandles that will conveniently be closed
+automatically when the scope ends, provided there are no other references
+to them.  This largely eliminates the need for typeglobs when opening
+filehandles that must be passed around, as in the following example:
 
     sub myopen {
         open my $fh, "@_"
