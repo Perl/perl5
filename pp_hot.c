@@ -901,7 +901,7 @@ PP(pp_rv2hv)
     }
     else if (gimme == G_SCALAR) {
 	dTARGET;
-    TARG = Perl_hv_scalar(hv);
+    TARG = Perl_hv_scalar(aTHX_ hv);
 	SETTARG;
     }
     RETURN;

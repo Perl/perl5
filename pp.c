@@ -106,7 +106,7 @@ PP(pp_padhv)
 	RETURNOP(do_kv());
     }
     else if (gimme == G_SCALAR) {
-	SV* sv = Perl_hv_scalar((HV*)TARG);
+	SV* sv = Perl_hv_scalar(aTHX_ (HV*)TARG);
 	SETs(sv);
     }
     RETURN;
