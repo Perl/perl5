@@ -1081,7 +1081,7 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)/.exists 
     $ldfrom = "-all $ldfrom -none" if ($^O eq 'dec_osf');
 
     # The IRIX linker doesn't use LD_RUN_PATH
-    $ldrun = qq{-rpath "$self->{LD_RUN_PATH}"}
+    my $ldrun = qq{-rpath "$self->{LD_RUN_PATH}"}
 	if ($^O eq 'irix' && $self->{LD_RUN_PATH});
 
     # For example in AIX the shared objects/libraries from previous builds
@@ -2514,7 +2514,7 @@ MAP_LIBPERL = $libperl
 
 push @m, "
 \$(MAP_TARGET) :: $tmp/perlmain\$(OBJ_EXT) \$(MAP_LIBPERL) \$(MAP_STATIC) \$(INST_ARCHAUTODIR)/extralibs.all
-	\$(MAP_LINKCMD) -o \$\@ \$(OPTIMIZE) $tmp/perlmain\$(OBJ_EXT) $ldfrom \$(MAP_STATIC) $llibperl `cat \$(INST_ARCHAUTODIR)/extralibs.all` \$(MAP_PRELIBS)
+	\$(MAP_LINKCMD) -o \$\@ \$(OPTIMIZE) $tmp/perlmain\$(OBJ_EXT) \$(LDFROM) \$(MAP_STATIC) $llibperl `cat \$(INST_ARCHAUTODIR)/extralibs.all` \$(MAP_PRELIBS)
 	$self->{NOECHO}echo 'To install the new \"\$(MAP_TARGET)\" binary, call'
 	$self->{NOECHO}echo '    make -f $makefilename inst_perl MAP_TARGET=\$(MAP_TARGET)'
 	$self->{NOECHO}echo 'To remove the intermediate files say'
@@ -3122,6 +3122,7 @@ sub processPL {
         my $list = ref($self->{PL_FILES}->{$plfile})
 		? $self->{PL_FILES}->{$plfile}
 		: [$self->{PL_FILES}->{$plfile}];
+	my $target;
 	foreach $target (@$list) {
 	push @m, "
 all :: $target
