@@ -3059,7 +3059,7 @@ PP(pp_fttext)
 	else {
 	    if (ckWARN(WARN_UNOPENED)) {
 		gv = cGVOP_gv;
-		Perl_warner(aTHX_ WARN_UNOPENED, "Test on unopened file <%s>",
+		Perl_warner(aTHX_ WARN_UNOPENED, "Test on unopened file %s",
 			    GvENAME(gv));
 	    }
 	    SETERRNO(EBADF,RMS$_IFI);

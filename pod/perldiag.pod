@@ -1064,7 +1064,7 @@ not realizing that 777 will be interpreted as a decimal number,
 equivalent to 01411.  Octal constants are introduced with a leading 0 in
 Perl, as in C.
 
-=item Close on unopened file <%s>
+=item Close on unopened file %s
 
 (W unopened) You tried to close a filehandle that was never opened.
 
@@ -2990,7 +2990,7 @@ unless there was a failure.  You probably wanted to use system()
 instead, which does return.  To suppress this warning, put the exec() in
 a block by itself.
 
-=item Stat on unopened file <%s>
+=item Stat on unopened file %s
 
 (W unopened) You tried to use the stat() function (or an equivalent file
 test) on a filehandle that was either never opened or has since been
@@ -3110,7 +3110,7 @@ for Perl to reach.  Perl is doing you a favor by refusing.
 (W unopened) You tried to use the tell() function on a filehandle that
 was either never opened or has since been closed.
 
-=item Test on unopened file <%s>
+=item Test on unopened file %s
 
 (W unopened) You tried to invoke a file test operator on a filehandle
 that isn't open.  Check your logic.  See also L<perlfunc/-X>.

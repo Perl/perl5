@@ -812,7 +812,7 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 	    dTHR;
 	    if (ckWARN(WARN_UNOPENED))
 		Perl_warner(aTHX_ WARN_UNOPENED, 
-		       "Close on unopened file <%s>",GvENAME(gv));
+		       "Close on unopened file %s",GvENAME(gv));
 	    SETERRNO(EBADF,SS$_IVCHAN);
 	}
 	return FALSE;
@@ -1196,7 +1196,7 @@ Perl_my_stat(pTHX)
 	    if (tmpgv == PL_defgv)
 		return PL_laststatval;
 	    if (ckWARN(WARN_UNOPENED))
-		Perl_warner(aTHX_ WARN_UNOPENED, "Stat on unopened file <%s>",
+		Perl_warner(aTHX_ WARN_UNOPENED, "Stat on unopened file %s",
 		  GvENAME(tmpgv));
 	    PL_statgv = Nullgv;
 	    sv_setpv(PL_statname,"");

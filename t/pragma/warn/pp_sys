@@ -331,7 +331,7 @@ close STDIN ;
 no warnings 'unopened' ;
 -T STDIN ;
 EXPECT
-Test on unopened file <STDIN> at - line 4.
+Test on unopened file STDIN at - line 4.
 ########
 # pp_sys.c [pp_fttext]
 use warnings 'newline' ;
