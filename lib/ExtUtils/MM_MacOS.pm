@@ -265,7 +265,7 @@ sub macify {
 	}
 	push(@mac, $_);
     }
-    
+
     return "@mac";
 }
 
@@ -278,8 +278,8 @@ Translate Unix filepaths and shell globs to Mac style.
 sub patternify {
     my($unix) = @_;
     my(@mac);
-    use bytes; # Non-UTF-8 high bytes in the below.
-    
+    use bytes; # Non-UTF-8 high bytes below.
+
     foreach (split(/[ \t\n]+/, $unix)) {
 	if (m|/|) {
 	    $_ = ":$_";
@@ -289,7 +289,7 @@ sub patternify {
 	    push(@mac, $_);
 	}
     }
-    
+
     return "@mac";
 }
 

@@ -53,3 +53,6 @@ Fix NORECUSE bug continuing to set DIR
 Give typemap location its own macro.
 
 Merge MM_VMS->tool_xsubpp
+
+Initialize PERL_SRC to '' instead of leaving undef when outside the source 
+tree

@@ -557,6 +557,11 @@ include:
 sub metafile_target {
     my $self = shift;
 
+    return <<'MAKE_FRAG' if $self->{NO_META};
+metafile:
+	$(NOECHO) $(NOOP)
+MAKE_FRAG
+
     my $prereq_pm = '';
     while( my($mod, $ver) = each %{$self->{PREREQ_PM}} ) {
         $prereq_pm .= sprintf "    %-30s %s\n", "$mod:", $ver;
@@ -593,6 +598,11 @@ Adds the META.yml file to the MANIFEST.
 
 sub metafile_addtomanifest_target {
     my $self = shift;
+
+    return <<'MAKE_FRAG' if $self->{NO_META};
+metafile_addtomanifest:
+	$(NOECHO) $(NOOP)
+MAKE_FRAG
 
     my $add_meta = $self->oneliner(<<'CODE', ['-MExtUtils::Manifest=maniadd']);
 maniadd({q{META.yml} => q{Module meta-data in YAML}});

@@ -16,7 +16,7 @@ BEGIN {
 use strict;
 use Config;
 
-use Test::More tests => 48;
+use Test::More tests => 52;
 use MakeMaker::Test::Utils;
 use File::Find;
 use File::Spec;
@@ -28,33 +28,7 @@ delete @ENV{qw(PREFIX LIB MAKEFLAGS)};
 my $perl = which_perl();
 my $Is_VMS = $^O eq 'VMS';
 
-my $root_dir = 't';
-
-if( $^O eq 'VMS' ) {
-    # On older systems we might exceed the 8-level directory depth limit
-    # imposed by RMS.  We get around this with a rooted logical, but we
-    # can't create logical names with attributes in Perl, so we do it
-    # in a DCL subprocess and put it in the job table so the parent sees it.
-    open( BFDTMP, '>bfdtesttmp.com' ) || die "Error creating command file; $!";
-    print BFDTMP <<'COMMAND';
-$ IF F$TRNLNM("PERL_CORE") .EQS. "" .AND. F$TYPE(PERL_CORE) .EQS. ""
-$ THEN
-$!  building CPAN version
-$   BFD_TEST_ROOT = F$PARSE("SYS$DISK:[]",,,,"NO_CONCEAL")-".][000000"-"]["-"].;"+".]"
-$ ELSE
-$!  we're in the core
-$   BFD_TEST_ROOT = F$PARSE("SYS$DISK:[-]",,,,"NO_CONCEAL")-".][000000"-"]["-"].;"+".]"
-$ ENDIF
-$ DEFINE/JOB/NOLOG/TRANSLATION=CONCEALED BFD_TEST_ROOT 'BFD_TEST_ROOT'
-COMMAND
-    close BFDTMP;
-
-    system '@bfdtesttmp.com';
-    END { 1 while unlink 'bfdtesttmp.com' }
-    $root_dir = 'BFD_TEST_ROOT:[t]';
-}
-
-chdir $root_dir;
+chdir($Is_VMS ? 'BFD_TEST_ROOT:[t]' : 't');
 
 
 perl_lib;
@@ -187,12 +161,20 @@ my $manifest = maniread();
 _normalize($manifest);
 is( $manifest->{'meta.yml'}, 'Module meta-data in YAML' );
 
+# Test NO_META META.yml suppression
+unlink 'META.yml';
+ok( !-f 'META.yml',   'META.yml deleted' );
+@mpl_out = run(qq{$perl Makefile.PL "NO_META=1"});
+cmp_ok( $?, '==', 0, 'Makefile.PL exited with zero' ) || diag(@mpl_out);
+my $metafile_out = run("$make metafile");
+is( $?, 0, 'metafile' ) || diag($metafile_out);
+ok( !-f 'META.yml',   'META.yml generation suppressed by NO_META' );
+
 
 # Make sure init_dirscan doesn't go into the distdir
 @mpl_out = run(qq{$perl Makefile.PL "PREFIX=dummy-install"});
 
-cmp_ok( $?, '==', 0, 'Makefile.PL exited with zero' ) ||
-  diag(@mpl_out);
+cmp_ok( $?, '==', 0, 'Makefile.PL exited with zero' ) || diag(@mpl_out);
 
 ok( grep(/^Writing $makefile for Big::Dummy/, @mpl_out) == 1,
                                 'init_dirscan skipped distdir') || 

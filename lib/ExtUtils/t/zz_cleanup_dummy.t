@@ -8,7 +8,7 @@ BEGIN {
         unshift @INC, 't/lib';
     }
 }
-chdir 't';
+chdir($^O eq 'VMS' ? 'BFD_TEST_ROOT:[t]' : 't');
 
 
 use strict;
