@@ -2781,23 +2781,42 @@ Perl_scan_bin(pTHX_ char *start, I32 len, I32 *retlen)
 {
     register char *s = start;
     register UV retval = 0;
-    bool overflowed = FALSE;
-    while (len && *s >= '0' && *s <= '1') {
-	register UV n = retval << 1;
-	if (!overflowed && (n >> 1) != retval) {
-	    dTHR;
-	    if (ckWARN_d(WARN_UNSAFE))
-		Perl_warner(aTHX_ WARN_UNSAFE, "Integer overflow in binary number");
-	    overflowed = TRUE;
+    register UV n;
+    register I32 d = 0;
+    register bool seenb = FALSE;
+    register bool overflow = FALSE;
+
+    for (; len-- && *s; s++) {
+	if (!(*s == '0' || *s == '1')) {
+	    if (*s == '_')
+		continue;
+	    if (seenb == FALSE && *s == 'b' && retval == 0) {
+		/* Disallow 0bbb0b0bbb... */
+		seenb = TRUE;
+		d = 0; /* Forget any leading zeros before the 'b'. */
+		continue;
+	    }
+	    else {
+		dTHR;
+		if (ckWARN(WARN_UNSAFE))
+		    Perl_warner(aTHX_ WARN_UNSAFE,
+				"Illegal binary digit '%c' ignored", *s);
+		break;
+	    }
 	}
-	retval = n | (*s++ - '0');
-	len--;
+	n = retval << 1;
+	overflow |= (n >> 1) != retval;
+	retval = n | (*s - '0');
+	d++;
     }
-    if (len && (*s >= '2' && *s <= '9')) {
-      dTHR;
-      if (ckWARN(WARN_UNSAFE))
-          Perl_warner(aTHX_ WARN_UNSAFE, "Illegal binary digit '%c' ignored", *s);
+    if (sizeof(UV) > 4 && d > 32) {
+	dTHR;
+	if (ckWARN(WARN_UNSAFE))
+	    Perl_warner(aTHX_ WARN_UNSAFE,
+			"Binary number > 0b11111111111111111111111111111111 non-portable");
     }
+    if (overflow)
+	Perl_croak(aTHX_ "Integer overflow in binary number");
     *retlen = s - start;
     return retval;
 }
@@ -2806,24 +2825,40 @@ Perl_scan_oct(pTHX_ char *start, I32 len, I32 *retlen)
 {
     register char *s = start;
     register UV retval = 0;
-    bool overflowed = FALSE;
+    register UV n;
+    register I32 d = 0;
+    register bool overflow = FALSE;
 
-    while (len && *s >= '0' && *s <= '7') {
-	register UV n = retval << 3;
-	if (!overflowed && (n >> 3) != retval) {
-	    dTHR;
-	    if (ckWARN_d(WARN_UNSAFE))
-		Perl_warner(aTHX_ WARN_UNSAFE, "Integer overflow in octal number");
-	    overflowed = TRUE;
+    for (; len-- && *s; s++) {
+	if (!(*s >= '0' && *s <= '7')) {
+	    if (*s == '_')
+		continue;
+	    else {
+		/* Allow \octal to work the DWIM way (that is, stop scanning
+		 * as soon as non-octal characters are seen, complain only iff
+		 * someone seems to want to use the digits eight and nine). */
+		if (*s == '8' || *s == '9') {
+		    dTHR;
+		    if (ckWARN(WARN_OCTAL))
+			Perl_warner(aTHX_ WARN_OCTAL,
+				    "Illegal octal digit '%c' ignored", *s);
+		}
+		break;
+	    }
 	}
-	retval = n | (*s++ - '0');
-	len--;
+	n = retval << 3;
+	overflow |= (n >> 3) != retval;
+	retval = n | (*s - '0');
+	d++;
     }
-    if (len && (*s == '8' || *s == '9')) {
+    if (sizeof(UV) > 4 && d > 10 && (retval >> 30) > 3) {
 	dTHR;
-	if (ckWARN(WARN_OCTAL))
-	    Perl_warner(aTHX_ WARN_OCTAL, "Illegal octal digit '%c' ignored", *s);
+	if (ckWARN(WARN_UNSAFE))
+	    Perl_warner(aTHX_ WARN_UNSAFE,
+			"Octal number > 037777777777 non-portable");
     }
+    if (overflow)
+	Perl_croak(aTHX_ "Integer overflow in octal number");
     *retlen = s - start;
     return retval;
 }
@@ -2833,32 +2868,45 @@ Perl_scan_hex(pTHX_ char *start, I32 len, I32 *retlen)
 {
     register char *s = start;
     register UV retval = 0;
-    bool overflowed = FALSE;
     char *tmp = s;
     register UV n;
+    register I32 d = 0;
+    register bool seenx = FALSE;
+    register bool overflow = FALSE;
 
     while (len-- && *s) {
 	tmp = strchr((char *) PL_hexdigit, *s++);
 	if (!tmp) {
-	    if (*(s-1) == '_' || (*(s-1) == 'x' && retval == 0))
+	    if (*(s-1) == '_')
 		continue;
+	    if (seenx == FALSE && *(s-1) == 'x' && retval == 0) {
+		/* Disallow 0xxx0x0xxx... */
+		seenx = TRUE;
+		d = 0; /* Forget any leading zeros before the 'x'. */
+		continue;
+	    }
 	    else {
 		dTHR;
 		--s;
 		if (ckWARN(WARN_UNSAFE))
-		    Perl_warner(aTHX_ WARN_UNSAFE,"Illegal hexadecimal digit '%c' ignored", *s);
+		    Perl_warner(aTHX_ WARN_UNSAFE,
+				"Illegal hexadecimal digit '%c' ignored", *s);
 		break;
 	    }
 	}
+	d++;
 	n = retval << 4;
-	if (!overflowed && (n >> 4) != retval) {
-	    dTHR;
-	    if (ckWARN_d(WARN_UNSAFE))
-		Perl_warner(aTHX_ WARN_UNSAFE, "Integer overflow in hexadecimal number");
-	    overflowed = TRUE;
-	}
+	overflow |= (n >> 4) != retval;
 	retval = n | ((tmp - PL_hexdigit) & 15);
     }
+    if (sizeof(UV) > 4 && d > 8) {
+	dTHR;
+	if (ckWARN(WARN_UNSAFE))
+	    Perl_warner(aTHX_ WARN_UNSAFE,
+			"Hexadecimal number > 0xffffffff non-portable");
+    }
+    if (overflow)
+	Perl_croak(aTHX_ "Integer overflow in hexadecimal number");
     *retlen = s - start;
     return retval;
 }

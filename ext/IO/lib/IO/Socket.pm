@@ -279,7 +279,7 @@ sub socktype {
 sub protocol {
     @_ == 1 or croak 'usage: $sock->protocol()';
     my($sock) = @_;
-    ${*$sock}{'io_socket_protocol'};
+    ${*$sock}{'io_socket_proto'};
 }
 
 1;

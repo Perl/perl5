@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun Jul 25 17:05:01 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Wed Jul 28 20:32:22 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -12772,10 +12772,10 @@ find_extensions='
                    eval $find_extensions;
                    cd ..;
                    shift;
-               fi
+               fi;
            fi
            ;;
-       esac
+       esac;
     done'
 tdir=`pwd`
 cd $rsrc/ext

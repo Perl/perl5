@@ -85,9 +85,7 @@ sub install {
 	    exists $hash{"blib/arch"} and
 	    directory_not_empty("blib/arch")) {
 	    $targetroot = $hash{"blib/arch"};
-            print "Files found in blib/arch --> Installing files in " 
-	        . "blib/lib into architecture dependend library tree!\n"
-		; #if $verbose>1;
+            print "Files found in blib/arch: installing files in blib/lib into architecture dependent library tree\n";
 	}
 	chdir($source) or next;
 	find(sub {

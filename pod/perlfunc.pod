@@ -396,8 +396,8 @@ undefined, or you might be able to use the C<syscall> interface to
 access setitimer(2) if your system supports it.  The Time::HiRes module
 from CPAN may also prove useful.
 
-It is usually a mistake to intermix C<alarm>
-and C<sleep> calls.
+It is usually a mistake to intermix C<alarm> and C<sleep> calls.
+(C<sleep> may be internally implemented in your system with C<alarm>)
 
 If you want to use C<alarm> to time out a system call you need to use an
 C<eval>/C<die> pair.  You can't rely on the alarm causing the system call to
@@ -2227,11 +2227,13 @@ In scalar context, returns the ctime(3) value:
     $now_string = localtime;  # e.g., "Thu Oct 13 04:54:34 1994"
 
 This scalar value is B<not> locale dependent, see L<perllocale>, but
-instead a Perl builtin.  Also see the C<Time::Local> module, and the
-strftime(3) and mktime(3) function available via the POSIX module.  To
-get somewhat similar but locale dependent date strings, set up your
-locale environment variables appropriately (please see L<perllocale>)
-and try for example:
+instead a Perl builtin.  Also see the C<Time::Local> module
+(to convert the second, minutes, hours, ... back to seconds since the
+stroke of midnight the 1st of January 1970, the value returned by
+time()), and the strftime(3) and mktime(3) function available via the
+POSIX module.  To get somewhat similar but locale dependent date
+strings, set up your locale environment variables appropriately
+(please see L<perllocale>) and try for example:
 
     use POSIX qw(strftime);
     $now_string = strftime "%a %b %e %H:%M:%S %Y", localtime;
@@ -2717,7 +2719,8 @@ follows:
     s	A signed short value.
     S	An unsigned short value.
 	  (This 'short' is _exactly_ 16 bits, which may differ from
-	   what a local C compiler calls 'short'.)
+	   what a local C compiler calls 'short'.  If you want
+	   native-length shorts, use the '!' suffix.)
 
     i	A signed integer value.
     I	An unsigned integer value.
@@ -2729,7 +2732,8 @@ follows:
     l	A signed long value.
     L	An unsigned long value.
 	  (This 'long' is _exactly_ 32 bits, which may differ from
-	   what a local C compiler calls 'long'.)
+	   what a local C compiler calls 'long'.  If you want
+	   native-length longs, use the '!' suffix.)
 
     n	A short in "network" (big-endian) order.
     N	A long in "network" (big-endian) order.
@@ -2740,8 +2744,8 @@ follows:
 
     q	A signed quad (64-bit) value.
     Q	An unsigned quad value.
-	  (Available only if your system supports 64-bit integer values
-	   _and_ if Perl has been compiled to support those.
+	  (Quads are available only if your system supports 64-bit
+	   integer values _and_ if Perl has been compiled to support those.
            Causes a fatal error otherwise.)
 
     f	A single-precision float in the native format.
@@ -2788,7 +2792,8 @@ Likewise, the C<"b"> and C<"B"> fields pack a string that many bits long.
 
 =item *
 
-The C<"h"> and C<"H"> fields pack a string that many nybbles long.
+The C<"h"> and C<"H"> fields pack a string that many nybbles (4-bit groups,
+representable as hexadecimal digits, 0-9a-f) long.
 
 =item *
 
@@ -2831,20 +2836,17 @@ which Perl does not regard as legal in numeric strings.
 =item *
 
 The integer types C<"s">, C<"S">, C<"l">, and C<"L"> may be
-immediately followed by a C<"!"> to signify native shorts or longs--as
-you can see from above for example a bare C<"l"> does mean exactly 32
-bits, the native C<long> (as seen by the local C compiler) may be
-larger.  This is an issue mainly in 64-bit platforms.  You can see
-whether using C<"!"> makes any difference by
+immediately followed by a C<"!"> suffix to signify native shorts or
+longs--as you can see from above for example a bare C<"l"> does mean
+exactly 32 bits, the native C<long> (as seen by the local C compiler)
+may be larger.  This is an issue mainly in 64-bit platforms.  You can
+see whether using C<"!"> makes any difference by
 
 	print length(pack("s")), " ", length(pack("s!")), "\n";
 	print length(pack("l")), " ", length(pack("l!")), "\n";
 
 C<"i!"> and C<"I!"> also work but only because of completeness;
 they are identical to C<"i"> and C<"I">.
-
-The actual sizes (in bytes) of native shorts, ints, and longs on
-the platform where Perl was built are also available via L<Config>:
 
 The actual sizes (in bytes) of native shorts, ints, longs, and long
 longs on the platform where Perl was built are also available via
@@ -2855,6 +2857,9 @@ L<Config>:
        print $Config{intsize},      "\n";
        print $Config{longsize},     "\n";
        print $Config{longlongsize}, "\n";
+
+(The C<$Config{longlongsize}> will be empty if your system does
+not support long longs.) 
 
 =item *
 
@@ -2898,6 +2903,7 @@ and C<'87654321'> are big-endian.
 
 If you want portable packed integers use the formats C<"n">, C<"N">,
 C<"v">, and C<"V">, their byte endianness and size is known.
+See also L<perlport>.
 
 =item *
 
@@ -2907,12 +2913,20 @@ standard "network" representation, no facility for interchange has been
 made.  This means that packed floating point data written on one machine
 may not be readable on another - even if both use IEEE floating point
 arithmetic (as the endian-ness of the memory representation is not part
-of the IEEE spec).
+of the IEEE spec).  See also L<perlport>.
 
 Note that Perl uses doubles internally for all numeric calculation, and
 converting from double into float and thence back to double again will
 lose precision (i.e., C<unpack("f", pack("f", $foo)>) will not in general
 equal $foo).
+
+=item *
+
+You must yourself do any alignment or padding by inserting for example
+enough C<'x'>es while packing.  There is no way to pack() and unpack()
+could know where the bytes are going to or coming from.  Therefore
+C<pack> (and C<unpack>) handle their output and input as flat
+sequences of bytes.
 
 =back
 
@@ -2927,6 +2941,11 @@ Examples:
 
     $foo = pack("ccxxcc",65,66,67,68);
     # foo eq "AB\0\0CD"
+
+    # note: the above examples featuring "C" and "c" are true
+    # only on ASCII and ASCII-derived systems such as ISO Latin 1
+    # and UTF-8.  In EBCDIC the first example would be
+    # $foo = pack("CCCC",193,194,195,196);
 
     $foo = pack("s2",1,2);
     # "\1\0\2\0" on little-endian
@@ -2954,6 +2973,12 @@ Examples:
     sub bintodec {
 	unpack("N", pack("B32", substr("0" x 32 . shift, -32)));
     }
+
+    $foo = pack('sx2l', 12, 34);
+    # short 12, two zero bytes padding, long 34
+    $bar = pack('s@4l', 12, 34);
+    # short 12, zero fill to position 4, long 34
+    # $foo eq $bar
 
 The same template may generally also be used in unpack().
 
@@ -3742,8 +3767,9 @@ however, because your process might not be scheduled right away in a
 busy multitasking system.
 
 For delays of finer granularity than one second, you may use Perl's
-C<syscall> interface to access setitimer(2) if your system supports it,
-or else see L</select> above.
+C<syscall> interface to access setitimer(2) if your system supports
+it, or else see L</select> above.  The Time::HiRes module from CPAN
+may also help.
 
 See also the POSIX module's C<sigpause> function.
 
@@ -4610,6 +4636,11 @@ considers to be the epoch (that's 00:00:00, January 1, 1904 for MacOS,
 and 00:00:00 UTC, January 1, 1970 for most other systems).
 Suitable for feeding to C<gmtime> and C<localtime>.
 
+For measuring time in better granularity than one second,
+you may use either the Time::HiRes module from CPAN, or
+if you have gettimeofday(2), you may be able to use the
+C<syscall> interface of Perl, see L<perlfaq8> for details.
+
 =item times
 
 Returns a four-element list giving the user and system times, in
@@ -4771,7 +4802,7 @@ has no way of checking whether the value passed to C<unpack()>
 corresponds to a valid memory location, passing a pointer value that's
 not known to be valid is likely to have disastrous consequences.
 
-See L</pack> for more examples.
+See L</pack> for more examples and notes.
 
 =item untie VARIABLE
 

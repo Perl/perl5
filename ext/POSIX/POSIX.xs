@@ -358,7 +358,7 @@ not_here(char *s)
 }
 
 static
-#ifdef HAS_LONG_DOUBLE
+#if defined(HAS_LONG_DOUBLE) && (LONG_DOUBLESIZE > DOUBLESIZE)
 long double
 #else
 double

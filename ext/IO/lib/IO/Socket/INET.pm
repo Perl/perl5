@@ -147,6 +147,9 @@ sub configure {
 	    last;
 	}
 
+ 	# don't try to connect unless we're given a PeerAddr
+ 	last unless exists($arg->{PeerAddr});
+ 
         $raddr = shift @raddr;
 
 	return _error($sock,'Cannot determine remote port')

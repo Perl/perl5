@@ -134,6 +134,10 @@ C<oct()>:
     $answer = 0b101010;
     printf "The answer is: %b\n", oct("0b101010");
 
+=head2 Too large hexadecimal, octal, and binary constants more serious
+
+Too large hexadecimal, octal, and binary constants now cause fatal errors.
+
 =head2 syswrite() ease-of-use
 
 The length argument of C<syswrite()> is now optional.
