@@ -2491,8 +2491,17 @@ $ make = F$EDIT(build,"UPCASE")
 $!
 $!: locate the preferred pager for this system
 $!pagers = "most|more|less|type/page"
-$!rp="What pager is used on your system? [''dflt'] "
-$ pager="most"
+$ dflt = "type/page"
+$! assume that the presence of a most symbol indicates the presence
+$! of the pager.
+$ IF F$TYPE(most) .EQS. "STRING" THEN dflt = "most"
+$ IF F$TYPE(pager) .EQS. "STRING" THEN dflt = pager
+$ rp="What pager is used on your system? [''dflt'] "
+$ GOSUB myread
+$ IF (ans .EQS. "") 
+$ THEN pager = dflt
+$ ELSE pager = ans
+$ ENDIF
 $!
 $! update [.vms]config.vms here
 $!
@@ -2734,6 +2743,7 @@ $   quadtype = "long long"
 $   uquadtype = "unsigned long long"
 $   quadkind  = "QUAD_IS_LONG_LONG"
 $   d_frexpl = "define"
+$   d_isnan = "define"
 $   d_isnanl = "define"
 $   d_modfl = "define"
 $ ELSE
@@ -2765,6 +2775,7 @@ $   quadtype = "long"
 $   uquadtype = "unsigned long"
 $   quadkind  = "QUAD_IS_LONG"
 $   d_frexpl = "undef"
+$   d_isnan = "undef"
 $   d_isnanl = "undef"
 $   d_modfl = "undef"
 $ ENDIF
