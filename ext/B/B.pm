@@ -1042,6 +1042,8 @@ Only when perl was compiled with ithreads.
 
 =item stash
 
+=item stashpv
+
 =item file
 
 =item cop_seq
@@ -1049,6 +1051,10 @@ Only when perl was compiled with ithreads.
 =item arybase
 
 =item line
+
+=item warnings
+
+=item io
 
 =back
 
