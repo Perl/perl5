@@ -88,7 +88,7 @@ CRYPT_SRC	= fcrypt.c
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-INST_VER = \5.6.1
+INST_VER = \5.6.2
 
 #
 # Comment this out if you DON'T want your perl installation to have
