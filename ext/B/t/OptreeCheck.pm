@@ -5,23 +5,31 @@
 
 =head1 NAME
 
-OptreeCheck - check optrees
+OptreeCheck - check optrees as rendered by B::Concise
 
 =head1 SYNOPSIS
 
 OptreeCheck supports regression testing of perl's parser, optimizer,
-bytecode generator, via a single function: checkOptree(%args).'
+bytecode generator, via a single function: checkOptree(%args).  It
+invokes B::Concise upon sample code, and checks that it 'agrees' with
+reference renderings.
 
- checkOptree(name   => "your title here", # optional, (synth from others)
-	     bcopts => '-exec',	# $opt or \@opts, passed to BC::compile
-	     code   => sub {my $a},	# coderef, or source (wrapped and evald)
-	     # prog   => 'sort @a',	# run in subprocess, aka -MO=Concise
-	     # skip => 1,		# skips test
-	     # todo => 'excuse',	# anticipated failures
-	     # fail => 1		# fails (by redirecting result)
-	     # debug => 1,		# turns on regex debug for match test !!
-	     # retry => 1		# retry with debug on test failure
-	     expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
+  checkOptree (
+    name   => "test-name',	# optional, (synth from others)
+
+    # 2 kinds of code-under-test: must provide 1
+    code   => sub {my $a},	# coderef, or source (wrapped and evald)
+    prog   => 'sort @a',	# run in subprocess, aka -MO=Concise
+
+    bcopts => '-exec',		# $opt or \@opts, passed to BC::compile
+    # errs   => '.*',		# match against any emitted errs, -w warnings
+    # skip => 1,		# skips test
+    # todo => 'excuse',		# anticipated failures
+    # fail => 1			# force fail (by redirecting result)
+    # debug => 1,		# turns on regex debug for match test !!
+    # retry => 1		# retry with debug on test failure
+
+    expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT' );
  # 1  <;> nextstate(main 45 optree.t:23) v
  # 2  <0> padsv[$a:45,46] M/LVINTRO
  # 3  <1> leavesub[1 ref] K/REFC,1
@@ -33,33 +41,34 @@ bytecode generator, via a single function: checkOptree(%args).'
 
 =head1 checkOptree(%in) Overview
 
-Calls getRendering(), which runs code or prog through B::Concise, and
-captures its rendering.
+optreeCheck() calls getRendering(), which runs code or prog through
+B::Concise, and captures its rendering.
 
-Calls mkCheckRex() to produce a regex which will match the expected
-rendering, and fail when it doesn't match.
+It then calls mkCheckRex() to produce a regex which will match the
+expected rendering, and fail when it doesn't match.
 
-Also calls like($rendering,/$regex/,$name), and thereby plugs into the
-test.pl framework.
+Finally, it compares the 2; like($rendering,/$regex/,$testname).
+
 
 =head1 checkOptree(%Args) API
 
 Accepts %Args, with following requirements and actions:
 
-expect and expect_nt are both: required, not empty, not whitespace.
-It's a fatal error otherwise, because false positives are BAD.
-
 Either code or prog must be present.  prog is some source code, and is
-passed through via runperl, to B::Concise like this: (bcopts are fixed
-up for cmdline)
+passed through via test.pl:runperl, to B::Concise like this: (bcopts
+are fixed up for cmdline)
 
     './perl -w -MO=Concise,$bcopts_massaged -e $src'
 
 code is a subref, or $src, like above.  If it's not a subref, it's
-treated like source, but is wrapped as a subroutine, and passed to
+treated like source-code, is wrapped as a subroutine, and is passed to
 B::Concise::compile().
 
     $subref = eval "sub{$src}";
+    B::Concise::compile($subref).
+
+expect and expect_nt are the reference optree renderings.  Theyre
+required, except when the code/prog compilation fails.
 
 I suppose I should also explain these more, but they seem obvious.
 
@@ -182,8 +191,15 @@ our %gOpts = 	# values are replaced at runtime !!
      help	=> 0,	# 1 ends in die
 
      # array values are one-of selections, with 1st value as default
-     #   tbc: 1st value is help, 2nd is default
      testmode => [qw/ native cross both /],
+
+     # fixup for VMS, cygwin, which dont have stderr b4 stdout
+     #  2nd value is used as help-str, 1st val (still) default
+
+     rxnoorder	=> [1, 'if 1, dont req match on -e lines, and -banner',0],
+     strip	=> [1, 'if 1, catch errs and remove from renderings',0],
+     stripv	=> 'if strip&&1, be verbose about it',
+     errs	=> 'expected compile errs',
     );
 
 
@@ -267,12 +283,13 @@ sub getCmdLine {	# import assistant
 	    # override with 'foo' if 'opt=foo' appears
 	    grep s/$opt=(.*)/$gOpts{$opt}=$1/e, @ARGV;
 	}
-    }
+     }
     print("$0 heres current state:\n", Dumper \%gOpts)
 	if $gOpts{help} or $gOpts{dump};
 
     exit if $gOpts{help};
 }
+# the above arg-handling cruft should be replaced by a Getopt call
 
 ##################################
 # API
@@ -285,9 +302,25 @@ sub checkOptree {
     SKIP: {
 	label(\%in);
 	skip($in{name}, 1) if $in{skip};
+
+	# cpy globals into each test
+	foreach $k (keys %gOpts) {
+	    if ($gOpts{$k}) {
+		$in{$k} = $gOpts{$k} unless $in{$k};
+	    }
+	}
+	#die "no reftext found for $want: $in->{name}" unless $str;
+
 	return runSelftest(\%in) if $gOpts{selftest};
 
-	my $rendering = getRendering(\%in);	# get the actual output
+	my ($rendering,@errs) = getRendering(\%in);	# get the actual output
+
+	if ($in->{errs}) {
+	    if (@errs) {
+		like ("@errs", qr/$in->{errs}\s*/, "$in->{name} - matched expected errs");
+		next;
+	    }
+	}
 	fail("FORCED: $in{name}:\n$rendering") if $gOpts{fail}; # silly ?
 
 	# Test rendering against ..
@@ -397,7 +430,7 @@ sub mylike {
 	    #$got =~ s/($rex)/ate: $1/msg;	# noisy
 	    $got =~ s/($rex)\n//msg;		# remove matches
 	}
-	print "sequentially deconstructed, these are unmatched:\n$got\n";
+	print "these lines not matched:\n$got\n";
     }
 
     if (not $ok and $retry) {
@@ -418,18 +451,20 @@ sub getRendering {
 
     my @opts = get_bcopts($in);
     my $rendering = ''; # suppress "Use of uninitialized value in open"
+    my @errs;		# collect errs via 
+
 
     if ($in->{prog}) {
 	$rendering = runperl( switches => ['-w',join(',',"-MO=Concise",@opts)],
 			      prog => $in->{prog}, stderr => 1,
-			      ); #verbose => 1);
+			      ); # verbose => 1);
     } else {
 	my $code = $in->{code};
 	unless (ref $code eq 'CODE') {
 	    # treat as source, and wrap
 	    $code = eval "sub { $code }";
-	    die "$@ evaling code 'sub { $in->{code} }'\n"
-		unless ref $code eq 'CODE';
+	    # return errors
+	    push @errs, $@ if $@;
 	}
 	# set walk-output b4 compiling, which writes 'announce' line
 	walk_output(\$rendering);
@@ -443,7 +478,18 @@ sub getRendering {
       B::Concise::reset_sequence();
 	$opwalker->();
     }
-    return $rendering;
+    if ($in->{strip}) {
+	$rendering =~ s/(B::Concise::compile.*?\n)//;
+	print "stripped from rendering <$1>\n" if $1 and $in->{stripv};
+
+	while ($rendering =~ s/^(.*?-e line .*?\n)//g) {
+	    print "stripped <$1>\n" if $in->{stripv};
+	    push @errs, $1;
+	}
+	$rendering =~ s/^(-e syntax OK\n)//ms;
+	$rendering =~ s/^(-e had compilation errors.\n)//ms;
+    }
+    return $rendering, @errs;
 }
 
 sub get_bcopts {
@@ -457,6 +503,33 @@ sub get_bcopts {
     return @opts;
 }
 
+=head1 mkCheckRex
+
+mkCheckRex receives the full testcase object, and constructs a regex.
+1st, it selects a reftxt from either the expect or expect_nt items.
+
+Once selected, the reftext is massaged & converted into a Regex that
+accepts 'good' concise renderings, with appropriate input variations,
+but is otherwise as strict as possible.  For example, it should *not*
+match when opcode flags change, or when optimizations convert an op to
+an ex-op.
+
+selection is driven by platform mostly, but also by test-mode, which
+rather complicates the code.  this is worsened by the potential need
+to make platform specific conversions on the reftext.
+
+=head2 match criteria
+
+Opcode arguments (text within braces) are disregarded for matching
+purposes.  This loses some info in 'add[t5]', but greatly simplifys
+matching 'nextstate(main 22 (eval 10):1)'.  Besides, we are testing
+for regressions, not for complete accuracy.
+
+The regex is anchored by default, but can be suppressed with
+'noanchors', allowing 1-liner tests to succeed if opcode is found.
+
+=cut
+
 # needless complexity due to 'too much info' from B::Concise v.60
 my $announce = 'B::Concise::compile\(CODE\(0x[0-9a-f]+\)\)';;
 
@@ -469,7 +542,6 @@ sub mkCheckRex {
     my $str = $in->{expect} || $in->{expect_nt};	# standard bias
     $str = $in->{$want} if $want;			# stated pref
 
-    die "no reftext found for $want: $in->{name}" unless $str;
     #fail("rex-str is empty, won't allow false positives") unless $str;
 
     $str =~ s/^\# //mg;		# ease cut-paste testcase authoring
@@ -490,12 +562,17 @@ sub mkCheckRex {
     
     # no 'invisible' failures in debugger
     $str =~ s/(?:next|db)state(\\\(.*?\\\))/(?:next|db)state(.*?)/msg;
-    
+    # widened for -terse mode
+    $str =~ s/(?:next|db)state/(?:next|db)state/msg;
+
     # don't care about:
     $str =~ s/:-?\d+,-?\d+/:-?\\d+,-?\\d+/msg;		# FAKE line numbers
     $str =~ s/match\\\(.*?\\\)/match\(.*?\)/msg;	# match args
     $str =~ s/(0x[0-9A-Fa-f]+)/0x[0-9A-Fa-f]+/msg;	# hexnum values
     $str =~ s/".*?"/".*?"/msg;				# quoted strings
+
+    $str =~ s/(\d refs?)/\\d refs?/msg;
+    $str =~ s/leavesub \[\d\]/leavesub [\\d]/msg;	# for -terse
 
     croak "no reftext found for $want: $in->{name}"
 	unless $str =~ /\w+/; # fail unless a real test
@@ -505,7 +582,7 @@ sub mkCheckRex {
 
     # allow -eval, banner at beginning of anchored matches
     $str = "(-e .*?)?(B::Concise::compile.*?)?\n" . $str
-	unless $in->{noanchors};
+	unless $in->{noanchors} or $in->{rxnoorder};
     
     eval "use re 'debug'" if $debug;
     my $qr = ($in->{noanchors})	? qr/$str/ms : qr/^$str$/ms ;
@@ -654,27 +731,6 @@ if ($0 =~ /OptreeCheck\.pm/) {
 
 __END__
 
-=head1 mkCheckRex
-
-mkCheckRex receives the full testcase object, and constructs a regex.
-1st, it selects a reftxt from either the expect or expect_nt items.
-
-Once selected, reftext is massaged & converted into a Regex that
-accepts 'good' concise renderings, with appropriate input variations,
-but is otherwise as strict as possible.  For example, it should *not*
-match when opcode flags change, or when optimizations convert an op to
-an ex-op.
-
-=head2 match criteria
-
-Opcode arguments (text within braces) are disregarded for matching
-purposes.  This loses some info in 'add[t5]', but greatly simplifys
-matching 'nextstate(main 22 (eval 10):1)'.  Besides, we are testing
-for regressions, not for complete accuracy.
-
-The regex is anchored by default, but can be suppressed with
-'noanchors', allowing 1-liner tests to succeed if opcode is found.
-
 =head1 TEST DEVELOPMENT SUPPORT
 
 This optree regression testing framework needs tests in order to find
@@ -711,5 +767,11 @@ crosstest, etc selection mechanics.
 
 improve retry, retrydbg, esp. it's control of eval "use re debug".
 This seems to work part of the time, but isn't stable enough.
+
+=head1 CAVEATS
+
+This code is purely for testing core. While checkOptree feels flexible
+enough to be stable, the whole selftest framework is subject to change
+w/o notice.
 
 =cut

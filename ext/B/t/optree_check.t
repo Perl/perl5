@@ -118,18 +118,18 @@ if (1) {
 
 pass ("TEST -e \$srcCode");
 
-checkOptree ( name	=> '-w errors seen',
-	      prog	=> 'sort our @a',
-	      noanchors	=> 1, # unanchored match
-	      expect	=> 'Useless use of sort in void context',
-	      expect_nt	=> 'Useless use of sort in void context');
-
-checkOptree ( name	=> "self strict, catch err",
-	      prog	=> 'use strict; bogus',
-	      noanchors	=> 1,
-	      expect	=> 'strict subs',
-	      expect_nt	=> 'strict subs');
-
+checkOptree
+    (  name	=> '-w errors seen',
+       prog	=> 'sort our @a',
+       errs	=> 'Useless use of sort in void context at -e line 1.',
+       );
+    
+checkOptree
+    (  name	=> "self strict, catch err",
+       prog	=> 'use strict; bogus',
+       errs	=> 'Bareword "bogus" not allowed while "strict subs" in use at -e line 1.',
+       );
+    
 checkOptree ( name	=> "sort vK - flag specific search",
 	      prog	=> 'sort our @a',
 	      noanchors	=> 1,

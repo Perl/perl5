@@ -20,7 +20,7 @@ BEGIN {
 use OptreeCheck;	# ALSO DOES @ARGV HANDLING !!!!!!
 use Config;
 
-plan tests => 23;
+plan tests => 24;
 SKIP: {
 skip "no perlio in this build", 23 unless $Config::Config{useperlio};
 
@@ -249,24 +249,35 @@ EOT_EOT
 # 7  <@> leave[1 ref] vKP/REFC
 EONT_EONT
 
-checkOptree ( name	=> 'cmdline self-strict compile err',
-	      prog	=> 'use strict; sort @a',
-	      bcopts	=> [qw/ -basic -concise -exec /],
-	      noanchors	=> 1,
-	      expect	=> 'compilation errors',
-	      expect_nt	=> 'compilation errors');
+;
+$DB::single=1;
+checkOptree
+    ( name	=> 'cmdline self-strict compile err using prog',
+      prog	=> 'use strict; sort @a',
+      bcopts	=> [qw/ -basic -concise -exec /],
+      errs	=> 'Global symbol "@a" requires explicit package name at .*? line 1.',
+      );
 
-checkOptree ( name	=> 'error at -e line 1',
-	      prog	=> 'our @a; sort @a',
-	      bcopts	=> [qw/ -basic -concise -exec /],
-	      noanchors	=> 1,
-	      expect	=> 'at -e line 1',
-	      expect_nt	=> 'at -e line 1');
+checkOptree
+    ( name	=> 'cmdline self-strict compile err using code',
+      code	=> 'use strict; sort @a',
+      bcopts	=> [qw/ -basic -concise -exec /],
+      #noanchors	=> 1,
+      errs	=> 'Global symbol "@a" requires explicit package name at .*? line 1.',
+      );
 
-checkOptree ( name	=> 'cmdline -basic -concise -exec works',
-	      prog	=> 'our @a; sort @a',
-	      bcopts	=> [qw/ -basic -concise -exec /],
-	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
+checkOptree
+    ( name	=> 'useless use of sort in void context',
+      prog	=> 'our @a; sort @a',
+      bcopts	=> [qw/ -basic -concise -exec /],
+      errs	=> 'Useless use of sort in void context at -e line 1.',
+      );
+
+checkOptree
+    ( name	=> 'cmdline -basic -concise -exec works',
+      prog	=> 'our @a; sort @a',
+      bcopts	=> [qw/ -basic -concise -exec /],
+      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 1  <0> enter 
 # 2  <;> nextstate(main 1 -e:1) v
 # 3  <#> gv[*a] s
