@@ -683,7 +683,7 @@ this yourself would be a productive exercise), but finishes in a fourth
 the time when used on a similar string with 1000000 C<a>s.  Be aware,
 however, that this pattern currently triggers a warning message under
 the C<use warnings> pragma or B<-w> switch saying it
-C<"matches the null string many times">):
+C<"matches null string many times in regex">.
 
 On simple groups, such as the pattern C<< (?> [^()]+ ) >>, a comparable
 effect may be achieved by negative look-ahead, as in C<[^()]+ (?! [^()] )>.
