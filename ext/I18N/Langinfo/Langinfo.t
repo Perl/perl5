@@ -17,6 +17,21 @@ use POSIX qw(setlocale LC_ALL);
 
 setlocale(LC_ALL, $ENV{LC_ALL} = $ENV{LANG} = "C");
 
+print "1..1\n"; # We loaded okay.  That's about all we can hope for.
+print "ok 1\n";
+exit(0);
+# Background: the langinfo() (in C known as nl_langinfo()) interface
+# is supposed a to be a portable way to fetch various language dependent
+# constants like "the first day of the week" or "the decimal separator".
+# Give a portable (numeric) constant, get back a language-specific string.
+# That's a comforting fantasy.  Now tune in for blunt reality:
+# vendors seem to have implemented for those constants whatever they
+# felt like defining.  The UNIX standard says that one should have
+# the RADIXCHAR constant for the decimal separator.  Not so for many
+# Linux and BSD implementations.  One should have the CODESET constant
+# for returning the current codeset (say, ISO 8859-1).  Not so.
+# --jhi
+
 my %want =
     (
      ABDAY_1	=> "Sun",
