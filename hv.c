@@ -904,7 +904,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		}
 	    }
 #ifdef ENV_IS_CASELESS
-	    else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
+	    if (mg_find((SV*)hv, PERL_MAGIC_env)) {
 		/* XXX This code isn't UTF8 clean.  */
 		keysv = sv_2mortal(newSVpvn(key,klen));
 		key = strupr(SvPVX(keysv));
