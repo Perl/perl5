@@ -68,3 +68,6 @@ d_dirnamlen='define'
 # Ultrix can mmap only character devices, not regular files,
 # which is rather useless state of things for Perl.
 d_mmap='undef'
+
+# Configure gets fooled somehow into thinking that Ultrix would have mkstemp.
+d_mkstemp='undef'
