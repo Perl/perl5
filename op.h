@@ -81,10 +81,14 @@ typedef U32 PADOFFSET;
 				/*  On OP_ENTERITER, loop var is per-thread */
 
 /* old names; don't use in new code, but don't break them, either */
-#define OPf_LIST	1
-#define OPf_KNOW	2
+#define OPf_LIST	OPf_WANT_LIST
+#define OPf_KNOW	OPf_WANT
 #define GIMME \
-	  (op->op_flags & OPf_KNOW ? op->op_flags & OPf_LIST : dowantarray())
+	  (op->op_flags & OPf_WANT					\
+	   ? ((op->op_flags & OPf_WANT) == OPf_WANT_LIST		\
+	      ? G_ARRAY							\
+	      : G_SCALAR)						\
+	   : dowantarray())
 
 /* Private for lvalues */
 #define OPpLVAL_INTRO	128	/* Lvalue must be localized */
