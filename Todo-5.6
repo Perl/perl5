@@ -52,9 +52,12 @@ Configure
     POSIX 1003.1 1996 Edition support--realtime stuff:
 	POSIX semaphores, message queues, shared memory, realtime clocks,
 	timers, signals (the metaconfig units mostly already exist for these)
-    better shadow password support: see pp_sys.c:pp_gpwent()
+	PREFERABLY AS AN EXTENSION
     UNIX98 support: reader-writer locks, realtime/asynchronous IO
+	PREFERABLY AS AN EXTENSION
     IPv6 support: see RFC2292, RFC2553
+	PREFERABLY AS AN EXTENSION
+	there already is Socket6
 
 Long doubles
     figure out where the PV->NV->PV conversion gets it wrong at least
@@ -65,6 +68,7 @@ Long doubles
 64-bit support
     Configure probe for quad_t, uquad_t, and (argh) u_quad_t, they might
     be in some systems the only thing working as quadtype and uquadtype.
+    more pain: long_long, u_long_long. 
 
 Locales
     deprecate traditional/legacy locales?
@@ -141,6 +145,7 @@ Miscellaneous
 	(no metaconfig units yet for these).
         Don't forget finitel(), fp_classl(), fp_class_l(), (yes, both do,
 	unfortunately, exist), and unorderedl().
+	PREFERABLY AS AN EXTENSION.
 	As of 5.6.1 there is cpp macro Perl_isnan().
     fix the basic arithmetics (+ - * / %) to preserve IVness/UVness if
 	both arguments are IVs/UVs
