@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Jul 13 03:14:01 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Sat Jul 14 05:31:33 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -9670,6 +9670,7 @@ case "$o_nonblock" in
 	$cat head.c > try.c
 	$cat >>try.c <<'EOCP'
 #include <stdio.h>
+#include <stdlib.h>
 int main() {
 #ifdef O_NONBLOCK
 	printf("O_NONBLOCK\n");
@@ -9711,6 +9712,7 @@ case "$eagain" in
 #include <sys/types.h>
 #include <signal.h>
 #include <stdio.h> 
+#include <stdlib.h> 
 #define MY_O_NONBLOCK $o_nonblock
 #ifndef errno  /* XXX need better Configure test */
 extern int errno;
