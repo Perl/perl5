@@ -8,7 +8,6 @@ BEGIN {
 {
     my $wide = v256;
     use bytes;
-    print STDERR ord($wide),"\n";
     if (ord($wide) == 140) {
 	print "1..0 # Skip: UTF-EBCDIC (not UTF-8) used here\n";
 	exit 0;

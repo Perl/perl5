@@ -851,7 +851,6 @@ lib/open2.pl		Open a two-ended pipe (uses IPC::Open2)
 lib/open3.pl		Open a three-ended pipe (uses IPC::Open3)
 lib/overload.pm		Module for overloading perl operators
 lib/perl5db.pl		Perl debugging routines
-lib/perlio.pm		Perl IO interface pragma
 lib/pwd.pl		Routines to keep track of PWD environment variable
 lib/shellwords.pl	Perl library to split into words with shell quoting
 lib/sigtrap.pm		For trapping an abort and giving traceback
