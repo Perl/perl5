@@ -814,6 +814,7 @@ hints/3b1cc			Hints for named architecture
 hints/3b1.sh			Hints for named architecture
 hints/aix.sh			Hints for named architecture
 hints/aix_3.sh			Hints for named architecture
+hints/aix_4.sh			Hints for named architecture
 hints/altos486.sh		Hints for named architecture
 hints/amigaos.sh		Hints for named architecture
 hints/apollo.sh			Hints for named architecture
