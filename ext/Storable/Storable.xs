@@ -433,11 +433,7 @@ static stcxt_t *Context_ptr = &Context;
 #if PTRSIZE <= 4
 #define LOW_32BITS(x)	((I32) (x))
 #else
-#if BYTEORDER == 0x87654321
-#define LOW_32BITS(x)	((I32) ((unsigned long) (x) & 0xffffffff00000000UL))
-#else       /* BYTEORDER == 0x12345678 */
 #define LOW_32BITS(x)	((I32) ((unsigned long) (x) & 0xffffffffUL))
-#endif
 #endif
 
 /*
@@ -2654,7 +2650,7 @@ PerlIO *f;
 SV *sv;
 {
 	TRACEME(("pstore"));
-	return do_store(f, sv, 0, FALSE, Nullsv);
+	return do_store(f, sv, 0, FALSE, (SV**)0);
 
 }
 
@@ -2669,7 +2665,7 @@ PerlIO *f;
 SV *sv;
 {
 	TRACEME(("net_pstore"));
-	return do_store(f, sv, 0, TRUE, Nullsv);
+	return do_store(f, sv, 0, TRUE, (SV**)0);
 }
 
 /***
@@ -2702,7 +2698,7 @@ SV *sv;
 
 	TRACEME(("mstore"));
 
-	if (!do_store(0, sv, 0, FALSE, &out))
+	if (!do_store((PerlIO*)0, sv, 0, FALSE, &out))
 		return &PL_sv_undef;
 
 	return out;
@@ -2722,7 +2718,7 @@ SV *sv;
 
 	TRACEME(("net_mstore"));
 
-	if (!do_store(0, sv, 0, TRUE, &out))
+	if (!do_store((PerlIO*)0, sv, 0, TRUE, &out))
 		return &PL_sv_undef;
 
 	return out;
@@ -4375,7 +4371,7 @@ SV *mretrieve(sv)
 SV *sv;
 {
 	TRACEME(("mretrieve"));
-	return do_retrieve(0, sv, 0);
+	return do_retrieve((PerlIO*)0, sv, 0);
 }
 
 /***
@@ -4414,7 +4410,7 @@ SV *sv;
 	 * we need to allocate one because we're deep cloning from a hook.
 	 */
 
-	if (!do_store(0, sv, ST_CLONE, FALSE, Nullsv))
+	if (!do_store((PerlIO*)0, sv, ST_CLONE, FALSE, (SV**)0))
 		return &PL_sv_undef;				/* Error during store */
 
 	/*
@@ -4436,7 +4432,7 @@ SV *sv;
 	TRACEME(("dclone stored %d bytes", size));
 
 	MBUF_INIT(size);
-	out = do_retrieve(0, Nullsv, ST_CLONE);	/* Will free non-root context */
+	out = do_retrieve((PerlIO*)0, Nullsv, ST_CLONE);	/* Will free non-root context */
 
 	TRACEME(("dclone returns 0x%lx", (unsigned long) out));
 
