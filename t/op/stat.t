@@ -9,7 +9,7 @@ BEGIN {
 use Config;
 use File::Spec;
 
-plan tests => 73;
+plan tests => 78;
 
 my $Perl = which_perl();
 
@@ -426,6 +426,21 @@ SKIP: {
 	'-l _ croaks after -T _' );
     unlink $linkname or print "# unlink $linkname failed: $!\n";
 }
+
+print "# Zzz...\n";
+sleep(3);
+my $f = 'tstamp.tmp';
+unlink $f;
+ok (open(S, "> $f"), 'can create tmp file');
+close S or die;
+my @a = stat $f;
+print "# time=$^T, stat=(@a)\n";
+my @b = (-M _, -A _, -C _);
+print "# -MAC=(@b)\n";
+ok( (-M _) < 0, 'negative -M works');
+ok( (-A _) < 0, 'negative -A works');
+ok( (-C _) < 0, 'negative -C works');
+ok(unlink($f), 'unlink tmp file');
 
 END {
     1 while unlink $tmpfile;

@@ -14,6 +14,11 @@
  */
 #define HAS_UTIME		/**/
 
+/* BIG_TIME:
+ *	This symbol is defined if Time_t is an unsigned type on this system.
+ */
+#define BIG_TIME
+
 #define HAS_KILL
 #define HAS_WAIT
 #define HAS_DLERROR

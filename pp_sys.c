@@ -3084,7 +3084,7 @@ PP(pp_ftmtime)
     dSP; dTARGET;
     if (result < 0)
 	RETPUSHUNDEF;
-    PUSHn( (PL_basetime - PL_statcache.st_mtime) / 86400.0 );
+    PUSHn( (((NV)PL_basetime - PL_statcache.st_mtime)) / 86400.0 );
     RETURN;
 }
 
@@ -3094,7 +3094,7 @@ PP(pp_ftatime)
     dSP; dTARGET;
     if (result < 0)
 	RETPUSHUNDEF;
-    PUSHn( (PL_basetime - PL_statcache.st_atime) / 86400.0 );
+    PUSHn( (((NV)PL_basetime - PL_statcache.st_atime)) / 86400.0 );
     RETURN;
 }
 
@@ -3104,7 +3104,7 @@ PP(pp_ftctime)
     dSP; dTARGET;
     if (result < 0)
 	RETPUSHUNDEF;
-    PUSHn( (PL_basetime - PL_statcache.st_ctime) / 86400.0 );
+    PUSHn( (((NV)PL_basetime - PL_statcache.st_ctime)) / 86400.0 );
     RETURN;
 }
 
