@@ -113,7 +113,7 @@ CODE:
 		endian = 'V';
 	    }
 	    else {
-		croak("%"SVf":Unregognised BOM %"UVxf,
+		croak("%"SVf": Unrecognised BOM %"UVxf,
                       *hv_fetch((HV *)SvRV(obj),"Name",4,0),
 		      bom);
 	    }
