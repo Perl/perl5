@@ -706,3 +706,21 @@ Execution of - aborted due to compilation errors.
 EXPECT
 Missing right brace on \x{} at - line 2, within string
 Execution of - aborted due to compilation errors.
+########
+my $foo = Bar->new();
+my @dst;
+END {
+    ($_ = "@dst") =~ s/\(0x.+?\)/(0x...)/;
+    print $_, "\n";
+}
+package Bar;
+sub new {
+    my Bar $self = bless [], Bar;
+    eval '$self';
+    return $self;
+}
+sub DESTROY { 
+    push @dst, "$_[0]";
+}
+EXPECT
+Bar=ARRAY(0x...)
