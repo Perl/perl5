@@ -1399,7 +1399,7 @@ as well as from CPAN.
 
 =item  *
 
-Plan 9, F<README.plan9>
+S<Plan 9>, F<README.plan9>
 
 =back
 
@@ -1502,7 +1502,7 @@ in the SYSTEM environment settings.  (Cygwin)
 
 =item chown LIST
 
-Not implemented. (S<Mac OS>, Win32, Plan9, S<RISC OS>, VOS)
+Not implemented. (S<Mac OS>, Win32, S<Plan 9>, S<RISC OS>, VOS)
 
 Does nothing, but won't fail. (Win32)
 
@@ -1510,7 +1510,7 @@ Does nothing, but won't fail. (Win32)
 
 =item chroot
 
-Not implemented. (S<Mac OS>, Win32, VMS, Plan9, S<RISC OS>, VOS, VM/ESA)
+Not implemented. (S<Mac OS>, Win32, VMS, S<Plan 9>, S<RISC OS>, VOS, VM/ESA)
 
 =item crypt PLAINTEXT,SALT
 
@@ -1521,11 +1521,11 @@ Not implemented. (VOS)
 
 =item dbmclose HASH
 
-Not implemented. (VMS, Plan9, VOS)
+Not implemented. (VMS, S<Plan 9>, VOS)
 
 =item dbmopen HASH,DBNAME,MODE
 
-Not implemented. (VMS, Plan9, VOS)
+Not implemented. (VMS, S<Plan 9>, VOS)
 
 =item dump LABEL
 
@@ -1602,7 +1602,7 @@ Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>)
 
 =item getnetbyname NAME
 
-Not implemented. (S<Mac OS>, Win32, Plan9)
+Not implemented. (S<Mac OS>, Win32, S<Plan 9>)
 
 =item getpwuid UID
 
@@ -1616,7 +1616,7 @@ Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>)
 
 =item getnetbyaddr ADDR,ADDRTYPE
 
-Not implemented. (S<Mac OS>, Win32, Plan9)
+Not implemented. (S<Mac OS>, Win32, S<Plan 9>)
 
 =item getprotobynumber NUMBER
 
@@ -1640,31 +1640,31 @@ Not implemented. (S<Mac OS>, Win32)
 
 =item getnetent
 
-Not implemented. (S<Mac OS>, Win32, Plan9)
+Not implemented. (S<Mac OS>, Win32, S<Plan 9>)
 
 =item getprotoent
 
-Not implemented. (S<Mac OS>, Win32, Plan9)
+Not implemented. (S<Mac OS>, Win32, S<Plan 9>)
 
 =item getservent
 
-Not implemented. (Win32, Plan9)
+Not implemented. (Win32, S<Plan 9>)
 
 =item sethostent STAYOPEN
 
-Not implemented. (S<Mac OS>, Win32, Plan9, S<RISC OS>)
+Not implemented. (S<Mac OS>, Win32, S<Plan 9>, S<RISC OS>)
 
 =item setnetent STAYOPEN
 
-Not implemented. (S<Mac OS>, Win32, Plan9, S<RISC OS>)
+Not implemented. (S<Mac OS>, Win32, S<Plan 9>, S<RISC OS>)
 
 =item setprotoent STAYOPEN
 
-Not implemented. (S<Mac OS>, Win32, Plan9, S<RISC OS>)
+Not implemented. (S<Mac OS>, Win32, S<Plan 9>, S<RISC OS>)
 
 =item setservent STAYOPEN
 
-Not implemented. (Plan9, Win32, S<RISC OS>)
+Not implemented. (S<Plan 9>, Win32, S<RISC OS>)
 
 =item endpwent
 
@@ -1680,19 +1680,19 @@ Not implemented. (S<Mac OS>, Win32)
 
 =item endnetent
 
-Not implemented. (S<Mac OS>, Win32, Plan9)
+Not implemented. (S<Mac OS>, Win32, S<Plan 9>)
 
 =item endprotoent
 
-Not implemented. (S<Mac OS>, Win32, Plan9)
+Not implemented. (S<Mac OS>, Win32, S<Plan 9>)
 
 =item endservent
 
-Not implemented. (Plan9, Win32)
+Not implemented. (S<Plan 9>, Win32)
 
 =item getsockopt SOCKET,LEVEL,OPTNAME
 
-Not implemented. (Plan9)
+Not implemented. (S<Plan 9>)
 
 =item glob EXPR
 
@@ -1752,7 +1752,7 @@ Return values (especially for device and inode) may be bogus. (Win32)
 
 =item msgrcv ID,VAR,SIZE,TYPE,FLAGS
 
-Not implemented. (S<Mac OS>, Win32, VMS, Plan9, S<RISC OS>, VOS)
+Not implemented. (S<Mac OS>, Win32, VMS, S<Plan 9>, S<RISC OS>, VOS)
 
 =item open FILEHANDLE,EXPR
 
@@ -1810,7 +1810,7 @@ Not implemented. (S<Mac OS>, MPE/iX, Win32, S<RISC OS>)
 
 =item setsockopt SOCKET,LEVEL,OPTNAME,OPTVAL
 
-Not implemented. (Plan9)
+Not implemented. (S<Plan 9>)
 
 =item shmctl ID,CMD,ARG
 

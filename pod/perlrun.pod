@@ -166,7 +166,7 @@ common) and how to protect whitespace and these characters to run
 one-liners (see B<-e> below).
 
 On some systems, you may have to change single-quotes to double ones,
-which you must I<not> do on Unix or Plan9 systems.  You might also
+which you must I<not> do on Unix or Plan 9 systems.  You might also
 have to change a single % to a %%.
 
 For example:
