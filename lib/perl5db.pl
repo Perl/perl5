@@ -2,7 +2,7 @@ package DB;
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 
-$VERSION = 1.07;
+$VERSION = 1.10;
 $header = "perl5db.pl version $VERSION";
 
 #
@@ -82,7 +82,6 @@ $header = "perl5db.pl version $VERSION";
 ##################################################################
 
 # Enhanced by ilya@math.ohio-state.edu (Ilya Zakharevich)
-# Latest version available: ftp://ftp.math.ohio-state.edu/pub/users/ilya/perl
 
 # modified Perl debugger, to be run from Emacs in perldb-mode
 # Ray Lischner (uunet!mntgfx!lisch) as of 5 Nov 1990
@@ -119,7 +118,7 @@ $header = "perl5db.pl version $VERSION";
 #	Some additional words on internal work of debugger.
 #	`b load filename' implemented.
 #	`b postpone subr' implemented.
-#	now only `q' exits debugger (overwriteable on $inhibit_exit).
+#	now only `q' exits debugger (overwritable on $inhibit_exit).
 #	When restarting debugger breakpoints/actions persist.
 #     Buglet: When restarting debugger only one breakpoint/action per 
 #		autoloaded function persists.
@@ -129,7 +128,7 @@ $header = "perl5db.pl version $VERSION";
 #	new `inhibitExit' option.
 #	printing of a very long statement interruptible.
 # Changes: 0.98: New command `m' for printing possible methods
-#	'l -' is a synonim for `-'.
+#	'l -' is a synonym for `-'.
 #	Cosmetic bugs in printing stack trace.
 #	`frame' & 8 to print "expanded args" in stack trace.
 #	Can list/break in imported subs.
@@ -147,7 +146,7 @@ $header = "perl5db.pl version $VERSION";
 #	when completing a subroutine name (same for `l').
 # Changes: 1.07: Many fixed by tchrist 13-March-2000
 #   BUG FIXES:
-#   + Added bare mimimal security checks on perldb rc files, plus
+#   + Added bare minimal security checks on perldb rc files, plus
 #     comments on what else is needed.
 #   + Fixed the ornaments that made "|h" completely unusable.
 #     They are not used in print_help if they will hurt.  Strip pod
@@ -155,7 +154,7 @@ $header = "perl5db.pl version $VERSION";
 #   + Fixed mis-formatting of help messages caused by ornaments
 #     to restore Larry's original formatting.  
 #   + Fixed many other formatting errors.  The code is still suboptimal, 
-#     and needs a lot of work at restructuing. It's also misindented
+#     and needs a lot of work at restructuring.  It's also misindented
 #     in many places.
 #   + Fixed bug where trying to look at an option like your pager
 #     shows "1".  
@@ -164,7 +163,7 @@ $header = "perl5db.pl version $VERSION";
 #     or else not caring about detailed status.  This should really be
 #     unified into one place, too.
 #   + Fixed bug where invisible trailing whitespace on commands hoses you,
-#     tricking Perl into thinking you wern't calling a debugger command!
+#     tricking Perl into thinking you weren't calling a debugger command!
 #   + Fixed bug where leading whitespace on commands hoses you.  (One
 #     suggests a leading semicolon or any other irrelevant non-whitespace
 #     to indicate literal Perl code.)
@@ -187,6 +186,65 @@ $header = "perl5db.pl version $VERSION";
 #   + Added to and rearranged the help information.
 #   + Detected apparent misuse of { ... } to declare a block; this used
 #     to work but now is a command, and mysteriously gave no complaint.
+#
+# Changes: 1.08: Apr 25, 2001  Jon Eveland <jweveland@yahoo.com>
+#   BUG FIX:
+#   + This patch to perl5db.pl cleans up formatting issues on the help
+#     summary (h h) screen in the debugger.  Mostly columnar alignment
+#     issues, plus converted the printed text to use all spaces, since
+#     tabs don't seem to help much here.
+#
+# Changes: 1.09: May 19, 2001  Ilya Zakharevich <ilya@math.ohio-state.edu>
+#   0) Minor bugs corrected;
+#   a) Support for auto-creation of new TTY window on startup, either
+#      unconditionally, or if started as a kid of another debugger session;
+#   b) New `O'ption CreateTTY
+#       I<CreateTTY>       bits control attempts to create a new TTY on events:
+#                          1: on fork()   2: debugger is started inside debugger
+#                          4: on startup
+#   c) Code to auto-create a new TTY window on OS/2 (currently one one
+#      extra window per session - need named pipes to have more...);
+#   d) Simplified interface for custom createTTY functions (with a backward
+#      compatibility hack); now returns the TTY name to use; return of ''
+#      means that the function reset the I/O handles itself;
+#   d') Better message on the semantic of custom createTTY function;
+#   e) Convert the existing code to create a TTY into a custom createTTY
+#      function;
+#   f) Consistent support for TTY names of the form "TTYin,TTYout";
+#   g) Switch line-tracing output too to the created TTY window;
+#   h) make `b fork' DWIM with CORE::GLOBAL::fork;
+#   i) High-level debugger API cmd_*():
+#      cmd_b_load($filenamepart)            # b load filenamepart
+#      cmd_b_line($lineno [, $cond])        # b lineno [cond]
+#      cmd_b_sub($sub [, $cond])            # b sub [cond]
+#      cmd_stop()                           # Control-C
+#      cmd_d($lineno)                       # d lineno
+#      The cmd_*() API returns FALSE on failure; in this case it outputs
+#      the error message to the debugging output.
+#   j) Low-level debugger API
+#      break_on_load($filename)             # b load filename
+#      @files = report_break_on_load()      # List files with load-breakpoints
+#      breakable_line_in_filename($name, $from [, $to])
+#                                           # First breakable line in the
+#                                           # range $from .. $to.  $to defaults
+#                                           # to $from, and may be less than $to
+#      breakable_line($from [, $to])        # Same for the current file
+#      break_on_filename_line($name, $lineno [, $cond])
+#                                           # Set breakpoint,$cond defaults to 1
+#      break_on_filename_line_range($name, $from, $to [, $cond])
+#                                           # As above, on the first
+#                                           # breakable line in range
+#      break_on_line($lineno [, $cond])     # As above, in the current file
+#      break_subroutine($sub [, $cond])     # break on the first breakable line
+#      ($name, $from, $to) = subroutine_filename_lines($sub)
+#                                           # The range of lines of the text
+#      The low-level API returns TRUE on success, and die()s on failure.
+#
+# Changes: 1.10: May 23, 2001  Daniel Lewart <d-lewart@uiuc.edu>
+#   BUG FIXES:
+#   + Fixed warnings generated by "perl -dWe 42"
+#   + Corrected spelling errors
+#   + Squeezed Help (h) output into 80 columns
 
 ####################################################################
 
@@ -296,6 +354,7 @@ signalLevel($signalLevel);
 setman();
 &recallCommand("!") unless defined $prc;
 &shellBang("!") unless defined $psh;
+sethelp();
 $maxtrace = 400 unless defined $maxtrace;
 $ini_pids = $ENV{PERLDB_PIDS};
 if (defined $ENV{PERLDB_PIDS}) {
@@ -308,7 +367,7 @@ if (defined $ENV{PERLDB_PIDS}) {
   $term_pid = $$;
 }
 $pidprompt = '';
-*emacs = $slave_editor;		# May be used in afterinit()...
+*emacs = $slave_editor if $slave_editor;	# May be used in afterinit()...
 
 if (-e "/dev/tty") {  # this is the wrong metric!
   $rcfile=".perldb";
@@ -459,7 +518,7 @@ if ($notty) {
     create_IN_OUT(4);
   } else {
     if (defined $console) {
-      my ($i, $o) = split $console, /,/;
+      my ($i, $o) = split /,/, $console;
       $o = $i unless defined $o;
       open(IN,"+<$i") || open(IN,"<$i") || open(IN,"<&STDIN");
       open(OUT,"+>$o") || open(OUT,">$o") || open(OUT,">&STDERR")
@@ -533,7 +592,7 @@ sub DB {
       "package $package;";	# this won't let them modify, alas
     local(*dbline) = $main::{'_<' . $filename};
     $max = $#dbline;
-    if (($stop,$action) = split(/\0/,$dbline{$line})) {
+    if ($dbline{$line} && (($stop,$action) = split(/\0/,$dbline{$line}))) {
 	if ($stop eq '1') {
 	    $signal |= 1;
 	} elsif ($stop) {
@@ -819,7 +878,8 @@ EOP
 			    $i = $end;
 			} else {
 			    for (; $i <= $end; $i++) {
-			        ($stop,$action) = split(/\0/, $dbline{$i});
+				($stop,$action) = split(/\0/, $dbline{$i}) if
+				    $dbline{$i};
 			        $arrow = ($i==$line 
 					  and $filename eq $filename_ini) 
 				  ?  '==>' 
@@ -1202,7 +1262,7 @@ EOP
 			delete $ENV{PERLDB_PIDS}; # Restore ini state
 			$ENV{PERLDB_PIDS} = $ini_pids if defined $ini_pids;
 			#print "$^X, '-d', @flags, @script, ($slave_editor ? '-emacs' : ()), @ARGS";
-			exec $^X, '-d', @flags, @script, ($slave_editor ? '-emacs' : ()), @ARGS;
+			exec($^X, '-d', @flags, @script, ($slave_editor ? '-emacs' : ()), @ARGS) ||
 			print $OUT "exec failed: $!\n";
 			last CMD; };
 		    $cmd =~ /^T$/ && do {
@@ -1527,7 +1587,7 @@ sub cmd_b_load {
     $file .= '.pm', redo unless $file =~ /\./;
   }
   break_on_load($_) for @files;
-  my @files = report_break_on_load;
+  @files = report_break_on_load;
   print $OUT "Will stop on load of `@files'.\n";
 }
 
@@ -1563,7 +1623,7 @@ sub break_on_line {
   my $pl = '';
   die "Line $i$filename_error not breakable.\n" if $dbline[$i] == 0;
   $had_breakpoints{$filename} |= 1;
-  $dbline{$i} =~ s/^[^\0]*/$cond/;
+  $dbline{$i} =~ s/^[^\0]*/$cond/ if $dbline{$i};
 }
 
 sub cmd_b_line {
@@ -1662,7 +1722,7 @@ sub eval {
     my $at = $@;
     local $saved[0];		# Preserve the old value of $@
     eval { &DB::save };
-    if ($at) {
+    if (defined($at)) {
 	print $OUT $at;
     } elsif ($onetimeDump eq 'dump') {
 	dumpit($OUT, \@res);
@@ -1949,8 +2009,8 @@ sub os2_get_fork_TTY {
   (my $name = $0) =~ s,^.*[/\\],,s;
   if ( pipe $in1, $out1 and pipe $in2, $out2 and
        # system P_SESSION will fail if there is another process
-       # in the same session with a "dependent" asyncroneous child session.
-       (($kpid = system 4, $^X, '-we', <<'ES', fileno $in1, fileno $out2, "Daughter Perl debugger $pids $name") >= 0 or warn "system P_SESSION: $!, $^E" and 0) # P_SESSION
+       # in the same session with a "dependent" asynchronous child session.
+       (($kpid = CORE::system 4, $^X, '-we', <<'ES', fileno $in1, fileno $out2, "Daughter Perl debugger $pids $name") >= 0 or warn "system P_SESSION: $!, $^E" and 0) # P_SESSION
 use Term::ReadKey;
 use OS2::Process;
 
@@ -1986,7 +2046,7 @@ I<#########> Forked, but do not know how to create a new B<TTY>. I<#########>
 EOP
       print_help(<<EOP) if $why == 2;
 I<#########> Daughter session, do not know how to change a B<TTY>. I<#########>
-  This may be an asyncroneous session, so the parent debugger may be active.
+  This may be an asynchronous session, so the parent debugger may be active.
 EOP
       print_help(<<EOP) if $why != 4;
   Since two debuggers fight for the same TTY, input is severely entangled.
@@ -2276,7 +2336,6 @@ sub shellBang {
     $psh = $sh;
     $psh =~ s/\\b$//;
     $psh =~ s/\\(.)/$1/g;
-    &sethelp;
     $psh;
 }
 
@@ -2298,7 +2357,6 @@ sub recallCommand {
     $prc = $rc;
     $prc =~ s/\\b$//;
     $prc =~ s/\\(.)/$1/g;
-    &sethelp;
     $prc;
 }
 
@@ -2333,7 +2391,7 @@ sub list_versions {
 }
 
 sub sethelp {
-    # XXX: make sure these are tabs between the command and explantion,
+    # XXX: make sure there are tabs between the command and explanation,
     #      or print_help will screw up your formatting if you have
     #      eeevil ornaments enabled.  This is an insane mess.
 
@@ -2407,7 +2465,6 @@ B<>> I<expr>		Define Perl command to run after each prompt.
 B<>>B<>> I<expr>		Add to the list of Perl commands to run after each prompt.
 B<{> I<db_command>	Define debugger command to run before each prompt.
 B<{> ?			List debugger commands to run before each prompt.
-B<<> I<expr>		Define Perl command to run before each prompt.
 B<{{> I<db_command>	Add to the list of debugger commands to run before each prompt.
 B<$prc> I<number>	Redo a previous command (default previous command).
 B<$prc> I<-number>	Redo number'th-to-last command.
@@ -2426,7 +2483,7 @@ I<command>		Execute as a perl statement in current package.
 B<v>		Show versions of loaded modules.
 B<R>		Pure-man-restart of debugger, some of debugger state
 		and command-line options may be lost.
-		Currently the following setting are preserved: 
+		Currently the following settings are preserved:
 		history, breakpoints and actions, debugger B<O>ptions 
 		and the following command-line options: I<-w>, I<-I>, I<-e>.
 
@@ -2452,9 +2509,9 @@ B<O> [I<opt>B<=>I<val>] [I<opt>=B<\">I<val>B<\">] ...
     I<bareStringify> 		Do not print the overload-stringified value;
   Other options include:
     I<PrintRet>		affects printing of return value after B<r> command,
-    I<frame>		affects printing messages on entry and exit from subroutines.
-    I<AutoTrace>	affects printing messages on every possible breaking point.
-    I<maxTraceLen>	gives maximal length of evals/args listed in stack trace.
+    I<frame>		affects printing messages on subroutine entry/exit.
+    I<AutoTrace>	affects printing messages on possible breaking points.
+    I<maxTraceLen>	gives max length of evals/args listed in stack trace.
     I<ornaments> 	affects screen appearance of the command line.
     I<CreateTTY> 	bits control attempts to create a new TTY on events:
 			1: on fork()	2: debugger is started inside debugger
@@ -2473,7 +2530,7 @@ B<$doccmd> I<manpage>	Runs the external doc viewer B<$doccmd> command on the
 
 Type `|h' for a paged display if this was too hard to read.
 
-"; # Fix balance of vi % matching: } }}
+"; # Fix balance of vi % matching: }}}}
 
     #  note: tabs in the following section are not-so-helpful
     $summary = <<"END_SUM";
@@ -2511,8 +2568,8 @@ sub print_help {
     # ornaments: A pox on both their houses!
     #
     # A help command will have everything up to and including
-    # the first tab sequence paddeed into a field 16 (or if indented 20)
-    # wide.  If it's wide than that, an extra space will be added.
+    # the first tab sequence padded into a field 16 (or if indented 20)
+    # wide.  If it's wider than that, an extra space will be added.
     s{
 	^ 		    	# only matters at start of line
 	  ( \040{4} | \t )*	# some subcommands are indented
@@ -2526,9 +2583,9 @@ sub print_help {
 	my $clean = $command;
 	$clean =~ s/[BI]<([^>]*)>/$1/g;  
     # replace with this whole string:
-	(length($leadwhite) ? " " x 4 : "")
+	($leadwhite ? " " x 4 : "")
       . $command
-      . ((" " x (16 + (length($leadwhite) ? 4 : 0) - length($clean))) || " ")
+      . ((" " x (16 + ($leadwhite ? 4 : 0) - length($clean))) || " ")
       . $text;
 
     }mgex;
@@ -2589,7 +2646,7 @@ sub dbwarn {
   local $SIG{__DIE__} = '';
   eval { require Carp } if defined $^S;	# If error/warning during compilation,
                                         # require may be broken.
-  warn(@_, "\nCannot print stack trace, load with -MCarp option to see stack"),
+  CORE::warn(@_, "\nCannot print stack trace, load with -MCarp option to see stack"),
     return unless defined &Carp::longmess;
   my ($mysingle,$mytrace) = ($single,$trace);
   $single = 0; $trace = 0;
@@ -2633,7 +2690,7 @@ sub warnLevel {
     $warnLevel = shift;
     if ($warnLevel) {
       $SIG{__WARN__} = \&DB::dbwarn;
-    } else {
+    } elsif ($prevwarn) {
       $SIG{__WARN__} = $prevwarn;
     }
   }
@@ -2651,7 +2708,7 @@ sub dieLevel {
         ( $dieLevel == 1 ? " outside of evals" : ""), ".\n"
 	  if $I_m_init;
       print $OUT "Dump printed too.\n" if $dieLevel > 2;
-    } else {
+    } elsif ($prevdie) {
       $SIG{__DIE__} = $prevdie;
       print $OUT "Default die handler restored.\n";
     }
@@ -2769,7 +2826,7 @@ sub runman {
     my $oldpath = $ENV{MANPATH};
     $ENV{MANPATH} = $manpath if $manpath;
     my $nopathopt = $^O =~ /dunno what goes here/;
-    if (system($doccmd, 
+    if (CORE::system($doccmd, 
 		# I just *know* there are men without -M
 		(($manpath && !$nopathopt) ? ("-M", $manpath) : ()),  
 	    split ' ', $page) )
@@ -2786,7 +2843,7 @@ sub runman {
 	      }) 
 	    {
 		$page =~ s/^/perl/;
-		system($doccmd, 
+		CORE::system($doccmd, 
 			(($manpath && !$nopathopt) ? ("-M", $manpath) : ()),  
 			$page);
 	    }
@@ -2830,7 +2887,7 @@ BEGIN {			# This does not compile, alas.
 
 BEGIN {$^W = $ini_warn;}	# Switch warnings back
 
-#use Carp;			# This did break, left for debuggin
+#use Carp;			# This did break, left for debugging
 
 sub db_complete {
   # Specific code for b c l V m f O, &blah, $blah, @blah, %blah
