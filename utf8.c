@@ -1223,21 +1223,28 @@ UV
 Perl_to_utf8_upper(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp)
 {
     return Perl_to_utf8_case(aTHX_ p, ustrp, lenp,
-			     &PL_utf8_toupper, "ToUpper", "utf8::ToSpecUpper");
+                             &PL_utf8_toupper, "ToUpper", "utf8::ToSpecUpper");
 }
 
 UV
 Perl_to_utf8_title(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp)
 {
     return Perl_to_utf8_case(aTHX_ p, ustrp, lenp,
-			     &PL_utf8_totitle, "ToTitle", "utf8::ToSpecTitle");
+                             &PL_utf8_totitle, "ToTitle", "utf8::ToSpecTitle");
 }
 
 UV
 Perl_to_utf8_lower(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp)
 {
     return Perl_to_utf8_case(aTHX_ p, ustrp, lenp,
-			     &PL_utf8_tolower, "ToLower", "utf8::ToSpecLower");
+                             &PL_utf8_tolower, "ToLower", "utf8::ToSpecLower");
+}
+
+UV
+Perl_to_utf8_fold(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp)
+{
+    return Perl_to_utf8_case(aTHX_ p, ustrp, lenp,
+                             &PL_utf8_tofold, "ToFold", "utf8::ToSpecFold");
 }
 
 /* a "swash" is a swatch hash */

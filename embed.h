@@ -725,6 +725,7 @@
 #define to_utf8_lower		Perl_to_utf8_lower
 #define to_utf8_upper		Perl_to_utf8_upper
 #define to_utf8_title		Perl_to_utf8_title
+#define to_utf8_fold		Perl_to_utf8_fold
 #if defined(UNLINK_ALL_VERSIONS)
 #define unlnk			Perl_unlnk
 #endif
@@ -2238,6 +2239,7 @@
 #define to_utf8_lower(a,b,c)	Perl_to_utf8_lower(aTHX_ a,b,c)
 #define to_utf8_upper(a,b,c)	Perl_to_utf8_upper(aTHX_ a,b,c)
 #define to_utf8_title(a,b,c)	Perl_to_utf8_title(aTHX_ a,b,c)
+#define to_utf8_fold(a,b,c)	Perl_to_utf8_fold(aTHX_ a,b,c)
 #if defined(UNLINK_ALL_VERSIONS)
 #define unlnk(a)		Perl_unlnk(aTHX_ a)
 #endif

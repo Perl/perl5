@@ -1824,6 +1824,7 @@ Ap	|UV	|to_utf8_case	|U8 *p|U8* ustrp|STRLEN *lenp \
 Ap	|UV	|to_utf8_lower	|U8 *p|U8* ustrp|STRLEN *lenp
 Ap	|UV	|to_utf8_upper	|U8 *p|U8* ustrp|STRLEN *lenp
 Ap	|UV	|to_utf8_title	|U8 *p|U8* ustrp|STRLEN *lenp
+Ap	|UV	|to_utf8_fold	|U8 *p|U8* ustrp|STRLEN *lenp
 #if defined(UNLINK_ALL_VERSIONS)
 Ap	|I32	|unlnk		|char* f
 #endif
