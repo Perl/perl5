@@ -653,6 +653,13 @@ You can actually chomp anything that's an lvalue, including an assignment:
 If you chomp a list, each element is chomped, and the total number of
 characters removed is returned.
 
+Note that parentheses are necessary when you're chomping anything
+that is not a simple variable.  This is because C<chomp $cwd = `pwd`;>
+is interpreted as C<(chomp $cwd) = `pwd`;>, rather than as
+C<chomp( $cwd = `pwd` )> which you might expect.  Similarly,
+C<chomp $a, $b> is interpreted as C<chomp($a), $b> rather than
+as C<chomp($a, $b)>.
+
 =item chop VARIABLE
 
 =item chop( LIST )
@@ -671,6 +678,8 @@ last C<chop> is returned.
 
 Note that C<chop> returns the last character.  To return all but the last
 character, use C<substr($string, 0, -1)>.
+
+See also L</chomp>.
 
 =item chown LIST
 
