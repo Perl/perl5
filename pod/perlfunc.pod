@@ -2923,11 +2923,10 @@ equal $foo).
 =item *
 
 You must yourself do any alignment or padding by inserting for example
-enough C<'x'>es while packing.  There is no way to they could know
-from where the bytes are coming from, they might be coming from a
-completely different system than the one your script is running in.
-Therefore C<pack> (and C<unpack>) handle their output and input as
-flat sequences of bytes.
+enough C<'x'>es while packing.  There is no way to pack() and unpack()
+could know where the bytes are going to or coming from.  Therefore
+C<pack> (and C<unpack>) handle their output and input as flat
+sequences of bytes.
 
 =back
 
@@ -2942,6 +2941,11 @@ Examples:
 
     $foo = pack("ccxxcc",65,66,67,68);
     # foo eq "AB\0\0CD"
+
+    # note: the above examples featuring "C" and "c" are true
+    # only on ASCII and ASCII-derived systems such as ISO Latin 1
+    # and UTF-8.  In EBCDIC the first example would be
+    # $foo = pack("CCCC",193,194,195,196);
 
     $foo = pack("s2",1,2);
     # "\1\0\2\0" on little-endian
