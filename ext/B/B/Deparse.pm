@@ -768,8 +768,9 @@ sub deparse_format {
     my @text;
     local($self->{'curcv'}) = $form;
     local($self->{'curcvlex'});
+    local($self->{'in_format'}) = 1;
     local(@$self{qw'curstash warnings hints'})
-		= @$self{'curstash warnings hints'};
+		= @$self{qw'curstash warnings hints'};
     my $op = $form->ROOT;
     my $kid;
     $op = $op->first->first; # skip leavewrite, lineseq
@@ -1064,7 +1065,7 @@ sub lineseq {
     }
     my $body = join(";\n", grep {length} @exprs);
     my $subs = "";
-    if (defined $root && defined $limit_seq) {
+    if (defined $root && defined $limit_seq && !$self->{'in_format'}) {
 	$subs = join "\n", $self->seq_subs($limit_seq);
     }
     return join(";\n", grep {length} $body, $subs);
