@@ -3412,6 +3412,7 @@ PP(pp_chdir)
         }
         else {            
             PUSHi(0);
+            TAINT_PROPER("chdir");
             RETURN;
         }
     }
