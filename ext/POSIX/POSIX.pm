@@ -194,7 +194,7 @@ sub AUTOLOAD {
     local $! = 0;
     my $constname = $AUTOLOAD;
     $constname =~ s/.*:://;
-    my $val = constant($constname, $_[0]);
+    my $val = constant($constname, @_ ? $_[0] : 0);
     if ($! == 0) {
 	*$AUTOLOAD = sub { $val };
     }
