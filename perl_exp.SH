@@ -38,9 +38,9 @@ echo "Extracting perl.exp"
 rm -f perl.exp
 echo "#!" > perl.exp
 
-# No compat3 since and including the 5.004_50.
-# perlio.sym added later if needed.
-syms=`ls -1 *.sym|egrep -v 'compat3|perlio'`
+# No compat3 since 5.004_50.
+# perlio.sym will added below if needed.
+syms="global.sym interp.sym thread.sym"
 
 sed -n '/^[A-Za-z]/ s/^/Perl_/p' $syms                  >> perl.exp
 
