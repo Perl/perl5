@@ -727,3 +727,14 @@ no warnings 'ambiguous';
 "@mjd_previously_unused_array";        
 EXPECT
 Possible unintended interpolation of @mjd_previously_unused_array in string at - line 3.
+########
+# toke.c
+# The \q should warn, the \_ should NOT warn.
+use warnings 'misc';
+"foo" =~ /\q/;
+"bar" =~ /\_/;
+no warnings 'misc';
+"foo" =~ /\q/;
+"bar" =~ /\_/;
+EXPECT
+Unrecognized escape \q passed through at - line 4.
