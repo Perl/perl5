@@ -509,6 +509,22 @@ Perhaps you need to predeclare a subroutine?
 the compiler saw no other uses of that namespace before that point.
 Perhaps you need to predeclare a package?
 
+=item Bareword found in conditional
+
+(W) The compiler found a bareword where it expected a conditional,
+which often indicates that an || or && was parsed as part of the
+last argument of the previous construct, for example:
+
+    open FOO || die;
+
+It may also indicate a misspelled constant that has been interpreted
+as a bareword:
+
+    use constant TYPO => 1;
+    if (TYOP) { print "foo" }
+
+The C<strict> pragma is useful in avoiding such errors.
+
 =item BEGIN failed--compilation aborted
 
 (F) An untrapped exception was raised while executing a BEGIN subroutine.
@@ -2521,14 +2537,6 @@ Check your logic flow.
 
 (W) The filehandle you're writing to got itself closed sometime before now.
 Check your logic flow.
-
-=item Probable precedence problem on %s
-
-(W) The compiler found a bareword where it expected a conditional,
-which often indicates that an || or && was parsed as part of the
-last argument of the previous construct, for example:
-
-    open FOO || die;
 
 =item Prototype mismatch: %s vs %s
 

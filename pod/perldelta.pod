@@ -1903,6 +1903,22 @@ most likely an unexpected right brace '}'.
 malloc()ed in the first place. Mandatory, but can be disabled by
 setting environment variable C<PERL_BADFREE> to 1.
 
+=item Bareword found in conditional
+
+(W) The compiler found a bareword where it expected a conditional,
+which often indicates that an || or && was parsed as part of the
+last argument of the previous construct, for example:
+
+    open FOO || die;
+
+It may also indicate a misspelled constant that has been interpreted
+as a bareword:
+
+    use constant TYPO => 1;
+    if (TYOP) { print "foo" }
+
+The C<strict> pragma is useful in avoiding such errors.
+
 =item Binary number > 0b11111111111111111111111111111111 non-portable
 
 (W) The binary number you specified is larger than 2**32-1
@@ -2361,6 +2377,14 @@ names.  Because it cannot be translated normally, it is skipped, and will not
 appear in %ENV.  This may be a benign occurrence, as some software packages
 might directly modify logical name tables and introduce nonstandard names,
 or it may indicate that a logical name table has been corrupted.
+
+=item Probable precedence problem on %s
+
+(W) The compiler found a bareword where it expected a conditional,
+which often indicates that an || or && was parsed as part of the
+last argument of the previous construct, for example:
+
+    open FOO || die;
 
 =item regexp too big
 
