@@ -48,6 +48,8 @@
 #define PL_archpat_auto		(*Perl_Iarchpat_auto_ptr(aTHXo))
 #undef  PL_argvgv
 #define PL_argvgv		(*Perl_Iargvgv_ptr(aTHXo))
+#undef  PL_argvout_stack
+#define PL_argvout_stack	(*Perl_Iargvout_stack_ptr(aTHXo))
 #undef  PL_argvoutgv
 #define PL_argvoutgv		(*Perl_Iargvoutgv_ptr(aTHXo))
 #undef  PL_basetime

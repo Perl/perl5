@@ -279,9 +279,14 @@ Perl_save_gp(pTHX_ GV *gv, I32 empty)
     if (empty) {
 	register GP *gp;
 
+	Newz(602, gp, 1, GP);
+
 	if (GvCVu(gv))
 	    PL_sub_generation++;	/* taking a method out of circulation */
-	Newz(602, gp, 1, GP);
+	else if (GvIOp(gv) && (IoFLAGS(GvIOp(gv)) & IOf_ARGV)) {
+	    gp->gp_io = newIO();
+	    IoFLAGS(gp->gp_io) |= IOf_ARGV|IOf_START;
+	}
 	GvGP(gv) = gp_ref(gp);
 	GvSV(gv) = NEWSV(72,0);
 	GvLINE(gv) = PL_curcop->cop_line;

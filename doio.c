@@ -484,9 +484,15 @@ Perl_nextargv(pTHX_ register GV *gv)
 #endif
     Uid_t fileuid;
     Gid_t filegid;
+    IO *io = GvIOp(gv);
 
     if (!PL_argvoutgv)
 	PL_argvoutgv = gv_fetchpv("ARGVOUT",TRUE,SVt_PVIO);
+    if (io && (IoFLAGS(io) & IOf_ARGV) && (IoFLAGS(io) & IOf_START)) {
+	IoFLAGS(io) &= ~IOf_START;
+	if (PL_inplace)
+	    av_push(PL_argvout_stack, SvREFCNT_inc(PL_defoutgv));
+    }
     if (PL_filemode & (S_ISUID|S_ISGID)) {
 	PerlIO_flush(IoIFP(GvIOn(PL_argvoutgv)));  /* chmod must follow last write */
 #ifdef HAS_FCHMOD
@@ -610,11 +616,12 @@ Perl_nextargv(pTHX_ register GV *gv)
 		SETERRNO(0,0);		/* in case sprintf set errno */
 #ifdef VMS
 		if (!do_open(PL_argvoutgv,SvPVX(sv),SvCUR(sv),PL_inplace!=0,
-                 O_WRONLY|O_CREAT|O_TRUNC,0,Nullfp)) { 
+                 O_WRONLY|O_CREAT|O_TRUNC,0,Nullfp))
 #else
 		if (!do_open(PL_argvoutgv,SvPVX(sv),SvCUR(sv),PL_inplace!=0,
-			     O_WRONLY|O_CREAT|OPEN_EXCL,0666,Nullfp)) {
+			     O_WRONLY|O_CREAT|OPEN_EXCL,0666,Nullfp))
 #endif
+		{
 		    if (ckWARN_d(WARN_INPLACE))	
 		        Perl_warner(aTHX_ WARN_INPLACE, "Can't do inplace edit on %s: %s",
 		          PL_oldname, Strerror(errno) );
@@ -657,8 +664,16 @@ Perl_nextargv(pTHX_ register GV *gv)
 	    }
 	}
     }
+    if (io && (IoFLAGS(io) & IOf_ARGV))
+	IoFLAGS(io) |= IOf_START;
     if (PL_inplace) {
 	(void)do_close(PL_argvoutgv,FALSE);
+	if (io && (IoFLAGS(io) & IOf_ARGV) && AvFILLp(PL_argvout_stack) >= 0) {
+	    GV *oldout = (GV*)av_pop(PL_argvout_stack);
+	    setdefout(oldout);
+	    SvREFCNT_dec(oldout);
+	    return Nullfp;
+	}
 	setdefout(gv_fetchpv("STDOUT",TRUE,SVt_PVIO));
     }
     return Nullfp;

@@ -2767,6 +2767,7 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	for (; argc > 0; argc--,argv++) {
 	    av_push(GvAVn(PL_argvgv),newSVpv(argv[0],0));
 	}
+	PL_argvout_stack = newAV();
     }
     if (PL_envgv = gv_fetchpv("ENV",TRUE, SVt_PVHV)) {
 	HV *hv;
