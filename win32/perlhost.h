@@ -210,7 +210,7 @@ protected:
 
     DWORD   m_dwEnvCount;
     LPSTR*  m_lppEnvList;
-    BOOL    m_bTopLevel;	/* is this a toplevel host? */
+    BOOL    m_bTopLevel;	// is this a toplevel host?
     static long num_hosts;
 public:
     inline  int LastHost(void) { return num_hosts == 1L; };
@@ -2051,7 +2051,7 @@ CPerlHost::CPerlHost(CPerlHost& host)
 
 CPerlHost::~CPerlHost(void)
 {
-/* Reset(); */
+//  Reset();
     InterlockedDecrement(&num_hosts);
     delete m_pvDir;
     m_pVMemParse->Release();
@@ -2078,7 +2078,7 @@ CPerlHost::Find(LPCSTR lpStr)
 
 int
 lookup(const void *arg1, const void *arg2)
-{   /* Compare strings */
+{   // Compare strings
     char*ptr1, *ptr2;
     char c1,c2;
 
@@ -2091,18 +2091,18 @@ lookup(const void *arg1, const void *arg2)
 	    if(c2 == '\0' || c2 == '=')
 		break;
 
-	    return -1; /* string 1 < string 2 */
+	    return -1; // string 1 < string 2
 	}
 	else if(c2 == '\0' || c2 == '=')
-	    return 1; /* string 1 > string 2 */
+	    return 1; // string 1 > string 2
 	else if(c1 != c2) {
 	    c1 = toupper(c1);
 	    c2 = toupper(c2);
 	    if(c1 != c2) {
 		if(c1 < c2)
-		    return -1; /* string 1 < string 2 */
+		    return -1; // string 1 < string 2
 
-		return 1; /* string 1 > string 2 */
+		return 1; // string 1 > string 2
 	    }
 	}
     }
@@ -2117,7 +2117,7 @@ CPerlHost::Lookup(LPCSTR lpStr)
 
 int
 compare(const void *arg1, const void *arg2)
-{   /* Compare strings */
+{   // Compare strings
     char*ptr1, *ptr2;
     char c1,c2;
 
@@ -2130,18 +2130,18 @@ compare(const void *arg1, const void *arg2)
 	    if(c1 == c2)
 		break;
 
-	    return -1; /* string 1 < string 2 */
+	    return -1; // string 1 < string 2
 	}
 	else if(c2 == '\0' || c2 == '=')
-	    return 1; /* string 1 > string 2 */
+	    return 1; // string 1 > string 2
 	else if(c1 != c2) {
 	    c1 = toupper(c1);
 	    c2 = toupper(c2);
 	    if(c1 != c2) {
 		if(c1 < c2)
-		    return -1; /* string 1 < string 2 */
+		    return -1; // string 1 < string 2
 	
-		return 1; /* string 1 > string 2 */
+		return 1; // string 1 > string 2
 	    }
 	}
     }
@@ -2161,7 +2161,7 @@ CPerlHost::Add(LPCSTR lpStr)
 
     szBuffer[index] = '\0';
 
-    /* replacing ? */
+    // replacing ?
     lpPtr = Lookup(szBuffer);
     if(lpPtr != NULL) {
 	Renew(*lpPtr, length, char);
@@ -2231,45 +2231,45 @@ CPerlHost::CreateLocalEnvironmentStrings(VDir &vDir)
     DWORD dwSize, dwEnvIndex;
     int nLength, compVal;
 
-    /* get the process environment strings */
+    // get the process environment strings
     lpAllocPtr = lpTmp = (LPSTR)GetEnvironmentStrings();
 
-    /* step over current directory stuff */
+    // step over current directory stuff
     while(*lpTmp == '=')
 	lpTmp += strlen(lpTmp) + 1;
 
-    /* save the start of the environment strings */
+    // save the start of the environment strings
     lpEnvPtr = lpTmp;
     for(dwSize = 1; *lpTmp != '\0'; lpTmp += strlen(lpTmp) + 1) {
-	/* calculate the size of the environment strings */
+	// calculate the size of the environment strings
 	dwSize += strlen(lpTmp) + 1;
     }
 
-    /* add the size of current directories */
+    // add the size of current directories
     dwSize += vDir.CalculateEnvironmentSpace();
 
-    /* add the additional space used by changes made to the environment */
+    // add the additional space used by changes made to the environment
     dwSize += CalculateEnvironmentSpace();
 
     New(1, lpStr, dwSize, char);
     lpPtr = lpStr;
     if(lpStr != NULL) {
-	/* build the local environment */
+	// build the local environment
 	lpStr = vDir.BuildEnvironmentSpace(lpStr);
 
 	dwEnvIndex = 0;
 	lpLocalEnv = GetIndex(dwEnvIndex);
 	while(*lpEnvPtr != '\0') {
 	    if(!lpLocalEnv) {
-		/* all environment overrides have been added */
-		/* so copy string into place */
+		// all environment overrides have been added
+		// so copy string into place
 		strcpy(lpStr, lpEnvPtr);
 		nLength = strlen(lpEnvPtr) + 1;
 		lpStr += nLength;
 		lpEnvPtr += nLength;
 	    }
 	    else {	
-		/* determine which string to copy next */
+		// determine which string to copy next
 		compVal = compare(&lpEnvPtr, &lpLocalEnv);
 		if(compVal < 0) {
 		    strcpy(lpStr, lpEnvPtr);
@@ -2285,7 +2285,7 @@ CPerlHost::CreateLocalEnvironmentStrings(VDir &vDir)
 		    }
 		    lpLocalEnv = GetIndex(dwEnvIndex);
 		    if(compVal == 0) {
-			/* this string was replaced */
+			// this string was replaced
 			lpEnvPtr += strlen(lpEnvPtr) + 1;
 		    }
 		}
@@ -2293,8 +2293,8 @@ CPerlHost::CreateLocalEnvironmentStrings(VDir &vDir)
 	}
 
 	while(lpLocalEnv) {
-	    /* still have environment overrides to add */
-	    /* so copy the strings into place if not an override */
+	    // still have environment overrides to add
+	    // so copy the strings into place if not an override
 	    char *ptr = strchr(lpLocalEnv, '=');
 	    if(ptr && ptr[1]) {
 		strcpy(lpStr, lpLocalEnv);
@@ -2303,11 +2303,11 @@ CPerlHost::CreateLocalEnvironmentStrings(VDir &vDir)
 	    lpLocalEnv = GetIndex(dwEnvIndex);
 	}
 
-	/* add final NULL */
+	// add final NULL
 	*lpStr = '\0';
     }
 
-    /* release the process environment strings */
+    // release the process environment strings
     FreeEnvironmentStrings(lpAllocPtr);
 
     return lpPtr;
