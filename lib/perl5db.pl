@@ -2249,6 +2249,7 @@ Type `|h' for a paged display if this was too hard to read.
 
 "; # Fix balance of vi % matching: } }}
 
+    #  note: tabs in the following section are not-so-helpful
     $summary = <<"END_SUM";
 I<List/search source lines:>               I<Control script execution:>
   B<l> [I<ln>|I<sub>]  List source code            B<T>           Stack trace
@@ -2256,7 +2257,7 @@ I<List/search source lines:>               I<Control script execution:>
   B<w> [I<line>]    List around line            B<n> [I<expr>]    Next, steps over subs
   B<f> I<filename>  View source in file         <B<CR>/B<Enter>>  Repeat last B<n> or B<s>
   B</>I<pattern>B</> B<?>I<patt>B<?>   Search forw/backw    B<r>           Return from subroutine
-  B<v>	      Show versions of modules    B<c> [I<ln>|I<sub>]  Continue until position
+  B<v>           Show versions of modules    B<c> [I<ln>|I<sub>]  Continue until position
 I<Debugger controls:>                        B<L>           List break/watch/actions
   B<O> [...]     Set debugger options        B<t> [I<expr>]    Toggle trace [trace expr]
   B<<>[B<<>]|B<{>[B<{>]|B<>>[B<>>] [I<cmd>] Do pre/post-prompt B<b> [I<ln>|I<event>|I<sub>] [I<cnd>] Set breakpoint
@@ -2265,13 +2266,13 @@ I<Debugger controls:>                        B<L>           List break/watch/act
   B<=> [I<a> I<val>]   Define/list an alias        B<W> I<expr>      Add a watch expression
   B<h> [I<db_cmd>]  Get help on command         B<A> or B<W>      Delete all actions/watch
   B<|>[B<|>]I<db_cmd>  Send output to pager        B<$psh>\[B<$psh>\] I<syscmd> Run cmd in a subprocess
-  B<q> or B<^D>     Quit			  B<R>	      Attempt a restart
-I<Data Examination:>	      B<expr>     Execute perl code, also see: B<s>,B<n>,B<t> I<expr>
-  B<x>|B<m> I<expr>	Evals expr in list context, dumps the result or lists methods.
-  B<p> I<expr>	Print expression (uses script's current package).
-  B<S> [[B<!>]I<pat>]	List subroutine names [not] matching pattern
-  B<V> [I<Pk> [I<Vars>]]	List Variables in Package.  Vars can be ~pattern or !pattern.
-  B<X> [I<Vars>]	Same as \"B<V> I<current_package> [I<Vars>]\".
+  B<q> or B<^D>     Quit                        B<R>           Attempt a restart
+I<Data Examination:>     B<expr>     Execute perl code, also see: B<s>,B<n>,B<t> I<expr>
+  B<x>|B<m> I<expr>       Evals expr in list context, dumps the result or lists methods.
+  B<p> I<expr>         Print expression (uses script's current package).
+  B<S> [[B<!>]I<pat>]     List subroutine names [not] matching pattern
+  B<V> [I<Pk> [I<Vars>]]  List Variables in Package.  Vars can be ~pattern or !pattern.
+  B<X> [I<Vars>]       Same as \"B<V> I<current_package> [I<Vars>]\".
 For more help, type B<h> I<cmd_letter>, or run B<$doccmd perldebug> for all docs.
 END_SUM
 				# ')}}; # Fix balance of vi % matching
