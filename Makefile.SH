@@ -1051,10 +1051,14 @@ test_notty.deparse:	test_prep
 # Can't depend on lib/Config.pm because that might be where miniperl
 # is crashing.
 minitest: miniperl$(EXE_EXT) lib/re.pm
+	-@test -f lib/lib.pm && test -f lib/Config.pm || \
+	  $(MAKE) lib/Config.pm lib/lib.pm
+	@echo " "
 	@echo "You may see some irrelevant test failures if you have been unable"
-	@echo "to build lib/Config.pm."
+	@echo "to build lib/Config.pm or lib/lib.pm."
+	@echo " "
 	- cd t && (rm -f perl$(EXE_EXT); $(LNS) ../miniperl$(EXE_EXT) perl$(EXE_EXT)) \
-		&& $(LDLIBPTH) ./perl TEST base/*.t comp/*.t cmd/*.t run/*.t io/*.t op/*.t </dev/tty
+		&& $(LDLIBPTH) ./perl TEST base/*.t comp/*.t cmd/*.t run/*.t io/*.t op/*.t uni/*.t </dev/tty
 
 # Test via harness
 

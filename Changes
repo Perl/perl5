@@ -31,6 +31,187 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 14680] By: jhi                                   on 2002/02/13  13:41:50
+        Log: Integrate perlio;
+             
+             Do not lc() the file names before doing dirname() or they don't match.
+     Branch: perl
+	  !> lib/ExtUtils/t/Installed.t
+____________________________________________________________________________
+[ 14679] By: sky                                   on 2002/02/13  12:56:13
+        Log: rename mutex to make a bit more sense
+     Branch: perl
+	   ! ext/threads/threads.xs
+____________________________________________________________________________
+[ 14678] By: sky                                   on 2002/02/13  12:46:11
+        Log: Track active threads....
+     Branch: perl
+	   ! ext/threads/threads.pm ext/threads/threads.xs
+____________________________________________________________________________
+[ 14676] By: sky                                   on 2002/02/13  09:03:37
+        Log: Subject: [PATCH] Re: File/Spec/t/rel2abs2rel2whatever broken again
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: ons feb 13, 2002  11:00:17  Europe/Stockholm
+             Message-Id: <20020213100017.GA6288@blackrider>
+     Branch: perl
+	   ! lib/File/Spec/t/rel2abs2rel.t
+____________________________________________________________________________
+[ 14675] By: sky                                   on 2002/02/13  09:00:24
+        Log: Do not propagate END blocks to child threads, test.
+     Branch: perl
+	   + ext/threads/t/end.t
+	   ! MANIFEST ext/threads/threads.xs
+____________________________________________________________________________
+[ 14672] By: jhi                                   on 2002/02/13  05:17:07
+        Log: $ln is supposed to be already set to $ln + executable suffix
+             on platforms that need it, from Paul Green.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 14671] By: jhi                                   on 2002/02/13  05:12:28
+        Log: Subject: New command syntax for 'x' command
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Tue, 12 Feb 2002 20:54:01 -0500
+             Message-ID: <20020213015401.25685.qmail@plover.com>
+     Branch: perl
+	   ! lib/perl5db.pl pod/perldebug.pod
+____________________________________________________________________________
+[ 14670] By: jhi                                   on 2002/02/13  05:11:12
+        Log: Subject: New debugger option 'dumpDepth' controls recursion depth of 'x' command
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Tue, 12 Feb 2002 20:20:42 -0500
+             Message-ID: <20020213012042.25245.qmail@plover.com>
+     Branch: perl
+	   ! lib/dumpvar.pl lib/perl5db.pl pod/perldebug.pod
+____________________________________________________________________________
+[ 14669] By: jhi                                   on 2002/02/13  04:43:43
+        Log: Iteration continues.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 14668] By: jhi                                   on 2002/02/13  02:37:31
+        Log: Duh.
+     Branch: perl
+	   ! pp_pack.c t/op/length.t
+____________________________________________________________________________
+[ 14667] By: jhi                                   on 2002/02/13  01:33:01
+        Log: Retract #14666.
+     Branch: perl
+	   ! t/op/lc.t
+____________________________________________________________________________
+[ 14666] By: jhi                                   on 2002/02/13  01:22:13
+        Log: (retracted by #14667)
+     Branch: perl
+	   ! t/op/lc.t
+____________________________________________________________________________
+[ 14665] By: jhi                                   on 2002/02/13  00:45:02
+        Log: Tiny test script tweaks.
+     Branch: perl
+	   ! t/uni/fold.t
+____________________________________________________________________________
+[ 14664] By: jhi                                   on 2002/02/13  00:24:37
+        Log: Rewrite the "special mapping" part of to_utf8_case(),
+             this time with fewer bugs.  (See: The Law of Cybernetic
+             Entymology.)
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 14663] By: sky                                   on 2002/02/12  18:26:16
+        Log: Stop failures if you pass an object, sv_dup might not be the right 
+             thing to use since I have a feeling we end up cloning far too much. 
+             (Like the stash for example).... Maybe we need a lightweight sv_dup 
+             that searches the target for things....
+             Real fix is another option to perl_clone which controls if you should 
+             save stashes.
+     Branch: perl
+	   ! ext/threads/threads.xs
+____________________________________________________________________________
+[ 14662] By: jhi                                   on 2002/02/12  17:19:49
+        Log: Retract #14661.
+     Branch: perl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[ 14661] By: jhi                                   on 2002/02/12  17:16:20
+        Log: (retracted by #14662)
+     Branch: perl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[ 14660] By: jhi                                   on 2002/02/12  15:03:58
+        Log: EBCDIC: another "can't happen".
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 14659] By: sky                                   on 2002/02/12  14:38:21
+        Log: Join support, however something wierd seems to happen with filehandles that are passed along threads...
+     Branch: perl
+	   + ext/threads/t/join.t
+	   ! MANIFEST ext/threads/threads.xs
+____________________________________________________________________________
+[ 14657] By: jhi                                   on 2002/02/12  13:44:34
+        Log: Subject: Re: [PATCH 5.6.1] Win32: Give user control over window creation behavior of system() function 
+             From: Jan Dubois <JanD@ActiveState.com> 
+             Date: Tue, 12 Feb 2002 00:56:31 -0800
+             Message-ID: <4llh6uc4gnqtk3csmfoqed3t6q85436bb1@4ax.com>
+     Branch: perl
+	   ! lib/Win32.pod win32/win32.c win32/win32.h
+____________________________________________________________________________
+[ 14656] By: jhi                                   on 2002/02/12  13:39:18
+        Log: Subject: [PATCH] Re: 14654 introduced a bug 
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Tue, 12 Feb 2002 05:37:36 -0500
+             Message-ID: <20020212103736.GC14327@blackrider>
+     Branch: perl
+	   ! lib/File/Spec/t/rel2abs2rel.t
+____________________________________________________________________________
+[ 14655] By: jhi                                   on 2002/02/12  04:50:58
+        Log: More unset installman[13]dir tweaks from chromatic.
+     Branch: perl
+	   ! lib/ExtUtils/Installed.pm
+____________________________________________________________________________
+[ 14654] By: jhi                                   on 2002/02/12  04:31:44
+        Log: Subject: Re: [PATCH] Re: Change 14566: Re: File::Spec::rel2abs2rel (?)
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 11 Feb 2002 12:23:02 -0500
+             Message-ID: <20020211172302.GD9556@blackrider>
+     Branch: perl
+	   ! lib/File/Spec/t/rel2abs2rel.t
+____________________________________________________________________________
+[ 14653] By: jhi                                   on 2002/02/12  04:29:10
+        Log: Use `` instead of -| to be a little bit more portable,
+             from Michael Schwern.
+     Branch: perl
+	   ! lib/ExtUtils/t/Embed.t
+____________________________________________________________________________
+[ 14652] By: jhi                                   on 2002/02/12  03:17:44
+        Log: EBCDIC: this change for \N{} in particular is now
+             unnecessary because of the recent more general
+             pack U change.
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[ 14651] By: jhi                                   on 2002/02/12  02:15:05
+        Log: Subject: [PATCH @14647] t/test.pl fix for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Mon, 11 Feb 2002 17:13:47 -0600
+             Message-Id: <5.1.0.14.2.20020211170332.01b94e88@exchi01>
+     Branch: perl
+	   ! t/test.pl
+____________________________________________________________________________
+[ 14650] By: jhi                                   on 2002/02/11  23:44:09
+        Log: EBCDIC: pack U bytes change.
+     Branch: perl
+	   ! t/op/length.t
+____________________________________________________________________________
+[ 14649] By: jhi                                   on 2002/02/11  23:38:28
+        Log: EBCDIC: pack U is no more equal to concat of \xHHs.
+     Branch: perl
+	   ! t/op/each.t
+____________________________________________________________________________
+[ 14647] By: jhi                                   on 2002/02/11  15:11:14
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 14646] By: jhi                                   on 2002/02/11  15:07:28
         Log: Regen toc.
      Branch: perl

@@ -32,26 +32,31 @@ if ($DOSISH)
 return(0);
 }
 
+sub _is_doc($$)
+{ 
+my ($self, $path) = @_;
+my $man1dir = $Config{man1direxp};
+my $man3dir = $Config{man3direxp};
+return(($man1dir && $self->_is_prefix($path, $man1dir))
+      ||
+      ($man3dir && $self->_is_prefix($path, $man3dir))
+      ? 1 : 0)
+}
+ 
 sub _is_type($$$)
 {
 my ($self, $path, $type) = @_;
 return(1) if ($type eq "all");
+
 if ($type eq "doc")
    {
-   return($self->_is_prefix($path, $Config{installman1dir})
-          ||
-          $self->_is_prefix($path, $Config{installman3dir})
-          ? 1 : 0)
+   return($self->_is_doc($path))
    }
 if ($type eq "prog")
    {
-   return($self->_is_prefix($path, $Config{prefix})
+   return($self->_is_prefix($path, $Config{prefixexp})
           &&
-          !($Config{installman1dir} && 
-		  	$self->_is_prefix($path, $Config{installman1dir}))
-          &&
-          !($Config{installman3dir} && 
-		  	$self->_is_prefix($path, $Config{installman3dir}))
+          !($self->_is_doc($path))
           ? 1 : 0);
    }
 return(0);
@@ -74,27 +79,25 @@ my ($class) = @_;
 $class = ref($class) || $class;
 my $self = {};
 
-my $installarchlib = $Config{installarchlib};
-my $archlib = $Config{archlib};
-my $sitearch = $Config{sitearch};
+my $archlib = $Config{archlibexp};
+my $sitearch = $Config{sitearchexp};
 
 if ($DOSISH)
    {
-   $installarchlib =~ s|\\|/|g;
    $archlib =~ s|\\|/|g;
    $sitearch =~ s|\\|/|g;
    }
 
 # Read the core packlist
 $self->{Perl}{packlist} =
-   ExtUtils::Packlist->new( File::Spec->catfile($installarchlib, '.packlist') );
+   ExtUtils::Packlist->new( File::Spec->catfile($archlib, '.packlist') );
 $self->{Perl}{version} = $Config{version};
 
 # Read the module packlists
 my $sub = sub
    {
    # Only process module .packlists
-   return if ($_) ne ".packlist" || $File::Find::dir eq $installarchlib;
+   return if ($_) ne ".packlist" || $File::Find::dir eq $archlib;
 
    # Hack of the leading bits of the paths & convert to a module name
    my $module = $File::Find::name;
@@ -256,7 +259,7 @@ is given the special name 'Perl'.
 This takes one mandatory parameter, the name of a module.  It returns a list of
 all the filenames from the package.  To obtain a list of core perl files, use
 the module name 'Perl'.  Additional parameters are allowed.  The first is one
-of the strings "prog", "man" or "all", to select either just program files,
+of the strings "prog", "doc" or "all", to select either just program files,
 just manual files or all files.  The remaining parameters are a list of
 directories. The filenames returned will be restricted to those under the
 specified directories.
@@ -265,7 +268,7 @@ specified directories.
 
 This takes one mandatory parameter, the name of a module.  It returns a list of
 all the directories from the package.  Additional parameters are allowed.  The
-first is one of the strings "prog", "man" or "all", to select either just
+first is one of the strings "prog", "doc" or "all", to select either just
 program directories, just manual directories or all directories.  The remaining
 parameters are a list of directories. The directories returned will be
 restricted to those under the specified directories.  This method returns only
@@ -273,7 +276,7 @@ the leaf directories that contain files from the specified module.
 
 =item directory_tree()
 
-This is identical in operation to directory(), except that it includes all the
+This is identical in operation to directories(), except that it includes all the
 intermediate directories back up to the specified directories.
 
 =item validate()
