@@ -223,11 +223,42 @@ unless (defined &Time::HiRes::setitimer
     $SIG{VTALRM} = 'DEFAULT';
 }
 
-$a = abs(sleep(1.5)        / 1.5       - 1.0);
-print $a < 0.1 ? "ok 20 # $a\n" : "not ok 20 # $a\n";
+if ($have_gettimeofday) {
+    my ($t0, $td);
 
-$a = abs(usleep(1_500_000) / 1_500_000 - 1.0);
-print $a < 0.1 ? "ok 21 # $a\n" : "not ok 21 # $a\n";
+    my $sleep = 1.5; # seconds
+    my $limit = 0.1; # 10% is acceptable slosh for timers
+    my $msg;
+
+    $t0 = gettimeofday();
+    $a = abs(sleep($sleep)        / $sleep         - 1.0);
+    $td = gettimeofday() - $t0;
+
+    $msg = "$td went by while sleeping $sleep, ratio $a\n";
+
+    if ($td < $sleep * (1 + $limit)) {
+	print $a < $limit ? "ok 20 # $msg" : "not ok 20 # $msg";
+    } else {
+	print "ok 20 # Skip: $msg";
+    }
+
+    $t0 = gettimeofday();
+    $a = abs(usleep($sleep * 1E6) / ($sleep * 1E6) - 1.0);
+    $td = gettimeofday() - $t0;
+
+    $msg = "$td went by while sleeping $sleep, ratio $a\n";
+
+    if ($td < $sleep * (1 + $limit)) {
+	print $a < $limit ? "ok 21 # $msg" : "not ok 21 # $msg";
+    } else {
+	print "ok 21 # Skip: $msg";
+    }
+
+} else {
+    for (20..21) {
+	print "ok $_ # Skip: no gettimeofday\n";
+    }
+}
 
 eval { sleep(-1) };
 print $@ =~ /::sleep\(-1\): negative time not invented yet/ ?
