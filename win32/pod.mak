@@ -8,8 +8,10 @@ POD2HTML = pod2html \
 
 all: $(CONVERTERS) html
 
+converters: $(CONVERTERS)
+
 PERL = ..\miniperl.exe
-PL2BAT = ..\win32\bin\pl2bat.pl
+REALPERL = ..\perl.exe
 
 POD = \
 	perl.pod	\
@@ -23,6 +25,7 @@ POD = \
 	perlvar.pod	\
 	perlsub.pod	\
 	perlmod.pod	\
+	perlmodlib.pod	\
 	perlform.pod	\
 	perllocale.pod	\
 	perlref.pod	\
@@ -70,6 +73,7 @@ MAN = \
 	perlvar.man	\
 	perlsub.man	\
 	perlmod.man	\
+	perlmodlib.man	\
 	perlform.man	\
 	perllocale.man	\
 	perlref.man	\
@@ -117,6 +121,7 @@ HTML = \
 	perlvar.html	\
 	perlsub.html	\
 	perlmod.html	\
+	perlmodlib.html	\
 	perlform.html	\
 	perllocale.html	\
 	perlref.html	\
@@ -164,6 +169,7 @@ TEX = \
 	perlvar.tex	\
 	perlsub.tex	\
 	perlmod.tex	\
+	perlmodlib.tex	\
 	perlform.tex	\
 	perllocale.tex	\
 	perlref.tex	\
@@ -206,67 +212,67 @@ html:	pod2html $(HTML)
 tex:	pod2latex $(TEX)
 
 toc:
-	$(PERL) -I..\lib buildtoc >perltoc.pod
+	$(PERL) -I../lib buildtoc >perltoc.pod
 
 .SUFFIXES: .pm .pod
 
 .SUFFIXES: .man
 
 .pm.man:
-	$(PERL) -I..\lib pod2man $*.pm >$*.man
+	$(PERL) -I../lib pod2man $*.pm >$*.man
 
 .pod.man:
-	$(PERL) -I..\lib pod2man $*.pod >$*.man
+	$(PERL) -I../lib pod2man $*.pod >$*.man
 
 .SUFFIXES: .html
 
 .pm.html:
-	$(PERL) -I..\lib $(POD2HTML) --infile=$*.pm --outfile=$*.html
+	$(PERL) -I../lib $(POD2HTML) --infile=$*.pm --outfile=$*.html
 
 .pod.html:
-	$(PERL) -I..\lib $(POD2HTML) --infile=$*.pod --outfile=$*.html
+	$(PERL) -I../lib $(POD2HTML) --infile=$*.pod --outfile=$*.html
 
 .SUFFIXES: .tex
 
 .pm.tex:
-	$(PERL) -I..\lib pod2latex $*.pm
+	$(PERL) -I../lib pod2latex $*.pm
 
 .pod.tex:
-	$(PERL) -I..\lib pod2latex $*.pod
+	$(PERL) -I../lib pod2latex $*.pod
 
 clean:
-	del /f $(MAN) $(HTML) $(TEX)
-	del /f pod2html-*cache
-	del /f *.aux *.log
+	rm -f $(MAN)
+	rm -f $(HTML)
+	rm -f $(TEX)
+	rm -f pod2html-*cache
+	rm -f *.aux *.log *.exe
 
 realclean:	clean
-	del /f $(CONVERTERS)
+	rm -f $(CONVERTERS)
 
 distclean:	realclean
 
 check:	checkpods
 	@echo "checking..."; \
-	$(PERL) -I..\lib checkpods $(POD)
+	$(PERL) -I../lib checkpods $(POD)
 
 # Dependencies.
-pod2latex:	pod2latex.PL ..\lib\Config.pm
-	$(PERL) -I..\lib pod2latex.PL
-	$(PERL) $(PL2BAT) pod2latex
+pod2latex:	pod2latex.PL ../lib/Config.pm
+	$(PERL) -I../lib pod2latex.PL
 
-pod2html:	pod2html.PL ..\lib\Config.pm
-	$(PERL) -I..\lib pod2html.PL
-	$(PERL) $(PL2BAT) pod2html
+pod2html:	pod2html.PL ../lib/Config.pm
+	$(PERL) -I ../lib pod2html.PL
 
-pod2man:	pod2man.PL ..\lib\Config.pm
-	$(PERL) -I..\lib pod2man.PL
-	$(PERL) $(PL2BAT) pod2man
+pod2man:	pod2man.PL ../lib/Config.pm
+	$(PERL) -I ../lib pod2man.PL
 
-pod2text:	pod2text.PL ..\lib\Config.pm
-	$(PERL) -I..\lib pod2text.PL
-	$(PERL) $(PL2BAT) pod2text
+pod2text:	pod2text.PL ../lib/Config.pm
+	$(PERL) -I ../lib pod2text.PL
 
-checkpods:	checkpods.PL ..\lib\Config.pm
-	$(PERL) -I..\lib checkpods.PL
-	$(PERL) $(PL2BAT) checkpods
+checkpods:	checkpods.PL ../lib/Config.pm
+	$(PERL) -I ../lib checkpods.PL
 
+compile: all
+	$(REALPERL) -I../lib ../utils/perlcc -regex 's/$$/.exe/' pod2latex pod2man pod2text checkpods -prog -verbose dcf -log ../compilelog;
 
+	

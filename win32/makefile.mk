@@ -324,6 +324,29 @@ X2P		= ..\x2p\a2p.exe
 PL2BAT		= bin\pl2bat.pl
 GLOBBAT		= bin\perlglob.bat
 
+UTILS		=			\
+		..\utils\h2ph		\
+		..\utils\splain		\
+		..\utils\perlbug	\
+		..\utils\pl2pm 		\
+		..\utils\c2ph		\
+		..\utils\h2xs		\
+		..\utils\perldoc	\
+		..\utils\pstruct	\
+		..\utils\perlcc		\
+		..\pod\checkpods	\
+		..\pod\pod2html		\
+		..\pod\pod2latex	\
+		..\pod\pod2man		\
+		..\pod\pod2text		\
+		..\x2p\find2perl	\
+		..\x2p\s2p		\
+		bin\www.pl		\
+		bin\runperl.pl		\
+		bin\pl2bat.pl		\
+		bin\perlglob.pl		\
+		bin\search.pl
+
 .IF "$(CCTYPE)" == "BORLAND"
 
 CFGSH_TMPL	= config.bc
@@ -842,21 +865,15 @@ $(SOCKET_DLL): $(PERLEXE) $(SOCKET).xs
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
 doc: $(PERLEXE)
-	cd ..\pod && $(MAKE) -f ..\win32\pod.mak checkpods \
-		pod2html pod2latex pod2man pod2text
-	cd ..\pod && $(XCOPY) *.bat ..\win32\bin\*.*
 	copy ..\README.win32 ..\pod\perlwin32.pod
 	$(PERLEXE) -I..\lib ..\installhtml --podroot=.. --htmldir=./html \
 	    --podpath=pod:lib:ext:utils --htmlroot="file://$(INST_HTML:s,:,|,)"\
 	    --libpod=perlfunc:perlguts:perlvar:perlrun:perlop --recurse
 
-utils: $(PERLEXE)
+utils: $(PERLEXE) $(X2P)
 	cd ..\utils && $(MAKE) PERL=$(MINIPERL)
-	cd ..\utils && $(PERLEXE) ..\win32\$(PL2BAT) h2ph splain perlbug \
-		pl2pm c2ph h2xs perldoc pstruct
-	$(XCOPY) ..\utils\*.bat bin\*.*
-	$(PERLEXE) -I..\lib $(PL2BAT) bin\network.pl bin\www.pl bin\runperl.pl \
-			bin\pl2bat.pl bin\perlglob.pl
+	cd ..\pod && $(MAKE) -f ..\win32\pod.mak converters
+	$(PERLEXE) $(PL2BAT) $(UTILS)
 
 distclean: clean
 	-del /f $(MINIPERL) $(PERLEXE) $(PERL95EXE) $(PERLDLL) $(GLOBEXE) \
@@ -887,18 +904,16 @@ distclean: clean
 	-rmdir /s /q $(AUTODIR) || rmdir /s $(AUTODIR)
 	-rmdir /s /q $(COREDIR) || rmdir /s $(COREDIR)
 
-install : all installbare installutils installhtml
+install : all installbare installhtml
 
-installbare :
+installbare : utils
 	$(PERLEXE) ..\installperl
 .IF "$(PERL95EXE)" != ""
 	$(XCOPY) $(PERL95EXE) $(INST_BIN)\*.*
 .ENDIF
-
-installutils : utils
 	$(XCOPY) $(GLOBEXE) $(INST_BIN)\*.*
 	$(XCOPY) bin\*.bat $(INST_SCRIPT)\*.*
-	$(XCOPY) ..\pod\*.bat $(INST_SCRIPT)\*.*
+	$(XCOPY) bin\network.pl $(INST_LIB)\*.*
 
 installhtml : doc
 	$(RCOPY) html\*.* $(INST_HTML)\*.*
