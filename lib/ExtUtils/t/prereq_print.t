@@ -13,9 +13,8 @@ BEGIN {
 use strict;
 use Config;
 
-use Test::More tests => 11;
+use Test::More tests => 8;
 use MakeMaker::Test::Utils;
-use MakeMaker::Test::Setup::BFD;
 
 # 'make disttest' sets a bunch of environment variables which interfere
 # with our testing.
@@ -29,12 +28,6 @@ chdir($Is_VMS ? 'BFD_TEST_ROOT:[t]' : 't');
 perl_lib;
 
 $| = 1;
-
-ok( setup_recurs(), 'setup' );
-END {
-    ok( chdir File::Spec->updir );
-    ok( teardown_recurs(), 'teardown' );
-}
 
 ok( chdir('Big-Dummy'), "chdir'd to Big-Dummy" ) ||
   diag("chdir failed: $!");

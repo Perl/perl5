@@ -125,6 +125,8 @@ The && problem.
 sub xs_o {
     my($self) = shift;
     return '' unless $self->needs_linking();
+    # Having to choose between .xs -> .c -> .o and .xs -> .o confuses dmake.
+    return '' if $DMAKE;
     '
 .xs$(OBJ_EXT):
 	$(PERLRUN) $(XSUBPP) $(XSPROTOARG) $(XSUBPPARGS) $*.xs > $*.c
@@ -209,11 +211,11 @@ sub os_flavor {
 
 =head1 AUTHOR
 
-Code originally inside MM_Win32.  Original author unknown.
+Code originally inside MM_Win32.  Original author unknown.  
 
-Currently maintained by Michael G Schwern C<schwern@pobox.com>.
+Currently maintained by Michael G Schwern <schwern@pobox.com>.
 
-Send patches and ideas to C<makemaker@perl.org>.
+Send patches and ideas to <F<makemaker@perl.org>>.
 
 See http://www.makemaker.org.
 

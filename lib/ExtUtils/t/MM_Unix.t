@@ -18,12 +18,14 @@ BEGIN {
         plan skip_all => 'Non-Unix platform';
     }
     else {
-        plan tests => 110;
+        plan tests => 115;
     }
 }
 
 BEGIN { use_ok( 'ExtUtils::MM_Unix' ); }
 
+use vars qw($VERSION);
+$VERSION = '0.02';
 use strict;
 use File::Spec;
 
@@ -72,6 +74,7 @@ foreach ( qw /
   const_loadlibs
   constants
   depend
+  dir_target
   dist
   dist_basics
   dist_ci
@@ -171,23 +174,42 @@ is ($t->libscan('Fatty'), 'Fatty', 'libscan on something not a VC file' );
 ###############################################################################
 # maybe_command
 
-open(FILE, ">command"); print FILE "foo"; close FILE;
-ok (!$t->maybe_command('command') ,"non executable file isn't a command");
-chmod 0755, "command";
-ok ($t->maybe_command('command'),        "executable file is a command");
-unlink "command";
+is ($t->maybe_command('blargel'),undef,"'blargel' isn't a command");
 
 ###############################################################################
 # nicetext (dummy method)
 
 is ($t->nicetext('LOTR'),'LOTR','nicetext');
 
+###############################################################################
+# parse_version
+
+my $self_name = $ENV{PERL_CORE} ? '../lib/ExtUtils/t/MM_Unix.t' 
+                                : 'MM_Unix.t';
+
+is( $t->parse_version($self_name), '0.02',  'parse_version on ourself');
+
+my %versions = (
+                '$VERSION = 0.0'    => 0.0,
+                '$VERSION = -1.0'   => -1.0,
+                '$VERSION = undef'  => 'undef',
+                '$wibble  = 1.0'    => 'undef',
+               );
+
+while( my($code, $expect) = each %versions ) {
+    open(FILE, ">VERSION.tmp") || die $!;
+    print FILE "$code\n";
+    close FILE;
+
+    is( $t->parse_version('VERSION.tmp'), $expect, $code );
+
+    unlink "VERSION.tmp";
+}
+
 
 ###############################################################################
 # perl_script (on unix any ordinary, readable file)
 
-my $self_name = $ENV{PERL_CORE} ? '../lib/ExtUtils/t/MM_Unix.t' 
-                                 : 'MM_Unix.t';
 is ($t->perl_script($self_name),$self_name, 'we pass as a perl_script()');
 
 ###############################################################################

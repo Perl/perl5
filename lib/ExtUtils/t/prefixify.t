@@ -23,8 +23,6 @@ use Config;
 use File::Spec;
 use ExtUtils::MM;
 
-my $Is_Dosish = $^O =~ /^(dos|MSWin32)$/;
-
 my $mm = bless {}, 'MM';
 
 my $default = File::Spec->catdir(qw(this that));
@@ -38,12 +36,11 @@ $mm->prefixify('installbin', 'wibble', 'something', $default);
 is( $mm->{INSTALLBIN}, File::Spec->catdir('something', $default),
                                             'prefixify w/defaults and PREFIX');
 
-SKIP: {
-    skip "Test for DOSish prefixification", 1 unless $Is_Dosish;
-
+{
     undef *ExtUtils::MM_Unix::Config;
     $ExtUtils::MM_Unix::Config{wibble} = 'C:\opt\perl\wibble';
     $mm->prefixify('wibble', 'C:\opt\perl', 'C:\yarrow');
 
     is( $mm->{WIBBLE}, 'C:\yarrow\wibble',  'prefixify Win32 paths' );
+    { package ExtUtils::MM_Unix;  Config->import }
 }

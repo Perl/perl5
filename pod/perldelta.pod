@@ -48,12 +48,6 @@ caveats.
 
 =item Encode
 
-=item ExtUtils::MakeMaker
-
-Now able to generate a SIGNATURE file if Module::Signature is installed,
-by passing (SIGN => 1) to WriteMakefile().  (Work completed as part of
-The Perl Foundation's grant to Autrijus Tang)
-
 =item File::Spec
 
 =item FindBin
