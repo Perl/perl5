@@ -59,6 +59,21 @@ case "$optimize" in
 	;;
 esac
 
+# we want optimisation
+
+case "$optimize" in
+'')	case "$cc" in 
+	*gcc*)	
+		optimize='-O3'				;;
+	*)	case "$_DEC_cc_style" in
+		new)	optimize='-O4'			;;
+		old)	optimize='-O2 -Olimit 3200'	;;
+	    	esac
+		;;
+	esac
+	;;
+esac
+
 # all compilers are ANSI
 ccflags="$ccflags -DSTANDARD_C"
 
@@ -91,7 +106,20 @@ case "$optimize" in
 esac
 
 #
+# Unset temporary variables no more needed.
+#
+
+unset _DEC_cc_style
+    
+#
 # History:
+#
+# perl5.003_27:
+#
+#	18-Feb-1997 Jarkko Hietaniemi <jhi@iki.fi>
+#
+#	* unset _DEC_cc_style and more commentary on -std1.
+#
 #
 # perl5.003_24:
 #
