@@ -1,7 +1,7 @@
 package Time::Piece;
 
 use strict;
-use vars qw($VERSION @ISA @EXPORT %EXPORT_TAGS);
+use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
 require Exporter;
 require DynaLoader;
@@ -13,6 +13,10 @@ use Carp;
 @EXPORT = qw(
     localtime
     gmtime
+);
+
+@EXPORT_OK = qw(
+    strptime
 );
 
 %EXPORT_TAGS = ( 
@@ -777,9 +781,8 @@ sub _ptime {
 }
 
 sub strptime {
-    my $time   = shift;
     my $format = shift;
-    my $stime =  @_ ? shift : "$time";
+    my $stime =  shift;
     my %ptime;
 
     while ($format ne '') {
@@ -944,13 +947,17 @@ http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2000-01/msg00241.html
 
 =head1 USAGE
 
-After importing this module, when you use localtime or gmtime in a scalar
-context, rather than getting an ordinary scalar string representing the
-date and time, you get a Time::Piece object, whose stringification happens
-to produce the same effect as the localtime and gmtime functions. There is 
-also a new() constructor provided, which is the same as localtime(), except
-when passed a Time::Piece object, in which case it's a copy constructor. The
-following methods are available on the object:
+After importing this module, when you use localtime(0 or gmtime() in
+scalar context, rather than getting an ordinary scalar string
+representing the date and time, you get a Time::Piece object, whose
+stringification happens to produce the same effect as the localtime()
+and gmtime(0 functions.
+
+There is also a new() constructor provided, which is the same as
+localtime(), except when passed a Time::Piece object, in which case
+it's a copy constructor.
+
+The following methods are available on the object:
 
     $t->s                    # 0..61 [1]
                              # and 61: leap second and double leap second
@@ -1024,7 +1031,7 @@ following methods are available on the object:
 Both wdayname (day) and monname (month) allow passing in a list to use
 to index the name of the days against. This can be useful if you need
 to implement some form of localisation without actually installing or
-using locales.
+using the locales provided by the operating system.
 
   my @days = qw( Dimanche Lundi Merdi Mercredi Jeudi Vendredi Samedi );
   
