@@ -271,6 +271,19 @@ sub predefine_encodings{
 		return $octets;
 	    };
 	}
+	*cat_decode = sub{ # ($obj, $dst, $src, $pos, $trm, $chk)
+	    my ($obj, undef, undef, $pos, $trm) = @_; # currently ignores $chk
+	    my ($rdst, $rsrc, $rpos) = \@_[1,2,3];
+	    use bytes;
+	    if ((my $npos = index($$rsrc, $trm, $pos)) >= 0) {
+		$$rdst .= substr($$rsrc, $pos, $npos - $pos + length($trm));
+		$$rpos = $npos + length($trm);
+		return 1;
+	    }
+	    $$rdst .= substr($$rsrc, $pos);
+	    $$rpos = length($$rsrc);
+	    return '';
+	};
 	$Encode::Encoding{utf8} =
 	    bless {Name => "utf8"} => "Encode::utf8";
     }

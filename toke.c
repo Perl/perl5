@@ -6882,6 +6882,10 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
     register char *to;			/* current position in the sv's data */
     I32 brackets = 1;			/* bracket nesting level */
     bool has_utf8 = FALSE;		/* is there any utf8 content? */
+    I32 termcode;			/* terminating char. code */
+    U8 termstr[UTF8_MAXLEN];		/* terminating string */
+    STRLEN termlen;			/* length of terminating string */
+    char *last = NULL;			/* last position for nesting bracket */
 
     /* skip space before the delimiter */
     if (isSPACE(*s))
@@ -6892,8 +6896,16 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 
     /* after skipping whitespace, the next character is the terminator */
     term = *s;
-    if (!UTF8_IS_INVARIANT((U8)term) && UTF)
-	has_utf8 = TRUE;
+    if (!UTF) {
+	termcode = termstr[0] = term;
+	termlen = 1;
+    }
+    else {
+	termcode = utf8_to_uvchr(s, &termlen);
+	Copy(s, termstr, termlen, U8);
+	if (!UTF8_IS_INVARIANT(term))
+	    has_utf8 = TRUE;
+    }
 
     /* mark where we are */
     PL_multi_start = CopLINE(PL_curcop);
@@ -6901,21 +6913,92 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 
     /* find corresponding closing delimiter */
     if (term && (tmps = strchr("([{< )]}> )]}>",term)))
-	term = tmps[5];
+	termcode = termstr[0] = term = tmps[5];
+
     PL_multi_close = term;
 
     /* create a new SV to hold the contents.  87 is leak category, I'm
        assuming.  79 is the SV's initial length.  What a random number. */
     sv = NEWSV(87,79);
     sv_upgrade(sv, SVt_PVIV);
-    SvIVX(sv) = term;
+    SvIVX(sv) = termcode;
     (void)SvPOK_only(sv);		/* validate pointer */
 
     /* move past delimiter and try to read a complete string */
     if (keep_delims)
-	sv_catpvn(sv, s, 1);
-    s++;
+	sv_catpvn(sv, s, termlen);
+    s += termlen;
     for (;;) {
+	if (PL_encoding && !UTF) {
+	    bool cont = TRUE;
+
+	    while (cont) {
+		int offset = s - SvPVX(PL_linestr);
+		bool found = sv_cat_decode(sv, PL_encoding, PL_linestr,
+					   &offset, termstr, termlen);
+		char *ns = SvPVX(PL_linestr) + offset;
+		char *svlast = SvEND(sv) - 1;
+
+		for (; s < ns; s++) {
+		    if (*s == '\n' && !PL_rsfp)
+			CopLINE_inc(PL_curcop);
+		}
+		if (!found)
+		    goto read_more_line;
+		else {
+		    /* handle quoted delimiters */
+		    if (*(svlast-1) == '\\') {
+			char *t;
+			for (t = svlast-2; t >= SvPVX(sv) && *t == '\\';)
+			    t--;
+			if ((svlast-1 - t) % 2) {
+			    if (!keep_quoted) {
+				*(svlast-1) = term;
+				*svlast = '\0';
+				SvCUR_set(sv, SvCUR(sv) - 1);
+			    }
+			    continue;
+			}
+		    }
+		    if (PL_multi_open == PL_multi_close) {
+			cont = FALSE;
+		    }
+		    else {
+			char *t, *w;
+			if (!last)
+			    last = SvPVX(sv);
+			for (w = t = last; t < svlast; w++, t++) {
+			    /* At here, all closes are "was quoted" one,
+			       so we don't check PL_multi_close. */
+			    if (*t == '\\') {
+				if (!keep_quoted && *(t+1) == PL_multi_open)
+				    t++;
+				else
+				    *w++ = *t++;
+			    }
+			    else if (*t == PL_multi_open)
+				brackets++;
+
+			    *w = *t;
+			}
+			if (w < t) {
+			    *w++ = term;
+			    *w = '\0';
+			    SvCUR_set(sv, w - SvPVX(sv));
+			}
+			last = w;
+			if (--brackets <= 0)
+			    cont = FALSE;
+		    }
+		}
+	    }
+	    if (!keep_delims) {
+		SvCUR_set(sv, SvCUR(sv) - 1);
+		*SvEND(sv) = '\0';
+	    }
+	    break;
+	}
+
     	/* extend sv if need be */
 	SvGROW(sv, SvCUR(sv) + (PL_bufend - s) + 1);
 	/* set 'to' to the next character in the sv's string */
@@ -6937,8 +7020,12 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 		}
 		/* terminate when run out of buffer (the for() condition), or
 		   have found the terminator */
-		else if (*s == term)
-		    break;
+		else if (*s == term) {
+		    if (termlen == 1)
+			break;
+		    if (s+termlen <= PL_bufend && memEQ(s, termstr, termlen))
+			break;
+		}
 		else if (!has_utf8 && !UTF8_IS_INVARIANT((U8)*s) && UTF)
 		    has_utf8 = TRUE;
 		*to = *s;
@@ -7000,6 +7087,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 	    to[-1] = '\n';
 #endif
 	
+     read_more_line:
 	/* if we're out of file, or a read fails, bail and reset the current
 	   line marker so we can report where the unterminated string began
 	*/
@@ -7030,15 +7118,15 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 
     /* at this point, we have successfully read the delimited string */
 
-    if (keep_delims)
-	sv_catpvn(sv, s, 1);
-    if (has_utf8)
+    if (!PL_encoding || UTF) {
+	if (keep_delims)
+	    sv_catpvn(sv, s, termlen);
+	s += termlen;
+    }
+    if (has_utf8 || PL_encoding)
 	SvUTF8_on(sv);
-    else if (PL_encoding)
-	sv_recode_to_utf8(sv, PL_encoding);
 
     PL_multi_end = CopLINE(PL_curcop);
-    s++;
 
     /* if we allocated too much space, give some back */
     if (SvCUR(sv) + 5 < SvLEN(sv)) {

@@ -37,7 +37,7 @@ no utf8; # Ironic, no?
 #
 #
 
-plan tests => 98;
+plan tests => 99;
 
 {
     # bug id 20001009.001
@@ -323,3 +323,8 @@ END
     is("@i", "60 62 58 50 52 48 70 72 68", "utf8 heredoc index and rindex");
 }
 
+{
+    use utf8;
+    eval qq{is(q \xc3\xbc test \xc3\xbc, qq\xc2\xb7 test \xc2\xb7,
+	       "utf8 quote delimiters [perl #16823]");};
+}

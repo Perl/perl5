@@ -130,6 +130,13 @@ replacement character.
 
 =back
 
+=item -E<gt>cat_decode($destination, $octets, $offset, $terminator [,$check])
+
+MUST decode I<$octets> with I<$offset> and concatenate it to I<$destination>.
+Decoding will terminate when $terminator (a string) appears in output.
+I<$offset> will be modified to the last $octets position at end of decode.
+Returns true if $terminator appears output, else returns false.
+
 =head2 Other methods defined in Encode::Encodings
 
 You do not have to override methods shown below unless you have to.
