@@ -15,7 +15,7 @@ use Socket;
 use Test::More;
 use strict;
 use warnings;
-use Errno 'EPIPE';
+use Errno qw(EPIPE ESHUTDOWN);
 
 my $skip_reason;
 
@@ -89,7 +89,7 @@ $SIG{PIPE} = 'IGNORE';
 }
 SKIP: {
   # This may need skipping on some OSes
-  ok ($! == EPIPE, '$! should be EPIPE')
+  ok (($! == EPIPE or $! == ESHUTDOWN), '$! should be EPIPE or ESHUTDOWN')
     or printf "\$\!=%d(%s)\n", $!, $!;
 }
 

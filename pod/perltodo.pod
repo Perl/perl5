@@ -148,7 +148,7 @@ Reader-writer locks, realtime/asynchronous IO
 
 =head2 IPv6 Support
 
-There are non-core modules, such as C<Net::IPv6>, but these will need
+There are non-core modules, such as C<Socket6>, but these will need
 integrating when IPv6 actually starts to really happen.  See RFC 2292
 and RFC 2553.
 
@@ -223,7 +223,7 @@ C<&>, C<oct>, C<hex> and C<pack>.
 
 =head2 Replace pod2html with something using Pod::Parser
 
-The CPAN module C<Malik::Pod::Html> may be a more suitable basis for a
+The CPAN module C<Marek::Pod::Html> may be a more suitable basis for a
 C<pod2html> convertor; the current one duplicates the functionality
 abstracted in C<Pod::Parser>, which makes updating the POD language
 difficult.

@@ -2752,7 +2752,7 @@ and opening C<< '>-' >> opens STDOUT.
 You may use the three-argument form of open to specify
 I<I/O disciplines> that affect how the input and output
 are processed: see L</binmode> and L<open>.  For example
-  
+
   open(FH, "<:utf8", "file")
 
 will open the UTF-8 encoded file containing Unicode characters,
@@ -4236,7 +4236,7 @@ documentation.
 
 =item send SOCKET,MSG,FLAGS
 
-Sends a message on a socket.  Attemps to send the scalar MSG to the
+Sends a message on a socket.  Attempts to send the scalar MSG to the
 SOCKET filehandle.  Takes the same flags as the system call of the
 same name.  On unconnected sockets you must specify a destination to
 send TO, in which case it does a C C<sendto>.  Returns the number of

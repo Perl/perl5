@@ -142,7 +142,7 @@ Using perl's built in conversion of 0x notation:
 
     $int = 0xDEADBEEF;
     $dec = sprintf("%d", $int);
- 
+
 Using the hex function:
 
     $int = hex("DEADBEEF");
@@ -1849,7 +1849,7 @@ in L<perltoot>.
 
 =head2 How can I use a reference as a hash key?
 
-You can't do this directly, but you could use the standard Tie::Refhash
+You can't do this directly, but you could use the standard Tie::RefHash
 module distributed with Perl.
 
 =head1 Data: Misc
@@ -1919,10 +1919,10 @@ respectively.
 =head2 How do I keep persistent data across program calls?
 
 For some specific applications, you can use one of the DBM modules.
-See L<AnyDBM_File>.  More generically, you should consult the FreezeThaw,
-Storable, or Class::Eroot modules from CPAN.  Starting from Perl 5.8
-Storable is part of the standard distribution.  Here's one example using
-Storable's C<store> and C<retrieve> functions:
+See L<AnyDBM_File>.  More generically, you should consult the FreezeThaw
+or Storable modules from CPAN.  Starting from Perl 5.8 Storable is part
+of the standard distribution.  Here's one example using Storable's C<store>
+and C<retrieve> functions:
 
     use Storable; 
     store(\%hash, "filename");

@@ -247,7 +247,7 @@ portion of the string between the "real" and the "fake" beginnings is
 shown in parentheses, and the values of C<SvCUR> and C<SvLEN> reflect
 the fake beginning, not the real one.
 
-Something similar to the offset hack is perfomed on AVs to enable
+Something similar to the offset hack is performed on AVs to enable
 efficient shifting and splicing off the beginning of the array; while
 C<AvARRAY> points to the first element in the array that is visible from
 Perl, C<AvALLOC> points to the real start of the C array. These are

@@ -88,12 +88,6 @@
 #define const
 #endif
 
-/* HAS_CRYPT:
- *	This symbol, if defined, indicates that the crypt routine is available
- *	to encrypt passwords and the like.
- */
-/*#define HAS_CRYPT		/**/
-
 /* HAS_CUSERID:
  *	This symbol, if defined, indicates that the cuserid routine is
  *	available to get character login names.
@@ -1307,7 +1301,7 @@
  *	This symbol, when defined, indicates presence of the fd_set typedef
  *	in <sys/types.h>
  */
-/*#define HAS_FD_SET	/**/
+#define HAS_FD_SET	/**/
 
 /* HAS_FINITE:
  *	This symbol, if defined, indicates that the finite routine is
@@ -3400,6 +3394,12 @@
 #define PERL_XS_APIVERSION "5.00563"
 #define PERL_PM_APIVERSION "5.005"
 
+/* HAS_CRYPT:
+ *	This symbol, if defined, indicates that the crypt routine is available
+ *	to encrypt passwords and the like.
+ */
+/*#define HAS_CRYPT		/**/
+
 /* SETUID_SCRIPTS_ARE_SECURE_NOW:
  *	This symbol, if defined, indicates that the bug that prevents
  *	setuid scripts from being secure is not present in this kernel.
@@ -3502,6 +3502,11 @@
 /* HAS_PROCSELFEXE:
  *	This symbol is defined if PROCSELFEXE_PATH is a symlink
  *	to the absolute pathname of the executing program.
+ */
+/* PROCSELFEXE_PATH:
+ *	If HAS_PROCSELFEXE is defined this symbol is the filename
+ *	of the symbolic link pointing to the absolute pathname of
+ *	the executing program.
  */
 /*#define HAS_PROCSELFEXE	/**/
 #if defined(HAS_PROCSELFEXE) && !defined(PROCSELFEXE_PATH)

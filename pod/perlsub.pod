@@ -1204,7 +1204,7 @@ Note however that some built-ins can't have their syntax expressed by a
 prototype (such as C<system> or C<chomp>).  If you override them you won't
 be able to fully mimic their original syntax.
 
-The built-ins C<do>, C<require> and C<glob> can also be overriden, but due
+The built-ins C<do>, C<require> and C<glob> can also be overridden, but due
 to special magic, their original syntax is preserved, and you don't have
 to define a prototype for their replacements.  (You can't override the
 C<do BLOCK> syntax, though).
@@ -1214,9 +1214,9 @@ C<require> replacement as C<require Foo::Bar>, it will actually receive
 the argument C<"Foo/Bar.pm"> in @_.  See L<perlfunc/require>.
 
 And, as you'll have noticed from the previous example, if you override
-C<glob>, the C<E<lt>*E<gt>> glob operator is overriden as well.
+C<glob>, the C<E<lt>*E<gt>> glob operator is overridden as well.
 
-Finally, some built-ins (e.g. C<exists> or C<grep>) can't be overriden.
+Finally, some built-ins (e.g. C<exists> or C<grep>) can't be overridden.
 
 =head2 Autoloading
 

@@ -109,7 +109,7 @@ numbers - which we've had to count by hand. So it's error-prone as well
 as horribly unfriendly.
 
 Or maybe we could use regular expressions:
-    
+
     while (<>) { 
         my($date, $desc, $income, $expend) = 
             m|(\d\d/\d\d/\d{4}) (.{27}) (.{7})(.*)|;
@@ -661,7 +661,7 @@ cannot be unpacked naively:
 
    # pack a message
    my $msg = pack( 'Z*Z*CA*C', $src, $dst, length( $sm ), $sm, $prio );
-   
+
    # unpack fails - $prio remains undefined!
    ( $src, $dst, $len, $sm, $prio ) = unpack( 'Z*Z*CA*C', $msg );
 
@@ -727,7 +727,7 @@ call, creating the items we intend to stuff into the C<$env> buffer:
 to each key (in C<$_>) it adds the C<=> separator and the hash entry value.
 Each triplet is packed with the template code sequence C<A*A*Z*> that
 is multiplied with the number of keys. (Yes, that's what the C<keys>
-function resturns in scalar context.) To get the very last null byte,
+function returns in scalar context.) To get the very last null byte,
 we add a C<0> at the end of the C<pack> list, to be packed with C<C>.
 (Attentive readers may have noticed that we could have omitted the 0.)
 
