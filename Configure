@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Feb  8 01:45:46 EET 1999 [metaconfig 3.0 PL70]
+# Generated on Mon Feb  8 16:55:49 EET 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -11931,6 +11931,7 @@ if $test -z ccsym.raw; then
 	$cat Cppsym.true
     	ccsymbols=''
 	cppsymbols=`$cat Cppsym.true`
+        cppsymbols=`echo $cppsymbols`
 	cppccsymbols="$cppsymbols"
 else
 	if $test -s ccsym.com; then
@@ -11939,6 +11940,7 @@ else
 		also='also '
 		symbols='ones'
 		cppccsymbols=`$cat ccsym.com`
+		cppccsymbols=`echo $cppccsymbols`
 		$test "$silent" || sleep 1
 	fi
 	if $test -s ccsym.cpp; then
@@ -11947,6 +11949,7 @@ else
 		$sed -e 's/\(.*\)=.*/\1/' ccsym.cpp
 		also='further '
 		cppsymbols=`$cat ccsym.cpp`
+		cppsymbols=`echo $cppsymbols`
 		$test "$silent" || sleep 1
 	fi
 	if $test -s ccsym.own; then
@@ -11955,6 +11958,7 @@ else
 		$sed -e 's/\(.*\)=1/\1/' ccsym.own
 		$sed -e 's/\(.*\)=.*/\1/' ccsym.own | $uniq >>Cppsym.true
 	        ccsymbols=`$cat ccsym.own`
+	        ccsymbols=`echo $ccsymbols`
 		$test "$silent" || sleep 1
 	fi
 fi
