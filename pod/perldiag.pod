@@ -195,16 +195,6 @@ thread.  See L<threads>.
 (F) The failing code has attempted to get or set a key which is not in
 the current set of allowed keys of a restricted hash.
 
-=item Attempt to delete readonly key '%s' from a restricted hash
-
-(F) The failing code attempted to delete a key whose value has been
-declared readonly from a restricted hash.
-
-=item Attempt to delete disallowed key '%s' from a restricted hash
-
-(F) The failing code attempted to delete from a restricted hash a key
-which is not in its key set.
-
 =item Attempt to bless into a reference
 
 (F) The CLASSNAME argument to the bless() operator is expected to be
