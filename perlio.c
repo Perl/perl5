@@ -2389,7 +2389,7 @@ IV
 PerlIOUnix_seek(pTHX_ PerlIO *f, Off_t offset, int whence)
 {
     int fd = PerlIOSelf(f, PerlIOUnix)->fd;
-    Off_t new;
+    Off_t new_loc;
     if (PerlIOBase(f)->flags & PERLIO_F_NOTREG) {
 #ifdef  ESPIPE
 	SETERRNO(ESPIPE, LIB_INVARG);
@@ -2398,8 +2398,8 @@ PerlIOUnix_seek(pTHX_ PerlIO *f, Off_t offset, int whence)
 #endif
 	return -1;
     }
-    new  = PerlLIO_lseek(fd, offset, whence);
-    if (new == (Off_t) - 1)
+    new_loc = PerlLIO_lseek(fd, offset, whence);
+    if (new_loc == (Off_t) - 1)
      {
       return -1;
      }

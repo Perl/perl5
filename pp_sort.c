@@ -1503,7 +1503,7 @@ PP(pp_sort)
     bool hasargs = FALSE;
     I32 is_xsub = 0;
     I32 sorting_av = 0;
-    U8 private = PL_op->op_private;
+    U8 priv = PL_op->op_private;
     U8 flags = PL_op->op_flags;
     void (*sortsvp)(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp)
       = Perl_sortsv;
@@ -1566,7 +1566,7 @@ PP(pp_sort)
     /* optimiser converts "@a = sort @a" to "sort \@a";
      * in case of tied @a, pessimise: push (@a) onto stack, then assign
      * result back to @a at the end of this function */
-    if (private & OPpSORT_INPLACE) {
+    if (priv & OPpSORT_INPLACE) {
 	assert( MARK+1 == SP && *SP && SvTYPE(*SP) == SVt_PVAV);
 	(void)POPMARK; /* remove mark associated with ex-OP_AASSIGN */
 	av = (AV*)(*SP);
@@ -1589,7 +1589,7 @@ PP(pp_sort)
 	max = SP - MARK;
    }
 
-    if (private & OPpSORT_DESCEND) {
+    if (priv & OPpSORT_DESCEND) {
 	sortsvp = S_sortsv_desc;
     }
 
@@ -1668,8 +1668,8 @@ PP(pp_sort)
 	    MEXTEND(SP, 20);	/* Can't afford stack realloc on signal. */
 	    start = sorting_av ? AvARRAY(av) : ORIGMARK+1;
 	    sortsvp(aTHX_ start, max,
-		    (private & OPpSORT_NUMERIC)
-			? ( (private & OPpSORT_INTEGER)
+		    (priv & OPpSORT_NUMERIC)
+			? ( (priv & OPpSORT_INTEGER)
 			    ? ( overloading ? amagic_i_ncmp : sv_i_ncmp)
 			    : ( overloading ? amagic_ncmp : sv_ncmp))
 			: ( IN_LOCALE_RUNTIME
@@ -1678,7 +1678,7 @@ PP(pp_sort)
 				: sv_cmp_locale_static)
 			    : ( overloading ? amagic_cmp : sv_cmp_static)));
 	}
-	if (private & OPpSORT_REVERSE) {
+	if (priv & OPpSORT_REVERSE) {
 	    SV **q = start+max-1;
 	    while (start < q) {
 		SV *tmp = *start;

@@ -6177,7 +6177,7 @@ Perl_ck_subr(pTHX_ OP *o)
     I32 contextclass = 0;
     char *e = 0;
     STRLEN n_a;
-    bool delete=0;
+    bool delete_op = 0;
 
     o->op_private |= OPpENTERSUB_HASTARG;
     for (cvop = o2; cvop->op_sibling; cvop = cvop->op_sibling) ;
@@ -6202,7 +6202,7 @@ Perl_ck_subr(pTHX_ OP *o)
 			    o->op_private |= OPpENTERSUB_DB;
 		    }
 		    else {
-			delete=1;
+			delete_op = 1;
 			if (ckWARN(WARN_ASSERTIONS) && !(PL_hints & HINT_ASSERTIONSSEEN)) {
 			    Perl_warner(aTHX_ packWARN(WARN_ASSERTIONS),
 					"Impossible to activate assertion call");
@@ -6390,7 +6390,7 @@ Perl_ck_subr(pTHX_ OP *o)
     if (proto && !optional &&
 	  (*proto && *proto != '@' && *proto != '%' && *proto != ';'))
 	return too_few_arguments(o, gv_ename(namegv));
-    if(delete) {
+    if(delete_op) {
 	op_free(o);
 	o=newSVOP(OP_CONST, 0, newSViv(0));
     }

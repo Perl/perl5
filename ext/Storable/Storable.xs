@@ -289,6 +289,7 @@ typedef unsigned long stag_t;	/* Used by pre-0.6 binary format */
  * perl to remap such common words.	-- RAM, 29/09/00
  */
 
+struct stcxt;
 typedef struct stcxt {
 	int entry;			/* flags recursion */
 	int optype;			/* type of traversal operation */
@@ -322,7 +323,7 @@ typedef struct stcxt {
 	PerlIO *fio;		/* where I/O are performed, NULL for memory */
 	int ver_major;		/* major of version for retrieved object */
 	int ver_minor;		/* minor of version for retrieved object */
-	SV *(**retrieve_vtbl)();	/* retrieve dispatch table */
+	SV *(**retrieve_vtbl)(pTHX_ struct stcxt *, char *);	/* retrieve dispatch table */
 	SV *prev;		/* contexts chained backwards in real recursion */
 	SV *my_sv;		/* the blessed scalar who's SvPVX() I am */
 } stcxt_t;
@@ -2760,7 +2761,7 @@ static int store_hook(
 	SV *hook)
 {
 	I32 len;
-	char *class;
+	char *classname;
 	STRLEN len2;
 	SV *ref;
 	AV *av;
@@ -2777,7 +2778,7 @@ static int store_hook(
 	char mtype = '\0';				/* for blessed ref to tied structures */
 	unsigned char eflags = '\0';	/* used when object type is SHT_EXTRA */
 
-	TRACEME(("store_hook, class \"%s\", tagged #%d", HvNAME(pkg), cxt->tagnum));
+	TRACEME(("store_hook, classname \"%s\", tagged #%d", HvNAME(pkg), cxt->tagnum));
 
 	/*
 	 * Determine object type on 2 bits.
@@ -2828,8 +2829,8 @@ static int store_hook(
 	}
 	flags = SHF_NEED_RECURSE | obj_type;
 
-	class = HvNAME(pkg);
-	len = strlen(class);
+	classname = HvNAME(pkg);
+	len = strlen(classname);
 
 	/*
 	 * To call the hook, we need to fake a call like:
@@ -2844,7 +2845,7 @@ static int store_hook(
 	 * make the call on that reference.
 	 */
 
-	TRACEME(("about to call STORABLE_freeze on class %s", class));
+	TRACEME(("about to call STORABLE_freeze on class %s", classname));
 
 	ref = newRV_noinc(sv);				/* Temporary reference */
 	av = array_call(aTHX_ ref, hook, clone);	/* @a = $object->STORABLE_freeze($c) */
@@ -2868,14 +2869,14 @@ static int store_hook(
 		 * They must not change their mind in the middle of a serialization.
 		 */
 
-		if (hv_fetch(cxt->hclass, class, len, FALSE))
+		if (hv_fetch(cxt->hclass, classname, len, FALSE))
 			CROAK(("Too late to ignore hooks for %s class \"%s\"",
-				(cxt->optype & ST_CLONE) ? "cloning" : "storing", class));
+				(cxt->optype & ST_CLONE) ? "cloning" : "storing", classname));
 	
 		pkg_hide(aTHX_ cxt->hook, pkg, "STORABLE_freeze");
 
 		ASSERT(!pkg_can(aTHX_ cxt->hook, pkg, "STORABLE_freeze"), ("hook invisible"));
-		TRACEME(("ignoring STORABLE_freeze in class \"%s\"", class));
+		TRACEME(("ignoring STORABLE_freeze in class \"%s\"", classname));
 
 		return store_blessed(aTHX_ cxt, sv, type, pkg);
 	}
@@ -2908,7 +2909,7 @@ static int store_hook(
 
 		if (!SvROK(rsv))
 			CROAK(("Item #%d returned by STORABLE_freeze "
-				"for %s is not a reference", i, class));
+				"for %s is not a reference", i, classname));
 		xsv = SvRV(rsv);		/* Follow ref to know what to look for */
 
 		/*
@@ -2946,7 +2947,7 @@ static int store_hook(
 
 		svh = hv_fetch(cxt->hseen, (char *) &xsv, sizeof(xsv), FALSE);
 		if (!svh)
-			CROAK(("Could not serialize item #%d from hook in %s", i, class));
+			CROAK(("Could not serialize item #%d from hook in %s", i, classname));
 
 		/*
 		 * It was the first time we serialized `xsv'.
@@ -2991,11 +2992,11 @@ static int store_hook(
 	 * proposed the right fix.  -- RAM, 15/09/2000
 	 */
 
-	if (!known_class(aTHX_ cxt, class, len, &classnum)) {
-		TRACEME(("first time we see class %s, ID = %d", class, classnum));
+	if (!known_class(aTHX_ cxt, classname, len, &classnum)) {
+		TRACEME(("first time we see class %s, ID = %d", classname, classnum));
 		classnum = -1;				/* Mark: we must store classname */
 	} else {
-		TRACEME(("already seen class %s, ID = %d", class, classnum));
+		TRACEME(("already seen class %s, ID = %d", classname, classnum));
 	}
 
 	/*
@@ -3051,7 +3052,7 @@ static int store_hook(
 			unsigned char clen = (unsigned char) len;
 			PUTMARK(clen);
 		}
-		WRITE(class, len);		/* Final \0 is omitted */
+		WRITE(classname, len);		/* Final \0 is omitted */
 	}
 
 	/* <len2> <frozen-str> */
@@ -3158,7 +3159,7 @@ static int store_blessed(
 {
 	SV *hook;
 	I32 len;
-	char *class;
+	char *classname;
 	I32 classnum;
 
 	TRACEME(("store_blessed, type %d, class \"%s\"", type, HvNAME(pkg)));
@@ -3176,8 +3177,8 @@ static int store_blessed(
 	 * This is a blessed SV without any serialization hook.
 	 */
 
-	class = HvNAME(pkg);
-	len = strlen(class);
+	classname = HvNAME(pkg);
+	len = strlen(classname);
 
 	TRACEME(("blessed 0x%"UVxf" in %s, no hook: tagged #%d",
 		 PTR2UV(sv), class, cxt->tagnum));
@@ -3189,8 +3190,8 @@ static int store_blessed(
 	 * used).
 	 */
 
-	if (known_class(aTHX_ cxt, class, len, &classnum)) {
-		TRACEME(("already seen class %s, ID = %d", class, classnum));
+	if (known_class(aTHX_ cxt, classname, len, &classnum)) {
+		TRACEME(("already seen class %s, ID = %d", classname, classnum));
 		PUTMARK(SX_IX_BLESS);
 		if (classnum <= LG_BLESS) {
 			unsigned char cnum = (unsigned char) classnum;
@@ -3201,7 +3202,7 @@ static int store_blessed(
 			WLEN(classnum);
 		}
 	} else {
-		TRACEME(("first time we see class %s, ID = %d", class, classnum));
+		TRACEME(("first time we see class %s, ID = %d", classname, classnum));
 		PUTMARK(SX_BLESS);
 		if (len <= LG_BLESS) {
 			unsigned char clen = (unsigned char) len;
@@ -3211,7 +3212,7 @@ static int store_blessed(
 			PUTMARK(flag);
 			WLEN(len);					/* Don't BER-encode, this should be rare */
 		}
-		WRITE(class, len);				/* Final \0 is omitted */
+		WRITE(classname, len);				/* Final \0 is omitted */
 	}
 
 	/*
@@ -3776,7 +3777,7 @@ static SV *retrieve_other(pTHX_ stcxt_t *cxt, char *cname)
 static SV *retrieve_idx_blessed(pTHX_ stcxt_t *cxt, char *cname)
 {
 	I32 idx;
-	char *class;
+	char *classname;
 	SV **sva;
 	SV *sv;
 
@@ -3795,15 +3796,15 @@ static SV *retrieve_idx_blessed(pTHX_ stcxt_t *cxt, char *cname)
 	if (!sva)
 		CROAK(("Class name #%"IVdf" should have been seen already", (IV) idx));
 
-	class = SvPVX(*sva);	/* We know it's a PV, by construction */
+	classname = SvPVX(*sva);	/* We know it's a PV, by construction */
 
-	TRACEME(("class ID %d => %s", idx, class));
+	TRACEME(("class ID %d => %s", idx, classname));
 
 	/*
 	 * Retrieve object and bless it.
 	 */
 
-	sv = retrieve(aTHX_ cxt, class);	/* First SV which is SEEN will be blessed */
+	sv = retrieve(aTHX_ cxt, classname);	/* First SV which is SEEN will be blessed */
 
 	return sv;
 }
@@ -3819,7 +3820,7 @@ static SV *retrieve_blessed(pTHX_ stcxt_t *cxt, char *cname)
 	I32 len;
 	SV *sv;
 	char buf[LG_BLESS + 1];		/* Avoid malloc() if possible */
-	char *class = buf;
+	char *classname = buf;
 
 	TRACEME(("retrieve_blessed (#%d)", cxt->tagnum));
 	ASSERT(!cname, ("no bless-into class given here, got %s", cname));
@@ -3835,27 +3836,27 @@ static SV *retrieve_blessed(pTHX_ stcxt_t *cxt, char *cname)
 	if (len & 0x80) {
 		RLEN(len);
 		TRACEME(("** allocating %d bytes for class name", len+1));
-		New(10003, class, len+1, char);
+		New(10003, classname, len+1, char);
 	}
-	READ(class, len);
-	class[len] = '\0';		/* Mark string end */
+	READ(classname, len);
+	classname[len] = '\0';		/* Mark string end */
 
 	/*
 	 * It's a new classname, otherwise it would have been an SX_IX_BLESS.
 	 */
 
-	TRACEME(("new class name \"%s\" will bear ID = %d", class, cxt->classnum));
+	TRACEME(("new class name \"%s\" will bear ID = %d", classname, cxt->classnum));
 
-	if (!av_store(cxt->aclass, cxt->classnum++, newSVpvn(class, len)))
+	if (!av_store(cxt->aclass, cxt->classnum++, newSVpvn(classname, len)))
 		return (SV *) 0;
 
 	/*
 	 * Retrieve object and bless it.
 	 */
 
-	sv = retrieve(aTHX_ cxt, class);	/* First SV which is SEEN will be blessed */
-	if (class != buf)
-		Safefree(class);
+	sv = retrieve(aTHX_ cxt, classname);	/* First SV which is SEEN will be blessed */
+	if (classname != buf)
+		Safefree(classname);
 
 	return sv;
 }
@@ -3884,7 +3885,7 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, char *cname)
 {
 	I32 len;
 	char buf[LG_BLESS + 1];		/* Avoid malloc() if possible */
-	char *class = buf;
+	char *classname = buf;
 	unsigned int flags;
 	I32 len2;
 	SV *frozen;
@@ -3995,8 +3996,8 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, char *cname)
 			CROAK(("Class name #%"IVdf" should have been seen already",
 				(IV) idx));
 
-		class = SvPVX(*sva);	/* We know it's a PV, by construction */
-		TRACEME(("class ID %d => %s", idx, class));
+		classname = SvPVX(*sva);	/* We know it's a PV, by construction */
+		TRACEME(("class ID %d => %s", idx, classname));
 
 	} else {
 		/*
@@ -4014,21 +4015,21 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, char *cname)
 
 		if (len > LG_BLESS) {
 			TRACEME(("** allocating %d bytes for class name", len+1));
-			New(10003, class, len+1, char);
+			New(10003, classname, len+1, char);
 		}
 
-		READ(class, len);
-		class[len] = '\0';		/* Mark string end */
+		READ(classname, len);
+		classname[len] = '\0';		/* Mark string end */
 
 		/*
 		 * Record new classname.
 		 */
 
-		if (!av_store(cxt->aclass, cxt->classnum++, newSVpvn(class, len)))
+		if (!av_store(cxt->aclass, cxt->classnum++, newSVpvn(classname, len)))
 			return (SV *) 0;
 	}
 
-	TRACEME(("class name: %s", class));
+	TRACEME(("class name: %s", classname));
 
 	/*
 	 * Decode user-frozen string length and read it in an SV.
@@ -4113,7 +4114,7 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, char *cname)
 	 * Bless the object and look up the STORABLE_thaw hook.
 	 */
 
-	BLESS(sv, class);
+	BLESS(sv, classname);
 	hook = pkg_can(aTHX_ cxt->hook, SvSTASH(sv), "STORABLE_thaw");
 	if (!hook) {
 		/*
@@ -4126,10 +4127,10 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, char *cname)
 		 */
 
 		SV *psv = newSVpvn("require ", 8);
-		sv_catpv(psv, class);
+		sv_catpv(psv, classname);
 
-		TRACEME(("No STORABLE_thaw defined for objects of class %s", class));
-		TRACEME(("Going to require module '%s' with '%s'", class, SvPVX(psv)));
+		TRACEME(("No STORABLE_thaw defined for objects of class %s", classname));
+		TRACEME(("Going to require module '%s' with '%s'", classname, SvPVX(psv)));
 
 		perl_eval_sv(psv, G_DISCARD);
 		sv_free(psv);
@@ -4144,7 +4145,7 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, char *cname)
 
 		if (!hook)
 			CROAK(("No STORABLE_thaw defined for objects of class %s "
-					"(even after a \"require %s;\")", class, class));
+					"(even after a \"require %s;\")", classname, classname));
 	}
 
 	/*
@@ -4175,7 +4176,7 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, char *cname)
 	 */
 
 	TRACEME(("calling STORABLE_thaw on %s at 0x%"UVxf" (%"IVdf" args)",
-		 class, PTR2UV(sv), (IV) AvFILLp(av) + 1));
+		 classname, PTR2UV(sv), (IV) AvFILLp(av) + 1));
 
 	rv = newRV(sv);
 	(void) scalar_call(aTHX_ rv, hook, clone, av, G_SCALAR|G_DISCARD);
@@ -4188,8 +4189,8 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, char *cname)
 	SvREFCNT_dec(frozen);
 	av_undef(av);
 	sv_free((SV *) av);
-	if (!(flags & SHF_IDX_CLASSNAME) && class != buf)
-		Safefree(class);
+	if (!(flags & SHF_IDX_CLASSNAME) && classname != buf)
+		Safefree(classname);
 
 	/*
 	 * If we had an <extra> type, then the object was not as simple, and

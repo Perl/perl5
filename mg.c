@@ -146,7 +146,7 @@ Perl_mg_get(pTHX_ SV *sv)
 {
     const I32 mgs_ix = SSNEW(sizeof(MGS));
     const bool was_temp = (bool)SvTEMP(sv);
-    int new = 0;
+    int have_new = 0;
     MAGIC *newmg, *head, *cur, *mg;
     /* guard against sv having being freed midway by holding a private
        reference. */
@@ -185,19 +185,19 @@ Perl_mg_get(pTHX_ SV *sv)
 
 	mg = mg->mg_moremagic;
 
-	if (new) {
+	if (have_new) {
 	    /* Have we finished with the new entries we saw? Start again
 	       where we left off (unless there are more new entries). */
 	    if (mg == head) {
-		new  = 0;
+		have_new = 0;
 		mg   = cur;
 		head = newmg;
 	    }
 	}
 
 	/* Were any new entries added? */
-	if (!new && (newmg = SvMAGIC(sv)) != head) {
-	    new = 1;
+	if (!have_new && (newmg = SvMAGIC(sv)) != head) {
+	    have_new = 1;
 	    cur = mg;
 	    mg  = newmg;
 	}

@@ -398,7 +398,7 @@ XS(XS_version_new)
 	Perl_croak(aTHX_ "Usage: version::new(class, version)");
     SP -= items;
     {
-        const char *class = SvPV_nolen(ST(0));
+        const char *classname = SvPV_nolen(ST(0));
         SV *vs = ST(1);
 	SV *rv;
 	if (items == 3 )
@@ -408,8 +408,8 @@ XS(XS_version_new)
 	}
 
 	rv = new_version(vs);
-	if ( strcmp(class,"version") != 0 ) /* inherited new() */
-	    sv_bless(rv, gv_stashpv(class,TRUE));
+	if ( strcmp(classname,"version") != 0 ) /* inherited new() */
+	    sv_bless(rv, gv_stashpv(classname,TRUE));
 
 	PUSHs(sv_2mortal(rv));
 	PUTBACK;
