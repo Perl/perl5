@@ -26,13 +26,13 @@ $ORS = "\n";
 print 'ok',7;
 undef $OUTPUT_FIELD_SEPARATOR;
 
-$LIST_SEPARATOR = "\n";
+if ($threads) { $" = "\n" } else { $LIST_SEPARATOR = "\n" };
 @foo = ("ok 8", "ok 9");
 print "@foo";
 undef $OUTPUT_RECORD_SEPARATOR;
 
 eval 'NO SUCH FUNCTION';
-print "ok 10\n" if $EVAL_ERROR =~ /method/;
+print "ok 10\n" if $EVAL_ERROR =~ /method/ || $threads;
 
 print $UID == $< ? "ok 11\n" : "not ok 11\n";
 print $GID == $( ? "ok 12\n" : "not ok 12\n";

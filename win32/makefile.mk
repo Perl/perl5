@@ -11,7 +11,7 @@
 # newly built perl.
 INST_DRV=c:
 INST_TOP=$(INST_DRV)\perl\perl5004.5X
-BUILDOPT=-DUSE_THREADS -P
+BUILDOPT=-DUSE_THREADS 
 
 # -DUSE_PERLIO -D__STDC__=1 -DUSE_SFIO -DI_SFIO -I\sfio97\include
 
@@ -379,7 +379,7 @@ perlglob.obj  : perlglob.c
 config.w32 : $(CFGSH_TMPL)
 	copy $(CFGSH_TMPL) config.w32
 
-.\config.h : $(CFGSH_TMPL)
+.\config.h : $(CFGH_TMPL)
 	-del /f config.h
 	copy $(CFGH_TMPL) config.h
 
