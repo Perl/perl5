@@ -1022,13 +1022,13 @@ win32_longpath(char *path)
 	     (path[1] == '/' || path[1] == '\\'))
     {
 	start = path + 2;
-	*tmpstart++ = '/';
-	*tmpstart++ = '/';
+	*tmpstart++ = path[0];
+	*tmpstart++ = path[1];
 	/* copy machine name */
 	while (*start && *start != '/' && *start != '\\')
 	    *tmpstart++ = *start++;
 	if (*start) {
-	    *tmpstart++ = '/';
+	    *tmpstart++ = *start;
 	    start++;
 	    /* copy share name */
 	    while (*start && *start != '/' && *start != '\\')
@@ -1037,7 +1037,7 @@ win32_longpath(char *path)
     }
     sep = *start++;
     if (sep == '/' || sep == '\\')
-	*tmpstart++ = '/';
+	*tmpstart++ = sep;
     *tmpstart = '\0';
     while (sep) {
 	/* walk up to slash */
@@ -1056,7 +1056,7 @@ win32_longpath(char *path)
 	    strcpy(tmpstart, fdata.cFileName);
 	    tmpstart += strlen(fdata.cFileName);
 	    if (sep)
-		*tmpstart++ = '/';
+		*tmpstart++ = sep;
 	    *tmpstart = '\0';
 	    *start++ = sep;
 	    FindClose(fhand);
