@@ -7,7 +7,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..27\n";
+print "1..28\n";
 
 $TST = 'tst';
 
@@ -143,4 +143,12 @@ if (tell($tst) == 15 ||
 
 close($tst);
 
+open($tst,">$written")  || die "Cannot open $written:$!";
+print $tst "foobar";
+close $tst;
+open($tst,">>$written")  || die "Cannot open $written:$!";
+
+if (tell($tst) == 6)
+{ print "ok 28\n"; } else { print "not ok 28\n"; }
+close $tst;
 

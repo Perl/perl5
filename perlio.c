@@ -288,7 +288,7 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd,
 	    return PerlIO_tmpfile();
 	else {
 	    char *name = SvPV_nolen(*args);
-	    if (*mode == '#') {
+	    if (*mode == IoTYPE_NUMERIC) {
 		fd = PerlLIO_open3(name, imode, perm);
 		if (fd >= 0)
 		    return PerlIO_fdopen(fd, (char *) mode + 1);
@@ -1960,7 +1960,7 @@ PerlIOBase_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
     if (tab->Set_ptrcnt != NULL)
 	l->flags |= PERLIO_F_FASTGETS;
     if (mode) {
-	if (*mode == '#' || *mode == 'I')
+	if (*mode == IoTYPE_NUMERIC || *mode == IoTYPE_IMPLICIT)
 	    mode++;
 	switch (*mode++) {
 	case 'r':
@@ -2276,7 +2276,7 @@ int
 PerlIOUnix_oflags(const char *mode)
 {
     int oflags = -1;
-    if (*mode == 'I' || *mode == '#')
+    if (*mode == IoTYPE_IMPLICIT || *mode == IoTYPE_NUMERIC)
 	mode++;
     switch (*mode) {
     case 'r':
@@ -2375,6 +2375,28 @@ PerlIOUnix_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
     return code;
 }
 
+IV
+PerlIOUnix_seek(pTHX_ PerlIO *f, Off_t offset, int whence)
+{
+    int fd = PerlIOSelf(f, PerlIOUnix)->fd;
+    Off_t new;
+    if (PerlIOBase(f)->flags & PERLIO_F_NOTREG) {
+#ifdef  ESPIPE
+	SETERRNO(ESPIPE, LIB_INVARG);
+#else
+	SETERRNO(EINVAL, LIB_INVARG);
+#endif
+	return -1;
+    }
+    new  = PerlLIO_lseek(fd, offset, whence);
+    if (new == (Off_t) - 1)
+     {
+      return -1;
+     }
+    PerlIOBase(f)->flags &= ~PERLIO_F_EOF;
+    return  0;
+}
+
 PerlIO *
 PerlIOUnix_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 		IV n, const char *mode, int fd, int imode,
@@ -2386,7 +2408,7 @@ PerlIOUnix_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
     }
     if (narg > 0) {
 	char *path = SvPV_nolen(*args);
-	if (*mode == '#')
+	if (*mode == IoTYPE_NUMERIC)
 	    mode++;
 	else {
 	    imode = PerlIOUnix_oflags(mode);
@@ -2397,7 +2419,7 @@ PerlIOUnix_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 	}
     }
     if (fd >= 0) {
-	if (*mode == 'I')
+	if (*mode == IoTYPE_IMPLICIT)
 	    mode++;
 	if (!f) {
 	    f = PerlIO_allocate(aTHX);
@@ -2409,6 +2431,8 @@ PerlIOUnix_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 	}
         PerlIOUnix_setfd(aTHX_ f, fd, imode);
 	PerlIOBase(f)->flags |= PERLIO_F_OPEN;
+	if (*mode == IoTYPE_APPEND)
+	    PerlIOUnix_seek(aTHX_ f, 0, SEEK_END);
 	return f;
     }
     else {
@@ -2483,28 +2507,6 @@ PerlIOUnix_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 	}
 	PERL_ASYNC_CHECK();
     }
-}
-
-IV
-PerlIOUnix_seek(pTHX_ PerlIO *f, Off_t offset, int whence)
-{
-    int fd = PerlIOSelf(f, PerlIOUnix)->fd;
-    Off_t new;
-    if (PerlIOBase(f)->flags & PERLIO_F_NOTREG) {
-#ifdef  ESPIPE
-	SETERRNO(ESPIPE, LIB_INVARG);
-#else
-	SETERRNO(EINVAL, LIB_INVARG);
-#endif
-	return -1;
-    }
-    new  = PerlLIO_lseek(fd, offset, whence);
-    if (new == (Off_t) - 1)
-     {
-      return -1;
-     }
-    PerlIOBase(f)->flags &= ~PERLIO_F_EOF;
-    return  0;
 }
 
 Off_t
@@ -2705,7 +2707,7 @@ PerlIOStdio_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
     else {
 	if (narg > 0) {
 	    char *path = SvPV_nolen(*args);
-	    if (*mode == '#') {
+	    if (*mode == IoTYPE_NUMERIC) {
 		mode++;
 		fd = PerlLIO_open3(path, imode, perm);
 	    }
@@ -2741,7 +2743,7 @@ PerlIOStdio_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 	if (fd >= 0) {
 	    FILE *stdio = NULL;
 	    int init = 0;
-	    if (*mode == 'I') {
+	    if (*mode == IoTYPE_IMPLICIT) {
 		init = 1;
 		mode++;
 	    }
@@ -3431,7 +3433,7 @@ PerlIOBuf_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
     else {
 	PerlIO_funcs *tab = PerlIO_layer_fetch(aTHX_ layers, n - 1, PerlIO_default_btm());
 	int init = 0;
-	if (*mode == 'I') {
+	if (*mode == IoTYPE_IMPLICIT) {
 	    init = 1;
 	    /*
 	     * mode++;

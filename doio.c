@@ -179,7 +179,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		 (ismodifying & (O_CREAT|appendtrunc)))
 		  TAINT_PROPER("sysopen");
 	}
-	mode[ix++] = '#'; /* Marker to openn to use numeric "sysopen" */
+	mode[ix++] = IoTYPE_NUMERIC; /* Marker to openn to use numeric "sysopen" */
 
 #if defined(USE_64_BIT_RAWIO) && defined(O_LARGEFILE)
 	rawmode |= O_LARGEFILE;	/* Transparently largefiley. */
@@ -674,8 +674,8 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	if (IoTYPE(io) == IoTYPE_SOCKET
 	    || (IoTYPE(io) == IoTYPE_WRONLY && fd >= 0 && S_ISCHR(PL_statbuf.st_mode)) ) {
 	    char *s = mode;
-	    if (*s == 'I' || *s == '#')
-	     s++;
+	    if (*s == IoTYPE_IMPLICIT || *s == IoTYPE_NUMERIC)
+	      s++;
 	    *s = 'w';
 	    if (!(IoOFP(io) = PerlIO_openn(aTHX_ type,s,fd,0,0,NULL,0,svp))) {
 		PerlIO_close(fp);
