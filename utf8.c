@@ -1707,7 +1707,7 @@ Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, STRLEN pvlim, UV flags)
 }
 
 /*
-=for apidoc A|I32|ibcmp_utf8|const char *s1|bool u1|register I32 len1|const char *s2|bool u2|register I32 len2
+=for apidoc A|I32|ibcmp_utf8|const char *s1|register I32 len1|bool u1|char **f1|const char *s2|register I32 len2|bool u2|char **f2
 
 Return true if the strings s1 and s2 differ case-insensitively, false
 if not (if they are equal case-insensitively).  If u1 is true, the
@@ -1718,21 +1718,36 @@ For case-insensitiveness, the "casefolding" of Unicode is used
 instead of upper/lowercasing both the characters, see
 http://www.unicode.org/unicode/reports/tr21/ (Case Mappings).
 
+If either length is (STRLEN)-1 the scan will continue until a match is
+found.  If both lengths are (STRLEN)-1, true is returned (as a sign of
+non-match).  In the case of a match, the f1 and f2 are updated to record
+how far the comparison proceeded.
+
 =cut */
 I32
-Perl_ibcmp_utf8(pTHX_ const char *s1, bool u1, register I32 len1, const char *s2, bool u2, register I32 len2)
+Perl_ibcmp_utf8(pTHX_ const char *s1, register I32 len1, bool u1, char **f1, const char *s2, register I32 len2, bool u2, char **f2)
 {
-     register U8 *p1  = (U8*)s1, *q1 = 0;
-     register U8 *p2  = (U8*)s2, *q2 = 0;
-     register U8 *e1 = p1 + len1;
-     register U8 *e2 = p2 + len2;
+     register U8 *p1  = (U8*)s1;
+     register U8 *p2  = (U8*)s2;
+     register U8 *e1, *q1 = 0;
+     register U8 *e2, *q2 = 0;
      STRLEN l1 = 0, l2 = 0;
      U8 foldbuf1[UTF8_MAXLEN_FOLD+1];
      U8 foldbuf2[UTF8_MAXLEN_FOLD+1];
      U8 natbuf[1+1];
      STRLEN foldlen1, foldlen2;
+     bool inf1, inf2, match;
      
-     while (p1 < e1 && p2 < e2) {
+     inf1 = len1 == (STRLEN)-1;
+     inf2 = len2 == (STRLEN)-1;
+     if (inf1 && inf2)
+	  return 1; /* mismatch */
+     if (!inf1)
+	  e1 = p1 + len1;
+     if (!inf2)
+	  e2 = p2 + len2;
+
+     while ((p1 < e1 || inf1) && (p2 < e2 || inf2)) {
 	  if (l1 == 0) {
 	       if (u1)
 		    to_utf8_fold(p1, foldbuf1, &foldlen1);
@@ -1768,6 +1783,16 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, bool u1, register I32 len1, const char *s2
 	       p2 += u2 ? UTF8SKIP(p2) : 1;
 
      }
-     return p1 == e1 && p2 == e2 ? 0 : 1; /* 0 match, 1 mismatch */
+
+     match = (inf1 ? 1 : p1 == e1) && (inf2 ? 1 : p2 == e2);
+
+     if (match) {
+	  if (f1)
+	       *f1 = (char *)p1;
+	  if (f2)
+	       *f2 = (char *)p2;
+     }
+
+     return match ? 0 : 1; /* 0 match, 1 mismatch */
 }
 

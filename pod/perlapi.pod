@@ -1139,7 +1139,12 @@ For case-insensitiveness, the "casefolding" of Unicode is used
 instead of upper/lowercasing both the characters, see
 http://www.unicode.org/unicode/reports/tr21/ (Case Mappings).
 
-	I32	ibcmp_utf8(const char* a, bool ua, I32 len1, const char* b, bool ub, I32 len2)
+If either length is (STRLEN)-1 the scan will continue until a match is
+found.  If both lengths are (STRLEN)-1, true is returned (as a sign of
+non-match).  In the case of a match, the f1 and f2 are updated to record
+how far the comparison proceeded.
+
+	I32	ibcmp_utf8(const char* a, I32 len1, bool u1, char **ae, const char* b, I32 len2, bool u2, char **be)
 
 =for hackers
 Found in file utf8.c
