@@ -20,7 +20,7 @@ use vars @EXPORT_OK;
 # Class::Struct forbids use of @ISA
 sub import { goto &Exporter::import }
 
-use Class::Struct qw(struct);
+use Class::Struct;
 struct 'File::stat' => [
      map { $_ => '$' } qw{
 	 dev ino mode nlink uid gid rdev size
