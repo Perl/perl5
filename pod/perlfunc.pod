@@ -3697,9 +3697,10 @@ See L<perlipc/"UDP: Message Passing"> for examples.
 
 Sets the current process group for the specified PID, C<0> for the current
 process.  Will produce a fatal error if used on a machine that doesn't
-implement setpgrp(2).  If the arguments are omitted, it defaults to
-C<0,0>.  Note that the POSIX version of C<setpgrp> does not accept any
-arguments, so only C<setpgrp(0,0)> is portable.  See also C<POSIX::setsid()>.
+implement POSIX setpgid(2) or BSD setpgrp(2).  If the arguments are omitted,
+it defaults to C<0,0>.  Note that the BSD 4.2 version of C<setpgrp> does not
+accept any arguments, so only C<setpgrp(0,0)> is portable.  See also
+C<POSIX::setsid()>.
 
 =item setpriority WHICH,WHO,PRIORITY
 

@@ -2369,7 +2369,7 @@ perspective, it's probably not what you intended.
 
 =item POSIX getpgrp can't take an argument
 
-(F) Your C compiler uses POSIX getpgrp(), which takes no argument, unlike
+(F) Your system has POSIX getpgrp(), which takes no argument, unlike
 the BSD version, which takes a pid.
 
 =item Possible Y2K bug: %s
@@ -2681,6 +2681,11 @@ think so.
 (F) You tried to assign to C<$E<gt>>, and your operating system doesn't support
 the seteuid() system call (or equivalent), or at least Configure didn't
 think so.
+
+=item setpgrp can't take arguments
+
+(F) Your system has the setpgrp() from BSD 4.2, which takes no arguments,
+unlike POSIX setpgid(), which takes a process ID and process group ID.
 
 =item setrgid() not implemented
 
