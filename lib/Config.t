@@ -223,7 +223,7 @@ foreach my $pain ($first, @virtual) {
 
   @result = Config::config_re($pain);
   is (scalar @result, 1, "single result for config_re('$pain')");
-  like ($result[0], qr/^$pain=(['"])$Config{$pain}\1$/, # grr '
+  like ($result[0], qr/^$pain=(['"])\Q$Config{$pain}\E\1$/, # grr '
 	"which is the expected result for $pain");
 }
 
