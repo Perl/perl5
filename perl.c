@@ -2920,7 +2920,6 @@ S_init_main_thread(pTHX)
     thr->threadsv = newAV();
     /* thr->threadsvp is set when find_threadsv is called */
     thr->specific = newAV();
-    thr->errhv = newHV();
     thr->flags = THRf_R_JOINABLE;
     MUTEX_INIT(&thr->mutex);
     /* Handcraft thrsv similarly to mess_sv */

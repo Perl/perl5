@@ -1272,26 +1272,25 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 
 	if (message) {
 	    if (PL_in_eval & EVAL_KEEPERR) {
-		SV **svp;
-		
-		svp = hv_fetch(ERRHV, message, msglen, TRUE);
-		if (svp) {
-		    if (!SvIOK(*svp)) {
-			static char prefix[] = "\t(in cleanup) ";
-			SV *err = ERRSV;
-			sv_upgrade(*svp, SVt_IV);
-			(void)SvIOK_only(*svp);
-			if (!SvPOK(err))
-			    sv_setpv(err,"");
-			SvGROW(err, SvCUR(err)+sizeof(prefix)+msglen);
-			sv_catpvn(err, prefix, sizeof(prefix)-1);
-			sv_catpvn(err, message, msglen);
-			if (ckWARN(WARN_UNSAFE)) {
-			    STRLEN start = SvCUR(err)-msglen-sizeof(prefix)+1;
-			    Perl_warner(aTHX_ WARN_UNSAFE, SvPVX(err)+start);
-			}
+		static char prefix[] = "\t(in cleanup) ";
+		SV *err = ERRSV;
+		char *e = Nullch;
+		if (!SvPOK(err))
+		    sv_setpv(err,"");
+		else if (SvCUR(err) >= sizeof(prefix)+msglen-1) {
+		    e = SvPV(err, n_a);
+		    e += n_a - msglen;
+		    if (*e != *message || strNE(e,message))
+			e = Nullch;
+		}
+		if (!e) {
+		    SvGROW(err, SvCUR(err)+sizeof(prefix)+msglen);
+		    sv_catpvn(err, prefix, sizeof(prefix)-1);
+		    sv_catpvn(err, message, msglen);
+		    if (ckWARN(WARN_UNSAFE)) {
+			STRLEN start = SvCUR(err)-msglen-sizeof(prefix)+1;
+			Perl_warner(aTHX_ WARN_UNSAFE, SvPVX(err)+start);
 		    }
-		    sv_inc(*svp);
 		}
 	    }
 	    else
