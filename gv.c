@@ -749,6 +749,7 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
     case '/':
     case '|':
     case '\001':
+    case '\003':
     case '\004':
     case '\005':
     case '\006':
