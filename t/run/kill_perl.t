@@ -816,3 +816,9 @@ ok
 print "ok" if 'X' =~ /\X/;
 EXPECT
 ok
+######## segfault in 5.6.1 within peep()
+@a = (1..9);
+@b = sort { @c = sort { @d = sort { 0 } @a; @d; } @a; } @a;
+print join '', @a, "\n";
+EXPECT
+123456789
