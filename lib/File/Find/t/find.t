@@ -51,10 +51,10 @@ BEGIN {
 
 cleanup();
 
-find({wanted => sub { print "ok 1\n" if $_ eq '1_compile.t'; } },
+find({wanted => sub { print "ok 1\n" if $_ eq 'commonsense.t'; } },
    File::Spec->curdir);
 
-finddepth({wanted => sub { print "ok 2\n" if $_ eq '1_compile.t'; } },
+finddepth({wanted => sub { print "ok 2\n" if $_ eq 'commonsense.t'; } },
 	File::Spec->curdir);
 
 
