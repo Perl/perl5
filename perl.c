@@ -497,7 +497,7 @@ perl_destruct(register PerlInterpreter *sv_interp)
 	    if (hent) {
 		warn("Unbalanced string table refcount: (%d) for \"%s\"",
 		     HeVAL(hent) - Nullsv, HeKEY(hent));
-		HeVAL(hent) = Nullsv;
+		HeVAL(hent) = &sv_undef;
 		hent = HeNEXT(hent);
 	    }
 	    if (!hent) {

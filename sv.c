@@ -2718,6 +2718,7 @@ sv_replace(register SV *sv, register SV *nsv)
 void
 sv_clear(register SV *sv)
 {
+    HV* stash;
     assert(sv);
     assert(SvREFCNT(sv) == 0);
 
@@ -2726,7 +2727,6 @@ sv_clear(register SV *sv)
 	if (defstash) {		/* Still have a symbol table? */
 	    djSP;
 	    GV* destructor;
-	    HV* stash;
 	    SV ref;
 
 	    Zero(&ref, 1, SV);
@@ -2770,6 +2770,7 @@ sv_clear(register SV *sv)
     }
     if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv))
 	mg_free(sv);
+    stash = NULL;
     switch (SvTYPE(sv)) {
     case SVt_PVIO:
 	if (IoIFP(sv) != PerlIO_stdin() &&
@@ -2795,7 +2796,11 @@ sv_clear(register SV *sv)
     case SVt_PVGV:
 	gp_free((GV*)sv);
 	Safefree(GvNAME(sv));
-	SvREFCNT_dec(GvSTASH(sv));
+	/* cannot decrease stash refcount yet, as we might recursively delete
+	   ourselves when the refcnt drops to zero. Delay SvREFCNT_dec
+	   of stash until current sv is completely gone.
+	   -- JohnPC, 27 Mar 1998 */
+	stash = GvSTASH(sv);
 	/* FALL THROUGH */
     case SVt_PVLV:
     case SVt_PVMG:
@@ -2857,7 +2862,13 @@ sv_clear(register SV *sv)
 	break;
     case SVt_PVGV:
 	del_XPVGV(SvANY(sv));
-	break;
+	/* code duplication for increased performance. */
+	SvFLAGS(sv) &= SVf_BREAK;
+	SvFLAGS(sv) |= SVTYPEMASK;
+	/* decrease refcount of the stash that owns this GV, if any */
+	if (stash)
+	    SvREFCNT_dec(stash);
+	return; /* not break, SvFLAGS reset already happened */
     case SVt_PVBM:
 	del_XPVBM(SvANY(sv));
 	break;
@@ -5005,7 +5016,8 @@ sv_dump(SV *sv)
     case SVt_PVGV:
 	PerlIO_printf(Perl_debug_log, "  NAME = \"%s\"\n", GvNAME(sv));
 	PerlIO_printf(Perl_debug_log, "  NAMELEN = %ld\n", (long)GvNAMELEN(sv));
-	PerlIO_printf(Perl_debug_log, "  STASH = \"%s\"\n", HvNAME(GvSTASH(sv)));
+	PerlIO_printf(Perl_debug_log, "  STASH = \"%s\"\n",
+	    SvTYPE(GvSTASH(sv)) == SVt_PVHV ? HvNAME(GvSTASH(sv)) : "(deleted)");
 	PerlIO_printf(Perl_debug_log, "  GP = 0x%lx\n", (long)GvGP(sv));
 	PerlIO_printf(Perl_debug_log, "    SV = 0x%lx\n", (long)GvSV(sv));
 	PerlIO_printf(Perl_debug_log, "    REFCNT = %ld\n", (long)GvREFCNT(sv));
