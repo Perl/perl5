@@ -6,6 +6,7 @@ WriteMakefile(
     VERSION_FROM	=> 'Syslog.pm', 
     MAN3PODS		=> {}, 	# Pods will be built by installman.
     XSPROTOARG          => '-noprototypes',
+    realclean => {FILES=> 'const-c.inc const-xs.inc'},
 );
 
 # We hope syslogd understands /dev/log.

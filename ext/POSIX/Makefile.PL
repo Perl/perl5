@@ -10,7 +10,8 @@ WriteMakefile(
     @libs,
     MAN3PODS 	=> {}, 	# Pods will be built by installman.
     XSPROTOARG => '-noprototypes', 		# XXX remove later?
-    VERSION_FROM => 'POSIX.pm', 
+    VERSION_FROM => 'POSIX.pm',
+    realclean => {FILES=> 'const-c.inc const-xs.inc'},
 );
 
 my @names =
