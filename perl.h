@@ -2438,24 +2438,17 @@ typedef pthread_key_t	perl_key;
 
 #ifndef SVf
 #  ifdef CHECK_FORMAT
-#    define SVf "p"
-#    ifndef SVf256
-#      define SVf256 SVf
-#    endif
+#    define SVf "-p"
 #  else
 #    define SVf "_"
 #  endif
 #endif
 
-#ifndef SVf256
-#  define SVf256 ".256"SVf
-#endif
-
-#ifndef UVf
+#ifndef SVf_precision
 #  ifdef CHECK_FORMAT
-#    define UVf UVuf
+#    define SVf_precision(n) "-" n "p"
 #  else
-#    define UVf "Vu"
+#    define SVf_precision(n) "." n "_"
 #  endif
 #endif
 
@@ -2467,11 +2460,23 @@ typedef pthread_key_t	perl_key;
 #  endif
 #endif
 
-#ifndef Nullformat
+#ifndef SVf32
+#  define SVf32 SVf_precision("32")
+#endif
+
+#ifndef SVf256
+#  define SVf256 SVf_precision("256")
+#endif
+ 
+#ifndef UVf
+#  define UVf UVuf
+#endif
+
+#ifndef DieNull
 #  ifdef CHECK_FORMAT
-#    define Nullformat "%s",""
+#    define DieNull Perl_vdie(aTHX_ Nullch, Null(va_list *))
 #  else
-#    define Nullformat Nullch
+#    define DieNull Perl_die(aTHX_ Nullch)
 #  endif
 #endif
 

@@ -96,6 +96,7 @@ Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
 
 #define NORMAL PL_op->op_next
 #define DIE return Perl_die
+#define DIE_NULL return DieNull
 
 /*
 =for apidoc Ams||PUTBACK

@@ -8777,6 +8777,9 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    goto string;
 
 	case '_':
+#ifdef CHECK_FORMAT
+	format_sv:
+#endif
 	    /*
 	     * The "%_" hack might have to be changed someday,
 	     * if ISO or ANSI decide to use '_' for something.
@@ -8798,6 +8801,17 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    /* INTEGERS */
 
 	case 'p':
+#ifdef CHECK_FORMAT
+	    if (left) {
+		left = FALSE;
+	        if (!width)
+		    goto format_sv;	/* %-p	-> %_	*/
+		precis = width;
+		has_precis = TRUE;
+		width = 0;
+		goto format_sv;		/* %-Np	-> %.N_	*/	
+	    }
+#endif
 	    if (alt || vectorize)
 		goto unknown;
 	    uv = PTR2UV(args ? va_arg(*args, void*) : argsv);
