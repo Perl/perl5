@@ -119,7 +119,7 @@ pack, read, syscall, sysread, syswrite, unpack, vec
 
 =item Functions for filehandles, files, or directories
 
--X, chdir, chmod, chown, chroot, fcntl, glob, ioctl, link,
+C<-X>, chdir, chmod, chown, chroot, fcntl, glob, ioctl, link,
 lstat, mkdir, open, opendir, readlink, rename, rmdir,
 stat, symlink, umask, unlink, utime
 
@@ -2889,7 +2889,7 @@ Attempts to write LENGTH bytes of data from variable SCALAR to the
 specified FILEHANDLE, using the system call write(2).  It bypasses
 stdio, so mixing this with prints may cause confusion.  Returns the
 number of bytes actually written, or undef if there was an error.  An
-OFFSET may be specified to place the read data at some other place than
+OFFSET may be specified to get the write data from some other place than
 the beginning of the string.
 
 =item tell FILEHANDLE
@@ -3155,9 +3155,14 @@ on the same array.  See also keys() and each().
 
 =item vec EXPR,OFFSET,BITS
 
-Treats a string as a vector of unsigned integers, and returns the value
-of the bitfield specified.  May also be assigned to.  BITS must be a
-power of two from 1 to 32.
+Treats the string in EXPR as a vector of unsigned integers, and
+returns the value of the bitfield specified by OFFSET.  BITS specifies
+the number of bits that are reserved for each entry in the bit
+vector. This must be a power of two from 1 to 32. vec() may also be
+assigned to, in which case parens are needed to give the expression
+the correct precedence as in
+
+    vec($image, $max_x * $x + $y, 8) = 3;
 
 Vectors created with vec() can also be manipulated with the logical
 operators |, & and ^, which will assume a bit vector operation is
