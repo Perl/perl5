@@ -831,6 +831,7 @@
 #define simplify_sort		S_simplify_sort
 #define is_handle_constructor	S_is_handle_constructor
 #define gv_ename		S_gv_ename
+#define cv_dump			S_cv_dump
 #define cv_clone2		S_cv_clone2
 #define scalar_mod_type		S_scalar_mod_type
 #define my_kid			S_my_kid
@@ -2199,6 +2200,7 @@
 #define simplify_sort(a)	S_simplify_sort(aTHX_ a)
 #define is_handle_constructor(a,b)	S_is_handle_constructor(aTHX_ a,b)
 #define gv_ename(a)		S_gv_ename(aTHX_ a)
+#define cv_dump(a)		S_cv_dump(aTHX_ a)
 #define cv_clone2(a,b)		S_cv_clone2(aTHX_ a,b)
 #define scalar_mod_type(a,b)	S_scalar_mod_type(aTHX_ a,b)
 #define my_kid(a,b)		S_my_kid(aTHX_ a,b)
@@ -4322,6 +4324,8 @@
 #define is_handle_constructor	S_is_handle_constructor
 #define S_gv_ename		CPerlObj::S_gv_ename
 #define gv_ename		S_gv_ename
+#define S_cv_dump		CPerlObj::S_cv_dump
+#define cv_dump			S_cv_dump
 #define S_cv_clone2		CPerlObj::S_cv_clone2
 #define cv_clone2		S_cv_clone2
 #define S_scalar_mod_type	CPerlObj::S_scalar_mod_type

@@ -809,6 +809,7 @@ STATIC OP*	S_new_logop(pTHX_ I32 type, I32 flags, OP **firstp, OP **otherp);
 STATIC void	S_simplify_sort(pTHX_ OP *o);
 STATIC bool	S_is_handle_constructor(pTHX_ OP *o, I32 argnum);
 STATIC char*	S_gv_ename(pTHX_ GV *gv);
+STATIC void	S_cv_dump(pTHX_ CV *cv);
 STATIC CV*	S_cv_clone2(pTHX_ CV *proto, CV *outside);
 STATIC bool	S_scalar_mod_type(pTHX_ OP *o, I32 type);
 STATIC OP *	S_my_kid(pTHX_ OP *o, OP *attrs);
