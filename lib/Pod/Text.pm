@@ -1,5 +1,5 @@
 # Pod::Text -- Convert POD data to formatted ASCII text.
-# $Id: Text.pm,v 2.1 1999/09/20 11:53:33 eagle Exp $
+# $Id: Text.pm,v 2.3 1999/10/07 09:41:57 eagle Exp $
 #
 # Copyright 1999 by Russ Allbery <rra@stanford.edu>
 #
@@ -20,16 +20,20 @@ package Pod::Text;
 require 5.004;
 
 use Carp qw(carp croak);
+use Exporter ();
 use Pod::Select ();
 
 use strict;
-use vars qw(@ISA %ESCAPES $VERSION);
+use vars qw(@ISA @EXPORT %ESCAPES $VERSION);
 
 # We inherit from Pod::Select instead of Pod::Parser so that we can be used
 # by Pod::Usage.
-@ISA = qw(Pod::Select);
+@ISA = qw(Pod::Select Exporter);
 
-($VERSION = (split (' ', q$Revision: 2.1 $ ))[1]) =~ s/\.(\d)$/.0$1/;
+# We have to export pod2text for backward compatibility.
+@EXPORT = qw(pod2text);
+
+($VERSION = (split (' ', q$Revision: 2.3 $ ))[1]) =~ s/\.(\d)$/.0$1/;
 
 
 ############################################################################
@@ -235,9 +239,13 @@ sub interior_sequence {
 
     # Expand escapes into the actual character now, carping if invalid.
     if ($command eq 'E') {
-        return $ESCAPES{$_} if defined $ESCAPES{$_};
-        carp "Unknown escape: E<$_>";
-        return "E<$_>";
+        if (/^\d+$/) {
+            return chr;
+        } else {
+            return $ESCAPES{$_} if defined $ESCAPES{$_};
+            carp "Unknown escape: E<$_>";
+            return "E<$_>";
+        }
     }
 
     # For all the other sequences, empty content produces no output.

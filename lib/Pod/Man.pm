@@ -1,5 +1,5 @@
 # Pod::Man -- Convert POD data to formatted *roff input.
-# $Id: Man.pm,v 0.5 1999/09/25 19:49:49 eagle Exp $
+# $Id: Man.pm,v 0.8 1999/10/07 09:39:37 eagle Exp $
 #
 # Copyright 1999 by Russ Allbery <rra@stanford.edu>
 #
@@ -28,7 +28,7 @@ use vars qw(@ISA %ESCAPES $PREAMBLE $VERSION);
 
 @ISA = qw(Pod::Parser);
 
-($VERSION = (split (' ', q$Revision: 0.5 $ ))[1]) =~ s/\.(\d)$/.0$1/;
+($VERSION = (split (' ', q$Revision: 0.8 $ ))[1]) =~ s/\.(\d)$/.0$1/;
 
 
 ############################################################################
@@ -525,7 +525,9 @@ sub sequence {
 
     # Handle E<> escapes.
     if ($command eq 'E') {
-        if (exists $ESCAPES{$_}) {
+        if (/^\d+$/) {
+            return bless \ chr ($_), 'Pod::Man::String';
+        } elsif (exists $ESCAPES{$_}) {
             return bless \ "$ESCAPES{$_}", 'Pod::Man::String';
         } else {
             carp "Unknown escape E<$1>";
@@ -745,7 +747,8 @@ sub buildlink {
         $text .= (length $manpage) ? " in $manpage"
                                    : " elsewhere in this document";
     } else {
-        $text .= 'the section on "' . $section . '"';
+        if ($section !~ /^".*"$/) { $section = '"' . $section . '"' }
+        $text .= 'the section on ' . $section;
         $text .= " in $manpage" if length $manpage;
     }
     $text;
