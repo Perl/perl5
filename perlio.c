@@ -950,6 +950,8 @@ PerlIOUnix_oflags(const char *mode)
    oflags |= O_BINARY;
    mode++; 
   }   
+ /* Always open in binary mode */
+ oflags |= O_BINARY;
  if (*mode || oflags == -1)
   {
    errno = EINVAL;
@@ -1659,35 +1661,33 @@ PerlIOBuf_fill(PerlIO *f)
 SSize_t
 PerlIOBuf_read(PerlIO *f, void *vbuf, Size_t count)
 {
- PerlIOBuf *b = PerlIOSelf(f,PerlIOBuf);
- STDCHAR *buf = (STDCHAR *) vbuf;
+ PerlIOBuf *b  = PerlIOSelf(f,PerlIOBuf);
+ STDCHAR *buf  = (STDCHAR *) vbuf;
  if (f)
   {
-   Size_t got = 0;
    if (!b->ptr)
     PerlIO_get_base(f);
    if (!(PerlIOBase(f)->flags & PERLIO_F_CANREAD))
     return 0;
    while (count > 0)
     {
-     SSize_t avail = (b->end - b->ptr);
-     if ((SSize_t) count < avail)
-      avail = count;
-     if (avail > 0)
+     SSize_t avail = PerlIO_get_cnt(f);
+     SSize_t take  = (count < avail) ? count : avail; 
+     if (take > 0)
       {
-       Copy(b->ptr,buf,avail,STDCHAR);
-       got     += avail;
-       b->ptr  += avail;
-       count   -= avail;
-       buf     += avail;
+       STDCHAR *ptr = PerlIO_get_ptr(f);
+       Copy(ptr,buf,take,STDCHAR);
+       PerlIO_set_ptrcnt(f,ptr+take,(avail -= take));
+       count   -= take;
+       buf     += take;
       }
-     if (count && (b->ptr >= b->end))
+     if (count > 0  && avail <= 0)
       {
        if (PerlIO_fill(f) != 0)
         break;
       }
     }
-   return got;
+   return (buf - (STDCHAR *) vbuf);
   }
  return 0;
 }
@@ -1929,27 +1929,232 @@ PerlIO_funcs PerlIO_perlio = {
 };
 
 /*--------------------------------------------------------------------------------------*/
-/* crlf - translation currently just a copy of perlio to prove
-   that extra buffering which real one will do is not an issue.
+/* crlf - translation
+   On read translate CR,LF to "\n" we do this by overriding ptr/cnt entries
+   to hand back a line at a time and keeping a record of which nl we "lied" about. 
+   On write translate "\n" to CR,LF
  */
+
+typedef struct
+{
+ PerlIOBuf	base;         /* PerlIOBuf stuff */
+ STDCHAR       *nl;           /* Position of crlf we "lied" about in the buffer */ 
+} PerlIOCrlf;
+
+SSize_t
+PerlIOCrlf_unread(PerlIO *f, const void *vbuf, Size_t count)
+{
+ const STDCHAR *buf = (const STDCHAR *) vbuf+count;
+ PerlIOBuf *b = PerlIOSelf(f,PerlIOBuf);
+ SSize_t unread = 0;
+ if (PerlIOBase(f)->flags & PERLIO_F_WRBUF)
+  PerlIO_flush(f);
+ if (!b->buf)
+  PerlIO_get_base(f);
+ if (b->buf)
+  {
+   if (!(PerlIOBase(f)->flags & PERLIO_F_RDBUF))
+    {
+     b->end = b->ptr = b->buf + b->bufsiz;
+     PerlIOBase(f)->flags |= PERLIO_F_RDBUF;
+    }
+   while (count > 0 && b->ptr > b->buf)
+    {
+     int ch = *--buf;
+     if (ch == '\n')
+      {
+       if (b->ptr - 2 >= b->buf)
+        {
+         *(b->ptr)-- = 0xa;
+         *(b->ptr)-- = 0xd;
+         unread++;
+         count--;
+        }
+       else
+        {
+         buf++;
+         break;
+        }
+      }
+     else
+      {
+       *(b->ptr)-- = ch;
+       unread++;
+       count--;
+      } 
+    }
+  }
+ return unread;
+}
+
+SSize_t
+PerlIOCrlf_get_cnt(PerlIO *f)
+{
+ PerlIOBuf *b = PerlIOSelf(f,PerlIOBuf);
+ if (!b->buf)
+  PerlIO_get_base(f);
+ if (PerlIOBase(f)->flags & PERLIO_F_RDBUF)
+  {
+   PerlIOCrlf *c = PerlIOSelf(f,PerlIOCrlf);
+   if (!c->nl)
+    {
+     STDCHAR *nl   = b->ptr;
+    scan: 
+     while (nl < b->end && *nl != 0xd)
+      nl++;
+     if (nl < b->end && *nl == 0xd)
+      {
+     test: 
+       if (nl+1 < b->end)
+        {
+         if (nl[1] == 0xa)
+          {
+           *nl   = '\n';
+           c->nl = nl;  
+          }
+         else 
+          {
+           /* Not CR,LF but just CR */
+           nl++;
+           goto scan;  
+          }
+        }
+       else
+        {
+         /* Blast - found CR as last char in buffer */ 
+         if (b->ptr < nl)
+          {
+           /* They may not care, defer work as long as possible */
+           return (nl - b->ptr);            
+          }
+         else
+          {
+           int code;
+           dTHX;
+           Perl_warn(aTHX_ __FUNCTION__ " f=%p CR @ end of buffer",f);
+           b->ptr++;               /* say we have read it as far as flush() is concerned */
+           b->buf++;               /* Leave space an front of buffer */
+           b->bufsiz--;            /* Buffer is thus smaller */
+           code = PerlIO_fill(f);  /* Fetch some more */
+           b->bufsiz++;            /* Restore size for next time */
+           b->buf--;               /* Point at space */
+           b->ptr = nl = b->buf;   /* Which is what we hand off */
+           b->posn--;              /* Buffer starts here */
+           *nl = 0xd;              /* Fill in the CR */
+           if (code == 0)          
+            goto test;             /* fill() call worked */
+           /* CR at EOF - just fall through */
+          }
+        }
+      }  
+    } 
+   return (((c->nl) ? (c->nl+1) : b->end) - b->ptr);
+  }
+ return 0;
+}
+
+void
+PerlIOCrlf_set_ptrcnt(PerlIO *f, STDCHAR *ptr, SSize_t cnt)
+{
+ PerlIOBuf *b  = PerlIOSelf(f,PerlIOBuf);
+ PerlIOCrlf *c = PerlIOSelf(f,PerlIOCrlf);
+ if (!b->buf)
+  PerlIO_get_base(f);
+ if (!ptr)
+  ptr = ((c->nl) ? (c->nl+1) : b->end) - cnt; 
+ if (c->nl)
+  {
+   if (ptr > c->nl)
+    {
+     /* They have taken what we lied about */
+     *(c->nl) = 0xd;
+     c->nl = NULL;
+     ptr++;
+    } 
+  }
+ b->ptr = ptr;
+ PerlIOBase(f)->flags |= PERLIO_F_RDBUF;
+}
+
+SSize_t
+PerlIOCrlf_write(PerlIO *f, const void *vbuf, Size_t count)
+{
+ PerlIOBuf *b = PerlIOSelf(f,PerlIOBuf);
+ const STDCHAR *buf  = (const STDCHAR *) vbuf;
+ const STDCHAR *ebuf = buf+count;
+ if (!b->buf)
+  PerlIO_get_base(f);
+ if (!(PerlIOBase(f)->flags & PERLIO_F_CANWRITE))
+  return 0;
+ while (buf < ebuf)
+  {
+   STDCHAR *eptr = b->buf+b->bufsiz;
+   PerlIOBase(f)->flags |= PERLIO_F_WRBUF;
+   while (buf < ebuf && b->ptr < eptr)
+    {
+     if (*buf == '\n')
+      {
+       if (b->ptr + 2 >= eptr)
+        {
+         /* Not room for both */
+         PerlIO_flush(f);
+         break;
+        }
+       *(b->ptr)++ = 0xd; /* CR */
+       *(b->ptr)++ = 0xa; /* LF */
+       buf++;
+       if (PerlIOBase(f)->flags & PERLIO_F_LINEBUF)
+        { 
+         PerlIO_flush(f);
+         break;
+        }
+      }
+     else
+      {
+       int ch = *buf++;
+       *(b->ptr)++ = ch;
+      }
+     if (b->ptr >= eptr)
+      {
+       PerlIO_flush(f);
+       break;
+      }
+    }
+  }
+ return (buf - (STDCHAR *) vbuf);
+}
+
+IV
+PerlIOCrlf_flush(PerlIO *f)
+{
+ PerlIOCrlf *c = PerlIOSelf(f,PerlIOCrlf);
+ if (c->nl)
+  {
+   dTHX;
+   Perl_warn(aTHX_ __FUNCTION__ " f=%p flush with nl@%p",f,c->nl);
+   *(c->nl) = 0xd;
+   c->nl = NULL; 
+  }
+ return PerlIOBuf_flush(f);
+}
 
 PerlIO_funcs PerlIO_crlf = {
  "crlf",
- sizeof(PerlIOBuf),
+ sizeof(PerlIOCrlf),
  0,
  PerlIOBase_fileno,
  PerlIOBuf_fdopen,
  PerlIOBuf_open,
  PerlIOBuf_reopen,
  PerlIOBase_pushed,
- PerlIOBase_noop_ok,
- PerlIOBuf_read,
- PerlIOBuf_unread,
- PerlIOBuf_write,
+ PerlIOBase_noop_ok,   /* popped */
+ PerlIOBuf_read,       /* generic read works with ptr/cnt lies ... */
+ PerlIOCrlf_unread,    /* Put CR,LF in buffer for each '\n' */
+ PerlIOCrlf_write,     /* Put CR,LF in buffer for each '\n' */
  PerlIOBuf_seek,
  PerlIOBuf_tell,
  PerlIOBuf_close,
- PerlIOBuf_flush,
+ PerlIOCrlf_flush,
  PerlIOBuf_fill,
  PerlIOBase_eof,
  PerlIOBase_error,
@@ -1958,8 +2163,8 @@ PerlIO_funcs PerlIO_crlf = {
  PerlIOBuf_get_base,
  PerlIOBuf_bufsiz,
  PerlIOBuf_get_ptr,
- PerlIOBuf_get_cnt,
- PerlIOBuf_set_ptrcnt,
+ PerlIOCrlf_get_cnt,
+ PerlIOCrlf_set_ptrcnt,
 };
 
 #ifdef HAS_MMAP
@@ -1972,7 +2177,6 @@ typedef struct
  Mmap_t		mptr;        /* Mapped address */
  Size_t		len;          /* mapped length */
  STDCHAR	*bbuf;        /* malloced buffer if map fails */
-
 } PerlIOMmap;
 
 static size_t page_size = 0;

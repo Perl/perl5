@@ -387,11 +387,11 @@ LIBFILES	= $(CRYPT_LIB) $(LIBC) \
 		  -lwinmm -lversion -lodbc32
 
 .IF  "$(CFG)" == "Debug"
-OPTIMIZE	= -g -DDEBUGGING
+OPTIMIZE	= -g -O2 -DDEBUGGING
 LINK_DBG	= -g
 .ELSE
 OPTIMIZE	= -g -O2
-LINK_DBG	= 
+LINK_DBG	= -g 
 .ENDIF
 
 CFLAGS		= $(INCLUDES) $(DEFINES) $(LOCDEFS) $(OPTIMIZE)
