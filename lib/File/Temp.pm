@@ -1454,18 +1454,16 @@ sub unlink0 {
   my @okstat = (0..$#fh);  # Use all by default
   if ($^O eq 'MSWin32') {
     @okstat = (1,2,3,4,5,7,8,9,10);
-  }  elsif ($^O eq 'VMS') {
-    @okstat = (0,1,2,3,4,5,7,8,9,10);
   } elsif ($^O eq 'os2') {
-    @okstat = (0, 2..10, 13..$#fh);
+    @okstat = (0, 2..$#fh);
   }
 
   # Now compare each entry explicitly by number
   for (@okstat) {
     print "Comparing: $_ : $fh[$_] and $path[$_]\n" if $DEBUG;
-    # Use eq rather than == since on OS/2 elements 11 and 12 return
-    # the empty string rather than a null. This is fine since we
-    # are only comparing integers.
+    # Use eq rather than == since rdev, blksize, and blocks (6, 11,
+    # and 12) will be '' on platforms that do not support them.  This
+    # is fine since we are only comparing integers.
     unless ($fh[$_] eq $path[$_]) {
       warn "Did not match $_ element of stat\n" if $DEBUG;
       return 0;
