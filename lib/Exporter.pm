@@ -247,7 +247,7 @@ Exporter has a special method, 'export_to_level' which is used in situations
 where you can't directly call Exporter's import method. The export_to_level
 method looks like:
 
-MyPackage->export_to_level($where_to_export, $package, @what_to_export);
+    MyPackage->export_to_level($where_to_export, $package, @what_to_export);
 
 where $where_to_export is an integer telling how far up the calling stack
 to export your symbols, and @what_to_export is an array telling what
@@ -257,30 +257,30 @@ currently unused.
 For example, suppose that you have a module, A, which already has an
 import function:
 
-package A;
+    package A;
 
-@ISA = qw(Exporter);
-@EXPORT_OK = qw ($b);
+    @ISA = qw(Exporter);
+    @EXPORT_OK = qw ($b);
 
-sub import
-{
-    $A::b = 1;     # not a very useful import method
-}
+    sub import
+    {
+	$A::b = 1;     # not a very useful import method
+    }
 
 and you want to Export symbol $A::b back to the module that called 
 package A. Since Exporter relies on the import method to work, via 
 inheritance, as it stands Exporter::import() will never get called. 
 Instead, say the following:
 
-package A;
-@ISA = qw(Exporter);
-@EXPORT_OK = qw ($b);
+    package A;
+    @ISA = qw(Exporter);
+    @EXPORT_OK = qw ($b);
 
-sub import
-{
-    $A::b = 1;
-    A->export_to_level(1, @_);
-}
+    sub import
+    {
+	$A::b = 1;
+	A->export_to_level(1, @_);
+    }
 
 This will export the symbols one level 'above' the current package - ie: to 
 the program or module that used package A. 
