@@ -464,14 +464,6 @@ PerlIOVia_clearerr(PerlIO *f)
  PerlIOBase_clearerr(f);
 }
 
-SV *
-PerlIOVia_getarg(PerlIO *f)
-{
- dTHX;
- PerlIOVia *s = PerlIOSelf(f,PerlIOVia);
- return PerlIOVia_method(aTHX_ f,MYMethod(GETARG),G_SCALAR,Nullsv);
-}
-
 IV
 PerlIOVia_error(PerlIO *f)
 {
@@ -490,12 +482,19 @@ PerlIOVia_eof(PerlIO *f)
  return (result) ? SvIV(result) : PerlIOBase_eof(f);
 }
 
-PerlIO *
-PerlIOVia_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param)
+SV *
+PerlIOVia_getarg(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags)
 {
- if ((f = PerlIOBase_dup(aTHX_ f, o, param)))
+ PerlIOVia *s = PerlIOSelf(f,PerlIOVia);
+ return PerlIOVia_method(aTHX_ f,MYMethod(GETARG),G_SCALAR,Nullsv);
+}
+
+PerlIO *
+PerlIOVia_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
+{
+ if ((f = PerlIOBase_dup(aTHX_ f, o, param, flags)))
   {
-   /* Most of the fields will lazily set them selves up as needed
+   /* Most of the fields will lazily set themselves up as needed
       stash and obj have been set up by the implied push
     */
   }

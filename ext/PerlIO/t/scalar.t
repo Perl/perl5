@@ -10,7 +10,7 @@ BEGIN {
 }
 
 $| = 1;
-print "1..20\n";
+print "1..22\n";
 
 my $fh;
 my $var = "ok 2\n";
@@ -99,3 +99,19 @@ close $fh;
 print "# Got [$var], expect [foo]\n";
 print "not " unless $var eq "foo";
 print "ok 20\n";
+
+# Check that dup'ing the handle works
+
+$var = '';
+
+open $fh, "+>", \$var;
+print $fh "ok 21\n";
+open $dup,'+<&',$fh;
+print $dup "ok 22\n";
+seek($dup,0,0);
+while (<$dup>) {
+    print;
+}
+close($fh);
+close($dup);
+

@@ -178,7 +178,7 @@ PerlIO_binmode(pTHX_ PerlIO *fp, int iotype, int mode, const char *names)
 }
 
 PerlIO *
-PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param)
+PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags)
 {
 #ifndef PERL_MICRO
     if (f) {
@@ -442,13 +442,13 @@ PerlIO_allocate(pTHX)
 
 #undef PerlIO_fdupopen
 PerlIO *
-PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param)
+PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags)
 {
     if (f && *f) {
 	PerlIO_funcs *tab = PerlIOBase(f)->tab;
 	PerlIO *new;
 	PerlIO_debug("fdupopen f=%p param=%p\n",f,param);
-        new = (*tab->Dup)(aTHX_ PerlIO_allocate(aTHX),f,param);
+        new = (*tab->Dup)(aTHX_ PerlIO_allocate(aTHX),f,param, flags);
 	return new;
     }
     else {
@@ -1259,7 +1259,7 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd,
 	    while (l) {
 		SV *arg =
 		    (l->tab->Getarg) ? (*l->tab->
-					Getarg) (&l) : &PL_sv_undef;
+					Getarg) (aTHX_ &l, NULL, 0) : &PL_sv_undef;
 		PerlIO_list_push(aTHX_ layera, l->tab, arg);
 		l = *PerlIONext(&l);
 	    }
@@ -1976,12 +1976,12 @@ PerlIO_sv_dup(pTHX_ SV *arg, CLONE_PARAMS *param)
 }
 
 PerlIO *
-PerlIOBase_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param)
+PerlIOBase_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 {
     PerlIO *nexto = PerlIONext(o);
     if (*nexto) {
 	PerlIO_funcs *tab = PerlIOBase(nexto)->tab;
-	f = (*tab->Dup)(aTHX_ f, nexto, param);
+	f = (*tab->Dup)(aTHX_ f, nexto, param, flags);
     }
     if (f) {
 	PerlIO_funcs *self = PerlIOBase(o)->tab;
@@ -1989,13 +1989,10 @@ PerlIOBase_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param)
 	char buf[8];
 	PerlIO_debug("PerlIOBase_dup %s f=%p o=%p param=%p\n",self->name,f,o,param);
 	if (self->Getarg) {
-	    arg = (*self->Getarg)(o);
-	    if (arg) {
-		arg = PerlIO_sv_dup(aTHX_ arg, param);
-	    }
+	    arg = (*self->Getarg)(aTHX_ o,param,flags);
 	}
 	f = PerlIO_push(aTHX_ f, self, PerlIO_modestr(o,buf), arg);
-	if (!f && arg) {
+	if (arg) {
 	    SvREFCNT_dec(arg);
 	}
     }
@@ -2207,12 +2204,15 @@ PerlIOUnix_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 }
 
 PerlIO *
-PerlIOUnix_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param)
+PerlIOUnix_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 {
     PerlIOUnix *os = PerlIOSelf(o, PerlIOUnix);
     int fd = os->fd;
+    if (flags & PERLIO_DUP_FD) {
+	fd = PerlLIO_dup(fd);
+    }
     if (fd >= 0 && fd < PERLIO_MAX_REFCOUNTABLE_FD) {
-	f = PerlIOBase_dup(aTHX_ f, o, param);
+	f = PerlIOBase_dup(aTHX_ f, o, param, flags);
 	if (f) {
 	    /* If all went well overwrite fd in dup'ed lay with the dup()'ed fd */
 	    PerlIOUnix *s = PerlIOSelf(f, PerlIOUnix);
@@ -2485,13 +2485,27 @@ PerlIOStdio_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 }
 
 PerlIO *
-PerlIOStdio_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param)
+PerlIOStdio_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 {
     /* This assumes no layers underneath - which is what
        happens, but is not how I remember it. NI-S 2001/10/16
      */
-    if ((f = PerlIOBase_dup(aTHX_ f, o, param))) {
+    if ((f = PerlIOBase_dup(aTHX_ f, o, param, flags))) {
 	FILE *stdio = PerlIOSelf(o, PerlIOStdio)->stdio;
+	if (flags & PERLIO_DUP_FD) {
+	    int fd = PerlLIO_dup(fileno(stdio));
+	    if (fd >= 0) {
+		char mode[8];
+		int omode = fcntl(fd, F_GETFL);
+		PerlIO_intmode2str(omode,mode,NULL);
+		stdio = fdopen(fd, mode);
+	    }
+	    else {
+		/* FIXME: To avoid messy error recovery if dup fails
+		   re-use the existing stdio as though flag was not set
+		 */
+	    }
+	}
 	PerlIOSelf(f, PerlIOStdio)->stdio = stdio;
 	PerlIOUnix_refcnt_inc(fileno(stdio));
     }
@@ -3246,9 +3260,9 @@ PerlIOBuf_set_ptrcnt(PerlIO *f, STDCHAR * ptr, SSize_t cnt)
 }
 
 PerlIO *
-PerlIOBuf_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param)
+PerlIOBuf_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 {
- return PerlIOBase_dup(aTHX_ f, o, param);
+ return PerlIOBase_dup(aTHX_ f, o, param, flags);
 }
 
 
@@ -3974,9 +3988,9 @@ PerlIOMmap_close(PerlIO *f)
 }
 
 PerlIO *
-PerlIOMmap_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param)
+PerlIOMmap_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 {
- return PerlIOBase_dup(aTHX_ f, o, param);
+ return PerlIOBase_dup(aTHX_ f, o, param, flags);
 }
 
 

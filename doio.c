@@ -172,6 +172,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	STRLEN olen = len;
 	char *tend;
 	int dodup = 0;
+	PerlIO *that_fp = NULL;
 
 	type = savepvn(name, len);
 	tend = type+len;
@@ -266,7 +267,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 
 	    if (*type == '&') {
 	      duplicity:
-		dodup = 1;
+		dodup = PERLIO_DUP_FD;
 		type++;
 		if (*type == '=') {
 		    dodup = 0;
@@ -307,7 +308,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 			    goto say_false;
 			}
 			if (IoIFP(thatio)) {
-			    PerlIO *fp = IoIFP(thatio);
+			    that_fp = IoIFP(thatio);
 			    /* Flush stdio buffer before dup. --mjd
 			     * Unfortunately SEEK_CURing 0 seems to
 			     * be optimized away on most platforms;
@@ -317,15 +318,15 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 			    /* sfio fails to clear error on next
 			       sfwrite, contrary to documentation.
 			       -- Nick Clark */
-			    if (PerlIO_seek(fp, 0, SEEK_CUR) == -1)
-				PerlIO_clearerr(fp);
+			    if (PerlIO_seek(that_fp, 0, SEEK_CUR) == -1)
+				PerlIO_clearerr(that_fp);
 #endif
 			    /* On the other hand, do all platforms
 			     * take gracefully to flushing a read-only
 			     * filehandle?  Perhaps we should do
 			     * fsetpos(src)+fgetpos(dst)?  --nik */
-			    PerlIO_flush(fp);
-			    fd = PerlIO_fileno(fp);
+			    PerlIO_flush(that_fp);
+			    fd = PerlIO_fileno(that_fp);
 			    /* When dup()ing STDIN, STDOUT or STDERR
 			     * explicitly set appropriate access mode */
 			    if (IoIFP(thatio) == PerlIO_stdout()
@@ -341,15 +342,20 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 			else
 			    fd = -1;
 		    }
-		    if (dodup)
-			fd = PerlLIO_dup(fd);
-		    else
-			was_fdopen = TRUE;
 		    if (!num_svs)
 			type = Nullch;
-		    if (!(fp = PerlIO_openn(aTHX_ type,mode,fd,0,0,NULL,num_svs,svp))) {
+		    if (that_fp) {
+			fp = PerlIO_fdupopen(aTHX_ that_fp, NULL, dodup);
+		    }
+		    else {
 			if (dodup)
-			    PerlLIO_close(fd);
+			    fd = PerlLIO_dup(fd);
+			else
+			    was_fdopen = TRUE;
+			if (!(fp = PerlIO_openn(aTHX_ type,mode,fd,0,0,NULL,num_svs,svp))) {
+			    if (dodup)
+				PerlLIO_close(fd);
+			}
 		    }
 		}
 	    } /* & */
@@ -535,6 +541,10 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	if (savefd != fd) {
 	    Pid_t pid;
 	    SV *sv;
+	    /* Still a small can-of-worms here if (say) PerlIO::Scalar
+	       is assigned to (say) STDOUT - for now let dup2() fail
+	       and provide the error
+	     */
 	    if (PerlLIO_dup2(fd, savefd) < 0) {
 		(void)PerlIO_close(fp);
 		goto say_false;
@@ -557,8 +567,9 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    UNLOCK_FDPID_MUTEX;
 	    (void)SvUPGRADE(sv, SVt_IV);
 	    SvIVX(sv) = pid;
-	    if (!was_fdopen)
+	    if (!was_fdopen) {
 		PerlIO_close(fp);
+	    }
 	}
 	fp = saveifp;
 	PerlIO_clearerr(fp);

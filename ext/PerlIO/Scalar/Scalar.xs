@@ -40,12 +40,12 @@ PerlIOScalar_pushed(PerlIO *f, const char *mode, SV *arg)
   }
  sv_upgrade(s->var,SVt_PV);
  code = PerlIOBase_pushed(f,mode,Nullsv);
+ if ((PerlIOBase(f)->flags) & PERLIO_F_TRUNCATE)
+   SvCUR(s->var) = 0;
  if ((PerlIOBase(f)->flags) & PERLIO_F_APPEND)
-   s->posn = SvCUR(SvRV(arg));
+   s->posn = SvCUR(s->var);
  else
    s->posn = 0;
- if ((PerlIOBase(f)->flags) & PERLIO_F_TRUNCATE)
-   SvCUR(SvRV(arg)) = 0;
  return code;
 }
 
@@ -236,10 +236,29 @@ PerlIOScalar_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers, IV n, const c
  return NULL;
 }
 
-PerlIO *
-PerlIOScalar_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param)
+SV *
+PerlIOScalar_arg(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags)
 {
- if ((f = PerlIOBase_dup(aTHX_ f, o, param)))
+ PerlIOScalar *s = PerlIOSelf(f,PerlIOScalar);
+ SV *var = s->var;
+ if (flags & PERLIO_DUP_CLONE)
+  var = PerlIO_sv_dup(aTHX_ var, param);
+ else if (flags & PERLIO_DUP_FD)
+  {
+   /* Equivalent (guesses NI-S) of dup() is to create a new scalar */
+   var = newSVsv(var);
+  }
+ else
+  {
+   var = SvREFCNT_inc(var);
+  }
+ return newRV_noinc(var);
+}
+
+PerlIO *
+PerlIOScalar_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
+{
+ if ((f = PerlIOBase_dup(aTHX_ f, o, param, flags)))
   {
    PerlIOScalar *fs = PerlIOSelf(f,PerlIOScalar);
    PerlIOScalar *os = PerlIOSelf(o,PerlIOScalar);
@@ -256,7 +275,7 @@ PerlIO_funcs PerlIO_scalar = {
  PerlIOScalar_pushed,
  PerlIOScalar_popped,
  PerlIOScalar_open,
- NULL,
+ PerlIOScalar_arg,
  PerlIOScalar_fileno,
  PerlIOScalar_dup,
  PerlIOBase_read,
