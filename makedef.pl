@@ -550,6 +550,7 @@ my @layer_syms = qw(
 			 PerlIOBase_setlinebuf
 			 PerlIOBase_pushed
 			 PerlIOBase_read
+		         PerlIOBase_unread
 			 PerlIOBuf_bufsiz
 			 PerlIOBuf_fill
 			 PerlIOBuf_flush
