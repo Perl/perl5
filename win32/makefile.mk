@@ -157,8 +157,8 @@ DEFINES  = -DWIN32 $(BUILDOPT) $(CRYPT_FLAG)
 LOCDEFS  = -DPERLDLL -DPERL_CORE
 SUBSYS   = console
 LIBC	 = -lcrtdll
-LIBFILES = $(CRYPT_LIB) -ladvapi32 -luser32 -lwsock32 -lmingw32 -lgcc -lmoldname $(LIBC) \
-		-lkernel32
+LIBFILES = $(CRYPT_LIB) -ladvapi32 -luser32 -lnetapi32 -lwsock32 -lmingw32 \
+	-lgcc -lmoldname $(LIBC) -lkernel32
 
 WINIOMAYBE =
 

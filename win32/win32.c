@@ -16,6 +16,7 @@
 #endif
 #include <windows.h>
 
+#ifndef __MINGW32__
 #include <lmcons.h>
 #include <lmerr.h>
 /* ugliness to work around a buggy struct definition in lmwksta.h */
@@ -24,6 +25,8 @@
 #include <lmwksta.h>
 #undef LPTSTR
 #define LPTSTR LPSTR
+#include <lmapibuf.h>
+#endif /* __MINGW32__ */
 
 /* #include "config.h" */
 
@@ -1910,6 +1913,23 @@ static
 XS(w32_DomainName)
 {
     dXSARGS;
+#ifdef __MINGW32__
+    /* mingw32 doesn't have NetWksta*() yet, so do it the old way */
+    char name[256];
+    DWORD size = sizeof(name);
+    if (GetUserName(name,&size)) {
+	char sid[1024];
+	DWORD sidlen = sizeof(sid);
+	char dname[256];
+	DWORD dnamelen = sizeof(dname);
+	SID_NAME_USE snu;
+	if (LookupAccountName(NULL, name, &sid, &sidlen,
+			      dname, &dnamelen, &snu)) {
+	    XSRETURN_PV(dname);		/* all that for this */
+	}
+    }
+#else
+    /* this way is more reliable, in case user has a local account */
     char dname[256];
     DWORD dnamelen = sizeof(dname);
     PWKSTA_INFO_100 pwi;
@@ -1925,6 +1945,7 @@ XS(w32_DomainName)
 	NetApiBufferFree(pwi);
 	XSRETURN_PV(dname);
     }
+#endif
     XSRETURN_UNDEF;
 }
 
