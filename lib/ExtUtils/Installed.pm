@@ -261,6 +261,10 @@ This returns the version number for the specified module.
 
 =back
 
+=head1 EXAMPLE
+
+See the example in L<ExtUtils::Packlist>.
+
 =head1 AUTHOR
 
 Alan Burlison <Alan.Burlison@uk.sun.com>
