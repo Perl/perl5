@@ -54,11 +54,11 @@ case "$cc" in
 	# Check for which version of the compiler we're running
 	case "`$cc -version 2>&1`" in
 	*7.0*)                        # Mongoose 7.0
-	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1042,1048,1110,1116,1184 -OPT:Olimit=0"
+	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1042,1048,1110,1116,1174,1184,1552 -OPT:Olimit=0"
 	     optimize='none'
 	     ;;
 	*7.1*|*7.2|*7.20)             # Mongoose 7.1+
-	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1184 -OPT:Olimit=0"
+	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1174,1184,1552 -OPT:Olimit=0"
 	     optimize='-O3'
 # This is a temporary fix for 5.005.
 # Leave pp_ctl_cflags  line at left margin for Configure.  See 
@@ -67,15 +67,15 @@ case "$cc" in
 pp_ctl_cflags='optimize=-O'
 	     ;;
 	*7.*)                         # Mongoose 7.2.1+
-	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1184 -OPT:Olimit=0:space=ON"
+	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1174,1184,1552 -OPT:Olimit=0:space=ON"
 	     optimize='-O3'
 	     ;;
 	*6.2*)                        # Ragnarok 6.2
-	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1184"
+	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1174,1184,1552"
 	     optimize='none'
 	     ;;
 	*)                            # Be safe and not optimize
-	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1184 -OPT:Olimit=0"
+	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1174,1184,1552 -OPT:Olimit=0"
 	     optimize='none'
 	     ;;
 	esac
@@ -151,6 +151,11 @@ ldflags="$ldflags -Wl,-woff,84"
 set `echo X "$libswanted "|sed -e 's/ socket / /' -e 's/ nsl / /' -e 's/ dl / /'`
 shift
 libswanted="$*"
+
+# Irix 6.5.6 seems to have a broken header <sys/mode.h>
+# don't include that (it doesn't contain S_IFMT, S_IFREG, et al)
+
+i_sysmode="$undef"
 
 # I have conflicting reports about the sun, crypt, bsd, and PW
 # libraries on Irix 6.2.

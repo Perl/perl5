@@ -981,6 +981,7 @@ Perl_malloc(register size_t nbytes)
   	register union overhead *p;
   	register int bucket;
   	register MEM_SIZE shiftr;
+  	static void morecore(int bucket);
 
 #if defined(DEBUGGING) || defined(RCHECK)
 	MEM_SIZE size = nbytes;

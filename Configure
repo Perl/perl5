@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Feb 22 06:52:47 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Thu Feb 24 03:13:49 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -402,7 +402,7 @@ d_hasmntopt=''
 d_htonl=''
 d_iconv=''
 d_inetaton=''
-d_int64t=''
+d_int64_t=''
 d_isascii=''
 d_killpg=''
 d_lchown=''
@@ -514,6 +514,7 @@ d_socket=''
 d_sockpair=''
 sockethdr=''
 socketlib=''
+d_socklen_t=''
 d_sqrtl=''
 d_statblks=''
 d_statfs_f_flags=''
@@ -711,6 +712,7 @@ libs=''
 libsdirs=''
 libsfiles=''
 libsfound=''
+libspath=''
 lns=''
 d_PRIEldbl=''
 d_PRIFldbl=''
@@ -2403,12 +2405,12 @@ EOM
 	: specified already.
 	case "$hintfile" in
 	''|' ')
-		file=`echo "${osname}_${osvers}" | $sed -e 's@\.@_@g' -e 's@_$@@'`
+		file=`echo "${osname}_${osvers}" | $sed -e 's%\.%_%g' -e 's%_$%%'`
 		: Also try without trailing minor version numbers.
-		xfile=`echo $file | $sed -e 's@_[^_]*$@@'`
-		xxfile=`echo $xfile | $sed -e 's@_[^_]*$@@'`
-		xxxfile=`echo $xxfile | $sed -e 's@_[^_]*$@@'`
-		xxxxfile=`echo $xxxfile | $sed -e 's@_[^_]*$@@'`
+		xfile=`echo $file | $sed -e 's%_[^_]*$%%'`
+		xxfile=`echo $xfile | $sed -e 's%_[^_]*$%%'`
+		xxxfile=`echo $xxfile | $sed -e 's%_[^_]*$%%'`
+		xxxxfile=`echo $xxxfile | $sed -e 's%_[^_]*$%%'`
 		case "$file" in
 		'') dflt=none ;;
 		*)  case "$osvers" in
@@ -3698,8 +3700,15 @@ $define)
 	libswanted="$libswanted socks5 socks5_sh"
 	;;
 esac
+libsfound=''
+libsfiles=''
+libsdirs=''
+libspath=''
+for thisdir in $libpth $xlibpth; do
+  test -d $thisdir && libspath="$libspath $thisdir"
+done
 for thislib in $libswanted; do
-	for thisdir in $libpth; do
+	for thisdir in $libspath; do
 	    xxx=''
 	    if $test ! -f "$xxx" -a "X$ignore_versioned_solibs" = "X"; then
 		xxx=`ls $thisdir/lib$thislib.$so.[0-9] 2>/dev/null|tail -1`
@@ -3743,7 +3752,7 @@ for thislib in $libswanted; do
                    libsfound="$libsfound $xxx"
                    yyy=`basename $xxx`
                    libsfiles="$libsfiles $yyy"
-                   yyy=`echo $xxx|sed "s@/$yyy\\$@@"`
+                   yyy=`echo $xxx|$sed -e "s%/$yyy\\$%%"`
                    case " $libsdirs " in
                    *" $yyy "*) ;;
                    *) libsdirs="$libsdirs $yyy" ;;
@@ -4260,16 +4269,16 @@ if eval $compile_ok; then
 	yyy=`./try`
 	case "$yyy" in
 	'')	fpossize=4
-		echo " "
+		echo " " >&4
 		echo "(I can't execute the test program--guessing $fpossize.)" >&4
 		;;
 	*)	fpossize=$yyy
-		echo " $fpossize bytes."
+		echo " $fpossize bytes." >&4
 		;;
 	esac
 else
 	dflt="$longsize"
-	echo " "
+	echo " " >&4
 	echo "(I can't compile the test program.  Guessing...)" >&4
 	rp="What is the size of your file positions (in bytes)?"
 	. ./myread
@@ -5958,7 +5967,7 @@ y*) usedl="$define"
 	. ./getfile
 	usedl="$define"
 	: emulate basename
-	dlsrc=`echo $ans | $sed -e 's@.*/\([^/]*\)$@\1@'`
+	dlsrc=`echo $ans | $sed -e 's%.*/\([^/]*\)$%\1%'`
 
 	$cat << EOM
 
@@ -7155,10 +7164,12 @@ echo 'int main() { long double x = 7.0; }' > try.c
 set try
 if eval $compile; then
 	val="$define"
-	echo " Yes, it does." >&4
+	echo " " >&4
+	echo "You have long double."
 else
 	val="$undef"
-	echo " No, it doesn't." >&4
+	echo " " >&4
+	echo "You do not have long double."
 fi
 $rm try.*
 set d_longdbl
@@ -8811,7 +8822,7 @@ echo "Checking to see if your system supports off64_t..." >&4
 $cat >try.c <<EOCP
 #include <sys/types.h>
 #include <unistd.h>
-int main() { off64_t x = 7; }'
+int main() { off64_t x = 7; }
 EOCP
 set try
 if eval $compile; then
@@ -8832,8 +8843,8 @@ eval $setvar
 echo " "
 echo "Checking to see if your system supports fpos64_t..." >&4
 $cat >try.c <<EOCP
-#include <sys/stdio.h>
-int main() { fpos64_t x x = 7; }'
+#include <stdio.h>
+int main() { fpos64_t x = 7; }
 EOCP
 set try
 if eval $compile; then
@@ -9301,13 +9312,15 @@ EOCP
 set try
 if eval $compile; then
 	val="$define"
-	echo " Yes, it does." >&4
+	echo " " >&4
+	echo "You have int64_t."
 else
 	val="$undef"
-	echo " No, it doesn't." >&4
+	echo " " >&4
+	echo "You do not have int64_t."
 fi
 $rm -f try try.*
-set d_int64t
+set d_int64_t
 eval $setvar
 
 : Look for isascii
@@ -9417,10 +9430,12 @@ echo 'int main() { long long x = 7; return 0; }' > try.c
 set try
 if eval $compile; then
 	val="$define"
-	echo " Yes, it does." >&4
+	echo " " >&4
+	echo "You have have long long."
 else
 	val="$undef"
-	echo " No, it doesn't." >&4
+	echo " " >&4
+	echo "You do not have long long."
 fi
 $rm try.*
 set d_longlong
@@ -9645,7 +9660,7 @@ case "$intsize" in
         eval $setvar
         quadkind=3
         ;;
-      *) case "$d_int64t" in
+      *) case "$d_int64_t" in
          define)
            val=int64_t
            set quadtype
@@ -10933,6 +10948,31 @@ esac
 set d_sigsetjmp
 eval $setvar
 $rm -f try.c try
+
+: check for socklen_t
+echo " "
+$echo $n "Checking to see if your system supports socklen_t...$c" >&4
+$cat >try.c <<EOCP
+#include <sys/types.h>
+#$d_socket HAS_SOCKET
+#ifdef HAS_SOCKET
+#include <sys/socket.h>
+#endif
+int main() { socklen_t x = 16; }
+EOCP
+set try
+if eval $compile; then
+	val="$define"
+	echo " " >&4
+	echo "You have socklen_t."
+else
+	val="$undef"
+	echo " " >&4
+	echo "You do not have socklen_t."
+fi
+$rm -f try try.*
+set d_socklen_t
+eval $setvar
 
 : see if sys/stat.h is available
 set sys/stat.h i_sysstat
@@ -14693,7 +14733,7 @@ d_htonl='$d_htonl'
 d_iconv='$d_iconv'
 d_index='$d_index'
 d_inetaton='$d_inetaton'
-d_int64t='$d_int64t'
+d_int64_t='$d_int64_t'
 d_isascii='$d_isascii'
 d_killpg='$d_killpg'
 d_lchown='$d_lchown'
@@ -14808,6 +14848,7 @@ d_shmget='$d_shmget'
 d_sigaction='$d_sigaction'
 d_sigsetjmp='$d_sigsetjmp'
 d_socket='$d_socket'
+d_socklen_t='$d_socklen_t'
 d_sockpair='$d_sockpair'
 d_sqrtl='$d_sqrtl'
 d_statblks='$d_statblks'
@@ -15032,6 +15073,7 @@ libs='$libs'
 libsdirs='$libsdirs'
 libsfiles='$libsfiles'
 libsfound='$libsfound'
+libspath='$libspath'
 libswanted='$libswanted'
 line='$line'
 lint='$lint'

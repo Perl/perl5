@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Tue Feb 22 07:10:02 EET 2000
+# Configuration time: Tue Feb 22 23:57:36 EET 2000
 # Configured by     : jhi
 # Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
 
@@ -59,7 +59,7 @@ ccflags='-pthread -std -DLANGUAGE_C'
 ccsymbols='__alpha=1 __LANGUAGE_C__=1 __osf__=1 __unix__=1 _LONGLONG=1 _SYSTYPE_BSD=1 SYSTYPE_BSD=1 unix=1'
 cf_by='jhi'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Tue Feb 22 07:10:02 EET 2000'
+cf_time='Tue Feb 22 23:57:36 EET 2000'
 charsize='1'
 chgrp=''
 chmod=''
@@ -197,7 +197,7 @@ d_htonl='define'
 d_iconv='undef'
 d_index='undef'
 d_inetaton='define'
-d_int64t='undef'
+d_int64_t='undef'
 d_isascii='define'
 d_killpg='define'
 d_lchown='define'
@@ -312,6 +312,7 @@ d_shmget='define'
 d_sigaction='define'
 d_sigsetjmp='define'
 d_socket='define'
+d_socklen_t='undef'
 d_sockpair='define'
 d_sqrtl='define'
 d_statblks='define'
@@ -524,7 +525,7 @@ known_extensions='B ByteLoader DB_File Data/Dumper Devel/DProf Devel/Peek Fcntl 
 ksh=''
 large=''
 ld='ld'
-lddlflags='-shared -expect_unresolved "*" -msym -s'
+lddlflags='-shared -expect_unresolved "*" -msym -std -s'
 ldflags=''
 ldlibpthname='LD_LIBRARY_PATH'
 less='less'
@@ -536,6 +537,7 @@ libs='-lgdbm -ldbm -ldb -lm -lpthread -lexc'
 libsdirs=' /usr/shlib /usr/ccs/lib'
 libsfiles=' libgdbm.so libdbm.a libdb.so libm.so libpthread.so libexc.so'
 libsfound=' /usr/shlib/libgdbm.so /usr/ccs/lib/libdbm.a /usr/shlib/libdb.so /usr/shlib/libm.so /usr/shlib/libpthread.so /usr/shlib/libexc.so'
+libspath=' /usr/shlib /usr/ccs/lib /usr/lib/cmplrs/cc /usr/lib /var/shlib'
 libswanted='sfio socket inet nsl nm gdbm dbm db malloc dld ld sun m cposix posix ndir dir crypt sec ucb BSD x pthread exc'
 line=''
 lint=''

@@ -106,7 +106,7 @@ sub connect {
     $blocking = $sock->blocking(0) if $timeout;
 
     if (!connect($sock, $addr)) {
-	if ($timeout && exists(&IO::EINPROGRESS) && ($! == &IO::EINPROGRESS)) {
+	if ($timeout && $!{EINPROGRESS}) {
 	    require IO::Select;
 
 	    my $sel = new IO::Select $sock;
@@ -115,7 +115,9 @@ sub connect {
 		$err = $! || (exists &Errno::ETIMEDOUT ? &Errno::ETIMEDOUT : 1);
 		$@ = "connect: timeout";
 	    }
-	    elsif(!connect($sock,$addr)) {
+	    elsif(!connect($sock,$addr) && not $!{EISCONN}) {
+		# Some systems refuse to re-connect() to
+		# an already open socket and set errno to EISCONN.
 		$err = $!;
 		$@ = "connect: $!";
 	    }

@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Tue Feb 22 07:10:02 EET 2000
+ * Configuration time: Tue Feb 22 23:57:36 EET 2000
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -1922,6 +1922,12 @@
 /*#define	HAS_MSG_PROXY	/ **/
 #define	HAS_SCM_RIGHTS	/**/
 
+/* HAS_SOCKLEN_T:
+ *     This symbol will defined if the C compiler supports socklen_t.
+ *     Usually the <sys/socket.h> needs to be included.
+ */
+/*#define     HAS_SOCKLEN_T               / **/
+
 /* HAS_SQRTL:
  *	This symbol, if defined, indicates that the sqrtl routine is
  *	available to do long double square roots.
@@ -2345,6 +2351,12 @@
  */
 #define	I_SYSLOG		/**/
 
+/* I_SYSMODE:
+ *	This symbol, if defined, indicates that <sys/mode.h> exists and
+ *	should be included.
+ */
+#define	I_SYSMODE		/**/
+
 /* I_SYS_MOUNT:
  *	This symbol, if defined, indicates that <sys/mount.h> exists and
  *	should be included.
@@ -2367,6 +2379,12 @@
  *	should be included.
  */
 #define	I_SYSUIO		/**/
+
+/* I_SYSUTSNAME:
+ *	This symbol, if defined, indicates that <sys/utsname.h> exists and
+ *	should be included.
+ */
+#define	I_SYSUTSNAME		/**/
 
 /* I_SYS_VFS:
  *	This symbol, if defined, indicates that <sys/vfs.h> exists and
@@ -2965,17 +2983,5 @@
  */
 #define PERL_XS_APIVERSION "5.5.660"
 #define PERL_PM_APIVERSION "5.005"
-
-/* I_SYSMODE:
- *	This symbol, if defined, indicates that <sys/mode.h> exists and
- *	should be included.
- */
-#define	I_SYSMODE		/**/
-
-/* I_SYS_UTSNAME:
- *	This symbol, if defined, indicates that <sys/utsname.h> exists and
- *	should be included.
- */
-#define	I_SYS_UTSNAME		/**/
 
 #endif

@@ -462,7 +462,4 @@ BOOT:
      * constant subs for IO
      */
     stash = gv_stashpvn("IO", 2, TRUE);
-#ifdef EINPROGRESS
-        newCONSTSUB(stash,"EINPROGRESS", newSViv(EINPROGRESS));
-#endif
 }

@@ -1620,7 +1620,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *     Usually the <inttypes.h> needs to be included, but sometimes
  *	<sys/types.h> is enough.
  */
-#$d_int64t     HAS_INT64_T               /**/
+#$d_int64_t     HAS_INT64_T               /**/
 
 /* HAS_ISASCII:
  *	This manifest constant lets the C program know that isascii 
@@ -1935,6 +1935,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_msg_peek	HAS_MSG_PEEK	/**/
 #$d_msg_proxy	HAS_MSG_PROXY	/**/
 #$d_scm_rights	HAS_SCM_RIGHTS	/**/
+
+/* HAS_SOCKLEN_T:
+ *     This symbol will defined if the C compiler supports socklen_t.
+ *     Usually the <sys/socket.h> needs to be included.
+ */
+#$d_socklen_t     HAS_SOCKLEN_T               /**/
 
 /* HAS_SQRTL:
  *	This symbol, if defined, indicates that the sqrtl routine is
@@ -2359,6 +2365,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$i_syslog	I_SYSLOG		/**/
 
+/* I_SYSMODE:
+ *	This symbol, if defined, indicates that <sys/mode.h> exists and
+ *	should be included.
+ */
+#$i_sysmode	I_SYSMODE		/**/
+
 /* I_SYS_MOUNT:
  *	This symbol, if defined, indicates that <sys/mount.h> exists and
  *	should be included.
@@ -2381,6 +2393,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	should be included.
  */
 #$i_sysuio	I_SYSUIO		/**/
+
+/* I_SYSUTSNAME:
+ *	This symbol, if defined, indicates that <sys/utsname.h> exists and
+ *	should be included.
+ */
+#$i_sysutsname	I_SYSUTSNAME		/**/
 
 /* I_SYS_VFS:
  *	This symbol, if defined, indicates that <sys/vfs.h> exists and
@@ -2979,18 +2997,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define PERL_XS_APIVERSION "$xs_apiversion"
 #define PERL_PM_APIVERSION "$pm_apiversion"
-
-/* I_SYSMODE:
- *	This symbol, if defined, indicates that <sys/mode.h> exists and
- *	should be included.
- */
-#$i_sysmode	I_SYSMODE		/**/
-
-/* I_SYS_UTSNAME:
- *	This symbol, if defined, indicates that <sys/utsname.h> exists and
- *	should be included.
- */
-#$i_sysutsname	I_SYS_UTSNAME		/**/
 
 #endif
 !GROK!THIS!
