@@ -2630,7 +2630,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl)
 		    if (curop->op_type == OP_GV) {
 			GV *gv = cGVOPx_gv(curop);
 			repl_has_vars = 1;
-			if (strchr("&`'123456789+", *GvENAME(gv)))
+			if (strchr("&`'123456789+-", *GvENAME(gv)))
 			    break;
 		    }
 		    else if (curop->op_type == OP_RV2CV)
