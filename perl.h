@@ -3928,7 +3928,8 @@ typedef struct am_table_short AMTS;
  * for an example of the use of these macros, and perlxs.pod for more.
  *
  * Code that uses these macros is responsible for the following:
- * 1. #define MY_CXT_KEY to a unique string, e.g. "DynaLoader::_guts"
+ * 1. #define MY_CXT_KEY to a unique string, e.g.
+ *    "DynaLoader::_guts" XS_VERSION
  * 2. Declare a typedef named my_cxt_t that is a structure that contains
  *    all the data that needs to be interpreter-local.
  * 3. Use the START_MY_CXT macro after the declaration of my_cxt_t.
