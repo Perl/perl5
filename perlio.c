@@ -2609,7 +2609,7 @@ PerlIOStdio_mode(const char *mode, char *tmode)
     while (*mode) {
 	*tmode++ = *mode++;
     }
-#ifdef PERLIO_USING_CRLF
+#if defined(PERLIO_USING_CRLF) || defined(__CYGWIN__)
     *tmode++ = 'b';
 #endif
     *tmode = '\0';
@@ -2710,25 +2710,28 @@ PerlIOStdio_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 		fd = PerlLIO_open3(path, imode, perm);
 	    }
 	    else {
-		FILE *stdio = PerlSIO_fopen(path, mode);
-		if (stdio) {
-		    PerlIOStdio *s;
-		    if (!f) {
-			f = PerlIO_allocate(aTHX);
-		    }
-		    if ((f = PerlIO_push(aTHX_ f, self,
-				    (mode = PerlIOStdio_mode(mode, tmode)),
-				    PerlIOArg))) {
-			s = PerlIOSelf(f, PerlIOStdio);
-			s->stdio = stdio;
-			PerlIOUnix_refcnt_inc(fileno(s->stdio));
-		    }
-		    return f;
-		}
-		else {
-		    return NULL;
-		}
+		 /* Append the 'b' - more correct for CRLF platforms
+		  * and Cygwin and should be harmless (since it's a
+		  * no-op) elsewhere. */
+		 mode = PerlIOStdio_mode(mode, tmode);
+		 {
+		      FILE *stdio = PerlSIO_fopen(path, mode);
+		      if (stdio) {
+			   PerlIOStdio *s;
+			   if (!f) {
+				f = PerlIO_allocate(aTHX);
+			   }
+			   if ((f = PerlIO_push(aTHX_ f, self,
+						mode, PerlIOArg))) {
+				s = PerlIOSelf(f, PerlIOStdio);
+				s->stdio = stdio;
+				PerlIOUnix_refcnt_inc(fileno(s->stdio));
+			  }
+			  return f;
+		      }
+		 }
 	    }
+	    return NULL;
 	}
 	if (fd >= 0) {
 	    FILE *stdio = NULL;
