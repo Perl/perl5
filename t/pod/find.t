@@ -29,9 +29,9 @@ if ($^O eq 'VMS') {
 }
 print "### searching $lib_dir\n";
 my %pods = pod_find("$lib_dir");
-my $result = join(",", sort values %pods);
+my $result = join("\n# ", sort values %pods);
 print "### found $result\n";
-my $compare = join(',', qw(
+my $compare = join("\n# ", qw(
     Checker
     Find
     Html
@@ -50,7 +50,7 @@ my $compare = join(',', qw(
 ));
 if ($^O eq 'VMS') {
     $compare = lc($compare);
-    $result = join(',', sort grep(/pod::/, values %pods));
+    $result = join("\n# ", sort grep(/pod::/, values %pods));
     my $undollared = $Qlib_dir;
     $undollared =~ s/\$/\\\$/g;
     $undollared =~ s/\-/\\\-/g;
@@ -90,19 +90,11 @@ else {
 print "### searching for perlfunc.pod\n";
 $result = pod_where({ -dirs => ['../pod'], -verbose => $VERBOSE }, 'perlfunc')
   || 'undef - perlfunc.pod not found!';
+$result = VMS::Filespec::unixify($result) if $^O eq 'VMS';
 print "### found $result\n";
 
-if ($^O eq 'VMS') { # privlib is perl_root:[lib] unfortunately
-    $compare = "/lib/pod/perlfunc.pod";
-    $result = VMS::Filespec::unixify($result);
-    $result =~ s/perl_root\///i;
-    $result =~ s/^\.\.//;  # needed under `mms test`
-    ok($result,$compare);
-}
-else {
-    $compare = File::Spec->catfile("..","pod","perlfunc.pod");
-    ok(_canon($result),_canon($compare));
-}
+$compare = File::Spec->catfile("..","pod","perlfunc.pod");
+ok(_canon($result),_canon($compare));
 
 # make the path as generic as possible
 sub _canon

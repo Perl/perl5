@@ -32,9 +32,9 @@ $defwarn = <<'EOW';
 # file specifications shwn above are in fact equivalent.
 EOW
 
-if (rmsexpand('[]') eq "\U$ENV{DEFAULT}") { print 'ok ',++$idx,"\n"; }
+if (uc(rmsexpand('[]')) eq "\U$ENV{DEFAULT}") { print 'ok ',++$idx,"\n"; }
 else {
-  print 'not ok ', ++$idx, ": rmsexpand('[]') = |", rmsexpand('[]'),
+  print 'not ok ', ++$idx, ": uc(rmsexpand('[]')) = |", uc(rmsexpand('[]')),
         "|, \$ENV{DEFAULT} = |\U$ENV{DEFAULT}|\n$defwarn";
 }
 if (rmsexpand('from.here') eq "\L$ENV{DEFAULT}from.here") {
