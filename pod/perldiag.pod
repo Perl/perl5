@@ -161,14 +161,14 @@ an ampersand before the name to avoid the warning.  See L<perlsub>.
 (F) The argument to exists() must be a hash or array element, such as:
 
     $foo{$bar}
-    $ref->[12]->["susie"]
+    $ref->{"susie"}[12]
 
 =item %s argument is not a HASH or ARRAY element or slice
 
 (F) The argument to delete() must be either a hash or array element, such as:
 
     $foo{$bar}
-    $ref->[12]->["susie"]
+    $ref->{"susie"}[12]
 
 or a hash or array slice, such as:
 
