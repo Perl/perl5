@@ -3110,7 +3110,7 @@ sub prefixify {
     my($self,$var,$sprefix,$rprefix) = @_;
     $self->{uc $var} ||= $Config{lc $var};
     $self->{uc $var} = VMS::Filespec::unixpath($self->{uc $var}) if $Is_VMS;
-    $self->{uc $var} =~ s/\Q$sprefix\E/$rprefix/s;
+    $self->{uc $var} =~ s/\w\Q$sprefix\E\w/$rprefix/s;
 }
 
 =item processPL (o)
