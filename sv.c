@@ -65,8 +65,6 @@ static void sv_mortalgrow _((void));
 static void sv_unglob _((SV* sv));
 static void sv_check_thinkfirst _((SV *sv));
 
-#define SV_CHECK_THINKFIRST(sv) if (SvTHINKFIRST(sv)) sv_check_thinkfirst(sv)
-
 #ifndef PURIFY
 static void *my_safemalloc(MEM_SIZE size);
 #endif
@@ -76,6 +74,8 @@ typedef void (*SVFUNC) _((SV*));
 #define FCALL *f
 
 #endif /* PERL_OBJECT */
+
+#define SV_CHECK_THINKFIRST(sv) if (SvTHINKFIRST(sv)) sv_check_thinkfirst(sv)
 
 #ifdef PURIFY
 

@@ -42,6 +42,7 @@ safemalloc(size_t size)
 	exit(1);
     }
     /*NOTREACHED*/
+    return 0;
 }
 
 /* paranoid version of realloc */
@@ -66,6 +67,7 @@ saferealloc(void *where, size_t size)
 	exit(1);
     }
     /*NOTREACHED*/
+    return 0;
 }
 
 /* safe version of free */
