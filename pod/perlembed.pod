@@ -750,6 +750,8 @@ with L<perlfunc/my> whenever possible.
  #define DO_CLEAN 0
  #endif
 
+ #define BUFFER_SIZE 1024
+
  static PerlInterpreter *my_perl = NULL;
 
  int
@@ -757,7 +759,7 @@ with L<perlfunc/my> whenever possible.
  {
      char *embedding[] = { "", "persistent.pl" };
      char *args[] = { "", DO_CLEAN, NULL };
-     char filename [1024];
+     char filename[BUFFER_SIZE];
      int exitstatus = 0;
      STRLEN n_a;
 
@@ -772,8 +774,10 @@ with L<perlfunc/my> whenever possible.
      if(!exitstatus) {
         exitstatus = perl_run(my_perl);
 
-        while(printf("Enter file name: ") && gets(filename)) {
+        while(printf("Enter file name: ") &&
+              fgets(filename, BUFFER_SIZE, stdin)) {
 
+            filename[strlen(filename)-1] = '\0'; /* strip \n */
             /* call the subroutine, passing it the filename as an argument */
             args[0] = filename;
             call_argv("Embed::Persistent::eval_file",

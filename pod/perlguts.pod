@@ -1799,7 +1799,7 @@ A public function (i.e. part of the internal API, but not necessarily
 sanctioned for use in extensions) begins like this:
 
   void
-  Perl_sv_setsv(pTHX_ SV* dsv, SV* ssv)
+  Perl_sv_setiv(pTHX_ SV* dsv, IV num)
 
 C<pTHX_> is one of a number of macros (in perl.h) that hide the
 details of the interpreter's context.  THX stands for "thread", "this",
@@ -1818,19 +1818,19 @@ macro without the trailing underscore is used when there are no additional
 explicit arguments.
 
 When a core function calls another, it must pass the context.  This
-is normally hidden via macros.  Consider C<sv_setsv>.  It expands into
+is normally hidden via macros.  Consider C<sv_setiv>.  It expands into
 something like this:
 
-    ifdef PERL_IMPLICIT_CONTEXT
-      define sv_setsv(a,b)      Perl_sv_setsv(aTHX_ a, b)
+    #ifdef PERL_IMPLICIT_CONTEXT
+      #define sv_setiv(a,b)      Perl_sv_setiv(aTHX_ a, b)
       /* can't do this for vararg functions, see below */
-    else
-      define sv_setsv           Perl_sv_setsv
-    endif
+    #else
+      #define sv_setiv           Perl_sv_setiv
+    #endif
 
 This works well, and means that XS authors can gleefully write:
 
-    sv_setsv(foo, bar);
+    sv_setiv(foo, bar);
 
 and still have it work under all the modes Perl could have been
 compiled with.
@@ -1874,16 +1874,16 @@ with extensions: whenever XSUB.h is #included, it redefines the aTHX
 and aTHX_ macros to call a function that will return the context.
 Thus, something like:
 
-        sv_setsv(asv, bsv);
+        sv_setiv(sv, num);
 
 in your extension will translate to this when PERL_IMPLICIT_CONTEXT is
 in effect:
 
-        Perl_sv_setsv(Perl_get_context(), asv, bsv);
+        Perl_sv_setiv(Perl_get_context(), sv, num);
 
 or to this otherwise:
 
-        Perl_sv_setsv(asv, bsv);
+        Perl_sv_setiv(sv, num);
 
 You have to do nothing new in your extension to get this; since
 the Perl library provides Perl_get_context(), it will all just

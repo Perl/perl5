@@ -687,7 +687,7 @@ Found in file perl.c
 
 Tells Perl to C<require> the file named by the string argument.  It is
 analogous to the Perl code C<eval "require '$file'">.  It's even
-implemented that way; consider using Perl_load_module instead.
+implemented that way; consider using load_module instead.
 
 NOTE: the perl_ form of this function is deprecated.
 
@@ -915,6 +915,7 @@ Found in file hv.h
 =item Nullch
 
 Null character pointer.
+
 =for hackers
 Found in file handy.h
 
@@ -4233,6 +4234,25 @@ Found in file sv.c
 Like C<sv_setpvf>, but also handles 'set' magic.
 
 	void	sv_setpvf_mg(SV *sv, const char* pat, ...)
+
+=for hackers
+Found in file sv.c
+
+=item sv_setpviv
+
+Copies an integer into the given SV, also updating its string value.
+Does not handle 'set' magic.  See C<sv_setpviv_mg>.
+
+	void	sv_setpviv(SV* sv, IV num)
+
+=for hackers
+Found in file sv.c
+
+=item sv_setpviv_mg
+
+Like C<sv_setpviv>, but also handles 'set' magic.
+
+	void	sv_setpviv_mg(SV *sv, IV iv)
 
 =for hackers
 Found in file sv.c
