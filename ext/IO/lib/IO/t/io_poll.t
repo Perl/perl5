@@ -15,7 +15,7 @@ if ($^O eq 'mpeix') {
 select(STDERR); $| = 1;
 select(STDOUT); $| = 1;
 
-print "1..9\n";
+print "1..10\n";
 
 use IO::Handle;
 use IO::Poll qw(/POLL/);
@@ -80,3 +80,11 @@ $poll->remove($dupout);
 print "not "
     if $poll->handles;
 print "ok 9\n";
+
+my $stdin = \*STDIN;
+$poll->mask($stdin => POLLIN);
+$poll->remove($stdin);
+close STDIN;
+print "not "
+    if $poll->poll(0.1);
+print "ok 10\n";
