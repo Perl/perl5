@@ -351,26 +351,45 @@ ____________________________________________________________________________
 	  !> t/cmd/for.t t/op/goto.t t/op/tie.t
 ____________________________________________________________________________
 [ 22979] By: nicholas                              on 2004/06/23  10:32:34
-        Log: Integrate:
-             [ 22877]
-             Subject: [PATCH] Re: [perl #29969] h2ph not correctly processing glibc sys/sysmacros.ph 
-             From: <wolfgang.laun@chello.at>
-             Date: Sun, 30 May 2004 17:27:07 +0200
-             Message-Id: <20040530152707.ZLWL22856.viefep16-int.chello.at@localhost>
-             
-             [ 22925]
-             Make h2ph able to understand a limited set of inline functions.
-             The glibc apparently now ships headers that use inline functions
-             instead of plain old macros.
-             
-             [ 22929]
-             More h2ph tweaking for gcc __inline functions
-             
-             [ 22930]
-             More h2ph tweaks: recognition of C types
-             
-             [ 22933]
-             More h2ph voodoo.
+             Integrate:
+             [ 22884]
+             Subject: [PATCH] configure.com and PERL_API_REVISION
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Mon, 31 May 2004 21:04:07 -0500
+             Message-ID: <40BBE417.2090001@mac.com>
+
+             [ 22892]
+             Subject: Re: [PATCH] [perl #29612] ndbm failure in make test
+             From: Alexey Tourbin <at@altlinux.ru>
+             Date: Sat, 22 May 2004 02:22:22 +0400
+             Message-ID: <20040521222222.GJ2030@solemn.turbinal.org>
+
+             [ 22893]
+             Subject: [PATCH] on VMS, always exit with failure in my_failure_exit
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Tue, 01 Jun 2004 23:16:58 -0500
+             Message-ID: <40BD54BA.9040708@mac.com>
+
+             [ 22901]
+             Subject: [PATCH] Have win32/makefile.mk default to gcc, and update docs
+             From: Steve Hay <steve.hay@uk.radan.com>
+             Date: Thu, 03 Jun 2004 15:46:17 +0100
+             Message-ID: <40BF39B9.3060207@uk.radan.com>
+
+             [ 22918]
+             Subject: [patch] Windows/Win32 thread handle leak with threads join
+             From: "Kevin Chase" <kevincha99@hotmail.com>
+             Date: Sun, 06 Jun 2004 09:44:44 -0700
+             Message-ID: <BAY2-F172Ih5h5xf4rJ0001a3a6@hotmail.com>
+
+             [ 22939]
+             Improve the substitution to cc_r for threading so that compilers
+             specified with a full path or as a parameter to ccache are changed
+
+             [ 22975]
+             Backward compatibility issues for HP-UX 10.01 and older
+             Yes, it is still actively used in production environment
+             One more patch expected for toke.c optimization level
      Branch: maint-5.8/perl
 	  !> README.win32 configure.com ext/NDBM_File/hints/linux.pl
 	  !> ext/threads/threads.xs hints/aix.sh hints/hpux.sh perl.c
