@@ -156,6 +156,7 @@ PP(pp_substcont)
     register char *m = cx->sb_m;
     char *orig = cx->sb_orig;
     register REGEXP *rx = cx->sb_rx;
+    SV *nsv = Nullsv;
 
     rxres_restore(&cx->sb_rxres, rx);
     RX_MATCH_UTF8_set(rx, SvUTF8(cx->sb_targ));
@@ -178,7 +179,10 @@ PP(pp_substcont)
 	{
 	    SV *targ = cx->sb_targ;
 
-	    sv_catpvn(dstr, s, cx->sb_strend - s);
+	    if (DO_UTF8(dstr) && !SvUTF8(targ))
+		sv_catpvn_utf8_upgrade(dstr, s, cx->sb_strend - s, nsv);
+	    else
+		sv_catpvn(dstr, s, cx->sb_strend - s);
 	    cx->sb_rxtainted |= RX_MATCH_TAINTED(rx);
 
 #ifdef PERL_COPY_ON_WRITE
@@ -221,8 +225,12 @@ PP(pp_substcont)
 	cx->sb_strend = s + (cx->sb_strend - m);
     }
     cx->sb_m = m = rx->startp[0] + orig;
-    if (m > s)
-	sv_catpvn(dstr, s, m-s);
+    if (m > s) {
+	if (DO_UTF8(dstr) && !SvUTF8(cx->sb_targ)) 
+	    sv_catpvn_utf8_upgrade(dstr, s, m - s, nsv);
+	else
+	    sv_catpvn(dstr, s, m-s);
+    }
     cx->sb_s = rx->endp[0] + orig;
     { /* Update the pos() information. */
 	SV *sv = cx->sb_targ;
