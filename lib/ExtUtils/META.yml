@@ -1,6 +1,6 @@
 #XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
 name:         ExtUtils-MakeMaker
-version:      6.10_06
+version:      6.10_07
 version_from: lib/ExtUtils/MakeMaker.pm
 installdirs:  perl
 requires:
@@ -10,4 +10,4 @@ requires:
     Pod::Man:                      0
 
 distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.10_06
+generated_by: ExtUtils::MakeMaker version 6.10_07

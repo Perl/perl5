@@ -1,3 +1,12 @@
+6.10_07
+    - Sun's make treats escaped newlines oddly.  Switching oneliner() back
+      to using multiple -e's.
+    * Bug in libscan() meant that any .pm containing RCS or CVS or SCCS
+      in its name (for example, RCS.pm) would be skipped.
+    - Command.t was getting confused in the core because it was reading
+      files from the core t/ directory, not MakeMaker's t/ directry.
+    - MM_OS2 PERL_ARCHIVE_AFTER test wrong for a.out systems (Ilya)
+
 6.10_06 Sat Jun  7 00:55:29 PDT 2003
     - Whoops, Liblist.t busted on VMS after I turned strict on in
       ExtUtils::Liblist::Kid.  Merely a test bug, not a real bug.

@@ -29,7 +29,7 @@ use vars qw(@ISA $VERSION $BORLAND $GCC $DMAKE $NMAKE);
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
 @ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
-$VERSION = '1.07';
+$VERSION = '1.08';
 
 $ENV{EMXSHELL} = 'sh'; # to run `commands`
 
@@ -169,6 +169,7 @@ sub init_others {
 
     # Used in favor of echo because echo won't strip quotes. :(
     $self->{ECHO}     ||= $self->oneliner('print qq{@ARGV}', ['-l']);
+    $self->{ECHO_N}   ||= $self->oneliner('print qq{@ARGV}');
 
     $self->{TOUCH}    ||= '$(PERLRUN) -MExtUtils::Command -e touch';
     $self->{CHMOD}    ||= '$(PERLRUN) -MExtUtils::Command -e chmod'; 

@@ -20,7 +20,7 @@ use vars qw($VERSION @ISA
 
 use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
-$VERSION = '1.36';
+$VERSION = '1.37';
 
 require ExtUtils::MM_Any;
 @ISA = qw(ExtUtils::MM_Any);
@@ -1418,7 +1418,7 @@ Called by init_main.
 sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
     my($self) = @_;
     my($name, %dir, %xs, %c, %h, %ignore, %pl_files, %manifypods);
-    local(%pm); #the sub in find() has to see this hash
+    my %pm;
 
     @ignore{qw(Makefile.PL test.pl t)} = (1,1,1);
 
@@ -1875,7 +1875,7 @@ usually solves this kind of problem.
 Initializes EXTRALIBS, BSLOADLIBS, LDLOADLIBS, LIBS, LD_RUN_PATH,
 OBJECT, BOOTDEP, PERLMAINCC, LDFROM, LINKTYPE, SHELL, NOOP,
 FIRST_MAKEFILE, MAKEFILE_OLD, NOECHO, RM_F, RM_RF, TEST_F,
-TOUCH, CP, MV, CHMOD, UMASK_NULL
+TOUCH, CP, MV, CHMOD, UMASK_NULL, ECHO, ECHO_N
 
 =cut
 
@@ -1936,6 +1936,7 @@ sub init_others {	# --- Initialize Other Attributes
     $self->{SHELL}              ||= $Config{sh} || '/bin/sh';
 
     $self->{ECHO}       ||= 'echo';
+    $self->{ECHO_N}     ||= 'echo -n';
     $self->{RM_F}       ||= "rm -f";
     $self->{RM_RF}      ||= "rm -rf";
     $self->{TOUCH}      ||= "touch";
@@ -2527,26 +2528,26 @@ doc_perl_install ::
 		>> }.$self->catfile('$(INSTALLARCHLIB)','perllocal.pod').q{
 
 doc_site_install ::
-	$(NOECHO) $(ECHO) Appending installation info to $(INSTALLSITEARCH)/perllocal.pod
-	-$(NOECHO) $(MKPATH) $(INSTALLSITEARCH)
+	$(NOECHO) $(ECHO) Appending installation info to $(INSTALLARCHLIB)/perllocal.pod
+	-$(NOECHO) $(MKPATH) $(INSTALLARCHLIB)
 	-$(NOECHO) $(DOC_INSTALL) \
 		"Module" "$(NAME)" \
 		"installed into" "$(INSTALLSITELIB)" \
 		LINKTYPE "$(LINKTYPE)" \
 		VERSION "$(VERSION)" \
 		EXE_FILES "$(EXE_FILES)" \
-		>> }.$self->catfile('$(INSTALLSITEARCH)','perllocal.pod').q{
+		>> }.$self->catfile('$(INSTALLARCHLIB)','perllocal.pod').q{
 
 doc_vendor_install ::
-	$(NOECHO) $(ECHO) Appending installation info to $(INSTALLVENDORARCH)/perllocal.pod
-	-$(NOECHO) $(MKPATH) $(INSTALLVENDORARCH)
+	$(NOECHO) $(ECHO) Appending installation info to $(INSTALLARCHLIB)/perllocal.pod
+	-$(NOECHO) $(MKPATH) $(INSTALLARCHLIB)
 	-$(NOECHO) $(DOC_INSTALL) \
 		"Module" "$(NAME)" \
 		"installed into" "$(INSTALLVENDORLIB)" \
 		LINKTYPE "$(LINKTYPE)" \
 		VERSION "$(VERSION)" \
 		EXE_FILES "$(EXE_FILES)" \
-		>> }.$self->catfile('$(INSTALLVENDORARCH)','perllocal.pod').q{
+		>> }.$self->catfile('$(INSTALLARCHLIB)','perllocal.pod').q{
 
 };
 
@@ -2930,7 +2931,7 @@ $(OBJECT) : $(FIRST_MAKEFILE)
 ' if $self->{OBJECT};
 
     push @m, q{
-# We take a very conservative approach here, but it\'s worth it.
+# We take a very conservative approach here, but it's worth it.
 # We move Makefile to Makefile.old here to avoid gnu make looping.
 $(FIRST_MAKEFILE) : Makefile.PL $(CONFIGDEP)
 	$(NOECHO) $(ECHO) "Makefile out-of-date with respect to $?"
@@ -3888,7 +3889,8 @@ sub tools_other {
     my @m;
 
     for my $tool (qw{ SHELL CHMOD CP MV NOOP NOECHO RM_F RM_RF TEST_F TOUCH 
-                      UMASK_NULL DEV_NULL MKPATH EQUALIZE_TIMESTAMP ECHO
+                      UMASK_NULL DEV_NULL MKPATH EQUALIZE_TIMESTAMP 
+                      ECHO ECHO_N
                       UNINST VERBINST
                       MOD_INSTALL DOC_INSTALL UNINSTALL
                       WARN_IF_OLD_PACKLIST
