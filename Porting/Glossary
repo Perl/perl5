@@ -1019,7 +1019,7 @@ d_memset (d_memset.U):
 d_mkdir (d_mkdir.U):
 	This variable conditionally defines the HAS_MKDIR symbol, which
 	indicates to the C program that the mkdir() routine is available
-	to create directories.
+	to create directories..
 
 d_mkdtemp (d_mkdtemp.U):
 	This variable conditionally defines the HAS_MKDTEMP symbol, which
@@ -2546,8 +2546,8 @@ inc_version_list_init (inc_version_list.U):
 	suitable for use in the PERL_INC_VERSION_LIST initialization.
 
 incpath (usrinc.U):
-	This variable must preceed the normal include path to get the
-	right one, as in $incpath/usr/include or $incpath/usr/lib.
+	This variable must preceed the normal include path to get hte
+	right one, as in "$incpath/usr/include" or "$incpath/usr/lib".
 	Value can be "" or "/bsd43" on mips.
 
 inews (Loc.U):
@@ -2754,7 +2754,7 @@ libswanted_uselargefiles (uselfs.U):
 	This variable contains the libraries needed by large file builds
 	and added to ldflags by hints files.  It is a space separated list
 	of the library names without the "lib" prefix or any suffix, just
-	like libswanted.
+	like libswanted..
 
 line (Loc.U):
 	This variable is defined but not used by Configure.
@@ -3271,7 +3271,7 @@ rd_nodata (nblock_io.U):
 	This variable holds the return code from read() when no data is
 	present. It should be -1, but some systems return 0 when O_NDELAY is
 	used, which is a shame because you cannot make the difference between
-	no data and an EOF. Sigh!
+	no data and an EOF.. Sigh!
 
 revision (patchlevel.U):
 	The value of revision comes from the patchlevel.h file.
