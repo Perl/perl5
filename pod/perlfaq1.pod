@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq1 - General Questions About Perl ($Revision: 1.5 $, $Date: 2002/01/27 20:22:52 $)
+perlfaq1 - General Questions About Perl ($Revision: 1.6 $, $Date: 2002/01/31 01:46:23 $)
 
 =head1 DESCRIPTION
 
@@ -264,7 +264,7 @@ http://www.cpan.org/misc/japh .
 Over a hundred quips by Larry, from postings of his or source code,
 can be found at http://www.cpan.org/misc/lwall-quotes.txt.gz .
 
-=head2 How can I convince my sysadmin/supervisor/employees to use version 5/5.005/Perl instead of some other language?
+=head2 How can I convince my sysadmin/supervisor/employees to use version 5/5.6.1/Perl instead of some other language?
 
 If your manager or employees are wary of unsupported software, or
 software which doesn't officially ship with your operating system, you
@@ -296,7 +296,7 @@ for any given task.  Also mention that the difference between version
 (Well, OK, maybe it's not quite that distinct, but you get the idea.)
 If you want support and a reasonable guarantee that what you're
 developing will continue to work in the future, then you have to run
-the supported version.  As of April 2001 that probably means
+the supported version.  As of January 2002 that probably means
 running either of the releases 5.6.1 (released in April 2001) or
 5.005_03 (released in March 1999), although 5.004_05 isn't that bad
 if you B<absolutely> need such an old version (released in April 1999)

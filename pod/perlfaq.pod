@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq - frequently asked questions about Perl ($Date: 2002/01/28 04:17:26 $)
+perlfaq - frequently asked questions about Perl ($Date: 2002/01/31 04:27:54 $)
 
 =head1 DESCRIPTION
 
@@ -13,7 +13,7 @@ This document.
 
 =head2 L<perlfaq1>: General Questions About Perl
 
-Very general, high-level information about Perl.
+Very general, high-level questions about Perl.
 
 =over 4
 
@@ -75,14 +75,14 @@ Where can I get a list of Larry Wall witticisms?
 
 =item *
 
-How can I convince my sysadmin/supervisor/employees to use version 5/5.005/Perl instead of some other language?
+How can I convince my sysadmin/supervisor/employees to use version 5/5.6.1/Perl instead of some other language?
 
 =back
 
 
 =head2 L<perlfaq2>: Obtaining and Learning about Perl
 
-Where to find source and documentation to Perl, support,
+Where to find source and documentation for Perl, support,
 and related matters.
 
 =over 4
@@ -157,7 +157,7 @@ Where do I send bug reports?
 
 =item *
 
-What is perl.com? Perl Mongers? pm.org? perl.org?
+What is perl.com? Perl Mongers? pm.org? perl.org? cpan.org?
 
 =back
 
@@ -287,8 +287,7 @@ my C program; what am I doing wrong?
 
 =item *
 
-When I tried to run my script, I got this message. What does it
-mean?
+When I tried to run my script, I got this message. What does it mean?
 
 =item *
 
@@ -318,7 +317,7 @@ Does Perl have a round() function?  What about ceil() and floor()?  Trig functio
 
 =item *
 
-How do I convert bits into ints?
+How do I convert between numeric representations?
 
 =item *
 
@@ -463,7 +462,7 @@ How can I remove duplicate elements from a list or array?
 
 =item *
 
-How can I tell whether a list or array contains a certain element?
+How can I tell whether a certain element is contained in a list or array?
 
 =item *
 
@@ -606,7 +605,7 @@ How do I pack arrays of doubles or floats for XS code?
 
 =head2 L<perlfaq5>: Files and Formats
 
-I/O and the "f" issues: filehandles, flushing, formats and footers.
+I/O and the "f" issues: filehandles, flushing, formats, and footers.
 
 =over 4
 
@@ -757,7 +756,7 @@ Why do I get weird spaces when I print an array of lines?
 =back
 
 
-=head2 L<perlfaq6>: Regexps
+=head2 L<perlfaq6>: Regular Expressions
 
 Pattern matching and regular expressions.
 
@@ -1188,9 +1187,13 @@ What is socket.ph and where do I get it?
 
 =head2 L<perlfaq9>: Networking
 
-Networking, the Internet, and a few on the web.
+Networking, the internet, and a few on the web.
 
 =over 4
+
+=item *
+
+What is the correct form of response from a CGI script?
 
 =item *
 
@@ -1267,6 +1270,10 @@ How do I return the user's mail address?
 =item *
 
 How do I send mail?
+
+=item *
+
+How do I use MIME to make an attachment to a mail message?
 
 =item *
 
