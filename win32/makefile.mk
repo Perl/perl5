@@ -29,7 +29,7 @@ INST_TOP	*= $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-INST_VER	*= \5.00472
+INST_VER	*= \5.00473
 
 #
 # uncomment to enable threads-capabilities
@@ -75,7 +75,7 @@ CCTYPE		*= BORLAND
 #
 # if you have the source for des_fcrypt(), uncomment this and make sure the
 # file exists (see README.win32).  File should be located in the same
-# directory as this file.
+# directory as this file.  Not (yet) supported with PERL_OBJECT.
 #
 #CRYPT_SRC	*= des_fcrypt.c
 

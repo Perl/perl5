@@ -65,7 +65,81 @@ indicator:
 
 
 ----------------
-Version 5.004_72        Developer release working toward 5.005
+Version 5.004_73        Developer release working toward 5.005
+----------------
+
+____________________________________________________________________________
+[  1463] By: gsar                                  on 1998/07/13  02:58:51
+        Log: avoid empty rm -f in MM_Unix.pm
+     Branch: perl
+           ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[  1462] By: gsar                                  on 1998/07/13  02:54:52
+        Log: update perldelta
+     Branch: perl
+           ! pod/perldelta.pod
+____________________________________________________________________________
+[  1461] By: gsar                                  on 1998/07/13  02:44:30
+        Log: added patch, tweaked PERL_OBJECT things
+             From:    Graham Barr <gbarr@pobox.com>
+             Date:    Sun, 12 Jul 1998 19:57:47 CDT
+             Message-Id: <19980712195747.C493@pobox.com>
+             Subject: [ PATCH perl5.004_72] patch to add qr//
+     Branch: perl
+	   ! dump.c embed.h ext/Opcode/Opcode.pm global.sym globals.c
+	   ! keywords.h keywords.pl op.c op.h opcode.h opcode.pl
+	   ! pod/perlfunc.pod pp.c pp_hot.c pp_proto.h proto.h regcomp.c
+           ! regexp.h sv.c t/op/pat.t toke.c
+____________________________________________________________________________
+[  1460] By: gsar                                  on 1998/07/13  01:25:07
+        Log: add a few more PURIFY guards
+     Branch: perl
+           ! av.c sv.c
+____________________________________________________________________________
+[  1459] By: gsar                                  on 1998/07/12  23:38:31
+        Log: add tests for change#1458 and then some
+     Branch: perl
+           ! t/op/array.t
+____________________________________________________________________________
+[  1458] By: gsar                                  on 1998/07/12  22:42:47
+        Log: apply patch for smarter AASSIGN_COMMON detection; regen headers
+             From:    Stephen McCamant <alias@mcs.com>
+             Date:    Sun, 12 Jul 1998 17:17:00 CDT
+             Message-Id: <13737.12300.950886.821143@alias-2.pr.mcs.net>
+             Subject: [PATCH] @a=@a=qw(1) not working, both 5.004_04 and 5.004_71
+     Branch: perl
+           ! op.c opcode.h opcode.pl
+____________________________________________________________________________
+[  1457] By: gsar                                  on 1998/07/12  22:06:05
+        Log: small tweaks from Jarkko Hietaniemi <jhi@cc.hut.fi>
+     Branch: perl
+           ! Configure Makefile.SH ext/Socket/Socket.xs perl.c
+____________________________________________________________________________
+[  1456] By: gsar                                  on 1998/07/12  21:56:39
+        Log: From: Doug MacEachern <dougm@pobox.com>
+             Date: Sun, 12 Jul 1998 14:29:29 -0400
+             Message-Id: <199807121829.OAA00525@postman.opengroup.org>
+             Subject: [PATCH 5.004_72] Embed.pm support for PERL_OBJECT
+     Branch: perl
+           ! lib/ExtUtils/Embed.pm
+____________________________________________________________________________
+[  1455] By: gsar                                  on 1998/07/12  21:54:02
+        Log: applied installperl patch, corrected other little nits
+             From: andreas.koenig@kulturbox.de (Andreas J. Koenig)
+             Date: 12 Jul 1998 16:27:21 +0200
+             Message-ID: <sfcn2afrvp2.fsf@dubravka.in-berlin.de>
+             Subject: [5.004_72] installperl tweak
+     Branch: perl
+           ! Changes Configure README.win32 installperl win32/makefile.mk
+____________________________________________________________________________
+[  1454] By: gsar                                  on 1998/07/12  10:14:24
+        Log: update MANIFEST, Changes
+     Branch: perl
+           - lib/Bundle/CPAN.pm
+           ! Changes MANIFEST
+
+----------------
+Version 5.004_72
 ----------------
 
 ____________________________________________________________________________

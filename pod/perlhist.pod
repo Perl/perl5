@@ -286,6 +286,8 @@ the strings?).
           5.004_69      1998-Jun-29
           5.004_70      1998-Jul-06
           5.004_71      1998-Jul-09
+          5.004_72      1998-Jul-12
+          5.004_73      1998-Jul-13
 
 =head2 SELECTED RELEASE SIZES
 
