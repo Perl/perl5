@@ -513,14 +513,13 @@ EOM
 	        loclibpth="/usr/lib/sparcv9 $loclibpth"
 		ccflags="$ccflags -mcpu=v9 -m64"
 		if test X`getconf XBS5_LP64_OFF64_CFLAGS 2>/dev/null` != X; then
+		    # This adds in -Wa,-xarch=v9.  I suspect that's superfluous,
+		    # since the -m64 above should do that already.  Someone
+		    # with gcc-3.x.x, please test with gcc -v.   A.D. 20-Nov-2003
 		    ccflags="$ccflags -Wa,`getconf XBS5_LP64_OFF64_CFLAGS 2>/dev/null`"
 		fi
-		# no changes to ld flags, as (according to man ld):
-		#
-   		# There is no specific option that tells ld to link 64-bit
-		# objects; the class of the first object that gets processed
-		# by ld determines whether it is to perform a 32-bit or a
-		# 64-bit link edit.
+		ldflags="$ldflags -m64"
+		lddlflags="$lddlflags -G -m64"
 		;;
 	    *)
 		ccflags="$ccflags `getconf XBS5_LP64_OFF64_CFLAGS 2>/dev/null`"
