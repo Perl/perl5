@@ -1968,6 +1968,12 @@ EOM
 			osvers="$2.$3"
 		fi
 	fi
+	$test -f /sys/posix.dll &&
+		$test -f /usr/bin/what &&
+		set X `/usr/bin/what /sys/posix.dll` &&
+		$test "$3" = UWIN &&
+		osname=uwin &&
+		osvers="$5"
 	if $test -f $uname; then
 		set X $myuname
 		shift

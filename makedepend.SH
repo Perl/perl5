@@ -98,6 +98,11 @@ $MAKE clist || ($echo "Searching for .c files..."; \
 	$echo *.c | $tr ' ' $trnl | $egrep -v '\*' >.clist)
 for file in `$cat .clist`; do
 # for file in `cat /dev/null`; do
+	if [ "$osname" = uwin ]; then
+		uwinfix="-e s,\\\\\\\\,/,g -e s,\\([a-zA-Z]\\):/,/\\1/,g"
+	else
+		uwinfix=
+	fi
     case "$file" in
     *.c) filebase=`basename $file .c` ;;
     *.y) filebase=`basename $file .y` ;;
@@ -126,7 +131,7 @@ for file in `$cat .clist`; do
 	-e 's/^.*"\(.*\)".*$/'$filebase'\$(OBJ_EXT): \1/' \
 	-e 's/^# *[0-9][0-9]* \(.*\)$/'$filebase'\$(OBJ_EXT): \1/' \
 	-e 's|: \./|: |' \
-	-e 's|\.c\.c|.c|' | \
+	-e 's|\.c\.c|.c|' $uwinfix | \
     $uniq | $sort | $uniq >> .deptmp
 done
 
