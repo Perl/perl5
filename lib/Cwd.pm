@@ -200,7 +200,9 @@ sub _backtick_pwd {
 
 unless(defined &cwd) {
     # The pwd command is not available in some chroot(2)'ed environments
-    if($^O eq 'MacOS' || grep { -x "$_/pwd" } split(':', $ENV{PATH})) {
+    if( $^O eq 'MacOS' || (defined $ENV{PATH} && 
+                           grep { -x "$_/pwd" } split(':', $ENV{PATH})) ) 
+    {
 	*cwd = \&_backtick_pwd;
     }
     else {
