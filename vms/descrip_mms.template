@@ -334,7 +334,7 @@ LIBPREREQ = $(ARCHDIR)Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm [.lib]
 
 utils1 = [.lib.pod]perldoc.com [.lib.ExtUtils]Miniperl.pm [.utils]c2ph.com [.utils]h2ph.com 
 utils2 = [.utils]h2xs.com [.utils]libnetcfg.com [.lib]perlbug.com [.lib]perlcc.com [.utils]dprofpp.com 
-utils3 = [.utils]perlivp.com [.lib]splain.com [.utils]pl2pm.com [.lib.ExtUtils]xsubpp.com
+utils3 = [.utils]perlivp.com [.lib]splain.com [.utils]pl2pm.com [.utils]xsubpp.com [.utils]instmodsh.com
 utils4 = [.utils]enc2xs.com [.utils]piconv.com [.utils]cpan.com [.utils]prove.com
 
 .ifdef NOX2P
@@ -548,6 +548,9 @@ dynext : $(LIBPREREQ) $(DBG)perlshr$(E) preplibrary
 [.utils]h2xs.com : [.utils]h2xs.PL $(ARCHDIR)Config.pm
 	$(MINIPERL) $(MMS$SOURCE)
 
+[.utils]instmodsh.com : [.utils]instmodsh.PL $(ARCHDIR)Config.pm
+	$(MINIPERL) $(MMS$SOURCE)
+
 [.utils]libnetcfg.com : [.utils]libnetcfg.PL $(ARCHDIR)Config.pm
        $(MINIPERL) $(MMS$SOURCE)
 
@@ -575,8 +578,8 @@ dynext : $(LIBPREREQ) $(DBG)perlshr$(E) preplibrary
 [.x2p]s2p.com : [.x2p]s2p.PL $(ARCHDIR)Config.pm
 	$(MINIPERL) $(MMS$SOURCE)
 
-[.lib.ExtUtils]xsubpp.com : [.lib.ExtUtils]xsubpp 
-	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.ExtUtils]xsubpp.com
+[.utils]xsubpp.com : [.utils]xsubpp.PL $(ARCHDIR)Config.pm
+	$(MINIPERL) $(MMS$SOURCE)
 
 # Rename catches problem with some DECC versions in which object file is
 # placed in current default dir, not same one as source file.
