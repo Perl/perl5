@@ -373,7 +373,7 @@ PP(pp_formline)
 		PerlIO_printf(Perl_debug_log, "%-16s%ld\n", name, (long) arg);
 	    else
 		PerlIO_printf(Perl_debug_log, "%-16s\n", name);
-	} )
+	} );
 	switch (*fpc++) {
 	case FF_LINEMARK:
 	    linemark = t;

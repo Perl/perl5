@@ -1360,7 +1360,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
   AMT *amtp=NULL, *oamtp=NULL;
   int fl=0, off=0, off1, lr=0, assign=AMGf_assign & flags, notfound=0;
   int postpr = 0, force_cpy = 0, assignshift = assign ? 1 : 0;
-  HV* stash;
+  HV* stash=NULL;
   if (!(AMGf_noleft & flags) && SvAMAGIC(left)
       && (mg = mg_find((SV*)(stash=SvSTASH(SvRV(left))),
 			PERL_MAGIC_overload_table))

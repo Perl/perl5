@@ -2369,9 +2369,13 @@ Perl_my_popen_list(pTHX_ char *mode, int n, SV **args)
 #  ifndef NOFILE
 #  define NOFILE 20
 #  endif
-	for (int fd = PL_maxsysfd + 1; fd < NOFILE; fd++) {
-	    if (fd != pp[1])
-		PerlLIO_close(fd);
+	{
+	    int fd;
+
+	    for (fd = PL_maxsysfd + 1; fd < NOFILE; fd++) {
+	        if (fd != pp[1])
+		    PerlLIO_close(fd);
+	    }
 	}
 #endif
 	do_aexec5(Nullsv, args-1, args-1+n, pp[1], did_pipes);
@@ -2500,11 +2504,16 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 #ifndef NOFILE
 #define NOFILE 20
 #endif
-	    for (fd = PL_maxsysfd + 1; fd < NOFILE; fd++)
-		if (fd != pp[1])
-		    PerlLIO_close(fd);
+	    {
+	        int fd;
+
+		for (fd = PL_maxsysfd + 1; fd < NOFILE; fd++)
+		    if (fd != pp[1])
+		        PerlLIO_close(fd);
+	    }
 #endif
-	    do_exec3(cmd,pp[1],did_pipes);	/* may or may not use the shell */
+	    /* may or may not use the shell */
+	    do_exec3(cmd, pp[1], did_pipes);
 	    PerlProc__exit(1);
 	}
 #endif	/* defined OS2 */

@@ -2263,23 +2263,28 @@ Gid_t getegid (void);
     } STMT_END
 #  endif
 
-#  define DEBUG_f(a) if (DEBUG_f_TEST) a
-#  define DEBUG_r(a) if (DEBUG_r_TEST) a
-#  define DEBUG_x(a) if (DEBUG_x_TEST) a
-#  define DEBUG_u(a) if (DEBUG_u_TEST) a
-#  define DEBUG_L(a) if (DEBUG_L_TEST) a
-#  define DEBUG_H(a) if (DEBUG_H_TEST) a
-#  define DEBUG_X(a) if (DEBUG_X_TEST) a
-#  define DEBUG_D(a) if (DEBUG_D_TEST) a
+#  define DEBUG__(t, a) \
+	STMT_START { \
+		if (t) STMT_START {a;} STMT_END; \
+	} STMT_END
+
+#  define DEBUG_f(a) DEBUG__(DEBUG_f_TEST, a)
+#  define DEBUG_r(a) DEBUG__(DEBUG_r_TEST, a)
+#  define DEBUG_x(a) DEBUG__(DEBUG_x_TEST, a)
+#  define DEBUG_u(a) DEBUG__(DEBUG_u_TEST, a)
+#  define DEBUG_L(a) DEBUG__(DEBUG_L_TEST, a)
+#  define DEBUG_H(a) DEBUG__(DEBUG_H_TEST, a)
+#  define DEBUG_X(a) DEBUG__(DEBUG_X_TEST, a)
+#  define DEBUG_D(a) DEBUG__(DEBUG_D_TEST, a)
 
 #  ifdef USE_THREADS
-#    define DEBUG_S(a) if (DEBUG_S_TEST) a
+#    define DEBUG_S(a) DEBUG__(DEBUG_S_TEST, a)
 #  else
 #    define DEBUG_S(a)
 #  endif
 
-#  define DEBUG_T(a) if (DEBUG_T_TEST) a
-#  define DEBUG_R(a) if (DEBUG_R_TEST) a
+#  define DEBUG_T(a) DEBUG__(DEBUG_T_TEST, a)
+#  define DEBUG_R(a) DEBUG__(DEBUG_R_TEST, a)
 
 #else /* DEBUGGING */
 

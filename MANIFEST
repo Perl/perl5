@@ -1524,6 +1524,7 @@ t/lib/fatal.t           See if Fatal works
 t/lib/fcntl.t           See if Fcntl works
 t/lib/fields.t          See if base/fields works
 t/lib/filecache.t	See if FileCache works
+t/lib/filecomp.t	See if File::Compare works
 t/lib/filecopy.t	See if File::Copy works
 t/lib/filefind.t	See if File::Find works
 t/lib/filefunc.t	See if File::Spec::Functions works

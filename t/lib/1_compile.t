@@ -147,6 +147,7 @@ Fatal
 Fcntl
 File::Basename
 File::CheckTree
+File::Compare
 File::Copy
 File::DosGlob
 File::Find

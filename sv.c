@@ -9505,7 +9505,7 @@ do_clean_objs(pTHXo_ SV *sv)
     SV* rv;
 
     if (SvROK(sv) && SvOBJECT(rv = SvRV(sv))) {
-	DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning object ref:\n "), sv_dump(sv));)
+	DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning object ref:\n "), sv_dump(sv)));
 	if (SvWEAKREF(sv)) {
 	    sv_del_backref(sv);
 	    SvWEAKREF_off(sv);
@@ -9531,7 +9531,7 @@ do_clean_named_objs(pTHXo_ SV *sv)
 	     (GvIO(sv) && SvOBJECT(GvIO(sv))) ||
 	     (GvCV(sv) && SvOBJECT(GvCV(sv))) )
 	{
-	    DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning named glob object:\n "), sv_dump(sv));)
+	    DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning named glob object:\n "), sv_dump(sv)));
 	    SvREFCNT_dec(sv);
 	}
     }
@@ -9541,7 +9541,7 @@ do_clean_named_objs(pTHXo_ SV *sv)
 static void
 do_clean_all(pTHXo_ SV *sv)
 {
-    DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning loops: SV at 0x%"UVxf"\n", PTR2UV(sv)) );)
+    DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning loops: SV at 0x%"UVxf"\n", PTR2UV(sv)) ));
     SvFLAGS(sv) |= SVf_BREAK;
     SvREFCNT_dec(sv);
 }
