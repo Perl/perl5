@@ -32,7 +32,7 @@ d_setruid=$undef
 #
 ARCH=`arch | sed 's/^OpenBSD.//'`
 case "${ARCH}-${osvers}" in
-alpha-2.[0-8]|mips-*|vax-*|powerpc-2.[0-7]|m88k-*)
+alpha-2.[0-8]|mips-2.[0-8]|powerpc-2.[0-7]|m88k-*|vax-*)
 	test -z "$usedl" && usedl=$undef
 	;;
 *)
@@ -54,6 +54,11 @@ alpha-2.[0-8]|mips-*|vax-*|powerpc-2.[0-7]|m88k-*)
 		libswanted=`echo $libswanted | sed 's/ dl / /'`
 		;;
 	esac
+
+	# We need to force ld to export symbols on ELF platforms.
+	# Without this, dlopen() is crippled.
+	ELF=`${cc:-cc} -dM -E - </dev/null | grep __ELF__`
+	test -n "$ELF" && ldflags="-Wl,-E $ldflags"
 	;;
 esac
 
