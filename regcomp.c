@@ -776,7 +776,7 @@ reginitcolors(void)
 		PL_colors[i] = ++s;
 	    }
 	    else
-		PL_colors[i] = "";
+		PL_colors[i] = s = "";
 	}
     } else {
 	while (i < 6) 
