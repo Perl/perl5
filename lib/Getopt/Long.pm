@@ -2,12 +2,12 @@
 
 package Getopt::Long;
 
-# RCS Status      : $Id: GetoptLong.pm,v 2.67 2003-06-24 23:18:55+02 jv Exp jv $
+# RCS Status      : $Id: GetoptLong.pm,v 2.68 2003-09-23 15:24:53+02 jv Exp $
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Sun Sep 21 13:16:30 2003
-# Update Count    : 1363
+# Last Modified On: Tue Sep 23 15:21:23 2003
+# Update Count    : 1364
 # Status          : Released
 
 ################ Copyright ################
@@ -35,10 +35,10 @@ use 5.004;
 use strict;
 
 use vars qw($VERSION);
-$VERSION        =  2.3303;
+$VERSION        =  2.34;
 # For testing versions only.
-use vars qw($VERSION_STRING);
-$VERSION_STRING = "2.33_03";
+#use vars qw($VERSION_STRING);
+#$VERSION_STRING = "2.33_03";
 
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK);
@@ -264,7 +264,7 @@ sub GetOptions(@) {
 	local ($^W) = 0;
 	print STDERR
 	  ("Getopt::Long $Getopt::Long::VERSION (",
-	   '$Revision: 2.67 $', ") ",
+	   '$Revision: 2.68 $', ") ",
 	   "called from package \"$pkg\".",
 	   "\n  ",
 	   "ARGV: (@ARGV)",
