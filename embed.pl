@@ -2038,10 +2038,6 @@ s	|I32	|win32_textfilter	|int idx|SV *sv|int maxlen
 s	|SV*|isa_lookup	|HV *stash|const char *name|int len|int level
 #endif
 
-#if defined(PERL_IN_XSUTILS_C) || defined(PERL_DECL_PROT)
-s	|int|modify_SV_attributes|SV *sv|SV **retlist|SV **attrlist|int numattrs
-#endif
-
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 s	|SV*	|mess_alloc
 #  if defined(LEAKTEST)

@@ -1506,7 +1506,8 @@ sub process_L {
 	$link = "#" . htmlify(0,$section);
 	$linktext = $section unless defined($linktext);
     } elsif ( $page =~ /::/ ) {
-	$linktext  = ($section ? "$section" : "$page");
+	$linktext  = ($section ? "$section" : "$page")
+	    unless defined($linktext);
 	$page =~ s,::,/,g;
 	# Search page cache for an entry keyed under the html page name,
 	# then look to see what directory that page might be in.  NOTE:

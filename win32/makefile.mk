@@ -546,7 +546,8 @@ MICROCORE_SRC	=		\
 		..\toke.c	\
 		..\universal.c	\
 		..\utf8.c	\
-		..\util.c
+		..\util.c	\
+		..\xsutils.c
 
 EXTRACORE_SRC	+= perllib.c
 

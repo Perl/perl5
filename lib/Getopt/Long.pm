@@ -2,22 +2,23 @@
 
 package Getopt::Long;
 
-# RCS Status      : $Id: GetoptLong.pl,v 2.18 1998-06-14 15:02:19+02 jv Exp $
+# RCS Status      : $Id: GetoptLong.pl,v 2.21 1999-08-04 10:33:07+02 jv Exp $
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Fri Jan  8 14:48:43 1999
-# Update Count    : 707
+# Last Modified On: Wed Aug  4 10:08:50 1999
+# Update Count    : 709
 # Status          : Released
 
 ################ Copyright ################
 
 # This program is Copyright 1990,1999 by Johan Vromans.
 # This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# as published by the Free Software Foundation; either version 2
-# of the License, or (at your option) any later version.
-# 
+# modify it under the terms of the Perl Artistic License or the
+# GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any
+# later version.
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -35,7 +36,7 @@ BEGIN {
     require 5.004;
     use Exporter ();
     use vars     qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
-    $VERSION     = "2.19";
+    $VERSION     = "2.20";
 
     @ISA         = qw(Exporter);
     @EXPORT      = qw(&GetOptions $REQUIRE_ORDER $PERMUTE $RETURN_IN_ORDER);
@@ -108,12 +109,12 @@ __END__
 
 ################ AutoLoading subroutines ################
 
-# RCS Status      : $Id: GetoptLongAl.pl,v 2.20 1998-06-14 15:02:19+02 jv Exp $
+# RCS Status      : $Id: GetoptLongAl.pl,v 2.22 1999-07-07 12:57:05+02 jv Exp $
 # Author          : Johan Vromans
 # Created On      : Fri Mar 27 11:50:30 1998
 # Last Modified By: Johan Vromans
-# Last Modified On: Sun Jun 14 13:54:35 1998
-# Update Count    : 24
+# Last Modified On: Wed Jul  7 12:47:57 1999
+# Update Count    : 28
 # Status          : Released
 
 sub GetOptions {
@@ -137,7 +138,7 @@ sub GetOptions {
     print STDERR ("GetOpt::Long $Getopt::Long::VERSION ",
 		  "called from package \"$pkg\".",
 		  "\n  ",
-		  'GetOptionsAl $Revision: 2.20 $ ',
+		  'GetOptionsAl $Revision: 2.22 $ ',
 		  "\n  ",
 		  "ARGV: (@ARGV)",
 		  "\n  ",
@@ -164,7 +165,11 @@ sub GetOptions {
 
     # See if the first element of the optionlist contains option
     # starter characters.
-    if ( $optionlist[0] =~ /^\W+$/ ) {
+    # Be careful not to interpret '<>' as option starters.
+    if ( $optionlist[0] =~ /^\W+$/
+	 && !($optionlist[0] eq '<>'
+	      && @optionlist > 0
+	      && ref($optionlist[1])) ) {
 	$genprefix = shift (@optionlist);
 	# Turn into regexp. Needs to be parenthesized!
 	$genprefix =~ s/(\W)/\\$1/g;
@@ -1118,11 +1123,14 @@ CONFIGURATION OPTIONS), options that start with "+" or "-" may also
 include their arguments, e.g. "+foo=bar". This is for compatiblity
 with older implementations of the GNU "getopt" routine.
 
-If the first argument to GetOptions is a string consisting of only
-non-alphanumeric characters, it is taken to specify the option starter
-characters. Everything starting with one of these characters from the
-starter will be considered an option. B<Using a starter argument is
-strongly deprecated.>
+If the first argument to GetOptions (after the optional linkage
+specification) is a string consisting of only non-alphanumeric
+characters, it is taken to specify the option starter characters.
+Everything starting with one of these characters from the starter will
+be considered an option. GetOptions will not interpret a leading
+"<>" as option starters if the next argument is a reference. To
+force "<" and ">" as option starters, use "><". Confusing? Well,
+B<using a starter argument is strongly deprecated.>
 
 For convenience, option specifiers may have a leading B<-> or B<-->,
 so it is possible to write:
@@ -1366,9 +1374,10 @@ Johan Vromans E<lt>jvromans@squirrel.nlE<gt>
 
 This program is Copyright 1990,1999 by Johan Vromans.
 This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
+modify it under the terms of the Perl Artistic License or the
+GNU General Public License as published by the Free Software
+Foundation; either version 2 of the License, or (at your option) any
+later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of

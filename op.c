@@ -1267,19 +1267,19 @@ Perl_mod(pTHX_ OP *o, I32 type)
 		    if (kid->op_type == OP_METHOD_NAMED
 			|| kid->op_type == OP_METHOD)
 		    {
-			OP *new;
+			OP *newop;
 
 			if (kid->op_sibling || kid->op_next != kid) {
 			    yyerror("panic: unexpected optree near method call");
 			    break;
 			}
 			
-			NewOp(1101, new, 1, OP);
-			new->op_type = OP_RV2CV;
-			new->op_ppaddr = PL_ppaddr[OP_RV2CV];
-			new->op_next = new;
-			kid->op_sibling = new;
-			new->op_private |= OPpLVAL_INTRO;
+			NewOp(1101, newop, 1, OP);
+			newop->op_type = OP_RV2CV;
+			newop->op_ppaddr = PL_ppaddr[OP_RV2CV];
+			newop->op_next = newop;
+			kid->op_sibling = newop;
+			newop->op_private |= OPpLVAL_INTRO;
 			break;
 		    }
 		    

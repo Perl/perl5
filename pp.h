@@ -49,8 +49,6 @@
 
 #define dTARG SV *targ
 
-#define dXS_TARGET SV * targ = (PL_op->op_private & OPpENTERSUB_HASTARG ? PAD_SV(PL_op->op_targ) : sv_newmortal())
-
 #define NORMAL PL_op->op_next
 #define DIE return Perl_die
 

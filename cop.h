@@ -76,6 +76,7 @@ struct block_sub {
 	    /* destroy arg array */					\
 	    av_clear(cxsub.argarray);					\
 	    AvREAL_off(cxsub.argarray);					\
+	    AvREIFY_on(cxsub.argarray);					\
 	}								\
 	if (cxsub.cv) {							\
 	    if (!(CvDEPTH(cxsub.cv) = cxsub.olddepth))			\

@@ -11,6 +11,9 @@
 	I32 ax = mark - PL_stack_base + 1;	\
 	I32 items = sp - mark
 
+#define dXSTARG SV * targ = ((PL_op->op_private & OPpENTERSUB_HASTARG) \
+			     ? PAD_SV(PL_op->op_targ) : sv_newmortal())
+
 #define XSANY CvXSUBANY(cv)
 
 #define dXSI32 I32 ix = XSANY.any_i32

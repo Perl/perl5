@@ -1005,9 +1005,6 @@
 #if defined(PERL_IN_UNIVERSAL_C) || defined(PERL_DECL_PROT)
 #define isa_lookup		S_isa_lookup
 #endif
-#if defined(PERL_IN_XSUTILS_C) || defined(PERL_DECL_PROT)
-#define modify_SV_attributes	S_modify_SV_attributes
-#endif
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 #define mess_alloc		S_mess_alloc
 #  if defined(LEAKTEST)
@@ -2332,9 +2329,6 @@
 #endif
 #if defined(PERL_IN_UNIVERSAL_C) || defined(PERL_DECL_PROT)
 #define isa_lookup(a,b,c,d)	S_isa_lookup(aTHX_ a,b,c,d)
-#endif
-#if defined(PERL_IN_XSUTILS_C) || defined(PERL_DECL_PROT)
-#define modify_SV_attributes(a,b,c,d)	S_modify_SV_attributes(aTHX_ a,b,c,d)
 #endif
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 #define mess_alloc()		S_mess_alloc(aTHX)
@@ -4548,10 +4542,6 @@
 #if defined(PERL_IN_UNIVERSAL_C) || defined(PERL_DECL_PROT)
 #define S_isa_lookup		CPerlObj::S_isa_lookup
 #define isa_lookup		S_isa_lookup
-#endif
-#if defined(PERL_IN_XSUTILS_C) || defined(PERL_DECL_PROT)
-#define S_modify_SV_attributes	CPerlObj::S_modify_SV_attributes
-#define modify_SV_attributes	S_modify_SV_attributes
 #endif
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 #define S_mess_alloc		CPerlObj::S_mess_alloc

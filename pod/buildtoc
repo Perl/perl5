@@ -13,7 +13,7 @@ sub output ($);
 	   perllol perltoot perltootc perlobj perltie perlbot perlipc
 	   perldbmfilter perldebug
 	   perldiag perlsec perltrap perlport perlstyle perlpod perlbook
-	   perlembed perlapio perlxs perlxstut perlguts perlcall
+	   perlembed perlapio perlxs perlxstut perlguts perlcall perlcompile
 	   perlhist
 	  );
 

@@ -59,6 +59,7 @@ POD = \
 	perlxstut.pod	\
 	perlguts.pod	\
 	perlcall.pod	\
+	perlcompile.pod	\
 	perltodo.pod	\
 	perlhist.pod	\
 	perlfaq.pod	\
@@ -118,6 +119,7 @@ MAN = \
 	perlxstut.man	\
 	perlguts.man	\
 	perlcall.man	\
+	perlcompile.man	\
 	perltodo.man	\
 	perlhist.man	\
 	perlfaq.man	\
@@ -177,6 +179,7 @@ HTML = \
 	perlxstut.html	\
 	perlguts.html	\
 	perlcall.html	\
+	perlcompile.html	\
 	perltodo.html	\
 	perlhist.html	\
 	perlfaq.html	\
@@ -236,6 +239,7 @@ TEX = \
 	perlxstut.tex	\
 	perlguts.tex	\
 	perlcall.tex	\
+	perlcompile.tex	\
 	perltodo.tex	\
 	perlhist.tex	\
 	perlfaq.tex	\

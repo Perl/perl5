@@ -13,7 +13,7 @@ $VERSION = $VERSION = '2.101';
 
 #$| = 1;
 
-require 5.004;
+require 5.004_02;
 require Exporter;
 require DynaLoader;
 require overload;
@@ -214,9 +214,8 @@ sub _dump {
   if ($type) {
 
     # prep it, if it looks like an object
-    if ($type =~ /[a-z_:]/) {
-      my $freezer = $s->{freezer};
-      $val->$freezer() if $freezer && UNIVERSAL::can($val, $freezer);
+    if (my $freezer = $s->{freezer}) {
+      $val->$freezer() if UNIVERSAL::can($val, $freezer);
     }
 
     ($realpack, $realtype, $id) =

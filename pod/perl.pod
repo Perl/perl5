@@ -50,6 +50,7 @@ sections:
     perlthrtut		Perl threads tutorial
     perldbmfilter	Perl DBM Filters
 
+    perlcompile		Perl compiler suite intro
     perldebug		Perl debugging
     perldiag		Perl diagnostic messages
     perlsec		Perl security

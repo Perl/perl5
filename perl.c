@@ -14,6 +14,7 @@
 #include "EXTERN.h"
 #define PERL_IN_PERL_C
 #include "perl.h"
+#include "patchlevel.h"			/* for local_patches */
 
 /* XXX If this causes problems, set i_unistd=undef in the hint file.  */
 #ifdef I_UNISTD
