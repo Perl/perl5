@@ -3669,7 +3669,7 @@ target of the change to
 
 =item 5.005 threads are deprecated
 
-(D deprecacted)  The 5.005-style threads (activated by C<use Thread;>)
+(D deprecated)  The 5.005-style threads (activated by C<use Thread;>)
 are deprecated and one should use the new ithreads instead,
 see L<perl58delta> for more details.
 
