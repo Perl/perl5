@@ -31,12 +31,14 @@ of sections:
     perlfunc		Perl builtin functions
     perlvar		Perl predefined variables
     perlsub		Perl subroutines
+    perlopentut		Perl open() tutorial
     perlmod		Perl modules: how they work
     perlmodlib		Perl modules: how to write and use
     perlmodinstall	Perl modules: how to install from CPAN
     perlform		Perl formats
     perllocale		Perl locale support
 
+    perlreftut		Perl references tutorial
     perlref		Perl references
     perldsc		Perl data structures intro
     perllol		Perl data structures: lists of lists
@@ -62,7 +64,6 @@ of sections:
     perlxstut		Perl XS tutorial
     perlguts		Perl internal functions for those doing extensions
     perlcall		Perl calling conventions from C
-    perlopentut		Perl open() tutorial
 
     perlhist		Perl history records
 

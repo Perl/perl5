@@ -44,6 +44,7 @@ toroff=`
     $mandir/perlform.1	\
     $mandir/perllocale.1	\
     $mandir/perlref.1	\
+    $mandir/perlreftut.1	\
     $mandir/perldsc.1	\
     $mandir/perllol.1	\
     $mandir/perltoot.1	\

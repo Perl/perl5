@@ -691,7 +691,9 @@ sites.
 
 Some more Perl traps are documented now.  See L<perltrap>.
 
-L<perlopentut> gives a tutorial of using open()
+L<perlopentut> gives a tutorial on using open().
+
+L<perlreftut> gives a tutorial on references.
 
 =head1 New Diagnostics
 
