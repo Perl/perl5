@@ -1,17 +1,18 @@
 package CPAN;
-use vars qw{$Try_autoload $Revision
+use vars qw{$Try_autoload
+            $Revision
 	    $META $Signal $Cwd $End
 	    $Suppress_readline %Dontload
 	    $Frontend  $Defaultsite
-	   };
+	   }; #};
 
-$VERSION = '1.47';
+$VERSION = '1.50';
 
-# $Id: CPAN.pm,v 1.256 1999/01/25 13:06:22 k Exp $
+# $Id: CPAN.pm,v 1.264 1999/05/23 14:26:49 k Exp $
 
 # only used during development:
 $Revision = "";
-# $Revision = "[".substr(q$Revision: 1.256 $, 10)."]";
+# $Revision = "[".substr(q$Revision: 1.264 $, 10)."]";
 
 use Carp ();
 use Config ();
@@ -70,6 +71,7 @@ sub AUTOLOAD {
     $l =~ s/.*:://;
     my(%EXPORT);
     @EXPORT{@EXPORT} = '';
+    CPAN::Config->load unless $CPAN::Config_loaded++;
     if (exists $EXPORT{$l}){
 	CPAN::Shell->$l(@_);
     } else {
@@ -87,7 +89,9 @@ sub AUTOLOAD {
 
 #-> sub CPAN::shell ;
 sub shell {
+    my($self) = @_;
     $Suppress_readline ||= ! -t STDIN;
+    CPAN::Config->load unless $CPAN::Config_loaded++;
 
     my $prompt = "cpan> ";
     local($^W) = 1;
@@ -95,8 +99,20 @@ sub shell {
 	require Term::ReadLine;
 #	import Term::ReadLine;
 	$term = Term::ReadLine->new('CPAN Monitor');
-	$readline::rl_completion_function =
-	    $readline::rl_completion_function = 'CPAN::Complete::cpl';
+	if ($term->ReadLine eq "Term::ReadLine::Gnu") {
+	    my $attribs = $term->Attribs;
+#	     $attribs->{completion_entry_function} =
+#		 $attribs->{'list_completion_function'};
+	     $attribs->{attempted_completion_function} = sub {
+		 &CPAN::Complete::gnu_cpl;
+	     }
+#	    $attribs->{completion_word} =
+#		[qw(help me somebody to find out how
+#                    to use completion with GNU)];
+	} else {
+	    $readline::rl_completion_function =
+		$readline::rl_completion_function = 'CPAN::Complete::cpl';
+	}
     }
 
     no strict;
@@ -104,6 +120,7 @@ sub shell {
     my $getcwd;
     $getcwd = $CPAN::Config->{'getcwd'} || 'cwd';
     my $cwd = CPAN->$getcwd();
+    my $try_detect_readline = $term->ReadLine eq "Term::ReadLine::Stub";
     my $rl_avail = $Suppress_readline ? "suppressed" :
 	($term->ReadLine ne "Term::ReadLine::Stub") ? "enabled" :
 	    "available (try ``install Bundle::CPAN'')";
@@ -163,6 +180,20 @@ ReadLine support $rl_avail
 	}
     } continue {
       $Signal=0;
+      CPAN::Queue->nullify_queue;
+      if ($try_detect_readline) {
+	if ($CPAN::META->has_inst("Term::ReadLine::Gnu")
+	    ||
+	    $CPAN::META->has_inst("Term::ReadLine::Perl")
+	   ) {
+	    delete $INC{"Term/ReadLine.pm"};
+	    my $redef;
+	    local($SIG{__WARN__}) = CPAN::Shell::dotdot_onreload(\$redef);
+	    require Term::ReadLine;
+	    $CPAN::Frontend->myprint("\n$redef subroutines in Term::ReadLine redefined\n");
+	    goto &shell;
+	}
+      }
     }
 }
 
@@ -282,7 +313,7 @@ sub try_dot_al {
 	}
     } else {
 
-	$ok = 1;
+      $ok = 1;
 
     }
     $@ = $save;
@@ -300,7 +331,7 @@ sub try_dot_al {
 # $Try_autoload = 1;
 
 if ($CPAN::Try_autoload) {
-    my $p;
+  my $p;
     for $p (qw(
 	       CPAN::Author CPAN::Bundle CPAN::CacheMgr CPAN::Complete
 	       CPAN::Config CPAN::Debug CPAN::Distribution CPAN::FTP
@@ -427,12 +458,15 @@ sub delete {
   # warn "Deleting Queue object for mod[$mod] all[@all]";
 }
 
+sub nullify_queue {
+  @All = ();
+}
+
+
+
 package CPAN;
 
 $META ||= CPAN->new; # In case we re-eval ourselves we need the ||
-
-# Do this after you have set up the whole inheritance
-CPAN::Config->load unless defined $CPAN::No_Config_is_ok;
 
 1;
 
@@ -456,12 +490,14 @@ sub clean;
 sub test;
 
 #-> sub CPAN::all ;
-sub all {
+sub all_objects {
     my($mgr,$class) = @_;
+    CPAN::Config->load unless $CPAN::Config_loaded++;
     CPAN->debug("mgr[$mgr] class[$class]") if $CPAN::DEBUG;
     CPAN::Index->reload;
     values %{ $META->{$class} };
 }
+*all = \&all_objects;
 
 # Called by shell, not in batch mode. Not clean XXX
 #-> sub CPAN::checklock ;
@@ -503,7 +539,40 @@ You may want to kill it and delete the lockfile, maybe. On UNIX try:
 	    }
 	}
     }
-    File::Path::mkpath($CPAN::Config->{cpan_home});
+    my $dotcpan = $CPAN::Config->{cpan_home};
+    eval { File::Path::mkpath($dotcpan);};
+    if ($@) {
+      # A special case at least for Jarkko.
+      my $firsterror = $@;
+      my $seconderror;
+      my $symlinkcpan;
+      if (-l $dotcpan) {
+	$symlinkcpan = readlink $dotcpan;
+	die "readlink $dotcpan failed: $!" unless defined $symlinkcpan;
+	eval { File::Path::mkpath($symlinkcpan); };
+	if ($@) {
+	  $seconderror = $@;
+	} else {
+	  $CPAN::Frontend->mywarn(qq{
+Working directory $symlinkcpan created.
+});
+	}
+      }
+      unless (-d $dotcpan) {
+	my $diemess = qq{
+Your configuration suggests "$dotcpan" as your
+CPAN.pm working directory. I could not create this directory due
+to this error: $firsterror\n};
+	$diemess .= qq{
+As "$dotcpan" is a symlink to "$symlinkcpan",
+I tried to create that, but I failed with this error: $seconderror
+} if $seconderror;
+	$diemess .= qq{
+Please make sure the directory exists and is writable.
+};
+	$CPAN::Frontend->mydie($diemess);
+      }
+    }
     my $fh;
     unless ($fh = FileHandle->new(">$lockfile")) {
 	if ($! =~ /Permission/) {
@@ -1281,6 +1350,21 @@ Known options:
     }
 }
 
+sub dotdot_onreload {
+    my($ref) = shift;
+    sub {
+	if ( $_[0] =~ /Subroutine (\w+) redefined/ ) {
+	    my($subr) = $1;
+	    ++$$ref;
+	    local($|) = 1;
+	    # $CPAN::Frontend->myprint(".($subr)");
+	    $CPAN::Frontend->myprint(".");
+	    return;
+	}
+	warn @_;
+    };
+}
+
 #-> sub CPAN::Shell::reload ;
 sub reload {
     my($self,$command,@arg) = @_;
@@ -1291,18 +1375,7 @@ sub reload {
 	my $fh = FileHandle->new($INC{'CPAN.pm'});
 	local($/);
 	$redef = 0;
-	local($SIG{__WARN__})
-	    = sub {
-		if ( $_[0] =~ /Subroutine (\w+) redefined/ ) {
-		  my($subr) = $1;
-		  ++$redef;
-		  local($|) = 1;
-		  # $CPAN::Frontend->myprint(".($subr)");
-		  $CPAN::Frontend->myprint(".");
-		  return;
-		}
-		warn @_;
-	    };
+	local($SIG{__WARN__}) = dotdot_onreload(\$redef);
 	eval <$fh>;
 	warn $@ if $@;
 	$CPAN::Frontend->myprint("\n$redef subroutines redefined\n");
@@ -1465,6 +1538,7 @@ sub u {
 #-> sub CPAN::Shell::autobundle ;
 sub autobundle {
     my($self) = shift;
+    CPAN::Config->load unless $CPAN::Config_loaded++;
     my(@bundle) = $self->_u_r_common("a",@_);
     my($todir) = MM->catdir($CPAN::Config->{'cpan_home'},"Bundle");
     File::Path::mkpath($todir);
@@ -1521,7 +1595,7 @@ sub expand {
 	my $class = "CPAN::$type";
 	my $obj;
 	if (defined $regex) {
-	    for $obj ( sort {$a->id cmp $b->id} $CPAN::META->all($class)) {
+	    for $obj ( sort {$a->id cmp $b->id} $CPAN::META->all_objects($class)) {
 		push @m, $obj
 		    if
 			$obj->id =~ /$regex/i
@@ -1841,7 +1915,7 @@ sub localize {
     to insufficient permissions.\n}) unless -w $aslocal_dir;
 
     # Inheritance is not easier to manage than a few if/else branches
-    if ($CPAN::META->has_inst('LWP')) {
+    if ($CPAN::META->has_inst('LWP::UserAgent')) {
 	require LWP::UserAgent;
  	unless ($Ua) {
 	    $Ua = LWP::UserAgent->new;
@@ -1940,8 +2014,11 @@ sub hosteasy {
 		# fileurl = "file://" [ host | "localhost" ] "/" fpath
 		# Thanks to "Mark D. Baushke" <mdb@cisco.com> for
 		# the code
-		($l = $url) =~ s,^file://[^/]+,,; # discard the host part
-		$l =~ s/^file://;	# assume they meant file://localhost
+		($l = $url) =~ s|^file://[^/]*/|/|; # discard the host part
+		$l =~ s|^file:||;                   # assume they
+                                                    # meant
+                                                    # file://localhost
+		$l =~ s|^/|| unless -f $l;          # e.g. /P:
 	    }
 	    if ( -f $l && -r _) {
 		$Thesite = $i;
@@ -2217,7 +2294,7 @@ sub hosthardest {
 	    $CPAN::Frontend->mywarn("Your ~/.netrc neither contains $host
   nor does it have a default entry\n");
 	}
-	
+
 	# OK, they don't have a valid ~/.netrc. Use 'ftp -n'
 	# then and login manually to host, using e-mail as
 	# password.
@@ -2381,6 +2458,27 @@ sub contains {
 
 package CPAN::Complete;
 
+sub gnu_cpl {
+    my($text, $line, $start, $end) = @_;
+    my(@perlret) = cpl($text, $line, $start);
+    # find longest common match. Can anybody show me how to peruse
+    # T::R::Gnu to have this done automatically? Seems expensive.
+    return () unless @perlret;
+    my($newtext) = $text;
+    for (my $i = length($text)+1;;$i++) {
+	last unless length($perlret[0]) && length($perlret[0]) >= $i;
+	my $try = substr($perlret[0],0,$i);
+	my @tries = grep {substr($_,0,$i) eq $try} @perlret;
+	# warn "try[$try]tries[@tries]";
+	if (@tries == @perlret) {
+	    $newtext = $try;
+	} else {
+	    last;
+	}
+    }
+    ($newtext,@perlret);
+}
+
 #-> sub CPAN::Complete::cpl ;
 sub cpl {
     my($word,$line,$pos) = @_;
@@ -2426,7 +2524,7 @@ sub cpl {
 #-> sub CPAN::Complete::cplx ;
 sub cplx {
     my($class, $word) = @_;
-    grep /^\Q$word\E/, map { $_->id } $CPAN::META->all($class);
+    grep /^\Q$word\E/, map { $_->id } $CPAN::META->all_objects($class);
 }
 
 #-> sub CPAN::Complete::cpl_any ;
@@ -2487,7 +2585,7 @@ sub reload {
     # XXX check if a newer one is available. (We currently read it
     # from time to time)
     for ($CPAN::Config->{index_expire}) {
-	$_ = 0.001 unless $_ > 0.001;
+	$_ = 0.001 unless $_ && $_ > 0.001;
     }
     return if $last_time + $CPAN::Config->{index_expire}*86400 > $time
 	and ! $force;
@@ -2778,6 +2876,12 @@ sub author {
     $CPAN::META->instance(CPAN::Author,$self->{CPAN_USERID})->fullname;
 }
 
+sub dump {
+  my($self) = @_;
+  require Data::Dumper;
+  Data::Dumper::Dumper($self);
+}
+
 package CPAN::Author;
 
 #-> sub CPAN::Author::as_glimpse ;
@@ -2799,6 +2903,7 @@ sub as_glimpse {
 #-> sub CPAN::Author::fullname ;
 sub fullname { shift->{'FULLNAME'} }
 *name = \&fullname;
+
 #-> sub CPAN::Author::email ;
 sub email    { shift->{'EMAIL'} }
 
@@ -2979,6 +3084,12 @@ sub new {
 #-> sub CPAN::Distribution::look ;
 sub look {
     my($self) = @_;
+
+    if ($^O eq 'MacOS') {
+      $self->ExtUtils::MM_MacOS::look;
+      return;
+    }
+
     if (  $CPAN::Config->{'shell'} ) {
 	$CPAN::Frontend->myprint(qq{
 Trying to open a subshell in the build directory...
@@ -3121,7 +3232,7 @@ sub MD5_check_file {
 	  my $md5 = MD5->new;
 	  my($data,$ref);
 	  $ref = \$data;
-	  while ($fh->READ($ref, 4096)){
+	  while ($fh->READ($ref, 4096) > 0){
 	    $md5->add($data);
 	  }
 	  my $hexdigest = $md5->hexdigest;
@@ -3185,7 +3296,7 @@ sub force {
   $self->{'force_update'}++;
   for my $att (qw(
   MD5_STATUS archived build_dir localfile make install unwrapped
-  writemakefile have_sponsored
+  writemakefile
  )) {
     delete $self->{$att};
   }
@@ -3266,8 +3377,8 @@ or
 	"had problems unarchiving. Please build manually";
 
 	exists $self->{writemakefile} &&
-	    $self->{writemakefile} eq "NO" and push @e,
-	    "Had some problem writing Makefile";
+	    $self->{writemakefile} =~ m/ ^ NO\s* ( .* ) /sx and push @e,
+		$1 || "Had some problem writing Makefile";
 
 	defined $self->{'make'} and push @e,
 	"Has already been processed within this session";
@@ -3324,18 +3435,27 @@ or
 		kill 9, $pid;
 		waitpid $pid, 0;
 		$CPAN::Frontend->myprint($@);
-		$self->{writemakefile} = "NO - $@";
+		$self->{writemakefile} = "NO $@";
 		$@ = "";
 		return;
 	    }
 	} else {
 	  $ret = system($system);
 	  if ($ret != 0) {
-	    $self->{writemakefile} = "NO";
+	    $self->{writemakefile} = "NO Makefile.PL returned status $ret";
 	    return;
 	  }
 	}
-	$self->{writemakefile} = "YES";
+	if (-f "Makefile") {
+	  $self->{writemakefile} = "YES";
+	} else {
+	  $self->{writemakefile} =
+	      qq{NO Makefile.PL refused to write a Makefile.};
+	  # It's probably worth to record the reason, so let's retry
+	  # local $/;
+	  # my $fh = IO::File->new("$system |"); # STDERR? STDIN?
+	  # $self->{writemakefile} .= <$fh>;
+	}
     }
     return if $CPAN::Signal;
     if (my @prereq = $self->needs_prereq){
@@ -3369,7 +3489,7 @@ of modules we are processing right now?", "yes");
 	 $CPAN::Frontend->myprint("  $system -- OK\n");
 	 $self->{'make'} = "YES";
     } else {
-	 $self->{writemakefile} = "YES";
+	 $self->{writemakefile} ||= "YES";
 	 $self->{'make'} = "NO";
 	 $CPAN::Frontend->myprint("  $system -- NOT OK\n");
     }
@@ -3402,7 +3522,7 @@ sub needs_prereq {
     next if $mo->uptodate;
     # it's not needed, so don't push it. We cannot omit this step, because
     # if 'force' is in effect, nobody else will check.
-    if ($self->{'have_sponsored'}{$p}++){
+    if ($self->{have_sponsored}{$p}++){
       # We have already sponsored it and for some reason it's still
       # not available. So we do nothing. Or what should we do?
       # if we push it again, we have a potential infinite loop
@@ -4102,7 +4222,7 @@ sub READLINE {
     my $gz = $self->{GZ};
     my($line,$bytesread);
     $bytesread = $gz->gzreadline($line);
-    return undef if $bytesread == 0;
+    return undef if $bytesread <= 0;
     return $line;
   } else {
     my $fh = $self->{FH};
@@ -4441,8 +4561,8 @@ functions in the calling package (C<install(...)>).
 There's currently only one class that has a stable interface -
 CPAN::Shell. All commands that are available in the CPAN shell are
 methods of the class CPAN::Shell. Each of the commands that produce
-listings of modules (C<r>, C<autobundle>, C<u>) returns a list of the
-IDs of all modules within the list.
+listings of modules (C<r>, C<autobundle>, C<u>) also return a list of
+the IDs of all modules within the list.
 
 =over 2
 
@@ -4476,6 +4596,41 @@ functionalities that are available in the shell.
 	next unless $mod->inst_version eq "undef";
 	print "No VERSION in ", $mod->id, "\n";
     }
+
+Or if you want to write a cronjob to watch The CPAN, you could list
+all modules that need updating:
+
+    perl -e 'use CPAN; CPAN::Shell->r;'
+
+If you don't want to get any output if all modules are up to date, you
+can parse the output of above command for the regular expression
+//modules are up to date// and decide to mail the output only if it
+doesn't match. Ick?
+
+If you prefer to do it more in a programmer style in one single
+process, maybe something like this suites you better:
+
+  # list all modules on my disk that have newer versions on CPAN
+  for $mod (CPAN::Shell->expand("Module","/./")){
+    next unless $mod->inst_file;
+    next if $mod->uptodate;
+    printf "Module %s is installed as %s, could be updated to %s from CPAN\n",
+        $mod->id, $mod->inst_version, $mod->cpan_version;
+  }
+
+If that gives you too much output every day, you maybe only want to
+watch for three modules. You can write
+
+  for $mod (CPAN::Shell->expand("Module","/Apache|LWP|CGI/")){
+
+as the first line instead. Or you can combine some of the above
+tricks:
+
+  # watch only for a new mod_perl module
+  $mod = CPAN::Shell->expand("Module","mod_perl");
+  exit if $mod->uptodate;
+  # new mod_perl arrived, let me know all update recommendations
+  CPAN::Shell->r;
 
 =back
 
@@ -4594,7 +4749,7 @@ you might use CPAN.pm to put together all you need on a networked
 machine. Then copy the $CPAN::Config->{keep_source_where} (but not
 $CPAN::Config->{build_dir}) directory on a floppy. This floppy is kind
 of a personal CPAN. CPAN.pm on the non-networked machines works nicely
-with this floppy.
+with this floppy. See also below the paragraph about CD-ROM support.
 
 =head1 CONFIGURATION
 
@@ -4617,7 +4772,6 @@ defined:
                      many seconds inactivity. Set to 0 to never break.
   inhibit_startup_message
                      if true, does not print the startup message
-  keep_source        keep the source in a local directory?
   keep_source_where  directory in which to keep the source (if we do)
   make               location of external make program
   make_arg	     arguments that should always be passed to 'make'
@@ -4664,6 +4818,17 @@ works like the corresponding perl commands.
 
 =back
 
+=head2 Note on urllist parameter's format
+
+urllist parameters are URLs according to RFC 1738. We do a little
+guessing if your URL is not compliant, but if you have problems with file URLs, please try the correct format. Either:
+
+    file://localhost/whatever/ftp/pub/CPAN/
+
+or
+
+    file:///home/ftp/pub/CPAN/
+
 =head2 urllist parameter has CD-ROM support
 
 The C<urllist> parameter of the configuration table contains a list of
@@ -4708,28 +4873,30 @@ To populate a freshly installed perl with my favorite modules is pretty
 easiest by maintaining a private bundle definition file. To get a useful
 blueprint of a bundle definition file, the command autobundle can be used
 on the CPAN shell command line. This command writes a bundle definition
-file for all modules that re installed for the currently running perl
+file for all modules that are installed for the currently running perl
 interpreter. It's recommended to run this command only once and from then
 on maintain the file manually under a private name, say
 Bundle/my_bundle.pm. With a clever bundle file you can then simply say
 
     cpan> install Bundle::my_bundle
 
-then answer a few questions and then go out.
+then answer a few questions and then go out for a coffee.
 
-Maintaining a bundle definition file means to keep track of two things:
-dependencies and interactivity. CPAN.pm (currently) does not take into
-account dependencies between distributions, so a bundle definition file
-should specify distributions that depend on others B<after> the others.
-On the other hand, it's a bit annoying that many distributions need some
-interactive configuring. So what I try to accomplish in my private bundle
-file is to have the packages that need to be configured early in the file
-and the gentle ones later, so I can go out after a few minutes and leave
-CPAN.pm unattained.
+Maintaining a bundle definition file means to keep track of two
+things: dependencies and interactivity. CPAN.pm sometimes fails on
+calculating dependencies because not all modules define all MakeMaker
+attributes correctly, so a bundle definition file should specify
+prerequisites as early as possible. On the other hand, it's a bit
+annoying that many distributions need some interactive configuring. So
+what I try to accomplish in my private bundle file is to have the
+packages that need to be configured early in the file and the gentle
+ones later, so I can go out after a few minutes and leave CPAN.pm
+unattained.
 
 =head1 WORKING WITH CPAN.pm BEHIND FIREWALLS
 
-Thanks to Graham Barr for contributing the firewall following howto.
+Thanks to Graham Barr for contributing the following paragraphs about
+the interaction between perl, and various firewall configurations.
 
 Firewalls can be categorized into three basic types.
 
@@ -4788,7 +4955,7 @@ special compiling is need as you can access hosts directly.
 
 =head1 BUGS
 
-We should give coverage for _all_ of the CPAN and not just the PAUSE
+We should give coverage for B<all> of the CPAN and not just the PAUSE
 part, right? In this discussion CPAN and PAUSE have become equal --
 but they are not. PAUSE is authors/ and modules/. CPAN is PAUSE plus
 the clpa/, doc/, misc/, ports/, src/, scripts/.

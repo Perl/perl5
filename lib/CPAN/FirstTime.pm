@@ -16,7 +16,7 @@ use FileHandle ();
 use File::Basename ();
 use File::Path ();
 use vars qw($VERSION);
-$VERSION = substr q$Revision: 1.35 $, 10;
+$VERSION = substr q$Revision: 1.37 $, 10;
 
 =head1 NAME
 
@@ -77,6 +77,7 @@ dialog anytime later by typing 'o conf init' at the cpan prompt.)
 	*prompt = \&ExtUtils::MakeMaker::prompt;
       } else {
 	$fastread = 1;
+	$CPAN::Config->{urllist} ||= [];
 	*prompt = sub {
 	  my($q,$a) = @_;
 	  my($ret) = defined $a ? $a : "";
@@ -113,13 +114,18 @@ First of all, I\'d like to create this directory. Where?
 
     $default = $cpan_home;
     while ($ans = prompt("CPAN build and cache directory?",$default)) {
-	File::Path::mkpath($ans); # dies if it can't
-	if (-d $ans && -w _) {
-	    last;
-	} else {
-	    warn "Couldn't find directory $ans
+      eval { File::Path::mkpath($ans); }; # dies if it can't
+      if ($@) {
+	warn "Couldn't create directory $ans.
+Please retry.\n";
+	next;
+      }
+      if (-d $ans && -w _) {
+	last;
+      } else {
+	warn "Couldn't find directory $ans
   or directory is not writable. Please retry.\n";
-	}
+      }
     }
     $CPAN::Config->{cpan_home} = $ans;
 
@@ -353,16 +359,25 @@ sub conf_sites {
     require File::Copy;
     File::Copy::copy($m,$mby) or die "Could not update $mby: $!";
   }
-  if ( ! -f $mby ){
-    print qq{You have no $mby
+  while () {
+    if ( ! -f $mby ){
+      print qq{You have no $mby
   I\'m trying to fetch one
 };
-    $mby = CPAN::FTP->localize($m,$mby,3);
-  } elsif (-M $mby > 30 ) {
-    print qq{Your $mby is older than 30 days,
+      $mby = CPAN::FTP->localize($m,$mby,3);
+    } elsif (-M $mby > 30 ) {
+      print qq{Your $mby is older than 30 days,
   I\'m trying to fetch one
 };
-    $mby = CPAN::FTP->localize($m,$mby,3);
+      $mby = CPAN::FTP->localize($m,$mby,3);
+    } elsif (-s $mby == 0) {
+      print qq{You have an empty $mby,
+  I\'m trying to fetch one
+};
+      $mby = CPAN::FTP->localize($m,$mby,3);
+    } else {
+      last;
+    }
   }
   read_mirrored_by($mby);
 }
