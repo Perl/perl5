@@ -3162,11 +3162,6 @@ tryagain:
 				ender = grok_hex(p + 1, &numlen, &flags, NULL);
 				if (ender > 0xff)
 				    RExC_utf8 = 1;
-				/* numlen is generous */
-				if (numlen + len >= 127) {
-				    p--;
-				    goto loopdone;
-				}
 				p = e + 1;
 			    }
 			}
