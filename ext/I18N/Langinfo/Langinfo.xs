@@ -22,7 +22,7 @@ langinfo(code)
 	char *s;
 	if (code > 0) { /* bold assumption: all valid langinfo codes > 0 */
 #ifdef _MAXSTRMSG
-	    if (code >= _MAXSTRMSG
+	  if (code > _MAXSTRMSG)
 	        RETVAL = &PL_sv_undef;
 	    else
 #else
