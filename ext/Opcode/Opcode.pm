@@ -427,6 +427,12 @@ beyond the scope of the compartment.
 
     rand srand
 
+=item :base_thread
+
+This op is related to multi-threading.
+
+    lock
+
 =item :default
 
 A handy tag name for a I<reasonable> default set of ops.  (The current ops
