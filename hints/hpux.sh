@@ -97,7 +97,6 @@ case `$cc -v 2>&1`"" in
 # When HP-UX runs a script with "#!", it sets argv[0] to the script name.
 toke_cflags='ccflags="$ccflags -DARG_ZERO_IS_SCRIPT"'
 
-
 ### 64 BITNESS
 
 case "$use64bitall" in
@@ -203,7 +202,7 @@ those parts. If you are a sysadmin, and you *do* want full
 optimization, raise the 'maxdsiz' kernel configuration parameter
 to at least 0x08000000 (128 Mb) and rebuild your kernel.
 EOM
-    exit
+regexec_cflags=''
     fi
 
 case "$ccisgcc" in
@@ -232,12 +231,10 @@ case "$ccisgcc" in
 		;;
 	    esac
 	if [ $maxdsiz -le 64 ]; then
-	    # 64 Mb is probably not enough to optimize toke.c
-	    # and regexp.c with -O2
 	    case "$optimize" in
 		*O2*)	opt=`echo "$optimize" | sed -e 's/O2/O1/'`
-			toke_cflags="$ccflags $opt"
-			regexec_cflags="$ccflags $opt"
+			toke_cflags="$toke_cflags;optimize=\"$opt\""
+			regexec_cflags="optimize=\"$opt\""
 			;;
 		esac
 	    fi
@@ -249,13 +246,11 @@ case "$ccisgcc" in
 	    *O[3456789]*) optimize=`echo "$optimize" | sed -e 's/O[3-9]/O2/'` ;;
 	    esac
 	if [ $maxdsiz -le 64 ]; then
-	    # 64 Mb is probably not enough to optimize toke.c
-	    # and regexp.c with -O (+O2)
 	    case "$optimize" in
 		*-O*|\
 		*O2*)	opt=`echo "$optimize" | sed -e 's/-O/+O2/' -e 's/O2/O1/' -e 's/ *+Onolimit//'`
-			toke_cflags="$ccflags $opt"
-			regexec_cflags="$ccflags $opt"
+			toke_cflags="$toke_cflags;optimize=\"$opt\""
+			regexec_cflags="optimize=\"$opt\""
 			;;
 		esac
 	    fi
@@ -264,7 +259,6 @@ case "$ccisgcc" in
 	lddlflags='-b +vnocompatwarnings'
 	;;
     esac
-
 
 ## LARGEFILES
 
