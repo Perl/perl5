@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..7\n";
+print "1..10\n";
 
 @oops = @ops = <op/*>;
 
@@ -48,3 +48,11 @@ for (1..2) {
     ++$i;
 }
 print $i == 2 ? "ok 7\n" : "not ok 7\n";
+
+# [ID 20010526.001] localized glob loses value when assigned to
+
+$j=1; %j=(a=>1); @j=(1); local *j=*j; *j = sub{};
+
+print $j    == 1 ? "ok 8\n"  : "not ok 8\n";
+print $j{a} == 1 ? "ok 9\n"  : "not ok 9\n";
+print $j[0] == 1 ? "ok 10\n" : "not ok 10\n";
