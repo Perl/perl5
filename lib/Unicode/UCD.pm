@@ -126,9 +126,9 @@ you will need also the compexcl(), casefold(), and casespec() functions.
 sub _getcode {
     my $arg = shift;
 
-    if ($arg =~ /^\d+$/) {
+    if ($arg =~ /^[1-9]\d*$/) {
 	return $arg;
-    } elsif ($arg =~ /^(?:U\+|0x)?([[:xdigit:]]+)$/) {
+    } elsif ($arg =~ /^(?:[Uu]\+|0[xX])?([[:xdigit:]]+)$/) {
 	return hex($1);
     }
 
@@ -457,9 +457,12 @@ any of the 256 code points in the Tibetan block).
 
 A I<code point argument> is either a decimal or a hexadecimal scalar
 designating a Unicode character, or C<U+> followed by hexadecimals
-designating a Unicode character.  Note that Unicode is B<not> limited
-to 16 bits (the number of Unicode characters is open-ended, in theory
-unlimited): you may have more than 4 hexdigits.
+designating a Unicode character.  In other words, if you want a code
+point to be interpreted as a hexadecimal number, you must prefix it
+with either C<0x> or C<U+>, becauseq a string like e.g. C<123> will
+be interpreted as a decimal code point.  Also note that Unicode is
+B<not> limited to 16 bits (the number of Unicode characters is
+open-ended, in theory unlimited): you may have more than 4 hexdigits.
 
 =head2 charinrange
 
