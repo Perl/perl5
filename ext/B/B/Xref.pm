@@ -89,7 +89,7 @@ Malcolm Beattie, mbeattie@sable.ox.ac.uk.
 use strict;
 use Config;
 use B qw(peekop class comppadlist main_start svref_2object walksymtable
-         OPpLVAL_INTRO SVf_POK
+         OPpLVAL_INTRO SVf_POK OPpOUR_INTRO
         );
 
 sub UNKNOWN { ["?", "?", "?"] }
@@ -230,16 +230,16 @@ sub pp_padav { pp_padsv(@_) }
 sub pp_padhv { pp_padsv(@_) }
 
 sub deref {
-    my ($var, $as) = @_;
+    my ($op, $var, $as) = @_;
     $var->[1] = $as . $var->[1];
-    process($var, "used");
+    process($var, $op->private & OPpOUR_INTRO ? "intro" : "used");
 }
 
-sub pp_rv2cv { deref($top, "&"); }
-sub pp_rv2hv { deref($top, "%"); }
-sub pp_rv2sv { deref($top, "\$"); }
-sub pp_rv2av { deref($top, "\@"); }
-sub pp_rv2gv { deref($top, "*"); }
+sub pp_rv2cv { deref(shift, $top, "&"); }
+sub pp_rv2hv { deref(shift, $top, "%"); }
+sub pp_rv2sv { deref(shift, $top, "\$"); }
+sub pp_rv2av { deref(shift, $top, "\@"); }
+sub pp_rv2gv { deref(shift, $top, "*"); }
 
 sub pp_gvsv {
     my $op = shift;
@@ -253,7 +253,8 @@ sub pp_gvsv {
 	$gv = $op->gv;
 	$top = [$gv->STASH->NAME, '$', $gv->NAME];
     }
-    process($top, $op->private & OPpLVAL_INTRO ? "intro" : "used");
+    process($top, $op->private & OPpLVAL_INTRO ||
+                  $op->private & OPpOUR_INTRO   ? "intro" : "used");
 }
 
 sub pp_gv {
