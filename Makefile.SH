@@ -871,6 +871,27 @@ minitest: miniperl lib/re.pm
 	- cd t && (rm -f perl$(EXE_EXT); $(LNS) ../miniperl$(EXE_EXT) perl$(EXE_EXT)) \
 		&& $(LDLIBPTH) ./perl TEST base/*.t comp/*.t cmd/*.t run/*.t io/*.t op/*.t pragma/*.t </dev/tty
 
+# Targets for Third Degree testing.
+
+test.third check.third:	test-prep perl.third
+	if (true </dev/tty) >/dev/null 2>&1; then \
+	  cd t && $(LDLIBPTH) PERL_3LOG=1 ./perl.third TEST </dev/tty; \
+	else \
+	  cd t && PERL_SKIP_TTY_TEST=1 PERL_3LOG=1 $(LDLIBPTH) ./perl TEST; \
+	fi
+	@echo "Ran tests" > t/rantests
+
+utest.third ucheck.third: test-prep perl.third
+	if (true </dev/tty) >/dev/null 2>&1; then \
+	  cd t && $(LDLIBPTH) PERL_3LOG=1 ./perl.third TEST -utf8 </dev/tty; \
+	else \
+	  cd t && PERL_SKIP_TTY_TEST=1 PERL_3LOG=1 $(LDLIBPTH) ./perl TEST -utf8; \
+	fi
+
+# For testing without a tty or controling terminal. See t/op/stat.t
+test-notty.third: test-prep perl.third
+	cd t && PERL_SKIP_TTY_TEST=1 PERL_3LOG=1 $(LDLIBPTH) ./perl.third TEST
+
 # Handy way to run perlbug -ok without having to install and run the
 # installed perlbug. We don't re-run the tests here - we trust the user.
 # Please *don't* use this unless all tests pass.
