@@ -6,7 +6,7 @@ $config_pm = $ARGV[0] || 'lib/Config.pm';
 # list names to put first (and hence lookup fastest)
 @fast = qw(archname osname osvers prefix libs libpth
 	dynamic_ext static_ext extensions dlsrc so
-	sig_name cc ccflags cppflags
+	sig_name sig_num cc ccflags cppflags
 	privlibexp archlibexp installprivlib installarchlib
 	sharpbang startsh shsharp
 );
@@ -245,17 +245,23 @@ See also C<-V:name> in L<perlrun/Switches>.
 Here's a more sophisticated example of using %Config:
 
     use Config;
+    use strict;
 
-    defined $Config{sig_name} || die "No sigs?";
-    foreach $name (split(' ', $Config{sig_name})) {
-	$signo{$name} = $i;
-	$signame[$i] = $name;
-	$i++;
-    }   
+    my %sig_num;
+    my @sig_name;
+    unless($Config{sig_name} && $Config{sig_num}) {
+	die "No sigs?";
+    } else {
+	my @names = split ' ', $Config{sig_name};
+	@sig_num{@names} = split ' ', $Config{sig_num};
+	foreach (@names) {
+	    $sig_name[$sig_num{$_}] ||= $_;
+	}   
+    }
 
-    print "signal #17 = $signame[17]\n";
-    if ($signo{ALRM}) { 
-	print "SIGALRM is $signo{ALRM}\n";
+    print "signal #17 = $sig_name[17]\n";
+    if ($sig_num{ALRM}) { 
+	print "SIGALRM is $sig_num{ALRM}\n";
     }   
 
 =head1 WARNING
