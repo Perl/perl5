@@ -432,7 +432,7 @@ anonhash	anonymous hash		ck_fun		ms@	L
 
 splice		splice			ck_fun		m@	A S? S? L
 push		push			ck_fun		imst@	A L
-pop		pop			ck_shift	si%	A
+pop		pop			ck_shift	s%	A
 shift		shift			ck_shift	s%	A
 unshift		unshift			ck_fun		imst@	A L
 sort		sort			ck_sort		m@	C? L
