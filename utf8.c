@@ -189,9 +189,11 @@ and the pointer C<s> will be advanced to the end of the character.
 If C<s> does not point to a well-formed UTF8 character, the behaviour
 is dependent on the value of C<flags>: if it contains UTF8_CHECK_ONLY,
 it is assumed that the caller will raise a warning, and this function
-will set C<retlen> to C<-1> and return.  The C<flags> can also contain
-various flags to allow deviations from the strict UTF-8 encoding 
-(see F<utf8.h>).
+will set C<retlen> to C<-1> and return zero.  If the C<flags> does not
+contain UTF8_CHECK_ONLY, the UNICODE_REPLACEMENT_CHARACTER (0xFFFD)
+will be returned, and C<retlen> will be set to the expected length of
+the UTF-8 character in bytes.  The C<flags> can also contain various
+flags to allow deviations from the strict UTF-8 encoding (see F<utf8.h>).
 
 =cut */
 
@@ -336,7 +338,7 @@ malformed:
     }
 
     if (retlen)
-	*retlen = expectlen ? expectlen : len;
+	*retlen = expectlen;
 
     return UNICODE_REPLACEMENT_CHARACTER;
 }
