@@ -32,6 +32,9 @@
 
 #if defined(LIBC_SCCS) && !defined(lint)
 static char sccsid[] = "@(#)glob.c	8.3 (Berkeley) 10/13/93";
+/* most changes between the version above and the one below have been ported:
+static char sscsid[]=  "$OpenBSD: glob.c,v 1.8.10.1 2001/04/10 jason Exp $";
+ */
 #endif /* LIBC_SCCS and not lint */
 
 /*
@@ -407,19 +410,20 @@ globexp2(const Char *ptr, const Char *pattern,
  * expand tilde from the passwd file.
  */
 static const Char *
-globtilde(const Char *pattern, Char *patbuf, size_t limit, glob_t *pglob)
+globtilde(const Char *pattern, Char *patbuf, size_t patbuf_len, glob_t *pglob)
 {
 	struct passwd *pwd;
 	char *h;
 	const Char *p;
-	Char *b;
+	Char *b, *eb;
 
 	if (*pattern != BG_TILDE || !(pglob->gl_flags & GLOB_TILDE))
 		return pattern;
 
 	/* Copy up to the end of the string or / */
-	for (p = pattern + 1, h = (char *) patbuf; *p && *p != BG_SLASH;
-	     *h++ = *p++)
+	eb = &patbuf[patbuf_len - 1];
+	for (p = pattern + 1, h = (char *) patbuf;
+	     h < (char*)eb && *p && *p != BG_SLASH; *h++ = *p++)
 		;
 
 	*h = BG_EOS;
@@ -459,12 +463,13 @@ globtilde(const Char *pattern, Char *patbuf, size_t limit, glob_t *pglob)
 	}
 
 	/* Copy the home directory */
-	for (b = patbuf; *h; *b++ = *h++)
+	for (b = patbuf; b < eb && *h; *b++ = *h++)
 		;
 
 	/* Append the rest of the pattern */
-	while ((*b++ = *p++) != BG_EOS)
+	while (b < eb && (*b++ = *p++) != BG_EOS)
 		;
+	*b = BG_EOS;
 
 	return patbuf;
 }
@@ -637,7 +642,6 @@ glob2(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend_last,
 	for (anymeta = 0;;) {
 		if (*pattern == BG_EOS) {		/* End of pattern? */
 			*pathend = BG_EOS;
-
 			if (g_lstat(pathbuf, &sb, pglob))
 				return(0);
 
@@ -724,17 +728,18 @@ glob3(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend_last,
 
 #ifdef VMS
         {
-            Char *q = pathend;
-            if (q - pathbuf > 5) {
-                q -= 5;
-                if (q[0] == '.' && tolower(q[1]) == 'd' && tolower(q[2]) == 'i'
-		    && tolower(q[3]) == 'r' && q[4] == '/')
-		{
-                    q[0] = '/';
-                    q[1] = BG_EOS;
-                    pathend = q+1;
-                }
-            }
+		Char *q = pathend;
+		if (q - pathbuf > 5) {
+			q -= 5;
+			if (q[0] == '.' &&
+			    tolower(q[1]) == 'd' && tolower(q[2]) == 'i' &&
+			    tolower(q[3]) == 'r' && q[4] == '/')
+			{
+				q[0] = '/';
+				q[1] = BG_EOS;
+				pathend = q+1;
+			}
+		}
         }
 #endif
 	if ((dirp = g_opendir(pathbuf, pglob)) == NULL) {
@@ -846,6 +851,7 @@ globextend(const Char *path, glob_t *pglob, size_t *limitp)
 	for (p = path; *p++;)
 		;
 	len = (STRLEN)(p - path);
+	*limitp += len;
 	New(0, copy, p-path, char);
 	if (copy != NULL) {
 		if (g_Ctoc(path, copy, len)) {
@@ -861,6 +867,7 @@ globextend(const Char *path, glob_t *pglob, size_t *limitp)
 		errno = 0;
 		return(GLOB_NOSPACE);
 	}
+
 	return(copy == NULL ? GLOB_NOSPACE : 0);
 }
 
@@ -957,8 +964,8 @@ g_opendir(register Char *str, glob_t *pglob)
 
 	if (pglob->gl_flags & GLOB_ALTDIRFUNC)
 		return((*pglob->gl_opendir)(buf));
-	else
-	    return(PerlDir_open(buf));
+
+	return(PerlDir_open(buf));
 }
 
 static int
