@@ -1,6 +1,7 @@
 #
 # Trigonometric functions, mostly inherited from Math::Complex.
 # -- Jarkko Hietaniemi, April 1997
+# -- Raphael Manfredi, September 1996 (indirectly: because of Math::Complex)
 #
 
 require Exporter;
@@ -12,8 +13,7 @@ use Math::Complex qw(:trig);
 
 use vars qw($VERSION $PACKAGE
 	    @ISA
-	    @EXPORT
-	    $pi2 $DR $RD $DG $GD $RG $GR);
+	    @EXPORT);
 
 @ISA = qw(Exporter);
 
@@ -26,40 +26,13 @@ my @angcnv = qw(rad_to_deg rad_to_grad
 @EXPORT = (@{$Math::Complex::EXPORT_TAGS{'trig'}},
 	   @angcnv);
 
-sub pi2 () {
-    $pi2 = 2 * pi unless ($pi2);
-    $pi2;
-}
-
-sub DR () {
-    $DR = pi2/360 unless ($DR);
-    $DR;
-}
-
-sub RD () {
-    $RD = 360/pi2 unless ($RD);
-    $RD;
-}
-
-sub DG () {
-    $DG = 400/360 unless ($DG);
-    $DG;
-}
-
-sub GD () {
-    $GD = 360/400 unless ($GD);
-    $GD;
-}
-
-sub RG () {
-    $RG = 400/pi2 unless ($RG);
-    $RG;
-}
-
-sub GR () {
-    $GR = pi2/400 unless ($GR);
-    $GR;
-}
+use constant pi2 => 2 * pi;
+use constant DR  => pi2/360;
+use constant RD  => 360/pi2;
+use constant DG  => 400/360;
+use constant GD  => 360/400;
+use constant RG  => 400/pi2;
+use constant GR  => pi2/400;
 
 #
 # Truncating remainder.
@@ -74,29 +47,17 @@ sub remt ($$) {
 # Angle conversions.
 #
 
-sub rad_to_deg ($) {
-    remt(RD * $_[0], 360);
-}
+sub rad_to_deg ($)  { remt(RD * $_[0], 360) }
 
-sub deg_to_rad ($) {
-    remt(DR * $_[0], pi2);
-}
+sub deg_to_rad ($)  { remt(DR * $_[0], pi2) }
 
-sub grad_to_deg ($) {
-    remt(GD * $_[0], 360);
-}
+sub grad_to_deg ($) { remt(GD * $_[0], 360) }
 
-sub deg_to_grad ($) {
-    remt(DG * $_[0], 400);
-}
+sub deg_to_grad ($) { remt(DG * $_[0], 400) }
 
-sub rad_to_grad ($) {
-    remt(RG * $_[0], 400);
-}
+sub rad_to_grad ($) { remt(RG * $_[0], 400) }
 
-sub grad_to_rad ($) {
-    remt(GR * $_[0], pi2);
-}
+sub grad_to_rad ($) { remt(GR * $_[0], pi2) }
 
 =head1 NAME
 
@@ -169,7 +130,39 @@ The trigonometric constant B<pi> is also defined.
 
 	$pi2 = 2 * pi;
 
-=head2 SIMPLE ARGUMENTS, COMPLEX RESULTS
+=head2 ERRORS DUE TO DIVISION BY ZERO
+
+The following functions
+
+	tan
+	sec
+	csc
+	cot
+	asec
+	acsc
+	tanh
+	sech
+	csch
+	coth
+	atanh
+	asech
+	acsch
+	acoth
+
+cannot be computed for all arguments because that would mean dividing
+by zero. These situations cause fatal runtime errors looking like this
+
+	cot(0): Division by zero.
+	(Because in the definition of cot(0), the divisor sin(0) is 0)
+	Died at ...
+
+For the C<csc>, C<cot>, C<asec>, C<acsc>, C<csch>, C<coth>, C<asech>,
+C<acsch>, the argument cannot be C<0> (zero). For the C<atanh>,
+C<acoth>, the argument cannot be C<1> (one). For the C<tan>, C<sec>,
+C<tanh>, C<sech>, the argument cannot be I<pi/2 + k * pi>, where I<k> is
+any integer.
+
+=head2 SIMPLE (REAL) ARGUMENTS, COMPLEX RESULTS
 
 Please note that some of the trigonometric functions can break out
 from the B<real axis> into the B<complex plane>. For example
@@ -193,8 +186,8 @@ should produce something like this (take or leave few last decimals):
 
 	1.5707963267949-1.31695789692482i
 
-That is, a complex number with the real part of approximately E<1.571>
-and the imaginary part of approximately E<-1.317>.
+That is, a complex number with the real part of approximately C<1.571>
+and the imaginary part of approximately C<-1.317>.
 
 =head1 ANGLE CONVERSIONS
 
@@ -209,33 +202,24 @@ and the imaginary part of approximately E<-1.317>.
 	$gradians = deg_to_grad($degrees);
 	$gradians = rad_to_grad($radians);
 
-The full circle is 2 B<pi> radians or E<360> degrees or E<400> gradians.
+The full circle is 2 I<pi> radians or I<360> degrees or I<400> gradians.
 
-=head1
+=head1 BUGS
 
-The following functions
+Saying C<use Math::Trig;> exports many mathematical routines in the
+caller environment and even overrides some (C<sin>, C<cos>).  This is
+construed as a feature by the Authors, actually... ;-)
 
-	tan
-	sec
-	csc
-	cot
-	atan
-	acot
-	tanh
-	sech
-	csch
-	coth
-	atanh
-	asech
-	acsch
-	acoth
+The code is not optimized for speed, especially because we use
+C<Math::Complex> and thus go quite near complex numbers while doing
+the computations even when the arguments are not. This, however,
+cannot be completely avoided if we want things like C<asin(2)> to give
+an answer instead of giving a fatal runtime error.
 
-cannot be computed for all arguments because that would mean dividing
-by zero. These situations cause fatal runtime errors looking like this
+=head1 AUTHORS
 
-	cot(0): Division by zero.
-	(Because in the definition of cot(0), sin(0) is 0)
-	Died at ...
+	Jarkko Hietaniemi <F<jhi@iki.fi>>
+	Raphael Manfredi <F<Raphael_Manfredi@grenoble.hp.com>>
 
 =cut
 

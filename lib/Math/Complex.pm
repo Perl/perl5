@@ -2,7 +2,7 @@
 #
 # Complex numbers and associated mathematical functions
 # -- Raphael Manfredi, September 1996
-# -- Jarkko Hietaniemi, March 1997
+# -- Jarkko Hietaniemi, March-April 1997
 
 require Exporter;
 package Math::Complex;
@@ -12,7 +12,7 @@ use strict;
 use vars qw($VERSION @ISA
 	    @EXPORT %EXPORT_TAGS
 	    $package $display
-	    $pi $i $ilog10 $logn %logn);
+	    $i $logn %logn);
 
 @ISA = qw(Exporter);
 
@@ -20,7 +20,7 @@ $VERSION = 1.01;
 
 my @trig = qw(
 	      pi
-	      tan
+	      sin cos tan
 	      csc cosec sec cot cotan
 	      asin acos atan
 	      acsc acosec asec acot acotan
@@ -135,10 +135,16 @@ sub cplxe {
 #
 # The number defined as 2 * pi = 360 degrees
 #
-sub pi () {
-	$pi = 4 * atan2(1, 1) unless $pi;
-	return $pi;
-}
+
+use constant pi => 4 * atan2(1, 1);
+
+#
+# log2inv
+#
+# Used in log10().
+#
+
+use constant log10inv => 1 / log(10);
 
 #
 # i
@@ -146,9 +152,10 @@ sub pi () {
 # The number defined as i*i = -1;
 #
 sub i () {
-	$i = bless {} unless $i;		# There can be only one i
+        return $i if ($i);
+	$i = bless {};
 	$i->{'cartesian'} = [0, 1];
-	$i->{'polar'} = [1, pi/2];
+	$i->{'polar'}     = [1, pi/2];
 	$i->{c_dirty} = 0;
 	$i->{p_dirty} = 0;
 	return $i;
@@ -199,9 +206,8 @@ sub update_polar {
 #
 sub plus {
 	my ($z1, $z2, $regular) = @_;
-	$z2 = cplx($z2, 0) unless ref $z2;
 	my ($re1, $im1) = @{$z1->cartesian};
-	my ($re2, $im2) = @{$z2->cartesian};
+	my ($re2, $im2) = ref $z2 ? @{$z2->cartesian} : ($z2, 0);
 	unless (defined $regular) {
 		$z1->set_cartesian([$re1 + $re2, $im1 + $im2]);
 		return $z1;
@@ -216,9 +222,8 @@ sub plus {
 #
 sub minus {
 	my ($z1, $z2, $inverted) = @_;
-	$z2 = cplx($z2, 0) unless ref $z2;
 	my ($re1, $im1) = @{$z1->cartesian};
-	my ($re2, $im2) = @{$z2->cartesian};
+	my ($re2, $im2) = ref $z2 ? @{$z2->cartesian} : ($z2, 0);
 	unless (defined $inverted) {
 		$z1->set_cartesian([$re1 - $re2, $im1 - $im2]);
 		return $z1;
@@ -251,12 +256,19 @@ sub multiply {
 # Die on division by zero.
 #
 sub divbyzero {
-    warn "$_[0]: Division by zero.\n";
-    warn "(Because in the definition of $_[0], $_[1] is 0)\n"
-	if (defined $_[1]);
+    my $mess = "$_[0]: Division by zero.\n";
+
+    if (defined $_[1]) {
+	$mess .= "(Because in the definition of $_[0], the divisor ";
+	$mess .= "$_[1] " unless ($_[1] eq '0');
+	$mess .= "is 0)\n";
+    }
+
     my @up = caller(1);
-    my $dmess = "Died at $up[1] line $up[2].\n";
-    die $dmess;
+    
+    $mess .= "Died at $up[1] line $up[2].\n";
+
+    die $mess;
 }
 
 #
@@ -302,9 +314,8 @@ sub power {
 #
 sub spaceship {
 	my ($z1, $z2, $inverted) = @_;
-	$z2 = cplx($z2, 0) unless ref $z2;
-	my ($re1, $im1) = @{$z1->cartesian};
-	my ($re2, $im2) = @{$z2->cartesian};
+	my ($re1, $im1) = ref $z1 ? @{$z1->cartesian} : ($z1, 0);
+	my ($re2, $im2) = ref $z2 ? @{$z2->cartesian} : ($z2, 0);
 	my $sgn = $inverted ? -1 : 1;
 	return $sgn * ($re1 <=> $re2) if $re1 != $re2;
 	return $sgn * ($im1 <=> $im2);
@@ -459,8 +470,8 @@ sub exp {
 sub log {
 	my ($z) = @_;
 	$z = cplx($z, 0) unless ref $z;
-	my ($r, $t) = @{$z->polar};
 	my ($x, $y) = @{$z->cartesian};
+	my ($r, $t) = @{$z->polar};
 	$t -= 2 * pi if ($t >  pi() and $x < 0);
 	$t += 2 * pi if ($t < -pi() and $x < 0);
 	return (ref $z)->make(log($r), $t);
@@ -478,12 +489,13 @@ sub ln { Math::Complex::log(@_) }
 #
 # Compute log10(z).
 #
+
 sub log10 {
 	my ($z) = @_;
-	my $ilog10 = 1 / log(10) unless defined $ilog10;
-	return log(cplx($z, 0)) * $ilog10 unless ref $z;
+
+	return log(cplx($z, 0)) * log10inv unless ref $z;
 	my ($r, $t) = @{$z->polar};
-	return (ref $z)->make(log($r) * $ilog10, $t * $ilog10);
+	return (ref $z)->make(log($r) * log10inv, $t * log10inv);
 }
 
 #
@@ -506,6 +518,7 @@ sub logn {
 #
 sub cos {
 	my ($z) = @_;
+	$z = cplx($z, 0) unless ref $z;
 	my ($x, $y) = @{$z->cartesian};
 	my $ey = exp($y);
 	my $ey_1 = 1 / $ey;
@@ -520,6 +533,7 @@ sub cos {
 #
 sub sin {
 	my ($z) = @_;
+	$z = cplx($z, 0) unless ref $z;
 	my ($x, $y) = @{$z->cartesian};
 	my $ey = exp($y);
 	my $ey_1 = 1 / $ey;
@@ -618,6 +632,7 @@ sub asin {
 #
 sub atan {
 	my ($z) = @_;
+	$z = cplx($z, 0) unless ref $z;
 	divbyzero "atan($z)", "i - $z" if ($z == i);
 	return i/2*log((i + $z) / (i - $z));
 }
@@ -629,25 +644,27 @@ sub atan {
 #
 sub asec {
 	my ($z) = @_;
+	divbyzero "asec($z)", $z if ($z == 0);
 	return acos(1 / $z);
-}
-
-#
-# acosec
-#
-# Computes the arc cosecant sec(z) = asin(1 / z).
-#
-sub acosec {
-	my ($z) = @_;
-	return asin(1 / $z);
 }
 
 #
 # acsc
 #
-# Alias for acosec().
+# Computes the arc cosecant sec(z) = asin(1 / z).
 #
-sub acsc { Math::Complex::acosec(@_) }
+sub acsc {
+	my ($z) = @_;
+	divbyzero "acsc($z)", $z if ($z == 0);
+	return asin(1 / $z);
+}
+
+#
+# acosec
+#
+# Alias for acsc().
+#
+sub acosec { Math::Complex::acsc(@_) }
 
 #
 # acot
@@ -656,6 +673,7 @@ sub acsc { Math::Complex::acosec(@_) }
 #
 sub acot {
 	my ($z) = @_;
+	$z = cplx($z, 0) unless ref $z;
 	divbyzero "acot($z)", "$z - i" if ($z == i);
 	return i/-2 * log((i + $z) / ($z - i));
 }
@@ -674,8 +692,7 @@ sub acotan { Math::Complex::acot(@_) }
 #
 sub cosh {
 	my ($z) = @_;
-	$z = cplx($z, 0) unless ref $z;
-	my ($x, $y) = @{$z->cartesian};
+	my ($x, $y) = ref $z ? @{$z->cartesian} : ($z, 0);
 	my $ex = exp($x);
 	my $ex_1 = 1 / $ex;
 	return ($ex + $ex_1)/2 unless ref $z;
@@ -690,8 +707,7 @@ sub cosh {
 #
 sub sinh {
 	my ($z) = @_;
-	$z = cplx($z, 0) unless ref $z;
-	my ($x, $y) = @{$z->cartesian};
+	my ($x, $y) = ref $z ? @{$z->cartesian} : ($z, 0);
 	my $ex = exp($x);
 	my $ex_1 = 1 / $ex;
 	return ($ex - $ex_1)/2 unless ref $z;
@@ -768,7 +784,7 @@ sub cotanh { Math::Complex::coth(@_) }
 #
 sub acosh {
 	my ($z) = @_;
-	$z = cplx($z, 0) unless ref $z; # asinh(-2)
+	$z = cplx($z, 0) unless ref $z;
 	return log($z + sqrt($z*$z - 1));
 }
 
@@ -779,7 +795,7 @@ sub acosh {
 #
 sub asinh {
 	my ($z) = @_;
-	$z = cplx($z, 0) unless ref $z; # asinh(-2)
+	$z = cplx($z, 0) unless ref $z;
 	return log($z + sqrt($z*$z + 1));
 }
 
@@ -790,8 +806,8 @@ sub asinh {
 #
 sub atanh {
 	my ($z) = @_;
-	$z = cplx($z, 0) unless ref $z; # atanh(-2)
 	divbyzero 'atanh(1)', "1 - $z" if ($z == 1);
+	$z = cplx($z, 0) unless ref $z;
 	my $cz = (1 + $z) / (1 - $z);
 	return log($cz) / 2;
 }
@@ -832,8 +848,8 @@ sub acosech { Math::Complex::acsch(@_) }
 #
 sub acoth {
 	my ($z) = @_;
-	$z = cplx($z, 0) unless ref $z; # acoth(-2)
 	divbyzero 'acoth(1)', "$z - 1" if ($z == 1);
+	$z = cplx($z, 0) unless ref $z;
 	my $cz = (1 + $z) / ($z - 1);
 	return log($cz) / 2;
 }
@@ -852,8 +868,8 @@ sub acotanh { Math::Complex::acoth(@_) }
 #
 sub atan2 {
 	my ($z1, $z2, $inverted) = @_;
-	my ($re1, $im1) = @{$z1->cartesian};
-	my ($re2, $im2) = @{$z2->cartesian};
+	my ($re1, $im1) = ref $z1 ? @{$z1->cartesian} : ($z1, 0);
+	my ($re2, $im2) = ref $z2 ? @{$z2->cartesian} : ($z2, 0);
 	my $tan;
 	if (defined $inverted && $inverted) {	# atan(z2/z1)
 		return pi * ($re2 > 0 ? 1 : -1) if $re1 == 0 && $im1 == 0;
@@ -1341,7 +1357,7 @@ Here are some examples:
 	$k = exp(i * 2*pi/3);
 	print "$j - $k = ", $j - $k, "\n";
 
-=head1 CAVEATS
+=head1 ERRORS DUE TO DIVISION BY ZERO
 
 The division (/) and the following functions
 
@@ -1349,6 +1365,8 @@ The division (/) and the following functions
 	sec
 	csc
 	cot
+	asec
+	acsc
 	atan
 	acot
 	tanh
@@ -1364,13 +1382,22 @@ cannot be computed for all arguments because that would mean dividing
 by zero. These situations cause fatal runtime errors looking like this
 
 	cot(0): Division by zero.
-	(Because in the definition of cot(0), sin(0) is 0)
+	(Because in the definition of cot(0), the divisor sin(0) is 0)
 	Died at ...
+
+For the C<csc>, C<cot>, C<asec>, C<acsc>, C<csch>, C<coth>, C<asech>,
+C<acsch>, the argument cannot be C<0> (zero). For the C<atanh>,
+C<acoth>, the argument cannot be C<1> (one). For the C<atan>, C<acot>,
+the argument cannot be C<i> (the imaginary unit).  For the C<tan>,
+C<sec>, C<tanh>, C<sech>, the argument cannot be I<pi/2 + k * pi>, where
+I<k> is any integer.
 
 =head1 BUGS
 
-Saying C<use Math::Complex;> exports many mathematical routines in the caller
-environment.  This is construed as a feature by the Author, actually... ;-)
+Saying C<use Math::Complex;> exports many mathematical routines in the
+caller environment and even overrides some (C<sin>, C<cos>, C<sqrt>,
+C<log>, C<exp>).  This is construed as a feature by the Authors,
+actually... ;-)
 
 The code is not optimized for speed, although we try to use the cartesian
 form for addition-like operators and the trigonometric form for all
@@ -1388,3 +1415,7 @@ operation (for instance) between two overloaded entities.
 
 	Raphael Manfredi <F<Raphael_Manfredi@grenoble.hp.com>>
 	Jarkko Hietaniemi <F<jhi@iki.fi>>
+
+=cut
+
+# eof

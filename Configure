@@ -304,6 +304,7 @@ d_ftime=''
 d_gettimeod=''
 d_Gconvert=''
 d_getgrps=''
+d_setgrps=''
 d_gethent=''
 aphostname=''
 d_gethname=''
@@ -8490,20 +8491,24 @@ gidtype="$ans"
 set getgroups d_getgrps
 eval $inlibc
 
-: Find type of 2nd arg to getgroups
+: see if setgroups exists
+set setgroups d_setgrps
+eval $inlibc
+
+: Find type of 2nd arg to getgroups (and setgroups)
 echo " "
-case "$d_getgrps" in
-'define')
+case "$d_getgrps$d_setgrps" in
+*define*)
 	case "$groupstype" in
 	'') dflt="$gidtype" ;;
 	*)  dflt="$groupstype" ;;
 	esac
 	$cat <<EOM
-What is the type of the second argument to getgroups()?  Usually this
-is the same as group ids, $gidtype, but not always.
+What is the type of the second argument to getgroups() and setgroups()?
+Usually this is the same as group ids, $gidtype, but not always.
 
 EOM
-	rp='What type is the second argument to getgroups()?'
+	rp='What type is the second argument to getgroups() and setgroups()?'
 	. ./myread
 	groupstype="$ans"
 	;;
@@ -9921,10 +9926,10 @@ echo "Creating config.sh..." >&4
 $spitshell <<EOT >config.sh
 $startsh
 #
-# This file was produced by running the Configure script. It holds all the
-# definitions figured out by Configure. Should you modify one of these values,
-# do not forget to propagate your changes by running "Configure -der". You may
-# instead choose to run each of the .SH files by yourself, or "Configure -S".
+# This file was produced by running the Configure script.  It holds all
+# the definitions figured out by Configure.  Should you modify any of
+# these values, do not forget to propagate your changes by running
+# "Configure -S"; or, equivalently, you may run each .SH file yourself.
 #
 
 # Configuration time: $cf_time
@@ -10035,6 +10040,7 @@ d_fpathconf='$d_fpathconf'
 d_fsetpos='$d_fsetpos'
 d_ftime='$d_ftime'
 d_getgrps='$d_getgrps'
+d_setgrps='$d_setgrps'
 d_gethent='$d_gethent'
 d_gethname='$d_gethname'
 d_getlogin='$d_getlogin'

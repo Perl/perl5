@@ -84,13 +84,30 @@ After this code executes in Perl 5.004, $a{b} exists but $a[2] does
 not.  In Perl 5.002 and 5.003, both $a{b} and $a[2] would have existed
 (but $a[2]'s value would have been undefined).
 
+=head2 C<$)> is writable
+
+The C<$)> special variable has always (well, in Perl 5, at least)
+reflected not only the current effective group, but also the group
+list as returned by the C<getgroups()> C function (if there is one).
+However, due to an oversight, assigning to C<$)> has not called
+C<setgroups()>, only C<setegid()>.
+
+In Perl 5.004, assigning to C<$)> is exactly symmetrical with
+examining it: The first number in its string value is used as the
+effective gid, and all the others are passed to the C<setgroups()> C
+function (if there is one).
+
 =head2 Fixed parsing of $$<digit>, &$<digit>, etc.
 
-A bug in previous versions of Perl 5.0 prevented proper parsing of
-numeric special variables as symbolic references.  That bug has been
-fixed.  As a result, the string "$$0" is no longer equivalent to
-C<$$."0">, but rather to C<${$0}>.  To get the old behavior, change
-"$$" followed by a digit to "${$}".
+Perl versions before 5.004 misinterpreted any type marker followed by
+"$" and a digit.  For example, "$$0" was incorrectly taken to mean
+"${$}0" instead of "${$0}".  This bug is (mostly) fixed in Perl 5.004.
+
+However, the developers of Perl 5.004 could not fix this bug completely,
+because at least two widely-used modules depend on the old meaning of
+"$$0" in a string.  So Perl 5.004 still interprets "$$<digit>" in the
+old (broken) way inside strings; but it generates this message as a
+warning.  And in Perl 5.005, this special treatment will cease.
 
 =head2 No resetting of $. on implicit close
 
@@ -600,6 +617,17 @@ relative to the local time zone, in the VMS tradition.
 
 =head1 Modules
 
+=head2 Required Updates
+
+Though Perl 5.004 is compatible with almost all modules that work
+with Perl 5.003, there are a few exceptions:
+
+    Module   Required Version for Perl 5.004
+    ------   -------------------------------
+    Filter   1.12
+    LWP      5.08
+    Tk       Tk400.202 (-w makes noise)
+
 =head2 Installation directories
 
 The I<installperl> script now places the Perl source files for
@@ -698,14 +726,20 @@ more operations.  These are overloaded:
 And these functions are now exported:
 
     pi i Re Im arg
-    log10 logn cbrt root
-    tan cotan asin acos atan acotan
-    sinh cosh tanh cotanh asinh acosh atanh acotanh
+    log10 logn ln cbrt root
+    tan
+    csc sec cot
+    asin acos atan
+    acsc asec acot
+    sinh cosh tanh
+    csch sech coth
+    asinh acosh atanh
+    acsch asech acoth
     cplx cplxe
 
 =head2 Math::Trig
 
-This module provides a simpler interface to parts of Math::Complex for
+This new module provides a simpler interface to parts of Math::Complex for
 those who need trigonometric functions only for real numbers.
 
 =head2 DB_File
@@ -994,6 +1028,17 @@ architecture. On a 32-bit architecture the largest hex literal is
 architecture. On a 32-bit architecture the largest octal literal is
 037777777777.
 
+=item internal error: glob failed
+
+(P) Something went wrong with the external program(s) used for C<glob>
+and C<E<lt>*.cE<gt>>.  This may mean that your csh (C shell) is
+broken.  If so, you should change all of the csh-related variables in
+config.sh:  If you have tcsh, make the variables refer to it as if it
+were csh (e.g. C<full_csh='/usr/bin/tcsh'>); otherwise, make them all
+empty (except that C<d_csh> should be C<'undef'>) so that Perl will
+think csh is missing.  In either case, after editing config.sh, run
+C<./Configure -S> and rebuild Perl.
+
 =item Name "%s::%s" used only once: possible typo
 
 (W) Typographical errors often show up as unique variable names.
@@ -1078,6 +1123,12 @@ commas if you don't want them to appear in your data:
 
     qw! a b c !;
 
+=item Recursive substitution detected
+
+(F) The replacement string of a substitution caused the recursive
+execution of that very same substituion.  Perl cannot keep track of
+special variables (C<$1>, etc.) under such circumstances.
+
 =item Scalar value @%s{%s} better written as $%s{%s}
 
 (W) You've used a hash slice (indicated by @) to select a single element of
@@ -1119,6 +1170,18 @@ script, a binary program, or a directory as a Perl program.
 Note that under some systems, like OS/2, there may be different flavors of
 Perl executables, some of which may support fork, some not. Try changing
 the name you call Perl by to C<perl_>, C<perl__>, and so on.
+
+=item Use of "$$<digit>" to mean "${$}<digit>" is deprecated
+
+(D) Perl versions before 5.004 misinterpreted any type marker followed
+by "$" and a digit.  For example, "$$0" was incorrectly taken to mean
+"${$}0" instead of "${$0}".  This bug is (mostly) fixed in Perl 5.004.
+
+However, the developers of Perl 5.004 could not fix this bug completely,
+because at least two widely-used modules depend on the old meaning of
+"$$0" in a string.  So Perl 5.004 still interprets "$$<digit>" in the
+old (broken) way inside strings; but it generates this message as a
+warning.  And in Perl 5.005, this special treatment will cease.
 
 =item Value of %s can be "0"; test with defined()
 

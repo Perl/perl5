@@ -1203,6 +1203,17 @@ and execute the specified command.
 
 (P) Something went badly wrong in the regular expression parser.
 
+=item internal error: glob failed
+
+(P) Something went wrong with the external program(s) used for C<glob>
+and C<E<lt>*.cE<gt>>.  This may mean that your csh (C shell) is
+broken.  If so, you should change all of the csh-related variables in
+config.sh:  If you have tcsh, make the variables refer to it as if it
+were csh (e.g. C<full_csh='/usr/bin/tcsh'>); otherwise, make them all
+empty (except that C<d_csh> should be C<'undef'>) so that Perl will
+think csh is missing.  In either case, after editing config.sh, run
+C<./Configure -S> and rebuild Perl.
+
 =item internal urp in regexp at /%s/
 
 (P) Something went badly awry in the regular expression parser.
@@ -1897,6 +1908,12 @@ which is why it's currently left out of your copy.
 (F) More than 100 levels of inheritance were used.  Probably indicates
 an unintended loop in your inheritance hierarchy.
 
+=item Recursive substitution detected
+
+(F) The replacement string of a substitution caused the recursive
+execution of that very same substituion.  Perl cannot keep track of
+special variables (C<$1>, etc.) under such circumstances.
+
 =item Reference miscount in sv_replace()
 
 (W) The internal sv_replace() function was handed a new SV with a
@@ -2447,6 +2464,18 @@ a term, so it's looking for the corresponding right angle bracket, and not
 finding it.  Chances are you left some needed parentheses out earlier in
 the line, and you really meant a "less than".
 
+=item Use of "$$<digit>" to mean "${$}<digit>" is deprecated
+
+(D) Perl versions before 5.004 misinterpreted any type marker followed
+by "$" and a digit.  For example, "$$0" was incorrectly taken to mean
+"${$}0" instead of "${$0}".  This bug is (mostly) fixed in Perl 5.004.
+
+However, the developers of Perl 5.004 could not fix this bug completely,
+because at least two widely-used modules depend on the old meaning of
+"$$0" in a string.  So Perl 5.004 still interprets "$$<digit>" in the
+old (broken) way inside strings; but it generates this message as a
+warning.  And in Perl 5.005, this special treatment will cease.
+
 =item Use of $# is deprecated
 
 (D) This was an ill-advised attempt to emulate a poorly defined B<awk> feature.
@@ -2477,10 +2506,10 @@ a split() explicitly to an array (or list).
 
 =item Use of inherited AUTOLOAD for non-method %s() is deprecated
 
-As an (ahem) accidental feature, C<AUTOLOAD> subroutines are looked up
-as methods (using the C<@ISA> hierarchy) even when the subroutines to be
-autoloaded were called as plain functions (e.g. C<Foo::bar()>), not as
-methods (e.g. C<Foo->bar()> or C<$obj->bar()>).
+(D) As an (ahem) accidental feature, C<AUTOLOAD> subroutines are looked
+up as methods (using the C<@ISA> hierarchy) even when the subroutines to
+be autoloaded were called as plain functions (e.g. C<Foo::bar()>), not
+as methods (e.g. C<Foo->bar()> or C<$obj->bar()>).
 
 This bug will be rectified in Perl 5.005, which will use method lookup
 only for methods' C<AUTOLOAD>s.  However, there is a significant base

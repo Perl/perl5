@@ -195,14 +195,6 @@ register PerlInterpreter *sv_interp;
     }
 #endif
 
-    /* unhook hooks which will soon be, or use, destroyed data */
-    SvREFCNT_dec(warnhook);
-    warnhook = Nullsv;
-    SvREFCNT_dec(diehook);
-    diehook = Nullsv;
-    SvREFCNT_dec(parsehook);
-    parsehook = Nullsv;
-
     LEAVE;
     FREETMPS;
 
@@ -228,6 +220,14 @@ register PerlInterpreter *sv_interp;
 	dirty = TRUE;
 	sv_clean_objs();
     }
+
+    /* unhook hooks which will soon be, or use, destroyed data */
+    SvREFCNT_dec(warnhook);
+    warnhook = Nullsv;
+    SvREFCNT_dec(diehook);
+    diehook = Nullsv;
+    SvREFCNT_dec(parsehook);
+    parsehook = Nullsv;
 
     if (destruct_level == 0){
 
@@ -645,7 +645,7 @@ setuid perl scripts securely.\n");
 #if defined(LOCAL_PATCH_COUNT)
 		if (LOCAL_PATCH_COUNT > 0) {
 		    int i;
-		    sv_catpv(Sv,"print \"  Locally applied patches:\\n\",");
+		    sv_catpv(Sv,"\"  Locally applied patches:\\n\",");
 		    for (i = 1; i <= LOCAL_PATCH_COUNT; i++) {
 			if (localpatches[i]) {
 			    sprintf(buf,"\"  \\t%s\\n\",",localpatches[i]);

@@ -4388,7 +4388,12 @@ I32 ck_uni;
     }
     if (*s == '$' && s[1] &&
       (isALNUM(s[1]) || strchr("${", s[1]) || strnEQ(s+1,"::",2)) )
-	return s;
+    {
+	if (isDIGIT(s[1]) && lex_state == LEX_INTERPNORMAL)
+	    deprecate("\"$$<digit>\" to mean \"${$}<digit>\"");
+	else
+	    return s;
+    }
     if (*s == '{') {
 	bracket = s;
 	s++;
@@ -4589,7 +4594,8 @@ register PMOP *pm;
 	    }
 	}
 	/* promote the better string */
-	if ((!pm->op_pmshort && !(pm->op_pmregexp->reganch & ROPT_ANCH)) ||
+	if ((!pm->op_pmshort &&
+	     !(pm->op_pmregexp->reganch & ROPT_ANCH_GPOS)) ||
 	    ((pm->op_pmflags & PMf_SCANFIRST) &&
 	     (SvCUR(pm->op_pmshort) < SvCUR(pm->op_pmregexp->regmust)))) {
 	    SvREFCNT_dec(pm->op_pmshort);		/* ok if null */

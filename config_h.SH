@@ -298,7 +298,13 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	available to get the list of process groups.  If unavailable, multiple
  *	groups are probably not supported.
  */
+/* HAS_SETGROUPS:
+ *	This symbol, if defined, indicates that the setgroups() routine is
+ *	available to set the list of process groups.  If unavailable, multiple
+ *	groups are probably not supported.
+ */
 #$d_getgrps HAS_GETGROUPS		/**/
+#$d_setgrps HAS_SETGROUPS		/**/
 
 /* HAS_GETHOSTENT:
  *	This symbol, if defined, indicates that the gethostent routine is
@@ -990,14 +996,14 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 
 /* Groups_t:
  *	This symbol holds the type used for the second argument to
- *	getgroups().  Usually, this is the same of gidtype, but
+ *	[gs]etgroups().  Usually, this is the same of gidtype, but
  *	sometimes it isn't.  It can be int, ushort, uid_t, etc... 
  *	It may be necessary to include <sys/types.h> to get any 
  *	typedef'ed information.  This is only required if you have
- *	getgroups().
+ *	getgroups() or setgroups().
  */
-#ifdef HAS_GETGROUPS
-#define Groups_t $groupstype	/* Type for 2nd arg to getgroups() */
+#if defined(HAS_GETGROUPS) || defined(HAS_SETGROUPS)
+#define Groups_t $groupstype	/* Type for 2nd arg to [gs]etgroups() */
 #endif
 
 /* DB_Prefix_t:

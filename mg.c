@@ -20,7 +20,7 @@
 # include <unistd.h>
 #endif
 
-#ifdef HAS_GETGROUPS
+#if defined(HAS_GETGROUPS) || defined(HAS_SETGROUPS)
 #  ifndef NGROUPS
 #    define NGROUPS 32
 #  endif
@@ -307,7 +307,7 @@ MAGIC *mg;
 	    if (rx->subend && (s = rx->endp[0])) {
 		i = rx->subend - s;
 		if (i >= 0)
-		    return 0;
+		    return i;
 	    }
 	}
 	return 0;
@@ -1518,7 +1518,29 @@ MAGIC* mg;
 	tainting |= (uid && (euid != uid || egid != gid));
 	break;
     case ')':
+#ifdef HAS_SETGROUPS
+	{
+	    char *p = SvPV(sv, na);
+	    Groups_t gary[NGROUPS];
+
+	    SET_NUMERIC_STANDARD();
+	    while (isSPACE(*p))
+		++p;
+	    egid = I_V(atof(p));
+	    for (i = 0; i < NGROUPS; ++i) {
+		while (*p && !isSPACE(*p))
+		    ++p;
+		while (isSPACE(*p))
+		    ++p;
+		if (!*p)
+		    break;
+		gary[i] = I_V(atof(p));
+	    }
+	    (void)setgroups(i, gary);
+	}
+#else  /* HAS_SETGROUPS */
 	egid = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
+#endif /* HAS_SETGROUPS */
 	if (delaymagic) {
 	    delaymagic |= DM_EGID;
 	    break;				/* don't do magic till later */

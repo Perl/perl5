@@ -35,6 +35,7 @@ file, and their current addresses (as of March 1997):
     Ulrich Pfeifer      <pfeifer@charly.informatik.uni-dortmund.de>
     Tom Phoenix         <rootbeer@teleport.com>
     Norbert Pueschel    <pueschel@imsdd.meb.uni-bonn.de>
+    Dean Roehrich       <roehrich@cray.com>
     Roderick Schertler  <roderick@argon.org>
     Ilya Zakharevich    <ilya@math.ohio-state.edu>
 
@@ -42,6 +43,118 @@ And the Keepers of the Patch Pumpkin:
 
     Andy Dougherty      <doughera@lafcol.lafayette.edu>
     Chip Salzenberg     <chip@pobox.com>
+
+
+-------------------
+ Version 5.003_97b
+-------------------
+
+Working on the second public beta...
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Make assignment to C<$)> call setgroups()"
+   From:  Chip Salzenberg
+  Files:  Configure config_H config_h.SH mg.c plan9/config.plan9
+          pod/perldelta.pod vms/config.vms win32/config.H
+          win32/config.w32
+
+  Title:  "Grandfather "$$<digit>" in strings"
+   From:  Chip Salzenberg
+  Files:  pod/perldiag.pod toke.c
+
+  Title:  "Disconnect warn and die hooks _after_ object destruction"
+   From:  Chip Salzenberg
+  Files:  perl.c
+
+  Title:  "Forbid recursive substitutions"
+   From:  Chip Salzenberg
+  Files:  cop.h pod/perldelta.pod pod/perldiag.pod pp_ctl.c pp_hot.c
+
+ CORE PORTABILITY
+
+  Title:  "Use SSize_t for values of PerlIO_{read,write}"
+   From:  Chip Salzenberg
+  Files:  perlio.c perlio.h perlsdio.h pp_sys.c
+
+  Title:  "perlwin-97a_4: win32 environ fix"
+   From:  Gurusamy Sarathy
+ Msg-ID:  <199704060431.XAA23400@aatma.engin.umich.edu>
+   Date:  Sat, 05 Apr 1997 23:31:11 -0500
+  Files:  win32/win32.c win32/win32io.c win32/win32io.h win32/win32iop.h
+
+ OTHER CORE CHANGES
+
+  Title:  "length($') isn't"
+   From:  Gurusamy Sarathy
+ Msg-ID:  <199704070730.DAA07310@aatma.engin.umich.edu>
+   Date:  Mon, 07 Apr 1997 03:30:44 -0400
+  Files:  mg.c
+
+  Title:  "Fix obscure regex bug related to leading C<.*>"
+   From:  Chip Salzenberg
+  Files:  toke.c
+
+  Title:  "Add warning for glob failure"
+   From:  Chip Salzenberg
+  Files:  pod/perldelta.pod pod/perldiag.pod pp_hot.c
+
+  Title:  "Fix C<perl -V> in presence of local patches"
+   From:  Chip Salzenberg
+  Files:  perl.c
+
+ BUILD PROCESS
+
+  Title:  "Don't suggest 'Configure -der' in config.sh comments"
+   From:  Chip Salzenberg
+  Files:  Configure
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "CGI->redirect patch"
+   From:  Doug MacEachern
+ Msg-ID:  <199704051527.KAA11280@postman.osf.org>
+   Date:  Sat, 05 Apr 1997 10:27:52 -0500
+  Files:  lib/CGI.pm
+
+  Title:  "Updates to Math::Complex and Math::Trig"
+   From:  Jarkko Hietaniemi
+  Files:  lib/Math/Complex.pm lib/Math/Trig.pm pod/perldelta.pod
+          t/lib/complex.t
+
+  Title:  "Fix FindBin under Win32, and document success"
+   From:  Nick Ing-Simmons and Gurusamy Sarathy
+ Msg-ID:  <199704051504.QAA09507@ni-s.u-net.com>
+   Date:  Sat, 5 Apr 1997 16:04:52 +0100
+  Files:  README.win32 lib/Cwd.pm lib/FindBin.pm
+
+ TESTS
+
+   (no other changes)
+
+ UTILITIES
+
+  Title:  "Patch for 'perldoc -f'"
+   From:  Gisle Aas
+ Msg-ID:  <199704061732.TAA00353@bergen.sn.no>
+   Date:  Sun, 6 Apr 1997 19:32:04 +0200
+  Files:  utils/perldoc.PL
+
+ DOCUMENTATION
+
+  Title:  "Document required module versions"
+   From:  Chip Salzenberg
+  Files:  pod/perldelta.pod
+
+  Title:  "Document sample function perl_eval()"
+   From:  Doug MacEachern
+ Msg-ID:  <199704051524.KAA06090@postman.osf.org>
+   Date:  Sat, 05 Apr 1997 10:24:43 -0500
+  Files:  pod/perlcall.pod pod/perlembed.pod
+
+  Title:  "Make L<perltrap> refer to L<perldelta>"
+   From:  Chip Salzenberg
+  Files:  pod/perltrap.pod
 
 
 -------------------
@@ -265,7 +378,7 @@ planning on making 5.003_98 the second public beta.
 
  TESTS
 
-   (no changes)
+   (no other changes)
 
  UTILITIES
 
@@ -485,7 +598,7 @@ planning on making 5.003_98 the second public beta.
 
  TESTS
 
-   (no changes)
+   (no other changes)
 
  UTILITIES
 
@@ -643,7 +756,7 @@ planning on making 5.003_98 the second public beta.
 
  BUILD PROCESS
 
-   (no changes)
+   (no other changes)
 
  LIBRARY AND EXTENSIONS
 
@@ -1011,7 +1124,7 @@ planning on making 5.003_98 the second public beta.
 
  TESTS
 
-   (no changes)
+   (no other changes)
 
  UTILITIES
 
@@ -3898,7 +4011,7 @@ updates.  We'll get to 5.004 RSN, I promise.  :-)
  CORE PORTABILITY
 
   Title:  "_13: patches for unicos/unicosmk"
-   From:  Dean Roehrich <roehrich@cray.com>
+   From:  Dean Roehrich
  Msg-ID:  <199612202038.OAA22805@poplar.cray.com>
    Date:  Fri, 20 Dec 1996 14:38:50 -0600
   Files:  Configure MANIFEST hints/unicos.sh hints/unicosmk.sh
@@ -7975,7 +8088,7 @@ Index: utils/h2ph.PL
 Index: utils/h2xs.PL
 
     Date: Sat, 21 Sep 1996 16:38:24 -0500
-    From: Dean Roehrich <roehrich@cray.com>
+    From: Dean Roehrich
     Subject: h2xs bug fix
 
     The h2xs that is in perl5.003_05 has a regexp bug which prevents it from

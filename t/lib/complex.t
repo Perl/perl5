@@ -4,7 +4,7 @@
 #
 # Regression tests for the Math::Complex pacakge
 # -- Raphael Manfredi, September 1996
-# -- Jarkko Hietaniemi, March 1997
+# -- Jarkko Hietaniemi, March-April 1997
 
 BEGIN {
     chdir 't' if -d 't';
@@ -47,6 +47,38 @@ while (<DATA>) {
 	} else {
 		test($op, undef, @args);
 	}
+}
+
+# test the divbyzeros
+
+test_dbz(
+	 'i/0',
+#	 'tan(pi/2)',	# may succeed thanks to floating point inaccuracies
+#	 'sec(pi/2)',	# may succeed thanks to floating point inaccuracies
+	 'csc(0)',
+	 'cot(0)',
+	 'atan(i)',
+	 'asec(0)',
+	 'acsc(0)',
+	 'acot(i)',
+#	 'tanh(pi/2)',	# may succeed thanks to floating point inaccuracies
+#	 'sech(pi/2)',	# may succeed thanks to floating point inaccuracies
+	 'csch(0)',
+	 'coth(0)',
+	 'atanh(1)',
+	 'asech(0)',
+	 'acsch(0)',
+	 'acoth(1)'
+	);
+
+sub test_dbz {
+    for my $op (@_) {
+	$test++;
+
+	push(@script, qq(eval '$op';));
+	push(@script, qq(print 'not ' unless (\$@ =~ /Division by zero/);));
+	push(@script, qq(print "ok $test\n";));
+    }
 }
 
 print "1..$test\n";

@@ -241,6 +241,7 @@ struct subst {
 	cx->sb_s		= s,					\
 	cx->sb_m		= m,					\
 	cx->sb_strend		= strend,				\
+	cx->sb_subbase		= Nullch,				\
 	cx->sb_rx		= rx,					\
 	cx->cx_type		= CXt_SUBST
 

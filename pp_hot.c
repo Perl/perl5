@@ -1171,7 +1171,8 @@ do_readline()
 		IoFLAGS(io) |= IOf_START;
 	    }
 	    else if (type == OP_GLOB) {
-		(void)do_close(last_in_gv, FALSE);
+		if (do_close(last_in_gv, FALSE) & ~0xFF)
+		    warn("internal error: glob failed");
 	    }
 	    if (gimme == G_SCALAR) {
 		(void)SvOK_off(TARG);
@@ -1386,6 +1387,13 @@ PP(pp_iter)
     RETPUSHYES;
 }
 
+static void
+leave_subst(p)
+void *p;
+{
+    ((PMOP*)p)->op_private &= ~OPpLVAL_INTRO;
+}
+
 PP(pp_subst)
 {
     dSP; dTARG;
@@ -1410,8 +1418,8 @@ PP(pp_subst)
     int force_on_match = 0;
     I32 oldsave = savestack_ix;
 
-    if (pm->op_pmflags & PMf_CONST)	/* known replacement string? */
-	dstr = POPs;
+    /* known replacement string? */
+    dstr = (pm->op_pmflags & PMf_CONST) ? POPs : Nullsv;
     if (op->op_flags & OPf_STACKED)
 	TARG = POPs;
     else {
@@ -1426,6 +1434,13 @@ PP(pp_subst)
     if (!SvPOKp(TARG) || SvTYPE(TARG) == SVt_PVGV)
 	force_on_match = 1;
     TAINT_NOT;
+
+    if (pm->op_private & OPpLVAL_INTRO)
+	croak("Recursive substitution detected");
+    if (!dstr) {
+	SAVEDESTRUCTOR(leave_subst, pm);
+	pm->op_private |= OPpLVAL_INTRO;
+    }
 
   force_it:
     if (!pm || !s)
@@ -1480,7 +1495,7 @@ PP(pp_subst)
     once = !(rpm->op_pmflags & PMf_GLOBAL);
 
     /* known replacement string? */
-    c = (rpm->op_pmflags & PMf_CONST) ? SvPV(dstr, clen) : Nullch;
+    c = dstr ? SvPV(dstr, clen) : Nullch;
 
     /* can do inplace substitution? */
     if (c && clen <= rx->minlen) {
@@ -1630,13 +1645,12 @@ PP(pp_subst)
 	LEAVE_SCOPE(oldsave);
 	RETURN;
     }
-
-    PUSHs(&sv_no);
-    LEAVE_SCOPE(oldsave);
-    RETURN;
+    goto ret_no;
 
 nope:
     ++BmUSEFUL(pm->op_pmshort);
+
+ret_no:
     PUSHs(&sv_no);
     LEAVE_SCOPE(oldsave);
     RETURN;

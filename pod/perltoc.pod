@@ -833,6 +833,8 @@ file on another machine?
 
 =item Subroutine arguments created only when they're modified
 
+=item C<$)> is writable
+
 =item Fixed parsing of $$<digit>, &$<digit>, etc.
 
 =item No resetting of $. on implicit close
@@ -887,6 +889,8 @@ constant NAME => VALUE, use locale, use ops, use vmsish
 
 =over
 
+=item Required Updates
+
 =item Installation directories
 
 =item Module information summary
@@ -937,18 +941,20 @@ resolve method `%s' overloading `%s' in package `%s', Constant subroutine
 %s redefined, Constant subroutine %s undefined, Copy method did not return
 a reference, Died, Exiting pseudo-block via %s, Illegal character %s
 (carriage return), Illegal switch in PERL5OPT: %s, Integer overflow in hex
-number, Integer overflow in octal number, Name "%s::%s" used only once:
-possible typo, Null picture in formline, Offset outside string, Out of
-memory!, Out of memory during request for %s, Possible attempt to put
-comments in qw() list, Possible attempt to separate words with commas,
-Scalar value @%s{%s} better written as $%s{%s}, Stub found while resolving
-method `%s' overloading `%s' in package `%s', Too late for "B<-T>" option,
-untie attempted while %d inner references still exist, Unrecognized
-character %s, Unsupported function fork, Value of %s can be "0"; test with
-defined(), Variable "%s" may be unavailable, Variable "%s" will not stay
-shared, Warning: something's wrong, Ill-formed logical name |%s| in
-prime_env_iter, Got an error from DosAllocMem, Malformed PERLLIB_PREFIX,
-PERL_SH_DIR too long, Process terminated by SIG%s
+number, Integer overflow in octal number, internal error: glob failed, Name
+"%s::%s" used only once: possible typo, Null picture in formline, Offset
+outside string, Out of memory!, Out of memory during request for %s,
+Possible attempt to put comments in qw() list, Possible attempt to separate
+words with commas, Recursive substitution detected, Scalar value @%s{%s}
+better written as $%s{%s}, Stub found while resolving method `%s'
+overloading `%s' in package `%s', Too late for "B<-T>" option, untie
+attempted while %d inner references still exist, Unrecognized character %s,
+Unsupported function fork, Use of "$$<digit>" to mean "${$}<digit>" is
+deprecated, Value of %s can be "0"; test with defined(), Variable "%s" may
+be unavailable, Variable "%s" will not stay shared, Warning: something's
+wrong, Ill-formed logical name |%s| in prime_env_iter, Got an error from
+DosAllocMem, Malformed PERLLIB_PREFIX, PERL_SH_DIR too long, Process
+terminated by SIG%s
 
 =item BUGS
 
@@ -2428,6 +2434,8 @@ callbacks - hard wired limit, 3. Use a parameter to map to the Perl
 callback
 
 =item Alternate Stack Manipulation
+
+=item Creating and calling an anonymous subroutine in C
 
 =back
 
@@ -4093,7 +4101,7 @@ functions
 
 =item USAGE
 
-=item CAVEATS
+=item ERRORS DUE TO DIVISION BY ZERO
 
 =item BUGS
 
@@ -4109,11 +4117,17 @@ functions
 
 =over
 
-=item SIMPLE ARGUMENTS, COMPLEX RESULTS
+=item ERRORS DUE TO DIVISION BY ZERO
+
+=item SIMPLE (REAL) ARGUMENTS, COMPLEX RESULTS
 
 =back
 
 =item ANGLE CONVERSIONS
+
+=item BUGS
+
+=item AUTHORS
 
 =head2 NDBM_File - Tied access to ndbm files
 
