@@ -2866,7 +2866,7 @@ Perl_yylex(pTHX)
 		    if (*d++ == '-') {
 			bool switches_done = PL_doswitches;
 			do {
-			    if (*d == 'M' || *d == 'm') {
+			    if (*d == 'M' || *d == 'm' || *d == 'C') {
 				char *m = d;
 				while (*d && !isSPACE(*d)) d++;
 				Perl_croak(aTHX_ "Too late for \"-%.*s\" option",
