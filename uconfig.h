@@ -1338,8 +1338,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-/*#define ARCHLIB "/usr/local/lib/perl5/5.7/unknown"		/ **/
-/*#define ARCHLIB_EXP "/usr/local/lib/perl5/5.7/unknown"		/ **/
+/*#define ARCHLIB "/usr/local/lib/perl5/5.9/unknown"		/ **/
+/*#define ARCHLIB_EXP "/usr/local/lib/perl5/5.9/unknown"		/ **/
 
 /* BIN:
  *	This symbol holds the path of the bin directory where the package will
@@ -1399,8 +1399,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "/usr/local/lib/perl5/5.7"		/**/
-#define PRIVLIB_EXP "/usr/local/lib/perl5/5.7"		/**/
+#define PRIVLIB "/usr/local/lib/perl5/5.9"		/**/
+#define PRIVLIB_EXP "/usr/local/lib/perl5/5.9"		/**/
 
 /* SITEARCH:
  *	This symbol contains the name of the private library for this package.
@@ -4265,7 +4265,7 @@
  *	unsigned long, int, etc.  It may be necessary to include
  *	<sys/types.h> to get any typedef'ed information.
  */
-#define Size_t int	 /* length paramater for string functions */
+#define Size_t size_t	 /* length paramater for string functions */
 
 /* Uid_t_f:
  *	This symbol defines the format string used for printing a Uid_t.
