@@ -4,7 +4,7 @@
 
 perlhist - the Perl history records
 
-=begin RCS
+=for RCS
 
 #
 # $Id: perlhist.pod,v 1.57 1999/01/26 17:38:07 jhi Exp $
@@ -311,6 +311,7 @@ the strings?).
           5.005_03-MT4  1999-Jan-26
           5.005_03-MT5  1999-Jan-28
           5.005_03-MT6  1999-Mar-04
+          5.005_03      1999-Mar-28
 
  Sarathy  5.005_50      1998-Jul-26     The 5.006 development track.
           5.005_51      1998-Aug-10
