@@ -1062,6 +1062,7 @@ lib/ExtUtils/t/Manifest.t	See if ExtUtils::Manifest works
 lib/ExtUtils/t/Mkbootstrap.t	See if ExtUtils::Mkbootstrap works
 lib/ExtUtils/t/MM_BeOS.t	See if ExtUtils::MM_BeOS works
 lib/ExtUtils/t/MM_Cygwin.t	See if ExtUtils::MM_Cygwin works
+lib/ExtUtils/t/MM_NW5.t		See if ExtUtils::MM_NW5 works
 lib/ExtUtils/t/MM_OS2.t		See if ExtUtils::MM_OS2 works
 lib/ExtUtils/t/MM_Unix.t	See if ExtUtils::MM_UNIX works
 lib/ExtUtils/t/MM_VMS.t		See if ExtUtils::MM_VMS works
@@ -1101,6 +1102,7 @@ lib/File/Spec/Cygwin.pm		portable operations on Cygwin file names
 lib/File/Spec/Epoc.pm		portable operations on EPOC file names
 lib/File/Spec/Functions.pm	Function interface to File::Spec object methods
 lib/File/Spec/Mac.pm		portable operations on Mac file names
+lib/File/Spec/NW5.pm		portable operations on NetWare5 file names
 lib/File/Spec/OS2.pm		portable operations on OS2 file names
 lib/File/Spec/t/Functions.t	See if File::Spec::Functions works
 lib/File/Spec/t/rel2abs2rel.t	See if File::Spec->rel2abs/abs2rel works
