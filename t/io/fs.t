@@ -2,7 +2,7 @@
 
 # $RCSfile: fs.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:28 $
 
-print "1..22\n";
+print "1..26\n";
 
 $wd = `pwd`;
 chop($wd);
@@ -83,3 +83,27 @@ if (`ls -l perl 2>/dev/null` =~ /^l.*->/) {  # we have symbolic links
 else {
     print "ok 21\nok 22\n";
 }
+
+# truncate (may not be implemented everywhere)
+unlink "Iofs.tmp";
+`echo helloworld > Iofs.tmp`;
+eval { truncate "Iofs.tmp", 5; };
+if ($@ =~ /not implemented/) {
+  print "# truncate not implemented -- skipping tests 23 through 26\n";
+  for (23 .. 26) {
+    print "ok $_\n";
+  }
+}
+else {
+  if (-s "Iofs.tmp" == 5) {print "ok 23\n"} else {print "not ok 23\n"}
+  truncate "Iofs.tmp", 0;
+  if (-z "Iofs.tmp") {print "ok 24\n"} else {print "not ok 24\n"}
+  `echo helloworld > Iofs.tmp`;
+  open(FH, ">Iofs.tmp") or die "Can't create Iofs.tmp";
+  truncate FH, 5;
+  if (-s "Iofs.tmp" == 5) {print "ok 25\n"} else {print "not ok 25\n"}
+  truncate FH, 0;
+  if (-z "Iofs.tmp") {print "ok 26\n"} else {print "not ok 26\n"}
+  close FH;
+}
+unlink "Iofs.tmp";
