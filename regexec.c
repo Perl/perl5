@@ -2196,6 +2196,50 @@ regmatch(regnode *prog)
 		    sayNO;
 		locinput = PL_reginput;
 		REGCP_SET;
+		if (c1 != -1000) {
+		    char *e = locinput + n - ln; /* Should not check after this */
+		    char *old = locinput;
+
+		    if (e >= PL_regeol || (n == REG_INFTY))
+			e = PL_regeol - 1;
+		    while (1) {
+			/* Find place 'next' could work */
+			if (c1 == c2) {
+			    while (locinput <= e && *locinput != c1)
+				locinput++;
+			} else {
+			    while (locinput <= e 
+				   && *locinput != c1
+				   && *locinput != c2)
+				locinput++;			    
+			}
+			if (locinput > e) 
+			    sayNO;
+			/* PL_reginput == old now */
+			if (locinput != old) {
+			    ln = 1;	/* Did some */
+			    if (regrepeat(scan, locinput - old) <
+				 locinput - old)
+				sayNO;
+			}
+			/* PL_reginput == locinput now */
+			if (paren) {
+			    if (ln) {
+				PL_regstartp[paren] = HOPc(locinput, -1);
+				PL_regendp[paren] = locinput;
+			    }
+			    else
+				PL_regendp[paren] = NULL;
+			}
+			if (regmatch(next))
+			    sayYES;
+			PL_reginput = locinput;	/* Could be reset... */
+			REGCP_UNWIND;
+			/* Couldn't or didn't -- move forward. */
+			old = locinput++;
+		    }
+		}
+		else
 		while (n >= ln || (n == REG_INFTY && ln > 0)) { /* ln overflow ? */
 		    /* If it could work, try it. */
 		    if (c1 == -1000 ||
@@ -2323,10 +2367,20 @@ regmatch(regnode *prog)
 	case UNLESSM:
 	    n = 0;
 	    if (scan->flags) {
-		s = HOPMAYBEc(locinput, -scan->flags);
-		if (!s)
-		    goto say_yes;
-		PL_reginput = s;
+		if (UTF) {		/* XXXX This is absolutely
+					   broken, we read before
+					   start of string. */
+		    s = HOPMAYBEc(locinput, -scan->flags);
+		    if (!s)
+			goto say_yes;
+		    PL_reginput = s;
+		}
+		else {
+		    if (locinput < PL_bostr + scan->flags) 
+			goto say_yes;
+		    PL_reginput = locinput - scan->flags;
+		    goto do_ifmatch;
+		}
 	    }
 	    else
 		PL_reginput = locinput;
@@ -2334,10 +2388,20 @@ regmatch(regnode *prog)
 	case IFMATCH:
 	    n = 1;
 	    if (scan->flags) {
-		s = HOPMAYBEc(locinput, -scan->flags);
-		if (!s || s < PL_bostr)
-		    goto say_no;
-		PL_reginput = s;
+		if (UTF) {		/* XXXX This is absolutely
+					   broken, we read before
+					   start of string. */
+		    s = HOPMAYBEc(locinput, -scan->flags);
+		    if (!s || s < PL_bostr)
+			goto say_no;
+		    PL_reginput = s;
+		}
+		else {
+		    if (locinput < PL_bostr + scan->flags) 
+			goto say_no;
+		    PL_reginput = locinput - scan->flags;
+		    goto do_ifmatch;
+		}
 	    }
 	    else
 		PL_reginput = locinput;
