@@ -692,29 +692,21 @@ EOF
 #       define $func($v) $call
 EOF
 	    } else {
-		$call = "((PL_REENTRANT_RETINT = $call))" if $r eq 'I' && $func ne 'random';
 		if ($func =~ /^get/) {
 		    my $rv = $v ? ", $v" : "";
 		    if ($r eq 'I') {
-			$call = qq[($call$test ? $true : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? Perl_reentrant_retry("$func"$rv) : 0))];
-		    } else {
-			$call = qq[($call$test ? $true : ((errno == ERANGE) ? Perl_reentrant_retry("$func"$rv) : 0))];
-                    }
-		} else {
-		    $call = qq[($call$test ? $true : 0)];
-		}
-
-		my $arg = join(", ", map { $seenm{$func}{substr($a,$_,1)}." ".$v[$_] } 0..$seenu{$func}-1);
-		my $ret = $seenr{$func} eq 'V' ? "" : "return ";
-		push @wrap, <<EOF;
+			$call = qq[((PL_REENTRANT_RETINT = $call)$test ? $true : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? Perl_reentrant_retry("$func"$rv) : 0))];
+			my $arg = join(", ", map { $seenm{$func}{substr($a,$_,1)}." ".$v[$_] } 0..$seenu{$func}-1);
+			my $ret = $seenr{$func} eq 'V' ? "" : "return ";
+			push @wrap, <<EOF;
 #       ifdef PERL_CORE
 #           define $func($v) $call
 #       else
 #           if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
 #               define $func($v) ({int PL_REENTRANT_RETINT; $call;})
 #           else
-#               define $func($v) S_my_$func($v)
-                static $seenm{$func}{$seenr{$func}} S_my_$func($arg) {
+#               define $func($v) Perl_reentr_$func($v)
+                static $seenm{$func}{$seenr{$func}} Perl_reentr_$func($arg) {
                     dTHX;
                     int PL_REENTRANT_RETINT;
                     $ret$call;
@@ -722,6 +714,16 @@ EOF
 #           endif
 #       endif
 EOF
+		    } else {
+			push @wrap, <<EOF;
+#       define $func($v) ($call$test ? $true : ((errno == ERANGE) ? Perl_reentrant_retry("$func"$rv) : 0))
+EOF
+                    }
+		} else {
+	        push @wrap, <<EOF;
+#       define $func($v) ($call$test ? $true : 0)
+EOF
+		}
 	    }
 	    push @wrap, <<EOF;
 #   endif
