@@ -185,16 +185,23 @@ start losing precision (their lower digits).
 If you have filesystems that support "large files" (files larger than
 2 gigabytes), you may now also be able to create and access them from Perl.
 
-Note that in addition to requiring a proper file system to do this you
-may also need to adjust your per-process (or your per-system, or per-user-group)
-maximum filesize limits before running Perl scripts that try to handle large
-files, especially if you intend to write such files.
+Note that in addition to requiring a proper file system to do large
+files you may also need to adjust your per-process (or your
+per-system, or per-process-group, or per-user-group) maximum filesize
+limits before running Perl scripts that try to handle large files,
+especially if you intend to write such files.
 
-Adjusting your file system/system limits is outside the scope of Perl.
-For process limits, you may try to increase the limits using your
-shell's limit/ulimit command before running Perl.  The BSD::Resource
-extension (not included with the standard Perl distribution) may also
-be of use, it contains getrlimit/setrlimit calls.
+Finally, in addition to your process/process group maximum filesize
+limits, you may have quota limits on your filesystems that stop you
+(your user id or your user group id) from using large files.
+
+Adjusting your process/user/group/file system/operating system limits
+is outside the scope of Perl core language.  For process limits, you
+may try increasing the limits using your shell's limits/limit/ulimit
+command before running Perl.  The BSD::Resource extension (not
+included with the standard Perl distribution) may also be of use, it
+offers the getrlimit/setrlimit interface that can be used to adjust
+process resource usage limits, including the maximum filesize limit.
  
 (Large file support is related to 64-bit support, for obvious reasons.)
 
