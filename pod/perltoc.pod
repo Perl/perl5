@@ -5864,6 +5864,28 @@ R4 x86, R4 PPC
 
 =back
 
+=over 4
+
+=item Name
+
+=item Description
+
+=item Build
+
+=over 4
+
+=item Tools & SDK
+
+=item Make
+
+=back
+
+=item Acknowledgements
+
+=item Author
+
+=back
+
 =head2 perlcygwin, README.cygwin - Perl for Cygwin
 
 =over 4
@@ -5972,6 +5994,50 @@ Source, Compiled Module Source, Perl Modules/Scripts
 =item Testing Perl on DG/UX
 
 =item Installing the built perl on DG/UX
+
+=back
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 perldos - Perl under DOS, W31, W95.
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Prerequisites for Compiling Perl on DOS
+
+DJGPP, Pthreads
+
+=item Shortcomings of Perl under DOS
+
+=item Building Perl on DOS
+
+=item Testing Perl on DOS
+
+=item Installation of Perl on DOS
+
+=back
+
+=item BUILDING AND INSTALLING MODULES ON DOS
+
+=over 4
+
+=item Building Prerequisites for Perl on DOS
+
+=item Unpacking CPAN Modules on DOS
+
+=item Building Non-XS Modules on DOS
+
+=item Building XS Modules on DOS
 
 =back
 
@@ -6848,6 +6914,48 @@ LIST, waitpid PID,FLAGS
 =item AUTHOR
 
 =item LAST UPDATE
+
+=back
+
+=head2 perlwin32 - Perl under Win32
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Setting Up Perl on Win32
+
+Make, Command Shell, Borland C++, Microsoft Visual C++, Mingw32 with GCC
+
+=item Building
+
+=item Testing Perl on Win32
+
+=item Installation of Perl on Win32
+
+=item Usage Hints for Perl on Win32
+
+Environment Variables, File Globbing, Using perl from the command line,
+Building Extensions, Command-line Wildcard Expansion, Win32 Specific
+Extensions, Running Perl Scripts, Miscellaneous Things
+
+=back
+
+=item BUGS AND CAVEATS
+
+=item AUTHORS
+
+Gary Ng E<lt>71564.1743@CompuServe.COME<gt>, Gurusamy Sarathy
+E<lt>gsar@activestate.comE<gt>, Nick Ing-Simmons
+E<lt>nick@ing-simmons.netE<gt>
+
+=item SEE ALSO
+
+=item HISTORY
 
 =back
 
@@ -8799,7 +8907,7 @@ C<drand01>, C<dynamic_ext>
 =item e
 
 C<eagain>, C<ebcdic>, C<echo>, C<egrep>, C<emacs>, C<eunicefix>,
-C<exe_ext>, C<expr>, C<extensions>
+C<exe_ext>, C<expr>, C<extensions>, C<extras>
 
 =item f
 

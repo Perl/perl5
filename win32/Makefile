@@ -943,6 +943,7 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.apollo   .\perlapollo.pod
 	copy ..\README.beos     .\perlbeos.pod
 	copy ..\README.bs2000   .\perlbs2000.pod
+	copy ..\README.ce	.\perlce.pod
 	copy ..\README.cygwin   .\perlcygwin.pod
 	copy ..\README.dgux     .\perldgux.pod
 	copy ..\README.dos      .\perldos.pod
@@ -1021,7 +1022,7 @@ distclean: clean
 	cd $(PODDIR)
 	-del /f *.html *.bat checkpods \
 	    perlaix.pod perlamiga.pod perlapollo.pod perlbeos.pod \
-	    perlbs2000.pod perlcygwin.pod perldgux.pod \
+	    perlbs2000.pod perlce.pod perlcygwin.pod perldgux.pod \
 	    perldos.pod perlepoc.pod perlhurd.pod \
 	    perlhpux.pod perlmachten.pod \
 	    perlmacos.pod perlmint.pod perlmpeix.pod perlnetware.pod \

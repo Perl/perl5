@@ -65,6 +65,7 @@ if (-d "pod") {
     perlamiga          
     perlbeos
     perlbs2000
+    perlce
     perlcygwin          
     perldgux             
     perldos             

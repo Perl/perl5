@@ -114,6 +114,7 @@ For ease of access, the Perl manual has been split up into several sections:
     perlapollo		Perl notes for Apollo DomainOS
     perlbeos		Perl notes for BeOS
     perlbs2000		Perl notes for POSIX-BC BS2000
+    perlce		Perl notes for WinCE
     perlcygwin		Perl notes for Cygwin
     perldgux		Perl notes for DG/UX
     perldos		Perl notes for DOS
