@@ -5,7 +5,7 @@ no strict 'refs';
 
 # On one line so MakeMaker will see it.
 require Exporter;  our $VERSION = $Exporter::VERSION;
-
+$Carp::Internal{"Exporter::Heavy"} = 1;
 our $Verbose;
 
 =head1 NAME
