@@ -565,9 +565,9 @@ sub chmod {
 sub fstat {
     usage "fstat(fd)" if @_ != 1;
     local *TMP;
-    open(TMP, "<&$_[0]");		# Gross.
+    CORE::open(TMP, "<&$_[0]");		# Gross.
     my @l = CORE::stat(TMP);
-    close(TMP);
+    CORE::close(TMP);
     @l;
 }
 
