@@ -408,6 +408,8 @@ Perl_regdump
 Perl_pregexec
 Perl_pregfree
 Perl_pregcomp
+Perl_re_intuit_start
+Perl_re_intuit_string
 Perl_regexec_flags
 Perl_regnext
 Perl_regprop

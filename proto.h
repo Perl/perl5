@@ -452,6 +452,8 @@ VIRTUAL void	Perl_regdump(pTHX_ regexp* r);
 VIRTUAL I32	Perl_pregexec(pTHX_ regexp* prog, char* stringarg, char* strend, char* strbeg, I32 minend, SV* screamer, U32 nosave);
 VIRTUAL void	Perl_pregfree(pTHX_ struct regexp* r);
 VIRTUAL regexp*	Perl_pregcomp(pTHX_ char* exp, char* xend, PMOP* pm);
+VIRTUAL char*	Perl_re_intuit_start(pTHX_ regexp* prog, SV* sv, char* strpos, char* strend, U32 flags, struct re_scream_pos_data_s *data);
+VIRTUAL SV*	Perl_re_intuit_string(pTHX_ regexp* prog);
 VIRTUAL I32	Perl_regexec_flags(pTHX_ regexp* prog, char* stringarg, char* strend, char* strbeg, I32 minend, SV* screamer, void* data, U32 flags);
 VIRTUAL regnode*	Perl_regnext(pTHX_ regnode* p);
 VIRTUAL void	Perl_regprop(pTHX_ SV* sv, regnode* o);

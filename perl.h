@@ -145,6 +145,9 @@ class CPerlObj;
 #define CALLRUNOPS  CALL_FPTR(PL_runops)
 #define CALLREGCOMP CALL_FPTR(PL_regcompp)
 #define CALLREGEXEC CALL_FPTR(PL_regexecp)
+#define CALLREG_INTUIT_START CALL_FPTR(PL_regint_start)
+#define CALLREG_INTUIT_STRING CALL_FPTR(PL_regint_string)
+#define CALLREGFREE CALL_FPTR(PL_regfree)
 #define CALLPROTECT CALL_FPTR(PL_protect)
 
 #define NOOP (void)0
@@ -2385,6 +2388,12 @@ typedef regexp*(CPERLscope(*regcomp_t)) (pTHX_ char* exp, char* xend, PMOP* pm);
 typedef I32 (CPERLscope(*regexec_t)) (pTHX_ regexp* prog, char* stringarg,
 				      char* strend, char* strbeg, I32 minend,
 				      SV* screamer, void* data, U32 flags);
+typedef char* (CPERLscope(*re_intuit_start_t)) (pTHX_ regexp *prog, SV *sv,
+						char *strpos, char *strend,
+						U32 flags,
+						struct re_scream_pos_data_s *d);
+typedef SV*	(CPERLscope(*re_intuit_string_t)) (pTHX_ regexp *prog);
+typedef void	(CPERLscope(*regfree_t)) (pTHX_ struct regexp* r);
 
 
 /* Set up PERLVAR macros for populating structs */

@@ -846,10 +846,8 @@ PP(pp_match)
     register char *s;
     char *strend;
     I32 global;
-    I32 r_flags = 0;
-    char *truebase;			/* Start of string, may be
-					   relocated if REx engine
-					   copies the string.  */
+    I32 r_flags = REXEC_CHECKED;
+    char *truebase;			/* Start of string  */
     register REGEXP *rx = pm->op_pmregexp;
     bool rxtainted;
     I32 gimme = GIMME;
@@ -909,9 +907,7 @@ PP(pp_match)
     if ((gimme != G_ARRAY && !global && rx->nparens)
 	    || SvTEMP(TARG) || PL_sawampersand)
 	r_flags |= REXEC_COPY_STR;
-    if (SvSCREAM(TARG) && rx->check_substr
-	&& SvTYPE(rx->check_substr) == SVt_PVBM
-	&& SvVALID(rx->check_substr)) 
+    if (SvSCREAM(TARG)) 
 	r_flags |= REXEC_SCREAM;
 
     if (pm->op_pmflags & (PMf_MULTILINE|PMf_SINGLELINE)) {
@@ -927,76 +923,17 @@ play_it_again:
 	if (update_minmatch++)
 	    minmatch = had_zerolen;
     }
-    if (rx->check_substr) {
-	if (!(rx->reganch & ROPT_NOSCAN)) { /* Floating checkstring. */
-	    SV *c = rx->check_substr;
+    if (rx->reganch & RE_USE_INTUIT) {
+	s = CALLREG_INTUIT_START(aTHX_ rx, TARG, s, strend, r_flags, NULL);
 
-	    if (r_flags & REXEC_SCREAM) {
-		I32 p = -1;
-		char *b;
-
-		if (PL_screamfirst[BmRARE(c)] < 0
-		    && !( BmRARE(c) == '\n' && (BmPREVIOUS(c) == SvCUR(c) - 1)
-			  && SvTAIL(c) ))
-		    goto nope;
-
-		b = (char*)HOP((U8*)s, rx->check_offset_min);
-		if (!(s = screaminstr(TARG, c, b - s, 0, &p, 0)))
-		    goto nope;
-
-		if ((rx->reganch & ROPT_CHECK_ALL)
-			 && !PL_sawampersand && !SvTAIL(c))
-		    goto yup;
-	    }
-	    else if (!(s = fbm_instr((unsigned char*)HOP((U8*)s, rx->check_offset_min),
-				     (unsigned char*)strend, c, 
-				     PL_multiline ? FBMrf_MULTILINE : 0)))
-		goto nope;
-	    else if ((rx->reganch & ROPT_CHECK_ALL) && !PL_sawampersand)
-		goto yup;
-	    if (s && rx->check_offset_max < s - t) {
-		++BmUSEFUL(c);
-		s = (char*)HOP((U8*)s, -rx->check_offset_max);
-	    }
-	    else
-		s = t;
-	}
-	/* Now checkstring is fixed, i.e. at fixed offset from the
-	   beginning of match, and the match is anchored at s. */
-	else if (!PL_multiline) {	/* Anchored near beginning of string. */
-	    I32 slen;
-	    char *b = (char*)HOP((U8*)s, rx->check_offset_min);
-
-	    if (SvTAIL(rx->check_substr)) {
-		slen = SvCUR(rx->check_substr);	/* >= 1 */
-
-		if ( strend - b > slen || strend - b < slen - 1 )
-		    goto nope;
-		if ( strend - b == slen && strend[-1] != '\n')
-		    goto nope;
-		/* Now should match b[0..slen-2] */
-		slen--;
-		if (slen && (*SvPVX(rx->check_substr) != *b
-			     || (slen > 1
-				 && memNE(SvPVX(rx->check_substr), b, slen))))
-		    goto nope;
-		if ((rx->reganch & ROPT_CHECK_ALL) && !PL_sawampersand)
-		    goto yup;
-	    } else {			/* Assume len > 0 */
-		if (*SvPVX(rx->check_substr) != *b
-		    || ((slen = SvCUR(rx->check_substr)) > 1
-			&& memNE(SvPVX(rx->check_substr), b, slen)))
-		    goto nope;
-		if ((rx->reganch & ROPT_CHECK_ALL) && !PL_sawampersand)
-		    goto yup;
-	    }
-	}
-	if (!(rx->reganch & ROPT_NAUGHTY) && --BmUSEFUL(rx->check_substr) < 0
-	    && rx->check_substr == rx->float_substr) {
-	    SvREFCNT_dec(rx->check_substr);
-	    rx->check_substr = Nullsv;	/* opt is being useless */
-	    rx->float_substr = Nullsv;
-	}
+	if (!s)
+	    goto nope;
+	if ( (rx->reganch & ROPT_CHECK_ALL)
+	     && !PL_sawampersand 
+	     && ((rx->reganch & ROPT_NOSCAN)
+		 || !((rx->reganch & RE_INTUIT_TAIL)
+		      && (r_flags & REXEC_SCREAM))))
+	    goto yup;
     }
     if (CALLREGEXEC(aTHX_ rx, s, strend, truebase, minmatch, TARG, NULL, r_flags))
     {
@@ -1066,11 +1003,10 @@ play_it_again:
 	RETPUSHYES;
     }
 
-yup:					/* Confirmed by check_substr */
+yup:					/* Confirmed by INTUIT */
     if (rxtainted)
 	RX_MATCH_TAINTED_on(rx);
     TAINT_IF(RX_MATCH_TAINTED(rx));
-    ++BmUSEFUL(rx->check_substr);
     PL_curpm = pm;
     if (pm->op_pmflags & PMf_ONCE)
 	pm->op_pmdynflags |= PMdf_USED;
@@ -1081,7 +1017,7 @@ yup:					/* Confirmed by check_substr */
     if (global) {
 	rx->subbeg = truebase;
 	rx->startp[0] = s - truebase;
-	rx->endp[0] = s - truebase + SvCUR(rx->check_substr);
+	rx->endp[0] = s - truebase + rx->minlen;
 	rx->sublen = strend - truebase;
 	goto gotcha;
     } 
@@ -1092,19 +1028,16 @@ yup:					/* Confirmed by check_substr */
 	rx->sublen = strend - t;
 	RX_MATCH_COPIED_on(rx);
 	off = rx->startp[0] = s - t;
-	rx->endp[0] = off + SvCUR(rx->check_substr);
+	rx->endp[0] = off + rx->minlen;
     }
     else {			/* startp/endp are used by @- @+. */
 	rx->startp[0] = s - truebase;
-	rx->endp[0] = s - truebase + SvCUR(rx->check_substr);
+	rx->endp[0] = s - truebase + rx->minlen;
     }
     LEAVE_SCOPE(oldsave);
     RETPUSHYES;
 
 nope:
-    if (rx->check_substr)
-	++BmUSEFUL(rx->check_substr);
-
 ret_no:
     if (global && !(pm->op_pmflags & PMf_CONTINUE)) {
 	if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG)) {
@@ -1717,56 +1650,26 @@ PP(pp_subst)
     }
     r_flags = (rx->nparens || SvTEMP(TARG) || PL_sawampersand)
 		? REXEC_COPY_STR : 0;
-    if (SvSCREAM(TARG) && rx->check_substr
-		  && SvTYPE(rx->check_substr) == SVt_PVBM
-		  && SvVALID(rx->check_substr))
+    if (SvSCREAM(TARG))
 	r_flags |= REXEC_SCREAM;
     if (pm->op_pmflags & (PMf_MULTILINE|PMf_SINGLELINE)) {
 	SAVEINT(PL_multiline);
 	PL_multiline = pm->op_pmflags & PMf_MULTILINE;
     }
     orig = m = s;
-    if (rx->check_substr) {
-	if (!(rx->reganch & ROPT_NOSCAN)) { /* It floats. */
-	    if (r_flags & REXEC_SCREAM) {
-		I32 p = -1;
-		char *b;
-		
-		if (PL_screamfirst[BmRARE(rx->check_substr)] < 0)
-		    goto nope;
+    if (rx->reganch & RE_USE_INTUIT) {
+	s = CALLREG_INTUIT_START(aTHX_ rx, TARG, s, strend, r_flags, NULL);
 
-		b = (char*)HOP((U8*)s, rx->check_offset_min);
-		if (!(s = screaminstr(TARG, rx->check_substr, b - s, 0, &p, 0)))
-		    goto nope;
-	    }
-	    else if (!(s = fbm_instr((unsigned char*)HOP((U8*)s, rx->check_offset_min), 
-				     (unsigned char*)strend,
-				     rx->check_substr, 
-				     PL_multiline ? FBMrf_MULTILINE : 0)))
-		goto nope;
-	    if (s && rx->check_offset_max < s - m) {
-		++BmUSEFUL(rx->check_substr);
-		s = (char*)HOP((U8*)s, -rx->check_offset_max);
-	    }
-	    else
-		s = m;
-	}
-	/* Now checkstring is fixed, i.e. at fixed offset from the
-	   beginning of match, and the match is anchored at s. */
-	else if (!PL_multiline) { /* Anchored at beginning of string. */
-	    I32 slen;
-	    char *b = (char*)HOP((U8*)s, rx->check_offset_min);
-	    if (*SvPVX(rx->check_substr) != *b
-		|| ((slen = SvCUR(rx->check_substr)) > 1
-		    && memNE(SvPVX(rx->check_substr), b, slen)))
-		goto nope;
-	}
-	if (!(rx->reganch & ROPT_NAUGHTY) && --BmUSEFUL(rx->check_substr) < 0
-	    && rx->check_substr == rx->float_substr) {
-	    SvREFCNT_dec(rx->check_substr);
-	    rx->check_substr = Nullsv;	/* opt is being useless */
-	    rx->float_substr = Nullsv;
-	}
+	if (!s)
+	    goto nope;
+	/* How to do it in subst? */
+/*	if ( (rx->reganch & ROPT_CHECK_ALL)
+	     && !PL_sawampersand 
+	     && ((rx->reganch & ROPT_NOSCAN)
+		 || !((rx->reganch & RE_INTUIT_TAIL)
+		      && (r_flags & REXEC_SCREAM))))
+	    goto yup;
+*/
     }
 
     /* only replace once? */
@@ -1778,7 +1681,9 @@ PP(pp_subst)
     /* can do inplace substitution? */
     if (c && clen <= rx->minlen && (once || !(r_flags & REXEC_COPY_STR))
 	&& !(rx->reganch & ROPT_LOOKBEHIND_SEEN)) {
-	if (!CALLREGEXEC(aTHX_ rx, s, strend, orig, 0, TARG, NULL, r_flags)) {
+	if (!CALLREGEXEC(aTHX_ rx, s, strend, orig, 0, TARG, NULL,
+			 r_flags | REXEC_CHECKED))
+	{
 	    SPAGAIN;
 	    PUSHs(&PL_sv_no);
 	    LEAVE_SCOPE(oldsave);
@@ -1851,7 +1756,9 @@ PP(pp_subst)
 		}
 		s = rx->endp[0] + orig;
 	    } while (CALLREGEXEC(aTHX_ rx, s, strend, orig, s == m,
-				 Nullsv, NULL, REXEC_NOT_FIRST)); /* don't match same null twice */
+				 TARG, NULL,
+				 /* don't match same null twice */
+				 REXEC_NOT_FIRST|REXEC_IGNOREPOS));
 	    if (s != d) {
 		i = strend - s;
 		SvCUR_set(TARG, d - SvPVX(TARG) + i);
@@ -1873,7 +1780,9 @@ PP(pp_subst)
 	RETURN;
     }
 
-    if (CALLREGEXEC(aTHX_ rx, s, strend, orig, 0, TARG, NULL, r_flags)) {
+    if (CALLREGEXEC(aTHX_ rx, s, strend, orig, 0, TARG, NULL,
+		    r_flags | REXEC_CHECKED))
+    {
 	if (force_on_match) {
 	    force_on_match = 0;
 	    s = SvPV_force(TARG, len);
@@ -1933,8 +1842,6 @@ PP(pp_subst)
     goto ret_no;
 
 nope:
-    ++BmUSEFUL(rx->check_substr);
-
 ret_no:         
     SPAGAIN;
     PUSHs(&PL_sv_no);

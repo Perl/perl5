@@ -15,6 +15,7 @@
 #include "EXTERN.h"
 #define PERL_IN_DUMP_C
 #include "perl.h"
+#include "regcomp.h"
 
 #ifndef DBL_DIG
 #define DBL_DIG	15   /* A guess that works lots of places */

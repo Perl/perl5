@@ -237,3 +237,34 @@ EXTCONST char PL_simple[] = {
 #endif
 
 END_EXTERN_C
+
+typedef struct re_scream_pos_data_s
+{
+    char **scream_olds;		/* match pos */
+    I32 *scream_pos;		/* Internal iterator of scream. */
+} re_scream_pos_data;
+
+struct reg_data {
+    U32 count;
+    U8 *what;
+    void* data[1];
+};
+
+struct reg_substr_datum {
+    I32 min_offset;
+    I32 max_offset;
+    SV *substr;
+};
+
+struct reg_substr_data {
+    struct reg_substr_datum data[3];	/* Actual array */
+};
+
+#define anchored_substr substrs->data[0].substr
+#define anchored_offset substrs->data[0].min_offset
+#define float_substr substrs->data[1].substr
+#define float_min_offset substrs->data[1].min_offset
+#define float_max_offset substrs->data[1].max_offset
+#define check_substr substrs->data[2].substr
+#define check_offset_min substrs->data[2].min_offset
+#define check_offset_max substrs->data[2].max_offset

@@ -25,7 +25,7 @@
 #    define PERL_IN_XSUB_RE
 #  endif
 /* need access to debugger hooks */
-#  ifndef DEBUGGING
+#  if defined(PERL_EXT_RE_DEBUG) && !defined(DEBUGGING)
 #    define DEBUGGING
 #  endif
 #endif
@@ -35,8 +35,9 @@
 #  define Perl_pregcomp my_regcomp
 #  define Perl_regdump my_regdump
 #  define Perl_regprop my_regprop
-/* *These* symbols are masked to allow static link. */
 #  define Perl_pregfree my_regfree
+#  define Perl_re_intuit_string my_re_intuit_string
+/* *These* symbols are masked to allow static link. */
 #  define Perl_regnext my_regnext
 #  define Perl_save_re_context my_save_re_context
 #  define Perl_reginitcolors my_reginitcolors 
@@ -898,7 +899,11 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 		 PL_regkind[(U8)OP(first)] == NBOUND)
 	    r->regstclass = first;
 	else if (PL_regkind[(U8)OP(first)] == BOL) {
-	    r->reganch |= (OP(first) == MBOL ? ROPT_ANCH_MBOL: ROPT_ANCH_BOL);
+	    r->reganch |= (OP(first) == MBOL
+			   ? ROPT_ANCH_MBOL
+			   : (OP(first) == SBOL
+			      ? ROPT_ANCH_SBOL
+			      : ROPT_ANCH_BOL));
 	    first = NEXTOPER(first);
 	    goto again;
 	}
@@ -912,12 +917,21 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	    !(r->reganch & ROPT_ANCH) )
 	{
 	    /* turn .* into ^.* with an implied $*=1 */
-	    r->reganch |= ROPT_ANCH_BOL | ROPT_IMPLICIT;
+	    int type = OP(NEXTOPER(first));
+
+	    if (type == REG_ANY || type == ANYUTF8)
+		type = ROPT_ANCH_MBOL;
+	    else
+		type = ROPT_ANCH_SBOL;
+
+	    r->reganch |= type | ROPT_IMPLICIT;
 	    first = NEXTOPER(first);
 	    goto again;
 	}
-	if (sawplus && (!sawopen || !PL_regsawback))
-	    r->reganch |= ROPT_SKIP;	/* x+ must match 1st of run */
+	if (sawplus && (!sawopen || !PL_regsawback) 
+	    && !(PL_regseen & REG_SEEN_EVAL)) /* May examine pos and $& */
+	    /* x+ must match at the 1st pos of run of x's */
+	    r->reganch |= ROPT_SKIP;
 
 	/* Scan is after the zeroth branch, first is atomic matcher. */
 	DEBUG_r(PerlIO_printf(Perl_debug_log, "first at %d\n", 
@@ -1009,6 +1023,11 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	    r->check_substr = r->float_substr;
 	    r->check_offset_min = data.offset_float_min;
 	    r->check_offset_max = data.offset_float_max;
+	}
+	if (r->check_substr) {
+	    r->reganch |= RE_USE_INTUIT;
+	    if (SvTAIL(r->check_substr))
+		r->reganch |= RE_INTUIT_TAIL;
 	}
     }
     else {
@@ -2846,6 +2865,8 @@ Perl_regdump(pTHX_ regexp *r)
 	    PerlIO_printf(Perl_debug_log, "(BOL)");
 	if (r->reganch & ROPT_ANCH_MBOL)
 	    PerlIO_printf(Perl_debug_log, "(MBOL)");
+	if (r->reganch & ROPT_ANCH_SBOL)
+	    PerlIO_printf(Perl_debug_log, "(SBOL)");
 	if (r->reganch & ROPT_ANCH_GPOS)
 	    PerlIO_printf(Perl_debug_log, "(GPOS)");
 	PerlIO_putc(Perl_debug_log, ' ');
@@ -2896,10 +2917,37 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 #endif	/* DEBUGGING */
 }
 
+SV *
+Perl_re_intuit_string(pTHX_ regexp *prog)
+{				/* Assume that RE_INTUIT is set */
+    DEBUG_r(
+	{   STRLEN n_a;
+	    char *s = SvPV(prog->check_substr,n_a);
+
+	    if (!PL_colorset) reginitcolors();
+	    PerlIO_printf(Perl_debug_log,
+		      "%sUsing REx substr:%s `%s%.60s%s%s'\n",
+		      PL_colors[4],PL_colors[5],PL_colors[0],
+		      s,
+		      PL_colors[1],
+		      (strlen(s) > 60 ? "..." : ""));
+	} );
+
+    return prog->check_substr;
+}
+
 void
 Perl_pregfree(pTHX_ struct regexp *r)
 {
     dTHR;
+    DEBUG_r(PerlIO_printf(Perl_debug_log,
+		      "%sFreeing REx:%s `%s%.60s%s%s'\n",
+		      PL_colors[4],PL_colors[5],PL_colors[0],
+		      r->precomp,
+		      PL_colors[1],
+		      (strlen(r->precomp) > 60 ? "..." : "")));
+
+
     if (!r || (--r->refcnt > 0))
 	return;
     if (r->precomp)

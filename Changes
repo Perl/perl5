@@ -79,6 +79,99 @@ Version 5.005_58        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  3604] By: gsar                                  on 1999/07/06  07:08:30
+        Log: From: paul.marquess@bt.com
+             Date: Tue, 8 Jun 1999 22:37:58 +0100 
+             Message-ID: <5104D4DBC598D211B5FE0000F8FE7EB29C6C3C@mbtlipnt02.btlabs.bt.co.uk>
+             Subject: [PATCH 5.005_57] DB_File 1.67
+     Branch: perl
+	   ! ext/DB_File/Changes ext/DB_File/DB_File.pm
+           ! ext/DB_File/DB_File.xs ext/DB_File/typemap
+____________________________________________________________________________
+[  3603] By: gsar                                  on 1999/07/06  07:04:50
+        Log: From: paul.marquess@bt.com
+             Date: Tue, 8 Jun 1999 22:34:01 +0100 
+             Message-ID: <5104D4DBC598D211B5FE0000F8FE7EB29C6C3B@mbtlipnt02.btlabs.bt.co.uk>
+             Subject: [PATCH 5.005_57] DBM Filters
+     Branch: perl
+	   ! ext/GDBM_File/GDBM_File.pm ext/GDBM_File/GDBM_File.xs
+	   ! ext/NDBM_File/NDBM_File.pm ext/NDBM_File/NDBM_File.xs
+	   ! ext/ODBM_File/ODBM_File.pm ext/ODBM_File/ODBM_File.xs
+           ! ext/SDBM_File/SDBM_File.pm ext/SDBM_File/SDBM_File.xs
+____________________________________________________________________________
+[  3602] By: gsar                                  on 1999/07/06  07:00:01
+        Log: slightly tweaked version of suggested patch
+             From: Dan Sugalski <sugalskd@ous.edu>
+             Date: Tue, 08 Jun 1999 14:09:38 -0700
+             Message-Id: <3.0.6.32.19990608140938.030f12e0@ous.edu>
+             Subject: [PATCH 5.005_57]Use NV instead of double in the core
+     Branch: perl
+	   ! av.h bytecode.pl cv.h doio.c dump.c embed.pl
+	   ! ext/ByteLoader/bytecode.h ext/ByteLoader/byterun.c hv.h
+	   ! intrpvar.h mg.c op.c perl.h pp.c pp.h pp_ctl.c pp_sys.c
+           ! proto.h sv.c sv.h toke.c universal.c util.c
+____________________________________________________________________________
+[  3601] By: gsar                                  on 1999/07/06  06:52:57
+        Log: integrate cfgperl contents into mainline
+     Branch: perl
+	  +> README.epoc epoc/config.h epoc/epoc.c epoc/epocish.h
+          +> epoc/perl.mmp epoc/perl.pkg
+          !> (integrate 30 files)
+____________________________________________________________________________
+[  3598] By: jhi                                   on 1999/07/05  20:02:55
+        Log: Integrate with mainperl.
+     Branch: cfgperl
+          +> lib/CGI/Pretty.pm
+	  !> Changes ext/B/B/Bblock.pm ext/B/B/C.pm ext/B/B/CC.pm
+	  !> ext/B/B/Stackobj.pm ext/GDBM_File/GDBM_File.xs mg.c op.c
+	  !> opcode.h opcode.pl pp_sys.c t/lib/io_udp.t thread.h toke.c
+	  !> vms/descrip_mms.template vms/subconfigure.com vms/vms.c
+          !> vms/vmsish.h
+____________________________________________________________________________
+[  3597] By: jhi                                   on 1999/07/05  19:59:48
+        Log: Hack SOCKS support some more plus a patch from Andy Dougherty
+             that addresses the notorious "Additional libraries" question.
+     Branch: cfgperl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH doio.c ext/Socket/Socket.xs hints/aix.sh perl.c
+           ! pp_sys.c
+____________________________________________________________________________
+[  3596] By: gsar                                  on 1999/07/05  18:30:51
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 8 Jun 1999 04:47:58 -0400 (EDT)
+             Message-Id: <199906080847.EAA03810@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.00557] Long-standing UDP sockets bug on OS/2
+     Branch: perl
+           ! pp_sys.c t/lib/io_udp.t
+____________________________________________________________________________
+[  3595] By: gsar                                  on 1999/07/05  18:29:08
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 8 Jun 1999 04:44:58 -0400 (EDT)
+             Message-Id: <199906080844.EAA03784@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.00557] Setting $^E wipes out $!
+     Branch: perl
+           ! mg.c
+____________________________________________________________________________
+[  3594] By: gsar                                  on 1999/07/05  18:24:53
+        Log: hand-apply whitespace mutiliated patch
+             From: Dan Sugalski <sugalskd@osshe.edu>
+             Date: Mon, 07 Jun 1999 14:46:42 -0700
+             Message-Id: <3.0.6.32.19990607144642.03079100@ous.edu>
+             Subject: [PATCH 5.005_57]Updated VMS patch
+     Branch: perl
+	   ! thread.h vms/descrip_mms.template vms/subconfigure.com
+           ! vms/vms.c vms/vmsish.h
+____________________________________________________________________________
+[  3593] By: gsar                                  on 1999/07/05  17:53:04
+        Log: applied parts not duplicated by previous patches
+             From: "Vishal Bhatia" <vishalb@my-deja.com>
+             Date: Sat, 05 Jun 1999 08:42:17 -0700
+             Message-ID: <JAMCAJKJEJDPAAAA@my-deja.com>
+             Subject: Fwd: [PATCH 5.005_57] consolidated compiler changes
+     Branch: perl
+	   ! Changes ext/B/B/Bblock.pm ext/B/B/C.pm ext/B/B/CC.pm
+           ! ext/B/B/Stackobj.pm
+____________________________________________________________________________
 [  3592] By: jhi                                   on 1999/07/05  17:17:22
         Log: AIX threaded build, plus few more on the side.
      Branch: cfgperl

@@ -4998,17 +4998,19 @@ PP(pp_split)
 	    s = m;
 	}
     }
-    else if (rx->check_substr && !rx->nparens
+    else if ((rx->reganch & RE_USE_INTUIT) && !rx->nparens
 	     && (rx->reganch & ROPT_CHECK_ALL)
 	     && !(rx->reganch & ROPT_ANCH)) {
-	int tail = SvTAIL(rx->check_substr) != 0;
+	int tail = (rx->reganch & RE_INTUIT_TAIL);
+	SV *csv = CALLREG_INTUIT_STRING(aTHX_ rx);
+	char c;
 
-	i = SvCUR(rx->check_substr);
+	i = rx->minlen;
 	if (i == 1 && !tail) {
-	    i = *SvPVX(rx->check_substr);
+	    c = *SvPV(csv,i);
 	    while (--limit) {
 		/*SUPPRESS 530*/
-		for (m = s; m < strend && *m != i; m++) ;
+		for (m = s; m < strend && *m != c; m++) ;
 		if (m >= strend)
 		    break;
 		dstr = NEWSV(30, m-s);
@@ -5022,8 +5024,8 @@ PP(pp_split)
 	else {
 #ifndef lint
 	    while (s < strend && --limit &&
-	      (m=fbm_instr((unsigned char*)s, (unsigned char*)strend,
-		    rx->check_substr, PL_multiline ? FBMrf_MULTILINE : 0)) )
+	      (m = fbm_instr((unsigned char*)s, (unsigned char*)strend,
+			     csv, PL_multiline ? FBMrf_MULTILINE : 0)) )
 #endif
 	    {
 		dstr = NEWSV(31, m-s);
@@ -5031,14 +5033,18 @@ PP(pp_split)
 		if (make_mortal)
 		    sv_2mortal(dstr);
 		XPUSHs(dstr);
-		s = m + i - tail;	/* Fake \n at the end */
+		s = m + i;		/* Fake \n at the end */
 	    }
 	}
     }
     else {
 	maxiters += (strend - s) * rx->nparens;
-	while (s < strend && --limit &&
-	       CALLREGEXEC(aTHX_ rx, s, strend, orig, 1, sv, NULL, 0))
+	while (s < strend && --limit
+/*	       && (!rx->check_substr 
+		   || ((s = CALLREG_INTUIT_START(aTHX_ rx, sv, s, strend,
+						 0, NULL))))
+*/	       && CALLREGEXEC(aTHX_ rx, s, strend, orig,
+			      1 /* minend */, sv, NULL, 0))
 	{
 	    TAINT_IF(RX_MATCH_TAINTED(rx));
 	    if (RX_MATCH_COPIED(rx) && rx->subbeg != orig) {

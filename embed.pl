@@ -1210,6 +1210,10 @@ p	|I32	|pregexec	|regexp* prog|char* stringarg \
 				|SV* screamer|U32 nosave
 p	|void	|pregfree	|struct regexp* r
 p	|regexp*|pregcomp	|char* exp|char* xend|PMOP* pm
+p	|char*	|re_intuit_start|regexp* prog|SV* sv|char* strpos \
+				|char* strend|U32 flags \
+				|struct re_scream_pos_data_s *data
+p	|SV*	|re_intuit_string|regexp* prog
 p	|I32	|regexec_flags	|regexp* prog|char* stringarg \
 				|char* strend|char* strbeg|I32 minend \
 				|SV* screamer|void* data|U32 flags
