@@ -701,7 +701,6 @@ ext/threads/t/end.t		Test end functions
 ext/threads/t/join.t		Testing the join function
 ext/threads/t/libc.t		testing libc functions for threadsafety
 ext/threads/t/list.t		Test threads->list()
-ext/threads/t/problems.t	Test various memory problems
 ext/threads/t/stress_cv.t	Test with multiple threads, coderef cv argument.
 ext/threads/t/stress_re.t	Test with multiple threads, string cv argument and regexes.
 ext/threads/t/stress_string.t	Test with multiple threads, string cv argument.
