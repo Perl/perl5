@@ -1354,8 +1354,9 @@ confusion with the Perl POSIX module.
 
 =item *
 
-The documentation for the WinCE platform is called "CE", to avoid
-confusion with the perlwin32 documentation on 8.3-restricted filesystems.
+The documentation for the WinCE platform is called perlce (README.ce
+in the source code kit), to avoid confusion with the perlwin32
+documentation on 8.3-restricted filesystems.
 
 =back
 
