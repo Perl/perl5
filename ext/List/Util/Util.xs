@@ -49,7 +49,7 @@ my_cxinc(pTHX)
 #ifdef SVf_IVisUV
 #  define slu_sv_value(sv) (SvIOK(sv)) ? (SvIOK_UV(sv)) ? (NV)(SvUVX(sv)) : (NV)(SvIVX(sv)) : (SvNV(sv))
 #else
-#  define slu_sv_value(sv) (SvIOK(sv)) ? (NV)(SvIVX(sv)) : SvNV(sv)
+#  define slu_sv_value(sv) (SvIOK(sv)) ? (NV)(SvIVX(sv)) : (SvNV(sv))
 #endif
 
 #ifndef Drand01

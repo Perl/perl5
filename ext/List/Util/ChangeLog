@@ -1,3 +1,11 @@
+Change 827 on 2003/09/25 by <gbarr@pobox.com> (Graham Barr)
+
+	Release 1.13
+
+Change 826 on 2003/09/25 by <gbarr@pobox.com> (Graham Barr)
+
+	Fix NV casting issue with some compilers
+
 Change 825 on 2003/08/14 by <gbarr@pobox.com> (Graham Barr)
 
 	Release 1.12
