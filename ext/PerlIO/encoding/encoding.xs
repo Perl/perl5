@@ -49,6 +49,7 @@ typedef struct {
 } PerlIOEncode;
 
 #define NEEDS_LINES	1
+#define OUR_DEFAULT_FB	"Encode::FB_QUIET"
 
 SV *
 PerlIOEncode_getarg(pTHX_ PerlIO * f, CLONE_PARAMS * param, int flags)
@@ -79,13 +80,6 @@ PerlIOEncode_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg)
     IV  code = PerlIOBuf_pushed(aTHX_ f, mode, Nullsv);
     SV *result = Nullsv;
 
-    /*
-     * we now "use Encode qw(:fallbacks)" here instead of
-     * PerlIO/encoding.pm.  This avoids SEGV when ":encoding()"
-     * is invoked without prior "use Encode". -- dankogai
-     */
-    require_pv("Encode.pm");
-
     ENTER;
     SAVETMPS;
 
@@ -104,7 +98,7 @@ PerlIOEncode_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg)
     if (!SvROK(result) || !SvOBJECT(SvRV(result))) {
 	e->enc = Nullsv;
 	Perl_warner(aTHX_ packWARN(WARN_IO), "Cannot find encoding \"%" SVf "\"",
-		    arg); 
+		    arg);
 	errno = EINVAL;
 	code = -1;
     }
@@ -142,21 +136,8 @@ PerlIOEncode_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg)
 	PerlIOBase(f)->flags |= PERLIO_F_UTF8;
     }
 
-    if (SvIV(result = get_sv("PerlIO::encoding::check", 1)) == 0){
-	PUSHMARK(sp);
-	PUTBACK;
-       if (call_pv("Encode::FB_QUIET", G_SCALAR) != 1) {
-	    /* should never happen */
-	    Perl_die(aTHX_ "Encode::FB_QUIET did not return a value");
-	    return -1;
-	}
-	SPAGAIN;
-	e->chk = newSVsv(POPs);
-	PUTBACK;
-	sv_setsv(result, e->chk);
-    }else{
-	e->chk = newSVsv(result);
-    }
+    e->chk = newSVsv(get_sv("PerlIO::encoding::check", 0));
+
     FREETMPS;
     LEAVE;
     return code;
@@ -607,7 +588,29 @@ PROTOTYPES: ENABLE
 
 BOOT:
 {
+    SV *chk = get_sv("PerlIO::encoding::check", GV_ADD|GV_ADDMULTI);
+    /*
+     * we now "use Encode ()" here instead of
+     * PerlIO/encoding.pm.  This avoids SEGV when ":encoding()"
+     * is invoked without prior "use Encode". -- dankogai
+     */
+    if (!gv_stashpvn("Encode", 6, FALSE)) {
+	Perl_warner(aTHX_ packWARN(WARN_IO), ":encoding without 'use Encode'");
+	ENTER;
+	/* The SV is magically freed by load_module */
+	load_module(PERL_LOADMOD_NOIMPORT, newSVpvn("Encode", 6), Nullsv, Nullsv);
+	LEAVE;
+    }
+    PUSHMARK(sp);
+    PUTBACK;
+    if (call_pv(OUR_DEFAULT_FB, G_SCALAR) != 1) {
+	    /* should never happen */
+	    Perl_die(aTHX_ "%s did not return a value",OUR_DEFAULT_FB);
+    }
+    SPAGAIN;
+    sv_setsv(chk, POPs);
+    PUTBACK;
 #ifdef PERLIO_LAYERS
- PerlIO_define_layer(aTHX_ &PerlIO_encode);
+    PerlIO_define_layer(aTHX_ &PerlIO_encode);
 #endif
 }
