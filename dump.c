@@ -887,7 +887,7 @@ Perl_gv_dump(pTHX_ GV *gv)
  * (with the PERL_MAGIC_ prefixed stripped)
  */
 
-static struct { char type; char *name; } magic_names[] = {
+static struct { const char type; const char *name; } magic_names[] = {
 	{ PERL_MAGIC_sv,             "sv(\\0)" },
 	{ PERL_MAGIC_arylen,         "arylen(#)" },
 	{ PERL_MAGIC_glob,           "glob(*)" },
@@ -938,8 +938,8 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, MAGIC *mg, I32 nest, I32 maxne
  	Perl_dump_indent(aTHX_ level, file,
 			 "  MAGIC = 0x%"UVxf"\n", PTR2UV(mg));
  	if (mg->mg_virtual) {
-            MGVTBL *v = mg->mg_virtual;
- 	    char *s = 0;
+            const MGVTBL * const v = mg->mg_virtual;
+ 	    const char *s = 0;
  	    if      (v == &PL_vtbl_sv)         s = "sv";
             else if (v == &PL_vtbl_env)        s = "env";
             else if (v == &PL_vtbl_envelem)    s = "envelem";

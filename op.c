@@ -176,21 +176,21 @@ S_no_fh_allowed(pTHX_ OP *o)
 }
 
 STATIC OP *
-S_too_few_arguments(pTHX_ OP *o, char *name)
+S_too_few_arguments(pTHX_ OP *o, const char *name)
 {
     yyerror(Perl_form(aTHX_ "Not enough arguments for %s", name));
     return o;
 }
 
 STATIC OP *
-S_too_many_arguments(pTHX_ OP *o, char *name)
+S_too_many_arguments(pTHX_ OP *o, const char *name)
 {
     yyerror(Perl_form(aTHX_ "Too many arguments for %s", name));
     return o;
 }
 
 STATIC void
-S_bad_type(pTHX_ I32 n, char *t, char *name, OP *kid)
+S_bad_type(pTHX_ I32 n, const char *t, const char *name, OP *kid)
 {
     yyerror(Perl_form(aTHX_ "Type of arg %d to %s must be %s (not %s)",
 		 (int)n, name, t, OP_DESC(kid)));
@@ -518,8 +518,8 @@ Perl_linklist(pTHX_ OP *o)
 OP *
 Perl_scalarkids(pTHX_ OP *o)
 {
-    OP *kid;
     if (o && o->op_flags & OPf_KIDS) {
+        OP *kid;
 	for (kid = cLISTOPo->op_first; kid; kid = kid->op_sibling)
 	    scalar(kid);
     }
@@ -4575,7 +4575,7 @@ Used by C<xsubpp> to hook up XSUBs as Perl subs.
 */
 
 CV *
-Perl_newXS(pTHX_ char *name, XSUBADDR_t subaddr, char *filename)
+Perl_newXS(pTHX_ const char *name, XSUBADDR_t subaddr, const char *filename)
 {
     GV *gv = gv_fetchpv(name ? name :
 			(PL_curstash ? "__ANON__" : "__ANON__::__ANON__"),

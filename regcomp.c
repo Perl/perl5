@@ -268,7 +268,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
  * "...".
  */
 #define	FAIL(msg) STMT_START {						\
-    char *ellipses = "";						\
+    const char *ellipses = "";						\
     IV len = RExC_end - RExC_precomp;					\
 									\
     if (!SIZE_ONLY)							\
@@ -288,7 +288,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
  * "...".
  */
 #define	FAIL2(pat,msg) STMT_START {					\
-    char *ellipses = "";						\
+    const char *ellipses = "";						\
     IV len = RExC_end - RExC_precomp;					\
 									\
     if (!SIZE_ONLY)							\
@@ -1646,8 +1646,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 */
 		 char *s0 = STRING(scan), *s, *t;
 		 char *s1 = s0 + STR_LEN(scan) - 1, *s2 = s1 - 4;
-		 char *t0 = "\xcc\x88\xcc\x81";
-		 char *t1 = t0 + 3;
+                 const char *t0 = "\xcc\x88\xcc\x81";
+                 const char *t1 = t0 + 3;
 		 
 		 for (s = s0 + 2;
 		      s < s2 && (t = ninstr(s, s1, t0, t1));
@@ -2097,7 +2097,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 	    }
 	    flags &= ~SCF_DO_STCLASS;
 	}
-	else if (strchr((char*)PL_varies,OP(scan))) {
+	else if (strchr((const char*)PL_varies,OP(scan))) {
 	    I32 mincount, maxcount, minnext, deltanext, fl = 0;
 	    I32 f = flags, pos_before = 0;
 	    regnode *oscan = scan;
@@ -2241,7 +2241,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 
 		    /* Skip open. */
 		    nxt = regnext(nxt);
-		    if (!strchr((char*)PL_simple,OP(nxt))
+		    if (!strchr((const char*)PL_simple,OP(nxt))
 			&& !(PL_regkind[(U8)OP(nxt)] == EXACT
 			     && STR_LEN(nxt) == 1))
 			goto nogo;
@@ -2446,7 +2446,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		break;
 	    }
 	}
-	else if (strchr((char*)PL_simple,OP(scan))) {
+	else if (strchr((const char*)PL_simple,OP(scan))) {
 	    int value = 0;
 
 	    if (flags & SCF_DO_SUBSTR) {
@@ -2754,7 +2754,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 }
 
 STATIC I32
-S_add_data(pTHX_ RExC_state_t *pRExC_state, I32 n, char *s)
+S_add_data(pTHX_ RExC_state_t *pRExC_state, I32 n, const char *s)
 {
     if (RExC_rx->data) {
 	Renewc(RExC_rx->data,
@@ -2975,7 +2975,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	    else if ((OP(first) == EXACTF || OP(first) == EXACTFL))
 		r->regstclass = first;
 	}
-	else if (strchr((char*)PL_simple,OP(first)))
+	else if (strchr((const char*)PL_simple,OP(first)))
 	    r->regstclass = first;
 	else if (PL_regkind[(U8)OP(first)] == BOUND ||
 		 PL_regkind[(U8)OP(first)] == NBOUND)
@@ -3588,8 +3588,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
     }
 
     {
-	char *p;
-	static char parens[] = "=!<,>";
+	const char *p;
+	static const char parens[] = "=!<,>";
 
 	if (paren && (p = strchr(parens, paren))) {
 	    U8 node = ((p - parens) % 2) ? UNLESSM : IFMATCH;
@@ -5911,7 +5911,7 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 	/* It would be nice to FAIL() here, but this may be called from
 	   regexec.c, and it would be hard to supply pRExC_state. */
 	Perl_croak(aTHX_ "Corrupted regexp opcode");
-    sv_catpv(sv, (char*)reg_name[OP(o)]); /* Take off const! */
+    sv_catpv(sv, reg_name[OP(o)]); /* Take off const! */
 
     k = PL_regkind[(U8)OP(o)];
 

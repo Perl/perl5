@@ -4531,9 +4531,9 @@ PP(pp_gmtime)
 {
     dSP;
     Time_t when;
-    struct tm *tmbuf;
-    static char *dayname[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
-    static char *monname[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    const struct tm *tmbuf;
+    static const char *dayname[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+    static const char *monname[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
 			      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
     if (MAXARG < 1)

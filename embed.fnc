@@ -157,8 +157,8 @@ Ap	|I32	|debstack
 Ap	|I32	|debstackptrs
 Ap	|char*	|delimcpy	|char* to|char* toend|char* from \
 				|char* fromend|int delim|I32* retlen
-p	|void	|deprecate	|char* s
-p	|void	|deprecate_old	|char* s
+p	|void	|deprecate	|const char* s
+p	|void	|deprecate_old	|const char* s
 Afp	|OP*	|die		|const char* pat|...
 p	|OP*	|vdie		|const char* pat|va_list* args
 p	|OP*	|die_where	|const char* message|STRLEN msglen
@@ -502,7 +502,7 @@ Ap	|OP*	|newRANGE	|I32 flags|OP* left|OP* right
 Ap	|OP*	|newSLICEOP	|I32 flags|OP* subscript|OP* listop
 Ap	|OP*	|newSTATEOP	|I32 flags|char* label|OP* o
 Ap	|CV*	|newSUB		|I32 floor|OP* o|OP* proto|OP* block
-Apd	|CV*	|newXS		|char* name|XSUBADDR_t f|char* filename
+Apd	|CV*	|newXS		|const char* name|XSUBADDR_t f|const char* filename
 Apd	|AV*	|newAV
 Ap	|OP*	|newAVREF	|OP* o
 Ap	|OP*	|newBINOP	|I32 type|I32 flags|OP* first|OP* last
@@ -538,7 +538,7 @@ Ap	|OP*	|newWHILEOP	|I32 flags|I32 debuggable|LOOP* loop \
 				|I32 whileline|OP* expr|OP* block|OP* cont
 
 Ap	|PERL_SI*|new_stackinfo|I32 stitems|I32 cxitems
-Ap	|char*	|scan_vstring	|char *vstr|SV *sv
+Ap	|char*	|scan_vstring	|const char *vstr|SV *sv
 Apd	|char*	|scan_version	|char *vstr|SV *sv|bool qv
 Apd	|SV*	|new_version	|SV *ver
 Apd	|SV*	|upg_version	|SV *ver
@@ -683,7 +683,7 @@ p	|OP*	|scalarseq	|OP* o
 p	|OP*	|scalarvoid	|OP* o
 Apd	|NV	|scan_bin	|char* start|STRLEN len|STRLEN* retlen
 Apd	|NV	|scan_hex	|char* start|STRLEN len|STRLEN* retlen
-Ap	|char*	|scan_num	|char* s|YYSTYPE *lvalp
+Ap	|char*	|scan_num	|const char* s|YYSTYPE *lvalp
 Apd	|NV	|scan_oct	|char* start|STRLEN len|STRLEN* retlen
 p	|OP*	|scope		|OP* o
 Ap	|char*	|screaminstr	|SV* bigsv|SV* littlesv|I32 start_shift \
@@ -735,7 +735,7 @@ Apd	|I32	|sv_cmp_locale	|SV* sv1|SV* sv2
 #if defined(USE_LOCALE_COLLATE)
 Apd	|char*	|sv_collxfrm	|SV* sv|STRLEN* nxp
 #endif
-Ap	|OP*	|sv_compile_2op	|SV* sv|OP** startp|char* code|PAD** padp
+Ap	|OP*	|sv_compile_2op	|SV* sv|OP** startp|const char* code|PAD** padp
 Apd	|int	|getcwd_sv	|SV* sv
 Apd	|void	|sv_dec		|SV* sv
 Ap	|void	|sv_dump	|SV* sv
@@ -769,7 +769,7 @@ Apd	|char*	|sv_pvbyten_force|SV* sv|STRLEN* lp
 Apd	|char*	|sv_recode_to_utf8	|SV* sv|SV *encoding
 Apd	|bool	|sv_cat_decode	|SV* dsv|SV *encoding|SV *ssv|int *offset \
 				|char* tstr|int tlen
-Apd	|char*	|sv_reftype	|SV* sv|int ob
+Apd	|const char*|sv_reftype	|const SV* sv|int ob
 Apd	|void	|sv_replace	|SV* sv|SV* nsv
 Apd	|void	|sv_report_used
 Apd	|void	|sv_reset	|char* s|HV* stash
@@ -854,10 +854,10 @@ Ap	|void	|vwarner	|U32 err|const char* pat|va_list* args
 p	|void	|watch		|char** addr
 Ap	|I32	|whichsig	|const char* sig
 p	|void	|write_to_stderr|const char* message|int msglen
-p	|int	|yyerror	|char* s
+p	|int	|yyerror	|const char* s
 p	|int	|yylex
 p	|int	|yyparse
-p	|int	|yywarn		|char* s
+p	|int	|yywarn		|const char* s
 #if defined(MYMALLOC)
 Ap	|void	|dump_mstats	|char* s
 Ap	|int	|get_mstats	|perl_mstats_t *buf|int buflen|int level
@@ -1001,14 +1001,14 @@ s	|int	|magic_methcall	|SV *sv|MAGIC *mg|char *meth|I32 f \
 
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 s	|I32	|list_assignment|OP *o
-s	|void	|bad_type	|I32 n|char *t|char *name|OP *kid
+s	|void	|bad_type	|I32 n|const char *t|const char *name|OP *kid
 s	|void	|cop_free	|COP *cop
 s	|OP*	|modkids	|OP *o|I32 type
 s	|void	|no_bareword_allowed|OP *o
 s	|OP*	|no_fh_allowed	|OP *o
 s	|OP*	|scalarboolean	|OP *o
-s	|OP*	|too_few_arguments|OP *o|char* name
-s	|OP*	|too_many_arguments|OP *o|char* name
+s	|OP*	|too_few_arguments|OP *o|const char* name
+s	|OP*	|too_many_arguments|OP *o|const char* name
 s	|OP*	|newDEFSVOP
 s	|OP*	|new_logop	|I32 type|I32 flags|OP **firstp|OP **otherp
 s	|void	|simplify_sort	|OP *o
@@ -1069,7 +1069,7 @@ s	|int	|div128		|SV *pnum|bool *done
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
 s	|OP*	|docatch	|OP *o
 s	|void*	|docatch_body
-s	|OP*	|dofindlabel	|OP *o|char *label|OP **opstack|OP **oplimit
+s	|OP*	|dofindlabel	|OP *o|const char *label|OP **opstack|OP **oplimit
 s	|OP*	|doparseform	|SV *sv
 sn	|bool	|num_overflow	|NV value|I32 fldsize|I32 frcsize
 s	|I32	|dopoptoeval	|I32 startingblock
@@ -1129,7 +1129,7 @@ Es	|void	|cl_or		|struct RExC_state_t*|struct regnode_charclass_class *cl \
 Es	|I32	|study_chunk	|struct RExC_state_t*|regnode **scanp|I32 *deltap \
 				|regnode *last|struct scan_data_t *data \
 				|U32 flags|U32 depth
-Es	|I32	|add_data	|struct RExC_state_t*|I32 n|char *s
+Es	|I32	|add_data	|struct RExC_state_t*|I32 n|const char *s
 rs	|void|re_croak2	|const char* pat1|const char* pat2|...
 Es	|I32	|regpposixcc	|struct RExC_state_t*|I32 value
 Es	|void	|checkposixcc	|struct RExC_state_t*
@@ -1253,14 +1253,14 @@ s	|char*	|scan_word	|char *s|char *dest|STRLEN destlen \
 				|int allow_package|STRLEN *slp
 s	|char*	|skipspace	|char *s
 s	|char*	|swallow_bom	|U8 *s
-s	|void	|checkcomma	|char *s|char *name|char *what
-s	|void	|force_ident	|char *s|int kind
+s	|void	|checkcomma	|char *s|char *name|const char *what
+s	|void	|force_ident	|const char *s|int kind
 s	|void	|incline	|char *s
 s	|int	|intuit_method	|char *s|GV *gv
 s	|int	|intuit_more	|char *s
 s	|I32	|lop		|I32 f|int x|char *s
 s	|void	|missingterm	|char *s
-s	|void	|no_op		|char *what|char *s
+s	|void	|no_op		|const char *what|char *s
 s	|void	|set_csh
 s	|I32	|sublex_done
 s	|I32	|sublex_push
@@ -1270,11 +1270,11 @@ s	|HV *	|find_in_my_stash|const char *pkgname|I32 len
 s	|SV*	|new_constant	|const char *s|STRLEN len|const char *key|SV *sv \
 				|SV *pv|const char *type
 #  if defined(DEBUGGING)
-s	|int	|tokereport	|char *s|I32 rv
+s	|int	|tokereport	|const char *s|I32 rv
 #  endif
 s	|int	|ao		|int toketype
 s	|void	|depcom
-s	|char*	|incl_perldb
+s	|const char*|incl_perldb
 #if 0
 s	|I32	|utf16_textfilter|int idx|SV *sv|int maxlen
 s	|I32	|utf16rev_textfilter|int idx|SV *sv|int maxlen

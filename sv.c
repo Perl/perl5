@@ -682,7 +682,7 @@ S_find_array_subscript(pTHX_ AV *av, SV* val)
 #define FUV_SUBSCRIPT_WITHIN	4	/* "within @foo"   */
 
 STATIC SV*
-S_varname(pTHX_ GV *gv, char *gvtype, PADOFFSET targ,
+S_varname(pTHX_ GV *gv, const char *gvtype, PADOFFSET targ,
 	SV* keyname, I32 aindex, int subscript_type)
 {
     AV *av;
@@ -696,15 +696,13 @@ S_varname(pTHX_ GV *gv, char *gvtype, PADOFFSET targ,
 	 * XXX get rid of all this if gv_fullnameX() ever supports this
 	 * directly */
 
-	char *p;
+	const char *p;
 	HV *hv = GvSTASH(gv);
 	sv_setpv(name, gvtype);
 	if (!hv)
 	    p = "???";
-	else if (!HvNAME(hv))
+	else if (!(p=HvNAME(hv)))
 	    p = "__ANON__";
-	else
-	    p = HvNAME(hv);
 	if (strNE(p, "main")) {
 	    sv_catpv(name,p);
 	    sv_catpvn(name,"::", 2);
@@ -2114,14 +2112,14 @@ Perl_sv_grow(pTHX_ register SV *sv, register STRLEN newlen)
 #endif
 	    Renew(s,newlen,char);
 	}
-        else {
+	else {
 	    New(703, s, newlen, char);
 	    if (SvPVX(sv) && SvCUR(sv)) {
 	        Move(SvPVX(sv), s, (newlen < SvCUR(sv)) ? newlen : SvCUR(sv), char);
 	    }
 	}
 	SvPV_set(sv, s);
-        SvLEN_set(sv, newlen);
+	SvLEN_set(sv, newlen);
     }
     return s;
 }
@@ -8398,11 +8396,11 @@ Returns a string describing what the SV is a reference to.
 =cut
 */
 
-char *
-Perl_sv_reftype(pTHX_ SV *sv, int ob)
+const char *
+Perl_sv_reftype(pTHX_ const SV *sv, int ob)
 {
     if (ob && SvOBJECT(sv)) {
-	char *name = HvNAME(SvSTASH(sv));
+        const char *name = HvNAME(SvSTASH(sv));
 	return name ? name : "__ANON__";
     }
     else {

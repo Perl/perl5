@@ -623,12 +623,12 @@ hopefully catches attempts to access uninitialized memory.
 	  (v = (MEM_WRAP_CHECK(n,t), (c*)saferealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t)))))
 #define Safefree(d)	safefree((Malloc_t)(d))
 
-#define Move(s,d,n,t)	(MEM_WRAP_CHECK(n,t), (void)memmove((char*)(d),(char*)(s), (n) * sizeof(t)))
-#define Copy(s,d,n,t)	(MEM_WRAP_CHECK(n,t), (void)memcpy((char*)(d),(char*)(s), (n) * sizeof(t)))
+#define Move(s,d,n,t)	(MEM_WRAP_CHECK(n,t), (void)memmove((char*)(d),(const char*)(s), (n) * sizeof(t)))
+#define Copy(s,d,n,t)	(MEM_WRAP_CHECK(n,t), (void)memcpy((char*)(d),(const char*)(s), (n) * sizeof(t)))
 #define Zero(d,n,t)	(MEM_WRAP_CHECK(n,t), (void)memzero((char*)(d), (n) * sizeof(t)))
 
-#define MoveD(s,d,n,t)	(MEM_WRAP_CHECK(n,t), memmove((char*)(d),(char*)(s), (n) * sizeof(t)))
-#define CopyD(s,d,n,t)	(MEM_WRAP_CHECK(n,t), memcpy((char*)(d),(char*)(s), (n) * sizeof(t)))
+#define MoveD(s,d,n,t)	(MEM_WRAP_CHECK(n,t), memmove((char*)(d),(const char*)(s), (n) * sizeof(t)))
+#define CopyD(s,d,n,t)	(MEM_WRAP_CHECK(n,t), memcpy((char*)(d),(const char*)(s), (n) * sizeof(t)))
 #ifdef HAS_MEMSET
 #define ZeroD(d,n,t)	(MEM_WRAP_CHECK(n,t), memzero((char*)(d), (n) * sizeof(t)))
 #else
@@ -654,12 +654,12 @@ hopefully catches attempts to access uninitialized memory.
 	  (v = (c*)saferealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t))))
 #define Safefree(d)	safefree((Malloc_t)(d))
 
-#define Move(s,d,n,t)	(void)memmove((char*)(d),(char*)(s), (n) * sizeof(t))
-#define Copy(s,d,n,t)	(void)memcpy((char*)(d),(char*)(s), (n) * sizeof(t))
+#define Move(s,d,n,t)	(void)memmove((char*)(d),(const char*)(s), (n) * sizeof(t))
+#define Copy(s,d,n,t)	(void)memcpy((char*)(d),(const char*)(s), (n) * sizeof(t))
 #define Zero(d,n,t)	(void)memzero((char*)(d), (n) * sizeof(t))
 
-#define MoveD(s,d,n,t)	memmove((char*)(d),(char*)(s), (n) * sizeof(t))
-#define CopyD(s,d,n,t)	memcpy((char*)(d),(char*)(s), (n) * sizeof(t))
+#define MoveD(s,d,n,t)	memmove((char*)(d),(const char*)(s), (n) * sizeof(t))
+#define CopyD(s,d,n,t)	memcpy((char*)(d),(const char*)(s), (n) * sizeof(t))
 #ifdef HAS_MEMSET
 #define ZeroD(d,n,t)	memzero((char*)(d), (n) * sizeof(t))
 #else

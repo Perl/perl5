@@ -26,9 +26,9 @@
 #define yychar	(*PL_yycharp)
 #define yylval	(*PL_yylvalp)
 
-static char ident_too_long[] = "Identifier too long";
-static char c_without_g[] = "Use of /c modifier is meaningless without /g";
-static char c_in_subst[] = "Use of /c modifier is meaningless in s///";
+static char const ident_too_long[] = "Identifier too long";
+static char const c_without_g[] = "Use of /c modifier is meaningless without /g";
+static char const c_in_subst[] = "Use of /c modifier is meaningless in s///";
 
 static void restore_rsfp(pTHX_ void *f);
 #ifndef PERL_NO_UTF16_FILTER
@@ -76,7 +76,7 @@ static I32 utf16rev_textfilter(pTHX_ int idx, SV *sv, int maxlen);
 #define LEX_KNOWNEXT		 0
 
 #ifdef DEBUGGING
-static char* lex_state_names[] = {
+static char const* lex_state_names[] = {
     "KNOWNEXT",
     "FORMLINE",
     "INTERPCONST",
@@ -199,7 +199,7 @@ enum token_type {
     TOKENTYPE_GVVAL
 };
 
-static struct debug_tokens { int token, type; char *name;} debug_tokens[] =
+static struct debug_tokens { const int token, type; const char *name; } debug_tokens[] =
 {
     { ADDOP,		TOKENTYPE_OPNUM,	"ADDOP" },
     { ANDAND,		TOKENTYPE_NONE,		"ANDAND" },
@@ -269,13 +269,13 @@ static struct debug_tokens { int token, type; char *name;} debug_tokens[] =
 /* dump the returned token in rv, plus any optional arg in yylval */
 
 STATIC int
-S_tokereport(pTHX_ char* s, I32 rv)
+S_tokereport(pTHX_ const char* s, I32 rv)
 {
     if (DEBUG_T_TEST) {
-	char *name = Nullch;
+	const char *name = Nullch;
 	enum token_type type = TOKENTYPE_NONE;
 	struct debug_tokens *p;
-        SV* report = newSVpvn("<== ", 4);
+	SV* report = newSVpvn("<== ", 4);
 
 	for (p = debug_tokens; p->token; p++) {
 	    if (p->token == (int)rv) {
@@ -365,7 +365,7 @@ S_ao(pTHX_ int toketype)
  */
 
 STATIC void
-S_no_op(pTHX_ char *what, char *s)
+S_no_op(pTHX_ const char *what, char *s)
 {
     char *oldbp = PL_bufptr;
     bool is_first = (PL_oldbufptr == PL_linestart);
@@ -441,14 +441,14 @@ S_missingterm(pTHX_ char *s)
  */
 
 void
-Perl_deprecate(pTHX_ char *s)
+Perl_deprecate(pTHX_ const char *s)
 {
     if (ckWARN(WARN_DEPRECATED))
 	Perl_warner(aTHX_ packWARN(WARN_DEPRECATED), "Use of %s is deprecated", s);
 }
 
 void
-Perl_deprecate_old(pTHX_ char *s)
+Perl_deprecate_old(pTHX_ const char *s)
 {
     /* This function should NOT be called for any new deprecated warnings */
     /* Use Perl_deprecate instead                                         */
@@ -459,7 +459,7 @@ Perl_deprecate_old(pTHX_ char *s)
     /* in its own right.                                                  */
 
     if (ckWARN2(WARN_DEPRECATED, WARN_SYNTAX))
-	Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX), 
+	Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
 			"Use of %s is deprecated", s);
 }
 
@@ -873,7 +873,7 @@ STATIC SV *
 S_newSV_maybe_utf8(pTHX_ const char *start, STRLEN len)
 {
     SV *sv = newSVpvn(start,len);
-    if (UTF && !IN_BYTES && is_utf8_string((U8*)start, len))
+    if (UTF && !IN_BYTES && is_utf8_string((const U8*)start, len))
 	SvUTF8_on(sv);
     return sv;
 }
@@ -936,10 +936,10 @@ S_force_word(pTHX_ register char *start, int token, int check_keyword, int allow
  */
 
 STATIC void
-S_force_ident(pTHX_ register char *s, int kind)
+S_force_ident(pTHX_ register const char *s, int kind)
 {
     if (s && *s) {
-	OP* o = (OP*)newSVOP(OP_CONST, 0, newSVpv(s,0));
+	OP* const o = (OP*)newSVOP(OP_CONST, 0, newSVpv(s,0));
 	PL_nextval[PL_nexttoke].opval = o;
 	force_next(WORD);
 	if (kind) {
@@ -1549,7 +1549,7 @@ S_scan_const(pTHX_ char *start)
 	    default:
 	        {
 		    if (ckWARN(WARN_MISC) &&
-			isALNUM(*s) && 
+			isALNUM(*s) &&
 			*s != '_')
 			Perl_warner(aTHX_ packWARN(WARN_MISC),
 			       "Unrecognized escape \\%c passed through",
@@ -2091,11 +2091,11 @@ S_intuit_method(pTHX_ char *start, GV *gv)
  * compile-time require of perl5db.pl.
  */
 
-STATIC char*
+STATIC const char*
 S_incl_perldb(pTHX)
 {
     if (PL_perldb) {
-	char *pdb = PerlEnv_getenv("PERL5DB");
+	const char *pdb = PerlEnv_getenv("PERL5DB");
 
 	if (pdb)
 	    return pdb;
@@ -2272,7 +2272,7 @@ S_find_in_my_stash(pTHX_ const char *pkgname, I32 len)
 }
 
 #ifdef DEBUGGING
-    static char* exp_name[] =
+    static char const* exp_name[] =
 	{ "OPERATOR", "TERM", "REF", "STATE", "BLOCK", "ATTRBLOCK",
 	  "ATTRTERM", "TERMBLOCK", "TERMORDORDOR"
 	};
@@ -2734,7 +2734,7 @@ Perl_yylex(pTHX)
 		    d = s + 2;
 #ifdef ALTERNATE_SHEBANG
 		else {
-		    static char as[] = ALTERNATE_SHEBANG;
+		    static char const as[] = ALTERNATE_SHEBANG;
 		    if (*s == as[0] && strnEQ(s, as, sizeof(as) - 1))
 			d = s + (sizeof(as) - 1);
 		}
@@ -3178,7 +3178,7 @@ Perl_yylex(pTHX)
 #else
 			    ; /* skip to avoid loading attributes.pm */
 #endif
-			else 
+			else
 			    Perl_croak(aTHX_ "The 'unique' attribute may only be applied to 'our' variables");
 		    }
 
@@ -4275,7 +4275,7 @@ Perl_yylex(pTHX)
 			while (*proto == ';')
 			    proto++;
 			if (*proto == '&' && *s == '{') {
-			    sv_setpv(PL_subname, PL_curstash ? 
+			    sv_setpv(PL_subname, PL_curstash ?
 					"__ANON__" : "__ANON__::__ANON__");
 			    PREBLOCK(LSTOPSUB);
 			}
@@ -4338,7 +4338,7 @@ Perl_yylex(pTHX)
 
 	    /*SUPPRESS 560*/
 	    if (PL_rsfp && (!PL_in_eval || PL_tokenbuf[2] == 'D')) {
-		char *pname = "main";
+		const char *pname = "main";
 		if (PL_tokenbuf[2] == 'D')
 		    pname = HvNAME(PL_curstash ? PL_curstash : PL_defstash);
 		gv = gv_fetchpv(Perl_form(aTHX_ "%s::DATA", pname), TRUE, SVt_PVIO);
@@ -4405,7 +4405,7 @@ Perl_yylex(pTHX)
 			SPAGAIN;
 			name = POPs;
 			PUTBACK;
-			PerlIO_apply_layers(aTHX_ PL_rsfp, NULL, 
+			PerlIO_apply_layers(aTHX_ PL_rsfp, NULL,
 					    Perl_form(aTHX_ ":encoding(%"SVf")",
 						      name));
 			FREETMPS;
@@ -8887,7 +8887,7 @@ unknown:
 }
 
 STATIC void
-S_checkcomma(pTHX_ register char *s, char *name, char *what)
+S_checkcomma(pTHX_ register char *s, char *name, const char *what)
 {
     char *w;
 
@@ -9270,7 +9270,7 @@ S_scan_pat(pTHX_ char *start, I32 type)
 	    pmflag(&pm->op_pmflags,*s++);
     }
     /* issue a warning if /c is specified,but /g is not */
-    if (ckWARN(WARN_REGEXP) && 
+    if (ckWARN(WARN_REGEXP) &&
         (pm->op_pmflags & PMf_CONTINUE) && !(pm->op_pmflags & PMf_GLOBAL))
     {
         Perl_warner(aTHX_ packWARN(WARN_REGEXP), c_without_g);
@@ -10113,16 +10113,16 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 */
 
 char *
-Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
+Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 {
-    register char *s = start;		/* current position in buffer */
+    register const char *s = start;	/* current position in buffer */
     register char *d;			/* destination in temp buffer */
     register char *e;			/* end of temp buffer */
     NV nv;				/* number read, as a double */
     SV *sv = Nullsv;			/* place to put the converted number */
     bool floatit;			/* boolean: int or float? */
-    char *lastub = 0;			/* position of last underbar */
-    static char number_too_long[] = "Number too long";
+    const char *lastub = 0;		/* position of last underbar */
+    static char const number_too_long[] = "Number too long";
 
     /* We use the first character to decide what type of number this is */
 
@@ -10150,16 +10150,16 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 	    bool overflowed = FALSE;
 	    bool just_zero  = TRUE;	/* just plain 0 or binary number? */
 	    static NV nvshift[5] = { 1.0, 2.0, 4.0, 8.0, 16.0 };
-	    static char* bases[5] = { "", "binary", "", "octal",
+	    static char const* bases[5] = { "", "binary", "", "octal",
 				      "hexadecimal" };
-	    static char* Bases[5] = { "", "Binary", "", "Octal",
+	    static char const* Bases[5] = { "", "Binary", "", "Octal",
 				      "Hexadecimal" };
-	    static char *maxima[5] = { "",
+	    static char const *maxima[5] = { "",
 				       "0b11111111111111111111111111111111",
 				       "",
 				       "037777777777",
 				       "0xffffffff" };
-	    char *base, *Base, *max;
+	    const char *base, *Base, *max;
 
 	    /* check for hex */
 	    if (s[1] == 'x') {
@@ -10301,7 +10301,7 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 		sv_setuv(sv, u);
 	    }
 	    if (just_zero && (PL_hints & HINT_NEW_INTEGER))
-		sv = new_constant(start, s - start, "integer", 
+		sv = new_constant(start, s - start, "integer",
 				  sv, Nullsv, NULL);
 	    else if (PL_hints & HINT_NEW_BINARY)
 		sv = new_constant(start, s - start, "binary", sv, Nullsv, NULL);
@@ -10625,7 +10625,7 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
 #pragma segment Perl_yylex
 #endif
 int
-Perl_yywarn(pTHX_ char *s)
+Perl_yywarn(pTHX_ const char *s)
 {
     PL_in_eval |= EVAL_WARNONLY;
     yyerror(s);
@@ -10634,10 +10634,10 @@ Perl_yywarn(pTHX_ char *s)
 }
 
 int
-Perl_yyerror(pTHX_ char *s)
+Perl_yyerror(pTHX_ const char *s)
 {
-    char *where = NULL;
-    char *context = NULL;
+    const char *where = NULL;
+    const char *context = NULL;
     int contlen = -1;
     SV *msg;
 
@@ -10900,16 +10900,16 @@ passed in, for performance reasons.
 */
 
 char *
-Perl_scan_vstring(pTHX_ char *s, SV *sv)
+Perl_scan_vstring(pTHX_ const char *s, SV *sv)
 {
-    char *pos = s;
-    char *start = s;
+    const char *pos = s;
+    const char *start = s;
     if (*pos == 'v') pos++;  /* get past 'v' */
     while (pos < PL_bufend && (isDIGIT(*pos) || *pos == '_'))
 	pos++;
     if ( *pos != '.') {
 	/* this may not be a v-string if followed by => */
-	char *next = pos;
+	const char *next = pos;
 	while (next < PL_bufend && isSPACE(*next))
 	    ++next;
 	if ((PL_bufend - next) >= 2 && *next == '=' && next[1] == '>' ) {
@@ -10932,7 +10932,7 @@ Perl_scan_vstring(pTHX_ char *s, SV *sv)
 	    rev = 0;
 	    {
 		/* this is atoi() that tolerates underscores */
-		char *end = pos;
+		const char *end = pos;
 		UV mult = 1;
 		while (--end >= s) {
 		    UV orev;
