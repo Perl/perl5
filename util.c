@@ -2539,7 +2539,7 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
     {
 	SV *sv;
 	SV** svp;
-	char spid[TYPE_CHARS(int)];
+	char spid[TYPE_CHARS(IV)];
 
 	if (pid > 0) {
 	    sprintf(spid, "%"IVdf, (IV)pid);
@@ -2555,9 +2555,6 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 
 	    hv_iterinit(PL_pidstatus);
 	    if ((entry = hv_iternext(PL_pidstatus))) {
-		SV *sv;
-		char spid[TYPE_CHARS(int)];
-
 		pid = atoi(hv_iterkey(entry,(I32*)statusp));
 		sv = hv_iterval(PL_pidstatus,entry);
 		*statusp = SvIVX(sv);
@@ -2606,7 +2603,7 @@ void
 Perl_pidgone(pTHX_ Pid_t pid, int status)
 {
     register SV *sv;
-    char spid[TYPE_CHARS(int)];
+    char spid[TYPE_CHARS(IV)];
 
     sprintf(spid, "%"IVdf, (IV)pid);
     sv = *hv_fetch(PL_pidstatus,spid,strlen(spid),TRUE);

@@ -5128,7 +5128,7 @@ Perl_save_re_context(pTHX)
 	U32 i;
 	GV *mgv;
 	REGEXP *rx;
-	char digits[16];
+	char digits[TYPE_CHARS(long)];
 
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
 	    for (i = 1; i <= rx->nparens; i++) {
