@@ -925,34 +925,51 @@ See also L</undef>, L</exists>, L</ref>.
 
 =item delete EXPR
 
-Deletes the specified key(s) and their associated values from a hash.
-For each key, returns the deleted value associated with that key, or
-the undefined value if there was no such key.  Deleting from C<$ENV{}>
-modifies the environment.  Deleting from a hash tied to a DBM file
-deletes the entry from the DBM file.  (But deleting from a C<tie>d hash
-doesn't necessarily return anything.)
+Given an expression that specifies a hash element, array element, hash slice,
+or array slice, deletes the specified element(s) from the hash or array.
+If the array elements happen to be at the end of the array, the size
+of the array will shrink by that number of elements.
 
-The following deletes all the values of a hash:
+Returns each element so deleted or the undefined value if there was no such
+element.  Deleting from C<$ENV{}> modifies the environment.  Deleting from
+a hash tied to a DBM file deletes the entry from the DBM file.  Deleting
+from a C<tie>d hash or array may not necessarily return anything.
+
+The following (inefficiently) deletes all the values of %HASH and @ARRAY:
 
     foreach $key (keys %HASH) {
 	delete $HASH{$key};
     }
 
-And so does this:
+    foreach $index (0 .. $#ARRAY) {
+	delete $ARRAY[$index];
+    }
 
-    delete @HASH{keys %HASH}
+And so do these:
+
+    delete @HASH{keys %HASH};
+
+    delete @ARRAY{0 .. $#ARRAY};
 
 But both of these are slower than just assigning the empty list
-or undefining it:
+or undefining %HASH or @ARRAY:
 
-    %hash = ();		# completely empty %hash
-    undef %hash;	# forget %hash every existed
+    %HASH = ();		# completely empty %HASH
+    undef %HASH;	# forget %HASH ever existed
+
+    @ARRAY = ();	# completely empty @ARRAY
+    undef @ARRAY;	# forget @ARRAY ever existed
 
 Note that the EXPR can be arbitrarily complicated as long as the final
-operation is a hash element lookup or hash slice:
+operation is a hash element, array element,  hash slice, or array slice
+lookup:
 
     delete $ref->[$x][$y]{$key};
     delete @{$ref->[$x][$y]}{$key1, $key2, @morekeys};
+
+    delete $ref->[$x][$y][$index];
+    delete @{$ref->[$x][$y]}[$index1, $index2, @moreindices];
+
 
 =item die LIST
 
@@ -1386,27 +1403,36 @@ any C<DESTROY> methods in your objects.
 
 =item exists EXPR
 
-Returns true if the specified hash key exists in its hash, even
-if the corresponding value is undefined.
+Given an expression that specifies a hash element or array element,
+returns true if the specified element exists in the hash or array,
+even if the corresponding value is undefined.  The element is not
+autovivified if it doesn't exist.
 
-    print "Exists\n" 	if exists $array{$key};
-    print "Defined\n" 	if defined $array{$key};
-    print "True\n"      if $array{$key};
+    print "Exists\n" 	if exists $hash{$key};
+    print "Defined\n" 	if defined $hash{$key};
+    print "True\n"      if $hash{$key};
+
+    print "Exists\n" 	if exists $array[$index];
+    print "Defined\n" 	if defined $array[$index];
+    print "True\n"      if $array[$index];
 
 A hash element can be true only if it's defined, and defined if
 it exists, but the reverse doesn't necessarily hold true.
 
 Note that the EXPR can be arbitrarily complicated as long as the final
-operation is a hash key lookup:
+operation is a hash or array key lookup:
 
     if (exists $ref->{A}->{B}->{$key}) 	{ }
     if (exists $hash{A}{B}{$key}) 	{ }
 
-Although the last element will not spring into existence just because
-its existence was tested, intervening ones will.  Thus C<$ref-E<gt>{"A"}>
-and C<$ref-E<gt>{"A"}-E<gt>{"B"}> will spring into existence due to the
-existence test for a $key element.  This happens anywhere the arrow
-operator is used, including even 
+    if (exists $ref->{A}->{B}->[$ix]) 	{ }
+    if (exists $hash{A}{B}[$ix]) 	{ }
+
+Although the deepest nested array or hash will not spring into existence
+just because its existence was tested, any intervening ones will.
+Thus C<$ref-E<gt>{"A"}> and C<$ref-E<gt>{"A"}-E<gt>{"B"}> will spring
+into existence due to the existence test for the $key element above.
+This happens anywhere the arrow operator is used, including even:
 
     undef $ref;
     if (exists $ref->{"Some key"})	{ }

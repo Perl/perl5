@@ -67,12 +67,15 @@
 #define append_elem		Perl_append_elem
 #define append_list		Perl_append_list
 #define apply			Perl_apply
+#define avhv_delete_ent		Perl_avhv_delete_ent
 #define avhv_exists_ent		Perl_avhv_exists_ent
 #define avhv_fetch_ent		Perl_avhv_fetch_ent
 #define avhv_iternext		Perl_avhv_iternext
 #define avhv_iterval		Perl_avhv_iterval
 #define avhv_keys		Perl_avhv_keys
 #define av_clear		Perl_av_clear
+#define av_delete		Perl_av_delete
+#define av_exists		Perl_av_exists
 #define av_extend		Perl_av_extend
 #define av_fake			Perl_av_fake
 #define av_fetch		Perl_av_fetch
@@ -1502,12 +1505,15 @@
 #define append_elem(a,b,c)	Perl_append_elem(aTHX_ a,b,c)
 #define append_list(a,b,c)	Perl_append_list(aTHX_ a,b,c)
 #define apply(a,b,c)		Perl_apply(aTHX_ a,b,c)
+#define avhv_delete_ent(a,b,c,d)	Perl_avhv_delete_ent(aTHX_ a,b,c,d)
 #define avhv_exists_ent(a,b,c)	Perl_avhv_exists_ent(aTHX_ a,b,c)
 #define avhv_fetch_ent(a,b,c,d)	Perl_avhv_fetch_ent(aTHX_ a,b,c,d)
 #define avhv_iternext(a)	Perl_avhv_iternext(aTHX_ a)
 #define avhv_iterval(a,b)	Perl_avhv_iterval(aTHX_ a,b)
 #define avhv_keys(a)		Perl_avhv_keys(aTHX_ a)
 #define av_clear(a)		Perl_av_clear(aTHX_ a)
+#define av_delete(a,b,c)	Perl_av_delete(aTHX_ a,b,c)
+#define av_exists(a,b)		Perl_av_exists(aTHX_ a,b)
 #define av_extend(a,b)		Perl_av_extend(aTHX_ a,b)
 #define av_fake(a,b)		Perl_av_fake(aTHX_ a,b)
 #define av_fetch(a,b,c)		Perl_av_fetch(aTHX_ a,b,c)
@@ -2919,6 +2925,8 @@
 #define append_list		Perl_append_list
 #define Perl_apply		CPerlObj::Perl_apply
 #define apply			Perl_apply
+#define Perl_avhv_delete_ent	CPerlObj::Perl_avhv_delete_ent
+#define avhv_delete_ent		Perl_avhv_delete_ent
 #define Perl_avhv_exists_ent	CPerlObj::Perl_avhv_exists_ent
 #define avhv_exists_ent		Perl_avhv_exists_ent
 #define Perl_avhv_fetch_ent	CPerlObj::Perl_avhv_fetch_ent
@@ -2931,6 +2939,10 @@
 #define avhv_keys		Perl_avhv_keys
 #define Perl_av_clear		CPerlObj::Perl_av_clear
 #define av_clear		Perl_av_clear
+#define Perl_av_delete		CPerlObj::Perl_av_delete
+#define av_delete		Perl_av_delete
+#define Perl_av_exists		CPerlObj::Perl_av_exists
+#define av_exists		Perl_av_exists
 #define Perl_av_extend		CPerlObj::Perl_av_extend
 #define av_extend		Perl_av_extend
 #define Perl_av_fake		CPerlObj::Perl_av_fake

@@ -1084,12 +1084,15 @@ p	|bool	|Gv_AMupdate	|HV* stash
 p	|OP*	|append_elem	|I32 optype|OP* head|OP* tail
 p	|OP*	|append_list	|I32 optype|LISTOP* first|LISTOP* last
 p	|I32	|apply		|I32 type|SV** mark|SV** sp
+p	|SV*	|avhv_delete_ent|AV *ar|SV* keysv|I32 flags|U32 hash
 p	|bool	|avhv_exists_ent|AV *ar|SV* keysv|U32 hash
 p	|SV**	|avhv_fetch_ent	|AV *ar|SV* keysv|I32 lval|U32 hash
 p	|HE*	|avhv_iternext	|AV *ar
 p	|SV*	|avhv_iterval	|AV *ar|HE* entry
 p	|HV*	|avhv_keys	|AV *ar
 p	|void	|av_clear	|AV* ar
+p	|SV*	|av_delete	|AV* ar|I32 key|I32 flags
+p	|bool	|av_exists	|AV* ar|I32 key
 p	|void	|av_extend	|AV* ar|I32 key
 p	|AV*	|av_fake	|I32 size|SV** svp
 p	|SV**	|av_fetch	|AV* ar|I32 key|I32 lval

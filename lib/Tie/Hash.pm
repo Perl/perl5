@@ -73,6 +73,8 @@ Return the next key for the hash.
 
 Verify that I<key> exists with the tied hash I<this>.
 
+The B<Tie::Hash> implementation is a stub that simply croaks.
+
 =item DELETE this, key
 
 Delete the key I<key> from the tied hash I<this>.

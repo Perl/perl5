@@ -91,6 +91,13 @@ Perl_apply(pTHXo_ I32 type, SV** mark, SV** sp)
     return ((CPerlObj*)pPerl)->Perl_apply(type, mark, sp);
 }
 
+#undef  Perl_avhv_delete_ent
+SV*
+Perl_avhv_delete_ent(pTHXo_ AV *ar, SV* keysv, I32 flags, U32 hash)
+{
+    return ((CPerlObj*)pPerl)->Perl_avhv_delete_ent(ar, keysv, flags, hash);
+}
+
 #undef  Perl_avhv_exists_ent
 bool
 Perl_avhv_exists_ent(pTHXo_ AV *ar, SV* keysv, U32 hash)
@@ -131,6 +138,20 @@ void
 Perl_av_clear(pTHXo_ AV* ar)
 {
     ((CPerlObj*)pPerl)->Perl_av_clear(ar);
+}
+
+#undef  Perl_av_delete
+SV*
+Perl_av_delete(pTHXo_ AV* ar, I32 key, I32 flags)
+{
+    return ((CPerlObj*)pPerl)->Perl_av_delete(ar, key, flags);
+}
+
+#undef  Perl_av_exists
+bool
+Perl_av_exists(pTHXo_ AV* ar, I32 key)
+{
+    return ((CPerlObj*)pPerl)->Perl_av_exists(ar, key);
 }
 
 #undef  Perl_av_extend

@@ -4921,11 +4921,22 @@ Perl_ck_delete(pTHX_ OP *o)
     o->op_private = 0;
     if (o->op_flags & OPf_KIDS) {
 	OP *kid = cUNOPo->op_first;
-	if (kid->op_type == OP_HSLICE)
+	switch (kid->op_type) {
+	case OP_ASLICE:
+	    o->op_flags |= OPf_SPECIAL;
+	    /* FALL THROUGH */
+	case OP_HSLICE:
 	    o->op_private |= OPpSLICE;
-	else if (kid->op_type != OP_HELEM)
-	    Perl_croak(aTHX_ "%s argument is not a HASH element or slice",
+	    break;
+	case OP_AELEM:
+	    o->op_flags |= OPf_SPECIAL;
+	    /* FALL THROUGH */
+	case OP_HELEM:
+	    break;
+	default:
+	    Perl_croak(aTHX_ "%s argument is not a HASH or ARRAY element or slice",
 		  PL_op_desc[o->op_type]);
+	}
 	null(kid);
     }
     return o;
@@ -5011,8 +5022,11 @@ Perl_ck_exists(pTHX_ OP *o)
     o = ck_fun(o);
     if (o->op_flags & OPf_KIDS) {
 	OP *kid = cUNOPo->op_first;
-	if (kid->op_type != OP_HELEM)
-	    Perl_croak(aTHX_ "%s argument is not a HASH element", PL_op_desc[o->op_type]);
+	if (kid->op_type == OP_AELEM)
+	    o->op_flags |= OPf_SPECIAL;
+	else if (kid->op_type != OP_HELEM)
+	    Perl_croak(aTHX_ "%s argument is not a HASH or ARRAY element",
+		       PL_op_desc[o->op_type]);
 	null(kid);
     }
     return o;

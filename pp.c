@@ -2647,13 +2647,28 @@ PP(pp_delete)
 	U32 hvtype;
 	hv = (HV*)POPs;
 	hvtype = SvTYPE(hv);
-	while (++MARK <= SP) {
-	    if (hvtype == SVt_PVHV)
+	if (hvtype == SVt_PVHV) {			/* hash element */
+	    while (++MARK <= SP) {
 		sv = hv_delete_ent(hv, *MARK, discard, 0);
-	    else
-		DIE(aTHX_ "Not a HASH reference");
-	    *MARK = sv ? sv : &PL_sv_undef;
+		*MARK = sv ? sv : &PL_sv_undef;
+	    }
 	}
+	else if (hvtype == SVt_PVAV) {
+	    if (PL_op->op_flags & OPf_SPECIAL) {	/* array element */
+		while (++MARK <= SP) {
+		    sv = av_delete((AV*)hv, SvIV(*MARK), discard);
+		    *MARK = sv ? sv : &PL_sv_undef;
+		}
+	    }
+	    else {					/* pseudo-hash element */
+		while (++MARK <= SP) {
+		    sv = avhv_delete_ent((AV*)hv, *MARK, discard, 0);
+		    *MARK = sv ? sv : &PL_sv_undef;
+		}
+	    }
+	}
+	else
+	    DIE(aTHX_ "Not a HASH reference");
 	if (discard)
 	    SP = ORIGMARK;
 	else if (gimme == G_SCALAR) {
@@ -2667,6 +2682,12 @@ PP(pp_delete)
 	hv = (HV*)POPs;
 	if (SvTYPE(hv) == SVt_PVHV)
 	    sv = hv_delete_ent(hv, keysv, discard, 0);
+	else if (SvTYPE(hv) == SVt_PVAV) {
+	    if (PL_op->op_flags & OPf_SPECIAL)
+		sv = av_delete((AV*)hv, SvIV(keysv), discard);
+	    else
+		sv = avhv_delete_ent((AV*)hv, keysv, discard, 0);
+	}
 	else
 	    DIE(aTHX_ "Not a HASH reference");
 	if (!sv)
@@ -2687,7 +2708,11 @@ PP(pp_exists)
 	    RETPUSHYES;
     }
     else if (SvTYPE(hv) == SVt_PVAV) {
-	if (avhv_exists_ent((AV*)hv, tmpsv, 0))
+	if (PL_op->op_flags & OPf_SPECIAL) {		/* array element */
+	    if (av_exists((AV*)hv, SvIV(tmpsv)))
+		RETPUSHYES;
+	}
+	else if (avhv_exists_ent((AV*)hv, tmpsv, 0))	/* pseudo-hash element */
 	    RETPUSHYES;
     }
     else {

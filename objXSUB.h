@@ -851,6 +851,10 @@
 #define Perl_apply		pPerl->Perl_apply
 #undef  apply
 #define apply			Perl_apply
+#undef  Perl_avhv_delete_ent
+#define Perl_avhv_delete_ent	pPerl->Perl_avhv_delete_ent
+#undef  avhv_delete_ent
+#define avhv_delete_ent		Perl_avhv_delete_ent
 #undef  Perl_avhv_exists_ent
 #define Perl_avhv_exists_ent	pPerl->Perl_avhv_exists_ent
 #undef  avhv_exists_ent
@@ -875,6 +879,14 @@
 #define Perl_av_clear		pPerl->Perl_av_clear
 #undef  av_clear
 #define av_clear		Perl_av_clear
+#undef  Perl_av_delete
+#define Perl_av_delete		pPerl->Perl_av_delete
+#undef  av_delete
+#define av_delete		Perl_av_delete
+#undef  Perl_av_exists
+#define Perl_av_exists		pPerl->Perl_av_exists
+#undef  av_exists
+#define av_exists		Perl_av_exists
 #undef  Perl_av_extend
 #define Perl_av_extend		pPerl->Perl_av_extend
 #undef  av_extend

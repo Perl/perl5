@@ -23,12 +23,15 @@ Perl_Gv_AMupdate
 Perl_append_elem
 Perl_append_list
 Perl_apply
+Perl_avhv_delete_ent
 Perl_avhv_exists_ent
 Perl_avhv_fetch_ent
 Perl_avhv_iternext
 Perl_avhv_iterval
 Perl_avhv_keys
 Perl_av_clear
+Perl_av_delete
+Perl_av_exists
 Perl_av_extend
 Perl_av_fake
 Perl_av_fetch

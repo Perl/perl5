@@ -185,10 +185,12 @@ methods: TIEARRAY, FETCH, STORE, FETCHSIZE, STORESIZE and perhaps DESTROY.
 FETCHSIZE and STORESIZE are used to provide C<$#array> and
 equivalent C<scalar(@array)> access.
     
-The methods POP, PUSH, SHIFT, UNSHIFT, SPLICE are required if the perl
-operator with the corresponding (but lowercase) name is to operate on the
-tied array. The B<Tie::Array> class can be used as a base class to implement
-these in terms of the basic five methods above.  
+The methods POP, PUSH, SHIFT, UNSHIFT, SPLICE, DELETE, and EXISTS are
+required if the perl operator with the corresponding (but lowercase) name
+is to operate on the tied array. The B<Tie::Array> class can be used as a
+base class to implement the first five of these in terms of the basic
+methods above.  The default implementations of DELETE and EXISTS in
+B<Tie::Array> simply C<croak>.
 
 In addition EXTEND will be called when perl would have pre-extended 
 allocation in a real array.
