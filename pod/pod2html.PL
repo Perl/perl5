@@ -116,7 +116,7 @@ for $count (0,1) {
 	$html = $pod.".html";
 	if ($count) {              # give us a html and rcs header
 	    open(HTML,">$html") || die "can't create $html: $ERRNO";
-	    print HTML '<!-- $Id$ -->',"\n",'<HTML><HEAD>',"\n";
+	    print HTML '<!-- $Id: pod2html.PL,v 1.1.1.1 1997/01/11 12:49:12 mbeattie Exp $ -->',"\n",'<HTML><HEAD>',"\n";
 	    print HTML "<CENTER>" unless $NO_NS;
 	    print HTML "<TITLE>$pod</TITLE>\n</HEAD>\n<BODY>";
 	    print HTML "</CENTER>" unless $NO_NS;

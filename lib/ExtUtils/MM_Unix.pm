@@ -1,7 +1,7 @@
 package ExtUtils::MM_Unix;
 
-$VERSION = substr q$Revision: 1.101 $, 10;
-# $Id: MM_Unix.pm,v 1.101 1996/06/23 20:51:18 k Exp k $
+$VERSION = substr q$Revision: 1.1.1.1 $, 10;
+# $Id: MM_Unix.pm,v 1.1.1.1 1997/01/11 12:48:52 mbeattie Exp $
 
 require Exporter;
 use Config;

@@ -27,7 +27,7 @@
 ;;; Corrections made by Ilya Zakharevich ilya@math.mps.ohio-state.edu
 ;;; XEmacs changes by Peter Arius arius@informatik.uni-erlangen.de
 
-;; $Id: cperl-mode.el,v 1.20 1996/02/09 03:40:01 ilya Exp ilya $
+;; $Id: cperl-mode.el,v 1.1.1.1 1997/01/11 12:48:09 mbeattie Exp $
 
 ;;; To use this mode put the following into your .emacs file:
 

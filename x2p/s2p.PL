@@ -35,9 +35,12 @@ $Config{'startperl'}
 
 print OUT <<'!NO!SUBS!';
 
-# $RCSfile: s2p.SH,v $$Revision: 4.1 $$Date: 92/08/07 18:29:23 $
+# $RCSfile: s2p.PL,v $$Revision: 1.1.1.1 $$Date: 1997/01/11 12:49:38 $
 #
-# $Log:	s2p.SH,v $
+# $Log: s2p.PL,v $
+# Revision 1.1.1.1  1997/01/11 12:49:38  mbeattie
+# 5.003
+#
 
 $indent = 4;
 $shiftwidth = 4;

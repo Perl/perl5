@@ -1,7 +1,7 @@
 package ExtUtils::Install;
 
-$VERSION = substr q$Revision: 1.12 $, 10;
-# $Id: Install.pm,v 1.12 1996/06/23 20:46:07 k Exp $
+$VERSION = substr q$Revision: 1.1.1.1 $, 10;
+# $Id: Install.pm,v 1.1.1.1 1997/01/11 12:48:51 mbeattie Exp $
 
 use Exporter;
 use Carp ();
