@@ -2361,9 +2361,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
     }
     else if (paren != '?')		/* Not Conditional */
 	ret = br;
-    if (flags&HASWIDTH)
-	*flagp |= HASWIDTH;
-    *flagp |= flags&SPSTART;
+    *flagp |= flags & (SPSTART | HASWIDTH);
     lastbr = br;
     while (*RExC_parse == '|') {
 	if (!SIZE_ONLY && RExC_extralen) {
