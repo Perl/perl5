@@ -87,7 +87,7 @@ $DEF_INDENT = 4;
 $indent = $DEF_INDENT;
 $needspace = 0;
 
-open(IN, shift) || die "Couldn't open file!\n";
+open(IN, $file) || die "Couldn't open $file: $!";
 
 POD_DIRECTIVE: while (<IN>) {
     if ($cutting) {
@@ -213,7 +213,7 @@ sub prepare_for_output {
 	    {
 		if (length() + 3 < $indent) {
 		    my $paratag = $_;
-		    $_ = <>;
+		    $_ = <IN>;
 		    if (/^=/) {  # tricked!
 			local($indent) = $indent[$#index - 1] || $DEF_INDENT;
 			output($paratag);
