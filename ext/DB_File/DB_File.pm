@@ -1,10 +1,12 @@
 # DB_File.pm -- Perl 5 interface to Berkeley DB 
 #
 # written by Paul Marquess (pmarquess@bfsec.bt.co.uk)
-# last modified 4th Sept 1996
-# version 1.03
+# last modified 10th Nov 1996
+# version 1.05
 
 package DB_File::HASHINFO ;
+
+require 5.003 ;
 
 use strict;
 use Carp;
@@ -19,18 +21,20 @@ sub new
     bless \%x, $pkg ;
 }
 
+
 sub TIEHASH
 {
     my $pkg = shift ;
 
-    bless {   'bsize'     => undef,
-              'ffactor'   => undef,
-              'nelem'     => undef,
-              'cachesize' => undef,
+    bless {   'bsize'     => 0,
+              'ffactor'   => 0,
+              'nelem'     => 0,
+              'cachesize' => 0,
               'hash'      => undef,
-              'lorder'    => undef,
+              'lorder'    => 0,
         }, $pkg ;
 }
+
 
 sub FETCH 
 {  
@@ -106,12 +110,12 @@ sub TIEHASH
 {
     my $pkg = shift ;
 
-    bless {   'bval'      => undef,
-              'cachesize' => undef,
-              'psize'     => undef,
-              'flags'     => undef,
-              'lorder'    => undef,
-              'reclen'    => undef,
+    bless {   'bval'      => 0,
+              'cachesize' => 0,
+              'psize'     => 0,
+              'flags'     => 0,
+              'lorder'    => 0,
+              'reclen'    => 0,
               'bfname'    => "",
             }, $pkg ;
 }
@@ -126,14 +130,14 @@ sub TIEHASH
 {
     my $pkg = shift ;
 
-    bless {   'flags'	  => undef,
-              'cachesize'  => undef,
-              'maxkeypage' => undef,
-              'minkeypage' => undef,
-              'psize'      => undef,
+    bless {   'flags'	  => 0,
+              'cachesize'  => 0,
+              'maxkeypage' => 0,
+              'minkeypage' => 0,
+              'psize'      => 0,
               'compare'    => undef,
               'prefix'     => undef,
-              'lorder'     => undef,
+              'lorder'     => 0,
             }, $pkg ;
 }
 
@@ -145,13 +149,9 @@ use vars qw($VERSION @ISA @EXPORT $AUTOLOAD $DB_BTREE $DB_HASH $DB_RECNO) ;
 use Carp;
 
 
-$VERSION = "1.03" ;
+$VERSION = "1.05" ;
 
 #typedef enum { DB_BTREE, DB_HASH, DB_RECNO } DBTYPE;
-#$DB_BTREE = TIEHASH DB_File::BTREEINFO ;
-#$DB_HASH  = TIEHASH DB_File::HASHINFO ;
-#$DB_RECNO = TIEHASH DB_File::RECNOINFO ;
-
 $DB_BTREE = new DB_File::BTREEINFO ;
 $DB_HASH  = new DB_File::HASHINFO ;
 $DB_RECNO = new DB_File::RECNOINFO ;
@@ -232,6 +232,17 @@ bootstrap DB_File $VERSION;
 # Preloaded methods go here.  Autoload methods go after __END__, and are
 # processed by the autosplit program.
 
+sub TIEHASH
+{
+    my (@arg) = @_ ;
+
+    $arg[4] = tied %{ $arg[4] } 
+	if @arg >= 5 && ref $arg[4] && $arg[4] =~ /=HASH/ && tied %{ $arg[4] } ;
+
+    DoTie_(@arg) ;
+}
+
+*TIEARRAY = \&TIEHASH ;
 
 sub get_dup
 {
@@ -248,9 +259,6 @@ sub get_dup
     my @values    = () ;
     my $counter   = 0 ;
     my $status    = 0 ;
- 
-    # get the first value associated with the key, $key
-    #$db->seq($key, $value, R_CURSOR()) ;
  
     # iterate through the database until either EOF ($status == 0)
     # or a different key is encountered ($key ne $origkey).
@@ -286,7 +294,6 @@ DB_File - Perl5 access to Berkeley DB
 =head1 SYNOPSIS
 
  use DB_File ;
- use strict 'untie' ;
  
  [$X =] tie %hash,  'DB_File', [$filename, $flags, $mode, $DB_HASH] ;
  [$X =] tie %hash,  'DB_File', $filename, $flags, $mode, $DB_BTREE ;
@@ -532,8 +539,9 @@ This example shows how to create a database, add key/value pairs to the
 database, delete keys/value pairs and finally how to enumerate the
 contents of the database.
 
+    use strict ;
     use DB_File ;
-    use strict 'untie' ;
+    use vars qw( %h $k $v ) ;
 
     tie %h, "DB_File", "fruit", O_RDWR|O_CREAT, 0640, $DB_HASH 
         or die "Cannot open file 'fruit': $!\n";
@@ -580,8 +588,10 @@ This script shows how to override the default sorting algorithm that
 BTREE uses. Instead of using the normal lexical ordering, a case
 insensitive compare function will be used.
 
+    use strict ;
     use DB_File ;
-    use strict 'untie' ;
+
+    my %h ;
 
     sub Compare
     {
@@ -645,9 +655,11 @@ There are some difficulties in using the tied hash interface if you
 want to manipulate a BTREE database with duplicate keys. Consider this
 code:
 
+    use strict ;
     use DB_File ;
-    use strict 'untie' ;
- 
+
+    use vars qw($filename %h ) ;
+
     $filename = "tree" ;
     unlink $filename ;
  
@@ -697,9 +709,11 @@ and the API in general.
 
 Here is the script above rewritten using the C<seq> API method.
 
+    use strict ;
     use DB_File ;
-    use strict 'untie' ;
  
+    use vars qw($filename $x %h $status $key $value) ;
+
     $filename = "tree" ;
     unlink $filename ;
  
@@ -718,6 +732,7 @@ Here is the script above rewritten using the C<seq> API method.
  
     # iterate through the btree using seq
     # and print each key/value pair.
+    $key = $value = 0 ;
     for ($status = $x->seq($key, $value, R_FIRST) ;
          $status == 0 ;
          $status = $x->seq($key, $value, R_NEXT) )
@@ -762,14 +777,14 @@ value occurred in the BTREE.
 So assuming the database created above, we can use C<get_dup> like
 this:
 
-    $cnt  = $x->get_dup("Wall") ;
+    my $cnt  = $x->get_dup("Wall") ;
     print "Wall occurred $cnt times\n" ;
 
-    %hash = $x->get_dup("Wall", 1) ;
+    my %hash = $x->get_dup("Wall", 1) ;
     print "Larry is there\n" if $hash{'Larry'} ;
     print "There are $hash{'Brick'} Brick Walls\n" ;
 
-    @list = $x->get_dup("Wall") ;
+    my @list = $x->get_dup("Wall") ;
     print "Wall =>	[@list]\n" ;
 
     @list = $x->get_dup("Smith") ;
@@ -799,24 +814,24 @@ is used along with the R_CURSOR flag.
 Here is the relevant quote from the dbopen man page where it defines
 the use of the R_CURSOR flag with seq:
 
-
     Note, for the DB_BTREE access method, the returned key is not
     necessarily an exact match for the specified key. The returned key
     is the smallest key greater than or equal to the specified key,
     permitting partial key matches and range searches.
 
-
 In the example script below, the C<match> sub uses this feature to find
 and print the first matching key/value pair given a partial key.
 
+    use strict ;
     use DB_File ;
     use Fcntl ;
-    use strict 'untie' ;
+
+    use vars qw($filename $x %h $st $key $value) ;
 
     sub match
     {
         my $key = shift ;
-        my $value ;
+        my $value = 0;
         my $orig_key = $key ;
         $x->seq($key, $value, R_CURSOR) ;
         print "$orig_key\t-> $key\t-> $value\n" ;
@@ -835,6 +850,7 @@ and print the first matching key/value pair given a partial key.
     $h{'Smith'} = 'John' ;
  
 
+    $key = $value = 0 ;
     print "IN ORDER\n" ;
     for ($st = $x->seq($key, $value, R_FIRST) ;
 	 $st == 0 ;
@@ -881,9 +897,10 @@ the start of the array will raise a fatal run-time error.
 
 Here is a simple example that uses RECNO.
 
+    use strict ;
     use DB_File ;
-    use strict 'untie' ;
 
+    my @h ;
     tie @h, "DB_File", "text", O_RDWR|O_CREAT, 0640, $DB_RECNO 
         or die "Cannot open file 'text': $!\n" ;
 
@@ -1007,7 +1024,7 @@ L<THE API INTERFACE>).
 
     # same again, but use the API functions instead
     print "\nREVERSE again\n" ;
-    my ($s, $k, $v)  ;
+    my ($s, $k, $v)  = (0, 0, 0) ;
     for ($s = $H->seq($k, $v, R_LAST) ; 
              $s == 0 ; 
              $s = $H->seq($k, $v, R_PREV))
@@ -1091,7 +1108,7 @@ as B<DB_File> methods directly like this:
 B<Important:> If you have saved a copy of the object returned from
 C<tie>, the underlying database file will I<not> be closed until both
 the tied variable is untied and all copies of the saved object are
-destroyed. See L<The strict untie pragma> for more details.
+destroyed. 
 
     use DB_File ;
     $db = tie %hash, "DB_File", "filename" 
@@ -1227,101 +1244,6 @@ R_RECNOSYNC is the only valid flag at present.
 
 =head1 HINTS AND TIPS 
 
-=head2 The strict untie pragma
-
-If you run Perl version 5.004 or later (actually any version from the
-5.003_01 development release on will suffice) and you make use of the
-Berkeley DB API, it is is I<very> strongly recommended that you always
-include the C<use strict 'untie'> pragma in any of your scripts that
-make use of B<DB_File>.
-
-Even if you don't currently make use of the API interface, it is still
-a good idea to include the pragma. It won't affect the performance of
-your script, but it will prevent problems in the future.
-
-If possible you should try to run with the full strict pragma, but that
-is another story. For further details see L<strict> and 
-L<perldsc/WHY YOU SHOULD ALWAYS C<use strict>>.
-
-To illustrate the importance of including the untie pragma, here is an
-example script that fails in an unexpected place because it doesn't use
-it:
-
-    use DB_File ;
-    use Fcntl ;
- 
-    $X = tie %x, 'DB_File', 'tst.fil' , O_RDWR|O_CREAT
-        or die "Cannot tie first time: $!" ;
- 
-    $x{123} = 456 ;
- 
-    untie %x ;
- 
-    $X = tie %x, 'DB_File', 'tst.fil' , O_RDWR|O_CREAT
-        or die "Cannot tie second time: $!" ;
-
-    untie %x ;
-
-When run the script will produce this error message:
-
-    Cannot tie second time: Invalid argument at bad.file line 12.
-
-Although the error message above refers to the second tie statement in
-the script, the source of the problem is really with the untie
-statement that precedes it.
-
-To understand why there is a problem at all with the untie statement,
-consider what the tie does for a moment. 
-
-Whenever the tie is executed, it creates a logical link between a Perl
-variable, the associative array C<%x> in this case, and a Berkeley DB
-database, C<tst.fil>. The logical link ensures that all operation on
-the associative array are automatically mirrored to the database file.
-
-In normal circumstances the untie is enough to break the logical link
-and also close the database. In this particular case there is another
-logical link, namely the API object returned from the tie and stored in
-C<$X>. Whenever the untie is executed in this case, only the link
-between the associative array and the database will be broken. The API
-object in C<$X> is still valid, so the database will not be closed.
-
-The end result of this is that when the second tie is executed, the
-database will be in an inconsistent state (i.e. it is still opened by
-the first tie) - thus the second tie will fail.
-
-If the C<use strict 'untie'> pragma is included in the script, like
-this:
-
-    use DB_File ;
-    use Fcntl ;
-    use strict 'untie' ;
- 
-    $X = tie %x, 'DB_File', 'tst.fil' , O_RDWR|O_CREAT
-        or die "Cannot tie first time: $!" ;
- 
-    $x{123} = 456 ;
- 
-    untie %x ;
- 
-    $X = tie %x, 'DB_File', 'tst.fil' , O_RDWR|O_CREAT
-        or die "Cannot tie second time: $!" ;
-
-then the error message becomes:
-
-    Can't untie: 1 inner references still exist at bad.file line 11.
-
-which pinpoints the real problem. Finally the script can now be
-modified to fix the original problem by destroying the API object
-before the untie:
-
-    ...
-    $x{123} = 456 ;
-
-    undef $X ;
-    untie %x ;
- 
-    $X = tie %x, 'DB_File', 'tst.fil' , O_RDWR|O_CREAT
-    ...
 
 =head2 Locking Databases
 
@@ -1331,7 +1253,6 @@ uses the I<fd> method to get the file descriptor, and then a careful
 open() to give something Perl will flock() for you.  Run this repeatedly
 in the background to watch the locks granted in proper order.
 
-    use strict 'untie';
     use DB_File;
 
     use strict;
@@ -1374,7 +1295,7 @@ in the background to watch the locks granted in proper order.
 
     print "$$: Write lock granted\n";
     $db{$key} = $value;
-    $db->sync;
+    $db->sync;	# to flush
     sleep 10;
 
     flock(DB_FH, LOCK_UN);
@@ -1406,10 +1327,11 @@ Here is a snippet of code that is loosely based on Tom Christiansen's
 I<ggh> script (available from your nearest CPAN archive in
 F<authors/id/TOMC/scripts/nshist.gz>).
 
+    use strict ;
     use DB_File ;
     use Fcntl ;
-    use strict 'untie' ;
 
+    use vars qw( $dotdir $HISTORY %hist_db $href $binary_time $date ) ;
     $dotdir = $ENV{HOME} || $ENV{LOGNAME};
 
     $HISTORY = "$dotdir/.netscape/history.db";
@@ -1480,8 +1402,7 @@ Here are a couple of possibilities:
 
 =item 1.
 
-Attempting to reopen a database without closing it. See 
-L<The strict untie pragma> for an example.
+Attempting to reopen a database without closing it. 
 
 =item 2.
 
@@ -1577,6 +1498,28 @@ The standard hash function C<exists> is now supported.
 Modified the behavior of get_dup. When it returns an associative
 array, the value is the count of the number of matching BTREE values.
 
+=item 1.04
+
+Minor documentation changes.
+
+Fixed a bug in hash_cb. Patches supplied by Dave Hammen,
+E<lt>hammen@gothamcity.jsc.nasa.govE<gt>.
+
+Fixed a bug with the constructors for DB_File::HASHINFO,
+DB_File::BTREEINFO and DB_File::RECNOINFO. Also tidied up the
+constructors to make them C<-w> clean.
+
+Reworked part of the test harness to be more locale friendly.
+
+=item 1.05
+
+Made all scripts in the documentation C<strict> and C<-w> clean.
+
+Added logic to F<DB_File.xs> to allow the module to be built after Perl
+is installed.
+
+=back
+
 =head1 BUGS
 
 Some older versions of Berkeley DB had problems with fixed length
@@ -1593,8 +1536,9 @@ the directory F<ext/DB_File>.
 
 Berkeley DB is available at your nearest CPAN archive (see
 L<perlmod/"CPAN"> for a list) in F<src/misc/db.1.85.tar.gz>, or via the
-host F<ftp.cs.berkeley.edu> in F</ucb/4bsd/db.tar.gz>.  It is I<not> under
-the GPL.
+host F<ftp.cs.berkeley.edu> in F</ucb/4bsd/db.tar.gz>.  Alternatively,
+check out the Berkeley DB home page at F<http://www.bostic.com/db>. It
+is I<not> under the GPL.
 
 If you are running IRIX, then get Berkeley DB from
 F<http://reality.sgi.com/ariel>. It has the patches necessary to
