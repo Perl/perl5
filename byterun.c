@@ -1,5 +1,5 @@
 /*
- *      Copyright (c) 1996 Malcolm Beattie
+ *      Copyright (c) 1996, 1997 Malcolm Beattie
  *
  *      You may distribute under the terms of either the GNU General Public
  *      License or the Artistic License, as specified in the README file.
@@ -22,6 +22,7 @@ void byterun(fp)
 FILE *fp;
 #endif /* INDIRECT_BGET_MACROS */
 {
+    dTHR;
     int insn;
     while ((insn = FGETC()) != EOF) {
 	switch (insn) {

@@ -12,7 +12,9 @@ void *bset_obj_store _((void *, I32));
 void freadpv _((U32, void *));
 
 EXT SV *sv;
+#ifndef USE_THREADS
 EXT OP *op;
+#endif
 EXT XPV pv;
 
 EXT void **obj_list;
@@ -135,14 +137,15 @@ EXT I32 obj_list_fill INIT(-1);
 #define BSET_hv_store(sv, arg)	\
 	hv_store((HV*)sv, pv.xpv_pv, pv.xpv_cur, arg, 0)
 #define BSET_pv_free(pv)	Safefree(pv.xpv_pv)
-#define BSET_pregcomp(op, arg) \
-	cPMOP->op_pmregexp = arg ? pregcomp(arg, arg + pv.xpv_cur, cPMOP) : 0
+#define BSET_pregcomp(o, arg) \
+	((PMOP*)o)->op_pmregexp = arg ? \
+		pregcomp(arg, arg + pv.xpv_cur, ((PMOP*)o)) : 0
 #define BSET_newsv(sv, arg)	sv = NEWSV(666,0); SvUPGRADE(sv, arg)
-#define BSET_newop(op, arg)	op = (OP*)safemalloc(optype_size[arg])
-#define BSET_newopn(op, arg)	do {	\
-	OP *oldop = op;			\
-	BSET_newop(op, arg);		\
-	oldop->op_next = op;		\
+#define BSET_newop(o, arg)	o = (OP*)safemalloc(optype_size[arg])
+#define BSET_newopn(o, arg)	do {	\
+	OP *oldop = o;			\
+	BSET_newop(o, arg);		\
+	oldop->op_next = o;		\
     } while (0)
 
 #define BSET_ret(foo) return
@@ -151,11 +154,11 @@ EXT I32 obj_list_fill INIT(-1);
  * Kludge special-case workaround for OP_MAPSTART
  * which needs the ppaddr for OP_GREPSTART. Blech.
  */
-#define BSET_op_type(op, arg)	do {	\
-	op->op_type = arg;		\
-	op->op_ppaddr = (arg != OP_MAPSTART) ? ppaddr[arg] : pp_grepstart; \
+#define BSET_op_type(o, arg)	do {	\
+	o->op_type = arg;		\
+	o->op_ppaddr = (arg != OP_MAPSTART) ? ppaddr[arg] : pp_grepstart; \
     } while (0)
-#define BSET_op_ppaddr(op, arg) croak("op_ppaddr not yet implemented")
+#define BSET_op_ppaddr(o, arg) croak("op_ppaddr not yet implemented")
 #define BSET_curpad(pad, arg) pad = AvARRAY(arg)
 
 #define BSET_OBJ_STORE(obj, ix)		\

@@ -260,6 +260,7 @@ walkoptree(opsv, method)
 SV *opsv;
 char *method;
 {
+    dTHR;
     dSP;
     OP *o;
     
