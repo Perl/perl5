@@ -1174,9 +1174,9 @@ regen_headers :
 
 # VMS uses modified perly.[ch] with tags for globaldefs if using DEC compiler
 perly.c : [.vms]perly_c.vms
-	Copy/NoConfirm/Log $(MMS$SOURCE) []
+	Copy/NoConfirm/Log $(MMS$SOURCE) $(MMS$TARGET)
 perly.h : [.vms]perly_h.vms
-	Copy/NoConfirm/Log $(MMS$SOURCE) []
+	Copy/NoConfirm/Log $(MMS$SOURCE) $(MMS$TARGET)
 
 .ifdef LINK_ONLY
 .else
