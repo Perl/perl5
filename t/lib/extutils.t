@@ -54,7 +54,7 @@ my @names = ("FIVE", {name=>"OK6", type=>"PV",},
              {name => "ANSWER", default=>["UV", 42]}, "NOTDEF",
              {name => "Yes", type=>"YES"},
              {name => "No", type=>"NO"},
-             {name => "Undef", type=>"UNDEF"}
+             {name => "Undef", type=>"UNDEF"},
 );
 
 my @names_only = map {(ref $_) ? $_->{name} : $_} @names;

@@ -104,7 +104,7 @@ $VERSION = '0.04';
                 PVN => 'PUSHp(pv, iv)',
 		YES => 'PUSHs(&PL_sv_yes)',
 		NO => 'PUSHs(&PL_sv_no)',
-		UNDEF => ''	# implicit undef
+		UNDEF => '',	# implicit undef
 );
 
 %XS_TypeSet = (
@@ -113,7 +113,9 @@ $VERSION = '0.04';
                 NV => '*nv_return =',
                 PV => '*pv_return =',
                 PVN => ['*pv_return =', '*iv_return = (IV)'],
-		YES => undef, NO => undef, UNDEF => undef
+		YES   => undef,
+		NO    => undef,
+		UNDEF => undef,
 );
 
 
