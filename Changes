@@ -95,6 +95,146 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6756] By: jhi                                   on 2000/08/21  18:34:02
+        Log: A pod nit.
+             
+             Subject: [PATCH] pod/perlre.pod (was Re: [ID 20000821.007] $&, $1, etc. disappear when sub returns)
+             From: <abigail@foad.org>
+             Date: Mon, 21 Aug 2000 14:00:16 -0400
+             Message-ID: <20000821180016.28627.qmail@foad.org>
+     Branch: perl
+	   ! pod/perlre.pod
+____________________________________________________________________________
+[  6755] By: jhi                                   on 2000/08/21  18:30:56
+        Log: Use PodParser 1.18 new test.
+     Branch: perl
+	   ! t/pod/special_seqs.t t/pod/special_seqs.xr
+____________________________________________________________________________
+[  6754] By: jhi                                   on 2000/08/21  18:28:35
+        Log: Apply some PodParser 1.18 patches; the Pod/Find.pm
+             patches cannot be applied since #6712 conflicts.
+     Branch: perl
+	   ! lib/Pod/InputObjects.pm lib/Pod/Parser.pm lib/Pod/Usage.pm
+____________________________________________________________________________
+[  6753] By: jhi                                   on 2000/08/21  18:15:11
+        Log: Weed out some smaller changes.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  6752] By: jhi                                   on 2000/08/21  18:02:30
+        Log: Also under djgpp the timestamps are funky.
+     Branch: perl
+	   ! t/op/stat.t
+____________________________________________________________________________
+[  6751] By: jhi                                   on 2000/08/21  17:55:56
+        Log: Tweak the floating point output routine preferences.
+     Branch: metaconfig
+	   ! U/compline/d_gconvert.U
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[  6750] By: jhi                                   on 2000/08/21  17:51:29
+        Log: Unicos/mk requires elaborate paranoia.
+     Branch: perl
+	   ! lib/Math/Complex.pm
+____________________________________________________________________________
+[  6749] By: gsar                                  on 2000/08/21  16:53:31
+        Log: use Cwd 'chdir' didn't set $ENV{PWD} correctly on Windows
+     Branch: perl
+	   ! lib/Cwd.pm
+____________________________________________________________________________
+[  6748] By: gsar                                  on 2000/08/21  16:22:19
+        Log: free TLS slot properly on Windows
+     Branch: perl
+	   ! thread.h win32/perllib.c win32/win32thread.h
+____________________________________________________________________________
+[  6747] By: jhi                                   on 2000/08/21  16:20:58
+        Log: Rename the macro argument because some preprocessors
+             can't tell the difference and expand arguments also inside
+             double quoted strings.
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[  6746] By: jhi                                   on 2000/08/21  16:09:41
+        Log: Support long doubles in Storable.
+             
+             Subject: Re: Not OK: perl v5.7.0 +SUIDMAIL +DEVEL6735 on i686-linux-thread-multi-64int 2.2.14-5.0 (UNINSTALLED)
+             From: Radu Greab <radu@netsoft.ro>
+             Date: Mon, 21 Aug 2000 18:05:59 +0300 (EET DST)
+             Message-ID: <Pine.GSO.4.05.10008211804210.10137-100000@localhost>
+     Branch: perl
+	   ! ext/Storable/Storable.xs
+____________________________________________________________________________
+[  6745] By: jhi                                   on 2000/08/21  15:51:40
+        Log: Subject: RE: [PATCH perl@6736] t/pragma/warn/9enabled assumes stdout buffered
+             From: "Fifer, Eric" <EFifer@sanwaint.com>
+             Date: Mon, 21 Aug 2000 15:34:49 +0100
+             Message-ID: <779F20BCCE5AD31186A50008C75D9979171786@silldn_mail1.sanwaint.com>
+     Branch: perl
+	   ! t/pragma/warn/9enabled
+____________________________________________________________________________
+[  6744] By: jhi                                   on 2000/08/21  15:39:35
+        Log: Document the endianness of Alpha more precisely.
+     Branch: perl
+	   ! hints/unicos.sh pod/perldelta.pod pod/perlfunc.pod
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[  6743] By: jhi                                   on 2000/08/21  14:47:05
+        Log: perldelta fixes from the p5p crowd.
+     Branch: perl
+	   ! pod/perldelta.pod pod/perlop.pod
+____________________________________________________________________________
+[  6742] By: jhi                                   on 2000/08/21  13:34:51
+        Log: Update to Pod::LaTeX 0.53.
+             
+             Subject: [PATCH] lib/Pod/LaTeX.pm updates
+             From: Tim Jenness <timj@jach.hawaii.edu>
+             Date: Sun, 20 Aug 2000 23:09:48 -1000 (HST)
+             Message-ID: <Pine.LNX.4.21.0008202308040.12047-100000@lapaki.jach.hawaii.edu>
+     Branch: perl
+	   ! lib/Pod/LaTeX.pm
+____________________________________________________________________________
+[  6741] By: jhi                                   on 2000/08/21  13:33:01
+        Log: Subject: [PATCH] os2.c fix for use64bitint
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Mon, 21 Aug 2000 01:32:25 -0700
+             Message-ID: <ZkOo5gzkgWEb092yn@efn.org>
+     Branch: perl
+	   ! os2/os2.c
+____________________________________________________________________________
+[  6740] By: jhi                                   on 2000/08/21  13:28:52
+        Log: Array context keeps slithering in.
+             
+             Subject: Re: 5.7.0 getting really close, new snapshot: perldelta, Storable
+             From: Daniel Chetlin <daniel@chetlin.com>
+             Date: Sun, 20 Aug 2000 21:40:25 -0700
+             Message-ID: <20000820214025.C29387@ilmd.chetlin.org>
+     Branch: perl
+	   ! ext/Storable/Storable.xs lib/Pod/InputObjects.pm
+	   ! pod/perldebtut.pod
+____________________________________________________________________________
+[  6739] By: jhi                                   on 2000/08/21  13:23:55
+        Log: Big-endian quad fixes for Storable from Radu Greab,
+             plus few explicit null casts for picky compilers.
+     Branch: perl
+	   ! ext/Storable/Storable.xs
+____________________________________________________________________________
+[  6738] By: gsar                                  on 2000/08/21  05:56:13
+        Log: small tweaks for change#6705: avoid C++ style comments in C code;
+             use Perl's malloc API rather than the low level system one
+     Branch: perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[  6737] By: gsar                                  on 2000/08/21  05:35:41
+        Log: add Storable to list of extensions on Windows
+     Branch: perl
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  6736] By: jhi                                   on 2000/08/21  02:57:53
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  6735] By: jhi                                   on 2000/08/21  02:57:20
         Log: Draft 0.
      Branch: perl
