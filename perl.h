@@ -1086,6 +1086,25 @@ typedef UVTYPE UV;
 #  endif
 #endif
 
+/*
+  I've tracked down a weird bug in Perl5.6.1 to the UTS compiler's
+  mishandling of MY_UV_MAX in util.c.  It is defined as
+    #ifndef MY_UV_MAX
+    #  define MY_UV_MAX ((UV)IV_MAX * (UV)2 + (UV)1)
+    #endif
+  The compiler handles {double floating point value} >= MY_UV_MAX as if
+  MY_UV_MAX were the signed integer -1.  In fact it will do the same
+  thing with (UV)(0xffffffff), in place of MY_UV_MAX, though 0xffffffff
+  *without* the typecast to UV works fine.
+
+  hom00@utsglobal.com (Hal Morris) 2001-05-02
+
+  */
+
+#ifdef UTS
+#  define MY_UV_MAX 0xffffffff 
+#endif
+
 #define IV_DIG (BIT_DIGITS(IVSIZE * 8))
 #define UV_DIG (BIT_DIGITS(UVSIZE * 8))
 
@@ -2357,7 +2376,7 @@ END_EXTERN_C
 #  if defined(NeXT) || defined(__NeXT__) /* or whatever catches all NeXTs */
 char *crypt ();       /* Maybe more hosts will need the unprototyped version */
 #  else
-#    if !defined(WIN32)
+#    if !defined(WIN32) && !defined(VMS)
 char *crypt (const char*, const char*);
 #    endif /* !WIN32 */
 #  endif /* !NeXT && !__NeXT__ */
@@ -3336,7 +3355,7 @@ typedef struct am_table_short AMTS;
 
 #define IS_NUMERIC_RADIX(s)	\
 	((PL_hints & HINT_LOCALE) && \
-	  PL_numeric_radix && memEQ(s, SvPVX(PL_numeric_radix), SvCUR(PL_numeric_radix)))
+	  PL_numeric_radix_sv && memEQ(s, SvPVX(PL_numeric_radix_sv), SvCUR(PL_numeric_radix_sv)))
 
 #define STORE_NUMERIC_LOCAL_SET_STANDARD() \
 	bool was_local = (PL_hints & HINT_LOCALE) && PL_numeric_local; \

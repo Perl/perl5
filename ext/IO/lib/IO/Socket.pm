@@ -112,7 +112,7 @@ sub connect {
     $blocking = $sock->blocking(0) if $timeout;
 
     if (!connect($sock, $addr)) {
-	if ($timeout && $!{EINPROGRESS}) {
+	if (defined $timeout && $!{EINPROGRESS}) {
 	    require IO::Select;
 
 	    my $sel = new IO::Select $sock;
@@ -168,7 +168,7 @@ sub accept {
     my $new = $pkg->new(Timeout => $timeout);
     my $peer = undef;
 
-    if($timeout) {
+    if(defined $timeout) {
 	require IO::Select;
 
 	my $sel = new IO::Select $sock;
@@ -369,13 +369,21 @@ in attempt to make the interface more flexible. These are
 
 =item accept([PKG])
 
-perform the system call C<accept> on the socket and return a new object. The
-new object will be created in the same class as the listen socket, unless
-C<PKG> is specified. This object can be used to communicate with the client
-that was trying to connect. In a scalar context the new socket is returned,
-or undef upon failure. In a list context a two-element array is returned
-containing the new socket and the peer address; the list will
-be empty upon failure.
+perform the system call C<accept> on the socket and return a new
+object. The new object will be created in the same class as the listen
+socket, unless C<PKG> is specified. This object can be used to
+communicate with the client that was trying to connect.
+
+In a scalar context the new socket is returned, or undef upon
+failure. In a list context a two-element array is returned containing
+the new socket and the peer address; the list will be empty upon
+failure.
+
+The timeout in the [PKG] can be specified as zero to effect a "poll",
+but you shouldn't do that because a new IO::Select object will be
+created behind the scenes just do to the single poll.  This is
+horrendously inefficient.  Use rather true select() with a zero
+timeout on the handle, or non-blocking IO.
 
 =item socketpair(DOMAIN, TYPE, PROTOCOL)
 

@@ -83,6 +83,11 @@ case `$cc -v 2>&1`"" in
     *)      ccisgcc=''
 	    ccversion=`which cc | xargs what | awk '/Compiler/{print $2}'`
 	    ccflags="-Ae $cc_cppflags"
+           # Needed because cpp does only support -Aa (not -Ae)
+           cpplast='-'
+           cppminus='-'
+           cppstdin='cc -E -Aa -D__STDC_EXT__'
+           cpprun=$cppstdin
 	    case "$d_casti32" in
 		"") d_casti32='undef' ;;
 		esac
@@ -201,7 +206,7 @@ case "$ccisgcc" in
 
     *)	# HP's compiler cannot combine -g and -O
 	case "$optimize" in
-	    "")           optimize="-O" ;;
+           "")           optimize="+O2 +Onolimit" ;;
 	    *O[3456789]*) optimize=`echo "$optimize" | sed -e 's/O[3-9]/O2/'` ;;
 	    esac
 	ld=/usr/bin/ld

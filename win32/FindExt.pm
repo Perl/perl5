@@ -27,7 +27,7 @@ sub dynamic_extensions
 
 sub noxs_extensions
 {
- return grep $ext{$_} eq 'noxs',keys %ext;
+ return grep $ext{$_} eq 'nonxs',keys %ext;
 }
 
 sub extensions
@@ -37,7 +37,7 @@ sub extensions
 
 sub find_ext
 {
- if (/^(.*)\.pm$/i || /^(.*)_pm.PL$/i)
+ if (/^(.*)\.pm$/i || /^(.*)_pm\.PL$/i || /^(.*)\.xs$/i)
   {
    my $name = $1;
    return if $name =~ $no; 

@@ -569,26 +569,171 @@ use vars qw($_ptime);
 $_ptime =
 {
  '%' => sub {
-     $_[1] =~ s/^(%)// && $1;
+     $_[1] =~ s/^%//                      && $1;
+ },
+ # a unimplemented
+ # A unimplemented
+ # b unimplemented
+ # B unimplemented
+ # c unimplemented
+ 'C' => sub {
+     $_[1] =~ s/^(0[0-9])//               && $1;
  },
  'd' => sub {
-     $_[1] =~ s/^(0[1-9]|2[0-9]|3[01])// && $1;
+     $_[1] =~ s/^(0[1-9]|2[0-9]|3[01])//  && $1;
  },
+ 'D' => sub {
+     my %D;
+     my $D;
+     if (defined ($D = $_ptime->{'m'}->($_[0], $_[1]))) {
+	 $D{m} = $D;
+     } else {
+	 return;
+     }
+     $_[1] =~ s:^/:: || return;
+     if (defined ($D = $_ptime->{'d'}->($_[0], $_[1]))) {
+	 $D{d} = $D;
+     } else {
+	 return;
+     }
+     $_[1] =~ s:^/:: || return;
+     if (defined ($D = $_ptime->{'y'}->($_[0], $_[1]))) {
+	 $D{y} = $D;
+     } else {
+	 return;
+     }
+     return { %D };
+ },
+ 'e' => sub {
+     $_[1] =~ s/^( [1-9]|2[0-9]|3[01])//  && $1;
+ },
+ # h unimplemented
  'H' => sub {
-     $_[1] =~ s/^([0-1][0-9]|2[0-3])// && $1;
+     $_[1] =~ s/^([0-1][0-9]|2[0-3])//    && $1;
+ },
+ 'I' => sub {
+     $_[1] =~ s/^(0[1-9]|1[012])//        && $1;
+ },
+ 'j' => sub {
+     $_[1] =~ s/^([0-9][0-9][0-9])// && $1 >= 1 && $1 <= 366 && $1;
  },
  'm' => sub {
-     $_[1] =~ s/^(0[1-9]|1[012])// && $1;
+     $_[1] =~ s/^(0[1-9]|1[012])//        && $1;
  },
  'M' => sub {
-     $_[1] =~ s/^([0-5][0-9])// && $1;
+     $_[1] =~ s/^([0-5][0-9])//           && $1;
+ },
+ 't' => sub {
+     $_[1] =~ s/^\n//                     && $1;
+ },
+ 'p' => sub {
+     $_[1] =~ s/^(am|pm)//                && $1;
+ },
+ 'r' => sub {
+     my %r;
+     my $r;
+     if (defined ($r = $_ptime->{'I'}->($_[0], $_[1]))) {
+	 $r{I} = $r;
+     } else {
+	 return;
+     }
+     $_[1] =~ s/^:// || return;
+     if (defined ($r = $_ptime->{'M'}->($_[0], $_[1]))) {
+	 $r{M} = $r;
+     } else {
+	 return;
+     }
+     $_[1] =~ s/^:// || return;
+     if (defined ($r = $_ptime->{'S'}->($_[0], $_[1]))) {
+	 $r{S} = $r;
+     } else {
+	 return;
+     }
+     $_[1] =~ s/^ // || return;
+     if (defined ($r = $_ptime->{'p'}->($_[0], $_[1]))) {
+	 $r{p} = $r;
+     } else {
+	 return;
+     }
+     return { %r };
+ },
+ 'R' => sub {
+     my %R;
+     my $R;
+     if (defined ($R = $_ptime->{'H'}->($_[0], $_[1]))) {
+	 $R{H} = $R;
+     } else {
+	 return;
+     }
+     $_[1] =~ s/^:// || return;
+     if (defined ($R = $_ptime->{'M'}->($_[0], $_[1]))) {
+	 $R{M} = $R;
+     } else {
+	 return;
+     }
+     return { %R };
  },
  'S' => sub {
-     $_[1] =~ s/^([0-5][0-9])// && $1;
+     $_[1] =~ s/^([0-5][0-9])//           && $1;
+ },
+ 't' => sub {
+     $_[1] =~ s/^\t//                     && $1;
+ },
+ 'T' => sub {
+     my %T;
+     my $T;
+     if (defined ($T = $_ptime->{'H'}->($_[0], $_[1]))) {
+	 $T{H} = $T;
+     } else {
+	 return;
+     }
+     $_[1] =~ s/^:// || return;
+     if (defined ($T = $_ptime->{'M'}->($_[0], $_[1]))) {
+	 $T{M} = $T;
+     } else {
+	 return;
+     }
+     $_[1] =~ s/^:// || return;
+     if (defined ($T = $_ptime->{'S'}->($_[0], $_[1]))) {
+	 $T{S} = $T;
+     } else {
+	 return;
+     }
+     return { %T };
+ },
+ # u unimplemented
+ # U unimplemented
+ # w unimplemented
+ # W unimplemented
+ 'x' => sub {
+     my %x;
+     my $x;
+     if (defined ($x = $_ptime->{'m'}->($_[0], $_[1]))) {
+	 $x{m} = $x;
+     } else {
+	 return;
+     }
+     $_[1] =~ s:^/:: || return;
+     if (defined ($x = $_ptime->{'d'}->($_[0], $_[1]))) {
+	 $x{d} = $x;
+     } else {
+	 return;
+     }
+     $_[1] =~ s:^/:: || return;
+     if (defined ($x = $_ptime->{'y'}->($_[0], $_[1]))) {
+	 $x{y} = $x;
+     } else {
+	 return;
+     }
+     return { %x };
+ },
+ 'y' => sub {
+     $_[1] =~ s/^([0-9][0-9])//           && $1;
  },
  'Y' => sub {
      $_[1] =~ s/^([1-9][0-9][0-9][0-9])// && $1;
  },
+ # Z too unportable
 };
 
 sub has_ptime {
@@ -626,7 +771,7 @@ sub _ptime {
     if (has_ptime($format)) {
 	# We are passing format to the anonsubs so that
 	# one can share the same sub among several formats.
-	return $_ptime->{$format}->($format, $stime);
+	return $_ptime->{$format}->($format, $_[1]);
     }
     die "strptime: unknown format %$format (time '$stime')\n";
 }
@@ -636,19 +781,25 @@ sub strptime {
     my $format = shift;
     my $stime =  @_ ? shift : "$time";
     my %ptime;
+
     while ($format ne '') {
 	if ($format =~ s/^([^%]+)//) {
 	    my $skip = $1;
 	    last unless $stime =~ s/^\Q$skip//;
 	}
 	while ($format =~ s/^%(.)//) {
-	    my $t = _ptime($1, $stime);
+	    my $f = $1;
+	    my $t = _ptime($f, $stime);
 	    if (defined $t) {
-		$ptime{$1} = $t;
-		substr($stime, 0, length($t)) = '';
+		if (ref $t eq 'HASH') {
+		    @ptime{keys %$t} = values %$t;
+		} else {
+		    $ptime{$f} = $t;
+		}
 	    }
 	}
     }
+
     return %ptime;
 }
 

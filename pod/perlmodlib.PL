@@ -1,16 +1,19 @@
 #!../miniperl
 
+$ENV{LC_ALL} = 'C';
+
 open (OUT, ">perlmodlib.tmp") or die $!;
-my (@pragma, @mod);
+my (@pragma, @mod, @MANIFEST);
 open (MANIFEST, "../MANIFEST") or die $!;
 
 while (<MANIFEST>) {
      my $filename;
      next unless s|^lib/|| or m|^ext/|;
-     ($filename) = /(\S+)/;
+     ($filename) = m|^(\S+)|;
      $filename =~ s|^[^/]+/|| if $filename =~ s|^ext/||;
-     next unless $filename =~ /\.p(m|od)$/;
+     next unless $filename =~ m!\.p(m|od)$!;
      next unless open (MOD, "../lib/$filename");
+
 
      my ($name, $thing);
      my $foundit=0;
@@ -23,7 +26,7 @@ while (<MANIFEST>) {
 	 }
      }
      unless ($foundit) {
-	 warn "$filename missing head1\n";
+	 warn "$filename missing =head1 NAME (okay if there is respective .pod)\n";
 	 next;
      }
      my $title = <MOD>;
@@ -42,13 +45,12 @@ while (<MANIFEST>) {
 	 next;
      }
 
+
      $thing =~ s/^perl pragma to //i;
      $thing = ucfirst($thing);
      $title = "=item $perlname\n\n$thing\n\n";
 
-     # print "$perlname $thing\n";
-
-     if ($filename=~/[A-Z]/) {
+     if ($filename =~ /[A-Z]/) {
           push @mod, $title;
      } else {
           push @pragma, $title;

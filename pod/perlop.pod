@@ -1701,7 +1701,7 @@ The <> symbol will return C<undef> for end-of-file only once.
 If you call it again after this, it will assume you are processing another 
 @ARGV list, and if you haven't set @ARGV, will read input from STDIN.
 
-If angle brackets contain is a simple scalar variable (e.g.,
+If what the angle brackets contain is a simple scalar variable (e.g.,
 <$foo>), then that variable contains the name of the
 filehandle to input from, or its typeglob, or a reference to the
 same.  For example:
@@ -1765,7 +1765,7 @@ than
 because the latter will alternate between returning a filename and
 returning false.
 
-It you're trying to do variable interpolation, it's definitely better
+If you're trying to do variable interpolation, it's definitely better
 to use the glob() function, because the older notation can cause people
 to become confused with the indirect filehandle notation.
 

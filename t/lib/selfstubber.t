@@ -10,6 +10,10 @@ use Devel::SelfStubber;
 
 my $runperl = "$^X \"-I../lib\"";
 
+# ensure correct output ordering for system() calls
+
+select STDERR; $| = 1; select STDOUT; $| = 1;
+
 print "1..12\n";
 
 my @cleanup;
@@ -199,11 +203,11 @@ print "ok 8\n";
 }
 
 # Check that the DATA handle stays open
-system "$runperl -w \"-I$lib\" -MData -e Data::ok";
+system "$runperl -w \"-I$lib\" \"-MData\" -e \"Data::ok\"";
 
 # Possibly a pointless test as this doesn't really verify that it's been
 # stubbed.
-system "$runperl -w \"-I$lib\" -MEnd -e End::lime";
+system "$runperl -w \"-I$lib\" \"-MEnd\" -e \"End::lime\"";
 
 # But check that the documentation after the __END__ survived.
 open FH, "$lib/End.pm" or die $!;

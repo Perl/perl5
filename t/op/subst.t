@@ -6,7 +6,7 @@ BEGIN {
     require Config; import Config;
 }
 
-print "1..84\n";
+print "1..85\n";
 
 $x = 'foo';
 $_ = "x";
@@ -378,4 +378,8 @@ print +($_ eq '' and !length $@) ? "ok 83\n" : "not ok 83\n# \$_ eq $_, $@\n";
 $_ = "C:/";
 s/^([a-z]:)/\u$1/ and print "not ";
 print "ok 84\n";
+
+$_ = "Charles Bronson";
+s/\B\w//g;
+print $_ eq "C B" ? "ok 85\n" : "not ok 85\n# \$_ eq '$_'\n";
 

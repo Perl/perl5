@@ -15,16 +15,13 @@ use warnings;
 use strict;
 use Config;
 
-print "1..14\n";
-
-my $test = 1;
-
-sub ok { print "ok $test\n"; $test++ }
-
+print "1..12\n";
 
 use B::Deparse;
 my $deparse = B::Deparse->new() or print "not ";
-ok;
+my $i=1;
+print "ok ", $i++, "\n";
+
 
 # Tell B::Deparse about our ambient pragmas
 { my ($hint_bits, $warning_bits);
@@ -36,62 +33,63 @@ ok;
  );
 }
 
-print "not " if "{\n    1;\n}" ne $deparse->coderef2text(sub {1});
-ok;
+$/ = "\n####\n";
+while (<DATA>) {
+    chomp;
+    s/#.*$//mg;
 
-print "not " if "{\n    '???';\n    2;\n}" ne
-                    $deparse->coderef2text(sub {1;2});
-ok;
-
-print "not " if "{\n    \$test /= 2 if ++\$test;\n}" ne
-                    $deparse->coderef2text(sub {++$test and $test/=2;});
-ok;
-
-print "not " if "{\n    -((1, 2) x 2);\n}" ne
-                    $deparse->coderef2text(sub {-((1,2)x2)});
-ok;
-
-{
-my $a = <<'EOF';
-{
-    $test = sub : lvalue {
-        my $x;
+    my ($input, $expected);
+    if (/(.*)\n>>>>\n(.*)/s) {
+	($input, $expected) = ($1, $2);
     }
-    ;
+    else {
+	($input, $expected) = ($_, $_);
+    }
+
+    my $coderef = eval "sub {$input}";
+
+    if ($@) {
+	print "not ok ", $i++, "\n";
+	print "# $@";
+    }
+    else {
+	my $deparsed = $deparse->coderef2text( $coderef );
+	my $regex = quotemeta($expected);
+	do {
+	    no warnings 'misc';
+	    $regex =~ s/\s+/\s+/g;
+	};
+
+	my $ok = ($deparsed =~ /^\{\s*$regex\s*\}$/);
+	print ($ok ? "ok " : "not ok ");
+	print $i++, "\n";
+	if (!$ok) {
+	    print "# EXPECTED:\n";
+	    $regex =~ s/^/# /mg;
+	    print "$regex\n";
+
+	    print "\n# GOT: \n";
+	    $deparsed =~ s/^/# /mg;
+	    print "$deparsed\n";
+	}
+    }
 }
-EOF
-chomp $a;
-print "not " if $deparse->coderef2text(sub{$test = sub : lvalue{my $x}}) ne $a;
-ok;
-
-$a =~ s/lvalue/method/;
-print "not " if $deparse->coderef2text(sub{$test = sub : method{my $x}}) ne $a;
-ok;
-
-$a =~ s/method/locked method/;
-print "not " if $deparse->coderef2text(sub{$test = sub : method locked {my $x}})
-                                     ne $a;
-ok;
-}
-
-print "not " if (eval "sub ".$deparse->coderef2text(sub () { 42 }))->() != 42;
-ok;
 
 use constant 'c', 'stuff';
 print "not " if (eval "sub ".$deparse->coderef2text(\&c))->() ne 'stuff';
-ok;
+print "ok ", $i++, "\n";
 
 $a = 0;
 print "not " if "{\n    (-1) ** \$a;\n}"
 		ne $deparse->coderef2text(sub{(-1) ** $a });
-ok;
+print "ok ", $i++, "\n";
 
 # XXX ToDo - constsub that returns a reference
 #use constant cr => ['hello'];
 #my $string = "sub " . $deparse->coderef2text(\&cr);
 #my $val = (eval $string)->();
 #print "not " if ref($val) ne 'ARRAY' || $val->[0] ne 'hello';
-#ok;
+#print "ok ", $i++, "\n";
 
 my $a;
 my $Is_VMS = $^O eq 'VMS';
@@ -114,19 +112,57 @@ LINE: while (defined($_ = <ARGV>)) {
 
 EOF
 print "# [$a]\n\# vs expected\n# [$b]\nnot " if $a ne $b;
-ok;
+print "ok ", $i++, "\n";
 
-
-# Bug 20001204.07
+__DATA__
+# 1
+1;
+####
+# 2
 {
-my $foo = $deparse->coderef2text(sub { { 234; }});
-# Constants don't get optimised here.
-print "not " unless $foo =~ /{.*{.*234;.*}.*}/sm;
-ok;
-$foo = $deparse->coderef2text(sub { { 234; } continue { 123; } });
-unless ($foo =~ /{\s*{\s*do\s*{\s*234;\s*};\s*}\s*continue\s*{\s*123;\s*}\s*}/sm) {
-  print "# [$foo]\n\# vs expected\n# [{ { do { 234; }; } continue { 123; } }]\n";
-  print "not ";
+    no warnings;
+    '???';
+    2;
 }
-ok;
+####
+# 3
+my $test;
+++$test and $test /= 2;
+>>>>
+my $test;
+$test /= 2 if ++$test;
+####
+# 4
+-((1, 2) x 2);
+####
+# 5
+{
+    my $test = sub : lvalue {
+	my $x;
+    }
+    ;
+}
+####
+# 6
+{
+    my $test = sub : method {
+	my $x;
+    }
+    ;
+}
+####
+# 7
+{
+    my $test = sub : locked method {
+	my $x;
+    }
+    ;
+}
+####
+# 8
+{
+    234;
+}
+continue {
+    123;
 }

@@ -54,6 +54,8 @@ EOM
     print "1..0 # Skip: @_\n" if @_;
 }
 
+$| = 1;
+
 print "# checking whether we have sparse files...\n";
 
 # Known have-nots.

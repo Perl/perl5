@@ -4,7 +4,7 @@ use strict;
 use vars qw($VERSION);
 use Carp;
 
-$VERSION = '2.01';
+$VERSION = '2.02';
 
 
 # LOAD FILTERING MODULE...
@@ -18,10 +18,10 @@ $::_S_W_I_T_C_H = sub { croak "case statement not in switch block" };
 
 my $offset;
 my $fallthrough;
-my $nextlabel = 1;
 
 sub import
 {
+	$DB::single = 1;
 	$fallthrough = grep /\bfallthrough\b/, @_;
 	$offset = (caller)[2]+1;
 	filter_add({}) unless @_>1 && $_[1] ne '__';
@@ -80,7 +80,7 @@ sub filter_blocks
 	my $text = "";
 	component: while (pos $source < length $source)
 	{
-		if ($source =~ m/(\G\s*use\s+switch\b)/gc)
+		if ($source =~ m/(\G\s*use\s+Switch\b)/gc)
 		{
 			$text .= q{use Switch 'noimport'};
 			next component;
@@ -88,20 +88,20 @@ sub filter_blocks
 		my @pos = Text::Balanced::_match_quotelike(\$source,qr/\s*/,1,1);
 		if (defined $pos[0])
 		{
-			$text .= substr($source,$pos[2],$pos[18]-$pos[2]);
+			$text .= " " . substr($source,$pos[2],$pos[18]-$pos[2]);
 			next component;
 		}
 		@pos = Text::Balanced::_match_variable(\$source,qr/\s*/);
 		if (defined $pos[0])
 		{
-			$text .= substr($source,$pos[0],$pos[4]-$pos[0]);
+			$text .= " " . substr($source,$pos[0],$pos[4]-$pos[0]);
 			next component;
 		}
 
 		if ($source =~ m/\G(\n*)(\s*)switch\b(?=\s*[(])/gc)
 		{
 			$text .= $1.$2.'S_W_I_T_C_H: while (1) ';
-			@pos = Text::Balanced::_match_codeblock(\$source,qr/\s*/,qr/\(/,qr/\)/,qr/\{/,qr/\}/,undef) 
+			@pos = Text::Balanced::_match_codeblock(\$source,qr/\s*/,qr/\(/,qr/\)/,qr/[[{(<]/,qr/[]})>]/,undef) 
 			or do {
 				die "Bad switch statement (problem in the parentheses?) near $Switch::file line ", line(substr($source,0,pos $source),$line), "\n";
 			};
@@ -454,8 +454,8 @@ Switch - A switch statement for Perl
 
 =head1 VERSION
 
-This document describes version 2.01 of Switch,
-released January  9, 2001.
+This document describes version 2.02 of Switch,
+released April 26, 2001.
 
 =head1 SYNOPSIS
 

@@ -4660,7 +4660,6 @@ Perl_save_re_context(pTHX)
     SAVEVPTR(PL_regendp);		/* Ditto for endp. */
     SAVEVPTR(PL_reglastparen);		/* Similarly for lastparen. */
     SAVEPPTR(PL_regtill);		/* How far we are required to go. */
-    SAVEI8(PL_regprev);			/* char before regbol, \n if none */
     SAVEGENERICPV(PL_reg_start_tmp);		/* from regexec.c */
     PL_reg_start_tmp = 0;
     SAVEI32(PL_reg_start_tmpl);		/* from regexec.c */

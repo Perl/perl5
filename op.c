@@ -1361,31 +1361,6 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	PL_modcount++;
 	return o;
     case OP_CONST:
-        if (o->op_private & (OPpCONST_BARE) &&
-                !(type == OP_GREPSTART || type == OP_ENTERSUB || type == OP_REFGEN)) {
-            SV *sv = ((SVOP*)o)->op_sv;
-            GV *gv;
-
-            /* Could be a filehandle */
-            if ((gv = gv_fetchpv(SvPV_nolen(sv), FALSE, SVt_PVIO))) {
-                OP* gvio = newUNOP(OP_RV2GV, 0, newGVOP(OP_GV, 0, gv));
-                op_free(o);
-                o = gvio;
-            } else {
-                /* OK, it's a sub */
-                OP* enter;
-                gv = gv_fetchpv(SvPV_nolen(sv), TRUE, SVt_PVCV);
-
-                enter = newUNOP(OP_ENTERSUB,0,
-                        newUNOP(OP_RV2CV, 0,
-                            newGVOP(OP_GV, 0, gv)
-                        ));
-                enter->op_private |= OPpLVAL_INTRO;
-                op_free(o);
-                o = enter;
-            }
-            break;
-        }
 	if (!(o->op_private & (OPpCONST_ARYBASE)))
 	    goto nomod;
 	if (PL_eval_start && PL_eval_start->op_type == OP_CONST) {

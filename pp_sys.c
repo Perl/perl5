@@ -70,8 +70,10 @@ extern int h_errno;
 # ifdef I_PWD
 #  include <pwd.h>
 # else
+#  if !defined(VMS)
     struct passwd *getpwnam (char *);
     struct passwd *getpwuid (Uid_t);
+#  endif
 # endif
 # ifdef HAS_GETPWENT
   struct passwd *getpwent (void);
@@ -3697,7 +3699,7 @@ PP(pp_readdir)
 {
     dSP;
 #if defined(Direntry_t) && defined(HAS_READDIR)
-#ifndef I_DIRENT
+#if !defined(I_DIRENT) && !defined(VMS)
     Direntry_t *readdir (DIR *);
 #endif
     register Direntry_t *dp;

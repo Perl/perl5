@@ -12,7 +12,7 @@ BEGIN {
     }
 }
 
-print "1..85\n";
+print "1..86\n";
 
 use Time::Piece;
 
@@ -313,4 +313,9 @@ print "ok 84\n";
 
 print "not " unless Time::Piece::_is_leap_year(1904);
 print "ok 85\n";
+
+my %T = $t->strptime("%T", "12:34:56");
+
+print "not " unless keys %T == 3 && $T{H} == 12 && $T{M} == 34 && $T{S} == 56;
+print "ok 86\n";
 

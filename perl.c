@@ -585,7 +585,7 @@ perl_destruct(pTHXx)
 #ifdef USE_LOCALE_NUMERIC
     Safefree(PL_numeric_name);
     PL_numeric_name = Nullch;
-    SvREFCNT_dec(PL_numeric_radix);
+    SvREFCNT_dec(PL_numeric_radix_sv);
 #endif
 
     /* clear utf8 character classes */
@@ -2615,6 +2615,9 @@ S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv, int *fdscript)
 	sv_catpvn(sv, "-I", 2);
 	sv_catpv(sv,PRIVLIB_EXP);
 
+	DEBUG_P(PerlIO_printf(Perl_debug_log,
+			      "PL_preprocess: scriptname=\"%s\", cpp=\"%s\", sv=\"%s\", CPPMINUS=\"%s\"\n",
+			      scriptname, SvPVX (cpp), SvPVX (sv), CPPMINUS));
 #if defined(MSDOS) || defined(WIN32)
 	Perl_sv_setpvf(aTHX_ cmd, "\
 sed %s -e \"/^[^#]/b\" \

@@ -15,6 +15,8 @@ if ($^O eq 'mpeix') {
     exit 0;
 }
 
+$| = 1;
+
 my $perl = -e '../perl' ? '../perl' : -e './perl' ? './perl' : 'perl';
 
 use strict;

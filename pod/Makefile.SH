@@ -84,7 +84,7 @@ html:	pod2html $(HTML)
 
 tex:	pod2latex $(TEX)
 
-toc:	buildtoc
+toc perltoc.pod:	buildtoc
 	$(PERLILIB) buildtoc
 
 .SUFFIXES: .pm .pod
@@ -157,7 +157,7 @@ podchecker:	podchecker.PL ../lib/Config.pm
 podselect:	podselect.PL ../lib/Config.pm
 	$(PERL) -I ../lib podselect.PL
 
-perlmodlib.pod:	$(PERL) perlmodlib.PL ../mv-if-diff
+perlmodlib.pod:	$(PERL) perlmodlib.PL ../mv-if-diff ../MANIFEST
 	rm -f perlmodlib.tmp
 	$(PERL) -I ../lib perlmodlib.PL
 	sh ../mv-if-diff perlmodlib.tmp perlmodlib.pod

@@ -1,5 +1,9 @@
 #if defined(USE_THREADS) || defined(USE_ITHREADS)
 
+#if defined(VMS)
+#include <builtins.h>
+#endif
+
 #ifdef WIN32
 #  include <win32thread.h>
 #else

@@ -2847,6 +2847,8 @@ Perl_yylex(pTHX)
 		s++;
 	    if (s < d)
 		s++;
+	    else if (s > d) /* Found by Ilya: feed random input to Perl. */
+	      Perl_croak(aTHX_ "panic: input overflow");
 	    incline(s);
 	    if (PL_lex_formbrack && PL_lex_brackets <= PL_lex_formbrack) {
 		PL_bufptr = s;
@@ -6876,12 +6878,11 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 
   Read a number in any of the formats that Perl accepts:
 
-  0(x[0-7A-F]+)|([0-7]+)|(b[01])
-  \d([\d_]*\d)?(\.\d([\d_]*\d)?)?[Ee](\d+)
-
-  Underbars (_) are allowed in decimal numbers.  If -w is on,
-  underbars must not be consecutive, and they cannot start
-  or end integer or fractional parts.
+  \d(_?\d)*(\.(\d(_?\d)*)?)?[Ee](\d+)	12 12.34 12.
+  \.\d(_?\d)*[Ee](\d+)			.34
+  0b[01](_?[01])*
+  0[0-7](_?[0-7])*
+  0x[0-9A-Fa-f](_?[0-9A-Fa-f])*
 
   Like most scan_ routines, it uses the PL_tokenbuf buffer to hold the
   thing it reads.

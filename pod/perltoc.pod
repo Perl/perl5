@@ -2214,7 +2214,7 @@ File::Spec::VMS, File::Spec::Win32, File::Temp, File::stat, FileCache,
 FileHandle, Filter::Simple, FindBin, Getopt::Long, Getopt::Std,
 I18N::Collate, IO, IPC::Open2, IPC::Open3, Locale::Constants,
 Locale::Country, Locale::Currency, Locale::Language, Math::BigFloat,
-Math::BigInt, Math::Complex, Math::Trig, NDBM_File, Net::Ping,
+Math::BigInt, Math::Complex, Math::Trig, NDBM_File, NEXT, Net::Ping,
 Net::hostent, Net::netent, Net::protoent, Net::servent, O, ODBM_File,
 Opcode, POSIX, PerlIO, Pod::Checker, Pod::Find, Pod::Html,
 Pod::InputObjects, Pod::LaTeX, Pod::Man, Pod::ParseUtils, Pod::Parser,
@@ -2775,6 +2775,9 @@ filehandles between subroutines?  How do I make an array of filehandles?
 
 =item I still don't get locking.  I just want to increment the number in
 the file.  How can I do this?
+
+=item All I want to do is append a small amount of text to the end of a
+file.  Do I still have to use locking?
 
 =item How do I randomly update a binary file?
 
@@ -5501,6 +5504,11 @@ B<Unix emulation for AmigaOS: ixemul.library>, B<Version of Amiga OS>
 
 =item Shortcomings of Perl under AmigaOS
 
+fork(), some features of the UNIX filesystem regarding link count and file
+dates, inplace operation (the -i switch) without backup file, umask()
+works, but the correct permissions are only set when the file is      
+finally close()d
+
 =back
 
 =item INSTALLATION
@@ -5529,7 +5537,7 @@ B<Unix emulation for AmigaOS: ixemul.library>, B<Version of Amiga OS>
 
 =item Making
 
-sh Configure -Dprefix=/ade -Dloclibpth=/ade/lib
+	remember to use a hefty wad of stack (I use 2000000)
 
 =item Testing
 
@@ -5669,50 +5677,6 @@ Source, Compiled Module Source, Perl Modules/Scripts
 =item AUTHORS
 
 =item HISTORY
-
-=back
-
-=head2 perldos - Perl under DOS, W31, W95.
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over 4
-
-=item Prerequisites
-
-DJGPP, Pthreads
-
-=item Shortcomings of Perl under DOS
-
-=item Building
-
-=item Testing
-
-=item Installation
-
-=back
-
-=item BUILDING AND INSTALLING MODULES
-
-=over 4
-
-=item Prerequisites
-
-=item Unpacking CPAN Modules
-
-=item Building Non-XS Modules
-
-=item Building XS Modules
-
-=back
-
-=item AUTHOR
-
-=item SEE ALSO
 
 =back
 
@@ -6397,48 +6361,6 @@ LIST, waitpid PID,FLAGS
 =item AUTHOR
 
 =item LAST UPDATE
-
-=back
-
-=head2 perlwin32 - Perl under Win32
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over 4
-
-=item Setting Up
-
-Make, Command Shell, Borland C++, Microsoft Visual C++, Mingw32 with GCC
-
-=item Building
-
-=item Testing
-
-=item Installation
-
-=item Usage Hints
-
-Environment Variables, File Globbing, Using perl from the command line,
-Building Extensions, Command-line Wildcard Expansion, Win32 Specific
-Extensions, Running Perl Scripts, Miscellaneous Things
-
-=back
-
-=item BUGS AND CAVEATS
-
-=item AUTHORS
-
-Gary Ng E<lt>71564.1743@CompuServe.COME<gt>, Gurusamy Sarathy
-E<lt>gsar@activestate.comE<gt>, Nick Ing-Simmons
-E<lt>nick@ing-simmons.netE<gt>
-
-=item SEE ALSO
-
-=item HISTORY
 
 =back
 
@@ -7176,8 +7098,9 @@ label, stash, file, cop_seq, arybase, line
 
 main_cv, init_av, main_root, main_start, comppadlist, sv_undef, sv_yes,
 sv_no, amagic_generation, walkoptree(OP, METHOD), walkoptree_debug(DEBUG),
-walksymtable(SYMREF, METHOD, RECURSE), svref_2object(SV), ppname(OPNUM),
-hash(STR), cast_I32(I), minus_c, cstring(STR), class(OBJ), threadsv_names
+walksymtable(SYMREF, METHOD, RECURSE, PREFIX), svref_2object(SV),
+ppname(OPNUM), hash(STR), cast_I32(I), minus_c, cstring(STR), class(OBJ),
+threadsv_names
 
 =item AUTHOR
 
@@ -7334,6 +7257,8 @@ B<#targ>, B<#targarg>, B<#targarglife>, B<#typenum>
 
 =back
 
+=item Using B::Concise outside of the O framework
+
 =item AUTHOR
 
 =back
@@ -7360,7 +7285,7 @@ B<#targ>, B<#targarg>, B<#targarglife>, B<#typenum>
 
 =item OPTIONS
 
-B<-l>, B<-p>, B<-q>, B<-u>I<PACKAGE>, B<-s>I<LETTERS>, B<C>, B<i>I<NUMBER>,
+B<-l>, B<-p>, B<-q>, B<-f>I<FILE>, B<-s>I<LETTERS>, B<C>, B<i>I<NUMBER>,
 B<T>, B<v>I<STRING>B<.>, B<-x>I<LEVEL>
 
 =item USING B::Deparse AS A MODULE
@@ -8622,7 +8547,8 @@ B<DB_HASH>, B<DB_BTREE>, B<DB_RECNO>
 =item Extra RECNO Methods
 
 B<$X-E<gt>push(list) ;>, B<$value = $X-E<gt>pop ;>, B<$X-E<gt>shift>,
-B<$X-E<gt>unshift(list) ;>, B<$X-E<gt>length>
+B<$X-E<gt>unshift(list) ;>, B<$X-E<gt>length>, B<$X-E<gt>splice(offset,
+length, elements);>
 
 =item Another Example
 
@@ -9008,10 +8934,12 @@ reference, e.g.:
 
 =item Encoding and IO
 
+=item Encode and PerlIO
+
 =item Encoding How to ...
 
 IO with mixed content (faking iso-2020-*), MIME's Content-Length:, UTF-8
-strings in binary data, perl/Encode wrappers on non-Unicode XS modules
+strings in binary data, Perl/Encode wrappers on non-Unicode XS modules
 
 =item Messing with Perl's Internals
 
@@ -10418,6 +10346,10 @@ $fh->print, $fh->printf, $fh->getline, $fh->getlines
 
 =item A Solution
 
+=item Disabling or changing <no> behaviour
+
+=item All-in-one interface
+
 =item How it works
 
 =back
@@ -10754,8 +10686,8 @@ IO ), handles( [ EVENT_MASK ] )
 
 =item DESCRIPTION
 
-$io->getpos, $io->setpos, $io->setpos ( POS, WHENCE ), WHENCE=0 (SEEK_SET),
-WHENCE=1 (SEEK_CUR), WHENCE=1 (SEEK_END), $io->sysseek( POS, WHENCE ),
+$io->getpos, $io->setpos, $io->seek ( POS, WHENCE ), WHENCE=0 (SEEK_SET),
+WHENCE=1 (SEEK_CUR), WHENCE=2 (SEEK_END), $io->sysseek( POS, WHENCE ),
 $io->tell
 
 =item SEE ALSO
@@ -10994,8 +10926,8 @@ I/O objects
 
 =item DESCRIPTION
 
-$io->getpos, $io->setpos, $io->setpos ( POS, WHENCE ), WHENCE=0 (SEEK_SET),
-WHENCE=1 (SEEK_CUR), WHENCE=1 (SEEK_END), $io->sysseek( POS, WHENCE ),
+$io->getpos, $io->setpos, $io->seek ( POS, WHENCE ), WHENCE=0 (SEEK_SET),
+WHENCE=1 (SEEK_CUR), WHENCE=2 (SEEK_END), $io->sysseek( POS, WHENCE ),
 $io->tell
 
 =item SEE ALSO
@@ -11292,7 +11224,8 @@ general-utility scalar subroutines
 
 =item DESCRIPTION
 
-blessed EXPR, dualvar NUM, STRING, isweak EXPR, reftype EXPR, weaken REF
+blessed EXPR, dualvar NUM, STRING, isweak EXPR, readonly SCALAR, reftype
+EXPR, tainted EXPR, weaken REF
 
 =item COPYRIGHT
 
@@ -11667,6 +11600,22 @@ C<O_RDONLY>, C<O_WRONLY>, C<O_RDWR>
 =back
 
 =item BUGS AND WARNINGS
+
+=back
+
+=head2 NEXT - Provide a pseudo-class NEXT that allows method redispatch
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=item BUGS AND IRRITATIONS
+
+=item COPYRIGHT
 
 =back
 
@@ -13233,7 +13182,8 @@ Memory, CPU, Snooping, Signals, State Changes
 
 =item DESCRIPTION
 
-blessed EXPR, dualvar NUM, STRING, isweak EXPR, reftype EXPR, weaken REF
+blessed EXPR, dualvar NUM, STRING, isweak EXPR, readonly SCALAR, reftype
+EXPR, tainted EXPR, weaken REF
 
 =item COPYRIGHT
 
@@ -13995,9 +13945,15 @@ $floating_seconds [, $interval_floating_seconds ] ), getitimer ( $which )
 
 =item Date Comparisons
 
+=item YYYY-MM-DDThh:mm:ss
+
+=item Week Number
+
 =item Global Overriding
 
 =back
+
+=item SEE ALSO
 
 =item AUTHOR
 

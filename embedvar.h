@@ -99,6 +99,7 @@
 #define PL_regcode		(vTHX->Tregcode)
 #define PL_regcomp_parse	(vTHX->Tregcomp_parse)
 #define PL_regcomp_rx		(vTHX->Tregcomp_rx)
+#define PL_regcompat1		(vTHX->Tregcompat1)
 #define PL_regcompp		(vTHX->Tregcompp)
 #define PL_regdata		(vTHX->Tregdata)
 #define PL_regdummy		(vTHX->Tregdummy)
@@ -117,7 +118,6 @@
 #define PL_regnaughty		(vTHX->Tregnaughty)
 #define PL_regnpar		(vTHX->Tregnpar)
 #define PL_regprecomp		(vTHX->Tregprecomp)
-#define PL_regprev		(vTHX->Tregprev)
 #define PL_regprogram		(vTHX->Tregprogram)
 #define PL_regsawback		(vTHX->Tregsawback)
 #define PL_regseen		(vTHX->Tregseen)
@@ -325,9 +325,10 @@
 #define PL_nthreads		(PERL_GET_INTERP->Inthreads)
 #define PL_nthreads_cond	(PERL_GET_INTERP->Inthreads_cond)
 #define PL_nullstash		(PERL_GET_INTERP->Inullstash)
+#define PL_numeric_compat1	(PERL_GET_INTERP->Inumeric_compat1)
 #define PL_numeric_local	(PERL_GET_INTERP->Inumeric_local)
 #define PL_numeric_name		(PERL_GET_INTERP->Inumeric_name)
-#define PL_numeric_radix	(PERL_GET_INTERP->Inumeric_radix)
+#define PL_numeric_radix_sv	(PERL_GET_INTERP->Inumeric_radix_sv)
 #define PL_numeric_standard	(PERL_GET_INTERP->Inumeric_standard)
 #define PL_ofmt			(PERL_GET_INTERP->Iofmt)
 #define PL_oldbufptr		(PERL_GET_INTERP->Ioldbufptr)
@@ -606,9 +607,10 @@
 #define PL_nthreads		(vTHX->Inthreads)
 #define PL_nthreads_cond	(vTHX->Inthreads_cond)
 #define PL_nullstash		(vTHX->Inullstash)
+#define PL_numeric_compat1	(vTHX->Inumeric_compat1)
 #define PL_numeric_local	(vTHX->Inumeric_local)
 #define PL_numeric_name		(vTHX->Inumeric_name)
-#define PL_numeric_radix	(vTHX->Inumeric_radix)
+#define PL_numeric_radix_sv	(vTHX->Inumeric_radix_sv)
 #define PL_numeric_standard	(vTHX->Inumeric_standard)
 #define PL_ofmt			(vTHX->Iofmt)
 #define PL_oldbufptr		(vTHX->Ioldbufptr)
@@ -805,6 +807,7 @@
 #define PL_regcode		(aTHXo->interp.Tregcode)
 #define PL_regcomp_parse	(aTHXo->interp.Tregcomp_parse)
 #define PL_regcomp_rx		(aTHXo->interp.Tregcomp_rx)
+#define PL_regcompat1		(aTHXo->interp.Tregcompat1)
 #define PL_regcompp		(aTHXo->interp.Tregcompp)
 #define PL_regdata		(aTHXo->interp.Tregdata)
 #define PL_regdummy		(aTHXo->interp.Tregdummy)
@@ -823,7 +826,6 @@
 #define PL_regnaughty		(aTHXo->interp.Tregnaughty)
 #define PL_regnpar		(aTHXo->interp.Tregnpar)
 #define PL_regprecomp		(aTHXo->interp.Tregprecomp)
-#define PL_regprev		(aTHXo->interp.Tregprev)
 #define PL_regprogram		(aTHXo->interp.Tregprogram)
 #define PL_regsawback		(aTHXo->interp.Tregsawback)
 #define PL_regseen		(aTHXo->interp.Tregseen)
@@ -1023,9 +1025,10 @@
 #define PL_nthreads		(aTHXo->interp.Inthreads)
 #define PL_nthreads_cond	(aTHXo->interp.Inthreads_cond)
 #define PL_nullstash		(aTHXo->interp.Inullstash)
+#define PL_numeric_compat1	(aTHXo->interp.Inumeric_compat1)
 #define PL_numeric_local	(aTHXo->interp.Inumeric_local)
 #define PL_numeric_name		(aTHXo->interp.Inumeric_name)
-#define PL_numeric_radix	(aTHXo->interp.Inumeric_radix)
+#define PL_numeric_radix_sv	(aTHXo->interp.Inumeric_radix_sv)
 #define PL_numeric_standard	(aTHXo->interp.Inumeric_standard)
 #define PL_ofmt			(aTHXo->interp.Iofmt)
 #define PL_oldbufptr		(aTHXo->interp.Ioldbufptr)
@@ -1305,9 +1308,10 @@
 #define PL_Inthreads		PL_nthreads
 #define PL_Inthreads_cond	PL_nthreads_cond
 #define PL_Inullstash		PL_nullstash
+#define PL_Inumeric_compat1	PL_numeric_compat1
 #define PL_Inumeric_local	PL_numeric_local
 #define PL_Inumeric_name	PL_numeric_name
-#define PL_Inumeric_radix	PL_numeric_radix
+#define PL_Inumeric_radix_sv	PL_numeric_radix_sv
 #define PL_Inumeric_standard	PL_numeric_standard
 #define PL_Iofmt		PL_ofmt
 #define PL_Ioldbufptr		PL_oldbufptr
@@ -1500,6 +1504,7 @@
 #define PL_regcode		(aTHX->Tregcode)
 #define PL_regcomp_parse	(aTHX->Tregcomp_parse)
 #define PL_regcomp_rx		(aTHX->Tregcomp_rx)
+#define PL_regcompat1		(aTHX->Tregcompat1)
 #define PL_regcompp		(aTHX->Tregcompp)
 #define PL_regdata		(aTHX->Tregdata)
 #define PL_regdummy		(aTHX->Tregdummy)
@@ -1518,7 +1523,6 @@
 #define PL_regnaughty		(aTHX->Tregnaughty)
 #define PL_regnpar		(aTHX->Tregnpar)
 #define PL_regprecomp		(aTHX->Tregprecomp)
-#define PL_regprev		(aTHX->Tregprev)
 #define PL_regprogram		(aTHX->Tregprogram)
 #define PL_regsawback		(aTHX->Tregsawback)
 #define PL_regseen		(aTHX->Tregseen)
@@ -1636,6 +1640,7 @@
 #define PL_Tregcode		PL_regcode
 #define PL_Tregcomp_parse	PL_regcomp_parse
 #define PL_Tregcomp_rx		PL_regcomp_rx
+#define PL_Tregcompat1		PL_regcompat1
 #define PL_Tregcompp		PL_regcompp
 #define PL_Tregdata		PL_regdata
 #define PL_Tregdummy		PL_regdummy
@@ -1654,7 +1659,6 @@
 #define PL_Tregnaughty		PL_regnaughty
 #define PL_Tregnpar		PL_regnpar
 #define PL_Tregprecomp		PL_regprecomp
-#define PL_Tregprev		PL_regprev
 #define PL_Tregprogram		PL_regprogram
 #define PL_Tregsawback		PL_regsawback
 #define PL_Tregseen		PL_regseen

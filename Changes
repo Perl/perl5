@@ -31,6 +31,772 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[  9972] By: jhi                                   on 2001/05/03  12:58:33
+        Log: Subject: [PATCH: perl@9945] fix handling of $Config{variables} in io/fflush.t
+             From: Prymmer/Kahn <pvhp@best.com>
+             Date: Wed, 2 May 2001 23:56:13 -0700 (PDT)
+             Message-ID: <Pine.BSF.4.21.0105022353380.24421-100000@shell8.ba.best.com>
+     Branch: perl
+	   ! t/io/fflush.t
+____________________________________________________________________________
+[  9971] By: jhi                                   on 2001/05/03  12:57:26
+        Log: Subject: [PATCH: perl@9945] two fixes for win32/FindExt.pm
+             From: Prymmer/Kahn <pvhp@best.com>
+             Date: Wed, 2 May 2001 23:42:33 -0700 (PDT)
+             Message-ID: <Pine.BSF.4.21.0105022337070.24421-100000@shell8.ba.best.com>
+     Branch: perl
+	   ! win32/FindExt.pm
+____________________________________________________________________________
+[  9970] By: jhi                                   on 2001/05/03  02:42:46
+        Log: Can't croak sans thread context, from Doug MacEachern.
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  9969] By: jhi                                   on 2001/05/03  01:23:48
+        Log: Subject: Random input test and Perl
+             From: Ilya Zakharevich <ilya@math.berkeley.edu>
+             Date: Wed, 2 May 2001 14:35:50 -0700 (PDT)
+             Message-Id: <200105022135.OAA26245@fac-813-1.math.Berkeley.EDU>
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  9968] By: jhi                                   on 2001/05/02  22:17:21
+        Log: Subject: [PATCH: perl@9945] fix some misinformation in perlfunc.pod
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Wed, 2 May 2001 15:58:18 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10105021554040.342459-100000@aspara.forte.com>
+     Branch: perl
+	   ! pod/perlfunc.pod pod/perlport.pod
+____________________________________________________________________________
+[  9967] By: jhi                                   on 2001/05/02  20:12:45
+        Log: Workaround for UTS compiler casting bug from Hal Morris.
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[  9966] By: jhi                                   on 2001/05/02  18:31:37
+        Log: Subject: Re: [PATCH 5.6.1] Multiplicity and thread fixes for VMS 
+             From: Dan Sugalski <dan@sidhe.org>
+             Date: Wed, 02 May 2001 15:23:22 -0400
+             Message-Id: <5.0.2.1.0.20010502152210.01f65550@24.8.96.48>
+     Branch: perl
+	   ! perl.c vms/vms.c
+____________________________________________________________________________
+[  9965] By: jhi                                   on 2001/05/02  18:21:29
+        Log: Minor doc tweaks on endianness, closes bug 20010327.004.
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  9964] By: jhi                                   on 2001/05/02  18:15:01
+        Log: Document large files in INSTALL, document also the %x
+             limitation if not use64bitint, closes bug 20010326.007.
+     Branch: perl
+	   ! INSTALL
+____________________________________________________________________________
+[  9963] By: jhi                                   on 2001/05/02  17:24:47
+        Log: perlmodlib tweaks; regen pods.
+     Branch: perl
+	   ! pod/Makefile.SH pod/perlmodlib.PL pod/perlmodlib.pod
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[  9962] By: jhi                                   on 2001/05/02  17:14:00
+        Log: Fix for a segfault, from Marc Lehmann.
+     Branch: perl
+	   ! ext/POSIX/POSIX.xs ext/Time/Piece/Piece.xs
+____________________________________________________________________________
+[  9961] By: jhi                                   on 2001/05/02  15:55:53
+        Log: Subject: [DOC PATCH bleadperl] minor nits in perlop.pod
+             From: "Philip Newton" <pnewton@gmx.de>
+             Date: Wed, 2 May 2001 18:39:03 +0200
+             Message-ID: <3AF05447.15525.173B588@localhost>
+     Branch: perl
+	   ! pod/perlop.pod
+____________________________________________________________________________
+[  9960] By: jhi                                   on 2001/05/02  15:35:37
+        Log: Subject: [PATCH 5.6.1] Multiplicity and thread fixes for VMS
+             From: Dan Sugalski <dan@sidhe.org>
+             Date: Wed, 02 May 2001 11:37:27 -0400
+             Message-Id: <5.0.2.1.0.20010502112909.01f24e28@24.8.96.48>
+     Branch: perl
+	   ! doio.c ext/File/Glob/bsd_glob.c perl.c perl.h pp_sys.c
+	   ! thread.h vms/vms.c vms/vmsish.h
+____________________________________________________________________________
+[  9959] By: jhi                                   on 2001/05/02  15:21:08
+        Log: Subject: Re: [PATCH] Allow appending on a PerlIO::Scalar
+             From: Benjamin Sugars <bsugars@canoe.ca>
+             Date: Wed, 2 May 2001 10:53:11 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.21.0105021041380.1652-100000@marmot.rim.canoe.ca>
+     Branch: perl
+	   ! ext/PerlIO/Scalar/Scalar.xs
+____________________________________________________________________________
+[  9958] By: jhi                                   on 2001/05/02  15:15:53
+        Log: Bug in #9915, spotted by Mike Guy.
+     Branch: perl
+	   ! installperl
+____________________________________________________________________________
+[  9957] By: jhi                                   on 2001/05/02  13:26:01
+        Log: Add a test for not griping about references as array
+             indices if the reference has magic in it (overloaded
+             methods).
+     Branch: perl
+	   ! pod/perldiag.pod t/pragma/warn/pp_hot
+____________________________________________________________________________
+[  9956] By: jhi                                   on 2001/05/02  13:07:01
+        Log: Retracted a bit too much in #9952.
+     Branch: perl
+	   ! t/pragma/sub_lval.t
+____________________________________________________________________________
+[  9955] By: jhi                                   on 2001/05/02  13:05:38
+        Log: Test for #9952.
+     Branch: perl
+	   ! t/op/tie.t
+____________________________________________________________________________
+[  9954] By: jhi                                   on 2001/05/02  11:48:18
+        Log: Additional note on the encoding example: one cannot
+             convert string constants in-place.
+     Branch: perl
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[  9953] By: jhi                                   on 2001/05/02  11:43:51
+        Log: Note that if you have recent enough Perl you already
+             have Filter::Util::Call.
+     Branch: perl
+	   ! lib/Filter/Simple.pm
+____________________________________________________________________________
+[  9952] By: jhi                                   on 2001/05/02  11:31:53
+        Log: Retract changes #8254 and #8255, causes coredump in
+             'tie FH, "main"', reported by Abigail, culprit found by
+             Benjamin Sugars.  Mirrors maintperl change #9950.
+     Branch: perl
+	   ! op.c t/pragma/sub_lval.t
+____________________________________________________________________________
+[  9951] By: jhi                                   on 2001/05/02  11:14:29
+        Log: Forgot from #9942.  (Needed by t/lib/filter-simple.t.)
+     Branch: perl
+	   + t/lib/MyFilter.pm
+____________________________________________________________________________
+[  9950] By: gsar                                  on 2001/05/02  03:17:11
+        Log: revert integration of changes#8254,8255 in change#8620 (causes
+             a coredump in C<tie FH, 'foo'>; the idea itself may need better
+             rationalization)
+     Branch: maint-5.6/perl
+	   ! op.c t/pragma/sub_lval.t
+____________________________________________________________________________
+[  9949] By: gsar                                  on 2001/05/02  02:56:32
+        Log: integrate changes#9774,9814 from mainline (Unixware fixes)
+             
+             Subject: [ID 20010421.010] Perl 5.6.1 on Unixware 7
+             
+             Subject: Re: [ID 20010421.010] Perl 5.6.1 on Unixware 7
+     Branch: maint-5.6/perl
+	  !> hints/svr5.sh
+____________________________________________________________________________
+[  9948] By: gsar                                  on 2001/05/02  02:49:15
+        Log: pod/find.t breaks on VMS (from Craig Berry)
+     Branch: maint-5.6/perl
+	   ! t/pod/find.t
+____________________________________________________________________________
+[  9947] By: jhi                                   on 2001/05/02  02:43:09
+        Log: Add an encoding conversion example.
+     Branch: perl
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[  9946] By: jhi                                   on 2001/05/02  01:34:22
+        Log: Another coat of paint but still nowhere finished.
+             Need to decide on the semantics of strptime(): should
+             strptime() be a function instead of a method?  To do
+             the week/monthname-strptiming the i18n/l10n bullet needs
+             to be bitten with gusto.
+     Branch: perl
+	   ! ext/Time/Piece/Piece.pm t/lib/time-piece.t
+____________________________________________________________________________
+[  9945] By: jhi                                   on 2001/05/01  23:40:52
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
+[  9944] By: jhi                                   on 2001/05/01  23:33:37
+        Log: Add known-to-be-tested modules to the list-to-be-skipped.
+     Branch: perl
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[  9943] By: jhi                                   on 2001/05/01  23:24:40
+        Log: Subject: BorlandC++ fix
+             From: "Vadim Konovalov" <watman@inbox.ru>
+             Date: Mon, 30 Apr 2001 20:12:26 -0700
+             Message-ID: <006e01c0d1ec$8fb1b8d0$406bff87@vad>
+     Branch: perl
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[  9942] By: jhi                                   on 2001/05/01  23:18:02
+        Log: Update to Filter::Simple 0.60, create a test for it.
+     Branch: perl
+	   + t/lib/filter-simple.t
+	   ! MANIFEST lib/Filter/Simple.pm
+____________________________________________________________________________
+[  9941] By: jhi                                   on 2001/05/01  19:47:24
+        Log: Subject: Re: bleadperl: s/// failure with \b and /g 
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Tue, 01 May 2001 20:12:20 +0100
+             Message-Id: <200105011912.UAA06826@crypt.compulink.co.uk>
+     Branch: perl
+	   ! pp_hot.c t/op/re_tests
+____________________________________________________________________________
+[  9940] By: jhi                                   on 2001/05/01  19:42:16
+        Log: Integrate perlio.
+     Branch: perl
+	  !> lib/base.pm t/lib/fields.t
+____________________________________________________________________________
+[  9939] By: jhi                                   on 2001/05/01  19:39:51
+        Log: Subject: [PATCH] Allow appending on a PerlIO::Scalar
+             From: Benjamin Sugars <bsugars@canoe.ca>
+             Date: Tue, 1 May 2001 16:32:03 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.21.0105011627110.1526-100000@marmot.rim.canoe.ca>
+     Branch: perl
+	   ! ext/PerlIO/Scalar/Scalar.xs t/lib/io_scalar.t
+____________________________________________________________________________
+[  9938] By: jhi                                   on 2001/05/01  19:34:09
+        Log: Add NEXT, a pseudo-class for method redispatching.
+             <Damian>NEXT.pm probably offers more bang-for-buck
+             than anything else I've ever written.</Damian>
+     Branch: perl
+	   + lib/NEXT.pm t/lib/next.t
+	   ! MANIFEST
+____________________________________________________________________________
+[  9937] By: jhi                                   on 2001/05/01  19:21:41
+        Log: Update to Switch 2.02.
+     Branch: perl
+	   ! lib/Switch.pm t/lib/switch.t
+____________________________________________________________________________
+[  9936] By: nick                                  on 2001/05/01  19:09:21
+        Log: Fix for base.pm clobbering $VERSION
+     Branch: perlio
+	   ! lib/base.pm
+____________________________________________________________________________
+[  9935] By: nick                                  on 2001/05/01  18:54:38
+        Log: Test for base.pm clobbering $VERSION.
+     Branch: perlio
+	   ! t/lib/fields.t
+____________________________________________________________________________
+[  9934] By: jhi                                   on 2001/05/01  18:39:10
+        Log: Add information about Scalar::Util::blessed.
+     Branch: perl
+	   ! pod/perlobj.pod
+____________________________________________________________________________
+[  9933] By: jhi                                   on 2001/05/01  18:33:51
+        Log: Subject: Extra UNIVERSAL documentation
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Tue, 01 May 2001 20:12:11 +0100
+             Message-Id: <E14ufZD-0007kD-00@libra.cus.cam.ac.uk>
+     Branch: perl
+	   ! pod/perlobj.pod
+____________________________________________________________________________
+[  9932] By: jhi                                   on 2001/05/01  18:26:54
+        Log: Subject: Autoflush in tests as appropriate
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Tue, 01 May 2001 20:05:31 +0100
+             Message-Id: <E14ufSl-0007gS-00@libra.cus.cam.ac.uk>
+     Branch: perl
+	   ! t/lib/syslfs.t t/op/die_exit.t t/op/lex_assign.t t/op/lfs.t
+	   ! t/op/taint.t
+____________________________________________________________________________
+[  9931] By: jhi                                   on 2001/05/01  18:02:29
+        Log: Subject: [PATCH] Multiple consecutive writes on PerlIO::Scalar
+             From: Benjamin Sugars <bsugars@canoe.ca>
+             Date: Tue, 1 May 2001 14:58:24 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.21.0105011431300.1526-100000@marmot.rim.canoe.ca>
+     Branch: perl
+	   ! ext/PerlIO/Scalar/Scalar.xs t/lib/io_scalar.t
+____________________________________________________________________________
+[  9930] By: jhi                                   on 2001/05/01  15:12:26
+        Log: Subject: Re: Finally got a round tuit
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Tue, 01 May 2001 14:14:10 +0200
+             Message-Id: <20010501135740.19E4.H.M.BRAND@hccnet.nl>
+             
+             The -DP part, slightly modified.
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[  9929] By: jhi                                   on 2001/05/01  14:17:15
+        Log: Subject: Re: Finally got a round tuit
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Tue, 01 May 2001 16:34:06 +0200
+             Message-Id: <20010501163255.19F2.H.M.BRAND@hccnet.nl>
+             
+             cpp and optimization tweaks for HP-UX.
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[  9928] By: jhi                                   on 2001/05/01  13:24:20
+        Log: Tune the scan_num() comments to reality.
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  9927] By: jhi                                   on 2001/05/01  13:14:01
+        Log: Subject: [PATCH B::Deparse] optimised sort
+             From: Robin Houston <robin@kitsite.com>
+             Date: Tue, 1 May 2001 14:07:12 +0100
+             Message-ID: <20010501140712.A4266@penderel>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9926] By: jhi                                   on 2001/05/01  13:10:53
+        Log: Subject: [PATCH t/lib/b-deparse.t] 
+             From: Robin Houston <robin@kitsite.com>
+             Date: Tue, 1 May 2001 13:37:42 +0100
+             Message-ID: <20010501133742.A4082@penderel>
+     Branch: perl
+	   ! t/lib/b-deparse.t
+____________________________________________________________________________
+[  9925] By: jhi                                   on 2001/05/01  13:10:13
+        Log: Subject: [PATCH B::Deparse] for(;;), sort
+             From: Robin Houston <robin@kitsite.com>
+             Date: Tue, 1 May 2001 13:35:00 +0100
+             Message-ID: <20010501133500.A4061@penderel>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9924] By: jhi                                   on 2001/05/01  13:09:22
+        Log: Subject: [PATCH B::Deparse] do, warn, use
+             From: Robin Houston <robin@kitsite.com>
+             Date: Tue, 1 May 2001 13:31:03 +0100
+             Message-ID: <20010501133103.A4041@penderel>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9923] By: jhi                                   on 2001/05/01  11:45:36
+        Log: Subject: [PATCH] Test autoflush on fork (Was: Should I remove something?)
+             From: Benjamin Sugars <ben.sugars@home.com>
+             Date: Mon, 30 Apr 2001 22:21:54 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.21.0104302213190.19002-100000@localhost.localdomain>
+     Branch: perl
+	   + t/io/fflush.t
+	   ! MANIFEST
+____________________________________________________________________________
+[  9922] By: jhi                                   on 2001/05/01  11:35:42
+        Log: Subject: [PATCH: perl@9917] more VMS tweaks for addn'l selfstubber tests
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Mon, 30 Apr 2001 16:26:30 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10104301621200.161547-100000@aspara.forte.com>
+     Branch: perl
+	   ! t/lib/selfstubber.t
+____________________________________________________________________________
+[  9921] By: jhi                                   on 2001/04/30  16:34:33
+        Log: Subject: [PATCH B::Concise] suppress warning
+             From: Robin Houston <robin@kitsite.com>
+             Date: Mon, 30 Apr 2001 16:09:49 +0100
+             Message-ID: <20010430160949.A25086@penderel>
+     Branch: perl
+	   ! ext/B/B/Concise.pm
+____________________________________________________________________________
+[  9920] By: jhi                                   on 2001/04/30  13:56:04
+        Log: Strip the *markers* from #9919.
+     Branch: perl
+	   ! pod/perlfaq.pod pod/perlfaq5.pod
+____________________________________________________________________________
+[  9919] By: jhi                                   on 2001/04/30  13:54:04
+        Log: Subject: [PATCH] (perlfaq/bleadperl) append mode and locking
+             From: Gwyn Judd <b.judd@xtra.co.nz>
+             Date: Sun, 29 Apr 2001 01:47:49 +1200
+             Message-ID: <20010429014749.A4418@thislove>
+     Branch: perl
+	   ! pod/perlfaq.pod pod/perlfaq5.pod
+____________________________________________________________________________
+[  9918] By: jhi                                   on 2001/04/30  13:13:54
+        Log: More_tweakage.
+     Branch: perl
+	   ! pod/perldata.pod pod/perldiag.pod
+____________________________________________________________________________
+[  9917] By: jhi                                   on 2001/04/30  13:01:27
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
+[  9916] By: jhi                                   on 2001/04/30  12:57:03
+        Log: T_w_e_a_k_a_g_e.
+     Branch: perl
+	   ! pod/perldata.pod pod/perldiag.pod
+____________________________________________________________________________
+[  9915] By: jhi                                   on 2001/04/30  12:39:29
+        Log: Install s2p also as psed.
+             
+             TODO: psed documentation?
+     Branch: perl
+	   ! installperl
+____________________________________________________________________________
+[  9914] By: jhi                                   on 2001/04/30  12:29:21
+        Log: Subject: Re: [ID 20010303.009] SOCKS5 work around breaks other sockets
+             From: Jens Hamisch <jens@Strawberry.COM>
+             Date: Fri, 27 Apr 2001 17:00:36 +0200
+             Message-ID: <20010427170036.K1372@Strawberry.COM>
+             
+             SOCKS5_VERSION_NAME is the right symbol to detect
+             the presence of SOCKS5.  (HAS_SOCKS5_INIT is telling whether
+             function called socks5_init() is available, and even that is
+             not universal, most SOCKS5 installations use SOCKSinit()).
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[  9913] By: jhi                                   on 2001/04/30  12:22:15
+        Log: Allow a zero timeout on IO::Socket accept and connect--
+             though one really shouldn't do that.  Based on
+             
+             Subject: Not possible to set zero second timeout on accept() in IO::Socket and company..
+             From: "John Holdsworth" <coldwave@bigfoot.com>
+             Date: Sun, 4 Feb 2001 12:48:18 +0100
+             Message-ID: <005a01c08ea0$5e6039d0$03ac2ac0@planc>
+     Branch: perl
+	   ! ext/IO/lib/IO/Socket.pm
+____________________________________________________________________________
+[  9912] By: jhi                                   on 2001/04/30  11:27:27
+        Log: Save the spot of regprev (see #9911) for binary compatibility;
+             regen API.
+     Branch: perl
+	   ! embedvar.h perlapi.h thrdvar.h
+____________________________________________________________________________
+[  9911] By: jhi                                   on 2001/04/30  11:22:03
+        Log: Subject: Re: [PATCH bleadperl] [ID 20010426.002] Word boundry regex [...] 
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Sun, 29 Apr 2001 17:09:30 +0100
+             Message-Id: <200104291609.RAA17790@crypt.compulink.co.uk>
+     Branch: perl
+	   ! regcomp.c regexec.c sv.c t/op/re_tests t/op/subst.t thrdvar.h
+____________________________________________________________________________
+[  9910] By: jhi                                   on 2001/04/30  11:15:12
+        Log: Change PL_numeric_radix to PL_numeric_radix_sv (and leave in
+             a dummy for PL_numeric_radix); no pressing reason to break
+             binary compatibility; regen API.
+     Branch: perl
+	   ! embedvar.h global.sym intrpvar.h objXSUB.h perl.c perl.h
+	   ! perlapi.c perlapi.h pod/perlapi.pod sv.c util.c
+____________________________________________________________________________
+[  9909] By: jhi                                   on 2001/04/30  10:56:08
+        Log: Subject: [DOC PATCH bleadperl] Document generation of random integers
+             From: Walt Mankowski <waltman@netaxs.com>
+             Date: Sun, 29 Apr 2001 21:53:48 -0400
+             Message-ID: <20010429215348.A3971@netaxs.com>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  9908] By: jhi                                   on 2001/04/30  10:49:40
+        Log: Reintroduce #9889 to unbuffer the stderr/stdout on stdio configs.
+     Branch: perl
+	   ! t/lib/selfstubber.t
+____________________________________________________________________________
+[  9907] By: nick                                  on 2001/04/30  09:26:50
+        Log: Integrate mainline.
+     Branch: perlio
+	  !> pod/perldata.pod pod/perldiag.pod t/pragma/warn/toke toke.c
+____________________________________________________________________________
+[  9906] By: jhi                                   on 2001/04/29  23:24:20
+        Log: Abigail spotted a thinko in #9905.
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[  9905] By: jhi                                   on 2001/04/29  15:55:39
+        Log: Changed the underscore/undebar syntax in numeric constants;
+             now any grouping will do, as long as the underscores are not
+             consecutive (so "zero-grouping" is out), and they do not begin
+             or end the integer or fractional parts.
+     Branch: perl
+	   ! pod/perldata.pod pod/perldiag.pod t/pragma/warn/toke toke.c
+____________________________________________________________________________
+[  9904] By: nick                                  on 2001/04/29  15:43:22
+        Log: Integrate mainline.
+     Branch: perlio
+	  +> (branch 98 files)
+	   - lib/unicode/Block.pl
+	   - lib/unicode/In/AlphabeticPresentationForms.pl
+	   - lib/unicode/In/Arabic.pl
+	   - lib/unicode/In/ArabicPresentationForms-A.pl
+	   - lib/unicode/In/ArabicPresentationForms-B.pl
+	   - lib/unicode/In/Armenian.pl lib/unicode/In/Arrows.pl
+	   - lib/unicode/In/BasicLatin.pl lib/unicode/In/Bengali.pl
+	   - lib/unicode/In/BlockElements.pl lib/unicode/In/Bopomofo.pl
+	   - lib/unicode/In/BopomofoExtended.pl
+	   - lib/unicode/In/BoxDrawing.pl lib/unicode/In/BraillePatterns.pl
+	   - lib/unicode/In/CJKCompatibility.pl
+	   - lib/unicode/In/CJKCompatibilityForms.pl
+	   - lib/unicode/In/CJKCompatibilityIdeographs.pl
+	   - lib/unicode/In/CJKRadicalsSupplement.pl
+	   - lib/unicode/In/CJKSymbolsandPunctuation.pl
+	   - lib/unicode/In/CJKUnifiedIdeographs.pl
+	   - lib/unicode/In/CJKUnifiedIdeographsExtensionA.pl
+	   - lib/unicode/In/Cherokee.pl
+	   - lib/unicode/In/CombiningDiacriticalMarks.pl
+	   - lib/unicode/In/CombiningHalfMarks.pl
+	   - lib/unicode/In/CombiningMarksforSymbols.pl
+	   - lib/unicode/In/ControlPictures.pl
+	   - lib/unicode/In/CurrencySymbols.pl lib/unicode/In/Cyrillic.pl
+	   - lib/unicode/In/Devanagari.pl lib/unicode/In/Dingbats.pl
+	   - lib/unicode/In/EnclosedAlphanumerics.pl
+	   - lib/unicode/In/EnclosedCJKLettersandMonths.pl
+	   - lib/unicode/In/Ethiopic.pl
+	   - lib/unicode/In/GeneralPunctuation.pl
+	   - lib/unicode/In/GeometricShapes.pl lib/unicode/In/Georgian.pl
+	   - lib/unicode/In/Greek.pl lib/unicode/In/GreekExtended.pl
+	   - lib/unicode/In/Gujarati.pl lib/unicode/In/Gurmukhi.pl
+	   - lib/unicode/In/HalfwidthandFullwidthForms.pl
+	   - lib/unicode/In/HangulCompatibilityJamo.pl
+	   - lib/unicode/In/HangulJamo.pl lib/unicode/In/HangulSyllables.pl
+	   - lib/unicode/In/Hebrew.pl
+	   - lib/unicode/In/HighPrivateUseSurrogates.pl
+	   - lib/unicode/In/HighSurrogates.pl lib/unicode/In/Hiragana.pl
+	   - lib/unicode/In/IPAExtensions.pl
+	   - lib/unicode/In/IdeographicDescriptionCharacters.pl
+	   - lib/unicode/In/Kanbun.pl lib/unicode/In/KangxiRadicals.pl
+	   - lib/unicode/In/Kannada.pl lib/unicode/In/Katakana.pl
+	   - lib/unicode/In/Khmer.pl lib/unicode/In/Lao.pl
+	   - lib/unicode/In/Latin-1Supplement.pl
+	   - lib/unicode/In/LatinExtended-A.pl
+	   - lib/unicode/In/LatinExtended-B.pl
+	   - lib/unicode/In/LatinExtendedAdditional.pl
+	   - lib/unicode/In/LetterlikeSymbols.pl
+	   - lib/unicode/In/LowSurrogates.pl lib/unicode/In/Malayalam.pl
+	   - lib/unicode/In/MathematicalOperators.pl
+	   - lib/unicode/In/MiscellaneousSymbols.pl
+	   - lib/unicode/In/MiscellaneousTechnical.pl
+	   - lib/unicode/In/Mongolian.pl lib/unicode/In/Myanmar.pl
+	   - lib/unicode/In/NumberForms.pl lib/unicode/In/Ogham.pl
+	   - lib/unicode/In/OpticalCharacterRecognition.pl
+	   - lib/unicode/In/Oriya.pl lib/unicode/In/PrivateUse.pl
+	   - lib/unicode/In/Runic.pl lib/unicode/In/Sinhala.pl
+	   - lib/unicode/In/SmallFormVariants.pl
+	   - lib/unicode/In/SpacingModifierLetters.pl
+	   - lib/unicode/In/Specials.pl
+	   - lib/unicode/In/SuperscriptsandSubscripts.pl
+	   - lib/unicode/In/Syriac.pl lib/unicode/In/Tamil.pl
+	   - lib/unicode/In/Telugu.pl lib/unicode/In/Thaana.pl
+	   - lib/unicode/In/Thai.pl lib/unicode/In/Tibetan.pl
+	   - lib/unicode/In/UnifiedCanadianAboriginalSyllabics.pl
+	   - lib/unicode/In/YiRadicals.pl lib/unicode/In/YiSyllables.pl
+	  !> INSTALL MANIFEST doop.c embed.h embed.pl ext/B/B/Deparse.pm
+	  !> ext/IO/lib/IO/Seekable.pm hints/hpux.sh
+	  !> lib/unicode/mktables.PL lib/utf8_heavy.pl objXSUB.h perl.h
+	  !> pod/perldiag.pod pod/perlunicode.pod proto.h regcomp.c
+	  !> regexec.c t/lib/b-deparse.t t/lib/selfstubber.t t/op/pat.t
+	  !> utf8.c win32/Makefile
+____________________________________________________________________________
+[  9903] By: jhi                                   on 2001/04/29  14:30:53
+        Log: Subject: [PATCH: perl@9885] win32/Makefile (nmake) update
+             From: Prymmer/Kahn <pvhp@best.com>
+             Date: Sat, 28 Apr 2001 21:56:51 -0700 (PDT)
+             Message-ID: <Pine.BSF.4.21.0104282147270.2927-100000@shell8.ba.best.com>
+     Branch: perl
+	   ! win32/Makefile
+____________________________________________________________________________
+[  9902] By: jhi                                   on 2001/04/29  02:52:44
+        Log: Subject: [PATCH ext/IO/lib/IO/Seekable.pm] Doc fixes.
+             From: "Abigail" <abigail@foad.org>
+             Date: Sun, 29 Apr 2001 03:14:25 +0200
+             Message-ID: <20010429011425.24503.qmail@foad.org>
+     Branch: perl
+	   ! ext/IO/lib/IO/Seekable.pm
+____________________________________________________________________________
+[  9901] By: jhi                                   on 2001/04/29  02:04:46
+        Log: In character classes one couldn't have 0x80..0xff characters
+             at the left hand side if there were 0x100.. characters in the
+             character class.
+     Branch: perl
+	   ! doop.c embed.h embed.pl objXSUB.h proto.h regcomp.c regexec.c
+	   ! t/op/pat.t utf8.c
+____________________________________________________________________________
+[  9900] By: jhi                                   on 2001/04/28  22:55:04
+        Log: Forgot the latest mktables.PL from #9899.
+     Branch: perl
+	   ! lib/unicode/mktables.PL
+____________________________________________________________________________
+[  9899] By: jhi                                   on 2001/04/28  22:53:28
+        Log: Explain the \p{} and \P{} error message better and
+             have prettier prettyprint in In.pl.
+     Branch: perl
+	   ! lib/unicode/In.pl lib/unicode/mktables.PL lib/utf8_heavy.pl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[  9898] By: jhi                                   on 2001/04/28  21:03:34
+        Log: Add one possible explanation for the "Invalid [] range" error.
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[  9897] By: jhi                                   on 2001/04/28  17:18:26
+        Log: Add a level of indirection to the implementation of \p{InFoo}
+             so that we don't have to have long filenames.  (Nothing changes
+             in the user interface.)   The indirection is defined in
+             the file lib/unicode/In.pl and it is handled in lib/utf8_heavy.pl.
+             Also rename some the character classes by removing '-' from
+             the classnames, and finally renamed Block.pl as Blocks.pl.
+     Branch: perl
+	   + lib/unicode/Blocks.pl lib/unicode/In.pl lib/unicode/In/0.pl
+	   + lib/unicode/In/1.pl lib/unicode/In/10.pl lib/unicode/In/11.pl
+	   + lib/unicode/In/12.pl lib/unicode/In/13.pl lib/unicode/In/14.pl
+	   + lib/unicode/In/15.pl lib/unicode/In/16.pl lib/unicode/In/17.pl
+	   + lib/unicode/In/18.pl lib/unicode/In/19.pl lib/unicode/In/2.pl
+	   + lib/unicode/In/20.pl lib/unicode/In/21.pl lib/unicode/In/22.pl
+	   + lib/unicode/In/23.pl lib/unicode/In/24.pl lib/unicode/In/25.pl
+	   + lib/unicode/In/26.pl lib/unicode/In/27.pl lib/unicode/In/28.pl
+	   + lib/unicode/In/29.pl lib/unicode/In/3.pl lib/unicode/In/30.pl
+	   + lib/unicode/In/31.pl lib/unicode/In/32.pl lib/unicode/In/33.pl
+	   + lib/unicode/In/34.pl lib/unicode/In/35.pl lib/unicode/In/36.pl
+	   + lib/unicode/In/37.pl lib/unicode/In/38.pl lib/unicode/In/39.pl
+	   + lib/unicode/In/4.pl lib/unicode/In/40.pl lib/unicode/In/41.pl
+	   + lib/unicode/In/42.pl lib/unicode/In/43.pl lib/unicode/In/44.pl
+	   + lib/unicode/In/45.pl lib/unicode/In/46.pl lib/unicode/In/47.pl
+	   + lib/unicode/In/48.pl lib/unicode/In/49.pl lib/unicode/In/5.pl
+	   + lib/unicode/In/50.pl lib/unicode/In/51.pl lib/unicode/In/52.pl
+	   + lib/unicode/In/53.pl lib/unicode/In/54.pl lib/unicode/In/55.pl
+	   + lib/unicode/In/56.pl lib/unicode/In/57.pl lib/unicode/In/58.pl
+	   + lib/unicode/In/59.pl lib/unicode/In/6.pl lib/unicode/In/60.pl
+	   + lib/unicode/In/61.pl lib/unicode/In/62.pl lib/unicode/In/63.pl
+	   + lib/unicode/In/64.pl lib/unicode/In/65.pl lib/unicode/In/66.pl
+	   + lib/unicode/In/67.pl lib/unicode/In/68.pl lib/unicode/In/69.pl
+	   + lib/unicode/In/7.pl lib/unicode/In/70.pl lib/unicode/In/71.pl
+	   + lib/unicode/In/72.pl lib/unicode/In/73.pl lib/unicode/In/74.pl
+	   + lib/unicode/In/75.pl lib/unicode/In/76.pl lib/unicode/In/77.pl
+	   + lib/unicode/In/78.pl lib/unicode/In/79.pl lib/unicode/In/8.pl
+	   + lib/unicode/In/80.pl lib/unicode/In/81.pl lib/unicode/In/82.pl
+	   + lib/unicode/In/83.pl lib/unicode/In/84.pl lib/unicode/In/85.pl
+	   + lib/unicode/In/86.pl lib/unicode/In/87.pl lib/unicode/In/88.pl
+	   + lib/unicode/In/89.pl lib/unicode/In/9.pl lib/unicode/In/90.pl
+	   + lib/unicode/In/91.pl lib/unicode/In/92.pl lib/unicode/In/93.pl
+	   + lib/unicode/In/94.pl lib/unicode/In/95.pl
+	   - lib/unicode/Block.pl
+	   - lib/unicode/In/AlphabeticPresentationForms.pl
+	   - lib/unicode/In/Arabic.pl
+	   - lib/unicode/In/ArabicPresentationForms-A.pl
+	   - lib/unicode/In/ArabicPresentationForms-B.pl
+	   - lib/unicode/In/Armenian.pl lib/unicode/In/Arrows.pl
+	   - lib/unicode/In/BasicLatin.pl lib/unicode/In/Bengali.pl
+	   - lib/unicode/In/BlockElements.pl lib/unicode/In/Bopomofo.pl
+	   - lib/unicode/In/BopomofoExtended.pl
+	   - lib/unicode/In/BoxDrawing.pl lib/unicode/In/BraillePatterns.pl
+	   - lib/unicode/In/CJKCompatibility.pl
+	   - lib/unicode/In/CJKCompatibilityForms.pl
+	   - lib/unicode/In/CJKCompatibilityIdeographs.pl
+	   - lib/unicode/In/CJKRadicalsSupplement.pl
+	   - lib/unicode/In/CJKSymbolsandPunctuation.pl
+	   - lib/unicode/In/CJKUnifiedIdeographs.pl
+	   - lib/unicode/In/CJKUnifiedIdeographsExtensionA.pl
+	   - lib/unicode/In/Cherokee.pl
+	   - lib/unicode/In/CombiningDiacriticalMarks.pl
+	   - lib/unicode/In/CombiningHalfMarks.pl
+	   - lib/unicode/In/CombiningMarksforSymbols.pl
+	   - lib/unicode/In/ControlPictures.pl
+	   - lib/unicode/In/CurrencySymbols.pl lib/unicode/In/Cyrillic.pl
+	   - lib/unicode/In/Devanagari.pl lib/unicode/In/Dingbats.pl
+	   - lib/unicode/In/EnclosedAlphanumerics.pl
+	   - lib/unicode/In/EnclosedCJKLettersandMonths.pl
+	   - lib/unicode/In/Ethiopic.pl
+	   - lib/unicode/In/GeneralPunctuation.pl
+	   - lib/unicode/In/GeometricShapes.pl lib/unicode/In/Georgian.pl
+	   - lib/unicode/In/Greek.pl lib/unicode/In/GreekExtended.pl
+	   - lib/unicode/In/Gujarati.pl lib/unicode/In/Gurmukhi.pl
+	   - lib/unicode/In/HalfwidthandFullwidthForms.pl
+	   - lib/unicode/In/HangulCompatibilityJamo.pl
+	   - lib/unicode/In/HangulJamo.pl lib/unicode/In/HangulSyllables.pl
+	   - lib/unicode/In/Hebrew.pl
+	   - lib/unicode/In/HighPrivateUseSurrogates.pl
+	   - lib/unicode/In/HighSurrogates.pl lib/unicode/In/Hiragana.pl
+	   - lib/unicode/In/IPAExtensions.pl
+	   - lib/unicode/In/IdeographicDescriptionCharacters.pl
+	   - lib/unicode/In/Kanbun.pl lib/unicode/In/KangxiRadicals.pl
+	   - lib/unicode/In/Kannada.pl lib/unicode/In/Katakana.pl
+	   - lib/unicode/In/Khmer.pl lib/unicode/In/Lao.pl
+	   - lib/unicode/In/Latin-1Supplement.pl
+	   - lib/unicode/In/LatinExtended-A.pl
+	   - lib/unicode/In/LatinExtended-B.pl
+	   - lib/unicode/In/LatinExtendedAdditional.pl
+	   - lib/unicode/In/LetterlikeSymbols.pl
+	   - lib/unicode/In/LowSurrogates.pl lib/unicode/In/Malayalam.pl
+	   - lib/unicode/In/MathematicalOperators.pl
+	   - lib/unicode/In/MiscellaneousSymbols.pl
+	   - lib/unicode/In/MiscellaneousTechnical.pl
+	   - lib/unicode/In/Mongolian.pl lib/unicode/In/Myanmar.pl
+	   - lib/unicode/In/NumberForms.pl lib/unicode/In/Ogham.pl
+	   - lib/unicode/In/OpticalCharacterRecognition.pl
+	   - lib/unicode/In/Oriya.pl lib/unicode/In/PrivateUse.pl
+	   - lib/unicode/In/Runic.pl lib/unicode/In/Sinhala.pl
+	   - lib/unicode/In/SmallFormVariants.pl
+	   - lib/unicode/In/SpacingModifierLetters.pl
+	   - lib/unicode/In/Specials.pl
+	   - lib/unicode/In/SuperscriptsandSubscripts.pl
+	   - lib/unicode/In/Syriac.pl lib/unicode/In/Tamil.pl
+	   - lib/unicode/In/Telugu.pl lib/unicode/In/Thaana.pl
+	   - lib/unicode/In/Thai.pl lib/unicode/In/Tibetan.pl
+	   - lib/unicode/In/UnifiedCanadianAboriginalSyllabics.pl
+	   - lib/unicode/In/YiRadicals.pl lib/unicode/In/YiSyllables.pl
+	   ! MANIFEST lib/unicode/mktables.PL lib/utf8_heavy.pl
+	   ! pod/perlunicode.pod
+____________________________________________________________________________
+[  9896] By: jhi                                   on 2001/04/28  14:33:17
+        Log: Update the information on shared library path on HP-UX.
+     Branch: perl
+	   ! INSTALL
+____________________________________________________________________________
+[  9895] By: jhi                                   on 2001/04/28  14:32:30
+        Log: Because #9894 seems to do the trick, this workaround can be removed.
+     Branch: perl
+	   ! t/lib/selfstubber.t
+____________________________________________________________________________
+[  9894] By: jhi                                   on 2001/04/28  14:26:13
+        Log: For PerlIO flush the children's file handles (on fork/exec/system).
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[  9893] By: jhi                                   on 2001/04/28  14:23:15
+        Log: Test tweak for #9891.
+     Branch: perl
+	   ! t/lib/b-deparse.t
+____________________________________________________________________________
+[  9892] By: jhi                                   on 2001/04/28  14:10:13
+        Log: New HP-UX hints from Merijn.
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[  9891] By: jhi                                   on 2001/04/28  14:07:27
+        Log: Subject: [PATCH B::Deparse] non-block scopes
+             From: Robin Houston <robin@kitsite.com>
+             Date: Fri, 27 Apr 2001 19:15:14 +0100
+             Message-ID: <20010427191514.A30951@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9890] By: nick                                  on 2001/04/27  19:41:25
+        Log: Integrate mainline
+     Branch: perlio
+	  +> t/lib/selfstubber.t
+	  !> (integrate 50 files)
+____________________________________________________________________________
+[  9889] By: jhi                                   on 2001/04/27  18:23:46
+        Log: Subject: Re: selfstubber test fail on bleadperl
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Fri, 27 Apr 2001 19:31:18 +0100
+             Message-Id: <E14tD1S-0001tJ-00@libra.cus.cam.ac.uk>
+     Branch: perl
+	   ! t/lib/selfstubber.t
+____________________________________________________________________________
+[  9888] By: jhi                                   on 2001/04/27  16:20:54
+        Log: Test tweak for #9886.
+     Branch: perl
+	   ! t/lib/b-deparse.t
+____________________________________________________________________________
+[  9887] By: jhi                                   on 2001/04/27  16:16:33
+        Log: Buffering issue at least in Solaris (even with perlio).
+     Branch: perl
+	   ! t/lib/selfstubber.t
+____________________________________________________________________________
+[  9886] By: jhi                                   on 2001/04/27  14:59:23
+        Log: Subject: [PATCH B::Deparse] Human-readable pragmas &c
+             From: Robin Houston <robin@kitsite.com>
+             Date: Fri, 27 Apr 2001 16:53:20 +0100
+             Message-ID: <20010427165320.A30479@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9885] By: jhi                                   on 2001/04/27  14:23:51
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  9884] By: jhi                                   on 2001/04/27  14:14:12
         Log: Subject: [DOC PATCH bleadperl] Document underscores in numeric literals
              From: "Philip Newton" <pnewton@gmx.de>

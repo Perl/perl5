@@ -152,6 +152,7 @@ File::Spec::Functions
 File::Temp
 FileCache
 FileHandle
+Filter::Simple
 Filter::Util::Call
 FindBin
 GDBM_File
@@ -182,6 +183,7 @@ Math::BigInt
 Math::Complex
 Math::Trig
 NDBM_File
+NEXT
 Net::hostent
 ODBM_File
 Opcode
