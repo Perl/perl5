@@ -6,8 +6,8 @@ perlunicode - Unicode support in Perl
 
 =head2 Important Caveats
 
-WARNING: While the implementation of Unicode support in Perl is now fairly
-complete it is still evolving to some extent.
+WARNING: While the implementation of Unicode support in Perl is now
+fairly complete it is still evolving to some extent.
 
 In particular the way Unicode is handled on EBCDIC platforms is still
 rather experimental. On such a platform references to UTF-8 encoding
@@ -496,6 +496,69 @@ some attempt to apply 8-bit locale info to characters in the range
 0..255, but this is demonstrably incorrect for locales that use
 characters above that range (when mapped into Unicode).  It will also
 tend to run slower.  Avoidance of locales is strongly encouraged.
+
+=head1 UNICODE REGULAR EXPRESSION SUPPORT LEVEL
+
+The following list of Unicode regular expression support describes
+feature by feature the Unicode support implemented in Perl as of Perl
+5.8.0.  The "Level N" and the section numbers refer to the Unicode
+Technical Report 18, "Unicode Regular Expression Guidelines".
+
+=over 4
+
+=item *
+
+Level 1 - Basic Unicode Support
+
+        2.1 Hex Notation                        - done          [1]
+                Named Notation                  - done          [2]
+        2.2 Categories                          - done          [3][4]
+        2.3 Subtraction                         - MISSING       [5][6]
+        2.4 Simple Word Boundaries              - done          [7]
+        2.5 Simple Loose Matches                - MISSING       [8]
+        2.6 End of Line                         - MISSING       [9][10]
+
+        [ 1] \x{...}
+        [ 2] \N{...}
+        [ 3] . \p{Is...} \P{Is...}
+        [ 4] now scripts (see UTR#24 Script Names) in  addition to blocks
+        [ 5] have negation
+        [ 6] can use look-ahead to emulate subtracion
+        [ 7] include Letters in word characters
+        [ 8] see UTR#21 Case Mappings
+        [ 9] see UTR#13 Unicode Newline Guidelines
+        [10] should do ^ and $ also on \x{2028} and \x{2029}
+
+=item *
+
+Level 2 - Extended Unicode Support
+
+        3.1 Surrogates                          - MISSING
+        3.2 Canonical Equivalents               - MISSING       [11][12]
+        3.3 Locale-Independent Graphemes        - MISSING       [13]
+        3.4 Locale-Independent Words            - MISSING       [14]
+        3.5 Locale-Independent Loose Matches    - MISSING       [15]
+
+        [11] see UTR#15 Unicode Normalization
+        [12] have Unicode::Normalize but not integrated to regexes
+        [13] have \X but at this level . should equal that
+        [14] need three classes, not just \w and \W
+        [15] see UTR#21 Case Mappings
+
+=item *
+
+Level 3 - Locale-Sensitive Support
+
+        4.1 Locale-Dependent Categories         - MISSING
+        4.2 Locale-Dependent Graphemes          - MISSING       [16][17]
+        4.3 Locale-Dependent Words              - MISSING
+        4.4 Locale-Dependent Loose Matches      - MISSING
+        4.5 Locale-Dependent Ranges             - MISSING
+
+        [16] see UTR#10 Unicode Collation Algorithms
+        [17] have Unicode::Collate but not integrated to regexes
+
+=back
 
 =head1 SEE ALSO
 

@@ -61,16 +61,25 @@ engine. The idea is that, for instance, C<\b> needs to be
 algorithmically computed if you're dealing with Thai text. Hence, the
 B<\b> assertion wants to be overloaded by a function.
 
-=head2 Unicode case mappings 
+=head2 Unicode
+
+=over 4
+
+=item *
 
     Case Mappings? http://www.unicode.org/unicode/reports/tr21/
 
-=head2 Unicode regular expression character classes
+=item *
 
 They have some tricks Perl doesn't yet implement like character
 class subtraction.
 
 	http://www.unicode.org/unicode/reports/tr18/
+
+=back
+
+See L<perlunicode/UNICODE REGULAR EXPRESSION SUPPORT LEVEL> for what's
+there and what's missing.
 
 =head2 use Thread for iThreads
 
