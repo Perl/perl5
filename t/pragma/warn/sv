@@ -189,7 +189,7 @@ my $b = 1 + $a;
 no warnings 'numeric' ;
 my $c = 1 + $a;
 EXPECT
-Argument "def" isn't numeric in add at - line 6.
+Argument "def" isn't numeric in addition (+) at - line 6.
 ########
 # sv.c
 use warnings 'numeric' ;
@@ -197,7 +197,7 @@ my $x = 1 + "def" ;
 no warnings 'numeric' ;
 my $z = 1 + "def" ;
 EXPECT
-Argument "def" isn't numeric in add at - line 3.
+Argument "def" isn't numeric in addition (+) at - line 3.
 ########
 # sv.c
 use warnings 'numeric' ;
@@ -206,7 +206,7 @@ my $x = 1 + $a ;
 no warnings 'numeric' ;
 my $y = 1 + $a ;
 EXPECT
-Argument "def" isn't numeric in add at - line 4.
+Argument "def" isn't numeric in addition (+) at - line 4.
 ########
 # sv.c
 use warnings 'numeric' ; use integer ;
@@ -215,7 +215,7 @@ my $x = 1 + $a ;
 no warnings 'numeric' ;
 my $z = 1 + $a ;
 EXPECT
-Argument "def" isn't numeric in i_add at - line 4.
+Argument "def" isn't numeric in integer addition (+) at - line 4.
 ########
 # sv.c
 use warnings 'numeric' ;
@@ -223,7 +223,7 @@ my $x = 1 & "def" ;
 no warnings 'numeric' ;
 my $z = 1 & "def" ;
 EXPECT
-Argument "def" isn't numeric in bit_and at - line 3.
+Argument "def" isn't numeric in bitwise and (&) at - line 3.
 ########
 # sv.c
 use warnings 'redefine' ;
