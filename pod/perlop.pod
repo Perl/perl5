@@ -789,7 +789,7 @@ the trailing delimiter.  This avoids expensive run-time recompilations,
 and is useful when the value you are interpolating won't change over
 the life of the script.  However, mentioning C</o> constitutes a promise
 that you won't change the variables in the pattern.  If you change them,
-Perl won't even notice.  See also L<qr//>.
+Perl won't even notice.  See also L<"qr//">.
 
 If the PATTERN evaluates to the empty string, the last
 I<successfully> matched regular expression is used instead.

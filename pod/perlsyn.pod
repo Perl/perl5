@@ -5,21 +5,14 @@ perlsyn - Perl syntax
 =head1 DESCRIPTION
 
 A Perl script consists of a sequence of declarations and statements.
-The only things that need to be declared in Perl are report formats
-and subroutines.  See the sections below for more information on those
-declarations.  All uninitialized user-created objects are assumed to
-start with a C<null> or C<0> value until they are defined by some explicit
-operation such as assignment.  (Though you can get warnings about the
-use of undefined values if you like.)  The sequence of statements is
-executed just once, unlike in B<sed> and B<awk> scripts, where the
-sequence of statements is executed for each input line.  While this means
-that you must explicitly loop over the lines of your input file (or
-files), it also means you have much more control over which files and
-which lines you look at.  (Actually, I'm lying--it is possible to do an
-implicit loop with either the B<-n> or B<-p> switch.  It's just not the
-mandatory default like it is in B<sed> and B<awk>.)
-
-=head2 Declarations
+The sequence of statements is executed just once, unlike in B<sed>
+and B<awk> scripts, where the sequence of statements is executed
+for each input line.  While this means that you must explicitly
+loop over the lines of your input file (or files), it also means
+you have much more control over which files and which lines you look at.
+(Actually, I'm lying--it is possible to do an implicit loop with
+either the B<-n> or B<-p> switch.  It's just not the mandatory
+default like it is in B<sed> and B<awk>.)
 
 Perl is, for the most part, a free-form language.  (The only exception
 to this is format declarations, for obvious reasons.)  Text from a
@@ -29,11 +22,27 @@ interpreted either as division or pattern matching, depending on the
 context, and C++ C<//> comments just look like a null regular
 expression, so don't do that.
 
+=head2 Declarations
+
+The only things you need to declare in Perl are report formats
+and subroutines--and even undefined subroutines can be handled
+through AUTOLOAD.  A variable holds the undefined value (C<undef>)
+until it has been assigned a defined value, which is anything
+other than C<undef>.  When used as a number, C<undef> is treated
+as C<0>; when used as a string, it is treated the empty string,
+C<"">; and when used as a reference that isn't being assigned
+to, it is treated as an error.  If you enable warnings, you'll
+be notified of an uninitialized value whenever you treat C<undef>
+as a string or a number.  Well, usually.  Boolean ("don't-care")
+contexts and operators such as C<++>, C<-->, C<+=>, C<-=>, and
+C<.=> are always exempt from such warnings.
+
 A declaration can be put anywhere a statement can, but has no effect on
 the execution of the primary sequence of statements--declarations all
 take effect at compile time.  Typically all the declarations are put at
 the beginning or the end of the script.  However, if you're using
-lexically-scoped private variables created with C<my()>, you'll have to make sure
+lexically-scoped private variables created with C<my()>, you'll
+have to make sure
 your format or subroutine definition is within the same block scope
 as the my if you expect to be able to access those private variables.
 
