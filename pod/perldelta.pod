@@ -292,10 +292,10 @@ sort() has been changed to use mergesort internally as opposed to the
 earlier quicksort.  For very small lists this may result in slightly
 slower sorting times, but in general the speedup should be at least 20%.
 Additional bonuses are that the worst case behaviour of sort() is now
-better (in computer science terms it is now O(N log N), as opposed to
-O(N**2) of quicksort), and that sort() is now stable (meaning that
-elements with identical keys will stay ordered as they were before
-the sort).
+better (in computer science terms it now runs in time O(N log N), as
+opposed to quicksorts Theta(N**2) worst-case run time behaviour), and
+that sort() is now stable (meaning that elements with identical keys
+will stay ordered as they were before the sort).
 
 =back
 
