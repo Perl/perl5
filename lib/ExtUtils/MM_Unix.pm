@@ -1074,11 +1074,12 @@ sub dynamic_lib {
     my($ldfrom) = '$(LDFROM)';
     $armaybe = 'ar' if ($^O eq 'dec_osf' and $armaybe eq ':');
     my(@m);
+    my $ld_opt = $Is_OS2 ? '$(OPTIMIZE) ' : '';	# Useful on other systems too?
     push(@m,'
 # This section creates the dynamically loadable $(INST_DYNAMIC)
 # from $(OBJECT) and possibly $(MYEXTLIB).
 ARMAYBE = '.$armaybe.'
-OTHERLDFLAGS = '.$otherldflags.'
+OTHERLDFLAGS = '.$ld_opt.$otherldflags.'
 INST_DYNAMIC_DEP = '.$inst_dynamic_dep.'
 
 $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)/.exists $(EXPORT_LIST) $(PERL_ARCHIVE) $(PERL_ARCHIVE_AFTER) $(INST_DYNAMIC_DEP)
