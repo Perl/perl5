@@ -43,7 +43,7 @@ README.epoc		Notes about EPOC port
 README.hpux		Notes about HP-UX port
 README.hurd		Notes about GNU/Hurd port
 README.machten		Notes about Power MachTen port
-README.micro		Notes about microperl 
+README.micro		Notes about microperl
 README.mint		Notes about Atari MiNT port
 README.mpeix		Notes about MPE/iX port
 README.os2		Notes about OS/2 port
@@ -192,6 +192,75 @@ ext/Encode/Encode.pm		Encode extension
 ext/Encode/Encode.xs		Encode extension
 ext/Encode/Makefile.PL		Encode extension
 ext/Encode/Todo			Encode extension
+ext/Encode/Encode/ascii.enc	Encoding tables
+ext/Encode/Encode/big5.enc	Encoding tables
+ext/Encode/Encode/cp1250.enc	Encoding tables
+ext/Encode/Encode/cp1251.enc	Encoding tables
+ext/Encode/Encode/cp1252.enc	Encoding tables
+ext/Encode/Encode/cp1253.enc	Encoding tables
+ext/Encode/Encode/cp1254.enc	Encoding tables
+ext/Encode/Encode/cp1255.enc	Encoding tables
+ext/Encode/Encode/cp1256.enc	Encoding tables
+ext/Encode/Encode/cp1257.enc	Encoding tables
+ext/Encode/Encode/cp1258.enc	Encoding tables
+ext/Encode/Encode/cp437.enc	Encoding tables
+ext/Encode/Encode/cp737.enc	Encoding tables
+ext/Encode/Encode/cp775.enc	Encoding tables
+ext/Encode/Encode/cp850.enc	Encoding tables
+ext/Encode/Encode/cp852.enc	Encoding tables
+ext/Encode/Encode/cp855.enc	Encoding tables
+ext/Encode/Encode/cp857.enc	Encoding tables
+ext/Encode/Encode/cp860.enc	Encoding tables
+ext/Encode/Encode/cp861.enc	Encoding tables
+ext/Encode/Encode/cp862.enc	Encoding tables
+ext/Encode/Encode/cp863.enc	Encoding tables
+ext/Encode/Encode/cp864.enc	Encoding tables
+ext/Encode/Encode/cp865.enc	Encoding tables
+ext/Encode/Encode/cp866.enc	Encoding tables
+ext/Encode/Encode/cp869.enc	Encoding tables
+ext/Encode/Encode/cp874.enc	Encoding tables
+ext/Encode/Encode/cp932.enc	Encoding tables
+ext/Encode/Encode/cp936.enc	Encoding tables
+ext/Encode/Encode/cp949.enc	Encoding tables
+ext/Encode/Encode/cp950.enc	Encoding tables
+ext/Encode/Encode/dingbats.enc	Encoding tables
+ext/Encode/Encode/euc-cn.enc	Encoding tables
+ext/Encode/Encode/euc-jp.enc	Encoding tables
+ext/Encode/Encode/euc-kr.enc	Encoding tables
+ext/Encode/Encode/gb12345.enc	Encoding tables
+ext/Encode/Encode/gb1988.enc	Encoding tables
+ext/Encode/Encode/gb2312.enc	Encoding tables
+ext/Encode/Encode/iso2022-jp.enc	Encoding tables
+ext/Encode/Encode/iso2022-kr.enc	Encoding tables
+ext/Encode/Encode/iso2022.enc		Encoding tables
+ext/Encode/Encode/iso8859-1.enc		Encoding tables
+ext/Encode/Encode/iso8859-2.enc		Encoding tables
+ext/Encode/Encode/iso8859-3.enc		Encoding tables
+ext/Encode/Encode/iso8859-4.enc		Encoding tables
+ext/Encode/Encode/iso8859-5.enc		Encoding tables
+ext/Encode/Encode/iso8859-6.enc		Encoding tables
+ext/Encode/Encode/iso8859-7.enc		Encoding tables
+ext/Encode/Encode/iso8859-8.enc		Encoding tables
+ext/Encode/Encode/iso8859-9.enc		Encoding tables
+ext/Encode/Encode/jis0201.enc		Encoding tables
+ext/Encode/Encode/jis0208.enc		Encoding tables
+ext/Encode/Encode/jis0212.enc		Encoding tables
+ext/Encode/Encode/koi8-r.enc		Encoding tables
+ext/Encode/Encode/ksc5601.enc		Encoding tables
+ext/Encode/Encode/macCentEuro.enc	Encoding tables
+ext/Encode/Encode/macCroatian.enc	Encoding tables
+ext/Encode/Encode/macCyrillic.enc	Encoding tables
+ext/Encode/Encode/macDingbats.enc	Encoding tables
+ext/Encode/Encode/macGreek.enc		Encoding tables
+ext/Encode/Encode/macIceland.enc	Encoding tables
+ext/Encode/Encode/macJapan.enc		Encoding tables
+ext/Encode/Encode/macRoman.enc		Encoding tables
+ext/Encode/Encode/macRomania.enc	Encoding tables
+ext/Encode/Encode/macThai.enc		Encoding tables
+ext/Encode/Encode/macTurkish.enc	Encoding tables
+ext/Encode/Encode/macUkraine.enc	Encoding tables
+ext/Encode/Encode/shiftjis.enc		Encoding tables
+ext/Encode/Encode/symbol.enc		Encoding tables
 ext/Errno/ChangeLog		Errno perl module change log
 ext/Errno/Errno_pm.PL		Errno perl module create script
 ext/Errno/Makefile.PL		Errno extension makefile writer
@@ -1368,7 +1437,7 @@ t/lib/syslog.t		See if Sys::Syslog works
 t/lib/textfill.t	See if Text::Wrap::fill works
 t/lib/texttabs.t	See if Text::Tabs works
 t/lib/textwrap.t	See if Text::Wrap::wrap works
-t/lib/thr5005.t		Test 5.005-style threading (skipped if no use5005threads) 
+t/lib/thr5005.t		Test 5.005-style threading (skipped if no use5005threads)
 t/lib/tie-push.t	Test for Tie::Array
 t/lib/tie-stdarray.t	Test for Tie::StdArray
 t/lib/tie-stdhandle.t	Test for Tie::StdHandle
@@ -1640,7 +1709,7 @@ win32/config_H.bc	Win32 config header (Borland C++ build)
 win32/config_H.gc	Win32 config header (GNU build)?
 win32/config_H.vc	Win32 config header (Visual C++ build)
 win32/config_h.PL	Perl code to convert Win32 config.sh to config.h
-win32/config_sh.PL	Perl code to update Win32 config.sh from Makefile 
+win32/config_sh.PL	Perl code to update Win32 config.sh from Makefile
 win32/des_fcrypt.patch	Win32 port
 win32/dl_win32.xs	Win32 port
 win32/genmk95.pl        Perl code to generate command.com-usable makefile.95
@@ -1661,7 +1730,7 @@ win32/win32.c		Win32 port
 win32/win32.h		Win32 port
 win32/win32iop.h	Win32 port
 win32/win32sck.c	Win32 port
-win32/win32thread.c	Win32 functions for threads 
+win32/win32thread.c	Win32 functions for threads
 win32/win32thread.h	Win32 port mapping to threads
 writemain.SH		Generate perlmain.c from miniperlmain.c+extensions
 x2p/EXTERN.h		Same as above

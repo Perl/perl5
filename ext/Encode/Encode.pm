@@ -21,6 +21,7 @@ require Exporter;
        on_utf8
        off_utf8
        utf_to_utf
+       encodings
       );
 
 bootstrap Encode ();
@@ -62,7 +63,7 @@ specified the bytes are expected to be encoded in US-ASCII or ISO
 8859-1 (Latin 1).  Returns the new size of STRING, or C<undef> if
 there's a failure.
 
-[INTERNAL] Also the UTF-8 flag of STRING is turned on.        
+[INTERNAL] Also the UTF-8 flag of STRING is turned on.
 
 =item *
 
@@ -104,7 +105,7 @@ characters, you must use C<from_to('Unicode', ...)>.
         utf8_to_chars(STRING)
 
 The UTF-8 in STRING is decoded in-place into chars.  Returns the new
-size of STRING, or C<undef> if there's a failure. 
+size of STRING, or C<undef> if there's a failure.
 
 If the UTF-8 in STRING is malformed C<undef> is returned, and also an
 optional lexical warning (category utf8) is given.
@@ -307,10 +308,6 @@ sub chars_to_bytes {
     &_chars_to_bytes;
 }
 
-sub from_to {
-    &_from_to;
-}
-
 sub is_utf8 {
     &_is_utf8;
 }
@@ -327,3 +324,201 @@ sub utf_to_utf {
     &_utf_to_utf;
 }
 
+sub from_to
+{
+ my ($string,$from,$to,$check) = @_;
+ my $f = __PACKAGE__->getEncoding($from);
+ my $t = __PACKAGE__->getEncoding($to);
+ my $uni = $f->toUnicode($string,$check);
+ $string = $t->fromUnicode($uni,$check);
+ return length($_[0] = $string);
+}
+
+sub encodings
+{
+ my ($class) = @_;
+ my ($dir) = __FILE__ =~ /^(.*)\.pm$/;
+ my @names = ('Unicode');
+ if (opendir(my $dh,$dir))
+  {
+   while (defined(my $name = readdir($dh)))
+    {
+     push(@names,$1) if ($name =~ /^(.*)\.enc$/);
+    }
+   closedir($dh);
+  }
+ else
+  {
+   die "Cannot open $dir:$!";
+  }
+ return @names;
+}
+
+my %encoding = ( Unicode => 'Encode::Unicode' );
+
+sub getEncoding
+{
+ my ($class,$name) = @_;
+ unless (exists $encoding{$name})
+  {
+   my $file = __FILE__;
+   $file =~ s#\.pm$#/$name.enc#;
+   if (open(my $fh,$file))
+    {
+     my $type;
+     while (1)
+      {
+       my $line = <$fh>;
+       $type = substr($line,0,1);
+       last unless $type eq '#';
+      }
+     $class .= ('::'.(($type eq 'E') ? 'Escape' : 'Table'));
+     $encoding{$name} = $class->read($fh,$name,$type);
+    }
+  }
+ return $encoding{$name} if exists $encoding{$name};
+}
+
+package Encode::Unicode;
+
+# Dummy package that provides the encode interface
+
+sub name { 'Unicode' }
+
+sub toUnicode   { $_[1] }
+
+sub fromUnicode { $_[1] }
+
+package Encode::Table;
+
+sub read
+{
+ my ($class,$fh,$name,$type) = @_;
+ my $rep = $class->can("rep_$type");
+ my ($def,$sym,$pages) = split(/\s+/,scalar(<$fh>));
+ my @touni;
+ my %fmuni;
+ my $count = 0;
+ $def = hex($def);
+ $def = pack(&$rep($def),$def);
+ while ($pages--)
+  {
+   my $page = hex(<$fh>);
+   my @page;
+   my $ch = $page * 256;
+   for (my $i = 0; $i < 16; $i++)
+    {
+     my $line = <$fh>;
+     for (my $j = 0; $j < 16; $j++)
+      {
+       my $val = hex(substr($line,0,4,''));
+       if ($val || !$ch)
+        {
+         my $uch = chr($val);
+         push(@page,$uch);
+         $fmuni{$uch} = pack(&$rep($ch),$ch);
+         $count++;
+        }
+       else
+        {
+         push(@page,undef);
+        }
+       $ch++;
+      }
+    }
+   $touni[$page] = \@page;
+  }
+
+ return bless {Name  => $name,
+               Rep   => $rep,
+               ToUni => \@touni,
+               FmUni => \%fmuni,
+               Def   => $def,
+               Num   => $count,
+              },$class;
+}
+
+sub name { shift->{'Name'} }
+
+sub rep_S { 'C' }
+
+sub rep_D { 'S' }
+
+sub rep_M { ($_[0] > 255) ? 'S' : 'C' }
+
+sub representation
+{
+ my ($obj,$ch) = @_;
+ $ch = 0 unless @_ > 1;
+ $obj-{'Rep'}->($ch);
+}
+
+sub toUnicode
+{
+ my ($obj,$str) = @_;
+ my $rep   = $obj->{'Rep'};
+ my $touni = $obj->{'ToUni'};
+ my $uni   = '';
+ while (length($str))
+  {
+   my $ch = ord(substr($str,0,1,''));
+   if (&$rep($ch) eq 'C')
+    {
+     $uni .= $touni->[0][$ch];
+    }
+   else
+    {
+     $uni .= $touni->[$ch][ord(substr($str,0,1,''))];
+    }
+  }
+ return $uni;
+}
+
+sub fromUnicode
+{
+ my ($obj,$uni) = @_;
+ my $fmuni = $obj->{'FmUni'};
+ my $str   = '';
+ my $def   = $obj->{'Def'};
+ while (length($uni))
+  {
+   my $ch = substr($uni,0,1,'');
+   my $x  = $fmuni->{$ch};
+   $x = $def unless defined $x;
+   $str  .= $x;
+  }
+ return $str;
+}
+
+package Encode::Escape;
+use Carp;
+
+sub read
+{
+ my ($class,$fh,$name) = @_;
+ my %self = (Name => $name, Num => 0);
+ while (<$fh>)
+  {
+   my ($key,$val) = /^(\S+)\s+(.*)$/;
+   $val =~ s/^\{(.*?)\}/$1/g;
+   $val =~ s/\\x([0-9a-f]{2})/chr(hex($1))/ge;
+   $self{$key} = $val;
+  }
+ return bless \%self,$class;
+}
+
+sub name { shift->{'Name'} }
+
+sub toUnicode
+{
+ croak("Not implemented yet");
+}
+
+sub fromUnicode
+{
+ croak("Not implemented yet");
+}
+
+1;
+
+__END__
