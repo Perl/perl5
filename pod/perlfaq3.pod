@@ -183,7 +183,7 @@ PerlBuilder (http://www.solutionsoft.com/perl.htm) is an integrated
 development environment for Windows that supports Perl development.
 PerlDevKit (http://www.activestate.com/Products/Perl_Dev_Kit/index.html)
 is an IDE from ActiveState supporting the ActivePerl.  (VisualPerl,
-a Visual Studio (or Visual.NET, in time) component is currently
+a Visual Studio (or Studio.NET, in time) component is currently
 (late 2000) in beta).  The visiPerl+ IDE is available from Help
 Consulting (http://helpconsulting.net/visiperl/).  Perl code magic is
 another IDE (http://www.petes-place.com/codemagic.html).  CodeMagicCD
@@ -193,7 +193,8 @@ applications development IDE.  Starbase's Codewright
 (http://www.starbase.com/) is yet another multilanguage editor/IDE.
 
 Perl programs are just plain text, though, so you could download GNU
-Emacs or XEmacs (http://www.gnu.org/software/emacs/windows/ntemacs.html)
+Emacs or XEmacs
+(http://www.gnu.org/software/emacs/windows/ntemacs.html)
 (http://www.xemacs.org/Download/index.html), or a vi clone such as nvi
 (available from CPAN in src/misc/) or vim (http://www.vim.org/).  Vim
 runs on win32 (http://www.cs.vu.nl/%7Etmgil/vi.html).  Vile is another
@@ -202,7 +203,9 @@ widely ported vi clone that has a Perl language sensitivity module
 (http://www.slickedit.com/) is a full featured commercial editor that
 has a modular architecture: it can emulate several other common
 editors and it can help with programming language sensitivity modules
-for a variety of programming languages including Perl.
+for a variety of programming languages including Perl.  MultiEdit
+(http://www.MultiEdit.com) has a user extendable interface and
+good Perl support.
 
 If you're transferring Windows text files to Unix be sure to transfer
 them in ASCII mode so the ends of lines are appropriately mangled.
