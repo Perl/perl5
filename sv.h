@@ -709,6 +709,19 @@ Set the length of the string which is in the SV.  See C<SvCUR>.
 #define IoFLAGS(sv)	((XPVIO*)  SvANY(sv))->xio_flags
 
 /*
+IoTYPE(sv) is a single character saying what type of I/O connection
+this is:
+    |        pipe
+    -        stdin or stdout
+    <        read-only
+    >        write-only
+    a        append
+    +        read and write
+    s        socket
+    space    closed
+*/
+
+/*
 =for apidoc Am|bool|SvTAINTED|SV* sv
 Checks to see if an SV is tainted. Returns TRUE if it is, FALSE if
 not.
