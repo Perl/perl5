@@ -9140,7 +9140,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		case 'V':  uv = va_arg(*args, UV); break;
 		default:   uv = va_arg(*args, unsigned); break;
 #ifdef HAS_QUAD
-		case 'q':  uv = va_arg(*args, Quad_t); break;
+		case 'q':  uv = va_arg(*args, Uquad_t); break;
 #endif
 		}
 	    }
