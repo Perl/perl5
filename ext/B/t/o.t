@@ -60,6 +60,7 @@ sub get_lines {
 
 END {
 	1 while unlink($file);
+	rmdir($path); # not "1 while" since there might be more in there
 }
 
 __END__
