@@ -32,8 +32,9 @@ pieces using the syntax of different operating systems.
 =item fileparse_set_fstype
 
 You select the syntax via the routine fileparse_set_fstype().
+
 If the argument passed to it contains one of the substrings
-"VMS", "MSDOS", "MacOS" or "AmigaOS", the file specification 
+"VMS", "MSDOS", "MacOS", or "AmigaOS", the file specification 
 syntax of that operating system is used in future calls to 
 fileparse(), basename(), and dirname().  If it contains none of
 these substrings, UNIX syntax is used.  This pattern matching is
@@ -41,6 +42,12 @@ case-insensitive.  If you've selected VMS syntax, and the file
 specification you pass to one of these routines contains a "/",
 they assume you are using UNIX emulation and apply the UNIX syntax
 rules instead, for that function call only.
+
+If the argument passed to it contains one of the substrings "VMS",
+"MSDOS", "MacOS", "AmigaOS", "os2", or "RISCOS", then the pattern
+matching for suffix removal is performed without regard for case,
+since those systems are not case-sensitive when opening existing files
+(though some of them preserve case on file creation).
 
 If you haven't called fileparse_set_fstype(), the syntax is chosen
 by examining the builtin variable C<$^O> according to these rules.
@@ -116,21 +123,21 @@ require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(fileparse fileparse_set_fstype basename dirname);
 #use strict;
-#use vars qw($VERSION $Fileparse_fstype $Fileparse_fgcase);
+#use vars qw($VERSION $Fileparse_fstype $Fileparse_igncase);
 $VERSION = "2.4";
 
 
 #   fileparse_set_fstype() - specify OS-based rules used in future
 #                            calls to routines in this package
 #
-#   Currently recognized values: VMS, MSDOS, MacOS, os2, AmigaOS
-#       Any other name uses Unix-style rules
+#   Currently recognized values: VMS, MSDOS, MacOS, AmigaOS, os2, RISCOS
+#       Any other name uses Unix-style rules and is case-sensitive
 
 sub fileparse_set_fstype {
-  my @old = ($Fileparse_fstype, $Fileparse_fgcase);
+  my @old = ($Fileparse_fstype, $Fileparse_igncase);
   if (@_) {
     $Fileparse_fstype = $_[0];
-    $Fileparse_fgcase = ($_[0] =~ /^(?:MacOS|VMS|os2|AmigaOS)/i);
+    $Fileparse_igncase = ($_[0] =~ /^(?:MacOS|VMS|AmigaOS|os2|RISCOS)/i);
   }
   wantarray ? @old : $old[0];
 }
@@ -142,7 +149,7 @@ sub fileparse_set_fstype {
 
 sub fileparse {
   my($fullname,@suffices) = @_;
-  my($fstype,$fgcase) = ($Fileparse_fstype, $Fileparse_fgcase);
+  my($fstype,$igncase) = ($Fileparse_fstype, $Fileparse_igncase);
   my($dirpath,$tail,$suffix,$basename);
 
   if ($fstype =~ /^VMS/i) {
@@ -169,7 +176,7 @@ sub fileparse {
   if (@suffices) {
     $tail = '';
     foreach $suffix (@suffices) {
-      my $pat = ($fgcase ? '(?i)' : '') . "($suffix)\$";
+      my $pat = ($igncase ? '(?i)' : '') . "($suffix)\$";
       if ($basename =~ s/$pat//) {
         $tail = $1 . $tail;
       }
