@@ -3,54 +3,35 @@ package Test::More;
 use 5.004;
 
 use strict;
-use Carp;
-use Test::Utils;
+use Test::Builder;
 
-BEGIN {
-    require Test::Simple;
-    *TESTOUT = \*Test::Simple::TESTOUT;
-    *TESTERR = \*Test::Simple::TESTERR;
+
+# Can't use Carp because it might cause use_ok() to accidentally succeed
+# even though the module being used forgot to use Carp.  Yes, this
+# actually happened.
+sub _carp {
+    my($file, $line) = (caller(1))[1,2];
+    warn @_, sprintf " at $file line $line\n";
 }
 
+
+
 require Exporter;
-use vars qw($VERSION @ISA @EXPORT $TODO);
-$VERSION = '0.19';
+use vars qw($VERSION @ISA @EXPORT %EXPORT_TAGS $TODO);
+$VERSION = '0.32';
 @ISA    = qw(Exporter);
 @EXPORT = qw(ok use_ok require_ok
-             is isnt like
+             is isnt like is_deeply
              skip todo
              pass fail
              eq_array eq_hash eq_set
-             skip
              $TODO
              plan
              can_ok  isa_ok
             );
 
+my $Test = Test::Builder->new;
 
-sub import {
-    my($class, $plan, @args) = @_;
-
-    if( defined $plan ) {
-        if( $plan eq 'skip_all' ) {
-            $Test::Simple::Skip_All = 1;
-            my $out = "1..0";
-            $out .= " # Skip @args" if @args;
-            $out .= "\n";
-
-            my_print *TESTOUT, $out;
-            exit(0);
-        }
-        else {
-            Test::Simple->import($plan => @args);
-        }
-    }
-    else {
-        Test::Simple->import;
-    }
-
-    __PACKAGE__->_export_to_level(1, __PACKAGE__);
-}
 
 # 5.004's Exporter doesn't have export_to_level.
 sub _export_to_level
@@ -84,6 +65,8 @@ Test::More - yet another framework for writing test scripts
   is  ($this, $that,    $test_name);
   isnt($this, $that,    $test_name);
   like($this, qr/that/, $test_name);
+
+  is_deeply($complex_structure1, $complex_structure2, $test_name);
 
   SKIP: {
       skip $why, $how_many unless $have_some_feature;
@@ -151,6 +134,54 @@ In some cases, you'll want to completely skip an entire testing script.
 Your script will declare a skip with the reason why you skipped and
 exit immediately with a zero (success).  See L<Test::Harness> for
 details.
+
+If you want to control what functions Test::More will export, you
+have to use the 'import' option.  For example, to import everything
+but 'fail', you'd do:
+
+  use Test::More tests => 23, import => ['!fail'];
+
+Alternatively, you can use the plan() function.  Useful for when you
+have to calculate the number of tests.
+
+  use Test::More;
+  plan tests => keys %Stuff * 3;
+
+or for deciding between running the tests at all:
+
+  use Test::More;
+  if( $^O eq 'MacOS' ) {
+      plan skip_all => 'Test irrelevent on MacOS';
+  }
+  else {
+      plan tests => 42;
+  }
+
+=cut
+
+sub plan {
+    my(@plan) = @_;
+
+    my $caller = caller;
+
+    $Test->exported_to($caller);
+    $Test->plan(@plan);
+
+    my @imports = ();
+    foreach my $idx (0..$#plan) {
+        if( $plan[$idx] eq 'import' ) {
+            @imports = @{$plan[$idx+1]};
+            last;
+        }
+    }
+
+    __PACKAGE__->_export_to_level(1, __PACKAGE__, @imports);
+}
+
+sub import {
+    my($class) = shift;
+    goto &plan;
+}
 
 
 =head2 Test names
@@ -220,7 +251,10 @@ This is actually Test::Simple's ok() routine.
 
 =cut
 
-# We get ok() from Test::Simple's import().
+sub ok ($;$) {
+    my($test, $name) = @_;
+    $Test->ok($test, $name);
+}
 
 =item B<is>
 
@@ -282,27 +316,7 @@ function which is an alias of isnt().
 =cut
 
 sub is ($$;$) {
-    my($this, $that, $name) = @_;
-
-    my $test;
-    {
-        local $^W = 0;   # so is(undef, undef) works quietly.
-        $test = $this eq $that;
-    }
-    my $ok = @_ == 3 ? ok($test, $name)
-                     : ok($test);
-
-    unless( $ok ) {
-        $this = defined $this ? "'$this'" : 'undef';
-        $that = defined $that ? "'$that'" : 'undef';
-        my_print *TESTERR, sprintf <<DIAGNOSTIC, $this, $that;
-#          got: %s
-#     expected: %s
-DIAGNOSTIC
-
-    }
-
-    return $ok;
+    $Test->is_eq(@_);
 }
 
 sub isnt ($$;$) {
@@ -314,15 +328,14 @@ sub isnt ($$;$) {
         $test = $this ne $that;
     }
 
-    my $ok = @_ == 3 ? ok($test, $name)
-                     : ok($test);
+    my $ok = $Test->ok($test, $name);
 
     unless( $ok ) {
         $that = defined $that ? "'$that'" : 'undef';
 
-        my_print *TESTERR, sprintf <<DIAGNOSTIC, $that;
-#     it should not be %s
-#     but it is.
+        $Test->diag(sprintf <<DIAGNOSTIC, $that);
+it should not be %s
+but it is.
 DIAGNOSTIC
 
     }
@@ -364,42 +377,7 @@ diagnostics on failure.
 =cut
 
 sub like ($$;$) {
-    my($this, $regex, $name) = @_;
-
-    my $ok = 0;
-    if( ref $regex eq 'Regexp' ) {
-        local $^W = 0;
-        $ok = @_ == 3 ? ok( $this =~ $regex ? 1 : 0, $name )
-                      : ok( $this =~ $regex ? 1 : 0 );
-    }
-    # Check if it looks like '/foo/i'
-    elsif( my($re, $opts) = $regex =~ m{^ /(.*)/ (\w*) $ }sx ) {
-        local $^W = 0;
-        $ok = @_ == 3 ? ok( $this =~ /(?$opts)$re/ ? 1 : 0, $name )
-                      : ok( $this =~ /(?$opts)$re/ ? 1 : 0 );
-    }
-    else {
-        # Can't use fail() here, the call stack will be fucked.
-        my $ok = @_ == 3 ? ok(0, $name )
-                         : ok(0);
-
-        my_print *TESTERR, <<ERR;
-#     '$regex' doesn't look much like a regex to me.  Failing the test.
-ERR
-
-        return $ok;
-    }
-
-    unless( $ok ) {
-        $this = defined $this ? "'$this'" : 'undef';
-        my_print *TESTERR, sprintf <<DIAGNOSTIC, $this;
-#                   %s
-#     doesn't match '$regex'
-DIAGNOSTIC
-
-    }
-
-    return $ok;
+    $Test->like(@_);
 }
 
 =item B<can_ok>
@@ -430,7 +408,7 @@ sub can_ok ($@) {
 
     my @nok = ();
     foreach my $method (@methods) {
-        my $test = "$class->can('$method')";
+        my $test = "'$class'->can('$method')";
         eval $test || push @nok, $method;
     }
 
@@ -438,16 +416,16 @@ sub can_ok ($@) {
     $name = @methods == 1 ? "$class->can($methods[0])" 
                           : "$class->can(...)";
     
-    ok( !@nok, $name );
+    my $ok = $Test->ok( !@nok, $name );
 
-    my_print *TESTERR, map "#     $class->can('$_') failed\n", @nok;
+    $Test->diag(map "$class->can('$_') failed\n", @nok);
 
-    return !@nok;
+    return $ok;
 }
 
 =item B<isa_ok>
 
-  isa_ok($object, $class);
+  isa_ok($object, $class, $object_name);
 
 Checks to see if the given $object->isa($class).  Also checks to make
 sure the object was defined in the first place.  Handy for this sort
@@ -463,32 +441,38 @@ where you'd otherwise have to write
 
 to safeguard against your test script blowing up.
 
+The diagnostics of this test normally just refer to 'the object'.  If
+you'd like them to be more specific, you can supply an $object_name
+(for example 'Test customer').
+
 =cut
 
-sub isa_ok ($$) {
-    my($object, $class) = @_;
+sub isa_ok ($$;$) {
+    my($object, $class, $obj_name) = @_;
 
     my $diag;
-    my $name = "object->isa('$class')";
+    $obj_name = 'The object' unless defined $obj_name;
+    my $name = "$obj_name isa $class";
     if( !defined $object ) {
-        $diag = "The object isn't defined";
+        $diag = "$obj_name isn't defined";
     }
     elsif( !ref $object ) {
-        $diag = "The object isn't a reference";
+        $diag = "$obj_name isn't a reference";
     }
     elsif( !$object->isa($class) ) {
-        $diag = "The object isn't a '$class'";
+        $diag = "$obj_name isn't a '$class'";
     }
 
+    my $ok;
     if( $diag ) {
-        ok( 0, $name );
-        my_print *TESTERR, "#     $diag\n";
-        return 0;
+        $ok = $Test->ok( 0, $name );
+        $Test->diag("$diag\n");
     }
     else {
-        ok( 1, $name );
-        return 1;
+        $ok = $Test->ok( 1, $name );
     }
+
+    return $ok;
 }
 
 
@@ -510,15 +494,11 @@ Use these very, very, very sparingly.
 =cut
 
 sub pass (;$) {
-    my($name) = @_;
-    return @_ == 1 ? ok(1, $name)
-                   : ok(1);
+    $Test->ok(1, @_);
 }
 
 sub fail (;$) {
-    my($name) = @_;
-    return @_ == 1 ? ok(0, $name)
-                   : ok(0);
+    $Test->ok(0, @_);
 }
 
 =back
@@ -564,13 +544,13 @@ require $module;
 $module->import(\@imports);
 USE
 
-    my $ok = ok( !$@, "use $module;" );
+    my $ok = $Test->ok( !$@, "use $module;" );
 
     unless( $ok ) {
         chomp $@;
-        my_print *TESTERR, <<DIAGNOSTIC;
-#     Tried to use '$module'.
-#     Error:  $@
+        $Test->diag(<<DIAGNOSTIC);
+Tried to use '$module'.
+Error:  $@
 DIAGNOSTIC
 
     }
@@ -596,11 +576,11 @@ package $pack;
 require $module;
 REQUIRE
 
-    my $ok = ok( !$@, "require $module;" );
+    my $ok = $Test->ok( !$@, "require $module;" );
 
     unless( $ok ) {
         chomp $@;
-        my_print *TESTERR, <<DIAGNOSTIC;
+        $Test->diag(<<DIAGNOSTIC);
 #     Tried to require '$module'.
 #     Error:  $@
 DIAGNOSTIC
@@ -658,7 +638,8 @@ If pigs cannot fly, the whole block of tests will be skipped
 completely.  Test::More will output special ok's which Test::Harness
 interprets as skipped tests.  Its important to include $how_many tests
 are in the block so the total number of tests comes out right (unless
-you're using C<no_plan>).
+you're using C<no_plan>, in which case you can leave $how_many off if
+you like).
 
 You'll typically use this when a feature is missing, like an optional
 module is not installed or the operating system doesn't have some
@@ -673,15 +654,16 @@ See L</Why are skip and todo so weird?>
 #'#
 sub skip {
     my($why, $how_many) = @_;
-    unless( $how_many >= 1 ) {
+
+    unless( defined $how_many ) {
         # $how_many can only be avoided when no_plan is in use.
-        carp "skip() needs to know \$how_many tests are in the block"
-          if $Test::Simple::Planned_Tests;
+        _carp "skip() needs to know \$how_many tests are in the block"
+          unless $Test::Builder::No_Plan;
         $how_many = 1;
     }
 
     for( 1..$how_many ) {
-        Test::Simple::_skipped($why);
+        $Test->skip($why);
     }
 
     local $^W = 0;
@@ -738,6 +720,83 @@ quite sure what will happen with filehandles.
 
 =over 4
 
+=item B<is_deeply>
+
+  is_deeply( $this, $that, $test_name );
+
+Similar to is(), except that if $this and $that are hash or array
+references, it does a deep comparison walking each data structure to
+see if they are equivalent.  If the two structures are different, it
+will display the place where they start differing.
+
+B<NOTE> Display of scalar refs is not quite 100%
+
+=cut
+
+use vars qw(@Data_Stack);
+my $DNE = bless [], 'Does::Not::Exist';
+sub is_deeply {
+    my($this, $that, $name) = @_;
+
+    my $ok;
+    if( !ref $this || !ref $that ) {
+        $ok = $Test->is_eq($this, $that, $name);
+    }
+    else {
+        local @Data_Stack = ();
+        if( _deep_check($this, $that) ) {
+            $ok = $Test->ok(1, $name);
+        }
+        else {
+            $ok = $Test->ok(0, $name);
+            $ok = $Test->diag(_format_stack(@Data_Stack));
+        }
+    }
+
+    return $ok;
+}
+
+sub _format_stack {
+    my(@Stack) = @_;
+
+    my $var = '$FOO';
+    my $did_arrow = 0;
+    foreach my $entry (@Stack) {
+        my $type = $entry->{type} || '';
+        my $idx  = $entry->{'idx'};
+        if( $type eq 'HASH' ) {
+            $var .= "->" unless $did_arrow++;
+            $var .= "{$idx}";
+        }
+        elsif( $type eq 'ARRAY' ) {
+            $var .= "->" unless $did_arrow++;
+            $var .= "[$idx]";
+        }
+        elsif( $type eq 'REF' ) {
+            $var = "\${$var}";
+        }
+    }
+
+    my @vals = @{$Stack[-1]{vals}}[0,1];
+    my @vars = ();
+    ($vars[0] = $var) =~ s/\$FOO/     \$got/;
+    ($vars[1] = $var) =~ s/\$FOO/\$expected/;
+
+    my $out = "Structures begin differing at:\n";
+    foreach my $idx (0..$#vals) {
+        my $val = $vals[$idx];
+        $vals[$idx] = !defined $val ? 'undef' : 
+                      $val eq $DNE  ? "Does not exist"
+                                    : "'$val'";
+    }
+
+    $out .= "$vars[0] = $vals[0]\n";
+    $out .= "$vars[1] = $vals[1]\n";
+
+    return $out;
+}
+
+
 =item B<eq_array>
 
   eq_array(\@this, \@that);
@@ -750,13 +809,18 @@ multi-level structures are handled correctly.
 #'#
 sub eq_array  {
     my($a1, $a2) = @_;
-    return 0 unless @$a1 == @$a2;
     return 1 if $a1 eq $a2;
 
     my $ok = 1;
-    for (0..$#{$a1}) {
-        my($e1,$e2) = ($a1->[$_], $a2->[$_]);
+    my $max = $#$a1 > $#$a2 ? $#$a1 : $#$a2;
+    for (0..$max) {
+        my $e1 = $_ > $#$a1 ? $DNE : $a1->[$_];
+        my $e2 = $_ > $#$a2 ? $DNE : $a2->[$_];
+
+        push @Data_Stack, { type => 'ARRAY', idx => $_, vals => [$e1, $e2] };
         $ok = _deep_check($e1,$e2);
+        pop @Data_Stack if $ok;
+
         last unless $ok;
     }
     return $ok;
@@ -785,7 +849,21 @@ sub _deep_check {
             {
                 $ok = eq_hash($e1, $e2);
             }
+            elsif( UNIVERSAL::isa($e1, 'REF') and
+                   UNIVERSAL::isa($e2, 'REF') )
+            {
+                push @Data_Stack, { type => 'REF', vals => [$e1, $e2] };
+                $ok = _deep_check($$e1, $$e2);
+                pop @Data_Stack if $ok;
+            }
+            elsif( UNIVERSAL::isa($e1, 'SCALAR') and
+                   UNIVERSAL::isa($e2, 'SCALAR') )
+            {
+                push @Data_Stack, { type => 'REF', vals => [$e1, $e2] };
+                $ok = _deep_check($$e1, $$e2);
+            }
             else {
+                push @Data_Stack, { vals => [$e1, $e2] };
                 $ok = 0;
             }
         }
@@ -806,13 +884,18 @@ is a deep check.
 
 sub eq_hash {
     my($a1, $a2) = @_;
-    return 0 unless keys %$a1 == keys %$a2;
     return 1 if $a1 eq $a2;
 
     my $ok = 1;
-    foreach my $k (keys %$a1) {
-        my($e1, $e2) = ($a1->{$k}, $a2->{$k});
+    my $bigger = keys %$a1 > keys %$a2 ? $a1 : $a2;
+    foreach my $k (keys %$bigger) {
+        my $e1 = exists $a1->{$k} ? $a1->{$k} : $DNE;
+        my $e2 = exists $a2->{$k} ? $a2->{$k} : $DNE;
+
+        push @Data_Stack, { type => 'HASH', idx => $k, vals => [$e1, $e2] };
         $ok = _deep_check($e1, $e2);
+        pop @Data_Stack if $ok;
+
         last unless $ok;
     }
 

@@ -24,29 +24,33 @@ sub ok ($;$) {
 
 package main;
 
-require Test::Simple;
+require Test::More;
+Test::More->import;
+my($out, $err);
 
-push @INC, '../t/lib';
-require Test::Simple::Catch;
-my($out, $err) = Test::Simple::Catch::caught();
+BEGIN {
+    require Test::Harness;
+}
 
-Test::Simple->import(tests => 5);
+if( $Test::Harness::VERSION < 1.20 ) {
+    plan(skip_all => 'Need Test::Harness 1.20 or up');
+}
+else {
+    push @INC, '../t/lib';
+    require Test::Simple::Catch;
+    ($out, $err) = Test::Simple::Catch::caught();
+    plan('no_plan');
+}
 
-#line 30
-ok(1, 'Foo');
-ok(0, 'Bar');
+pass('Just testing');
+ok(1, 'Testing again');
 
 END {
     My::Test::ok($$out eq <<OUT);
-1..5
-ok 1 - Foo
-not ok 2 - Bar
+ok 1 - Just testing
+ok 2 - Testing again
+1..2
 OUT
 
-    My::Test::ok($$err eq <<ERR);
-#     Failed test ($0 at line 31)
-# Looks like you planned 5 tests but only ran 2.
-ERR
-
-    exit 0;
+    My::Test::ok($$err eq '');
 }

@@ -1,4 +1,11 @@
-use Test::More tests => 22;
+#!perl -w
+
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
+
+use Test::More tests => 24;
 
 use_ok('Text::Soundex');
 require_ok('Test::More');
@@ -46,6 +53,7 @@ my @complex_array2 = (
                       [qw(498 10 29)],
                      );
 
+is_deeply( \@complex_array1, \@complex_array2,    'is_deeply with arrays' );
 ok( eq_array(\@complex_array1, \@complex_array2),
     'eq_array with complicated arrays' );
 ok( eq_set(\@complex_array1, \@complex_array2),
@@ -70,9 +78,8 @@ my %hash2 = ( foo => 23,
               har => { foo => 24, bar => 42 },
             );
 
-
-ok( eq_hash(\%hash1, \%hash2),
-    'eq_hash with complicated hashes');
+is_deeply( \%hash1, \%hash2,    'is_deeply with complicated hashes' );
+ok( eq_hash(\%hash1, \%hash2),  'eq_hash with complicated hashes');
 
 %hash1 = ( foo => 23,
            bar => [qw(this that whatever)],

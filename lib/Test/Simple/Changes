@@ -1,5 +1,30 @@
 Revision history for Perl extension Test::Simple
 
+0.32  Tue Oct 16 16:52:02 EDT 2001
+    * Finally added a seperate plan() function
+    * Adding a name field to isa_ok()
+      (Requested by Dave Rolsky)
+    - Test::More was using Carp.pm, causing the occasional false positive.
+      (Reported by Tatsuhiko Miyagawa)
+
+0.31  Mon Oct  8 19:24:53 EDT 2001
+    * Added an import option to Test::More
+    * Added no_ending and no_header options to Test::Builder
+      (Thanks to Dave Rolsky for giving this a swift kick in the ass)
+    * Added is_deeply().  Display of scalar refs not quite 100%
+      (Thanks to Stas Bekman for Apache::TestUtil idea thievery)
+    - Fixed a minor warning with skip()
+      (Thanks to Wolfgang Weisselberg for finding this one)
+
+0.30  Thu Sep 27 22:10:04 EDT 2001
+    * Added Test::Builder
+    * Diagnostics are back to using STDERR *unless* it's from a todo
+      test.  Those go to STDOUT.
+    - Fixed it so nothing is printed if a test is run with a -c flag.
+      Handy when a test is being deparsed with B::Deparse.
+
+0.20  *UNRELEASED*
+
 0.19  Tue Sep 18 17:48:32 EDT 2001
     * Test::Simple and Test::More no longer print their diagnostics
       to STDERR.  It instead goes to STDOUT.

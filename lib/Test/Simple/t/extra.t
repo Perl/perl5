@@ -1,3 +1,5 @@
+#!perl -w
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
@@ -26,7 +28,7 @@ package main;
 
 require Test::Simple;
 
-push @INC, '../t/lib';
+push @INC, '../t/lib/';
 require Test::Simple::Catch;
 my($out, $err) = Test::Simple::Catch::caught();
 
@@ -49,7 +51,11 @@ ok 4 - Car
 not ok 5 - Sar
 OUT
 
-    My::Test::ok($$err =~ /Looks like you planned 3 tests but ran 2 extra/);
+    My::Test::ok($$err eq <<ERR);
+#     Failed test ($0 at line 31)
+#     Failed test ($0 at line 34)
+# Looks like you planned 3 tests but ran 2 extra.
+ERR
 
     exit 0;
 }

@@ -1,10 +1,9 @@
-# Can't use Test.pm, that's a 5.005 thing.
-
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
 }
 
+# Can't use Test.pm, that's a 5.005 thing.
 package My::Test;
 
 print "1..12\n";
@@ -53,12 +52,12 @@ eval {
 
 My::Test::ok($$out eq '');
 My::Test::ok($$err eq '');
-My::Test::ok($@ =~ /You told Test::Simple you plan to run 0 tests!/);
+My::Test::ok($@ =~ /You said to run 0 tests!/);
 
 eval {
     Test::Simple::ok(1);
 };
-My::Test::ok( $@ =~ /You tried to use ok\(\) without a plan!/);
+My::Test::ok( $@ =~ /You tried to run a test without a plan!/);
 
 
 END {

@@ -1169,6 +1169,7 @@ lib/Term/Complete.t		See if Term::Complete works
 lib/Term/ReadLine.pm		Stub readline library
 lib/termcap.pl			Perl library supporting termcap usage
 lib/Test.pm			A simple framework for writing test scripts
+lib/Test/Builder.pm             For writing new test libraries
 lib/Test/Harness.pm		A test harness
 lib/Test/Harness/Changes	Test::Harness
 lib/Test/Harness/t/base.t	Test::Harness
@@ -1177,20 +1178,31 @@ lib/Test/Harness/t/test-harness.t	Test::Harness test
 lib/Test/More.pm                More utilities for writing tests
 lib/Test/Simple.pm              Basic utility for writing tests
 lib/Test/Simple/Changes		Test::Simple changes
+lib/Test/Simple/t/Builder.t     Test::Builder tests
 lib/Test/Simple/t/exit.t        Test::Simple test, exit codes
 lib/Test/Simple/t/extra.t       Test::Simple test
 lib/Test/Simple/t/fail-like.t   Test::More test, like() failures
 lib/Test/Simple/t/fail-more.t   Test::More test, tests failing
 lib/Test/Simple/t/fail.t        Test::Simple test, test failures
+lib/Test/Simple/t/filehandles.t Test::Simple test, STDOUT can be played with
+lib/Test/Simple/t/import.t      Test::More test, importing functions
+lib/Test/Simple/t/is_deeply.t   Test::More test, is_deeply()
 lib/Test/Simple/t/missing.t     Test::Simple test, missing tests
 lib/Test/Simple/t/More.t        Test::More test, basic stuff
+lib/Test/Simple/t/no_ending.t   Test::Builder test, no_ending()
+lib/Test/Simple/t/no_header.t   Test::Builder test, no_header()
 lib/Test/Simple/t/no_plan.t     Test::Simple test, forgot the plan
+lib/Test/Simple/t/output.t      Test::Builder test, output methods
+lib/Test/Simple/t/plan.t        Test::More test, plan()
 lib/Test/Simple/t/plan_is_noplan.t      Test::Simple test, no_plan
+lib/Test/Simple/t/plan_no_plan.t        Test::More test, plan() w/no_plan
+lib/Test/Simple/t/plan_skip_all.t       Test::More test, plan() w/skip_all
 lib/Test/Simple/t/simple.t      Test::Simple test, basic stuff
 lib/Test/Simple/t/skip.t        Test::More test, SKIP tests
 lib/Test/Simple/t/skipall.t     Test::More test, skip all tests
 lib/Test/Simple/t/todo.t        Test::More test, TODO tests
 lib/Test/Simple/t/undef.t       Test::More test, undefs don't cause warnings
+lib/Test/Simple/t/use_ok.t      Test::More test, use_ok()
 lib/Test/Simple/t/useing.t      Test::More test, compile test
 lib/Test/t/fail.t		See if Test works
 lib/Test/t/mix.t		See if Test works
@@ -1200,7 +1212,6 @@ lib/Test/t/skip.t		See if Test works
 lib/Test/t/success.t		See if Test works
 lib/Test/t/todo.t		See if Test works
 lib/Test/Tutorial.pod           A tutorial on writing tests
-lib/Test/Utils.pm               Utility module for Test::Simple/More
 lib/Text/Abbrev.pm		An abbreviation table builder
 lib/Text/Abbrev.t		Test Text::Abbrev
 lib/Text/Balanced.pm		Text::Balanced
@@ -2033,7 +2044,6 @@ t/lib/strict/refs		Tests of "use strict 'refs'" for strict.t
 t/lib/strict/subs		Tests of "use strict 'subs'" for strict.t
 t/lib/strict/vars		Tests of "use strict 'vars'" for strict.t
 t/lib/Test/Simple/Catch.pm      Utility module for testing Test::Simple
-t/lib/Test/Simple/Catch/More.pm Utility module for testing Test::More
 t/lib/Test/Simple/sample_tests/death.plx                for exit.t
 t/lib/Test/Simple/sample_tests/death_in_eval.plx        for exit.t
 t/lib/Test/Simple/sample_tests/extras.plx               for exit.t

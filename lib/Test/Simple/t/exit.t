@@ -6,7 +6,10 @@ BEGIN {
 # Can't use Test.pm, that's a 5.005 thing.
 package My::Test;
 
-use File::Spec;
+unless( eval { require File::Spec } ) {
+    print "1..0 # Skip Need File::Spec to run this test\n";
+    exit(0);
+}
 
 my $test_num = 1;
 # Utility testing functions.

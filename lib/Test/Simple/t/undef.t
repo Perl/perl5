@@ -1,3 +1,8 @@
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
+
 use strict;
 use Test::More tests => 10;
 
