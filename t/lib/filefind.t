@@ -57,8 +57,10 @@ sub wanted {
   print "# '$_' => 1\n";
   s#\.$## if ($^O eq 'VMS' && $_ ne '.');
   Check( $Expect{$_} );
-  delete $Expect{$_};
+  delete $Expect{$_} 
+    unless ( $Expect_Dir{$_} && ! -d _ );
   $File::Find::prune=1 if  $_ eq 'faba';
+  
 }
 
 sub dn_wanted {
@@ -106,6 +108,9 @@ touch('fa/fab/faba/faba_ord');
 %Expect = ('.' => 1, 'fsl' => 1, 'fa_ord' => 1, 'fab' => 1, 'fab_ord' => 1,
 	   'faba' => 1, 'faa' => 1, 'faa_ord' => 1);
 delete $Expect{'fsl'} unless $symlink_exists;
+%Expect_Dir = ('fa' => 1, 'faa' => 1, 'fab' => 1, 'faba' => 1, 
+               'fb' => 1, 'fba' => 1);
+delete @Expect_Dir{'fb','fba'} unless $symlink_exists;
 File::Find::find( {wanted => \&wanted, },'fa' );
 Check( scalar(keys %Expect) == 0 );
 
@@ -113,6 +118,9 @@ Check( scalar(keys %Expect) == 0 );
 	 'fa/fab/fab_ord' => 1, 'fa/fab/faba' => 1,
 	 'fa/fab/faba/faba_ord' => 1, 'fa/faa' => 1, 'fa/faa/faa_ord' => 1);
 delete $Expect{'fa/fsl'} unless $symlink_exists;
+%Expect_Dir = ('fa' => 1, 'fa/faa' => 1, '/fa/fab' => 1, 'fa/fab/faba' => 1, 
+               'fb' => 1, 'fb/fba' => 1);
+delete @Expect_Dir{'fb','fb/fba'} unless $symlink_exists;
 File::Find::find( {wanted => \&wanted, no_chdir => 1},'fa' );
 
 Check( scalar(keys %Expect) == 0 );
@@ -122,6 +130,9 @@ Check( scalar(keys %Expect) == 0 );
          './fa/fab/faba/faba_ord' => 1, './fa/faa' => 1, './fa/faa/faa_ord' => 1,
          './fb' => 1, './fb/fba' => 1, './fb/fba/fba_ord' => 1, './fb/fb_ord' => 1);
 delete $Expect{'./fa/fsl'} unless $symlink_exists;
+%Expect_Dir = ('./fa' => 1, './fa/faa' => 1, '/fa/fab' => 1, './fa/fab/faba' => 1, 
+               './fb' => 1, './fb/fba' => 1);
+delete @Expect_Dir{'./fb','./fb/fba'} unless $symlink_exists;
 File::Find::finddepth( {wanted => \&dn_wanted },'.' );
 Check( scalar(keys %Expect) == 0 );
 
@@ -130,6 +141,9 @@ Check( scalar(keys %Expect) == 0 );
          './fa/fab/faba/faba_ord' => 1, './fa/faa' => 1, './fa/faa/faa_ord' => 1,
          './fb' => 1, './fb/fba' => 1, './fb/fba/fba_ord' => 1, './fb/fb_ord' => 1);
 delete $Expect{'./fa/fsl'} unless $symlink_exists;
+%Expect_Dir = ('./fa' => 1, './fa/faa' => 1, '/fa/fab' => 1, './fa/fab/faba' => 1, 
+               './fb' => 1, './fb/fba' => 1);
+delete @Expect_Dir{'./fb','./fb/fba'} unless $symlink_exists;
 File::Find::finddepth( {wanted => \&d_wanted, no_chdir => 1 },'.' );
 Check( scalar(keys %Expect) == 0 );
 
@@ -137,6 +151,8 @@ if ( $symlink_exists ) {
   %Expect=('.' => 1, 'fa_ord' => 1, 'fsl' => 1, 'fb_ord' => 1, 'fba' => 1,
            'fba_ord' => 1, 'fab' => 1, 'fab_ord' => 1, 'faba' => 1, 'faa' => 1,
            'faa_ord' => 1);
+  %Expect_Dir = ('fa' => 1, 'fa/faa' => 1, '/fa/fab' => 1, 'fa/fab/faba' => 1, 
+                 'fb' => 1, 'fb/fba' => 1);
 
   File::Find::find( {wanted => \&wanted, follow_fast => 1},'fa' );
   Check( scalar(keys %Expect) == 0 );
@@ -145,6 +161,8 @@ if ( $symlink_exists ) {
            'fa/fsl/fba' => 1, 'fa/fsl/fba/fba_ord' => 1, 'fa/fab' => 1,
            'fa/fab/fab_ord' => 1, 'fa/fab/faba' => 1, 'fa/fab/faba/faba_ord' => 1,
            'fa/faa' => 1, 'fa/faa/faa_ord' => 1);
+  %Expect_Dir = ('fa' => 1, 'fa/faa' => 1, '/fa/fab' => 1, 'fa/fab/faba' => 1, 
+                 'fb' => 1, 'fb/fba' => 1);
   File::Find::find( {wanted => \&wanted, follow_fast => 1, no_chdir => 1},'fa' );
   Check( scalar(keys %Expect) == 0 );
 
@@ -152,6 +170,8 @@ if ( $symlink_exists ) {
            'fa/fsl/fba' => 1, 'fa/fsl/fba/fba_ord' => 1, 'fa/fab' => 1,
            'fa/fab/fab_ord' => 1, 'fa/fab/faba' => 1, 'fa/fab/faba/faba_ord' => 1,
            'fa/faa' => 1, 'fa/faa/faa_ord' => 1);
+  %Expect_Dir = ('fa' => 1, 'fa/faa' => 1, '/fa/fab' => 1, 'fa/fab/faba' => 1, 
+                 'fb' => 1, 'fb/fba' => 1);
 
   File::Find::finddepth( {wanted => \&dn_wanted, follow_fast => 1},'fa' );
   Check( scalar(keys %Expect) == 0 );
@@ -160,6 +180,8 @@ if ( $symlink_exists ) {
            'fa/fsl/fba' => 1, 'fa/fsl/fba/fba_ord' => 1, 'fa/fab' => 1,
            'fa/fab/fab_ord' => 1, 'fa/fab/faba' => 1, 'fa/fab/faba/faba_ord' => 1,
            'fa/faa' => 1, 'fa/faa/faa_ord' => 1);
+  %Expect_Dir = ('fa' => 1, 'fa/faa' => 1, '/fa/fab' => 1, 'fa/fab/faba' => 1, 
+                 'fb' => 1, 'fb/fba' => 1);
 
   File::Find::finddepth( {wanted => \&d_wanted, follow_fast => 1, no_chdir => 1},'fa' );
   Check( scalar(keys %Expect) == 0 );
