@@ -1212,10 +1212,26 @@ sigaction(sig, optaction, oldaction = 0)
 	    sigset_t osset;
 	    POSIX__SigSet sigset;
 	    SV** svp;
-	    SV** sigsvp = hv_fetch(GvHVn(siggv),
-				 PL_sig_name[sig],
-				 strlen(PL_sig_name[sig]),
-				 TRUE);
+	    SV** sigsvp;
+	    if (sig == 0 && SvPOK(ST(0))) {
+	        char *s = SvPVX(ST(0));
+		int i = whichsig(s);
+
+	        if (i < 0 && memEQ(s, "SIG", 3))
+		    i = whichsig(s + 3);
+	        if (i < 0) {
+	            if (ckWARN(WARN_SIGNAL))
+		        Perl_warner(aTHX_ packWARN(WARN_SIGNAL),
+                                    "No such signal: SIG%s", s);
+	            XSRETURN_UNDEF;
+		}
+	        else
+		    sig = i;
+            }
+	    sigsvp = hv_fetch(GvHVn(siggv),
+			      PL_sig_name[sig],
+			      strlen(PL_sig_name[sig]),
+			      TRUE);
 
 	    /* Check optaction and set action */
 	    if(SvTRUE(optaction)) {
@@ -1234,9 +1250,11 @@ sigaction(sig, optaction, oldaction = 0)
 	     * in between. We use sigprocmask() to make it so.
 	     */
 	    sigfillset(&sset);
+#if 0
 	    RETVAL=sigprocmask(SIG_BLOCK, &sset, &osset);
 	    if(RETVAL == -1)
                XSRETURN_UNDEF;
+#endif
 	    ENTER;
 	    /* Restore signal mask no matter how we exit this block. */
 	    osset_sv = newSVpv((char *)(&osset), sizeof(sigset_t));

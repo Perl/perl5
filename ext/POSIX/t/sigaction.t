@@ -21,7 +21,7 @@ use vars qw/$bad7 $ok10 $bad18 $ok/;
 
 $^W=1;
 
-print "1..18\n";
+print "1..21\n";
 
 sub IGNORE {
 	$bad7=1;
@@ -133,3 +133,25 @@ if ($^O eq 'VMS') {
     print $bad18 ? "not ok 18\n" : "ok 18\n";
 }
 
+{
+    local $SIG{__WARN__} = sub { }; # Just suffer silently.
+
+    my $hup20;
+    my $hup21;
+
+    sub hup20 { $hup20++ }
+    sub hup21 { $hup21++ }
+
+    sigaction("FOOBAR", $newaction);
+    print "ok 19\n"; # no coredump, still alive
+
+    $newaction = POSIX::SigAction->new("hup20");
+    sigaction("SIGHUP", $newaction);
+    kill "HUP", $$;
+    print $hup20 == 1 ? "ok 20\n" : "not ok 20\n";
+
+    $newaction = POSIX::SigAction->new("hup21");
+    sigaction("HUP", $newaction);
+    kill "HUP", $$;
+    print $hup21 == 1 ? "ok 21\n" : "not ok 21\n";
+}
