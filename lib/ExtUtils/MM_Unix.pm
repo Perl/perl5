@@ -1088,12 +1088,6 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)/.exists 
     my $ldrun = qq{-rpath "$self->{LD_RUN_PATH}"}
 	if ($^O eq 'irix' && $self->{LD_RUN_PATH});
 
-    my $libs = $self->{LDLOADLIBS};
-
-    if ($^O eq 'netbsd') {
-	$libs = '$(LLIBPERL)';
-    }
-
     # For example in AIX the shared objects/libraries from previous builds
     # linger quite a while in the shared dynalinker cache even when nobody
     # is using them.  This is painful if one for instance tries to restart
@@ -1101,6 +1095,22 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)/.exists 
     # the shared object/library is 'busy'.
     push(@m,'	$(RM_F) $@
 ');
+
+    my $libs = $self->{LDLOADLIBS};
+
+    if ($^O eq 'netbsd') {
+	# Use nothing on static perl platforms, and to the flags needed
+	# to link against the shared libperl library on shared perl
+	# platforms.  We peek at lddlflags to see if we need -Wl,-R
+	# or -R to add paths to the run-time library search path.
+	if ($Config{'useshrplib'}) {
+	    if ($Config{'lddlflags'} =~ /-Wl,-R/) {
+		$libs = '-L$(PERL_INC) -Wl,-R$(INSTALLARCHLIB)/CORE -lperl';
+	    } elsif ($Config{'lddlflags'} =~ /-R/) {
+		$libs = '-L$(PERL_INC) -R$(INSTALLARCHLIB)/CORE -lperl';
+	    }
+	}
+    }
 
     push(@m,
 '	LD_RUN_PATH="$(LD_RUN_PATH)" $(LD) '.$ldrun.' $(LDDLFLAGS) '.$ldfrom.
@@ -3215,19 +3225,6 @@ sub realclean {
     my($self, %attribs) = @_;
     my(@m);
 
-    # Set LLIBPERL to nothing on static perl platforms, and to the flags
-    # needed to link against the shared libperl library on shared perl
-    # platforms.  We peek at lddlflags to see if we need -Wl,-R or -R
-    # to add paths to the run-time library search path.
-    #
-    my($llibperl) = '';
-    if ($Config{'useshrplib'}) {
-	if ($Config{'lddlflags'} =~ /-Wl,-R/) {
-	    $llibperl = '-L$(PERL_INC) -Wl,-R$(INSTALLARCHLIB)/CORE -lperl';
-	} elsif ($Config{'lddlflags'} =~ /-R/) {
-	    $llibperl = '-L$(PERL_INC) -R$(INSTALLARCHLIB)/CORE -lperl';
-	}
-    }
     push(@m,'LLIBPERL = '.$llibperl."\n");
 
     push(@m,'
