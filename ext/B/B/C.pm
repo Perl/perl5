@@ -25,6 +25,7 @@ my $gv_index = 0;
 my $re_index = 0;
 my $pv_index = 0;
 my $anonsub_index = 0;
+my $initsub_index = 0;
 
 my %symtable;
 my $warn_undefined_syms;
@@ -564,6 +565,10 @@ sub B::CV::save {
 		$ppname .= ($stashname eq "main") ?
 			    $gvname : "$stashname\::$gvname";
 		$ppname =~ s/::/__/g;
+	        if ($gvname eq "INIT"){
+		       $ppname .= "_$initsub_index";
+		       $initsub_index++;
+		    }
 	    }
 	}
 	if (!$ppname) {
@@ -1074,9 +1079,7 @@ sub B::GV::savecv {
 			 $gv->STASH->NAME, $name, $$cv, $$gv);
 	}
       my $package=$gv->STASH->NAME;
-      # This seems to undo all the ->isa and prefix stuff we do below
-      # so disable again for now
-      if (0 && ! grep(/^$package$/,@unused_sub_packages)){
+      if ( ! grep(/^$package$/,@unused_sub_packages)){
           warn sprintf("omitting cv in superclass %s", $gv->STASH->NAME) 
               if $debug_cv;
           return ;
@@ -1103,10 +1106,6 @@ sub save_unused_subs {
 	return 0 if ($package =~ /::::/);  # skip ::::ISA::CACHE etc.
 	#warn "Considering $package\n";#debug
 	return 1 if exists $search_pack{$package};
-      #sub try for a partial match
-      if (grep(/^$package\:\:/,@unused_sub_packages)){ 
-          return 1;   
-      }       
 	#warn "    (nothing explicit)\n";#debug
 	# Omit the packages which we use (and which cause grief
 	# because of fancy "goto &$AUTOLOAD" stuff).
@@ -1117,20 +1116,20 @@ sub save_unused_subs {
 	    return 0;
 	}
 	foreach my $u (keys %search_pack) {
-	    if ($package =~ /^${u}::/) {
-		warn "$package starts with $u\n";
-		return 1
-	    }
 	    if ($package->isa($u)) {
-		warn "$package isa $u\n";
-		return 1
-	    }
-	    return 1 if $package->isa($u);
-	}
+      		warn "$package isa $u\n" if defined $debug_cv;
+      		push @unused_sub_package, $package;
+	  		return 1
+ 	    }
+	if ($package =~ /^${u}::/) {
+   		warn "$package starts with $u\n" if defined $debug_cv;
+   		return 1
+ 	    }
+  }
 	foreach my $m (qw(new DESTROY TIESCALAR TIEARRAY TIEHASH)) {
 	    if (defined(&{$package."::$m"})) {
 		warn "$package has method $m: -u$package assumed\n";#debug
-              push @unused_sub_package, $package;
+                push @unused_sub_package, $package;
 		return 1;
 	    }
 	}

@@ -8,7 +8,7 @@
 package B::CC;
 use strict;
 use B qw(main_start main_root class comppadlist peekop svref_2object
-	timing_info);
+	timing_info init_av);
 use B::C qw(save_unused_subs objsym init_sections
 	    output_all output_boilerplate output_main);
 use B::Bblock qw(find_leaders);
@@ -499,7 +499,7 @@ sub pp_and {
     if (@stack >= 1) {
 	my $bool = pop_bool();
 	write_back_stack();
-	runtime(sprintf("if (!$bool) goto %s;", label($next)));
+	runtime(sprintf("if (!$bool) {XPUSHs(&PL_sv_no); goto %s;}", label($next)));
     } else {
 	runtime(sprintf("if (!%s) goto %s;", top_bool(), label($next)),
 		"*sp--;");
@@ -513,10 +513,10 @@ sub pp_or {
     reload_lexicals();
     unshift(@bblock_todo, $next);
     if (@stack >= 1) {
-	my $obj = pop @stack;
+	my $bool = pop_bool @stack;
 	write_back_stack();
-	runtime(sprintf("if (%s) { XPUSHs(%s); goto %s; }",
-			$obj->as_numeric, $obj->as_sv, label($next)));
+	runtime(sprintf("if (%s) { XPUSHs(&PL_sv_yes); goto %s; }",
+			$bool, label($next)));
     } else {
 	runtime(sprintf("if (%s) goto %s;", top_bool(), label($next)),
 		"*sp--;");
@@ -1389,6 +1389,7 @@ sub cc_main {
     my @comppadlist = comppadlist->ARRAY;
     my $curpad_nam = $comppadlist[0]->save;
     my $curpad_sym = $comppadlist[1]->save;
+    my $init_av   = init_av->save;
     my $start = cc_recurse("pp_main", main_root, main_start, @comppadlist);
     save_unused_subs(@unused_sub_packages);
     cc_recurse();
@@ -1398,8 +1399,11 @@ sub cc_main {
 	$init->add(sprintf("PL_main_root = s\\_%x;", ${main_root()}),
 		   "PL_main_start = $start;",
 		   "PL_curpad = AvARRAY($curpad_sym);",
+	           "PL_initav = $init_av;",
 		   "av_store(CvPADLIST(PL_main_cv),0,SvREFCNT_inc($curpad_nam));",
-		   "av_store(CvPADLIST(PL_main_cv),1,SvREFCNT_inc($curpad_sym));");
+		   "av_store(CvPADLIST(PL_main_cv),1,SvREFCNT_inc($curpad_sym));",
+		     );
+                 
     }
     output_boilerplate();
     print "\n";
