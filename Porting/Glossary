@@ -1460,6 +1460,10 @@ d_sigsetjmp (d_sigsetjmp.U):
 	which indicates that the sigsetjmp() routine is available to
 	call setjmp() and optionally save the process's signal mask.
 
+d_sockatmark (d_sockatmark.U):
+	This variable conditionally defines the HAS_SOCKATMARK symbol, which
+	indicates to the C program that the sockatmark() routine is available.
+
 d_socket (d_socket.U):
 	This variable conditionally defines HAS_SOCKET, which indicates
 	that the BSD socket interface is supported.

@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Mar 13 05:21:04 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Tue Mar 27 07:51:37 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -521,6 +521,7 @@ d_shmget=''
 d_sigaction=''
 d_sigprocmask=''
 d_sigsetjmp=''
+d_sockatmark=''
 d_msg_ctrunc=''
 d_msg_dontroute=''
 d_msg_oob=''
@@ -11619,6 +11620,10 @@ set d_sigsetjmp
 eval $setvar
 $rm -f try.c try
 
+: see if sockatmark exists
+set sockatmark d_sockatmark
+eval $inlibc
+
 : see if socks5_init exists
 set socks5_init d_socks5_init
 eval $inlibc
@@ -15437,6 +15442,26 @@ fi
 set i_sysioctl
 eval $setvar
 
+: see if socket ioctl defs are in sys/sockio.h
+echo " "
+xxx=`./findhdr sys/sockio.h`
+if $test "$xxx"; then
+	if $contains SIOCATMARK $xxx >/dev/null 2>&1; then
+		val="$define"
+		echo "You have socket ioctls defined in <sys/sockio.h>." >&4
+	else
+		val="$undef"
+		echo "No socket ioctls found in <sys/sockio.h>." >&4
+	fi
+else
+	val="$undef"
+	$cat <<EOM
+<sys/sockio.h> not found, assuming socket ioctls are in <sys/ioctl.h>.
+EOM
+fi
+set i_syssockio
+eval $setvar
+
 
 : see if this is a syslog.h system
 set syslog.h i_syslog
@@ -16180,6 +16205,7 @@ d_shmget='$d_shmget'
 d_sigaction='$d_sigaction'
 d_sigprocmask='$d_sigprocmask'
 d_sigsetjmp='$d_sigsetjmp'
+d_sockatmark='$d_sockatmark'
 d_socket='$d_socket'
 d_socklen_t='$d_socklen_t'
 d_sockpair='$d_sockpair'
