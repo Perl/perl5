@@ -31,8 +31,279 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 14470] By: jhi                                   on 2002/01/28  14:33:36
+        Log: BeOS has sockets but not true ones.
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 14468] By: jhi                                   on 2002/01/28  14:03:01
+        Log: For some strange reason under the smoke harness the alignment
+             test hangs in HP-UX 10.20.  So hint it to avoid the test.
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[ 14467] By: jhi                                   on 2002/01/28  14:00:32
+        Log: Allow d_u32align to be hinted.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 14466] By: jhi                                   on 2002/01/28  13:41:18
+        Log: The shift key is important.
+     Branch: perl
+	   ! ext/B/B.xs
+____________________________________________________________________________
+[ 14465] By: jhi                                   on 2002/01/28  13:36:15
+        Log: The "used only once" warnings (from gv_check) come
+             in pseudorandom hash order-- in EBCDIC the order
+             is different.  Add a new option that allow the warnings
+             to come in any order (Paul Marquess).
+     Branch: perl
+	   ! lib/warnings.t t/lib/warnings/perl
+____________________________________________________________________________
+[ 14464] By: jhi                                   on 2002/01/28  13:04:58
+        Log: Integrate perlio; the 0nothread test failure without threads.
+     Branch: perl
+	  !> ext/threads/shared/t/0nothread.t
+____________________________________________________________________________
+[ 14460] By: jhi                                   on 2002/01/28  03:37:30
+        Log: FAQ sync.
+     Branch: perl
+	   ! pod/perlfaq.pod pod/perlfaq1.pod pod/perlfaq2.pod
+	   ! pod/perlfaq3.pod pod/perlfaq4.pod pod/perlfaq5.pod
+	   ! pod/perlfaq6.pod pod/perlfaq7.pod pod/perlfaq8.pod
+	   ! pod/perlfaq9.pod
+____________________________________________________________________________
+[ 14459] By: jhi                                   on 2002/01/28  02:28:10
+        Log: Upgrade to podlators 1.20.
+     Branch: perl
+	   ! lib/Pod/Text/Overstrike.pm lib/Pod/t/basic.t
+____________________________________________________________________________
+[ 14458] By: jhi                                   on 2002/01/28  01:36:28
+        Log: Retract #14448, a better patch coming up.
+     Branch: perl
+	   ! lib/Pod/t/basic.t
+____________________________________________________________________________
+[ 14457] By: jhi                                   on 2002/01/28  01:31:40
+        Log: EBCDIC portability.
+     Branch: perl
+	   ! t/op/append.t
+____________________________________________________________________________
+[ 14456] By: jhi                                   on 2002/01/27  23:49:40
+        Log: Further cygwin installperl tweak from Gerrit P. Haase.
+     Branch: perl
+	   ! installperl
+____________________________________________________________________________
+[ 14455] By: jhi                                   on 2002/01/27  23:47:42
+        Log: A bug in Bulgarian EBCDIC locale (this sounds like
+             a Sherlock Holmes mystery...)  Well, a few more EBCDICs
+             locales failed, too.  The patch works around the bug by
+             skipping the test, but the real problem may be deeper
+             (affecting probably only EBCDIC platforms, though):
+             see the comment in locale.t for more details.
+     Branch: perl
+	   ! lib/locale.t
+____________________________________________________________________________
+[ 14453] By: jhi                                   on 2002/01/27  22:36:08
+        Log: Subject: Bleadperl on Cygwin today
+             From: "Gerrit P. Haase" <gp@familiehaase.de>              
+             Date: Sun, 27 Jan 2002 22:30:41 +0100
+             Message-ID: <462007239437.20020127223041@familiehaase.de>
+     Branch: perl
+	   ! Configure cygwin/Makefile.SHs cygwin/perlld.in installperl
+	   ! lib/ExtUtils/MM_Cygwin.pm lib/ExtUtils/t/Embed.t
+	   ! lib/ExtUtils/t/MM_Cygwin.t
+____________________________________________________________________________
+[ 14452] By: jhi                                   on 2002/01/27  21:57:56
+        Log: Unfinished EBCDIC branch.
+     Branch: perl
+	   ! t/op/ver.t
+____________________________________________________________________________
+[ 14451] By: jhi                                   on 2002/01/27  21:47:29
+        Log: B::cstring() and B::Deparse EBCDIC fixes from Rafael Garcia-Suarez.
+     Branch: perl
+	   ! ext/B/B.xs ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 14450] By: jhi                                   on 2002/01/27  21:44:37
+        Log: Cleanup the stash test, and reclaim it in non-ASCII-sorting
+             platforms.
+     Branch: perl
+	   ! ext/B/t/stash.t
+____________________________________________________________________________
+[ 14449] By: jhi                                   on 2002/01/27  19:34:56
+        Log: Apparently no need for EBCDIC exception any more.
+     Branch: perl
+	   ! ext/B/t/showlex.t
+____________________________________________________________________________
+[ 14448] By: jhi                                   on 2002/01/27  18:48:17
+        Log: (retracted by #14458)
+             (Russ Allbery) OS/390 is using a high-bit character for ESC,
+             skip the test for now.  A better fix would be to override
+             the notion of the platform's escape sequence in the test
+             of Pod::Text::Termcap.  We may have to apply a filter to
+             the output to substitute back in the ESC character that
+             the test expects, but only on OS/390.
+     Branch: perl
+	   ! lib/Pod/t/basic.t
+____________________________________________________________________________
+[ 14447] By: jhi                                   on 2002/01/27  18:19:01
+        Log: Detypo.
+     Branch: perl
+	   ! ext/Devel/Peek/Peek.t
+____________________________________________________________________________
+[ 14446] By: jhi                                   on 2002/01/27  17:57:21
+        Log: OS/390 USS has a different idea of the pw* functions.
+             Also, test the name with eq, not with ==.
+     Branch: perl
+	   ! lib/User/pwent.t
+____________________________________________________________________________
+[ 14445] By: jhi                                   on 2002/01/27  17:37:54
+        Log: O_RDONLY/O_WRONLY/O_RDWR portability.
+     Branch: perl
+	   ! doio.c
+____________________________________________________________________________
+[ 14444] By: jhi                                   on 2002/01/27  16:32:32
+        Log: ASCIIisms.
+     Branch: perl
+	   ! ext/PerlIO/t/encoding.t
+____________________________________________________________________________
+[ 14443] By: jhi                                   on 2002/01/27  15:59:31
+        Log: chr(42) ne '*'  if one is in EBCDIC.
+     Branch: perl
+	   ! t/op/pack.t
+____________________________________________________________________________
+[ 14442] By: jhi                                   on 2002/01/27  15:26:52
+        Log: Subject: [PATCH] Fix up recent op/stat.t failures
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Sun, 27 Jan 2002 09:46:38 -0500 (EST)
+             Message-ID: <Pine.SOL.4.10.10201270943120.4253-100000@maxwell.phys.lafayette.edu>         
+     Branch: perl
+	   ! t/op/stat.t
+____________________________________________________________________________
+[ 14441] By: jhi                                   on 2002/01/27  15:21:49
+        Log: Subject: [ PATCH ] Re: Smoke 14406 /pro/3gl/CPAN/perl-current
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Sun, 27 Jan 2002 15:03:18 +0100
+             Message-Id: <20020127145902.0EA2.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! lib/ExtUtils/t/Command.t
+____________________________________________________________________________
+[ 14440] By: jhi                                   on 2002/01/27  15:20:52
+        Log: Subject: [PATCH B::Deparse] new switch: don't check prototypes while deparsing
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Sun, 27 Jan 2002 14:51:10 +0100
+             Message-ID: <20020127145110.A16332@rafael>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 14438] By: jhi                                   on 2002/01/26  23:56:53
+        Log: Comment to avoid later "cleanups."
+     Branch: perl
+	   ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[ 14437] By: jhi                                   on 2002/01/26  23:54:50
+        Log: USS V2R10 seems to be happier with env FOO=... cmd ...
+             instead of just FOO=... cmd ...
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 14436] By: jhi                                   on 2002/01/26  23:14:04
+        Log: Overquoting bad (in UNIX one would get
+             Can't open perl script "'-I../lib'": No such file or directory)
+     Branch: perl
+	   ! lib/Pod/t/Usage.t
+____________________________________________________________________________
+[ 14435] By: jhi                                   on 2002/01/26  22:41:05
+        Log: Integrate perlio;
+             
+             "All tests successful" VC6.0 Win32
+             (Update config.vc to need cppstdin so those tests are skipped...)
+     Branch: perl
+	  !> win32/config.vc win32/config_H.bc win32/config_H.gc
+	  !> win32/config_H.vc
+____________________________________________________________________________
+[ 14433] By: jhi                                   on 2002/01/26  21:38:56
+        Log: Integrate perlio;
+             
+             1st two tests of File/Find/t/find.t and taint.t were run after 
+             calling cleanup(). If previous fail had left for_find directory,
+             but no content in it then cleanup() returned cd'ed to that directory.
+             So tests failed. Fixed cleanup()-s.
+             
+             If we get to sighandler by mistake (no perl handler set) then
+             warn() and exit() rather than die() - should never happen
+             but if it does context needed to die is likely to be trashed
+             as well.
+             
+             Win32 signal emulation cleanup.
+             
+             Tinkering with thread cleanup mutex-ing - not the problem 
+             (op.c is) but could have been...
+             
+             Fix/band-aid for op.c's anon CV leak fix co-existing with threads.
+             Should really be looked at by someone that knows about pads.
+             
+             Gurusamy Sarathy <gsar@ActiveState.com>'s patch to Filter::Simple
+             for CRLF line endings.
+     Branch: perl
+	  !> ext/threads/threads.xs lib/File/Find/t/find.t
+	  !> lib/File/Find/t/taint.t lib/Filter/Simple.pm mg.c op.c
+	  !> win32/perlhost.h win32/win32.c win32/win32.h win32/win32iop.h
+____________________________________________________________________________
+[ 14430] By: jhi                                   on 2002/01/26  20:54:16
+        Log: Subject: Re: [PATCH @14417] vmsify Pod::Usage and its test
+             From: "Craig A. Berry" <craigberry@mac.com>       
+             Date: Sat, 26 Jan 2002 11:19:44 -0600
+             Message-Id: <a05101000b87895064ee3@[172.16.52.1]>
+     Branch: perl
+	   ! lib/Pod/Usage.pm lib/Pod/t/Usage.t
+____________________________________________________________________________
+[ 14424] By: jhi                                   on 2002/01/25  22:10:11
+        Log: Integrate perlio;
+             
+             Fix winsystem.t's attempt to build showav.exe to work
+             with gcc (which writes a.exe unless told with -o ).
+             Also put in a few more fail-safes to check .exe got
+             built somehow.
+             
+             More Win32 tuning
+             
+             Save $! so that other syscalls don't disturb it before
+             we test it.
+     Branch: perl
+	  !> ext/Socket/socketpair.t t/op/stat.t t/op/taint.t
+	  !> t/op/winsystem.t
+____________________________________________________________________________
+[ 14423] By: jhi                                   on 2002/01/25  22:08:09
+        Log: Subject: [PATCH] new test in op/universal.t
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Fri, 25 Jan 2002 23:17:33 +0100
+             Message-ID: <20020125231733.A11733@rafael>
+     Branch: perl
+	   ! t/op/universal.t
+____________________________________________________________________________
+[ 14419] By: jhi                                   on 2002/01/25  17:25:05
+        Log: Subject: [Patch Encode.xs] calculation of need overflows
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date: Sat, 26 Jan 2002 00:58:50 +0900
+             Message-Id: <20020126005802.89B3.BQW10602@nifty.com>
+     Branch: perl
+	   ! ext/Encode/Encode.xs
+____________________________________________________________________________
+[ 14418] By: jhi                                   on 2002/01/25  16:28:40
+        Log: Integrate changes 13474+13478+13584 from maintperl;
+             anon sub leakage.
+     Branch: perl
+	   ! op.c t/run/fresh_perl.t
+____________________________________________________________________________
+[ 14417] By: jhi                                   on 2002/01/25  15:34:18
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 14416] By: jhi                                   on 2002/01/25  15:04:25
         Log: Integrate perlio; extensive threads and threads::shared work
+             (note that the below is a chronological list of perlio
+             check-in entries since the last integrate)
              
              Nearly-working threads re-structuring. Do not integrate,
              submit-ing to get to Win32, and as "off site" backup.
@@ -257,7 +528,7 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [ 14374] By: jhi                                   on 2002/01/22  16:36:41
         Log: Get rid of the _() macro since (1) we require ANSI anyway
-             (2) Other software (NU)seems to use it and we don't need it,
+             (2) Other software (GNU) seems to use it and we don't need it,
              so let's give it up.
      Branch: perl
 	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
@@ -516,7 +787,9 @@ ____________________________________________________________________________
 	   ! lib/File/Find.pm
 ____________________________________________________________________________
 [ 14327] By: jhi                                   on 2002/01/18  14:33:19
-        Log: Subject: [PATCH] Improving lib/Time/Local.t
+        Log: (retracted by #14334)
+             
+             Subject: [PATCH] Improving lib/Time/Local.t
              From: Paul_GreenVOS@vos.stratus.com        
              Date: Thu, 17 Jan 02 22:36 est
              Message-Id: <200201180335.WAA08768@mailhub2.stratus.com> 
