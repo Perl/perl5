@@ -1020,6 +1020,8 @@ I32 flags;		/* See G_* flags in cop.h */
     XPUSHs(sv_2mortal(newSVpv(methname,0)));
     PUTBACK;
     pp_method();
+	if(op == &myop)
+		op = Nullop;
     return perl_call_sv(*stack_sp--, flags);
 }
 
