@@ -1310,7 +1310,7 @@ typedef struct
 IV
 PerlIOStdio_fileno(PerlIO *f)
 {
- return fileno(PerlIOSelf(f,PerlIOStdio)->stdio);
+ return PerlSIO_fileno(PerlIOSelf(f,PerlIOStdio)->stdio);
 }
 
 const char *
@@ -1349,19 +1349,19 @@ PerlIOStdio_fdopen(PerlIO_funcs *self, int fd,const char *mode)
      switch(fd)
       {
        case 0:
-        stdio = stdin;
+        stdio = PerlSIO_stdin;
         break;
        case 1:
-        stdio = stdout;
+        stdio = PerlSIO_stdout;
         break;
        case 2:
-        stdio = stderr;
+        stdio = PerlSIO_stderr;
         break;
       }
     }
    else
     {
-     stdio = fdopen(fd,mode = PerlIOStdio_mode(mode,tmode));
+     stdio = PerlSIO_fdopen(fd,mode = PerlIOStdio_mode(mode,tmode));
     }
    if (stdio)
     {
@@ -1389,7 +1389,7 @@ PerlIO *
 PerlIOStdio_open(PerlIO_funcs *self, const char *path,const char *mode)
 {
  PerlIO *f = NULL;
- FILE *stdio = fopen(path,mode);
+ FILE *stdio = PerlSIO_fopen(path,mode);
  if (stdio)
   {
    char tmode[8];
@@ -1406,7 +1406,7 @@ PerlIOStdio_reopen(const char *path, const char *mode, PerlIO *f)
 {
  PerlIOStdio *s = PerlIOSelf(f,PerlIOStdio);
  char tmode[8];
- FILE *stdio = freopen(path,(mode = PerlIOStdio_mode(mode,tmode)),s->stdio);
+ FILE *stdio = PerlSIO_freopen(path,(mode = PerlIOStdio_mode(mode,tmode)),s->stdio);
  if (!s->stdio)
   return -1;
  s->stdio = stdio;
@@ -1424,7 +1424,7 @@ PerlIOStdio_read(PerlIO *f, void *vbuf, Size_t count)
    /* Perl is expecting PerlIO_getc() to fill the buffer
     * Linux's stdio does not do that for fread()
     */
-   int ch = fgetc(s);
+   int ch = PerlSIO_fgetc(s);
    if (ch != EOF)
     {
      *buf = ch;
@@ -1432,7 +1432,7 @@ PerlIOStdio_read(PerlIO *f, void *vbuf, Size_t count)
     }
   }
  else
-  got = fread(vbuf,1,count,s);
+  got = PerlSIO_fread(vbuf,1,count,s);
  return got;
 }
 
@@ -1445,7 +1445,7 @@ PerlIOStdio_unread(PerlIO *f, const void *vbuf, Size_t count)
  while (count > 0)
   {
    int ch = *buf-- & 0xff;
-   if (ungetc(ch,s) != ch)
+   if (PerlSIO_ungetc(ch,s) != ch)
     break;
    unread++;
    count--;
@@ -1456,21 +1456,21 @@ PerlIOStdio_unread(PerlIO *f, const void *vbuf, Size_t count)
 SSize_t
 PerlIOStdio_write(PerlIO *f, const void *vbuf, Size_t count)
 {
- return fwrite(vbuf,1,count,PerlIOSelf(f,PerlIOStdio)->stdio);
+ return PerlSIO_fwrite(vbuf,1,count,PerlIOSelf(f,PerlIOStdio)->stdio);
 }
 
 IV
 PerlIOStdio_seek(PerlIO *f, Off_t offset, int whence)
 {
  FILE *stdio = PerlIOSelf(f,PerlIOStdio)->stdio;
- return fseek(stdio,offset,whence);
+ return PerlSIO_fseek(stdio,offset,whence);
 }
 
 Off_t
 PerlIOStdio_tell(PerlIO *f)
 {
  FILE *stdio = PerlIOSelf(f,PerlIOStdio)->stdio;
- return ftell(stdio);
+ return PerlSIO_ftell(stdio);
 }
 
 IV
@@ -1480,7 +1480,7 @@ PerlIOStdio_close(PerlIO *f)
  FILE *stdio = PerlIOSelf(f,PerlIOStdio)->stdio;
  return(
    (getsockopt(PerlIO_fileno(f), SOL_SOCKET, SO_TYPE, (char *)&optval, &optlen) < 0) ?
-       fclose(stdio) :
+       PerlSIO_fclose(stdio) :
        close(PerlIO_fileno(f)));
 }
 
@@ -1490,7 +1490,7 @@ PerlIOStdio_flush(PerlIO *f)
  FILE *stdio = PerlIOSelf(f,PerlIOStdio)->stdio;
  if (PerlIOBase(f)->flags & PERLIO_F_CANWRITE)
   {
-   return fflush(stdio);
+   return PerlSIO_fflush(stdio);
   }
  else
   {
@@ -1502,7 +1502,7 @@ PerlIOStdio_flush(PerlIO *f)
     */
    /* Not writeable - sync by attempting a seek */
    int err = errno;
-   if (fseek(stdio,(Off_t) 0, SEEK_CUR) != 0)
+   if (PerlSIO_fseek(stdio,(Off_t) 0, SEEK_CUR) != 0)
     errno = err;
 #endif
   }
@@ -1517,11 +1517,11 @@ PerlIOStdio_fill(PerlIO *f)
  /* fflush()ing read-only streams can cause trouble on some stdio-s */
  if ((PerlIOBase(f)->flags & PERLIO_F_CANWRITE))
   {
-   if (fflush(stdio) != 0)
+   if (PerlSIO_fflush(stdio) != 0)
     return EOF;
   }
- c = fgetc(stdio);
- if (c == EOF || ungetc(c,stdio) != c)
+ c = PerlSIO_fgetc(stdio);
+ if (c == EOF || PerlSIO_ungetc(c,stdio) != c)
   return EOF;
  return 0;
 }
@@ -1529,28 +1529,28 @@ PerlIOStdio_fill(PerlIO *f)
 IV
 PerlIOStdio_eof(PerlIO *f)
 {
- return feof(PerlIOSelf(f,PerlIOStdio)->stdio);
+ return PerlSIO_feof(PerlIOSelf(f,PerlIOStdio)->stdio);
 }
 
 IV
 PerlIOStdio_error(PerlIO *f)
 {
- return ferror(PerlIOSelf(f,PerlIOStdio)->stdio);
+ return PerlSIO_ferror(PerlIOSelf(f,PerlIOStdio)->stdio);
 }
 
 void
 PerlIOStdio_clearerr(PerlIO *f)
 {
- clearerr(PerlIOSelf(f,PerlIOStdio)->stdio);
+ PerlSIO_clearerr(PerlIOSelf(f,PerlIOStdio)->stdio);
 }
 
 void
 PerlIOStdio_setlinebuf(PerlIO *f)
 {
 #ifdef HAS_SETLINEBUF
- setlinebuf(PerlIOSelf(f,PerlIOStdio)->stdio);
+ PerlSIO_setlinebuf(PerlIOSelf(f,PerlIOStdio)->stdio);
 #else
- setvbuf(PerlIOSelf(f,PerlIOStdio)->stdio, Nullch, _IOLBF, 0);
+ PerlSIO_setvbuf(PerlIOSelf(f,PerlIOStdio)->stdio, Nullch, _IOLBF, 0);
 #endif
 }
 
@@ -1559,14 +1559,14 @@ STDCHAR *
 PerlIOStdio_get_base(PerlIO *f)
 {
  FILE *stdio  = PerlIOSelf(f,PerlIOStdio)->stdio;
- return FILE_base(stdio);
+ return PerlSIO_get_base(stdio);
 }
 
 Size_t
 PerlIOStdio_get_bufsiz(PerlIO *f)
 {
  FILE *stdio = PerlIOSelf(f,PerlIOStdio)->stdio;
- return FILE_bufsiz(stdio);
+ return PerlSIO_get_bufsiz(stdio);
 }
 #endif
 
@@ -1575,14 +1575,14 @@ STDCHAR *
 PerlIOStdio_get_ptr(PerlIO *f)
 {
  FILE *stdio = PerlIOSelf(f,PerlIOStdio)->stdio;
- return FILE_ptr(stdio);
+ return PerlSIO_get_ptr(stdio);
 }
 
 SSize_t
 PerlIOStdio_get_cnt(PerlIO *f)
 {
  FILE *stdio = PerlIOSelf(f,PerlIOStdio)->stdio;
- return FILE_cnt(stdio);
+ return PerlSIO_get_cnt(stdio);
 }
 
 void
@@ -1592,12 +1592,12 @@ PerlIOStdio_set_ptrcnt(PerlIO *f,STDCHAR *ptr,SSize_t cnt)
  if (ptr != NULL)
   {
 #ifdef STDIO_PTR_LVALUE
-   FILE_ptr(stdio) = ptr;
+   PerlSIO_set_ptr(stdio,ptr);
 #ifdef STDIO_PTR_LVAL_SETS_CNT
-   if (FILE_cnt(stdio) != (cnt))
+   if (PerlSIO_get_cnt(stdio) != (cnt))
     {
      dTHX;
-     assert(FILE_cnt(stdio) == (cnt));
+     assert(PerlSIO_get_cnt(stdio) == (cnt));
     }
 #endif
 #if (!defined(STDIO_PTR_LVAL_NOCHANGE_CNT))
@@ -1605,17 +1605,17 @@ PerlIOStdio_set_ptrcnt(PerlIO *f,STDCHAR *ptr,SSize_t cnt)
    return;
 #endif
 #else  /* STDIO_PTR_LVALUE */
-   abort();
+   PerlProc_abort();
 #endif /* STDIO_PTR_LVALUE */
   }
 /* Now (or only) set cnt */
 #ifdef STDIO_CNT_LVALUE
- FILE_cnt(stdio) = cnt;
+ PerlSIO_set_cnt(stdio,cnt);
 #else  /* STDIO_CNT_LVALUE */
 #if (defined(STDIO_PTR_LVALUE) && defined(STDIO_PTR_LVAL_SETS_CNT))
- FILE_ptr(stdio) = FILE_ptr(stdio)+(FILE_cnt(stdio)-cnt);
+ PerlSIO_set_ptr(stdio,PerlSIO_get_ptr(stdio)+(PerlSIO_get_cnt(stdio)-cnt));
 #else  /* STDIO_PTR_LVAL_SETS_CNT */
- abort();
+ PerlProc_abort();
 #endif /* STDIO_PTR_LVAL_SETS_CNT */
 #endif /* STDIO_CNT_LVALUE */
 }
@@ -3018,7 +3018,7 @@ PerlIO_tmpfile(void)
  /* I have no idea how portable mkstemp() is ... */
 #if defined(WIN32) || !defined(HAVE_MKSTEMP)
  PerlIO *f = NULL;
- FILE *stdio = tmpfile();
+ FILE *stdio = PerlSIO_tmpfile();
  if (stdio)
   {
    PerlIOStdio *s = PerlIOSelf(PerlIO_push(f = PerlIO_allocate(),&PerlIO_stdio,"w+"),PerlIOStdio);
