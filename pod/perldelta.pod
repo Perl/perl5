@@ -616,6 +616,11 @@ An illegal user-defined Unicode casemapping was specified.
 
 Something modified the values being iterated over.  This is not good.
 
+=head2 New "v-strings are deprecated"
+
+The marginal benefits of v-strings were greatly outweighed by the
+potential for Surprise and Confusion.
+
 =head1 Changed Internals
 
 These news matter to you only if you either write XS code or like to
@@ -688,7 +693,7 @@ the IP address 127.0.0.1.
 IBM z/OS and other EBCDIC platforms continue to be problematic
 regarding Unicode support.
 
-=head2 (FreeBSD)
+=head2 FreeBSD: malloc dilemma
 
 The choice of malloc (the C-level memory management interface)
 when building Perl is problematic in FreeBSD.
@@ -710,7 +715,7 @@ programs.  No such problems were found in other platforms, however.
 A decision was made to stick with the system malloc, regardless
 of the performance problems.
 
-=head2 (HP-UX) HP cc warnings about sendfile
+=head2 HP-UX: HP cc warnings about sendfile
 
 With certain HP C compiler releases (e.g. B.11.11.02) you will
 get many warnings like this:
@@ -719,13 +724,13 @@ get many warnings like this:
 
 This warning, however, is not serious and can be ignored.
 
-=head2 (Tru64) No threaded builds with GNU cc (gcc)
+=head2 Tru64: No threaded builds with GNU cc (gcc)
 
 In the latest Tru64 releases (e.g. v5.1B) the gcc (3.3) cannot be
 used to compile a threaded Perl (-Duseithreads) because the system
 <pthread.h> file doesn't know about gcc.
 
-=head2 (Win32) sysopen, sysread, syswrite
+=head2 Win32: sysopen, sysread, syswrite
 
 As of the 5.8.0 release, sysopen()/sysread()/syswrite() do not behave
 like they used to in 5.6.1 and earlier with respect to "text" mode.
