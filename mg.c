@@ -2089,7 +2089,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	     * but not the "(perl) suffix from the ps(1)
 	     * output, because that's what ps(1) shows if the
 	     * argv[] is modified. */
-	    setproctitle("-%s", s, len + 1);
+	    setproctitle("-%s", s);
 #   else	/* old FreeBSDs, NetBSD, OpenBSD, anyBSD */
 	    /* This doesn't really work if you assume that
 	     * $0 = 'foobar'; will wipe out 'perl' from the $0
