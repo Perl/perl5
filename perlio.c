@@ -1049,26 +1049,15 @@ PerlIOBase_popped(PerlIO *f)
  return 0;
 }
 
-extern PerlIO_funcs PerlIO_pending;
-
 SSize_t
 PerlIOBase_unread(PerlIO *f, const void *vbuf, Size_t count)
 {
-#if 0
  Off_t old = PerlIO_tell(f);
- if (0 && PerlIO_seek(f,-((Off_t)count),SEEK_CUR) == 0)
-  {
-   Off_t new = PerlIO_tell(f);
-   return old - new;
-  }
- else
-  {
-   return 0;
-  }
-#else
+ SSize_t done;
  PerlIO_push(f,&PerlIO_pending,"r",Nullch,0);
- return PerlIOBuf_unread(f,vbuf,count);
-#endif
+ done = PerlIOBuf_unread(f,vbuf,count);
+ PerlIOSelf(f,PerlIOBuf)->posn = old - done;
+ return done;
 }
 
 IV
@@ -2315,14 +2304,14 @@ PerlIOPending_set_ptrcnt(PerlIO *f, STDCHAR *ptr, SSize_t cnt)
 IV
 PerlIOPending_pushed(PerlIO *f,const char *mode,const char *arg,STRLEN len)
 {
- IV code    = PerlIOBuf_pushed(f,mode,arg,len);
+ IV code    = PerlIOBase_pushed(f,mode,arg,len);
  PerlIOl *l = PerlIOBase(f);
  /* Our PerlIO_fast_gets must match what we are pushed on,
     or sv_gets() etc. get muddled when it changes mid-string
     when we auto-pop.
   */
- l->flags   = (l->flags & ~PERLIO_F_FASTGETS) |
-              (PerlIOBase(PerlIONext(f))->flags & PERLIO_F_FASTGETS);
+ l->flags   = (l->flags & ~(PERLIO_F_FASTGETS|PERLIO_F_UTF8)) |
+              (PerlIOBase(PerlIONext(f))->flags & (PERLIO_F_FASTGETS|PERLIO_F_UTF8));
  return code;
 }
 

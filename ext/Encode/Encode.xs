@@ -10,6 +10,30 @@ UNIMPLEMENTED(_encoded_utf8_to_bytes, I32)
 UNIMPLEMENTED(_encoded_bytes_to_utf8, I32)
 
 #ifdef USE_PERLIO
+/* Define an encoding "layer" in the perliol.h sense.
+   The layer defined here "inherits" in an object-oriented sense from the
+   "perlio" layer with its PerlIOBuf_* "methods".
+   The implementation is particularly efficient as until Encode settles down
+   there is no point in tryint to tune it.
+
+   The layer works by overloading the "fill" and "flush" methods.
+
+   "fill" calls "SUPER::fill" in perl terms, then calls the encode OO perl API
+   to convert the encoded data to UTF-8 form, then copies it back to the
+   buffer. The "base class's" read methods then see the UTF-8 data.
+
+   "flush" transforms the UTF-8 data deposited by the "base class's write
+   method in the buffer back into the encoded form using the encode OO perl API,
+   then copies data back into the buffer and calls "SUPER::flush.
+
+   Note that "flush" is _also_ called for read mode - we still do the (back)-translate
+   so that the the base class's "flush" sees the correct number of encoded chars
+   for positioning the seek pointer. (This double translation is the worst performance
+   issue - particularly with all-perl encode engine.)
+
+*/
+
+
 #include "perliol.h"
 
 typedef struct
@@ -106,12 +130,6 @@ PerlIOEncode_get_base(PerlIO *f)
  return e->base.buf;
 }
 
-static void
-Break(void)
-{
-
-}
-
 IV
 PerlIOEncode_fill(PerlIO *f)
 {
@@ -119,11 +137,13 @@ PerlIOEncode_fill(PerlIO *f)
  dTHX;
  dSP;
  IV code;
- Break();
  code = PerlIOBuf_fill(f);
  if (code == 0)
   {
    SV *uni;
+   STRLEN len;
+   char *s;
+   /* Set SV that is the buffer to be buf..ptr */
    SvCUR_set(e->bufsv, e->base.end - e->base.buf);
    SvUTF8_off(e->bufsv);
    ENTER;
@@ -138,10 +158,20 @@ PerlIOEncode_fill(PerlIO *f)
    SPAGAIN;
    uni = POPs;
    PUTBACK;
-   sv_setsv(e->bufsv,uni);
-   sv_utf8_upgrade(e->bufsv);
-   e->base.buf    = SvPVX(e->bufsv);
-   e->base.end    = e->base.buf+SvCUR(e->bufsv);
+   /* Now get translated string (forced to UTF-8) and copy back to buffer
+      don't use sv_setsv as that may "steal" PV from returned temp
+      and so free() our known-large-enough buffer.
+      sv_setpvn() should do but let us do it long hand.
+    */
+   s = SvPVutf8(uni,len);
+   if (s != SvPVX(e->bufsv))
+    {
+     e->base.buf = SvGROW(e->bufsv,len);
+     Move(s,e->base.buf,len,char);
+     SvCUR_set(e->bufsv,len);
+    }
+   SvUTF8_on(e->bufsv);
+   e->base.end    = e->base.buf+len;
    e->base.ptr    = e->base.buf;
    FREETMPS;
    LEAVE;
@@ -161,11 +191,20 @@ PerlIOEncode_flush(PerlIO *f)
    SV *str;
    char *s;
    STRLEN len;
+   SSize_t left = 0;
+   if (PerlIOBase(f)->flags & PERLIO_F_RDBUF)
+    {
+     /* This is really just a flag to see if we took all the data, if
+        we did PerlIOBase_flush avoids a seek to lower layer.
+        Need to revisit if we start getting clever with unreads or seeks-in-buffer
+      */
+     left = e->base.end - e->base.ptr;
+    }
    ENTER;
    SAVETMPS;
    PUSHMARK(sp);
    XPUSHs(e->enc);
-   SvCUR_set(e->bufsv, e->base.end - e->base.buf);
+   SvCUR_set(e->bufsv, e->base.ptr - e->base.buf);
    SvUTF8_on(e->bufsv);
    XPUSHs(e->bufsv);
    XPUSHs(&PL_sv_yes);
@@ -175,10 +214,17 @@ PerlIOEncode_flush(PerlIO *f)
    SPAGAIN;
    str = POPs;
    PUTBACK;
-   sv_setsv(e->bufsv,str);
+   s = SvPV(str,len);
+   if (s != SvPVX(e->bufsv))
+    {
+     e->base.buf = SvGROW(e->bufsv,len);
+     Move(s,e->base.buf,len,char);
+     SvCUR_set(e->bufsv,len);
+    }
    SvUTF8_off(e->bufsv);
-   e->base.buf = SvPVX(e->bufsv);
-   e->base.ptr = e->base.buf+SvCUR(e->bufsv);
+   e->base.ptr = e->base.buf+len;
+   /* restore end != ptr as inequality is used by PerlIOBuf_flush in read case */
+   e->base.end = e->base.ptr + left;
    FREETMPS;
    LEAVE;
    if (PerlIOBuf_flush(f) != 0)
@@ -205,8 +251,40 @@ PerlIOEncode_close(PerlIO *f)
  return code;
 }
 
+Off_t
+PerlIOEncode_tell(PerlIO *f)
+{
+ PerlIOBuf *b = PerlIOSelf(f,PerlIOBuf);
+ /* Unfortunately the only way to get a postion is to back-translate,
+    the UTF8-bytes we have buf..ptr and adjust accordingly.
+    But we will try and save any unread data in case stream
+    is un-seekable.
+  */
+ if ((PerlIOBase(f)->flags & PERLIO_F_RDBUF) && b->ptr < b->end)
+  {
+   Size_t count = b->end - b->ptr;
+   PerlIO_push(f,&PerlIO_pending,"r",Nullch,0);
+   /* Save what we have left to read */
+   PerlIOSelf(f,PerlIOBuf)->bufsiz = count;
+   PerlIO_unread(f,b->ptr,count);
+   /* There isn't any unread data - we just saved it - so avoid the lower seek */
+   b->end = b->ptr;
+   /* Flush ourselves - now one layer down,
+      this does the back translate and adjusts position
+    */
+   PerlIO_flush(PerlIONext(f));
+   /* Set position of the saved data */
+   PerlIOSelf(f,PerlIOBuf)->posn = b->posn;
+  }
+ else
+  {
+   PerlIO_flush(f);
+  }
+ return b->posn;
+}
+
 PerlIO_funcs PerlIO_encode = {
- "encode",
+ "encoding",
  sizeof(PerlIOEncode),
  PERLIO_K_BUFFERED,
  PerlIOBase_fileno,
@@ -219,7 +297,7 @@ PerlIO_funcs PerlIO_encode = {
  PerlIOBuf_unread,
  PerlIOBuf_write,
  PerlIOBuf_seek,
- PerlIOBuf_tell,
+ PerlIOEncode_tell,
  PerlIOEncode_close,
  PerlIOEncode_flush,
  PerlIOEncode_fill,

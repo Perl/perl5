@@ -78,6 +78,7 @@ extern PerlIO_funcs PerlIO_unix;
 extern PerlIO_funcs PerlIO_perlio;
 extern PerlIO_funcs PerlIO_stdio;
 extern PerlIO_funcs PerlIO_crlf;
+extern PerlIO_funcs PerlIO_pending;
 #ifdef HAS_MMAP
 extern PerlIO_funcs PerlIO_mmap;
 #endif
