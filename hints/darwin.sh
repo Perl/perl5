@@ -26,8 +26,7 @@ case "$prefix" in
 	;;
 '/usr')	# We are building/replacing the built-in perl
 	prefix='/';
-	# The DSTROOT is used by the Apple build system.
-	installprefix="${DSTROOT}/";
+	installprefix='/';
 	bin='/usr/bin';
 	sitebin='/usr/bin';
 	installusrbinperl='define'; # You knew what you were doing.
