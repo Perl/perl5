@@ -3373,7 +3373,8 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 	    (type == OP_DOR && !SvOK(((SVOP*)first)->op_sv))) {
 	    op_free(first);
 	    *firstp = Nullop;
-	    other->op_private |= OPpCONST_SHORTCIRCUIT;
+	    if (other->op_type == OP_CONST)
+		other->op_private |= OPpCONST_SHORTCIRCUIT;
 	    return other;
 	}
 	else {
@@ -3396,7 +3397,8 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 
 	    op_free(other);
 	    *otherp = Nullop;
-	    first->op_private |= OPpCONST_SHORTCIRCUIT;
+	    if (first->op_type == OP_CONST)
+		first->op_private |= OPpCONST_SHORTCIRCUIT;
 	    return first;
 	}
     }
