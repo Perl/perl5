@@ -562,6 +562,14 @@ S_mulexp10(NV value, I32 exponent)
 	negative = 1;
 	exponent = -exponent;
     }
+#ifdef __VAX /* avoid %SYSTEM-F-FLTOVF_F sans VAXC$ESTABLISH */
+#  if defined(__DECC_VER) && __DECC_VER <= 50390006
+    /* __F_FLT_MAX_10_EXP - 5 == 33 */
+    if (!negative &&
+          (log10(value) + exponent) >= (__F_FLT_MAX_10_EXP - 5))
+        return NV_MAX;
+#  endif
+#endif
     for (bit = 1; exponent; bit <<= 1) {
 	if (exponent & bit) {
 	    exponent ^= bit;
