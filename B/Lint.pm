@@ -76,6 +76,13 @@ or C<$obj-E<gt>meth()>. Note that some programs or modules delay
 definition of subs until runtime by means of the AUTOLOAD
 mechanism.
 
+=item B<regexp-variables>
+
+This option warns whenever one of the regexp variables $', $& or
+$' is used. Any occurrence of any of these variables in your
+program can slow your whole program down. See L<perlre> for
+details.
+
 =item B<all>
 
 Turn all warnings on.
@@ -138,7 +145,7 @@ my %valid_check;
 BEGIN {
     map($valid_check{$_}++,
 	qw(context implicit_read implicit_write dollar_underscore
-	   private_names undefined_subs));
+	   private_names undefined_subs regexp_variables));
 }
 
 # Debugging options
@@ -257,6 +264,12 @@ sub B::GVOP::lint {
 		$subname =~ s/^main:://;
 		warning('Undefined subroutine %s called', $subname);
 	    }
+	}
+    }
+    if ($check{regexp_variables} && $op->ppaddr eq "pp_gvsv") {
+	my $name = $op->gv->NAME;
+	if ($name =~ /^[&'`]$/) {
+	    warning('Use of regexp variable $%s', $name);
 	}
     }
 }
