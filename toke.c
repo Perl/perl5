@@ -6632,7 +6632,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	sv_setpvn(tmpstr,d+1,s-d);
 	s += len - 1;
 	sv_catpvn(herewas,s,bufend-s);
-	(void)strcpy(bufptr,SvPVX(herewas));
+	Copy(SvPVX(herewas),bufptr,SvCUR(herewas) + 1,char);
 
 	s = olds;
 	goto retval;
@@ -6802,7 +6802,7 @@ S_scan_inputsymbol(pTHX_ char *start)
 
 	/* turn <> into <ARGV> */
 	if (!len)
-	    (void)strcpy(d,"ARGV");
+	    Copy("ARGV",d,5,char);
 
 	/* Check whether readline() is overriden */
 	if (((gv_readline = gv_fetchpv("readline", FALSE, SVt_PVCV))
