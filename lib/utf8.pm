@@ -50,12 +50,14 @@ the source text as literal bytes in the current lexical scope.
 This pragma is primarily a compatibility device.  Perl versions
 earlier than 5.6 allowed arbitrary bytes in source code, whereas
 in future we would like to standardize on the UTF-8 encoding for
-source text.  Until UTF-8 becomes the default format for source
-text, this pragma should be used to recognize UTF-8 in the source.
-When UTF-8 becomes the standard source format, this pragma will
-effectively become a no-op.  For convenience in what follows the
-term I<UTF-X> is used to refer to UTF-8 on ASCII and ISO Latin based
-platforms and UTF-EBCDIC on EBCDIC based platforms.
+source text.
+
+Until UTF-8 becomes the default format for source text, either this
+pragma or the L</encoding> pragma should be used to recognize UTF-8
+in the source.  When UTF-8 becomes the standard source format, this
+pragma will effectively become a no-op.  For convenience in what
+follows the term I<UTF-X> is used to refer to UTF-8 on ASCII and ISO
+Latin based platforms and UTF-EBCDIC on EBCDIC based platforms.
 
 Enabling the C<utf8> pragma has the following effect:
 
@@ -78,6 +80,18 @@ Note that if you have bytes with the eighth bit on in your script
 will be unhappy since the bytes are most probably not well-formed
 UTF-8.  If you want to have such bytes and use utf8, you can disable
 utf8 until the end the block (or file, if at top level) by C<no utf8;>.
+
+If you want to automatically upgrade your 8-bit legacy bytes to UTF-8,
+use the L</encoding> pragma instead of this pragma.  For example, if
+you want to implicitly upgrade your ISO 8859-1 (Latin-1) bytes to UTF-8
+as used in e.g. C<chr()> and C<\x{...}>, try this:
+
+    use encoding "latin-1";
+    my $c = chr(0xc4);
+    my $x = "\x{c5}";
+
+In case you are wondering: yes, C<use encoding 'utf8';> works much
+the same as C<use utf8;>.
 
 =head2 Utility functions
 
@@ -165,6 +179,6 @@ portable answers.
 
 =head1 SEE ALSO
 
-L<perluniintro>, L<perlunicode>, L<bytes>
+L<perluniintro>, L<encoding>, L<perlunicode>, L<bytes>
 
 =cut
