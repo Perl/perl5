@@ -3149,4 +3149,14 @@ ok("bbbbac" =~ /$pattern/ && $1 eq 'a', "[perl #3547]");
     ok("\x{100}\n" =~ /\x{100}\n$/, "UTF8 length cache and fbm_compile");  
 }
 
-# last test 995
+{
+    package Str;
+    use overload q/""/ => sub { ${$_[0]}; };
+    sub new { my ($c, $v) = @_; bless \$v, $c; }
+
+    package main;
+    $_ = Str->new("a\x{100}/\x{100}b");
+    ok(join(":", /\b(.)\x{100}/g) eq "a:/", "re_intuit_start and PL_bostr");
+}
+
+# last test 996
