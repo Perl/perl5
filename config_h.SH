@@ -428,6 +428,14 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_mkfifo HAS_MKFIFO		/**/
 
+/* HAS_MKNOD:
+ *	This symbol, if defined, indicates that the mknod routine is
+ *	available to create character and block special files. Otherwise,
+ *	mknod should be able to do it for you. However, if mknod is there,
+ *	mknod might require super-user privileges which mknod will not.
+ */
+#$d_mknod HAS_MKNOD		/**/
+
 /* HAS_MKTIME:
  *	This symbol, if defined, indicates that the mktime routine is
  *	available.
@@ -2024,6 +2032,13 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	any typedef'ed information.
  */
 #define Gid_t $gidtype		/* Type for getgid(), etc... */
+
+/* Dev_t:
+ *	This symbol holds the type used to declare device numbers.
+ *	It can be int, long, dev_t, etc... It may be necessary to include
+ *	<sys/types.h> to get any typedef'ed information.
+ */
+#define Dev_t $devtype			/* <device> type */
 
 /* Off_t:
  *	This symbol holds the type used to declare offsets in the kernel.

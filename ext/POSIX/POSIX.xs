@@ -35,6 +35,7 @@
 #ifdef I_STDDEF
 #include <stddef.h>
 #endif
+
 /* XXX This comment is just to make I_TERMIO and I_SGTTY visible to 
    metaconfig for future extension writers.  We don't use them in POSIX.
    (This is really sneaky :-)  --AD
@@ -62,8 +63,9 @@
 #    define pid_t int       /* old versions of DECC miss this in types.h */
 #  endif
 
-#  undef mkfifo  /* #defined in perl.h */
+#  undef mkfifo
 #  define mkfifo(a,b) (not_here("mkfifo"),-1)
+#  define mknod(a,b,c) (not_here("mknod"),-1)
 #  define tzset() not_here("tzset")
 
 #if ((__VMS_VER >= 70000000) && (__DECC_VER >= 50200000)) || (__CRTL_VER >= 70000000)
@@ -103,8 +105,9 @@
 #  define times(t) vms_times(t)
 #else
 #if defined (WIN32)
-#  undef mkfifo  /* #defined in perl.h */
+#  undef mkfifo
 #  define mkfifo(a,b) not_here("mkfifo")
+#  define mknod(a,b,c) not_here("mknod")
 #  define ttyname(a) (char*)not_here("ttyname")
 #  define sigset_t long
 #  define pid_t long
@@ -133,6 +136,13 @@
 #  define sigfillset(a)		not_here("sigfillset")
 #  define sigismember(a,b)	not_here("sigismember")
 #else
+
+#  ifndef HAS_MKFIFO
+#    ifndef mkfifo
+#      define mkfifo(path, mode) (mknod((path), (mode) | S_IFIFO, 0))
+#    endif
+#  endif /* !HAS_MKFIFO */
+
 #  include <grp.h>
 #  include <sys/times.h>
 #  ifdef HAS_UNAME
@@ -3469,6 +3479,17 @@ mkfifo(filename, mode)
     CODE:
 	TAINT_PROPER("mkfifo");
 	RETVAL = mkfifo(filename, mode);
+    OUTPUT:
+	RETVAL
+
+SysRet
+mknod(filename, mode, device)
+	char *		filename
+	Mode_t		mode
+	Dev_t		device
+    CODE:
+	TAINT_PROPER("mknod");
+	RETVAL = mknod(filename, mode, device);
     OUTPUT:
 	RETVAL
 

@@ -376,6 +376,7 @@ d_memmove=''
 d_memset=''
 d_mkdir=''
 d_mkfifo=''
+d_mknod=''
 d_mktime=''
 d_msg=''
 d_msgctl=''
@@ -589,6 +590,7 @@ plibpth=''
 xlibpth=''
 libs=''
 lns=''
+devtype=''
 lseektype=''
 make_set_make=''
 d_mymalloc=''
@@ -7397,6 +7399,10 @@ eval $inlibc
 set mkfifo d_mkfifo
 eval $inlibc
 
+: see if mknod exists
+set mknod d_mknod
+eval $inlibc
+
 : see if mktime exists
 set mktime d_mktime
 eval $inlibc
@@ -9474,6 +9480,11 @@ EOM
 *)  groupstype="$gidtype";;
 esac
 
+: see what type is used for devices
+rp="What is the type used for device numbers on this system?"
+set dev_t devtype long stdio.h sys/types.h
+eval $typedef_ask
+
 : see what type lseek is declared as in the kernel
 rp="What is the type used for lseek's offset on this system?"
 set off_t lseektype long stdio.h sys/types.h
@@ -11312,6 +11323,7 @@ d_memmove='$d_memmove'
 d_memset='$d_memset'
 d_mkdir='$d_mkdir'
 d_mkfifo='$d_mkfifo'
+d_mknod='$d_mknod'
 d_mktime='$d_mktime'
 d_msg='$d_msg'
 d_msgctl='$d_msgctl'
@@ -11433,6 +11445,7 @@ date='$date'
 db_hashtype='$db_hashtype'
 db_prefixtype='$db_prefixtype'
 defvoidused='$defvoidused'
+devtype='$devtype'
 direntrytype='$direntrytype'
 dlext='$dlext'
 dlsrc='$dlsrc'

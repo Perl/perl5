@@ -563,12 +563,6 @@ Free_t   Perl_free _((Malloc_t where));
 #   undef HAS_STRERROR
 #endif
 
-#ifndef HAS_MKFIFO
-#  ifndef mkfifo
-#    define mkfifo(path, mode) (mknod((path), (mode) | S_IFIFO, 0))
-#  endif
-#endif /* !HAS_MKFIFO */
-
 #include <errno.h>
 #ifdef HAS_SOCKET
 #   ifdef I_NET_ERRNO
