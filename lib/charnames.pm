@@ -60,28 +60,28 @@ __END__
 
 =head1 NAME
 
-charnames - define character names for C<\C{named}> string literal escape.
+charnames - define character names for C<\N{named}> string literal escape.
 
 =head1 SYNOPSIS
 
   use charnames ':full';
-  print "\C{GREEK SMALL LETTER SIGMA} is called sigma.\n";
+  print "\N{GREEK SMALL LETTER SIGMA} is called sigma.\n";
 
   use charnames ':short';
-  print "\C{greek:Sigma} is an upper-case sigma.\n";
+  print "\N{greek:Sigma} is an upper-case sigma.\n";
 
   use charnames qw(cyrillic greek);
-  print "\C{sigma} is Greek sigma, and \C{be} is Cyrillic b.\n";
+  print "\N{sigma} is Greek sigma, and \N{be} is Cyrillic b.\n";
 
 =head1 DESCRIPTION
 
 Pragma C<use charnames> supports arguments C<:full>, C<:short> and
 script names.  If C<:full> is present, for expansion of
-C<\C{CHARNAME}}> string C<CHARNAME> is first looked in the list of
+C<\N{CHARNAME}}> string C<CHARNAME> is first looked in the list of
 standard Unicode names of chars.  If C<:short> is present, and
 C<CHARNAME> has the form C<SCRIPT:CNAME>, then C<CNAME> is looked up
 as a letter in script C<SCRIPT>.  If pragma C<use charnames> is used
-with script name arguments, then for C<\C{CHARNAME}}> the name
+with script name arguments, then for C<\N{CHARNAME}}> the name
 C<CHARNAME> is looked up as a letter in the given scripts (in the
 specified order).
 
@@ -98,7 +98,7 @@ ignored.
 
 =head1 CUSTOM TRANSLATORS
 
-The mechanism of translation is C<\C{...}> escapes is general and not
+The mechanism of translation is C<\N{...}> escapes is general and not
 hardwired into F<charnames.pm>.  A module can install custom
 translations (inside the scope which C<use>s the module) by the
 following magic incantation:
@@ -111,7 +111,7 @@ following magic incantation:
 
 Here translator() is a subroutine which takes C<CHARNAME> as an
 argument, and returns text to insert into the string instead of the
-C<\C{CHARNAME}> escape.  Since the text to insert should be different
+C<\N{CHARNAME}> escape.  Since the text to insert should be different
 in C<utf8> mode and out of it, the function should check the current
 state of C<utf8>-flag as in
 

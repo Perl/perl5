@@ -21,14 +21,20 @@ will be called on each warning instead of printing it.  See L<perlvar>.
 
 Trappable errors may be trapped using the eval operator.  See
 L<perlfunc/eval>.  In almost all cases, warnings may be selectively
-disabled or promoted to fatal errors using the C<warning> pragma.
-See L<warning>.
+disabled or promoted to fatal errors using the C<warnings> pragma.
+See L<warnings>.
 
 Some of these messages are generic.  Spots that vary are denoted with a %s,
 just as in a printf format.  Note that some messages start with a %s!
-The symbols C<"%(-?@> sort before the letters, while C<[> and C<\> sort after.
+Since the messages are listed in alphabetical order, the symbols
+C<"%(-?@> sort before the letters, while C<[> and C<\> sort after.
 
 =over 4
+
+=item "my sub" not yet implemented
+
+(F) Lexically scoped subroutines are not yet implemented.  Don't try that
+yet.
 
 =item "my" variable %s can't be in a package
 
@@ -174,6 +180,13 @@ regular expression engine didn't specifically check for that.  See L<perlre>.
 (S) The symbol in question was declared but somehow went out of scope
 before it could possibly have been used.
 
+=item %s package attribute may clash with future reserved word: %s
+
+(W) A lowercase attribute name was used that had a package-specific handler.
+That name might have a meaning to Perl itself some day, even though it
+doesn't yet.  Perhaps you should use a mixed-case attribute name, instead.
+See L<attributes>.
+
 =item %s syntax OK
 
 (F) The final summary message when a C<perl -c> succeeds.
@@ -297,7 +310,8 @@ imported with the C<use subs> pragma).
 
 To silently interpret it as the Perl operator, use the C<CORE::> prefix
 on the operator (e.g. C<CORE::log($x)>) or by declaring the subroutine
-to be an object method (see L<attrs>).
+to be an object method (see L<perlsub/"Subroutine Attributes">
+or L<attributes>).
 
 =item Args must match #! line
 
@@ -491,6 +505,10 @@ L<perlport> for more on portability concerns.
 (W) You tried to do a bind on a closed socket.  Did you forget to check
 the return value of your socket() call?  See L<perlfunc/bind>.
 
+=item Bit vector size > 32 non-portable
+
+(W) Using bit vector sizes larger than 32 is non-portable.
+
 =item Bizarre copy of %s in %s
 
 (P) Perl detected an attempt to copy an internal value that is not copiable.
@@ -655,9 +673,11 @@ They must have ordinary identifiers as names.
 from a deleted (but still opened) file.  You have to say C<-i.bak>, or some
 such.
 
-=item Can't do inplace edit: %s E<gt> 14 characters
+=item Can't do inplace edit: %s would not be unique
 
-(S) There isn't enough room in the filename to make a backup name for the file.
+(S) Your filesystem does not support filenames longer than 14
+characters and Perl was unable to create a unique filename during
+inplace editing with the B<-i> switch.  The file was ignored.
 
 =item Can't do inplace edit: %s is not a regular file
 
@@ -904,10 +924,16 @@ pointers into them.  You tried to redefine one such sort subroutine when it
 was currently active, which is not allowed.  If you really want to do
 this, you should write C<sort { &func } @x> instead of C<sort func @x>.
 
+=item Can't remove %s: %s, skipping file 
+
+(S) You requested an inplace edit without creating a backup file.  Perl
+was unable to remove the original file to replace it with the modified
+file.  The file was left unmodified.
+
 =item Can't rename %s to %s: %s, skipping file
 
-(S) The rename done by the B<-i> switch failed for some reason, probably because
-you don't have write permission to the directory.
+(S) The rename done by the B<-i> switch failed for some reason,
+probably because you don't have write permission to the directory.
 
 =item Can't reopen input pipe (name: %s) in binary mode
 
@@ -1370,11 +1396,10 @@ the name.
 
 =item Format %s redefined
 
-(W) You redefined a format, perhaps accidentally.  To suppress this warning,
-say
+(W) You redefined a format.  To suppress this warning, say
 
     {
-	no warning;
+	no warnings;
 	eval "format NAME =...";
     }
 
@@ -1526,8 +1551,8 @@ before the illegal character.
 =item Illegal number of bits in vec
 
 (F) The number of bits in vec() (the third argument) must be a power of
-two from 1 to 32.
- 
+two from 1 to 32 (or 64, if your platform supports that).
+
 =item Illegal switch in PERL5OPT: %s
 
 (X) The PERL5OPT environment variable may only be used to set the
@@ -1611,6 +1636,16 @@ rebuild Perl.
 
 (P) Something went badly awry in the regular expression parser.
 
+=item Invalid %s attribute: %s
+
+The indicated attribute for a subroutine or variable was not recognized
+by Perl or by a user-supplied handler.  See L<attributes>.
+
+=item Invalid %s attributes: %s
+
+The indicated attributes for a subroutine or variable were not recognized
+by Perl or by a user-supplied handler.  See L<attributes>.
+
 =item invalid [] range in regexp
 
 (F) The range specified in a character class had a minimum character
@@ -1621,6 +1656,13 @@ a literal character.  See L<perlre>.
 
 (W) Perl does not understand the given format conversion.
 See L<perlfunc/sprintf>.
+
+=item Invalid separator character %s in attribute list
+
+(F) Something other than a comma or whitespace was seen between the
+elements of an attribute list.  If the previous attribute
+had a parenthesised parameter list, perhaps that list was terminated
+too soon.  See L<attributes>.
 
 =item Invalid type in pack: '%s'
 
@@ -1692,9 +1734,9 @@ ended earlier on the current line.
 mentioned with the $ in Perl, unlike in the shells, where it can vary from
 one line to the next.
 
-=item Missing %sbrace%s on \C{}
+=item Missing %sbrace%s on \N{}
 
-(F) Wrong syntax of character name literal C<\C{charname}> within
+(F) Wrong syntax of character name literal C<\N{charname}> within
 double-quotish context.
 
 =item Missing comma after first argument to %s function
@@ -1752,6 +1794,11 @@ be created for some peculiar reason.
 
 (W) Multidimensional arrays aren't written like C<$foo[1,2,3]>.  They're written
 like C<$foo[1][2][3]>, as in C.
+
+=item Missing name in "my sub"
+
+(F) The reserved syntax for lexically scoped subroutines requires that they
+have a name with which they can be found.
 
 =item Name "%s::%s" used only once: possible typo
 
@@ -2013,6 +2060,8 @@ try using scientific notation (e.g. "1e6" instead of "1_000_000").
 (W) The octal number you specified is larger than 2**32-1 (4294967295)
 and therefore non-portable between systems.  See L<perlport> for more
 on portability concerns.
+
+See also L<perlport> for writing portable code.
 
 =item Odd number of elements in hash assignment
 
@@ -2612,10 +2661,6 @@ See L<perlfunc/sort>.
 (F) A sort comparison subroutine may not return a list value with more
 or less than one element.  See L<perlfunc/sort>.
 
-=item split /^/ better written as split /^/m
-
-(W) Implicit translation of /^/ to mean /^/m in split is deprecated.
-
 =item Split loop
 
 (P) The split was looping infinitely.  (Obviously, a split shouldn't iterate
@@ -2651,11 +2696,10 @@ may break this.
 
 =item Subroutine %s redefined
 
-(W) You redefined a subroutine, perhaps accidentally.  To suppress this
-warning, say
+(W) You redefined a subroutine.  To suppress this warning, say
 
     {
-	no warning;
+	no warnings;
 	eval "sub name { ... }";
     }
 
@@ -3043,6 +3087,20 @@ least that's what Configure thought.
 a term, so it's looking for the corresponding right angle bracket, and not
 finding it.  Chances are you left some needed parentheses out earlier in
 the line, and you really meant a "less than".
+
+=item Unterminated attribute parameter in attribute list
+
+(F) The lexer saw an opening (left) parenthesis character while parsing an
+attribute list, but the matching closing (right) parenthesis
+character was not found.  You may need to add (or remove) a backslash
+character to get your parentheses to balance.  See L<attributes>.
+
+=item Unterminated attribute list
+
+(F) The lexer found something other than a simple identifier at the start
+of an attribute, and it wasn't a semicolon or the start of a
+block.  Perhaps you terminated the parameter list of the previous attribute
+too soon.  See L<attributes>.
 
 =item Use of $# is deprecated
 

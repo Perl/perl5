@@ -640,6 +640,7 @@ lib/User/grent.pm	By-name interface to Perl's builtin getgr*
 lib/User/pwent.pm	By-name interface to Perl's builtin getpw*
 lib/abbrev.pl		An abbreviation table builder
 lib/assert.pl		assertion and panic with stack trace
+lib/attributes.pm	For "sub foo : attrlist"
 lib/autouse.pm		Load and call a function only when it's used
 lib/base.pm		Establish IS-A relationship at compile time
 lib/bigfloat.pl		An arbitrary precision floating point package
@@ -874,7 +875,7 @@ lib/utf8.pm					Pragma to control Unicode support
 lib/utf8_heavy.pl				Support routines for utf8 pragma
 lib/validate.pl		Perl library supporting wholesale file mode validation
 lib/vars.pm		Declare pseudo-imported global variables
-lib/warning.pm		For "use warning"
+lib/warnings.pm		For "use warnings"
 makeaperl.SH		perl script that produces a new perl binary
 makedef.pl		Create symbol export lists for linking
 makedepend.SH		Precursor to makedepend
@@ -1117,6 +1118,7 @@ t/io/read.t		See if read works
 t/io/tell.t		See if file seeking works
 t/lib/abbrev.t		See if Text::Abbrev works
 t/lib/anydbm.t		See if AnyDBM_File works
+t/lib/attrs.t		See if attrs works with C<sub : attrs>
 t/lib/autoloader.t	See if AutoLoader works
 t/lib/basename.t	See if File::Basename works
 t/lib/bigfloat.t	See if bigfloat.pl works
@@ -1218,6 +1220,7 @@ t/op/append.t		See if . works
 t/op/arith.t		See if arithmetic works
 t/op/array.t		See if array operations work
 t/op/assignwarn.t	See if OP= operators warn correctly for undef targets
+t/op/attrs.t		See if attributes on declarations work
 t/op/auto.t		See if autoincrement et all work
 t/op/avhv.t		See if pseudo-hashes work
 t/op/bop.t		See if bitops work
@@ -1343,37 +1346,39 @@ t/pragma/strict-vars	Tests of "use strict 'vars'" for strict.t
 t/pragma/strict.t	See if strictures work
 t/pragma/subs.t		See if subroutine pseudo-importation works
 t/pragma/utf8.t		See if utf8 operations work
-t/pragma/warn/1global	Tests of global warnings for warning.t
-t/pragma/warn/2use	Tests for "use warning" for warning.t
-t/pragma/warn/3both	Tests for interaction of $^W and "use warning"
+t/pragma/warn/1global	Tests of global warnings for warnings.t
+t/pragma/warn/2use	Tests for "use warnings" for warnings.t
+t/pragma/warn/3both	Tests for interaction of $^W and "use warnings"
 t/pragma/warn/4lint	Tests for -W switch
 t/pragma/warn/5nolint	Tests for -X switch
 t/pragma/warn/6default	Tests default warnings
-t/pragma/warn/av	Tests for av.c for warning.t
-t/pragma/warn/doio	Tests for doio.c for warning.t
-t/pragma/warn/doop	Tests for doop.c for warning.t
-t/pragma/warn/gv	Tests for gv.c for warning.t
-t/pragma/warn/hv	Tests for hv.c for warning.t
-t/pragma/warn/malloc	Tests for malloc.c for warning.t
-t/pragma/warn/mg	Tests for mg.c for warning.t
-t/pragma/warn/op	Tests for op.c for warning.t
-t/pragma/warn/perl	Tests for perl.c for warning.t
-t/pragma/warn/perlio	Tests for perlio.c for warning.t
-t/pragma/warn/perly	Tests for perly.y for warning.t
-t/pragma/warn/pp	Tests for pp.c for warning.t
-t/pragma/warn/pp_ctl	Tests for pp_ctl.c for warning.t
-t/pragma/warn/pp_hot	Tests for pp_hot.c for warning.t
-t/pragma/warn/pp_sys	Tests for pp_sys.c for warning.t
-t/pragma/warn/regcomp	Tests for regcomp.c for warning.t
-t/pragma/warn/regexec	Tests for regexec.c for warning.t
-t/pragma/warn/run	Tests for run.c for warning.t
-t/pragma/warn/sv	Tests for sv.c for warning.t
-t/pragma/warn/taint	Tests for taint.c for warning.t
-t/pragma/warn/toke	Tests for toke.c for warning.t
-t/pragma/warn/universal	Tests for universal.c for warning.t
-t/pragma/warn/utf8	Tests for utf8.c for warning.t
-t/pragma/warn/util	Tests for util.c for warning.t
-t/pragma/warning.t	See if warning controls work
+t/pragma/warn/7fatal	Tests fatal warnings
+t/pragma/warn/8signal	Tests warnings + __WARN__ and __DIE__
+t/pragma/warn/av	Tests for av.c for warnings.t
+t/pragma/warn/doio	Tests for doio.c for warnings.t
+t/pragma/warn/doop	Tests for doop.c for warnings.t
+t/pragma/warn/gv	Tests for gv.c for warnings.t
+t/pragma/warn/hv	Tests for hv.c for warnings.t
+t/pragma/warn/malloc	Tests for malloc.c for warnings.t
+t/pragma/warn/mg	Tests for mg.c for warnings.t
+t/pragma/warn/op	Tests for op.c for warnings.t
+t/pragma/warn/perl	Tests for perl.c for warnings.t
+t/pragma/warn/perlio	Tests for perlio.c for warnings.t
+t/pragma/warn/perly	Tests for perly.y for warnings.t
+t/pragma/warn/pp	Tests for pp.c for warnings.t
+t/pragma/warn/pp_ctl	Tests for pp_ctl.c for warnings.t
+t/pragma/warn/pp_hot	Tests for pp_hot.c for warnings.t
+t/pragma/warn/pp_sys	Tests for pp_sys.c for warnings.t
+t/pragma/warn/regcomp	Tests for regcomp.c for warnings.t
+t/pragma/warn/regexec	Tests for regexec.c for warnings.t
+t/pragma/warn/run	Tests for run.c for warnings.t
+t/pragma/warn/sv	Tests for sv.c for warnings.t
+t/pragma/warn/taint	Tests for taint.c for warnings.t
+t/pragma/warn/toke	Tests for toke.c for warnings.t
+t/pragma/warn/universal	Tests for universal.c for warnings.t
+t/pragma/warn/utf8	Tests for utf8.c for warnings.t
+t/pragma/warn/util	Tests for util.c for warnings.t
+t/pragma/warnings.t	See if warning controls work
 taint.c			Tainting code
 thrdvar.h		Per-thread variables
 thread.h		Threading header
@@ -1441,8 +1446,8 @@ vos/perl.bind		VOS bind control file
 vos/test_vos_dummies.c	Test program for "vos_dummies.c"
 vos/vos_dummies.c	Wrappers to soak up undefined functions
 vos/vosish.h		VOS-specific header file
-warning.h		The warning numbers
-warning.pl		Program to write warning.h and lib/warning.pm
+warnings.h		The warning numbers
+warnings.pl		Program to write warnings.h and lib/warnings.pm
 win32/Makefile		Win32 makefile for NMAKE (Visual C++ build)
 win32/bin/perlglob.pl	Win32 globbing
 win32/bin/pl2bat.pl	wrap perl scripts into batch files
@@ -1494,3 +1499,4 @@ x2p/str.h		Public declarations for the above
 x2p/util.c		Utility routines
 x2p/util.h		Public declarations for the above
 x2p/walk.c		Parse tree walker
+xsutils.c		Additional bundled package methods not in UNIVERSAL::

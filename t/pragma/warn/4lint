@@ -28,8 +28,8 @@ EXPECT
 print on closed filehandle main::STDIN at - line 5.
 ########
 -W
-# lint: check "no warning" is zapped
-no warning ;
+# lint: check "no warnings" is zapped
+no warnings ;
 $a = $b = 1 ;
 $a = 1 if $a EQ $b ;
 close STDIN ; print STDIN "abc" ;
@@ -38,9 +38,9 @@ Use of EQ is deprecated at - line 5.
 print on closed filehandle main::STDIN at - line 6.
 ########
 -W
-# lint: check "no warning" is zapped
+# lint: check "no warnings" is zapped
 {
-  no warning ;
+  no warnings ;
   close STDIN ; print STDIN "abc" ;
 }
 EXPECT
@@ -57,12 +57,12 @@ print on closed filehandle main::STDIN at - line 5.
 ########
 -W
 --FILE-- abc.pm
-no warning 'deprecated' ;
+no warnings 'deprecated' ;
 my ($a, $b) = (0,0);
 1 if $a EQ $b ;
 1;
 --FILE-- 
-no warning 'uninitialized' ;
+no warnings 'uninitialized' ;
 use abc;
 my $a ; chop $a ;
 EXPECT
@@ -71,12 +71,12 @@ Use of uninitialized value at - line 3.
 ########
 -W
 --FILE-- abc
-no warning 'deprecated' ;
+no warnings 'deprecated' ;
 my ($a, $b) = (0,0);
 1 if $a EQ $b ;
 1;
 --FILE-- 
-no warning 'uninitialized' ;
+no warnings 'uninitialized' ;
 require "./abc";
 my $a ; chop $a ;
 EXPECT

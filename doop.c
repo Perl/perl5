@@ -737,6 +737,58 @@ Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
 			((UV) s[offset + 1] << 16) +
 			(     s[offset + 2] <<  8);
 	    }
+#ifdef HAS_QUAD
+	    else if (size == 64) {
+		dTHR;
+		if (ckWARN(WARN_PORTABLE))
+		    Perl_warner(aTHX_ WARN_PORTABLE,
+				"Bit vector size > 32 non-portable");
+		if (offset >= srclen)
+		    retnum = 0;
+		else if (offset + 1 >= srclen)
+		    retnum =
+			(UV) s[offset     ] << 56;
+		else if (offset + 2 >= srclen)
+		    retnum =
+			((UV) s[offset    ] << 56) +
+			((UV) s[offset + 1] << 48);
+		else if (offset + 3 >= srclen)
+		    retnum =
+			((UV) s[offset    ] << 56) +
+			((UV) s[offset + 1] << 48) +
+			((UV) s[offset + 2] << 40);
+		else if (offset + 4 >= srclen)
+		    retnum =
+			((UV) s[offset    ] << 56) +
+			((UV) s[offset + 1] << 48) +
+			((UV) s[offset + 2] << 40) +
+			((UV) s[offset + 3] << 32);
+		else if (offset + 5 >= srclen)
+		    retnum =
+			((UV) s[offset    ] << 56) +
+			((UV) s[offset + 1] << 48) +
+			((UV) s[offset + 2] << 40) +
+			((UV) s[offset + 3] << 32) +
+			(     s[offset + 4] << 24);
+		else if (offset + 6 >= srclen)
+		    retnum =
+			((UV) s[offset    ] << 56) +
+			((UV) s[offset + 1] << 48) +
+			((UV) s[offset + 2] << 40) +
+			((UV) s[offset + 3] << 32) +
+			((UV) s[offset + 4] << 24) +
+			((UV) s[offset + 5] << 16);
+		else
+		    retnum = 
+			((UV) s[offset    ] << 56) +
+			((UV) s[offset + 1] << 48) +
+			((UV) s[offset + 2] << 40) +
+			((UV) s[offset + 3] << 32) +
+			((UV) s[offset + 4] << 24) +
+			((UV) s[offset + 5] << 16) +
+			(     s[offset + 6] << 8);
+	    }
+#endif
 	}
     }
     else if (size < 8)
@@ -755,6 +807,23 @@ Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
 		((UV) s[offset + 1] << 16) +
 		(     s[offset + 2] <<  8) +
 		      s[offset + 3];
+#ifdef HAS_QUAD
+	else if (size == 64) {
+	    dTHR;
+	    if (ckWARN(WARN_PORTABLE))
+		Perl_warner(aTHX_ WARN_PORTABLE,
+			    "Bit vector size > 32 non-portable");
+	    retnum =
+		((UV) s[offset    ] << 56) +
+		((UV) s[offset + 1] << 48) +
+		((UV) s[offset + 2] << 40) +
+		((UV) s[offset + 3] << 32) +
+		((UV) s[offset + 4] << 24) +
+		((UV) s[offset + 5] << 16) +
+		(     s[offset + 6] << 8) +
+		      s[offset + 7];
+	}
+#endif
     }
 
     return retnum;
@@ -800,17 +869,33 @@ Perl_do_vecset(pTHX_ SV *sv)
     else {
 	offset >>= 3;			/* turn into byte offset */
 	if (size == 8)
-	    s[offset] = lval & 255;
+	    s[offset  ] = lval         & 0xff;
 	else if (size == 16) {
-	    s[offset] = (lval >> 8) & 255;
-	    s[offset+1] = lval & 255;
+	    s[offset  ] = (lval >>  8) & 0xff;
+	    s[offset+1] = lval         & 0xff;
 	}
 	else if (size == 32) {
-	    s[offset] = (lval >> 24) & 255;
-	    s[offset+1] = (lval >> 16) & 255;
-	    s[offset+2] = (lval >> 8) & 255;
-	    s[offset+3] = lval & 255;
+	    s[offset  ] = (lval >> 24) & 0xff;
+	    s[offset+1] = (lval >> 16) & 0xff;
+	    s[offset+2] = (lval >>  8) & 0xff;
+	    s[offset+3] =  lval        & 0xff;
 	}
+#ifdef HAS_QUAD
+	else if (size == 64) {
+	    dTHR;
+	    if (ckWARN(WARN_PORTABLE))
+		Perl_warner(aTHX_ WARN_PORTABLE,
+			    "Bit vector size > 32 non-portable");
+	    s[offset  ] = (lval >> 56) & 0xff;
+	    s[offset+1] = (lval >> 48) & 0xff;
+	    s[offset+2] = (lval >> 40) & 0xff;
+	    s[offset+3] = (lval >> 32) & 0xff;
+	    s[offset+4] = (lval >> 24) & 0xff;
+	    s[offset+5] = (lval >> 16) & 0xff;
+	    s[offset+6] = (lval >>  8) & 0xff;
+	    s[offset+7] =  lval        & 0xff;
+	}
+#endif
     }
     SvSETMAGIC(targ);
 }

@@ -220,11 +220,15 @@ Binary "." concatenates two strings.
 
 Binary "<<" returns the value of its left argument shifted left by the
 number of bits specified by the right argument.  Arguments should be
-integers.  (See also L<Integer Arithmetic>.)
+integers.  (See also L<Integer Arithmetic>.)  Shifting more than the
+width of an integer in bits (usually 32 or 64) produces undefined
+(platform dependent) results.
 
 Binary ">>" returns the value of its left argument shifted right by
 the number of bits specified by the right argument.  Arguments should
-be integers.  (See also L<Integer Arithmetic>.)
+be integers.  (See also L<Integer Arithmetic>.)  Shifting more than
+the width of an integer in bits (usually 32 or 64) produces undefined
+(platform dependent) results.
 
 =head2 Named Unary Operators
 
@@ -673,7 +677,7 @@ a transliteration, the first eleven of these sequences may be used.
     \x1b	hex char	(ESC)
     \x{263a}	wide hex char	(SMILEY)
     \c[		control char    (ESC)
-    \C{name}	named char
+    \N{name}	named char
 
     \l		lowercase next char
     \u		uppercase next char
@@ -684,7 +688,7 @@ a transliteration, the first eleven of these sequences may be used.
 
 If C<use locale> is in effect, the case map used by C<\l>, C<\L>, C<\u>
 and C<\U> is taken from the current locale.  See L<perllocale>.  For
-documentation of C<\C{name}>, see L<charnames>.
+documentation of C<\N{name}>, see L<charnames>.
 
 All systems use the virtual C<"\n"> to represent a line terminator,
 called a "newline".  There is no such thing as an unvarying, physical

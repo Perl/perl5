@@ -107,7 +107,7 @@ sub fail () {
     $fail++;
 }
 
-print "1..8\n";
+print "1..17\n";
 
 my $fail = 0;
 
@@ -117,39 +117,61 @@ print "ok 1\n";
 fail unless -s "big" == 5_000_000_003;	# exercizes pp_ftsize
 print "ok 2\n";
 
+fail unless -e "big";
+print "ok 3\n";
+
+fail unless -f "big";
+print "ok 4\n";
+
 open(BIG, "big") or do { warn "open failed: $!\n"; bye };
 binmode BIG;
 
-seek(BIG, 4_500_000_000, $SEEK_SET);
-
-fail unless tell(BIG) == 4_500_000_000;
-print "ok 3\n";
-
-seek(BIG, 1, $SEEK_CUR);
-
-fail unless tell(BIG) == 4_500_000_001;
-print "ok 4\n";
-
-seek(BIG, -1, $SEEK_CUR);
-
-fail unless tell(BIG) == 4_500_000_000;
+fail unless seek(BIG, 4_500_000_000, $SEEK_SET);
 print "ok 5\n";
 
-seek(BIG, -3, $SEEK_END);
+fail unless tell(BIG) == 4_500_000_000;
+print "ok 6\n";
+
+fail unless seek(BIG, 1, $SEEK_CUR);
+print "ok 7\n";
+
+fail unless tell(BIG) == 4_500_000_001;
+print "ok 8\n";
+
+fail unless seek(BIG, -1, $SEEK_CUR);
+print "ok 9\n";
+
+fail unless tell(BIG) == 4_500_000_000;
+print "ok 10\n";
+
+fail unless seek(BIG, -3, $SEEK_END);
+print "ok 11\n";
 
 fail unless tell(BIG) == 5_000_000_000;
-print "ok 6\n";
+print "ok 12\n";
 
 my $big;
 
 fail unless read(BIG, $big, 3) == 3;
-print "ok 7\n";
+print "ok 13\n";
 
 fail unless $big eq "big";
-print "ok 8\n";
+print "ok 14\n";
+
+# 705_032_704 = (I32)5_000_000_000
+fail unless seek(BIG, 705_032_704, $SEEK_SET);
+print "ok 15\n";
+
+my $zero;
+
+fail unless read(BIG, $zero, 3) == 3;
+print "ok 16\n";
+
+fail unless $zero eq "\0\0\0";
+print "ok 17\n";
 
 explain if $fail;
 
-bye();
+bye(); # does the necessary cleanup
 
 # eof

@@ -132,6 +132,7 @@ miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL)s$(LIB_EXT)
 	;;
 *)
 $spitshell >>Makefile <<'!NO!SUBS!'
+cwobj = $(obj)
 
 # perl library
 $(LIBPERL)$(LIB_EXT): $& perl$(OBJ_EXT) $(cwobj)

@@ -13,25 +13,25 @@
 
 __END__
 # regcomp.c
-use warning 'unsafe' ;
+use warnings 'unsafe' ;
 my $a = "ABC123" ; 
 $a =~ /(?=a)*/ ;
-no warning 'unsafe' ;
+no warnings 'unsafe' ;
 $a =~ /(?=a)*/ ;
 EXPECT
 (?=a)* matches null string many times at - line 4.
 ########
 # regcomp.c
-use warning 'unsafe' ;
+use warnings 'unsafe' ;
 $_ = "" ;
 /(?=a)?/;
-no warning 'unsafe' ;
+no warnings 'unsafe' ;
 /(?=a)?/;
 EXPECT
 Strange *+?{} on zero-length expression at - line 4.
 ########
 # regcomp.c
-use warning 'unsafe' ;
+use warnings 'unsafe' ;
 $_ = "" ;
 /[:alpha:]/;
 /[.bar.]/;
@@ -40,7 +40,7 @@ $_ = "" ;
 /[[.foo.]]/;
 /[[=bar=]]/;
 /[:zog:]/;
-no warning 'unsafe' ;
+no warnings 'unsafe' ;
 /[:alpha:]/;
 /[.foo.]/;
 /[=bar=]/;

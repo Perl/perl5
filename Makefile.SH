@@ -226,18 +226,19 @@ h1 = EXTERN.h INTERN.h XSUB.h av.h config.h cop.h cv.h dosish.h
 h2 = embed.h form.h gv.h handy.h hv.h keywords.h mg.h op.h
 h3 = opcode.h patchlevel.h perl.h perly.h pp.h proto.h regcomp.h
 h4 = regexp.h scope.h sv.h unixish.h util.h iperlsys.h thread.h
-h5 = utf8.h warning.h
+h5 = utf8.h warnings.h
 h = $(h1) $(h2) $(h3) $(h4) $(h5)
 
 c1 = $(mallocsrc) av.c scope.c op.c doop.c doio.c dump.c hv.c mg.c
 c2 = perl.c perly.c pp.c pp_hot.c pp_ctl.c pp_sys.c regcomp.c regexec.c utf8.c
-c3 = gv.c sv.c taint.c toke.c util.c deb.c run.c universal.c globals.c perlio.c
+c3 = gv.c sv.c taint.c toke.c util.c deb.c run.c universal.c xsutils.c
+c4 = globals.c perlio.c
 
-c = $(c1) $(c2) $(c3) miniperlmain.c perlmain.c
+c = $(c1) $(c2) $(c3) $(c4) miniperlmain.c perlmain.c
 
 obj1 = $(mallocobj) gv$(OBJ_EXT) toke$(OBJ_EXT) perly$(OBJ_EXT) op$(OBJ_EXT) regcomp$(OBJ_EXT) dump$(OBJ_EXT) util$(OBJ_EXT) mg$(OBJ_EXT)
 obj2 = hv$(OBJ_EXT) av$(OBJ_EXT) run$(OBJ_EXT) pp_hot$(OBJ_EXT) sv$(OBJ_EXT) pp$(OBJ_EXT) scope$(OBJ_EXT) pp_ctl$(OBJ_EXT) pp_sys$(OBJ_EXT)
-obj3 = doop$(OBJ_EXT) doio$(OBJ_EXT) regexec$(OBJ_EXT) utf8$(OBJ_EXT) taint$(OBJ_EXT) deb$(OBJ_EXT) universal$(OBJ_EXT) globals$(OBJ_EXT) perlio$(OBJ_EXT)
+obj3 = doop$(OBJ_EXT) doio$(OBJ_EXT) regexec$(OBJ_EXT) utf8$(OBJ_EXT) taint$(OBJ_EXT) deb$(OBJ_EXT) universal$(OBJ_EXT) xsutils$(OBJ_EXT) globals$(OBJ_EXT) perlio$(OBJ_EXT)
 
 obj = $(obj1) $(obj2) $(obj3) $(ARCHOBJS)
 
@@ -550,7 +551,7 @@ SYMH = perlvars.h intrpvar.h thrdvar.h
 #	ext/B/Asmdata.pm:	bytecode.pl
 #	global.sym:	embed.pl
 #	regnodes.h:	regcomp.pl
-#	warning.h lib/warning.pm:	warning.pl
+#	warnings.h lib/warnings.pm:	warnings.pl
 # The correct versions should be already supplied with the perl kit,
 # in case you don't have perl available.
 # To force them to run, type
@@ -561,7 +562,7 @@ regen_headers:	FORCE
 	perl embed.pl
 	perl bytecode.pl
 	perl regcomp.pl
-	perl warning.pl
+	perl warnings.pl
 
 # Extensions:
 # Names added to $(dynamic_ext) or $(static_ext) or $(nonxs_ext) will

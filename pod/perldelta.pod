@@ -127,7 +127,7 @@ scope.  See L<utf8> for more information.
 =head2 Lexically scoped warning categories
 
 You can now control the granularity of warnings emitted by perl at a finer
-level using the C<use warning> pragma.  See L<warning> and L<perllexwarn>
+level using the C<use warnings> pragma.  See L<warnings> and L<perllexwarn>
 for details.
 
 =head2 Binary numbers supported
@@ -150,30 +150,37 @@ use "quads" (64-integers) as follows:
 
 =over 4
 
-=item constants in the code 
+=item literal numeric constants in the code
 
 =item arguments to oct() and hex()
 
 =item arguments to print(), printf() and sprintf()
 
-=item pack() and unpack() "q" format
+=item pack() and unpack() "q" and "Q" formats
 
-=item in basic arithmetics
+=item in basic arithmetics: +, -, *, /, %
 
+=item in bit arithmetics: &, |, ^, ~, <<, >>, vec()
+    
 =back
 
 Note that unless you have the case (a) you will have to configure
 and compile Perl using the -Duse64bits Configure flag.
 
-Unfortunately, bit operations (&, <<, ...) and vec() do not work,
-they are limited to 32 bits.
-
 Last but not least: note that due to Perl's habit of always using
-floating point numbers the quads are still not true integers.  When
-quads overflow their limits (18446744073709551615 unsigned,
--9223372036854775808...9223372036854775807 signed), they are silently
-promoted to floating point numbers, after which they will 
-start losing precision (their lower digits).
+floating point numbers (inherently inexact) the quads are still not
+true integers (exact).  When the quads overflow their limits
+(0...18_446_744_073_709_551_615 unsigned, -9_223_372_036_854_775_808...
+9_223_372_036_854_775_807 signed), they are silently promoted to
+floating point numbers, after which they will start losing precision
+(their lower digits).  What this means, among other things, is that
+adding/subtracting small numbers doesn't change the large number,
+and that == may return equalness for numbers that are not equal.
+One particular cause of grief is using the ~ operator which when
+used on small numbers produces large numbers.  These large numbers
+stay (internally) integers for only as long as bit arithmetics are
+used, but for example + will turn the results into floating point
+numbers.
 
 =head2 Large file support
 
@@ -181,9 +188,10 @@ If you have filesystems that support "large files" (files larger than
 2 gigabytes), you may now also be able to create and access them from Perl.
 
 Note that in addition to requiring a proper file system to do this you
-may also need to adjust your per-process (or even your per-system)
-maximum filesize limits before running Perl scripts that try to handle
-large files, especially if you intend to write such files.
+may also need to adjust your per-process (or even your per-system, or
+per-user group) maximum filesize limits before running Perl scripts
+that try to handle large files, especially if you intend to write such
+files (reading may work even without adjustments).
 
 Adjusting your file system/system limits is outside the scope of Perl.
 For process limits, you may try to increase the limits using your
@@ -192,7 +200,7 @@ extension (not included with the standard Perl distribution) may also
 be of use.
  
 (Large file support is also related to 64-bit support, for obvious reasons)
- 
+
 =head2 Better syntax checks on parenthesized unary operators
 
 Expressions such as:
@@ -268,8 +276,24 @@ As before, lexical variables may not have names beginning with control
 characters.  As before, variables whose names begin with a control
 character are always forced to be in package `main'.  All such variables
 are reserved for future extensions, except those that begin with
-C<^_>, which may be used by user programs and is guaranteed not to
+C<^_>, which may be used by user programs and are guaranteed not to
 acquire special meaning in any future version of Perl.
+
+=head2 C<use attrs> implicit in subroutine attributes
+
+Formerly, if you wanted to mark a subroutine as being a method call or
+as requiring an automatic lock() when it is entered, you had to declare
+that with a C<use attrs> pragma in the body of the subroutine.
+That can now be accomplished with a declaration syntax, like this:
+
+    sub mymethod : locked, method ;
+    ...
+    sub mymethod : locked, method {
+	...
+    }
+
+F<AutoSplit.pm> and F<SelfLoader.pm> have been updated to keep the attributes
+with the stubs they provide.  See L<attributes>.
 
 =head1 Significant bug fixes
 
@@ -363,25 +387,33 @@ EPOC is is now supported (on Psion 5).
 
 =over 4
 
-=item	op/io_const
+=item	lib/attrs
+
+Compatibility tests for C<sub : attrs> vs the older C<use attrs>.
+
+=item	lib/io_const
 
 IO constants (SEEK_*, _IO*).
 
-=item	op/io_dir
+=item	lib/io_dir
 
 Directory-related IO methods (new, read, close, rewind, tied delete).
 
-=item	op/io_multihomed
+=item	lib/io_multihomed
 
 INET sockets with multi-homed hosts.
 
-=item	op/io_poll
+=item	lib/io_poll
 
 IO poll().
 
-=item	op/io_unix
+=item	lib/io_unix
 
 UNIX sockets.
+
+=item	op/attrs
+
+Regression tests for C<my ($x,@y,%z) : attrs> and <sub : attrs>.
 
 =item	op/filetest
 
@@ -398,6 +430,12 @@ Verify operations that access pad objects (lexicals and temporaries).
 =head2 Modules
 
 =over 4
+
+=item attributes
+
+While used internally by Perl as a pragma, this module also
+provides a way to fetch subroutine and variable attributes.
+See L<attributes>.
 
 =item ByteLoader
 
@@ -539,13 +577,17 @@ See L<perldbmfilter> for further information.
 
 =head2 Pragmata
 
+C<use attrs> is now obsolescent, and is only provided for
+backward-compatibility.  It's been replaced by the C<sub : attributes>
+syntax.  See L<perlsub/"Subroutine Attributes"> and L<attributes>.
+
 C<use utf8> to enable UTF-8 and Unicode support.
 
 C<use caller 'encoding'> allows modules to inherit pragmatic attributes
 from the caller's context.  C<encoding> is currently the only supported
 attribute.
 
-Lexical warnings pragma, C<use warning;>, to control optional warnings.
+Lexical warnings pragma, C<use warnings;>, to control optional warnings.
 
 C<use filetest> to control the behaviour of filetests (C<-r> C<-w> ...).
 Currently only one subpragma implemented, "use filetest 'access';",
@@ -578,6 +620,18 @@ A tutorial on managing class data for object modules.
 
 =head1 New Diagnostics
 
+=item "my sub" not yet implemented
+
+(F) Lexically scoped subroutines are not yet implemented.  Don't try that
+yet.
+
+=item %s package attribute may clash with future reserved word: %s
+
+(W) A lowercase attribute name was used that had a package-specific handler.
+That name might have a meaning to Perl itself some day, even though it
+doesn't yet.  Perhaps you should use a mixed-case attribute name, instead.
+See L<attributes>.
+
 =item /%s/: Unrecognized escape \\%c passed through
 
 (W) You used a backslash-character combination which is not recognized
@@ -592,15 +646,51 @@ intended it to be a read-write filehandle, you needed to open it with
 you intended only to read from the file, use "E<lt>".  See
 L<perlfunc/open>.
 
+=item Invalid %s attribute: %s
+
+The indicated attribute for a subroutine or variable was not recognized
+by Perl or by a user-supplied handler.  See L<attributes>.
+
+=item Invalid %s attributes: %s
+
+The indicated attributes for a subroutine or variable were not recognized
+by Perl or by a user-supplied handler.  See L<attributes>.
+
+=item Invalid separator character %s in attribute list
+
+(F) Something other than a comma or whitespace was seen between the
+elements of an attribute list.  If the previous attribute
+had a parenthesised parameter list, perhaps that list was terminated
+too soon.  See L<attributes>.
+
 =item Missing command in piped open
 
 (W) You used the C<open(FH, "| command")> or C<open(FH, "command |")>
 construction, but the command was missing or blank.
 
+=item Missing name in "my sub"
+
+(F) The reserved syntax for lexically scoped subroutines requires that they
+have a name with which they can be found.
+
 =item Unrecognized escape \\%c passed through
 
 (W) You used a backslash-character combination which is not recognized
 by Perl.
+
+=item Unterminated attribute parameter in attribute list
+
+(F) The lexer saw an opening (left) parenthesis character while parsing an
+attribute list, but the matching closing (right) parenthesis
+character was not found.  You may need to add (or remove) a backslash
+character to get your parentheses to balance.  See L<attributes>.
+
+=item Unterminated attribute list
+
+(F) The lexer found something other than a simple identifier at the start
+of an attribute, and it wasn't a semicolon or the start of a
+block.  Perhaps you terminated the parameter list of the previous attribute
+too soon.  See L<attributes>.
 
 =item defined(@array) is deprecated
 
@@ -613,6 +703,27 @@ just use C<if (@array) { # not empty }> for example.
 (D) defined() is not usually useful on hashes because it checks for an
 undefined I<scalar> value.  If you want to see if the hash is empty,
 just use C<if (%hash) { # not empty }> for example.  
+
+=item Invalid separator character %s in subroutine attribute list
+
+(F) Something other than a comma or whitespace was seen between the
+elements of a subroutine attribute list.  If the previous attribute
+had a parenthesised parameter list, perhaps that list was terminated
+too soon.
+
+=item Unterminated attribute parameter in subroutine attribute list
+
+(F) The lexer saw an opening (left) parenthesis character while parsing a
+subroutine attribute list, but the matching closing (right) parenthesis
+character was not found.  You may need to add (or remove) a backslash
+character to get your parentheses to balance.
+
+=item Unterminated subroutine attribute list
+
+(F) The lexer found something other than a simple identifier at the start
+of a subroutine attribute, and it wasn't a semicolon or the start of a
+block.  Perhaps you terminated the parameter list of the previous attribute
+too soon.
 
 =head1 Obsolete Diagnostics
 

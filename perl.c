@@ -926,6 +926,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     CvPADLIST(PL_compcv) = comppadlist;
 
     boot_core_UNIVERSAL();
+    boot_core_xsutils();
 
     if (xsinit)
 	(*xsinit)(aTHXo);	/* in case linked C routines want magical variables */

@@ -93,7 +93,7 @@ Perl_mg_get(pTHX_ SV *sv)
     while ((mg = *mgp) != 0) {
 	MGVTBL* vtbl = mg->mg_virtual;
 	if (!(mg->mg_flags & MGf_GSKIP) && vtbl && (vtbl->svt_get != NULL)) {
-	    CALL_FTPR(vtbl->svt_get)(aTHX_ sv, mg);
+	    CALL_FPTR(vtbl->svt_get)(aTHX_ sv, mg);
 	    /* Ignore this magic if it's been deleted */
 	    if ((mg == (mgp_valid ? *mgp : SvMAGIC(sv))) &&
 		  (mg->mg_flags & MGf_GSKIP))
@@ -400,19 +400,6 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '\001':		/* ^A */
 	sv_setsv(sv, PL_bodytarget);
 	break;
-    case '\002':		/* ^B */
-	if (PL_curcop->cop_warnings == WARN_NONE ||
-	    PL_curcop->cop_warnings == WARN_STD)
-	{
-	    sv_setpvn(sv, WARN_NONEstring, WARNsize) ;
-        }
-        else if (PL_curcop->cop_warnings == WARN_ALL) {
-	    sv_setpvn(sv, WARN_ALLstring, WARNsize) ;
-	}    
-        else {
-	    sv_setsv(sv, PL_curcop->cop_warnings);
-	}    
-	break;
     case '\003':		/* ^C */
 	sv_setiv(sv, (IV)PL_minus_c);
 	break;
@@ -504,8 +491,22 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	sv_setiv(sv, (IV)PL_basetime);
 #endif
 	break;
-    case '\027':		/* ^W */
-	sv_setiv(sv, (IV)((PL_dowarn & G_WARN_ON) ? TRUE : FALSE));
+    case '\027':		/* ^W  & $^Warnings*/
+	if (*(mg->mg_ptr+1) == '\0')
+	    sv_setiv(sv, (IV)((PL_dowarn & G_WARN_ON) ? TRUE : FALSE));
+	else if (strEQ(mg->mg_ptr, "\027arnings")) {
+	    if (PL_compiling.cop_warnings == WARN_NONE ||
+	        PL_compiling.cop_warnings == WARN_STD)
+	    {
+	        sv_setpvn(sv, WARN_NONEstring, WARNsize) ;
+            }
+            else if (PL_compiling.cop_warnings == WARN_ALL) {
+	        sv_setpvn(sv, WARN_ALLstring, WARNsize) ;
+	    }    
+            else {
+	        sv_setsv(sv, PL_compiling.cop_warnings);
+	    }    
+	}
 	break;
     case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9': case '&':
@@ -1559,25 +1560,6 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
     case '\001':	/* ^A */
 	sv_setsv(PL_bodytarget, sv);
 	break;
-    case '\002':	/* ^B */
-	if ( ! (PL_dowarn & G_WARN_ALL_MASK)) {
-            if (memEQ(SvPVX(sv), WARN_ALLstring, WARNsize)) {
-	        PL_compiling.cop_warnings = WARN_ALL;
-	        PL_dowarn |= G_WARN_ONCE ;
-	    }	
-	    else if (memEQ(SvPVX(sv), WARN_NONEstring, WARNsize))
-	        PL_compiling.cop_warnings = WARN_NONE;
-            else {
-	        if (specialWARN(PL_compiling.cop_warnings))
-		    PL_compiling.cop_warnings = newSVsv(sv) ;
-	        else
-	            sv_setsv(PL_compiling.cop_warnings, sv);
-	        if (isWARN_on(PL_compiling.cop_warnings, WARN_ONCE))
-	            PL_dowarn |= G_WARN_ONCE ;
-	    }
-	}
-	break;
-
     case '\003':	/* ^C */
 	PL_minus_c = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
 	break;
@@ -1634,12 +1616,32 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	PL_basetime = (Time_t)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 #endif
 	break;
-    case '\027':	/* ^W */
-	if ( ! (PL_dowarn & G_WARN_ALL_MASK)) {
-	    i = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
-	    PL_dowarn = (PL_dowarn & ~G_WARN_ON) 
+    case '\027':	/* ^W & $^Warnings */
+	if (*(mg->mg_ptr+1) == '\0') {
+	    if ( ! (PL_dowarn & G_WARN_ALL_MASK)) {
+	        i = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
+	        PL_dowarn = (PL_dowarn & ~G_WARN_ON) 
 		    		| (i ? G_WARN_ON : G_WARN_OFF) ;
+	    }
 	}
+	else if (strEQ(mg->mg_ptr, "\027arnings")) {
+	    if ( ! (PL_dowarn & G_WARN_ALL_MASK)) {
+                if (memEQ(SvPVX(sv), WARN_ALLstring, WARNsize)) {
+	            PL_compiling.cop_warnings = WARN_ALL;
+	            PL_dowarn |= G_WARN_ONCE ;
+	        }	
+	        else if (memEQ(SvPVX(sv), WARN_NONEstring, WARNsize))
+	            PL_compiling.cop_warnings = WARN_NONE;
+                else {
+	            if (specialWARN(PL_compiling.cop_warnings))
+		        PL_compiling.cop_warnings = newSVsv(sv) ;
+	            else
+	                sv_setsv(PL_compiling.cop_warnings, sv);
+	            if (isWARN_on(PL_compiling.cop_warnings, WARN_ONCE))
+	                PL_dowarn |= G_WARN_ONCE ;
+	        }
+	    }
+	}    
 	break;
     case '.':
 	if (PL_localizing) {

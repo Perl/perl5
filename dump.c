@@ -472,8 +472,11 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
 		    sv_catpv(tmpsv, ",AMPER");
 		if (o->op_private & OPpENTERSUB_DB)
 		    sv_catpv(tmpsv, ",DB");
+		if (o->op_private & OPpENTERSUB_HASTARG)
+		    sv_catpv(tmpsv, ",HASTARG");
 	    }
-	    switch (o->op_private & OPpDEREF) {
+	    else 
+		switch (o->op_private & OPpDEREF) {
 	    case OPpDEREF_SV:
 		sv_catpv(tmpsv, ",SV");
 		break;

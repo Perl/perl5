@@ -10,20 +10,22 @@ BEGIN {
 
 # This could use a lot of more tests.
 #
-# Nota bene: bit operations (&, |, ^, ~, <<, >>, vec) are not 64-bit clean.
+# Nota bene: bit operations (&, |, ^, ~, <<, >>) are not 64-bit clean.
 # See the beginning of pp.c and the explanation next to IBW/UBW.
 
-# so that using > 0xfffffff constants and 32+ bit
-# shifts and vector sizes doesn't cause noise
-no warning 'overflow';
+# So that using > 0xfffffff constants and
+# 32+ bit vector sizes and shift doesn't cause noise.
+no warnings qw(overflow portable);
 
-print "1..36\n";
+print "1..48\n";
 
 my $q = 12345678901;
 my $r = 23456789012;
 my $f = 0xffffffff;
 my $x;
 my $y;
+my $z;
+
 
 $x = unpack "q", pack "q", $q;
 print "not " unless $x == $q && $x > $f;
@@ -190,3 +192,42 @@ print "not " unless $a == -9223372036854775809;
 print "ok 36\n";
 
 
+$x = '';
+print "not " unless (vec($x, 1, 64) = $q) == $q;
+print "ok 37\n";
+
+print "not " unless vec($x, 1, 64) == $q && vec($x, 1, 64) > $f;
+print "ok 38\n";
+
+print "not " unless vec($x, 0, 64) == 0 && vec($x, 2, 64) == 0;
+print "ok 39\n";
+
+
+print "not " unless ($q & $r) == 1442844692;
+print "ok 40\n";
+
+print "not " unless ($q | $r) == 34359623221;
+print "ok 41\n";
+
+print "not " unless ($q ^ $r) == 32916778529;
+print "ok 42\n";
+
+print "not " unless ~$q == 18446744061363872714;
+print "ok 43\n";
+
+print "not " unless ($q << 1) == 24691357802;
+print "ok 44\n";
+
+print "not " unless (($q << 1) >> 1) == $q;
+print "ok 45\n";
+
+print "not " unless (1 << 32) == 2**32; # Risky because of the **?
+print "ok 46\n";
+
+print "not " unless ((1 << 40) >> 32) == 256;
+print "ok 47\n";
+
+print "not " unless (1 << 63) == ~0 ^ (~0 >> 1);
+print "ok 48\n";
+
+# eof

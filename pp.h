@@ -49,6 +49,8 @@
 
 #define dTARG SV *targ
 
+#define dXS_TARGET SV * targ = (PL_op->op_private & OPpENTERSUB_HASTARG ? PAD_SV(PL_op->op_targ) : sv_newmortal())
+
 #define NORMAL PL_op->op_next
 #define DIE return Perl_die
 
@@ -67,7 +69,7 @@
 #define POPul		((unsigned long)SvIVx(POPs))
 #ifdef HAS_QUAD
 #define POPq		((Quad_t)SvIVx(POPs))
-#define POPuq		((Uquad_t)SvIVx(POPs))
+#define POPuq		((Uquad_t)SvUVx(POPs))
 #endif
 
 #define TOPs		(*sp)
@@ -77,10 +79,10 @@
 #define TOPi		((IV)SvIV(TOPs))
 #define TOPu		((UV)SvUV(TOPs))
 #define TOPl		((long)SvIV(TOPs))
-#define TOPul		((unsigned long)SvIV(TOPs))
+#define TOPul		((unsigned long)SvUV(TOPs))
 #ifdef HAS_QUAD
 #define TOPq		((Quad_t)SvIV(TOPs))
-#define TOPuq		((Uquad_t)SvIV(TOPs))
+#define TOPuq		((Uquad_t)SvUV(TOPs))
 #endif
 
 /* Go to some pains in the rare event that we must extend the stack. */

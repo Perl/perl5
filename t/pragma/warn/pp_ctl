@@ -60,7 +60,7 @@
 
 __END__
 # pp_ctl.c
-use warning 'syntax' ;
+use warnings 'syntax' ;
 format STDOUT =
 @<<< @<<<
 1
@@ -71,7 +71,7 @@ Not enough format arguments at - line 5.
 1
 ########
 # pp_ctl.c
-no warning 'syntax' ;
+no warnings 'syntax' ;
 format =
 @<<< @<<<
 1
@@ -81,14 +81,14 @@ EXPECT
 1
 ########
 # pp_ctl.c
-use warning 'unsafe' ;
+use warnings 'unsafe' ;
 $_ = "abc" ;
  
 while ($i ++ == 0)
 {
     s/ab/last/e ;
 }
-no warning 'unsafe' ;
+no warnings 'unsafe' ;
 while ($i ++ == 0)
 {
     s/ab/last/e ;
@@ -97,10 +97,10 @@ EXPECT
 Exiting substitution via last at - line 7.
 ########
 # pp_ctl.c
-use warning 'unsafe' ;
+use warnings 'unsafe' ;
 sub fred { last }
 { fred() }
-no warning 'unsafe' ;
+no warnings 'unsafe' ;
 sub joe { last }
 { joe() }
 EXPECT
@@ -108,35 +108,35 @@ Exiting subroutine via last at - line 3.
 ########
 # pp_ctl.c
 {
-  eval "use warning 'unsafe' ; last;" 
+  eval "use warnings 'unsafe' ; last;" 
 }
 print STDERR $@ ;
 {
-  eval "no warning 'unsafe' ;last;" 
+  eval "no warnings 'unsafe' ;last;" 
 } 
 print STDERR $@ ;
 EXPECT
 Exiting eval via last at (eval 1) line 1.
 ########
 # pp_ctl.c
-use warning 'unsafe' ;
+use warnings 'unsafe' ;
 @a = (1,2) ;
 @b = sort { last } @a ;
-no warning 'unsafe' ;
+no warnings 'unsafe' ;
 @b = sort { last } @a ;
 EXPECT
 Exiting pseudo-block via last at - line 4.
 Can't "last" outside a block at - line 4.
 ########
 # pp_ctl.c
-use warning 'unsafe' ;
+use warnings 'unsafe' ;
 $_ = "abc" ;
 fred: 
 while ($i ++ == 0)
 {
     s/ab/last fred/e ;
 }
-no warning 'unsafe' ;
+no warnings 'unsafe' ;
 while ($i ++ == 0)
 {
     s/ab/last fred/e ;
@@ -145,10 +145,10 @@ EXPECT
 Exiting substitution via last at - line 7.
 ########
 # pp_ctl.c
-use warning 'unsafe' ;
+use warnings 'unsafe' ;
 sub fred { last joe }
 joe: { fred() }
-no warning 'unsafe' ;
+no warnings 'unsafe' ;
 sub Fred { last Joe }
 Joe: { Fred() }
 EXPECT
@@ -156,26 +156,26 @@ Exiting subroutine via last at - line 3.
 ########
 # pp_ctl.c
 joe:
-{ eval "use warning 'unsafe' ; last joe;" }
+{ eval "use warnings 'unsafe' ; last joe;" }
 print STDERR $@ ;
 Joe:
-{ eval "no warning 'unsafe' ; last Joe;" }
+{ eval "no warnings 'unsafe' ; last Joe;" }
 print STDERR $@ ;
 EXPECT
 Exiting eval via last at (eval 1) line 1.
 ########
 # pp_ctl.c
-use warning 'unsafe' ;
+use warnings 'unsafe' ;
 @a = (1,2) ;
 fred: @b = sort { last fred } @a ;
-no warning 'unsafe' ;
+no warnings 'unsafe' ;
 Fred: @b = sort { last Fred } @a ;
 EXPECT
 Exiting pseudo-block via last at - line 4.
 Label not found for "last fred" at - line 4.
 ########
 # pp_ctl.c
-use warning 'recursion' ;
+use warnings 'recursion' ;
 BEGIN { warn "PREFIX\n" ;}
 sub fred
 {
@@ -187,7 +187,7 @@ EXPECT
 Deep recursion on subroutine "main::fred" at - line 6.
 ########
 # pp_ctl.c
-no warning 'recursion' ;
+no warnings 'recursion' ;
 BEGIN { warn "PREFIX\n" ;}
 sub fred
 {
@@ -199,7 +199,7 @@ EXPECT
 Can't find label
 ########
 # pp_ctl.c
-use warning 'unsafe' ;
+use warnings 'unsafe' ;
 package Foo;
 DESTROY { die "@{$_[0]} foo bar" }
 { bless ['A'], 'Foo' for 1..10 }
@@ -209,7 +209,7 @@ EXPECT
 	(in cleanup) B foo bar at - line 4.
 ########
 # pp_ctl.c
-no warning 'unsafe' ;
+no warnings 'unsafe' ;
 package Foo;
 DESTROY { die "@{$_[0]} foo bar" }
 { bless ['A'], 'Foo' for 1..10 }

@@ -5,7 +5,7 @@
 
 __END__
 # universal.c
-use warning 'misc' ;
+use warnings 'misc' ;
 
 EXPECT
 

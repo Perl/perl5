@@ -13,7 +13,7 @@ use Fcntl;
 print "1..12\n";
 
 $Is_Dosish = ($^O eq 'amigaos' || $^O eq 'MSWin32' or $^O eq 'dos' or
-	      $^O eq 'os2' or $^O eq 'mint' or $^O =~ /cygwin/);
+	      $^O eq 'os2' or $^O eq 'mint');
 
 unlink <Op_dbmx*>;
 

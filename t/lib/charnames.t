@@ -12,13 +12,13 @@ print "1..5\n";
 
 use charnames ':full';
 
-print "not " unless "Here\C{EXCLAMATION MARK}?" eq 'Here!?';
+print "not " unless "Here\N{EXCLAMATION MARK}?" eq 'Here!?';
 print "ok 1\n";
 
 print "# \$res=$res \$\@='$@'\nnot "
   if $res = eval <<'EOE'
 use charnames ":full";
-"Here: \C{CYRILLIC SMALL LETTER BE}!";
+"Here: \N{CYRILLIC SMALL LETTER BE}!";
 1
 EOE
   or $@ !~ /above 0xFF/;
@@ -28,7 +28,7 @@ print "ok 2\n";
 print "# \$res=$res \$\@='$@'\nnot "
   if $res = eval <<'EOE'
 use charnames 'cyrillic';
-"Here: \C{Be}!";
+"Here: \N{Be}!";
 1
 EOE
   or $@ !~ /CYRILLIC CAPITAL LETTER BE.*above 0xFF/;
@@ -42,12 +42,12 @@ $encoded_bet = "\327\221";
   use charnames ':full';
   use utf8;
 
-  print "not " unless "\C{CYRILLIC SMALL LETTER BE}" eq $encoded_be;
+  print "not " unless "\N{CYRILLIC SMALL LETTER BE}" eq $encoded_be;
   print "ok 4\n";
 
   use charnames qw(cyrillic greek :short);
 
-  print "not " unless "\C{be},\C{alpha},\C{hebrew:bet}" 
+  print "not " unless "\N{be},\N{alpha},\N{hebrew:bet}" 
     eq "$encoded_be,$encoded_alpha,$encoded_bet";
   print "ok 5\n";
 }

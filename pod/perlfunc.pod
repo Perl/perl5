@@ -2366,6 +2366,8 @@ there is an error.  See also C<IPC::SysV> and C<IPC::SysV::Msg> documentation.
 
 =item my EXPR
 
+=item my EXPR : ATTRIBUTES
+
 A C<my> declares the listed variables to be local (lexically) to the
 enclosing block, file, or C<eval>.  If
 more than one value is listed, the list must be placed in parentheses.  See
@@ -4338,10 +4340,10 @@ out the names of those files that contain a match:
 =item sub NAME BLOCK
 
 This is subroutine definition, not a real function I<per se>.  With just a
-NAME (and possibly prototypes), it's just a forward declaration.  Without
-a NAME, it's an anonymous function declaration, and does actually return a
-value: the CODE ref of the closure you just created.  See L<perlsub> and
-L<perlref> for details.
+NAME (and possibly prototypes or attributes), it's just a forward declaration.
+Without a NAME, it's an anonymous function declaration, and does actually
+return a value: the CODE ref of the closure you just created.  See L<perlsub>
+and L<perlref> for details.
 
 =item substr EXPR,OFFSET,LENGTH,REPLACEMENT
 
@@ -4932,10 +4934,10 @@ are also implemented this way.  Currently implemented pragmas are:
 
     use integer;
     use diagnostics;
-    use sigtrap qw(SEGV BUS);
-    use strict  qw(subs vars refs);
-    use subs    qw(afunc blurfl);
-    use warning qw(all);
+    use sigtrap  qw(SEGV BUS);
+    use strict   qw(subs vars refs);
+    use subs     qw(afunc blurfl);
+    use warnings qw(all);
 
 Some of these pseudo-modules import semantics into the current
 block scope (like C<strict> or C<integer>, unlike ordinary modules,
@@ -4947,7 +4949,7 @@ by C<use>, i.e., it calls C<unimport Module LIST> instead of C<import>.
 
     no integer;
     no strict 'refs';
-    no warning;
+    no warnings;
 
 If no C<unimport> method can be found the call fails with a fatal error.
 
@@ -4990,15 +4992,18 @@ See also C<keys>, C<each>, and C<sort>.
 Treats the string in EXPR as a vector of unsigned integers, and
 returns the value of the bit field specified by OFFSET.  BITS
 specifies the number of bits that are reserved for each entry in the
-bit vector.  This must be a power of two from 1 to 32.
+bit vector.  This must be a power of two from 1 to 32 (or 64, if your
+platform supports that).
+
 C<vec> may also be assigned to, in which case parentheses are needed
 to give the expression the correct precedence as in
 
     vec($image, $max_x * $x + $y, 8) = 3;
 
 Vectors created with C<vec> can also be manipulated with the logical
-operators C<|>, C<&>, and C<^>, which will assume a bit vector operation is
-desired when both operands are strings.  See L<perlop/"Bitwise String Operators">.
+operators C<|>, C<&>, and C<^>, which will assume a bit vector
+operation is desired when both operands are strings.
+See L<perlop/"Bitwise String Operators">.
 
 The following code will build up an ASCII string saying C<'PerlPerlPerl'>.
 The comments show the string after each step.  Note that this code works

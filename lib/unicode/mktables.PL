@@ -327,19 +327,21 @@ END
 open(UNICODEDATA, $UnicodeData) || die "$0: $UnicodeData: $!\n";
 
 while (<UNICODEDATA>) {
-    ($code, $name) = split /;/;
+    ($code, $name, $category, $decomposition) = (split /;/)[0,1,2,5];
     
     $code{$name} = $code;
     $name{$code} = $name;
 
-    next unless $name =~ /^(.+? LETTER .+?) WITH .+( \w+ FORM)?$/;
+    next unless $category =~ /^L/ && $decomposition ne '';
+    $decomposition =~ s/^<\w+> //;
+    @decomposition = split(' ', $decomposition);
 
-    push @base, [ $code, $1 ];
-    push @base, [ $code, $1.$2 ] if $2 ne '';
+    push @base, [ $code, $decomposition[0] ];
 }
 
 foreach my $b (@base) {
-    ($code, $base) = @$b;
+    ($code, $basecode) = @$b;
+    $base = $name{$basecode};
     next unless exists $code{$base};
     push @{$unicode{$code{$base}}}, $code;
 #   print "$code: $name{$code} -> $base\n",
@@ -369,4 +371,6 @@ if (open(EQ_LATIN1, ">Eq/Latin1")) {
 } else {
     die "$0: failed to open Eq/Latin1 for writing: $!\n";
 }
+
+# eof
   

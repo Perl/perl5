@@ -24,17 +24,17 @@ EXPECT
 EXPECT
 ########
 -X
-# nolint: check "no warning" is zapped
-use warning ;
+# nolint: check "no warnings" is zapped
+use warnings ;
 $a = $b = 1 ;
 $a = 1 if $a EQ $b ;
 close STDIN ; print STDIN "abc" ;
 EXPECT
 ########
 -X
-# nolint: check "no warning" is zapped
+# nolint: check "no warnings" is zapped
 {
-  use warning ;
+  use warnings ;
   close STDIN ; print STDIN "abc" ;
 }
 EXPECT
@@ -49,24 +49,24 @@ EXPECT
 ########
 -X
 --FILE-- abc.pm
-use warning 'deprecated' ;
+use warnings 'deprecated' ;
 my ($a, $b) = (0,0);
 1 if $a EQ $b ;
 1;
 --FILE-- 
-use warning 'uninitialized' ;
+use warnings 'uninitialized' ;
 use abc;
 my $a ; chop $a ;
 EXPECT
 ########
 -X
 --FILE-- abc
-use warning 'deprecated' ;
+use warnings 'deprecated' ;
 my ($a, $b) = (0,0);
 1 if $a EQ $b ;
 1;
 --FILE-- 
-use warning 'uninitialized' ;
+use warnings 'uninitialized' ;
 require "./abc";
 my $a ; chop $a ;
 EXPECT

@@ -59,7 +59,7 @@
        local $a, $b = (1,2);
  
      Probable precedence problem on logical or at -e line 1.
-       use warning 'syntax'; my $x = print(ABC || 1);
+       use warnings 'syntax'; my $x = print(ABC || 1);
  
      Value of %s may be \"0\"; use \"defined\" 
 	$x = 1 if $x = <FH> ;
@@ -112,16 +112,16 @@
 
 __END__
 # op.c
-use warning 'unsafe' ;
+use warnings 'unsafe' ;
 my $x ;
 my $x ;
-no warning 'unsafe' ;
+no warnings 'unsafe' ;
 my $x ;
 EXPECT
 "my" variable $x masks earlier declaration in same scope at - line 4.
 ########
 # op.c
-use warning 'unsafe' ;
+use warnings 'unsafe' ;
 sub x {
       my $x;
       sub y {
@@ -132,7 +132,7 @@ EXPECT
 Variable "$x" will not stay shared at - line 7.
 ########
 # op.c
-no warning 'unsafe' ;
+no warnings 'unsafe' ;
 sub x {
       my $x;
       sub y {
@@ -143,7 +143,7 @@ EXPECT
 
 ########
 # op.c
-use warning 'unsafe' ;
+use warnings 'unsafe' ;
 sub x {
       my $x;
       sub y {
@@ -154,7 +154,7 @@ EXPECT
 Variable "$x" may be unavailable at - line 6.
 ########
 # op.c
-no warning 'unsafe' ;
+no warnings 'unsafe' ;
 sub x {
       my $x;
       sub y {
@@ -165,31 +165,31 @@ EXPECT
 
 ########
 # op.c
-use warning 'syntax' ;
+use warnings 'syntax' ;
 1 if $a = 1 ;
-no warning 'syntax' ;
+no warnings 'syntax' ;
 1 if $a = 1 ;
 EXPECT
 Found = in conditional, should be == at - line 3.
 ########
 # op.c
-use warning 'deprecated' ;
+use warnings 'deprecated' ;
 split ;
-no warning 'deprecated' ;
+no warnings 'deprecated' ;
 split ;
 EXPECT
 Use of implicit split to @_ is deprecated at - line 3.
 ########
 # op.c
-use warning 'deprecated' ;
+use warnings 'deprecated' ;
 $a = split ;
-no warning 'deprecated' ;
+no warnings 'deprecated' ;
 $a = split ;
 EXPECT
 Use of implicit split to @_ is deprecated at - line 3.
 ########
 # op.c
-use warning 'void' ; close STDIN ;
+use warnings 'void' ; close STDIN ;
 1 x 3 ;			# OP_REPEAT
 			# OP_GVSV
 wantarray ; 		# OP_WANTARRAY
@@ -281,7 +281,7 @@ Useless use of getpwnam in void context at - line 52.
 Useless use of getpwuid in void context at - line 53.
 ########
 # op.c
-no warning 'void' ; close STDIN ;
+no warnings 'void' ; close STDIN ;
 1 x 3 ;			# OP_REPEAT
 			# OP_GVSV
 wantarray ; 		# OP_WANTARRAY
@@ -336,15 +336,15 @@ eval { getpwuid 1 };	# OP_GPWUID
 EXPECT
 ########
 # op.c
-use warning 'void' ;
+use warnings 'void' ;
 for (@{[0]}) { "$_" }		# check warning isn't duplicated
-no warning 'void' ;
+no warnings 'void' ;
 for (@{[0]}) { "$_" }		# check warning isn't duplicated
 EXPECT
 Useless use of string in void context at - line 3.
 ########
 # op.c
-use warning 'void' ;
+use warnings 'void' ;
 use Config ;
 BEGIN {
     if ( ! $Config{d_telldir}) {
@@ -356,13 +356,13 @@ EOM
     }
 }
 telldir 1 ;		# OP_TELLDIR
-no warning 'void' ;
+no warnings 'void' ;
 telldir 1 ;		# OP_TELLDIR
 EXPECT
 Useless use of telldir in void context at - line 13.
 ########
 # op.c
-use warning 'void' ;
+use warnings 'void' ;
 use Config ;
 BEGIN {
     if ( ! $Config{d_getppid}) {
@@ -374,13 +374,13 @@ EOM
     }
 }
 getppid ;		# OP_GETPPID
-no warning 'void' ;
+no warnings 'void' ;
 getppid ;		# OP_GETPPID
 EXPECT
 Useless use of getppid in void context at - line 13.
 ########
 # op.c
-use warning 'void' ;
+use warnings 'void' ;
 use Config ;
 BEGIN {
     if ( ! $Config{d_getpgrp}) {
@@ -392,13 +392,13 @@ EOM
     }
 }
 getpgrp ;		# OP_GETPGRP
-no warning 'void' ;
+no warnings 'void' ;
 getpgrp ;		# OP_GETPGRP
 EXPECT
 Useless use of getpgrp in void context at - line 13.
 ########
 # op.c
-use warning 'void' ;
+use warnings 'void' ;
 use Config ;
 BEGIN {
     if ( ! $Config{d_times}) {
@@ -410,13 +410,13 @@ EOM
     }
 }
 times ;			# OP_TMS
-no warning 'void' ;
+no warnings 'void' ;
 times ;			# OP_TMS
 EXPECT
 Useless use of times in void context at - line 13.
 ########
 # op.c
-use warning 'void' ;
+use warnings 'void' ;
 use Config ;
 BEGIN {
     if ( ! $Config{d_getprior} or $^O eq 'os2') { # Locks before fixpak22
@@ -428,13 +428,13 @@ EOM
     }
 }
 getpriority 1,2;	# OP_GETPRIORITY
-no warning 'void' ;
+no warnings 'void' ;
 getpriority 1,2;	# OP_GETPRIORITY
 EXPECT
 Useless use of getpriority in void context at - line 13.
 ########
 # op.c
-use warning 'void' ;
+use warnings 'void' ;
 use Config ;
 BEGIN {
     if ( ! $Config{d_getlogin}) {
@@ -446,13 +446,13 @@ EOM
     }
 }
 getlogin ;			# OP_GETLOGIN
-no warning 'void' ;
+no warnings 'void' ;
 getlogin ;			# OP_GETLOGIN
 EXPECT
 Useless use of getlogin in void context at - line 13.
 ########
 # op.c
-use warning 'void' ;
+use warnings 'void' ;
 use Config ; BEGIN {
 if ( ! $Config{d_socket}) {
     print <<EOM ;
@@ -489,7 +489,7 @@ getservbyname 1,2;	# OP_GSBYNAME
 getservbyport 1,2;	# OP_GSBYPORT
 getservent ;		# OP_GSERVENT
 
-no warning 'void' ;
+no warnings 'void' ;
 getsockname STDIN ;	# OP_GETSOCKNAME
 getpeername STDIN ;	# OP_GETPEERNAME
 gethostbyname 1 ;	# OP_GHBYNAME
@@ -525,12 +525,12 @@ Useless use of getservbyport in void context at - line 36.
 Useless use of getservent in void context at - line 37.
 ########
 # op.c
-use warning 'void' ;
+use warnings 'void' ;
 *a ; # OP_RV2GV
 $a ; # OP_RV2SV
 @a ; # OP_RV2AV
 %a ; # OP_RV2HV
-no warning 'void' ;
+no warnings 'void' ;
 *a ; # OP_RV2GV
 $a ; # OP_RV2SV
 @a ; # OP_RV2AV
@@ -542,10 +542,10 @@ Useless use of a variable in void context at - line 5.
 Useless use of a variable in void context at - line 6.
 ########
 # op.c
-use warning 'void' ;
+use warnings 'void' ;
 "abc"; # OP_CONST
 7 ; # OP_CONST
-no warning 'void' ;
+no warnings 'void' ;
 "abc"; # OP_CONST
 7 ; # OP_CONST
 EXPECT
@@ -554,7 +554,7 @@ Useless use of a constant in void context at - line 4.
 ########
 # op.c
 $ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3; # known scalar leak
-use warning 'unsafe' ;
+use warnings 'unsafe' ;
 my $a ; my @a = () ; my %a = () ; my $b = \@a ; my $c = \%a ;
 @a =~ /abc/ ;
 @a =~ s/a/b/ ;
@@ -569,7 +569,7 @@ my $a ; my @a = () ; my %a = () ; my $b = \@a ; my $c = \%a ;
 %$c =~ s/a/b/ ;
 %$c =~ tr/a/b/ ;
 {
-no warning 'unsafe' ;
+no warnings 'unsafe' ;
 my $a ; my @a = () ; my %a = () ; my $b = \@a ; my $c = \%a ;
 @a =~ /abc/ ;
 @a =~ s/a/b/ ;
@@ -601,25 +601,25 @@ Applying character translation to %hash will act on scalar(%hash) at - line 16.
 BEGIN not safe after errors--compilation aborted at - line 18.
 ########
 # op.c
-use warning 'syntax' ;
+use warnings 'syntax' ;
 my $a, $b = (1,2);
-no warning 'syntax' ;
+no warnings 'syntax' ;
 my $c, $d = (1,2);
 EXPECT
 Parentheses missing around "my" list at - line 3.
 ########
 # op.c
-use warning 'syntax' ;
+use warnings 'syntax' ;
 local $a, $b = (1,2);
-no warning 'syntax' ;
+no warnings 'syntax' ;
 local $c, $d = (1,2);
 EXPECT
 Parentheses missing around "local" list at - line 3.
 ########
 # op.c
-use warning 'syntax' ;
+use warnings 'syntax' ;
 print (ABC || 1) ;
-no warning 'syntax' ;
+no warnings 'syntax' ;
 print (ABC || 1) ;
 EXPECT
 Probable precedence problem on logical or at - line 3.
@@ -628,107 +628,107 @@ Probable precedence problem on logical or at - line 3.
 
 --FILE--
 # op.c
-use warning 'unsafe' ;
+use warnings 'unsafe' ;
 open FH, "<abc" ;
 $x = 1 if $x = <FH> ;
-no warning 'unsafe' ;
+no warnings 'unsafe' ;
 $x = 1 if $x = <FH> ;
 EXPECT
 Value of <HANDLE> construct can be "0"; test with defined() at - line 4.
 ########
 # op.c
-use warning 'unsafe' ;
+use warnings 'unsafe' ;
 opendir FH, "." ;
 $x = 1 if $x = readdir FH ;
-no warning 'unsafe' ;
+no warnings 'unsafe' ;
 $x = 1 if $x = readdir FH ;
 closedir FH ;
 EXPECT
 Value of readdir() operator can be "0"; test with defined() at - line 4.
 ########
 # op.c
-use warning 'unsafe' ;
+use warnings 'unsafe' ;
 $x = 1 if $x = <*> ;
-no warning 'unsafe' ;
+no warnings 'unsafe' ;
 $x = 1 if $x = <*> ;
 EXPECT
 Value of glob construct can be "0"; test with defined() at - line 3.
 ########
 # op.c
-use warning 'unsafe' ;
+use warnings 'unsafe' ;
 %a = (1,2,3,4) ;
 $x = 1 if $x = each %a ;
-no warning 'unsafe' ;
+no warnings 'unsafe' ;
 $x = 1 if $x = each %a ;
 EXPECT
 Value of each() operator can be "0"; test with defined() at - line 4.
 ########
 # op.c
-use warning 'unsafe' ;
+use warnings 'unsafe' ;
 $x = 1 while $x = <*> and 0 ;
-no warning 'unsafe' ;
+no warnings 'unsafe' ;
 $x = 1 while $x = <*> and 0 ;
 EXPECT
 Value of glob construct can be "0"; test with defined() at - line 3.
 ########
 # op.c
-use warning 'unsafe' ;
+use warnings 'unsafe' ;
 opendir FH, "." ;
 $x = 1 while $x = readdir FH and 0 ;
-no warning 'unsafe' ;
+no warnings 'unsafe' ;
 $x = 1 while $x = readdir FH and 0 ;
 closedir FH ;
 EXPECT
 Value of readdir() operator can be "0"; test with defined() at - line 4.
 ########
 # op.c
-use warning 'redefine' ;
+use warnings 'redefine' ;
 sub fred {}
 sub fred {}
-no warning 'redefine' ;
+no warnings 'redefine' ;
 sub fred {}
 EXPECT
 Subroutine fred redefined at - line 4.
 ########
 # op.c
-use warning 'redefine' ;
+use warnings 'redefine' ;
 sub fred () { 1 }
 sub fred () { 1 }
-no warning 'redefine' ;
+no warnings 'redefine' ;
 sub fred () { 1 }
 EXPECT
 Constant subroutine fred redefined at - line 4.
 ########
 # op.c
-use warning 'redefine' ;
+use warnings 'redefine' ;
 format FRED =
 .
 format FRED =
 .
-no warning 'redefine' ;
+no warnings 'redefine' ;
 format FRED =
 .
 EXPECT
 Format FRED redefined at - line 5.
 ########
 # op.c
-use warning 'syntax' ;
+use warnings 'syntax' ;
 push FRED;
-no warning 'syntax' ;
+no warnings 'syntax' ;
 push FRED;
 EXPECT
 Array @FRED missing the @ in argument 1 of push() at - line 3.
 ########
 # op.c
-use warning 'syntax' ;
+use warnings 'syntax' ;
 @a = keys FRED ;
-no warning 'syntax' ;
+no warnings 'syntax' ;
 @a = keys FRED ;
 EXPECT
 Hash %FRED missing the % in argument 1 of keys() at - line 3.
 ########
 # op.c
-use warning 'syntax' ;
+use warnings 'syntax' ;
 exec "$^X -e 1" ; 
 my $a
 EXPECT
@@ -736,28 +736,28 @@ Statement unlikely to be reached at - line 4.
 (Maybe you meant system() when you said exec()?)
 ########
 # op.c
-use warning 'deprecated' ;
+use warnings 'deprecated' ;
 my @a; defined(@a);
 EXPECT
 defined(@array) is deprecated at - line 3.
 (Maybe you should just omit the defined()?)
 ########
 # op.c
-use warning 'deprecated' ;
+use warnings 'deprecated' ;
 defined(@a = (1,2,3));
 EXPECT
 defined(@array) is deprecated at - line 3.
 (Maybe you should just omit the defined()?)
 ########
 # op.c
-use warning 'deprecated' ;
+use warnings 'deprecated' ;
 my %h; defined(%h);
 EXPECT
 defined(%hash) is deprecated at - line 3.
 (Maybe you should just omit the defined()?)
 ########
 # op.c
-no warning 'syntax' ;
+no warnings 'syntax' ;
 exec "$^X -e 1" ; 
 my $a
 EXPECT
@@ -774,10 +774,10 @@ $^W = 0 ;
 sub fred() ;
 sub fred($) {}
 {
-    no warning 'unsafe' ;
+    no warnings 'unsafe' ;
     sub Fred() ;
     sub Fred($) {}
-    use warning 'unsafe' ;
+    use warnings 'unsafe' ;
     sub freD() ;
     sub freD($) {}
 }

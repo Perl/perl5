@@ -1753,6 +1753,11 @@ p	|void	|sv_force_normal|SV *sv
 p	|void	|tmps_grow	|I32 n
 p	|SV*	|sv_rvweaken	|SV *sv
 p	|int	|magic_killbackrefs|SV *sv|MAGIC *mg
+p	|OP*	|newANONATTRSUB	|I32 floor|OP *proto|OP *attrs|OP *block
+p	|CV*	|newATTRSUB	|I32 floor|OP *o|OP *proto|OP *attrs|OP *block
+p	|void	|newMYSUB	|I32 floor|OP *o|OP *proto|OP *attrs|OP *block
+p	|OP *	|my_attrs	|OP *o|OP *attrs
+p	|void	|boot_core_xsutils
 
 #if defined(PERL_OBJECT)
 protected:
@@ -1816,6 +1821,9 @@ s	|bool	|is_handle_constructor	|OP *o|I32 argnum
 s	|char*	|gv_ename	|GV *gv
 s	|CV*	|cv_clone2	|CV *proto|CV *outside
 s	|bool	|scalar_mod_type|OP *o|I32 type
+s	|OP *	|my_kid		|OP *o|OP *attrs
+s	|OP *	|dup_attrlist	|OP *o
+s	|void	|apply_attrs	|HV *stash|SV *target|OP *attrs
 #  if defined(PL_OP_SLAB_ALLOC)
 s	|void*	|Slab_Alloc	|int m|size_t sz
 #  endif
@@ -1986,7 +1994,7 @@ s	|char*	|scan_ident	|char *s|char *send|char *dest \
 				|STRLEN destlen|I32 ck_uni
 s	|char*	|scan_inputsymbol|char *start
 s	|char*	|scan_pat	|char *start|I32 type
-s	|char*	|scan_str	|char *start
+s	|char*	|scan_str	|char *start|int keep_quoted|int keep_delims
 s	|char*	|scan_subst	|char *start
 s	|char*	|scan_trans	|char *start
 s	|char*	|scan_word	|char *s|char *dest|STRLEN destlen \
@@ -2022,6 +2030,10 @@ s	|I32	|win32_textfilter	|int idx|SV *sv|int maxlen
 
 #if defined(PERL_IN_UNIVERSAL_C) || defined(PERL_DECL_PROT)
 s	|SV*|isa_lookup	|HV *stash|const char *name|int len|int level
+#endif
+
+#if defined(PERL_IN_XSUTILS_C) || defined(PERL_DECL_PROT)
+s	|int|modify_SV_attributes|SV *sv|SV **retlist|SV **attrlist|int numattrs
 #endif
 
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)

@@ -1599,7 +1599,7 @@ You want to temporarily change just one element of an array or hash
 
 attrs, autouse, base, blib, constant, diagnostics, fields, filetest,
 integer, less, lib, locale, ops, overload, re, sigtrap, strict, subs, utf8,
-vars, vmsish, warning
+vars, vmsish, warnings
 
 =item Standard Modules
 
@@ -3488,7 +3488,7 @@ C<strict refs>, C<strict vars>, C<strict subs>
 
 =item DESCRIPTION
 
-=head2 warning - Perl pragma to control optional warnings
+=head2 warnings - Perl pragma to control optional warnings
 
 =item SYNOPSIS
 

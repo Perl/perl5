@@ -5,6 +5,10 @@ BEGIN {
     unshift @INC, '../lib';
 }
 
+END {
+    unlink 'tmon.out', 'err';
+}
+
 use Benchmark qw( timediff timestr );
 use Getopt::Std 'getopts';
 use Config '%Config';

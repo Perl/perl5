@@ -470,6 +470,10 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #  include "embed.h"
 #endif
 
+#if defined(NeXT) || defined(__NeXT) || defined (__MACHTEN__)
+#  undef PERL_POLLUTE_MALLOC
+#endif
+
 #define MEM_SIZE Size_t
 
 #if defined(STANDARD_C) && defined(I_STDDEF)
@@ -891,21 +895,14 @@ Free_t   Perl_mfree (Malloc_t where);
 #include <inttypes.h>
 #endif
 
-/*  XXX QUAD stuff is not currently supported on most systems.
-    Specifically, perl internals don't support long long.  Among
-    the many problems is that some compilers support long long,
-    but the underlying library functions (such as sprintf) don't.
-    Some things do work (such as quad pack/unpack on convex);
-    also some systems use long long for the fpos_t typedef.  That
-    seems to work too.
-
+/*
     The IV type is supposed to be long enough to hold any integral
     value or a pointer.
     --Andy Dougherty	August 1996
 */
 
-/*  Much more 64-bit probing added.  Now we should get Quad_t
-    in most systems: int64_t, long long, long, int, will do.
+/*  We should be able to get Quad_t in most systems:
+    all of int64_t, long long, long, int, will work.
 
     Beware of LP32 systems (ILP32, ILP32LL64).  Such systems have been
     used to sizeof(long) == sizeof(foo*).  This is a bad assumption
@@ -917,9 +914,11 @@ Free_t   Perl_mfree (Malloc_t where);
     Summary: a long long system needs to add -DUSE_LONG_LONG to $ccflags
     to get quads -- and if its pointers are still 32 bits, this will break
     binary compatibility.  Casting an IV (a long long) to a pointer will
-    truncate half of the IV away.
+    truncate half of the IV away.  Most systems can just use
+    Configure -Duse64bits to get the -DUSE_LONG_LONG added either by
+    their hints files, or directly by Configure if they are using gcc.
 
-    --jhi		September 1998 */
+    --jhi		September 1999 */
 
 #if INTSIZE == 4 && LONGSIZE == 4 && PTRSIZE == 4
 #   define PERL_ILP32
@@ -1003,6 +1002,9 @@ Free_t   Perl_mfree (Malloc_t where);
 #    define IV_MAX INT64_MAX
 #    define IV_MIN INT64_MIN
 #    define UV_MAX UINT64_MAX
+#    ifndef UINT64_MIN
+#      define UINT64_MIN 0
+#    endif
 #    define UV_MIN UINT64_MIN
 #  else
 #    define IV_MAX PERL_QUAD_MAX
@@ -1010,7 +1012,7 @@ Free_t   Perl_mfree (Malloc_t where);
 #    define UV_MAX PERL_UQUAD_MAX
 #    define UV_MIN PERL_UQUAD_MIN
 #  endif
-#  define IVSIZF 8
+#  define IVSIZE 8
 #  define UVSIZE 8
 #  define IV_IS_QUAD
 #  define UV_IS_QUAD
@@ -1021,6 +1023,9 @@ Free_t   Perl_mfree (Malloc_t where);
 #    define IV_MAX INT32_MAX
 #    define IV_MIN INT32_MIN
 #    define UV_MAX UINT32_MAX
+#    ifndef UINT32_MIN
+#      define UINT32_MIN 0
+#    endif
 #    define UV_MIN UINT32_MIN
 #  else
 #    define IV_MAX PERL_LONG_MAX
@@ -1038,8 +1043,8 @@ Free_t   Perl_mfree (Malloc_t where);
 #  define UVSIZE LONGSIZE
 #  define IVSIZE LONGSIZE
 #endif
-#define IV_DIG (BIT_DIGITS(IVSIZE * 8) + 1)
-#define UV_DIG (BIT_DIGITS(IVSIZE * 8) + 1)
+#define IV_DIG (BIT_DIGITS(IVSIZE * 8))
+#define UV_DIG (BIT_DIGITS(IVSIZE * 8))
 
 #ifdef USE_LONG_DOUBLE
 #  if defined(HAS_LONG_DOUBLE) && (LONG_DOUBLESIZE > DOUBLESIZE)
@@ -1069,6 +1074,12 @@ Free_t   Perl_mfree (Malloc_t where);
 #ifndef HAS_DBL_DIG
 #define DBL_DIG	15   /* A guess that works lots of places */
 #endif
+#endif
+#ifdef I_FLOAT
+#include <float.h>
+#endif
+#ifndef HAS_DBL_DIG
+#define DBL_DIG	15   /* A guess that works lots of places */
 #endif
 
 #ifdef OVR_LDBL_DIG
@@ -1390,9 +1401,15 @@ typedef union any ANY;
 #endif
 
 #if defined(USE_64_BIT_FILES) || defined(USE_LARGE_FILES)
-#   define USE_64_BIT_OFFSETS
+#   define USE_64_BIT_OFFSETS /* Explicit */
 #   define USE_64_BIT_STDIO
 #endif
+
+#if LSEEKSIZE == 8 && !defined(USE_64_BIT_OFFSETS)
+#   define USE_64_BIT_OFFSETS /* Implicit */
+#endif
+
+/* Do we need FSEEKSIZE? */
 
 /* I couldn't find any -Ddefine or -flags in IRIX 6.5 that would
  * have done the necessary symbol renaming using cpp. --jhi */
@@ -1685,6 +1702,22 @@ typedef pthread_key_t	perl_key;
 #  endif
 #endif
 
+#if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_GET_THX)
+#  ifdef USE_THREADS
+#    define PERL_GET_THX		THR
+#  else
+#  ifdef MULTIPLICITY
+#    define PERL_GET_THX		PERL_GET_INTERP
+#  else
+#  ifdef PERL_OBJECT
+#    define PERL_GET_THX		((CPerlObj*)PERL_GET_INTERP)
+#  else
+#    define PERL_GET_THX		((void*)0)
+#  endif
+#  endif
+#  endif
+#endif
+
 /* Some unistd.h's give a prototype for pause() even though
    HAS_PAUSE ends up undefined.  This causes the #define
    below to be rejected by the compmiler.  Sigh.
@@ -1757,7 +1790,7 @@ typedef I32 (*filter_t) (pTHXo_ int, SV *, int);
 #include "hv.h"
 #include "mg.h"
 #include "scope.h"
-#include "warning.h"
+#include "warnings.h"
 #include "utf8.h"
 
 /* Current curly descriptor */
@@ -1875,10 +1908,10 @@ typedef I32 CHECKPOINT;
 #define IV_FITS_IN_NV
 /* Doubt. */
 #if defined(USE_LONG_DOUBLE) && \
-	defined(LDBL_MANT_DIG) && IVSIZE*8 >= LDBL_MANT_DIG
+	defined(LDBL_MANT_DIG) && IV_DIG >= LDBL_MANT_DIG
 #   undef IV_FITS_IN_NV
 #else
-#   if defined(DBL_MANT_DIG) && IVSIZE*8 >= DBL_MANT_DIG
+#   if defined(DBL_MANT_DIG) && IV_DIG >= DBL_MANT_DIG
 #       undef IV_FITS_IN_NV
 #   else
 #       if IV_DIG >= NV_DIG
@@ -2423,6 +2456,8 @@ typedef enum {
     XREF,
     XSTATE,
     XBLOCK,
+    XATTRBLOCK,
+    XATTRTERM,
     XTERMBLOCK
 } expectation;
 
@@ -2558,7 +2593,7 @@ struct perl_vars {
 EXT struct perl_vars PL_Vars;
 EXT struct perl_vars *PL_VarsPtr INIT(&PL_Vars);
 #else /* PERL_CORE */
-#if !defined(__GNUC__) || !(defined(WIN32) || defined(CYGWIN))
+#if !defined(__GNUC__) || !defined(WIN32)
 EXT
 #endif /* WIN32 */
 struct perl_vars *PL_VarsPtr;

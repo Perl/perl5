@@ -49,9 +49,9 @@
 __END__
 # sv.c
 use integer ;
-use warning 'uninitialized' ;
+use warnings 'uninitialized' ;
 $x = 1 + $a[0] ; # a
-no warning 'uninitialized' ;
+no warnings 'uninitialized' ;
 $x = 1 + $b[0] ; # a
 EXPECT
 Use of uninitialized value at - line 4.
@@ -64,18 +64,18 @@ sub STORE { return 1 }
 package main ;
 tie $A, 'fred' ;
 use integer ;
-use warning 'uninitialized' ;
+use warnings 'uninitialized' ;
 $A *= 2 ;
-no warning 'uninitialized' ;
+no warnings 'uninitialized' ;
 $A *= 2 ;
 EXPECT
 Use of uninitialized value at - line 10.
 ########
 # sv.c
 use integer ;
-use warning 'uninitialized' ;
+use warnings 'uninitialized' ;
 my $x *= 2 ; #b 
-no warning 'uninitialized' ;
+no warnings 'uninitialized' ;
 my $y *= 2 ; #b 
 EXPECT
 Use of uninitialized value at - line 4.
@@ -87,37 +87,37 @@ sub FETCH { return undef }
 sub STORE { return 1 }
 package main ;
 tie $A, 'fred' ;
-use warning 'uninitialized' ;
+use warnings 'uninitialized' ;
 $B = 0 ;
 $B |= $A ;
-no warning 'uninitialized' ;
+no warnings 'uninitialized' ;
 $B = 0 ;
 $B |= $A ;
 EXPECT
 Use of uninitialized value at - line 10.
 ########
 # sv.c
-use warning 'uninitialized' ;
+use warnings 'uninitialized' ;
 my $Y = 1 ; 
 my $x = 1 | $a[$Y] ;
-no warning 'uninitialized' ;
+no warnings 'uninitialized' ;
 my $Y = 1 ; 
 $x = 1 | $b[$Y] ;
 EXPECT
 Use of uninitialized value at - line 4.
 ########
 # sv.c
-use warning 'uninitialized' ;
+use warnings 'uninitialized' ;
 my $x *= 1 ; # d
-no warning 'uninitialized' ;
+no warnings 'uninitialized' ;
 my $y *= 1 ; # d
 EXPECT
 Use of uninitialized value at - line 3.
 ########
 # sv.c
-use warning 'uninitialized' ;
+use warnings 'uninitialized' ;
 $x = 1 + $a[0] ; # e
-no warning 'uninitialized' ;
+no warnings 'uninitialized' ;
 $x = 1 + $b[0] ; # e
 EXPECT
 Use of uninitialized value at - line 3.
@@ -129,33 +129,33 @@ sub FETCH { return undef }
 sub STORE { return 1 }
 package main ;
 tie $A, 'fred' ;
-use warning 'uninitialized' ;
+use warnings 'uninitialized' ;
 $A *= 2 ;
-no warning 'uninitialized' ;
+no warnings 'uninitialized' ;
 $A *= 2 ;
 EXPECT
 Use of uninitialized value at - line 9.
 ########
 # sv.c
-use warning 'uninitialized' ;
+use warnings 'uninitialized' ;
 $x = $y + 1 ; # f
-no warning 'uninitialized' ;
+no warnings 'uninitialized' ;
 $x = $z + 1 ; # f
 EXPECT
 Use of uninitialized value at - line 3.
 ########
 # sv.c
-use warning 'uninitialized' ;
+use warnings 'uninitialized' ;
 $x = chop undef ; # g
-no warning 'uninitialized' ;
+no warnings 'uninitialized' ;
 $x = chop undef ; # g
 EXPECT
 Modification of a read-only value attempted at - line 3.
 ########
 # sv.c
-use warning 'uninitialized' ;
+use warnings 'uninitialized' ;
 $x = chop $y ; # h
-no warning 'uninitialized' ;
+no warnings 'uninitialized' ;
 $x = chop $z ; # h
 EXPECT
 Use of uninitialized value at - line 3.
@@ -167,73 +167,73 @@ sub FETCH { return undef }
 sub STORE { return 1 }
 package main ;
 tie $A, 'fred' ;
-use warning 'uninitialized' ;
+use warnings 'uninitialized' ;
 $B = "" ;
 $B .= $A ;
-no warning 'uninitialized' ;
+no warnings 'uninitialized' ;
 $C = "" ;
 $C .= $A ;
 EXPECT
 Use of uninitialized value at - line 10.
 ########
 # sv.c 
-use warning 'numeric' ;
+use warnings 'numeric' ;
 sub TIESCALAR{bless[]} ; 
 sub FETCH {"def"} ; 
 tie $a,"main" ; 
 my $b = 1 + $a;
-no warning 'numeric' ;
+no warnings 'numeric' ;
 my $c = 1 + $a;
 EXPECT
 Argument "def" isn't numeric in add at - line 6.
 ########
 # sv.c
-use warning 'numeric' ;
+use warnings 'numeric' ;
 my $x = 1 + "def" ;
-no warning 'numeric' ;
+no warnings 'numeric' ;
 my $z = 1 + "def" ;
 EXPECT
 Argument "def" isn't numeric in add at - line 3.
 ########
 # sv.c
-use warning 'numeric' ;
+use warnings 'numeric' ;
 my $a = "def" ;
 my $x = 1 + $a ;
-no warning 'numeric' ;
+no warnings 'numeric' ;
 my $y = 1 + $a ;
 EXPECT
 Argument "def" isn't numeric in add at - line 4.
 ########
 # sv.c
-use warning 'numeric' ; use integer ;
+use warnings 'numeric' ; use integer ;
 my $a = "def" ;
 my $x = 1 + $a ;
-no warning 'numeric' ;
+no warnings 'numeric' ;
 my $z = 1 + $a ;
 EXPECT
 Argument "def" isn't numeric in i_add at - line 4.
 ########
 # sv.c
-use warning 'numeric' ;
+use warnings 'numeric' ;
 my $x = 1 & "def" ;
-no warning 'numeric' ;
+no warnings 'numeric' ;
 my $z = 1 & "def" ;
 EXPECT
 Argument "def" isn't numeric in bit_and at - line 3.
 ########
 # sv.c
-use warning 'redefine' ;
+use warnings 'redefine' ;
 sub fred {}  
 sub joe {} 
 *fred = \&joe ;
-no warning 'redefine' ;
+no warnings 'redefine' ;
 sub jim {} 
 *jim = \&joe ;
 EXPECT
 Subroutine fred redefined at - line 5.
 ########
 # sv.c
-use warning 'printf' ;
+use warnings 'printf' ;
 open F, ">".($^O eq 'VMS'? 'NL:' : '/dev/null') ;
 printf F "%z\n" ;
 my $a = sprintf "%z" ;
@@ -241,7 +241,7 @@ printf F "%" ;
 $a = sprintf "%" ;
 printf F "%\x02" ;
 $a = sprintf "%\x02" ;
-no warning 'printf' ;
+no warnings 'printf' ;
 printf F "%z\n" ;
 $a = sprintf "%z" ;
 printf F "%" ;
@@ -257,9 +257,9 @@ Invalid conversion in printf: end of string at - line 6.
 Invalid conversion in printf: "%\002" at - line 8.
 ########
 # sv.c
-use warning 'unsafe' ;
+use warnings 'unsafe' ;
 *a = undef ;
-no warning 'unsafe' ;
+no warnings 'unsafe' ;
 *b = undef ;
 EXPECT
 Undefined value assigned to typeglob at - line 3.
@@ -268,9 +268,9 @@ Undefined value assigned to typeglob at - line 3.
 use utf8 ;
 $^W =0 ;
 {
-  use warning 'utf8' ;
+  use warnings 'utf8' ;
   my $a = rindex "a\xff bc ", "bc" ;
-  no warning 'utf8' ;
+  no warnings 'utf8' ;
   $a = rindex "a\xff bc ", "bc" ;
 }
 my $a = rindex "a\xff bc ", "bc" ;

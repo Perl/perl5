@@ -153,7 +153,7 @@ the strings?).
           5.000b3g      1994-Oct-04
  Andy     5.000b3h      1994-Oct-07
 
- Larry   5.000          1994-Oct-18
+ Larry   5.000          1994-Oct-17
 
  Andy     5.000a        1994-Dec-19
           5.000b        1995-Jan-18
@@ -327,6 +327,8 @@ the strings?).
 	  5.005_58	1999-Jul-27
 	  5.005_59	1999-Aug-02
 	  5.005_60	1999-Aug-02
+	  5.005_61	1999-Aug-20
+	  5.005_62	1999-Sep-**
 	  5.6 beta	1999-***-**
 
 =head2 SELECTED RELEASE SIZES

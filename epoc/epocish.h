@@ -89,9 +89,6 @@
  */
 /* #define ALTERNATE_SHEBANG "#!" / **/
 
-#if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX) || defined(__NetBSD__)
-# include <signal.h>
-#endif
 
 #ifndef SIGABRT
 #    define SIGABRT SIGILL
@@ -116,15 +113,7 @@
 
 /* these should be set in a hint file, not here */
 #ifndef PERL_SYS_INIT
-#ifdef PERL_SCO5
-#  define PERL_SYS_INIT(c,v)	fpsetmask(0); MALLOC_INIT
-#else
-#  ifdef POSIX_BC
-#    define PERL_SYS_INIT(c,v)	sigignore(SIGFPE); MALLOC_INIT
-#  else
-#    define PERL_SYS_INIT(c,v)	MALLOC_INIT
-#  endif
-#endif
+#    define PERL_SYS_INIT(c,v)  Perl_epoc_init(c,v);   MALLOC_INIT
 #endif
 
 #ifndef PERL_SYS_TERM
@@ -134,3 +123,4 @@
 #define BIT_BUCKET "NUL:"
 
 #define dXSUB_SYS
+
