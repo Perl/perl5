@@ -3104,11 +3104,13 @@ Perl_sv_catsv(pTHX_ SV *dstr, register SV *sstr)
     if (!sstr)
 	return;
     if ((s = SvPV(sstr, len))) {
-	if (SvUTF8(sstr))
+	if (DO_UTF8(sstr)) {
 	    sv_utf8_upgrade(dstr);
-	sv_catpvn(dstr,s,len);
-	if (SvUTF8(sstr))
+	    sv_catpvn(dstr,s,len);
 	    SvUTF8_on(dstr);
+	}
+	else
+	    sv_catpvn(dstr,s,len);
     }
 }
 
@@ -3465,6 +3467,7 @@ Perl_sv_insert(pTHX_ SV *bigstr, STRLEN offset, STRLEN len, char *little, STRLEN
     if (!bigstr)
 	Perl_croak(aTHX_ "Can't modify non-existent substring");
     SvPV_force(bigstr, curlen);
+    SvPOK_only_UTF8(bigstr);
     if (offset + len > curlen) {
 	SvGROW(bigstr, offset+len+1);
 	Zero(SvPVX(bigstr)+curlen, offset+len-curlen, char);

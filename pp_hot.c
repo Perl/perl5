@@ -146,22 +146,36 @@ PP(pp_concat)
     dPOPTOPssrl;
     STRLEN len;
     char *s;
+    bool left_utf = DO_UTF8(left);
+    bool right_utf = DO_UTF8(right);
 
     if (TARG != left) {
+	if (right_utf && !left_utf)
+	    sv_utf8_upgrade(left);
 	s = SvPV(left,len);
+	SvUTF8_off(TARG);
 	if (TARG == right) {
+	    if (left_utf && !right_utf)
+		sv_utf8_upgrade(right);
 	    sv_insert(TARG, 0, 0, s, len);
+	    if (left_utf || right_utf)
+		SvUTF8_on(TARG);
 	    SETs(TARG);
 	    RETURN;
 	}
 	sv_setpvn(TARG,s,len);
     }
-    else if (SvGMAGICAL(TARG))
+    else if (SvGMAGICAL(TARG)) {
 	mg_get(TARG);
+	if (right_utf && !left_utf)
+	    sv_utf8_upgrade(left);
+    }
     else if (!SvOK(TARG) && SvTYPE(TARG) <= SVt_PVMG) {
 	sv_setpv(TARG, "");	/* Suppress warning. */
 	s = SvPV_force(TARG, len);
     }
+    if (left_utf && !right_utf)
+	sv_utf8_upgrade(right);
     s = SvPV(right,len);
     if (SvOK(TARG)) {
 #if defined(PERL_Y2KWARN)
@@ -176,19 +190,12 @@ PP(pp_concat)
 	    }
 	}
 #endif
-	if (DO_UTF8(right))
-	    sv_utf8_upgrade(TARG);
 	sv_catpvn(TARG,s,len);
-	if (!IN_BYTE) {
-	    if (SvUTF8(right))
-		SvUTF8_on(TARG);
-	}
-	else if (!SvUTF8(right)) {
-	    SvUTF8_off(TARG);
-	}
     }
     else
 	sv_setpvn(TARG,s,len);	/* suppress warning */
+    if (left_utf || right_utf)
+	SvUTF8_on(TARG);
     SETTARG;
     RETURN;
   }

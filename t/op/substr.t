@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..132\n";
+print "1..135\n";
 
 #P = start of string  Q = start of substr  R = end of substr  S = end of string
 
@@ -271,18 +271,29 @@ $a = "abcdefgh";
 ok 124, sub { shift }->(substr($a, 0, 4, "xxxx")) eq 'abcd';
 ok 125, $a eq 'xxxxefgh';
 
+{
+    my $y = 10;
+    $y = "2" . $y;
+    ok 126, $y+0 == 210;
+}
+
 # utf8 sanity
 {
     my $x = substr("a\x{263a}b",0);
-    ok 126, length($x) == 3;
+    ok 127, length($x) == 3;
     $x = substr($x,1,1);
-    ok 127, $x eq "\x{263a}";
+    ok 128, $x eq "\x{263a}";
     $x = $x x 2;
-    ok 128, length($x) == 2;
+    ok 129, length($x) == 2;
     substr($x,0,1) = "abcd";
-    ok 129, $x eq "abcd\x{263a}";
-    ok 130, length($x) == 5;
-    $x = reverse $x;
+    ok 130, $x eq "abcd\x{263a}";
     ok 131, length($x) == 5;
-    ok 132, $x eq "\x{263a}dcba";
+    $x = reverse $x;
+    ok 132, length($x) == 5;
+    ok 133, $x eq "\x{263a}dcba";
+
+    my $z = 10;
+    $z = "21\x{263a}" . $z;
+    ok 134, length($z) == 5;
+    ok 135, $z eq "21\x{263a}10";
 }
