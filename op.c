@@ -4870,6 +4870,7 @@ ck_sysread(OP *o)
 	OP *kid = cLISTOPo->op_first->op_sibling;
 	if (kid && (kid = kid->op_sibling)) {
 	    switch (kid->op_type) {
+	    case OP_THREADSV:
 	    case OP_HELEM:
 	    case OP_AELEM:
 	    case OP_SASSIGN:
