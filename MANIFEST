@@ -389,6 +389,7 @@ hints/esix4.sh		Hints for named architecture
 hints/fps.sh		Hints for named architecture
 hints/freebsd.sh	Hints for named architecture
 hints/genix.sh		Hints for named architecture
+hints/gnu.sh		Hints for named architecture
 hints/greenhills.sh	Hints for named architecture
 hints/hpux.sh		Hints for named architecture
 hints/i386.sh		Hints for named architecture
@@ -1047,6 +1048,7 @@ vos/build.cm		VOS command macro to build Perl
 vos/Changes		Changes made to port Perl to the VOS operating system
 vos/compile_perl.cm	VOS commnad macro to build multiple version of Perl
 vos/config.h		config.h for VOS
+vos/config_h.SH_orig	config_h.SH at the time config.h was created
 vos/perl.bind		VOS bind control file
 vos/test_vos_dummies.c	Test program for "vos_dummies.c"
 vos/vos_accept.c	Wrapper to fixup nonstandard VOS _accept function
