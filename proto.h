@@ -943,6 +943,8 @@ VIRTUAL void	sv_setpvn_mg _((SV *sv, const char *ptr, STRLEN len));
 VIRTUAL void	sv_setsv_mg _((SV *dstr, SV *sstr));
 VIRTUAL void	sv_usepvn_mg _((SV *sv, char *ptr, STRLEN len));
 
+VIRTUAL MGVTBL*	get_vtbl _((int vtbl_id));
+
 /* New virtual functions must be added here to maintain binary
  * compatablity with PERL_OBJECT
  */

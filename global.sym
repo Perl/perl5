@@ -158,6 +158,7 @@ get_op_names
 get_no_modify
 get_opargs
 get_specialsv_list
+get_vtbl
 gp_free
 gp_ref
 gv_AVadd

@@ -673,7 +673,7 @@ L<perlipc/"Sockets: Client/Server Communication">.
 =item continue BLOCK
 
 Actually a flow control statement rather than a function.  If there is a
-C<continue> BLOCK attached to a BLOCK (typically in a L<(while> or
+C<continue> BLOCK attached to a BLOCK (typically in a L</while> or
 L</foreach>), it is always executed just before the conditional is about to
 be evaluated again, just like the third part of a L</for> loop in C.  Thus
 it can be used to increment a loop variable, even when the loop has been

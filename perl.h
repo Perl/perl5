@@ -2144,6 +2144,40 @@ typedef enum {
     XTERMBLOCK
 } expectation;
 
+enum {		/* pass one of these to get_vtbl */
+    want_vtbl_sv,
+    want_vtbl_env,
+    want_vtbl_envelem,
+    want_vtbl_sig,
+    want_vtbl_sigelem,
+    want_vtbl_pack,
+    want_vtbl_packelem,
+    want_vtbl_dbline,
+    want_vtbl_isa,
+    want_vtbl_isaelem,
+    want_vtbl_arylen,
+    want_vtbl_glob,
+    want_vtbl_mglob,
+    want_vtbl_nkeys,
+    want_vtbl_taint,
+    want_vtbl_substr,
+    want_vtbl_vec,
+    want_vtbl_pos,
+    want_vtbl_bm,
+    want_vtbl_fm,
+    want_vtbl_uvar,
+    want_vtbl_defelem,
+    want_vtbl_regexp,
+    want_vtbl_collxfrm,
+    want_vtbl_amagic,
+    want_vtbl_amagicelem,
+#ifdef USE_THREADS
+    want_vtbl_mutex,
+#endif
+    want_vtbl_regdata,
+    want_vtbl_regdatum
+};
+
 
 				/* Note: the lowest 8 bits are reserved for
 				   stuffing into op->op_private */

@@ -2970,3 +2970,104 @@ get_specialsv_list(void)
 {
  return PL_specialsv_list;
 }
+
+
+MGVTBL*
+get_vtbl(int vtbl_id)
+{
+    MGVTBL* result = Null(MGVTBL*);
+
+    switch(vtbl_id) {
+    case want_vtbl_sv:
+	result = &PL_vtbl_sv;
+	break;
+    case want_vtbl_env:
+	result = &PL_vtbl_env;
+	break;
+    case want_vtbl_envelem:
+	result = &PL_vtbl_envelem;
+	break;
+    case want_vtbl_sig:
+	result = &PL_vtbl_sig;
+	break;
+    case want_vtbl_sigelem:
+	result = &PL_vtbl_sigelem;
+	break;
+    case want_vtbl_pack:
+	result = &PL_vtbl_pack;
+	break;
+    case want_vtbl_packelem:
+	result = &PL_vtbl_packelem;
+	break;
+    case want_vtbl_dbline:
+	result = &PL_vtbl_dbline;
+	break;
+    case want_vtbl_isa:
+	result = &PL_vtbl_isa;
+	break;
+    case want_vtbl_isaelem:
+	result = &PL_vtbl_isaelem;
+	break;
+    case want_vtbl_arylen:
+	result = &PL_vtbl_arylen;
+	break;
+    case want_vtbl_glob:
+	result = &PL_vtbl_glob;
+	break;
+    case want_vtbl_mglob:
+	result = &PL_vtbl_mglob;
+	break;
+    case want_vtbl_nkeys:
+	result = &PL_vtbl_nkeys;
+	break;
+    case want_vtbl_taint:
+	result = &PL_vtbl_taint;
+	break;
+    case want_vtbl_substr:
+	result = &PL_vtbl_substr;
+	break;
+    case want_vtbl_vec:
+	result = &PL_vtbl_vec;
+	break;
+    case want_vtbl_pos:
+	result = &PL_vtbl_pos;
+	break;
+    case want_vtbl_bm:
+	result = &PL_vtbl_bm;
+	break;
+    case want_vtbl_fm:
+	result = &PL_vtbl_fm;
+	break;
+    case want_vtbl_uvar:
+	result = &PL_vtbl_uvar;
+	break;
+#ifdef USE_THREADS
+    case want_vtbl_mutex:
+	result = &PL_vtbl_mutex;
+	break;
+#endif
+    case want_vtbl_defelem:
+	result = &PL_vtbl_defelem;
+	break;
+    case want_vtbl_regexp:
+	result = &PL_vtbl_regexp;
+	break;
+    case want_vtbl_regdata:
+	result = &PL_vtbl_regdata;
+	break;
+    case want_vtbl_regdatum:
+	result = &PL_vtbl_regdatum;
+	break;
+    case want_vtbl_collxfrm:
+	result = &PL_vtbl_collxfrm;
+	break;
+    case want_vtbl_amagic:
+	result = &PL_vtbl_amagic;
+	break;
+    case want_vtbl_amagicelem:
+	result = &PL_vtbl_amagicelem;
+	break;
+    }
+    return result;
+}
+
