@@ -1,6 +1,21 @@
 Revision history for Perl module I18N::LangTags.
-                                        Time-stamp: "2003-10-10 17:07:55 ADT"
+                                        Time-stamp: "2004-03-30 21:38:00 AST"
 
+2004-03-30  Sean M. Burke  sburke@cpan.org
+
+	* Release 0.30
+
+	New in I18N::LangTags : implicate_supers and
+	implicate_supers_strictly.
+
+	New module: I18N::LangTags::Detect.
+
+	Some new tests.
+
+	Thanks to Autrijus Tang for catching some errors in my makefile!
+
+	
+	
 2003-10-10  Sean M. Burke  sburke@cpan.org
 	
 	* Release 0.29

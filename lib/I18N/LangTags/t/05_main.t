@@ -1,9 +1,6 @@
-# Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl test.pl'
 
-######################### We start with some black magic to print on failure.
 require 5;
- # Time-stamp: "2003-07-20 07:36:49 ADT"
+ # Time-stamp: "2004-03-30 17:52:14 AST"
 use strict;
 use Test;
 BEGIN { plan tests => 64 };
