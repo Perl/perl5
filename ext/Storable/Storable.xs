@@ -69,14 +69,30 @@
 #ifndef HvSHAREKEYS_off
 #define HvSHAREKEYS_off(hv)	/* Ignore */
 #endif
-#ifndef INT2PTR
-#define INT2PTR(t,v)	(t)(IV)(v)
-#endif
 #ifndef AvFILLp				/* Older perls (<=5.003) lack AvFILLp */
 #define AvFILLp AvFILL
 #endif
 typedef double NV;			/* Older perls lack the NV type */
+#define	IVdf		"ld"	/* Various printf formats for Perl types */
+#define	UVuf		"lu"
+#define	UVof		"lo"
+#define	UVxf		"lx"
+#define INT2PTR(t,v) (t)(IV)(v)
+#define PTR2UV(v)    (unsigned long)(v)
 #endif						/* PERL_VERSION -- perls < 5.6 */
+
+#ifndef NVef				/* The following were not part of perl 5.6 */
+#if defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE) && defined(PERL_PRIfldbl)
+#define	NVef		PERL_PRIeldbl
+#define	NVff		PERL_PRIfldbl
+#define	NVgf		PERL_PRIgldbl
+#endif
+#ifndef NVef
+#define	NVef		"e"
+#define	NVff		"f"
+#define	NVgf		"g"
+#endif
+#endif
 
 #ifdef DEBUGME
 #ifndef DASSERT
@@ -1442,6 +1458,7 @@ static int store_scalar(stcxt_t *cxt, SV *sv)
 			goto string;				/* Share code below */
 		}
 	} else if (flags & SVp_POK) {		/* SvPOKp(sv) => string */
+		I32 wlen;						/* For 64-bit machines */
 		pv = SvPV(sv, len);
 
 		/*
@@ -1995,7 +2012,7 @@ static int store_hook(
 		pkg_hide(cxt->hook, pkg, "STORABLE_freeze");
 
 		ASSERT(!pkg_can(cxt->hook, pkg, "STORABLE_freeze"), ("hook invisible"));
-		TRACEME(("Ignoring STORABLE_freeze in class \"%s\"", class));
+		TRACEME(("ignoring STORABLE_freeze in class \"%s\"", class));
 
 		return store_blessed(cxt, sv, type, pkg);
 	}
@@ -2136,9 +2153,10 @@ static int store_hook(
 	}
 
 	/* <len2> <frozen-str> */
-	if (flags & SHF_LARGE_STRLEN)
-		WLEN(len2);
-	else {
+	if (flags & SHF_LARGE_STRLEN) {
+		I32 wlen2 = len2;		/* STRLEN might be 8 bytes */
+		WLEN(wlen2);			/* Must write an I32 for 64-bit machines */
+	} else {
 		unsigned char clen = (unsigned char) len2;
 		PUTMARK(clen);
 	}
@@ -2287,7 +2305,7 @@ static int store_blessed(
  */
 static int store_other(stcxt_t *cxt, SV *sv)
 {
-	STRLEN len;
+	I32 len;
 	static char buf[80];
 
 	TRACEME(("store_other"));
