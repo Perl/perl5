@@ -1301,6 +1301,8 @@ lib/Pod/t/basic.txt		podlators test
 lib/Pod/t/Functions.t		See if Pod::Functions works
 lib/Pod/t/htmlescp.pod          pod2html escape test input data
 lib/Pod/t/htmlescp.t            pod2html escape test
+lib/Pod/t/htmlview.t            pod2html render test
+lib/Pod/t/htmlview.pod          pod2html render test input data
 lib/Pod/t/InputObjects.t	See if Pod::InputObjects works
 lib/Pod/t/latex.t		See if Pod::LaTeX works
 lib/Pod/t/man.t    		podlators test
@@ -2458,7 +2460,6 @@ t/pod/testcmp.pl		Module to compare output against expected results
 t/pod/testp2pt.pl		Module to test Pod::PlainText for a given file
 t/pod/testpchk.pl		Module to test Pod::Checker for a given file
 t/pod/testpods/lib/Pod/Stuff.pm			Sample data for find.t
-t/pod2html/README		Placeholder to keep the t/pod2html directory.
 t/README			Instructions for regression tests
 t/run/exit.t                    Test perl's exit status.
 t/run/fresh_perl.t              Tests that require a fresh perl.
