@@ -6623,8 +6623,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		*--eptr = '#';
 	    *--eptr = '%';
 
-	    /* No taint.  Otherwise we are in the strange
-	     * situaiton where printf() taints but print($float) doesn't.
+	    /* No taint.  Otherwise we are in the strange situation
+	     * where printf() taints but print($float) doesn't.
 	     * --jhi */
 	    (void)sprintf(PL_efloatbuf, eptr, nv);
 
