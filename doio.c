@@ -323,13 +323,13 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		    if (num_svs > 1) {
 			Perl_croak(aTHX_ "More than one argument to '%c&' open",IoTYPE(io));
 		    }
+		    /*SUPPRESS 530*/
+		    for (; isSPACE(*type); type++) ;
 		    if (num_svs && (SvIOK(*svp) || (SvPOK(*svp) && looks_like_number(*svp)))) {
 			fd = SvUV(*svp);
 			num_svs = 0;
 		    }
 		    else if (isDIGIT(*type)) {
-			/*SUPPRESS 530*/
-			for (; isSPACE(*type); type++) ;
 			fd = atoi(type);
 		    }
 		    else {
@@ -339,8 +339,6 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 			}
 			else {
 			    GV *thatgv;
-			    /*SUPPRESS 530*/
-			    for (; isSPACE(*type); type++) ;
 			    thatgv = gv_fetchpv(type,FALSE,SVt_PVIO);
 			    thatio = GvIO(thatgv);
 			}
