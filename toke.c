@@ -2597,7 +2597,7 @@ Perl_yylex(pTHX)
 			    /* The count here deliberately includes the NUL
 			       that terminates the C string constant.  This
 			       embeds the opening NUL into the string.  */
-			    sv_catpvn(aTHX_ PL_linestr, "our @F=split(q", 15);
+			    sv_catpvn(PL_linestr, "our @F=split(q", 15);
 			    s = PL_splitstr;
 			    do {
 				/* Need to \ \s  */
