@@ -126,7 +126,8 @@ For versions < 5.6.0, the changes are.
     - no 'use warnings'
 
 Specifying a compatibility version higher than the version of perl you
-are using to run h2xs will have no effect.
+are using to run h2xs will have no effect.  If unspecified h2xs will default
+to compatibility with the version of perl you are using to run h2xs.
 
 =item B<-c>, B<--omit-constant>
 
@@ -551,8 +552,20 @@ if( $opt_b ){
     usage "You must provide the backwards compatibility version in X.Y.Z form. "
           .  "(i.e. 5.5.0)\n";
     my ($maj,$min,$sub) = split(/\./,$opt_b,3);
-    $compat_version = sprintf("%d.%03d%02d",$maj,$min,$sub);
-} 
+    if ($maj < 5 || ($maj == 5 && $min < 6)) {
+        $compat_version = sprintf("%d.%03d%02d",$maj,$min,$sub);
+    } else {
+        $compat_version = sprintf("%d.%03d%03d",$maj,$min,$sub);
+    }
+} else {
+    my ($maj,$min,$sub) = $compat_version =~ /(\d+)\.(\d\d\d)(\d\d\d?)/;
+    warn sprintf <<'EOF', $maj,$min,$sub;
+Defaulting to backwards compatibility with perl %d.%d.%d
+If you intend this module to be compatible with earlier perl versions, please
+specify a minimum perl version with the -b option.
+
+EOF
+}
 
 if( $opt_v ){
 	$TEMPLATE_VERSION = $opt_v;

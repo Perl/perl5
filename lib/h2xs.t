@@ -5,7 +5,9 @@
 # hence are not checked.  File existence is checked with -e though.
 # This test depends on File::Path::rmtree() to clean up with.
 #  - pvhp
-
+#
+# We are now checking that the correct use $version; is present in
+# Makefile.PL and $module.pm
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
@@ -38,9 +40,14 @@ if ($^O eq 'MacOS') {
 # not already be found in the t/ subdirectory for perl.
 my $name = 'h2xst';
 my $header = "$name.h";
+my $thisversion = sprintf "%vd", $^V;
 
 my @tests = (
-"-f -n $name", <<"EOXSFILES",
+"-f -n $name", $], <<"EOXSFILES",
+Defaulting to backwards compatibility with perl $thisversion
+If you intend this module to be compatible with earlier perl versions, please
+specify a minimum perl version with the -b option.
+
 Writing $name/$name.pm
 Writing $name/$name.xs
 Writing $name/fallback.c
@@ -52,7 +59,43 @@ Writing $name/Changes
 Writing $name/MANIFEST
 EOXSFILES
 
-"\"-X\" -f -n $name", <<"EONOXSFILES",
+"-f -n $name -b $thisversion", $], <<"EOXSFILES",
+Writing $name/$name.pm
+Writing $name/$name.xs
+Writing $name/fallback.c
+Writing $name/fallback.xs
+Writing $name/Makefile.PL
+Writing $name/README
+Writing $name/t/1.t
+Writing $name/Changes
+Writing $name/MANIFEST
+EOXSFILES
+
+"-f -n $name -b 5.6.1", "5.006001", <<"EOXSFILES",
+Writing $name/$name.pm
+Writing $name/$name.xs
+Writing $name/fallback.c
+Writing $name/fallback.xs
+Writing $name/Makefile.PL
+Writing $name/README
+Writing $name/t/1.t
+Writing $name/Changes
+Writing $name/MANIFEST
+EOXSFILES
+
+"-f -n $name -b 5.5.3", "5.00503", <<"EOXSFILES",
+Writing $name/$name.pm
+Writing $name/$name.xs
+Writing $name/fallback.c
+Writing $name/fallback.xs
+Writing $name/Makefile.PL
+Writing $name/README
+Writing $name/t/1.t
+Writing $name/Changes
+Writing $name/MANIFEST
+EOXSFILES
+
+"\"-X\" -f -n $name -b $thisversion", $], <<"EONOXSFILES",
 Writing $name/$name.pm
 Writing $name/Makefile.PL
 Writing $name/README
@@ -61,7 +104,7 @@ Writing $name/Changes
 Writing $name/MANIFEST
 EONOXSFILES
 
-"-f -n $name $header", <<"EOXSFILES",
+"-f -n $name $header -b $thisversion", $], <<"EOXSFILES",
 Writing $name/$name.pm
 Writing $name/$name.xs
 Writing $name/fallback.c
@@ -75,10 +118,11 @@ EOXSFILES
 );
 
 my $total_tests = 3; # opening, closing and deleting the header file.
-for (my $i = $#tests; $i > 0; $i-=2) {
+for (my $i = $#tests; $i > 0; $i-=3) {
   # 1 test for running it, 1 test for the expected result, and 1 for each file
+  # plus 1 to open and 1 to check for the use in $name.pm and Makefile.PL
   # use the () to force list context and hence count the number of matches.
-  $total_tests += 2 + (() = $tests[$i] =~ /(Writing)/sg);
+  $total_tests += 6 + (() = $tests[$i] =~ /(Writing)/sg);
 }
 
 plan tests => $total_tests;
@@ -90,7 +134,7 @@ print HEADER <<HEADER or die $!;
 HEADER
 ok (close (HEADER));
 
-while (my ($args, $expectation) = splice @tests, 0, 2) {
+while (my ($args, $version, $expectation) = splice @tests, 0, 3) {
   # h2xs warns about what it is writing hence the (possibly unportable)
   # 2>&1 dupe:
   # does it run?
@@ -109,9 +153,7 @@ while (my ($args, $expectation) = splice @tests, 0, 2) {
   # Was the output the list of files that were expected?
   ok ($result, $expectation, "running $prog");
 
-  $expectation =~ s/Writing //; # remove leader
-  foreach (split(/Writing /,$expectation)) {
-    chomp;  # remove \n
+  foreach ($expectation =~ /Writing\s+(\S+)/gm) {
     if ($^O eq 'MacOS') {
       $_ = ':' . join(':',split(/\//,$_));
       $_ =~ s/$name:t:1.t/$name:t\/1.t/; # is this an h2xs bug?
@@ -119,6 +161,18 @@ while (my ($args, $expectation) = splice @tests, 0, 2) {
     ok (-e $_, 1, "$_ missing");
   }
 
+  foreach my $leaf ("$name.pm", 'Makefile.PL') {
+    my $file = ($^O eq 'MacOS') ? ":$name:$leaf" : "$name/$leaf";
+    if (ok (open (FILE, $file), 1, "open $file")) {
+      my $match = qr/use $version;/;
+      my $found;
+      while (<FILE>) {
+        last if $found = /$match/;
+      }
+      ok ($found, 1, "looking for /$match/ in $file");
+      close FILE or die "close $file: $!";
+    }
+  }
   # clean up
   rmtree($name);
 }
