@@ -1718,6 +1718,9 @@ moreswitches(char *s)
 #ifdef atarist
 	printf("atariST series port, ++jrb  bammi@cadence.com\n");
 #endif
+#ifdef BINARY_BUILD_NOTICE
+	BINARY_BUILD_NOTICE;
+#endif
 	printf("\n\
 Perl may be copied only under the terms of either the Artistic License or the\n\
 GNU General Public License, which may be found in the Perl 5.0 source kit.\n\n\

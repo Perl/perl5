@@ -2694,7 +2694,7 @@ PP(pp_rename)
     char *tmps = SvPV(TOPs, na);
     TAINT_PROPER("rename");
 #ifdef HAS_RENAME
-    anum = rename(tmps, tmps2);
+    anum = PerlLIO_rename(tmps, tmps2);
 #else
     if (!(anum = PerlLIO_stat(tmps, &statbuf))) {
 	if (same_dirent(tmps2, tmps))	/* can always rename to same name */

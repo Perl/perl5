@@ -56,6 +56,15 @@ INST_VER	= \5.00471
 #USE_PERLCRT	= define
 
 #
+# uncomment to enable linking with setargv.obj under the Visual C
+# compiler. Setting this options enables perl to expand wildcards in
+# arguments, but it may be harder to use alternate methods like
+# File::DosGlob that are more powerful.  This option is supported only with
+# Visual C.
+#
+#USE_SETARGV	= define
+
+#
 # if you have the source for des_fcrypt(), uncomment this and make sure the
 # file exists (see README.win32).  File should be located at the perl
 # top level directory.
@@ -448,6 +457,10 @@ PERLEXE_OBJ	= $(PERLEXE_OBJ) $(WIN32_OBJ) $(DLL_OBJ)
 PERL95_OBJ	= $(PERL95_OBJ) DynaLoadmt$(o)
 !ENDIF
 
+!IF "$(USE_SETARGV)" != ""
+SETARGV_OBJ	= setargv$(o)
+!ENDIF
+
 DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
 		Data/Dumper
 STATIC_EXT	= DynaLoader
@@ -664,7 +677,7 @@ perlmain$(o) : perlmain.c
 
 $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ)
 	$(LINK32) -subsystem:console -out:$@ $(LINK_FLAGS) $(LIBFILES) \
-	    $(PERLEXE_OBJ) $(PERLIMPLIB) 
+	    $(PERLEXE_OBJ) $(SETARGV_OBJ) $(PERLIMPLIB) 
 	copy splittree.pl .. 
 	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" $(AUTODIR)
 
@@ -690,7 +703,8 @@ DynaLoadmt$(o) : $(DYNALOADER).c
 
 $(PERL95EXE): $(PERLDLL) $(CONFIGPM) $(PERL95_OBJ)
 	$(LINK32) -subsystem:console -nodefaultlib -out:$@ $(LINK_FLAGS) \
-	    $(LIBBASEFILES) $(PERL95_OBJ) $(PERLIMPLIB) libcmt.lib
+	    $(LIBBASEFILES) $(PERL95_OBJ) $(SETARGV_OBJ) $(PERLIMPLIB) \
+	    libcmt.lib
 
 !ENDIF
 
