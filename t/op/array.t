@@ -234,3 +234,16 @@ sub foo { "a" }
 @foo=(foo())[0,0];
 $foo[1] eq "a" or print "not ";
 print "ok 71\n";
+
+# $[ should have the same effect regardless of whether the aelem
+#    op is optimized to aelemfast.
+
+sub tary {
+  local $[ = 10;
+  my $five = 5;
+  print "not " unless $tary[5] == $tary[$five];
+  print "ok 72\n";
+}
+
+@tary = (0..50);
+tary();

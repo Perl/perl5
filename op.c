@@ -6818,7 +6818,7 @@ Perl_peep(pTHX_ register OP *o)
 		    pop->op_next->op_type == OP_AELEM &&
 		    !(pop->op_next->op_private &
 		      (OPpLVAL_INTRO|OPpLVAL_DEFER|OPpDEREF|OPpMAYBE_LVSUB)) &&
-		    (i = SvIV(((SVOP*)pop)->op_sv) - PL_compiling.cop_arybase)
+		    (i = SvIV(((SVOP*)pop)->op_sv) - PL_curcop->cop_arybase)
 				<= 255 &&
 		    i >= 0)
 		{
