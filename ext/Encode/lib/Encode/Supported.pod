@@ -202,7 +202,6 @@ to 'CN', continental China, while traditional Chinese is mapped to
   euc-jp
   shiftjis      cp932   macJapanese
   7bit-jis
-  euc-jp
   iso-2022-jp                                            [RFC1468]
   iso-2022-jp-1                                          [RFC2237]
   jis0201-raw  { JIS X 0201 (roman + halfwidth kana) without CES }
@@ -239,9 +238,25 @@ distributed separately on CPAN, under the name Encode::HanExtra.
 
   Standard      DOS/Win Macintosh                Comment/Reference
   ----------------------------------------------------------------
-  gb18030
-  euc-tw
-  big5plus
+  big5ext                                   CMEX's Big5e Extension
+  big5plus                                  CMEX's Big5+ Extension
+  cccii         Chinese Character Code for Information Interchange
+  euc-tw                             EUC (Extended Unix Character)
+  gb18030                          GBK with Traditional Characters
+  ----------------------------------------------------------------
+
+=item Encode::JIS2K -- JIS X 0213 encodings via CPAN
+
+Due to size concerns, additional Japanese encodings below are
+distributed separately on CPAN, under the name Encode::JIS2K.
+
+  Standard      DOS/Win Macintosh                Comment/Reference
+  ----------------------------------------------------------------
+  euc-jisx0213
+  shiftjisx0123
+  iso-2022-jp-3
+  jis0213-1-raw
+  jis0213-2-raw
   ----------------------------------------------------------------
 
 =back
@@ -274,6 +289,23 @@ For symbols  and dingbats.
   AdobeZdingbat
   AdobeSymbol
   ----------------------------------------------------------------
+
+=item Encode::MIME::Header
+
+Strictly speaking, MIME header encoding documented in RFC 2047 is more
+of encapsulation than encoding.  But included anyway.
+
+  ----------------------------------------------------------------
+  MIME-Header                                            [RFC2047]
+  MIME-B                                                 [RFC2047]
+  MIME-Q                                                 [RFC2047]
+  ----------------------------------------------------------------
+
+=item Encode::Guess
+
+This one is not a name of encoding but a utility that lets you pick up
+the most appropriate encoding for a data out of given I<suspects>.  See
+L<Encode::Guess> for details.
 
 =back
 
@@ -530,7 +562,6 @@ pages!
 The rule of thumb is to use C<UTF-8> unless you know what
 you're doing and unless you really benefit from using C<UTF-16>.
 
-
   ISO-IR-165    [RFC1345]
   VISCII
   GB 12345
@@ -701,6 +732,7 @@ L<Encode>,
 L<Encode::Byte>, 
 L<Encode::CN>, L<Encode::JP>, L<Encode::KR>, L<Encode::TW>,
 L<Encode::EBCDIC>, L<Encode::Symbol>
+L<Encode::MIME::Header>, L<Encode::Guess>
 
 =head1 References
 

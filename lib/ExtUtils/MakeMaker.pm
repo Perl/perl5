@@ -2,10 +2,10 @@ BEGIN {require 5.004;}
 
 package ExtUtils::MakeMaker;
 
-$VERSION = "5.91_02";
+$VERSION = "5.92_01";
 $Version_OK = "5.49";   # Makefiles older than $Version_OK will die
                         # (Will be checked from MakeMaker version 4.13 onwards)
-($Revision = substr(q$Revision: 1.44 $, 10)) =~ s/\s+$//;
+($Revision = substr(q$Revision: 1.46 $, 10)) =~ s/\s+$//;
 
 require Exporter;
 use Config;
@@ -79,7 +79,8 @@ sub prompt ($;$) {
 sub eval_in_subdirs {
     my($self) = @_;
     use Cwd qw(cwd abs_path);
-    my $pwd = cwd();
+    my $pwd = cwd() || die "Can't figure out your cwd!";
+
     local @INC = map eval {abs_path($_) if -e} || $_, @INC;
     push @INC, '.';     # '.' has to always be at the end of @INC
 
@@ -1811,7 +1812,7 @@ MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
     *VERSION = \'1.01';
-    ( $VERSION ) = '$Revision: 1.43 $ ' =~ /\$Revision:\s+([^\s]+)/;
+    ( $VERSION ) = '$Revision: 1.46 $ ' =~ /\$Revision:\s+([^\s]+)/;
     $FOO::VERSION = '1.10';
     *FOO::VERSION = \'1.11';
     our $VERSION = 1.2.3;       # new for perl5.6.0 

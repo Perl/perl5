@@ -1,9 +1,21 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.64 2002/04/29 06:54:06 dankogai Exp $
+# $Id: Changes,v 1.65 2002/04/30 16:13:37 dankogai Exp dankogai $
 #
 
-$Revision: 1.64 $ $Date: 2002/04/29 06:54:06 $
+$Revision: 1.65 $ $Date: 2002/04/30 16:13:37 $
+! Encode.pm
+  encode(undef) no longer warns for C<Use of uninitialized value in 
+  subroutine entry>.  Suggested by Paul.
+  Message-Id: <AIEAJICLCBDNAAOLLOKLMEEEEJAA.Paul.Marquess@ntlworld.com>
+! lib/Encode/Supported.pod
+  Encode::MIME::Header and Encode::Guess mentioned
+  Updated for Encode::HanExtra 0.05 and Encode::JIS2K
+! lib/Encode/Guess.pm
+  POD fix by Miyagawa-kun
+  Message-Id: <86k7qqx8p7.wl@mail.edge.co.jp>
+
+1.64 2002/04/29 06:54:06
 ! ucm/euc-jp.ucm
   Now decodes euc-jisx0213 also.  CAVEAT: encode("euc-jp"...) and
   encocde("euc-jisx0213") are still DIFFERENT.
@@ -541,7 +553,7 @@ $Revision: 1.64 $ $Date: 2002/04/29 06:54:06 $
   Typo fixes and improvements by jhi
   Message-Id: <200204010201.FAA03564@alpha.hut.fi>, et al.
 
-1.11  $Date: 2002/04/29 06:54:06 $
+1.11  $Date: 2002/04/30 16:13:37 $
 + t/encoding.t
 + t/jperl.t
 ! MANIFEST

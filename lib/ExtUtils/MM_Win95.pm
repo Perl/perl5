@@ -7,7 +7,20 @@ require ExtUtils::MM_Win32;
 @ISA = qw(ExtUtils::MM_Win32);
 
 
-# a few workarounds for command.com (very basic)
+=head1 NAME
+
+ExtUtils::MM_Win95 - method to customize MakeMaker for Win9X
+
+=head1 SYNOPSIS
+
+  You should not be using this module directly.
+
+=head1 DESCRIPTION
+
+This is a subclass of ExtUtils::MM_Win32 containing changes necessary
+to get MakeMaker playing nice with command.com and other Win9Xisms.
+
+=cut
 
 sub dist_test {
     my($self) = shift;

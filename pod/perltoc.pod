@@ -449,14 +449,14 @@ SOCKET,MSG,FLAGS,TO, send SOCKET,MSG,FLAGS, setpgrp PID,PGRP, setpriority
 WHICH,WHO,PRIORITY, setsockopt SOCKET,LEVEL,OPTNAME,OPTVAL, shift ARRAY,
 shift, shmctl ID,CMD,ARG, shmget KEY,SIZE,FLAGS, shmread ID,VAR,POS,SIZE,
 shmwrite ID,STRING,POS,SIZE, shutdown SOCKET,HOW, sin EXPR, sin, sleep
-EXPR, sleep, sockatmark SOCKET, socket SOCKET,DOMAIN,TYPE,PROTOCOL,
-socketpair SOCKET1,SOCKET2,DOMAIN,TYPE,PROTOCOL, sort SUBNAME LIST, sort
-BLOCK LIST, sort LIST, splice ARRAY,OFFSET,LENGTH,LIST, splice
-ARRAY,OFFSET,LENGTH, splice ARRAY,OFFSET, splice ARRAY, split
-/PATTERN/,EXPR,LIMIT, split /PATTERN/,EXPR, split /PATTERN/, split, sprintf
-FORMAT, LIST, sqrt EXPR, sqrt, srand EXPR, srand, stat FILEHANDLE, stat
-EXPR, stat, study SCALAR, study, sub BLOCK, sub NAME, sub NAME BLOCK,
-substr EXPR,OFFSET,LENGTH,REPLACEMENT, substr EXPR,OFFSET,LENGTH, substr
+EXPR, sleep, socket SOCKET,DOMAIN,TYPE,PROTOCOL, socketpair
+SOCKET1,SOCKET2,DOMAIN,TYPE,PROTOCOL, sort SUBNAME LIST, sort BLOCK LIST,
+sort LIST, splice ARRAY,OFFSET,LENGTH,LIST, splice ARRAY,OFFSET,LENGTH,
+splice ARRAY,OFFSET, splice ARRAY, split /PATTERN/,EXPR,LIMIT, split
+/PATTERN/,EXPR, split /PATTERN/, split, sprintf FORMAT, LIST, sqrt EXPR,
+sqrt, srand EXPR, srand, stat FILEHANDLE, stat EXPR, stat, study SCALAR,
+study, sub BLOCK, sub NAME, sub NAME BLOCK, substr
+EXPR,OFFSET,LENGTH,REPLACEMENT, substr EXPR,OFFSET,LENGTH, substr
 EXPR,OFFSET, symlink OLDFILE,NEWFILE, syscall LIST, sysopen
 FILEHANDLE,FILENAME,MODE, sysopen FILEHANDLE,FILENAME,MODE,PERMS, sysread
 FILEHANDLE,SCALAR,LENGTH,OFFSET, sysread FILEHANDLE,SCALAR,LENGTH, sysseek
@@ -852,10 +852,11 @@ B<-X>, B<-x> I<directory>
 
 =item ENVIRONMENT
 
-HOME, LOGDIR, PATH, PERL5LIB, PERL5OPT, PERLLIB, PERL5DB, PERL5SHELL
-(specific to the Win32 port), PERL_DEBUG_MSTATS, PERL_DESTRUCT_LEVEL,
-PERL_ENCODING, PERL_ROOT (specific to the VMS port), SYS$LOGIN (specific to
-the VMS port)
+HOME, LOGDIR, PATH, PERL5LIB, PERL5OPT, PERLIO, :bytes, :crlf, :mmap,
+:perlio, :raw, :stdio, :unix, :utf8, :win32, PERLIO_DEBUG, PERLLIB,
+PERL5DB, PERL5SHELL (specific to the Win32 port), PERL_DEBUG_MSTATS,
+PERL_DESTRUCT_LEVEL, PERL_ENCODING, PERL_ROOT (specific to the VMS port),
+SYS$LOGIN (specific to the VMS port)
 
 =back
 
@@ -2053,16 +2054,15 @@ FILEHANDLE,OPERATION, fork, getlogin, getpgrp PID, getppid, getpriority
 WHICH,WHO, getpwnam NAME, getgrnam NAME, getnetbyname NAME, getpwuid UID,
 getgrgid GID, getnetbyaddr ADDR,ADDRTYPE, getprotobynumber NUMBER,
 getservbyport PORT,PROTO, getpwent, getgrent, gethostent, getnetent,
-getprotoent, getservent, setpwent, setgrent, sethostent STAYOPEN, setnetent
-STAYOPEN, setprotoent STAYOPEN, setservent STAYOPEN, endpwent, endgrent,
-endhostent, endnetent, endprotoent, endservent, getsockopt
-SOCKET,LEVEL,OPTNAME, glob EXPR, glob, ioctl FILEHANDLE,FUNCTION,SCALAR,
-kill SIGNAL, LIST, link OLDFILE,NEWFILE, lstat FILEHANDLE, lstat EXPR,
-lstat, msgctl ID,CMD,ARG, msgget KEY,FLAGS, msgsnd ID,MSG,FLAGS, msgrcv
-ID,VAR,SIZE,TYPE,FLAGS, open FILEHANDLE,EXPR, open FILEHANDLE, pipe
-READHANDLE,WRITEHANDLE, readlink EXPR, readlink, select
-RBITS,WBITS,EBITS,TIMEOUT, semctl ID,SEMNUM,CMD,ARG, semget
-KEY,NSEMS,FLAGS, semop KEY,OPSTRING, setgrent, setpgrp PID,PGRP,
+getprotoent, getservent, sethostent STAYOPEN, setnetent STAYOPEN,
+setprotoent STAYOPEN, setservent STAYOPEN, endpwent, endgrent, endhostent,
+endnetent, endprotoent, endservent, getsockopt SOCKET,LEVEL,OPTNAME, glob
+EXPR, glob, ioctl FILEHANDLE,FUNCTION,SCALAR, kill SIGNAL, LIST, link
+OLDFILE,NEWFILE, lstat FILEHANDLE, lstat EXPR, lstat, msgctl ID,CMD,ARG,
+msgget KEY,FLAGS, msgsnd ID,MSG,FLAGS, msgrcv ID,VAR,SIZE,TYPE,FLAGS, open
+FILEHANDLE,EXPR, open FILEHANDLE, pipe READHANDLE,WRITEHANDLE, readlink
+EXPR, readlink, select RBITS,WBITS,EBITS,TIMEOUT, semctl ID,SEMNUM,CMD,ARG,
+semget KEY,NSEMS,FLAGS, semop KEY,OPSTRING, setgrent, setpgrp PID,PGRP,
 setpriority WHICH,WHO,PRIORITY, setpwent, setsockopt
 SOCKET,LEVEL,OPTNAME,OPTVAL, shmctl ID,CMD,ARG, shmget KEY,SIZE,FLAGS,
 shmread ID,VAR,POS,SIZE, shmwrite ID,STRING,POS,SIZE, sockatmark SOCKET,
@@ -2259,6 +2259,8 @@ to enable UTF-8/UTF-EBCDIC in scripts
 =item Scripts
 
 =item Blocks
+
+=item User-defined Character Properties
 
 =item Character encodings for input and output
 
@@ -2778,8 +2780,8 @@ Scheme, or Tcl?
 
 =back
 
-=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.12 $,
-$Date: 2002/04/09 17:16:05 $)
+=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.13 $,
+$Date: 2002/04/26 16:56:35 $)
 
 =over 4
 
@@ -2834,8 +2836,8 @@ References, Tutorials, Task-Oriented, Special Topics
 
 =back
 
-=head2 perlfaq3 - Programming Tools ($Revision: 1.18 $, $Date: 2002/04/09
-17:11:16 $)
+=head2 perlfaq3 - Programming Tools ($Revision: 1.21 $, $Date: 2002/04/28
+15:51:10 $)
 
 =over 4
 
@@ -2861,7 +2863,7 @@ References, Tutorials, Task-Oriented, Special Topics
 
 =item Is there an IDE or Windows Perl Editor?
 
-Komodo, The Object System, Open Perl IDE, PerlBuilder, visiPerl+,
+Komodo, The Object System, Open Perl IDE, PerlBuilder, visiPerl+, OptiPerl,
 CodeMagicCD, GNU Emacs, MicroEMACS, XEmacs, Elvis, Vile, Vim, Codewright,
 MultiEdit, SlickEdit, Bash, Ksh, Tcsh, Zsh, BBEdit and BBEdit Lite, Alpha
 
@@ -3375,8 +3377,8 @@ is in scope?
 
 =back
 
-=head2 perlfaq8 - System Interaction ($Revision: 1.6 $, $Date: 2002/01/28
-04:17:27 $)
+=head2 perlfaq8 - System Interaction ($Revision: 1.7 $, $Date: 2002/04/18
+14:23:15 $)
 
 =over 4
 
@@ -4772,6 +4774,10 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 
 =item Allow restricted hash assignment
 
+=item Should overload be inheritable?
+
+=item Taint rethink
+
 =back
 
 =item Vague ideas
@@ -5111,6 +5117,8 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =over 4
 
+=item Binary Incompatibility
+
 =item 64-bit platforms and malloc
 
 =item AIX Dynaloading
@@ -5213,11 +5221,11 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item op/sprintf tests 91, 129, and 130
 
+=item Solaris 2.5
+
 =item Failure of Thread (5.005-style) tests
 
 =item UNICOS
-
-=item UNICOS and UNICOS/mk
 
 =item UNICOS/mk
 
@@ -7078,50 +7086,6 @@ Source, Compiled Module Source, Perl Modules/Scripts
 
 =back
 
-=head2 perldos - Perl under DOS, W31, W95.
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over 4
-
-=item Prerequisites for Compiling Perl on DOS
-
-DJGPP, Pthreads
-
-=item Shortcomings of Perl under DOS
-
-=item Building Perl on DOS
-
-=item Testing Perl on DOS
-
-=item Installation of Perl on DOS
-
-=back
-
-=item BUILDING AND INSTALLING MODULES ON DOS
-
-=over 4
-
-=item Building Prerequisites for Perl on DOS
-
-=item Unpacking CPAN Modules on DOS
-
-=item Building Non-XS Modules on DOS
-
-=item Building XS Modules on DOS
-
-=back
-
-=item AUTHOR
-
-=item SEE ALSO
-
-=back
-
 =head2 perlepoc, README.epoc - Perl for EPOC
 
 =over 4
@@ -7184,6 +7148,8 @@ DJGPP, Pthreads
 =item Building Dynamic Extensions on HP-UX
 
 =item The HP ANSI C Compiler
+
+=item The GNU C Compiler
 
 =item Using Large Files with Perl on HP-UX
 
@@ -8001,48 +7967,6 @@ LIST, waitpid PID,FLAGS
 
 =back
 
-=head2 perlwin32 - Perl under Win32
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over 4
-
-=item Setting Up Perl on Win32
-
-Make, Command Shell, Borland C++, Microsoft Visual C++, Mingw32 with GCC
-
-=item Building
-
-=item Testing Perl on Win32
-
-=item Installation of Perl on Win32
-
-=item Usage Hints for Perl on Win32
-
-Environment Variables, File Globbing, Using perl from the command line,
-Building Extensions, Command-line Wildcard Expansion, Win32 Specific
-Extensions, Running Perl Scripts, Miscellaneous Things
-
-=back
-
-=item BUGS AND CAVEATS
-
-=item AUTHORS
-
-Gary Ng E<lt>71564.1743@CompuServe.COME<gt>, Gurusamy Sarathy
-E<lt>gsar@activestate.comE<gt>, Nick Ing-Simmons
-E<lt>nick@ing-simmons.netE<gt>
-
-=item SEE ALSO
-
-=item HISTORY
-
-=back
-
 =head1 PRAGMA DOCUMENTATION
 
 =head2 attrs - set/get attributes of a subroutine (deprecated)
@@ -8103,23 +8027,18 @@ from perl
 =item DESCRIPTION
 
 $thread = threads->create(function, LIST), $thread->join, $thread->detach,
-threads->self, $thread->tid
+threads->self, $thread->tid, threads->yield();, threads->list();
 
 =item WARNINGS
 
 Cleanup skipped %d active threads
 
-=item TODO
+=item BUGS / TODO
 
-Fix so the return value is returned when you join, Add join_all, Fix memory
-leaks!
+Parent-Child threads, tid is I32, Returning objects, PERL_OLD_SIGNALS are
+not threadsafe, will not be
 
 =item AUTHOR and COPYRIGHT
-
-=item BUGS
-
-creating a thread from within a thread is unsafe under win32,
-PERL_OLD_SIGNALS are not threadsafe, will not be
 
 =item SEE ALSO
 
@@ -8426,7 +8345,7 @@ diagnostics
 
 =back
 
-=head2 encoding -  allows you to write your script in non-asii or non-utf8
+=head2 encoding - allows you to write your script in non-ascii or non-utf8
 
 =over 4
 
@@ -8449,7 +8368,7 @@ I<ENCNAME_IN> ...] ;, no encoding;
 
 =back
 
-=item NON-ASCII Identifiers and Filter option
+=item Non-ASCII Identifiers and Filter option
 
 use encoding I<ENCNAME> Filter=E<gt>1;
 
@@ -8774,23 +8693,18 @@ from perl
 =item DESCRIPTION
 
 $thread = threads->create(function, LIST), $thread->join, $thread->detach,
-threads->self, $thread->tid
+threads->self, $thread->tid, threads->yield();, threads->list();
 
 =item WARNINGS
 
 Cleanup skipped %d active threads
 
-=item TODO
+=item BUGS / TODO
 
-Fix so the return value is returned when you join, Add join_all, Fix memory
-leaks!
+Parent-Child threads, tid is I32, Returning objects, PERL_OLD_SIGNALS are
+not threadsafe, will not be
 
 =item AUTHOR and COPYRIGHT
-
-=item BUGS
-
-creating a thread from within a thread is unsafe under win32,
-PERL_OLD_SIGNALS are not threadsafe, will not be
 
 =item SEE ALSO
 
@@ -9409,6 +9323,8 @@ B<-u Package>
 =item CONVENTIONS
 
 =item IMPLEMENTATION
+
+=item BUGS
 
 =item AUTHOR
 
@@ -10455,7 +10371,7 @@ C<orderlib>, C<osname>, C<osvers>, C<otherlibdirs>
 =item p
 
 C<package>, C<pager>, C<passcat>, C<patchlevel>, C<path_sep>, C<perl5>,
-C<perl5>, C<perl>, C<perl_patchlevel>
+C<perl>, C<perl_patchlevel>
 
 =item P
 
@@ -10525,7 +10441,7 @@ C<xlibpth>, C<xs_apiversion>
 
 =item y
 
-C<yaccflags>
+C<yacc>, C<yaccflags>
 
 =item z
 
@@ -11038,15 +10954,12 @@ Perl code
 
 =item PERL ENCODING API
 
-$octets  = encode(ENCODING, $string[, CHECK]), $string = decode(ENCODING,
-$octets[, CHECK]), [$length =] from_to($string, FROM_ENCODING, TO_ENCODING
-[,CHECK])
+$octets  = encode(ENCODING, $string [, CHECK]), $string = decode(ENCODING,
+$octets [, CHECK]), [$length =] from_to($octets, FROM_ENC, TO_ENC [,
+CHECK]), $octets = encode_utf8($string);, $string = decode_utf8($octets [,
+CHECK]);
 
 =over 4
-
-=item UTF-8 / utf8
-
-$octets = encode_utf8($string);, $string = decode_utf8($octets [, CHECK]);
 
 =item Listing available encodings
 
@@ -11054,17 +10967,39 @@ $octets = encode_utf8($string);, $string = decode_utf8($octets [, CHECK]);
 
 =back
 
-=item Encoding and IO
+=item Encoding via PerlIO
 
 =item Handling Malformed Data
 
+I<CHECK> = Encode::FB_DEFAULT ( == 0), I<CHECK> = Encode::FB_CROAK ( == 1),
+I<CHECK> = Encode::FB_QUIET, I<CHECK> = Encode::FB_WARN, perlqq mode
+(I<CHECK> = Encode::FB_PERLQQ), HTML charref mode (I<CHECK> =
+Encode::FB_HTMLCREF), XML charref mode (I<CHECK> = Encode::FB_XMLCREF), The
+bitmask
+
+=over 4
+
+=item Unimplemented fallback schemes
+
+=back
+
 =item Defining Encodings
+
+=item The UTF-8 flag
+
+Goal #1:, Goal #2:, Goal #3:, Goal #4:
+
+=over 4
 
 =item Messing with Perl's Internals
 
 is_utf8(STRING [, CHECK]), _utf8_on(STRING), _utf8_off(STRING)
 
+=back
+
 =item SEE ALSO
+
+=item MAINTAINER
 
 =back
 
@@ -11081,7 +11016,7 @@ reference, e.g.:
 
 =over 4
 
-=item  Alias overloading
+=item Alias overloading
 
 =back
 
@@ -11123,6 +11058,8 @@ reference, e.g.:
 
 =head2 Encode::CN::HZ -- internally used by Encode::CN
 
+=head2 Encode::Config -- internally used by Encode
+
 =head2 Encode::EBCDIC - EBCDIC Encodings
 
 =over 4
@@ -11145,8 +11082,21 @@ reference, e.g.:
 
 =item DESCRIPTION
 
--E<gt>name, -E<gt>new_sequence, -E<gt>encode($string,$check),
--E<gt>decode($octets,$check)
+=over 4
+
+=item Methods you should implement
+
+-E<gt>encode($string [,$check]), -E<gt>decode($octets [,$check])
+
+=item Other methods defined in Encode::Encodings
+
+-E<gt>name, -E<gt>new_sequence, -E<gt>perlio_ok(), -E<gt>needs_lines()
+
+=item Example: Encode::ROT13
+
+=back
+
+=item Why the heck Encode API is different?
 
 =over 4
 
@@ -11157,6 +11107,26 @@ reference, e.g.:
 =item SEE ALSO
 
 Scheme 1, Scheme 2, Other Schemes
+
+=back
+
+=head2 Encode::Guess -- Guesses encoding from data
+
+=over 4
+
+=item SYNOPSIS
+
+=item ABSTRACT
+
+=item DESCRIPTION
+
+Encode::Guess->set_suspects, Encode::Guess->add_suspects,
+Encode::decode("Guess" ...), Encode::Guess->guess($data),
+guess_encoding($data, [, I<list of suspects>])
+
+=item CAVEATS
+
+=item SEE ALSO
 
 =back
 
@@ -11182,7 +11152,61 @@ Scheme 1, Scheme 2, Other Schemes
 
 =head2 Encode::JP::JIS7 -- internally used by Encode::JP
 
-=head2 Encode::Supported -- Supported encodings by Encode
+=head2 Encode::KR - Korean Encodings
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item BUGS
+
+=item SEE ALSO
+
+=back
+
+=head2 Encode::KR::2022_KR -- internally used by Encode::KR
+
+=head2 Encode::MIME::Header -- MIME 'B' and 'Q' header encoding
+
+=over 4
+
+=item SYNOPSIS
+
+=item ABSTRACT
+
+=item DESCRIPTION
+
+=item BUGS
+
+=item SEE ALSO
+
+=back
+
+=head2 Encode::PerlIO -- a detailed document on Encode and PerlIO
+
+=over 4
+
+=item Overview
+
+=item How does it work?
+
+=item BUGS
+
+=over 4
+
+=item Workaround
+
+=item How can I tell whether my encoding fully supports PerlIO ?
+
+=back
+
+=item SEE ALSO
+
+=back
+
+=head2 Encode::Supported -- Encodings supported by Encode
 
 =over 4
 
@@ -11205,12 +11229,12 @@ Scheme 1, Scheme 2, Other Schemes
 =item Encode::Byte -- Extended ASCII
 
 ISO-8859 and corresponding vendor mappings, KOI8 - De Facto Standard for
-Cyrillic world
+the Cyrillic world, gsm0338 - Hentai Latin 1
 
-=item The CJK: Chinese, Japanese, Korean (Multibyte)
+=item CJK: Chinese, Japanese, Korean (Multibyte)
 
 Encode::CN -- Continental China, Encode::JP -- Japan, Encode::KR -- Korea,
-Encode::HanExtra -- More Chinese via CPAN
+Encode::TW -- Taiwan, Encode::HanExtra -- More Chinese via CPAN
 
 =item Miscellaneous encodings
 
@@ -11220,10 +11244,10 @@ Encode::EBCDIC, Encode::Symbols
 
 =item Unsupported encodings
 
-  ISO-2022-JP-2 [RFC1554],   ISO-2022-CN [RFC1922], various UP-UX
-encodings, Cyrillic encoding ISO-IR-111, ISO-8859-8-1 [Hebrew], Thai
-encoding TCVN, Vietnamese encodings VPS, various Mac encodings, (Mac) Indic
-encodings
+  ISO-2022-JP-2 [RFC1554], ISO-2022-CN [RFC1922], Various HP-UX encodings,
+Cyrillic encoding ISO-IR-111, ISO-8859-8-1 [Hebrew], ISIRI 3342, Iran
+System, ISIRI 2900 [Farsi], Thai encoding TCVN, Vietnamese encodings VPS,
+Various Mac encodings, (Mac) Indic encodings
 
 =item Encoding vs. Charset -- terminology
 
@@ -11247,14 +11271,15 @@ UTF-16
 
 =item References
 
-ECMA, EMCA-035 (eq C<ISO-2022>), IANA, Assigned Charset Names by IANA, ISO,
+ECMA, ECMA-035 (eq C<ISO-2022>), IANA, Assigned Charset Names by IANA, ISO,
 RFC, UC, Unicode Glossary
 
 =over 4
 
 =item Other Notable Sites
 
-czyborra.com, CJK.inf, Jungshik Shin's Hangul FAQ
+czyborra.com, CJK.inf, Jungshik Shin's Hangul FAQ, debian.org:
+"Introduction to i18n"
 
 =item Offline sources
 
@@ -11294,7 +11319,7 @@ C<CJKV Information Processing> by Ken Lunde
 
 =back
 
-=head2 Encode::Unicode -- Various Unicode Transform Format
+=head2 Encode::Unicode -- Various Unicode Transformation Formats
 
 =over 4
 
@@ -11308,9 +11333,9 @@ L<http://www.unicode.org/glossary/> says:, Quick Reference
 
 =over 4
 
-=item by Size
+=item by size
 
-=item by Endianness
+=item by endianness
 
 BOM as integer when fetched in network byte order
 
@@ -11321,8 +11346,6 @@ BOM as integer when fetched in network byte order
 =item SEE ALSO
 
 =back
-
-=head2 Encode::XS -- for internal use only
 
 =head2 Encode::lib::Encode::Alias, Encode::Alias - alias definitions to
 encodings
@@ -11338,7 +11361,7 @@ reference, e.g.:
 
 =over 4
 
-=item  Alias overloading
+=item Alias overloading
 
 =back
 
@@ -11352,6 +11375,9 @@ Internally used by Encode::??::ISO_2022_*
 =head2 Encode::lib::Encode::CN::HZ, Encode::CN::HZ -- internally used by
 Encode::CN
 
+=head2 Encode::lib::Encode::Config, Encode::Config -- internally used by
+Encode
+
 =head2 Encode::lib::Encode::Encoding, Encode::Encoding - Encode
 Implementation Base Class
 
@@ -11361,8 +11387,21 @@ Implementation Base Class
 
 =item DESCRIPTION
 
--E<gt>name, -E<gt>new_sequence, -E<gt>encode($string,$check),
--E<gt>decode($octets,$check)
+=over 4
+
+=item Methods you should implement
+
+-E<gt>encode($string [,$check]), -E<gt>decode($octets [,$check])
+
+=item Other methods defined in Encode::Encodings
+
+-E<gt>name, -E<gt>new_sequence, -E<gt>perlio_ok(), -E<gt>needs_lines()
+
+=item Example: Encode::ROT13
+
+=back
+
+=item Why the heck Encode API is different?
 
 =over 4
 
@@ -11376,14 +11415,78 @@ Scheme 1, Scheme 2, Other Schemes
 
 =back
 
+=head2 Encode::lib::Encode::Guess, Encode::Guess -- Guesses encoding from
+data
+
+=over 4
+
+=item SYNOPSIS
+
+=item ABSTRACT
+
+=item DESCRIPTION
+
+Encode::Guess->set_suspects, Encode::Guess->add_suspects,
+Encode::decode("Guess" ...), Encode::Guess->guess($data),
+guess_encoding($data, [, I<list of suspects>])
+
+=item CAVEATS
+
+=item SEE ALSO
+
+=back
+
 =head2 Encode::lib::Encode::JP::H2Z, Encode::JP::H2Z -- internally used by
 Encode::JP::2022_JP*
 
 =head2 Encode::lib::Encode::JP::JIS7, Encode::JP::JIS7 -- internally used
 by Encode::JP
 
-=head2 Encode::lib::Encode::Supported, Encode::Supported -- Supported
-encodings by Encode
+=head2 Encode::lib::Encode::KR::2022_KR, Encode::KR::2022_KR -- internally
+used by Encode::KR
+
+=head2 Encode::lib::Encode::MIME::Header, Encode::MIME::Header -- MIME 'B'
+and 'Q' header encoding
+
+=over 4
+
+=item SYNOPSIS
+
+=item ABSTRACT
+
+=item DESCRIPTION
+
+=item BUGS
+
+=item SEE ALSO
+
+=back
+
+=head2 Encode::lib::Encode::PerlIO, Encode::PerlIO -- a detailed document
+on Encode and PerlIO
+
+=over 4
+
+=item Overview
+
+=item How does it work?
+
+=item BUGS
+
+=over 4
+
+=item Workaround
+
+=item How can I tell whether my encoding fully supports PerlIO ?
+
+=back
+
+=item SEE ALSO
+
+=back
+
+=head2 Encode::lib::Encode::Supported, Encode::Supported -- Encodings
+supported by Encode
 
 =over 4
 
@@ -11406,12 +11509,12 @@ encodings by Encode
 =item Encode::Byte -- Extended ASCII
 
 ISO-8859 and corresponding vendor mappings, KOI8 - De Facto Standard for
-Cyrillic world
+the Cyrillic world, gsm0338 - Hentai Latin 1
 
-=item The CJK: Chinese, Japanese, Korean (Multibyte)
+=item CJK: Chinese, Japanese, Korean (Multibyte)
 
 Encode::CN -- Continental China, Encode::JP -- Japan, Encode::KR -- Korea,
-Encode::HanExtra -- More Chinese via CPAN
+Encode::TW -- Taiwan, Encode::HanExtra -- More Chinese via CPAN
 
 =item Miscellaneous encodings
 
@@ -11421,10 +11524,10 @@ Encode::EBCDIC, Encode::Symbols
 
 =item Unsupported encodings
 
-  ISO-2022-JP-2 [RFC1554],   ISO-2022-CN [RFC1922], various UP-UX
-encodings, Cyrillic encoding ISO-IR-111, ISO-8859-8-1 [Hebrew], Thai
-encoding TCVN, Vietnamese encodings VPS, various Mac encodings, (Mac) Indic
-encodings
+  ISO-2022-JP-2 [RFC1554], ISO-2022-CN [RFC1922], Various HP-UX encodings,
+Cyrillic encoding ISO-IR-111, ISO-8859-8-1 [Hebrew], ISIRI 3342, Iran
+System, ISIRI 2900 [Farsi], Thai encoding TCVN, Vietnamese encodings VPS,
+Various Mac encodings, (Mac) Indic encodings
 
 =item Encoding vs. Charset -- terminology
 
@@ -11448,14 +11551,15 @@ UTF-16
 
 =item References
 
-ECMA, EMCA-035 (eq C<ISO-2022>), IANA, Assigned Charset Names by IANA, ISO,
+ECMA, ECMA-035 (eq C<ISO-2022>), IANA, Assigned Charset Names by IANA, ISO,
 RFC, UC, Unicode Glossary
 
 =over 4
 
 =item Other Notable Sites
 
-czyborra.com, CJK.inf, Jungshik Shin's Hangul FAQ
+czyborra.com, CJK.inf, Jungshik Shin's Hangul FAQ, debian.org:
+"Introduction to i18n"
 
 =item Offline sources
 
@@ -11464,37 +11568,6 @@ C<CJKV Information Processing> by Ken Lunde
 =back
 
 =back
-
-=head2 Encode::lib::Encode::Unicode, Encode::Unicode -- Various Unicode
-Transform Format
-
-=over 4
-
-=item SYNOPSIS
-
-=item ABSTRACT
-
-L<http://www.unicode.org/glossary/> says:, Quick Reference
-
-=item Size, Endianness, and BOM
-
-=over 4
-
-=item by Size
-
-=item by Endianness
-
-BOM as integer when fetched in network byte order
-
-=back
-
-=item Surrogate Pairs
-
-=item SEE ALSO
-
-=back
-
-=head2 Encode::lib::Encode::XS, Encode::XS -- for internal use only
 
 =head2 Encode::lib::Encoder, Encode::Encoder -- Object Oriented Encoder
 
@@ -11531,7 +11604,7 @@ $e-E<gt>bytes([$encoding])
 
 =item Example: base64 transcoder
 
-=item operator overloading
+=item Operator Overloading
 
 =back
 
@@ -11539,8 +11612,8 @@ $e-E<gt>bytes([$encoding])
 
 =back
 
-=head2 Encodencoding, encoding -  allows you to write your script in
-non-asii or non-utf8
+=head2 Encodencoding, encoding - allows you to write your script in
+non-ascii or non-utf8
 
 =over 4
 
@@ -11563,7 +11636,7 @@ I<ENCNAME_IN> ...] ;, no encoding;
 
 =back
 
-=item NON-ASCII Identifiers and Filter option
+=item Non-ASCII Identifiers and Filter option
 
 use encoding I<ENCNAME> Filter=E<gt>1;
 
@@ -11610,7 +11683,7 @@ $e-E<gt>bytes([$encoding])
 
 =item Example: base64 transcoder
 
-=item operator overloading
+=item Operator Overloading
 
 =back
 
@@ -12140,6 +12213,8 @@ extliblist
 
 find_perl
 
+find_tests
+
 =over 4
 
 =item Methods to actually produce chunks of text for the Makefile
@@ -12163,6 +12238,8 @@ init_others
 init_INST
 
 init_INSTALL
+
+init_lib2arch
 
 init_PERL
 
@@ -12369,11 +12446,15 @@ perldepend (override)
 
 makefile (override)
 
+find_tests (override)
+
 test (override)
 
 makeaperl (override)
 
 nicetext (override)
+
+prefixify (override)
 
 =head2 ExtUtils::MM_Win32 - methods to override UN*X behaviour in
 ExtUtils::MakeMaker
@@ -12471,8 +12552,8 @@ PERL, PERL_CORE, PERLMAINCC, PERL_ARCHLIB, PERL_LIB, PERL_MALLOC_OK,
 PERLRUN, PERLRUNINST, PERL_SRC, PERM_RW, PERM_RWX, PL_FILES, PM, PMLIBDIRS,
 PM_FILTER, POLLUTE, PPM_INSTALL_EXEC, PPM_INSTALL_SCRIPT, PREFIX,
 PREREQ_PM, PREREQ_FATAL, PREREQ_PRINT, PRINT_PREREQ, SITEPREFIX, SKIP,
-TYPEMAPS, VENDORPREFIX, VERSION, VERSION_FROM, XS, XSOPT, XSPROTOARG,
-XS_VERSION
+TYPEMAPS, VENDORPREFIX, VERBINST, VERSION, VERSION_FROM, XS, XSOPT,
+XSPROTOARG, XS_VERSION
 
 =item Additional lowercase attributes
 
@@ -12519,8 +12600,8 @@ PERL_MM_OPT, PERL_MM_USE_DEFAULT
 
 =item DIAGNOSTICS
 
-C<Not in MANIFEST:> I<file>, C<No such file:> I<file>, C<MANIFEST:> I<$!>,
-C<Added to MANIFEST:> I<file>
+C<Not in MANIFEST:> I<file>, C<Skipping> I<file>, C<No such file:> I<file>,
+C<MANIFEST:> I<$!>, C<Added to MANIFEST:> I<file>
 
 =item ENVIRONMENT
 
@@ -15739,6 +15820,8 @@ login (), password (), account (), lpa ()
 
 =item IMPLEMENTATION
 
+=item BUGS
+
 =item AUTHOR
 
 =back
@@ -15996,7 +16079,7 @@ name space
 
 =item DESCRIPTION
 
-unix, stdio, perlio, crlf, utf8, raw
+unix, stdio, perlio, crlf, utf8, bytes, raw
 
 =over 4
 
@@ -16041,6 +16124,18 @@ $obj->CLEARERR($fh), $obj->ERROR($fh), $obj->EOF($fh)
 =item Example - a Hexadecimal Handle
 
 =back
+
+=back
+
+=head2 PerlIO::encoding - encoding layer
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
 
 =back
 
@@ -17768,6 +17863,8 @@ B<isnt_eq>, B<isnt_num>
 
 B<like>, B<unlike>
 
+B<maybe_regex>
+
 B<cmp_ok>
 
 B<BAILOUT>
@@ -17892,9 +17989,9 @@ C<All tests successful.\nFiles=%d,  Tests=%d, %s>, C<FAILED tests
 
 =item ENVIRONMENT
 
-C<HARNESS_IGNORE_EXITCODE>, C<HARNESS_NOTTY>, C<HARNESS_COMPILE_TEST>,
-C<HARNESS_FILELEAK_IN_DIR>, C<HARNESS_PERL_SWITCHES>, C<HARNESS_COLUMNS>,
-C<HARNESS_ACTIVE>
+C<HARNESS_ACTIVE>, C<HARNESS_COLUMNS>, C<HARNESS_COMPILE_TEST>,
+C<HARNESS_FILELEAK_IN_DIR>, C<HARNESS_IGNORE_EXITCODE>, C<HARNESS_NOTTY>,
+C<HARNESS_PERL_SWITCHES>, C<HARNESS_VERBOSE>
 
 =item EXAMPLE
 
@@ -18748,7 +18845,7 @@ Unicode Collation Algorithm - Unicode TR #10, L<Unicode::Normalize>
 
 =back
 
-=head2 Unicode::Normalize - normalized forms of Unicode text
+=head2 Unicode::Normalize - Unicode Normalization Forms
 
 =over 4
 

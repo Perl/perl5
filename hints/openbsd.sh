@@ -30,24 +30,35 @@ d_setruid=$undef
 # it can set the libperl name appropriately.
 # Allow command line overrides.
 #
-case "`arch -s`-${osvers}" in
-alpha-2.[0-8]|mips-*|vax-*|powerpc-2.[0-7]|m88k-*)
+ARCH=`arch | sed 's/^OpenBSD.//'`
+case "${ARCH}-${osvers}" in
+alpha-2.[0-8]|mips-2.[0-8]|powerpc-2.[0-7]|m88k-*|vax-*)
 	test -z "$usedl" && usedl=$undef
 	;;
 *)
 	test -z "$usedl" && usedl=$define
-	# we use -fPIC here because -fpic is *NOT* enough for some of the
+	# We use -fPIC here because -fpic is *NOT* enough for some of the
 	# extensions like Tk on some OpenBSD platforms (ie: sparc)
 	cccdlflags="-DPIC -fPIC $cccdlflags"
 	case "$osvers" in
 	[01].*|2.[0-7]|2.[0-7].*)
 		lddlflags="-Bshareable $lddlflags"
 		;;
-	*) # from 2.8 onwards
+	2.[8-9]|3.0)
 		ld=${cc:-cc}
 		lddlflags="-shared -fPIC $lddlflags"
 		;;
+	*) # from 3.1 onwards
+		ld=${cc:-cc}
+		lddlflags="-shared -fPIC $lddlflags"
+		libswanted=`echo $libswanted | sed 's/ dl / /'`
+		;;
 	esac
+
+	# We need to force ld to export symbols on ELF platforms.
+	# Without this, dlopen() is crippled.
+	ELF=`${cc:-cc} -dM -E - </dev/null | grep __ELF__`
+	test -n "$ELF" && ldflags="-Wl,-E $ldflags"
 	;;
 esac
 
@@ -70,7 +81,7 @@ d_suidsafe=$define
 
 # cc is gcc so we can do better than -O
 # Allow a command-line override, such as -Doptimize=-g
-case `arch -s` in
+case ${ARCH} in
 m88k)
    optimize='-O0'
    ;;

@@ -1,9 +1,9 @@
 #
-# $Id: Encode.pm,v 1.64 2002/04/29 06:54:06 dankogai Exp $
+# $Id: Encode.pm,v 1.65 2002/04/30 16:13:37 dankogai Exp dankogai $
 #
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.64 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.65 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 use XSLoader ();
 XSLoader::load(__PACKAGE__, $VERSION);
@@ -130,7 +130,8 @@ sub resolve_alias {
 
 sub encode($$;$)
 {
-    my ($name,$string,$check) = @_;
+    my ($name, $string, $check) = @_;
+    defined $string or return;
     $check ||=0;
     my $enc = find_encoding($name);
     unless(defined $enc){
@@ -145,6 +146,7 @@ sub encode($$;$)
 sub decode($$;$)
 {
     my ($name,$octets,$check) = @_;
+    defined $octets or return;
     $check ||=0;
     my $enc = find_encoding($name);
     unless(defined $enc){
@@ -159,6 +161,7 @@ sub decode($$;$)
 sub from_to($$$;$)
 {
     my ($string,$from,$to,$check) = @_;
+    defined $string or return;
     $check ||=0;
     my $f = find_encoding($from);
     unless (defined $f){
@@ -180,6 +183,7 @@ sub from_to($$$;$)
 sub encode_utf8($)
 {
     my ($str) = @_;
+    defined $str or return;
     utf8::encode($str);
     return $str;
 }
@@ -187,6 +191,7 @@ sub encode_utf8($)
 sub decode_utf8($)
 {
     my ($str) = @_;
+    defined $str or return;
     return undef unless utf8::decode($str);
     return $str;
 }

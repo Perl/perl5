@@ -1,5 +1,5 @@
 #
-# $Id: euc-jp.ucm,v 1.2 2002/04/29 07:01:58 dankogai Exp dankogai $
+# $Id: euc-jp.ucm,v 1.2 2002/04/29 07:01:58 dankogai Exp $
 #
 <code_set_name> "euc-jp"
 <mb_cur_min> 1

@@ -12,7 +12,7 @@ use File::Spec;
 use DirHandle;
 use strict;
 use vars qw($VERSION @ISA
-            $Is_Mac $Is_OS2 $Is_VMS $Is_Win32 $Is_Dos $Is_VOS $Is_NetWare
+            $Is_Mac $Is_OS2 $Is_VMS $Is_Win32 $Is_Dos $Is_VOS
             $Verbose %pm %static $Xsubpp_Version
             %Config_Override
            );
@@ -26,7 +26,7 @@ require ExtUtils::MM_Any;
 
 $Is_OS2   = $^O eq 'os2';
 $Is_Mac   = $^O eq 'MacOS';
-$Is_Win32 = $^O eq 'MSWin32' || $Config{'osname'} eq 'NetWare';
+$Is_Win32 = $^O eq 'MSWin32' || $Config{osname} eq 'NetWare';
 $Is_Dos   = $^O eq 'dos';
 $Is_VOS   = $^O eq 'vos';
 $Is_VMS   = $^O eq 'VMS';

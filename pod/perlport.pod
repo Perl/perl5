@@ -188,7 +188,7 @@ The Unix column assumes that you are not accessing a serial line
 "\n", and "\n" on output becomes CRLF.
 
 These are just the most common definitions of C<\n> and C<\r> in Perl.
-There may well be others.  For example, on an EBCDIC implemtation such
+There may well be others.  For example, on an EBCDIC implementation such
 as z/OS or OS/400 the above material is similar to "Unix" but the code
 numbers change:
 

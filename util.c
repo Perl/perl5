@@ -1109,13 +1109,15 @@ Perl_vmess(pTHX_ const char *pat, va_list *args)
 	if (CopLINE(cop))
 	    Perl_sv_catpvf(aTHX_ sv, " at %s line %"IVdf,
            OutCopFILE(cop), (IV)CopLINE(cop));
-	if (GvIO(PL_last_in_gv) && IoLINES(GvIOp(PL_last_in_gv))) {
+	if (GvIO(PL_last_in_gv) && GvGP(PL_last_in_gv) &&
+	    IoLINES(GvIOp(PL_last_in_gv))) {
 	    bool line_mode = (RsSIMPLE(PL_rs) &&
 			      SvCUR(PL_rs) == 1 && *SvPVX(PL_rs) == '\n');
 	    Perl_sv_catpvf(aTHX_ sv, ", <%s> %s %"IVdf,
-		      PL_last_in_gv == PL_argvgv ? "" : GvNAME(PL_last_in_gv),
-		      line_mode ? "line" : "chunk",
-		      (IV)IoLINES(GvIOp(PL_last_in_gv)));
+			   PL_last_in_gv == PL_argvgv ?
+			   "" : GvNAME(PL_last_in_gv),
+			   line_mode ? "line" : "chunk",
+			   (IV)IoLINES(GvIOp(PL_last_in_gv)));
 	}
 #ifdef USE_5005THREADS
 	if (thr->tid)
