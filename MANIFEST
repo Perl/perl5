@@ -38,6 +38,7 @@ README.mpeix		Notes about MPE/iX port
 README.os2		Notes about OS/2 port
 README.os390		Notes about OS/390 (nee MVS) port
 README.plan9		Notes about Plan9 port
+README.posix-bc		Notes about BC2000 POSIX port
 README.qnx		Notes about QNX port
 README.threads		Notes about multithreading
 README.vms		Notes about VMS port
@@ -412,6 +413,7 @@ hints/openbsd.sh	Hints for named architecture
 hints/opus.sh		Hints for named architecture
 hints/os2.sh		Hints for named architecture
 hints/os390.sh		Hints for named architecture
+hints/posix-bc.sh	Hints for named architecture
 hints/powerux.sh	Hints for named architecture
 hints/qnx.sh		Hints for named architecture
 hints/sco.sh		Hints for named architecture
