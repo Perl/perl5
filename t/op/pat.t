@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..812\n";
+print "1..825\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2449,4 +2449,74 @@ print "# some Unicode properties\n";
     print $sigma =~ /[$SIGMA]/i ? "ok 810\n" : "not ok 810\n";
     print $sigma =~ /[$Sigma]/i ? "ok 811\n" : "not ok 811\n";
     print $sigma =~ /[$sigma]/i ? "ok 812\n" : "not ok 812\n";
+}
+
+{
+    print "# parlez-vous?\n";
+
+    use charnames ':full';
+
+    print "fran\N{LATIN SMALL LETTER C}ais" =~
+	  /fran.ais/ &&
+	$& eq "francais" ?
+	"ok 813\n" : "not ok 813\n";
+
+    print "fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais" =~
+	  /fran.ais/ &&
+	$& eq "fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais" ?
+	"ok 814\n" : "not ok 814\n";
+
+    print "fran\N{LATIN SMALL LETTER C}ais" =~
+	   /fran\Cais/ &&
+        $& eq "francais" ?
+	"ok 815\n" : "not ok 815\n";
+
+    print "franc\N{COMBINING CEDILLA}ais" =~
+	  /franc\C\Cais/ ? # COMBINING CEDILLA is two bytes when encoded
+	"ok 816\n" : "not ok 816\n";
+
+    print "fran\N{LATIN SMALL LETTER C}ais" =~
+	  /fran\Xais/ &&
+	$& eq "francais" ?
+	"ok 817\n" : "not ok 817\n";
+
+    print "fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais" =~
+	  /fran\Xais/  &&
+        $& eq "fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais" ?
+	"ok 818\n" : "not ok 818\n";
+
+    print "franc\N{COMBINING CEDILLA}ais" =~
+	  /fran\Xais/ &&
+         $& eq "franc\N{COMBINING CEDILLA}ais" ?
+	 "ok 819\n" : "not ok 819\n";
+
+    print "fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais" =~
+	  /fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais/  &&
+        $& eq "fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais" ?
+	"ok 820\n" : "not ok 820\n";
+
+    print "franc\N{COMBINING CEDILLA}ais" =~
+	  /franc\N{COMBINING CEDILLA}ais/  &&
+        $& eq "franc\N{COMBINING CEDILLA}ais" ?
+	"ok 821\n" : "not ok 821\n";
+
+    print "fran\N{LATIN SMALL LETTER C}ais" =~
+	  /fran(?:c\N{COMBINING CEDILLA}?|\N{LATIN SMALL LETTER C WITH CEDILLA})ais/ &&
+	$& eq "francais" ?
+	"ok 822\n" : "not ok 822\n";
+
+    print "fran\N{LATIN SMALL LETTER C}ais" =~
+	  /fran(?:c\N{COMBINING CEDILLA}?|\N{LATIN SMALL LETTER C WITH CEDILLA})ais/ &&
+	$& eq "francais" ?
+	"ok 823\n" : "not ok 823\n";
+
+    print "fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais" =~
+	  /fran(?:c\N{COMBINING CEDILLA}?|\N{LATIN SMALL LETTER C WITH CEDILLA})ais/ &&
+	$& eq "fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais" ?
+	"ok 824\n" : "not ok 824\n";
+
+    print "franc\N{COMBINING CEDILLA}ais" =~
+	  /fran(?:c\N{COMBINING CEDILLA}?|\N{LATIN SMALL LETTER C WITH CEDILLA})ais/ &&
+	$& eq "franc\N{COMBINING CEDILLA}ais" ?
+	"ok 825\n" : "not ok 825\n";
 }
