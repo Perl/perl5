@@ -1215,6 +1215,10 @@
 #define Perl_do_open		pPerl->Perl_do_open
 #undef  do_open
 #define do_open			Perl_do_open
+#undef  Perl_do_open9
+#define Perl_do_open9		pPerl->Perl_do_open9
+#undef  do_open9
+#define do_open9		Perl_do_open9
 #undef  Perl_do_pipe
 #define Perl_do_pipe		pPerl->Perl_do_pipe
 #undef  do_pipe

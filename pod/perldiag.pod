@@ -2890,6 +2890,12 @@ representative, who probably put it there in the first place.
 
 (F) There are no byte-swapping functions for a machine with this byte order.
 
+=item Unknown open() mode '%s'
+
+(F) The second argument of 3-arguments open is not one from the list
+of C<L<lt>>, C<L<gt>>, C<E<gt>E<gt>>, C<+L<lt>>, C<+L<gt>>,
+C<+E<gt>E<gt>>, C<-|>, C<|-> of possible open() modes.
+
 =item Unknown process %x sent message to prime_env_iter: %s
 
 (P) An error peculiar to VMS.  Perl was reading values for %ENV before

@@ -122,6 +122,7 @@
 #define do_join			Perl_do_join
 #define do_kv			Perl_do_kv
 #define do_open			Perl_do_open
+#define do_open9		Perl_do_open9
 #define do_pipe			Perl_do_pipe
 #define do_print		Perl_do_print
 #define do_readline		Perl_do_readline
@@ -1447,6 +1448,7 @@
 #define do_join(a,b,c,d)	Perl_do_join(aTHX_ a,b,c,d)
 #define do_kv()			Perl_do_kv(aTHX)
 #define do_open(a,b,c,d,e,f,g)	Perl_do_open(aTHX_ a,b,c,d,e,f,g)
+#define do_open9(a,b,c,d,e,f,g,h,i)	Perl_do_open9(aTHX_ a,b,c,d,e,f,g,h,i)
 #define do_pipe(a,b,c)		Perl_do_pipe(aTHX_ a,b,c)
 #define do_print(a,b)		Perl_do_print(aTHX_ a,b)
 #define do_readline()		Perl_do_readline(aTHX)
@@ -2875,6 +2877,8 @@
 #define do_kv			Perl_do_kv
 #define Perl_do_open		CPerlObj::Perl_do_open
 #define do_open			Perl_do_open
+#define Perl_do_open9		CPerlObj::Perl_do_open9
+#define do_open9		Perl_do_open9
 #define Perl_do_pipe		CPerlObj::Perl_do_pipe
 #define do_pipe			Perl_do_pipe
 #define Perl_do_print		CPerlObj::Perl_do_print

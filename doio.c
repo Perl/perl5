@@ -87,7 +87,17 @@
 #endif
 
 bool
-Perl_do_open(pTHX_ GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO *supplied_fp)
+Perl_do_open(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
+	     int rawmode, int rawperm, PerlIO *supplied_fp)
+{
+    return do_open9(gv, name, len, as_raw, rawmode, rawperm,
+		    supplied_fp, Nullsv, 0);
+}
+
+bool
+Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
+	      int rawmode, int rawperm, PerlIO *supplied_fp, SV *svs,
+	      I32 num_svs)
 {
     register IO *io = GvIOn(gv);
     PerlIO *saveifp = Nullfp;
@@ -116,7 +126,7 @@ Perl_do_open(pTHX_ GV *gv, register char *name, I32 len, int as_raw, int rawmode
 	else if (IoIFP(io) != IoOFP(io)) {
 	    if (IoOFP(io)) {
 		result = PerlIO_close(IoOFP(io));
-		PerlIO_close(IoIFP(io));	/* clear stdio, fd already closed */
+		PerlIO_close(IoIFP(io)); /* clear stdio, fd already closed */
 	    }
 	    else
 		result = PerlIO_close(IoIFP(io));
@@ -124,8 +134,9 @@ Perl_do_open(pTHX_ GV *gv, register char *name, I32 len, int as_raw, int rawmode
 	else
 	    result = PerlIO_close(IoIFP(io));
 	if (result == EOF && fd > PL_maxsysfd)
-	    PerlIO_printf(PerlIO_stderr(), "Warning: unable to close filehandle %s properly.\n",
-	      GvENAME(gv));
+	    PerlIO_printf(PerlIO_stderr(),
+			  "Warning: unable to close filehandle %s properly.\n",
+			  GvENAME(gv));
 	IoOFP(io) = IoIFP(io) = Nullfp;
     }
 
@@ -173,26 +184,44 @@ Perl_do_open(pTHX_ GV *gv, register char *name, I32 len, int as_raw, int rawmode
     }
     else {
 	char *myname;
+	char *type = name;
+	char *otype = name;
+	STRLEN tlen;
+	STRLEN otlen = len;
 	char mode[3];		/* stdio file mode ("r\0" or "r+\0") */
 	int dodup;
 
+	if (num_svs) {
+	    type = name;
+	    name = SvPV(svs, tlen) ;
+	    len = (I32)tlen;
+	}
+
+	tlen = otlen;
 	myname = savepvn(name, len);
 	SAVEFREEPV(myname);
 	name = myname;
-	while (len && isSPACE(name[len-1]))
-	    name[--len] = '\0';
+	if (!num_svs)
+	    while (tlen && isSPACE(type[tlen-1]))
+		type[--tlen] = '\0';
 
 	mode[0] = mode[1] = mode[2] = '\0';
-	IoTYPE(io) = *name;
-	if (*name == '+' && len > 1 && name[len-1] != '|') { /* scary */
-	    mode[1] = *name++;
-	    --len;
+	IoTYPE(io) = *type;
+	if (*type == '+' && tlen > 1 && type[tlen-1] != '|') { /* scary */
+	    mode[1] = *type++;
+	    --tlen;
 	    writing = 1;
 	}
 
-	if (*name == '|') {
+	if (*type == '|') {
+	    if (num_svs && (tlen != 2 || type[1] != '-')) {
+	      unknown_desr:
+		Perl_croak(aTHX_ "Unknown open() mode '%.*s'", otlen, otype);
+	    }
 	    /*SUPPRESS 530*/
-	    for (name++; isSPACE(*name); name++) ;
+	    for (type++; isSPACE(*type); type++) ;
+	    if (!num_svs)
+		name = type;
 	    if (*name == '\0') { /* command is missing 19990114 */
 		dTHR;
 		if (ckWARN(WARN_PIPE))
@@ -200,7 +229,7 @@ Perl_do_open(pTHX_ GV *gv, register char *name, I32 len, int as_raw, int rawmode
 		errno = EPIPE;
 		goto say_false;
 	    }
-	    if (strNE(name,"-"))
+	    if (strNE(name,"-") || num_svs)
 		TAINT_ENV();
 	    TAINT_PROPER("piped open");
 	    if (name[strlen(name)-1] == '|') {
@@ -212,18 +241,22 @@ Perl_do_open(pTHX_ GV *gv, register char *name, I32 len, int as_raw, int rawmode
 	    fp = PerlProc_popen(name,"w");
 	    writing = 1;
 	}
-	else if (*name == '>') {
+	else if (*type == '>') {
 	    TAINT_PROPER("open");
-	    name++;
-	    if (*name == '>') {
+	    type++;
+	    if (*type == '>') {
 		mode[0] = IoTYPE(io) = 'a';
-		name++;
+		type++;
+		tlen--;
 	    }
 	    else
 		mode[0] = 'w';
 	    writing = 1;
 
-	    if (*name == '&') {
+	    if (num_svs && tlen != 1)
+	        goto unknown_desr;
+	    if (*type == '&') {
+		name = type;
 	      duplicity:
 		dodup = 1;
 		name++;
@@ -268,35 +301,46 @@ Perl_do_open(pTHX_ GV *gv, register char *name, I32 len, int as_raw, int rawmode
 	    }
 	    else {
 		/*SUPPRESS 530*/
-		for (; isSPACE(*name); name++) ;
-		if (strEQ(name,"-")) {
+		for (; isSPACE(*type); type++) ;
+		if (strEQ(type,"-")) {
 		    fp = PerlIO_stdout();
 		    IoTYPE(io) = '-';
 		}
 		else  {
-		    fp = PerlIO_open(name,mode);
+		    fp = PerlIO_open((num_svs ? name : type), mode);
 		}
 	    }
 	}
-	else if (*name == '<') {
+	else if (*type == '<') {
+	    if (num_svs && tlen != 1)
+	        goto unknown_desr;
 	    /*SUPPRESS 530*/
-	    for (name++; isSPACE(*name); name++) ;
+	    for (type++; isSPACE(*type); type++) ;
 	    mode[0] = 'r';
-	    if (*name == '&')
+	    if (*type == '&') {
+		name = type;
 		goto duplicity;
-	    if (strEQ(name,"-")) {
+	    }
+	    if (strEQ(type,"-")) {
 		fp = PerlIO_stdin();
 		IoTYPE(io) = '-';
 	    }
 	    else
-		fp = PerlIO_open(name,mode);
+		fp = PerlIO_open((num_svs ? name : type), mode);
 	}
-	else if (len > 1 && name[len-1] == '|') {
-	    name[--len] = '\0';
-	    while (len && isSPACE(name[len-1]))
-		name[--len] = '\0';
-	    /*SUPPRESS 530*/
-	    for (; isSPACE(*name); name++) ;
+	else if (tlen > 1 && type[tlen-1] == '|') {
+	    if (num_svs) {
+		if (tlen != 2 || type[0] != '-')
+		    goto unknown_desr;
+	    }
+	    else {
+		type[--tlen] = '\0';
+		while (tlen && isSPACE(type[tlen-1]))
+		    type[--tlen] = '\0';
+		/*SUPPRESS 530*/
+		for (; isSPACE(*type); type++) ;
+		name = type;
+	    }
 	    if (*name == '\0') { /* command is missing 19990114 */
 		dTHR;
 		if (ckWARN(WARN_PIPE))
@@ -304,13 +348,16 @@ Perl_do_open(pTHX_ GV *gv, register char *name, I32 len, int as_raw, int rawmode
 		errno = EPIPE;
 		goto say_false;
 	    }
-	    if (strNE(name,"-"))
+	    if (strNE(name,"-") || num_svs)
 		TAINT_ENV();
 	    TAINT_PROPER("piped open");
 	    fp = PerlProc_popen(name,"r");
 	    IoTYPE(io) = '|';
 	}
 	else {
+	    if (num_svs)
+		goto unknown_desr;
+	    name = type;
 	    IoTYPE(io) = '<';
 	    /*SUPPRESS 530*/
 	    for (; isSPACE(*name); name++) ;

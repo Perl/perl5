@@ -568,7 +568,7 @@ exit		exit			ck_fun		ds%	S?
 
 # I/O.
 
-open		open			ck_fun		ist@	F S?
+open		open			ck_fun		ist@	F S? S?
 close		close			ck_fun		is%	F?
 pipe_op		pipe			ck_fun		is@	F F
 
