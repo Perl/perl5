@@ -595,7 +595,7 @@ sub constant {
 }
 
 
-# so that flush.pl can be depriciated
+# so that flush.pl can be deprecated
 
 sub printflush {
     my $io = shift;
