@@ -15,7 +15,7 @@ use warnings;
 use strict;
 use Config;
 
-print "1..18\n";
+print "1..19\n";
 
 my $test = 1;
 
@@ -68,6 +68,11 @@ ok;
 
 use constant 'c', 'stuff';
 print "not " if (eval "sub ".$deparse->coderef2text(\&c))->() ne 'stuff';
+ok;
+
+$a = 0;
+print "not " if "{\n    (-1) ** \$a;\n}"
+		ne $deparse->coderef2text(sub{(-1) ** $a });
 ok;
 
 # XXX ToDo - constsub that returns a reference
