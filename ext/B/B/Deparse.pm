@@ -9,7 +9,7 @@
 package B::Deparse;
 use Carp 'cluck';
 use B qw(class main_root main_start main_cv svref_2object);
-$VERSION = 0.53;
+$VERSION = 0.54;
 use strict;
 
 # Changes between 0.50 and 0.51:
@@ -30,6 +30,9 @@ use strict;
 # - many changes adding precedence contexts and associativity
 # - added `-p' and `-s' output style options
 # - various other minor fixes
+# Changes between 0.53 and 0.54
+# - added support for new `for (1..100)' optimization,
+#   thanks to Gisle Aas
 
 # Todo:
 # - {} around variables in strings ("${var}letters")
@@ -1514,10 +1517,8 @@ sub pp_leaveloop {
 	my $ary = $enter->first->sibling; # first was pushmark
 	my $var = $ary->sibling;
 	if ($enter->flags & OPf_STACKED) {
-	    my $from = $ary->first->sibling;
-	    my $to = $from->sibling;
-	    $ary = join("", "(", $self->deparse($from,1), " .. ",
-                                 $self->deparse($to,1), ")");
+	    $ary = $self->deparse($ary->first->sibling, 9) . " .. " .
+	      $self->deparse($ary->first->sibling->sibling, 9);
 	} else {
 	    $ary = $self->deparse($ary, 1);
 	}
