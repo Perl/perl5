@@ -196,7 +196,7 @@ S_regcppop(pTHX)
      * a better location to since this code can #if 0-ed out
      * but the code in regtry() is needed or otherwise tests
      * requiring null fields (pat.t#187 and split.t#{13,14}
-     * (as of 7877)  will fail. --jhi */
+     * (as of patchlevel 7877)  will fail. --jhi */
     for (paren = *PL_reglastparen + 1; paren <= PL_regnpar; paren++) {
 	if (paren > PL_regsize)
 	    PL_regstartp[paren] = -1;
@@ -1810,7 +1810,7 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
     sp = prog->startp;
     ep = prog->endp;
     if (prog->nparens) {
-	for (i = prog->nparens; i >= 1; i--) {
+	for (i = prog->nparens; i > *PL_reglastparen; i--) {
 	    *++sp = -1;
 	    *++ep = -1;
 	}
