@@ -382,9 +382,13 @@ sub ExtUtils::MakeMaker::new {
 
     my($prereq);
     foreach $prereq (sort keys %{$self->{PREREQ_PM}}) {
-	my $eval = "use $prereq $self->{PREREQ_PM}->{$prereq}";
+	my $eval = "require $prereq";
 	eval $eval;
-	if ($@){
+
+	if ($@) {
+	    warn "Warning: prerequisite $prereq failed to load: $@";
+	}
+	else if ($prereq->VERSION < $self->{PREREQ_PM}->{$prereq} ){
 	    warn "Warning: prerequisite $prereq $self->{PREREQ_PM}->{$prereq} not found";
 # Why is/was this 'delete' here?  We need PREREQ_PM later to make PPDs.
 #	} else {
