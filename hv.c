@@ -669,9 +669,6 @@ hsplit(HV *hv)
     register HE **b;
     register HE *entry;
     register HE **oentry;
-#ifndef STRANGE_MALLOC
-    I32 tmp;
-#endif
 
     nomemok = TRUE;
 #if defined(STRANGE_MALLOC) || defined(MYMALLOC)
@@ -681,15 +678,8 @@ hsplit(HV *hv)
       return;
     }
 #else
-    i = newsize * sizeof(HE*);
 #define MALLOC_OVERHEAD 16
-    tmp = MALLOC_OVERHEAD;
-    while (tmp - MALLOC_OVERHEAD < i)
-	tmp += tmp;
-    tmp -= MALLOC_OVERHEAD;
-    tmp /= sizeof(HE*);
-    assert(tmp >= newsize);
-    New(2,a, tmp, HE*);
+    New(2, a, newsize*sizeof(HE*) * 2 - MALLOC_OVERHEAD, char);
     if (!a) {
       nomemok = FALSE;
       return;
@@ -762,14 +752,7 @@ hv_ksplit(HV *hv, IV newmax)
 	  return;
 	}
 #else
-	i = newsize * sizeof(HE*);
-	j = MALLOC_OVERHEAD;
-	while (j - MALLOC_OVERHEAD < i)
-	    j += j;
-	j -= MALLOC_OVERHEAD;
-	j /= sizeof(HE*);
-	assert(j >= newsize);
-	New(2, a, j, HE*);
+	New(2, a, newsize * sizeof(HE*) * 2 - MALLOC_OVERHEAD, char);
         if (!a) {
 	  nomemok = FALSE;
 	  return;
@@ -786,7 +769,11 @@ hv_ksplit(HV *hv, IV newmax)
 	Zero(&a[oldsize], newsize-oldsize, HE*); /* zero 2nd half*/
     }
     else {
+#if defined(STRANGE_MALLOC) || defined(MYMALLOC)
 	Newz(0, a, newsize, HE*);
+#else
+	Newz(0, a, newsize * sizeof(HE*) * 2 - MALLOC_OVERHEAD, char);
+#endif
     }
     xhv->xhv_max = --newsize;
     xhv->xhv_array = (char*)a;
