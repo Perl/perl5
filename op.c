@@ -5332,6 +5332,7 @@ Perl_ck_glob(pTHX_ OP *o)
 	o->op_ppaddr = PL_ppaddr[OP_LIST];
 	cLISTOPo->op_first->op_type = OP_PUSHMARK;
 	cLISTOPo->op_first->op_ppaddr = PL_ppaddr[OP_PUSHMARK];
+	cLISTOPo->op_first->op_targ = 0;
 	o = newUNOP(OP_ENTERSUB, OPf_STACKED,
 		    append_elem(OP_LIST, o,
 				scalar(newUNOP(OP_RV2CV, 0,
