@@ -3614,7 +3614,9 @@ void
 PerlIO_init(void)
 {
  dTHX;
+#ifndef WIN32
  call_atexit(PerlIO_cleanup_layers, NULL);
+#endif
  if (!_perlio)
   {
 #ifndef WIN32
