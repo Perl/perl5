@@ -11,6 +11,9 @@ while (@ARGV && $ARGV[0] =~ /^([\w_]+)=(.*)$/)
   $opt{$1}=$2;
   shift(@ARGV);
  }
+
+$opt{CONFIG_H} ||= 'config.h';
+
 my $patchlevel = $opt{INST_VER};
 $patchlevel =~ s|^[\\/]||;
 $patchlevel =~ s|~VERSION~|$Config{version}|g;
@@ -23,6 +26,8 @@ while (<SH>)
   last if /^sed/;
  }
 ($term,$file,$pat) = /^sed\s+<<(\S+)\s+>(\S+)\s+(.*)$/;
+
+$file =~ s/^\$(\w+)$/$opt{$1}/g;
 
 my $str = "sub munge\n{\n";
 
