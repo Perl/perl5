@@ -36,8 +36,23 @@ foreach (keys %datahandle) {
      unlink "$_.t";
 }
 
-@tests = @ARGV;
-@tests = <base/*.t comp/*.t cmd/*.t io/*.t op/*.t pragma/*.t lib/*.t pod/*.t> unless @tests;
+if (@ARGV) {
+    @tests = @ARGV;
+} else {
+    @tests = <base/*.t comp/*.t cmd/*.t io/*.t op/*.t pragma/*.t lib/*.t pod/*.t> unless @tests;
+    use File::Spec;
+    my $updir = File::Spec->updir;
+    my $mani  = File::Spec->catdir(File::Spec->updir, "MANIFEST");
+    if (open(MANI, $mani)) {
+        while (<MANI>) {
+	    if (m!^((?:ext|lib)/.+/t/[^/]+\.t)\s!) {
+		push @tests, File::Spec->catdir($updir, $1);
+	    }
+	}
+    } else {
+        warn "$0: cannot open $mani: $!\n";
+    }
+}
 
 Test::Harness::runtests @tests;
 exit(0) unless -e "../testcompile";
