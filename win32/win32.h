@@ -111,8 +111,12 @@ struct tms {
 
 #define ENV_IS_CASELESS
 
-#ifndef VER_PLATFORM_WIN32_WINDOWS	/* VC-2.0 headers dont have this */
+#ifndef VER_PLATFORM_WIN32_WINDOWS	/* VC-2.0 headers don't have this */
 #define VER_PLATFORM_WIN32_WINDOWS	1
+#endif
+
+#ifndef FILE_SHARE_DELETE		/* VC-4.0 headers don't have this */
+#define FILE_SHARE_DELETE		0x00000004
 #endif
 
 /* Compiler-specific stuff. */
