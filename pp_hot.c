@@ -365,15 +365,15 @@ PP(pp_print)
     }
     else if (!(fp = IoOFP(io))) {
 	if (ckWARN2(WARN_CLOSED, WARN_IO))  {
-	    SV* sv = sv_newmortal();
-	    gv_efullname3(sv, gv, Nullch);
-	    if (IoIFP(io))
+	    if (IoIFP(io)) {
+		SV* sv = sv_newmortal();
+		gv_efullname3(sv, gv, Nullch);
 		Perl_warner(aTHX_ WARN_IO,
 			    "Filehandle %s opened only for input",
 			    SvPV(sv,n_a));
+	    }
 	    else if (ckWARN(WARN_CLOSED))
-		Perl_warner(aTHX_ WARN_CLOSED,
-			    "print() on closed filehandle %s", SvPV(sv,n_a));
+		report_closed_fh(gv, io, "print", "filehandle");
 	}
 	SETERRNO(EBADF,IoIFP(io)?RMS$_FAC:RMS$_IFI);
 	goto just_say_no;
@@ -1256,13 +1256,8 @@ Perl_do_readline(pTHX)
 		Perl_warner(aTHX_ WARN_CLOSED,
 			    "glob failed (can't start child: %s)",
 			    Strerror(errno));
-	    else {
-		SV* sv = sv_newmortal();
-		gv_efullname3(sv, PL_last_in_gv, Nullch);
-		Perl_warner(aTHX_ WARN_CLOSED,
-			    "readline() on closed filehandle %s",
-			    SvPV_nolen(sv));
-	    }
+	    else
+		report_closed_fh(PL_last_in_gv, io, "readline", "filehandle");
 	}
 	if (gimme == G_SCALAR) {
 	    (void)SvOK_off(TARG);

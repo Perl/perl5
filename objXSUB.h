@@ -3297,6 +3297,10 @@
 #define Perl_wait4pid		pPerl->Perl_wait4pid
 #undef  wait4pid
 #define wait4pid		Perl_wait4pid
+#undef  Perl_report_closed_fh
+#define Perl_report_closed_fh	pPerl->Perl_report_closed_fh
+#undef  report_closed_fh
+#define report_closed_fh	Perl_report_closed_fh
 #undef  Perl_report_uninit
 #define Perl_report_uninit	pPerl->Perl_report_uninit
 #undef  report_uninit

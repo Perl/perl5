@@ -676,8 +676,7 @@ struct xpvio {
     :    SvPOK(sv)						\
 	?   (({XPV *nxpv = (XPV*)SvANY(sv);			\
 	     nxpv &&						\
-	     (*nxpv->xpv_pv > '0' ||				\
-	      nxpv->xpv_cur > 1 ||				\
+	     (nxpv->xpv_cur > 1 ||				\
 	      (nxpv->xpv_cur && *nxpv->xpv_pv != '0')); })	\
 	     ? 1						\
 	     : 0)						\
@@ -712,8 +711,7 @@ struct xpvio {
     ? 0								\
     :    SvPOK(sv)						\
 	?   ((PL_Xpv = (XPV*)SvANY(sv)) &&			\
-	     (*PL_Xpv->xpv_pv > '0' ||				\
-	      PL_Xpv->xpv_cur > 1 ||				\
+	     (PL_Xpv->xpv_cur > 1 ||				\
 	      (PL_Xpv->xpv_cur && *PL_Xpv->xpv_pv != '0'))	\
 	     ? 1						\
 	     : 0)						\

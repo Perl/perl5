@@ -159,6 +159,11 @@ or a hash or array slice, such as:
     @foo[$bar, $baz, $xyzzy]
     @{$ref->[12]}{"susie", "queue"}
 
+=item %s argument is not a subroutine name
+
+(F) The argument to exists() for C<exists &sub> must be a subroutine
+name, and not a subroutine call.  C<exists &sub()> will generate this error.
+
 =item %s did not return a true value
 
 (F) A required (or used) file must return a true value to indicate that
@@ -280,7 +285,7 @@ the string being unpacked.  See L<perlfunc/pack>.
 (F) You wrote C<require E<lt>fileE<gt>> when you should have written
 C<require 'file'>.
 
-=item accept() on closed socket
+=item accept() on closed socket %s
 
 (W) You tried to do an accept on a closed socket.  Did you forget to check
 the return value of your socket() call?  See L<perlfunc/accept>.
@@ -518,7 +523,7 @@ likely depends on its correct operation, Perl just gave up.
 (4294967295) and therefore non-portable between systems.  See
 L<perlport> for more on portability concerns.
 
-=item bind() on closed socket
+=item bind() on closed socket %s
 
 (W) You tried to do a bind on a closed socket.  Did you forget to check
 the return value of your socket() call?  See L<perlfunc/bind>.
@@ -1187,7 +1192,7 @@ than in the regular expression engine; or rewriting the regular
 expression so that it is simpler or backtracks less.  (See L<perlbook>
 for information on I<Mastering Regular Expressions>.)
 
-=item connect() on closed socket
+=item connect() on closed socket %s
 
 (W) You tried to do a connect on a closed socket.  Did you forget to check
 the return value of your socket() call?  See L<perlfunc/connect>.
@@ -1489,7 +1494,7 @@ when you meant
 because if it did, it'd feel morally obligated to return every hostname
 on the Internet.
 
-=item get%sname() on closed socket
+=item get%sname() on closed socket %s
 
 (W) You tried to get a socket or peer socket name on a closed socket.
 Did you forget to check the return value of your socket() call?
@@ -1766,7 +1771,7 @@ L<perlfunc/last>.
 (F) While under the C<use filetest> pragma, switching the real and
 effective uids or gids failed.
 
-=item listen() on closed socket
+=item listen() on closed socket %s
 
 (W) You tried to do a listen on a closed socket.  Did you forget to check
 the return value of your socket() call?  See L<perlfunc/listen>.
@@ -2654,7 +2659,7 @@ that had previously been marked as free.
 (W) A nearby syntax error was probably caused by a missing semicolon,
 or possibly some other missing operator, such as a comma.
 
-=item send() on closed socket
+=item send() on closed socket %s
 
 (W) The socket you're sending to got itself closed sometime before now.
 Check your logic flow.
@@ -2743,7 +2748,7 @@ because the world might have written on it already.
 
 (F) You don't have System V shared memory IPC on your system.
 
-=item shutdown() on closed socket
+=item shutdown() on closed socket %s
 
 (W) You tried to do a shutdown on a closed socket.  Seems a bit superfluous.
 
@@ -2881,7 +2886,7 @@ into Perl yourself.
 machine.  In some machines the functionality can exist but be
 unconfigured.  Consult your system support.
 
-=item syswrite() on closed filehandle
+=item syswrite() on closed filehandle %s
 
 (W) The filehandle you're writing to got itself closed sometime before now.
 Check your logic flow.
@@ -3492,7 +3497,7 @@ already have a subroutine of that name declared, which means that Perl 5
 will try to call the subroutine when the assignment is executed, which is
 probably not what you want.  (If it IS what you want, put an & in front.)
 
-=item %cetsockopt() on closed fd
+=item %cetsockopt() on closed socket %s
 
 (W) You tried to get or set a socket option on a closed socket.
 Did you forget to check the return value of your socket() call?
@@ -3562,3 +3567,10 @@ in F<README.os2>.
 
 =back
 
+=item flock() on closed filehandle %s
+
+(W) The filehandle you're attempting to flock() got itself closed some
+time before now.  Check your logic flow.  flock() operates on filehandles.
+Are you attempting to call flock() on a dirhandle by the same name?
+
+=back

@@ -4449,6 +4449,13 @@ Perl_wait4pid(pTHXo_ Pid_t pid, int* statusp, int flags)
     return ((CPerlObj*)pPerl)->Perl_wait4pid(pid, statusp, flags);
 }
 
+#undef  Perl_report_closed_fh
+void
+Perl_report_closed_fh(pTHXo_ GV *gv, IO *io, const char *func, const char *obj)
+{
+    ((CPerlObj*)pPerl)->Perl_report_closed_fh(gv, io, func, obj);
+}
+
 #undef  Perl_report_uninit
 void
 Perl_report_uninit(pTHXo)

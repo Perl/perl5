@@ -1691,7 +1691,7 @@ Perl_ref(pTHX_ OP *o, I32 type)
 
     switch (o->op_type) {
     case OP_ENTERSUB:
-	if ((type == OP_DEFINED || type == OP_LOCK) &&
+	if ((type == OP_EXISTS || type == OP_DEFINED || type == OP_LOCK) &&
 	    !(o->op_flags & OPf_STACKED)) {
 	    o->op_type = OP_RV2CV;             /* entersub => rv2cv */
 	    o->op_ppaddr = PL_ppaddr[OP_RV2CV];
@@ -5033,7 +5033,14 @@ Perl_ck_exists(pTHX_ OP *o)
     o = ck_fun(o);
     if (o->op_flags & OPf_KIDS) {
 	OP *kid = cUNOPo->op_first;
-	if (kid->op_type == OP_AELEM)
+	if (kid->op_type == OP_ENTERSUB) {
+	    (void) ref(kid, o->op_type);
+	    if (kid->op_type != OP_RV2CV && !PL_error_count)
+		Perl_croak(aTHX_ "%s argument is not a subroutine name",
+			   PL_op_desc[o->op_type]);
+	    o->op_private |= OPpEXISTS_SUB;
+	}
+	else if (kid->op_type == OP_AELEM)
 	    o->op_flags |= OPf_SPECIAL;
 	else if (kid->op_type != OP_HELEM)
 	    Perl_croak(aTHX_ "%s argument is not a HASH or ARRAY element",

@@ -425,6 +425,12 @@ This is rather similar to how the arrow may be omitted from
 C<$foo[10]->{'foo'}>.  Note however, that the arrow is still
 required for C<foo(10)->('bar')>.
 
+=head2 exists() is supported on subroutine names
+
+The exists() builtin now works on subroutine names.  A subroutine
+is considered to exist if it has been declared (even if implicitly).
+See L<perlfunc/exists> for examples.
+
 =head2 exists() and delete() are supported on array elements
 
 The exists() and delete() builtins now work on simple arrays as well.
@@ -447,16 +453,17 @@ See L<perlfunc/exists> and L<perlfunc/delete> for examples.
 
 The length argument of C<syswrite()> has become optional.
 
-=head2 Filehandles can be autovivified
+=head2 File and directory handles can be autovivified
 
 Similar to how constructs such as C<$x->[0]> autovivify a reference,
-open() now autovivifies a filehandle if the first argument is an
-uninitialized variable.  This allows the constructs C<open(my $fh, ...)> and
-C<open(local $fh,...)> to be used to create filehandles that will
-conveniently be closed automatically when the scope ends, provided there
-are no other references to them.  This largely eliminates the need for
-typeglobs when opening filehandles that must be passed around, as in the
-following example:
+handle constructors (open(), opendir(), pipe(), socketpair(), sysopen(),
+socket(), and accept()) now autovivify a file or directory handle
+if the handle passed to them is an uninitialized scalar variable.  This
+allows the constructs such as C<open(my $fh, ...)> and C<open(local $fh,...)>
+to be used to create filehandles that will conveniently be closed
+automatically when the scope ends, provided there are no other references
+to them.  This largely eliminates the need for typeglobs when opening
+filehandles that must be passed around, as in the following example:
 
     sub myopen {
         open my $fh, "@_"
@@ -1114,6 +1121,10 @@ File test operators.
 
 Verify operations that access pad objects (lexicals and temporaries).
 
+=item	op/exists_sub
+
+Verify C<exists &sub> operations.
+
 =back
 
 =head1 Modules and Pragmata
@@ -1591,6 +1602,11 @@ declaration for the subroutine in question, or move the subroutine
 definition ahead of the call to get proper prototype checking.  Alternatively,
 if you are certain that you're calling the function correctly, you may put
 an ampersand before the name to avoid the warning.  See L<perlsub>.
+
+=item %s argument is not a subroutine name
+
+(F) The argument to exists() for C<exists &sub> must be a subroutine
+name, and not a subroutine call.  C<exists &sub()> will generate this error.
 
 =item %s package attribute may clash with future reserved word: %s
 

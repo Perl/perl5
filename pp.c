@@ -2701,8 +2701,22 @@ PP(pp_delete)
 PP(pp_exists)
 {
     djSP;
-    SV *tmpsv = POPs;
-    HV *hv = (HV*)POPs;
+    SV *tmpsv;
+    HV *hv;
+
+    if (PL_op->op_private & OPpEXISTS_SUB) {
+	GV *gv;
+	CV *cv;
+	SV *sv = POPs;
+	cv = sv_2cv(sv, &hv, &gv, FALSE);
+	if (cv)
+	    RETPUSHYES;
+	if (gv && isGV(gv) && GvCV(gv) && !GvCVGEN(gv))
+	    RETPUSHYES;
+	RETPUSHNO;
+    }
+    tmpsv = POPs;
+    hv = (HV*)POPs;
     if (SvTYPE(hv) == SVt_PVHV) {
 	if (hv_exists_ent(hv, tmpsv, 0))
 	    RETPUSHYES;

@@ -8,7 +8,8 @@ First, make sure you are installing an up-to-date version of Perl.   If
 you didn't get your Perl source from CPAN, check the latest version at
 <URL:http://www.perl.com/CPAN/src/>.
 
-The basic steps to build and install perl5 on a Unix system are:
+The basic steps to build and install perl5 on a Unix system
+with all the defaults are:
 
 	rm -f config.sh Policy.sh
 	sh Configure -de
@@ -42,7 +43,34 @@ For information on what's new in this release, see the
 pod/perldelta.pod file.  For more detailed information about specific
 changes, see the Changes file.
 
-IMPORTANT NOTE:  5.005_53 and later releases do not export unadorned
+=head1 DESCRIPTION
+
+This document is written in pod format as an easy way to indicate its
+structure.  The pod format is described in pod/perlpod.pod, but you can
+read it as is with any pager or editor.  Headings and items are marked
+by lines beginning with '='.  The other mark-up used is
+
+    B<text>     embolden text, used for switches, programs or commands
+    C<code>	literal code
+    L<name>     A link (cross reference) to name
+
+Although most of the defaults are probably fine for most users,
+you should probably at least skim through this entire document before
+proceeding.
+
+If you're building Perl on a non-Unix system, you should also read
+the README file specific to your operating system, since this may
+provide additional or different instructions for building Perl.
+
+If there is a hint file for your system (in the hints/ directory) you
+should also read that hint file for specific information for your
+system.  (Unixware users should use the svr4.sh hint file.)  If
+there is a README file for your platform, then you should read
+that too.  Additional information is in the Porting/ directory.
+
+=head1 WARNING:  This version requires an extra step to build old extensions.
+
+5.005_53 and later releases do not export unadorned
 global symbols anymore.  This means you may need to build older
 extensions that have not been updated for the new naming convention
 with:
@@ -55,30 +83,6 @@ building perl itself with:
 	sh Configure -Accflags=-DPERL_POLLUTE
 
 pod/perldelta.pod contains more details about this.
-
-=head1 DESCRIPTION
-
-This document is written in pod format as an easy way to indicate its
-structure.  The pod format is described in pod/perlpod.pod, but you can
-read it as is with any pager or editor.  Headings and items are marked
-by lines beginning with '='.  The other mark-up used is
-
-    B<text>     embolden text, used for switches, programs or commands
-    C<code>	literal code
-    L<name>     A link (cross reference) to name
-
-You should probably at least skim through this entire document before
-proceeding.
-
-If you're building Perl on a non-Unix system, you should also read
-the README file specific to your operating system, since this may
-provide additional or different instructions for building Perl.
-
-If there is a hint file for your system (in the hints/ directory) you
-should also read that hint file for specific information for your
-system.  (Unixware users should use the svr4.sh hint file.)  If
-there is a README file for your platform, then you should read
-that too.  Additional information is in the Porting/ directory.
 
 =head1 WARNING:  This version may not be binary compatible with Perl 5.005.
 
@@ -102,7 +106,7 @@ The standard extensions supplied with Perl will be handled automatically.
 On a related issue, old modules may possibly be affected by the
 changes in the Perl language in the current release.  Please see
 pod/perldelta.pod (and pod/perl500Xdelta.pod) for a description of
-what's changed.  See also your installed copy of the perllocal.pod
+what's changed.  See your installed copy of the perllocal.pod
 file for a (possibly incomplete) list of locally installed modules.
 Also see CPAN::autobundle for one way to make a "bundle" of your
 currently installed modules.
@@ -126,10 +130,10 @@ followed.  This will enable us to officially support this option.
 
 =head1 Space Requirements
 
-The complete perl5 source tree takes up about 15 MB of disk space.
-After completing make, it takes up roughly 20 MB, though the actual
+The complete perl5 source tree takes up about 20 MB of disk space.
+After completing make, it takes up roughly 30 MB, though the actual
 total is likely to be quite system-dependent.  The installation
-directories need something on the order of 15 MB, though again that
+directories need something on the order of 20 MB, though again that
 value is system-dependent.
 
 =head1 Start with a Fresh Distribution
@@ -333,7 +337,7 @@ The directories set up by Configure fall into three broad categories.
 
 =item Directories for the perl distribution
 
-By default, Configure will use the following directories for 5.6.
+By default, Configure will use the following directories for 5.6.0.
 $version is the full perl version number, including subversion, e.g.
 5.6.0 or 5.6.1, and $archname is a string like sun4-sunos,
 determined by Configure.  The full definitions of all Configure
@@ -360,8 +364,7 @@ the common style is shown here.
 
 After perl is installed, you may later wish to add modules (e.g. from
 CPAN) or scripts.  Configure will set up the following directories to
-be used for installing those add-on modules and scripts.  $version
-is the perl version number, e.g. 5.6.0.
+be used for installing those add-on modules and scripts.
 
     Configure variable	Default value
     $siteprefix		$prefix
@@ -582,7 +585,7 @@ If the generated Policy.sh file is unsuitable, you may freely edit it
 to contain any valid shell commands.  It will be run just after the
 platform-specific hints files.
 
-Note:  Since the directory hierarchy for 5.6 contains a number of
+Note:  Since the directory hierarchy for 5.6.0 contains a number of
 new vendor* and site* entries, your Policy.sh file will probably not
 set them to your desired values.  I encourage you to run Configure
 interactively to be sure it puts things where you want them.
@@ -881,7 +884,17 @@ the Configure command line.  Similarly, the Opcode extension is always
 built by default, but you can skip it by setting the Configure variable
 useopcode=false either in a hint file for from the command line.
 
-You can learn more about each of these extensions by consulting the
+If you unpack any additional extensions in the ext/ directory before
+running Configure, then Configure will offer to build those additional
+extensions as well.  Most users probably shouldn't have to do this --
+it is usually easier to build additional extensions later after perl
+has been installed.  However, if you wish to have those additional
+extensions statically linked into the perl binary, then this offers a
+convenient way to do that in one step.  (It is not necessary, however;
+you can build and install extensions just fine even if you don't have
+dynamic loading.  See lib/ExtUtils/MakeMaker.pm for more details.)
+
+You can learn more about each of the supplied extensions by consulting the
 documentation in the individual .pm modules, located under the
 ext/ subdirectory.
 
@@ -1133,8 +1146,9 @@ $ccflags or $optimize, and then re-run
 
 =item No sh
 
-If you don't have sh, you'll have to copy the sample file Porting/config_H
-to config.h and edit the config.h to reflect your system's peculiarities.
+If you don't have sh, you'll have to copy the sample file
+Porting/config.sh to config.sh and edit your config.sh to reflect your
+system's peculiarities.  See Porting/pumpkin.pod for more information.
 You'll probably also have to extensively modify the extension building
 mechanism.
 
@@ -1179,7 +1193,7 @@ libgdbm under HP-UX 11.
 Specific information for the OS/2, Plan9, VMS and Win32 ports is in the
 corresponding README files and subdirectories.  Additional information,
 including a glossary of all those config.sh variables, is in the Porting
-subdirectory.  Especially Porting/Glossary should come in handy. 
+subdirectory.  Especially Porting/Glossary should come in handy.
 
 Ports for other systems may also be available.  You should check out
 http://www.perl.com/CPAN/ports for current information on ports to
@@ -1704,8 +1718,9 @@ searched by version 5.6.0 will be
 
 	/usr/local/lib/perl5/site_perl/5.005/$archname
 	/usr/local/lib/perl5/site_perl/5.005
+	/usr/local/lib/perl5/site_perl/
 
-Notice the last two entries -- Perl understands the default structure
+Notice the last three entries -- Perl understands the default structure
 of the $sitelib directories and will look back in older, compatible
 directories.  This way, modules installed under 5.005_03 will continue
 to be usable by 5.005_03 but will also accessible to 5.6.0.  Further,
@@ -1714,11 +1729,8 @@ present only in 5.6.0.  That new module will get installed into
 /usr/local/lib/perl5/site_perl/5.6.0 and will be available to 5.6.0,
 but will not interfere with the 5.005_03 version.
 
-Also, by default, 5.6.0 will look in
-
-	/usr/local/lib/perl5/site_perl/
-
-for 5.004-era pure perl modules.
+The last entry, /usr/local/lib/perl5/site_perl/, is there so that
+5.6.0 will look for 5.004-era pure perl modules.
 
 Lastly, suppose you now install version 5.6.1, which we'll assume is
 binary compatible with 5.6.0 and 5.005.  The directories searched
@@ -1775,15 +1787,15 @@ yet.
 
 =head2 Upgrading from 5.005 to 5.6.0
 
-Extensions built and installed with versions of perl prior to 5.005_50
-will need to be recompiled to be used with 5.005_50 and later.  You will,
-however, be able to continue using 5.005 even after you install 5.6.
-The 5.005 binary will still be able to find the modules built under
-5.005; the 5.6.0 binary will look in the new $sitearch and $sitelib
-directories, and will not find them.  See also your installed copy
-of the perllocal.pod file for a (possibly incomplete) list of locally
-installed modules.  Note that you want perllocal.pod not perllocale.pod
-for installed module information.
+Most extensions built and installed with versions of perl
+prior to 5.005_50 will not need to be recompiled to be used with
+5.6.0.  If you find you do need to rebuild an extension with 5.6.0,
+you may safely do so without disturbing the 5.005 installation.
+(See L<"Coexistence with earlier versions of perl5"> above.)
+
+See your installed copy of the perllocal.pod file for a (possibly
+incomplete) list of locally installed modules.  Note that you want
+perllocal.pod not perllocale.pod for installed module information.
 
 =head1 Coexistence with perl4
 

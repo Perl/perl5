@@ -169,11 +169,11 @@ search or modify the string $_ by default.  This operator makes that kind
 of operation work on some other string.  The right argument is a search
 pattern, substitution, or transliteration.  The left argument is what is
 supposed to be searched, substituted, or transliterated instead of the default
-$_.  The return value indicates the success of the operation.  (If the
+$_.  The return value indicates the success of the operation.  If the
 right argument is an expression rather than a search pattern,
 substitution, or transliteration, it is interpreted as a search pattern at run
-time.  This can be is less efficient than an explicit search, because the
-pattern must be compiled every time the expression is evaluated).
+time.  This can be less efficient than an explicit search, because the
+pattern must be compiled every time the expression is evaluated.
 
 Binary "!~" is just like "=~" except the return value is negated in
 the logical sense.

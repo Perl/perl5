@@ -1422,14 +1422,24 @@ element is not autovivified if it doesn't exist.
 A hash or array element can be true only if it's defined, and defined if
 it exists, but the reverse doesn't necessarily hold true.
 
+Given an expression that specifies the name of a subroutine,
+returns true if the specified subroutine has ever been declared, even
+if it is undefined.  Mentioning a subroutine name for exists or defined
+does not count as declaring it.
+
+    print "Exists\n" 	if exists &subroutine;
+    print "Defined\n" 	if defined &subroutine;
+
 Note that the EXPR can be arbitrarily complicated as long as the final
-operation is a hash or array key lookup:
+operation is a hash or array key lookup or subroutine name:
 
     if (exists $ref->{A}->{B}->{$key}) 	{ }
     if (exists $hash{A}{B}{$key}) 	{ }
 
     if (exists $ref->{A}->{B}->[$ix]) 	{ }
     if (exists $hash{A}{B}[$ix]) 	{ }
+
+    if (exists &{$ref->{A}{B}{$key}})   { }
 
 Although the deepest nested array or hash will not spring into existence
 just because its existence was tested, any intervening ones will.
@@ -1447,6 +1457,12 @@ release.
 
 See L<perlref/"Pseudo-hashes"> for specifics on how exists() acts when
 used on a pseudo-hash.
+
+Use of a subroutine call, rather than a subroutine name, as an argument
+to exists() is an error.
+
+    exists &sub;	# OK
+    exists &sub();	# Error
 
 =item exit EXPR
 

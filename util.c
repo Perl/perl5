@@ -3702,7 +3702,8 @@ Perl_my_fflush_all(pTHX)
 }
 
 NV
-Perl_my_atof(pTHX_ const char* s) {
+Perl_my_atof(pTHX_ const char* s)
+{
 #ifdef USE_LOCALE_NUMERIC
     if ((PL_hints & HINT_LOCALE) && PL_numeric_local) {
 	NV x, y;
@@ -3720,4 +3721,24 @@ Perl_my_atof(pTHX_ const char* s) {
 #else
     return Perl_atof(s);
 #endif
+}
+
+void
+Perl_report_closed_fh(pTHX_ GV *gv, IO *io, const char *func, const char *obj)
+{
+    SV *sv;
+    char *name;
+
+    assert(gv);
+
+    sv = sv_newmortal();
+    gv_efullname3(sv, gv, Nullch);
+    name = SvPVX(sv);
+
+    Perl_warner(aTHX_ WARN_CLOSED, "%s() on closed %s %s", func, obj, name);
+
+    if (io && IoDIRP(io))
+	Perl_warner(aTHX_ WARN_CLOSED,
+		    "(Are you trying to call %s() on dirhandle %s?)\n",
+		    func, name);
 }
