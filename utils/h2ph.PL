@@ -40,7 +40,7 @@ use Config;
 use File::Path qw(mkpath);
 use Getopt::Std;
 
-getopts('Dd:rlha');
+getopts('Dd:rlhaQ');
 die "-r and -a options are mutually exclusive\n" if ($opt_r and $opt_a);
 @inc_dirs = inc_dirs() if $opt_a;
 
@@ -81,7 +81,7 @@ while (defined ($file = next_file())) {
 	open(OUT, ">-");
     } else {
 	($outfile = $file) =~ s/\.h$/.ph/ || next;
-	print "$file -> $outfile\n";
+	print "$file -> $outfile\n" unless $opt_Q;
 	if ($file =~ m|^(.*)/|) {
 	    $dir = $1;
 	    mkpath "$Dest_dir/$dir";
@@ -237,7 +237,7 @@ while (defined ($file = next_file())) {
 	    } elsif(/^ident\s+(.*)/) {
 		print OUT $t, "# $1\n";
 	    }
-	} elsif(/^\s*(typedef\s*)?enum(\s+[a-zA-Z_]\w*)?\s*\{/) {
+ 	} elsif(/^\s*(typedef\s*)?enum\s*(\s+[a-zA-Z_]\w*\s*)?\{/) {
 	    until(/\}.*?;/) {
 		chomp($next = <IN>);
 		$_ .= $next;
