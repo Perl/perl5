@@ -1,164 +1,276 @@
-This is a DOS/DJGPP port of Perl 5.004_5x
+If you read this file _as_is_, just ignore the funny characters you
+see. It is written in the POD format (see perlpod manpage) which is
+specially designed to be readable as is.
 
-1. Installation
-   ------------
+=head1 NAME
 
-   - Unzip the binary package perl54b.zip preserving the directory
-     structure (-d switch to PKUNZIP) from the top DJGPP directory.
-     If you want to use perl with long file names (win0.95), then use a LFN
-     aware unzip and add
+perldos - Perl under DOS, W31, W95.
+                                 
+=head1 SYNOPSIS
 
-              set LFN=y
+These are instructions for building Perl under DOS (or w??), using
+DJGPP v2.01 or later. Under w95 long filenames are supported.
 
-     to your autoexec.bat or DJGPP.ENV.
+=head1 DESCRIPTION
 
-   - Edit lib/perl5/Config.pm, and replace every 'c:/djgpp' with your
-     DJGPP root directory. This can be done with perl too:
-   
-              perl -i~ -pe "s!c:/djgpp!x:/djroot!i;" lib/perl5/Config.pm
-                                       ^^^^^^^^^
-                        Substitute this with your DJGPP root directory!
+Before you start, you should glance through the README file
+found in the top-level directory where the Perl distribution
+was extracted.  Make sure you read and understand the terms under
+which this software is being distributed.
 
-   - This version of perl searches its library files in '../lib/perl5/',
-     which is relative to the path of perl.exe. If you don't like this,
-     you can use the PERL5LIB environment variable to tell perl where 
-     the library is. E.g:
-     
-              set PERL5LIB=c:/perl/lib
-              
-     Warning: if you set PERL5LIB and use tainting checks (-T command line 
-     option), perl ignores PERL5LIB, so you must use the -I command line
-     switch or the "use lib '...'"  construct. Or you can patch perl.exe :)
+This port currently supports MakeMaker (the set of modules that
+is used to build extensions to perl).  Therefore, you should be
+able to build and install most extensions found in the CPAN sites.
 
-   - Perl works best with a unixy shell, so you may want to download and
-     install bash (bshXXXXb.zip from the usual DJGPP sites). After installing
-     it make the 'SHELL' environment variable point to your bash.exe.
-     Finally create a `link' to your bash.exe in your %DJDIR%/bin directory:
+=head2 Prerequisites
 
-              ln -s bash.exe sh.exe
-     or
-              stubify -g sh.exe
-              stubedit sh.exe runfile=bash
+=over 4
 
-   - The documentation is in lib/perl5/pod. You can read the .pod files
-     with any editor, or you can use the `perldoc' utility. For more info:
+=item DJGPP
 
-              perl -S perldoc -h
+DJGPP is a port of GNU C/C++ compiler and development tools to 32-bit,
+protected-mode environment on Intel 32-bit CPUs running MS-DOS and compatible
+operating systems, by DJ Delorie <dj@delorie.com> and friends.
 
-     It tries to use less.exe or more.com, but you can set your pager with:
-     
-              SET PAGER=path_of_your_favourite_pager
+For more details (FAQ), check out the home of DJGPP at:
 
-2. Building Perl
-   -------------
+        http://www.delorie.com/djgpp/
 
-   - In addition to the standard DJGPP tools, you will need sed, gawk, grep,
-     sh-utils, textutils, fileutils, bash, diffutils, make and findutils. :-)
-     You can find them on the usual DJGPP sites. If you want to build perl
-     under win0.95, then you MUST use fileutils 3.16+ (3.13 doesn't work).
+If you have questions about DJGPP, try posting to the DJGPP newsgroup:
+comp.os.msdos.djgpp, or use the email gateway djgpp@delorie.com.
 
-   - Unzip the source package perl54s.zip preserving the directory
-     structure (-d switch to PKUNZIP) from the top DJGPP directory.
-     Under plain DOS, use the -o switch too when unzipping.
-     This creates the directory gnu/perl5004.
+You can find the full DJGPP distribution on any SimTel.Net mirror all over
+the world. Like:
 
-   - Create a symlink or copy your bash.exe to sh.exe in your DJGPP/bin
-     directory.
+        ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2*
 
-              ln -s bash.exe sh.exe
+You need the following files to build perl (or add new modules):
 
-     And make the 'SHELL' environment variable point to this sh.exe:
+        v2/djdev201.zip
+        v2/bnu27b.zip
+        v2gnu/gcc2721b.zip
+        v2gnu/bsh1147b.zip
+        v2gnu/mak3761b.zip
+        v2gnu/fil316b.zip
+        v2gnu/sed118b.zip
+        v2gnu/txt122b.zip
+        v2gnu/dif271b.zip
+        v2gnu/grep21b.zip
+        v2gnu/shl112b.zip
+        v2gnu/gawk303b.zip
+        v2misc/csdpmi4b.zip 
 
-              set SHELL=c:/djgpp/bin/sh.exe (use full path name!)
+or any newer version.
 
-     You can do this in djgpp.env too. Add this line BEFORE any section
-     definition:
+=item Pthreads
 
-              +SHELL=%DJDIR%/bin/sh.exe
+If you want multithreading support in perl, you need a pthread library
+that supports DJGPP. One of them can be found at:
 
-   - If you have split.exe and gsplit.exe in your path, then rename split.exe
-     to djsplit.exe, and gsplit.exe to split.exe.
+        ftp://ftp.cs.fsu.edu/pub/PART/PTHREADS/pthreads.zip
 
-   - Copy or link gecho.exe to echo.exe if you don't have echo.exe.
+But thread support is still in alpha, it may be unstable. For more information
+see below.
 
-   - Copy or link gawk.exe to awk.exe if you don't have awk.exe.
+=back
 
-   - Chdir to the gnu/perl5004/djgpp directory and type the following
-     command:
+=head2 Shortcomings of Perl under DOS
 
-              configure.bat
+Perl under DOS lacks some features of perl under UNIX because of
+deficiencies in the UNIX-emulation, most notably:
 
-     This will do some preprocessing then run the Configure script.
+=over 4
 
-     The Configure script is interactive, but in most of the cases you
-     just need to press ENTER.
+=item *
 
-     If the script says that your package is incomplete, and ask whether
-     to continue, just answer with Y (this can only happen if you don't use
-     long filenames).
+fork() and pipe()
 
-     When Configure asks about the extensions, I suggest IO and Fcntl,
-     and if you want database handling then SDBM_File or GDBM_File
-     (you need to install gdbm for this one). If you want to use the 
-     POSIX extension (this is the default), make sure that the stack 
-     size of your cc1.exe is at least 512kbyte (you can check this 
-     with: stubedit cc1.exe).
-     
-        You can use the Configure script in non-interactive mode too. 
-        When I've built my perl.exe, I used this:
+=item *
 
-                 configure.bat -Uuseposix -dEs
+some features of the UNIX filesystem regarding link count and file dates
 
-        then edited config.sh (set hostname & domainname), then
+=item *
 
-                 sh Configure -S
+in-place operation is a little bit broken with short filenames
 
-        You can find more info about Configure's command line switches in
-        the `INSTALL' file.
+=item *
 
-   - When the script ends, and you want to change some values in the
-     generated config.sh file, then run
+sockets
 
-              sh Configure -S
+=back
 
-     after you made your modifications.
+=head2 Building
 
-     IMPORTANT: if you use this -S switch, be sure to delete the CONFIG
-     environment variable before running the script:
+=over 4
 
-              set CONFIG=
+=item *
 
-   - Now you can compile Perl. Type:
+Unpack the source package F<perl5.00?_??.tar.gz> with djtarx. If you want
+to use long file names under w95, don't forget to use
 
-              make
+        set LFN=y
+        
+before unpacking the archive.
 
-   - Run the tests:
+=item *
 
-              make test
+Create a "symlink" or copy your bash.exe to sh.exe in your C<($DJDIR)/bin>
+directory.
 
-     You should see "All tests successful" if you configured a database
-     manager, and 1 failed test script if not (lib/anydbm.t). If you
-     configured POSIX you will see 4 failed subtests in lib/posix.t.
+        ln -s bash.exe sh.exe
 
-   - If you want the documentation in HTML format, then read INSTALL in
-     the main perl5004 source directory.
+And make the C<SHELL> environment variable point to this F<sh.exe>:
 
-     WARNING: if you want to use absolute path names with `installhtml',
-     use something like this:
+        set SHELL=c:/djgpp/bin/sh.exe (use full path name!)
 
-             --htmldir=f:/html
-             --htmlroot='/f|/html'     # "|" instead of ":" !!!
+You can do this in F<djgpp.env> too. Add this line BEFORE any section
+definition:
 
-     or NETSCAPE does strange things.
+        +SHELL=%DJDIR%/bin/sh.exe
 
-   - If you don't want to use the modules, then you are ready: copy perl.exe
-     into your bin directory.
+=item *
 
-   - Else install the files with:
+If you have F<split.exe> and F<gsplit.exe> in your path, then rename 
+F<split.exe> to F<djsplit.exe>, and F<gsplit.exe> to F<split.exe>.
+Copy or link F<gecho.exe> to F<echo.exe> if you don't have F<echo.exe>.
+Copy or link F<gawk.exe> to F<awk.exe> if you don't have F<awk.exe>.
 
-              make install
+=item *
 
- Enjoy.
+Chdir to the djgpp subdirectory of perl toplevel and type the following
+command:
 
-                               Laszlo Molnar <molnarl@cdata.tvnet.hu>
+        configure.bat
+
+This will do some preprocessing then run the Configure script for you.
+The Configure script is interactive, but in most cases you
+just need to press ENTER.
+
+If the script says that your package is incomplete, and asks whether
+to continue, just answer with Y (this can only happen if you don't use
+long filenames).
+
+When Configure asks about the extensions, I suggest IO and Fcntl,
+and if you want database handling then SDBM_File or GDBM_File
+(you need to install gdbm for this one). If you want to use the
+POSIX extension (this is the default), make sure that the stack
+size of your F<cc1.exe> is at least 512kbyte (you can check this
+with: C<stubedit cc1.exe>).
+
+You can use the Configure script in non-interactive mode too.
+When I built my F<perl.exe>, I used something like this:
+
+        configure.bat -Uuseposix -des
+
+You can find more info about Configure's command line switches in
+the F<INSTALL> file.
+
+When the script ends, and you want to change some values in the
+generated F<config.sh> file, then run
+
+        sh Configure -S
+
+after you made your modifications.
+
+IMPORTANT: if you use this C<-S> switch, be sure to delete the CONFIG
+environment variable before running the script:
+
+        set CONFIG=
+
+=item *
+
+Now you can compile Perl. Type:
+
+        make
+
+=back
+
+=head2 Testing
+
+Type:
+
+        make test
+
+You should see "All tests successful" if you configured a database
+manager, and 1 failed test script if not (F<lib/anydbm.t>). If you
+configured POSIX you will see 1 additional failed subtest in F<lib/posix.t>.
+
+=head2 Installation
+
+Type:
+
+        make install
+
+This will copy the newly compiled perl and libraries into your DJGPP
+directory structure. Perl.exe and the utilities go into C<($DJDIR)/bin>,
+and the library goes under C<($DJDIR)/lib/perl5>. The pod documentation
+goes under C<($DJDIR)/lib/perl5/pod>.
+
+=head2 Threaded perl under dos-djgpp
+
+Multithreading support is considered alpha, because some of the
+tests in C<ext/Thread> still die with SIGSEGV (patches are welcome). But
+if you want to give it a try, here are the necessary steps:
+
+=over 4
+
+=item
+
+1. You will need a pthread library which supports djgpp. Go, and download
+FSU's version from:
+
+      ftp://ftp.cs.fsu.edu/pub/PART/PTHREADS/pthreads.zip
+
+The latest version is 3.5, released in Feb 98.
+
+=item 
+
+2. Unzip the file, cd to C<threads\src> and run F<configur.bat>.
+
+=item 
+
+3. Add C<RAND_SWITCH> or C<MUTEX_SWITCH> or C<RR_SWITCH> to C<CFLAGS>
+in the F<makefile>. Note that using these values, multithreading will
+NOT be preemptive. This is necessary, since djgpp's libc is not thread safe.
+
+=item 
+
+4. Apply the following patch:
+
+    *** include/pthread/signal.h~	Wed Feb  4 10:51:24 1998
+    --- include/pthread/signal.h	Tue Feb 10 22:40:32 1998
+    ***************
+    *** 364,368 ****
+    --- 364,370 ----
+      
+      #ifndef SA_ONSTACK
+    + #ifdef  SV_ONSTACK
+      #define SA_ONSTACK SV_ONSTACK
+    + #endif
+      #endif /* !SA_ONSTACK */
+
+=item
+
+5. run make (before you do this, you must make sure your C<SHELL> environment 
+variable does NOT point to bash).
+
+=item
+
+6. Install the library and header files into your djgpp directory structure.
+
+=item
+
+7. Add C<-Dusethreads> to the commmand line of perl's F<configure.bat>.
+
+=back
+
+=head1 AUTHOR
+
+Laszlo Molnar, F<molnarl@cdata.tvnet.hu>
+
+=head1 SEE ALSO
+
+perl(1).
+
+=cut
 
