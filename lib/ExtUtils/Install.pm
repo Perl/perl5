@@ -224,7 +224,7 @@ sub inc_uninstall {
 	if ($nonono) {
 	    if ($verbose) {
 		$Inc_uninstall_warn_handler ||= new ExtUtils::Install::Warn;
-		$libdir =~ s|^\./|| ; # That's just cosmetics, no need to port. It looks prettier.
+		$libdir =~ s|^\./||s ; # That's just cosmetics, no need to port. It looks prettier.
 		$Inc_uninstall_warn_handler->add("$libdir/$file",$targetfile);
 	    }
 	    # if not verbose, we just say nothing
@@ -274,7 +274,7 @@ sub pm_to_blib {
 	utime($atime,$mtime+$Is_VMS,$fromto->{$_});
 	chmod(0444 | ( $mode & 0111 ? 0111 : 0 ),$fromto->{$_});
 	print "cp $_ $fromto->{$_}\n";
-	next unless /\.pm$/;
+	next unless /\.pm\z/;
 	autosplit($fromto->{$_},$autodir);
     }
 }
