@@ -231,6 +231,12 @@ could indicate that SvREFCNT_dec() was called too many times, or that
 SvREFCNT_inc() was called too few times, or that the SV was mortalized
 when it shouldn't have been, or that memory has been corrupted.
 
+=item Attempt to use reference as lvalue in substr
+
+(W) You supplied a reference as the first argument to substr() used
+as an lvalue, which is pretty strange.  Perhaps you forgot to 
+dereference it first.  See L<perlfunc/substr>.
+
 =item Bad arg length for %s, is %d, should be %d
 
 (F) You passed a buffer of the wrong size to one of msgctl(), semctl() or
