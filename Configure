@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Mar  2 19:38:01 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Thu Mar  2 21:42:14 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -4817,7 +4817,7 @@ case "$installstyle" in
 		*) dflt='lib/perl5' ;;
 	esac
 	;;
-*)	dflt='lib/perl5' ;;
+*)	dflt="$installstyle" ;;
 esac
 : Probably not worth prompting for this since we prompt for all
 : the directories individually, and the prompt would be too long and
