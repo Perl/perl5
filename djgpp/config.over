@@ -15,7 +15,10 @@ repair()
      -e 's/fcntl/Fcntl/'\
      -e 's/gdbm_fil/GDBM_File/'\
      -e 's/io/IO/'\
-     -e 's=ipc/sysv=IPC/SysV='\
+     -e 's/SysV//'\
+     -e 's/sysv//'\
+     -e 's=ipc/=='\
+     -e 's=IPC/=='\
      -e 's/ndbm_fil/NDBM_File/'\
      -e 's/odbm_fil/ODBM_File/'\
      -e 's/opcode/Opcode/'\
@@ -31,3 +34,6 @@ nonxs_ext=$(repair "$nonxs_ext")
 
 # I use Dos::UseLFN in AutoSplit.pm to override this under win0.95
 d_flexfnam='undef'
+
+# with W95 + bash the test program returns bogus result
+d_casti32='undef'
