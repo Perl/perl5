@@ -131,7 +131,7 @@ else {
     ok 11, $f > 0.4 && $f < 0.9, "slept $f instead of 0.5 secs.";
 }
 
-if (!$have_ualarm) {
+if (!$have_ualarm || !$Config{d_alarm}) {
     skip 12..13;
 }
 else {
