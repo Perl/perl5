@@ -190,6 +190,19 @@ It is now possible to build Perl with AT&T's sfio IO package
 instead of stdio.  See L<perlapio> for more details, and
 the F<INSTALL> file for how to use it.
 
+=head2 New and changed builtin constants
+
+=over
+
+=item __PACKAGE__
+
+The current package name at compile time, or the undefined value if
+there is no current package (due to a C<package;> directive).  Like
+C<__FILE__> and C<__LINE__>, C<__PACKAGE__> does I<not> interpolate
+into strings.
+
+=back
+
 =head2 New and changed builtin variables
 
 =over
