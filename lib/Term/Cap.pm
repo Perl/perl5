@@ -213,11 +213,15 @@ sub Tgetent { ## public -- static method
           $entry = $VMS_TERMCAP;
         }
         else {
+	  if ( grep { -x "$_/infocmp" } split /:/, $ENV{PATH} ) {
            eval
            {
-	     $entry = `infocmp -C 2>/dev/null`
-                    if grep { -x "$_/infocmp" } split /:/, $ENV{PATH};
+	     $foo = `infocmp -C 2>/dev/null`;
+	     if (($foo !~ m:^/:s) && ($foo =~ m/(^|\|)${termpat}[:|]/s)) {
+		$entry = $foo;
+	     }
            }
+	  }
         }
     }
 
