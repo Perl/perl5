@@ -704,8 +704,10 @@ Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
     unsigned char *s = (unsigned char *) SvPV(sv, srclen);
     UV retnum = 0;
 
-    if (offset < 0 || size < 1)
+    if (offset < 0)
 	return retnum;
+    if (size < 1 || (size & (size-1))) /* size < 1 or not a power of two */ 
+	Perl_croak(aTHX_ "Illegal number of bits in vec");
     offset *= size;	/* turn into bit offset */
     len = (offset + size + 7) / 8;	/* required number of bytes */
     if (len > srclen) {
@@ -735,8 +737,6 @@ Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
 			((UV) s[offset + 1] << 16) +
 			(     s[offset + 2] <<  8);
 	    }
-	    else
-		Perl_croak(aTHX_ "Illegal number of bits in vec");
 	}
     }
     else if (size < 8)
@@ -755,8 +755,6 @@ Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
 		((UV) s[offset + 1] << 16) +
 		(     s[offset + 2] <<  8) +
 		      s[offset + 3];
-	else
-	    Perl_croak(aTHX_ "Illegal number of bits in vec");
     }
 
     return retnum;
@@ -780,6 +778,8 @@ Perl_do_vecset(pTHX_ SV *sv)
     lval = SvUV(sv);
     offset = LvTARGOFF(sv);
     size = LvTARGLEN(sv);
+    if (size < 1 || (size & (size-1))) /* size < 1 or not a power of two */ 
+	Perl_croak(aTHX_ "Illegal number of bits in vec");
     
     offset *= size;			/* turn into bit offset */
     len = (offset + size + 7) / 8;	/* required number of bytes */
