@@ -2688,7 +2688,7 @@ init_perllib(void)
     ARCHLIB PRIVLIB SITEARCH and SITELIB 
 */
 #ifdef APPLLIB_EXP
-    incpush(APPLLIB_EXP, FALSE);
+    incpush(APPLLIB_EXP, TRUE);
 #endif
 
 #ifdef ARCHLIB_EXP

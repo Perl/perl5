@@ -3098,10 +3098,12 @@ sanity checks in the interest of speed.
 =item splice ARRAY,OFFSET
 
 Removes the elements designated by OFFSET and LENGTH from an array, and
-replaces them with the elements of LIST, if any.  Returns the elements
-removed from the array.  The array grows or shrinks as necessary.  If
-LENGTH is omitted, removes everything from OFFSET onward.  The
-following equivalences hold (assuming C<$[ == 0>):
+replaces them with the elements of LIST, if any.  In a list context,
+returns the elements removed from the array.  In a scalar context,
+returns the last element removed, or C<undef> if no elements are
+removed.  The array grows or shrinks as necessary.  If LENGTH is
+omitted, removes everything from OFFSET onward.  The following
+equivalences hold (assuming C<$[ == 0>):
 
     push(@a,$x,$y)	splice(@a,$#a+1,0,$x,$y)
     pop(@a)		splice(@a,-1)
@@ -4008,6 +4010,13 @@ for no value (void context).
 
 Produces a message on STDERR just like die(), but doesn't exit or throw
 an exception.
+
+If LIST is empty and $@ already contains a value (typically from a
+previous eval) that value is used after appending "\t...caught"
+to $@. This is useful for staying almost, but not entirely similar to
+die().
+
+If $@ is empty then the string "Warning: Something's wrong" is used.
 
 No message is printed if there is a C<$SIG{__WARN__}> handler
 installed.  It is the handler's responsibility to deal with the message
