@@ -1,11 +1,11 @@
 package constant;
 
 use strict;
-use 5.005_64;
+use 5.006_00;
 use warnings::register;
 
 our($VERSION, %declared);
-$VERSION = '1.03';
+$VERSION = '1.04';
 
 #=======================================================================
 
@@ -158,8 +158,8 @@ constant - Perl pragma to declare constants
 	PI		=> 4 * atan2( 1, 1 ),
 	DEBUGGING	=> 0,
 	ORACLE		=> 'oracle@cs.indiana.edu',
-	USERNAME	=> scalar getpwuid($<),
-	USERINFO	=> getpwuid($<),
+	USERNAME	=> scalar getpwuid($<),      # this works
+	USERINFO	=> getpwuid($<),             # THIS IS A BUG!
     };
 
 =head1 DESCRIPTION
@@ -200,7 +200,9 @@ compile time.
 
 Constant symbols are package scoped (rather than block scoped, as
 C<use strict> is). That is, you can refer to a constant from package
-Other as C<Other::CONST>.
+Other as C<Other::CONST>.  You may also use constants as either class
+or object methods, ie. C<< Other->CONST() >> or C<< $obj->CONST() >>.
+Such constant methods will be inherited as usual.
 
 As with all C<use> directives, defining a constant happens at
 compile time. Thus, it's probably not correct to put a constant
@@ -218,39 +220,63 @@ finished.
     [...]
     use constant PERSON => { age => AGE }; # Right
 
-Omitting the value for a symbol gives it the value of C<undef> in
-a scalar context or the empty list, C<()>, in a list context. This
-isn't so nice as it may sound, though, because in this case you
-must either quote the symbol name, or use a big arrow, (C<=E<gt>>),
-with nothing to point to. It is also illegal to do when defining
-multiple constants at once, you must declare them explicitly.  It
-is probably best to declare these explicitly.
+Giving an empty list, C<()>, as the value for a symbol makes it return
+C<undef> in scalar context and the empty list in list context.
 
-    use constant UNICORNS	=> ();
-    use constant LOGFILE	=> undef;
+    use constant UNICORNS => ();
 
-The result from evaluating a list constant in a scalar context is
-not documented, and is B<not> guaranteed to be any particular value
-in the future. In particular, you should not rely upon it being
-the number of elements in the list, especially since it is not
-B<necessarily> that value in the current implementation.
+    print "Impossible!\n"  if defined UNICORNS;    
+    my @unicorns = UNICORNS;  # there are no unicorns
 
-Magical values, tied values, and references can be made into
-constants at compile time, allowing for way cool stuff like this.
-(These error numbers aren't totally portable, alas.)
+The same effect can be achieved by omitting the value and the big
+arrow entirely, but then the symbol name must be put in quotes.
+
+    use constant "UNICORNS";
+
+The result from evaluating a list constant with more than one element
+in a scalar context is not documented, and is B<not> guaranteed to be
+any particular value in the future. In particular, you should not rely
+upon it being the number of elements in the list, especially since it
+is not B<necessarily> that value in the current implementation.
+
+Magical values and references can be made into constants at compile
+time, allowing for way cool stuff like this.  (These error numbers
+aren't totally portable, alas.)
 
     use constant E2BIG => ($! = 7);
     print   E2BIG, "\n";	# something like "Arg list too long"
     print 0+E2BIG, "\n";	# "7"
 
+You can't produce a tied constant by giving a tied scalar as the
+value.  References to tied variables, however, can be used as
+constants without any problems.
+
 Dereferencing constant references incorrectly (such as using an array
 subscript on a constant hash reference, or vice versa) will be trapped at
 compile time.
 
-When declaring multiple constants, all constant values will be a scalar.
-This is because C<constant> can't guess the intent of the programmer
-correctly all the time since values must be expressed in scalar context
-within a hash ref.
+When declaring multiple constants, all constant values B<must be
+scalars>.  If you accidentally try to use a list with more (or less)
+than one value, every second value will be treated as a symbol name.
+
+    use constant {
+        EMPTY => (),                    # WRONG!
+        MANY => ("foo", "bar", "baz"),  # WRONG!
+    };
+
+This will get interpreted as below, which is probably not what you
+wanted.
+
+    use constant {
+        EMPTY => "MANY",  # oops.
+        foo => "bar",     # oops!
+        baz => undef,     # OOPS!
+    };
+
+This is a fundamental limitation of the way hashes are constructed in
+Perl.  The error messages produced when this happens will often be
+quite cryptic -- in the worst case there may be none at all, and
+you'll only later find that something is broken.
 
 In the rare case in which you need to discover at run time whether a
 particular constant has been declared via this module, you may use
@@ -316,6 +342,9 @@ many other folks.
 
 Multiple constant declarations at once added by Casey West,
 E<lt>F<casey@geeknest.com>E<gt>.
+
+Assorted documentation fixes by Ilmari Karonen,
+E<lt>F<perl@itz.pp.sci.fi>E<gt>.
 
 =head1 COPYRIGHT
 
