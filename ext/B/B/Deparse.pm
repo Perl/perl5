@@ -19,7 +19,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber cstring
          CVf_METHOD CVf_LOCKED CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE PMf_SKIPWHITE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
-$VERSION = 0.60;
+$VERSION = 0.61;
 use strict;
 use warnings ();
 
@@ -92,6 +92,19 @@ use warnings ();
 # - separate recognition of constant subs
 # - rewrote continue block handling, now recoginizing for loops
 # - added more control of expanding control structures
+# Changes between 0.60 and 0.61 (mostly by Robin Houston)
+# - many bug-fixes
+# - support for pragmas and 'use'
+# - support for the little-used $[ variable
+# - support for __DATA__ sections
+# - UTF8 support
+# - BEGIN, CHECK, INIT and END blocks
+# - scoping of subroutine declarations fixed
+# - compile-time output from the input program can be suppressed, so that the
+#   output is just the deparsed code. (a change to O.pm in fact)
+# - our() declarations
+# - *all* the known bugs are now listed in the BUGS section
+# - comprehensive test mechanism (TEST -deparse)
 
 # Todo:
 #  (See also BUGS section at the end of this file)
@@ -483,9 +496,15 @@ sub new {
     return $self;
 }
 
-sub WARN_MASK () {
-    # Mask out the bits that C<use vars> uses
-    $warnings::Bits{all} | $warnings::DeadBits{all};
+{
+    # Mask out the bits that L<warnings::register> uses
+    my $WARN_MASK;
+    BEGIN {
+	$WARN_MASK = $warnings::Bits{all} | $warnings::DeadBits{all};
+    }
+    sub WARN_MASK () {
+	return $WARN_MASK;
+    }
 }
 
 # Initialise the contextual information, either from
@@ -613,7 +632,7 @@ sub ambient_pragmas {
 
 	elsif ($name eq 'warnings') {
 	    if ($val eq 'none') {
-		$warning_bits = "\0"x12;
+		$warning_bits = $warnings::NONE;
 		next();
 	    }
 
@@ -625,7 +644,7 @@ sub ambient_pragmas {
 		@names = split/\s+/, $val;
 	    }
 
-	    $warning_bits = "\0"x12 if !defined ($warning_bits);
+	    $warning_bits = $warnings::NONE if !defined ($warning_bits);
 	    $warning_bits |= warnings::bits(@names);
 	}
 
@@ -1257,10 +1276,10 @@ sub pp_nextstate {
     my $warnings = $op->warnings;
     my $warning_bits;
     if ($warnings->isa("B::SPECIAL") && $$warnings == 4) {
-	$warning_bits = $warnings::Bits{"all"};
+	$warning_bits = $warnings::Bits{"all"} & WARN_MASK;
     }
     elsif ($warnings->isa("B::SPECIAL") && $$warnings == 5) {
-        $warning_bits = "\0"x12;
+        $warning_bits = $warnings::NONE;
     }
     elsif ($warnings->isa("B::SPECIAL")) {
 	$warning_bits = undef;
@@ -2655,6 +2674,16 @@ sub elem {
     # expression would be parenthesized as well.]
     #
     $idx =~ s/^\((.*)\)$/$1/ if $self->{'parens'};
+
+    # Hash-element braces will autoquote a bareword inside themselves.
+    # We need to make sure that C<$hash{warn()}> doesn't come out as
+    # C<$hash{warn}>, which has a quite different meaning. Currently
+    # B::Deparse will always quote strings, even if the string was a
+    # bareword in the original (i.e. the OPpCONST_BARE flag is ignored
+    # for constant strings.) So we can cheat slightly here - if we see
+    # a bareword, we know that it is supposed to be a function call.
+    #
+    $idx =~ s/^([A-Za-z_]\w*)$/$1()/;
 
     return "\$" . $array . $left . $idx . $right;
 }
@@ -4100,9 +4129,22 @@ than in the input file.
 
 =item *
 
+In fact, the above is a specific instance of a more general problem:
+we can't guarantee to produce BEGIN blocks or C<use> declarations in
+exactly the right place. So if you use a module which affects compilation
+(such as by over-riding keywords, overloading constants or whatever)
+then the output code might not work as intended.
+
+This is the most serious outstanding problem, and will be very hard
+to fix.
+
+=item *
+
 If a keyword is over-ridden, and your program explicitly calls
 the built-in version by using CORE::keyword, the output of B::Deparse
-will not reflect this.
+will not reflect this. If you run the resulting code, it will call
+the over-ridden version rather than the built-in one. (Maybe there
+should be an option to B<always> print keyword calls as C<CORE::name>.)
 
 =item *
 

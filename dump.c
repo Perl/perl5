@@ -519,6 +519,8 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
 	else if (o->op_type == OP_CONST) {
 	    if (o->op_private & OPpCONST_BARE)
 		sv_catpv(tmpsv, ",BARE");
+	    if (o->op_private & OPpCONST_OCTAL)
+		sv_catpv(tmpsv, ",OCTAL");
 	    if (o->op_private & OPpCONST_STRICT)
 		sv_catpv(tmpsv, ",STRICT");
 	    if (o->op_private & OPpCONST_ARYBASE)
@@ -960,7 +962,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     case SVt_PVGV:
 	if (GvINTRO(sv))	sv_catpv(d, "INTRO,");
 	if (GvMULTI(sv))	sv_catpv(d, "MULTI,");
-	if (GvSHARED(sv))       sv_catpv(d, "SHARED,");
+	if (GvUNIQUE(sv))       sv_catpv(d, "UNIQUE,");
 	if (GvASSUMECV(sv))	sv_catpv(d, "ASSUMECV,");
 	if (GvIN_PAD(sv))       sv_catpv(d, "IN_PAD,");
 	if (flags & SVpad_OUR)	sv_catpv(d, "OUR,");

@@ -6,7 +6,8 @@ BEGIN {
     require Config; import Config;
 }
 
-print "1..160\n";
+print "1..161\n";
+# Note: All test numbers in comments are off by 1 after the comment below..
 
 $format = "c2 x5 C C x s d i l a6";
 # Need the expression in here to force ary[5] to be numeric.  This avoids
@@ -57,12 +58,17 @@ print +($x = unpack("I",pack("I", 0xFFFFFFFF))) == 0xFFFFFFFF
 
 # check 'w'
 my $test=10;
-my @x = (5,130,256,560,32000,3097152,268435455,1073741844,
+my @x = (5,130,256,560,32000,3097152,268435455,1073741844, 2**33,
          '4503599627365785','23728385234614992549757750638446');
 my $x = pack('w*', @x);
-my $y = pack 'H*', '0581028200843081fa0081bd8440ffffff7f848080801487ffffffffffdb19caefe8e1eeeea0c2e1e3e8ede1ee6e';
+my $y = pack 'H*', '0581028200843081fa0081bd8440ffffff7f8480808014A08080800087ffffffffffdb19caefe8e1eeeea0c2e1e3e8ede1ee6e';
 
-print $x eq $y ? "ok $test\n" : "not ok $test\n"; $test++;
+if ($x eq $y) {
+  print "ok $test\n";
+} else {
+  printf "not ok $test # %s\n", unpack 'H*', $x;
+}
+$test++;
 
 @y = unpack('w*', $y);
 my $a;
@@ -71,10 +77,12 @@ while ($a = pop @x) {
   print $a eq $b ? "ok $test\n" : "not ok $test\n$a\n$b\n"; $test++;
 }
 
+# XXX All test numbers in comments are off by 1 after this point.
+
 @y = unpack('w2', $x);
 
 print scalar(@y) == 2 ? "ok $test\n" : "not ok $test\n"; $test++;
-print $y[1] == 130 ? "ok $test\n" : "not ok $test\n"; $test++;
+print $y[1] == 130 ? "ok $test\n" : "not ok $test # $y[1]\n"; $test++;
 
 # test exeptions
 eval { $x = unpack 'w', pack 'C*', 0xff, 0xff};
@@ -362,6 +370,23 @@ print "ok ", $test++, "\n";
 
 # 144..152: /
 
+# Using Test considered bad plan in op/*.t ?
+
+sub report {
+  my ($pass, $test, $err, $wrong) = @_;
+  if ($pass) {
+    print "ok $test\n"
+  } else {
+    if ($err) {
+      chomp $err;
+      print "not ok $test # \$\@ = $err\n";
+    } else {
+      $wrong =~ s/([[:cntrl:]\177 ])/sprintf "\\%03o", ord $1/ge;
+      print "not ok $test # got $wrong\n";
+    }
+  }
+}
+
 my $z;
 eval { ($x) = unpack '/a*','hello' };
 print 'not ' unless $@; print "ok $test\n"; $test++;
@@ -373,8 +398,8 @@ print $@ eq '' && $y eq 'z' ? "ok $test\n" : "not ok $test\n"; $test++;
 eval { ($x) = pack '/a*','hello' };
 print 'not ' unless $@; print "ok $test\n"; $test++;
 $z = pack 'n/a* N/Z* w/A*','string','hi there ','etc';
-print 'not ' unless $z eq "\000\006string\0\0\0\012hi there \000\003etc";
-print "ok $test\n"; $test++;
+my $expect = "\000\006string\0\0\0\012hi there \000\003etc";
+report ($z eq $expect, $test++, '', $z);
 
 eval { ($x) = unpack 'a/a*/a*', '212ab345678901234567' };
 print $@ eq '' && $x eq 'ab3456789012' ? "ok $test\n" : "#$x,$@\nnot ok $test\n";
@@ -405,7 +430,8 @@ $z = pack <<EOP,'string','etc';
   n/a*			# Count as network short
   w/A*			# Count a  BER integer
 EOP
-print 'not ' unless $z eq "\000\006string\003etc"; print "ok $test\n"; $test++;
+$expect = "\000\006string\003etc";
+report ($z eq $expect, $test++, '', $z);
 
 print 'not ' unless "1.20.300.4000" eq sprintf "%vd", pack("U*",1,20,300,4000);
 print "ok $test\n"; $test++;

@@ -1257,7 +1257,7 @@ S_scan_const(pTHX_ char *start)
 		    char *e = d++;
 		    while (e-- > c)
 			*(e + 1) = *e;
-		    *c = UTF_TO_NATIVE(0xff);
+		    *c = (char)UTF_TO_NATIVE(0xff);
 		    /* mark the range as done, and continue */
 		    dorange = FALSE;
 		    didrange = TRUE;
@@ -1308,7 +1308,7 @@ S_scan_const(pTHX_ char *start)
 		    Perl_croak(aTHX_ "Ambiguous range in transliteration operator");
 		}
 		if (has_utf8) {
-		    *d++ = UTF_TO_NATIVE(0xff);	/* use illegal utf8 byte--see pmtrans */
+		    *d++ = (char)UTF_TO_NATIVE(0xff);	/* use illegal utf8 byte--see pmtrans */
 		    s++;
 		    continue;
 		}
@@ -2545,9 +2545,6 @@ Perl_yylex(pTHX)
 		if (PL_minus_l)
 		    sv_catpv(PL_linestr,"chomp;");
 		if (PL_minus_a) {
-		    GV* gv = gv_fetchpv("::F", TRUE, SVt_PVAV);
-		    if (gv)
-			GvIMPORTED_AV_on(gv);
 		    if (PL_minus_F) {
 			if (strchr("/'\"", *PL_splitstr)
 			      && strchr(PL_splitstr + 1, *PL_splitstr))
@@ -2557,7 +2554,7 @@ Perl_yylex(pTHX)
 			    s = "'~#\200\1'"; /* surely one char is unused...*/
 			    while (s[1] && strchr(PL_splitstr, *s))  s++;
 			    delim = *s;
-			    Perl_sv_catpvf(aTHX_ PL_linestr, "@F=split(%s%c",
+			    Perl_sv_catpvf(aTHX_ PL_linestr, "our @F=split(%s%c",
 				      "q" + (delim == '\''), delim);
 			    for (s = PL_splitstr; *s; s++) {
 				if (*s == '\\')
@@ -2568,7 +2565,7 @@ Perl_yylex(pTHX)
 			}
 		    }
 		    else
-		        sv_catpv(PL_linestr,"@F=split(' ');");
+		        sv_catpv(PL_linestr,"our @F=split(' ');");
 		}
 	    }
 	    sv_catpv(PL_linestr, "\n");
@@ -3092,7 +3089,7 @@ Perl_yylex(pTHX)
 			CvMETHOD_on(PL_compcv);
 #ifdef USE_ITHREADS
       else if (PL_in_my == KEY_our && len == 6 && strnEQ(s, "unique", len))
-			GvSHARED_on(cGVOPx_gv(yylval.opval));
+			GvUNIQUE_on(cGVOPx_gv(yylval.opval));
 #endif
 		    /* After we've set the flags, it could be argued that
 		       we don't need to do the attributes.pm-based setting
@@ -4302,12 +4299,6 @@ Perl_yylex(pTHX)
 	    LOP(OP_CRYPT,XTERM);
 
 	case KEY_chmod:
-	    if (ckWARN(WARN_CHMOD)) {
-		for (d = s; d < PL_bufend && (isSPACE(*d) || *d == '('); d++) ;
-		if (*d != '0' && isDIGIT(*d))
-		    Perl_warner(aTHX_ WARN_CHMOD,
-		    		"chmod() mode argument is missing initial 0");
-	    }
 	    LOP(OP_CHMOD,XTERM);
 
 	case KEY_chown:
@@ -5165,12 +5156,6 @@ Perl_yylex(pTHX)
 	    LOP(OP_UTIME,XTERM);
 
 	case KEY_umask:
-	    if (ckWARN(WARN_UMASK)) {
-		for (d = s; d < PL_bufend && (isSPACE(*d) || *d == '('); d++) ;
-		if (*d != '0' && isDIGIT(*d))
-		    Perl_warner(aTHX_ WARN_UMASK,
-		    		"umask: argument is missing initial 0");
-	    }
 	    UNI(OP_UMASK);
 
 	case KEY_unshift:
@@ -6917,7 +6902,8 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
     register char *e;			/* end of temp buffer */
     NV nv;				/* number read, as a double */
     SV *sv = Nullsv;			/* place to put the converted number */
-    bool floatit;			/* boolean: int or float? */
+    bool floatit,			/* boolean: int or float? */
+	octal = 0;			/* Is this an octal number? */
     char *lastub = 0;			/* position of last underbar */
     static char number_too_long[] = "Number too long";
 
@@ -6971,6 +6957,7 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 	    /* so it must be octal */
 	    else {
 		shift = 3;
+		octal = 1;
 		s++;
 	    }
 
@@ -7376,8 +7363,11 @@ vstring:
 
     /* make the op for the constant and return */
 
-    if (sv)
+    if (sv) {
 	lvalp->opval = newSVOP(OP_CONST, 0, sv);
+	if (octal)
+	    ((SVOP *)lvalp->opval)->op_private |= OPpCONST_OCTAL;
+    }
     else
 	lvalp->opval = Nullop;
 

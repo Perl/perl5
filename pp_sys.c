@@ -758,9 +758,9 @@ PP(pp_tie)
 	    methname = "TIEARRAY";
 	    break;
 	case SVt_PVGV:
-#ifdef GV_SHARED_CHECK
-	    if (GvSHARED((GV*)varsv)) {
-                Perl_croak(aTHX_ "Attempt to tie shared GV");
+#ifdef GV_UNIQUE_CHECK
+	    if (GvUNIQUE((GV*)varsv)) {
+                Perl_croak(aTHX_ "Attempt to tie unique GV");
 	    }
 #endif
 	    methname = "TIEHANDLE";

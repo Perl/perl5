@@ -205,13 +205,13 @@ sub full_setup {
     LINKTYPE MAKEAPERL MAKEFILE MAN1PODS MAN3PODS MAP_TARGET MYEXTLIB
     PERL_MALLOC_OK
     NAME NEEDS_LINKING NOECHO NORECURS NO_VC OBJECT OPTIMIZE PERL PERLMAINCC
-    PERL_ARCHLIB PERL_LIB PERL_SRC PERM_RW PERM_RWX
+    PERLRUN PERLRUNINST PERL_ARCHLIB PERL_CORE
+    PERL_LIB PERL_SRC PERM_RW PERM_RWX
     PL_FILES PM PM_FILTER PMLIBDIRS POLLUTE PPM_INSTALL_EXEC
-	PPM_INSTALL_SCRIPT PREFIX
-    PREREQ_PM SKIP TYPEMAPS VERSION VERSION_FROM XS XSOPT XSPROTOARG
+    PPM_INSTALL_SCRIPT PREFIX
+    PREREQ_PM SKIP TEST_LIBS TYPEMAPS VERSION VERSION_FROM XS XSOPT XSPROTOARG
     XS_VERSION clean depend dist dynamic_lib linkext macro realclean
     tool_autosplit
-
     MACPERL_SRC MACPERL_LIB MACLIBS_68K MACLIBS_PPC MACLIBS_SC MACLIBS_MRC
     MACLIBS_ALL_68K MACLIBS_ALL_PPC MACLIBS_SHARED
 	/;
@@ -411,7 +411,7 @@ sub ExtUtils::MakeMaker::new {
 	}
 	if ($self->{PARENT}) {
 	    $self->{PARENT}->{CHILDREN}->{$newclass} = $self;
-	    foreach my $opt (qw(CAPI POLLUTE)) {
+	    foreach my $opt (qw(CAPI POLLUTE PERL_CORE)) {
 		if (exists $self->{PARENT}->{$opt}
 		    and not exists $self->{$opt})
 		    {
@@ -1060,7 +1060,7 @@ is built. You can invoke the corresponding section of the makefile with
     make perl
 
 That produces a new perl binary in the current directory with all
-extensions linked in that can be found in INST_ARCHLIB , SITELIBEXP,
+extensions linked in that can be found in INST_ARCHLIB, SITELIBEXP,
 and PERL_ARCHLIB. To do that, MakeMaker writes a new Makefile, on
 UNIX, this is called Makefile.aperl (may be system dependent). If you
 want to force the creation of a new perl, it is recommended, that you
@@ -1591,6 +1591,11 @@ passed to subdirectory makes.
 
 Perl binary for tasks that can be done by miniperl
 
+=item PERL_CORE
+
+Set only when MakeMaker is building the extensions of the Perl core
+distribution.
+
 =item PERLMAINCC
 
 The call to the program that is able to compile perlmain.c. Defaults
@@ -1598,11 +1603,19 @@ to $(CC).
 
 =item PERL_ARCHLIB
 
-Same as below, but for architecture dependent files.
+Same as for PERL_LIB, but for architecture dependent files.
+
+Used only when MakeMaker is building the extensions of the Perl core
+distribution (because normally $(PERL_ARCHLIB) is automatically in @INC,
+and adding it would get in the way of PERL5LIB).
 
 =item PERL_LIB
 
 Directory containing the Perl library to use.
+
+Used only when MakeMaker is building the extensions of the Perl core
+distribution (because normally $(PERL_LIB) is automatically in @INC,
+and adding it would get in the way of PERL5LIB).
 
 =item PERL_MALLOC_OK
 
@@ -1632,6 +1645,17 @@ nullifies many advantages of Perl's malloc(), such as better usage of
 system resources, error detection, memory usage reporting, catchable failure
 of memory allocations, etc.
 
+=item PERLRUN
+
+Use this instead of $(PERL) or $(FULLPERL) when you wish to run perl.
+It will set up extra necessary flags for you.
+  
+=item PERLRUNINST
+  
+Use this instead of $(PERL) or $(FULLPERL) when you wish to run
+perl to work with modules.  It will add things like -I$(INST_ARCH)
+and other necessary flags.
+  
 =item PERL_SRC
 
 Directory containing the Perl source code (use of this should be
@@ -1744,11 +1768,16 @@ only check if any version is installed already.
 
 =item SKIP
 
-Arryref. E.g. [qw(name1 name2)] skip (do not write) sections of the
+Arrayref. E.g. [qw(name1 name2)] skip (do not write) sections of the
 Makefile. Caution! Do not use the SKIP attribute for the negligible
 speedup. It may seriously damage the resulting Makefile. Only use it
 if you really need it.
 
+=item TEST_LIBS
+
+The set of -I's necessary to run a "make test".  Use as:
+$(PERL) $(TEST_LIBS) -e '...' for example.
+  
 =item TYPEMAPS
 
 Ref to array of typemap file names.  Use this when the typemaps are

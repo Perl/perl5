@@ -41,7 +41,37 @@ my %ideodigit = ( # cjk ideograph 'one' to 'ten'
 );
 my @ideodigit = qw(one two three four five six seven eight nine ten);
 
-plan test => $n*@encodings + $n*@encodings*@greek + $n*@encodings*@ideodigit;
+my $jis = '7bit-jis';
+my $kr  = '7bit-kr';
+my %esc_str;
+
+$esc_str{$jis} = {qw(
+  1b24422422242424262428242a1b2842
+  3042304430463048304a
+  1b284931323334355d1b2842
+  ff71ff72ff73ff74ff75ff9d
+  1b2442467c4b5c1b2842
+  65e5672c
+  3132331b244234413b7a1b28425065726c
+  0031003200336f225b57005000650072006c
+  546573740a1b24422546253925481b28420a
+  0054006500730074000a30c630b930c8000a
+)};
+
+$esc_str{$kr} = {qw(
+  1b2429430e2a22213e0f410d0a
+  304200b10041000d000a
+  1b2429430e3021332a34593673383639593b673e46405a0f0d0a
+  ac00b098b2e4b77cb9c8bc14c0acc544c790000d000a
+  1b2429434142430d0a
+  004100420043000d000a
+)};
+
+my $num_esc = $n * keys(%esc_str);
+foreach (values %esc_str){ $num_esc += $n * keys %$_ }
+
+plan test => $n*@encodings + $n*@encodings*@greek
+  + $n*@encodings*@ideodigit + $num_esc;
 
 foreach my $enc (@encodings)
  {
@@ -81,3 +111,35 @@ foreach my $enc (@encodings)
    }
  }
 
+{
+ sub to_unicode
+  {
+   my $enc = shift;
+   return unpack('H*', pack 'n*', unpack 'U*',
+   decode $enc, pack 'H*', join '', @_);
+  }
+
+ sub from_unicode
+  {
+   my $enc = shift;
+   return unpack('H*', encode $enc,
+   pack 'U*', unpack 'n*', pack 'H*', join '', @_);
+  }
+
+ foreach my $enc (sort keys %esc_str)
+  {
+   my $tab = Encode->getEncoding($enc);
+   ok(1,defined($tab),"Could not load $enc");
+   my %strings = %{ $esc_str{$enc} };
+   foreach my $estr (sort keys %strings)
+    {
+     my $ustr = to_unicode($enc, $estr);
+     ok($ustr, $strings{$estr},
+	 "$enc mangled translating to Unicode");
+     ok(from_unicode($enc, $ustr), $estr,
+	 "$enc mangled translating from Unicode");
+    }
+   ok(to_unicode($enc, keys %strings), join('', values %strings),
+   "$enc mangled translating to Unicode");
+  }
+}

@@ -484,7 +484,7 @@ RCOPY		= xcopy /f /r /i /e /d
 NOOP		= @echo
 NULL		=
 
-DEL		= bin\mdelete.bat
+DEL		= del
 
 #
 # filenames given to xsubpp must have forward slashes (since it puts
@@ -995,7 +995,6 @@ distclean: clean
 	-del /f $(LIBDIR)\Scalar\Util.pm
 	-del /f $(LIBDIR)\Time\HiRes.pm
 	-del /f $(LIBDIR)\Time\Piece.pm
-	-del /f $(LIBDIR)\Cwd.pm
 	-del /f $(LIBDIR)\XS\Typemap.pm
 	-if exist $(LIBDIR)\IO rmdir /s /q $(LIBDIR)\IO
 	-rmdir /s $(LIBDIR)\IO

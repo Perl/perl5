@@ -1657,10 +1657,10 @@
 #define Perl_sv_compile_2op	pPerl->Perl_sv_compile_2op
 #undef  sv_compile_2op
 #define sv_compile_2op		Perl_sv_compile_2op
-#undef  Perl_sv_getcwd
-#define Perl_sv_getcwd		pPerl->Perl_sv_getcwd
-#undef  sv_getcwd
-#define sv_getcwd		Perl_sv_getcwd
+#undef  Perl_getcwd_sv
+#define Perl_getcwd_sv		pPerl->Perl_getcwd_sv
+#undef  getcwd_sv
+#define getcwd_sv		Perl_getcwd_sv
 #undef  Perl_sv_dec
 #define Perl_sv_dec		pPerl->Perl_sv_dec
 #undef  sv_dec

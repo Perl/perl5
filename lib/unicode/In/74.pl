@@ -2,5 +2,5 @@
 # This file is built by mktables.PL from e.g. Unicode.txt.
 # Any changes made here will be lost!
 return <<'END';
-D800	DB7F
+16A0	16FF
 END

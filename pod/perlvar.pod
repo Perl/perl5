@@ -193,7 +193,10 @@ This variable is read-only and dynamically scoped to the current BLOCK.
 
 The text matched by the used group most-recently closed (i.e. the group
 with the rightmost closing parenthesis) of the last successful search
-pattern. This is primarly used inside C<(?{...})> blocks for examining text
+pattern.  (Mnemonic: the (possibly) Nested parenthesis that most
+recently closed.)
+
+This is primarly used inside C<(?{...})> blocks for examining text
 recently matched. For example, to effectively capture text to a variable
 (in addition to C<$1>, C<$2>, etc.), replace C<(...)> with
 

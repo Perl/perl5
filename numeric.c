@@ -448,7 +448,7 @@ Perl_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
                                           break;
                                       }
                                       if (digit >= 0 && digit <= 9
-                                          && !(s < send)) {
+                                          && (s < send)) {
                                         /* value overflowed.
                                            skip the remaining digits, don't
                                            worry about setting *valuep.  */

@@ -147,11 +147,10 @@ PP(pp_regcomp)
 
     if (!PM_GETRE(pm)->prelen && PL_curpm)
 	pm = PL_curpm;
+    else if (strEQ("\\s+", PM_GETRE(pm)->precomp))
+	pm->op_pmflags |= PMf_WHITE;
     else
-	if (strEQ("\\s+", PM_GETRE(pm)->precomp))
-	    pm->op_pmflags |= PMf_WHITE;
-	else
-	    pm->op_pmflags &= ~PMf_WHITE;
+	pm->op_pmflags &= ~PMf_WHITE;
 
     /* XXX runtime compiled output needs to move to the pad */
     if (pm->op_pmflags & PMf_KEEP) {

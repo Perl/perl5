@@ -24,11 +24,11 @@ PERL_CALLCONV PerlInterpreter*	perl_clone_using(PerlInterpreter *interp, UV flag
 #  endif
 #endif
 
-#if defined(MYMALLOC)
 PERL_CALLCONV Malloc_t	Perl_malloc(MEM_SIZE nbytes);
 PERL_CALLCONV Malloc_t	Perl_calloc(MEM_SIZE elements, MEM_SIZE size);
 PERL_CALLCONV Malloc_t	Perl_realloc(Malloc_t where, MEM_SIZE nbytes);
 PERL_CALLCONV Free_t	Perl_mfree(Malloc_t where);
+#if defined(MYMALLOC)
 PERL_CALLCONV MEM_SIZE	Perl_malloced_size(void *p);
 #endif
 
@@ -755,7 +755,7 @@ PERL_CALLCONV I32	Perl_sv_cmp_locale(pTHX_ SV* sv1, SV* sv2);
 PERL_CALLCONV char*	Perl_sv_collxfrm(pTHX_ SV* sv, STRLEN* nxp);
 #endif
 PERL_CALLCONV OP*	Perl_sv_compile_2op(pTHX_ SV* sv, OP** startp, char* code, AV** avp);
-PERL_CALLCONV int	Perl_sv_getcwd(pTHX_ SV* sv);
+PERL_CALLCONV int	Perl_getcwd_sv(pTHX_ SV* sv);
 PERL_CALLCONV void	Perl_sv_dec(pTHX_ SV* sv);
 PERL_CALLCONV void	Perl_sv_dump(pTHX_ SV* sv);
 PERL_CALLCONV bool	Perl_sv_derived_from(pTHX_ SV* sv, const char* name);

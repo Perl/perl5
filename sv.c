@@ -3613,8 +3613,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		Perl_croak(aTHX_ "Can't redefine active sort subroutine %s",
 		      GvNAME(dstr));
 
-#ifdef GV_SHARED_CHECK
-                if (GvSHARED((GV*)dstr)) {
+#ifdef GV_UNIQUE_CHECK
+                if (GvUNIQUE((GV*)dstr)) {
                     Perl_croak(aTHX_ PL_no_modify);
                 }
 #endif
@@ -3659,8 +3659,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		SV *dref = 0;
 		int intro = GvINTRO(dstr);
 
-#ifdef GV_SHARED_CHECK
-                if (GvSHARED((GV*)dstr)) {
+#ifdef GV_UNIQUE_CHECK
+                if (GvUNIQUE((GV*)dstr)) {
                     Perl_croak(aTHX_ PL_no_modify);
                 }
 #endif
@@ -4101,7 +4101,7 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
 	    *SvEND(sv) = '\0';
 	    SvFAKE_off(sv);
 	    SvREADONLY_off(sv);
-	    unsharepvn(pvx,SvUTF8(sv)?-len:len,hash);
+	    unsharepvn(pvx, SvUTF8(sv) ? -(I32)len : len, hash);
 	}
 	else if (PL_curcop != &PL_compiling)
 	    Perl_croak(aTHX_ PL_no_modify);
@@ -4415,9 +4415,9 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
     mg->mg_moremagic = SvMAGIC(sv);
     SvMAGIC(sv) = mg;
 
-    /* Some magic sontains a reference loop, where the sv and object refer to
-       each other.  To prevent a avoid a reference loop that would prevent such
-       objects being freed, we look for such loops and if we find one we avoid
+    /* Some magic contains a reference loop, where the sv and object refer to
+       each other.  To avoid a reference loop that would prevent such objects
+       being freed, we look for such loops and if we find one we avoid
        incrementing the object refcount. */
     if (!obj || obj == sv ||
 	how == PERL_MAGIC_arylen ||
@@ -4946,7 +4946,9 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	else if (SvPVX(sv) && SvLEN(sv))
 	    Safefree(SvPVX(sv));
 	else if (SvPVX(sv) && SvREADONLY(sv) && SvFAKE(sv)) {
-	    unsharepvn(SvPVX(sv),SvUTF8(sv)?-SvCUR(sv):SvCUR(sv),SvUVX(sv));
+	    unsharepvn(SvPVX(sv),
+		       SvUTF8(sv) ? -(I32)SvCUR(sv) : SvCUR(sv),
+		       SvUVX(sv));
 	    SvFAKE_off(sv);
 	}
 	break;
@@ -8634,7 +8636,7 @@ S_gv_share(pTHX_ SV *sstr)
     SV *sv = &PL_sv_no; /* just need SvREADONLY-ness */
 
     if (GvIO(gv) || GvFORM(gv)) {
-        GvSHARED_off(gv); /* GvIOs cannot be shared. nor can GvFORMs */
+        GvUNIQUE_off(gv); /* GvIOs cannot be shared. nor can GvFORMs */
     }
     else if (!GvCV(gv)) {
         GvCV(gv) = (CV*)sv;
@@ -8642,11 +8644,11 @@ S_gv_share(pTHX_ SV *sstr)
     else {
         /* CvPADLISTs cannot be shared */
         if (!CvXSUB(GvCV(gv))) {
-            GvSHARED_off(gv);
+            GvUNIQUE_off(gv);
         }
     }
 
-    if (!GvSHARED(gv)) {
+    if (!GvUNIQUE(gv)) {
 #if 0
         PerlIO_printf(Perl_debug_log, "gv_share: unable to share %s::%s\n",
                       HvNAME(GvSTASH(gv)), GvNAME(gv));
@@ -8830,7 +8832,7 @@ Perl_sv_dup(pTHX_ SV *sstr, clone_params* param)
 	LvTYPE(dstr)	= LvTYPE(sstr);
 	break;
     case SVt_PVGV:
-	if (GvSHARED((GV*)sstr)) {
+	if (GvUNIQUE((GV*)sstr)) {
             SV *share;
             if ((share = gv_share(sstr))) {
                 del_SV(dstr);

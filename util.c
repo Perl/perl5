@@ -336,6 +336,37 @@ S_xstat(pTHX_ int flag)
 
 #endif /* LEAKTEST */
 
+/* These must be defined when not using Perl's malloc for binary
+ * compatibility */
+
+#ifndef MYMALLOC
+
+Malloc_t Perl_malloc (MEM_SIZE nbytes)
+{
+    dTHXs;
+    return PerlMem_malloc(nbytes);
+}
+
+Malloc_t Perl_calloc (MEM_SIZE elements, MEM_SIZE size)
+{
+    dTHXs;
+    return PerlMem_calloc(elements, size);
+}
+
+Malloc_t Perl_realloc (Malloc_t where, MEM_SIZE nbytes)
+{
+    dTHXs;
+    return PerlMem_realloc(where, nbytes);
+}
+
+Free_t   Perl_mfree (Malloc_t where)
+{
+    dTHXs;
+    PerlMem_free(where);
+}
+
+#endif
+
 /* copy a string up to some (non-backslashed) delimiter, if any */
 
 char *
@@ -692,16 +723,8 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	  top2:
 	    /*SUPPRESS 560*/
 	    if ((tmp = table[*s])) {
-#ifdef POINTERRIGOR
-		if (bigend - s > tmp) {
-		    s += tmp;
-		    goto top2;
-		}
-		s += tmp;
-#else
 		if ((s += tmp) < bigend)
 		    goto top2;
-#endif
 		goto check_end;
 	    }
 	    else {		/* less expensive than calling strncmp() */
@@ -795,25 +818,6 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
 	if (!(pos += PL_screamnext[pos]))
 	    goto cant_find;
     }
-#ifdef POINTERRIGOR
-    do {
-	if (pos >= stop_pos) break;
-	if (big[pos-previous] != first)
-	    continue;
-	for (x=big+pos+1-previous,s=little; s < littleend; /**/ ) {
-	    if (*s++ != *x++) {
-		s--;
-		break;
-	    }
-	}
-	if (s == littleend) {
-	    *old_posp = pos;
-	    if (!last) return (char *)(big+pos-previous);
-	    found = 1;
-	}
-    } while ( pos += PL_screamnext[pos] );
-    return (last && found) ? (char *)(big+(*old_posp)-previous) : Nullch;
-#else /* !POINTERRIGOR */
     big -= previous;
     do {
 	if (pos >= stop_pos) break;
@@ -833,7 +837,6 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
     } while ( pos += PL_screamnext[pos] );
     if (last && found)
 	return (char *)(big+(*old_posp));
-#endif /* POINTERRIGOR */
   check_tail:
     if (!SvTAIL(littlestr) || (end_shift > 0))
 	return Nullch;
@@ -3614,7 +3617,7 @@ return FALSE
         (dp->d_name[1] == '.' && dp->d_name[2] == '\0')))
 
 /*
-=for apidoc sv_getcwd
+=for apidoc getcwd_sv
 
 Fill the sv with current working directory
 
@@ -3630,7 +3633,7 @@ Fill the sv with current working directory
  *     back into. */
 
 int
-Perl_sv_getcwd(pTHX_ register SV *sv)
+Perl_getcwd_sv(pTHX_ register SV *sv)
 {
 #ifndef PERL_MICRO
 

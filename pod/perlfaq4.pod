@@ -1018,7 +1018,7 @@ Like (d), but @in contains only small positive integers:
 
 But perhaps you should have been using a hash all along, eh?
 
-=head2 How can I tell whether a list or array contains a certain element?
+=head2 How can I tell whether a certain element is contained in a list or array?
 
 Hearing the word "in" is an I<in>dication that you probably should have
 used a hash, not a list or array, to store your data.  Hashes are

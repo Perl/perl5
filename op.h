@@ -166,6 +166,7 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPpTARGET_MY		16	/* Target is PADMY. */
 
 /* Private for OP_CONST */
+#define	OPpCONST_OCTAL		4	/* Octal constant. */
 #define	OPpCONST_STRICT		8	/* bearword subject to strict 'subs' */
 #define OPpCONST_ENTERED	16	/* Has been entered as symbol. */
 #define OPpCONST_ARYBASE	32	/* Was a $[ translated to constant. */
@@ -277,7 +278,7 @@ struct pmop {
 
 #ifdef USE_ITHREADS
 #  define PmopSTASHPV(o)	((o)->op_pmstashpv)
-#  define PmopSTASHPV_set(o,pv)	(Safefree((o)->op_pmstashpv), (o)->op_pmstashpv = ((pv) ? savepv(pv) : Nullch))
+#  define PmopSTASHPV_set(o,pv)	((o)->op_pmstashpv = ((pv) ? savepv(pv) : Nullch))
 #  define PmopSTASH(o)		(PmopSTASHPV(o) \
 				 ? gv_stashpv(PmopSTASHPV(o),GV_ADD) : Nullhv)
 #  define PmopSTASH_set(o,hv)	PmopSTASHPV_set(o, (hv) ? HvNAME(hv) : Nullch)
@@ -383,7 +384,7 @@ struct loop {
 
 #define Nullop Null(OP*)
 
-/* Lowest byte of PL_opargs */
+/* Lowest byte-and-a-bit of PL_opargs */
 #define OA_MARK 1
 #define OA_FOLDCONST 2
 #define OA_RETSCALAR 4

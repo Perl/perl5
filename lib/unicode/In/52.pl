@@ -2,5 +2,5 @@
 # This file is built by mktables.PL from e.g. Unicode.txt.
 # Any changes made here will be lost!
 return <<'END';
-2580	259F
+0700	074F
 END

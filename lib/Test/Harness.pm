@@ -714,6 +714,8 @@ sub _parse_test_line {
 		$tot->{ok}++;
 		$test->{skipped}++ if $isskip;
 
+		$reason = '[no reason given]'
+		    if $isskip and not defined $reason;
 		if (defined $reason and defined $test->{skip_reason}) {
 		    # print "was: '$skip_reason' new '$reason'\n";
 		    $test->{skip_reason} = 'various reasons'

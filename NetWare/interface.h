@@ -8,11 +8,11 @@
  */
 
 /*
- * FILENAME		:	interface.c
- * DESCRIPTION	:	Perl parsing and running functions.
- * Author		:	SGP
- * Date			:	January 2001.
- *
+ * FILENAME     :   interface.c
+ * DESCRIPTION  :   Perl parsing and running functions.
+ * Author       :   SGP
+ * Date Created :   January 2001.
+ * Date Modified:   July 2nd 2001. 
  */
 
 
@@ -36,7 +36,8 @@ public:
 	int PerlParse(PerlInterpreter *my_perl, int argc, char** argv, char** env);
 	int PerlRun(PerlInterpreter *my_perl);
 	void PerlDestroy(PerlInterpreter *my_perl);
-
+	bool RegisterWithThreadTable(void);
+	bool UnregisterWithThreadTable(void);
 };
 
 

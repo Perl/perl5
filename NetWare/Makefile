@@ -15,7 +15,7 @@
 ## This file is created by using the makefile that creates Windows Perl as the reference
 ## Author: sgp
 ## Date Created: 13th July 2000
-## Date Modified: 30th June 2001
+## Date Modified: 2nd July 2001
 
 # Name of the NLM
 NLM_NAME		= perl.nlm
@@ -1479,8 +1479,11 @@ distclean: clean nwclean
 	cd ..\netware
 !if "$(NW_EXTNS)"=="yes"
 	cd cgi2perl
-	-del *.obj *.bs Makefile *$(o) *.c pm_to_blib *.xdc *.err
+	-del *.obj *.bs Makefile *$(o) *.c pm_to_blib *.xdc *.err *.sym *.map
 	cd ..
+	cd $(EXTDIR)\Perl2UCS
+	-del *.obj *.bs Makefile *$(o) *.c pm_to_blib *.xdc *.err *.sym *.map *.c
+	cd ..\..\netware
 !endif
 	-rmdir /s /q $(AUTODIR) || rmdir /s $(AUTODIR)
 	-rmdir /s /q $(COREDIR) || rmdir /s $(COREDIR)

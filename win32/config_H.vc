@@ -13,8 +13,8 @@
 /*
  * Package name      : perl5
  * Source directory  : 
- * Configuration time: Fri Jun 15 15:36:07 2001
- * Configured by     : nick
+ * Configuration time: Mon Jul  2 02:04:03 2001
+ * Configured by     : gsar
  * Target system     : 
  */
 
@@ -126,12 +126,6 @@
  *	available to duplicate file descriptors.
  */
 #define HAS_DUP2	/**/
-
-/* HAS_FCHDIR:
- *	This symbol, if defined, indicates that the fchdir routine is
- *	available to change directory using a file descriptor.
- */
-/*#define HAS_FCHDIR		/**/
 
 /* HAS_FCHMOD:
  *	This symbol, if defined, indicates that the fchmod routine is available
@@ -1287,6 +1281,12 @@
  */
 /*#define HAS_ENDSERVENT		/**/
 
+/* HAS_FCHDIR:
+ *	This symbol, if defined, indicates that the fchdir routine is
+ *	available to change directory using a file descriptor.
+ */
+/*#define HAS_FCHDIR		/**/
+
 /* FCNTL_CAN_LOCK:
  *	This symbol, if defined, indicates that fcntl() can be used
  *	for file locking.  Normally on Unix systems this is defined.
@@ -1370,7 +1370,7 @@
  *	This symbol, if defined, indicates that the getcwd routine is
  *	available to get the current working directory.
  */
-/*#define HAS_GETCWD		/**/
+#define HAS_GETCWD		/**/
 
 /* HAS_GETESPWNAM:
  *	This symbol, if defined, indicates that the getespwnam system call is
@@ -1828,7 +1828,7 @@
 
 /* HAS_SAFE_BCOPY:
  *	This symbol, if defined, indicates that the bcopy routine is available
- *	to copy potentially overlapping memory blocks. Otherwise you should
+ *	to copy potentially overlapping memory blocks. Normally, you should
  *	probably use memmove() or memcpy(). If neither is defined, roll your
  *	own version.
  */
@@ -1836,9 +1836,9 @@
 
 /* HAS_SAFE_MEMCPY:
  *	This symbol, if defined, indicates that the memcpy routine is available
- *	to copy potentially overlapping memory blocks. Otherwise you should
- *	probably use memmove() or memcpy(). If neither is defined, roll your
- *	own version.
+ *	to copy potentially overlapping memory blocks.  If you need to
+ *	copy overlapping memory blocks, you should check HAS_MEMMOVE and
+ *	use memmove() instead, if available.
  */
 /*#define HAS_SAFE_MEMCPY	/**/
 
@@ -3374,6 +3374,13 @@
  */
 /*#define	HAS_FLOCK_PROTO	/**/
 
+/* HAS_NL_LANGINFO:
+ *	This symbol, if defined, indicates that the nl_langinfo routine is
+ *	available to return local data.  You will also need <langinfo.h>
+ *	and therefore I_LANGINFO.
+ */
+/*#define HAS_NL_LANGINFO		/**/
+
 /* HAS_SIGPROCMASK:
  *	This symbol, if defined, indicates that the sigprocmask
  *	system call is available to examine or change the signal mask
@@ -3439,5 +3446,11 @@
  *		extern int usleep(useconds_t);
  */
 /*#define	HAS_USLEEP_PROTO	/**/
+
+/* I_LANGINFO:
+ *	This symbol, if defined, indicates that <langinfo.h> exists and
+ *	should be included.
+ */
+/*#define	I_LANGINFO		/**/
 
 #endif

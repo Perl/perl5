@@ -666,10 +666,6 @@ Local configuration data for libnet
 
 Attempt to evaluate the current host's internet name and domain
 
-=item Net::DummyInetd
-
-A dummy Inetd server
-
 =item Net::FTP
 
 FTP Client class
@@ -682,10 +678,6 @@ NNTP Client class
 
 OO interface to users netrc file
 
-=item Net::PH
-
-CCSO Nameserver Client class
-
 =item Net::POP3
 
 Post Office Protocol 3 Client class (RFC1081)
@@ -697,10 +689,6 @@ Check a remote host for reachability
 =item Net::SMTP
 
 Simple Mail Transfer Protocol Client
-
-=item Net::SNPP
-
-Simple Network Pager Protocol Client
 
 =item Net::Time
 
@@ -965,6 +953,10 @@ Internal object used by Time::gmtime and Time::localtime
 =item UNIVERSAL
 
 Base class for ALL classes (blessed references)
+
+=item Unicode::UCD
+
+Unicode character database
 
 =item User::grent
 

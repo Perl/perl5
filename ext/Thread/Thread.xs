@@ -342,6 +342,7 @@ static Signal_t
 handle_thread_signal(int sig)
 {
     unsigned char c = (unsigned char) sig;
+    dTHX;
     /*
      * We're not really allowed to call fprintf in a signal handler
      * so don't be surprised if this isn't robust while debugging

@@ -71,8 +71,12 @@ if (/^$_$/) {print "ok 23\n";} else {print "not ok 23\n";}
 $* = 1;		# test 3 only tested the optimized version--this one is for real
 if ("ab\ncd\n" =~ /^cd/) {print "ok 24\n";} else {print "not ok 24\n";}
 
-# [ID 20010618.006] tests 25..26 may loop
-{
+if ($^O eq 'os390') {
+    # Even with the alarm() OS/390 can't manage these tests
+    # (Perl just goes into a busy loop, luckily an interruptable one)
+    for (25..26) { print "not ok $_ # compiler bug?\n" }
+} else {
+    # [ID 20010618.006] tests 25..26 may loop
     use Config;
     my $have_alarm = $Config{d_alarm};
     local $SIG{ALRM} = sub { die "timeout\n" };
@@ -96,3 +100,4 @@ if ("ab\ncd\n" =~ /^cd/) {print "ok 24\n";} else {print "not ok 24\n";}
 	print "not ok 26\t# " . $@ || "should not match\n";
     }
 }
+

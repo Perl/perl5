@@ -1971,9 +1971,11 @@ XS(XS_Cwd_sys_abspath)
     {
 	STRLEN n_a;
 	char *	path = (char *)SvPV(ST(0),n_a);
-	char *	dir;
+	char *	dir, *s, *t, *e;
 	char p[MAXPATHLEN];
 	char *	RETVAL;
+	int l;
+	SV *sv;
 
 	if (items < 2)
 	    dir = NULL;
@@ -2063,8 +2065,31 @@ XS(XS_Cwd_sys_abspath)
 	      done:
 	    }
 	}
+	if (!RETVAL)
+	    XSRETURN_EMPTY;
+	/* Backslashes are already converted to slashes. */
+	/* Remove trailing slashes */
+	l = strlen(RETVAL);
+	while (l > 0 && RETVAL[l-1] == '/')
+	    l--;
 	ST(0) = sv_newmortal();
-	sv_setpv((SV*)ST(0), RETVAL);
+	sv_setpvn( sv = (SV*)ST(0), RETVAL, l);
+	/* Remove duplicate slashes, skipping the first three, which
+	   may be parts of a server-based path */
+	s = t = 3 + SvPV_force(sv, n_a);
+	e = SvEND(sv);
+	/* Do not worry about multibyte chars here, this would contradict the
+	   eventual UTFization, and currently most other places break too... */
+	while (s < e) {
+	    if (s[0] == t[-1] && s[0] == '/')
+		s++;				/* Skip duplicate / */
+	    else
+		*t++ = *s++;
+	}
+	if (t < e) {
+	    *t = 0;
+	    SvCUR_set(sv, t - SvPVX(sv));
+	}
     }
     XSRETURN(1);
 }

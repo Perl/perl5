@@ -194,7 +194,11 @@ err1:	serrno = errno;
 #else
 	(void)chdir(wd);
 #endif
-err2:	(void)close(fd);
+
+err2:
+#ifdef HAS_FCHDIR
+	(void)close(fd);
+#endif
 	errno = serrno;
 	return (NULL);
 #endif
@@ -209,7 +213,7 @@ fastcwd()
 PPCODE:
 {
     dXSTARG;
-    sv_getcwd(TARG);
+    getcwd_sv(TARG);
     XSprePUSH; PUSHTARG;
 }
 

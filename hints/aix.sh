@@ -351,11 +351,6 @@ EOM
 		exit 1
 		;;
 	    esac
-	    # XXX In 64-bit AIX 5L (oslevel 5.1.0.0, ccversion 5.0.2.0)
-	    # the Configure library symbol probe mysteriously finds all
-	    # symbols but these two --jhi XXX
-	    d_pipe='define'
-	    d_times='define'
 	    ;;
 esac
 EOCBU
@@ -474,8 +469,11 @@ EOCBU
 
 if test $usenativedlopen = 'true'
 then
-        ccflags="$ccflags -DUSE_NATIVE_DLOPEN"
-	ldflags="$ldflags -brtl"
+    ccflags="$ccflags -DUSE_NATIVE_DLOPEN"
+    case "$cc" in
+      *gcc*) ldflags="$ldflags -Wl,-brtl" ;;
+      *)     ldflags="$ldflags -brtl" ;;
+      esac
 else
     # If the C++ libraries, libC and libC_r, are available we will prefer them
     # over the vanilla libc, because the libC contain loadAndInit() and

@@ -1751,7 +1751,7 @@ getcwd()
     PPCODE:
       {
 	dXSTARG;
-	sv_getcwd(TARG);
+	getcwd_sv(TARG);
 	XSprePUSH; PUSHTARG;
       }
 

@@ -8,17 +8,17 @@
  */
 
 /*
- * FILENAME		:	interface.c
- * DESCRIPTION	:	Perl parsing and running functions.
- * Author		:	SGP
- * Date			:	January 2001.
- *
+ * FILENAME     :   interface.c
+ * DESCRIPTION  :   Calling Perl APIs.
+ * Author       :   SGP
+ * Date	Created :   January 2001.
+ * Date Modified:   July 2nd 2001.
  */
 
 
 
 #include "interface.h"
-
+#include "nwtinfo.h"
 
 static void xs_init(pTHX);
 
@@ -40,6 +40,18 @@ ClsPerlHost::~ClsPerlHost()
 ClsPerlHost::VersionNumber()
 {
 	return 0;
+}
+
+bool
+ClsPerlHost::RegisterWithThreadTable()
+{
+	return(fnRegisterWithThreadTable());
+}
+
+bool
+ClsPerlHost::UnregisterWithThreadTable()
+{
+	return(fnUnregisterWithThreadTable());
 }
 
 int

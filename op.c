@@ -2035,9 +2035,15 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
 	right->op_type == OP_SUBST ||
 	right->op_type == OP_TRANS)) {
 	right->op_flags |= OPf_STACKED;
-	if (right->op_type != OP_MATCH &&
-            ! (right->op_type == OP_TRANS &&
-               right->op_private & OPpTRANS_IDENTICAL))
+	if ((right->op_type != OP_MATCH &&
+	     ! (right->op_type == OP_TRANS &&
+		right->op_private & OPpTRANS_IDENTICAL)) ||
+	    /* if SV has magic, then match on original SV, not on its copy.
+	       see note in pp_helem() */
+	    (right->op_type == OP_MATCH &&	
+	     (left->op_type == OP_AELEM ||
+	      left->op_type == OP_HELEM ||
+	      left->op_type == OP_AELEMFAST)))
 	    left = mod(left, right->op_type);
 	if (right->op_type == OP_TRANS)
 	    o = newBINOP(OP_NULL, OPf_STACKED, scalar(left), right);
@@ -4598,9 +4604,9 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 
     cv = (!name || GvCVGEN(gv)) ? Nullcv : GvCV(gv);
 
-#ifdef GV_SHARED_CHECK
-    if (cv && GvSHARED(gv) && SvREADONLY(cv)) {
-        Perl_croak(aTHX_ "Can't define subroutine %s (GV is shared)", name);
+#ifdef GV_UNIQUE_CHECK
+    if (cv && GvUNIQUE(gv) && SvREADONLY(cv)) {
+        Perl_croak(aTHX_ "Can't define subroutine %s (GV is unique)", name);
     }
 #endif
 
@@ -4612,9 +4618,9 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     if (cv) {
         bool exists = CvROOT(cv) || CvXSUB(cv);
 
-#ifdef GV_SHARED_CHECK
-        if (exists && GvSHARED(gv)) {
-            Perl_croak(aTHX_ "Can't redefine shared subroutine %s", name);
+#ifdef GV_UNIQUE_CHECK
+        if (exists && GvUNIQUE(gv)) {
+            Perl_croak(aTHX_ "Can't redefine unique subroutine %s", name);
         }
 #endif
 
@@ -5102,9 +5108,9 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
     else
 	name = "STDOUT";
     gv = gv_fetchpv(name,TRUE, SVt_PVFM);
-#ifdef GV_SHARED_CHECK
-    if (GvSHARED(gv)) {
-        Perl_croak(aTHX_ "Bad symbol for form (GV is shared)");
+#ifdef GV_UNIQUE_CHECK
+    if (GvUNIQUE(gv)) {
+        Perl_croak(aTHX_ "Bad symbol for form (GV is unique)");
     }
 #endif
     GvMULTI_on(gv);
@@ -6111,6 +6117,39 @@ Perl_ck_null(pTHX_ OP *o)
 }
 
 OP *
+Perl_ck_octmode(pTHX_ OP *o)
+{
+    OP *p;
+
+    if ((ckWARN(WARN_OCTMODE)
+	/* Add WARN_MKDIR instead of getting rid of WARN_{CHMOD,UMASK}.
+	   Backwards compatibility and consistency are terrible things.
+	   AMS 20010705 */
+	|| (o->op_type == OP_CHMOD && ckWARN(WARN_CHMOD))
+	|| (o->op_type == OP_UMASK && ckWARN(WARN_UMASK))
+	|| (o->op_type == OP_MKDIR && ckWARN(WARN_MKDIR)))
+	&& o->op_flags & OPf_KIDS)
+    {
+	if (o->op_type == OP_MKDIR)
+	    p = cLISTOPo->op_last;		/* mkdir $foo, 0777 */
+	else if (o->op_type == OP_CHMOD)
+	    p = cLISTOPo->op_first->op_sibling;	/* chmod 0777, $foo */
+	else
+	    p = cUNOPo->op_first;		/* umask 0222 */
+
+	if (p->op_type == OP_CONST && !(p->op_private & OPpCONST_OCTAL)) {
+	    int mode = SvIV(cSVOPx_sv(p));
+
+	    Perl_warner(aTHX_ WARN_OCTMODE,
+			"Non-octal literal mode (%d) specified", mode);
+	    Perl_warner(aTHX_ WARN_OCTMODE,
+			"\t(Did you mean 0%d instead?)\n", mode);
+	}
+    }
+    return ck_fun(o);
+}
+
+OP *
 Perl_ck_open(pTHX_ OP *o)
 {
     HV *table = GvHV(PL_hintgv);
@@ -6901,9 +6940,9 @@ Perl_peep(pTHX_ register OP *o)
 	    svp = cSVOPx_svp(((BINOP*)o)->op_last);
 	    if ((!SvFAKE(sv = *svp) || !SvREADONLY(sv)) && !IS_PADCONST(sv)) {
 		key = SvPV(sv, keylen);
-		if (SvUTF8(sv))
-		  keylen = -keylen;
-		lexname = newSVpvn_share(key, keylen, 0);
+		lexname = newSVpvn_share(key,
+					 SvUTF8(sv) ? -(I32)keylen : keylen,
+					 0);
 		SvREFCNT_dec(sv);
 		*svp = lexname;
 	    }
@@ -6921,9 +6960,8 @@ Perl_peep(pTHX_ register OP *o)
 	    if (!fields || !GvHV(*fields))
 		break;
 	    key = SvPV(*svp, keylen);
-	    if (SvUTF8(*svp))
-	        keylen = -keylen;
-	    indsvp = hv_fetch(GvHV(*fields), key, keylen, FALSE);
+	    indsvp = hv_fetch(GvHV(*fields), key,
+			      SvUTF8(*svp) ? -(I32)keylen : keylen, FALSE);
 	    if (!indsvp) {
 		Perl_croak(aTHX_ "No such pseudo-hash field \"%s\" in variable %s of type %s",
 		      key, SvPV(lexname, n_a), HvNAME(SvSTASH(lexname)));
@@ -6988,9 +7026,8 @@ Perl_peep(pTHX_ register OP *o)
 		 key_op = (SVOP*)key_op->op_sibling) {
 		svp = cSVOPx_svp(key_op);
 		key = SvPV(*svp, keylen);
-		if (SvUTF8(*svp))
-	            keylen = -keylen;
-		indsvp = hv_fetch(GvHV(*fields), key, keylen, FALSE);
+		indsvp = hv_fetch(GvHV(*fields), key,
+				  SvUTF8(*svp) ? -(I32)keylen : keylen, FALSE);
 		if (!indsvp) {
 		    Perl_croak(aTHX_ "No such pseudo-hash field \"%s\" "
 			       "in variable %s of type %s",

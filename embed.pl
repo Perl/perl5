@@ -1359,11 +1359,11 @@ Ajno	|PerlInterpreter*|perl_clone_using|PerlInterpreter *interp|UV flags \
 #  endif
 #endif
 
-#if defined(MYMALLOC)
 Ajnop	|Malloc_t|malloc	|MEM_SIZE nbytes
 Ajnop	|Malloc_t|calloc	|MEM_SIZE elements|MEM_SIZE size
 Ajnop	|Malloc_t|realloc	|Malloc_t where|MEM_SIZE nbytes
 Ajnop	|Free_t	|mfree		|Malloc_t where
+#if defined(MYMALLOC)
 jnp	|MEM_SIZE|malloced_size	|void *p
 #endif
 
@@ -2031,7 +2031,7 @@ Apd	|I32	|sv_cmp_locale	|SV* sv1|SV* sv2
 Apd	|char*	|sv_collxfrm	|SV* sv|STRLEN* nxp
 #endif
 Ap	|OP*	|sv_compile_2op	|SV* sv|OP** startp|char* code|AV** avp
-Apd	|int	|sv_getcwd	|SV* sv
+Apd	|int	|getcwd_sv	|SV* sv
 Apd	|void	|sv_dec		|SV* sv
 Ap	|void	|sv_dump	|SV* sv
 Apd	|bool	|sv_derived_from|SV* sv|const char* name

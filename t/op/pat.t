@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..660\n";
+print "1..672\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -1889,3 +1889,43 @@ $T="ok 659\n";if ($x =~ /(a([abcdefg]+)(?{$y=$^N})d)(?{$z=$^N})e/ and $y eq "bc"
               {print $T} else {print "not $T"};
 $T="ok 660\n";if ($x =~ /(a([abcdefg]+)(?{$y=$^N})de)(?{$z=$^N})/ and $y eq "bc" and $z eq "abcde")
               {print $T} else {print "not $T"};
+
+# Test the Unicode script classes
+
+print "not " unless chr(0x100) =~ /\p{InLatin}/; # outside Latin-1
+print "ok 661\n";
+
+print "not " unless chr(0x212b) =~ /\p{InLatin}/; # Angstrom sign, very outside
+print "ok 662\n";
+
+print "not " unless chr(0x5d0) =~ /\p{InHebrew}/; # inside HebrewBlock
+print "ok 663\n";
+
+print "not " unless chr(0xfb4f) =~ /\p{InHebrew}/; # outside HebrewBlock
+print "ok 664\n";
+
+print "not " unless chr(0xb5) =~ /\p{InGreek}/; # singleton (not in a range)
+print "ok 665\n";
+
+print "not " unless chr(0x37a) =~ /\p{InGreek}/; # singleton
+print "ok 666\n";
+
+print "not " unless chr(0x386) =~ /\p{InGreek}/; # singleton
+print "ok 667\n";
+
+print "not " unless chr(0x387) =~ /\P{InGreek}/; # not there
+print "ok 668\n";
+
+print "not " unless chr(0x388) =~ /\p{InGreek}/; # range
+print "ok 669\n";
+
+print "not " unless chr(0x38a) =~ /\p{InGreek}/; # range
+print "ok 670\n";
+
+print "not " unless chr(0x38b) =~ /\P{InGreek}/; # not there
+print "ok 671\n";
+
+print "not " unless chr(0x38c) =~ /\p{InGreek}/; # singleton
+print "ok 672\n";
+
+

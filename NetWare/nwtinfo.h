@@ -8,11 +8,11 @@
  */
 
 /*
- * FILENAME		:	NWTInfo.h
- * DESCRIPTION	:	Thread-local storage for Perl.
- * Author		:	SGP, HYAK
- * Date			:	January 2001.
- *
+ * FILENAME     :   NWTInfo.h
+ * DESCRIPTION  :   Thread-local storage for Perl.
+ * Author       :   SGP, HYAK
+ * Date	Created :   January 2001.
+ * Date Modified:   July 2nd 2001.
  */
 
 
@@ -33,19 +33,25 @@ typedef struct tagThreadInfo
 
 void fnInitializeThreadInfo(void);
 BOOL fnTerminateThreadInfo(void);
-BOOL fnRegisterWithThreadTable(void);
-BOOL fnUnregisterWithThreadTable(void);
 
 ThreadInfo* fnAddThreadInfo(int tid);
 BOOL fnRemoveThreadInfo(int tid);
 ThreadInfo* fnGetThreadInfo(int tid);
 
-//For storing and retrieving Watcom Hash list address
 #ifdef __cplusplus
+	//For storing and retrieving Watcom Hash list address
 	extern "C" BOOL fnInsertHashListAddrs(void *addrs, BOOL dontTouchHashList);
+	//Registering with the Thread table
+	extern "C" BOOL fnRegisterWithThreadTable(void);
+	extern "C" BOOL fnUnregisterWithThreadTable(void);
 #else
+	//For storing and retrieving Watcom Hash list address
 	BOOL fnInsertHashListAddrs(void *addrs, BOOL dontTouchHashList);
+	//Registering with the Thread table
+	BOOL fnRegisterWithThreadTable(void);
+	BOOL fnUnregisterWithThreadTable(void);
 #endif
+
 BOOL fnGetHashListAddrs(void **addrs, BOOL *dontTouchHashList);
 
 //New TLS to set and get the thread contex - may be redundant,

@@ -15,7 +15,7 @@ use warnings;
 use strict;
 use Config;
 
-print "1..14\n";
+print "1..15\n";
 
 use B::Deparse;
 my $deparse = B::Deparse->new() or print "not ";
@@ -105,7 +105,7 @@ $b = <<'EOF';
 
 LINE: while (defined($_ = <ARGV>)) {
     chomp $_;
-    @F = split(" ", $_, 0);
+    our(@F) = split(" ", $_, 0);
     '???';
 }
 
@@ -114,27 +114,27 @@ print "# [$a]\n\# vs expected\n# [$b]\nnot " if $a ne $b;
 print "ok " . $i++ . "\n";
 
 __DATA__
-# 1
+# 2
 1;
 ####
-# 2
+# 3
 {
     no warnings;
     '???';
     2;
 }
 ####
-# 3
+# 4
 my $test;
 ++$test and $test /= 2;
 >>>>
 my $test;
 $test /= 2 if ++$test;
 ####
-# 4
+# 5
 -((1, 2) x 2);
 ####
-# 5
+# 6
 {
     my $test = sub : lvalue {
 	my $x;
@@ -142,7 +142,7 @@ $test /= 2 if ++$test;
     ;
 }
 ####
-# 6
+# 7
 {
     my $test = sub : method {
 	my $x;
@@ -150,7 +150,7 @@ $test /= 2 if ++$test;
     ;
 }
 ####
-# 7
+# 8
 {
     my $test = sub : locked method {
 	my $x;
@@ -158,7 +158,7 @@ $test /= 2 if ++$test;
     ;
 }
 ####
-# 8
+# 9
 {
     234;
 }
@@ -166,10 +166,14 @@ continue {
     123;
 }
 ####
-# 9
+# 10
 my $x;
 print $main::x;
 ####
-# 10
+# 11
 my @x;
 print $main::x[1];
+####
+# 12
+my %x;
+$x{warn()};

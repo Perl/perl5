@@ -180,6 +180,8 @@ END_EXTERN_C
 	TlsFree(PL_thr_key);						\
     } STMT_END
 
+#define PTHREAD_ATFORK(prepare,parent,child)	NOOP
+
 #if defined(USE_RTL_THREAD_API) && !defined(_MSC_VER)
 #define JOIN(t, avp)							\
     STMT_START {							\

@@ -37,7 +37,7 @@ sub canonpath {
     
     # Handle POSIX-style node names beginning with double slash
     my $node = '';
-    if ( $^O =~ m/^qnx|nto$/ && $path =~ s:^(//[^/]+)(/|\z):/:s ) {
+    if ( $^O =~ m/^(?:qnx|nto)$/ && $path =~ s:^(//[^/]+)(/|\z):/:s ) {
       $node = $1;
     }
     $path =~ s|/+|/|g unless($^O eq 'cygwin');     # xx////xx  -> xx/xx

@@ -62,6 +62,11 @@
 #define fseek fseeko
 #endif
 
+/* BS2000 includes are sometimes a bit non standard :-( */
+#if defined(POSIX_BC) && defined(O_BINARY) && !defined(O_TEXT)
+#undef O_BINARY
+#endif
+
 #ifdef PERLIO_IS_STDIO
 /* #define PerlIO_xxxx() as equivalent stdio function */
 #include "perlsdio.h"
