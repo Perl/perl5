@@ -3257,7 +3257,7 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
     else if (k == REF || k == OPEN || k == CLOSE || k == GROUPP )
 	Perl_sv_catpvf(aTHX_ sv, "%d", ARG(o));	/* Parenth number */
     else if (k == LOGICAL)
-	Perl_sv_catpvf(aTHX_ sv, "[%d]", ARG(o));	/* 2: embedded, otherwise 1 */
+	Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags);	/* 2: embedded, otherwise 1 */
     else if (k == BRANCHJ && (OP(o) == UNLESSM || OP(o) == IFMATCH))
 	Perl_sv_catpvf(aTHX_ sv, "[-%d]", o->flags);
 #endif	/* DEBUGGING */
