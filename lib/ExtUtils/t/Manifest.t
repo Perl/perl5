@@ -218,6 +218,7 @@ SKIP: {
     like( $@, qr/^Could not open MANIFEST/,  
                  "maniadd() dies if it can't open the MANIFEST" );
 
+    chmod( 0600, 'MANIFEST' );
 }
     
 
