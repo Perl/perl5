@@ -206,18 +206,20 @@ will produce different results on platforms that have different
 $Config{ivsize}.  For portability, be sure to mask off the excess bits
 in the result of unary C<~>, e.g., C<~$x & 0xffffffff>.
 
-=head2 The passwd and shell returned by the getpwxxx() are now tainted
+=head2 More builtins taint their results
 
-Because the user can affect her own encrypted password and login shell
-the password and shell returned by the getpwent(), getpwnam(), and
-getpwuid() functions are tainted.
+The C<passwd> and C<shell> fields returned by the getpwent(), getpwnam(),
+and getpwuid() are now tainted, because the user can affect their own
+encrypted password and login shell.
 
-=head2 The msgrcv() and shmread() now taint
+The variable modified by shmread(), and messages returned by msgrcv()
+(and its object-oriented interface IPC::SysV::Msg::rcv) are also tainted,
+because other untrusted processes can modify messages and shared memory
+segments for their own nefarious purposes.
 
-Because other (untrusted) processes can modify messages and shared
-memory segments for their own nefarious purposes, the messages
-returned by msgrcv() (and its object-oriented interface,
-IPC::SysV::Msg::rcv) and the variable modified by shmread() are tainted.
+To avoid these new tainting behaviors, you can build Perl with the
+Configure option C<-Accflags=-DINCOMPLETE_TAINTS>.  Beware that the
+ensuing perl binary may be insecure.
 
 =back
 
@@ -2647,17 +2649,19 @@ warning.  And in Perl 5.005, this special treatment will cease.
 
 =head1 Known Problems
 
-=head2 Thread tests failing
+=head2 Thread test failures
 
-The subtests 19 and 20 of the lib/thread test are known to fail in
-many platforms.
+The subtests 19 and 20 of lib/thread.t test are known to fail due to
+fundamental problems in the 5.005 threading implementation.  These are
+not new failures--Perl 5.005_0x has the same bugs, but didn't have these
+tests.
 
 =head2 EBCDIC platforms not supported
 
-In earlier releases of Perl the EBCDIC environments like OS390 (also
-known as Open Edition MVS) and VM-ESA were supported.  Due to the
-changes required by the UTF-8 (Unicode) support in Perl 5.6 the EBCDIC
-platforms are not supported in Perl 5.6.0.
+In earlier releases of Perl, EBCDIC environments like OS390 (also
+known as Open Edition MVS) and VM-ESA were supported.  Due to changes
+required by the UTF-8 (Unicode) support, the EBCDIC platforms are not
+supported in Perl 5.6.0.
 
 =head2 NEXTSTEP 3.3 POSIX test failure
 
@@ -2684,10 +2688,10 @@ these days.
 
 =head2 Many features still experimental
 
-As discussed above, many features are still experimental, to a greater
-or lesser degree.  Interfaces and implementation are subject to
-change, in extreme cases even subject to removal in some future
-release of Perl.  These features include the following:
+As discussed above, many features are still experimental.  Interfaces and
+implementation of these features are subject to change, and in extreme cases,
+even subject to removal in some future release of Perl.  These features
+include the following:
 
 =over 4
 
@@ -2703,9 +2707,9 @@ release of Perl.  These features include the following:
 
 =item The Compiler suite
 
-=item the DB module
+=item The DB module
 
-=item the regular expression constructs C<(?{ code })> and C<(??{ code })>
+=item The regular expression constructs C<(?{ code })> and C<(??{ code })>
 
 =back
 
