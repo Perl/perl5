@@ -149,7 +149,7 @@ do, import, no, package, require, use
 
 =item Keywords related to classes and object-orientedness
 
-bless, dbmclose, dbmopen, package, ref, tie, untie, use
+bless, dbmclose, dbmopen, package, ref, tie, tied, untie, use
 
 =item Low-level socket functions
 
@@ -3023,6 +3023,13 @@ A class implementing a scalar should have the following methods:
 Unlike dbmopen(), the tie() function will not use or require a module
 for you--you need to do that explicitly yourself.  See L<DB_File>
 or the F<Config> module for interesting tie() implementations.
+
+=item tied VARIABLE
+
+Returns a reference to the object underlying VARIABLE (the same value
+that was originally returned by the tie() call which bound the variable
+to a package.)  Returns the undefined value if VARIABLE isn't tied to a
+package.
 
 =item time
 
