@@ -5624,6 +5624,7 @@ Perl_ck_subr(pTHX_ OP *o)
     I32 arg = 0;
     STRLEN n_a;
 
+    o->op_private |= OPpENTERSUB_HASTARG;
     for (cvop = o2; cvop->op_sibling; cvop = cvop->op_sibling) ;
     if (cvop->op_type == OP_RV2CV) {
 	SVOP* tmpop;
