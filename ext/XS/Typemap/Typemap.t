@@ -313,8 +313,8 @@ if (defined $fh) {
   # print to it using normal perl
   ok(print $fh "$lines[1]");
 
-  # close it using XS
-  ok( T_STDIO_close( $fh ) );
+  # close it using XS if using perlio, using Perl otherwise
+  ok( $Config{useperlio} ? T_STDIO_close( $fh ) : close( $fh ) );
 
   # open from perl, and check contents
   open($fh, "< $testfile");
