@@ -3220,7 +3220,7 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	    SV *sv = newSVpv(argv[0],0);
 	    av_push(GvAVn(PL_argvgv),sv);
 	    if (PL_widesyscalls)
-		sv_utf8_upgrade(sv);
+		(void)sv_utf8_decode(sv);
 	}
     }
     if ((PL_envgv = gv_fetchpv("ENV",TRUE, SVt_PVHV))) {
