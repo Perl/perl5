@@ -264,7 +264,7 @@ EOS
     $test++;
     push @script, <<EOS;
     print "# j = \$j\n";
-    print "not " unless "\$j" =~ /^\Q-0.5+0.86602540\E\d+i$/;
+    print "not " unless "\$j" =~ /^-0\\.5\\+0.86602540\\d+i\$/;
     print "ok $test\n";
 
     \$j->display_format('style' => 'polar', 'polar_pretty_print' => 0);
@@ -273,7 +273,7 @@ EOS
     $test++;
     push @script, <<EOS;
     print "# j = \$j\n";
-    print "not " unless "\$j" =~ /^\Q[1,2.09439510\E\d+]$/;
+    print "not " unless "\$j" =~ /^\\[1,2\\.09439510\\d+\\]\$/;
     print "ok $test\n";
 
     \$j->display_format('style' => 'cartesian', 'format' => '(%.5g)');
