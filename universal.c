@@ -303,9 +303,10 @@ XS(XS_UNIVERSAL_VERSION)
 	    sv_setnv(req, n);
 	}
 
-	if (SvNV(req) > SvNV(sv))
+	if (SvNV(req) > SvNV(sv)) {
 	    Perl_croak(aTHX_ "%s version %s required--this is only version %s",
-		  HvNAME(pkg), SvPV(req,len), SvPV(sv,len));
+		       HvNAME(pkg), SvPV_nolen(req), SvPV_nolen(sv,len));
+	}
     }
 
 finish:
