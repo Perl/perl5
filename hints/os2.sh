@@ -39,7 +39,7 @@ if [ "$emxaout" != "" ]; then
     d_fork='define'
     lddlflags='-Zdll'
     ldflags='-Zexe'
-    ccflags='-DDOSISH -DNO_SYS_ALLOC -DOS2=2 -DEMBED -I.'
+    ccflags='-DDOSISH -DNO_SYS_ALLOC -DOS2=2 -DEMBED -I. -DPACK_MALLOC'
     use_clib='c'
 else
     d_shrplib='define'
@@ -49,8 +49,9 @@ else
     plibext='.lib'
     d_fork='undef'
     lddlflags='-Zdll -Zomf -Zcrtdll'
-    ldflags='-Zexe -Zomf -Zcrtdll'
-    ccflags='-Zomf -DDOSISH -DOS2=2 -DEMBED -I.'
+    # Recursive regmatch may eat 2.5M of stack alone.
+    ldflags='-Zexe -Zomf -Zcrtdll -Zstack 32000'
+    ccflags='-Zomf -DDOSISH -DOS2=2 -DEMBED -I. -DPACK_MALLOC'
     use_clib='c_import'
 fi
 

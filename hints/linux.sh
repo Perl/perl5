@@ -19,10 +19,14 @@ case "$prefix" in
 '') prefix='/usr' ;;
 esac
 
-# Perl users typically expect BSD style signal handling.
 # This may not be needed in 5.002 since sigaction is used.
 # gcc-2.6.3 defines _G_HAVE_BOOL to 1, but doesn't actually supply bool.
-ccflags="-D__USE_BSD_SIGNAL -Dbool=char -DHAS_BOOL $ccflags"
+ccflags="-Dbool=char -DHAS_BOOL $ccflags"
+
+# BSD compatability library no longer needed
+set `echo X "$libswanted "| sed -e 's/ bsd / /'`
+shift
+libswanted="$*"
 
 # Configure may fail to find lstat() since it's a static/inline
 # function in <sys/stat.h>.
@@ -64,6 +68,7 @@ if ${cc:-gcc} try.c >/dev/null 2>&1 && ./a.out; then
 
 You appear to have ELF support.  I'll try to use it for dynamic loading.
 EOM
+    nm_so_opt='-dynamic'
 else
     cat <<'EOM'
 

@@ -12,6 +12,9 @@ cc="cc -32"
 ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -Olimit 3000"
 #ccflags="$ccflags -Olimit 3000" # this line builds perl but not tk (beta 8)
 lddlflags="-32 -shared"
+# Configure would suggest the default -Kpic, which won't work for SGI.
+# Configure will respect this blank hint value instead.
+cccdlflags=' '
 
 # We don't want these libraries.  Anyone know why?
 set `echo X "$libswanted "|sed -e 's/ socket / /' -e 's/ nsl / /' -e 's/ dl / /'`
