@@ -340,6 +340,9 @@ walk_table {
 		$ret .= hide($func,"Perl_$func");
 	    }
 	}
+        unless ($flags =~ /A/) {
+            $ret = "#ifdef PERL_CORE\n$ret#endif\n";
+        }
     }
     $ret;
 } \*EM, "";
@@ -393,6 +396,9 @@ walk_table {
 		$ret .= $alist . ")\n";
 	    }
 	}
+        unless ($flags =~ /A/) {
+            $ret = "#ifdef PERL_CORE\n$ret#endif\n";
+        }
     }
     $ret;
 } \*EM, "";
