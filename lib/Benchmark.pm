@@ -403,7 +403,7 @@ use Exporter;
 @EXPORT_OK=qw(timesum cmpthese countit
 	      clearcache clearallcache disablecache enablecache);
 
-$VERSION = 1.01;
+$VERSION = 1.02;
 
 &init;
 
@@ -687,7 +687,8 @@ sub timethese{
     print " ", join(', ',@names) unless $style eq 'none';
     unless ( $n > 0 ) {
 	my $for = n_to_for( $n );
-	print ", each for at least $for CPU seconds" unless $style eq 'none';
+	print ", each" if $n > 1 && $style ne 'none';
+	print " for at least $for CPU seconds" unless $style eq 'none';
     }
     print "...\n" unless $style eq 'none';
 
