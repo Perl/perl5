@@ -1,4 +1,4 @@
-char rcsid[] = "$RCSfile: perl.c,v $$Revision: 4.0.1.4 $$Date: 91/06/10 01:23:07 $\nPatch level: ###\n";
+char rcsid[] = "$RCSfile: perl.c,v $$Revision: 4.0.1.5 $$Date: 91/11/05 18:03:32 $\nPatch level: ###\n";
 /*
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,15 @@ char rcsid[] = "$RCSfile: perl.c,v $$Revision: 4.0.1.4 $$Date: 91/06/10 01:23:07
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	perl.c,v $
+ * Revision 4.0.1.5  91/11/05  18:03:32  lwall
+ * patch11: random cleanup
+ * patch11: $0 was being truncated at times
+ * patch11: cppstdin now installed outside of source directory
+ * patch11: -P didn't allow use of #elif or #undef
+ * patch11: prepared for ctype implementations that don't define isascii()
+ * patch11: added eval {}
+ * patch11: eval confused by string containing null
+ * 
  * Revision 4.0.1.4  91/06/10  01:23:07  lwall
  * patch10: perl -v printed incorrect copyright notice
  * 
@@ -25,6 +34,8 @@ char rcsid[] = "$RCSfile: perl.c,v $$Revision: 4.0.1.4 $$Date: 91/06/10 01:23:07
  * 4.0 baseline.
  * 
  */
+
+/*SUPPRESS 560*/
 
 #include "EXTERN.h"
 #include "perl.h"
@@ -64,6 +75,7 @@ register char **env;
 {
     register STR *str;
     register char *s;
+    char *scriptname;
     char *getenv();
     bool dosearch = FALSE;
 #ifdef DOSUID
@@ -193,6 +205,10 @@ setuid perl scripts securely.\n");
 	    s++;
 	    goto reswitch;
 	case 'S':
+#ifdef TAINT
+	    if (euid != uid || egid != gid)
+		fatal("No -S allowed in setuid scripts");
+#endif
 	    dosearch = TRUE;
 	    s++;
 	    goto reswitch;
@@ -212,10 +228,11 @@ setuid perl scripts securely.\n");
 	}
     }
   switch_end:
+    scriptname = argv[0];
     if (e_fp) {
 	(void)fclose(e_fp);
 	argc++,argv--;
-	argv[0] = e_tmpname;
+	scriptname = e_tmpname;
     }
 
 #ifdef MSDOS
@@ -259,17 +276,17 @@ setuid perl scripts securely.\n");
 
     /* open script */
 
-    if (argv[0] == Nullch)
+    if (scriptname == Nullch)
 #ifdef MSDOS
     {
 	if ( isatty(fileno(stdin)) )
 	  moreswitches("v");
-	argv[0] = "-";
+	scriptname = "-";
     }
 #else
-	argv[0] = "-";
+	scriptname = "-";
 #endif
-    if (dosearch && !index(argv[0], '/') && (s = getenv("PATH"))) {
+    if (dosearch && !index(scriptname, '/') && (s = getenv("PATH"))) {
 	char *xfound = Nullch, *xfailed = Nullch;
 	int len;
 
@@ -289,7 +306,7 @@ setuid perl scripts securely.\n");
 	    if (len && tokenbuf[len-1] != '\\')
 #endif
 		(void)strcat(tokenbuf+len,"/");
-	    (void)strcat(tokenbuf+len,argv[0]);
+	    (void)strcat(tokenbuf+len,scriptname);
 #ifdef DEBUGGING
 	    if (debug & 1)
 		fprintf(stderr,"Looking for %s\n",tokenbuf);
@@ -305,20 +322,26 @@ setuid perl scripts securely.\n");
 		xfailed = savestr(tokenbuf);
 	}
 	if (!xfound)
-	    fatal("Can't execute %s", xfailed ? xfailed : argv[0] );
+	    fatal("Can't execute %s", xfailed ? xfailed : scriptname );
 	if (xfailed)
 	    Safefree(xfailed);
-	argv[0] = savestr(xfound);
+	scriptname = savestr(xfound);
     }
 
     fdpid = anew(Nullstab);	/* for remembering popen pids by fd */
     pidstatus = hnew(COEFFSIZE);/* for remembering status of dead pids */
 
-    origfilename = savestr(argv[0]);
+    origfilename = savestr(scriptname);
     curcmd->c_filestab = fstab(origfilename);
     if (strEQ(origfilename,"-"))
-	argv[0] = "";
+	scriptname = "";
     if (preprocess) {
+	char *cpp = CPPSTDIN;
+
+	if (strEQ(cpp,"cppstdin"))
+	    sprintf(tokenbuf, "%s/%s", SCRIPTDIR, cpp);
+	else
+	    sprintf(tokenbuf, "%s", cpp);
 	str_cat(str,"-I");
 	str_cat(str,PRIVLIB);
 	(void)sprintf(buf, "\
@@ -329,8 +352,10 @@ setuid perl scripts securely.\n");
  -e '/^#[ 	]*ifdef[ 	]/b' \
  -e '/^#[ 	]*ifndef[ 	]/b' \
  -e '/^#[ 	]*else/b' \
+ -e '/^#[ 	]*elif[ 	]/b' \
+ -e '/^#[ 	]*undef[ 	]/b' \
  -e '/^#[ 	]*endif/b' \
- -e 's/^#.*//' \
+ -e 's/^[ 	]*#.*//' \
  %s | %s -C %s %s",
 #ifdef MSDOS
 	  "",
@@ -338,7 +363,7 @@ setuid perl scripts securely.\n");
 	  "/bin/",
 #endif
 	  (doextract ? "-e '1,/^#/d\n'" : ""),
-	  argv[0], CPPSTDIN, str_get(str), CPPMINUS);
+	  scriptname, tokenbuf, str_get(str), CPPMINUS);
 #ifdef DEBUGGING
 	if (debug & 64) {
 	    fputs(buf,stderr);
@@ -360,11 +385,16 @@ setuid perl scripts securely.\n");
 #endif /* IAMSUID */
 	rsfp = mypopen(buf,"r");
     }
-    else if (!*argv[0])
+    else if (!*scriptname) {
+#ifdef TAINT
+	if (euid != uid || egid != gid)
+	    fatal("Can't take set-id script from stdin");
+#endif
 	rsfp = stdin;
+    }
     else
-	rsfp = fopen(argv[0],"r");
-    if (rsfp == Nullfp) {
+	rsfp = fopen(scriptname,"r");
+    if ((FILE*)rsfp == Nullfp) {
 #ifdef DOSUID
 #ifndef IAMSUID		/* in case script is not readable before setuid */
 	if (euid && stat(stab_val(curcmd->c_filestab)->str_ptr,&statbuf) >= 0 &&
@@ -473,7 +503,7 @@ setuid perl scripts securely.\n");
 	    fatal("No #! line");
 	s = tokenbuf+2;
 	if (*s == ' ') s++;
-	while (!isspace(*s)) s++;
+	while (!isSPACE(*s)) s++;
 	if (strnNE(s-4,"perl",4) && strnNE(s-9,"perl",4))  /* sanity check */
 	    fatal("Not a perl script");
 	while (*s == ' ' || *s == '\t') s++;
@@ -484,7 +514,7 @@ setuid perl scripts securely.\n");
 	 */
 	len = strlen(validarg);
 	if (strEQ(validarg," PHOOEY ") ||
-	    strnNE(s,validarg,len) || !isspace(s[len]))
+	    strnNE(s,validarg,len) || !isSPACE(s[len]))
 	    fatal("Args must match #! line");
 
 #ifndef IAMSUID
@@ -593,6 +623,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 	    doextract = FALSE;
 	    if (s = instr(s,"perl -")) {
 		s += 6;
+		/*SUPPRESS 530*/
 		while (s = moreswitches(s)) ;
 	    }
 	    if (cddir && chdir(cddir) < 0)
@@ -872,10 +903,11 @@ STR *str;
 /* this routine is in perl.c by virtue of being sort of an alternate main() */
 
 int
-do_eval(str,optype,stash,gimme,arglast)
+do_eval(str,optype,stash,savecmd,gimme,arglast)
 STR *str;
 int optype;
 HASH *stash;
+int savecmd;
 int gimme;
 int *arglast;
 {
@@ -891,6 +923,7 @@ int *arglast;
     SPAT * VOLATILE oldspat = curspat;
     SPAT * VOLATILE oldlspat = lastspat;
     static char *last_eval = Nullch;
+    static long last_elen = 0;
     static CMD *last_root = Nullcmd;
     VOLATILE int sp = arglast[0];
     char *specfilename;
@@ -996,18 +1029,20 @@ int *arglast;
 	    retval = yyparse();
 	    retval |= error_count;
 	}
-	else if (last_root && *bufptr == *last_eval && strEQ(bufptr,last_eval)){
+	else if (last_root && last_elen == bufend - bufptr
+	  && *bufptr == *last_eval && !bcmp(bufptr,last_eval)){
 	    retval = 0;
 	    eval_root = last_root;	/* no point in reparsing */
 	}
-	else if (in_eval == 1) {
+	else if (in_eval == 1 && !savecmd) {
 	    if (last_root) {
 		Safefree(last_eval);
 		last_eval = Nullch;
 		cmd_free(last_root);
 	    }
 	    last_root = Nullcmd;
-	    last_eval = savestr(bufptr);
+	    last_elen = bufend - bufptr;
+	    last_eval = nsavestr(bufptr, last_elen);
 	    retval = yyparse();
 	    retval |= error_count;
 	    if (!retval)
@@ -1035,7 +1070,7 @@ int *arglast;
 #endif
 	    cmd_free(eval_root);
 #endif
-	    if (eval_root == last_root)
+	    if ((CMD*)eval_root == last_root)
 		last_root = Nullcmd;
 	    eval_root = myroot = Nullcmd;
 	}
@@ -1051,7 +1086,9 @@ int *arglast;
 	for (i = arglast[0] + 1; i <= sp; i++)
 	    st[i] = str_mortal(st[i]);
 				/* if we don't save result, free zaps it */
-	if (in_eval != 1 && myroot != last_root)
+	if (savecmd)
+	    eval_root = myroot;
+	else if (in_eval != 1 && myroot != last_root)
 	    cmd_free(myroot);
     }
 
@@ -1091,6 +1128,68 @@ int *arglast;
     return sp;
 }
 
+int
+do_try(cmd,gimme,arglast)
+CMD *cmd;
+int gimme;
+int *arglast;
+{
+    STR **st = stack->ary_array;
+
+    CMD * VOLATILE oldcurcmd = curcmd;
+    VOLATILE int oldtmps_base = tmps_base;
+    VOLATILE int oldsave = savestack->ary_fill;
+    SPAT * VOLATILE oldspat = curspat;
+    SPAT * VOLATILE oldlspat = lastspat;
+    VOLATILE int sp = arglast[0];
+
+    tmps_base = tmps_max;
+    str_set(stab_val(stabent("@",TRUE)),"");
+    in_eval++;
+    if (++loop_ptr >= loop_max) {
+	loop_max += 128;
+	Renew(loop_stack, loop_max, struct loop);
+    }
+    loop_stack[loop_ptr].loop_label = "_EVAL_";
+    loop_stack[loop_ptr].loop_sp = sp;
+#ifdef DEBUGGING
+    if (debug & 4) {
+	deb("(Pushing label #%d _EVAL_)\n", loop_ptr);
+    }
+#endif
+    if (setjmp(loop_stack[loop_ptr].loop_env)) {
+	st = stack->ary_array;
+	sp = arglast[0];
+	if (gimme != G_ARRAY)
+	    st[++sp] = &str_undef;
+    }
+    else {
+	sp = cmd_exec(cmd,gimme,sp);
+	st = stack->ary_array;
+/*	for (i = arglast[0] + 1; i <= sp; i++)
+	    st[i] = str_mortal(st[i]);  not needed, I think */
+				/* if we don't save result, free zaps it */
+    }
+
+    in_eval--;
+#ifdef DEBUGGING
+    if (debug & 4) {
+	char *tmps = loop_stack[loop_ptr].loop_label;
+	deb("(Popping label #%d %s)\n",loop_ptr,
+	    tmps ? tmps : "" );
+    }
+#endif
+    loop_ptr--;
+    tmps_base = oldtmps_base;
+    curspat = oldspat;
+    lastspat = oldlspat;
+    curcmd = oldcurcmd;
+    if (savestack->ary_fill > oldsave)	/* let them use local() */
+	restorelist(oldsave);
+
+    return sp;
+}
+
 /* This routine handles any switches that can be given during run */
 
 static char *
@@ -1099,7 +1198,6 @@ char *s;
 {
     int numlen;
 
-  reswitch:
     switch (*s) {
     case '0':
 	nrschar = scanoct(s, 4, &numlen);
@@ -1141,11 +1239,13 @@ char *s;
 #else
 	warn("Recompile perl with -DDEBUGGING to use -D switch\n");
 #endif
-	for (s++; isdigit(*s); s++) ;
+	/*SUPPRESS 530*/
+	for (s++; isDIGIT(*s); s++) ;
 	return s;
     case 'i':
 	inplace = savestr(s+1);
-	for (s = inplace; *s && !isspace(*s); s++) ;
+	/*SUPPRESS 530*/
+	for (s = inplace; *s && !isSPACE(*s); s++) ;
 	*s = '\0';
 	break;
     case 'I':
@@ -1162,7 +1262,7 @@ char *s;
     case 'l':
 	minus_l = TRUE;
 	s++;
-	if (isdigit(*s)) {
+	if (isDIGIT(*s)) {
 	    ors = savestr("\n");
 	    orslen = 1;
 	    *ors = scanoct(s, 3 + (*s == '0'), &numlen);

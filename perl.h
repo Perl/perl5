@@ -1,4 +1,4 @@
-/* $RCSfile: perl.h,v $$Revision: 4.0.1.3 $$Date: 91/06/10 01:25:10 $
+/* $RCSfile: perl.h,v $$Revision: 4.0.1.4 $$Date: 91/11/05 18:06:10 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,12 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	perl.h,v $
+ * Revision 4.0.1.4  91/11/05  18:06:10  lwall
+ * patch11: various portability fixes
+ * patch11: added support for dbz
+ * patch11: added some support for 64-bit integers
+ * patch11: hex() didn't understand leading 0x
+ * 
  * Revision 4.0.1.3  91/06/10  01:25:10  lwall
  * patch10: certain pattern optimizations were botched
  * 
@@ -24,6 +30,23 @@
 
 #define VOIDWANT 1
 #include "config.h"
+
+#ifdef MYMALLOC
+#   ifdef HIDEMYMALLOC
+#	define malloc Mymalloc
+#	define realloc Myremalloc
+#	define free Myfree
+#   endif
+#   define safemalloc malloc
+#   define saferealloc realloc
+#   define safefree free
+#endif
+
+/* work around some libPW problems */
+#define fatal Myfatal
+#ifdef DOINIT
+char Error[1];
+#endif
 
 #ifdef MSDOS
 /* This stuff now in the MS-DOS config.h file. */
@@ -197,6 +220,23 @@ extern char *sys_errlist[];
 #endif
 #endif
 
+#ifdef WANT_DBZ
+#include <dbz.h>
+#define SOME_DBM
+#define dbm_fetch(db,dkey) fetch(dkey)
+#define dbm_delete(db,dkey) fatal("dbz doesn't implement delete")
+#define dbm_store(db,dkey,dcontent,flags) store(dkey,dcontent)
+#define dbm_close(db) dbmclose()
+#define dbm_firstkey(db) (fatal("dbz doesn't implement traversal"),fetch())
+#define nextkey() (fatal("dbz doesn't implement traversal"),fetch())
+#define dbm_nextkey(db) (fatal("dbz doesn't implement traversal"),fetch())
+#ifdef HAS_NDBM
+#undef HAS_NDBM
+#endif
+#ifndef HAS_ODBM
+#define HAS_ODBM
+#endif
+#else
 #ifdef HAS_GDBM
 #ifdef I_GDBM
 #include <gdbm.h>
@@ -234,6 +274,7 @@ extern char *sys_errlist[];
 #endif /* HAS_ODBM */
 #endif /* HAS_NDBM */
 #endif /* HAS_GDBM */
+#endif /* WANT_DBZ */
 #ifdef SOME_DBM
 EXT char *dbmkey;
 EXT int dbmlen;
@@ -301,6 +342,10 @@ EXT int dbmlen;
 #   else
 #	define S_ISBLK(m) (0)
 #   endif
+#endif
+
+#if S_ISBLK(060000) == 060000
+	XXX Your sys/stat.h appears to be buggy.  Please fix it.
 #endif
 
 #ifndef S_ISREG
@@ -375,6 +420,26 @@ EXT int dbmlen;
 
 #ifdef f_next
 #undef f_next
+#endif
+
+#if defined(cray) || defined(gould)
+#   define SLOPPYDIVIDE
+#endif
+
+#if defined(cray) || defined(convex) || BYTEORDER > 0xffff
+#   define QUAD
+#endif
+
+#ifdef QUAD
+#   ifdef cray
+#	define quad int
+#   else
+#	ifdef convex
+#	    define quad long long
+#	else
+#	    define quad long
+#	endif
+#   endif
 #endif
 
 typedef unsigned int STRLEN;
@@ -631,7 +696,7 @@ EXT int origargc;
 EXT char **origenviron;
 extern char **environ;
 
-EXT line_t subline INIT(0);
+EXT long subline INIT(0);
 EXT STR *subname INIT(Nullstr);
 EXT int arybase INIT(0);
 
@@ -676,7 +741,7 @@ EXT STR *DBsignal INIT(Nullstr);
 EXT int lastspbase;
 EXT int lastsize;
 
-EXT char *hexdigit INIT("0123456789abcdef0123456789ABCDEF");
+EXT char *hexdigit INIT("0123456789abcdef0123456789ABCDEFx");
 EXT char *origfilename;
 EXT FILE * VOLATILE rsfp;
 EXT char buf[1024];
@@ -753,6 +818,7 @@ STR *interp();
 void free_arg();
 STIO *stio_new();
 void hoistmust();
+void scanconst();
 
 EXT struct stat statbuf;
 EXT struct stat statcache;

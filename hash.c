@@ -1,4 +1,4 @@
-/* $RCSfile: hash.c,v $$Revision: 4.0.1.1 $$Date: 91/06/07 11:10:11 $
+/* $RCSfile: hash.c,v $$Revision: 4.0.1.2 $$Date: 91/11/05 17:24:13 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	hash.c,v $
+ * Revision 4.0.1.2  91/11/05  17:24:13  lwall
+ * patch11: saberized perl
+ * 
  * Revision 4.0.1.1  91/06/07  11:10:11  lwall
  * patch4: new copyright notice
  * 
@@ -70,7 +73,7 @@ int lval;
 	else
 	    maxi = tb->tbl_coeffsize;
 	for (s=key,		i=0,	hash = 0;
-			    i < maxi;
+			    i < maxi;			/*SUPPRESS 8*/
 	     s++,		i++,	hash *= 5) {
 	    hash += *s * coeff[i];
 	}
@@ -129,6 +132,7 @@ register int hash;
 	return FALSE;
 
     if (hash)
+	/*SUPPRESS 530*/
 	;
     else if (!tb->tbl_coeffsize)
 	hash = *key + 128 * key[1] + 128 * key[klen-1];
@@ -138,7 +142,7 @@ register int hash;
 	else
 	    maxi = tb->tbl_coeffsize;
 	for (s=key,		i=0,	hash = 0;
-			    i < maxi;
+			    i < maxi;			/*SUPPRESS 8*/
 	     s++,		i++,	hash *= 5) {
 	    hash += *s * coeff[i];
 	}
@@ -226,7 +230,7 @@ unsigned int klen;
 	else
 	    maxi = tb->tbl_coeffsize;
 	for (s=key,		i=0,	hash = 0;
-			    i < maxi;
+			    i < maxi;			/*SUPPRESS 8*/
 	     s++,		i++,	hash *= 5) {
 	    hash += *s * coeff[i];
 	}
@@ -425,6 +429,7 @@ int dodbm;
     tb->tbl_dbm = 0;			/* now clear just cache */
 #endif
     (void)hiterinit(tb);
+    /*SUPPRESS 560*/
     while (hent = hiternext(tb)) {	/* concise but not very efficient */
 	hentfree(ohent);
 	ohent = hent;

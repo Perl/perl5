@@ -1,11 +1,11 @@
 # newgetopt.pl -- new options parsing
 
-# SCCS Status     : @(#)@ newgetopt.pl	1.7
+# SCCS Status     : @(#)@ newgetopt.pl	1.8
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Sun Oct 14 14:35:36 1990
-# Update Count    : 34
+# Last Modified On: Thu Sep 26 20:10:41 1991
+# Update Count    : 35
 # Status          : Okay
 
 # This package implements a new getopt function. This function adheres
@@ -138,6 +138,9 @@ sub main'NGetOpt {
 	    if ( $mand eq "=" ) {
 		print STDERR ("Option ", $opt, " requires an argument\n");
 		$error++;
+	    }
+	    if ( $mand eq ":" ) {
+		$arg = $type eq "s" ? "" : 0;
 	    }
 	    next;
 	}

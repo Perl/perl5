@@ -6,7 +6,9 @@ while (@ARGV) {
     shift;
 }
 
-@scripts = ('h2ph', 'x2p/s2p', 'x2p/find2perl');
+umask 022;
+
+@scripts = ('cppstdin', 'h2ph', 'c2ph', 'pstruct', 'x2p/s2p', 'x2p/find2perl');
 @manpages = ('perl.man', 'h2ph.man', 'x2p/a2p.man', 'x2p/s2p.man');
 
 $version = sprintf("%5.3f", $]);
@@ -85,7 +87,7 @@ if ($bdev != $ddev || $bino != $dino) {
 ($udev,$uino) = stat("/usr/bin");
 
 if (-w _ && ($udev != $ddev || $uino != $dino) && !$nonono) {
-    unlink "/usr/bin/perl";
+    &unlink("/usr/bin/perl");
     eval 'symlink("$installbin/perl", "/usr/bin/perl")' ||
     eval 'link("$installbin/perl", "/usr/bin/perl")' ||
     &cmd("cp $installbin/perl /usr/bin");
@@ -98,16 +100,6 @@ if (-w _ && ($udev != $ddev || $uino != $dino) && !$nonono) {
 for (@scripts) {
     &cmd("cp $_ $installscr");
     s#.*/##; &chmod(0755, "$installscr/$_");
-}
-
-# Install library files.
-
-&makedir($installprivlib);
-
-($pdev,$pino) = stat($installprivlib);
-
-if ($pdev != $ddev || $pino != $dino) {
-    &cmd("cd lib && cp *.pl $installprivlib");
 }
 
 # Install man pages.
@@ -133,6 +125,28 @@ if ($mansrc ne '') {
 	}
     }
 }
+
+# Install library files.
+
+&makedir($installprivlib);
+if (chdir "lib") {
+
+    ($pdev,$pino) = stat($installprivlib);
+    ($ldev,$lino) = stat('.');
+
+    if ($pdev != $ldev || $pino != $lino) {
+	foreach $file (<*.pl>) {
+	    &unlink("$installprivlib/$file");
+	    &cmd("cp $file $installprivlib");
+	}
+    }
+    chdir ".." || die "Can't cd back to source directory: $!\n";
+}
+else {
+    warn "Can't cd to lib to install lib files: $!\n";
+}
+
+&chmod(0755, "usub/mus");
 
 print STDERR "  Installation complete\n";
 

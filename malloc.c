@@ -1,6 +1,9 @@
-/* $RCSfile: malloc.c,v $$Revision: 4.0.1.2 $$Date: 91/06/07 11:20:45 $
+/* $RCSfile: malloc.c,v $$Revision: 4.0.1.3 $$Date: 91/11/05 17:57:40 $
  *
  * $Log:	malloc.c,v $
+ * Revision 4.0.1.3  91/11/05  17:57:40  lwall
+ * patch11: safe malloc code now integrated into Perl's malloc when possible
+ * 
  * Revision 4.0.1.2  91/06/07  11:20:45  lwall
  * patch4: many, many itty-bitty portability fixes
  * 
@@ -13,6 +16,7 @@
  */
 
 #ifndef lint
+/*SUPPRESS 592*/
 static char sccsid[] = "@(#)malloc.c	4.3 (Berkeley) 9/16/83";
 
 #ifdef DEBUGGING
@@ -110,6 +114,10 @@ botch(s)
 #define	ASSERT(p)
 #endif
 
+#ifdef safemalloc
+static int an = 0;
+#endif
+
 MALLOCPTRTYPE *
 malloc(nbytes)
 	register unsigned nbytes;
@@ -117,6 +125,23 @@ malloc(nbytes)
   	register union overhead *p;
   	register int bucket = 0;
   	register unsigned shiftr;
+
+#ifdef safemalloc
+#ifdef DEBUGGING
+	int size = nbytes;
+#endif
+
+#ifdef MSDOS
+	if (nbytes > 0xffff) {
+		fprintf(stderr, "Allocation too large: %lx\n", nbytes);
+		exit(1);
+	}
+#endif /* MSDOS */
+#ifdef DEBUGGING
+	if ((long)nbytes < 0)
+	    fatal("panic: malloc");
+#endif
+#endif /* safemalloc */
 
 	/*
 	 * Convert amount of memory requested into
@@ -136,8 +161,27 @@ malloc(nbytes)
 	 */
   	if (nextf[bucket] == NULL)    
   		morecore(bucket);
-  	if ((p = (union overhead *)nextf[bucket]) == NULL)
+  	if ((p = (union overhead *)nextf[bucket]) == NULL) {
+#ifdef safemalloc
+		fputs("Out of memory!\n", stderr);
+		exit(1);
+#else
   		return (NULL);
+#endif
+	}
+
+#ifdef safemalloc
+#ifdef DEBUGGING
+#  ifndef I286
+    if (debug & 128)
+        fprintf(stderr,"0x%x: (%05d) malloc %d bytes\n",p+1,an++,size);
+#  else
+    if (debug & 128)
+        fprintf(stderr,"0x%lx: (%05d) malloc %d bytes\n",p+1,an++,size);
+#  endif
+#endif
+#endif /* safemalloc */
+
 	/* remove from linked list */
 #ifdef RCHECK
 	if (*((int*)p) & (sizeof(union overhead) - 1))
@@ -240,6 +284,18 @@ free(mp)
 	register union overhead *op;
 	char *cp = (char*)mp;
 
+#ifdef safemalloc
+#ifdef DEBUGGING
+#  ifndef I286
+	if (debug & 128)
+		fprintf(stderr,"0x%x: (%05d) free\n",cp,an++);
+#  else
+	if (debug & 128)
+		fprintf(stderr,"0x%lx: (%05d) free\n",cp,an++);
+#  endif
+#endif
+#endif /* safemalloc */
+
   	if (cp == NULL)
   		return;
 	op = (union overhead *)((caddr_t)cp - sizeof (union overhead));
@@ -292,6 +348,25 @@ realloc(mp, nbytes)
 	int was_alloced = 0;
 	char *cp = (char*)mp;
 
+#ifdef safemalloc
+#ifdef DEBUGGING
+	int size = nbytes;
+#endif
+
+#ifdef MSDOS
+	if (nbytes > 0xffff) {
+		fprintf(stderr, "Reallocation too large: %lx\n", size);
+		exit(1);
+	}
+#endif /* MSDOS */
+	if (!cp)
+		fatal("Null realloc");
+#ifdef DEBUGGING
+	if ((long)nbytes < 0)
+		fatal("panic: realloc");
+#endif
+#endif /* safemalloc */
+
   	if (cp == NULL)
   		return (malloc(nbytes));
 	op = (union overhead *)((caddr_t)cp - sizeof (union overhead));
@@ -336,14 +411,32 @@ realloc(mp, nbytes)
 			*((u_int *)((caddr_t)op + nbytes - RSLOP)) = RMAGIC;
 		}
 #endif
-		return((MALLOCPTRTYPE*)cp);
+		res = cp;
 	}
-  	if ((res = (char*)malloc(nbytes)) == NULL)
-  		return (NULL);
-  	if (cp != res)			/* common optimization */
-		(void)bcopy(cp, res, (int)((nbytes < onb) ? nbytes : onb));
-  	if (was_alloced)
-		free(cp);
+	else {
+		if ((res = (char*)malloc(nbytes)) == NULL)
+			return (NULL);
+		if (cp != res)			/* common optimization */
+			bcopy(cp, res, (int)(nbytes < onb ? nbytes : onb));
+		if (was_alloced)
+			free(cp);
+	}
+
+#ifdef safemalloc
+#ifdef DEBUGGING
+#  ifndef I286
+	if (debug & 128) {
+	    fprintf(stderr,"0x%x: (%05d) rfree\n",res,an++);
+	    fprintf(stderr,"0x%x: (%05d) realloc %d bytes\n",res,an++,size);
+	}
+#  else
+	if (debug & 128) {
+	    fprintf(stderr,"0x%lx: (%05d) rfree\n",res,an++);
+	    fprintf(stderr,"0x%lx: (%05d) realloc %d bytes\n",res,an++,size);
+	}
+#  endif
+#endif
+#endif /* safemalloc */
   	return ((MALLOCPTRTYPE*)res);
 }
 

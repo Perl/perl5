@@ -64,11 +64,12 @@ EOF
 	    if ($mode =~ /O/) {
 		if ($what eq 'gnum') {
 		    push(@outies, "\t    str_numset(st[$i], (double) $name);\n");
+		    push(@callnames, "&$name");
 		}
 		else {
 		    push(@outies, "\t    str_set(st[$i], (char*) $name);\n");
+		    push(@callnames, "$name");
 		}
-		push(@callnames, "&$name");
 	    }
 	    else {
 		push(@callnames, $name);
@@ -76,6 +77,11 @@ EOF
 	    if ($mode =~ /I/) {
 	    print <<EOF;
 	    $type	$name =$x	$cast	str_$what(st[$i]);
+EOF
+	    }
+            elsif ($type =~ /char/) {
+            print <<EOF;
+	    char	${name}[133];
 EOF
 	    }
 	    else {
