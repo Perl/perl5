@@ -213,23 +213,23 @@ C<xsubpp>.  See L<perlxs/"The VERSIONCHECK: Keyword">.
 #ifdef XS_VERSION
 #  define XS_VERSION_BOOTCHECK \
     STMT_START {							\
-	SV *tmpsv; STRLEN n_a;						\
+	SV *_sv; STRLEN n_a;						\
 	char *vn = Nullch, *module = SvPV(ST(0),n_a);			\
 	if (items >= 2)	 /* version supplied as bootstrap arg */	\
-	    tmpsv = ST(1);						\
+	    _sv = ST(1);						\
 	else {								\
 	    /* XXX GV_ADDWARN */					\
-	    tmpsv = get_sv(Perl_form(aTHX_ "%s::%s", module,		\
+	    _sv = get_sv(Perl_form(aTHX_ "%s::%s", module,		\
 				vn = "XS_VERSION"), FALSE);		\
-	    if (!tmpsv || !SvOK(tmpsv))					\
-		tmpsv = get_sv(Perl_form(aTHX_ "%s::%s", module,	\
+	    if (!_sv || !SvOK(_sv))					\
+		_sv = get_sv(Perl_form(aTHX_ "%s::%s", module,	\
 				    vn = "VERSION"), FALSE);		\
 	}								\
-	if (tmpsv && (!SvOK(tmpsv) || strNE(XS_VERSION, SvPV(tmpsv, n_a))))	\
+	if (_sv && (!SvOK(_sv) || strNE(XS_VERSION, SvPV(_sv, n_a))))	\
 	    Perl_croak(aTHX_ "%s object version %s does not match %s%s%s%s %"SVf,\
 		  module, XS_VERSION,					\
 		  vn ? "$" : "", vn ? module : "", vn ? "::" : "",	\
-		  vn ? vn : "bootstrap parameter", tmpsv);		\
+		  vn ? vn : "bootstrap parameter", _sv);		\
     } STMT_END
 #else
 #  define XS_VERSION_BOOTCHECK
