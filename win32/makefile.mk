@@ -658,11 +658,8 @@ EXTRACORE_SRC	+= ..\perlio.c
 
 WIN32_SRC	=		\
 		.\win32.c	\
-		.\win32sck.c
-
-.IF "$(USE_5005THREADS)" == "define"
-WIN32_SRC	+= .\win32thread.c 
-.ENDIF
+		.\win32sck.c	\
+		.\win32thread.c 
 
 .IF "$(CRYPT_SRC)" != ""
 WIN32_SRC	+= .\$(CRYPT_SRC)

@@ -168,8 +168,6 @@ extern __declspec(thread) void *PL_current_context;
 #define PERL_SET_CONTEXT(t)		Perl_set_context(t)
 #endif
 
-#define PERL_GET_CONTEXT_DEFINED
-
 #if defined(USE_THREADS)
 struct perl_thread;
 int Perl_thread_create (struct perl_thread *thr, thread_func_t *fn);
@@ -185,8 +183,10 @@ END_EXTERN_C
 #define INIT_THREADS		NOOP
 #define ALLOC_THREAD_KEY \
     STMT_START {							\
-	if ((PL_thr_key = TlsAlloc()) == TLS_OUT_OF_INDEXES)		\
-	    Perl_croak_nocontext("panic: TlsAlloc");			\
+	if ((PL_thr_key = TlsAlloc()) == TLS_OUT_OF_INDEXES) {		\
+	    fprintf(stderr,"panic: TlsAlloc");				\
+	    exit(1);							\
+	}								\
     } STMT_END
 
 #if defined(USE_RTL_THREAD_API) && !defined(_MSC_VER)

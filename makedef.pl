@@ -551,6 +551,7 @@ if ($PLATFORM eq 'win32') {
     foreach my $symbol (qw(
 			    boot_DynaLoader
 			    Perl_init_os_extras
+			    Perl_thread_create
 			    Perl_win32_init
 			    RunPerl
 			    win32_errno

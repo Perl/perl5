@@ -158,6 +158,8 @@ struct utsname {
 #  define	F_OK	0
 #endif
 
+#define PERL_GET_CONTEXT_DEFINED
+
 /* Compiler-specific stuff. */
 
 #ifdef __BORLANDC__		/* Borland C++ */

@@ -3303,7 +3303,11 @@ Perl_get_context(void)
 	Perl_croak_nocontext("panic: pthread_getspecific");
     return (void*)t;
 #  else
+#  ifdef I_MACH_CTHREADS
+    return (void*)cthread_data(cthread_self());
+#  else
     return (void*)pthread_getspecific(PL_thr_key);
+#  endif
 #  endif
 #else
     return (void*)NULL;
@@ -3314,8 +3318,12 @@ void
 Perl_set_context(void *t)
 {
 #if defined(USE_THREADS) || defined(USE_ITHREADS)
+#  ifdef I_MACH_CTHREADS
+    cthread_set_data(cthread_self(), t);
+#  else
     if (pthread_setspecific(PL_thr_key, t))
 	Perl_croak_nocontext("panic: pthread_setspecific");
+#  endif
 #endif
 }
 
