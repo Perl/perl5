@@ -72,10 +72,10 @@ sub copy {
 
     if ($Config{d_symlink} && $Config{d_readlink} &&
 	!($^O eq 'Win32' || $^O eq 'os2' || $^O eq 'vms')) {
-	if (-l $from || -l $to) {
+	if ((-e $from && -l $from) || (-e $to && -l $to)) {
 	    my @fs = stat($from);
 	    my @ts = stat($to);
-	    if ($fs[0] == $ts[0] && $fs[1] == $ts[1]) {
+	    if (@fs && @ts && $fs[0] == $ts[0] && $fs[1] == $ts[1]) {
 		croak("'$from' and '$to' are identical (not copied)");
 	    }
 	}
