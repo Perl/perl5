@@ -1,6 +1,9 @@
-/* $Header: cmd.h,v 1.0 87/12/18 13:04:59 root Exp $
+/* $Header: cmd.h,v 1.0.1.1 88/01/28 10:23:07 root Exp $
  *
  * $Log:	cmd.h,v $
+ * Revision 1.0.1.1  88/01/28  10:23:07  root
+ * patch8: added eval_root for eval operator.
+ * 
  * Revision 1.0  87/12/18  13:04:59  root
  * Initial revision
  * 
@@ -106,6 +109,7 @@ struct cmd {
 #define Nullcmd Null(CMD*)
 
 EXT CMD *main_root INIT(Nullcmd);
+EXT CMD *eval_root INIT(Nullcmd);
 
 EXT struct compcmd {
     CMD *comp_true;

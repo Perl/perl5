@@ -14,9 +14,12 @@ case "$0" in
 esac
 echo "Extracting Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 1.0.1.3 88/01/26 14:14:52 root Exp $
+# $Header: Makefile.SH,v 1.0.1.4 88/01/28 10:17:59 root Exp $
 #
 # $Log:	Makefile.SH,v $
+# Revision 1.0.1.4  88/01/28  10:17:59  root
+# patch8: added perldb.man
+# 
 # Revision 1.0.1.3  88/01/26  14:14:52  root
 # Added mallocsrc stuff.
 # 
@@ -47,11 +50,11 @@ libs = $libnm -lm
 
 cat >>Makefile <<'!NO!SUBS!'
 
-public = perl
+public = perl perldb
 
 private = 
 
-manpages = perl.man
+manpages = perl.man perldb.man
 
 util =
 

@@ -1,6 +1,9 @@
-char rcsid[] = "$Header: perly.c,v 1.0.1.2 88/01/24 00:06:03 root Exp $";
+char rcsid[] = "$Header: perly.c,v 1.0.1.3 88/01/28 10:28:31 root Exp $";
 /*
  * $Log:	perly.c,v $
+ * Revision 1.0.1.3  88/01/28  10:28:31  root
+ * patch8: added eval operator.  Also fixed expectterm following right curly.
+ * 
  * Revision 1.0.1.2  88/01/24  00:06:03  root
  * patch 2: s/(abc)/\1/ grandfathering didn't work right.
  * 
@@ -16,6 +19,7 @@ bool preprocess = FALSE;
 bool assume_n = FALSE;
 bool assume_p = FALSE;
 bool doswitches = FALSE;
+bool allstabs = FALSE;		/* init all customary symbols in symbol table?*/
 char *filename;
 char *e_tmpname = "/tmp/perl-eXXXXXX";
 FILE *e_fp = Nullfp;
@@ -161,12 +165,12 @@ register char **env;
 	    str_numset(stabent(argv[0]+1,TRUE)->stab_val,(double)1.0);
 	}
     }
-    if (argvstab = stabent("ARGV",FALSE)) {
+    if (argvstab = stabent("ARGV",allstabs)) {
 	for (; argc > 0; argc--,argv++) {
 	    apush(argvstab->stab_array,str_make(argv[0]));
 	}
     }
-    if (envstab = stabent("ENV",FALSE)) {
+    if (envstab = stabent("ENV",allstabs)) {
 	for (; *env; env++) {
 	    if (!(s = index(*env,'=')))
 		continue;
@@ -177,12 +181,12 @@ register char **env;
 	    *--s = '=';
 	}
     }
-    sigstab = stabent("SIG",FALSE);
+    sigstab = stabent("SIG",allstabs);
 
     magicalize("!#?^~=-%0123456789.+&*(),\\/[|");
 
-    (tmpstab = stabent("0",FALSE)) && str_set(STAB_STR(tmpstab),filename);
-    (tmpstab = stabent("$",FALSE)) &&
+    (tmpstab = stabent("0",allstabs)) && str_set(STAB_STR(tmpstab),filename);
+    (tmpstab = stabent("$",allstabs)) &&
 	str_numset(STAB_STR(tmpstab),(double)getpid());
 
     tmpstab = stabent("stdin",TRUE);
@@ -198,6 +202,8 @@ register char **env;
     tmpstab = stabent("stderr",TRUE);
     tmpstab->stab_io = stio_new();
     tmpstab->stab_io->fp = stderr;
+    safefree(filename);
+    filename = "(eval)";
 
     setjmp(top_env);	/* sets goto_targ on longjump */
 
@@ -225,7 +231,7 @@ register char *list;
 
     sym[1] = '\0';
     while (*sym = *list++) {
-	if (stab = stabent(sym,FALSE)) {
+	if (stab = stabent(sym,allstabs)) {
 	    stab->stab_flags = SF_VMAGIC;
 	    stab->stab_val->str_link.str_magic = stab;
 	}
@@ -322,7 +328,15 @@ yylex()
 	    filename = savestr(s);
 	    s = str_get(linestr);
 	}
-	*s = '\0';
+	if (in_eval) {
+	    while (*s && *s != '\n')
+		s++;
+	    if (*s)
+		s++;
+	    line++;
+	}
+	else
+	    *s = '\0';
 	if (lex_newlines)
 	    RETURN('\n');
 	goto retry;
@@ -350,9 +364,15 @@ yylex()
 	OPERATOR(tmp);
     case ')':
     case ']':
-    case '}':
 	tmp = *s++;
 	TERM(tmp);
+    case '}':
+	tmp = *s++;
+	for (d = s; *d == ' ' || *d == '\t'; d++) ;
+	if (*d == '\n' || *d == '#')
+	    OPERATOR(tmp);		/* block end */
+	else
+	    TERM(tmp);			/* associative array end */
     case '&':
 	s++;
 	tmp = *s++;
@@ -508,6 +528,10 @@ yylex()
 	    OPERATOR(SEQ);
 	if (strEQ(d,"exit"))
 	    UNI(O_EXIT);
+	if (strEQ(d,"eval")) {
+	    allstabs = TRUE;		/* must initialize everything since */
+	    UNI(O_EVAL);		/* we don't know what will be used */
+	}
 	if (strEQ(d,"eof"))
 	    TERM(FEOF);
 	if (strEQ(d,"exp"))
@@ -1480,8 +1504,12 @@ char *s;
 	strcpy(tname,"^?");
     else
 	sprintf(tname,"%c",yychar);
-    printf("%s in file %s at line %d, next token \"%s\"\n",
+    sprintf(tokenbuf, "%s in file %s at line %d, next token \"%s\"\n",
       s,filename,line,tname);
+    if (in_eval)
+	str_set(stabent("@",TRUE)->stab_val,tokenbuf);
+    else
+	fputs(tokenbuf,stderr);
 }
 
 char *
@@ -1964,7 +1992,7 @@ register ARG *arg;
 	    str_numset(str, (double)str_len(s1));
 	    break;
 	case O_SUBSTR:
-	    if (arg[3].arg_type != A_SINGLE || stabent("[",FALSE)) {
+	    if (arg[3].arg_type != A_SINGLE || stabent("[",allstabs)) {
 		str_free(str);		/* making the fallacious assumption */
 		str = Nullstr;		/* that any $[ occurs before substr()*/
 	    }
@@ -2463,4 +2491,129 @@ load_format()
     bufptr = str_get(linestr);
     yyerror("Format not terminated");
     return froot.f_next;
+}
+
+STR *
+do_eval(str)
+STR *str;
+{
+    int retval;
+    CMD *myroot;
+
+    in_eval++;
+    str_set(stabent("@",TRUE)->stab_val,"");
+    line = 1;
+    str_sset(linestr,str);
+    bufptr = str_get(linestr);
+    if (setjmp(eval_env))
+	retval = 1;
+    else
+	retval = yyparse();
+    myroot = eval_root;		/* in case cmd_exec does another eval! */
+    if (retval)
+	str = &str_no;
+    else {
+	str = cmd_exec(eval_root);
+	cmd_free(myroot);	/* can't free on error, for some reason */
+    }
+    in_eval--;
+    return str;
+}
+
+cmd_free(cmd)
+register CMD *cmd;
+{
+    register CMD *tofree;
+    register CMD *head = cmd;
+
+    while (cmd) {
+	if (cmd->c_label)
+	    safefree(cmd->c_label);
+	if (cmd->c_first)
+	    str_free(cmd->c_first);
+	if (cmd->c_spat)
+	    spat_free(cmd->c_spat);
+	if (cmd->c_expr)
+	    arg_free(cmd->c_expr);
+	switch (cmd->c_type) {
+	case C_WHILE:
+	case C_BLOCK:
+	case C_IF:
+	    if (cmd->ucmd.ccmd.cc_true)
+		cmd_free(cmd->ucmd.ccmd.cc_true);
+	    if (cmd->c_type == C_IF && cmd->ucmd.ccmd.cc_alt)
+		cmd_free(cmd->ucmd.ccmd.cc_alt,Nullcmd);
+	    break;
+	case C_EXPR:
+	    if (cmd->ucmd.acmd.ac_stab)
+		arg_free(cmd->ucmd.acmd.ac_stab);
+	    if (cmd->ucmd.acmd.ac_expr)
+		arg_free(cmd->ucmd.acmd.ac_expr);
+	    break;
+	}
+	tofree = cmd;
+	cmd = cmd->c_next;
+	safefree((char*)tofree);
+	if (cmd && cmd == head)		/* reached end of while loop */
+	    break;
+    }
+}
+
+arg_free(arg)
+register ARG *arg;
+{
+    register int i;
+
+    for (i = 1; i <= arg->arg_len; i++) {
+	switch (arg[i].arg_type) {
+	case A_NULL:
+	    break;
+	case A_LEXPR:
+	case A_EXPR:
+	    arg_free(arg[i].arg_ptr.arg_arg);
+	    break;
+	case A_CMD:
+	    cmd_free(arg[i].arg_ptr.arg_cmd);
+	    break;
+	case A_STAB:
+	case A_LVAL:
+	case A_READ:
+	case A_ARYLEN:
+	    break;
+	case A_SINGLE:
+	case A_DOUBLE:
+	case A_BACKTICK:
+	    str_free(arg[i].arg_ptr.arg_str);
+	    break;
+	case A_SPAT:
+	    spat_free(arg[i].arg_ptr.arg_spat);
+	    break;
+	case A_NUMBER:
+	    break;
+	}
+    }
+    free_arg(arg);
+}
+
+spat_free(spat)
+register SPAT *spat;
+{
+    register SPAT *sp;
+
+    if (spat->spat_runtime)
+	arg_free(spat->spat_runtime);
+    if (spat->spat_repl) {
+	arg_free(spat->spat_repl);
+    }
+    free_compex(&spat->spat_compex);
+
+    /* now unlink from spat list */
+    if (spat_root == spat)
+	spat_root = spat->spat_next;
+    else {
+	for (sp = spat_root; sp->spat_next != spat; sp = sp->spat_next) ;
+	sp->spat_next = spat->spat_next;
+    }
+
+    safefree((char*)spat);
 }

@@ -1,8 +1,8 @@
 #!./perl
 
-# $Header: base.lex,v 1.0 87/12/18 13:11:51 root Exp $
+# $Header: base.lex,v 1.0.1.1 88/01/28 10:37:00 root Exp $
 
-print "1..4\n";
+print "1..6\n";
 
 $ # this is the register <space>
 = 'x';
@@ -21,3 +21,12 @@ if ($x eq '-1') {print "ok 3\n";} else {print "not ok 3\n";}
 $x = '\\'; # ';
 
 if (length($x) == 1) {print "ok 4\n";} else {print "not ok 4\n";}
+
+eval 'while (0) {
+    print "foo\n";
+}
+/^/ && (print "ok 5\n");
+';
+
+eval '$foo{1} / 1;';
+if (!$@) {print "ok 6\n";} else {print "not ok 6\n";}

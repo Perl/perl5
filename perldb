@@ -1,0 +1,296 @@
+#!/bin/perl
+
+# $Header: perldb,v 1.0.1.1 88/01/28 10:27:16 root Exp $
+#
+# $Log:	perldb,v $
+# Revision 1.0.1.1  88/01/28  10:27:16  root
+# patch8: created this file.
+# 
+#
+
+$tmp = "/tmp/pdb$$";		# default temporary file, -o overrides.
+
+# parse any switches
+
+while ($ARGV[0] =~ /^-/) {
+    $_ = shift;
+    /^-o$/ && ($tmp = shift,next);
+    die "Unrecognized switch: $_";
+}
+
+$filename = shift;
+die "Usage: perldb [-o output] scriptname arguments" unless $filename;
+
+open(script,$filename) || die "Can't find $filename";
+
+open(tmp, ">$tmp") || die "Can't make temp script";
+
+$perl = '/bin/perl';
+$init = 1;
+$state = 'statement';
+
+# now translate script to contain DB calls at the appropriate places
+
+while (<script>) {
+    chop;
+    if ($. == 1) {
+	if (/^#! *([^ \t]*) (-[^ \t]*)/) {
+	    $perl = $1;
+	    $switch = $2;
+	}
+	elsif (/^#! *([^ \t]*)/) {
+	    $perl = $1;
+	}
+    }
+    s/ *$//;
+    push(@script,$_);		# remember line for DBinit
+    $line = $_;
+    next if /^$/;		# blank lines are uninteresting
+    next if /^[ \t]*#/;		# likewise comment lines
+    if ($init) {
+	print tmp "do DBinit($.);"; $init = '';
+    }
+    if ($inform) {		# skip formats
+	if (/^\.$/) {
+	    $inform = '';
+	    $state = 'statement';
+	}
+	next;
+    }
+    if (/^[ \t]*format /) {
+	$inform++;
+	next;
+    }
+    if ($state eq 'statement' && !/^[ \t]*}/) {
+	if (s/^([ \t]*[A-Za-z_0-9]+:)//) {
+	    $label = $1;
+	}
+	else {
+	    $label = '';
+	}
+	$line = $label . "do DB($.); " . $_;	# all that work for this line
+    }
+    else {
+	$script[$#script - 1] .= ' ';	# mark line as having continuation
+    }
+    do parse();				# set $state to correct eol value
+}
+continue {
+    print tmp $line,"\n";
+}
+
+# now put out our debugging subroutines.  First the one that's called all over.
+
+print tmp '
+sub DB {
+    push(@DB,$. ,$@, $!, $[, $,, $/, $\ );
+    $[ = 0; $, = ""; $/ = "\n"; $\ = "";
+    $DBline=pop(@_);
+    if ($DBsingle || $DBstop[$DBline] || $DBtrace) {
+	print "$DBline:\t",$DBline[$DBline],"\n";
+	for ($DBi = $DBline; $DBline[$DBi++] =~ / $/; ) {
+	    print "$DBi:\t",$DBline[$DBi],"\n";
+	}
+    }
+    if ($DBaction[$DBline]) {
+	eval $DBaction[$DBline];  print $@;
+    }
+    if ($DBstop[$DBline] || $DBsingle) {
+	for (;;) {
+	    print "perldb> ";
+	    $DBcmd = <stdin>;
+	    last if $DBcmd =~ /^$/;
+	    if ($DBcmd =~ /^q$/) {
+		exit 0;
+	    }
+	    if ($DBcmd =~ /^h$/) {
+		print "
+s		Single step.
+c		Continue.
+<CR>		Repeat last s or c.
+l min-max	List lines.
+l line		List line.
+l		List the whole program.
+L		List breakpoints.
+t		Toggle trace mode.
+b line		Set breakpoint.
+d line		Delete breakpoint.
+d		Delete breakpoint at this line.
+a line command	Set an action for this line.
+q		Quit.
+command		Execute as a perl statement.
+
+";
+		next;
+	    }
+	    if ($DBcmd =~ /^t$/) {
+		$DBtrace = !$DBtrace;
+		print "Trace = $DBtrace\n";
+		next;
+	    }
+	    if ($DBcmd =~ /^l (.*)[-,](.*)/) {
+		for ($DBi = $1; $DBi <= $2; $DBi++) {
+		    print "$DBi:\t", $DBline[$DBi], "\n";
+		}
+		next;
+	    }
+	    if ($DBcmd =~ /^l (.*)/) {
+		print "$1:\t", $DBline[$1], "\n";
+		next;
+	    }
+	    if ($DBcmd =~ /^l$/) {
+		for ($DBi = 1; $DBi <= $DBmax ; $DBi++) {
+		    print "$DBi:\t", $DBline[$DBi], "\n";
+		}
+		next;
+	    }
+	    if ($DBcmd =~ /^L$/) {
+		for ($DBi = 1; $DBi <= $DBmax ; $DBi++) {
+		    print "$DBi:\t", $DBline[$DBi], "\n" if $DBstop[$DBi];
+		}
+		next;
+	    }
+	    if ($DBcmd =~ /^b (.*)/) {
+		$DBi = $1;
+		if ($DBline[$DBi-1] =~ / $/) {
+		    print "Line $DBi not breakable.\n";
+		}
+		else {
+		    $DBstop[$DBi] = 1;
+		}
+		next;
+	    }
+	    if ($DBcmd =~ /^d (.*)/) {
+		$DBstop[$1] = 0;
+		next;
+	    }
+	    if ($DBcmd =~ /^d$/) {
+		$DBstop[$DBline] = 0;
+		next;
+	    }
+	    if ($DBcmd =~ /^a ([0-9]+)[ \t]+(.*)/) {
+		$DBi = $1;
+		$DBaction = $2;
+		$DBaction .= ";" unless $DBaction =~ /[;}]$/;
+		$DBaction[$DBi] = $DBaction;
+		next;
+	    }
+	    if ($DBcmd =~ /^s$/) {
+		$DBsingle = 1;
+		last;
+	    }
+	    if ($DBcmd =~ /^c$/) {
+		$DBsingle = 0;
+		last;
+	    }
+	    chop($DBcmd);
+	    $DBcmd .= ";" unless $DBcmd =~ /[;}]$/;
+	    eval $DBcmd;
+	    print $@,"\n";
+	}
+    }
+    $\ = pop(@DB);
+    $/ = pop(@DB);
+    $, = pop(@DB);
+    $[ = pop(@DB);
+    $! = pop(@DB);
+    $@ = pop(@DB);
+    $. = pop(@DB);
+}
+
+sub DBinit {
+    $DBstop[$_[0]] = 1;
+';
+print tmp "    \$0 = '$script';\n";
+print tmp "    \$DBmax = $.;\n";
+print tmp "    unlink '/tmp/pdb$$';\n";		# expected to fail on -o.
+for ($i = 1; $#script >= 0; $i++) {
+    $_ = shift(@script);
+    s/'/\\'/g;
+    print tmp "    \$DBline[$i] = '$_';\n";
+}
+print tmp '}
+';
+
+close tmp;
+
+# prepare to run the new script
+
+unshift(@ARGV,$tmp);
+unshift(@ARGV,$switch) if $switch;
+unshift(@ARGV,$perl);
+exec @ARGV;
+
+# This routine tokenizes one perl line good enough to tell what state we are
+# in by the end of the line, so we can tell if the next line should contain
+# a call to DB or not.
+
+sub parse {
+    until ($_ eq '') {
+	$ord = ord($_);
+	if ($quoting) {
+	    if ($quote == $ord) {
+		$quoting--;
+	    }
+	    s/^.//			if /^[\\]/;
+	    s/^.//;
+	    last if $_ eq "\n";
+	    $state = 'term'		unless $quoting;
+	    next;
+	}
+	if ($ord > 64) {
+	    do quote(ord($1),1), next	if s/^m\b(.)//;
+	    do quote(ord($1),2), next	if s/^s\b(.)//;
+	    do quote(ord($1),2), next	if s/^y\b(.)//;
+	    do quote(ord($1),2), next	if s/^tr\b(.)//;
+	    next			if s/^[A-Za-z_][A-Za-z_0-9]*://;
+	    $state = 'term', next	if s/^eof\b//;
+	    $state = 'term', next	if s/^shift\b//;
+	    $state = 'term', next	if s/^split\b//;
+	    $state = 'term', next	if s/^tell\b//;
+	    $state = 'term', next	if s/^write\b//;
+	    $state = 'operator', next	if s/^[A-Za-z_][A-Za-z_0-9]*//;
+	    $state = 'operator', next	if s/^[~^|]+//;
+	    $state = 'statement', next	if s/^{//;
+	    $state = 'statement', next	if s/^}[ \t]*$//;
+	    $state = 'statement', next	if s/^}[ \t]*#/#/;
+	    $state = 'term', next	if s/^}//;
+	    $state = 'operator', next	if s/^\[//;
+	    $state = 'term', next	if s/^]//;
+	    die "Illegal character $_";
+	}
+	elsif ($ord < 33) {
+	    next if s/[ \t\n]+//;
+	    die "Illegal character $_";
+	}
+	else {
+	    $state = 'statement', next	if s/^;//;
+	    $state = 'term', next	if s/^\.[0-9eE]+//;
+	    $state = 'term', next	if s/^[0-9][0-9xaAbBcCddeEfF.]*//;
+	    $state = 'term', next	if s/^\$[A-Za-z_][A-Za-z_0-9]*//;
+	    $state = 'term', next	if s/^\$.//;
+	    $state = 'term', next	if s/^@[A-Za-z_][A-Za-z_0-9]*//;
+	    $state = 'term', next	if s/^@.//;
+	    $state = 'term', next	if s/^<[A-Za-z_0-9]*>//;
+	    next			if s/^\+\+//;
+	    next			if s/^--//;
+	    $state = 'operator', next	if s/^[(!%&*-=+:,.<>]//;
+	    $state = 'term', next	if s/^\)+//;
+	    do quote($ord,1), next	if s/^'//;
+	    do quote($ord,1), next	if s/^"//;
+	    if (s|^[/?]||) {
+		if ($state =~ /stat|oper/) {
+		    $state = 'term';
+		    do quote($ord,1), next;
+		}
+		$state = 'operator', next;
+	    }
+	    next			if s/^#.*//;
+	}
+    }
+}
+
+sub quote {
+    ($quote,$quoting) = @_;
+    $state = 'quote';
+}

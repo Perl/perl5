@@ -1,0 +1,119 @@
+.rn '' }`
+''' $Header: perldb.man,v 1.0.1.1 88/01/28 10:28:19 root Exp $
+''' 
+''' $Log:	perldb.man,v $
+''' Revision 1.0.1.1  88/01/28  10:28:19  root
+''' patch8: created this file.
+''' 
+''' 
+.de Sh
+.br
+.ne 5
+.PP
+\fB\\$1\fR
+.PP
+..
+.de Sp
+.if t .sp .5v
+.if n .sp
+..
+.de Ip
+.br
+.ie \\n.$>=3 .ne \\$3
+.el .ne 3
+.IP "\\$1" \\$2
+..
+'''
+'''     Set up \*(-- to give an unbreakable dash;
+'''     string Tr holds user defined translation string.
+'''     Bell System Logo is used as a dummy character.
+'''
+.tr \(bs-|\(bv\*(Tr
+.ie n \{\
+.ds -- \(bs-
+.if (\n(.H=4u)&(1m=24u) .ds -- \(bs\h'-12u'\(bs\h'-12u'-\" diablo 10 pitch
+.if (\n(.H=4u)&(1m=20u) .ds -- \(bs\h'-12u'\(bs\h'-8u'-\" diablo 12 pitch
+.ds L" ""
+.ds R" ""
+.ds L' '
+.ds R' '
+'br\}
+.el\{\
+.ds -- \(em\|
+.tr \*(Tr
+.ds L" ``
+.ds R" ''
+.ds L' `
+.ds R' '
+'br\}
+.TH PERLDB 1 LOCAL
+.SH NAME
+perldb - Perl Debugger
+.SH SYNOPSIS
+.B perldb [-o output] perlscript arguments
+.SH DESCRIPTION
+.I Perldb
+is a symbolic debugger for
+.I perl
+scripts.
+Run your script just as you normally would, only prepend \*(L"perldb\*(R" to
+the command.
+(On systems where #! doesn't work, put any perl switches into the #! line
+anyway\*(--perldb will pass them off to perl when it runs the script.)
+Perldb copies your script to a temporary file, instrumenting it in the process
+and adding a debugging monitor.
+It then executes the instrumented script for
+you and stops at the first statement so you can set any breakpoints or actions
+you desire.
+.PP
+There is only one switch: \-o, which tells perldb to put its temporary file
+in the filename you specify, and to refrain from deleting the file.
+Use this switch if you intend to rerun the instrumented script, or want to
+look at it for some reason.
+.PP
+These are the debugging commands:
+.Ip s 8
+Single step.
+Subsequent carriage returns will single step.
+.Ip c 8
+Continue.
+Turns off single step mode and runs till the next break point.
+Subsequent carriage returns will continue.
+.Ip <CR> 8
+Repeat last s or c.
+.Ip "l min-max" 8
+List lines in the indicated range.
+.Ip "l line" 8
+List indicated line.
+.Ip l 8
+List the whole program.
+.Ip L 8
+List breakpoints.
+.Ip t 8
+Toggle trace mode.
+.Ip "b line" 8
+Set breakpoint at indicated line.
+.Ip "d line" 8
+Delete breakpoint at indicated line.
+.Ip d 8
+Delete breakpoint at this line.
+.Ip "a line command" 8
+Set an action for indicated line.
+The command must be a valid perl command, except that a missing trailing ;
+will be supplied.
+.Ip q 8
+Quit.
+.Ip command 8
+Execute command as a perl statement.
+A missing trailing ; will be supplied if necessary.
+.SH ENVIRONMENT
+No environment variables are used by perldb.
+.SH AUTHOR
+Larry Wall <lwall@jpl-devvax.Jpl.Nasa.Gov>
+.SH FILES
+/tmp/pdb$$	temporary file for instrumented script
+.SH SEE ALSO
+perl	
+.SH DIAGNOSTICS
+.SH BUGS
+.rn }` ''

@@ -1,6 +1,9 @@
-/* $Header: perl.y,v 1.0 87/12/18 15:48:59 root Exp $
+/* $Header: perl.y,v 1.0.1.1 88/01/28 10:25:31 root Exp $
  *
  * $Log:	perl.y,v $
+ * Revision 1.0.1.1  88/01/28  10:25:31  root
+ * patch8: added eval operator.
+ * 
  * Revision 1.0  87/12/18  15:48:59  root
  * Initial revision
  * 
@@ -97,7 +100,10 @@ char *tokename[] = {
 %% /* RULES */
 
 prog	:	lineseq
-			{ main_root = block_head($1); }
+			{ if (in_eval)
+				eval_root = block_head($1);
+			    else
+				main_root = block_head($1); }
 	;
 
 compblock:	block CONTINUE block

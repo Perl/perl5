@@ -1,6 +1,9 @@
-/* $Header: a2py.c,v 1.0 87/12/18 17:50:33 root Exp $
+/* $Header: a2py.c,v 1.0.1.1 88/01/28 11:07:08 root Exp $
  *
  * $Log:	a2py.c,v $
+ * Revision 1.0.1.1  88/01/28  11:07:08  root
+ * patch8: added support for FOO=bar switches using eval.
+ * 
  * Revision 1.0  87/12/18  17:50:33  root
  * Initial revision
  * 
@@ -114,6 +117,10 @@ register char **env;
 
     tmpstr = walk(0,0,root,&i);
     str = str_make("#!/bin/perl\n\n");
+    str_cat(str,
+      "eval '$'.$1.'$2;' while $ARGV[0] =~ /^([A-Za-z_]+=)(.*)/ && shift;\n");
+    str_cat(str,
+      "			# process any FOO=bar switches\n\n");
     if (do_opens && opens) {
 	str_scat(str,opens);
 	str_free(opens);

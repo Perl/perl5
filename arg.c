@@ -1,8 +1,8 @@
-/* $Header: arg.c,v 1.0.1.3 88/01/26 12:30:33 root Exp $
+/* $Header: arg.c,v 1.0.1.4 88/01/28 10:22:06 root Exp $
  *
  * $Log:	arg.c,v $
- * Revision 1.0.1.3  88/01/26  12:30:33  root
- * patch 6: sprintf didn't finish processing format string when out of args.
+ * Revision 1.0.1.4  88/01/28  10:22:06  root
+ * patch8: added eval operator.
  * 
  * Revision 1.0.1.2  88/01/24  03:52:34  root
  * patch 2: added STATBLKS dependencies.
@@ -1190,6 +1190,7 @@ init_eval()
     opargs[O_UNSHIFT] =		A(1,0,0);
     opargs[O_LINK] =		A(1,1,0);
     opargs[O_REPEAT] =		A(1,1,0);
+    opargs[O_EVAL] =		A(1,0,0);
 }
 
 #ifdef VOIDSIG
@@ -2091,6 +2092,11 @@ STR ***retary;		/* where to return an array to, null if nowhere */
 	    astore(ary,0,str);
 	}
 	value = (double)(ary->ary_fill + 1);
+	break;
+    case O_EVAL:
+	str_sset(str,
+	    do_eval(arg[1].arg_type != A_NULL ? sarg[1] : defstab->stab_val) );
+	STABSET(str);
 	break;
     }
 #ifdef DEBUGGING

@@ -1,6 +1,9 @@
-/* $Header: walk.c,v 1.0 87/12/18 13:07:40 root Exp $
+/* $Header: walk.c,v 1.0.1.1 88/01/28 11:07:56 root Exp $
  *
  * $Log:	walk.c,v $
+ * Revision 1.0.1.1  88/01/28  11:07:56  root
+ * patch8: changed some misleading comments.
+ * 
  * Revision 1.0  87/12/18  13:07:40  root
  * Initial revision
  * 
@@ -68,13 +71,13 @@ int *numericptr;
 	    str_cat(str,"';\t\t# field separator from -F switch\n");
 	}
 	else if (saw_FS && !const_FS) {
-	    str_cat(str,"$FS = '[ \\t\\n]+';\t\t# default field separator\n");
+	    str_cat(str,"$FS = '[ \\t\\n]+';\t\t# set field separator\n");
 	}
 	if (saw_OFS) {
-	    str_cat(str,"$, = ' ';\t\t# default output field separator\n");
+	    str_cat(str,"$, = ' ';\t\t# set output field separator\n");
 	}
 	if (saw_ORS) {
-	    str_cat(str,"$\\ = \"\\n\";\t\t# default output record separator\n");
+	    str_cat(str,"$\\ = \"\\n\";\t\t# set output record separator\n");
 	}
 	if (str->str_cur > 20)
 	    str_cat(str,"\n");

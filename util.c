@@ -1,6 +1,9 @@
-/* $Header: util.c,v 1.0 87/12/18 13:06:30 root Exp $
+/* $Header: util.c,v 1.0.1.1 88/01/28 11:06:35 root Exp $
  *
  * $Log:	util.c,v $
+ * Revision 1.0.1.1  88/01/28  11:06:35  root
+ * patch8: changed fatal() to support eval operator with exiting.
+ * 
  * Revision 1.0  87/12/18  13:06:30  root
  * Initial revision
  * 
@@ -205,6 +208,11 @@ char *pat;
     extern FILE *e_fp;
     extern char *e_tmpname;
 
+    if (in_eval) {
+	sprintf(tokenbuf,pat,a1,a2,a3,a4);
+	str_set(stabent("@",TRUE)->stab_val,tokenbuf);
+	longjmp(eval_env,1);
+    }
     fprintf(stderr,pat,a1,a2,a3,a4);
     if (e_fp)
 	UNLINK(e_tmpname);

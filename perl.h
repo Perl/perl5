@@ -1,6 +1,9 @@
-/* $Header: perl.h,v 1.0.1.2 88/01/24 03:53:47 root Exp $
+/* $Header: perl.h,v 1.0.1.3 88/01/28 10:24:17 root Exp $
  *
  * $Log:	perl.h,v $
+ * Revision 1.0.1.3  88/01/28  10:24:17  root
+ * patch8: added eval operator.
+ * 
  * Revision 1.0.1.2  88/01/24  03:53:47  root
  * patch 2: hid str_peek() in #ifdef DEBUGGING.
  * 
@@ -103,7 +106,8 @@ ARG *flipflip();
 STR *arg_to_str();
 STR *str_new();
 STR *stab_str();
-STR *eval();
+STR *eval();		/* this evaluates expressions */
+STR *do_eval();		/* this evaluates eval operator */
 
 FCMD *load_format();
 
@@ -164,6 +168,7 @@ EXT char *inplace INIT(Nullch);
 EXT char tokenbuf[256];
 EXT int expectterm INIT(TRUE);
 EXT int lex_newlines INIT(FALSE);
+EXT int in_eval INIT(FALSE);
 
 FILE *popen();
 /* char *str_get(); */
@@ -196,6 +201,7 @@ EXT struct loop {
 EXT int loop_ptr INIT(-1);
 
 EXT jmp_buf top_env;
+EXT jmp_buf eval_env;
 
 EXT char *goto_targ INIT(Nullch);	/* cmd_exec gets strange when set */
 

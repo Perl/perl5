@@ -1,6 +1,9 @@
-/* $Header: arg.h,v 1.0 87/12/18 13:04:39 root Exp $
+/* $Header: arg.h,v 1.0.1.1 88/01/28 10:22:40 root Exp $
  *
  * $Log:	arg.h,v $
+ * Revision 1.0.1.1  88/01/28  10:22:40  root
+ * patch8: added eval operator.
+ * 
  * Revision 1.0  87/12/18  13:04:39  root
  * Initial revision
  * 
@@ -111,7 +114,8 @@
 #define O_UNSHIFT 102
 #define O_LINK 103
 #define O_REPEAT 104
-#define MAXO 105
+#define O_EVAL 105
+#define MAXO 106
 
 #ifndef DOINIT
 extern char *opname[];
@@ -222,7 +226,8 @@ char *opname[] = {
     "UNSHIFT",
     "LINK",
     "REPEAT",
-    "105"
+    "EVAL",
+    "106"
 };
 #endif
 

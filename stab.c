@@ -1,6 +1,9 @@
-/* $Header: stab.c,v 1.0 87/12/18 13:06:14 root Exp $
+/* $Header: stab.c,v 1.0.1.1 88/01/28 10:35:17 root Exp $
  *
  * $Log:	stab.c,v $
+ * Revision 1.0.1.1  88/01/28  10:35:17  root
+ * patch8: changed some stabents to support eval operator.
+ * 
  * Revision 1.0  87/12/18  13:06:14  root
  * Initial revision
  * 
@@ -169,12 +172,12 @@ STR *str;
 	case '^':
 	    safefree(curoutstab->stab_io->top_name);
 	    curoutstab->stab_io->top_name = str_get(str);
-	    curoutstab->stab_io->top_stab = stabent(str_get(str),FALSE);
+	    curoutstab->stab_io->top_stab = stabent(str_get(str),TRUE);
 	    break;
 	case '~':
 	    safefree(curoutstab->stab_io->fmt_name);
 	    curoutstab->stab_io->fmt_name = str_get(str);
-	    curoutstab->stab_io->fmt_stab = stabent(str_get(str),FALSE);
+	    curoutstab->stab_io->fmt_stab = stabent(str_get(str),TRUE);
 	    break;
 	case '=':
 	    curoutstab->stab_io->page_len = (long)str_gnum(str);
@@ -274,7 +277,7 @@ int sig;
     ARRAY *savearray;
     STR *str;
 
-    stab = stabent(str_get(hfetch(sigstab->stab_hash,sig_name[sig])),FALSE);
+    stab = stabent(str_get(hfetch(sigstab->stab_hash,sig_name[sig])),TRUE);
     savearray = defstab->stab_array;
     defstab->stab_array = anew();
     str = str_new(0);
