@@ -201,7 +201,7 @@ sub ldopts {
     my($mod,@ns,$root,$sub,$extra,$archive,@archives);
     print STDERR "Searching (@path) for archives\n" if $Verbose;
     foreach $mod (@mods) {
-	@ns = split('::', $mod);
+	@ns = split(/::|\/|\\/, $mod);
 	$sub = $ns[-1];
 	$root = $MM->catdir(@ns);
 	
