@@ -1066,7 +1066,11 @@ fail_discipline:
 		end = strchr(s+1, ':');
 		if (!end)
 		    end = s+len;
+#ifndef PERLIO_LAYERS
 		Perl_croak(aTHX_ "Unknown discipline '%.*s'", end-s, s);
+#else
+		s = end;
+#endif
 	    }
 	}
     }
@@ -1076,46 +1080,11 @@ fail_discipline:
 int
 Perl_do_binmode(pTHX_ PerlIO *fp, int iotype, int mode)
 {
-#ifdef DOSISH
-#  if defined(atarist) || defined(__MINT__)
-    if (!PerlIO_flush(fp)) {
-	if (mode & O_BINARY)
-	    ((FILE*)fp)->_flag |= _IOBIN;
-	else
-	    ((FILE*)fp)->_flag &= ~ _IOBIN;
-	return 1;
-    }
-    return 0;
-#  else
-    if (PerlLIO_setmode(PerlIO_fileno(fp), mode) != -1) {
-#    if defined(WIN32) && defined(__BORLANDC__)
-	/* The translation mode of the stream is maintained independent
-	 * of the translation mode of the fd in the Borland RTL (heavy
-	 * digging through their runtime sources reveal).  User has to
-	 * set the mode explicitly for the stream (though they don't
-	 * document this anywhere). GSAR 97-5-24
-	 */
-	PerlIO_seek(fp,0L,0);
-	if (mode & O_BINARY)
-	    ((FILE*)fp)->flags |= _F_BIN;
-	else
-	    ((FILE*)fp)->flags &= ~ _F_BIN;
-#    endif
-	return 1;
-    }
-    else
-	return 0;
-#  endif
-#else
-#  if defined(USEMYBINMODE)
-    if (my_binmode(fp, iotype, mode) != FALSE)
-	return 1;
-    else
-	return 0;
-#  else
-    return 1;
-#  endif
-#endif
+ /* The old body of this is now in non-LAYER part of perlio.c
+  * This is a stub for any XS code which might have been calling it.
+  */
+ char *name = (O_BINARY != O_TEXT && !(mode & O_BINARY)) ? ":crlf" : ":raw";
+ return PerlIO_binmode(aTHX_ fp, iotype, mode, name);
 }
 
 #if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(F_FREESP)
@@ -2151,7 +2120,7 @@ static int S_s64_malloc( S64_IOB *ptr) {
 	    return( 0);
 	
 	ptr->size += _S64_BUFFER_SIZE;
-	 
+	
 	return( 1);
     }
 
@@ -2162,7 +2131,7 @@ static int S_s64_malloc( S64_IOB *ptr) {
 int Perl_do_s64_getc( PerlIO *f) {
     S64_IOB *ptr = _s64_get_buffer(f);
     if( ptr) {
-	if( ptr->cnt) 
+	if( ptr->cnt)
 	    return( ptr->buffer[--ptr->cnt]);
     }
     return( getc(f));
@@ -2174,7 +2143,7 @@ int Perl_do_s64_ungetc( int ch, PerlIO *f) {
 
     if( !ptr) ptr=_s64_create_buffer(f);
     if( !ptr) return( EOF);
-    if( !ptr->buffer || (ptr->buffer && ptr->cnt >= ptr->size)) 
+    if( !ptr->buffer || (ptr->buffer && ptr->cnt >= ptr->size))
 	if( !_s64_malloc( ptr)) return( EOF);
     ptr->buffer[ptr->cnt++] = ch;
 
