@@ -277,10 +277,10 @@ are as follows; listing the letters is equal to summing the numbers.
     O     2    STDOUT will be in UTF-8
     E     4    STDERR will be in UTF-8
     S     7    I + O + E
-    i     8    the default input layer expects UTF-8
-    o    16    the default output layer enforces UTF-8
+    i     8    UTF-8 is the default PerlIO layer for input streams
+    o    16    UTF-8 is the default PerlIO layer for output streams
     D    24    i + o
-    A    32    the @ARGV elements are supposed to be in UTF-8
+    A    32    the @ARGV elements are expected to be strings encoded in UTF-8
     L    64    normally the "IOEioA" are unconditional,
                the L makes them conditional on the locale environment
                variables (the LC_ALL, LC_TYPE, and LANG, in the order
@@ -290,6 +290,13 @@ are as follows; listing the letters is equal to summing the numbers.
 For example, C<-COE> and C<-C6> will both turn on UTF-8-ness on both
 STDOUT and STDERR.  Repeating letters is just redundant, not cumulative
 nor toggling.
+
+The C<io> options mean that any subsequent open() (or similar I/O
+operations) will have the C<:utf8> PerlIO layer implicitly applied
+to them, in other words, UTF-8 is expected from any input stream,
+and UTF-8 is produced to any output stream.  This is just the default,
+with explicit layers in open() and with binmode() one can manipulate
+streams as usual.
 
 C<-C> on its own (not followed by any number or option list), or the
 empty string C<""> for the C<$ENV{PERL_UNICODE}, has the same effect
