@@ -1958,6 +1958,13 @@ could also result in this warning.  See L<perlcall/G_KEEPERR>.
 (F) You wrote C<< require <file> >> when you should have written
 C<require 'file'>.
 
+=item Ambiguous range in transliteration operator
+
+(F) You wrote something like C<tr/a-z-0//> which doesn't mean anything at
+all.  To include a C<-> character in a transliteration, put it either
+first or last.  (In the past, C<tr/a-z-0//> was synonymous with
+C<tr/a-y//>, which was probably not what you would have expected.)
+
 =item Attempt to join self
 
 (F) You tried to join a thread from within itself, which is an
@@ -2209,6 +2216,13 @@ by Perl or by a user-supplied handler.  See L<attributes>.
 =item invalid [] range "%s" in regexp
 
 The offending range is now explicitly displayed.
+
+=item invalid [] range "%s" in transliteration operator
+
+(F) The range specified in the tr/// or y/// operator had a minimum
+character greater than the maximum character.  See L<perlop>.
+
+The offending range is displayed.
 
 =item Invalid separator character %s in attribute list
 

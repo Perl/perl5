@@ -5,7 +5,7 @@ BEGIN {
     unshift @INC, "../lib";
 }
 
-print "1..15\n";
+print "1..23\n";
 
 $_ = "abcdefghijklmnopqrstuvwxyz";
 
@@ -108,3 +108,41 @@ $y = $x =~ tr/\x{190}/\x{190}/;
 print "not " if $y != 0;
 print "ok 15\n";
 }
+
+# 16: test brokenness with tr/a-z-9//;
+$_ = "abcdefghijklmnopqrstuvwxyz";
+eval "tr/a-z-9/ /";
+print (($@ =~ /^Ambiguous range in transliteration operator/) 
+       ? '' : 'not ', "ok 16\n");
+
+# 17-19: Make sure leading and trailing hyphens still work
+$_ = "car-rot9";
+tr/-a-m/./;
+print (($_ eq '..r.rot9') ? '' : 'not ', "ok 17\n");
+
+$_ = "car-rot9";
+tr/a-m-/./;
+print (($_ eq '..r.rot9') ? '' : 'not ', "ok 18\n");
+
+$_ = "car-rot9";
+tr/-a-m-/./;
+print (($_ eq '..r.rot9') ? '' : 'not ', "ok 19\n");
+
+$_ = "abcdefghijklmnop";
+tr/ae-hn/./;
+print (($_ eq '.bcd....ijklm.op') ? '' : 'not ', "ok 20\n");
+
+$_ = "abcdefghijklmnop";
+tr/a-cf-kn-p/./;
+print (($_ eq '...de......lm...') ? '' : 'not ', "ok 21\n");
+
+$_ = "abcdefghijklmnop";
+tr/a-ceg-ikm-o/./;
+print (($_ eq '...d.f...j.l...p') ? '' : 'not ', "ok 22\n");
+
+# 23: Test reversed range check
+# 20000705 MJD
+eval "tr/m-d/ /";
+print (($@ =~ /^Invalid \[\] range "m-d" in transliteration operator/) 
+       ? '' : 'not ', "ok 23\n");
+

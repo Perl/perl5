@@ -1208,6 +1208,7 @@ S_scan_const(pTHX_ char *start)
     register char *s = start;			/* start of the constant */
     register char *d = SvPVX(sv);		/* destination for copies */
     bool dorange = FALSE;			/* are we in a translit range? */
+    bool didrange = FALSE;		        /* did we just finish a range? */
     bool has_utf = FALSE;			/* embedded \x{} */
     I32 len;					/* ? */
     UV uv;
@@ -1241,6 +1242,13 @@ S_scan_const(pTHX_ char *start)
 		min = (U8)*d;			/* first char in range */
 		max = (U8)d[1];			/* last char in range  */
 
+
+                if (min > max) {
+                    Perl_croak(aTHX_
+                           "Invalid [] range \"%c-%c\" in transliteration operator",
+                           min, max);
+                }
+
 #ifndef ASCIIish
 		if ((isLOWER(min) && isLOWER(max)) ||
 		    (isUPPER(min) && isUPPER(max))) {
@@ -1261,11 +1269,15 @@ S_scan_const(pTHX_ char *start)
 
 		/* mark the range as done, and continue */
 		dorange = FALSE;
+                didrange = TRUE;
 		continue;
-	    }
+	    } 
 
 	    /* range begins (ignore - as first or last char) */
 	    else if (*s == '-' && s+1 < send  && s != start) {
+                if (didrange) { 
+                  croak("Ambiguous range in transliteration operator");
+                }
 		if (utf) {
 		    *d++ = (char)0xff;	/* use illegal utf8 byte--see pmtrans */
 		    s++;
@@ -1273,7 +1285,9 @@ S_scan_const(pTHX_ char *start)
 		}
 		dorange = TRUE;
 		s++;
-	    }
+	    } else {
+              didrange = FALSE;
+            }
 	}
 
 	/* if we get here, we're not doing a transliteration */

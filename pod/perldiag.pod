@@ -76,6 +76,13 @@ on the operator (e.g. C<CORE::log($x)>) or by declaring the subroutine
 to be an object method (see L<perlsub/"Subroutine Attributes"> or
 L<attributes>).
 
+=item Ambiguous range in transliteration operator
+
+(F) You wrote something like C<tr/a-z-0//> which doesn't mean anything at
+all.  To include a C<-> character in a transliteration, put it either
+first or last.  (In the past, C<tr/a-z-0//> was synonymous with
+C<tr/a-y//>, which was probably not what you would have expected.)
+
 =item Ambiguous use of %s resolved as %s
 
 (W ambiguous)(S) You said something that may not be interpreted the way
@@ -1696,6 +1703,11 @@ L<perlfunc/sprintf>.
 
 (F) The range specified in a character class had a minimum character
 greater than the maximum character.  See L<perlre>.
+
+=item invalid [] range "%s" in transliteration operator
+
+(F) The range specified in the tr/// or y/// operator had a minimum
+character greater than the maximum character.  See L<perlop>.
 
 =item Invalid separator character %s in attribute list
 
