@@ -3277,7 +3277,7 @@ PP(pp_uc)
 	    d = (U8*)SvPVX(TARG);
 	    send = s + len;
 	    while (s < send) {
-	        toUPPER_utf8(s, tmpbuf, &ulen);
+		toUPPER_utf8(s, tmpbuf, &ulen);
 		Copy(tmpbuf, d, ulen, U8);
 		d += ulen;
 		s += UTF8SKIP(s);
@@ -3344,7 +3344,24 @@ PP(pp_lc)
 	    d = (U8*)SvPVX(TARG);
 	    send = s + len;
 	    while (s < send) {
-	        toLOWER_utf8(s, tmpbuf, &ulen);
+		UV uv = toLOWER_utf8(s, tmpbuf, &ulen);
+#define GREEK_CAPITAL_LETTER_SIGMA 0x03A3 /* Unicode */
+		if (uv == GREEK_CAPITAL_LETTER_SIGMA) {
+		     /*
+		      * Now if the sigma is NOT followed by
+		      * /$ignorable_sequence$cased_letter/;
+		      * and it IS preceded by
+		      * /$cased_letter$ignorable_sequence/;
+		      * where $ignorable_sequence is
+		      * [\x{2010}\x{AD}\p{Mn}]*
+		      * and $cased_letter is
+		      * [\p{Ll}\p{Lo}\p{Lt}]
+		      * then it should be mapped to 0x03C2,
+		      * (GREEK SMALL LETTER FINAL SIGMA),
+		      * instead of staying 0x03A3.
+		      * See lib/unicore/SpecCase.txt.
+		      */
+		}
 		Copy(tmpbuf, d, ulen, U8);
 		d += ulen;
 		s += UTF8SKIP(s);
