@@ -179,7 +179,7 @@ rm -f core
 # DC/OSx hides certain functions in a libc that looks dynamic but isn't
 # because of this we reinclude -lc when building dynamic extenstions
 libc='/usr/ccs/lib/libc.so'
-cccdlflags='-lc'
+lddlflags='-G -lc'
 
 # DC/OSx gets overenthusiastic with symbol removal when building dynamically
 ccdlflags='-Blargedynsym'
