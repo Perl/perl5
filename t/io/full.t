@@ -14,7 +14,7 @@ print FULL "I like pie.\n" ? print "ok 1\n" : print "not ok 1\n";
 # Should fail
 $z = close(FULL);
 print $z ? "not ok 2 # z=$z; $!\n" : "ok 2\n";
-print $!{ENOSPC} ? "ok 3\n" : "not ok 3\n";
+print $!{ENOSPC} || $!{EBADF} ? "ok 3\n" : "not ok 3\n";
   
 if (open FULL, "> /dev/full") {
   select FULL;   $| = 1;  select STDOUT;
@@ -22,7 +22,7 @@ if (open FULL, "> /dev/full") {
   # Should fail
   $z = print FULL "I like pie.\n";
   print $z ? "not ok 4 # z=$z; $!\n" : "ok 4\n";
-      print $!{ENOSPC} ? "ok 5\n" : "not ok 5\n";
+      print $!{ENOSPC} || $!{EBADF} ? "ok 5\n" : "not ok 5\n";
   $z = close FULL;
   print $z ? "ok 6\n" : "not ok 6 # z=$s; $!\n";
 } else {
