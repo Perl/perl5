@@ -94,6 +94,7 @@ my $Is_VMS = $^O eq 'VMS';
 my $Is_MSWin32 = $^O eq 'MSWin32';
 my $Is_Dos = $^O eq 'dos';
 my $Is_OS2 = $^O eq 'os2';
+my $Is_BeOS = $^O eq 'beos';
 
 sub usage{
     warn "@_\n" if @_;
@@ -159,8 +160,8 @@ print OUT <<'!NO!SUBS!';
 usage if $opt_h;
 
 # attempt to drop privs if we should be tainting and aren't
-if (!($Is_VMS || $Is_MSWin32 || $Is_Dos || $Is_OS2) && ($> == 0 || $< == 0)
-     && !am_taint_checking()) 
+if (!($Is_VMS || $Is_MSWin32 || $Is_Dos || $Is_OS2 || $Is_BeOS)
+    && ($> == 0 || $< == 0) && !am_taint_checking()) 
 {
     my $id = eval { getpwnam("nobody") };
     $id = eval { getpwnam("nouser") } unless defined $id;
@@ -202,9 +203,8 @@ if ($opt_X) {
 if ((my $opts = do{ no warnings; $opt_t + $opt_u + $opt_m + $opt_l }) > 1) {
     usage("only one of -t, -u, -m or -l")
 }
-elsif ($Is_MSWin32
-       || $Is_Dos
-       || !($ENV{TERM} && $ENV{TERM} !~ /dumb|emacs|none|unknown/i))
+elsif ($Is_MSWin32 || $Is_Dos || $Is_BeOS
+    || !($ENV{TERM} && $ENV{TERM} !~ /dumb|emacs|none|unknown/i))
 {
     $opt_t = 1 unless ( $opts || $opt_n );
 }
