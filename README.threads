@@ -4,7 +4,8 @@ interpreter-based threads support, also known as ithreads, and in Perl
 5.8.0 the interpeter threads became available from perl level through
 the threads and threads::shared modules (in Perl 5.6 ithreads are
 available only internally and to XS extension builders, and used
-by the Win32 port for emulating fork()).
+by the Win32 port for emulating fork()). As of Perl 5.8.0, ithreads has
+become the standard threading model for Perl.
 
 If you really want the older support for threads described below,
 it is enabled with:
