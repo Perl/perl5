@@ -2473,8 +2473,9 @@ sub re_uninterp {
 }
 
 # character escapes, but not delimiters that might need to be escaped
-sub escape_str { # ASCII
+sub escape_str { # ASCII, UTF8
     my($str) = @_;
+    $str =~ s/(.)/ord($1)>255 ? sprintf("\\x{%x}", ord($1)) : $1/eg;
     $str =~ s/\a/\\a/g;
 #    $str =~ s/\cH/\\b/g; # \b means someting different in a regex 
     $str =~ s/\t/\\t/g;
