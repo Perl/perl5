@@ -1051,6 +1051,12 @@ multiple commands in a single line by separating them with the command
 separator character, if your shell supports that (e.g. C<;> on many Unix
 shells; C<&> on the Windows NT C<cmd> shell).
 
+Beginning with v5.6.0, Perl will attempt to flush all files opened for
+output before starting the child process, but this may not be supported
+on some platforms (see L<perlport>).  To be safe, you may need to set
+C<$|> ($AUTOFLUSH in English) or call the C<autoflush()> method of
+C<IO::Handle> on any open handles.
+
 Beware that some command shells may place restrictions on the length
 of the command line.  You must ensure your strings don't exceed this
 limit after any necessary interpolations.  See the platform-specific

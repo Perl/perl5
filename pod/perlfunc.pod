@@ -1432,6 +1432,12 @@ program, passing it C<"surprise"> an argument.  The second version
 didn't--it tried to run a program literally called I<"echo surprise">,
 didn't find it, and set C<$?> to a non-zero value indicating failure.
 
+Beginning with v5.6.0, Perl will attempt to flush all files opened for
+output before the exec, but this may not be supported on some platforms
+(see L<perlport>).  To be safe, you may need to set C<$|> ($AUTOFLUSH
+in English) or call the C<autoflush()> method of C<IO::Handle> on any
+open handles in order to avoid lost output.
+
 Note that C<exec> will not call your C<END> blocks, nor will it call
 any C<DESTROY> methods in your objects.
 
@@ -1650,7 +1656,11 @@ fork(), great care has gone into making it extremely efficient (for
 example, using copy-on-write technology on data pages), making it the
 dominant paradigm for multitasking over the last few decades.
 
-All files opened for output are flushed before forking the child process.
+Beginning with v5.6.0, Perl will attempt to flush all files opened for
+output before forking the child process, but this may not be supported
+on some platforms (see L<perlport>).  To be safe, you may need to set
+C<$|> ($AUTOFLUSH in English) or call the C<autoflush()> method of
+C<IO::Handle> on any open handles in order to avoid duplicate output.
 
 If you C<fork> without ever waiting on your children, you will
 accumulate zombies.  On some systems, you can avoid this by setting
@@ -2753,8 +2763,13 @@ The following triples are more or less equivalent:
 
 See L<perlipc/"Safe Pipe Opens"> for more examples of this.
 
-NOTE: On any operation that may do a fork, all files opened for output
-are flushed before the fork is attempted.  On systems that support a
+Beginning with v5.6.0, Perl will attempt to flush all files opened for
+output before any operation that may do a fork, but this may not be
+supported on some platforms (see L<perlport>).  To be safe, you may need
+to set C<$|> ($AUTOFLUSH in English) or call the C<autoflush()> method
+of C<IO::Handle> on any open handles.
+
+On systems that support a
 close-on-exec flag on files, the flag will be set for the newly opened
 file descriptor as determined by the value of $^F.  See L<perlvar/$^F>.
 
@@ -4910,7 +4925,11 @@ platforms).  If there are no shell metacharacters in the argument,
 it is split into words and passed directly to C<execvp>, which is
 more efficient.
 
-All files opened for output are flushed before attempting the exec().
+Beginning with v5.6.0, Perl will attempt to flush all files opened for
+output before any operation that may do a fork, but this may not be
+supported on some platforms (see L<perlport>).  To be safe, you may need
+to set C<$|> ($AUTOFLUSH in English) or call the C<autoflush()> method
+of C<IO::Handle> on any open handles.
 
 The return value is the exit status of the program as
 returned by the C<wait> call.  To get the actual exit value divide by
