@@ -20,7 +20,7 @@
   /%.127s/: Unrecognized escape \\%c passed through	[S_regatom] 
   	$x = '\m' ; /$x/
 
-  POSIX syntax [%c %c] is reserved for future extensions [S_checkposixcc] 
+  POSIX syntax [%c %c] belongs inside character classes	[S_checkposixcc] 
 
 
   Character class [:%.*s:] unknown	[S_regpposixcc]
@@ -62,15 +62,12 @@ use warnings 'regexp' ;
 $_ = "" ;
 /[:alpha:]/;
 /[:zog:]/;
-/[[:zog:]]/;
 no warnings 'regexp' ;
 /[:alpha:]/;
 /[:zog:]/;
-/[[:zog:]]/;
 EXPECT
 POSIX syntax [: :] belongs inside character classes in regex; marked by <-- HERE in m/[:alpha:] <-- HERE / at - line 5.
 POSIX syntax [: :] belongs inside character classes in regex; marked by <-- HERE in m/[:zog:] <-- HERE / at - line 6.
-POSIX class [:zog:] unknown in regex; marked by <-- HERE in m/[[:zog:] <-- HERE ]/
 ########
 # regcomp.c [S_checkposixcc]
 #
@@ -82,16 +79,6 @@ no warnings 'regexp' ;
 EXPECT
 POSIX syntax [. .] belongs inside character classes in regex; marked by <-- HERE in m/[.zog.] <-- HERE / at - line 5.
 POSIX syntax [. .] is reserved for future extensions in regex; marked by <-- HERE in m/[.zog.] <-- HERE /
-########
-# regcomp.c [S_checkposixcc]
-#
-use warnings 'regexp' ;
-$_ = "" ;
-/[[.zog.]]/;
-no warnings 'regexp' ;
-/[[.zog.]]/;
-EXPECT
-POSIX syntax [. .] is reserved for future extensions in regex; marked by <-- HERE in m/[[.zog.] <-- HERE ]/
 ########
 # regcomp.c [S_regclass]
 $_ = "";

@@ -47,7 +47,7 @@ SKIP: {
     # now load a real-looking locale
     $ENV{LC_ALL} = ' .utf8';
     import( 'IN', 'locale' );
-    is( ${^OPEN}, ":utf8\0", 
+    like( ${^OPEN}, qr/^(:utf8)?:utf8\0/,
         'should set a valid locale layer' );
 }
 

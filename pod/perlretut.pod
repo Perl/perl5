@@ -1403,6 +1403,7 @@ off.  C<\G> allows us to easily do context-sensitive matching:
 
 The combination of C<//g> and C<\G> allows us to process the string a
 bit at a time and use arbitrary Perl logic to decide what to do next.
+Currently, the C<\G> anchor only works at the beginning of a pattern.
 
 C<\G> is also invaluable in processing fixed length records with
 regexps.  Suppose we have a snippet of coding region DNA, encoded as
@@ -1782,10 +1783,11 @@ C<[:space:]> correspond to the familiar C<\d>, C<\w>, and C<\s>
 character classes.  To negate a POSIX class, put a C<^> in front of
 the name, so that, e.g., C<[:^digit:]> corresponds to C<\D> and under
 C<utf8>, C<\P{IsDigit}>.  The Unicode and POSIX character classes can
-be used just like C<\d>, both inside and outside of character classes:
+be used just like C<\d>, with the exception that POSIX character
+classes can only be used inside of a character class:
 
     /\s+[abc[:digit:]xyz]\s*/;  # match a,b,c,x,y,z, or a digit
-    /^=item\s[:digit:]/;        # match '=item',
+    /^=item\s[[:digit:]]/;      # match '=item',
                                 # followed by a space and a digit
     use charnames ":full";
     /\s+[abc\p{IsDigit}xyz]\s+/;  # match a,b,c,x,y,z, or a digit

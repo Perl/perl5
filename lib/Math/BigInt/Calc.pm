@@ -8,7 +8,7 @@ require Exporter;
 use vars qw/@ISA $VERSION/;
 @ISA = qw(Exporter);
 
-$VERSION = '0.26';
+$VERSION = '0.27';
 
 # Package to store unsigned big integers in decimal and do math with them
 
@@ -106,7 +106,8 @@ BEGIN
   $e = 5 if $^O =~ /^uts/;	# UTS get's some special treatment
   $e = 5 if $^O =~ /^unicos/;	# unicos is also problematic (6 seems to work
 				# there, but we play safe)
-  $e = 8 if $e > 8;		# cap, for VMS, OS/390 and other 64 bit systems
+  $e = 7 if $e > 7;		# cap, for VMS, OS/390 and other 64 bit systems
+				# 8 fails inside random testsuite, so take 7
 
   # determine how many digits fit into an integer and can be safely added 
   # together plus carry w/o causing an overflow

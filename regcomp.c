@@ -2970,8 +2970,11 @@ tryagain:
 		    }
 		    RExC_end++;
 		}
-		else
+		else {
 		    RExC_end = RExC_parse + 2;
+		    if (RExC_end > oldregxend)
+			RExC_end = oldregxend;
+		}
 		RExC_parse--;
 
 		ret = regclass(pRExC_state);
@@ -3483,7 +3486,10 @@ S_checkposixcc(pTHX_ RExC_state_t *pRExC_state)
 	while(*s && isALNUM(*s))
 	    s++;
 	if (*s && c == *s && s[1] == ']') {
-	    vWARN3(s+2, "POSIX syntax [%c %c] belongs inside character classes", c, c);
+	    if (ckWARN(WARN_REGEXP))
+		vWARN3(s+2,
+			"POSIX syntax [%c %c] belongs inside character classes",
+			c, c);
 
 	    /* [[=foo=]] and [[.foo.]] are still future. */
 	    if (POSIXCC_NOTYET(c)) {
@@ -3590,6 +3596,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	    case 'D':	namedclass = ANYOF_NDIGIT;	break;
 	    case 'p':
 	    case 'P':
+		if (RExC_parse >= RExC_end)
+		    vFAIL2("Empty \\%c{}", value);
 		if (*RExC_parse == '{') {
 		    U8 c = (U8)value;
 		    e = strchr(RExC_parse++, '}');

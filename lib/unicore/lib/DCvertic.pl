@@ -9,5 +9,7 @@
 # Meaning: Compatible with 'vertical'
 #
 return <<'END';
+309F		
+30FF		
 FE30	FE44	
 END

@@ -30,9 +30,6 @@ return <<'END';
 212C	212D	Other_Math
 212F	2131	Other_Math
 2133	2138	Other_Math
-2329	232A	Other_Math
-300A	300B	Other_Math
-301A	301B	Other_Math
 FE35	FE38	Other_Math
 FE59	FE5C	Other_Math
 FE61		Other_Math

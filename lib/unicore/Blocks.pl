@@ -10,8 +10,9 @@ return <<'END';
 0250	02AF	IPA Extensions
 02B0	02FF	Spacing Modifier Letters
 0300	036F	Combining Diacritical Marks
-0370	03FF	Greek
+0370	03FF	Greek and Coptic
 0400	04FF	Cyrillic
+0500	052F	Cyrillic Supplementary
 0530	058F	Armenian
 0590	05FF	Hebrew
 0600	06FF	Arabic
@@ -38,6 +39,10 @@ return <<'END';
 1400	167F	Unified Canadian Aboriginal Syllabics
 1680	169F	Ogham
 16A0	16FF	Runic
+1700	171F	Tagalog
+1720	173F	Hanunoo
+1740	175F	Buhid
+1760	177F	Tagbanwa
 1780	17FF	Khmer
 1800	18AF	Mongolian
 1E00	1EFF	Latin Extended Additional
@@ -45,7 +50,7 @@ return <<'END';
 2000	206F	General Punctuation
 2070	209F	Superscripts and Subscripts
 20A0	20CF	Currency Symbols
-20D0	20FF	Combining Marks for Symbols
+20D0	20FF	Combining Diacritical Marks for Symbols
 2100	214F	Letterlike Symbols
 2150	218F	Number Forms
 2190	21FF	Arrows
@@ -59,7 +64,12 @@ return <<'END';
 25A0	25FF	Geometric Shapes
 2600	26FF	Miscellaneous Symbols
 2700	27BF	Dingbats
+27C0	27EF	Miscellaneous Mathematical Symbols-A
+27F0	27FF	Supplemental Arrows-A
 2800	28FF	Braille Patterns
+2900	297F	Supplemental Arrows-B
+2980	29FF	Miscellaneous Mathematical Symbols-B
+2A00	2AFF	Supplemental Mathematical Operators
 2E80	2EFF	CJK Radicals Supplement
 2F00	2FDF	Kangxi Radicals
 2FF0	2FFF	Ideographic Description Characters
@@ -70,36 +80,37 @@ return <<'END';
 3130	318F	Hangul Compatibility Jamo
 3190	319F	Kanbun
 31A0	31BF	Bopomofo Extended
+31F0	31FF	Katakana Phonetic Extensions
 3200	32FF	Enclosed CJK Letters and Months
 3300	33FF	CJK Compatibility
-3400	4DB5	CJK Unified Ideographs Extension A
+3400	4DBF	CJK Unified Ideographs Extension A
 4E00	9FFF	CJK Unified Ideographs
 A000	A48F	Yi Syllables
 A490	A4CF	Yi Radicals
-AC00	D7A3	Hangul Syllables
+AC00	D7AF	Hangul Syllables
 D800	DB7F	High Surrogates
 DB80	DBFF	High Private Use Surrogates
 DC00	DFFF	Low Surrogates
-E000	F8FF	Private Use
+E000	F8FF	Private Use Area
 F900	FAFF	CJK Compatibility Ideographs
 FB00	FB4F	Alphabetic Presentation Forms
 FB50	FDFF	Arabic Presentation Forms-A
+FE00	FE0F	Variation Selectors
 FE20	FE2F	Combining Half Marks
 FE30	FE4F	CJK Compatibility Forms
 FE50	FE6F	Small Form Variants
-FE70	FEFE	Arabic Presentation Forms-B
-FEFF		Specials
+FE70	FEFF	Arabic Presentation Forms-B
 FF00	FFEF	Halfwidth and Fullwidth Forms
-FFF0	FFFD	Specials
+FFF0	FFFF	Specials
 10300	1032F	Old Italic
 10330	1034F	Gothic
 10400	1044F	Deseret
 1D000	1D0FF	Byzantine Musical Symbols
 1D100	1D1FF	Musical Symbols
 1D400	1D7FF	Mathematical Alphanumeric Symbols
-20000	2A6D6	CJK Unified Ideographs Extension B
+20000	2A6DF	CJK Unified Ideographs Extension B
 2F800	2FA1F	CJK Compatibility Ideographs Supplement
 E0000	E007F	Tags
-F0000	FFFFD	Private Use
-100000	10FFFD	Private Use
+F0000	FFFFF	Supplementary Private Use Area-A
+100000	10FFFF	Supplementary Private Use Area-B
 END

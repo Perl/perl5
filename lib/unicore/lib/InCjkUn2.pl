@@ -9,5 +9,5 @@
 # Meaning: Block 'CJK Unified Ideographs Extension B'
 #
 return <<'END';
-20000	2A6D6	CJK Unified Ideographs Extension B
+20000	2A6DF	CJK Unified Ideographs Extension B
 END

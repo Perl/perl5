@@ -9,5 +9,5 @@
 # Meaning: Block 'Arabic Presentation Forms-B'
 #
 return <<'END';
-FE70	FEFE	Arabic Presentation Forms-B
+FE70	FEFF	Arabic Presentation Forms-B
 END

@@ -4,10 +4,10 @@
 
 #
 # This file supports:
-# 	\p{InCombiningDiacriticalMarks} (and fuzzy permutations)
+# 	\p{InCombiningDiacriticalMarksForSymbols} (and fuzzy permutations)
 # 
-# Meaning: Block 'Combining Diacritical Marks'
+# Meaning: Block 'Combining Diacritical Marks for Symbols'
 #
 return <<'END';
-0300	036F	Combining Diacritical Marks
+20D0	20FF	Combining Diacritical Marks for Symbols
 END

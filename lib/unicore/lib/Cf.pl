@@ -10,10 +10,12 @@
 # Meaning: General Category 'Cf'
 #
 return <<'END';
+06DD		
 070F		
-180B	180E	
+180E		
 200C	200F	
 202A	202E	
+2060	2063	
 206A	206F	
 FEFF		
 FFF9	FFFB	

@@ -33,9 +33,12 @@ sub convert_n_test {
     open my $in, $outfile or die "cannot open $outfile: $!";
     my $result = <$in>;
     close $in;
+    1 while unlink $outfile;
 
     is($expect, $result, $testname);
-
+    # pod2html creates these
+    1 while unlink "pod2htmd.x~~";
+    1 while unlink "pod2htmi.x~~";
 }
 
 1;

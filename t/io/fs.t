@@ -261,9 +261,10 @@ close(IOFSCOM);
 # as per UNIX FAQ.
 
 SKIP: {
+# Check truncating a closed file.
     eval { truncate "Iofs.tmp", 5; };
-
-    skip("no truncate - $@", 6) if $@;
+    
+    skip("no truncate - $@", 10) if $@;
 
     is(-s "Iofs.tmp", 5, "truncation to five bytes");
 
@@ -277,8 +278,8 @@ SKIP: {
     print FH "x\n" x 200;
     close FH;
 
-
-       open(FH, ">>Iofs.tmp") or die "Can't open Iofs.tmp for appending";
+# Check truncating an open file.
+    open(FH, ">>Iofs.tmp") or die "Can't open Iofs.tmp for appending";
 
     binmode FH;
     select FH;
@@ -296,10 +297,10 @@ SKIP: {
     }
        
     if ($^O eq 'vos') {
-     is(-s "Iofs.tmp", 200, "TODO - hit VOS bug posix-973 - fh resize to 200 working (filename check)");
-    } else {
-     is(-s "Iofs.tmp", 200, "fh resize to 200 working (filename check)");
+        skip ("# TODO - hit VOS bug posix-973 - cannot resize an open file below the current file pos.", 7);
     }
+
+    is(-s "Iofs.tmp", 200, "fh resize to 200 working (filename check)");
 
     ok(truncate(FH, 0), "fh resize to zero");
 
@@ -309,11 +310,12 @@ SKIP: {
 
     ok(-z "Iofs.tmp", "fh resize to zero working (filename check)");
 
-       ok(truncate(FH, 200), "fh resize to 200");
-       is(-s FH, 200, "fh resize to 200 working (FH check)");
+    ok(truncate(FH, 200), "fh resize to 200");
+    is(-s FH, 200, "fh resize to 200 working (FH check)");
 
-       ok(truncate(FH, 0), "fh resize to 0");
-       ok(-z FH, "fh resize to 0 working (FH check)");
+    ok(truncate(FH, 0), "fh resize to 0");
+    ok(-z FH, "fh resize to 0 working (FH check)");
+
     close FH;
 }
 

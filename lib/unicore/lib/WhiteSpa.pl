@@ -6,16 +6,16 @@
 # This file supports:
 # 	\p{WhiteSpace} (and fuzzy permutations)
 # 
-# Meaning: Extended property 'White_space'
+# Meaning: Extended property 'White_Space'
 #
 return <<'END';
-0009	000D	White_space
-0020		White_space
-0085		White_space
-00A0		White_space
-1680		White_space
-2000	200A	White_space
-2028	2029	White_space
-202F		White_space
-3000		White_space
+0009	000D	White_Space
+0020		White_Space
+0085		White_Space
+00A0		White_Space
+1680		White_Space
+2000	200A	White_Space
+2028	2029	White_Space
+202F		White_Space
+3000		White_Space
 END

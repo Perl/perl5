@@ -349,7 +349,7 @@ and L<perlunicode> for details.
 =item *
 
 The Unicode Character Database coming with Perl has been upgraded
-to Unicode 3.1.1.  For more information, see http://www.unicode.org/ .
+to Unicode 3.2.0.  For more information, see http://www.unicode.org/ .
 
 =item *
 

@@ -47,7 +47,7 @@ return <<'END';
 0B47	0B48	Other_Alphabetic
 0B4B	0B4C	Other_Alphabetic
 0B56	0B57	Other_Alphabetic
-0B82	0B83	Other_Alphabetic
+0B82		Other_Alphabetic
 0BBE	0BC2	Other_Alphabetic
 0BC6	0BC8	Other_Alphabetic
 0BCA	0BCC	Other_Alphabetic
@@ -87,6 +87,10 @@ return <<'END';
 1038		Other_Alphabetic
 1056	1059	Other_Alphabetic
 16EE	16F0	Other_Alphabetic
+1712	1713	Other_Alphabetic
+1732	1733	Other_Alphabetic
+1752	1753	Other_Alphabetic
+1772	1773	Other_Alphabetic
 17B4	17C8	Other_Alphabetic
 18A9		Other_Alphabetic
 2160	2183	Other_Alphabetic

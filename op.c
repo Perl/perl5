@@ -4842,6 +4842,10 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	/* already defined (or promised)? */
 	if (exists || GvASSUMECV(gv)) {
 	    if (!block && !attrs) {
+		if (CvFLAGS(PL_compcv)) {
+		    /* might have had built-in attrs applied */
+		    CvFLAGS(cv) |= (CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS);
+		}
 		/* just a "sub foo;" when &foo is already defined */
 		SAVEFREESV(PL_compcv);
 		goto done;

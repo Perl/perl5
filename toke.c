@@ -2990,6 +2990,8 @@ Perl_yylex(pTHX)
 		    PL_lex_stuff = Nullsv;
 		}
 		else {
+		    /* NOTE: any CV attrs applied here need to be part of
+		       the CVf_BUILTIN_ATTRS define in cv.h! */
 		    if (!PL_in_my && len == 6 && strnEQ(s, "lvalue", len))
 			CvLVALUE_on(PL_compcv);
 		    else if (!PL_in_my && len == 6 && strnEQ(s, "locked", len))
@@ -2997,14 +2999,20 @@ Perl_yylex(pTHX)
 		    else if (!PL_in_my && len == 6 && strnEQ(s, "method", len))
 			CvMETHOD_on(PL_compcv);
 #ifdef USE_ITHREADS
-      else if (PL_in_my == KEY_our && len == 6 && strnEQ(s, "unique", len))
+		    else if (PL_in_my == KEY_our && len == 6 &&
+			     strnEQ(s, "unique", len))
 			GvUNIQUE_on(cGVOPx_gv(yylval.opval));
 #endif
 		    /* After we've set the flags, it could be argued that
 		       we don't need to do the attributes.pm-based setting
 		       process, and shouldn't bother appending recognized
-		       flags. To experiment with that, uncomment the
-		       following "else": */
+		       flags.  To experiment with that, uncomment the
+		       following "else".  (Note that's already been
+		       uncommented.  That keeps the above-applied built-in
+		       attributes from being intercepted (and possibly
+		       rejected) by a package's attribute routines, but is
+		       justified by the performance win for the common case
+		       of applying only built-in attributes.) */
 		    else
 		        attrs = append_elem(OP_LIST, attrs,
 					    newSVOP(OP_CONST, 0,

@@ -208,11 +208,17 @@ is ($result, undef, "fgets should fail");
 like ($@, qr/^Use method IO::Handle::gets\(\) instead/,
       "check its redef message");
 
-$| = 0;
-# The following line assumes buffered output, which may be not true:
-print '@#!*$@(!@#$' unless ($Is_MacOS || $Is_OS2 || $Is_UWin || $Is_OS390 ||
+# Check that output is not flushed by _exit. This test should be last
+# in the file, and is not counted in the total number of tests.
+if ($^O eq 'vos') {
+ print "# TODO - hit VOS bug posix-885 - _exit flushes output buffers.\n";
+} else {
+ $| = 0;
+ # The following line assumes buffered output, which may be not true:
+ print '@#!*$@(!@#$' unless ($Is_MacOS || $Is_OS2 || $Is_UWin || $Is_OS390 ||
                             $Is_VMS ||
 			    (defined $ENV{PERLIO} &&
 			     $ENV{PERLIO} eq 'unix' &&
 			     $Config::Config{useperlio}));
-_exit(0);
+ _exit(0);
+}

@@ -9,5 +9,5 @@
 # Meaning: Block 'Hangul Syllables'
 #
 return <<'END';
-AC00	D7A3	Hangul Syllables
+AC00	D7AF	Hangul Syllables
 END

@@ -9,6 +9,5 @@
 # Meaning: Block 'Specials'
 #
 return <<'END';
-FEFF		Specials
-FFF0	FFFD	Specials
+FFF0	FFFF	Specials
 END
