@@ -328,10 +328,10 @@ of that conditional, including any C<elsif> and C<else> clauses,
 but not beyond it.
 
 B<NOTE:> None of the foregoing text applies to C<if/unless>,
-C<while/until> or C<for> modifiers appended to simple statements.  Such
-modifiers are not control structures and have no effect on scoping.  Use
-of such modifiers in conjunction with C<my> may have unexpected effects,
-and are best avoided.  A future release of Perl may define precise
+C<while/until> or C<for> modifiers appended to simple statements. Such
+modifiers are not control structures and have no effect on scoping. The
+use of such modifiers in conjunction with C<my> is best avoided, as it may
+have unexpected effects.  A future release of Perl may define precise
 semantics for constructs such as C<my $foo = 1 if $bar>.
 
 The C<foreach> loop defaults to scoping its index variable dynamically
