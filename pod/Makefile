@@ -1,4 +1,4 @@
-CONVERTERS = pod2html pod2latex pod2man pod2text
+CONVERTERS = pod2html pod2latex pod2man pod2text checkpods
 
 all: $(CONVERTERS) man
 PERL = ../miniperl
@@ -180,6 +180,10 @@ realclean:	clean
 
 distclean:	realclean
 
+check:	checkpods
+	@echo "checking..."; \
+	$(PERL) -I../lib checkpods $(POD)
+
 # Dependencies.
 pod2latex:	pod2latex.PL ../lib/Config.pm
 	$(PERL) -I../lib pod2latex.PL
@@ -192,3 +196,8 @@ pod2man:	pod2man.PL ../lib/Config.pm
 
 pod2text:	pod2text.PL ../lib/Config.pm
 	$(PERL) -I ../lib pod2text.PL
+
+checkpods:	checkpods.PL ../lib/Config.pm
+	$(PERL) -I ../lib checkpods.PL
+
+
