@@ -2565,6 +2565,11 @@ have been defined yet.  See L<perlfunc/sort>.
 (F) The format indicated doesn't seem to exist.  Perhaps it's really in
 another package?  See L<perlform>.
 
+=item Undefined value assigned to typeglob
+
+(W) An undefined value was assigned to a typeglob, a la C<*foo = undef>.
+This does nothing.  It's possible that you really mean C<undef *foo>.
+
 =item unexec of %s into %s failed!
 
 (F) The unexec() routine failed for some reason.  See your local FSF

@@ -3795,19 +3795,21 @@ digits.  See also L</oct>, if all you have is a string.
 =item undef
 
 Undefines the value of EXPR, which must be an lvalue.  Use only on a
-scalar value, an entire array, an entire hash, or a subroutine name (using
-"&").  (Using undef() will probably not do what you expect on most
-predefined variables or DBM list values, so don't do that.)  Always
-returns the undefined value.  You can omit the EXPR, in which case
-nothing is undefined, but you still get an undefined value that you
-could, for instance, return from a subroutine, assign to a variable or
-pass as a parameter.  Examples:
+scalar value, an array (using "@"), a hash (using "%"), a subroutine
+(using "&"), or a typeglob (using "*").  (Saying C<undef $hash{$key}>
+will probably not do what you expect on most predefined variables or
+DBM list values, so don't do that; see L<delete>.)  Always returns the
+undefined value.  You can omit the EXPR, in which case nothing is
+undefined, but you still get an undefined value that you could, for
+instance, return from a subroutine, assign to a variable or pass as a
+parameter.  Examples:
 
     undef $foo;
     undef $bar{'blurfl'};             # Compare to: delete $bar{'blurfl'};
     undef @ary;
     undef %hash;
     undef &mysub;
+    undef *xyz;       # destroys $xyz, @xyz, %xyz, &xyz, etc.
     return (wantarray ? (undef, $errmsg) : undef) if $they_blew_it;
     select undef, undef, undef, 0.25;
     ($a, $b, undef, $c) = &foo;       # Ignore third value returned

@@ -20,10 +20,20 @@ getcwd - get pathname of current working directory
     chdir "/tmp";
     print $ENV{'PWD'};
 
+    use Cwd 'abs_path';
+    print abs_path($ENV{'PWD'});
+
+    use Cwd 'fast_abs_path';
+    print fast_abs_path($ENV{'PWD'});
+
 =head1 DESCRIPTION
 
 The getcwd() function re-implements the getcwd(3) (or getwd(3)) functions
 in Perl.
+
+The abs_path() function takes a single argument and returns the
+absolute pathname for that argument. It uses the same algoritm as
+getcwd(). (actually getcwd() is abs_path("."))
 
 The fastcwd() function looks the same as getcwd(), but runs faster.
 It's also more dangerous because it might conceivably chdir() you out
@@ -34,6 +44,9 @@ everything appears to have worked, the fastcwd() function will check
 that it leaves you in the same directory that it started in. If it has
 changed it will C<die> with the message "Unstable directory path,
 current directory changed unexpectedly". That should never happen.
+
+The fast_abs_path() function looks the same as abs_path(), but runs faster.
+And like fastcwd() is more dangerous.
 
 The cwd() function looks the same as getcwd and fastgetcwd but is
 implemented using the most natural and safe form for the current

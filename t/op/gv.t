@@ -4,7 +4,7 @@
 # various typeglob tests
 #
 
-print "1..13\n";
+print "1..18\n";
 
 # type coersion on assignment
 $foo = 'foo';
@@ -65,3 +65,21 @@ if (defined $baa) {
 { package Foo::Bar }
 print exists $Foo::{'Bar::'} ? "ok 12\n" : "not ok 12\n";
 print $Foo::{'Bar::'} eq '*Foo::Bar::' ? "ok 13\n" : "not ok 13\n";
+
+# test undef operator clearing out entire glob
+$foo = 'stuff';
+@foo = qw(more stuff);
+%foo = qw(even more random stuff);
+undef *foo;
+print +($foo || @foo || %foo) ? "not ok" : "ok", " 16\n";
+
+# test warnings from assignment of undef to glob
+{
+    my $msg;
+    local $SIG{__WARN__} = sub { $msg = $_[0] };
+    local $^W = 1;
+    *foo = 'bar';
+    print $msg ? "not ok" : "ok", " 17\n";
+    *foo = undef;
+    print $msg ? "ok" : "not ok", " 18\n";
+}
