@@ -141,7 +141,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     }
 
     if (as_raw) {
-#if defined(USE_64_BIT_OFFSETS) && defined(O_LARGEFILE)
+#if defined(USE_64_BIT_RAWIO) && defined(O_LARGEFILE)
 	rawmode |= O_LARGEFILE;
 #endif
 
@@ -1696,7 +1696,7 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
     else
     {
 	IV i = SvIV(astr);
-	a = (char *)i;		/* ouch */
+	a = INT2PTR(char *,i);		/* ouch */
     }
     SETERRNO(0,0);
     switch (optype)

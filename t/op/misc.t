@@ -59,12 +59,11 @@ $a = ":="; split /($a)/o, "a:=b:=c"; print "@_"
 EXPECT
 a := b := c
 ########
-use integer;
 $cusp = ~0 ^ (~0 >> 1);
 $, = " ";
 print +($cusp - 1) % 8, $cusp % 8, -$cusp % 8, ($cusp + 1) % 8, "!\n";
 EXPECT
--1 0 0 1 !
+7 0 0 1 !
 ########
 $foo=undef; $foo->go;
 EXPECT
@@ -105,7 +104,7 @@ EXPECT
 ########
 %@x=0;
 EXPECT
-Can't modify hash deref in repeat at - line 1, near "0;"
+Can't modify hash dereference in repeat (x) at - line 1, near "0;"
 Execution of - aborted due to compilation errors.
 ########
 $_="foo";

@@ -3,7 +3,7 @@ package File::Spec::Functions;
 use File::Spec;
 use strict;
 
-use vars qw(@ISA @EXPORT @EXPORT_OK);
+use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
 require Exporter;
 
@@ -30,6 +30,8 @@ require Exporter;
 	abs2rel
 	rel2abs
 );
+
+%EXPORT_TAGS = ( ALL => [ @EXPORT_OK, @EXPORT ] );
 
 foreach my $meth (@EXPORT, @EXPORT_OK) {
     my $sub = File::Spec->can($meth);
@@ -84,6 +86,8 @@ The following functions are exported only by request.
 	catpath
 	abs2rel
 	rel2abs
+
+All the functions may be imported using the C<:ALL> tag.
 
 =head1 SEE ALSO
 

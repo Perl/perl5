@@ -1,83 +1,88 @@
   pp_sys.c 	AOK
 
-  untie attempted while %d inner references still exist
+  untie attempted while %d inner references still exist	[pp_untie]
     sub TIESCALAR { bless [] } ; tie $a, 'main'; untie $a ;
 
-  Filehandle %s opened only for input
+  Filehandle %s opened only for input		[pp_leavewrite]
     format STDIN =
     .
     write STDIN;
 
-  Write on closed filehandle %s
+  Write on closed filehandle %s			[pp_leavewrite]
     format STDIN =
     .
     close STDIN;
     write STDIN ;
 
-  page overflow	
+  page overflow	 				[pp_leavewrite]
 
-  Filehandle %s never opened
+  Filehandle %s never opened			[pp_prtf]
     $a = "abc"; printf $a "fred"
 
-  Filehandle %s opened only for input
+  Filehandle %s opened only for input		[pp_prtf]
     $a = "abc"; 
     printf $a "fred"
 
-  printf on closed filehandle %s
+  printf on closed filehandle %s		[pp_prtf]
     close STDIN ;
     printf STDIN "fred"
 
-  Syswrite on closed filehandle
+  Syswrite on closed filehandle			[pp_send]
     close STDIN; 
     syswrite STDIN, "fred", 1;
 
-  Send on closed socket
+  Send on closed socket				[pp_send]
     close STDIN; 
     send STDIN, "fred", 1
 
-  bind() on closed fd
+  bind() on closed fd				[pp_bind]
     close STDIN; 
     bind STDIN, "fred" ;
 
 
-  connect() on closed fd
+  connect() on closed fd			[pp_connect]
     close STDIN; 
     connect STDIN, "fred" ;
 
-  listen() on closed fd
+  listen() on closed fd				[pp_listen]
     close STDIN; 
     listen STDIN, 2;
 
-  accept() on closed fd
+  accept() on closed fd				[pp_accept]
     close STDIN; 
     accept STDIN, "fred" ;
 
-  shutdown() on closed fd
+  shutdown() on closed fd			[pp_shutdown]
     close STDIN; 
     shutdown STDIN, 0;
 
-  [gs]etsockopt() on closed fd
+  [gs]etsockopt() on closed fd			[pp_ssockopt]
     close STDIN; 
     setsockopt STDIN, 1,2,3;
     getsockopt STDIN, 1,2;
 
-  get{sock, peer}name() on closed fd
+  get{sock, peer}name() on closed fd		[pp_getpeername]
     close STDIN; 
     getsockname STDIN;
     getpeername STDIN;
 
-  warn(warn_nl, "stat");
+  warn(warn_nl, "stat");			[pp_stat]
 
   Test on unopened file <%s>
 	close STDIN ; -T STDIN ;
 
-  warn(warn_nl, "open");
+  warn(warn_nl, "open");			[pp_fttext]
     -T "abc\ndef" ;
 
+  Filehandle %s opened only for output		[pp_sysread]
+	my $file = "./xcv" ;
+	open(F, ">$file") ; 
+	my $a = sysread(F, $a,10) ;
+  
   
 
 __END__
-# pp_sys.c
+# pp_sys.c [pp_untie]
 use warnings 'untie' ;
 sub TIESCALAR { bless [] } ; 
 $b = tie $a, 'main'; 
@@ -88,7 +93,7 @@ untie $d ;
 EXPECT
 untie attempted while 1 inner references still exist at - line 5.
 ########
-# pp_sys.c
+# pp_sys.c [pp_leavewrite]
 use warnings 'io' ;
 format STDIN =
 .
@@ -98,7 +103,7 @@ write STDIN;
 EXPECT
 Filehandle main::STDIN opened only for input at - line 5.
 ########
-# pp_sys.c
+# pp_sys.c [pp_leavewrite]
 use warnings 'closed' ;
 format STDIN =
 .
@@ -109,7 +114,7 @@ write STDIN;
 EXPECT
 Write on closed filehandle main::STDIN at - line 6.
 ########
-# pp_sys.c
+# pp_sys.c [pp_leavewrite]
 use warnings 'io' ;
 format STDOUT_TOP =
 abc
@@ -127,7 +132,7 @@ write ;
 EXPECT
 page overflow at - line 13.
 ########
-# pp_sys.c
+# pp_sys.c [pp_prtf]
 use warnings 'unopened' ;
 $a = "abc"; 
 printf $a "fred";
@@ -136,7 +141,7 @@ printf $a "fred";
 EXPECT
 Filehandle main::abc never opened at - line 4.
 ########
-# pp_sys.c
+# pp_sys.c [pp_prtf]
 use warnings 'closed' ;
 close STDIN ;
 printf STDIN "fred";
@@ -145,7 +150,7 @@ printf STDIN "fred";
 EXPECT
 printf on closed filehandle main::STDIN at - line 4.
 ########
-# pp_sys.c
+# pp_sys.c [pp_prtf]
 use warnings 'io' ;
 printf STDIN "fred";
 no warnings 'io' ;
@@ -153,7 +158,7 @@ printf STDIN "fred";
 EXPECT
 Filehandle main::STDIN opened only for input at - line 3.
 ########
-# pp_sys.c
+# pp_sys.c [pp_send]
 use warnings 'closed' ;
 close STDIN; 
 syswrite STDIN, "fred", 1;
@@ -162,7 +167,7 @@ syswrite STDIN, "fred", 1;
 EXPECT
 Syswrite on closed filehandle at - line 4.
 ########
-# pp_sys.c
+# pp_sys.c [pp_prtf pp_send pp_bind pp_connect pp_listen pp_accept pp_shutdown pp_ssockopt ppp_getpeername]
 use warnings 'io' ;
 use Config; 
 BEGIN { 
@@ -216,7 +221,7 @@ shutdown() on closed fd at - line 27.
 get{sock, peer}name() on closed fd at - line 30.
 get{sock, peer}name() on closed fd at - line 31.
 ########
-# pp_sys.c
+# pp_sys.c [pp_stat]
 use warnings 'newline' ;
 stat "abc\ndef";
 no warnings 'newline' ;
@@ -224,7 +229,7 @@ stat "abc\ndef";
 EXPECT
 Unsuccessful stat on filename containing newline at - line 3.
 ########
-# pp_sys.c
+# pp_sys.c [pp_fttext]
 use warnings 'unopened' ;
 close STDIN ; 
 -T STDIN ;
@@ -233,10 +238,22 @@ no warnings 'unopened' ;
 EXPECT
 Test on unopened file <STDIN> at - line 4.
 ########
-# pp_sys.c
+# pp_sys.c [pp_fttext]
 use warnings 'newline' ;
 -T "abc\ndef" ;
 no warnings 'newline' ;
 -T "abc\ndef" ;
 EXPECT
 Unsuccessful open on filename containing newline at - line 3.
+########
+# pp_sys.c [pp_sysread]
+use warnings 'io' ;
+my $file = "./xcv" ;
+open(F, ">$file") ; 
+my $a = sysread(F, $a,10) ;
+no warnings 'io' ;
+my $a = sysread(F, $a,10) ;
+close F ;
+unlink $file ;
+EXPECT
+Filehandle main::F opened only for output at - line 5.

@@ -327,15 +327,24 @@ The special literals __FILE__, __LINE__, and __PACKAGE__
 represent the current filename, line number, and package name at that
 point in your program.  They may be used only as separate tokens; they
 will not be interpolated into strings.  If there is no current package
-(due to an empty C<package;> directive), __PACKAGE__ is the undefined value.
+(due to an empty C<package;> directive), __PACKAGE__ is the undefined
+value.
 
-The tokens __END__ and __DATA__ may be used to indicate the logical
-end of the script before the actual end of file.  Any following
-text is ignored, but may be read via a DATA filehandle: main::DATA
-for __END__, or PACKNAME::DATA (where PACKNAME is the current
-package) for __DATA__.  The two control characters ^D and ^Z are
-synonyms for __END__ in the main program, __DATA__ in a separate
-module.  See L<SelfLoader> for more description of __DATA__, and
+The two control characters ^D and ^Z, and the tokens __END__ and __DATA__
+may be used to indicate the logical end of the script before the actual
+end of file.  Any following text is ignored.
+
+Text after __DATA__ but may be read via the filehandle C<PACKNAME::DATA>,
+where C<PACKNAME> is the package that was current when the __DATA__
+token was encountered.  The filehandle is left open pointing to the
+contents after __DATA__.  It is the program's responsibility to
+C<close DATA> when it is done reading from it.  For compatibility with
+older scripts written before __DATA__ was introduced, __END__ behaves
+like __DATA__ in the toplevel script (but not in files loaded with
+C<require> or C<do>) and leaves the remaining contents of the
+file accessible via C<main::DATA>.
+
+See L<SelfLoader> for more description of __DATA__, and
 an example of its use.  Note that you cannot read from the DATA
 filehandle in a BEGIN block: the BEGIN block is executed as soon
 as it is seen (during compilation), at which point the corresponding

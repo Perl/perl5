@@ -46,6 +46,11 @@ execution. The semantics of the lock are exactly those of one
 explicitly taken with the C<lock> operator immediately after the
 subroutine is entered.
 
+=item lvalue
+
+Setting this attribute enables the subroutine to be used in
+lvalue context.  See L<perlsub/"Lvalue subroutines">.
+
 =back
 
 =cut

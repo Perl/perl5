@@ -92,19 +92,18 @@ The file Mytest.pm should start with something like this:
 	package Mytest;
 
 	use strict;
-	use vars qw($VERSION @ISA @EXPORT);
 
 	require Exporter;
 	require DynaLoader;
 
-	@ISA = qw(Exporter DynaLoader);
+	our @ISA = qw(Exporter DynaLoader);
 	# Items to export into callers namespace by default. Note: do not export
 	# names by default without a very good reason. Use EXPORT_OK instead.
 	# Do not simply export all your public functions/methods/constants.
-	@EXPORT = qw(
+	our @EXPORT = qw(
 
 	);
-	$VERSION = '0.01';
+	our $VERSION = '0.01';
 
 	bootstrap Mytest $VERSION;
 
@@ -563,8 +562,7 @@ the following three lines:
 	mylib/mylib.h
 
 To keep our namespace nice and unpolluted, edit the .pm file and change
-the variable C<@EXPORT> to C<@EXPORT_OK> (there are two: one in the line
-beginning "use vars" and one setting the array itself).  Finally, in the
+the variable C<@EXPORT> to C<@EXPORT_OK>.  Finally, in the
 .xs file, edit the #include line to read:
 
 	#include "mylib/mylib.h"

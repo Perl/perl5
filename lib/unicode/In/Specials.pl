@@ -1,3 +1,3 @@
 return <<'END';
-FFF0	FFFF
+FFF0	FFFD
 END

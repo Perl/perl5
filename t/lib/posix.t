@@ -14,7 +14,7 @@ use POSIX qw(fcntl_h signal_h limits_h _exit getcwd open read strftime write);
 use strict subs;
 
 $| = 1;
-print "1..18\n";
+print "1..26\n";
 
 $Is_W32 = $^O eq 'MSWin32';
 
@@ -94,6 +94,31 @@ print &POSIX::acos(1.0) == 0.0 ? "ok 17\n" : "not ok 17\n";
 # -DSTRUCT_TM_HASZONE to your cflags when compiling ext/POSIX/POSIX.c.
 # See ext/POSIX/hints/sunos_4.pl and ext/POSIX/hints/linux.pl 
 print POSIX::strftime("ok 18 # %H:%M, on %D\n", localtime());
+
+# If that worked, validate the mini_mktime() routine's normalisation of
+# input fields to strftime().
+sub try_strftime {
+    my $num = shift;
+    my $expect = shift;
+    my $got = POSIX::strftime("%a %b %d %H:%M:%S %Y %j", @_);
+    if ($got eq $expect) {
+	print "ok $num\n";
+    }
+    else {
+	print "# expected: $expect\n# got: $got\nnot ok $num\n";
+    }
+}
+
+$lc = &POSIX::setlocale(&POSIX::LC_TIME, 'C') if $Config{d_setlocale};
+try_strftime(19, "Wed Feb 28 00:00:00 1996 059", 0,0,0, 28,1,96);
+try_strftime(20, "Thu Feb 29 00:00:60 1996 060", 60,0,-24, 30,1,96);
+try_strftime(21, "Fri Mar 01 00:00:00 1996 061", 0,0,-24, 31,1,96);
+try_strftime(22, "Sun Feb 28 00:00:00 1999 059", 0,0,0, 28,1,99);
+try_strftime(23, "Mon Mar 01 00:00:00 1999 060", 0,0,24, 28,1,99);
+try_strftime(24, "Mon Feb 28 00:00:00 2000 059", 0,0,0, 28,1,100);
+try_strftime(25, "Tue Feb 29 00:00:00 2000 060", 0,0,0, 0,2,100);
+try_strftime(26, "Wed Mar 01 00:00:00 2000 061", 0,0,0, 1,2,100);
+&POSIX::setlocale(&POSIX::LC_TIME, $lc) if $Config{d_setlocale};
 
 $| = 0;
 # The following line assumes buffered output, which may be not true with EMX:

@@ -1,60 +1,62 @@
-  doio.c	AOK
+  doio.c	
 
-  Can't do bidirectional pipe
+  Can't do bidirectional pipe		[Perl_do_open9]
     open(F, "| true |");
 
-  Missing command in piped open
+  Missing command in piped open		[Perl_do_open9]
     open(F, "| ");
 
-  Missing command in piped open
+  Missing command in piped open		[Perl_do_open9]
     open(F, " |");
 
-  warn(warn_nl, "open");
+  warn(warn_nl, "open");		[Perl_do_open9]
     open(F, "true\ncd")
 
-  Close on unopened file <%s>
-    $a = "fred";close($a)
+  Close on unopened file <%s>		[Perl_do_close] <<TODO
+    $a = "fred";close("$a")
 
-  tell() on unopened file
+  tell() on unopened file		[Perl_do_tell]
     $a = "fred";$a = tell($a)
 
-  seek() on unopened file
+  seek() on unopened file		[Perl_do_seek]
     $a = "fred";$a = seek($a,1,1)
 
-  sysseek() on unopened file
+  sysseek() on unopened file		[Perl_do_sysseek]
     $a = "fred";$a = seek($a,1,1)
 
-  warn(warn_uninit);
+  warn(warn_uninit);			[Perl_do_print]
     print $a ;
 
-  Stat on unopened file <%s> 
+  Stat on unopened file <%s> 		[Perl_my_stat]
     close STDIN ; -x STDIN ;
 
-  warn(warn_nl, "stat");
+  warn(warn_nl, "stat");		[Perl_my_stat]
     stat "ab\ncd"
 
-  warn(warn_nl, "lstat");
+  warn(warn_nl, "lstat");		[Perl_my_lstat]
     lstat "ab\ncd"
 
-  Can't exec \"%s\": %s 
+  Can't exec \"%s\": %s 		[Perl_do_aexec5]
 
-  Can't exec \"%s\": %s 
+  Can't exec \"%s\": %s 		[Perl_do_exec3]
 
+  Filehandle %s opened only for output	[Perl_do_eof]
+	my $a = eof STDOUT
 
   Mandatory Warnings ALL TODO
   ------------------
-  Can't do inplace edit: %s is not a regular file
+  Can't do inplace edit: %s is not a regular file	[Perl_nextargv]
      edit a directory
 
-  Can't do inplace edit: %s would not be unique
-  Can't rename %s to %s: %s, skipping file
-  Can't rename %s to %s: %s, skipping file
-  Can't remove %s: %s, skipping file
-  Can't do inplace edit on %s: %s
+  Can't do inplace edit: %s would not be unique		[Perl_nextargv]
+  Can't rename %s to %s: %s, skipping file		[Perl_nextargv]
+  Can't rename %s to %s: %s, skipping file		[Perl_nextargv]
+  Can't remove %s: %s, skipping file			[Perl_nextargv]
+  Can't do inplace edit on %s: %s			[Perl_nextargv]
   
 
 __END__
-# doio.c
+# doio.c [Perl_do_open9]
 use warnings 'io' ;
 open(F, '|'.($^O eq 'VMS' ? 'mcr ':'')."$^X -e 1|");
 close(F);
@@ -64,7 +66,7 @@ close(G);
 EXPECT
 Can't do bidirectional pipe at - line 3.
 ########
-# doio.c
+# doio.c [Perl_do_open9]
 use warnings 'io' ;
 open(F, "|      ");
 no warnings 'io' ;
@@ -72,7 +74,7 @@ open(G, "|      ");
 EXPECT
 Missing command in piped open at - line 3.
 ########
-# doio.c
+# doio.c [Perl_do_open9]
 use warnings 'io' ;
 open(F, "      |");
 no warnings 'io' ;
@@ -80,7 +82,7 @@ open(G, "      |");
 EXPECT
 Missing command in piped open at - line 3.
 ########
-# doio.c
+# doio.c [Perl_do_open9]
 use warnings 'io' ;
 open(F, "<true\ncd");
 no warnings 'io' ;
@@ -88,7 +90,15 @@ open(G, "<true\ncd");
 EXPECT
 Unsuccessful open on filename containing newline at - line 3.
 ########
-# doio.c
+# doio.c [Perl_do_close] <<TODO
+use warnings 'unopened' ;
+close "fred" ;
+no warnings 'unopened' ;
+close "joe" ;
+EXPECT
+Close on unopened file <fred> at - line 3.
+########
+# doio.c [Perl_do_tell Perl_do_seek Perl_do_sysseek Perl_my_stat]
 use warnings 'io' ;
 close STDIN ;
 tell(STDIN);
@@ -107,7 +117,7 @@ seek() on unopened file at - line 5.
 sysseek() on unopened file at - line 6.
 Stat on unopened file <STDIN> at - line 7.
 ########
-# doio.c
+# doio.c [Perl_do_print]
 use warnings 'uninitialized' ;
 print $a ;
 no warnings 'uninitialized' ;
@@ -115,13 +125,7 @@ print $b ;
 EXPECT
 Use of uninitialized value at - line 3.
 ########
-# doio.c
-use warnings 'io' ;
-
-EXPECT
-
-########
-# doio.c
+# doio.c [Perl_my_stat Perl_my_lstat]
 use warnings 'io' ;
 stat "ab\ncd";
 lstat "ab\ncd";
@@ -132,7 +136,7 @@ EXPECT
 Unsuccessful stat on filename containing newline at - line 3.
 Unsuccessful stat on filename containing newline at - line 4.
 ########
-# doio.c
+# doio.c [Perl_do_aexec5]
 use warnings 'io' ;
 exec "lskdjfalksdjfdjfkls","" ;
 no warnings 'io' ;
@@ -141,7 +145,7 @@ EXPECT
 OPTION regex
 Can't exec "lskdjfalksdjfdjfkls": .+
 ########
-# doio.c
+# doio.c [Perl_do_exec3]
 use warnings 'io' ;
 exec "lskdjfalksdjfdjfkls", "abc" ;
 no warnings 'io' ;
@@ -150,7 +154,7 @@ EXPECT
 OPTION regex
 Can't exec "lskdjfalksdjfdjfkls(:? abc)?": .+
 ########
-# doio.c
+# doio.c [Perl_nextargv]
 $^W = 0 ;
 my $filename = "./temp" ;
 mkdir $filename, 0777 
@@ -177,3 +181,11 @@ EXPECT
 Can't do inplace edit: ./temp is not a regular file at - line 9.
 Can't do inplace edit: ./temp is not a regular file at - line 21.
 
+########
+# doio.c [Perl_do_eof]
+use warnings 'io' ;
+my $a = eof STDOUT ;
+no warnings 'io' ;
+$a = eof STDOUT ;
+EXPECT
+Filehandle main::STDOUT opened only for output at - line 3.

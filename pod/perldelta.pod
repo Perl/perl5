@@ -150,56 +150,72 @@ use "quads" (64-integers) as follows:
 
 =over 4
 
-=item literal numeric constants in the code
+=item constants (decimal, hexadecimal, octal, binary) in the code 
 
 =item arguments to oct() and hex()
 
-=item arguments to print(), printf() and sprintf()
+=item arguments to print(), printf() and sprintf() (flag prefixes ll, L, q)
+
+=item printed as such
 
 =item pack() and unpack() "q" and "Q" formats
 
-=item in basic arithmetics: +, -, *, /, %
+=item in basic arithmetics: + - * / %
 
-=item in bit arithmetics: &, |, ^, ~, <<, >>, vec()
+=item vec() (but see the below note about bit arithmetics)
     
 =back
 
 Note that unless you have the case (a) you will have to configure
 and compile Perl using the -Duse64bits Configure flag.
 
+Unfortunately bit arithmetics (&, |, ^, ~, <<, >>) for numbers are not
+64-bit clean, they are explictly forced to be 32-bit.  Bit arithmetics
+for bit vectors (created by vec()) are not limited in their width.
+
 Last but not least: note that due to Perl's habit of always using
-floating point numbers (inherently inexact) the quads are still not
-true integers (exact).  When the quads overflow their limits
-(0...18_446_744_073_709_551_615 unsigned, -9_223_372_036_854_775_808...
-9_223_372_036_854_775_807 signed), they are silently promoted to
-floating point numbers, after which they will start losing precision
-(their lower digits).  What this means, among other things, is that
-adding/subtracting small numbers doesn't change the large number,
-and that == may return equalness for numbers that are not equal.
-One particular cause of grief is using the ~ operator which when
-used on small numbers produces large numbers.  These large numbers
-stay (internally) integers for only as long as bit arithmetics are
-used, but for example + will turn the results into floating point
-numbers.
+floating point numbers the quads are still not true integers.
+When quads overflow their limits (0...18_446_744_073_709_551_615 unsigned,
+-9_223_372_036_854_775_808...9_223_372_036_854_775_807 signed), they
+are silently promoted to floating point numbers, after which they will
+start losing precision (their lower digits).
 
 =head2 Large file support
 
 If you have filesystems that support "large files" (files larger than
-2 gigabytes), you may now also be able to create and access them from Perl.
+2 gigabytes), you may now also be able to create and access them from
+Perl.  You have to use Configure -Duselargefiles.  Turning on the
+large file support turns on also the 64-bit support, for obvious reasons.
 
-Note that in addition to requiring a proper file system to do this you
-may also need to adjust your per-process (or even your per-system, or
-per-user group) maximum filesize limits before running Perl scripts
-that try to handle large files, especially if you intend to write such
-files (reading may work even without adjustments).
+Note that in addition to requiring a proper file system to do large
+files you may also need to adjust your per-process (or your
+per-system, or per-process-group, or per-user-group) maximum filesize
+limits before running Perl scripts that try to handle large files,
+especially if you intend to write such files.
 
-Adjusting your file system/system limits is outside the scope of Perl.
-For process limits, you may try to increase the limits using your
-shell's limit/ulimit command before running Perl.  The BSD::Resource
-extension (not included with the standard Perl distribution) may also
-be of use.
+Finally, in addition to your process/process group maximum filesize
+limits, you may have quota limits on your filesystems that stop you
+(your user id or your user group id) from using large files.
+
+Adjusting your process/user/group/file system/operating system limits
+is outside the scope of Perl core language.  For process limits, you
+may try increasing the limits using your shell's limits/limit/ulimit
+command before running Perl.  The BSD::Resource extension (not
+included with the standard Perl distribution) may also be of use, it
+offers the getrlimit/setrlimit interface that can be used to adjust
+process resource usage limits, including the maximum filesize limit.
  
-(Large file support is also related to 64-bit support, for obvious reasons)
+=head2 Long doubles
+
+In some systems you may be able to use long doubles to enhance the
+range of precision of your double precision floating point numbers
+(that is, Perl's numbers).  Use Configure -Duselongdouble to enable
+this support (if it is available).
+
+=head2 "more bits"
+
+You can Configure -Dusemorebits to turn on both the 64-bit support
+and the long double support.
 
 =head2 Better syntax checks on parenthesized unary operators
 
@@ -534,7 +550,9 @@ runtime error.
 
 The timelocal() and timegm() functions used to silently return bogus
 results when the date exceeded the machine's integer range.  They
-now consistently croak() if the date falls in an unsupported range.
+now consistently croak() if the date falls in an unsupported range--
+but on the other hand they now accept "out-of-limits" day-of-month
+to make "Julian date" conversions easier.
 
 =item Win32
 
@@ -711,6 +729,11 @@ elements of a subroutine attribute list.  If the previous attribute
 had a parenthesised parameter list, perhaps that list was terminated
 too soon.
 
+=item Possible Y2K bug: %s
+
+(W) You are concatenating the number 19 with another number, which
+could be a potential Year 2000 problem.
+
 =item Unterminated attribute parameter in subroutine attribute list
 
 (F) The lexer saw an opening (left) parenthesis character while parsing a
@@ -724,6 +747,13 @@ character to get your parentheses to balance.
 of a subroutine attribute, and it wasn't a semicolon or the start of a
 block.  Perhaps you terminated the parameter list of the previous attribute
 too soon.
+
+=item /%s/ should probably be written as "%s"
+
+(W) You have used a pattern where Perl expected to find a string,
+like in the first argument to C<join>.  Perl will treat the true
+or false result of matching the pattern against $_ as the string,
+which is probably not what you had in mind.
 
 =head1 Obsolete Diagnostics
 
@@ -742,6 +772,13 @@ because many scripts assume to find Perl in /usr/bin/perl.
 
 You can use "Configure -Dusesocks" which causes Perl to probe
 for the SOCKS proxy protocol library, http://www.socks.nec.com/
+
+=head2 -A flag
+
+You can "post-edit" the Configure variables using the Configure -A
+flag.  The editing happens immediately after the platform specific
+hints files have been processed but before the actual configuration
+process starts.  Run Configure -h to find out the full -A syntax.
 
 =head1 BUGS
 

@@ -79,14 +79,13 @@ return <<'END';
 01a3	
 01a5	
 01a8	
-01ab	
+01aa	01ab
 01ad	
 01b0	
 01b4	
 01b6	
 01b9	01ba
-01bd	
-01bf	
+01bd	01bf
 01c6	
 01c9	
 01cc	
@@ -153,7 +152,7 @@ return <<'END';
 03e9	
 03eb	
 03ed	
-03ef	03f2
+03ef	03f3
 0430	045f
 0461	
 0463	

@@ -552,6 +552,11 @@ EOT
 			substr($_,$i-1,1) = '$';
 		    }
 		}
+		elsif ($c eq '@') {
+		    substr($_, $i, 0) = '\\';
+		    $i++;
+		    $len++;
+		}
 		elsif ($c eq '&' && $repl) {
 		    substr($_, $i, 0) = '$';
 		    $i++;
@@ -797,6 +802,7 @@ sub fetchpat {
 	}
     }
     $addr =~ s/\t/\\t/g;
+    $addr =~ s/\@/\\@/g;
     &simplify($addr);
     $addr;
 }

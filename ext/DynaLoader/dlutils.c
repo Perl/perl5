@@ -55,7 +55,7 @@ SaveError(pTHXo_ char* pat, ...)
     /* This code is based on croak/warn, see mess() in util.c */
 
     va_start(args, pat);
-    msv = mess(pat, &args);
+    msv = vmess(pat, &args);
     va_end(args);
 
     message = SvPV(msv,len);

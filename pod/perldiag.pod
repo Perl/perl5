@@ -65,26 +65,26 @@ no useful value.  See L<perlmod>.
 (F) The '!' is allowed in pack() and unpack() only after certain types.
 See L<perlfunc/pack>.
 
-=item # cannot take a count
+=item / cannot take a count
 
 (F) You had an unpack template indicating a counted-length string,
 but you have also specified an explicit size for the string.
 See L<perlfunc/pack>.
 
-=item # must be followed by a, A or Z
+=item / must be followed by a, A or Z
 
 (F) You had an unpack template indicating a counted-length string,
 which must be followed by one of the letters a, A or Z
 to indicate what sort of string is to be unpacked.
 See L<perlfunc/pack>.
 
-=item # must be followed by a*, A* or Z*
+=item / must be followed by a*, A* or Z*
 
 (F) You had an pack template indicating a counted-length string,
 Currently the only things that can have their length counted are a*, A* or Z*.
 See L<perlfunc/pack>.
 
-=item # must follow a numeric type
+=item / must follow a numeric type
 
 (F) You had an unpack template that contained a '#',
 but this did not follow some numeric unpack specification.
@@ -111,6 +111,13 @@ your signed integers.  See L<perlfunc/unpack>.
 (W) You used a backslash-character combination which is not recognized
 by Perl.  This combination appears in an interpolated variable or a 
 C<'>-delimited regular expression.
+
+=item /%s/ should probably be written as "%s"
+
+(W) You have used a pattern where Perl expected to find a string,
+like in the first argument to C<join>.  Perl will treat the true
+or false result of matching the pattern against $_ as the string,
+which is probably not what you had in mind.
 
 =item %s (...) interpreted as function
 
@@ -447,6 +454,12 @@ is not the same as
 
     $var = 'myvar';
     $sym = "mypack::$var";
+
+=item Bad realloc() ignored
+
+(S) An internal routine called realloc() on something that had never been
+malloc()ed in the first place. Mandatory, but can be disabled by
+setting environment variable C<PERL_BADFREE> to 1.
 
 =item Bad symbol for array
 
@@ -866,6 +879,11 @@ to exist.
 (F) You aren't allowed to assign to the item indicated, or otherwise try to
 change it, such as with an auto-increment.
 
+=item Can't modify non-lvalue subroutine call
+
+(F) Subroutines used in lvalue context should be marked as such, see
+L<perlsub/"Lvalue subroutines">.
+
 =item Can't modify nonexistent substring
 
 (P) The internal routine that does assignment to a substr() was handed
@@ -949,6 +967,12 @@ of suidperl.
 
 (F) The return statement was executed in mainline code, that is, where
 there was no subroutine call to return out of.  See L<perlsub>.
+
+=item Can't return %s from lvalue subroutine
+
+(F) Perl detected an attempt to return illegal lvalues (such
+as temporary or readonly values) from a subroutine used as an lvalue.
+This is not allowed.
 
 =item Can't stat script "%s"
 
@@ -1222,6 +1246,10 @@ just use C<if (%hash) { # not empty }> for example.
 C<FOO> is too long for Perl to handle.  You have to be seriously
 twisted to write code that triggers this error.
 
+=item Did not produce a valid header
+
+See Server error.
+
 =item Did you mean &%s instead?
 
 (W) You probably referred to an imported subroutine &FOO as $FOO or some such.
@@ -1247,6 +1275,10 @@ referencing something that isn't defined yet, you don't actually have
 to define the subroutine or package before the current location.  You
 can use an empty "sub foo;" or "package FOO;" to enter a "forward"
 declaration.
+
+=item Document contains no data
+
+See Server error.
 
 =item Don't know how to handle magic of type '%s'
 
@@ -1713,10 +1745,20 @@ effective uids or gids failed.
 (W) You tried to do a listen on a closed socket.  Did you forget to check
 the return value of your socket() call?  See L<perlfunc/listen>.
 
+=item Lvalue subs returning %s not implemented yet
+
+(F) Due to limitations in the current implementation, array and hash
+values cannot be returned in subroutines used in lvalue context.
+See L<perlsub/"Lvalue subroutines">.
+
 =item Method for operation %s not found in package %s during blessing
 
 (F) An attempt was made to specify an entry in an overloading table that
 doesn't resolve to a valid subroutine.  See L<overload>.
+
+=item Method %s not permitted
+
+See Server error.
 
 =item Might be a runaway multi-line %s string starting on line %d
 
@@ -1804,8 +1846,8 @@ have a name with which they can be found.
 
 (W) Typographical errors often show up as unique variable names.
 If you had a good reason for having a unique name, then just mention
-it again somehow to suppress the message.  The C<use vars> pragma is
-provided for just this purpose.
+it again somehow to suppress the message.  The C<our> declaration is
+provided for this purpose.
 
 =item Negative length
 
@@ -2324,6 +2366,11 @@ perspective, it's probably not what you intended.
 (F) Your C compiler uses POSIX getpgrp(), which takes no argument, unlike
 the BSD version, which takes a pid.
 
+=item Possible Y2K bug: %s
+
+(W) You are concatenating the number 19 with another number, which
+could be a potential Year 2000 problem.
+
 =item Possible attempt to put comments in qw() list
 
 (W) qw() lists contain items separated by whitespace; as with literal
@@ -2391,6 +2438,10 @@ and list operators.  (The old open was a little of both.)  You must
 put parentheses around the filehandle, or use the new "or" operator
 instead of "||".
 
+=item Premature end of script headers
+
+See Server error.
+
 =item print on closed filehandle %s
 
 (W) The filehandle you're printing on got itself closed sometime before now.
@@ -2425,6 +2476,11 @@ increment by prepending "0" to your numbers.
 
 (W) The filehandle you're reading from got itself closed sometime before now.
 Check your logic flow.
+
+=item realloc() of freed memory ignored
+
+(S) An internal routine called realloc() on something that had already
+been freed.
 
 =item Reallocation too large: %lx
 
@@ -2584,7 +2640,12 @@ See L<perlre>.
 
 =item Server error
 
-Also known as "500 Server error".
+This is the error message generally seen in a browser window when trying
+to run a CGI program (including SSI) over the web. The actual error
+text varies widely from server to server. The most frequently-seen
+variants are "500 Server error", "Method (something) not permitted",
+"Document contains no data", "Premature end of script headers", and
+"Did not produce a valid header".
 
 B<This is a CGI error, not a Perl error>.
 
@@ -3285,6 +3346,12 @@ variables.
 (A) You've accidentally run your script through B<csh> instead
 of Perl.  Check the #! line, or manually feed your script into
 Perl yourself.
+
+=item Version number must be a constant number
+
+(P) The attempt to translate a C<use Module n.n LIST> statement into
+its equivalent C<BEGIN> block found an internal inconsistency with
+the version number.
 
 =item perl: warning: Setting locale failed.
 

@@ -29,6 +29,7 @@ goto end
 sh -c 'if test ! -d /tmp; then mkdir /tmp; fi'
 cp djgpp.c config.over ..
 cd ..
+mv ext/B/defsu* ext/B/defsubsh.PL
 echo Running sed...
 sh djgpp/djgppsed.sh
 

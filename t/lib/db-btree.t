@@ -82,6 +82,8 @@ sub docat_del
 }   
 
 
+$db185mode =  ($DB_File::db_version == 1 && ! $DB_File::db_185_compat) ;
+
 my $Dfile = "dbbtree.tmp";
 unlink $Dfile;
 
@@ -933,7 +935,7 @@ EOM
     unlink $filename ;
   }  
 
-  ok(150, docat_del($file) eq ($DB_File::db_version == 1 ? <<'EOM' : <<'EOM') ) ;
+  ok(150, docat_del($file) eq ($db185mode ? <<'EOM' : <<'EOM') ) ;
 Smith	-> John
 Wall	-> Brick
 Wall	-> Brick
@@ -987,7 +989,7 @@ EOM
     untie %h ;
   }
 
-  ok(151, docat_del($file) eq ($DB_File::db_version == 1 ? <<'EOM' : <<'EOM') ) ;
+  ok(151, docat_del($file) eq ($db185mode == 1 ? <<'EOM' : <<'EOM') ) ;
 Smith	-> John
 Wall	-> Brick
 Wall	-> Brick

@@ -2074,8 +2074,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "/perl/lib/5.00560/epoc"               /**/
-#define ARCHLIB_EXP "/perl/lib/5.00560/epoc"		/**/
+#define ARCHLIB "/perl/lib/5.00562/epoc"               /**/
+#define ARCHLIB_EXP "/perl/lib/5.00562/epoc"		/**/
 
 /* DLSYM_NEEDS_UNDERSCORE:
  *	This symbol, if defined, indicates that we need to prepend an
@@ -2168,42 +2168,6 @@
  */
 /*#define HAS_WRITEV		/**/
 
-/* HAS_DBMINIT64:
- *	This symbol, if defined, indicates that the dbminit64 routine is
- *	available to open dbm files larger than 2 gigabytes.
- */
-/* HAS_DBMCLOSE64:
- *	This symbol, if defined, indicates that the dbmclose64 routine is
- *	available to close dbm files larger than 2 gigabytes.
- */
-/* HAS_FETCH64:
- *	This symbol, if defined, indicates that the fetch64 routine is
- *	available to fetch from dbm files larger than 2 gigabytes.
- */
-/* HAS_STORE64:
- *	This symbol, if defined, indicates that the store64 routine is
- *	available to store to dbm files larger than 2 gigabytes.
- */
-/* HAS_DELETE64:
- *	This symbol, if defined, indicates that the delete64 routine is
- *	available to delete from dbm files larger than 2 gigabytes.
- */
-/* HAS_FIRSTKEY64:
- *	This symbol, if defined, indicates that the firstkey64 routine is
- *	available to firstkey in dbm files larger than 2 gigabytes.
- */
-/* HAS_NEXTKEY64:
- *	This symbol, if defined, indicates that the nextkey64 routine is
- *	available to nextkey in dbm files larger than 2 gigabytes.
- */
-/*#define   HAS_DBMINIT64	/ **/
-/*#define  HAS_DBMCLOSE64	/ **/
-/*#define     HAS_FETCH64		/ **/
-/*#define     HAS_STORE64		/ **/
-/*#define    HAS_DELETE64		/ **/
-/*#define  HAS_FIRSTKEY64	/ **/
-/*#define   HAS_NEXTKEY64	/ **/
-
 /* USE_DYNAMIC_LOADING:
  *	This symbol, if defined, indicates that dynamic loading of
  *	some sort is available.
@@ -2291,70 +2255,6 @@
  */
 /*#define INSTALL_USR_BIN_PERL	/**/
 
-/* HAS_FSTAT64:
- *	This symbol, if defined, indicates that the fstat64 routine is
- *	available to stat files (fds) larger than 2 gigabytes.
- */
-/* HAS_FTRUNCATE64:
- *	This symbol, if defined, indicates that the ftruncate64 routine is
- *	available to tell files larger than 2 gigabytes.
- */
-/* HAS_LSEEK64:
- *	This symbol, if defined, indicates that the lseek64 routine is
- *	available to seek files larger than 2 gigabytes.
- */
-/* HAS_LSTAT64:
- *	This symbol, if defined, indicates that the lstat64 routine is
- *	available to stat files (symlinks) larger than 2 gigabytes.
- */
-/* HAS_OPEN64:
- *	This symbol, if defined, indicates that the open64 routine is
- *	available to open files larger than 2 gigabytes.
- */
-/* HAS_OPENDIR64:
- *	This symbol, if defined, indicates that the opendir64 routine is
- *	available to opendir files larger than 2 gigabytes.
- */
-/* HAS_READDIR64:
- *	This symbol, if defined, indicates that the readdir64 routine is
- *	available to readdir files larger than 2 gigabytes.
- */
-/* HAS_SEEKDIR64:
- *	This symbol, if defined, indicates that the seekdir64 routine is
- *	available to seekdir files larger than 2 gigabytes.
- */
-/* HAS_STAT64:
- *	This symbol, if defined, indicates that the stat64 routine is
- *	available to stat files larger than 2 gigabytes.
- */
-/* HAS_TELLDIR64:
- *	This symbol, if defined, indicates that the telldir64 routine is
- *	available to telldir files larger than 2 gigabytes.
- */
-/* HAS_TRUNCATE64:
- *	This symbol, if defined, indicates that the truncate64 routine is
- *	available to truncate files larger than 2 gigabytes.
- */
-/* HAS_OFF64_T:
- *	This symbol will be defined if the C compiler supports off64_t.
- */
-/* HAS_STRUCT_DIRENT64:
- *	This symbol will be defined if the C compiler supports struct dirent64.
- */
-/*#define     HAS_FSTAT64		/ **/
-/*#define HAS_FTRUNCATE64	/ **/
-/*#define     HAS_LSEEK64		/ **/
-/*#define     HAS_LSTAT64		/ **/
-/*#define      HAS_OPEN64		/ **/
-/*#define   HAS_OPENDIR64	/ **/
-/*#define   HAS_READDIR64	/ **/
-/*#define   HAS_SEEKDIR64	/ **/
-/*#define      HAS_STAT64		/ **/
-/*#define   HAS_TELLDIR64	/ **/
-/*#define  HAS_TRUNCATE64	/ **/
-/*#define      HAS_OFF64_T    	/ **/
-/*#define   HAS_STRUCT_DIRENT64 	/ **/
-
 /* PRIVLIB:
  *	This symbol contains the name of the private library for this package.
  *	The library is private in the sense that it needn't be in anyone's
@@ -2365,8 +2265,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "/perl/lib/5.00560"		/**/
-#define PRIVLIB_EXP "/perl/lib/5.00560"		/**/
+#define PRIVLIB "/perl/lib/5.00562"		/**/
+#define PRIVLIB_EXP "/perl/lib/5.00562"		/**/
 
 /* SELECT_MIN_BITS:
  *	This symbol holds the minimum number of bits operated by select.
@@ -2390,8 +2290,8 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH "/perl/lib/site_perl/5.00556/epoc"		/**/
-#define SITEARCH_EXP "/perl/lib/site_perl/5.00560/epoc"		/**/
+#define SITEARCH "/perl/lib/site_perl/5.00562/epoc"		/**/
+#define SITEARCH_EXP "/perl/lib/site_perl/5.00562/epoc"		/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -2406,8 +2306,8 @@
  *	This symbol contains the ~name expanded version of SITELIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITELIB "/perl/lib/site_perl/5.00560"		/**/
-#define SITELIB_EXP "/perl/lib/site_perl/5.00560"		/**/
+#define SITELIB "/perl/lib/site_perl/5.00562"		/**/
+#define SITELIB_EXP "/perl/lib/site_perl/5.00562"		/**/
 
 /* STARTPERL:
  *	This variable contains the string to put in front of a perl
@@ -2415,52 +2315,6 @@
  *	some shell.
  */
 #define STARTPERL "#!/opt/perl/bin/perl"		/**/
-
-/* HAS_FGETPOS64:
- *	This symbol, if defined, indicates that the fgetpos64 routine is
- *	available to getpos files larger than 2 gigabytes.
- */
-/* HAS_FOPEN64:
- *	This symbol, if defined, indicates that the fopen64 routine is
- *	available to open files larger than 2 gigabytes.
- */
-/* HAS_FREOPEN64:
- *	This symbol, if defined, indicates that the freopen64 routine is
- *	available to reopen files larger than 2 gigabytes.
- */
-/* HAS_FSEEK64:
- *	This symbol, if defined, indicates that the fseek64 routine is
- *	available to seek files larger than 2 gigabytes.
- */
-/* HAS_FSEEKO64:
- *	This symbol, if defined, indicates that the fseeko64 routine is
- *	available to seek files larger than 2 gigabytes.
- */
-/* HAS_FSETPOS64:
- *	This symbol, if defined, indicates that the fsetpos64 routine is
- *	available to setpos files larger than 2 gigabytes.
- */
-/* HAS_FTELL64:
- *	This symbol, if defined, indicates that the ftell64 routine is
- *	available to tell files larger than 2 gigabytes.
- */
-/* HAS_FTELLO64:
- *	This symbol, if defined, indicates that the ftello64 routine is
- *	available to tell files larger than 2 gigabytes.
- */
-/* HAS_TMPFILE64:
- *	This symbol, if defined, indicates that the tmpfile64 routine is
- *	available to tmpfile files larger than 2 gigabytes.
- */
-/*#define   HAS_FGETPOS64	/ **/
-/*#define     HAS_FOPEN64		/ **/
-/*#define   HAS_FREOPEN64	/ **/
-/*#define     HAS_FSEEK64		/ **/
-/*#define    HAS_FSEEKO64		/ **/
-/*#define   HAS_FSETPOS64	/ **/
-/*#define     HAS_FTELL64		/ **/
-/*#define    HAS_FTELLO64		/ **/
-/*#define   HAS_TMPFILE64	/ **/
 
 /* HAS_STDIO_STREAM_ARRAY:
  *	This symbol, if defined, tells that there is an array

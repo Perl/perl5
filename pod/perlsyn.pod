@@ -155,10 +155,11 @@ C<if> an C<else> goes with.  If you use C<unless> in place of C<if>,
 the sense of the test is reversed.
 
 The C<while> statement executes the block as long as the expression is
-true (does not evaluate to the null string (C<"">) or C<0> or C<"0")>.  The LABEL is
-optional, and if present, consists of an identifier followed by a colon.
-The LABEL identifies the loop for the loop control statements C<next>,
-C<last>, and C<redo>.  If the LABEL is omitted, the loop control statement
+true (does not evaluate to the null string C<""> or C<0> or C<"0">).
+The LABEL is optional, and if present, consists of an identifier followed
+by a colon.  The LABEL identifies the loop for the loop control
+statements C<next>, C<last>, and C<redo>.
+If the LABEL is omitted, the loop control statement
 refers to the innermost enclosing loop.  This may include dynamically
 looking back your call-stack at run time to find the LABEL.  Such
 desperate behavior triggers a warning if you use the B<-w> flag.

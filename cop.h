@@ -35,12 +35,15 @@ struct block_sub {
     AV *	argarray;
     U16		olddepth;
     U8		hasargs;
+    U8		lval;		/* XXX merge lval and hasargs? */
 };
 
 #define PUSHSUB(cx)							\
 	cx->blk_sub.cv = cv;						\
 	cx->blk_sub.olddepth = CvDEPTH(cv);				\
-	cx->blk_sub.hasargs = hasargs;
+	cx->blk_sub.hasargs = hasargs;					\
+	cx->blk_sub.lval = PL_op->op_private &                          \
+	                      (OPpLVAL_INTRO|OPpENTERSUB_INARGS);
 
 #define PUSHFORMAT(cx)							\
 	cx->blk_sub.cv = cv;						\
@@ -63,16 +66,22 @@ struct block_sub {
 #define POPSAVEARRAY()							\
     STMT_START {							\
 	SvREFCNT_dec(GvAV(PL_defgv));					\
-	GvAV(PL_defgv) = cxsub.savearray;					\
+	GvAV(PL_defgv) = cxsub.savearray;				\
     } STMT_END
 #endif /* USE_THREADS */
 
 #define POPSUB2()							\
 	if (cxsub.hasargs) {						\
 	    POPSAVEARRAY();						\
-	    /* destroy arg array */					\
-	    av_clear(cxsub.argarray);					\
-	    AvREAL_off(cxsub.argarray);					\
+	    /* abandon @_ if it got reified */				\
+	    if (AvREAL(cxsub.argarray)) {				\
+		SSize_t fill = AvFILLp(cxsub.argarray);			\
+		SvREFCNT_dec(cxsub.argarray);				\
+		cxsub.argarray = newAV();				\
+		av_extend(cxsub.argarray, fill);			\
+		AvFLAGS(cxsub.argarray) = AVf_REIFY;			\
+		PL_curpad[0] = (SV*)cxsub.argarray;			\
+	    }								\
 	}								\
 	if (cxsub.cv) {							\
 	    if (!(CvDEPTH(cxsub.cv) = cxsub.olddepth))			\

@@ -2064,7 +2064,8 @@ separated by the value of EXPR, and returns that new string.  Example:
 
     $rec = join(':', $login,$passwd,$uid,$gid,$gcos,$home,$shell);
 
-See L</split>.
+Beware that unlike C<split>, C<join> doesn't take a pattern as its
+first argument.  Compare L</split>.
 
 =item keys HASH
 
@@ -2699,6 +2700,18 @@ Returns the numeric (ASCII or Unicode) value of the first character of EXPR.  If
 EXPR is omitted, uses C<$_>.  For the reverse, see L</chr>.
 See L<utf8> for more about Unicode.
 
+=item our EXPR
+
+An C<our> declares the listed variables to be valid globals within
+the enclosing block, file, or C<eval>.  That is, it has the same
+scoping rules as a "my" declaration, but does not create a local
+variable.  If more than one value is listed, the list must be placed
+in parentheses.  The C<our> declaration has no semantic effect unless
+"use strict vars" is in effect, in which case it lets you use the
+declared global variable without qualifying it with a package name.
+(But only within the lexical scope of the C<our> declaration.  In this
+it differs from "use vars", which is package scoped.)
+
 =item pack TEMPLATE,LIST
 
 Takes a list of values and packs it into a binary structure,
@@ -2808,9 +2821,9 @@ C<"P"> is C<undef>.
 
 =item *
 
-The C<"#"> character allows packing and unpacking of strings where the
+The C<"/"> character allows packing and unpacking of strings where the
 packed structure contains a byte count followed by the string itself.
-You write I<length-item>C<#>I<string-item>.
+You write I<length-item>C</>I<string-item>.
 
 The I<length-item> can be any C<pack> template letter,
 and describes how the length value is packed.
@@ -2822,9 +2835,9 @@ The I<string-item> must, at present, be C<"A*">, C<"a*"> or C<"Z*">.
 For C<unpack> the length of the string is obtained from the I<length-item>,
 but if you put in the '*' it will be ignored.
 
-    unpack 'C#a', "\04Gurusamy";        gives 'Guru'
-    unpack 'a3#A* A*', '007 Bond  J ';  gives (' Bond','J')
-    pack 'n#a* w#a*','hello,','world';  gives "\000\006hello,\005world"
+    unpack 'C/a', "\04Gurusamy";        gives 'Guru'
+    unpack 'a3/A* A*', '007 Bond  J ';  gives (' Bond','J')
+    pack 'n/a* w/a*','hello,','world';  gives "\000\006hello,\005world"
 
 The I<length-item> is not returned explicitly from C<unpack>.
 
@@ -2860,7 +2873,7 @@ L<Config>:
        print $Config{longsize},     "\n";
        print $Config{longlongsize}, "\n";
 
-(The C<$Config{longlongsize}> will be empty if your system does
+(The C<$Config{longlongsize}> will be undefine if your system does
 not support long longs.) 
 
 =item *
@@ -2868,7 +2881,7 @@ not support long longs.)
 The integer formats C<"s">, C<"S">, C<"i">, C<"I">, C<"l">, and C<"L">
 are inherently non-portable between processors and operating systems
 because they obey the native byteorder and endianness.  For example a
-4-byte integer 0x87654321 (2271560481 decimal) be ordered natively
+4-byte integer 0x12345678 (305419896 decimal) be ordered natively
 (arranged in and handled by the CPU registers) into bytes as
  
  	0x12 0x34 0x56 0x78	# little-endian
@@ -2884,7 +2897,7 @@ the classic "Gulliver's Travels" (via the paper "On Holy Wars and a
 Plea for Peace" by Danny Cohen, USC/ISI IEN 137, April 1, 1980) and
 the egg-eating habits of the Lilliputians.
  
-Some systems may even have weird byte orders such as
+Some systems may have even weirder byte orders such as
  
  	0x56 0x78 0x12 0x34
  	0x34 0x12 0x78 0x56
@@ -2929,6 +2942,10 @@ enough C<'x'>es while packing.  There is no way to pack() and unpack()
 could know where the bytes are going to or coming from.  Therefore
 C<pack> (and C<unpack>) handle their output and input as flat
 sequences of bytes.
+
+=item *
+
+A comment in a TEMPLATE starts with C<#> and goes to the end of line.
 
 =back
 
@@ -4103,6 +4120,7 @@ and the conversion letter:
            for integer
    l       interpret integer as C type "long" or "unsigned long"
    h       interpret integer as C type "short" or "unsigned short"
+           If no flags, interpret integer as C type "int" or "unsigned"
 
 There is also one Perl-specific flag:
 
@@ -4118,9 +4136,16 @@ If C<use locale> is in effect, the character used for the decimal
 point in formatted real numbers is affected by the LC_NUMERIC locale.
 See L<perllocale>.
 
+To cope with broken systems that allow the standard locales to be
+overridden by malicious users, the return value may be tainted
+if any of the floating point formats are used and the conversion
+yields something that doesn't look like a normal C-locale floating
+point number.  This happens regardless of whether C<use locale> is
+in effect or not.
+
 If Perl understands "quads" (64-bit integers) (this requires
 either that the platform natively supports quads or that Perl
-has been specifically compiled to support quads), the flags
+has been specifically compiled to support quads), the characters
 
 	d u o x X b i D U O
 

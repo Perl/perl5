@@ -198,7 +198,7 @@ sub AUTOLOAD {
     ($constname = $AUTOLOAD) =~ s/.*:://;
     my $val = constant($constname, @_ ? $_[0] : 0);
     if ($! != 0) {
-	if ($! =~ /Invalid/ || $!{EINVAL}) {
+	if ($! =~ /Invalid/) {
 	    $AutoLoader::AUTOLOAD = $AUTOLOAD;
 	    goto &AutoLoader::AUTOLOAD;
 	}
@@ -215,22 +215,45 @@ bootstrap JNI $VERSION;
 if (not $JPL::_env_) {
     $ENV{JAVA_HOME} ||= "/usr/local/java";
 
-    chop(my $arch = `uname -p`);
-    chop($arch = `uname -m`) unless -d "$ENV{JAVA_HOME}/lib/$arch";
+    my ($arch, @CLASSPATH);
+    if ($^O eq 'MSWin32') {
 
-    my @CLASSPATH = split(/:/, $ENV{CLASSPATH});
-    @CLASSPATH = "." unless @CLASSPATH;
-    push @CLASSPATH,
-	"$ENV{JAVA_HOME}/classes",
-	"$ENV{JAVA_HOME}/lib/classes.zip";
-    $ENV{CLASSPATH} = join(':', @CLASSPATH);
+        $arch = 'MSWin32' unless -d "$ENV{JAVA_HOME}/lib/$arch";
+        @CLASSPATH = split(/;/, $ENV{CLASSPATH});
+        @CLASSPATH = "." unless @CLASSPATH;
+        push @CLASSPATH,
+	    "$ENV{JAVA_HOME}\\classes",
+	    "$ENV{JAVA_HOME}\\lib\\classes.zip";
 
-    $ENV{THREADS_TYPE} ||= "green_threads";
+        $ENV{CLASSPATH} = join(';', @CLASSPATH);
+        $ENV{THREADS_TYPE} ||= "green_threads";
 
-    $JAVALIB = "$ENV{JAVA_HOME}/lib/$arch/$ENV{THREADS_TYPE}";
-    $ENV{$Config{ldlibpthname}} .= ":$JAVALIB";
+        $JAVALIB = "$ENV{JAVA_HOME}/lib/$arch/$ENV{THREADS_TYPE}";
+        $ENV{LD_LIBRARY_PATH} .= ":$JAVALIB";
 
-    $JVM = GetJavaVM("$JAVALIB/libjava.so",@JVM_ARGS);
+        push @JVM_ARGS, "classpath", $ENV{CLASSPATH};
+        print "JVM_ARGS=@JVM_ARGS!\n";
+        $JVM = GetJavaVM("$JAVALIB/javai.dll",@JVM_ARGS);
+
+    } else {
+        chop($arch = `uname -p`);
+        chop($arch = `uname -m`) unless -d "$ENV{JAVA_HOME}/lib/$arch";
+
+        @CLASSPATH = split(/:/, $ENV{CLASSPATH});
+        @CLASSPATH = "." unless @CLASSPATH;
+        push @CLASSPATH,
+	    "$ENV{JAVA_HOME}/classes",
+	    "$ENV{JAVA_HOME}/lib/classes.zip";
+        $ENV{CLASSPATH} = join(':', @CLASSPATH);
+
+        $ENV{THREADS_TYPE} ||= "green_threads";
+
+        $JAVALIB = "$ENV{JAVA_HOME}/lib/$arch/$ENV{THREADS_TYPE}";
+        $ENV{LD_LIBRARY_PATH} .= ":$JAVALIB";
+        push @JVM_ARGS, "classpath", $ENV{CLASSPATH};
+        print "JVM_ARGS=@JVM_ARGS!\n";
+        $JVM = GetJavaVM("$JAVALIB/libjava.so",@JVM_ARGS);
+    }
 }
 
 1;

@@ -22,7 +22,8 @@ $nn = $n = 2;
 sub subb {"in s"}
 
 @INPUT = <DATA>;
-print "1..", (8 + @INPUT), "\n";
+@simple_input = grep /^\s*\w+\s*\$\w+\s*[#\n]/, @INPUT;
+print "1..", (8 + @INPUT + @simple_input), "\n";
 $ord = 0;
 
 sub wrn {"@_"}
@@ -115,6 +116,33 @@ EOE
   if ($@) {
     if ($@ =~ /is unimplemented/) {
       print "# skipping $comment: unimplemented:\nok $ord\n";
+    } else {
+      warn $@;
+      print "not ok $ord\n";
+    }
+  }
+}
+
+for (@simple_input) {
+  $ord++;
+  ($op, undef, $comment) = /^([^\#]+)(\#\s+(.*))?/;
+  $comment = $op unless defined $comment;
+  ($operator, $variable) = /^\s*(\w+)\s*\$(\w+)/ or warn "misprocessed '$_'\n";
+  eval <<EOE;
+  local \$SIG{__WARN__} = \\&wrn;
+  my \$$variable = "Ac# Ca\\nxxx";
+  \$$variable = $operator \$$variable;
+  \$toself = \$$variable;
+  \$direct = $operator "Ac# Ca\\nxxx";
+  print "# \\\$$variable = $operator \\\$$variable\\nnot "
+    unless \$toself eq \$direct;
+  print "ok \$ord\\n";
+EOE
+  if ($@) {
+    if ($@ =~ /is unimplemented/) {
+      print "# skipping $comment: unimplemented:\nok $ord\n";
+    } elsif ($@ =~ /Can't (modify|take log of 0)/) {
+      print "# skipping $comment: syntax not good for selfassign:\nok $ord\n";
     } else {
       warn $@;
       print "not ok $ord\n";

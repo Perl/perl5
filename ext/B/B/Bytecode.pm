@@ -392,7 +392,8 @@ sub B::PVIV::bytecode {
 }
 
 sub B::PVNV::bytecode {
-    my ($sv, $flag) = @_;
+    my $sv = shift;
+    my $flag = shift || 0;
     # The $flag argument is passed through PVMG::bytecode by BM::bytecode
     # and AV::bytecode and indicates special handling. $flag = 1 is used by
     # BM::bytecode and means that we should ensure we save the whole B-M

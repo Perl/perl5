@@ -2,6 +2,7 @@
  
 use Config;
 use File::Basename qw(&basename &dirname);
+use File::Spec;
 use Cwd;
  
 # List explicitly here the variables you want Configure to
@@ -53,6 +54,7 @@ my $pathsep = ($Config{'osname'} eq 'MSWin32')? "\\" : "/"; # MAJOR HACK. SHOULD
 
 my $options = {};
 my $_fh;
+unshift @ARGV, split ' ', $ENV{PERLCC_OPTS} if $ENV{PERLCC_OPTS};
 
 main();
 
@@ -69,7 +71,9 @@ sub main
                         "regex:s",
                         "verbose:s",
                         "log:s",
-						"argv:s",
+                        "argv:s",
+                        "b",
+                        "opt",
                         "gen",
                         "sav",
                         "run",
@@ -104,33 +108,53 @@ sub _doit
     my ($file) = @_;
 
     my ($program_ext, $module_ext) = _getRegexps();
-    my ($obj, $objfile, $so, $type);
+    my ($obj, $objfile, $so, $type, $backend, $gentype);
+
+    $backend = $options->{'b'} ? 'Bytecode' : $options->{'opt'} ? 'CC' : 'C';
+
+    $gentype = $options->{'b'} ? 'Bytecode' : 'C';
 
     if  (
             (($file =~ m"@$program_ext") && ($file !~ m"@$module_ext"))
             || (defined($options->{'prog'}) || defined($options->{'run'}))
         )
     {
-        $objfile = ($options->{'C'}) ?     $options->{'C'} : "$file.c";
         $type = 'program';
 
-        $obj =         ($options->{'o'})?     $options->{'o'} : 
-                                            _getExecutable( $file,$program_ext);
+        if ($options->{'b'})
+        {
+            $obj = $objfile = $options->{'o'} ? $options->{'o'} : "${file}c";
+        }
+        else
+        {
+            $objfile = $options->{'C'} ? $options->{'C'} : "$file.c";
+            $obj = $options->{'o'} ? $options->{'o'}
+                                   : _getExecutable( $file,$program_ext);
+        }
 
         return() if (!$obj);
 
     }
     elsif (($file =~ m"@$module_ext") || ($options->{'mod'}))
     {
-        die "Shared objects are not supported on Win32 yet!!!!\n"
-                                      if ($Config{'osname'} eq 'MSWin32');
+        $type = 'module';
 
-        $obj =         ($options->{'o'})?    $options->{'o'} :
-                                            _getExecutable($file, $module_ext);
-        $so = "$obj.$Config{so}";
-        $type = 'sharedlib';
+        if ($options->{'b'})
+        {
+            $obj = $objfile = $options->{'o'} ? $options->{'o'} : "${file}c";
+        }
+        else
+        {
+            die "Shared objects are not supported on Win32 yet!!!!\n"
+                                          if ($Config{'osname'} eq 'MSWin32');
+
+            $objfile = $options->{'C'} ? $options->{'C'} : "$file.c";
+            $obj = $options->{'o'} ? $options->{'o'}
+                                   : _getExecutable($file, $module_ext);
+            $so = "$obj.$Config{so}";
+        }
+
         return() if (!$obj);
-        $objfile = ($options->{'C'}) ?     $options->{'C'} : "$file.c";
     }
     else
     {
@@ -140,15 +164,17 @@ sub _doit
 
     if ($type eq 'program')
     {
-        _print("Making C($objfile) for $file!\n", 36 );
+        _print("Making $gentype($objfile) for $file!\n", 36 );
 
-        my $errcode = _createCode($objfile, $file);
+        my $errcode = _createCode($backend, $objfile, $file);
         (_print( "ERROR: In generating code for $file!\n", -1), return()) 
                                                                 if ($errcode);
 
-        _print("Compiling C($obj) for $file!\n", 36 ) if (!$options->{'gen'});
+        _print("Compiling C($obj) for $file!\n", 36 ) if (!$options->{'gen'} &&
+                                                          !$options->{'b'});
         $errcode = _compileCode($file, $objfile, $obj) 
-                                            if (!$options->{'gen'});
+                                            if (!$options->{'gen'} &&
+                                                !$options->{'b'});
 
         if ($errcode)
 		{
@@ -160,29 +186,35 @@ sub _doit
 			return()
 		}
     
-        _runCode($obj) if ($options->{'run'});
+        _runCode($objfile) if ($options->{'run'} && $options->{'b'});
+        _runCode($obj) if ($options->{'run'} && !$options->{'b'});
 
-        _removeCode($objfile) if (!$options->{'sav'} || 
-                                    ($options->{'e'} && !$options->{'C'}));
+        _removeCode($objfile) if (($options->{'b'} &&
+                                   ($options->{'e'} && !$options->{'o'})) ||
+                                  (!$options->{'b'} &&
+                                   (!$options->{'sav'} || 
+                                    ($options->{'e'} && !$options->{'C'}))));
 
         _removeCode($file) if ($options->{'e'}); 
 
-        _removeCode($obj) if (($options->{'e'}
-			       && !$options->{'sav'}
-			       && !$options->{'o'})
-			      || ($options->{'run'} && !$options->{'sav'}));
+        _removeCode($obj) if (!$options->{'b'} &&
+                              (($options->{'e'} &&
+			        !$options->{'sav'} && !$options->{'o'}) ||
+			       ($options->{'run'} && !$options->{'sav'})));
     }
     else
     {
-        _print( "Making C($objfile) for $file!\n", 36 );
-        my $errcode = _createCode($objfile, $file, $obj);
+        _print( "Making $gentype($objfile) for $file!\n", 36 );
+        my $errcode = _createCode($backend, $objfile, $file, $obj);
         (_print( "ERROR: In generating code for $file!\n", -1), return()) 
                                                                 if ($errcode);
     
-        _print( "Compiling C($so) for $file!\n", 36 ) if (!$options->{'gen'});
+        _print( "Compiling C($so) for $file!\n", 36 ) if (!$options->{'gen'} &&
+                                                          !$options->{'b'});
 
-        my $errorcode = 
-            _compileCode($file, $objfile, $obj, $so ) if (!$options->{'gen'});
+        $errcode = 
+            _compileCode($file, $objfile, $obj, $so ) if (!$options->{'gen'} &&
+                                                          !$options->{'b'});
 
         (_print( "ERROR: In compiling code for $objfile!\n", -1), return()) 
                                                                 if ($errcode);
@@ -219,27 +251,42 @@ sub _getExecutable
 
 sub _createCode
 {
-    my ( $generated_cfile, $file, $final_output ) = @_;
+    my ( $backend, $generated_file, $file, $final_output ) = @_;
     my $return;
 
     local($") = " -I";
 
-    if (@_ == 2)                                   # compiling a program   
+    open(GENFILE, "> $generated_file") || die "Can't open $generated_file: $!";
+
+    if ($backend eq "Bytecode")
     {
+        require ByteLoader;
+
+        print GENFILE "#!$^X\n" if @_ == 3;
+        print GENFILE "use ByteLoader $ByteLoader::VERSION;\n";
+    }
+
+    close(GENFILE);
+
+    if (@_ == 3)                                   # compiling a program   
+    {
+        chmod $generated_file, 0777 & ~umask if $backend eq "Bytecode";
+	my $null=File::Spec->devnull;
         _print( "$^X -I@INC -MB::Stash -c  $file\n", 36);
-        my $stash=`$^X -I@INC -MB::Stash -c  $file 2>/dev/null|tail -1`;
+        my @stash=`$^X -I@INC -MB::Stash -c  $file 2>$null`;
+	my $stash=$stash[-1];
         chomp $stash;
 
-        _print( "$^X -I@INC -MO=CC,$stash,-o$generated_cfile $file\n", 36);
-        $return =  _run("$^X -I@INC -MO=CC,$stash,-o$generated_cfile $file", 9);
+        _print( "$^X -I@INC -MO=$backend,$stash $file\n", 36);
+        $return =  _run("$^X -I@INC -MO=$backend,$stash,-o$generated_file $file", 9);
         $return;
     }
     else                                           # compiling a shared object
     {            
         _print( 
-            "$^X -I@INC -MO=CC,-m$final_output,-o$generated_cfile $file\n", 36);
+            "$^X -I@INC -MO=$backend,-m$final_output $file\n", 36);
         $return = 
-        _run("$^X -I@INC -MO=CC,-m$final_output,-o$generated_cfile $file", 9);
+        _run("$^X -I@INC -MO=$backend,-m$final_output,-o$generated_file $file  ", 9);
         $return;
     }
 }
@@ -328,7 +375,9 @@ sub _ccharness
 
     my $libs = _getSharedObjects($sourceprog);
 
-    my $cccmd = "$Config{cc} $Config{ccflags} $optimize $incdir "
+    my $ccflags = $Config{ccflags};
+    $ccflags .= ' -DUSEIMPORTLIB' if $Config{osname} =~ /cygwin/i;
+    my $cccmd = "$Config{cc} $ccflags $optimize $incdir "
 		."@args $dynaloader $linkargs @$libs";
 
     _print ("$cccmd\n", 36);
@@ -345,17 +394,8 @@ sub _getSharedObjects
     my ($tmpprog);
     ($tmpprog = $sourceprog) =~ s"(.*)[\\/](.*)"$2";
 
-    my $tempdir;
+    my $tempdir= File::Spec->tmpdir;
 
-    if ($Config{'osname'} eq 'MSWin32') 
-    { 
-         $tempdir = $ENV{TEMP};
-         $tempdir =~ s[\\][/]g;
-    }
-    else
-    {
-         $tempdir = "/tmp";
-    }
     $tmpfile = "$tempdir/$tmpprog.tst";
     $incfile = "$tempdir/$tmpprog.val";
 
@@ -429,12 +469,13 @@ sub _lookforAuto
     my ($relabs, $relshared);
     my ($prefix);
     my $return;
-
+    my $sharedextension = $^O =~ /MSWin32|cygwin|os2/i
+			  ? $Config{_a} : ".$Config{so}";
     ($prefix = $file) =~ s"(.*)\.pm"$1";
 
     my ($tmp, $modname) = ($prefix =~ m"(?:(.*)[\\/]){0,1}(.*)"s);
 
-    $relshared = "$pathsep$prefix$pathsep$modname.$Config{so}";
+    $relshared = "$pathsep$prefix$pathsep$modname$sharedextension";
     $relabs    = "$pathsep$prefix$pathsep$modname$Config{_a}";
                                                # HACK . WHY DOES _a HAVE A '.'
                                                # AND so HAVE NONE??
@@ -538,6 +579,21 @@ sub _checkopts
         $_fh = new FileHandle(">> $options->{'log'}") || push(@errors, "ERROR: Couldn't open $options->{'log'}\n");
     }
 
+    if ($options->{'b'} && $options->{'c'})
+    {
+        push(@errors,
+"ERROR: The '-b' and '-c' options are incompatible. The '-c' option specifies
+       a name for the intermediate C code but '-b' generates byte code
+       directly.\n");
+    }
+    if ($options->{'b'} && ($options->{'sav'} || $options->{'gen'}))
+    {
+        push(@errors,
+"ERROR: The '-sav' and '-gen' options are incompatible with the '-b' option.
+       They ask for intermediate C code to be saved by '-b' generates byte
+       code directly.\n");
+    }
+
     if (($options->{'c'}) && (@ARGV > 1) && ($options->{'sav'} ))
     {
         push(@errors, 
@@ -549,17 +605,17 @@ sub _checkopts
     if (($options->{'o'}) && (@ARGV > 1))
     {
         push(@errors, 
-"ERROR: The '-o' option is incompatible when you have more than one input file! 
-       (-o explicitly names the resulting executable, hence, with more than 
+"ERROR: The '-o' option is incompatible when you have more than one input 
+       file! (-o explicitly names the resulting file, hence, with more than 
        one file the names clash)\n");
     }
 
-    if ($options->{'e'} && $options->{'sav'} && !$options->{'o'} && 
+    if ($options->{'e'} && ($options->{'sav'} || $options->{'gen'}) &&
                                                             !$options->{'C'})
     {
         push(@errors, 
 "ERROR: You need to specify where you are going to save the resulting 
-       executable or C code,  when using '-sav' and '-e'. Use '-o' or '-C'.\n");
+       C code when using '-sav' and '-e'. Use '-C'.\n");
     }
 
     if (($options->{'regex'} || $options->{'run'} || $options->{'o'}) 
@@ -706,7 +762,7 @@ sub _run
 sub _interruptrun
 {
     my ($command) = @_;
-    my $pid = open (FD, "$command 2>&1 |");
+    my $pid = open (FD, "$command  |");
 
     local($SIG{HUP}) = sub { 
 #	kill 9, $pid + 1;  
@@ -727,14 +783,14 @@ sub _interruptrun
     }; 
 
     my $needalarm = 
-            ($ENV{'COMPILE_TIMEOUT'} && 
+            ($ENV{'PERLCC_TIMEOUT'} && 
                     $Config{'osname'} ne 'MSWin32' && $command =~ m"^perlc");
     my $text;
 
     eval
     {
         local($SIG{ALRM}) = sub { die "INFINITE LOOP"; };
-        alarm($ENV{'COMPILE_TIMEOUT'}) if ($needalarm);
+        alarm($ENV{'PERLCC_TIMEOUT'}) if ($needalarm);
         $text = join('', <FD>); 
         alarm(0) if ($needalarm);
     };
@@ -757,6 +813,9 @@ sub _usage
 
 Usage: $0 <file_list> 
 
+WARNING: The whole compiler suite ('perlcc' included) is considered VERY
+experimental.  Use for production purposes is strongly discouraged.
+
     Flags with arguments
         -L       < extra library dirs for installation (form of 'dir1:dir2') >
         -I       < extra include dirs for installation (form of 'dir1:dir2') >
@@ -768,8 +827,10 @@ Usage: $0 <file_list>
         -argv    < arguments for the executables to be run via '-run' or '-e' > 
 
     Boolean flags
-        -gen     ( to just generate the c code. Implies '-sav' )
-        -sav     ( to save intermediate c code, (and executables with '-run'))
+        -b       ( to generate byte code )
+        -opt     ( to generated optimised C code. May not work in some cases. )
+        -gen     ( to just generate the C code. Implies '-sav' )
+        -sav     ( to save intermediate C code, (and executables with '-run'))
         -run     ( to run the compiled program on the fly, as were interpreted.)
         -prog    ( to indicate that the files on command line are programs )
         -mod     ( to indicate that the files on command line are modules  )
@@ -847,8 +908,9 @@ Adds directories inside B<include_directories> to the compilation command.
 
 =item -C   < c_code_name > 
 
-Explicitly gives the name B<c_code_name> to the generated c code which is to 
-be compiled. Can only be used if compiling one file on the command line.
+Explicitly gives the name B<c_code_name> to the generated file containing
+the C code which is to be compiled. Can only be used if compiling one file
+on the command line.
 
 =item -o   < executable_name >
 
@@ -862,6 +924,20 @@ the command line. Default is to have the 'one liner' be compiled, and run all
 in one go (see B<-run>); giving the B<-o> flag saves the resultant executable, 
 rather than throwing it away. Use '-argv' to pass arguments to the executable
 created.
+
+=item -b
+
+Generates bytecode instead of C code.
+
+=item -opt
+
+Uses the optimized C backend (C<B::CC>)rather than the simple C backend
+(C<B::C>).  Beware that the optimized C backend creates very large
+switch structures and structure initializations.  Many C compilers
+find it a challenge to compile the resulting output in finite amounts
+of time.  Many Perl features such as C<goto LABEL> are also not
+supported by the optimized C backend.  The simple C backend should
+work in more instances, but can only offer modest speed increases.
 
 =item -regex   <rename_regex>
 
@@ -984,6 +1060,14 @@ setenv PERL_SCRIPT_EXT '\.\.\.\.\.'
 which would have the effect of compiling ANYTHING (except what is in 
 PERL_MODULE_EXT) into an executable with 5 less characters in its name.
 
+The PERLCC_OPTS environment variable can be set to the default flags
+that must be used by the compiler.
+
+The PERLCC_TIMEOUT environment variable can be set to the number of
+seconds to wait for the backends before giving up.  This is sometimes
+necessary to avoid some compilers taking forever to compile the
+generated output.  May not work on Windows and similar platforms.
+
 =head1 FILES
 
 'perlcc' uses a temporary file when you use the B<-e> option to evaluate 
@@ -995,8 +1079,14 @@ perlc$$
 
 =head1 BUGS
 
+The whole compiler suite (C<perlcc> included) should be considered very
+experimental.  Use for production purposes is strongly discouraged.
+
 perlcc currently cannot compile shared objects on Win32. This should be fixed
-by perl5.005.
+in future.
+
+Bugs in the various compiler backends still exist, and are perhaps too
+numerous to list here.
 
 =cut
 

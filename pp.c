@@ -28,6 +28,37 @@ static double UV_MAX_cxux = ((double)UV_MAX);
 #endif
 
 /*
+ * Types used in bitwise operations.
+ *
+ * Normally we'd just use IV and UV.  However, some hardware and
+ * software combinations (e.g. Alpha and current OSF/1) don't have a
+ * floating-point type to use for NV that has adequate bits to fully
+ * hold an IV/UV.  (In other words, sizeof(long) == sizeof(double).)
+ *
+ * It just so happens that "int" is the right size almost everywhere.
+ */
+typedef int IBW;
+typedef unsigned UBW;
+
+/*
+ * Mask used after bitwise operations.
+ *
+ * There is at least one realm (Cray word machines) that doesn't
+ * have an integral type (except char) small enough to be represented
+ * in a double without loss; that is, it has no 32-bit type.
+ */
+#if LONGSIZE > 4  && defined(_CRAY) && !defined(_CRAYMPP)
+#  define BW_BITS  32
+#  define BW_MASK  ((1 << BW_BITS) - 1)
+#  define BW_SIGN  (1 << (BW_BITS - 1))
+#  define BWi(i)  (((i) & BW_SIGN) ? ((i) | ~BW_MASK) : ((i) & BW_MASK))
+#  define BWu(u)  ((u) & BW_MASK)
+#else
+#  define BWi(i)  (i)
+#  define BWu(u)  (u)
+#endif
+
+/*
  * Offset for integer pack/unpack.
  *
  * On architectures where I16 and I32 aren't really 16 and 32 bits,
@@ -375,6 +406,8 @@ PP(pp_rv2cv)
     if (cv) {
 	if (CvCLONE(cv))
 	    cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
+	if ((PL_op->op_private & OPpLVAL_INTRO) && !CvLVALUE(cv))
+	    DIE(aTHX_ "Can't modify non-lvalue subroutine call");
     }
     else
 	cv = (CV*)&PL_sv_undef;
@@ -436,7 +469,7 @@ PP(pp_prototype)
 		goto set;
 	    else {			/* None such */
 	      nonesuch:
-		Perl_croak(aTHX_ "Can't find an opnumber for \"%s\"", s+6);
+		DIE(aTHX_ "Can't find an opnumber for \"%s\"", s+6);
 	    }
 	}
     }
@@ -496,6 +529,12 @@ S_refto(pTHX_ SV *sv)
 	    sv = &PL_sv_undef;
 	else
 	    (void)SvREFCNT_inc(sv);
+    }
+    else if (SvTYPE(sv) == SVt_PVAV) {
+	if (!AvREAL((AV*)sv) && AvREIFY((AV*)sv))
+	    av_reify((AV*)sv);
+	SvTEMP_off(sv);
+	(void)SvREFCNT_inc(sv);
     }
     else if (SvPADTMP(sv))
 	sv = newSVsv(sv);
@@ -832,7 +871,7 @@ PP(pp_predec)
 {
     djSP;
     if (SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
-	Perl_croak(aTHX_ PL_no_modify);
+	DIE(aTHX_ PL_no_modify);
     if (SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
     	SvIVX(TOPs) != IV_MIN)
     {
@@ -849,7 +888,7 @@ PP(pp_postinc)
 {
     djSP; dTARGET;
     if (SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
-	Perl_croak(aTHX_ PL_no_modify);
+	DIE(aTHX_ PL_no_modify);
     sv_setsv(TARG, TOPs);
     if (SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
     	SvIVX(TOPs) != IV_MAX)
@@ -870,7 +909,7 @@ PP(pp_postdec)
 {
     djSP; dTARGET;
     if (SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
-	Perl_croak(aTHX_ PL_no_modify);
+	DIE(aTHX_ PL_no_modify);
     sv_setsv(TARG, TOPs);
     if (SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
     	SvIVX(TOPs) != IV_MIN)
@@ -1100,11 +1139,17 @@ PP(pp_left_shift)
 {
     djSP; dATARGET; tryAMAGICbin(lshift,opASSIGN);
     {
-      IV shift = POPi;
-      if (PL_op->op_private & HINT_INTEGER)
-	SETi(TOPi << shift);
-      else
-	SETu(TOPu << shift);
+      IBW shift = POPi;
+      if (PL_op->op_private & HINT_INTEGER) {
+	IBW i = TOPi;
+	i = BWi(i) << shift;
+	SETi(BWi(i));
+      }
+      else {
+	UBW u = TOPu;
+	u <<= shift;
+	SETu(BWu(u));
+      }
       RETURN;
     }
 }
@@ -1113,11 +1158,17 @@ PP(pp_right_shift)
 {
     djSP; dATARGET; tryAMAGICbin(rshift,opASSIGN);
     {
-      IV shift = POPi;
-      if (PL_op->op_private & HINT_INTEGER)
-	SETi(TOPi >> shift);
-      else
-	SETu(TOPu >> shift);
+      IBW shift = POPi;
+      if (PL_op->op_private & HINT_INTEGER) {
+	IBW i = TOPi;
+	i = BWi(i) >> shift;
+	SETi(BWi(i));
+      }
+      else {
+	UBW u = TOPu;
+	u >>= shift;
+	SETu(BWu(u));
+      }
       RETURN;
     }
 }
@@ -1285,10 +1336,14 @@ PP(pp_bit_and)
     {
       dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
-	if (PL_op->op_private & HINT_INTEGER)
-	  SETi( SvIV(left) & SvIV(right) );
-	else
-	  SETu( SvUV(left) & SvUV(right) );
+	if (PL_op->op_private & HINT_INTEGER) {
+	  IBW value = SvIV(left) & SvIV(right);
+	  SETi(BWi(value));
+	}
+	else {
+	  UBW value = SvUV(left) & SvUV(right);
+	  SETu(BWu(value));
+	}
       }
       else {
 	do_vop(PL_op->op_type, TARG, left, right);
@@ -1304,10 +1359,14 @@ PP(pp_bit_xor)
     {
       dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
-	if (PL_op->op_private & HINT_INTEGER)
-	  SETi( (USE_LEFT(left) ? SvIV(left) : 0) ^ SvIV(right) );
-	else
-	  SETu( (USE_LEFT(left) ? SvUV(left) : 0) ^ SvUV(right) );
+	if (PL_op->op_private & HINT_INTEGER) {
+	  IBW value = (USE_LEFT(left) ? SvIV(left) : 0) ^ SvIV(right);
+	  SETi(BWi(value));
+	}
+	else {
+	  UBW value = (USE_LEFT(left) ? SvUV(left) : 0) ^ SvUV(right);
+	  SETu(BWu(value));
+	}
       }
       else {
 	do_vop(PL_op->op_type, TARG, left, right);
@@ -1323,10 +1382,14 @@ PP(pp_bit_or)
     {
       dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
-	if (PL_op->op_private & HINT_INTEGER)
-	  SETi( (USE_LEFT(left) ? SvIV(left) : 0) | SvIV(right) );
-	else
-	  SETu( (USE_LEFT(left) ? SvUV(left) : 0) | SvUV(right) );
+	if (PL_op->op_private & HINT_INTEGER) {
+	  IBW value = (USE_LEFT(left) ? SvIV(left) : 0) | SvIV(right);
+	  SETi(BWi(value));
+	}
+	else {
+	  UBW value = (USE_LEFT(left) ? SvUV(left) : 0) | SvUV(right);
+	  SETu(BWu(value));
+	}
       }
       else {
 	do_vop(PL_op->op_type, TARG, left, right);
@@ -1385,10 +1448,14 @@ PP(pp_complement)
     {
       dTOPss;
       if (SvNIOKp(sv)) {
-	if (PL_op->op_private & HINT_INTEGER)
-	  SETi( ~SvIV(sv) );
-	else
-	  SETu( ~SvUV(sv) );
+	if (PL_op->op_private & HINT_INTEGER) {
+	  IBW value = ~SvIV(sv);
+	  SETi(BWi(value));
+	}
+	else {
+	  UBW value = ~SvUV(sv);
+	  SETu(BWu(value));
+	}
       }
       else {
 	register char *tmps;
@@ -1717,9 +1784,9 @@ S_seed(pTHX)
 #  endif
 #endif
     u += SEED_C3 * (U32)getpid();
-    u += SEED_C4 * (U32)(UV)PL_stack_sp;
+    u += SEED_C4 * (U32)PTR2UV(PL_stack_sp);
 #ifndef PLAN9           /* XXX Plan9 assembler chokes on this; fix needed  */
-    u += SEED_C5 * (U32)(UV)&when;
+    u += SEED_C5 * (U32)PTR2UV(&when);
 #endif
     return u;
 }
@@ -3221,6 +3288,11 @@ PP(pp_unpack)
 #endif
 	if (isSPACE(datumtype))
 	    continue;
+	if (datumtype == '#') {
+	    while (pat < patend && *pat != '\n')
+		pat++;
+	    continue;
+	}
 	if (*pat == '!') {
 	    char *natstr = "sSiIlL";
 
@@ -3231,7 +3303,7 @@ PP(pp_unpack)
 		pat++;
 	    }
 	    else
-		Perl_croak(aTHX_ "'!' allowed only after types %s", natstr);
+		DIE(aTHX_ "'!' allowed only after types %s", natstr);
 	}
 	if (pat >= patend)
 	    len = 1;
@@ -3244,17 +3316,18 @@ PP(pp_unpack)
 	    while (isDIGIT(*pat)) {
 		len = (len * 10) + (*pat++ - '0');
 		if (len < 0)
-		    Perl_croak(aTHX_ "Repeat count in unpack overflows");
+		    DIE(aTHX_ "Repeat count in unpack overflows");
 	    }
 	}
 	else
 	    len = (datumtype != '@');
 	switch(datumtype) {
 	default:
-	    Perl_croak(aTHX_ "Invalid type in unpack: '%c'", (int)datumtype);
+	    DIE(aTHX_ "Invalid type in unpack: '%c'", (int)datumtype);
 	case ',': /* grandfather in commas but with a warning */
 	    if (commas++ == 0 && ckWARN(WARN_UNSAFE))
-		Perl_warner(aTHX_ WARN_UNSAFE, "Invalid type in unpack: '%c'", (int)datumtype);
+		Perl_warner(aTHX_ WARN_UNSAFE,
+			    "Invalid type in unpack: '%c'", (int)datumtype);
 	    break;
 	case '%':
 	    if (len == 1 && pat[-1] != '1')
@@ -3280,16 +3353,16 @@ PP(pp_unpack)
 		DIE(aTHX_ "x outside of string");
 	    s += len;
 	    break;
-	case '#':
+	case '/':
 	    if (oldsp >= SP)
-		DIE(aTHX_ "# must follow a numeric type");
+		DIE(aTHX_ "/ must follow a numeric type");
 	    if (*pat != 'a' && *pat != 'A' && *pat != 'Z')
-		DIE(aTHX_ "# must be followed by a, A or Z");
+		DIE(aTHX_ "/ must be followed by a, A or Z");
 	    datumtype = *pat++;
 	    if (*pat == '*')
 		pat++;		/* ignore '*' for compatibility with pack */
 	    if (isDIGIT(*pat))
-		DIE(aTHX_ "# cannot take a count" );
+		DIE(aTHX_ "/ cannot take a count" );
 	    len = POPi;
 	    /* drop through */
 	case 'A':
@@ -3920,7 +3993,7 @@ PP(pp_unpack)
 		    }
 		}
 		if ((s >= strend) && bytes)
-		    Perl_croak(aTHX_ "Unterminated compressed integer");
+		    DIE(aTHX_ "Unterminated compressed integer");
 	    }
 	    break;
 	case 'P':
@@ -4278,6 +4351,11 @@ PP(pp_pack)
 #endif
 	if (isSPACE(datumtype))
 	    continue;
+	if (datumtype == '#') {
+	    while (pat < patend && *pat != '\n')
+		pat++;
+	    continue;
+	}
         if (*pat == '!') {
 	    char *natstr = "sSiIlL";
 
@@ -4288,7 +4366,7 @@ PP(pp_pack)
 		pat++;
 	    }
 	    else
-		Perl_croak(aTHX_ "'!' allowed only after types %s", natstr);
+		DIE(aTHX_ "'!' allowed only after types %s", natstr);
 	}
 	if (*pat == '*') {
 	    len = strchr("@Xxu", datumtype) ? 0 : items;
@@ -4299,21 +4377,21 @@ PP(pp_pack)
 	    while (isDIGIT(*pat)) {
 		len = (len * 10) + (*pat++ - '0');
 		if (len < 0)
-		    Perl_croak(aTHX_ "Repeat count in pack overflows");
+		    DIE(aTHX_ "Repeat count in pack overflows");
 	    }
 	}
 	else
 	    len = 1;
-	if (*pat == '#') {
+	if (*pat == '/') {
 	    ++pat;
 	    if (*pat != 'a' && *pat != 'A' && *pat != 'Z' || pat[1] != '*')
-		DIE(aTHX_ "# must be followed by a*, A* or Z*");
+		DIE(aTHX_ "/ must be followed by a*, A* or Z*");
 	    lengthcode = sv_2mortal(newSViv(sv_len(items > 0
 						   ? *MARK : &PL_sv_no)));
 	}
 	switch(datumtype) {
 	default:
-	    Perl_croak(aTHX_ "Invalid type in pack: '%c'", (int)datumtype);
+	    DIE(aTHX_ "Invalid type in pack: '%c'", (int)datumtype);
 	case ',': /* grandfather in commas but with a warning */
 	    if (commas++ == 0 && ckWARN(WARN_UNSAFE))
 		Perl_warner(aTHX_ WARN_UNSAFE,
@@ -4602,7 +4680,7 @@ PP(pp_pack)
 		adouble = Perl_floor(SvNV(fromstr));
 
 		if (adouble < 0)
-		    Perl_croak(aTHX_ "Cannot compress negative numbers");
+		    DIE(aTHX_ "Cannot compress negative numbers");
 
 		if (
 #ifdef BW_BITS
@@ -4636,7 +4714,7 @@ PP(pp_pack)
 		    /* Copy string and check for compliance */
 		    from = SvPV(fromstr, len);
 		    if ((norm = is_an_int(from, len)) == NULL)
-			Perl_croak(aTHX_ "can compress only unsigned integer");
+			DIE(aTHX_ "can compress only unsigned integer");
 
 		    New('w', result, len, char);
 		    in = result + len;
@@ -4656,14 +4734,14 @@ PP(pp_pack)
 			double next = floor(adouble / 128);
 			*--in = (unsigned char)(adouble - (next * 128)) | 0x80;
 			if (--in < buf)  /* this cannot happen ;-) */
-			    Perl_croak(aTHX_ "Cannot compress integer");
+			    DIE(aTHX_ "Cannot compress integer");
 			adouble = next;
 		    } while (adouble > 0);
 		    buf[sizeof(buf) - 1] &= 0x7f; /* clear continue bit */
 		    sv_catpvn(cat, in, (buf + sizeof(buf)) - in);
 		}
 		else
-		    Perl_croak(aTHX_ "Cannot compress non integer");
+		    DIE(aTHX_ "Cannot compress non integer");
 	    }
             break;
 	case 'i':
@@ -4868,6 +4946,7 @@ PP(pp_split)
 	else {
 	    if (!AvREAL(ary)) {
 		AvREAL_on(ary);
+		AvREIFY_off(ary);
 		for (i = AvFILLp(ary); i >= 0; i--)
 		    AvARRAY(ary)[i] = &PL_sv_undef;	/* don't free mere refs */
 	    }

@@ -17,15 +17,27 @@ return <<'END';
 0675	0677	R
 0678	0687	D
 0688	0699	R
-069a	06b7	D
-06ba	06be	D
+069a	06bf	D
 06c0		R
 06c1		D
 06c2	06cb	R
 06cc		D
 06cd		R
 06ce		D
+06cf		R
 06d0	06d1	D
 06d2	06d3	R
 06d5		U
+06fa	06fc	D
+0710		R
+0712	0714	D
+0715	0719	R
+071a	071d	D
+071e		R
+071f	0727	D
+0728		R
+0729		D
+072a		R
+072b		D
+072c		R
 END

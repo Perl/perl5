@@ -1,3 +1,6 @@
+#ifndef _INC_PERL_XSUB_H
+#define _INC_PERL_XSUB_H 1
+
 #define ST(off) PL_stack_base[ax + (off)]
 
 #if defined(CYGWIN) && defined(USE_DYNAMIC_LOADING)
@@ -10,6 +13,9 @@
 	dSP; dMARK;			\
 	I32 ax = mark - PL_stack_base + 1;	\
 	I32 items = sp - mark
+
+#define dXSTARG SV * targ = ((PL_op->op_private & OPpENTERSUB_HASTARG) \
+			     ? PAD_SV(PL_op->op_targ) : sv_newmortal())
 
 #define XSANY CvXSUBANY(cv)
 
@@ -276,3 +282,5 @@
 #    define socketpair		PerlSock_socketpair
 #  endif  /* NO_XSLOCKS */
 #endif  /* PERL_CAPI */
+
+#endif _INC_PERL_XSUB_H		/* include guard */

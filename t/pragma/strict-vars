@@ -165,6 +165,7 @@ print STDERR $@;
 $joe = 1 ;
 EXPECT
 Global symbol "$joe" requires explicit package name at - line 5.
+Global symbol "$joe" requires explicit package name at - line 8.
 Execution of - aborted due to compilation errors.
 ########
 
@@ -221,3 +222,88 @@ $joe = 1 ;
 EXPECT
 Global symbol "$joe" requires explicit package name at - line 8.
 Execution of - aborted due to compilation errors.
+########
+
+# Check if multiple evals produce same errors
+use strict 'vars';
+my $ret = eval q{ print $x; };
+print $@;
+print "ok 1\n" unless defined $ret;
+$ret = eval q{ print $x; };
+print $@;
+print "ok 2\n" unless defined $ret;
+EXPECT
+Global symbol "$x" requires explicit package name at (eval 1) line 1.
+ok 1
+Global symbol "$x" requires explicit package name at (eval 2) line 1.
+ok 2
+########
+
+# strict vars with outer our - no error
+use strict 'vars' ;
+our $freddy;
+local $abc::joe ;
+my $fred ;
+my $b = \$fred ;
+$Fred::ABC = 1 ;
+$freddy = 2 ;
+EXPECT
+
+########
+
+# strict vars with inner our - no error
+use strict 'vars' ;
+sub foo {
+    our $fred;
+    $fred;
+}
+EXPECT
+
+########
+
+# strict vars with outer our, inner use - no error
+use strict 'vars' ;
+our $fred;
+sub foo {
+    $fred;
+}
+EXPECT
+
+########
+
+# strict vars with nested our - no error
+use strict 'vars' ;
+our $fred;
+sub foo {
+    our $fred;
+    $fred;
+}
+$fred ;
+EXPECT
+
+########
+
+# strict vars with elapsed our - error
+use strict 'vars' ;
+sub foo {
+    our $fred;
+    $fred;
+}
+$fred ;
+EXPECT
+Variable "$fred" is not imported at - line 8.
+Global symbol "$fred" requires explicit package name at - line 8.
+Execution of - aborted due to compilation errors.
+########
+
+# nested our with local - no error
+$fred = 1;
+use strict 'vars';
+{
+    local our $fred = 2;
+    print $fred,"\n";
+}
+print our $fred,"\n";
+EXPECT
+2
+1

@@ -475,6 +475,321 @@ S_more_xpv(pTHX)
     xpv->xpv_pv = 0;
 }
 
+STATIC XPVIV*
+S_new_xpviv(pTHX)
+{
+    XPVIV* xpviv;
+    LOCK_SV_MUTEX;
+    if (!PL_xpviv_root)
+	more_xpviv();
+    xpviv = PL_xpviv_root;
+    PL_xpviv_root = (XPVIV*)xpviv->xpv_pv;
+    UNLOCK_SV_MUTEX;
+    return xpviv;
+}
+
+STATIC void
+S_del_xpviv(pTHX_ XPVIV *p)
+{
+    LOCK_SV_MUTEX;
+    p->xpv_pv = (char*)PL_xpviv_root;
+    PL_xpviv_root = p;
+    UNLOCK_SV_MUTEX;
+}
+
+
+STATIC void
+S_more_xpviv(pTHX)
+{
+    register XPVIV* xpviv;
+    register XPVIV* xpvivend;
+    New(714, PL_xpviv_root, 1008/sizeof(XPVIV), XPVIV);
+    xpviv = PL_xpviv_root;
+    xpvivend = &xpviv[1008 / sizeof(XPVIV) - 1];
+    while (xpviv < xpvivend) {
+	xpviv->xpv_pv = (char*)(xpviv + 1);
+	xpviv++;
+    }
+    xpviv->xpv_pv = 0;
+}
+
+
+STATIC XPVNV*
+S_new_xpvnv(pTHX)
+{
+    XPVNV* xpvnv;
+    LOCK_SV_MUTEX;
+    if (!PL_xpvnv_root)
+	more_xpvnv();
+    xpvnv = PL_xpvnv_root;
+    PL_xpvnv_root = (XPVNV*)xpvnv->xpv_pv;
+    UNLOCK_SV_MUTEX;
+    return xpvnv;
+}
+
+STATIC void
+S_del_xpvnv(pTHX_ XPVNV *p)
+{
+    LOCK_SV_MUTEX;
+    p->xpv_pv = (char*)PL_xpvnv_root;
+    PL_xpvnv_root = p;
+    UNLOCK_SV_MUTEX;
+}
+
+
+STATIC void
+S_more_xpvnv(pTHX)
+{
+    register XPVNV* xpvnv;
+    register XPVNV* xpvnvend;
+    New(715, PL_xpvnv_root, 1008/sizeof(XPVNV), XPVNV);
+    xpvnv = PL_xpvnv_root;
+    xpvnvend = &xpvnv[1008 / sizeof(XPVNV) - 1];
+    while (xpvnv < xpvnvend) {
+	xpvnv->xpv_pv = (char*)(xpvnv + 1);
+	xpvnv++;
+    }
+    xpvnv->xpv_pv = 0;
+}
+
+
+
+STATIC XPVCV*
+S_new_xpvcv(pTHX)
+{
+    XPVCV* xpvcv;
+    LOCK_SV_MUTEX;
+    if (!PL_xpvcv_root)
+	more_xpvcv();
+    xpvcv = PL_xpvcv_root;
+    PL_xpvcv_root = (XPVCV*)xpvcv->xpv_pv;
+    UNLOCK_SV_MUTEX;
+    return xpvcv;
+}
+
+STATIC void
+S_del_xpvcv(pTHX_ XPVCV *p)
+{
+    LOCK_SV_MUTEX;
+    p->xpv_pv = (char*)PL_xpvcv_root;
+    PL_xpvcv_root = p;
+    UNLOCK_SV_MUTEX;
+}
+
+
+STATIC void
+S_more_xpvcv(pTHX)
+{
+    register XPVCV* xpvcv;
+    register XPVCV* xpvcvend;
+    New(716, PL_xpvcv_root, 1008/sizeof(XPVCV), XPVCV);
+    xpvcv = PL_xpvcv_root;
+    xpvcvend = &xpvcv[1008 / sizeof(XPVCV) - 1];
+    while (xpvcv < xpvcvend) {
+	xpvcv->xpv_pv = (char*)(xpvcv + 1);
+	xpvcv++;
+    }
+    xpvcv->xpv_pv = 0;
+}
+
+
+
+STATIC XPVAV*
+S_new_xpvav(pTHX)
+{
+    XPVAV* xpvav;
+    LOCK_SV_MUTEX;
+    if (!PL_xpvav_root)
+	more_xpvav();
+    xpvav = PL_xpvav_root;
+    PL_xpvav_root = (XPVAV*)xpvav->xav_array;
+    UNLOCK_SV_MUTEX;
+    return xpvav;
+}
+
+STATIC void
+S_del_xpvav(pTHX_ XPVAV *p)
+{
+    LOCK_SV_MUTEX;
+    p->xav_array = (char*)PL_xpvav_root;
+    PL_xpvav_root = p;
+    UNLOCK_SV_MUTEX;
+}
+
+
+STATIC void
+S_more_xpvav(pTHX)
+{
+    register XPVAV* xpvav;
+    register XPVAV* xpvavend;
+    New(717, PL_xpvav_root, 1008/sizeof(XPVAV), XPVAV);
+    xpvav = PL_xpvav_root;
+    xpvavend = &xpvav[1008 / sizeof(XPVAV) - 1];
+    while (xpvav < xpvavend) {
+	xpvav->xav_array = (char*)(xpvav + 1);
+	xpvav++;
+    }
+    xpvav->xav_array = 0;
+}
+
+
+
+STATIC XPVHV*
+S_new_xpvhv(pTHX)
+{
+    XPVHV* xpvhv;
+    LOCK_SV_MUTEX;
+    if (!PL_xpvhv_root)
+	more_xpvhv();
+    xpvhv = PL_xpvhv_root;
+    PL_xpvhv_root = (XPVHV*)xpvhv->xhv_array;
+    UNLOCK_SV_MUTEX;
+    return xpvhv;
+}
+
+STATIC void
+S_del_xpvhv(pTHX_ XPVHV *p)
+{
+    LOCK_SV_MUTEX;
+    p->xhv_array = (char*)PL_xpvhv_root;
+    PL_xpvhv_root = p;
+    UNLOCK_SV_MUTEX;
+}
+
+
+STATIC void
+S_more_xpvhv(pTHX)
+{
+    register XPVHV* xpvhv;
+    register XPVHV* xpvhvend;
+    New(718, PL_xpvhv_root, 1008/sizeof(XPVHV), XPVHV);
+    xpvhv = PL_xpvhv_root;
+    xpvhvend = &xpvhv[1008 / sizeof(XPVHV) - 1];
+    while (xpvhv < xpvhvend) {
+	xpvhv->xhv_array = (char*)(xpvhv + 1);
+	xpvhv++;
+    }
+    xpvhv->xhv_array = 0;
+}
+
+
+STATIC XPVMG*
+S_new_xpvmg(pTHX)
+{
+    XPVMG* xpvmg;
+    LOCK_SV_MUTEX;
+    if (!PL_xpvmg_root)
+	more_xpvmg();
+    xpvmg = PL_xpvmg_root;
+    PL_xpvmg_root = (XPVMG*)xpvmg->xpv_pv;
+    UNLOCK_SV_MUTEX;
+    return xpvmg;
+}
+
+STATIC void
+S_del_xpvmg(pTHX_ XPVMG *p)
+{
+    LOCK_SV_MUTEX;
+    p->xpv_pv = (char*)PL_xpvmg_root;
+    PL_xpvmg_root = p;
+    UNLOCK_SV_MUTEX;
+}
+
+
+STATIC void
+S_more_xpvmg(pTHX)
+{
+    register XPVMG* xpvmg;
+    register XPVMG* xpvmgend;
+    New(719, PL_xpvmg_root, 1008/sizeof(XPVMG), XPVMG);
+    xpvmg = PL_xpvmg_root;
+    xpvmgend = &xpvmg[1008 / sizeof(XPVMG) - 1];
+    while (xpvmg < xpvmgend) {
+	xpvmg->xpv_pv = (char*)(xpvmg + 1);
+	xpvmg++;
+    }
+    xpvmg->xpv_pv = 0;
+}
+
+
+
+STATIC XPVLV*
+S_new_xpvlv(pTHX)
+{
+    XPVLV* xpvlv;
+    LOCK_SV_MUTEX;
+    if (!PL_xpvlv_root)
+	more_xpvlv();
+    xpvlv = PL_xpvlv_root;
+    PL_xpvlv_root = (XPVLV*)xpvlv->xpv_pv;
+    UNLOCK_SV_MUTEX;
+    return xpvlv;
+}
+
+STATIC void
+S_del_xpvlv(pTHX_ XPVLV *p)
+{
+    LOCK_SV_MUTEX;
+    p->xpv_pv = (char*)PL_xpvlv_root;
+    PL_xpvlv_root = p;
+    UNLOCK_SV_MUTEX;
+}
+
+
+STATIC void
+S_more_xpvlv(pTHX)
+{
+    register XPVLV* xpvlv;
+    register XPVLV* xpvlvend;
+    New(720, PL_xpvlv_root, 1008/sizeof(XPVLV), XPVLV);
+    xpvlv = PL_xpvlv_root;
+    xpvlvend = &xpvlv[1008 / sizeof(XPVLV) - 1];
+    while (xpvlv < xpvlvend) {
+	xpvlv->xpv_pv = (char*)(xpvlv + 1);
+	xpvlv++;
+    }
+    xpvlv->xpv_pv = 0;
+}
+
+
+STATIC XPVBM*
+S_new_xpvbm(pTHX)
+{
+    XPVBM* xpvbm;
+    LOCK_SV_MUTEX;
+    if (!PL_xpvbm_root)
+	more_xpvbm();
+    xpvbm = PL_xpvbm_root;
+    PL_xpvbm_root = (XPVBM*)xpvbm->xpv_pv;
+    UNLOCK_SV_MUTEX;
+    return xpvbm;
+}
+
+STATIC void
+S_del_xpvbm(pTHX_ XPVBM *p)
+{
+    LOCK_SV_MUTEX;
+    p->xpv_pv = (char*)PL_xpvbm_root;
+    PL_xpvbm_root = p;
+    UNLOCK_SV_MUTEX;
+}
+
+
+STATIC void
+S_more_xpvbm(pTHX)
+{
+    register XPVBM* xpvbm;
+    register XPVBM* xpvbmend;
+    New(721, PL_xpvbm_root, 1008/sizeof(XPVBM), XPVBM);
+    xpvbm = PL_xpvbm_root;
+    xpvbmend = &xpvbm[1008 / sizeof(XPVBM) - 1];
+    while (xpvbm < xpvbmend) {
+	xpvbm->xpv_pv = (char*)(xpvbm + 1);
+	xpvbm++;
+    }
+    xpvbm->xpv_pv = 0;
+}
+
 #ifdef PURIFY
 #define new_XIV() (void*)safemalloc(sizeof(XPVIV))
 #define del_XIV(p) Safefree((char*)p)
@@ -521,32 +836,73 @@ S_my_safemalloc(MEM_SIZE size)
 #  define my_safefree(s) Safefree(s)
 #endif 
 
-#define new_XPVIV() (void*)my_safemalloc(sizeof(XPVIV))
-#define del_XPVIV(p) my_safefree((char*)p)
+#ifdef PURIFY
+#define new_XPVIV() (void*)safemalloc(sizeof(XPVIV))
+#define del_XPVIV(p) Safefree((char*)p)
+#else
+#define new_XPVIV() (void*)new_xpviv()
+#define del_XPVIV(p) del_xpviv((XPVIV *)p)
+#endif
   
-#define new_XPVNV() (void*)my_safemalloc(sizeof(XPVNV))
-#define del_XPVNV(p) my_safefree((char*)p)
+#ifdef PURIFY
+#define new_XPVNV() (void*)safemalloc(sizeof(XPVNV))
+#define del_XPVNV(p) Safefree((char*)p)
+#else
+#define new_XPVNV() (void*)new_xpvnv()
+#define del_XPVNV(p) del_xpvnv((XPVNV *)p)
+#endif
+
+
+#ifdef PURIFY
+#define new_XPVCV() (void*)safemalloc(sizeof(XPVCV))
+#define del_XPVCV(p) Safefree((char*)p)
+#else
+#define new_XPVCV() (void*)new_xpvcv()
+#define del_XPVCV(p) del_xpvcv((XPVCV *)p)
+#endif
+
+#ifdef PURIFY
+#define new_XPVAV() (void*)safemalloc(sizeof(XPVAV))
+#define del_XPVAV(p) Safefree((char*)p)
+#else
+#define new_XPVAV() (void*)new_xpvav()
+#define del_XPVAV(p) del_xpvav((XPVAV *)p)
+#endif
+
+#ifdef PURIFY
+#define new_XPVHV() (void*)safemalloc(sizeof(XPVHV))
+#define del_XPVHV(p) Safefree((char*)p)
+#else
+#define new_XPVHV() (void*)new_xpvhv()
+#define del_XPVHV(p) del_xpvhv((XPVHV *)p)
+#endif
   
-#define new_XPVMG() (void*)my_safemalloc(sizeof(XPVMG))
-#define del_XPVMG(p) my_safefree((char*)p)
+#ifdef PURIFY
+#define new_XPVMG() (void*)safemalloc(sizeof(XPVMG))
+#define del_XPVMG(p) Safefree((char*)p)
+#else
+#define new_XPVMG() (void*)new_xpvmg()
+#define del_XPVMG(p) del_xpvmg((XPVMG *)p)
+#endif
   
-#define new_XPVLV() (void*)my_safemalloc(sizeof(XPVLV))
-#define del_XPVLV(p) my_safefree((char*)p)
-  
-#define new_XPVAV() (void*)my_safemalloc(sizeof(XPVAV))
-#define del_XPVAV(p) my_safefree((char*)p)
-  
-#define new_XPVHV() (void*)my_safemalloc(sizeof(XPVHV))
-#define del_XPVHV(p) my_safefree((char*)p)
-  
-#define new_XPVCV() (void*)my_safemalloc(sizeof(XPVCV))
-#define del_XPVCV(p) my_safefree((char*)p)
+#ifdef PURIFY
+#define new_XPVLV() (void*)safemalloc(sizeof(XPVLV))
+#define del_XPVLV(p) Safefree((char*)p)
+#else
+#define new_XPVLV() (void*)new_xpvlv()
+#define del_XPVLV(p) del_xpvlv((XPVLV *)p)
+#endif
   
 #define new_XPVGV() (void*)my_safemalloc(sizeof(XPVGV))
 #define del_XPVGV(p) my_safefree((char*)p)
   
-#define new_XPVBM() (void*)my_safemalloc(sizeof(XPVBM))
-#define del_XPVBM(p) my_safefree((char*)p)
+#ifdef PURIFY
+#define new_XPVBM() (void*)safemalloc(sizeof(XPVBM))
+#define del_XPVBM(p) Safefree((char*)p)
+#else
+#define new_XPVBM() (void*)new_xpvbm()
+#define del_XPVBM(p) del_xpvbm((XPVBM *)p)
+#endif
   
 #define new_XPVFM() (void*)my_safemalloc(sizeof(XPVFM))
 #define del_XPVFM(p) my_safefree((char*)p)
@@ -612,8 +968,8 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	pv	= (char*)SvRV(sv);
 	cur	= 0;
 	len	= 0;
-	iv	= (IV)pv;
-	nv	= (NV)(unsigned long)pv;
+	iv	= PTR2IV(pv);
+	nv	= PTR2NV(pv);
 	del_XRV(SvANY(sv));
 	magic	= 0;
 	stash	= 0;
@@ -1034,10 +1390,12 @@ S_not_a_number(pTHX_ SV *sv)
     *d = '\0';
 
     if (PL_op)
-	Perl_warner(aTHX_ WARN_NUMERIC, "Argument \"%s\" isn't numeric in %s", tmpbuf,
-		PL_op_name[PL_op->op_type]);
+	Perl_warner(aTHX_ WARN_NUMERIC,
+		    "Argument \"%s\" isn't numeric in %s", tmpbuf,
+		PL_op_desc[PL_op->op_type]);
     else
-	Perl_warner(aTHX_ WARN_NUMERIC, "Argument \"%s\" isn't numeric", tmpbuf);
+	Perl_warner(aTHX_ WARN_NUMERIC,
+		    "Argument \"%s\" isn't numeric", tmpbuf);
 }
 
 /* the number can be converted to integer with atol() or atoll() */
@@ -1077,7 +1435,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 	  SV* tmpstr;
 	  if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv, numer)))
 	      return SvIV(tmpstr);
-	  return (IV)SvRV(sv);
+	  return PTR2IV(SvRV(sv));
 	}
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    dTHR;
@@ -1113,7 +1471,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 #ifdef IV_IS_QUAD
 	    DEBUG_c(PerlIO_printf(Perl_debug_log, 
 				  "0x%" PERL_PRIx64 " 2iv(%" PERL_PRIu64 " => %" PERL_PRId64 ") (as unsigned)\n",
-				  (UV)sv,
+				  PTR2UV(sv),
 				  (UV)SvUVX(sv), (IV)SvUVX(sv)));
 #else
 	    DEBUG_c(PerlIO_printf(Perl_debug_log, 
@@ -1222,7 +1580,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	  SV* tmpstr;
 	  if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv, numer)))
 	      return SvUV(tmpstr);
-	  return (UV)SvRV(sv);
+	  return PTR2UV(SvRV(sv));
 	}
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    dTHR;
@@ -1393,7 +1751,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	  SV* tmpstr;
 	  if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,numer)))
 	      return SvNV(tmpstr);
-	  return (NV)(unsigned long)SvRV(sv);
+	  return PTR2NV(SvRV(sv));
 	}
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    dTHR;
@@ -1777,7 +2135,7 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 		else
 		    sv_setpv(tsv, s);
 #ifdef IV_IS_QUAD
-		Perl_sv_catpvf(aTHX_ tsv, "(0x%" PERL_PRIx64")", (UV)sv);
+		Perl_sv_catpvf(aTHX_ tsv, "(0x%" PERL_PRIx64")", PTR2UV(sv));
 #else
 		Perl_sv_catpvf(aTHX_ tsv, "(0x%lx)", (unsigned long)sv);
 #endif
@@ -3691,7 +4049,7 @@ Perl_sv_inc(pTHX_ register SV *sv)
 	    IV i;
 	    if (SvAMAGIC(sv) && AMG_CALLun(sv,inc))
 		return;
-	    i = (IV)SvRV(sv);
+	    i = PTR2IV(SvRV(sv));
 	    sv_unref(sv);
 	    sv_setiv(sv, i);
 	}
@@ -3791,7 +4149,7 @@ Perl_sv_dec(pTHX_ register SV *sv)
 	    IV i;
 	    if (SvAMAGIC(sv) && AMG_CALLun(sv,dec))
 		return;
-	    i = (IV)SvRV(sv);
+	    i = PTR2IV(SvRV(sv));
 	    sv_unref(sv);
 	    sv_setiv(sv, i);
 	}
@@ -4395,7 +4753,7 @@ Perl_sv_setref_pv(pTHX_ SV *rv, const char *classname, void *pv)
 	SvSETMAGIC(rv);
     }
     else
-	sv_setiv(newSVrv(rv,classname), (IV)pv);
+	sv_setiv(newSVrv(rv,classname), PTR2IV(pv));
     return rv;
 }
 
@@ -4645,14 +5003,14 @@ Perl_sv_vcatpvf_mg(pTHX_ SV *sv, const char* pat, va_list* args)
 }
 
 void
-Perl_sv_vsetpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, I32 svmax, bool *used_locale)
+Perl_sv_vsetpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, I32 svmax, bool *maybe_tainted)
 {
     sv_setpvn(sv, "", 0);
-    sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale);
+    sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, maybe_tainted);
 }
 
 void
-Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, I32 svmax, bool *used_locale)
+Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, I32 svmax, bool *maybe_tainted)
 {
     dTHR;
     char *p;
@@ -4898,15 +5256,15 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	case 'p':
 	    if (args)
-		uv = (UV)va_arg(*args, void*);
+		uv = PTR2UV(va_arg(*args, void*));
 	    else
-		uv = (svix < svmax) ? (UV)svargs[svix++] : 0;
+		uv = (svix < svmax) ? PTR2UV(svargs[svix++]) : 0;
 	    base = 16;
 	    goto integer;
 
 	case 'D':
 #ifdef IV_IS_QUAD
-	    /* nothing */
+	    intsize = 'q';
 #else
 	    intsize = 'l';
 #endif
@@ -4916,11 +5274,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    if (args) {
 		switch (intsize) {
 		case 'h':	iv = (short)va_arg(*args, int); break;
-#ifdef IV_IS_QUAD
-		default:	iv = va_arg(*args, IV); break;
-#else
 		default:	iv = va_arg(*args, int); break;
-#endif
 		case 'l':	iv = va_arg(*args, long); break;
 		case 'V':	iv = va_arg(*args, IV); break;
 #ifdef HAS_QUAD
@@ -4932,11 +5286,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		iv = (svix < svmax) ? SvIVx(svargs[svix++]) : 0;
 		switch (intsize) {
 		case 'h':	iv = (short)iv; break;
-#ifdef IV_IS_QUAD
-		default:	break;
-#else
 		default:	iv = (int)iv; break;
-#endif
 		case 'l':	iv = (long)iv; break;
 		case 'V':	break;
 #ifdef HAS_QUAD
@@ -4958,7 +5308,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	case 'U':
 #ifdef IV_IS_QUAD
-	    /* nothing */
+	    intsize = 'q';
 #else
 	    intsize = 'l';
 #endif
@@ -4973,7 +5323,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	case 'O':
 #ifdef IV_IS_QUAD
-	    /* nothing */
+	    intsize = 'q';
 #else
 	    intsize = 'l';
 #endif
@@ -4990,11 +5340,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    if (args) {
 		switch (intsize) {
 		case 'h':  uv = (unsigned short)va_arg(*args, unsigned); break;
-#ifdef UV_IS_QUAD
-		default:   uv = va_arg(*args, UV); break;
-#else
 		default:   uv = va_arg(*args, unsigned); break;
-#endif
 		case 'l':  uv = va_arg(*args, unsigned long); break;
 		case 'V':  uv = va_arg(*args, UV); break;
 #ifdef HAS_QUAD
@@ -5006,11 +5352,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		uv = (svix < svmax) ? SvUVx(svargs[svix++]) : 0;
 		switch (intsize) {
 		case 'h':	uv = (unsigned short)uv; break;
-#ifdef UV_IS_QUAD
-		default:	break;
-#else
 		default:	uv = (unsigned)uv; break;
-#endif
 		case 'l':	uv = (unsigned long)uv; break;
 		case 'V':	break;
 #ifdef HAS_QUAD
@@ -5049,10 +5391,25 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    dig = uv & 1;
 		    *--eptr = '0' + dig;
 		} while (uv >>= 1);
-		if (alt && *eptr != '0')
-		    *--eptr = '0';
+		if (alt) {
+		    esignbuf[esignlen++] = '0';
+		    esignbuf[esignlen++] = 'b';
+		}
 		break;
 	    default:		/* it had better be ten or less */
+#if defined(PERL_Y2KWARN)
+		if (ckWARN(WARN_MISC)) {
+		    STRLEN n;
+		    char *s = SvPV(sv,n);
+		    if (n >= 2 && s[n-2] == '1' && s[n-1] == '9'
+			&& (n == 2 || !isDIGIT(s[n-3])))
+		    {
+			Perl_warner(aTHX_ WARN_MISC,
+				    "Possible Y2K bug: %%%c %s",
+				    c, "format string following '19'");
+		    }
+		}
+#endif
 		do {
 		    dig = uv % base;
 		    *--eptr = '0' + dig;
@@ -5102,6 +5459,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		Safefree(PL_efloatbuf);
 		PL_efloatsize = need + 20; /* more fudge */
 		New(906, PL_efloatbuf, PL_efloatsize, char);
+		PL_efloatbuf[0] = '\0';
 	    }
 
 	    eptr = ebuf + sizeof ebuf;
@@ -5141,15 +5499,36 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    eptr = PL_efloatbuf;
 	    elen = strlen(PL_efloatbuf);
 
-#ifdef LC_NUMERIC
+#ifdef USE_LOCALE_NUMERIC
 	    /*
 	     * User-defined locales may include arbitrary characters.
-	     * And, unfortunately, some system may alloc the "C" locale
-	     * to be overridden by a malicious user.
+	     * And, unfortunately, some (broken) systems may allow the
+	     * "C" locale to be overridden by a malicious user.
+	     * XXX This is an extreme way to cope with broken systems.
 	     */
-	    if (used_locale)
-		*used_locale = TRUE;
-#endif /* LC_NUMERIC */
+	    if (maybe_tainted && PL_tainting) {
+		/* safe if it matches /[-+]?\d*(\.\d*)?([eE][-+]?\d*)?/ */
+		if (*eptr == '-' || *eptr == '+')
+		    ++eptr;
+		while (isDIGIT(*eptr))
+		    ++eptr;
+		if (*eptr == '.') {
+		    ++eptr;
+		    while (isDIGIT(*eptr))
+			++eptr;
+		}
+		if (*eptr == 'e' || *eptr == 'E') {
+		    ++eptr;
+		    if (*eptr == '-' || *eptr == '+')
+			++eptr;
+		    while (isDIGIT(*eptr))
+			++eptr;
+		}
+		if (*eptr)
+		    *maybe_tainted = TRUE;	/* results are suspect */
+		eptr = PL_efloatbuf;
+	    }
+#endif /* USE_LOCALE_NUMERIC */
 
 	    break;
 
@@ -5160,11 +5539,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    if (args) {
 		switch (intsize) {
 		case 'h':	*(va_arg(*args, short*)) = i; break;
-#ifdef IV_IS_QUAD
-		default:	*(va_arg(*args, IV*)) = i; break;
-#else
 		default:	*(va_arg(*args, int*)) = i; break;
-#endif
 		case 'l':	*(va_arg(*args, long*)) = i; break;
 		case 'V':	*(va_arg(*args, IV*)) = i; break;
 #ifdef HAS_QUAD

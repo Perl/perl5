@@ -41,11 +41,18 @@ pod/perldelta.pod file.  For more detailed information about specific
 changes, see the Changes file.
 
 IMPORTANT NOTE:  5.005_53 and later releases do not export unadorned
-global symbols anymore.  This means most CPAN modules probably won't
-build under this release without adding '-DPERL_POLLUTE' to ccflags
-in config.sh.  This is not the default because we want the modules
-to get fixed *before* the 5.6 release.  pod/perldelta.pod contains
-additional notes about this.
+global symbols anymore.  This means you may need to build older
+extensions that have not been updated for the new naming convention
+with:
+
+	perl Makefile.PL POLLUTE=1
+	
+Alternatively, you can enable CPP symbol pollution wholesale by
+building perl itself with:
+
+	sh Configure -Accflags=-DPERL_POLLUTE
+
+pod/perldelta.pod contains more details about this.
 
 =head1 DESCRIPTION
 
@@ -71,18 +78,26 @@ system.  (Unixware users should use the svr4.sh hint file.)  If
 there is a README file for your platform, then you should read
 that too.  Additional information is in the Porting/ directory.
 
-=head1 WARNING:  This version is not binary compatible with Perl 5.005.
+=head1 WARNING:  This version may not be binary compatible with Perl 5.005.
 
-If you have dynamically loaded extensions that you built under perl
-5.005, you will need to rebuild and reinstall those extensions to use
-them with 5.6.  Pure perl modules should continue to work just fine
-without reinstallation.  See the discussions below on L<"Coexistence
-with earlier versions of perl5"> and L<"Upgrading from 5.005 to
-5.6"> for more details.
+Using the default Configure options for building perl should get you
+a perl that will be binary compatible with the 5.005 release.
+
+However, if you run Configure with any custom options, such as
+-Dusethreads, -Dusemultiplicity, -Dusemymalloc, -Ubincompat5005 etc.,
+the resulting perl will not be binary compatible.  Under these
+circumstances, if you have dynamically loaded extensions that were
+built under perl 5.005, you will need to rebuild and reinstall all
+those extensions to use them with 5.6.
+
+Pure perl modules without XS or C code should continue to work fine
+without reinstallation.  See the discussions below on
+L<"Coexistence with earlier versions of perl5"> and
+L<"Upgrading from 5.005 to 5.6"> for more details.
 
 The standard extensions supplied with Perl will be handled automatically.
 
-In a related issue, old modules may possibly be affected by the
+On a related issue, old modules may possibly be affected by the
 changes in the Perl language in the current release.  Please see
 pod/perldelta.pod (and pod/perl500Xdelta.pod) for a description of
 what's changed.  See also your installed copy of the perllocal.pod
@@ -179,6 +194,21 @@ defaults from then on.
 
 After it runs, Configure will perform variable substitution on all the
 *.SH files and offer to run make depend.
+
+=head2 Altering config.sh variables for C compiler switches etc.
+
+For most users, all of the Configure defaults are fine.  Configure
+also has several convenient options which are all described below.
+However, if Configure doesn't have an option to do what you want,
+you can change Configure variables after the platform hints have been
+run, by using Configure's -A switch.  For example, here's how to add
+a couple of extra flags to C compiler invocations:
+
+	sh Configure -Accflags="-DPERL_Y2KWARN -DPERL_POLLUTE_MALLOC"
+
+For more help on Configure switches, run:
+
+	sh Configure -h
 
 =head2 Common Configure options
 
@@ -766,12 +796,22 @@ or you can answer 'n' at the appropriate interactive Configure prompt.
 
 =item -DPERL_POLLUTE_MALLOC
 
-Perl's malloc family of functions are called Perl_malloc(),
-Perl_realloc(), Perl_calloc() and Perl_mfree().  The names do not clash
-with the system versions of these functions.
+NOTE: This flag is enabled automatically on some platforms if you
+asked for binary compatibility with version 5.005, or if you just
+run Configure to accept all the defaults on those platforms.  You
+can refuse the automatic binary compatibility flags wholesale by
+running:
 
-If you add -DPERL_POLLUTE_MALLOC to your ccflags variable in
-config.sh, then Perl's malloc family of functions will have the same
+	sh Configure -Ubincompat5005
+
+or by answering 'n' at the appropriate prompt.
+
+Perl's malloc family of functions are called Perl_malloc(),
+Perl_realloc(), Perl_calloc() and Perl_mfree().  When this flag is
+not enabled, the names do not clash with the system versions of
+these functions.
+
+If enabled, Perl's malloc family of functions will have the same
 names as the system versions.  This may be sometimes required when you
 have libraries that like to free() data that may have been allocated
 by Perl_malloc() and vice versa.
@@ -808,16 +848,6 @@ it's convenient to have both.
 
 If you are using a shared libperl, see the warnings about multiple
 versions of perl under L<Building a shared libperl.so Perl library>.
-
-=head2 Other Compiler Flags
-
-For most users, all of the Configure defaults are fine.  However, you
-can change a number of factors in the way perl is built by adding
-appropriate -D directives to your ccflags variable in config.sh.
-
-You should also run Configure interactively to verify that a hint file
-doesn't inadvertently override your ccflags setting.  (Hints files
-shouldn't do that, but some might.)
 
 =head2 Extensions
 
@@ -1349,10 +1379,13 @@ with B<make depend; make>.
 
 =item CRIPPLED_CC
 
-If you still can't compile successfully, try adding a -DCRIPPLED_CC
-flag.  (Just because you get no errors doesn't mean it compiled right!)
-This simplifies some complicated expressions for compilers that get
-indigestion easily.
+If you still can't compile successfully, try:
+
+	sh Configure -Accflags=-DCRIPPLED_CC
+
+This flag simplifies some complicated expressions for compilers that get
+indigestion easily.  (Just because you get no errors doesn't mean it
+compiled right!)
 
 =item Missing functions
 

@@ -13,7 +13,7 @@ $VERSION = $VERSION = '2.101';
 
 #$| = 1;
 
-require 5.004;
+require 5.004_02;
 require Exporter;
 require DynaLoader;
 require overload;
@@ -39,7 +39,7 @@ $Deepcopy = 0 unless defined $Deepcopy;
 $Quotekeys = 1 unless defined $Quotekeys;
 $Bless = "bless" unless defined $Bless;
 #$Expdepth = 0 unless defined $Expdepth;
-#$Maxdepth = 0 unless defined $Maxdepth;
+$Maxdepth = 0 unless defined $Maxdepth;
 
 #
 # expects an arrayref of values to be dumped.
@@ -74,7 +74,7 @@ sub new {
              quotekeys	=> $Quotekeys,  # quote hash keys
              'bless'	=> $Bless,	# keyword to use for "bless"
 #	     expdepth   => $Expdepth,   # cutoff depth for explicit dumping
-#	     maxdepth	=> $Maxdepth,   # depth beyond which we give up
+	     maxdepth	=> $Maxdepth,   # depth beyond which we give up
 	   };
 
   if ($Indent > 0) {
@@ -214,14 +214,13 @@ sub _dump {
   if ($type) {
 
     # prep it, if it looks like an object
-    if ($type =~ /[a-z_:]/) {
-      my $freezer = $s->{freezer};
-      $val->$freezer() if $freezer && UNIVERSAL::can($val, $freezer);
+    if (my $freezer = $s->{freezer}) {
+      $val->$freezer() if UNIVERSAL::can($val, $freezer);
     }
 
     ($realpack, $realtype, $id) =
       (overload::StrVal($val) =~ /^(?:(.*)\=)?([^=]*)\(([^\(]*)\)$/);
-    
+
     # if it has a name, we need to either look it up, or keep a tab
     # on it so we know when we hit it later
     if (defined($name) and length($name)) {
@@ -259,17 +258,28 @@ sub _dump {
       }
     }
 
-    if ($realpack) {
-      if ($realpack eq 'Regexp') {
+    if ($realpack and $realpack eq 'Regexp') {
 	$out = "$val";
 	$out =~ s,/,\\/,g;
 	return "qr/$out/";
-      }
-      else {          # we have a blessed ref
-	$out = $s->{'bless'} . '( ';
-	$blesspad = $s->{apad};
-	$s->{apad} .= '       ' if ($s->{indent} >= 2);
-      }
+    }
+
+    # If purity is not set and maxdepth is set, then check depth: 
+    # if we have reached maximum depth, return the string
+    # representation of the thing we are currently examining
+    # at this depth (i.e., 'Foo=ARRAY(0xdeadbeef)'). 
+    if (!$s->{purity}
+	and $s->{maxdepth} > 0
+	and $s->{level} >= $s->{maxdepth})
+    {
+      return qq['$val'];
+    }
+
+    # we have a blessed ref
+    if ($realpack) {
+      $out = $s->{'bless'} . '( ';
+      $blesspad = $s->{apad};
+      $s->{apad} .= '       ' if ($s->{indent} >= 2);
     }
 
     $s->{level}++;
@@ -518,6 +528,12 @@ sub Bless {
   my($s, $v) = @_;
   defined($v) ? (($s->{'bless'} = $v), return $s) : $s->{'bless'};
 }
+
+sub Maxdepth {
+  my($s, $v) = @_;
+  defined($v) ? (($s->{'maxdepth'} = $v), return $s) : $s->{'maxdepth'};
+}
+
 
 # used by qquote below
 my %esc = (  
@@ -822,6 +838,14 @@ builtin operator used to create objects.  A function with the specified
 name should exist, and should accept the same arguments as the builtin.
 Default is C<bless>.
 
+=item $Data::Dumper::Maxdepth  I<or>  $I<OBJ>->Maxdepth(I<[NEWVAL]>)
+
+Can be set to a positive integer that specifies the depth beyond which
+which we don't venture into a structure.  Has no effect when
+C<Data::Dumper::Purity> is set.  (Useful in debugger when we often don't
+want to see more than enough).  Default is 0, which means there is 
+no maximum depth. 
+
 =back
 
 =head2 Exports
@@ -904,6 +928,21 @@ distribution for more examples.)
     $Data::Dumper::Purity = 0;         # avoid cross-refs
     print Data::Dumper->Dump([$b, $a], [qw(*b a)]);
     
+    ########
+    # deep structures
+    ########
+    
+    $a = "pearl";
+    $b = [ $a ];
+    $c = { 'b' => $b };
+    $d = [ $c ];
+    $e = { 'd' => $d };
+    $f = { 'e' => $e };
+    print Data::Dumper->Dump([$f], [qw(f)]);
+
+    $Data::Dumper::Maxdepth = 3;       # no deeper than 3 refs down
+    print Data::Dumper->Dump([$f], [qw(f)]);
+
     
     ########
     # object-oriented usage
@@ -999,7 +1038,7 @@ modify it under the same terms as Perl itself.
 
 =head1 VERSION
 
-Version 2.10    (31 Oct 1998)
+Version 2.11   (unreleased)
 
 =head1 SEE ALSO
 

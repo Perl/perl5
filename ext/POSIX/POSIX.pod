@@ -1024,7 +1024,8 @@ If you want your code to be portable, your format (C<fmt>) argument
 should use only the conversion specifiers defined by the ANSI C
 standard.  These are C<aAbBcdHIjmMpSUwWxXyYZ%>.
 The given arguments are made consistent
-by calling C<mktime()> before calling your system's C<strftime()> function.
+as though by calling C<mktime()> before calling your system's
+C<strftime()> function, except that the C<isdst> value is not affected.
 
 The string for Tuesday, December 12, 1995.
 

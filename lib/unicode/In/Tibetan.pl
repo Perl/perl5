@@ -1,3 +1,3 @@
 return <<'END';
-0F00	0FBF
+0F00	0FFF
 END

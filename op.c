@@ -18,6 +18,7 @@
 #include "EXTERN.h"
 #define PERL_IN_OP_C
 #include "perl.h"
+#include "keywords.h"
 
 /* #define PL_OP_SLAB_ALLOC */
                                                             
@@ -96,9 +97,9 @@ S_bad_type(pTHX_ I32 n, char *t, char *name, OP *kid)
 STATIC void
 S_no_bareword_allowed(pTHX_ OP *o)
 {
-    Perl_warn(aTHX_ "Bareword \"%s\" not allowed while \"strict subs\" in use",
-	  SvPV_nolen(cSVOPo->op_sv));
-    ++PL_error_count;
+    qerror(Perl_mess(aTHX_
+		     "Bareword \"%s\" not allowed while \"strict subs\" in use",
+		     SvPV_nolen(cSVOPo->op_sv)));
 }
 
 /* "register" allocation */
@@ -111,9 +112,10 @@ Perl_pad_allocmy(pTHX_ char *name)
     SV *sv;
 
     if (!(
+	PL_in_my == KEY_our ||
 	isALPHA(name[1]) ||
 	(PL_hints & HINT_UTF8 && (name[1] & 0xc0) == 0xc0) ||
-	name[1] == '_' && (int)strlen(name) > 2))
+	name[1] == '_' && (int)strlen(name) > 2 ))
     {
 	if (!isPRINT(name[1]) || strchr("\t\n\r\f", name[1])) {
 	    /* 1999-02-27 mjd@plover.com */
@@ -145,8 +147,10 @@ Perl_pad_allocmy(pTHX_ char *name)
 		&& strEQ(name, SvPVX(sv)))
 	    {
 		Perl_warner(aTHX_ WARN_UNSAFE,
-			"\"my\" variable %s masks earlier declaration in same %s", 
-			name, (SvIVX(sv) == PAD_MAX ? "scope" : "statement"));
+			"\"%s\" variable %s masks earlier declaration in same %s", 
+			(PL_in_my == KEY_our ? "our" : "my"),
+			name,
+			(SvIVX(sv) == PAD_MAX ? "scope" : "statement"));
 		break;
 	    }
 	}
@@ -164,6 +168,8 @@ Perl_pad_allocmy(pTHX_ char *name)
 	SvSTASH(sv) = (HV*)SvREFCNT_inc(PL_in_my_stash);
 	PL_sv_objcount++;
     }
+    if (PL_in_my == KEY_our)
+	SvFLAGS(sv) |= SVpad_OUR;
     av_store(PL_comppad_name, off, sv);
     SvNVX(sv) = (NV)PAD_MAX;
     SvIVX(sv) = 0;			/* Not yet introduced--see newSTATEOP */
@@ -231,6 +237,8 @@ S_pad_findlex(pTHX_ char *name, PADOFFSET newoff, U32 seq, CV* startcv,
 		    SvNVX(namesv) = (NV)PL_curcop->cop_seq;
 		    SvIVX(namesv) = PAD_MAX;	/* A ref, intro immediately */
 		    SvFAKE_on(namesv);		/* A ref, not a real var */
+		    if (SvFLAGS(sv) & SVpad_OUR)/* An "our" variable */
+			SvFLAGS(namesv) |= SVpad_OUR;
 		    if (SvOBJECT(sv)) {		/* A typed var */
 			SvOBJECT_on(namesv);
 			(void)SvUPGRADE(namesv, SVt_PVMG);
@@ -355,7 +363,7 @@ Perl_pad_findmy(pTHX_ char *name)
 	      seq > I_32(SvNVX(sv)))) &&
 	    strEQ(SvPVX(sv), name))
 	{
-	    if (SvIVX(sv))
+	    if (SvIVX(sv) || SvFLAGS(sv) & SVpad_OUR)
 		return (PADOFFSET)off;
 	    pendoff = off;	/* this pending def. will override import */
 	}
@@ -1239,6 +1247,91 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	    null(((LISTOP*)cUNOPo->op_first)->op_first);/* disable pushmark */
 	    break;
 	}
+	else {				/* lvalue subroutine call */
+	    o->op_private |= OPpLVAL_INTRO;
+	    if (type == OP_GREPSTART || type == OP_ENTERSUB) {
+		/* Backward compatibility mode: */
+		o->op_private |= OPpENTERSUB_INARGS;
+		break;
+	    }
+	    else {                      /* Compile-time error message: */
+		OP *kid = cUNOPo->op_first;
+		CV *cv;
+		OP *okid;
+
+		if (kid->op_type == OP_PUSHMARK)
+		    goto skip_kids;
+		if (kid->op_type != OP_NULL || kid->op_targ != OP_LIST)
+		    Perl_croak(aTHX_
+			       "panic: unexpected lvalue entersub "
+			       "args: type/targ %ld:%ld",
+			       (long)kid->op_type,kid->op_targ);
+		kid = kLISTOP->op_first;
+	      skip_kids:
+		while (kid->op_sibling)
+		    kid = kid->op_sibling;
+		if (!(kid->op_type == OP_NULL && kid->op_targ == OP_RV2CV)) {
+		    /* Indirect call */
+		    if (kid->op_type == OP_METHOD_NAMED
+			|| kid->op_type == OP_METHOD)
+		    {
+			OP *newop;
+
+			if (kid->op_sibling || kid->op_next != kid) {
+			    yyerror("panic: unexpected optree near method call");
+			    break;
+			}
+			
+			NewOp(1101, newop, 1, OP);
+			newop->op_type = OP_RV2CV;
+			newop->op_ppaddr = PL_ppaddr[OP_RV2CV];
+			newop->op_next = newop;
+			kid->op_sibling = newop;
+			newop->op_private |= OPpLVAL_INTRO;
+			break;
+		    }
+		    
+		    if (kid->op_type != OP_RV2CV)
+			Perl_croak(aTHX_
+				   "panic: unexpected lvalue entersub "
+				   "entry via type/targ %ld:%ld",
+				   (long)kid->op_type,kid->op_targ);
+		    kid->op_private |= OPpLVAL_INTRO;
+		    break;	/* Postpone until runtime */
+		}
+		
+		okid = kid;		
+		kid = kUNOP->op_first;
+		if (kid->op_type == OP_NULL && kid->op_targ == OP_RV2SV)
+		    kid = kUNOP->op_first;
+		if (kid->op_type == OP_NULL)		
+		    Perl_croak(aTHX_
+			       "Unexpected constant lvalue entersub "
+			       "entry via type/targ %ld:%ld",
+			       (long)kid->op_type,kid->op_targ);
+		if (kid->op_type != OP_GV) {
+		    /* Restore RV2CV to check lvalueness */
+		  restore_2cv:
+		    if (kid->op_next && kid->op_next != kid) { /* Happens? */
+			okid->op_next = kid->op_next;
+			kid->op_next = okid;
+		    }
+		    else
+			okid->op_next = Nullop;
+		    okid->op_type = OP_RV2CV;
+		    okid->op_targ = 0;
+		    okid->op_ppaddr = PL_ppaddr[OP_RV2CV];
+		    okid->op_private |= OPpLVAL_INTRO;
+		    break;
+		}
+		
+		cv = GvCV(kGVOP->op_gv);
+		if (!cv) 
+		    goto restore_2cv;
+		if (CvLVALUE(cv))
+		    break;
+	    }
+	}
 	/* FALL THROUGH */
     default:
       nomod:
@@ -1247,7 +1340,10 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	    break;
 	yyerror(Perl_form(aTHX_ "Can't modify %s in %s",
 		     (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL)
-		      ? "do block" : PL_op_desc[o->op_type]),
+		      ? "do block"
+		      : (o->op_type == OP_ENTERSUB
+			? "non-lvalue subroutine call"
+			: PL_op_desc[o->op_type])),
 		     type ? PL_op_desc[type] : "local"));
 	return o;
 
@@ -1642,6 +1738,10 @@ S_my_kid(pTHX_ OP *o, OP *attrs)
 	for (kid = cLISTOPo->op_first; kid; kid = kid->op_sibling)
 	    my_kid(kid, attrs);
     } else if (type == OP_UNDEF) {
+	return o;
+    } else if (type == OP_RV2SV ||	/* "our" declaration */
+	       type == OP_RV2AV ||
+	       type == OP_RV2HV) { /* XXX does this let anything illegal in? */
 	return o;
     } else if (type != OP_PADSV &&
 	     type != OP_PADAV &&
@@ -4207,7 +4307,12 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	}
     }
 
-    CvROOT(cv) = newUNOP(OP_LEAVESUB, 0, scalarseq(block));
+    if(CvLVALUE(cv)) {
+	CvROOT(cv) = newUNOP(OP_LEAVESUBLV, 0, scalarseq(block));
+    }
+    else {
+	CvROOT(cv) = newUNOP(OP_LEAVESUB, 0, scalarseq(block));
+    }
     CvSTART(cv) = LINKLIST(CvROOT(cv));
     CvROOT(cv)->op_next = 0;
     peep(CvSTART(cv));
@@ -5288,14 +5393,13 @@ Perl_ck_sassign(pTHX_ OP *o)
 	    && !(kkid->op_private & OPpLVAL_INTRO))
 	{
 	    /* Concat has problems if target is equal to right arg. */
-	    if (kid->op_type == OP_CONCAT
-		&& kLISTOP->op_first->op_sibling->op_type == OP_PADSV
-		&& kLISTOP->op_first->op_sibling->op_targ == kkid->op_targ)
-	    {
-		return o;
+	    if (kid->op_type == OP_CONCAT) {
+		if (kLISTOP->op_first->op_sibling->op_type == OP_PADSV
+		    && kLISTOP->op_first->op_sibling->op_targ == kkid->op_targ)
+		    return o;
 	    }
-	    if (kid->op_type == OP_JOIN) {
-		/* do_join has problems the arguments coincide with target.
+	    else if (kid->op_type == OP_JOIN) {
+		/* do_join has problems if the arguments coincide with target.
 		   In fact the second argument *can* safely coincide,
 		   but ignore=pessimize this rare occasion. */
 		OP *arg = kLISTOP->op_first->op_sibling; /* Skip PUSHMARK */
@@ -5306,6 +5410,12 @@ Perl_ck_sassign(pTHX_ OP *o)
 			return o;
 		    arg = arg->op_sibling;
 		}
+	    }
+	    else if (kid->op_type == OP_QUOTEMETA) {
+		/* quotemeta has problems if the argument coincides with target. */
+		if (kLISTOP->op_first->op_type == OP_PADSV
+		    && kLISTOP->op_first->op_targ == kkid->op_targ)
+		    return o;
 	    }
 	    kid->op_targ = kkid->op_targ;
 	    /* Now we do not need PADSV and SASSIGN. */
@@ -5624,6 +5734,23 @@ Perl_ck_split(pTHX_ OP *o)
 }
 
 OP *
+Perl_ck_join(pTHX_ OP *o) 
+{
+    if (ckWARN(WARN_SYNTAX)) {
+	OP *kid = cLISTOPo->op_first->op_sibling;
+	if (kid && kid->op_type == OP_MATCH) {
+	    char *pmstr = "STRING";
+	    if (kPMOP->op_pmregexp)
+		pmstr = kPMOP->op_pmregexp->precomp;
+	    Perl_warner(aTHX_ WARN_SYNTAX,
+			"/%s/ should probably be written as \"%s\"",
+			pmstr, pmstr);
+	}
+    }
+    return ck_fun(o);
+}
+
+OP *
 Perl_ck_subr(pTHX_ OP *o)
 {
     dTHR;
@@ -5825,6 +5952,7 @@ Perl_peep(pTHX_ register OP *o)
     dTHR;
     register OP* oldop = 0;
     STRLEN n_a;
+    OP *last_composite = Nullop;
 
     if (!o || o->op_seq)
 	return;
@@ -5843,6 +5971,7 @@ Perl_peep(pTHX_ register OP *o)
 	case OP_DBSTATE:
 	    PL_curcop = ((COP*)o);		/* for warnings */
 	    o->op_seq = PL_op_seqmax++;
+	    last_composite = Nullop;
 	    break;
 
 	case OP_CONST:
@@ -5871,7 +6000,8 @@ Perl_peep(pTHX_ register OP *o)
 			    && (((LISTOP*)o)->op_first->op_sibling->op_targ
 				== o->op_next->op_targ))) {
 			goto ignore_optimization;
-		    } else {
+		    }
+		    else {
 			o->op_targ = o->op_next->op_targ;
 			o->op_private |= OPpTARGET_MY;
 		    }
@@ -6039,6 +6169,40 @@ Perl_peep(pTHX_ register OP *o)
 	    *svp = newSViv(ind);
 	    break;
 	}
+
+	case OP_RV2AV:
+	case OP_RV2HV:
+	    if (!(o->op_flags & OPf_WANT)
+		|| o->op_flags & OPf_WANT == OPf_WANT_LIST)
+		last_composite = o;
+	    o->op_seq = PL_op_seqmax++;
+	    break;
+
+	case OP_RETURN:
+	    if (o->op_next->op_type != OP_LEAVESUBLV) {
+		o->op_seq = PL_op_seqmax++;
+		break;
+	    }
+	    /* FALL THROUGH */
+
+	case OP_LEAVESUBLV:
+	    if (last_composite) {
+		OP *r = last_composite;
+
+		while (r->op_sibling)
+		   r = r->op_sibling;
+		if (r->op_next == o 
+		    || (r->op_next->op_type == OP_LIST
+			&& r->op_next->op_next == o))
+		{
+		    if (last_composite->op_type == OP_RV2AV)
+			yyerror("Lvalue subs returning arrays not implemented yet");
+		    else
+			yyerror("Lvalue subs returning hashes not implemented yet");
+			;
+		}		
+	    }
+	    /* FALL THROUGH */
 
 	default:
 	    o->op_seq = PL_op_seqmax++;

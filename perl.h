@@ -389,7 +389,7 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 /* HP-UX 10.X CMA (Common Multithreaded Architecure) insists that
    pthread.h must be included before all other header files.
 */
-#if defined(USE_THREADS) && defined(PTHREAD_H_FIRST)
+#if defined(USE_THREADS) && defined(PTHREAD_H_FIRST) && defined(I_PTHREAD)
 #  include <pthread.h>
 #endif
 
@@ -468,10 +468,6 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 
 #if !defined(PERL_FOR_X2P) && !defined(PERL_OBJECT)
 #  include "embed.h"
-#endif
-
-#if defined(NeXT) || defined(__NeXT) || defined (__MACHTEN__)
-#  undef PERL_POLLUTE_MALLOC
 #endif
 
 #define MEM_SIZE Size_t
@@ -1022,7 +1018,11 @@ Free_t   Perl_mfree (Malloc_t where);
 #  if defined(INT32_MAX) && LONGSIZE == 4
 #    define IV_MAX INT32_MAX
 #    define IV_MIN INT32_MIN
-#    define UV_MAX UINT32_MAX
+#    ifndef UINT32_MAX_BROKEN /* e.g. HP-UX with gcc messes this up */
+#        define UV_MAX UINT32_MAX
+#    else
+#        define UV_MAX 4294967295U
+#    endif
 #    ifndef UINT32_MIN
 #      define UINT32_MIN 0
 #    endif
@@ -1044,8 +1044,34 @@ Free_t   Perl_mfree (Malloc_t where);
 #  define IVSIZE LONGSIZE
 #endif
 #define IV_DIG (BIT_DIGITS(IVSIZE * 8))
-#define UV_DIG (BIT_DIGITS(IVSIZE * 8))
+#define UV_DIG (BIT_DIGITS(UVSIZE * 8))
 
+/*   
+ *  The macros INT2PTR and NUM2PTR are (despite their names)
+ *  bi-directional: they will convert int/float to or from pointers.
+ *  However the conversion to int/float are named explicitly:
+ *  PTR2IV, PTR2UV, PTR2NV.
+ *
+ *  For int conversions we do not need two casts if pointers are
+ *  the same size as IV and UV.   Otherwise we need an explicit
+ *  cast (PTRV) to avoid compiler warnings.
+ */
+#if (IVSIZE == PTRSIZE) && (UVSIZE == PTRSIZE)
+#  define PTRV			UV
+#  define INT2PTR(any,d)	(any)(d)
+#else
+#  if PTRSIZE == LONGSIZE 
+#    define PTRV		unsigned long
+#  else
+#    define PTRV		unsigned
+#  endif
+#  define INT2PTR(any,d)	(any)(PTRV)(d)
+#endif
+#define NUM2PTR(any,d)	(any)(PTRV)(d)
+#define PTR2IV(p)	INT2PTR(IV,p)
+#define PTR2UV(p)	INT2PTR(UV,p)
+#define PTR2NV(p)	NUM2PTR(NV,p)
+  
 #ifdef USE_LONG_DOUBLE
 #  if defined(HAS_LONG_DOUBLE) && (LONG_DOUBLESIZE > DOUBLESIZE)
 #    define LDoub_t long double
@@ -1396,17 +1422,13 @@ typedef union any ANY;
 
 #include "handy.h"
 
-#ifdef USE_64_BITS
-#   define USE_64_BIT_FILES
-#endif
-
-#if defined(USE_64_BIT_FILES) || defined(USE_LARGE_FILES)
-#   define USE_64_BIT_OFFSETS /* Explicit */
+#if defined(USE_LARGE_FILES)
+#   define USE_64_BIT_RAWIO /* Explicit */
 #   define USE_64_BIT_STDIO
 #endif
 
-#if LSEEKSIZE == 8 && !defined(USE_64_BIT_OFFSETS)
-#   define USE_64_BIT_OFFSETS /* Implicit */
+#if LSEEKSIZE == 8 && !defined(USE_64_BIT_RAWIO)
+#   define USE_64_BIT_RAWIO /* Implicit */
 #endif
 
 /* Do we need FSEEKSIZE? */
@@ -1423,7 +1445,7 @@ typedef union any ANY;
 #define USE_FREOPEN64
 #endif
 
-#ifdef USE_64_BIT_OFFSETS
+#ifdef USE_64_BIT_RAWIO
 #   ifdef HAS_OFF64_T
 #       undef Off_t
 #       define Off_t off64_t
@@ -1432,7 +1454,7 @@ typedef union any ANY;
 #   endif
 /* Most 64-bit environments have defines like _LARGEFILE_SOURCE that
  * will trigger defines like the ones below.  Some 64-bit environments,
- * however, do not. */
+ * however, do not.  Therefore we have to explicitly mix and match. */
 #   if defined(USE_OPEN64)
 #       define open open64
 #   endif
@@ -1590,7 +1612,9 @@ typedef mutex_t		perl_mutex;
 typedef condition_t	perl_cond;
 typedef void *		perl_key;
 #        else /* Posix threads */
-#          include <pthread.h>
+#          ifdef I_PTHREAD
+#            include <pthread.h>
+#          endif
 typedef pthread_t	perl_os_thread;
 typedef pthread_mutex_t	perl_mutex;
 typedef pthread_cond_t	perl_cond;
@@ -1684,22 +1708,6 @@ typedef pthread_key_t	perl_key;
 
 #ifndef PERL_GET_INTERP
 #  define PERL_GET_INTERP		(PL_curinterp)
-#endif
-
-#if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_GET_THX)
-#  ifdef USE_THREADS
-#    define PERL_GET_THX		THR
-#  else
-#  ifdef MULTIPLICITY
-#    define PERL_GET_THX		PERL_GET_INTERP
-#  else
-#  ifdef PERL_OBJECT
-#    define PERL_GET_THX		((CPerlObj*)PERL_GET_INTERP)
-#  else
-#    define PERL_GET_THX		((void*)0)
-#  endif
-#  endif
-#  endif
 #endif
 
 #if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_GET_THX)
@@ -2028,7 +2036,9 @@ struct ufuncs {
 /* Fix these up for __STDC__ */
 #ifndef DONT_DECLARE_STD
 char *mktemp (char*);
+#ifndef atof
 double atof (const char*);
+#endif
 #endif
 
 #ifndef STANDARD_C

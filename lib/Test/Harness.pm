@@ -87,9 +87,10 @@ sub runtests {
 	$s .= join " ", q[ "-T"], map {qq["-I$_"]} @INC
 	    if $first =~ /^#!.*\bperl.*-\w*T/;
 	$fh->close or print "can't close $test. $!\n";
-	my $cmd = ($ENV{'COMPILE_TEST'})? 
-"./perl -I../lib ../utils/perlcc $test -run 2>> ./compilelog |" 
-															:  "$^X $s $test|";
+	my $cmd = ($ENV{'HARNESS_COMPILE_TEST'})
+		? "./perl -I../lib ../utils/perlcc $test "
+		  . "-run 2>> ./compilelog |" 
+		: "$^X $s $test|";
 	$cmd = "MCR $cmd" if $^O eq 'VMS';
 	$fh->open($cmd) or print "can't run $test. $!\n";
 	$ok = $next = $max = 0;
@@ -483,6 +484,9 @@ STDOUT were not a console.  You may need to set this if you don't want
 harness to output more frequent progress messages using carriage returns.
 Some consoles may not handle carriage returns properly (which results
 in a somewhat messy output).
+
+Setting C<HARNESS_COMPILE_TEST> to a true value will make harness attempt
+to compile the test using C<perlcc> before running it.
 
 If C<HARNESS_FILELEAK_IN_DIR> is set to the name of a directory, harness
 will check after each test whether new files appeared in that directory,

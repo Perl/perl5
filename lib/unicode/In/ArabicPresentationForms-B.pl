@@ -1,3 +1,3 @@
 return <<'END';
-FE70	FEFF
+FE70	FEFE
 END

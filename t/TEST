@@ -43,8 +43,8 @@ TESTING COMPILER
 --------------------------------------------------------------------------------
 EOT
 
-    $ENV{COMPILE_TIMEOUT} = 120 
-          if ($type eq 'compile' && !$ENV{COMPILE_TIMEOUT});
+    $ENV{PERLCC_TIMEOUT} = 120 
+          if ($type eq 'compile' && !$ENV{PERLCC_TIMEOUT});
 
     $bad = 0;
     $good = 0;

@@ -202,7 +202,7 @@ make_sv_object(pTHX_ SV *arg, SV *sv)
     }
     if (!type) {
 	type = svclassnames[SvTYPE(sv)];
-	iv = (IV)sv;
+	iv = PTR2IV(sv);
     }
     sv_setiv(newSVrv(arg, type), iv);
     return arg;
@@ -211,7 +211,7 @@ make_sv_object(pTHX_ SV *arg, SV *sv)
 static SV *
 make_mg_object(pTHX_ SV *arg, MAGIC *mg)
 {
-    sv_setiv(newSVrv(arg, "B::MAGIC"), (IV)mg);
+    sv_setiv(newSVrv(arg, "B::MAGIC"), PTR2IV(mg));
     return arg;
 }
 
@@ -317,7 +317,7 @@ walkoptree(pTHX_ SV *opsv, char *method)
     if (!SvROK(opsv))
 	croak("opsv is not a reference");
     opsv = sv_mortalcopy(opsv);
-    o = (OP*)SvIV((SV*)SvRV(opsv));
+    o = INT2PTR(OP*,SvIV((SV*)SvRV(opsv)));
     if (walkoptree_debug) {
 	PUSHMARK(sp);
 	XPUSHs(opsv);
@@ -332,7 +332,7 @@ walkoptree(pTHX_ SV *opsv, char *method)
 	OP *kid;
 	for (kid = ((UNOP*)o)->op_first; kid; kid = kid->op_sibling) {
 	    /* Use the same opsv. Rely on methods not to mess it up. */
-	    sv_setiv(newSVrv(opsv, cc_opclassname(aTHX_ kid)), (IV)kid);
+	    sv_setiv(newSVrv(opsv, cc_opclassname(aTHX_ kid)), PTR2IV(kid));
 	    walkoptree(aTHX_ opsv, method);
 	}
     }
@@ -437,7 +437,7 @@ walkoptree_debug(...)
     OUTPUT:
 	RETVAL
 
-#define address(sv) (IV)sv
+#define address(sv) PTR2IV(sv)
 
 IV
 address(sv)
@@ -647,10 +647,10 @@ PMOP_pmreplroot(o)
 	if (o->op_type == OP_PUSHRE) {
 	    sv_setiv(newSVrv(ST(0), root ?
 			     svclassnames[SvTYPE((SV*)root)] : "B::SV"),
-		     (IV)root);
+		     PTR2IV(root));
 	}
 	else {
-	    sv_setiv(newSVrv(ST(0), cc_opclassname(aTHX_ root)), (IV)root);
+	    sv_setiv(newSVrv(ST(0), cc_opclassname(aTHX_ root)), PTR2IV(root));
 	}
 
 B::OP
@@ -814,7 +814,11 @@ packiv(sv)
 	     * reach this code anyway (unless sizeof(IV) > 8 but then
 	     * everything else breaks too so I'm not fussed at the moment).
 	     */
-	    wp[0] = htonl(((U32)iv) >> (sizeof(IV)*4));
+#ifdef UV_IS_QUAD
+	    wp[0] = htonl(((UV)iv) >> (sizeof(UV)*4));
+#else
+	    wp[0] = htonl(((U32)iv) >> (sizeof(UV)*4));
+#endif
 	    wp[1] = htonl(iv & 0xffffffff);
 	    ST(0) = sv_2mortal(newSVpvn((char *)wp, 8));
 	} else {
@@ -1149,7 +1153,7 @@ void
 CvXSUB(cv)
 	B::CV	cv
     CODE:
-	ST(0) = sv_2mortal(newSViv((IV)CvXSUB(cv)));
+	ST(0) = sv_2mortal(newSViv(PTR2IV(CvXSUB(cv))));
 
 
 void
