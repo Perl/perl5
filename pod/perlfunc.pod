@@ -4119,9 +4119,9 @@ of a SUBNAME, you can provide a BLOCK as an anonymous, in-line sort
 subroutine.
 
 If the subroutine's prototype is C<($$)>, the elements to be compared
-are passed by reference in C<@_>, as for a normal subroutine.  If not,
-the normal calling code for subroutines is bypassed in the interests of
-efficiency, and the elements to be compared are passed into the subroutine
+are passed by reference in C<@_>, as for a normal subroutine.  This is
+slower than unprototyped subroutines, where the elements to be
+compared are passed into the subroutine
 as the package global variables $a and $b (see example below).  Note that
 in the latter case, it is usually counter-productive to declare $a and
 $b as lexicals.
