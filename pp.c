@@ -3254,13 +3254,13 @@ PP(pp_unpack)
     I16 ashort;
     int aint;
     I32 along;
-#ifdef Quad_t
+#ifdef HAS_QUAD
     Quad_t aquad;
 #endif
     U16 aushort;
     unsigned int auint;
     U32 aulong;
-#ifdef Quad_t
+#ifdef HAS_QUAD
     Uquad_t auquad;
 #endif
     char *aptr;
@@ -4018,7 +4018,7 @@ PP(pp_unpack)
 		sv_setpvn(sv, aptr, len);
 	    PUSHs(sv_2mortal(sv));
 	    break;
-#ifdef Quad_t
+#ifdef HAS_QUAD
 	case 'q':
 	    along = (strend - s) / sizeof(Quad_t);
 	    if (len > along)
@@ -4336,7 +4336,7 @@ PP(pp_pack)
     unsigned int auint;
     I32 along;
     U32 aulong;
-#ifdef Quad_t
+#ifdef HAS_QUAD
     Quad_t aquad;
     Uquad_t auquad;
 #endif
@@ -4828,7 +4828,7 @@ PP(pp_pack)
 		}
 	    }
 	    break;
-#ifdef Quad_t
+#ifdef HAS_QUAD
 	case 'Q':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;

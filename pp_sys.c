@@ -2463,14 +2463,26 @@ PP(pp_stat)
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_ino)));
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_mode)));
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_nlink)));
+#if Uid_t_size > IVSIZE
+	PUSHs(sv_2mortal(newSVnv(PL_statcache.st_uid)));
+#else
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_uid)));
+#endif
+#if Gid_t_size > IVSIZE 
+	PUSHs(sv_2mortal(newSVnv(PL_statcache.st_gid)));
+#else
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_gid)));
+#endif
 #ifdef USE_STAT_RDEV
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_rdev)));
 #else
 	PUSHs(sv_2mortal(newSVpvn("", 0)));
 #endif
+#if Size_t_size > IVSIZE
+	PUSHs(sv_2mortal(newSVnv(PL_statcache.st_size)));
+#else
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_size)));
+#endif
 #ifdef BIG_TIME
 	PUSHs(sv_2mortal(newSVnv(PL_statcache.st_atime)));
 	PUSHs(sv_2mortal(newSVnv(PL_statcache.st_mtime)));
@@ -2673,7 +2685,8 @@ PP(pp_ftrowned)
     djSP;
     if (result < 0)
 	RETPUSHUNDEF;
-    if (PL_statcache.st_uid == (PL_op->op_type == OP_FTEOWNED ? PL_euid : PL_uid) )
+    if (PL_statcache.st_uid == (PL_op->op_type == OP_FTEOWNED ?
+				PL_euid : PL_uid) )
 	RETPUSHYES;
     RETPUSHNO;
 }
@@ -2684,7 +2697,7 @@ PP(pp_ftzero)
     djSP;
     if (result < 0)
 	RETPUSHUNDEF;
-    if (!PL_statcache.st_size)
+    if (PL_statcache.st_size == 0)
 	RETPUSHYES;
     RETPUSHNO;
 }
@@ -2695,7 +2708,11 @@ PP(pp_ftsize)
     djSP; dTARGET;
     if (result < 0)
 	RETPUSHUNDEF;
+#if Size_t_size > IVSISE
+    PUSHn(PL_statcache.st_size);
+#else
     PUSHi(PL_statcache.st_size);
+#endif
     RETURN;
 }
 
@@ -2896,6 +2913,7 @@ PP(pp_fttext)
     register SV *sv;
     GV *gv;
     STRLEN n_a;
+    PerlIO *fp;
 
     if (PL_op->op_flags & OPf_REF)
 	gv = cGVOP;
@@ -2960,21 +2978,19 @@ PP(pp_fttext)
 	PL_statgv = Nullgv;
 	PL_laststatval = -1;
 	sv_setpv(PL_statname, SvPV(sv, n_a));
-#ifdef HAS_OPEN3
-	i = PerlLIO_open3(SvPV(sv, n_a), O_RDONLY, 0);
-#else
-	i = PerlLIO_open(SvPV(sv, n_a), 0);
-#endif
-	if (i < 0) {
+	if (!(fp = PerlIO_open(SvPVX(PL_statname), "r"))) {
 	    if (ckWARN(WARN_NEWLINE) && strchr(SvPV(sv, n_a), '\n'))
 		Perl_warner(aTHX_ WARN_NEWLINE, PL_warn_nl, "open");
 	    RETPUSHUNDEF;
 	}
-	PL_laststatval = PerlLIO_fstat(i, &PL_statcache);
-	if (PL_laststatval < 0)
+	PL_laststatval = PerlLIO_fstat(PerlIO_fileno(fp), &PL_statcache);
+	if (PL_laststatval < 0)	{
+	    (void)PerlIO_close(fp);
 	    RETPUSHUNDEF;
-	len = PerlLIO_read(i, tbuf, 512);
-	(void)PerlLIO_close(i);
+	}
+	do_binmode(fp, '<', TRUE);
+	len = PerlIO_read(fp, tbuf, sizeof(tbuf));
+	(void)PerlIO_close(fp);
 	if (len <= 0) {
 	    if (S_ISDIR(PL_statcache.st_mode) && PL_op->op_type == OP_FTTEXT)
 		RETPUSHNO;		/* special case NFS directories */
@@ -2986,6 +3002,12 @@ PP(pp_fttext)
     /* now scan s to look for textiness */
     /*   XXX ASCII dependent code */
 
+#if defined(DOSISH) || defined(USEMYBINMODE)
+    /* ignore trailing ^Z on short files */
+    if (len && len < sizeof(tbuf) && tbuf[len-1] == 26)
+	--len;
+#endif
+
     for (i = 0; i < len; i++, s++) {
 	if (!*s) {			/* null never allowed in text */
 	    odd += len;
@@ -2995,8 +3017,12 @@ PP(pp_fttext)
         else if (!(isPRINT(*s) || isSPACE(*s))) 
             odd++;
 #else
-	else if (*s & 128)
-	    odd++;
+	else if (*s & 128) {
+#ifdef USE_LOCALE
+	    if (!(PL_op->op_private & OPpLOCALE) || !isALPHA_LC(*s))
+#endif
+		odd++;
+	}
 	else if (*s < 32 &&
 	  *s != '\n' && *s != '\r' && *s != '\b' &&
 	  *s != '\t' && *s != '\f' && *s != 27)
@@ -3537,7 +3563,7 @@ PP(pp_fork)
 
 PP(pp_wait)
 {
-#if !defined(DOSISH) || defined(OS2) || defined(WIN32)
+#if (!defined(DOSISH) || defined(OS2) || defined(WIN32)) && !defined(MACOS_TRADITIONAL) 
     djSP; dTARGET;
     Pid_t childpid;
     int argflags;
@@ -3553,7 +3579,7 @@ PP(pp_wait)
 
 PP(pp_waitpid)
 {
-#if !defined(DOSISH) || defined(OS2) || defined(WIN32)
+#if (!defined(DOSISH) || defined(OS2) || defined(WIN32)) && !defined(MACOS_TRADITIONAL) 
     djSP; dTARGET;
     Pid_t childpid;
     int optype;

@@ -226,6 +226,8 @@ EOM
 esac
 EOCBU
 
+# The -n32 makes off_t to be 8 bytes, so we should have largefileness.
+
 # This script UU/use64bits.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use 64 bits.
 cat > UU/use64bits.cbu <<'EOCBU'
@@ -241,7 +243,7 @@ EOM
 		exit 1
 		;;
 	    esac
-	    case "$ccflags" in
+	    case "$cc $ccflags" in
 	    *-n32*)
 		case "$ccflags" in
 		*-DUSE_LONG_LONG) ;;

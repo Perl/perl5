@@ -475,13 +475,13 @@ Perl_pad_sv(pTHX_ PADOFFSET po)
     dTHR;
 #ifdef USE_THREADS
     DEBUG_X(PerlIO_printf(Perl_debug_log,
-			  "0x%"UVxf" Pad 0x%"UVxf" sv %d\n",
-			  PTR2UV(thr), PTR2UV(PL_curpad), po));
+			  "0x%"UVxf" Pad 0x%"UVxf" sv %"IVdf"\n",
+			  PTR2UV(thr), PTR2UV(PL_curpad), (IV)po));
 #else
     if (!po)
 	Perl_croak(aTHX_ "panic: pad_sv po");
-    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%"UVxf" sv %d\n",
-			  PTR2UV(PL_curpad), po));
+    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%"UVxf" sv %"IVdf"\n",
+			  PTR2UV(PL_curpad), (IV)po));
 #endif /* USE_THREADS */
     return PL_curpad[po];		/* eventually we'll turn this into a macro */
 }
@@ -498,11 +498,11 @@ Perl_pad_free(pTHX_ PADOFFSET po)
 	Perl_croak(aTHX_ "panic: pad_free po");
 #ifdef USE_THREADS
     DEBUG_X(PerlIO_printf(Perl_debug_log,
-			  "0x%"UVxf" Pad 0x%"UVxf" free %d\n",
-			  PTR2UV(thr), PTR2UV(PL_curpad), po));
+			  "0x%"UVxf" Pad 0x%"UVxf" free %"IVd"\n",
+			  PTR2UV(thr), PTR2UV(PL_curpad), (IV)po));
 #else
-    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%"UVxf" free %d\n",
-			  PTR2UV(PL_curpad), po));
+    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%"UVxf" free %"IVdf"\n",
+			  PTR2UV(PL_curpad), (IV)po));
 #endif /* USE_THREADS */
     if (PL_curpad[po] && PL_curpad[po] != &PL_sv_undef)
 	SvPADTMP_off(PL_curpad[po]);
@@ -520,11 +520,11 @@ Perl_pad_swipe(pTHX_ PADOFFSET po)
 	Perl_croak(aTHX_ "panic: pad_swipe po");
 #ifdef USE_THREADS
     DEBUG_X(PerlIO_printf(Perl_debug_log,
-			  "0x%"UVxf" Pad 0x%"UVxf" swipe %d\n",
-			  PTR2UV(thr), PTR2UV(PL_curpad), po));
+			  "0x%"UVxf" Pad 0x%"UVxf" swipe %"IVdf"\n",
+			  PTR2UV(thr), PTR2UV(PL_curpad), (IV)po));
 #else
-    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%"UVxf" swipe %d\n",
-			  PTR2UV(PL_curpad), po));
+    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%"UVxf" swipe %"IVdf"\n",
+			  PTR2UV(PL_curpad), (IV)po));
 #endif /* USE_THREADS */
     SvPADTMP_off(PL_curpad[po]);
     PL_curpad[po] = NEWSV(1107,0);
@@ -1326,7 +1326,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	}
 	else {				/* lvalue subroutine call */
 	    o->op_private |= OPpLVAL_INTRO;
-	    if (type == OP_GREPSTART || type == OP_ENTERSUB) {
+	    if (type == OP_GREPSTART || type == OP_ENTERSUB || type == OP_REFGEN) {
 		/* Backward compatibility mode: */
 		o->op_private |= OPpENTERSUB_INARGS;
 		break;
@@ -5123,10 +5123,10 @@ Perl_ck_ftst(pTHX_ OP *o)
     dTHR;
     I32 type = o->op_type;
 
-    if (o->op_flags & OPf_REF)
-	return o;
-
-    if (o->op_flags & OPf_KIDS && cUNOPo->op_first->op_type != OP_STUB) {
+    if (o->op_flags & OPf_REF) {
+	/* nothing */
+    }
+    else if (o->op_flags & OPf_KIDS && cUNOPo->op_first->op_type != OP_STUB) {
 	SVOP *kid = (SVOP*)cUNOPo->op_first;
 
 	if (kid->op_type == OP_CONST && (kid->op_private & OPpCONST_BARE)) {
@@ -5134,17 +5134,24 @@ Perl_ck_ftst(pTHX_ OP *o)
 	    OP *newop = newGVOP(type, OPf_REF,
 		gv_fetchpv(SvPVx(kid->op_sv, n_a), TRUE, SVt_PVIO));
 	    op_free(o);
-	    return newop;
+	    o = newop;
 	}
     }
     else {
 	op_free(o);
 	if (type == OP_FTTTY)
-           return newGVOP(type, OPf_REF, gv_fetchpv("main::STDIN", TRUE,
+           o =  newGVOP(type, OPf_REF, gv_fetchpv("main::STDIN", TRUE,
 				SVt_PVIO));
 	else
-	    return newUNOP(type, 0, newDEFSVOP());
+	    o = newUNOP(type, 0, newDEFSVOP());
     }
+#ifdef USE_LOCALE
+    if (type == OP_FTTEXT || type == OP_FTBINARY) {
+	o->op_private = 0;
+	if (PL_hints & HINT_LOCALE)
+	    o->op_private |= OPpLOCALE;
+    }
+#endif
     return o;
 }
 

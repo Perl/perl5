@@ -891,10 +891,6 @@ Free_t   Perl_mfree (Malloc_t where);
 #undef UV
 #endif
 
-#ifdef I_INTTYPES
-#include <inttypes.h>
-#endif
-
 /*
     The IV type is supposed to be long enough to hold any integral
     value or a pointer.
@@ -905,7 +901,7 @@ typedef IVTYPE IV;
 typedef UVTYPE UV;
 
 #if defined(USE_64_BITS) && defined(HAS_QUAD)
-#  if QUADCASE == 4 && defined(INT64_MAX) /* quad is int64_t */
+#  if QUADKIND == QUAD_IS_INT64_T && defined(INT64_MAX)
 #    define IV_MAX INT64_MAX
 #    define IV_MIN INT64_MIN
 #    define UV_MAX UINT64_MAX
@@ -1331,16 +1327,34 @@ typedef struct svtbl SVTBL;
 
 #include "handy.h"
 
-#if defined(USE_LARGE_FILES)
-#   define USE_64_BIT_RAWIO /* Explicit */
-#   define USE_64_BIT_STDIO
+#ifndef NO_LARGE_FILES
+#   define USE_LARGE_FILES	/* If available. */
 #endif
 
-#if LSEEKSIZE == 8 && !defined(USE_64_BIT_RAWIO)
-#   define USE_64_BIT_RAWIO /* Implicit */
+#if defined(USE_LARGE_FILES) && !defined(NO_64_BIT_RAWIO)
+#   define USE_64_BIT_RAWIO	/* explicit */
+#   if LSEEKSIZE == 8 && !defined(USE_64_BIT_RAWIO)
+#       define USE_64_BIT_RAWIO	/* implicit */
+#   endif
 #endif
 
-/* Do we need FSEEKSIZE? */
+/* Notice the use of HAS_FSEEKO: now we are obligated to always use
+ * fseeko/ftello if possible.  Don't go #defining ftell to ftello yourself,
+ * however, because operating systems like to do that themself. */
+#ifndef FSEEKSIZE
+#   ifdef HAS_FSEEKO
+#       define FSEEKSIZE LSEEKSIZE
+#   else
+#       define FSEEKSIZE LONGSIZE
+#   endif  
+#endif
+
+#if defined(USE_LARGE_FILES) && !defined(NO_64_BIT_STDIO)
+#   define USE_64_BIT_STDIO	/* explicit */
+#   if FSEEKSIZE == 8 && !defined(USE_64_BIT_STDIO)
+#       define USE_64_BIT_STDIO /* implicit */
+#   endif
+#endif
 
 /* I couldn't find any -Ddefine or -flags in IRIX 6.5 that would
  * have done the necessary symbol renaming using cpp. --jhi */
@@ -1369,9 +1383,10 @@ typedef struct svtbl SVTBL;
 #   endif
 #   if defined(USE_LSEEK64)
 #       define lseek lseek64
-#   endif
-#   if defined(USE_LLSEEK)
-#       define lseek llseek
+#   else
+#       if defined(USE_LLSEEK)
+#           define lseek llseek
+#       endif
 #   endif
 #   if defined(USE_STAT64)
 #       define stat stat64
@@ -1411,10 +1426,10 @@ typedef struct svtbl SVTBL;
 #       define fopen fopen64
 #   endif
 #   if defined(USE_FSEEK64)
-#       define fseek fseek64
+#       define fseek fseek64 /* don't do fseeko here, see perlio.c */
 #   endif
 #   if defined(USE_FTELL64)
-#       define ftell ftell64
+#       define ftell ftell64 /* don't do ftello here, see perlio.c */
 #   endif
 #   if defined(USE_FSETPOS64)
 #       define fsetpos fsetpos64
@@ -1460,7 +1475,11 @@ typedef struct svtbl SVTBL;
 #         if defined(EPOC)
 #           include "epocish.h"
 #         else
-#           include "unixish.h"
+#           if defined(MACOS_TRADITIONAL)
+#             include "macos/macish.h"
+#           else
+#             include "unixish.h"
+#           endif
 #         endif
 #       endif
 #     endif
@@ -3031,6 +3050,34 @@ typedef struct am_table_short AMTS;
 
 #ifndef PERL_SCRIPT_MODE
 #define PERL_SCRIPT_MODE "r"
+#endif
+
+/*
+ * Some operating systems are stingy with stack allocation,
+ * so perl may have to guard against stack overflow.
+ */
+#ifndef PERL_STACK_OVERFLOW_CHECK
+#define PERL_STACK_OVERFLOW_CHECK()  NOOP
+#endif
+
+/*
+ * Some nonpreemptive operating systems find it convenient to
+ * check for asynchronous conditions after each op execution.
+ * Keep this check simple, or it may slow down execution
+ * massively.
+ */
+#ifndef PERL_ASYNC_CHECK
+#define PERL_ASYNC_CHECK()  NOOP
+#endif
+
+/*
+ * On some operating systems, a memory allocation may succeed,
+ * but put the process too close to the system's comfort limit.
+ * In this case, PERL_ALLOC_CHECK frees the pointer and sets
+ * it to NULL.
+ */
+#ifndef PERL_ALLOC_CHECK
+#define PERL_ALLOC_CHECK(p)  NOOP
 #endif
 
 /*

@@ -867,7 +867,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	PL_regprecomp = Nullch;
 	return(NULL);
     }
-    DEBUG_r(PerlIO_printf(Perl_debug_log, "size %d ", PL_regsize));
+    DEBUG_r(PerlIO_printf(Perl_debug_log, "size %"IVdf" ", (IV)PL_regsize));
 
     /* Small enough for pointer-storage convention?
        If extralen==0, this means that we will not need long jumps. */
@@ -3188,7 +3188,7 @@ S_dumpuntil(pTHX_ regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 	    goto after_print;
 	regprop(sv, node);
 	PerlIO_printf(Perl_debug_log, "%4"IVdf":%*s%s", (IV)(node - start),
-		      2*l + 1, "", SvPVX(sv));
+		      (int)(2*l + 1), "", SvPVX(sv));
 	if (next == NULL)		/* Next ptr. */
 	    PerlIO_printf(Perl_debug_log, "(0)");
 	else 

@@ -22,7 +22,9 @@ Perl_runops_standard(pTHX)
 {
     dTHR;
 
-    while ( PL_op = CALL_FPTR(PL_op->op_ppaddr)(aTHX) ) ;
+    while ( PL_op = CALL_FPTR(PL_op->op_ppaddr)(aTHX) ) {
+	PERL_ASYNC_CHECK();
+    }
 
     TAINT_NOT;
     return 0;
@@ -40,6 +42,7 @@ Perl_runops_debug(pTHX)
     }
 
     do {
+	PERL_ASYNC_CHECK();
 	if (PL_debug) {
 	    if (PL_watchaddr != 0 && *PL_watchaddr != PL_watchok)
 		PerlIO_printf(Perl_debug_log,

@@ -108,10 +108,18 @@ typedef I16TYPE I16;
 typedef U16TYPE U16;
 typedef I32TYPE I32;
 typedef U32TYPE U32;
-#ifdef Quad_t
+#ifdef PERL_CORE
+#   ifdef HAS_QUAD
+#       if QUADKIND == QUAD_IS_INT64_T
+#           include <sys/types.h>
+#           ifdef I_INTTYPES /* e.g. Linux has int64_t without <inttypes.h> */
+#               include <inttypes.h>
+#           endif
+#       endif
 typedef I64TYPE I64;
 typedef U64TYPE U64;
-#endif
+#   endif
+#endif /* PERL_CORE */
 
 /* Mention I8SIZE, U8SIZE, I16SIZE, U16SIZE, I32SIZE, U32SIZE,
    I64SIZE, and U64SIZE here so that metaconfig pulls them in. */

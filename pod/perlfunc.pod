@@ -2769,10 +2769,10 @@ follows:
 	   what a local C compiler calls 'long'.  If you want
 	   native-length longs, use the '!' suffix.)
 
-    n	A short in "network" (big-endian) order.
-    N	A long in "network" (big-endian) order.
-    v	A short in "VAX" (little-endian) order.
-    V	A long in "VAX" (little-endian) order.
+    n	An unsigned short in "network" (big-endian) order.
+    N	An unsigned long in "network" (big-endian) order.
+    v	An unsigned short in "VAX" (little-endian) order.
+    V	An unsigned long in "VAX" (little-endian) order.
 	  (These 'shorts' and 'longs' are _exactly_ 16 bits and
 	   _exactly_ 32 bits, respectively.)
 
@@ -2934,7 +2934,7 @@ because they obey the native byteorder and endianness.  For example a
  	0x12 0x34 0x56 0x78	# little-endian
  	0x78 0x56 0x34 0x12	# big-endian
  
-Basically, the Intel, Alpha, and VAX CPUs and little-endian, while
+Basically, the Intel, Alpha, and VAX CPUs are little-endian, while
 everybody else, for example Motorola m68k/88k, PPC, Sparc, HP PA,
 Power, and Cray are big-endian.  MIPS can be either: Digital used it
 in little-endian mode; SGI uses it in big-endian mode.

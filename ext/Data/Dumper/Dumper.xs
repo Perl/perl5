@@ -839,7 +839,7 @@ Data_Dumper_Dumpxs(href, ...)
 			STRLEN nchars = 0;
 			sv_setpvn(name, "$", 1);
 			sv_catsv(name, varname);
-			(void) sprintf(tmpbuf, "%d", i+1);
+			(void) sprintf(tmpbuf, "%"IVdf, (IV)(i+1));
 			nchars = strlen(tmpbuf);
 			sv_catpvn(name, tmpbuf, nchars);
 		    }

@@ -3,12 +3,6 @@
 # If you modify/add tests here, remember to update also t/lib/syslfs.t.
 
 BEGIN {
-	# Don't bother if there are no quads.
-	eval { my $q = pack "q", 0 };
-	if ($@) {
-		print "1..0\n# no 64-bit types\n";
-		exit(0);
-	}
 	chdir 't' if -d 't';
 	unshift @INC, '../lib';
 	# Don't bother if there are no quad offsets.

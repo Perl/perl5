@@ -1146,6 +1146,9 @@ bool
 Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
 	       int fd, int do_report)
 {
+#ifdef MACOS_TRADITIONAL
+    Perl_croak(aTHX_ "exec? I'm not *that* kind of operating system");
+#else
     register char **a;
     char *tmps;
     STRLEN n_a;
@@ -1178,6 +1181,7 @@ Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
 	}
     }
     do_execfree();
+#endif
     return FALSE;
 }
 
@@ -1194,7 +1198,7 @@ Perl_do_execfree(pTHX)
     }
 }
 
-#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP) && !defined(EPOC)
+#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP) && !defined(EPOC) && !defined(MACOS_TRADITIONAL)
 
 bool
 Perl_do_exec(pTHX_ char *cmd)
@@ -1575,6 +1579,10 @@ Perl_cando(pTHX_ Mode_t mode, Uid_t effective, register Stat_t *statbufp)
 bool
 Perl_ingroup(pTHX_ Gid_t testgid, Uid_t effective)
 {
+#ifdef MACOS_TRADITIONAL
+    /* This is simply not correct for AppleShare, but fix it yerself. */
+    return TRUE;
+#else
     if (testgid == (effective ? PL_egid : PL_gid))
 	return TRUE;
 #ifdef HAS_GETGROUPS
@@ -1592,6 +1600,7 @@ Perl_ingroup(pTHX_ Gid_t testgid, Uid_t effective)
     }
 #endif
     return FALSE;
+#endif
 }
 
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)

@@ -95,7 +95,8 @@ Perl_safesysmalloc(MEM_SIZE size)
 	Perl_croak_nocontext("panic: malloc");
 #endif
     ptr = PerlMem_malloc(size?size:1);	/* malloc(0) is NASTY on our system */
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05d) malloc %ld bytes\n",PTR2UV(ptr),PL_an++,(long)size));
+    PERL_ALLOC_CHECK(ptr);
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) malloc %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)size));
     if (ptr != Nullch)
 	return ptr;
     else if (PL_nomemok)
@@ -138,9 +139,10 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 	Perl_croak_nocontext("panic: realloc");
 #endif
     ptr = PerlMem_realloc(where,size);
-
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05d) rfree\n",PTR2UV(where),PL_an++));
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05d) realloc %ld bytes\n",PTR2UV(ptr),PL_an++,(long)size));
+    PERL_ALLOC_CHECK(ptr);
+ 
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) rfree\n",PTR2UV(where),(long)PL_an++));
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) realloc %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)size));
 
     if (ptr != Nullch)
 	return ptr;
@@ -160,7 +162,7 @@ Free_t
 Perl_safesysfree(Malloc_t where)
 {
     dTHX;
-    DEBUG_m( PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05d) free\n",PTR2UV(where),PL_an++));
+    DEBUG_m( PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) free\n",PTR2UV(where),(long)PL_an++));
     if (where) {
 	/*SUPPRESS 701*/
 	PerlMem_free(where);
@@ -188,7 +190,8 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 #endif
     size *= count;
     ptr = PerlMem_malloc(size?size:1);	/* malloc(0) is NASTY on our system */
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05d) calloc %ld x %ld bytes\n",PTR2UV(ptr),PL_an++,(long)count,(long)size));
+    PERL_ALLOC_CHECK(ptr);
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) calloc %ld x %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)count,(long)size));
     if (ptr != Nullch) {
 	memset((void*)ptr, 0, size);
 	return ptr;
@@ -2222,7 +2225,7 @@ VTOH(vtohl,long)
 #endif
 
     /* VMS' my_popen() is in VMS.c, same with OS/2. */
-#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(__OPEN_VM) && !defined(EPOC)
+#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(__OPEN_VM) && !defined(EPOC) && !defined(MACOS_TRADITIONAL)
 PerlIO *
 Perl_my_popen(pTHX_ char *cmd, char *mode)
 {
@@ -2514,7 +2517,7 @@ Perl_rsignal_restore(pTHX_ int signo, Sigsave_t *save)
 #endif /* !HAS_SIGACTION */
 
     /* VMS' my_pclose() is in VMS.c; same with OS/2 */
-#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(__OPEN_VM) && !defined(EPOC)
+#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(__OPEN_VM) && !defined(EPOC) && !defined(MACOS_TRADITIONAL)
 I32
 Perl_my_pclose(pTHX_ PerlIO *ptr)
 {
@@ -2570,7 +2573,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 }
 #endif /* !DOSISH */
 
-#if  !defined(DOSISH) || defined(OS2) || defined(WIN32)
+#if  (!defined(DOSISH) || defined(OS2) || defined(WIN32)) && !defined(MACOS_TRADITIONAL)
 I32
 Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 {
@@ -3120,15 +3123,26 @@ Perl_find_script(pTHX_ char *scriptname, bool dosearch, char **search_ext, I32 f
     }
 #endif
 
+#ifdef MACOS_TRADITIONAL
+    if (dosearch && !strchr(scriptname, ':') &&
+	(s = PerlEnv_getenv("Commands")))
+#else
     if (dosearch && !strchr(scriptname, '/')
 #ifdef DOSISH
 		 && !strchr(scriptname, '\\')
 #endif
-		 && (s = PerlEnv_getenv("PATH"))) {
+		 && (s = PerlEnv_getenv("PATH")))
+#endif
+    {
 	bool seen_dot = 0;
 	
 	PL_bufend = s + strlen(s);
 	while (s < PL_bufend) {
+#ifdef MACOS_TRADITIONAL
+	    s = delimcpy(tmpbuf, tmpbuf + sizeof tmpbuf, s, PL_bufend,
+			',',
+			&len);
+#else
 #if defined(atarist) || defined(DOSISH)
 	    for (len = 0; *s
 #  ifdef atarist
@@ -3145,10 +3159,15 @@ Perl_find_script(pTHX_ char *scriptname, bool dosearch, char **search_ext, I32 f
 			':',
 			&len);
 #endif /* ! (atarist || DOSISH) */
+#endif /* MACOS_TRADITIONAL */
 	    if (s < PL_bufend)
 		s++;
 	    if (len + 1 + strlen(scriptname) + MAX_EXT_LEN >= sizeof tmpbuf)
 		continue;	/* don't search dir with too-long name */
+#ifdef MACOS_TRADITIONAL
+	    if (len && tmpbuf[len - 1] != ':')
+	    	tmpbuf[len++] = ':';
+#else
 	    if (len
 #if defined(atarist) || defined(__MINT__) || defined(DOSISH)
 		&& tmpbuf[len - 1] != '/'
@@ -3158,6 +3177,7 @@ Perl_find_script(pTHX_ char *scriptname, bool dosearch, char **search_ext, I32 f
 		tmpbuf[len++] = '/';
 	    if (len == 2 && tmpbuf[0] == '.')
 		seen_dot = 1;
+#endif
 	    (void)strcpy(tmpbuf + len, scriptname);
 #endif  /* !VMS */
 
@@ -3182,7 +3202,7 @@ Perl_find_script(pTHX_ char *scriptname, bool dosearch, char **search_ext, I32 f
 		continue;
 	    if (S_ISREG(PL_statbuf.st_mode)
 		&& cando(S_IRUSR,TRUE,&PL_statbuf)
-#ifndef DOSISH
+#if !defined(DOSISH) && !defined(MACOS_TRDITIONAL)
 		&& cando(S_IXUSR,TRUE,&PL_statbuf)
 #endif
 		)
@@ -3443,7 +3463,8 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
 	    av_store(thr->threadsv, i, sv);
 	    sv_magic(sv, 0, 0, &PL_threadsv_names[i], 1);
 	    DEBUG_S(PerlIO_printf(Perl_debug_log,
-		"new_struct_thread: copied threadsv %d %p->%p\n",i, t, thr));
+		"new_struct_thread: copied threadsv %"IVdf" %p->%p\n",
+				  (IV)i, t, thr));
 	}
     } 
     thr->threadsvp = AvARRAY(thr->threadsv);

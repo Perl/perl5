@@ -146,13 +146,13 @@ S_regcppush(pTHX_ I32 parenfloor)
 
 /* These are needed since we do not localize EVAL nodes: */
 #  define REGCP_SET  DEBUG_r(PerlIO_printf(Perl_debug_log,		\
-			     "  Setting an EVAL scope, savestack=%i\n",	\
-			     PL_savestack_ix)); lastcp = PL_savestack_ix
+			     "  Setting an EVAL scope, savestack=%"IVdf"\n",	\
+			     (IV)PL_savestack_ix)); lastcp = PL_savestack_ix
 
 #  define REGCP_UNWIND  DEBUG_r(lastcp != PL_savestack_ix ?		\
 				PerlIO_printf(Perl_debug_log,		\
-				"  Clearing an EVAL scope, savestack=%i..%i\n", \
-				lastcp, PL_savestack_ix) : 0); regcpblow(lastcp)
+				"  Clearing an EVAL scope, savestack=%"IVdf"..%"IVdf"\n", \
+				(IV)lastcp, (IV)PL_savestack_ix) : 0); regcpblow(lastcp)
 
 STATIC char *
 S_regcppop(pTHX)
@@ -186,8 +186,8 @@ S_regcppop(pTHX)
     DEBUG_r(
 	if (*PL_reglastparen + 1 <= PL_regnpar) {
 	    PerlIO_printf(Perl_debug_log,
-			  "     restoring \\%d..\\%d to undef\n",
-			  *PL_reglastparen + 1, PL_regnpar);
+			  "     restoring \\%"IVdf"..\\%"IVdf" to undef\n",
+			  (IV)(*PL_reglastparen + 1), (IV)PL_regnpar);
 	}
     );
     for (paren = *PL_reglastparen + 1; paren <= PL_regnpar; paren++) {
@@ -643,6 +643,9 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	    prog->check_substr = Nullsv;	/* disable */
 	    prog->float_substr = Nullsv;	/* clear */
 	    s = strpos;
+	    /* XXXX This is a remnant of the old implementation.  It
+	            looks wasteful, since now INTUIT can use many
+	            other heuristics too. */
 	    prog->reganch &= ~RE_USE_INTUIT;
 	}
 	else
@@ -805,9 +808,13 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 		  after_try:
 		    if (s >= end)
 			goto phooey;
-		    s = re_intuit_start(prog, sv, s + 1, strend, flags, NULL);
-		    if (!s)
-			goto phooey;
+		    if (prog->reganch & RE_USE_INTUIT) {
+			s = re_intuit_start(prog, sv, s + 1, strend, flags, NULL);
+			if (!s)
+			    goto phooey;
+		    }
+		    else
+			s++;
 		}		
 	    } else {
 		if (s > startpos)
@@ -2745,9 +2752,9 @@ S_regmatch(pTHX_ regnode *prog)
 		locinput = PL_reginput;
 		DEBUG_r(
 		    PerlIO_printf(Perl_debug_log,
-				  "%*s  matched %d times, len=%"IVdf"...\n",
+				  "%*s  matched %"IVdf" times, len=%"IVdf"...\n",
 				  (int)(REPORT_CODE_OFF+PL_regindent*2), "",
-				  n, (IV)l)
+				  (IV) n, (IV)l)
 		    );
 		if (n >= ln) {
 		    if (PL_regkind[(U8)OP(next)] == EXACT) {

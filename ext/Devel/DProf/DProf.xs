@@ -230,9 +230,13 @@ prof_dump_until(long ix)
 	wprof_s += t2.tms_stime - t1.tms_stime;
 
 	PerlIO_printf(fp,"+ & Devel::DProf::write\n" );
-	PerlIO_printf(fp,"@ %ld %ld %ld\n", 
-		t2.tms_utime - t1.tms_utime, t2.tms_stime - t1.tms_stime, 
-		realtime2 - realtime1);
+	PerlIO_printf(fp,"@ %"IVdf" %"IVdf" %"IVdf"\n", 
+		      /* The (IV) casts are one possibility:
+		       * the Painfully Correct Way would be to
+		       * have Clock_t_f. */
+		      (IV)(t2.tms_utime - t1.tms_utime),
+		      (IV)(t2.tms_stime - t1.tms_stime), 
+		      (IV)(realtime2 - realtime1));
 	PerlIO_printf(fp,"- & Devel::DProf::write\n" );
 	otms_utime = t2.tms_utime;
 	otms_stime = t2.tms_stime;
@@ -481,8 +485,12 @@ prof_recordheader(void)
         PerlIO_printf(fp, "$XS_VERSION='DProf %s';\n", XS_VERSION );
         PerlIO_printf(fp, "# All values are given in HZ\n" );
 	test_time(&r, &u, &s);
-        PerlIO_printf(fp, "$over_utime=%ld; $over_stime=%ld; $over_rtime=%ld;\n",
-                u, s, r);
+        PerlIO_printf(fp,
+		      "$over_utime=%"IVdf"; $over_stime=%"IVdf"; $over_rtime=%"IVdf";\n",
+		      /* The (IV) casts are one possibility:
+		       * the Painfully Correct Way would be to
+		       * have Clock_t_f. */
+		      (IV)u, (IV)s, (IV)r);
         PerlIO_printf(fp, "$over_tests=10000;\n");
 
         TIMES_LOCATION = PerlIO_tell(fp);
@@ -512,10 +520,14 @@ prof_record(void)
         }
         PerlIO_seek(fp, TIMES_LOCATION, SEEK_SET);
 	/* Write into reserved 240 bytes: */
-        PerlIO_printf(fp, "$rrun_utime=%ld; $rrun_stime=%ld; $rrun_rtime=%ld;",
-                prof_end.tms_utime - prof_start.tms_utime - wprof_u,
-                prof_end.tms_stime - prof_start.tms_stime - wprof_s,
-                rprof_end - rprof_start - wprof_r );
+        PerlIO_printf(fp,
+		      "$rrun_utime=%"IVdf"; $rrun_stime=%"IVdf"; $rrun_rtime=%"IVdf";",
+		      /* The (IV) casts are one possibility:
+		       * the Painfully Correct Way would be to
+		       * have Clock_t_f. */
+		      (IV)(prof_end.tms_utime-prof_start.tms_utime-wprof_u),
+		      (IV)(prof_end.tms_stime-prof_start.tms_stime-wprof_s),
+		      (IV)(rprof_end-rprof_start-wprof_r) );
         PerlIO_printf(fp, "\n$total_marks=%"IVdf, (IV)total);
 	
         PerlIO_close( fp );

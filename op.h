@@ -158,7 +158,8 @@ typedef U32 PADOFFSET;
 /* Private for OP_DELETE */
 #define OPpSLICE		64	/* Operating on a list of keys */
 
-/* Private for OP_SORT, OP_PRTF, OP_SPRINTF, string cmp'n, and case changers */
+/* Private for OP_SORT, OP_PRTF, OP_SPRINTF, OP_FTTEXT, OP_FTBINARY, */
+/*             string comparisons, and case changers. */
 #define OPpLOCALE		64	/* Use locale */
 
 /* Private for OP_SORT */
