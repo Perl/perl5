@@ -1247,7 +1247,7 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp,char *normal
 	      return 0;
 	 }
     }
-    if *lenp)
+    if (lenp)
        *lenp = UNISKIP(uv);
     uvuni_to_utf8(ustrp, uv);
     return uv;
