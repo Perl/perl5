@@ -173,11 +173,14 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
  * SSPTR() converts the index returned by SSNEW/SSNEWa() into a pointer.
  */
 
-#define SSNEW(size)             save_alloc(size, 0)
-#define SSNEWa(size,align)	save_alloc(size, \
+#define SSNEW(size)             save_alloc(aTHX_ (size), 0)
+#define SSNEWt(n,t)             SSNEW((n)*sizeof(t))
+#define SSNEWa(size,align)	save_alloc(aTHX_ (size), \
     (align - ((int)((caddr_t)&PL_savestack[PL_savestack_ix]) % align)) % align)
+#define SSNEWat(n,t,align)	SSNEWa((n)*sizeof(t), align)
 
-#define SSPTR(off,type)         ((type) ((char*)PL_savestack + off))
+#define SSPTR(off,type)         ((type)  ((char*)PL_savestack + off))
+#define SSPTRt(off,type)        ((type*) ((char*)PL_savestack + off))
 
 /* A jmpenv packages the state required to perform a proper non-local jump.
  * Note that there is a start_env initialized when perl starts, and top_env

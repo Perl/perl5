@@ -496,7 +496,7 @@ $test++;
 $_ = 'xabcx';
 foreach $ans ('', 'c') {
   /(?<=(?=a)..)((?=c)|.)/g;
-  print "not " unless $1 eq $ans;
+  print "# \$1  ='$1'\n# \$ans='$ans'\nnot " unless $1 eq $ans;
   print "ok $test\n";
   $test++;
 }
@@ -504,7 +504,7 @@ foreach $ans ('', 'c') {
 $_ = 'a';
 foreach $ans ('', 'a', '') {
   /^|a|$/g;
-  print "not " unless $& eq $ans;
+  print "# \$&  ='$&'\n# \$ans='$ans'\nnot " unless $& eq $ans;
   print "ok $test\n";
   $test++;
 }
