@@ -419,7 +419,7 @@ package Maintainers;
 
 	'Safe' =>
 		{
-		'MAINTAINER'	=> 'abergman',
+		'MAINTAINER'	=> 'rgarcia',
 		'FILES'		=> q[ext/Safe],
 		'CPAN'		=> 1,
 		},
