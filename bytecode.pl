@@ -43,6 +43,7 @@ safer_unlink "ext/ByteLoader/byterun.c", "ext/ByteLoader/byterun.h", "ext/B/B/As
 # Start with boilerplate for Asmdata.pm
 #
 open(ASMDATA_PM, ">ext/B/B/Asmdata.pm") or die "ext/B/B/Asmdata.pm: $!";
+binmode ASMDATA_PM;
 print ASMDATA_PM $perl_header, <<'EOT';
 package B::Asmdata;
 
@@ -67,6 +68,7 @@ EOT
 # Boilerplate for byterun.c
 #
 open(BYTERUN_C, ">ext/ByteLoader/byterun.c") or die "ext/ByteLoader/byterun.c: $!";
+binmode BYTERUN_C;
 print BYTERUN_C $c_header, <<'EOT';
 
 #define PERL_NO_GET_CONTEXT
@@ -198,6 +200,7 @@ EOT
 # Write the instruction and optype enum constants into byterun.h
 #
 open(BYTERUN_H, ">ext/ByteLoader/byterun.h") or die "ext/ByteLoader/byterun.h: $!";
+binmode BYTERUN_H;
 print BYTERUN_H $c_header, <<'EOT';
 struct byteloader_fdata {
     SV	*datasv;
