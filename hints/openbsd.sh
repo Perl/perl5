@@ -118,8 +118,8 @@ $define|true|[yY]*)
 	;;
 	esac
 	case "$osvers" in
-	[012].*|3.[0-5])
-        	# Broken at least up to OpenBSD 3.5, we'll see about 3.6
+	[012].*|3.[0-6])
+        	# Broken at least up to OpenBSD 3.6, we'll see about 3.7
 		d_getservbyname_r=$undef ;;
 	esac
 esac
