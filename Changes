@@ -28,6 +28,187 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 19825] By: jhi                                   on 2003/06/19  15:12:52
+        Log: Integrate:
+             [ 19824]
+             Bump Time::HiRes to 1.49.
+     Branch: maint-5.8/perl
+	  !> ext/Time/HiRes/Changes ext/Time/HiRes/HiRes.pm
+	  !> ext/Time/HiRes/HiRes.xs
+____________________________________________________________________________
+[ 19823] By: jhi                                   on 2003/06/19  14:51:22
+        Log: Integrate:
+             [ 19818]
+             Subject: [PATCH -current] email address correction
+             Date: Thu, 19 Jun 2003 02:19:31 -0700
+             Message-ID: <CGEAIAFGDFMPCFCBLLCOEENKCBAA.rs@crystalflame.net>
+             From: rs@crystalflame.net (Richard Soderberg)
+             
+             [ 19819]
+             Subject: [PATCH] Re: [perl #17934] tied STDERR and internal warnings
+             From: grazz@pobox.com (Steve Grazzini)
+             Date: Wed, 18 Jun 2003 19:42:37 -0400
+             Message-ID: <20030618234237.GA6267@grazzini.net>
+             
+             [ 19820]
+             Upgrade to MakeMaker 6.10_07 (from makemaker.org snapshot
+             as of 2003-06-19 18:39 EET).
+             
+             [ 19821]
+             A tweak from Alan Burlison for MM 6.10_07 that makes Solaris
+             make happy.
+             
+             [ 19822]
+             This change chunk doesn't work well with blead.
+     Branch: maint-5.8/perl
+	  !> embed.fnc embed.h ext/threads/threads.pm
+	  !> lib/ExtUtils/MM_Any.pm lib/ExtUtils/MM_OS2.pm
+	  !> lib/ExtUtils/MM_Unix.pm lib/ExtUtils/MM_VMS.pm
+	  !> lib/ExtUtils/MakeMaker.pm lib/ExtUtils/t/Command.t
+	  !> lib/ExtUtils/t/MM_OS2.t lib/ExtUtils/t/MM_Unix.t
+	  !> pod/perltie.pod pp_ctl.c proto.h t/op/runlevel.t
+	  !> t/op/tiehandle.t util.c
+____________________________________________________________________________
+[ 19817] By: jhi                                   on 2003/06/19  05:24:45
+        Log: Integrate:
+             [ 19804]
+             Subject: DOCPATCH Re: $1 remains uncleared for failed matches
+             From: david nicol <whatever@davidnicol.com>
+             Date: 16 Jun 2003 20:35:24 -0500
+             Message-Id: <1055813724.1580.19.camel@plaza.davidnicol.com>
+             
+             Subject: Re: DOCPATCH Re: $1 remains uncleared for failed matches
+             From: Ronald J Kimball <rjk@linguist.Thayer.dartmouth.edu>
+             Date: Tue, 17 Jun 2003 00:12:04 -0400
+             Message-ID: <20030617041204.GA34960@linguist.thayer.dartmouth.edu>
+             
+             [ 19805]
+             Subject: /ext/DynaLoader/dl_dyld.xs
+             From: "Peter O'Gorman" <peter@pogma.com>
+             Date: Tue, 17 Jun 2003 23:45:47 +0900
+             Message-Id: <619B6B53-A0D2-11D7-BAF7-003065F6C222@pogma.com>
+             
+             No need to see dlclose() and dlsym() outside the dl_dyld.xs
+             (Mac OS X, NeXT), and seeing them is harmful for libdlcompat
+             of OpenDarwin.
+             
+             [ 19806]
+             io_dir.t tweak from Craig Berry.
+             
+             [ 19809]
+             If the first argument of sigaction() was a string, not a number
+             (or a SIGXXX 'constant') one got first (if using -w) 'Argument "FOO"
+             isn't numeric in subroutine entry ...' but after that one got
+             (depending on the OS) either a coredump (because of trying to
+             assign to *0 in mg_get) or a hang (because of the sigprocmask()
+             blocking signals inside POSIX::sigaction, a nasty hang since
+             one obviously cannot interrupt it...only SIGKILL works).
+             In older Perls (tried with 5.6.1) one got 'No such signal: SIGZERO ...'
+             because of the string becoming zero due to the XS typemap magic.
+             Resolved by making the POSIX::sigaction to try harder to figure
+             out a valid signal number (one still gets the warning, though),
+             and returning undef if no sense can be made.
+             
+             [ 19810]
+             Oops in change #19809.
+             
+             [ 19811]
+             Subject: Encode] 1.96 Released
+             From: Dan Kogai <dankogai@dan.co.jp>
+             Date: Wed, 18 Jun 2003 19:09:11 +0900
+             Message-Id: <E7FFAE2E-A174-11D7-ACE4-000393AE4244@dan.co.jp>
+             
+             [ 19812]
+             Sync with libnet 1.16
+             
+             [ 19813]
+             Upgrade to Tie::File 0.97.
+             
+             [ 19814]
+             Subject: Re: [perl #22727] split() with re_eval segfaults/panics
+             From: Enache Adrian <enache@rdslink.ro>
+             Date: Wed, 18 Jun 2003 23:00:43 +0300
+             Message-ID: <20030618200043.GA1249@ratsnest.hole>
+             
+             [ 19815]
+             A bunch of minor changes to perlguts.pod.
+             
+             [ 19816]
+             MPE/iX gets serious indigestion on w-packed infinities.
+     Branch: maint-5.8/perl
+	  !> (integrate 31 files)
+____________________________________________________________________________
+[ 19807] By: jhi                                   on 2003/06/17  19:52:07
+        Log: Subject: [PATCH] fixes for debugger bugs noted while documenting
+             From: Joe McMahon <mcmahon@ibiblio.org>
+             Date: Tue, 17 Jun 2003 16:42:42 -0400
+             Message-Id: <3E62E1B3-A104-11D7-8CDD-000393BCA0FC@ibiblio.org>
+     Branch: maint-5.8/perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[ 19803] By: jhi                                   on 2003/06/17  05:18:41
+        Log: Integrate:
+             [ 19793]
+             Remove all magic in untie()
+             
+             Subject: Re: untie from within FETCH/STORE not working under 5.8.0 (fwd)
+             From: Aaron J Mackey <ajm6q@virginia.edu>
+             Date: Fri, 13 Jun 2003 08:22:05 -0400 (EDT)
+             Message-ID: <Pine.OSF.4.33.0306130820570.29017-100000@alpha10.bioch.virginia.edu>
+             (plus a test case)
+             
+             [ 19795]
+             Instead of fancy condvar footwork do a simple join,
+             as suggested by Arthur.
+             
+             [ 19796]
+             Add O_NOATIME.
+             
+             [ 19797]
+             Even more glibc O_ modes.
+             
+             [ 19798]
+             And even more glibc fcntl constants, this time mostly F_XXX.
+             Be more conservative and use @EXPORT_OK instead of @EXPORT.
+             
+             [ 19799]
+             Subject: [perl #22622] Bogus error codes from File::Copy::move 
+             From: "Amick, Eric" (via RT) <perlbug-followup@perl.org>
+             Date: 9 Jun 2003 15:48:09 -0000
+             Message-ID: <rt-22622-59134.12.3966151660257@rt.perl.org>
+             
+             [ 19800]
+             Subject: [PATCH] unnecessary stringification in eval/die
+             From: Steve Grazzini <grazz@pobox.com>
+             Date: 15 Jun 2003 21:02:26 -0000
+             Message-ID: <20030615210226.56430.qmail@onion.perl.org>
+             (See also <slrnbek5u6.cfi.joey@dragon.kitenet.net>
+             in c.l.p.misc and bug #17763)
+             
+             [ 19801]
+             Revert change #19126, a poor attempt at fixing bug #21742.
+             The test for #21742 is marked as TODO.
+             Plus new regression tests from :
+             
+             Subject: [perl #22708] void context in string eval is broken 
+             From: "Marcus Holland-Moritz" (via RT) <perlbug-followup@perl.org>
+             Date: 15 Jun 2003 23:09:03 -0000
+             Message-ID: <rt-22708-59432.14.6755501393177@rt.perl.org>
+             
+             [ 19802]
+             UNICOS: try papering over the Configure symbol scan problems
+             by disavowing any knowledge of dynaloading.
+     Branch: maint-5.8/perl
+	  !> ext/Fcntl/Fcntl.pm ext/Fcntl/Makefile.PL
+	  !> ext/threads/shared/t/hv_refs.t hints/unicos.sh
+	  !> lib/File/Copy.pm pod/perlfunc.pod pp_ctl.c pp_sys.c
+	  !> t/comp/require.t t/op/eval.t t/op/tie.t
+____________________________________________________________________________
+[ 19792] By: jhi                                   on 2003/06/15  18:29:32
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 19791] By: jhi                                   on 2003/06/15  17:57:06
         Log: Integrate:
              [ 19775]
