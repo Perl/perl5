@@ -456,26 +456,26 @@ See Example 3 below for an example of initialization.
 =item Example 1
 
 Giving a struct element a class type that is also a struct is how
-structs are nested.  Here, C<timeval> represents a time (seconds and
-microseconds), and C<rusage> has two elements, each of which is of
-type C<timeval>.
+structs are nested.  Here, C<Timeval> represents a time (seconds and
+microseconds), and C<Rusage> has two elements, each of which is of
+type C<Timeval>.
 
     use Class::Struct;
 
-    struct( rusage => {
-        ru_utime => timeval,  # seconds
-        ru_stime => timeval,  # microseconds
+    struct( Rusage => {
+        ru_utime => 'Timeval',  # seconds
+        ru_stime => 'Timeval',  # microseconds
     });
 
-    struct( timeval => [
+    struct( Timeval => [
         tv_secs  => '$',
         tv_usecs => '$',
     ]);
 
         # create an object:
-    my $t = new rusage;
+    my $t = Rusage->new(ru_utime=>Timeval->new(), ru_stime=>Timeval->new());
 
-        # $t->ru_utime and $t->ru_stime are objects of type timeval.
+        # $t->ru_utime and $t->ru_stime are objects of type Timeval.
         # set $t->ru_utime to 100.0 sec and $t->ru_stime to 5.0 sec.
     $t->ru_utime->tv_secs(100);
     $t->ru_utime->tv_usecs(0);
