@@ -365,7 +365,7 @@ void
 walkoptree(pTHX_ SV *opsv, char *method)
 {
     dSP;
-    OP *o;
+    OP *o, *kid;
     dMY_CXT;
 
     if (!SvROK(opsv))
@@ -383,12 +383,17 @@ walkoptree(pTHX_ SV *opsv, char *method)
     PUTBACK;
     perl_call_method(method, G_DISCARD);
     if (o && (o->op_flags & OPf_KIDS)) {
-	OP *kid;
 	for (kid = ((UNOP*)o)->op_first; kid; kid = kid->op_sibling) {
 	    /* Use the same opsv. Rely on methods not to mess it up. */
 	    sv_setiv(newSVrv(opsv, cc_opclassname(aTHX_ kid)), PTR2IV(kid));
 	    walkoptree(aTHX_ opsv, method);
 	}
+    }
+    if (o && (cc_opclass(aTHX_ o) == OPc_PMOP)
+	    && (kid = cPMOPo->op_pmreplroot))
+    {
+	sv_setiv(newSVrv(opsv, opclassnames[OPc_PMOP]), PTR2IV(kid));
+	walkoptree(aTHX_ opsv, method);
     }
 }
 
