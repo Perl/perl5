@@ -2035,16 +2035,27 @@ usually solves this kind of problem.
     # --- Initialize Perl Binary Locations
 
     # Find Perl 5. The only contract here is that both 'PERL' and 'FULLPERL'
-    # will be working versions of perl 5. miniperl has priority over perl
-    # for PERL to ensure that $(PERL) is usable while building ./ext/*
+    # will be working versions of perl 5.
     my ($component,@defpath);
-    foreach $component ($self->{PERL_SRC}, $self->path(), $Config::Config{binexp}) {
+    foreach $component ($self->{PERL_SRC}, $self->path(), 
+                        $Config::Config{binexp}) 
+    {
 	push @defpath, $component if defined $component;
     }
+
+    my @perls = ($self->canonpath($^X), 'perl', 'perl5', "perl$Config{version}");
+
+    # miniperl has priority over all but the cannonical perl when in the 
+    # core.  Otherwise its a last resort.
+    if( $self->{PERL_CORE} ) {
+        splice @perls, 1, 0, 'miniperl';
+    }
+    else {
+        push @perls, 'miniperl';
+    }
+
     $self->{PERL} ||=
-        $self->find_perl(5.0, [ $self->canonpath($^X), 'miniperl',
-				'perl','perl5',"perl$Config{version}" ],
-	    \@defpath, $Verbose );
+        $self->find_perl(5.0, \@perls, \@defpath, $Verbose );
     # don't check if perl is executable, maybe they have decided to
     # supply switches with perl
 
