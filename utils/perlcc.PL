@@ -253,6 +253,7 @@ sub _createCode
 {
     my ( $backend, $generated_file, $file, $final_output ) = @_;
     my $return;
+    my $output_switch = "o";
 
     local($") = " -I";
 
@@ -264,6 +265,8 @@ sub _createCode
 
         print GENFILE "#!$^X\n" if @_ == 3;
         print GENFILE "use ByteLoader $ByteLoader::VERSION;\n";
+
+	$output_switch ="a";
     }
 
     close(GENFILE);
@@ -278,7 +281,7 @@ sub _createCode
         chomp $stash;
 
         _print( "$^X -I@INC -MO=$backend,$stash $file\n", 36);
-        $return =  _run("$^X -I@INC -MO=$backend,$stash,-o$generated_file $file", 9);
+        $return =  _run("$^X -I@INC -MO=$backend,$stash,-$output_switch$generated_file $file", 9);
         $return;
     }
     else                                           # compiling a shared object
@@ -286,7 +289,7 @@ sub _createCode
         _print( 
             "$^X -I@INC -MO=$backend,-m$final_output $file\n", 36);
         $return = 
-        _run("$^X -I@INC -MO=$backend,-m$final_output,-o$generated_file $file  ", 9);
+        _run("$^X -I@INC -MO=$backend,-m$final_output,-$output_switch$generated_file $file  ", 9);
         $return;
     }
 }
