@@ -1356,20 +1356,36 @@ os2error(int rc)
 {
 	static char buf[300];
 	ULONG len;
+	char *s;
+	int number = SvTRUE(get_sv("OS2::nsyserror", TRUE));
 
         if (!(_emx_env & 0x200)) return ""; /* Nop if not OS/2. */
 	if (rc == 0)
-		return NULL;
-	if (DosGetMessage(NULL, 0, buf, sizeof buf - 1, rc, "OSO001.MSG", &len))
-		sprintf(buf, "OS/2 system error code %d=0x%x", rc, rc);
-	else {
-		buf[len] = '\0';
-		if (len && buf[len - 1] == '\n')
-			buf[--len] = 0;
-		if (len && buf[len - 1] == '\r')
-			buf[--len] = 0;
-		if (len && buf[len - 1] == '.')
-			buf[--len] = 0;
+		return "";
+	if (number) {
+	    sprintf(buf, "SYS%04d=%#x: ", rc, rc);
+	    s = buf + strlen(buf);
+	} else
+	    s = buf;
+	if (DosGetMessage(NULL, 0, s, sizeof(buf) - 1 - (s-buf), 
+			  rc, "OSO001.MSG", &len)) {
+	    if (!number) {
+		sprintf(buf, "SYS%04d=%#x: ", rc, rc);
+		s = buf + strlen(buf);
+	    }
+	    sprintf(s, "[No description found in OSO001.MSG]");
+	} else {
+		s[len] = '\0';
+		if (len && s[len - 1] == '\n')
+			s[--len] = 0;
+		if (len && s[len - 1] == '\r')
+			s[--len] = 0;
+		if (len && s[len - 1] == '.')
+			s[--len] = 0;
+		if (len >= 10 && number && strnEQ(s, buf, 7)
+		    && s[7] == ':' && s[8] == ' ')
+		    /* Some messages start with SYSdddd:, some not */
+		    Move(s + 9, s, (len -= 9) + 1, char);
 	}
 	return buf;
 }
@@ -2186,6 +2202,9 @@ Xs_OS2_init(pTHX)
 	gv = gv_fetchpv("OS2::os_ver", TRUE, SVt_PV);
 	GvMULTI_on(gv);
 	sv_setnv(GvSV(gv), _osmajor + 0.001 * _osminor);
+	gv = gv_fetchpv("OS2::nsyserror", TRUE, SVt_PV);
+	GvMULTI_on(gv);
+	sv_setiv(GvSV(gv), 1);		/* DEFAULT: Show number on syserror */
     }
     return 0;
 }

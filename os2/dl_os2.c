@@ -8,6 +8,8 @@
 static ULONG retcode;
 static char fail[300];
 
+char *os2error(int rc);
+
 void *
 dlopen(char *path, int mode)
 {
@@ -62,29 +64,17 @@ dlerror(void)
 {
 	static char buf[700];
 	ULONG len;
+	char *err;
 
 	if (retcode == 0)
 		return NULL;
-	if (DosGetMessage(NULL, 0, buf, sizeof buf - 1, retcode,
-			  "OSO001.MSG", &len)) {
-		if (fail[0])
-		  sprintf(buf, 
-"OS/2 system error code %lu, possible problematic module: '%s'",
-			  retcode, fail);
-		else
-		  sprintf(buf, "OS/2 system error code %lu", retcode);
-	} else {
-		buf[len] = '\0';
-		if (len && buf[len - 1] == '\n')
-			buf[--len] = 0;
-		if (len && buf[len - 1] == '\r')
-			buf[--len] = 0;
-		if (len && buf[len - 1] == '.')
-			buf[--len] = 0;
-		if (fail[0] && len < 300)
-		  sprintf(buf + len, ", possible problematic module: '%s'",
-			  fail);
-	}
+	err = os2error(retcode);
+	len = strlen(err);
+	if (len > sizeof(buf) - 1)
+	    len = sizeof(buf) - 1;
+	strncpy(buf, err, len+1);
+	if (fail[0] && len < 300)
+	    sprintf(buf + len, ", possible problematic module: '%s'", fail);
 	retcode = 0;
 	return buf;
 }
