@@ -50,6 +50,7 @@ compat3.sym		List of symbols for binary-compatibility with 5.003
 config_h.SH		Produces config.h
 configpm		Produces lib/Config.pm
 configure.gnu		Crude emulation of GNU configure
+configure.com   Configure-equivalent for VMS
 cop.h			Control operator header
 cv.h			Code value header
 cygwin32/cw32imp.h	Cygwin32 port
@@ -934,8 +935,7 @@ utils/perlcc.PL		Front-end for compiler
 utils/perldoc.PL	A simple tool to find & display perl's documentation
 utils/pl2pm.PL		A pl to pm translator
 utils/splain.PL		Stand-alone version of diagnostics.pm
-vms/config.vms		default config.h for VMS
-vms/descrip.mms		MM[SK] description file for build
+vms/descrip_mms.template		Template MM[SK] description file for build
 vms/ext/DCLsym/0README.txt	ReadMe file for VMS::DCLsym
 vms/ext/DCLsym/DCLsym.pm	Perl access to CLI symbols
 vms/ext/DCLsym/DCLsym.xs	Perl access to CLI symbols
@@ -957,12 +957,14 @@ vms/genconfig.pl	retcon config.sh from config.h
 vms/genopt.com		hack to write options files in case of broken makes
 vms/make_command.com	record MM[SK] command used to build Perl
 vms/mms2make.pl		convert descrip.mms to make syntax
+vms/munchconfig.c   performs shell $var substitution for VMS
 vms/myconfig.com	record local configuration info for bug report
 vms/perlvms.pod		VMS-specific additions to Perl documentation
 vms/perly_c.vms		perly.c with fixed declarations for global syms
 vms/perly_h.vms		perly.h with fixed declarations for global syms
 vms/sockadapt.c		glue for SockshShr socket support
 vms/sockadapt.h		glue for SockshShr socket support
+vms/subconfigure.com    performs compiler checks and writes config.sh, config.h, and descrip.mms
 vms/test.com		DCL driver for regression tests
 vms/vms.c		VMS-specific C code for Perl core
 vms/vms_yfix.pl		convert Unix perly.[ch] to VMS perly_[ch].vms

@@ -1970,9 +1970,7 @@ uninstall_from_sitedirs ::
 =item perldepend (override)
 
 Use VMS-style syntax for files; it's cheaper to just do it directly here
-than to have the MM_Unix method call C<catfile> repeatedly.  Also use
-config.vms as source of original config data if the Perl distribution
-is available; config.sh is an ancillary file under VMS.  Finally, if
+than to have the MM_Unix method call C<catfile> repeatedly.  Also, if
 we have to rebuild Config.pm, use MM[SK] to do it.
 
 =cut
@@ -2005,13 +2003,10 @@ $(OBJECT) : $(PERL_INC)vmsish.h, $(PERL_INC)util.h, $(PERL_INC)config.h
 # Check for unpropagated config.sh changes. Should never happen.
 # We do NOT just update config.h because that is not sufficient.
 # An out of date config.h is not fatal but complains loudly!
-#$(PERL_INC)config.h : $(PERL_SRC)config.sh
-$(PERL_INC)config.h : $(PERL_VMS)config.vms
-	$(NOECHO) Write Sys$Error "Warning: $(PERL_INC)config.h out of date with $(PERL_VMS)config.vms"
+$(PERL_INC)config.h : $(PERL_SRC)config.sh
 
-#$(PERL_ARCHLIB)Config.pm : $(PERL_SRC)config.sh
-$(PERL_ARCHLIB)Config.pm : $(PERL_VMS)config.vms $(PERL_VMS)genconfig.pl
-	$(NOECHO) Write Sys$Error "$(PERL_ARCHLIB)Config.pm may be out of date with config.vms or genconfig.pl"
+$(PERL_ARCHLIB)Config.pm : $(PERL_SRC)config.sh
+	$(NOECHO) Write Sys$Error "$(PERL_ARCHLIB)Config.pm may be out of date with config.h or genconfig.pl"
 	olddef = F$Environment("Default")
 	Set Default $(PERL_SRC)
 	$(MMS)],$mmsquals,);
