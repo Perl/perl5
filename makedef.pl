@@ -694,9 +694,7 @@ my @layer_syms = qw(
 			 PerlIO_pending
 			 PerlIO_push
 			 PerlIO_sv_dup
-			 PL_def_layerlist
-			 PL_known_layers
-			 PL_perlio
+			 PerlIO_perlio
 );
 
 
