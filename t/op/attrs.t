@@ -8,7 +8,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 39;
+plan tests => 47;
 
 $SIG{__WARN__} = sub { die @_ };
 
@@ -55,6 +55,24 @@ eval '{my $x : plugh}';
 like $@, qr/^Invalid SCALAR attribute: ["']?plugh["']? at/;
 eval '{my ($x,$y) : plugh(})}';
 like $@, qr/^Invalid SCALAR attribute: ["']?plugh\(}\)["']? at/;
+
+# More syntax tests from the attributes manpage
+eval 'my $x : switch(10,foo(7,3))  :  expensive;';
+like $@, qr/^Invalid SCALAR attributes: ["']?switch\(10,foo\(7,3\)\) : expensive["']? at/;
+eval q/my $x : Ugly('\(") :Bad;/;
+like $@, qr/^Invalid SCALAR attributes: ["']?Ugly\('\\\("\) : Bad["']? at/;
+eval 'my $x : _5x5;';
+like $@, qr/^Invalid SCALAR attribute: ["']?_5x5["']? at/;
+eval 'my $x : locked method;';
+like $@, qr/^Invalid SCALAR attributes: ["']?locked : method["']? at/;
+eval 'my $x : switch(10,foo();';
+like $@, qr/^Unterminated attribute parameter in attribute list at/;
+eval q/my $x : Ugly('(');/;
+like $@, qr/^Unterminated attribute parameter in attribute list at/;
+eval 'my $x : 5x5;';
+like $@, qr/error/;
+eval 'my $x : Y2::north;';
+like $@, qr/Invalid separator character ':' in attribute list at/;
 
 sub A::MODIFY_SCALAR_ATTRIBUTES { return }
 eval 'my A $x : plugh;';
