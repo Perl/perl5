@@ -10,24 +10,28 @@ BEGIN {
     require 'lib/filter-util.pl';
 }
 
+use strict;
+use warnings;
+
+use vars qw($Inc $Perl);
+
 print "1..28\n" ;
 
 $Perl = "$Perl -w" ;
 
 use Cwd ;
-$here = getcwd ;
+my $here = getcwd ;
 
-use vars qw($Inc $Perl);
 
-$filename = "call.tst" ;
-$filenamebin = "call.bin" ;
-$module   = "MyTest" ;
-$module2  = "MyTest2" ;
-$module3  = "MyTest3" ;
-$module4  = "MyTest4" ;
-$module5  = "MyTest5" ;
-$nested   = "nested" ;
-$block   = "block" ;
+my $filename = "call.tst" ;
+my $filenamebin = "call.bin" ;
+my $module   = "MyTest" ;
+my $module2  = "MyTest2" ;
+my $module3  = "MyTest3" ;
+my $module4  = "MyTest4" ;
+my $module5  = "MyTest5" ;
+my $nested   = "nested" ;
+my $block   = "block" ;
 
 # Test error cases
 ##################
@@ -45,7 +49,7 @@ sub import { filter_add(bless []) }
 1 ;
 EOM
  
-$a = `$Perl "-I." $Inc -e "use ${module} ;"  2>&1` ;
+my $a = `$Perl "-I." $Inc -e "use ${module} ;"  2>&1` ;
 ok(1, (($? >>8) != 0 or ($^O eq 'MSWin32' && $? != 0))) ;
 ok(2, $a =~ /^Can't locate object method "filter" via package "MyTest"/) ;
  
@@ -495,7 +499,7 @@ sub filter
 1 ;
 EOM
 
-$string = <<'EOM' ;
+my $string = <<'EOM' ;
 print "hello mum\n" ;
 $x = 'me ' x 3 ;
 print "Who wants it?\n$x\n" ;

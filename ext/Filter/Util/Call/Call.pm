@@ -5,11 +5,12 @@ require DynaLoader;
 require Exporter;
 use Carp ;
 use strict;
+use warnings;
 use vars qw($VERSION @ISA @EXPORT) ;
 
 @ISA = qw(Exporter DynaLoader);
 @EXPORT = qw( filter_add filter_del filter_read filter_read_exact) ;
-$VERSION = "1.04" ;
+$VERSION = "1.05" ;
 
 sub filter_read_exact($)
 {
