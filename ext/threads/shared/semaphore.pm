@@ -28,8 +28,8 @@ unlike locks, aren't tied to particular scalars, and so may be used to
 control access to anything you care to use them for.
 
 Semaphores don't limit their values to zero or one, so they can be used to
-control access to some resource that may have more than one of. (For
-example, filehandles) Increment and decrement amounts aren't fixed at one
+control access to some resource that there may be more than one of. (For
+example, filehandles). Increment and decrement amounts aren't fixed at one
 either, so threads can reserve or return multiple resources at once.
 
 =head1 FUNCTIONS AND METHODS
@@ -48,7 +48,7 @@ number. If no number is passed, the semaphore's count is set to one.
 =item down NUMBER
 
 The C<down> method decreases the semaphore's count by the specified number,
-or one if no number has been specified. If the semaphore's count would drop
+or by one if no number has been specified. If the semaphore's count would drop
 below zero, this method will block until such time that the semaphore's
 count is equal to or larger than the amount you're C<down>ing the
 semaphore's count by.
@@ -58,9 +58,9 @@ semaphore's count by.
 =item up NUMBER
 
 The C<up> method increases the semaphore's count by the number specified,
-or one if no number's been specified. This will unblock any thread blocked
+or by one if no number has been specified. This will unblock any thread blocked
 trying to C<down> the semaphore if the C<up> raises the semaphore count
-above what the C<down>s are trying to decrement it by.
+above the amount that the C<down>s are trying to decrement it by.
 
 =back
 
