@@ -2867,6 +2867,7 @@ wince/bin/search.pl			WinCE port
 wince/cecopy-lib.pl			WinCE port
 wince/comp.pl				WinCE port
 wince/compile.bat			WinCE port
+wince/compile-all.bat			WinCE port
 wince/config.ce				WinCE port
 wince/config_H.ce			WinCE port
 wince/config_h.PL			WinCE port
@@ -2875,9 +2876,9 @@ wince/dl_win32.xs			WinCE port
 wince/include/arpa/inet.h		WinCE port
 wince/include/netdb.h			WinCE port
 wince/include/sys/socket.h		WinCE port
-wince/include/sys/stat.h		WinCE port
 wince/Makefile.ce			WinCE port
 wince/makeico.pl			WinCE port
+wince/makedist.pl			WinCE port
 wince/perl.rc				WinCE port
 wince/perllib.c				WinCE port
 wince/perlmain.c			WinCE port
@@ -2894,9 +2895,6 @@ wince/win32thread.h			WinCE port
 wince/wince.c				WinCE port
 wince/wince.h				WinCE port
 wince/wincesck.c			WinCE port
-wince/xbuildall.ksh			WinCE port
-wince/xdistclean.ksh			WinCE port
-wince/xmakediffs.ksh			WinCE port
 writemain.SH			Generate perlmain.c from miniperlmain.c+extensions
 x2p/a2p.c			Output of a2p.y run through byacc
 x2p/a2p.h			Global declarations

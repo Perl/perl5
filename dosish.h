@@ -6,7 +6,6 @@
  *    License or the Artistic License, as specified in the README file.
  *
  */
-
 #define ABORT() abort();
 
 #ifndef SH_PATH
@@ -82,7 +81,11 @@
 #if defined(WIN64) || defined(USE_LARGE_FILES)
 #define Stat_t struct _stati64
 #else
+#if defined(UNDER_CE)
+#define Stat_t struct xcestat
+#else
 #define Stat_t struct stat
+#endif
 #endif
 
 /* USE_STAT_RDEV:
