@@ -60,12 +60,16 @@
 
 cc=${cc:-cc}
 
+case "`$cc -v 2>&1 | grep cc`" in
+*gcc*) isgcc=gcc ;;
+esac
+
 # do NOT, I repeat, *NOT* take away the leading tabs
 # Configure Black Magic (TM)
 	# reset
 	_DEC_cc_style=
-case "`$cc -v 2>&1 | grep cc`" in
-*gcc*)	_gcc_version=`$cc --version 2>&1 | tr . ' '`
+case "$isgcc" in
+gcc)	_gcc_version=`$cc --version 2>&1 | tr . ' '`
 	set $_gcc_version
 	if test "$1" -lt 2 -o \( "$1" -eq 2 -a \( "$2" -lt 95 -o \( "$2" -eq 95 -a "$3" -lt 2 \) \) \); then
 	    cat >&4 <<EOF
@@ -116,8 +120,8 @@ EOF
 esac
 
 # be nauseatingly ANSI
-case "`$cc -v 2>&1 | grep gcc`" in
-*gcc*)	ccflags="$ccflags -ansi"
+case "$isgcc" in
+gcc)	ccflags="$ccflags -ansi"
 	;;
 *)	ccflags="$ccflags -std"
 	;;
@@ -129,17 +133,22 @@ esac
 # we want optimisation
 
 case "$optimize" in
-'')	case "`$cc -v 2>&1 | grep gcc`" in
-	*gcc*)	
-		optimize='-O3'				;;
+'')	case "$isgcc" in
+	gcc)	optimize='-O3'				;;
 	*)	case "$_DEC_cc_style" in
-		new)	optimize='-O4'
-			ccflags="$ccflags -fprm d -ieee"
-			;;
+		new)	optimize='-O4'			;;
 		old)	optimize='-O2 -Olimit 3200'	;;
 	    	esac
 		ccflags="$ccflags -D_INTRINSICS"
 		;;
+	esac
+	;;
+esac
+
+# we want dynamic fp rounding mode, and we want ieee exception semantics
+case "$isgcc" in
+gcc)	case "$_DEC_cc_style" in
+	new)	ccflags="$ccflags -fprm d -ieee"	;;
 	esac
 	;;
 esac
@@ -255,8 +264,8 @@ cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in
 $define|true|[yY]*)
 	# Threads interfaces changed with V4.0.
-	case "`$cc -v 2>&1 | grep gcc`" in
-	*gcc*)ccflags="-D_REENTRANT $ccflags" ;;
+	case "$isgcc" in
+	gcc)	ccflags="-D_REENTRANT $ccflags" ;;
 	*)  case "`uname -r`" in
 	    *[123].*)	ccflags="-threads $ccflags" ;;
 	    *)          ccflags="-pthread $ccflags" ;;
