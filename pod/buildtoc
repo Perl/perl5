@@ -343,6 +343,7 @@ sub podset {
     my $pod;
 
     while(<>) {
+	tr/\015//d;
 	if (s/^=head1 (NAME)\s*/=head2 /) {
 	    $pod = path2modname($ARGV);
 	    unhead1();
