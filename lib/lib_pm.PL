@@ -82,14 +82,14 @@ sub import {
 	}
 	unshift(@INC, $_);
 	# Add any previous version directories we found at configure time
-	foreach my $invcer (@inc_version_list)
+	foreach my $incver (@inc_version_list)
 	{
 	    my $dir = $Is_MacOS
 		? File::Spec->catdir( $_, $incver )
 		: "$_/$incver";
 	    unshift(@INC, $dir) if -d $dir;
 	}
-	# Put a corresponding archlib directory infront of $_ if it
+	# Put a corresponding archlib directory in front of $_ if it
 	# looks like $_ has an archlib directory below it.
 	my($arch_auto_dir, $arch_dir, $version_dir, $version_arch_dir)
 	    = _get_dirs($_);
