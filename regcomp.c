@@ -6267,7 +6267,7 @@ S_re_croak2(pTHX_ const char* pat1,const char* pat2,...)
     STRLEN l2 = strlen(pat2);
     char buf[512];
     SV *msv;
-    char *message;
+    const char *message;
 
     if (l1 > 510)
 	l1 = 510;

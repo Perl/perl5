@@ -3458,7 +3458,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 
     if (!sv) {
 	*lp = 0;
-	return "";
+	return (char *)"";
     }
     if (SvGMAGICAL(sv)) {
 	if (flags & SV_GMAGIC)
@@ -3486,7 +3486,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		    report_uninit(sv);
 	    }
             *lp = 0;
-            return "";
+            return (char *)"";
         }
     }
     if (SvTHINKFIRST(sv)) {
@@ -3626,13 +3626,13 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		goto tokensaveref;
 	    }
 	    *lp = strlen(typestr);
-	    return typestr;
+	    return (char *)typestr;
 	}
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    if (ckWARN(WARN_UNINITIALIZED))
 		report_uninit(sv);
 	    *lp = 0;
-	    return "";
+	    return (char *)"";
 	}
     }
     if (SvIOK(sv) || ((SvIOKp(sv) && !SvNOKp(sv)))) {
@@ -3695,7 +3695,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	if (SvTYPE(sv) < SVt_PV)
 	    /* Typically the caller expects that sv_any is not NULL now.  */
 	    sv_upgrade(sv, SVt_PV);
-	return "";
+	return (char *)"";
     }
     *lp = s - SvPVX(sv);
     SvCUR_set(sv, *lp);
@@ -3717,7 +3717,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
     }
     else {
 	STRLEN len;
-	char *t;
+        const char *t;
 
 	if (tsv) {
 	    sv_2mortal(tsv);
@@ -9141,6 +9141,8 @@ missing (NULL).  When running with taint checks enabled, indicates via
 C<maybe_tainted> if results are untrustworthy (often due to the use of
 locales).
 
+XXX Except that it maybe_tainted is never assigned to.
+
 Usually used via one of its frontends C<sv_vcatpvf> and C<sv_vcatpvf_mg>.
 
 =cut
@@ -9178,7 +9180,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	switch (pat[1]) {
 	case 's':
 	    if (args) {
-		char *s = va_arg(*args, char*);
+                const char *s = va_arg(*args, char*);
 		sv_catpv(sv, s ? s : nullstr);
 	    }
 	    else if (svix < svmax) {
@@ -10308,6 +10310,8 @@ PerlIO *
 Perl_fp_dup(pTHX_ PerlIO *fp, char type, CLONE_PARAMS *param)
 {
     PerlIO *ret;
+    (void)type;
+
     if (!fp)
 	return (PerlIO*)NULL;
 

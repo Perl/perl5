@@ -9419,6 +9419,8 @@ S_scan_heredoc(pTHX_ register char *s)
     I32 len;
     SV *tmpstr;
     char term;
+    const char newline[] = "\n";
+    const char *found_newline;
     register char *d;
     register char *e;
     char *peek;
@@ -9479,11 +9481,13 @@ S_scan_heredoc(pTHX_ register char *s)
 	s = olds;
     }
 #endif
-    d = "\n";
-    if (outer || !(d=ninstr(s,PL_bufend,d,d+1)))
-	herewas = newSVpvn(s,PL_bufend-s);
-    else
-	s--, herewas = newSVpvn(s,d-s);
+    if ( outer || !(found_newline = ninstr(s,PL_bufend,newline,newline+1)) ) {
+        herewas = newSVpvn(s,PL_bufend-s);
+    }
+    else {
+        s--;
+        herewas = newSVpvn(s,found_newline-s);
+    }
     s += SvCUR(herewas);
 
     tmpstr = NEWSV(87,79);
@@ -10489,7 +10493,7 @@ vstring:
     else
 	lvalp->opval = Nullop;
 
-    return s;
+    return (char *)s;
 }
 
 STATIC char *
@@ -10915,7 +10919,7 @@ Perl_scan_vstring(pTHX_ const char *s, SV *sv)
 	if ((PL_bufend - next) >= 2 && *next == '=' && next[1] == '>' ) {
 	    /* return string not v-string */
 	    sv_setpvn(sv,(char *)s,pos-s);
-	    return pos;
+	    return (char *)pos;
 	}
     }
 
@@ -10968,6 +10972,6 @@ Perl_scan_vstring(pTHX_ const char *s, SV *sv)
 	sv_magic(sv,NULL,PERL_MAGIC_vstring,(const char*)start, pos-start);
 	SvRMAGICAL_on(sv);
     }
-    return s;
+    return (char *)s;
 }
 

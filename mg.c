@@ -476,6 +476,7 @@ Perl_magic_regdatum_set(pTHX_ SV *sv, MAGIC *mg)
 {
     Perl_croak(aTHX_ PL_no_modify);
     /* NOT REACHED */
+    (void)sv; (void)mg;
     return 0;
 }
 

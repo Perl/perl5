@@ -787,7 +787,7 @@ Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *len, bool *is_utf8)
     I32 count = 0;
 
     if (!*is_utf8)
-	return start;
+        return (U8 *)start;
 
     /* ensure valid UTF-8 and chars < 256 before converting string */
     for (send = s + *len; s < send;) {
@@ -797,7 +797,7 @@ Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *len, bool *is_utf8)
                 (c = *s++) && UTF8_IS_CONTINUATION(c))
 		count++;
 	    else
-		return start;
+                return (U8 *)start;
 	}
     }
 
@@ -816,7 +816,7 @@ Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *len, bool *is_utf8)
     }
     *d = '\0';
     *len = d - start;
-    return start;
+    return (U8 *)start;
 }
 
 /*
@@ -1620,7 +1620,7 @@ Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits
     POPSTACK;
     if (IN_PERL_COMPILETIME) {
 	STRLEN len;
-	char* pv = SvPV(tokenbufsv, len);
+        const char* pv = SvPV(tokenbufsv, len);
 
 	Copy(pv, PL_tokenbuf, len+1, char);
 	PL_curcop->op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);

@@ -471,33 +471,33 @@ For backwards compatibility. Use C<grok_oct> instead.
  */
 
 NV
-Perl_scan_bin(pTHX_ char *start, STRLEN len, STRLEN *retlen)
+Perl_scan_bin(pTHX_ const char *start, STRLEN len, STRLEN *retlen)
 {
     NV rnv;
     I32 flags = *retlen ? PERL_SCAN_ALLOW_UNDERSCORES : 0;
-    UV ruv = grok_bin (start, &len, &flags, &rnv);
+    const UV ruv = grok_bin (start, &len, &flags, &rnv);
 
     *retlen = len;
     return (flags & PERL_SCAN_GREATER_THAN_UV_MAX) ? rnv : (NV)ruv;
 }
 
 NV
-Perl_scan_oct(pTHX_ char *start, STRLEN len, STRLEN *retlen)
+Perl_scan_oct(pTHX_ const char *start, STRLEN len, STRLEN *retlen)
 {
     NV rnv;
     I32 flags = *retlen ? PERL_SCAN_ALLOW_UNDERSCORES : 0;
-    UV ruv = grok_oct (start, &len, &flags, &rnv);
+    const UV ruv = grok_oct (start, &len, &flags, &rnv);
 
     *retlen = len;
     return (flags & PERL_SCAN_GREATER_THAN_UV_MAX) ? rnv : (NV)ruv;
 }
 
 NV
-Perl_scan_hex(pTHX_ char *start, STRLEN len, STRLEN *retlen)
+Perl_scan_hex(pTHX_ const char *start, STRLEN len, STRLEN *retlen)
 {
     NV rnv;
     I32 flags = *retlen ? PERL_SCAN_ALLOW_UNDERSCORES : 0;
-    UV ruv = grok_hex (start, &len, &flags, &rnv);
+    const UV ruv = grok_hex (start, &len, &flags, &rnv);
 
     *retlen = len;
     return (flags & PERL_SCAN_GREATER_THAN_UV_MAX) ? rnv : (NV)ruv;
@@ -516,7 +516,7 @@ Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
 #ifdef USE_LOCALE_NUMERIC
     if (PL_numeric_radix_sv && IN_LOCALE) { 
         STRLEN len;
-        char* radix = SvPV(PL_numeric_radix_sv, len);
+        const char* radix = SvPV(PL_numeric_radix_sv, len);
         if (*sp + len <= send && memEQ(*sp, radix, len)) {
             *sp += len;
             return TRUE; 
@@ -998,7 +998,7 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
 	result[2] = -result[2];
 #endif /* USE_PERL_ATOF */
     *value = result[2];
-    return s;
+    return (char *)s;
 }
 
 #if ! defined(HAS_MODFL) && defined(HAS_AINTL) && defined(HAS_COPYSIGNL)

@@ -1851,7 +1851,7 @@ Perl_save_hints(pTHX)
 int
 Perl_block_start(pTHX_ int full)
 {
-    int retval = PL_savestack_ix;
+    const int retval = PL_savestack_ix;
     pad_block_start(full);
     SAVEHINTS();
     PL_hints &= ~HINT_BLOCK_SCOPE;
@@ -3699,8 +3699,9 @@ Perl_newLOOPOP(pTHX_ I32 flags, I32 debuggable, OP *expr, OP *block)
 {
     OP* listop;
     OP* o;
-    int once = block && block->op_flags & OPf_SPECIAL &&
+    const bool once = block && block->op_flags & OPf_SPECIAL &&
       (block->op_type == OP_ENTERSUB || block->op_type == OP_NULL);
+    (void)debuggable;
 
     if (expr) {
 	if (once && expr->op_type == OP_CONST && !SvTRUE(((SVOP*)expr)->op_sv))
@@ -3710,8 +3711,8 @@ Perl_newLOOPOP(pTHX_ I32 flags, I32 debuggable, OP *expr, OP *block)
 	    expr = newUNOP(OP_DEFINED, 0,
 		newASSIGNOP(0, newDEFSVOP(), 0, expr) );
 	} else if (expr->op_flags & OPf_KIDS) {
-	    OP *k1 = ((UNOP*)expr)->op_first;
-	    OP *k2 = (k1) ? k1->op_sibling : NULL;
+            const OP *k1 = ((UNOP*)expr)->op_first;
+            const OP *k2 = (k1) ? k1->op_sibling : NULL;
 	    switch (expr->op_type) {
 	      case OP_NULL:
 		if (k2 && k2->op_type == OP_READLINE
@@ -3761,6 +3762,7 @@ Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop, I32 whileline, OP *
     OP *listop;
     OP *o;
     U8 loopflags = 0;
+    (void)debuggable;
 
     if (expr && (expr->op_type == OP_READLINE || expr->op_type == OP_GLOB
 		 || (expr->op_type == OP_NULL && expr->op_targ == OP_GLOB))) {
@@ -3879,7 +3881,7 @@ Perl_newFOROP(pTHX_ I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *blo
 	    Perl_croak(aTHX_ "Can't use %s for loop variable", PL_op_desc[sv->op_type]);
     }
     else {
-	I32 offset = pad_findmy("$_");
+        const I32 offset = pad_findmy("$_");
 	if (offset == NOT_IN_PAD || PAD_COMPNAME_FLAGS(offset) & SVpad_OUR) {
 	    sv = newGVOP(OP_GV, 0, PL_defgv);
 	}
@@ -4158,6 +4160,7 @@ Perl_op_const_sv(pTHX_ OP *o, CV *cv)
 void
 Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 {
+    (void)floor;
     if (o)
 	SAVEFREEOP(o);
     if (proto)
@@ -4842,7 +4845,7 @@ Perl_oopsCV(pTHX_ OP *o)
 {
     Perl_croak(aTHX_ "NOT IMPL LINE %d",__LINE__);
     /* STUB */
-    return o;
+    (void)o;
 }
 
 OP *

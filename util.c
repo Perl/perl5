@@ -246,7 +246,7 @@ Perl_delimcpy(pTHX_ register char *to, register const char *toend, register cons
     if (to < toend)
 	*to = '\0';
     *retlen = tolen;
-    return from;
+    return (char *)from;
 }
 
 /* return ptr to little string in big string, NULL if not found */
@@ -1142,7 +1142,7 @@ S_vdie_common(pTHX_ const char *message, STRLEN msglen, I32 utf8)
 OP *
 Perl_vdie(pTHX_ const char* pat, va_list *args)
 {
-    char *message;
+    const char *message;
     const int was_in_eval = PL_in_eval;
     STRLEN msglen;
     I32 utf8 = 0;
@@ -1191,7 +1191,7 @@ Perl_die(pTHX_ const char* pat, ...)
 void
 Perl_vcroak(pTHX_ const char* pat, va_list *args)
 {
-    char *message;
+    const char *message;
     STRLEN msglen;
     I32 utf8 = 0;
 
@@ -2758,6 +2758,7 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch, const char **searc
     int extidx = 0, i = 0;
     const char *curext = Nullch;
 #else
+    (void)search_ext;
 #  define MAX_EXT_LEN 0
 #endif
 
@@ -3918,7 +3919,7 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
 	while (len-- > 0)
 	    av_push((AV *)sv, newSViv(0));
     }
-    return s;
+    return (char *)s;
 }
 
 /*
@@ -4465,6 +4466,7 @@ some level of strict-ness.
 void
 Perl_sv_nosharing(pTHX_ SV *sv)
 {
+    (void)sv;
 }
 
 /*
@@ -4480,6 +4482,7 @@ some level of strict-ness.
 void
 Perl_sv_nolocking(pTHX_ SV *sv)
 {
+    (void)sv;
 }
 
 
@@ -4496,6 +4499,7 @@ some level of strict-ness.
 void
 Perl_sv_nounlocking(pTHX_ SV *sv)
 {
+    (void)sv;
 }
 
 U32
