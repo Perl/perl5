@@ -4707,6 +4707,7 @@ Perl_ck_rvconst(pTHX_ register OP *o)
 	    kid->op_type = OP_GV;
 	    SvREFCNT_dec(kid->op_sv);
 	    kid->op_sv = SvREFCNT_inc(gv);
+	    kid->op_ppaddr = PL_ppaddr[OP_GV];
 	}
     }
     return o;
@@ -5451,9 +5452,11 @@ Perl_ck_subr(pTHX_ OP *o)
 	o->op_private |= (cvop->op_private & OPpENTERSUB_AMPER);
 	null(cvop);		/* disable rv2cv */
 	tmpop = (SVOP*)((UNOP*)cvop)->op_first;
-	if (tmpop->op_type == OP_GV) {
+	if (tmpop->op_type == OP_GV && !(o->op_private & OPpENTERSUB_AMPER)) {
 	    cv = GvCVu(tmpop->op_sv);
-	    if (cv && SvPOK(cv) && !(o->op_private & OPpENTERSUB_AMPER)) {
+	    if (!cv)
+		tmpop->op_private |= OPpEARLY_CV;
+	    else if (SvPOK(cv)) {
 		namegv = CvANON(cv) ? (GV*)tmpop->op_sv : CvGV(cv);
 		proto = SvPV((SV*)cv, n_a);
 	    }
@@ -5738,6 +5741,18 @@ Perl_peep(pTHX_ register OP *o)
 		    GvAVn(((GVOP*)o)->op_gv);
 		}
 	    }
+	    else if ((o->op_private & OPpEARLY_CV) && ckWARN(WARN_UNSAFE)) {
+		GV *gv = cGVOPo->op_gv;
+		if (SvTYPE(gv) == SVt_PVGV && GvCV(gv) && SvPVX(GvCV(gv))) {
+		    /* XXX could check prototype here instead of just carping */
+		    SV *sv = sv_newmortal();
+		    gv_efullname3(sv, gv, Nullch);
+		    Perl_warner(aTHX_ WARN_UNSAFE,
+				"%s() called too early to check prototype",
+				SvPV_nolen(sv));
+		}
+	    }
+
 	    o->op_seq = PL_op_seqmax++;
 	    break;
 
