@@ -127,10 +127,10 @@ prog	:	/* NULL */
 #if defined(YYDEBUG) && defined(DEBUGGING)
 		    yydebug = (PL_debug & 1);
 #endif
-		    PL_expect = XSTATE;
+		    PL_expect = XSTATE; $$ = block_start(TRUE);
 		}
 	/*CONTINUED*/	lineseq
-			{ newPROG($2); }
+			{ newPROG(block_end($1,$2)); }
 	;
 
 block	:	'{' remember lineseq '}'

@@ -12,5 +12,3 @@ my $a = bless [] ;
 UNIVERSAL::isa $a, Jim ;
 EXPECT
 Can't locate package Joe for @main::ISA at - line 5.
-Can't locate package Joe for @main::ISA.
-Can't locate package Joe for @main::ISA.
