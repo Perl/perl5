@@ -201,7 +201,6 @@ EOC
 ok( !eval { open local $f, '<&', 'afile'; 1 },  'local <& on non-filehandle');
 like( $@, qr/Bad filehandle:\s+afile/,          '       right error' );
 
-
 {
     local *F;
     for (1..2) {
@@ -229,4 +228,42 @@ like( $@, qr/Bad filehandle:\s+afile/,          '       right error' );
     ok( seek($x,0,0),           '       seek' );
     is( scalar <$x>, "ok\n",    '       readline' );
     ok( tell($x) >= 3,          '       tell' );
+}
+
+# this used to leak FILE* pointers on all platforms (and also died on
+# Windows after running a few hundred times)
+
+my $devnull = File::Spec->devnull;
+{
+    my $loopcount;
+
+    $loopcount = 0;
+    while ($loopcount++ < 555) {
+       open NEWOUT, ">$devnull" or die;
+       open SAVEOUT, ">&STDOUT" or die;
+       open STDOUT, ">&=" . fileno(NEWOUT) or die;
+       open STDOUT, ">&SAVEOUT" or die;
+       close NEWOUT;
+    }
+    ok;
+
+    $loopcount = 0;
+    while ($loopcount++ < 555) {
+       open NEWOUT, ">$devnull" or die;
+       open SAVEOUT, ">&STDOUT" or die;
+       open STDOUT, ">&=NEWOUT" or die;
+       open STDOUT, ">&SAVEOUT" or die;
+       close NEWOUT;
+    }
+    ok;
+
+    $loopcount = 0;
+    while ($loopcount++ < 555) {
+       open NEWOUT, ">$devnull" or die;
+       open SAVEOUT, ">&STDOUT" or die;
+       open STDOUT, ">&NEWOUT" or die;
+       open STDOUT, ">&SAVEOUT" or die;
+       close NEWOUT;
+    }
+    ok;
 }
