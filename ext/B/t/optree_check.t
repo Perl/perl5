@@ -28,7 +28,7 @@ use Config;
 plan tests => 5 + 18 + 14 * $gOpts{selftest};	# fudged
 
 SKIP: {
-    skip "no perlio in this build", 5 + 19 + 14 * $gOpts{selftest}
+    skip "no perlio in this build", 5 + 18 + 14 * $gOpts{selftest}
     unless $Config::Config{useperlio};
 
 
