@@ -28,7 +28,7 @@ BEGIN {
 #
 #
 
-plan tests => 16;
+plan tests => 31;
 
 {
     # bug id 20001009.001
@@ -102,19 +102,66 @@ plan tests => 16;
 }
 
 {
+    use warnings;
     my $progfile = 'utf' . $$;
-    END {unlink $progfile}
-    open P, ">$progfile" or die "Can't open '$progfile': $!";
-    # Interpolation of hex characters needs to take place now, as we're
-    # testing feeding malformed utf8 into perl. Bug now fixed was an
-    # "out of memory" error. We really need the "" [rather than qq() or q()]
-    # to get the best explosion.
-    print P <<"BANG";
+    END {unlink_all $progfile}
+
+    # If I'm right 60 is '>' in ASCII, ' ' in EBCDIC
+    # 173 is not punctuation in either ASCII or EBCDIC
+    my (@char);
+    foreach (60, 173, 257, 65532) {
+      my $char = chr $_;
+      utf8::encode($char);
+      # I don't want to use map {ord} and I've no need to hardcode the UTF
+      # version
+      my $charsubst = $char;
+      $charsubst =~ s/(.)/ord ($1) . ','/ge;
+      chop $charsubst;
+      push @char, [$_, $char, $charsubst];
+    }
+    foreach (
+             ['check our detection program works',
+              '@a = ("'.chr(60).'\x2A", ""); display @a', qr/^>60,42<><$/],
+             ['check literal 8 bit input',
+              '$a = "' . chr (173) . '"; display $a', qr/^>173<$/],
+             ['check no utf8; makes no change',
+              'no utf8; $a = "' . chr (173) . '"; display $a', qr/^>173<$/],
+             # Now we do the real byte sequences that are valid UTF8
+             (map {
+               ["the utf8 sequence for chr $_->[0]",
+                qq(\$a = "$_->[1]"; display \$a), qr/^>$_->[2]<$/],
+               ["no utf8; for the utf8 sequence for chr $_->[0]",
+                qq(no utf8; \$a = "$_->[1]"; display \$a), qr/^>$_->[2]<$/],
+               ["use utf8; for the utf8 sequence for chr $_->[0]",
+                qq(use utf8; \$a = "$_->[1]"; display \$a), qr/^>$_->[0]<$/],
+              } @char),
+             # Interpolation of hex characters needs to take place now, as we're
+             # testing feeding malformed utf8 into perl. Bug now fixed was an
+             # "out of memory" error. We really need the "" [rather than qq()
+             # or q()] to get the best explosion.
+             ["!Feed malformed utf8 into perl.", <<"BANG",
     use utf8; %a = ("\xE1\xA0"=>"sterling");
-    print 'start'; printf '%x,', ord $_ foreach keys %a; print "end\n";
+    print 'start'; printf '%x,', ord \$_ foreach keys %a; print "end\n";
 BANG
-    print "# Possible delay...\n";
-    my $result = runperl ( verbose => 1, stderr => 1, progfile => $progfile );
-    like ($result,
-          qr/^Malformed UTF-8 character \(2 bytes, need 3\).*start\d+,end$/s);
+	      qr/^Malformed UTF-8 character \(2 bytes, need 3\).*start\d+,end$/s
+	     ],
+            ) {
+        my ($why, $prog, $expect) = @$_;
+        open P, ">$progfile" or die "Can't open '$progfile': $!";
+        print P q(
+                  sub display {
+                    print '>' . join (',', map {ord} split //, $_) . '<'
+                    foreach @_;
+                  }
+                 );
+	print P $prog;
+        close P or die "Can't close '$progfile': $!";
+        if ($why =~ s/^!//) {
+            print "# Possible delay...\n";
+        } else {
+            print "# $prog\n";
+        }
+        my $result = runperl ( stderr => 1, progfile => $progfile );
+        like ($result, $expect, $why);
+    }
 }

@@ -147,7 +147,8 @@ sub like {
     if (ref $expected eq 'Regexp') {
 	$pass = $got =~ $expected;
 	unless ($pass) {
-	    unshift(@mess, "#      got '$got'\n");
+	    unshift(@mess, "#      got '$got'\n",
+		           "# expected /$expected/\n");
 	}
     } else {
 	$pass = $got =~ /$expected/;
@@ -373,4 +374,10 @@ sub which_perl {
     return $Perl;
 }
 
+sub unlink_all {
+    foreach my $file (@_) {
+        1 while unlink $file;
+        print "# Couldn't unlink '$file': $!\n" if -f $file;
+    }
+}
 1;
