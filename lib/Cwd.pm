@@ -167,7 +167,7 @@ if ($^O eq 'os2' && defined &sys_cwd && defined &sys_abspath) {
 
 eval {
     require XSLoader;
-    no warnings 'redefine';
+    local $^W = 0;
     XSLoader::load('Cwd');
 };
 
