@@ -13,10 +13,6 @@ croak   - die of errors (from perspective of caller)
 
 confess - die of errors with stack backtrace
 
-shortmess - return the message that carp and croak produce
-
-longmess - return the message that cluck and confess produce
-
 =head1 SYNOPSIS
 
     use Carp;
@@ -25,22 +21,19 @@ longmess - return the message that cluck and confess produce
     use Carp qw(cluck);
     cluck "This is how we got here!";
 
-    print FH Carp::shortmess("This will have caller's details added");
-    print FH Carp::longmess("This will have stack backtrace added");
-
 =head1 DESCRIPTION
 
 The Carp routines are useful in your own modules because
 they act like die() or warn(), but with a message which is more
 likely to be useful to a user of your module.  In the case of
-cluck, confess, and longmess that context is a summary of every
-call in the call-stack.  For a shorter message you can use carp,
-croak or shortmess which report the error as being from where
+cluck and confess that context is a summary of every
+call in the call-stack.  For a shorter message you can use carp
+or croak which try to report the error as being from where
 your module was called.  There is no guarantee that that is where
 the error was, but it is a good educated guess.
 
-Here is a more complete description of how shortmess works.  What
-it does is search the call-stack for a function call stack where
+Here is a more complete description of how the shorter message works.
+What it does is search the call-stack for a function call stack where
 it hasn't been told that there shouldn't be an error.  If every
 call is marked safe, it then gives up and gives a full stack
 backtrace instead.  In other words it presumes that the first likely
@@ -76,7 +69,7 @@ this practice is discouraged.)
 =item 5.
 
 Any call to Carp is safe.  (This rule is what keeps it from
-reporting the error where you call carp/croak/shortmess.)
+reporting the error where you call carp or croak.)
 
 =back
 
@@ -131,19 +124,19 @@ $Verbose = 0;		# If true then make shortmess call longmess instead
 require Exporter;
 @ISA = ('Exporter');
 @EXPORT = qw(confess croak carp);
-@EXPORT_OK = qw(cluck verbose longmess shortmess);
-@EXPORT_FAIL = qw(verbose);	# hook to enable verbose mode
+@EXPORT_OK = qw(cluck);
 
-
-# if the caller specifies verbose usage ("perl -MCarp=verbose script.pl")
-# then the following method will be called by the Exporter which knows
-# to do this thanks to @EXPORT_FAIL, above.  $_[1] will contain the word
-# 'verbose'.
-
-sub export_fail {
-    shift;
-    $Verbose = shift if $_[0] eq 'verbose';
-    return @_;
+# we handle verbose usage ("perl -MCarp=verbose script.pl") ourselves
+# and then erase all traces of this call so that Exporter doesn't
+# know that we have been here.  BTW subclasses shouldn't try to
+# do anything useful with 'verbose', including have that be their
+# name...
+sub import {
+    if (grep 'verbose' eq $_, @_) {
+	@_ = grep 'verbose' ne $_, @_;
+	$Verbose = "verbose";
+    }
+    goto &Exporter::import;
 }
 
 
