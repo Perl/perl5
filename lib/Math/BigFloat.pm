@@ -67,6 +67,7 @@ my $LOG_10_A = length($LOG_10)-1;
 my $LOG_2 = 
  '0.6931471805599453094172321214581765680755001343602552541206800094933936220';
 my $LOG_2_A = length($LOG_2)-1;
+my $HALF = '0.5';			# made into an object if necc.
 
 ##############################################################################
 # the old code had $rnd_mode, so we need to support it, too
@@ -1043,10 +1044,11 @@ sub _log_10
   ### Since $x in the range 0.5 .. 1.5 is MUCH faster, we do a repeated div
   ### or mul by 2 (maximum times 3, since x < 10 and x > 0.1)
 
-  my $half = $self->new('0.5');
+  $HALF = $self->new($HALF) unless ref($HALF);
+
   my $twos = 0;				# default: none (0 times)	
   my $two = $self->new(2);
-  while ($x->bacmp($half) <= 0)
+  while ($x->bacmp($HALF) <= 0)
     {
     $twos--; $x->bmul($two);
     }
@@ -1506,9 +1508,20 @@ sub broot
   local $Math::BigInt::upgrade = undef;	# should be really parent class vs MBI
 
   # remember sign and make $x positive, since -4 ** (1/2) => -2
-  my $sign = 0; $sign = 1 if $x->{sign} eq '-'; $x->babs();
+  my $sign = 0; $sign = 1 if $x->{sign} eq '-'; $x->{sign} = '+';
 
-  if ($y->bcmp(2) == 0)		# normal square root
+  my $is_two = 0;
+  if ($y->isa('Math::BigFloat'))
+    {
+    $is_two = ($y->{sign} eq '+' && $MBI->_is_two($y->{_m}) && $MBI->_is_zero($y->{_e}));
+    }
+  else
+    {
+    $is_two = ($y == 2);
+    }
+
+  # normal square root if $y == 2:
+  if ($is_two)
     {
     $x->bsqrt($scale+4);
     }
@@ -1770,7 +1783,8 @@ sub _pow
   my $self = ref($x);
 
   # if $y == 0.5, it is sqrt($x)
-  return $x->bsqrt($a,$p,$r,$y) if $y->bcmp('0.5') == 0;
+  $HALF = $self->new($HALF) unless ref($HALF);
+  return $x->bsqrt($a,$p,$r,$y) if $y->bcmp($HALF) == 0;
 
   # Using:
   # a ** x == e ** (x * ln a)
@@ -2342,6 +2356,7 @@ sub bnorm
       if ($MBI->_acmp($x->{_e},$z) >= 0)
         {
         $x->{_e} = $MBI->_sub  ($x->{_e}, $z);
+        $x->{_es} = '+' if $MBI->_is_zero($x->{_e});
         }
       else
         {

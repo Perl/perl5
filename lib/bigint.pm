@@ -1,7 +1,7 @@
 package bigint;
 require 5.005;
 
-$VERSION = '0.04';
+$VERSION = '0.05';
 use Exporter;
 @ISA		= qw( Exporter );
 @EXPORT_OK	= qw( ); 
@@ -379,6 +379,6 @@ as L<Math::BigInt::BitVect>, L<Math::BigInt::Pari> and  L<Math::BigInt::GMP>.
 
 =head1 AUTHORS
 
-(C) by Tels L<http://bloodgate.com/> in early 2002.
+(C) by Tels L<http://bloodgate.com/> in early 2002, 2003.
 
 =cut
