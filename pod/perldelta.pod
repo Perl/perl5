@@ -1121,6 +1121,73 @@ worst-case run time behaviour), and that sort() is now stable
 (meaning that elements with identical keys will stay ordered as they
 were before the sort).  See the C<sort> pragma for information.
 
+The story in more detail: suppose you want to serve yourself a little
+slice of Pi.
+
+    @digits = ( 3,1,4,1,5,9 );
+
+A numerical sort of the digits will yield (1,1,3,4,5,9), as expected.
+Which C<1> comes first is hard to know, since one C<1> looks pretty
+much like any other.  You can regard this as totally trivial,
+or somewhat profound.  However, if you just want to sort the even
+digits ahead of the odd ones, then what will
+
+    sort { ($a % 2) <=> ($b % 2) } @digits;
+
+yield?  The only even digit, C<4>, will come first.  But how about
+the odd numbers, which all compare equal?  With the quicksort algorithm
+used to implement Perl 5.6 and earlier, the order of ties is left up
+to the sort.  So, as you add more and more digits of Pi, the order
+in which the sorted even and odd digits appear will change.
+and, for sufficiently large slices of Pi, the quicksort algorithm
+in Perl 5.8 won't return the same results even if reinvoked with the
+same input.  The justification for this rests with quicksort's
+worst case behavior.  If you run
+
+   sort { $a <=> $b } ( 1 .. $N , 1 .. $N );
+
+(something you might approximate if you wanted to merge two sorted
+arrays using sort), doubling $N doesn't just double the quicksort time,
+it I<quadruples> it.  Quicksort has a worst case run time that can
+grow like N**2, so-called I<quadratic> behaviour, and it can happen
+on patterns that may well arise in normal use.  You won't notice this
+for small arrays, but you I<will> notice it with larger arrays,
+and you may not live long enough for the sort to complete on arrays
+of a million elements.  So the 5.8 quicksort scrambles large arrays
+before sorting them, as a statistical defence against quadratic behaviour.
+But that means if you sort the same large array twice, ties may be
+broken in different ways.
+
+Because of the unpredictability of tie-breaking order, and the quadratic
+worst-case behaviour, quicksort was I<almost> replaced completely with
+a stable mergesort.  I<Stable> means that ties are broken to preserve
+the original order of appearance in the input array.  So
+
+    sort { ($a % 2) <=> ($b % 2) } (3,1,4,1,5,9);
+
+will yield (4,3,1,1,5,9), guaranteed.  The even and odd numbers
+appear in the output in the same order they appeared in the input.
+Mergesort has worst case O(NlogN) behaviour, the best value
+attainable.  And, ironically, this mergesort does particularly
+well where quicksort goes quadratic:  mergesort sorts (1..$N, 1..$N)
+in O(N) time.  But quicksort was rescued at the last moment because
+it is faster than mergesort on certain inputs and platforms.
+For example, if you really I<don't> care about the order of even
+and odd digits, quicksort will run in O(N) time; it's very good
+at sorting many repetitions of a small number of distinct elements.
+The quicksort divide and conquer strategy works well on platforms
+with relatively small, very fast, caches.  Eventually, the problem gets
+whittled down to one that fits in the cache, from which point it
+benefits from the increased memory speed.
+
+Quicksort was rescued by implementing a sort pragma to control aspects
+of the sort.  The B<stable> subpragma forces stable behaviour,
+regardless of algorithm.  The B<_quicksort> and B<_mergesort>
+subpragmas are heavy-handed ways to select the underlying implementation.
+The leading C<_> is a reminder that these subpragmas may not survive
+beyond 5.8.  More appropriate mechanisms for selecting the implementation
+exist, but they wouldn't have arrived in time to save quicksort.
+
 =item *
 
 Hashes now use Bob Jenkins "One-at-a-Time" hashing key algorithm
