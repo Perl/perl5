@@ -657,11 +657,21 @@ where they don't belong.
 This is explained in more depth in the L<perlsyn>.  Briefly, there's
 no official case statement, because of the variety of tests possible
 in Perl (numeric comparison, string comparison, glob comparison,
-regex matching, overloaded comparisons, ...).  Larry couldn't decide
-how best to do this, so he left it out, even though it's been on the
-wish list since perl1.
+regex matching, overloaded comparisons, ...).
+Larry couldn't decide how best to do this, so he left it out, even
+though it's been on the wish list since perl1.
 
-The general answer is to write a construct like this:
+Starting from Perl 5.8 to get switch and case one can use the
+Switch extension and say:
+
+	use Switch;
+
+after which one has switch and case.  It is not as fast as it could be
+because it's not really part of the language (it's done using source
+filters) but it is available, and it's very flexible.
+
+But if one wants to use pure Perl, the general answer is to write a
+construct like this:
 
     for ($variable_to_test) {
 	if    (/pat1/)  { }     # do something

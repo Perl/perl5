@@ -667,8 +667,9 @@ Note, however, that this does not always work for quoting Perl code:
 
 	$s = q{ if($a eq "}") ... }; # WRONG
 
-is a syntax error. The C<Text::Balanced> module on CPAN is able to do this
-properly.
+is a syntax error. The C<Text::Balanced> module (from CPAN, and
+starting from Perl 5.8 part of the standard distribution) is able
+to do this properly.
 
 There can be whitespace between the operator and the quoting
 characters, except when C<#> is being used as the quoting character.

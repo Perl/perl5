@@ -557,6 +557,11 @@ The Source Filters distribution is available on CPAN, in
 
     CPAN/modules/by-module/Filter
 
+Starting from Perl 5.8 Filter::Util::Call (the core part of the
+Source Filters distribution) is part of the standard Perl distribution.
+Also included is a friendlier interface called Filter::Simple, by
+Damian Conway.
+
 =head1 AUTHOR
 
 Paul Marquess E<lt>Paul.Marquess@btinternet.comE<gt>

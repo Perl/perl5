@@ -398,8 +398,9 @@ on the previous timer.
 For delays of finer granularity than one second, you may use Perl's
 four-argument version of select() leaving the first three arguments
 undefined, or you might be able to use the C<syscall> interface to
-access setitimer(2) if your system supports it.  The Time::HiRes module
-from CPAN may also prove useful.
+access setitimer(2) if your system supports it.  The Time::HiRes
+module (from CPAN, and starting from Perl 5.8 part of the standard
+distribution) may also prove useful.
 
 It is usually a mistake to intermix C<alarm> and C<sleep> calls.
 (C<sleep> may be internally implemented in your system with C<alarm>)
@@ -4159,8 +4160,9 @@ busy multitasking system.
 
 For delays of finer granularity than one second, you may use Perl's
 C<syscall> interface to access setitimer(2) if your system supports
-it, or else see L</select> above.  The Time::HiRes module from CPAN
-may also help.
+it, or else see L</select> above.  The Time::HiRes module (from CPAN,
+and starting from Perl 5.8 part of the standard distribution) may also
+help.
 
 See also the POSIX module's C<pause> function.
 

@@ -111,12 +111,6 @@ problem for free.
 
 =head1 Perl Language
 
-=head2 64-bit Perl
-
-Verify complete 64 bit support so that the value of sysseek, or C<-s>, or
-stat(), or tell can fit into a perl number without losing precision.
-Work with the perl-64bit mailing list on perl.org.
-
 =head2 Prototypes
 
 =over 4
@@ -167,9 +161,9 @@ write a cogent summary, I'll post it.]
 
 =head2 Reliable signals
 
-Sarathy and Dan Sugalski are working on this.  Chip posted a patch
-earlier, but it was not accepted into 5.005.  The issue is tricky,
-because it has the potential to greatly slow down the core.
+Mostly done in Perl 5.8, there is now a reliable signal handler
+despatch.  No measurable slowdown detected in Linux or Solaris
+with the 5.8 approach (implemented by Nick I-S).
 
 There are at least three things to consider:
 
@@ -177,7 +171,7 @@ There are at least three things to consider:
 
 =item Alternate runops() for signal despatch
 
-Sarathy and Dan are discussed this on perl5-porters.
+Sarathy and Dan discussed this on perl5-porters.
 
 =item Figure out how to die() in delayed sighandler
 
@@ -206,13 +200,17 @@ it needs more thorough documentation.
 =head2 Memory leaks from failed eval/regcomp
 
 The only known memory leaks in Perl are in failed code or regexp
-compilation.  Fix this.  Hugo Van Der Sanden will attempt this but
-won't have tuits until January 1999.
+compilation.  Fix this.
+
+Noticed in Perl 5.6: Also local()ising tied variables leak.
 
 =head2 Make XS easier to use
 
 There was interest in SWIG from porters, but nothing has happened
 lately.
+
+New development in 2001: the Inline module, when it gels, shows great
+promise.
 
 =head2 Make embedded Perl easier to use
 
@@ -267,10 +265,6 @@ More documents of a tutorial nature could help.  Here are some
 candidates:
 
 =over 4
-
-=item Regular expressions
-
-Robin Berjon (r.berjon@ltconsulting.net) has volunteered.
 
 =item I/O
 
@@ -365,13 +359,6 @@ little 3p pages.
 Make C<perldoc> tell users what they need to add to their .login or
 .cshrc to set their MANPATH correctly.
 
-=head2 Install ALL Documentation
-
-Make the standard documentation kit include the VMS, OS/2, Win32,
-Threads, etc information.  installperl and pod/Makefile should know
-enough to copy README.foo to perlfoo.pod before building everything,
-when appropriate.
-
 =head2 Outstanding issues to be documented
 
 Tom has a list of 5.005_5* features or changes that require
@@ -421,8 +408,7 @@ in with the SDK discussed on the perl-sdk list at perl.org.
 
 =head2 Profiler
 
-Make the profiler (Devel::DProf) part of the standard release, and
-document it well.
+Devel::DProf requires more documentation.
 
 =head2 Tie Modules
 
@@ -458,11 +444,6 @@ thousands of lines of code.
 Write a module for transparent, portable remote procedure calls.  (Not
 core).  This touches on the CORBA and ILU work.
 
-=head2 y2k localtime/gmtime
-
-Write a module, Y2k::Catch, which overloads localtime and gmtime's
-returned year value and catches "bad" attempts to use it.
-
 =head2 Export File::Find variables
 
 Make File::Find export C<$name> etc manually, at least if asked to.
@@ -474,14 +455,6 @@ Finish a proper Ioctl module.
 =head2 Debugger attach/detach
 
 Permit a user to debug an already-running program.
-
-=head2 Regular Expression debugger
-
-Create a visual profiler/debugger tool that stepped you through the
-execution of a regular expression point by point.  Ilya has a module
-to color-code and display regular expression parses and executions.
-There's something at http://tkworld.org/ that might be a good start,
-it's a Tk/Tcl RE wizard, that builds regexen of many flavours.
 
 =head2 Alternative RE Syntax
 
@@ -642,11 +615,6 @@ Not a win, according to Guido.
 
 =head2 Optimize away @_ where possible
 
-=head2 Optimize sort by { $a <=> $b }
-
-Greg Bacon added several more sort optimizations.  These have
-made it into 5.005_55, thanks to Hans Mulder.
-
 =head2 Rewrite regexp parser for better integrated optimization
 
 The regexp parser was rewritten for 5.005.  Ilya's the regexp guru.
@@ -662,12 +630,6 @@ This seems impossible to do without substantially breaking code.
 =item make tr/// return histogram in list context?
 
 =item Loop control on do{} et al
-
-=item Explicit switch statements
-
-Nobody has yet managed to come up with a switch syntax that would
-allow for mixed hash, constant, regexp checks.  Submit implementation
-with syntax, please.
 
 =item compile to real threaded code
 
@@ -814,20 +776,11 @@ from where newASSIGNOP steals the field).
 
 Can we install modules as bytecode?
 
-=head1 Recently Finished Tasks
-
-=head2 Figure a way out of $^(capital letter)
-
-Figure out a clean way to extend $^(capital letter) beyond
-the 26 alphabets.  (${^WORD} maybe?)
-
-Mark-Jason Dominus sent a patch which went into 5.005_56.
-
 =head2 Filenames
 
-Keep filenames in the distribution and in the standard module set
-be 8.3 friendly where feasible.  Good luck changing the standard
-modules, though.
+Ongoing effort: keep filenames in the distribution and in the standard
+module set be 8.3 friendly where feasible.  Good luck changing the
+standard modules, though.
 
 =head2 Foreign lines
 
@@ -844,10 +797,6 @@ Mostly B<done> in 5.005.
 =head2 ISA.pm
 
 Rename and alter ISA.pm.  B<Done>.  It is now base.pm.
-
-=head2 gettimeofday
-
-See Time::HiRes.
 
 =head2 autocroak?
 

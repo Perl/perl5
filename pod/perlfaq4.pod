@@ -464,7 +464,8 @@ parser.
 If you are serious about writing a parser, there are a number of
 modules or oddities that will make your life a lot easier.  There are
 the CPAN modules Parse::RecDescent, Parse::Yapp, and Text::Balanced;
-and the byacc program.
+and the byacc program.   Starting from perl 5.8 the Text::Balanced
+is part of the standard distribution.
 
 One simple destructive, inside-out approach that you might try is to
 pull out the smallest nesting parts one at a time:
@@ -1780,7 +1781,8 @@ respectively.
 
 For some specific applications, you can use one of the DBM modules.
 See L<AnyDBM_File>.  More generically, you should consult the FreezeThaw,
-Storable, or Class::Eroot modules from CPAN.  Here's one example using
+Storable, or Class::Eroot modules from CPAN.  Starting from Perl 5.8
+Storable is part of the standard distribution.  Here's one example using
 Storable's C<store> and C<retrieve> functions:
 
     use Storable; 

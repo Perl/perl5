@@ -557,14 +557,15 @@ determine the insecure things and exploit them without viewing the
 source.  Security through obscurity, the name for hiding your bugs
 instead of fixing them, is little security indeed.
 
-You can try using encryption via source filters (Filter::* from CPAN),
-but any decent programmer will be able to decrypt it.  You can try using
-the byte code compiler and interpreter described below, but the curious
-might still be able to de-compile it.  You can try using the native-code
-compiler described below, but crackers might be able to disassemble it.
-These pose varying degrees of difficulty to people wanting to get at
-your code, but none can definitively conceal it (true of every
-language, not just Perl).
+You can try using encryption via source filters (Starting from Perl
+5.8 the Filter::Simple and Filter::Util::Call modules are included in
+the standard distribution), but any decent programmer will be able to
+decrypt it.  You can try using the byte code compiler and interpreter
+described below, but the curious might still be able to de-compile it.
+You can try using the native-code compiler described below, but
+crackers might be able to disassemble it.  These pose varying degrees
+of difficulty to people wanting to get at your code, but none can
+definitively conceal it (true of every language, not just Perl).
 
 If you're concerned about people profiting from your code, then the
 bottom line is that nothing but a restrictive license will give you
