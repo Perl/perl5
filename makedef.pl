@@ -97,8 +97,9 @@ unless ($PLATFORM eq 'win32' || $PLATFORM eq 'MacOS' || $PLATFORM eq 'netware') 
 	    $define{$1} = 1 while /-D(\w+)/g;
 	}
 	if ($PLATFORM eq 'os2') {
-	    $CONFIG_ARGS = $1 if /^(?:config_args)='(.+)'$/;
-	    $ARCHNAME =    $1 if /^(?:archname)='(.+)'$/;
+	    $CONFIG_ARGS = $1 if /^config_args='(.+)'$/;
+	    $ARCHNAME =    $1 if /^archname='(.+)'$/;
+	    $PATCHLEVEL =  $1 if /^perl_patchlevel='(.+)'$/;
 	}
     }
     close(CFG);
@@ -121,6 +122,8 @@ if ($define{USE_ITHREADS}) {
     }
 }
 
+my $sym_ord = 0;
+
 $define{PERL_IMPLICIT_CONTEXT} ||=
     $define{USE_ITHREADS} ||
     $define{USE_5005THREADS}  ||
@@ -140,9 +143,21 @@ if ($PLATFORM eq 'win32') {
     }
 }
 elsif ($PLATFORM eq 'os2') {
+    if (open my $fh, '<', 'perl5.def') {
+      while (<$fh>) {
+	last if /^\s*EXPORTS\b/;
+      }
+      while (<$fh>) {
+	$ordinal{$1} = $2 if /^\s*"(\w+)"\s*\@(\d+)\s*$/;
+	# This allows skipping ordinals which were used in older versions
+	$sym_ord = $1 if /^\s*;\s*LAST_ORDINAL\s*=\s*(\d+)\s*$/;
+      }
+      $sym_ord < $_ and $sym_ord = $_ for values %ordinal; # Take the max
+    }
     ($v = $]) =~ s/(\d\.\d\d\d)(\d\d)$/$1_$2/;
     $v .= '-thread' if $ARCHNAME =~ /-thread/;
     ($dll = $define{PERL_DLL}) =~ s/\.dll$//i;
+    $v .= "\@$PATCHLEVEL" if $PATCHLEVEL;
     $d = "DESCRIPTION '\@#perl5-porters\@perl.org:$v#\@ Perl interpreter, configured as $CONFIG_ARGS'";
     $d = substr($d, 0, 249) . "...'" if length $d > 253;
     print <<"---EOP---";
@@ -1105,6 +1120,8 @@ if ($PLATFORM eq 'netware') {
 	# that the last symbol will not contain a comma else
 	# Watcom linker cribs
 	print "\tdummy\n";
+} elsif ($PLATFORM eq 'os2') {
+	print "; LAST_ORDINAL=$sym_ord\n";
 }
 
 sub emit_symbol {
@@ -1112,8 +1129,6 @@ sub emit_symbol {
     chomp($symbol);
     $export{$symbol} = 1;
 }
-
-my $sym_ord = 0;
 
 sub output_symbol {
     my $symbol = shift;
@@ -1145,7 +1160,8 @@ sub output_symbol {
 #	}
     }
     elsif ($PLATFORM eq 'os2') {
-	printf qq(    %-31s \@%s\n), qq("$symbol"), ++$sym_ord;
+	printf qq(    %-31s \@%s\n),
+	  qq("$symbol"), $ordinal{$symbol} || ++$sym_ord;
     }
     elsif ($PLATFORM eq 'aix' || $PLATFORM eq 'MacOS') {
 	print "$symbol\n";
