@@ -3074,6 +3074,8 @@ The following tests fail on 5.8.0 Perl in BeOS Personal 5.03:
 
  t/op/lfs............................FAILED at test 17
  t/op/magic..........................FAILED at test 24
+ ext/Fcntl/t/syslfs..................FAILED at test 17
+ ext/File/Glob/t/basic...............FAILED at test 3
  ext/POSIX/t/sigaction...............FAILED at test 13
  ext/POSIX/t/waitpid.................FAILED at test 1
 
