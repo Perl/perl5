@@ -5,7 +5,8 @@ no strict 'refs';
 
 # On one line so MakeMaker will see it.
 require Exporter;  our $VERSION = $Exporter::VERSION;
-$Carp::Internal{"Exporter::Heavy"} = 1;
+# Carp does this now for us, so we can finally live w/o Carp
+#$Carp::Internal{"Exporter::Heavy"} = 1;
 
 =head1 NAME
 
