@@ -138,7 +138,7 @@ sub cacheout {
       ( $mode !~ /^\s*(?:>>|\+?>|\+?<|\|\-|)|\-\|\s*$/ );
 
     # Mode changed?
-    if( $isopen{$file} && ($mode||'>') ne $isopen{$file}->[2] ){
+    if( $isopen{$file} && ($mode||'>') ne $isopen{$file}->[1] ){
       &cacheout_close($file, 1);
     }
     
