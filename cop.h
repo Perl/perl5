@@ -156,6 +156,7 @@ struct block_eval {
     SV *	old_namesv;
     OP *	old_eval_root;
     SV *	cur_text;
+    CV *	cv;
 };
 
 #define PUSHEVAL(cx,n,fgv)						\
@@ -165,6 +166,7 @@ struct block_eval {
 	cx->blk_eval.old_namesv = (n ? newSVpv(n,0) : Nullsv);		\
 	cx->blk_eval.old_eval_root = PL_eval_root;			\
 	cx->blk_eval.cur_text = PL_linestr;				\
+	cx->blk_eval.cv = Nullcv; /* set by doeval(), as applicable */	\
     } STMT_END
 
 #define POPEVAL(cx)							\

@@ -2832,6 +2832,9 @@ S_doeval(pTHX_ int gimme, OP** startop)
     PL_compcv = (CV*)NEWSV(1104,0);
     sv_upgrade((SV *)PL_compcv, SVt_PVCV);
     CvEVAL_on(PL_compcv);
+    assert(CxTYPE(&cxstack[cxstack_ix]) == CXt_EVAL);
+    cxstack[cxstack_ix].blk_eval.cv = PL_compcv;
+
 #ifdef USE_THREADS
     CvOWNER(PL_compcv) = 0;
     New(666, CvMUTEXP(PL_compcv), 1, perl_mutex);

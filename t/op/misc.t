@@ -587,6 +587,18 @@ EXPECT
 ok 1
 ok 2
 ########
+# lexicals outside an eval"" should be visible inside subroutine definitions
+# within it
+eval <<'EOT'; die $@ if $@;
+{
+    my $X = "ok\n";
+    eval 'sub Y { print $X }'; die $@ if $@;
+    Y();
+}
+EOT
+EXPECT
+ok
+########
 # This test is here instead of pragma/locale.t because
 # the bug depends on in the internal state of the locale
 # settings and pragma/locale messes up that state pretty badly.

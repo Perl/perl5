@@ -346,15 +346,22 @@ S_pad_findlex(pTHX_ char *name, PADOFFSET newoff, U32 seq, CV* startcv,
 	switch (CxTYPE(cx)) {
 	default:
 	    if (i == 0 && saweval) {
-		seq = cxstack[saweval].blk_oldcop->cop_seq;
 		return pad_findlex(name, newoff, seq, PL_main_cv, -1, saweval, 0);
 	    }
 	    break;
 	case CXt_EVAL:
 	    switch (cx->blk_eval.old_op_type) {
 	    case OP_ENTEREVAL:
-		if (CxREALEVAL(cx))
+		if (CxREALEVAL(cx)) {
+		    PADOFFSET off;
 		    saweval = i;
+		    seq = cxstack[i].blk_oldcop->cop_seq;
+		    startcv = cxstack[i].blk_eval.cv;
+		    off = pad_findlex(name, newoff, seq, startcv, i-1,
+				      saweval, 0);
+		    if (off)	/* continue looking if not found here */
+			return off;
+		}
 		break;
 	    case OP_DOFILE:
 	    case OP_REQUIRE:
@@ -371,7 +378,6 @@ S_pad_findlex(pTHX_ char *name, PADOFFSET newoff, U32 seq, CV* startcv,
 		saweval = i;	/* so we know where we were called from */
 		continue;
 	    }
-	    seq = cxstack[saweval].blk_oldcop->cop_seq;
 	    return pad_findlex(name, newoff, seq, cv, i-1, saweval,FINDLEX_NOSEARCH);
 	}
     }
