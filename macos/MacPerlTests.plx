@@ -2,7 +2,7 @@
 while (<>) {
 	chomp;
 	next if /^\s*#/;
-	if (/^::macos:perl .* (\S+)$/) {
+	if (/^:perl .* (\S+)$/) {
 		if ($script) {
 			$tests{$script}{num}   = $num;
 			$tests{$script}{tests} = [@tests];
