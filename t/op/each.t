@@ -1,6 +1,12 @@
 #!./perl
 
-print "1..24\n";
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '.'; 
+    push @INC, '../lib';
+}    
+
+print "1..26\n";
 
 $h{'abc'} = 'ABC';
 $h{'def'} = 'DEF';
@@ -156,3 +162,16 @@ print "#$b{$_}\n" for keys %b; # Used to core dump before change #8056.
 print "ok 23\n";
 print "#$u{$_}\n" for keys %u; # Used to core dump before change #8056.
 print "ok 24\n";
+
+$d = qu"\xe3\x81\x82";
+%u = ($d => "downgrade");
+for (keys %u) {
+    use bytes;
+    print "not " if length ne 3 or $_ ne "\xe3\x81\x82";
+    print "ok 25\n";
+}
+{
+    use bytes;
+    print "not " if length($d) ne 6 or $d ne qu"\xe3\x81\x82";
+    print "ok 26\n";
+}

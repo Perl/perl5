@@ -514,7 +514,12 @@ print "ok 61\n";
 
 $str = "Made w/ JavaScript";
 sub veclv : lvalue { vec($str, 2, 32) }
-veclv() = 0x5065726C;
+if (ord('A') != 193) {
+    veclv() = 0x5065726C;
+}
+else { # EBCDIC?
+    veclv() = 0xD7859993;
+}
 print "# $str\nnot " unless $str eq "Made w/ PerlScript";
 print "ok 62\n";
 

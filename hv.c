@@ -152,6 +152,7 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen, I32 lval)
     register HE *entry;
     SV *sv;
     bool is_utf8 = FALSE;
+    const char *keysave = key;
 
     if (!hv)
 	return 0;
@@ -196,6 +197,9 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen, I32 lval)
 	    return 0;
     }
 
+    if (is_utf8 && !(PL_hints & HINT_UTF8_DISTINCT))
+	key = (char*)bytes_from_utf8((U8*)key, (STRLEN*)&klen, &is_utf8);
+
     PERL_HASH(hash, key, klen);
 
     entry = ((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
@@ -208,6 +212,8 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen, I32 lval)
 	    continue;
 	if (HeKUTF8(entry) != (char)is_utf8)
 	    continue;
+	if (key != keysave)
+	    Safefree(key);
 	return &HeVAL(entry);
     }
 #ifdef DYNAMIC_ENV_FETCH  /* %ENV lookup?  If so, try to fetch the value now */
@@ -217,14 +223,24 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen, I32 lval)
 	if (env) {
 	    sv = newSVpvn(env,len);
 	    SvTAINTED_on(sv);
+	    if (key != keysave)
+		Safefree(key);
 	    return hv_store(hv,key,klen,sv,hash);
 	}
     }
 #endif
     if (lval) {		/* gonna assign to this, so it better be there */
 	sv = NEWSV(61,0);
-	return hv_store(hv,key,is_utf8?-klen:klen,sv,hash);
+	if (key != keysave) { /* must be is_utf8 == 0 */
+	    SV **ret = hv_store(hv,key,klen,sv,hash);
+	    Safefree(key);
+	    return ret;
+	}
+	else
+	    return hv_store(hv,key,is_utf8?-klen:klen,sv,hash);
     }
+    if (key != keysave)
+	Safefree(key);
     return 0;
 }
 
@@ -256,6 +272,7 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
     register HE *entry;
     SV *sv;
     bool is_utf8;
+    char *keysave;
 
     if (!hv)
 	return 0;
@@ -304,8 +321,11 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
 	    return 0;
     }
 
-    key = SvPV(keysv, klen);
+    keysave = key = SvPV(keysv, klen);
     is_utf8 = (SvUTF8(keysv)!=0);
+
+    if (is_utf8 && !(PL_hints & HINT_UTF8_DISTINCT))
+	key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
 
     if (!hash)
 	PERL_HASH(hash, key, klen);
@@ -320,6 +340,8 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
 	    continue;
 	if (HeKUTF8(entry) != (char)is_utf8)
 	    continue;
+	if (key != keysave)
+	    Safefree(key);
 	return entry;
     }
 #ifdef DYNAMIC_ENV_FETCH  /* %ENV lookup?  If so, try to fetch the value now */
@@ -333,6 +355,8 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
 	}
     }
 #endif
+    if (key != keysave)
+	Safefree(key);
     if (lval) {		/* gonna assign to this, so it better be there */
 	sv = NEWSV(61,0);
 	return hv_store_ent(hv,keysv,sv,hash);
@@ -385,6 +409,7 @@ Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen, SV *val, register U32 has
     register HE *entry;
     register HE **oentry;
     bool is_utf8 = FALSE;
+    const char *keysave = key;
 
     if (!hv)
 	return 0;
@@ -412,6 +437,9 @@ Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen, SV *val, register U32 has
 #endif
 	}
     }
+    if (is_utf8 && !(PL_hints & HINT_UTF8_DISTINCT))
+	key = (char*)bytes_from_utf8((U8*)key, (STRLEN*)&klen, &is_utf8);
+
     if (!hash)
 	PERL_HASH(hash, key, klen);
 
@@ -433,6 +461,8 @@ Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen, SV *val, register U32 has
 	    continue;
 	SvREFCNT_dec(HeVAL(entry));
 	HeVAL(entry) = val;
+	if (key != keysave)
+	    Safefree(key);
 	return &HeVAL(entry);
     }
 
@@ -441,6 +471,8 @@ Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen, SV *val, register U32 has
 	HeKEY_hek(entry) = share_hek(key, is_utf8?-klen:klen, hash);
     else                                       /* gotta do the real thing */
 	HeKEY_hek(entry) = save_hek(key, is_utf8?-klen:klen, hash);
+    if (key != keysave)
+	Safefree(key);
     HeVAL(entry) = val;
     HeNEXT(entry) = *oentry;
     *oentry = entry;
@@ -484,6 +516,7 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, register U32 hash)
     register HE *entry;
     register HE **oentry;
     bool is_utf8;
+    char *keysave;
 
     if (!hv)
 	return 0;
@@ -513,8 +546,11 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, register U32 hash)
 	}
     }
 
-    key = SvPV(keysv, klen);
+    keysave = key = SvPV(keysv, klen);
     is_utf8 = (SvUTF8(keysv) != 0);
+
+    if (is_utf8 && !(PL_hints & HINT_UTF8_DISTINCT))
+	key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
 
     if (!hash)
 	PERL_HASH(hash, key, klen);
@@ -537,6 +573,8 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, register U32 hash)
 	    continue;
 	SvREFCNT_dec(HeVAL(entry));
 	HeVAL(entry) = val;
+	if (key != keysave)
+	    Safefree(key);
 	return entry;
     }
 
@@ -545,6 +583,8 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, register U32 hash)
 	HeKEY_hek(entry) = share_hek(key, is_utf8?-klen:klen, hash);
     else                                       /* gotta do the real thing */
 	HeKEY_hek(entry) = save_hek(key, is_utf8?-klen:klen, hash);
+    if (key != keysave)
+	Safefree(key);
     HeVAL(entry) = val;
     HeNEXT(entry) = *oentry;
     *oentry = entry;
@@ -581,6 +621,7 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
     SV **svp;
     SV *sv;
     bool is_utf8 = FALSE;
+    const char *keysave = key;
 
     if (!hv)
 	return Nullsv;
@@ -615,6 +656,9 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
     if (!xhv->xhv_array)
 	return Nullsv;
 
+    if (is_utf8 && !(PL_hints & HINT_UTF8_DISTINCT))
+	key = (char*)bytes_from_utf8((U8*)key, (STRLEN*)&klen, &is_utf8);
+
     PERL_HASH(hash, key, klen);
 
     oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
@@ -629,6 +673,8 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
 	    continue;
 	if (HeKUTF8(entry) != (char)is_utf8)
 	    continue;
+	if (key != keysave)
+	    Safefree(key);
 	*oentry = HeNEXT(entry);
 	if (i && !*oentry)
 	    xhv->xhv_fill--;
@@ -645,6 +691,8 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
 	--xhv->xhv_keys;
 	return sv;
     }
+    if (key != keysave)
+	Safefree(key);
     return Nullsv;
 }
 
@@ -670,6 +718,7 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
     register HE **oentry;
     SV *sv;
     bool is_utf8;
+    char *keysave;
 
     if (!hv)
 	return Nullsv;
@@ -702,8 +751,11 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
     if (!xhv->xhv_array)
 	return Nullsv;
 
-    key = SvPV(keysv, klen);
+    keysave = key = SvPV(keysv, klen);
     is_utf8 = (SvUTF8(keysv) != 0);
+
+    if (is_utf8 && !(PL_hints & HINT_UTF8_DISTINCT))
+	key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
 
     if (!hash)
 	PERL_HASH(hash, key, klen);
@@ -720,6 +772,8 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
 	    continue;
 	if (HeKUTF8(entry) != (char)is_utf8)
 	    continue;
+	if (key != keysave)
+	    Safefree(key);
 	*oentry = HeNEXT(entry);
 	if (i && !*oentry)
 	    xhv->xhv_fill--;
@@ -736,6 +790,8 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
 	--xhv->xhv_keys;
 	return sv;
     }
+    if (key != keysave)
+	Safefree(key);
     return Nullsv;
 }
 
@@ -756,6 +812,7 @@ Perl_hv_exists(pTHX_ HV *hv, const char *key, I32 klen)
     register HE *entry;
     SV *sv;
     bool is_utf8 = FALSE;
+    const char *keysave = key;
 
     if (!hv)
 	return 0;
@@ -786,6 +843,9 @@ Perl_hv_exists(pTHX_ HV *hv, const char *key, I32 klen)
 	return 0;
 #endif
 
+    if (is_utf8 && !(PL_hints & HINT_UTF8_DISTINCT))
+	key = (char*)bytes_from_utf8((U8*)key, (STRLEN*)&klen, &is_utf8);
+
     PERL_HASH(hash, key, klen);
 
 #ifdef DYNAMIC_ENV_FETCH
@@ -802,6 +862,8 @@ Perl_hv_exists(pTHX_ HV *hv, const char *key, I32 klen)
 	    continue;
 	if (HeKUTF8(entry) != (char)is_utf8)
 	    continue;
+	if (key != keysave)
+	    Safefree(key);
 	return TRUE;
     }
 #ifdef DYNAMIC_ENV_FETCH  /* is it out there? */
@@ -816,6 +878,8 @@ Perl_hv_exists(pTHX_ HV *hv, const char *key, I32 klen)
 	}
     }
 #endif
+    if (key != keysave)
+	Safefree(key);
     return FALSE;
 }
 
@@ -839,6 +903,7 @@ Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
     register HE *entry;
     SV *sv;
     bool is_utf8;
+    char *keysave;
 
     if (!hv)
 	return 0;
@@ -867,8 +932,10 @@ Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
 	return 0;
 #endif
 
-    key = SvPV(keysv, klen);
+    keysave = key = SvPV(keysv, klen);
     is_utf8 = (SvUTF8(keysv) != 0);
+    if (is_utf8 && !(PL_hints & HINT_UTF8_DISTINCT))
+	key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
     if (!hash)
 	PERL_HASH(hash, key, klen);
 
@@ -886,6 +953,8 @@ Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
 	    continue;
 	if (HeKUTF8(entry) != (char)is_utf8)
 	    continue;
+	if (key != keysave)
+	    Safefree(key);
 	return TRUE;
     }
 #ifdef DYNAMIC_ENV_FETCH  /* is it out there? */
@@ -900,6 +969,8 @@ Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
 	}
     }
 #endif
+    if (key != keysave)
+	Safefree(key);
     return FALSE;
 }
 
@@ -1471,10 +1542,13 @@ Perl_unsharepvn(pTHX_ const char *str, I32 len, U32 hash)
     register I32 i = 1;
     I32 found = 0;
     bool is_utf8 = FALSE;
+    const char *save = str;
 
     if (len < 0) {
       len = -len;
       is_utf8 = TRUE;
+      if (!(PL_hints & HINT_UTF8_DISTINCT))
+	  str = (char*)bytes_from_utf8((U8*)str, (STRLEN*)&len, &is_utf8);
     }
 
     /* what follows is the moral equivalent of:
@@ -1507,7 +1581,8 @@ Perl_unsharepvn(pTHX_ const char *str, I32 len, U32 hash)
 	break;
     }
     UNLOCK_STRTAB_MUTEX;
-
+    if (str != save)
+	Safefree(str);
     if (!found && ckWARN_d(WARN_INTERNAL))
 	Perl_warner(aTHX_ WARN_INTERNAL, "Attempt to free non-existent shared string '%s'",str);
 }
@@ -1525,10 +1600,13 @@ Perl_share_hek(pTHX_ const char *str, I32 len, register U32 hash)
     register I32 i = 1;
     I32 found = 0;
     bool is_utf8 = FALSE;
+    const char *save = str;
 
     if (len < 0) {
       len = -len;
       is_utf8 = TRUE;
+      if (!(PL_hints & HINT_UTF8_DISTINCT))
+	  str = (char*)bytes_from_utf8((U8*)str, (STRLEN*)&len, &is_utf8);
     }
 
     /* what follows is the moral equivalent of:
@@ -1568,8 +1646,7 @@ Perl_share_hek(pTHX_ const char *str, I32 len, register U32 hash)
 
     ++HeVAL(entry);				/* use value slot as REFCNT */
     UNLOCK_STRTAB_MUTEX;
+    if (str != save)
+	Safefree(str);
     return HeKEY_hek(entry);
 }
-
-
-

@@ -126,31 +126,40 @@ int yyactlevel = -1;
  * Also see LOP and lop() below.
  */
 
-#define TOKEN(retval) return (PL_bufptr = s,(int)retval)
-#define OPERATOR(retval) return (PL_expect = XTERM,PL_bufptr = s,(int)retval)
-#define AOPERATOR(retval) return ao((PL_expect = XTERM,PL_bufptr = s,(int)retval))
-#define PREBLOCK(retval) return (PL_expect = XBLOCK,PL_bufptr = s,(int)retval)
-#define PRETERMBLOCK(retval) return (PL_expect = XTERMBLOCK,PL_bufptr = s,(int)retval)
-#define PREREF(retval) return (PL_expect = XREF,PL_bufptr = s,(int)retval)
-#define TERM(retval) return (CLINE, PL_expect = XOPERATOR,PL_bufptr = s,(int)retval)
-#define LOOPX(f) return(yylval.ival=f,PL_expect = XTERM,PL_bufptr = s,(int)LOOPEX)
-#define FTST(f) return(yylval.ival=f,PL_expect = XTERM,PL_bufptr = s,(int)UNIOP)
-#define FUN0(f) return(yylval.ival = f,PL_expect = XOPERATOR,PL_bufptr = s,(int)FUNC0)
-#define FUN1(f) return(yylval.ival = f,PL_expect = XOPERATOR,PL_bufptr = s,(int)FUNC1)
-#define BOop(f) return ao((yylval.ival=f,PL_expect = XTERM,PL_bufptr = s,(int)BITOROP))
-#define BAop(f) return ao((yylval.ival=f,PL_expect = XTERM,PL_bufptr = s,(int)BITANDOP))
-#define SHop(f) return ao((yylval.ival=f,PL_expect = XTERM,PL_bufptr = s,(int)SHIFTOP))
-#define PWop(f) return ao((yylval.ival=f,PL_expect = XTERM,PL_bufptr = s,(int)POWOP))
-#define PMop(f) return(yylval.ival=f,PL_expect = XTERM,PL_bufptr = s,(int)MATCHOP)
-#define Aop(f) return ao((yylval.ival=f,PL_expect = XTERM,PL_bufptr = s,(int)ADDOP))
-#define Mop(f) return ao((yylval.ival=f,PL_expect = XTERM,PL_bufptr = s,(int)MULOP))
-#define Eop(f) return(yylval.ival=f,PL_expect = XTERM,PL_bufptr = s,(int)EQOP)
-#define Rop(f) return(yylval.ival=f,PL_expect = XTERM,PL_bufptr = s,(int)RELOP)
+#ifdef DEBUGGING /* Serve -DT. */
+#   define REPORT(x,retval) tokereport(x,s,(int)retval)
+#   define REPORT2(x,retval) tokereport(x,s, yylval.ival)
+#else
+#   define REPORT(x,retval) 1
+#   define REPORT2(x,retval) 1
+#endif
+
+#define TOKEN(retval) return (REPORT2("token",retval), PL_bufptr = s,(int)retval)
+#define OPERATOR(retval) return (REPORT2("operator",retval), PL_expect = XTERM, PL_bufptr = s,(int)retval)
+#define AOPERATOR(retval) return ao((REPORT2("aop",retval), PL_expect = XTERM, PL_bufptr = s,(int)retval))
+#define PREBLOCK(retval) return (REPORT2("preblock",retval), PL_expect = XBLOCK,PL_bufptr = s,(int)retval)
+#define PRETERMBLOCK(retval) return (REPORT2("pretermblock",retval), PL_expect = XTERMBLOCK,PL_bufptr = s,(int)retval)
+#define PREREF(retval) return (REPORT2("preref",retval), PL_expect = XREF,PL_bufptr = s,(int)retval)
+#define TERM(retval) return (CLINE, REPORT2("term",retval), PL_expect = XOPERATOR, PL_bufptr = s,(int)retval)
+#define LOOPX(f) return(yylval.ival=f, REPORT("loopx",f), PL_expect = XTERM,PL_bufptr = s,(int)LOOPEX)
+#define FTST(f) return(yylval.ival=f, REPORT("ftst",f), PL_expect = XTERM,PL_bufptr = s,(int)UNIOP)
+#define FUN0(f) return(yylval.ival = f, REPORT("fun0",f), PL_expect = XOPERATOR,PL_bufptr = s,(int)FUNC0)
+#define FUN1(f) return(yylval.ival = f, REPORT("fun1",f), PL_expect = XOPERATOR,PL_bufptr = s,(int)FUNC1)
+#define BOop(f) return ao((yylval.ival=f, REPORT("bitorop",f), PL_expect = XTERM,PL_bufptr = s,(int)BITOROP))
+#define BAop(f) return ao((yylval.ival=f, REPORT("bitandop",f), PL_expect = XTERM,PL_bufptr = s,(int)BITANDOP))
+#define SHop(f) return ao((yylval.ival=f, REPORT("shiftop",f), PL_expect = XTERM,PL_bufptr = s,(int)SHIFTOP))
+#define PWop(f) return ao((yylval.ival=f, REPORT("powop",f), PL_expect = XTERM,PL_bufptr = s,(int)POWOP))
+#define PMop(f) return(yylval.ival=f, REPORT("matchop",f), PL_expect = XTERM,PL_bufptr = s,(int)MATCHOP)
+#define Aop(f) return ao((yylval.ival=f, REPORT("add",f), PL_expect = XTERM,PL_bufptr = s,(int)ADDOP))
+#define Mop(f) return ao((yylval.ival=f, REPORT("mul",f), PL_expect = XTERM,PL_bufptr = s,(int)MULOP))
+#define Eop(f) return(yylval.ival=f, REPORT("eq",f), PL_expect = XTERM,PL_bufptr = s,(int)EQOP)
+#define Rop(f) return(yylval.ival=f, REPORT("rel",f), PL_expect = XTERM,PL_bufptr = s,(int)RELOP)
 
 /* This bit of chicanery makes a unary function followed by
  * a parenthesis into a function with one argument, highest precedence.
  */
 #define UNI(f) return(yylval.ival = f, \
+	REPORT("uni",f), \
 	PL_expect = XTERM, \
 	PL_bufptr = s, \
 	PL_last_uni = PL_oldbufptr, \
@@ -158,12 +167,31 @@ int yyactlevel = -1;
 	(*s == '(' || (s = skipspace(s), *s == '(') ? (int)FUNC1 : (int)UNIOP) )
 
 #define UNIBRACK(f) return(yylval.ival = f, \
+        REPORT("uni",f), \
 	PL_bufptr = s, \
 	PL_last_uni = PL_oldbufptr, \
 	(*s == '(' || (s = skipspace(s), *s == '(') ? (int)FUNC1 : (int)UNIOP) )
 
 /* grandfather return to old style */
 #define OLDLOP(f) return(yylval.ival=f,PL_expect = XTERM,PL_bufptr = s,(int)LSTOP)
+
+void
+S_tokereport(pTHX_ char *thing, char* s, I32 rv)
+{ 
+    SV *report;
+    DEBUG_T({
+        report = newSVpv(thing, 0);
+        Perl_sv_catpvf(aTHX_ report, ":line %i:%i:", CopLINE(PL_curcop), rv);
+
+        if (s - PL_bufptr > 0)
+            sv_catpvn(report, PL_bufptr, s - PL_bufptr);
+        else {
+            if (PL_oldbufptr && *PL_oldbufptr)
+                sv_catpv(report, PL_tokenbuf);
+        }
+        PerlIO_printf(Perl_debug_log, "### %s\n", SvPV_nolen(report));
+    })
+}
 
 /*
  * S_ao
@@ -677,6 +705,7 @@ S_lop(pTHX_ I32 f, int x, char *s)
 {
     yylval.ival = f;
     CLINE;
+    REPORT("lop", f);
     PL_expect = x;
     PL_bufptr = s;
     PL_last_lop = PL_oldbufptr;
@@ -1359,8 +1388,7 @@ S_scan_const(pTHX_ char *start)
 			       "Unrecognized escape \\%c passed through",
 			       *s);
 		    /* default action is to copy the quoted character */
-		    *d++ = *s++;
-		    continue;
+		    goto default_action;
 		}
 
 	    /* \132 indicates an octal constant */
@@ -1450,6 +1478,13 @@ S_scan_const(pTHX_ char *start)
                     if (has_utf8 || uv > 255) {
 		        d = (char*)uv_to_utf8((U8*)d, uv);
 			has_utf8 = TRUE;
+			if (PL_lex_inwhat == OP_TRANS &&
+			    PL_sublex_info.sub_op) {
+			    PL_sublex_info.sub_op->op_private |=
+				(PL_lex_repl ? OPpTRANS_FROM_UTF
+					     : OPpTRANS_TO_UTF);
+			    utf = TRUE;
+			}
                     }
 		    else {
 		        *d++ = (char)uv;
@@ -1477,6 +1512,8 @@ S_scan_const(pTHX_ char *start)
 		    res = newSVpvn(s + 1, e - s - 1);
 		    res = new_constant( Nullch, 0, "charnames",
 					res, Nullsv, "\\N{...}" );
+		    if (has_utf8)
+			sv_utf8_upgrade(res);
 		    str = SvPV(res,len);
 		    if (!has_utf8 && SvUTF8(res)) {
 			char *ostart = SvPVX(sv);
@@ -1559,8 +1596,7 @@ S_scan_const(pTHX_ char *start)
 	    continue;
 	} /* end if (backslash) */
 
-       /* (now in tr/// code again) */
-
+    default_action:
        if (UTF8_IS_CONTINUED(*s) && (this_utf8 || has_utf8)) {
            STRLEN len = (STRLEN) -1;
            UV uv;
@@ -1579,10 +1615,15 @@ S_scan_const(pTHX_ char *start)
                    *d++ = *s++;
            }
            has_utf8 = TRUE;
+	   if (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op) {
+	       PL_sublex_info.sub_op->op_private |=
+		   (PL_lex_repl ? OPpTRANS_FROM_UTF : OPpTRANS_TO_UTF);
+	       utf = TRUE;
+	   }
            continue;
        }
 
-	*d++ = *s++;
+       *d++ = *s++;
     } /* while loop to process each character */
 
     /* terminate the string and set up the sv */
@@ -2531,33 +2572,7 @@ Perl_yylex(pTHX)
 	}
 	do {
 	    bof = PL_rsfp ? TRUE : FALSE;
-	    if (bof) {
-#ifdef PERLIO_IS_STDIO
-#  ifdef __GNU_LIBRARY__
-#    if __GNU_LIBRARY__ == 1 /* Linux glibc5 */
-#      define FTELL_FOR_PIPE_IS_BROKEN
-#    endif
-#  else
-#    ifdef __GLIBC__
-#      if __GLIBC__ == 1 /* maybe some glibc5 release had it like this? */
-#        define FTELL_FOR_PIPE_IS_BROKEN
-#      endif
-#    endif
-#  endif
-#endif
-#ifdef FTELL_FOR_PIPE_IS_BROKEN
-		/* This loses the possibility to detect the bof
-		 * situation on perl -P when the libc5 is being used.
-		 * Workaround?  Maybe attach some extra state to PL_rsfp?
-		 */
-		if (!PL_preprocess)
-		    bof = PerlIO_tell(PL_rsfp) == 0;
-#else
-		bof = PerlIO_tell(PL_rsfp) == 0;
-#endif
-	    }
-	    s = filter_gets(PL_linestr, PL_rsfp, 0);
-	    if (s == Nullch) {
+	    if ((s = filter_gets(PL_linestr, PL_rsfp, 0)) == Nullch) {
 	      fake_eof:
 		if (PL_rsfp) {
 		    if (PL_preprocess && !PL_in_eval)
@@ -2580,9 +2595,36 @@ Perl_yylex(pTHX)
 		PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
 		sv_setpv(PL_linestr,"");
 		TOKEN(';');	/* not infinite loop because rsfp is NULL now */
-	    } else if (bof) {
-		PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
-		s = swallow_bom((U8*)s);
+	    }
+	    /* if it looks like the start of a BOM, check if it in fact is */
+	    else if (bof && (!*s || *(U8*)s == 0xEF || *(U8*)s >= 0xFE)) {
+#ifdef PERLIO_IS_STDIO
+#  ifdef __GNU_LIBRARY__
+#    if __GNU_LIBRARY__ == 1 /* Linux glibc5 */
+#      define FTELL_FOR_PIPE_IS_BROKEN
+#    endif
+#  else
+#    ifdef __GLIBC__
+#      if __GLIBC__ == 1 /* maybe some glibc5 release had it like this? */
+#        define FTELL_FOR_PIPE_IS_BROKEN
+#      endif
+#    endif
+#  endif
+#endif
+#ifdef FTELL_FOR_PIPE_IS_BROKEN
+		/* This loses the possibility to detect the bof
+		 * situation on perl -P when the libc5 is being used.
+		 * Workaround?  Maybe attach some extra state to PL_rsfp?
+		 */
+		if (!PL_preprocess)
+		    bof = PerlIO_tell(PL_rsfp) == SvCUR(PL_linestr);
+#else
+		bof = PerlIO_tell(PL_rsfp) == SvCUR(PL_linestr);
+#endif
+		if (bof) {
+		    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
+		    s = swallow_bom((U8*)s);
+		}
 	    }
 	    if (PL_doextract) {
 		if (*s == '#' && s[1] == '!' && instr(s,"perl"))
@@ -4128,10 +4170,6 @@ Perl_yylex(pTHX)
 			(void)PerlIO_seek(PL_rsfp, 0L, 0);
 		    }
 		    if (PerlLIO_setmode(PerlIO_fileno(PL_rsfp), O_TEXT) != -1) {
-#if defined(__BORLANDC__)
-			/* XXX see note in do_binmode() */
-			((FILE*)PL_rsfp)->flags |= _F_BIN;
-#endif
 			if (loc > 0)
 			    PerlIO_seek(PL_rsfp, loc, 0);
 		    }
@@ -4713,7 +4751,8 @@ Perl_yylex(pTHX)
 	case KEY_qq:
 	case KEY_qu:
 	    s = scan_str(s,FALSE,FALSE);
-	    if (tmp == KEY_qu && is_utf8_string((U8*)s, SvCUR(PL_lex_stuff)))
+	    if (tmp == KEY_qu &&
+		is_utf8_string((U8*)SvPVX(PL_lex_stuff), SvCUR(PL_lex_stuff)))
 		SvUTF8_on(PL_lex_stuff);
 	    if (!s)
 		missingterm((char*)0);

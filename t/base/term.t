@@ -48,5 +48,5 @@ else {
     die "/dev/null IS NOT A CHARACTER SPECIAL FILE!!!!\n" unless -c '/dev/null';
 }
 
-open(try, "../Configure") || (die "Can't open ../Configure.");
+open(try, "harness") || (die "Can't open harness.");
 if (<try> ne '') {print "ok 7\n";} else {print "not ok 7\n";}

@@ -198,6 +198,7 @@ my @extvars = qw(sv_undef sv_yes sv_no na dowarn
 		 diehook
 		 dirty
 		 perl_destruct_level
+		 ppaddr
                 );
 
 sub readsyms (\%$) {
@@ -2085,6 +2086,7 @@ Adp	|STRLEN	|utf8_length	|U8* s|U8 *e
 Apd	|IV	|utf8_distance	|U8 *a|U8 *b
 Apd	|U8*	|utf8_hop	|U8 *s|I32 off
 ApMd	|U8*	|utf8_to_bytes	|U8 *s|STRLEN *len
+ApMd	|U8*	|bytes_from_utf8|U8 *s|STRLEN *len|bool *is_utf8
 ApMd	|U8*	|bytes_to_utf8	|U8 *s|STRLEN *len
 Apd	|UV	|utf8_to_uv_simple|U8 *s|STRLEN* retlen
 Adp	|UV	|utf8_to_uv	|U8 *s|STRLEN curlen|STRLEN* retlen|U32 flags
@@ -2518,6 +2520,7 @@ s	|char *	|filter_gets	|SV *sv|PerlIO *fp|STRLEN append
 s	|HV *	|find_in_my_stash|char *pkgname|I32 len
 s	|SV*	|new_constant	|char *s|STRLEN len|const char *key|SV *sv \
 				|SV *pv|const char *type
+s	|void	|tokereport	|char *thing|char *s|I32 rv
 s	|int	|ao		|int toketype
 s	|void	|depcom
 s	|char*	|incl_perldb

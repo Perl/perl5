@@ -2264,6 +2264,7 @@ Perl_sighandler(int sig)
 
     POPSTACK;
     if (SvTRUE(ERRSV)) {
+#ifndef PERL_MICRO
 #ifdef HAS_SIGPROCMASK
 	/* Handler "died", for example to get out of a restart-able read().
 	 * Before we re-do that on its behalf re-enable the signal which was
@@ -2278,6 +2279,7 @@ Perl_sighandler(int sig)
 	(void)rsignal(sig, SIG_IGN);
 	(void)rsignal(sig, &Perl_csighandler);
 #endif
+#endif /* !PERL_MICRO */
 	Perl_die(aTHX_ Nullch);
     }
 cleanup:

@@ -2448,6 +2448,9 @@ Perl_looks_like_number(pTHX_ SV *sv)
     I32 numtype = 0;
     I32 sawinf  = 0;
     STRLEN len;
+#ifdef USE_LOCALE_NUMERIC
+    bool specialradix = FALSE;
+#endif
 
     if (SvPOK(sv)) {
 	sbegin = SvPVX(sv);
@@ -2514,10 +2517,15 @@ Perl_looks_like_number(pTHX_ SV *sv)
 
         if (*s == '.'
 #ifdef USE_LOCALE_NUMERIC
-	    || IS_NUMERIC_RADIX(*s)
+	    || (specialradix = IS_NUMERIC_RADIX(s))
 #endif
 	    ) {
-	    s++;
+#ifdef USE_LOCALE_NUMERIC
+	    if (specialradix)
+		s += SvCUR(PL_numeric_radix);
+	    else
+#endif
+		s++;
 	    numtype |= IS_NUMBER_NOT_INT;
             while (isDIGIT(*s))  /* optional digits after the radix */
                 s++;
@@ -2525,10 +2533,15 @@ Perl_looks_like_number(pTHX_ SV *sv)
     }
     else if (*s == '.'
 #ifdef USE_LOCALE_NUMERIC
-	    || IS_NUMERIC_RADIX(*s)
+	    || (specialradix = IS_NUMERIC_RADIX(s))
 #endif
 	    ) {
-        s++;
+#ifdef USE_LOCALE_NUMERIC
+	if (specialradix)
+	    s += SvCUR(PL_numeric_radix);
+	else
+#endif
+	    s++;
 	numtype |= IS_NUMBER_TO_INT_BY_ATOL | IS_NUMBER_NOT_INT;
         /* no digits before the radix means we need digits after it */
         if (isDIGIT(*s)) {
@@ -3530,15 +3543,16 @@ void
 Perl_sv_setpvn(pTHX_ register SV *sv, register const char *ptr, register STRLEN len)
 {
     register char *dptr;
-    {
-        /* len is STRLEN which is unsigned, need to copy to signed */
-	IV iv = len;
-	assert(iv >= 0);
-    }
+
     SV_CHECK_THINKFIRST(sv);
     if (!ptr) {
 	(void)SvOK_off(sv);
 	return;
+    }
+    else {
+        /* len is STRLEN which is unsigned, need to copy to signed */
+	IV iv = len;
+	assert(iv >= 0);
     }
     (void)SvUPGRADE(sv, SVt_PV);
 
@@ -4689,30 +4703,24 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
 
     /* do not utf8ize the comparands as a side-effect */
     if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTE) {
+	bool is_utf8 = TRUE;
+
 	if (PL_hints & HINT_UTF8_DISTINCT)
 	    return FALSE;
 
 	if (SvUTF8(sv1)) {
-	    (void)utf8_to_bytes((U8*)(pv1 = savepvn(pv1, cur1)), &cur1);
-	    {
-		IV scur1 = cur1;
-		if (scur1 < 0) {
-		    Safefree(pv1);
-		    return 0;
-		}
-	    }
-	    pv1tmp = TRUE;
+	    char *pv = (char*)bytes_from_utf8((U8*)pv1, &cur1, &is_utf8);
+	    if (is_utf8)
+		return 0;
+	    pv1tmp = (pv != pv1);
+	    pv1 = pv;
 	}
 	else {
-	    (void)utf8_to_bytes((U8*)(pv2 = savepvn(pv2, cur2)), &cur2);
-	    {
-		IV scur2 = cur2;
-		if (scur2 < 0) {
-		    Safefree(pv2);
-		    return 0;
-		}
-	    }
-	    pv2tmp = TRUE;
+	    char *pv = (char *)bytes_from_utf8((U8*)pv2, &cur2, &is_utf8);
+	    if (is_utf8)
+		return 0;
+	    pv2tmp = (pv != pv2);
+	    pv2 = pv;
 	}
     }
 
@@ -5600,6 +5608,8 @@ Perl_newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
         len = -len;
         is_utf8 = TRUE;
     }
+    if (is_utf8 && !(PL_hints & HINT_UTF8_DISTINCT))
+	src = (char*)bytes_from_utf8((U8*)src, (STRLEN*)&len, &is_utf8);
     if (!hash)
 	PERL_HASH(hash, src, len);
     new_SV(sv);
@@ -8836,7 +8846,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_numeric_name	= SAVEPV(proto_perl->Inumeric_name);
     PL_numeric_standard	= proto_perl->Inumeric_standard;
     PL_numeric_local	= proto_perl->Inumeric_local;
-    PL_numeric_radix	= proto_perl->Inumeric_radix;
+    PL_numeric_radix	= sv_dup_inc(proto_perl->Inumeric_radix);
 #endif /* !USE_LOCALE_NUMERIC */
 
     /* utf8 character classes */

@@ -1,5 +1,5 @@
 # hints/solaris_2.sh
-# Last modified: Tue Jan  2 10:16:35 2001
+# Last modified: Mon Jan 29 12:52:28 2001
 # Lupe Christoph <lupe@lupe-christoph.de>
 # Based on version by:
 # Andy Dougherty  <doughera@lafayette.edu>
@@ -26,9 +26,16 @@
 #  these ought to be harmless.  See below for more details.
 
 # See man vfork.
-usevfork=false
+usevfork=${usevfork:-false}
 
-d_suidsafe=define
+# Solaris has secure SUID scripts
+d_suidsafe=${d_suidsafe:-define}
+
+# Several people reported problems with perl's malloc, especially
+# when use64bitall is defined or when using gcc.
+#     http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2001-01/msg01318.html
+#     http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2001-01/msg00465.html
+usemymalloc=${usemymalloc:-false}
 
 # Avoid all libraries in /usr/ucblib.
 # /lib is just a symlink to /usr/lib

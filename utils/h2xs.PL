@@ -409,10 +409,12 @@ my @ARGS = @ARGV;
 my $compat_version = $];
 
 use Getopt::Std;
+use Config;
 
-sub usage{
-	warn "@_\n" if @_;
-    die "h2xs [-ACOPXacdfhkmx] [-F addflags] [-M fmask] [-n module_name] [-o tmask] [-p prefix] [-s subs] [-v version] [headerfile [extra_libraries]]
+sub usage {
+    warn "@_\n" if @_;
+    die <<EOFUSAGE;
+h2xs [-ACOPXacdfhkmx] [-F addflags] [-M fmask] [-n module_name] [-o tmask] [-p prefix] [-s subs] [-v version] [-b compat_version ] [headerfile [extra_libraries]]
 version: $H2XS_VERSION
     -A   Omit all autoloading facilities (implies -c).
     -C   Omit creating the Changes file, add HISTORY heading to stub POD.
@@ -438,7 +440,7 @@ version: $H2XS_VERSION
 extra_libraries
          are any libraries that might be needed for loading the
          extension, e.g. -lm would try to link in the math library.
-";
+EOFUSAGE
 }
 
 
@@ -960,8 +962,19 @@ print PM <<"END";
 __END__
 END
 
-my $author = "A. U. Thor";
-my $email = 'a.u.thor@a.galaxy.far.far.away';
+my ($email,$author);
+
+eval {
+       my $user;
+       ($user,$author) = (getpwuid($>))[0,6];
+       $author =~ s/,.*$//; # in case of sub fields
+       my $domain = $Config{'mydomain'};
+       $domain =~ s/^\.//;
+       $email = "$user\@$domain";
+     };
+
+$author ||= "A. U. Thor";
+$email  ||= 'a.u.thor@a.galaxy.far.far.away';
 
 my $revhist = '';
 $revhist = <<EOT if $opt_C;

@@ -470,6 +470,7 @@ Perl_utf8_length
 Perl_utf8_distance
 Perl_utf8_hop
 Perl_utf8_to_bytes
+Perl_bytes_from_utf8
 Perl_bytes_to_utf8
 Perl_utf8_to_uv_simple
 Perl_utf8_to_uv

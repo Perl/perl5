@@ -97,7 +97,7 @@ Similarly, F<s2p> converts F<sed> scripts to Perl programs. F<s2p> run
 on C<s/foo/bar> will produce a Perl program based around this:
 
     while (<>) {
-        chop;
+        chomp;
         s/foo/bar/g;
         print if $printit;
     }

@@ -3064,7 +3064,8 @@ enum {
   to_sv_amg,   to_av_amg,
   to_hv_amg,   to_gv_amg,
   to_cv_amg,   iter_amg,
-  DESTROY_amg, max_amg_code
+  int_amg,	DESTROY_amg,
+  max_amg_code
   /* Do not leave a trailing comma here.  C9X allows it, C89 doesn't. */
 };
 
@@ -3110,7 +3111,7 @@ EXTCONST char * PL_AMG_names[NofAMmeth] = {
   "(${}",	"(@{}",
   "(%{}",	"(*{}",
   "(&{}",	"(<>",
-  "DESTROY",
+  "(int",	"DESTROY",
 };
 #else
 EXTCONST char * PL_AMG_names[NofAMmeth];
@@ -3216,9 +3217,9 @@ typedef struct am_table_short AMTS;
 #define SET_NUMERIC_LOCAL() \
 	set_numeric_local();
 
-#define IS_NUMERIC_RADIX(c)	\
+#define IS_NUMERIC_RADIX(s)	\
 	((PL_hints & HINT_LOCALE) && \
-	  PL_numeric_radix && (c) == PL_numeric_radix)
+	  PL_numeric_radix && memEQ(s, SvPVX(PL_numeric_radix), SvCUR(PL_numeric_radix)))
 
 #define STORE_NUMERIC_LOCAL_SET_STANDARD() \
 	bool was_local = (PL_hints & HINT_LOCALE) && PL_numeric_local; \
@@ -3339,12 +3340,14 @@ typedef struct am_table_short AMTS;
  * massively.
  */
 
-#ifndef PERL_OLD_SIGNALS
-#define PERL_ASYNC_CHECK() if (PL_sig_pending) despatch_signals()
+#ifndef PERL_MICRO
+#   ifndef PERL_OLD_SIGNALS
+#       define PERL_ASYNC_CHECK() if (PL_sig_pending) despatch_signals()
+#   endif
 #endif
 
 #ifndef PERL_ASYNC_CHECK
-#define PERL_ASYNC_CHECK()  NOOP
+#   define PERL_ASYNC_CHECK()  NOOP
 #endif
 
 /*

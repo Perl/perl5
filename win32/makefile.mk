@@ -67,6 +67,10 @@ USE_ITHREADS	*= define
 USE_IMP_SYS	*= define
 
 #
+# uncomment to enable the experimental PerlIO I/O subsystem.
+USE_PERLIO	= define
+
+#
 # WARNING! This option is deprecated and will eventually go away (enable
 # USE_ITHREADS instead).
 #
@@ -248,6 +252,7 @@ USE_MULTI	*= undef
 USE_OBJECT	*= undef
 USE_ITHREADS	*= undef
 USE_IMP_SYS	*= undef
+USE_PERLIO	*= undef
 USE_PERLCRT	*= undef
 
 .IF "$(USE_IMP_SYS)$(USE_MULTI)$(USE_5005THREADS)$(USE_OBJECT)" == "defineundefundefundef"
@@ -278,6 +283,11 @@ ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-thread
 .ELIF "$(USE_MULTI)" == "define"
 ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-multi
 .ELSE
+.IF "$(USE_PERLIO)" == "define"
+ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-perlio
+.ELSE
+ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)
+.ENDIF
 ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)
 .ENDIF
 
@@ -862,6 +872,7 @@ CFG_VARS	=					\
 		useithreads=$(USE_ITHREADS)	~	\
 		usethreads=$(USE_5005THREADS)	~	\
 		usemultiplicity=$(USE_MULTI)	~	\
+		useperlio=$(USE_PERLIO)		~	\
 		LINK_FLAGS=$(LINK_FLAGS:s/\/\\/)		~	\
 		optimize=$(OPTIMIZE)
 

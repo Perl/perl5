@@ -425,6 +425,10 @@ this could be done:
 Notice how there's no memory to deallocate in the destructor?  That's
 something that Perl takes care of for you all by itself.
 
+Alternatively, you could use the Class::Data::Inheritable module from
+CPAN.
+
+
 =head2 Accessing Class Data
 
 It turns out that this is not really a good way to go about handling
@@ -1749,6 +1753,16 @@ L<perlbot>,
 L<perltie>,
 and
 L<overload>.
+
+L<perlboot> is a kinder, gentler introduction to object-oriented
+programming.
+
+L<perltootc> provides more detail on class data.
+
+Some modules which might prove interesting are Class::Accessor,
+Class::Class, Class::Contract, Class::Data::Inheritable,
+Class::MethodMaker and Tie::SecureHash
+
 
 =head1 AUTHOR AND COPYRIGHT
 

@@ -2,7 +2,7 @@
 
 package Getopt::Long;
 
-# RCS Status      : $Id: GetoptLong.pl,v 2.25 2000-08-28 21:45:17+02 jv Exp jv $
+# RCS Status      : $Id: GetoptLong.pl,v 2.26 2001-01-31 10:20:29+01 jv Exp $
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
@@ -35,8 +35,8 @@ use 5.004;
 use strict;
 
 use vars qw($VERSION $VERSION_STRING);
-$VERSION        =  2.24_02;
-$VERSION_STRING = "2.24_02";
+$VERSION        =  2.25;
+$VERSION_STRING = "2.25";
 
 use Exporter;
 use AutoLoader qw(AUTOLOAD);
@@ -215,7 +215,7 @@ __END__
 
 ################ AutoLoading subroutines ################
 
-# RCS Status      : $Id: GetoptLongAl.pl,v 2.29 2000-08-28 21:56:18+02 jv Exp jv $
+# RCS Status      : $Id: GetoptLongAl.pl,v 2.30 2001-01-31 10:21:11+01 jv Exp $
 # Author          : Johan Vromans
 # Created On      : Fri Mar 27 11:50:30 1998
 # Last Modified By: Johan Vromans
@@ -244,7 +244,7 @@ sub GetOptions {
     print STDERR ("GetOpt::Long $Getopt::Long::VERSION ",
 		  "called from package \"$pkg\".",
 		  "\n  ",
-		  'GetOptionsAl $Revision: 2.29 $ ',
+		  'GetOptionsAl $Revision: 2.30 $ ',
 		  "\n  ",
 		  "ARGV: (@ARGV)",
 		  "\n  ",
@@ -1694,6 +1694,10 @@ is equivalent to
 
     --foo -- arg1 --bar arg2 arg3
 
+If C<pass_through> is also enabled, options processing will terminate
+at the first unrecognized option, or non-option, whichever comes
+first.
+
 =item bundling (default: disabled)
 
 Enabling this option will allow single-character options to be bundled.
@@ -1735,7 +1739,9 @@ errors. This makes it possible to write wrapper scripts that process
 only part of the user supplied command line arguments, and pass the
 remaining options to some other program.
 
-This can be very confusing, especially when C<permute> is also enabled.
+If C<require_order> is enabled, options processing will terminate at
+the first unrecognized option, or non-option, whichever comes first.
+However, if C<permute> is enabled instead, results can become confusing.
 
 =item prefix
 
@@ -1880,6 +1886,5 @@ MA 02139, USA.
 =cut
 
 # Local Variables:
-# mode: perl
 # eval: (load-file "pod.el")
 # End:

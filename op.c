@@ -1568,7 +1568,6 @@ Perl_mod(pTHX_ OP *o, I32 type)
     case OP_AASSIGN:
     case OP_NEXTSTATE:
     case OP_DBSTATE:
-    case OP_REFGEN:
     case OP_CHOMP:
        PL_modcount = RETURN_UNLIMITED_NUMBER;
 	break;

@@ -55,6 +55,7 @@ Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
 
 =cut */
 
+#undef SP /* Solaris 2.7 i386 has this in /usr/include/sys/reg.h */
 #define SP sp
 #define MARK mark
 #define TARG targ
@@ -133,6 +134,7 @@ Pops a long off the stack.
 
 #define TOPs		(*sp)
 #define TOPm1s		(*(sp-1))
+#define TOPp1s		(*(sp+1))
 #define TOPp		(SvPV(TOPs, PL_na))		/* deprecated */
 #define TOPpx		(SvPV(TOPs, n_a))
 #define TOPn		(SvNV(TOPs))

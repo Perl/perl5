@@ -3417,9 +3417,8 @@ sigaction(sig, action, oldaction = 0)
 		/* Set up any desired mask. */
 		svp = hv_fetch(action, "MASK", 4, FALSE);
 		if (svp && sv_isa(*svp, "POSIX::SigSet")) {
-		    unsigned long tmp;
-		    tmp = (unsigned long)SvNV((SV*)SvRV(*svp));
-		    sigset = (sigset_t*) tmp;
+		    IV tmp = SvIV((SV*)SvRV(*svp));
+		    sigset =  INT2PTR(sigset_t*, tmp);
 		    act.sa_mask = *sigset;
 		}
 		else

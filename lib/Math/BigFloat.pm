@@ -18,6 +18,7 @@ use overload
 			 scalar fdiv(${$_[0]},$_[1])},
 'neg'	=>	sub {new Math::BigFloat &fneg},
 'abs'	=>	sub {new Math::BigFloat &fabs},
+'int'	=>	sub {new Math::BigInt &f2int},
 
 qw(
 ""	stringify
@@ -56,6 +57,13 @@ sub stringify {
     # 1 while $n =~ s/(.*\d)(\d\d\d)/$1,$2/;
 
     return $n;
+}
+
+sub import {
+  shift;
+  return unless @_;
+  die "unknown import: @_" unless @_ == 1 and $_[0] eq ':constant';
+  overload::constant float => sub {Math::BigFloat->new(shift)};
 }
 
 $div_scale = 40;
@@ -231,6 +239,26 @@ sub ffround { #(fnum_str, scale) return fnum_str
 	    } else {
 		&norm(&round(substr($xm,$[,$xe),
 		      "+0".substr($xm,$[+$xe,1),"+10"), $scale);
+	    }
+	}
+    }
+}
+
+# Calculate the integer part of $x
+sub f2int { #(fnum_str) return inum_str
+    local($x) = ${$_[$[]};
+    if ($x eq 'NaN') {
+	die "Attempt to take int(NaN)";
+    } else {
+	local($xm,$xe) = split('E',$x);
+	if ($xe >= 0) {
+	    $xm . '0' x $xe;
+	} else {
+	    $xe = length($xm)+$xe;
+	    if ($xe <= 1) {
+		'+0';
+	    } else {
+	        substr($xm,$[,$xe);
 	    }
 	}
     }

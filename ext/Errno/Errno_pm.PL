@@ -83,6 +83,9 @@ sub get_files {
     } elsif ($^O eq 'vmesa') {
 	# OS/390 C compiler doesn't generate #file or #line directives
 	$file{'../../vmesa/errno.h'} = 1;
+    } elsif ($Config{archname} eq 'epoc') {
+	# Watch out for cross compiling for EPOC (usually done on linux)
+	$file{'/usr/local/epoc/include/libc/sys/errno.h'} = 1;
     } elsif ($^O eq 'linux') {
 	# Some Linuxes have weird errno.hs which generate
 	# no #file or #line directives

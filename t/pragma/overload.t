@@ -970,6 +970,38 @@ unless ($aaa) {
     test($a =~ /^`1' is not a code reference at/); # 215
 }
 
+{
+  my $c = 0;
+  package ov_int1;
+  use overload '""'    => sub { 3+shift->[0] },
+               '0+'    => sub { 10+shift->[0] },
+               'int'   => sub { 100+shift->[0] };
+  sub new {my $p = shift; bless [shift], $p}
+
+  package ov_int2;
+  use overload '""'    => sub { 5+shift->[0] },
+               '0+'    => sub { 30+shift->[0] },
+               'int'   => sub { 'ov_int1'->new(1000+shift->[0]) };
+  sub new {my $p = shift; bless [shift], $p}
+
+  package noov_int;
+  use overload '""'    => sub { 2+shift->[0] },
+               '0+'    => sub { 9+shift->[0] };
+  sub new {my $p = shift; bless [shift], $p}
+
+  package main;
+
+  my $x = new noov_int 11;
+  my $int_x = int $x;
+  main::test("$int_x" eq 20);			# 216
+  $x = new ov_int1 31;
+  $int_x = int $x;
+  main::test("$int_x" eq 131);			# 217
+  $x = new ov_int2 51;
+  $int_x = int $x;
+  main::test("$int_x" eq 1054);			# 218
+}
+
 # make sure that we don't inifinitely recurse
 {
   my $c = 0;
@@ -979,10 +1011,12 @@ unless ($aaa) {
                'bool'  => sub { shift },
                fallback => 1;
   my $x = bless([]);
-  main::test("$x" =~ /Recurse=ARRAY/);		# 216
-  main::test($x);                               # 217
-  main::test($x+0 =~ /Recurse=ARRAY/);		# 218
-};
+  main::test("$x" =~ /Recurse=ARRAY/);		# 219
+  main::test($x);                               # 220
+  main::test($x+0 =~ /Recurse=ARRAY/);		# 221
+}
+
+
 
 # Last test is:
-sub last {218}
+sub last {221}

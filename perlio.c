@@ -651,6 +651,10 @@ PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
              PerlIO_funcs *tab = INT2PTR(PerlIO_funcs *, SvIV(SvRV(layer)));
              if (tab)
               {
+	       if (as && (ae == Nullch)) {
+		ae = e;
+		Perl_warn(aTHX_ "perlio: argument list not closed for layer \"%.*s\"",(int)(e - s),s);
+	       }
                len = (as) ? (ae-(as++)-1) : 0;
                if (!PerlIO_push(f,tab,mode,as,len))
                 return -1;

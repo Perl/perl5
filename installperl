@@ -117,7 +117,7 @@ find(sub {
 # print "[$_]\n" for sort keys %archpms;
 
 my $ver = $Config{version};
-my $release = substr($],0,3);   # Not used presently.
+my $release = substr($],0,3);   # Not used currently.
 my $patchlevel = substr($],3,2);
 die "Patchlevel of perl ($patchlevel)",
     "and patchlevel of config.sh ($Config{'PERL_VERSION'}) don't match\n"
@@ -137,6 +137,15 @@ my $libperl = $Config{libperl};
 my $so = $Config{so};
 my $dlext = $Config{dlext};
 my $dlsrc = $Config{dlsrc};
+if ($^O eq 'os390') {
+    my $pwd;
+    chomp($pwd=`pwd`);
+    my $archlibexp = $Config{archlibexp};
+    my $usedl = $Config{usedl};
+    if ($usedl eq 'define') {
+        `./$^X -pibak -e 's{$pwd\/libperl.x}{$archlibexp/CORE/libperl.x}' lib/Config.pm`;
+    }
+}
 
 my $d_dosuid = $Config{d_dosuid};
 my $binexp = $Config{binexp};

@@ -348,9 +348,7 @@ EOM
             fi
 
             # HP-UX 10.X uses the old pthreads API
-            case "$d_oldpthreads" in
-            '') d_oldpthreads="$define" ;;
-            esac
+            d_oldpthreads="$define"
 
             # include libcma before all the others
             libswanted="cma $libswanted"

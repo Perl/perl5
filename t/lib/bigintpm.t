@@ -9,7 +9,7 @@ use Math::BigInt;
 
 $test = 0;
 $| = 1;
-print "1..278\n";
+print "1..283\n";
 while (<DATA>) {
        chop;
        if (s/^&//) {
@@ -25,6 +25,8 @@ while (<DATA>) {
                    $try .= "-\$x;";
                } elsif ($f eq "babs") {
                    $try .= "abs \$x;";
+               } elsif ($f eq "bint") {
+                   $try .= "int \$x;";
                } else {
                    $try .= "\$y = new Math::BigInt \"$args[1]\";";
                    if ($f eq "bcmp"){
@@ -375,3 +377,9 @@ abc:NaN
 +0:-1
 +8:-9
 +281474976710656:-281474976710657
+&bint
++0:+0
++1:+1
++11111111111111111234:+11111111111111111234
+-1:-1
+-11111111111111111234:-11111111111111111234

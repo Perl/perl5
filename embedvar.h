@@ -1747,6 +1747,7 @@
 #define no_modify		PL_no_modify
 #define perl_destruct_level	PL_perl_destruct_level
 #define perldb			PL_perldb
+#define ppaddr			PL_ppaddr
 #define rsfp			PL_rsfp
 #define rsfp_filters		PL_rsfp_filters
 #define stack_base		PL_stack_base

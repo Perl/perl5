@@ -559,7 +559,10 @@ eval q{
     sub END { cleanup($tmp, $buffer) } 
     1;
 } || die;
-eval q{ use sigtrap qw(die INT TERM HUP QUIT) };
+
+# exit/die in a windows sighandler is dangerous, so let it do the
+# default thing, which is to exit
+eval q{ use sigtrap qw(die INT TERM HUP QUIT) } unless $^O eq 'MSWin32';
 
 if ($opt_m) {
     foreach my $pager (@pagers) {

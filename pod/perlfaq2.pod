@@ -489,23 +489,21 @@ Other starting points include
     http://conference.perl.com/
     http://reference.perl.com/
 
-Perl Mongers is an advocacy organization for the Perl language.  For
-details, see the Perl Mongers web site at http://www.perlmongers.org/.
-
-Perl Mongers uses the pm.org domain for services related to Perl user
-groups.  See the Perl user group web site at http://www.pm.org/ for more
-information about joining, starting, or requesting services for a Perl
-user group.
-
-Perl Mongers also maintains the perl.org domain to provide general
-support services to the Perl community, including the hosting of mailing
-lists, web sites, and other services.  The web site
-http://www.perl.org/ is a general advocacy site for the Perl language,
-and there are many other sub-domains for special topics, such as
+Perl Mongers is an advocacy organization for the Perl language which
+maintains the web site http://www.perl.org/ as a general advocacy
+site for the Perl language, with many sub-domains for special topics,
+including
 
     http://history.perl.org/
     http://bugs.perl.org/
-    http://www.news.perl.org/
+    http://use.perl.org/
+
+Perl Mongers uses the pm.org domain for services related to Perl user
+groups, including the hosting of mailing lists and web sites.  See the
+Perl user group web site at http://www.pm.org/ for more information about
+joining, starting, or requesting services for a Perl user group.
+
+
 
 =head1 AUTHOR AND COPYRIGHT
 
