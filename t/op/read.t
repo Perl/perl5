@@ -9,7 +9,7 @@ BEGIN {
 }
 use strict;
 
-plan tests => 1732;
+plan tests => 2564;
 
 open(FOO,'op/read.t') || open(FOO,'t/op/read.t') || open(FOO,':op:read.t') || die "Can't open op.read";
 seek(FOO,4,0) or die "Seek failed: $!";
@@ -31,7 +31,7 @@ my $tmpfile = 'Op_read.tmp';
 
 my (@values, @buffers) = ('', '');
 
-foreach (65, 161, 253) { #  9786) {
+foreach (65, 161, 253, 9786) {
     push @values, join "", map {chr $_} $_ .. $_ + 4;
     push @buffers, join "", map {chr $_} $_ + 5 .. $_ + 20;
 }
