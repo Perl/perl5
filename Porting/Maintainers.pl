@@ -42,6 +42,7 @@ package Maintainers;
 	'petdance'	=> 'Andy Lester <petdance@cpan.org>',
 	'pmqs'		=> 'Paul Marquess <pmqs@cpan.org>',
 	'pvhp'		=> 'Peter Prymmer <pvhp@best.com>',
+	'rgarcia'	=> 'Rafael Garcia-Suarez <rgarcia@cpan.org>',
 	'rmbarker'	=> 'Robin Barker <rmbarker@cpan.org>',
 	'rra'		=> 'Russ Allbery <rra@cpan.org>',
 	'sadahiro'	=> 'SADAHIRO Tomoyuki <SADAHIRO@cpan.org>',
@@ -425,7 +426,7 @@ package Maintainers;
 
 	'Switch' =>
 		{
-		'MAINTAINER'	=> 'dconway',
+		'MAINTAINER'	=> 'rgarcia',
 		'FILES'		=> q[lib/Switch.pm lib/Switch],
 		'CPAN'		=> 1,
 		},

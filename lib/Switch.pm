@@ -850,7 +850,8 @@ and requires both these modules to be installed.
 
 =head1 AUTHOR
 
-Damian Conway (damian@conway.org)
+Damian Conway (damian@conway.org). The maintainer of this module is now Rafael
+Garcia-Suarez (rgarciasuarez@free.fr).
 
 =head1 BUGS
 
