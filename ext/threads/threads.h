@@ -47,7 +47,7 @@ shared_sv* threads;
 #ifdef WIN32
 THREAD_RET_TYPE Perl_thread_run(LPVOID arg);
 #else
-void Perl_thread_run(void * arg);
+void* Perl_thread_run(void * arg);
 #endif
 void Perl_thread_destruct(ithread* thread);
 

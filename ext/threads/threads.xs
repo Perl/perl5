@@ -13,7 +13,7 @@
 #ifdef WIN32
 THREAD_RET_TYPE Perl_thread_run(LPVOID arg) {
 #else
-void Perl_thread_run(void * arg) {
+void* Perl_thread_run(void * arg) {
 #endif
 	ithread* thread = (ithread*) arg;
 	SV* thread_tid_ptr;
@@ -74,6 +74,8 @@ void Perl_thread_run(void * arg) {
    	}
 #ifdef WIN32
 	return (DWORD)0;
+#else
+	return 0;
 #endif
 
 }
@@ -168,7 +170,7 @@ SV* Perl_thread_create(char* class, SV* init_function, SV* params) {
 			(LPVOID)thread, 0, &thread->thr);
 
 #else
-	pthread_create( &thread->thr, NULL, (void *) Perl_thread_run, thread);
+	pthread_create( &thread->thr, NULL, Perl_thread_run, thread);
 #endif
 	MUTEX_UNLOCK(&create_mutex);	
 
@@ -288,7 +290,7 @@ BOOT:
 	PL_perl_destruct_level = 2;
 	threads = Perl_sharedsv_new(aTHX);
 	SHAREDSvEDIT(threads);
-	((HV*) SHAREDSvGET(threads)) = newHV();
+	SHAREDSvGET(threads) = (SV *)newHV();
 	SHAREDSvRELEASE(threads);
 	{
 	    
