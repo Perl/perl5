@@ -31,6 +31,149 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 12022] By: jhi                                   on 2001/09/14  14:49:52
+        Log: Subject: Re: [ID 20010911.001] Not OK: perl v5.7.2 +DEVEL11978 on
+             From: "chromatic" <chromatic@rmci.net>
+             Date: Fri, 14 Sep 2001 09:44:57 -0600 
+             Message-ID: <20010914154936.70059.qmail@onion.perl.org>
+     Branch: perl
+	   ! lib/ExtUtils/Manifest.t
+____________________________________________________________________________
+[ 12021] By: jhi                                   on 2001/09/14  14:46:36
+        Log: Hopefully better skipping of the Complete.t tests
+             in case of not a tty. 
+     Branch: perl
+	   ! lib/Term/Complete.t t/op/stat.t
+____________________________________________________________________________
+[ 12020] By: jhi                                   on 2001/09/14  14:10:44
+        Log: Subject: [PATCH regexec.c] more jumpables, and hit-bit bug
+             From: "Jeff 'japhy/Marillion' Pinyan" <jeffp@crusoe.net>
+             Date: Fri, 14 Sep 2001 09:58:24 -0400 (EDT)
+             Message-ID: <Pine.GSO.4.21.0109140955250.12393-100000@crusoe.crusoe.net>     
+     Branch: perl
+	   ! regexec.c t/op/pat.t
+____________________________________________________________________________
+[ 12019] By: jhi                                   on 2001/09/14  14:02:59
+        Log: Subject: Re: unterminated C<...> at line 426 in file perlport.pod
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Fri, 14 Sep 2001 16:01:11 +0100 (BST)
+             Message-Id: <200109141501.QAA13044@tempest.npl.co.uk>
+     Branch: perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[ 12018] By: jhi                                   on 2001/09/14  13:55:56
+        Log: NetWare tweaks from Ananth Kesari.
+     Branch: perl
+	   ! NetWare/NWUtil.c NetWare/Nwmain.c NetWare/Nwpipe.c
+	   ! NetWare/nwutil.h
+____________________________________________________________________________
+[ 12017] By: jhi                                   on 2001/09/14  13:50:08
+        Log: Subject: unterminated C<...> at line 426 in file perlport.pod
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Fri, 14 Sep 2001 10:51:13 +0200
+             Message-Id: <20010914103300.4B59.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[ 12016] By: jhi                                   on 2001/09/14  13:28:08
+        Log: Subject: Re: [PATCH 2 pl2pm.PL]
+             From: Joe Smith <Joe.Smith@inwap.com>
+             Date: Fri, 14 Sep 2001 00:13:32 -0700
+             Message-Id: <3BA1AE1C.64313CEE@inwap.com>                 
+             
+             Eradicate qu.
+     Branch: perl
+	   ! keywords.h keywords.pl utils/pl2pm.PL
+____________________________________________________________________________
+[ 12015] By: jhi                                   on 2001/09/14  02:38:23
+        Log: Retract #12013, didn't go over too well in Tru64.
+     Branch: perl
+	   ! embed.h embed.pl sv.h
+____________________________________________________________________________
+[ 12014] By: jhi                                   on 2001/09/14  02:31:05
+        Log: Subject: [PATCH] Execute files of debugger commands
+             From: Peter Scott <Peter@PSDT.com>
+             Date: Thu, 13 Sep 2001 15:26:31 -0700
+             Message-Id: <4.3.2.7.2.20010913115845.00b22100@mail.webquarry.com>
+     Branch: perl
+	   ! lib/perl5db.pl pod/perldebug.pod
+____________________________________________________________________________
+[ 12013] By: jhi                                   on 2001/09/14  02:25:05
+        Log: (Retracted by #12015)
+             Subject: [proposed PATCH] Re: perl@11920
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Wed, 12 Sep 2001 23:46:09 +0100
+             Message-ID: <20010912234609.H4971@plum.flirble.org>     
+     Branch: perl
+	   ! embed.h embed.pl sv.h
+____________________________________________________________________________
+[ 12012] By: jhi                                   on 2001/09/14  02:12:02
+        Log: ucblib shouldn't be linked against in nonstop-ux,
+             from Tom Bates.
+     Branch: perl
+	   ! hints/nonstopux.sh
+____________________________________________________________________________
+[ 12011] By: jhi                                   on 2001/09/13  12:54:51
+        Log: Do stty only if we have stty.
+             
+             TODO: non-UNIX platforms.  Solaris and /usr/ucb/stty?
+     Branch: perl
+	   ! lib/Term/Complete.pm
+____________________________________________________________________________
+[ 12010] By: jhi                                   on 2001/09/13  12:44:28
+        Log: Skip the test if not running on a tty.
+     Branch: perl
+	   ! lib/Term/Complete.t
+____________________________________________________________________________
+[ 12009] By: jhi                                   on 2001/09/13  12:01:56
+        Log: Regen headers.
+     Branch: perl
+	   ! embed.h opcode.h pod/perlapi.pod proto.h
+____________________________________________________________________________
+[ 12008] By: jhi                                   on 2001/09/12  17:51:32
+        Log: Subject: [PATCH op.c] Re: perl@12003
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Wed, 12 Sep 2001 19:00:38 +0100 (BST)
+             Message-Id: <200109121800.TAA05256@tempest.npl.co.uk>
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[ 12007] By: jhi                                   on 2001/09/12  17:49:39
+        Log: Subject: [PATCH sv.c] may be uninitialized warning forperl@12003
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Wed, 12 Sep 2001 19:00:31 +0100 (BST)
+             Message-Id: <200109121800.TAA05250@tempest.npl.co.uk>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 12006] By: jhi                                   on 2001/09/12  17:41:49
+        Log: Upgrade to Memoize 0.66.
+     Branch: perl
+	   ! lib/Memoize.pm lib/Memoize/AnyDBM_File.pm
+	   ! lib/Memoize/Expire.pm lib/Memoize/README lib/Memoize/TODO
+	   ! lib/Memoize/t/expire_module_t.t lib/Memoize/t/speed.t
+____________________________________________________________________________
+[ 12005] By: jhi                                   on 2001/09/12  13:14:59
+        Log: Subject: [ID 20010912.007] substr reference core dump
+             From: me-01@ton.iguana.be
+             Date: 12 Sep 2001 14:11:16 -0000
+             Message-Id: <20010912141116.6058.qmail@quasar.home.lunix>
+     Branch: perl
+	   ! mg.c
+____________________________________________________________________________
+[ 12004] By: ams                                   on 2001/09/12  01:13:49
+        Log: Subject: [PATCH perlfaq4.pod] Deobfuscate Fisher-Yates example code
+             From: Ilmari Karonen <iltzu@sci.fi>
+             Date: Tue, 11 Sep 2001 23:31:25 +0300 (EET DST)
+             Message-Id: <Pine.SOL.3.96.1010911231925.688A-100000@simpukka>
+     Branch: perl
+	   ! pod/perlfaq4.pod
+____________________________________________________________________________
+[ 12003] By: jhi                                   on 2001/09/11  13:02:37
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 12002] By: jhi                                   on 2001/09/11  11:50:48
         Log: NetWare update from Ananth Kesari.
      Branch: perl
