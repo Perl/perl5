@@ -10,7 +10,7 @@ if (-e '.fast') {
   exit 0;
 }
 
-print "# Warning: I'm testing the timed expiration policy.\nThis will take about thirty seconds.\n";
+print "# Warning: I'm testing the timed expiration policy.\n# This will take about thirty seconds.\n";
 
 print "1..14\n";
 
