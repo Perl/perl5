@@ -23,21 +23,13 @@
 #
 # Columns 1, 2 and 5 are \n-interpolated.
 #
-# The variables $reg_infty, $reg_infty_m and $reg_infty_m in columns 1
-# and 5 are replaced respectively with the configuration value reg_infty,
-# reg_infty-1 and reg_infty+1, or if reg_infty is not defined in the
-# configuration, default values.  No other variables are substituted.
-
+# If you want to add a regular expression test that can't be expressed
+# in this format, don't add it here: put it in op/pat.t instead.
 
 $iters = shift || 1;		# Poor man performance suite, 10000 is OK.
 
-chdir 't' if -d 't';
-@INC = "../lib";
-eval 'use Config';          #  Defaults assumed if this fails
-$reg_infty = defined $Config{reg_infty} ? $Config{reg_infty} : 32767;
-$reg_infty_m = $reg_infty - 1; $reg_infty_p = $reg_infty + 1;
-
-open(TESTS,'op/re_tests') || die "Can't open re_tests";
+open(TESTS,'op/re_tests') || open(TESTS,'t/op/re_tests') ||
+	die "Can't open re_tests";
 
 while (<TESTS>) { }
 $numtests = $.;

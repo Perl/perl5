@@ -1,8 +1,16 @@
 #!./perl
+#
+# This is a home for regular expression tests that don't fit into
+# the format supported by op/regexp.t.  If you want to add a test
+# that does fit that format, add it to op/re_tests, not here.
 
 # $RCSfile: pat.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:12 $
 
-print "1..113\n";
+print "1..120\n";
+
+chdir 't' if -d 't';
+@INC = "../lib";
+eval 'use Config';          #  Defaults assumed if this fails
 
 $x = "abc\ndef\n";
 
@@ -233,8 +241,56 @@ $_ = 'foobar1 bar2 foobar3 barfoobar5 foobar6';
 print "not " if "@out" ne 'bar2 barf';
 print "ok 65\n";
 
+# Tests which depend on REG_INFTY
+$reg_infty = defined $Config{reg_infty} ? $Config{reg_infty} : 32767;
+$reg_infty_m = $reg_infty - 1; $reg_infty_p = $reg_infty + 1;
+
+# As well as failing if the pattern matches do unexpected things, the
+# next three tests will fail if you should have picked up a lower-than-
+# default value for $reg_infty from Config.pm, but have not.
+
+undef $@;
+print "not " if eval q(('aaa' =~ /(a{1,$reg_infty_m})/)[0] ne 'aaa') || $@;
+print "ok 66\n";
+
+undef $@;
+print "not " if eval q(('a' x $reg_infty_m) !~ /a{$reg_infty_m}/) || $@;
+print "ok 67\n";
+
+undef $@;
+print "not " if eval q(('a' x ($reg_infty_m - 1)) =~ /a{$reg_infty_m}/) || $@;
+print "ok 68\n";
+
+undef $@;
+eval "'aaa' =~ /a{1,$reg_infty}/";
+print "not " if $@ !~ m%^\Q/a{1,$reg_infty}/: Quantifier in {,} bigger than%;
+print "ok 69\n";
+
+eval "'aaa' =~ /a{1,$reg_infty_p}/";
+print "not "
+	if $@ !~ m%^\Q/a{1,$reg_infty_p}/: Quantifier in {,} bigger than%;
+print "ok 70\n";
+undef $@;
+
+# Poke a couple more parse failures
+
+$context = 'x' x 256;
+eval qq("${context}y" =~ /(?<=$context)y/);
+print "not " if $@ !~ m%^\Q/(?<=\Ex+/: lookbehind longer than 255 not%;
+print "ok 71\n";
+
+# This one will fail when POSIX character classes do get implemented
+{
+	my $w;
+	local $^W = 1;
+	local $SIG{__WARN__} = sub{$w = shift};
+	eval q('a' =~ /[[:alpha:]]/);
+	print "not " if $w !~ /^\QCharacter class syntax [: :] is reserved/;
+}
+print "ok 72\n";
+
 # Long Monsters
-$test = 66;
+$test = 73;
 for $l (125, 140, 250, 270, 300000, 30) { # Ordered to free memory
   $a = 'a' x $l;
   print "# length=$l\nnot " unless "ba$a=" =~ /a$a=/;
