@@ -142,51 +142,56 @@ PP(pp_concat)
   dSP; dATARGET; tryAMAGICbin(concat,opASSIGN);
   {
     dPOPTOPssrl;
-    SV* rcopy = Nullsv;
+    STRLEN llen;
+    char* lpv;
+    bool lbyte;
+    STRLEN rlen;
+    char* rpv = SvPV(right, rlen);	/* mg_get(right) happens here */
+    bool rbyte = !SvUTF8(right);
 
-    if (SvGMAGICAL(left))
-        mg_get(left);
-    if (TARG == right && SvGMAGICAL(right))
-        mg_get(right);
+    if (TARG == right && right != left) {
+	right = sv_2mortal(newSVpvn(rpv, rlen));
+	rpv = SvPV(right, rlen);	/* no point setting UTF8 here */
+    }
 
-    if (TARG == right && left != right)
-	/* Clone since otherwise we cannot prepend. */
-	rcopy = sv_2mortal(newSVsv(right));
-
-    if (TARG != left)
-	sv_setsv(TARG, left);
+    if (TARG != left) {
+	lpv = SvPV(left, llen);		/* mg_get(left) may happen here */
+	lbyte = !SvUTF8(left);
+	sv_setpvn(TARG, lpv, llen);
+	if (!lbyte)
+	    SvUTF8_on(TARG);
+	else
+	    SvUTF8_off(TARG);
+    }
+    else { /* TARG == left */
+	if (SvGMAGICAL(left))
+	    mg_get(left);		/* or mg_get(left) may happen here */
+	if (!SvOK(TARG))
+	    sv_setpv(left, "");
+	lpv = SvPV_nomg(left, llen);
+	lbyte = !SvUTF8(left);
+    }
 
 #if defined(PERL_Y2KWARN)
     if ((SvIOK(right) || SvNOK(right)) && ckWARN(WARN_Y2K) && SvOK(TARG)) {
-       STRLEN n;
-       char *s = SvPV(TARG,n);
-       if (n >= 2 && s[n-2] == '1' && s[n-1] == '9'
-           && (n == 2 || !isDIGIT(s[n-3])))
-       {
-           Perl_warner(aTHX_ WARN_Y2K, "Possible Y2K bug: %s",
-                       "about to append an integer to '19'");
-       }
+	if (llen >= 2 && lpv[llen - 2] == '1' && lpv[llen - 1] == '9'
+	    && (llen == 2 || !isDIGIT(lpv[llen - 3])))
+	{
+	    Perl_warner(aTHX_ WARN_Y2K, "Possible Y2K bug: %s",
+			"about to append an integer to '19'");
+	}
     }
 #endif
 
-    if (TARG == right) {
-	if (left == right) {
-	    /*  $right = $right . $right; */
-	    STRLEN rlen;
-	    char *rpv = SvPV(right, rlen);
-
-	    sv_catpvn(TARG, rpv, rlen);
+    if (lbyte != rbyte) {
+	if (lbyte)
+	    sv_utf8_upgrade_nomg(TARG);
+	else {
+	    sv_utf8_upgrade_nomg(right);
+	    rpv = SvPV(right, rlen);
 	}
-	else /* $right = $left  . $right; */
-	    sv_catsv(TARG, rcopy);
     }
-    else {
-	if (!SvOK(TARG)) /* Avoid warning when concatenating to undef. */
-	    sv_setpv(TARG, "");
-	/* $other = $left . $right; */
-	/* $left  = $left . $right; */
-	sv_catsv(TARG, right);
-    }
+    sv_catpvn_nomg(TARG, rpv, rlen);
 
     SETTARG;
     RETURN;

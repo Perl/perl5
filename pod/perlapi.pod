@@ -2608,6 +2608,20 @@ Handles 'get' magic, but not 'set' magic.  See C<sv_catpvn_mg>.
 =for hackers
 Found in file sv.c
 
+=item sv_catpvn_flags
+
+Concatenates the string onto the end of the string which is in the SV.  The
+C<len> indicates number of bytes to copy.  If the SV has the UTF8
+status set, then the bytes appended should be valid UTF8.
+If C<flags> has C<SV_GMAGIC> bit set, will C<mg_get> on C<dsv> if
+appropriate, else not. C<sv_catpvn> and C<sv_catpvn_nomg> are implemented
+in terms of this function.
+
+	void	sv_catpvn_flags(SV* sv, const char* ptr, STRLEN len, I32 flags)
+
+=for hackers
+Found in file sv.c
+
 =item sv_catpvn_mg
 
 Like C<sv_catpvn>, but also handles 'set' magic.
@@ -2633,6 +2647,18 @@ SV C<dsv>.  Modifies C<dsv> but not C<ssv>.  Handles 'get' magic, but
 not 'set' magic.  See C<sv_catsv_mg>.
 
 	void	sv_catsv(SV* dsv, SV* ssv)
+
+=for hackers
+Found in file sv.c
+
+=item sv_catsv_flags
+
+Concatenates the string from SV C<ssv> onto the end of the string in
+SV C<dsv>.  Modifies C<dsv> but not C<ssv>.  If C<flags> has C<SV_GMAGIC>
+bit set, will C<mg_get> on the SVs if appropriate, else not. C<sv_catsv>
+and C<sv_catsv_nomg> are implemented in terms of this function.
+
+	void	sv_catsv_flags(SV* dsv, SV* ssv, I32 flags)
 
 =for hackers
 Found in file sv.c
@@ -2842,6 +2868,18 @@ Found in file sv.c
 Get a sensible string out of the SV somehow.
 
 	char*	sv_pvn_force(SV* sv, STRLEN* lp)
+
+=for hackers
+Found in file sv.c
+
+=item sv_pvn_force_flags
+
+Get a sensible string out of the SV somehow.
+If C<flags> has C<SV_GMAGIC> bit set, will C<mg_get> on C<sv> if
+appropriate, else not. C<sv_pvn_force> and C<sv_pvn_force_nomg> are
+implemented in terms of this function.
+
+	char*	sv_pvn_force_flags(SV* sv, STRLEN* lp, I32 flags)
 
 =for hackers
 Found in file sv.c
@@ -3083,6 +3121,19 @@ C<sv_setsv_mg>.
 =for hackers
 Found in file sv.c
 
+=item sv_setsv_flags
+
+Copies the contents of the source SV C<ssv> into the destination SV C<dsv>.
+The source SV may be destroyed if it is mortal.  Does not handle 'set'
+magic.  If C<flags> has C<SV_GMAGIC> bit set, will C<mg_get> on C<ssv> if
+appropriate, else not. C<sv_setsv> and C<sv_setsv_nomg> are implemented
+in terms of this function.
+
+	void	sv_setsv_flags(SV* dsv, SV* ssv, I32 flags)
+
+=for hackers
+Found in file sv.c
+
 =item sv_setsv_mg
 
 Like C<sv_setsv>, but also handles 'set' magic.
@@ -3238,6 +3289,20 @@ Always sets the SvUTF8 flag to avoid future validity checks even
 if all the bytes have hibit clear.
 
 	STRLEN	sv_utf8_upgrade(SV *sv)
+
+=for hackers
+Found in file sv.c
+
+=item sv_utf8_upgrade_flags
+
+Convert the PV of an SV to its UTF8-encoded form.
+Forces the SV to string form it it is not already.
+Always sets the SvUTF8 flag to avoid future validity checks even
+if all the bytes have hibit clear. If C<flags> has C<SV_GMAGIC> bit set,
+will C<mg_get> on C<sv> if appropriate, else not. C<sv_utf8_upgrade> and
+C<sv_utf8_upgrade_nomg> are implemented in terms of this function.
+
+	STRLEN	sv_utf8_upgrade_flags(SV *sv, I32 flags)
 
 =for hackers
 Found in file sv.c

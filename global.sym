@@ -571,3 +571,9 @@ Perl_ptr_table_clear
 Perl_ptr_table_free
 Perl_sys_intern_clear
 Perl_sys_intern_init
+Perl_sv_setsv_flags
+Perl_sv_catpvn_flags
+Perl_sv_catsv_flags
+Perl_sv_utf8_upgrade_flags
+Perl_sv_pvn_force_flags
+Perl_sv_2pv_flags

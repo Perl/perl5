@@ -4233,6 +4233,48 @@ Perl_sys_intern_init(pTHXo)
 #if defined(PERL_OBJECT)
 #endif
 
+#undef  Perl_sv_setsv_flags
+void
+Perl_sv_setsv_flags(pTHXo_ SV* dsv, SV* ssv, I32 flags)
+{
+    ((CPerlObj*)pPerl)->Perl_sv_setsv_flags(dsv, ssv, flags);
+}
+
+#undef  Perl_sv_catpvn_flags
+void
+Perl_sv_catpvn_flags(pTHXo_ SV* sv, const char* ptr, STRLEN len, I32 flags)
+{
+    ((CPerlObj*)pPerl)->Perl_sv_catpvn_flags(sv, ptr, len, flags);
+}
+
+#undef  Perl_sv_catsv_flags
+void
+Perl_sv_catsv_flags(pTHXo_ SV* dsv, SV* ssv, I32 flags)
+{
+    ((CPerlObj*)pPerl)->Perl_sv_catsv_flags(dsv, ssv, flags);
+}
+
+#undef  Perl_sv_utf8_upgrade_flags
+STRLEN
+Perl_sv_utf8_upgrade_flags(pTHXo_ SV *sv, I32 flags)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_utf8_upgrade_flags(sv, flags);
+}
+
+#undef  Perl_sv_pvn_force_flags
+char*
+Perl_sv_pvn_force_flags(pTHXo_ SV* sv, STRLEN* lp, I32 flags)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_pvn_force_flags(sv, lp, flags);
+}
+
+#undef  Perl_sv_2pv_flags
+char*
+Perl_sv_2pv_flags(pTHXo_ SV* sv, STRLEN* lp, I32 flags)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_2pv_flags(sv, lp, flags);
+}
+
 #undef Perl_fprintf_nocontext
 int
 Perl_fprintf_nocontext(PerlIO *stream, const char *format, ...)

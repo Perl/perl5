@@ -1694,6 +1694,7 @@ t/op/filetest.t		See if file tests work
 t/op/flip.t		See if range operator works
 t/op/fork.t		See if fork works
 t/op/glob.t		See if <*> works
+t/op/gmagic.t		See if GMAGIC works
 t/op/goto.t		See if goto works
 t/op/goto_xs.t		See if "goto &sub" works on XSUBs
 t/op/grent.t		See if getgr*() functions work

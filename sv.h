@@ -890,16 +890,51 @@ false, defined or undefined.  Does not handle 'get' magic.
 #undef SvNV
 #define SvNV(sv) (SvNOK(sv) ? SvNVX(sv) : sv_2nv(sv))
 
-#undef SvPV
-#define SvPV(sv, lp) \
-    ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
-     ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pv(sv, &lp))
+/* flag values for sv_*_flags functions */
+#define SV_IMMEDIATE_UNREF	1
+#define SV_GMAGIC		2
 
+#define sv_setsv_macro(dsv, ssv) sv_setsv_flags(dsv, ssv, SV_GMAGIC)
+#define sv_setsv_nomg(dsv, ssv) sv_setsv_flags(dsv, ssv, 0)
+#define sv_catsv_macro(dsv, ssv) sv_catsv_flags(dsv, ssv, SV_GMAGIC)
+#define sv_catsv_nomg(dsv, ssv) sv_catsv_flags(dsv, ssv, 0)
+#define sv_catpvn_macro(dsv, sstr, slen) sv_catpvn_flags(dsv, sstr, slen, SV_GMAGIC)
+#define sv_catpvn_nomg(dsv, sstr, slen) sv_catpvn_flags(dsv, sstr, slen, 0)
+#define sv_2pv_macro(sv, lp) sv_2pv_flags(sv, lp, SV_GMAGIC)
+#define sv_2pv_nomg(sv, lp) sv_2pv_flags(sv, lp, 0)
+#define sv_pvn_force_macro(sv, lp) sv_pvn_force_flags(sv, lp, SV_GMAGIC)
+#define sv_pvn_force_nomg(sv, lp) sv_pvn_force_flags(sv, lp, 0)
+#define sv_utf8_upgrade_macro(sv) sv_utf8_upgrade_flags(sv, SV_GMAGIC)
+#define sv_utf8_upgrade_nomg(sv) sv_utf8_upgrade_flags(sv, 0)
+
+/* function style also available for bincompat */
+#define sv_setsv(dsv, ssv) sv_setsv_macro(dsv, ssv)
+#define sv_catsv(dsv, ssv) sv_catsv_macro(dsv, ssv)
+#define sv_catpvn(dsv, sstr, slen) sv_catpvn_macro(dsv, sstr, slen)
+#define sv_2pv(sv, lp) sv_2pv_macro(sv, lp)
+#define sv_pvn_force(sv, lp) sv_pvn_force_macro(sv, lp)
+#define sv_utf8_upgrade(sv) sv_utf8_upgrade_macro(sv)
+
+#undef SvPV
+#define SvPV(sv, lp) SvPV_flags(sv, lp, SV_GMAGIC)
+
+#undef SvPV_nomg
+#define SvPV_nomg(sv, lp) SvPV_flags(sv, lp, 0)
+
+#undef SvPV_flags
+#define SvPV_flags(sv, lp, flags) \
+    ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
+     ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pv_flags(sv, &lp, flags))
 
 #undef SvPV_force
-#define SvPV_force(sv, lp) \
+#define SvPV_force(sv, lp) SvPV_force_flags(sv, lp, SV_GMAGIC)
+#undef SvPV_force_nomg
+#define SvPV_force_nomg(sv, lp) SvPV_force_flags(sv, lp, 0)
+
+#undef SvPV_force_flags
+#define SvPV_force_flags(sv, lp, flags) \
     ((SvFLAGS(sv) & (SVf_POK|SVf_THINKFIRST)) == SVf_POK \
-     ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_pvn_force(sv, &lp))
+    ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_pvn_force_flags(sv, &lp, flags))
 
 #undef SvPV_nolen
 #define SvPV_nolen(sv) \
@@ -1107,8 +1142,6 @@ Returns a pointer to the character buffer.
 
 #define SvGROW(sv,len) (SvLEN(sv) < (len) ? sv_grow(sv,len) : SvPVX(sv))
 #define Sv_Grow sv_grow
-
-#define SV_IMMEDIATE_UNREF	1
 
 #define CLONEf_COPY_STACKS 1
 #define CLONEf_KEEP_PTR_TABLE 2

@@ -213,8 +213,8 @@ sub fileparse {
   }
 
   $tail .= $taint if defined $tail; # avoid warning if $tail == undef
-  wantarray ? ($basename . $taint, $dirpath . $taint, $tail)
-            : $basename . $taint;
+  wantarray ? ($basename .= $taint, $dirpath .= $taint, $tail)
+            : $basename .= $taint;
 }
 
 

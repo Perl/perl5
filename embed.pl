@@ -2000,7 +2000,7 @@ Ap	|IO*	|sv_2io		|SV* sv
 Ap	|IV	|sv_2iv		|SV* sv
 Apd	|SV*	|sv_2mortal	|SV* sv
 Ap	|NV	|sv_2nv		|SV* sv
-Ap	|char*	|sv_2pv		|SV* sv|STRLEN* lp
+Aop	|char*	|sv_2pv		|SV* sv|STRLEN* lp
 Ap	|char*	|sv_2pvutf8	|SV* sv|STRLEN* lp
 Ap	|char*	|sv_2pvbyte	|SV* sv|STRLEN* lp
 Ap	|UV	|sv_2uv		|SV* sv
@@ -2017,8 +2017,8 @@ Apd	|SV*	|sv_bless	|SV* sv|HV* stash
 Afpd	|void	|sv_catpvf	|SV* sv|const char* pat|...
 Ap	|void	|sv_vcatpvf	|SV* sv|const char* pat|va_list* args
 Apd	|void	|sv_catpv	|SV* sv|const char* ptr
-Apd	|void	|sv_catpvn	|SV* sv|const char* ptr|STRLEN len
-Apd	|void	|sv_catsv	|SV* dsv|SV* ssv
+Aopd	|void	|sv_catpvn	|SV* sv|const char* ptr|STRLEN len
+Aopd	|void	|sv_catsv	|SV* dsv|SV* ssv
 Apd	|void	|sv_chop	|SV* sv|char* ptr
 p	|I32	|sv_clean_all
 p	|void	|sv_clean_objs
@@ -2052,7 +2052,7 @@ Ap	|SV*	|sv_newref	|SV* sv
 Ap	|char*	|sv_peek	|SV* sv
 Ap	|void	|sv_pos_u2b	|SV* sv|I32* offsetp|I32* lenp
 Ap	|void	|sv_pos_b2u	|SV* sv|I32* offsetp
-Apd	|char*	|sv_pvn_force	|SV* sv|STRLEN* lp
+Aopd	|char*	|sv_pvn_force	|SV* sv|STRLEN* lp
 Apd	|char*	|sv_pvutf8n_force|SV* sv|STRLEN* lp
 Ap	|char*	|sv_pvbyten_force|SV* sv|STRLEN* lp
 Apd	|char*	|sv_reftype	|SV* sv|int ob
@@ -2073,7 +2073,7 @@ Apd	|SV*	|sv_setref_pvn	|SV* rv|const char* classname|char* pv \
 				|STRLEN n
 Apd	|void	|sv_setpv	|SV* sv|const char* ptr
 Apd	|void	|sv_setpvn	|SV* sv|const char* ptr|STRLEN len
-Apd	|void	|sv_setsv	|SV* dsv|SV* ssv
+Aopd	|void	|sv_setsv	|SV* dsv|SV* ssv
 Ap	|void	|sv_taint	|SV* sv
 Ap	|bool	|sv_tainted	|SV* sv
 Apd	|int	|sv_unmagic	|SV* sv|int type
@@ -2204,7 +2204,7 @@ Ap	|char*	|sv_2pvbyte_nolen|SV* sv
 Ap	|char*	|sv_pv		|SV *sv
 Ap	|char*	|sv_pvutf8	|SV *sv
 Ap	|char*	|sv_pvbyte	|SV *sv
-Apd	|STRLEN	|sv_utf8_upgrade|SV *sv
+Aopd	|STRLEN	|sv_utf8_upgrade|SV *sv
 ApdM	|bool	|sv_utf8_downgrade|SV *sv|bool fail_ok
 Apd	|void	|sv_utf8_encode |SV *sv
 ApdM	|bool	|sv_utf8_decode |SV *sv
@@ -2586,3 +2586,9 @@ s	|void	|xstat		|int
 #if defined(PERL_OBJECT)
 };
 #endif
+Apd	|void	|sv_setsv_flags	|SV* dsv|SV* ssv|I32 flags
+Apd	|void	|sv_catpvn_flags|SV* sv|const char* ptr|STRLEN len|I32 flags
+Apd	|void	|sv_catsv_flags	|SV* dsv|SV* ssv|I32 flags
+Apd	|STRLEN	|sv_utf8_upgrade_flags|SV *sv|I32 flags
+Apd	|char*	|sv_pvn_force_flags|SV* sv|STRLEN* lp|I32 flags
+Ap	|char*	|sv_2pv_flags	|SV* sv|STRLEN* lp|I32 flags
