@@ -29,11 +29,11 @@ BEGIN {
     # toggled on load failure.
     eval {
 	require XSLoader;
-	XSLoader::load( 'Data::Dumper' );
-	1;
     };
     $Useperl = 1 if $@;
 }
+
+XSLoader::load( 'Data::Dumper' ) unless $Useperl;
 
 # module vars and their defaults
 $Indent     = 2         unless defined $Indent;
