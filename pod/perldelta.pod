@@ -18,6 +18,19 @@ those are marked C<[561+]>.
 You can see the list of changes in the 5.6.1 release (both from the
 5.005_03 release and the 5.6.0 release) by reading L<perl561delta>.
 
+=head1 Note about build and test times
+
+Note that the build times can vary considerably.  Perl 5.8.0 is about
+twice the size of 5.6.1, and some source code files are quite large,
+so your compiler might have hard time processing them.  On a fast
+modern system with lots of CPU and memory the build can be a matter
+of ten minutes, but on slower/older/more heavily loaded systems it
+can take up to eight hours, while half an hour to an hour being common.
+
+Also testing times vary a lot.  Perl 5.8.0 has almost six times the
+the tests of Perl 5.6.1.  Fifteen minutes to half an hour is quite
+normal, but a slow system may easily take an hour or more.
+
 =head1 Highlights In 5.8.0
 
 =over 4
