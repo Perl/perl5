@@ -977,6 +977,8 @@ lib/Filter/Simple.pm		Simple frontend to Filter::Util::Call
 lib/Filter/Simple/Changes	Filter::Simple
 lib/Filter/Simple/README	Filter::Simple
 lib/Filter/Simple/t/filter.t	See if Filter::Simple works
+lib/Filter/Simple/t/data.t	See if Filter::Simple works
+lib/Filter/Simple/t/filter_only.t	See if Filter::Simple works
 lib/find.pl			A find emulator--used by find2perl
 lib/FindBin.pm			Find name of currently executing program
 lib/FindBin.t			See if FindBin works
@@ -2044,6 +2046,7 @@ t/lib/dprof/test6_v		Perl code profiler tests
 t/lib/dprof/V.pm		Perl code profiler tests
 t/lib/filter-util.pl		See if Filter::Util::Call works
 t/lib/FilterTest.pm		Helper file for lib/Filter/Simple/t/filter.t
+t/lib/FilterOnlyTest.pm		Helper file for lib/Filter/Simple/t/filter_only.t
 t/lib/h2ph.h			Test header file for h2ph
 t/lib/h2ph.pht			Generated output from h2ph.h by h2ph, for comparison
 t/lib/locale/latin1		Part of locale.t in Latin 1

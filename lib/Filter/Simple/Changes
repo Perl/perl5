@@ -30,3 +30,17 @@ Revision history for Perl extension Filter::Simple
 	- Added documentation for using F::S and Exporter together
 
 
+0.70	Wed Nov 14 23:36:18 2001
+
+	- Added FILTER_ONLY for fine-grained filtering of code,
+	  strings, or regexes
+
+	- Fixed document snafu regarding optional terminators
+
+	- Fixed bug so that FILTER now receives *all* import args
+	  (i.e. including the class name in $_[0])
+
+	- Allowed default terminator to allow comments embedded in it
+	  (thanks, Christian) and to handle __DATA__ and __END__
+
+	- Fixed handling of __DATA__ and *DATA
