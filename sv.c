@@ -1607,7 +1607,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	    SvIVX(sv) = I_V(SvNVX(sv));
 	  ret_zero:
 	    DEBUG_c(PerlIO_printf(Perl_debug_log, 
-				  "0x%"UVxf" 2uv(%"IVdf" => %"UVdf") (as signed)\n",
+				  "0x%"UVxf" 2uv(%"IVdf" => %"IVdf") (as signed)\n",
 				  PTR2UV(sv),
 				  SvIVX(sv),
 				  (IV)(UV)SvIVX(sv)));
