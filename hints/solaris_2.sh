@@ -257,12 +257,30 @@ if [ "X$usethreads" = "X$define" ]; then
     # when linked with the threads library, such that whatever positive value
     # you pass to siglongjmp(), sigsetjmp() returns 1.
     # Thanks to Simon Parsons <S.Parsons@ftel.co.uk> for this report.
-    if test "`arch`" = i86pc -a "$osvers" = 2.6; then
-	d_sigaction=$undef
+    # Sun BugID is 4117946, "sigsetjmp always returns 1 when called by
+    # siglongjmp in a MT program". As of 19980622, there is no patch
+    # available.
+    cat >try.c <<'EOM'
+	/* Test for sig(set|long)jmp bug. */
+	#include <setjmp.h>
+	 
+	main()
+	{
+	    sigjmp_buf env;
+	    int ret;
+	
+	    ret = sigsetjmp(env, 1);
+	    if (ret) { return ret == 2; }
+	    siglongjmp(env, 2);
+	}
+EOM
+    if test "`arch`" = i86pc -a "$osvers" = 2.6 \
+    && ${cc:-cc} try.c -lpthread >/dev/null 2>&1 && ./a.out; then
+	d_sigsetjmp=$undef
 	cat << 'EOM' >&2
 
 You will see a *** WHOA THERE!!! ***  message from Configure for
-d_sigaction.  Keep the recommended value.  See hints/solaris_2.sh
+d_sigsetjmp.  Keep the recommended value.  See hints/solaris_2.sh
 for more information.
 
 EOM
