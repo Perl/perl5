@@ -53,7 +53,7 @@ sub stringify {
 	return $_ . "" if ref \$_ eq 'GLOB';
 	$_ = &{'overload::StrVal'}($_) 
 	  if $bareStringify and ref $_ 
-	    and defined %overload:: and defined &{'overload::StrVal'};
+	    and %overload:: and defined &{'overload::StrVal'};
 	
 	if ($tick eq 'auto') {
 	  if (/[\000-\011\013-\037\177]/) {
@@ -125,7 +125,7 @@ sub unwrap {
     if (ref $v) { 
       my $val = $v;
       $val = &{'overload::StrVal'}($v) 
-	if defined %overload:: and defined &{'overload::StrVal'};
+	if %overload:: and defined &{'overload::StrVal'};
       ($address) = $val =~ /(0x[0-9a-f]+)\)$/ ; 
       if (!$dumpReused && defined $address) { 
 	$address{$address}++ ;
@@ -289,12 +289,12 @@ sub dumpglob {
       print( (' ' x $off) . "\$", &unctrl($key), " = " );
       DumpElem $entry, 3+$off;
     }
-    if (($key !~ /^_</ or $dumpDBFiles) and defined @entry) {
+    if (($key !~ /^_</ or $dumpDBFiles) and @entry) {
       print( (' ' x $off) . "\@$key = (\n" );
       unwrap(\@entry,3+$off) ;
       print( (' ' x $off) .  ")\n" );
     }
-    if ($key ne "main::" && $key ne "DB::" && defined %entry
+    if ($key ne "main::" && $key ne "DB::" && %entry
 	&& ($dumpPackages or $key !~ /::$/)
 	&& ($key !~ /^_</ or $dumpDBFiles)
 	&& !($package eq "dumpvar" and $key eq "stab")) {
@@ -323,7 +323,7 @@ sub dumpsub {
 }
 
 sub findsubs {
-  return undef unless defined %DB::sub;
+  return undef unless %DB::sub;
   my ($addr, $name, $loc);
   while (($name, $loc) = each %DB::sub) {
     $addr = \&$name;
@@ -395,8 +395,8 @@ sub globUsage {			# glob ref, name
   local *name = *{$_[0]};
   $total = 0;
   $total += scalarUsage $name if defined $name;
-  $total += arrayUsage \@name, $_[1] if defined @name;
-  $total += hashUsage \%name, $_[1] if defined %name and $_[1] ne "main::" 
+  $total += arrayUsage \@name, $_[1] if @name;
+  $total += hashUsage \%name, $_[1] if %name and $_[1] ne "main::" 
     and $_[1] ne "DB::";   #and !($package eq "dumpvar" and $key eq "stab"));
   $total;
 }
