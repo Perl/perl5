@@ -77,7 +77,7 @@ extern "C" int syscall(unsigned long,...);
    compiling multithreaded and singlethreaded ($ccflags et al).
    HOST_NOT_FOUND is typically defined in <netdb.h>.
 */
-#if defined(HOST_NOT_FOUND) && !defined(h_errno)
+#if defined(HOST_NOT_FOUND) && !defined(h_errno) && !defined(__CYGWIN__)
 extern int h_errno;
 #endif
 
