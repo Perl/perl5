@@ -1370,7 +1370,6 @@ lib/Net/Netrc.pm		libnet
 lib/Net/NNTP.pm			libnet
 lib/Net/Ping.pm			Hello, anybody home?
 lib/Net/Ping/Changes		Net::Ping
-lib/Net/Ping/README		Net::Ping
 lib/Net/Ping/t/100_load.t	Ping Net::Ping
 lib/Net/Ping/t/110_icmp_inst.t	Ping Net::Ping
 lib/Net/Ping/t/120_udp_inst.t	Ping Net::Ping
@@ -1385,6 +1384,7 @@ lib/Net/Ping/t/400_ping_syn.t	Ping Net::Ping
 lib/Net/Ping/t/410_syn_host.t	Ping Net::Ping
 lib/Net/Ping/t/450_service.t	Ping Net::Ping
 lib/Net/Ping/t/500_ping_icmp.t	Ping Net::Ping
+lib/Net/Ping/t/510_ping_udp.t	Ping Net::Ping
 lib/Net/POP3.pm			libnet
 lib/Net/protoent.pm		By-name interface to Perl's builtin getproto*
 lib/Net/protoent.t		See if Net::protoent works
