@@ -530,7 +530,9 @@ runtime error.
 
 The timelocal() and timegm() functions used to silently return bogus
 results when the date exceeded the machine's integer range.  They
-now consistently croak() if the date falls in an unsupported range.
+now consistently croak() if the date falls in an unsupported range--
+but on the other hand they now accept "out-of-limits" day-of-month
+to make "Julian date" conversions easier.
 
 =item Win32
 
