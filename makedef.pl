@@ -572,8 +572,8 @@ sub emit_symbol {
 sub output_symbol {
     my $symbol = shift;
     if ($PLATFORM eq 'win32') {
-	print "\t$symbol\n";
 	$symbol = "_$symbol" if $CCTYPE eq 'BORLAND';
+	print "\t$symbol\n";
 # XXX: binary compatibility between compilers is an exercise
 # in frustration :-(
 #        if ($CCTYPE eq "BORLAND") {

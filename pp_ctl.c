@@ -2848,7 +2848,7 @@ PP(pp_require)
 				       save the gv to manage the lifespan of
 				       the pipe, but this didn't help. XXX */
 				    filter_child_proc = (GV *)arg;
-				    SvREFCNT_inc(filter_child_proc);
+				    (void)SvREFCNT_inc(filter_child_proc);
 				}
 				else {
 				    if (IoOFP(io) && IoOFP(io) != IoIFP(io)) {
@@ -2866,11 +2866,11 @@ PP(pp_require)
 
 			if (SvROK(arg) && SvTYPE(SvRV(arg)) == SVt_PVCV) {
 			    filter_sub = arg;
-			    SvREFCNT_inc(filter_sub);
+			    (void)SvREFCNT_inc(filter_sub);
 
 			    if (i < count) {
 				filter_state = SP[i];
-				SvREFCNT_inc(filter_state);
+				(void)SvREFCNT_inc(filter_state);
 			    }
 
 			    if (tryrsfp == 0) {
