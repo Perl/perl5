@@ -28,13 +28,15 @@ $iv_min = $iv_max;
 my $uv_bigi = $iv_big;
 $uv_bigi |= 0x0;
 
+my @array = qw(perl rules);
+
 # Seems one needs to perform the maths on 'Inf' to get the NV correctly primed.
 @FOO = ('s', 'N/A', 'a', 'NaN', -1, undef, 0, 1, 3.14, 1e37, 0.632120558, -.5,
 	'Inf'+1, '-Inf'-1, 0x0, 0x1, 0x5, 0xFFFFFFFF, $uv_max, $uv_maxm1,
 	$uv_big, $uv_bigi, $iv0, $iv1, $ivm1, $iv_min, $iv_max, $iv_big,
-	$iv_small);
+	$iv_small, \$array[0], \$array[0], \$array[1], \$^X);
 
-$expect = 6 * ($#FOO+2) * ($#FOO+1);
+$expect = 7 * ($#FOO+2) * ($#FOO+1);
 print "1..$expect\n";
 
 sub nok ($$$$$$$$) {
@@ -50,14 +52,14 @@ for my $i (0..$#FOO) {
 	# Comparison routines may convert these internally, which would change
 	# what is used to determine the comparison on later runs. Hence copy
 	my ($i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10,
-	    $i11, $i12, $i13, $i14, $i15) =
-	  ($FOO[$i], $FOO[$i], $FOO[$i], $FOO[$i], $FOO[$i],
-	   $FOO[$i], $FOO[$i], $FOO[$i], $FOO[$i], $FOO[$i],
+	    $i11, $i12, $i13, $i14, $i15, $i16, $i17) =
+	  ($FOO[$i], $FOO[$i], $FOO[$i], $FOO[$i], $FOO[$i], $FOO[$i],
+	   $FOO[$i], $FOO[$i], $FOO[$i], $FOO[$i], $FOO[$i], $FOO[$i],
 	   $FOO[$i], $FOO[$i], $FOO[$i], $FOO[$i], $FOO[$i]);
 	my ($j1, $j2, $j3, $j4, $j5, $j6, $j7, $j8, $j9, $j10,
-	    $j11, $j12, $j13, $j14, $j15) =
-	  ($FOO[$j], $FOO[$j], $FOO[$j], $FOO[$j], $FOO[$j],
-	   $FOO[$j], $FOO[$j], $FOO[$j], $FOO[$j], $FOO[$j],
+	    $j11, $j12, $j13, $j14, $j15, $j16, $j17) =
+	  ($FOO[$j], $FOO[$j], $FOO[$j], $FOO[$j], $FOO[$j], $FOO[$j],
+	   $FOO[$j], $FOO[$j], $FOO[$j], $FOO[$j], $FOO[$j], $FOO[$j],
 	   $FOO[$j], $FOO[$j], $FOO[$j], $FOO[$j], $FOO[$j]);
 	my $cmp = $i1 <=> $j1;
 	if (!defined($cmp) ? !($i2 < $j2)
@@ -127,6 +129,20 @@ for my $i (0..$#FOO) {
 	    nok ($ok, $i3, '<=>', $j3, $cmp, $i, $j, '<=');
 	}
 	$ok++;
+        my $pmc =  $j16 <=> $i16; # cmp it in reverse
+        # Should give -ve of other answer, or undef for NaNs
+        # a + -a should be zero. not zero is truth. which avoids using ==
+	if (defined($cmp) ? !($cmp + $pmc) : !defined $pmc)
+	{
+	    print "ok $ok\n";
+	}
+	else {
+	    nok ($ok, $i3, '<=>', $j3, $cmp, $i, $j, '<=> transposed');
+	}
+
+
+	# String comparisons
+	$ok++;
 	$cmp = $i9 cmp $j9;
 	if ($cmp == -1 && $i10 lt $j10 ||
 	    $cmp == 0  && !($i10 lt $j10) ||
@@ -186,6 +202,17 @@ for my $i (0..$#FOO) {
 	}
 	else {
 	    nok ($ok, $i3, 'cmp', $j3, $cmp, $i, $j, 'ge');
+	}
+	$ok++;
+        $pmc =  $j17 cmp $i17; # cmp it in reverse
+        # Should give -ve of other answer
+        # a + -a should be zero. not zero is truth. which avoids using ==
+	if (!($cmp + $pmc))
+	{
+	    print "ok $ok\n";
+	}
+	else {
+	    nok ($ok, $i3, '<=>', $j3, $cmp, $i, $j, 'cmp transposed');
 	}
     }
 }
