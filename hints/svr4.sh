@@ -70,7 +70,8 @@ fi
 # is probably a reasonable way of detecting UnixWare.  
 # UnixWare has a broken csh.  (This might already be detected above).
 # In Unixware 2.1.1 the fields in FILE* got renamed!
-$ Unixware 1.1 can't cast large floats to 32-bit ints.
+# Unixware 1.1 can't cast large floats to 32-bit ints.
+# Configure can't detect memcpy or memset on Unixware 2 or 7
 #
 #    Leave leading tabs on the next two lines so Configure doesn't 
 #    propagate these variables to config.sh
@@ -88,9 +89,26 @@ if [ "$uw_isuw" = "Release = 4.2MP" ]; then
    case $uw_ver in
    2.1)
 	d_csh='undef'
+	d_memcpy='define'
+	d_memset='define'
 	;;
    2.1.*)
 	d_csh='undef'
+	d_memcpy='define'
+	d_memset='define'
+	stdio_cnt='((fp)->__cnt)'
+	d_stdio_cnt_lval='define'
+	stdio_ptr='((fp)->__ptr)'
+	d_stdio_ptr_lval='define'
+	;;
+   esac
+fi
+if [ "$uw_isuw" = "Release = 5" ]; then
+   case $uw_ver in
+   7)
+	d_csh='undef'
+	d_memcpy='define'
+	d_memset='define'
 	stdio_cnt='((fp)->__cnt)'
 	d_stdio_cnt_lval='define'
 	stdio_ptr='((fp)->__ptr)'
