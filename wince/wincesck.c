@@ -1,4 +1,4 @@
-// Time-stamp: <01/08/01 21:01:12 keuchel@w2k>
+/* Time-stamp: <01/08/01 21:01:12 keuchel@w2k> */
 
 /* wincesck.c
  *
@@ -10,7 +10,7 @@
  *    License or the Artistic License, as specified in the README file.
  */
 
-// The socket calls use fd functions from celib...
+/* The socket calls use fd functions from celib... */
 
 #define WIN32IO_IS_STDIO
 #define WIN32SCK_IS_STDSCK
@@ -50,7 +50,7 @@ XCE_EXPORT struct protoent *xcegetprotobynumber(int number);
 #define getprotobyname xcegetprotobyname
 #define getprotobynumber xcegetprotobynumber
 
-// uses fdtab...
+/* uses fdtab... */
 #include "cesocket2.h"
 
 #endif
@@ -234,7 +234,7 @@ win32_select(int nfds, Perl_fd_set* rd, Perl_fd_set* wr,
 	     Perl_fd_set* ex, const struct timeval* timeout)
 {
   StartSockets();
-  // select not yet fixed
+  /* select not yet fixed */
   errno = ENOSYS;
   return -1;
 }

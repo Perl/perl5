@@ -134,21 +134,21 @@ protected:
     void* Expand(void* block, size_t size);
     void WalkHeap(void);
 
-    HANDLE		m_hHeap;		    // memory heap for this script
-    char		m_FreeDummy[minAllocSize];  // dummy free block
-    PBLOCK		m_pFreeList;		    // pointer to first block on free list
-    PBLOCK		m_pRover;		    // roving pointer into the free list
-    HeapRec		m_heaps[maxHeaps];	    // list of all non-contiguous heap areas 
-    int			m_nHeaps;		    // no. of heaps in m_heaps 
-    long		m_lAllocSize;		    // current alloc size
-    long		m_lRefCount;		    // number of current users
-    CRITICAL_SECTION	m_cs;			    // access lock
+    HANDLE		m_hHeap;		    /* memory heap for this script */
+    char		m_FreeDummy[minAllocSize];  /* dummy free block */
+    PBLOCK		m_pFreeList;		    /* pointer to first block on free list */
+    PBLOCK		m_pRover;		    /* roving pointer into the free list */
+    HeapRec		m_heaps[maxHeaps];	    /* list of all non-contiguous heap areas  */
+    int			m_nHeaps;		    /* no. of heaps in m_heaps  */
+    long		m_lAllocSize;		    /* current alloc size */
+    long		m_lRefCount;		    /* number of current users */
+    CRITICAL_SECTION	m_cs;			    /* access lock */
 #ifdef _DEBUG_MEM
     FILE*		m_pLog;
 #endif
 };
 
-// #define _DEBUG_MEM
+/* #define _DEBUG_MEM */
 #ifdef _DEBUG_MEM
 #define ASSERT(f) if(!(f)) DebugBreak();
 

@@ -59,7 +59,7 @@ main(register int argc, register char **argv, register char **env)
     STR *tmpstr;
 
 	#ifdef NETWARE
-		fnInitGpfGlobals();	// For importing the CLIB calls in place of Watcom calls
+		fnInitGpfGlobals();	/* For importing the CLIB calls in place of Watcom calls */
 	#endif	/* NETWARE */
 
     myname = argv[0];

@@ -871,8 +871,8 @@ win32_fseek(FILE *pf,long offset,int origin)
   return fseek(pf, offset, origin);
 }
 
-// fpos_t seems to be int64 on hpc pro! Really stupid.
-// But maybe someday there will be such large disks in a hpc...
+/* fpos_t seems to be int64 on hpc pro! Really stupid. */
+/* But maybe someday there will be such large disks in a hpc... */
 DllExport int
 win32_fgetpos(FILE *pf, fpos_t *p)
 {
@@ -1233,7 +1233,7 @@ win32_dynaload(const char* filename)
     return hModule;
 }
 
-// this is needed by Cwd.pm...
+/* this is needed by Cwd.pm... */
 
 static
 XS(w32_GetCwd)
@@ -1293,7 +1293,7 @@ XS(w32_GetOSVersion)
     XPUSHs(newSViv(osver.dwMajorVersion));
     XPUSHs(newSViv(osver.dwMinorVersion));
     XPUSHs(newSViv(osver.dwBuildNumber));
-    // WINCE = 3
+    /* WINCE = 3 */
     XPUSHs(newSViv(osver.dwPlatformId));
     PUTBACK;
 }
@@ -1560,12 +1560,12 @@ wce_hitreturn()
   return;
 }
 
-//////////////////////////////////////////////////////////////////////
+/* //////////////////////////////////////////////////////////////////// */
 
 void
 win32_argv2utf8(int argc, char** argv)
 {
-  // do nothing...
+  /* do nothing... */
 }
 
 void
@@ -1600,7 +1600,7 @@ Perl_sys_intern_clear(pTHX)
 #  endif
 }
 
-//////////////////////////////////////////////////////////////////////
+/* //////////////////////////////////////////////////////////////////// */
 
 #undef getcwd
 

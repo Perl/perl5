@@ -1,4 +1,4 @@
-// Time-stamp: <01/08/01 21:00:16 keuchel@w2k>
+/* Time-stamp: <01/08/01 21:00:16 keuchel@w2k> */
 
 #ifndef WIN32IOP_H
 #define WIN32IOP_H

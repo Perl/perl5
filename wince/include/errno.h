@@ -24,7 +24,7 @@ extern int errno;
 #define ENOMEM          12
 #define EACCES          13
 #define EFAULT          14
-#define EOSERR          15 // rk
+#define EOSERR          15 /* rk */
 #define EBUSY           16
 #define EEXIST          17
 #define EXDEV           18

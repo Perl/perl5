@@ -1,4 +1,4 @@
-// Time-stamp: <01/08/01 20:58:19 keuchel@w2k>
+/* Time-stamp: <01/08/01 20:58:19 keuchel@w2k> */
 
 #include "EXTERN.h"
 #include "perl.h"
@@ -14,7 +14,7 @@ int _CRT_glob = 0;
 
 #endif
 
-// Called from w32console/wmain.c
+/* Called from w32console/wmain.c */
 
 int
 main(int argc, char **argv, char **env)

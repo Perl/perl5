@@ -1,4 +1,4 @@
-// Time-stamp: <01/08/01 21:00:36 keuchel@w2k>
+/* Time-stamp: <01/08/01 21:00:36 keuchel@w2k> */
 
 #ifndef _WIN32THREAD_H
 #define _WIN32THREAD_H
