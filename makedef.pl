@@ -200,10 +200,6 @@ sub emit_symbols {
     }
 }
 
-unless ($PLATFORM eq 'vms') {
-    skip_symbols [qw(PL_my_inv_rand_max)];
-}
-
 if ($PLATFORM eq 'win32') {
     skip_symbols [qw(
 		     PL_statusvalue_vms
