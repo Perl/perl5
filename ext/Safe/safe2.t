@@ -118,14 +118,18 @@ print $@ =~ /foo bar/ ? "ok 29\n" : "not ok 29\n";
 
 # --- rdo
   
+my $t = 30;
 my $nosuch = '/non/existant/file.name';
 open(NOSUCH, $nosuch);
-my $errno  = $! + 0;
+if ($@) {
+    my $errno  = $!;
+    $cpt->rdo($nosuch);
+    print $! == $errno ? "ok $t\n" : sprintf "not ok $t # \"$!\" is %d (expected %d)\n", $!, $errno; $t++;
+} else {
+    die "Eek! Didn't expect $nosuch to be there.";
+}
 close(NOSUCH);
 
-my $t = 30;
-$cpt->rdo($nosuch);
-print $! == $errno ? "ok $t\n" : sprintf "not ok $t # \"$!\" is %d (expected %d)\n", $!, $errno; $t++;
 # test #31 is gone.
 print "ok $t\n"; $t++;
   
