@@ -3978,6 +3978,15 @@ Like C<sv_catpvn>, but also handles 'set' magic.
 =for hackers
 Found in file sv.c
 
+=item sv_catpvn_nomg
+
+Like C<sv_catpvn> but doesn't process magic.
+
+	void	sv_catpvn_nomg(SV* sv, const char* ptr, STRLEN len)
+
+=for hackers
+Found in file sv.h
+
 =item sv_catpv_mg
 
 Like C<sv_catpv>, but also handles 'set' magic.
@@ -4018,6 +4027,15 @@ Like C<sv_catsv>, but also handles 'set' magic.
 
 =for hackers
 Found in file sv.c
+
+=item sv_catsv_nomg
+
+Like C<sv_catsv> but doesn't process magic.
+
+	void	sv_catsv_nomg(SV* dsv, SV* ssv)
+
+=for hackers
+Found in file sv.h
 
 =item sv_chop
 
@@ -4761,6 +4779,15 @@ Like C<sv_setsv>, but also handles 'set' magic.
 
 =for hackers
 Found in file sv.c
+
+=item sv_setsv_nomg
+
+Like C<sv_setsv> but doesn't process magic.
+
+	void	sv_setsv_nomg(SV* dsv, SV* ssv)
+
+=for hackers
+Found in file sv.h
 
 =item sv_setuv
 
