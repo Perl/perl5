@@ -43,7 +43,9 @@ public:
 	CPerlObj(IPerlMem*, IPerlMem*, IPerlMem*, IPerlEnv*, IPerlStdIO*,
 	    IPerlLIO*, IPerlDir*, IPerlSock*, IPerlProc*);
 	void* operator new(size_t nSize, IPerlMem *pvtbl);
+#ifndef __BORLANDC__
 	static void operator delete(void* pPerl, IPerlMem *pvtbl);
+#endif
 	int do_aspawn (void *vreally, void **vmark, void **vsp);
 #endif
 #if defined(PERL_OBJECT)

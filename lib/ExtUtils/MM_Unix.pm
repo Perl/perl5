@@ -377,10 +377,22 @@ sub cflags {
 
     if ($Is_PERL_OBJECT) {
         $self->{CCFLAGS} =~ s/-DPERL_OBJECT(\b|$)/-DPERL_CAPI/g;
-        if ($Is_Win32 && $Config{'cc'} =~ /^cl/i) {
-            # Turn off C++ mode of the MSC compiler
-            $self->{CCFLAGS} =~ s/-TP(\s|$)//;
-            $self->{OPTIMIZE} =~ s/-TP(\s|$)//;
+        if ($Is_Win32) { 
+	    if ($Config{'cc'} =~ /^cl/i) {
+		# Turn off C++ mode of the MSC compiler
+		$self->{CCFLAGS} =~ s/-TP(\s|$)//g;
+		$self->{OPTIMIZE} =~ s/-TP(\s|$)//g;
+	    }
+	    elsif ($Config{'cc'} =~ /^bcc32/i) {
+		# Turn off C++ mode of the Borland compiler
+		$self->{CCFLAGS} =~ s/-P(\s|$)//g;
+		$self->{OPTIMIZE} =~ s/-P(\s|$)//g;
+	    }
+	    elsif ($Config{'cc'} =~ /^gcc/i) {
+		# Turn off C++ mode of the GCC compiler
+		$self->{CCFLAGS} =~ s/-xc\+\+(\s|$)//g;
+		$self->{OPTIMIZE} =~ s/-xc\+\+(\s|$)//g;
+	    }
         }
     }
 

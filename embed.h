@@ -56,6 +56,8 @@
 #define malloced_size		Perl_malloced_size
 #endif
 #if defined(PERL_OBJECT)
+#ifndef __BORLANDC__
+#endif
 #endif
 #if defined(PERL_OBJECT)
 #else
@@ -1489,6 +1491,8 @@
 #define malloced_size		Perl_malloced_size
 #endif
 #if defined(PERL_OBJECT)
+#ifndef __BORLANDC__
+#endif
 #endif
 #if defined(PERL_OBJECT)
 #else
@@ -2899,6 +2903,8 @@
 #define malloced_size		Perl_malloced_size
 #endif
 #if defined(PERL_OBJECT)
+#ifndef __BORLANDC__
+#endif
 #endif
 #if defined(PERL_OBJECT)
 #else

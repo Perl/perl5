@@ -96,7 +96,9 @@ typedef struct {
     long long	start_cnt;
 #endif
 #ifdef PERL_IMPLICIT_CONTEXT
+#  define register
     pTHX;
+#  undef register
 #endif
 } prof_state_t;
 

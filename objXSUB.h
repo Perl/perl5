@@ -825,6 +825,8 @@
 #if defined(MYMALLOC)
 #endif
 #if defined(PERL_OBJECT)
+#ifndef __BORLANDC__
+#endif
 #endif
 #if defined(PERL_OBJECT)
 #else

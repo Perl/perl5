@@ -324,7 +324,7 @@ walk_table {
     my $ret = "";
     if (@_ == 1) {
 	my $arg = shift;
-	$ret .= "$arg\n" if $arg =~ /^#\s*(if|ifdef|else|endif)\b/;
+	$ret .= "$arg\n" if $arg =~ /^#\s*(if|ifn?def|else|endif)\b/;
     }
     else {
 	my ($flags,$retval,$func,@args) = @_;
@@ -357,7 +357,7 @@ walk_table {
     my $ret = "";
     if (@_ == 1) {
 	my $arg = shift;
-	$ret .= "$arg\n" if $arg =~ /^#\s*(if|ifdef|else|endif)\b/;
+	$ret .= "$arg\n" if $arg =~ /^#\s*(if|ifn?def|else|endif)\b/;
     }
     else {
 	my ($flags,$retval,$func,@args) = @_;
@@ -417,7 +417,7 @@ walk_table {
     my $ret = "";
     if (@_ == 1) {
 	my $arg = shift;
-	$ret .= "$arg\n" if $arg =~ /^#\s*(if|ifdef|else|endif)\b/;
+	$ret .= "$arg\n" if $arg =~ /^#\s*(if|ifn?def|else|endif)\b/;
     }
     else {
 	my ($flags,$retval,$func,@args) = @_;
@@ -732,7 +732,7 @@ walk_table {
     my $ret = "";
     if (@_ == 1) {
 	my $arg = shift;
-	$ret .= "$arg\n" if $arg =~ /^#\s*(if|ifdef|else|endif)\b/;
+	$ret .= "$arg\n" if $arg =~ /^#\s*(if|ifn?def|else|endif)\b/;
     }
     else {
 	my ($flags,$retval,$func,@args) = @_;
@@ -943,7 +943,7 @@ walk_table {
     my $ret = "";
     if (@_ == 1) {
 	my $arg = shift;
-	$ret .= "$arg\n" if $arg =~ /^#\s*(if|ifdef|else|endif)\b/;
+	$ret .= "$arg\n" if $arg =~ /^#\s*(if|ifn?def|else|endif)\b/;
     }
     else {
 	my ($flags,$retval,$func,@args) = @_;
@@ -1068,7 +1068,9 @@ public:
 	CPerlObj(IPerlMem*, IPerlMem*, IPerlMem*, IPerlEnv*, IPerlStdIO*,
 	    IPerlLIO*, IPerlDir*, IPerlSock*, IPerlProc*);
 	void* operator new(size_t nSize, IPerlMem *pvtbl);
+#ifndef __BORLANDC__
 	static void operator delete(void* pPerl, IPerlMem *pvtbl);
+#endif
 	int do_aspawn (void *vreally, void **vmark, void **vsp);
 #endif
 #if defined(PERL_OBJECT)
