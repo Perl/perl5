@@ -6,7 +6,7 @@ BEGIN {
     require Config; import Config;
 }
 
-print "1..153\n";
+print "1..156\n";
 
 $format = "c2 x5 C C x s d i l a6";
 # Need the expression in here to force ary[5] to be numeric.  This avoids
@@ -357,7 +357,7 @@ print "ok ", $test++, "\n";
 print "not " unless pack("V", 0xdeadbeef) eq "\xef\xbe\xad\xde";
 print "ok ", $test++, "\n";
 
-# 144..149: /
+# 144..152: /
 
 my $z;
 eval { ($x) = unpack '/a*','hello' };
@@ -372,7 +372,19 @@ print 'not ' unless $@; print "ok $test\n"; $test++;
 $z = pack 'n/a* w/A*','string','etc';
 print 'not ' unless $z eq "\000\006string\003etc"; print "ok $test\n"; $test++;
 
-# 150..153: / with #
+eval { ($x) = unpack 'a/a*/a*', '212ab345678901234567' };
+print $@ eq '' && $x eq 'ab3456789012' ? "ok $test\n" : "#$x,$@\nnot ok $test\n";
+$test++;
+
+eval { ($x) = unpack 'a/a*/a*', '3012ab345678901234567' };
+print $@ eq '' && $x eq 'ab3456789012' ? "ok $test\n" : "not ok $test\n";
+$test++;
+
+eval { ($x) = unpack 'a/a*/b*', '212ab' };
+print $@ eq '' && $x eq '100001100100' ? "ok $test\n" : "#$x,$@\nnot ok $test\n";
+$test++;
+
+# 153..156: / with #
 
 eval { ($z,$x,$y) = unpack <<EOU, "003ok \003yes\004z\000abc" };
  a3/A			# Count in ASCII

@@ -3264,6 +3264,7 @@ PP(pp_unpack)
     register U32 culong;
     NV cdouble;
     int commas = 0;
+    int star;
 #ifdef PERL_NATINT_PACK
     int natint;		/* native integer */
     int unatint;	/* unsigned native integer */
@@ -3305,11 +3306,13 @@ PP(pp_unpack)
 	    else
 		DIE(aTHX_ "'!' allowed only after types %s", natstr);
 	}
+	star = 0;
 	if (pat >= patend)
 	    len = 1;
 	else if (*pat == '*') {
 	    len = strend - strbeg;	/* long enough */
 	    pat++;
+	    star = 1;
 	}
 	else if (isDIGIT(*pat)) {
 	    len = *pat++ - '0';
@@ -3321,6 +3324,7 @@ PP(pp_unpack)
 	}
 	else
 	    len = (datumtype != '@');
+      redo_switch:
 	switch(datumtype) {
 	default:
 	    DIE(aTHX_ "Invalid type in unpack: '%c'", (int)datumtype);
@@ -3356,15 +3360,14 @@ PP(pp_unpack)
 	case '/':
 	    if (oldsp >= SP)
 		DIE(aTHX_ "/ must follow a numeric type");
-	    if (*pat != 'a' && *pat != 'A' && *pat != 'Z')
-		DIE(aTHX_ "/ must be followed by a, A or Z");
 	    datumtype = *pat++;
 	    if (*pat == '*')
 		pat++;		/* ignore '*' for compatibility with pack */
 	    if (isDIGIT(*pat))
 		DIE(aTHX_ "/ cannot take a count" );
 	    len = POPi;
-	    /* drop through */
+	    star = 0;
+	    goto redo_switch;
 	case 'A':
 	case 'Z':
 	case 'a':
@@ -3395,7 +3398,7 @@ PP(pp_unpack)
 	    break;
 	case 'B':
 	case 'b':
-	    if (pat[-1] == '*' || len > (strend - s) * 8)
+	    if (star || len > (strend - s) * 8)
 		len = (strend - s) * 8;
 	    if (checksum) {
 		if (!PL_bitcount) {
@@ -3463,7 +3466,7 @@ PP(pp_unpack)
 	    break;
 	case 'H':
 	case 'h':
-	    if (pat[-1] == '*' || len > (strend - s) * 2)
+	    if (star || len > (strend - s) * 2)
 		len = (strend - s) * 2;
 	    sv = NEWSV(35, len + 1);
 	    SvCUR_set(sv, len);
