@@ -400,6 +400,7 @@ malformed:
 	case UTF8_WARN_SHORT:
 	    Perl_sv_catpvf(aTHX_ sv, "(%d byte%s, need %d)",
                            curlen, curlen == 1 ? "" : "s", expectlen);
+	    expectlen = curlen;		/* distance for caller to skip */
 	    break;
 	case UTF8_WARN_OVERFLOW:
 	    Perl_sv_catpvf(aTHX_ sv, "(overflow at 0x%"UVxf", byte 0x%02x)",
