@@ -841,7 +841,11 @@ that you won't change the variables in the pattern.  If you change them,
 Perl won't even notice.  See also L<"qr/STRING/imosx">.
 
 If the PATTERN evaluates to the empty string, the last
-I<successfully> matched regular expression is used instead.
+I<successfully> matched regular expression is used instead. In this
+case, only the C<g> and C<c> flags on the empty pattern is honoured -
+the other flags are taken from the original pattern. If no match has
+previously succeeded, this will (silently) act instead as a genuine
+empty pattern (which will always match).
 
 If the C</g> option is not used, C<m//> in list context returns a
 list consisting of the subexpressions matched by the parentheses in the

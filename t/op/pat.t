@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..897\n";
+print "1..900\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2797,4 +2797,29 @@ print "# some Unicode properties\n";
 
     print eval { "a" =~ /\p{qrst} / } ? "not ok $test\n" : "ok $test\n";
     $test++;
+}
+
+{
+    # [ID 20020412.005] wrong pmop flags checked when empty pattern
+    # requires reuse of last successful pattern
+    my $test = 898;
+    $test =~ /\d/;
+    for (0 .. 1) {
+	my $match = ?? + 0;
+	if ($match != $_) {
+	    print "ok $test\n";
+	} else {
+	    printf "not ok %s\t# 'match once' %s on %s iteration\n", $test,
+		    $match ? 'succeeded' : 'failed', $_ ? 'second' : 'first';
+	}
+	++$test;
+    }
+    $test =~ /(\d)/;
+    my $result = join '', $test =~ //g;
+    if ($result eq $test) {
+	print "ok $test\n";
+    } else {
+	printf "not ok %s\t# expected '%s', got '%s'\n", $test, $test, $result;
+    }
+    ++$test;
 }

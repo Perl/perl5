@@ -1184,6 +1184,7 @@ PP(pp_match)
 {
     dSP; dTARG;
     register PMOP *pm = cPMOP;
+    PMOP *dynpm = pm;
     register char *t;
     register char *s;
     char *strend;
@@ -1217,6 +1218,7 @@ PP(pp_match)
 
     PL_reg_match_utf8 = DO_UTF8(TARG);
 
+    /* PMdf_USED is set after a ?? matches once */
     if (pm->op_pmdynflags & PMdf_USED) {
       failure:
 	if (gimme == G_ARRAY)
@@ -1224,17 +1226,19 @@ PP(pp_match)
 	RETPUSHNO;
     }
 
+    /* empty pattern special-cased to use last successful pattern if possible */
     if (!rx->prelen && PL_curpm) {
 	pm = PL_curpm;
 	rx = PM_GETRE(pm);
     }
+
     if (rx->minlen > len)
-      goto failure;
+	goto failure;
 
     truebase = t = s;
 
     /* XXXX What part of this is needed with true \G-support? */
-    if ((global = pm->op_pmflags & PMf_GLOBAL)) {
+    if ((global = dynpm->op_pmflags & PMf_GLOBAL)) {
 	rx->startp[0] = -1;
 	if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG)) {
 	    MAGIC* mg = mg_find(TARG, PERL_MAGIC_regex_global);
@@ -1287,8 +1291,8 @@ play_it_again:
     if (CALLREGEXEC(aTHX_ rx, s, strend, truebase, minmatch, TARG, NULL, r_flags))
     {
 	PL_curpm = pm;
-	if (pm->op_pmflags & PMf_ONCE)
-	    pm->op_pmdynflags |= PMdf_USED;
+	if (dynpm->op_pmflags & PMf_ONCE)
+	    dynpm->op_pmdynflags |= PMdf_USED;
 	goto gotcha;
     }
     else
@@ -1325,7 +1329,7 @@ play_it_again:
 	    }
 	}
 	if (global) {
-	    if (pm->op_pmflags & PMf_CONTINUE) {
+	    if (dynpm->op_pmflags & PMf_CONTINUE) {
 		MAGIC* mg = 0;
 		if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG))
 		    mg = mg_find(TARG, PERL_MAGIC_regex_global);
@@ -1378,8 +1382,8 @@ yup:					/* Confirmed by INTUIT */
 	RX_MATCH_TAINTED_on(rx);
     TAINT_IF(RX_MATCH_TAINTED(rx));
     PL_curpm = pm;
-    if (pm->op_pmflags & PMf_ONCE)
-	pm->op_pmdynflags |= PMdf_USED;
+    if (dynpm->op_pmflags & PMf_ONCE)
+	dynpm->op_pmdynflags |= PMdf_USED;
     if (RX_MATCH_COPIED(rx))
 	Safefree(rx->subbeg);
     RX_MATCH_COPIED_off(rx);
@@ -1416,7 +1420,7 @@ yup:					/* Confirmed by INTUIT */
 
 nope:
 ret_no:
-    if (global && !(pm->op_pmflags & PMf_CONTINUE)) {
+    if (global && !(dynpm->op_pmflags & PMf_CONTINUE)) {
 	if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG)) {
 	    MAGIC* mg = mg_find(TARG, PERL_MAGIC_regex_global);
 	    if (mg)
