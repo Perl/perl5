@@ -458,6 +458,14 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
 		    Perl_croak(aTHX_ "panic: magic_len: %"IVdf, (IV)i);
 		return i;
 	    }
+	    else {
+		if (ckWARN(WARN_UNINITIALIZED))
+		    report_uninit();
+	    }
+	}
+	else {
+	    if (ckWARN(WARN_UNINITIALIZED))
+		report_uninit();
 	}
 	return 0;
     case '+':

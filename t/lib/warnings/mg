@@ -42,3 +42,10 @@ $|=1;
 $SIG{"INT"} = "fred"; kill "INT",$$;
 EXPECT
 
+########
+# mg.c
+use warnings 'uninitialized';
+'foo' =~ /(b)(a)(r)/;
+length $3;
+EXPECT
+Use of uninitialized value in length at - line 4.
