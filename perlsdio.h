@@ -110,11 +110,11 @@
 
 #ifdef STDIO_PTR_LVALUE
 #ifdef STDIO_PTR_LVAL_NOCHANGE_CNT
-#define PerlIO_set_ptrcnt(f,p,c)	STMT_START {FILE_ptr(f) = (p), PerlIO_set_cnt(f,c)} STMT_END
+#define PerlIO_set_ptrcnt(f,p,c)      STMT_START {FILE_ptr(f) = (p), PerlIO_set_cnt(f,c);} STMT_END
 #else
 #ifdef STDIO_PTR_LVAL_SETS_CNT
 /* assert() may pre-process to ""; potential syntax error (FILE_ptr(), ) */
-#define PerlIO_set_ptrcnt(f,p,c)	STMT_START {FILE_ptr(f) = (p); assert(FILE_cnt(f) == (c))} STMT_END
+#define PerlIO_set_ptrcnt(f,p,c)      STMT_START {FILE_ptr(f) = (p); assert(FILE_cnt(f) == (c));} STMT_END
 #define PerlIO_fast_gets(f)		1        
 #else
 #define PerlIO_set_ptrcnt(f,p,c)	abort()
