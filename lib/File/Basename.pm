@@ -77,7 +77,7 @@ would yield
 
     $base eq 'draft'
     $path eq '/virgil/aeneid/',
-    $tail eq '.book7'
+    $type eq '.book7'
 
 Similarly, using VMS syntax:
 
@@ -118,7 +118,7 @@ require Exporter;
 @EXPORT = qw(fileparse fileparse_set_fstype basename dirname);
 #use strict;
 #use vars qw($VERSION $Fileparse_fstype);
-$VERSION = "2.3";
+$VERSION = "2.4";
 
 
 #   fileparse_set_fstype() - specify OS-based rules used in future
@@ -135,7 +135,7 @@ sub fileparse_set_fstype {
 
 #   fileparse() - parse file specification
 #
-#   Version 2.3   4-Jul-1996  Charles Bailey  bailey@genetics.upenn.edu
+#   Version 2.4  27-Sep-1996  Charles Bailey  bailey@genetics.upenn.edu
 
 
 sub fileparse {
@@ -146,18 +146,18 @@ sub fileparse {
   if ($fstype =~ /^VMS/i) {
     if ($fullname =~ m#/#) { $fstype = '' }  # We're doing Unix emulation
     else {
-      ($dirpath,$basename) = ($fullname =~ /(.*[:>\]])?(.*)/);
+      ($dirpath,$basename) = ($fullname =~ /^(.*[:>\]])?(.*)/);
     }
   }
   if ($fstype =~ /^MSDOS/i) {
-    ($dirpath,$basename) = ($fullname =~ /(.*[:\\])?(.*)/);
+    ($dirpath,$basename) = ($fullname =~ /^(.*[:\\\/])?(.*)/);
     $dirpath .= '.\\' unless $dirpath =~ /\\$/;
   }
   elsif ($fstype =~ /^MacOS/i) {
-    ($dirpath,$basename) = ($fullname =~ /(.*:)?(.*)/);
+    ($dirpath,$basename) = ($fullname =~ /^(.*:)?(.*)/);
   }
   elsif ($fstype !~ /^VMS/i) {  # default to Unix
-    ($dirpath,$basename) = ($fullname =~ m#(.*/)?(.*)#);
+    ($dirpath,$basename) = ($fullname =~ m#^(.*/)?(.*)#);
     $dirpath = './' unless $dirpath;
   }
 
