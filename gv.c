@@ -412,7 +412,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
 	return Nullgv;
     cv = GvCV(gv);
 
-    if (!CvROOT(cv))
+    if (!(CvROOT(cv) || CvXSUB(cv)))
 	return Nullgv;
 
     /*
@@ -423,6 +423,20 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
 	Perl_warner(aTHX_ WARN_DEPRECATED,
 	  "Use of inherited AUTOLOAD for non-method %s::%.*s() is deprecated",
 	     HvNAME(stash), (int)len, name);
+
+#ifndef USE_THREADS
+    if (CvXSUB(cv)) {
+        /* rather than lookup/init $AUTOLOAD here
+         * only to have the XSUB do another lookup for $AUTOLOAD
+         * and split that value on the last '::',
+         * pass along the same data via some unused fields in the CV
+         */
+        CvSTASH(cv) = stash;
+        SvPVX(cv) = (char *)name; /* cast to loose constness warning */
+        SvCUR(cv) = len;
+        return gv;
+    }
+#endif
 
     /*
      * Given &FOO::AUTOLOAD, set $FOO::AUTOLOAD to desired function name.
