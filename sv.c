@@ -5398,7 +5398,7 @@ SV *
 Perl_sv_newref(pTHX_ SV *sv)
 {
     if (sv)
-	ATOMIC_INC(SvREFCNT(sv));
+	(SvREFCNT(sv))++;
     return sv;
 }
 
@@ -5416,8 +5416,6 @@ Normally called via a wrapper macro C<SvREFCNT_dec>.
 void
 Perl_sv_free(pTHX_ SV *sv)
 {
-    int refcount_is_zero;
-
     if (!sv)
 	return;
     if (SvREFCNT(sv) == 0) {
@@ -5436,8 +5434,7 @@ Perl_sv_free(pTHX_ SV *sv)
 	    Perl_warner(aTHX_ packWARN(WARN_INTERNAL), "Attempt to free unreferenced scalar");
 	return;
     }
-    ATOMIC_DEC_AND_TEST(refcount_is_zero, SvREFCNT(sv));
-    if (!refcount_is_zero)
+    if (--(SvREFCNT(sv)) > 0)
 	return;
 #ifdef DEBUGGING
     if (SvTEMP(sv)) {
