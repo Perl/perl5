@@ -25,6 +25,13 @@ binary compatibility with Perl 5.003.  If you choose binary
 compatibility, you do not have to recompile your extensions, but you
 might have symbol conflicts if you embed Perl in another application.
 
+=head2 New Opcode Module and Revised Safe Module
+
+A new Opcode module supports the creation, manipulation and
+application of opcode masks.  The revised Safe module has a new API
+and is implemented using the new Opcode module.  Please read the new
+Opcode and Safe documentation.
+
 =head2 Internal Change: FileHandle Deprecated
 
 Filehandles are now stored internally as type IO::Handle.
@@ -32,12 +39,6 @@ Although C<use FileHandle> and C<*STDOUT{FILEHANDLE}>
 are still supported for backwards compatibility
 C<use IO::Handle> (or C<IO::Seekable> or C<IO::File>) and
 C<*STDOUT{IO}> are the way of the future.
-
-=head2 Internal Change: Safe Module Absorbed into Opcode
-
-A new Opcode module subsumes 5.003's Safe module.  The Safe
-interface is still available, so existing scripts should still
-work, but users are encouraged to read the new Opcode documentation.
 
 =head2 Internal Change: PerlIO internal IO abstraction interface.
 
@@ -167,6 +168,11 @@ version as an argument.  The default VERSION method, inherited from
 the Universal class, croaks if the given version is larger than the
 value of the variable $Module::VERSION.  (Note that there is not a
 comma after VERSION!)
+
+This version-checking mechanism is similar to the one currently used
+in the Exporter module, but it is faster and can be used with modules
+that don't use the Exporter.  It is the recommended method for new
+code.
 
 =item prototype(FUNCTION)
 
@@ -321,7 +327,7 @@ See L<perllocale> for more information.
 
 =item use ops
 
-Restricts unsafe operations when compiling.
+Disable unsafe opcodes, or any named opcodes, when compiling Perl code.
 
 =back
 
@@ -419,7 +425,8 @@ All hash keys with the same string are only allocated once, so
 even if you have 100 copies of the same hash, the immutable keys
 never have to be re-allocated.
 
-Functions that do nothing but return a fixed value are now inlined.
+Functions that have an empty prototype and that do nothing but return
+a fixed value are now inlined (e.g. C<sub PI () { 3.14159 }>).
 
 =head1 Documentation Changes
 
