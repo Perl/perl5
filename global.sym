@@ -74,8 +74,6 @@ in_my
 in_my_stash
 inc_amg
 io_close
-key_create
-key_destroy
 know_next
 last_lop
 last_lop_op

@@ -73,12 +73,12 @@ struct io {
 #define SvREFCNT(sv)	(sv)->sv_refcnt
 
 #ifdef __GNUC__
-#  define SvREFCNT_inc(sv)	({SV *nsv = (SV*)(sv); ++SvREFCNT(nsv); nsv;})
+#  define SvREFCNT_inc(sv) ({SV* nsv=(SV*)(sv); if(nsv) ++SvREFCNT(nsv); nsv;})
 #else
 #  if defined(CRIPPLED_CC) || defined(USE_THREADS)
-#    define SvREFCNT_inc(sv)	sv_newref((SV*)sv)
+#    define SvREFCNT_inc(sv) sv_newref((SV*)sv)
 #  else
-#    define SvREFCNT_inc(sv)	((Sv = (SV*)(sv)), ++SvREFCNT(Sv), (SV*)Sv)
+#    define SvREFCNT_inc(sv) ((Sv=(SV*)(sv)), (Sv && ++SvREFCNT(Sv)), (SV*)Sv)
 #  endif
 #endif
 

@@ -2186,7 +2186,7 @@ int gimme;
     CvPADLIST(compcv) = comppadlist;
 
     if (saveop->op_type != OP_REQUIRE)
-	CvOUTSIDE(compcv) = caller ? (CV*)SvREFCNT_inc(caller) : 0;
+	CvOUTSIDE(compcv) = (CV*)SvREFCNT_inc(caller);
 
     SAVEFREESV(compcv);
 

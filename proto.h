@@ -190,8 +190,6 @@ bool	io_close _((IO* io));
 OP*	invert _((OP* cmd));
 OP*	jmaybe _((OP* arg));
 I32	keyword _((char* d, I32 len));
-PADOFFSET	key_create _((void));
-void	key_destroy _((PADOFFSET key));
 void	leave_scope _((I32 base));
 void	lex_end _((void));
 void	lex_start _((SV* line));

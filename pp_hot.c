@@ -1901,7 +1901,7 @@ PP(pp_entersub)
      	 * (3) instead of (2) so we'd have to clone. Would the fact
      	 * that we released the mutex more quickly make up for this?
      	 */
-	svp = hv_fetch(cvcache, (char *)cv, sizeof(cv), FALSE);
+	svp = hv_fetch(thr->cvcache, (char *)cv, sizeof(cv), FALSE);
      	if (svp) {
 	    /* We already have a clone to use */
 	    MUTEX_UNLOCK(CvMUTEXP(cv));
@@ -1941,7 +1941,7 @@ PP(pp_entersub)
 		 */
 	     	clonecv = cv_clone(cv);
     		SvREFCNT_dec(cv); /* finished with this */
-		hv_store(cvcache, (char*)cv, sizeof(cv), (SV*)clonecv,0);
+		hv_store(thr->cvcache, (char*)cv, sizeof(cv), (SV*)clonecv,0);
 		CvOWNER(clonecv) = thr;
 		cv = clonecv;
 		SvREFCNT_inc(cv);

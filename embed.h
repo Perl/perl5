@@ -289,8 +289,6 @@
 #define invert			Perl_invert
 #define io_close		Perl_io_close
 #define jmaybe			Perl_jmaybe
-#define key_create		Perl_key_create
-#define key_destroy		Perl_key_destroy
 #define keyword			Perl_keyword
 #define know_next		Perl_know_next
 #define last_lop		Perl_last_lop

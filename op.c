@@ -247,7 +247,7 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
 			    warn("Variable \"%s\" will not stay shared", name);
 		    }
 		}
-		av_store(comppad, newoff, oldsv ? SvREFCNT_inc(oldsv) : 0);
+		av_store(comppad, newoff, SvREFCNT_inc(oldsv));
 		return newoff;
 	    }
 	}

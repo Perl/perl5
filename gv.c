@@ -1112,7 +1112,7 @@ HV* stash;
 	    filled = 1;
 	}
 #endif 
-	amt.table[i]= cv ? (CV*)SvREFCNT_inc(cv) : 0;
+	amt.table[i]=(CV*)SvREFCNT_inc(cv);
     }
     if (filled) {
       AMT_AMAGIC_on(&amt);

@@ -115,6 +115,8 @@ void *arg;
 	goto finishoff;
     }
 
+    CATCH_SET(TRUE);
+
     /* Now duplicate most of perl_call_sv but with a few twists */
     op = (OP*)&myop;
     Zero(op, 1, LOGOP);
@@ -142,7 +144,7 @@ void *arg;
     /* removed for debug */
     SvREFCNT_dec(curstack);
 #endif
-    SvREFCNT_dec(cvcache);
+    SvREFCNT_dec(thr->cvcache);
     SvREFCNT_dec(thr->magicals);
     SvREFCNT_dec(thr->specific);
     Safefree(markstack);
@@ -151,6 +153,7 @@ void *arg;
     Safefree(retstack);
     Safefree(cxstack);
     Safefree(tmps_stack);
+    Safefree(ofs);
 
     MUTEX_LOCK(&thr->mutex);
     DEBUG_L(PerlIO_printf(PerlIO_stderr(),
@@ -207,7 +210,6 @@ char *class;
     
     savethread = thr;
     thr = new_struct_thread(thr);
-    init_stacks(ARGS);
     SPAGAIN;
     DEBUG_L(PerlIO_printf(PerlIO_stderr(),
 			  "%p: newthread, tid is %u, preparing stack\n",
@@ -236,7 +238,7 @@ char *class;
 #endif
     if (err) {
 	/* Thread creation failed--clean up */
-	SvREFCNT_dec(cvcache);
+	SvREFCNT_dec(thr->cvcache);
 	remove_thread(thr);
 	MUTEX_DESTROY(&thr->mutex);
 	for (i = 0; i <= AvFILL(initargs); i++)
@@ -251,7 +253,7 @@ char *class;
 	croak("panic: sigprocmask");
 #endif
     sv = newSViv(thr->tid);
-    sv_magic(sv, oursv, '~', 0, 0);
+    sv_magic(sv, thr->oursv, '~', 0, 0);
     SvMAGIC(sv)->mg_private = Thread_MAGIC_SIGNATURE;
     return sv_bless(newRV_noinc(sv), gv_stashpv(class, TRUE));
 }
@@ -352,7 +354,7 @@ self(class)
 	SV *sv;
     PPCODE:
 	sv = newSViv(thr->tid);
-	sv_magic(sv, oursv, '~', 0, 0);
+	sv_magic(sv, thr->oursv, '~', 0, 0);
 	SvMAGIC(sv)->mg_private = Thread_MAGIC_SIGNATURE;
 	PUSHs(sv_2mortal(sv_bless(newRV_noinc(sv), gv_stashpv(class, TRUE))));
 
@@ -479,7 +481,7 @@ list(class)
 	do {
 	    SV *sv = (SV*)SvRV(*svp);
 	    sv_setiv(sv, t->tid);
-	    SvMAGIC(sv)->mg_obj = SvREFCNT_inc(t->Toursv);
+	    SvMAGIC(sv)->mg_obj = SvREFCNT_inc(t->oursv);
 	    SvMAGIC(sv)->mg_flags |= MGf_REFCOUNTED;
 	    SvMAGIC(sv)->mg_private = Thread_MAGIC_SIGNATURE;
 	    t = t->next;

@@ -69,6 +69,9 @@ static void init_ids _((void));
 static void init_debugger _((void));
 static void init_lexer _((void));
 static void init_main_stash _((void));
+#ifdef USE_THREADS
+static struct thread * init_main_thread _((void));
+#endif /* USE_THREADS */
 static void init_perllib _((void));
 static void init_postdump_symbols _((int, char **, char **));
 static void init_predump_symbols _((void));
@@ -139,7 +142,7 @@ register PerlInterpreter *sv_interp;
 	MUTEX_INIT(&threads_mutex);
 	COND_INIT(&nthreads_cond);
 	
-	thr = new_struct_thread(0);
+	thr = init_main_thread();
 #endif /* USE_THREADS */
 
 	linestr = NEWSV(65,80);
@@ -2824,6 +2827,63 @@ int addsubdirs;
 
     SvREFCNT_dec(subdir);
 }
+
+#ifdef USE_THREADS
+static struct thread *
+init_main_thread()
+{
+    struct thread *thr;
+    XPV *xpv;
+
+    Newz(53, thr, 1, struct thread);
+    curcop = &compiling;
+    thr->cvcache = newHV();
+    thr->magicals = newAV();
+    thr->specific = newAV();
+    thr->flags = THRf_R_JOINABLE;
+    MUTEX_INIT(&thr->mutex);
+    /* Handcraft thrsv similarly to mess_sv */
+    New(53, thrsv, 1, SV);
+    Newz(53, xpv, 1, XPV);
+    SvFLAGS(thrsv) = SVt_PV;
+    SvANY(thrsv) = (void*)xpv;
+    SvREFCNT(thrsv) = 1 << 30;	/* practically infinite */
+    SvPVX(thrsv) = (char*)thr;
+    SvCUR_set(thrsv, sizeof(thr));
+    SvLEN_set(thrsv, sizeof(thr));
+    *SvEND(thrsv) = '\0';	/* in the trailing_nul field */
+    thr->oursv = thrsv;
+    curcop = &compiling;
+    chopset = " \n-";
+
+    MUTEX_LOCK(&threads_mutex);
+    nthreads++;
+    thr->tid = 0;
+    thr->next = thr;
+    thr->prev = thr;
+    MUTEX_UNLOCK(&threads_mutex);
+
+#ifdef HAVE_THREAD_INTERN
+    init_thread_intern(thr);
+#else
+    thr->self = pthread_self();
+#endif /* HAVE_THREAD_INTERN */
+    SET_THR(thr);
+
+    /*
+     * These must come after the SET_THR because sv_setpvn does
+     * SvTAINT and the taint fields require dTHR.
+     */
+    toptarget = NEWSV(0,0);
+    sv_upgrade(toptarget, SVt_PVFM);
+    sv_setpvn(toptarget, "", 0);
+    bodytarget = NEWSV(0,0);
+    sv_upgrade(bodytarget, SVt_PVFM);
+    sv_setpvn(bodytarget, "", 0);
+    formtarget = bodytarget;
+    return thr;
+}
+#endif /* USE_THREADS */
 
 void
 call_list(oldscope, list)

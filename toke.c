@@ -5346,7 +5346,7 @@ U32 flags;
     av_store(comppadlist, 1, (SV*)comppad);
 
     CvPADLIST(compcv) = comppadlist;
-    CvOUTSIDE(compcv) = outsidecv ? (CV*)SvREFCNT_inc(outsidecv) : 0;
+    CvOUTSIDE(compcv) = (CV*)SvREFCNT_inc(outsidecv);
 #ifdef USE_THREADS
     CvOWNER(compcv) = 0;
     New(666, CvMUTEXP(compcv), 1, perl_mutex);
