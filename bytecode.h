@@ -90,7 +90,7 @@ EXT I32 obj_list_fill INIT(-1);
 	unsigned short *ary;		\
 	int i;				\
 	New(666, ary, 256, unsigned short); \
-	FREAD(ary, 256, 2);		\
+	BGET_FREAD(ary, 256, 2);	\
 	for (i = 0; i < 256; i++)	\
 	    ary[i] = ntohs(ary[i]);	\
 	arg = (char *) ary;		\
