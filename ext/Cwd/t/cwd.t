@@ -118,7 +118,7 @@ if ($Config{d_symlink}) {
     print +($abs_path      =~ m|$want$| ? "" : "not "), "ok 13\n";
     print +($fast_abs_path =~ m|$want$| ? "" : "not "), "ok 14\n";
 
-    rmtree(["ptrslt"], 0, 0);
+    rmtree(["_ptrslt_"], 0, 0);
     unlink "linktest";
 } else {
     print "ok 13 # skipped\n";

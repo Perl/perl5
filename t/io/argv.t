@@ -129,4 +129,4 @@ ok( eof(),      'eof() true after closing ARGV' );
     close F;
 }
 
-END { unlink 'Io_argv1.tmp', 'Io_argv1.tmp.bak', 'Io_argv2.tmp', 'Io_argv2.tmp.bak' }
+END { unlink 'Io_argv1.tmp', 'Io_argv1.tmp_bak', 'Io_argv2.tmp', 'Io_argv2.tmp_bak' }
