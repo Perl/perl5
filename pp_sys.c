@@ -2943,11 +2943,10 @@ PP(pp_system)
 	} while (result == -1 && errno == EINTR);
 	(void)rsignal_restore(SIGINT, &ihand);
 	(void)rsignal_restore(SIGQUIT, &qhand);
-	STATUS_NATIVE_SET(status);
-	value = (result == -1) ? -1 : status;
+	STATUS_NATIVE_SET(result == -1 ? -1 : status);
 	do_execfree();	/* free any memory child malloced on vfork */
 	SP = ORIGMARK;
-	PUSHi(value);
+	PUSHi(STATUS_POSIX);
 	RETURN;
     }
     if (op->op_flags & OPf_STACKED) {
@@ -2973,7 +2972,7 @@ PP(pp_system)
     STATUS_NATIVE_SET(value);
     do_execfree();
     SP = ORIGMARK;
-    PUSHi(value);
+    PUSHi(STATUS_POSIX);
 #endif /* !FORK or VMS */
     RETURN;
 }

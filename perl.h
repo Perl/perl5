@@ -444,7 +444,12 @@
 #endif
 
 #define STATUS_POSIX		statusvalue
-#define STATUS_POSIX_SET(n)	(statusvalue = (n))
+#define STATUS_POSIX_SET(n)		\
+    STMT_START {			\
+	statusvalue = (n);		\
+	if (statusvalue != -1)		\
+	    statusvalue &= 0xFFFF;	\
+    } STMT_END
 
 #ifdef VMS
 #   define STATUS_NATIVE	statusvalue_vms
@@ -468,8 +473,8 @@
 #   define STATUS_NATIVE	STATUS_POSIX
 #   define STATUS_NATIVE_EXPORT	STATUS_POSIX
 #   define STATUS_NATIVE_SET	STATUS_POSIX_SET
-#   define STATUS_ALL_SUCCESS	STATUS_POSIX_SET(0)
-#   define STATUS_ALL_FAILURE	STATUS_POSIX_SET(1)
+#   define STATUS_ALL_SUCCESS	(statusvalue = 0)
+#   define STATUS_ALL_FAILURE	(statusvalue = 1)
 #endif
 
 #ifdef I_SYS_IOCTL
@@ -1712,7 +1717,7 @@ IEXT STRLEN	Iorslen;
 IEXT char *	Iofmt;			/* $# */
 IEXT I32	Imaxsysfd IINIT(MAXSYSFD); /* top fd to pass to subprocesses */
 IEXT int	Imultiline;		/* $*--do strings hold >1 line? */
-IEXT U32	Istatusvalue;		/* $? */
+IEXT I32	Istatusvalue;		/* $? */
 #ifdef VMS
 IEXT U32	Istatusvalue_vms;	/* $^S */
 #endif

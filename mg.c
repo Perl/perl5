@@ -462,10 +462,7 @@ MAGIC *mg;
 #endif
 	break;
     case '?':
-	if (STATUS_POSIX == -1)
-	    sv_setiv(sv, (IV)-1);
-	else
-	    sv_setuv(sv, (UV)STATUS_POSIX);
+	sv_setiv(sv, (IV)STATUS_POSIX);
 	break;
     case '^':
 	s = IoTOP_NAME(GvIOp(defoutgv));
@@ -1354,7 +1351,7 @@ MAGIC* mg;
 	compiling.cop_arybase = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
 	break;
     case '?':
-	STATUS_POSIX_SET(SvIOK(sv) ? SvUVX(sv) : sv_2uv(sv));
+	STATUS_POSIX_SET(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 	break;
     case '!':
 	SETERRNO(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv),
