@@ -136,7 +136,7 @@ static unsigned char PADDING[64] = {
 
 /* F, G, H and I are basic MD5 functions.
  */
-#define F(x, y, z) (((x) & ((y) ^ (z)) ^ (z)))
+#define F(x, y, z) ((((x) & ((y) ^ (z))) ^ (z)))
 #define G(x, y, z) F(z, x, y)
 #define H(x, y, z) ((x) ^ (y) ^ (z))
 #define I(x, y, z) ((y) ^ ((x) | (~z)))
