@@ -4990,7 +4990,7 @@ See also C<keys>, C<each>, and C<sort>.
 Treats the string in EXPR as a vector of unsigned integers, and
 returns the value of the bit field specified by OFFSET.  BITS
 specifies the number of bits that are reserved for each entry in the
-bit vector.  This must be between 1 and 8 (inclusive), or 16, or 32.
+bit vector.  This must be a power of two from 1 to 32.
 C<vec> may also be assigned to, in which case parentheses are needed
 to give the expression the correct precedence as in
 

@@ -1521,8 +1521,8 @@ before the illegal character.
 
 =item Illegal number of bits in vec
 
-(F) The number of bits in vec() (the third argument) must be from 1 to 8
-(inclusive), or 16, or 32.
+(F) The number of bits in vec() (the third argument) must be a power of
+two from 1 to 32.
  
 =item Illegal switch in PERL5OPT: %s
 
