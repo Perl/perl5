@@ -232,13 +232,13 @@ C<\U>, and C<\u>.  For Titlecase, see L</Titlecase>.
 Unicode concept which most often is equal to uppercase, but for
 certain characters like the German "sharp s" there is a difference.
 
-=head2 AUTHOR
+=head1 AUTHOR
 
 Iain Truskett.
 
 This document may be distributed under the same terms as Perl itself.
 
-=head2 SEE ALSO
+=head1 SEE ALSO
 
 =over 4
 
@@ -292,7 +292,7 @@ reference on the topic.
 
 =back
 
-=head2 THANKS
+=head1 THANKS
 
 David P.C. Wollmann,
 Richard Soderberg,
