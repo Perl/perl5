@@ -84,7 +84,7 @@ clean:
 	rm -f a2p *.o a2p.c
 
 realclean: clean
-	rm -f *.orig */*.orig core $(addedbyconf) a2p.c all
+	rm -f *.orig */*.orig core $(addedbyconf) a2p.c all malloc.c
 	rm -f Makefile cflags find2perl s2p makefile makefile.old
 
 # The following lint has practically everything turned on.  Unfortunately,

@@ -5,7 +5,7 @@ require Exporter;
 require AutoLoader;
 require DynaLoader;
 require Config;
-@ISA = (Exporter, AutoLoader, DynaLoader);
+@ISA = (Exporter, DynaLoader);
 
 $H{assert_h} =	[qw(assert NDEBUG)];
 

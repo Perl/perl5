@@ -6320,7 +6320,9 @@ $cc $ccflags -c bar1.c >/dev/null 2>&1
 $cc $ccflags -c bar2.c >/dev/null 2>&1
 $cc $ccflags -c foo.c >/dev/null 2>&1
 ar rc bar.a bar2.o bar1.o >/dev/null 2>&1
-if $cc $ccflags $ldflags -o foobar foo.o bar.a $libs > /dev/null 2>&1 &&
+if test -n "$ranlib" ; then
+	orderlib=false
+elif $cc $ccflags $ldflags -o foobar foo.o bar.a $libs > /dev/null 2>&1 &&
 	./foobar >/dev/null 2>&1; then
 	echo "ar appears to generate random libraries itself."
 	orderlib=false

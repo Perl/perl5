@@ -115,7 +115,7 @@ manpages = perl.man
 
 util =
 
-sh = Makefile.SH cflags.SH embed_h.SH makedepend.SH makedir.SH writemain.SH
+sh = Makefile.SH cflags.SH makedepend.SH makedir.SH writemain.SH
 
 h1 = EXTERN.h INTERN.h XSUB.h av.h config.h cop.h cv.h dosish.h 
 h2 = embed.h form.h gv.h handy.h hv.h keywords.h mg.h op.h
@@ -215,8 +215,8 @@ sperl.o: perl.c perly.h patchlevel.h $(h)
 opcode.h: opcode.pl
 	- perl opcode.pl
 
-embed.h: embed_h.SH global.sym interp.sym
-	sh embed_h.SH
+embed.h: embed_h.sh global.sym interp.sym
+	sh embed_h.sh
 
 preplibrary: miniperl lib/Config.pm
 	@test -d lib/auto || mkdir lib/auto

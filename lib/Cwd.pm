@@ -46,8 +46,8 @@ sub getcwd
 	{
 	    do
 	    {
-		unless ($dir = readdir(PARENT))
-		{
+		unless (defined ($dir = readdir(PARENT)))
+	        {
 		    warn "readdir($dotdots): $!";
 		    closedir(PARENT);
 		    return '';
@@ -65,7 +65,7 @@ sub getcwd
 	$cwd = "$dir/$cwd";
 	closedir(PARENT);
     } while ($dir);
-    chop($cwd);
+    chop($cwd); # drop the trailing /
     $cwd;
 }
 
@@ -95,7 +95,7 @@ sub fastcwd {
 	    next if $_ eq '.';
 	    next if $_ eq '..';
 
-	    last unless $_;
+	    last unless defined;
 	    ($tdev, $tino) = lstat($_);
 	    last unless $tdev != $odev || $tino != $oino;
 	}

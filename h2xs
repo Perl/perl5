@@ -1,16 +1,114 @@
 #!/usr/bin/perl
-'di ';
-'ds 00 \"';
-'ig 00 ';
+
+=head1 NAME
+
+h2xs - convert .h C header files to Perl extensions
+
+=head1 SYNOPSIS
+
+B<h2xs> [B<-Acfh>] [B<-n> module_name] [headerfile [extra_libraries]]
+
+=head1 DESCRIPTION
+
+I<h2xs> builds a Perl extension from any C header file.  The extension will
+include functions which can be used to retrieve the value of any #define
+statement which was in the C header.
+
+The I<module_name> will be used for the name of the extension.  If
+module_name is not supplied then the name of the header file will be used,
+with the first character capitalized.
+
+If the extension might need extra libraries, they should be included
+here.  The extension Makefile.PL will take care of checking whether
+the libraries actually exist and how they should be loaded.
+The extra libraries should be specified in the form -lm -lposix, etc,
+just as on the cc command line.  By default, the Makefile.PL will
+search through the library path determined by Configure.  That path
+can be augmented by including arguments of the form B<-L/another/library/path>
+in the extra-libraries argument.
+
+=head1 OPTIONS
+
+=over 5
+
+=item B<-n> I<module_name>
+
+Specifies a name to be used for the extension, e.g., S<-n RPC::DCE>
+
+=item B<-f>
+
+Allows an extension to be created for a header even if that header is
+not found in /usr/include.
+
+=item B<-c>
+
+Omit C<constant()> from the .xs file and corresponding specialised
+C<AUTOLOAD> from the .pm file.
+
+=item B<-A>
+
+Omit all autoload facilities.  This is the same as B<-c> but also removes the
+S<C<require AutoLoader>> statement from the .pm file.
+
+=back
+
+=head1 EXAMPLES
+
+
+	# Default behavior, extension is Rusers
+	h2xs rpcsvc/rusers
+
+	# Same, but extension is RUSERS
+	h2xs -n RUSERS rpcsvc/rusers
+
+	# Extension is rpcsvc::rusers. Still finds <rpcsvc/rusers.h>
+	h2xs rpcsvc::rusers
+
+	# Extension is ONC::RPC.  Still finds <rpcsvc/rusers.h>
+	h2xs -n ONC::RPC rpcsvc/rusers
+
+	# Without constant() or AUTOLOAD
+	h2xs -c rpcsvc/rusers
+
+	# Creates templates for an extension named RPC
+	h2xs -cfn RPC
+
+	# Extension is ONC::RPC.
+	h2xs -cfn ONC::RPC
+
+	# Makefile.PL will look for library -lrpc in 
+	# additional directory /opt/net/lib
+	h2xs rpcsvc/rusers -L/opt/net/lib -lrpc
+
+
+=head1 ENVIRONMENT
+
+No environment variables are used.
+
+=head1 AUTHOR
+
+Larry Wall and others
+
+=head1 SEE ALSO
+
+L<perl>, L<ExtUtils::MakeMaker>, L<AutoLoader>
+
+=head1 DIAGNOSTICS
+
+The usual warnings if it can't read or write the files involved.
+
+=cut
+
 
 use Getopt::Std;
 
 sub usage{
 	warn "@_\n" if @_;
-    die 'h2xs [-fnch] [-n module_name] [headerfile [extra_libraries]]
+    die 'h2xs [-Acfh] [-n module_name] [headerfile [extra_libraries]]
     -f   Force creation of the extension even if the C header does not exist.
     -n   Specify a name to use for the extension (recommended).
     -c   Omit the constant() function and specialised AUTOLOAD from the XS file.
+    -A   Omit all autoloading facilities (implies -c).
     -h   Display this help message
 extra_libraries
          are any libraries that might be needed for loading the
@@ -19,7 +117,7 @@ extra_libraries
 }
 
 
-getopts("fhcAn:") || usage;
+getopts("Acfhn:") || usage;
 
 usage if $opt_h;
 $opt_c = 1 if $opt_A;
@@ -96,11 +194,33 @@ print PM <<"END";
 package $module;
 
 require Exporter;
-require AutoLoader;
 require DynaLoader;
+END
+
+if( ! $opt_A ){
+	print PM <<"END";
+require AutoLoader;
+END
+}
+
+if( $opt_c && ! $opt_A ){
+	# we won't have our own AUTOLOAD(), so we'll inherit it.
+	print PM <<"END";
 
 \@ISA = qw(Exporter AutoLoader DynaLoader);
+END
+}
+else{
+	# 1) we have our own AUTOLOAD(), so don't need to inherit it.
+	# or
+	# 2) we don't want autoloading mentioned.
+	print PM <<"END";
 
+\@ISA = qw(Exporter DynaLoader);
+END
+}
+
+print PM<<"END";
 # Items to export into callers namespace by default. Note: do not export
 # names by default without a very good reason. Use EXPORT_OK instead.
 # Do not simply export all your public functions/methods/constants.
@@ -115,8 +235,9 @@ END
 
 print PM <<"END" unless $opt_c;
 sub AUTOLOAD {
-    # This AUTOLOAD function overrides the one inherited from AutoLoader.
-    # It is used to 'autoload' constants from the constant() XS function.
+    # This AUTOLOAD is used to 'autoload' constants from the constant()
+    # XS function.  If a constant is not found then control is passed
+    # to the AUTOLOAD in AutoLoader.
 
     # NOTE: THIS AUTOLOAD FUNCTION IS FLAWED (but is the best we can do for now).
     # Avoid old-style ``&CONST'' usage. Either remove the ``&'' or add ``()''.
@@ -274,94 +395,3 @@ print PL ");\n";
 
 
 system '/bin/ls > MANIFEST';
-
-
-##############################################################################
-
-	# These next few lines are legal in both Perl and nroff.
-
-.00 ;			# finish .ig
- 
-'di			\" finish diversion--previous line must be blank
-.nr nl 0-1		\" fake up transition to first page again
-.nr % 0			\" start at page 1
-'; __END__ ############# From here on it's a standard manual page ############
-.TH H2XS 1 "August 9, 1994"
-.AT 3
-.SH NAME
-h2xs \- convert .h C header files to Perl extensions
-.SH SYNOPSIS
-.B h2xs [-Aachfm] [-n module_name] [headerfile [extra_libraries]]
-.SH DESCRIPTION
-.I h2xs
-builds a Perl extension from any C header file.  The extension will include
-functions which can be used to retrieve the value of any #define statement
-which was in the C header.
-.PP
-The 
-.I module_name
-will be used for the name of the extension.  If module_name is not supplied
-then the name of the header file will be used, with the first character
-capitalized.
-.PP
-If the extension might need extra libraries, they should be included
-here.  The extension Makefile.PL will take care of checking whether
-the libraries actually exist and how they should be loaded.
-The extra libraries should be specified in the form -lm -lposix, etc,
-just as on the cc command line.  By default, the Makefile.PL will
-search through the library path determined by Configure.  That path
-can be augmented by including arguments of the form -L/another/library/path
-in the extra-libraries argument.
-.SH OPTIONS
-.TP
-.B \-n module_name
-Specifies a name to be used for the extension, e.g., -n RPC::DCE
-.TP
-.B \-f
-Allows an extension to be created for a header even if that header is
-not found in /usr/include.
-.TP
-.B \-c
-Omit constant() from the .xs file and corresponding specialised AUTOLOAD from
-the .pm file.
-.TP
-.B \-A
-Deprecated synonym for -c.
-.SH EXAMPLES
-.nf
-
-	# Default behavior, extension is Rusers
-	h2xs rpcsvc/rusers
-
-	# Same, but extension is RUSERS
-	h2xs -n RUSERS rpcsvc/rusers
-
-	# Extension is rpcsvc::rusers. Still finds <rpcsvc/rusers.h>
-	h2xs rpcsvc::rusers
-
-	# Extension is ONC::RPC.  Still finds <rpcsvc/rusers.h>
-	h2xs -n ONC::RPC rpcsvc/rusers
-
-	# Without constant() or AUTOLOAD
-	h2xs -c rpcsvc/rusers
-
-	# Creates templates for an extension named RPC
-	h2xs -cfn RPC
-
-	# Extension is ONC::RPC.
-	h2xs -cfn ONC::RPC
-
-	# Makefile.PL will look for library -lrpc in 
-	# additional directory /opt/net/lib
-	h2xs rpcsvc/rusers -L/opt/net/lib -lrpc
-
-.fi
-.SH ENVIRONMENT
-No environment variables are used.
-.SH AUTHOR
-Larry Wall and others
-.SH "SEE ALSO"
-perl(1) ExtUtils::MakeMaker
-.SH DIAGNOSTICS
-The usual warnings if it can't read or write the files involved.
-.ex

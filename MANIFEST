@@ -79,7 +79,7 @@ emacs/perldb.el		Emacs debugging
 emacs/perldb.pl		Emacs debugging
 emacs/tedstuff		Some optional patches
 embed.h			Maps symbols to safer names
-embed_h.SH		Produces embed.h
+embed_h.sh		Produces embed.h
 ext/DB_File/DB_File.pm		Berkeley DB extension Perl module
 ext/DB_File/DB_File.xs		Berkeley DB extension external subroutines
 ext/DB_File/DB_File_BS		Berkeley DB extension mkbootstrap fodder
@@ -150,11 +150,9 @@ ext/SDBM_File/typemap	SDBM extension interface types
 ext/Socket/Makefile.PL	Socket extension makefile writer
 ext/Socket/Socket.pm	Socket extension Perl module
 ext/Socket/Socket.xs	Socket extension external subroutines
-ext/typemap		Extension interface types
 ext/util/extliblist	Used by extension Makefile.PL to make lib lists
 ext/util/make_ext	Used by Makefile to execute extension Makefiles
 ext/util/mkbootstrap	Turns ext/*/*_BS into bootstrap info
-ext/xsubpp		External subroutine preprocessor
 form.h			Public declarations for the above
 global.sym		Symbols that need hiding when embedded
 gv.c			Glob value code
@@ -239,6 +237,8 @@ lib/English.pm		Readable aliases for short variables
 lib/Env.pm		Map environment into ordinary variables
 lib/Exporter.pm		Exporter base class
 lib/ExtUtils/MakeMaker.pm	Write Makefiles for extensions
+lib/ExtUtils/typemap		Extension interface types
+lib/ExtUtils/xsubpp		External subroutine preprocessor
 lib/File/Basename.pm	A module to emulate the basename program
 lib/File/CheckTree.pm	Perl module supporting wholesale file mode validation
 lib/File/Find.pm	Routines to do a find
@@ -533,7 +533,6 @@ x2p/find2perl.SH	A find to perl translator
 x2p/handy.h		Handy definitions
 x2p/hash.c		Associative arrays again
 x2p/hash.h		Public declarations for the above
-x2p/malloc.c		Malloc code
 x2p/s2p.SH		Sed to perl translator
 x2p/s2p.man		Manual page for sed to perl translator
 x2p/str.c		String handling package

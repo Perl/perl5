@@ -8,23 +8,25 @@ use Carp;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(&autosplit &autosplit_lib_modules);
-@EXPORT_OK = qw($Verbose $Keep);
+@EXPORT_OK = qw($Verbose $Keep $Maxlen $CheckForAutoloader $CheckModTime);
 
 # for portability warn about names longer than $maxlen
 $Maxlen  = 8;	# 8 for dos, 11 (14-".al") for SYSVR3
 $Verbose = 1;	# 0=none, 1=minimal, 2=list .al files
 $Keep    = 0;
-$IndexFile = "autosplit.ix";	# file also serves as timestamp
+$CheckForAutoloader = 1;
+$CheckModTime = 1;
 
+$IndexFile = "autosplit.ix";	# file also serves as timestamp
 $maxflen = 255;
 $maxflen = 14 if $Config{'d_flexfnam'} ne 'define';
 $vms = ($Config{'osname'} eq 'VMS');
 
+
 sub autosplit{
     my($file, $autodir) = @_;
-    autosplit_file($file, $autodir, $Keep, 1, 0);
+    autosplit_file($file, $autodir, $Keep, $CheckForAutoloader, $CheckModTime);
 }
-
 
 
 # This function is used during perl building/installation
@@ -42,7 +44,7 @@ sub autosplit_lib_modules{
 	    $dir =~ s#[\.\]]#/#g;
 	    $_ = $dir . $name;
 	}
-	autosplit_file("lib/$_", "lib/auto", $Keep, 1, 1);
+	autosplit_file("lib/$_", "lib/auto", $Keep, $CheckForAutoloader, $CheckModTime);
     }
     0;
 }
@@ -56,7 +58,18 @@ sub autosplit_file{
 
     # where to write output files
     $autodir = "lib/auto" unless $autodir;
-    die "autosplit directory $autodir does not exist" unless -d $autodir;
+    unless (-d $autodir){
+	local($", @p)="/";
+	foreach(split(/\//,$autodir)){
+	    push(@p, $_);
+	    next if -d "@p/";
+	    mkdir("@p",0755) or die "AutoSplit unable to mkdir @p: $!";
+	}
+	# We should never need to create the auto dir here. installperl
+	# (or similar) should have done it. Expecting it to exist is a valuable
+	# sanity check against autosplitting into some random directory by mistake.
+	print "Warning: AutoSplit had to create top-level $autodir unexpectedly.\n";
+    }
 
     # allow just a package name to be used
     $filename .= ".pm" unless ($filename =~ m/\.pm$/);
@@ -67,11 +80,15 @@ sub autosplit_file{
     while (<IN>) {
 	# record last package name seen
 	$package = $1 if (m/^\s*package\s+([\w:]+)\s*;/);
-	++$autoloader_seen if m/^\s*use\s+AutoLoader\b/;
+	++$autoloader_seen if m/^\s*(use|require)\s+AutoLoader\b/;
 	++$autoloader_seen if m/\bISA\s*=.*\bAutoLoader\b/;
+	++$autoloader_seen if m/^\s*sub\s+AUTOLOAD\b/;
 	last if /^__END__/;
     }
-    return 0 if ($check_for_autoloader && !$autoloader_seen);
+    if ($check_for_autoloader && !$autoloader_seen){
+	print "AutoSplit skipped $filename: no AutoLoader used\n" if ($Verbose>=2);
+	return 0
+    }
     $_ or die "Can't find __END__ in $filename\n";
 
     $package or die "Can't find 'package Name;' in $filename\n";

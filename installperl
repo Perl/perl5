@@ -48,7 +48,7 @@ if ($d_dosuid && $>) { die "You must run as root to install suidperl\n"; }
    $installbin		|| die "No installbin directory in config.sh\n";
 -d $installbin		|| die "$installbin is not a directory\n";
 -w $installbin		|| die "$installbin is not writable by you\n"
-	unless $installbin =~ m#^/afs/#;
+	unless $installbin =~ m#^/afs/# || $nonono;
 
 -x 'perl'		|| die "perl isn't executable!\n";
 -x 'suidperl'		|| die "suidperl isn't executable!\n" if $d_dosuid;
@@ -146,6 +146,12 @@ if (chdir "lib") {
 }
 else {
     warn "Can't cd to lib to install lib files: $!\n";
+}
+
+# Install header files
+makedir("$installarchlib/CORE");
+foreach $file (<*.h libperl*.a>) {
+    cp_if_diff($file,"$installarchlib/CORE/$file");
 }
 
 # Offer to install perl in a "standard" location
@@ -300,16 +306,31 @@ sub installlib {
 	return unless $do_installprivlib;
     }
 
-    &makedir("$installlib/$dir");
-
     if (-f $_) {
+	if (/\.al$/ || /\.ix$/) {
+	    $installlib = $installprivlib;
+	    #We're installing *.al and *.ix files into $installprivlib,
+	    #but we have to delete old *.al and *.ix files from the 5.000
+	    #distribution:
+	    &unlink("$installarchlib/$name");
+	}
 	system "cmp", "-s", $_, "$installlib/$name";
 	if ($?) {
 	    &unlink("$installlib/$name");
+	    &makedir("$installlib/$dir");
 	    &cmd("cp $_ $installlib/$dir");
 	    &chmod(0644, "$installlib/$name");
 	}
     } elsif (-d $_) {
 	&makedir("$installlib/$name");
+    }
+}
+
+sub cp_if_diff {
+    my($from,$to)=@_;
+    -f $from || die "$0: $from not found";
+    system "cmp", "-s", $from, $to;
+    if ($?) {
+	cmd("cp $from $to");
     }
 }

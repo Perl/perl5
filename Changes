@@ -15,7 +15,7 @@ New things
     meaning the parens are optional.  Even subroutines may be called as
     list operators if they've already been declared.
 
-    More embeddible.  See main.c and embed_h.SH.  Multiple interpreters
+    More embeddible.  See main.c and embed_h.sh.  Multiple interpreters
     in the same process are supported (though not with interleaved
     execution yet).
 

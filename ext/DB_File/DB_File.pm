@@ -179,7 +179,7 @@ require TieHash;
 require Exporter;
 require AutoLoader;
 require DynaLoader;
-@ISA = (TieHash, Exporter, AutoLoader, DynaLoader);
+@ISA = (TieHash, Exporter, DynaLoader);
 @EXPORT = qw(
         $DB_BTREE $DB_HASH $DB_RECNO 
 	BTREEMAGIC

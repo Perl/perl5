@@ -3,7 +3,7 @@ package Fcntl;
 require Exporter;
 require AutoLoader;
 require DynaLoader;
-@ISA = (Exporter, AutoLoader, DynaLoader);
+@ISA = (Exporter, DynaLoader);
 # Items to export into callers namespace by default
 # (move infrequently used names to @EXPORT_OK below)
 @EXPORT =
