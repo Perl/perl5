@@ -17,6 +17,7 @@ package Maintainers;
 	'craig'		=> 'Craig Berry <craigberry@mac.com>',
 	'dankogai'	=> 'Dan Kogai <dankogai@cpan.org>',
 	'dconway'	=> 'Damian Conway <dconway@cpan.org>',
+	'dmanura'	=> 'David Manura <dmanura@cpan.org>',
 	'drolsky'	=> 'Dave Rolsky <drolsky@cpan.org>',
 	'elizabeth'	=> 'Elizabeth Mattijsen <liz@dijkmat.nl>',
 	'gbarr'		=> 'Graham Barr <gbarr@cpan.org>',
@@ -447,7 +448,7 @@ package Maintainers;
 
 	'Text::Balanced' =>
 		{
-		'MAINTAINER'	=> 'dconway',
+		'MAINTAINER'	=> 'dmanura',
 		'FILES'		=> q[lib/Text/Balanced.pm lib/Text/Balanced],
 		'CPAN'		=> 1,
 		},
