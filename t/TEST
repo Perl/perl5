@@ -182,8 +182,6 @@ EOT
 	    close(SCRIPT);
 	}
 
-	$test = $OVER{$test} if exists $OVER{$test};
-
 	my $utf = $with_utf ? '-I../lib -Mutf8' : '';
 	my $testswitch = '-I. -MTestInit'; # -T will strict . from @INC
 	if ($type eq 'deparse') {
