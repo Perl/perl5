@@ -3,8 +3,8 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess (pmarquess@bfsec.bt.co.uk)
- last modified 26th June 1996
- version 1.02
+ last modified 4th Sept 1996
+ version 1.03
 
  All comments/suggestions/problems are welcome
 
@@ -22,6 +22,8 @@
 		Merged OS2 code into the main distribution.
 		Allow negative subscripts with RECNO interface.
 		Changed the default flags to O_CREAT|O_RDWR
+	1.03 - 	Added EXISTS
+
 */
 
 #include "EXTERN.h"  
@@ -771,6 +773,21 @@ db_DELETE(db, key, flags=0)
 	INIT:
 	  CurrentDB = db ;
 
+
+int
+db_EXISTS(db, key)
+	DB_File		db
+	DBTKEY		key
+	CODE:
+	{
+          DBT		value ;
+	
+	  CurrentDB = db ;
+	  RETVAL = (((db->dbp)->get)(db->dbp, &key, &value, 0) == 0) ;
+	}
+	OUTPUT:
+	  RETVAL
+
 int
 db_FETCH(db, key, flags=0)
 	DB_File		db
@@ -887,9 +904,11 @@ pop(db)
 	    /* Now delete it */
 	    if (RETVAL == 0)
 	    {
+		/* the call to del will trash value, so take a copy now */
+	        sv_setpvn(ST(0), value.data, value.size);
 	        RETVAL = (Db->del)(Db, &key, R_CURSOR) ;
-	        if (RETVAL == 0)
-	            sv_setpvn(ST(0), value.data, value.size);
+	        if (RETVAL != 0) 
+	            sv_setsv(ST(0), &sv_undef); 
 	    }
 	}
 
@@ -898,20 +917,22 @@ shift(db)
 	DB_File		db
 	CODE:
 	{
-	    DBTKEY	key ;
 	    DBT		value ;
+	    DBTKEY	key ;
 	    DB *	Db = db->dbp ;
 
 	    CurrentDB = db ;
 	    /* get the first value */
-	    RETVAL = (Db->seq)(Db, &key, &value, R_FIRST) ;	
+	    RETVAL = (Db->seq)(Db, &key, &value, R_FIRST) ;	 
 	    ST(0) = sv_newmortal();
 	    /* Now delete it */
 	    if (RETVAL == 0)
 	    {
-	        RETVAL = (Db->del)(Db, &key, R_CURSOR) ;
-	        if (RETVAL == 0)
-	            sv_setpvn(ST(0), value.data, value.size);
+		/* the call to del will trash value, so take a copy now */
+	        sv_setpvn(ST(0), value.data, value.size);
+	        RETVAL = (Db->del)(Db, &key, R_CURSOR) ; 
+	        if (RETVAL != 0)
+	            sv_setsv (ST(0), &sv_undef) ;
 	    }
 	}
 

@@ -1,4 +1,4 @@
-#!./perl
+#!./perl -w
 
 BEGIN {
     @INC = '../lib';
@@ -12,7 +12,16 @@ BEGIN {
 use DB_File; 
 use Fcntl;
 
-print "1..86\n";
+print "1..91\n";
+
+sub ok
+{
+    my $no = shift ;
+    my $result = shift ;
+ 
+    print "not " unless $result ;
+    print "ok $no\n" ;
+}
 
 $Dfile = "dbbtree.tmp";
 unlink $Dfile;
@@ -21,65 +30,68 @@ umask(0);
 
 # Check the interface to BTREEINFO
 
-#$dbh = TIEHASH DB_File::BTREEINFO ;
-$dbh = new DB_File::BTREEINFO ;
-print (($dbh->{flags} == undef) ? "ok 1\n" : "not ok 1\n") ;
-print (($dbh->{cachesize} == undef) ? "ok 2\n" : "not ok 2\n") ;
-print (($dbh->{psize} == undef) ? "ok 3\n" : "not ok 3\n") ;
-print (($dbh->{lorder} == undef) ? "ok 4\n" : "not ok 4\n") ;
-print (($dbh->{minkeypage} == undef) ? "ok 5\n" : "not ok 5\n") ;
-print (($dbh->{maxkeypage} == undef) ? "ok 6\n" : "not ok 6\n") ;
-print (($dbh->{compare} == undef) ? "ok 7\n" : "not ok 7\n") ;
-print (($dbh->{prefix} == undef) ? "ok 8\n" : "not ok 8\n") ;
+my $dbh = new DB_File::BTREEINFO ;
+$^W = 0 ;
+ok(1, $dbh->{flags} == undef) ;
+ok(2, $dbh->{cachesize} == undef) ;
+ok(3, $dbh->{psize} == undef) ;
+ok(4, $dbh->{lorder} == undef) ;
+ok(5, $dbh->{minkeypage} == undef) ;
+ok(6, $dbh->{maxkeypage} == undef) ;
+ok(7, $dbh->{compare} == undef) ;
+ok(8, $dbh->{prefix} == undef) ;
+$^W = 1 ;
 
 $dbh->{flags} = 3000 ;
-print ($dbh->{flags} == 3000 ? "ok 9\n" : "not ok 9\n") ;
+ok(9, $dbh->{flags} == 3000) ;
 
 $dbh->{cachesize} = 9000 ;
-print ($dbh->{cachesize} == 9000 ? "ok 10\n" : "not ok 10\n") ;
-#
+ok(10, $dbh->{cachesize} == 9000);
+
 $dbh->{psize} = 400 ;
-print (($dbh->{psize} == 400) ? "ok 11\n" : "not ok 11\n") ;
+ok(11, $dbh->{psize} == 400) ;
 
 $dbh->{lorder} = 65 ;
-print (($dbh->{lorder} == 65) ? "ok 12\n" : "not ok 12\n") ;
+ok(12, $dbh->{lorder} == 65) ;
 
 $dbh->{minkeypage} = 123 ;
-print (($dbh->{minkeypage} == 123) ? "ok 13\n" : "not ok 13\n") ;
+ok(13, $dbh->{minkeypage} == 123) ;
 
 $dbh->{maxkeypage} = 1234 ;
-print ($dbh->{maxkeypage} == 1234 ? "ok 14\n" : "not ok 14\n") ;
+ok(14, $dbh->{maxkeypage} == 1234 );
 
 $dbh->{compare} = 1234 ;
-print ($dbh->{compare} == 1234 ? "ok 15\n" : "not ok 15\n") ;
+ok(15, $dbh->{compare} == 1234) ;
 
 $dbh->{prefix} = 1234 ;
-print ($dbh->{prefix} == 1234 ? "ok 16\n" : "not ok 16\n") ;
+ok(16, $dbh->{prefix} == 1234 );
 
 # Check that an invalid entry is caught both for store & fetch
 eval '$dbh->{fred} = 1234' ;
-print ($@ =~ /^DB_File::BTREEINFO::STORE - Unknown element 'fred' at/ ? "ok 17\n" : "not ok 17\n") ;
+ok(17, $@ =~ /^DB_File::BTREEINFO::STORE - Unknown element 'fred' at/ ) ;
 eval '$q = $dbh->{fred}' ;
-print ($@ =~ /^DB_File::BTREEINFO::FETCH - Unknown element 'fred' at/ ? "ok 18\n" : "not ok 18\n") ;
+ok(18, $@ =~ /^DB_File::BTREEINFO::FETCH - Unknown element 'fred' at/ ) ;
 
 # Now check the interface to BTREE
 
-print (($X = tie(%h, DB_File,$Dfile, O_RDWR|O_CREAT, 0640, $DB_BTREE )) ? "ok 19\n" : "not ok 19");
+ok(19, $X = tie(%h, 'DB_File',$Dfile, O_RDWR|O_CREAT, 0640, $DB_BTREE )) ;
 
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
    $blksize,$blocks) = stat($Dfile);
-print (($mode & 0777) == 0640 ? "ok 20\n" : "not ok 20\n");
+ok(20, ($mode & 0777) == 0640 );
 
 while (($key,$value) = each(%h)) {
     $i++;
 }
-print (!$i ? "ok 21\n" : "not ok 21\n");
+ok(21, !$i ) ;
 
 $h{'goner1'} = 'snork';
 
 $h{'abc'} = 'ABC';
-print ($h{'abc'} eq 'ABC' ? "ok 22\n" : "not ok 22\n") ;
-print (defined $h{'jimmy'} ? "not ok 23\n" : "ok 23\n");
+ok(22, $h{'abc'} eq 'ABC' );
+ok(23, ! defined $h{'jimmy'} ) ;
+ok(24, ! exists $h{'jimmy'} ) ;
+ok(25,  defined $h{'abc'} ) ;
 
 $h{'def'} = 'DEF';
 $h{'jkl','mno'} = "JKL\034MNO";
@@ -111,7 +123,7 @@ untie(%h);
 
 
 # tie to the same file again
-print (($X = tie(%h,DB_File,$Dfile, O_RDWR, 0640, $DB_BTREE)) ? "ok 24\n" : "not ok 24\n");
+ok(26, $X = tie(%h,'DB_File',$Dfile, O_RDWR, 0640, $DB_BTREE)) ;
 
 # Modify an entry from the previous tie
 $h{'g'} = 'G';
@@ -142,8 +154,9 @@ $X->DELETE('goner3');
 @keys = keys(%h);
 @values = values(%h);
 
-if ($#keys == 29 && $#values == 29) {print "ok 25\n";} else {print "not ok 25\n";}
+ok(27, $#keys == 29 && $#values == 29) ;
 
+$i = 0 ;
 while (($key,$value) = each(%h)) {
     if ($key eq $keys[$i] && $value eq $values[$i] && $key gt $value) {
 	$key =~ y/a-z/A-Z/;
@@ -151,10 +164,10 @@ while (($key,$value) = each(%h)) {
     }
 }
 
-if ($i == 30) {print "ok 26\n";} else {print "not ok 26\n";}
+ok(28, $i == 30) ;
 
 @keys = ('blurfl', keys(%h), 'dyick');
-if ($#keys == 31) {print "ok 27\n";} else {print "not ok 27\n";}
+ok(29, $#keys == 31) ;
 
 #Check that the keys can be retrieved in order
 $ok = 1 ;
@@ -163,27 +176,27 @@ foreach (keys %h)
     ($ok = 0), last if defined $previous && $previous gt $_ ;
     $previous = $_ ;
 }
-print ($ok ? "ok 28\n" : "not ok 28\n") ;
+ok(30, $ok ) ;
 
 $h{'foo'} = '';
-print ($h{'foo'} eq '' ? "ok 29\n" : "not ok 29\n") ;
+ok(31, $h{'foo'} eq '' ) ;
 
 $h{''} = 'bar';
-print ($h{''} eq 'bar' ? "ok 30\n" : "not ok 30\n") ;
+ok(32, $h{''} eq 'bar' );
 
 # check cache overflow and numeric keys and contents
 $ok = 1;
 for ($i = 1; $i < 200; $i++) { $h{$i + 0} = $i + 0; }
 for ($i = 1; $i < 200; $i++) { $ok = 0 unless $h{$i} == $i; }
-print ($ok ? "ok 31\n" : "not ok 31\n");
+ok(33, $ok);
 
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
    $blksize,$blocks) = stat($Dfile);
-print ($size > 0 ? "ok 32\n" : "not ok 32\n");
+ok(34, $size > 0 );
 
 @h{0..200} = 200..400;
 @foo = @h{0..200};
-print join(':',200..400) eq join(':',@foo) ? "ok 33\n" : "not ok 33\n";
+ok(35, join(':',200..400) eq join(':',@foo) );
 
 # Now check all the non-tie specific stuff
 
@@ -192,52 +205,55 @@ print join(':',200..400) eq join(':',@foo) ? "ok 33\n" : "not ok 33\n";
 # an existing record.
  
 $status = $X->put( 'x', 'newvalue', R_NOOVERWRITE) ;
-print ($status == 1 ? "ok 34\n" : "not ok 34\n") ;
+ok(36, $status == 1 );
  
 # check that the value of the key 'x' has not been changed by the 
 # previous test
-print ($h{'x'} eq 'X' ? "ok 35\n" : "not ok 35\n") ;
+ok(37, $h{'x'} eq 'X' );
 
 # standard put
 $status = $X->put('key', 'value') ;
-print ($status == 0 ? "ok 36\n" : "not ok 36\n") ;
+ok(38, $status == 0 );
 
 #check that previous put can be retrieved
+$value = 0 ;
 $status = $X->get('key', $value) ;
-print ($status == 0 ? "ok 37\n" : "not ok 37\n") ;
-print ($value eq 'value' ? "ok 38\n" : "not ok 38\n") ;
+ok(39, $status == 0 );
+ok(40, $value eq 'value' );
 
 # Attempting to delete an existing key should work
 
 $status = $X->del('q') ;
-print ($status == 0 ? "ok 39\n" : "not ok 39\n") ;
+ok(41, $status == 0 );
 $status = $X->del('') ;
-print ($status == 0 ? "ok 40\n" : "not ok 40\n") ;
+ok(42, $status == 0 );
 
 # Make sure that the key deleted, cannot be retrieved
-print (($h{'q'} eq undef) ? "ok 41\n" : "not ok 41\n") ;
-print (($h{''} eq undef) ? "ok 42\n" : "not ok 42\n") ;
+$^W = 0 ;
+ok(43, $h{'q'} eq undef) ;
+ok(44, $h{''} eq undef) ;
+$^W = 1 ;
 
 undef $X ;
 untie %h ;
 
-print (($X = tie(%h, DB_File,$Dfile, O_RDWR, 0640, $DB_BTREE )) ? "ok 43\n" : "not ok 43");
+ok(45, $X = tie(%h, 'DB_File',$Dfile, O_RDWR, 0640, $DB_BTREE ));
 
 # Attempting to delete a non-existant key should fail
 
 $status = $X->del('joe') ;
-print ($status == 1 ? "ok 44\n" : "not ok 44\n") ;
+ok(46, $status == 1 );
 
 # Check the get interface
 
 # First a non-existing key
 $status = $X->get('aaaa', $value) ;
-print ($status == 1 ? "ok 45\n" : "not ok 45\n") ;
+ok(47, $status == 1 );
 
 # Next an existing key
 $status = $X->get('a', $value) ;
-print ($status == 0 ? "ok 46\n" : "not ok 46\n") ;
-print ($value eq 'A' ? "ok 47\n" : "not ok 47\n") ;
+ok(48, $status == 0 );
+ok(49, $value eq 'A' );
 
 # seq
 # ###
@@ -246,15 +262,15 @@ print ($value eq 'A' ? "ok 47\n" : "not ok 47\n") ;
 $key = 'ke' ;
 $value = '' ;
 $status = $X->seq($key, $value, R_CURSOR) ;
-print ($status == 0 ? "ok 48\n" : "not ok 48\n") ;
-print ($key eq 'key' ? "ok 49\n" : "not ok 49\n") ;
-print ($value eq 'value' ? "ok 50\n" : "not ok 50\n") ;
+ok(50, $status == 0 );
+ok(51, $key eq 'key' );
+ok(52, $value eq 'value' );
 
 # seq when the key does not match
 $key = 'zzz' ;
 $value = '' ;
 $status = $X->seq($key, $value, R_CURSOR) ;
-print ($status == 1 ? "ok 51\n" : "not ok 51\n") ;
+ok(53, $status == 1 );
 
 
 # use seq to set the cursor, then delete the record @ the cursor.
@@ -262,35 +278,35 @@ print ($status == 1 ? "ok 51\n" : "not ok 51\n") ;
 $key = 'x' ;
 $value = '' ;
 $status = $X->seq($key, $value, R_CURSOR) ;
-print ($status == 0 ? "ok 52\n" : "not ok 52\n") ;
-print ($key eq 'x' ? "ok 53\n" : "not ok 53\n") ;
-print ($value eq 'X' ? "ok 54\n" : "not ok 54\n") ;
+ok(54, $status == 0 );
+ok(55, $key eq 'x' );
+ok(56, $value eq 'X' );
 $status = $X->del(0, R_CURSOR) ;
-print ($status == 0 ? "ok 55\n" : "not ok 55\n") ;
+ok(57, $status == 0 );
 $status = $X->get('x', $value) ;
-print ($status == 1 ? "ok 56\n" : "not ok 56\n") ;
+ok(58, $status == 1 );
 
 # ditto, but use put to replace the key/value pair.
 $key = 'y' ;
 $value = '' ;
 $status = $X->seq($key, $value, R_CURSOR) ;
-print ($status == 0 ? "ok 57\n" : "not ok 57\n") ;
-print ($key eq 'y' ? "ok 58\n" : "not ok 58\n") ;
-print ($value eq 'Y' ? "ok 59\n" : "not ok 59\n") ;
+ok(59, $status == 0 );
+ok(60, $key eq 'y' );
+ok(61, $value eq 'Y' );
 
 $key = "replace key" ;
 $value = "replace value" ;
 $status = $X->put($key, $value, R_CURSOR) ;
-print ($status == 0 ? "ok 60\n" : "not ok 60\n") ;
-print ($key eq 'replace key' ? "ok 61\n" : "not ok 61\n") ;
-print ($value eq 'replace value' ? "ok 62\n" : "not ok 62\n") ;
+ok(62, $status == 0 );
+ok(63, $key eq 'replace key' );
+ok(64, $value eq 'replace value' );
 $status = $X->get('y', $value) ;
-print ($status == 1 ? "ok 63\n" : "not ok 63\n") ;
+ok(65, $status == 1 );
 
 # use seq to walk forwards through a file 
 
 $status = $X->seq($key, $value, R_FIRST) ;
-print ($status == 0 ? "ok 64\n" : "not ok 64\n") ;
+ok(66, $status == 0 );
 $previous = $key ;
 
 $ok = 1 ;
@@ -299,12 +315,12 @@ while (($status = $X->seq($key, $value, R_NEXT)) == 0)
     ($ok = 0), last if ($previous cmp $key) == 1 ;
 }
 
-print ($status == 1 ? "ok 65\n" : "not ok 65\n") ;
-print ($ok == 1 ? "ok 66\n" : "not ok 66\n") ;
+ok(67, $status == 1 );
+ok(68, $ok == 1 );
 
 # use seq to walk backwards through a file 
 $status = $X->seq($key, $value, R_LAST) ;
-print ($status == 0 ? "ok 67\n" : "not ok 67\n") ;
+ok(69, $status == 0 );
 $previous = $key ;
 
 $ok = 1 ;
@@ -314,8 +330,8 @@ while (($status = $X->seq($key, $value, R_PREV)) == 0)
     #print "key = [$key] value = [$value]\n" ;
 }
 
-print ($status == 1 ? "ok 68\n" : "not ok 68\n") ;
-print ($ok == 1 ? "ok 69\n" : "not ok 69\n") ;
+ok(70, $status == 1 );
+ok(71, $ok == 1 );
 
 
 # check seq FIRST/LAST
@@ -324,14 +340,14 @@ print ($ok == 1 ? "ok 69\n" : "not ok 69\n") ;
 # ####
 
 $status = $X->sync ;
-print ($status == 0 ? "ok 70\n" : "not ok 70\n") ;
+ok(72, $status == 0 );
 
 
 # fd
 # ##
 
 $status = $X->fd ;
-print ($status != 0 ? "ok 71\n" : "not ok 71\n") ;
+ok(73, $status != 0 );
 
 
 undef $X ;
@@ -340,11 +356,11 @@ untie %h ;
 unlink $Dfile;
 
 # Now try an in memory file
-print (($Y = tie(%h, DB_File,undef, O_RDWR|O_CREAT, 0640, $DB_BTREE )) ? "ok 72\n" : "not ok 72");
+ok(74, $Y = tie(%h, 'DB_File',undef, O_RDWR|O_CREAT, 0640, $DB_BTREE ));
 
 # fd with an in memory file should return failure
 $status = $Y->fd ;
-print ($status == -1 ? "ok 73\n" : "not ok 73\n") ;
+ok(75, $status == -1 );
 
 
 undef $Y ;
@@ -353,42 +369,44 @@ untie %h ;
 # Duplicate keys
 my $bt = new DB_File::BTREEINFO ;
 $bt->{flags} = R_DUP ;
-print (($YY = tie(%hh, DB_File, $Dfile, O_RDWR|O_CREAT, 0640, $bt )) ? "ok 74\n" : "not ok 74");
+ok(76, $YY = tie(%hh, 'DB_File', $Dfile, O_RDWR|O_CREAT, 0640, $bt )) ;
 
 $hh{'Wall'} = 'Larry' ;
 $hh{'Wall'} = 'Stone' ; # Note the duplicate key
 $hh{'Wall'} = 'Brick' ; # Note the duplicate key
+$hh{'Wall'} = 'Brick' ; # Note the duplicate key and value
 $hh{'Smith'} = 'John' ;
 $hh{'mouse'} = 'mickey' ;
 
 # first work in scalar context
-print(scalar $YY->get_dup('Unknown') == 0 ? "ok 75\n" : "not ok 75\n") ;
-print(scalar $YY->get_dup('Smith') == 1 ? "ok 76\n" : "not ok 76\n") ;
-print(scalar $YY->get_dup('Wall') == 3 ? "ok 77\n" : "not ok 77\n") ;
+ok(77, scalar $YY->get_dup('Unknown') == 0 );
+ok(78, scalar $YY->get_dup('Smith') == 1 );
+ok(79, scalar $YY->get_dup('Wall') == 4 );
 
 # now in list context
 my @unknown = $YY->get_dup('Unknown') ;
-print( "@unknown" eq "" ? "ok 78\n" : "not ok 78\n") ;
+ok(80, "@unknown" eq "" );
 
 my @smith = $YY->get_dup('Smith') ;
-print( "@smith" eq "John" ? "ok 79\n" : "not ok 79\n") ;
+ok(81, "@smith" eq "John" );
 
 {
- my @wall = $YY->get_dup('Wall') ;
- my %wall ;
- @wall{@wall} = @wall ;
- print( (@wall == 3 && $wall{'Larry'} && $wall{'Stone'} && $wall{'Brick'}) ? "ok 80\n" : "not ok 80\n") ;
+my @wall = $YY->get_dup('Wall') ;
+my %wall ;
+@wall{@wall} = @wall ;
+ok(82, (@wall == 4 && $wall{'Larry'} && $wall{'Stone'} && $wall{'Brick'}) );
 }
 
 # hash
 my %unknown = $YY->get_dup('Unknown', 1) ;
-print( keys %unknown == 0 ? "ok 81\n" : "not ok 81\n") ;
+ok(83, keys %unknown == 0 );
 
 my %smith = $YY->get_dup('Smith', 1) ;
-print( (keys %smith == 1 && $smith{'John'}) ? "ok 82\n" : "not ok 82\n") ;
+ok(84, keys %smith == 1 && $smith{'John'}) ;
 
-%wall = $YY->get_dup('Wall', 1) ;
-print( (keys %wall == 3 && $wall{'Larry'} && $wall{'Stone'} && $wall{'Brick'}) ? "ok 83\n" : "not ok 83\n") ;
+my %wall = $YY->get_dup('Wall', 1) ;
+ok(85, keys %wall == 3 && $wall{'Larry'} == 1 && $wall{'Stone'} == 1 
+		&& $wall{'Brick'} == 2);
 
 undef $YY ;
 untie %hh ;
@@ -410,17 +428,19 @@ $dbh3 = TIEHASH DB_File::BTREEINFO ;
 $dbh3->{compare} = sub { length $_[0] <=> length $_[1] } ;
  
  
-tie(%h, DB_File,$Dfile1, O_RDWR|O_CREAT, 0640, $dbh1 ) ;
-tie(%g, DB_File,$Dfile2, O_RDWR|O_CREAT, 0640, $dbh2 ) ;
-tie(%k, DB_File,$Dfile3, O_RDWR|O_CREAT, 0640, $dbh3 ) ;
+tie(%h, 'DB_File',$Dfile1, O_RDWR|O_CREAT, 0640, $dbh1 ) ;
+tie(%g, 'DB_File',$Dfile2, O_RDWR|O_CREAT, 0640, $dbh2 ) ;
+tie(%k, 'DB_File',$Dfile3, O_RDWR|O_CREAT, 0640, $dbh3 ) ;
  
 @Keys = qw( 0123 12 -1234 9 987654321 def  ) ;
+$^W = 0 ;
 @srt_1 = sort { $a <=> $b } @Keys ;
+$^W = 1 ;
 @srt_2 = sort { $a cmp $b } @Keys ;
 @srt_3 = sort { length $a <=> length $b } @Keys ;
  
 foreach (@Keys) {
-    $h{$_} = 1 ;
+    $^W = 0 ; $h{$_} = 1 ; $^W = 1 ;
     $g{$_} = 1 ;
     $k{$_} = 1 ;
 }
@@ -439,13 +459,40 @@ sub ArrayCompare
     1 ;
 }
  
-print ( ArrayCompare (\@srt_1, [keys %h]) ? "ok 84\n" : "not ok 84\n") ;
-print ( ArrayCompare (\@srt_2, [keys %g]) ? "ok 85\n" : "not ok 85\n") ;
-print ( ArrayCompare (\@srt_3, [keys %k]) ? "ok 86\n" : "not ok 86\n") ;
+ok(86, ArrayCompare (\@srt_1, [keys %h]) );
+ok(87, ArrayCompare (\@srt_2, [keys %g]) );
+ok(88, ArrayCompare (\@srt_3, [keys %k]) );
 
 untie %h ;
 untie %g ;
 untie %k ;
 unlink $Dfile1, $Dfile2, $Dfile3 ;
+
+# clear
+# #####
+
+ok(89, tie(%h, 'DB_File', $Dfile1, O_RDWR|O_CREAT, 0640, $DB_BTREE ) );
+foreach (1 .. 10)
+  { $h{$_} = $_ * 100 }
+
+# check that there are 10 elements in the hash
+$i = 0 ;
+while (($key,$value) = each(%h)) {
+    $i++;
+}
+ok(90, $i == 10);
+
+# now clear the hash
+%h = () ;
+
+# check it is empty
+$i = 0 ;
+while (($key,$value) = each(%h)) {
+    $i++;
+}
+ok(91, $i == 0);
+
+untie %h ;
+unlink $Dfile1 ;
 
 exit ;

@@ -1,4 +1,4 @@
-#!./perl
+#!./perl -w
 
 BEGIN {
     @INC = '../lib';
@@ -23,7 +23,7 @@ sub ok
     print "ok $no\n" ;
 }
 
-print "1..35\n";
+print "1..47\n";
 
 my $Dfile = "recno.tmp";
 unlink $Dfile ;
@@ -33,6 +33,7 @@ umask(0);
 # Check the interface to RECNOINFO
 
 my $dbh = new DB_File::RECNOINFO ;
+$^W = 0 ;
 ok(1, $dbh->{bval} == undef ) ;
 ok(2, $dbh->{cachesize} == undef) ;
 ok(3, $dbh->{psize} == undef) ;
@@ -40,52 +41,52 @@ ok(4, $dbh->{flags} == undef) ;
 ok(5, $dbh->{lorder} == undef);
 ok(6, $dbh->{reclen} == undef);
 ok(7, $dbh->{bfname} eq undef);
+$^W = 0 ;
 
 $dbh->{bval} = 3000 ;
-print ($dbh->{bval} == 3000 ? "ok 8\n" : "not ok 8\n") ;
+ok(8, $dbh->{bval} == 3000 );
 
 $dbh->{cachesize} = 9000 ;
-print ($dbh->{cachesize} == 9000 ? "ok 9\n" : "not ok 9\n") ;
+ok(9, $dbh->{cachesize} == 9000 );
 
 $dbh->{psize} = 400 ;
-print (($dbh->{psize} == 400) ? "ok 10\n" : "not ok 10\n") ;
+ok(10, $dbh->{psize} == 400 );
 
 $dbh->{flags} = 65 ;
-print (($dbh->{flags} == 65) ? "ok 11\n" : "not ok 11\n") ;
+ok(11, $dbh->{flags} == 65 );
 
 $dbh->{lorder} = 123 ;
-print (($dbh->{lorder} == 123) ? "ok 12\n" : "not ok 12\n") ;
+ok(12, $dbh->{lorder} == 123 );
 
 $dbh->{reclen} = 1234 ;
-print ($dbh->{reclen} == 1234 ? "ok 13\n" : "not ok 13\n") ;
+ok(13, $dbh->{reclen} == 1234 );
 
 $dbh->{bfname} = 1234 ;
-print ($dbh->{bfname} == 1234 ? "ok 14\n" : "not ok 14\n") ;
+ok(14, $dbh->{bfname} == 1234 );
 
 
 # Check that an invalid entry is caught both for store & fetch
 eval '$dbh->{fred} = 1234' ;
-print ($@ =~ /^DB_File::RECNOINFO::STORE - Unknown element 'fred' at/ ? "ok 15\n" : "not ok 15\n") ;
+ok(15, $@ =~ /^DB_File::RECNOINFO::STORE - Unknown element 'fred' at/ );
 eval 'my $q = $dbh->{fred}' ;
-print ($@ =~ /^DB_File::RECNOINFO::FETCH - Unknown element 'fred' at/ ? "ok 16\n" : "not ok 16\n") ;
+ok(16, $@ =~ /^DB_File::RECNOINFO::FETCH - Unknown element 'fred' at/ );
 
 # Now check the interface to RECNOINFO
 
 my $X  ;
 my @h ;
 ok(17, $X = tie @h, 'DB_File', $Dfile, O_RDWR|O_CREAT, 0640, $DB_RECNO ) ;
-#print (($X = tie(%h, DB_File,$Dfile, O_RDWR|O_CREAT, 0640, $DB_BTREE )) ? "ok 19\n" : "not ok 19");
 
 ok(18, ( (stat($Dfile))[2] & 0777) == 0640) ;
 
 #my $l = @h ;
 my $l = $X->length ;
-print (!$l ? "ok 19\n" : "not ok 19\n");
+ok(19, !$l );
 
 my @data = qw( a b c d ever f g h  i j k longername m n o p) ;
 
 $h[0] = shift @data ;
-print ($h[0] eq 'a' ? "ok 20\n" : "not ok 20\n") ;
+ok(20, $h[0] eq 'a' );
 
 my $ i;
 foreach (@data)
@@ -93,45 +94,58 @@ foreach (@data)
 
 unshift (@data, 'a') ;
 
-print (defined $h[1] ? "ok 21\n" : "not ok 21\n");
-print (! defined $h[16] ? "ok 22\n" : "not ok 22\n");
-print ($X->length == @data ? "ok 23\n" : "not ok 23\n") ;
+ok(21, defined $h[1] );
+ok(22, ! defined $h[16] );
+ok(23, $X->length == @data );
 
 
 # Overwrite an entry & check fetch it
 $h[3] = 'replaced' ;
 $data[3] = 'replaced' ;
-print ($h[3] eq 'replaced' ? "ok 24\n" : "not ok 24\n");
+ok(24, $h[3] eq 'replaced' );
 
 #PUSH
 my @push_data = qw(added to the end) ;
-#push (@h, @push_data) ;
+#my push (@h, @push_data) ;
 $X->push(@push_data) ;
 push (@data, @push_data) ;
-print ($h[++$i] eq 'added' ? "ok 25\n" : "not ok 25\n");
+ok(25, $h[++$i] eq 'added' );
+ok(26, $h[++$i] eq 'to' );
+ok(27, $h[++$i] eq 'the' );
+ok(28, $h[++$i] eq 'end' );
 
 # POP
-pop (@data) ;
-#$value = pop(@h) ;
+my $popped = pop (@data) ;
+#my $value = pop(@h) ;
 my $value = $X->pop ;
-print ($value eq 'end' ? "not ok 26\n" : "ok 26\n");
+ok(29, $value eq $popped) ;
 
 # SHIFT
 #$value = shift @h
 $value = $X->shift ;
-print ($value eq shift @data ? "not ok 27\n" : "ok 27\n");
+my $shifted = shift @data ;
+ok(30, $value eq $shifted );
 
 # UNSHIFT
 
 # empty list
 $X->unshift ;
-print ($X->length == @data ? "ok 28\n" : "not ok 28\n") ;
+ok(31, $X->length == @data );
 
 my @new_data = qw(add this to the start of the array) ;
 #unshift @h, @new_data ;
 $X->unshift (@new_data) ;
 unshift (@data, @new_data) ;
-print ($X->length == @data ? "ok 29\n" : "not ok 29\n") ;
+ok(32, $X->length == @data );
+ok(33, $h[0] eq "add") ;
+ok(34, $h[1] eq "this") ;
+ok(35, $h[2] eq "to") ;
+ok(36, $h[3] eq "the") ;
+ok(37, $h[4] eq "start") ;
+ok(38, $h[5] eq "of") ;
+ok(39, $h[6] eq "the") ;
+ok(40, $h[7] eq "array") ;
+ok(41, $h[8] eq $data[8]) ;
 
 # SPLICE
 
@@ -143,22 +157,22 @@ foreach (@data)
 {
    $ok = 0, last if $_ ne $h[$j ++] ; 
 }
-print ($ok ? "ok 30\n" : "not ok 30\n") ;
+ok(42, $ok );
 
 # Neagtive subscripts
 
 # get the last element of the array
-print($h[-1] eq $data[-1] ? "ok 31\n" : "not ok 31\n") ;
-print($h[-1] eq $h[$X->length -1] ? "ok 32\n" : "not ok 32\n") ;
+ok(43, $h[-1] eq $data[-1] );
+ok(44, $h[-1] eq $h[$X->length -1] );
 
 # get the first element using a negative subscript
 eval '$h[ - ( $X->length)] = "abcd"' ;
-print ($@ eq "" ? "ok 33\n" : "not ok 33\n") ;
-print ($h[0] eq "abcd" ? "ok 34\n" : "not ok 34\n") ;
+ok(45, $@ eq "" );
+ok(46, $h[0] eq "abcd" );
 
 # now try to read before the start of the array
 eval '$h[ - (1 + $X->length)] = 1234' ;
-print ($@ =~ '^Modification of non-creatable array value attempted' ? "ok 35\n" : "not ok 35\n") ;
+ok(47, $@ =~ '^Modification of non-creatable array value attempted' );
 
 # IMPORTANT - $X must be undefined before the untie otherwise the
 #             underlying DB close routine will not get called.
