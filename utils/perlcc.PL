@@ -223,8 +223,11 @@ sub _createCode
 
     if (@_ == 2)                                   # compiling a program   
     {
-        _print( "$^X -I@INC -MO=CC,-o$generated_cfile $file\n", 36);
-        $return =  _run("$ -I@INC -MO=CC,-o$generated_cfile $file", 9);
+        _print( "$^X -I@INC -MB::Stash -c  $file\n", 36);
+        my $stash=`$^X -I@INC -MB::Stash -c  $file 2>/dev/null|tail -1`;
+	chomp $stash;
+        _print( "$^X -I@INC -MO=CC,$stash,-o$generated_cfile $file\n", 36);
+        $return =  _run("$ -I@INC -MO=CC,$stash,-o$generated_cfile $file", 9);
         $return;
     }
     else                                           # compiling a shared object
@@ -311,9 +314,10 @@ sub _ccharness
     }
 
     my @sharedobjects = _getSharedObjects($sourceprog); 
+    my $dynaloader="$Config{'installarchlib'}/auto/DynaLoader/DynaLoader.a";
 
     my $cccmd = 
-        "$Config{cc} @Config{qw(ccflags optimize)} $incdir @sharedobjects @args $linkargs";
+        "$Config{cc} @Config{qw(ccflags optimize)} $incdir @sharedobjects @args $dynaloader $linkargs";
 
 
     _print ("$cccmd\n", 36);
@@ -558,7 +562,7 @@ sub _checkopts
                                                     && $options->{'gen'})
     {
         push(@errors, 
-"ERROR: The options '-regex', '-run', and '-o' are incompatible with '-gen'. 
+"ERROR: The options '-regex', ' -c -run', and '-o' are incompatible with '-gen'. 
        '-gen' says to stop at C generation, and the other three modify the 
        compilation and/or running process!\n");
     }
