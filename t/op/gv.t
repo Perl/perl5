@@ -11,7 +11,7 @@ BEGIN {
 
 use warnings;
 
-print "1..40\n";
+print "1..41\n";
 
 # type coersion on assignment
 $foo = 'foo';
@@ -97,15 +97,19 @@ $x = "ok 17\n";
 %x = ("ok 19" => "\n");
 sub x { "ok 20\n" }
 print ${*x{SCALAR}}, @{*x{ARRAY}}, %{*x{HASH}}, &{*x{CODE}};
+format x =
+ok 21
+.
+print ref *x{FORMAT} eq "FORMAT" ? "ok 21\n" : "not ok 21\n";
 *x = *STDOUT;
-print *{*x{GLOB}} eq "*main::STDOUT" ? "ok 21\n" : "not ok 21\n";
-print {*x{IO}} "ok 22\n";
-print {*x{FILEHANDLE}} "ok 23\n";
+print *{*x{GLOB}} eq "*main::STDOUT" ? "ok 22\n" : "not ok 22\n";
+print {*x{IO}} "ok 23\n";
+print {*x{FILEHANDLE}} "ok 24\n";
 
 # test if defined() doesn't create any new symbols
 
 {
-    my $test = 23;
+    my $test = 24;
 
     my $a = "SYM000";
     print "not " if defined *{$a};
@@ -131,7 +135,7 @@ print {*x{FILEHANDLE}} "ok 23\n";
 # although it *should* if you're talking about magicals
 
 {
-    my $test = 29;
+    my $test = 30;
 
     my $a = "]";
     print "not " unless defined ${$a};
@@ -173,4 +177,4 @@ print {*x{FILEHANDLE}} "ok 23\n";
 }
 
 __END__
-ok 40
+ok 41

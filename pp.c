@@ -599,6 +599,9 @@ PP(pp_gelem)
     case 'F':
 	if (strEQ(elem, "FILEHANDLE")) /* XXX deprecate in 5.005 */
 	    tmpRef = (SV*)GvIOp(gv);
+	else
+	if (strEQ(elem, "FORMAT"))
+	    tmpRef = (SV*)GvFORM(gv);
 	break;
     case 'G':
 	if (strEQ(elem, "GLOB"))

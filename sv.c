@@ -2831,6 +2831,13 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 			dref = (SV*)GvIOp(dstr);
 		    GvIOp(dstr) = (IO*)sref;
 		    break;
+		case SVt_PVFM:
+		    if (intro)
+			SAVESPTR(GvFORM(dstr));
+		    else
+			dref = (SV*)GvFORM(dstr);
+		    GvFORM(dstr) = (CV*)sref;
+		    break;
 		default:
 		    if (intro)
 			SAVESPTR(GvSV(dstr));
