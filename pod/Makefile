@@ -239,7 +239,9 @@ toc:
 	$(PERL) -I../lib pod2latex $*.pod
 
 clean:
-	rm -f $(MAN) $(HTML) $(TEX)
+	rm -f $(MAN)
+	rm -f $(HTML)
+	rm -f $(TEX)
 	rm -f pod2html-*cache
 	rm -f *.aux *.log *.exe
 

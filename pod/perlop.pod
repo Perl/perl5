@@ -186,6 +186,11 @@ C<$a>.  If C<$b> is negative, then C<$a % $b> is C<$a> minus the
 smallest multiple of C<$b> that is not less than C<$a> (i.e. the
 result will be less than or equal to zero).
 
+Note than when C<use integer> is in scope "%" give you direct access
+to the modulus operator as implemented by your C compiler.  This
+operator is not as well defined for negative operands, but it will
+execute faster.
+
 Binary "x" is the repetition operator.  In a scalar context, it
 returns a string consisting of the left operand repeated the number of
 times specified by the right operand.  In a list context, if the left

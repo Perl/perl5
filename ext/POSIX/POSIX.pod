@@ -1392,7 +1392,9 @@ Tests the SigSet object to see if it contains a specific signal.
 =item new
 
 Create a new Termios object.  This object will be destroyed automatically
-when it is no longer needed.
+when it is no longer needed.  A Termios object corresponds to the termios
+C struct.  new() mallocs a new one, getattr() fills it from a file descriptor,
+and setattr() sets a file descriptor's parameters to match Termios' contents.
 
 	$termios = POSIX::Termios->new;
 
@@ -1474,13 +1476,13 @@ array so an index must be specified.
 
 Set the c_cflag field of a termios object.
 
-	$termios->setcflag( &POSIX::CLOCAL );
+	$termios->setcflag( $c_cflag | &POSIX::CLOCAL );
 
 =item setiflag
 
 Set the c_iflag field of a termios object.
 
-	$termios->setiflag( &POSIX::BRKINT );
+	$termios->setiflag( $c_iflag | &POSIX::BRKINT );
 
 =item setispeed
 
@@ -1494,13 +1496,13 @@ Returns C<undef> on failure.
 
 Set the c_lflag field of a termios object.
 
-	$termios->setlflag( &POSIX::ECHO );
+	$termios->setlflag( $c_lflag | &POSIX::ECHO );
 
 =item setoflag
 
 Set the c_oflag field of a termios object.
 
-	$termios->setoflag( &POSIX::OPOST );
+	$termios->setoflag( $c_oflag | &POSIX::OPOST );
 
 =item setospeed
 

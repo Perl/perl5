@@ -202,7 +202,7 @@ sub find {
   find_opt(wrap_wanted($wanted), @_);
 }
 
-sub find_depth {
+sub finddepth {
   my $wanted = wrap_wanted(shift);
   $wanted->{bydepth} = 1;
   find_opt($wanted, @_);
