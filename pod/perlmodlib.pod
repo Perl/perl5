@@ -101,7 +101,7 @@ Declare constants
 
 =item diagnostics
 
-Perl compiler pragma to force verbose warning diagnostics
+Produce verbose warning diagnostics
 
 =item encoding
 
@@ -413,6 +413,10 @@ Modules that calculate message digests
 
 Perl interface to the MD5 Algorithm
 
+=item Digest::base
+
+Digest base class
+
 =item DirHandle
 
 Supply object methods for directory handles
@@ -635,11 +639,11 @@ Writing a module with MakeMaker
 
 =item ExtUtils::MakeMaker::bytes
 
-Version agnostic bytes.pm
+Version-agnostic bytes.pm
 
 =item ExtUtils::MakeMaker::vmsish
 
-Platform agnostic vmsish.pm
+Platform-agnostic vmsish.pm
 
 =item ExtUtils::Manifest
 
@@ -912,10 +916,6 @@ Arbitrary size integer math package
 =item Math::BigInt::Calc
 
 Pure Perl module to support Math::BigInt
-
-=item Math::BigInt::Scalar
-
-Pure Perl module to test Math::BigInt with scalars
 
 =item Math::BigRat
 
@@ -1247,7 +1247,7 @@ Backend for building test libraries
 
 =item Test::Harness
 
-Run perl standard test scripts with statistics
+Run Perl standard test scripts with statistics
 
 =item Test::Harness::Assert
 

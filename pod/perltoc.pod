@@ -829,8 +829,8 @@ Interaction, perlfaq9 - Networking
 
 =back
 
-=head2 perlfaq1 - General Questions About Perl ($Revision: 1.12 $, $Date:
-2003/07/09 15:47:28 $)
+=head2 perlfaq1 - General Questions About Perl ($Revision: 1.14 $, $Date:
+2003/11/23 08:02:29 $)
 
 =over 4
 
@@ -878,8 +878,8 @@ Scheme, or Tcl?
 
 =back
 
-=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.20 $,
-$Date: 2003/01/26 17:50:56 $)
+=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.25 $,
+$Date: 2003/10/16 04:57:38 $)
 
 =over 4
 
@@ -934,8 +934,8 @@ References, Tutorials, Task-Oriented, Special Topics
 
 =back
 
-=head2 perlfaq3 - Programming Tools ($Revision: 1.35 $, $Date: 2003/08/24
-05:26:59 $)
+=head2 perlfaq3 - Programming Tools ($Revision: 1.37 $, $Date: 2003/11/24
+19:55:50 $)
 
 =over 4
 
@@ -1021,8 +1021,8 @@ my C program; what am I doing wrong?
 
 =back
 
-=head2 perlfaq4 - Data Manipulation ($Revision: 1.52 $, $Date: 2003/10/02
-04:44:33 $)
+=head2 perlfaq4 - Data Manipulation ($Revision: 1.54 $, $Date: 2003/11/30
+00:50:08 $)
 
 =over 4
 
@@ -1240,8 +1240,8 @@ array of hashes or arrays?
 
 =back
 
-=head2 perlfaq5 - Files and Formats ($Revision: 1.28 $, $Date: 2003/01/26
-17:45:46 $)
+=head2 perlfaq5 - Files and Formats ($Revision: 1.30 $, $Date: 2003/11/23
+08:07:46 $)
 
 =over 4
 
@@ -2626,7 +2626,7 @@ this
 
 USER, HOME, CLOBBER, LIST, TIEHASH classname, LIST, FETCH this, key, STORE
 this, key, value, DELETE this, key, CLEAR this, EXISTS this, key, FIRSTKEY
-this, NEXTKEY this, lastkey, UNTIE this, DESTROY this
+this, NEXTKEY this, lastkey, SCALAR this, UNTIE this, DESTROY this
 
 =item Tying FileHandles
 
@@ -3343,7 +3343,8 @@ LC_NUMERIC, LC_TIME, LANG
 =item Important Caveats
 
 Input and Output Layers, Regular Expressions, C<use utf8> still needed to
-enable UTF-8/UTF-EBCDIC in scripts
+enable UTF-8/UTF-EBCDIC in scripts, C<use encoding> needed to upgrade
+non-Latin-1 byte strings
 
 =item Byte and Character Semantics
 
@@ -3533,6 +3534,8 @@ chcp, dataset access, OS/390, z/OS iconv, locales
 
 =item Switches On the "#!" Line
 
+=item Taint mode and @INC
+
 =item Cleaning Up Your Path
 
 =item Security Bugs
@@ -3561,7 +3564,7 @@ chcp, dataset access, OS/390, z/OS iconv, locales
 
 =item Symbol Tables
 
-=item Package Constructors and Destructors
+=item BEGIN, CHECK, INIT and END
 
 =item Perl Classes
 
@@ -3601,10 +3604,10 @@ CGI::Cookie, CGI::Fast, CGI::Pretty, CGI::Push, CGI::Switch, CGI::Util,
 CPAN, CPAN::FirstTime, CPAN::Nox, Carp, Carp::Heavy, Class::ISA,
 Class::Struct, Config, Cwd, DB, DB_File, Data::Dumper, Devel::DProf,
 Devel::PPPort, Devel::Peek, Devel::SelfStubber, Digest, Digest::MD5,
-DirHandle, Dumpvalue, DynaLoader, Encode, Encode::Alias, Encode::Byte,
-Encode::CJKConstants, Encode::CN, Encode::CN::HZ, Encode::Config,
-Encode::EBCDIC, Encode::Encoder, Encode::Encoding, Encode::Guess,
-Encode::JP, Encode::JP::H2Z, Encode::JP::JIS7, Encode::KR,
+Digest::base, DirHandle, Dumpvalue, DynaLoader, Encode, Encode::Alias,
+Encode::Byte, Encode::CJKConstants, Encode::CN, Encode::CN::HZ,
+Encode::Config, Encode::EBCDIC, Encode::Encoder, Encode::Encoding,
+Encode::Guess, Encode::JP, Encode::JP::H2Z, Encode::JP::JIS7, Encode::KR,
 Encode::KR::2022_KR, Encode::MIME::Header, Encode::PerlIO,
 Encode::Supported, Encode::Symbol, Encode::TW, Encode::Unicode,
 Encode::Unicode::UTF7, English, Env, Errno, Exporter, Exporter::Heavy,
@@ -3631,16 +3634,16 @@ IPC::SysV::Semaphore, List::Util, Locale::Constants, Locale::Country,
 Locale::Currency, Locale::Language, Locale::Maketext,
 Locale::Maketext::TPJ13, Locale::Script, MIME::Base64,
 MIME::Base64::QuotedPrint, Math::BigFloat, Math::BigInt,
-Math::BigInt::Calc, Math::BigInt::Scalar, Math::BigRat, Math::Complex,
-Math::Trig, Memoize, Memoize::AnyDBM_File, Memoize::Expire,
-Memoize::ExpireFile, Memoize::ExpireTest, Memoize::NDBM_File,
-Memoize::SDBM_File, Memoize::Storable, NDBM_File, NEXT, Net::Cmd,
-Net::Config, Net::Domain, Net::FTP, Net::NNTP, Net::Netrc, Net::POP3,
-Net::Ping, Net::SMTP, Net::Time, Net::hostent, Net::libnetFAQ, Net::netent,
-Net::protoent, Net::servent, O, ODBM_File, Opcode, POSIX, PerlIO,
-PerlIO::encoding, PerlIO::scalar, PerlIO::via, PerlIO::via::QuotedPrint,
-Pod::Checker, Pod::Find, Pod::Functions, Pod::Html, Pod::InputObjects,
-Pod::LaTeX, Pod::Man, Pod::ParseLink, Pod::ParseUtils, Pod::Parser,
+Math::BigInt::Calc, Math::BigRat, Math::Complex, Math::Trig, Memoize,
+Memoize::AnyDBM_File, Memoize::Expire, Memoize::ExpireFile,
+Memoize::ExpireTest, Memoize::NDBM_File, Memoize::SDBM_File,
+Memoize::Storable, NDBM_File, NEXT, Net::Cmd, Net::Config, Net::Domain,
+Net::FTP, Net::NNTP, Net::Netrc, Net::POP3, Net::Ping, Net::SMTP,
+Net::Time, Net::hostent, Net::libnetFAQ, Net::netent, Net::protoent,
+Net::servent, O, ODBM_File, Opcode, POSIX, PerlIO, PerlIO::encoding,
+PerlIO::scalar, PerlIO::via, PerlIO::via::QuotedPrint, Pod::Checker,
+Pod::Find, Pod::Functions, Pod::Html, Pod::InputObjects, Pod::LaTeX,
+Pod::Man, Pod::ParseLink, Pod::ParseUtils, Pod::Parser,
 Pod::Perldoc::ToChecker, Pod::Perldoc::ToMan, Pod::Perldoc::ToNroff,
 Pod::Perldoc::ToPod, Pod::Perldoc::ToRtf, Pod::Perldoc::ToText,
 Pod::Perldoc::ToTk, Pod::Perldoc::ToXml, Pod::PlainText, Pod::Plainer,
@@ -4655,10 +4658,11 @@ HEf_SVKEY, Nullch, Nullsv
 =item Hash Manipulation Functions
 
 get_hv, HeHASH, HeKEY, HeKLEN, HePV, HeSVKEY, HeSVKEY_force, HeSVKEY_set,
-HeVAL, HvNAME, hv_assert, hv_clear, hv_delete, hv_delete_ent, hv_exists,
-hv_exists_ent, hv_fetch, hv_fetch_ent, hv_iterinit, hv_iterkey,
-hv_iterkeysv, hv_iternext, hv_iternextsv, hv_iternext_flags, hv_iterval,
-hv_magic, hv_store, hv_store_ent, hv_undef, newHV, Nullhv
+HeVAL, HvNAME, hv_assert, hv_clear, hv_clear_placeholders, hv_delete,
+hv_delete_ent, hv_exists, hv_exists_ent, hv_fetch, hv_fetch_ent,
+hv_iterinit, hv_iterkey, hv_iterkeysv, hv_iternext, hv_iternextsv,
+hv_iternext_flags, hv_iterval, hv_magic, hv_scalar, hv_store, hv_store_ent,
+hv_undef, newHV, Nullhv
 
 =item Magical Functions
 
@@ -5522,6 +5526,8 @@ B<-V>
 
 =item Tied Arrays with Negative Array Indices
 
+=item Tied hashes in scalar context
+
 =item local ${$x}
 
 =item Unicode Character Database 4.0.0
@@ -5608,8 +5614,6 @@ Win32::GetOSVersion
 =item Known Problems
 
 =over 4
-
-=item Tied hashes in scalar context
 
 =item Net::Ping 450_service and 510_ping_udp failures
 
@@ -7772,13 +7776,13 @@ R4 x86, R4 PPC
 
 =back
 
+=head2 perlce - Perl for WinCE
+
 =over 4
 
-=item Name
+=item DESCRIPTION
 
-=item Description
-
-=item Build
+=item BUILD
 
 =over 4
 
@@ -7794,7 +7798,7 @@ go to ./wince subdirectory, edit file compile.bat, run	  compile.bat, run
 
 =back
 
-=item Acknowledgements
+=item ACKNOWLEDGEMENTS
 
 =item AUTHORS
 
@@ -8239,11 +8243,15 @@ public_html/feedback.cgi, src/perl-5.6.0-mpe
 
 =item AUTHOR
 
-=item Name
+=back
 
-=item Description
+=head2 perlnetware - Perl for NetWare
 
-=item Build
+=over 4
+
+=item DESCRIPTION
+
+=item BUILD
 
 =over 4
 
@@ -8261,15 +8269,15 @@ SetNWBld.bat, Buildtype.bat
 
 =back
 
-=item Install
+=item INSTALL
 
-=item Build new extensions
+=item BUILD NEW EXTENSIONS
 
-=item Acknowledgements
+=item ACKNOWLEDGEMENTS
 
-=item Authors
+=item AUTHORS
 
-=item Date
+=item DATE
 
 =back
 
@@ -9393,8 +9401,7 @@ escapes
 
 =back
 
-=head2 diagnostics - Perl compiler pragma to force verbose warning
-diagnostics
+=head2 diagnostics, splain - produce verbose warning diagnostics
 
 =over 4
 
@@ -9433,6 +9440,8 @@ diagnostics
 =item Literal Conversions
 
 =item PerlIO layers for C<STD(IN|OUT)>
+
+=item Implicit upgrading for byte strings
 
 =back
 
@@ -11969,8 +11978,9 @@ I<binary>, I<hex>, I<base64>
 
 $ctx = Digest->XXX($arg,...), $ctx = Digest->new(XXX => $arg,...), $ctx =
 Digest::XXX->new($arg,...), $other_ctx = $ctx->clone, $ctx->reset,
-$ctx->add($data,...), $ctx->addfile($io_handle), $ctx->digest,
-$ctx->hexdigest, $ctx->b64digest
+$ctx->add($data,...), $ctx->addfile($io_handle), $ctx->add_bits($data,
+$nbits), $ctx->add_bits($bitstring), $ctx->digest, $ctx->hexdigest,
+$ctx->b64digest
 
 =item SEE ALSO
 
@@ -11993,7 +12003,8 @@ md5($data,...), md5_hex($data,...), md5_base64($data,...)
 =item METHODS
 
 $md5 = Digest::MD5->new, $md5->reset, $md5->clone, $md5->add($data,...),
-$md5->addfile($io_handle), $md5->digest, $md5->hexdigest, $md5->b64digest
+$md5->addfile($io_handle), $md5->add_bits($data, $nbits),
+$md5->add_bits($bitstring), $md5->digest, $md5->hexdigest, $md5->b64digest
 
 =item EXAMPLES
 
@@ -12002,6 +12013,18 @@ $md5->addfile($io_handle), $md5->digest, $md5->hexdigest, $md5->b64digest
 =item COPYRIGHT
 
 =item AUTHORS
+
+=back
+
+=head2 Digest::base - Digest base class
+
+=over 4
+
+=item SYNPOSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
 
 =back
 
@@ -12805,6 +12828,8 @@ non-ascii or non-utf8
 
 =item PerlIO layers for C<STD(IN|OUT)>
 
+=item Implicit upgrading for byte strings
+
 =back
 
 =item FEATURES THAT REQUIRE 5.8.1
@@ -12949,6 +12974,8 @@ C<use ModuleName;>, C<use ModuleName ();>, C<use ModuleName qw(...);>
 =item Specialised Import Lists
 
 =item Exporting without using Exporter's import method
+
+=item Exporting without inheriting from Exporter
 
 =item Module Version Checking
 
@@ -15101,8 +15128,8 @@ supplied
 
 =back
 
-=head2 Getopt::Std, getopt - Process single-character switches with switch
-clustering
+=head2 Getopt::Std, getopt, getopts - Process single-character switches
+with switch clustering
 
 =over 4
 
@@ -16482,7 +16509,7 @@ Input, Output
 
 =item sign
 
-=item bcmp
+=item digit
 
 =item bneg
 
@@ -16626,9 +16653,9 @@ broot() does not work, Out of Memory!, Fails to load Calc on Perl prior
 
 =item CAVEATS
 
-stringify, bstr(), bsstr() and 'cmp', int(), length, bdiv, infinity
-handling, Modifying and =, bpow, Overloading -$x, Mixing different object
-types, bsqrt(), brsft()
+bstr(), bsstr() and 'cmp', int(), length, bdiv, infinity handling,
+Modifying and =, bpow, Overloading -$x, Mixing different object types,
+bsqrt(), brsft()
 
 =item LICENSE
 
@@ -16659,27 +16686,6 @@ under
 the same terms as Perl itself. 
 
 =item AUTHORS
-
-=item SEE ALSO
-
-=back
-
-=head2 Math::BigInt::Scalar - Pure Perl module to test Math::BigInt with
-scalars
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item LICENSE
-
-This program is free software; you may redistribute it and/or modify it
-under
-the same terms as Perl itself. 
-
-=item AUTHOR
 
 =item SEE ALSO
 
@@ -18007,9 +18013,9 @@ C<-inc =E<gt> 1>, C<-dirs =E<gt> [ $dir1, $dir2, ... ]>, C<-verbose =E<gt>
 
 =item ARGUMENTS
 
-backlink, cachedir, css, flush, header, help, htmldir, htmlroot, index,
-infile, libpods, netscape, outfile, podpath, podroot, quiet, recurse,
-title, verbose
+backlink, cachedir, css, flush, header, help, hiddendirs, htmldir,
+htmlroot, index, infile, libpods, netscape, outfile, podpath, podroot,
+quiet, recurse, title, verbose
 
 =item EXAMPLE
 
@@ -19768,7 +19774,13 @@ B<_my_exit>
 
 =back
 
-=head2 Test::Harness - run perl standard test scripts with statistics
+=head2 Test::Harness - Run Perl standard test scripts with statistics
+
+=over 4
+
+=item VERSION
+
+=back
 
 =over 4
 
@@ -19788,7 +19800,7 @@ else>
 
 =item Configuration variables.
 
-B<$Test::Harness::verbose>, B<$Test::Harness::switches>
+B<$Test::Harness::Verbose>, B<$Test::Harness::switches>
 
 =item Failure
 
@@ -19827,8 +19839,9 @@ C<All tests successful.\nFiles=%d,  Tests=%d, %s>, C<FAILED tests
 =item ENVIRONMENT
 
 C<HARNESS_ACTIVE>, C<HARNESS_COLUMNS>, C<HARNESS_COMPILE_TEST>,
-C<HARNESS_FILELEAK_IN_DIR>, C<HARNESS_IGNORE_EXITCODE>, C<HARNESS_NOTTY>,
-C<HARNESS_OK_SLOW>, C<HARNESS_PERL_SWITCHES>, C<HARNESS_VERBOSE>
+C<HARNESS_DEBUG>, C<HARNESS_FILELEAK_IN_DIR>, C<HARNESS_IGNORE_EXITCODE>,
+C<HARNESS_NOTTY>, C<HARNESS_OK_SLOW>, C<HARNESS_PERL>,
+C<HARNESS_PERL_SWITCHES>, C<HARNESS_VERBOSE>
 
 =item EXAMPLE
 
@@ -19842,6 +19855,10 @@ C<HARNESS_OK_SLOW>, C<HARNESS_PERL_SWITCHES>, C<HARNESS_VERBOSE>
 
 =item BUGS
 
+=item AUTHORS
+
+=item COPYRIGHT
+
 =back
 
 =head2 Test::Harness::Assert - simple assert
@@ -19852,11 +19869,11 @@ C<HARNESS_OK_SLOW>, C<HARNESS_PERL_SWITCHES>, C<HARNESS_VERBOSE>
 
 =item DESCRIPTION
 
+=item FUNCTIONS
+
 =over 4
 
-=item Functions
-
-B<assert>
+=item C<assert()>
 
 =back
 
@@ -19930,7 +19947,25 @@ B<assert>
 
 =over 4
 
+=item C<_command_line( $file )>
+
+=back
+
+=over 4
+
+=item C<_command>
+
+=back
+
+=over 4
+
 =item C<_switches>
+
+=back
+
+=over 4
+
+=item C<_cleaned_switches>
 
 =back
 
@@ -20538,13 +20573,14 @@ tied hashes
 =item DESCRIPTION
 
 TIEHASH classname, LIST, STORE this, key, value, FETCH this, key, FIRSTKEY
-this, NEXTKEY this, lastkey, EXISTS this, key, DELETE this, key, CLEAR this
+this, NEXTKEY this, lastkey, EXISTS this, key, DELETE this, key, CLEAR
+this, SCALAR this
 
 =item Inheriting from B<Tie::StdHash>
 
 =item Inheriting from B<Tie::ExtraHash>
 
-=item C<UNTIE> and C<DESTROY>
+=item C<SCALAR>, C<UNTIE> and C<DESTROY>
 
 =item MORE INFORMATION
 
@@ -20834,7 +20870,7 @@ C<$may_be_composed_with_prev_char = isComp2nd($codepoint)>
 
 =item SEE ALSO
 
-http://www.unicode.org/unicode/reports/tr15/,
+http://www.unicode.org/reports/tr15/,
 http://www.unicode.org/Public/UNIDATA/DerivedNormalizationProps.txt,
 http://www.unicode.org/notes/tn5/
 
