@@ -474,17 +474,17 @@ representation matches the internal representation, but on some
 platforms the external representation of C<\n> is made up of more than
 one character.
 
-Mac OS and all variants of Unix use a single character to end each line
-in the external representation of text (even though that single
-character is not necessarily the same across these platforms).
-Consequently binmode() has no effect on these operating systems.  In
-other systems like VMS, MS-DOS and the various flavors of MS-Windows
-your program sees a C<\n> as a simple C<\cJ>, but what's stored in text
-files are the two characters C<\cM\cJ>.  That means that, if you don't
-use binmode() on these systems, C<\cM\cJ> sequences on disk will be
-converted to C<\n> on input, and any C<\n> in your program will be
-converted back to C<\cM\cJ> on output.  This is what you want for text
-files, but it can be disastrous for binary files.
+Mac OS, all variants of Unix, and Stream_LF files on VMS use a single 
+character to end each line in the external representation of text (even 
+though that single character is CARRIAGE RETURN on Mac OS and LINE FEED
+on Unix and most VMS files).  Consequently binmode() has no effect on 
+these operating systems.  In other systems like OS/2, DOS and the various 
+flavors of MS-Windows your program sees a C<\n> as a simple C<\cJ>, but 
+what's stored in text files are the two characters C<\cM\cJ>.  That means 
+that, if you don't use binmode() on these systems, C<\cM\cJ> sequences on 
+disk will be converted to C<\n> on input, and any C<\n> in your program 
+will be converted back to C<\cM\cJ> on output.  This is what you want for
+text files, but it can be disastrous for binary files.
 
 Another consequence of using binmode() (on some systems) is that
 special end-of-file markers will be seen as part of the data stream.
