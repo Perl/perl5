@@ -268,7 +268,13 @@ init_tm(ptm)		/* see mktime, strftime and asctime	*/
 #endif
 
 
-#ifndef HAS_LONG_DOUBLE /* XXX What to do about long doubles? */
+#ifdef HAS_LONG_DOUBLE
+#  if LONG_DOUBLESIZE > DOUBLESIZE
+#    undef HAS_LONG_DOUBLE  /* XXX until we figure out how to use them */
+#  endif
+#endif
+
+#ifndef HAS_LONG_DOUBLE 
 #ifdef LDBL_MAX
 #undef LDBL_MAX
 #endif

@@ -6,7 +6,7 @@ Install - Build and Installation guide for perl5.
 
 The basic steps to build and install perl5 on a Unix system are:
 
-	rm -f config.sh
+	rm -f config.sh Policy.sh
 	sh Configure
 	make
 	make test
@@ -70,10 +70,10 @@ pod/perldelta.pod for a description of what's changed.
 
 =head1 Space Requirements
 
-The complete perl5 source tree takes up about 7 MB of disk space.  The
-complete tree after completing make takes roughly 15 MB, though the
+The complete perl5 source tree takes up about 10 MB of disk space.  The
+complete tree after completing make takes roughly 20 MB, though the
 actual total is likely to be quite system-dependent.  The installation
-directories need something on the order of 7 MB, though again that
+directories need something on the order of 10 MB, though again that
 value is system-dependent.
 
 =head1 Start with a Fresh Distribution
@@ -81,13 +81,20 @@ value is system-dependent.
 If you have built perl before, you should clean out the build directory
 with the command
 
+	make distclean
+
+or
+
 	make realclean
 
-The results of a Configure run are stored in the config.sh file.  If
-you are upgrading from a previous version of perl, or if you change
-systems or compilers or make other significant changes, or if you are
-experiencing difficulties building perl, you should probably not
-re-use your old config.sh.  Simply remove it or rename it, e.g.
+The only difference between the two is that make distclean also removes
+your old config.sh and Policy.sh files.
+
+The results of a Configure run are stored in the config.sh and Policy.sh
+files.  If you are upgrading from a previous version of perl, or if you
+change systems or compilers or make other significant changes, or if
+you are experiencing difficulties building perl, you should probably
+not re-use your old config.sh.  Simply remove it or rename it, e.g.
 
 	mv config.sh config.sh.old
 
@@ -107,6 +114,11 @@ pick up a precompiled binary, it might not use the same name.
 
 In short, if you wish to use your old config.sh, I recommend running
 Configure interactively rather than blindly accepting the defaults.
+
+If your reason to reuse your old config.sh is to save your
+particular installation choices, then you can probably achieve the
+same effect by using the new Policy.sh file.  See the section on
+L<"Site-wide Policy settings"> below.
 
 =head1 Run Configure
 
@@ -167,11 +179,11 @@ For my Solaris system, I usually use
 =head2 GNU-style configure
 
 If you prefer the GNU-style configure command line interface, you can
-use the supplied configure command, e.g.
+use the supplied configure.gnu command, e.g.
 
 	CC=gcc ./configure.gnu
 
-The configure script emulates a few of the more common configure
+The configure.gnu script emulates a few of the more common configure
 options.  Try
 
 	./configure.gnu --help
@@ -180,7 +192,7 @@ for a listing.
 
 Cross compiling is not supported.
 
-(The file is called configugre.gnu to avoid problems on systems
+(The file is called configure.gnu to avoid problems on systems
 that would not distinguish the files "Configure" and "configure".)
 
 =head2 Extensions
@@ -235,6 +247,11 @@ the extensions you want.
 Note:  The DB_File module will only work with version 1.x of Berkeley
 DB or newer releases of version 2.  Configure will automatically detect
 this for you and refuse to try to build DB_File with version 2.
+
+If you re-use your old config.sh but change your system (e.g. by
+adding libgdbm) Configure will still offer your old choices of extensions
+for the default answer, but it will also point out the discrepancy to
+you.
 
 Finally, if you have dynamic loading (most modern Unix systems do)
 remember that these extensions do not increase the size of your perl
@@ -457,7 +474,7 @@ installed on multiple systems.  Here's one way to do that:
     cd /usr/local  # Or wherever you specified as $prefix
     tar xvf perl5-archive.tar
 
-=head2 Site-wide "Policy" settings
+=head2 Site-wide Policy settings
 
 After Configure runs, it stores a number of common site-wide "policy"
 answers (such as installation directories and the local perl contact
@@ -465,6 +482,15 @@ person) in the Policy.sh file.  If you want to build perl on another
 system using the same policy defaults, simply copy the Policy.sh file
 to the new system and Configure will use it along with the appropriate
 hint file for your system.
+
+Alternatively, if you wish to change some or all of those policy
+answers, you should
+
+	rm -f Policy.sh
+
+to ensure that Configure doesn't re-use them.
+
+Further information is in the Policy_sh.SH file itself.
 
 =head2 Configure-time Options
 
@@ -962,8 +988,8 @@ at Perl startup.
 
 =item malloc duplicates
 
-If you get duplicates upon linking for malloc et al, add -DHIDEMYMALLOC
-or -DEMBEDMYMALLOC to your ccflags variable in config.sh.
+If you get duplicates upon linking for malloc et al, add -DEMBEDMYMALLOC
+to your ccflags variable in config.sh.
 
 =item varargs
 
@@ -1300,7 +1326,7 @@ In general, you can usually safely upgrade from one version of Perl (e.g.
 all of your add-on extensions.  You can also safely leave the old version
 around in case the new version causes you problems for some reason.
 For example, if you want to be sure that your script continues to run
-with 5.004_04, simplly replace the '#!/usr/local/bin/perl' line at the
+with 5.004_04, simply replace the '#!/usr/local/bin/perl' line at the
 top of the script with the particular version you want to run, e.g.
 #!/usr/local/bin/perl5.00404.
 
@@ -1376,7 +1402,7 @@ to be recompiled to be used with 5.004_50 and later.
 
 If you wish to continue using those extensions under 5.004_04, for
 example, then you need to move those extensions from their current
-direcotries, which are something like
+directories, which are something like
 
 	/usr/local/lib/perl5/site_perl/
 	/usr/local/lib/perl5/site_perl/archname
@@ -1509,4 +1535,4 @@ above.
 
 =head1 LAST MODIFIED
 
-$Id: INSTALL,v 1.31 1998/03/03 18:08:52 doughera Released $
+$Id: INSTALL,v 1.32 1998/03/20 19:20:08 doughera Released $

@@ -69,7 +69,11 @@ typedef unsigned UBW;
  * If they're not right on your machine, then pack() and unpack()
  * wouldn't work right anyway; you'll need to apply the Cray hack.
  * (I'd like to check them with #if, but you can't use sizeof() in
- * the preprocessor.)
+ * the preprocessor.)  --???
+ */
+/*
+    The appropriate SHORTSIZE, INTSIZE, LONGSIZE, and LONGLONGSIZE
+    defines are now in config.h.  --Andy Dougherty  April 1998
  */
 #define SIZE16 2
 #define SIZE32 4

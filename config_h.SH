@@ -655,17 +655,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #define Shmat_t $shmattype	/**/
 #$d_shmatprototype HAS_SHMAT_PROTOTYPE	/**/
 
-/* HAS_SOCKET:
- *	This symbol, if defined, indicates that the BSD socket interface is
- *	supported.
- */
-/* HAS_SOCKETPAIR:
- *	This symbol, if defined, indicates that the BSD socketpair() call is
- *	supported.
- */
-#$d_socket HAS_SOCKET		/**/
-#$d_sockpair HAS_SOCKETPAIR	/**/
-
 /* USE_STAT_BLOCKS:
  *	This symbol is defined if this system has a stat structure declaring
  *	st_blksize and st_blocks.
@@ -776,20 +765,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_tcsetpgrp HAS_TCSETPGRP		/**/
 
-/* Time_t:
- *	This symbol holds the type returned by time(). It can be long,
- *	or time_t on BSD sites (in which case <sys/types.h> should be
- *	included).
- */
-#define Time_t $timetype		/* Time type */
-
-/* HAS_TIMES:
- *	This symbol, if defined, indicates that the times() routine exists.
- *	Note that this became obsolete on some systems (SUNOS), which now
- * use getrusage(). It may be necessary to include <sys/times.h>.
- */
-#$d_times HAS_TIMES		/**/
-
 /* HAS_TRUNCATE:
  *	This symbol, if defined, indicates that the truncate routine is
  *	available to truncate files.
@@ -844,22 +819,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	to covert a wide character to a multibyte.
  */
 #$d_wctomb HAS_WCTOMB		/**/
-
-/* Fpos_t:
- *	This symbol holds the type used to declare file positions in libc.
- *	It can be fpos_t, long, uint, etc... It may be necessary to include
- *	<sys/types.h> to get any typedef'ed information.
- */
-#define Fpos_t $fpostype		/* File position type */
-
-/* Gid_t:
- *	This symbol holds the return type of getgid() and the type of
- *	argument to setrgid() and related functions.  Typically,
- *	it is the type of group ids in the kernel. It can be int, ushort,
- *	uid_t, etc... It may be necessary to include <sys/types.h> to get
- *	any typedef'ed information.
- */
-#define Gid_t $gidtype		/* Type for getgid(), etc... */
 
 /* I_DBM:
  *	This symbol, if defined, indicates that <dbm.h> exists and should
@@ -1073,12 +1032,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$i_systimes	I_SYS_TIMES		/**/
 
-/* I_SYS_TYPES:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <sys/types.h>.
- */
-#$i_systypes	I_SYS_TYPES		/**/
-
 /* I_SYS_UN:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <sys/un.h> to get UNIX domain socket definitions.
@@ -1148,13 +1101,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$i_vfork I_VFORK	/**/
 
-/* Off_t:
- *	This symbol holds the type used to declare offsets in the kernel.
- *	It can be int, long, off_t, etc... It may be necessary to include
- *	<sys/types.h> to get any typedef'ed information.
- */
-#define Off_t $lseektype		/* <offset> type */
-
 /* Free_t:
  *	This variable contains the return type of free().  It is usually
  * void, but occasionally int.
@@ -1169,21 +1115,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol, if defined, indicates that we're using our own malloc.
  */
 #$d_mymalloc MYMALLOC			/**/
-
-/* Mode_t:
- *	This symbol holds the type used to declare file modes 
- *	for systems calls.  It is usually mode_t, but may be
- *	int or unsigned short.  It may be necessary to include <sys/types.h>
- *	to get any typedef'ed information.
- */
-#define Mode_t $modetype	 /* file mode parameter for system calls */
-
-/* Pid_t:
- *	This symbol holds the type used to declare process ids in the kernel.
- *	It can be int, uint, pid_t, etc... It may be necessary to include
- *	<sys/types.h> to get any typedef'ed information.
- */
-#define Pid_t $pidtype		/* PID type */
 
 /* CAN_PROTOTYPE:
  *	If defined, this macro indicates that the C compiler can handle
@@ -1212,26 +1143,11 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define SH_PATH "$sh"  /**/
 
-/* Size_t:
- *	This symbol holds the type used to declare length parameters
- *	for string functions.  It is usually size_t, but may be
- *	unsigned long, int, etc.  It may be necessary to include
- *	<sys/types.h> to get any typedef'ed information.
- */
-#define Size_t $sizetype	 /* length paramater for string functions */
-
 /* STDCHAR:
  *	This symbol is defined to be the type of char used in stdio.h.
  *	It has the values "unsigned char" or "char".
  */
 #define STDCHAR $stdchar	/**/
-
-/* Uid_t:
- *	This symbol holds the type used to declare user ids in the kernel.
- *	It can be int, ushort, uid_t, etc... It may be necessary to include
- *	<sys/types.h> to get any typedef'ed information.
- */
-#define Uid_t $uidtype		/* UID type */
 
 /* VOIDFLAGS:
  *	This symbol indicates how much support of the void type is given by this
@@ -1727,6 +1643,20 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #define LONG_DOUBLESIZE $longdblsize		/**/
 #endif
 
+/* HAS_LONG_LONG:
+ *	This symbol will be defined if the C compiler supports
+ *	long long.
+ */
+/* LONGLONGSIZE:
+ *	This symbol contains the size of a long long, so that the 
+ *	C preprocessor can make decisions based on it.  It is only
+ *	defined if the system supports long long.
+ */
+#$d_longlong HAS_LONG_LONG		/**/
+#ifdef HAS_LONG_LONG
+#define LONGLONGSIZE $longlongsize		/**/
+#endif
+
 /* HAS_MKSTEMP:
  *	This symbol, if defined, indicates that the mkstemp routine is
  *	available to create and open a unique temporary file.
@@ -1771,6 +1701,17 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_setvbuf HAS_SETVBUF		/**/
 
+/* HAS_SOCKET:
+ *	This symbol, if defined, indicates that the BSD socket interface is
+ *	supported.
+ */
+/* HAS_SOCKETPAIR:
+ *	This symbol, if defined, indicates that the BSD socketpair() call is
+ *	supported.
+ */
+#$d_socket HAS_SOCKET		/**/
+#$d_sockpair HAS_SOCKETPAIR	/**/
+
 /* Signal_t:
  *	This symbol's value is either "void" or "int", corresponding to the
  *	appropriate return type of a signal handler.  Thus, you can declare
@@ -1798,6 +1739,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$i_netdb I_NETDB		/**/
 
+/* I_SYS_TYPES:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sys/types.h>.
+ */
+#$i_systypes	I_SYS_TYPES		/**/
+
 /* PRIVLIB:
  *	This symbol contains the name of the private library for this package.
  *	The library is private in the sense that it needn't be in anyone's
@@ -1810,37 +1757,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define PRIVLIB "$privlib"		/**/
 #define PRIVLIB_EXP "$privlibexp"		/**/
-
-/* SIG_NAME:
- *	This symbol contains a list of signal names in order of
- *	signal number. This is intended
- *	to be used as a static array initialization, like this:
- *		char *sig_name[] = { SIG_NAME };
- *	The signals in the list are separated with commas, and each signal
- *	is surrounded by double quotes. There is no leading SIG in the signal
- *	name, i.e. SIGQUIT is known as "QUIT".
- *	Gaps in the signal numbers (up to NSIG) are filled in with NUMnn,
- *	etc., where nn is the actual signal number (e.g. NUM37).
- *	The signal number for sig_name[i] is stored in sig_num[i].
- *	The last element is 0 to terminate the list with a NULL.  This
- *	corresponds to the 0 at the end of the sig_num list.
- */
-/* SIG_NUM:
- *	This symbol contains a list of signal numbers, in the same order as the
- *	SIG_NAME list. It is suitable for static array initialization, as in:
- *		int sig_num[] = { SIG_NUM };
- *	The signals in the list are separated with commas, and the indices
- *	within that list and the SIG_NAME list match, so it's easy to compute
- *	the signal name from a number or vice versa at the price of a small
- *	dynamic linear lookup. 
- *	Duplicates are allowed, but are moved to the end of the list.
- *	The signal number corresponding to sig_name[i] is sig_number[i].
- *	if (i < NSIG) then sig_number[i] == i.  
- *	The last element is 0, corresponding to the 0 at the end of
- *	the sig_name list.
- */
-#define SIG_NAME $sig_name_init		/**/
-#define SIG_NUM  $sig_num			/**/
 
 /* SITEARCH:
  *	This symbol contains the name of the private library for this package.
@@ -1921,6 +1837,38 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$useperlio	USE_PERLIO		/**/
 
+/* HAS_GETHOST_PROTOS:
+ *	This symbol, if defined, indicates that <netdb.h> includes
+ *	prototypes for gethostent(), gethostbyname(), and
+ *	gethostbyaddr().  Otherwise, it is up to the program to guess
+ *	them.  See netdbtype.U for probing for various Netdb_xxx_t types.
+ */
+#$d_gethostprotos	HAS_GETHOST_PROTOS	/**/
+
+/* HAS_GETNET_PROTOS:
+ *	This symbol, if defined, indicates that <netdb.h> includes
+ *	prototypes for getnetent(), getnetbyname(), and
+ *	getnetbyaddr().  Otherwise, it is up to the program to guess
+ *	them.  See netdbtype.U for probing for various Netdb_xxx_t types.
+ */
+#$d_getnetprotos	HAS_GETNET_PROTOS	/**/
+
+/* HAS_GETPROTO_PROTOS:
+ *	This symbol, if defined, indicates that <netdb.h> includes
+ *	prototypes for getprotoent(), getprotobyname(), and
+ *	getprotobyaddr().  Otherwise, it is up to the program to guess
+ *	them.  See netdbtype.U for probing for various Netdb_xxx_t types.
+ */
+#$d_getprotoprotos	HAS_GETPROTO_PROTOS	/**/
+
+/* HAS_GETSERV_PROTOS:
+ *	This symbol, if defined, indicates that <netdb.h> includes
+ *	prototypes for getservent(), getservbyname(), and
+ *	getservbyaddr().  Otherwise, it is up to the program to guess
+ *	them.  See netdbtype.U for probing for various Netdb_xxx_t types.
+ */
+#$d_getservprotos	HAS_GETSERV_PROTOS	/**/
+
 /* Netdb_host_t:
  *	This symbol holds the type used for the 1st argument
  *	to gethostbyaddr().
@@ -1949,6 +1897,37 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	have select(), of course.
  */
 #define Select_fd_set_t 	$selecttype	/**/
+
+/* SIG_NAME:
+ *	This symbol contains a list of signal names in order of
+ *	signal number. This is intended
+ *	to be used as a static array initialization, like this:
+ *		char *sig_name[] = { SIG_NAME };
+ *	The signals in the list are separated with commas, and each signal
+ *	is surrounded by double quotes. There is no leading SIG in the signal
+ *	name, i.e. SIGQUIT is known as "QUIT".
+ *	Gaps in the signal numbers (up to NSIG) are filled in with NUMnn,
+ *	etc., where nn is the actual signal number (e.g. NUM37).
+ *	The signal number for sig_name[i] is stored in sig_num[i].
+ *	The last element is 0 to terminate the list with a NULL.  This
+ *	corresponds to the 0 at the end of the sig_num list.
+ */
+/* SIG_NUM:
+ *	This symbol contains a list of signal numbers, in the same order as the
+ *	SIG_NAME list. It is suitable for static array initialization, as in:
+ *		int sig_num[] = { SIG_NUM };
+ *	The signals in the list are separated with commas, and the indices
+ *	within that list and the SIG_NAME list match, so it's easy to compute
+ *	the signal name from a number or vice versa at the price of a small
+ *	dynamic linear lookup. 
+ *	Duplicates are allowed, but are moved to the end of the list.
+ *	The signal number corresponding to sig_name[i] is sig_number[i].
+ *	if (i < NSIG) then sig_number[i] == i.  
+ *	The last element is 0, corresponding to the 0 at the end of
+ *	the sig_name list.
+ */
+#define SIG_NAME $sig_name_init		/**/
+#define SIG_NUM  $sig_num			/**/
 
 /* ARCHNAME:
  *	This symbol holds a string representing the architecture name.
@@ -1981,6 +1960,73 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$usethreads	USE_THREADS		/**/
 #$d_oldpthreads	OLD_PTHREADS_API		/**/
+
+/* Time_t:
+ *	This symbol holds the type returned by time(). It can be long,
+ *	or time_t on BSD sites (in which case <sys/types.h> should be
+ *	included).
+ */
+#define Time_t $timetype		/* Time type */
+
+/* HAS_TIMES:
+ *	This symbol, if defined, indicates that the times() routine exists.
+ *	Note that this became obsolete on some systems (SUNOS), which now
+ * use getrusage(). It may be necessary to include <sys/times.h>.
+ */
+#$d_times HAS_TIMES		/**/
+
+/* Fpos_t:
+ *	This symbol holds the type used to declare file positions in libc.
+ *	It can be fpos_t, long, uint, etc... It may be necessary to include
+ *	<sys/types.h> to get any typedef'ed information.
+ */
+#define Fpos_t $fpostype		/* File position type */
+
+/* Gid_t:
+ *	This symbol holds the return type of getgid() and the type of
+ *	argument to setrgid() and related functions.  Typically,
+ *	it is the type of group ids in the kernel. It can be int, ushort,
+ *	uid_t, etc... It may be necessary to include <sys/types.h> to get
+ *	any typedef'ed information.
+ */
+#define Gid_t $gidtype		/* Type for getgid(), etc... */
+
+/* Off_t:
+ *	This symbol holds the type used to declare offsets in the kernel.
+ *	It can be int, long, off_t, etc... It may be necessary to include
+ *	<sys/types.h> to get any typedef'ed information.
+ */
+#define Off_t $lseektype		/* <offset> type */
+
+/* Mode_t:
+ *	This symbol holds the type used to declare file modes 
+ *	for systems calls.  It is usually mode_t, but may be
+ *	int or unsigned short.  It may be necessary to include <sys/types.h>
+ *	to get any typedef'ed information.
+ */
+#define Mode_t $modetype	 /* file mode parameter for system calls */
+
+/* Pid_t:
+ *	This symbol holds the type used to declare process ids in the kernel.
+ *	It can be int, uint, pid_t, etc... It may be necessary to include
+ *	<sys/types.h> to get any typedef'ed information.
+ */
+#define Pid_t $pidtype		/* PID type */
+
+/* Size_t:
+ *	This symbol holds the type used to declare length parameters
+ *	for string functions.  It is usually size_t, but may be
+ *	unsigned long, int, etc.  It may be necessary to include
+ *	<sys/types.h> to get any typedef'ed information.
+ */
+#define Size_t $sizetype	 /* length paramater for string functions */
+
+/* Uid_t:
+ *	This symbol holds the type used to declare user ids in the kernel.
+ *	It can be int, ushort, uid_t, etc... It may be necessary to include
+ *	<sys/types.h> to get any typedef'ed information.
+ */
+#define Uid_t $uidtype		/* UID type */
 
 #endif
 !GROK!THIS!

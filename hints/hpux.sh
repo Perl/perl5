@@ -169,6 +169,11 @@ case "$prefix" in
 '') prefix='/opt/perl5' ;;
 esac
 
+# HP-UX can't do setuid emulation offered by Configure
+case "$d_dosuid" in
+'') d_dosuid="$undef" ;;
+esac
+
 # Date: Fri, 6 Sep 96 23:15:31 CDT
 # From: "Daniel S. Lewart" <d-lewart@uiuc.edu>
 # I looked through the gcc.info and found this:
