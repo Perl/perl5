@@ -699,8 +699,8 @@ foreach (
 {
     # 615
 
-    # from Wolfgang Laun:Lfix in change #13288
+    # from Wolfgang Laun: fix in change #13288
 
-    eval { unpack("P*", "abc") };
+    eval { my $t=unpack("P*", "abc") };
     ok($@ =~ /P must have an explicit size/);
 }
