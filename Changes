@@ -158,6 +158,20 @@ ____________________________________________________________________________
      Branch: perl
 	   ! Changes patchlevel.h
 ____________________________________________________________________________
+[  7503] By: jhi                                   on 2000/10/31  14:30:50
+        Log: Whitespace style tweak.  Was originally going to see to
+             
+             Subject: PATCH (Re: PerlIO - Configure tweak for Linux/glibc?)
+             From: Joe Smith <jms@inwap.com>
+             Date: Mon, 30 Oct 2000 18:47:57 -0800
+             Message-Id: <39FE32DD.24AAC4D@inwap.com>
+             
+             but that had already been taken care of.
+     Branch: metaconfig
+	   ! U/compline/d_stdstdio.U
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
 [  7502] By: jhi                                   on 2000/10/31  14:25:02
         Log: AUTHORS tweaks.
      Branch: perl
