@@ -3083,6 +3083,10 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
 	PL_formtarget = PL_toptarget;
     else
 	PL_formtarget = PL_bodytarget;
+    PL_watchaddr = 0; /* XXX */
+    PL_watchok = 0; /* XXX */
+    PL_comppad = 0;
+    PL_curpad = 0;
 
     /* Initialise all per-thread SVs that the template thread used */
     svp = AvARRAY(t->threadsv);

@@ -274,3 +274,5 @@ PERLVAR(thr_done,	bool)		/* True when the thread has finished */
 
 PERLVAR(Treg_match_utf8,	bool)		/* was what we matched against utf8 */
 
+PERLVAR(Tcomppad,	AV *)		/* storage for lexically scoped temporaries */
+

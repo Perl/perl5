@@ -86,6 +86,8 @@ END_EXTERN_C
 
 #undef  PL_Argv
 #define PL_Argv			(*Perl_IArgv_ptr(aTHX))
+#undef  PL_BINCOMPAT0
+#define PL_BINCOMPAT0		(*Perl_IBINCOMPAT0_ptr(aTHX))
 #undef  PL_Cmd
 #define PL_Cmd			(*Perl_ICmd_ptr(aTHX))
 #undef  PL_DBcv
@@ -168,8 +170,6 @@ END_EXTERN_C
 #define PL_compcv		(*Perl_Icompcv_ptr(aTHX))
 #undef  PL_compiling
 #define PL_compiling		(*Perl_Icompiling_ptr(aTHX))
-#undef  PL_comppad
-#define PL_comppad		(*Perl_Icomppad_ptr(aTHX))
 #undef  PL_comppad_name
 #define PL_comppad_name		(*Perl_Icomppad_name_ptr(aTHX))
 #undef  PL_comppad_name_fill
@@ -724,6 +724,8 @@ END_EXTERN_C
 #define PL_colors		(*Perl_Tcolors_ptr(aTHX))
 #undef  PL_colorset
 #define PL_colorset		(*Perl_Tcolorset_ptr(aTHX))
+#undef  PL_comppad
+#define PL_comppad		(*Perl_Tcomppad_ptr(aTHX))
 #undef  PL_curcop
 #define PL_curcop		(*Perl_Tcurcop_ptr(aTHX))
 #undef  PL_curpad

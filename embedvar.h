@@ -48,6 +48,7 @@
 #define PL_chopset		(vTHX->Tchopset)
 #define PL_colors		(vTHX->Tcolors)
 #define PL_colorset		(vTHX->Tcolorset)
+#define PL_comppad		(vTHX->Tcomppad)
 #define PL_curcop		(vTHX->Tcurcop)
 #define PL_curpad		(vTHX->Tcurpad)
 #define PL_curpm		(vTHX->Tcurpm)
@@ -180,6 +181,7 @@
 /* case 5 above */
 
 #define PL_Argv			(PERL_GET_INTERP->IArgv)
+#define PL_BINCOMPAT0		(PERL_GET_INTERP->IBINCOMPAT0)
 #define PL_Cmd			(PERL_GET_INTERP->ICmd)
 #define PL_DBcv			(PERL_GET_INTERP->IDBcv)
 #define PL_DBgv			(PERL_GET_INTERP->IDBgv)
@@ -221,7 +223,6 @@
 #define PL_collxfrm_mult	(PERL_GET_INTERP->Icollxfrm_mult)
 #define PL_compcv		(PERL_GET_INTERP->Icompcv)
 #define PL_compiling		(PERL_GET_INTERP->Icompiling)
-#define PL_comppad		(PERL_GET_INTERP->Icomppad)
 #define PL_comppad_name		(PERL_GET_INTERP->Icomppad_name)
 #define PL_comppad_name_fill	(PERL_GET_INTERP->Icomppad_name_fill)
 #define PL_comppad_name_floor	(PERL_GET_INTERP->Icomppad_name_floor)
@@ -496,6 +497,7 @@
 /* cases 2 and 3 above */
 
 #define PL_Argv			(vTHX->IArgv)
+#define PL_BINCOMPAT0		(vTHX->IBINCOMPAT0)
 #define PL_Cmd			(vTHX->ICmd)
 #define PL_DBcv			(vTHX->IDBcv)
 #define PL_DBgv			(vTHX->IDBgv)
@@ -537,7 +539,6 @@
 #define PL_collxfrm_mult	(vTHX->Icollxfrm_mult)
 #define PL_compcv		(vTHX->Icompcv)
 #define PL_compiling		(vTHX->Icompiling)
-#define PL_comppad		(vTHX->Icomppad)
 #define PL_comppad_name		(vTHX->Icomppad_name)
 #define PL_comppad_name_fill	(vTHX->Icomppad_name_fill)
 #define PL_comppad_name_floor	(vTHX->Icomppad_name_floor)
@@ -815,6 +816,7 @@
 /* cases 1 and 4 above */
 
 #define PL_IArgv		PL_Argv
+#define PL_IBINCOMPAT0		PL_BINCOMPAT0
 #define PL_ICmd			PL_Cmd
 #define PL_IDBcv		PL_DBcv
 #define PL_IDBgv		PL_DBgv
@@ -856,7 +858,6 @@
 #define PL_Icollxfrm_mult	PL_collxfrm_mult
 #define PL_Icompcv		PL_compcv
 #define PL_Icompiling		PL_compiling
-#define PL_Icomppad		PL_comppad
 #define PL_Icomppad_name	PL_comppad_name
 #define PL_Icomppad_name_fill	PL_comppad_name_fill
 #define PL_Icomppad_name_floor	PL_comppad_name_floor
@@ -1138,6 +1139,7 @@
 #define PL_chopset		(aTHX->Tchopset)
 #define PL_colors		(aTHX->Tcolors)
 #define PL_colorset		(aTHX->Tcolorset)
+#define PL_comppad		(aTHX->Tcomppad)
 #define PL_curcop		(aTHX->Tcurcop)
 #define PL_curpad		(aTHX->Tcurpad)
 #define PL_curpm		(aTHX->Tcurpm)
@@ -1277,6 +1279,7 @@
 #define PL_Tchopset		PL_chopset
 #define PL_Tcolors		PL_colors
 #define PL_Tcolorset		PL_colorset
+#define PL_Tcomppad		PL_comppad
 #define PL_Tcurcop		PL_curcop
 #define PL_Tcurpad		PL_curpad
 #define PL_Tcurpm		PL_curpm

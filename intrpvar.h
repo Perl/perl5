@@ -207,7 +207,7 @@ PERLVARI(Irsfp_filters,	AV *,	Nullav)	/* keeps active source filters */
 PERLVAR(Icompiling,	COP)		/* compiling/done executing marker */
 
 PERLVAR(Icompcv,	CV *)		/* currently compiling subroutine */
-PERLVAR(Icomppad,	AV *)		/* storage for lexically scoped temporaries */
+PERLVAR(IBINCOMPAT0,	AV *)		/* filler for binary compatibility */
 PERLVAR(Icomppad_name,	AV *)		/* variable names for "my" variables */
 PERLVAR(Icomppad_name_fill,	I32)	/* last "introduced" variable offset */
 PERLVAR(Icomppad_name_floor,	I32)	/* start of vars in innermost block */
