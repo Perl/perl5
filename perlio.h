@@ -312,4 +312,6 @@ extern int	PerlIO_isutf8		(PerlIO *);
 extern int	PerlIO_apply_layers	(pTHX_ PerlIO *f,const char *mode, const char *names);
 #endif
 
+extern void PerlIO_debug(const char *fmt,...);
+
 #endif /* _PERLIO_H */
