@@ -494,6 +494,8 @@
 #define PL_profiledata		pPerl->PL_profiledata
 #undef  PL_reg_call_cc
 #define PL_reg_call_cc		pPerl->PL_reg_call_cc
+#undef  PL_reg_curpm
+#define PL_reg_curpm		pPerl->PL_reg_curpm
 #undef  PL_reg_eval_set
 #define PL_reg_eval_set		pPerl->PL_reg_eval_set
 #undef  PL_reg_flags
@@ -502,6 +504,8 @@
 #define PL_reg_ganch		pPerl->PL_reg_ganch
 #undef  PL_reg_magic
 #define PL_reg_magic		pPerl->PL_reg_magic
+#undef  PL_reg_oldcurpm
+#define PL_reg_oldcurpm		pPerl->PL_reg_oldcurpm
 #undef  PL_reg_oldpos
 #define PL_reg_oldpos		pPerl->PL_reg_oldpos
 #undef  PL_reg_re

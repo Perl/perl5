@@ -268,6 +268,7 @@ restore_pos(void *arg)
     if (PL_reg_eval_set) {    
 	PL_reg_magic->mg_len = PL_reg_oldpos;
 	PL_reg_eval_set = 0;
+	PL_curpm = PL_reg_oldcurpm;
     }	
 }
 
@@ -1011,14 +1012,15 @@ got_it:
 	    }
 	}
     }
-    /* Preserve the current value of $^R */
-    if (oreplsv != GvSV(PL_replgv)) {
-	sv_setsv(oreplsv, GvSV(PL_replgv));/* So that when GvSV(replgv) is
-					   restored, the value remains
-					   the same. */
-    }
-    if (PL_reg_eval_set)
+    if (PL_reg_eval_set) {
+	/* Preserve the current value of $^R */
+	if (oreplsv != GvSV(PL_replgv))
+	    sv_setsv(oreplsv, GvSV(PL_replgv));/* So that when GvSV(replgv) is
+						  restored, the value remains
+						  the same. */
 	restore_pos(0);
+    }
+    
     return 1;
 
 phooey:
@@ -1073,7 +1075,15 @@ regtry(regexp *prog, char *startpos)
 	    PL_reg_oldpos   = mg->mg_len;
 	    SAVEDESTRUCTOR(restore_pos, 0);
         }
+	if (!PL_reg_curpm)
+	    New(22,PL_reg_curpm, 1, PMOP);
+	PL_reg_curpm->op_pmregexp = prog;
+	PL_reg_oldcurpm = PL_curpm;
+	PL_curpm = PL_reg_curpm;
+	prog->subbeg = PL_bostr;
+	prog->subend = PL_regeol;	/* strend may have been modified */
     }
+    prog->startp[0] = startpos;
     PL_reginput = startpos;
     PL_regstartp = prog->startp;
     PL_regendp = prog->endp;
@@ -1089,17 +1099,19 @@ regtry(regexp *prog, char *startpos)
             New(22,PL_reg_start_tmp, PL_reg_start_tmpl, char*);
     }
 
+    /* XXXX What this code is doing here?!!!  There should be no need
+       to do this again and again, PL_reglastparen should take care of
+       this!  */
     sp = prog->startp;
     ep = prog->endp;
     if (prog->nparens) {
-	for (i = prog->nparens; i >= 0; i--) {
-	    *sp++ = NULL;
-	    *ep++ = NULL;
+	for (i = prog->nparens; i >= 1; i--) {
+	    *++sp = NULL;
+	    *++ep = NULL;
 	}
     }
     REGCP_SET;
     if (regmatch(prog->program + 1)) {
-	prog->startp[0] = startpos;
 	prog->endp[0] = PL_reginput;
 	return 1;
     }
@@ -1646,6 +1658,7 @@ regmatch(regnode *prog)
 	    DEBUG_r( PerlIO_printf(Perl_debug_log, "  re_eval 0x%x\n", PL_op) );
 	    PL_curpad = AvARRAY((AV*)PL_regdata->data[n + 1]);
 	    PL_reg_magic->mg_len = locinput - PL_bostr;
+	    PL_regendp[0] = locinput;
 
 	    CALLRUNOPS();			/* Scalar context. */
 	    SPAGAIN;

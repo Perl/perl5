@@ -160,6 +160,8 @@ PERLVAR(Treg_ganch,	char *)		/* position of \G */
 PERLVAR(Treg_sv,	SV *)		/* what we match against */
 PERLVAR(Treg_magic,	MAGIC *)	/* pos-magic of what we match */
 PERLVAR(Treg_oldpos,	I32)		/* old pos of what we match */
+PERLVARI(Treg_oldcurpm,	PMOP*, NULL)	/* curpm before match */
+PERLVARI(Treg_curpm,	PMOP*, NULL)	/* curpm during match */
 
 PERLVARI(Tregcompp,	regcomp_t, FUNC_NAME_TO_PTR(pregcomp))
 					/* Pointer to RE compiler */

@@ -4,7 +4,7 @@
 # the format supported by op/regexp.t.  If you want to add a test
 # that does fit that format, add it to op/re_tests, not here.
 
-print "1..174\n";
+print "1..176\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -763,6 +763,31 @@ $_ = 'abcde|abcde';
 print "#'$str','$foo','$bar','$_'\nnot "
     unless s/b(?{$foo = $_; $bar = pos})c/x/g and $foo eq 'abcde|abcde' 
 	and $bar eq 8 and $_ eq 'axde|axde';
+print "ok $test\n";
+$test++;
+
+@res = ();
+# List context:
+$_ = 'abcde|abcde';
+@dummy = /([ace]).(?{push @res, $1,$2})([ce])(?{push @res, $1,$2})/g;
+@res = map {defined $_ ? "'$_'" : 'undef'} @res;
+$res = "@res";
+print "#'@res' '$_'\nnot "
+    unless "@res" eq "'a' undef 'a' 'c' 'e' undef 'a' undef 'a' 'c'";
+print "ok $test\n";
+$test++;
+
+@res = ();
+@dummy = /([ace]).(?{push @res, $`,$&,$'})([ce])(?{push @res, $`,$&,$'})/g;
+@res = map {defined $_ ? "'$_'" : 'undef'} @res;
+$res = "@res";
+print "#'@res' '$_'\nnot "
+    unless "@res" eq
+  "'' 'ab' 'cde|abcde' " .
+  "'' 'abc' 'de|abcde' " .
+  "'abcd' 'e|' 'abcde' " .
+  "'abcde|' 'ab' 'cde' " .
+  "'abcde|' 'abc' 'de'" ;
 print "ok $test\n";
 $test++;
 

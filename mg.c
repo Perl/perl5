@@ -350,9 +350,9 @@ magic_regdatum_get(SV *sv, MAGIC *mg)
 	    (t = rx->endp[paren]))
 	    {
 		if (mg->mg_obj)		/* @+ */
-		    i = t - rx->subbase;
+		    i = t - rx->subbeg;
 		else			/* @- */
-		    i = s - rx->subbase;
+		    i = s - rx->subbeg;
 		sv_setiv(sv,i);
 	    }
     }
