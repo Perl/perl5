@@ -174,8 +174,3 @@ EOF
     ;;
 esac
 
-# One is able to create semaphores, but not do anything much with them.
-# This is seen at least in NetBSD 1.5.3 and 1.6.1 for sparc.
-case `uname -m` in
-sparc)	d_sem='undef' ;;
-esac
