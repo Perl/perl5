@@ -481,7 +481,7 @@ perl_destruct(pTHXx)
             REGEXP *re = (REGEXP *)SvIVX(resv);
 
             if (SvFLAGS(resv) & SVf_BREAK) {
-                /* this is PL_curpm, already freed
+                /* this is PL_reg_curpm, already freed
                  * flag is set in regexec.c:S_regtry
                  */
                 SvFLAGS(resv) &= ~SVf_BREAK;
