@@ -4,6 +4,13 @@
 #include "XSUB.h"
 #include "byterun.h"
 
+#ifdef NEED_FGETC_PROTOTYPE
+extern int fgetc();
+#endif
+#ifdef NEED_FREAD_PROTOTYPE
+extern int fread();
+#endif
+
 static void
 freadpv(U32 len, void *data, XPV *pv)
 {
