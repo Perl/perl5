@@ -24,7 +24,8 @@ package Female;
 
 package Alice;
 @ISA=qw(Bob Female);
-sub drink {}
+sub sing;
+sub drink { return "drinking " . $_[1]  }
 sub new { bless {} }
 
 $Alice::VERSION = 2.718;
@@ -44,8 +45,9 @@ $Alice::VERSION = 2.718;
 
 package main;
 
-my $i = 2;
-sub test { print "not " unless shift; print "ok $i\n"; $i++; }
+{ my $i = 2;
+  sub test { print "not " unless shift; print "ok $i\n"; $i++; }
+}
 
 $a = new Alice;
 
@@ -61,11 +63,13 @@ test ! $a->isa("Male");
 
 test ! $a->isa('Programmer');
 
-test $a->can("drink");
-
 test $a->can("eat");
-
 test ! $a->can("sleep");
+test my $ref = $a->can("drink");        # returns a coderef
+test $a->$ref("tea") eq "drinking tea"; # ... which works
+test $ref = $a->can("sing");
+eval { $a->sing };
+test $@;                                # ... but not if no actual subroutine
 
 test (!Cedric->isa('Programmer'));
 
